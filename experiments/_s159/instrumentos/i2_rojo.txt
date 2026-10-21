@@ -1,0 +1,120 @@
+.FFFFFFFFF                                                                                                                                                                                                                                         [100%]
+======================================================================================================================= FAILURES ========================================================================================================================
+_____________________________________________________________________________________________________ test_el_defecto_del_evaluador_es_el_del_sello _____________________________________________________________________________________________________
+
+    def test_el_defecto_del_evaluador_es_el_del_sello():
+>       assert X.CALIB_MODO == "simetrica"
+E       AssertionError: assert 'sellada' == 'simetrica'
+E         
+E         - simetrica
+E         + sellada
+
+tests\test_evaluar_d25_placebo_s159.py:55: AssertionError
+_____________________________________________________________________________________________ test_placebo_de_ganancia_invalida_cuando_K_queda_bajo_mirova ______________________________________________________________________________________________
+
+    def test_placebo_de_ganancia_invalida_cuando_K_queda_bajo_mirova():
+        """K a 0,6 de MIROVA en tres volcanes: K×1,2 se acerca y la regla sellada lo aprueba. El instrumento no sirve."""
+        P = _pares(0.6)
+>       ver, info = X.evaluar_m({"VIIRS750|z<=40": P}, ok_ctrl=True, modo_calib="simetrica")
+                    ^^^^^^^^^^^
+E       AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+
+tests\test_evaluar_d25_placebo_s159.py:65: AttributeError
+_____________________________________________________________________________________________ test_placebo_hacia_abajo_invalida_cuando_K_queda_sobre_mirova _____________________________________________________________________________________________
+
+    def test_placebo_hacia_abajo_invalida_cuando_K_queda_sobre_mirova():
+        P = _pares(1.6)
+>       ver, info = X.evaluar_m({"VIIRS750|z<=40": P}, ok_ctrl=True, modo_calib="simetrica")
+                    ^^^^^^^^^^^
+E       AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+
+tests\test_evaluar_d25_placebo_s159.py:74: AttributeError
+__________________________________________________________________________________________________ test_placebo_no_invalida_cuando_K_calza_con_mirova ___________________________________________________________________________________________________
+
+    def test_placebo_no_invalida_cuando_K_calza_con_mirova():
+        """Control: si K ya calza, una ganancia de 1,2 o 0,8 aleja y la regla no la aprueba; el instrumento sirve."""
+        P = _pares(1.0)
+>       ver, info = X.evaluar_m({"VIIRS750|z<=40": P}, ok_ctrl=True, modo_calib="simetrica")
+                    ^^^^^^^^^^^
+E       AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+
+tests\test_evaluar_d25_placebo_s159.py:82: AttributeError
+_________________________________________________________________________________________________ test_placebo_en_estrato_que_solo_informa_no_invalida __________________________________________________________________________________________________
+
+    def test_placebo_en_estrato_que_solo_informa_no_invalida():
+        P = _pares(0.6, vols=("Lastarria", "Villarrica", "Chaiten"))
+>       ver, _ = X.evaluar_m({"VIIRS375|kernel|z<=40": P}, ok_ctrl=True, modo_calib="simetrica")
+                 ^^^^^^^^^^^
+E       AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+
+tests\test_evaluar_d25_placebo_s159.py:89: AttributeError
+___________________________________________________________________________________________________ test_placebo_se_mide_aunque_fallen_los_controles ____________________________________________________________________________________________________
+
+    def test_placebo_se_mide_aunque_fallen_los_controles():
+        """El placebo prueba la métrica, no la corrida: con controles caídos se informa igual."""
+>       ver, info = X.evaluar_m({"VIIRS750|z<=40": _pares(0.6)}, ok_ctrl=False, modo_calib="simetrica")
+                    ^^^^^^^^^^^
+E       AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+
+tests\test_evaluar_d25_placebo_s159.py:95: AttributeError
+____________________________________________________________________________________________________ test_evaluar_m_no_cambia_la_decision_del_brazo _____________________________________________________________________________________________________
+
+    def test_evaluar_m_no_cambia_la_decision_del_brazo():
+        """La extracción de evaluar_m no puede mover la decisión: un brazo que lleva K a mitad de camino hacia MIROVA."""
+        P = _pares(0.6)
+        for p in P:
+            p["d"] = p["k"] * (p["m"] / p["k"]) ** 0.5
+>       ver, info = X.evaluar_m({"VIIRS750|z<=40": P}, ok_ctrl=True, modo_calib="simetrica")
+                    ^^^^^^^^^^^
+E       AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+
+tests\test_evaluar_d25_placebo_s159.py:105: AttributeError
+_______________________________________________________________________________________________ test_veredicto_de_la_ventana_queda_invalido_con_el_motivo _______________________________________________________________________________________________
+
+    def test_veredicto_de_la_ventana_queda_invalido_con_el_motivo():
+        ver = {"P1|VIIRS375": "CUMPLE", "P1|VIIRS750": "CUMPLE", "P2|VIIRS375": "EMPATE", "P2|VIIRS750": "EMPATE",
+               "P1b|VIIRS375": "SIN CRUCES", "P1b|VIIRS750": "SIN CRUCES"}
+        for nom, modo in X.ESTRATOS:
+            ver["M|%s" % nom] = "MEJORA" if nom == "VIIRS750|z<=40" else "NEUTRO"
+        ver["PLACEBO"] = "OK"
+        estado, mejora, _ = X.global_ventana(ver, True)
+        assert estado == "MEJORA" and mejora
+        ver["PLACEBO"] = "INVALIDO: placebo x1.2 da MEJORA en VIIRS750|z<=40"
+        estado, mejora, empeora = X.global_ventana(ver, True)
+>       assert estado.startswith("INVALIDO POR INSTRUMENTO"), estado
+E       AssertionError: MEJORA
+E       assert False
+E        +  where False = <built-in method startswith of str object at 0x000002B842DCE370>('INVALIDO POR INSTRUMENTO')
+E        +    where <built-in method startswith of str object at 0x000002B842DCE370> = 'MEJORA'.startswith
+
+tests\test_evaluar_d25_placebo_s159.py:120: AssertionError
+__________________________________________________________________________________________________ test_combinar_no_da_cumple_con_una_ventana_invalida __________________________________________________________________________________________________
+
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1235/test_combinar_no_da_cumple_con0')
+
+    def test_combinar_no_da_cumple_con_una_ventana_invalida(tmp_path):
+        a, b = tmp_path / "v1.json", tmp_path / "v2.json"
+        a.write_text(json.dumps({"ventana": "V1", "estado": "INVALIDO POR INSTRUMENTO (x) | sin el placebo: MEJORA",
+                                 "mejora": False, "empeora": False}), encoding="utf-8")
+        b.write_text(json.dumps({"ventana": "V2", "estado": "MEJORA", "mejora": True, "empeora": False}), encoding="utf-8")
+>       assert X.combinar([str(a), str(b)]).startswith("INVALIDO POR INSTRUMENTO")
+E       AssertionError: assert False
+E        +  where False = <built-in method startswith of str object at 0x000002B8591365B0>('INVALIDO POR INSTRUMENTO')
+E        +    where <built-in method startswith of str object at 0x000002B8591365B0> = 'DECIDE NICOLAS (M mejora en una sola ventana)'.startswith
+E        +      where 'DECIDE NICOLAS (M mejora en una sola ventana)' = <function combinar at 0x000002B8592F4D60>(['C:\\Users\\nmend\\AppData\\Local\\Temp\\pytest-of-nmend\\pytest-1235\\test_combinar_no_da_cumple_con0\\v1.json', 'C:\\Users\\nmend\\AppData\\Local\\Temp\\pytest-of-nmend\\pytest-1235\\test_combinar_no_da_cumple_con0\\v2.json'])
+E        +        where <function combinar at 0x000002B8592F4D60> = X.combinar
+
+tests\test_evaluar_d25_placebo_s159.py:131: AssertionError
+----------------------------------------------------------------------------------------------------------------- Captured stdout call ------------------------------------------------------------------------------------------------------------------
+== VEREDICTO COMBINADO: DECIDE NICOLAS (M mejora en una sola ventana) | por ventana [('V1', 'INVALIDO POR INSTRUMENTO (x) | sin el placebo: MEJORA'), ('V2', 'MEJORA')]
+================================================================================================================ short test summary info ================================================================================================================
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_el_defecto_del_evaluador_es_el_del_sello - AssertionError: assert 'sellada' == 'simetrica'
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_placebo_de_ganancia_invalida_cuando_K_queda_bajo_mirova - AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_placebo_hacia_abajo_invalida_cuando_K_queda_sobre_mirova - AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_placebo_no_invalida_cuando_K_calza_con_mirova - AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_placebo_en_estrato_que_solo_informa_no_invalida - AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_placebo_se_mide_aunque_fallen_los_controles - AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_evaluar_m_no_cambia_la_decision_del_brazo - AttributeError: module 'evaluar_d25_s159' has no attribute 'evaluar_m'. Did you mean: 'evaluar'?
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_veredicto_de_la_ventana_queda_invalido_con_el_motivo - AssertionError: MEJORA
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_combinar_no_da_cumple_con_una_ventana_invalida - AssertionError: assert False
+9 failed, 1 passed in 0.74s

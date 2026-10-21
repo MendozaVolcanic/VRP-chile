@@ -228,7 +228,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
-                        print(f"  No geolocation match for {l1b.name}")
+                        _sin_geolocalizacion(volcano, date, platform, l1b)  # S159 (I1, VB-1)
                         continue
                     try:
                         eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
@@ -271,7 +271,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
-                        print(f"  No geolocation match for {l1b.name}")
+                        _sin_geolocalizacion(volcano, date, platform, l1b)  # S159 (I1, VB-1)
                         continue
                     try:
                         eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
@@ -318,7 +318,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
-                        print(f"  No geolocation match for {l1b.name}")
+                        _sin_geolocalizacion(volcano, date, platform, l1b)  # S159 (I1, VB-1)
                         continue
                     try:
                         eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
@@ -368,6 +368,15 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
             print(f"  Cleaned up {volcano_tmp}")
 
 
+def _sin_geolocalizacion(volcano: dict, date: datetime, platform: str, l1b: Path) -> None:
+    """S159 (I1, VB-1): un L1B en disco sin su archivo de geolocalización. Antes sólo se imprimía y la cobertura
+    decía «completa»; ahora queda como incidencia (pipeline/fetch.py, TIPOS_INCIDENCIA). Función aparte, y no tres
+    líneas en cada procesador, para no correr las citas archivo:línea de CLAUDE.md (guard G8)."""
+    print(f"  No geolocation match for {l1b.name}")
+    fetch.registrar_incidencia("sin_geolocalizacion", volcano["name"], date.strftime("%Y-%m-%d"), platform,
+                               f"L1B en disco sin su geolocalización: {l1b.name}")
+
+
 def _time_key(filename: str) -> str:
     """Extract YYYYDDDHHMI time key from granule filename."""
     parts = filename.split(".")
@@ -399,46 +408,78 @@ def default_date_window(today: datetime, lookback_days: int = 7):
     return [today - timedelta(days=d) for d in range(lookback_days, -1, -1)]
 
 
-def informar_cobertura(fallas: list, ruta_json=None, estricto: bool = False) -> int:
+def informar_cobertura(fallas: list, ruta_json=None, estricto: bool = False, incidencias=None) -> int:
     """S157: dice qué búsquedas y descargas no se pudieron hacer, y devuelve el código de salida.
 
     POR QUÉ: con CMR caído cada búsqueda caía en un WARN y el job salía verde sin datos
     (experiments/_s157_busqueda_ventana/MEDICION.md §3). En un reproceso eso deja un tramo
     viejo o vacío pasando por hecho (A108); con --estricto-cobertura el job sale con 3. El NRT
     no usa el modo estricto: avisa y sigue, porque la corrida siguiente vuelve a intentar.
+
+    S159 (I1; AUDIT_S158_R2, R2-9 y VB-1): además informa las INCIDENCIAS que no son fallas
+    (pipeline/fetch.py, TIPOS_INCIDENCIA): búsqueda sin gránulos (sin juicio: no cuenta ni en modo
+    estricto), L1B sin geolocalización y día parcial (cuentan en modo estricto). Con cualquiera de
+    ellas el resumen deja de decir «completa». Sin modo estricto el código de salida sigue en 0.
     """
     import json
     from collections import defaultdict
+    incidencias = list(incidencias or [])
     if ruta_json:
         Path(ruta_json).parent.mkdir(parents=True, exist_ok=True)
         with open(ruta_json, "w", encoding="utf-8") as fh:
-            json.dump({"fallas": fallas, "n": len(fallas)}, fh, ensure_ascii=False, indent=1)
-    if not fallas:
-        print("Cobertura: completa (ninguna búsqueda ni descarga fallida).")
+            json.dump({"fallas": fallas, "n": len(fallas), "incidencias": incidencias,
+                       "n_incidencias": len(incidencias)}, fh, ensure_ascii=False, indent=1)
+    if not fallas and not incidencias:
+        print("Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).")
         return 0
-    por_volcan = defaultdict(lambda: defaultdict(list))
-    for f in fallas:
-        por_volcan[f.get("volcan") or "?"][f.get("fecha") or "?"].append(f)
-    print(f"Cobertura INCOMPLETA: {len(fallas)} búsquedas o descargas fallidas.")
     resumen = os.environ.get("GITHUB_STEP_SUMMARY")
     lineas = []
-    for volcan, por_fecha in sorted(por_volcan.items()):
-        for fecha, fs in sorted(por_fecha.items()):
-            detalle = ", ".join(f"{x.get('plataforma')}:{x.get('etapa')}" for x in fs)
-            print(f"  {volcan} {fecha}: {detalle} | {fs[0].get('motivo', '')[:100]}")
-            lineas.append(f"- {volcan} {fecha}: {detalle}")
-        if os.environ.get("GITHUB_ACTIONS") == "true":
-            fechas = sorted(por_fecha)
-            print(f"::warning title=Cobertura incompleta {volcan}::{len(fechas)} días con búsquedas o "
-                  f"descargas fallidas: {', '.join(fechas[:12])}{' ...' if len(fechas) > 12 else ''}",
-                  flush=True)
+    if fallas:
+        por_volcan = defaultdict(lambda: defaultdict(list))
+        for f in fallas:
+            por_volcan[f.get("volcan") or "?"][f.get("fecha") or "?"].append(f)
+        print(f"Cobertura INCOMPLETA: {len(fallas)} búsquedas o descargas fallidas.")
+        lineas.append("### Cobertura incompleta")
+        for volcan, por_fecha in sorted(por_volcan.items()):
+            for fecha, fs in sorted(por_fecha.items()):
+                detalle = ", ".join(f"{x.get('plataforma')}:{x.get('etapa')}" for x in fs)
+                print(f"  {volcan} {fecha}: {detalle} | {fs[0].get('motivo', '')[:100]}")
+                lineas.append(f"- {volcan} {fecha}: {detalle}")
+            if os.environ.get("GITHUB_ACTIONS") == "true":
+                fechas = sorted(por_fecha)
+                print(f"::warning title=Cobertura incompleta {volcan}::{len(fechas)} días con búsquedas o "
+                      f"descargas fallidas: {', '.join(fechas[:12])}{' ...' if len(fechas) > 12 else ''}",
+                      flush=True)
+    if incidencias:
+        # Sin ::warning: el NRT procesa siempre el día en curso (parcial) y vería un aviso por volcán en cada corrida.
+        titulos = {"sin_granulos": "sin gránulos, sin juicio (la búsqueda respondió vacía; el código no sabe si "
+                                   "debía haber pasada)",
+                   "sin_geolocalizacion": "L1B sin geolocalización (descartados sin procesar)",
+                   "dia_parcial": "día parcial (no había terminado más la latencia mínima de LANCE)"}
+        if not fallas:
+            print(f"Cobertura NO COMPLETA: {len(incidencias)} incidencias (ninguna búsqueda ni descarga fallida).")
+        else:
+            print(f"Además, {len(incidencias)} incidencias de cobertura.")
+        lineas.append("### Incidencias de cobertura")
+        por_tipo = defaultdict(lambda: defaultdict(list))
+        for i in incidencias:
+            por_tipo[i.get("tipo")][(i.get("volcan") or "?", i.get("fecha") or "?")].append(i)
+        for tipo in sorted(por_tipo):
+            cuenta = "cuenta en modo estricto" if any(x.get("cuenta_estricto") for v in por_tipo[tipo].values()
+                                                       for x in v) else "no cuenta en modo estricto"
+            print(f"  {titulos.get(tipo, tipo)}; {cuenta}:")
+            for (volcan, fecha), xs in sorted(por_tipo[tipo].items()):
+                plat = ", ".join(str(x.get("plataforma") or "todas") for x in xs)
+                print(f"    {volcan} {fecha}: {plat} | {xs[0].get('motivo', '')[:100]}")
+                lineas.append(f"- {tipo}: {volcan} {fecha}: {plat}")
     if resumen:
         try:
             with open(resumen, "a", encoding="utf-8") as fh:
-                fh.write("### Cobertura incompleta\n" + "\n".join(lineas) + "\n")
+                fh.write("\n".join(lineas) + "\n")
         except OSError:
             pass
-    return 3 if estricto else 0
+    cuenta_estricto = bool(fallas) or any(i.get("cuenta_estricto") for i in incidencias)
+    return 3 if (estricto and cuenta_estricto) else 0
 
 
 def _ventana_del_entorno(dates: list) -> tuple | None:
@@ -545,7 +586,8 @@ def main():
                         skip_noaa20=args.skip_noaa20, overwrite=args.overwrite)
 
     codigo = informar_cobertura(fetch.fallas_de_cobertura(), ruta_json=args.cobertura_json,
-                                estricto=args.estricto_cobertura)
+                                estricto=args.estricto_cobertura,
+                                incidencias=fetch.incidencias_de_cobertura())
     print("\nDone.")
     sys.exit(codigo)
 

@@ -111,11 +111,13 @@ def escribir(caso, arms, flags=None, partir=None):
     return raices
 
 
-def correr(caso, raices, ventana, desde, hasta, extra=()):
+def correr(caso, raices, ventana, desde, hasta, extra=(), placebo=False):
+    """S159: los casos de reglas corren con --omitir-placebo-solo-prueba (el placebo de M daría INVALIDO sobre los K
+    reales, que quedan bajo MIROVA, y taparía la regla que cada caso prueba); el caso `placebo` lo corre."""
     out = TMP / caso / "out.json"
     cmd = [sys.executable, str(AQUI / "evaluar_d25.py"), "--ventana", ventana, "--out", str(out), "--tmp", str(TMP / caso / "tmp"),
            "--vols", ",".join(VOLS if ventana == "V1" else [v for v in VOLS if v != "NevadosDeChillan"]),
-           "--desde", desde, "--hasta", hasta] + list(extra)
+           "--desde", desde, "--hasta", hasta] + list(extra) + ([] if placebo else ["--omitir-placebo-solo-prueba"])
     for r in raices:
         cmd += ["--raiz", str(r), "--logs", str(r / "logs")]
     p = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
@@ -197,6 +199,13 @@ def main():
           and all(regla(res)["veredicto"]["P2|%s" % s] == "EMPATE" for s in X.SENS),
           "estado %s | M %s" % (res["estado"], mv))
     n_v750 = len(pares(t, lambda k, c: "|VIIRS750|" in k))
+    # S159 (I2, R2-8): el mismo nulo con el placebo obligatorio. Lo que tiene que pasar: el placebo se calcula (no
+    # OMITIDO) y, si da MEJORA en un estrato que decide, el veredicto es INVALIDO POR INSTRUMENTO con el motivo.
+    res_p = correr("placebo", escribir("placebo", arms0), "V1", *V1, placebo=True)
+    pl = regla(res_p)["veredicto"].get("PLACEBO", "")
+    check("placebo", pl and not pl.startswith("OMITIDO") and (res_p["estado"].startswith("INVALIDO POR INSTRUMENTO")
+                                                              if pl.startswith("INVALIDO") else pl == "OK"),
+          "PLACEBO %s -> estado %s" % (pl, res_p["estado"]))
     print("   pares VIIRS 750 en el nulo: %d" % n_v750)
     json.dump({"ruido_frac": res["ruido_frac"]}, open(TMP / "ruido_v1.json", "w", encoding="utf-8"))
 
@@ -225,7 +234,8 @@ def main():
     mv = m_veredictos(res)
     check("mejora750", "MEJORA" in (mv["M|VIIRS750|z<=40"], mv["M|VIIRS750|z>40"]) and res["estado"].startswith("MEJORA"),
           "M %s | estado %s" % ({k: v for k, v in mv.items() if "750" in k}, res["estado"]))
-    res_s = correr("sellada", escribir("sellada", dict(arms0, D=con_huella(mover(base, sel, "mitad")))), "V1", *V1)
+    res_s = correr("sellada", escribir("sellada", dict(arms0, D=con_huella(mover(base, sel, "mitad")))), "V1", *V1,
+                   extra=["--calibracion", "sellada"])   # S159: el default ya es la simétrica (sello D-27)
     print("   sellada (calibración 'ambos'): M %s | estado %s" % ({k: v for k, v in m_veredictos(res_s).items() if "750" in k}, res_s["estado"]))
     res = correr("empeora750", escribir("empeora750", dict(arms0, D=con_huella(mover(base, sel, 1 / 20)))), "V1", *V1, extra=mej)
     mv = m_veredictos(res)
@@ -301,7 +311,8 @@ def main():
         r.update(distance_class="summit", f5_core_vrp_mw=0.5, diag_bg_vecinos_n_sin_vecinos=0,
                  primary_cluster={"n_pixels": 1, "vrp_mw": 0.5, "centroid_lat": r.get("volcano_lat"),
                                   "centroid_lon": r.get("volcano_lon"), "centroid_dist_km": 0.5})
-    res = correr("p2_m_indec", escribir("p2_m_indec", dict(arms0, D=Dh)), "V1", *V1)
+    res = correr("p2_m_indec", escribir("p2_m_indec", dict(arms0, D=Dh)), "V1", *V1,
+                 extra=["--calibracion", "sellada"])   # S159: el default ya es la simétrica (sello D-27)
     mi = [v for k, v in m_veredictos(res).items() if "750" in k]
     check("p2_m_indec", "INDECIDIBLE" in mi and res["estado"].startswith("NO CUMPLE (suma"), "M VIIRS 750 %s -> %s" % (mi, res["estado"]))
 
