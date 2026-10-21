@@ -61,6 +61,10 @@ atrás cuando se aplique el reproceso histórico con K (marca S157 de `docs/MISS
 - Saturación en Chillán: 0 píxeles saturados en 385 gránulos (tarea 1.18; citado en
   `experiments/_s155_audit/frente_5/INFORME.md`). D24 (MODIS DN 65533 se elimina) sigue abierta.
 
+- S158 (`docs/DISENO_D17_REMUESTREO_UTM.md`): los TIF UTM de MIROVA muestran que su grilla no está centrada en `mirova_center`
+  (falla hasta 310 m), que es UTM verdadera y que MIROVA interpola; nuestro F70 deja huecos en oblicuo y pierde energía con el
+  ángulo como el área fija. Propone una Fase 0 de sólo lectura (reproducir los TIF) y un A/B sólo VIIRS sobre la base de D25.
+
 **Abierto**: D25 (fondo = mediana del anillo, no media de vecinos; pre-registro sobre K en PR #871, borrador,
 espera sello); D17 como hipótesis competidora de la curva angular (tarea 1.36, rama `loop/activo`: sólo si después
 de D25 queda dependencia con el cenit); D32; D33 (encendido); D24.

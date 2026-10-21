@@ -2235,10 +2235,23 @@ cosa: ver D17.
 > Bow tie más remuestreo, en ese orden y centrado en `get_grid_center`, **nunca se corrió**, y
 > sobre MODIS y VIIRS 750 no hay medición. Ver la nota S146 al inicio de esta D y la Fase 4 del
 > plan.
+>
+> ⚠️ **S158**: además, el regrid F70 que se refutó deja huecos en oblicuo y pierde la energía del foco con el ángulo igual que el
+> área fija de hoy (`docs/DISENO_D17_REMUESTREO_UTM.md` §3.3), así que no podía corregir la magnitud oblicua; y «centrado en
+> `get_grid_center`» tampoco es el brazo fiel: la grilla de MIROVA se lee de sus TIF (§3.1 del mismo documento).
 
 ---
 
 ## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA (premisa probada, consecuencia NO)** S124/S125 ⚠️ **S157 (A113, tarea 1.34): el «mecanismo geométrico SÍ quedó probado» del bloque S130 de abajo NO atribuye la caída con el ángulo a D17. La tarea 1.14 (`experiments/_s151_presupuesto_magnitud/README.md` §3.2) midió que el Npix de MIROVA no crece hacia el borde y que lo que empeora es nuestro fondo (F_bg 0,85 a 0,73): la dependencia angular queda SIN ATRIBUIR, con D25 y D17 compitiendo (ver `docs/SINTOMAS.md` §1). Texto conservado por historia**
+
+> ⚠️ **S158 (A113, `docs/DISENO_D17_REMUESTREO_UTM.md` §3): el título y la tabla de abajo cayeron en 8 de 11, medido sobre
+> los TIF UTM de MIROVA** (`experiments/_s158_d17_diseno/grilla_tif.py`). El centro de la grilla de MIROVA no es `mirova_center`
+> (que queda a 46 a 310 m de él) sino unos 62,5 m al oeste y al sur del `lat`/`lon` del yaml en 8 volcanes; F70 usó el punto más
+> cercano y cablear `get_grid_center` no es el arreglo. En Láscar, Planchón-Peteroa y Tupungatito ningún campo del yaml es la grilla.
+> La grilla es UTM verdadera (EPSG:32719, y 32718 en Chaitén y Cordón Caulle), con hasta 1,87° de giro que F70 no tiene. Y el defecto
+> mayor de F70 es otro: `regrid_to_utm` asigna cada muestra a su celda y deja vacía entre el 43 y el 77 % de la grilla en oblicuo
+> (sintético, `firma_interpolador.py`), mientras los TIF de MIROVA, a 60 a 65° de cenit, no repiten ningún valor entre vecinas y casi
+> no tienen celdas vacías: interpola. Texto de abajo conservado por historia.
 
 > **S141, lectura de papers verificada renderizando las páginas** (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-08 y V-13).
 > **Grilla por sensor.** MODIS 51 × 51 celdas de 1 km (Coppola et al. 2023, Front. Earth Sci. 11:1240107, p. 3, §2.1);
