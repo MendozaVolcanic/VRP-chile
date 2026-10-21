@@ -342,6 +342,9 @@ el robo real ANTES de cercar.
   cap top-100 anomaly_pixels (anti-bloat), gitignore de snapshots locales.
 - **Render frontend**: visualización 1 marker/record alineado con MIROVA NRT
   (S27).
+- ⚠️ **S158 (F2-H1, confirmado por V2)**: MIROVA cuenta píxeles y suma todos los alertados, sin agrupar
+  (`MIROVA_VIIRS750_VRP.m` l. 61 y 83 a 85). El ítem que sigue describe algo que el código de MIROVA no hace. Ver
+  `docs/AUDIT_S158.md`.
 - **Cluster aggregation** (S27): alineación con `n_hotspots` MIROVA via
   `scipy.ndimage.label` 8-conn — explícitamente Coppola 2016a "neighbor
   pixels" connectivity.

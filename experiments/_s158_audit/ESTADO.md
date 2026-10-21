@@ -38,5 +38,6 @@ sesión (no sesiones aparte: el disco no alcanza para worktrees nuevos), cada un
 |---|---|
 | F1 a F6 | lanzados el 2026-10-21 como subagentes en segundo plano (F2 y F4 en Fable, el resto en Opus, esfuerzo alto); prompt = bloque canónico + §4 + §5 del plan, con carpeta y presupuesto de dos horas |
 | F1 a F6 | **terminados**; informes en f1/ a f6/ (commit 56ec42c6b) |
-| V1 a V3 | lanzados el 2026-10-21 (Opus, esfuerzo alto): V1 = F1 y F6 (7 hallazgos), V2 = F2 y F5 (4), V3 = F3 y F4 (6); sólo título, ubicación y gravedad |
-| síntesis | pendiente: docs/AUDIT_S158.md cuando terminen V1 a V3 |
+| V1 a V3 | **terminados** (commit 928ec40bf); lanzados el 2026-10-21 (Opus, esfuerzo alto): V1 = F1 y F6 (7 hallazgos), V2 = F2 y F5 (4), V3 = F3 y F4 (6); sólo título, ubicación y gravedad |
+| síntesis | **hecha**: docs/AUDIT_S158.md |
+| segunda ronda | aprobada por Nicolás; espera 24,8 GB libres en C: para el worktree de la sesión nueva (§6 de la síntesis) |

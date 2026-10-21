@@ -967,6 +967,9 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   objetivo por etapa. Reusa el preámbulo real del pipeline (fiel), es read-only, y
   resuelve "¿de qué path viene esto?" que el JSON persistido no puede.
 
+- ⚠️ **S158 (F5, fuera de alcance; F6 m9)**: el «no gate automático» de A76 cae para VIIRS 750: el código rechaza la
+  escena entera con sun-glint bajo 12° (`MIROVA_VIIRS750_hotspot_detection.m` l. 83 a 89) y tiene umbrales diurnos
+  propios; en 17.859 pasadas diurnas del OSF ninguna tiene glint bajo 10°. Ver `docs/AUDIT_S158.md`.
 - **A76. MIROVA publica artefactos solares diurnos en su producto per-volcán; los limpia
   por supervisión MANUAL, no gate automático** (S110, caso Láscar 760 MW verificado):
   VIIRS375 diurno cerca del mediodía solar sobre nube → la nube refleja sol en MIR (I04
@@ -1673,6 +1676,11 @@ pipeline es el alumno. Cada noche-satélite de cada volcán es una pregunta.
   monitoreo**: un evento real sin alerta. Típico en señales sub-pixel (lava lake
   Villarrica, 0.05–0.2 MW) que MIROVA ve integrando ROI completo.
 - **TN (True Negative)** — Ambos coinciden en que no hay nada. No se tabula.
+- ⚠️ **S158, auditoría contra el código de MIROVA (F2-H1, confirmado por V2 con gravedad 2):** el punto que sigue es
+  falso. MIROVA cuenta **píxeles**, no regiones: `npix = numel(alert)` y suma todos los alertados sin agrupar
+  (`MIROVA_VIIRS750_VRP.m` l. 61 y 83 a 85), y lo mismo dicen la guía del tablero v2.5 y la ec. 8 del paper. Pareado por
+  pasada en 2025 hoy contamos **menos** píxeles que MIROVA (razón 0,67, V2), y en el caso original del «factor 42»
+  (Láscar 2025-11-15 05:48) MIROVA tiene 4 píxeles y nuestro record de hoy 3. Ver `docs/AUDIT_S158.md`. Texto viejo:
 - **Cluster vs pixel (S23 T14, hallazgo factor 42)** — MIROVA reporta
   `n_hotspots` (regiones espacialmente contiguas, conectividad ~1km).
   VRP Chile reporta `n_anomalous_pixels` (pixels individuales del granule).

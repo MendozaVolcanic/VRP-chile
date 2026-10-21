@@ -33,6 +33,9 @@ similar a MIROVA".
 - ⚠️ **Data layer**: el JSON sigue conteniendo el array de N pixels. No es
   divergencia metodológica (n_anomalous_pixels es info útil), pero el cruce
   contra MIROVA debe usar siempre `final_hotspot_*` o el primary pixel.
+- ⚠️ **S158 (F2-H1, confirmado por V2 con gravedad 2)**: lo que sigue es falso. MIROVA cuenta píxeles y suma todos
+  los alertados (`MIROVA_VIIRS750_VRP.m` l. 61 y 83 a 85); en 2025 contamos menos píxeles que MIROVA (0,67). La
+  diferencia de magnitud por publicar un recorte vive en D32. Ver `docs/AUDIT_S158.md`.
 - 🔴 **Cluster aggregation**: MIROVA junta pixels contiguos (~1 km) en clusters
   antes de reportar `n_hotspots`. Nuestro `n_anomalous_pixels` no agrupa.
   Factor empírico observado: ~42× pixels nuestros por cluster MIROVA (S23 T14
@@ -2490,6 +2493,14 @@ círculo de igual área tiene radio 2,82, así que hay píxeles que sólo la caj
 Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
 
 ## D19 — `keep_peak` publica como *summit* a 0,0 km un píxel del borde del disco del Test 1, más frío que el fondo; y el second pass corre sin conjunto activo — **ABIERTA (CONFIRMADA gravedad 5 por verificador limpio; probe A75 corrido S135: el cráter no está en el Test 1, y los conteos son del régimen de fondo previo a #537; decisión D1/D2 de Nicolás pendiente)** S134/S135
+
+> ⚠️ **S158, auditoría contra el código de MIROVA (F2-H2, confirmado por V2; F1-H5 y V2-2)**: el código de VIIRS 750
+> corre el segundo pase **siempre y sobre toda la escena**, con la misma función que el primero
+> (`MIROVA_VIIRS750_hotspot_detection.m` l. 228 a 235 y 389 a 399). La condición (a) del paper («sólo si el primer pase
+> detectó algo») coincide en efecto con el código; la (b) («adyacentes») **no corre** en VIIRS 750. Y nuestro primer
+> pase tiene una compuerta `bt > t_bg + 3 K` que MIROVA no tiene: 19 de 67 publicados de VIIRS 750 con K salen sólo del
+> segundo pase (3 protegidas de Chillán), así que condicionar sin quitar la compuerta las apagaría. Lo que acerca al
+> código es igualar los dos pases **al código**, no condicionar. Pesa en la decisión D1/D2. Ver `docs/AUDIT_S158.md`.
 
 > ⚠️ **S153, adopción de K (regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, #848):** el disco del Test 1 integrado, donde `keep_peak` publicaba el píxel del borde, queda APAGADO en producción (`enable_test1_path: false`). Lo que esta D describe para el camino del Test 1 deja de ocurrir en la réplica; el second pass sin conjunto activo (D2) no lo toca K y sigue abierto. Evidencia: `experiments/_s153_fk_v2/`. Texto original conservado.
 
