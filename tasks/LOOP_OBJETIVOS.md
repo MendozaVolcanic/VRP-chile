@@ -532,6 +532,11 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   procesaron en vivo y hoy no hay archivo de donde reprocesarlas. Pregunta abierta a Nicolás: dejarlas en C0 con su
   marca y volver a consultar CMR por si NASA publica el estándar más adelante. SIN VERIFICAR: por qué falta el
   estándar (hueco de producción de NASA o algo del satélite).
+- #881 mergeado (`c0ee0950`; probe archivado en `_archive/`, CI verde sobre `a5f7130e`). **#876 arreglado en PR #882**
+  (`s158-watchdog-juzgadas`): lista `.github/reproc-watchdog-juzgadas.json` con id, intento, motivo y referencia;
+  exime sólo terminadas y sólo ese intento; entrada incompleta invalida la lista y deja el job en rojo. 41 de 41
+  locales, dos mutaciones atrapadas por aserción. Merge cuando el CI dé conclusión (enmienda A39).
+- Relleno: 5.º (39534689286, PCC 2026-04-25) `success`; 6.º = 39535573533 (Copahue 2026-07-02).
 
 ### 2026-10-21 02:45 UTC: TRASPASO del loop de S157 a la sesión nueva (S158)
 - S157 detuvo sus tres procesos locales a las 02:41 UTC para que haya una sola dueña del loop (S153). **Desde ahora
