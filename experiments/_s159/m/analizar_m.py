@@ -65,7 +65,9 @@ def main():
     print("\n== Validez del instrumento")
     print("nulo geometria = 0 en", sum(1 for f in ok if f["nulo_geo_crater_km"] == 0), "de", len(ok))
     print("A identico a A2 en", sum(1 for f in ok if f["nulo_A_A2_identico"]), "de", len(ok))
-    s6 = [f for f in ok if f["objetivo"]["estrato"] == "S6_control_lascar_s151"]
+    # El control S6 es el granulo de S151, cualquiera sea su estrato: armar_poblacion.py lo deduplica y queda
+    # dentro de S1 (es un summit de Lascar del lado del frame 0 a 44,6 grados).
+    s6 = [f for f in ok if f["objetivo"]["volcan"] == "Lascar" and ".A2026073.0705." in f["objetivo"]["granulo"]]
     for f in s6:
         print("control S6", f["objetivo"]["granulo"], "hacia sensor", f["geo_crater"]["obs_hacia_sensor_km"],
               "(S151: 2.581)", "traza", f["geo_crater"]["obs_traza_km"], "(S151: -0.431)")
@@ -100,7 +102,15 @@ def main():
         f["extremo"] = g["linea"] < 400 or g["linea"] > n - 1 - 400
         f["lado_real"] = "f0" if g["volcan_del_lado_del_frame0"] else "otro"
         f["total_crater"] = math.hypot(g["obs_barrido_km"], g["obs_traza_km"])
+        # Pixeles del cumulo de A: anomaly_pixels guarda TODOS los pixeles calientes de la escena (puede haber
+        # uno a 25 km), no solo los del cumulo publicado. Se toman los n_pixels del cumulo mas cercanos a su
+        # centroide y, de esos, el de maxima BT (metrica 1 del pre-registro: "pixel de maxima BT del cumulo").
         dp = f["desp_pixeles_A"]
+        if dp and pa.get("centroid_lat") is not None:
+            pix = (a.get("anomaly_pixels") or [])[:len(dp)]
+            dc = [math.hypot(*ne_km(pa["centroid_lat"], pa["centroid_lon"], q["lat"], q["lon"])) for q in pix]
+            orden = sorted(range(len(dp)), key=lambda k: dc[k])[:max(1, pa.get("n_pixels") or 1)]
+            dp = [dp[k] for k in orden]
         hot = max(dp, key=lambda x: (x["bt_k"] or 0)) if dp else None
         f["hot_d"] = hot["d_km"] if hot else None
         f["hot_rumbo"] = hot["rumbo"] if hot else None
@@ -141,6 +151,11 @@ def main():
               f"  <0,5 km: {sum(1 for f in l if f['hot_d'] is not None and f['hot_d']<0.5)}")
         print(f"   rumbos pixel caliente: {Counter(int(((f['hot_rumbo']+45)%360)//90) for f in l if f['hot_rumbo'] is not None)} (0=N 1=E 2=S 3=O)")
         print(f"   centroide A->B med {med([f['cent_d'] for f in l])} km  n={sum(1 for f in l if f['cent_d'] is not None)}")
+        dA = [((f['rec_A'] or {}).get('pc') or {}).get('centroid_dist_km') for f in l]
+        dB = [((f['rec_B'] or {}).get('pc') or {}).get('centroid_dist_km') for f in l]
+        par = [(x, y) for x, y in zip(dA, dB) if x is not None and y is not None]
+        print(f"   distancia del centroide al crater: A med {med([x for x,_ in par])} km, B med {med([y for _,y in par])} km"
+              f"  (n pares={len(par)}; B mas cerca en {sum(1 for x,y in par if y<x)})")
         print(f"   clase cambia: {sum(1 for f in l if f['clase_cambia'])}  "
               f"{Counter((f['rec_A'] or {}).get('distance_class') and str((f['rec_A'] or {}).get('distance_class'))+'->'+str((f['rec_B'] or {}).get('distance_class')) for f in l if f['clase_cambia'])}")
         print(f"   publicado cambia: {sum(1 for f in l if f['pub_cambia'])}  (A>0: {sum(1 for f in l if f['pub_A']>0)}, B>0: {sum(1 for f in l if f['pub_B']>0)})")
