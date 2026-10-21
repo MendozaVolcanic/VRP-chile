@@ -554,6 +554,27 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): frente N terminado, verificador limpio corriendo
+- N (rama `s159-n`, `3faa5a4f6`; pre-registro `0b20eb1f3` antes del disparo; runs 39680724047, 39682867040 y
+  39690106947; 391 de 398 pasadas con los cinco brazos, K2 = K y K = record publicado en 391 de 391). Todo SIN
+  VERIFICAR hasta que entregue el verificador:
+  - **F y FC: ENCIENDEN DE MÁS** (pre-registrado). Negativos limpios publicados de 54 (1,0 %) a 206 (3,8 % de 5.385,
+    ponderado; 6 eventos en 141 muestreados), ΔE +104 [14,5; 212]; 0 protegidas perdidas; alertas bajo 1 MW sin
+    publicar de 65 a 17 de 175. Lo encendido son cúmulos de 1 píxel en 0 MW del segundo pase que el código de MIROVA
+    no detecta: el fondo solo no es el arreglo.
+  - **C (sin la compuerta de 3 K): 0 de 391 cambios.** El cero de los cúmulos lo pone el fondo, no D22 (responde VA-1).
+  - **El código entero en la grilla de GEO reproduce la magnitud de MIROVA**: razón 0,999 [0,978; 1,007] en 145
+    alertas, con remuestreo lineal y esquina a -187,5 m. Primera medición por valores que sostiene la grilla de GEO.
+  - **Post hoc**: el oráculo como brazo, con umbrales de cumbre en todo el recuadro, gana en las dos caras (negativos de
+    54 a 8, 59 alertas débiles ganadas, 0 protegidas perdidas); con la caja por defecto pierde 6 protegidas de Cordón
+    Caulle. Para la ola 3 lo que cuenta es el paquete entero, no el fondo solo.
+  - El tope D9 recorta con F una protegida de Chillán (MIROVA 9,0; F 6,21 a 5,0).
+  - SIN DATO: 3 pasadas del 2026-10-12 que CMR autenticado no devuelve, 2 diurnas de Chillán (estrato diurno sin
+    medir), 2 de Chaitén con el volcán fuera del gránulo.
+- Incidente: la cuenta de GitHub tocó el límite de la API a las 22:16 UTC, en parte por `gh run watch` con el intervalo
+  por defecto. Regla para los agentes: nada de `gh run watch` ni bucles de `gh`.
+- Decisiones para Nicolás que deja N: escalar la muestra de negativos sobre el tope de 400 y medir el estrato diurno.
+
 ### 2026-10-21 ~23:20 UTC (S159, dueña del loop): D-28 implementada; cuatro frentes nuevos en paralelo
 - **#890** (`b4258040c`, borrador): comparador implementado; roja 10 por aserción, verde 15 de 15,
   `probar_evaluar_d25.py` 30 de 30 (los 27 de S157 idénticos), con los pares reales de K el placebo ya no da MEJORA
