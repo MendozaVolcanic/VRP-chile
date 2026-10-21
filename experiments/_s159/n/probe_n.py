@@ -267,37 +267,53 @@ def resumen_brazo(nombre, PVM, volcan, l1b, geo):
 
 
 # ---------------------------------------------------------------- bajada
-def bajar_por_tag(tag, lat, lon, destino):
-    """Estrato diurno: no hay record nuestro. Se busca en CMR por nombre de gránulo con la hora de MIROVA, en los
-    tres satélites (la búsqueda de producción por día y caja filtra lo diurno, por eso no sirve aquí)."""
+def _buscar_por_ventana(sn, vers, tag, lat, lon):
+    """CMR por ventana temporal de la hora del tag y caja de 1 grado: el gránulo que contiene el volcán."""
     import earthaccess
+    from datetime import datetime, timedelta
+    t = datetime.strptime(tag[1:], "%Y%j.%H%M")
+    for ver in vers:
+        try:
+            h = earthaccess.search_data(short_name=sn, version=ver,
+                                        temporal=((t - timedelta(minutes=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                                  (t + timedelta(minutes=7)).strftime("%Y-%m-%dT%H:%M:%SZ")),
+                                        bounding_box=(lon - 0.5, lat - 0.5, lon + 0.5, lat + 0.5), count=10)
+        except Exception as e:  # noqa: BLE001
+            print(f"   ventana {sn} {ver} fallo: {type(e).__name__}: {str(e)[:100]}", flush=True)
+            h = []
+        h = [g for g in h if tag in str(g["umm"].get("GranuleUR", ""))]
+        if h:
+            return h[:1]
+    return []
+
+
+VERS = {"VNP": ("2",), "VJ1": ("2.1", "2"), "VJ2": ("2.1",)}
+
+
+def bajar_por_tag(tag, lat, lon, destino, prefijos=("VNP", "VJ1", "VJ2")):
+    """Sin nombre de gránulo (estrato diurno) o cuando la búsqueda por nombre falla: por ventana y caja, en cada
+    satélite; la caja garantiza que el gránulo contenga el volcán (en el disparo 39682867040 la búsqueda por nombre
+    de las diurnas encontró un gránulo de otro satélite a la misma hora, lejos de Chillán)."""
     from pipeline.fetch import download_granules
-    for pref, vers in (("VNP", ("2",)), ("VJ1", ("2.1", "2")), ("VJ2", ("2.1",))):
+    for pref in prefijos:
         par = {}
         for tipo in ("02", "03"):
             for sn in (f"{pref}{tipo}MOD", f"{pref}{tipo}MOD_NRT"):
-                h = []
-                for ver in vers:
-                    try:
-                        h = earthaccess.search_data(short_name=sn, version=ver, granule_name=f"{sn}.{tag}.*", count=5)
-                    except Exception as e:  # noqa: BLE001
-                        print(f"   busqueda {sn} {ver} fallo: {type(e).__name__}: {str(e)[:100]}", flush=True)
-                        h = []
-                    if h:
-                        break
+                h = _buscar_por_ventana(sn, VERS[pref], tag, lat, lon)
                 if h:
-                    par[tipo] = h[:1]
+                    par[tipo] = h
                     break
         if len(par) == 2:
             p1 = download_granules(par["02"], destino)
             p2 = download_granules(par["03"], destino)
             return ([q for q in p1 if q.suffix in (".nc", ".h5")][0],
                     [q for q in p2 if q.suffix in (".nc", ".h5")][0]), None
-    return None, "sin_granulo_diurno"
+    return None, "sin_granulo_por_ventana"
 
 
 def bajar_con_reintentos(nombre, destino, intentos=3):
-    """CMR da ReadTimeout transitorios (humo, run 39680724047: Chaitén 2026-10-06). Reintenta la búsqueda."""
+    """CMR da ReadTimeout transitorios (humo, run 39680724047: Chaitén 2026-10-06). Reintenta la búsqueda por nombre
+    y, si sigue sin gránulo, busca por ventana temporal y caja (las tres del 2026-10-12, run 39682867040)."""
     err = None
     for n in range(intentos):
         par, err = PG.bajar(nombre, destino)
@@ -305,7 +321,10 @@ def bajar_con_reintentos(nombre, destino, intentos=3):
             return par, None
         print(f"   intento {n + 1} de {intentos}: {err}", flush=True)
         time.sleep(30)
-    return None, err
+    tag = nombre.split(".")[1] + "." + nombre.split(".")[2]
+    pref = {"VNP0": "VNP", "VJ10": "VJ1", "VJ20": "VJ2"}[nombre[:4]]
+    par, err2 = bajar_por_tag(tag, PG.LATLON[0], PG.LATLON[1], destino, prefijos=(pref,))
+    return (par, None) if par else (None, err + "|" + err2)
 
 
 def procesar_granulo(objs, destino, outdir, sin_k=False):
@@ -337,6 +356,7 @@ def procesar_granulo(objs, destino, outdir, sin_k=False):
             dist = 6371.0 * 2 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
             if not np.isfinite(dist).any() or np.nanmin(dist) > 5:
                 r["estado"] = "volcan_fuera_del_granulo"
+                r["dist_min_km"] = None if not np.isfinite(dist).any() else float(np.nanmin(dist))
                 res.append(r)
                 continue
             i0 = np.unravel_index(np.nanargmin(np.where(np.isfinite(dist), dist, np.inf)), dist.shape)
@@ -350,16 +370,17 @@ def procesar_granulo(objs, destino, outdir, sin_k=False):
             gg = grillar(lat, lon, rad["M13"], rad["M15"], g, g["ul_x"], g["ul_y"], ("linear", "nearest", "cubic"))
             gr2 = grillar(lat, lon, rad["M13"], rad["M15"], g, g["ul_x_r2"], g["ul_y_r2"], ("linear", "nearest"))
             if gg is None:
-                r["estado"] = "volcan_fuera_del_granulo"
-                res.append(r)
-                continue
+                r["oraculo_estado"] = "grilla_incompleta"
+                gg, gr2 = {}, {}
             for m, (a13, a15) in gg.items():
                 orc[f"geo_{m}"] = oraculo(a13, a15, dayflag, sg)
-            orc["geo_linear_anillo_sensible"] = oraculo(*gg["linear"], dayflag, sg, sensible=True)
-            for m, (a13, a15) in gr2.items():
+            if gg:
+                orc["geo_linear_anillo_sensible"] = oraculo(*gg["linear"], dayflag, sg, sensible=True)
+            for m, (a13, a15) in (gr2 or {}).items():
                 orc[f"r2_{m}"] = oraculo(a13, a15, dayflag, sg)
             r["oraculo"] = orc
-            np.savez_compressed(outdir / f"grilla_{o['id']:03d}.npz", m13=gg["linear"][0], m15=gg["linear"][1])
+            if gg:
+                np.savez_compressed(outdir / f"grilla_{o['id']:03d}.npz", m13=gg["linear"][0], m15=gg["linear"][1])
             if not sin_k and dayflag == 0:
                 r["brazos"] = {}
                 for b in ("K", "K2", "C", "F", "FC"):
