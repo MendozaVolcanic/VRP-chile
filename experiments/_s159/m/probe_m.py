@@ -113,7 +113,7 @@ def main():
     salida = open(out / f"probe_m_parte{args.parte}.jsonl", "w", encoding="utf-8")
     faltan = 0
 
-    def bajar(short, pat, dest):
+    def _bajar_una(short, pat, dest):
         r = P151._bajar(short, pat, dest)
         if r is not None:
             return r, "6.1"
@@ -124,6 +124,18 @@ def main():
             return None, None
         p = download_granules(res[:1], dest)
         return (p[0] if p else None), "6.1NRT"
+
+    def bajar(short, pat, dest):
+        # Run 39679594869: un ReadTimeout de CMR (60 s) mato las 4 partes. Reintento con espera; si igual falla,
+        # el granulo queda como error (el script sale 2), no se cae la corrida entera.
+        import time
+        for intento in range(4):
+            try:
+                return _bajar_una(short, pat, dest)
+            except Exception as e:
+                print(f"  CMR/descarga fallo intento {intento} {short}.{pat}: {e!r}"[:300], flush=True)
+                time.sleep(20 * (intento + 1))
+        return None, None
 
     for g in mios:
         short, pat = g.split(".")[0], ".".join(g.split(".")[1:3])
