@@ -509,6 +509,14 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 ~02:25 UTC (S157, tras el cierre): relleno confirmado en CMR y despachándose
+- `armar_relleno.py` con CMR arriba (consulta 02:11 UTC): **31 `standard` = «existe (CMR)», 58 `nrt` = «no_existe
+  (CMR)»**. Los archivos regenerados quedaron sin commitear en `D:\vrp-trabajo\temporales\s157_relleno_wt` (worktree
+  detached de `main`): llevarlos a `main` con el PR del relleno.
+- Proceso local despachando los 10 días en serie (`reproc-chunked`, perfil `_s154_reproc_k_historico`, modo
+  estricto); cada resultado queda en el log del proceso. Si la app se cerró, revisar `gh run list -w reproc-chunked.yml`
+  y despachar los que falten desde `experiments/_s157_relleno/plan_relleno.json`. Después: contar pasadas (A108).
+
 ### 2026-10-21 ~02:10 UTC (S157): NRT con código nuevo verde; **A/B de D25 DESPACHADO**; relleno en preparación
 - NRT 39525751661 (01:10 UTC, sobre `cf07ead1`, con #877): verde, 88 `AUTH_OK`, 484 `SEARCH_VENTANA` (búsqueda por
   ventana activa), cobertura completa salvo 1 falla en un volcán, sin el 401 de NOAA-21 del probe. **0 commits**:
