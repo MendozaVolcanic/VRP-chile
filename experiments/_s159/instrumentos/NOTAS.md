@@ -255,3 +255,7 @@ Al aplicarlo, quitar la marca `xfail` de `test_v375_magnitud_enorme_con_temperat
    el placebo la tape; deja el veredicto marcado como «no vale para decidir». Si prefieres que no exista, la prueba de
    punta a punta tiene que esperar a que se resuelva el punto 1.
 
+
+## Nota del coordinador (S159, 2026-10-21)
+
+La pieza I2 (evaluador de D25 y su placebo) salió de este PR a uno aparte, rama `s159-evaluador-d25`, porque cambia el instrumento de un pre-registro sellado y se corrige sólo por adenda con Nicolás (R2.1 c del loop). Sus pruebas, salidas y `placebo_real.py` viven en esa rama; las mutaciones I2 de `mutar.py` apuntan a un archivo que en esta rama sigue como en `main`.

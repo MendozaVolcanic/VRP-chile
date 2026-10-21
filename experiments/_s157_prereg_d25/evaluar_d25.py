@@ -75,25 +75,12 @@ N_CALIB, MAX_FALSOS_CALIB = 200, 0.05    # calibración de M: falsos en 5 % o me
 # cuando K ya calza con MIROVA. "simetrica" es la propuesta de la adenda (ADENDA_CALIBRACION.md, decisión de Nicolás):
 # nulo con el SIGNO DE d sorteado por bloque (mediana 0 por construcción), cada cola con su tope de 5 %, las dos colas
 # donde el estrato decide y sólo EMPEORA donde bloquea; y un MEJORA cuenta sólo si la mediana de d es negativa en al
-# menos dos volcanes del estrato con 3 pares o más (H4: cada estrato lo domina un volcán).
-# S159 (tarea I2, VB-2 de AUDIT_S158_R2): el default es el que el sello declara vigente. ADENDA_CALIBRACION.md l. 3 a 8:
-# «SELLADA por Nicolás el 2026-10-20 (D-27) ... Rige: §2 entero ... y §3 opción A ... El evaluador corre con
-# `--calibracion simetrica`.» Hasta S158 el default era "sellada" (la regla del §5 original, reemplazada por ese sello),
-# así que un despacho que olvidara el argumento evaluaba con la regla vieja. "sellada" queda disponible por argumento
-# para reproducir lo medido antes del sello (calibracion_previa_salida.txt, caso `sellada` de probar_evaluar_d25.py).
-CALIB_MODO = "simetrica"
+# menos dos volcanes del estrato con 3 pares o más (H4: cada estrato lo domina un volcán). El default es el sellado.
+CALIB_MODO = "sellada"
 MIN_VOLCANES_MEJORA, MIN_PARES_VOLCAN = 2, 3
 MIN_PARES_PODER, MIN_PODER = 20, 0.80    # control positivo de la calibración (informa)
-# S159 (tarea I2, R2-8 de AUDIT_S158_R2): control placebo OBLIGATORIO de M. POR QUÉ: un brazo que sólo multiplica la
-# magnitud de K por 1,2 da MEJORA con la calibración simétrica (experiments/_s158_audit_r2/rb/05_placebo_metrica_m.txt):
-# K queda bajo MIROVA (razón mediana 0,67 en VIIRS 375), así que cualquier ganancia acerca. Una métrica que aprueba un
-# placebo no distingue un mecanismo fiel (D25) de una ganancia cualquiera. Antes de dar veredicto se corre la MISMA
-# decisión de cada estrato que decide o bloquea sobre K×g, con g de esta tupla; si alguna da MEJORA, el veredicto de la
-# ventana queda INVALIDO POR INSTRUMENTO. No cambia la regla de decisión sellada: es un control de validez de la métrica.
-PLACEBO_GANANCIAS = (1.2, 0.8)
 # Del más estricto al menos estricto; «manda la más estricta» entre las reglas original y SN (verificador H15).
-ORDEN = ("INVALIDO POR INSTRUMENTO", "NO CUMPLE", "INDECIDIBLE", "PENDIENTE DE REPETICION", "DECIDE NICOLAS",
-         "SIN EFECTO", "MEJORA", "CUMPLE")
+ORDEN = ("NO CUMPLE", "INDECIDIBLE", "PENDIENTE DE REPETICION", "DECIDE NICOLAS", "SIN EFECTO", "MEJORA", "CUMPLE")
 HITO_SNPP = "2026-10-09"                 # A119: hasta acá las filas sólo OCR de Suomi NPP traen distancia de otra pasada
 
 
@@ -309,81 +296,7 @@ def es_snpp(k, c, prot):
     return E.ocr_snpp(k, c, prot) and k.split("|")[2][:10] < HITO_SNPP
 
 
-def decidir_estrato(P, modo, modo_calib, ok_ctrl):
-    """La decisión de M de UN estrato con sus pares P (k, d, m, clave, bloque): regla, calibración y opción A.
-    S159: extraída sin cambios de contar() para poder correrla también sobre los placebos (evaluar_m)."""
-    d = np.array([d_par(p["k"], p["d"], p["m"]) for p in P])
-    W = pesos_bloque([p["bloque"] for p in P])
-    r, lo, hi = regla_m(d, W)
-    bl = [p["bloque"] for p in P]
-    vols_neg, vols_n = 0, 0
-    for v_ in sorted({p["clave"].split("|")[0] for p in P}):
-        dv = [x for x, p in zip(d, P) if p["clave"].startswith(v_ + "|")]
-        if len(dv) >= MIN_PARES_VOLCAN:
-            vols_n += 1; vols_neg += float(np.median(dv)) < 0
-    nota = ""
-    if modo_calib == "sellada":
-        f_mej, f_emp, poder = calibrar(P, W, bl)
-        calibrada = f_mej + f_emp <= MAX_FALSOS_CALIB
-    else:
-        f_mej, f_emp, poder = calibrar_simetrico(d, W, bl)
-        calibrada = (f_emp <= MAX_FALSOS_CALIB) if modo == "bloquea" else (f_mej <= MAX_FALSOS_CALIB and f_emp <= MAX_FALSOS_CALIB)
-    if modo == "informa":
-        r_dec = r                  # no decide: se informa la regla tal cual
-    elif not ok_ctrl or not calibrada:
-        r_dec = "INDECIDIBLE"
-    elif modo == "bloquea" and r == "MEJORA":
-        r_dec = "NEUTRO"           # sello §8 a: en este estrato una mejora no cuenta
-    elif modo_calib == "simetrica" and r == "MEJORA" and vols_neg < MIN_VOLCANES_MEJORA:
-        r_dec, nota = "NEUTRO", "MEJORA sostenida por menos de %d volcanes (adenda, H4)" % MIN_VOLCANES_MEJORA
-    else:
-        r_dec = r
-    detalle = {"n": len(P), "noches": len(set(bl)), "modo": modo, "regla": r, "d_mediana": float(np.median(d)),
-               "ic95": [lo, hi], "razon_K": float(np.median([p["k"] / p["m"] for p in P])),
-               "razon_D": float(np.median([p["d"] / p["m"] for p in P])),
-               "falsos_mejora": f_mej, "falsos_empeora": f_emp, "modo_calibracion": modo_calib,
-               "volcanes_con_d_negativa": vols_neg, "volcanes_con_3_pares": vols_n, "nota": nota,
-               "calibrada": calibrada, "poder": poder if len(P) >= MIN_PARES_PODER else None}
-    return r_dec, detalle
-
-
-def evaluar_m(pares, ok_ctrl, modo_calib=CALIB_MODO, placebo=True):
-    """M de todos los estratos y su control placebo. `pares`: {estrato: [pares]}. Devuelve (ver, info) con las claves
-    M|<estrato>, PLACEBO (ver) y M_pares, M_pares_con_magnitud_distinta, M_placebo (info).
-
-    Placebo (S159, R2-8): para cada estrato que decide o bloquea, la misma decisión sobre un brazo D = K×g, con g en
-    PLACEBO_GANANCIAS, y con los controles dados por buenos (se prueba la métrica, no la corrida). Si alguna da MEJORA,
-    ver["PLACEBO"] = "INVALIDO: ..." con el motivo; si no, "OK". Con placebo=False (sólo la prueba del evaluador) queda
-    "OMITIDO (solo prueba)" y no invalida."""
-    ver, info = {}, {}
-    # Verificador H8: la huella dice que el flag se leyó, no que D25 actuó. Cuántos pares cambian de magnitud.
-    todos = [p for P in pares.values() for p in P]
-    info["M_pares_con_magnitud_distinta"] = sum(abs(p["d"] - p["k"]) > 1e-9 for p in todos)
-    info["M_pares"] = len(todos)
-    info["M_placebo"] = {}
-    motivos = []
-    for nom, modo in ESTRATOS:
-        P = pares.get(nom, [])
-        bloques = sorted({p["bloque"] for p in P})
-        clave = "M|%s" % nom
-        if len(P) < N_MIN_PARES or len(bloques) < N_MIN_NOCHES:
-            ver[clave], info[clave] = "SIN SUSTRATO", {"n": len(P), "noches": len(bloques), "modo": modo}
-            continue
-        ver[clave], info[clave] = decidir_estrato(P, modo, modo_calib, ok_ctrl)
-        if not placebo or modo == "informa":
-            continue
-        info["M_placebo"][nom] = {}
-        for g in PLACEBO_GANANCIAS:
-            r_g = decidir_estrato([dict(p, d=p["k"] * g) for p in P], modo, modo_calib, True)[0]
-            info["M_placebo"][nom][str(g)] = r_g
-            if modo != "informa" and r_g == "MEJORA":
-                motivos.append("placebo x%s da MEJORA en %s" % (g, nom))
-    ver["PLACEBO"] = ("OMITIDO (solo prueba)" if not placebo else
-                      "INVALIDO: " + "; ".join(motivos) if motivos else "OK")
-    return ver, info
-
-
-def contar(T, prot, R, cfg, regla, res_ctrl, ruido_frac_de, inner, modo_calib=CALIB_MODO, T_rep=None, placebo=True):
+def contar(T, prot, R, cfg, regla, res_ctrl, ruido_frac_de, inner, modo_calib=CALIB_MODO, T_rep=None):
     """Las pruebas P1, P1b, P2 y M con las etiquetas ya fijadas en T (regla 'original' o 'SN')."""
     ver, info = {}, {"regla": regla}
     brazos = cfg["brazos"]
@@ -462,9 +375,50 @@ def contar(T, prot, R, cfg, regla, res_ctrl, ruido_frac_de, inner, modo_calib=CA
         pares[nom].append({"k": c["disp"], "d": b["disp"], "m": c["vrp_ref"], "clave": k,
                            "bloque": "%s|%s" % (k.split("|")[0], k.split("|")[2][:10])})
     info["M_salen"] = dict(salen)
-    ver_m, info_m = evaluar_m(pares, ok_ctrl, modo_calib, placebo=placebo)
-    ver.update(ver_m)
-    info.update(info_m)
+    # Verificador H8: la huella dice que el flag se leyó, no que D25 actuó. Cuántos pares cambian de magnitud.
+    todos = [p for P in pares.values() for p in P]
+    info["M_pares_con_magnitud_distinta"] = sum(abs(p["d"] - p["k"]) > 1e-9 for p in todos)
+    info["M_pares"] = len(todos)
+    for nom, modo in ESTRATOS:
+        P = pares.get(nom, [])
+        bloques = sorted({p["bloque"] for p in P})
+        clave = "M|%s" % nom
+        if len(P) < N_MIN_PARES or len(bloques) < N_MIN_NOCHES:
+            ver[clave], info[clave] = "SIN SUSTRATO", {"n": len(P), "noches": len(bloques), "modo": modo}
+            continue
+        d = np.array([d_par(p["k"], p["d"], p["m"]) for p in P])
+        W = pesos_bloque([p["bloque"] for p in P])
+        r, lo, hi = regla_m(d, W)
+        bl = [p["bloque"] for p in P]
+        vols_neg, vols_n = 0, 0
+        for v_ in sorted({p["clave"].split("|")[0] for p in P}):
+            dv = [x for x, p in zip(d, P) if p["clave"].startswith(v_ + "|")]
+            if len(dv) >= MIN_PARES_VOLCAN:
+                vols_n += 1; vols_neg += float(np.median(dv)) < 0
+        nota = ""
+        if modo_calib == "sellada":
+            f_mej, f_emp, poder = calibrar(P, W, bl)
+            calibrada = f_mej + f_emp <= MAX_FALSOS_CALIB
+        else:
+            f_mej, f_emp, poder = calibrar_simetrico(d, W, bl)
+            calibrada = (f_emp <= MAX_FALSOS_CALIB) if modo == "bloquea" else (f_mej <= MAX_FALSOS_CALIB and f_emp <= MAX_FALSOS_CALIB)
+        if modo == "informa":
+            r_dec = r                  # no decide: se informa la regla tal cual
+        elif not ok_ctrl or not calibrada:
+            r_dec = "INDECIDIBLE"
+        elif modo == "bloquea" and r == "MEJORA":
+            r_dec = "NEUTRO"           # sello §8 a: en este estrato una mejora no cuenta
+        elif modo_calib == "simetrica" and r == "MEJORA" and vols_neg < MIN_VOLCANES_MEJORA:
+            r_dec, nota = "NEUTRO", "MEJORA sostenida por menos de %d volcanes (adenda, H4)" % MIN_VOLCANES_MEJORA
+        else:
+            r_dec = r
+        ver[clave] = r_dec
+        info[clave] = {"n": len(P), "noches": len(bloques), "modo": modo, "regla": r, "d_mediana": float(np.median(d)),
+                       "ic95": [lo, hi], "razon_K": float(np.median([p["k"] / p["m"] for p in P])),
+                       "razon_D": float(np.median([p["d"] / p["m"] for p in P])),
+                       "falsos_mejora": f_mej, "falsos_empeora": f_emp, "modo_calibracion": modo_calib,
+                       "volcanes_con_d_negativa": vols_neg, "volcanes_con_3_pares": vols_n, "nota": nota,
+                       "calibrada": calibrada, "poder": poder if len(P) >= MIN_PARES_PODER else None}
     # M por volcán y Chillán aparte (informa)
     por_vol = collections.defaultdict(list)
     for nom, P in pares.items():
@@ -476,18 +430,7 @@ def contar(T, prot, R, cfg, regla, res_ctrl, ruido_frac_de, inner, modo_calib=CA
 
 
 def global_ventana(ver, ok_ctrl):
-    """§8 d, una ventana. Devuelve (estado, mejora_en_algún_estrato_que_decide, empeora).
-
-    S159 (R2-8): si el placebo de M dio MEJORA (ver["PLACEBO"] empieza con INVALIDO), el veredicto queda INVALIDO POR
-    INSTRUMENTO con el motivo, y se informa lo que habría dado sin el placebo; no cuenta como mejora ni empeora."""
-    estado, mejora, empeora = _global_ventana_sin_placebo(ver, ok_ctrl)
-    if ver.get("PLACEBO", "OK") != "OK" and ver["PLACEBO"].startswith("INVALIDO"):
-        return ("INVALIDO POR INSTRUMENTO (%s) | sin el placebo: %s" % (ver["PLACEBO"][len("INVALIDO: "):], estado),
-                False, False)
-    return estado, mejora, empeora
-
-
-def _global_ventana_sin_placebo(ver, ok_ctrl):
+    """§8 d, una ventana. Devuelve (estado, mejora_en_algún_estrato_que_decide, empeora)."""
     if not ok_ctrl:
         return "INDECIDIBLE", False, False
     p1 = [ver["P1|%s" % s] for s in SENS]
@@ -546,14 +489,9 @@ def evaluar(a):
         a.ventana, cfg["desde"], cfg["hasta"], len(vols), brazos,
         "decide la tabla sola" if cfg["solo_tabla"] else "decide tabla y OCR", res["sha256_index_html"]))
     print("   volcanes con kernel local en VIIRS 375 (volcanoes.yaml):", sorted(KERNEL))
-    print("   calibración de M: %s" % ("sellada (§5 original: signo de log D/K al azar, falsos MEJORA o EMPEORA <= 5 %%;"
-          " reemplazada por el sello D-27, sólo para reproducir)" if a.calibracion == "sellada" else
-          "simétrica con opción A (ADENDA_CALIBRACION.md l. 3 a 8, sello D-27 de Nicolás, vigente)"))
-    print("   control placebo de M: %s" % ("OMITIDO (--omitir-placebo-solo-prueba: este veredicto NO vale para decidir)"
-          if a.omitir_placebo else "obligatorio, K x %s; si alguno da MEJORA el veredicto es INVALIDO POR INSTRUMENTO"
-          % " y K x ".join(str(g) for g in PLACEBO_GANANCIAS)))
+    print("   calibración de M: %s" % ("sellada (§5: signo de log D/K al azar, falsos MEJORA o EMPEORA <= 5 %%)"
+          if a.calibracion == "sellada" else "simétrica (ADENDA_CALIBRACION.md, propuesta, requiere el sello de Nicolás)"))
     res["calibracion"] = a.calibracion
-    res["placebo"] = "omitido (solo prueba)" if a.omitir_placebo else list(PLACEBO_GANANCIAS)
     ref = E.archivos_ref(cfg, tmp)
     res["referencia_ok"] = E.referencia_congelada(cfg["ref"], ref[2], False)
     pares = [("K", n) for n in brazos if n != "K"]
@@ -654,8 +592,7 @@ def evaluar(a):
         labs = base if modo == "original" else E.etiquetas_regla(sorted(todas), ref, cfg["desde"], cfg["hasta"], modo, umbral)
         nuevo = {k: (labs[k] if labs[k] != base[k] else tabla_lab.get(k, base[k])) for k in todas}
         Tx = {p: {k: {lado: dict(x, lab=nuevo[k]) for lado, x in v.items()} for k, v in t.items()} for p, t in T.items()}
-        ver, info = contar(Tx, prot, R, cfg, regla, res, ruido_de, inner, a.calibracion, T_rep,
-                           placebo=not a.omitir_placebo)
+        ver, info = contar(Tx, prot, R, cfg, regla, res, ruido_de, inner, a.calibracion, T_rep)
         estado, mejora, empeora = global_ventana(ver, res["controles_ok"] and all(res["cableado"].values()))
         res["por_regla"][regla] = {"veredicto": ver, "info": info, "estado": estado, "mejora": mejora, "empeora": empeora}
         res["ruido_frac"][regla] = info.get("ruido_frac", {})
@@ -732,9 +669,6 @@ def imprimir(regla, ver, info, estado):
             print("         volcanes con d negativa %d de %d con 3 pares o más %s" % (
                 x["volcanes_con_d_negativa"], x["volcanes_con_3_pares"], ("| " + x["nota"]) if x["nota"] else ""))
     print("   pares de M con magnitud distinta entre K y D: %d de %d" % (info["M_pares_con_magnitud_distinta"], info["M_pares"]))
-    print("   placebo de M (S159): %s" % ver.get("PLACEBO"))
-    for nom, rs in info.get("M_placebo", {}).items():
-        print("      %-26s %s" % (nom, ", ".join("K x %s -> %s" % (g, r) for g, r in rs.items())))
     for kv, x in info["M_por_volcan"].items():
         if kv.startswith("NevadosDeChillan|"):
             print("      Chillán %-10s n %d razón K %.3f D %.3f (informa)" % (kv.split("|")[1], x["n"], x["razon_K"], x["razon_D"]))
@@ -746,7 +680,7 @@ def combinar(archivos):
     ventana y no empeora en ninguna (H9). Lo demás: el peor estado, o decide Nicolás."""
     rs = [json.load(open(f, encoding="utf-8")) for f in archivos]
     estados = [(r["ventana"], r["estado"]) for r in rs]
-    malo = [e for v, e in estados if e.startswith(("INVALIDO", "NO CUMPLE", "INDECIDIBLE", "PENDIENTE"))]
+    malo = [e for v, e in estados if e.startswith(("NO CUMPLE", "INDECIDIBLE", "PENDIENTE"))]
     if malo:
         final = peor(malo)
     elif any(r["empeora"] for r in rs):
@@ -784,8 +718,6 @@ def main():
     # sólo para la prueba del evaluador: no cambian ninguna regla
     ap.add_argument("--vols"); ap.add_argument("--desde"); ap.add_argument("--hasta"); ap.add_argument("--ref")
     ap.add_argument("--brazos")
-    ap.add_argument("--omitir-placebo-solo-prueba", dest="omitir_placebo", action="store_true",
-                    help="SÓLO para probar_evaluar_d25.py: no corre el placebo de M (el veredicto no vale para decidir)")
     a = ap.parse_args()
     if a.combinar:
         combinar(a.combinar)
