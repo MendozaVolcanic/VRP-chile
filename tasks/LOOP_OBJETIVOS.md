@@ -509,6 +509,20 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 ~02:10 UTC (S157): NRT con código nuevo verde; **A/B de D25 DESPACHADO**; relleno en preparación
+- NRT 39525751661 (01:10 UTC, sobre `cf07ead1`, con #877): verde, 88 `AUTH_OK`, 484 `SEARCH_VENTANA` (búsqueda por
+  ventana activa), cobertura completa salvo 1 falla en un volcán, sin el 401 de NOAA-21 del probe. **0 commits**:
+  todos «No changes to commit». No prueba regresión (ayer los commits de esa franja salieron de la corrida de las 02:10,
+  y entre 22:55 y 01:10 no hay pasadas nocturnas nuevas). Control en segundo plano a las 09:35 UTC: commits del NRT de
+  02:00 a 09:30 contra los 24 de ayer.
+- Disco: 9 worktrees terminados borrados (limpios y subidos); D: 19 GB. C: bajó a 18 GB por 7,8 GB del temporal de
+  Claude de OTRO proyecto (`Diversion-Poleras`), no tocado.
+- **D25 (D-26, D-27)**: tag `s157-d25-k-codigo` = `66961f65`. V1 (2026-08-29..10-18, tres brazos) = run
+  **39530508296**. Proceso local despacha V2a (04-01..05-07) y V2b (05-08..06-12), dos brazos, en serie y sólo con 0
+  A/B vivos (H18). Prueba corta previa: 39510227734.
+- Relleno de las 31 (plan de #873): `armar_relleno.py` corriendo otra vez con CMR (lento) en
+  `D:\vrp-trabajo\temporales\s157_relleno_wt`; los 10 despachos de un día se lanzan en serie después.
+
 ### 2026-10-21 ~00:00 UTC (S157): saturación (#880) sin poder decidir; dos hallazgos laterales
 - Run 39512756808 midió 2 de 40 pasadas. Grupo A (18-oct): sin medir (CMR no indexa el 18 ni el 19; respaldo de
   LAADS falló). Grupo B: 1 medida (Suomi NPP 750, 2026-09-29 06:36, cenit 55,8°): 0 de 156 píxeles saturados, en el
