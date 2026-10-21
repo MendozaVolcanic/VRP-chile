@@ -555,6 +555,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): verificador del pareo MODIS entregado
+- `experiments/_s159/pareo_modis/verificador/INFORME.md` (`0392cdffc`). **CONFIRMADAS**: el pareo a ±120 s (ensanchar
+  rescata 0 de 2.212 alertas y sólo duplica el conteo; ninguna protegida en las 148); MIROVA lista el gránulo sur
+  (Terra 57 de 60, Aqua 70 de 70, lo que descarta el orden del scraper) y no alerta con el cráter al norte (0 observadas
+  contra 28,7 esperadas; control sur 24 contra 25,4); #864 no cambia (también cambian las falsas de C0, 295 a 299 en
+  V375); Chillán 01-19 es borde. Matices: en MODIS la regla descansa en una sola alerta (22 de las 24 son V375), y los
+  negativos limpios contaminados son 0,9 % MODIS, 2,0 % V375 y 1,4 % V750. **PARCIAL**: el exceso de publicación del
+  gránulo norte está inflado por el doble record (p 0,043 contra la tasa esperada con dos oportunidades); fuera de toda
+  métrica quedan 7 publicaciones V375, 13 en los tres sensores. Queda SOSPECHA si MIROVA mira un solo gránulo o si el
+  canal que scrapeamos sólo expone el del sur.
+
 ### 2026-10-21 (S159, dueña del loop): verificador del pre-registro de MxD03: LISTO CON CAMBIOS
 - Informe `experiments/_s159/mxd03_prereg/verificador/INFORME.md` (`464152853`). Población reproducida exacta y no
   condicionada a K; citas de Coppola 2026 p. 4 y Coppola 2016a sobre remuestreo textuales. Cuatro cambios obligatorios:
