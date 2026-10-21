@@ -583,6 +583,16 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   retrospectivo 252 a 2.207 y la lista informativa de protegidas 5 a 9). El NRT rebasa con `-X theirs` (gana el
   commit del NRT en un trozo en conflicto, al revés de lo que dice el comentario de `nrt.yml`), por eso el reemplazo
   entra con el NRT quieto, regenerado sobre main fresco por `D:\vrp-trabajo\temporales\s158\aplicar_en_ventana.sh`.
+- **Reemplazo aplicado en la rama de #883** (11:08 UTC, con el NRT quieto; el clasificador de permisos rechazó dos
+  veces saltarse la compuerta «NRT vivo», así que se esperó el fin del NRT y se corrió con la compuerta intacta).
+  Tag `pre-s158-reemplazo-k` = `0e80bb88` (empujado). CI del commit de datos: 4 pruebas ancladas a la historia C0
+  (banco de paridad S139 con 63,5 %, golden 4 de Villarrica, isValidDetection con sustrato C0, ancla Chaitén)
+  re-ancladas en `f7c18018`: el banco con K da 2,59 % en 3.701 negativos limpios de V375 (MODIS 0,75 %, V750 0,93 %,
+  recall por noche V375 0,967); el golden 4 era una publicación de más (MIROVA RUTINA 0,0 MW en esa pasada) y ahora
+  vigila que K calle; el sustrato C0 queda en la sombra `experimental_v2` (27) y en los residuos (3). El NRT de las
+  11:10 generó conflicto: los 11 JSON se tomaron de main y el reemplazo se reaplicó (`cdbf7478`); 24 pruebas clave
+  verdes. Falta el CI y el merge.
+- Tres sesiones propuestas a Nicolás (tarjetas, sin iniciar): v750-recall-m15, tupungatito-magnitud, d17-diseno.
 - #880 (texto previo): CMR no devolvió gránulos del 18-oct sobre Chillán en ningún producto, ni siquiera MODIS; SIN DATO hasta
   validar la consulta con un día que sí tenga (CMR lento, consulta de control en segundo plano).
 
