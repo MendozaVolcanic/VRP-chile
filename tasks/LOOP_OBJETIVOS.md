@@ -553,6 +553,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 ~22:40 UTC (S159, dueña del loop): frente M terminado, verificador limpio corriendo
+- M (rama `s159-m`, `cecd4b0f1`, run 39681481914, 85 de 85 records, controles en verde): **CONFIRMA** su
+  pre-registro, todavía SIN VERIFICAR. Lo que afirma: con MxD03 cambian 12 de 57 publicaciones MODIS de cumbre sobre
+  40° (10 se apagan, 2 se encienden; 6 eran píxeles en el borde del círculo de cumbre); desplazamiento mediano de 2,82
+  km a 40-50° y 5,04 km sobre 50° del lado del frame 0; fondo y magnitud casi iguales (razón 1,03 y 1,00); y las dos
+  protegidas de Chillán del #864 sí tienen gránulo, procesado y sin detección en los dos brazos, así que la
+  geolocalización no las explica.
+- Hallazgo lateral (H7 de M, confirmado por el coordinador en los runs 39685038909 y siguientes):
+  `.github/workflows/vigilar-osf-mirova.yml` (viene de #888) deja un run fallido sin jobs en cada push de las ramas
+  que lo traen. Arreglarlo antes de mergear #888.
+- Leer MxD03 en `process_modis` toca `pipeline/`: va con ciclo A45 y A/B, decisión de Nicolás.
+
 ### 2026-10-21 ~19:50 UTC (S159 «retomar», dueña del loop): D-28 sellada; ola 2 lanzada con N y M
 - Verificado al abrir: `loop/activo` = remoto (`a722063c4`); NRT operacional publicó a las 15:24 UTC; #885 a #890 en
   borrador; CMR sigue sin Chile el 18 y 19 de octubre (0 gránulos en VNP02IMG, VJ102IMG y MOD021KM) y parcial el 17 y 20.
