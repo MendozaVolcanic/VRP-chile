@@ -1,0 +1,68 @@
+filas a consultar en CMR: 139 | post-inicio: 54 | muestra pre-inicio: 55 | controles: 30
+0 Chaiten 2025-01-02 05:18:00 1 1
+20 NevadosDeChillan 2025-02-17 18:12:00 1 1
+40 NevadosDeChillan 2025-03-25 18:36:00 1 1
+60 Copahue 2025-11-19 19:00:00 1 1
+80 Lascar 2025-04-02 02:35:00 1 1
+100 Lastarria 2025-01-09 06:00:00 1 1
+120 PlanchonPeteroa 2025-04-18 19:06:00 1 1
+
+== CONTROL POSITIVO (pasadas con record, consultadas) ==
+n: 30 | CMR L1B presente: 30 | GEO presente: 30 | elevacion < 0: 30 | elevacion >= 0: 0
+producer_granule_id de CMR == granulo del record (prefijo+AYYYYDDD.HHMM): 30 de 30
+dayflag OSF vs elevacion en TODAS las cubiertas (2523): dayflag=0 con elev>=0: 0 | dayflag=1 con elev<0: 0
+
+== CONTROL NEGATIVO (hora OSF + 180 min, misma plataforma/volcan, 10 casos): con granulo en CMR: 0
+
+== CLASES de las 411 pasadas sin record (F: solo la muestra consultada tiene dato CMR) ==
+clase
+F    357
+C     53
+A      1
+
+clase x Dayflag OSF:
+dayflag    0   1
+clase           
+A          1   0
+C          4  49
+F        352   5
+
+F: consultadas=55 | CMR L1B presente=55 ausente=0 | L1B sin GEO=0
+
+C: consultadas=53 | CMR L1B presente=52 ausente=1 | L1B sin GEO=0
+
+DETALLE no-F no-C (A, B, D):
+         vol                   t       sensor  dayflag   elev  cmr_l1b  cmr_geo clase  npix        vrp_w
+1281  Lascar 2025-07-15 02:15:00  MODIS_TERRA        0 -58.62        0        0     A     2  1101128.594
+
+clase C: elevacion por dayflag
+         count       mean        std    min    25%    50%     75%    max
+dayflag                                                                 
+0          4.0  21.055000  10.036299  12.00  13.08  19.71  27.685  32.80
+1         49.0  50.138776  11.036586  27.76  43.78  50.00  56.700  78.44
+
+faltantes con Dayflag=0 de MIROVA y elevacion >= 0 en el volcan: 5
+             vol                   t       sensor   elev  cmr_l1b  cmr_geo
+20       Chaiten 2025-02-09 13:40:00  MODIS_TERRA  40.84        1        1
+46       Chaiten 2025-05-14 20:10:00   MODIS_AQUA  13.44        1        1
+290      Copahue 2025-08-13 12:40:00  MODIS_TERRA  12.00        1        1
+2915  Villarrica 2025-03-26 13:55:00  MODIS_TERRA  32.80        0        0
+2921  Villarrica 2025-04-07 13:35:00  MODIS_TERRA  25.98        1        1
+faltantes con Dayflag=1 y elevacion < 0: 0
+Empty DataFrame
+Columns: [vol, t, sensor, elev, cmr_l1b, cmr_geo]
+Index: []
+
+F consultadas por volcan (con L1B+GEO en CMR / consultadas):
+                     n  con_cmr
+vol                            
+Chaiten              6        6
+Copahue              6        6
+Isluga               6        6
+Lascar               6        6
+Lastarria            6        6
+Llaima               1        1
+NevadosDeChillan     6        6
+PlanchonPeteroa      6        6
+PuyehueCordonCaulle  6        6
+Villarrica           6        6
