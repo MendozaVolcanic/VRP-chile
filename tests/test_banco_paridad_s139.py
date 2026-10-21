@@ -54,11 +54,16 @@ def test_controles_de_instrumento(banco):
 
 def test_linea_base_reproduce_s139(banco):
     """S139 (VERIFICADOR.md) midio V375 publicando en 63,5 % de los negativos limpios por pasada con
-    la referencia solo-snapshot. Con la referencia unificada y ventana desde marzo el valor puede
-    moverse unos puntos, no de orden: se fija una banda."""
+    la referencia solo-snapshot, con el detector anterior (C0). Banda historica: [0,50, 0,75].
+
+    S158: desde el reemplazo del historico con K (tarea 1.24) la serie entera es K, y la linea base
+    que se reproduce es la de K. Medida con este mismo banco sobre la serie reemplazada (S158, 3.701
+    negativos limpios de VIIRS 375): 2,59 %, en el orden de la regla de adopcion (2,5 % en V1 y 3,7 %
+    en V2, experiments/_s153_fk_v2/README.md). Si vuelve a 50 %, el historico perdio K; si cae a 0, el
+    banco dejo de ver publicaciones. La banda es de orden, no de decimales."""
     v375 = banco["por_sensor"]["VIIRS375"]["pasada"]
     assert v375["n_neg_limpio"] > 1000
-    assert 0.50 <= v375["tasa_pub_neg"] <= 0.75
+    assert 0.01 <= v375["tasa_pub_neg"] <= 0.06
     assert banco["por_sensor"]["VIIRS375"]["noche_volcan"]["recall_pos"] > 0.95
 
 
