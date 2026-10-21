@@ -608,6 +608,10 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   `local_5c68f9b3` (V750, `D:\vrp-trabajo\temporales\s158_v750`), `local_4b70f190` (Tupungatito, `..\s158_tupun`),
   `local_a4b23469` (D17, `..\s158_d17`). Borrar cada worktree cuando entregue su PR.
 - Pendiente 1.24 cola: PR que borre `data/_s154_reproc_k_historico/` de `main` (queda en la historia y en el tag).
+  **NO antes de evaluar D25**: `experiments/_s157_prereg_d25/evaluar_d25.py` y `sustrato_k.py` lo leen. Junto con
+  ese PR, pulir la frase del aviso de `frontend/cambio_detector.js` sobre «series que crucen» la frontera.
+- **#884 mergeado** (`34c23d1a`). CI de main sobre `8471add4`: Tests `success`, Deploy `success`. D25: V2a
+  (39575542584) corriendo, V1 intento 2 pendiente detrás, V2b lo despacha el proceso local `d25_serie.sh`.
 - #880 (texto previo): CMR no devolvió gránulos del 18-oct sobre Chillán en ningún producto, ni siquiera MODIS; SIN DATO hasta
   validar la consulta con un día que sí tenga (CMR lento, consulta de control en segundo plano).
 
