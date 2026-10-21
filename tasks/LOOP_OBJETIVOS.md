@@ -551,6 +551,22 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 - `verificar_ventana.py` (1.24 e) vive sólo en `loop/activo` (`experiments/_s154_reproc_k/`), no en `main`.
 - #880, control de la consulta: misma caja sobre Chillán da 3/4/12 (VNP02IMG/VJ102IMG/MOD021KM) el 10-15, 3/3/6 el
   10-16, 1/3/5 el 10-17 y 0/0/0 el 10-18 y 10-19: CMR aún no indexa el estándar del 18-oct; #880 sigue esperando.
+- **Relleno 10 de 10 `success`** (03:38 UTC; runs en `D:\vrp-trabajo\temporales\s158\relleno.log`). Ensayo de los 11
+  tras el relleno (rama `s158-reemplazo-ensayo`, `25f3a463`): **los 11 PASAN**, C0 = 64, **las 64 `nrt`, 0
+  `standard`** (máx. 0,15 %, Tupungatito). Verificador limpio en primer plano (`D:\vrp-trabajo\temporales\s158_verif\
+  INFORME.md`): las tres afirmaciones CONFIRMADAS (relleno: 14+9+5+3 = 31 claves `standard` agregadas, nada borrado;
+  CMR: estándar de Suomi NPP cortado de 2026-08-03T01:54 a 08-06T16:30, también `VNP02MOD`).
+- **Hallazgo H1 del verificador (gravedad 3, decisión de Nicolás)**: las 64 C0 quedan SIN marca dentro de la serie K y
+  **25 publican**, concentradas en dos pasadas de Suomi NPP del 2026-08-06 (05:06/05:12 y 06:42/06:54) en 8 volcanes:
+  un pulso simultáneo falso. Ni la prueba de frontera (95 %) ni `detector_de_noche` del auto-audit lo ven. Conteo con
+  un puerto Python de `mirovaEqVrp`, no con el predicado literal (A97): SOSPECHA en el número exacto, patrón claro.
+- **Misma familia, ya en producción hoy**: 26 records `MODIS_TERRA` `nrt` sin `regimen` después del 2026-09-18
+  (09-28, 10-02, 10-10), procesados por el NRT con C0 antes de la adopción (p. ej. PCC 09-28 01:25 procesado
+  2026-09-28T10:56Z) y no reemplazados por el reproceso de 30 días por falta de estándar de Terra (1.27). 2 publican
+  en PCC (0,852 y 0,378 MW).
+- H3 (informativo, para el sí del reemplazo): lo publicado en la ventana baja de 25.202 a 9.120 pasadas (Villarrica
+  2.761 a 86, Llaima 2.133 a 17); protegidas de MIROVA cubiertas suben de 243 a 288 de 379, se pierden 3 pasadas y
+  0 noches.
 - #880 (texto previo): CMR no devolvió gránulos del 18-oct sobre Chillán en ningún producto, ni siquiera MODIS; SIN DATO hasta
   validar la consulta con un día que sí tenga (CMR lento, consulta de control en segundo plano).
 
