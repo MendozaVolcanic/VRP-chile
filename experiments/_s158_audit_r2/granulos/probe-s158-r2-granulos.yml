@@ -48,7 +48,8 @@ jobs:
           set -o pipefail
           mkdir -p out
           python experiments/_s158_audit_r2/granulos/probe_granulos.py \
-            --objetivos experiments/_s158_audit_r2/granulos/objetivos.json --out out 2>&1 | tee out/probe.log
+            --objetivos experiments/_s158_audit_r2/granulos/objetivos.json --out out \
+            --solo "NevadosDeChillan|2026-10-18 06:48,NevadosDeChillan|2026-10-18 05:42,Isluga|2026-10-12 05:48,Villarrica|2026-10-18 06:48" 2>&1 | tee out/probe.log
       - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4

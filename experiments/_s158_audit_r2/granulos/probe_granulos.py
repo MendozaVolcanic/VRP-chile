@@ -174,6 +174,9 @@ def produccion(volcan_nombre, l1b, geo):
             "final_hotspot_dist_km": r.get("final_hotspot_dist_km")}
 
 
+LATLON = [0.0, 0.0]  # centro del volcán de la pasada en curso (lo fija procesar)
+
+
 def bajar(nombre_granulo, destino):
     """Busca en CMR por nombre exacto del gránulo (L1B y GEO) y baja los dos archivos."""
     import earthaccess
@@ -193,6 +196,20 @@ def bajar(nombre_granulo, destino):
             if hallados:
                 break
         if not hallados:
+            # Respaldo (run 2): búsqueda por día y caja con la función de producción, filtrada por la hora del gránulo.
+            from datetime import datetime
+            from pipeline import fetch as F
+            plat = {"VNP0": "SNPP", "VJ10": "NOAA20", "VJ20": "NOAA21"}[pref]
+            clave = f"VIIRS_{plat}_MOD_{'L1B' if tipo == '2' else 'GEO'}"
+            dia = datetime.strptime(tag[1:8], "%Y%j")
+            try:
+                cand = F.search_granules(clave, LATLON[0], LATLON[1], 30, dia)
+            except Exception as e:  # noqa: BLE001
+                print(f"   respaldo {clave} fallo: {type(e).__name__}: {str(e)[:120]}", flush=True)
+                cand = []
+            hallados = [g for g in cand if tag in str(g["umm"].get("GranuleUR", ""))]
+            print(f"   respaldo {clave} {dia:%Y-%m-%d}: {len(cand)} candidatos, {len(hallados)} con {tag}", flush=True)
+        if not hallados:
             return None, f"sin_granulo_{sn}"
         from pipeline.fetch import download_granules
         p = download_granules(hallados[:1], destino)
@@ -207,6 +224,7 @@ def procesar(obj, destino, outdir):
         r["estado"] = "sin_record_nuestro"
         return r
     gran = obj["nuestros"][0]["granule"]
+    LATLON[0], LATLON[1] = obj["grilla"]["centro_lat"], obj["grilla"]["centro_lon"]
     r["granulo"] = gran
     t0 = time.time()
     par, err = bajar(gran, destino)
@@ -279,6 +297,7 @@ def main():
     ap.add_argument("--objetivos", default=str(AQUI / "objetivos.json"))
     ap.add_argument("--out", default="out")
     ap.add_argument("--sin-red", action="store_true")
+    ap.add_argument("--solo", default="", help="lista de volcan|hora separadas por coma")
     a = ap.parse_args()
     prueba_sintetica()
     if a.sin_red:
@@ -291,6 +310,9 @@ def main():
     outdir = Path(a.out); outdir.mkdir(parents=True, exist_ok=True)
     destino = Path(os.environ.get("VRP_TMP_DIR", "/tmp/vrp_tmp")) / "granulos"
     objs = json.loads(Path(a.objetivos).read_text(encoding="utf-8"))
+    if a.solo:
+        quiero = set(a.solo.split(","))
+        objs = [o for o in objs if f"{o['volcan']}|{o['hora_utc']}" in quiero]
     resultados, faltan = [], 0
     for o in objs:
         print(f"== {o['volcan']} {o['hora_utc']} ({o['motivo']})", flush=True)
