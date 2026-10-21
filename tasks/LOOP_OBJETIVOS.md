@@ -554,6 +554,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): verificador limpio de N entregado
+- Integrado a `s159-pruebas` (merge `1360c4631`; verificador en `s159-n` `dc07644df`). Informe:
+  `experiments/_s159/n/verificador/INFORME.md`. Recalculó la publicación de los cinco brazos con el predicado del tablero
+  en node y coincide en las 1.955 combinaciones.
+- **CONFIRMADAS**: la grilla de GEO con remuestreo lineal (sobre las 107 alertas que detectan las cinco variantes, 1,000
+  [0,985; 1,008]; la esquina viene de los encabezados de los TIF y quedó fija en el pre-registro: sin sobreajuste; son
+  cuartiles, no IC, y condicionado a que el oráculo detecte, 145 de 181); C cambia 0 de 391; el tope D9 recorta la
+  protegida de Chillán (F 6,214 a 5,0, sigue publicada); K reproduce producción en 391 de 391.
+- **PARCIAL** lo de F: el mecanismo y las 48 alertas ganadas se sostienen (0 protegidas perdidas sobre 78 de 79; Chillán
+  2026-10-12 05:18 SIN DATO), pero el **3,8 % y el ΔE +104 caen**: F no cambia la detección, así que sólo puede encender
+  donde K ya tiene cúmulo sin publicar, y eso se cuenta entero en la población (60 de cumbre en 0 MW y 59 `far`). Techo
+  real 173 negativos (3,2 %), ΔE ≤ +71; con lo observado, ΔE cerca de +11 (rango −16 a +11, más 0 a +59 por los `far`
+  sin caso en la muestra). La muestra sacó 4,3 % de elegibles contra 1,1 % de la población. Se cierra con un **censo de
+  ~120 pasadas** (las 60, las 59 y Isluga 10-12).
+- **PARCIAL** el oráculo post hoc: aritmética reproducida, pero una de las 6 protegidas de Cordón Caulle está a 4,59 km
+  según MIROVA (no 7,8 a 10,5); publica 0 de 140 negativos muestreados pero cambia la detección y no tiene techo por
+  censo (cota 2,6 %, ΔE hasta +34); y mezcla el predicado del agente con el del tablero.
+
 ### 2026-10-21 (S159, dueña del loop): frente N terminado, verificador limpio corriendo
 - N (rama `s159-n`, `3faa5a4f6`; pre-registro `0b20eb1f3` antes del disparo; runs 39680724047, 39682867040 y
   39690106947; 391 de 398 pasadas con los cinco brazos, K2 = K y K = record publicado en 391 de 391). Todo SIN
