@@ -522,6 +522,16 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   (7) PAT y aviso a OVDAS quedan con él. Y responder #864.
 - #881 traía `.github/workflows/probe-s157-pcc865.yml` (probe por push a su rama, sólo lectura): se archiva en
   `.github/workflows/_archive/` antes del merge para que no quede un workflow muerto en `main`.
+- Mergeados #878 (`458d5b43`), #869 (`1fe351e1`), #879 (`bd4d8e4b`); ramas borradas. #864 respondido
+  (comentario 6306747826), con el matiz de que **la parte MODIS de Chillán no la contesta D25** (D-26 dejó MODIS
+  fuera; PREREGISTRO l. 6-7, 70 y 298-301).
+- **La decisión (1) no es ejecutable tal cual** (CMR consultado 2026-10-21 ~02:55 UTC, `granules.json`, caja
+  -75,-45,-65,-17, 00-12 UTC): `VNP02IMG_NRT` da 0 gránulos el 2026-08-05 y también el 09-01, 09-20, 10-01 y 10-08, y 5
+  el 10-15, o sea que LANCE retiene el NRT apenas días; y `VNP02IMG` (estándar) da **0 del 2026-08-03 al 08-06**
+  contra 4 a 6 el 08-02, 08-07 y 08-08 (NOAA-20 `VJ102IMG` sí tiene 4 a 6 esos días). Las ~64 pasadas `nrt` se
+  procesaron en vivo y hoy no hay archivo de donde reprocesarlas. Pregunta abierta a Nicolás: dejarlas en C0 con su
+  marca y volver a consultar CMR por si NASA publica el estándar más adelante. SIN VERIFICAR: por qué falta el
+  estándar (hueco de producción de NASA o algo del satélite).
 
 ### 2026-10-21 02:45 UTC: TRASPASO del loop de S157 a la sesión nueva (S158)
 - S157 detuvo sus tres procesos locales a las 02:41 UTC para que haya una sola dueña del loop (S153). **Desde ahora
