@@ -1,0 +1,207 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf
+sigma de control (mediana C1-C3): sd_dnti=0.003550 sd_deti=0.002711 (n=3)
+
+====================================================================================================
+T1 MYD021KM.A2026285.0720 version 6.1 archivo MYD021KM.A2026285.0720.061.2026286023420.hdf  MIROVA 2.18 MW a 2.24 km
+CONTROL instrumento: {"replica_fp_identica": true, "replica_sp_identica": true, "n_fp == pub": true, "n_fp_inner == pub summit": true, "rec 2p == pub": true, "t_bg rel": 0.0, "mu_dnti rel": 0.0, "sd_dnti rel": 0.0, "pc pub": null, "pc probe": null} -> REPRODUCE
+cenit pub 58.19  t_bg 272.937016  sigma_bg_anillo(pub) 9.701  mu/sd dNTI -5.7e-05/0.003899  mu/sd dETI -3e-06/0.001921  n_bg 761.0
+umbrales: {'dnti_sum': 0.019438, 'deti_sum': 0.009601, 'dnti_sce': 0.038932, 'deti_sce': 0.019205}  rama estadistica: {'dnti_sum': 0.019438, 'deti_sum': 0.009601, 'dnti_sce': 0.038932, 'deti_sce': 0.019205}  C1: {'dnti_sum': 0.003, 'deti_sum': 0.003, 'dnti_sce': 0.01, 'deti_sce': 0.01}
+pixel del crater (i,j,d): [977, 59, 0.006622]  factor de area sec (no usado en VRP) 7.056693  lineas 2030
+conteos dentro del inner: produccion 0 (escena 0); F1 sin compuerta 0; F2 conectiva min 0; F3 las dos 2; B21 0; segundo pase nuevos dentro 0 (escena 0)
+saturacion a <=4 km: 21 pixeles, DN>32767 en 21 o 22: 0, BT MIR no finita: 0; BT22 max 276.06 K, BT21 max 279.36 K
+F4 sigma de control: 0 dentro del inner
+MEJOR pixel dentro del inner: i=977 j=60 d=3.470947 km cumbre=True  ETAPA: b) Test 2 (dNTI)
+   DN 21/22/31 2517/4683/9908  BT21 264.910728 BT22 269.234951 BTMIR 269.234951 BT31 262.694022
+   NTI -0.936442 media8 -0.951138 dNTI 0.014695 (umbral 0.019438)  dETI 0.012489 (umbral 0.009601)
+   compuerta: BT MIR - t_bg = -3.70 K (pide > 3)
+   LE FALTA dNTI/dETI 0.00474: L_MIR 0.16815 -> 0.18115 W/m2/sr/um (BT MIR 269.234951 -> 270.73 K), VRP equivalente del pixel -0.639 -> -0.393 MW (L_bg a t_bg 0.20194)
+   contexto: BT31 crater [262.527025] vs mediana anillo 272.214101; BT MIR anillo 272.937016
+   pixeles <= 5 km (d, cumbre, BTMIR, BT31, dNTI/umbral, dETI/umbral, pasa2, pasa3, compuerta, hot, F1, F2, F3, sp_dNTI/umbral, sp_out):
+      3.47 1  269.23  262.69 +0.01469/0.01944 +0.01249/0.00960 010 0001  +0.01469/0.01944 0 3x3=1
+      3.40 1  268.70  264.73 +0.01016/0.01944 +0.00616/0.00960 000 0001  +0.01016/0.01944 0 3x3=0
+      3.93 1  276.05  276.15 +0.01160/0.01944 -0.00207/0.00960 001 0000  +0.01160/0.01944 0 3x3=0
+      3.38 1  267.89  267.74 +0.00663/0.01944 -0.00319/0.00960 000 0000  +0.00663/0.01944 0 3x3=0
+      0.93 1  271.52  271.99 +0.00923/0.01944 -0.00359/0.00960 000 0000  +0.00923/0.01944 0 3x3=0
+      4.11 1  275.28  274.44 +0.00596/0.01944 +0.00052/0.00960 000 0000  +0.00596/0.01944 0 3x3=0
+      3.47 1  273.27  271.08 +0.00506/0.01944 +0.00245/0.00960 000 0000  +0.00506/0.01944 0 3x3=1
+      3.89 1  276.06  275.75 +0.00383/0.01944 -0.00086/0.00960 001 0000  +0.00383/0.01944 0 3x3=1
+      4.90 1  276.21  276.00 +0.00357/0.01944 +0.00066/0.00960 001 0000  +0.00357/0.01944 0 3x3=0
+      4.35 1  268.96  266.46 +0.00191/0.01944 +0.00192/0.00960 000 0000  +0.00191/0.01944 0 3x3=0
+      1.24 1  268.19  265.74 +0.00153/0.01944 +0.00236/0.00960 000 0000  +0.00153/0.01944 0 3x3=0
+      0.01 1  266.30  262.53 +0.00072/0.01944 +0.00353/0.00960 000 0000  +0.00072/0.01944 0 3x3=1
+   segundo pase: mu/sd dNTI -5.7e-05/0.003899 mu/sd dETI -3e-06/0.001921 n_bg 761.0 kw {'c1_dnti': 0.003, 'c1_deti': 0.003, 'c2_dnti': 5.0, 'c2_deti': 5.0, 'c1_dnti_scene': 0.01, 'c1_deti_scene': 0.01, 'c2_dnti_scene': 10.0, 'c2_deti_scene': 10.0, 'min_bg_pixels': 10, 'conditioned': False, 'use_prose_branch': True}
+====================================================================================================
+T2 MOD021KM.A2026288.0105 version 6.1 archivo MOD021KM.A2026288.0105.061.2026288131238.hdf  MIROVA 1.72 MW a 2.24 km
+CONTROL instrumento: {"replica_fp_identica": true, "replica_sp_identica": true, "n_fp == pub": true, "n_fp_inner == pub summit": true, "rec 2p == pub": true, "t_bg rel": 0.0, "mu_dnti rel": 0.0, "sd_dnti rel": 0.0, "pc pub": null, "pc probe": null} -> REPRODUCE
+cenit pub 57.58  t_bg 273.058995  sigma_bg_anillo(pub) 6.34  mu/sd dNTI -0.000133/0.003693  mu/sd dETI -1.1e-05/0.002014  n_bg 792.0
+umbrales: {'dnti_sum': 0.01833, 'deti_sum': 0.010059, 'dnti_sce': 0.036793, 'deti_sce': 0.020129}  rama estadistica: {'dnti_sum': 0.01833, 'deti_sum': 0.010059, 'dnti_sce': 0.036793, 'deti_sce': 0.020129}  C1: {'dnti_sum': 0.003, 'deti_sum': 0.003, 'dnti_sce': 0.01, 'deti_sce': 0.01}
+pixel del crater (i,j,d): [185, 1287, 1.226556]  factor de area sec (no usado en VRP) 6.611376  lineas 2040
+conteos dentro del inner: produccion 0 (escena 0); F1 sin compuerta 0; F2 conectiva min 0; F3 las dos 3; B21 0; segundo pase nuevos dentro 0 (escena 0)
+saturacion a <=4 km: 18 pixeles, DN>32767 en 21 o 22: 0, BT MIR no finita: 0; BT22 max 270.01 K, BT21 max 274.33 K
+F4 sigma de control: 0 dentro del inner
+MEJOR pixel dentro del inner: i=190 j=1286 d=2.38597 km cumbre=True  ETAPA: b) Test 2 (dNTI)
+   DN 21/22/31 2783/5094/7319  BT21 270.161187 BT22 268.686936 BTMIR 268.686936 BT31 259.560402
+   NTI -0.934391 media8 -0.948006 dNTI 0.013615 (umbral 0.01833)  dETI 0.013751 (umbral 0.010059)
+   compuerta: BT MIR - t_bg = -4.37 K (pide > 3)
+   LE FALTA dNTI/dETI 0.00471: L_MIR 0.16359 -> 0.17577 W/m2/sr/um (BT MIR 268.686936 -> 270.12 K), VRP equivalente del pixel -0.748 -> -0.517 MW (L_bg a t_bg 0.20314)
+   contexto: BT31 crater [258.842437] vs mediana anillo 271.188309; BT MIR anillo 273.058995
+   pixeles <= 5 km (d, cumbre, BTMIR, BT31, dNTI/umbral, dETI/umbral, pasa2, pasa3, compuerta, hot, F1, F2, F3, sp_dNTI/umbral, sp_out):
+      2.39 1  268.69  259.56 +0.01362/0.01833 +0.01375/0.01006 010 0001  +0.01362/0.01833 0 3x3=0
+      1.83 1  267.87  259.61 +0.01212/0.01833 +0.01095/0.01006 010 0001  +0.01212/0.01833 0 3x3=1
+      1.53 1  269.24  261.46 +0.00891/0.01833 +0.00940/0.01006 000 0001  +0.00891/0.01833 0 3x3=1
+      4.71 1  272.86  268.26 +0.00602/0.01833 +0.00268/0.01006 000 0000  +0.00602/0.01833 0 3x3=1
+      3.61 1  270.01  265.30 +0.00269/0.01833 +0.00067/0.01006 000 0000  +0.00269/0.01833 0 3x3=0
+      2.18 1  265.25  260.74 +0.00186/0.01833 +0.00023/0.01006 000 0000  +0.00186/0.01833 0 3x3=0
+      2.76 1  267.87  262.36 +0.00186/0.01833 +0.00284/0.01006 000 0000  +0.00186/0.01833 0 3x3=0
+      4.85 1  271.07  268.61 +0.00122/0.01833 -0.00101/0.01006 000 0000  +0.00122/0.01833 0 3x3=0
+      4.28 1  271.26  268.07 +0.00107/0.01833 -0.00120/0.01006 000 0000  +0.00107/0.01833 0 3x3=1
+      2.11 1  266.94  261.50 +0.00101/0.01833 +0.00225/0.01006 000 0000  +0.00101/0.01833 0 3x3=1
+      4.45 1  269.91  266.05 -0.00030/0.01833 +0.00032/0.01006 000 0000  -0.00030/0.01833 0 3x3=0
+      4.42 1  263.35  258.31 -0.00071/0.01833 -0.00011/0.01006 000 0000  -0.00071/0.01833 0 3x3=0
+   segundo pase: mu/sd dNTI -0.000133/0.003693 mu/sd dETI -1.1e-05/0.002014 n_bg 792.0 kw {'c1_dnti': 0.003, 'c1_deti': 0.003, 'c2_dnti': 5.0, 'c2_deti': 5.0, 'c1_dnti_scene': 0.01, 'c1_deti_scene': 0.01, 'c2_dnti_scene': 10.0, 'c2_deti_scene': 10.0, 'min_bg_pixels': 10, 'conditioned': False, 'use_prose_branch': True}
+====================================================================================================
+E1 MYD021KM.A2026272.0720 version 6.1 archivo MYD021KM.A2026272.0720.061.2026272222606.hdf  MIROVA 0.13 MW a 0.0 km
+CONTROL instrumento: {"replica_fp_identica": true, "replica_sp_identica": true, "n_fp == pub": true, "n_fp_inner == pub summit": true, "rec 2p == pub": true, "t_bg rel": 0.0, "mu_dnti rel": 0.0, "sd_dnti rel": 0.0, "pc pub": null, "pc probe": null} -> REPRODUCE
+cenit pub 58.42  t_bg 271.99769  sigma_bg_anillo(pub) 3.936  mu/sd dNTI 2.7e-05/0.001902  mu/sd dETI -3e-06/0.001029  n_bg 758.0
+umbrales: {'dnti_sum': 0.009536, 'deti_sum': 0.00514, 'dnti_sce': 0.019044, 'deti_sce': 0.010284}  rama estadistica: {'dnti_sum': 0.009536, 'deti_sum': 0.00514, 'dnti_sce': 0.019044, 'deti_sce': 0.010284}  C1: {'dnti_sum': 0.003, 'deti_sum': 0.003, 'dnti_sce': 0.01, 'deti_sce': 0.01}
+pixel del crater (i,j,d): [53, 57, 1.445417]  factor de area sec (no usado en VRP) 7.192862  lineas 2030
+conteos dentro del inner: produccion 0 (escena 0); F1 sin compuerta 0; F2 conectiva min 0; F3 las dos 0; B21 0; segundo pase nuevos dentro 0 (escena 0)
+saturacion a <=4 km: 11 pixeles, DN>32767 en 21 o 22: 0, BT MIR no finita: 0; BT22 max 269.68 K, BT21 max 271.30 K
+F4 sigma de control: 0 dentro del inner
+MEJOR pixel dentro del inner: i=53 j=55 d=4.976655 km cumbre=True  ETAPA: b) Test 2 (dNTI)
+   DN 21/22/31 2531/5097/11500  BT21 271.297477 BT22 272.711464 BTMIR 272.711464 BT31 272.732609
+   NTI -0.937183 media8 -0.94121 dNTI 0.004027 (umbral 0.009536)  dETI 0.000754 (umbral 0.00514)
+   compuerta: BT MIR - t_bg = 0.71 K (pide > 3)
+   LE FALTA dNTI/dETI 0.00551: L_MIR 0.19973 -> 0.21786 W/m2/sr/um (BT MIR 272.711464 -> 274.50 K), VRP equivalente del pixel 0.130 -> 0.472 MW (L_bg a t_bg 0.19286)
+   contexto: BT31 crater [260.119909] vs mediana anillo 272.247418; BT MIR anillo 271.99769
+   pixeles <= 5 km (d, cumbre, BTMIR, BT31, dNTI/umbral, dETI/umbral, pasa2, pasa3, compuerta, hot, F1, F2, F3, sp_dNTI/umbral, sp_out):
+      4.98 1  272.71  272.73 +0.00403/0.00954 +0.00075/0.00514 000 0000  +0.00403/0.00954 0 3x3=0
+      4.44 1  271.59  271.69 +0.00374/0.00954 +0.00024/0.00514 000 0000  +0.00374/0.00954 0 3x3=0
+      4.06 1  271.16  271.31 +0.00220/0.00954 -0.00011/0.00514 000 0000  +0.00220/0.00954 0 3x3=0
+      3.97 1  269.11  269.00 +0.00129/0.00954 +0.00035/0.00514 000 0000  +0.00129/0.00954 0 3x3=0
+      2.27 1  268.65  268.85 +0.00114/0.00954 -0.00029/0.00514 000 0000  +0.00114/0.00954 0 3x3=1
+      4.20 1  270.64  270.70 +0.00110/0.00954 -0.00003/0.00514 000 0000  +0.00110/0.00954 0 3x3=0
+      3.59 1  269.68  269.92 +0.00100/0.00954 -0.00043/0.00514 000 0000  +0.00100/0.00954 0 3x3=0
+      4.86 1  264.76  264.03 +0.00077/0.00954 +0.00065/0.00514 000 0000  +0.00077/0.00954 0 3x3=1
+      1.78 1  267.59  268.00 -0.00014/0.00954 -0.00112/0.00514 000 0000  -0.00014/0.00954 0 3x3=1
+      2.63 1  267.48  267.47 -0.00015/0.00954 -0.00007/0.00514 000 0000  -0.00015/0.00954 0 3x3=1
+      4.40 1  270.65  270.62 -0.00023/0.00954 +0.00026/0.00514 000 0000  -0.00023/0.00954 0 3x3=0
+      4.75 1  271.40  271.64 -0.00029/0.00954 -0.00045/0.00514 000 0000  -0.00029/0.00954 0 3x3=0
+   segundo pase: mu/sd dNTI 2.7e-05/0.001902 mu/sd dETI -3e-06/0.001029 n_bg 758.0 kw {'c1_dnti': 0.003, 'c1_deti': 0.003, 'c2_dnti': 5.0, 'c2_deti': 5.0, 'c1_dnti_scene': 0.01, 'c1_deti_scene': 0.01, 'c2_dnti_scene': 10.0, 'c2_deti_scene': 10.0, 'min_bg_pixels': 10, 'conditioned': False, 'use_prose_branch': True}
+====================================================================================================
+E2 MYD021KM.A2026290.0850 version 6.1NRT archivo MYD021KM.A2026290.0850.061.2026290101145.NRT.hdf  MIROVA 7.09 MW a 2.83 km
+CONTROL instrumento: {"replica_fp_identica": true, "replica_sp_identica": true, "n_fp == pub": true, "n_fp_inner == pub summit": true, "rec 2p == pub": true, "t_bg rel": 7.325470661483339e-05, "mu_dnti rel": 0.057032029334776364, "sd_dnti rel": 0.0014451676045691886, "pc pub": {"vrp_mw": 0.538, "n_pixels": 2, "centroid_dist_km": 1.966}, "pc probe": {"vrp_mw": 0.535, "n_pixels": 2, "centroid_dist_km": 2.059}} -> NO REPRODUCE (SIN DATO)
+cenit pub 62.76  t_bg 273.018162  sigma_bg_anillo(pub) 3.0  mu/sd dNTI 9.4e-05/0.002859  mu/sd dETI -9.5e-05/0.0024  n_bg 645.0
+umbrales: {'dnti_sum': 0.014386, 'deti_sum': 0.011905, 'dnti_sce': 0.028679, 'deti_sce': 0.023905}  rama estadistica: {'dnti_sum': 0.014386, 'deti_sum': 0.011905, 'dnti_sce': 0.028679, 'deti_sce': 0.023905}  C1: {'dnti_sum': 0.003, 'deti_sum': 0.003, 'dnti_sce': 0.01, 'deti_sce': 0.01}
+pixel del crater (i,j,d): [1343, 1334, 0.410352]  factor de area sec (no usado en VRP) 10.86818  lineas 2030
+conteos dentro del inner: produccion 0 (escena 0); F1 sin compuerta 2; F2 conectiva min 0; F3 las dos 5; B21 1; segundo pase nuevos dentro 2 (escena 2)
+saturacion a <=4 km: 13 pixeles, DN>32767 en 21 o 22: 0, BT MIR no finita: 0; BT22 max 275.87 K, BT21 max 279.07 K
+F4 sigma de control: 0 dentro del inner
+MEJOR pixel dentro del inner: i=1338 j=1333 d=3.917236 km cumbre=True  ETAPA: d) compuerta 3 K
+   DN 21/22/31 2554/5529/10313  BT21 279.069855 BT22 275.872257 BTMIR 275.872257 BT31 265.355753
+   NTI -0.91719 media8 -0.944066 dNTI 0.026876 (umbral 0.014386)  dETI 0.028062 (umbral 0.011905)
+   compuerta: BT MIR - t_bg = 2.85 K (pide > 3)
+   pasa los dos tests con margen 0.01249; VRP equivalente del pixel 0.566 MW
+   contexto: BT31 crater [265.711102] vs mediana anillo 273.787285; BT MIR anillo 273.018162
+   pixeles <= 5 km (d, cumbre, BTMIR, BT31, dNTI/umbral, dETI/umbral, pasa2, pasa3, compuerta, hot, F1, F2, F3, sp_dNTI/umbral, sp_out):
+      3.92 1  275.87  265.36 +0.02688/0.01439 +0.02806/0.01191 110 0101  +0.02688/0.01439 1 3x3=0
+      1.56 1  274.26  267.11 +0.01542/0.01439 +0.01585/0.01191 110 0101  +0.01542/0.01439 1 3x3=0
+      0.41 1  272.93  265.71 +0.01304/0.01439 +0.01463/0.01191 010 0001  +0.01304/0.01439 0 3x3=1
+      3.99 1  271.05  265.54 +0.00762/0.01439 +0.00887/0.01191 000 0001  +0.00762/0.01439 0 3x3=1
+      1.05 1  272.07  267.09 +0.00567/0.01439 +0.00682/0.01191 000 0001  +0.00567/0.01439 0 3x3=1
+      1.30 1  270.74  269.85 +0.00319/0.01439 +0.00142/0.01191 000 0000  +0.00319/0.01439 0 3x3=0
+      4.92 1  275.69  275.67 +0.00727/0.01439 +0.00058/0.01191 000 0000  +0.00727/0.01439 0 3x3=0
+      4.65 1  271.43  270.61 +0.00185/0.01439 +0.00110/0.01191 000 0000  +0.00185/0.01439 0 3x3=0
+      4.80 1  274.73  274.39 +0.00234/0.01439 -0.00074/0.01191 000 0000  +0.00234/0.01439 0 3x3=0
+      4.15 1  267.91  263.60 -0.00047/0.01439 +0.00264/0.01191 000 0000  -0.00047/0.01439 0 3x3=1
+      1.18 1  270.23  268.50 -0.00052/0.01439 +0.00035/0.01191 000 0000  -0.00052/0.01439 0 3x3=0
+      3.52 1  267.07  266.69 -0.00087/0.01439 -0.00012/0.01191 000 0000  -0.00087/0.01439 0 3x3=0
+   segundo pase: mu/sd dNTI 9.4e-05/0.002859 mu/sd dETI -9.5e-05/0.0024 n_bg 645.0 kw {'c1_dnti': 0.003, 'c1_deti': 0.003, 'c2_dnti': 5.0, 'c2_deti': 5.0, 'c1_dnti_scene': 0.01, 'c1_deti_scene': 0.01, 'c2_dnti_scene': 10.0, 'c2_deti_scene': 10.0, 'min_bg_pixels': 10, 'conditioned': False, 'use_prose_branch': True}
+====================================================================================================
+C1 MYD021KM.A2026274.0835 version 6.1 archivo MYD021KM.A2026274.0835.061.2026275122602.hdf  MIROVA 5.18 MW a 2.24 km
+CONTROL instrumento: {"replica_fp_identica": true, "replica_sp_identica": true, "n_fp == pub": true, "n_fp_inner == pub summit": true, "rec 2p == pub": true, "t_bg rel": 0.0, "mu_dnti rel": 0.0, "sd_dnti rel": 0.0, "pc pub": {"vrp_mw": 1.081, "n_pixels": 1, "centroid_dist_km": 0.862}, "pc probe": {"vrp_mw": 1.081, "n_pixels": 1, "centroid_dist_km": 0.862}} -> REPRODUCE
+cenit pub 50.45  t_bg 265.300494  sigma_bg_anillo(pub) 3.521  mu/sd dNTI -3.3e-05/0.002123  mu/sd dETI 6e-06/0.001657  n_bg 1132.0
+umbrales: {'dnti_sum': 0.010584, 'deti_sum': 0.008291, 'dnti_sce': 0.021201, 'deti_sce': 0.016576}  rama estadistica: {'dnti_sum': 0.010584, 'deti_sum': 0.008291, 'dnti_sce': 0.021201, 'deti_sce': 0.016576}  C1: {'dnti_sum': 0.003, 'deti_sum': 0.003, 'dnti_sce': 0.01, 'deti_sce': 0.01}
+pixel del crater (i,j,d): [187, 1219, 0.581361]  factor de area sec (no usado en VRP) 3.916502  lineas 2030
+conteos dentro del inner: produccion 2 (escena 2); F1 sin compuerta 2; F2 conectiva min 2; F3 las dos 3; B21 1; segundo pase nuevos dentro 1 (escena 1)
+saturacion a <=4 km: 23 pixeles, DN>32767 en 21 o 22: 0, BT MIR no finita: 0; BT22 max 272.55 K, BT21 max 276.95 K
+F4 sigma de control: 2 dentro del inner
+MEJOR pixel dentro del inner: i=188 j=1219 d=0.862395 km cumbre=True  ETAPA: pasa las cuatro
+   DN 21/22/31 2547/5077/9638  BT21 276.954468 BT22 272.55467 BTMIR 272.55467 BT31 260.873067
+   NTI -0.922964 media8 -0.953605 dNTI 0.030641 (umbral 0.010584)  dETI 0.030127 (umbral 0.008291)
+   compuerta: BT MIR - t_bg = 7.25 K (pide > 3)
+   pasa los dos tests con margen 0.02006; VRP equivalente del pixel 1.144 MW
+   contexto: BT31 crater [260.264212] vs mediana anillo 262.359706; BT MIR anillo 265.300494
+   pixeles <= 5 km (d, cumbre, BTMIR, BT31, dNTI/umbral, dETI/umbral, pasa2, pasa3, compuerta, hot, F1, F2, F3, sp_dNTI/umbral, sp_out):
+      0.86 1  272.55  260.87 +0.03064/0.01058 +0.03013/0.00829 111 1111  +0.03064/0.00871 1 3x3=1
+      2.88 1  270.78  260.94 +0.02338/0.01058 +0.02281/0.00829 111 1111  +0.02338/0.00871 1 3x3=0
+      3.22 1  266.02  260.17 +0.00757/0.01058 +0.00764/0.00829 000 0001  +0.01063/0.00871 1 3x3=0
+      4.67 1  266.59  264.32 +0.00253/0.01058 +0.00128/0.00829 000 0000  +0.00253/0.00871 0 3x3=0
+      4.33 1  266.67  265.19 +0.00242/0.01058 +0.00073/0.00829 000 0000  +0.00242/0.00871 0 3x3=0
+      4.22 1  263.83  261.34 +0.00107/0.01058 +0.00096/0.00829 000 0000  +0.00107/0.00871 0 3x3=0
+      4.37 1  264.60  262.17 +0.00088/0.01058 +0.00097/0.00829 000 0000  +0.00088/0.00871 0 3x3=0
+      4.20 1  263.34  261.09 +0.00087/0.01058 +0.00031/0.00829 000 0000  +0.00087/0.00871 0 3x3=0
+      2.88 1  263.72  262.49 +0.00021/0.01058 -0.00012/0.00829 000 0000  +0.00021/0.00871 0 3x3=0
+      1.48 1  262.40  261.18 +0.00016/0.01058 -0.00009/0.00829 000 0000  +0.00016/0.00871 0 3x3=0
+      4.14 1  262.54  260.74 -0.00011/0.01058 -0.00032/0.00829 000 0000  -0.00011/0.00871 0 3x3=0
+      4.00 1  262.36  260.79 -0.00056/0.01058 -0.00011/0.00829 000 0000  -0.00056/0.00871 0 3x3=0
+   segundo pase: mu/sd dNTI -3.3e-05/0.001749 mu/sd dETI 6e-06/0.001157 n_bg 1130.0 kw {'c1_dnti': 0.003, 'c1_deti': 0.003, 'c2_dnti': 5.0, 'c2_deti': 5.0, 'c1_dnti_scene': 0.01, 'c1_deti_scene': 0.01, 'c2_dnti_scene': 10.0, 'c2_deti_scene': 10.0, 'min_bg_pixels': 10, 'conditioned': False, 'use_prose_branch': True}
+====================================================================================================
+C2 MOD021KM.A2026290.0220 version 6.1 archivo MOD021KM.A2026290.0220.061.2026290131751.hdf  MIROVA 12.97 MW a 2.24 km
+CONTROL instrumento: {"replica_fp_identica": true, "replica_sp_identica": true, "n_fp == pub": true, "n_fp_inner == pub summit": true, "rec 2p == pub": true, "t_bg rel": 0.0, "mu_dnti rel": 0.0, "sd_dnti rel": 0.0, "pc pub": {"vrp_mw": 2.638, "n_pixels": 1, "centroid_dist_km": 4.053}, "pc probe": {"vrp_mw": 2.638, "n_pixels": 1, "centroid_dist_km": 4.053}} -> REPRODUCE
+cenit pub 54.01  t_bg 276.337313  sigma_bg_anillo(pub) 3.476  mu/sd dNTI 4e-06/0.00355  mu/sd dETI -7e-06/0.002711  n_bg 963.0
+umbrales: {'dnti_sum': 0.017752, 'deti_sum': 0.013548, 'dnti_sce': 0.0355, 'deti_sce': 0.027102}  rama estadistica: {'dnti_sum': 0.017752, 'deti_sum': 0.013548, 'dnti_sce': 0.0355, 'deti_sce': 0.027102}  C1: {'dnti_sum': 0.003, 'deti_sum': 0.003, 'dnti_sce': 0.01, 'deti_sce': 0.01}
+pixel del crater (i,j,d): [1226, 98, 1.418378]  factor de area sec (no usado en VRP) 5.055292  lineas 2030
+conteos dentro del inner: produccion 1 (escena 1); F1 sin compuerta 1; F2 conectiva min 2; F3 las dos 2; B21 1; segundo pase nuevos dentro 0 (escena 0)
+saturacion a <=4 km: 15 pixeles, DN>32767 en 21 o 22: 0, BT MIR no finita: 0; BT22 max 280.67 K, BT21 max 281.24 K
+F4 sigma de control: 1 dentro del inner
+MEJOR pixel dentro del inner: i=1225 j=99 d=4.053489 km cumbre=True  ETAPA: pasa las cuatro
+   DN 21/22/31 2847/8293/8450  BT21 287.059892 BT22 286.838031 BTMIR 286.838031 BT31 269.119596
+   NTI -0.874961 media8 -0.941149 dNTI 0.066188 (umbral 0.017752)  dETI 0.067079 (umbral 0.013548)
+   compuerta: BT MIR - t_bg = 10.50 K (pide > 3)
+   pasa los dos tests con margen 0.04844; VRP equivalente del pixel 2.781 MW
+   contexto: BT31 crater [271.243166] vs mediana anillo 276.300836; BT MIR anillo 276.337313
+   pixeles <= 5 km (d, cumbre, BTMIR, BT31, dNTI/umbral, dETI/umbral, pasa2, pasa3, compuerta, hot, F1, F2, F3, sp_dNTI/umbral, sp_out):
+      4.05 1  286.84  269.12 +0.06619/0.01775 +0.06708/0.01355 111 1111  +0.06619/0.01353 1 3x3=1
+      4.57 1  279.94  277.76 +0.00676/0.01775 +0.00595/0.01355 001 0011  +0.00676/0.01353 0 3x3=0
+      3.99 1  280.67  279.62 +0.00587/0.01775 +0.00140/0.01355 001 0000  +0.00587/0.01353 0 3x3=0
+      3.78 1  275.48  275.46 +0.00783/0.01775 +0.00103/0.01355 000 0000  +0.00783/0.01353 0 3x3=0
+      3.69 1  277.69  277.53 +0.00658/0.01775 +0.00098/0.01355 000 0000  +0.00658/0.01353 0 3x3=0
+      3.99 1  279.03  278.66 +0.00316/0.01775 +0.00040/0.01355 000 0000  +0.00316/0.01353 0 3x3=0
+      4.70 1  271.38  271.48 +0.00217/0.01775 +0.00179/0.01355 000 0000  +0.00217/0.01353 0 3x3=0
+      2.48 1  272.02  271.51 +0.00187/0.01775 +0.00182/0.01355 000 0000  +0.00187/0.01353 0 3x3=1
+      2.83 1  274.20  274.65 +0.00093/0.01775 -0.00061/0.01355 000 0000  +0.00093/0.01353 0 3x3=0
+      4.45 1  268.88  267.98 -0.00050/0.01775 +0.00203/0.01355 000 0000  -0.00050/0.01353 0 3x3=1
+      4.56 1  275.89  276.36 -0.00066/0.01775 -0.00115/0.01355 000 0000  -0.00066/0.01353 0 3x3=0
+      3.32 1  272.36  272.99 -0.00072/0.01775 -0.00190/0.01355 000 0000  -0.00072/0.01353 0 3x3=0
+   segundo pase: mu/sd dNTI 2e-06/0.002706 mu/sd dETI -6e-06/0.001483 n_bg 962.0 kw {'c1_dnti': 0.003, 'c1_deti': 0.003, 'c2_dnti': 5.0, 'c2_deti': 5.0, 'c1_dnti_scene': 0.01, 'c1_deti_scene': 0.01, 'c2_dnti_scene': 10.0, 'c2_deti_scene': 10.0, 'min_bg_pixels': 10, 'conditioned': False, 'use_prose_branch': True}
+====================================================================================================
+C3 MOD021KM.A2026289.0140 version 6.1 archivo MOD021KM.A2026289.0140.061.2026289131949.hdf  MIROVA 12.39 MW a 1.41 km
+CONTROL instrumento: {"replica_fp_identica": true, "replica_sp_identica": true, "n_fp == pub": true, "n_fp_inner == pub summit": true, "rec 2p == pub": true, "t_bg rel": 0.0, "mu_dnti rel": 0.0, "sd_dnti rel": 0.0, "pc pub": {"vrp_mw": 9.25, "n_pixels": 2, "centroid_dist_km": 1.609}, "pc probe": {"vrp_mw": 9.25, "n_pixels": 2, "centroid_dist_km": 1.609}} -> REPRODUCE
+cenit pub 3.23  t_bg 277.32612  sigma_bg_anillo(pub) 3.302  mu/sd dNTI -1.4e-05/0.00387  mu/sd dETI -1e-06/0.00326  n_bg 2502.0
+umbrales: {'dnti_sum': 0.019337, 'deti_sum': 0.016297, 'dnti_sce': 0.038689, 'deti_sce': 0.032594}  rama estadistica: {'dnti_sum': 0.019337, 'deti_sum': 0.016297, 'dnti_sce': 0.038689, 'deti_sce': 0.032594}  C1: {'dnti_sum': 0.003, 'deti_sum': 0.003, 'dnti_sce': 0.01, 'deti_sce': 0.01}
+pixel del crater (i,j,d): [1772, 711, 0.46146]  factor de area sec (no usado en VRP) 1.004447  lineas 2040
+conteos dentro del inner: produccion 2 (escena 2); F1 sin compuerta 2; F2 conectiva min 2; F3 las dos 2; B21 2; segundo pase nuevos dentro 0 (escena 0)
+saturacion a <=4 km: 50 pixeles, DN>32767 en 21 o 22: 0, BT MIR no finita: 0; BT22 max 299.74 K, BT21 max 295.04 K
+F4 sigma de control: 2 dentro del inner
+MEJOR pixel dentro del inner: i=1770 j=712 d=1.783005 km cumbre=True  ETAPA: pasa las cuatro
+   DN 21/22/31 2895/12326/8548  BT21 295.044372 BT22 299.737104 BTMIR 299.737104 BT31 269.901767
+   NTI -0.796261 media8 -0.936236 dNTI 0.139975 (umbral 0.019337)  dETI 0.137531 (umbral 0.016297)
+   compuerta: BT MIR - t_bg = 22.41 K (pide > 3)
+   pasa los dos tests con margen 0.12064; VRP equivalente del pixel 7.841 MW
+   contexto: BT31 crater [268.637418] vs mediana anillo 276.571762; BT MIR anillo 277.32612
+   pixeles <= 5 km (d, cumbre, BTMIR, BT31, dNTI/umbral, dETI/umbral, pasa2, pasa3, compuerta, hot, F1, F2, F3, sp_dNTI/umbral, sp_out):
+      1.78 1  299.74  269.90 +0.13997/0.01934 +0.13753/0.01630 111 1111  +0.14737/0.01104 1 3x3=0
+      1.58 1  284.65  268.39 +0.04099/0.01934 +0.04120/0.01630 111 1111  +0.05944/0.01104 1 3x3=0
+      4.16 1  272.17  271.07 +0.00218/0.01934 +0.00152/0.01630 000 0000  +0.00218/0.01104 0 3x3=0
+      4.94 1  273.24  272.22 +0.00174/0.01934 +0.00100/0.01630 000 0000  +0.00174/0.01104 0 3x3=0
+      2.60 1  271.63  270.91 +0.00134/0.01934 +0.00028/0.01630 000 0000  +0.00134/0.01104 0 3x3=0
+      3.25 1  270.81  269.99 +0.00130/0.01934 +0.00130/0.01630 000 0000  +0.00130/0.01104 0 3x3=0
+      2.65 1  270.68  269.90 +0.00124/0.01934 +0.00085/0.01630 000 0000  +0.00124/0.01104 0 3x3=0
+      3.56 1  272.27  271.47 +0.00101/0.01934 +0.00027/0.01630 000 0000  +0.00101/0.01104 0 3x3=0
+      4.40 1  270.25  269.84 +0.00097/0.01934 +0.00036/0.01630 000 0000  +0.00097/0.01104 0 3x3=0
+      4.64 1  270.77  270.07 +0.00083/0.01934 +0.00017/0.01630 000 0000  +0.00083/0.01104 0 3x3=0
+      4.48 1  271.87  271.07 +0.00055/0.01934 -0.00005/0.01630 000 0000  +0.00055/0.01104 0 3x3=0
+      4.98 1  272.35  271.57 +0.00051/0.01934 +0.00042/0.01630 000 0000  +0.00051/0.01104 0 3x3=0
+   segundo pase: mu/sd dNTI -1.5e-05/0.002211 mu/sd dETI -1e-06/0.000938 n_bg 2500.0 kw {'c1_dnti': 0.003, 'c1_deti': 0.003, 'c2_dnti': 5.0, 'c2_deti': 5.0, 'c1_dnti_scene': 0.01, 'c1_deti_scene': 0.01, 'c2_dnti_scene': 10.0, 'c2_deti_scene': 10.0, 'min_bg_pixels': 10, 'conditioned': False, 'use_prose_branch': True}
