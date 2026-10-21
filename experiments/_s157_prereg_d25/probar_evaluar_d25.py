@@ -24,6 +24,9 @@ Casos V1 (ventana de prueba 2026-09-18 a 2026-10-18, donde producción ya es K; 
   p2              D publica en 30 negativos limpios de VIIRS 375          -> P2 PIERDE, NO CUMPLE (suma)
   p2_m_indec      lo mismo con M de VIIRS 750 INDECIDIBLE (sellada)       -> sigue NO CUMPLE (suma): H2
   un_volcan       D mejora VIIRS 750 sólo en Chillán (simétrica)          -> MEJORA de un volcán no cuenta: SIN EFECTO
+  placebo         el nulo: K x 1,2 y K x 0,8 se informan sin comparador   -> no invalida (S159, D-28 §2.5)
+  placebo_x1.2    D = K x 1,2 en todos los pares de M                      -> ningún MEJORA, d′ idénticamente 0 (D-28 §3 i)
+  placebo_x0.8    D = K x 0,8 en todos los pares de M                      -> ningún MEJORA, d′ = 0, EMPEORA por d (§3 i, iii)
 Casos V2 (2026-04-01 a 2026-06-12, sin gemelo, tabla sola, dos despachos, --ruido-de):
   v2_nulo         K y D idénticos                                         -> controles OK, SIN EFECTO
   v2_veto         D apaga una protegida A                                 -> PENDIENTE DE REPETICION
@@ -111,13 +114,13 @@ def escribir(caso, arms, flags=None, partir=None):
     return raices
 
 
-def correr(caso, raices, ventana, desde, hasta, extra=(), placebo=False):
-    """S159: los casos de reglas corren con --omitir-placebo-solo-prueba (el placebo de M daría INVALIDO sobre los K
-    reales, que quedan bajo MIROVA, y taparía la regla que cada caso prueba); el caso `placebo` lo corre."""
+def correr(caso, raices, ventana, desde, hasta, extra=()):
+    """S159, D-28 (ADENDA_PLACEBO.md): el placebo ya no es compuerta, así que todos los casos corren con el evaluador
+    tal cual (la salida --omitir-placebo-solo-prueba de la primera versión se retiró)."""
     out = TMP / caso / "out.json"
     cmd = [sys.executable, str(AQUI / "evaluar_d25.py"), "--ventana", ventana, "--out", str(out), "--tmp", str(TMP / caso / "tmp"),
            "--vols", ",".join(VOLS if ventana == "V1" else [v for v in VOLS if v != "NevadosDeChillan"]),
-           "--desde", desde, "--hasta", hasta] + list(extra) + ([] if placebo else ["--omitir-placebo-solo-prueba"])
+           "--desde", desde, "--hasta", hasta] + list(extra)
     for r in raices:
         cmd += ["--raiz", str(r), "--logs", str(r / "logs")]
     p = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
@@ -199,13 +202,14 @@ def main():
           and all(regla(res)["veredicto"]["P2|%s" % s] == "EMPATE" for s in X.SENS),
           "estado %s | M %s" % (res["estado"], mv))
     n_v750 = len(pares(t, lambda k, c: "|VIIRS750|" in k))
-    # S159 (I2, R2-8): el mismo nulo con el placebo obligatorio. Lo que tiene que pasar: el placebo se calcula (no
-    # OMITIDO) y, si da MEJORA en un estrato que decide, el veredicto es INVALIDO POR INSTRUMENTO con el motivo.
-    res_p = correr("placebo", escribir("placebo", arms0), "V1", *V1, placebo=True)
-    pl = regla(res_p)["veredicto"].get("PLACEBO", "")
-    check("placebo", pl and not pl.startswith("OMITIDO") and (res_p["estado"].startswith("INVALIDO POR INSTRUMENTO")
-                                                              if pl.startswith("INVALIDO") else pl == "OK"),
-          "PLACEBO %s -> estado %s" % (pl, res_p["estado"]))
+    # S159, D-28 §2.5: el placebo (K x 1,2 y K x 0,8 sin comparador) se informa por estrato y no invalida; el nulo
+    # sigue SIN EFECTO y ningún veredicto queda INVALIDO.
+    pl = regla(res)["info"].get("M_placebo", {})
+    decide = [nom for nom, modo in X.ESTRATOS if modo != "informa" and regla(res)["veredicto"]["M|%s" % nom] != "SIN SUSTRATO"]
+    check("placebo", decide and all(set(pl.get(nom, {})) == {"1.2", "0.8"} for nom in decide)
+          and not res["estado"].startswith("INVALIDO") and "PLACEBO" not in regla(res)["veredicto"]
+          and all("g_hat_factor" in regla(res)["info"]["M|%s" % nom] for nom in decide),
+          "placebo sin comparador %s | estado %s" % (pl, res["estado"]))
     print("   pares VIIRS 750 en el nulo: %d" % n_v750)
     json.dump({"ruido_frac": res["ruido_frac"]}, open(TMP / "ruido_v1.json", "w", encoding="utf-8"))
 
@@ -260,6 +264,19 @@ def main():
     check("corte", res["estado"].startswith("SIN EFECTO") and m_veredictos(res)["M|VIIRS375|sin_kernel|z<=40"] != "MEJORA",
           "estado %s, M sin kernel z<=40 %s (n mejorados %d, todos de 40 a 50°)" % (
               res["estado"], m_veredictos(res)["M|VIIRS375|sin_kernel|z<=40"], len(sel)))
+
+    # D-28 §3 (i): un brazo que es sólo una ganancia uniforme (K x 1,2 y K x 0,8 en todos los pares de M) no puede dar
+    # MEJORA en ningún estrato; K x 0,8 sigue dando EMPEORA por d (iii).
+    todos_m = pares(t, lambda k, c: True)
+    for caso, g in (("placebo_x1.2", 1.2), ("placebo_x0.8", 0.8)):
+        res = correr(caso, escribir(caso, dict(arms0, D=con_huella(mover(base, todos_m, g)))), "V1", *V1)
+        mv = m_veredictos(res)
+        dmax = max(regla(res)["info"]["M|%s" % nom].get("dprima_max_abs", 0.0) for nom, modo in X.ESTRATOS
+                   if modo != "informa" and mv["M|%s" % nom] != "SIN SUSTRATO")
+        reglas_d = {k: regla(res)["info"][k].get("regla") for k in mv}
+        ok = (not any(v == "MEJORA" for k, v in mv.items() if "|kernel|" not in k) and dmax == 0.0
+              and (g != 0.8 or "EMPEORA" in mv.values()))
+        check(caso, ok, "M %s | regla sobre d %s | max |d′| %r | estado %s" % (mv, reglas_d, dmax, res["estado"]))
 
     # un volcán solo (adenda, H4): D lleva hacia MIROVA sólo a Chillán en VIIRS 750
     sel = pares(t, lambda k, c: "|VIIRS750|" in k and k.startswith("NevadosDeChillan|"))

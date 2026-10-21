@@ -11,34 +11,54 @@
    - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
    - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
 
-== V1 2026-08-29 a 2026-10-18 | calibración simetrica | PLACEBO: INVALIDO: placebo x1.2 da MEJORA en VIIRS750|z<=40; placebo x1.2 da MEJORA en VIIRS375|sin_kernel|z<=40
-   VIIRS750|z<=40             decide   n  29 noches  27 razón K 0.659 -> nulo NEUTRO | placebo x1.2 MEJORA, x0.8 EMPEORA
-   VIIRS750|z>40              decide   n  23 noches  14 razón K 0.353 -> nulo NEUTRO | placebo x1.2 NEUTRO, x0.8 EMPEORA
-   VIIRS375|sin_kernel|z<=40  decide   n 103 noches  82 razón K 0.518 -> nulo NEUTRO | placebo x1.2 MEJORA, x0.8 EMPEORA
-   VIIRS375|sin_kernel|z>40   bloquea  n  91 noches  66 razón K 0.381 -> nulo NEUTRO | placebo x1.2 NEUTRO, x0.8 EMPEORA
-   VIIRS375|kernel|z<=40      informa  n  64 noches  56 razón K 1.019 -> nulo NEUTRO | placebo -
-   VIIRS375|kernel|z>40       informa  n  41 noches  32 razón K 0.986 -> nulo NEUTRO | placebo -
+== V1 2026-08-29 a 2026-10-18 | calibración simétrica (D-27) con el comparador de D-28
+   VIIRS750|z<=40             decide   n  29 noches  27 razón K 0.659 | nulo NEUTRO | placebo sin comparador x1.2 MEJORA, x0.8 EMPEORA
+      brazo D = K x 1.2: regla sobre d MEJORA  -> decide NEUTRO      | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x1.2000 | nota: sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x0.8000
+      nulo (D = K): ĝ x1.0000, max |d′| 0.0
+   VIIRS750|z>40              decide   n  23 noches  14 razón K 0.353 | nulo NEUTRO | placebo sin comparador x1.2 NEUTRO, x0.8 EMPEORA
+      brazo D = K x 1.2: regla sobre d MEJORA  -> decide NEUTRO      | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x1.2000 | nota: MEJORA sostenida por menos de 2 volcanes (adenda, H4)
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x0.8000
+      nulo (D = K): ĝ x1.0000, max |d′| 0.0
+   VIIRS375|sin_kernel|z<=40  decide   n 103 noches  82 razón K 0.518 | nulo NEUTRO | placebo sin comparador x1.2 MEJORA, x0.8 EMPEORA
+      brazo D = K x 1.2: regla sobre d MEJORA  -> decide NEUTRO      | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x1.2000 | nota: sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x0.8000
+      nulo (D = K): ĝ x1.0000, max |d′| 0.0
+   VIIRS375|sin_kernel|z>40   bloquea  n  91 noches  66 razón K 0.381 | nulo NEUTRO | placebo sin comparador x1.2 NEUTRO, x0.8 EMPEORA
+      brazo D = K x 1.2: regla sobre d MEJORA  -> decide NEUTRO      | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x1.2000
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x0.8000
+      nulo (D = K): ĝ x1.0000, max |d′| 0.0
+   VIIRS375|kernel|z<=40      informa  n  64 noches  56 razón K 1.019 | nulo NEUTRO | placebo sin comparador -
+      brazo D = K x 1.2: regla sobre d NEUTRO  -> decide NEUTRO      | sin comparador (estrato que informa)
+      brazo D = K x 0.8: regla sobre d NEUTRO  -> decide NEUTRO      | sin comparador (estrato que informa)
+   VIIRS375|kernel|z>40       informa  n  41 noches  32 razón K 0.986 | nulo NEUTRO | placebo sin comparador -
+      brazo D = K x 1.2: regla sobre d NEUTRO  -> decide NEUTRO      | sin comparador (estrato que informa)
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | sin comparador (estrato que informa)
+   K x 0,8 da EMPEORA por d en: ['VIIRS750|z<=40', 'VIIRS750|z>40', 'VIIRS375|sin_kernel|z<=40', 'VIIRS375|sin_kernel|z>40']
 
-== V1 2026-08-29 a 2026-10-18 | calibración sellada | PLACEBO: OK
-   VIIRS750|z<=40             decide   n  29 noches  27 razón K 0.659 -> nulo NEUTRO | placebo x1.2 INDECIDIBLE, x0.8 INDECIDIBLE
-   VIIRS750|z>40              decide   n  23 noches  14 razón K 0.353 -> nulo NEUTRO | placebo x1.2 INDECIDIBLE, x0.8 INDECIDIBLE
-   VIIRS375|sin_kernel|z<=40  decide   n 103 noches  82 razón K 0.518 -> nulo NEUTRO | placebo x1.2 INDECIDIBLE, x0.8 INDECIDIBLE
-   VIIRS375|sin_kernel|z>40   bloquea  n  91 noches  66 razón K 0.381 -> nulo NEUTRO | placebo x1.2 INDECIDIBLE, x0.8 INDECIDIBLE
-   VIIRS375|kernel|z<=40      informa  n  64 noches  56 razón K 1.019 -> nulo NEUTRO | placebo -
-   VIIRS375|kernel|z>40       informa  n  41 noches  32 razón K 0.986 -> nulo NEUTRO | placebo -
+== V2 2026-04-01 a 2026-06-12 | calibración simétrica (D-27) con el comparador de D-28
+   VIIRS750|z<=40             decide   n  64 noches  64 razón K 0.540 | nulo NEUTRO | placebo sin comparador x1.2 MEJORA, x0.8 EMPEORA
+      brazo D = K x 1.2: regla sobre d MEJORA  -> decide NEUTRO      | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x1.2000 | nota: sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x0.8000
+      nulo (D = K): ĝ x1.0000, max |d′| 0.0
+   VIIRS750|z>40              decide   n  27 noches  22 razón K 0.511 | nulo NEUTRO | placebo sin comparador x1.2 NEUTRO, x0.8 EMPEORA
+      brazo D = K x 1.2: regla sobre d MEJORA  -> decide NEUTRO      | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x1.2000 | nota: MEJORA sostenida por menos de 2 volcanes (adenda, H4)
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x0.8000
+      nulo (D = K): ĝ x1.0000, max |d′| 0.0
+   VIIRS375|sin_kernel|z<=40  decide   n 108 noches 107 razón K 0.579 | nulo NEUTRO | placebo sin comparador x1.2 MEJORA, x0.8 EMPEORA
+      brazo D = K x 1.2: regla sobre d MEJORA  -> decide NEUTRO      | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x1.2000 | nota: sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x0.8000
+      nulo (D = K): ĝ x1.0000, max |d′| 0.0
+   VIIRS375|sin_kernel|z>40   bloquea  n  97 noches  90 razón K 0.394 | nulo NEUTRO | placebo sin comparador x1.2 NEUTRO, x0.8 EMPEORA
+      brazo D = K x 1.2: regla sobre d MEJORA  -> decide NEUTRO      | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x1.2000
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | regla sobre d′ NEUTRO, max |d′| 0.0, ĝ x0.8000
+      nulo (D = K): ĝ x1.0000, max |d′| 0.0
+   VIIRS375|kernel|z<=40      informa  n 103 noches  98 razón K 0.963 | nulo NEUTRO | placebo sin comparador -
+      brazo D = K x 1.2: regla sobre d NEUTRO  -> decide NEUTRO      | sin comparador (estrato que informa)
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | sin comparador (estrato que informa)
+   VIIRS375|kernel|z>40       informa  n  92 noches  79 razón K 0.861 | nulo NEUTRO | placebo sin comparador -
+      brazo D = K x 1.2: regla sobre d NEUTRO  -> decide NEUTRO      | sin comparador (estrato que informa)
+      brazo D = K x 0.8: regla sobre d EMPEORA -> decide EMPEORA     | sin comparador (estrato que informa)
+   K x 0,8 da EMPEORA por d en: ['VIIRS750|z<=40', 'VIIRS750|z>40', 'VIIRS375|sin_kernel|z<=40', 'VIIRS375|sin_kernel|z>40']
 
-== V2 2026-04-01 a 2026-06-12 | calibración simetrica | PLACEBO: INVALIDO: placebo x1.2 da MEJORA en VIIRS750|z<=40; placebo x1.2 da MEJORA en VIIRS375|sin_kernel|z<=40
-   VIIRS750|z<=40             decide   n  64 noches  64 razón K 0.540 -> nulo NEUTRO | placebo x1.2 MEJORA, x0.8 EMPEORA
-   VIIRS750|z>40              decide   n  27 noches  22 razón K 0.511 -> nulo NEUTRO | placebo x1.2 NEUTRO, x0.8 EMPEORA
-   VIIRS375|sin_kernel|z<=40  decide   n 108 noches 107 razón K 0.579 -> nulo NEUTRO | placebo x1.2 MEJORA, x0.8 EMPEORA
-   VIIRS375|sin_kernel|z>40   bloquea  n  97 noches  90 razón K 0.394 -> nulo NEUTRO | placebo x1.2 NEUTRO, x0.8 EMPEORA
-   VIIRS375|kernel|z<=40      informa  n 103 noches  98 razón K 0.963 -> nulo NEUTRO | placebo -
-   VIIRS375|kernel|z>40       informa  n  92 noches  79 razón K 0.861 -> nulo NEUTRO | placebo -
-
-== V2 2026-04-01 a 2026-06-12 | calibración sellada | PLACEBO: OK
-   VIIRS750|z<=40             decide   n  64 noches  64 razón K 0.540 -> nulo NEUTRO | placebo x1.2 INDECIDIBLE, x0.8 INDECIDIBLE
-   VIIRS750|z>40              decide   n  27 noches  22 razón K 0.511 -> nulo NEUTRO | placebo x1.2 INDECIDIBLE, x0.8 EMPEORA
-   VIIRS375|sin_kernel|z<=40  decide   n 108 noches 107 razón K 0.579 -> nulo NEUTRO | placebo x1.2 INDECIDIBLE, x0.8 INDECIDIBLE
-   VIIRS375|sin_kernel|z>40   bloquea  n  97 noches  90 razón K 0.394 -> nulo NEUTRO | placebo x1.2 INDECIDIBLE, x0.8 INDECIDIBLE
-   VIIRS375|kernel|z<=40      informa  n 103 noches  98 razón K 0.963 -> nulo NEUTRO | placebo -
-   VIIRS375|kernel|z>40       informa  n  92 noches  79 razón K 0.861 -> nulo NEUTRO | placebo -
+RESUMEN: los controles (i) y (iii) de D-28 §3 pasan en V1 y V2
