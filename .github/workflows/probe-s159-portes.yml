@@ -1,0 +1,87 @@
+name: "Probe S159 PORTES, codigo de MIROVA V750 portado a VIIRS 375 y MODIS, y produccion K (solo lectura)"
+
+# Frente PORTES de S159. Diseno y controles: experiments/_s159/portes/probe_portes.py; criterio:
+# experiments/_s159/portes/PREREGISTRO.md (commiteado antes de este disparo).
+# Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# Se dispara con un push a la rama s159-portes-disparo (workflow_dispatch solo existe desde main, S73). No se mergea.
+# Copia de experiments/_s159/portes/probe-s159-portes.yml.
+# A43: "on" entre comillas. S141: pipefail con tee; el script sale 2 si falta una pasada.
+# A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio (el par usuario y clave esta vencido).
+# MODIS solo en Linux (pyhdf). A15: ~19 pasadas VIIRS 375 por trozo a ~3 min (granulos IMG grandes) ~60 min;
+# timeout 180 (mayor que 1,3 x estimado, bajo 6 h).
+"on":
+  push:
+    branches: ["s159-portes-disparo"]
+
+concurrency:
+  group: probe-s159-portes
+  cancel-in-progress: false
+
+env:
+  SOLO: "150,157,151,0,2,4,302,303"
+  OBJETIVOS: "experiments/_s159/portes/objetivos_portes.json"
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        include:
+          - {sensor: VIIRS375, chunk: 0, nchunks: 8}
+          - {sensor: VIIRS375, chunk: 1, nchunks: 8}
+          - {sensor: VIIRS375, chunk: 2, nchunks: 8}
+          - {sensor: VIIRS375, chunk: 3, nchunks: 8}
+          - {sensor: VIIRS375, chunk: 4, nchunks: 8}
+          - {sensor: VIIRS375, chunk: 5, nchunks: 8}
+          - {sensor: VIIRS375, chunk: 6, nchunks: 8}
+          - {sensor: VIIRS375, chunk: 7, nchunks: 8}
+          - {sensor: MODIS, chunk: 0, nchunks: 6}
+          - {sensor: MODIS, chunk: 1, nchunks: 6}
+          - {sensor: MODIS, chunk: 2, nchunks: 6}
+          - {sensor: MODIS, chunk: 3, nchunks: 6}
+          - {sensor: MODIS, chunk: 4, nchunks: 6}
+          - {sensor: MODIS, chunk: 5, nchunks: 6}
+          - {sensor: VIIRS750, chunk: 0, nchunks: 1}
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s159/portes/probe_portes.py --objetivos "$OBJETIVOS" --out out \
+            --sensor ${{ matrix.sensor }} --chunk ${{ matrix.chunk }} --nchunks ${{ matrix.nchunks }} \
+            --solo "$SOLO" 2>&1 | tee out/probe_${{ matrix.sensor }}_${{ matrix.chunk }}.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s159-portes-${{ matrix.sensor }}-${{ matrix.chunk }}
+          path: |
+            out/*.json
+            out/*.npz
+            out/*.log
+          retention-days: 30
+          if-no-files-found: error
