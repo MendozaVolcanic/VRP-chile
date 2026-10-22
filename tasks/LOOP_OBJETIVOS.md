@@ -565,6 +565,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 ~04:45 UTC (S160 nocturna): verificador del censo del oráculo: números CONFIRMADOS; integrado a s159-pruebas
+- `experiments/_s159/oraculo_censo/verificador/INFORME.md` (Fable 5.1, high; `ebf8cf861`). Re-corrió el analizador
+  (tablas byte a byte iguales) y recontó desde los crudos sin pasar por él: K 54, O-def 5, O-sens 15 de 5.353; O-def
+  pierde 6 protegidas de Cordón Caulle; O-sens 0 perdidas y 1 ganada; ΔE −60 y −90; con el rescate −62 y −92.
+  Etiquetas sin cambio. Lo que cambia la lectura: dos de las pérdidas bajo 1 MW no son del detector de MIROVA sino del
+  record sintético (VOC-01, Láscar 2026-08-26 05:48: el centroide sin pesos de un píxel del cráter y uno a 17,3 km cae
+  a 9,3 km y queda `far`; VOC-02, Cordón Caulle 2026-10-21 05:48: 11 píxeles a 10,3 MW con 270,8 K que el filtro de
+  cirrus del tablero apaga, la única vez que dispara en el censo). Las 6 protegidas de O-def son geometría de la caja
+  (O-sens las encuentra a 7,7 a 7,8 km del centro del TIF). **Con la tabla de `latest.php` sola**: 5 alertas que
+  deciden vienen sólo del OCR (todas protegidas, desde el 13-jun); O-def pierde 5 en vez de 6, O-sens sigue en 0, ΔE
+  igual. Salvedades de redacción de los controles: control 2 = 503 pasadas × 2 cajas; la pata de magnitud del control
+  1 compara 422 pares (el resto None con None); en 9 pasadas de NOAA-21 del 20-oct K corrió sobre NRT y producción
+  sobre Standard (VOC-03). Población: 30 pasadas RUTINA de la tabla sin record nuestro a 120 s quedan fuera (0,5 %,
+  0 alertas; VOC-05). Seguimiento VOC-04: comprobar en el `.m` de MIROVA si la prueba p1 se aplica fuera de la caja.
+- Arreglado S-1 (mío): 178 bytes NUL al final de mis dos salidas de texto.
+- Integrado: `s159-oraculo-censo` trae `s159-pruebas` y se empuja como `s159-pruebas` (`812624cc6`), desde
+  `C:\vrp-trabajo\s159-m`.
+
 ### 2026-10-22 ~04:24 UTC (S160 nocturna): censo del oráculo V750 analizado, verificador corriendo
 - Run **39713438252** terminado (28 verdes, 4 rojos por 20 pasadas sin procesar declaradas, todas del 12-oct) y
   rescate **39715348772** (20 de 20 ok). El agente de S159 que lo diseñó ya no estaba vivo: corrí el analizador
