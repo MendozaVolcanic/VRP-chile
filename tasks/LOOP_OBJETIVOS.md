@@ -565,6 +565,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 ~04:55 UTC (S160 nocturna): D-34 commiteado; verificador limpio corriendo; D-29 falta en el evaluador
+- El agente de S159 subió **`c44709e27`** (P2 con bootstrap por bloques, D-34, y `ADENDA_GEMELO.md`): roja 11 de 11,
+  verde 31 de 31, mutaciones 17 de 17 por aserción, suite 2.373 con árbol quieto, según su mensaje. Verificador con
+  contexto limpio (Fable 5.1, high) sólo del diff `63e310af5..c44709e27`, con prohibición de tocar datos reales del
+  A/B; escribe en `C:\vrp-trabajo\s159-evaluador\experiments\_s159\instrumentos\verificador_d34\`.
+- **Hallazgo propio: D-29 no está implementado.** `evaluar_d25.py` no excluye ningún día: la ventana V1 va del
+  2026-08-29 al 2026-10-18 entera, y la cobertura (`claves_cobertura`) compara los brazos contra producción, que sí
+  tiene el 17 y el 18 por NRT. Sin la exclusión, V1 podría quedar INDECIDIBLE por cobertura o mezclar días. Parche
+  diseñado (constante de días por ventana, filtro de claves `volcán|sensor|fecha` en tablas, crudos y cobertura, y
+  la exclusión al inicio de la línea del veredicto); se aplica **después** del verificador de D-34 para no cambiarle el
+  árbol a mitad de camino (A112), con prueba roja, y pasa por verificación antes del tag. Interpretación que aplico y
+  dejo a la vista de Nicolás: «sin el 13 parcial» = se excluye el día 13 entero, en los tres brazos por igual (una
+  exclusión por pasada dependería de qué faltó en cada brazo); el 19 y el 20 caen fuera de V1.
+
 ### 2026-10-22 ~04:45 UTC (S160 nocturna): verificador del censo del oráculo: números CONFIRMADOS; integrado a s159-pruebas
 - `experiments/_s159/oraculo_censo/verificador/INFORME.md` (Fable 5.1, high; `ebf8cf861`). Re-corrió el analizador
   (tablas byte a byte iguales) y recontó desde los crudos sin pasar por él: K 54, O-def 5, O-sens 15 de 5.353; O-def
