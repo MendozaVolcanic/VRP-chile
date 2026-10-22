@@ -14,3 +14,4 @@ Hora del servidor al armar este registro: Thu, 22 Oct 2026 03:18:42 GMT. Esfuerz
 | V4 | Opus | 04:02 | 04:2x | ver task | | | 12 verificados + 3 propios | 281 EN PARTE g4; 284 REFUTADO; 282, 283, 286, 287, 293 EN PARTE; 285, 288, 289, 290, 291 CONFIRMADOS |
 | F0a | Fable | 04:07 | 04:20 | 13 min | ver task | | 10 pendientes S158 + 1 propio | 7 CONFIRMADOS, 3 EN PARTE, 0 REFUTADOS; F1-H6 sube a g4, F6-3 a g3; V0a-01 nada de S158 en main |
 | V1a | Opus (el agente declara esfuerzo bajo, no high) | 03:48 | 04:25 | 37 min | ver task | | 3 hallazgos + 3 celdas | 161 primera mitad CONFIRMADA (placebo al azar pasa 16 de 30 en V1), segunda mitad CONFIRMADA (K supera el margen); g3, no 5; 162 EN PARTE g2; 163 CONFIRMADO g2; R6 CONFIRMADA, R11 EN PARTE, R17 REFUTADA |
+| F1b | Fable | 03:42 | 04:30 | 48 min | 400.290 | 67 | 17 (180 a 196) + matriz de 28 instrumentos con 45 celdas FALLA | |
