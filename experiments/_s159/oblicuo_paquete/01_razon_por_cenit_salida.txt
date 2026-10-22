@@ -1,0 +1,112 @@
+alertas que deciden con estado ok: 181 (esperado 181, N)
+cenit centro de grilla vs cenit del record: n=181, |dif| mediana 0.01, max 0.38; sin cenit de centro 0
+pasadas que cambian de tramo segun cual cenit se use: 1 de 181
+control: deteccion del oraculo releida contra la columna O_pub de N: 0 discrepancias de 181
+
+== 0. controles contra el §9 de N (todas, crudo)
+   K        0.510 [0.370, 0.733] n=115   (N: 0.510 [0.370, 0.733] n=115)
+   F        0.990 [0.703, 1.290] n=163   (N: 0.990 [0.703, 1.290] n=163)
+   O        0.999 [0.978, 1.007] n=145   (N: 0.999 [0.978, 1.007] n=145)
+   placebo  0.612 [0.444, 0.880] n=115   (N: 0.612)
+
+== 1. todas las alertas que deciden, crudo
+   tramo  | alertas | K publica / razon | F publica / razon | oraculo detecta / razon | oraculo no detecta | recuadro sensible detecta / razon
+   <=25   |  93 | K  60 0.634 [0.485, 0.831] n=60 | F  88 1.116 [0.882, 1.381] n=88 | O  71 1.000 [0.967, 1.014] n=71 | no det  22 | S  90 1.000 [0.967, 1.022] n=90
+   25-40  |  33 | K  20 0.400 [0.310, 0.551] n=20 | F  30 0.792 [0.668, 1.176] n=30 | O  26 1.001 [0.996, 1.007] n=26 | no det   7 | S  32 1.000 [0.989, 1.007] n=32
+   40-50  |  39 | K  23 0.498 [0.353, 0.575] n=23 | F  31 0.806 [0.607, 1.102] n=31 | O  33 0.997 [0.973, 1.001] n=33 | no det   6 | S  37 0.995 [0.943, 1.000] n=37
+   >50    |  16 | K  12 0.178 [0.143, 0.431] n=12 | F  14 0.539 [0.378, 1.542] n=14 | O  15 0.996 [0.984, 1.023] n=15 | no det   1 | S  16 1.000 [0.992, 1.060] n=16
+   todas  | 181 | K 115 0.510 [0.370, 0.733] n=115 | F 163 0.990 [0.703, 1.290] n=163 | O 145 0.999 [0.978, 1.007] n=145 | no det  36 | S 175 0.999 [0.973, 1.009] n=175
+
+== 2. sin Chillan, crudo
+   tramo  | alertas | K publica / razon | F publica / razon | oraculo detecta / razon | oraculo no detecta | recuadro sensible detecta / razon
+   <=25   |  88 | K  55 0.594 [0.474, 0.769] n=55 | F  83 1.126 [0.874, 1.417] n=83 | O  66 1.000 [0.967, 1.013] n=66 | no det  22 | S  85 1.000 [0.967, 1.021] n=85
+   25-40  |  28 | K  15 0.396 [0.310, 0.509] n=15 | F  25 0.775 [0.668, 1.176] n=25 | O  21 0.999 [0.996, 1.003] n=21 | no det   7 | S  27 0.999 [0.986, 1.004] n=27
+   40-50  |  33 | K  17 0.510 [0.431, 0.576] n=17 | F  25 0.880 [0.667, 1.128] n=25 | O  27 0.998 [0.980, 1.002] n=27 | no det   6 | S  31 0.997 [0.973, 1.001] n=31
+   >50    |   4 | K   2 0.366 [0.300, 0.431] n=2 | F   3 1.677 [1.542, 1.719] n=3 | O   3 0.987 [0.081, 1.023] n=3 | no det   1 | S   4 0.988 [0.987, 1.023] n=4
+   todas  | 153 | K  89 0.519 [0.400, 0.726] n=89 | F 136 1.064 [0.803, 1.358] n=136 | O 117 0.999 [0.980, 1.006] n=117 | no det  36 | S 147 0.999 [0.973, 1.007] n=147
+
+== 3. Chillan sola, crudo
+   tramo  | alertas | K publica / razon | F publica / razon | oraculo detecta / razon | oraculo no detecta | recuadro sensible detecta / razon
+   <=25   |   5 | K   5 0.910 [0.845, 0.949] n=5 | F   5 1.033 [1.030, 1.239] n=5 | O   5 1.000 [0.973, 1.073] n=5 | no det   0 | S   5 1.000 [0.973, 1.073] n=5
+   25-40  |   5 | K   5 0.678 [0.295, 0.788] n=5 | F   5 0.870 [0.703, 0.911] n=5 | O   5 1.017 [1.001, 1.095] n=5 | no det   0 | S   5 1.017 [1.001, 1.095] n=5
+   40-50  |   6 | K   6 0.377 [0.353, 0.482] n=6 | F   6 0.535 [0.440, 0.598] n=6 | O   6 0.914 [0.868, 0.990] n=6 | no det   0 | S   6 0.914 [0.868, 0.990] n=6
+   >50    |  12 | K  10 0.163 [0.098, 0.418] n=10 | F  11 0.470 [0.325, 0.703] n=11 | O  12 0.998 [0.992, 1.046] n=12 | no det   0 | S  12 1.001 [0.996, 1.285] n=12
+   todas  |  28 | K  26 0.402 [0.192, 0.788] n=26 | F  27 0.598 [0.469, 0.929] n=27 | O  28 0.998 [0.973, 1.046] n=28 | no det   0 | S  28 1.000 [0.973, 1.073] n=28
+
+== 4. ponderado por peso de muestreo (todas)
+   <=25   K 0.558 [0.437, 0.769] n=60 | F 1.137 [0.882, 1.459] n=88 | O 1.002 [0.973, 1.013] n=71
+   25-40  K 0.459 [0.295, 0.678] n=20 | F 0.911 [0.723, 1.206] n=30 | O 0.997 [0.989, 1.003] n=26
+   40-50  K 0.499 [0.385, 0.575] n=23 | F 0.880 [0.657, 1.102] n=31 | O 0.997 [0.978, 1.001] n=33
+   >50    K 0.300 [0.162, 0.431] n=12 | F 0.775 [0.469, 1.677] n=14 | O 0.996 [0.987, 1.023] n=15
+
+== 5. por volcan y tramo (crudo): n alertas, razon K / F / O (mediana y n)
+   Chaiten              <=25: n1 K1.15(1) F1.26(1) O0.86(1) Odet1
+   Isluga               <=25: n11 K0.34(4) F1.26(11) O1.00(11) Odet11 | 25-40: n6 K- F0.74(5) O1.00(6) Odet6 | 40-50: n5 K- F1.23(1) O1.00(5) Odet5 | >50: n2 K0.30(1) F1.61(2) O0.55(2) Odet2
+   Lascar               <=25: n43 K0.60(37) F0.95(43) O1.00(43) Odet43 | 25-40: n14 K0.40(13) F0.74(14) O1.00(14) Odet14 | 40-50: n21 K0.50(16) F0.81(20) O1.00(21) Odet21 | >50: n1 K0.43(1) F1.72(1) O0.99(1) Odet1
+   NevadosDeChillan     <=25: n5 K0.91(5) F1.03(5) O1.00(5) Odet5 | 25-40: n5 K0.68(5) F0.87(5) O1.02(5) Odet5 | 40-50: n6 K0.38(6) F0.54(6) O0.91(6) Odet6 | >50: n12 K0.16(10) F0.47(11) O1.00(12) Odet12
+   PlanchonPeteroa      <=25: n6 K- F1.32(4) O1.00(6) Odet6 | 25-40: n1 K- F- O1.00(1) Odet1 | 40-50: n1 K- F- O0.96(1) Odet1
+   PuyehueCordonCaulle  <=25: n16 K0.73(11) F1.38(13) O- Odet0 | 25-40: n6 K0.26(2) F1.47(5) O- Odet0 | 40-50: n5 K0.58(1) F1.31(3) O- Odet0 | >50: n1 K- F- O- Odet0
+   Tupungatito          <=25: n6 K- F1.55(6) O- Odet0 | 25-40: n1 K- F1.78(1) O- Odet0 | 40-50: n1 K- F1.49(1) O- Odet0
+   Villarrica           <=25: n5 K0.47(2) F1.31(5) O1.04(5) Odet5
+
+== 6. atribucion por pares (mediana [q1,q3] n del cociente en las alertas donde AMBOS tienen magnitud > 0)
+   F/K  (fondo y suma del codigo, misma deteccion nativa)
+      <=25   1.443 [1.227, 2.254] n=60
+      25-40  1.592 [1.157, 2.160] n=20
+      40-50  1.430 [1.217, 1.945] n=23
+      >50    3.282 [1.852, 3.986] n=12
+      todas  1.464 [1.227, 2.229] n=115
+   O/F  (deteccion + grilla + remuestreo; mismo fondo y suma)
+      <=25   0.943 [0.799, 1.103] n=69
+      25-40  1.322 [1.150, 1.727] n=24
+      40-50  1.450 [0.931, 1.576] n=27
+      >50    1.850 [0.663, 3.031] n=14
+      todas  1.074 [0.847, 1.451] n=134
+   O/F  solo pares con 1 px en F y en O
+      <=25   0.753 [0.686, 0.887] n=29
+      25-40  0.951 [0.847, 1.336] n=9
+      40-50  0.882 [0.809, 0.931] n=7
+      >50    0.525 [0.476, 0.663] n=4
+      todas  0.809 [0.684, 0.914] n=49
+   O/K  (todo el paquete)
+      <=25   1.522 [1.220, 2.086] n=49
+      25-40  2.176 [1.722, 3.240] n=18
+      40-50  2.004 [1.736, 2.348] n=22
+      >50    5.564 [2.451, 10.191] n=12
+      todas  1.926 [1.425, 2.523] n=101
+   O_geo/O_r2 lineal (posicion de la grilla)
+      <=25   1.039 [0.911, 1.138] n=55
+      25-40  0.959 [0.903, 1.094] n=21
+      40-50  0.983 [0.909, 1.131] n=24
+      >50    0.964 [0.880, 0.997] n=13
+      todas  0.993 [0.903, 1.111] n=113
+   O_lineal/O_vecino (interpolador, grilla GEO)
+      <=25   0.864 [0.684, 1.080] n=68
+      25-40  0.778 [0.602, 0.918] n=25
+      40-50  0.763 [0.640, 0.848] n=29
+      >50    0.816 [0.699, 1.229] n=11
+      todas  0.816 [0.654, 1.042] n=133
+
+== 7. alertas con cenit > 50: volcan hora z MIROVA | K pub pc n | F pub pc n | O det vrp npix | S det vrp
+   232 Isluga               2026-06-06 05:12 z 52.6 M  0.19 | K 1 0.057 1.0 | F 1 0.293 1.0 | O 1 0.194 1 | S 1 0.194
+   246 Isluga               2026-06-22 05:12 z 52.6 M  0.22 | K 0 0.0 1.0 | F 1 0.369 1.0 | O 1 0.018 1 | S 1 0.018
+    30 Lascar               2026-04-29 06:18 z 55.0 M  0.16 | K 1 0.069 1.0 | F 1 0.275 1.0 | O 1 0.158 1 | S 1 0.158
+   315 NevadosDeChillan     2026-09-28 04:42 z 65.1 M  0.23 | K 0 None None | F 0 None None | O 1 0.296 1 | S 1 0.296
+   386 NevadosDeChillan     2026-09-29 06:36 z 55.7 M  2.03 | K 1 0.329 1.0 | F 1 1.149 1.0 | O 1 2.022 3 | S 1 2.022
+   148 NevadosDeChillan     2026-10-01 04:42 z 67.9 M  0.09 | K 0 0.0 1.0 | F 1 0.198 1.0 | O 1 0.094 1 | S 1 0.094
+   151 NevadosDeChillan     2026-10-05 05:06 z 53.6 M  3.43 | K 1 1.435 2.0 | F 1 2.658 2.0 | O 1 3.182 4 | S 1 3.182
+   152 NevadosDeChillan     2026-10-05 06:48 z 64.3 M  2.66 | K 1 0.259 2.0 | F 1 1.361 2.0 | O 1 2.64 6 | S 1 2.64
+   392 NevadosDeChillan     2026-10-10 04:54 z 65.5 M  2.48 | K 1 0.243 1.0 | F 1 0.797 1.0 | O 1 2.481 10 | S 1 2.481
+   159 NevadosDeChillan     2026-10-10 06:54 z 67.6 M 15.26 | K 1 2.508 2.0 | F 1 3.508 2.0 | O 1 14.878 13 | S 1 16.18
+   338 NevadosDeChillan     2026-10-14 06:18 z 51.5 M  2.00 | K 1 1.173 2.0 | F 1 0.937 2.0 | O 1 2.875 5 | S 1 2.875
+   396 NevadosDeChillan     2026-10-15 06:36 z 55.5 M 15.15 | K 1 8.511 4.0 | F 1 10.651 4.0 | O 1 15.04 9 | S 1 15.04
+   164 NevadosDeChillan     2026-10-16 05:00 z 58.0 M  8.36 | K 1 1.609 2.0 | F 1 3.162 2.0 | O 1 8.36 9 | S 1 8.36
+   165 NevadosDeChillan     2026-10-16 06:42 z 60.6 M 14.02 | K 1 2.007 3.0 | F 1 6.591 3.0 | O 1 14.045 14 | S 1 14.045
+   167 NevadosDeChillan     2026-10-17 04:42 z 68.0 M  2.47 | K 1 0.224 1.0 | F 1 0.802 1.0 | O 1 2.431 5 | S 1 3.329
+   339 PuyehueCordonCaulle  2026-10-14 06:24 z 51.2 M  0.31 | K 0 None None | F 0 None None | O 0 None 0 | S 1 0.306
+
+== 8. Chillan en el lote: alertas por tramo y magnitud de MIROVA
+   <=25   n=5 MIROVA: [1.03, 7.86, 10.0, 13.13, 15.63]
+   25-40  n=5 MIROVA: [0.35, 2.3, 2.52, 9.0, 30.1]
+   40-50  n=6 MIROVA: [5.48, 6.42, 7.0, 7.06, 14.02, 21.94]
+   >50    n=12 MIROVA: [0.09, 0.23, 2.0, 2.03, 2.47, 2.48, 2.66, 3.43, 8.36, 14.02, 15.15, 15.26]
