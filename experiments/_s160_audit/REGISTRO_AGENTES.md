@@ -16,3 +16,5 @@ Hora del servidor al armar este registro: Thu, 22 Oct 2026 03:18:42 GMT. Esfuerz
 | V1a | Opus (el agente declara esfuerzo bajo, no high) | 03:48 | 04:25 | 37 min | ver task | | 3 hallazgos + 3 celdas | 161 primera mitad CONFIRMADA (placebo al azar pasa 16 de 30 en V1), segunda mitad CONFIRMADA (K supera el margen); g3, no 5; 162 EN PARTE g2; 163 CONFIRMADO g2; R6 CONFIRMADA, R11 EN PARTE, R17 REFUTADA |
 | F1b | Fable | 03:42 | 04:30 | 48 min | 400.290 | 67 | 17 (180 a 196) + matriz de 28 instrumentos con 45 celdas FALLA | |
 | F0b | Opus | 04:20 | 04:45 | 25 min | ver task | | 6 pendientes S158 + 3 propios | F4-H2 EN PARTE, F4-H3 REFUTADO EN PARTE, F4-H5, H7, H8, R2-17 CONFIRMADOS; V0b-01 K1 decide el tope D9 (Chillán protegida 11,08 a 5,0 MW con K1 -0,7) |
+| V1b | Opus | 04:30 | 04:52 | 21 min | 384.714 | 137 | 5 hallazgos + 45 celdas; 4 propios | 180, 181, 182 EN PARTE y bajan de 4 a 2; 188, 189 EN PARTE; celdas 25 confirmadas o en parte, 11 refutadas o sin efecto, 9 SIN DATO; V1b-01 g3 |
+| marcas A113 (no auditor) | Opus | 04:33 | 04:43 | 10 min | 279.494 | 91 | 27 marcas aplicadas, 12 sin aplicar | revisado el diff por el orquestador |

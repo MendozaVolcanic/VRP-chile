@@ -1,0 +1,500 @@
+{
+ "meta": {
+  "ventana": [
+   "2026-06-01",
+   "2026-08-31"
+  ],
+  "brazos": [
+   "_s142_ab_control",
+   "_v1b_sin_dia"
+  ],
+  "control": "_s142_ab_control",
+  "volcanes": [
+   "Isluga",
+   "Lascar",
+   "Lastarria",
+   "PlanchonPeteroa",
+   "PuyehueCordonCaulle",
+   "Tupungatito",
+   "Chaiten",
+   "Villarrica",
+   "NevadosDeChillan"
+  ],
+  "volcanes_evaluados": [],
+  "estratos": {
+   "Isluga": "focal",
+   "Lascar": "focal",
+   "Lastarria": "focal",
+   "PlanchonPeteroa": "focal",
+   "PuyehueCordonCaulle": "focal",
+   "Tupungatito": "nevado",
+   "Chaiten": "nevado",
+   "Villarrica": "nevado",
+   "NevadosDeChillan": "nevado"
+  },
+  "estratos_fuente": "scripts/build_c2ab_windows.py:41-42",
+  "radios": {
+   "Isluga": {
+    "inner_dashboard": 5.0,
+    "inner_yaml": 5,
+    "mirova_center": [
+     -19.15212,
+     -68.83269
+    ]
+   },
+   "Lascar": {
+    "inner_dashboard": 5.0,
+    "inner_yaml": 5,
+    "mirova_center": [
+     -23.37041,
+     -67.73102
+    ]
+   },
+   "Lastarria": {
+    "inner_dashboard": 3.0,
+    "inner_yaml": 3,
+    "mirova_center": [
+     -25.16837,
+     -68.50807
+    ]
+   },
+   "PlanchonPeteroa": {
+    "inner_dashboard": 3.0,
+    "inner_yaml": 3,
+    "mirova_center": [
+     -35.2232,
+     -70.5695
+    ]
+   },
+   "PuyehueCordonCaulle": {
+    "inner_dashboard": 20.0,
+    "inner_yaml": 20,
+    "mirova_center": [
+     -40.5903,
+     -72.1187
+    ]
+   },
+   "Tupungatito": {
+    "inner_dashboard": 7.0,
+    "inner_yaml": 7,
+    "mirova_center": [
+     -33.42694,
+     -69.80039
+    ]
+   },
+   "Chaiten": {
+    "inner_dashboard": 5.0,
+    "inner_yaml": 5,
+    "mirova_center": [
+     -42.83496,
+     -72.65005
+    ]
+   },
+   "Villarrica": {
+    "inner_dashboard": 5.0,
+    "inner_yaml": 5,
+    "mirova_center": [
+     -39.42177,
+     -71.93391
+    ]
+   },
+   "NevadosDeChillan": {
+    "inner_dashboard": 5.0,
+    "inner_yaml": 5,
+    "mirova_center": [
+     -36.86483,
+     -71.38068
+    ]
+   }
+  },
+  "dir_artefactos": "D:/vrp-trabajo/temporales/s160_audit/v1b/s143_r2",
+  "prefijo": "s143ab-",
+  "procedencia": {
+   "evaluador": {
+    "archivo": "experiments/_s143_evaluador/evaluar.py",
+    "commit": "a29d6e028653fda668eabd8fe6abf6345e6f010f",
+    "modificado_sin_commit": false,
+    "blob": "1af058db80d77580812a163f1e60f1ba4fa859f6"
+   },
+   "banco_paridad": {
+    "archivo": "scripts/banco_paridad.py",
+    "commit": "9ac09b163ddd17d1a3e93bf44c5f86dc0de45a4c",
+    "modificado_sin_commit": false,
+    "blob": "384c1369dc5dc13ae2ad35169d19963c92da3a0c"
+   },
+   "sha_index_html": "85a0bd8d4f54673ac02fe57446960039c2334bf2",
+   "referencia": {
+    "fuente": "archivos locales",
+    "cons": "D:\\vrp-trabajo\\temporales\\s160_audit\\main\\latest_consolidado.csv",
+    "ocr": "D:\\vrp-trabajo\\temporales\\s160_audit\\main\\data\\mirova_reference\\mirova_v1_snapshot\\registro_vrp_ocr.csv",
+    "blob_cons": "4029c4b3f3b6cefeda8e7e40ced582df1b6b9b08",
+    "blob_ocr": "13b79ea9856c0568c1d31f03c6d156ed8ccdcc35",
+    "respaldo_20260408_blob": "3bb77309a1f5c9ec061f908436cb2bdd2d3ea303"
+   }
+  },
+  "parametros": {
+   "cota_km": 0.55,
+   "tol_pareo_s": 120,
+   "B": 200,
+   "semilla": 143,
+   "n_min_magnitud": 30,
+   "tol_magnitud": 0.05
+  },
+  "campo_posicion_cota": "final_hotspot_si_test1",
+  "campos_posicion_disponibles": {
+   "centroide": "primary_cluster.centroid (semántica de S135)",
+   "final_hotspot_si_test1": "final_hotspot cuando final_hotspot_source es test1_roi (posición oficial del dashboard para esos records, S106/A84); el centroide en el resto"
+  },
+  "parametros_congelados": {
+   "archivo": "experiments/_s143_evaluador/parametros.json",
+   "commit": "3ee3d15beb33c290bac4e6ae7c6a732fe5ac8263",
+   "modificado_sin_commit": false,
+   "blob": "1093f01c78bf41e26bc7e2df3fcf6d5928c14c2c",
+   "contenido": {
+    "_por_que": "Los parametros de la corrida del A/B D22/D25 se congelan aca, versionados, para que no puedan elegirse despues de ver datos (H1 del verificador externo del PR #686). El evaluador los lee por defecto, la salida JSON los copia enteros con el sha de este archivo, y tests/test_evaluador_ab_s143.py comprueba uno por uno que sigan siendo estos. Cambiar cualquiera es un cambio de pre-registro: se hace antes de correr, con su razon escrita, o el brazo se juzga en una ventana nueva sin mirar (criterio 4 del pre-registro).",
+    "_fuente": "docs/PREREGISTRO_AB_D22_D25_S143.md secciones 3, 4 y 5; cota y semilla heredadas de docs/PREREGISTRO_AB_D1_D2_S135.md",
+    "ventana": [
+     "2026-06-01",
+     "2026-08-31"
+    ],
+    "volcanes": [
+     "Isluga",
+     "Lascar",
+     "Lastarria",
+     "PlanchonPeteroa",
+     "PuyehueCordonCaulle",
+     "Tupungatito",
+     "Chaiten",
+     "Villarrica",
+     "NevadosDeChillan"
+    ],
+    "brazos": [
+     "_s142_ab_control",
+     "_s142_ab_literal",
+     "_s142_ab_lit_sin_fondo",
+     "_s142_ab_lit_con_compuerta",
+     "_s142_ab_lit_sp_suelto",
+     "_s142_ab_lit_keep_peak"
+    ],
+    "control": "_s142_ab_control",
+    "prefijo": "s143ab-",
+    "cota_km": 0.55,
+    "B": 10000,
+    "semilla": 143,
+    "n_min_magnitud": 30,
+    "tol_magnitud": 0.05,
+    "campo_posicion_cota": "final_hotspot_si_test1",
+    "_unidades": {
+     "campo_posicion_cota": "con que posicion del record se mide la cota de mismo objeto: 'centroide' (primary_cluster, la semantica de S135) o 'final_hotspot_si_test1' (final_hotspot cuando final_hotspot_source es test1_roi, la posicion oficial del dashboard para esos records; el centroide en el resto). DECIDIDO por Nicolas el 2026-09-18: manda 'final_hotspot_si_test1', porque es la posicion que el propio dashboard trata como oficial y el centroide de un record del Test 1 es el footprint de la integral, arrastrado por el gradiente topografico del nevado (A69, S106/A84). El evaluador calcula y reporta LAS DOS; esta clave dice cual decide",
+     "cota_km": "presupuesto de la cota de mismo objeto (A93): semidiagonal de la celda de 375 m mas el residuo por sensor del centro de grilla",
+     "B": "replicas del bootstrap percentil del criterio 2",
+     "semilla": "semilla del bootstrap",
+     "n_min_magnitud": "pasadas pos del CONTROL a partir de las cuales un volcan entra al chequeo del criterio 3",
+     "tol_magnitud": "cuanto puede empeorar por volcan la distancia a 1 antes de contar como que empeora"
+    }
+   }
+  },
+  "parametros_efectivos": {
+   "ventana": [
+    "2026-06-01",
+    "2026-08-31"
+   ],
+   "volcanes": [
+    "Isluga",
+    "Lascar",
+    "Lastarria",
+    "PlanchonPeteroa",
+    "PuyehueCordonCaulle",
+    "Tupungatito",
+    "Chaiten",
+    "Villarrica",
+    "NevadosDeChillan"
+   ],
+   "brazos": [
+    "_v1b_sin_dia"
+   ],
+   "control": "_s142_ab_control",
+   "prefijo": "s143ab-",
+   "cota_km": 0.55,
+   "B": 200,
+   "semilla": 143,
+   "n_min_magnitud": 30,
+   "tol_magnitud": 0.05,
+   "campo_posicion_cota": "final_hotspot_si_test1"
+  },
+  "parametros_igual_a_los_congelados": false,
+  "referencia_fijada_por_sha": false,
+  "n_filas_referencia_nocturnas": 7919,
+  "generado_utc": "2026-10-22T04:46:46+00:00",
+  "fusion": {
+   "tramos": [
+    [
+     "C:/Users/nmend/AppData/Local/Temp/claude/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/0a44fda0-e659-4f4d-80af-9f8577f14092/scratchpad/ab_t1_final",
+     ""
+    ],
+    [
+     "C:/Users/nmend/AppData/Local/Temp/claude/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/0a44fda0-e659-4f4d-80af-9f8577f14092/scratchpad/ab_t2",
+     ""
+    ]
+   ],
+   "conflictos": 0,
+   "faltantes": 0
+  }
+ },
+ "cobertura": {
+  "detalle": {
+   "Isluga": {
+    "_v1b_sin_dia": {
+     "n_control": 318,
+     "n_brazo": 314,
+     "solo_control": 4,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "Lascar": {
+    "_v1b_sin_dia": {
+     "n_control": 332,
+     "n_brazo": 328,
+     "solo_control": 4,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "Lastarria": {
+    "_v1b_sin_dia": {
+     "n_control": 333,
+     "n_brazo": 329,
+     "solo_control": 4,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "PlanchonPeteroa": {
+    "_v1b_sin_dia": {
+     "n_control": 378,
+     "n_brazo": 373,
+     "solo_control": 5,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "PuyehueCordonCaulle": {
+    "_v1b_sin_dia": {
+     "n_control": 418,
+     "n_brazo": 413,
+     "solo_control": 5,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "Tupungatito": {
+    "_v1b_sin_dia": {
+     "n_control": 378,
+     "n_brazo": 373,
+     "solo_control": 5,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "Chaiten": {
+    "_v1b_sin_dia": {
+     "n_control": 435,
+     "n_brazo": 430,
+     "solo_control": 5,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "Villarrica": {
+    "_v1b_sin_dia": {
+     "n_control": 410,
+     "n_brazo": 404,
+     "solo_control": 6,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "NevadosDeChillan": {
+    "_v1b_sin_dia": {
+     "n_control": 398,
+     "n_brazo": 393,
+     "solo_control": 5,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   }
+  },
+  "excluidos": {
+   "Isluga": [
+    "_v1b_sin_dia: solo_control 4, solo_brazo 0, product_version distinto 0"
+   ],
+   "Lascar": [
+    "_v1b_sin_dia: solo_control 4, solo_brazo 0, product_version distinto 0"
+   ],
+   "Lastarria": [
+    "_v1b_sin_dia: solo_control 4, solo_brazo 0, product_version distinto 0"
+   ],
+   "PlanchonPeteroa": [
+    "_v1b_sin_dia: solo_control 5, solo_brazo 0, product_version distinto 0"
+   ],
+   "PuyehueCordonCaulle": [
+    "_v1b_sin_dia: solo_control 5, solo_brazo 0, product_version distinto 0"
+   ],
+   "Tupungatito": [
+    "_v1b_sin_dia: solo_control 5, solo_brazo 0, product_version distinto 0"
+   ],
+   "Chaiten": [
+    "_v1b_sin_dia: solo_control 5, solo_brazo 0, product_version distinto 0"
+   ],
+   "Villarrica": [
+    "_v1b_sin_dia: solo_control 6, solo_brazo 0, product_version distinto 0"
+   ],
+   "NevadosDeChillan": [
+    "_v1b_sin_dia: solo_control 5, solo_brazo 0, product_version distinto 0"
+   ]
+  },
+  "n_pasadas_v375_nocturnas": {
+   "_s142_ab_control": {},
+   "_v1b_sin_dia": {}
+  }
+ },
+ "noches_confirmadas": {
+  "total": 0,
+  "por_volcan": {},
+  "por_estrato": {},
+  "fechas": {},
+  "aceptadas_sin_cota_calculable": {},
+  "coincidencias_de_fecha_descartadas": {},
+  "noches_publicadas_sin_filtro": {}
+ },
+ "noches_confirmadas_por_campo_de_posicion": {
+  "centroide": {
+   "total": 0,
+   "por_volcan": {},
+   "por_estrato": {},
+   "fechas": {},
+   "aceptadas_sin_cota_calculable": {},
+   "coincidencias_de_fecha_descartadas": {},
+   "noches_publicadas_sin_filtro": {}
+  },
+  "final_hotspot_si_test1": {
+   "total": 0,
+   "por_volcan": {},
+   "por_estrato": {},
+   "fechas": {},
+   "aceptadas_sin_cota_calculable": {},
+   "coincidencias_de_fecha_descartadas": {},
+   "noches_publicadas_sin_filtro": {}
+  }
+ },
+ "control": {
+  "etiquetas_v375": {},
+  "neg_limpio_n": 0,
+  "neg_limpio_tasa_publica": null,
+  "neg_limpio_tasa_art": null,
+  "neg_limpio_tasa_predisplay": null,
+  "noches_con_alerta_nocturna_v375": {}
+ },
+ "brazos": {
+  "_v1b_sin_dia": {
+   "criterio1": {
+    "perdidas": [],
+    "n_perdidas": 0,
+    "perdidas_sin_filtro_brazo": [],
+    "n_perdidas_sin_filtro_brazo": 0,
+    "ganancias": [],
+    "n_ganancias": 0,
+    "ganancias_sin_filtro": [],
+    "n_ganancias_sin_filtro": 0,
+    "por_volcan": {},
+    "cumple": true,
+    "por_estrato": {}
+   },
+   "criterio1_por_campo_de_posicion": {
+    "centroide": {
+     "perdidas": [],
+     "n_perdidas": 0,
+     "perdidas_sin_filtro_brazo": [],
+     "n_perdidas_sin_filtro_brazo": 0,
+     "ganancias": [],
+     "n_ganancias": 0,
+     "ganancias_sin_filtro": [],
+     "n_ganancias_sin_filtro": 0,
+     "por_volcan": {},
+     "cumple": true,
+     "por_estrato": {}
+    },
+    "final_hotspot_si_test1": {
+     "perdidas": [],
+     "n_perdidas": 0,
+     "perdidas_sin_filtro_brazo": [],
+     "n_perdidas_sin_filtro_brazo": 0,
+     "ganancias": [],
+     "n_ganancias": 0,
+     "ganancias_sin_filtro": [],
+     "n_ganancias_sin_filtro": 0,
+     "por_volcan": {},
+     "cumple": true,
+     "por_estrato": {}
+    }
+   },
+   "criterio2": {
+    "total": {
+     "n": 0,
+     "n_noches": 0,
+     "pub_control": 0,
+     "pub_brazo": 0,
+     "tasa_control": null,
+     "tasa_brazo": null,
+     "dif": null,
+     "ic95": [
+      null,
+      null
+     ],
+     "solo_brazo": 0,
+     "solo_control": 0,
+     "margen_signo": 0
+    },
+    "por_estrato": {},
+    "por_volcan": {},
+    "acompanantes_neg_limpio": {
+     "tasa_art_control": null,
+     "tasa_art_brazo": null,
+     "tasa_predisplay_control": null,
+     "tasa_predisplay_brazo": null,
+     "definicion_predisplay": "summit && valid && disp > 0 (antes de isThermalArtifact)",
+     "art_sube_en_brazo": null
+    },
+    "cumple": false
+   },
+   "criterio3": {
+    "total": {
+     "n_pos_control": 0,
+     "n_pares_decisivo": 0,
+     "mediana_control_decisivo": null,
+     "mediana_brazo_decisivo": null,
+     "dist_a_1_control": null,
+     "dist_a_1_brazo": null,
+     "n_control_informativo": 0,
+     "mediana_control_informativo": null,
+     "n_brazo_informativo": 0,
+     "mediana_brazo_informativo": null
+    },
+    "por_estrato": {},
+    "por_volcan": {},
+    "volcanes_que_empeoran": [],
+    "cumple": false
+   },
+   "cumple_1_2_3": false
+  }
+ },
+ "controles_instrumento": {
+  "identidad_predicado_node": true,
+  "control_contra_si_mismo": {
+   "perdidas": 0,
+   "ganancias": 0,
+   "dif_neg_limpio": null
+  }
+ }
+}
