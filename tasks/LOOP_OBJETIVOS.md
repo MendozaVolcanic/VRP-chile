@@ -558,6 +558,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 ~03:20 UTC (S159, dueña del loop): port a VIIRS 375 y MODIS; S160 en su sesión; un merge en rama ajena revertido
+- **PORTES** (`experiments/_s159/portes/`, pre-registro `6fb94d1c3`, informe `599a5659`, run 39712862945, 310 pasadas;
+  integrado a `s159-pruebas` en `2934273f5`), SIN VERIFICAR, verificador corriendo. El código V750 de MIROVA, cambiando
+  sólo bandas, grilla, coeficiente y caja, **reproduce a MIROVA en MODIS** (banda 22 + MxD03: protegidas 50 de 50, razón
+  1,006, ΔE −44 contra K; con banda 21 se hunde, con la geolocalización de 5 km baja a 0,903) y en la **magnitud de VIIRS
+  375** (razón 1,000 en 61 alertas). En VIIRS 375 el veredicto pre-registrado es PIERDE PROTEGIDA (6 de 36); el post hoc
+  las atribuye a filas sólo OCR de Suomi NPP con distancia de otra pasada (A119), sin verificar.
+- **Auditoría S160**: la inició Nicolás con la tarjeta (sesión `local_7491a729-1f11-4a2c-b5db-9dc29f9c436c`, rama
+  `s160-auditoria` en `C:\vrp-trabajo\s159-pruebas`). Ese worktree pasa a ser de esa sesión.
+- **Error propio corregido**: hice un merge del port en `s160-auditoria` creyendo que el worktree seguía en
+  `s159-pruebas` (commit local `f47f39e5d`, nunca subido). Revertido con `git reset --keep 06e0fad3b` (el último commit de
+  la sesión, igual al remoto) y avisado a la sesión. Lección: antes de un merge en un worktree compartido, mirar
+  `git branch --show-current`; si otra sesión puede estar ahí, integrar desde el worktree de la rama de origen con
+  `git push origin HEAD:<destino>`.
+
 ### 2026-10-22 (S159, dueña del loop): verificador de la referencia y cese de Suomi NPP
 - **Verificador de la referencia** (`5ab6716db`): la pérdida de filas de la tabla es del CSV del scraper (carrera de
   workflows, Mirova-v1#19), no de MIROVA; las 39 reescrituras del OCR son correcciones MANUALES documentadas de Nicolás
