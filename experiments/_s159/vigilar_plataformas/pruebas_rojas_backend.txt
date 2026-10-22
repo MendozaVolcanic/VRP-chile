@@ -1,0 +1,218 @@
+FFFFFFFFFFFF.FFFF                                                        [100%]
+================================== FAILURES ===================================
+_____________ test_la_lista_de_ceses_trae_snpp_con_fecha_y_fuente _____________
+
+    def test_la_lista_de_ceses_trae_snpp_con_fecha_y_fuente():
+        ceses = _ceses()
+        snpp = [c for c in ceses if c["plataforma"] == "Suomi NPP"]
+>       assert len(snpp) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_vigilar_plataformas_s159.py:55: AssertionError
+_________ test_los_sensores_vigilados_son_los_que_escribe_el_pipeline _________
+
+    def test_los_sensores_vigilados_son_los_que_escribe_el_pipeline():
+        # A48: la convención real del campo `sensor`, verificada en data/mirova_equivalent/Villarrica.json.
+>       assert set(vp.SENSORES) == {"VIIRS_SNPP", "VIIRS_SNPP_750", "VIIRS_NOAA20", "VIIRS_NOAA20_750",
+                                    "VIIRS_NOAA21", "VIIRS_NOAA21_750", "MODIS_TERRA", "MODIS_AQUA"}
+E       AssertionError: assert set() == {'MODIS_AQUA'...A21_750', ...}
+E         
+E         Extra items in the right set:
+E         'VIIRS_NOAA21'
+E         'VIIRS_SNPP_750'
+E         'MODIS_TERRA'
+E         'VIIRS_NOAA20'
+E         'VIIRS_SNPP'...
+E         
+E         ...Full output truncated (4 lines hidden), use '-vv' to show
+
+tests\test_vigilar_plataformas_s159.py:63: AssertionError
+___________________________ test_todo_vivo_no_avisa ___________________________
+
+    def test_todo_vivo_no_avisa():
+        ahora = datetime(2026, 10, 21, 12, 0, tzinfo=timezone.utc)
+        v = vp.evaluar(_sinteticos(ahora), ahora, _ceses())
+>       assert v["estado"] == "ok"
+E       AssertionError: assert '' == 'ok'
+E         
+E         - ok
+
+tests\test_vigilar_plataformas_s159.py:73: AssertionError
+____________________ test_sin_modis_alarma_por_plataforma _____________________
+
+    def test_sin_modis_alarma_por_plataforma():
+        ahora = datetime(2026, 10, 21, 12, 0, tzinfo=timezone.utc)
+        regs = _sinteticos(ahora, quitar=MODIS, quitar_desde=ahora - timedelta(days=5))
+        v = vp.evaluar(regs, ahora, _ceses())
+>       assert v["estado"] == "alarma"
+E       AssertionError: assert '' == 'alarma'
+E         
+E         - alarma
+
+tests\test_vigilar_plataformas_s159.py:81: AssertionError
+___________________ test_sin_snpp_antes_del_cese_es_alarma ____________________
+
+    def test_sin_snpp_antes_del_cese_es_alarma():
+        ahora = datetime(2026, 11, 1, 12, 0, tzinfo=timezone.utc)
+        regs = _sinteticos(ahora, quitar=SNPP, quitar_desde=ahora - timedelta(days=5))
+        v = vp.evaluar(regs, ahora, _ceses())
+>       assert v["estado"] == "alarma"
+E       AssertionError: assert '' == 'alarma'
+E         
+E         - alarma
+
+tests\test_vigilar_plataformas_s159.py:90: AssertionError
+_____________ test_sin_snpp_despues_del_cese_es_solo_informativo ______________
+
+    def test_sin_snpp_despues_del_cese_es_solo_informativo():
+        ahora = datetime(2026, 11, 6, 12, 0, tzinfo=timezone.utc)
+        regs = _sinteticos(ahora, quitar=SNPP, quitar_desde=CESE - timedelta(hours=6))
+        v = vp.evaluar(regs, ahora, _ceses())
+>       assert v["estado"] == "ok"
+E       AssertionError: assert '' == 'ok'
+E         
+E         - ok
+
+tests\test_vigilar_plataformas_s159.py:99: AssertionError
+_ test_snpp_muerto_y_ademas_noaa21_muerto_despues_del_cese_alarma_por_noaa21 __
+
+    def test_snpp_muerto_y_ademas_noaa21_muerto_despues_del_cese_alarma_por_noaa21():
+        ahora = datetime(2026, 11, 6, 12, 0, tzinfo=timezone.utc)
+        regs = _sinteticos(ahora, quitar=SNPP + ("VIIRS_NOAA21", "VIIRS_NOAA21_750"), quitar_desde=CESE)
+        v = vp.evaluar(regs, ahora, _ceses())
+>       assert v["estado"] == "alarma"
+E       AssertionError: assert '' == 'alarma'
+E         
+E         - alarma
+
+tests\test_vigilar_plataformas_s159.py:108: AssertionError
+_________ test_dato_vacio_total_es_caida_general_y_no_por_plataforma __________
+
+    def test_dato_vacio_total_es_caida_general_y_no_por_plataforma():
+        ahora = datetime(2026, 10, 21, 12, 0, tzinfo=timezone.utc)
+        v = vp.evaluar([], ahora, _ceses())
+>       assert v["estado"] == "caida_general"
+E       AssertionError: assert '' == 'caida_general'
+E         
+E         - caida_general
+
+tests\test_vigilar_plataformas_s159.py:116: AssertionError
+___________________ test_el_borde_de_la_ventana_es_72_horas ___________________
+
+    def test_el_borde_de_la_ventana_es_72_horas():
+>       assert vp.VENTANA_H == 72
+E       assert 0 == 72
+E        +  where 0 = vp.VENTANA_H
+
+tests\test_vigilar_plataformas_s159.py:124: AssertionError
+__________________ test_el_informativo_se_abre_una_sola_vez ___________________
+
+    def test_el_informativo_se_abre_una_sola_vez():
+        v = _veredicto_cese()
+        primero = vp.planear_issues(v, abiertos_alarma=[], existentes_cese=[])
+        crear = [a for a in primero if a[0] == "create"]
+>       assert len(crear) == 1 and crear[0][1] == vp.titulo_cese("Suomi NPP")
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\test_vigilar_plataformas_s159.py:150: AssertionError
+___________________ test_la_alarma_abre_y_si_existe_comenta ___________________
+
+    def test_la_alarma_abre_y_si_existe_comenta():
+        v = _veredicto_alarma()
+        primero = vp.planear_issues(v, abiertos_alarma=[], existentes_cese=[])
+        crear = [a for a in primero if a[0] == "create"]
+>       assert len(crear) == 1 and crear[0][1] == vp.TITULO_ALARMA and crear[0][2] == vp.LABEL_ALARMA
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\test_vigilar_plataformas_s159.py:161: AssertionError
+____________________ test_al_recuperarse_cierra_la_alarma _____________________
+
+    def test_al_recuperarse_cierra_la_alarma():
+        ahora = datetime(2026, 10, 21, 12, 0, tzinfo=timezone.utc)
+        sano = vp.evaluar(_sinteticos(ahora), ahora, _ceses())
+        abierto = [{"number": 12, "title": vp.TITULO_ALARMA, "body": "x"}]
+        acciones = vp.planear_issues(sano, abiertos_alarma=abierto, existentes_cese=[])
+>       assert [a[0] for a in acciones] == ["comment", "close"] and all(a[1] == 12 for a in acciones)
+E       AssertionError: assert ([] == ['comment', 'close']
+E         
+E         Right contains 2 more items, first extra item: 'comment'
+E         Use -v to get more diff)
+
+tests\test_vigilar_plataformas_s159.py:173: AssertionError
+_______________ test_el_informe_dice_caida_general_en_palabras ________________
+
+    def test_el_informe_dice_caida_general_en_palabras():
+        ahora = datetime(2026, 10, 21, 12, 0, tzinfo=timezone.utc)
+        txt = vp.informe(vp.evaluar([], ahora, _ceses()))
+>       assert "caída general" in txt.lower()
+E       AssertionError: assert 'caída general' in ''
+E        +  where '' = <built-in method lower of str object at 0x00007FFF01899CA0>()
+E        +    where <built-in method lower of str object at 0x00007FFF01899CA0> = ''.lower
+
+tests\test_vigilar_plataformas_s159.py:186: AssertionError
+________ test_el_healthcheck_corre_la_vigilancia_con_permisos_minimos _________
+
+    def test_el_healthcheck_corre_la_vigilancia_con_permisos_minimos():
+        ruta = RAIZ / ".github" / "workflows" / "nrt-healthcheck.yml"
+        src = ruta.read_text(encoding="utf-8")
+        wf = yaml.safe_load(src)
+        assert "on" in wf, "la clave on debe ir entre comillas (A43)"
+        job = wf["jobs"]["healthcheck"]
+        assert job["permissions"] == {"contents": "read", "issues": "write"}
+        pasos = [p for p in job["steps"] if "vigilar_plataformas.py" in (p.get("run") or "")]
+>       assert len(pasos) == 1, "el healthcheck debe correr scripts/vigilar_plataformas.py una vez"
+E       AssertionError: el healthcheck debe correr scripts/vigilar_plataformas.py una vez
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_vigilar_plataformas_s159.py:201: AssertionError
+____ test_nulo_en_los_datos_reales_ninguna_plataforma_viva_habria_alarmado ____
+
+reales = [('x', datetime.datetime(2026, 1, 1, 0, 0))]
+
+    def test_nulo_en_los_datos_reales_ninguna_plataforma_viva_habria_alarmado(reales):
+        """Repetición diaria a las 12:00 UTC del 2026-01-29 al 2026-10-21 (después del hueco del backfill)."""
+        desde = datetime(2026, 1, 29, 12, 0, tzinfo=timezone.utc)
+        hasta = datetime(2026, 10, 21, 12, 0, tzinfo=timezone.utc)
+        rep = vp.repetir(reales, desde, hasta, _ceses())
+>       assert rep["dias"] == 266
+E       assert 0 == 266
+
+tests\test_vigilar_plataformas_s159.py:224: AssertionError
+_______ test_control_positivo_en_los_datos_reales_quitar_noaa21_alarma ________
+
+reales = [('x', datetime.datetime(2026, 1, 1, 0, 0))]
+
+    def test_control_positivo_en_los_datos_reales_quitar_noaa21_alarma(reales):
+        corte = datetime(2026, 10, 10, 0, 0, tzinfo=timezone.utc)
+        sin21 = [(s, t) for s, t in reales if not (s.startswith("VIIRS_NOAA21") and t >= corte)]
+        ahora = datetime(2026, 10, 21, 12, 0, tzinfo=timezone.utc)
+        v = vp.evaluar(sin21, ahora, _ceses())
+>       assert [a["plataforma"] for a in v["alarmas"]] == ["NOAA-21"]
+E       AssertionError: assert [] == ['NOAA-21']
+E         
+E         Right contains one more item: 'NOAA-21'
+E         Use -v to get more diff
+
+tests\test_vigilar_plataformas_s159.py:235: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_vigilar_plataformas_s159.py::test_la_lista_de_ceses_trae_snpp_con_fecha_y_fuente
+FAILED tests/test_vigilar_plataformas_s159.py::test_los_sensores_vigilados_son_los_que_escribe_el_pipeline
+FAILED tests/test_vigilar_plataformas_s159.py::test_todo_vivo_no_avisa - Asse...
+FAILED tests/test_vigilar_plataformas_s159.py::test_sin_modis_alarma_por_plataforma
+FAILED tests/test_vigilar_plataformas_s159.py::test_sin_snpp_antes_del_cese_es_alarma
+FAILED tests/test_vigilar_plataformas_s159.py::test_sin_snpp_despues_del_cese_es_solo_informativo
+FAILED tests/test_vigilar_plataformas_s159.py::test_snpp_muerto_y_ademas_noaa21_muerto_despues_del_cese_alarma_por_noaa21
+FAILED tests/test_vigilar_plataformas_s159.py::test_dato_vacio_total_es_caida_general_y_no_por_plataforma
+FAILED tests/test_vigilar_plataformas_s159.py::test_el_borde_de_la_ventana_es_72_horas
+FAILED tests/test_vigilar_plataformas_s159.py::test_el_informativo_se_abre_una_sola_vez
+FAILED tests/test_vigilar_plataformas_s159.py::test_la_alarma_abre_y_si_existe_comenta
+FAILED tests/test_vigilar_plataformas_s159.py::test_al_recuperarse_cierra_la_alarma
+FAILED tests/test_vigilar_plataformas_s159.py::test_el_informe_dice_caida_general_en_palabras
+FAILED tests/test_vigilar_plataformas_s159.py::test_el_healthcheck_corre_la_vigilancia_con_permisos_minimos
+FAILED tests/test_vigilar_plataformas_s159.py::test_nulo_en_los_datos_reales_ninguna_plataforma_viva_habria_alarmado
+FAILED tests/test_vigilar_plataformas_s159.py::test_control_positivo_en_los_datos_reales_quitar_noaa21_alarma
+16 failed, 1 passed in 1.04s

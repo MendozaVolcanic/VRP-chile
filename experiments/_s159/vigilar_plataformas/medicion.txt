@@ -1,0 +1,43 @@
+Medición de la ventana de la vigilancia por plataforma (S159)
+Datos: 71968 records de los 11 Tier A en data/mirova_equivalent/
+Desde 2026-01-29 (fin del hueco del backfill, nov-2025 a ene-2026) hasta 2026-10-21.
+
+1) Huecos más largos entre dos records consecutivos de cada sensor (los 11 Tier A juntos):
+   VIIRS_SNPP         {'n_horas_distintas': 781, 'p99_h': 23.6, 'mayores_h_desde': [(70.9, '2026-05-31 06:06'), (94.6, '2026-03-09 07:00'), (94.6, '2026-04-27 06:42'), (118.4, '2026-08-02 06:24'), (165.7, '2026-07-10 07:00')]}
+   VIIRS_SNPP_750     {'n_horas_distintas': 772, 'p99_h': 23.6, 'mayores_h_desde': [(70.9, '2026-05-31 06:06'), (94.6, '2026-03-09 07:00'), (94.6, '2026-04-27 06:42'), (118.4, '2026-08-02 06:24'), (165.7, '2026-07-10 07:00')]}
+   VIIRS_NOAA20       {'n_horas_distintas': 818, 'p99_h': 23.6, 'mayores_h_desde': [(23.6, '2026-10-09 05:30'), (23.6, '2026-10-13 05:54'), (23.6, '2026-10-14 05:36'), (23.6, '2026-10-19 05:42'), (23.6, '2026-10-20 05:24')]}
+   VIIRS_NOAA20_750   {'n_horas_distintas': 817, 'p99_h': 23.6, 'mayores_h_desde': [(23.6, '2026-10-09 05:30'), (23.6, '2026-10-13 05:54'), (23.6, '2026-10-14 05:36'), (23.6, '2026-10-19 05:42'), (23.6, '2026-10-20 05:24')]}
+   VIIRS_NOAA21       {'n_horas_distintas': 814, 'p99_h': 23.6, 'mayores_h_desde': [(23.6, '2026-10-10 05:54'), (23.6, '2026-10-11 05:36'), (23.6, '2026-10-16 05:42'), (23.6, '2026-10-17 05:24'), (47.3, '2026-10-12 05:18')]}
+   VIIRS_NOAA21_750   {'n_horas_distintas': 813, 'p99_h': 23.6, 'mayores_h_desde': [(23.6, '2026-10-10 05:54'), (23.6, '2026-10-11 05:36'), (23.6, '2026-10-16 05:42'), (23.6, '2026-10-17 05:24'), (47.3, '2026-10-12 05:18')]}
+   MODIS_TERRA        {'n_horas_distintas': 714, 'p99_h': 24.6, 'mayores_h_desde': [(46.1, '2026-02-21 02:55'), (47.6, '2026-06-01 02:40'), (47.6, '2026-10-01 01:50'), (47.6, '2026-10-09 02:05'), (47.7, '2026-09-27 02:25')]}
+   MODIS_AQUA         {'n_horas_distintas': 697, 'p99_h': 24.6, 'mayores_h_desde': [(24.6, '2026-09-30 07:55'), (24.6, '2026-10-15 07:35'), (24.6, '2026-10-18 07:50'), (34.0, '2026-07-20 21:45'), (38.2, '2026-05-23 07:25')]}
+
+2) Regla repetida a las 12:00 UTC de cada día, ventana 48 h: 266 días, caídas generales 0
+   VIIRS_SNPP         días con alarma= 13  ['2026-03-11', '2026-03-12', '2026-04-29', '2026-04-30', '2026-06-02', '2026-07-12', '2026-07-13', '2026-07-14', '2026-07-15', '2026-07-16', '2026-08-04', '2026-08-05', '2026-08-06']
+   VIIRS_SNPP_750     días con alarma= 13  ['2026-03-11', '2026-03-12', '2026-04-29', '2026-04-30', '2026-06-02', '2026-07-12', '2026-07-13', '2026-07-14', '2026-07-15', '2026-07-16', '2026-08-04', '2026-08-05', '2026-08-06']
+   VIIRS_NOAA20       días con alarma=  0  []
+   VIIRS_NOAA20_750   días con alarma=  0  []
+   VIIRS_NOAA21       días con alarma=  0  []
+   VIIRS_NOAA21_750   días con alarma=  0  []
+   MODIS_TERRA        días con alarma=  0  []
+   MODIS_AQUA         días con alarma=  0  []
+
+2) Regla repetida a las 12:00 UTC de cada día, ventana 72 h: 266 días, caídas generales 0
+   VIIRS_SNPP         días con alarma=  8  ['2026-03-12', '2026-04-30', '2026-07-13', '2026-07-14', '2026-07-15', '2026-07-16', '2026-08-05', '2026-08-06']
+   VIIRS_SNPP_750     días con alarma=  8  ['2026-03-12', '2026-04-30', '2026-07-13', '2026-07-14', '2026-07-15', '2026-07-16', '2026-08-05', '2026-08-06']
+   VIIRS_NOAA20       días con alarma=  0  []
+   VIIRS_NOAA20_750   días con alarma=  0  []
+   VIIRS_NOAA21       días con alarma=  0  []
+   VIIRS_NOAA21_750   días con alarma=  0  []
+   MODIS_TERRA        días con alarma=  0  []
+   MODIS_AQUA         días con alarma=  0  []
+
+2) Regla repetida a las 12:00 UTC de cada día, ventana 96 h: 266 días, caídas generales 0
+   VIIRS_SNPP         días con alarma=  4  ['2026-07-14', '2026-07-15', '2026-07-16', '2026-08-06']
+   VIIRS_SNPP_750     días con alarma=  4  ['2026-07-14', '2026-07-15', '2026-07-16', '2026-08-06']
+   VIIRS_NOAA20       días con alarma=  0  []
+   VIIRS_NOAA20_750   días con alarma=  0  []
+   VIIRS_NOAA21       días con alarma=  0  []
+   VIIRS_NOAA21_750   días con alarma=  0  []
+   MODIS_TERRA        días con alarma=  0  []
+   MODIS_AQUA         días con alarma=  0  []
