@@ -62,136 +62,56 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Download fresh CSV from Mirova-v1
-        run: |
-          set -e
-          curl -fsSL \
-            "https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_consolidado.csv" \
-            -o latest_consolidado.csv.new
-
-      - name: Check if changed
-        id: changed
-        run: |
-          if cmp -s latest_consolidado.csv latest_consolidado.csv.new; then
-            echo "CSV sin cambios, skip commit"
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            rm latest_consolidado.csv.new
-          else
-            mv latest_consolidado.csv.new latest_consolidado.csv
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Rows: $(wc -l < latest_consolidado.csv)"
-            echo "Latest date: $(awk -F, 'NR==2{print $2}' latest_consolidado.csv | head -c 16)"
-          fi
-
-      - name: Download fresh OCR CSV from Mirova-v1
-        id: ocr
-        run: |
-          # Mismas defensas que el consolidado (archivo temporal + cmp) más dos
-          # que el consolidado no tiene y que acá hacen falta: el OCR es la
-          # entrada de un rótulo que lee el geólogo, así que un archivo vacío o
-          # truncado es peor que un archivo viejo.
-          #
-          # POR QUE no aborta el job: este cron también sincroniza el
-          # consolidado. Si el OCR viene mal, se salta el OCR, el consolidado
-          # igual se commitea, y el último step deja la corrida en ROJO para que
-          # el fallo no pase en silencio (A87: un flag que se apaga solo no es
-          # prueba de que el problema se fue).
-          OCR=data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv
-          URL=https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_ocr.csv
-          changed=false; bad=false
-          if ! curl -fsSL "$URL" -o "$OCR.new"; then
-            echo "::error::no se pudo bajar el OCR desde Mirova-v1"
-            bad=true
-          else
-            nuevas=$(wc -l < "$OCR.new"); viejas=$(wc -l < "$OCR")
-            cabecera=$(head -1 "$OCR.new")
-            # Vacío / sin la cabecera esperada / más corto que lo que ya tenemos:
-            # el registro de MIROVA sólo crece, así que encogerse es truncamiento.
-            if [ "$nuevas" -lt 2 ] || ! printf '%s' "$cabecera" | grep -q "Fecha_Satelite_UTC" \
-               || [ "$nuevas" -lt "$viejas" ]; then
-              echo "::error::OCR invalido: lineas=$nuevas (previas=$viejas) cabecera='${cabecera:0:60}'"
-              rm -f "$OCR.new"
-              bad=true
-            elif cmp -s "$OCR" "$OCR.new"; then
-              echo "OCR sin cambios, skip commit"
-              rm -f "$OCR.new"
-            else
-              mv "$OCR.new" "$OCR"
-              changed=true
-              echo "OCR rows: $nuevas (antes $viejas)"
-              echo "OCR latest date: $(tail -1 "$OCR" | cut -d, -f2)"
-            fi
-          fi
-          echo "ocr_changed=$changed" >> "$GITHUB_OUTPUT"
-          echo "ocr_bad=$bad" >> "$GITHUB_OUTPUT"
-
+      # S160: Python se instala siempre. Antes sólo cuando cambiaba el consolidado, pero el
+      # bucle de push puede volver a bajar y regenerar sobre un origin/main más nuevo, y para
+      # eso hace falta Python aunque la primera pasada sólo trajera OCR.
       - name: Setup Python
-        if: steps.changed.outputs.changed == 'true'
         uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
       - name: Install minimal deps for rebuild
-        if: steps.changed.outputs.changed == 'true'
         run: |
           pip install pyyaml
 
-      - name: Rebuild data/mirova/<Vol>.json from CSV (F54 fix)
-        if: steps.changed.outputs.changed == 'true'
-        run: |
-          set -e
-          # F54/S77: el dashboard frontend NO lee latest_consolidado.csv
-          # directamente. Lee data/mirova/<Volcano>.json (records filtrados
-          # por volcán) generados por scripts/rebuild_mirova_from_consolidado.py.
-          # Sin este step, sync del CSV mantenía latest_consolidado fresh pero
-          # data/mirova/*.json quedaban congelados meses → banner stale F49
-          # aparecía aunque el sync funcionaba. Detectado S77 2026-05-25.
-          #
-          # Mapping JSON_stem → "Volcan" en CSV (verificado 2026-05-25).
-          # 11 Tier A según volcanoes.yaml mirova_monitored=true.
-          for entry in \
-            "PuyehueCordonCaulle|Puyehue-Cordon Caulle" \
-            "Villarrica|Villarrica" \
-            "Lascar|Lascar" \
-            "Copahue|Copahue" \
-            "NevadosDeChillan|Nevados de Chillan" \
-            "Llaima|Llaima" \
-            "Chaiten|Chaiten" \
-            "PlanchonPeteroa|PlanchonPeteroa" \
-            "Lastarria|Lastarria" \
-            "Isluga|Isluga" \
-            "Tupungatito|Tupungatito"
-          do
-            stem="${entry%%|*}"
-            csvname="${entry##*|}"
-            echo "Rebuilding data/mirova/${stem}.json from CSV (Volcan='${csvname}')"
-            python scripts/rebuild_mirova_from_consolidado.py \
-              "$stem" "$csvname" \
-              --source latest_consolidado.csv \
-              --ocr data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv \
-              || echo "  WARN: rebuild $stem failed (continuing)"
-          done
+      - name: Bajar los CSV de Mirova-v1 y regenerar data/mirova/<Vol>.json
+        id: bajar
+        # El cuerpo vive en scripts/sync_mirova_csv.sh (mismas URL, mismas defensas del OCR,
+        # mismo rebuild que los pasos que reemplaza) para que el bucle de push lo pueda volver
+        # a correr. Escribe changed / ocr_changed / ocr_bad en $GITHUB_OUTPUT.
+        run: bash scripts/sync_mirova_csv.sh
 
       - name: Commit and push if changed
-        if: steps.changed.outputs.changed == 'true' || steps.ocr.outputs.ocr_changed == 'true'
+        id: push
+        if: steps.bajar.outputs.changed == 'true' || steps.bajar.outputs.ocr_changed == 'true'
         run: |
           git config user.name "vrp-mirova-sync-bot"
           git config user.email "noreply@github.com"
-          # S146: el OCR entra al mismo commit. `git add` de un archivo que no
-          # cambió no agrega nada, así que los tres caminos (sólo consolidado,
-          # sólo OCR, los dos) quedan cubiertos por una sola lista.
-          git add latest_consolidado.csv data/mirova/ \
-            data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv
-          git diff --staged --quiet && { echo "nada que commitear"; exit 0; }
-          git commit -m "data(mirova): sync CSV consolidado + OCR y JSONs por volcan (auto, F54/S146)"
-          # S120 (cacería de bugs): push pelado rechazaba non-fast-forward cuando
-          # los jobs matrix del NRT pushean concurrente, retry con rebase
-          # (mismo patrón probado de nrt.yml).
+          # S160 (R13, hallazgo H-V1 de la auditoría de Mirova-v1): si el push pierde la
+          # carrera, NO se rebasa. `latest_consolidado.csv` se reemplaza entero en cada sync y
+          # llega cada vez con las filas en otro orden (el scraper ordena sólo por timestamp);
+          # `git pull --rebase -X theirs` mezclaba como texto tres permutaciones del archivo y
+          # dejaba filas dos veces o ninguna. El commit 81dd25ce3 (2026-08-19, 822 duplicados,
+          # 163 llaves menos) se reproduce byte a byte así. En su lugar: volver a origin/main,
+          # bajar de nuevo y regenerar con el mismo script (mismo patrón que aplicar-reemplazo.yml).
+          # Antes de cada push, la guarda de llaves: un CSV con llaves repetidas no se empuja.
           for attempt in 1 2 3 4 5; do
-            git pull --rebase -X theirs origin main && git push && exit 0
+            if [ "$attempt" -gt 1 ]; then
+              sleep $((attempt * 10))
+              git fetch origin main || continue
+              git reset --hard origin/main
+              bash scripts/sync_mirova_csv.sh || exit 1
+            fi
+            # S146: el OCR entra al mismo commit. `git add` de un archivo que no cambió no
+            # agrega nada, así que los tres caminos (sólo consolidado, sólo OCR, los dos)
+            # quedan cubiertos por una sola lista.
+            git add latest_consolidado.csv data/mirova/ \
+              data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv
+            git diff --staged --quiet && { echo "nada que commitear"; exit 0; }
+            python scripts/guarda_llaves_consolidado.py latest_consolidado.csv || exit 1
+            git commit -m "data(mirova): sync CSV consolidado + OCR y JSONs por volcan (auto, F54/S146)"
+            git push && exit 0
             echo "push attempt $attempt failed"
-            git rebase --abort 2>/dev/null || true
-            sleep $((attempt * 10))
           done
           echo "all push attempts failed"; exit 1
 
@@ -199,7 +119,8 @@ jobs:
         # Va DESPUES del push a proposito: el consolidado se sincroniza igual y la
         # corrida queda en rojo, que es la unica forma de que el fallo del canal
         # OCR se vea. Sin esto seria un warning que nadie lee.
-        if: always() && steps.ocr.outputs.ocr_bad == 'true'
+        # S160: el bucle de push puede volver a bajar el OCR, así que se miran los dos pasos.
+        if: always() && (steps.bajar.outputs.ocr_bad == 'true' || steps.push.outputs.ocr_bad == 'true')
         run: |
           echo "el OCR no se pudo sincronizar en esta corrida (ver el step de descarga)"
           exit 1
