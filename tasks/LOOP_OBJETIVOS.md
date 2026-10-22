@@ -558,6 +558,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 (S159, dueña del loop): verificador de la referencia y cese de Suomi NPP
+- **Verificador de la referencia** (`5ab6716db`): la pérdida de filas de la tabla es del CSV del scraper (carrera de
+  workflows, Mirova-v1#19), no de MIROVA; las 39 reescrituras del OCR son correcciones MANUALES documentadas de Nicolás
+  (15-jun y 4-ago) que dejaron 0 contradicciones con la tabla; el veredicto de K no cambia (referencia congelada por hash).
+  Riesgo latente: `scripts/clase_mirova.py:65-75` cuenta como protegida una alerta OCR aunque la tabla diga FALSO_POSITIVO.
+  Nicolás: «solo latest.php es lo mas creible»; auditoría de Mirova-v1 en sesión aparte (`audit-mirova-v1`, copia parcial
+  en `D:\vrp-trabajo\mirova-v1`, sólo lectura).
+- **Cese de Suomi NPP** (`experiments/_s159/cese_snpp/`): el 2-nov el pipeline se apaga en SILENCIO (CMR devuelve [],
+  `fetch.py:1085-1088` sigue sin registrar falla, «Cobertura: completa», código 0; simulado sin red). Ninguna vigilancia
+  mira por plataforma (sin SNPP 0 avisos; sin MODIS, control, 11). Costo medido: 0 de 362 noches quedan sin VIIRS, pero
+  22 noches publicadas dependían sólo de SNPP; pérdida neta 1 noche con alerta por sensor VIIRS en 33 días (una
+  protegida: PCC V750 2026-10-10, 1,19 MW). El NRT de LANCE probablemente también se corta (NESDIS: «all S-NPP data
+  products, Permanent»), SIN CONFIRMAR. Cambios urgentes sin tocar `pipeline/`: vigilancia por plataforma, aviso al
+  operador en los tres HTML, ficha SDA v1.10; después, confirmar el corte el 3-nov y separar el auto-audit antes y después.
+
 ### 2026-10-21 (S159, dueña del loop): rescate de gránulos entregado
 - `experiments/_s159/laads_rescate/` (`798400dec`): el **12-oct** fue reprocesado por NASA el 19-oct; LAADS borró los
   originales y CMR sigue entregando las entradas viejas (404). La protegida de Chillán 05:18 existe como
