@@ -21,6 +21,9 @@ POR QUÉ CADA PIEZA (resumen del pre-registro):
   * D-28 (ADENDA_PLACEBO.md, sellada el 2026-10-21): un MEJORA de M cuenta sólo si D queda además más cerca de MIROVA
     que una ganancia uniforme del mismo tamaño (K×ĝ), porque K queda bajo MIROVA y cualquier ganancia acerca en
     promedio; EMPEORA sigue sobre D contra K; el placebo K×1,2 y K×0,8 informa y no invalida.
+  * D-42 (ADENDA_CALIBRACION_P2.md, sellada el 2026-10-22): P2 (D-34) se calibra como M, con el signo sorteado por
+    bloque noche-volcán; si la calibración falla, P2 de ese sensor queda INDECIDIBLE. El estrato 203
+    (NOTA_ESTRATO_203.md) se informa y no decide.
 
 Uso:
   python evaluar_d25.py --ventana V1 --raiz <run V1> --logs <run V1>/logs --out v1.json
@@ -118,6 +121,16 @@ NOTA_COMPARADOR = "sube en promedio, no en los pares correctos (ADENDA_PLACEBO.m
 # no cambia: 200 repeticiones (N_CALIB).
 SEMILLA_CALIB_DPRIMA = SEMILLA + 3       # = 160, sellada (D-32)
 N_CALIB_DPRIMA = 1000                    # sellado (D-32)
+# D-42 (ADENDA_CALIBRACION_P2.md, «SELLADA por Nicolás el 2026-10-22»): P2 se calibra como M. Cita textual: «Sí a D-42
+# opción (a): calibra P2 como M en una cuarta adenda sellada, con los candados de V34-03 y V29-01 y verificador limpio
+# antes del tag.» POR QUÉ: el verificador de D-34 (verificador_d34/INFORME.md, V34-01) midió que la regla de D-34 sin
+# calibrar decide en falso en 24,8 % de los nulos con 3 noches de signo común (con B noches del mismo lado,
+# probabilidad 2^(1-B), ningún remuestreo de bloques cruza 0). El nulo: el signo de cada BLOQUE noche-volcán entero se
+# sortea (§2.1); a cada sorteo se le aplica la misma regla de D-34 (§2.2); 1.000 sorteos con la semilla 161 (§2.3); tope
+# del 5 % en cada cola por separado (§2.4, MAX_FALSOS_CALIB, 50 de 1.000).
+SEMILLA_CALIB_P2 = SEMILLA + 4           # = 161, sellada (D-42 §2.3)
+N_CALIB_P2 = 1000                        # sellado (D-42 §2.3)
+NOTA_CALIB_P2 = "la calibración de P2 falla: con estas noches no se distingue de un nulo (ADENDA_CALIBRACION_P2.md, D-42)"
 # D-30, respuesta 1: si d da MEJORA y la calibración de d′ falla, el estrato queda INDECIDIBLE (no se sabe si hay MEJORA).
 NOTA_CALIB_DPRIMA = "la calibración de d′ falla: no se sabe si D sube los pares correctos (ADENDA_PLACEBO.md §5, D-30)"
 # Detalle numérico, no de la regla: d′ se redondea a 1e-12 en unidades de log10 (un factor de 1 + 2,3e-12). Con D = K×g
@@ -437,30 +450,78 @@ def contribuciones_p2(TKD, prot, lect, cfg, s, excluir):
             for k in sorted(eK ^ eD)]
 
 
+def regla_p2(sumas, neto):
+    """D-34 §5.4 y §5.5 sobre las sumas del bootstrap: GANA si el intervalo al 95 % queda entero bajo 0; PIERDE si queda
+    entero sobre 0; si cruza 0 (o lo toca), BLOQUEA cuando el neto puntual es positivo y EMPATE si no. S160 (D-42): la
+    misma función decide la pasada observada y cada sorteo de la calibración, así que las dos usan la misma regla."""
+    lo, hi = float(np.percentile(sumas, 2.5)), float(np.percentile(sumas, 97.5))
+    if hi < 0:
+        return "GANA", lo, hi
+    if lo > 0:
+        return "PIERDE", lo, hi
+    elif neto > 0:
+        return "BLOQUEA", lo, hi
+    return "EMPATE", lo, hi
+
+
+def calibrar_p2(c, bloques, W, n_rep=N_CALIB_P2, semilla=SEMILLA_CALIB_P2):
+    """D-42 §2 (ADENDA_CALIBRACION_P2.md): el nulo de P2. En cada sorteo, el signo de cada BLOQUE noche-volcán entero
+    (todas sus contribuciones a la vez) se multiplica por +1 o -1 al azar, y se aplica regla_p2 con la MISMA matriz W
+    de D-34 (pesos_bloque con 10.000 remuestreos y semilla 157; depende sólo de los bloques, que el sorteo no cambia).
+    POR QUÉ por bloque: bajo el nulo D y K son intercambiables dentro de una noche, y cambiar los brazos de una noche
+    invierte todas sus contribuciones a la vez (§2.1; el mismo sorteo que calibrar_simetrico hace para M).
+    Devuelve las fracciones de sorteos con GANA, PIERDE y BLOQUEA (falsos GANA, falsos PIERDE, falsos BLOQUEA)."""
+    rng = np.random.default_rng(semilla)
+    c = np.asarray(c, dtype=np.float64)
+    bl = list(bloques)
+    uniq = sorted(set(bl)); idx = np.array([uniq.index(b) for b in bl])
+    S = np.array([rng.choice((-1.0, 1.0), size=len(uniq))[idx] for _ in range(n_rep)])   # un signo por bloque y sorteo
+    Wf = np.asarray(W, dtype=np.float64)
+    cuenta = collections.Counter()
+    for i0 in range(0, n_rep, 100):                     # de a 100 sorteos: 10.000 x 100 sumas en memoria
+        C = S[i0:i0 + 100] * c[None, :]
+        sumas = Wf @ C.T
+        for j in range(C.shape[0]):
+            cuenta[regla_p2(sumas[:, j], int(round(C[j].sum())))[0]] += 1
+    return cuenta["GANA"] / n_rep, cuenta["PIERDE"] / n_rep, cuenta["BLOQUEA"] / n_rep
+
+
 def decidir_p2_bloques(contrib, ok_ctrl):
     """D-34 §5: GANA si el intervalo al 95 % del neto (bootstrap por bloques noche-volcán) queda entero bajo 0; PIERDE si
     queda entero sobre 0; si cruza 0, BLOQUEA cuando el neto puntual es positivo (en contra de D: bloquea CUMPLE, como un
-    EMPEORA en un estrato que sólo bloquea) y EMPATE si no. Con menos pasadas o noches que los mínimos de M, SIN SUSTRATO."""
+    EMPEORA en un estrato que sólo bloquea) y EMPATE si no. Con menos pasadas o noches que los mínimos de M, SIN SUSTRATO.
+    S160, D-42 §2: después del SIN SUSTRATO y sólo con los controles OK, la regla se calibra (calibrar_p2); si los falsos
+    GANA o los falsos PIERDE pasan del 5 %, P2 queda INDECIDIBLE sea cual sea su resultado sin calibrar, que se informa
+    al lado (§2.5). BLOQUEA no se calibra: su fracción se informa y no decide (§2.6). Todo va al detalle (§2.7)."""
     c = np.array([x["c"] for x in contrib], dtype=np.float64)
     bl_p2 = [x["bloque"] for x in contrib]
     neto = int(round(c.sum())) if len(c) else 0
     det = {"neto": neto, "n_discordantes": len(c), "noches_discordantes": len(set(bl_p2)), "ic95": None,
-           "regla": "D-34: neto de errores (D menos K) con intervalo por bloques noche-volcán"}
+           "regla": "D-34: neto de errores (D menos K) con intervalo por bloques noche-volcán; calibrada por D-42",
+           # D-42 §2.7: se informa siempre; sin calibración (controles caídos o sin sustrato) los falsos quedan en None
+           "resultado_sin_calibrar": None, "calibrada": None, "falsos_gana": None, "falsos_pierde": None,
+           "falsos_bloquea": None, "n_sorteos": N_CALIB_P2, "semilla_calibracion": SEMILLA_CALIB_P2,
+           "tope_por_cola": MAX_FALSOS_CALIB, "nota_calibracion": ""}
     if not ok_ctrl:
+        det["resultado_sin_calibrar"] = "INDECIDIBLE"
+        det["nota_calibracion"] = "no se calibra: controles generales caídos"
         return "INDECIDIBLE", det
     if len(c) < N_MIN_PARES or len(set(bl_p2)) < N_MIN_NOCHES:
+        det["resultado_sin_calibrar"] = "SIN SUSTRATO"
+        det["nota_calibracion"] = "no se calibra: sin sustrato (D-34 §5.6)"
         return "SIN SUSTRATO", det
     W = pesos_bloque(bl_p2)
-    sumas = W @ c
-    lo, hi = float(np.percentile(sumas, 2.5)), float(np.percentile(sumas, 97.5))
+    v, lo, hi = regla_p2(W @ c, neto)
     det["ic95"] = [lo, hi]
-    if hi < 0:
-        return "GANA", det
-    if lo > 0:
-        return "PIERDE", det
-    elif neto > 0:
-        return "BLOQUEA", det
-    return "EMPATE", det
+    f_gana, f_pierde, f_bloquea = calibrar_p2(c, bl_p2, W)
+    calibrada = f_gana <= MAX_FALSOS_CALIB and f_pierde <= MAX_FALSOS_CALIB
+    det.update(resultado_sin_calibrar=v, calibrada=bool(calibrada), falsos_gana=f_gana, falsos_pierde=f_pierde,
+               falsos_bloquea=f_bloquea)
+    if not calibrada:
+        det["nota_calibracion"] = "%s (falsos GANA %.3f, PIERDE %.3f, tope %.2f por cola)" % (
+            NOTA_CALIB_P2, f_gana, f_pierde, MAX_FALSOS_CALIB)
+        return "INDECIDIBLE", det
+    return v, det
 
 
 def lista_p2(contrib, TKD, R):
@@ -477,6 +538,44 @@ def lista_p2(contrib, TKD, R):
                     "pc_vrp_mw_D": (R.get("D", {}).get(k) or {}).get("pc_vrp"), "error_de": "D" if x["c"] > 0 else "K",
                     "contribucion": x["c"]})
     return out
+
+
+def estrato_203(TKD, prot, R, lect, cfg, excluir, s="VIIRS750"):
+    """NOTA_ESTRATO_203.md (5f986a209, declarado antes del tag): SÓLO INFORMA, no entra a P1, P1b, P2, M, global_ventana
+    ni combinar. POR QUÉ: la auditoría S160 (hallazgo 203) midió que en K 30 de 97 cúmulos de cumbre de VIIRS 750 quedan
+    en 0,0 MW (el exceso sobre el anillo se recorta a cero) y el tablero no publica nada con 0 MW; D25 cambia justo ese
+    fondo, así que ahí es donde más puede mover la publicación, en los dos sentidos. Mezclado con el resto se diluye en P2.
+    Pasadas de VIIRS 750 cuyo cúmulo de cumbre en K (distance_class summit) tiene pc.vrp_mw 0 o ausente. Totales: recupera
+    (alerta que D publica y K no), enciende (negativo limpio que D publica y K no), no cambia (misma publicación) y otros
+    cambios (el resto, para que los totales sumen n)."""
+    eK = E.errores_por_pasada(TKD, "control", prot, lect, cfg, s, excluir)
+    eD = E.errores_por_pasada(TKD, "brazo", prot, lect, cfg, s, excluir)
+    pasadas = []
+    tot = collections.Counter()
+    for k in sorted(TKD):
+        v = TKD[k]
+        rk = R.get("K", {}).get(k)
+        if k.split("|")[1] != s or len(v) != 2 or not rk or rk.get("dc") != "summit" or rk.get("pc_vrp") not in (0, None):
+            continue
+        c, b = v["control"], v["brazo"]
+        clase = ("protegida" if prot.get(k, {}).get(lect) else "alerta" if c["lab"] == "pos" else
+                 "negativo limpio" if c["lab"] == "neg_limpio" else "otra")
+        vol, _, hora = k.split("|")
+        pasadas.append({"volcan": vol, "hora": hora, "clase_mirova": clase, "vrp_mirova": c.get("vrp_ref"),
+                        "publica_K": bool(c["pub"]), "publica_D": bool(b["pub"]), "pc_vrp_mw_K": rk.get("pc_vrp"),
+                        "pc_vrp_mw_D": (R.get("D", {}).get(k) or {}).get("pc_vrp"),
+                        "error_p2_de": "K y D" if k in eK and k in eD else "K" if k in eK else "D" if k in eD else None})
+        if bool(c["pub"]) == bool(b["pub"]):
+            tot["no_cambia"] += 1
+        elif b["pub"] and c["lab"] == "pos":
+            tot["recupera_D"] += 1
+        elif b["pub"] and c["lab"] == "neg_limpio":
+            tot["enciende_D"] += 1
+        else:
+            tot["otros_cambios"] += 1
+    return {"sensor": s, "n": len(pasadas), "recupera_D": tot["recupera_D"], "enciende_D": tot["enciende_D"],
+            "no_cambia": tot["no_cambia"], "otros_cambios": tot["otros_cambios"], "pasadas": pasadas,
+            "nota": "informa, no decide (NOTA_ESTRATO_203.md)"}
 
 
 def regla_b_d33(v_a, margen):
@@ -639,6 +738,7 @@ def contar(T, prot, R, cfg, regla, res_ctrl, ruido_frac_de, inner, modo_calib=CA
                                  regla_a_gemelo=v_a, regla_b_d33=regla_b_d33(v_a, abs(sd - sk)),
                                  discordantes=lista_p2(contrib, TKD, R),
                                  noches_con_error_K=len(noches["control"]), noches_con_error_D=len(noches["brazo"]))
+    info["estrato_203"] = estrato_203(TKD, prot, R, lect, cfg, excluir)
     # ---- M
     pares = collections.defaultdict(list)
     salen = collections.Counter()
@@ -938,12 +1038,25 @@ def imprimir(regla, ver, info, estado):
               "noches con error K %d, D %d" % (
                   s, ver["P2|%s" % s], i2["neto"], i2["ic95"], i2["n_discordantes"], i2["noches_discordantes"],
                   i2["suma_K"], i2["suma_D"], i2["noches_con_error_K"], i2["noches_con_error_D"]))
+        print("      calibración D-42: %s | sin calibrar %s | falsos GANA %s PIERDE %s (tope %.2f por cola), BLOQUEA %s "
+              "(informa) | %d sorteos, semilla %d%s" % (
+                  {True: "OK", False: "FALLA: INDECIDIBLE", None: "no corre"}[i2["calibrada"]], i2["resultado_sin_calibrar"],
+                  i2["falsos_gana"], i2["falsos_pierde"], i2["tope_por_cola"], i2["falsos_bloquea"], i2["n_sorteos"],
+                  i2["semilla_calibracion"], (" | " + i2["nota_calibracion"]) if i2["nota_calibracion"] else ""))
         print("      informan, no deciden: (a) ruido del gemelo %.1f -> %s | (b) D-33 -> %s" % (
             i2["ruido_gemelo"], i2["regla_a_gemelo"], i2["regla_b_d33"]))
         for x in i2["discordantes"]:
             print("      discordante: %s %s %s | K %s D %s | %s VRP %s | pc.vrp_mw K %s D %s | error de %s" % (
                 x["volcan"], x["sensor"], x["hora"], x["publica_K"], x["publica_D"], x["clase_mirova"],
                 x["vrp_mirova"], x["pc_vrp_mw_K"], x["pc_vrp_mw_D"], x["error_de"]))
+    e203 = info["estrato_203"]
+    print("   estrato 203 (VIIRS 750, cumbre de K en 0,0 MW; informa, no decide): %d pasadas | D recupera %d, enciende %d, "
+          "no cambia %d, otros cambios %d" % (e203["n"], e203["recupera_D"], e203["enciende_D"], e203["no_cambia"],
+                                              e203["otros_cambios"]))
+    for x in e203["pasadas"]:
+        print("      203: %s %s | %s VRP %s | publica K %s D %s | pc.vrp_mw K %s D %s | error de P2 %s" % (
+            x["volcan"], x["hora"], x["clase_mirova"], x["vrp_mirova"], x["publica_K"], x["publica_D"],
+            x["pc_vrp_mw_K"], x["pc_vrp_mw_D"], x["error_p2_de"]))
     print("   M (pares que salen: %s)" % info["M_salen"])
     for nom, modo in ESTRATOS:
         x = info["M|%s" % nom]
