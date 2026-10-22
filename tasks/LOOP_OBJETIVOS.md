@@ -556,6 +556,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): gemelo de D25 medido; oblicuo y prompting entregados
+- **Gemelo de D25** (`experiments/_s159/gemelo_d25/INFORME.md`): K, K' y D corren en el mismo job, en serie y sobre la
+  misma CPU; K' es copia bit a bit de K (0 de 4.610 pasadas con publicación o `pc.vrp_mw` distintos en V1, en los cuatro
+  estratos). El ruido de P2 vale 0 por construcción: P2 decide con una sola pasada neta, y el control de determinismo
+  del §7 no puede fallar. Ruido entre máquinas medido en F/K V1 (un brazo por job): también 0 de 3.420 (detector C0, sin
+  Villarrica). Controles: mutación 8 de 7 y 76 de 60; K contra C0, 1.576 discordancias. Propuesta de adenda para Nicolás
+  antes del tag: declarar qué mide K', citar el ruido de F/K V1 con su salvedad, y (a) aceptar que P2 decide por una
+  pasada neta diciéndolo en la primera línea o (b) listar y diagnosticar por pasada todo GANA o PIERDE de una o dos
+  pasadas netas antes de declararlo.
+- **Oblicuo** (`experiments/_s159/oblicuo_paquete/`, `cf964a718`, SIN VERIFICAR, verificador corriendo): en VIIRS 750
+  sobre 50° de cenit el oráculo da 0,996 contra 0,178 de K (12 de 16 son Chillán); el remuestreo reparte el píxel
+  oblicuo en 1,5 a 2,75 celdas.
+- **Guía de auditorías**: agente B (prompting) entregó `experiments/_s159/guia_auditorias/B_PROMPTING.md`; falta A.
+  Guías del workspace versionadas en el repo privado nuevo `MendozaVolcanic/workspace-guias` (línea base `59f1817`).
+
 ### 2026-10-21 (S159, dueña del loop): ola 2b, ocho frentes en paralelo (sí de Nicolás al paquete)
 - Nicolás pidió vías nuevas y aprobó el paquete («si continua con el paquete que dices, todo lo que se pueda en
   paralelo»). Lanzados, sin worktrees nuevos (carpetas en `s159-pruebas` salvo el 6, en `C:\vrp-trabajo\s159-n` rama
