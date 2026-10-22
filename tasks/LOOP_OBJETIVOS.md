@@ -567,7 +567,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-22 ~10:50 UTC (S160): estrato informativo 203 declarado antes del tag; #893 listo
+### 2026-10-22 ~10:40 UTC (S160): estrato informativo 203 declarado antes del tag; #893 listo
 - La auditoría S160 propuso informar aparte su hallazgo 203 (30 de 97 cúmulos de cumbre V750 en 0,0 MW en K por el
   recorte a cero del exceso sobre el anillo; 7 con alerta de MIROVA, 11 negativos limpios, ninguna protegida). Es el
   conjunto que D25 más puede mover, en los dos sentidos. Declarado como estrato que sólo informa en
