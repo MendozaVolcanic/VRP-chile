@@ -565,6 +565,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 ~04:30 UTC (S160 nocturna): censo del oráculo V750 analizado, verificador corriendo
+- Run **39713438252** terminado (28 verdes, 4 rojos por 20 pasadas sin procesar declaradas, todas del 12-oct) y
+  rescate **39715348772** (20 de 20 ok). El agente de S159 que lo diseñó ya no estaba vivo: corrí el analizador
+  pre-registrado sin cambios de lógica (`1259ccc66` sólo toca la salida y se hizo antes de que terminara el run).
+  Informe `experiments/_s159/oraculo_censo/INFORME.md` (`f7dba3c57`, rama `s159-oraculo-censo`; artefactos en
+  `D:\vrp-trabajo\temporales\s159_oraculo\`). **SIN VERIFICAR**: verificador limpio en Fable corriendo, escribe en
+  `C:\vrp-trabajo\s159-m\experiments\_s159\oraculo_censo\verificador\`.
+- Controles 1 a 4 pasan (K = producción 5.620 de 5.620; oráculo = N 1.006 de 1.006; nulo 1.006 de 1.006; razón
+  O/MIROVA 1,000 y 0,999). Negativos limpios publicados sobre 5.353: **K 54, O-def 5, O-sens 15** (cierra la cota
+  «hasta ~139» del frente N). O-def **PIERDE PROTEGIDAS** (6 de Cordón Caulle, ΔE −60); O-sens **GANA EN EL CENSO**
+  (0 perdidas, 1 ganada, ΔE −90, rango −92 a −73). Con el rescate: 0 SIN DATO, ΔE −62 y −92, mismas etiquetas.
+  Etiquetas descriptivas: no deciden adopción (ola 3, con pre-registro y sello).
+- Falta, como seguimiento: la lectura con la tabla de `latest.php` sola (el analizador no la da).
+
 ### 2026-10-22 ~03:47 UTC (S160 nocturna): auditoría de Mirova-v1 entregada
 - Sesión `audit-mirova-v1` terminada (sólo lectura, commit medido `c48d24cad8`). Informe y `hallazgos.csv` copiados a
   `experiments/_s159/mirova_v1_auditoria/`; scripts y verificadores en `D:\vrp-trabajo\mirova-v1-auditoria\`. Sin
