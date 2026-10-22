@@ -29,6 +29,10 @@ if cmp -s latest_consolidado.csv latest_consolidado.csv.new; then
   changed=false
   rm latest_consolidado.csv.new
 else
+  # S160 (hallazgo 245 de docs/AUDIT_S160.md): avisa si la copia nueva perdió llaves de la vigente.
+  # Avisa, no rechaza (puede congelar la referencia): escribe llaves_perdidas en $GITHUB_OUTPUT y el
+  # último paso del workflow pone la corrida en rojo. Test: tests/test_avisar_llaves_perdidas_s160.py.
+  python scripts/avisar_llaves_perdidas_consolidado.py latest_consolidado.csv latest_consolidado.csv.new || true
   mv latest_consolidado.csv.new latest_consolidado.csv
   changed=true
   echo "Rows: $(wc -l < latest_consolidado.csv)"
