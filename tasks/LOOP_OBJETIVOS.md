@@ -555,6 +555,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): censo de F (D-31) terminado
+- Run 39693661527 (pre-registro `bf6cf4db5` antes del disparo; apéndice `69eb48eb0` en `s159-n`, integrado a
+  `s159-pruebas`). 122 pasadas: 60 negativos con cúmulo de cumbre en 0 MW, 59 `far`, Isluga 2026-10-12 05:48 y las otras
+  dos SIN DATO de ese día. Controles en verde en las 119 con estado ok. **F enciende 60 de 60 cumbres** (1 píxel, 0,06 a
+  0,61 MW; una ambigua por triangulación) **y 0 de 59 `far`**. Negativos limpios publicados sobre 5.476: K 54 (0,99 %),
+  F 114 (2,08 %). **ΔE de F por censo = +12** (rango +10 a +12), igual que la predicción del verificador (≈ +11).
+  Veredicto pre-registrado: ENCIENDE DE MÁS, ahora contado. 0 protegidas perdidas de 78; las 3 pasadas del 10-12, entre
+  ellas la protegida de Chillán 05:18 (8,44 MW), siguen SIN DATO porque CMR no devuelve esos gránulos.
+
 ### 2026-10-21 (S159, dueña del loop): pre-registro de MxD03 v2
 - `experiments/_s159/mxd03_prereg/PREREGISTRO_MXD03.md` v2 (`4a6559082` en `s159-pruebas`), §0 con cada cambio contra el
   verificador. P2 con nulo de 20 semillas de R en los 2.046 records con cenit ≤ 35° (sobre 35° y sin Cordón Caulle sólo
