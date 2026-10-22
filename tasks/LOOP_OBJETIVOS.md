@@ -567,6 +567,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 ~10:50 UTC (S160): estrato informativo 203 declarado antes del tag; #893 listo
+- La auditoría S160 propuso informar aparte su hallazgo 203 (30 de 97 cúmulos de cumbre V750 en 0,0 MW en K por el
+  recorte a cero del exceso sobre el anillo; 7 con alerta de MIROVA, 11 negativos limpios, ninguna protegida). Es el
+  conjunto que D25 más puede mover, en los dos sentidos. Declarado como estrato que sólo informa en
+  `experiments/_s157_prereg_d25/NOTA_ESTRATO_203.md` (`5f986a209`, antes del tag, sin abrir nada del A/B); su código va
+  con el implementador de D-42 y lo revisa el mismo verificador.
+- Según la sesión S160: #893 (`s160-auditoria`) entra limpio a `main` tras traer #891; el mapa de integración de las
+  ramas S157 a S159 está en `docs/AUDIT_S160.md` §9 de esa rama. Merge de Nicolás.
+
 ### 2026-10-22 ~10:38 UTC (S160, con Nicolás despierto): D-42 sellada; implementación en curso; placebo del 1 %
 - D-42 cerrada por Nicolás (opción a). Cuarta adenda `ADENDA_CALIBRACION_P2.md` (`ca65069f6`). Implementa un agente
   Opus en `C:\vrp-trabajo\s159-evaluador` (calibración, candados de V34-03 y V29-01, falsos y poder sintéticos,
