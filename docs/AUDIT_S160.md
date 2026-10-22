@@ -55,7 +55,7 @@ protocolo).
 
 | ID | qué pasa (fenómeno primero) | gravedad | guarda y su rojo |
 |---|---|---|---|
-| 203 | Un cúmulo de cumbre de VIIRS 750 cuyo píxel está a la temperatura del anillo regional o más frío queda en 0,0 MW, y el tablero no publica nada con 0 MW: 30 de 97 en la ventana K, 7 con alerta de MIROVA, 11 negativos limpios, ninguna protegida. El código de MIROVA no recorta ahí. Arreglarlo movería la publicación en los dos sentidos | 5 | contar cúmulos `summit` con `pc.vrp_mw == 0` por sensor en cada auto-audit; rojo: la fracción supera la de la ventana K (31 %) o una protegida cae en el conjunto. Decide Nicolás si entra al A/B del detector del código (§5) |
+| 203 | Un cúmulo de cumbre de VIIRS 750 cuyo píxel está a la temperatura del anillo regional o más frío queda en 0,0 MW, y el tablero no publica nada con 0 MW: 30 de 97 en la ventana K, 7 con alerta de MIROVA, 11 negativos limpios, ninguna protegida. El código de MIROVA no recorta ahí. Arreglarlo movería la publicación en los dos sentidos | 5 | contar cúmulos `summit` con `pc.vrp_mw == 0` por sensor en cada auto-audit; rojo: la fracción supera la de la ventana K (31 %) o una protegida cae en el conjunto. Es D25: lo mide su A/B (#890, §5 decisión 4) |
 | 241 | Una plataforma o colección que la búsqueda de NASA deja de servir se lee como «no hubo pasada»: «Cobertura: completa», código 0, también con `--estricto-cobertura`. Las otras plataformas siguen, así que el tablero no queda vacío: se pierden en silencio las pasadas de esa | 4 | el vigilante por plataforma de #892, más un test que simule Suomi NPP vacío y exija un aviso distinto de «completa»; rojo: el mensaje sigue diciendo «completa» |
 | V3-01 | Si MIROVA tiene una alerta protegida y nosotros no tenemos ningún record de esa pasada (`sin_record`), el auto-audit no levanta bandera (`scripts/auto_audit_weekly.py:796` y `:827`) | 4 (V3, sin segundo verificador) | caso sintético con una protegida sin record; rojo: el auto-audit no la cuenta |
 | 281 | #883 reemplazó todo el histórico por datos de K (68.072 records anteriores al 18-sep son de K) y los documentos rectores siguen diciendo «C0 antes del 2026-09-18» | 4 | test que lea la frontera de `cambio_detector.js` y exija que `MISSION.md` y `CLAUDE.md` la nombren; rojo: la fecha escrita no coincide |
@@ -113,8 +113,8 @@ guarda G6 exige.
 | 1 | Mergear el PR del preámbulo (MendozaVolcanic/VRP-chile#891) | sí; ningún test lo lee y la suite pasa entera |
 | 2 | Antes de leer el veredicto de D25 (#890): ¿P2 con tolerancia 0 sirve para decidir D25? | no leer #890 hasta comprobar que su evaluador rechaza el placebo que apaga al azar el 1 % (V1a-01); si no lo rechaza, fijar el margen de P2 contra ese placebo antes de abrir el resultado |
 | 3 | Suomi NPP: #892 y el mensaje del NRT | mergear #892 antes del 2-nov y agregar que «sin gránulos de una plataforma esperada» no se llame «completa»; C-06 de la cola de campo lo comprueba el mismo día |
-| 4 | El recorte a cero de VIIRS 750 (203) | no arreglarlo aislado (mueve publicación en los dos sentidos): que entre al A/B del detector del código como una de sus diferencias, con C-08 mirado antes |
-| 5 | Llevar a `main` lo de S157 y S158 (V0a-01, V4-01) | sí, y pronto: hoy el `CLAUDE.md` que carga cada sesión desde OneDrive no tiene ninguna marca de S157 ni S158 |
+| 4 | El recorte a cero de VIIRS 750 (203) | no arreglarlo aislado (mueve publicación en los dos sentidos). Es la divergencia D25, abierta y con su A/B en #890: que esa lectura informe aparte los cúmulos de cumbre en 0 MW (30 de 97 en V750, 7 con alerta de MIROVA); C-08 se mira antes |
+| 5 | Llevar a `main` lo de S157 a S159 (V0a-01, V4-01) | sí, y pronto: hoy el `CLAUDE.md` que carga cada sesión desde OneDrive no tiene ninguna marca de S157 ni S158. Mapa en §9 |
 | 6 | Reabrir D18 y D22 (180, 182) | no reabrirlos por S160 (los tres hallazgos de F1b bajaron a gravedad 2); sí mirar C-10 antes de dar D18 por vetada, porque el veto cuelga de una alerta de 1,00 MW |
 | 7 | Guardas de la referencia (245) y del token en `nrt.yml` (247) | sí; son workflows, no pipeline, pero tocan producción: con tag y tu sí (A45) |
 | 8 | Dónde vive la cola de campo | `docs/COLA_CAMPO.md`, abierta en esta rama con 10 casos; la mantiene la síntesis de cada auditoría |
@@ -155,3 +155,23 @@ Los 19 puntos del plan entraron 18 a la guía (`workspace-guias` `f570abd`). Lo 
 
 Ningún arreglo, A/B, reproceso ni descarga de L1B; no leyó el veredicto de D25; no mergeó nada; no auditó el código
 del scraper Mirova-v1 (lo audita la sesión `audit-mirova-v1`); no corrió el frente por uso ni el de prueba de campo.
+
+## 9. Mapa para llevar S157 a S159 a `main` (2026-10-22, después de la síntesis)
+
+Medido con `git merge-base --is-ancestor` y `git merge-tree` contra `origin/main` (`0d73f2a4e`) y contra la rama de
+esta auditoría ya puesta al día con `main` (`5fa282f6b`, que resolvió el único choque, el preámbulo, con la versión de
+#891).
+
+- **#893 (esta rama) entra limpio a `main`** y ya contiene `s158-d17-diseno` (#885) y el linaje `s159-pruebas` hasta el
+  momento en que se cortó.
+- Las ocho ramas abiertas que #893 no trae entera se mezclan **limpias contra #893**: `claude/s158-audit-r2-0eeee2`
+  (#888, 3 commits), `s158-tupungatito` (#886, 1), `s158-v750-recall` (#887, 4), `s157-saturacion` (#880, 4),
+  `s159-instrumentos` (#889, 2), `s159-evaluador-d25` (#890, 10, borrador), `s159-pruebas` (13 posteriores al corte) y
+  `s159-portes` (4).
+- Orden recomendado: #893 primero (trae la base y las marcas), después #888, #885 si queda algo, #886, #887 y #880 (sólo
+  documentos y experimentos), después `s159-pruebas` y `s159-portes`; #889 y #890 al final, porque cambian instrumentos
+  sellados y #890 espera su tag de lectura.
+- `loop/activo` (el checkout de OneDrive) lleva 337 commits fuera de `main`; no se midió qué son. Es la rama que carga
+  cada sesión abierta desde OneDrive, así que conviene decidir aparte si se integra o se reapunta a `main`.
+- Ningún merge lo hace esta sesión: el clasificador de permisos los bloquea («merge sin revisión») y son decisión de
+  Nicolás (A39, excepción de alta criticidad).
