@@ -65,3 +65,153 @@ archivo nuevo publica lo mismo que producción sobre el viejo en esas 20.
 - Las 6 protegidas que pierde O-def son las mismas de Cordón Caulle que ya había visto el frente N: la caja por
   defecto las deja fuera y la sensible no. Que sea porque el campo difuso del lacolito (A68) cae fuera de la cumbre de
   7 × 7 es SOSPECHA: este análisis no lo midió.
+
+---
+
+## Secciones agregadas por el agente del frente (S159, 2026-10-22)
+
+Nota de proceso: el agente del frente no murió; el run tardó 1 h 31 min (02:48:59 a 04:19:34 UTC) y siguió esperando
+con un único `gh run view` cada 5 a 10 min. Lo de arriba lo escribió la sesión nocturna con el analizador pre-registrado;
+lo revisé contra mi propia corrida de `02_analizar.py` sobre los mismos artefactos, que da **el mismo texto** (comparado
+ordenando líneas y sin finales de línea: 0 diferencias), así que no reemplacé las salidas commiteadas. Lo que sigue son
+las piezas que el encargo pedía y que faltaban: hallazgos en formato, pasadas partidas, comparación con F, por qué no se
+publica lo que el oráculo detecta, candidatas para §12 y VERIFICADO LIMPIO. No toqué `verificador/` (lo está escribiendo
+otra sesión). Scripts nuevos, todos post hoc y descriptivos: `03_detalle.py`, `04_por_que_no_publica.py`,
+`05_pixeles_fuera_del_recuadro.py`, con sus `_salida.txt`. Resultados crudos de los dos runs en
+`resultados_crudos.tar.gz` (0,7 MB; los mismos JSON de `D:\vrp-trabajo\temporales\s159_oraculo\`).
+
+Ventana de todo número: VIIRS 750 nocturno, 2026-04-01 a 2026-10-21 sin el 18 ni el 19 de octubre, población del frente
+N (5.746 pasadas, 5.476 negativos limpios, 256 alertas que deciden). Denominador de negativos: 5.353 ok (5.476 menos 106
+fuera del gránulo y 17 SIN DATO); con el rescate, 5.370.
+
+### Hallazgos, de mayor a menor gravedad
+
+#### C-1. El código de MIROVA con la caja por defecto pierde 6 protegidas y 33 alertas débiles que producción publica, casi todas de Cordón Caulle
+
+- SCRIPT:SALIDA: `02_analizar.py` → `02_analizar_salida.txt`, bloque `== O-def` (líneas «protegidas» y «bajo 1 MW perdidas»).
+- QUÉ PASA: en Cordón Caulle la anomalía no está en el cráter sino repartida en el campo del lacolito, a 4,6 a 10,5 km
+  del centro según MIROVA. La caja por defecto pone los umbrales sensibles sólo en la cumbre de 7 × 7 celdas (±2,6 km)
+  y el resto con umbrales de escena, que esos píxeles débiles no pasan. En el censo: 6 protegidas perdidas (1,00 a
+  1,43 MW, las mismas que vio N) y 33 de las alertas bajo 1 MW que K publica (27 de Cordón Caulle).
+- CÓMO SE VE EN EL DASHBOARD: invisible hoy. Si el paquete de la ola 3 usara la caja por defecto, el operador dejaría
+  de ver alertas de Cordón Caulle de 1 MW o más que MIROVA sí publica (regla 1 de MISSION).
+- CÓMO REPRODUCIRLO: `python 02_analizar.py --art D:\vrp-trabajo\temporales\s159_oraculo\censo_39713438252`; por ejemplo
+  Cordón Caulle 2026-06-07 05:54 (MIROVA 1,2 MW).
+- CONFIANZA: CONFIRMADO (censo: 78 de 79 protegidas medidas; 79 de 79 con el rescate). Que la causa sea el lacolito
+  fuera de la cumbre de 7 × 7: SOSPECHA apoyada en las distancias de MIROVA (N-3), no medida aquí píxel por píxel.
+- GRAVEDAD: 4 (con esta caja el paquete no se puede adoptar).
+
+#### C-2. Contado entero, el oráculo con el recuadro sensible publica 15 negativos limpios de 5.353, no «hasta 139»: la cota abierta de N queda cerrada
+
+- SCRIPT:SALIDA: `02_analizar_salida.txt`, bloque `== O-sens`; `resumen.json`.
+- QUÉ PASA: de las noches en que MIROVA miró y no vio nada, producción (K) publica 54 (1,01 %) y el código entero de
+  MIROVA con el recuadro sensible publica 15 (0,28 %): 7 que K no publica, y 46 de las de K apagadas. Con las alertas:
+  0 protegidas perdidas, 1 ganada, 59 alertas bajo 1 MW ganadas y 8 perdidas; ΔE = (14 + 15) − (65 + 54) = **−90**
+  (rango por SIN DATO −92 a −73; con el rescate, −92). La predicción del verificador de N era ≈ 12 con cota hasta ~139;
+  salieron 15: 12 ya estaban en las pasadas que N midió y **3 vienen de los 5.303 negativos sin ningún píxel de
+  producción** (Tupungatito 2026-04-16 05:24 y 2026-06-10 04:54, Cordón Caulle 2026-10-09 06:54), que N no podía ver
+  por muestreo. Contra F (fondo del código sobre nuestra detección, censo de N): F enciende 60 y queda en ΔE +12; el
+  paquete entero queda en −90. Por cenit: O-sens 11 de 1.891 (≤ 40°) y 4 de 3.568 (> 40°); K 41 y 13.
+- CÓMO SE VE EN EL DASHBOARD: invisible hoy. Con el paquete, el operador vería en seis meses 39 puntos de cumbre menos en
+  noches sin actividad (de 54 a 15) y 51 alertas débiles más en neto (59 ganadas, 8 perdidas).
+- CÓMO REPRODUCIRLO: igual que C-1; la lista de los 15 está al final del bloque `== O-sens`.
+- CONFIANZA: CONFIRMADO (censo; controles 1 a 4 en verde). Condicionado a C-3 y C-4.
+- GRAVEDAD: 4 (es el número que pedía el pre-registro de adopción de la ola 3).
+
+#### C-3. El «gana» de O-sens descansa en el radio interior del tablero: el código detecta 43 negativos y 28 no se publican sólo por estar `far`
+
+- SCRIPT:SALIDA: `03_detalle.py` → `03_detalle_salida.txt`; `04_por_que_no_publica.py` → `04_por_que_no_publica_salida.txt`.
+- QUÉ PASA: el código de MIROVA con el recuadro sensible marca píxeles en 43 de los 5.353 negativos. El predicado del
+  tablero publica 15; los otros 28 tienen VRP positivo y no son cirrus: no se publican sólo porque el centroide cae más
+  lejos que el `inner_radius_km` del tablero, medido desde el centro del TIF (Lastarria 6, Chillán 5, Copahue 4,
+  Llaima 3, Villarrica 3 y otros; lista en `04_por_que_no_publica_salida.txt`). Además el código detecta también
+  **fuera** del recuadro de 21 × 21: la celda con `box == 0` entra como región de escena (`m0`) y sólo se excluye el
+  borde de la matriz (`experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py:140-145`); por eso hay una detección de
+  Lastarria 2026-08-25 05:48 con centroide a 22,8 km. Si el paquete publicara todo lo que el código detecta, sin
+  filtro de distancia (no sabemos qué filtro usa MIROVA para publicar), los negativos serían hasta 43 (0,80 %) y ΔE
+  quedaría en −62 o menos (las alertas `far` que se ganarían lo bajarían más; no medido).
+- CÓMO SE VE EN EL DASHBOARD: invisible hoy; decide si el paquete necesita el filtro `summit` del tablero.
+- CÓMO REPRODUCIRLO: `python 04_por_que_no_publica.py --art D:/vrp-trabajo/temporales/s159_oraculo/censo_39713438252`.
+- CONFIANZA: CONFIRMADO (medido y leído). Que MIROVA publique sin filtro de distancia: SOSPECHA, sin dato.
+- GRAVEDAD: 3.
+
+#### C-4. El record sintético junta todos los alertados en un centroide: un píxel lejano hace perder una alerta de Láscar
+
+- SCRIPT:SALIDA: `05_pixeles_fuera_del_recuadro.py` → `05_pixeles_fuera_del_recuadro_salida.txt`.
+- QUÉ PASA: el record del pre-registro (función `record_oraculo` de N) promedia la posición de todos los alertados. En
+  Láscar 2026-08-26 05:48 (alerta de MIROVA 0,37 MW, K publica 0,172) el código marca la cumbre y además un píxel fuera
+  del recuadro; el centroide se corre más allá del radio interior y el tablero no la publica, con las dos cajas. Sin los
+  píxeles de fuera del recuadro se publica. Es 1 de las 8 alertas bajo 1 MW que O-sens «pierde» y 1 de las 33 de O-def:
+  efecto de cómo se armó el record, no del código de MIROVA. Mezclas en todo el censo: 1 pasada por caja; ningún
+  negativo cambia. Aproximación declarada: el VRP del recorte se reparte por radiancia, sin recalcular el fondo (no
+  cambia el signo, que es lo que lee el predicado).
+- CÓMO SE VE EN EL DASHBOARD: invisible.
+- CÓMO REPRODUCIRLO: `python 05_pixeles_fuera_del_recuadro.py --art D:/vrp-trabajo/temporales/s159_oraculo/censo_39713438252`.
+- CONFIANZA: CONFIRMADO. GRAVEDAD: 2 (mueve ΔE en 1; para la ola 3, el record del paquete debe salir de un cúmulo, no
+  del centroide de todos los alertados).
+
+#### C-5. 106 de los 5.476 «negativos limpios» son pasadas que no miran el volcán (1,9 %), y 44 más no ven la cumbre
+
+- SCRIPT:SALIDA: `02_analizar_salida.txt`, líneas «fuera del granulo» y «por partida» de cada caja.
+- QUÉ PASA: el recuadro de 25 km de producción toca el borde del gránulo y el record existe, pero el píxel del gránulo
+  más cercano al volcán está a más de 5 km (hasta 23 km): MIROVA tampoco miró el cráter y su fila RUTINA no dice «no
+  había nada». Es N-8 generalizado: N vio 2 de 143 (1,4 %), el censo da 106 de 5.476. Además 44 pasadas tienen celdas
+  sin dato en la cumbre de 7 × 7 («sin cráter») y 174 están partidas pero con la cumbre entera. **Ni K ni el oráculo
+  publican en ninguna de esas 324**; sacarlas sólo achica el denominador (K 54 de 5.309, O-sens 15 de 5.309). Coincide
+  con `experiments/_s159/negativo_crater/INFORME.md` (la regla sólo saca denominador), medido aquí por otra vía (la
+  cobertura del gránulo en la grilla, no `diag_n_bg_anillo`).
+- CÓMO SE VE EN EL DASHBOARD: invisible.
+- CÓMO REPRODUCIRLO: igual que C-1.
+- CONFIANZA: CONFIRMADO. GRAVEDAD: 1.
+
+#### C-6. En los gránulos reprocesados del 12-oct, K reproduce a producción también sobre el archivo nuevo, y el código mide la protegida de Chillán en 0,80 de MIROVA
+
+- SCRIPT:SALIDA: run 39715348772, `probe_rescate.log` del artefacto, y `02_analizar_salida_con_rescate.txt`.
+- QUÉ PASA: las 20 pasadas de los cuatro gránulos que NASA reprocesó el 19-oct bajaron de la nube de LAADS
+  (`data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/...`, la misma ruta que CMR da a producción; `/archive/allData/`
+  redirige al login de URS y devuelve una página de 10 KB, lo que hizo fallar los intentos 39713687687 y 39714551225).
+  K publica igual y con el mismo `pc.vrp_mw` que producción en las 20 (el control no aplicaba, y aun así pasa).
+  Chillán 05:18, protegida: MIROVA 8,44 MW, oráculo 6 px 6,753 (0,80), K 3,46. Isluga 05:48: 0,244 contra 0,24.
+  Chillán 05:54: 0,417 contra 0,40. Las dos cajas publican las tres.
+- CÓMO REPRODUCIRLO: push de `probe-s159-oraculo-rescate.yml` a una rama auxiliar con `EARTHDATA_TOKEN`.
+- CONFIANZA: CONFIRMADO. GRAVEDAD: 1 (cierra los SIN DATO; la protegida queda medida).
+
+### Cuántas pasadas quedaron SIN DATO y por qué
+
+20 en el censo, todas de los gránulos reprocesados del 2026-10-12 (VJ202MOD 05:12 y 05:18, VNP02MOD 05:48 y 05:54): CMR
+da la entrada vieja y la búsqueda por ventana no encuentra otra (`sin_granulo_*|sin_granulo_por_ventana`). Las 20 se
+recuperaron en el run aparte (C-6): con el rescate, 0 SIN DATO. Los 4 jobs en rojo del censo son los que tenían esas
+pasadas (el probe sale 2 si falta una; `volcan_fuera_del_granulo` no cuenta como falta).
+
+### Lo que no cubre
+
+- MIROVA no publica con el predicado del tablero: «publica» aquí es nuestra regla aplicada al record del código. Cómo
+  decide MIROVA publicar (distancia, umbral de VRP) sigue sin conocerse (C-3).
+- El recuadro sensible es una aproximación de la ROI de MIROVA en Cordón Caulle y Tupungatito (N-3); la caja real por
+  volcán no se conoce.
+- Sólo VIIRS 750 nocturno. El canal de la alerta (tabla u OCR) no se separó (lo anota la sección de arriba).
+
+## Candidatas para BEYOND_MIROVA_EXTENSIONS §12
+
+| qué | por qué podría ser mejor | evidencia | estado |
+|---|---|---|---|
+| Separar «no miré» de «no vi» en el record (cobertura del gránulo sobre la cumbre) | 106 pasadas (1,9 %) no miran el volcán y 44 no ven la cumbre; MIROVA las lista como RUTINA. Un SDA que lo declare es más honesto con el operador | C-5; medido con la grilla del gránulo, sin parámetros nuevos | idea, barata |
+| Mostrar en el experimental lo que el código de MIROVA detecta fuera del radio interior | 28 negativos con detección `far` (Lastarria 6, Chillán 5, Copahue 4 y otros); si son fumarolas o campos tibios reales son categoría b (A54) | C-3; validar contra OVDAS y SWIR, no contra MIROVA | hipótesis |
+| Los píxeles de un píxel que nuestro segundo pase ve y el código no (de N) | el censo confirma que el código no los publica (O-def 1 de los 60 de N, O-sens 4) | N, apéndice; este censo | hipótesis (ya anotada por N) |
+
+## VERIFICADO LIMPIO
+
+- **K = producción en todo el censo**: 5.620 de 5.620 pasadas ok (5.640 con el rescate), misma publicación con el
+  predicado del tablero y mismo `pc.vrp_mw` a 0,001 MW. `python 02_analizar.py --art <censo>`, línea «control 1».
+- **El oráculo es determinista entre corridas**: 1.006 comparaciones (503 pasadas × 2 cajas) iguales a N en número de
+  píxeles y VRP a 1e-6 MW. Línea «control 2». Vale como control de regresión, no de verdad.
+- **El contador ve lo que dice ver**: 956 perturbaciones de records que publican (VRP a 0 y `far`) dejan de publicar y 50
+  cúmulos inyectados en negativos pasan a publicar; 0 excepciones. Línea «control 3».
+- **El oráculo reproduce la magnitud de MIROVA en el censo entero**: O-def 193 de 253 alertas, razón 1,000 [0,984,
+  1,008]; O-sens 241 de 253, 0,999 [0,973, 1,010]. Línea «control 4».
+- **Ninguna publicación del oráculo en negativos es ambigua por la triangulación** (banda de 20 semillas que no toca
+  0): `03_detalle_salida.txt`, última línea.
+- **Cobertura**: 5.746 de 5.746 objetivos con resultado; 0 pasadas perdidas sin explicar (106 fuera, 20 SIN DATO
+  declaradas y rescatadas).
+- **Nada en `pipeline/`, `data/` ni `frontend/`**: los dos workflows son de sólo lectura y viven en ramas auxiliares
+  (`s159-oraculo-disparo`, `s159-oraculo-rescate`) que no se mergean.
