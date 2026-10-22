@@ -517,6 +517,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
+| D-42 | **PENDIENTE, bloquea el tag de lectura de D25**: calibración de P2. El verificador limpio de D-34 (V34-01, medido con la función real sobre datos sintéticos, n = 2.000 por escenario) muestra que la regla sellada de P2 decide GANA o PIERDE en falso en **24,8 %** de los nulos con 3 noches discordantes de signo común por noche (4 noches 13,0 %, 5 noches 6,5 %, 12 noches 4,0 %; nulo iid 6,5 a 8,7 %): con pocas noches todas del mismo lado, ningún remuestreo por bloques cruza 0. M tiene su calibración (D-27) y queda INDECIDIBLE si falla; P2 adoptó los mínimos de M sin esa calibración. El código hace lo que la adenda dice: el defecto es de la regla. Opciones: (a) **calibrar P2 como M**: sobre las mismas pasadas discordantes, nulo con el signo de cada noche al azar (1.000 repeticiones, semilla fija); si los falsos GANA más PIERDE pasan de 5 %, P2 queda INDECIDIBLE; (b) subir el mínimo de noches (no basta: con 8 noches correlacionadas sigue en 7,0 %); (c) leer como está, con V34-01 declarado. Recomendación del loop: **(a)**, en una cuarta adenda sellada antes del tag, junto con los candados de V34-03 (7 mutaciones que hoy pasan en verde) y D-29; después, verificador limpio del cambio y recién ahí el tag. Además V34-02: bajo el nulo, BLOQUEA apaga CUMPLE en 37 a 48 % de los casos (lo pide la adenda; leerlo como moneda, no como señal) | `experiments/_s159/instrumentos/verificador_d34/INFORME.md` (`786bfb288`, rama `s159-evaluador-d25`) | #890 | (sin issue) |
 | D-41 | **PENDIENTE**: alertas sólo OCR en el criterio de victoria de VRP Chile (las 184 protegidas que sólo existen en el OCR; entre 40 y 90 serían falsas, centro ~55, estimado). Opciones: todas; sólo las del método de la estrella, nocturnas y desde V29.2 (2026-06-13); ninguna. Recomendación del informe y del loop: **sólo estrella nocturna desde V29.2**, el resto contado aparte. Hoy `Metodo_Validacion` no dice el método (hay que leerlo en la nota, R10). No toca los pre-registros sellados: aplica a evaluaciones nuevas, y en las selladas se informa como lectura adicional | informe §4 y H-O1 | | (sin issue) |
 | D-40 | **PENDIENTE**: arreglos del OCR y la operación de Mirova-v1 (R5 fallar fuerte, R6 vigilante de dato, R7 cron de respaldo y fila de credencial, R8 lista cerrada de sensores, R9 y R10 marcar el método de grupo y guardar el método real, R11 rastro de reconciliación, R12 mojibake). Recomendación del informe: R9 + R10 (marcar, no apagar) y R5 a R7 primero; 141 ciclos reales con 0 filas cerraron «Proceso completado» | informe §3 y H-P1, H-O1, H-O4 | | (sin issue) |
 | D-39 | **PENDIENTE**: bucle de push del scraper Mirova-v1 (la tabla pierde filas: 1.948 en 60 días, 18 protegidas, 14 de Láscar, por 8 commits del propio scraper que mezclan como texto un CSV reescrito en otro orden). Opciones: R1 solo; R1+R2+R3; nada. Recomendación del informe y del loop: **R1+R2+R3** y **reponer las filas en Mirova-v1** (R4, `filas_recuperadas.csv`); además R13 en VRP Chile (`sync-mirova-csv.yml:191`: reset a `origin/main` en vez de rebase, porque el mismo mecanismo fabricó la copia corrupta `81dd25ce3`). Es producción de Mirova-v1 y un workflow de VRP Chile: sólo con el sí de Nicolás | `experiments/_s159/mirova_v1_auditoria/INFORME.md` H-T1 y H-V1 (copia; scripts en `D:\vrp-trabajo\mirova-v1-auditoria\`) | | (sin issue) |
@@ -564,6 +565,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-22 ~06:00 UTC (S160 nocturna): verificador de D-34: código fiel, regla de P2 descalibrada; tag de lectura NO creado
+- `experiments/_s159/instrumentos/verificador_d34/INFORME.md` (Fable 5.1; `786bfb288`). Las ocho afirmaciones
+  CONFIRMADAS en el código: D-30 (INDECIDIBLE si d mejora y d′ no calibra; sólo la cola de mejora; marca de
+  `--calibracion sellada`), D-32 (1.000 repeticiones, semilla 160, tope 50 por cola), D-34 (P2 por bloques con GANA,
+  PIERDE, EMPATE, BLOQUEA y SIN SUSTRATO), las tres guardas, y el signo de P2 (neto = errores de D menos errores de K;
+  coincide con la fila P2 del pre-registro, no con el encargo al revés). Pruebas reproducidas: 11 de 11 rojas sobre
+  `7cbee245a`, 31 de 31 verdes, 17 de 17 mutaciones por aserción, suite 2.373 con el árbol quieto.
+- **V34-01 (gravedad 3)**: la regla sellada de P2 no tiene calibración y con el sustrato mínimo decide en falso en
+  24,8 % de los nulos correlacionados por noche → **D-42**. V34-02: bajo el nulo, BLOQUEA apaga CUMPLE en 37 a 48 %.
+  V34-03: 7 de 23 mutaciones propias pasan en verde (semilla, remuestreos, nivel, borde de PIERDE de P2; tope de d′
+  en la comparación; alcance del INDECIDIBLE; marca de validez en el estado). V34-04 y V34-05 menores.
+- **Decisión de la noche: no creo el tag de lectura ni leo el veredicto.** Leerlo con una regla que se sabe
+  descalibrada amarraría la decisión, y corregirla después de mirar sería sospechosa. Queda para Nicolás (D-42). El
+  plazo de LANCE de D-35 (24-oct ~16:00 UTC) no depende de esto si el brazo de sensibilidad se despacha desde un tag de
+  código, no de lectura.
+- Limpieza: quité los 5 enlaces (junctions) de `raiz_falsa` del verificador con `rmdir` (los destinos quedaron
+  intactos) y su carpeta sintética `tmp_probar` (527 MB).
 
 ### 2026-10-22 ~04:55 UTC (S160 nocturna): D-34 commiteado; verificador limpio corriendo; D-29 falta en el evaluador
 - El agente de S159 subió **`c44709e27`** (P2 con bootstrap por bloques, D-34, y `ADENDA_GEMELO.md`): roja 11 de 11,
