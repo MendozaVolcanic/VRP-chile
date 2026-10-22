@@ -517,6 +517,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
+| D-36 | **PENDIENTE**: ampliar el port (bloque S160 §b.9). El verificador limpio deja el «GANA contra K» de MODIS **NO RESUELTO**: el estrato de negativos limpios donde producción calla (5.093 noches MODIS, 3.348 VIIRS 375) tiene 0 de 37 y 0 de 45 sorteados, y con 0 eventos el bootstrap estratificado no ve nada; la cota de Wilson deja el silencio del port hasta 9,4 % (MODIS) y 8,5 % (VIIRS 375), contra 0,76 % y 3,85 % de K. Recomendación del loop: **sí, un lote de sólo lectura con 300 a 400 negativos de ese estrato por sensor**, con pre-registro previo (con 0 en 400 la cota baja a ~0,95 %, del orden de K); el lote corre fuera de producción | `experiments/_s159/portes/verificador/INFORME.md` V-1 (`ca034d66e`, ramas `s159-portes` y `s159-pruebas`) | | (sin issue) |
 | D-35 | **PENDIENTE, con plazo**: brazo de sensibilidad de D25 sobre el 17 al 19-oct por NRT de LANCE (bloque S160 §b.1), declarado aparte y sin tocar el veredicto sellado. Recomendación del loop: **correrlo**, despachado desde el tag de lectura de D25 en cuanto exista; dice si los días excluidos por D-29 cambian el veredicto. **Plazo medido 2026-10-22 03:45 UTC: LANCE retiene ~7,7 días; el 17-oct se purga cerca del 2026-10-24 ~16:00 UTC** | bitácora 2026-10-22 ~03:45 UTC (S160 nocturna) | tag de lectura de D25 (por crear) | (sin issue) |
 | D-34 | **CERRADA: opción (c) con la variante** (Nicolás, 2026-10-21, respuesta textual a la propuesta del coordinador: «si, has lo que nos entregue mayor informacion o la mejor metodologia para lograr nuestro trabajo, tenemos tokens  tiempo y podemos probarlo todo»). P2 de D25 se decide como M: sobre las pasadas donde K y D publican distinto, diferencia neta (alertas bajo 1 MW recuperadas menos publicaciones de más en negativos limpios) con intervalo bootstrap al 95 % por bloques noche-volcán. GANA si el intervalo queda entero del lado bueno, PIERDE si entero del malo, EMPATE si cruza 0; variante: una diferencia neta en contra que no alcance PIERDE bloquea CUMPLE (como EMPEORA en los estratos que sólo bloquean, D-27). Se declara que K' mide determinismo dentro de una máquina y se cita el ruido entre máquinas de F/K V1 con su salvedad. La lista de pasadas discordantes se informa siempre sin decidir, y el evaluador informa también lo que habrían dado (a) y (b), sin decidir. Reemplaza a D-33 | `experiments/_s159/gemelo_d25/INFORME.md` | #890 | (sin issue) |
 | D-33 | ⚠️ **REEMPLAZADA por D-34 el mismo día, antes de implementarse** (el coordinador mostró que (b) usa un corte arbitrario de dos pasadas y un diagnóstico hecho después de mirar, y que había una opción (c) mejor). Texto original: **CERRADA: opción (b)** (Nicolás, 2026-10-21: «Opción (b) por adenda: todo GANA o PIERDE de P2 decidido por una o dos pasadas netas se lista y se diagnostica pasada por pasada antes de declararlo; además se declara que K' mide determinismo dentro de una máquina y se cita el ruido entre máquinas de F/K V1 con su salvedad.»). Tercera adenda de D25 (`ADENDA_GEMELO.md` en `s159-evaluador-d25`); el evaluador marca esos casos como pendientes de diagnóstico en vez de declararlos | `experiments/_s159/gemelo_d25/INFORME.md` (0 de 4.610 en V1; 0 de 3.420 entre máquinas en F/K V1, detector C0, sin Villarrica) | #890 | (sin issue) |
@@ -558,6 +559,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-22 ~04:00 UTC (S160 nocturna): verificador del port entregado e integrado
+- `experiments/_s159/portes/verificador/INFORME.md` (`ca034d66e`, empujado a `s159-portes` y `s159-pruebas` desde el
+  worktree `C:\vrp-trabajo\s159-n`; el informe no declara su modelo, el «Opus» del mensaje del commit es un error mío).
+  Veredictos: (1) MODIS **PARCIAL**: detección, banda 21 que se hunde y geolocalización de 5 km que degrada,
+  CONFIRMADOS e idénticos con la tabla sola; el GANA contra K y el silencio en negativos, **NO RESUELTOS** (D-36).
+  (2) Magnitud VIIRS 375 **CONFIRMADA** y pasada a pasada, no sólo en promedio: 82 % en banda contra la misma pasada
+  de MIROVA y 15 % contra otra pasada de la misma noche (control A109). (3) Pérdida de protegidas en VIIRS 375
+  **PARCIAL**: con la tabla de `latest.php` sola el port pierde **0 de 29**, y el verificador recuerda que eso no es
+  rescate post hoc sino la regla A119 vigente para esa ventana; pero de las 6 perdidas con OCR, 3 son de la regla del
+  centroide, 2 (Isluga 2026-09-09 06:06, Tupungatito 2026-08-01 05:00) calzan con un píxel débil del cráter (0,02 a
+  0,04 MW) que producción ve y el port no, y 1 apoya «otra pasada». (4) Controles **CONFIRMADOS** (391 de 391).
+- Los archivos del verificador quedaron también sin seguimiento en `C:\vrp-trabajo\s159-pruebas` (worktree de la
+  sesión S160); avisado a esa sesión, sin git ahí.
 
 ### 2026-10-22 ~03:45 UTC (S160 nocturna, ÚNICA dueña del loop; Nicolás duerme)
 - Toma del loop tras el cierre de S159 (`0be01b35a`). Hora del servidor 03:27 UTC al abrir. Comprobado contra GitHub:
