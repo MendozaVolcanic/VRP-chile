@@ -62,6 +62,16 @@ Del proyecto: el calor que MIROVA alerta está en el cráter aunque el cráter q
 - La geometría de los tres volcanes de la auditoría espacial: el centro no hay que moverlo.
 - El umbral de 5 MW de VIIRS 750 no es errata (lo confirma el OSF).
 
+## g. Sesiones paralelas de S160 (ya terminadas; su trabajo está en GitHub, no en su conversación)
+
+| sesión | qué dejó y dónde | qué falta |
+|---|---|---|
+| «Auditoría S160 de VRP Chile con la guía nueva» | `docs/AUDIT_S160.md` (decisiones en su §5), `docs/COLA_CAMPO.md` (10 casos; C-06 es el cese del 2-nov) y 27 marcas A113, en `main` por #893; preámbulo del auditor en `main` por #891 | sus decisiones abiertas son D-43; su worktree `C:\vrp-trabajo\s159-pruebas` (rama `s160-auditoria`, ya integrada) se puede borrar con `git worktree remove` si está limpio |
+| «Auditoría del scraper Mirova-v1 con la guía nueva» | informe copiado en `experiments/_s159/mirova_v1_auditoria/`; scripts y verificadores en `D:\vrp-trabajo\mirova-v1-auditoria\`; arreglos en **Mirova-v1#26** | **revisar y mergear Mirova-v1#26** (Nicolás); D-39 a D-41 |
+| «R13: sync de VRP Chile sin rebase del CSV» | `sync-mirova-csv.yml` reintenta sin rebasar, en `main` por #895 | nada; vigilar la primera semana que la copia de la tabla no se encoja |
+
+Antes de archivar estas sesiones no hace falta nada más: lo que importa está en `main`, en Mirova-v1#26 o en esta tabla.
+
 ## f. Prompt para la próxima sesión
 
 ```
@@ -70,8 +80,8 @@ Retoma VRP Chile (cierre de S160, 2026-10-22 ~18:45 UTC). Antes de creerle a nad
 1. cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"; git fetch origin --prune; git status -sb
    (loop/activo, en el commit de este cierre o más nuevo); hora del servidor con
    gh api -i repos/MendozaVolcanic/VRP-chile | grep -i date (A86).
-2. Lee CLAUDE.md del proyecto, después tasks/BLOQUE_ARRANQUE_S161.md (el bloque de arriba; las secciones -prev son
-   historia), después tasks/LOOP_OBJETIVOS.md §5 (D-35 a D-45) y las entradas del 2026-10-22 de su §6.
+2. Lee CLAUDE.md del proyecto, después tasks/BLOQUE_ARRANQUE_S161.md (el bloque de arriba, incluida la sección g de
+   sesiones paralelas; las secciones -prev son historia), después tasks/LOOP_OBJETIVOS.md §5 (D-35 a D-45) y las entradas del 2026-10-22 de su §6.
 3. Comprueba contra GitHub: la rama s159-evaluador-d25 (debe estar en bcfdc7c76), #890 (borrador), Mirova-v1#26.
 
 Trabajo, en orden:
