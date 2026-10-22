@@ -567,6 +567,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 ~13:44 UTC (S160): calibración de P2 implementada y verificada en el código; dos huecos antes del tag
+- Implementador (Opus; `31bb1c371` y `b57ecfe62`, rama `s159-evaluador-d25`, `experiments/_s159/instrumentos/calib_p2/`):
+  calibración de P2 según D-42 y estrato 203; 28 de 28 mutaciones; suite 2.415; poder calibrado C 98,8 %, C2 99,8 %,
+  D 68 %, E 33 %; con 4 noches discordantes o menos P2 no decide nunca (16 combinaciones de signo).
+- Verificador limpio (Fable 5.1; `981cceda7`, `verificador_d42/INFORME.md`): código CONFIRMADO en los siete puntos y
+  el estrato 203 sólo informa; el exceso de falsos por muestreo (A, B7, B8) era de la muestra de semillas (espejo exacto
+  y 1.000 semillas nuevas: 2,6 a 4,3 %). Huecos: **V42-01** el placebo del 1 % no ejercitó la calibración (V1 0 de 80
+  celdas calibradas; casi todo SIN SUSTRATO), así que su «0 GANA» no mide nada; **V42-02** sin candado donde la
+  calibración decide; V42-04 menor. Encargados al implementador. **V42-03**: la lectura de §2.5 (PIERDE de un sensor
+  contra INDECIDIBLE del otro: el código da NO CUMPLE, coherente con PREREGISTRO §8 d y H2) queda para Nicolás, junto
+  con aceptar que P2 no decida con 4 noches o menos.
+
 ### 2026-10-22 ~10:40 UTC (S160): estrato informativo 203 declarado antes del tag; #893 listo
 - La auditoría S160 propuso informar aparte su hallazgo 203 (30 de 97 cúmulos de cumbre V750 en 0,0 MW en K por el
   recorte a cero del exceso sobre el anillo; 7 con alerta de MIROVA, 11 negativos limpios, ninguna protegida). Es el
