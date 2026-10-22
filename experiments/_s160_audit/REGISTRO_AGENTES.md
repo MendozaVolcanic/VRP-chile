@@ -8,4 +8,4 @@ Hora del servidor al armar este registro: Thu, 22 Oct 2026 03:18:42 GMT. Esfuerz
 | F2 | Fable | 03:14 | 03:40 | 26 min | 431.765 | 77 | ver f2/hallazgos.csv | |
 | F3 | Fable | 03:16 | 03:39 | 24 min | 384.716 | 64 | 16 (9 de gravedad 3+) | |
 | F4 | Fable | 03:18 | 03:47 | 29 min | 455.480 | 70 | 17 (281 a 297) | |
-| F1a | Fable | 03:24 | | | | | | |
+| F1a | Fable | 03:24 | 03:54 | 29 min | 503.001 | 83 | 6 (161 a 166) | |
