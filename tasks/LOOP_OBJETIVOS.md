@@ -567,9 +567,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-22 ~09:50 UTC (S160, con Nicolás despierto): D-42 sellada; implementación en curso; placebo del 1 %
+### 2026-10-22 ~10:38 UTC (S160, con Nicolás despierto): D-42 sellada; implementación en curso; placebo del 1 %
 - D-42 cerrada por Nicolás (opción a). Cuarta adenda `ADENDA_CALIBRACION_P2.md` (`ca65069f6`). Implementa un agente
-  Opus en `C:rp-trabajo\s159-evaluador` (calibración, candados de V34-03 y V29-01, falsos y poder sintéticos,
+  Opus en `C:\vrp-trabajo\s159-evaluador` (calibración, candados de V34-03 y V29-01, falsos y poder sintéticos,
   suite con árbol quieto); después verificador limpio en Fable y recién ahí el tag de lectura.
 - Propuesta de la auditoría S160 (V1a): con tolerancia 0, P2 aprueba un placebo sin información (D = K con el 1 % de
   las publicaciones apagado al azar: GANA en 16 de 30 semillas en V1 y 5 de 10 en V2). **La adenda D-42 no lo cubre**:
