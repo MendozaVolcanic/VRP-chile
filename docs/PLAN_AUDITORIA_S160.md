@@ -717,6 +717,16 @@ sobre el texto de arriba donde choquen.
    VRP-chile, 50 corridas de `nrt.yml` y de `sync-mirova-csv.yml`, nombres y fecha de los secretos, PR abiertos),
    bajado una vez por el orquestador el 2026-10-22 03:11 UTC. `LEEME.md` ahí dice dónde está cada cosa.
 
+### 11.2b R7, fijada por Nicolás el 2026-10-22 (sello de F1a y F1b)
+
+Nicolás eligió la recomendación. **R7 queda así**: barajando las etiquetas dentro de cada estrato **1.000 veces** (semilla
+escrita en el informe antes de correr), se calcula la fracción de barajados en que el criterio «cumple» y su intervalo
+de 95 % (Wilson o Clopper-Pearson, declarado). **FALLA** si el intervalo queda entero sobre el 5 %; **SIN PODER
+CONCLUYENTE** si lo cruza (no es OK y se cuenta aparte); **OK** si queda entero bajo el 5 %. Esta fila reemplaza la R7
+del §3. El commit que trae este párrafo es «SHA_PLAN_F1».
+
+PR del preámbulo: MendozaVolcanic/VRP-chile#891 (rama `s160-preambulo`, suite 2342 passed en árbol quieto), sin mergear.
+
 ### 11.3 Lo que no cambié y por qué
 
 - Las filas R1 a R6 y R8 a R17, los criterios de F2, F3 y F4 y la escala de gravedad: están bien planteados y
