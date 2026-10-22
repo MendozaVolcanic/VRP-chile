@@ -821,6 +821,18 @@ def _hito_ocr_suomi_npp():
 HITO_OCR_SUOMI_NPP = _hito_ocr_suomi_npp()
 
 
+def avisos_protegidas_sin_record(lista, vigente):
+    """S160 (V3-01 de docs/AUDIT_S160.md): protegidas de MIROVA en pasadas de las que no tenemos record.
+
+    POR QUÉ: cuando una plataforma se calla (Suomi NPP cesa el 2026-11-02) las otras siguen dando datos ese
+    día, así que la guarda de cobertura por días no se entera. S150 separó `sin_record` de `sin_publicar`
+    porque «no miramos» no es «no vimos»: por eso va como aviso de cobertura (veredicto DEGRADADO), no como
+    flag de pérdida de detección. Test: tests/test_auto_audit_protegida_sin_record_s160.py."""
+    return [f"alerta protegida sin record nuestro: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, "
+            f"MIROVA {p['vrp_mirova_mw']} MW (no miramos esa pasada: plataforma callada o gránulo perdido)"
+            for p in lista if p["detector"] == vigente and p["estado"] == "sin_record"]
+
+
 def flags_protegidas(lista, vigente):
     out = []
     for p in lista:
@@ -949,6 +961,8 @@ def main():
             f"{gt_stale_dias} días (> {MAX_GT_STALE_DAYS}) — es el scraper, no los volcanes")
     if error_banco:
         cobertura_avisos.append(f"no se pudieron evaluar las alertas protegidas (banco de paridad): {error_banco}")
+    if protegidas:
+        cobertura_avisos.extend(avisos_protegidas_sin_record(protegidas, vigente))
 
     cobertura = {
         "cobertura_propia_pct": cobertura_pct,
