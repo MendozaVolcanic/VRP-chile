@@ -568,6 +568,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 ~17:16 UTC (S160): auditoría espacial Tupungatito, Cordón Caulle e Isluga (pedida por Nicolás), verificada
+- `experiments/_s160_espacial/` (auditor Fable, verificador Opus; leer primero `verificador/INFORME.md` y el README).
+  El cráter está a 4,79 km NW (Tupungatito) y 7,61 km N (Cordón Caulle) del centro del TIF de MIROVA; el calor que
+  MIROVA alerta cae casi siempre en el cráter y nuestro cúmulo en el mismo lugar (0,21 a 0,49 km; control A109 0,47
+  a 0,59). Isluga: 0,8 a 1,0 km SW del yaml. Lo que no publicamos es sobre todo el cráter en 0,0 MW (D25).
+- Cordón Caulle con inner 20 km publica en noches limpias hasta 20 km del cráter, muchos fuera del anillo de MIROVA
+  (V375 30 de 38 a más de 2 km, V750 13 de 30, MODIS 26 de 38). La caja de cumbre del código centrada en el TIF no
+  reproduce las alertas de MIROVA en esos dos volcanes (0 de 10, 0 de 48): hecho del port, no prueba de producción.
+- **VE-01 (SOSPECHA, gravedad 3)**: protegida de Tupungatito 2026-09-29 04:54 (Suomi NPP, 1,86 MW) con nuestro único
+  píxel a 9,42 km ENE del cráter, fuera del inner de 7 km: posible protegida perdida por radio. VE-02: alerta de
+  Cordón Caulle del 2026-10-21 lejos del cráter (publicamos 1,42 MW a 10,1 km SW). La «fuente persistente» del E de
+  Cordón Caulle no lo es (13 de 15 RUTINA diurnos, 19 de 23 apariciones del 9 al 18-may); corregido en el mapa.
+- Mapa para Nicolás: `experiments/_s160_espacial_mapa/`. No commiteadas las copias de datos (`data/`, `_censo_s159/`).
+
 ### 2026-10-22 ~16:24 UTC (S160): umbrales de VRP por sensor de MIROVA (pregunta de Nicolás)
 - Coppola et al. 2026, *Scientific Data*, tabla 1 (p. 7 y 8 del PDF, RENDER): umbral nocturno de VRP para construir el
   archivo, MODIS 1,0 × 10⁵ W, VIIRS 750 5,0 × 10⁶ W, VIIRS 375 1,0 × 10⁴ W; diurno 5,0 × 10⁷ W en los tres.

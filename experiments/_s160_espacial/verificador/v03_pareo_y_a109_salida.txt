@@ -1,0 +1,51 @@
+(a) tolerancia del pareo TIF <-> MIROVA (CSV 02b del auditor; d_vent recalculado aqui con geodesica WGS84)
+
+  == PuyehueCordonCaulle: TIF etiquetados ALERTA 78; |dt| en min: p50 0.0, max 30.0
+    ALERTA (como 02b, +-30 min)              n= 78 foco a vent p50 0.68 km, <=1 km 74 %, <=1,5 km 77 %
+    ALERTA con |dt| <= 2 min                 n= 68 foco a vent p50 0.68 km, <=1 km 81 %, <=1,5 km 82 %
+    ALERTA con 2 < |dt| <= 10 min            SIN DATO
+    ALERTA con |dt| > 10 min                 n= 10 foco a vent p50 6.12 km, <=1 km 30 %, <=1,5 km 40 %
+    RUTINA (control)                         n=161 foco a vent p50 10.77 km, <=1 km 14 %, <=1,5 km 15 %
+    re-pareo propio a 120 s: ALERTA          n= 68 foco a vent p50 0.68 km, <=1 km 81 %, <=1,5 km 82 %
+    re-pareo propio a 120 s: RUTINA          n=172 foco a vent p50 10.74 km, <=1 km 15 %, <=1,5 km 16 %
+    TIF que 02b llama ALERTA, segun el re-pareo a 120 s: {'ALERTA': np.int64(68), 'RUTINA': np.int64(10)}
+    origen de la hora del TIF en ALERTA: {'acquisition_utc': np.int64(78)}
+
+  == Tupungatito: TIF etiquetados ALERTA 62; |dt| en min: p50 0.0, max 19.2
+    ALERTA (como 02b, +-30 min)              n= 62 foco a vent p50 0.36 km, <=1 km 60 %, <=1,5 km 60 %
+    ALERTA con |dt| <= 2 min                 n= 54 foco a vent p50 0.36 km, <=1 km 67 %, <=1,5 km 67 %
+    ALERTA con 2 < |dt| <= 10 min            SIN DATO
+    ALERTA con |dt| > 10 min                 n=  8 foco a vent p50 6.88 km, <=1 km 12 %, <=1,5 km 12 %
+    RUTINA (control)                         n=144 foco a vent p50 8.76 km, <=1 km 7 %, <=1,5 km 8 %
+    re-pareo propio a 120 s: ALERTA          n= 55 foco a vent p50 0.36 km, <=1 km 65 %, <=1,5 km 65 %
+    re-pareo propio a 120 s: RUTINA          n=149 foco a vent p50 8.73 km, <=1 km 7 %, <=1,5 km 8 %
+    TIF que 02b llama ALERTA, segun el re-pareo a 120 s: {'ALERTA': np.int64(55), 'RUTINA': np.int64(6), 'sin_fila': np.int64(1)}
+    origen de la hora del TIF en ALERTA: {'acquisition_utc': np.int64(61), 'nombre': np.int64(1)}
+
+  == Isluga: TIF etiquetados ALERTA 97; |dt| en min: p50 0.0, max 30.0
+    ALERTA (como 02b, +-30 min)              n= 97 foco a vent p50 0.85 km, <=1 km 60 %, <=1,5 km 65 %
+    ALERTA con |dt| <= 2 min                 n= 76 foco a vent p50 0.85 km, <=1 km 68 %, <=1,5 km 71 %
+    ALERTA con 2 < |dt| <= 10 min            SIN DATO
+    ALERTA con |dt| > 10 min                 n= 21 foco a vent p50 3.46 km, <=1 km 29 %, <=1,5 km 43 %
+    RUTINA (control)                         n= 95 foco a vent p50 6.53 km, <=1 km 6 %, <=1,5 km 14 %
+    re-pareo propio a 120 s: ALERTA          n= 81 foco a vent p50 0.85 km, <=1 km 70 %, <=1,5 km 73 %
+    re-pareo propio a 120 s: RUTINA          n=107 foco a vent p50 6.48 km, <=1 km 7 %, <=1,5 km 13 %
+    TIF que 02b llama ALERTA, segun el re-pareo a 120 s: {'ALERTA': np.int64(81), 'RUTINA': np.int64(13), 'sin_fila': np.int64(2), 'otra': np.int64(1)}
+    origen de la hora del TIF en ALERTA: {'acquisition_utc': np.int64(95), 'nombre': np.int64(2)}
+
+(b) control A109: foco del TIF (ALERTA segun 02b) contra nuestro cumulo de la misma pasada, de otra pasada de la misma noche (45-120 min) y de otra noche al azar
+  PuyehueCordonCaulle: n=67 TIF con cumulo nuestro en la misma pasada Y en otra pasada de la misma noche
+     d(foco TIF, misma pasada                              ) p50 0.49 km; <=0,6 km 67 %; <=1,5 km 82 %
+     d(foco TIF, otra pasada misma noche (la mas cercana)  ) p50 0.52 km; <=0,6 km 60 %; <=1,5 km 81 %
+     d(foco TIF, otra noche al azar                        ) p50 0.74 km; <=0,6 km 43 %; <=1,5 km 70 %
+     d(foco TIF, vent (referencia fija)                    ) p50 0.68 km; <=0,6 km 48 %; <=1,5 km 82 %
+  Tupungatito: n=44 TIF con cumulo nuestro en la misma pasada Y en otra pasada de la misma noche
+     d(foco TIF, misma pasada                              ) p50 0.23 km; <=0,6 km 73 %; <=1,5 km 73 %
+     d(foco TIF, otra pasada misma noche (la mas cercana)  ) p50 0.47 km; <=0,6 km 64 %; <=1,5 km 66 %
+     d(foco TIF, otra noche al azar                        ) p50 0.39 km; <=0,6 km 64 %; <=1,5 km 64 %
+     d(foco TIF, vent (referencia fija)                    ) p50 0.36 km; <=0,6 km 70 %; <=1,5 km 73 %
+  Isluga: n=66 TIF con cumulo nuestro en la misma pasada Y en otra pasada de la misma noche
+     d(foco TIF, misma pasada                              ) p50 0.21 km; <=0,6 km 65 %; <=1,5 km 68 %
+     d(foco TIF, otra pasada misma noche (la mas cercana)  ) p50 0.59 km; <=0,6 km 50 %; <=1,5 km 59 %
+     d(foco TIF, otra noche al azar                        ) p50 0.61 km; <=0,6 km 48 %; <=1,5 km 61 %
+     d(foco TIF, vent (referencia fija)                    ) p50 0.85 km; <=0,6 km 3 %; <=1,5 km 67 %

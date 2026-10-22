@@ -1,0 +1,169 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-01-10 a 2026-10-21 pisa 13 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-01-16 (tabla, todos): antes los tipos de registro eran otros (17 filas RUTINA con VRP > 0; FALSO_POSITIVO no existia)
+   - 2026-02-14 (tabla, Tupungatito): antes Tupungatito no tiene ninguna fila
+   - 2026-02-23 (tabla, Tupungatito): antes su limite de alerta era 5 km y no 7
+   - 2026-03-01 (tabla, todos): antes, sin contar a Tupungatito, la cobertura nocturna de la tabla en enero (desde el 11) era 99,0 % en MODIS, 98,6 a 99,5 % en VIIRS 375 y 95,2 a 95,7 % en VIIRS 750, y en febrero 98,2 a 99,6 %; desde marzo 99 a 100 %
+   - 2026-03-01 (ocr, VIIRS): antes el OCR corrio con siete versiones y doce metodos de validacion distintos; capturo 0,26 a 0,29 alertas por alerta de la tabla contra 0,50 a 0,89 despues, y no hubo reproceso retroactivo
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+P1 control de identidad del predicado: ([0, 1, 1, 1, 0], [1, 0]) OK
+inner del tablero (frontend/index.html) = volcanoes.yaml: {'Tupungatito': 7.0, 'PuyehueCordonCaulle': 20.0, 'Isluga': 5.0}
+referencia nocturna indexada: 5867 filas en ('2026-01-10', '2026-10-21')
+
+==== Tupungatito (inner 7 km; vent a 4.80 km del centro del TIF)
+  -- VIIRS375: 1184 pasadas nocturnas nuestras; etiquetas {'sin_info': 725, 'pos': 171, 'neg_limpio': 239, 'far_ref': 46, 'sin_geometria': 3}
+     alertas pareadas 171: {'publicada': 160, 'perdida_geometria:pixel_cerca_en_0MW': 5, 'perdida_deteccion': 4, 'perdida_deteccion:foco_lejano': 2}
+       solo tabla (CONS) 130: {'publicada': 126, 'perdida_geometria:pixel_cerca_en_0MW': 2, 'perdida_deteccion': 2}
+       protegidas 4: {'publicada': 2, 'perdida_deteccion:foco_lejano': 2}
+       tramo CONS_desde-mar: {'publicada': 119, 'perdida_geometria:pixel_cerca_en_0MW': 2, 'perdida_deteccion': 2}
+       tramo CONS_ene-feb: {'publicada': 7}
+       tramo OCR_0613-0805: {'publicada': 5}
+       tramo OCR_antes-0613: {'publicada': 19, 'perdida_geometria:pixel_cerca_en_0MW': 3, 'perdida_deteccion': 2}
+       tramo OCR_desde-0806: {'publicada': 10, 'perdida_deteccion:foco_lejano': 2}
+     perdidas por geometria 5: dc {'summit': 5}; pc_dvent p50 0.25 km; octante pc desde vent {'NW': 1, 'SW': 2, 'W': 1, 'S': 1}; ap_min_dvent p50 0.21 km
+        2026-03-04 05:12 MIROVA 0.09 MW @0.99 km [OCR] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=2 d_vent 0.26 NW pc_dist 0.261 | ap n=3 fhs=ctx_cluster a46=None t_bg? t_max 286.48 | pixeles (d_vent, oct, vrp, bt): [(0.6, 'NW', 0.0, 269.27), (0.61, 'NW', 0.0, 267.37), (0.2, 'NE', 0.0, 266.26)]
+        2026-03-06 06:36 MIROVA 0.12 MW @5.21 km [CONS+OCR] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.49 SW pc_dist 0.492 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 285.13 | pixeles (d_vent, oct, vrp, bt): [(0.49, 'SW', 0.0, 265.14)]
+        2026-03-27 06:18 MIROVA 0.13 MW @1.44 km [OCR] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.03 W pc_dist 0.026 | ap n=2 fhs=ctx_cluster a46=None t_bg? t_max 283.08 | pixeles (d_vent, oct, vrp, bt): [(0.05, 'N', 0.0, 266.35), (0.03, 'W', 0.0, 266.6)]
+        2026-04-10 06:24 MIROVA 0.13 MW @4.89 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.25 S pc_dist 0.253 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 283.32 | pixeles (d_vent, oct, vrp, bt): [(0.25, 'S', 0.0, 266.14)]
+        2026-04-12 06:18 MIROVA 0.12 MW @1.35 km [OCR] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.21 SW pc_dist 0.212 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 283.3 | pixeles (d_vent, oct, vrp, bt): [(0.21, 'SW', 0.0, 264.36)]
+     publicadas con alerta 160: pc a vent p50 0.18 km, octante desde vent {'NW': 45, 'SW': 37, 'W': 19, 'N': 17}; pc al centro TIF p50 4.84 km; MIROVA Distancia_km p50 5.21
+     negativos limpios 239: publicamos 11 (4.6 %)
+       donde: pc a vent p50 0.21 km, <=1,5 km 82%, octante desde vent {'W': 3, 'S': 2, 'E': 2, 'N': 2, 'NW': 1}; pc a centro TIF p50 4.88 km; dentro de caja 2,63 del centro TIF 0%, dentro del anillo 7,88 91%
+     far_ref (FALSO_POSITIVO de MIROVA) 46: publicamos 18; con energia detectada 45
+  -- VIIRS750: 1176 pasadas nocturnas nuestras; etiquetas {'sin_info': 594, 'neg_limpio': 564, 'far_ref': 4, 'pos': 14}
+     alertas pareadas 14: {'perdida_geometria:pixel_cerca_en_0MW': 12, 'publicada': 2}
+       solo tabla (CONS) 14: {'perdida_geometria:pixel_cerca_en_0MW': 12, 'publicada': 2}
+       protegidas 0: {}
+       tramo CONS_desde-mar: {'perdida_geometria:pixel_cerca_en_0MW': 11, 'publicada': 2}
+       tramo CONS_ene-feb: {'perdida_geometria:pixel_cerca_en_0MW': 1}
+     perdidas por geometria 12: dc {'summit': 12}; pc_dvent p50 0.30 km; octante pc desde vent {'W': 1, 'NE': 3, 'SE': 3, 'SW': 4, 'E': 1}; ap_min_dvent p50 0.30 km
+        2026-02-26 05:42 MIROVA 0.27 MW @5.41 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.27 W pc_dist 0.271 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 282.93 | pixeles (d_vent, oct, vrp, bt): [(0.27, 'W', 0.0, 265.22)]
+        2026-03-03 05:48 MIROVA 0.25 MW @5.03 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.3 NE pc_dist 0.305 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 280.73 | pixeles (d_vent, oct, vrp, bt): [(0.3, 'NE', 0.0, 263.5)]
+        2026-03-04 05:30 MIROVA 0.17 MW @4.37 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.36 SE pc_dist 0.358 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 284.52 | pixeles (d_vent, oct, vrp, bt): [(0.36, 'SE', 0.0, 262.68)]
+        2026-03-25 05:36 MIROVA 0.25 MW @4.37 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.19 SW pc_dist 0.193 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 280.03 | pixeles (d_vent, oct, vrp, bt): [(0.19, 'SW', 0.0, 263.29)]
+        2026-04-08 05:24 MIROVA 0.17 MW @4.37 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.29 SW pc_dist 0.29 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 282.66 | pixeles (d_vent, oct, vrp, bt): [(0.29, 'SW', 0.0, 263.7)]
+        2026-04-12 05:48 MIROVA 0.3 MW @5.03 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.32 NE pc_dist 0.316 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 282.56 | pixeles (d_vent, oct, vrp, bt): [(0.32, 'NE', 0.0, 260.44)]
+        2026-04-13 05:30 MIROVA 0.26 MW @4.37 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.36 SE pc_dist 0.363 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 276.46 | pixeles (d_vent, oct, vrp, bt): [(0.36, 'SE', 0.0, 261.42)]
+        2026-05-12 05:36 MIROVA 0.24 MW @5.03 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.2 E pc_dist 0.197 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 279.82 | pixeles (d_vent, oct, vrp, bt): [(0.2, 'E', 0.0, 260.75)]
+        2026-05-24 05:12 MIROVA 0.19 MW @4.37 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.09 SW pc_dist 0.09 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 273.31 | pixeles (d_vent, oct, vrp, bt): [(0.09, 'SW', 0.0, 255.72)]
+        2026-05-27 05:36 MIROVA 0.24 MW @4.37 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.14 SE pc_dist 0.135 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 279.2 | pixeles (d_vent, oct, vrp, bt): [(0.14, 'SE', 0.0, 261.94)]
+        2026-05-31 05:30 MIROVA 0.18 MW @4.8 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.39 SW pc_dist 0.389 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 281.43 | pixeles (d_vent, oct, vrp, bt): [(0.39, 'SW', 0.0, 261.42)]
+        2026-08-21 05:48 MIROVA 0.19 MW @5.03 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.31 NE pc_dist 0.309 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 275.59 | pixeles (d_vent, oct, vrp, bt): [(0.31, 'NE', 0.0, 252.7)]
+     publicadas con alerta 2: pc a vent p50 0.26 km, octante desde vent {'W': 1, 'S': 1}; pc al centro TIF p50 4.87 km; MIROVA Distancia_km p50 4.89
+     negativos limpios 564: publicamos 4 (0.7 %)
+       donde: pc a vent p50 3.07 km, <=1,5 km 50%, octante desde vent {'S': 2, 'SW': 1, 'E': 1}; pc a centro TIF p50 5.76 km; dentro de caja 2,63 del centro TIF 0%, dentro del anillo 7,88 75%
+     far_ref (FALSO_POSITIVO de MIROVA) 4: publicamos 0; con energia detectada 2
+  -- MODIS: 603 pasadas nocturnas nuestras; etiquetas {'sin_info': 109, 'neg_limpio': 494}
+     alertas pareadas 0: {}
+       solo tabla (CONS) 0: {}
+       protegidas 0: {}
+     negativos limpios 494: publicamos 0 (0.0 %)
+
+==== PuyehueCordonCaulle (inner 20 km; vent a 7.62 km del centro del TIF)
+  -- VIIRS375: 1321 pasadas nocturnas nuestras; etiquetas {'sin_info': 669, 'pos': 266, 'neg_limpio': 378, 'far_ref': 4, 'sin_geometria': 4}
+     alertas pareadas 266: {'publicada': 259, 'perdida_deteccion': 5, 'perdida_deteccion:foco_lejano': 2}
+       solo tabla (CONS) 187: {'publicada': 183, 'perdida_deteccion': 4}
+       protegidas 4: {'publicada': 4}
+       tramo CONS_desde-mar: {'publicada': 144, 'perdida_deteccion': 3}
+       tramo CONS_ene-feb: {'publicada': 39, 'perdida_deteccion': 1}
+       tramo OCR_0613-0805: {'publicada': 12}
+       tramo OCR_antes-0613: {'publicada': 53, 'perdida_deteccion:foco_lejano': 2}
+       tramo OCR_desde-0806: {'publicada': 11, 'perdida_deteccion': 1}
+     publicadas con alerta 259: pc a vent p50 0.23 km, octante desde vent {'E': 71, 'NW': 53, 'N': 49, 'NE': 42}; pc al centro TIF p50 7.69 km; MIROVA Distancia_km p50 8.10
+     negativos limpios 378: publicamos 38 (10.1 %)
+       donde: pc a vent p50 13.34 km, <=1,5 km 21%, octante desde vent {'N': 8, 'SW': 7, 'NE': 7, 'E': 5, 'SE': 5}; pc a centro TIF p50 12.03 km; dentro de caja 2,63 del centro TIF 3%, dentro del anillo 7,88 29%
+     far_ref (FALSO_POSITIVO de MIROVA) 4: publicamos 3; con energia detectada 4
+  -- VIIRS750: 1310 pasadas nocturnas nuestras; etiquetas {'sin_info': 660, 'neg_limpio': 589, 'pos': 61}
+     alertas pareadas 61: {'publicada': 46, 'perdida_geometria:pixel_cerca_en_0MW': 8, 'perdida_deteccion': 7}
+       solo tabla (CONS) 58: {'publicada': 43, 'perdida_geometria:pixel_cerca_en_0MW': 8, 'perdida_deteccion': 7}
+       protegidas 13: {'publicada': 12, 'perdida_deteccion': 1}
+       tramo CONS_desde-mar: {'publicada': 31, 'perdida_geometria:pixel_cerca_en_0MW': 7, 'perdida_deteccion': 7}
+       tramo CONS_ene-feb: {'publicada': 12, 'perdida_geometria:pixel_cerca_en_0MW': 1}
+       tramo OCR_0613-0805: {'publicada': 1}
+       tramo OCR_antes-0613: {'publicada': 2}
+     perdidas por geometria 8: dc {'summit': 8}; pc_dvent p50 0.39 km; octante pc desde vent {'SW': 2, 'N': 1, 'NE': 1, 'S': 2, 'W': 1, 'E': 1}; ap_min_dvent p50 0.39 km
+        2026-02-01 05:12 MIROVA 0.57 MW @7.83 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 3.25 SW pc_dist 3.246 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 286.52 | pixeles (d_vent, oct, vrp, bt): [(3.25, 'SW', 0.0, 279.72)]
+        2026-04-30 06:06 MIROVA 0.41 MW @7.83 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 17.64 N pc_dist 17.644 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 277.57 | pixeles (d_vent, oct, vrp, bt): [(17.64, 'N', 0.0, 264.47)]
+        2026-05-26 05:24 MIROVA 0.44 MW @7.65 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.45 NE pc_dist 0.449 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 283.93 | pixeles (d_vent, oct, vrp, bt): [(0.45, 'NE', 0.0, 276.96)]
+        2026-07-03 05:12 MIROVA 0.52 MW @7.83 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.25 SW pc_dist 0.255 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 279.69 | pixeles (d_vent, oct, vrp, bt): [(0.25, 'SW', 0.0, 269.26)]
+        2026-07-03 06:06 MIROVA 0.53 MW @7.83 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.14 S pc_dist 0.143 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 278.23 | pixeles (d_vent, oct, vrp, bt): [(0.14, 'S', 0.0, 268.34)]
+        2026-07-06 05:12 MIROVA 0.49 MW @7.83 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.5 W pc_dist 0.498 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 276.89 | pixeles (d_vent, oct, vrp, bt): [(0.5, 'W', 0.0, 267.34)]
+        2026-09-07 05:30 MIROVA 0.38 MW @7.65 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.33 E pc_dist 0.329 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 277.68 | pixeles (d_vent, oct, vrp, bt): [(0.33, 'E', 0.0, 268.01)]
+        2026-09-11 05:36 MIROVA 0.49 MW @7.83 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.26 S pc_dist 0.255 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 276.41 | pixeles (d_vent, oct, vrp, bt): [(0.26, 'S', 0.0, 267.28)]
+     publicadas con alerta 46: pc a vent p50 0.26 km, octante desde vent {'NE': 10, 'E': 7, 'N': 6, 'NW': 6}; pc al centro TIF p50 7.69 km; MIROVA Distancia_km p50 7.83
+     negativos limpios 589: publicamos 30 (5.1 %)
+       donde: pc a vent p50 0.58 km, <=1,5 km 57%, octante desde vent {'NE': 11, 'N': 5, 'NW': 4, 'SE': 4, 'SW': 3}; pc a centro TIF p50 8.06 km; dentro de caja 2,63 del centro TIF 0%, dentro del anillo 7,88 40%
+  -- MODIS: 679 pasadas nocturnas nuestras; etiquetas {'sin_info': 51, 'neg_limpio': 628}
+     alertas pareadas 0: {}
+       solo tabla (CONS) 0: {}
+       protegidas 0: {}
+     negativos limpios 628: publicamos 38 (6.1 %)
+       donde: pc a vent p50 9.76 km, <=1,5 km 18%, octante desde vent {'SE': 11, 'SW': 8, 'S': 6, 'N': 5, 'NE': 4}; pc a centro TIF p50 8.96 km; dentro de caja 2,63 del centro TIF 0%, dentro del anillo 7,88 37%
+
+==== Isluga (inner 5 km; vent a 0.06 km del centro del TIF)
+  -- VIIRS375: 1018 pasadas nocturnas nuestras; etiquetas {'sin_info': 530, 'neg_limpio': 96, 'far_ref': 67, 'pos': 321, 'sin_geometria': 4}
+     alertas pareadas 321: {'publicada': 303, 'perdida_geometria:pixel_cerca_en_0MW': 14, 'perdida_deteccion': 1, 'perdida_deteccion:foco_lejano': 2, 'perdida_geometria:cumulo_elegido_lejos_o_0MW': 1}
+       solo tabla (CONS) 231: {'publicada': 217, 'perdida_geometria:pixel_cerca_en_0MW': 13, 'perdida_deteccion': 1}
+       protegidas 8: {'publicada': 8}
+       tramo CONS_desde-mar: {'publicada': 206, 'perdida_geometria:pixel_cerca_en_0MW': 10}
+       tramo CONS_ene-feb: {'publicada': 11, 'perdida_geometria:pixel_cerca_en_0MW': 3, 'perdida_deteccion': 1}
+       tramo OCR_0613-0805: {'publicada': 13, 'perdida_geometria:cumulo_elegido_lejos_o_0MW': 1}
+       tramo OCR_antes-0613: {'publicada': 49, 'perdida_geometria:pixel_cerca_en_0MW': 1, 'perdida_deteccion:foco_lejano': 2}
+       tramo OCR_desde-0806: {'publicada': 24}
+     perdidas por geometria 15: dc {'far': 4, 'summit': 11}; pc_dvent p50 0.94 km; octante pc desde vent {'W': 2, 'SW': 10, 'NW': 1, 'NE': 1, 'SE': 1}; ap_min_dvent p50 0.80 km
+        2026-02-02 06:06 MIROVA 0.1 MW @0.84 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=far pc 0.029 MW n=1 d_vent 22.74 W pc_dist 22.737 | ap n=2 fhs=ctx_cluster a46=None t_bg? t_max 276.64 | pixeles (d_vent, oct, vrp, bt): [(22.74, 'W', 0.0291, 270.41), (0.91, 'SW', 0.0, 266.5)]
+        2026-02-03 06:12 MIROVA 0.07 MW @0.53 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.8 SW pc_dist 0.796 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 272.99 | pixeles (d_vent, oct, vrp, bt): [(0.8, 'SW', 0.0, 264.65)]
+        2026-02-06 06:36 MIROVA 0.09 MW @0.84 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.94 SW pc_dist 0.935 | ap n=2 fhs=ctx_cluster a46=None t_bg? t_max 277.14 | pixeles (d_vent, oct, vrp, bt): [(0.94, 'SW', 0.0, 270.25), (1.0, 'SW', 0.0, 270.55)]
+        2026-02-24 05:54 MIROVA 0.09 MW @2.18 km [OCR] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=2 d_vent 0.88 SW pc_dist 0.883 | ap n=2 fhs=ctx_cluster a46=None t_bg? t_max 277.17 | pixeles (d_vent, oct, vrp, bt): [(1.0, 'SW', 0.0, 269.65), (0.8, 'SW', 0.0, 270.24)]
+        2026-04-06 05:06 MIROVA 0.16 MW @0.84 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.46 SW pc_dist 0.457 | ap n=3 fhs=ctx_cluster a46=None t_bg? t_max 278.59 | pixeles (d_vent, oct, vrp, bt): [(1.24, 'SW', 0.0, 269.54), (0.86, 'SW', 0.0, 271.78), (0.46, 'SW', 0.0, 270.92)]
+        2026-04-11 05:12 MIROVA 0.06 MW @0.84 km [CONS+OCR] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=2 d_vent 0.99 SW pc_dist 0.991 | ap n=2 fhs=ctx_cluster a46=None t_bg? t_max 278.02 | pixeles (d_vent, oct, vrp, bt): [(0.85, 'W', 0.0, 269.73), (1.18, 'SW', 0.0, 270.7)]
+        2026-04-14 06:00 MIROVA 0.08 MW @0.84 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 1.0 SW pc_dist 0.997 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 276.02 | pixeles (d_vent, oct, vrp, bt): [(1.0, 'SW', 0.0, 267.32)]
+        2026-06-28 05:00 MIROVA 0.09 MW @0.38 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.55 SW pc_dist 0.549 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 273.35 | pixeles (d_vent, oct, vrp, bt): [(0.55, 'SW', 0.0, 266.86)]
+        2026-06-30 05:18 MIROVA 0.09 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=far pc 0.062 MW n=1 d_vent 18.88 NW pc_dist 18.88 | ap n=2 fhs=ctx_cluster a46=None t_bg? t_max 275.33 | pixeles (d_vent, oct, vrp, bt): [(18.88, 'NW', 0.0618, 272.59), (0.88, 'W', 0.0, 268.04)]
+        2026-07-07 06:24 MIROVA 0.09 MW @0.53 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.79 SW pc_dist 0.791 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 274.48 | pixeles (d_vent, oct, vrp, bt): [(0.79, 'SW', 0.0, 264.49)]
+        2026-07-28 06:12 MIROVA 0.74 MW @0.81 km [OCR] | perdida_geometria:cumulo_elegido_lejos_o_0MW dc=summit pc 0.0 MW n=1 d_vent 0.99 SW pc_dist 0.99 | ap n=3 fhs=ctx_cluster a46=None t_bg? t_max 291.57 | pixeles (d_vent, oct, vrp, bt): [(24.52, 'E', 0.5198, 291.57), (16.34, 'SE', 0.2252, 281.24), (0.99, 'SW', 0.0001, 268.53)]
+        2026-09-13 05:12 MIROVA 0.07 MW @0.38 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.63 W pc_dist 0.626 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 274.49 | pixeles (d_vent, oct, vrp, bt): [(0.63, 'W', 0.0, 267.95)]
+     publicadas con alerta 303: pc a vent p50 0.84 km, octante desde vent {'SW': 287, 'W': 14, 'NE': 1, 'N': 1}; pc al centro TIF p50 0.78 km; MIROVA Distancia_km p50 0.84
+     negativos limpios 96: publicamos 5 (5.2 %)
+       donde: pc a vent p50 0.83 km, <=1,5 km 80%, octante desde vent {'SW': 2, 'NE': 1, 'S': 1, 'W': 1}; pc a centro TIF p50 0.77 km; dentro de caja 2,63 del centro TIF 80%, dentro del anillo 7,88 100%
+     far_ref (FALSO_POSITIVO de MIROVA) 67: publicamos 36; con energia detectada 67
+  -- VIIRS750: 1014 pasadas nocturnas nuestras; etiquetas {'sin_info': 476, 'neg_limpio': 493, 'pos': 43, 'far_ref': 2}
+     alertas pareadas 43: {'perdida_geometria:pixel_cerca_en_0MW': 19, 'publicada': 18, 'perdida_deteccion': 6}
+       solo tabla (CONS) 43: {'perdida_geometria:pixel_cerca_en_0MW': 19, 'publicada': 18, 'perdida_deteccion': 6}
+       protegidas 1: {'publicada': 1}
+       tramo CONS_desde-mar: {'perdida_geometria:pixel_cerca_en_0MW': 18, 'perdida_deteccion': 6, 'publicada': 17}
+       tramo CONS_ene-feb: {'perdida_geometria:pixel_cerca_en_0MW': 1, 'publicada': 1}
+     perdidas por geometria 19: dc {'summit': 19}; pc_dvent p50 0.99 km; octante pc desde vent {'SW': 9, 'S': 10}; ap_min_dvent p50 0.99 km
+        2026-02-26 05:36 MIROVA 0.17 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 1.12 SW pc_dist 1.119 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 276.66 | pixeles (d_vent, oct, vrp, bt): [(1.12, 'SW', 0.0, 268.82)]
+        2026-03-03 05:48 MIROVA 0.35 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.89 SW pc_dist 0.895 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 275.71 | pixeles (d_vent, oct, vrp, bt): [(0.89, 'SW', 0.0, 268.66)]
+        2026-03-09 05:30 MIROVA 0.25 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.76 SW pc_dist 0.761 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 276.31 | pixeles (d_vent, oct, vrp, bt): [(0.76, 'SW', 0.0, 268.18)]
+        2026-03-13 06:00 MIROVA 0.22 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.99 S pc_dist 0.986 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 275.59 | pixeles (d_vent, oct, vrp, bt): [(0.99, 'S', 0.0, 268.82)]
+        2026-04-07 05:36 MIROVA 0.19 MW @0.0 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.52 SW pc_dist 0.524 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 276.2 | pixeles (d_vent, oct, vrp, bt): [(0.52, 'SW', 0.0, 266.55)]
+        2026-04-12 05:42 MIROVA 0.18 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 1.11 S pc_dist 1.109 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 276.46 | pixeles (d_vent, oct, vrp, bt): [(1.11, 'S', 0.0, 267.49)]
+        2026-04-28 05:42 MIROVA 0.33 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.94 S pc_dist 0.939 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 275.28 | pixeles (d_vent, oct, vrp, bt): [(0.94, 'S', 0.0, 267.3)]
+        2026-05-28 05:36 MIROVA 0.24 MW @0.0 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 0.52 S pc_dist 0.517 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 273.44 | pixeles (d_vent, oct, vrp, bt): [(0.52, 'S', 0.0, 264.85)]
+        2026-06-02 05:42 MIROVA 0.26 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 1.04 S pc_dist 1.036 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 272.5 | pixeles (d_vent, oct, vrp, bt): [(1.04, 'S', 0.0, 264.66)]
+        2026-06-07 05:48 MIROVA 0.2 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 1.01 S pc_dist 1.008 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 270.66 | pixeles (d_vent, oct, vrp, bt): [(1.01, 'S', 0.0, 262.89)]
+        2026-06-08 05:30 MIROVA 0.21 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 1.02 S pc_dist 1.023 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 268.82 | pixeles (d_vent, oct, vrp, bt): [(1.02, 'S', 0.0, 261.41)]
+        2026-06-22 05:12 MIROVA 0.22 MW @0.75 km [CONS] | perdida_geometria:pixel_cerca_en_0MW dc=summit pc 0.0 MW n=1 d_vent 1.08 SW pc_dist 1.081 | ap n=1 fhs=ctx_cluster a46=None t_bg? t_max 272.0 | pixeles (d_vent, oct, vrp, bt): [(1.08, 'SW', 0.0, 264.96)]
+     publicadas con alerta 18: pc a vent p50 0.88 km, octante desde vent {'SW': 11, 'S': 4, 'W': 2, 'NW': 1}; pc al centro TIF p50 0.82 km; MIROVA Distancia_km p50 0.75
+     negativos limpios 493: publicamos 10 (2.0 %)
+       donde: pc a vent p50 1.01 km, <=1,5 km 90%, octante desde vent {'SW': 7, 'S': 2, 'N': 1}; pc a centro TIF p50 0.95 km; dentro de caja 2,63 del centro TIF 90%, dentro del anillo 7,88 100%
+     far_ref (FALSO_POSITIVO de MIROVA) 2: publicamos 0; con energia detectada 2
+  -- MODIS: 523 pasadas nocturnas nuestras; etiquetas {'sin_info': 37, 'neg_limpio': 484, 'far_ref': 2}
+     alertas pareadas 0: {}
+       solo tabla (CONS) 0: {}
+       protegidas 0: {}
+     negativos limpios 484: publicamos 1 (0.2 %)
+       donde: pc a vent p50 0.21 km, <=1,5 km 100%, octante desde vent {'E': 1}; pc a centro TIF p50 0.26 km; dentro de caja 2,63 del centro TIF 100%, dentro del anillo 7,88 100%
+     far_ref (FALSO_POSITIVO de MIROVA) 2: publicamos 0; con energia detectada 2
+
+alertas de MIROVA sin record nuestro (alertas_sin_record): 3
+  por volcan/sensor: {}
