@@ -517,6 +517,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
+| D-41 | **PENDIENTE**: alertas sólo OCR en el criterio de victoria de VRP Chile (las 184 protegidas que sólo existen en el OCR; entre 40 y 90 serían falsas, centro ~55, estimado). Opciones: todas; sólo las del método de la estrella, nocturnas y desde V29.2 (2026-06-13); ninguna. Recomendación del informe y del loop: **sólo estrella nocturna desde V29.2**, el resto contado aparte. Hoy `Metodo_Validacion` no dice el método (hay que leerlo en la nota, R10). No toca los pre-registros sellados: aplica a evaluaciones nuevas, y en las selladas se informa como lectura adicional | informe §4 y H-O1 | | (sin issue) |
+| D-40 | **PENDIENTE**: arreglos del OCR y la operación de Mirova-v1 (R5 fallar fuerte, R6 vigilante de dato, R7 cron de respaldo y fila de credencial, R8 lista cerrada de sensores, R9 y R10 marcar el método de grupo y guardar el método real, R11 rastro de reconciliación, R12 mojibake). Recomendación del informe: R9 + R10 (marcar, no apagar) y R5 a R7 primero; 141 ciclos reales con 0 filas cerraron «Proceso completado» | informe §3 y H-P1, H-O1, H-O4 | | (sin issue) |
+| D-39 | **PENDIENTE**: bucle de push del scraper Mirova-v1 (la tabla pierde filas: 1.948 en 60 días, 18 protegidas, 14 de Láscar, por 8 commits del propio scraper que mezclan como texto un CSV reescrito en otro orden). Opciones: R1 solo; R1+R2+R3; nada. Recomendación del informe y del loop: **R1+R2+R3** y **reponer las filas en Mirova-v1** (R4, `filas_recuperadas.csv`); además R13 en VRP Chile (`sync-mirova-csv.yml:191`: reset a `origin/main` en vez de rebase, porque el mismo mecanismo fabricó la copia corrupta `81dd25ce3`). Es producción de Mirova-v1 y un workflow de VRP Chile: sólo con el sí de Nicolás | `experiments/_s159/mirova_v1_auditoria/INFORME.md` H-T1 y H-V1 (copia; scripts en `D:\vrp-trabajo\mirova-v1-auditoria\`) | | (sin issue) |
 | D-38 | **PENDIENTE**: alarma de plataforma callada en #892: ¿comenta cada día mientras dure (lo pedido), o patrón S123 (editar el cuerpo y comentar sólo cuando cambia la lista de sensores callados)? Recomendación del loop: **patrón S123**; un comentario diario idéntico se deja de leer, y el cambio son pocas líneas, después del merge | descripción de #892, «Preguntas que quedan» 2 | #892 | (sin issue) |
 | D-37 | **PENDIENTE, con plazo 2026-11-02 13:00 UTC**: merge de **#892** (vigilancia por plataforma, aviso del cese de Suomi NPP en index, diario y mosaico, ficha SDA v1.10; toca `frontend/` y `.github/`, no `pipeline/` ni `data/`). CI `pytest` verde; verificado en el navegador (comentario en el PR). Más la pregunta 1 del PR: el issue informativo, ¿«una sola vez» aunque se cierre (busca en abiertos y cerrados) o se repite al cerrarlo? Recomendación del loop: **mergear ya** y **una sola vez** (el cese es un hecho único; repetirlo es ruido) | #892 y su comentario de verificación (`issuecomment-6332148549`) | #892 | (sin issue) |
 | D-36 | **PENDIENTE**: ampliar el port (bloque S160 §b.9). El verificador limpio deja el «GANA contra K» de MODIS **NO RESUELTO**: el estrato de negativos limpios donde producción calla (5.093 noches MODIS, 3.348 VIIRS 375) tiene 0 de 37 y 0 de 45 sorteados, y con 0 eventos el bootstrap estratificado no ve nada; la cota de Wilson deja el silencio del port hasta 9,4 % (MODIS) y 8,5 % (VIIRS 375), contra 0,76 % y 3,85 % de K. Recomendación del loop: **sí, un lote de sólo lectura con 300 a 400 negativos de ese estrato por sensor**, con pre-registro previo (con 0 en 400 la cota baja a ~0,95 %, del orden de K); el lote corre fuera de producción | `experiments/_s159/portes/verificador/INFORME.md` V-1 (`ca034d66e`, ramas `s159-portes` y `s159-pruebas`) | | (sin issue) |
@@ -562,7 +565,22 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-22 ~03:45 UTC (S160 nocturna): #892 (cese de Suomi NPP) verificado en el navegador
+### 2026-10-22 ~03:47 UTC (S160 nocturna): auditoría de Mirova-v1 entregada
+- Sesión `audit-mirova-v1` terminada (sólo lectura, commit medido `c48d24cad8`). Informe y `hallazgos.csv` copiados a
+  `experiments/_s159/mirova_v1_auditoria/`; scripts y verificadores en `D:\vrp-trabajo\mirova-v1-auditoria\`. Sin
+  verificación propia de esta sesión. En una pantalla: (1) la tabla pierde filas por el bucle de push del scraper
+  (`git pull --rebase -X ours` mezcla como texto un CSV reescrito en otro orden), reproducido byte a byte, sigue
+  activo; (2) el contenido de la tabla es confiable, pero `latest.php` sólo muestra la última pasada de cada volcán y
+  sensor: una pasada que el scraper no alcanzó se pierde y entra como «sin información», nunca como negativo; (3) el
+  OCR vale como VRP y hora, y como clase sólo con el método de la estrella, de noche y desde V29.2; (4) las 39
+  reescrituras son manuales de Nicolás; la copia corrupta `81dd25ce3` la fabricó el sync de VRP Chile; (5) el scraper
+  y el OCR salen con código 0 en toda falla de MIROVA. Decisiones D-39 a D-41.
+- **Para la relectura de D25**: la referencia sellada es la copia congelada por hash del pre-registro (no se cambia
+  después del sello). El informe agrega dos lecturas informativas para poner al lado, sin decidir: la tabla sola (ya
+  pedida) y las protegidas sólo OCR restringidas al método de la estrella nocturna desde V29.2. El riesgo latente de
+  `scripts/clase_mirova.py:65-75` (una fila OCR que le gana a la histórica de la tabla) da 0 casos hoy según el informe.
+
+### 2026-10-22 ~03:43 UTC (S160 nocturna): #892 (cese de Suomi NPP) verificado en el navegador
 - PR **#892** abierto por el agente de S159 (rama `s159-cese-snpp`, `f995d7101`, CI `pytest` verde). Verificado en el
   preview `vrp-frontend-s159-cese`: recuadro en index, diario y mosaico bajo el aviso de K; ausente en comparacion;
   ninguna línea «sin Suomi NPP» hoy, con control positivo; texto en pasado con el reloj en el 3-nov y nulo a los 90
