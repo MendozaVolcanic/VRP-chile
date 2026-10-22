@@ -556,6 +556,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): ola 2b, ocho frentes en paralelo (sí de Nicolás al paquete)
+- Nicolás pidió vías nuevas y aprobó el paquete («si continua con el paquete que dices, todo lo que se pueda en
+  paralelo»). Lanzados, sin worktrees nuevos (carpetas en `s159-pruebas` salvo el 6, en `C:rp-trabajo\s159-n` rama
+  `s159-portes`): (1) **gemelo de D25**: ¿K y K' corren en el mismo job y su ruido de P2 es cero por construcción?, sin
+  abrir el brazo D; (2) **negativo limpio con cráter**: exigir que el gránulo que listó MIROVA tenga el cráter y
+  recalcular la línea base de K, el +12 de F y el oráculo; (3) **estabilidad de la referencia**: cuántas filas pasadas
+  reescribe el consolidado y en cuánto se asienta; (4) **¿el paquete cura el déficit oblicuo?**, con los datos de N por
+  cenit; (6) **portar el código de VIIRS 750 a VIIRS 375 y MODIS** contra MIROVA (tope 300 pasadas, runs de sólo
+  lectura); (7) **rescatar gránulos** del 12 y del 17 al 20 de octubre listando LAADS y LANCE; (8) **código OSF entero**
+  (Fable): pasos distintos sin frente y qué dice de la selección de gránulo; (9) **bibliografía 2025-2026 y avisos de
+  NASA** (Fable, skill `investigacion`). El (5), censo del oráculo sobre todos los negativos de VIIRS 750, espera el sí
+  de Nicolás por la escala. Sigue corriendo la segunda vuelta de #890 (D-30, D-32).
+
 ### 2026-10-21 (S159, dueña del loop): censo de F (D-31) terminado
 - Run 39693661527 (pre-registro `bf6cf4db5` antes del disparo; apéndice `69eb48eb0` en `s159-n`, integrado a
   `s159-pruebas`). 122 pasadas: 60 negativos con cúmulo de cumbre en 0 MW, 59 `far`, Isluga 2026-10-12 05:48 y las otras
