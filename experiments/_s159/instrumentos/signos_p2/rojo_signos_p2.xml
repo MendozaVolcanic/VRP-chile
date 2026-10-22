@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="31" skipped="0" tests="31" time="14.160" timestamp="2026-10-22T16:12:05.215647-03:00" hostname="Nico"><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_las_constantes_de_la_prueba_de_signos_son_las_selladas" time="0.001"><failure message="AssertionError: falta SEMILLA_P2_SIGNOS (D-45)&#10;assert False&#10; +  where False = hasattr(X, 'SEMILLA_P2_SIGNOS')">def test_las_constantes_de_la_prueba_de_signos_son_las_selladas():
+        """§2.5 y §2.7: semilla 162 = SEMILLA + 5, 10.000 sorteos, exacto hasta B = 20, SIN SUSTRATO con B &lt;= 4."""
+        for nombre in ("SEMILLA_P2_SIGNOS", "N_SORTEOS_P2_SIGNOS", "MAX_B_EXACTO_P2", "MAX_B_SIN_SUSTRATO_P2"):
+&gt;           assert hasattr(X, nombre), "falta %s (D-45)" % nombre
+E           AssertionError: falta SEMILLA_P2_SIGNOS (D-45)
+E           assert False
+E            +  where False = hasattr(X, 'SEMILLA_P2_SIGNOS')
+
+tests\test_evaluar_d25_signos_p2_s161.py:115: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_siete_noches_del_mismo_lado_deciden_con_p_1_de_128[1-PIERDE]" time="0.371"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.46, 'falsos_gana': 0.074, 'falsos_pierde': 0.071, ...}">signo = 1, esperado = 'PIERDE'
+
+    @pytest.mark.parametrize("signo,esperado", [(+1, "PIERDE"), (-1, "GANA")])
+    def test_siete_noches_del_mismo_lado_deciden_con_p_1_de_128(signo, esperado):
+        """V42-20: con 7 noches todas del mismo lado la calibración de D-42 falla (la regla de D-34 tiene 6,25 % por cola
+        con B = 7) y dejaba INDECIDIBLE. Con D-45 decide, con p = 1/128 en la cola de su dirección (mutación 11: la
+        calibración de D-42 todavía decide). Control de poder: el detalle informa que D-42 habría dado INDECIDIBLE."""
+&gt;       v, det = _decidir([[signo]] * 7)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[1], [1], [1], [1], [1], [1], ...], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.46, 'falsos_gana': 0.074, 'falsos_pierde': 0.071, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_siete_noches_del_mismo_lado_deciden_con_p_1_de_128[-1-GANA]" time="0.354"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.395, 'falsos_gana': 0.071, 'falsos_pierde': 0.074, ...}">signo = -1, esperado = 'GANA'
+
+    @pytest.mark.parametrize("signo,esperado", [(+1, "PIERDE"), (-1, "GANA")])
+    def test_siete_noches_del_mismo_lado_deciden_con_p_1_de_128(signo, esperado):
+        """V42-20: con 7 noches todas del mismo lado la calibración de D-42 falla (la regla de D-34 tiene 6,25 % por cola
+        con B = 7) y dejaba INDECIDIBLE. Con D-45 decide, con p = 1/128 en la cola de su dirección (mutación 11: la
+        calibración de D-42 todavía decide). Control de poder: el detalle informa que D-42 habría dado INDECIDIBLE."""
+&gt;       v, det = _decidir([[signo]] * 7)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1], [-1], [-1], [-1], [-1], [-1], ...], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.395, 'falsos_gana': 0.071, 'falsos_pierde': 0.074, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_seis_contra_una_con_siete_noches_no_decide[1-BLOQUEA]" time="0.328"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.467, 'falsos_gana': 0.054, 'falsos_pierde': 0.066, ...}">signo = 1, esperado = 'BLOQUEA'
+
+    @pytest.mark.parametrize("signo,esperado", [(+1, "BLOQUEA"), (-1, "EMPATE")])
+    def test_seis_contra_una_con_siete_noches_no_decide(signo, esperado):
+        """§7: 6 contra 1 con 7 noches no decide. Neto 5: p = 8/128 = 6,25 % &gt; 5 % (mutación 2, tope al 10 %). La regla de
+        D-34 sin calibrar sí lo daba por decidido (V42-20), y se informa."""
+&gt;       v, det = _decidir([[signo]] * 6 + [[-signo]])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[1], [1], [1], [1], [1], [1], ...], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.467, 'falsos_gana': 0.054, 'falsos_pierde': 0.066, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_seis_contra_una_con_siete_noches_no_decide[-1-EMPATE]" time="0.294"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.413, 'falsos_gana': 0.066, 'falsos_pierde': 0.054, ...}">signo = -1, esperado = 'EMPATE'
+
+    @pytest.mark.parametrize("signo,esperado", [(+1, "BLOQUEA"), (-1, "EMPATE")])
+    def test_seis_contra_una_con_siete_noches_no_decide(signo, esperado):
+        """§7: 6 contra 1 con 7 noches no decide. Neto 5: p = 8/128 = 6,25 % &gt; 5 % (mutación 2, tope al 10 %). La regla de
+        D-34 sin calibrar sí lo daba por decidido (V42-20), y se informa."""
+&gt;       v, det = _decidir([[signo]] * 6 + [[-signo]])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1], [-1], [-1], [-1], [-1], [-1], ...], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.413, 'falsos_gana': 0.066, 'falsos_pierde': 0.054, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_cinco_noches_del_mismo_lado_deciden_a_una_cola[1-PIERDE]" time="0.336"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.491, 'falsos_gana': 0.032, 'falsos_pierde': 0.038, ...}">signo = 1, esperado = 'PIERDE'
+
+    @pytest.mark.parametrize("signo,esperado", [(+1, "PIERDE"), (-1, "GANA")])
+    def test_cinco_noches_del_mismo_lado_deciden_a_una_cola(signo, esperado):
+        """§2.4: a una cola 5 noches del mismo lado dan p = 1/32 = 3,1 % y deciden; a dos colas (p = 1/16) no podrían
+        (mutación 1). El valor-p a dos colas se informa al lado y no decide."""
+&gt;       v, det = _decidir([[signo]] * 5)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[1], [1], [1], [1], [1]], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.491, 'falsos_gana': 0.032, 'falsos_pierde': 0.038, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_cinco_noches_del_mismo_lado_deciden_a_una_cola[-1-GANA]" time="0.369"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.439, 'falsos_gana': 0.038, 'falsos_pierde': 0.032, ...}">signo = -1, esperado = 'GANA'
+
+    @pytest.mark.parametrize("signo,esperado", [(+1, "PIERDE"), (-1, "GANA")])
+    def test_cinco_noches_del_mismo_lado_deciden_a_una_cola(signo, esperado):
+        """§2.4: a una cola 5 noches del mismo lado dan p = 1/32 = 3,1 % y deciden; a dos colas (p = 1/16) no podrían
+        (mutación 1). El valor-p a dos colas se informa al lado y no decide."""
+&gt;       v, det = _decidir([[signo]] * 5)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1], [-1], [-1], [-1], [-1]], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.439, 'falsos_gana': 0.038, 'falsos_pierde': 0.032, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_la_cola_de_gana_es_menor_o_igual_y_la_de_pierde_mayor_o_igual" time="0.500"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.479, 'falsos_gana': 0.014, 'falsos_pierde': 0.017, ...}">def test_la_cola_de_gana_es_menor_o_igual_y_la_de_pierde_mayor_o_igual():
+        """§2.4 (mutación 3): GANA = fracción de repartos con suma &lt;= neto; PIERDE = fracción con suma &gt;= neto. Con el neto
+        observado en -5 y bloques [-2, -1, -1, +1, -1, -1] los dos valores-p se calculan aparte por enumeración."""
+        por_noche = [[-1, -1], [-1], [-1], [+1], [-1], [-1, +1, -1]]
+        c = _contrib(por_noche)
+        s = _sumas_bloque(c)
+        neto = sum(s)
+        k_le, k_ge, k_dos, den = _oraculo_exacto(s, neto)
+&gt;       v, det = _decidir(por_noche)
+                 ^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:172: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1, -1], [-1], [-1], [1], [-1], [-1, 1, -1]], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.479, 'falsos_gana': 0.014, 'falsos_pierde': 0.017, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_cuatro_noches_dan_sin_sustrato[1]" time="0.001"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': None, 'falsos_bloquea': None, 'falsos_gana': None, 'falsos_pierde': None, ...}">signo = 1
+
+    @pytest.mark.parametrize("signo", [+1, -1])
+    def test_cuatro_noches_dan_sin_sustrato(signo):
+        """§2.7: con B &lt;= 4 P2 da SIN SUSTRATO y no decide ni bloquea (mutación 4 con B &lt;= 3: con 4 noches de +1 saldría
+        BLOQUEA y con 4 de -1 EMPATE). Los campos de §4 se informan igual."""
+&gt;       v, det = _decidir([[signo]] * 4)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[1], [1], [1], [1]], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': None, 'falsos_bloquea': None, 'falsos_gana': None, 'falsos_pierde': None, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_cuatro_noches_dan_sin_sustrato[-1]" time="0.001"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': None, 'falsos_bloquea': None, 'falsos_gana': None, 'falsos_pierde': None, ...}">signo = -1
+
+    @pytest.mark.parametrize("signo", [+1, -1])
+    def test_cuatro_noches_dan_sin_sustrato(signo):
+        """§2.7: con B &lt;= 4 P2 da SIN SUSTRATO y no decide ni bloquea (mutación 4 con B &lt;= 3: con 4 noches de +1 saldría
+        BLOQUEA y con 4 de -1 EMPATE). Los campos de §4 se informan igual."""
+&gt;       v, det = _decidir([[signo]] * 4)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1], [-1], [-1], [-1]], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': None, 'falsos_bloquea': None, 'falsos_gana': None, 'falsos_pierde': None, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_b_cuenta_los_bloques_de_suma_cero" time="0.382"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.239, 'falsos_gana': 0.073, 'falsos_pierde': 0.065, ...}">def test_b_cuenta_los_bloques_de_suma_cero():
+        """§2.2 (mutación 5): cuatro noches de -1 y una noche con un error de D y otro de K (suma 0) son B = 5, no 4: P2
+        se calcula (EMPATE, p = 2/32) y no queda SIN SUSTRATO."""
+&gt;       v, det = _decidir([[-1]] * 4 + [[+1, -1]])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1], [-1], [-1], [-1], [1, -1]], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.239, 'falsos_gana': 0.073, 'falsos_pierde': 0.065, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_el_signo_es_por_bloque_y_no_por_pasada" time="0.405"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.486, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...}">def test_el_signo_es_por_bloque_y_no_por_pasada():
+        """§2.3 (mutación 6): doce errores sólo de K en una misma noche y cuatro noches de suma 0 son 5 bloques; la noche
+        entera cambia de signo junta, así que P(suma &lt;= -12) = 1/2 y P2 da EMPATE. Por pasada (20 monedas) saldría GANA."""
+&gt;       v, det = _decidir([[-1] * 12, [+1, -1], [+1, -1], [+1, -1], [+1, -1]])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:205: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1, -1, -1, -1, -1, -1, ...], [1, -1], [1, -1], [1, -1], [1, -1]]
+ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.486, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_con_b_20_el_metodo_es_exacto_y_reproduce_la_enumeracion" time="0.586"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.469, 'falsos_gana': 0.033, 'falsos_pierde': 0.032, ...}">def test_con_b_20_el_metodo_es_exacto_y_reproduce_la_enumeracion():
+        """§2.5 (mutación 7): con B &lt;= 20 se enumeran los 2^B repartos. La prueba exige «exacto» en B = 20 y el valor-p
+        k / 2^20 de la enumeración hecha aparte, sin semilla ni sorteos."""
+        c = _veinte()
+        s = _sumas_bloque(_contrib(c))
+        assert len(s) == 20
+        k_le, k_ge, k_dos, den = _oraculo_exacto(s, sum(s))
+&gt;       v, det = _decidir(c)
+                 ^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:230: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1, -1, -1], [-1], [1, -1], [1], [-1, -1], [-1], ...]
+ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.469, 'falsos_gana': 0.033, 'falsos_pierde': 0.032, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_con_b_21_son_10000_sorteos_con_semilla_162_y_el_mas_uno" time="0.311"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.464, 'falsos_gana': 0.031, 'falsos_pierde': 0.027, ...}">def test_con_b_21_son_10000_sorteos_con_semilla_162_y_el_mas_uno():
+        """§2.5 (mutaciones 7, 8 y 9): con B &gt;= 21, 10.000 sorteos de signos por bloque con semilla 162 y valor-p
+        (1 + m) / 10.001. Se compara con el sorteo repetido aquí con los literales; el valor-p de GANA cae lejos de 0 y de
+        1 (unas 1.000 de 10.000), así que otra semilla, otro número de sorteos o el valor-p sin el +1 dan otra fracción."""
+        c = _veintiuno()
+        s = _sumas_bloque(_contrib(c))
+        assert len(s) == 21
+        num_le, num_ge, num_dos, den = _oraculo_sorteos(s, sum(s))
+        assert 100 &lt; num_le &lt; 9900, "sin poder: el sorteo no distingue semillas (%d)" % num_le
+&gt;       v, det = _decidir(c)
+                 ^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:248: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1, -1, -1, -1, -1], [-1], [-1], [-1], [-1], [-1], ...]
+ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.464, 'falsos_gana': 0.031, 'falsos_pierde': 0.027, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_el_detalle_dice_la_semilla_y_los_sorteos_que_se_usaron" time="0.001"><failure message="AssertionError: falta prueba_signos_p2 (D-45)&#10;assert False&#10; +  where False = hasattr(X, 'prueba_signos_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x0000023DEFB1B230&gt;
+
+    def test_el_detalle_dice_la_semilla_y_los_sorteos_que_se_usaron(monkeypatch):
+        """Como V42-04 para D-42: la semilla y el número de sorteos del detalle salen de lo que la prueba usó, no de las
+        constantes (si no, una llamada con otros números seguiría declarando 162 y 10.000)."""
+&gt;       assert hasattr(X, "prueba_signos_p2"), "falta prueba_signos_p2 (D-45)"
+E       AssertionError: falta prueba_signos_p2 (D-45)
+E       assert False
+E        +  where False = hasattr(X, 'prueba_signos_p2')
+
+tests\test_evaluar_d25_signos_p2_s161.py:261: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_un_sorteo_con_una_noche_grande_es_por_bloque" time="0.332"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.498, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...}">def test_un_sorteo_con_una_noche_grande_es_por_bloque():
+        """§2.3 con sorteos (mutación 6 en la rama de B &gt;= 21): una noche con doce errores de K y veinte noches de suma 0.
+        Por bloque, la suma es ±12 con probabilidad 1/2 cada una: valor-p de GANA cerca de 1/2 y P2 EMPATE."""
+        c = [[-1] * 12] + [[+1, -1]] * 20
+        s = _sumas_bloque(_contrib(c))
+        num_le, num_ge, num_dos, den = _oraculo_sorteos(s, sum(s))
+&gt;       v, det = _decidir(c)
+                 ^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:278: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1, -1, -1, -1, -1, -1, ...], [1, -1], [1, -1], [1, -1], [1, -1], [1, -1], ...]
+ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.498, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_neto_cero_es_empate_y_no_bloquea" time="0.345"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.307, 'falsos_gana': 0.01, 'falsos_pierde': 0.018, ...}">def test_neto_cero_es_empate_y_no_bloquea():
+        """§2.6 (mutación 10): BLOQUEA exige neto &gt; 0; con neto 0 y sin llegar, EMPATE."""
+&gt;       v, det = _decidir([[+1]] * 3 + [[-1]] * 3)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:288: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[1], [1], [1], [-1], [-1], [-1]], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.307, 'falsos_gana': 0.01, 'falsos_pierde': 0.018, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_neto_positivo_sin_llegar_bloquea" time="0.429"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.37, 'falsos_gana': 0.01, 'falsos_pierde': 0.009, ...}">def test_neto_positivo_sin_llegar_bloquea():
+&gt;       v, det = _decidir([[+1]] * 6 + [[-1]] * 4)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:294: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[1], [1], [1], [1], [1], [1], ...], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.37, 'falsos_gana': 0.01, 'falsos_pierde': 0.009, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_con_muchas_noches_decide_en_las_dos_direcciones" time="0.370"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.36, 'falsos_gana': 0.025, 'falsos_pierde': 0.02, ...}">def test_con_muchas_noches_decide_en_las_dos_direcciones():
+        for por_noche, esperado in (([[-1]] * 12, "GANA"), ([[+1]] * 12, "PIERDE")):
+&gt;           v, det = _decidir(por_noche)
+                     ^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:302: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1], [-1], [-1], [-1], [-1], [-1], ...], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.36, 'falsos_gana': 0.025, 'falsos_pierde': 0.02, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_controles_caidos_dejan_indecidible_e_informan" time="0.001"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': None, 'falsos_bloquea': None, 'falsos_gana': None, 'falsos_pierde': None, ...}">def test_controles_caidos_dejan_indecidible_e_informan():
+        """§2.8: con los controles generales caídos P2 sigue INDECIDIBLE (es lo único que lo deja INDECIDIBLE)."""
+&gt;       v, det = _decidir([[-1]] * 12, ok_ctrl=False)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:308: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1], [-1], [-1], [-1], [-1], [-1], ...], ok_ctrl = False
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': None, 'falsos_bloquea': None, 'falsos_gana': None, 'falsos_pierde': None, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_la_regla_que_decide_es_d45" time="0.338"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.395, 'falsos_gana': 0.071, 'falsos_pierde': 0.074, ...}">def test_la_regla_que_decide_es_d45():
+&gt;       v, det = _decidir([[-1]] * 7)
+                 ^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1], [-1], [-1], [-1], [-1], [-1], ...], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.395, 'falsos_gana': 0.071, 'falsos_pierde': 0.074, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_d34_y_d42_se_informan_y_no_deciden" time="0.337"><failure message="AssertionError: el detalle ya no informa resultado_d42 (§3)&#10;assert 'resultado_d42' in {'calibrada': False, 'falsos_bloquea': 0.46, 'falsos_gana': 0.074, 'falsos_pierde': 0.071, ...}">def test_d34_y_d42_se_informan_y_no_deciden():
+        """§3 (mutación 12): el resultado de D-34 sin calibrar con su intervalo, y el de D-42 (calibrada o no, falsos GANA,
+        PIERDE y BLOQUEA, sorteos y semilla 161), se informan. En 7 noches de +1 D-34 da PIERDE con el intervalo entero
+        sobre 0, D-42 lo deja INDECIDIBLE (calibración fallida, 1.000 sorteos con semilla 161) y decide D-45 (PIERDE)."""
+        c = _contrib([[+1]] * 7)
+        v34, ic = _oraculo_d34(c)
+        v, det = X.decidir_p2_bloques(c, ok_ctrl=True)
+        for campo in CAMPOS_INFORMA:
+&gt;           assert campo in det, "el detalle ya no informa %s (§3)" % campo
+E           AssertionError: el detalle ya no informa resultado_d42 (§3)
+E           assert 'resultado_d42' in {'calibrada': False, 'falsos_bloquea': 0.46, 'falsos_gana': 0.074, 'falsos_pierde': 0.071, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:338: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_d42_calibrada_informa_el_resultado_de_d34" time="0.455"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.36, 'falsos_gana': 0.025, 'falsos_pierde': 0.02, ...}">def test_d42_calibrada_informa_el_resultado_de_d34():
+        """Con 12 noches de -1 la calibración de D-42 pasa: D-42 habría decidido GANA, igual que D-45."""
+&gt;       v, det = _decidir([[-1]] * 12)
+                 ^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:348: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1], [-1], [-1], [-1], [-1], [-1], ...], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.36, 'falsos_gana': 0.025, 'falsos_pierde': 0.02, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_d34_y_d42_conservan_su_propio_minimo[por_noche0-SIN SUSTRATO]" time="0.001"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': None, 'falsos_bloquea': None, 'falsos_gana': None, 'falsos_pierde': None, ...}">por_noche = [[1], [1], [1], [1]], v34 = 'SIN SUSTRATO'
+
+    @pytest.mark.parametrize("por_noche,v34", [([[+1]] * 4, "SIN SUSTRATO"), ([[+1] * 4] * 3, "PIERDE")])
+    def test_d34_y_d42_conservan_su_propio_minimo(por_noche, v34):
+        """LECTURA (README de signos_p2): D-34 y D-42 se informan con su propio mínimo (D-34 §5.6: 5 pasadas y 3 noches),
+        para que se vea si el cambio de regla cambia el veredicto (§3). Tres noches de cuatro pasadas son SIN SUSTRATO
+        para D-45 (B = 3) pero D-34 da PIERDE y D-42 INDECIDIBLE (la calibración corre)."""
+&gt;       v, det = _decidir(por_noche)
+                 ^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:358: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[1], [1], [1], [1]], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': None, 'falsos_bloquea': None, 'falsos_gana': None, 'falsos_pierde': None, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_d34_y_d42_conservan_su_propio_minimo[por_noche1-PIERDE]" time="0.357"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.386, 'falsos_gana': 0.119, 'falsos_pierde': 0.138, ...}">por_noche = [[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]], v34 = 'PIERDE'
+
+    @pytest.mark.parametrize("por_noche,v34", [([[+1]] * 4, "SIN SUSTRATO"), ([[+1] * 4] * 3, "PIERDE")])
+    def test_d34_y_d42_conservan_su_propio_minimo(por_noche, v34):
+        """LECTURA (README de signos_p2): D-34 y D-42 se informan con su propio mínimo (D-34 §5.6: 5 pasadas y 3 noches),
+        para que se vea si el cambio de regla cambia el veredicto (§3). Tres noches de cuatro pasadas son SIN SUSTRATO
+        para D-45 (B = 3) pero D-34 da PIERDE y D-42 INDECIDIBLE (la calibración corre)."""
+&gt;       v, det = _decidir(por_noche)
+                 ^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:358: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': False, 'falsos_bloquea': 0.386, 'falsos_gana': 0.119, 'falsos_pierde': 0.138, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_las_sumas_de_bloque_son_el_multiconjunto" time="0.419"><failure message="AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)&#10;assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.386, 'falsos_gana': 0.035, 'falsos_pierde': 0.032, ...}">def test_las_sumas_de_bloque_son_el_multiconjunto():
+        por_noche = [[-1, -1], [+1], [+1, -1], [-1], [-1], [-1, -1, -1]]
+&gt;       v, det = _decidir(por_noche)
+                 ^^^^^^^^^^^^^^^^^^^
+
+tests\test_evaluar_d25_signos_p2_s161.py:369: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+por_noche = [[-1, -1], [1], [1, -1], [-1], [-1], [-1, -1, -1]], ok_ctrl = True
+
+    def _decidir(por_noche, ok_ctrl=True):
+        v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=ok_ctrl)
+        for campo in CAMPOS_D45:
+&gt;           assert campo in det, "el detalle de P2 no trae %s (ADENDA_SIGNOS_P2.md §4)" % campo
+E           AssertionError: el detalle de P2 no trae B (ADENDA_SIGNOS_P2.md §4)
+E           assert 'B' in {'calibrada': True, 'falsos_bloquea': 0.386, 'falsos_gana': 0.035, 'falsos_pierde': 0.032, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:72: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_contar_publica_el_veredicto_de_d45_y_la_ventana_lo_lee" time="0.421"><failure message="AssertionError: sin poder: {'resultado_sin_calibrar': 'PIERDE', 'ic95': [7.0, 7.0], 'resultado_d42': None, 'calibrada': False, 'falsos_gana': 0.074, 'falsos_pierde': 0.071, 'falsos_bloquea': 0.46, 'n_sorteos': 1000, 'semilla_calibracion': 161}&#10;assert None == 'INDECIDIBLE'&#10; +  where None = &lt;built-in method get of dict object at 0x0000023DEFCD0140&gt;('resultado_d42')&#10; +    where &lt;built-in method get of dict object at 0x0000023DEFCD0140&gt; = {'calibrada': False, 'discordantes': [{'clase_mirova': 'neg_limpio', 'contribucion': 1, 'error_de': 'D', 'hora': '2026...bucion': 1, 'error_de': 'D', 'hora': '2026-09-06 05:10', ...}, ...], 'falsos_bloquea': 0.46, 'falsos_gana': 0.074, ...}.get">def test_contar_publica_el_veredicto_de_d45_y_la_ventana_lo_lee():
+        """Como V42-02 para D-42: la regla decide en un solo punto, ver["P2|sensor"] dentro de contar, que es lo que lee
+        global_ventana. Siete noches con un error sólo de D: D-45 da PIERDE (p = 1/128), D-42 habría dado INDECIDIBLE, y la
+        ventana queda NO CUMPLE (suma de errores)."""
+        T, prot, R, cfg, res_ctrl = _armar(7, 0)
+        ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Lascar": 5.0})
+        i = info["P2|VIIRS375"]
+&gt;       assert i.get("resultado_d42") == "INDECIDIBLE", "sin poder: %s" % {k: i.get(k) for k in CAMPOS_INFORMA}
+E       AssertionError: sin poder: {'resultado_sin_calibrar': 'PIERDE', 'ic95': [7.0, 7.0], 'resultado_d42': None, 'calibrada': False, 'falsos_gana': 0.074, 'falsos_pierde': 0.071, 'falsos_bloquea': 0.46, 'n_sorteos': 1000, 'semilla_calibracion': 161}
+E       assert None == 'INDECIDIBLE'
+E        +  where None = &lt;built-in method get of dict object at 0x0000023DEFCD0140&gt;('resultado_d42')
+E        +    where &lt;built-in method get of dict object at 0x0000023DEFCD0140&gt; = {'calibrada': False, 'discordantes': [{'clase_mirova': 'neg_limpio', 'contribucion': 1, 'error_de': 'D', 'hora': '2026...bucion': 1, 'error_de': 'D', 'hora': '2026-09-06 05:10', ...}, ...], 'falsos_bloquea': 0.46, 'falsos_gana': 0.074, ...}.get
+
+tests\test_evaluar_d25_signos_p2_s161.py:417: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_contar_no_publica_el_resultado_de_d34" time="0.337"><failure message="AssertionError: contar publica INDECIDIBLE&#10;assert 'INDECIDIBLE' == 'BLOQUEA'&#10;  &#10;  - BLOQUEA&#10;  + INDECIDIBLE">def test_contar_no_publica_el_resultado_de_d34():
+        """Seis noches con error de D y una con error de K: D-34 sin calibrar da PIERDE (V42-20), D-45 BLOQUEA (p = 8/128).
+        La ventana queda en DECIDE NICOLAS por P2, no en NO CUMPLE."""
+        T, prot, R, cfg, res_ctrl = _armar(6, 1)
+        ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Lascar": 5.0})
+        i = info["P2|VIIRS375"]
+        assert i.get("resultado_sin_calibrar") == "PIERDE", "sin poder: %s" % i.get("resultado_sin_calibrar")
+&gt;       assert ver["P2|VIIRS375"] == "BLOQUEA", "contar publica %s" % ver["P2|VIIRS375"]
+E       AssertionError: contar publica INDECIDIBLE
+E       assert 'INDECIDIBLE' == 'BLOQUEA'
+E         
+E         - BLOQUEA
+E         + INDECIDIBLE
+
+tests\test_evaluar_d25_signos_p2_s161.py:429: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_imprimir_muestra_la_regla_nueva_y_lo_que_informa" time="0.338"><failure message="AssertionError:    P2 VIIRS375 INDECIDIBLE (D-34) | neto D menos K +7, IC95 [7.0, 7.0] | discordantes 7 en 7 noches | suma K 7, D 14 | noches con error K 7, D 7&#10;assert ('D-45' in '   P2 VIIRS375 INDECIDIBLE (D-34) | neto D menos K +7, IC95 [7.0, 7.0] | discordantes 7 en 7 noches | suma K 7, D 14 | noches con error K 7, D 7')">capsys = &lt;_pytest.capture.CaptureFixture object at 0x0000023D86FD3B60&gt;
+
+    def test_imprimir_muestra_la_regla_nueva_y_lo_que_informa(capsys):
+        """El informe de texto dice qué regla decidió (D-45, valores-p, método) y deja a la vista D-34 y D-42."""
+        T, prot, R, cfg, res_ctrl = _armar(7, 0)
+        ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Lascar": 5.0})
+        capsys.readouterr()
+        X.imprimir("SN", ver, info, "estado")
+        out = capsys.readouterr().out
+        linea = next((l for l in out.splitlines() if l.strip().startswith("P2 VIIRS375")), "")
+&gt;       assert "D-45" in linea and "PIERDE" in linea, linea
+E       AssertionError:    P2 VIIRS375 INDECIDIBLE (D-34) | neto D menos K +7, IC95 [7.0, 7.0] | discordantes 7 en 7 noches | suma K 7, D 14 | noches con error K 7, D 7
+E       assert ('D-45' in '   P2 VIIRS375 INDECIDIBLE (D-34) | neto D menos K +7, IC95 [7.0, 7.0] | discordantes 7 en 7 noches | suma K 7, D 14 | noches con error K 7, D 7')
+
+tests\test_evaluar_d25_signos_p2_s161.py:442: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_e2e_el_json_trae_el_detalle_de_d45_y_lo_que_informa" time="3.934"><failure message="AssertionError: ('original', 'VIIRS375', 'B')&#10;assert 'B' in {'calibrada': False, 'discordantes': [{'clase_mirova': 'pos', 'contribucion': 1, 'error_de': 'D', 'hora': '2026-10-01 ...ucion': 1, 'error_de': 'D', 'hora': '2026-10-10 05:54', ...}, ...], 'falsos_bloquea': 0.329, 'falsos_gana': 0.071, ...}">e2e = ({'P4': {'cambia_distance_class': [], 'movidas': 0, 'movidas_protegidas': []}, 'P5': {'apagadas_por_filtro_del_tablero...N): NO CUMPLE (veto) | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)\n', 25)
+
+    def test_e2e_el_json_trae_el_detalle_de_d45_y_lo_que_informa(e2e):
+        """§4: siempre que P2 se calcule, el detalle del JSON trae neto, B, bloques de suma no nula, sumas de bloque,
+        valores-p, método, p mínimo, semilla y sorteos, la regla, y lo de §3 (D-34 con su intervalo, D-42 entera)."""
+        res, out, apagadas = e2e
+        assert apagadas &gt;= 10, "sin poder: sólo %d publicaciones de K apagadas en D" % apagadas
+        assert res["controles_ok"] is True and all(res["cableado"].values()), (res["controles_ok"], res["cableado"])
+        for regla in ("original", "SN"):
+            for s in ("VIIRS375", "VIIRS750"):
+                i = res["por_regla"][regla]["info"]["P2|%s" % s]
+                for campo in CAMPOS_D45 + CAMPOS_INFORMA:
+&gt;                   assert campo in i, (regla, s, campo)
+E                   AssertionError: ('original', 'VIIRS375', 'B')
+E                   assert 'B' in {'calibrada': False, 'discordantes': [{'clase_mirova': 'pos', 'contribucion': 1, 'error_de': 'D', 'hora': '2026-10-01 ...ucion': 1, 'error_de': 'D', 'hora': '2026-10-10 05:54', ...}, ...], 'falsos_bloquea': 0.329, 'falsos_gana': 0.071, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:521: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_signos_p2_s161" name="test_e2e_el_veredicto_sale_de_los_valores_p_del_detalle" time="0.001"><failure message="AssertionError: ('original', 'VIIRS375', 'B')&#10;assert 'B' in {'calibrada': False, 'discordantes': [{'clase_mirova': 'pos', 'contribucion': 1, 'error_de': 'D', 'hora': '2026-10-01 ...ucion': 1, 'error_de': 'D', 'hora': '2026-10-10 05:54', ...}, ...], 'falsos_bloquea': 0.329, 'falsos_gana': 0.071, ...}">e2e = ({'P4': {'cambia_distance_class': [], 'movidas': 0, 'movidas_protegidas': []}, 'P5': {'apagadas_por_filtro_del_tablero...N): NO CUMPLE (veto) | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)\n', 25)
+
+    def test_e2e_el_veredicto_sale_de_los_valores_p_del_detalle(e2e):
+        """El veredicto de cada sensor y regla es el que dan, con §2.6 y §2.7, los campos que el mismo JSON informa (las
+        fracciones, en enteros). Y VIIRS 375 tiene sustrato: hay al menos un P2 que se calcula con B &gt;= 5."""
+        res, out, apagadas = e2e
+        con_sustrato = 0
+        for regla in ("original", "SN"):
+            for s in ("VIIRS375", "VIIRS750"):
+                i = res["por_regla"][regla]["info"]["P2|%s" % s]
+                v = res["por_regla"][regla]["veredicto"]["P2|%s" % s]
+                for campo in ("B", "neto", "p_gana_fraccion", "p_pierde_fraccion"):
+&gt;                   assert campo in i, (regla, s, campo)
+E                   AssertionError: ('original', 'VIIRS375', 'B')
+E                   assert 'B' in {'calibrada': False, 'discordantes': [{'clase_mirova': 'pos', 'contribucion': 1, 'error_de': 'D', 'hora': '2026-10-01 ...ucion': 1, 'error_de': 'D', 'hora': '2026-10-10 05:54', ...}, ...], 'falsos_bloquea': 0.329, 'falsos_gana': 0.071, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:538: AssertionError</failure></testcase></testsuite></testsuites>
