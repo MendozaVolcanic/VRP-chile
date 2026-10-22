@@ -1,0 +1,51 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+nulo           OK     estado SIN EFECTO | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8) | M {'M|VIIRS750|z<=40': 'NEUTRO', 'M|VIIRS750|z>40': 'NEUTRO', 'M|VIIRS375|sin_kernel|z<=40': 'NEUTRO', 'M|VIIRS375|sin_kernel|z>40': 'NEUTRO', 'M|VIIRS375|kernel|z<=40': 'NEUTRO', 'M|VIIRS375|kernel|z>40': 'NEUTRO'}
+placebo        OK     placebo sin comparador {'VIIRS750|z<=40': {'1.2': 'MEJORA', '0.8': 'EMPEORA'}, 'VIIRS750|z>40': {'1.2': 'NEUTRO', '0.8': 'EMPEORA'}, 'VIIRS375|sin_kernel|z<=40': {'1.2': 'MEJORA', '0.8': 'EMPEORA'}, 'VIIRS375|sin_kernel|z>40': {'1.2': 'NEUTRO', '0.8': 'EMPEORA'}} | estado SIN EFECTO | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+   pares VIIRS 750 en el nulo: 39
+modis          OK     cableado {'K': True, 'G': True, 'D': False}, estado INDECIDIBLE | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+huella         OK     cableado {'K': True, 'G': True, 'D': False}
+flag           OK     cableado {'K': True, 'G': True, 'D': False}
+determ         OK     determinismo False (100 apagadas en K')
+mejora750      OK     M {'M|VIIRS750|z<=40': 'MEJORA', 'M|VIIRS750|z>40': 'NEUTRO'} | estado MEJORA
+   sellada (calibración 'ambos'): M {'M|VIIRS750|z<=40': 'MEJORA', 'M|VIIRS750|z>40': 'INDECIDIBLE'} | estado INDECIDIBLE | NO VALE PARA DECIDIR: calibración sellada, anterior a D-27, sin el comparador de D-28; sólo para reproducir lo medido antes del sello
+sellada_marca  OK     sellada vale_para_decidir False | simétrica (mejora750) True
+empeora750     OK     estado DECIDE NICOLAS (M empeora, sin mejora) | P1b: protegidas que cruzan 1 MW hacia abajo, decide Nicolas
+bloq_mejora    OK     regla MEJORA, decide NEUTRO, estado SIN EFECTO (n 59)
+bloq_empeora   OK     estado DECIDE NICOLAS (M empeora, sin mejora)
+kernel         OK     regla kernel ['MEJORA', 'MEJORA'], estado SIN EFECTO (n 30)
+corte          OK     estado SIN EFECTO, M sin kernel z<=40 NEUTRO (n mejorados 23, todos de 40 a 50°)
+placebo_x1.2   OK     M {'M|VIIRS750|z<=40': 'NEUTRO', 'M|VIIRS750|z>40': 'NEUTRO', 'M|VIIRS375|sin_kernel|z<=40': 'NEUTRO', 'M|VIIRS375|sin_kernel|z>40': 'NEUTRO', 'M|VIIRS375|kernel|z<=40': 'NEUTRO', 'M|VIIRS375|kernel|z>40': 'NEUTRO'} | regla sobre d {'M|VIIRS750|z<=40': 'MEJORA', 'M|VIIRS750|z>40': 'MEJORA', 'M|VIIRS375|sin_kernel|z<=40': 'MEJORA', 'M|VIIRS375|sin_kernel|z>40': 'MEJORA', 'M|VIIRS375|kernel|z<=40': 'NEUTRO', 'M|VIIRS375|kernel|z>40': 'NEUTRO'} | max |d′| 0.0 | estado SIN EFECTO
+placebo_x0.8   OK     M {'M|VIIRS750|z<=40': 'EMPEORA', 'M|VIIRS750|z>40': 'EMPEORA', 'M|VIIRS375|sin_kernel|z<=40': 'EMPEORA', 'M|VIIRS375|sin_kernel|z>40': 'EMPEORA', 'M|VIIRS375|kernel|z<=40': 'NEUTRO', 'M|VIIRS375|kernel|z>40': 'NEUTRO'} | regla sobre d {'M|VIIRS750|z<=40': 'EMPEORA', 'M|VIIRS750|z>40': 'EMPEORA', 'M|VIIRS375|sin_kernel|z<=40': 'EMPEORA', 'M|VIIRS375|sin_kernel|z>40': 'EMPEORA', 'M|VIIRS375|kernel|z<=40': 'NEUTRO', 'M|VIIRS375|kernel|z>40': 'NEUTRO'} | max |d′| 0.0 | estado DECIDE NICOLAS (M empeora, sin mejora) | P1b: protegidas que cruzan 1 MW hacia abajo, decide Nicolas
+un_volcan      OK     estado SIN EFECTO | notas ['', 'MEJORA sostenida por menos de 2 volcanes (adenda, H4)'] (n 32)
+[referencia MIROVA] la ventana 2026-09-18 a 2026-10-18 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+veto           OK     Lascar|VIIRS375|2026-10-01 05:18 -> NO CUMPLE (veto) | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+veto_gemelo    OK     P1 INDECIDIBLE
+snpp           OK     Isluga|VIIRS375|2026-09-28 05:12 -> P1 CUMPLE
+p1b            OK     estado SIN EFECTO | P1b: protegidas que cruzan 1 MW hacia abajo, decide Nicolas
+p2             OK     30 negativos -> NO CUMPLE (suma de errores) | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+p2_m_indec     OK     M VIIRS 750 ['MEJORA', 'INDECIDIBLE'] -> NO CUMPLE (suma de errores) | NO VALE PARA DECIDIR: calibración sellada, anterior a D-27, sin el comparador de D-28; sólo para reproducir lo medido antes del sello
+v2_nulo        OK     estado SIN EFECTO | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+[referencia MIROVA] la ventana 2026-04-01 a 2026-06-12 pisa 7 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+v2_veto        OK     estado PENDIENTE DE REPETICION | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+rep_si         OK     P1 VETADO, estado NO CUMPLE (veto) | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+rep_no         OK     P1 CUMPLE, estado SIN EFECTO | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+== VEREDICTO COMBINADO: CUMPLE | por ventana [('V1', 'MEJORA'), ('V2', 'MEJORA')]
+== VEREDICTO COMBINADO: DECIDE NICOLAS (M mejora en una sola ventana) | por ventana [('V1', 'MEJORA'), ('V2', 'SIN EFECTO')]
+== VEREDICTO COMBINADO: NO CUMPLE (veto) | por ventana [('V1', 'NO CUMPLE (veto)'), ('V2', 'MEJORA')]
+combinar       OK     CUMPLE | DECIDE NICOLAS (M mejora en una sola ventana) | NO CUMPLE (veto)
+estratos       OK     z 40 -> <=40 decide; 40,5 -> >40 bloquea; kernel informa; VIIRS 750 decide
+orden          OK     la regla más estricta manda entre original y SN
+calibracion    OK     nulo sellado: falsos MEJORA por pasada 0.235, por bloques 0.045
+calib_simetrica OK     nulo simétrico: por pasada MEJORA 0.285 EMPEORA 0.265; por bloques 0.020 y 0.025; poder True
+
+RESUMEN: 31 de 31 casos OK
+probar exit 0

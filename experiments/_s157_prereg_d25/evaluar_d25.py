@@ -65,6 +65,12 @@ VENTANAS = {"V1": {"desde": "2026-08-29", "hasta": "2026-10-18", "ref": AQUI / "
 SENS = ("VIIRS375", "VIIRS750")
 CORTE_CENIT = 40.0                       # el de D17 (nota S141), ELEGIDO (§5, verificador H7)
 FRONTERA_K = "2026-09-18"                # desde acá producción es K; antes, el histórico reprocesado con K
+# D-29 (Nicolás, 2026-10-21, tasks/LOOP_OBJETIVOS.md §5): «D25 se evalúa sin el 17 al 20 de octubre ni el 13 parcial,
+# declarados en el veredicto». POR QUÉ: esos días CMR no entregó los gránulos a los brazos y producción sí los tiene
+# (NRT de su momento), y la cobertura compara contra producción. Se excluyen en los tres brazos por igual y en la
+# referencia de cobertura; el 13 entero (excluir pasada por pasada dependería de qué le faltó a cada brazo). El 19 y el
+# 20 caen fuera de V1 y se listan para que la regla diga lo mismo que la decisión. Sale en la primera línea del veredicto.
+DIAS_EXCLUIDOS = {"V1": ("2026-10-13", "2026-10-17", "2026-10-18", "2026-10-19", "2026-10-20"), "V2": ()}
 UMBRAL_DETERMINISMO = 0.98               # heredado de S149 a F/K, elegido
 MAX_FALTA_COBERTURA = 0.05               # umbral del instrumento, heredado de F/K, elegido
 MOV_KM = 0.01                            # P4: el centroide se mueve más de 0,01 km
@@ -322,6 +328,16 @@ def fusionar(raices, tmp, brazos, vols):
                 (dst / BRAZOS[n]).mkdir(parents=True, exist_ok=True)
                 json.dump({"records": recs}, open(dst / BRAZOS[n] / (v + ".json"), "w", encoding="utf-8"))
     return dst
+
+
+def filtrar_dias(claves, dias):
+    """D-29: saca de un dict o un set las pasadas (clave «volcán|sensor|fecha...») cuya fecha UTC está en `dias`."""
+    dias = set(dias)
+    if not dias:
+        return claves
+    if isinstance(claves, dict):
+        return {k: v for k, v in claves.items() if k.split("|")[2][:10] not in dias}
+    return {k for k in claves if k.split("|")[2][:10] not in dias}
 
 
 def crudos(raiz, n, vols, desde, hasta):
@@ -731,6 +747,11 @@ def evaluar(a):
     if faltan:
         raise SystemExit("faltan brazos o volcanes: %s. No se evalúa a medias." % faltan[:20])
     res = {"ventana": a.ventana, "desde": cfg["desde"], "hasta": cfg["hasta"], "brazos": list(brazos)}
+    excl = DIAS_EXCLUIDOS.get(a.ventana, ())
+    res["dias_excluidos"] = list(excl)
+    if excl:
+        print("== EVALUADO SIN %s (D-29: CMR no sirvió esos días; fuera en los tres brazos y en la cobertura)"
+              % ", ".join(excl))
     res["sha256_index_html"] = hashlib.sha256((RAIZ / "frontend" / "index.html").read_bytes()).hexdigest()
     print("== VENTANA %s: %s a %s | volcanes %d | brazos %s | %s | predicado sha256 %s" % (
         a.ventana, cfg["desde"], cfg["hasta"], len(vols), brazos,
@@ -751,10 +772,11 @@ def evaluar(a):
     pares = [("K", n) for n in brazos if n != "K"]
     T = {p: E.tabla(raiz / BRAZOS[p[0]], raiz / BRAZOS[p[1]], ref, cfg["desde"], cfg["hasta"], tmp / ("t_%s_%s.json" % p))
          for p in pares}
-    T = {p: {k: v for k, v in t.items() if k.split("|")[1] in SENS} for p, t in T.items()}
+    T = {p: {k: v for k, v in filtrar_dias(t, excl).items() if k.split("|")[1] in SENS} for p, t in T.items()}
     R, n_modis = {}, {}
     for n in brazos:
         R[n], n_modis[n] = crudos(raiz, n, vols, cfg["desde"], cfg["hasta"])
+        R[n] = filtrar_dias(R[n], excl)
     todas = set().union(*[set(t) for t in T.values()])
     prot = E.proteccion(todas, ref, cfg["desde"], cfg["hasta"])
 
@@ -769,7 +791,8 @@ def evaluar(a):
     protegidas = sorted(k for k in todas if prot[k]["A"])
     sin_rec = {k: [n for n in brazos if k not in claves_[n]] for k in protegidas}
     sin_rec = {k: v for k, v in sin_rec.items() if v}
-    cob = claves_cobertura(a.cobertura, vols, cfg["desde"], cfg["hasta"])
+    cob = {vs: filtrar_dias(ks, excl) for vs, ks in
+           claves_cobertura(a.cobertura, vols, cfg["desde"], cfg["hasta"]).items()}
     cortos = []
     for (v, s), ks in sorted(cob.items()):
         falta = {k for k in ks if k not in claves_["K"]}
@@ -973,6 +996,9 @@ def combinar(archivos):
         final += " | auditoría espacial A61 pendiente"
     if any(r.get("vale_para_decidir") is False for r in rs):
         final += " | NO VALE PARA DECIDIR: alguna ventana se evaluó con la calibración sellada (D-30)"
+    excl = sorted({d for r in rs for d in r.get("dias_excluidos", [])})
+    if excl:   # D-29: «declarados en el veredicto», en su primera línea
+        final = "EVALUADO SIN %s (D-29) | %s" % (", ".join(excl), final)
     print("== VEREDICTO COMBINADO: %s | por ventana %s" % (final, estados))
     return final
 
