@@ -1,0 +1,9 @@
+archivo: main
+sitios donde se decide cumbre por radio (o helper): 6
+  l.725 with final_hotspot_dist_km <= inner_radius_km are tagged as "summit" | mascara en contexto: NO
+  l.1206 is_summit = roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask) | mascara en contexto: SI
+  l.1346 is_summit_mask = roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask) | mascara en contexto: SI
+  l.1774 and test1_hotspot_dist_km <= inner_radius_km) | mascara en contexto: NO
+  l.1838 distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far" | mascara en contexto: NO
+  l.2134 distance_class = ("summit" if final_hotspot_dist_km <= inner_radius_km | mascara en contexto: NO
+R8: FALLA (4 consumidor(es) sin la mascara)

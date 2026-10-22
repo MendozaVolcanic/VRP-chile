@@ -1,0 +1,39 @@
+# A) Cobertura de identificadores en pipeline/*.py (archivo:línea de la primera coincidencia)
+denominador: 32 archivos .py en C:\vrp-trabajo\s159-pruebas\pipeline
+  paso 1 sun-glint                       archivos= 0  
+  paso 3 píxel frío ≤ 200 K              archivos= 0  
+  paso 4 escena con ≥ mitad NaN          archivos= 0  
+  paso 9 unión sin unique                archivos= 0  
+  V dilatación del hueco                 archivos= 3  detection_context.py:798 process_viirs.py:250 vrp_regimes.py:34
+  V interpolación 2D del fondo           archivos= 0  
+  V VRP NaN sin alerta                   archivos= 2  process_modis.py:1120 process_viirs_mod.py:1058
+  control positivo (polyfit)             archivos= 1  detection_context.py:719
+  control negativo (token inventado)     archivos= 0  
+
+# B) Compuertas del .m sobre las 791 escenas de O1 (oráculo mirova_v750, devolver_diag=True)
+familias: {'etna': 1, 'chilena': 190, 'sintetica': 600}
+control positivo Etna: 5 alertas, Tot_Lmir_hot 1.965342180 (OSF: 5 y 1,965342180)
+
+| compuerta | chilena | etna | sintetica |
+|---|---|---|---|
+| dayflag≠0 | 0 | 0 | 66 |
+| escena rechazada ≥ mitad NaN (paso 4) | 0 | 0 | 25 |
+| escenas | 190 | 1 | 600 |
+| escenas con alerta | 83 | 1 | 378 |
+| escenas con alerta absoluta NTI > K1 (paso 6) | 7 | 0 | 241 |
+| escenas con píxel M15 ≤ 200 K (paso 3) | 0 | 0 | 66 |
+| escenas con índices repetidos (unique≠raw) | 0 | 0 | 0 |
+| pase 2 sin regresión (<3 puntos) | 0 | 0 | 0 |
+| pase1 con estadísticos | 190 | 1 | 548 |
+| pase1: umbral dETI cumbre = piso 0,003 | 138 | 0 | 0 |
+| pase1: umbral dETI fuera = piso 0,01 | 167 | 0 | 110 |
+| pase1: umbral dNTI cumbre = piso 0,003 | 0 | 0 | 0 |
+| pase1: umbral dNTI fuera = piso 0,02 | 171 | 1 | 369 |
+| píxeles M15 ≤ 200 K (paso 3) | 0 | 0 | 134487 |
+| píxeles NTI > K1 (paso 6) | 7 | 0 | 345 |
+| rechazo del oráculo: escena | 0 | 0 | 25 |
+| rechazo del oráculo: sunglint | 0 | 0 | 27 |
+| sunglint<12 (rechazo paso 1) | 0 | 0 | 27 |
+
+Lectura: sólo las compuertas que disparan en la familia «chilena» tienen sustrato en Chile dentro de esta batería;
+las que disparan sólo en «sintetica» prueban que el instrumento las ve (control positivo) pero no que ocurran aquí.

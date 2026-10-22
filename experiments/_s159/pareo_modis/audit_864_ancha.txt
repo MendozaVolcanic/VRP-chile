@@ -1,0 +1,56 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-08-20 a 2026-10-19 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-20 a 2026-10-19 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+Auto-audit semanal — ventana 2026-08-20 → 2026-10-19 · detector vigente K (datos desde 2026-09-18) · D-9 SN
+  [C0] MODIS     recall crater 100.0% publicación 50.0% (n=2)
+  [C0] VIIRS750  recall crater 88.0% publicación 88.0% (n=25)
+  [C0] VIIRS375  recall crater 100.0% publicación 100.0% (n=101)
+  [K] MODIS     recall crater 66.7% publicación 66.7% (n=12)
+  [K] VIIRS750  recall crater 73.3% publicación 73.3% (n=30)
+  [K] VIIRS375  recall crater 96.8% publicación 96.8% (n=93)
+  [K] magnitud publicada Chaiten|VIIRS375               1.071x (n=4)
+  [K] magnitud publicada Chaiten|VIIRS750               1.15x (n=1)
+  [K] magnitud publicada Isluga|VIIRS375                0.503x (n=22)
+  [K] magnitud publicada Lascar|MODIS                   0.487x (n=1)
+  [K] magnitud publicada Lascar|VIIRS375                0.548x (n=11)
+  [K] magnitud publicada Lascar|VIIRS750                0.275x (n=3)
+  [K] magnitud publicada Lastarria|VIIRS375             0.664x (n=9)
+  [K] magnitud publicada NevadosDeChillan|MODIS         0.485x (n=7)
+  [K] magnitud publicada NevadosDeChillan|VIIRS375      0.65x (n=16)
+  [K] magnitud publicada NevadosDeChillan|VIIRS750      0.687x (n=13)
+  [K] magnitud publicada PlanchonPeteroa|VIIRS375       0.856x (n=10)
+  [K] magnitud publicada PuyehueCordonCaulle|VIIRS375   1.252x (n=9)
+  [K] magnitud publicada PuyehueCordonCaulle|VIIRS750   0.333x (n=4)
+  [K] magnitud publicada Tupungatito|VIIRS375           0.266x (n=8)
+  [K] magnitud publicada Villarrica|VIIRS375            0.877x (n=1)
+  [K] magnitud publicada Villarrica|VIIRS750            0.504x (n=1)
+  [C0] falsas MODIS     11.1% de 395 pasadas negativas limpias (sin alarma)
+  [C0] falsas VIIRS750  20.7% de 576 pasadas negativas limpias (sin alarma)
+  [C0] falsas VIIRS375  85.4% de 350 pasadas negativas limpias (sin alarma)
+  [K] falsas MODIS     1.2% de 682 pasadas negativas limpias (sin alarma)
+  [K] falsas VIIRS750  1.0% de 976 pasadas negativas limpias (sin alarma)
+  [K] falsas VIIRS375  3.2% de 677 pasadas negativas limpias (sin alarma)
+  [sin_marca] falsas MODIS     8.0% de 25 pasadas negativas limpias (sin alarma)
+  [sin_marca] falsas VIIRS750  None% de 0 pasadas negativas limpias (sin alarma)
+  [sin_marca] falsas VIIRS375  None% de 0 pasadas negativas limpias (sin alarma)
+  protegida sin_publicar [K] Tupungatito VIIRS375 2026-09-28 05:18 MIROVA 2.51 MW
+  protegida sin_publicar [K] Tupungatito VIIRS375 2026-09-29 04:54 MIROVA 1.86 MW
+  protegida sin_publicar [K] PuyehueCordonCaulle VIIRS750 2026-10-10 05:54 MIROVA 1.19 MW
+  protegida sin_publicar [K] NevadosDeChillan MODIS 2026-10-12 07:20 MIROVA 2.18 MW
+  protegida sin_publicar [K] NevadosDeChillan MODIS 2026-10-15 01:05 MIROVA 1.72 MW
+VEREDICTO: FUERA_DE_BANDA — 10 flags
+  ⚠ recall VIIRS750 73.3% < banda 79.5% (n=30, detector K)
+  ⚠ magnitud NevadosDeChillan MODIS 0.485x < 0.7 (SUB-estima, n=7; causa sin medir, antecedente: déficit de régimen débil S124, docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md)
+  ⚠ magnitud NevadosDeChillan VIIRS375 0.65x < 0.7 (SUB-estima, n=16; causa sin medir, antecedente: déficit de régimen débil S124, docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md)
+  ⚠ magnitud NevadosDeChillan VIIRS750 0.687x < 0.7 (SUB-estima, n=13; causa sin medir, antecedente: déficit de régimen débil S124, docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md)
+  ⚠ magnitud Tupungatito VIIRS375 0.266x < 0.7 (SUB-estima, n=8; causa sin medir, antecedente: déficit de régimen débil S124, docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md)
+  ⚠ alerta protegida sin publicar: Tupungatito VIIRS375 2026-09-28 05:18 UTC, MIROVA 2.51 MW (detector K; la noche sí se publicó en otra pasada; referencia sospechosa: sólo OCR de Suomi NPP antes del 2026-10-09, la distancia puede ser de otra pasada (A119))
+  ⚠ alerta protegida sin publicar: Tupungatito VIIRS375 2026-09-29 04:54 UTC, MIROVA 1.86 MW (detector K; la noche sí se publicó en otra pasada; referencia sospechosa: sólo OCR de Suomi NPP antes del 2026-10-09, la distancia puede ser de otra pasada (A119))
+  ⚠ alerta protegida sin publicar: PuyehueCordonCaulle VIIRS750 2026-10-10 05:54 UTC, MIROVA 1.19 MW (detector K; la noche sí se publicó en otra pasada)
+  ⚠ alerta protegida sin publicar: NevadosDeChillan MODIS 2026-10-12 07:20 UTC, MIROVA 2.18 MW (detector K; la noche sí se publicó en otra pasada)
+  ⚠ alerta protegida sin publicar: NevadosDeChillan MODIS 2026-10-15 01:05 UTC, MIROVA 1.72 MW (detector K; la noche sí se publicó en otra pasada)
+REGISTRO cadenas: {}

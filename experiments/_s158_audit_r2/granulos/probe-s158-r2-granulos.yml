@@ -1,0 +1,63 @@
+name: "Probe S158 R2, oraculo de MIROVA sobre granulos chilenos de VIIRS 750 (solo lectura)"
+
+# Corre el segundo oraculo (experiments/_s158_audit_r2/oraculo/) sobre los L1B reales de 14 pasadas de VIIRS 750
+# (12 alertas de MIROVA y 2 RUTINA), remuestreados a la grilla UTM de MIROVA, y la funcion de produccion sobre el
+# mismo granulo. Diseno, controles y predicciones: experiments/_s158_audit_r2/granulos/probe_granulos.py.
+# Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# Se dispara con un push a la rama s158-r2-granulos-disparo (workflow_dispatch solo existe desde main, S73).
+# Copia de experiments/_s158_audit_r2/granulos/probe-s158-r2-granulos.yml; la rama auxiliar no se mergea.
+# A43: "on" entre comillas. S141: pipefail con tee; el script sale 2 si falta una pasada.
+# A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio (el par usuario y clave esta vencido).
+# A15: 14 pares L1B+GEO (~80 MB cada par) y ~1 min de griddata por pasada -> 20 a 40 min estimados; timeout 90.
+"on":
+  push:
+    branches: ["s158-r2-granulos-disparo"]
+
+concurrency:
+  group: probe-s158-r2-granulos
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s158_audit_r2/granulos/probe_granulos.py \
+            --objetivos experiments/_s158_audit_r2/granulos/objetivos.json --out out \
+            --solo "NevadosDeChillan|2026-10-18 06:48,NevadosDeChillan|2026-10-18 05:42,Isluga|2026-10-12 05:48,Villarrica|2026-10-18 06:48" 2>&1 | tee out/probe.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s158-r2-granulos
+          path: |
+            out/*.json
+            out/*.npz
+            out/*.log
+          retention-days: 30
+          if-no-files-found: error

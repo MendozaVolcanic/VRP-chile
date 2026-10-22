@@ -1,0 +1,72 @@
+name: "Probe S159 M, geolocalizacion MODIS: MxD03 contra _interp_geo sobre lo publicado (solo lectura)"
+
+# Copia de experiments/_s159/m/probe-s159-m.yml. Se dispara con un push a la rama s159-m-disparo
+# (workflow_dispatch solo existe desde main, S73); la rama auxiliar no se mergea.
+# Criterio sellado en experiments/_s159/m/PREREGISTRO_M.md antes del primer despacho.
+# Solo lectura: no escribe en data/ (store.DATA_DIR va a un temporal), no commitea, no hace push; borra cada HDF.
+# A43: "on" entre comillas. S141: pipefail con tee; el script sale 2 si falta un granulo.
+# A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio (el par usuario y clave esta vencido).
+# A15: 83 granulos L1B+MxD03 (~150 MB el par) y 3 corridas de calculate_vrp por record, en 4 partes:
+# ~20 a 35 min por parte estimados; timeout 60.
+"on":
+  push:
+    branches: ["s159-m-disparo"]
+
+concurrency:
+  group: probe-s159-m
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        parte: [0, 1, 2, 3]
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Prueba sintetica
+        env:
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s159/m/probar_m.py | tee out/prueba_sintetica_parte${{ matrix.parte }}.txt
+      - name: Probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          python experiments/_s159/m/probe_m.py --objetivos experiments/_s159/m/objetivos.json --out out \
+            --parte ${{ matrix.parte }} --de 4 2>&1 | tee out/probe_parte${{ matrix.parte }}.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s159-m-parte${{ matrix.parte }}
+          path: |
+            out/*.jsonl
+            out/*.log
+            out/*.txt
+          retention-days: 30
+          if-no-files-found: error

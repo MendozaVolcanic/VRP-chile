@@ -16,6 +16,15 @@
 > sombra (§4.9 de la regla). Toda comparación con MIROVA que cruce la fecha de adopción se estratifica por régimen
 > (A104). Reversión: `git revert` del PR de adopción (tag `pre-s153-adopcion-k`). Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
 >
+> ⚠️ **S160, la frontera de la marca S157 que sigue ya no separa detectores** (A113; hallazgo 281 de
+> `experiments/_s160_audit/f4/INFORME.md` §3, CONFIRMADO EN PARTE en `experiments/_s160_audit/v4/INFORME.md` §3).
+> El punto (b) de abajo avisaba que «la frontera se moverá más atrás cuando se aplique el reproceso histórico con K».
+> Eso ya pasó: #883 (`8471add46`, 2026-10-21) reprocesó con K el histórico de los 11 Tier A, puso
+> `DATOS_K_DESDE_UTC` en 2025-02-15 (`frontend/cambio_detector.js:32`) y apartó los records C0 que quedaban en
+> `data/_c0_residuales/`. En main `d516b9d8c`, del 2025-02-15 al 2026-09-17 hay 68.072 records K y 0 sin marca de
+> régimen (`experiments/_s160_audit/v4/v_281_regimen_por_mes_salida.txt`; control: los 90 residuos salen C0). Una
+> ventana «C0 antes del 2026-09-18» compara K contra K. El punto (c) sobre la reversión no lo midió S160.
+>
 > ⚠️ **S157, lo que la marca de arriba no dice** (propagación de K, `docs/AUDIT_S155.md` §2 y arreglo 5; frente 1 en
 > `experiments/_s155_audit/frente_1_verif/INFORME.md`, F1-01 y V1-01). (a) El PR de adopción es **#850**, squash
 > `34cea39e`, mergeado el 2026-10-18 09:57:30 UTC. (b) **Los datos no cambian de detector en esa hora sino en la fecha
@@ -84,6 +93,12 @@ energía: arriba de 1 MW perder una alerta no tiene compensación posible.
    «una alerta que MIROVA clasifique de Bajo para arriba»; el corte de 1 MW es la operacionalización
    hecha en la tarea 0.2 (PR #780), sostenida por el banner de MIROVA de hoy (ningún VERY LOW llega a
    1 MW, ningún LOW queda bajo 1 MW) y **no por el paper**, cuya figura 11 se contradice con su pie.
+   ⚠️ **S160, sobre el 439 y el 992 de este punto** (hallazgo 283 de `experiments/_s160_audit/f4/INFORME.md`,
+   CONFIRMADO EN PARTE en `experiments/_s160_audit/v4/INFORME.md` §3): los dos números se reproducen exactos
+   sobre la unión de la referencia del 2026-10-14 (`03c44eed7`); sobre la de main `d516b9d8c` dan 478 y 1.055, de
+   las cuales 437 y 993 son hasta el 2026-10-13 (corpus vivo, A90; `experiments/_s160_audit/v4/v_283_d4_en_su_fecha.txt`).
+   Lo que decide es la definición, no el número. Ojo: `scripts/clase_mirova.py` cuenta las protegidas siempre
+   sobre la unión, aunque se le pase `--cons` o `--ocr` (V4-03).
    **Rige la lectura A, decidida por Nicolás el 2026-10-14 (D-4, issue #782 cerrado)**: una pasada
    de la referencia es **alerta protegida** si es alerta (`ALERTA_TERMICA` del consolidado o
    `ALERTA_TERMICA_OCR`) y su VRP de la pasada es de **1 MW o más**, recalculado desde el VRP y nunca
@@ -121,6 +136,13 @@ energía: arriba de 1 MW perder una alerta no tiene compensación posible.
 filtro, agregación o transformación en el pipeline, responder en orden**:
 
 1. **¿Está documentado en papers MIROVA core?** Lista oficial (**11 papers**):
+   ⚠️ **S158**: además de los papers existe ahora el **código operacional de VIIRS 750** publicado por MIROVA (OSF zm62w,
+   2026-07-24, MIT; `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`). En 3 puntos el paper y el código no dicen lo mismo (media de 8 vecinos contra 3 × 3 con el
+   central, fondo del VRP, piso de -0,1). Si el código prevalece sobre el texto del paper lo decide Nicolás; mientras
+   tanto, toda respuesta a esta pregunta para VIIRS 750 cita también el código. **Decisión de Nicolás, 2026-10-21**: a
+   la recomendación del §7 del informe («el código es la autoridad sobre el paper para VIIRS 750») respondió
+   «continua con todo lo que recomiendes». Para VIIRS 750, cuando el paper y el código difieren, manda el código; para
+   MODIS y VIIRS 375 manda el paper hasta tener su código o una medición.
    - Coppola 2016a SP 426.5 (Test 1 + NTI; Tabla 1 N·σ summit/scene, dual-ROI, dNTI 8-vec).
      ✅ **S128: «Coppola 2015» y «Coppola 2016a» eran la MISMA entrada, no dos papers.**
      El `Test 1` está dentro de `documentacion/sp426_5.txt` (`NTIPIX > K1 (Test 1)`, línea
@@ -181,6 +203,13 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
 2. **Si NO está en papers**, ¿cierra una divergencia ya documentada en
    `docs/MIROVA_DIVERGENCES.md`?**
    **El catálogo VIVO es el doc — esta lista es resumen (actualizada S105, AUDIT_S105):**
+   - ⚠️ **S160, sobre los números de la marca S151 que sigue** (hallazgo 282 de
+     `experiments/_s160_audit/f4/INFORME.md`, CONFIRMADO EN PARTE en `experiments/_s160_audit/v4/INFORME.md` §3):
+     el 65.705, el 1.565 y el 343 se reproducen exactos en el corpus de su fecha (`88e97d84e`, 2026-10-14) y no en
+     el de hoy, porque #883 reemplazó el histórico con K (A90). En main `d516b9d8c` (74.811 records) hay 9 cúmulos
+     con `pc.vrp_mw` = 5,0, los 9 con `primary_cluster.d9_capped`, y 183 sobre 5 MW
+     (`experiments/_s160_audit/v4/v_282_d9_capped_salida.txt`): bajo K el tope casi no actúa, y la cara de
+     co-validación del path D se midió con el detector anterior.
    - ⚠️ **S151, sobre el «se confirma el tope de 5 MW» del ítem que sigue**
      (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P5): «se confirma» sólo quiere decir que el
      tope recorta. No está medido que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02: el
@@ -223,6 +252,11 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
      (marca del inicio de este documento). Y K deja de publicar justo alertas débiles de VIIRS 375: 16 de 194 alertas
      Muy Bajo en V1 y 26 de 388 en V2, contra 0 con el detector anterior (`experiments/_s153_fk_v2/v1.log:91` y
      `v2.log:148`). La regla de adopción pesó ese costo; si D4 se reabre lo decide Nicolás.
+   - ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 5 y 13), dos
+     entradas más de la línea que sigue, contra el código de VIIRS 750: el tope de 5 MW de **D9** (cap C) es mecanismo
+     nuestro, MIROVA no topa ni compuerta por fondo (`MIROVA_VIIRS750_VRP.m` l. 83 a 91); y el fondo de **D8** no es
+     «Coppola 2024 L1129 literal»: esa frase es del modelo de dos componentes (libro p. impresa 337, renderizada) y en
+     VIIRS 750 MIROVA aparta los vecinos e interpola (`MIROVA_VIIRS750_VRP.m` l. 63 a 81).
    - Resueltas (no justifican features nuevas): D1 granularidad, D4 recall sub-pixel
      (S27), D5 magnitud (nadir S102/103 + ctxpeak D10 S100), D8/D8' cluster selection
      (S38/S62), sec³ off-nadir (S102/103), fix del ancla de detección (S98),
@@ -287,7 +321,7 @@ Estas fueron las desviaciones históricas. Nunca repetir.
 |---|---|---|
 | `MAX_SIGMA_COMPONENT_K=7K` cap eruption | No en papers; anula 5σ/10σ MIROVA | ⚠️ **Neutralizado por VALOR, no removido del código (S125).** El bloque corre en cada pasada; el perfil operacional lo pone en `999.0`, pero el **default del código es `7.0`** — un perfil que omita la clave resucita el parche en silencio. |
 | Vent-path entero | (⚠️ **S157**: el «sub-pixel debe ir por Test 1» describe el detector previo a K; desde #850 el Test 1 integrado no corre en la réplica. La razón primera, «no en papers», no cae. `experiments/_s155_audit/frente_1_verif/INFORME.md` F1-09. Texto original:) No en papers; sub-pixel debe ir por Test 1 (Coppola 2016a SP426.5) | Removido S27 |
-| `exclude_zones` (Salar, lagos) | No en papers; MIROVA no usa máscaras geográficas | Removido S27 |
+| `exclude_zones` (Salar, lagos) | ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 3): «MIROVA no usa máscaras geográficas» cae en su forma absoluta para VIIRS 750. Su código admite píxeles excluidos (NaN en `BOX`) y dice que las ROI se adaptan por volcán, incluso para excluir volcanes vecinos u otras fuentes térmicas persistentes (`MIROVA_VIIRS750_hotspot_detection.m` l. 25 a 29 y 120 a 128). Si lo aplica en Chile es SIN DATO; «no en papers» no lo revisé. Un salar o un lago no son «fuente térmica persistente» por definición: reponer `exclude_zones` sigue pidiendo pasar las 3 preguntas, ahora con el código como respaldo posible y no como veto. Texto original: No en papers; MIROVA no usa máscaras geográficas | Removido S27 |
 | Regla D vent-priority | Parche de clasificación visual, no en papers | Removido S27 |
 | Regla D Test 1-priority | Parche de composición de paths, no en papers | ⚠️ **SIGUE ACTIVA (corregido S125).** La fila decía "Removido S27" y es falsa: el bloque está vivo en los 3 procesadores (`process_viirs.py:1642-1710`, `process_modis.py:1196-1230`, `process_viirs_mod.py:1069`; líneas actualizadas S131) y está **parcialmente gateado**: la rama de clúster rival débil depende de `ENABLE_TEST1_PRIORITY_WEAK_CLUSTER` (`process_viirs.py:1695`), el resto no tiene flag y además se **amplió** después de S27 — port a MODIS en S30, y ajustes en S44 y S111. Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F1. |
 | Cloud mask BT<260K | ✅ **verificado verbatim S128** contra `documentacion/s00445-025-01932-y.pdf` p. 4: *"Importantly, no atmospheric correction or cloud-contamination automatic filtering is applied to the dataset"*. D14 CERRADA. ⚠️ Pero el mismo párrafo dice que MIROVA **sí filtra por distancia e intensidad y por doble conteo entre detectores**, quedándose con el 12 % (9.712 de 82.329), y que su mitigación de nube es tomar el **máximo diario** — eso último sigue sin implementarse. | ✅ **RETIRADA S126 (PR #535).** El umbral sale del perfil (`process_viirs.py:786`: `CLOUD_BT_THRESHOLD = CLOUD_MASK_BT_K`) y `cloud_mask_bt_k` vale `0.0`, así que la máscara está apagada en los tres sensores; el cambio de una línea que esta fila pedía ya se hizo. Texto anterior, por historia: ⚠️ ~~SIGUE ACTIVA en VIIRS 375 (corregido S125)~~. La perilla del perfil existe y está neutra (`CLOUD_MASK_BT_K = 0.0`, que apaga la máscara en MODIS y V750), pero `process_viirs.py:674` tenía `CLOUD_BT_THRESHOLD = 260.0` **hardcodeado**, ignorando la perilla, y en `:678-681` lo aplica a `roi_mask` **y** `bg_mask`. Ciega ~23 % de las pasadas del sensor que hoy carga el recall, y a 260 K no distingue tope de nube de cumbre nevada. Retirarla es cambiar el literal por la constante del perfil (una línea, requiere A45). Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F3. |
@@ -335,6 +369,9 @@ el robo real ANTES de cercar.
   cap top-100 anomaly_pixels (anti-bloat), gitignore de snapshots locales.
 - **Render frontend**: visualización 1 marker/record alineado con MIROVA NRT
   (S27).
+- ⚠️ **S158 (F2-H1, confirmado por V2)**: MIROVA cuenta píxeles y suma todos los alertados, sin agrupar
+  (`MIROVA_VIIRS750_VRP.m` l. 61 y 83 a 85). El ítem que sigue describe algo que el código de MIROVA no hace. Ver
+  `docs/AUDIT_S158.md`.
 - **Cluster aggregation** (S27): alineación con `n_hotspots` MIROVA via
   `scipy.ndimage.label` 8-conn — explícitamente Coppola 2016a "neighbor
   pixels" connectivity.

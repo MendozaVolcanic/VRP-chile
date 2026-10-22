@@ -1,0 +1,166 @@
+records V750 con cumulo: 2733 ; ventana de observacion 2025-02-15 04:48 a 2026-10-21 05:48
+avisos A119 para esa ventana:
+   - 2026-01-16 (tabla, todos): antes los tipos de registro eran otros (17 filas RUTINA con VRP > 0; FALSO_POSITIVO no existia)
+   - 2026-02-14 (tabla, Tupungatito): antes Tupungatito no tiene ninguna fila
+   - 2026-02-23 (tabla, Tupungatito): antes su limite de alerta era 5 km y no 7
+   - 2026-03-01 (tabla, todos): antes, sin contar a Tupungatito, la cobertura nocturna de la tabla en enero (desde el 11) era 99,0 % en MODIS, 98,6 a 99,5 % en VIIRS 375 y 95,2 a 95,7 % en VIIRS 750, y en febrero 98,2 a 99,6 %; desde marzo 99 a 100 %
+   - 2026-03-01 (ocr, VIIRS): antes el OCR corrio con siete versiones y doce metodos de validacion distintos; capturo 0,26 a 0,29 alertas por alerta de la tabla contra 0,50 a 0,89 despues, y no hubo reproceso retroactivo
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+inner_radius_km del tablero coincide con volcanoes.yaml en los volcanes con records (comprobado arriba si no hay OJO)
+
+#### cumulo dentro de inner_radius_km (centroid_dist_km <= inner): 2359 de 2733
+
+######## REGIMEN pre-K (obs 2025-02-15 05:42 a 2026-09-17 06:30): cumulos de cumbre 2262
+
+== cumbre con pc.vrp_mw == 0: n=565
+   tablero: isValidDetection=false y mirovaEqVrp=0 (ocultos): 565 ; visibles: 0
+   MIROVA miro (alguna fila VIIRS a <=60 min): 239 ; alerta de MIROVA: 86 ; protegida (>=1 MW): 10
+   por volcan: {'Chaiten': 2, 'Isluga': 182, 'Lascar': 83, 'Lastarria': 4, 'NevadosDeChillan': 2, 'PlanchonPeteroa': 32, 'PuyehueCordonCaulle': 54, 'Tupungatito': 200, 'Villarrica': 6}
+   distance_class: {'summit': 565}
+   single_pixel_mode: {True: 565}  n_pixels: {1: 557, 2: 8}
+
+== CONTROL cumbre con pc.vrp_mw > 0: n=1697
+   tablero: isValidDetection=false y mirovaEqVrp=0 (ocultos): 0 ; visibles: 1697
+   MIROVA miro (alguna fila VIIRS a <=60 min): 514 ; alerta de MIROVA: 344 ; protegida (>=1 MW): 199
+   por volcan: {'Chaiten': 25, 'Copahue': 2, 'Isluga': 182, 'Lascar': 933, 'Lastarria': 12, 'Llaima': 3, 'PlanchonPeteroa': 36, 'PuyehueCordonCaulle': 482, 'Tupungatito': 17, 'Villarrica': 5}
+   distance_class: {'summit': 1697}
+   single_pixel_mode: {True: 1680, False: 17}  n_pixels: {1: 1317, 2: 352, 3: 22, 4: 5, 6: 1}
+
+######## REGIMEN K (obs 2026-09-18 05:06 a 2026-10-21 05:48): cumulos de cumbre 97
+
+== cumbre con pc.vrp_mw == 0: n=30
+   tablero: isValidDetection=false y mirovaEqVrp=0 (ocultos): 30 ; visibles: 0
+   MIROVA miro (alguna fila VIIRS a <=60 min): 29 ; alerta de MIROVA: 10 ; protegida (>=1 MW): 1
+   por volcan: {'Isluga': 11, 'Lascar': 12, 'NevadosDeChillan': 1, 'PlanchonPeteroa': 3, 'PuyehueCordonCaulle': 1, 'Tupungatito': 2}
+   distance_class: {'summit': 30}
+   single_pixel_mode: {True: 30}  n_pixels: {1: 30}
+
+== CONTROL cumbre con pc.vrp_mw > 0: n=67
+   tablero: isValidDetection=false y mirovaEqVrp=0 (ocultos): 0 ; visibles: 67
+   MIROVA miro (alguna fila VIIRS a <=60 min): 65 ; alerta de MIROVA: 48 ; protegida (>=1 MW): 39
+   por volcan: {'Chaiten': 1, 'Isluga': 3, 'Lascar': 7, 'NevadosDeChillan': 39, 'PuyehueCordonCaulle': 15, 'Tupungatito': 1, 'Villarrica': 1}
+   distance_class: {'summit': 67}
+   single_pixel_mode: {True: 52, False: 15}  n_pixels: {1: 40, 2: 20, 3: 6, 4: 1}
+
+#### causa del cero en cumulos de cumbre (todos los regimenes)
+   todos los pixeles publicados <= t_bg (recorte explica)       594
+        ej: ('Chaiten', '2025-04-30 05:54', 'VIIRS_NOAA21_750', 't_bg=276.2 t_max=281.43 ap_bt_max=275.81 vrp_mw=0 n_px=1')
+        ej: ('Chaiten', '2025-07-04 05:36', 'VIIRS_NOAA21_750', 't_bg=274.88 t_max=280.35 ap_bt_max=273.91 vrp_mw=0 n_px=1')
+        ej: ('Isluga', '2025-02-20 05:42', 'VIIRS_NOAA21_750', 't_bg=267.49 t_max=275.02 ap_bt_max=265.57 vrp_mw=0 n_px=1')
+   hay pixel publicado > t_bg y aun asi 0 (OTRA causa)          1
+        ej: ('Lascar', '2026-05-28 05:36', 'VIIRS_NOAA20_750', 't_bg=263.5 t_max=278.77 ap_bt_max=272.37 vrp_mw=0.932 n_px=1')
+   mediana(t_max_k - t_bg_k) en ceros de cumbre: 12.659999999999968 (n=595) ; en no ceros de cumbre: 14.149999999999977 (n=1764)
+   t_bg_k mediana ceros: 266.83 ; no ceros: 265.69
+
+#### recorte parcial en cumulos de cumbre con magnitud > 0
+   records con algun anomaly_pixel con bt_k <= t_bg_k: 96 de 1764 (anomaly_pixels es top-100 de toda la escena, no solo el cumulo)
+
+#### single_pixel_mode (vrp = max por pixel en vez de suma) en cumulos de cumbre con magnitud > 0
+   cumulos de cumbre con single_pixel_mode=True y n_pixels>=2: 385 de 1764
+   de ellos, cumulo = toda la escena (n_anomalous_pixels == n_pixels), suma(anomaly_pixels)/pc.vrp_mw: n=343 mediana=1.319 max=2.795
+   por regimen: {'pre-K': 367, 'K': 18}  alertas MIROVA entre ellos: 86  protegidas: 72
+
+#### ceros de cumbre que MIROVA publico como alerta (VIIRS 750, <=60 min)
+   Isluga 2026-02-26 05:36 VIIRS_NOAA20_750 pc=0.0 dist=1.119 t_bg=270.95 t_max=276.66 MIROVA=0.17 MW reg=pre-K tablero_valid=False
+   Isluga 2026-03-03 05:24 VIIRS_SNPP_750 pc=0.0 dist=1.0 t_bg=269.71 t_max=276.29 MIROVA=0.35 MW reg=pre-K tablero_valid=False
+   Isluga 2026-03-03 05:48 VIIRS_NOAA20_750 pc=0.0 dist=0.895 t_bg=269.91 t_max=275.71 MIROVA=0.35 MW reg=pre-K tablero_valid=False
+   Isluga 2026-03-09 05:30 VIIRS_NOAA20_750 pc=0.0 dist=0.761 t_bg=269.29 t_max=276.31 MIROVA=0.25 MW reg=pre-K tablero_valid=False
+   Isluga 2026-03-13 06:00 VIIRS_NOAA20_750 pc=0.0 dist=0.986 t_bg=269.76 t_max=275.59 MIROVA=0.22 MW reg=pre-K tablero_valid=False
+   Isluga 2026-03-21 05:54 VIIRS_NOAA21_750 pc=0.0 dist=0.828 t_bg=268.57 t_max=276.07 MIROVA=0.2 MW reg=pre-K tablero_valid=False
+   Isluga 2026-04-07 05:36 VIIRS_NOAA21_750 pc=0.0 dist=0.524 t_bg=269.94 t_max=276.2 MIROVA=0.19 MW reg=pre-K tablero_valid=False
+   Isluga 2026-04-28 05:42 VIIRS_NOAA21_750 pc=0.0 dist=0.939 t_bg=268.03 t_max=275.28 MIROVA=0.33 MW reg=pre-K tablero_valid=False
+   Isluga 2026-05-15 06:00 VIIRS_SNPP_750 pc=0.0 dist=0.829 t_bg=263.99 t_max=270.91 MIROVA=0.15 MW reg=pre-K tablero_valid=False
+   Isluga 2026-05-22 05:30 VIIRS_SNPP_750 pc=0.0 dist=0.557 t_bg=267.62 t_max=273.81 MIROVA=0.36 MW reg=pre-K tablero_valid=False
+   Isluga 2026-05-28 05:36 VIIRS_NOAA20_750 pc=0.0 dist=0.517 t_bg=265.77 t_max=273.44 MIROVA=0.24 MW reg=pre-K tablero_valid=False
+   Isluga 2026-05-31 06:00 VIIRS_SNPP_750 pc=0.0 dist=1.112 t_bg=262.58 t_max=270.91 MIROVA=0.3 MW reg=pre-K tablero_valid=False
+   Isluga 2026-06-02 05:42 VIIRS_NOAA20_750 pc=0.0 dist=1.036 t_bg=266.13 t_max=272.5 MIROVA=0.26 MW reg=pre-K tablero_valid=False
+   Isluga 2026-06-05 06:06 VIIRS_SNPP_750 pc=0.0 dist=0.899 t_bg=264.57 t_max=271.77 MIROVA=0.18 MW reg=pre-K tablero_valid=False
+   Isluga 2026-06-07 05:48 VIIRS_NOAA20_750 pc=0.0 dist=1.008 t_bg=264.28 t_max=270.66 MIROVA=0.2 MW reg=pre-K tablero_valid=False
+   Isluga 2026-06-08 05:30 VIIRS_NOAA20_750 pc=0.0 dist=1.023 t_bg=262.48 t_max=268.82 MIROVA=0.21 MW reg=pre-K tablero_valid=False
+   Isluga 2026-06-22 05:12 VIIRS_NOAA21_750 pc=0.0 dist=1.081 t_bg=265.37 t_max=272.0 MIROVA=0.22 MW reg=pre-K tablero_valid=False
+   Isluga 2026-06-24 05:30 VIIRS_NOAA20_750 pc=0.0 dist=0.775 t_bg=262.06 t_max=268.66 MIROVA=0.19 MW reg=pre-K tablero_valid=False
+   Isluga 2026-07-07 06:06 VIIRS_SNPP_750 pc=0.0 dist=0.749 t_bg=264.57 t_max=271.91 MIROVA=0.19 MW reg=pre-K tablero_valid=False
+   Isluga 2026-07-12 05:36 VIIRS_NOAA21_750 pc=0.0 dist=0.835 t_bg=265.17 t_max=271.54 MIROVA=0.18 MW reg=pre-K tablero_valid=False
+   Isluga 2026-08-03 05:24 VIIRS_NOAA21_750 pc=0.0 dist=1.334 t_bg=262.36 t_max=269.77 MIROVA=0.25 MW reg=pre-K tablero_valid=False
+   Isluga 2026-08-14 05:18 VIIRS_NOAA21_750 pc=0.0 dist=1.389 t_bg=267.67 t_max=272.61 MIROVA=0.12 MW reg=pre-K tablero_valid=False
+   Isluga 2026-08-14 05:54 VIIRS_SNPP_750 pc=0.0 dist=0.673 t_bg=267.11 t_max=272.33 MIROVA=0.12 MW reg=pre-K tablero_valid=False
+   Isluga 2026-09-05 05:42 VIIRS_SNPP_750 pc=0.0 dist=0.676 t_bg=269.08 t_max=275.21 MIROVA=0.24 MW reg=pre-K tablero_valid=False
+   Isluga 2026-09-20 06:00 VIIRS_SNPP_750 pc=0.0 dist=1.031 t_bg=266.59 t_max=272.33 MIROVA=0.16 MW reg=K tablero_valid=False
+   Isluga 2026-10-12 05:48 VIIRS_SNPP_750 pc=0.0 dist=0.874 t_bg=267.11 t_max=273.42 MIROVA=0.24 MW reg=K tablero_valid=False
+   Lascar 2026-01-11 05:00 VIIRS_NOAA20_750 pc=0.0 dist=0.308 t_bg=265.77 t_max=281.42 MIROVA=0.27 MW reg=pre-K tablero_valid=False
+   Lascar 2026-01-14 05:24 VIIRS_SNPP_750 pc=0.0 dist=0.457 t_bg=268.44 t_max=282.57 MIROVA=1.21 MW reg=pre-K tablero_valid=False
+   Lascar 2026-01-25 05:42 VIIRS_NOAA20_750 pc=0.0 dist=0.174 t_bg=270.66 t_max=283.56 MIROVA=0.39 MW reg=pre-K tablero_valid=False
+   Lascar 2026-02-04 05:54 VIIRS_NOAA20_750 pc=0.0 dist=0.446 t_bg=269.45 t_max=282.83 MIROVA=0.23 MW reg=pre-K tablero_valid=False
+   Lascar 2026-02-05 05:36 VIIRS_NOAA20_750 pc=0.0 dist=0.259 t_bg=269.6 t_max=283.47 MIROVA=0.28 MW reg=pre-K tablero_valid=False
+   Lascar 2026-02-12 06:24 VIIRS_SNPP_750 pc=0.0 dist=0.456 t_bg=270.61 t_max=283.12 MIROVA=0.15 MW reg=pre-K tablero_valid=False
+   Lascar 2026-02-21 05:12 VIIRS_SNPP_750 pc=0.0 dist=0.115 t_bg=270.16 t_max=281.81 MIROVA=2.39 MW reg=pre-K tablero_valid=False
+   Lascar 2026-02-25 06:00 VIIRS_NOAA20_750 pc=0.0 dist=0.271 t_bg=269.6 t_max=282.28 MIROVA=0.27 MW reg=pre-K tablero_valid=False
+   Lascar 2026-02-26 05:42 VIIRS_NOAA20_750 pc=0.0 dist=0.323 t_bg=270.21 t_max=283.83 MIROVA=0.21 MW reg=pre-K tablero_valid=False
+   Lascar 2026-03-03 04:54 VIIRS_NOAA21_750 pc=0.0 dist=0.646 t_bg=267.49 t_max=283.06 MIROVA=3.07 MW reg=pre-K tablero_valid=False
+   Lascar 2026-03-08 05:00 VIIRS_NOAA21_750 pc=0.0 dist=0.52 t_bg=266.74 t_max=282.05 MIROVA=3.33 MW reg=pre-K tablero_valid=False
+   Lascar 2026-04-28 04:54 VIIRS_NOAA20_750 pc=0.0 dist=0.722 t_bg=263.69 t_max=276.07 MIROVA=2.38 MW reg=pre-K tablero_valid=False
+   Lascar 2026-05-08 05:12 VIIRS_NOAA20_750 pc=0.0 dist=0.744 t_bg=264.28 t_max=278.23 MIROVA=1.11 MW reg=pre-K tablero_valid=False
+   Lascar 2026-05-18 05:24 VIIRS_NOAA20_750 pc=0.0 dist=0.247 t_bg=261.63 t_max=276.66 MIROVA=0.26 MW reg=pre-K tablero_valid=False
+   Lascar 2026-05-25 06:12 VIIRS_SNPP_750 pc=0.0 dist=0.232 t_bg=262.99 t_max=277.22 MIROVA=0.53 MW reg=pre-K tablero_valid=False
+   Lascar 2026-05-28 05:36 VIIRS_NOAA20_750 pc=0.0 dist=0.475 t_bg=263.5 t_max=278.77 MIROVA=0.5 MW reg=pre-K tablero_valid=False
+   Lascar 2026-06-07 04:54 VIIRS_NOAA21_750 pc=0.0 dist=0.5 t_bg=261.18 t_max=276.46 MIROVA=1.18 MW reg=pre-K tablero_valid=False
+   Lascar 2026-06-12 05:54 VIIRS_NOAA20_750 pc=0.0 dist=0.412 t_bg=262.06 t_max=276.42 MIROVA=0.3 MW reg=pre-K tablero_valid=False
+   Lascar 2026-06-15 06:18 VIIRS_SNPP_750 pc=0.0 dist=0.22 t_bg=263.6 t_max=275.82 MIROVA=0.9 MW reg=pre-K tablero_valid=False
+   Lascar 2026-06-22 06:06 VIIRS_NOAA20_750 pc=0.0 dist=0.435 t_bg=259.83 t_max=274.09 MIROVA=0.29 MW reg=pre-K tablero_valid=False
+   Lascar 2026-06-28 05:00 VIIRS_NOAA21_750 pc=0.0 dist=0.267 t_bg=261.42 t_max=275.94 MIROVA=0.69 MW reg=pre-K tablero_valid=False
+   Lascar 2026-06-28 05:36 VIIRS_SNPP_750 pc=0.0 dist=0.395 t_bg=261.73 t_max=276.29 MIROVA=0.69 MW reg=pre-K tablero_valid=False
+   Lascar 2026-06-29 05:18 VIIRS_SNPP_750 pc=0.0 dist=0.298 t_bg=261.94 t_max=277.11 MIROVA=0.35 MW reg=pre-K tablero_valid=False
+   Lascar 2026-06-30 05:18 VIIRS_NOAA20_750 pc=0.0 dist=0.533 t_bg=256.55 t_max=270.51 MIROVA=0.19 MW reg=pre-K tablero_valid=False
+   Lascar 2026-06-30 06:06 VIIRS_NOAA21_750 pc=0.0 dist=0.586 t_bg=257.2 t_max=272.0 MIROVA=0.19 MW reg=pre-K tablero_valid=False
+   Lascar 2026-08-08 06:06 VIIRS_SNPP_750 pc=0.0 dist=0.468 t_bg=262.16 t_max=275.45 MIROVA=0.35 MW reg=pre-K tablero_valid=False
+   Lascar 2026-08-27 05:30 VIIRS_NOAA20_750 pc=0.0 dist=0.363 t_bg=263.89 t_max=279.72 MIROVA=0.22 MW reg=pre-K tablero_valid=False
+   Lascar 2026-09-01 06:24 VIIRS_NOAA21_750 pc=0.0 dist=1.417 t_bg=262.81 t_max=277.46 MIROVA=0.28 MW reg=pre-K tablero_valid=False
+   Lascar 2026-09-14 06:18 VIIRS_SNPP_750 pc=0.0 dist=0.333 t_bg=260.39 t_max=276.53 MIROVA=0.52 MW reg=pre-K tablero_valid=False
+   Lascar 2026-09-20 05:24 VIIRS_NOAA21_750 pc=0.0 dist=0.112 t_bg=265.17 t_max=279.8 MIROVA=0.19 MW reg=K tablero_valid=False
+   Lascar 2026-09-20 06:00 VIIRS_SNPP_750 pc=0.0 dist=0.331 t_bg=264.76 t_max=278.67 MIROVA=0.19 MW reg=K tablero_valid=False
+   Lascar 2026-09-21 05:42 VIIRS_SNPP_750 pc=0.0 dist=0.415 t_bg=264.19 t_max=279.31 MIROVA=0.22 MW reg=K tablero_valid=False
+   Lascar 2026-09-22 05:24 VIIRS_SNPP_750 pc=0.0 dist=0.291 t_bg=263.8 t_max=279.09 MIROVA=0.24 MW reg=K tablero_valid=False
+   Lascar 2026-10-08 05:24 VIIRS_SNPP_750 pc=0.0 dist=0.133 t_bg=263.2 t_max=278.45 MIROVA=0.36 MW reg=K tablero_valid=False
+   Lascar 2026-10-08 05:42 VIIRS_NOAA20_750 pc=0.0 dist=0.15 t_bg=263.5 t_max=278.99 MIROVA=0.36 MW reg=K tablero_valid=False
+   NevadosDeChillan 2026-10-01 04:42 VIIRS_NOAA20_750 pc=0.0 dist=2.391 t_bg=257.35 t_max=268.66 MIROVA=9.0 MW reg=K tablero_valid=False
+   PlanchonPeteroa 2026-05-09 05:42 VIIRS_NOAA21_750 pc=0.0 dist=0.582 t_bg=265.77 t_max=278.77 MIROVA=0.18 MW reg=pre-K tablero_valid=False
+   PlanchonPeteroa 2026-05-17 05:42 VIIRS_NOAA20_750 pc=0.0 dist=0.501 t_bg=266.31 t_max=281.52 MIROVA=0.33 MW reg=pre-K tablero_valid=False
+   PlanchonPeteroa 2026-05-25 05:42 VIIRS_NOAA21_750 pc=0.0 dist=0.606 t_bg=268.57 t_max=279.0 MIROVA=0.28 MW reg=pre-K tablero_valid=False
+   PlanchonPeteroa 2026-06-08 05:30 VIIRS_NOAA20_750 pc=0.0 dist=0.265 t_bg=267.51 t_max=281.32 MIROVA=0.26 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-02-01 05:12 VIIRS_NOAA20_750 pc=0.0 dist=3.246 t_bg=280.53 t_max=286.52 MIROVA=0.57 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-04-30 06:06 VIIRS_NOAA20_750 pc=0.0 dist=17.644 t_bg=268.18 t_max=277.57 MIROVA=0.41 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-05-26 05:24 VIIRS_NOAA21_750 pc=0.0 dist=0.449 t_bg=277.09 t_max=283.93 MIROVA=0.44 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-07-03 05:12 VIIRS_NOAA21_750 pc=0.0 dist=0.255 t_bg=269.94 t_max=279.69 MIROVA=1.0 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-07-03 06:06 VIIRS_NOAA20_750 pc=0.0 dist=0.143 t_bg=268.82 t_max=278.23 MIROVA=1.0 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-07-06 04:48 VIIRS_SNPP_750 pc=0.0 dist=0.84 t_bg=266.41 t_max=273.15 MIROVA=0.49 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-07-06 05:12 VIIRS_NOAA20_750 pc=0.0 dist=0.498 t_bg=268.18 t_max=276.89 MIROVA=1.02 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-08-19 05:30 VIIRS_NOAA21_750 pc=0.0 dist=0.415 t_bg=268.03 t_max=278.66 MIROVA=0.47 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-08-19 06:24 VIIRS_NOAA20_750 pc=0.0 dist=0.507 t_bg=269.91 t_max=276.31 MIROVA=0.47 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-09-07 05:30 VIIRS_NOAA20_750 pc=0.0 dist=0.329 t_bg=269.6 t_max=277.68 MIROVA=0.38 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-09-07 06:18 VIIRS_NOAA21_750 pc=0.0 dist=0.629 t_bg=270.43 t_max=278.77 MIROVA=0.38 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-09-11 05:36 VIIRS_SNPP_750 pc=0.0 dist=0.255 t_bg=267.45 t_max=276.41 MIROVA=0.8 MW reg=pre-K tablero_valid=False
+   PuyehueCordonCaulle 2026-10-16 06:18 VIIRS_SNPP_750 pc=0.0 dist=0.256 t_bg=275.94 t_max=283.12 MIROVA=0.61 MW reg=K tablero_valid=False
+   Tupungatito 2026-02-26 05:42 VIIRS_NOAA20_750 pc=0.0 dist=0.271 t_bg=267.51 t_max=282.93 MIROVA=0.27 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-03-03 05:48 VIIRS_NOAA20_750 pc=0.0 dist=0.305 t_bg=267.34 t_max=280.73 MIROVA=0.25 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-03-04 05:30 VIIRS_NOAA20_750 pc=0.0 dist=0.358 t_bg=268.34 t_max=284.52 MIROVA=0.17 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-03-25 05:36 VIIRS_NOAA20_750 pc=0.0 dist=0.193 t_bg=264.85 t_max=280.03 MIROVA=0.25 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-04-08 05:24 VIIRS_NOAA21_750 pc=0.0 dist=0.29 t_bg=266.16 t_max=282.66 MIROVA=0.17 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-04-12 05:48 VIIRS_NOAA21_750 pc=0.0 dist=0.316 t_bg=264.34 t_max=282.56 MIROVA=0.3 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-04-13 05:30 VIIRS_NOAA21_750 pc=0.0 dist=0.363 t_bg=265.57 t_max=276.46 MIROVA=0.26 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-04-15 05:24 VIIRS_SNPP_750 pc=0.0 dist=0.483 t_bg=261.51 t_max=272.88 MIROVA=0.32 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-05-12 05:36 VIIRS_NOAA20_750 pc=0.0 dist=0.197 t_bg=263.5 t_max=279.82 MIROVA=0.24 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-05-24 05:12 VIIRS_NOAA20_750 pc=0.0 dist=0.09 t_bg=258.63 t_max=273.31 MIROVA=0.19 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-05-27 05:36 VIIRS_SNPP_750 pc=0.0 dist=0.135 t_bg=263.8 t_max=279.2 MIROVA=0.24 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-05-27 05:54 VIIRS_NOAA20_750 pc=0.0 dist=0.099 t_bg=263.89 t_max=279.51 MIROVA=0.24 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-05-31 05:30 VIIRS_NOAA21_750 pc=0.0 dist=0.389 t_bg=262.81 t_max=281.43 MIROVA=0.18 MW reg=pre-K tablero_valid=False
+   Tupungatito 2026-08-21 05:48 VIIRS_NOAA20_750 pc=0.0 dist=0.309 t_bg=256.55 t_max=275.59 MIROVA=0.19 MW reg=pre-K tablero_valid=False
+   Villarrica 2026-08-13 05:42 VIIRS_NOAA21_750 pc=0.0 dist=0.265 t_bg=270.59 t_max=279.91 MIROVA=0.41 MW reg=pre-K tablero_valid=False
+   Villarrica 2026-08-23 05:54 VIIRS_NOAA21_750 pc=0.0 dist=0.317 t_bg=275.28 t_max=281.0 MIROVA=0.6 MW reg=pre-K tablero_valid=False
+   Villarrica 2026-09-17 05:42 VIIRS_NOAA20_750 pc=0.0 dist=0.339 t_bg=274.35 t_max=279.82 MIROVA=0.16 MW reg=pre-K tablero_valid=False

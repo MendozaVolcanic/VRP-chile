@@ -1,3 +1,7 @@
+# ⚠️ S158 R2 (docs/AUDIT_S158_R2.md, marca A113; experiments/_s158_audit_r2/a113/INFORME.md n 11): el «Fix universal ... Wooster physics» no es lo que
+# hace MIROVA en VIIRS 750: deltaL_MIR = sum(L_hot) - sum(L_bk) sobre todos los alertados, sin recorte por pixel
+# ni de la suma (MIROVA_VIIRS750_VRP.m l. 83 a 85). El OSF v2.5 no lo puede mostrar: esta filtrado por VRP minimo
+# por sensor (5 MW en VIIRS 750, m03). Para MODIS y VIIRS 375 no hay codigo (TRASLADADA). Ver D25.
 """S26 — TDD para clip ΔL ≥ 0 en cálculo VRP_MIR.
 
 Bug detectado en logs reproc Villarrica + Test 1: VRP_MIR sale negativo

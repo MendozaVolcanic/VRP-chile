@@ -1,0 +1,27 @@
+0. records con cenit solar < 90 o sin dato: {('MODIS', 'sz<90 o None'): 5} de {'MODIS': 14565, 'VIIRS375': 28822, 'VIIRS750': 28581}
+1. MODIS (ventana desde la 1a fila del volcan, cualquier sensor): {'sin_fila_10min': 195, 'total': 6692, 'pareo_120': 6349, 'solo_vecino_5min': 148}
+   MODIS (ventana desde la 1a fila MODIS del volcan): {'pareo_120': 6349, 'total': 6676, 'sin_fila_10min': 179, 'solo_vecino_5min': 148}
+   solo_vecino: con record nuestro en el granulo de MIROVA: 130 sin: 18
+   tipos en solo_vecino: Counter({('RUTINA',): 147, ('ALERTA_TERMICA',): 1})
+   max VRP MIROVA en solo_vecino: 0.9
+   los sin otro record, por volcan: Counter({'NevadosDeChillan': 5, 'PuyehueCordonCaulle': 3, 'Lascar': 2, 'Villarrica': 2, 'Chaiten': 2, 'Tupungatito': 1, 'PlanchonPeteroa': 1, 'Llaima': 1, 'Copahue': 1})
+    Chillan: 2026-01-19 02:40:00 MODIS_TERRA [-5] ['RUTINA'] n_bg 981 summit 0.849
+    Chillan: 2026-04-13 01:50:00 MODIS_TERRA [-5] ['RUTINA'] n_bg 1491 None None
+    Chillan: 2026-07-11 02:30:00 MODIS_TERRA [-5] ['RUTINA'] n_bg 799 None None
+    Chillan: 2026-08-04 01:45:00 MODIS_TERRA [-5] ['RUTINA'] n_bg 1723 None None
+    Chillan: 2026-05-13 07:35:00 MODIS_AQUA [5] ['RUTINA'] n_bg 1808 None None
+2. lados por plataforma: {('MODIS', 'MODIS_AQUA', 'sur'): 70, ('MODIS', 'MODIS_TERRA', 'norte'): 3, ('MODIS', 'MODIS_TERRA', 'sur'): 57, ('MODIS', 'los dos'): 3, ('VIIRS375', 'VIIRS_NOAA20', 'norte'): 1, ('VIIRS375', 'VIIRS_NOAA20', 'sur'): 119, ('VIIRS375', 'VIIRS_NOAA21', 'norte'): 2, ('VIIRS375', 'VIIRS_NOAA21', 'sur'): 65, ('VIIRS375', 'VIIRS_SNPP', 'norte'): 2, ('VIIRS375', 'VIIRS_SNPP', 'sur'): 34, ('VIIRS750', 'VIIRS_NOAA20', 'norte'): 1, ('VIIRS750', 'VIIRS_NOAA20', 'sur'): 102, ('VIIRS750', 'VIIRS_NOAA21', 'norte'): 2, ('VIIRS750', 'VIIRS_NOAA21', 'sur'): 55, ('VIIRS750', 'VIIRS_SNPP', 'norte'): 1, ('VIIRS750', 'VIIRS_SNPP', 'sur'): 24}
+   pares fuera: {('MODIS', 'antes de la referencia'): 147, ('VIIRS375', 'antes de la referencia'): 442, ('VIIRS375', 'ninguno, en ventana'): 117, ('VIIRS750', 'antes de la referencia'): 362, ('VIIRS750', 'ninguno, en ventana'): 102, ('MODIS', 'ninguno, en ventana'): 3}
+   lado de las alertas: {('VIIRS375', 'sur'): 22, ('MODIS', 'sur'): 1, ('VIIRS750', 'sur'): 1}
+   ('MODIS', 'alerta') n 1 mediana 0.512 bajo 0,5: 0
+   ('MODIS', 'otro') n 129 mediana 0.549 bajo 0,5: 55
+   ('VIIRS375', 'alerta') n 22 mediana 0.827 bajo 0,5: 0
+   ('VIIRS375', 'otro') n 201 mediana 0.455 bajo 0,5: 114
+   ('VIIRS750', 'alerta') n 1 mediana 0.76 bajo 0,5: 0
+   ('VIIRS750', 'otro') n 184 mediana 0.465 bajo 0,5: 103
+   casos en que MIROVA lista el norte: [('Lastarria', 'MODIS_TERRA', '2026-06-13 02:15:00', 0.97, ['RUTINA']), ('Tupungatito', 'VIIRS_NOAA21', '2026-04-09 06:42:00', 0.98, ['RUTINA']), ('Tupungatito', 'VIIRS_NOAA21_750', '2026-04-09 06:42:00', 0.98, ['RUTINA']), ('PlanchonPeteroa', 'MODIS_TERRA', '2026-01-17 02:55:00', 0.54, ['RUTINA']), ('PlanchonPeteroa', 'VIIRS_NOAA20', '2026-09-24 06:48:00', 0.93, ['RUTINA']), ('PlanchonPeteroa', 'VIIRS_NOAA20_750', '2026-09-24 06:48:00', 0.92, ['RUTINA']), ('PlanchonPeteroa', 'VIIRS_NOAA21', '2026-07-30 06:42:00', 0.91, ['RUTINA']), ('PlanchonPeteroa', 'VIIRS_NOAA21_750', '2026-07-30 06:42:00', 0.91, ['RUTINA']), ('Llaima', 'VIIRS_SNPP', '2026-07-31 07:00:00', 0.8, ['RUTINA']), ('Llaima', 'VIIRS_SNPP_750', '2026-07-31 07:00:00', 0.8, ['RUTINA']), ('Copahue', 'VIIRS_SNPP', '2026-08-27 06:54:00', 1.0, ['RUTINA']), ('PuyehueCordonCaulle', 'MODIS_TERRA', '2026-03-26 03:05:00', 0.94, ['RUTINA'])]
+   VALIDACION indicador (miembro con cumulo <3 km del crater): {('MODIS', 'frac>=0.5'): 6, ('VIIRS375', 'frac>=0.5'): 183, ('VIIRS375', 'frac<0.5'): 10, ('VIIRS750', 'frac>=0.5'): 32, ('VIIRS750', 'frac<0.5'): 3}
+   alertas por volcan: Counter({'PuyehueCordonCaulle': 6, 'Lascar': 5, 'Isluga': 4, 'Tupungatito': 4, 'Lastarria': 2, 'Villarrica': 2, 'PlanchonPeteroa': 1})
+    MODIS_TERRA RUTINA n 60 mediana fm 0.559 bajo 0,5 25
+    MODIS_AQUA RUTINA n 69 mediana fm 0.547 bajo 0,5 30
+18 [0.931, 0.944, 0.956, 0.963, 0.972, 0.972, 0.974, 0.975, 0.981, 0.984, 0.994, 0.997, 0.999, 1.0, 1.0, 1.003, 1.011, 1.019]

@@ -7,6 +7,14 @@
 > recopila citas verbatim con ubicación archivo:línea. Lectura obligatoria al
 > inicio de cada sesión que toque pipeline/.
 
+> ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 5): la cita
+> L1129 que motivó este documento, renderizada (libro `978-3-031-86841-2.pdf`, p. impresa 337), es **condicional** y
+> pertenece al **modelo de dos componentes** («If T_bk is retrieved from the pixels adjacent to the hot one, Eq. 14
+> can be solved by assuming one of the two other unknowns... two-component model»): no describe cómo MIROVA estima el
+> fondo del VRP. La fila «T_bk = pixels adyacentes» del §9 hereda el error. Y en VIIRS 750 el código de MIROVA aparta
+> los adyacentes (dilatación) e interpola el fondo (`MIROVA_VIIRS750_VRP.m` l. 63 a 81). Para MODIS el respaldo de un
+> fondo local es Coppola 2016a p. 8 («surrounding the active one»), no L1129. Texto conservado por historia.
+
 Convención: `[file:line]` = `documentacion/<archivo>` línea de la cita.
 
 ---

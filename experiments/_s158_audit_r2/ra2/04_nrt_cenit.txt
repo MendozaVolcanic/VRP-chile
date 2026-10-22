@@ -1,0 +1,79 @@
+[referencia MIROVA] la ventana 2026-04-01 a 2026-10-20 pisa 7 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+filas de la tabla en ventana: 32524 {'RUTINA': 30441, 'ALERTA_TERMICA': 1284, 'FALSO_POSITIVO': 799}
+alertas con VRP > 0: 1284 {'V375': 967, 'V750': 247, 'MODIS': 70}
+dt (min) nuestro - tabla: n = 1284 | |dt|<=1: 1254 | 1<|dt|<=10: 0 | >10: 30
+pares nocturnos: 1254 {'V375': 948, 'V750': 243, 'MODIS': 63} | sha: {'3695f675': 1026, '34cea39e': 201, '8527b2c8': 5, '3b530e67': 5, 'e0c90caa': 5, 'f7c82b71': 4, '293435d9': 3, 'cf272543': 2, '57d18ad7': 2, '2e1bc0e3': 1}
+regimen por fecha: {('K_nrt(34cea39e)', '293435d9'): 3, ('K_nrt(34cea39e)', '2e1bc0e3'): 1, ('K_nrt(34cea39e)', '34cea39e'): 201, ('K_nrt(34cea39e)', '8527b2c8'): 5, ('K_nrt(34cea39e)', 'cf272543'): 2, ('K_nrt(34cea39e)', 'f7c82b71'): 4, ('K_reproc(3695f675)', '3695f675'): 1026, ('K_reproc(3695f675)', '3b530e67'): 5, ('K_reproc(3695f675)', '57d18ad7'): 2, ('K_reproc(3695f675)', 'e0c90caa'): 5}
+con deteccion nuestra (pc_vrp > 0): 1128 {'V375': 897, 'V750': 176, 'MODIS': 55} | MIROVA alerta y nosotros nada: 126 {'V750': 67, 'V375': 51, 'MODIS': 8}
+
+=== MODIS (n=55) razon publicada (pub) / MIROVA por tramo de cenit ===
+           n  r_pub   r_pc  r_esc  n_anom  pc_n
+zbin                                           
+[0, 20)   29  0.747  0.747  0.747     1.0   1.0
+[20, 30)  14  0.434  0.434  0.474     1.0   1.0
+[30, 40)   5  0.240  0.240  0.300     1.0   1.0
+[40, 50)   4  0.218  0.218  0.525     1.5   1.0
+[50, 60)   2  0.206  0.206  0.291     2.0   1.0
+[60, 70)   1  0.076  0.076  0.108     2.0   2.0
+  Spearman con el cenit: r_pub -0.515 r_pc -0.515 r_esc -0.467 n_anom 0.114 pc_n -0.015
+  regimen K_nrt(34cea39e): n=12 r_pub mediana 0.362 Spearman r_pub-cenit -0.853
+  regimen K_reproc(3695f675): n=43 r_pub mediana 0.595 Spearman r_pub-cenit -0.367
+  por volcan: n, mediana r_pub, Spearman r_pub-cenit, Spearman pc_n-cenit, r_pub z<30 (n) vs z>=50 (n)
+    Lascar               n=  43 r_pub 0.571 sp_r -0.337 sp_n -0.184 | z<30 0.595 (37) z>=50 nan (0)
+    NevadosDeChillan     n=  11 r_pub 0.240 sp_r -0.864 sp_n -0.448 | z<30 0.747 (5) z>=50 0.203 (3)
+    Villarrica           n=   1 r_pub 0.972 sp_r None sp_n None | z<30 0.972 (1) z>=50 nan (0)
+
+=== V375 (n=897) razon publicada (pub) / MIROVA por tramo de cenit ===
+            n  r_pub   r_pc  r_esc  n_anom  pc_n
+zbin                                            
+[0, 20)   239  0.796  0.679  1.025     2.0   2.0
+[20, 30)  119  0.660  0.532  0.790     2.0   2.0
+[30, 40)  132  0.624  0.544  0.771     2.0   1.0
+[40, 50)  164  0.538  0.450  0.617     2.0   1.0
+[50, 60)  169  0.657  0.485  0.764     1.0   1.0
+[60, 70)   74  0.524  0.446  0.567     1.0   1.0
+  Spearman con el cenit: r_pub -0.226 r_pc -0.237 r_esc -0.284 n_anom -0.215 pc_n -0.268
+  regimen K_nrt(34cea39e): n=142 r_pub mediana 0.609 Spearman r_pub-cenit -0.329
+  regimen K_reproc(3695f675): n=755 r_pub mediana 0.686 Spearman r_pub-cenit -0.208
+  por volcan: n, mediana r_pub, Spearman r_pub-cenit, Spearman pc_n-cenit, r_pub z<30 (n) vs z>=50 (n)
+    Chaiten              n=  34 r_pub 1.268 sp_r -0.378 sp_n -0.583 | z<30 1.388 (22) z>=50 0.860 (6)
+    Copahue              n=   3 r_pub 1.862 sp_r None sp_n None | z<30 0.616 (1) z>=50 nan (0)
+    Isluga               n= 189 r_pub 0.526 sp_r -0.467 sp_n -0.268 | z<30 0.629 (77) z>=50 0.345 (59)
+    Lascar               n= 169 r_pub 0.582 sp_r -0.348 sp_n -0.396 | z<30 0.712 (61) z>=50 0.487 (36)
+    Lastarria            n= 126 r_pub 0.893 sp_r -0.015 sp_n -0.237 | z<30 0.874 (42) z>=50 0.841 (43)
+    Llaima               n=   1 r_pub 1.476 sp_r None sp_n None | z<30 nan (0) z>=50 1.476 (1)
+    NevadosDeChillan     n=  40 r_pub 0.573 sp_r -0.456 sp_n 0.181 | z<30 0.737 (11) z>=50 0.478 (16)
+    PlanchonPeteroa      n=  79 r_pub 1.028 sp_r 0.1 sp_n -0.211 | z<30 1.028 (43) z>=50 1.214 (8)
+    PuyehueCordonCaulle  n= 138 r_pub 0.879 sp_r -0.161 sp_n -0.578 | z<30 0.941 (40) z>=50 0.852 (56)
+    Tupungatito          n= 105 r_pub 0.358 sp_r -0.473 sp_n -0.512 | z<30 0.440 (48) z>=50 0.285 (18)
+    Villarrica           n=  13 r_pub 0.877 sp_r -0.852 sp_n 0.312 | z<30 0.877 (13) z>=50 nan (0)
+
+=== V750 (n=176) razon publicada (pub) / MIROVA por tramo de cenit ===
+           n  r_pub   r_pc  r_esc  n_anom  pc_n
+zbin                                           
+[0, 20)   64  0.619  0.619  0.648     1.0   1.0
+[20, 30)  29  0.543  0.543  0.564     1.0   1.0
+[30, 40)  29  0.389  0.389  0.410     1.0   1.0
+[40, 50)  36  0.491  0.491  0.523     1.0   1.0
+[50, 60)  12  0.363  0.363  0.466     2.0   1.0
+[60, 70)   6  0.111  0.111  0.199     2.5   2.0
+  Spearman con el cenit: r_pub -0.284 r_pc -0.284 r_esc -0.195 n_anom 0.234 pc_n 0.118
+  regimen K_nrt(34cea39e): n=36 r_pub mediana 0.411 Spearman r_pub-cenit -0.588
+  regimen K_reproc(3695f675): n=140 r_pub mediana 0.505 Spearman r_pub-cenit -0.2
+  por volcan: n, mediana r_pub, Spearman r_pub-cenit, Spearman pc_n-cenit, r_pub z<30 (n) vs z>=50 (n)
+    Chaiten              n=   2 r_pub 1.150 sp_r None sp_n None | z<30 1.150 (2) z>=50 nan (0)
+    Copahue              n=   1 r_pub 1.333 sp_r None sp_n None | z<30 1.333 (1) z>=50 nan (0)
+    Isluga               n=  16 r_pub 0.268 sp_r 0.012 sp_n nan | z<30 0.200 (11) z>=50 0.300 (1)
+    Lascar               n=  95 r_pub 0.511 sp_r -0.264 sp_n -0.037 | z<30 0.565 (50) z>=50 0.431 (3)
+    NevadosDeChillan     n=  29 r_pub 0.413 sp_r -0.812 sp_n 0.107 | z<30 0.845 (7) z>=50 0.162 (11)
+    PlanchonPeteroa      n=   1 r_pub 1.669 sp_r None sp_n None | z<30 nan (0) z>=50 nan (0)
+    PuyehueCordonCaulle  n=  25 r_pub 0.509 sp_r -0.431 sp_n -0.327 | z<30 0.659 (15) z>=50 0.297 (3)
+    Tupungatito          n=   2 r_pub 0.072 sp_r None sp_n None | z<30 0.072 (2) z>=50 nan (0)
+    Villarrica           n=   5 r_pub 0.384 sp_r None sp_n None | z<30 0.384 (5) z>=50 nan (0)

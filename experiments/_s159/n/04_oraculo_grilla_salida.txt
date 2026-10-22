@@ -1,0 +1,30 @@
+pasadas con oraculo ok (nocturnas): 391 de 396
+alertas que deciden 181 (protegidas 78), negativos limpios 195 (sin pesos)
+variante | alertas detectadas | protegidas detectadas | neg con alerta del oraculo (crudo y ponderado) | razon O/MIROVA en alertas detectadas: mediana [q1, q3] n, y fraccion entre 0,8 y 1,25
+  geo_linear                   145/181 |  71/78 |   4/195 (4.0 de 5385.5 ponderado) | 0.999 [0.978, 1.007] n=145, 127/145 entre 0,8 y 1,25
+  geo_nearest                  133/181 |  71/78 |  25/195 (114.3 de 5385.5 ponderado) | 1.226 [0.951, 1.454] n=133, 56/133 entre 0,8 y 1,25
+  geo_cubic                    136/181 |  71/78 |  11/195 (50.7 de 5385.5 ponderado) | 1.206 [1.115, 1.286] n=136, 85/136 entre 0,8 y 1,25
+  r2_linear                    113/181 |  71/78 |  15/195 (84.5 de 5385.5 ponderado) | 1.000 [0.868, 1.108] n=113, 83/113 entre 0,8 y 1,25
+  r2_nearest                   129/181 |  70/78 |  23/195 (122.3 de 5385.5 ponderado) | 1.238 [0.937, 1.512] n=129, 48/129 entre 0,8 y 1,25
+  geo_linear_anillo_sensible   175/181 |  78/78 |   8/195 (8.0 de 5385.5 ponderado) | 0.999 [0.973, 1.009] n=175, 144/175 entre 0,8 y 1,25
+  geo_linear 1 px: 0.996 [0.979, 1.008] n=60
+  geo_linear 2-4 px: 1.000 [0.973, 1.004] n=67
+  geo_linear 5+ px: 1.000 [0.990, 1.003] n=18
+  r2_linear 1 px: 0.898 [0.783, 1.025] n=25
+  r2_linear 2-4 px: 1.029 [0.882, 1.161] n=68
+  r2_linear 5+ px: 1.003 [0.921, 1.037] n=20
+  geo_linear z<=40: detecta 97/126; razon 1.000 n=97
+  geo_linear z>40: detecta 48/55; razon 0.997 n=48
+  r2_linear z<=40: detecta 76/126; razon 0.978 n=76
+  r2_linear z>40: detecta 37/55; razon 1.011 n=37
+cambios de alerta geo_linear contra r2_linear (lab, geo, r2): n {('pos', True, True): 113, ('pos', True, False): 32, ('pos', False, False): 36, ('neg_limpio', False, False): 179, ('neg_limpio', False, True): 12, ('neg_limpio', True, True): 3, ('neg_limpio', True, False): 1}
+  ('Lascar', '2026-09-26 05:48') MIROVA 0.74 | estado ok | geo_linear 1px 0.415 banda [0.415, 0.554] | geo_nearest 1px 0.645 banda [0.645, 0.833] | geo_cubic 1px 0.531 banda [0.531, 0.674] | geo_linear_anillo_sensible 1px 0.415 banda [0.415, 0.554] | r2_linear 0px None | r2_nearest 1px 0.816 banda [0.726, 0.816]
+  ('Chaiten', '2026-10-06 05:30') MIROVA 0.18 | estado ok | geo_linear 1px 0.155 banda [0.155, 0.219] | geo_nearest 1px 0.269 banda [0.269, 0.358] | geo_cubic 0px None | geo_linear_anillo_sensible 1px 0.155 banda [0.155, 0.219] | r2_linear 0px None | r2_nearest 1px 0.215 banda [0.215, 0.358]
+  ('Lascar', '2026-10-08 05:42') MIROVA 0.36 | estado ok | geo_linear 1px 0.358 banda [0.181, 0.358] | geo_nearest 1px 0.502 banda [0.341, 0.502] | geo_cubic 1px 0.429 banda [0.232, 0.429] | geo_linear_anillo_sensible 1px 0.358 banda [0.181, 0.358] | r2_linear 1px 0.328 banda [0.193, 0.328] | r2_nearest 1px 0.439 banda [0.278, 0.439]
+  ('PuyehueCordonCaulle', '2026-10-10 05:54') MIROVA 1.19 | estado ok | geo_linear 0px None | geo_nearest 0px None | geo_cubic 0px None | geo_linear_anillo_sensible 2px 1.193 banda [1.193, 1.193] | r2_linear 0px None | r2_nearest 0px None
+  ('PuyehueCordonCaulle', '2026-10-16 05:42') MIROVA 0.61 | estado ok | geo_linear 0px None | geo_nearest 0px None | geo_cubic 0px None | geo_linear_anillo_sensible 1px 0.61 banda [0.61, 0.713] | r2_linear 0px None | r2_nearest 0px None
+  ('Tupungatito', '2026-08-21 05:48') MIROVA 0.19 | estado ok | geo_linear 0px None | geo_nearest 0px None | geo_cubic 0px None | geo_linear_anillo_sensible 1px 0.194 banda [0.194, 0.236] | r2_linear 0px None | r2_nearest 0px None
+  ('Villarrica', '2026-09-19 05:48') MIROVA 0.45 | estado ok | geo_linear 1px 0.452 banda [0.377, 0.452] | geo_nearest 1px 0.735 banda [0.636, 0.735] | geo_cubic 1px 0.512 banda [0.462, 0.512] | geo_linear_anillo_sensible 1px 0.452 banda [0.377, 0.452] | r2_linear 2px 0.474 banda [0.474, 0.474] | r2_nearest 1px 0.744 banda [0.421, 0.744]
+  ('NevadosDeChillan', '2026-10-10 05:54') MIROVA 13.13 | estado ok | geo_linear 5px 13.131 banda [13.131, 13.131] | geo_nearest 2px 11.65 banda [11.65, 11.65] | geo_cubic 8px 15.836 banda [15.836, 15.836] | geo_linear_anillo_sensible 5px 13.131 banda [13.131, 13.131] | r2_linear 5px 12.367 banda [12.351, 12.511] | r2_nearest 2px 11.65 banda [11.65, 11.65]
+  diurna NevadosDeChillan 2026-10-01 18:42 MIROVA 3.71 estado volcan_fuera_del_granulo dayflag None sunglint None | 
+  diurna NevadosDeChillan 2026-10-10 18:18 MIROVA 3.33 estado volcan_fuera_del_granulo dayflag None sunglint None | 

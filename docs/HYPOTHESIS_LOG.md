@@ -809,6 +809,15 @@ Otros 6: stat "Detecciones" ≠ tabla events count, fallback legacy sin distance
 
 ## H_S23_FACTOR42 — MIROVA reporta clusters, nosotros pixels
 
+> ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 1): la hipótesis
+> quedó REFUTADA, no confirmada. MIROVA cuenta **píxeles**: en VIIRS 750 `npix = numel(alert)` y el VRP suma todos los
+> alertados sin agrupar (`MIROVA_VIIRS750_VRP.m` l. 61 y 83 a 85). En el OSF v2.5 el fondo integrado por unidad de
+> `Npix` queda plano con el tamaño y cerca de Planck(280 K) en los tres sensores (VIIRS 750: mediana 0,41 / 0,35 / 0,33
+> para `Npix` 2-4 / 5-20 / >20; Planck(280 K, 4,05 µm) = 0,34), lo que no podría pasar si `Npix` contara regiones de
+> 5 a 50 píxeles (`m02_osf_npix.txt`, 615.470 filas). El union-find de S23 midió cuántas regiones forman nuestros
+> píxeles, no qué cuenta MIROVA. Ya marcado en CLAUDE.md, `docs/MIROVA_DIVERGENCES.md` D1 y `docs/MISSION.md` (S158).
+> Texto conservado por historia.
+
 - **Formulada**: S23 (2026-04-26) tras audit profundo S22 que detectó "factor 42"
   abierto desde S15 (77 px nuestro vs 4 MIROVA Lascar 2025-11-15) sin causa raíz.
 - **Hipótesis**: MIROVA reporta `n_hotspots` (regiones contiguas, conectividad ~1km),
@@ -1125,6 +1134,12 @@ Lectura sistemática de 7 papers core. **Confirmado triple en TRES papers que el
 **6 CSVs adicionales olvidados**: registro_vrp_ocr (con 6 cols validación humana extra), Historial_Puyehue_Cordon_Caulle (curado), per-volcán snapshots.
 
 ### Subagente C — TDD local kernel (`pipeline/vrp_regimes.py` + `tests/test_local_kernel_background.py`)
+
+> ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 5): «L1129
+> literal» no se sostiene. Renderizada (libro `978-3-031-86841-2.pdf`, p. impresa 337) la frase es condicional y
+> pertenece al modelo de dos componentes, no al fondo del VRP; y en VIIRS 750 el código de MIROVA aparta los vecinos
+> adyacentes (dilatación) e interpola el fondo (`MIROVA_VIIRS750_VRP.m` l. 63 a 81). Ver la marca de D8 en
+> `docs/MIROVA_DIVERGENCES.md`. Texto conservado:
 
 Implementación MISSION-compliant (Coppola 2024 L1129 literal):
 

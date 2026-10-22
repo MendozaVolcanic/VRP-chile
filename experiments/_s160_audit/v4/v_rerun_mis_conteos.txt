@@ -1,0 +1,25 @@
+C:\vrp-trabajo\s159-pruebas\experiments\_s160_audit\f4\mis_conteos.py:2: SyntaxWarning: invalid escape sequence '\s'
+  """S160 F4: conteos propios sobre la instantanea de d516b9d8c (D:\vrp-trabajo\temporales\s160_audit\main).
+## 1. Test 1 integrado en data/mirova_equivalent (instantanea d516b9d8c)
+claves de tiempo vistas: ['datetime_utc'] | records sin timestamp parseable: 0
+  antes: records 70915 | triggered_test1 0 | final_hotspot_source test1/test1_roi: 0
+  desde_2026-09-18: records 3896 | triggered_test1 0 | final_hotspot_source test1/test1_roi: 0
+  fuentes (desde K): {None: 3315, 'ctx_cluster': 555, 'eruption': 26}
+  fuentes (antes): {None: 57901, 'eruption': 1101, 'vent': 45, 'ctx_cluster': 11868}
+
+## 2. Chillan MODIS 2026-09-28 a 2026-10-13: pasadas 31 | con primary_cluster.d9_capped: 0
+
+## 3. latest_consolidado.csv: filas 42410
+  ALERTA_TERMICA en 2026-01-11..2026-10-14: 1589 (S151 dijo 1.642)
+  entre 13 y 21 UTC: 37 (S151: 37) | de 1 MW o mas: 20 (S151: 19) por sensor Counter({'VIIRS375': 15, 'MODIS': 3, 'VIIRS': 2}) por volcan Counter({'Nevados de Chillan': 9, 'Lascar': 9, 'Villarrica': 2})
+  protegidas de noche (1 MW o mas, fuera de 13-21 UTC): 228 (S151: 233)
+  control: ALERTA_TERMICA en todo el CSV 1655; primera fecha 2026-01-10 19:06:00 ultima 2026-10-21 20:05:00
+
+## 4. registro_vrp_ocr.csv: filas 1122 | tipos: Counter({'ALERTA_TERMICA_OCR': 987, 'FALSO_POSITIVO_OCR': 94, 'ALERTA_SIN_GEOMETRIA_OCR': 41})
+  alertas MODIS del OCR sin alerta en la tabla a 120 s: 5 (S151: 5, todas Lascar, 4 nocturnas)
+    ('2026-05-05 19:30:00', 'Lascar', '15.0', 'ALERTA_TERMICA_OCR', 'tabla no la tiene')
+    ('2026-04-18 01:50:00', 'Lascar', '2.0', 'ALERTA_TERMICA_OCR', 'tabla no la tiene')
+    ('2026-03-19 01:55:00', 'Lascar', '2.0', 'ALERTA_TERMICA_OCR', 'tabla no la tiene')
+    ('2026-03-04 07:15:00', 'Lascar', '2.0', 'ALERTA_TERMICA_OCR', 'tabla no la tiene')
+    ('2026-02-14 01:40:00', 'Lascar', '3.0', 'ALERTA_TERMICA_OCR', 'tabla no la tiene')
+  nocturnas (fuera de 13-21 UTC): 4 | control: alertas MODIS en OCR total 41

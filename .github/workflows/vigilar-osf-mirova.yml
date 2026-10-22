@@ -1,0 +1,69 @@
+name: Vigilar OSF del grupo MIROVA
+
+# S158 (docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md §1). POR QUE: MIROVA publico su codigo operacional de VIIRS 750
+# en OSF zm62w el 2026-07-24 y nos enteramos tres meses despues. No tiene canal de anuncios: el unico registro con
+# fecha es el historial de actividad de cada proyecto OSF. Una vez por semana se compara contra
+# scripts/osf_mirova_linea_base.json y, si hay algo nuevo o el vigilante no puede leer OSF, se abre un issue.
+# No empuja nada: la linea base se actualiza a mano, en un PR, despues de mirar la novedad.
+# A43: "on" quoted (Norway Problem YAML 1.1).
+"on":
+  workflow_dispatch:
+  schedule:
+    - cron: "15 10 * * 3"   # miercoles 10:15 UTC
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: vigilar-osf-mirova
+  cancel-in-progress: false
+
+jobs:
+  vigilar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Vigilar
+        id: vigilar
+        run: |
+          set +e
+          python scripts/vigilar_osf_mirova.py | tee "$RUNNER_TEMP/vigilar.txt"
+          echo "codigo=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Abrir issue si hay novedad o el vigilante esta ciego
+        if: steps.vigilar.outputs.codigo == "1" || steps.vigilar.outputs.codigo == "2"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ steps.vigilar.outputs.codigo }}" = "2" ]; then
+            TITULO="Vigilante de OSF de MIROVA ciego"
+          else
+            TITULO="Novedad en OSF del grupo MIROVA"
+          fi
+          ABIERTOS=$(gh issue list --state open --search "in:title $TITULO" --json number --jq 'length')
+          CUERPO="$(cat "$RUNNER_TEMP/vigilar.txt")
+
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          Despues de mirarlo, actualizar la linea base en un PR: python scripts/vigilar_osf_mirova.py --generar-linea-base"
+          if [ "$ABIERTOS" = "0" ]; then
+            gh issue create --title "$TITULO" --body "$CUERPO"
+          else
+            N=$(gh issue list --state open --search "in:title $TITULO" --json number --jq '.[0].number')
+            gh issue comment "$N" --body "$CUERPO"
+          fi
+
+      - name: Fallar si el vigilante no pudo correr
+        if: steps.vigilar.outputs.codigo != "0" && steps.vigilar.outputs.codigo != "1" && steps.vigilar.outputs.codigo != "2"
+        run: |
+          echo "el script no devolvio un codigo conocido: ${{ steps.vigilar.outputs.codigo }}"
+          exit 1

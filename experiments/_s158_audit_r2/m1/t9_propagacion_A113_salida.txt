@@ -1,0 +1,256 @@
+
+== C01 MIROVA cuenta regiones/n_hotspots/factor 42: 31 citas, 26 sin marca S158 a +-6 lineas
+   SIN_MARCA tests/test_cluster_hotspots.py:2: espacialmente contiguos al estilo MIROVA n_hotspots.
+   SIN_MARCA tests/test_cluster_hotspots.py:4: MIROVA reporta n_hotspots = numero de regiones espacialmente contiguas
+   SIN_MARCA tests/test_cluster_hotspots.py:5: (~1km connectivity, Coppola 2016a). Cada cluster equivale a 1 punto en el
+
+== C02 segundo pase condicionado = lo que manda el paper/MIROVA: 28 citas, 27 sin marca S158 a +-6 lineas
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2588: de MIROVA, que era el cráter). Con D2 condicionado como manda Coppola 2016a, esos rescates
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:440: enable_second_pass_conditioned: false
+   SIN_MARCA experiments/_s157_prereg_d25/PREREGISTRO.md:48: más segundo pase condicionado sin keep_peak) quedó en no adoptar. Las dos cosas fueron sobre la detección ante
+   SIN_MARCA docs/PREREGISTRO_AB_D1_D2_S135.md:11: > Estado de ejecución: tag defensivo `pre-s135-second-pass-condicionado` creado y subido; el
+   SIN_MARCA docs/PREREGISTRO_AB_D1_D2_S135.md:12: > segundo pase condicionado está implementado detrás de `ENABLE_SECOND_PASS_CONDITIONED`, en OFF
+   SIN_MARCA docs/PREREGISTRO_AB_D1_D2_S135.md:205: | ¿Autorizás tocar `pipeline/detection_context.py` para los brazos C y D? | **Sí.** Tag defensivo `pre-s135-se
+   SIN_MARCA tests/test_flags_d22_d25_perfil_s142.py:29: " p.ENABLE_SECOND_PASS_CONDITIONED, p.ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK,"
+   SIN_MARCA tests/test_second_pass_conditioned_s135.py:2: """S135 — el segundo pase condicionado al conjunto activo y a la vecindad (D2 / D19).
+   SIN_MARCA tests/test_second_pass_conditioned_s135.py:143: assert prof.ENABLE_SECOND_PASS_CONDITIONED is False, (
+   SIN_MARCA tests/test_second_pass_conditioned_s135.py:153: assert "enable_second_pass_conditioned" in cfg["paths"], "está fuera de la sección que se lee"
+   SIN_MARCA tests/test_second_pass_conditioned_s135.py:154: assert cfg["paths"]["enable_second_pass_conditioned"] is False
+   SIN_MARCA tests/test_second_pass_conditioned_s135.py:174: "print(p.ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK, p.ENABLE_SECOND_PASS_CONDITIONED,"
+   SIN_MARCA tests/test_second_pass_conditioned_s135.py:190: """Cada brazo del A/B es (keep_peak, second_pass_conditioned) y escribe en su propio dir."""
+   SIN_MARCA tests/test_second_pass_conditioned_s135.py:197: cond = pa.get("enable_second_pass_conditioned")
+
+== C03 MIROVA no usa mascaras geograficas: 3 citas, 3 sin marca S158 a +-6 lineas
+   SIN_MARCA CLAUDE.md:209: no hay máscaras geométricas ni radios adaptativos. Es grilla UTM 51×51 +
+   SIN_MARCA docs/MISSION.md:297: | `exclude_zones` (Salar, lagos) | No en papers; MIROVA no usa máscaras geográficas | Removido S27 |
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:292: # desactivadas. MIROVA NO usa máscaras geográficas; depende de N·σ
+
+== C04 VIIRS750 12 sigma/8 sigma (Di Bella) canonico: 31 citas, 31 sin marca S158 a +-6 lineas
+   SIN_MARCA CLAUDE.md:245: (S26)**: por ~10 sesiones citamos Di Bella 2024 §3.3 (12σ VIIRS noche)
+   SIN_MARCA docs/MISSION.md:304: | N·σ Di Bella 2024 (12σ noche VIIRS) | Di Bella es INGV Catania, NO MIROVA | Identificado S26 |
+   SIN_MARCA tests/test_drift13_dibella_n12_viirs.py:68: Importa el módulo profile y verifica que VIIRS_C2_OVERRIDE_NIGHT
+   SIN_MARCA tests/test_drift13_dibella_n12_viirs.py:72: assert hasattr(profile, "VIIRS_C2_OVERRIDE_NIGHT"), (
+   SIN_MARCA tests/test_drift13_dibella_n12_viirs.py:73: "profile debe exponer VIIRS_C2_OVERRIDE_NIGHT")
+   SIN_MARCA tests/test_drift13_dibella_n12_viirs.py:75: assert profile.VIIRS_C2_OVERRIDE_NIGHT is None, (
+   SIN_MARCA tests/test_drift13_dibella_n12_viirs.py:76: f"default debe ser None, got {profile.VIIRS_C2_OVERRIDE_NIGHT}")
+   SIN_MARCA tests/test_rama_diurna_viirs_s151.py:123: assert dia["viirs_c2_override"] is None
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/reference_papers_mirova_canonical.md:89: **Error Di Bella 2024**: por ~10 sesiones referenciamos Di Bella 2024 §3.3 (12σ VIIRS noche) como "thresholds 
+
+== C05 D8 kernel = Coppola 2024 L1129 literal: 12 citas, 12 sin marca S158 a +-6 lineas
+   SIN_MARCA CLAUDE.md:299: (el patrón térmico decide, validar por A/B — A19) sigue; los dos números no. Fix kernel-bg (Coppola 2024 L1129
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:1315: **Fix adoptado**: kernel local 3×3 (Coppola 2024 L1129 literal). Reemplaza
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:449: # S61 ADOPCIÓN — kernel local 3×3 (Coppola 2024 L1129, Coppola 2016a L357,
+   SIN_MARCA tests/test_local_kernel_background.py:3: Implementa Coppola 2024 chapter L1129 literal: "T_bk is retrieved from the
+   SIN_MARCA tests/test_local_kernel_modis.py:5: un kernel 3x3 alrededor de cada hot pixel (Coppola 2024 L1129 literal), con
+   SIN_MARCA tests/test_local_kernel_modis.py:81: """VRP esperado per-pixel con L_bg LOCAL (Coppola 2024 L1129)."""
+
+== C06 K1 diurno -0.6 para VIIRS: 19 citas, 19 sin marca S158 a +-6 lineas
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2848: ## D27: El día no existe: la Tabla 1 diurna (K1 = -0,6, C1 = 0,02, C2 = 15) está escrita y nunca se ejecuta. *
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2856: > (A118). De día los Tests 2 y 3 usan K1 = -0,6, C1 = 0,02 y **C2 = 15** (Tabla 1, p. 7, página
+   SIN_MARCA tests/test_daytime_modis.py:15: assert hasattr(P, "NTI_K1_DAY") and abs(P.NTI_K1_DAY - (-0.6)) < 1e-9
+   SIN_MARCA tests/test_daytime_modis.py:29: # día + flag ON → params día (15σ ambos ROIs, K1=-0.6, C1=0.02 ambos)
+   SIN_MARCA tests/test_daytime_modis.py:31: assert day["nti_k1"] == -0.6
+   SIN_MARCA tests/test_rama_diurna_viirs_s151.py:7: (Coppola 2016a, sp426.5.pdf p. 7, Tabla 1: de día K1 = -0,6, C1 = 0,02 y C2 = 15 en ROI1 y ROI2).
+   SIN_MARCA tests/test_rama_diurna_viirs_s151.py:103: assert P.NTI_K1_DAY == -0.6 and P.DNTI_CONTEXTUAL_C1_DAY == 0.02
+   SIN_MARCA tests/test_rama_diurna_viirs_s151.py:117: assert dia["nti_k1"] == -0.6
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/reference_s90_daytime_modis_impl.md:15: params más estrictos (Coppola 2016a Tabla 1, MISSION puerta 1 verde): K1=-0.6,
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/reference_s90_daytime_modis_impl.md:21: - `profile.py`: `NTI_K1_DAY`/`N_SIGMA_MIR_DAY`/`DNTI_CONTEXTUAL_C1_DAY` + `ENABLE_DAYTIME_MODIS` (de `_p`=path
+
+== C07 contraste 8 vecinos: 87 citas, 84 sin marca S158 a +-6 lineas
+   SIN_MARCA CLAUDE.md:142: μ/σ), ETI por regresión cuadrática, kernel 8-vec aritmético. **La detección MODIS es FIEL a
+   SIN_MARCA CLAUDE.md:165: - **Kernel 8-vecinos dNTI contextual**: `np.mean` aritmética (Coppola 2016a + Campus 2024). **Drift D1
+   SIN_MARCA CLAUDE.md:415: mecánico: kernel local 8-vecinos sobre cirrus uniforme da `dNTI` artificial
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:333: > *"the presence of clouds is not taken into account by the algorithm and all eight neighbouring pixels are us
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:819: > contextual de 8 vecinos sin ETI y la compuerta de BT de 5/10 sigma. Los Tests 2 y 3 con ETI entraron el
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:1316: `median(ring 5-25km)` con `mean(8 vecinos directos del hot pixel)`.
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:1585: cuadrático, kernel 8-vec). **El difuso pasa GENUINAMENTE** (outlier espacial real a 1 km sobre
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2197: y nosotros sobre el swath crudo, donde "los ocho vecinos" son objetos distintos
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2780: **S142, flag (OFF en producción).** `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375` calcula, en VIIRS 375, el fondo de 
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2913: El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el código no tiene el paso (`process
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:3068: cuadrática ni el Test 1; sí tenía un contraste dNTI contextual de 8 vecinos sin ETI (commit
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:31: # S142 D25: semiancho máximo (px) de la ventana del fondo por vecinos cuando los 8 vecinos están
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:114: # P3.2 S15: dNTI contextual 8-vecinos (Coppola 2016a SP 426.5).
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:115: # C1 absoluto del umbral local dNTI = NTI_pixel - median(8 vecinos).
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:203: # P3.2 S15: habilitar gate contextual dNTI 8-vecinos (Path D).
+   SIN_MARCA experiments/_s157_prereg_d25/PREREGISTRO.md:31: con `ENABLE_LOCAL_KERNEL_BG` encendido en K, restan la media de **temperatura** de sus 8 vecinos no alertados
+   SIN_MARCA experiments/_s157_prereg_d25/PREREGISTRO.md:62: | D1 (opcional, §8 b) | `_s157_ab_d25_k_on_h1` | D con sólo los 8 vecinos | la mitad abierta de la decisión de
+   SIN_MARCA experiments/_s157_prereg_d25/RESUMEN_SELLO.md:47: 2. **Ventana de vecinos**: resuelta por la regla del pre-registro con el probe (8 vecinos y 7x7 dan idéntico):
+   SIN_MARCA tests/arnes_sintetico_s142.py:62: # tan suave que ningún píxel es anómalo contra sus 8 vecinos. Resultado medido: primer pase 0,
+   SIN_MARCA tests/arnes_sintetico_s142.py:149: # de la compuerta y son anómalos contra sus 8 vecinos: es la escena donde la compuerta
+   SIN_MARCA tests/test_cluster_corona_magnitude.py:101: # real process_modis.py:843): sus 8 vecinos son hot → excluidos → NaN.
+   SIN_MARCA tests/test_conectiva_tests23_s136.py:116: media de sus 8 vecinos, o sea mide textura LOCAL. Un fondo aleatorio uniforme, aunque su
+   SIN_MARCA tests/test_d22_compuerta_bt_s142.py:6: contra sus 8 vecinos. La fórmula de los Tests 2 y 3 de Coppola 2016a (p. 7) no tiene condición de
+   SIN_MARCA tests/test_d8_h_d8_5.py:417: # _nanmean_8neighbors_fast — vectorized 8-neighbor arithmetic mean (perf fix)
+   SIN_MARCA tests/test_d8_h_d8_5.py:462: """Pixel aislado rodeado por NaN: el mean de 8-vecinos debe ser NaN
+   SIN_MARCA tests/test_d8_h_d8_5.py:469: # El pixel center: sus 8 vecinos son NaN → mean = NaN
+   SIN_MARCA tests/test_d8_h_d8_5.py:474: """En campo uniforme arr=K constante, cada pixel tiene 8 vecinos de
+   SIN_MARCA tests/test_d8_h_d8_5.py:480: # Interior: 8 vecinos = 0.5 → mean = 0.5
+   SIN_MARCA tests/test_detection_context.py:1: """Tests for contextual dNTI 8-neighbor mask (P3.2).
+   SIN_MARCA tests/test_detection_context.py:5: 8-vecinos exige que el pixel destaque vs sus vecinos inmediatos. Si la
+   SIN_MARCA tests/test_detection_context.py:252: """Test S17 D1: el kernel 8-vecinos debe usar MEAN aritmetico, no median.
+   SIN_MARCA tests/test_detection_context.py:254: Caso: 1 outlier entre los 8 vecinos del pixel central. Mean y median
+   SIN_MARCA tests/test_drift4_second_pass_enabled.py:12: su dNTI legacy es chico porque mean(8-vecinos) incluye al hot, inflando bg local.
+   SIN_MARCA tests/test_drift4_second_pass_enabled.py:83: nti[10, 10] = -0.87  # bg mean ~-0.97 → dNTI=0.004 después de 8-vecinos
+   SIN_MARCA tests/test_focal_cluster_magnitude.py:6: sus 8 vecinos = dNTI, Coppola 2016a Tests 2/3) ∪ {pico}. El campo difuso tibio uniforme
+   SIN_MARCA tests/test_focal_cluster_magnitude.py:90: 8 vecinos difusos 0.3 MW no-ctx → se conserva 5.0, se cae el difuso (2.4)."""
+   SIN_MARCA tests/test_guard_desempate_top100_s151.py:171: # del L1B): cada uno es anomalo contra sus 8 vecinos y todos empatan en VRP por pixel. Son mas de
+   SIN_MARCA tests/test_local_kernel_background.py:33: Kernel 3x3 excluyendo centro debe retornar media de los 8 vecinos
+   SIN_MARCA tests/test_local_kernel_background.py:149: Setup: hot pixel BT=282K rodeado de 8 vecinos a 275K (cráter sub-pixel
+   SIN_MARCA tests/test_regrid_f70.py:9: donde un píxel off-nadir se estira hasta ~10 km² y "los 8 vecinos" son objetos
+   SIN_MARCA tests/test_regrid_viirs_f70.py:7: grilla regular, con el mismo schema — así máscaras, kernel 8-vecinos,
+   SIN_MARCA tests/test_second_pass_conditioned_s135.py:5: que ya se detectó: los vecinos de un píxel activo tienen su media de 8 vecinos contaminada por
+   SIN_MARCA tests/test_test1_contextual_s99.py:7: 8 VECINOS inmediatos. La roca tibia rodeada de roca tibia NO es contextualmente anómala
+   SIN_MARCA tests/test_unsuitable_filters.py:195: # Estrategia: bajar nti[10,10] mucho — el mean 8-vecinos queda como bg
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/reference_bibliography_synthesis.md:45: 3. dNTI / dETI = pixel - mean(8 vecinos)
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/reference_papers_mirova.md:14: | **Coppola 2016a SP 426.5** | Algoritmo core: K1, C1, C2 dual-ROI, kernel mean 8-vec, bbox 50×50 km |
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/reference_papers_mirova_canonical.md:64: | **Coppola 2016a SP 426.5** | `sp426.5.pdf` | 2016 | **Paper foundational**: Tabla 1 N·σ summit/scene, dual-R
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/reference_s90_pcc_cirrus_exposure_and_card_fix.md:16: lava), `diag_n_dnti_ctx`=107–153. El kernel 8-vecinos fabrica gradiente artificial
+
+== C08 C1 scene 0.010 Table 2: 6 citas, 6 sin marca S158 a +-6 lineas
+   SIN_MARCA CLAUDE.md:140: true` (**C1 = 0.003 summit / 0.010 scene**, 0.02 día), Tests 2∧3 con la rama OR completa
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:1089: scene=0.010 (Coppola 2016a Table 2). Si summit dispara con su umbral
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:116: # 0.003 = summit ROI segun paper. 0.010 scene ROI (reservado para P3.1).
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:118: # P3.1 S15: dual-ROI thresholds (Coppola 2016a Table 2).
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:253: # P3.1 S15: dual-ROI dNTI summit/scene — Coppola 2016a Table 2.
+   SIN_MARCA tests/test_detection_context.py:171: - pixel scene a 20 km, dNTI=0.005 -> rechazo (C1=0.010 scene).
+
+== C09 Test1 K1 = mascara de saturacion no reportable: 26 citas, 26 sin marca S158 a +-6 lineas
+   SIN_MARCA CLAUDE.md:161: la figura A6 del propio paper. La frase que sigue se conserva por historia. ⚠️ **FALSA en sus dos partes, veri
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:482: | **F1.2** | NEW-7 + NEW-8 — Test 1 K1 retire + edge/dNTI<-0.1/dETI<-0.1 unsuitable | ⚠️ **PARCIALMENTE RECLAS
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:519: Nicolás. El gap (1) de F1.2 (`enable_test1_k1_retire_from_hot_mask`) nació de leer
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:530: sería un drift, no un fix. **Decisión: `enable_test1_k1_retire_from_hot_mask` queda
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:1594: `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK` ~~controla el REPORTE (OFF = fiel), no el pool~~
+   SIN_MARCA tests/test_drift1_test1_k1_saturation.py:30: enable_test1_k1_retire_from_hot_mask=False,
+   SIN_MARCA tests/test_drift1_test1_k1_saturation.py:50: enable_test1_k1_retire_from_hot_mask=True,
+   SIN_MARCA tests/test_drift1_test1_k1_saturation.py:74: enable_test1_k1_retire_from_hot_mask=True,
+   SIN_MARCA tests/test_guard_gap_a_pool_musigma_s128.py:15: (2) «el flag ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK controla el REPORTE, no el
+   SIN_MARCA tests/test_guard_gap_a_pool_musigma_s128.py:70: r"ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK\s+else\s+None", src)
+   SIN_MARCA tests/test_unsuitable_filters.py:242: assert profile.ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK is False, (
+   SIN_MARCA tests/test_unsuitable_filters.py:254: assert profile.ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK is True, (
+
+== C10 recorte dL a cero (Wooster physics): 14 citas, 14 sin marca S158 a +-6 lineas
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2780: **S142, flag (OFF en producción).** `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375` calcula, en VIIRS 375, el fondo de 
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:465: # píxel sin vecinos no alertados. El recorte a cero no cambia. OFF hasta el A/B (A45).
+   SIN_MARCA tests/test_vrp_negative_clip.py:7: Fix universal: clip delta_L = max(L_hot - L_bg, 0). Pixels frios contribuyen
+   SIN_MARCA tests/test_vrp_negative_clip.py:19: delta_L = np.maximum(L_hot - L_bg, 0.0)
+
+== C11 piso -0.1 tambien en dETI: 53 citas, 53 sin marca S158 a +-6 lineas
+   SIN_MARCA docs/MISSION.md:266: `ENABLE_UNSUITABLE_FILTERS_267_273` está en True desde S72 y los tres procesadores lo
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:482: | **F1.2** | NEW-7 + NEW-8 — Test 1 K1 retire + edge/dNTI<-0.1/dETI<-0.1 unsuitable | ⚠️ **PARCIALMENTE RECLAS
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:491: > `ENABLE_UNSUITABLE_FILTERS_267_273` vale **True** (default de `profile.py:676`, puesto en el
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:527: que §267-273 aplica a edge/dNTI<-0.1/dETI<-0.1 (NEW-8) y que el kernel de fondo ya
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:546: **Razonamiento físico-algorítmico**: si pixels con dNTI<-0.1 o dETI<-0.1 (típicamente cirrus o lagos fríos con
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:548: **Bibliografía**: SP 426.5 §267-273: *"these unsuitable pixels are: all the pixels at the edge of the resample
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:552: **F2.1 (top P1, en implementación)**: 4 filtros + flag wireados en `first_pass_tests_2_and_3` y `contextual_dn
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:1236: - #15: falta exclusión edge `dNTI/dETI < -0.1` (sp426_5.txt:271-273)
+   SIN_MARCA docs/META_RULES_S80.md:87: invisibles en `mirova_equivalent.yaml` (ej. `enable_unsuitable_filters_267_273`).
+   SIN_MARCA tests/arnes_sintetico_s142.py:233: c1=0.003, bt_sanity_k=3.0, apply_unsuitable_filters=True, **extra)
+   SIN_MARCA tests/arnes_sintetico_s142.py:237: apply_unsuitable_filters=True, **extra)
+   SIN_MARCA tests/test_probe_vecinos_v2_s141.py:175: c2_deti_scene=10.0, test1_mask=None, unsuitable_dnti_floor=-0.1, unsuitable_deti_floor=-0.1,
+   SIN_MARCA tests/test_probe_vecinos_v2_s141.py:223: c1_summit=0.003, c1_scene=0.010, inner_km=1.0, bt_sanity_k=3.0, apply_unsuitable_filters=True)
+   SIN_MARCA tests/test_probe_vecinos_v2_s141.py:248: assert limitante("contextual", m2p={"margen_dnti": -0.001, "margen_deti": -0.1}) == "deti_2p+dnti_2p"
+   SIN_MARCA tests/test_probe_vecinos_v2_s141.py:458: inner_km=1.0, bt_sanity_k=3.0, apply_unsuitable_filters=True)
+   SIN_MARCA tests/test_unsuitable_filters.py:7: - dETI < -0.1                     → unsuitable.
+   SIN_MARCA tests/test_unsuitable_filters.py:64: """Pixel interior con dETI=-0.3 < -0.1 queda fuera del pool suitable."""
+   SIN_MARCA tests/test_unsuitable_filters.py:74: assert not suitable[5, 5], "dETI<-0.1 debe excluir del pool bg"
+   SIN_MARCA tests/test_unsuitable_filters.py:239: assert profile.ENABLE_UNSUITABLE_FILTERS_267_273 is True, (
+   SIN_MARCA tests/test_unsuitable_filters.py:240: "unsuitable_only debe activar §267-273 (edge + dNTI/dETI<-0.1)"
+   SIN_MARCA tests/test_unsuitable_filters.py:251: assert profile.ENABLE_UNSUITABLE_FILTERS_267_273 is False, (
+   SIN_MARCA tests/test_unsuitable_filters.py:259: def test_profile_default_unsuitable_filters_true_for_operational(monkeypatch):
+   SIN_MARCA tests/test_unsuitable_filters.py:260: """Default ENABLE_UNSUITABLE_FILTERS_267_273=True preserva post-F1.2.a."""
+   SIN_MARCA tests/test_unsuitable_filters.py:264: assert profile.ENABLE_UNSUITABLE_FILTERS_267_273 is True, (
+   SIN_MARCA tests/test_unsuitable_filters.py:302: unsuitable_deti_floor=-0.1,
+
+== C12 A76 MIROVA limpia diurno por supervision manual / no gate: 8 citas, 6 sin marca S158 a +-6 lineas
+   SIN_MARCA CLAUDE.md:1358: supervisión manual de Coppola 2023 §2.5 es de la base v.1. El OSF es filtrado: sus conteos no valen para el NR
+   SIN_MARCA docs/PREREGISTRO_AB_D1_D2_S135.md:148: caso, ni el conocimiento local de cada volcán para hacerlo. La supervisión manual que menciona
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/feedback_mirova_no_human_supervision.md:37: Coppola 2023 §2.5 menciona supervisión manual SOLO para el **OSF v2.5 histórico
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/feedback_s135_techo_artificial_supervision.md:13: ([[feedback_mirova_no_human_supervision]]): la supervisión manual es del archivo histórico
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/reference_mirova_daytime_cloud_artifact.md:3: description: "Caso S110 — MIROVA publicó 760 MW fantasma en Láscar (VIIRS375 diurno sobre nube); valida night-
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/reference_mirova_daytime_cloud_artifact.md:29: 3. **MIROVA limpia estos FP por SUPERVISIÓN MANUAL, no filtro automático** (confirma Coppola 2023 §2.5,
+
+== C13 fondo vecinos = lo que hace MIROVA (D25): 80 citas, 80 sin marca S158 a +-6 lineas
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2780: **S142, flag (OFF en producción).** `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375` calcula, en VIIRS 375, el fondo de 
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2805: confirmado). `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750` (`pipeline/profile.py`, clave en `paths:` del
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2806: perfil) cablea `vrp_bg_neighbor_mean_v750` en los tres sitios donde M-band resta fondo: el bloque
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:3170: **Lo que hace MIROVA**, verificado renderizando las páginas a imagen (A95), no por la capa de texto:
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:32: # alertados. Sólo actúa con enable_vrp_bg_neighbor_mean_viirs375 (en paths:, OFF). El A/B barre
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:466: enable_vrp_bg_neighbor_mean_viirs375: false
+   SIN_MARCA pipeline/profiles/mirova_equivalent.yaml:472: enable_vrp_bg_neighbor_mean_viirs750: false
+   SIN_MARCA experiments/_s157_prereg_d25/PREREGISTRO.md:61: | D | `_s157_ab_d25_k_on` | K más `enable_vrp_bg_neighbor_mean_viirs375` y `_viirs750`, ventana hasta 7x7 | la
+   SIN_MARCA experiments/_s157_prereg_d25/PREREGISTRO.md:71: lee (`grep -c "NEIGHBOR\|neighbor_mean" pipeline/process_modis.py`: 0). MODIS sólo tiene el kernel local 3x3 e
+   SIN_MARCA experiments/_s157_prereg_d25/RESUMEN_SELLO.md:3: **Qué se quiere saber.** Si restar como fondo la media de los vecinos del cráter (lo que hace MIROVA, D25) en 
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:31: from pipeline.vrp_regimes import neighbor_mean_radiance_background  # noqa: E402
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:51: l_bk, half = neighbor_mean_radiance_background(bt, alert, [2], [2], LAMBDA_I04, max_half_px=1)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:67: l_bk, half = neighbor_mean_radiance_background(bt, alert, [2, 2], [2, 3], LAMBDA_I04, max_half_px=1)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:79: l1, h1 = neighbor_mean_radiance_background(bt, alert, [4], [4], LAMBDA_I04, max_half_px=1)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:81: l3, h3 = neighbor_mean_radiance_background(bt, alert, [4], [4], LAMBDA_I04, max_half_px=3)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:92: l_bk, half = neighbor_mean_radiance_background(bt, alert, [1], [1], LAMBDA_I04, max_half_px=1)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:95: l_bk, half = neighbor_mean_radiance_background(bt, alert, [1], [1], LAMBDA_I04, max_half_px=3)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:105: l_bk, _ = neighbor_mean_radiance_background(bt, alert, [0], [0], LAMBDA_I04, max_half_px=1)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:112: neighbor_mean_radiance_background(bt, np.zeros((3, 3), bool), [1], [1], LAMBDA_I04, max_half_px=0)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:114: neighbor_mean_radiance_background(bt, np.zeros((2, 2), bool), [1], [1], LAMBDA_I04)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:116: neighbor_mean_radiance_background(bt, np.zeros((3, 3), bool), [1, 2], [1], LAMBDA_I04)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:120: l_bk, half = neighbor_mean_radiance_background(np.full((3, 3), 260.0), np.zeros((3, 3), bool),
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:137: l_bg, n_sin = pv.vrp_bg_neighbor_mean_v375(bt, alert, rows, cols, np.float64(0.123), max_half_px=1)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:142: l_bg2, n_sin2 = pv.vrp_bg_neighbor_mean_v375(bt, alert, rows, cols, legado, max_half_px=1)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:151: parches=("ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375=True",), solo="v375")
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:206: nuevo = re.search(r"^\s*if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375:\s*$", s, flags=re.M)
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:211: assert len(re.findall(r"_t1_Lbg, _n_sin = vrp_bg_neighbor_mean_v375\(", s)) == 2
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:234: prohibidos = ["ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375", "vrp_bg_neighbor_mean_v375"]
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:236: prohibidos += ["neighbor_mean_radiance_background", "VRP_BG_NEIGHBOR_MAX_HALF_PX",
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:237: "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750"]
+   SIN_MARCA tests/test_d25_fondo_vecinos_s142.py:240: assert re.search(r"(?<![A-Za-z0-9_])ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750(?![A-Za-z0-9_])", s)
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:21: from pipeline.process_viirs_mod import M13_LAMBDA, vrp_bg_neighbor_mean_v750  # noqa: E402
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:22: from pipeline.vrp_regimes import neighbor_mean_radiance_background  # noqa: E402
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:31: l_bg, n_sin = vrp_bg_neighbor_mean_v750(bt, alerta, [2], [2], 9.99, max_half_px=1)
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:32: esperado, _ = neighbor_mean_radiance_background(
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:42: l_bg, n_sin = vrp_bg_neighbor_mean_v750(bt, alerta, [0], [0], 0.1234, max_half_px=3)
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:50: assert hasattr(p, "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750")
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:51: assert p.ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750 is False
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:57: i, m = "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375", "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750"
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:60: for clave in ("enable_vrp_bg_neighbor_mean_viirs375", "enable_vrp_bg_neighbor_mean_viirs750"):
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:73: I-band (`grep -c "if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375:" pipeline/process_viirs.py` da 4).
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:79: guardas = re.findall(r"if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750:", s)
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:82: assert s.count("vrp_bg_neighbor_mean_v750(") == 4, "3 llamadas + la definicion"
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:89: assert "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750" in s
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:95: assert not re.search(r"(?<![A-Za-z0-9_])ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375(?![A-Za-z0-9_])", s)
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:96: assert not re.search(r"(?<![A-Za-z0-9_])vrp_bg_neighbor_mean_v375(?![A-Za-z0-9_])", s)
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:128: bloque = s.split("if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750:")[-1]
+   SIN_MARCA tests/test_d25_fondo_vecinos_v750_s145.py:155: monkeypatch.setattr(pvm, "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750", True)
+   SIN_MARCA tests/test_d8_h_d8_5.py:420: def _slow_reference_8neighbor_mean(arr):
+   SIN_MARCA tests/test_d8_h_d8_5.py:448: slow = _slow_reference_8neighbor_mean(arr)
+   SIN_MARCA tests/test_flags_d22_d25_perfil_s142.py:28: "print(p.ENABLE_TESTS_23_NO_BT_GATE_VIIRS375, p.ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375,"
+   SIN_MARCA tests/test_flags_d22_d25_perfil_s142.py:53: for clave in ("enable_tests_23_no_bt_gate_viirs375", "enable_vrp_bg_neighbor_mean_viirs375"):
+   SIN_MARCA tests/test_gr2_profile_invariants.py:138: "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375": False,
+   SIN_MARCA tests/test_gr2_profile_invariants.py:170: "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375": "enable_vrp_bg_neighbor_mean_viirs375",
+   SIN_MARCA tests/test_perfiles_d25_k_s157.py:22: D25 = {"ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375", "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750"}
+
+== C14 Etna prueba produccion: 0 citas, 0 sin marca S158 a +-6 lineas
+
+== C15 D17 cierra como mucho 23%: 2 citas, 2 sin marca S158 a +-6 lineas
+   SIN_MARCA CLAUDE.md:1336: pares entre 0,8 y 1,25. El subconjunto es el 23 % de los pares y está sesgado a lo simple (233 de
+   SIN_MARCA docs/MISSION.md:300: | Cloud mask BT<260K | ✅ **verificado verbatim S128** contra `documentacion/s00445-025-01932-y.pdf` p. 4: *"Im
+
+== C16 Cobertura completa con cero granulos: 1 citas, 0 sin marca S158 a +-6 lineas
+
+== C17 recall_v750_dash libro 85,06: 1 citas, 1 sin marca S158 a +-6 lineas
+   SIN_MARCA CLAUDE.md:1223: | `recall_v750_dash` 84,55 → **85,06** | deriva | dos ventanas distintas (toda la data vs 2026) |
+
+== C18 caja 5x5 km D18: 24 citas, 24 sin marca S158 a +-6 lineas
+   SIN_MARCA CLAUDE.md:1470: S130 corrió el A/B de la caja de 5 × 5 km (D18) con el Test 1 encendido, encontró que
+   SIN_MARCA CLAUDE.md:1530: general). (1) `enable_roi1_box_paper` entregaba la caja de 5 × 5 km sólo al primer pase. El
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2358: ## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por vol
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2396: > (1) El ROI de cumbre sigue siendo una caja de 5 × 5 km en 2023: «in the summit area (5 × 5 km) slightly lowe
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2408: > *«the inner region (ROI1) consists of a **box (5 × 5 km)** centred on the volcano's
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:2442: El brazo fiel es una **caja** de 5 × 5 km uniforme, no un círculo de radio equivalente:
+   SIN_MARCA docs/MIROVA_DIVERGENCES.md:3225: alertados de la caja de 50 por 50 km» es, en la práctica, **un puñado dentro de unos 2 km**: no es
+   SIN_MARCA tests/test_d18_roi1_caja_s130.py:1: """D18 (S130) — el ROI1 del paper es una CAJA de 5x5 km, no un circulo per-volcan.
+   SIN_MARCA tests/test_d18_roi1_caja_s130.py:7: "the inner region (ROI1) consists of a box (5 x 5 km) centred on the
+   SIN_MARCA tests/test_d18_roi1_caja_s130.py:115: assert p.ROI1_BOX_HALF_KM == 2.5, "la caja del paper es 5x5 km -> semilado 2,5"
+   SIN_MARCA tests/test_guard_caja_llega_al_segundo_pase_s149.py:6: `enable_roi1_box_paper` (D18) cambia esa geometria del circulo per-volcan a la caja de 5 x 5 km del
+   SIN_MARCA C:/Users/nmend/.claude/projects/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/memory/feedback_s147_saturacion_esconde_estructura.md:18: 17 sesiones antes (S130) se había corrido el A/B de otra palanca (la caja de 5 × 5 km) con el Test
+
+== C19 n_hotspots_clustered paridad: 12 citas, 12 sin marca S158 a +-6 lineas
+
+== C20 MIROVA no filtra nubes/ sin mascara: 0 citas, 0 sin marca S158 a +-6 lineas
