@@ -558,7 +558,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ### 2026-10-21 (S159, dueña del loop): ola 2b, ocho frentes en paralelo (sí de Nicolás al paquete)
 - Nicolás pidió vías nuevas y aprobó el paquete («si continua con el paquete que dices, todo lo que se pueda en
-  paralelo»). Lanzados, sin worktrees nuevos (carpetas en `s159-pruebas` salvo el 6, en `C:rp-trabajo\s159-n` rama
+  paralelo»). Lanzados, sin worktrees nuevos (carpetas en `s159-pruebas` salvo el 6, en `C:\vrp-trabajo\s159-n` rama
   `s159-portes`): (1) **gemelo de D25**: ¿K y K' corren en el mismo job y su ruido de P2 es cero por construcción?, sin
   abrir el brazo D; (2) **negativo limpio con cráter**: exigir que el gránulo que listó MIROVA tenga el cráter y
   recalcular la línea base de K, el +12 de F y el oráculo; (3) **estabilidad de la referencia**: cuántas filas pasadas
