@@ -567,6 +567,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 ~09:50 UTC (S160, con Nicolás despierto): D-42 sellada; implementación en curso; placebo del 1 %
+- D-42 cerrada por Nicolás (opción a). Cuarta adenda `ADENDA_CALIBRACION_P2.md` (`ca65069f6`). Implementa un agente
+  Opus en `C:rp-trabajo\s159-evaluador` (calibración, candados de V34-03 y V29-01, falsos y poder sintéticos,
+  suite con árbol quieto); después verificador limpio en Fable y recién ahí el tag de lectura.
+- Propuesta de la auditoría S160 (V1a): con tolerancia 0, P2 aprueba un placebo sin información (D = K con el 1 % de
+  las publicaciones apagado al azar: GANA en 16 de 30 semillas en V1 y 5 de 10 en V2). **La adenda D-42 no lo cubre**:
+  la calibración quita las decisiones del azar, no el premio a publicar menos. Se agregó como control del instrumento
+  al implementador (brazos armados desde producción, no desde el A/B; criterio: P2 calibrada no da GANA en más del
+  5 % de las semillas; si lo da, va a Nicolás como defecto de la métrica, sin inventar regla).
+- Según la sesión S160: **#891 ya está en `main`**; **#892 lo bloqueó el clasificador** al intentar mergearlo, así que
+  lo mergea Nicolás (D-37).
+
 ### 2026-10-22 ~09:33 UTC (S160 nocturna, tras el cierre): D-35 despachado con el sí de Nicolás
 - Nicolás aprobó D-35. Run **39756261926** (`reproc-s146-ab-sin-test1.yml`, ref `s157-d25-k-codigo` = `66961f65d`,
   2026-10-17 a 2026-10-19, los 11 volcanes, brazos `_s157_ab_d25_k_control`, `_s157_ab_d25_k_gemelo` y
