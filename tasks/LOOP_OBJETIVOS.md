@@ -558,6 +558,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): rescate de gránulos entregado
+- `experiments/_s159/laads_rescate/` (`798400dec`): el **12-oct** fue reprocesado por NASA el 19-oct; LAADS borró los
+  originales y CMR sigue entregando las entradas viejas (404). La protegida de Chillán 05:18 existe como
+  `VJ202MOD.A2026285.0518.021.2026292150831.nc` (más Isluga 05:48 y Chillán 05:54); se las pasé al censo del oráculo
+  como estrato aparte. **17 al 19-oct**: 66 gránulos intactos en LAADS que CMR Standard no indexa; CMR NRT los tiene hoy
+  (ayer 18:41 UTC no), y LANCE purga en pocos días. **SNPP del 20-oct, 04:18 a 07:48 UTC**: no existe en ningún depósito,
+  se declara «no observado». El pipeline sólo usa CMR (`pipeline/fetch.py:767-806`) y una búsqueda vacía sale sin
+  registrar falla (`fetch.py:1087-1088`).
+- Comprobado por el coordinador en `origin/main`: **producción sí tiene records del 17 al 19** (Chillán, Láscar,
+  Villarrica, Isluga, los tres sensores), procesados en su momento con NRT; el hueco sólo afectó a los A/B. El 20 Láscar
+  no tiene ningún record VIIRS (SNPP ausente).
+- Decisiones para Nicolás: reabrir D-29 con un brazo suplementario de D25 sobre el 17 al 19 por NRT antes de que LANCE
+  purgue (sensibilidad, no reemplaza el veredicto sellado); arreglo durable en `fetch.py` (fallback a listado de LAADS
+  ante cero resultados o 404, con registro de falla; A45).
+
 ### 2026-10-21 (S159, dueña del loop): referencia inestable; guía de auditorías mejorada y en git; diseño de S160
 - **Estabilidad de la referencia** (`experiments/_s159/referencia_estable/`, `8c5db502c`, SIN VERIFICAR, verificador
   corriendo): la tabla nunca cambia una fila pero las PIERDE (1.948 filas pasadas en 60 días, 14 protegidas); la unión
