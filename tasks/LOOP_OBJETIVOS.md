@@ -567,6 +567,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 ~07:30 UTC (S160 nocturna): verificador de D-29 y CIERRE de la sesión nocturna
+- Verificador limpio de D-29 (Fable 5.1; `29831d7bc`, `experiments/_s159/instrumentos/verificador_d29/INFORME.md`;
+  se cortó una vez por un error 529 de la API y se reanudó desde el disco). El código hace lo que dice la fila D-29: la
+  exclusión llega a la tabla, a los crudos y a la cobertura, y todo lo que decide sale de esos tres objetos; control
+  positivo sin exclusión: 60 pasadas más por sensor, «D: le faltan 54 de K», P4 54 y 16, determinismo FALLA. Lo débil
+  (V29-01): las 5 pruebas atrapan 4 de sus 9 mutaciones; las que dejan pasar días dentro de `evaluar` pasan en verde.
+  V29-02: mi `rojo_d29.txt` salió de un borrador de la prueba (re-medido por él: 5 de 5 rojas con la commiteada).
+  Recomendación: sumar al candado un caso de punta a punta como su `cobertura_sintetica.py` junto con D-42.
+- **Cierre**: traspaso `tasks/BLOQUE_ARRANQUE_S161.md`. Sin trabajo en curso salvo el CI de #890 sobre `29831d7bc`
+  (`pytest` pendiente, run 39740189157). Ningún agente vivo. Nada decidido por Nicolás esta noche.
+
 ### 2026-10-22 ~06:03 UTC (S160 nocturna): auditoría S160 terminada; D-29 implementado en el evaluador
 - **Auditoría S160** (sesión `auditor-a-s160-de-vrp-ch`) terminada: síntesis `docs/AUDIT_S160.md` en `s160-auditoria`
   (`b941c8052`), 27 marcas A113 en esa rama, cola de campo `docs/COLA_CAMPO.md`. En una pantalla: lo que está en
