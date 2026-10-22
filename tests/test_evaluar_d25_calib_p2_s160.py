@@ -17,6 +17,12 @@ de PIERDE, tope del 5 % de d′ en la comparación e INDECIDIBLE por d′ sólo 
 del hallazgo 203 (NOTA_ESTRATO_203.md, 5f986a209), que se cuenta y no decide.
 
 Las pruebas fallan primero por ASERCIÓN (S152, S156), por eso preguntan antes si el nombre existe.
+
+S161 (D-45, experiments/_s157_prereg_d25/ADENDA_SIGNOS_P2.md): P2 se decide con la prueba de signos por bloque y
+D-42 deja de decidir y se informa (§3). Las pruebas de aquí que sólo miraban la DECISIÓN de D-42 se re-apuntaron al
+campo que ahora la informa (`resultado_d42`) y fijan aparte lo que decide D-45; la lista, una por una, en
+experiments/_s159/instrumentos/signos_p2/README.md. Las que miran la calibración misma (semilla, sorteos, oráculo,
+tope en el campo `calibrada`) no cambian: siguen vigilando lo que se informa.
 """
 from __future__ import annotations
 
@@ -116,13 +122,16 @@ def test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados():
 def test_el_sorteo_es_por_bloque_y_no_por_pasada():
     """Tres noches de cuatro pasadas, todas con error sólo de D: sin calibrar, PIERDE. Con el signo sorteado por noche,
     las tres caen del mismo lado en 1 de cada 4 sorteos (12,5 % por cola): la calibración falla y queda INDECIDIBLE.
-    Sorteando por pasada, una noche casi nunca queda entera de un lado y la regla saldría «calibrada» (S156: V34-01)."""
+    Sorteando por pasada, una noche casi nunca queda entera de un lado y la regla saldría «calibrada» (S156: V34-01).
+    S161 (D-45, ADENDA_SIGNOS_P2.md §3 y §5): D-42 dejó de decidir y se informa en `resultado_d42`; esta prueba se
+    re-apuntó a ese campo y fija aparte lo que decide D-45. Con 3 noches D-45 da SIN SUSTRATO (B <= 4)."""
     _tiene("calibrar_p2")
     v, det = X.decidir_p2_bloques(_contrib([[+1] * 4] * 3), ok_ctrl=True)
     assert det.get("resultado_sin_calibrar") == "PIERDE", det
     assert det["falsos_gana"] > 0.10 and det["falsos_pierde"] > 0.10, det
     assert det["calibrada"] is False, det
-    assert v == "INDECIDIBLE", (v, det)
+    assert det.get("resultado_d42") == "INDECIDIBLE", det
+    assert v == "SIN SUSTRATO", (v, det)
 
 
 @pytest.mark.parametrize("f_gana,f_pierde,calibrada", [
@@ -133,11 +142,15 @@ def test_el_sorteo_es_por_bloque_y_no_por_pasada():
     (0.0, 0.08, False),
 ])
 def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, calibrada):
+    """S161 (D-45, ADENDA_SIGNOS_P2.md §3 y §5): D-42 dejó de decidir y se informa en `resultado_d42`; esta prueba se
+    re-apuntó a ese campo y fija aparte lo que decide D-45. Con 12 noches de -1 D-45 da GANA (p = 1/4096),
+    calibre o no D-42."""
     _calibracion_forzada(monkeypatch, f_gana, f_pierde)
     v, det = X.decidir_p2_bloques(_contrib([[-1]] * 12), ok_ctrl=True)
     assert det.get("resultado_sin_calibrar") == "GANA", det
     assert det["calibrada"] is calibrada, det
-    assert v == ("GANA" if calibrada else "INDECIDIBLE"), (v, det)
+    assert det.get("resultado_d42") == ("GANA" if calibrada else "INDECIDIBLE"), det
+    assert v == "GANA", (v, det)
 
 
 @pytest.mark.parametrize("por_noche,sin_calibrar", [
@@ -148,11 +161,16 @@ def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, cal
 ])
 def test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado(monkeypatch, por_noche, sin_calibrar):
     """Adenda §2.5: «P2 de ese sensor queda INDECIDIBLE, sea cual sea su resultado sin calibrar, que se informa al lado».
-    Un PIERDE sin calibrar tampoco cuenta."""
+    Un PIERDE sin calibrar tampoco cuenta.
+    S161 (D-45, ADENDA_SIGNOS_P2.md §3 y §5): D-42 dejó de decidir y se informa en `resultado_d42`; esta prueba se
+    re-apuntó a ese campo y fija aparte lo que decide D-45. En estos cuatro conjuntos D-45 da lo mismo que D-34
+    sin calibrar
+    (12 noches: p = 1/4096; 6 contra 4 con neto 2: p de PIERDE 386/1024, BLOQUEA; 4 contra 6: EMPATE)."""
     _calibracion_forzada(monkeypatch, 0.5, 0.5)
     v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=True)
     assert det.get("resultado_sin_calibrar") == sin_calibrar, det
-    assert v == "INDECIDIBLE", (v, det)
+    assert det.get("resultado_d42") == "INDECIDIBLE", det
+    assert v == sin_calibrar, (v, det)
     assert det["calibrada"] is False
 
 
@@ -161,6 +179,7 @@ def test_bloquea_no_se_calibra_y_su_fraccion_se_informa(monkeypatch):
     _calibracion_forzada(monkeypatch, 0.0, 0.0, f_bloquea=0.9)
     v, det = X.decidir_p2_bloques(_contrib([[+1]] * 6 + [[-1]] * 4), ok_ctrl=True)
     assert v == "BLOQUEA", (v, det)
+    assert det.get("resultado_d42") == "BLOQUEA", det          # S161: lo que D-42 habría dado se informa (D-45 §3)
     assert det["falsos_bloquea"] == 0.9 and det["calibrada"] is True, det
 
 
@@ -212,15 +231,20 @@ def _armar_p2_tres_noches():
 def test_contar_publica_el_veredicto_calibrado_y_no_el_sin_calibrar():
     """V42-02 (verificador de D-42, su m07): la calibración decide en un solo punto, el valor que contar escribe en
     ver["P2|sensor"], que es lo que lee global_ventana. Si contar escribiera el resultado sin calibrar, D-42 quedaría
-    sin efecto; esta prueba lo mira en contar y en la ventana, no en decidir_p2_bloques aislada."""
+    sin efecto; esta prueba lo mira en contar y en la ventana, no en decidir_p2_bloques aislada.
+    S161 (D-45, ADENDA_SIGNOS_P2.md §3 y §5): D-42 dejó de decidir y se informa en `resultado_d42`; esta prueba se
+    re-apuntó a ese campo y fija aparte lo que decide D-45. Con 3 noches D-45 da SIN SUSTRATO, así que contar
+    publica SIN SUSTRATO (no el INDECIDIBLE de D-42) y la ventana no queda INDECIDIBLE por P2. El candado de V42-02 para
+    la regla nueva (contar publica D-45 y no D-34 ni D-42) está en tests/test_evaluar_d25_signos_p2_s161.py."""
     _tiene("calibrar_p2")
     T, prot, R, cfg, res_ctrl = _armar_p2_tres_noches()
     ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Lascar": 5.0})
     i = info["P2|VIIRS375"]
     assert i.get("resultado_sin_calibrar") == "PIERDE" and i.get("calibrada") is False, "sin poder: %s" % i
-    assert ver["P2|VIIRS375"] == "INDECIDIBLE", "contar publica %s con la calibración fallida" % ver["P2|VIIRS375"]
+    assert i.get("resultado_d42") == "INDECIDIBLE", i
+    assert ver["P2|VIIRS375"] == "SIN SUSTRATO", "contar publica %s" % ver["P2|VIIRS375"]
     estado = X.global_ventana(_completar(ver), True)[0]
-    assert estado == "INDECIDIBLE", estado
+    assert not estado.startswith("INDECIDIBLE"), estado
 
 
 def test_con_muchas_noches_la_calibracion_pasa_y_decide():
@@ -229,6 +253,7 @@ def test_con_muchas_noches_la_calibracion_pasa_y_decide():
     for por_noche, esperado in (([[-1]] * 12, "GANA"), ([[+1]] * 12, "PIERDE")):
         v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=True)
         assert det.get("calibrada") is True, det
+        assert det.get("resultado_d42") == esperado, det     # S161: D-42 informa (D-45 §3)
         assert v == esperado, (v, det)
 
 

@@ -6,7 +6,8 @@ Vara: `experiments/_s157_prereg_d25/ADENDA_SIGNOS_P2.md` (quinta adenda, sellada
 ## Estado (se actualiza a medida que avanzo)
 
 1. Pruebas nuevas escritas y guardadas rojas contra `c13cf5808`: hecho (ver «Pruebas rojas»).
-2. Implementación: pendiente.
+2. Implementación: hecha en `evaluar_d25.py` (ver «Qué cambió»); las cuatro pruebas de D-42 que miraban la decisión,
+   re-apuntadas en el mismo commit (ver «Candados de D-42 re-apuntados»).
 3. Candados: pendiente.
 4. Verdes con el árbol quieto: pendiente.
 5. Placebos: pendiente.

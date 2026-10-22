@@ -24,6 +24,9 @@ POR QUÉ CADA PIEZA (resumen del pre-registro):
   * D-42 (ADENDA_CALIBRACION_P2.md, sellada el 2026-10-22): P2 (D-34) se calibra como M, con el signo sorteado por
     bloque noche-volcán; si la calibración falla, P2 de ese sensor queda INDECIDIBLE. El estrato 203
     (NOTA_ESTRATO_203.md) se informa y no decide.
+  * D-45 (ADENDA_SIGNOS_P2.md, sellada el 2026-10-22): P2 se decide con la prueba de signos por bloque noche-volcán
+    (exacta con 20 noches o menos, si no 10.000 sorteos con semilla 162), una cola por dirección al 5 %, SIN SUSTRATO
+    con 4 noches o menos. D-34 y D-42 dejan de decidir y se informan.
 
 Uso:
   python evaluar_d25.py --ventana V1 --raiz <run V1> --logs <run V1>/logs --out v1.json
@@ -131,6 +134,22 @@ N_CALIB_DPRIMA = 1000                    # sellado (D-32)
 SEMILLA_CALIB_P2 = SEMILLA + 4           # = 161, sellada (D-42 §2.3)
 N_CALIB_P2 = 1000                        # sellado (D-42 §2.3)
 NOTA_CALIB_P2 = "la calibración de P2 falla: con estas noches no se distingue de un nulo (ADENDA_CALIBRACION_P2.md, D-42)"
+# D-45 (ADENDA_SIGNOS_P2.md, «SELLADA por Nicolás el 2026-10-22»). Cita textual: «Sí a D-45 opción (ii): P2 se decide
+# con la prueba de signos por bloque noche-volcán (exacta hasta 20 noches), en una quinta adenda sellada, con
+# implementador, candados y verificador antes del tag; corrige también V42-21.» POR QUÉ: el verificador de D-42, vuelta
+# 3 (experiments/_s159/instrumentos/verificador_d42/vuelta3/INFORME.md, V42-20) enumeró los 2^B repartos con la función
+# real: el intervalo de D-34 deja el neto entero sobre 0 también con 6 noches contra 1, así que con 7 noches su tasa
+# exacta de falsos es 6,25 % por cola; la calibración de D-42 lo ve y dejaba INDECIDIBLE justo el efecto más claro (7
+# noches del mismo lado, p = 1/128 con la prueba de signos), y cerca del 5 % lo decidía la semilla 161. La prueba de
+# signos por bloque es una prueba de permutación exacta sobre el mismo nulo que D-42 simulaba (§3): calibrada por
+# construcción. D-34 y D-42 dejan de decidir y se informan (§3).
+SEMILLA_P2_SIGNOS = SEMILLA + 5          # = 162, sellada (D-45 §2.5: la siguiente libre después de la 161 de D-42)
+N_SORTEOS_P2_SIGNOS = 10000              # sellado (D-45 §2.5), sólo con B de 21 o más
+MAX_B_EXACTO_P2 = 20                     # D-45 §2.5: con B de 20 o menos se enumeran los 2^B repartos
+MAX_B_SIN_SUSTRATO_P2 = 4                # D-45 §2.7 (y D-44 punto 2): con B de 4 o menos, SIN SUSTRATO
+TOPE_P2_DEN = 20                         # D-45 §2.4 y §2.5: 5 % = 1/20 en cada cola, comparado en enteros (20 k <= den)
+REGLA_P2 = ("D-45 (ADENDA_SIGNOS_P2.md): prueba de signos por bloque noche-volcán, una cola por dirección al 5 %; "
+            "D-34 y D-42 informan, no deciden")
 # D-30, respuesta 1: si d da MEJORA y la calibración de d′ falla, el estrato queda INDECIDIBLE (no se sabe si hay MEJORA).
 NOTA_CALIB_DPRIMA = "la calibración de d′ falla: no se sabe si D sube los pares correctos (ADENDA_PLACEBO.md §5, D-30)"
 # Detalle numérico, no de la regla: d′ se redondea a 1e-12 en unidades de log10 (un factor de 1 + 2,3e-12). Con D = K×g
@@ -487,43 +506,130 @@ def calibrar_p2(c, bloques, W, n_rep=N_CALIB_P2, semilla=SEMILLA_CALIB_P2):
     return cuenta["GANA"] / n_rep, cuenta["PIERDE"] / n_rep, cuenta["BLOQUEA"] / n_rep, int(n_rep), int(semilla)
 
 
-def decidir_p2_bloques(contrib, ok_ctrl):
-    """D-34 §5: GANA si el intervalo al 95 % del neto (bootstrap por bloques noche-volcán) queda entero bajo 0; PIERDE si
-    queda entero sobre 0; si cruza 0, BLOQUEA cuando el neto puntual es positivo (en contra de D: bloquea CUMPLE, como un
-    EMPEORA en un estrato que sólo bloquea) y EMPATE si no. Con menos pasadas o noches que los mínimos de M, SIN SUSTRATO.
-    S160, D-42 §2: después del SIN SUSTRATO y sólo con los controles OK, la regla se calibra (calibrar_p2); si los falsos
-    GANA o los falsos PIERDE pasan del 5 %, P2 queda INDECIDIBLE sea cual sea su resultado sin calibrar, que se informa
-    al lado (§2.5). BLOQUEA no se calibra: su fracción se informa y no decide (§2.6). Todo va al detalle (§2.7)."""
-    c = np.array([x["c"] for x in contrib], dtype=np.float64)
-    bl_p2 = [x["bloque"] for x in contrib]
-    neto = int(round(c.sum())) if len(c) else 0
-    det = {"neto": neto, "n_discordantes": len(c), "noches_discordantes": len(set(bl_p2)), "ic95": None,
-           "regla": "D-34: neto de errores (D menos K) con intervalo por bloques noche-volcán; calibrada por D-42",
-           # D-42 §2.7: se informa siempre; sin calibración (controles caídos o sin sustrato) los falsos, los sorteos y
-           # la semilla quedan en None (V42-04: sorteos y semilla son los que calibrar_p2 usó, no las constantes)
-           "resultado_sin_calibrar": None, "calibrada": None, "falsos_gana": None, "falsos_pierde": None,
-           "falsos_bloquea": None, "n_sorteos": None, "semilla_calibracion": None,
+def prueba_signos_p2(sumas, neto, n_sorteos=N_SORTEOS_P2_SIGNOS, semilla=SEMILLA_P2_SIGNOS):
+    """D-45 §2.3 a §2.5 (ADENDA_SIGNOS_P2.md): la prueba de signos por bloque. `sumas` son las sumas de bloque (una por
+    noche-volcán con alguna discordante, incluidas las de suma 0, en el orden de la clave del bloque); `neto` es la suma
+    observada. Bajo el nulo cada bloque entero cambia de signo con probabilidad 1/2 (§2.3).
+
+    POR QUÉ por bloque: cambiar los brazos de una noche invierte todas sus pasadas a la vez (el mismo nulo de D-42 §2.1 y
+    de calibrar_simetrico para M). Una cola por dirección (§2.4): GANA cuenta los repartos con suma MENOR O IGUAL que el
+    neto; PIERDE, los de suma MAYOR O IGUAL. El valor a dos colas (|suma| >= |neto|) se informa y no decide.
+
+    Con B de 20 o menos (§2.5), exacto: se cuentan los 2^B repartos agrupados por su suma (convolución con enteros de
+    Python: cada bloque duplica los repartos, uno con +s y otro con -s, así que el resultado es exactamente el conteo
+    de la enumeración; un bloque de suma 0 duplica sin mover nada). El valor-p es k / 2^B. Con B de 21 o más, 10.000
+    sorteos de signos por bloque con la semilla 162 y valor-p (1 + m) / (1 + 10.000): el +1 cuenta el reparto
+    observado, que es uno de los posibles; sin él el valor-p puede dar 0 y la prueba rechaza más que el 5 % nominal.
+
+    Devuelve las fracciones como [numerador, denominador] en enteros (la comparación con el 5 % se hace en enteros, en
+    regla_signos_p2), el método, el p mínimo alcanzable (1 / 2^B exacto; 1 / 10.001 con sorteos, LECTURA del README de
+    experiments/_s159/instrumentos/signos_p2) y la semilla y los sorteos que se usaron de verdad (None en el exacto)."""
+    B = len(sumas)
+    if B <= MAX_B_EXACTO_P2:
+        dist = {0: 1}
+        for x in sumas:
+            nueva = collections.Counter()
+            for v, k in dist.items():
+                nueva[v + x] += k
+                nueva[v - x] += k
+            dist = nueva
+        den = 2 ** B
+        k_gana = sum(k for v, k in dist.items() if v <= neto)
+        k_pierde = sum(k for v, k in dist.items() if v >= neto)
+        k_dos = sum(k for v, k in dist.items() if abs(v) >= abs(neto))
+        return {"metodo": "exacto", "gana": [k_gana, den], "pierde": [k_pierde, den], "dos_colas": [k_dos, den],
+                "minimo": [1, den], "semilla": None, "n_sorteos": None}
+    rng = np.random.default_rng(semilla)
+    S = rng.choice((-1, 1), size=(n_sorteos, B))          # un signo por bloque y sorteo
+    tot = S @ np.asarray(sumas, dtype=np.int64)
+    den = int(n_sorteos) + 1
+    m_gana, m_pierde = int((tot <= neto).sum()), int((tot >= neto).sum())
+    m_dos = int((np.abs(tot) >= abs(neto)).sum())
+    return {"metodo": "sorteos", "gana": [1 + m_gana, den], "pierde": [1 + m_pierde, den], "dos_colas": [1 + m_dos, den],
+            "minimo": [1, den], "semilla": int(semilla), "n_sorteos": int(n_sorteos)}
+
+
+def regla_signos_p2(neto, B, pr):
+    """D-45 §2.6 y §2.7: SIN SUSTRATO con B de 4 o menos (no decide ni bloquea); GANA si el neto es negativo y el
+    valor-p de GANA es 5 % o menos; PIERDE si el neto es positivo y el de PIERDE es 5 % o menos; BLOQUEA si el neto es
+    positivo sin llegar (bloquea CUMPLE, ADENDA_GEMELO.md §5.5); EMPATE si el neto es 0 o negativo sin llegar. La
+    comparación con el 5 % es en enteros (20 k <= denominador), sin coma flotante. «5 % o menos» y «menos del 5 %» son
+    equivalentes aquí (el valor-p es k / 2^B o (1 + m) / 10.001, nunca 1/20 justo): se declara, no se prueba."""
+    if B <= MAX_B_SIN_SUSTRATO_P2:
+        return "SIN SUSTRATO"
+    if neto < 0 and TOPE_P2_DEN * pr["gana"][0] <= pr["gana"][1]:
+        return "GANA"
+    if neto > 0 and TOPE_P2_DEN * pr["pierde"][0] <= pr["pierde"][1]:
+        return "PIERDE"
+    if neto > 0:
+        return "BLOQUEA"
+    return "EMPATE"
+
+
+def informar_d34_d42(c, bl_p2, neto, ok_ctrl):
+    """D-45 §3: la regla de D-34 (intervalo por bloques, sin calibrar) y la de D-42 (D-34 calibrada) dejan de decidir y
+    se informan igual, como pide ADENDA_GEMELO.md §5.8 para las reglas retiradas: «Así se ve si el cambio de regla cambia
+    el veredicto.» LECTURA (README de signos_p2): cada una con su PROPIO mínimo (D-34 §5.6: menos de 5 pasadas o menos de
+    3 noches, SIN SUSTRATO), no con el de D-45, porque lo que se informa es lo que esa regla habría dado. Con los
+    controles caídos ninguna se calcula (como en D-42). `resultado_sin_calibrar` e `ic95` son D-34; `resultado_d42` es
+    lo que D-42 habría decidido (INDECIDIBLE si su calibración falla); el resto son los campos de D-42 §2.7."""
+    det = {"ic95": None, "resultado_sin_calibrar": None, "resultado_d42": None, "calibrada": None, "falsos_gana": None,
+           "falsos_pierde": None, "falsos_bloquea": None, "n_sorteos": None, "semilla_calibracion": None,
            "tope_por_cola": MAX_FALSOS_CALIB, "nota_calibracion": ""}
     if not ok_ctrl:
-        det["resultado_sin_calibrar"] = "INDECIDIBLE"
-        det["nota_calibracion"] = "no se calibra: controles generales caídos"
-        return "INDECIDIBLE", det
+        det.update(resultado_sin_calibrar="INDECIDIBLE", resultado_d42="INDECIDIBLE",
+                   nota_calibracion="no se calibra: controles generales caídos")
+        return det
     if len(c) < N_MIN_PARES or len(set(bl_p2)) < N_MIN_NOCHES:
-        det["resultado_sin_calibrar"] = "SIN SUSTRATO"
-        det["nota_calibracion"] = "no se calibra: sin sustrato (D-34 §5.6)"
-        return "SIN SUSTRATO", det
+        det.update(resultado_sin_calibrar="SIN SUSTRATO", resultado_d42="SIN SUSTRATO",
+                   nota_calibracion="no se calibra: sin sustrato para D-34 (D-34 §5.6)")
+        return det
     W = pesos_bloque(bl_p2)
     v, lo, hi = regla_p2(W @ c, neto)
-    det["ic95"] = [lo, hi]
     f_gana, f_pierde, f_bloquea, n_usados, semilla_usada = calibrar_p2(c, bl_p2, W)
     calibrada = f_gana <= MAX_FALSOS_CALIB and f_pierde <= MAX_FALSOS_CALIB
-    det.update(resultado_sin_calibrar=v, calibrada=bool(calibrada), falsos_gana=f_gana, falsos_pierde=f_pierde,
-               falsos_bloquea=f_bloquea, n_sorteos=n_usados, semilla_calibracion=semilla_usada)
+    det.update(ic95=[lo, hi], resultado_sin_calibrar=v, calibrada=bool(calibrada), falsos_gana=f_gana,
+               falsos_pierde=f_pierde, falsos_bloquea=f_bloquea, n_sorteos=n_usados, semilla_calibracion=semilla_usada,
+               resultado_d42=v if calibrada else "INDECIDIBLE")
     if not calibrada:
         det["nota_calibracion"] = "%s (falsos GANA %.3f, PIERDE %.3f, tope %.2f por cola)" % (
             NOTA_CALIB_P2, f_gana, f_pierde, MAX_FALSOS_CALIB)
+    return det
+
+
+def decidir_p2_bloques(contrib, ok_ctrl):
+    """P2 de un sensor. Desde S161 decide D-45 (ADENDA_SIGNOS_P2.md §2): la prueba de signos por bloque noche-volcán
+    (prueba_signos_p2 y regla_signos_p2). La unidad, el signo y el bloque no cambian (ADENDA_GEMELO.md §5.1 y §5.2):
+    cada pasada discordante aporta +1 si el error es sólo de D y -1 si es sólo de K; el bloque es la noche-volcán con la
+    clave de contribuciones_p2; la suma del bloque es la suma de sus aportes (puede ser 0); B cuenta los bloques con
+    alguna discordante, incluidos los de suma 0 (§2.2). Con los controles generales caídos, INDECIDIBLE (§2.8), que es
+    lo único que deja a P2 INDECIDIBLE. D-34 y D-42 se informan y no deciden (§3, informar_d34_d42).
+
+    El detalle trae lo de §4: neto, B, bloques de suma no nula, las sumas de bloque (multiconjunto, ordenadas), los
+    valores-p de GANA, PIERDE y a dos colas (como número y como fracción de enteros), el método, el p mínimo, la semilla
+    y los sorteos que se usaron (None en el exacto), la regla, y lo de §3. LECTURA: los campos de la prueba se calculan
+    siempre, también con SIN SUSTRATO y con los controles caídos; ahí no deciden."""
+    c = np.array([x["c"] for x in contrib], dtype=np.float64)
+    bl_p2 = [x["bloque"] for x in contrib]
+    neto = int(round(c.sum())) if len(c) else 0
+    por_bloque = collections.Counter()
+    for x in contrib:
+        por_bloque[x["bloque"]] += int(x["c"])
+    sumas = [por_bloque[b] for b in sorted(por_bloque)]    # en el orden de la clave del bloque (el del sorteo)
+    B = len(sumas)                                          # incluidos los bloques de suma 0 (§2.2)
+    pr = prueba_signos_p2(sumas, neto)
+    det = {"neto": neto, "n_discordantes": len(c), "noches_discordantes": len(set(bl_p2)), "B": B,
+           "bloques_suma_no_nula": sum(1 for x in sumas if x != 0), "sumas_bloque": sorted(sumas),
+           "metodo": pr["metodo"], "p_gana": pr["gana"][0] / pr["gana"][1], "p_pierde": pr["pierde"][0] / pr["pierde"][1],
+           "p_dos_colas": pr["dos_colas"][0] / pr["dos_colas"][1], "p_gana_fraccion": pr["gana"],
+           "p_pierde_fraccion": pr["pierde"], "p_dos_colas_fraccion": pr["dos_colas"],
+           "p_minimo": pr["minimo"][0] / pr["minimo"][1], "p_minimo_fraccion": pr["minimo"],
+           "semilla_signos": pr["semilla"], "n_sorteos_signos": pr["n_sorteos"], "tope_p2": "5 % por cola",
+           "regla": REGLA_P2}
+    det.update(informar_d34_d42(c, bl_p2, neto, ok_ctrl))
+    if not ok_ctrl:
         return "INDECIDIBLE", det
-    return v, det
+    return regla_signos_p2(neto, B, pr), det
 
 
 def lista_p2(contrib, TKD, R):
@@ -1036,14 +1142,18 @@ def imprimir(regla, ver, info, estado):
         for x in i1["netas"] + i1["ruidosas"] + i1["pendientes"]:
             print("      perdida: %s" % x)
         print("   P1b %-8s %s %s" % (s, ver["P1b|%s" % s], i1["cruces_1MW"][:5]))
-        print("   P2 %-8s %s (D-34) | neto D menos K %+d, IC95 %s | discordantes %d en %d noches | suma K %d, D %d | "
-              "noches con error K %d, D %d" % (
-                  s, ver["P2|%s" % s], i2["neto"], i2["ic95"], i2["n_discordantes"], i2["noches_discordantes"],
-                  i2["suma_K"], i2["suma_D"], i2["noches_con_error_K"], i2["noches_con_error_D"]))
-        print("      calibración D-42: %s | sin calibrar %s | falsos GANA %s PIERDE %s (tope %.2f por cola), BLOQUEA %s "
-              "(informa) | %s sorteos, semilla %s%s" % (
-                  {True: "OK", False: "FALLA: INDECIDIBLE", None: "no corre"}[i2["calibrada"]], i2["resultado_sin_calibrar"],
-                  i2["falsos_gana"], i2["falsos_pierde"], i2["tope_por_cola"], i2["falsos_bloquea"], i2["n_sorteos"],
+        print("   P2 %-8s %s (D-45, prueba de signos por bloque) | neto D menos K %+d | B %d noches (suma no nula %d) | "
+              "p GANA %.4f, PIERDE %.4f, dos colas %.4f (informa) | %s, p mínimo %.3g | semilla %s, sorteos %s | "
+              "discordantes %d | suma K %d, D %d | noches con error K %d, D %d" % (
+                  s, ver["P2|%s" % s], i2["neto"], i2["B"], i2["bloques_suma_no_nula"], i2["p_gana"], i2["p_pierde"],
+                  i2["p_dos_colas"], i2["metodo"], i2["p_minimo"], i2["semilla_signos"], i2["n_sorteos_signos"],
+                  i2["n_discordantes"], i2["suma_K"], i2["suma_D"], i2["noches_con_error_K"], i2["noches_con_error_D"]))
+        print("      sumas de bloque: %s" % i2["sumas_bloque"])
+        print("      informan, no deciden (D-45 §3): D-34 sin calibrar %s, IC95 %s | D-42 %s (calibración %s, falsos GANA "
+              "%s PIERDE %s, tope %.2f por cola, BLOQUEA %s, %s sorteos, semilla %s)%s" % (
+                  i2["resultado_sin_calibrar"], i2["ic95"], i2["resultado_d42"],
+                  {True: "OK", False: "FALLA", None: "no corre"}[i2["calibrada"]], i2["falsos_gana"],
+                  i2["falsos_pierde"], i2["tope_por_cola"], i2["falsos_bloquea"], i2["n_sorteos"],
                   i2["semilla_calibracion"], (" | " + i2["nota_calibracion"]) if i2["nota_calibracion"] else ""))
         print("      informan, no deciden: (a) ruido del gemelo %.1f -> %s | (b) D-33 -> %s" % (
             i2["ruido_gemelo"], i2["regla_a_gemelo"], i2["regla_b_d33"]))
