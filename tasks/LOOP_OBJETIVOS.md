@@ -568,6 +568,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 ~16:24 UTC (S160): umbrales de VRP por sensor de MIROVA (pregunta de Nicolás)
+- Coppola et al. 2026, *Scientific Data*, tabla 1 (p. 7 y 8 del PDF, RENDER): umbral nocturno de VRP para construir el
+  archivo, MODIS 1,0 × 10⁵ W, VIIRS 750 5,0 × 10⁶ W, VIIRS 375 1,0 × 10⁴ W; diurno 5,0 × 10⁷ W en los tres.
+  **No es errata**: en `data/mirova_reference/VRP_GLOBAL_ARCHIVE_2025.csv` (OSF v2.5) el mínimo de cada grupo calza
+  exacto (VIIRS 750 noche: n = 82.782, mínimo 5 × 10⁶ W, ninguna fila bajo eso).
+- **El tiempo casi real no lo aplica**: en la tabla de `latest.php` (snapshot del 2026-10-14, «VIIRS» a secas = 750
+  según `normalize_sensor`), 294 de 301 alertas nocturnas de VIIRS 750 están bajo 5 MW; MODIS 0 de 96 bajo 0,1 MW y
+  VIIRS 375 0 de 1.216 bajo 0,01 MW. Archivo y NRT son productos distintos (A105). Por qué 5 MW en VIIRS 750:
+  SOSPECHA (el archivo usaría 750 sólo para lo intenso, donde I4 satura).
+- **Alerta protegida**: sigue 1 MW para los tres sensores, sostenido por el banner (VIIRS 375: 107 pasadas; VIIRS
+  750: 7; MODIS: ninguna). Pregunta abierta: confirmar el banner de MODIS en imágenes de MIROVA.
+
 ### 2026-10-22 ~16:12 UTC (S160): arreglos verificados; el placebo del 1 % no podía fallar con K
 - Implementador: V42-02 (candado donde la calibración decide) y V42-04 cerrados; curva de placebo 1, 5, 10 y 20 %%
   (`743525a29`, `452956cf8`). Verificador vuelta 2 (`9359a762f`, `verificador_d42/vuelta2/INFORME.md`): los dos
