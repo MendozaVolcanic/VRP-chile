@@ -16,6 +16,15 @@
 > sombra (§4.9 de la regla). Toda comparación con MIROVA que cruce la fecha de adopción se estratifica por régimen
 > (A104). Reversión: `git revert` del PR de adopción (tag `pre-s153-adopcion-k`). Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
 >
+> ⚠️ **S160, la frontera de la marca S157 que sigue ya no separa detectores** (A113; hallazgo 281 de
+> `experiments/_s160_audit/f4/INFORME.md` §3, CONFIRMADO EN PARTE en `experiments/_s160_audit/v4/INFORME.md` §3).
+> El punto (b) de abajo avisaba que «la frontera se moverá más atrás cuando se aplique el reproceso histórico con K».
+> Eso ya pasó: #883 (`8471add46`, 2026-10-21) reprocesó con K el histórico de los 11 Tier A, puso
+> `DATOS_K_DESDE_UTC` en 2025-02-15 (`frontend/cambio_detector.js:32`) y apartó los records C0 que quedaban en
+> `data/_c0_residuales/`. En main `d516b9d8c`, del 2025-02-15 al 2026-09-17 hay 68.072 records K y 0 sin marca de
+> régimen (`experiments/_s160_audit/v4/v_281_regimen_por_mes_salida.txt`; control: los 90 residuos salen C0). Una
+> ventana «C0 antes del 2026-09-18» compara K contra K. El punto (c) sobre la reversión no lo midió S160.
+>
 > ⚠️ **S157, lo que la marca de arriba no dice** (propagación de K, `docs/AUDIT_S155.md` §2 y arreglo 5; frente 1 en
 > `experiments/_s155_audit/frente_1_verif/INFORME.md`, F1-01 y V1-01). (a) El PR de adopción es **#850**, squash
 > `34cea39e`, mergeado el 2026-10-18 09:57:30 UTC. (b) **Los datos no cambian de detector en esa hora sino en la fecha
@@ -84,6 +93,12 @@ energía: arriba de 1 MW perder una alerta no tiene compensación posible.
    «una alerta que MIROVA clasifique de Bajo para arriba»; el corte de 1 MW es la operacionalización
    hecha en la tarea 0.2 (PR #780), sostenida por el banner de MIROVA de hoy (ningún VERY LOW llega a
    1 MW, ningún LOW queda bajo 1 MW) y **no por el paper**, cuya figura 11 se contradice con su pie.
+   ⚠️ **S160, sobre el 439 y el 992 de este punto** (hallazgo 283 de `experiments/_s160_audit/f4/INFORME.md`,
+   CONFIRMADO EN PARTE en `experiments/_s160_audit/v4/INFORME.md` §3): los dos números se reproducen exactos
+   sobre la unión de la referencia del 2026-10-14 (`03c44eed7`); sobre la de main `d516b9d8c` dan 478 y 1.055, de
+   las cuales 437 y 993 son hasta el 2026-10-13 (corpus vivo, A90; `experiments/_s160_audit/v4/v_283_d4_en_su_fecha.txt`).
+   Lo que decide es la definición, no el número. Ojo: `scripts/clase_mirova.py` cuenta las protegidas siempre
+   sobre la unión, aunque se le pase `--cons` o `--ocr` (V4-03).
    **Rige la lectura A, decidida por Nicolás el 2026-10-14 (D-4, issue #782 cerrado)**: una pasada
    de la referencia es **alerta protegida** si es alerta (`ALERTA_TERMICA` del consolidado o
    `ALERTA_TERMICA_OCR`) y su VRP de la pasada es de **1 MW o más**, recalculado desde el VRP y nunca
@@ -188,6 +203,13 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
 2. **Si NO está en papers**, ¿cierra una divergencia ya documentada en
    `docs/MIROVA_DIVERGENCES.md`?**
    **El catálogo VIVO es el doc — esta lista es resumen (actualizada S105, AUDIT_S105):**
+   - ⚠️ **S160, sobre los números de la marca S151 que sigue** (hallazgo 282 de
+     `experiments/_s160_audit/f4/INFORME.md`, CONFIRMADO EN PARTE en `experiments/_s160_audit/v4/INFORME.md` §3):
+     el 65.705, el 1.565 y el 343 se reproducen exactos en el corpus de su fecha (`88e97d84e`, 2026-10-14) y no en
+     el de hoy, porque #883 reemplazó el histórico con K (A90). En main `d516b9d8c` (74.811 records) hay 9 cúmulos
+     con `pc.vrp_mw` = 5,0, los 9 con `primary_cluster.d9_capped`, y 183 sobre 5 MW
+     (`experiments/_s160_audit/v4/v_282_d9_capped_salida.txt`): bajo K el tope casi no actúa, y la cara de
+     co-validación del path D se midió con el detector anterior.
    - ⚠️ **S151, sobre el «se confirma el tope de 5 MW» del ítem que sigue**
      (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P5): «se confirma» sólo quiere decir que el
      tope recorta. No está medido que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02: el

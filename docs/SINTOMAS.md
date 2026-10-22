@@ -5,6 +5,11 @@
 > había retirado. El conocimiento estaba, pero repartido entre `docs/MIROVA_DIVERGENCES.md`, las reglas A-n de
 > `CLAUDE.md` y los documentos de sesión, y se busca por número cuando uno llega con un síntoma.
 >
+> ⚠️ **S160 (A113; hallazgo 281, `experiments/_s160_audit/v4/INFORME.md` §3)**: el «C0 antes del 2026-09-18, K
+> después» de este párrafo y la frontera del «Régimen vigente» de abajo ya no rigen. #883 (`8471add46`, 2026-10-21)
+> reprocesó con K el histórico de los 11 Tier A desde el 2025-02-15; detalle en la marca S160 del inicio de
+> `docs/MISSION.md`. Texto conservado.
+>
 > **Cómo se usa**: antes de proponer una palanca, leer el síntoma acá, seguir los punteros y estratificar por
 > cenit, sensor, volcán y régimen (C0 antes del 2026-09-18, K después; antes y después de #535). Este archivo
 > **no es fuente de verdad**: resume y apunta. Si un puntero y este resumen discrepan, manda el puntero, salvo que
@@ -15,6 +20,8 @@
 > en la tabla de decisiones de `tasks/LOOP_OBJETIVOS.md`. Las tareas `1.n` y las decisiones `D-n` posteriores a
 > S150 viven en la rama `loop/activo` de ese archivo, no en `main`. Lo que no está en `main` lleva su rama o PR.
 
+⚠️ **S160**: el «se moverá más atrás» de este párrafo ya ocurrió con #883 (2026-10-21): los datos son K desde el
+2025-02-15 (`DATOS_K_DESDE_UTC`), ver la marca S160 de arriba. Texto conservado:
 Régimen vigente: el detector K está en producción desde #850 (2026-10-18): sin Test 1 integrado (D30), conectiva
 `max` en los Tests 2 y 3, banda 22 primaria en MODIS (D21). En los datos rige desde la observación del 2026-09-18
 (`frontend/cambio_detector.js`, `DATOS_K_DESDE_UTC`), salvo 26 records MODIS Terra; la frontera se moverá más
@@ -208,7 +215,8 @@ puede pasar por subcadena (A92), y un laboratorio puede quedar más ciego que pr
 ## 7. Un número que no se reproduce o cambió entre sesiones
 
 - Corpus vivo que crece, también hacia atrás por backfill: registrar proporción y ventana (A90).
-- Cambio de régimen: #535 (A104); frontera de K en la fecha de observación 2026-09-18, no en el merge
+- Cambio de régimen: #535 (A104); (⚠️ **S160**: desde #883 los datos son K desde el 2025-02-15 y la frontera que
+  sigue ya no separa detectores; marca S160 del inicio de `docs/MISSION.md`. Texto original:) frontera de K en la fecha de observación 2026-09-18, no en el merge
   (AUDIT_S155, #860).
 - Citas `archivo:línea` que derivan: remapear por contenido (A101).
 - Suite corrida mientras se editaba (A112); empates desempatados según la CPU (decisión D-16 y tarea 1.22,

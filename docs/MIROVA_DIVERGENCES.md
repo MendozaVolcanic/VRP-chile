@@ -229,6 +229,15 @@ pixels del TIF como VRP. El patrón replicable de 5 pasos está documentado en
 
 ### D9 — Path D (dNTI contextual) dispara FPs y amplifica magnitud en cirrus alto frío
 
+> ⚠️ **S160, sobre los números de la marca S151 que sigue** (hallazgo 282 de `experiments/_s160_audit/f4/INFORME.md`,
+> CONFIRMADO EN PARTE en `experiments/_s160_audit/v4/INFORME.md` §3): el 65.705, el 1.565, el 343 y las 7 pasadas
+> de Chillán (todas `far`) se reproducen exactos en el corpus de su fecha (`88e97d84e`, 2026-10-14) y no en el de
+> hoy, porque #883 reemplazó el histórico con K (A90). En main `d516b9d8c` (74.811 records) hay 9 cúmulos con
+> `pc.vrp_mw` = 5,0, los 9 con `primary_cluster.d9_capped`, 183 sobre 5 MW, y Chillán MODIS tiene 0 topadas en 31
+> pasadas entre el 2026-09-28 y el 2026-10-13 (`experiments/_s160_audit/v4/v_282_d9_capped_salida.txt` y
+> `v_282_chillan_salida.txt`). Bajo K el tope casi no actúa, y la cara de co-validación del path D se midió con el
+> detector anterior.
+
 > ⚠️ **Estado S151 (marca agregada por la regla A113; fuente `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md`
 > P5): ABIERTA desde S146 en la cara de co-validación del path D (ver la rebaja de A23 en `CLAUDE.md`), y
 > el tope de 5 MW no está validado.** Que el tope «funciona» sólo quiere decir que recorta: no está medido
@@ -1468,6 +1477,11 @@ Cuando S62+S63 completen:
 
 ## D10 — Magnitud Test 1 sobre glaciar: ctxpeak (filtro contextual + keep-peak) — ADOPTADO S100
 
+> ⚠️ **S160 (hallazgo 281, `experiments/_s160_audit/v4/INFORME.md` §3)**: desde #883 el cero de la marca S157 que
+> sigue vale para todo el histórico: 0 records con fuente `test1` o `test1_roi` entre los 74.811 de main
+> `d516b9d8c` (`experiments/_s160_audit/f4/mis_conteos_salida.txt` §1). La frontera del 2026-09-18 ya no separa
+> detectores (marca S160 del inicio de `docs/MISSION.md`).
+
 > ⚠️ **S157, el «ADOPTADO» del encabezado ya no actúa** (propagación de K, A113; `experiments/_s155_audit/frente_1_verif/INFORME.md`
 > F1-14): el filtro contextual y el keep-peak sólo corren cuando `final_hotspot_source == "test1"`
 > (`pipeline/process_viirs.py:1876`), y con K el Test 1 integrado está apagado (D30, #850): 0 de 3.687 records con esa
@@ -1531,6 +1545,10 @@ Guard anti-revert: `tests/test_detection_anchor.py`. Resultados: det→cráter T
 (Entrada agregada retroactivamente en S105 — AUDIT_S105 detectó que faltaba acá.)
 
 ## D11 — ⚠️ **S157: la condición del cierre (banda 21 primaria) ya no rige en producción desde K (#850); ver la marca de abajo** · Sesgo topográfico de los paths MIR-absolutos (A69) — **CERRADA S114, CONDICIONADA S138** (el «irreducible a 1 km» y el «todos los ejes agotados» valen sólo bajo banda 21 primaria y compuerta de 3 K, D21 y D22, abiertas en este mismo catálogo; la «detección fiel a Coppola» es falsa en el código de hoy: la fórmula de los Tests 2 y 3 del paper no tiene condición de temperatura y `detection_context.py:532` la impone. Ver `docs/AUDIT_S138.md` §8 C2. No se reabre el frente far→summit por la vía espectral hasta consolidar D21/D22)
+
+> ⚠️ **S160 (hallazgo 281, `experiments/_s160_audit/v4/INFORME.md` §3)**: el «en los datos desde la observación
+> del 2026-09-18» de la marca S157 que sigue ya no rige: #883 (2026-10-21) reprocesó con K el histórico de los 11
+> Tier A desde el 2025-02-15 (marca S160 del inicio de `docs/MISSION.md`).
 
 > ⚠️ **S157, propagación de K** (A113; `experiments/_s155_audit/frente_1_verif/INFORME.md` F1-04 y F1-08). (1) La
 > condición con que S138 dejó vivo el cierre era «sólo bajo banda 21 primaria y compuerta de 3 K». Desde #850
@@ -1665,6 +1683,11 @@ gate/discriminante/cap post-hoc (anti-A8). La cara POSICIÓN del ancla en nevado
 queda como costo residual conocido, no de recall ni magnitud.
 
 ### D11-bis — El ancla honesta reporta `dist=0.0` para records Test1-only (divergencia formal, AUDIT_S106 P2.3)
+
+> ⚠️ **S160 (hallazgo 281, `experiments/_s160_audit/v4/INFORME.md` §3)**: el «sólo vale para los records
+> anteriores» de la marca S157 que sigue ya no aplica. #883 reprocesó con K el histórico: entre los 74.811 records
+> de main `d516b9d8c` hay 0 con fuente `test1` o `test1_roi` (`experiments/_s160_audit/f4/mis_conteos_salida.txt`
+> §1), así que los 2365 de abajo ya no están en `data/mirova_equivalent/`.
 
 > ⚠️ **S157, propagación de K** (A113): sin el Test 1 integrado (D30, #850) no hay records `test1_roi` nuevos: 0 de
 > 3.687 desde la observación del 2026-09-18 (`experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt`). El
@@ -2384,6 +2407,14 @@ para un A/B, no para afirmar el origen exacto.
 
 ## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (A/B corrido S130 → NO ADOPTAR; divergencia de fidelidad literal, prioridad baja)** S129/S130
 
+> ⚠️ **S160, propagación de S158 sobre el «igual para todos» del título** (pendiente U3 de
+> `experiments/_s158_audit_r2/m1/INFORME.md`; hallazgo 286 de `experiments/_s160_audit/v4/INFORME.md` §3): los
+> comentarios del código de MIROVA dicen que sus ROI «can be shifted, reshaped or resized» por volcán
+> (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §2), y en Cordón Caulle las dos alertas probadas sólo aparecen si el
+> anillo usa los umbrales de cumbre: MIROVA tiene ahí una caja propia que no conocemos (`docs/AUDIT_S158_R2.md`,
+> punto 4; F1-H3 de S158, premisa REFUTADA en PCC, `docs/AUDIT_S158.md`). La caja de 5 km es la del paper, no
+> necesariamente la de cada volcán. Título conservado.
+
 > ⚠️ **S151, resultado del A/B (D-8 sellado por Nicolás el 2026-10-15; `experiments/_s151_prereg_caja/resultado_d1/`,
 > verificado): KC NO CUMPLE (veto) en D1.** Pierde una alerta protegida MODIS de Láscar (2026-03-27 07:10, MIROVA
 > 1,0 MW) cuyo único píxel nuestro cae a 3,2 km del cráter, en la corona; la repetición lo confirma y el veto es
@@ -2927,6 +2958,13 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 > desproporcionada (reflejo probable) y 21 quedan SIN EVIDENCIA; la clase «real» de la primera versión era
 > circular. Detalle: `experiments/_s151_alertas_diurnas/README.md` §2 a §6.
 
+> ⚠️ **S160, sobre los números de la marca S151 que sigue** (hallazgo 290 de `experiments/_s160_audit/f4/INFORME.md`,
+> CONFIRMADO en `experiments/_s160_audit/v4/INFORME.md` §3): el 1.642 / 37 / 19 / 233 se reproduce exacto sobre la
+> tabla de su fecha (`latest_consolidado.csv` de `88e97d84e`, sha256 `edefbbd3e5067cad…`). Sobre la tabla de main
+> `d516b9d8c` (sha256 `bc1522c24c924cb5…`), en la misma ventana cerrada, da 1.589 / 37 / 20 / 228: la tabla perdió
+> 53 alertas y ganó una protegida de tarde (MODIS, Chillán) dentro de la ventana (A90). Las 37 de la tarde se
+> sostienen. Script: `experiments/_s160_audit/v4/v_290_d27_conteo.py` (salida `v_290_d27_conteo_salida.txt`).
+
 > ⚠️ **S151, marca agregada por la regla A113: «deliberada» y «no se propone cambiar» quedan como
 > pregunta, no como cierre.** El criterio de victoria que Nicolás fijó el 2026-10-13 (`docs/MISSION.md`,
 > sección «Criterio de victoria de la réplica») no acepta perder alertas protegidas de MIROVA (1 MW o
@@ -3281,6 +3319,14 @@ el exceso de la Ec. 6 (p. 8) es una diferencia de radiancias y RP = 18,9 · A ·
 apagados; 1528 en el diagnóstico). La radiancia que entra a la Ec. 7 sale ~5 % más baja que la medida. Bajo C0
 ida y vuelta usaban la misma λ y no había error: la divergencia nace con la adopción de K.
 
+> ⚠️ **S160, sobre los n del párrafo «Cuánto»** (hallazgo 291 de `experiments/_s160_audit/f4/INFORME.md`, CONFIRMADO
+> en `experiments/_s160_audit/v4/INFORME.md` §3): el 24 y las 12 pasadas son de la ventana 2026-09-18 a 2026-10-20
+> sobre el corpus anterior a #883 (A90). El script toma «todos los records K» según la frontera de
+> `frontend/cambio_detector.js`, que #883 movió al 2025-02-15: corrido sobre main `d516b9d8c` da F mediana 1,0587
+> en 581 records y, contra MIROVA, 95 pasadas con razón mediana 0,4926 → 0,5215, dominadas por Láscar (83) y no por
+> Chillán (11) (`experiments/_s160_audit/f4/t1_medir_efecto_lambda_salida.txt`). El efecto, F entre 1,05 y 1,08, se
+> sostiene; la población cambió.
+
 **Cuánto.** `experiments/_s157_lambda_b22/medir_efecto_lambda.py`: F (corregida / actual) 1,053 a 1,075, mediana
 1,0575, en los 24 records MODIS con K y cúmulo (2026-09-18 a 2026-10-20). Contra MIROVA, 12 pasadas (11 de
 Chillán): razón mediana 0,362 → 0,382. Es un sesgo de signo fijo, chico; no es la palanca de la brecha de Chillán
@@ -3310,6 +3356,13 @@ media local de 3 × 3 con el píxel central (nosotros 8 vecinos, como dice el pa
 (nosotros en dNTI y dETI, como dice el paper); constantes de Planck de la implementación operacional (h 6,6256e-34,
 c 2,9979e8, k 1,38e-23; nosotros CODATA). Las otras divergencias que el código confirma ya estaban: D17, D18, D22, D23,
 D25, D26, D29, D32 y el GAP #A.
+
+> ⚠️ **S160, propagación de S158 sobre el «Alcance» que sigue** (F4-H6 de `experiments/_s158_audit/f4/INFORME.md`,
+> CONFIRMADO en `docs/AUDIT_S158.md`; pendiente U1 de `experiments/_s158_audit_r2/m1/INFORME.md`; hallazgo 286 de
+> `experiments/_s160_audit/v4/INFORME.md` §3): la cita de Campus 2022 p. 7 habla del algoritmo entero, y es la misma
+> con que se trasladaron K1 y el mínimo de escena, que resultaron distintos, así que no separa estructura de números.
+> En la media local, el piso de -0,1 y el fondo del VRP el paper del otro sensor contradice al código de VIIRS 750:
+> trasladarlos se apoya sólo en que el código es más reciente. Cada traslado necesita su A/B por sensor.
 
 **Alcance**: sólo VIIRS 750. La estructura se puede trasladar a MODIS y VIIRS 375 con cita (Campus 2022 p. 7: el
 algoritmo de VIIRS «is the same used for MODIS»); los números no (§5 del informe). Si el código prevalece sobre el
