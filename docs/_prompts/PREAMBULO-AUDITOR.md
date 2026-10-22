@@ -115,7 +115,8 @@ Forma del informe, para que otro lo pueda filtrar sin releerte:
    ALCANCE.
 5. Además, hallazgos.csv en CARPETA, una fila por hallazgo, con columnas
    id,titulo,archivo_linea,confianza,gravedad,eje,comando_reproduccion,salida_cruda
-   (salida_cruda es la ruta del archivo con la salida del script, no el número).
+   (salida_cruda es la ruta del archivo con la salida del script, no el número). Escríbelo con
+   el módulo csv de Python: un campo con comas sin comillas corre las columnas sin dar error.
 Escribe el informe en CARPETA a medida que avanzas, no al final: si la sesión se corta, lo que esté
 en el disco es lo que queda. Tu último mensaje a quien orquesta repite el punto 2 y la ruta absoluta
 del informe.
