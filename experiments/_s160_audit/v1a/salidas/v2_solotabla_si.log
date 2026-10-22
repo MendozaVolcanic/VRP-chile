@@ -1,0 +1,308 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-03-01 a 2026-06-12 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+== VENTANA V2: 2026-03-01 a 2026-06-12 | volcanes 11 | brazos ('C0', 'K') | decide la tabla sola (OCR reetiquetado fuera)
+   predicado del tablero: frontend/index.html sha256 f711c61dfb96555b8d203ce0e127dc6c5f86e63d692b435c79b7d45fa7d0ba02
+   referencia congelada MendozaVolcanic/Mirova-v1@c5944c6134bff2bdc9380f9005c27055fd74d450: principales y capas (consolidado_filas_perdidas.csv 383 filas, respaldo_20260408.csv 5312 filas) OK
+
+== 0. SUSTRATO (pasadas nocturnas de C0, etiqueta del evaluador; en V2, VIIRS desde abril)
+   MODIS    pasadas  2443 | alertas   65 | protegidas A  39 (C0 publica   6; solo OCR Suomi NPP 0) | protegidas B  45 | negativos limpios  2254
+   VIIRS375 pasadas  3396 | alertas  426 | protegidas A  38 (C0 publica  38; solo OCR Suomi NPP 0) | protegidas B  80 | negativos limpios  1010
+   VIIRS750 pasadas  3373 | alertas  117 | protegidas A  42 (C0 publica  42; solo OCR Suomi NPP 0) | protegidas B  46 | negativos limpios  1829
+
+== 1. COBERTURA (A108)
+   protegidas (A o B) sin record en algun brazo: ninguna
+   C0 contra produccion (mirova_equivalent): en ningun volcan y sensor falta mas del 5 % de las pasadas de produccion
+   cobertura pareja: OK
+
+== 2. VERSION DEL PRODUCTO POR PASADA
+   pasadas con version distinta entre brazos: 0 (protegidas: 0) []
+
+== 3. CABLEADO DE CADA BRAZO (linea FLAGS_BRAZO de cada job y huella en los records)
+   C0  OK
+   K   OK
+
+== 4. DETERMINISMO (misma decision de publicar, por sensor)
+   C0 contra G: no esta en esta ventana (las perdidas se confirman repitiendo el job, §5)
+   F contra K: no esta en esta ventana (las perdidas se confirman repitiendo el job, §5)
+
+== CONTROLES GENERALES: OK
+
+== 5. P1, VETO: alertas protegidas que C0 publica y el candidato no (por pasada)
+   K lectura A MODIS    protegidas que C0 publica   6 | perdidas netas 0, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 33 | CUMPLE
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-01 01:40 | MIROVA 1.81 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-02 07:40 | MIROVA 1.64 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-04 07:15 | MIROVA 2.28 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-05 07:55 | MIROVA 1.95 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-06 01:35 | MIROVA 1.42 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-07 07:35 | MIROVA 2.7 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-09 01:55 | MIROVA 2.02 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-09 07:10 | MIROVA 1.38 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-10 07:50 | MIROVA 1.97 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-12 07:25 | MIROVA 2.22 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-14 01:55 | MIROVA 2.44 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-15 07:45 | MIROVA 2.22 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-16 01:35 | MIROVA 1.81 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-17 07:20 | MIROVA 1.19 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-19 01:55 | MIROVA 2.01 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-20 07:40 | MIROVA 3.82 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-21 01:35 | MIROVA 2.64 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-24 01:55 | MIROVA 1.7 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-27 07:10 | MIROVA 1.0 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-28 07:50 | MIROVA 1.55 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-29 01:55 | MIROVA 2.94 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-04 07:20 | MIROVA 1.71 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-07 07:35 | MIROVA 2.29 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-08 01:50 | MIROVA 1.79 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-12 07:30 | MIROVA 1.44 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-18 01:50 | MIROVA 2.06 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-23 01:50 | MIROVA 1.7 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-25 01:30 | MIROVA 1.6 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-25 07:35 | MIROVA 1.28 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-28 07:50 | MIROVA 1.31 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-05-03 01:45 | MIROVA 1.14 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-05-10 01:25 | MIROVA 1.07 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-06-03 07:45 | MIROVA 1.15 MW
+   K lectura A VIIRS375 protegidas que C0 publica  38 | perdidas netas 0, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | CUMPLE
+   K lectura A VIIRS750 protegidas que C0 publica  42 | perdidas netas 0, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | CUMPLE
+   K lectura B MODIS    protegidas que C0 publica   6 | perdidas netas 0, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 33 | CUMPLE
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-01 01:40 | MIROVA 1.81 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-02 07:40 | MIROVA 1.64 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-04 07:15 | MIROVA 2.28 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-05 07:55 | MIROVA 1.95 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-06 01:35 | MIROVA 1.42 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-07 07:35 | MIROVA 2.7 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-09 01:55 | MIROVA 2.02 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-09 07:10 | MIROVA 1.38 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-10 07:50 | MIROVA 1.97 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-12 07:25 | MIROVA 2.22 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-14 01:55 | MIROVA 2.44 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-15 07:45 | MIROVA 2.22 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-16 01:35 | MIROVA 1.81 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-17 07:20 | MIROVA 1.19 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-19 01:55 | MIROVA 2.01 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-20 07:40 | MIROVA 3.82 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-21 01:35 | MIROVA 2.64 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-24 01:55 | MIROVA 1.7 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-27 07:10 | MIROVA 1.0 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-28 07:50 | MIROVA 1.55 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-03-29 01:55 | MIROVA 2.94 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-04 07:20 | MIROVA 1.71 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-07 07:35 | MIROVA 2.29 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-08 01:50 | MIROVA 1.79 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-12 07:30 | MIROVA 1.44 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-18 01:50 | MIROVA 2.06 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-23 01:50 | MIROVA 1.7 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-25 01:30 | MIROVA 1.6 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-25 07:35 | MIROVA 1.28 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-04-28 07:50 | MIROVA 1.31 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-05-03 01:45 | MIROVA 1.14 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-05-10 01:25 | MIROVA 1.07 MW
+      recuperada (C0 no la publica): Lascar|MODIS|2026-06-03 07:45 | MIROVA 1.15 MW
+   K lectura B VIIRS375 protegidas que C0 publica  79 | perdidas netas 0, ruidosas 0, pendientes 30, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | PENDIENTE DE REPETICION
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Lascar|VIIRS375|2026-05-20 04:42 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Lascar|VIIRS375|2026-06-02 06:30 | MIROVA None MW | VIIRS_NOAA21 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Lascar|VIIRS375|2026-06-03 06:42 | MIROVA None MW | VIIRS_SNPP | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Lascar|VIIRS375|2026-06-11 06:12 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Lastarria|VIIRS375|2026-04-14 06:00 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Isluga|VIIRS375|2026-04-06 06:30 | MIROVA None MW | VIIRS_SNPP | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Isluga|VIIRS375|2026-04-23 06:30 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Isluga|VIIRS375|2026-05-13 06:36 | MIROVA None MW | VIIRS_SNPP | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): PlanchonPeteroa|VIIRS375|2026-04-12 05:00 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): PlanchonPeteroa|VIIRS375|2026-04-24 04:36 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): PlanchonPeteroa|VIIRS375|2026-05-30 05:00 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): PlanchonPeteroa|VIIRS375|2026-05-30 06:42 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): NevadosDeChillan|VIIRS375|2026-04-15 05:42 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): NevadosDeChillan|VIIRS375|2026-04-25 05:06 | MIROVA None MW | VIIRS_NOAA21 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): NevadosDeChillan|VIIRS375|2026-05-21 06:12 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): NevadosDeChillan|VIIRS375|2026-05-29 06:06 | MIROVA None MW | VIIRS_NOAA21 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): NevadosDeChillan|VIIRS375|2026-06-01 06:06 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Llaima|VIIRS375|2026-04-30 05:12 | MIROVA None MW | VIIRS_NOAA21 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Llaima|VIIRS375|2026-05-02 05:24 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Llaima|VIIRS375|2026-05-02 06:12 | MIROVA None MW | VIIRS_NOAA21 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Llaima|VIIRS375|2026-05-20 06:30 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Llaima|VIIRS375|2026-05-21 04:30 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Llaima|VIIRS375|2026-05-21 05:18 | MIROVA None MW | VIIRS_NOAA21 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Llaima|VIIRS375|2026-05-21 05:54 | MIROVA None MW | VIIRS_SNPP | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Llaima|VIIRS375|2026-05-21 06:12 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Villarrica|VIIRS375|2026-04-05 05:30 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Copahue|VIIRS375|2026-04-30 06:06 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Copahue|VIIRS375|2026-05-20 04:48 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Copahue|VIIRS375|2026-05-20 05:36 | MIROVA None MW | VIIRS_NOAA21 | lab far_ref
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): Chaiten|VIIRS375|2026-05-06 05:54 | MIROVA None MW | VIIRS_NOAA20 | lab far_ref
+   K lectura B VIIRS750 protegidas que C0 publica  43 | perdidas netas 0, ruidosas 0, pendientes 1, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | PENDIENTE DE REPETICION
+      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): PlanchonPeteroa|VIIRS750|2026-05-30 05:00 | MIROVA None MW | VIIRS_NOAA20_750 | lab far_ref
+
+== 6. P2, SUMA DE ERRORES BAJO 1 MW, por pasada (alertas Muy Bajo perdidas + publicaciones en negativos limpios)
+   lectura A MODIS    C0  Muy Bajo perdidas   25 de   26 | negativos publicados  243 de  2254 | suma   268 (con Suomi NPP solo OCR:   268) | otras publicadas    9
+   lectura A MODIS    K   Muy Bajo perdidas    5 de   26 | negativos publicados   20 de  2254 | suma    25 (con Suomi NPP solo OCR:    25) | otras publicadas    3
+      P2 K lectura A MODIS   : 25 contra C0 268, ruido 0.0 (fraccion del gemelo de res.json) -> GANA
+   lectura A VIIRS375 C0  Muy Bajo perdidas    0 de  388 | negativos publicados  863 de  1010 | suma   863 (con Suomi NPP solo OCR:   863) | otras publicadas 1743
+   lectura A VIIRS375 K   Muy Bajo perdidas   26 de  388 | negativos publicados   37 de  1010 | suma    63 (con Suomi NPP solo OCR:    63) | otras publicadas  507
+      P2 K lectura A VIIRS375: 63 contra C0 863, ruido 0.0 (fraccion del gemelo de res.json) -> GANA
+   lectura A VIIRS750 C0  Muy Bajo perdidas   22 de   75 | negativos publicados  398 de  1829 | suma   420 (con Suomi NPP solo OCR:   420) | otras publicadas  364
+   lectura A VIIRS750 K   Muy Bajo perdidas   26 de   75 | negativos publicados   20 de  1829 | suma    46 (con Suomi NPP solo OCR:    46) | otras publicadas   89
+      P2 K lectura A VIIRS750: 46 contra C0 420, ruido 0.0 (fraccion del gemelo de res.json) -> GANA
+   lectura B MODIS    C0  Muy Bajo perdidas   25 de   26 | negativos publicados  243 de  2254 | suma   268 (con Suomi NPP solo OCR:   268) | otras publicadas    9
+   lectura B MODIS    K   Muy Bajo perdidas    5 de   26 | negativos publicados   20 de  2254 | suma    25 (con Suomi NPP solo OCR:    25) | otras publicadas    3
+      P2 K lectura B MODIS   : 25 contra C0 268, ruido 0.0 (fraccion del gemelo de res.json) -> GANA
+   lectura B VIIRS375 C0  Muy Bajo perdidas    0 de  388 | negativos publicados  863 de  1010 | suma   863 (con Suomi NPP solo OCR:   863) | otras publicadas 1702
+   lectura B VIIRS375 K   Muy Bajo perdidas   26 de  388 | negativos publicados   37 de  1010 | suma    63 (con Suomi NPP solo OCR:    63) | otras publicadas  496
+      P2 K lectura B VIIRS375: 63 contra C0 863, ruido 0.0 (fraccion del gemelo de res.json) -> GANA
+   lectura B VIIRS750 C0  Muy Bajo perdidas   22 de   75 | negativos publicados  398 de  1829 | suma   420 (con Suomi NPP solo OCR:   420) | otras publicadas  363
+   lectura B VIIRS750 K   Muy Bajo perdidas   26 de   75 | negativos publicados   20 de  1829 | suma    46 (con Suomi NPP solo OCR:    46) | otras publicadas   89
+      P2 K lectura B VIIRS750: 46 contra C0 420, ruido 0.0 (fraccion del gemelo de res.json) -> GANA
+
+== 7. P3, RAZON DE MAGNITUD contra MIROVA, pareada (d = |log10(brazo/MIROVA)| - |log10(C0/MIROVA)|)
+   K MODIS    n   7 | razon mediana C0 0.693, K 0.682 | d mediana -0.009 [-0.148, +0.009] | ruido del gemelo 0.000 -> CUMPLE
+   K VIIRS375 n 400 | razon mediana C0 0.762, K 0.669 | d mediana +0.000 [+0.000, +0.000] | ruido del gemelo 0.000 -> CUMPLE
+   K VIIRS750 n  91 | razon mediana C0 0.594, K 0.534 | d mediana +0.000 [+0.000, +0.000] | ruido del gemelo 0.000 -> CUMPLE
+   P3b K VIIRS375 Lascar       n  84 | mediana log10(brazo/C0) +0.000 -> NO baja
+   P3b K VIIRS375 Isluga       n  62 | mediana log10(brazo/C0) +0.000 -> NO baja
+   P3b K VIIRS375 Tupungatito  n  56 | mediana log10(brazo/C0) +0.000 -> NO baja[referencia MIROVA] la ventana 2026-03-01 a 2026-06-12 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+[referencia MIROVA] la ventana 2026-03-01 a 2026-06-12 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+[referencia MIROVA] la ventana 2026-03-01 a 2026-06-12 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+[referencia MIROVA] la ventana 2026-03-01 a 2026-06-12 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+[referencia MIROVA] la ventana 2026-03-01 a 2026-06-12 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+
+
+== 8. P4, MOVIMIENTO DEL CUMULO PUBLICADO mas de 0.5 km (tope: Wilson superior de S147, 2 de 149 = 0.048)
+   K contra C0: en alertas 54 de 632 (0.085; de las movidas, 30 quedan mas cerca del crater) | en negativos limpios 38 de 86 | FALLA
+      MODIS    en alertas 6 de 7
+      VIIRS375 en alertas 32 de 508
+      VIIRS750 en alertas 16 de 117
+
+== 9. LAS TRES METRICAS POR SENSOR (informativo): recall de alertas, publicacion en negativos limpios
+   MODIS    C0  recall    7 de   65 | protegidas A   6 de  39 | negativos limpios publicados  243 de  2254 (10.8 %)
+   MODIS    K   recall   60 de   65 | protegidas A  39 de  39 | negativos limpios publicados   20 de  2254 (0.9 %)
+   VIIRS375 C0  recall  426 de  426 | protegidas A  38 de  38 | negativos limpios publicados  863 de  1010 (85.4 %)
+   VIIRS375 K   recall  400 de  426 | protegidas A  38 de  38 | negativos limpios publicados   37 de  1010 (3.7 %)
+   VIIRS750 C0  recall   95 de  117 | protegidas A  42 de  42 | negativos limpios publicados  398 de  1829 (21.8 %)
+   VIIRS750 K   recall   91 de  117 | protegidas A  42 de  42 | negativos limpios publicados   20 de  1829 (1.1 %)
+
+   P6 (informa): C0 publica en negativos limpios de VIIRS 375 863 de 1010 (85.4 %) | banda de A114 80 a 92 % -> DENTRO
+
+   MODIS fuera de Lascar (S150 midio K solo en Lascar), negativos limpios publicados:
+      todos C0 242 de 2173 | K 18 de 2173
+      Lastarria            C0 6/188 | K 0/188
+      Isluga               C0 10/178 | K 1/178
+      Tupungatito          C0 5/214 | K 0/214
+      PlanchonPeteroa      C0 9/223 | K 0/223
+      NevadosDeChillan     C0 6/217 | K 1/217
+      Llaima               C0 8/217 | K 0/217
+      Villarrica           C0 12/226 | K 0/226
+      Copahue              C0 1/218 | K 0/218
+      PuyehueCordonCaulle  C0 158/241 | K 15/241
+      Chaiten              C0 27/251 | K 1/251
+
+== VEREDICTO DE LA VENTANA V2 (reglas de §6):
+   K lectura A: CUMPLE | con auditoria espacial pendiente (P4)
+   K lectura B: PENDIENTE DE REPETICION
+   F lectura A: CUMPLE | con auditoria espacial pendiente (P4) [derivado de K: mismo codigo en VIIRS]
+   F lectura B: PENDIENTE DE REPETICION [derivado de K: mismo codigo en VIIRS]
+
+== 10. P2 Y VEREDICTO CON LAS REGLAS DE D-9 (issue #811; INFORMA. Decide la del pre-registro: original)
+   control: etiqueta original re-calculada igual a la de la tabla en 12023 de 12023 pasadas
+   regla original (original, umbral None) etiquetas que cambian: ninguna
+      lectura A MODIS    suma C0 268 K 25 | P2 K GANA
+      lectura A VIIRS375 suma C0 863 K 63 | P2 K GANA
+      lectura A VIIRS750 suma C0 420 K 46 | P2 K GANA
+      lectura B MODIS    suma C0 268 K 25 | P2 K GANA
+      lectura B VIIRS375 suma C0 863 K 63 | P2 K GANA
+      lectura B VIIRS750 suma C0 420 K 46 | P2 K GANA
+      veredicto de la ventana K lectura A: CUMPLE | con auditoria espacial pendiente (P4)
+      veredicto de la ventana K lectura B: PENDIENTE DE REPETICION
+      veredicto de la ventana F lectura A: CUMPLE | con auditoria espacial pendiente (P4) [derivado de K: mismo codigo en VIIRS]
+      veredicto de la ventana F lectura B: PENDIENTE DE REPETICION [derivado de K: mismo codigo en VIIRS]
+   regla SN       (SN, umbral 0.05) etiquetas que cambian: {'pos->sin_info': 21, 'pos->neg_limpio': 24, 'sin_info->neg_limpio': 18}
+      lectura A MODIS    suma C0 268 K 25 | P2 K GANA
+      lectura A VIIRS375 suma C0 893 K 65 | P2 K GANA
+      lectura A VIIRS750 suma C0 420 K 46 | P2 K GANA
+      lectura B MODIS    suma C0 268 K 25 | P2 K GANA
+      lectura B VIIRS375 suma C0 893 K 65 | P2 K GANA
+      lectura B VIIRS750 suma C0 420 K 46 | P2 K GANA
+      veredicto de la ventana K lectura A: CUMPLE | con auditoria espacial pendiente (P4)
+      veredicto de la ventana K lectura B: PENDIENTE DE REPETICION
+      veredicto de la ventana F lectura A: CUMPLE | con auditoria espacial pendiente (P4) [derivado de K: mismo codigo en VIIRS]
+      veredicto de la ventana F lectura B: PENDIENTE DE REPETICION [derivado de K: mismo codigo en VIIRS]
+   regla SE       (SE, umbral 0.05) etiquetas que cambian: {'pos->minima': 45}
+      lectura A MODIS    suma C0 268 K 25 | P2 K GANA
+      lectura A VIIRS375 suma C0 863 K 49 | P2 K GANA
+      lectura A VIIRS750 suma C0 420 K 46 | P2 K GANA
+      lectura B MODIS    suma C0 268 K 25 | P2 K GANA
+      lectura B VIIRS375 suma C0 863 K 49 | P2 K GANA
+      lectura B VIIRS750 suma C0 420 K 46 | P2 K GANA
+      veredicto de la ventana K lectura A: CUMPLE | con auditoria espacial pendiente (P4)
+      veredicto de la ventana K lectura B: PENDIENTE DE REPETICION
+      veredicto de la ventana F lectura A: CUMPLE | con auditoria espacial pendiente (P4) [derivado de K: mismo codigo en VIIRS]
+      veredicto de la ventana F lectura B: PENDIENTE DE REPETICION [derivado de K: mismo codigo en VIIRS]
+   regla SN_004   (SN, umbral 0.04) etiquetas que cambian: {'pos->sin_info': 10, 'pos->neg_limpio': 17, 'sin_info->neg_limpio': 14}
+      lectura A MODIS    suma C0 268 K 25 | P2 K GANA
+      lectura A VIIRS375 suma C0 887 K 64 | P2 K GANA
+      lectura A VIIRS750 suma C0 420 K 46 | P2 K GANA
+      lectura B MODIS    suma C0 268 K 25 | P2 K GANA
+      lectura B VIIRS375 suma C0 887 K 64 | P2 K GANA
+      lectura B VIIRS750 suma C0 420 K 46 | P2 K GANA
+      veredicto de la ventana K lectura A: CUMPLE | con auditoria espacial pendiente (P4)
+      veredicto de la ventana K lectura B: PENDIENTE DE REPETICION
+      veredicto de la ventana F lectura A: CUMPLE | con auditoria espacial pendiente (P4) [derivado de K: mismo codigo en VIIRS]
+      veredicto de la ventana F lectura B: PENDIENTE DE REPETICION [derivado de K: mismo codigo en VIIRS]
+   regla SE_004   (SE, umbral 0.04) etiquetas que cambian: {'pos->minima': 27}
+      lectura A MODIS    suma C0 268 K 25 | P2 K GANA
+      lectura A VIIRS375 suma C0 863 K 53 | P2 K GANA
+      lectura A VIIRS750 suma C0 420 K 46 | P2 K GANA
+      lectura B MODIS    suma C0 268 K 25 | P2 K GANA
+      lectura B VIIRS375 suma C0 863 K 53 | P2 K GANA
+      lectura B VIIRS750 suma C0 420 K 46 | P2 K GANA
+      veredicto de la ventana K lectura A: CUMPLE | con auditoria espacial pendiente (P4)
+      veredicto de la ventana K lectura B: PENDIENTE DE REPETICION
+      veredicto de la ventana F lectura A: CUMPLE | con auditoria espacial pendiente (P4) [derivado de K: mismo codigo en VIIRS]
+      veredicto de la ventana F lectura B: PENDIENTE DE REPETICION [derivado de K: mismo codigo en VIIRS]
+   autocontrol: la regla original reproduce la seccion 6: OK
