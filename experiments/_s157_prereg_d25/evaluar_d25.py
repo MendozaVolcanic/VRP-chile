@@ -402,6 +402,75 @@ def es_snpp(k, c, prot):
     return E.ocr_snpp(k, c, prot) and k.split("|")[2][:10] < HITO_SNPP
 
 
+# ---------------------------------------------------------------- P2 con ruido de muestreo (D-34)
+# ADENDA_GEMELO.md, «SELLADA por Nicolás el 2026-10-21 (D-34)». POR QUÉ: en V1 los tres brazos corren en el mismo job,
+# en serie sobre la misma CPU, y el gemelo K' sale copia bit a bit de K (0 de 4.610 pasadas distintas,
+# experiments/_s159/gemelo_d25/INFORME.md en s159-pruebas, d5b6839b2): el «ruido del gemelo» vale 0 por construcción y
+# P2 decidía con una sola pasada neta. Lo que importa es el ruido de MUESTREO: si D publica mejor que K en general o sólo
+# en estas noches. Las pasadas de una noche comparten volcán y atmósfera (H9), así que el intervalo es por bloques
+# noche-volcán, con la maquinaria y la semilla de M (pesos_bloque, D-27).
+
+def contribuciones_p2(TKD, prot, lect, cfg, s, excluir):
+    """Las pasadas discordantes de P2 (error en un brazo y no en el otro) con su aporte al neto. Signo de la definición
+    de P2 del pre-registro (§5), que cuenta ERRORES: +1 si el error es sólo de D, -1 si es sólo de K; positivo es malo
+    para D. Una alerta Muy Bajo que D publica y K no resta; una publicación de D en un negativo limpio que K no tiene
+    suma. La suma de los aportes es la suma de D menos la de K (mismo conjunto que suma_errores)."""
+    eK = E.errores_por_pasada(TKD, "control", prot, lect, cfg, s, excluir)
+    eD = E.errores_por_pasada(TKD, "brazo", prot, lect, cfg, s, excluir)
+    return [{"clave": k, "c": 1 if k in eD else -1, "bloque": "%s|%s" % (k.split("|")[0], k.split("|")[2][:10])}
+            for k in sorted(eK ^ eD)]
+
+
+def decidir_p2_bloques(contrib, ok_ctrl):
+    """D-34 §5: GANA si el intervalo al 95 % del neto (bootstrap por bloques noche-volcán) queda entero bajo 0; PIERDE si
+    queda entero sobre 0; si cruza 0, BLOQUEA cuando el neto puntual es positivo (en contra de D: bloquea CUMPLE, como un
+    EMPEORA en un estrato que sólo bloquea) y EMPATE si no. Con menos pasadas o noches que los mínimos de M, SIN SUSTRATO."""
+    c = np.array([x["c"] for x in contrib], dtype=np.float64)
+    bl_p2 = [x["bloque"] for x in contrib]
+    neto = int(round(c.sum())) if len(c) else 0
+    det = {"neto": neto, "n_discordantes": len(c), "noches_discordantes": len(set(bl_p2)), "ic95": None,
+           "regla": "D-34: neto de errores (D menos K) con intervalo por bloques noche-volcán"}
+    if not ok_ctrl:
+        return "INDECIDIBLE", det
+    if len(c) < N_MIN_PARES or len(set(bl_p2)) < N_MIN_NOCHES:
+        return "SIN SUSTRATO", det
+    W = pesos_bloque(bl_p2)
+    sumas = W @ c
+    lo, hi = float(np.percentile(sumas, 2.5)), float(np.percentile(sumas, 97.5))
+    det["ic95"] = [lo, hi]
+    if hi < 0:
+        return "GANA", det
+    if lo > 0:
+        return "PIERDE", det
+    elif neto > 0:
+        return "BLOQUEA", det
+    return "EMPATE", det
+
+
+def lista_p2(contrib, TKD, R):
+    """D-34 §5.7: cada pasada discordante, para diagnosticar; no decide."""
+    out = []
+    for x in contrib:
+        k = x["clave"]
+        v = TKD.get(k, {})
+        c, b = v.get("control", {}), v.get("brazo", {})
+        vol, sensor, hora = k.split("|")
+        out.append({"volcan": vol, "sensor": sensor, "hora": hora, "publica_K": bool(c.get("pub")),
+                    "publica_D": bool(b.get("pub")), "clase_mirova": c.get("lab", b.get("lab")),
+                    "vrp_mirova": c.get("vrp_ref"), "pc_vrp_mw_K": (R.get("K", {}).get(k) or {}).get("pc_vrp"),
+                    "pc_vrp_mw_D": (R.get("D", {}).get(k) or {}).get("pc_vrp"), "error_de": "D" if x["c"] > 0 else "K",
+                    "contribucion": x["c"]})
+    return out
+
+
+def regla_b_d33(v_a, margen):
+    """(b), D-33, nunca adoptada: la regla del gemelo, pero un GANA o PIERDE de una o dos pasadas netas queda pendiente
+    de diagnóstico por pasada. D-34 §5.8: se informa para ver si la elección de regla cambia el veredicto."""
+    if v_a in ("GANA", "PIERDE") and margen <= 2:
+        return "PENDIENTE DE DIAGNOSTICO POR PASADA (%s por %d)" % (v_a, margen)
+    return v_a
+
+
 def decidir_estrato(P, modo, modo_calib, ok_ctrl, comparador=True):
     """La decisión de M de UN estrato con sus pares P (k, d, m, clave, bloque): regla, calibración y opción A.
     S159: extraída sin cambios de contar() para poder correrla también sobre los placebos (evaluar_m).
@@ -541,12 +610,19 @@ def contar(T, prot, R, cfg, regla, res_ctrl, ruido_frac_de, inner, modo_calib=CA
             ruido = ruido_frac_de.get(regla, {}).get(s, 0.0) * sk
         else:
             ruido = 0.0
-        v_ = ("INDECIDIBLE" if not ok_ctrl else "GANA" if sd < sk - ruido else "PIERDE" if sd > sk + ruido else "EMPATE")
+        # (a) la regla del pre-registro §5 (ruido del gemelo), que D-34 retira: se informa, no decide
+        v_a = ("INDECIDIBLE" if not ok_ctrl else "GANA" if sd < sk - ruido else "PIERDE" if sd > sk + ruido else "EMPATE")
+        # D-34 (ADENDA_GEMELO.md §5): decide el neto de errores con intervalo por bloques noche-volcán
+        contrib = contribuciones_p2(TKD, prot, lect, cfg, s, excluir)
+        v_, det = decidir_p2_bloques(contrib, ok_ctrl)
         ver["P2|%s" % s] = v_
         noches = {lado: {(k.split("|")[0], k.split("|")[2][:10]) for k in
                          E.errores_por_pasada(TKD, lado, prot, lect, cfg, s, excluir)} for lado in ("control", "brazo")}
-        info["P2|%s" % s] = {"suma_K": sk, "suma_D": sd, "ruido": ruido,
-                             "noches_con_error_K": len(noches["control"]), "noches_con_error_D": len(noches["brazo"])}
+        info["P2|%s" % s] = dict(det, suma_K=sk, suma_D=sd, ruido_gemelo=ruido,
+                                 neto_igual_a_suma_D_menos_suma_K=(det["neto"] == sd - sk),
+                                 regla_a_gemelo=v_a, regla_b_d33=regla_b_d33(v_a, abs(sd - sk)),
+                                 discordantes=lista_p2(contrib, TKD, R),
+                                 noches_con_error_K=len(noches["control"]), noches_con_error_D=len(noches["brazo"]))
     # ---- M
     pares = collections.defaultdict(list)
     salen = collections.Counter()
@@ -608,6 +684,14 @@ def global_ventana(ver, ok_ctrl):
         estado = "MEJORA"
     else:
         estado = "SIN EFECTO"
+    # D-34 §5.5 (ADENDA_GEMELO.md): un P2 con neto en contra de D que no alcanza PIERDE bloquea CUMPLE, igual que un
+    # EMPEORA en un estrato que sólo bloquea. Desde aquí el tercer valor devuelto quiere decir «bloquea CUMPLE» (M
+    # EMPEORA o P2 BLOQUEA), y combinar lo trata así.
+    bloq = [s for s in SENS if ver["P2|%s" % s] == "BLOQUEA"]
+    if bloq:
+        estado = ("DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en %s: bloquea CUMPLE, "
+                  "ADENDA_GEMELO.md D-34) | M: %s" % (", ".join(bloq), estado))
+        empeora = True
     if any(ver["P1b|%s" % s].startswith("LISTA") for s in SENS):
         estado += " | P1b: protegidas que cruzan 1 MW hacia abajo, decide Nicolas"
     return estado, mejora, empeora
@@ -827,8 +911,16 @@ def imprimir(regla, ver, info, estado):
         for x in i1["netas"] + i1["ruidosas"] + i1["pendientes"]:
             print("      perdida: %s" % x)
         print("   P1b %-8s %s %s" % (s, ver["P1b|%s" % s], i1["cruces_1MW"][:5]))
-        print("   P2 %-8s %s | suma K %d, D %d, ruido %.1f | noches con error K %d, D %d" % (
-            s, ver["P2|%s" % s], i2["suma_K"], i2["suma_D"], i2["ruido"], i2["noches_con_error_K"], i2["noches_con_error_D"]))
+        print("   P2 %-8s %s (D-34) | neto D menos K %+d, IC95 %s | discordantes %d en %d noches | suma K %d, D %d | "
+              "noches con error K %d, D %d" % (
+                  s, ver["P2|%s" % s], i2["neto"], i2["ic95"], i2["n_discordantes"], i2["noches_discordantes"],
+                  i2["suma_K"], i2["suma_D"], i2["noches_con_error_K"], i2["noches_con_error_D"]))
+        print("      informan, no deciden: (a) ruido del gemelo %.1f -> %s | (b) D-33 -> %s" % (
+            i2["ruido_gemelo"], i2["regla_a_gemelo"], i2["regla_b_d33"]))
+        for x in i2["discordantes"]:
+            print("      discordante: %s %s %s | K %s D %s | %s VRP %s | pc.vrp_mw K %s D %s | error de %s" % (
+                x["volcan"], x["sensor"], x["hora"], x["publica_K"], x["publica_D"], x["clase_mirova"],
+                x["vrp_mirova"], x["pc_vrp_mw_K"], x["pc_vrp_mw_D"], x["error_de"]))
     print("   M (pares que salen: %s)" % info["M_salen"])
     for nom, modo in ESTRATOS:
         x = info["M|%s" % nom]
@@ -867,7 +959,7 @@ def combinar(archivos):
     if malo:
         final = peor(malo)
     elif any(r["empeora"] for r in rs):
-        final = "DECIDE NICOLAS (M empeora en alguna ventana)"
+        final = "DECIDE NICOLAS (M empeora o P2 bloquea en alguna ventana)"   # D-34 §5.5
     elif all(r["mejora"] for r in rs):
         final = "CUMPLE"
     elif any(r["mejora"] for r in rs):

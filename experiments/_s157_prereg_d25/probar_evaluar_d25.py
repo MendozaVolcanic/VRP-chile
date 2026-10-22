@@ -5,7 +5,9 @@ S140). Los brazos se fabrican desde los records con K en disco (la copia unida d
 del 2026-09-18, producción desde ahí), con la línea FLAGS_BRAZO igual que la escribe el workflow.
 
 Casos V1 (ventana de prueba 2026-09-18 a 2026-10-18, donde producción ya es K; 7 volcanes):
-  nulo            K, K' y D idénticos (D con la huella de D25)            -> controles OK, P1 sin pérdidas, P2 EMPATE,
+  nulo            K, K' y D idénticos (D con la huella de D25)            -> controles OK, P1 sin pérdidas, P2 SIN
+                                                                              SUSTRATO (D-34: 0 discordantes; la regla
+                                                                              del gemelo, informada, da EMPATE),
                                                                               M sin MEJORA ni EMPEORA, SIN EFECTO
   modis           D trae un record MODIS                                  -> cableado de D roto, INDECIDIBLE
   huella          D sin la huella de D25                                  -> cableado de D roto
@@ -199,7 +201,10 @@ def main():
     mv = m_veredictos(res)
     check("nulo", res["controles_ok"] and all(res["cableado"].values()) and res["estado"].startswith("SIN EFECTO")
           and not any(v in ("MEJORA", "EMPEORA") for v in mv.values())
-          and all(regla(res)["veredicto"]["P2|%s" % s] == "EMPATE" for s in X.SENS),
+          # D-34 (ADENDA_GEMELO.md §5.6): con D = K no hay pasadas discordantes, así que P2 es SIN SUSTRATO (antes
+          # EMPATE, con la regla del gemelo), y la regla anterior, que se sigue informando, da EMPATE
+          and all(regla(res)["veredicto"]["P2|%s" % s] == "SIN SUSTRATO" for s in X.SENS)
+          and all(regla(res)["info"]["P2|%s" % s]["regla_a_gemelo"] == "EMPATE" for s in X.SENS),
           "estado %s | M %s" % (res["estado"], mv))
     n_v750 = len(pares(t, lambda k, c: "|VIIRS750|" in k))
     # S159, D-28 §2.5: el placebo (K x 1,2 y K x 0,8 sin comparador) se informa por estrato y no invalida; el nulo
