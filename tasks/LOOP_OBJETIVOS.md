@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-22 19:04 UTC, hora del servidor (S161): quinta adenda de D25 sellada (D-45); implementador corriendo
+- Quinta adenda `experiments/_s157_prereg_d25/ADENDA_SIGNOS_P2.md` en `s159-evaluador-d25` (`c13cf5808`, subida;
+  sha256 `28eea84cf77b860a2aad12088e6ad6795c8ce3d1395a71890dabe0b3fba900c3`). Escrita antes de leer V1, V2 y el brazo
+  del 17 al 19. Lecturas propias de la adenda, que Nicolás puede vetar antes del tag: una cola por dirección al 5 %
+  (§2.4, por D-42 §2.4 y porque es la única en que «4 noches o menos» queda en la frontera); +1 en el valor-p por
+  sorteos y semilla 162 con B de 21 o más; B cuenta los bloques de suma 0; placebo (c) con 40 semillas por punto; (a)
+  y (b) re-decididos con la regla nueva.
+- Implementador (agente, worktree `C:\vrp-trabajo\s159-evaluador`) lanzado ~19:03 UTC; entrega en
+  `experiments/_s159/instrumentos/signos_p2/README.md`. Después: verificador limpio en Fable 5.1, y recién ahí tag.
+
 ### 2026-10-22 ~18:41 UTC (S160): D-45 cerrada por Nicolás (opción ii); CIERRE de la sesión
 - D-45: P2 se decidirá con la prueba exacta de signos por bloque noche-volcán, en una quinta adenda, con
   implementador, candados y verificador antes del tag; a hacer en S161. Corrige también V42-21.
