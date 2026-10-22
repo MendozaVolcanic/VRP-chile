@@ -1,4 +1,104 @@
-# Bloque de arranque S161 (cierre de la sesión nocturna S160, dueña única del loop, 2026-10-22 03:27 a 07:30 UTC)
+# Bloque de arranque S161 (cierre de S160, sesión dueña del loop: noche del 21 al 22 y día del 22-oct, hasta ~18:45 UTC)
+
+Escrito el 2026-10-22 ~18:45 UTC sobre `loop/activo`. **Sin trabajo en curso**: ningún agente vivo, la rama
+`s159-evaluador-d25` igual al remoto en `bcfdc7c76`. Más abajo queda, como historia, el bloque que escribió esta misma
+sesión a las ~07:30 UTC (secciones `-prev`); varias filas suyas ya cambiaron. El detalle de cada vuelta está en
+`tasks/LOOP_OBJETIVOS.md` §6 (entradas del 2026-10-22) y las decisiones en su §5 (D-35 a D-45).
+
+## a. Todo en una pantalla
+
+| qué | estado | evidencia |
+|---|---|---|
+| D25: veredicto | **SIN LEER, sin tag de lectura.** Falta ejecutar D-45 | rama `s159-evaluador-d25` |
+| D25: evaluador | D-28, D-30, D-32, D-34, D-29, D-42 (adenda `ca65069f6`) y el estrato 203 (`5f986a209`) implementados y **verificados** en tres vueltas; D-44 registrada (`172313c2d`) | `experiments/_s159/instrumentos/verificador_d34/`, `verificador_d29/`, `verificador_d42/` (vueltas 1 a 3) |
+| D25: placebos de D-44 | **corridos y verificados**: (a) GANA con sustrato, (b) PIERDE, (c) 2 % de falsos por cola | `experiments/_s159/instrumentos/placebos_d44/` (`20ac098a3`), `verificador_d42/vuelta3/` (`bcfdc7c76`) |
+| D25: P2 con pocas noches | **defecto confirmado (V42-20)**: con 7 noches P2 nunca decide; con 10 u 11 decide la semilla. **D-45 cerrada: opción (ii)**, por hacer | `verificador_d42/vuelta3/INFORME.md` |
+| D25: brazo de sensibilidad del 17 al 19-oct (D-35) | **terminado verde** (run 39756261926, 13 jobs); sin abrir hasta después del tag | rama `s146-ab/39756261926` |
+| #892 (cese de Suomi NPP), #891 (preámbulo), #893 (auditoría S160), #895 (R13 del sync) | **MERGEADOS** | GitHub |
+| Mirova-v1#26 (arreglos del scraper) | abierto, de Nicolás | sesión `audit-mirova-v1` |
+| Auditoría espacial (Tupungatito, Cordón Caulle, Isluga) | **terminada y verificada**: el calor que alerta MIROVA está en el cráter, lejos del centro de su imagen, y lo vemos ahí; Cordón Caulle con radio de 20 km publica lejos en noches limpias; VE-01 SOSPECHA de protegida perdida por radio en Tupungatito | `experiments/_s160_espacial/` (README y `verificador/INFORME.md`), mapa en `experiments/_s160_espacial_mapa/` |
+| Umbrales de VRP por sensor de MIROVA | reales en su archivo OSF (VIIRS 750 de noche: 5 MW), **no** aplicados en el NRT; la protegida sigue en 1 MW | bitácora del 2026-10-22, entrada «umbrales de VRP por sensor» |
+
+## b. Decisiones que espera Nicolás
+
+| # | pregunta | recomendación |
+|---|---|---|
+| D-36 | Ampliar el port con 300 a 400 negativos del estrato `neg_resto` | sí, con pre-registro |
+| D-38 | Alarma de plataforma callada: diaria o patrón S123 (#892 ya está en `main`) | patrón S123 |
+| D-39 a D-41 | Mirova-v1: bucle de push (en parte cubierto por #26 y #895), operación y OCR, alertas sólo OCR en el criterio | ver la cola |
+| D-43 | Lo que sigue abierto de `docs/AUDIT_S160.md` §5 (mensaje «Cobertura: completa» del NRT, guardas de token y de referencia, llevar S157 y S158 a `main`) | ver ese documento |
+| nueva | VE-01 y el radio de 20 km de Cordón Caulle: ¿pre-registro de un cambio de radio? | primero el mapa interactivo y la persistencia (§f); después decidir |
+
+## c. Lo aprendido
+
+Reglas generales del workspace:
+- **Un control que no puede fallar no es un control** (V42-10): apagar al azar le costaba a K seis alertas por cada
+  negativo, así que su «0 GANA» no medía nada. Antes de correr un placebo, contar la composición del sustrato y
+  preguntar si el resultado temido es siquiera posible.
+- **Ampliar semillas en un solo punto después de mirar es parada opcional** (V42-22): el estimador no se sesga, pero
+  el intervalo pierde su cobertura nominal. El número de semillas se fija antes.
+- **Un intervalo bootstrap con pocos bloques no es una prueba**: con 7 bloques, el percentil 2,5 no cruza 0 aunque un
+  bloque vaya en contra. Con pocos bloques se usa la prueba exacta de signos (enumerar los 2^B repartos).
+- Siguen en pie las del bloque de las 07:30: un defecto de la regla sellada se devuelve sin leer; el tipo de falla se
+  lee del XML de JUnit; la salida roja se guarda con la prueba final; los enlaces de carpeta se quitan con `rmdir`.
+
+Del proyecto: el calor que MIROVA alerta está en el cráter aunque el cráter quede lejos del centro de su imagen
+(Tupungatito 4,79 km, Cordón Caulle 7,61 km); su archivo OSF y su NRT usan umbrales distintos (A105).
+
+## d. Problemas abiertos e hipótesis
+
+| problema | estado |
+|---|---|
+| P2 de D-34 con pocas noches | **CONFIRMADO** (V42-20); se corrige con D-45 |
+| VE-01: protegida de Tupungatito del 2026-09-29 04:54 perdida por radio | **SOSPECHA** |
+| VE-02: alerta de Cordón Caulle del 2026-10-21 lejos del cráter | **SOSPECHA** |
+| La «fuente persistente» del E de Cordón Caulle | **REFUTADA como persistente** (13 de 15 TIF diurnos, del 9 al 18-may) |
+| El corte de Suomi NPP también en LANCE NRT | **SOSPECHA**; confirmar el 3-nov |
+
+## e. Lo que ya está cerrado y no hay que rehacer
+
+- El código del evaluador cumple todas las adendas hasta D-42 y el estrato 203 (tres verificadores).
+- Los placebos (a), (b) y (c) están corridos y verificados; sólo el (c) se rehace sorteando por noche (V42-21).
+- La geometría de los tres volcanes de la auditoría espacial: el centro no hay que moverlo.
+- El umbral de 5 MW de VIIRS 750 no es errata (lo confirma el OSF).
+
+## f. Prompt para la próxima sesión
+
+```
+Retoma VRP Chile (cierre de S160, 2026-10-22 ~18:45 UTC). Antes de creerle a nada:
+
+1. cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"; git fetch origin --prune; git status -sb
+   (loop/activo, en el commit de este cierre o más nuevo); hora del servidor con
+   gh api -i repos/MendozaVolcanic/VRP-chile | grep -i date (A86).
+2. Lee CLAUDE.md del proyecto, después tasks/BLOQUE_ARRANQUE_S161.md (el bloque de arriba; las secciones -prev son
+   historia), después tasks/LOOP_OBJETIVOS.md §5 (D-35 a D-45) y las entradas del 2026-10-22 de su §6.
+3. Comprueba contra GitHub: la rama s159-evaluador-d25 (debe estar en bcfdc7c76), #890 (borrador), Mirova-v1#26.
+
+Trabajo, en orden:
+- D-45 (Nicolás dijo sí a la opción ii; su respuesta textual está en la fila D-45): quinta adenda sellada en
+  experiments/_s157_prereg_d25/. P2 se decide con la prueba de signos por bloque noche-volcán: valor-p exacto
+  enumerado hasta 20 noches (si no, 10.000 sorteos con semilla fija), GANA o PIERDE con p de 5 % o menos, BLOQUEA si
+  el neto va en contra sin llegar, SIN SUSTRATO con 4 noches o menos (D-44); decir que la calibración de D-42 deja de
+  hacer falta para P2. Después: implementador (agente, worktree C:\vrp-trabajo\s159-evaluador) con pruebas rojas,
+  candados por mutación leídos de JUnit y el placebo (c) sorteando por noche (V42-21); verificador con contexto
+  limpio en el otro modelo; recién entonces tag de lectura y relectura de D25 con la referencia congelada por hash,
+  la tabla de latest.php sola al lado y el estrato 203; y después el brazo del 17 al 19 (run 39756261926, aparte).
+  Nunca leas el veredicto antes del tag. Base del diseño: experiments/_s159/instrumentos/verificador_d42/vuelta3/.
+- PEDIDO DE NICOLÁS: mapa interactivo (Artifact, Leaflet sobre imagen satelital, con zoom) de Tupungatito, Cordón
+  Caulle e Isluga con la geometría de MIROVA y la nuestra, nuestros cúmulos y los focos recurrentes, y la persistencia
+  de cada foco mes a mes durante el año SEPARANDO noche y día (el MIR diurno se contamina con sol, A76). Revisar
+  VE-01 y VE-02 en las imágenes de MIROVA. Base: experiments/_s160_espacial/ (leer primero verificador/INFORME.md y
+  el README). Cargar el skill artifact-design antes de escribir el artefacto; dar también la ruta local.
+
+Reglas duras: nada en pipeline/, data/ ni frontend/ sin tag y sí de Nicolás (A45); sólo EARTHDATA_TOKEN (A71);
+nada de gh run watch ni bucles de gh; disco justo (C: 14 GB, D: 8,6 GB al cierre; parada bajo 3 GB); git add por
+archivo; esperar el CI con conclusión antes de dar un PR por listo; español de Chile sin voseo ni guiones largos;
+rutas absolutas. Si la sesión no alcanza: commitea, anota en la bitácora qué quedó corriendo y cierra con /cierre.
+```
+
+---
+
+# (historia) Bloque de arranque S161 escrito a las ~07:30 UTC (cierre de la sesión nocturna S160, dueña única del loop, 2026-10-22 03:27 a 07:30 UTC)
 
 Escrito el 2026-10-22 ~07:30 UTC sobre `loop/activo`. Nicolás durmió toda la sesión: **no se tomó ninguna decisión
 suya**; todo lo que la necesita quedó en la cola `tasks/LOOP_OBJETIVOS.md` §5 (D-35 a D-43) con recomendación. El
@@ -6,7 +106,7 @@ estado se fijó **sin trabajo en curso**: ningún agente vivo (los de S159 entre
 que corre es el CI de #890 sobre `29831d7bc` (`pytest` pendiente al cerrar, run 39740189157). El bloque anterior
 (`tasks/BLOQUE_ARRANQUE_S160.md`) queda como historia; varias filas suyas ya cambiaron (ver tabla a).
 
-## a. Todo en una pantalla
+## a-prev. Todo en una pantalla
 
 | qué | estado | evidencia |
 |---|---|---|
@@ -22,7 +122,7 @@ que corre es el CI de #890 sobre `29831d7bc` (`pytest` pendiente al cerrar, run 
 | PRs | #889 borrador; #890 borrador (CI pendiente); #891 listo; #892 listo | `gh pr view` al cierre |
 | Issue de alerta #864 (auto-audit fuera de banda, 2026-10-19) | **ABIERTO**; su causa (Chillán MODIS, Test 2 y fondo) la midió S159 | `experiments/_s159/chillan_modis/` en `s159-pruebas` |
 
-## b. Decisiones que espera Nicolás
+## b-prev. Decisiones que espera Nicolás
 
 Todas en `tasks/LOOP_OBJETIVOS.md` §5 con su evidencia. En orden de urgencia:
 
@@ -39,7 +139,7 @@ Todas en `tasks/LOOP_OBJETIVOS.md` §5 con su evidencia. En orden de urgencia:
 | D-38 | Alarma de plataforma callada: comentario diario o patrón S123 | **patrón S123** |
 | heredadas | las del bloque S160 §b que no se tocaron: `fetch.py` sin SNPP tras el 2-nov (con tag), sello de MxD03 v2, OCR y `latest.php`, tope de cordura de `store.py`, D-10 diurno, #813, λ de B22, PAT, aviso a OVDAS | ver `tasks/BLOQUE_ARRANQUE_S160.md` §b |
 
-## c. Lo aprendido
+## c-prev. Lo aprendido
 
 Reglas generales del workspace (para el `CLAUDE.md` global o la guía de auditorías):
 - **Un verificador puede encontrar un defecto de la regla sellada y no del código.** Ahí no se lee el resultado ni se
@@ -59,7 +159,7 @@ Del proyecto (candidatas a reglas A120 en adelante, en un PR que toque `CLAUDE.m
 - Un record sintético que promedia la posición de los píxeles puede convertir un acierto en `far` (Láscar
   2026-08-26 05:48): al comparar contra el código de MIROVA, el sintético es parte del instrumento.
 
-## d. Problemas abiertos e hipótesis
+## d-prev. Problemas abiertos e hipótesis
 
 | problema | estado |
 |---|---|
@@ -71,7 +171,7 @@ Del proyecto (candidatas a reglas A120 en adelante, en un PR que toque `CLAUDE.m
 | NRT de LANCE de Suomi NPP también se corta el 2-nov | **SOSPECHA** fuerte; confirmar el 3-nov |
 | «Cobertura: completa» del NRT sin gránulos de una plataforma | **CONFIRMADO** por la auditoría S160 (241); #892 no lo cambia |
 
-## e. Lo que ya está cerrado y no hay que rehacer
+## e-prev. Lo que ya está cerrado y no hay que rehacer
 
 - **El código del evaluador de D25 cumple D-28, D-30, D-32, D-34 y D-29** (dos verificadores limpios). Lo que falta es
   la regla de P2 (D-42) y los candados, no la implementación.
@@ -81,7 +181,7 @@ Del proyecto (candidatas a reglas A120 en adelante, en un PR que toque `CLAUDE.m
 - Las ~60 corridas en rojo de `vigilar-osf-mirova.yml` en ramas de prueba son la versión vieja del yml (comillas
   dobles en `if:`); #888 ya la corrige. No es un fallo de producción.
 
-## f. Prompt para la próxima sesión
+## f-prev. Prompt para la próxima sesión
 
 ```
 Retoma VRP Chile (cierre de la sesión nocturna S160, 2026-10-22 ~07:30 UTC). Antes de creerle a nada:
