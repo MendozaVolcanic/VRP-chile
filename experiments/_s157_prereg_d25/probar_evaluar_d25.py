@@ -241,6 +241,11 @@ def main():
     res_s = correr("sellada", escribir("sellada", dict(arms0, D=con_huella(mover(base, sel, "mitad")))), "V1", *V1,
                    extra=["--calibracion", "sellada"])   # S159: el default ya es la simétrica (sello D-27)
     print("   sellada (calibración 'ambos'): M %s | estado %s" % ({k: v for k, v in m_veredictos(res_s).items() if "750" in k}, res_s["estado"]))
+    # D-30, respuesta 4 (ADENDA_PLACEBO.md §5): con la calibración sellada el comparador no se aplica y el veredicto
+    # no vale para decidir; con la simétrica (mejora750, recién corrido) sí.
+    check("sellada_marca", res_s.get("vale_para_decidir") is False and "NO VALE PARA DECIDIR" in res_s["estado"]
+          and res.get("vale_para_decidir") is True,
+          "sellada vale_para_decidir %s | simétrica (mejora750) %s" % (res_s.get("vale_para_decidir"), res.get("vale_para_decidir")))
     res = correr("empeora750", escribir("empeora750", dict(arms0, D=con_huella(mover(base, sel, 1 / 20)))), "V1", *V1, extra=mej)
     mv = m_veredictos(res)
     check("empeora750", "EMPEORA" in (mv["M|VIIRS750|z<=40"], mv["M|VIIRS750|z>40"]) and res["estado"].startswith("DECIDE NICOLAS (M empeora"),

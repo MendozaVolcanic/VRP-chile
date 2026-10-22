@@ -218,3 +218,92 @@ def test_medianas_por_fila_coinciden_con_medianas_ponderadas():
     W = X.pesos_bloque([i // 3 for i in range(37)], n_boot=500, semilla=5)
     filas = np.repeat(d[None, :], 500, axis=0)
     assert np.array_equal(X.medianas_ponderadas_filas(filas, W), X.medianas_ponderadas(d, W))
+
+
+# ---------------------------------------------------------------- D-30 (respuestas de Nicolás, 2026-10-21) y guardas
+# ADENDA_PLACEBO.md §5. Cita textual de Nicolás: «Acepto tus recomendaciones para las cinco preguntas de la adenda D-28:
+# INDECIDIBLE si falla la calibración de d′, sólo la cola de mejora en esa calibración, la lectura del caso sellada como
+# el brazo a mitad de camino, el comparador apagado con --calibracion sellada, y los tres detalles numéricos.»
+# Las guardas de opción A y calibración de d′ responden a H3 del verificador con contexto limpio
+# (experiments/_s159/instrumentos/verificador_comparador/INFORME.md): tres mutaciones que ninguna prueba atrapaba.
+
+def _mitad_de_camino():
+    P = _pares(0.6, ruido=0.3)
+    for p in P:
+        p["d"] = p["k"] * (p["m"] / p["k"]) ** 0.5
+    return P
+
+
+def _calibracion_de_dprima_forzada(monkeypatch, f_mej, f_emp):
+    """La calibración de d′ (y sólo ésa, la de semilla SEMILLA + 3) devuelve las tasas que se le pidan; la de d no se
+    toca. Así se prueba qué hace la regla cuando la calibración de d′ falla sin depender de una semilla en el borde."""
+    original = X.calibrar_simetrico
+
+    def falsa(d, W, bloques, n_rep=X.N_CALIB, semilla=X.SEMILLA + 2):
+        if semilla == X.SEMILLA + 3:
+            return f_mej, f_emp, True
+        return original(d, W, bloques, n_rep=n_rep, semilla=semilla)
+    monkeypatch.setattr(X, "calibrar_simetrico", falsa)
+
+
+def test_si_d_mejora_y_la_calibracion_de_dprima_falla_queda_indecidible(monkeypatch):
+    """D-30, respuesta 1: si la calibración de d′ falla, no se sabe si hay MEJORA; como en D-27, el estrato no decide."""
+    _calibracion_de_dprima_forzada(monkeypatch, f_mej=0.5, f_emp=0.0)
+    ver, info = X.evaluar_m({E750: _mitad_de_camino()}, ok_ctrl=True, modo_calib="simetrica")
+    assert ver["M|%s" % E750] == "INDECIDIBLE", "falla la calibración de d′ y el estrato da %s" % ver["M|%s" % E750]
+    assert info["M|%s" % E750]["regla"] == "MEJORA", "sin poder: d no daba MEJORA"
+    assert info["M|%s" % E750]["calibrada_dprima"] is False
+
+
+def test_la_calibracion_de_dprima_solo_mira_la_cola_de_mejora(monkeypatch):
+    """D-30, respuesta 2: d′ sólo se usa para MEJORA, así que la cola EMPEORA de su calibración no decide."""
+    _calibracion_de_dprima_forzada(monkeypatch, f_mej=0.0, f_emp=0.5)
+    ver, info = X.evaluar_m({E750: _mitad_de_camino()}, ok_ctrl=True, modo_calib="simetrica")
+    assert "calibrada_dprima" in info["M|%s" % E750], "el comparador no se calculó"
+    assert ver["M|%s" % E750] == "MEJORA", "la cola EMPEORA de d′ apagó la MEJORA: %s" % ver["M|%s" % E750]
+    assert info["M|%s" % E750]["calibrada_dprima"] is True
+
+
+def test_la_opcion_a_se_aplica_sobre_dprima_y_no_sobre_d():
+    """Guarda (H3): Láscar va derecho a MIROVA (d′ negativa en todos sus pares) e Isluga y Tupungatito reciben
+    exactamente la ganancia ĝ (d′ = 0). d da MEJORA en los tres volcanes y d′ da MEJORA en el intervalo, pero d′ es
+    negativa en un solo volcán: la opción A sobre d′ tiene que dejarlo NEUTRO."""
+    # 48 pares de Láscar contra 8 de cada otro: con 18 contra 6 el intervalo de d′ toca 0 y la prueba no tendría poder
+    lascar = _pares(0.6, vols=("Lascar",), noches=24, ruido=0.3, semilla=2)
+    otros = _pares(0.6, vols=("Isluga", "Tupungatito"), noches=4, ruido=0.3, semilla=3)
+    c = float(np.median([np.log10(p["m"] / p["k"]) for p in lascar]))
+    for p in lascar:
+        p["d"] = p["m"]
+    for p in otros:
+        p["d"] = p["k"] * 10 ** c
+    ver, info = X.evaluar_m({E750: lascar + otros}, ok_ctrl=True, modo_calib="simetrica")
+    i = info["M|%s" % E750]
+    assert "regla_dprima" in i, "el comparador no se calculó"
+    assert i["regla"] == "MEJORA" and i["volcanes_con_d_negativa"] == 3, "sin poder: d no da MEJORA en los tres"
+    assert i["regla_dprima"] == "MEJORA" and i["calibrada_dprima"], "sin poder: d′ no da MEJORA en el intervalo"
+    assert i["volcanes_con_dprima_negativa"] == 1, "la opción A de d′ no cuenta con d′: %s" % i["volcanes_con_dprima_negativa"]
+    assert ver["M|%s" % E750] == "NEUTRO", "MEJORA de d′ sostenida por un volcán: %s" % ver["M|%s" % E750]
+
+
+def test_la_calibracion_de_dprima_usa_la_semilla_y_las_repeticiones_selladas():
+    """D-32 (ADENDA_PLACEBO.md §5.3), cita textual de Nicolás: «Sí: sube las repeticiones de la calibración de d′ (por
+    ejemplo a 1.000) y sella esa semilla y ese número antes del tag, para que una sola semilla no decida V2 VIIRS 750.»
+    Con 200, la semilla fija dejaba V2 VIIRS 750 z<=40 en 11 falsos de 200 contra un tope de 10 (H2 del verificador)."""
+    assert hasattr(X, "N_CALIB_DPRIMA"), "el número de repeticiones de la calibración de d′ no es una constante"
+    assert X.N_CALIB_DPRIMA == 1000, "repeticiones de d′ %s, sellado 1.000 (D-32)" % X.N_CALIB_DPRIMA
+    assert X.SEMILLA_CALIB_DPRIMA == 160 == X.SEMILLA + 3, "semilla de d′ %s, sellada 160 (D-32)" % X.SEMILLA_CALIB_DPRIMA
+    assert round(X.MAX_FALSOS_CALIB * X.N_CALIB_DPRIMA) == 50, "el tope por cola no es el 5 % de 1.000"
+
+
+def test_un_veredicto_con_la_calibracion_sellada_no_vale_para_decidir(tmp_path):
+    """D-30, respuesta 4: con --calibracion sellada el comparador no se aplica, así que ese veredicto no vale para
+    decidir y el JSON lo dice; combinar lo arrastra."""
+    assert hasattr(X, "validez_calibracion"), "falta la marca de validez del veredicto"
+    assert X.validez_calibracion("sellada")["vale_para_decidir"] is False
+    assert X.validez_calibracion("simetrica")["vale_para_decidir"] is True
+    a, b = tmp_path / "v1.json", tmp_path / "v2.json"
+    for f, v in ((a, "V1"), (b, "V2")):
+        f.write_text(json.dumps(dict({"ventana": v, "estado": "MEJORA", "mejora": True, "empeora": False},
+                                     **X.validez_calibracion("sellada"))), encoding="utf-8")
+    final = X.combinar([str(a), str(b)])
+    assert "NO VALE PARA DECIDIR" in final, final

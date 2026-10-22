@@ -102,7 +102,18 @@ PLACEBO_GANANCIAS = (1.2, 0.8)
 NOTA_COMPARADOR = "sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)"
 # D-28 §3: la calibración de d′ es la simétrica de D-27 con su propio sorteo (semilla distinta de la de d) y ĝ fijo en
 # su estimación puntual («la calibración prueba la regla bajo el nulo, no a ĝ»).
-SEMILLA_CALIB_DPRIMA = SEMILLA + 3
+# D-32 (ADENDA_PLACEBO.md §5.3), SELLADO antes del tag. Cita textual de Nicolás (2026-10-21): «Sí: sube las repeticiones
+# de la calibración de d′ (por ejemplo a 1.000) y sella esa semilla y ese número antes del tag, para que una sola
+# semilla no decida V2 VIIRS 750.» POR QUÉ: con 200 repeticiones, el verificador con contexto limpio
+# (experiments/_s159/instrumentos/verificador_comparador/INFORME.md, H2) midió que esta semilla deja V2 VIIRS 750 z<=40
+# en 11 falsos MEJORA de 200 contra un tope de 10: la cola binomial fijada por una semilla (con 20 semillas el mismo d′
+# falla en 1). Con 1.000 da 31 de 1.000 contra un tope de 50 (calib_dprima_1000_salida.txt). El tope sigue siendo el
+# 5 % por cola (MAX_FALSOS_CALIB). La semilla es 160 (SEMILLA + 3, la misma de b4258040c). La calibración de d (D-27)
+# no cambia: 200 repeticiones (N_CALIB).
+SEMILLA_CALIB_DPRIMA = SEMILLA + 3       # = 160, sellada (D-32)
+N_CALIB_DPRIMA = 1000                    # sellado (D-32)
+# D-30, respuesta 1: si d da MEJORA y la calibración de d′ falla, el estrato queda INDECIDIBLE (no se sabe si hay MEJORA).
+NOTA_CALIB_DPRIMA = "la calibración de d′ falla: no se sabe si D sube los pares correctos (ADENDA_PLACEBO.md §5, D-30)"
 # Detalle numérico, no de la regla: d′ se redondea a 1e-12 en unidades de log10 (un factor de 1 + 2,3e-12). Con D = K×g
 # exacto, d′ es 0 en la aritmética pero ±1e-16 en coma flotante, y una mediana de -1e-17 en todas las réplicas daría un
 # intervalo «entero bajo 0» sin ningún efecto (D-28 §3 i exige d′ idénticamente 0 para el placebo).
@@ -255,10 +266,11 @@ def comparar_con_ganancia(P, W, bloques):
       * ĝ puntual = mediana de log10(D/K) sobre los pares (§2.1). En cada réplica del bootstrap ĝ se recalcula con los
         MISMOS pesos por bloque que la mediana de d′ (§3, primer punto), así la incertidumbre de ĝ entra al intervalo.
       * Regla de D-27 sobre d′: intervalo al 95 % entero bajo 0; calibración simétrica de d′ (signo de d′ sorteado por
-        bloque, ĝ fijo en su estimación puntual, §3) con tope de 5 % por cola; las dos colas, como en un estrato que
-        decide; y mediana de d′ negativa en al menos dos volcanes con 3 pares o más (opción A).
+        bloque, ĝ fijo en su estimación puntual, §3) con tope de 5 % en la cola de MEJORA, la única que d′ usa (D-30,
+        respuesta 2); y mediana de d′ negativa en al menos dos volcanes con 3 pares o más (opción A).
       * ĝ por volcán se informa y no decide (§3, segundo punto).
-    Devuelve el detalle; `dprima_da_mejora` es la conjunción de las tres condiciones."""
+    Devuelve el detalle; `dprima_da_mejora` es la conjunción de las tres condiciones. Si la calibración falla y d da
+    MEJORA, decidir_estrato deja el estrato INDECIDIBLE (D-30, respuesta 1)."""
     K = np.array([p["k"] for p in P], dtype=np.float64)
     Dv = np.array([p["d"] for p in P], dtype=np.float64)
     M = np.array([p["m"] for p in P], dtype=np.float64)
@@ -272,8 +284,10 @@ def comparar_con_ganancia(P, W, bloques):
     meds = medianas_ponderadas_filas(Dp, W)
     lo, hi = float(np.percentile(meds, 2.5)), float(np.percentile(meds, 97.5))
     r_p = "MEJORA" if hi < 0 else "EMPEORA" if lo > 0 else "NEUTRO"
-    f_mej, f_emp, poder = calibrar_simetrico(dp, W, bloques, semilla=SEMILLA_CALIB_DPRIMA)
-    calibrada = f_mej <= MAX_FALSOS_CALIB and f_emp <= MAX_FALSOS_CALIB
+    f_mej, f_emp, poder = calibrar_simetrico(dp, W, bloques, n_rep=N_CALIB_DPRIMA, semilla=SEMILLA_CALIB_DPRIMA)
+    # D-30, respuesta 2: d′ sólo se usa para MEJORA, así que sólo se exige la cola de MEJORA (f_emp se informa). Es lo
+    # mismo que D-27 hace en el estrato que sólo bloquea: se exige la cola que puede decidir.
+    calibrada = f_mej <= MAX_FALSOS_CALIB
     vols_neg, vols_n, g_vol = 0, 0, {}
     for v_ in sorted({p["clave"].split("|")[0] for p in P}):
         sel = np.array([p["clave"].startswith(v_ + "|") for p in P])
@@ -431,11 +445,15 @@ def decidir_estrato(P, modo, modo_calib, ok_ctrl, comparador=True):
     # ---- D-28, el comparador (ADENDA_PLACEBO.md §2.3): un MEJORA de d cuenta sólo si d′ también da MEJORA
     if comparador and modo_calib == "simetrica" and modo != "informa":
         detalle.update(comparar_con_ganancia(P, W, bl))
-        if r_dec == "MEJORA" and not detalle["dprima_da_mejora"]:
+        if r_dec == "MEJORA" and not detalle["calibrada_dprima"]:
+            # D-30, respuesta 1: como en D-27, un estrato cuya calibración falla no decide; aquí d′ es condición
+            # necesaria del MEJORA, así que el estrato queda INDECIDIBLE (y con él la ventana, global_ventana).
+            r_dec = "INDECIDIBLE"
+            detalle["nota"] = "%s (falsos MEJORA de d′ %.3f, tope %.2f)" % (
+                NOTA_CALIB_DPRIMA, detalle["falsos_mejora_dprima"], MAX_FALSOS_CALIB)
+        elif r_dec == "MEJORA" and not detalle["dprima_da_mejora"]:
             r_dec = "NEUTRO"
-            detalle["nota"] = NOTA_COMPARADOR + (
-                "" if detalle["calibrada_dprima"] else "; la calibración de d′ falla (MEJORA %.3f, EMPEORA %.3f)" % (
-                    detalle["falsos_mejora_dprima"], detalle["falsos_empeora_dprima"]))
+            detalle["nota"] = NOTA_COMPARADOR
     return r_dec, detalle
 
 
@@ -595,6 +613,17 @@ def global_ventana(ver, ok_ctrl):
     return estado, mejora, empeora
 
 
+def validez_calibracion(calibracion):
+    """D-30, respuesta 4 (ADENDA_PLACEBO.md §5): con --calibracion sellada (el §5 original, anterior a D-27) el
+    comparador de D-28 no se aplica y ese modo aprobaría un placebo, así que su veredicto no vale para decidir. El JSON
+    lo dice en `vale_para_decidir`, y combinar lo arrastra (verificador con contexto limpio, pregunta 5.4)."""
+    if calibracion == "simetrica":
+        return {"vale_para_decidir": True, "motivo_validez": "calibración simétrica (D-27) con el comparador (D-28)"}
+    return {"vale_para_decidir": False,
+            "motivo_validez": "NO VALE PARA DECIDIR: calibración %s, anterior a D-27, sin el comparador de D-28; "
+                              "sólo para reproducir lo medido antes del sello" % calibracion}
+
+
 def peor(estados):
     return min(estados, key=lambda e: next((i for i, o in enumerate(ORDEN) if e.startswith(o)), 3))
 
@@ -631,6 +660,7 @@ def evaluar(a):
         "no se aplica con la calibración sellada (D-28 se escribió sobre D-27)",
         " y K x ".join(str(g) for g in PLACEBO_GANANCIAS)))
     res["calibracion"] = a.calibracion
+    res.update(validez_calibracion(a.calibracion))
     res["placebo"] = {"ganancias_informadas": list(PLACEBO_GANANCIAS), "comparador": a.calibracion == "simetrica"}
     ref = E.archivos_ref(cfg, tmp)
     res["referencia_ok"] = E.referencia_congelada(cfg["ref"], ref[2], False)
@@ -776,6 +806,8 @@ def evaluar(a):
     print("   P5:", json.dumps(res["P5"], ensure_ascii=False)[:600])
     if mov_prot:
         res["estado"] += " | auditoría espacial A61 pendiente (P4)"
+    if not res["vale_para_decidir"]:
+        res["estado"] += " | " + res["motivo_validez"]
     sg = sin_geometria(todas, ref, cfg["desde"], cfg["hasta"])
     res["sin_geometria"] = {k: {"MIROVA": m, "K": T[("K", "D")][k]["control"]["disp"], "D": T[("K", "D")][k]["brazo"]["disp"]}
                             for k, m in sorted(sg.items()) if len(T[("K", "D")].get(k, {})) == 2}
@@ -847,6 +879,8 @@ def combinar(archivos):
                  else final + " | P1b: protegidas que cruzan 1 MW, decide Nicolas")
     if any("A61" in e for v, e in estados):
         final += " | auditoría espacial A61 pendiente"
+    if any(r.get("vale_para_decidir") is False for r in rs):
+        final += " | NO VALE PARA DECIDIR: alguna ventana se evaluó con la calibración sellada (D-30)"
     print("== VEREDICTO COMBINADO: %s | por ventana %s" % (final, estados))
     return final
 
