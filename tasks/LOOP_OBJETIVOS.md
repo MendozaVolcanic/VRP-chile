@@ -565,7 +565,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-22 ~04:30 UTC (S160 nocturna): censo del oráculo V750 analizado, verificador corriendo
+### 2026-10-22 ~04:24 UTC (S160 nocturna): censo del oráculo V750 analizado, verificador corriendo
 - Run **39713438252** terminado (28 verdes, 4 rojos por 20 pasadas sin procesar declaradas, todas del 12-oct) y
   rescate **39715348772** (20 de 20 ok). El agente de S159 que lo diseñó ya no estaba vivo: corrí el analizador
   pre-registrado sin cambios de lógica (`1259ccc66` sólo toca la salida y se hizo antes de que terminara el run).
@@ -578,6 +578,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   (0 perdidas, 1 ganada, ΔE −90, rango −92 a −73). Con el rescate: 0 SIN DATO, ΔE −62 y −92, mismas etiquetas.
   Etiquetas descriptivas: no deciden adopción (ola 3, con pre-registro y sello).
 - Falta, como seguimiento: la lectura con la tabla de `latest.php` sola (el analizador no la da).
+- Corrección: el agente del censo seguía vivo. Comparó su corrida con la mía (mismo texto) y agregó al informe los
+  hallazgos C-1 a C-6 (`42e2b799a`, en el remoto). Dos que importan para la ola 3: (1) con el recuadro sensible el
+  oráculo **detecta 43 negativos y publica 15**: el filtro de distancia del tablero deja 28 como `far`; sin ese filtro
+  ΔE quedaría en −62 o menos, así que la ventaja depende del predicado del tablero; (2) el record sintético promedia la
+  posición de los píxeles y eso hace perder una alerta de Láscar (2026-08-26 05:48). La protegida de Chillán 05:18 del
+  rescate sale con 6,75 MW contra 8,44 de MIROVA. 324 pasadas no miran el volcán, no ven la cumbre o están partidas, y
+  nadie publica en ellas.
 
 ### 2026-10-22 ~03:47 UTC (S160 nocturna): auditoría de Mirova-v1 entregada
 - Sesión `audit-mirova-v1` terminada (sólo lectura, commit medido `c48d24cad8`). Informe y `hallazgos.csv` copiados a
