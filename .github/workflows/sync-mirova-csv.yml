@@ -115,6 +115,15 @@ jobs:
           done
           echo "all push attempts failed"; exit 1
 
+      - name: Fallar si el consolidado perdió llaves
+        # S160 (hallazgo 245 de docs/AUDIT_S160.md): la copia nueva ya se commiteó (avisa, no rechaza:
+        # rechazar puede congelar la referencia); la corrida queda en rojo para que la pérdida se vea.
+        # La lista de llaves perdidas está en el resumen del paso de descarga o del de push.
+        if: always() && ((steps.bajar.outputs.llaves_perdidas != '' && steps.bajar.outputs.llaves_perdidas != '0') || (steps.push.outputs.llaves_perdidas != '' && steps.push.outputs.llaves_perdidas != '0'))
+        run: |
+          echo "el consolidado de MIROVA perdió llaves de la copia vigente (bajar=${{ steps.bajar.outputs.llaves_perdidas }}, push=${{ steps.push.outputs.llaves_perdidas }})"
+          exit 1
+
       - name: Fallar si el OCR vino mal
         # Va DESPUES del push a proposito: el consolidado se sincroniza igual y la
         # corrida queda en rojo, que es la unica forma de que el fallo del canal
