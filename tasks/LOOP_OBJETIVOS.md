@@ -567,7 +567,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-22 ~06:20 UTC (S160 nocturna): auditoría S160 terminada; D-29 implementado en el evaluador
+### 2026-10-22 ~06:03 UTC (S160 nocturna): auditoría S160 terminada; D-29 implementado en el evaluador
 - **Auditoría S160** (sesión `auditor-a-s160-de-vrp-ch`) terminada: síntesis `docs/AUDIT_S160.md` en `s160-auditoria`
   (`b941c8052`), 27 marcas A113 en esa rama, cola de campo `docs/COLA_CAMPO.md`. En una pantalla: lo que está en
   producción se sostiene; el riesgo más cercano es una plataforma callada («Cobertura: completa» con código 0, 241, y
@@ -584,7 +584,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   de excepción en el resumen de `-q`, que no lo trae; con el XML de JUnit, 4 de 4, y la copia sin mutar pasa 5 de 5.
   Falta: `probar_evaluar_d25` y la suite (corriendo) y un verificador limpio del cambio, junto con el de D-42.
 
-### 2026-10-22 ~06:00 UTC (S160 nocturna): verificador de D-34: código fiel, regla de P2 descalibrada; tag de lectura NO creado
+### 2026-10-22 ~05:57 UTC (S160 nocturna): verificador de D-34: código fiel, regla de P2 descalibrada; tag de lectura NO creado
 - `experiments/_s159/instrumentos/verificador_d34/INFORME.md` (Fable 5.1; `786bfb288`). Las ocho afirmaciones
   CONFIRMADAS en el código: D-30 (INDECIDIBLE si d mejora y d′ no calibra; sólo la cola de mejora; marca de
   `--calibracion sellada`), D-32 (1.000 repeticiones, semilla 160, tope 50 por cola), D-34 (P2 por bloques con GANA,
@@ -602,7 +602,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 - Limpieza: quité los 5 enlaces (junctions) de `raiz_falsa` del verificador con `rmdir` (los destinos quedaron
   intactos) y su carpeta sintética `tmp_probar` (527 MB).
 
-### 2026-10-22 ~04:55 UTC (S160 nocturna): D-34 commiteado; verificador limpio corriendo; D-29 falta en el evaluador
+### 2026-10-22 ~04:54 UTC (S160 nocturna): D-34 commiteado; verificador limpio corriendo; D-29 falta en el evaluador
 - El agente de S159 subió **`c44709e27`** (P2 con bootstrap por bloques, D-34, y `ADENDA_GEMELO.md`): roja 11 de 11,
   verde 31 de 31, mutaciones 17 de 17 por aserción, suite 2.373 con árbol quieto, según su mensaje. Verificador con
   contexto limpio (Fable 5.1, high) sólo del diff `63e310af5..c44709e27`, con prohibición de tocar datos reales del
