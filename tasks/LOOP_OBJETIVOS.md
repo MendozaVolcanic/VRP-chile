@@ -558,6 +558,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): ⚠ Suomi NPP cesa el 2026-11-02; bibliografía entregada
+- **Suomi NPP deja de entregar datos el 2026-11-02 a las 13:00 UTC** (aviso NASA Earthdata del 21-oct, comprobado por el
+  coordinador en la fuente: «is still expected to cease at 13:00 Universal Time (UTC) on November 2, 2026», sujeto a
+  cambio; no dice si incluye NRT). Es una de las tres plataformas VIIRS (`VIIRS_SNPP`, `VIIRS_SNPP_750`). Frente
+  `experiments/_s159/cese_snpp/` lanzado: qué se apaga en silencio y qué preparar antes de esa fecha.
+- **Bibliografía** (`experiments/_s159/biblio_2026/`, `a861d4d15`, PNG y PDF fuera del repo): MODIS C6.1 con decomiso
+  anunciado (LAADS 199534) y C7 en paralelo, la 6.1 sigue produciendo; el hueco del 17 al 20 de octubre es de las
+  colecciones **Standard**, no de NRT (8 a 11 gránulos por día), lo que matiza la premisa «CMR no sirve Chile» (D-29
+  sigue en pie: los brazos de D25 usaron lo que había); el 12-13 sí tiene aviso de NASA (huecos de nivel 0). Matiza P2:
+  Coppola et al. 2022 (Front. Earth Sci. 10:964372, p. 4-5) dice que el 375 m sigue «the procedure already used for
+  MODIS (Coppola et al., 2015) and VIIRS (Campus et al., 2022)», y Aveni 2024 RSE p. 5 §3.2 da la grilla de 375 («regular
+  134 × 134 UTM grid centred on the volcano summit»); el interpolador sigue sin fuente. Coppola 2022 da k ≈ 7,16 para
+  I04 donde usamos 18,0 (validado). Fuentes 2026 no leídas: Aveni, Coppola y Laiolo 2026 RSE 10.1016/j.rse.2026.115626
+  (OA, bajarla a mano) y la tesis de Aveni (Sapienza).
+
 ### 2026-10-21 (S159, dueña del loop): negativo con cráter, código OSF, verificador del oblicuo; guía y censo del oráculo lanzados
 - **Negativo limpio con cráter** (`experiments/_s159/negativo_crater/`, `33532e4ac`): hipótesis REFUTADA. Exigir que el
   gránulo de MIROVA tenga el cráter sólo saca denominador (K publica 0 veces en esas pasadas en las ventanas del
