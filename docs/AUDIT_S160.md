@@ -116,7 +116,7 @@ guarda G6 exige.
 | 4 | El recorte a cero de VIIRS 750 (203) | no arreglarlo aislado (mueve publicación en los dos sentidos). Es la divergencia D25, abierta y con su A/B en #890: que esa lectura informe aparte los cúmulos de cumbre en 0 MW (30 de 97 en V750, 7 con alerta de MIROVA); C-08 se mira antes |
 | 5 | Llevar a `main` lo de S157 a S159 (V0a-01, V4-01) | sí, y pronto: hoy el `CLAUDE.md` que carga cada sesión desde OneDrive no tiene ninguna marca de S157 ni S158. Mapa en §9 |
 | 6 | Reabrir D18 y D22 (180, 182) | no reabrirlos por S160 (los tres hallazgos de F1b bajaron a gravedad 2); sí mirar C-10 antes de dar D18 por vetada, porque el veto cuelga de una alerta de 1,00 MW |
-| 7 | Guardas de la referencia (245) y del token en `nrt.yml` (247) | sí; son workflows, no pipeline, pero tocan producción: con tag y tu sí (A45) |
+| 7 | Guardas de la referencia (245) y del token en `nrt.yml` (247) | la del token ya está en #894. La de la referencia es decisión tuya, porque rechazar una copia más corta puede congelar la referencia: la sesión del sync (#895) ya hace que un 200 vacío o con HTML no se commitee y movió la descarga a `scripts/sync_mirova_csv.sh` (bloque «Consolidado»); lo que queda es el encogimiento con cabecera válida, y la guarda tiene que comparar las llaves salientes contra la copia vigente, no contar filas (1 de los 7 encogimientos no pierde filas). Recomendación: que avise y no rechace, con un PR propio después de #895 |
 | 8 | Dónde vive la cola de campo | `docs/COLA_CAMPO.md`, abierta en esta rama con 10 casos; la mantiene la síntesis de cada auditoría |
 | 9 | K1 del código de MIROVA y el tope D9 (V0b-01) | no adoptar el K1 de -0,7 sin resolver antes que no tope una protegida |
 
