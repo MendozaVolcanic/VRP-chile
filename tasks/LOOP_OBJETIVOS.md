@@ -558,6 +558,22 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): negativo con cráter, código OSF, verificador del oblicuo; guía y censo del oráculo lanzados
+- **Negativo limpio con cráter** (`experiments/_s159/negativo_crater/`, `33532e4ac`): hipótesis REFUTADA. Exigir que el
+  gránulo de MIROVA tenga el cráter sólo saca denominador (K publica 0 veces en esas pasadas en las ventanas del
+  auto-audit y de N; 1 en la larga): la tasa de K sube 0,01 a 0,07 puntos. F sigue en +12. La regla sólo hace falta si
+  alguien ensancha el pareo (con ±390 s K pasaría de 48/113/60 a 52/122/64 falsas). VIIRS 375 en negativos: 3,7 %.
+- **Código OSF entero** (`experiments/_s159/osf_codigo/`, `d6ae7bb11`): 42 pasos, 12 iguales, 22 distintos, 7 sólo
+  suyos; 24 de los 29 no iguales ya tienen D o frente. El código no dice nada del gránulo (recibe la matriz ya
+  remuestreada; la elección del sur pasa antes). Sin frente: sun-glint < 12° (no existe en nuestro lado, pesa con D-10),
+  el segundo pase sin adyacencia, y tres de gravedad 1. OSF sin novedades desde julio.
+- **Verificador del oblicuo**: el 0,996 NO es tautológico (barajado dentro del volcán [0,17; 4,13]; otra pasada de la
+  noche 9 de 78 en rango contra 38 de 45 pareadas) pero mide RÉPLICA, no física: **MIROVA también tiene el déficit
+  oblicuo** (pasada más oblicua sobre menos oblicua de la misma noche: MIROVA 0,503, oráculo 0,517, K 0,239; nulo 1,054).
+  Fuera de Chillán sobre 50° n 3. Candidata §12: corregir la dilución oblicua en el experimental.
+- Lanzados: **integración de la guía de auditorías** (A + B a `GUIA_MAESTRA_AUDITORIAS.md`, repo `workspace-guias`) y
+  **censo del oráculo** sobre los 5.476 negativos limpios VIIRS 750 (rama `s159-oraculo-censo` en `C:\vrp-trabajo\s159-m`).
+
 ### 2026-10-21 (S159, dueña del loop): gemelo de D25 medido; oblicuo y prompting entregados
 - **Gemelo de D25** (`experiments/_s159/gemelo_d25/INFORME.md`): K, K' y D corren en el mismo job, en serie y sobre la
   misma CPU; K' es copia bit a bit de K (0 de 4.610 pasadas con publicación o `pc.vrp_mw` distintos en V1, en los cuatro
