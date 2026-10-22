@@ -84,7 +84,7 @@ def _oraculo(contrib):
 def _calibracion_forzada(monkeypatch, f_gana, f_pierde, f_bloquea=0.0):
     """La calibración de P2 devuelve las tasas pedidas: prueba qué hace la regla en el borde sin depender de una semilla."""
     _tiene("calibrar_p2")
-    monkeypatch.setattr(X, "calibrar_p2", lambda *a, **k: (f_gana, f_pierde, f_bloquea))
+    monkeypatch.setattr(X, "calibrar_p2", lambda *a, **k: (f_gana, f_pierde, f_bloquea, N_SORTEOS, SEMILLA_CALIB))
 
 
 # ---------------------------------------------------------------- la calibración (adenda §2)
@@ -173,7 +173,54 @@ def test_sin_sustrato_y_controles_caidos_no_se_calibran_pero_informan():
         for campo in CAMPOS_CALIB:
             assert campo in det, "sin %s en el detalle cuando P2 da %s" % (campo, esperado)
         assert det["calibrada"] is None and det["falsos_gana"] is None, det
+        assert det["n_sorteos"] is None and det["semilla_calibracion"] is None, "sin calibración no hubo sorteos: %s" % det
         assert det["resultado_sin_calibrar"] == esperado, det
+
+
+def test_el_detalle_dice_los_sorteos_y_la_semilla_que_la_calibracion_uso(monkeypatch):
+    """V42-04 (verificador de D-42): n_sorteos y semilla_calibracion tienen que salir de lo que calibrar_p2 usó, no de
+    las constantes; si no, una llamada con otros números seguiría declarando 1.000 y 161 (A116)."""
+    _tiene("calibrar_p2")
+    original = X.calibrar_p2
+
+    def otra(c, bloques, W, n_rep=None, semilla=None):
+        return original(c, bloques, W, n_rep=20, semilla=7)
+    monkeypatch.setattr(X, "calibrar_p2", otra)
+    v, det = X.decidir_p2_bloques(_contrib(MEZCLA), ok_ctrl=True)
+    assert (det["n_sorteos"], det["semilla_calibracion"]) == (20, 7), det
+
+
+def _armar_p2_tres_noches():
+    """Tres noches de Láscar en VIIRS 375 con cuatro pasadas cada una en que D publica un negativo limpio y K no: doce
+    errores sólo de D. Sin calibrar es PIERDE (todas las noches del mismo lado); calibrada, las tres noches caen del
+    mismo lado en 1 de cada 4 sorteos y la calibración falla: INDECIDIBLE."""
+    def fila(pub, lab, disp=0.0):
+        return {"pub": pub, "lab": lab, "disp": disp, "vrp_ref": None, "z": 20.0, "plataforma": "NOAA20",
+                "pc_lat": None, "pc_lon": None}
+    T, R = {}, {"K": {}, "D": {}}
+    for n in range(3):
+        for j in range(4):
+            k = "Lascar|VIIRS375|2026-09-%02d 05:%02d" % (n + 1, 10 * j)
+            T[k] = {"control": fila(False, "neg_limpio"), "brazo": fila(True, "neg_limpio", 0.3)}
+            R["K"][k], R["D"][k] = {"pc_vrp": 0.0, "dc": "summit"}, {"pc_vrp": 0.3, "dc": "summit"}
+    prot = {k: {"A": False, "B": False, "alerta_solo_ocr": False} for k in T}
+    cfg = {"brazos": ("K", "D"), "solo_tabla": True, "desde": "2026-09-01", "hasta": "2026-09-30"}
+    res_ctrl = {"controles_ok": True, "cableado": {"K": True, "D": True}}
+    return {("K", "D"): T}, prot, R, cfg, res_ctrl
+
+
+def test_contar_publica_el_veredicto_calibrado_y_no_el_sin_calibrar():
+    """V42-02 (verificador de D-42, su m07): la calibración decide en un solo punto, el valor que contar escribe en
+    ver["P2|sensor"], que es lo que lee global_ventana. Si contar escribiera el resultado sin calibrar, D-42 quedaría
+    sin efecto; esta prueba lo mira en contar y en la ventana, no en decidir_p2_bloques aislada."""
+    _tiene("calibrar_p2")
+    T, prot, R, cfg, res_ctrl = _armar_p2_tres_noches()
+    ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Lascar": 5.0})
+    i = info["P2|VIIRS375"]
+    assert i.get("resultado_sin_calibrar") == "PIERDE" and i.get("calibrada") is False, "sin poder: %s" % i
+    assert ver["P2|VIIRS375"] == "INDECIDIBLE", "contar publica %s con la calibración fallida" % ver["P2|VIIRS375"]
+    estado = X.global_ventana(_completar(ver), True)[0]
+    assert estado == "INDECIDIBLE", estado
 
 
 def test_con_muchas_noches_la_calibracion_pasa_y_decide():

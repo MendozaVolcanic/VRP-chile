@@ -470,7 +470,8 @@ def calibrar_p2(c, bloques, W, n_rep=N_CALIB_P2, semilla=SEMILLA_CALIB_P2):
     de D-34 (pesos_bloque con 10.000 remuestreos y semilla 157; depende sólo de los bloques, que el sorteo no cambia).
     POR QUÉ por bloque: bajo el nulo D y K son intercambiables dentro de una noche, y cambiar los brazos de una noche
     invierte todas sus contribuciones a la vez (§2.1; el mismo sorteo que calibrar_simetrico hace para M).
-    Devuelve las fracciones de sorteos con GANA, PIERDE y BLOQUEA (falsos GANA, falsos PIERDE, falsos BLOQUEA)."""
+    Devuelve las fracciones de sorteos con GANA, PIERDE y BLOQUEA (falsos GANA, falsos PIERDE, falsos BLOQUEA), y el
+    número de sorteos y la semilla que usó de verdad (V42-04: el detalle los declara desde aquí, no desde las constantes)."""
     rng = np.random.default_rng(semilla)
     c = np.asarray(c, dtype=np.float64)
     bl = list(bloques)
@@ -483,7 +484,7 @@ def calibrar_p2(c, bloques, W, n_rep=N_CALIB_P2, semilla=SEMILLA_CALIB_P2):
         sumas = Wf @ C.T
         for j in range(C.shape[0]):
             cuenta[regla_p2(sumas[:, j], int(round(C[j].sum())))[0]] += 1
-    return cuenta["GANA"] / n_rep, cuenta["PIERDE"] / n_rep, cuenta["BLOQUEA"] / n_rep
+    return cuenta["GANA"] / n_rep, cuenta["PIERDE"] / n_rep, cuenta["BLOQUEA"] / n_rep, int(n_rep), int(semilla)
 
 
 def decidir_p2_bloques(contrib, ok_ctrl):
@@ -498,9 +499,10 @@ def decidir_p2_bloques(contrib, ok_ctrl):
     neto = int(round(c.sum())) if len(c) else 0
     det = {"neto": neto, "n_discordantes": len(c), "noches_discordantes": len(set(bl_p2)), "ic95": None,
            "regla": "D-34: neto de errores (D menos K) con intervalo por bloques noche-volcán; calibrada por D-42",
-           # D-42 §2.7: se informa siempre; sin calibración (controles caídos o sin sustrato) los falsos quedan en None
+           # D-42 §2.7: se informa siempre; sin calibración (controles caídos o sin sustrato) los falsos, los sorteos y
+           # la semilla quedan en None (V42-04: sorteos y semilla son los que calibrar_p2 usó, no las constantes)
            "resultado_sin_calibrar": None, "calibrada": None, "falsos_gana": None, "falsos_pierde": None,
-           "falsos_bloquea": None, "n_sorteos": N_CALIB_P2, "semilla_calibracion": SEMILLA_CALIB_P2,
+           "falsos_bloquea": None, "n_sorteos": None, "semilla_calibracion": None,
            "tope_por_cola": MAX_FALSOS_CALIB, "nota_calibracion": ""}
     if not ok_ctrl:
         det["resultado_sin_calibrar"] = "INDECIDIBLE"
@@ -513,10 +515,10 @@ def decidir_p2_bloques(contrib, ok_ctrl):
     W = pesos_bloque(bl_p2)
     v, lo, hi = regla_p2(W @ c, neto)
     det["ic95"] = [lo, hi]
-    f_gana, f_pierde, f_bloquea = calibrar_p2(c, bl_p2, W)
+    f_gana, f_pierde, f_bloquea, n_usados, semilla_usada = calibrar_p2(c, bl_p2, W)
     calibrada = f_gana <= MAX_FALSOS_CALIB and f_pierde <= MAX_FALSOS_CALIB
     det.update(resultado_sin_calibrar=v, calibrada=bool(calibrada), falsos_gana=f_gana, falsos_pierde=f_pierde,
-               falsos_bloquea=f_bloquea)
+               falsos_bloquea=f_bloquea, n_sorteos=n_usados, semilla_calibracion=semilla_usada)
     if not calibrada:
         det["nota_calibracion"] = "%s (falsos GANA %.3f, PIERDE %.3f, tope %.2f por cola)" % (
             NOTA_CALIB_P2, f_gana, f_pierde, MAX_FALSOS_CALIB)
@@ -1039,7 +1041,7 @@ def imprimir(regla, ver, info, estado):
                   s, ver["P2|%s" % s], i2["neto"], i2["ic95"], i2["n_discordantes"], i2["noches_discordantes"],
                   i2["suma_K"], i2["suma_D"], i2["noches_con_error_K"], i2["noches_con_error_D"]))
         print("      calibración D-42: %s | sin calibrar %s | falsos GANA %s PIERDE %s (tope %.2f por cola), BLOQUEA %s "
-              "(informa) | %d sorteos, semilla %d%s" % (
+              "(informa) | %s sorteos, semilla %s%s" % (
                   {True: "OK", False: "FALLA: INDECIDIBLE", None: "no corre"}[i2["calibrada"]], i2["resultado_sin_calibrar"],
                   i2["falsos_gana"], i2["falsos_pierde"], i2["tope_por_cola"], i2["falsos_bloquea"], i2["n_sorteos"],
                   i2["semilla_calibracion"], (" | " + i2["nota_calibracion"]) if i2["nota_calibracion"] else ""))
