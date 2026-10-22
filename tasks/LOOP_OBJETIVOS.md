@@ -558,6 +558,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): referencia inestable; guía de auditorías mejorada y en git; diseño de S160
+- **Estabilidad de la referencia** (`experiments/_s159/referencia_estable/`, `8c5db502c`, SIN VERIFICAR, verificador
+  corriendo): la tabla nunca cambia una fila pero las PIERDE (1.948 filas pasadas en 60 días, 14 protegidas); la unión
+  histórica recupera 1.946 con 1 a 50 días de atraso; el OCR SÍ reescribe (39 alertas a FALSO_POSITIVO_OCR, 30
+  protegidas, distancia de 0-2 a 10-33 km sin cambiar fecha), contra el «sin reproceso retroactivo» de A119 y del mapa de
+  bases S139. Recomienda congelar la referencia por hash en todo A/B (aplica a la relectura de D25).
+- **Guía de auditorías mejorada** y versionada: `GUIA_MAESTRA_AUDITORIAS.md` de 214 a 442 líneas (commit `31b70f1` en
+  `MendozaVolcanic/workspace-guias`, privado): §3b de experimentos comparativos, §5 de prompting reescrita (bloque de
+  autonomía oficial, tabla única de modelo y esfuerzo, bloque del verificador), reglas nuevas. Informe de integración en
+  `experiments/_s159/guia_auditorias/C_INTEGRACION.md` (`e32b58265`), con cambios propuestos al preámbulo de VRP (P1 a P8,
+  ruta `_s134_audit` vencida): van en un PR del repo, con el sí de Nicolás.
+- Orden acordado con Nicolás («me parece ese orden»): guía primero, después diseño de la auditoría S160 con la guía nueva.
+  Diseño encargado (borrador `docs/PLAN_AUDITORIA_S160.md` en `s159-pruebas`); se presenta antes de lanzar nada.
+
 ### 2026-10-21 (S159, dueña del loop): ⚠ Suomi NPP cesa el 2026-11-02; bibliografía entregada
 - **Suomi NPP deja de entregar datos el 2026-11-02 a las 13:00 UTC** (aviso NASA Earthdata del 21-oct, comprobado por el
   coordinador en la fuente: «is still expected to cease at 13:00 Universal Time (UTC) on November 2, 2026», sujeto a
