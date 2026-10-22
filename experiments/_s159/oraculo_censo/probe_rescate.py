@@ -67,7 +67,9 @@ def bajar_laads(nombre_viejo, destino):
         nom = [n for n in listar(pref, tipo, anio, dia) if f".{tag}." in n and n.endswith(".nc")]
         if len(nom) != 1:
             return None, f"laads_{tipo}_candidatos_{len(nom)}"
-        url = f"{BASE}/{COL[pref]}/{pref}{tipo}MOD/{anio}/{dia}/{nom[0]}"
+        # El archivo se baja de la nube de LAADS, la misma URL que CMR da a produccion (data.laadsdaac...): el
+        # /archive/allData/ redirige al login de URS y devolvio una pagina de 10 KB (run 39714551225).
+        url = f"https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/{pref}{tipo}MOD/{nom[0]}"
         # La primera version (requests con Bearer) recibio 200 con 0,0 MB: una pagina, no el archivo (run 39713687687).
         # Se baja con la sesion autenticada de earthaccess (pipeline.fetch.auth, por token) y se verifica la firma HDF5.
         import earthaccess
