@@ -104,6 +104,19 @@ Trabajo, en orden (lo que necesite el sí de Nicolás, sólo si ya lo dio):
   del cambio; recién entonces tag de lectura y relectura de D25 con la referencia congelada por hash, informando
   también la tabla de latest.php sola. Nunca leas el veredicto antes del tag.
 - D-43 (auditoría S160) y D-39 a D-41 (Mirova-v1): aplicar sólo lo que Nicolás apruebe, cada uno con tag y prueba.
+- PEDIDO EXPLÍCITO DE NICOLÁS (2026-10-22, para esta sesión): «vuelve a mostrarme los mapas pero con la imagen
+  satelital por detrás en algún artefacto donde podamos hacer zoom, veamos qué tan persistentes son; puedes revisar
+  también datos durante el año, lo diurno parece ser no tan fiable, y revisamos si realmente son persistentes.»
+  Base: experiments/_s160_espacial/ (leer primero verificador/INFORME.md y el README) y
+  experiments/_s160_espacial_mapa/. Hacer: un Artifact con mapa interactivo (Leaflet sobre imagen satelital, con
+  zoom) por volcán (Tupungatito, Cordón Caulle, Isluga): cráter, centro de la imagen de MIROVA, caja de cumbre y
+  anillo de MIROVA (21 × 19, asimétrico, como lo midió el verificador), nuestro radio interno, nuestros cúmulos
+  publicados en noches limpias y con alerta, y los focos recurrentes. Persistencia: contar cada foco por mes durante
+  todo el año, SEPARANDO noche y día (el MIR diurno se contamina con reflejo solar, A76; la «fuente» del E de Cordón
+  Caulle resultó ser 13 de 15 TIF diurnos del 9 al 18-may), con los TIF de MIROVA (hasta el 2026-09-21) y nuestros
+  records nocturnos de todo el año. Revisar también VE-01 (protegida de Tupungatito 2026-09-29 04:54 con nuestro píxel
+  a 9,42 km ENE) y VE-02 (Cordón Caulle 2026-10-21 lejos del cráter) en las imágenes de MIROVA. Leer el skill
+  artifact-design antes de escribir el artefacto; publicar el artefacto y dar además su ruta local.
 
 Reglas duras: nada en pipeline/, data/ ni frontend/ sin tag y sí de Nicolás (A45); sólo EARTHDATA_TOKEN (A71);
 nada de gh run watch ni bucles de gh; disco justo (C: 13 GB, D: 8,3 GB al cierre; parada bajo 3 GB); git add por
