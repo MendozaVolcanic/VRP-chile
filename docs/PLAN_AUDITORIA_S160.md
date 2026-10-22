@@ -1,6 +1,7 @@
 # Plan de auditoría S160: los instrumentos, las unidades, lo que vence y los cierres con número
 
-> **Estado: BORRADOR, sin lanzar.** Escrito el 2026-10-21 (S159) para que Nicolás lo apruebe. Es la primera auditoría
+> **Estado: APROBADO y revisado antes del sello (2026-10-22, §11).** Lo que cambió respecto del borrador está en el
+> §11 y manda sobre el texto de arriba donde choquen. Borrador original: escrito el 2026-10-21 (S159) para que Nicolás lo apruebe. Es la primera auditoría
 > diseñada con la guía nueva `C:\Users\nmend\OneDrive\Escritorio\claude\GUIA_MAESTRA_AUDITORIAS.md` (442 líneas; el
 > commit `31b70f1` del repo `workspace-guias` lo da el coordinador, no lo comprobé) y su plantilla
 > `C:\Users\nmend\OneDrive\Escritorio\claude\PLANTILLA_CAZA_DE_BRECHAS.md`. El §10 lista lo que la guía no me dio y
@@ -213,9 +214,12 @@ pesado, `D:\vrp-trabajo\temporales\s160_audit\<frente>\` (fuera del repo).
 - **Criterio.** Una tabla dependencia · tipo · fecha de vencimiento (con fuente y fecha de consulta, o SIN FECHA) · qué
   la consume (archivo:línea) · qué se apaga si cae · cómo falla, **medido** con simulación (error, aviso o silencio) ·
   vigilante que existe · umbral del vigilante medido contra datos. Es hallazgo toda dependencia que falle en silencio y
-  toda fecha sin vigilante. Se mide sobre `origin/main` y, aparte, sobre la rama de PR #889 (worktree
-  `C:\vrp-trabajo\s159-instrumentos`, según el bloque de arranque S159), porque esa rama dice traer arreglos de
-  instrumento que no están mergeados (SOSPECHA hasta leerla).
+  toda fecha sin vigilante. Se mide sobre `origin/main` y, aparte, sobre la rama de PR #889
+  (`origin/s159-instrumentos`, cabeza `d0968e389` al sellar; se lee con `git show`, no tiene worktree propio: el
+  worktree `C:\vrp-trabajo\s159-instrumentos` está hoy en la rama `s159-cese-snpp`), porque esa rama dice traer
+  arreglos de instrumento que no están mergeados (SOSPECHA hasta leerla). **Revisión del sello, §11**: el arreglo de
+  Suomi NPP ya está en curso en la rama `s159-cese-snpp` (otra sesión); F3 lo audita y no propone el mismo arreglo, y
+  el código del scraper Mirova-v1 lo audita otra sesión (`audit-mirova-v1`): F3 mide sólo cómo lo consume VRP.
 - **Límites propios.** Sin autenticación contra Earthdata desde esta máquina (A71: la cuenta se bloquea). CMR sólo con
   búsquedas públicas, hasta 150 consultas. GitHub, desde el archivo de insumos del orquestador (§5), y hasta 10
   llamadas propias. Ninguna simulación toca `data/`: corre con `data_subdir` en CARPETA o sin escritura.
@@ -650,3 +654,71 @@ Cada punto dice qué faltaba o estaba mal, qué decidí y dónde está en el pla
     abre una cola; VRP no la tiene (C_INTEGRACION §2). Decidí que la abra la síntesis en vez de un frente (§7).
 19. **Costo.** La guía no da cómo estimar el costo de una auditoría ni registra consumos. Lo di en horas-agente sin
     base medida y agregué el registro del §7 para que la próxima tenga datos.
+
+## 11. Revisión antes del sello (2026-10-22, orquestador de S160)
+
+Nicolás aprobó lanzar con la instrucción de mejorar el método antes. Revisé el borrador con la regla A111 (un cierre o
+un plan hereda las premisas con que se escribió) y con lo aprendido el 2026-10-21 en otras ramas. Lo que sigue manda
+sobre el texto de arriba donde choquen.
+
+### 11.1 Hechos nuevos que el borrador no tenía
+
+1. **La referencia no es una sola.** La tabla `latest.php` (canal CONS, el consolidado del scraper) pierde filas por una
+   carrera de workflows en el scraper Mirova-v1 (1.948 bajas netas en 6 tandas, 14 protegidas, según
+   `experiments/_s159/referencia_estable/verificador/INFORME.md` §1), y el OCR tiene 39 reescrituras que son
+   correcciones manuales documentadas de Nicolás (mismo informe). Nicolás considera la tabla lo más creíble y pide
+   **informar siempre la tabla sola además del combinado** (memoria del proyecto, `feedback_s159_latest_php_mas_creible`).
+2. **`scripts/clase_mirova.py::alerta_protegida` (l. 65 a 78 en `d516b9d8c`) mira sólo la fila que recibe**: con
+   lectura A, una fila OCR de tipo alerta y 1 MW o más es protegida aunque la tabla tenga para esa pasada una fila
+   FALSO_POSITIVO (según el coordinador; la función no cruza canales, leído por mí: si el que la llama tampoco lo hace,
+   el efecto es ese; SOSPECHA hasta trazar a los que la llaman). Es un insumo compartido del criterio de K (fila R17).
+3. **Suomi NPP cesa el 2026-11-02 13:00 UTC y el arreglo ya está en curso** en la rama local `s159-cese-snpp`
+   (worktree `C:\vrp-trabajo\s159-instrumentos`, otra sesión, sin push al sellar: `git ls-remote origin s159-cese-snpp`
+   vacío). La decisión 1 del §9 queda tomada. F3 lee ese worktree sin tocarlo, fecha lo que vio y no propone el mismo
+   arreglo.
+4. **El scraper Mirova-v1 lo audita otra sesión** (`audit-mirova-v1`). F1 y F3 no auditan su código; miden cómo lo
+   consume VRP. Lo que vean del scraper va a SEGUIMIENTOS.
+5. **El preámbulo corregido es la copia de `main` de un PR propio** (rama `s160-preambulo`), no la del §6.1: se le
+   agregaron la tabla de huecos con la regla `grep -nE "«[A-Z_]+»"` antes de lanzar, el bloque de autonomía oficial de
+   Fable 5.1 textual con sus paradas y un hueco `«LIMITES_DE_RECURSOS»`, y el bloque del verificador con `caminos.md`
+   y su sha256. Los auditores de S160 llevan esa versión entera. La decisión 5 del §9 queda tomada así.
+6. **Los datos del worktree no son los de `main`** (`git diff --quiet d516b9d8c -- data/mirova_equivalent
+   latest_consolidado.csv data/mirova_reference` sale con 1). Se extrajeron con `git archive` a
+   `D:\vrp-trabajo\temporales\s160_audit\main\data\` (179 MB); es la única copia de datos que leen los agentes.
+7. **PR #889** está en `origin/s159-instrumentos` (`d0968e389`), sin worktree propio; se lee con `git show`.
+
+### 11.2 Cambios al método
+
+1. **La vara lleva dos referencias.** Toda cifra de paridad (alerta, protegida, negativo limpio, recall) se informa con
+   la tabla sola y con el combinado tabla más OCR, las dos desde la copia congelada de `d516b9d8c` con su sha256. Un
+   veredicto que cambia de signo entre las dos es hallazgo por sí mismo (fila R14).
+2. **F1 se parte en dos**, porque el borrador le pedía a un solo agente medición profunda de unos 25 instrumentos en
+   tres horas, y el que sostiene producción (K) merece un agente propio:
+   - **F1a, prioridad A y los compartidos** (IDs 161 a 179): la regla con que se adoptó K
+     (`experiments/_s151_prereg_fk_11/`) con medición profunda (placebo, barajado, borrado de un día) y **el veredicto
+     de K recalculado con la tabla sola** sobre la misma referencia congelada; `banco_paridad.py`, `clase_mirova.py`
+     (incluido el punto 11.1.2), `calidad_referencia_mirova.py`, `libro_de_cuentas.py` y el auto-audit, con la
+     reimplementación independiente de `etiquetar` (H1b). Controles positivos del barrido: (a) y (b) del F1 original.
+   - **F1b, prioridad B y C** (IDs 180 a 199): la matriz completa, con medición profunda en los de evaluador en código
+     que cerraron un frente que sigue cerrado. Controles positivos: (c) y (d) del F1 original. Pendientes de entrada:
+     F5-03 a F5-07.
+   F1a y F1b no comparten carpeta; lo que uno encuentre del otro va a SEGUIMIENTOS.
+3. **La fila R7 la fija Nicolás antes de lanzar F1a y F1b**, en un commit aparte de este plan («SHA_PLAN_F1»). F2, F3
+   y F4 no usan R7 y se lanzan con «SHA_PLAN». Recomendación que se le lleva: mantener el 5 % convencional, pero con
+   1.000 barajados en vez de 200 (con 200, el error de una fracción cercana al 5 % es de 1,5 puntos y el corte no se
+   distingue del azar), y llamar FALLA sólo si el intervalo de 95 % de la fracción queda entero sobre el 5 %; si lo
+   cruza, SIN PODER CONCLUYENTE, que no es OK.
+4. **Olas, rehechas**: ola 1 con F2, F3 y F4 (no dependen de R7); ola 2 con F1a y F1b en cuanto Nicolás fije R7, y
+   F0a y F0b; los verificadores en cuanto termina su auditor, con tope de cuatro agentes a la vez. V1 se parte en V1a y
+   V1b. Total: once agentes de auditoría o verificación de pendientes y verificadores, más la síntesis.
+5. **Modelos.** Auditores Fable a `high` como en el borrador, con `Please remove all mannered prose.`; verificadores
+   Opus a `high`. F0a (verifica lo que encontró Opus) Fable; F0b (verifica lo de Fable) Opus.
+6. **Archivo de insumos**: `experiments/_s160_audit/insumos/` (hora del servidor, rate limit, commits de Mirova-v1 y
+   VRP-chile, 50 corridas de `nrt.yml` y de `sync-mirova-csv.yml`, nombres y fecha de los secretos, PR abiertos),
+   bajado una vez por el orquestador el 2026-10-22 03:11 UTC. `LEEME.md` ahí dice dónde está cada cosa.
+
+### 11.3 Lo que no cambié y por qué
+
+- Las filas R1 a R6 y R8 a R17, los criterios de F2, F3 y F4 y la escala de gravedad: están bien planteados y
+  cambiarlos ahora sería ajustar la vara antes de ver datos sin motivo.
+- No agregué el frente por uso (decisión 3): sigue siendo de Nicolás.
