@@ -19,7 +19,11 @@ probar_evaluar_d25.py), con los días de D-29 excluidos. Ventana tipo V2: 2026-0
 cuántas pasadas publica K y no D en la tabla (tiene que ser el 1 % pedido, salvo las de días excluidos); (2) si el
 evaluador cayera, la semilla se marca CAIDO y no se cuenta.
 
-Uso: python placebo_1pct.py <tmp> <ventana V1|V2> <n semillas> [salida.jsonl]
+Uso: python placebo_1pct.py <tmp> <ventana V1|V2> <n semillas> [salida.jsonl] [fraccion, 0.01 por defecto]
+
+Después del verificador de D-42 (V42-01): con el 1 % la calibración casi no corrió (SIN SUSTRATO), así que el mismo
+script se corre también con el 5, el 10 y el 20 % (curva), y resumir_placebo.py informa por punto cuántas celdas
+(semilla x regla x sensor) llegaron a calibrarse.
 """
 import collections
 import copy
@@ -41,7 +45,7 @@ import sustrato_k as S  # noqa: E402
 VOLS = ["Lascar", "Isluga", "NevadosDeChillan", "Lastarria", "Villarrica", "PuyehueCordonCaulle", "Tupungatito"]
 VENT = {"V1": ("2026-09-18", "2026-10-18", ("K", "G", "D"), VOLS),
         "V2": ("2026-04-01", "2026-06-12", ("K", "D"), [v for v in VOLS if v != "NevadosDeChillan"])}
-FRAC = 0.01
+FRAC = float(sys.argv[5]) if len(sys.argv) > 5 else 0.01
 
 
 def cargar(datos, vols, desde, hasta):
@@ -128,7 +132,7 @@ def main():
         arms = {n: arms[n] for n in brazos}
         escribir(tmp / "raiz", arms)
         res, t = correr(tmp / ("s%d" % s), ventana, desde, hasta, vols, tmp / "raiz")
-        fila = {"ventana": ventana, "semilla": s, "apagadas_pedidas": n_apagar}
+        fila = {"ventana": ventana, "semilla": s, "fraccion": FRAC, "apagadas_pedidas": n_apagar}
         if res is None:
             fila["caido"] = t
         else:

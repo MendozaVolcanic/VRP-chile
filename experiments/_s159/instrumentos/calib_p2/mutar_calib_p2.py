@@ -107,6 +107,12 @@ MUT = [
      [("    if not calibrada:\n        det[\"nota_calibracion\"]", "    if not calibrada and v == \"GANA\":\n        det[\"nota_calibracion\"]")]),
     ("c7", "D-42", "la calibración corre también sin sustrato (SIN SUSTRATO no informa None)", BASE,
      [('        det["resultado_sin_calibrar"] = "SIN SUSTRATO"\n', '        det.update(resultado_sin_calibrar="SIN SUSTRATO", calibrada=True, falsos_gana=0.0)\n')]),
+    # ---- después del verificador de D-42 (V42-02 y V42-04)
+    ("m07", "V42-02", "contar publica el resultado sin calibrar (m07 del verificador)", BASE,
+     [('        ver["P2|%s" % s] = v_\n', '        ver["P2|%s" % s] = det["resultado_sin_calibrar"]\n')]),
+    ("n04", "V42-04", "el detalle declara sorteos y semilla desde las constantes", BASE,
+     [("falsos_bloquea=f_bloquea, n_sorteos=n_usados, semilla_calibracion=semilla_usada)",
+       "falsos_bloquea=f_bloquea, n_sorteos=N_CALIB_P2, semilla_calibracion=SEMILLA_CALIB_P2)")]),
     # ---- estrato 203 (informa, no decide)
     ("e1", "203", "el estrato decide: P2 de VIIRS 750 queda INDECIDIBLE si hay pasadas 203", BASE,
      [('    info["estrato_203"] = estrato_203(TKD, prot, R, lect, cfg, excluir)\n',

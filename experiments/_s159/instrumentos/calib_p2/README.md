@@ -139,3 +139,94 @@ por ventana, 0 caídas; en cada semilla las publicaciones apagadas llegan a la t
 - No medí exacto A ni B (12 noches); la tasa por cola de esos dos es la medida por muestreo o el promedio simétrico.
 - No volví a correr la curva de poder del comparador de M (ADENDA_PLACEBO.md §5.2); no cambia con esta adenda.
 - No hubo verificador con contexto limpio: lo pide la adenda antes del tag de lectura.
+
+## Después del verificador
+
+Verificador con contexto limpio: `experiments/_s159/instrumentos/verificador_d42/INFORME.md` (commit `981cceda7`).
+Confirma el código en los siete puntos de D-42. Cerré los tres hallazgos que pidió el coordinador, con las mismas reglas.
+
+### V42-02: candado donde la calibración decide
+
+El veredicto calibrado se escribe en un solo punto, `ver["P2|sensor"]` dentro de `contar`, y eso es lo que lee
+`global_ventana`. Ninguna prueba lo miraba ahí. Nueva prueba
+`test_contar_publica_el_veredicto_calibrado_y_no_el_sin_calibrar`: tres noches de Láscar con cuatro pasadas cada una en
+que sólo D se equivoca. Sin calibrar da PIERDE; calibrada, INDECIDIBLE. La prueba exige INDECIDIBLE en `ver` y en la
+ventana. Con la mutación m07 del verificador (`contar` escribe `det["resultado_sin_calibrar"]`) falla por aserción.
+
+### V42-04: sorteos y semilla salen de lo que se usó
+
+`calibrar_p2` devuelve ahora también los sorteos y la semilla que usó, y `decidir_p2_bloques` los copia al detalle.
+Cuando la calibración no corre (controles caídos o sin sustrato), `n_sorteos` y `semilla_calibracion` quedan en
+`None`, como los falsos. Prueba nueva `test_el_detalle_dice_los_sorteos_y_la_semilla_que_la_calibracion_uso`: llama a
+la calibración real con 20 sorteos y semilla 7, y exige que el detalle diga 20 y 7. `imprimir` ahora acepta `None`
+(antes formateaba con `%d`).
+
+Efecto colateral: el script de mutaciones del verificador (`verificador_d42/v03_mutaciones_propias.py`) busca la línea
+vieja `f_gana, f_pierde, f_bloquea = calibrar_p2(c, bl_p2, W)`; con el cambio ya no la encuentra y aborta en vez de
+contar (no lo toqué: es su instrumento).
+
+### Rojas y mutaciones
+
+- Rojas, después de la última edición de las pruebas: contra `5f986a209`, **39 pruebas, 26 fallan, las 26 por
+  aserción**, 0 por otra excepción (`rojo_calib_p2_v42_contra_5f986a209.txt` y `.xml`). Contra `b57ecfe62` (que ya
+  tiene la calibración), sólo las dos pruebas nuevas: la de V42-04 falla por aserción; la de V42-02 pasa porque el
+  código de `b57ecfe62` ya estaba bien, y su validez la da la mutación m07 (`rojo_calib_p2_v42_contra_b57ecfe62.txt`).
+- Mutaciones, re-corridas con m07 (V42-02) y n04 (V42-04, el detalle vuelve a las constantes) incluidas:
+  **30 de 30 atrapadas por aserción**, 0 por otra excepción, control sin mutar verde con 75 pruebas, ninguna copia
+  `_mut_*` al final (`mutaciones_salida_v42.txt` y `.json`).
+
+### V42-01: el placebo con sustrato
+
+`placebo_1pct.py` acepta ahora la fracción. Curva de 1, 5, 10 y 20 % de las publicaciones de K apagadas al azar en D,
+20 semillas por punto, ventanas tipo V1 y V2, brazos desde producción. Celda = semilla × regla × sensor; el control
+vale en un punto sólo si la calibración corrió en más de la mitad de sus 80 celdas (`resumir_placebo.py`). Resúmenes:
+`resumen_placebo_curva_V1.txt` y `resumen_placebo_curva_V2.txt`.
+
+| punto | apagadas | celdas calibradas | ¿vale? | GANA calibrada (cualquier celda) | lo que da P2 en VIIRS 375 (SN) |
+|---|---|---|---|---|---|
+| V1 1 % | 3 | 0 de 80 | no | 0 | SIN SUSTRATO 20/20 |
+| V1 5 % | 16 | 23 de 80 | no | 0 | PIERDE 4, BLOQUEA 5, EMPATE 2, INDECIDIBLE 2, SIN SUSTRATO 7 |
+| V1 10 % | 32 | 40 de 80 (VIIRS 375: 40 de 40) | no (justo la mitad) | 0 | PIERDE 7, BLOQUEA 7, INDECIDIBLE 4, EMPATE 2 |
+| V1 20 % | 64 | 50 de 80 | sí | 0 de 20 (Wilson [0, 16 %]) | PIERDE 15, BLOQUEA 5 |
+| V2 1 % | 10 | 8 de 80 | no | 0 | BLOQUEA 4, SIN SUSTRATO 16 |
+| V2 5 % | 49 | 46 de 80 | sí | 0 de 20 | PIERDE 20/20 |
+| V2 10 % | 97 | 78 de 80 | sí | 0 de 20 | PIERDE 20/20 |
+| V2 20 % | 194 | 80 de 80 | sí | 0 de 20 | PIERDE 20/20 |
+
+En VIIRS 750 sólo hay sustrato con muchas apagadas: V2 10 %, BLOQUEA 8, INDECIDIBLE 9, PIERDE 1; V2 20 %, BLOQUEA 16,
+PIERDE 4. Con la regla original los números son parecidos (en la salida).
+
+**El criterio del control se cumple en los cuatro puntos que valen: P2 calibrada no da GANA en ninguna semilla.** Pero
+el placebo no se comporta como «sin información» para P2: con K, apagar publicaciones al azar quita más alertas Muy
+Bajo que negativos limpios, D comete más errores que K, y P2 lo detecta como pérdida (PIERDE en 75 a 100 % de las
+semillas con sustrato). O sea, en estas ventanas de producción la métrica no premia publicar menos. La auditoría V1a
+vio lo contrario sobre C0, que sobrepublicaba mucho más; ahí sí cada apagada al azar quitaba sobre todo negativos.
+SOSPECHA razonable, no medida aquí: la dirección del placebo depende de cuánto sobrepublica el control.
+
+Límites: 20 semillas por punto (un 0 de 20 deja el intervalo hasta 16 %); V1 sólo tiene 7 volcanes y un mes; no hay
+punto donde el placebo pueda ganar, así que este control no prueba qué haría la calibración ante un placebo que sí
+favorezca a D. Ese caso lo cubren los escenarios sintéticos de la sección de falsos.
+
+### V42-06, una precisión
+
+El verificador infiere que mi suite corrió en paralelo con el corredor de mutaciones. No fue así: el corredor terminó
+de escribir `mutaciones_salida.txt` y `.json` a las 11:45:42 UTC (fecha de modificación de los archivos), 20 minutos
+antes de `status_antes.txt` (12:06:13 UTC), y la ventana de 37,6 min es exactamente probar (31 min 8 s) más la suite
+(6 min 28 s), en serie. La fecha de modificación es evidencia más débil que una marca escrita por el propio proceso; por
+eso esta vez `status_antes.txt` y `status_despues.txt` cuentan además las copias `_mut_*` que había en `experiments/`.
+El verificador además re-corrió la suite sola y dio lo mismo.
+
+### V42-03 y V42-05
+
+V42-03 es la misma pregunta 1 de arriba para Nicolás (sin cambio de código). V42-05 precisa mi atribución: el exceso
+de PIERDE en A, B7 y B8 es de la muestra de semillas 0 a 499, no del generador en general (con 100.000 semillas sale
+parejo, medido por el verificador).
+
+### Árbol quieto, segunda vez
+
+Con todo lo de arriba terminado (ningún proceso de Python vivo y 0 copias `_mut_*` en `experiments/`, contadas en la
+última línea de los dos status), en serie: `probar_evaluar_d25.py` **31 de 31 OK** (27 min 30 s,
+`probar_salida_v42.txt`) y la suite completa **2.417 passed, 29 skipped, 1 xfailed** (6 min 19 s, `suite_salida_v42.txt`;
+2.415 más las dos pruebas nuevas). `status_antes_v42.txt` (14:55:21 UTC) y `status_despues_v42.txt` iguales salvo la
+hora; `sha_antes_v42.txt` y `sha_despues_v42.txt` iguales para el evaluador, `probar_evaluar_d25.py` y las cinco
+baterías.
