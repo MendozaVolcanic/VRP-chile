@@ -264,9 +264,10 @@ def main():
         pr(f"   encendidos {len(enc)}, apagados {len(apa)}")
         pr(f"   protegidas (de {len(prot)}, ok {sum(1 for i in prot if okp(i))}): perdidas {len(prot_perd)} "
            f"{[(obj[i]['volcan'], obj[i]['hora_utc'], obj[i]['mirova_vrp']) for i in prot_perd]} | ganadas {len(prot_gan)} "
-           f"| SIN DATO {len(sin_prot)} {[(obj[i]['volcan'], obj[i]['hora_utc']) for i in sin_prot]}")
+           f"| SIN DATO {len(sin_prot)} {[(obj[i]['volcan'], obj[i]['hora_utc']) for i in sin_prot][:10]}")
         pr(f"   bajo 1 MW (de {len(mb)}, ok {sum(1 for i in mb if okp(i))}): sin publicar K {mb_fnK}, O {mb_fnO}; "
            f"ganadas {len(mb_gan)}, perdidas {len(mb_per)}; SIN DATO {len(sin_mb)}")
+        pr(f"   bajo 1 MW perdidas: {[(obj[i]['volcan'], obj[i]['hora_utc'], obj[i]['mirova_vrp'], obj[i]['pc_vrp']) for i in mb_per]}")
         pr(f"   dE = ({mb_fnO} + {pO}) - ({mb_fnK} + {pK}) = {dE:+d}  (rango por SIN DATO {lo:+d} a {hi:+d}) -> {et}")
         resumen["cajas"][nombre] = {"neg_pub_K": pK, "neg_pub_O": pO, "neg_ok": len(neg), "neg_pob": len(neg_all),
                                     "encendidos": len(enc), "apagados": len(apa), "prot_perdidas": len(prot_perd),
