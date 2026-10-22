@@ -29,7 +29,7 @@ Todas en `tasks/LOOP_OBJETIVOS.md` §5 con su evidencia. En orden de urgencia:
 | # | pregunta | recomendación |
 |---|---|---|
 | D-37 | Merge de #892 (vigilancia por plataforma y aviso del cese) antes del **2026-11-02 13:00 UTC**; y si el issue informativo sale una sola vez aunque se cierre | **mergear ya**; una sola vez |
-| D-35 | Brazo de sensibilidad de D25 sobre el 17 al 19-oct por NRT. **Plazo: LANCE purga el 17-oct cerca del 2026-10-24 ~16:00 UTC** (retención medida ~7,7 días) | **correrlo**, desde un tag de código (no hace falta el de lectura) |
+| D-35 | ~~Brazo de sensibilidad de D25 sobre el 17 al 19-oct por NRT~~ **APROBADO y DESPACHADO** (Nicolás, 2026-10-22 ~09:30 UTC): run 39756261926 desde `s157-d25-k-codigo` | no abrir sus resultados antes del tag de lectura de D25; al terminar, sólo contar cobertura por brazo |
 | D-42 | Calibrar P2 de D25 antes del tag (bloquea la lectura) | **calibrar P2 como M** (nulo con el signo de cada noche al azar, 1.000 repeticiones, INDECIDIBLE si los falsos pasan de 5 %) en una cuarta adenda sellada, más los candados que faltan (V34-03 y V29-01); después verificador limpio y recién el tag |
 | D-43 | Las nueve decisiones de `docs/AUDIT_S160.md` §5 (#891, mensaje «Cobertura: completa» del NRT, llevar S157 y S158 a `main`, guardas de referencia y token, etc.) | las de ese documento; la más urgente es la 3 (con el cese) |
 | D-39 | Bucle de push del scraper Mirova-v1 (pierde filas de la tabla) | **R1+R2+R3** y reponer filas (R4); R13 en el sync de VRP Chile |
@@ -95,8 +95,8 @@ Retoma VRP Chile (cierre de la sesión nocturna S160, 2026-10-22 ~07:30 UTC). An
    o D-42; issue #864. Pide al computador que no se suspenda si vas a esperar trabajo largo.
 
 Trabajo, en orden (lo que necesite el sí de Nicolás, sólo si ya lo dio):
-- D-35 tiene plazo: el 17-oct sale de LANCE cerca del 2026-10-24 16:00 UTC. Si Nicolás dijo sí, despachar el brazo
-  de sensibilidad de D25 sobre el 17 al 19 desde un tag de código del evaluador, declarado aparte.
+- D-35 ya está despachado (run 39756261926, 2026-10-22). Revisar que terminó y contar sus pasadas por brazo contra
+  producción (A108) SIN mirar publicaciones; sus resultados se abren recién después del tag de lectura de D25.
 - D-37: si dijo sí, merge de #892 antes del 2-nov 13:00 UTC; el 3-nov confirmar el corte con
   experiments/_s159/cese_snpp/cmr_colecciones_y_granulos.py (rama s159-pruebas).
 - D-42: si eligió calibrar P2, cuarta adenda sellada + código con prueba roja + candados de V34-03 y V29-01 (un caso
