@@ -68,12 +68,17 @@ def bajar_laads(nombre_viejo, destino):
         if len(nom) != 1:
             return None, f"laads_{tipo}_candidatos_{len(nom)}"
         url = f"{BASE}/{COL[pref]}/{pref}{tipo}MOD/{anio}/{dia}/{nom[0]}"
-        r = _get(url, stream=False)
-        if r is None:
-            return None, f"laads_{tipo}_descarga_fallo"
+        # La primera version (requests con Bearer) recibio 200 con 0,0 MB: una pagina, no el archivo (run 39713687687).
+        # Se baja con la sesion autenticada de earthaccess (pipeline.fetch.auth, por token) y se verifica la firma HDF5.
+        import earthaccess
         p = destino / nom[0]
-        p.write_bytes(r.content)
-        print(f"   bajado {nom[0]} ({len(r.content) / 1e6:.1f} MB)", flush=True)
+        try:
+            earthaccess.download([url], str(destino))
+        except Exception as e:  # noqa: BLE001
+            return None, f"laads_{tipo}_descarga_fallo_{type(e).__name__}"
+        if not p.exists() or p.stat().st_size < 1_000_000 or p.read_bytes()[:4] != bytes([0x89]) + b"HDF":
+            return None, f"laads_{tipo}_no_es_hdf5_{p.stat().st_size if p.exists() else 0}"
+        print(f"   bajado {nom[0]} ({p.stat().st_size / 1e6:.1f} MB)", flush=True)
         out.append(p)
     return (out[0], out[1]), None
 
@@ -87,6 +92,8 @@ def main():
     if not os.environ.get("EARTHDATA_TOKEN", "").strip():
         print("EARTHDATA_TOKEN vacio: no se corre (A71)")
         return 1
+    from pipeline.fetch import auth
+    auth()
     outdir = Path(a.out)
     outdir.mkdir(parents=True, exist_ok=True)
     destino = Path(os.environ.get("VRP_TMP_DIR", "/tmp/vrp_tmp")) / "granulos"
@@ -100,7 +107,11 @@ def main():
     resultados, faltan = [], 0
     for k in sorted(grupos):
         print(f"== {k} ({len(grupos[k])} pasadas)", flush=True)
-        rs = PC.procesar_granulo(grupos[k], destino)
+        try:
+            rs = PC.procesar_granulo(grupos[k], destino)
+        except Exception as e:  # noqa: BLE001
+            rs = [{"id": o["id"], "volcan": o["volcan"], "hora_utc": o["hora_utc"],
+                   "estado": f"error: {type(e).__name__}: {e}"} for o in grupos[k]]
         for r in rs:
             r["rescate"] = True
             if r.get("estado") not in ("ok", "volcan_fuera_del_granulo"):
