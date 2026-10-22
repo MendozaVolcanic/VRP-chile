@@ -1,6 +1,6 @@
 # S159, frente N: el fondo y la suma del código de MIROVA en VIIRS 750, a escala y en las dos direcciones
 
-2026-10-21 (hora del servidor al cerrar: ~23:40 UTC). Ola 2 del plan
+2026-10-21 (cuerpo cerrado a las 23:09 UTC, commit `3b49af569`; el apéndice del censo, al final, es posterior). Ola 2 del plan
 `docs/superpowers/specs/2026-10-21-pruebas-post-auditoria-s158-design.md` (fila N). Worktree
 `C:\vrp-trabajo\s159-n`, rama `s159-n`. Sólo lectura: no se tocó `pipeline/`, `data/` ni `frontend/`; los brazos son
 reemplazos en memoria del módulo (patrón A75), escritos en `probe_n.py`. Pre-registro commiteado **antes** de
@@ -11,7 +11,8 @@ y bitácoras en `run_39682867040\` de esta carpeta.
 
 ## En una pantalla
 
-1. **La hipótesis queda refutada para el fondo y la suma solos (brazo F) y para F más quitar la compuerta (FC).**
+1. ⚠️ **Corregido por el censo (apéndice al final, run 39693661527)**: el 3,8 % y el ΔE +104 salieron de un sorteo con suerte (verificador, afirmación 1). Contado entero: F enciende 60 negativos (los 60 cúmulos de cumbre en 0,0 MW; ninguno de los 59 `far`), publica 114 de 5.476 (2,1 %) y ΔE = +12. El veredicto sigue siendo ENCIENDE DE MÁS, pero del orden de una decena. Texto original:
+   **La hipótesis queda refutada para el fondo y la suma solos (brazo F) y para F más quitar la compuerta (FC).**
    Sobre la detección de producción (K), el fondo del código recupera 48 alertas de MIROVA bajo 1 MW (las no
    publicadas bajan de 65 a 17 de 175, ponderado) y no pierde ninguna protegida, pero enciende negativos limpios: de 54
    a 206 de 5.385 (1,0 % a 3,8 %). Por la regla 2 de MISSION la suma de errores sube 104 (IC 95 % 14,5 a 212,3).
@@ -37,6 +38,7 @@ y bitácoras en `run_39682867040\` de esta carpeta.
 
 ### N-1. El fondo y la suma del código sobre la detección de producción encienden negativos limpios por encima de lo que ganan
 
+- ⚠️ **Los números de esta sección quedan reemplazados por el censo del apéndice** (F enciende 60, no 152; ΔE +12, no +104; «del orden de 150 puntos» pasa a 60). El mecanismo se sostiene. Texto original:
 - **SCRIPT:SALIDA**: `03_analizar.py` → `03_analizar_salida.txt` §8 y `resumen.json`; detalle en `05_detalle.py` →
   `05_detalle_salida.txt` (a).
 - **QUÉ PASA**: de noche la cumbre de Isluga, Planchón-Peteroa o Tupungatito tiene a veces un píxel algo más tibio que
@@ -236,3 +238,44 @@ antes del 13 se informan aparte y las publican los cinco brazos.
 | Magnitud en la geometría nativa del sensor | El remuestreo lineal de MIROVA reparte un foco sub-píxel entre celdas y baja su radiancia (Villarrica 09-19: nativo 0,70, MIROVA 0,45); en el experimental la magnitud nativa podría estar más cerca del calor real | N-6; validar contra SWIR de alta resolución | hipótesis |
 | Declarar «no observado» cuando el volcán cae fuera del gránulo | Dos «negativos» de Chaitén no miran el cráter; un SDA que separa «no vi» de «no miré» es más honesto que la tabla de MIROVA | N-8 | idea, barata |
 | Fondo determinista | La triangulación sin perturbar coincide con MIROVA en la mayoría de los casos de un píxel; fijarla explícitamente quita la ambigüedad de O1 (amplía MEJ-2) | N-2 | idea |
+
+## Apéndice: censo de F en los negativos que puede encender (run 39693661527)
+
+Aprobado por Nicolás el 2026-10-21. Pre-registro `PREREGISTRO_CENSO_N.md`, commit `bf6cf4db5`, antes del disparo.
+Lista: `06_censo.py` → `objetivos_censo.json`; lectura: `07_censo_analizar.py` → `07_censo_analizar_salida.txt`;
+resultados y bitácoras en `run_39693661527\`. Por qué alcanza un censo: F no cambia la detección (verificador v3), así
+que sólo puede encender un negativo donde K ya tiene un cúmulo que no publica; en la población (sin el 18 y 19 de
+octubre) son 60 con cúmulo de cumbre en 0,0 MW y 59 `far`; los otros 5.303 no tienen ningún píxel alertado.
+
+**Controles** (antes de leer): 119 de 119 pasadas de negativos ok con los cinco brazos; K publica igual que producción
+y con el mismo `pc.vrp_mw` en 119 de 119; K2 = K en 119; F no cambia la detección ni la clase de distancia en ninguna.
+Control positivo: F tiene que publicar los cúmulos que K deja en 0,0 MW, y lo hace (abajo).
+
+| clase | n | K publica | F publica | FC publica | oráculo (predicado del tablero), caja por defecto | oráculo, recuadro sensible |
+|---|---|---|---|---|---|---|
+| cumbre en 0,0 MW | 60 | 0 | **60** | 60 | 1 | 4 |
+| far | 59 | 0 | **0** | 0 | 0 | 0 |
+| Isluga 2026-10-12 05:48 (alerta) | 1 | SIN DATO | SIN DATO | | | |
+| Chillán 2026-10-12 05:18 (protegida) y 05:54, reintento | 2 | SIN DATO | SIN DATO | | | |
+
+- **Encendidos de F**: 60 de 60 en cumbre (todos de 1 píxel, 0,06 a 0,61 MW; Isluga 22, Tupungatito 17, Láscar 10,
+  Planchón-Peteroa 6, Cordón Caulle 4, Lastarria 1); 0 de 59 `far` (F no cambia la clase de distancia, así que un `far`
+  sigue sin publicarse). Una de las 60 es ambigua por la triangulación (Isluga 2026-04-06 05:54, banda −0,009 a 0,237).
+  Apagados: 0 (los 54 que producción publica siguen publicados, censo del lote).
+- **Negativos limpios publicados**: K 54 de 5.476 (0,99 %), F 114 de 5.476 (2,08 %).
+- **ΔE de F por censo** = 60 encendidos − 0 apagados − 48 alertas bajo 1 MW ganadas (censo del lote) = **+12**; con
+  Isluga 10-12 (SIN DATO) ganada sería +11, y con la ambigua apagada +10 a +11. Denominadores: 5.476 negativos, 175
+  alertas bajo 1 MW que deciden (ponderado del lote). Las alertas perdidas siguen en 0: 0 de 78 protegidas medidas
+  (censo) y 0 de 36 en la muestra de `pos_resto` (esta parte sigue siendo muestra).
+- **Contra la predicción del verificador** (ΔE ≈ +11 si F publica todo cúmulo de cumbre en 0,0 MW, `far` de 0 a +59):
+  se cumple; los `far` aportan 0.
+- **Veredicto pre-registrado, con el censo**: ENCIENDE DE MÁS, ahora contado y no estimado, y pequeño: F gana 48 alertas
+  débiles y enciende 60 negativos débiles. Lo de N-1 sobre el mecanismo se sostiene: el oráculo (el código entero) publica
+  1 de esos 60 con la caja por defecto y 4 con el recuadro sensible, o sea que la detección del código no los ve.
+- **Protegidas, de nuevo**: 0 perdidas de 78 medidas en todos los brazos. Chillán 2026-10-12 05:18 (MIROVA 8,44 MW en
+  la referencia) sigue SIN DATO: CMR con credenciales no devuelve el gránulo por nombre, por día y caja ni por ventana,
+  en tres intentos más (runs 39690106947 y 39693661527).
+- **Oráculo, aparte** (predicado del tablero sobre un record sintético del oráculo, sin `store`): 1 de 119 negativos
+  con la caja por defecto (Isluga 2026-07-15 05:36) y 4 con el recuadro sensible (más Tupungatito 2026-04-05 05:30,
+  04-24 05:24 y 06-05 05:36). Sobre los otros 5.303 negativos el oráculo no tiene techo por censo (cambia la detección):
+  su tasa en negativos sigue siendo de muestra (verificador, afirmación 3).

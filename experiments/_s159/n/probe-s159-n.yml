@@ -20,6 +20,7 @@ concurrency:
 env:
   SOLO: ""
   NCHUNKS: "8"
+  OBJETIVOS: "experiments/_s159/n/objetivos_n.json"
 
 jobs:
   probe:
@@ -56,7 +57,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p out
-          python experiments/_s159/n/probe_n.py --objetivos experiments/_s159/n/objetivos_n.json --out out \
+          python experiments/_s159/n/probe_n.py --objetivos "$OBJETIVOS" --out out \
             --chunk ${{ matrix.chunk }} --nchunks "$NCHUNKS" --solo "$SOLO" 2>&1 | tee out/probe_${{ matrix.chunk }}.log
       - name: Upload artifact
         if: always()
