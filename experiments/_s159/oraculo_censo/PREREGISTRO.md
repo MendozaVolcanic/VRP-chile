@@ -113,3 +113,20 @@ más**. ΔE del lote ponderado: O-def −72,6, O-sens −105,0, con ΔE posible 
 Nada en `pipeline/`, `data/` ni `frontend/`. El workflow (`probe-s159-oraculo-censo.yml`, copia en esta carpeta) es
 de sólo lectura, autentica sólo con `EARTHDATA_TOKEN`, deja el resultado como artefacto y se dispara con un push a la
 rama auxiliar `s159-oraculo-disparo`, que no se mergea.
+
+## 8. Adenda (2026-10-22, antes de despachar el run aparte y antes de mirar el censo): estrato «reprocesadas del 12»
+
+Dato del coordinador, del frente de rescate de LAADS (`experiments/_s159/laads_rescate/INFORME.md` H1): NASA reprocesó
+el 2026-10-19 los gránulos de SNPP y NOAA-21 del 2026-10-12; LAADS borró los originales y CMR sigue entregando la entrada
+vieja con enlace muerto. El censo completo ya estaba despachado (run 39713438252), así que esas pasadas quedarán ahí
+como SIN DATO. Run aparte (`probe_rescate.py`, workflow `probe-s159-oraculo-rescate.yml`, rama auxiliar
+`s159-oraculo-rescate`): baja el archivo **nuevo** listando `archive/allData/{5200|5201}/{VNP|VJ2}0{2|3}MOD/2026/285.json`
+de LAADS y tomando el de mismo `A2026285.HHMM`, con el `EARTHDATA_TOKEN` como Bearer. Gránulos: VJ202MOD 05:12 y 05:18,
+VNP02MOD 05:48 y 05:54, con **todas** sus pasadas de la población (20: la protegida de Chillán 05:18, las alertas de
+Isluga 05:48 y Chillán 05:54, y 17 negativos limpios).
+
+- Se informan como **estrato aparte**; el resultado principal se da sin ellas (como SIN DATO, con el rango de §4) y
+  también con ellas reemplazando a sus SIN DATO.
+- **El control 1 (K = producción) no aplica** en este estrato: producción procesó el archivo original y éste es otro.
+  Diferencias de K contra el record publicado se informan, no cuentan como falla del control.
+- El control 2 tampoco aplica (N no las midió: fueron SIN DATO también ahí).
