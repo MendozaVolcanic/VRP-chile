@@ -1,3 +1,27 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · fetch.py  ·  SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Decidir QUE escenas satelitales entran al sistema: busca y baja, por volcan y dia, los
+#                 granulos L1B de MODIS y VIIRS que despues se analizan. No detecta ni clasifica, pero lo
+#                 que no busca no se puede publicar, y lo que no encuentra tiene que quedar dicho.
+# Lógica        : Para cada plataforma (Terra, Aqua, Suomi NPP, NOAA-20, NOAA-21) consulta el catalogo de
+#                 NASA (CMR), primero el producto definitivo y despues el de tiempo casi real (LANCE), y baja
+#                 solo las pasadas nocturnas. Una plataforma con cese anunciado no se busca para los dias
+#                 enteros posteriores al cese (S161). Lo que no se pudo buscar o bajar, y lo que dio cero en
+#                 toda la corrida, queda en la cobertura que informa scripts/run_pipeline.py.
+# Modelo/método : Reglas deterministicas de busqueda y descarga. Sin aprendizaje automatico.
+# Datos entrada : Catalogo CMR y granulos MOD021KM/MYD021KM, MOD03/MYD03, VNP02IMG/VJ102IMG/VJ202IMG,
+#                 VNP02MOD/VJ102MOD/VJ202MOD y sus geolocalizaciones; scripts/ceses_esperados.json. SIN datos
+#                 personales.
+# Variables     : Caja de busqueda (radius_km del volcan), dia UTC, orden definitivo/NRT, filtro nocturno,
+#                 fecha de cese de cada plataforma.
+# Limitaciones  : Cero granulos de una plataforma no distingue «no paso» de «dejo de entregar» en un dia
+#                 suelto; solo el conteo sobre toda la corrida lo delata. Si NASA posterga un cese sin
+#                 avisar, los dias posteriores a la fecha de la lista no se buscan (se corrige editando la
+#                 lista). La fecha de cese es la del aviso del operador, sujeta a cambio.
+# Refs/datos    : Aviso de NASA del cese de Suomi NPP (URL en scripts/ceses_esperados.json); docs/AUDIT_S160.md
+#                 hallazgo 241 y decision 3; experiments/_s159/cese_snpp/INFORME.md (rama s159-pruebas).
+#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """
 fetch.py — Download MODIS and VIIRS L1B granules from NASA Earthdata via earthaccess.
 
@@ -503,6 +527,18 @@ _MARGEN_MEDIANOCHE_S = 2.0
 # Cobertura: lo que no se pudo buscar ni bajar, por volcán, día y producto.
 _FALLAS: list = []
 
+# S161: lo que dio cada plataforma en la corrida (búsquedas con gránulos, sin gránulos, y días no
+# buscados por cese). POR QUÉ: cuando un satélite deja de entregar, CMR devuelve cero gránulos y eso
+# no es una falla; sin este conteo la cobertura decía «completa» aunque faltara una plataforma entera
+# (hallazgo 241 de docs/AUDIT_S160.md).
+_PLATAFORMAS: dict = {}
+
+# S161: ceses anunciados por el operador de cada satélite. POR QUÉ esta lista y no una fecha aquí: es la
+# misma que lee la vigilancia por plataforma de #892 y que el tablero exige por prueba, así que si NASA
+# mueve la fecha se edita un solo archivo. Se lee una vez por proceso.
+_RUTA_CESES = Path(__file__).resolve().parent.parent / "scripts" / "ceses_esperados.json"
+_CESES: dict | None = None
+
 
 def reiniciar_ventana() -> None:
     """Olvida la ventana y su caché en memoria (un proceso nuevo)."""
@@ -728,7 +764,52 @@ def fallas_de_cobertura() -> list[dict]:
 
 
 def limpiar_fallas() -> None:
+    """Olvida las fallas y el conteo por plataforma (inicio de una corrida)."""
     _FALLAS.clear()
+    _PLATAFORMAS.clear()
+
+
+def _contar_plataforma(platform: str, campo: str, desde: datetime | None = None) -> None:
+    c = _PLATAFORMAS.setdefault(platform, {"con_granulos": 0, "sin_granulos": 0, "retirada": 0,
+                                           "cese_desde": None})
+    c[campo] += 1
+    if desde is not None:
+        c["cese_desde"] = desde.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def cobertura_por_plataforma() -> dict:
+    """S161: por plataforma, búsquedas con gránulos, sin gránulos y días no buscados por cese."""
+    return {p: dict(c) for p, c in _PLATAFORMAS.items()}
+
+
+def _ceses() -> dict:
+    """{plataforma: instante UTC del cese} de scripts/ceses_esperados.json."""
+    global _CESES
+    if _CESES is None:
+        import json
+        try:
+            datos = json.loads(Path(_RUTA_CESES).read_text(encoding="utf-8"))
+            _CESES = {s: datetime.strptime(c["desde_utc"], "%Y-%m-%dT%H:%M:%SZ")
+                      for c in datos["ceses"] for s in c["sensores"]}
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            # POR QUÉ buscar todo y no callar: sin la lista no se sabe qué cesó, y lo seguro es el
+            # comportamiento anterior (buscar), que a lo más gasta consultas vacías.
+            print(f"  WARN: no se pudo leer {_RUTA_CESES} ({type(e).__name__}: {e}); "
+                  f"se buscan todas las plataformas")
+            _CESES = {}
+    return _CESES
+
+
+def cese_cumplido(platform: str, date: datetime) -> datetime | None:
+    """S161: instante del cese de `platform` si el día UTC `date` empieza después de él; si no, None.
+
+    POR QUÉ el día entero: el día del cese todavía trae pasadas (las nocturnas de Suomi NPP sobre Chile
+    son de 04:54 a 07:06 UTC y el cese es a las 13:00), y un reproceso anterior al cese debe seguir
+    buscando, porque el archivo histórico sigue disponible (LAADS 199516)."""
+    desde = _ceses().get(platform)
+    if desde is not None and datetime(date.year, date.month, date.day) >= desde:
+        return desde
+    return None
 
 
 def search_granules(product_key: str, lat: float, lon: float,
@@ -1076,6 +1157,15 @@ def fetch_for_volcano(volcano: dict, date: datetime,
 
     fecha_str = date.strftime("%Y-%m-%d")
     for platform, l1b_key, geo_key in all_platforms:
+        # S161 POR QUÉ: después de un cese anunciado (Suomi NPP, 2026-11-02 13:00 UTC) los gránulos
+        # no van a existir; buscarlos da cero, que el log no distingue de «no pasó». Se salta la
+        # búsqueda, se dice en el log y se cuenta para que la cobertura lo informe.
+        desde = cese_cumplido(platform, date)
+        if desde is not None:
+            _contar_plataforma(platform, "retirada", desde)
+            _diag(f"SEARCH_RETIRADA {platform} cese anunciado desde {desde:%Y-%m-%d %H:%M} UTC "
+                  f"(scripts/ceses_esperados.json), no se busca")
+            continue
         # S157: lo que no se pudo buscar ni bajar queda en la cobertura con volcán,
         # día y plataforma (antes era un WARN y el job salía verde, MEDICION.md §3).
         n_fallas_antes = len(_FALLAS)
@@ -1084,6 +1174,9 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             _diag(f"SEARCH_START {platform}")
             l1b_granules = search_granules(l1b_key, lat, lon, radius, date)
             _diag(f"SEARCH_DONE {platform} n_l1b={len(l1b_granules)}")
+            # S161: sólo cuenta una búsqueda que no falló; una falla ya va a la cobertura como falla.
+            if len(_FALLAS) == n_fallas_antes:
+                _contar_plataforma(platform, "con_granulos" if l1b_granules else "sin_granulos")
             if not l1b_granules:
                 continue
 

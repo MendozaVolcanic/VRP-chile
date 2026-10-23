@@ -199,7 +199,7 @@ escritos con los gates intra-radio encendidos); despachar cada ventana desde un 
 - La segunda pasada de Chillán (run 39391332259) salió 31 de 31 verde con 0 records nuevos: CMR devolvía HTTP 500.
 - El NRT salió `success` de 09:10 a 12:10 UTC sin commits de datos; el healthcheck mira 48 h
   (`.github/workflows/nrt-healthcheck.yml`). No se pierde nada porque `default_date_window`
-  (`scripts/run_pipeline.py:384`) reprocesa 7 días; cuesta latencia (bitácora del 2026-10-20 12:30 UTC, misma rama).
+  (`scripts/run_pipeline.py:404`, era 384 antes de la cabecera FICHA de S161) reprocesa 7 días; cuesta latencia (bitácora del 2026-10-20 12:30 UTC, misma rama).
 - El merge de `reproc-chunked.yml` borraba lo que main tenía fuera de las ventanas; arreglado en #873.
 - Antes: token de Earthdata vencido que apagó el NRT 5 días sin que el aviso llegara a una persona (`docs/AUDIT_S150.md`;
   nota del token en `CLAUDE.md`, Constraints técnicos); credenciales que bloquean la cuenta (A71); host caído que cuelga el job (A64).

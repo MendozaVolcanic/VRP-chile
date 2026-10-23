@@ -144,8 +144,9 @@ def test_g7_campo_con_flag_productor_apagado_queda_en_cero(flags_operacionales):
 # lineas en un archivo citado, hay que corregir CLAUDE.md **y** esta lista: el guard no la
 # deriva del documento (S136 lo aprendio agregando un flag que corrio tres citas en 1).
 CITAS_CLAUDE_MD = [
-    ("scripts/run_pipeline.py", 234, "get_detection_anchor"),
-    ("scripts/run_pipeline.py", 244, "local_kernel_bg"),
+    # S161: 234 -> 252 y 244 -> 262, +18 por la cabecera FICHA de run_pipeline.py.
+    ("scripts/run_pipeline.py", 252, "get_detection_anchor"),
+    ("scripts/run_pipeline.py", 262, "local_kernel_bg"),
     ("pipeline/geo_utils.py", 29, "get_grid_center"),
     # S151: 1473 -> 1483, +10 por la marca A113 sobre el tope D9 (tarea 0.3 del loop, sólo comentario).
     # V31.1: 1483 -> 1493, +10 por la marca de MIROVA sin distancia (helpers de estilo y tooltip).
