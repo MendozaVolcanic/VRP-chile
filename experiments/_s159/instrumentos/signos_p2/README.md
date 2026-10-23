@@ -130,12 +130,27 @@ mutar de las seis baterías (106 pruebas), que tiene que dar 0 fallas. Cada muta
   y `test_neto_en_contra_chico_bloquea_sin_dar_pierde`) indexan `det["ic95"]` sin preguntar antes y caen por
   `TypeError`. Arreglarlo es agregar una aserción en ese archivo, que esta tarea no me deja editar: queda para quien
   decida. La otra mitad de la mutación 12 de §5 (el resultado de D-34, s12a1) sí queda atrapada.
+- **s12a2, cerrada por el coordinador (S161, commit `ac6eab47b`)**: las dos pruebas de S159 preguntan ahora
+  `isinstance(det.get("ic95"), list) and len(det["ic95"]) == 2` antes de indexar. Re-corrida sola con su control
+  (`mutaciones_s12a2_parcial.jsonl`, `mutaciones_s12a2_salida.json`): control 0 fallas en 106; s12a2 atrapada por
+  aserción en 4 pruebas, 0 por otra excepción. **Total: 58 de 58 atrapadas por aserción** (sin la equivalente q01).
 - **Equivalente declarada (§5), q01** («menos del 5 %» en vez de «5 % o menos»): NO ATRAPADA, como se espera; no entra
   al total.
 
 ## Verdes
 
-VERDES_PENDIENTE
+`verdes.sh` corre en serie `probar_evaluar_d25.py` y la suite entera con el árbol quieto, escribiendo fuera del repo
+mientras corre, y deja `status_antes/despues.txt` y `sha_antes/despues.txt` (HEAD `8642543ec`).
+
+- **Primera corrida (2026-10-23 17:12 a 17:18 UTC), ROJA por el instrumento**: `verdes.sh` llamaba a
+  `probar_evaluar_d25.py` sin la carpeta de casos que exige (l. 65) y cayó por `IndexError` sin correr ningún caso.
+  Corregido en `8642543ec`. Sus salidas no se commitearon (quedaron fuera del repo, en el scratchpad del coordinador).
+- **Segunda corrida (hasta las 18:25:58 UTC)**: `probar_salida.txt` **31 de 31 casos OK** (exit 0). `suite_salida.txt`:
+  **2.447 pasan, 29 omitidas, 1 xfail, 1 falla**. La falla es `tests/test_mirova_csv_freshness_f49.py::
+  test_csv_max_age_under_48h`, que exige que `latest_consolidado.csv` tenga menos de 48 h: en esta rama es del
+  2026-10-21 15:25 UTC y ni el CSV ni la prueba cambiaron desde la adenda (`git diff --stat c13cf5808 HEAD` vacío para
+  los dos), así que falla igual sin D-45; es del entorno de la rama, no del evaluador. Árbol quieto: `status` igual salvo
+  la hora y sha256 iguales antes y después, 0 procesos python y 0 copias `_mut_*` al empezar y al terminar.
 
 ## Placebos (§6)
 
