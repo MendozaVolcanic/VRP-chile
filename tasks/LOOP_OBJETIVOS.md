@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-23 ~20:45 UTC (S161): CIERRE de la sesión
+- Sin trabajo en curso: ningún agente ni proceso propio vivo; `s159-evaluador-d25` limpia e igual al remoto en
+  `a7418e01d`; sesiones laterales terminadas (#897 y #899 mergeados; #898, #900 y #901 en borrador con CI verde).
+- Traspaso: `tasks/BLOQUE_ARRANQUE_S162.md`. Primera tarea de S162: leer D25 con el evaluador del tag
+  `s161-d25-lectura`. Informe de la sesión lateral sobre #864 commiteado en `experiments/_s161_estado_864/INFORME.md`.
+
 ### 2026-10-23 20:17 UTC, hora del servidor (S161): tag de lectura de D25 puesto
 - Corrida final de mutaciones con las pruebas finales (HEAD `fb053347a`): control 0 fallas en 106; **58 de 58
   atrapadas por aserción**, 0 por otra excepción; q01 equivalente, no atrapada. Cierra V45-05.
