@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-23 14:36 UTC, hora del servidor (S161): #897 mergeado con el sí de Nicolás; vigilante de OSF ciego
+- Nicolás (textual): «Sí a #897: crea el tag defensivo pre-s161-cese-snpp sobre la punta de main justo antes del
+  merge, súbelo y mergea por squash. Dejo el modo estricto como nota y lo decidimos aparte.» Tag
+  `pre-s161-cese-snpp` sobre `180b61317` (punta de `main` en ese momento), subido; squash `c3ee70ed6`. CI de `main`
+  sobre `c3ee70ed6` en curso al escribir esto. Desde el 2026-11-03 el NRT no busca Suomi NPP.
+- Hallazgo: `.github/workflows/vigilar-osf-mirova.yml` en `main` (desde `79aeb3406`, S158) tiene comillas dobles en
+  las expresiones `if:` (l. 44 y 66). GitHub lo rechaza: las 40 últimas corridas son `push` en `failure`, y **0
+  corridas por calendario**. El vigilante del código de MIROVA en OSF nunca corrió en `main`. #888 (borrador) lo
+  corrige mezclado con la auditoría S158 R2.
+- El computador se suspendió el 22-oct 19:36 UTC (cambio de fuente) hasta el 23-oct 12:50 UTC y se reinició el
+  23-oct 13:21 UTC (menú Inicio): el implementador de D-45 se relanzó desde git (`8dd8438ae`).
+
 ### 2026-10-22 19:04 UTC, hora del servidor (S161): quinta adenda de D25 sellada (D-45); implementador corriendo
 - Quinta adenda `experiments/_s157_prereg_d25/ADENDA_SIGNOS_P2.md` en `s159-evaluador-d25` (`c13cf5808`, subida;
   sha256 `28eea84cf77b860a2aad12088e6ad6795c8ce3d1395a71890dabe0b3fba900c3`). Escrita antes de leer V1, V2 y el brazo
