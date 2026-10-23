@@ -1,0 +1,322 @@
+F....FF..                                                                [100%]
+================================== FAILURES ===================================
+___________________ test_tras_el_cese_no_se_busca_suomi_npp ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000233FFF35970>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1615/test_tras_el_cese_no_se_busca_0')
+
+    def test_tras_el_cese_no_se_busca_suomi_npp(monkeypatch, tmp_path):
+        cmr = _CMR()
+        _instalar(monkeypatch, cmr)
+        fetch.fetch_for_volcano(VOLCAN, DIA_SIGUIENTE, tmp_path)
+        pedidas = [k for k in SNPP_L1B if k in cmr.pedidos]
+>       assert not pedidas, f"el {DIA_SIGUIENTE:%Y-%m-%d} se siguió buscando Suomi NPP: {pedidas}"
+E       AssertionError: el 2026-11-03 se siguió buscando Suomi NPP: ['VIIRS_SNPP_L1B', 'VIIRS_SNPP_MOD_L1B']
+E       assert not ['VIIRS_SNPP_L1B', 'VIIRS_SNPP_MOD_L1B']
+
+tests\test_cese_plataforma_nrt_s161.py:116: AssertionError
+---------------------------- Captured stdout call -----------------------------
+[diag 13:35:48Z] AUTH_START volcano=Lascar date=2026-11-03
+[diag 13:35:48Z] AUTH_OK
+[diag 13:35:48Z] SEARCH_START MODIS_TERRA
+[diag 13:35:48Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+  MODIS_TERRA: kept 1 of 1 granules (night filter)
+[diag 13:35:48Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=1
+[diag 13:35:48Z] SEARCH_START MODIS_AQUA
+[diag 13:35:48Z] SEARCH_DONE MODIS_AQUA n_l1b=1
+  MODIS_AQUA: kept 1 of 1 granules (night filter)
+[diag 13:35:48Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=1
+[diag 13:35:48Z] SEARCH_START VIIRS_SNPP
+[diag 13:35:48Z] SEARCH_DONE VIIRS_SNPP n_l1b=1
+  VIIRS_SNPP: kept 1 of 1 granules (night filter)
+[diag 13:35:48Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=1
+[diag 13:35:48Z] SEARCH_START VIIRS_NOAA20
+[diag 13:35:48Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=1
+  VIIRS_NOAA20: kept 1 of 1 granules (night filter)
+[diag 13:35:48Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=1
+[diag 13:35:48Z] SEARCH_START VIIRS_NOAA21
+[diag 13:35:48Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=1
+  VIIRS_NOAA21: kept 1 of 1 granules (night filter)
+[diag 13:35:48Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=1
+[diag 13:35:48Z] SEARCH_START VIIRS_SNPP_750
+[diag 13:35:48Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=1
+  VIIRS_SNPP_750: kept 1 of 1 granules (night filter)
+[diag 13:35:48Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=1
+[diag 13:35:48Z] SEARCH_START VIIRS_NOAA20_750
+[diag 13:35:48Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=1
+  VIIRS_NOAA20_750: kept 1 of 1 granules (night filter)
+[diag 13:35:48Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=1
+[diag 13:35:48Z] SEARCH_START VIIRS_NOAA21_750
+[diag 13:35:48Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=1
+  VIIRS_NOAA21_750: kept 1 of 1 granules (night filter)
+[diag 13:35:48Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=1
+_________ test_una_plataforma_muda_en_toda_la_corrida_no_es_completa __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000023395256E40>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1615/test_una_plataforma_muda_en_to0')
+capsys = <_pytest.capture.CaptureFixture object at 0x0000023395254590>
+
+    def test_una_plataforma_muda_en_toda_la_corrida_no_es_completa(monkeypatch, tmp_path, capsys):
+        """Hallazgo 241: Suomi NPP (o cualquier otra) devuelve cero gránulos antes de su cese."""
+        cod, cob = _correr_main(monkeypatch, tmp_path, _CMR(mudas=("VIIRS_SNPP",)), ANTES)
+        out = capsys.readouterr().out
+>       assert "Cobertura: completa" not in out, out
+E       AssertionError: === [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent ===
+E         Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+E         [diag 13:35:49Z] AUTH_START volcano=Lascar date=2026-10-25
+E         [diag 13:35:49Z] AUTH_OK
+E         [diag 13:35:49Z] SEARCH_START MODIS_TERRA
+E         [diag 13:35:49Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+E           MODIS_TERRA: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=1
+E         [diag 13:35:49Z] SEARCH_START MODIS_AQUA
+E         [diag 13:35:49Z] SEARCH_DONE MODIS_AQUA n_l1b=1
+E           MODIS_AQUA: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=1
+E         [diag 13:35:49Z] SEARCH_START VIIRS_SNPP
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+E         [diag 13:35:49Z] SEARCH_START VIIRS_NOAA20
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=1
+E           VIIRS_NOAA20: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=1
+E         [diag 13:35:49Z] SEARCH_START VIIRS_NOAA21
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=1
+E           VIIRS_NOAA21: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=1
+E         [diag 13:35:49Z] SEARCH_START VIIRS_SNPP_750
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+E         [diag 13:35:49Z] SEARCH_START VIIRS_NOAA20_750
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=1
+E           VIIRS_NOAA20_750: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=1
+E         [diag 13:35:49Z] SEARCH_START VIIRS_NOAA21_750
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=1
+E           VIIRS_NOAA21_750: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=1
+E         Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         
+E         Done.
+E         
+E       assert 'Cobertura: completa' not in '=== [VRP pr....\n\nDone.\n'
+E         
+E         'Cobertura: completa' is contained here:
+E           0 n_geo=1
+E           Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         ? +++++++++++++++++++
+E           
+E           Done.
+
+tests\test_cese_plataforma_nrt_s161.py:160: AssertionError
+_____ test_tras_el_cese_el_mensaje_nombra_a_suomi_npp_y_no_dice_completa ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000023395259E80>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1615/test_tras_el_cese_el_mensaje_n0')
+capsys = <_pytest.capture.CaptureFixture object at 0x000002339525A840>
+
+    def test_tras_el_cese_el_mensaje_nombra_a_suomi_npp_y_no_dice_completa(monkeypatch, tmp_path, capsys):
+        cod, cob = _correr_main(monkeypatch, tmp_path, _CMR(mudas=("VIIRS_SNPP",)), DIA_SIGUIENTE)
+        out = capsys.readouterr().out
+>       assert "Cobertura: completa" not in out, out
+E       AssertionError: === [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent ===
+E         Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+E         [diag 13:35:49Z] AUTH_START volcano=Lascar date=2026-11-03
+E         [diag 13:35:49Z] AUTH_OK
+E         [diag 13:35:49Z] SEARCH_START MODIS_TERRA
+E         [diag 13:35:49Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+E           MODIS_TERRA: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=1
+E         [diag 13:35:49Z] SEARCH_START MODIS_AQUA
+E         [diag 13:35:49Z] SEARCH_DONE MODIS_AQUA n_l1b=1
+E           MODIS_AQUA: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=1
+E         [diag 13:35:49Z] SEARCH_START VIIRS_SNPP
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+E         [diag 13:35:49Z] SEARCH_START VIIRS_NOAA20
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=1
+E           VIIRS_NOAA20: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=1
+E         [diag 13:35:49Z] SEARCH_START VIIRS_NOAA21
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=1
+E           VIIRS_NOAA21: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=1
+E         [diag 13:35:49Z] SEARCH_START VIIRS_SNPP_750
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+E         [diag 13:35:49Z] SEARCH_START VIIRS_NOAA20_750
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=1
+E           VIIRS_NOAA20_750: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=1
+E         [diag 13:35:49Z] SEARCH_START VIIRS_NOAA21_750
+E         [diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=1
+E           VIIRS_NOAA21_750: kept 1 of 1 granules (night filter)
+E         [diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=1
+E         Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         
+E         Done.
+E         
+E       assert 'Cobertura: completa' not in '=== [VRP pr....\n\nDone.\n'
+E         
+E         'Cobertura: completa' is contained here:
+E           0 n_geo=1
+E           Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         ? +++++++++++++++++++
+E           
+E           Done.
+
+tests\test_cese_plataforma_nrt_s161.py:169: AssertionError
+=================================== PASSES ====================================
+_________________ test_el_dia_del_cese_si_se_busca_suomi_npp __________________
+---------------------------- Captured stdout call -----------------------------
+[diag 13:35:49Z] AUTH_START volcano=Lascar date=2026-11-02
+[diag 13:35:49Z] AUTH_OK
+[diag 13:35:49Z] SEARCH_START MODIS_TERRA
+[diag 13:35:49Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+  MODIS_TERRA: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=1
+[diag 13:35:49Z] SEARCH_START MODIS_AQUA
+[diag 13:35:49Z] SEARCH_DONE MODIS_AQUA n_l1b=1
+  MODIS_AQUA: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_SNPP
+[diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP n_l1b=1
+  VIIRS_SNPP: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA20
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=1
+  VIIRS_NOAA20: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA21
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=1
+  VIIRS_NOAA21: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_SNPP_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=1
+  VIIRS_SNPP_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA20_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=1
+  VIIRS_NOAA20_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA21_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=1
+  VIIRS_NOAA21_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=1
+____________ test_un_reproceso_anterior_al_cese_si_busca_suomi_npp ____________
+---------------------------- Captured stdout call -----------------------------
+[diag 13:35:49Z] AUTH_START volcano=Lascar date=2026-10-25
+[diag 13:35:49Z] AUTH_OK
+[diag 13:35:49Z] SEARCH_START MODIS_TERRA
+[diag 13:35:49Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+  MODIS_TERRA: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=1
+[diag 13:35:49Z] SEARCH_START MODIS_AQUA
+[diag 13:35:49Z] SEARCH_DONE MODIS_AQUA n_l1b=1
+  MODIS_AQUA: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_SNPP
+[diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP n_l1b=1
+  VIIRS_SNPP: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA20
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=1
+  VIIRS_NOAA20: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA21
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=1
+  VIIRS_NOAA21: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_SNPP_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=1
+  VIIRS_SNPP_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA20_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=1
+  VIIRS_NOAA20_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA21_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=1
+  VIIRS_NOAA21_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=1
+__________________ test_sin_la_lista_de_ceses_se_busca_todo ___________________
+---------------------------- Captured stdout call -----------------------------
+[diag 13:35:49Z] AUTH_START volcano=Lascar date=2026-11-03
+[diag 13:35:49Z] AUTH_OK
+[diag 13:35:49Z] SEARCH_START MODIS_TERRA
+[diag 13:35:49Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+  MODIS_TERRA: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=1
+[diag 13:35:49Z] SEARCH_START MODIS_AQUA
+[diag 13:35:49Z] SEARCH_DONE MODIS_AQUA n_l1b=1
+  MODIS_AQUA: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_SNPP
+[diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP n_l1b=1
+  VIIRS_SNPP: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA20
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=1
+  VIIRS_NOAA20: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA21
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=1
+  VIIRS_NOAA21: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_SNPP_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=1
+  VIIRS_SNPP_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA20_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=1
+  VIIRS_NOAA20_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA21_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=1
+  VIIRS_NOAA21_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=1
+__________ test_tras_el_cese_el_modo_estricto_no_falla_por_el_retiro __________
+---------------------------- Captured stdout call -----------------------------
+=== [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+[diag 13:35:49Z] AUTH_START volcano=Lascar date=2026-11-03
+[diag 13:35:49Z] AUTH_OK
+[diag 13:35:49Z] SEARCH_START MODIS_TERRA
+[diag 13:35:49Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+  MODIS_TERRA: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=1
+[diag 13:35:49Z] SEARCH_START MODIS_AQUA
+[diag 13:35:49Z] SEARCH_DONE MODIS_AQUA n_l1b=1
+  MODIS_AQUA: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_SNPP
+[diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA20
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=1
+  VIIRS_NOAA20: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA21
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=1
+  VIIRS_NOAA21: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_SNPP_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA20_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=1
+  VIIRS_NOAA20_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=1
+[diag 13:35:49Z] SEARCH_START VIIRS_NOAA21_750
+[diag 13:35:49Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=1
+  VIIRS_NOAA21_750: kept 1 of 1 granules (night filter)
+[diag 13:35:49Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=1
+Cobertura: completa (ninguna búsqueda ni descarga fallida).
+
+Done.
+=========================== short test summary info ===========================
+PASSED tests/test_cese_plataforma_nrt_s161.py::test_el_dia_del_cese_si_se_busca_suomi_npp
+PASSED tests/test_cese_plataforma_nrt_s161.py::test_un_reproceso_anterior_al_cese_si_busca_suomi_npp
+PASSED tests/test_cese_plataforma_nrt_s161.py::test_sin_la_lista_de_ceses_se_busca_todo
+PASSED tests/test_cese_plataforma_nrt_s161.py::test_todo_vivo_dice_completa
+PASSED tests/test_cese_plataforma_nrt_s161.py::test_tras_el_cese_el_modo_estricto_no_falla_por_el_retiro
+PASSED tests/test_cese_plataforma_nrt_s161.py::test_una_busqueda_caida_es_falla_y_no_plataforma_muda
+FAILED tests/test_cese_plataforma_nrt_s161.py::test_tras_el_cese_no_se_busca_suomi_npp
+FAILED tests/test_cese_plataforma_nrt_s161.py::test_una_plataforma_muda_en_toda_la_corrida_no_es_completa
+FAILED tests/test_cese_plataforma_nrt_s161.py::test_tras_el_cese_el_mensaje_nombra_a_suomi_npp_y_no_dice_completa
+3 failed, 6 passed in 6.72s

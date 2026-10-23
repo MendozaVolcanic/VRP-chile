@@ -249,7 +249,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   perdidos en hipótesis ya implementada S15.
   - ⚠️ **El ejemplo drifteó — verificado S127.** La regla citaba
     `run_pipeline.py:220` pasando `eff_vent_lat` desde `get_effective_vent()`.
-    Hoy son las líneas **234/277/324** y la función es **`get_detection_anchor()`**;
+    Hoy son las líneas **252/295/342** (234/277/324 hasta S161, que agregó la cabecera FICHA) y la función es **`get_detection_anchor()`**;
     `get_effective_vent` quedó como alias sin llamador en producción (ver D17 y
     `docs/AUDIT_S127.md` §Hallazgo 7). **La lección vale entera**; el ejemplo no,
     como ya les pasó a A7, A13 y A17. Es la propia A6 aplicada a A6.
@@ -1245,7 +1245,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 
   | forma | ejemplo | el falso negativo que produjo |
   |---|---|---|
-  | el parámetro no se llama como la clave | `local_kernel_bg_compatible` (firma) vs `local_kernel_bg` (YAML), con `run_pipeline.py:244` de puente | «el kernel no corre en producción» — corre en 5 de los 11 Tier A |
+  | el parámetro no se llama como la clave | `local_kernel_bg_compatible` (firma) vs `local_kernel_bg` (YAML), con `run_pipeline.py:262` (244 hasta S161) de puente | «el kernel no corre en producción» — corre en 5 de los 11 Tier A |
   | la clave se lee de otra sección | `enable_utm_regrid` escrito en la raíz, leído de `thresholds:` (S124) | el flag arrancaba siempre apagado; su A/B habría corrido 4 brazos idénticos |
   | la llamada es calificada o renombrada | `store.append_record(`, `from pipeline.vrptir import vrp_tir_mw as _aveni_vrp_tir_mw` | «nadie la llama» sobre funciones que corren en cada granule |
 
