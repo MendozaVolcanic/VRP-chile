@@ -41,7 +41,7 @@ jobs:
           exit 0
 
       - name: Abrir issue si hay novedad o el vigilante esta ciego
-        if: steps.vigilar.outputs.codigo == "1" || steps.vigilar.outputs.codigo == "2"
+        if: steps.vigilar.outputs.codigo == '1' || steps.vigilar.outputs.codigo == '2'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -63,7 +63,7 @@ jobs:
           fi
 
       - name: Fallar si el vigilante no pudo correr
-        if: steps.vigilar.outputs.codigo != "0" && steps.vigilar.outputs.codigo != "1" && steps.vigilar.outputs.codigo != "2"
+        if: steps.vigilar.outputs.codigo != '0' && steps.vigilar.outputs.codigo != '1' && steps.vigilar.outputs.codigo != '2'
         run: |
           echo "el script no devolvio un codigo conocido: ${{ steps.vigilar.outputs.codigo }}"
           exit 1
