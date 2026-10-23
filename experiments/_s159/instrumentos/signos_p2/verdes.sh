@@ -18,7 +18,10 @@ foto() {
   { date -u; sha256sum $ARCH; } > "$O/sha_$1.txt"
 }
 foto antes
-{ date -u; time python experiments/_s157_prereg_d25/probar_evaluar_d25.py; echo "exit probar $?"; date -u; } > "$O/probar_salida.txt" 2>&1
+# S161: probar_evaluar_d25.py exige su carpeta de casos como argumento (l. 65); la primera corrida la omitió y cayó por
+# IndexError en la línea de arriba de todo, sin correr ningún caso (exit 1, salida guardada fuera del repo).
+{ date -u; time python experiments/_s157_prereg_d25/probar_evaluar_d25.py C:/vrp-trabajo/tmp_s161/probar_casos; echo "exit probar $?"; date -u; } > "$O/probar_salida.txt" 2>&1
+rm -rf C:/vrp-trabajo/tmp_s161/probar_casos
 { date -u; time python -m pytest -q -p no:cacheprovider --basetemp C:/vrp-trabajo/tmp_s161/bt_suite; echo "exit suite $?"; date -u; } > "$O/suite_salida.txt" 2>&1
 foto despues
 cp "$O"/*.txt "$R/experiments/_s159/instrumentos/signos_p2/"
