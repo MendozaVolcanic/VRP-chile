@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-23 20:17 UTC, hora del servidor (S161): tag de lectura de D25 puesto
+- Corrida final de mutaciones con las pruebas finales (HEAD `fb053347a`): control 0 fallas en 106; **58 de 58
+  atrapadas por aserción**, 0 por otra excepción; q01 equivalente, no atrapada. Cierra V45-05.
+- `NOTA_D47.md` commiteada (`a7418e01d`, sha256 `e77eda6d...c6e4`).
+- **Tag `s161-d25-lectura` sobre `a7418e01d`**, subido (objeto `724e43452`). `evaluar_d25.py` sha256 `93c26d62...fec2`.
+  Ningún veredicto del A/B leído antes del tag. Lo que sigue: la lectura de D25 (V1, V2a, V2b) con la referencia
+  congelada por hash, la tabla de `latest.php` sola al lado y el estrato 203; después, aparte, el brazo del 17 al 19
+  (run 39756261926). Recomendado hacerla en una sesión nueva (esta lleva más de 30 intercambios).
+
 ### 2026-10-23 19:23 UTC, hora del servidor (S161): D-47 ratificada por Nicolás
 - Textual: «Sí a D-47: ratifico las tres lecturas como recomiendas (signo común de la noche en el placebo c, orden de
   los bloques por su clave con la versión de numpy anotada en el registro, y D-34 y D-42 informados con su propio
