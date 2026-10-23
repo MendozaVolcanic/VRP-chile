@@ -134,6 +134,11 @@ mutar de las seis baterías (106 pruebas), que tiene que dar 0 fallas. Cada muta
   `isinstance(det.get("ic95"), list) and len(det["ic95"]) == 2` antes de indexar. Re-corrida sola con su control
   (`mutaciones_s12a2_parcial.jsonl`, `mutaciones_s12a2_salida.json`): control 0 fallas en 106; s12a2 atrapada por
   aserción en 4 pruebas, 0 por otra excepción. **Total: 58 de 58 atrapadas por aserción** (sin la equivalente q01).
+- **Corrida completa con las pruebas finales (S161, cierra V45-05 del verificador)**: sobre HEAD `fb053347a` (mismas
+  pruebas y evaluador que `7eb91eb5e`), `mutaciones_final_salida.txt`, `.json` y `mutaciones_final_parcial.jsonl`:
+  control 0 fallas en 106; **58 de 58 atrapadas por aserción, 0 por otra excepción**; por grupo D-45 24 de 24, D-45 §4
+  2 de 2, V34-03 7 de 7, V29-01 5 de 5, D-42 13 de 13, V42-02 2 de 2, V42-04 2 de 2, estrato 203 3 de 3; q01 NO
+  ATRAPADA, como se espera; ninguna copia `_mut_*` al final. Esta es la corrida que vale para el 58 de 58.
 - **Equivalente declarada (§5), q01** («menos del 5 %» en vez de «5 % o menos»): NO ATRAPADA, como se espera; no entra
   al total.
 
