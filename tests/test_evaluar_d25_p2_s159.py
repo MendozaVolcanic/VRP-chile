@@ -52,6 +52,9 @@ def test_d_que_gana_en_muchas_noches_da_gana():
     _tiene("decidir_p2_bloques")
     v, det = X.decidir_p2_bloques(_contrib([[-1]] * 12), ok_ctrl=True)
     assert v == "GANA", (v, det)
+    # S161: preguntar antes de indexar, para que si el intervalo deja de informarse falle por aserción y no por
+    # TypeError (la mutación s12a2 de experiments/_s159/instrumentos/signos_p2/ no contaba por eso, S156)
+    assert isinstance(det.get("ic95"), list) and len(det["ic95"]) == 2, det
     assert det["neto"] == -12 and det["ic95"][1] < 0
 
 
@@ -71,6 +74,7 @@ def test_neto_en_contra_chico_bloquea_sin_dar_pierde():
     v, det = X.decidir_p2_bloques(_contrib([[+1]] * 6 + [[-1]] * 4), ok_ctrl=True)
     assert det["neto"] == 2, det
     assert v == "BLOQUEA", (v, det)
+    assert isinstance(det.get("ic95"), list) and len(det["ic95"]) == 2, det     # S161, ver arriba
     assert det["ic95"][0] <= 0 <= det["ic95"][1]
 
 
