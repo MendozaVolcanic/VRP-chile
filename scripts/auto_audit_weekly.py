@@ -439,6 +439,63 @@ def _detector_banco(r, frontera):
     return _detector(bool(r.get("sha")), r["noche"], frontera)
 
 
+# --- S161 (recomendación 5 del frente S159 sobre el cese, experiments/_s159/cese_snpp/INFORME.md §3 H3) ---
+# POR QUÉ: desde el 2026-11-02 13:00 UTC Suomi NPP deja de entregar y VIIRS sigue sólo con NOAA-20 y
+# NOAA-21: una pasada menos por noche sobre cada volcán. El recall por noche se salva con menos pasadas y el
+# máximo de la noche sale de menos candidatos, así que recall y magnitud cambian por el muestreo, no por el
+# detector, y la ventana de 60 días mezclaría las dos mitades hasta enero (A104 por otra puerta). Igual que
+# con la frontera de K, cada sensor que perdió una plataforma se juzga sólo desde el primer día UTC
+# completo sin ella, y lo de antes se informa en `plataformas.aparte`. MODIS no pierde nada y no se recorta.
+# No se puede, en cambio, sacar a Suomi NPP de los dos lados: la referencia de MIROVA no dice de qué
+# plataforma es cada alerta (columna Sensor = VIIRS375 o VIIRS750). Las alertas protegidas no se recortan:
+# son pasadas, no tasas. La fecha sale de la misma lista que lee el NRT (#897) y la vigilancia (#892), y el
+# día con la misma regla que pipeline/fetch.py::cese_cumplido (no se importa: el workflow del audit no
+# instala earthaccess). Test: tests/test_auto_audit_cese_plataforma_s161.py.
+CESES_JSON = os.path.join(HERE, "ceses_esperados.json")
+
+
+def leer_ceses(path=None):
+    """(ceses, error): cada cese con su plataforma, los sensores del audit que pierde y el primer día UTC sin
+    ella. El día del cese todavía trae las pasadas nocturnas (Suomi NPP pasa de 04:54 a 07:06 UTC y cesa a
+    las 13:00), así que el primero sin ella es el siguiente, salvo un cese a medianoche exacta."""
+    path = path or CESES_JSON
+    try:
+        with open(path, encoding="utf-8") as fh:
+            datos = json.load(fh)
+        ceses = []
+        for c in datos["ceses"]:
+            desde = datetime.strptime(c["desde_utc"], "%Y-%m-%dT%H:%M:%SZ")
+            dia = desde.date() + timedelta(days=0 if (desde.hour, desde.minute, desde.second) == (0, 0, 0)
+                                           else 1)
+            ceses.append({"plataforma": c["plataforma"], "desde_utc": c["desde_utc"],
+                          "sensores": sorted({our_bucket(s) for s in c["sensores"]} - {None}),
+                          "primer_dia_sin": dia.isoformat()})
+        return ceses, None
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        return [], f"{type(e).__name__}: {e}"
+
+
+def juzga_desde(ceses, hoy):
+    """{sensor: primer día que se juzga, o None si no perdió plataforma}: el último cese ya cumplido hoy."""
+    return {s: max((c["primer_dia_sin"] for c in ceses
+                    if s in c["sensores"] and c["primer_dia_sin"] <= hoy.isoformat()), default=None)
+            for s in SENSORS}
+
+
+def es_aparte(sensor, fecha, desde):
+    """¿La noche (o pasada) es de antes del último cese de su sensor? Esas no se juzgan, se informan."""
+    d = desde.get(sensor)
+    return bool(d) and fecha[:10] < d
+
+
+def partir_por_plataformas(mir, desde):
+    """(juzgadas, aparte) de las noches de MIROVA {(volcán, sensor, fecha): vrp}."""
+    juzgadas, aparte = {}, {}
+    for k, v in mir.items():
+        (aparte if es_aparte(k[1], k[2], desde) else juzgadas)[k] = v
+    return juzgadas, aparte
+
+
 def aplicar_d9(alertas, modo=REGLA_MINIMAS, filas_ref=None):
     """Quita las pasadas mínimas (D-9) de las alertas del cargador canónico. 'original' no toca nada.
 
@@ -864,6 +921,8 @@ def linea_historial(out, cobertura_pct, gt_stale_dias):
     por_sensor = falsas.get("por_sensor") or {}
     return {"date": out["generated_utc"][:10], "verdict": out["verdict"],
             "detector": out.get("detector"),
+            # S161: una línea con VIIRS juzgado desde un cese no se compara con una sin ese recorte.
+            "plataformas_juzga_desde": (out.get("plataformas") or {}).get("juzga_desde"),
             "cobertura_pct": cobertura_pct, "gt_stale_dias": gt_stale_dias,
             "recall": {s: out["recall"][s]["recall_crater_pct"] for s in SENSORS},
             "n_flags": len(out["flags"]),
@@ -886,6 +945,11 @@ def main():
     mir, inst_mir, n_diurnas_excluidas = noches_mirova_con_instante(aplicar_d9(alertas, REGLA_MINIMAS, filas_ref),
                                                                     coords, win)
     mir_original, _ = noches_mirova(alertas, coords, win)
+    # S161: cada sensor se juzga desde el último cese de plataforma ya cumplido; lo anterior va aparte.
+    ceses, error_ceses = leer_ceses()
+    desde_plat = juzga_desde(ceses, today)
+    mir, mir_aparte = partir_por_plataformas(mir, desde_plat)
+    mir_original, _ = partir_por_plataformas(mir_original, desde_plat)
 
     # 2. Nuestros records + integridad (la integridad mira TODO el archivo, no sólo la ventana)
     records_por_volcan, integrity = cargar_records()
@@ -961,6 +1025,9 @@ def main():
             f"{gt_stale_dias} días (> {MAX_GT_STALE_DAYS}) — es el scraper, no los volcanes")
     if error_banco:
         cobertura_avisos.append(f"no se pudieron evaluar las alertas protegidas (banco de paridad): {error_banco}")
+    if error_ceses:
+        cobertura_avisos.append(f"no se pudo leer scripts/ceses_esperados.json ({error_ceses}): la ventana de "
+                                "VIIRS puede estar mezclando noches con y sin una plataforma retirada")
     if protegidas:
         cobertura_avisos.extend(avisos_protegidas_sin_record(protegidas, vigente))
 
@@ -996,7 +1063,8 @@ def main():
     if banco is None:
         falsas = {"error": error_banco, "alarma": False}
     else:
-        recs_falsas = medir_falsas_ventana(win_falsas, banco)
+        recs_falsas = [r for r in medir_falsas_ventana(win_falsas, banco)
+                       if not es_aparte(r["b"], r["noche"], desde_plat)]
         falsas = resumir_falsas_por_detector(recs_falsas, frontera, vigente)
 
     out = {
@@ -1017,6 +1085,10 @@ def main():
         "por_detector": por_detector,
         "fuera_de_detector": nuestros["fuera_de_detector"],
         "avisos_detector": avisos_detector,
+        # S161: desde qué día se juzga cada sensor y lo de antes del cese (detector vigente), sin flags.
+        "plataformas": {"ceses": ceses, "juzga_desde": desde_plat, "error": error_ceses,
+                        "aparte": (evaluar_detector(mir_aparte, ours, vistos, vigente, frontera)
+                                   if mir_aparte else None)},
         "alertas_protegidas": {"lectura": "A", "umbral_mw": cm.UMBRAL_PROTEGIDA_MW, "lista": protegidas,
                                "error": error_banco},
         "falsas_publicaciones": falsas,
@@ -1035,6 +1107,10 @@ def main():
 
     print(f"Auto-audit semanal — ventana {win[0]} → {win[1]} · detector vigente {vigente} "
           f"(datos desde {frontera}) · D-9 {REGLA_MINIMAS}")
+    for s, d in desde_plat.items():
+        if d:
+            print(f"  {s} se juzga desde {d} (cese de plataforma, scripts/ceses_esperados.json); "
+                  f"{sum(1 for k in mir_aparte if k[1] == s)} noches de MIROVA anteriores van aparte")
     for det, e in por_detector.items():
         for s in SENSORS:
             r = e["recall"][s]

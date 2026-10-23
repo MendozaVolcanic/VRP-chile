@@ -92,6 +92,10 @@ def correr(monkeypatch, tmp_path):
         monkeypatch.setattr(aa, "es_pasada_diurna_descartada", lambda *a: False)
         monkeypatch.setattr(aa, "_csv_ultima_fecha", lambda p: HOY.isoformat())
         monkeypatch.setattr(aa, "OUTDIR", str(tmp_path))
+        # S161: este escenario usa la fecha real y records de Suomi NPP; sin fijar la lista de ceses, desde
+        # el día siguiente al cese el audit recortaría VIIRS y la prueba cambiaría de sentido sola. El
+        # recorte por plataforma se prueba en tests/test_auto_audit_cese_plataforma_s161.py.
+        monkeypatch.setattr(aa, "leer_ceses", lambda *a, **k: ([], None))
         aa.main()
         out = json.loads((tmp_path / "latest.json").read_text(encoding="utf-8"))
         hist = [json.loads(x) for x in (tmp_path / "history.jsonl").read_text(encoding="utf-8").splitlines()]
