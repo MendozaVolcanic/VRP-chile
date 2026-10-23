@@ -128,6 +128,9 @@ def test_el_sorteo_es_por_bloque_y_no_por_pasada():
     _tiene("calibrar_p2")
     v, det = X.decidir_p2_bloques(_contrib([[+1] * 4] * 3), ok_ctrl=True)
     assert det.get("resultado_sin_calibrar") == "PIERDE", det
+    # S161: preguntar antes de comparar, para que un falso que deja de informarse (None) falle por aserción y no por
+    # TypeError (mutación s12c de experiments/_s159/instrumentos/signos_p2/mutar_signos_p2.py)
+    assert det.get("falsos_gana") is not None and det.get("falsos_pierde") is not None, det
     assert det["falsos_gana"] > 0.10 and det["falsos_pierde"] > 0.10, det
     assert det["calibrada"] is False, det
     assert det.get("resultado_d42") == "INDECIDIBLE", det

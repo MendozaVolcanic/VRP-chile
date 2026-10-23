@@ -104,9 +104,14 @@ MUT = [
     ("s11", "D-45", "11. la calibración de D-42 todavía decide (un fallo deja INDECIDIBLE)",
      [("    return regla_signos_p2(neto, B, pr), det\n",
        "    v45 = regla_signos_p2(neto, B, pr)\n    return (\"INDECIDIBLE\" if det[\"calibrada\"] is False else v45), det\n")]),
-    ("s12a", "D-45", "12. el resultado de D-34 deja de informarse",
+    # s12a (primera versión, ic95 y resultado de D-34 en None a la vez) quedó en mutaciones_parcial.jsonl como CAE: dos
+    # pruebas de tests/test_evaluar_d25_p2_s159.py indexan det["ic95"] sin preguntar antes (TypeError). Se parte en dos:
+    ("s12a1", "D-45", "12. el resultado de D-34 deja de informarse",
      [("    det.update(ic95=[lo, hi], resultado_sin_calibrar=v, calibrada",
-       "    det.update(ic95=None, resultado_sin_calibrar=None, calibrada")]),
+       "    det.update(ic95=[lo, hi], resultado_sin_calibrar=None, calibrada")]),
+    ("s12a2", "D-45", "12. el intervalo de D-34 deja de informarse (se espera CAE: ver README)",
+     [("    det.update(ic95=[lo, hi], resultado_sin_calibrar=v, calibrada",
+       "    det.update(ic95=None, resultado_sin_calibrar=v, calibrada")]),
     ("s12b", "D-45", "12. el resultado de D-42 deja de informarse",
      [('               resultado_d42=v if calibrada else "INDECIDIBLE")', "               resultado_d42=None)")]),
     ("s12c", "D-45", "12. los falsos de D-42 dejan de informarse",
@@ -115,8 +120,10 @@ MUT = [
     # ---- §4: lo que se informa (agregadas, no exigidas por §5)
     ("i01", "D-45 §4", "las sumas de bloque sin los ceros en el detalle",
      [('"sumas_bloque": sorted(sumas),', '"sumas_bloque": sorted(x for x in sumas if x),')]),
-    ("i02", "D-45 §4", "el p mínimo con 2^(B-1)",
-     [('"minimo": [1, den], "semilla": None', '"minimo": [1, den // 2], "semilla": None')]),
+    # i02 (primera versión, [1, den // 2]) se rompía sola con B = 0 (ZeroDivisionError en el evaluador mutado): no medía
+    # nada. Queda en mutaciones_parcial.jsonl como historia; la reemplaza i02b.
+    ("i02b", "D-45 §4", "el p mínimo con 2^(B+1)",
+     [('"minimo": [1, den], "semilla": None', '"minimo": [1, 2 * den], "semilla": None')]),
     # ---- V34-03 (el intervalo de D-34 que ahora informa, y el comparador de M)
     ("v05", "V34-03", "otra semilla en el intervalo de P2",
      [("    W = pesos_bloque(bl_p2)\n", "    W = pesos_bloque(bl_p2, semilla=SEMILLA + 11)\n")]),
