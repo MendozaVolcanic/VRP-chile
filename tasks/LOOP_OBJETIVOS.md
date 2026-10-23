@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-23 17:53 UTC, hora del servidor (S161): D-45 implementado; D-46 decidida; verdes re-corriendo
+- Implementador de D-45 entregó (con dos cortes: suspensión y reinicio del equipo, y un ENOTFOUND de la API). En
+  `s159-evaluador-d25`: rojas 31 de 31 por aserción (`da5e895c7`), código (`c8a000602`), placebos (404 corridas:
+  (a) GANA y (b) PIERDE en todas las celdas con sustrato; (c) por noche GANA 8/320 y PIERDE 4/320), mediciones
+  sintéticas (tasa exacta por cola de 4,81 % o menos con B de 5 a 20), mutaciones 58 de 58 por aserción (s12a2
+  re-corrida tras preguntar por `ic95` en `tests/test_evaluar_d25_p2_s159.py`, `ac6eab47b`).
+- **D-46 decidida por Nicolás** (textual: «lo que recomiendes», ante la recomendación de leer el 5 % del placebo (c)
+  sobre todo (c) e informar cada celda): se lee sobre todo (c) por cola; V2 50 % VIIRS 375 (GANA 3/40, P binomial 0,136)
+  se informa y no decide. POR QUÉ: leído por celda, 16 celdas-cola con 40 semillas rechazan una regla correcta con
+  probabilidad 0,67. Nota sellada `NOTA_D46.md` junto a la adenda.
+- Verdes, primera corrida (17:12 a 17:18 UTC) ROJA por el instrumento: `verdes.sh` no le pasó la carpeta de casos a
+  `probar_evaluar_d25.py` (IndexError sin correr nada), y la suite dio 1 falla de 2.448 en
+  `test_mirova_csv_freshness_f49` (el CSV de la rama es del 2026-10-21, sin cambios desde la adenda: entorno, no
+  D-45). Corregido en `8642543ec`; segunda corrida en curso.
+
 ### 2026-10-23 ~14:55 UTC (S161): vigilante de OSF arreglado (#899)
 - Nicolás (textual): «Sí: arregla las comillas del vigilante de OSF en un PR chico aparte de #888, con prueba de que
   el yml se acepta, y mergéalo con CI verde.» #899 mergeado por squash (`e31bf0a1d`) con CI verde (run 39972785243).
