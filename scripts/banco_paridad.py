@@ -60,7 +60,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
 from auto_audit_weekly import _coords_por_volcan, es_pasada_diurna_descartada  # noqa: E402
-from clase_mirova import TIPO_MINIMA_SE, aplicar_regla_minimas  # noqa: E402
+from clase_mirova import TIPO_MINIMA_SE, VENTANA_S, aplicar_regla_minimas  # noqa: E402
 from referencia_mirova_unificada import (HISTORICO_RECUPERADAS,  # noqa: E402
                                          RESPALDO_20260408, SNAP_CONS,
                                          SNAP_OCR, TIPO_SIN_GEOMETRIA,
@@ -73,7 +73,9 @@ VOLS = ["Lascar", "Lastarria", "Isluga", "Tupungatito", "PlanchonPeteroa", "Neva
         "Llaima", "Villarrica", "Copahue", "PuyehueCordonCaulle", "Chaiten"]
 BUCKETS = ["MODIS", "VIIRS375", "VIIRS750"]
 INICIO_DEFECTO = "2026-03-01"  # spec §7.5: cobertura CONS >= 99 % y OCR confiable desde marzo
-TOL_S = 120
+# S159 (I3): la ventana de pareo con MIROVA se define una sola vez, en clase_mirova.VENTANA_S (120 s); antes estaba
+# escrita como literal acá y allá (tests/test_pareo_unico_mirova_s159.py).
+TOL_S = VENTANA_S
 N_BARAJADOS = 50
 N_MIN_AUC = 5
 
