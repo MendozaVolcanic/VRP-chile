@@ -113,7 +113,25 @@ sin sustrato y controles caídos) no cambiaron: siguen vigilando lo que se infor
 
 ## Mutaciones
 
-MUTACIONES_PENDIENTE
+`mutar_signos_p2.py` (copia extendida de `calib_p2/mutar_calib_p2.py`). Atrapada = alguna prueba falla por
+`AssertionError` y ninguna por otra excepción ni error, leído del XML de JUnit; cada corrida empieza con una copia sin
+mutar de las seis baterías (106 pruebas), que tiene que dar 0 fallas. Cada mutación se anota al terminar en
+`mutaciones_parcial.jsonl`; el resumen va en `mutaciones_salida.txt` y `.json`.
+
+- **Primer tramo** (`mutaciones_parcial_tramo1.jsonl`, `mutaciones_salida_tramo1.txt`): control verde; 54 de 57
+  atrapadas. Cayeron por otra excepción s12a (D-34 en None: `TypeError` en dos pruebas de
+  `tests/test_evaluar_d25_p2_s159.py`), s12c (los falsos de D-42 en None: `TypeError` en una prueba de s160, que se
+  arregló preguntando antes) e i02 (la mutación se rompía sola con B = 0; la reemplaza i02b).
+- **Corrida final, con las pruebas en su versión final** (`mutaciones_parcial.jsonl`, `mutaciones_salida.txt`):
+  control verde (0 fallas en 106); **57 de 58 atrapadas por aserción**: D-45 §5 23 de 24, §4 2 de 2, V34-03 7 de 7,
+  V29-01 5 de 5, D-42 13 de 13, V42-02 2 de 2, V42-04 2 de 2, estrato 203 3 de 3. Ninguna copia `_mut_*` al final.
+- **La que no cuenta: s12a2** (el intervalo de D-34 deja de informarse, `ic95=None`): 2 pruebas fallan por aserción
+  (las de S161 que lo miran), pero 2 de `tests/test_evaluar_d25_p2_s159.py` (`test_d_que_gana_en_muchas_noches_da_gana`
+  y `test_neto_en_contra_chico_bloquea_sin_dar_pierde`) indexan `det["ic95"]` sin preguntar antes y caen por
+  `TypeError`. Arreglarlo es agregar una aserción en ese archivo, que esta tarea no me deja editar: queda para quien
+  decida. La otra mitad de la mutación 12 de §5 (el resultado de D-34, s12a1) sí queda atrapada.
+- **Equivalente declarada (§5), q01** («menos del 5 %» en vez de «5 % o menos»): NO ATRAPADA, como se espera; no entra
+  al total.
 
 ## Verdes
 
