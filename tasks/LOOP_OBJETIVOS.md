@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-23 19:23 UTC, hora del servidor (S161): D-47 ratificada por Nicolás
+- Textual: «Sí a D-47: ratifico las tres lecturas como recomiendas (signo común de la noche en el placebo c, orden de
+  los bloques por su clave con la versión de numpy anotada en el registro, y D-34 y D-42 informados con su propio
+  mínimo), sin cambio de código.» Nota sellada `NOTA_D47.md` junto a la adenda, se commitea en `s159-evaluador-d25`
+  cuando termine la corrida final de mutaciones (árbol quieto). numpy local 2.4.4, Python 3.12.10.
+- Falta para el tag de lectura: que la corrida final de mutaciones con las pruebas finales dé 58 de 58 (V45-05).
+
 ### 2026-10-23 ~19:05 UTC (S161): verificador de D-45 entregó; mutaciones finales corriendo; D-47 a Nicolás
 - Verdes (segunda corrida, `7eb91eb5e`): probar 31 de 31; suite 2.447 pasan y 1 falla de frescura del CSV de la rama
   (2026-10-21, sin cambios desde la adenda: entorno). Árbol quieto comprobado.
