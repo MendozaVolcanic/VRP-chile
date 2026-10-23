@@ -1,0 +1,42 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-09-29 a 2026-09-29 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-09-29 a 2026-09-29 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-09-29 a 2026-09-29 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+sha cons bbf504612c92220f543d2155128624076256b867 sha ocr a2769d9d3b674c6eaad1d7a845edbf8468a61a9c
+  ref {'fecha_utc': '2026-09-29 04:54:00', 'sensor_bucket': 'VIIRS375', 'tipo': 'ALERTA_TERMICA_OCR', 'vrp_mw': 1.86, 'dist_km': 5.68, 'source': 'OCR'}
+  ref {'fecha_utc': '2026-09-29 05:18:01', 'sensor_bucket': 'VIIRS375', 'tipo': 'ALERTA_TERMICA', 'vrp_mw': 0.04, 'dist_km': 5.41, 'source': 'CONS'}
+  ref {'fecha_utc': '2026-09-29 06:00:02', 'sensor_bucket': 'VIIRS375', 'tipo': 'RUTINA', 'vrp_mw': 0.0, 'dist_km': 0.0, 'source': 'CONS'}
+  ref {'fecha_utc': '2026-09-29 06:36:00', 'sensor_bucket': 'VIIRS375', 'tipo': 'RUTINA', 'vrp_mw': 0.0, 'dist_km': 0.0, 'source': 'CONS'}
+  ref {'fecha_utc': '2026-09-29 17:36:01', 'sensor_bucket': 'VIIRS375', 'tipo': 'RUTINA', 'vrp_mw': 0.0, 'dist_km': 0.0, 'source': 'CONS'}
+  ref {'fecha_utc': '2026-09-29 18:24:02', 'sensor_bucket': 'VIIRS375', 'tipo': 'RUTINA', 'vrp_mw': 0.0, 'dist_km': 0.0, 'source': 'CONS'}
+  ref {'fecha_utc': '2026-09-29 19:00:00', 'sensor_bucket': 'VIIRS375', 'tipo': 'RUTINA', 'vrp_mw': 0.0, 'dist_km': 0.0, 'source': 'CONS'}
+  ref {'fecha_utc': '2026-09-29 19:18:01', 'sensor_bucket': 'VIIRS375', 'tipo': 'RUTINA', 'vrp_mw': 0.0, 'dist_km': 0.0, 'source': 'CONS'}
+referencia tal cual, regla original
+   original 2026-09-29 04:54:00+00:00 VIIRS375 lab=pos dist_ref=None pub=0
+   original 2026-09-29 05:18:00+00:00 VIIRS375 lab=pos dist_ref=None pub=1
+   original 2026-09-29 06:00:00+00:00 VIIRS375 lab=sin_info dist_ref=None pub=1
+   original 2026-09-29 06:36:00+00:00 VIIRS375 lab=sin_info dist_ref=None pub=0
+referencia tal cual, regla SN
+   SN       2026-09-29 04:54:00+00:00 VIIRS375 lab=pos dist_ref=None pub=0
+   SN       2026-09-29 05:18:00+00:00 VIIRS375 lab=sin_info dist_ref=None pub=1
+   SN       2026-09-29 06:00:00+00:00 VIIRS375 lab=sin_info dist_ref=None pub=1
+   SN       2026-09-29 06:36:00+00:00 VIIRS375 lab=sin_info dist_ref=None pub=0
+referencia con la fila 04:54 a 9,59 km (regla del scraper -> FALSO_POSITIVO_OCR)
+   SN       2026-09-29 04:54:00+00:00 VIIRS375 lab=far_ref dist_ref=9.59 pub=0
+   SN       2026-09-29 05:18:00+00:00 VIIRS375 lab=sin_info dist_ref=None pub=1
+   SN       2026-09-29 06:00:00+00:00 VIIRS375 lab=sin_info dist_ref=None pub=1
+   SN       2026-09-29 06:36:00+00:00 VIIRS375 lab=sin_info dist_ref=None pub=0
+
+alertas nocturnas >= 1 MW de Tupungatito en toda la referencia del snapshot:
+   {'fecha_utc': '2026-04-13 18:24:00', 'sensor_bucket': 'VIIRS375', 'tipo': 'ALERTA_TERMICA_OCR', 'vrp_mw': 1.62, 'dist_km': 2.24, 'source': 'OCR'}
+   {'fecha_utc': '2026-08-01 05:00:00', 'sensor_bucket': 'VIIRS375', 'tipo': 'ALERTA_TERMICA_OCR', 'vrp_mw': 1.25, 'dist_km': 5.41, 'source': 'OCR'}
+   {'fecha_utc': '2026-08-20 17:30:02', 'sensor_bucket': 'VIIRS750', 'tipo': 'ALERTA_TERMICA_OCR', 'vrp_mw': 3.0, 'dist_km': 5.14, 'source': 'OCR'}
+   {'fecha_utc': '2026-09-14 06:18:00', 'sensor_bucket': 'VIIRS375', 'tipo': 'ALERTA_TERMICA_OCR', 'vrp_mw': 2.22, 'dist_km': 2.97, 'source': 'OCR'}
+   {'fecha_utc': '2026-09-28 05:18:00', 'sensor_bucket': 'VIIRS375', 'tipo': 'ALERTA_TERMICA_OCR', 'vrp_mw': 2.51, 'dist_km': 5.27, 'source': 'OCR'}
+   {'fecha_utc': '2026-09-29 04:54:00', 'sensor_bucket': 'VIIRS375', 'tipo': 'ALERTA_TERMICA_OCR', 'vrp_mw': 1.86, 'dist_km': 5.68, 'source': 'OCR'}
