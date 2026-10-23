@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-23 ~19:05 UTC (S161): verificador de D-45 entregó; mutaciones finales corriendo; D-47 a Nicolás
+- Verdes (segunda corrida, `7eb91eb5e`): probar 31 de 31; suite 2.447 pasan y 1 falla de frescura del CSV de la rama
+  (2026-10-21, sin cambios desde la adenda: entorno). Árbol quieto comprobado.
+- Verificador limpio (Fable 5.1, high, `fb053347a`, `experiments/_s159/instrumentos/verificador_d45/INFORME.md`): A1
+  (el evaluador decide P2 como la adenda §2) CONFIRMADO con enumeración y generador propios; A2, A3, A5, A6, A7
+  CONFIRMADOS; A4 y A8 CONFIRMADOS EN PARTE (V45-05: 57 de las 58 mutaciones corrieron con pruebas anteriores a
+  `ac6eab47b`; V45-04: verdes sobre `8642543ec`, mismos sha256). 5 mutaciones propias, las 5 atrapadas. Sobre el texto
+  de la regla, gravedad 2: V45-01 (el paréntesis de §6 dice acción común y el nulo pide signo común; el código sigue el
+  signo) y V45-02 (con B de 21 o más el valor-p por sorteos depende del orden de los bloques, que la adenda no fija; el
+  código usa la clave del bloque). Nada cambia un veredicto de P2 ni impide el tag por el lado del evaluador.
+- Para cerrar V45-05 por medición y no por argumento: corrida completa de `mutar_signos_p2.py` con las pruebas finales,
+  en curso desde ~19:04 UTC (salida a `C:\vrp-trabajo\tmp_s161\mut_final\`, se copia a `signos_p2/` al terminar).
+- **D-47 (pendiente, Nicolás)**: ratificar antes del tag (a) V45-01: en (c) manda el signo común de la noche; (b)
+  V45-02: con sorteos, el orden de los bloques es el de su clave, y la versión de numpy se anota en el registro de la
+  lectura; (c) lectura 1: D-34 y D-42 se informan con su propio mínimo. Recomendación: ratificar las tres, sin cambio de
+  código.
+
 ### 2026-10-23 17:53 UTC, hora del servidor (S161): D-45 implementado; D-46 decidida; verdes re-corriendo
 - Implementador de D-45 entregó (con dos cortes: suspensión y reinicio del equipo, y un ENOTFOUND de la API). En
   `s159-evaluador-d25`: rojas 31 de 31 por aserción (`da5e895c7`), código (`c8a000602`), placebos (404 corridas:
