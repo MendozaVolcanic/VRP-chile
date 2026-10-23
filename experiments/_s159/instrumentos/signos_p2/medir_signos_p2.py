@@ -13,6 +13,8 @@ Subcomandos:
                 D-45, D-42 y D-34 sin calibrar.
   escenarios N [lista]   los escenarios nulos y de efecto de V34-01 y de calib_p2/cobertura_p2_calibrada.py (mismos
                 generadores, semillas 0..N-1), con D-45 al lado de D-42 y de D-34; intervalos de Wilson al 95 %.
+  esperado_escenarios N lista   en los escenarios NULOS, la tasa exacta de D-45 sobre las magnitudes de cada conjunto
+                (sin el ruido de los signos sorteados con las semillas 0..N-1).
   v4220         el caso de V42-20: 7 noches del mismo lado decide (p = 1/128), 6 contra 1 no (p = 8/128).
 
 Las dos preguntas del instrumento: (1) ¿vería una regla mal calibrada? Sí: la columna de D-34 sin calibrar reproduce
@@ -177,6 +179,45 @@ def escenarios(n_sim, solo):
                                                        ("GANA", "PIERDE")), time.time() - t0), flush=True)
 
 
+def esperado_escenarios(n_sim, solo):
+    """Separa la regla de la muestra de semillas: para cada conjunto de un escenario NULO (semillas 0..n-1, los mismos
+    que escenarios), la probabilidad EXACTA de que D-45 decida GANA o PIERDE si los signos de sus bloques se sortearan
+    de nuevo (2^B repartos, prueba_signos_p2 y regla_signos_p2 reales, una llamada por neto posible). En los nulos de
+    estos generadores, dada la magnitud de cada bloque su signo es simétrico e independiente (iid por pasada o signo
+    común por noche), así que el promedio es la tasa de la regla sobre esas magnitudes sin el ruido de los signos
+    sorteados. Con B > 20 se usa el valor-p exacto en vez del de sorteos (aproximación, marcada)."""
+    for clave in solo:
+        nombre, tipo, gen = ESC[clave]
+        eg = ep = 0.0
+        aprox = 0
+        for s in range(n_sim):
+            c = contrib(gen(np.random.default_rng(s)))
+            tot = collections.Counter()
+            for x in c:
+                tot[x["bloque"]] += x["c"]
+            mags = [abs(v) for v in tot.values()]
+            B = len(mags)
+            aprox += B > X.MAX_B_EXACTO_P2
+            dist = {0: 1}
+            for m in mags:
+                nueva = collections.Counter()
+                for v, k in dist.items():
+                    nueva[v + m] += k
+                    nueva[v - m] += k
+                dist = nueva
+            den = 2 ** B
+            for neto, k in dist.items():
+                pr = X.prueba_signos_p2(mags, neto) if B <= X.MAX_B_EXACTO_P2 else {
+                    "gana": [sum(q for x, q in dist.items() if x <= neto), den],
+                    "pierde": [sum(q for x, q in dist.items() if x >= neto), den]}
+                v = X.regla_signos_p2(neto, B, pr)
+                eg += k / den * (v == "GANA")
+                ep += k / den * (v == "PIERDE")
+        print("%-62s n=%d | D-45 esperado exacto sobre estas magnitudes: GANA %.4f, PIERDE %.4f%s" % (
+            nombre, n_sim, eg / n_sim, ep / n_sim, " (aproximado en %d conjuntos con B > 20)" % aprox if aprox else ""),
+            flush=True)
+
+
 def v4220():
     for por_noche, nombre in (([[+1]] * 7, "7 noches de +1"), ([[-1]] * 7, "7 noches de -1"),
                               ([[+1]] * 6 + [[-1]], "6 de +1 contra 1 de -1"), ([[-1]] * 6 + [[+1]], "6 de -1 contra 1 de +1")):
@@ -197,5 +238,7 @@ if __name__ == "__main__":
         enumerables()
     elif cmd == "escenarios":
         escenarios(int(sys.argv[2]), sys.argv[3].split(",") if len(sys.argv) > 3 else list(ESC))
+    elif cmd == "esperado_escenarios":
+        esperado_escenarios(int(sys.argv[2]), sys.argv[3].split(","))
     elif cmd == "v4220":
         v4220()
