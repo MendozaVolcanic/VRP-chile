@@ -19,7 +19,12 @@ se lee del XML de JUnit, no del resumen de pytest. Las copias van en experiments
 RAIZ = AQUI.parents[1]) y se borran al terminar cada una. Cada pytest usa su propio --basetemp, para poder correr
 varias mutaciones en paralelo sin que una limpie el directorio temporal de otra. Sin enlaces de carpetas.
 
-Uso: python mutar_signos_p2.py [--solo id1,id2] [--out salida.json] [--paralelo N]
+S161, después del reinicio del computador del 2026-10-23 13:21 UTC (se perdieron los resultados, que sólo se
+escribían al final): cada mutación terminada se agrega en el acto a --parcial (JSONL, una línea por mutación) y una
+corrida nueva salta las que ya están ahí. El control sin mutar se vuelve a correr en cada corrida del script y queda
+también en el JSONL (una línea por corrida), así cada tramo tiene su propio control verde.
+
+Uso: python mutar_signos_p2.py [--solo id1,id2] [--out salida.json] [--parcial parcial.jsonl] [--paralelo N]
 """
 import argparse
 import json
@@ -242,7 +247,18 @@ def main():
     ap.add_argument("--solo")
     ap.add_argument("--out", default=str(AQUI / "mutaciones_salida.json"))
     ap.add_argument("--paralelo", type=int, default=4)
+    ap.add_argument("--parcial", default=str(AQUI / "mutaciones_parcial.jsonl"))
     a = ap.parse_args()
+    parcial = Path(a.parcial)
+    hechas = {}
+    if parcial.exists():
+        for l in open(parcial, encoding="utf-8"):
+            try:
+                x = json.loads(l)
+            except ValueError:
+                continue
+            if x.get("id") != "control":
+                hechas[x["id"]] = x
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     sel = [m for m in MUT if not a.solo or m[0] in a.solo.split(",")]
@@ -259,13 +275,30 @@ def main():
     print("%-5s %-8s %-75s %s (%d pruebas, %ds)" % ("ctrl", "control", "copia sin mutar, las seis baterías",
                                                    "OK, 0 fallas" if ok else "FALLA EL CONTROL", ctrl["n"], ctrl["seg"]), flush=True)
     res["control"] = dict(ctrl, ok=ok)
+    with open(parcial, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(dict(ctrl, ok=ok, id="control", hora=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())),
+                            ensure_ascii=False) + "\n")
     if not ok:
         print("RESUMEN: el control no da verde; nada se cuenta", ctrl)
         Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
         return 1
+    import threading
+    candado = threading.Lock()
+
+    def una_y_anotar(mid, cambios):
+        r = una(mid, cambios)
+        with candado, open(parcial, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(dict(r, id=mid), ensure_ascii=False) + "\n")
+        print("   terminada %s (%ds)" % (mid, r["seg"]), flush=True)
+        return r
+
+    pend = [m for m in sel + equiv if m[0] not in hechas]
+    print("ya hechas en %s: %d; quedan %d" % (parcial.name, len([m for m in sel + equiv if m[0] in hechas]), len(pend)),
+          flush=True)
     with ThreadPoolExecutor(max_workers=a.paralelo) as ex:
-        futs = {m[0]: ex.submit(una, m[0], m[3]) for m in sel + equiv}
+        futs = {m[0]: ex.submit(una_y_anotar, m[0], m[3]) for m in pend}
         rs = {mid: f.result() for mid, f in futs.items()}
+    rs.update({mid: {k: x[k] for k in ("n", "aser", "otras", "errores", "seg")} for mid, x in hechas.items()})
     atr, por_grupo = 0, {}
     for mid, grupo, nombre, cambios in sel + equiv:
         r = rs[mid]

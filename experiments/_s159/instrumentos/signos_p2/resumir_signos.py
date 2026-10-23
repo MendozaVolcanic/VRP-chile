@@ -48,18 +48,33 @@ _cache = {}
 
 def esperado(sumas):
     """Probabilidad exacta, bajo el nulo de §2.3 (signo de cada bloque al azar), de GANA y de PIERDE con la regla real,
-    para un conjunto de bloques con estas magnitudes. Recorre los 2^B repartos de signo."""
+    para un conjunto de bloques con estas magnitudes. Se cuentan los 2^B repartos agrupados por su suma (convolución
+    exacta) y, como el veredicto depende sólo del neto dadas las magnitudes, se llama a prueba_signos_p2 y
+    regla_signos_p2 reales una vez por cada neto posible. Con B de 21 o más el valor-p real es por sorteos y depende del
+    orden de los signos: ahí el esperado se calcula con el valor-p EXACTO de la misma distribución (aproximación del
+    de sorteos, cuyo error de muestreo con 10.000 sorteos es de unas décimas de punto) y se marca como aproximado."""
     mags = tuple(sorted(abs(x) for x in sumas))
     if mags in _cache:
         return _cache[mags]
     B = len(mags)
+    dist = {0: 1}
+    for m in mags:
+        nueva = collections.Counter()
+        for v, k in dist.items():
+            nueva[v + m] += k
+            nueva[v - m] += k
+        dist = nueva
     g = p = 0
-    for signos in itertools.product((-1, 1), repeat=B):
-        s = [a * b for a, b in zip(signos, mags)]
-        neto = sum(s)
-        v = X.regla_signos_p2(neto, B, X.prueba_signos_p2(s, neto))
-        g += v == "GANA"
-        p += v == "PIERDE"
+    den = 2 ** B
+    for neto, k in dist.items():
+        if B <= X.MAX_B_EXACTO_P2:
+            pr = X.prueba_signos_p2(list(mags), neto)
+        else:
+            pr = {"gana": [sum(c for x, c in dist.items() if x <= neto), den],
+                  "pierde": [sum(c for x, c in dist.items() if x >= neto), den]}
+        v = X.regla_signos_p2(neto, B, pr)
+        g += k * (v == "GANA")
+        p += k * (v == "PIERDE")
     _cache[mags] = (g / 2 ** B, p / 2 ** B)
     return _cache[mags]
 
@@ -75,7 +90,15 @@ def main():
         for l in open(f, encoding="utf-8"):
             x = json.loads(l)
             if "fraccion" in x:
-                grupos[(x["ventana"], x["placebo"], x["fraccion"])].append(x)
+                # una semilla caída (reinicio del 2026-10-23) que después se volvió a correr cuenta una sola vez: vale la
+                # corrida completa; una caída sin repetición queda como caída
+                g = grupos[(x["ventana"], x["placebo"], x["fraccion"])]
+                previa = [y for y in g if y["semilla"] == x["semilla"]]
+                if previa and "caido" not in previa[0] and "caido" in x:
+                    continue
+                for y in previa:
+                    g.remove(y)
+                g.append(x)
     ref44 = {}
     for f in d44:
         for l in open(f, encoding="utf-8"):
@@ -131,19 +154,26 @@ def main():
             if pl == "c":
                 g, p = sum(a["veredicto"] == "GANA" for a in sn), sum(a["veredicto"] == "PIERDE" for a in sn)
                 gc, pc = sum(a["veredicto"] == "GANA" for a in con), sum(a["veredicto"] == "PIERDE" for a in con)
+                aprox = sum(a["B"] > X.MAX_B_EXACTO_P2 for a in con)
                 eg = sum(esperado(a["sumas_bloque"])[0] for a in con)
                 ep = sum(esperado(a["sumas_bloque"])[1] for a in con)
                 netos = [a["neto"] for a in sn]
                 sd = statistics.pstdev(netos) if len(netos) > 1 else 0.0
                 print("            (c) todas las celdas: GANA %s, PIERDE %s | con sustrato: GANA %s, PIERDE %s | "
-                      "esperado exacto con sustrato: GANA %.2f, PIERDE %.2f de %d (%.1f y %.1f %%) | neto medio %+.2f "
-                      "(desvío %.2f)" % (pct(g, len(sn)), pct(p, len(sn)), pct(gc, len(con)), pct(pc, len(con)), eg, ep,
+                      "esperado exacto con sustrato%s: GANA %.2f, PIERDE %.2f de %d (%.1f y %.1f %%) | neto medio %+.2f "
+                      "(desvío %.2f)" % (pct(g, len(sn)), pct(p, len(sn)), pct(gc, len(con)), pct(pc, len(con)),
+                                         " (aproximado en %d celdas con B > 20)" % aprox if aprox else "", eg, ep,
                                          len(con), 100 * eg / len(con) if con else 0, 100 * ep / len(con) if con else 0,
                                          statistics.mean(netos), sd))
                 total_c.update({"celdas": len(sn), "con": len(con), "g": g, "p": p, "gc": gc, "pc": pc})
+                punto = total_c.setdefault(("punto", v, f), collections.Counter())
+                punto.update({"celdas": len(sn), "g": g, "p": p})
                 total_c["eg"] += eg
                 total_c["ep"] += ep
     if total_c:
+        for k, pt in sorted((k, x) for k, x in total_c.items() if isinstance(k, tuple)):
+            print("== (c) punto %s %.0f %% con los dos sensores (celdas semilla x sensor): GANA %s, PIERDE %s" % (
+                k[1], 100 * k[2], pct(pt["g"], pt["celdas"]), pct(pt["p"], pt["celdas"])))
         t = total_c
         print("\n== (c) TOTAL sobre todos los puntos (celdas semilla x sensor): GANA %s, PIERDE %s | con sustrato: GANA %s, "
               "PIERDE %s | esperado exacto con sustrato GANA %.1f %%, PIERDE %.1f %%" % (

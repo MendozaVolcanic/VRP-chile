@@ -192,6 +192,15 @@ def main():
     tmp, ventana, placebo = Path(sys.argv[1]).resolve(), sys.argv[2], sys.argv[3]
     fracs = [float(x) for x in sys.argv[4].split(",")]
     nsem, jl = int(sys.argv[5]), Path(sys.argv[6])
+    hechas = set()
+    if jl.exists():
+        for l in open(jl, encoding="utf-8"):
+            try:
+                x = json.loads(l)
+            except ValueError:
+                continue                      # una línea cortada por el reinicio no cuenta como hecha
+            if "fraccion" in x and "caido" not in x:       # una corrida caída se vuelve a correr (misma semilla)
+                hechas.add((x["fraccion"], x["semilla"]))
     desde, hasta, brazos, vols = VENT[ventana]
     tmp.mkdir(parents=True, exist_ok=True)
     datos, _ = S.unir_k(tmp / "k")
@@ -223,7 +232,14 @@ def main():
     with open(jl, "a", encoding="utf-8") as fh:
         fh.write(json.dumps({"composicion": comp, "ventana": ventana, "placebo": placebo}, ensure_ascii=False) + "\n")
     for f in fracs:
-        for s_ in range(nsem):
+        # S161, reanudación tras el reinicio del 2026-10-23 13:21 UTC: las semillas son las fijadas antes de correr
+        # (0..nsem-1; con el 100 % en (a) y (b), sólo la 0); las que ya tienen fila completa en el JSONL se saltan, sin
+        # repetir ni agregar. Cada semilla tiene su propio generador (random.Random(10000 f + s)), así que saltar una
+        # no cambia las demás.
+        for s_ in range(1 if placebo in ("a", "b") and f >= 1.0 else nsem):
+            if (f, s_) in hechas:
+                print("semilla %d de %.2f ya escrita: se salta" % (s_, f), flush=True)
+                continue
             rng = random.Random(10000 * int(round(f * 1000)) + s_)
             apagadas, encendidas = [], []
             faltaron, pedidos = collections.Counter(), collections.Counter()
@@ -300,8 +316,6 @@ def main():
                 fh.write(json.dumps(fila, ensure_ascii=False) + "\n")
             print(json.dumps(fila, ensure_ascii=False)[:400], flush=True)
             shutil.rmtree(tmp / "s", ignore_errors=True)
-            if placebo in ("a", "b") and f >= 1.0:
-                break           # con el 100 % todas las semillas apagan lo mismo: una sola corrida
     shutil.rmtree(tmp, ignore_errors=True)
 
 
