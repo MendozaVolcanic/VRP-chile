@@ -99,5 +99,8 @@ def test_workflow_abre_issue_sin_empujar():
     assert y["permissions"] == {"contents": "read", "issues": "write"}
     assert "git push" not in texto
     assert "scripts/vigilar_osf_mirova.py" in texto
-    # las dos salidas que no son verde abren issue (novedad y ciego)
-    assert '"1"' in texto and '"2"' in texto
+    # las dos salidas que no son verde abren issue (novedad y ciego). S161: mira el `if` del paso que abre el
+    # issue, con comillas SIMPLES; antes exigía '"1"' y '"2"' en el texto y así fijaba la forma que GitHub rechaza
+    # (comillas dobles en una expresión: el workflow nunca corrió en main, tests/test_guard_expresiones_workflows_s161.py)
+    paso = next(p for p in y["jobs"]["vigilar"]["steps"] if p.get("name", "").startswith("Abrir issue"))
+    assert "codigo == '1'" in paso["if"] and "codigo == '2'" in paso["if"], paso["if"]
