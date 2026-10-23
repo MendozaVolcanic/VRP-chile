@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-23 ~14:55 UTC (S161): vigilante de OSF arreglado (#899)
+- Nicolás (textual): «Sí: arregla las comillas del vigilante de OSF en un PR chico aparte de #888, con prueba de que
+  el yml se acepta, y mergéalo con CI verde.» #899 mergeado por squash (`e31bf0a1d`) con CI verde (run 39972785243).
+- Guarda nueva `tests/test_guard_expresiones_workflows_s161.py` sobre los 47 workflows: roja contra `main` sólo en
+  `vigilar-osf-mirova.yml`, por aserción; un primer borrador marcaba en falso `nrt.yml` y dos backfills (comillas dobles
+  dentro de un JSON entre simples, válido) y quedó como control. La prueba S158 `test_workflow_abre_issue_sin_empujar`
+  exigía `"1"` y `"2"`, o sea fijaba la forma rota; corregida (primer CI rojo por eso).
+- Prueba de aceptación: el push de la rama y el del merge a `main` no dejaron corrida fallida del vigilante (antes,
+  cada push a cualquier rama dejaba una: 100 en `failure` desde el 2026-10-20, con 0 jobs). Primer calendario: miércoles
+  2026-10-28 10:15 UTC. Las ramas cortadas antes del arreglo siguen mandando un correo por push hasta ponerse al día.
+- Error propio (A96): en el worktree aislado `git stash` con árbol limpio no guardó nada y `git stash pop` reaplicó
+  el stash ajeno de S78 sobre `Tupungatito.json` y un CSV; restaurados con `git checkout HEAD --`, stashes intactos.
+
 ### 2026-10-23 14:36 UTC, hora del servidor (S161): #897 mergeado con el sí de Nicolás; vigilante de OSF ciego
 - Nicolás (textual): «Sí a #897: crea el tag defensivo pre-s161-cese-snpp sobre la punta de main justo antes del
   merge, súbelo y mergea por squash. Dejo el modo estricto como nota y lo decidimos aparte.» Tag
