@@ -21,7 +21,7 @@ y la única que escribe `tasks/LOOP_OBJETIVOS.md`. Programa: `docs/superpowers/s
 ## Dónde se construye MOD-B
 
 El `pipeline/` de `main` va 708 commits adelante de `loop/activo` (11 archivos, 631 líneas), así que el arnés se
-construye y se prueba sobre `main`: worktree `D:rp-trabajo\s162-mxd03`, rama `s162-mxd03-codigo` (cortada de
+construye y se prueba sobre `main`: worktree `D:\vrp-trabajo\s162-mxd03` (en el disco D:), rama `s162-mxd03-codigo` (cortada de
 `origin/main` `80b819828`, sin upstream, checkout parcial: `data/` sólo `mirova_equivalent` y `mirova_reference`).
 Carpeta `experiments/_s162_mxd03/`. El tag `s162-mxd03-codigo` irá sobre esa rama (adenda del sello, punto 2). Al
 terminar, la carpeta se trae también a esta rama.
