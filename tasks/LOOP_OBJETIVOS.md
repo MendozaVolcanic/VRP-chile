@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~17:15 UTC (S162): MOD-D sellado por D-48; instrumento con sus 7 tareas en PR
+- `loop-modis`: MOD-C con segunda ronda del verificador («se puede despachar tal como está»; disparo `ffc1abc1b` sin
+  cambios); MOD-E verificado (D28 SIN DATO); MOD-D v2 listo para el sello de reglas. **Aplicado por la coordinadora con
+  D-48** (autorización vigente de Nicolás «sobre las decisiones mías haz lo que tú recomiendes», sobre la recomendación
+  de la hija): reglas de MOD-D v2 SELLADAS (el candado y su verificador siguen antes del despacho); D35 y las marcas A113
+  de MxD03 al catálogo en el PR del veredicto de MOD-B. Revocable por Nicolás.
+- Dato de MODIS: en la población congelada K/MIROVA de Chillán es 0,635 (n 7), no 0,485; cae de 0,64-0,85 bajo 30° de
+  cenit a 0,14-0,21 entre 35 y 51°; el port detecta las dos protegidas a 58° que K no ve.
+- `loop-instrumento`: las 7 tareas con PR (#902 a #905; #905 = T3 apilado sobre #904, 21 mutaciones atrapadas, coincide
+  con el evaluador sellado de D25 en 250 casos; su verificador corre). t1 de MOD-B en curso (8 jobs).
+
 ### 2026-10-24 ~17:00 UTC (S162): MOD-C listo; sale entre t1 y t2 de MOD-B
 - `loop-modis` entregó MOD-C (lote de 400 negativos neg_resto del port MODIS más 13 controles, D-36; regla Jeffreys
   fijada antes: GANA sólo con 0 de 400, 1 a 7 INDECIDIBLE, 8 o más refuta), pre-registro en `claude/s162-modis-774bb0`
