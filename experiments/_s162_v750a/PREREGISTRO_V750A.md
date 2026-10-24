@@ -67,9 +67,13 @@ P = para cada pasada nocturna de VIIRS 750 y cada volcán Tier A:
 - En el runner (dentro del run de §4.2): P contra O en cada pasada, del gránulo al record. Tolerancia: máscara idéntica
   y VRP a 1e-6 MW en todas, salvo las pasadas cuyo VRP cae en la banda de triangulación (20 semillas de jitter 1e-6,
   como N), que se listan aparte. **Una sola pasada distinta fuera de la banda bloquea la adopción** hasta explicarla.
-- Mutaciones con control (S156): 5 mutaciones del port en el pipeline (K1, piso de cumbre, 3 × 3 sin central, halo
-  fijo, sin segundo pase) tienen que hacer fallar la prueba **por aserción**; una mutación de control que sólo hace
-  caer el programa tiene que salir distinta.
+- Mutaciones con control (S156): seis mutaciones (K1 y mínimos de K, media de 8 vecinos sin el central, fondo sin
+  halo, recorte a cero, fondo de anillo, remuestreo por vecino más cercano) tienen que hacer fallar la prueba **por
+  aserción**; una mutación de control que sólo hace caer el programa tiene que salir como caída, no como atrapada.
+  Escrita y probada antes de la implementación: `equivalencia_v750a.py` → `equivalencia_v750a_salida.txt` (línea base
+  ROJA porque el módulo no existe; identidad del oráculo contra sí mismo en 1.020 casos de E1 y 10 recortes de E3; 6
+  de 6 mutaciones atrapadas por aserción y la de control caída). El remuestreo de referencia reproduce, en los 10
+  recortes, la grilla lineal que guardó el runner de R2: la regla GEO queda probada también sin red.
 
 ### 4.2 Censo retrospectivo (decide la adopción)
 
@@ -159,4 +163,5 @@ pierde contra P** en P2. Kgeo: cambia 7 a 13 de ~290 publicaciones de K, todas h
 - Resultado de V750-B (la ROI) y del brazo nativo N0/N1 (confirma V750-C).
 - Analizador `evaluar_v750a.py` con la regla de §6, probado sin red (nulo, placebo y control positivo sobre las 510
   grillas de N), y su verificador limpio.
-- Prueba de equivalencia local de §4.1 escrita como test antes de la implementación (TDD), roja sobre el `main` de hoy.
+- ~~Prueba de equivalencia local de §4.1 escrita antes de la implementación (TDD), roja sobre el `main` de hoy.~~
+  Hecha (`equivalencia_v750a.py`); falta su verificador limpio, junto con el del pre-registro.
