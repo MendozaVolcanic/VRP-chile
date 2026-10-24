@@ -70,7 +70,7 @@ V750-B la establece en el código de MIROVA, y entonces entra como brazo propio,
 | **PM** | el port del código de MIROVA (`experiments/_s159/portes/mirova_port.py`, variante `fisica`, sin un cambio): B22 primaria con B21 donde B22 satura, lat/lon de MxD03, grilla UTM 51 × 51 de 1 km con la esquina de GEO, remuestreo lineal, Test 1 como alerta, ventana 3 × 3 con central, umbrales del `.m`, segundo pase con regresión, fondo por `fillmissing2` sin recorte, suma de todos los alertados, sin modo de un píxel ni tope D9 | **la palanca** |
 | **PM-geo5** | PM con la lat/lon de `_interp_geo` (la de producción) en vez de MxD03 | aísla MxD03 dentro del paquete (PD2 del programa: «MxD03 sola o en el paquete») |
 | **PM-sens** | PM con todo el ROI1 en umbrales de cumbre (variante `sensible` de S159) | diagnóstico de la caja; en la muestra de S159 dio el mismo recall y silencio que `fisica` |
-| **PM-sin_dup** | PM con los duplicados del bow tie quitados antes de remuestrear | **sólo si MOD-E lo pide** (adenda fechada antes del despacho); si no, no corre |
+| **PM-sin_dup** | PM con los duplicados del bow tie quitados antes de remuestrear (filas de borde: cada barrido conserva los detectores cuyo centro cae en su franja nominal de 10 km) | **corre**: MOD-E lo pidió el 2026-10-24 (`experiments/_s162_modis_bowtie/INFORME.md` E-3: sin efecto hasta ~52° de cenit y ~25 % menos de magnitud sobre ~55°, donde está Chillán); informa, y decide qué pieza sostiene la magnitud oblicua |
 | **placebo** | K × 1,2 en magnitud, sin tocar detección | obligatorio para M (programa §2, D-28) |
 
 **D33 en el PM.** El port trabaja en radiancia: detecta sobre la radiancia MIR y suma la radiancia, así que la ida y
@@ -186,4 +186,4 @@ PM-geo5 y PM-sens tienen el mismo veredicto calculado, informativo: dicen qué p
    imitar, y D-45 es la regla vigente del proyecto para P2.
 4. ¿Chillán con las tres salidas del §5? **Sí.**
 5. ¿Despacho aparte de MOD-B (no acoplado)? **Sí.**
-6. ¿PM-sin_dup sólo si MOD-E lo pide? **Sí.**
+6. ¿PM-sin_dup? **Sí, corre** (MOD-E E-3); necesita el índice de línea de cada píxel nativo en el arnés de este censo.
