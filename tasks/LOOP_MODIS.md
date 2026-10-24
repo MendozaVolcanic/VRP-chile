@@ -69,7 +69,10 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 ### MOD-D, paquete MODIS contra K
 - [x] D1. (borrador en `experiments/_s162_modis_paquete/PREREGISTRO.md`) Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
 - [x] D2. Verificador limpio: v1 tenía reglas que obligaban a decidir después de mirar; v2 las cierra (`ce71a4ab1`). Ronda 2 CORRIENDO.
-- [ ] D3. Candado de MOD-D (evaluador, arnés, workflow, verificador) después de MOD-B y MOD-C.
+- [ ] D3. (incluye la adenda 1 informativa: soporte independiente y candidatas a experimental) Candado de MOD-D (evaluador, arnés, workflow, verificador) después de MOD-B y MOD-C.
+
+### Perfil experimental (candidatas)
+- [ ] X1. Anotar en `docs/BEYOND_MIROVA_EXTENSIONS.md` §12 la candidata Láscar 2026-05-11 07:55 (señal real del cráter que MIROVA calla en MODIS; diagnóstico de MOD-C), en el PR del veredicto de MOD-B o de MOD-D (archivo compartido: no tocarlo suelto).
 
 ### MOD-A (la hace la sesión del instrumento)
 - [ ] A1. Usar la cita de MOD03 de Coppola 2026 p. 4 cuando la entregue (afecta §2 del pre-registro de MxD03).

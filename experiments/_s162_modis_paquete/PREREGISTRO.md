@@ -182,3 +182,23 @@ Los 9,1 s por pasada MODIS de S159 incluyen búsqueda, descarga, port con sus 5 
 3. ¿Chillán con su prueba propia (§5), al lado del veredicto? **Sí.**
 4. ¿D28 fuera de los brazos hasta localizar el método y probarlo sin huecos? **Sí.**
 5. ¿Construir el candado después de MOD-B y MOD-C? **Sí.**
+
+## Adenda 1 (2026-10-24, informativa; aplicada por la coordinadora con D-48 sobre la recomendación de esta sesión)
+
+Origen: el diagnóstico de las dos publicaciones del port que dejan INDECIDIBLE a MOD-C
+(`experiments/_s162_modis_negativos/diagnostico/INFORME.md`): una era calor real del cráter (Láscar 2026-05-11 07:55,
+visto esa noche por VIIRS de los tres satélites y alertado por MIROVA en VIIRS) y la otra un artefacto de gradiente a 63°
+(Llaima 2026-07-24 01:05). **No cambia ninguna regla sellada**: P2 sigue contando toda publicación en un negativo limpio
+como costo para la réplica.
+
+Estrato informativo nuevo, para cada brazo y cada publicación en un negativo limpio o en `neg_resto`:
+- **soporte independiente**: si otro sensor la ve la misma noche en otro gránulo (A109: la pasada del mismo gránulo no
+  cuenta). Definición: un record nuestro de VIIRS 375 o VIIRS 750 (de cualquier satélite), o del otro MODIS, con cúmulo
+  `summit` publicado por el predicado del tablero, a 6 h o menos de la pasada MODIS (la ventana de la vara VIIRS de la
+  tarea 1.23 y de MOD-B), en el mismo volcán; y aparte, si MIROVA alertó en cualquier canal en esa ventana.
+- **candidata a experimental**: la publicación con soporte independiente. Se lista con volcán, hora, cenit, VRP y los
+  soportes; va al perfil experimental (valor agregado, se valida contra OVDAS y SWIR, A115), no a la réplica.
+- Se informa la cuenta: publicaciones en negativos con soporte, sin soporte, y su reparto por cenit (≤ 40°, > 40°).
+
+Láscar 2026-05-11 07:55 queda anotada desde ya como candidata a experimental (señal real que MIROVA calla en MODIS).
+Esta adenda entra al evaluador del candado del §10 y pasa por el mismo verificador limpio antes del despacho.
