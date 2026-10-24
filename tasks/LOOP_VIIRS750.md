@@ -16,10 +16,10 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 1. [hecho y verificado] **V750-C**: `experiments/_s162_v750c/INFORME.md`, con la marca del verificador.
 2. [hecho] Verificador limpio de V750-C (Fable 5.1): `experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`.
    Confirma los números; corrige la atribución: dos piezas (interpolación dentro de la caja sensible; ROI fuera).
-3. [v3, esperando la decisión de sello de la coordinadora] Pre-registro V750-B v3 (`81a5cfcd2`). Segunda vuelta
+3. [v3, en tercera vuelta corta (Fable) sobre el delta 607062ba7..439968ec1] Pre-registro V750-B v3 (`81a5cfcd2`). Segunda vuelta
    (Sonnet): «conforme con cambios», VB2-01 a VB2-15, todos hechos o declarados. Batería sellada
-   `bateria_regla_v750b.py` 11/11. Recomendado sellar sin tercera vuelta (VB2-01/02 probados por los escenarios del
-   verificador); VB2-02 (SIN SUSTRATO sólo con neto ≤ 0) es decisión de la coordinadora bajo D-48. El **2026-11-03**:
+   `bateria_regla_v750b.py` 11/11. La coordinadora confirmó VB2-02 bajo D-48 y pidió tercera vuelta corta: si da conforme sin
+   cambios en la regla, queda sellada; si toca la regla, avisarle ANTES de corregir. El **2026-11-03**:
    `objetivos_v750b.py --hasta 2026-11-02` (escribe también `sin_granulo_v750b.json`), commitear, pedir despacho con sha256.
 4. [borrador] Pre-registro V750-A: `experiments/_s162_v750a/PREREGISTRO_V750A.md` (equivalencia, censo, sombra; brazos
    K, P, P-def, P-sinfiltro, Kgeo, K×1,2, O). Prueba de equivalencia hecha y probada (roja sin módulo, 6/6 mutaciones).
@@ -80,3 +80,5 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
   sin brazos peores con la tabla (VB2-01), SIN SUSTRATO con neto ≤ 0 (VB2-02), banderas marcadas y camino para leer
   con faltantes (VB2-03/04), controles con filo (VB2-06), batería que comprueba sola 11 escenarios (VB2-05; encontró
   un defecto propio de la v3, corregido), y VB2-07 a VB2-15. Ensayo real: compuerta abierta, censo 503/503 en posición.
+- 2026-10-24 17:36 UTC (servidor), vuelta 7. Coordinadora: VB2-02 confirmada (D-48), anotada; tercera vuelta corta con
+  Fable sobre el delta lanzada (escribe en `experiments/_s162_v750b/verificador_v3/`).
