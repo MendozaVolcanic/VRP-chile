@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 17:28 UTC, hora de los runs (S162): t1 de MOD-B terminada; lote de V375 despachado
+- t1 de MOD-B (40112510038): 9 de 9 jobs success (~50 min, menos que las 2 h estimadas); `loop-modis` revisa cobertura.
+- Humo de V375 (40115765406) success en 2 min 15 s; OK de `loop-viirs375`: Láscar 2026-04-05 05:30 protegida, port
+  1,521 MW en los 10 brazos contra 1,52 de MIROVA; K re-corrido igual a lo publicado (pc 1,086, f5_core 1,1206);
+  Tupungatito neg_resto 0 píxeles en los 10 brazos; recálculo sin red igual al runner 467/467, K = publicado 151/151;
+  nulo, NUNCA y PLACEBO en verde. El humo destapó un KeyError del evaluador en el camino S162 (arreglado sin cambiar
+  reglas, adenda 1 de PREREGISTRO_C.md, `a6a02071b`; el runner no lo usa).
+- **Lote de V375: run 40116289866** (28 jobs, max-parallel 8), en cola detrás del NRT y del experimental diario. Nuevo
+  orden: MOD-C cuando termine el lote V375; t2 y t3 de MOD-B después.
+
 ### 2026-10-24 17:21 UTC, hora de los runs (S162): humo de V375 despachado
 - `loop-viirs375` armó los disparos sobre el árbol de `ca034d66e` (pipeline/ idéntico a `533398f8f`, el que escribió los
   records del marco) para que «K re-corrido = publicado» compare el mismo detector. Comprobado: el humo `fd0ba12bb` sólo
