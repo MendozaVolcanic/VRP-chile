@@ -1,6 +1,8 @@
 # Pre-registro V750-B (S162): la región sensible (ROI) del código de MIROVA, por volcán, en VIIRS 750
 
-Estado: **v3, en tercera vuelta corta sobre el delta v2 a v3** (con conforme sin cambios en la regla queda sellada, D-48), corregido tras dos verificadores limpios: el primero (Fable 5.1,
+Estado: **SELLADO bajo D-48** (2026-10-24; condición de la coordinadora cumplida: la batería atrapa por aserción 13 de 13
+mutaciones del analizador, con la copia sin mutar y la mutación que sólo se cae como controles, `mutar_bateria_salida.txt`),
+corregido tras dos verificadores limpios: el primero (Fable 5.1,
 `verificador/VERIFICADOR_PREREGISTRO_V750B.md`, «listo para sello con cambios») y la segunda vuelta (Sonnet,
 `verificador_v2/VERIFICADOR_V2_PREREGISTRO_V750B.md`, «conforme con cambios»); qué cambió en cada vuelta, en §12. No se despacha
 nada hasta (1) el sello, (2) que la sesión del instrumento entregue la cobertura contra la referencia (fase 0, programa
@@ -263,3 +265,13 @@ De la v2 a la v3 (segunda vuelta, Sonnet; decisiones de diseño bajo D-48 por la
   redundancia declarada. VB2-11: lo que `if-no-files-found` no cubre, declarado. VB2-12: el texto del control de N0
   y N1 dice lo que el código hace. VB2-13: lista completa de K distinta. VB2-14: cuarto de celda declarado.
   VB2-15: tamaños actualizados.
+
+De la v3 a la versión sellada (tercera vuelta, Fable, sólo sobre el delta; coordinadora bajo D-48):
+
+- VB3-01 (regla): a igual E entre ganadores, el orden de cercanía al `.m` del §6.3; escenario S3.
+- VB3-02: el archivo de pasadas sin gránulo es obligatorio y está atado por sha256 a la lista de objetivos.
+- VB3-03: la batería pasó de 11 a 19 escenarios (S1, S2, S3, E5b, E3b, KD, SG, SGx); `mutar_bateria.py` mide su nulo:
+  13 de 13 mutaciones atrapadas por aserción (las 11 de la tercera vuelta con el texto puesto al día y 2 propias),
+  identidad PASA y la mutación que sólo se cae sale CAÍDA.
+- VB3-04 a VB3-07: declarado (B0 y el control positivo) o arreglado (código de `--solo-controles`, bandera de pruebas
+  con censo fallado, denominador del 2 %).
