@@ -64,7 +64,7 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] E1. Leer cómo grilla el port MODIS y qué hay en disco; decidir si la ablación se puede hacer sin red.
 - [x] E2. Verificador limpio: los números se reproducen, la lectura del bow tie NO (VCD-03/04). Retirada con marca: D28 SIN DATO; la costura de barrido es SOSPECHA; E-2 con matiz (sólo bajo 1 MW, cenit con fecha). Ronda 2 CORRIENDO.
 - [x] C3. Lote de MOD-C leído (run 40120713181, artefactos en `C:/vrp-trabajo/temporales/s162_negmodis/run_40120713181/`): **INDECIDIBLE** (2 de 390, ΔE −18,1 [−43,8; +40,1]); controles en verde; informe `experiments/_s162_modis_negativos/INFORME.md` (`11570ab30`). Verificador limpio del resultado CORRIENDO (Fable alto).
-- [ ] E3. Ablación real con los recortes nativos de MOD-C (cuando llegue el lote), con un método de quitar duplicados sin huecos y la clasificación por costura. (CORRIENDO: subagente en segundo plano, carpeta `experiments/_s162_modis_bowtie/real/`; después, verificador limpio)
+- [ ] E3. Ablación real del bow tie (`c805fed19`, `experiments/_s162_modis_bowtie/real/`): reproducción 403 de 403; método A (conserva el barrido anterior) sin huecos reales; con A las 11 protegidas siguen publicando y las 2 de neg_resto se apagan (SOSPECHA, post hoc); signo de la magnitud SIN DATO (depende de qué copia conserva MIROVA). Verificador limpio CORRIENDO.
 
 ### MOD-D, paquete MODIS contra K
 - [x] D1. (borrador en `experiments/_s162_modis_paquete/PREREGISTRO.md`) Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
@@ -87,6 +87,13 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 2. ~~D35 y marcas A113~~: **resuelta** (D-48): van en el PR del veredicto de MOD-B, no antes (tarea B10).
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 (vuelta 11): ablación real del bow tie
+- E3 entregada por el subagente: con datos reales el método sin huecos no cambia las 11 protegidas y apaga las 2
+  publicaciones del port en neg_resto (incluida la de Láscar, que el diagnóstico dio como calor real: a revisar en el
+  verificador). La magnitud cambia sólo con el foco duplicado y su signo depende de la copia conservada. El criterio de
+  costura «detector 0 o 9» no delimita la franja duplicada sobre 50°. Verificador limpio lanzado.
+- Adenda 1 informativa de MOD-D escrita (`80ef5fcf2`).
 
 ### 2026-10-24 (vuelta 10): MOD-C verificado; diagnóstico de las dos publicaciones; t2 en curso
 - Verificador limpio del resultado de MOD-C: INDECIDIBLE confirmado (re-corrida byte a byte; regla propia también
