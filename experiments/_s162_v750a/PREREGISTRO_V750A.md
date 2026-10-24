@@ -102,6 +102,21 @@ P = para cada pasada nocturna de VIIRS 750 y cada volcán Tier A:
   K **y** de K×1,2.
 - Todo por tramo de 10° de cenit, por volcán y por canal. Curva de razón por cenit comparada contra la de MIROVA
   (más oblicua sobre menos oblicua de la misma noche: MIROVA 0,503, oráculo 0,517, K 0,239), no contra 1.
+- **Diagnóstico de acoplamiento por la sigma de escena** (obligatorio, no decide; seguimiento cruzado de MODIS,
+  verificador de la ablación del bow tie D28, `experiments/_s162_modis_bowtie/real/verificador/`, commit `f49e57dd7`,
+  hallazgo S-1). Físicamente: el umbral contextual del código de MIROVA no es local al cráter. Usa la media y la
+  desviación del contraste NTI y ETI de **toda** la grilla de 51 km (`mu + s · sd`, con piso), así que un cambio que
+  sólo toca píxeles lejos del cráter (el borde de la escena, el bow tie, el remuestreo de una franja oblicua) mueve el
+  umbral de la cumbre y puede encender o apagar una publicación del cráter sin que el cráter haya cambiado. En MODIS
+  eso pasó con márgenes de NTI de 1e-6 a 8e-4. Para cada par de brazos que comparten la detección del `.m` pero
+  difieren en la grilla o en el remuestreo (P, P-def, O; y en la vía del pipeline contra el oráculo), el analizador
+  informa por pasada: (a) cuánto cambia `sd` del contraste NTI y ETI en el primer y el segundo pase entre los dos
+  brazos; (b) el margen de la celda decisiva del cráter contra su umbral (`c / u` en NTI y en ETI); (c) las pasadas
+  cuya publicación cambia entre brazos y cuyo margen cae dentro del cambio de umbral que produce (a). Esas pasadas se
+  listan por nombre, se cuentan por volcán y por tramo de cenit, y cualquier cambio de publicación de una protegida que
+  caiga en ese grupo se informa como «decidido por la escena, no por el cráter» al lado del veredicto. Lo mismo vale
+  para la prueba de equivalencia de §4.1: una diferencia de máscara P contra O que sólo se explique por la sigma de
+  escena se informa así, y bloquea igual (la vía tiene que reproducir también la escena).
 
 ## 6. Regla de adopción (escrita antes de ver los datos)
 

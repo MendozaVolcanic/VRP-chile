@@ -32,7 +32,8 @@ reiniciarlo con `/loop Loop de VIIRS 750 de VRP Chile: lee tasks/LOOP_VIIRS750.m
    (`equivalencia_v750a_salida.txt`: roja sin módulo, 6/6 mutaciones). Falta el analizador `evaluar_v750a.py` (reusar
    la regla, las etiquetas y los controles de `analizar_v750b.py`; P2 contra K; M con el comparador y el placebo de
    `evaluar_d25.py` del tag) y su verificador. Bloqueado por el resultado de V750-B (la ROI) y, para el brazo P desde
-   el gránulo, por la vía de proceso en `pipeline/` (A45: tag y sí de Nicolás).
+   el gránulo, por la vía de proceso en `pipeline/` (A45: tag y sí de Nicolás). Incluye el diagnóstico de acoplamiento
+   por la sigma de escena (seguimiento cruzado de MODIS, S-1, anotado en §5 del pre-registro).
 4. [hecho] **V750-F**: paso a paso de O2 para Nicolás (`experiments/_s162_v750f/PASO_A_PASO_O2.md`).
 5. [hecho] Resumen a la coordinadora (mensajes + nota en la carpeta compartida).
 6. [después] V750-D (subsumido por V750-A salvo que no se adopte); V750-E (diurno) al final.
@@ -95,3 +96,7 @@ reiniciarlo con `/loop Loop de VIIRS 750 de VRP Chile: lee tasks/LOOP_VIIRS750.m
   VB3-01 (escenario S3) y VB3-02 a VB3-07; medidor `mutar_bateria.py`: 13 de 13 mutaciones atrapadas por aserción,
   identidad PASA, control de caída CAÍDA. Ensayo final con la compuerta abierta. **V750-B SELLADO** (`1af6c3cd8`, tag
   `s162-v750b-sellado`). Loop detenido: lo próximo es el 2026-11-03.
+- 2026-10-24, después de detener el loop. Seguimiento cruzado de MODIS (S-1 del verificador del bow tie D28): el umbral
+  del `.m` usa la sigma de toda la grilla, así que un A/B de remuestreo queda acoplado al borde de la escena. Anotado
+  en V750-A §5 como diagnóstico obligatorio (cambio de sd entre brazos, margen del cráter, pasadas decididas por la
+  escena). No cambia V750-B sellado.
