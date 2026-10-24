@@ -16,9 +16,11 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 1. [hecho y verificado] **V750-C**: `experiments/_s162_v750c/INFORME.md`, con la marca del verificador.
 2. [hecho] Verificador limpio de V750-C (Fable 5.1): `experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`.
    Confirma los números; corrige la atribución: dos piezas (interpolación dentro de la caja sensible; ROI fuera).
-3. [borrador] Pre-registro V750-B: `experiments/_s162_v750b/PREREGISTRO_V750B.md`. Hechos: probe (con B0e
-   informativo), objetivos, analizador `analizar_v750b.py`. Falta: resultado de `prueba_local_510.py` (corriendo),
-   ensayo del analizador sobre datos de N (sólo controles), y verificador del pre-registro antes del sello.
+3. [en verificación] Pre-registro V750-B: `experiments/_s162_v750b/PREREGISTRO_V750B.md`, con probe, workflow,
+   objetivos y analizador. Prueba local en verde (B0 y B1 = N en 510/510; B2 y B3 actúan en PCC y Tupungatito) y
+   ensayo del analizador con controles en verde. Verificador Fable del pre-registro corriendo; escribe en
+   `experiments/_s162_v750b/verificador/VERIFICADOR_PREREGISTRO_V750B.md`. Después: corregir, mandarlo a la
+   coordinadora con comandos y tamaños para el sello (DN-1).
 4. [borrador] Pre-registro V750-A: `experiments/_s162_v750a/PREREGISTRO_V750A.md` (equivalencia, censo, sombra; brazos
    K, P, P-def, P-sinfiltro, Kgeo, K×1,2, O). Falta su §11 (analizador, test de equivalencia rojo) y su verificador.
 5. [hecho] Paso a paso de V750-F para Nicolás: `experiments/_s162_v750f/PASO_A_PASO_O2.md` (paquete comprobado, md5 OK).
@@ -57,3 +59,8 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
   remuestreo. VV-01: la caja por defecto es de una sola matriz de ejemplo (BOX == 1 de 21 × 19). Marcas propagadas al
   informe de V750-C y a los dos pre-registros (A113); predicción de N0 revisada antes de datos; brazo B0e agregado.
   Analizador de V750-B escrito.
+- 2026-10-24 ~16:20 UTC, vuelta 3. Prueba local de V750-B en verde. B0e (matriz de ejemplo de 21 × 19) retirado: la
+  zona 0 y la 1 comparten umbrales en el `.m` (l. 389-395), así que no puede cambiar ninguna máscara (0 de 510). El
+  ensayo encontró que importar `evaluar_d25.py` arrastra todo el evaluador de D25: el analizador ahora extrae la prueba
+  de signos con ast, probada en 6 casos de resultado conocido. Workflow del probe escrito (artefactos en C:, pedido de
+  la coordinadora). Verificador del pre-registro lanzado.
