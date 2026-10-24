@@ -205,3 +205,10 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
 - Disparo armado sobre `ca034d66e`: humo `74e368f6e` (tag `s162-v375-b2-disparo-humo`, pasadas 5000 y 3000), lote
   `a9331d51c` (tag `s162-v375-b2-disparo-lote`, 48 trozos). Pedido de sello y despacho enviado a la coordinadora: el
   hallazgo 3 está arreglado y probado pero no re-verificado; que lo confirme ella.
+
+### 2026-10-24 (vuelta 12): humo de B2 despachado; re-verificación del delta
+- Humo de B2: run **40128648709** (rama `s162-v375-b2-disparo` en `74e368f6e`); vigilante en segundo plano.
+- Condición de la coordinadora para el lote: re-verificación corta, contexto limpio y OTRO modelo, sólo del delta v2→v3,
+  midiendo el nulo con el port roto a mano. Lanzada con **Fable** (los dos anteriores fueron Sonnet), con la guía de
+  prompting de Fable aplicada; informe en `b2/verificador_v3/`. Si da CONFORME y el humo sale bien, el sello queda firme
+  con D-48 y doy el OK al lote.
