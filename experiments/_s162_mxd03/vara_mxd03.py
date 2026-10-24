@@ -37,9 +37,12 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parents[1]
 DIR_123 = RAIZ / "experiments/_s151_mxd03_sola_123"
+# al final de sys.path: _s151_mxd03_etiquetas trae otro evaluar_mxd03.py (el de la 1.17) que no puede tapar al de esta
+# carpeta (verificador VMX-06)
 for p in (DIR_123, RAIZ / "experiments/_s151_mxd03_cumulo_121", RAIZ / "experiments/_s151_mxd03_etiquetas",
           RAIZ / "scripts", RAIZ):
-    sys.path.insert(0, str(p))
+    sys.path.append(str(p))
+sys.path.insert(0, str(AQUI))
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
 CENIT = 35.0

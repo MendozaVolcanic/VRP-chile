@@ -107,6 +107,8 @@ def main():
     ap.add_argument("--ref", required=True)
     ap.add_argument("--partes", type=int, default=24)
     ap.add_argument("--sin-bajar", action="store_true")
+    ap.add_argument("--salida", default=None, help="escribe la poblacion aqui en vez de poblacion.json (re-etiquetado "
+                                                   "del evaluador, VMX-04); no toca MANIFIESTO.json")
     args = ap.parse_args()
     ref = Path(args.ref)
     manif = AQUI / "MANIFIESTO.json"
@@ -221,11 +223,12 @@ def main():
     pob = {"pre_registro": "experiments/_s159/mxd03_prereg/PREREGISTRO_MXD03.md (sello D-48)",
            "checkout": head, "ventana": VENTANA, "tol_s": TOL_S, "cenit_r": CENIT_R, "regla_minimas": "SN",
            "referencia": referencia, "granulos": granulos, "partes": partes}
-    (AQUI / "poblacion.json").write_text(json.dumps(pob, ensure_ascii=False, indent=0), encoding="utf-8")
-    if not args.sin_bajar:
+    destino = Path(args.salida) if args.salida else AQUI / "poblacion.json"
+    destino.write_text(json.dumps(pob, ensure_ascii=False, indent=0), encoding="utf-8")
+    if not args.sin_bajar and not args.salida:
         manif.write_text(json.dumps({"checkout": head, "ventana": VENTANA, "referencia": referencia},
                                     ensure_ascii=False, indent=1), encoding="utf-8")
-    print("escrito", AQUI / "poblacion.json")
+    print("escrito", destino)
     sys.exit(0 if ok else 2)
 
 

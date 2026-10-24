@@ -264,7 +264,10 @@ def main():
     cab = {"tipo": "cabecera", "parte": args.parte, "n_granulos": len(claves), **Q.procedencia(),
            "poblacion_checkout": pob["checkout"], "referencia": pob["referencia"], "sal": SAL, "k_nulos": K_NULOS,
            "flag_ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER": bool(pm.ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER),
-           "flag_ENABLE_MODIS_B22_PRIMARY": bool(pm.ENABLE_MODIS_B22_PRIMARY)}
+           "flag_ENABLE_MODIS_B22_PRIMARY": bool(pm.ENABLE_MODIS_B22_PRIMARY),
+           # §6: «publica» es el predicado de frontend/index.html ejecutado con node; se fija su sha256 (VMX-05 d)
+           "sha256_frontend_index": hashlib.sha256((RAIZ / "frontend/index.html").read_bytes()
+                                                   .replace(b"\r\n", b"\n")).hexdigest()}
     salida.write(json.dumps(cab, ensure_ascii=False) + "\n")
     errores, t0 = 0, time.time()
     vol_cache = {}

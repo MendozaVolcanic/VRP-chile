@@ -62,3 +62,31 @@ def evaluar_filas(filas, recorridos, vara=None, externos=None):
 
 def veredicto(res):
     return "?"
+
+
+def vara_desde_estado(estado):
+    return "NO DETIENE"
+
+
+def p1b(filas):
+    return []
+
+
+def control_r_modulo(filas):
+    return {"estado": "OK"}
+
+
+def control_cableado(filas):
+    return {"estado": "OK"}
+
+
+def control_geometria(filas):
+    return {"estado": "OK"}
+
+
+def control_duplicados(crudas):
+    return {"estado": "OK"}
+
+
+def control_reetiquetado(pobf, nueva):
+    return {"estado": "OK"}

@@ -97,7 +97,11 @@ def p1b(filas):
 
 # ------------------------------------------------------------------ P2
 def _invisible(f):
-    return bool(f.get("partida")) and "sin_info" in (f.get("hermanos_lab") or [])
+    """Negativo limpio que es mitad de una pasada partida cuya hermana es sin_info: MIROVA listo el granulo sin crater,
+    asi que un cambio de X en esta mitad no lo puede juzgar MIROVA. Una alerta (bajo1) partida si la juzgo: no es
+    invisible (verificador VMX-05 a)."""
+    return (f.get("lab") == "neg_limpio" and bool(f.get("partida"))
+            and "sin_info" in (f.get("hermanos_lab") or []))
 
 
 def _base_p2(filas):
@@ -204,10 +208,13 @@ def p5(filas):
 
 
 def p6(filas):
+    """§6 P6: cambios de publicacion de X en las mitades de pasada partida (las 222, decidan o no en P2), en sin_info y
+    en far_ref (verificador VMX-05 b). `en_p2` dice si ese cambio tambien entra a P2."""
     return [{"vol": f["vol"], "dt": f["dt"], "lab": f["lab"], "partida": bool(f.get("partida")),
+             "invisible": _invisible(f), "en_p2": f in filas_p2(filas) or f in _base_p2(filas),
              "pub_k": f["pub"]["K"], "pub_x": f["pub"]["X"]}
             for f in filas if _ok(f) and f["pub"]["K"] != f["pub"]["X"]
-            and (f["lab"] in ("sin_info", "far_ref") or _invisible(f))]
+            and (f["lab"] in ("sin_info", "far_ref") or bool(f.get("partida")))]
 
 
 # ------------------------------------------------------------------ M (solo informa)
@@ -251,6 +258,8 @@ def vara_desde_estado(estado):
     INTERP MAS CERCA; con signos opuestos da SESGO POR SATELITE. SIN VARA, INDECIDIBLE y MXD03 MAS CERCA no detienen."""
     if estado == "INTERP MAS CERCA":
         return "DETIENE"
+    if str(estado).startswith("INTERP MAS CERCA"):        # «... SIN CONTROL DE SESGO» (un solo satelite con n): VMX-07
+        return "DETIENE SIN CONTROL DE SESGO"
     return "SESGO POR SATELITE" if estado == "SESGO POR SATELITE" else "NO DETIENE"
 
 
@@ -279,6 +288,25 @@ def control_arnes(filas, recorridos):
     estado = "INDECIDIBLE" if (no_rep or frac_total < UMBRAL_RESTO or malos) else "OK"
     return {"estado": estado, "deriva": deriva, "no_reproduce": no_rep, "resto_frac": frac_total,
             "por_sha": {s: {"n": v[0], "iguales": v[1]} for s, v in por_sha.items()}, "sha_bajo_umbral": malos}
+
+
+def control_duplicados(crudas):
+    """Una pasada (volcan, hora) no puede venir dos veces: artefactos del humo y de una tanda en la misma carpeta harian
+    que P2 contara doble sin que nada lo acuse (verificador VMX-02). Se cuenta sobre las filas crudas del arnes."""
+    c = collections.Counter((r.get("vol"), r.get("dt")) for r in crudas if r.get("tipo") == "record")
+    dup = sorted(k for k, n in c.items() if n > 1)
+    return {"estado": "INDECIDIBLE" if dup else "OK", "n_duplicadas": len(dup), "duplicadas": dup[:20]}
+
+
+def control_reetiquetado(pobf, pob_nueva):
+    """§8: el etiquetado con banco_paridad.etiquetar a 120 s, importado, rehecho desde la referencia congelada (la
+    poblacion se regenera con poblacion_mxd03.py --sin-bajar --salida) y comparado con la que uso el arnes (VMX-04)."""
+    nueva = {(f["vol"], f["dt"]): f for g in pob_nueva["granulos"] for f in g["records"]}
+    distintas = [k for k, f in pobf.items() if k not in nueva or any(nueva[k].get(c) != f.get(c)
+                                                                       for c in ("lab", "z", "partida", "vrp_mirova"))]
+    sobran = [k for k in nueva if k not in pobf]
+    return {"estado": "INDECIDIBLE" if (distintas or sobran) else "OK", "distintas": distintas[:20],
+            "n_distintas": len(distintas), "sobran": sobran[:20]}
 
 
 def control_cobertura(filas, esperadas):
@@ -358,7 +386,8 @@ def veredicto(res):
         return "DETENIDO POR LA VARA"
     if res["vara"] is None:
         return "PENDIENTE DE LA VARA"
-    if res["p1b"] or res["p2_informe"]["sobre35"]["delta_x"] > 0:
+    if (res["p1b"] or res["p2_informe"]["sobre35"]["delta_x"] > 0
+            or res["vara"] == "DETIENE SIN CONTROL DE SESGO"):
         return "DECIDE NICOLÁS"
     return "CUMPLE SIN DAÑO"
 
@@ -395,7 +424,27 @@ def main():
         mal = {n: _sha256_lf(Path(a.ref) / n) for n, v in pob["referencia"].items()
                if _sha256_lf(Path(a.ref) / n) != v["sha256_lf"]}
         externos["referencia"] = {"estado": "INDECIDIBLE" if mal else "OK", "distintos": mal}
+    if a.ref:
+        import subprocess
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            dst = Path(td) / "poblacion_reetiquetada.json"
+            pr = subprocess.run([sys.executable, "-I", str(AQUI / "poblacion_mxd03.py"), "--ref", a.ref, "--sin-bajar",
+                                 "--salida", str(dst)], capture_output=True, text=True, encoding="utf-8")
+            if pr.returncode != 0 or not dst.exists():
+                externos["reetiquetado"] = {"estado": "INDECIDIBLE", "error": (pr.stdout + pr.stderr)[-1500:]}
+            else:
+                externos["reetiquetado"] = control_reetiquetado(
+                    {(f["vol"], f["dt"]): f for g in pob["granulos"] for f in g["records"]},
+                    json.loads(dst.read_text(encoding="utf-8")))
+    else:
+        externos["reetiquetado"] = {"estado": "INDECIDIBLE", "motivo": "falta --ref: sin re-etiquetado no hay veredicto"}
     crudas, recorridos, cab = cargar(a.art)
+    externos["duplicados"] = control_duplicados(crudas)
+    sha_html = hashlib.sha256((RAIZ / "frontend/index.html").read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    shas_cab = sorted({c.get("sha256_frontend_index") for c in cab})
+    externos["predicado"] = {"estado": "OK" if shas_cab == [sha_html] else "INDECIDIBLE", "sha256_local": sha_html,
+                             "sha256_jobs": shas_cab}
     commits = sorted({c.get("commit") for c in cab})
     externos["procedencia"] = {"estado": "OK" if len(commits) == 1 else "INDECIDIBLE", "commits": commits,
                                "partes": sorted(c.get("parte") for c in cab)}
@@ -431,6 +480,10 @@ def main():
     print("  P2 sobre 35 (informa):", {k: v for k, v in res["p2_informe"]["sobre35"].items() if k != "cambios"})
     print("  P2 sin Cordon Caulle <= 35 (informa):",
           {k: res["p2_informe"]["sin_cc_le35"][k] for k in ("estado", "delta_x", "ruido")})
+    sgn = lambda x: (x > 0) - (x < 0)  # noqa: E731
+    if sgn(res["p2_informe"]["sin_cc_le35"]["delta_x"]) != sgn(res["p2"]["delta_x"]):
+        print("  ATENCION (§6): el signo de P2 sin Cordon Caulle difiere del de P2:",
+              res["p2_informe"]["sin_cc_le35"]["delta_x"], "contra", res["p2"]["delta_x"])
     print("  P4:", {k: v for k, v in res["p4"].items() if k != "cambios_dc"}, "cambios de clase:", len(res["p4"]["cambios_dc"]))
     print("  P5 (atribucion):", len(res["p5"]), "pasadas | P6 (fuera del censo decisor):", len(res["p6"]))
     print("  M (informa):", {k: v for k, v in res["m"].items() if k != "por_volcan"})

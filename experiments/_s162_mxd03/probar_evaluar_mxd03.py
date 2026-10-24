@@ -174,6 +174,86 @@ def pruebas(E):
         lista2 = [(t + timedelta(seconds=110), {"tipo": "ALERTA_TERMICA", "vrp_mw": 2.0})]
         return E.pareadas(lista, t) == [] and len(E.pareadas(lista2, t)) == 1, (E.pareadas(lista, t),)
     caso("12 una alerta pareada a 150 s no entra (pareo 120 s)", t12)
+
+    # ---- pruebas agregadas tras el verificador (VMX-03): fijan el camino que main() usa de verdad
+    def t13():
+        return E.regla_p2(3, [5] + [1] * 19, True) == "PIERDE", E.regla_p2(3, [5] + [1] * 19, True)
+    caso("13 el ruido de P2 es el SEGUNDO mayor |dR| (no el maximo): +3 contra [5, 1 x 19] PIERDE", t13)
+
+    def t14():
+        f = base()
+        f[1]["pub"]["X"] = 0                       # X apaga la bajo 1 MW que K publica
+        return E.p2(f)["delta_x"] == 1, E.p2(f)["delta_x"]
+    caso("14 el saldo de P2 cuenta las bajo 1 MW que el brazo deja sin publicar", t14)
+
+    def t15():
+        m = {e: E.vara_desde_estado(e) for e in ("INTERP MAS CERCA", "INTERP MAS CERCA SIN CONTROL DE SESGO",
+                                                  "SESGO POR SATELITE", "MXD03 MAS CERCA", "SIN VARA", "INDECIDIBLE")}
+        esp = {"INTERP MAS CERCA": "DETIENE", "INTERP MAS CERCA SIN CONTROL DE SESGO": "DETIENE SIN CONTROL DE SESGO",
+               "SESGO POR SATELITE": "SESGO POR SATELITE", "MXD03 MAS CERCA": "NO DETIENE", "SIN VARA": "NO DETIENE",
+               "INDECIDIBLE": "NO DETIENE"}
+        return m == esp, m
+    caso("15 vara_desde_estado (la que usa main) mapea los estados de evaluar_sola", t15)
+
+    def t16():
+        f = base()
+        a = E.veredicto(E.evaluar_filas(f, [], vara=None))
+        b = E.veredicto(E.evaluar_filas(f, [], vara="DETIENE SIN CONTROL DE SESGO"))
+        c = E.veredicto(E.evaluar_filas(f, [], vara="NO DETIENE", externos={"geometria": {"estado": "INDECIDIBLE"}}))
+        d = E.veredicto(E.evaluar_filas(f, [], vara="DETIENE"))
+        return (a, b, c, d) == ("PENDIENTE DE LA VARA", "DECIDE NICOLÁS", "INDECIDIBLE", "DETENIDO POR LA VARA"), (a, b, c, d)
+    caso("16 veredicto: sin vara PENDIENTE; vara sin control DECIDE NICOLAS; control externo rojo INDECIDIBLE", t16)
+
+    def t17():
+        f = [x for x in base() if x["lab"] != "protegida"]
+        f.append(fila(lab="protegida", dt="2026-07-01 07:10", pub_k=1, pub_x=1, vrp_k=1.2, vrp_x=0.9, vrp_m=1.5))
+        return (len(E.p1b(f)) == 1 and E.veredicto(E.evaluar_filas(f, [], vara="NO DETIENE")) == "DECIDE NICOLÁS",
+                E.p1b(f))
+    caso("17 P1b: protegida que cruza bajo 1 MW se lista y manda a Nicolas", t17)
+
+    def t18():
+        f = base()
+        f[0]["nulos"][3]["km_aplicado"] = 2.02
+        g = base()
+        g[0]["hash_grilla"] = {"K": "a", "X": "a", **{b: "r%d" % k for k, b in enumerate(NULOS)}}
+        return (E.control_r_modulo(f)["estado"] == "INDECIDIBLE" and E.control_r_modulo(base())["estado"] == "OK"
+                and E.control_cableado(g)["estado"] == "INDECIDIBLE"), (E.control_r_modulo(f), E.control_cableado(g))
+    caso("18 controles 2 y 8: modulo aplicado a 20 m del pedido e hash de X igual al de K dan INDECIDIBLE", t18)
+
+    def t19():
+        f = base()
+        sin = E.control_geometria(f)["estado"]
+        f[0]["control_s151"] = {"obs_hacia_sensor_km": 2.58}
+        bien = E.control_geometria(f)["estado"]
+        f[0]["control_s151"] = {"obs_hacia_sensor_km": 2.70}
+        mal = E.control_geometria(f)["estado"]
+        return (sin, bien, mal) == ("INDECIDIBLE", "OK", "INDECIDIBLE"), (sin, bien, mal)
+    caso("19 control 1: sin granulo S151 o fuera de 2,581 +- 0,05 km da INDECIDIBLE", t19)
+
+    def t20():
+        f = base()
+        return (E.control_duplicados(f + [dict(f[3])])["estado"] == "INDECIDIBLE"
+                and E.control_duplicados(f)["estado"] == "OK"), E.control_duplicados(f + [dict(f[3])])
+    caso("20 una pasada repetida (humo y tanda en la misma carpeta) da INDECIDIBLE", t20)
+
+    def t21():
+        pobf = {("Lascar", "2026-03-27 07:10"): {"lab": "protegida", "z": 20.0, "partida": False, "vrp_mirova": 1.5}}
+        igual = {"granulos": [{"records": [dict(vol="Lascar", dt="2026-03-27 07:10", lab="protegida", z=20.0,
+                                                 partida=False, vrp_mirova=1.5)]}]}
+        otra = {"granulos": [{"records": [dict(vol="Lascar", dt="2026-03-27 07:10", lab="bajo1", z=20.0,
+                                                partida=False, vrp_mirova=0.5)]}]}
+        return (E.control_reetiquetado(pobf, igual)["estado"] == "OK"
+                and E.control_reetiquetado(pobf, otra)["estado"] == "INDECIDIBLE"), E.control_reetiquetado(pobf, otra)
+    caso("21 re-etiquetado desde la referencia: una etiqueta distinta da INDECIDIBLE", t21)
+
+    def t22():
+        f = base()
+        f.append(fila(lab="bajo1", dt="2026-05-03 07:05", pub_k=1, pub_x=0, partida=True, hermanos=("sin_info",),
+                      vrp_k=0.2, vrp_m=0.4))
+        f.append(fila(lab="neg_limpio", dt="2026-05-04 07:05", pub_k=0, pub_x=1, partida=True, hermanos=("neg_limpio",)))
+        r, p6 = E.p2(f), E.p6(f)
+        return (r["delta_x"] == 2 and {x["dt"] for x in p6} >= {"2026-05-03 07:05", "2026-05-04 07:05"}), (r["delta_x"], p6)
+    caso("22 una bajo 1 MW partida si entra a P2 y P6 lista todas las partidas que cambian", t22)
     return res
 
 

@@ -32,7 +32,7 @@ import numpy as np
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parents[1]
-for p in (AQUI, RAIZ / "experiments/_s151_mxd03_etiquetas", RAIZ):
+for p in (RAIZ, RAIZ / "experiments/_s151_mxd03_etiquetas", AQUI):     # AQUI queda primero (VMX-06)
     sys.path.insert(0, str(p))
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
