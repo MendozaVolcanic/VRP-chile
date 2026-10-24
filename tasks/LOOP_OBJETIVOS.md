@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 18:26 UTC, hora de los runs (S162): lote V375 completo; MOD-C despachado
+- Lote V375 (40116289866) terminado en «failure» sólo por los exit 2 de diseño: 709 pasadas con resultado, 698 ok y
+  11 `volcan_fuera_del_granulo`, todas neg_resto. Diagnóstico de `loop-viirs375`: **«no observado», no falla de
+  cobertura** (el probe bajó exactamente el mismo gránulo que el record de producción; el píxel más cercano queda a
+  5,1-24,6 km del centro; producción dejó record porque su círculo de 25 km roza el gránulo; en 6 hay otro record del
+  mismo volcán a ≤ 7 min, la pasada partida). Salen del denominador (11 de 400, 2,75 %, bajo el 10 % del §4.1),
+  declarado conservador para el port. Artefactos en `C:\vrp-trabajo\temporales\s162_v375\run_40116289866\` (86 MB).
+  Evaluación en curso, con verificador limpio antes de informar.
+- **MOD-C: run 40120713181** (rama `s162-negmodis-disparo` en `ffc1abc1b`, tag `s162-base-portes` sobre `0e18e1053`).
+  t2 de MOD-B cuando termine.
+
 ### 2026-10-24 ~18:25 UTC (S162): V750-B SELLADO bajo D-48
 - Condición cumplida: 13 de 13 mutaciones atrapadas por aserción (las 11 de la tercera vuelta más VB3-01 y VB3-02), con
   la identidad PASA y el control de caída CAÍDA, cada una corriendo la batería entera de 19 escenarios
