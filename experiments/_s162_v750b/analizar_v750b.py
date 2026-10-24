@@ -173,9 +173,14 @@ def main():
     ap.add_argument("--evaluador", required=True, help="evaluar_d25.py del tag s161-d25-lectura (sha256 fijado)")
     ap.add_argument("--censo-art", nargs="*", default=[])
     ap.add_argument("--censo-objetivos", default="")
+    ap.add_argument("--sin-granulo", default=str(AQUI / "sin_granulo_v750b.json"),
+                    help="pasadas que el generador sacó de la lista por no tener gránulo (VB2-07)")
     ap.add_argument("--solo-controles", action="store_true")
     ap.add_argument("--censo-omitido-solo-pruebas", action="store_true",
                     help="SÓLO para baterías sintéticas: da por bueno el control del censo; el veredicto no vale para el run")
+    ap.add_argument("--leer-con-faltantes", default="",
+                    help="MOTIVO de la decisión (coordinadora y Nicolás, §4) para leer con cobertura insuficiente o sin "
+                         "el control del censo; cada línea de veredicto sale marcada y el código de salida es 5")
     ap.add_argument("--salida", default=str(AQUI / "analizar_v750b_salida.txt"))
     a = ap.parse_args()
     EV = cargar_signos(a.evaluador)
@@ -205,8 +210,17 @@ def main():
     pr("   SIN DATO por motivo:", dict(collections.Counter((res.get(i) or {}).get("estado", "sin_resultado")[:40]
                                                          for i in sin)))
     prot_sin = [(obj[i]["volcan"], obj[i]["hora_utc"]) for i in sin if obj[i].get("protegida")]
+    # VB2-07: las pasadas sin gránulo nunca llegan al probe; el generador las deja en un archivo y aquí cuentan como
+    # SIN DATO, y una protegida entre ellas también frena la lectura
+    sg = Path(a.sin_granulo)
+    sin_g = json.loads(sg.read_text(encoding="utf-8")) if sg.exists() else []
+    pr(f"   pasadas sin gránulo (del generador, {sg.name if sg.exists() else 'archivo ausente'}): {len(sin_g)}")
+    prot_sin += [(x["volcan"], x["hora_utc"]) for x in sin_g if x.get("protegida")]
+    pr("   protegidas no observadas (fuera del denominador, por nombre):",
+       [(obj[i]["volcan"], obj[i]["hora_utc"], part[i]) for i in obj if part[i] in ("fuera", "sin_crater")
+        and obj[i].get("protegida")] or "ninguna")
     pr("   protegidas SIN DATO (falla de cobertura, no de brazo):", prot_sin or "ninguna")
-    cob_ok = len(sin) <= MAX_SIN_DATO * max(1, len(obj) - no_obs["fuera"]) and not prot_sin
+    cob_ok = len(sin) + len(sin_g) <= MAX_SIN_DATO * max(1, len(obj) + len(sin_g) - no_obs["fuera"]) and not prot_sin
     pr("== cobertura:", "SUFICIENTE" if cob_ok else
        f"INSUFICIENTE (más de {MAX_SIN_DATO:.0%} sin procesar o una protegida): relanzar con SOLO las faltantes")
 
@@ -268,7 +282,7 @@ def main():
                     | {i for i in oks if abs((vrp(i, "K") or 0) - (obj[i].get("pc_vrp") or 0)) > 0.001})
     k_dist_prot = [(obj[i]["volcan"], obj[i]["hora_utc"]) for i in k_dist if obj[i].get("protegida")]
     pr(f"== control K = producción: distintas {len(k_dist)} de {len(oks)} (protegidas {k_dist_prot or 'ninguna'}); "
-       f"K sin record {len(k_none)}; lista {[(obj[i]['volcan'], obj[i]['hora_utc']) for i in k_dist[:20]]}")
+       f"K sin record {len(k_none)}; lista completa {[(obj[i]['volcan'], obj[i]['hora_utc']) for i in k_dist]}")
     k_ok = len(k_dist) <= MAX_K_DISTINTO * max(1, len(oks)) and not k_dist_prot
     oks = [i for i in oks if i not in set(k_dist)]   # §7: salen de todos los brazos y se listan arriba
     if a.censo_art and a.censo_objetivos:
@@ -283,7 +297,11 @@ def main():
                 continue
             for c, ref in (("B0", "geo_linear"), ("B1", "geo_linear_anillo_sensible")):
                 x, y = res[i]["oraculo"][c], (rc.get("oraculo") or {}).get(ref) or {}
-                igual = x.get("npix") == y.get("npix") and abs((x.get("vrp_mw") or 0) - (y.get("vrp_mw") or 0)) < 1e-6
+                # VB2-09: también la posición de cada píxel, no sólo la cuenta y el VRP
+                igual = (x.get("npix") == y.get("npix")
+                         and abs((x.get("vrp_mw") or 0) - (y.get("vrp_mw") or 0)) < 1e-6
+                         and sorted((p[0], p[1]) for p in x.get("pixeles") or [])
+                         == sorted((p[0], p[1]) for p in y.get("pixeles") or []))
                 cnt[f"{c}_{'igual' if igual else 'DISTINTO'}"] += 1
         censo_ok = bool(cnt) and not any("DISTINTO" in k for k in cnt)
         pr("== control B0 y B1 = censo S159 en pasadas comunes:", dict(cnt), "OK" if censo_ok else "FALLA")
@@ -341,10 +359,12 @@ def main():
         m["E"] = m["E_baja"] + m["E_neg"]
         return m
 
-    def p2(b, v, canal, ref="B1"):
+    def p2(b, v, canal, ref="B1", volcanes=None):
         sumas = collections.defaultdict(int)
         for i in oks:
             o = obj[i]
+            if volcanes is not None and o["volcan"] not in volcanes:
+                continue
             e = etiqueta(o, canal)
             if e not in ("baja", "neg") or not ventana(o, v):
                 continue
@@ -357,15 +377,32 @@ def main():
         pr_ = EV.prueba_signos_p2(s, neto)
         return EV.regla_signos_p2(neto, len(s), pr_), neto, len(s), pr_
 
-    # controles del instrumento de la ROI, DENTRO de la compuerta (VB-06)
-    neg_ctrl = p2("B1", "TO", "decide")
-    pcc = [obj[i]["hora_utc"] for i in oks if obj[i]["volcan"] == "PuyehueCordonCaulle"
+    # controles del instrumento de la ROI, DENTRO de la compuerta (VB-06; con filo tras VB2-06)
+    # negativo: en Cordón Caulle y Tupungatito B4 ES B1 por construcción; el evaluador tiene que dar 0 bloques ahí
+    neg_ctrl = p2("B4", "TO", "decide", volcanes=VOL_SENS)
+    # positivo: B0 pierde protegidas de Cordón Caulle que B1 sí publica (con el oráculo muerto, B1 no publicaría)
+    pcc = [i for i in oks if obj[i]["volcan"] == "PuyehueCordonCaulle"
            and etiqueta(obj[i], "decide") == "prot" and not pub(i, "B0")]
-    pr("== control negativo P2 (B1 contra B1):", neg_ctrl[:3], "(tiene que ser SIN SUSTRATO con 0 bloques)")
-    pr("== control positivo (B0 pierde protegidas de Cordón Caulle):", len(pcc), pcc[:10], "(tiene que ser 1 o más)")
-    ctrl_roi = neg_ctrl[0] == "SIN SUSTRATO" and neg_ctrl[2] == 0 and len(pcc) >= 1
-    todo_ok = ctrl_ok and ctrl_roi and censo_ok
-    pr("== compuerta del veredicto (generales, ROI y censo):", "ABIERTA" if todo_ok else "CERRADA")
+    pcc_b1 = [i for i in pcc if pub(i, "B1")]
+    pr("== control negativo P2 (B4 contra B1 en Cordón Caulle y Tupungatito, idénticos por construcción):",
+       neg_ctrl[:3], "(tiene que ser SIN SUSTRATO con 0 bloques)")
+    pr("== control positivo: protegidas de Cordón Caulle que B0 pierde", len(pcc), "y de ésas B1 publica", len(pcc_b1),
+       [obj[i]["hora_utc"] for i in pcc][:10], "(B0 pierde 1 o más y B1 publica 3 o más)")
+    ctrl_roi = neg_ctrl[0] == "SIN SUSTRATO" and neg_ctrl[2] == 0 and len(pcc) >= 1 and len(pcc_b1) >= 3
+    # VB2-03 y VB2-04: los dos caminos de excepción, marcados en cada línea de veredicto y con su propio código
+    # cada bandera cubre sólo lo suyo: la de pruebas, el censo; --leer-con-faltantes, la cobertura y el censo
+    aviso, rc_final = "", 0
+    faltan = not (cob_ok and censo_ok)
+    if faltan and a.leer_con_faltantes:
+        aviso, rc_final = f"[LEÍDO CON FALTANTES: {a.leer_con_faltantes}] ", 5
+    if a.censo_omitido_solo_pruebas:
+        aviso, rc_final = "[SIN CENSO, NO VALE PARA EL RUN] " + aviso, 4
+    cob_pasa = cob_ok or bool(a.leer_con_faltantes)
+    censo_pasa = censo_ok or a.censo_omitido_solo_pruebas or bool(a.leer_con_faltantes)
+    gen_ok = bool(nidx) and c_nulo == 0 and k_ok
+    todo_ok = gen_ok and ctrl_roi and cob_pasa and censo_pasa
+    pr("== compuerta del veredicto (generales, ROI, cobertura y censo):", "ABIERTA" if todo_ok else "CERRADA",
+       aviso.strip())
     if a.solo_controles or not todo_ok:
         pr("== sin veredicto:", "--solo-controles" if a.solo_controles else "controles caídos o SIN DATO")
         return salir(0 if a.solo_controles else 3)
@@ -380,29 +417,34 @@ def main():
                 linea = (f"   {b:3s} prot {m['n_prot']:4d} P1 {m['P1']:3d} | P1b abajo {m['P1b_abajo']:3d} arriba "
                          f"{m['P1b_arriba']:3d} | E {m['E']:4d} (bajas sin publicar {m['E_baja']} de {m['n_baja']}, "
                          f"neg publicados {m['E_neg']} de {m['n_neg']})")
-                reg = None
+                reg, neto = None, 0
                 if b not in ("B1", "K"):
                     reg, neto, nb, prr = p2(b, v, canal)
                     linea += f" | P2 contra B1: {reg} (neto {neto}, bloques {nb}, p gana {prr['gana']}, pierde {prr['pierde']})"
-                ver[(b, v, canal)] = (m["P1"], reg, m["E"])
+                ver[(b, v, canal)] = (m["P1"], reg, m["E"], neto)
                 pr(linea)
     # §6.1: P1 = 0 en el canal que decide (T con la tabla sola, O con tabla más OCR) y en O también con la tabla sola
     elegibles = [b for b in CANDIDATOS if ver[(b, "TO", "decide")][0] == 0 and ver[(b, "O", "tabla")][0] == 0]
     pr("\n== §6.1 elegibles:", elegibles)
-    # §6.2: GANA contra B1 en el canal que decide sobre T y O juntos, sin PERDER ni BLOQUEAR con la tabla sola
-    ganan = [b for b in elegibles if b != "B1" and ver[(b, "TO", "decide")][1] == "GANA"
-             and ver[(b, "TO", "tabla")][1] in ("GANA", "EMPATE", "SIN SUSTRATO")]
+    def no_peor(b, canal):
+        """No es peor que B1 en P2: GANA o EMPATE, o SIN SUSTRATO con el neto en 0 o a favor (VB2-02: con 4 bloques o
+        menos la prueba no puede rechazar, y un neto en contra no se premia)."""
+        _p1, reg, _e, neto = ver[(b, "TO", canal)]
+        return reg in ("GANA", "EMPATE") or (reg == "SIN SUSTRATO" and neto <= 0)
+
+    # §6.2: GANA contra B1 en el canal que decide sobre T y O juntos, y no es peor con la tabla sola
+    ganan = [b for b in elegibles if b != "B1" and ver[(b, "TO", "decide")][1] == "GANA" and no_peor(b, "tabla")]
     if ganan:
         elegido = min(ganan, key=lambda b: ver[(b, "TO", "decide")][2])
         motivo = f"gana contra B1 (§6.2): {ganan}"
     else:
-        # §6.3: sin ganadores, entre B1 y los que EMPATAN o quedan SIN SUSTRATO (nunca uno que PIERDE o BLOQUEA; VB-01)
-        cand = [b for b in PREF if b in elegibles and (b == "B1" or ver[(b, "TO", "decide")][1] in
-                                                     ("EMPATE", "SIN SUSTRATO"))]
+        # §6.3: sin ganadores, entre B1 y los que no son peores que B1 ni en el canal que decide ni con la tabla sola
+        # (VB-01, VB2-01, VB2-02)
+        cand = [b for b in PREF if b in elegibles and (b == "B1" or (no_peor(b, "decide") and no_peor(b, "tabla")))]
         elegido = cand[0] if cand else None
         motivo = ("ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)" if cand
                   else "NINGÚN BRAZO ELEGIBLE")
-    pr(f"== §6 ROI elegida: {elegido} ({motivo})")
+    pr(f"== §6 {aviso}ROI elegida: {elegido} ({motivo})")
     if elegido in ("B2", "B4"):
         pr("   §6.5: ROI por volcán; Nicolás confirma que es fidelidad al .m antes de pasarla a V750-A")
 
@@ -468,7 +510,9 @@ def main():
                 alg_g = sum(bool(res[i]["oraculo"][grilla]["npix"]) for i in sub)
                 lin.append(f"{nombre}: en el píxel de K {det_k}, con algún píxel {alg} (grilla {grilla}: {alg_g})")
             pr("   " + " | ".join(lin))
-    return salir(0)
+    if aviso:
+        pr(f"== {aviso.strip()}: el veredicto de arriba lleva esta marca")
+    return salir(rc_final)
 
 
 if __name__ == "__main__":

@@ -101,6 +101,9 @@ def main():
     pob = [p for p in pob if p["hora_utc"][:10] not in EXCLUIDOS and p["hora_utc"] < CORTE_SNPP]
     sin_g = [(p["volcan"], p["hora_utc"], p["lab"], p.get("protegida")) for p in pob if not p.get("granule")]
     print(f"pasadas sin gránulo (fuera de la lista, SIN DATO declarado; VB-05): {len(sin_g)} {sin_g[:20]}")
+    (AQUI / "sin_granulo_v750b.json").write_text(json.dumps(
+        [{"volcan": v, "hora_utc": h, "lab": lab, "protegida": pr} for v, h, lab, pr in sin_g], ensure_ascii=False),
+        encoding="utf-8")   # VB2-07: el analizador las lee y cuentan como SIN DATO
     pob = [p for p in pob if p.get("granule")]
     SEL = _modulo("sel", N_DIR / "02_seleccion.py")
     G = SEL.grillas()

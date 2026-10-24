@@ -1,7 +1,8 @@
 # Pre-registro V750-B (S162): la región sensible (ROI) del código de MIROVA, por volcán, en VIIRS 750
 
-Estado: **v2, en segunda vuelta de verificación** (se sella al dar conforme), corregido tras el verificador limpio
-(`verificador/VERIFICADOR_PREREGISTRO_V750B.md`, «listo para sello con cambios»; qué cambió, en §12). No se despacha
+Estado: **v3**, corregido tras dos verificadores limpios: el primero (Fable 5.1,
+`verificador/VERIFICADOR_PREREGISTRO_V750B.md`, «listo para sello con cambios») y la segunda vuelta (Sonnet,
+`verificador_v2/VERIFICADOR_V2_PREREGISTRO_V750B.md`, «conforme con cambios»); qué cambió en cada vuelta, en §12. No se despacha
 nada hasta (1) el sello, (2) que la sesión del instrumento entregue la cobertura contra la referencia (fase 0, programa
 §8.1, #904) y (3) que la coordinadora (S162, sesión «Retomar») lo meta en el despacho combinado de la fase 1. Autor:
 sesión hija VIIRS 750 (loop `tasks/LOOP_VIIRS750.md`), 2026-10-24. Programa:
@@ -120,12 +121,18 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
 
 ## 6. Regla de decisión (escrita antes de ver los datos)
 
-1. **Elegible**: P1 = 0 en T ∪ O con el canal que decide, **y** P1 = 0 en O con la tabla sola. Un brazo que pierde una
-   protegida no entra al paquete, aunque gane en P2.
-2. **Gana**: un elegible distinto de B1 que en P2 contra B1, sobre T ∪ O con el canal que decide, da GANA, y con la
-   tabla sola (T ∪ O) no da PIERDE ni BLOQUEA. Si ganan dos o más, el de menor E (T ∪ O, canal que decide).
-3. **Si ninguno gana**: se elige entre B1 y los elegibles que dieron EMPATE o SIN SUSTRATO contra B1, **nunca** uno que
-   PIERDE o BLOQUEA, por cercanía al `.m`, en este orden: B4 (cambia sólo dos volcanes respecto del ejemplo), B2
+1. **Elegible**: P1 = 0 en T ∪ O con el canal que decide (la condición «y P1 = 0 en O con la tabla sola» que tenía la
+   v2 es redundante: toda protegida de la tabla en O ya es protegida con el canal que decide; se deja en el código y
+   no veta nada aparte). Un brazo que pierde una protegida no entra al paquete, aunque gane en P2.
+2. **Gana**: un elegible distinto de B1 que en P2 contra B1, sobre T ∪ O con el canal que decide, da GANA, y que con
+   la tabla sola (T ∪ O) **no es peor** que B1. «No es peor» = GANA o EMPATE, o SIN SUSTRATO con el neto en 0 o a
+   favor (con 4 bloques o menos la prueba no puede rechazar, y un neto en contra no se premia). Si ganan dos o más,
+   el de menor E (T ∪ O, canal que decide). Multiplicidad: se contrastan hasta cinco brazos contra B1, cada uno al
+   5 % de una cola; no se corrige (los brazos están muy correlacionados y todos los candidatos ya cumplen P1 = 0), y
+   se declara: la probabilidad de que algún brazo gane sólo por azar es mayor que 5 %.
+3. **Si ninguno gana**: se elige entre B1 y los elegibles que **no son peores** que B1 ni con el canal que decide ni
+   con la tabla sola (definición del punto 2: nunca uno que PIERDE o BLOQUEA, ni uno SIN SUSTRATO con el neto en
+   contra), por cercanía al `.m`, en este orden: B4 (cambia sólo dos volcanes respecto del ejemplo), B2
    (conserva la caja de 7 × 7 y sólo la mueve), B5 (la lectura del comentario del `.m`), B1, B3 (B3 usa nuestra
    configuración, no la de MIROVA). Razón: a igual desempeño manda la fidelidad al código (decisión de Nicolás del
    2026-10-21). Si B1 tampoco es elegible y nadie más lo es: NINGÚN BRAZO ELEGIBLE, y V750-A no se arma con esta ROI.
@@ -140,11 +147,11 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
 |---|---|---|
 | nulo del contador | toda perturbación de un record publicado (VRP a 0, `far`) deja de publicar y todo cúmulo inyectado publica | el predicado no mide |
 | K = producción | publica igual y `pc.vrp_mw` a 0,001 MW; las distintas salen de todos los brazos y se listan; si son más del 1 % o hay una protegida, se detiene | el run no mide producción |
-| B0 y B1 = censo S159 | mismos píxeles y VRP a 1e-6 que el censo en las pasadas comunes (artefactos del censo en `D:\vrp-trabajo\temporales\s159_oraculo\censo_39713438252`, objetivos en `origin/s159-pruebas`); obligatorio | el oráculo cambió |
-| control positivo | B0 pierde al menos 1 protegida de Cordón Caulle (el censo vio 6) | el instrumento no ve la ROI |
-| control negativo | B1 contra B1: SIN SUSTRATO con 0 bloques | el evaluador no es determinista |
+| B0 y B1 = censo S159 | mismo número de píxeles, mismas posiciones y VRP a 1e-6 que el censo en las pasadas comunes (artefactos del censo en `D:\vrp-trabajo\temporales\s159_oraculo\censo_39713438252`, objetivos en `origin/s159-pruebas`); obligatorio | el oráculo cambió |
+| control positivo | B0 pierde al menos 1 protegida de Cordón Caulle **y B1 publica 3 o más de ésas** (en el ensayo: 7 y 7) | el instrumento no ve la ROI, o el oráculo está muerto |
+| control negativo | B4 contra B1 sólo en Cordón Caulle y Tupungatito, donde son idénticos por construcción: SIN SUSTRATO con 0 bloques | el evaluador cuenta diferencias que no existen |
 | cobertura | §4: SIN DATO bajo 2 % y ninguna protegida | se relanza antes de leer |
-| N0 y N1 actúan | distintos de B0 y B1 en al menos una máscara de S_C (informativo, no cierra la compuerta) | el brazo nativo no corre |
+| N0 y N1 | se informa, por grupo y tramo de cenit, cuántas pasadas de S_C detectan en el píxel de K y con algún píxel, al lado de B0 y B1 (diagnóstico de V750-C; no compara máscaras índice a índice porque las geometrías no coinciden, y no cierra la compuerta) | |
 
 ## 8. Predicciones (para poder fallar)
 
@@ -165,8 +172,9 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
 ## 9. Costo, escala y despacho
 
 - Un run de sólo lectura, combinable con V375-B, V375-C y MOD-C (programa §7, fase 1). Referencia: el censo S159 tardó
-  1 h 31 min con 32 trozos para 5.746 pasadas; con la ventana hasta el 11-02 serán más (SOSPECHA hasta regenerar los
-  objetivos), más N0 y N1 en S_C. Estimado unas 2 h con 32 trozos; timeout 120 min por trozo.
+  1 h 31 min con 32 trozos para 5.746 pasadas; el generador corrido por la segunda vuelta del verificador con los datos
+  del 2026-10-24 da 5.770 pasadas en 1.301 gránulos y 0 sin gránulo; al 2026-11-02 serán unas 6.000. Más N0 y N1 en
+  S_C. Estimado unas 2 h con 32 trozos; timeout 120 min por trozo.
 - Workflow `probe-s162-v750b.yml`: autentica sólo con `EARTHDATA_TOKEN` y falla al instante si viene vacío (A71);
   `"on":` entre comillas (A43); `pipefail` con `tee` (S141); el probe sale 2 si falta una pasada (no baja, sin
   gránulo, grilla incompleta o error de K); el artefacto falla si la carpeta queda vacía (`if-no-files-found: error`).
@@ -178,6 +186,15 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
   <objetivos.json del censo S159>`.
 - Run a medias: si el run termina con trozos en rojo, se relanzan sólo las pasadas faltantes con `SOLO` sobre el mismo
   tag; los resultados se juntan (un resultado «ok» reemplaza a uno fallido) y se lee una sola vez.
+- **Leer con faltantes** (§4): si después del relanzamiento siguen faltando pasadas o el control del censo no se puede
+  correr, y la coordinadora con Nicolás deciden leer igual, se usa `--leer-con-faltantes "<motivo y decisión>"`: cada
+  línea de veredicto sale marcada con el motivo y el código de salida es 5. No se edita el analizador después del
+  sello. La bandera `--censo-omitido-solo-pruebas` es sólo para baterías sintéticas: cubre sólo el censo, marca el
+  veredicto «SIN CENSO, NO VALE PARA EL RUN» y sale con código 4.
+- Pasadas sin gránulo: el generador las escribe en `sin_granulo_v750b.json` (se commitea con los objetivos) y el
+  analizador las cuenta como SIN DATO; una protegida entre ellas frena la lectura.
+- El artefacto siempre lleva el log del trozo, así que `if-no-files-found: error` no avisa de un trozo muerto; lo
+  avisa el paso del probe en rojo (`pipefail`) y, en la lectura, las pasadas «sin resultado», que cuentan como SIN DATO.
 
 ## 10. Lo que este pre-registro NO decide
 
@@ -193,7 +210,15 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
 - Prueba sin red del probe en verde (`python probe_v750b.py --sin-red`); prueba local sobre las 510 grillas de N
   (`prueba_local_510_salida.txt`): B0 y B1 iguales a N en 510 de 510, B2 y B3 cambian máscaras en Cordón Caulle y
   Tupungatito; ensayo del analizador sólo con controles (`ensayo_analizador_salida.txt`).
-- La batería de mutaciones del verificador (`verificador/mutaciones_regla_s6.py`) se re-corre sobre la versión v2.
+- **Batería sellada de la regla**: `bateria_regla_v750b.py` (comprueba sola el resultado esperado de 11 escenarios,
+  los 8 del primer verificador y V1, V3 y V6 de la segunda vuelta; sale 1 si alguno no coincide) →
+  `bateria_regla_v750b_salida.txt`: todos como se espera. Encontró un defecto de la propia v3 (la bandera de pruebas
+  abría también la cobertura), corregido antes de sellar. Límite declarado: la segunda vuelta mostró que la batería
+  de la v2 dejaba vivas 14 de 22 mutaciones del analizador; la v3 suma los escenarios que las mataban, pero el
+  conteo de mutaciones no se re-midió sobre la v3.
+- Centro de las zonas: las de la grilla se centran en la celda (33, 33) y las del brazo nativo en el centro del TIF,
+  que cae en los índices (32,75; 33,25): un cuarto de celda (unos 0,19 km) por eje. Sólo afecta la comparación del
+  brazo nativo con la grilla y se declara.
 
 ## 12. Qué cambió de la v1 a la v2 (verificador limpio, Fable 5.1)
 
@@ -213,3 +238,17 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
 - VB-14: artefacto vacío falla; retención de 30 días.
 - VB-15: se declara por qué no hay placebo.
 - Además: sha256 del evaluador del tag fijado y comprobado; criterio para un run a medias.
+
+De la v2 a la v3 (segunda vuelta, Sonnet; decisiones de diseño bajo D-48 por la coordinadora):
+
+- VB2-01: el desempate tampoco puede elegir un brazo peor que B1 con la tabla sola.
+- VB2-02: SIN SUSTRATO sólo cuenta como «no peor» con el neto en 0 o a favor (lectura conservadora).
+- VB2-03 y VB2-04: la bandera de pruebas marca el veredicto y sale con código 4; camino escrito para leer con
+  faltantes (`--leer-con-faltantes`, código 5), sin editar el analizador después del sello.
+- VB2-05 y VB2-06: batería que comprueba sola sus 11 escenarios; control positivo que exige que B1 publique lo que
+  B0 pierde (detecta un oráculo muerto); control negativo con filo (B4 contra B1 donde son idénticos).
+- VB2-07: pasadas sin gránulo en un archivo que el analizador lee; protegidas no observadas por nombre.
+- VB2-08: multiplicidad declarada. VB2-09: el control del censo compara la posición de los píxeles. VB2-10:
+  redundancia declarada. VB2-11: lo que `if-no-files-found` no cubre, declarado. VB2-12: el texto del control de N0
+  y N1 dice lo que el código hace. VB2-13: lista completa de K distinta. VB2-14: cuarto de celda declarado.
+  VB2-15: tamaños actualizados.

@@ -1,0 +1,73 @@
+
+== S2 B2 gana con todo y pierde con la tabla
+   original: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 | determinismo: IGUAL
+   P2 decide {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'GANA(neto -18, bl 30)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 tabla  {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'PIERDE(neto 6, bl 6)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   M0 sintaxis: CAE  (rc=SIN DATO, ROI=None, elegibles=None)
+   M2 sin filtro de tabla en 6.2: CAE  (rc=0, ROI=B2, elegibles=['B1', 'B2', 'B3', 'B4'])
+   M21 6.2 con canal todo: SOBREVIVE  (rc=0, ROI=B4, elegibles=['B1', 'B2', 'B3', 'B4'])
+
+== S3 B2 y B4 BLOQUEAN
+   original: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B1 | determinismo: IGUAL
+   P2 decide {'B0': 'BLOQUEA(neto 4, bl 8)', 'B2': 'BLOQUEA(neto 4, bl 8)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'BLOQUEA(neto 4, bl 8)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 tabla  {'B0': 'BLOQUEA(neto 4, bl 8)', 'B2': 'BLOQUEA(neto 4, bl 8)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'BLOQUEA(neto 4, bl 8)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   M0 sintaxis: CAE  (rc=SIN DATO, ROI=None, elegibles=None)
+   M3 6.3 admite BLOQUEA: CAE  (rc=0, ROI=B4, elegibles=['B1', 'B2', 'B3', 'B4'])
+
+== S5 protegida solo-OCR en O (2026-06-13 00:10)
+   original: rc=0 compuerta=ABIERTA elegibles=['B1', 'B3', 'B4'] ROI=B4 | determinismo: IGUAL
+   P2 decide {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 tabla  {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 1, bl 1)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   M0 sintaxis: CAE  (rc=SIN DATO, ROI=None, elegibles=None)
+   M5 frontera OCR 07-01: CAE  (rc=0, ROI=B4, elegibles=['B1', 'B2', 'B3', 'B4'])
+
+== S8 cumulo cerca del crater y lejos del centro
+   original: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 | determinismo: IGUAL
+   P2 decide {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 tabla  {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   M0 sintaxis: CAE  (rc=SIN DATO, ROI=None, elegibles=None)
+   M8 ancla = centro: CAE  (rc=0, ROI=None, elegibles=[])
+
+== S9 una protegida SIN DATO de ~100
+   original: rc=3 compuerta=CERRADA elegibles=None ROI=None | determinismo: IGUAL
+   P2 decide {}
+   P2 tabla  {}
+   M0 sintaxis: CAE  (rc=SIN DATO, ROI=None, elegibles=None)
+   M9 cobertura ignora protegidas SIN DATO: CAE  (rc=0, ROI=B4, elegibles=['B1', 'B2', 'B3', 'B4'])
+
+== S13 3 % SIN DATO sin protegidas
+   original: rc=3 compuerta=CERRADA elegibles=None ROI=None | determinismo: IGUAL
+   P2 decide {}
+   P2 tabla  {}
+   M0 sintaxis: CAE  (rc=SIN DATO, ROI=None, elegibles=None)
+   M13 tope SIN DATO 50 %: CAE  (rc=0, ROI=B4, elegibles=['B1', 'B2', 'B3', 'B4'])
+
+== S10 K distinto en 3 % de las pasadas
+   original: rc=3 compuerta=CERRADA elegibles=None ROI=None | determinismo: IGUAL
+   P2 decide {}
+   P2 tabla  {}
+   M0 sintaxis: CAE  (rc=SIN DATO, ROI=None, elegibles=None)
+   M10 compuerta ignora K = produccion: CAE  (rc=0, ROI=B4, elegibles=['B1', 'B2', 'B3', 'B4'])
+
+== S16 dos volcanes la misma noche
+   original: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 | determinismo: IGUAL
+   P2 decide {'B0': 'SIN SUSTRATO(neto -4, bl 4)', 'B2': 'EMPATE(neto 0, bl 8)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 tabla  {'B0': 'SIN SUSTRATO(neto -4, bl 4)', 'B2': 'EMPATE(neto 0, bl 8)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   M0 sintaxis: CAE  (rc=SIN DATO, ROI=None, elegibles=None)
+   M16 bloque = solo la noche: CAE  (rc=0, ROI=B4, elegibles=['B1', 'B2', 'B3', 'B4'])
+
+== S18 K distinta en 1 pasada donde B2 se equivoca
+   original: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 | determinismo: IGUAL
+   P2 decide {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 tabla  {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   M0 sintaxis: CAE  (rc=SIN DATO, ROI=None, elegibles=None)
+   M18 K distinta no sale de los brazos: CAE  (rc=0, ROI=B4, elegibles=['B1', 'B2', 'B3', 'B4'])
+
+== S19 dos ganadores, menor E
+   original: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B3 | determinismo: IGUAL
+   P2 decide {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'GANA(neto -7, bl 9)', 'B3': 'GANA(neto -8, bl 8)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 tabla  {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'GANA(neto -7, bl 9)', 'B3': 'GANA(neto -8, bl 8)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   M0 sintaxis: CAE  (rc=SIN DATO, ROI=None, elegibles=None)
+   M19 desempate 6.2 por MAYOR E: CAE  (rc=0, ROI=B2, elegibles=['B1', 'B2', 'B3', 'B4'])
+
+resumen (sin contar M0): {'CAE': 10, 'SOBREVIVE': 1, 'SIN DATO': 0}
