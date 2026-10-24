@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~19:15 UTC (S162): diagnóstico físico de las dos publicaciones de MOD-C (SOSPECHA fuerte, sin verificador)
+- Láscar 2026-05-11 07:55 (Aqua, 38°): **calor real del cráter** (K publica el cráter esa noche en VIIRS 375 y 750 de
+  los tres satélites a 0,03-0,31 km; MIROVA alertó en VIIRS esa noche y en casi todas las vecinas; su MODIS dice RUTINA
+  a las 07:55). Para la réplica es costo; físicamente, señal: candidata al perfil experimental.
+- Llaima 2026-07-24 01:05 (Terra, 63°): **artefacto de gradiente** (ninguna de las otras 10 pasadas de la noche tiene
+  cúmulo, MIROVA RUTINA en todas, nadie ve nada del 19 al 29-jul; 5 × 5 con 14,1 K de cambio en TIR).
+- Con D-48: estrato informativo en MOD-D (soporte de otro sensor la misma noche en otro gránulo, A109), sin tocar la
+  regla sellada; adenda con verificador antes del candado. Informe en `claude/s162-modis-774bb0`
+  `experiments/_s162_modis_negativos/diagnostico/INFORME.md`.
+
 ### 2026-10-24 ~19:05 UTC (S162): MOD-C verificado INDECIDIBLE; se resuelve en el censo de MOD-D
 - Verificador limpio (Fable alto) confirmó MOD-C: x = 2 de n = 390, ΔE −18,1 [−44,4; +40,1], lector idéntico byte a
   byte. VRC-01: en el denominador de K el port da 0,54 %. VRC-05: las dos publicaciones deciden (con 0 sería CONFIRMA),
