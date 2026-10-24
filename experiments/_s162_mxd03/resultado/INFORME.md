@@ -5,7 +5,9 @@
 40122029477, t3 40126381034. Artefactos de las tres tandas juntos en `D:\vrp-trabajo\temporales\s162_mxd03\tandas\`
 (sin el humo, para que el control de duplicados no cuente doble). Evaluación con `vara_mxd03.py --evaluar` y
 `evaluar_mxd03.py --art --vara --ref`, salidas en esta carpeta (`evaluar_mxd03_salida.txt`, `resultado_mxd03.json`,
-`vara_resultado.json`, `detalle_salida.txt`). **Pendiente: verificador con contexto limpio del resultado.**
+`vara_resultado.json`, `detalle_salida.txt`). **Verificado con contexto limpio** (Fable alto, `verificador/INFORME_VERIFICADOR.md`): R1, R3 y R4 CONFIRMADOS, R2
+CONFIRMADO EN PARTE; el CUMPLE SIN DAÑO se sostiene con código independiente del evaluador. Ver la sección «Lo que dijo
+el verificador» al final.
 
 ## En una pantalla
 
@@ -50,3 +52,30 @@ SIN DAÑO abre el ciclo de adopción por fidelidad literal (Coppola 2026, a conf
 de Nicolás (A45), D35 y las marcas A113 en el catálogo, FICHA SDA, marca visible en las tres vistas y aviso a OVDAS. La
 sesión recomendó adoptar MxD03 **dentro del paquete MODIS** (MOD-D) salvo que se atrase más de un mes: con este
 veredicto la pieza queda lista para eso.
+
+## Lo que dijo el verificador (2026-10-24)
+
+`verificador/INFORME_VERIFICADOR.md` (caminos sellados a las 20:33:02 GMT, sha256 `ad03b0a0…`). Confirmó con un recuento
+propio: 5.465 de 5.465 clave por clave contra la población del tag, 0 errores ni duplicados, un único commit (el del tag)
+en los 3 runs; K = data/ y K2 = K en las 5.465; P1 sin pérdida (48 de 48 protegidas con cúmulo en K y en X); P2 ≤ 35°
+EMPATE para cualquier ruido de 1 o más; la vara MXD03 MAS CERCA por cinco caminos distintos; la tabla del §10 rearmada a
+mano; los scripts del autor reproducen `resultado_mxd03.json` y `vara_resultado.json` byte a byte. Matices que hay que
+leer junto al veredicto (ninguno lo mueve):
+- **«13 controles»**: son 12 que pueden fallar. «vara_cruda» siempre da OK (`evaluar_mxd03.py`, l. 471): es un registro,
+  no un control.
+- **VRB-02, la vara**: con la referencia VIIRS de **otra noche** (placebo, 5 semillas) da el mismo MXD03 MAS CERCA (dd 0,83
+  a 0,95 km, 51 de 65). La vara mide «más cerca del cráter de Láscar», donde casi siempre está el calor, y no «más cerca
+  del calor de esa noche». No es un sesgo de construcción del estadístico; es un límite de lo que esta vara puede decir.
+- **VRB-03, M**: la mediana 0,000 esconde dispersión: 17 de 79 alertas cambian la magnitud más de 10 % y 6 más de 30 %
+  (hasta X/K 0,48); hay 38 d < 0, 39 d > 0 y 2 d = 0.
+- **R4, más fuerte de lo resumido**: los 158 movidos son todos los records con cúmulo en K y en X, y las 48 protegidas
+  con cúmulo quedan **todas más cerca del cráter con X** (mediana 1,46 km, máximo 2,49). El +1 de P2 sin Cordón Caulle
+  es una sola bajo 1 MW de Láscar (2026-04-02 07:45) que X apaga por el fondo (0,011 a 0,000 MW), no por la posición.
+- **VRB-01**: el módulo del nulo R llega a 103.470 km en 2 gránulos con relleno de MxD03 y el control del módulo lo
+  acepta; afecta sólo a un negativo que nadie publica (Lastarria 2026-04-23 01:50). Defecto del control, sin efecto.
+- **VRB-05**: la rama de re-corrida en el `codigo_sha` (control 4) **nunca se ejercitó**, ni en las tandas ni en el
+  humo: no hubo ningún record que decide con K distinto de `data/`. `RESPUESTA_VERIFICADOR.md` decía que el humo la
+  ejercitaba: era falso, se corrige aquí. VRB-06: el nulo de P2 no está centrado (todo es Cordón Caulle). VRB-07: en el
+  borde del barrido `_interp_geo` corre el píxel 10 a 16 km (15 records, cenit 63 a 75°).
+- **Seguimientos para la adopción**: `_interp_geo` interpola el relleno −999 sin enmascararlo (SOSPECHA); 36 records en 8
+  gránulos donde X pierde píxeles que no tienen geolocalización MxD03 y K sí conserva: la adopción tiene que declararlo.

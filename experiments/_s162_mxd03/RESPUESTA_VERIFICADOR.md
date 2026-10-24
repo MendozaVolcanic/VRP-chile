@@ -26,6 +26,8 @@ Re-corridas finales (salidas al lado): `probar_probe_mxd03_ab_salida.txt` (caso 
 Lo que el verificador dejó como CONFIRMADO EN PARTE y queda así, declarado:
 - **A3**: el control 4 no tiene prueba en un runner real; el humo lo ejercita (Láscar 03-27 y Chillán 10-10 son del sha
   mayoritario) y ahora el fetch por sha se prueba al arrancar cada job.
+  ⚠️ **Corregido tras el resultado (VRB-05)**: el humo NO ejercitó la re-corrida en sha, ni lo hicieron las tandas (no
+  hubo ningún record que decide con K distinto de `data/`); sí se probó en el runner el fetch por sha y el worktree.
 - **A5**: el bucle de selección de la vara es una copia adaptada de `construir_vara_viirs.main`, no un import (A102);
   misma lógica por lectura y la vara se reproduce byte a byte. Se deja así porque la de 1.23 lee la población de la 1.17.
 - **Dependencias**: el yml no instala `pyproj` ni `pandas`; el verificador midió con bloqueo que el arnés no los necesita.
