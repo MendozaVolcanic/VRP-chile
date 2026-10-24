@@ -57,15 +57,17 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
 - [x] C1. (`21b800259`, redactado por subagente Opus y revisado) Pre-registro del lote (300 a 400 de las 5.093 noches neg_resto), selección con semilla, objetivos, regla de
   decisión (Wilson), para el despacho combinado de la fase 1. Guardar el recorte nativo de cada pasada (lo pide MOD-E).
-- [ ] C2. Verificador limpio del pre-registro y entrega a la coordinadora. (CORRIENDO: Fable alto, carpeta `experiments/_s162_modis_verif_cde/`)
+- [x] C2. Verificador limpio (Fable alto): se sostiene, 3 grietas arregladas (adenda 1, `5f40f604d`); entregado a la coordinadora para la fase 1. Ronda 2 CORRIENDO.
 
 ### MOD-E, bow tie (D28), ablación local
 - [x] E1. Leer cómo grilla el port MODIS y qué hay en disco; decidir si la ablación se puede hacer sin red.
-- [ ] E2. Ablación (o veredicto de sustrato) con verificador limpio. (informe `e4feb6f57`; verificador CORRIENDO junto con C2 y D2)
+- [x] E2. Verificador limpio: los números se reproducen, la lectura del bow tie NO (VCD-03/04). Retirada con marca: D28 SIN DATO; la costura de barrido es SOSPECHA; E-2 con matiz (sólo bajo 1 MW, cenit con fecha). Ronda 2 CORRIENDO.
+- [ ] E3. Ablación real con los recortes nativos de MOD-C (cuando llegue el lote), con un método de quitar duplicados sin huecos y la clasificación por costura.
 
 ### MOD-D, paquete MODIS contra K
 - [x] D1. (borrador en `experiments/_s162_modis_paquete/PREREGISTRO.md`) Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
-- [ ] D2. Verificador limpio del pre-registro. (CORRIENDO, el mismo de C2)
+- [x] D2. Verificador limpio: v1 tenía reglas que obligaban a decidir después de mirar; v2 las cierra (`ce71a4ab1`). Ronda 2 CORRIENDO.
+- [ ] D3. Candado de MOD-D (evaluador, arnés, workflow, verificador) después de MOD-B y MOD-C.
 
 ### MOD-A (la hace la sesión del instrumento)
 - [ ] A1. Usar la cita de MOD03 de Coppola 2026 p. 4 cuando la entregue (afecta §2 del pre-registro de MxD03).
@@ -78,6 +80,17 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 (ninguna todavía)
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 (vuelta 6): humo de MOD-B en verde; segundo verificador; MOD-C entregado; MOD-D v2
+- Humo de MOD-B (run 40111997157, 4 gránulos, 15 records): todos los controles OK (geometría 2,581 km = S151, K = data/
+  en 15 de 15, K2 = K, re-etiquetado 0 distintas, predicado, cableado, fetch por sha y main congelado en el runner).
+  OK enviado a la coordinadora para t1, t2, t3. Evaluación archivada en `experiments/_s162_mxd03/humo_40111997157/`.
+- Verificador de MOD-C/D/E (Fable alto): MOD-C se sostiene (3 grietas arregladas: ángulos en la prueba, controles
+  oblicuos, sunglint); MOD-E: mi lectura del bow tie no se seguía de lo medido (el brazo de filas de borde dejaba huecos
+  y conservaba copias; la caída de 25 % aparecía en focos vistos una vez): retirada; MOD-D: v1 con BLOQUEA sin fila,
+  Chillán inalcanzable, placebo que no puede fallar, alcances sin fijar, 0,485 sin fuente (en la población es 0,635).
+- MOD-C enviado a la coordinadora (blob nuevo 2d57443d). MOD-D v2 escrita. Error mío al reescribir MOD-D: puse el
+  corte de Chillán en 44° cuando la pasada de K/MIROVA 0,137 tiene 35°; corregido a 30° antes del commit.
 
 ### 2026-10-24 (vuelta 5): ronda 2 del verificador y pedido de despacho de MOD-B
 - Ronda 2: «se puede despachar el humo». VMX-10 (homónimo en la prueba del arnés) quedó mal en el primer intento: la
