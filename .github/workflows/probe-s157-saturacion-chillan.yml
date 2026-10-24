@@ -1,0 +1,77 @@
+name: "Probe S157, saturacion del sensor en Nevados de Chillan (solo lectura)"
+
+# Separa saturacion de D17 en el deficit oblicuo de Chillan. Lee los quality flags de VIIRS (bit 4 Saturation,
+# VIIRS L1B UserGuide Aug 2021 Tabla C.1; A37: VIIRS clampa al Reported Range, no usa sentinela) en I04/I05 y
+# M13/M15, y los SI > 32767 de MODIS (65533 = Detector is saturated) en B21/B22/B31, para los 10 granulos del
+# 2026-10-18 del probe de #871 y las pasadas oblicuas con alerta de MIROVA >= 1 MW. Diseno, controles y
+# predicciones escritos ANTES de correr: experiments/_s157_saturacion/README.md y probe_saturacion.py.
+# Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# Se dispara con un push a la rama s157-saturacion-probe (workflow_dispatch solo existe desde main, S73).
+# A43: "on" entre comillas. S141: pipefail con tee y el script sale 2 si falta una pasada.
+# A71: autentica SOLO por EARTHDATA_TOKEN (el par usuario y clave de los secretos esta vencido, S146) y falla al
+# instante si viene vacio. Cuota: 2 jobs, grupo de concurrencia propio.
+# A15: ~16 granulos V375 (~320 MB el par) y ~24 V750+MODIS, 1 corrida por granulo, ~2 min cada uno estimados
+# -> 35 a 50 min; timeout 120.
+"on":
+  push:
+    branches: ["s157-saturacion-probe"]
+  workflow_dispatch:
+
+concurrency:
+  group: probe-s157-saturacion-chillan
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04  # pyhdf probado en 24.04 (ver nrt.yml)
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        job: [V375, V750_MODIS]
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Prueba sintetica del contador (C-SIN)
+        env:
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s157_saturacion/prueba_saturacion.py 2>&1 | tee out/prueba_${{ matrix.job }}.txt
+      - name: Probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          python experiments/_s157_saturacion/probe_saturacion.py --job ${{ matrix.job }} --out out \
+            2>&1 | tee out/probe_${{ matrix.job }}.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s157-saturacion-${{ matrix.job }}
+          path: |
+            out/*.json
+            out/*.txt
+            out/*.log
+          retention-days: 30
+          if-no-files-found: error

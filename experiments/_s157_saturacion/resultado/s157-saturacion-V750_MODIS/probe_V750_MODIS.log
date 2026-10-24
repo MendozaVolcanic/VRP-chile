@@ -1,0 +1,63 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+job V750_MODIS: 24 pasadas
+
+== C VIIRS_NOAA21_750 VJ202MOD.A2026273.0542.021.2026273095226.nc
+/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 23:08:07Z] DOWNLOAD_START attempt=0 n=1 dest=vrp_tmp [LAADS:10058351117]
+/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 23:08:11Z] DOWNLOAD_ERR attempt=0 elapsed=3.6s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202MOD/VJ202MOD.A2026273.0542.021.2026273
+[diag 23:08:21Z] DOWNLOAD_START attempt=1 n=1 dest=vrp_tmp [LAADS:10058351117]
+[diag 23:08:24Z] DOWNLOAD_ERR attempt=1 elapsed=3.5s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202MOD/VJ202MOD.A2026273.0542.021.2026273
+[diag 23:08:54Z] DOWNLOAD_START attempt=2 n=1 dest=vrp_tmp [LAADS:10058351117]
+[diag 23:08:58Z] DOWNLOAD_ERR attempt=2 elapsed=3.5s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202MOD/VJ202MOD.A2026273.0542.021.2026273
+[diag 23:09:58Z] DOWNLOAD_START attempt=3 n=1 dest=vrp_tmp [LAADS:10058351117]
+[diag 23:10:01Z] DOWNLOAD_ERR attempt=3 elapsed=3.6s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202MOD/VJ202MOD.A2026273.0542.021.2026273
+   ERROR DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202MOD/VJ202MOD.A2026273.0542.021.2026273095226.nc. Status code: 401
+
+== C MODIS_TERRA MOD021KM.A2026279.0145.061.2026279131214.hdf
+[diag 23:10:07Z] DOWNLOAD_START attempt=0 n=1 dest=vrp_tmp [LAADS:10064611903]
+[diag 23:10:12Z] DOWNLOAD_ERR attempt=0 elapsed=4.7s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/MOD021KM/MOD021KM.A2026279.0145.061.2026279
+[diag 23:10:22Z] DOWNLOAD_START attempt=1 n=1 dest=vrp_tmp [LAADS:10064611903]
+[diag 23:10:26Z] DOWNLOAD_ERR attempt=1 elapsed=4.2s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/MOD021KM/MOD021KM.A2026279.0145.061.2026279
+[diag 23:10:56Z] DOWNLOAD_START attempt=2 n=1 dest=vrp_tmp [LAADS:10064611903]
+[diag 23:11:00Z] DOWNLOAD_ERR attempt=2 elapsed=3.5s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/MOD021KM/MOD021KM.A2026279.0145.061.2026279
+[diag 23:12:00Z] DOWNLOAD_START attempt=3 n=1 dest=vrp_tmp [LAADS:10064611903]
+[diag 23:12:02Z] DOWNLOAD_DONE attempt=3 elapsed=2.5s n_files=1
+   cota 0.0 MW | C-P1 (True, '') | {"B21": {"n": 89, "si_65533_sat": 0, "si_invalido": 0, "codigos": {}, "tope_32767": 0}, "B22": {"n": 89, "si_65533_sat": 0, "si_invalido": 0, "codigos": {}, "tope_32767": 0}, "B31": {"n": 89, "si_65533_sat": 0, "si_invalido": 0, "codigos": {}, "tope_32767": 0}}
+
+== B VIIRS_SNPP_750 VNP02MOD.A2026272.0636.002.2026272143458.nc
+[diag 23:12:06Z] DOWNLOAD_START attempt=0 n=1 dest=vrp_tmp [LAADS:10057485574]
+[diag 23:12:09Z] DOWNLOAD_DONE attempt=0 elapsed=2.3s n_files=1
+[diag 23:12:09Z] DOWNLOAD_START attempt=0 n=1 dest=vrp_tmp [LAADS:10057484186]
+[diag 23:12:14Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=1
+   cota 0.0 MW | C-P1 (True, '') | {"M13": {"n": 156, "bit4_sat": 0, "bit2_oor": 0, "bit128_somesat": 0, "tope_lut": 0, "perdidos_pipeline": 0, "sentinela": 0}, "M15": {"n": 156, "bit4_sat": 0, "bit2_oor": 0, "bit128_somesat": 0, "tope_lut": 0, "perdidos_pipeline": 0, "sentinela": 44}}
+Traceback (most recent call last):
+  File "/home/runner/work/VRP-chile/VRP-chile/experiments/_s157_saturacion/probe_saturacion.py", line 406, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/runner/work/VRP-chile/VRP-chile/experiments/_s157_saturacion/probe_saturacion.py", line 399, in main
+    (out / (tag + ".json")).write_text(json.dumps(res, default=p871.a_json, ensure_ascii=False, indent=1),
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/json/encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  [Previous line repeated 1 more time]
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/json/encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+  File "/home/runner/work/VRP-chile/VRP-chile/experiments/_s157_prereg_d25/probe_l1b/probe_chillan.py", line 451, in a_json
+    raise TypeError(type(x))
+TypeError: <class 'bytes'>

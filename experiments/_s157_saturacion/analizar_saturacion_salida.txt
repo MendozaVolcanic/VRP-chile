@@ -1,0 +1,18 @@
+Techo de reporte (VIIRS L1B UserGuide Aug 2021, Tabla C.3, Reported Range, W m-2 sr-1 um-1 -> K):
+   I4      4.6593 -> 367.7 K
+   I5     22.8356 -> 379.1 K
+   M13   605.7700 -> 683.1 K
+   M15    25.5611 -> 381.5 K
+
+grp  sensor            pasada         cenit      M    pub  falta | MIR: bit4 bit2 tope perd (cum b4/tope) | TIR: bit4 bit2 tope perd (cum b4/tope) | perd    cota | veredicto / controles
+C    MODIS_TERRA       A2026279.0145    2.5      -   0.69      - | 65533 0 inval 0 (cum 0)            | 65533 0 inval 0 (cum 0)            |    0   0.000 | descartada C-P1 True C-IDX True bit4=n/a
+
+FALLIDAS: [('C_VIIRS_NOAA21_A2026273.0542.json', 'DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026273.0542.021.2026273095226.nc. Status code: 401'), ('C_VIIRS_NOAA21_750_A2026273.0542.json', 'DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202MOD/VJ202MOD.A2026273.0542.021.2026273095226.nc. Status code: 401')]
+SOLO LOG B VIIRS_SNPP_750 VNP02MOD.A2026272.0636.002.2026272143458.nc | cenit 55.77 | M 2.03 pub 0.329 falta 1.701 | cota 0.0 MW | C-P1 True | ventana {"M13": {"n": 156, "bit4_sat": 0, "bit2_oor": 0, "bit128_somesat": 0, "tope_lut": 0, "perdidos_pipeline": 0, "sentinela": 0}, "M15": {"n": 156, "bit4_sat": 0, "bit2_oor": 0, "bit128_somesat": 0, "tope_lut": 0, "perdidos_pipeline": 0, "sentinela": 44}}
+
+CONTROLES
+   C-0  (grupo C sin perdidos ni bit 4): [('MODIS_TERRA', 0, 'descartada')]
+   C-POS (65533 > 0 en Planchón Peteroa): []
+   pasadas que fallan C-P1 o C-IDX (no se interpretan): [('VIIRS_SNPP_750', 'A2026272.0636')]
+
+AGREGADO (grupos A y B con alerta de MIROVA, controles en verde)

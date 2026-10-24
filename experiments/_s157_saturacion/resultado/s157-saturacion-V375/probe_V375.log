@@ -1,0 +1,101 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+job V375: 16 pasadas
+
+== C VIIRS_NOAA21 VJ202IMG.A2026273.0542.021.2026273095226.nc
+/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 23:07:50Z] DOWNLOAD_START attempt=0 n=1 dest=vrp_tmp [LAADS:10058351101]
+/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 23:07:53Z] DOWNLOAD_ERR attempt=0 elapsed=3.9s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026273.0542.021.2026273
+[diag 23:08:03Z] DOWNLOAD_START attempt=1 n=1 dest=vrp_tmp [LAADS:10058351101]
+[diag 23:08:07Z] DOWNLOAD_ERR attempt=1 elapsed=3.7s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026273.0542.021.2026273
+[diag 23:08:37Z] DOWNLOAD_START attempt=2 n=1 dest=vrp_tmp [LAADS:10058351101]
+[diag 23:08:41Z] DOWNLOAD_ERR attempt=2 elapsed=3.6s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026273.0542.021.2026273
+[diag 23:09:41Z] DOWNLOAD_START attempt=3 n=1 dest=vrp_tmp [LAADS:10058351101]
+[diag 23:09:44Z] DOWNLOAD_ERR attempt=3 elapsed=3.6s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026273.0542.021.2026273
+   ERROR DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026273.0542.021.2026273095226.nc. Status code: 401
+
+== B VIIRS_NOAA21 VJ202IMG.A2026271.0442.021.2026271103143.nc
+[diag 23:09:47Z] DOWNLOAD_START attempt=0 n=1 dest=vrp_tmp [LAADS:10056405808]
+[diag 23:09:51Z] DOWNLOAD_ERR attempt=0 elapsed=3.7s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026271.0442.021.2026271
+[diag 23:10:01Z] DOWNLOAD_START attempt=1 n=1 dest=vrp_tmp [LAADS:10056405808]
+[diag 23:10:04Z] DOWNLOAD_ERR attempt=1 elapsed=3.8s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026271.0442.021.2026271
+[diag 23:10:34Z] DOWNLOAD_START attempt=2 n=1 dest=vrp_tmp [LAADS:10056405808]
+[diag 23:10:38Z] DOWNLOAD_ERR attempt=2 elapsed=3.7s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026271.0442.021.2026271
+[diag 23:11:38Z] DOWNLOAD_START attempt=3 n=1 dest=vrp_tmp [LAADS:10056405808]
+[diag 23:11:42Z] DOWNLOAD_ERR attempt=3 elapsed=4.0s err=DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026271.0442.021.2026271
+   ERROR DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026271.0442.021.2026271103143.nc. Status code: 401
+Traceback (most recent call last):
+  File "/home/runner/work/VRP-chile/VRP-chile/experiments/_s157_saturacion/probe_saturacion.py", line 382, in main
+    res = procesar(p, mods, vols, dest)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/VRP-chile/VRP-chile/experiments/_s157_saturacion/probe_saturacion.py", line 277, in procesar
+    par, nota = p871.bajar(vol, sensor, nombre, dest)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/VRP-chile/VRP-chile/experiments/_s157_prereg_d25/probe_l1b/probe_chillan.py", line 362, in bajar
+    got = [Path(p) for p in download_granules(grs[:1], dest) if stamp in Path(p).name]
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/VRP-chile/VRP-chile/pipeline/fetch.py", line 994, in download_granules
+    raise last_err if last_err else RuntimeError("download failed")
+  File "/home/runner/work/VRP-chile/VRP-chile/pipeline/fetch.py", line 959, in download_granules
+    paths = earthaccess.download(granules, local_path=str(dest_dir))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/api.py", line 433, in download
+    return earthaccess.__store__.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/store.py", line 696, in get
+    return self._get(
+           ^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/multimethod/__init__.py", line 372, in __call__
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/store.py", line 857, in _get_granules
+    return self._download_onprem_granules(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/store.py", line 975, in _download_onprem_granules
+    return pqdm(arguments, self._download_file, **pqdm_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/pqdm/threads.py", line 22, in pqdm
+    return _parallel_process(
+           ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/pqdm/_base.py", line 79, in _parallel_process
+    raise e
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/pqdm/_base.py", line 76, in _parallel_process
+    results.append(future.result())
+                   ^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/tenacity/__init__.py", line 404, in wrapped_f
+    return copy(f, *args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/tenacity/__init__.py", line 550, in __call__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/tenacity/__init__.py", line 440, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/tenacity/__init__.py", line 482, in exc_check
+    retry_exc.reraise()
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/tenacity/__init__.py", line 216, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/tenacity/__init__.py", line 553, in __call__
+    result = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/store.py", line 919, in _download_file
+    raise DownloadFailure(
+earthaccess.exceptions.DownloadFailure: Download failed for https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/VJ202IMG/VJ202IMG.A2026271.0442.021.2026271103143.nc. Status code: 401
+
+las dos primeras pasadas fallaron: se aborta para no bajar el resto
