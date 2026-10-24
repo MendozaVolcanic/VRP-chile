@@ -52,8 +52,9 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] B7. (2026-10-24, mensaje a la coordinadora) Pedido de despacho a la coordinadora (tag, tres tandas de 8 partes, ~47 h de runner).
 
 - [ ] B8. Evaluar el humo cuando llegue el run id (artefactos a `D:\vrp-trabajo\temporales\s162_mxd03\humo\`, evaluador desde checkout del tag, VMX-12) y dar el OK para las tandas.
-- [ ] B10. PR del veredicto de MOD-B con D35 en `docs/MIROVA_DIVERGENCES.md` y las marcas A113 en D18 y `docs/SINTOMAS.md` §3 (decisión D-48 aplicada por la coordinadora).
-- [ ] B9. Tres tandas evaluadas (`1aaaf709c`, rama `s162-mxd03-codigo`, `experiments/_s162_mxd03/resultado/`): **CUMPLE SIN DAÑO** (P1 sin pérdida; P2 ≤ 35° EMPATE ΔX −1 ruido 4; vara MXD03 MAS CERCA n 65; M NEUTRO; 13 controles en verde; 5.465 de 5.465). Condiciona: auditoría A61 de 48 protegidas movidas (P4); signo de P2 sin Cordón Caulle distinto. Verificador limpio del resultado CORRIENDO.
+- [ ] B10. PR del veredicto de MOD-B con D35 en `docs/MIROVA_DIVERGENCES.md` y las marcas A113 en D18 y `docs/SINTOMAS.md` §3 (decisión D-48 aplicada por la coordinadora). Además en ese PR: la candidata Láscar 2026-05-11 en BEYOND §12 (X1).
+- [ ] B11. Auditoría espacial A61 de las 48 protegidas cuyo cúmulo se mueve (§6 P4), antes de cualquier adopción; y los seguimientos de la adopción: relleno −999 en `_interp_geo`, 36 records con píxeles sin MxD03, control del módulo de R con relleno (VRB-01).
+- [x] B9. **CUMPLE SIN DAÑO, verificado** (`afb3fcdea`, `experiments/_s162_mxd03/resultado/`, verificador limpio Fable): P1 sin pérdida, P2 ≤ 35° EMPATE, vara MXD03 MAS CERCA (pero mide cercanía al cráter de Láscar, no al calor de la noche: VRB-02), M neutro en la mediana con 17 de 79 alertas cambiando más de 10 %; las 48 protegidas quedan más cerca del cráter con X (1,46 km). Veredicto enviado a la coordinadora.
 
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
 - [x] C1. (`21b800259`, redactado por subagente Opus y revisado) Pre-registro del lote (300 a 400 de las 5.093 noches neg_resto), selección con semilla, objetivos, regla de
@@ -87,6 +88,12 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 2. ~~D35 y marcas A113~~: **resuelta** (D-48): van en el PR del veredicto de MOD-B, no antes (tarea B10).
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 (vuelta 15): MOD-B verificado y entregado
+- Verificador limpio del resultado: el CUMPLE SIN DAÑO se sostiene con código independiente. Matices anotados en el
+  informe (VRB-01 a VRB-07); corrección mía: el control 4 nunca se ejercitó, ni en el humo.
+- Veredicto enviado a la coordinadora con la recomendación de adoptar MxD03 dentro del paquete MODIS. Propuse cerrar
+  esta sesión (larga) y hacer el PR del veredicto (D35, A113, BEYOND §12) y la auditoría A61 en una nueva.
 
 ### 2026-10-24 20:45 UTC (vuelta 14): MOD-B evaluado
 - t3 (40126381034) completa: 5.465 de 5.465 en las 24 partes, 0 errores, K = data/ y K2 = K en todas.
