@@ -43,7 +43,7 @@ el cero de arriba no es ceguera del instrumento.
 
 ## Pruebas, placebos y mutaciones
 
-- 21 pruebas. Lo central: el placebo ×1,2 da MEJORA **sin** comparador y no **con** comparador, y su d′ es 0 exacto;
+- 24 pruebas. Lo central: el placebo ×1,2 da MEJORA **sin** comparador y no **con** comparador, y su d′ es 0 exacto;
   un brazo que corrige cada par hacia MIROVA da MEJORA con comparador; una MEJORA de un solo volcán queda NEUTRO; el
   placebo (a) GANA, el (b) PIERDE y el (c) da pocos falsos y voltea lo mismo de cada lado en un bloque asimétrico.
 - Placebo (c), primera versión: volteaba el bloque entero del lado que salía; como los bloques del lado +1 traían más
@@ -52,7 +52,24 @@ el cero de arriba no es ceguera del instrumento.
 - Mutaciones (`mutaciones_t3.json` → `mutaciones_t3_salida.txt`): primera corrida 16 de 21; F1 caía por construcción
   (la prueba leía una clave que no existe sin comparador), F4 era casi equivalente (con signos al azar `s·d` y `s·|d|`
   tienen la misma distribución; sólo cambia el poder) y F5, F11 y F16 pedían casos nuevos. Con cuatro pruebas más y
-  una aserción sobre el poder: **21 de 21 atrapadas por aserción**, con control de caída.
+  una aserción sobre el poder: 21 de 21; con las tres del verificador (abajo): **24 de 24 atrapadas por aserción**,
+  con control de caída.
+
+## Verificador con contexto limpio (Sonnet, 2026-10-24)
+
+**APROBADO CON OBSERVACIONES**; las cinco afirmaciones se sostienen. Reprodujo la equivalencia (250 casos, 0
+diferencias; control negativo 17) y la extendió con 36 casos propios (controles caídos en M, `decidir_p2` contra
+`decidir_p2_bloques` en 5 tamaños de B): idénticos. Placebo de ganancia en 5 tablas propias: MEJORA sin comparador,
+NEUTRO con comparador, d′ = 0 exacto. Placebo (c) en tres tablas propias con bloques asimétricos y 12 % de pasadas no
+observadas, 2.500 semillas cada una: falsos entre 1,6 % y 4,0 % por cola, neto medio en torno a 0. `clase_p2` contra
+`banco_paridad.etiquetar` en la referencia de V1 (regla SN, 4.669 pasadas): 0 discrepancias.
+Hallazgos aplicados: (gravedad 3) ninguna prueba fallaba si P2 armaba el bloque con la pasada en vez de la noche, o
+sumaba por pasada: dos pruebas nuevas (seis noches con dos aportes dan B = 6 y p = 1/64; un bloque mixto suma 0 y
+cuenta en B) y sus dos mutaciones (G1, G2) atrapadas; (gravedad 2) `decidir_p2(contrib, ok_ctrl)` da INDECIDIBLE con
+los controles caídos, como el sellado (G3); (gravedad 2) el CLI informa en cada corrida las pasadas donde el OCR
+contradice a la tabla (V1: 0). Diferencias declaradas con el sellado, sin cambio: la tabla decide la clase (los
+sellados unían filas); los filtros de sensor, volcán y Suomi NPP los pone quien llama (`excluir`); P2 exige que los
+dos lados observen la pasada (más estricto); no se informan D-34 ni D-42 (retiradas por D-45).
 
 ## Límites
 

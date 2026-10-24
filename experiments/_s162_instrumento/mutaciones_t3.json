@@ -149,6 +149,27 @@
    "viejo": "if f[\"dia\"] in excl or p.estado != \"alerta\" or not p.vrp_mw or excluir(f) or not observada_en(f, control, brazo):",
    "nuevo": "if f[\"dia\"] in excl or p.estado != \"alerta\" or not p.vrp_mw or excluir(f):",
    "que": "pares de M sin el filtro de no observado"
+  },
+  {
+   "id": "G1",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "\"c\": 1 if eb else -1, \"bloque\": \"%s|%s\" % (f[\"pasada\"].volcano, f[\"dia\"])}",
+   "nuevo": "\"c\": 1 if eb else -1, \"bloque\": f[\"clave\"]}",
+   "que": "bloque = pasada (defecto V42-21; mutacion del verificador de #905)"
+  },
+  {
+   "id": "G2",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "        por_bloque[x[\"bloque\"]] += int(x[\"c\"])",
+   "nuevo": "        por_bloque[x[\"clave\"]] += int(x[\"c\"])",
+   "que": "P2 suma por pasada y no por bloque (mutacion del verificador de #905)"
+  },
+  {
+   "id": "G3",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "    if not ok_ctrl:\n        return \"INDECIDIBLE\", det",
+   "nuevo": "    if False:\n        return \"INDECIDIBLE\", det",
+   "que": "P2 decide con los controles caidos"
   }
  ]
 }

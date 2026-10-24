@@ -501,8 +501,13 @@ def regla_signos_p2(neto, B, pr):
     return "EMPATE"
 
 
-def decidir_p2(contrib):
-    """P2 con la prueba de signos por bloque noche-volcán (D-45). Devuelve (resultado, detalle)."""
+def decidir_p2(contrib, ok_ctrl=True):
+    """P2 con la prueba de signos por bloque noche-volcán (D-45). Devuelve (resultado, detalle).
+
+    Con los controles generales caídos (`ok_ctrl=False`, por ejemplo cobertura INVALIDO de T1) el resultado es
+    INDECIDIBLE, como en el sellado (D-45 §2.8); los campos de la prueba se calculan igual. Diferencias declaradas con
+    `evaluar_d25.decidir_p2_bloques` (verificador de #905): no informa D-34 ni D-42 (retiradas por D-45), y los
+    filtros de sensor, volcán o Suomi NPP los pone quien llama (callback `excluir` de contribuciones_p2)."""
     neto = sum(x["c"] for x in contrib)
     por_bloque = collections.Counter()
     for x in contrib:
@@ -512,6 +517,8 @@ def decidir_p2(contrib):
     det = {"neto": neto, "n_discordantes": len(contrib), "B": len(sumas), "metodo": pr["metodo"],
            "p_gana": pr["gana"][0] / pr["gana"][1], "p_pierde": pr["pierde"][0] / pr["pierde"][1],
            "p_dos_colas": pr["dos_colas"][0] / pr["dos_colas"][1]}
+    if not ok_ctrl:
+        return "INDECIDIBLE", det
     return regla_signos_p2(neto, len(sumas), pr), det
 
 
@@ -658,6 +665,10 @@ def main(argv=None):
     brazos = [l for l in lados if l != a.control]
     res = {"ventana": ventana, "sensores": sensores, "canal": a.canal, "regla_minimas": a.regla_minimas,
            "dias_excluidos": excl, "volcanes_sin_archivo": faltan, "pasadas_mirova": len(pasadas),
+           # Verificador de #905: si la tabla y el OCR discrepan en una pasada, este evaluador sigue a la tabla y los
+           # sellados unían las filas; se cuenta en cada corrida para que el día que aparezca no pase en silencio.
+           "ocr_contradice_tabla": sum(p.ocr_contradice_tabla for p in pasadas),
+           "ocr_cruza_1mw": sum(p.ocr_cruza_1mw for p in pasadas),
            "cobertura": cobertura(T, recs, a.control, excl),
            "p1b": {b: p1b(T, a.control, b, dias_excluidos=excl) for b in brazos},
            "rutina": publicaciones_sobre_rutina(T, list(lados), excl)}
@@ -665,6 +676,8 @@ def main(argv=None):
         res["cobertura"]["veredicto"] = INVALIDO
     c = res["cobertura"]
     print("COBERTURA CONTRA MIROVA:", c["veredicto"])
+    print("  pasadas donde el OCR contradice a la tabla (decide la tabla): %d; alerta a distinto lado de 1 MW: %d"
+          % (res["ocr_contradice_tabla"], res["ocr_cruza_1mw"]))
     print("  protegidas sin record en algún brazo que el control tiene:", len(c["protegidas_sin_record_en_brazos"]))
     for x in c["protegidas_sin_record_en_brazos"][:20]:
         print("    ", x)
