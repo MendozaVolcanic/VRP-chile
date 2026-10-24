@@ -13,20 +13,29 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 
 ## Cola (en orden)
 
-1. [hecho y verificado] **V750-C**: `experiments/_s162_v750c/INFORME.md`, con la marca del verificador.
-2. [hecho] Verificador limpio de V750-C (Fable 5.1): `experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`.
-   Confirma los números; corrige la atribución: dos piezas (interpolación dentro de la caja sensible; ROI fuera).
-3. [v3, en tercera vuelta corta (Fable) sobre el delta 607062ba7..439968ec1] Pre-registro V750-B v3 (`81a5cfcd2`). Segunda vuelta
-   (Sonnet): «conforme con cambios», VB2-01 a VB2-15, todos hechos o declarados. Batería sellada
-   `bateria_regla_v750b.py` 11/11. La coordinadora confirmó VB2-02 bajo D-48 y pidió tercera vuelta corta: si da conforme sin
-   cambios en la regla, queda sellada; si toca la regla, avisarle ANTES de corregir. El **2026-11-03**:
-   `objetivos_v750b.py --hasta 2026-11-02` (escribe también `sin_granulo_v750b.json`), commitear, pedir despacho con sha256.
-4. [borrador] Pre-registro V750-A: `experiments/_s162_v750a/PREREGISTRO_V750A.md` (equivalencia, censo, sombra; brazos
-   K, P, P-def, P-sinfiltro, Kgeo, K×1,2, O). Prueba de equivalencia hecha y probada (roja sin módulo, 6/6 mutaciones).
-   Falta: analizador `evaluar_v750a.py` (conviene después del resultado de V750-B, que fija la ROI) y su verificador.
-5. [hecho] Paso a paso de V750-F para Nicolás: `experiments/_s162_v750f/PASO_A_PASO_O2.md` (paquete comprobado, md5 OK).
-6. [pendiente] Resumen para la coordinadora (nota en la carpeta compartida + SendMessage corto).
-7. [después] V750-D (subsumido por V750-A salvo que no se adopte); V750-E (diurno) al final.
+**Estado al 2026-10-24 ~19:30 UTC: loop DETENIDO a propósito** (lo que sigue espera fechas o decisiones externas;
+reiniciarlo con `/loop Loop de VIIRS 750 de VRP Chile: lee tasks/LOOP_VIIRS750.md, ...` cuando toque).
+
+1. [hecho y verificado] **V750-C**: `experiments/_s162_v750c/INFORME.md` (verificador Fable). Dos piezas callan las
+   cumbres tibias: la interpolación lineal (dentro de la zona sensible) y la ROI (fuera, Tupungatito). La magnitud la
+   da el fondo del código.
+2. [SELLADO bajo D-48] **V750-B**: `experiments/_s162_v750b/PREREGISTRO_V750B.md`, commit `1af6c3cd8`, tag
+   `s162-v750b-sellado`. Tres vueltas de verificador (Fable, Sonnet, Fable); batería de 19 escenarios que atrapa 13
+   de 13 mutaciones por aserción (`mutar_bateria_salida.txt`).
+   **PRÓXIMA ACCIÓN, 2026-11-03** (después de que el NRT tenga las pasadas del 11-02): en un árbol de `origin/main` con
+   `experiments/_s162_v750b/` del tag, correr `python experiments/_s162_v750b/objetivos_v750b.py --data <data de
+   origin/main extraída> --ref-dest <carpeta> --hasta 2026-11-02`; commitear `objetivos_v750b.json`,
+   `sin_granulo_v750b.json` y `poblacion_completa.json`; pedir el despacho a la coordinadora con los sha256 (ella
+   despacha desde un tag; la cobertura contra la referencia del instrumento, #904, tiene que estar entregada).
+   Lectura: comando del §9 con `--sin-granulo`.
+3. [borrador] **V750-A**: `experiments/_s162_v750a/PREREGISTRO_V750A.md`; prueba de equivalencia local hecha y probada
+   (`equivalencia_v750a_salida.txt`: roja sin módulo, 6/6 mutaciones). Falta el analizador `evaluar_v750a.py` (reusar
+   la regla, las etiquetas y los controles de `analizar_v750b.py`; P2 contra K; M con el comparador y el placebo de
+   `evaluar_d25.py` del tag) y su verificador. Bloqueado por el resultado de V750-B (la ROI) y, para el brazo P desde
+   el gránulo, por la vía de proceso en `pipeline/` (A45: tag y sí de Nicolás).
+4. [hecho] **V750-F**: paso a paso de O2 para Nicolás (`experiments/_s162_v750f/PASO_A_PASO_O2.md`).
+5. [hecho] Resumen a la coordinadora (mensajes + nota en la carpeta compartida).
+6. [después] V750-D (subsumido por V750-A salvo que no se adopte); V750-E (diurno) al final.
 
 ## Decisiones para Nicolás
 
@@ -82,3 +91,7 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
   un defecto propio de la v3, corregido), y VB2-07 a VB2-15. Ensayo real: compuerta abierta, censo 503/503 en posición.
 - 2026-10-24 17:36 UTC (servidor), vuelta 7. Coordinadora: VB2-02 confirmada (D-48), anotada; tercera vuelta corta con
   Fable sobre el delta lanzada (escribe en `experiments/_s162_v750b/verificador_v3/`).
+- 2026-10-24 ~19:30 UTC, vuelta 8. Coordinadora aprobó VB3-01 bajo D-48 y fijó la condición de sello. Aplicado
+  VB3-01 (escenario S3) y VB3-02 a VB3-07; medidor `mutar_bateria.py`: 13 de 13 mutaciones atrapadas por aserción,
+  identidad PASA, control de caída CAÍDA. Ensayo final con la compuerta abierta. **V750-B SELLADO** (`1af6c3cd8`, tag
+  `s162-v750b-sellado`). Loop detenido: lo próximo es el 2026-11-03.
