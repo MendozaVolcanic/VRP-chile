@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~17:00 UTC (S162): MOD-C listo; sale entre t1 y t2 de MOD-B
+- `loop-modis` entregó MOD-C (lote de 400 negativos neg_resto del port MODIS más 13 controles, D-36; regla Jeffreys
+  fijada antes: GANA sólo con 0 de 400, 1 a 7 INDECIDIBLE, 8 o más refuta), pre-registro en `claude/s162-modis-774bb0`
+  `5f40f604d` (`experiments/_s162_modis_negativos/`), verificador Fable alto: se sostiene, tres grietas arregladas.
+  El verificador refutó la lectura previa del bow tie (MOD-E): D28 queda SIN DATO hasta la ablación con los recortes de
+  MOD-C. MOD-D todavía no despachable.
+- Commit de disparo preparado por la coordinadora: `ffc1abc1b` (5f40f604d + workflow copiado a `.github/workflows/`),
+  worktree temporal `C:\vrp-trabajo\s162-negmodis-disparo`, sin subir. Orden por cupo de 20 jobs (NRT 11): al
+  terminar t1 (40112510038), tag `s162-base-portes` sobre `0e18e1053` + push a `s162-negmodis-disparo`; al terminar
+  MOD-C, t2.
+
 ### 2026-10-24 ~16:40 UTC, hora de los runs (S162): humo de MOD-B en verde; t1 despachada
 - Humo 40111997157: plan y probe success (comprobado); evaluado por `loop-modis`: VEREDICTO INCOMPLETO esperado (15 de
   5.465 pasadas), todos los controles OK (geometría S151 2,581 km igual, nulo 0,0 km, K igual a data/ 15 de 15, K2 igual
