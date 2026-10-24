@@ -136,3 +136,10 @@ apagado por flag o sólo MODIS), y no se quiso que esa diferencia, por chica que
 
 La cobertura contra la referencia de MIROVA se aplica al evaluar con el código de la sesión del instrumento (PR #904,
 rama `instrumento/evaluador-comun`, sin mergear), declarando su commit (instrucción de la coordinadora, 2026-10-24).
+
+## Adenda 1 (2026-10-24, tras el verificador del resultado)
+
+El verificador del resultado (`resultado_run40116289866/verificador/INFORME.md`) notó que una línea de §5 («Qué lote
+decide») se editó después del sello para citar la adenda 1 de C. Se declara aquí: la edición sólo agregó esa referencia y
+no cambió la regla. Resultado y sensibilidad de B en `resultado_run40116289866/INFORME.md`: con la regla sellada, B queda
+NO RESUELTO (lote S162 solo: cota 4,10 % contra 3,85 %); no se reinterpreta.
