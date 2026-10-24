@@ -251,4 +251,4 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   (vía en `pipeline/`, A45) y #903/#905. V375-F después de E. **Loop en pausa**: no hay tarea avanzable sin esas
   entregas. Para retomar: `/loop` con el mismo prompt cuando la coordinadora avise PD1 o PD3.
 - Limpieza pendiente (no destructiva hasta que Nicolás o la coordinadora lo digan): artefactos falsos del verificador v3
-  en `C:rp-trabajo	emporales\s162_v375erif_v3\` (1,8 GB).
+  en `C:/vrp-trabajo/temporales/s162_v375/verif_v3/` (1,8 GB).
