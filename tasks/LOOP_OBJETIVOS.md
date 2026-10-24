@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~19:40 UTC (S162): V375-B2 dimensionado en 1.200 noches; t2 de MOD-B casi lista
+- V375-B2: el primer verificador mostró que la v1 reutilizaba S162 (en la frontera declaraba «calla» en 11-20 % de los
+  casos cuando no correspondía); en la v2 decide sólo la muestra nueva de neg_resto. Tamaño: **1.200 noches** (con la
+  tasa observada 1,16 %, probabilidad de decidir 93 %; ~8,3 h de runner, 48 trozos, ~90 min de reloj). Aprobado con
+  D-48. Segundo verificador en curso (`claude/s162-viirs375-c1b864` `7ff23cc3a`, `experiments/_s162_v375/b2/`).
+- t2 de MOD-B: 7 de 8 partes en verde, falta la 15.
+
 ### 2026-10-24 ~19:30 UTC (S162): V375-B y V375-C verificados (PD1 de VIIRS 375)
 - Verificador limpio (Sonnet), sin hallazgos que cambien veredictos; informe `experiments/_s162_v375/
   resultado_run40116289866/INFORME.md` (`claude/s162-viirs375-c1b864` `35e9560c2`). Instrumento: 709/709 pasadas,
