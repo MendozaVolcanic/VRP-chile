@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~19:05 UTC (S162): MOD-C verificado INDECIDIBLE; se resuelve en el censo de MOD-D
+- Verificador limpio (Fable alto) confirmó MOD-C: x = 2 de n = 390, ΔE −18,1 [−44,4; +40,1], lector idéntico byte a
+  byte. VRC-01: en el denominador de K el port da 0,54 %. VRC-05: las dos publicaciones deciden (con 0 sería CONFIRMA),
+  son robustas al instrumento pero dependen de banda 22 y MxD03 (con banda 21 o geolocalización de 5 km dan 0); calor
+  real o artefacto SIN DATO.
+- Aplicado con D-48: sin lote nuevo; el «gana contra K» de MODIS lo resuelve el censo de MOD-D. Pedido a `loop-modis` un
+  diagnóstico físico de sólo lectura de las dos publicaciones (Láscar 2026-05-11 07:55, Llaima 2026-07-24 01:05).
+- `loop-viirs375`: lectura pre-registrada del lote lista, en verificación limpia; instrumento limpio (recálculo = runner
+  en 7.427 pasadas por brazo, K = publicado 847/847, cobertura completa).
+
 ### 2026-10-24 ~18:50 UTC (S162): MOD-C terminado (preliminar INDECIDIBLE); t2 de MOD-B despachada
 - MOD-C (40120713181): 7 trozos en exit 2 de diseño (8 volcán fuera del gránulo, 2 escenas inválidas), sin errores de
   proceso; artefactos en `C:\vrp-trabajo\temporales\s162_negmodis\run_40120713181\` (108 MB). **Preliminar, sin
