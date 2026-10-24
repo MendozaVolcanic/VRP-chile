@@ -129,3 +129,17 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
 - **Siguiente**: cuando avise el run del lote, bajarlo a `C:\vrp-trabajo\temporales\s162_v375\run_<RUN>\`, correr
   `evaluar.py --art162 <run> --cobertura cobertura_marco.json`, y pasar el resultado por un verificador limpio antes
   de informarlo.
+
+### 2026-10-24 (vuelta 6): lote run 40116289866 terminado; cobertura del lote completa
+- Run **40116289866** (rama `s162-v375-disparo` en `798cac8ea`, 17:28 a 18:24 UTC): 18 jobs success, 10 failure. Los 10
+  en rojo son el exit 2 de diseño por pasadas no procesadas, no caídas. 28 de 28 artefactos bajados a
+  `C:\vrp-trabajo\temporales\s162_v375\run_40116289866\` (86 MB). **709 de 709 con resultado**: 698 ok (698 grillas) y
+  11 `volcan_fuera_del_granulo`.
+- Diagnóstico de las 11 (antes de evaluar, A108): las 11 son neg_resto (MIROVA RUTINA, K no publica). El probe bajó el
+  MISMO gránulo que el record de producción (mismo nombre, con la hora de proceso), así que no es una versión o reproceso
+  distinto como el 12-oct. El píxel más cercano del gránulo queda a 5,1 a 24,6 km del centro de la grilla: el volcán está
+  fuera o en el borde de la franja (producción deja record porque su círculo de 25 km roza el gránulo). 6 de 11 son
+  pasadas partidas (el gránulo vecino tiene el volcán). Son «no observado» por la regla de #904: salen del denominador y
+  su estrato se re-pondera; 11 de 400 neg_resto (2,75 %). Conservador para el port, porque la vara de K (133 / 3.456) sí
+  las cuenta. Sin relanzar (bajaría el mismo gránulo). Informado a la coordinadora.
+- Evaluación corriendo (`resultado_run40116289866/`); después, verificador limpio antes de informar.
