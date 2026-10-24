@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~21:00 UTC (S162): MOD-B (MxD03 sobre K) PRELIMINAR: CUMPLE SIN DAÑO
+- Censo completo 5.465/5.465 pasadas en 24 partes, sin errores; K = data/, K2 = K. 13 controles en verde. P1 sin
+  protegidas perdidas; P2 bajo 35° EMPATE (ΔX −1, ruido 4); vara VIIRS: **MxD03 más cerca por 0,73 km** (IC 0,49 a
+  1,10, Terra y Aqua del mismo signo); M NEUTRO (ĝ 1,00). Condicionan la adopción sin cambiar el veredicto: auditoría
+  espacial A61 de las 48 protegidas cuyo cúmulo se mueve (§6 P4, obligatoria) y P2 sin Cordón Caulle con signo contrario
+  (+1 contra −1). Informe `experiments/_s162_mxd03/resultado/INFORME.md` (`s162-mxd03-codigo` `1aaaf709c`); verificador
+  Fable alto en curso. Por D-48 la adopción va dentro del paquete MODIS (MOD-D), salvo que se atrase más de un mes.
+
 ### 2026-10-24 20:38 UTC, hora del servidor (S162): las tres tandas de MOD-B terminadas; humo de V375-B2 OK
 - t3 de MOD-B (40126381034): 9/9 success. Las tres tandas corridas (t1 40112510038, t2 40122029477, t3 40126381034);
   `loop-modis` evalúa las tres juntas con verificador limpio.
