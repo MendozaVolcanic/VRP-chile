@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~16:40 UTC, hora de los runs (S162): humo de MOD-B en verde; t1 despachada
+- Humo 40111997157: plan y probe success (comprobado); evaluado por `loop-modis`: VEREDICTO INCOMPLETO esperado (15 de
+  5.465 pasadas), todos los controles OK (geometría S151 2,581 km igual, nulo 0,0 km, K igual a data/ 15 de 15, K2 igual
+  a K, 0 re-etiquetadas, predicado con el mismo sha256), archivado en `s162-mxd03-codigo` `0c2a912ee`. Descargas de 2 a
+  3 s por archivo (contra 32,8 s en el probe M).
+- **t1 despachada: run 40112510038** (rama `s162-mxd03-t1`, tag `s162-mxd03-tag`), sin otros runs vivos. t2 y t3 cuando
+  termine cada anterior.
+
 ### 2026-10-24 ~16:55 UTC (S162): humo de MOD-B (MxD03 sobre K) despachado
 - Pedido de `loop-modis`: pre-registro v2 sellado con D-48 más adenda de 5 puntos; arnés 4/4 mutaciones, evaluador
   22/22 pruebas y 16 mutaciones; verificador Fable alto en dos rondas («se puede despachar el humo»). Comprobado por la
