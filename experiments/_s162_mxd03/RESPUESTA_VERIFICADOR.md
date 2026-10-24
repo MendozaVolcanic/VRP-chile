@@ -29,3 +29,14 @@ Lo que el verificador dejó como CONFIRMADO EN PARTE y queda así, declarado:
 - **A5**: el bucle de selección de la vara es una copia adaptada de `construir_vara_viirs.main`, no un import (A102);
   misma lógica por lectura y la vara se reproduce byte a byte. Se deja así porque la de 1.23 lee la población de la 1.17.
 - **Dependencias**: el yml no instala `pyproj` ni `pandas`; el verificador midió con bloqueo que el arnés no los necesita.
+
+## Ronda 2 (mismo verificador, 2026-10-24): «se puede despachar el humo»
+
+Informe: `verificador/ronda2/INFORME_RONDA2.md`. Los nueve, ARREGLADOS salvo VMX-06 y VMX-08 en parte. Lo nuevo:
+- **VMX-10** (VMX-06 en parte): `probar_probe_mxd03_ab.py` vuelve a poner su carpeta primera en `sys.path` después de
+  importar el arnés. Arreglado aquí.
+- **VMX-11, regla de operación**: una parte que se repite **reemplaza** su artefacto en la carpeta de evaluación, no
+  se suma (si no, el control de duplicados da INDECIDIBLE, como debe).
+- **VMX-12, regla de operación**: el evaluador se corre desde un checkout del tag (el `merge-base` con `origin/main`
+  tiene que seguir siendo el main congelado para que el re-etiquetado regenere la misma población).
+- **VMX-08 en parte**: el `git fetch --depth 1` por sha sólo lo prueba el runner; el humo lo decide antes del arnés.

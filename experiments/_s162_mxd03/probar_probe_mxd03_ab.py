@@ -37,6 +37,9 @@ for p in (RAIZ, RAIZ / "experiments/_s151_mxd03_etiquetas", AQUI):     # AQUI qu
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
 import probe_mxd03_ab as A  # noqa: E402
+# probe_mxd03_ab reinserta _s151_mxd03_etiquetas al frente de sys.path al importarse: esta carpeta vuelve primero, para
+# que un `import evaluar_mxd03` posterior no tome el homonimo de la 1.17 (verificador VMX-06 y VMX-10)
+sys.path.insert(0, str(AQUI))
 import probar_probe_mxd03 as T  # noqa: E402  (escena de la 1.17)
 
 CLAVE = "MYD021KM.A2026073.0705"
