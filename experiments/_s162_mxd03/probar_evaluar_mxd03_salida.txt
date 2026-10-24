@@ -1,0 +1,20 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+PASA  | 1 protegida apagada por X: VETADO aunque 15 R tambien la apaguen
+PASA  | 2 regla de P2: +3 contra +-1 PIERDE; +1 contra +-3 EMPATE; -3 GANA
+PASA  | 3 R sin mover ningun cumulo: P2 INDECIDIBLE (control 2), no PIERDE
+PASA  | 4 cambio de X a 40 grados: fuera de la decision de P2, dentro de su informe
+PASA  | 5 negativo de Cordon Caulle publicado de mas: cambia P2, no P2 sin Cordon Caulle
+PASA  | 6 cambio en mitad partida con hermana sin_info: en P6, no en P2
+PASA  | 7 K2 distinto de K: INDECIDIBLE
+PASA  | 8 alerta con K distinto de data/: sin reproducir INDECIDIBLE, reproducida en su sha deriva y sigue
+PASA  | 9 X = 0,97 K en todas las alertas: M informa EMPEORA y g = 0,97, el veredicto no cambia
+PASA  | 10 vara: X mas lejos con el mismo signo en Terra y Aqua detiene; signos opuestos SESGO POR SATELITE
+PASA  | 11 un None solo en X se cuenta en cobertura y no rompe
+PASA  | 12 una alerta pareada a 150 s no entra (pareo 120 s)
+pruebas: 12 de 12 pasan con evaluar_mxd03
+MUTACION ruido de P2 tomado de K2            ATRAPADA por: 2 
+MUTACION P2 decidido sobre todo el cenit     ATRAPADA por: 4 
+MUTACION veto absuelto por R                 ATRAPADA por: 1 
+MUTACION M bloqueando                        ATRAPADA por: 9 
+MUTACION pareo a 300 s                       ATRAPADA por: 12
+mutaciones atrapadas por asercion: 5 de 5

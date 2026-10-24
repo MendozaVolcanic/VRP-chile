@@ -1,0 +1,13 @@
+FALLA | 1 protegida apagada por X: VETADO aunque 15 R tambien la apaguen | {'estado': 'SIN PERDIDA', 'perdidas': []}
+FALLA | 2 regla de P2: +3 contra +-1 PIERDE; +1 contra +-3 EMPATE; -3 GANA | [('EMPATE', 'PIERDE'), ('EMPATE', 'EMPATE'), ('EMPATE', 'GANA')]
+FALLA | 3 R sin mover ningun cumulo: P2 INDECIDIBLE (control 2), no PIERDE | {'estado': 'EMPATE', 'delta_x': None}
+FALLA | 4 cambio de X a 40 grados: fuera de la decision de P2, dentro de su informe | ({'estado': 'EMPATE', 'delta_x': None}, {'delta_x': None})
+FALLA | 5 negativo de Cordon Caulle publicado de mas: cambia P2, no P2 sin Cordon Caulle | (None, {'delta_x': None})
+FALLA | 6 cambio en mitad partida con hermana sin_info: en P6, no en P2 | (None, [])
+FALLA | 7 K2 distinto de K: INDECIDIBLE | OK
+FALLA | 8 alerta con K distinto de data/: sin reproducir INDECIDIBLE, reproducida en su sha deriva y sigue | ({'estado': 'OK', 'deriva': []}, {'estado': 'OK', 'deriva': []})
+FALLA | 9 X = 0,97 K en todas las alertas: M informa EMPEORA y g = 0,97, el veredicto no cambia | ({'regla_d': 'NEUTRO', 'g': None}, '?')
+FALLA | 10 vara: X mas lejos con el mismo signo en Terra y Aqua detiene; signos opuestos SESGO POR SATELITE | ('NO DETIENE', 'NO DETIENE', 'NO DETIENE')
+FALLA | 11 un None solo en X se cuenta en cobertura y no rompe | {'estado': 'OK', 'none_por_brazo': {}}
+FALLA | 12 una alerta pareada a 150 s no entra (pareo 120 s) | ([(datetime.datetime(2026, 3, 27, 7, 12, 30), {'tipo': 'ALERTA_TERMICA', 'vrp_mw': 2.0})],)
+pruebas: 0 de 12 pasan con evaluar_vacio
