@@ -18,9 +18,9 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 
 | id | qué | estado |
 |---|---|---|
-| V375-B | pre-registro del lote de negativos limpios neg_resto para el port (D-36, aprobado) | borrador listo en `041e7fc43`; verificador limpio corriendo; falta sello |
-| V375-C | pre-registro de los 10 brazos de ROI (mismo lote que B) | borrador listo en `041e7fc43`; verificador corriendo; falta sello |
-| V375-E | pre-registro del paquete V375 contra K, curva de cenit contra la de MIROVA | borrador listo; depende de PD1, PD3 y del evaluador común del instrumento (M con d′) |
+| V375-B | pre-registro del lote de negativos limpios neg_resto para el port (D-36, aprobado) | listo para sellar (`b9e9c9f97`): verificador limpio pasado y corregido; entregado a la coordinadora; falta el sello de Nicolás |
+| V375-C | pre-registro de los 10 brazos de ROI (mismo lote que B) | listo para sellar (`b9e9c9f97`), mismo estado que B |
+| V375-E | pre-registro del paquete V375 contra K, curva de cenit contra la de MIROVA | listo y verificado (`b9e9c9f97`); no despachable hasta PD1, PD3 y el evaluador común del instrumento (M con d′) |
 | V375-D | números propios de 375 | sólo si B o C lo exigen (disparador en `PREREGISTRO_C.md` §5.3) |
 | V375-F | Chillán sobre 3 MW (port 0,939, n 6) | después de V375-E |
 | V375-A | etiqueta de protegida de cráter | la hace la sesión del instrumento; `evaluar.py --protegida-crater` la recibe |
@@ -59,3 +59,19 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   pares de cenit parecido (< 5°) en orden al azar (MIROVA 0,98). Línea base de K medida: MIROVA cae 0,778 de la pasada
   menos oblicua a la más oblicua, K 0,573; razón doble 0,766 [0,722; 0,861], CAE MAS QUE MIROVA; sobre 50°, 0,733.
 - Pendiente: verificador limpio (Sonnet) sobre los tres; resumen a la coordinadora en la carpeta de notas.
+
+### 2026-10-24 (vuelta 1): verificador limpio y entrega
+- Verificador limpio (Sonnet, `experiments/_s162_v375/verificador/INFORME.md`): el instrumento aguanta y B no tiene
+  defecto que lo invalide. Confirmó población, pesos, Wilson 0,86 % con 0 de 445, hash de la selección y la prueba de
+  signos (2.000 de 2.000; 0 falsos en 400). Encontró reglas que no podían fallar o eran más laxas que su texto; todas
+  corregidas en `b9e9c9f97` (tabla en `PREREGISTRO_C.md` §8): validar en O exige GANA; disparador (b) de D contra el
+  recall de K del marco (censo, 0,957); desempate por volcán a la caja más chica; veto de protegidas sobre la unión;
+  nulo de cenit de E ordenado como la lectura (con orden al azar d y 1/d eran equiprobables) y sesgo de plataforma
+  aparte (K: 0,66 / 0,64 / 0,61, sin sesgo); equivalencia de E sin tolerancia en la publicación; runner sobre float32.
+- Humo sobre S159 con las correcciones (visto, no decide): global C13; por volcán C13 en Cordón Caulle y en
+  Tupungatito, VALIDA EN O con GANA contra M14 y contra K; V375-D no necesario; 3 protegidas sólo OCR que pierden los
+  diez brazos (riesgo para el veto de V375-E, dicho antes de medir).
+- Entrega a la coordinadora: nota
+  `C:\Users\nmend\AppData\Roaming\Claude\side-session-notes\local_4152952c-6afd-433a-82b3-b07575feee3b\VIIRS375_entrega_fase1.md`
+  y SendMessage. No despaché nada. **Siguiente**: esperar el sello de Nicolás, la cobertura y V375-A del instrumento y el
+  despacho de la coordinadora; cuando lleguen los artefactos, correr `evaluar.py` y pasar el resultado por un verificador.
