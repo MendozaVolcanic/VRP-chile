@@ -74,13 +74,23 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [ ] A1. Usar la cita de MOD03 de Coppola 2026 p. 4 cuando la entregue (afecta §2 del pre-registro de MxD03).
 
 ### Cierre de esta etapa
-- [ ] Z1. Resumen para la coordinadora (en las notas compartidas y por mensaje).
+- [x] Z1. Resumen para la coordinadora (notas compartidas `MODIS_avance.md` y mensaje, 2026-10-24).
 
 ## Decisiones para Nicolás (con recomendación)
 
-(ninguna todavía)
+1. Sellar las reglas de MOD-D v2 (§11 de su pre-registro): recomendado sí; el candado viene después de MOD-B y MOD-C.
+2. D35 y las marcas A113 del pre-registro de MxD03 (§11 punto 9) en el catálogo: recomendado en el PR del veredicto de
+   MOD-B, no antes.
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 (vuelta 7): etapa completa
+- Ronda 2 del verificador de MOD-C/D/E: MOD-C despachable tal cual; MOD-E arreglado; MOD-D v2 lista para el sello de
+  reglas. VCD-15 (textos de MOD-C) y VCD-16/17 (casos borde de Chillán) aplicados (`b6edffb92`).
+- Etapa de la sesión cumplida: MOD-B sellado y despachado (t1 corriendo), MOD-C y MOD-D pre-registrados y verificados,
+  MOD-E con veredicto verificado (D28 SIN DATO), resumen enviado. Lección a memoria: un brazo de ablación hay que
+  medirlo sobre su insumo antes de leerlo.
+- Sigue: evaluar t1 a t3 de MOD-B, leer MOD-C, ablación real de D28 y candado de MOD-D.
 
 ### 2026-10-24 (vuelta 6): humo de MOD-B en verde; segundo verificador; MOD-C entregado; MOD-D v2
 - Humo de MOD-B (run 40111997157, 4 gránulos, 15 records): todos los controles OK (geometría 2,581 km = S151, K = data/
