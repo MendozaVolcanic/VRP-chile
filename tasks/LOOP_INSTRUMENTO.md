@@ -47,14 +47,14 @@ Estado: `[ ]` pendiente, `[~]` en curso, `[v]` en verificación, `[x]` lista (PR
 - [v] **T6. V375-A, «protegida de cráter»**, informada al lado de la lectura A sin reemplazarla: excluye filas sólo
   OCR de Suomi NPP antes del hito 2026-10-09 (`HITO_SNPP`) y fuentes lejanas (`experiments/_s159/portes/INFORME.md`
   P-5). Depende de T4.
-- [ ] **T1. Cobertura contra la referencia de MIROVA** en un evaluador común (`scripts/evaluador_comun.py` o similar):
+- [v] **T1. Cobertura contra la referencia de MIROVA** (#904, verificado, CI verde) en un evaluador común (`scripts/evaluador_comun.py` o similar):
   por brazo y producción, pasadas de la referencia sin record a ±120 s por volcán, sensor y día; una protegida sin
   record en todos los brazos que producción sí tiene, o un día con pasadas de MIROVA y cero records en un brazo, es
   INVALIDO POR INSTRUMENTO antes del veredicto. Caso de prueba obligatorio: el 2026-10-12 de V1 de D25.
-- [ ] **T2. «No observado» como estado propio**, fuera del denominador (volcán fuera del gránulo, escena inválida).
-- [ ] **T5. P1b en las dos direcciones** (cruces de 1 MW hacia arriba y hacia abajo) y conteo de publicaciones sobre
+- [v] **T2. «No observado» como estado propio** (#904), fuera del denominador (volcán fuera del gránulo, escena inválida).
+- [v] **T5. P1b en las dos direcciones** (#904) (cruces de 1 MW hacia arriba y hacia abajo) y conteo de publicaciones sobre
   pasadas RUTINA (VE162-03).
-- [ ] **T3. Placebo de ganancia y comparador d′ (D-28) en el evaluador común**, reutilizable por VIIRS y MODIS, con
+- [v] **T3. Placebo de ganancia y comparador d′ (D-28) en el evaluador común** (#905, verificador corriendo), reutilizable por VIIRS y MODIS, con
   los placebos de D-44; hoy sólo en `evaluar_d25.py` (rama `s159-evaluador-d25`, tag `s161-d25-lectura`).
 
 ## 3. Decisiones pendientes (para la coordinadora o Nicolás)
@@ -62,6 +62,15 @@ Estado: `[ ]` pendiente, `[~]` en curso, `[v]` en verificación, `[x]` lista (PR
 (ninguna todavía)
 
 ## 4. Bitácora (la más nueva arriba)
+
+### 2026-10-24 ~18:30 UTC: T3 con PR (#905); verificador corriendo
+- Mutaciones de T3, primera tanda 16 de 21: F1 caía por construcción (prueba leía clave inexistente), F4 casi
+  equivalente (con signos al azar `s·d` y `s·|d|` se distribuyen igual; sólo cambia el poder), F5, F11, F16 pedían
+  casos. Cuatro pruebas más y aserción sobre el poder: **21 de 21**. `mutar.py` ahora fuerza stdout UTF-8 (con `-I`
+  no se lee `PYTHONIOENCODING`).
+- PR **#905** (apilado sobre #904). Verificador Sonnet corriendo (puede correr la equivalencia, ~8 min, y leer las
+  mutaciones; NO tocar D: hasta que entregue).
+- Pila de PR: #903 (main) ← #904 ← #905. #902 independiente.
 
 ### 2026-10-24 ~17:45 UTC: verificador de #904 aplicado; T3 integrado, equivalencia exacta, mutaciones corriendo
 - **#904**: verificador Sonnet CONFIRMÓ las 4 afirmaciones con controles positivos y nulos propios. Dos hallazgos de
