@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~14:05 UTC (S162): inventario de limpieza entregado; informes de la vuelta 1 al repo
+- Inventario (Sonnet, sólo lectura): 14 worktrees sin cambios versionados, todas sus ramas en el remoto. BORRAR SEGURO
+  ~2,9 GB en D: y ~7,7 GB en C: (9 directorios de worktree, clon `D:\vrp-trabajo\mirova-v1`, temporales de pytest,
+  `experiments/_s140` y `_s160_espacial/data`). No borrar las ramas remotas `s159-oraculo-censo` y `s159-portes` (sin
+  PR, únicas). PREGUNTAR: 6,8 GB de temporales S155-S160 en D: (s160_audit 2,0 GB citado por main), 4 worktrees con
+  datos ignorados, 4 stashes de mayo. #888 superado por contenido (cerrable). Espera decisión de Nicolás.
+- Los cuatro informes de la vuelta 1 copiados a `experiments/_s162_vuelta1/` (persistencia; los de Chillán y VIIRS
+  750 siguen SIN VERIFICAR hasta que entreguen sus verificadores).
+
 ### 2026-10-24 ~13:50 UTC (S162): diagnóstico de lo que D25 publica de más en VIIRS 750 (sin verificar todavía)
 - Agente Fable (scratchpad S162 `vuelta1\encendidas_v750\INFORME.md`): las 127 pasadas de VIIRS 750 que D publica y K no
   (V1 45, V2 82) son un mismo objeto: un píxel junto al cráter que sólo entra por el segundo pase sin condicionar, al
