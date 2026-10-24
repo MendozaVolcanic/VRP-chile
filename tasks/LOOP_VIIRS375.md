@@ -212,3 +212,6 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   midiendo el nulo con el port roto a mano. Lanzada con **Fable** (los dos anteriores fueron Sonnet), con la guía de
   prompting de Fable aplicada; informe en `b2/verificador_v3/`. Si da CONFORME y el humo sale bien, el sello queda firme
   con D-48 y doy el OK al lote.
+- Humo 40128648709: success, 2 de 2 ok; control 5000 (Láscar) M14 5 px y 1,4126318824 MW = S162; muestra 3000 (Isluga)
+  0 px, K re-corrido «far» 0,194 que no publica = record. Artefactos en `C:\vrp-trabajo\temporales\s162_v375\run_40128648709\`.
+  Informado a la coordinadora; el OK al lote espera la re-verificación de Fable.
