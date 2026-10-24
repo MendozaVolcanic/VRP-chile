@@ -61,7 +61,8 @@ S162 ya se vio, y B2 existe porque S162 no decidió. Mirar dos veces la misma pr
 probabilidad de declarar ACOTADO cuando no lo está: con dos miradas, como mucho al doble del nominal de una cola (de 2,5
 a 5 %, cota de Bonferroni). Esto no cambia la regla que decide (la coordinadora pidió la misma regla), pero se informa al
 lado la **lectura estricta**: la misma cuenta con z = 2,241 (1,25 % por cola, que con dos miradas vuelve a 2,5 %). Si la
-regla dice ACOTADO y la estricta no, el informe lo dice en la primera línea.
+regla dice ACOTADO y la estricta no, el informe lo dice en la primera línea. Ya visto, antes de este pre-registro, al probar
+el evaluador sobre lo medido: con S162 solo la estricta da 4,49 % (NO RESUELTO) y con la unión S159 + S162, 3,68 %.
 
 ## 6. Costo y despacho
 
