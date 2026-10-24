@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~13:35 UTC (S162): diagnóstico de las 2 protegidas de Chillán (sin verificar todavía)
+- Agente Fable (informe en scratchpad S162 `vuelta1\chillan_p1b\INFORME.md`): en Chillán el signo de D25 lo decide la
+  temperatura del ANILLO (la cumbre está siempre a 259-269 K); las dos protegidas caen en noches de anillo frío
+  (258-262 K, SOSPECHA de nube en el valle, máscara de nube apagada desde #535). VIIRS 750 14-oct 06:18: el cúmulo
+  publicado no contiene al píxel más caliente (selección `vent_anchored` + modo de un píxel); sumando todos los
+  alertados, D 2,40 queda más cerca de MIROVA 2,0 que K 4,01. VIIRS 375 11-oct: halo tibio de 265-270 K junto al
+  cráter que el programa de MIROVA aparta y D25 resta. En el resto de V1, D25 sube Chillán (44/61 y 29/33).
+- Verificador limpio (Opus) despachado sobre CH162-01 a 05, incluido si CH162-01 es defecto de K en producción.
+
 ### 2026-10-24 ~13:20 UTC (S162): vuelta 1, entregaron el verificador de D25 y la revisión de #900
 - Verificador limpio de D25 (Fable): veredicto CONFIRMADO bit a bit (re-corrida de V1, V2, tabla sola y 17-19 oct);
   cuatro detalles del README corregidos y verificación guardada en `lectura_s162/verificacion/` (`ded217af4`).
