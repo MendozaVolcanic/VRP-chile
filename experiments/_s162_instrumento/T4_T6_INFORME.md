@@ -43,7 +43,7 @@ Referencia unificada del snapshot del repo (`origin/main` 80b819828): 45.344 fil
 
 ## Pruebas
 
-- `tests/test_clase_mirova_pasadas_s162.py`: 27 pruebas (canal, ventana y borde de 120 s, no encadenar, tabla
+- `tests/test_clase_mirova_pasadas_s162.py`: 26 pruebas (canal, ventana y borde de 120 s, no encadenar, tabla
   manda, estados, umbral de 1 MW, SN, no mutar la entrada, los motivos de cráter y sus bordes).
 - Roja por aserción: la mutación M1 (la semántica vieja, la tabla deja de mandar) hace fallar 3 pruebas por aserción.
 - Mutaciones (`mutar.py`, `mutaciones_t4_t6.json` → `mutaciones_t4_t6_salida.txt`): **20 de 20 atrapadas por
