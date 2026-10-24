@@ -85,3 +85,15 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   producción a ±10 min (ninguna entra a mi marco, que parte de nuestros records; van con la cobertura).
 - Tarea nueva en la cola: cuando #903 se mergee, que `evaluar.py` llame a `protegida_de_crater` directamente (hoy espera
   un archivo en `--protegida-crater`), con prueba; cuando llegue T1, conectarla en `--cobertura`.
+
+### 2026-10-24 (vuelta 3): #904 y #905 abiertos, cómo conectar la cobertura
+- El instrumento abrió #904 (`scripts/evaluador_comun.py`: T1 cobertura contra la referencia, T2 «no observado», T5 P1b y
+  publicaciones sobre RUTINA) y #905 (T3 placebo y d′). #902 a #905 siguen sin mergear; los decide la coordinadora.
+- **Diseño de la conexión** (para hacerlo cuando #904 entre, sin depender de código sin mergear): `evaluador_comun`
+  compara carpetas de records por brazo (un A/B completo). Mi lote es una MUESTRA armada desde los records de
+  producción, así que su T1 se aplica al MARCO, no a los brazos: correr `cobertura()` con un solo lado, producción en
+  533398f8f (`D:\vrp-trabajo\temporales\s159_n\data_main`), sobre la ventana del marco sin los días excluidos, y
+  contar las pasadas de MIROVA (protegidas y alertas bajo 1 MW) sin record de producción: son las que el sorteo nunca
+  pudo elegir. Una protegida en esa lista que el port sí vería es una falla de cobertura del marco y se informa antes
+  del veredicto. La cobertura del lote (pasadas sorteadas sin estado ok) ya la hace `evaluar.py` §1.
+- P1b de T5 lo tengo propio en `evaluar.py`; si el instrumento lo pide común, uso el suyo y comparo los dos.
