@@ -48,7 +48,7 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] B5a. (`87e91adf0`) Vara VIIRS congelada ANTES del despacho (adaptar `construir_vara_viirs.py` de 1.23 al censo de la ventana).
 - [x] B5. (`f10ea9b79`, `91a3055ff`) Evaluador `evaluar_mxd03.py` + `probar_evaluar_mxd03.py` (las 12 pruebas del §8, rojas antes, verdes
   después) y las 5 mutaciones con control de caída.
-- [ ] B6. Verificador con contexto limpio, de otro modelo, sobre arnés y evaluador. (Fable, alto, CORRIENDO; escribe en la carpeta verificador de experiments/_s162_mxd03/ del worktree de D:)
+- [x] B6. Verificador limpio (Fable alto): LISTO CON CAMBIOS CHICOS, 9 hallazgos (VMX-01 a 09), todos arreglados en `704097a95` (rama `s162-mxd03-codigo`, en el remoto); 22 pruebas, 11 de 11 mutaciones del verificador atrapadas. Segunda ronda corta del mismo verificador CORRIENDO.
 - [ ] B7. Pedido de despacho a la coordinadora (tag, tres tandas de 8 partes, ~47 h de runner).
 
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
@@ -75,6 +75,19 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 (ninguna todavía)
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 (vuelta 4): verificador de MOD-B entregó; arreglos
+- Veredicto: LISTO CON CAMBIOS CHICOS; ningún hallazgo da un CUMPLE falso. Los de más peso: el humo no tenía el
+  gránulo del control 1 de geometría (habría dado INDECIDIBLE siempre y el control 1 recién se estrenaba en la tanda
+  3) y el evaluador no deduplicaba pasadas (humo y tanda juntos contaban doble en P2). Además la suite no fijaba el
+  camino real (2 de 11 mutaciones del verificador atrapadas) y el control de unión era tautológico.
+- Arreglado todo (tabla en `experiments/_s162_mxd03/RESPUESTA_VERIFICADOR.md` de la rama `s162-mxd03-codigo`). Un
+  error mío en el camino: un escape `
+` dentro de un heredoc se volvió salto de línea real en el código; detectado
+  al compilar, corregido.
+- Pedido de despacho (borrador, sale tras la segunda ronda): tag `s162-mxd03-tag` (no `s162-mxd03-codigo`, que es el
+  nombre de la rama) sobre el commit final; humo por push del tag a `s162-mxd03-humo`; si el humo da controles en verde,
+  tandas `-t1`, `-t2`, `-t3`, una a la vez.
 
 ### 2026-10-24 16:05 UTC (vuelta 3): MOD-E a 3 MW, informe, segundo verificador
 - Ablación sintética a 3 MW: quitar duplicados no cambia la mediana hasta 45° de barrido (S/T 1,000 a 1,005) y la
