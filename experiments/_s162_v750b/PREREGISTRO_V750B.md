@@ -21,6 +21,13 @@ y dice en sus comentarios que la región se ajusta por volcán. Eso importa en d
 La pregunta es qué zona sensible reproduce a MIROVA **en las dos direcciones**: publicar sus alertas (sobre todo las
 de 1 MW o más) y callar en las noches en que no vio nada. El resultado fija la ROI del paquete V750-A.
 
+El verificador de V750-C agregó dos cosas que este pre-registro hereda: (1) en Tupungatito las 17 cumbres tibias que K
+ve y el `.m` calla caen a 4,4 a 5,4 km del centro de la grilla, en la zona conservadora, y es la ROI la que las calla
+antes que la interpolación; (2) la «caja por defecto» (B0) es un supuesto de **una** matriz de ejemplo de 2023 (BOX ==
+2 de 7 × 7 central, BOX == 1 de 21 × 19, que aquí se simetriza a 21 × 21), y el comentario del `.m` (l. 105-125) dice
+que la ROI se mueve, cambia de forma o de tamaño por volcán. O sea que ningún brazo es «la ROI de MIROVA»: son lecturas
+candidatas, y la que gane se elige por cómo reproduce lo que MIROVA publicó y calló.
+
 Lo que ya se sabe (no se re-mide como hallazgo, se usa como control): en el censo, la caja por defecto pierde 6
 protegidas y publica 5 negativos limpios de 5.353; el recuadro sensible de 21 × 21 no pierde ninguna, gana 1 y publica
 15 (ΔE −90 contra K). En la muestra de V750-C (`experiments/_s162_v750c/INFORME.md` V750C-4) el círculo
@@ -41,6 +48,7 @@ Octave en 791 de 791 escenas, S159 O1) sobre la grilla GEO con interpolación li
 | **B3** O-círculo | círculo de radio `inner_radius_km` (lista del tablero, `banco_paridad.inner_desde_html`) en el centro | el resto del 21 × 21 |
 | **B4** O-sens-PT | B1 en Cordón Caulle y Tupungatito; B0 en los otros nueve | |
 | **K** | producción (`calculate_vrp` de `pipeline/process_viirs_mod.py` sobre el mismo gránulo) | |
+| B0e (informativo) | la matriz de ejemplo del OSF tal cual: 7 × 7 central | 21 × 19 (filas 22 a 42, columnas 24 a 42) |
 
 Además, dos brazos de diagnóstico que **no deciden V750-B** (son la confirmación de V750-C, mismo gránulo y misma
 corrida):
@@ -99,7 +107,7 @@ Por brazo, contra MIROVA, en T y en O por separado y en T ∪ O (con la tabla so
 
 ## 6. Regla de decisión (escrita antes de ver los datos)
 
-1. **Elegible**: P1 = 0 en T y en O, con la tabla sola **y** con tabla más OCR. Un brazo que pierde una protegida no
+1. **Elegible** (B0e no entra: es informativo, para ver si la simetrización de B0 decide algo): P1 = 0 en T y en O, con la tabla sola **y** con tabla más OCR. Un brazo que pierde una protegida no
    entra al paquete, aunque gane en P2.
 2. Entre los elegibles, cada uno contra B1 por P2 (regla D-45). Se elige el que GANA contra B1; si dos ganan, el de menor
    E en T ∪ O.
@@ -131,8 +139,12 @@ Por brazo, contra MIROVA, en T y en O por separado y en T ∪ O (con la tabla so
   MIROVA las ubica a 4,6 a 10,5 km del centro, predigo que **pierde** alguna (no elegible). Tupungatito: la recupera.
 - B3: 0 perdidas; más negativos que B1 (V750-C: 12 contra 8 en la muestra).
 - B4: 0 perdidas; menos negativos que B1 (sólo dos volcanes con la sensible).
-- N0 (V750-C): si el remuestreo es lo que calla las cumbres, N0 detecta en la mayoría de las 66 cumbres negativas
-  (predigo más de 30) y publica más negativos limpios que B0 en S_C.
+- N0 (V750-C; predicción revisada antes de cualquier dato, tras el verificador de V750-C): si lo que calla las cumbres
+  dentro de la caja es el promedio del remuestreo, N0 detecta en la celda de K en más de la mitad de las cumbres
+  negativas que caen dentro del 7 × 7 (predigo 25 o más de unas 43) y en casi ninguna de Tupungatito (zona
+  conservadora); N1 recupera además parte de Tupungatito. Si N0 no supera al vecino más cercano de la grilla (23 de
+  38 en el censo), el remuestreo no es la pieza y lo que calla es la interpolación misma. Publica más negativos limpios
+  que B0 en S_C.
 
 ## 9. Costo, escala y despacho
 

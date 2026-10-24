@@ -10,10 +10,24 @@
 - Scripts: `oraculo_ablacion.py` (el oráculo con piezas intercambiables) y `ablacion.py` → `ablacion_salida.txt` y
   `ablacion_por_pasada.csv`. Reproducir: `bash extraer_insumos.sh <carpeta>` y después
   `python ablacion.py --insumos <carpeta> --grillas D:\vrp-trabajo\temporales\s159_n` (unos 5 minutos).
-- **Sin verificador todavía.** Ventana: VIIRS 750 nocturno, 2026-04-01 a 2026-10-21 sin el 18 ni el 19 de octubre
+- **Verificado** por un verificador limpio de otro modelo (Fable 5.1): `verificador/VERIFICADOR_V750C.md`. Ventana: VIIRS 750 nocturno, 2026-04-01 a 2026-10-21 sin el 18 ni el 19 de octubre
   (la de N); el 12-oct sin las pasadas que N dejó SIN DATO.
 
 ## En una pantalla
+
+⚠️ **Corrección del verificador limpio (Fable 5.1, `verificador/VERIFICADOR_V750C.md`, 2026-10-24 16:03 UTC).** Los
+números se reproducen (re-corrida desde cero, CSV con el mismo sha256), pero la atribución del punto 1 cambia: **son
+dos piezas, no una.** (a) En las **38** cumbres del censo que caen dentro de la caja sensible de 7 × 7 calla la
+**interpolación lineal**: el vecino más cercano, en la misma grilla, recupera 23, las 23 en la celda exacta de K. Eso
+aísla el interpolador y la fase de la grilla; **no** mide la ausencia de remuestreo, que sigue sin brazo nativo. (b) En
+las **22** fuera de la caja (Tupungatito 17, Cordón Caulle 4, Láscar 1) ningún remuestreo recupera ninguna: la celda de
+K está a 4,4 a 5,4 km del centro de la grilla de MIROVA y el `.m` la mira con los umbrales conservadores (margen 0,21);
+con los sensibles el margen sube a 0,80 y pasarían 3 de 17. Ahí calla primero **la ROI** y después la interpolación.
+Además: las 7 protegidas que pierde la caja por defecto son todas de Cordón Caulle (píxel a 7,65 a 7,83 km del
+centro); la «caja por defecto» es un supuesto sacado de una sola matriz de ejemplo de 2023 (BOX == 1 de 21 × 19, aquí
+simetrizado a 21 × 21), y el comentario del `.m` (l. 105-125) dice que la ROI se mueve y redimensiona por volcán; los
+25 negativos del vecino más cercano (punto 2) son Isluga 12 y Láscar 9, o sea que el punto 2 está medido en dos volcanes.
+Los puntos 1, 2 y 5 se leen con esta marca; el texto original se conserva.
 
 1. **Lo que calla las cumbres tibias es el remuestreo lineal a la grilla fija** (SOSPECHA FUERTE: se midió con
    sustitutos, no con el barrido nativo). En las 60 cumbres del censo que K deja en 0,0 MW en noches en que MIROVA no
@@ -96,7 +110,8 @@ de lo que calló.
 Por volcán, las 23 que el vecino más cercano recupera: Isluga 14 de 22, Láscar 6 de 10, Planchón-Peteroa 3 de 6,
 Tupungatito **0 de 17**, Cordón Caulle 0 de 4, Lastarria 0 de 1. En Tupungatito ni siquiera el valor nativo
 remuestreado pasa: ahí el silencio no es sólo el promedio, y queda SIN ATRIBUIR (puede ser la geometría nativa misma,
-la caja o la nieve, A69).
+la caja o la nieve, A69). ⚠️ **Atribuido por el verificador**: es la ROI (la celda de K cae fuera del 7 × 7, en la zona
+conservadora; margen 0,21, y 0,80 con umbrales sensibles).
 
 ## Hallazgos, de mayor a menor gravedad
 
@@ -109,7 +124,9 @@ la caja o la nieve, A69).
   el desplazamiento de media celda cambia el resultado (13).
 - CÓMO SE VE EN EL DASHBOARD: invisible hoy (las cumbres quedan en 0,0 MW). Decide el paquete de la ola 3: un detector
   sin remuestreo encendería esas cumbres apenas el fondo dejara de recortarlas (es lo que vio F en N).
-- CONFIANZA: SOSPECHA FUERTE. Las dos mediciones que la sostienen son sustitutos: (a) el vecino más cercano es otra
+- CONFIANZA (corregida por el verificador): **CONFIRMADO EN PARTE**, sólo para las 38 cumbres dentro de la caja
+  sensible y sólo como «interpolación lineal», no como «remuestreo»; las 22 de fuera las calla la ROI (marca de arriba).
+  Texto original: SOSPECHA FUERTE. Las dos mediciones que la sostienen son sustitutos: (a) el vecino más cercano es otra
   grilla (duplica o salta píxeles nativos), no el barrido nativo, y la diferencia entre 1 y 23 puede deberse al
   interpolador y no a la falta de remuestreo; (b) el exceso nativo usa el fondo del código en la geometría del gránulo
   con la máscara de K, no con la del código. Lo cierra el probe de ventana nativa (abajo).

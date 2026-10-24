@@ -14,8 +14,10 @@ publicó el código de VIIRS 750, y tres mediciones dicen que sus piezas no se p
 - El código entero, corrido en la grilla de MIROVA, da la magnitud de MIROVA al centésimo: razón 0,999 [0,978; 1,007]
   en 145 alertas (S159 N-2), contra 0,510 de K.
 - El fondo del código sobre la detección de K enciende cumbres tibias que MIROVA calla (S159 N-1: +60 negativos), y
-  V750-C mostró por qué: MIROVA no las ve porque primero interpola el gránulo a su grilla fija, y la interpolación
-  reparte el calor de un píxel aislado (SOSPECHA FUERTE, se confirma con el brazo nativo del run de V750-B).
+  V750-C (verificado) mostró por qué, con dos piezas: dentro de la caja sensible, MIROVA no las ve porque interpola
+  el gránulo a su grilla fija con un promedio lineal que reparte el calor de un píxel aislado (el brazo nativo del run
+  de V750-B dirá si es el remuestreo en sí o sólo el interpolador); fuera de la caja (Tupungatito), porque su ROI las
+  mira con umbrales conservadores.
 - En el censo de noches sin actividad, el código con la caja sensible publica 15 de 5.353 contra 54 de K, sin perder
   protegidas (ΔE −90, S159 censo).
 

@@ -13,11 +13,12 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 
 ## Cola (en orden)
 
-1. [hecho, sin verificar] **V750-C, ablación del oráculo en local**: `experiments/_s162_v750c/INFORME.md` (`8cc1cba83`).
-2. [en curso] Verificador limpio de V750-C (Fable, esfuerzo alto, en segundo plano): escribe
-   `experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`. Al llegar: leer, contrastar, commitear, marcar A113 si refuta.
-3. [borrador] Pre-registro V750-B: `experiments/_s162_v750b/PREREGISTRO_V750B.md`. Falta su §11 (probe, objetivos,
-   analizador, prueba sin red) y su verificador antes del sello.
+1. [hecho y verificado] **V750-C**: `experiments/_s162_v750c/INFORME.md`, con la marca del verificador.
+2. [hecho] Verificador limpio de V750-C (Fable 5.1): `experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`.
+   Confirma los números; corrige la atribución: dos piezas (interpolación dentro de la caja sensible; ROI fuera).
+3. [borrador] Pre-registro V750-B: `experiments/_s162_v750b/PREREGISTRO_V750B.md`. Hechos: probe (con B0e
+   informativo), objetivos, analizador `analizar_v750b.py`. Falta: resultado de `prueba_local_510.py` (corriendo),
+   ensayo del analizador sobre datos de N (sólo controles), y verificador del pre-registro antes del sello.
 4. [borrador] Pre-registro V750-A: `experiments/_s162_v750a/PREREGISTRO_V750A.md` (equivalencia, censo, sombra; brazos
    K, P, P-def, P-sinfiltro, Kgeo, K×1,2, O). Falta su §11 (analizador, test de equivalencia rojo) y su verificador.
 5. [hecho] Paso a paso de V750-F para Nicolás: `experiments/_s162_v750f/PASO_A_PASO_O2.md` (paquete comprobado, md5 OK).
@@ -51,3 +52,8 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 - 2026-10-24 vuelta 1 (sigue). Borrador del pre-registro V750-A escrito: P = remuestreo GEO lineal + `.m` literal + ROI
   de V750-B, sin modo de un píxel ni D9; validación por equivalencia + censo + sombra desde el 11-03; el laboratorio
   sigue con K si P se adopta (A117).
+- 2026-10-24 ~16:10 UTC, vuelta 2. Verificador de V750-C entregó: V2, V3, V5, V6, V7, V9 CONFIRMADO; V1, V4, V8 en
+  parte. Lo más grave (VV-04): son dos piezas; en las 22 cumbres fuera del 7 × 7 (Tupungatito 17) calla la ROI, no el
+  remuestreo. VV-01: la caja por defecto es de una sola matriz de ejemplo (BOX == 1 de 21 × 19). Marcas propagadas al
+  informe de V750-C y a los dos pre-registros (A113); predicción de N0 revisada antes de datos; brazo B0e agregado.
+  Analizador de V750-B escrito.
