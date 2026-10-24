@@ -48,8 +48,11 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] B5a. (`87e91adf0`) Vara VIIRS congelada ANTES del despacho (adaptar `construir_vara_viirs.py` de 1.23 al censo de la ventana).
 - [x] B5. (`f10ea9b79`, `91a3055ff`) Evaluador `evaluar_mxd03.py` + `probar_evaluar_mxd03.py` (las 12 pruebas del §8, rojas antes, verdes
   después) y las 5 mutaciones con control de caída.
-- [x] B6. Verificador limpio (Fable alto): LISTO CON CAMBIOS CHICOS, 9 hallazgos (VMX-01 a 09), todos arreglados en `704097a95` (rama `s162-mxd03-codigo`, en el remoto); 22 pruebas, 11 de 11 mutaciones del verificador atrapadas. Segunda ronda corta del mismo verificador CORRIENDO.
-- [ ] B7. Pedido de despacho a la coordinadora (tag, tres tandas de 8 partes, ~47 h de runner).
+- [x] B6. Verificador limpio (Fable alto), dos rondas: «listo con cambios chicos» y luego «se puede despachar el humo»; 9 + 3 hallazgos, arreglados o como reglas de operación. Commit final `ffbb36248` (rama `s162-mxd03-codigo`).
+- [x] B7. (2026-10-24, mensaje a la coordinadora) Pedido de despacho a la coordinadora (tag, tres tandas de 8 partes, ~47 h de runner).
+
+- [ ] B8. Evaluar el humo cuando llegue el run id (artefactos a `D:\vrp-trabajo\temporales\s162_mxd03\humo\`, evaluador desde checkout del tag, VMX-12) y dar el OK para las tandas.
+- [ ] B9. Evaluar las tres tandas (vara con `vara_mxd03.py --evaluar`, luego `evaluar_mxd03.py --art --vara --ref`), informe y verificador limpio del resultado.
 
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
 - [x] C1. (`21b800259`, redactado por subagente Opus y revisado) Pre-registro del lote (300 a 400 de las 5.093 noches neg_resto), selección con semilla, objetivos, regla de
@@ -75,6 +78,12 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 (ninguna todavía)
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 (vuelta 5): ronda 2 del verificador y pedido de despacho de MOD-B
+- Ronda 2: «se puede despachar el humo». VMX-10 (homónimo en la prueba del arnés) quedó mal en el primer intento: la
+  prueba de la 1.17 vuelve a meter su carpeta; arreglado moviendo la reinserción (`ffbb36248`).
+- Pedido enviado a la coordinadora: tag `s162-mxd03-tag` sobre `ffbb36248`, humo por push a `s162-mxd03-humo`, y las
+  tres tandas sólo con mi OK al humo. MOD-C se manda aparte cuando entregue su verificador.
 
 ### 2026-10-24 (vuelta 4): verificador de MOD-B entregó; arreglos
 - Veredicto: LISTO CON CAMBIOS CHICOS; ningún hallazgo da un CUMPLE falso. Los de más peso: el humo no tenía el
