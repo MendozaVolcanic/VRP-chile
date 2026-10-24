@@ -20,7 +20,7 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
    analizador, prueba sin red) y su verificador antes del sello.
 4. [borrador] Pre-registro V750-A: `experiments/_s162_v750a/PREREGISTRO_V750A.md` (equivalencia, censo, sombra; brazos
    K, P, P-def, P-sinfiltro, Kgeo, K×1,2, O). Falta su §11 (analizador, test de equivalencia rojo) y su verificador.
-5. [pendiente] Paso a paso de V750-F (O2 en MATLAB Online) para Nicolás.
+5. [hecho] Paso a paso de V750-F para Nicolás: `experiments/_s162_v750f/PASO_A_PASO_O2.md` (paquete comprobado, md5 OK).
 6. [pendiente] Resumen para la coordinadora (nota en la carpeta compartida + SendMessage corto).
 7. [después] V750-D (subsumido por V750-A salvo que no se adopte); V750-E (diurno) al final.
 
@@ -30,6 +30,9 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
   verificado. Recomendación: sí.
 - **DN-2 (V750-B §6.5)**: si gana una ROI por volcán (B4 o B2), confirmar que es fidelidad al `.m` (MIROVA declara que
   ajusta la ROI por volcán) y no un gate nuestro de los que excluye A85. Recomendación: tratarla como fidelidad.
+- **DN-3 (V750-F, la haces tú)**: correr O2 en MATLAB Online, ~15 min, paso a paso en
+  `experiments/_s162_v750f/PASO_A_PASO_O2.md`. No bloquea; fija la vara de M en alertas de un píxel.
+- **DN-4 (V750-A, cuando esté su §11)**: sellar `experiments/_s162_v750a/PREREGISTRO_V750A.md`. Recomendación: sí.
 
 ## Bitácora
 
