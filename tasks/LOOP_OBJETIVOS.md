@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~16:40 UTC (S162): las hijas pueden abrir sus propias sesiones
+- Nicolás: «si esas sesiones y loops necesitan iniciar otras también lo tienen permitido, envíales un mensaje para que
+  lo sepan». Mensaje enviado a las cuatro (entregado en su bandeja), con las reglas: worktree y rama propios, cola y
+  bitácora propias enlazadas desde su `tasks/LOOP_<X>.md`, despachos sólo vía esta coordinadora (sesión «Retomar»),
+  nada en `pipeline/` sin tag y sí, parada bajo 3 GB, y avisar el id `local_…` de cada sesión nueva.
+
 ### 2026-10-24 ~16:30 UTC (S162): programa por sensor, cuatro sesiones hijas con loop, decisiones de Nicolás aplicadas
 - Programa escrito: `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` (`b05d60527`): pasar de palancas
   sueltas a «el paquete del código de MIROVA por sensor con brazos de diagnóstico»; D17 pasa a pieza obligatoria.
