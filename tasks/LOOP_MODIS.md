@@ -63,8 +63,8 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 ### MOD-E, bow tie (D28), ablación local
 - [x] E1. Leer cómo grilla el port MODIS y qué hay en disco; decidir si la ablación se puede hacer sin red.
 - [x] E2. Verificador limpio: los números se reproducen, la lectura del bow tie NO (VCD-03/04). Retirada con marca: D28 SIN DATO; la costura de barrido es SOSPECHA; E-2 con matiz (sólo bajo 1 MW, cenit con fecha). Ronda 2 CORRIENDO.
-- [ ] C3. Leer el lote de MOD-C cuando la coordinadora pase el run id (disparo `ffc1abc1b`, rama `s162-negmodis-disparo`): artefactos a `C:/vrp-trabajo/temporales/s162_negmodis/run_<id>/` (en C:, no en D:, pedido de la coordinadora por disco), lectura con `07_leer_lote.py`, informe y verificador.
-- [ ] E3. Ablación real con los recortes nativos de MOD-C (cuando llegue el lote), con un método de quitar duplicados sin huecos y la clasificación por costura.
+- [x] C3. Lote de MOD-C leído (run 40120713181, artefactos en `C:/vrp-trabajo/temporales/s162_negmodis/run_40120713181/`): **INDECIDIBLE** (2 de 390, ΔE −18,1 [−43,8; +40,1]); controles en verde; informe `experiments/_s162_modis_negativos/INFORME.md` (`11570ab30`). Verificador limpio del resultado CORRIENDO (Fable alto).
+- [ ] E3. Ablación real con los recortes nativos de MOD-C (cuando llegue el lote), con un método de quitar duplicados sin huecos y la clasificación por costura. (CORRIENDO: subagente en segundo plano, carpeta `experiments/_s162_modis_bowtie/real/`; después, verificador limpio)
 
 ### MOD-D, paquete MODIS contra K
 - [x] D1. (borrador en `experiments/_s162_modis_paquete/PREREGISTRO.md`) Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
@@ -84,6 +84,14 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 2. ~~D35 y marcas A113~~: **resuelta** (D-48): van en el PR del veredicto de MOD-B, no antes (tarea B10).
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 (vuelta 9): MOD-C leído
+- MOD-C (40120713181): 7 trozos en rojo por las 10 pasadas no evaluables previstas (8 volcán fuera del gránulo, 2
+  escenas inválidas), sin errores de proceso. Veredicto pre-registrado: INDECIDIBLE (el port publica en 2 de 390
+  neg_resto: Láscar 2026-05-11 07:55 y Llaima 2026-07-24 01:05, un píxel cada una). Controles en verde. Verificador
+  limpio del resultado lanzado. Aviso a la coordinadora: puede lanzar t2.
+- E3 (ablación real del bow tie con los 403 recortes nativos) delegada a un subagente, con la instrucción de medir la
+  cobertura de cada método antes de leerlo.
 
 ### 2026-10-24 17:30 UTC (vuelta 8): t1 completa
 - t1 de MOD-B (40112510038): 9 de 9 jobs en success; 1.814 de 1.814 records en las 8 partes, 0 errores, K igual a
