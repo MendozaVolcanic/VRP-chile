@@ -227,3 +227,15 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   de leer, verificador limpio antes de informar).
 - Artefactos falsos del verificador v3 (1,8 GB) en `C:\vrp-trabajo\temporales\s162_v375\verif_v3\`: borrables cuando se
   cierre B2.
+
+### 2026-10-24 (vuelta 14): lote de B2 terminado y leído (SIN VERIFICAR), `8f2499fdc`
+- Run **40131572769** (`a9331d51c`, 20:50 a 21:59 UTC): 22 success y 26 failure, todos los rojos por el exit 2 de diseño.
+  1.220 de 1.220 con resultado: CTL 20 de 20 ok; muestra 1.165 ok y 35 `volcan_fuera_del_granulo` (2,9 %; mismo gránulo
+  que el record de producción, píxel más cercano a 5,8 a 30,5 km, 16 partidas) = no observadas. Artefactos en
+  `C:\vrp-trabajo\temporales\s162_v375\run_40131572769\` (144 MB).
+- Instrumento: recálculo = runner 19.277 de 19.277; K = publicado 2.032 de 2.032; **control de vida 20 de 20 iguales a
+  S162** (16 con píxeles); nulo, NUNCA y PLACEBO en verde.
+- **VEREDICTO B: SILENCIO ACOTADO BAJO K.** Conjunto que decide (neg_resto de B2 + neg_pub de S162): neg_resto 6 de 1.165
+  (0,52 % [0,24; 1,12]); todos los negativos 1,55 % [1,00; 2,48] contra 3,85 %. La unión confirma (1,70 % [1,43; 2,20]);
+  la lectura estricta también (2,65 %). Las líneas de C de esta corrida no se leen (§7 de B2).
+- Verificador limpio (Sonnet) del resultado corriendo; no informar como hecho hasta que vuelva.
