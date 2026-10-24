@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 17:10 UTC, hora del servidor (S162): vuelta; el hueco del NRT de la tarde es normal
+- t1 de MOD-B (40112510038): 2 trozos terminados en verde, 6 en curso. Disco C: 42 GB, D: 9,7 GB.
+- NRT sin correr desde las 13:49 UTC: **normal**. Los despachos horarios de cron-job.org van de 04:10 a 12:10 UTC (la
+  noche chilena) y el `schedule` de GitHub dispara cada ~5 h en la práctica (ayer 14:40, 19:47 y 22:53 UTC). La
+  observación de las vueltas anteriores queda cerrada.
+
 ### 2026-10-24 ~17:30 UTC (S162): V750-B v2 listo; sello por D-48 condicionado a una segunda vuelta del verificador
 - `loop-viirs750`: pre-registro V750-B v2 (`claude/s162-viirs750-f63ef4` `62e6ea194`); verificador Fable «listo para
   sello con cambios», 16 hallazgos corregidos (VB-01: el desempate podía elegir un brazo que PIERDE contra B1). Ensayo
