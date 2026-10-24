@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~20:15 UTC (S162): ablación real del bow tie de MODIS (D28) verificada
+- `loop-modis`, verificador Fable alto (`claude/s162-modis-774bb0` `f49e57dd7`, `experiments/_s162_modis_bowtie/real/`):
+  rearmar los 403 recortes nativos de MOD-C reproduce el lote 403/403; el método A (quitar sólo los centros que el
+  barrido anterior ya cubre) no abre huecos reales y las 11 protegidas siguen publicando; la regla de filas de borde
+  mataría la protegida de Chillán 2026-10-01 08:35 (5,18 MW): descartada. No se sostiene que el efecto quede en el foco
+  duplicado (pasa por la sigma global del umbral de cumbre), ni que el 2 a 0 en neg_resto sea robusto (márgenes de NTI
+  de 1e-6 a 8e-4). Efecto de D28 sobre la magnitud SIN DATO. MOD-D: brazo PM-sin_dup con el método A, sólo informativo.
+- **Seguimiento S-1** (también para VIIRS 750): el umbral de cumbre del oráculo usa la sigma de toda la grilla de 51 km,
+  lo que acopla cualquier A/B de remuestreo al borde de la escena; reenviado a `loop-viirs750` para V750-A.
+
 ### 2026-10-24 ~20:05 UTC (S162): t2 de MOD-B sin huecos; t3 despachada
 - t2 (40122029477): 1.837/1.837 records ok, K2 = K, K = data/, commit `ffbb36248` en las 8 partes (24 a 52 min por
   job). Llevan 3.651 de 5.465 pasadas. Artefactos en `D:\vrp-trabajo\temporales\s162_mxd03\t2\`.
