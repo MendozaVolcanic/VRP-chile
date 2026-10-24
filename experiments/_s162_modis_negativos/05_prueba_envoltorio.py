@@ -106,8 +106,12 @@ def granulo(g):
     full = {"band21": b21, "band22": b22, "band31": b31, "lat": lat + np.float32(0.004),
             "lon": lon - np.float32(0.003), "angles": {}}
     geo = {"Latitude": _DS(lat, {}), "Longitude": _DS(lon, {}),
-           "SensorZenith": _DS(np.full((L, F), 1500, np.int16), {"scale_factor": 0.01}),
-           "SensorAzimuth": _DS(np.full((L, F), 8000, np.int16), {"scale_factor": 0.01}),
+           # angulos que varian con linea y frame (un campo constante no ve un indice corrido ni un intercambio,
+           # verificador VCD-08)
+           "SensorZenith": _DS((1500 + 3 * np.arange(L)[:, None] + 7 * np.arange(F)[None, :]).astype(np.int16),
+                               {"scale_factor": 0.01}),
+           "SensorAzimuth": _DS((8000 - 5 * np.arange(L)[:, None] + 2 * np.arange(F)[None, :]).astype(np.int16),
+                                {"scale_factor": 0.01}),
            "SolarZenith": _DS(np.full((L, F), 12000, np.int16), {"scale_factor": 0.01}),
            "SolarAzimuth": _DS(np.full((L, F), -9000, np.int16), {"scale_factor": 0.01})}
     return full, geo, int(foco.sum())
@@ -175,6 +179,9 @@ def comprobar(r0, out0, r1, out1, o, full, geo):
              ("lon_5km", full["lon"]), ("lat_mxd03", lat3), ("lon_mxd03", lon3))
     for k, A in pares:
         assert np.array_equal(z[k], A[lin, fra], equal_nan=True), f"INDICES: {k} no es el pixel (linea, frame)"
+    for k, nm in (("sensor_zenith", "SensorZenith"), ("sensor_azimuth", "SensorAzimuth")):     # VCD-08
+        A = (geo[nm].a.astype(np.float64) * 0.01).astype(np.float32)
+        assert np.allclose(z[k], A[lin, fra], atol=1e-4), f"ANGULOS: {k} no es el del pixel (linea, frame)"
     assert ra <= L0 < rb and ca <= F0 < cb, "el pixel del volcan no esta en el recorte"
     i, j = L0 - ra, F0 - ca
     assert np.isnan(z["b22"][i, j]) and np.isfinite(z["b21"][i, j]), "el pixel saturado no esta donde dice"
@@ -207,7 +214,7 @@ def main():
                   {k: str(v.dtype) for k, v in z.items()})
             print("\nMUTACIONES (cada una tiene que caer por asercion de esta prueba):")
             for m in ("linea_mas_uno", "frame_al_reves", "b21_como_b22", "lat5_como_mxd03", "altera_recorte",
-                      "recorte_corrido"):
+                      "recorte_corrido", "angulos_intercambiados", "cenit_corrido"):
                 E._MUTACION = m
                 try:
                     rm, outm = correr(o, base, f"mut_{m}")
@@ -226,7 +233,7 @@ def main():
     if fallas:
         print("PRUEBA FALLA: mutaciones no atrapadas por asercion:", fallas)
         return 1
-    print("PRUEBA OK: identidad, indices, transparencia y 6 de 6 mutaciones atrapadas por asercion")
+    print("PRUEBA OK: identidad, indices, angulos, transparencia y 8 de 8 mutaciones atrapadas por asercion")
     return 0
 
 

@@ -185,6 +185,9 @@ def main():
     prot_prev = sorted((o for o in objp if o["b"] == "MODIS" and o["clase"] == "pos_prot"), key=lambda o: o["id"])
     neg_prev = sorted((o for o in ya if o["id"] not in (4, 57)), key=lambda o: o["id"])   # sin la escena invalida
     ctl = rc.sample(prot_prev, 8) + rc.sample(neg_prev, 2)                                  # ni la fuera del granulo
+    # verificador VCD-10: los 8 sorteados son todos de Lascar bajo 41 grados; se agregan, sin sorteo, las protegidas de
+    # S159 con cenit sobre 50 grados (Chillan, vistas de lado), que el port si detecto: prueban la cadena en lo oblicuo
+    ctl += [o for o in prot_prev if (o.get("z") or 0) > 50 and o not in ctl]
     for o in ctl:
         elegidos.append({**o, "clase": "control_s159", "clase_s159": o["clase"], "peso": 0.0})
     print("  control de instrumento (lote S159, mismo id):",

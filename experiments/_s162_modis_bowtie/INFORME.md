@@ -6,6 +6,24 @@ artefactos en `D:\vrp-trabajo\temporales\s159_portes\run_39712862945\`), `objeti
 la rama `s159-pruebas` (copia de lectura en el scratchpad de la sesión), el oráculo de VIIRS 750
 (`experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py`). **Pendiente: verificador con contexto limpio.**
 
+> ⚠️ **Corregido el 2026-10-24 tras el verificador con contexto limpio (Fable alto,
+> `experiments/_s162_modis_verif_cde/INFORME.md`, VCD-03, VCD-04 y VCD-07). Lo que sigue en «En una pantalla» y en
+> E-3 sobre el bow tie quedó REFUTADO como lectura; los números se reproducen, la conclusión no.** El brazo SIN_DUP
+> («filas de borde») no quita duplicados: deja huecos (10,7 % del eje a 25° de barrido, 19,7 % a 55°) y conserva
+> copias (8,9 % a 40°). La caída de 25 % a 50° aparece igual en focos vistos una sola vez (0,754, n 7): es efecto de
+> remuestrear con menos píxeles, no de quitar la copia del foco. Y el «efecto nulo hasta 45°» se mide donde el bow tie
+> no actúa, porque los focos en la costura entre barridos casi no se detectan en ningún brazo (a 40° de barrido, 0 de 11
+> con el foco duplicado y 0 de 8 aunque el brazo deje una sola copia; con el foco dentro de un barrido, 24 de 29).
+> **Lectura que sí se sostiene**: (1) en este modelo la costura entre barridos, donde la grilla nativa queda irregular,
+> es donde el código con remuestreo lineal pierde un foco sub-píxel, con o sin duplicados (SOSPECHA para los datos
+> reales); (2) el efecto de D28 sobre la magnitud es **SIN DATO**: el modelo no lo puede aislar y el método exacto de
+> MIROVA para quitar duplicados no está localizado; (3) E-2 se sostiene en el agregado y en Láscar, pero la subida está
+> sólo en las alertas bajo 1 MW (ρ 0,381, n 38; protegidas ρ 0,194, n 40) y el cenit va con la fecha (ρ −0,515): lo
+> compatible con lo medido es que MIROVA pierde magnitud oblicua en las alertas débiles y el port no. **Para MOD-D**: el
+> brazo PM-sin_dup no corre con la regla de filas de borde; la ablación real se hace con los recortes nativos,
+> clasificando cada alerta por si el cráter cae en la costura, y con un método de quitar duplicados que no deje huecos.
+> Texto original conservado por historia:
+
 ## En una pantalla
 
 1. **La ablación real no se puede hacer con lo que hay en disco**: las grillas guardadas del port ya están remuestreadas

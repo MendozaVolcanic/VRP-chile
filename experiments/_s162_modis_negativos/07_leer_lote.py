@@ -61,6 +61,8 @@ def evaluable(r):
         return False, "escena_invalida"
     if r.get("port_estado") == "grilla_incompleta":
         return False, "grilla_incompleta"
+    if (r["port"].get("fisica") or {}).get("motivo_vacio") == "sunglint":     # VCD-14: el .m no mira la escena
+        return False, "sunglint"
     return True, "ok"
 
 

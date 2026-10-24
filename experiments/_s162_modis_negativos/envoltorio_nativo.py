@@ -87,6 +87,10 @@ def _guardar(crop, l1b, geo):
         crop["mir"] *= 1.0001
     elif _MUTACION == "recorte_corrido":
         arr["b31"] = np.asarray(d["band31"])[r0 + 1:r1 + 1, c0:c1]
+    elif _MUTACION == "angulos_intercambiados":      # verificador VCD-08
+        arr["sensor_zenith"], arr["sensor_azimuth"] = arr["sensor_azimuth"], arr["sensor_zenith"]
+    elif _MUTACION == "cenit_corrido":
+        arr["sensor_zenith"] = np.roll(arr["sensor_zenith"], 1, axis=0)
     f = Path(_CTX["outdir"]) / f"nativo_{_CTX['id']:04d}.npz"
     t0 = time.time()
     np.savez_compressed(f, **arr)

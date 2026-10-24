@@ -59,8 +59,10 @@ pesa lo mismo que una alerta débil perdida.
   estima con x / n crudo (S159 usó asignación igual, con pesos dispares; aquí no conviene, porque con pocos eventos el
   peso de cada uno manda). 10 pasadas partidas entran y se informan aparte. Plataforma: Aqua 208, Terra 192. Tramos:
   315 antes de #535, 85 después. Ids 1000 a 1399, para no chocar con los 0 a 309 de S159.
-- **Más 10 pasadas de control de instrumento** (peso 0, fuera de todo denominador; §6): 8 protegidas y 2 `neg_resto`
-  de S159, re-corridas con el mismo id. Total del archivo `objetivos_neg_resto_modis.json`: 410 (blob `02ee29f8`).
+- **Más 13 pasadas de control de instrumento** (peso 0, fuera de todo denominador; §6): 8 protegidas sorteadas y 2
+  `neg_resto` de S159, más (adenda del verificador, VCD-10) las 3 protegidas de S159 con cenit sobre 50°, todas de
+  Chillán (2026-10-01 08:35, 10-12 07:20 y 10-15 01:05), re-corridas con el mismo id. Total del archivo
+  `objetivos_neg_resto_modis.json`: 413 (blob `2d57443d`; el sorteo principal no cambió).
 - **Por qué 400 y no 300** (`03_regla_decision_salida.txt`, tabla de planificación, que usa la regla de §5 con las
   filas reales de S159):
 
@@ -120,7 +122,7 @@ pesa lo mismo que una alerta débil perdida.
 
 ## 6. Controles, que se miran ANTES de leer x (si fallan, la lectura no se hace)
 
-1. **Cobertura (A108)**: estado por pasada contra las 410 pedidas. **No evaluables**, fuera de n y contados aparte:
+1. **Cobertura (A108)**: estado por pasada contra las 413 pedidas. **No evaluables**, fuera de n y contados aparte:
    estado distinto de `ok` (sin gránulo, volcán fuera del gránulo, error), escena inválida del `.m`
    (`motivo_vacio = escena_invalida`) o grilla con más de la mitad sin dato (`port_estado = grilla_incompleta`). Si
    quedan menos de 350 evaluables, la tabla de §3 dice qué puede resolver el lote (con 300 ya no confirma).
@@ -128,7 +130,7 @@ pesa lo mismo que una alerta débil perdida.
    la lectura se informa también contra K re-corrido.
 3. **Control de instrumento contra S159** (A116: en un estrato donde se espera 0, hay que mostrar que el instrumento
    puede dar distinto de 0): las 10 pasadas de control dan el mismo `npix` y VRP del port `fisica` que en S159 (a 1e-6
-   MW), y las 8 protegidas publican. Si no, la cadena cambió y el lote no se lee.
+   MW), y las 11 protegidas publican. Si no, la cadena cambió y el lote no se lee.
 4. **Prueba sin red del envoltorio en el runner** (job `prueba`, que el lote necesita para arrancar): identidad del
    port con y sin envoltorio, índices del recorte y 6 de 6 mutaciones atrapadas por aserción.
 5. **Recorte nativo guardado** en todas las evaluables (se informa; no bloquea la lectura de x, sí la tarea MOD-E).
@@ -137,7 +139,7 @@ pesa lo mismo que una alerta débil perdida.
 
 Del lote S159 (resultados por pasada y API de GitHub, `jobs_39712862945.json`): 9,1 s por pasada MODIS (mediana 9,2;
 p95 11,0; K incluido), 104 s fijos por job (checkout de 61 s, dependencias 30 s, prueba sin red del probe). Los 6 jobs
-MODIS de S159 sumaron 0,551 h. Proyección para 410 pasadas en 8 trozos: **1,27 h de runner**, unos 9,5 min por job
+MODIS de S159 sumaron 0,551 h. Proyección para 410 pasadas en 8 trozos (413 con los 3 controles agregados: lo mismo dentro del redondeo): **1,27 h de runner**, unos 9,5 min por job
 (11,1 con el p95 por pasada). El job `prueba` es nuevo: SIN DATO en el runner; en este computador la prueba tarda 61 a
 82 s, así que el job debería rondar 3 min (estimado). Guardar un recorte sintético de 136 × 136 tomó 0,04 s
 (`05_prueba_envoltorio_salida.txt`).
@@ -166,7 +168,7 @@ MODIS de S159 sumaron 0,551 h. Proyección para 410 pasadas en 8 trozos: **1,27 
 
 ## 9. Para la coordinadora: qué meter en el despacho combinado
 
-1. Commitear esta carpeta tal cual (el workflow comprueba el blob `02ee29f8` de `objetivos_neg_resto_modis.json`).
+1. Commitear esta carpeta tal cual (el workflow comprueba el blob `2d57443d` de `objetivos_neg_resto_modis.json`).
 2. Recomendado: fijar el commit base con un tag antes de despachar, porque hoy sólo lo alcanza la rama
    `s159-portes-disparo`: `git tag s162-base-portes 0e18e1053bb1cdc3fe1a4ef8d0c1aa72bbe60e64 && git push origin
    s162-base-portes`. Su `pipeline/` es idéntico al de `origin/s159-pruebas` y difiere de `origin/main` sólo en
@@ -196,3 +198,18 @@ MODIS de S159 sumaron 0,551 h. Proyección para 410 pasadas en 8 trozos: **1,27 
   medido.
 - SOSPECHA no verificada: ningún control mira si la geolocalización MxD03 de un gránulo viene corrida; el control de
   instrumento contra S159 sólo garantiza que la cadena es la misma.
+
+## Adenda 1 (2026-10-24, antes de despachar): verificador con contexto limpio
+
+Verificador Fable alto (`experiments/_s162_modis_verif_cde/INFORME.md`): MOD-C se sostiene. Los siete scripts
+reproducen sus salidas byte a byte, la regla es monótona y sus fronteras no se mueven con 10 semillas ni con N = 5.093,
+y el workflow es válido, de sólo lectura y por token. Tres grietas, arregladas antes del despacho:
+- **VCD-08**: la prueba del envoltorio era ciega a `sensor_zenith` y `sensor_azimuth` (el sintético los tenía
+  constantes). Ahora varían con la línea y el frame, la prueba los compara píxel a píxel y suma dos mutaciones
+  (intercambio y cenit corrido): **8 de 8 atrapadas por aserción** (`05_prueba_envoltorio_salida.txt`).
+- **VCD-10**: los 8 controles protegidos eran todos de Láscar bajo 41°. Se agregan, sin sorteo, las 3 protegidas de
+  S159 con cenit sobre 50° (Chillán). El archivo de objetivos pasa de 410 a 413 (blob `2d57443d`, ya en el workflow); el
+  sorteo principal no cambia (diff de `01_seleccion_salida.txt`: sólo la línea de controles).
+- **VCD-14**: `07_leer_lote.py` trata `motivo_vacio = sunglint` como no evaluable (de noche no debería ocurrir; si
+  ocurre, no es «el port calla»).
+Nada de esto toca la pregunta, la muestra, la regla de decisión ni el costo.
