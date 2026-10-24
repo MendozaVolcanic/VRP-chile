@@ -62,7 +62,7 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 ### MOD-E, bow tie (D28), ablación local
 - [x] E1. Leer cómo grilla el port MODIS y qué hay en disco; decidir si la ablación se puede hacer sin red.
 - [x] E2. Verificador limpio: los números se reproducen, la lectura del bow tie NO (VCD-03/04). Retirada con marca: D28 SIN DATO; la costura de barrido es SOSPECHA; E-2 con matiz (sólo bajo 1 MW, cenit con fecha). Ronda 2 CORRIENDO.
-- [ ] C3. Leer el lote de MOD-C cuando la coordinadora pase el run id (disparo `ffc1abc1b`, rama `s162-negmodis-disparo`): artefactos a `C:rp-trabajo	emporales\s162_negmodisun_<id>\` (en C:, no en D:, pedido de la coordinadora por disco), lectura con `07_leer_lote.py`, informe y verificador.
+- [ ] C3. Leer el lote de MOD-C cuando la coordinadora pase el run id (disparo `ffc1abc1b`, rama `s162-negmodis-disparo`): artefactos a `C:/vrp-trabajo/temporales/s162_negmodis/run_<id>/` (en C:, no en D:, pedido de la coordinadora por disco), lectura con `07_leer_lote.py`, informe y verificador.
 - [ ] E3. Ablación real con los recortes nativos de MOD-C (cuando llegue el lote), con un método de quitar duplicados sin huecos y la clasificación por costura.
 
 ### MOD-D, paquete MODIS contra K
