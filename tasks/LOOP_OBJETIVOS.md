@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~15:45 UTC (S162): verificador de los cúmulos por matriz; Nicolás pide programa por sensor en sesiones hijas con loop propio
+- Verificador limpio (Opus, `experiments/_s162_vuelta2/VERIFICADOR_CUMULOS_MATRIZ.md`, origin/main 80b819828):
+  CM162-01 CONFIRMADO EN PARTE (G3): mecanismo y los dos casos se reproducen; en K cambian 7 a 13 de 290
+  publicaciones V750 según el umbral, sólo 1 protegida cruza 1 MW (Láscar 2026-05-05 06:06); control a nadir 0
+  cambios bajo 20°; no cambia qué se publica. Denominadores del auditor no reproducidos (290/86/1.769 contra
+  338/82/2.070). CM162-02 G1 (f5_core inmune, 0 de 153). CM162-03 en parte: en Láscar el tablero publica el máximo,
+  no la suma; en Chillán 10-01 los 4,2 MW son cota superior. VM162-01 (G2): pegar no es neutro (un negativo limpio de
+  PCC 2026-06-11 sube de 0,447 a 3,03 MW). **Lectura: es una sola divergencia, D17 sin de-solape ni remuestreo**
+  (DISENO_D17 §4.3 ya nombra el doble conteo; lo nuevo es la causa de la fragmentación y la instancia V750).
+- Nicolás: «más que sólo los frentes deberían haber planes para continuar los estudios y experimentos [...] después
+  de la información nueva [del código de MIROVA V750]»; «cada plan puede ir en sesiones diferentes o hijas»; «cada una
+  con su loop si es que se puede». Planificador (Opus) armando el borrador del programa por sensor; después, sesiones
+  hijas (instrumento, VIIRS 750, VIIRS 375, MODIS), cada una con su loop, su cola y su bitácora propias; esta sesión
+  coordina y lleva el turno de los A/B.
+
 ### 2026-10-24 ~15:20 UTC (S162): cúmulos armados por la matriz del barrido (sin verificar todavía)
 - Agente Fable (`experiments/_s162_vuelta2/CUMULOS_POR_MATRIZ.md`): `cluster_hotspots` agrupa por vecindad 3x3 de
   índices (clustering.py:96); lejos del nadir los barridos se solapan y VIIRS borra filas, así que vecinos en el suelo
