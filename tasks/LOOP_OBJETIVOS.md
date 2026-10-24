@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~22:45 UTC (S162): V375-B RESUELTO con B2: SILENCIO ACOTADO BAJO K (verificado)
+- Verificador limpio (Sonnet, CONFIRMADO; `claude/s162-viirs375-c1b864` `52f255721`, `experiments/_s162_v375/b2/
+  resultado_run40131572769/INFORME.md`): en 1.165 noches limpias nuevas el port publica 6 (0,52 % [0,24; 1,12]), todas
+  de 1 píxel y 0,01-0,04 MW; cota sobre todas las noches limpias 2,48 % (estricta 2,65 %) contra la vara de 3,85 % de
+  K. Control de vida 20/20, recálculo = runner 19.277/19.277, K = publicado 2.032/2.032; las 35 no observadas no
+  mueven el veredicto (harían falta 13 a 15 publicando). Matices: la unión no confirma de forma independiente (73 % del
+  lote que decide); «calla al menos tanto como K» no es «no enciende nada nuevo» (apaga 72,5 % de lo que K publica en
+  noches limpias y enciende ~17 de 3.323 donde K calla).
+- **PD1 de VIIRS 375 completo**: caja C13 en el cráter (V375-C), silencio acotado (V375-B), V375-D no se abre. V375-E
+  espera la vía de proceso en `pipeline/` (PD3, se construye primero para V750 y se reutiliza) y #903/#905. Loop de
+  `loop-viirs375` en pausa. Limpieza pendiente de Nicolás: 1,8 GB de artefactos falsos del verificador en
+  `C:\vrp-trabajo\temporales\s162_v375\verif_v3\`.
+
 ### 2026-10-24 ~22:20 UTC (S162): lote V375-B2 completo; loop-modis cerrado
 - Lote V375-B2 (40131572769): 1.220/1.220 pasadas con resultado, 1.185 grillas; los 26 rojos son exit 2 de diseño
   (comprobado por la coordinadora en 21: 1 o 2 pasadas sin procesar, sin Traceback). Control de vida 20/20 ok; muestra
