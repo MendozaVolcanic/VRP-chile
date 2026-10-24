@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~16:50 UTC (S162): estado de las hijas; armando el despacho combinado de la fase 1
+- **loop-instrumento**: #902 (MOD-A, cita de MOD03), #903 (alerta y protegida por pasada, la tabla manda) y #904
+  (evaluador común con cobertura contra la referencia) con CI verde y CLEAN; el verificador de #904 encontró dos
+  defectos de G3 (protegida que falta en un solo brazo no invalidaba; control incompleto dejaba ciego al evaluador),
+  arreglados con prueba roja primero. Merges: de Nicolás.
+- **loop-viirs375**: pre-registros V375-B, V375-C y V375-E listos para el sello (rama `claude/s162-viirs375-c1b864`,
+  `b9e9c9f97`, `experiments/_s162_v375/`), evaluador probado, verificador limpio (Sonnet) pasado y corregido. Lote único
+  de sólo lectura para B y C: 709 pasadas VIIRS 375 (400 neg_resto, 41 protegidas, 155 bajo 1 MW, 113 neg_pub), ~4,9 h
+  de runner, `probe-s162-v375.yml` de 28 trozos, humo «1011,1062». Hallazgo: el nulo por hora de la curva de cenit de
+  750 no sirve en 375.
+- **loop-viirs750**: prueba local de V750-B commiteada (`331921487`); falta el ensayo del analizador y su verificador.
+- **loop-modis**: MOD-E con informe; esperando dos verificadores (arnés de MOD-B; MOD-C/D/E) antes de pedir despacho.
+- Despacho combinado de la fase 1 (V750-B, V375-B, V375-C, MOD-C): se arma cuando estén los verificadores de V750-B y
+  MOD-C; se pide un solo sello a Nicolás para los cuatro pre-registros. Disco: C: 43 GB, D: 9,7 GB.
+
 ### 2026-10-24 ~16:20 UTC (S162): V750-C cerrado con verificador limpio (loop-viirs750)
 - Rama `claude/s162-viirs750-f63ef4`, commit `5b56c77da`, verificador Fable 5.1. **Dos piezas callan las cumbres tibias
   que K deja en 0 MW, no una**: dentro de la caja sensible 7x7 (38 de 60) las calla la **interpolación lineal** (vecino
