@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~16:55 UTC (S162): humo de MOD-B (MxD03 sobre K) despachado
+- Pedido de `loop-modis`: pre-registro v2 sellado con D-48 más adenda de 5 puntos; arnés 4/4 mutaciones, evaluador
+  22/22 pruebas y 16 mutaciones; verificador Fable alto en dos rondas («se puede despachar el humo»). Comprobado por la
+  coordinadora: el commit `ffbb36248` sólo agrega `experiments/_s162_mxd03/` y `.github/workflows/probe-s162-mxd03.yml`
+  sobre origin/main `80b819828` (0 archivos en `pipeline/`, `scripts/`, `volcanoes.yaml`, `frontend/`,
+  `data/mirova_equivalent/`); YAML válido con `"on":`, sólo `EARTHDATA_TOKEN`.
+- Tag **`s162-mxd03-tag`** sobre `ffbb36248` y rama de disparo `s162-mxd03-humo`: **run 40111997157** (4 gránulos, 1
+  job, en curso). Las tandas t1, t2 y t3 (8 jobs cada una, ~2-2,5 h de pared, ~47 h de runner) recién con el OK de
+  `loop-modis` al humo, una a la vez y sin chocar con el cupo de 20 jobs (NRT usa 11).
+- Observación: el NRT no corre desde las 13:49 UTC (datos al 14:21); vigilar si es la ventana de cron-job.org.
+
 ### 2026-10-24 ~16:50 UTC (S162): estado de las hijas; armando el despacho combinado de la fase 1
 - **loop-instrumento**: #902 (MOD-A, cita de MOD03), #903 (alerta y protegida por pasada, la tabla manda) y #904
   (evaluador común con cobertura contra la referencia) con CI verde y CLEAN; el verificador de #904 encontró dos
