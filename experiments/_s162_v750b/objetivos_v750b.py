@@ -29,7 +29,9 @@ import yaml
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parents[1]
 N_DIR = RAIZ / "experiments/_s159/n"
-EXCLUIDOS = ("2026-10-13", "2026-10-17", "2026-10-18", "2026-10-19", "2026-10-20")
+# 2026-10-12 excluido en todos los brazos (§3 del pre-registro, opción «excluido»: VB-11 del verificador), 13 y 17 a 20
+# por D-29.
+EXCLUIDOS = ("2026-10-12", "2026-10-13", "2026-10-17", "2026-10-18", "2026-10-19", "2026-10-20")
 CORTE_SNPP = "2026-11-02 13:00"   # cese de Suomi NPP: toda pasada desde esta hora es otro régimen
 SEMILLA_SC = 162
 N_NEG_SC = 300
@@ -51,11 +53,23 @@ def celda_crater(g, vent_lat, vent_lon):
     return [int((g["ul_y"] - y) // CELDA), int((x - g["ul_x"]) // CELDA)]
 
 
+def pos_crater(g, vent_lat, vent_lon):
+    """Posición fraccionaria (fila, columna) del cráter en la grilla, en índices de celda (el centro de la celda i está
+    en i, como el centroide de un cúmulo, que promedia índices): de ahí mide la distancia el record de cada brazo, igual que producción mide desde el ancla
+    get_detection_anchor (vent_lat/vent_lon; verificador del pre-registro, VB-07)."""
+    from pyproj import Transformer
+    t = Transformer.from_crs("EPSG:4326", f"EPSG:{g['epsg']}", always_xy=True)
+    x, y = t.transform(vent_lon, vent_lat)
+    return [(g["ul_y"] - y) / CELDA - 0.5, (x - g["ul_x"]) / CELDA - 0.5]
+
+
 def completar(objs, vy, inner):
-    """Agrega celda_crater e inner_km a cada objetivo (vy: volcanoes.yaml por nombre; inner: del tablero)."""
+    """Agrega celda_crater, pos_crater e inner_km a cada objetivo (vy: volcanoes.yaml; inner: del tablero)."""
     for o in objs:
         v = vy[o["volcan"]]
-        o["celda_crater"] = celda_crater(o["grilla"], v.get("vent_lat", v["lat"]), v.get("vent_lon", v["lon"]))
+        vl, vo = v.get("vent_lat", v["lat"]), v.get("vent_lon", v["lon"])
+        o["celda_crater"] = celda_crater(o["grilla"], vl, vo)
+        o["pos_crater"] = pos_crater(o["grilla"], vl, vo)
         o["inner_km"] = float(inner[o["volcan"]])
     return objs
 
@@ -85,6 +99,9 @@ def main():
     P.main()
     pob = json.loads((AQUI / "poblacion_completa.json").read_text(encoding="utf-8"))["pasadas"]
     pob = [p for p in pob if p["hora_utc"][:10] not in EXCLUIDOS and p["hora_utc"] < CORTE_SNPP]
+    sin_g = [(p["volcan"], p["hora_utc"], p["lab"], p.get("protegida")) for p in pob if not p.get("granule")]
+    print(f"pasadas sin gránulo (fuera de la lista, SIN DATO declarado; VB-05): {len(sin_g)} {sin_g[:20]}")
+    pob = [p for p in pob if p.get("granule")]
     SEL = _modulo("sel", N_DIR / "02_seleccion.py")
     G = SEL.grillas()
     for p in pob:
@@ -100,7 +117,7 @@ def main():
     texto = json.dumps(pob, ensure_ascii=False, default=str)
     (AQUI / "objetivos_v750b.json").write_text(texto, encoding="utf-8")
     print(f"objetivos: {len(pob)} | S_C: cumbres en 0 MW {nc}, alertas que deciden {na}, negativos sin K {nn} | "
-          f"sin granulo {sum(1 for e in pob if not e['granule'])} | sha256 "
+          f"sha256 "
           f"{hashlib.sha256(texto.encode('utf-8')).hexdigest()}")
 
 

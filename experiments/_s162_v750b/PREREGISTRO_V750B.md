@@ -1,176 +1,207 @@
 # Pre-registro V750-B (S162): la región sensible (ROI) del código de MIROVA, por volcán, en VIIRS 750
 
-Estado: **BORRADOR para el sello de Nicolás.** No se despacha nada hasta (1) el sello, (2) que la sesión del
-instrumento entregue la cobertura contra la referencia (fase 0, programa §8.1) y (3) que la coordinadora (S162,
-sesión «Retomar») lo meta en el despacho combinado de la fase 1. Autor: sesión hija VIIRS 750 (loop
-`tasks/LOOP_VIIRS750.md`), 2026-10-24. Programa: `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` §3.
+Estado: **BORRADOR v2 para el sello de Nicolás**, corregido tras el verificador limpio
+(`verificador/VERIFICADOR_PREREGISTRO_V750B.md`, «listo para sello con cambios»; qué cambió, en §12). No se despacha
+nada hasta (1) el sello, (2) que la sesión del instrumento entregue la cobertura contra la referencia (fase 0, programa
+§8.1, #904) y (3) que la coordinadora (S162, sesión «Retomar») lo meta en el despacho combinado de la fase 1. Autor:
+sesión hija VIIRS 750 (loop `tasks/LOOP_VIIRS750.md`), 2026-10-24. Programa:
+`docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` §2 y §3.
 
 ## 1. La pregunta, como geólogo
 
 El código de MIROVA mira cada volcán en una grilla de 67 × 67 celdas de 750 m centrada en su propio punto (el centro
-del TIF). Dentro de esa grilla hay una zona «de cumbre» donde los umbrales son sensibles (5 sigma, piso 0,003) y un
-anillo donde son de escena (10 sigma, piso 0,02). El `.m` publicado trae una caja de cumbre de 7 × 7 celdas (±2,6 km)
-y dice en sus comentarios que la región se ajusta por volcán. Eso importa en dos volcanes:
+del TIF). Dentro de esa grilla hay una zona sensible (5 sigma, piso 0,003) y el resto con umbrales conservadores (10
+sigma, piso 0,02). El `.m` publicado no trae la matriz de zonas de cada volcán: trae una sola matriz de ejemplo (una
+pasada de 2023, con la zona sensible en el 7 × 7 central) y un comentario (l. 105-125) que dice que las zonas «can be
+shifted, reshaped or resized» por volcán. El comentario además describe las zonas al revés que la matriz de ejemplo:
+una ROI central conservadora rodeada de una corona extendida sensible. Eso importa en dos volcanes:
 
-- **Cordón Caulle**: el calor no está en el centro de la grilla sino en el campo del lacolito, a 4,6 a 10,5 km según
-  MIROVA; nuestro cráter de `volcanoes.yaml` está a 7,6 km del centro. Con la caja de 7 × 7 el código pierde 6
-  protegidas que MIROVA sí publicó (censo S159, `experiments/_s159/oraculo_censo/INFORME.md` C-1).
-- **Tupungatito**: el cráter está a 4,9 km al NW del centro; la caja de 7 × 7 no lo cubre.
-- (Planchón-Peteroa: cráter a 2,0 km del centro, dentro de la caja pero en el borde.)
+- **Cordón Caulle**: el calor está en el campo del lacolito, a 4,6 a 10,5 km del centro según MIROVA; el cráter de
+  `volcanoes.yaml` está a 7,6 km. Con la zona sensible de 7 × 7 el código pierde 6 protegidas que MIROVA sí publicó
+  (censo S159, `origin/s159-pruebas:experiments/_s159/oraculo_censo/INFORME.md`, C-1).
+- **Tupungatito**: el cráter está a 4,9 km al NW del centro; en V750-C las 17 cumbres tibias que K ve y el código calla
+  caen ahí, en la zona conservadora (`experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`, V4 y V9).
+- (Planchón-Peteroa: cráter a 2,0 km al S del centro.)
 
 La pregunta es qué zona sensible reproduce a MIROVA **en las dos direcciones**: publicar sus alertas (sobre todo las
-de 1 MW o más) y callar en las noches en que no vio nada. El resultado fija la ROI del paquete V750-A.
+de 1 MW o más) y callar en las noches en que no vio nada. Ningún brazo es «la ROI de MIROVA», que no conocemos: son
+lecturas candidatas, y gana la que mejor reproduce lo que MIROVA publicó y calló. El resultado fija la ROI del paquete
+V750-A.
 
-El verificador de V750-C agregó dos cosas que este pre-registro hereda: (1) en Tupungatito las 17 cumbres tibias que K
-ve y el `.m` calla caen a 4,4 a 5,4 km del centro de la grilla, en la zona conservadora, y es la ROI la que las calla
-antes que la interpolación; (2) la «caja por defecto» (B0) es un supuesto de **una** matriz de ejemplo de 2023 (BOX ==
-2 de 7 × 7 central, BOX == 1 de 21 × 19, que aquí se simetriza a 21 × 21), y el comentario del `.m` (l. 105-125) dice
-que la ROI se mueve, cambia de forma o de tamaño por volcán. O sea que ningún brazo es «la ROI de MIROVA»: son lecturas
-candidatas, y la que gane se elige por cómo reproduce lo que MIROVA publicó y calló.
-
-Lo que ya se sabe (no se re-mide como hallazgo, se usa como control): en el censo, la caja por defecto pierde 6
-protegidas y publica 5 negativos limpios de 5.353; el recuadro sensible de 21 × 21 no pierde ninguna, gana 1 y publica
-15 (ΔE −90 contra K). En la muestra de V750-C (`experiments/_s162_v750c/INFORME.md` V750C-4) el círculo
-`inner_radius_km` sensible y el 21 × 21 sensible detectan las 78 protegidas; el círculo publica 12 negativos del lote
-contra 8.
+Lo que ya se sabe (se usa como control, no se re-mide como hallazgo): en el censo S159 la caja del ejemplo pierde 6
+protegidas y publica 5 negativos limpios de 5.353; la sensible de 21 × 21 no pierde ninguna, gana 1 y publica 15 (ΔE
+−90 contra K).
 
 ## 2. Brazos
 
-Todos son el código de MIROVA (port de R2, `experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py`, validado contra
-Octave en 791 de 791 escenas, S159 O1) sobre la grilla GEO con interpolación lineal (esquina `X0 ± 25.000 m`, paso
-750, S159 GEO), sin compuerta, sin recorte, con su fondo y su suma. Sólo cambia la matriz BOX:
+Todos son el código de MIROVA (port de R2, `experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py` en `origin/main`,
+validado contra Octave en 791 de 791 escenas, S159 O1) sobre la grilla GEO con interpolación lineal (esquina
+`X0 ± 25.000 m`, paso 750, S159 GEO), sin compuerta, sin recorte, con su fondo y su suma. Sólo cambia la matriz de
+zonas (en el `.m` la zona 0 y la 1 comparten los umbrales conservadores, l. 389-395; lo único que decide es dónde está
+la zona 2, la sensible):
 
-| brazo | zona sensible (BOX = 2) | anillo de escena (BOX = 1) |
+| brazo | zona sensible (BOX == 2) | zona conservadora |
 |---|---|---|
-| **B0** O-def | 7 × 7 en el centro de la grilla (el `.m`) | 21 × 21 en el centro |
-| **B1** O-sens | 21 × 21 en el centro | (ninguno) |
-| **B2** O-cráter | 7 × 7 centrada en la celda del cráter de `volcanoes.yaml` (`vent_lat`, `vent_lon`) | 21 × 21 en el centro |
-| **B3** O-círculo | círculo de radio `inner_radius_km` (lista del tablero, `banco_paridad.inner_desde_html`) en el centro | el resto del 21 × 21 |
-| **B4** O-sens-PT | B1 en Cordón Caulle y Tupungatito; B0 en los otros nueve | |
+| **B0** caja del ejemplo | 7 × 7 en el centro de la grilla | el resto |
+| **B1** sensible | 21 × 21 en el centro | el resto |
+| **B2** caja en el cráter | 7 × 7 centrada en la celda del cráter de `volcanoes.yaml` (`vent_lat`, `vent_lon`) | el resto |
+| **B3** círculo | círculo de radio `inner_radius_km` del tablero (`banco_paridad.inner_desde_html`) en el centro | el resto |
+| **B4** sensible en dos volcanes | B1 en Cordón Caulle y Tupungatito; B0 en los otros nueve | |
+| **B5** lectura del comentario | corona: el 21 × 21 menos el 7 × 7 central (que queda conservador) | el 7 × 7 central y el resto |
 | **K** | producción (`calculate_vrp` de `pipeline/process_viirs_mod.py` sobre el mismo gránulo) | |
 
-Además, dos brazos de diagnóstico que **no deciden V750-B** (son la confirmación de V750-C, mismo gránulo y misma
-corrida):
+Brazos de diagnóstico que **no deciden V750-B** (confirman V750-C, mismo gránulo y misma corrida):
 
 | brazo | qué |
 |---|---|
-| **N0** O-nativo-def | el código sobre la ventana NATIVA del gránulo (filas y columnas del barrido, 67 × 67 píxeles alrededor del píxel más cercano al centro), caja 7 × 7 y 21 × 21 en píxeles nativos |
-| **N1** O-nativo-sens | ídem con 21 × 21 sensible |
+| **N0** nativo, caja del ejemplo | el código sobre la ventana NATIVA del gránulo (67 × 67 píxeles del barrido alrededor del píxel más cercano al centro), con las zonas definidas **en km** desde el centro de la grilla (semilados 2,625 y 7,875 km) para que midan lo mismo que en la grilla a cualquier ángulo de barrido |
+| **N1** nativo, sensible | ídem con la sensible de 7,875 km de semilado |
 
-N0 y N1 corren sólo en el subconjunto **S_C**: las 66 cumbres negativas y las 48 cumbres con alerta de V750-C, las
-alertas que deciden de la ventana y 300 negativos limpios sin ningún píxel de K, sorteados con semilla 162 entre los de
-la ventana (lista fija en `objetivos_sc.json`, que se commitea antes del despacho).
+N0 y N1 corren sólo en el subconjunto **S_C** (marcado en `objetivos_v750b.json` con `en_sc`): las cumbres de K en 0,0
+MW (negativas y con alerta), las alertas que deciden y 300 negativos limpios sin cúmulo de K sorteados con semilla 162.
+Se informan por tramo de 10° de cenit.
 
-Sin brazo con la matriz de ejemplo tal cual (anillo de 21 × 19 en vez de 21 × 21): en el `.m` la zona 0 y la zona 1
-usan los mismos umbrales conservadores (`MIROVA_VIIRS750_hotspot_detection.m` l. 389-395), así que el tamaño del anillo
-no puede cambiar ninguna máscara (medido: 0 de 510 grillas de N). Lo único que decide es dónde está la zona sensible.
-
-**Insumos que el run guarda** (para no volver a bajar gránulos en la ablación local siguiente): la grilla GEO lineal
-(`m13`, `m15`, float32) de todas las pasadas, y la ventana nativa (`lat`, `lon`, `M13`, `M15`, fila y columna del
-barrido, float32, hasta 45 km) de las pasadas de S_C. Tamaño estimado: ~170 MB y ~30 MB comprimidos.
+**Insumos que el run guarda**: la grilla GEO lineal (`m13`, `m15`, float32) de todas las pasadas y la ventana nativa
+(`lat`, `lon`, `m13`, `m15`, float32, más la esquina fila y columna) de las de S_C. Tamaño estimado (SOSPECHA, del
+tamaño de las grillas de N): ~170 MB y ~30 MB comprimidos.
 
 ## 3. Población y ventanas (programa §2, A119, A104)
 
-- VIIRS 750 nocturno (`dayflag = 0`), los 11 volcanes Tier A, pasadas con record de producción y con fila de la
-  referencia de MIROVA a ±120 s.
-- **T** (decide con la tabla sola): 2026-04-01 a 2026-06-12. **O** (tabla más OCR, la tabla sola al lado):
-  2026-06-13 a 2026-11-02 12:59 UTC, sin el 13 ni el 17 a 20 de octubre (D-29). El 12-oct sólo con los cuatro gránulos
-  rescatados de LAADS (patrón `experiments/_s159/oraculo_censo/probe_rescate.py`); si alguno no baja, el 12-oct se
-  excluye en todos los brazos. Toda la ventana es anterior al cese de Suomi NPP (2026-11-02 13:00 UTC).
+- VIIRS 750 nocturno (`dayflag = 0`), los 11 volcanes Tier A, pasadas con record de producción y fila de la referencia
+  de MIROVA a ±120 s. Lista: `objetivos_v750b.py` (corre `experiments/_s159/n/01_poblacion.py` de `origin/main` sin
+  cambiar su lógica, con la ventana extendida), regenerada y commiteada antes del despacho con su sha256.
+- **T** (decide la tabla sola): 2026-04-01 a 2026-06-12. **O** (decide tabla más OCR; la tabla sola al lado):
+  2026-06-13 a 2026-11-02 12:59 UTC. Fuera en todos los brazos: el **12-oct** (opción «excluido» del programa: no se
+  arma el rescate de LAADS), el 13 y del 17 al 20 de octubre (D-29). Las pasadas sin gránulo en el record salen de la
+  lista y se listan como SIN DATO declarado. Toda la ventana es anterior al cese de Suomi NPP.
 - Cortes informados por tramo: #535 (no separa brazos), adopción de K (2026-10-18 09:57 UTC).
-- Lista de objetivos: `01_objetivos.py` de `experiments/_s159/oraculo_censo/` con la ventana extendida, regenerada y
-  commiteada antes del despacho con su sha256.
 
-## 4. Etiquetas y record
+## 4. Etiquetas, cobertura y record
 
-- Alerta, protegida (lectura A, ≥ 1 MW), regla SN (D-9) y negativo limpio: `scripts/clase_mirova.py`, con el arreglo
-  de FALSO_POSITIVO de la sesión del instrumento si ya está mergeado (si no, se informa con y sin).
-- **Cobertura antes del veredicto** (§8.1): toda pasada de la referencia sin record a ±120 s y todo día con pasadas de
-  MIROVA y cero records se lista; una protegida sin record en todos los brazos que producción sí tiene es falla de
-  cobertura, no del brazo. Las pasadas «no observadas» (volcán fuera del gránulo, cumbre sin dato) salen del
-  denominador (censo C-5) y se cuentan aparte.
-- Record de cada brazo del oráculo: **el cúmulo 8-conexo del píxel alertado más radiante** (corrige C-4 del censo), con
-  su VRP calculado por el `.m` sobre la unión de los alertados (el VRP que MIROVA publica). Predicado «publica»: el del
-  tablero, ejecutado con node (A97, `banco_paridad`). Secundario, para continuidad con el censo: el record de
-  `record_oraculo` de N (centroide de todos los alertados).
+- Alerta, protegida (lectura A, ≥ 1 MW), regla SN (D-9) y negativo limpio: las de `01_poblacion.py`
+  (`banco_paridad`, `scripts/clase_mirova.py`). **Canal que decide** (programa §2): en T, sólo las filas de la tabla
+  (`source == "CONS"`; una alerta sólo del OCR no entra y una protegida sólo por el OCR no es protegida); en O, tabla
+  más OCR. Si la sesión del instrumento ya mergeó el arreglo de FALSO_POSITIVO, se informa con y sin.
+- **Cobertura antes del veredicto**: (a) «no observada», fuera del denominador y contada aparte: volcán fuera del
+  gránulo, o celdas sin dato en el 7 × 7 alrededor del **cráter** (no del centro de la grilla); (b) **SIN DATO**, con
+  nombre: pasada que no bajó, sin gránulo, grilla incompleta o error del brazo K. Si hay más de 2 % de SIN DATO o una
+  protegida SIN DATO, no se lee el veredicto: se relanzan sólo esas pasadas (`SOLO`) y se vuelve a leer; si siguen
+  faltando, se declaran y la coordinadora decide con Nicolás si se lee igual.
+- **Record de cada brazo del oráculo**: el cúmulo 8-conexo del píxel alertado más radiante (corrige C-4 del censo); su
+  VRP es el del `.m` sobre la unión de los alertados; su distancia se mide desde la posición del **cráter** de
+  `volcanoes.yaml` en la grilla, igual que producción, que mide desde `get_detection_anchor`. Se informa al lado
+  cuántas publicaciones cambiarían midiendo desde el centro de la grilla. Predicado «publica»: el del tablero,
+  ejecutado con node (A97).
+- **Record de K**: el que produce el probe; si K no arma record (ROI vacía), cuenta como «K no publica».
 
 ## 5. Métricas (programa §2)
 
-Por brazo, contra MIROVA, en T y en O por separado y en T ∪ O (con la tabla sola al lado en O):
+Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al lado, con la tabla sola y con todo:
 
-- **P1** protegidas perdidas (veto): alerta de MIROVA ≥ 1 MW que el brazo no publica.
-- **P1b** cruces de 1 MW en las dos direcciones: el brazo publica bajo 1 MW donde MIROVA dio ≥ 1, y ≥ 1 MW donde MIROVA
-  dio bajo 1 o nada.
-- **P2** suma de errores bajo 1 MW, E = alertas bajo 1 MW sin publicar + negativos limpios publicados; la diferencia
-  contra B1 se decide con la **prueba de signos por bloque noche-volcán** (D-45: `prueba_signos_p2` y
-  `regla_signos_p2` de `experiments/_s157_prereg_d25/evaluar_d25.py` en el tag `s161-d25-lectura`; exacta hasta 20
+- **P1** protegidas perdidas (veto): protegida que el brazo no publica.
+- **P1b** cruces de 1 MW en las dos direcciones (informativo).
+- **P2** E = alertas bajo 1 MW sin publicar + negativos limpios publicados; la diferencia contra B1 se decide con la
+  **prueba de signos por bloque noche-volcán** (D-45: `prueba_signos_p2` y `regla_signos_p2` extraídas con `ast` de
+  `experiments/_s157_prereg_d25/evaluar_d25.py` del tag `s161-d25-lectura`, sha256
+  `2e5576973ef1df6969f517c40bedc271f76db8a8b4756613e5004fc05d976747`, que el analizador comprueba: exacta hasta 20
   bloques; GANA o PIERDE con p ≤ 0,05; BLOQUEA si el neto va en contra sin llegar; SIN SUSTRATO con 4 bloques o menos).
-- Descriptivas: razón VRP brazo/MIROVA (mediana, cuartiles) en alertas y en protegidas; todo por volcán (con Cordón
-  Caulle, Tupungatito y Planchón-Peteroa aparte), por tramo de 10° de cenit y por canal (tabla, OCR).
+- Descriptivas: razón VRP brazo/MIROVA en alertas publicadas; Cordón Caulle, Tupungatito y Planchón-Peteroa aparte;
+  por tramo de 10° de cenit.
+- **Sin placebo de ganancia**: el placebo K × 1,2 del programa §2 es del comparador de magnitud M (D-44), y V750-B no
+  decide por M (las razones son descriptivas). M y su placebo van en V750-A.
 
 ## 6. Regla de decisión (escrita antes de ver los datos)
 
-1. **Elegible**: P1 = 0 en T y en O, con la tabla sola **y** con tabla más OCR. Un brazo que pierde una protegida no
-   entra al paquete, aunque gane en P2.
-2. Entre los elegibles, cada uno contra B1 por P2 (regla D-45). Se elige el que GANA contra B1; si dos ganan, el de menor
-   E en T ∪ O.
-3. Si ninguno gana contra B1 (empates o BLOQUEA), se elige por **cercanía al `.m`**, en este orden: B4 (cambia sólo dos
-   volcanes respecto del `.m`), B2 (conserva la caja de 7 × 7, sólo la mueve), B1, B3 (B3 usa nuestra configuración,
-   no la de MIROVA). Razón: a igual desempeño manda la fidelidad al código (decisión de Nicolás del 2026-10-21).
-4. P1b no decide pero se informa; un cruce hacia abajo en una protegida ya es pérdida en P1.
-5. **Decisión para Nicolás, no del pre-registro**: B4 y B2 son ajustes por volcán. MISSION excluye gates por volcán
-   cuando son nuestros (A85), pero aquí el ajuste por volcán es de MIROVA (el `.m` lo declara). Si el elegido es B4 o
-   B2, Nicolás confirma que eso es fidelidad y no un parche nuestro antes de pasarlo a V750-A.
+1. **Elegible**: P1 = 0 en T ∪ O con el canal que decide, **y** P1 = 0 en O con la tabla sola. Un brazo que pierde una
+   protegida no entra al paquete, aunque gane en P2.
+2. **Gana**: un elegible distinto de B1 que en P2 contra B1, sobre T ∪ O con el canal que decide, da GANA, y con la
+   tabla sola (T ∪ O) no da PIERDE ni BLOQUEA. Si ganan dos o más, el de menor E (T ∪ O, canal que decide).
+3. **Si ninguno gana**: se elige entre B1 y los elegibles que dieron EMPATE o SIN SUSTRATO contra B1, **nunca** uno que
+   PIERDE o BLOQUEA, por cercanía al `.m`, en este orden: B4 (cambia sólo dos volcanes respecto del ejemplo), B2
+   (conserva la caja de 7 × 7 y sólo la mueve), B5 (la lectura del comentario del `.m`), B1, B3 (B3 usa nuestra
+   configuración, no la de MIROVA). Razón: a igual desempeño manda la fidelidad al código (decisión de Nicolás del
+   2026-10-21). Si B1 tampoco es elegible y nadie más lo es: NINGÚN BRAZO ELEGIBLE, y V750-A no se arma con esta ROI.
+4. P1b no decide.
+5. **Decisión para Nicolás, no del pre-registro**: B2 y B4 son ajustes por volcán. MISSION excluye gates por volcán
+   cuando son nuestros (A85), pero aquí el ajuste es de MIROVA (el comentario del `.m` lo declara). Si el elegido es B2
+   o B4, Nicolás confirma que eso es fidelidad y no un parche nuestro antes de pasarlo a V750-A.
 
-## 7. Controles, leídos antes del veredicto
+## 7. Controles (todos dentro de la compuerta: si uno cae, no se imprime veredicto)
 
 | control | qué tiene que dar | si no |
 |---|---|---|
-| K = producción | publica igual y `pc.vrp_mw` a 0,001 MW en todas las pasadas ok | el run no mide producción: se detiene la lectura |
-| B0 y B1 = censo | mismo número de píxeles y VRP a 1e-6 que el censo S159 en las pasadas comunes | el oráculo cambió: se detiene |
+| nulo del contador | toda perturbación de un record publicado (VRP a 0, `far`) deja de publicar y todo cúmulo inyectado publica | el predicado no mide |
+| K = producción | publica igual y `pc.vrp_mw` a 0,001 MW; las distintas salen de todos los brazos y se listan; si son más del 1 % o hay una protegida, se detiene | el run no mide producción |
+| B0 y B1 = censo S159 | mismos píxeles y VRP a 1e-6 que el censo en las pasadas comunes (artefactos del censo en `D:\vrp-trabajo\temporales\s159_oraculo\censo_39713438252`, objetivos en `origin/s159-pruebas`); obligatorio | el oráculo cambió |
 | control positivo | B0 pierde al menos 1 protegida de Cordón Caulle (el censo vio 6) | el instrumento no ve la ROI |
-| control negativo | B1 contra sí mismo (dos corridas del evaluador) da E idéntico y P2 SIN SUSTRATO o EMPATE | el evaluador no es determinista |
-| cobertura | lista de §4 vacía, o cada caso explicado | SIN DATO declarado, nunca contado como acierto |
-| N0/N1 actúan | N0 distinto de B0 en al menos una máscara de S_C | el brazo nativo no corre |
+| control negativo | B1 contra B1: SIN SUSTRATO con 0 bloques | el evaluador no es determinista |
+| cobertura | §4: SIN DATO bajo 2 % y ninguna protegida | se relanza antes de leer |
+| N0 y N1 actúan | distintos de B0 y B1 en al menos una máscara de S_C (informativo, no cierra la compuerta) | el brazo nativo no corre |
 
 ## 8. Predicciones (para poder fallar)
 
 - B0: pierde 6 o más protegidas (todas de Cordón Caulle); no elegible.
-- B1: 0 protegidas perdidas; negativos limpios publicados del orden de 15 en 5.353 (censo) más lo que agregue la
-  ventana extendida.
-- B2: recupera las de Cordón Caulle sólo si el lacolito cae en la caja de 7 × 7 alrededor del cráter del yaml; como
-  MIROVA las ubica a 4,6 a 10,5 km del centro, predigo que **pierde** alguna (no elegible). Tupungatito: la recupera.
-- B3: 0 perdidas; más negativos que B1 (V750-C: 12 contra 8 en la muestra).
-- B4: 0 perdidas; menos negativos que B1 (sólo dos volcanes con la sensible).
-- N0 (V750-C; predicción revisada antes de cualquier dato, tras el verificador de V750-C): si lo que calla las cumbres
-  dentro de la caja es el promedio del remuestreo, N0 detecta en la celda de K en más de la mitad de las cumbres
-  negativas que caen dentro del 7 × 7 (predigo 25 o más de unas 43) y en casi ninguna de Tupungatito (zona
-  conservadora); N1 recupera además parte de Tupungatito. Si N0 no supera al vecino más cercano de la grilla (23 de
-  38 en el censo), el remuestreo no es la pieza y lo que calla es la interpolación misma. Publica más negativos limpios
-  que B0 en S_C.
+- B1: 0 protegidas perdidas; negativos limpios del orden de 15 en 5.353 (censo) más lo que agregue la ventana extendida.
+- B2: como MIROVA ubica el calor de Cordón Caulle a 4,6 a 10,5 km del centro y el cráter del yaml está a 7,6 km,
+  predigo que pierde alguna protegida de Cordón Caulle (no elegible).
+- B3: 0 perdidas; más negativos que B1.
+- B4: 0 perdidas; menos negativos que B1.
+- B5: como deja conservador el 7 × 7 central, predigo que pierde alertas de cumbre débiles en volcanes con el calor en
+  el centro (Láscar, Villarrica) y queda detrás de B1 en P2.
+- N0 (V750-C): si lo que calla las cumbres dentro de la zona sensible es el promedio del remuestreo, N0 detecta en la
+  celda de K en más de la mitad de las cumbres negativas que caen dentro del 7 × 7 central y publica más negativos
+  limpios que B0 en S_C; en Tupungatito no lo predigo (VB-10 del verificador: depende del ángulo de barrido, se lee por
+  tramo de cenit). Si N0 no supera al vecino más cercano de la grilla (23 de 38 en el censo), el remuestreo no es la
+  pieza y lo que calla es la interpolación misma.
 
 ## 9. Costo, escala y despacho
 
-- Un run de sólo lectura, combinable con V375-B, V375-C y MOD-C (programa §7, fase 1). Referencia: el censo S159
-  tardó 1 h 31 min con 32 trozos para 5.746 pasadas; con la ventana extendida a 11-02 serán unas 6.900 (SOSPECHA,
-  se cuenta al regenerar los objetivos), más N0/N1 en ~600. Estimado 2 h con 32 trozos, timeout 90 min por trozo.
-- Autentica sólo con `EARTHDATA_TOKEN` y falla al instante si viene vacío (A71); `"on":` entre comillas (A43);
-  `pipefail` con `tee` (S141); sale 2 si falta una pasada.
-- Lo despacha la coordinadora, desde un tag que fija el código (S152), en una rama auxiliar que no se mergea.
-- Artefactos en C: (pedido de la coordinadora: D: está en ~9,7 GB), en `C:\vrp-trabajo\temporales\s162_v750b\`;
-  parada si C: baja de 3 GB.
+- Un run de sólo lectura, combinable con V375-B, V375-C y MOD-C (programa §7, fase 1). Referencia: el censo S159 tardó
+  1 h 31 min con 32 trozos para 5.746 pasadas; con la ventana hasta el 11-02 serán más (SOSPECHA hasta regenerar los
+  objetivos), más N0 y N1 en S_C. Estimado unas 2 h con 32 trozos; timeout 120 min por trozo.
+- Workflow `probe-s162-v750b.yml`: autentica sólo con `EARTHDATA_TOKEN` y falla al instante si viene vacío (A71);
+  `"on":` entre comillas (A43); `pipefail` con `tee` (S141); el probe sale 2 si falta una pasada (no baja, sin
+  gránulo, grilla incompleta o error de K); el artefacto falla si la carpeta queda vacía (`if-no-files-found: error`).
+- Lo despacha la coordinadora desde un tag que fija el código (S152), en una rama auxiliar que no se mergea, con
+  `experiments/_s162_v750b/objetivos_v750b.json` commiteado y su sha256 anotado.
+- Artefactos en C: (`C:\vrp-trabajo\temporales\s162_v750b\`); parada si C: baja de 3 GB.
+- Lectura: `python analizar_v750b.py --art <artefactos> --objetivos objetivos_v750b.json --evaluador
+  <evaluar_d25.py del tag> --censo-art D:\vrp-trabajo\temporales\s159_oraculo\censo_39713438252 --censo-objetivos
+  <objetivos.json del censo S159>`.
+- Run a medias: si el run termina con trozos en rojo, se relanzan sólo las pasadas faltantes con `SOLO` sobre el mismo
+  tag; los resultados se juntan (un resultado «ok» reemplaza a uno fallido) y se lee una sola vez.
 
 ## 10. Lo que este pre-registro NO decide
 
-- No adopta nada ni toca `pipeline/`: la ROI elegida entra al pre-registro de V750-A, que tiene su propio sello, tag y
-  sí de Nicolás (A45).
+- No adopta nada ni toca `pipeline/`: la ROI elegida entra al pre-registro de V750-A, con su propio sello, tag y el sí
+  de Nicolás (A45).
 - No decide el filtro de publicación del paquete (P-sinfiltro es de V750-A).
-- No mide el diurno (V750-E) ni VIIRS 375 ni MODIS.
+- No mide el diurno (V750-E), ni VIIRS 375, ni MODIS.
 
-## 11. Pendiente antes del sello (lo hace esta sesión)
+## 11. Estado de lo preparado
 
-- `probe_v750b.py` (reusa `probe_n.py` y `probe_censo.py` de S159; agrega B2, B3, B4, N0, N1 y el guardado de
-  insumos), `01_objetivos.py` extendido, `objetivos_sc.json`, `02_analizar.py` con la regla de §6, y su prueba sin red
-  sobre las 510 grillas de N (B0 y B1 tienen que reproducir los números de N; B2, B3 y B4 tienen que dar distinto en
-  Cordón Caulle o Tupungatito).
-- Verificador limpio del pre-registro y del analizador antes del sello.
+- `probe_v750b.py` (brazos B0, B1, B2, B3, B5 y N0, N1; guarda insumos), `objetivos_v750b.py`, `analizar_v750b.py`
+  (regla del §6 y controles del §7), `probe-s162-v750b.yml`.
+- Prueba sin red del probe en verde (`python probe_v750b.py --sin-red`); prueba local sobre las 510 grillas de N
+  (`prueba_local_510_salida.txt`): B0 y B1 iguales a N en 510 de 510, B2 y B3 cambian máscaras en Cordón Caulle y
+  Tupungatito; ensayo del analizador sólo con controles (`ensayo_analizador_salida.txt`).
+- La batería de mutaciones del verificador (`verificador/mutaciones_regla_s6.py`) se re-corre sobre la versión v2.
+
+## 12. Qué cambió de la v1 a la v2 (verificador limpio, Fable 5.1)
+
+- VB-01: la regla de §6.3 ya no puede elegir un brazo que PIERDE o BLOQUEA contra B1.
+- VB-02: un record de K vacío ya no tumba el analizador; cuenta como «K no publica» y lo vigila el control K = producción.
+- VB-03 y VB-08: «canal que decide» definido (T con la tabla sola, O con tabla más OCR) y la regla dice qué ventana y
+  canal deciden cada paso.
+- VB-04, VB-05 y VB-16: grilla incompleta, error de K y pasada sin gránulo son SIN DATO con nombre y hacen salir 2 al
+  probe; la cobertura de la cumbre se mide en el cráter; criterio de relanzamiento escrito.
+- VB-06: los controles positivo, negativo y contra el censo entran a la compuerta; el del censo es obligatorio.
+- VB-07: la distancia del record se mide desde el cráter, como producción.
+- VB-09: brazo B5 con la lectura del comentario del `.m`.
+- VB-10: las zonas del brazo nativo se definen en km y se informan por cenit; predicción de Tupungatito retirada.
+- VB-11: el 12-oct queda excluido en todos los brazos.
+- VB-12: K distinto de producción en una pasada ya no detiene todo; sale de los brazos y se lista, con tope de 1 %.
+- VB-13: citas al censo S159 con su rama (`origin/s159-pruebas`).
+- VB-14: artefacto vacío falla; retención de 30 días.
+- VB-15: se declara por qué no hay placebo.
+- Además: sha256 del evaluador del tag fijado y comprobado; criterio para un run a medias.

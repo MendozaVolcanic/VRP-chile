@@ -59,7 +59,28 @@ def cajas(celda_crater, inner_km):
     # Sin brazo «21 x 19» (la matriz de ejemplo tal cual): en el .m la zona 0 y la zona 1 usan los MISMOS umbrales
     # conservadores (MIROVA_VIIRS750_hotspot_detection.m l. 389-395), así que el tamaño del anillo no cambia ninguna
     # máscara; medido: 0 de 510 grillas de N (prueba_local_510, primera versión). Sólo decide dónde está la zona 2.
-    return {"B0": b0, "B1": b1, "B2": b2, "B3": b3}
+    # B5: la lectura del COMENTARIO del .m (l. 111-119: BOX == 1 central conservadora, BOX == 2 corona extendida
+    # sensible), opuesta a la matriz de ejemplo; verificador del pre-registro, VB-09.
+    b5 = np.zeros((N, N))
+    b5[C - 10:C + 11, C - 10:C + 11] = 2
+    b5[C - 3:C + 4, C - 3:C + 4] = 1
+    return {"B0": b0, "B1": b1, "B2": b2, "B3": b3, "B5": b5}
+
+
+def cajas_km(lat_w, lon_w, centro_lat, centro_lon):
+    """BOX del .m (7 x 7 sensible dentro de 21 x 21) y la sensible de 21 x 21, en KILÓMETROS sobre la ventana nativa:
+    semilados de 2,625 y 7,875 km desde el centro de la grilla de MIROVA. En píxeles nativos la caja crece con el
+    ángulo de barrido (verificador del pre-registro, VB-10); en km mide lo mismo que la de la grilla."""
+    R = 6371.0
+    dy = np.radians(lat_w - centro_lat) * R
+    dx = np.radians(lon_w - centro_lon) * R * np.cos(np.radians(centro_lat))
+    lejos = np.maximum(np.abs(dx), np.abs(dy))
+    b0 = np.zeros(lat_w.shape)
+    b0[lejos <= 7.875] = 1
+    b0[lejos <= 2.625] = 2
+    b1 = b0.copy()
+    b1[b1 == 1] = 2
+    return {"N0": b0, "N1": b1}
 
 
 def oraculo_caja(m13, m15, dayflag, sg, box, semillas=None):
@@ -91,14 +112,21 @@ def ventana_nativa(arrs, i0):
     return out, (int(i0[0] - MEDIA_VENTANA), int(i0[1] - MEDIA_VENTANA))
 
 
-def cobertura(m13g):
+def cobertura(m13g, celda_crater=(C, C)):
+    """Celdas sin dato en la grilla. «crater»: el 7 x 7 alrededor de la celda del cráter de volcanoes.yaml (VB-16: en
+    Cordón Caulle y Tupungatito el cráter no está en el centro)."""
     nan = ~np.isfinite(m13g)
+    f, c = celda_crater
+    vent = nan[max(f - 3, 0):f + 4, max(c - 3, 0):c + 4]
     return {"nan_67": int(nan.sum()), "nan_21": int(nan[C - 10:C + 11, C - 10:C + 11].sum()),
-            "nan_7": int(nan[C - 3:C + 4, C - 3:C + 4].sum()), "nan_centro": bool(nan[C, C])}
+            "nan_7": int(nan[C - 3:C + 4, C - 3:C + 4].sum()), "nan_centro": bool(nan[C, C]),
+            "nan_7_crater": int(vent.sum()), "nan_crater": bool(nan[f, c]) if 0 <= f < N and 0 <= c < N else True}
 
 
 def procesar_granulo(objs, destino, outdir):
     o0 = objs[0]
+    if not o0.get("granule"):   # VB-05: sin gránulo no hay qué bajar; cuenta como pasada sin procesar
+        return [{"id": o["id"], "volcan": o["volcan"], "hora_utc": o["hora_utc"], "estado": "sin_granulo"} for o in objs]
     PG.LATLON[0], PG.LATLON[1] = o0["grilla"]["centro_lat"], o0["grilla"]["centro_lon"]
     par, err = PN.bajar_con_reintentos(o0["granule"], destino)
     if err:
@@ -136,7 +164,7 @@ def procesar_granulo(objs, destino, outdir):
                 r["oraculo_estado"] = "grilla_incompleta"
             else:
                 a13, a15 = gg["linear"]
-                r["cobertura"] = cobertura(a13)
+                r["cobertura"] = cobertura(a13, tuple(o["celda_crater"]))
                 for nom, box in cajas(tuple(o["celda_crater"]), o["inner_km"]).items():
                     r["oraculo"][nom] = oraculo_caja(a13, a15, dayflag, sg, box)
                 np.savez_compressed(outdir / f"grilla_{o['id']:05d}.npz", m13=a13.astype(np.float32),
@@ -144,11 +172,8 @@ def procesar_granulo(objs, destino, outdir):
             if o.get("en_sc"):
                 vn, esq = ventana_nativa({"m13": rad["M13"], "m15": rad["M15"], "lat": lat, "lon": lon}, i0)
                 r["nativo_esquina_fila_col"] = list(esq)
-                b0 = PG.caja_mirova()
-                b1 = b0.copy()
-                b1[b1 == 1] = 2
-                r["nativo"] = {"N0": oraculo_caja(vn["m13"], vn["m15"], dayflag, sg, b0),
-                               "N1": oraculo_caja(vn["m13"], vn["m15"], dayflag, sg, b1)}
+                ck = cajas_km(vn["lat"], vn["lon"], g["centro_lat"], g["centro_lon"])
+                r["nativo"] = {n: oraculo_caja(vn["m13"], vn["m15"], dayflag, sg, b) for n, b in ck.items()}
                 np.savez_compressed(outdir / f"nativo_{o['id']:05d}.npz",
                                     **{k: v.astype(np.float32) for k, v in vn.items()},
                                     esquina=np.array(esq, dtype=np.int32))
@@ -157,7 +182,13 @@ def procesar_granulo(objs, destino, outdir):
                     r["brazos"] = {"K": PN.resumen_brazo("K", None, o["volcan"], l1b, geo)}
                 except Exception as e:  # noqa: BLE001
                     r["brazos"] = {"K": {"error": f"{type(e).__name__}: {e}", "traza": traceback.format_exc()[-1200:]}}
-            r["estado"] = "ok"
+            # VB-04: una grilla incompleta o un error del brazo K no es «no observada»: es una pasada sin procesar
+            if gg is None:
+                r["estado"] = "grilla_incompleta"
+            elif dayflag == 0 and "error" in (r.get("brazos") or {}).get("K", {}):
+                r["estado"] = "error_K"
+            else:
+                r["estado"] = "ok"
         except Exception as e:  # noqa: BLE001
             r["estado"] = f"error: {type(e).__name__}: {e}"
             r["traza"] = traceback.format_exc()[-1500:]
@@ -178,6 +209,7 @@ def prueba_sin_red_v750b():
     assert np.array_equal(cj["B0"], PG.caja_mirova())
     assert not (cj["B1"] == 1).any() and (cj["B1"] == 2).sum() == 21 * 21
     assert np.array_equal(cj["B2"], cj["B0"]), "cráter en el centro: B2 tiene que ser B0"
+    assert (cj["B5"] == 1).sum() == 49 and (cj["B5"] == 2).sum() == 21 * 21 - 49 and cj["B5"][C, C] == 1
     cj2 = cajas((C - 6, C - 6), 7.0)   # Tupungatito: 4,9 km al NW
     assert (cj2["B2"] == 2).sum() == 49 and cj2["B2"][C - 6, C - 6] == 2 and cj2["B2"][C, C] == 1
     assert cj2["B3"][C, C] == 2 and (cj2["B3"] == 2).sum() > 49
@@ -186,6 +218,16 @@ def prueba_sin_red_v750b():
     assert esq == (5 - MEDIA_VENTANA, 78 - MEDIA_VENTANA)
     assert vn["x"][MEDIA_VENTANA, MEDIA_VENTANA] == a[5, 78]
     assert np.isnan(vn["x"][0, 0]) and np.isnan(vn["x"][MEDIA_VENTANA, -1])
+    # cajas en km: con píxeles de 0,75 km en una malla regular tienen que dar la misma caja que la grilla
+    la0, lo0 = -33.0, -70.0
+    paso_lat = 0.75 / 6371.0 * 180 / np.pi
+    paso_lon = paso_lat / np.cos(np.radians(la0))
+    ii, jj = np.indices((N, N))
+    ck = cajas_km(la0 - (ii - C) * paso_lat, lo0 + (jj - C) * paso_lon, la0, lo0)
+    assert np.array_equal(ck["N0"], PG.caja_mirova()), "caja en km sobre malla de 750 m = caja de la grilla"
+    assert (ck["N1"] == 2).sum() == 21 * 21
+    cb = cobertura(np.ones((N, N)), (27, 30))
+    assert cb["nan_7_crater"] == 0 and not cb["nan_crater"]
     print("prueba_sin_red_v750b: ok", flush=True)
 
 
@@ -217,7 +259,7 @@ def main():
         objs = [o for o in objs if o["id"] in quiero]
     grupos = {}
     for o in objs:
-        grupos.setdefault(o["granule"], []).append(o)
+        grupos.setdefault(o.get("granule") or f"~sin_granulo|{o['volcan']}|{o['hora_utc']}", []).append(o)
     claves = sorted(grupos)
     mias = [k for n, k in enumerate(claves) if n % a.nchunks == a.chunk]
     n_obj = sum(len(grupos[k]) for k in mias)

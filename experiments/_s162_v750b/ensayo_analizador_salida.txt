@@ -1,9 +1,16 @@
-== cobertura: objetivos 517 con resultado 509 {('neg_limpio', 'ok'): 314, ('neg_limpio', 'sin_resultado'): 2, ('pos', 'ok'): 195, ('pos', 'sin_resultado'): 6}
-   ok y observadas: 508 | no observadas (fuera del denominador): {'sin_crater': 1} | SIN DATO: 8
-   protegidas SIN DATO (falla de cobertura, no de brazo): [('NevadosDeChillan', '2026-10-12 05:18'), ('NevadosDeChillan', '2026-10-12 05:18')]
-== control nulo del contador: 1584 perturbaciones; las que NO cambian la publicación: 0 (tiene que ser 0)
-== control K = producción: publica distinto 0, pc.vrp_mw distinto 0 (tienen que ser 0)
-== control B0 y B1 = censo S159 en pasadas comunes: no pedido
-== controles generales: EN VERDE
+== cobertura: objetivos 506 con resultado 504 {('neg_limpio', 'ok'): 311, ('neg_limpio', 'sin_resultado'): 2, ('pos', 'ok'): 193}
+   observadas: 503 | no observadas (fuera del denominador): {'sin_crater': 1} | SIN DATO: 2
+   SIN DATO por motivo: {'sin_resultado': 2}
+   protegidas SIN DATO (falla de cobertura, no de brazo): ninguna
+== cobertura: SUFICIENTE
+== publicación con ancla en el cráter contra ancla en el centro de la grilla (pasadas que cambian): {('B0', 'PlanchonPeteroa'): 1, ('B1', 'PlanchonPeteroa'): 1, ('B1', 'Tupungatito'): 1, ('B3', 'PlanchonPeteroa'): 1, ('B5', 'Tupungatito'): 1}
+== control nulo del contador: 1718 perturbaciones; las que NO cambian la publicación: 0 (tiene que ser 0, con al menos una perturbación)
+== control K = producción: distintas 0 de 503 (protegidas ninguna); K sin record 0; lista []
+== control B0 y B1 = censo S159 en pasadas comunes: {'B0_igual': 503, 'B1_igual': 503} OK
+== controles generales (nulo, K = producción, cobertura): EN VERDE
+== control negativo P2 (B1 contra B1): ('SIN SUSTRATO', 0, 0) (tiene que ser SIN SUSTRATO con 0 bloques)
+== control positivo (B0 pierde protegidas de Cordón Caulle): 7 ['2026-06-07 05:54', '2026-09-18 05:24', '2026-05-25 05:42', '2026-06-05 05:36', '2026-07-06 05:54', '2026-10-10 05:54', '2026-07-03 05:48'] (tiene que ser 1 o más)
+== compuerta del veredicto (generales, ROI y censo): ABIERTA
+== sin veredicto: --solo-controles
 
-(Ensayo sobre las 510 grillas de N en formato del probe, con --solo-controles; evaluador extraído de s161-d25-lectura. Sin el control contra el censo S159, que necesita --censo-art.)
+(Ensayo v2 sobre las grillas de N en formato del probe, mismas exclusiones que el run, con el control del censo S159 y --solo-controles: la compuerta se abre y no se imprime veredicto. Evaluador del tag s161-d25-lectura, sha256 comprobado.)

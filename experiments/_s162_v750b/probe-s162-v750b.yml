@@ -64,6 +64,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: s162-v750b-chunk-${{ matrix.chunk }}
+          if-no-files-found: error
+          retention-days: 30
           path: |
             out/*.json
             out/*.log

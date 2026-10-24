@@ -46,7 +46,7 @@ def main():
     objs = []
     for nom in ("objetivos_n.json", "objetivos_censo.json"):
         objs += [o for o in json.loads((a.insumos / "n" / nom).read_text(encoding="utf-8")) if o["lab"] in
-                 ("pos", "neg_limpio")]
+                 ("pos", "neg_limpio") and o["hora_utc"][:10] not in OV.EXCLUIDOS]   # mismas exclusiones que el run
     vy = {v["name"]: v for v in yaml.safe_load((RAIZ / "volcanoes.yaml").read_text(encoding="utf-8"))["volcanoes"]}
     OV.completar(objs, vy, B.inner_desde_html())
     salida = []
@@ -62,7 +62,7 @@ def main():
         orc = {n: PV.oraculo_caja(z["m13"], z["m15"], 0, r["sunglint"], box, semillas=0)
                for n, box in PV.cajas(tuple(o["celda_crater"]), o["inner_km"]).items()}
         salida.append({"id": o["id"], "volcan": o["volcan"], "hora_utc": o["hora_utc"], "estado": "ok",
-                       "dayflag": 0, "sunglint": r["sunglint"], "cobertura": PV.cobertura(z["m13"]),
+                       "dayflag": 0, "sunglint": r["sunglint"], "cobertura": PV.cobertura(z["m13"], tuple(o["celda_crater"])),
                        "oraculo": orc, "brazos": {"K": r["brazos"]["K"]}})
     (a.dest / "art").mkdir(parents=True, exist_ok=True)
     (a.dest / "art" / "resultados_00.json").write_text(json.dumps(salida, default=float), encoding="utf-8")
