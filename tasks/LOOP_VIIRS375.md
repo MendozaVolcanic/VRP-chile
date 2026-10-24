@@ -181,3 +181,13 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   línea estricta. Workflow `b2/probe-s162-v375-b2.yml` (24 trozos, rama `s162-v375-b2-disparo`).
 - Verificador limpio (Sonnet) del pre-registro corriendo. Después: correcciones, sello por D-48, commits de disparo
   (humo y lote sobre `ca034d66e`) y pedido de despacho a la coordinadora.
+
+### 2026-10-24 (vuelta 10): verificador del B2 v1 y versión 2
+- Verificador v1 (`b2/verificador/INFORME.md`): muestra disjunta, pesos y evaluador sin cambios en lo publicado,
+  CONFIRMADOS. **F1 (gravedad 3)**: decidir con S162 + B2 reutilizaba lo ya visto, contra la lógica de C §5.5. Medido:
+  en la frontera ese diseño declaraba ACOTADO en 11 a 20 % de los casos; con B2 sola, 1 a 3 %.
+- **B2 v2** (`7ff23cc3a`): decide neg_resto de B2 sola + neg_pub de S162 (`--deciden S162b --neg-pub-de S162`); **1.200**
+  neg_resto nuevas (93 % de decidir con la tasa observada; pesos 2,72 a 2,83; sha256 `6328988b…019a`); cobertura por lote y
+  lote vacío invalida (F4, F5); potencia con tasa pareja declarada como SOSPECHA (F3). Regresión: la lectura publicada
+  sale idéntica. Workflow de 48 trozos (~8,3 h de runner, ~90 min de reloj).
+- Segundo verificador limpio (Sonnet) sobre el v2 corriendo.
