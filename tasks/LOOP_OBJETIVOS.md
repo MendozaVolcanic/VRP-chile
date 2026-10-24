@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~20:30 UTC (S162): humo de V375-B2 despachado; el lote espera una re-verificación corta
+- V375-B2 v3 (`ae65eaaaf`, tag `s162-v375-b2-listo`): el segundo verificador dio CONFIRMADO EN PARTE con un G3 (ningún
+  control probaba que el port estuviera vivo; un port muerto daba «calla»); arreglado con 20 pasadas de control
+  re-medidas fuera de todo denominador (INVALIDO si M14 no las reproduce), probado con runs fabricados (vivo 20/20,
+  muerto INVALIDO), NO DECIDE con más de 10 % sin dato, línea «VEREDICTO B». La probabilidad de decidir integrando la
+  incertidumbre de 4 de 389 baja de 93 % a 0,74-0,80.
+- Comprobado: el humo `74e368f6e` sólo agrega el workflow fuera de la carpeta; pipeline/ idéntico a `533398f8f`; el lote
+  `a9331d51c` es fast-forward con 4 líneas del workflow. **Humo: run 40128648709**. El lote (48 jobs) sale con la
+  re-verificación corta del delta v2→v3 conforme y el OK al humo, después de t3 de MOD-B.
+- `loop-viirs750`: S-1 incorporado a V750-A §5 como diagnóstico obligatorio que no decide (`27973d13a`).
+
 ### 2026-10-24 ~20:15 UTC (S162): ablación real del bow tie de MODIS (D28) verificada
 - `loop-modis`, verificador Fable alto (`claude/s162-modis-774bb0` `f49e57dd7`, `experiments/_s162_modis_bowtie/real/`):
   rearmar los 403 recortes nativos de MOD-C reproduce el lote 403/403; el método A (quitar sólo los centros que el
