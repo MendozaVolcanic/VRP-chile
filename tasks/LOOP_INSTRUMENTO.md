@@ -63,6 +63,22 @@ Estado: `[ ]` pendiente, `[~]` en curso, `[v]` en verificación, `[x]` lista (PR
 
 ## 4. Bitácora (la más nueva arriba)
 
+### 2026-10-24 ~17:45 UTC: verificador de #904 aplicado; T3 integrado, equivalencia exacta, mutaciones corriendo
+- **#904**: verificador Sonnet CONFIRMÓ las 4 afirmaciones con controles positivos y nulos propios. Dos hallazgos de
+  gravedad 3 arreglados con roja por aserción: (1) protegida faltante en UN brazo no invalidaba (una prueba mía
+  fijaba el defecto: reemplazada); (2) control incompleto dejaba ciego al evaluador (ahora invalida si un brazo tiene
+  una protegida que el control no). Gravedad 2: no observadas por día; pruebas de `cargar_lado` y
+  `pasadas_nocturnas` con un doble del predicado. Con K de control, V1 también da INVALIDO (44 no observadas el
+  12-oct). 27 pruebas, 28 de 28 mutaciones. Push `ff452671c`.
+- **T3** (rama `instrumento/evaluador-t3`, apilada sobre #904, sin PR todavía): integrado. Equivalencia contra
+  `evaluar_d25.py` del tag `s161-d25-lectura` (blob `1dbabf657`, importado read-only): **250 casos, 0 diferencias**;
+  control negativo (semilla de d′ y mínimo de volcanes perturbados): 17 diferencias, el instrumento sí puede fallar.
+  Placebo (c) de D-44: mi primera versión volteaba bloques enteros de un lado y salía sesgada (11 PIERDE de 40, porque
+  los bloques +1 traen más pasadas); rehecha con m = mín(n₊, n₋) por bloque: 7 GANA y 8 PIERDE de 200 (bajo 5 %
+  por cola). 18 pruebas. Mutaciones (21) corriendo en segundo plano: NO tocar D: hasta que terminen.
+- Nota de proceso: agregué pruebas con un heredoc (`cat >> ... <<'EOF'`), cosa que `LOOP_OBJETIVOS.md` §1.7 prohíbe;
+  el archivo quedó bien (27 pruebas verdes), pero de aquí en adelante sólo Edit.
+
 ### 2026-10-24 ~16:50 UTC: T4+T6 verificado; T1+T2+T5 con PR (#904); T3 escrito en borrador
 - **#902 (MOD-A)**: CI verde. LISTA.
 - **#903 (T4+T6)**: verificador Sonnet CONFIRMADO, gravedad máx. 2; aplicados sus hallazgos (orden de estados igual a
