@@ -65,8 +65,8 @@ def cajas(celda_crater, inner_km):
     return {"B0": b0, "B0e": b0e, "B1": b1, "B2": b2, "B3": b3}
 
 
-def oraculo_caja(m13, m15, dayflag, sg, box):
-    """Igual a probe_n.oraculo, con la BOX como argumento."""
+def oraculo_caja(m13, m15, dayflag, sg, box, semillas=None):
+    """Igual a probe_n.oraculo, con la BOX como argumento (semillas=0 omite la banda de triangulación)."""
     mask, _lista, d = ORA.detectar(m13, m15, box, dayflag, sg, devolver_diag=True)
     r = ORA.vrp(m13, mask)
     rr, cc = np.nonzero(mask)
@@ -74,8 +74,9 @@ def oraculo_caja(m13, m15, dayflag, sg, box):
            "npix": r["npix"], "vrp_mw": None if r["npix"] == 0 else float(r["VRP_MW"]),
            "pixeles": [[int(a), int(b), int(box[a, b]), round(float(np.hypot(a - C, b - C) * 0.75), 2),
                         round(float(m13[a, b]), 5)] for a, b in zip(rr, cc)]}
-    if r["npix"]:
-        v = [ORA.vrp(m13, mask, jitter=1e-6, semilla=s)["VRP_MW"] for s in range(PN.SEMILLAS)]
+    n_sem = PN.SEMILLAS if semillas is None else semillas
+    if r["npix"] and n_sem:
+        v = [ORA.vrp(m13, mask, jitter=1e-6, semilla=s)["VRP_MW"] for s in range(n_sem)]
         out["vrp_banda"] = [float(min(v)), float(max(v))]
     return out
 

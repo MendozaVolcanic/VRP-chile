@@ -154,8 +154,8 @@ Por brazo, contra MIROVA, en T y en O por separado y en T ∪ O (con la tabla so
 - Autentica sólo con `EARTHDATA_TOKEN` y falla al instante si viene vacío (A71); `"on":` entre comillas (A43);
   `pipefail` con `tee` (S141); sale 2 si falta una pasada.
 - Lo despacha la coordinadora, desde un tag que fija el código (S152), en una rama auxiliar que no se mergea.
-- Artefactos en `D:\vrp-trabajo\temporales\s162_v750b\` sólo si D: tiene más de 3 GB libres después de bajar; si no,
-  en C:.
+- Artefactos en C: (pedido de la coordinadora: D: está en ~9,7 GB), en `C:\vrp-trabajo\temporales\s162_v750b\`;
+  parada si C: baja de 3 GB.
 
 ## 10. Lo que este pre-registro NO decide
 

@@ -65,7 +65,7 @@ def main():
             ctrl["sin_grilla"] += 1
             continue
         z = np.load(gp)
-        s = {n: PV.oraculo_caja(z["m13"], z["m15"], 0, r["sunglint"], box)
+        s = {n: PV.oraculo_caja(z["m13"], z["m15"], 0, r["sunglint"], box, semillas=0)
              for n, box in PV.cajas(tuple(o["celda_crater"]), o["inner_km"]).items()}
         for nom, ref in (("B0", "geo_linear"), ("B1", "geo_linear_anillo_sensible")):
             x, y = s[nom], r["oraculo"][ref]
@@ -73,7 +73,7 @@ def main():
                                               or abs((x["vrp_mw"] or 0) - (y["vrp_mw"] or 0)) < 1e-9)
             ctrl[f"{nom}_igual_a_N" if ok else f"{nom}_DISTINTO"] += 1
         ctrl["pasadas"] += 1
-        for nom in ("B2", "B3"):
+        for nom in ("B0e", "B2", "B3"):
             # sólo fila y columna: el tercer campo de cada píxel es la zona de la caja, que cambia por construcción
             if sorted((p[0], p[1]) for p in s[nom]["pixeles"]) != sorted((p[0], p[1]) for p in s["B0"]["pixeles"]):
                 cambia[(nom, o["volcan"])] += 1
