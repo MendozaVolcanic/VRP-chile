@@ -1,0 +1,15 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+granulo sintetico 300 x 280, volcan en (linea 170, frame 100), foco de 1 pixeles; objetivo 1067 Lascar 2026-05-26 02:00
+CONTROL (sin mutacion): PASA | {'forma': [136, 136], 'bytes': 387203, 'segundos_guardar': 0.05, 'npix_fisica': 1, 'vrp_fisica': 4.60833197534918} | 20.9 bytes por pixel comprimido (18496 pixeles)
+  port fisica sin envoltorio: npix 1 vrp 4.60833197534918
+  bytes sin comprimir del recorte: 887832 (48.0 por pixel); capas y tipos: {'lat_mxd03': 'float64', 'lon_mxd03': 'float64', 'lat_5km': 'float32', 'lon_5km': 'float32', 'b21': 'float32', 'b22': 'float32', 'b31': 'float32', 'linea': 'int16', 'frame': 'int16', 'sensor_zenith': 'float32', 'sensor_azimuth': 'float32', 'rebanadas': 'int32', 'forma_granulo': 'int32'}
+
+MUTACIONES (cada una tiene que caer por asercion de esta prueba):
+  linea_mas_uno    atrapada por asercion: INDICES: linea
+  frame_al_reves   atrapada por asercion: INDICES: frame
+  b21_como_b22     atrapada por asercion: INDICES: b22 no es el pixel (linea, frame)
+  lat5_como_mxd03  atrapada por asercion: INDICES: lat_5km no es el pixel (linea, frame)
+  altera_recorte   atrapada por asercion: IDENTIDAD: el envoltorio cambia el resultado del port
+  recorte_corrido  atrapada por asercion: INDICES: b31 no es el pixel (linea, frame)
+PRUEBA OK: identidad, indices, transparencia y 6 de 6 mutaciones atrapadas por asercion
+(76.7 s)

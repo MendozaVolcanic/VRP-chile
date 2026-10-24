@@ -1,0 +1,135 @@
+name: "Probe S162 MODIS negativos neg_resto, port de MIROVA y K re-corrido, con recorte nativo (solo lectura)"
+
+# EJEMPLO, NO DESPACHADO. Lo despacha la sesion coordinadora dentro del despacho combinado de la fase 1.
+# Diseno y criterio: experiments/_s162_modis_negativos/PREREGISTRO.md (commiteado antes del disparo).
+# Copia adaptada de experiments/_s159/portes/probe-s159-portes.yml (lote S159, run 39712862945).
+# Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# Instrumento CONGELADO: el arbol del commit 0e18e1053 (el del lote S159: probe, port, oraculo y pipeline), con la
+#   carpeta experiments/_s162_modis_negativos/ traida del commit de disparo. El paso «Instrumento» lo comprueba.
+# A43: "on" entre comillas. S141: pipefail con tee; el probe sale 2 si falta una pasada (el job queda rojo y el
+#   artefacto se sube igual: la cobertura se cuenta pasada a pasada, A108).
+# A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio (el par usuario y clave esta vencido).
+# MODIS solo en Linux (pyhdf). A15: medido en S159 9,1 s por pasada (p95 11,0) y 104 s fijos por job
+#   (04_costo_salida.txt): 50 pasadas por trozo ~9,3 min (p95 10,9); timeout 45 min (mas de 1,3 x, bajo 6 h).
+"on":
+  push:
+    branches: ["s162-negmodis-disparo"]
+
+concurrency:
+  group: probe-s162-negmodis
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: "0e18e1053bb1cdc3fe1a4ef8d0c1aa72bbe60e64"
+  OBJETIVOS: "experiments/_s162_modis_negativos/objetivos_neg_resto_modis.json"
+  SHA_OBJETIVOS: "02ee29f8edc269aefa65874e6a834ff1fb41ec75"
+  SOLO: ""
+
+jobs:
+  prueba:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_SHA }}
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          path: disparo
+          sparse-checkout: experiments/_s162_modis_negativos
+      - name: Instrumento
+        run: |
+          cp -r disparo/experiments/_s162_modis_negativos experiments/
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git hash-object experiments/_s159/portes/probe_portes.py)" = "8ec50e7bbb76c16e765a92e2773270c26c6ed9ac"
+          test "$(git hash-object experiments/_s159/portes/mirova_port.py)" = "96769a89e6ee2233d86d973917c696cdb2405f29"
+          test "$(git hash-object experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py)" = "07da701094f5aca7f14d7d9de39741589721c478"
+          test "$(git hash-object "$OBJETIVOS")" = "$SHA_OBJETIVOS"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Prueba sin red del envoltorio (identidad, indices, 6 mutaciones)
+        env:
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          python -I experiments/_s162_modis_negativos/05_prueba_envoltorio.py 2>&1 | tee prueba_envoltorio_runner.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s162-negmodis-prueba
+          path: prueba_envoltorio_runner.log
+          retention-days: 30
+
+  probe:
+    needs: prueba
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        chunk: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_SHA }}
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          path: disparo
+          sparse-checkout: experiments/_s162_modis_negativos
+      - name: Instrumento
+        run: |
+          cp -r disparo/experiments/_s162_modis_negativos experiments/
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git hash-object experiments/_s159/portes/probe_portes.py)" = "8ec50e7bbb76c16e765a92e2773270c26c6ed9ac"
+          test "$(git hash-object experiments/_s159/portes/mirova_port.py)" = "96769a89e6ee2233d86d973917c696cdb2405f29"
+          test "$(git hash-object experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py)" = "07da701094f5aca7f14d7d9de39741589721c478"
+          test "$(git hash-object "$OBJETIVOS")" = "$SHA_OBJETIVOS"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Probe con recorte nativo
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s162_modis_negativos/envoltorio_nativo.py --objetivos "$OBJETIVOS" --out out \
+            --sensor MODIS --chunk ${{ matrix.chunk }} --nchunks 8 --solo "$SOLO" 2>&1 \
+            | tee out/probe_MODIS_${{ matrix.chunk }}.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s162-negmodis-MODIS-${{ matrix.chunk }}
+          path: |
+            out/*.json
+            out/*.npz
+            out/*.log
+          retention-days: 30
+          if-no-files-found: error
