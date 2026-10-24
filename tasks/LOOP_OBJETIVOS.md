@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 15:51 UTC, hora del servidor (S162): vuelta de la coordinadora
+- Sin runs vivos en GitHub; NRT verde (último 13:49 UTC; vigilar que vuelvan los despachos de las :10). Disco C: 43 GB,
+  D: 9,7 GB (bajó 1,3 GB desde la limpieza: lo usan las hijas; parada en 3 GB).
+- `loop-instrumento` abrió #902 (MOD-A, cita de MOD03), #903 (T4+T6, alerta y protegida por pasada) y #904 (T1+T2+T5,
+  evaluador común con cobertura contra la referencia): se revisan cuando la hija entregue su resumen; los merges son
+  de Nicolás. `loop-viirs750` corre la segunda pasada de V750-C (los `.npz` de N sólo traen la grilla GEO lineal; usa
+  sustitutos del barrido nativo y pedirá un probe de ventana nativa si el veredicto depende de eso). Fase 1 sin
+  despachar: espera la cobertura contra la referencia (#904).
+
 ### 2026-10-24 ~16:40 UTC (S162): las hijas pueden abrir sus propias sesiones
 - Nicolás: «si esas sesiones y loops necesitan iniciar otras también lo tienen permitido, envíales un mensaje para que
   lo sepan». Mensaje enviado a las cuatro (entregado en su bandeja), con las reglas: worktree y rama propios, cola y
