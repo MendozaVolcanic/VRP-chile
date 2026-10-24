@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~21:25 UTC (S162): MOD-B VERIFICADO: CUMPLE SIN DAÑO
+- Verificador Fable alto, código independiente (`s162-mxd03-codigo` `afb3fcdea`, `experiments/_s162_mxd03/resultado/`):
+  5.465/5.465 pasadas, un solo commit, 0 errores, 0 duplicados; P1 0 de 48 protegidas perdidas; P2 bajo 35° EMPATE;
+  vara MxD03 más cerca por cinco caminos; scripts reproducidos byte a byte.
+- Matices: 12 controles reales, no 13 (`vara_cruda` siempre da OK); la vara mide «más cerca del cráter de Láscar», no
+  «del calor de esa noche»; M neutro en la mediana pero 17 de 79 alertas cambian más de 10 % y 6 más de 30 %; las 48
+  protegidas quedan más cerca del cráter con MxD03 (mediana 1,46 km); la re-corrida en sha del control 4 nunca se
+  ejercitó. Seguimientos: control del módulo de R con relleno, `_interp_geo` con −999 (SOSPECHA), 36 records en que X
+  pierde píxeles sin geolocalización, corrimiento de 10 a 16 km en el borde del barrido con `_interp_geo`.
+- Abre el ciclo de adopción por fidelidad literal (tag, flag con TDD, A61 de las 48 protegidas, sí de Nicolás, FICHA,
+  marca en las tres vistas, aviso a OVDAS). Por D-48, dentro del paquete MODIS (MOD-D). `loop-modis` cierra con
+  /cierre y sigue en sesión nueva con el PR del veredicto y la A61.
+
 ### 2026-10-24 ~21:10 UTC (S162): V375-B2 sellado firme; lote despachado
 - Re-verificación del delta v2→v3 (Fable, contexto limpio) CONFORME: el control de vida atrapa por sí solo seis modos de
   port roto (no detecta, detecta todo, magnitud doblada, muerto sólo en el control, caída de 3 de 20, control ausente)
