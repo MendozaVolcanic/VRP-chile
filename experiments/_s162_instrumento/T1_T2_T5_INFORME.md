@@ -17,9 +17,11 @@ son «idénticos». Para ver un hueco común hay que partir de lo que MIROVA vio
 1. **Parte de las pasadas de MIROVA** (una por pasada a ±120 s, la tabla manda: T4) y busca cada una en cada lado, los
    brazos y un control (producción).
 2. **T1, falla de cobertura antes del veredicto (INVALIDO POR INSTRUMENTO)**: (a) una protegida (lectura A) sin record
-   en todos los brazos que el control sí tiene; (b) un volcán, sensor y día con pasadas de MIROVA y cero records en un
-   brazo (también si el control tampoco tiene: ese día no se puede evaluar). Los días excluidos (D-29) no cuentan y se
-   informan. Las alertas no protegidas faltantes se avisan sin invalidar.
+   en algún brazo que el control sí tiene (basta un brazo: uno con menos cobertura sesga igual que un hueco común);
+   (b) un volcán, sensor y día con pasadas de MIROVA y cero records en un brazo (también si el control tampoco tiene:
+   ese día no se puede evaluar); (c) una protegida que algún brazo tiene y el control no (el control no sirve de vara).
+   Los días excluidos (D-29) no cuentan y se informan. Las alertas no protegidas faltantes y las pasadas que el control
+   no tiene se avisan sin invalidar, y las no observadas se agrupan por día para que un hueco común salte a la vista.
 3. **T2, «no observado»**: el procesador no deja record cuando el volcán cae fuera del gránulo o la escena no sirve
    (`pipeline/process_viirs.py`, «if not np.any(roi_mask): return None»). Si ningún lado tiene la pasada, es
    `no_observado` y sale de todos los denominadores; si el control la tiene y el brazo no, es `falta_cobertura` (cuenta
@@ -36,11 +38,14 @@ Brazos K, G y D de V1 (`...a3efc9fd...\scratchpad\d25\V1\`), control = producci�
 de V1 (`C:\vrp-trabajo\s159-evaluador\experiments\_s157_prereg_d25\_congelado_v1\`), 2026-08-29 a 2026-10-18, VIIRS,
 días D-29 excluidos (13, 17 a 20 de octubre). **Sin decirle nada del 12-oct**:
 
-- **INVALIDO POR INSTRUMENTO**: las 2 protegidas de Chillán del 2026-10-12 05:18:02 (375 con 7,31 MW y 750 con 8,44).
+- **INVALIDO POR INSTRUMENTO**: las 2 protegidas de Chillán del 2026-10-12 05:18:02 (375 con 7,31 MW y 750 con 8,44),
+  «falta en D, G, K».
 - 42 pasadas con `falta_cobertura` en cada brazo (el informe del 12-oct contó 44 ausentes, 42 con fila de MIROVA).
 - Aviso: 5 alertas no protegidas sin record en los brazos, exactamente las que listó ese informe (Isluga 375 05:12 y
   05:48, Isluga 750 05:48, Chillán 05:54 en los dos sensores).
-- 6 pasadas `no_observado` en los cuatro lados.
+- 6 pasadas `no_observado` en los cuatro lados; el día con más es el 2026-10-12 (2).
+- Con K como control (como el evaluador sellado; `v1_control_K_salida.txt`): también INVALIDO, porque K no tiene las
+  2 protegidas que producción sí; aviso de 40 pasadas que producción tiene y K no, y 44 no observadas el 2026-10-12.
 - P1b de D contra producción: abajo 2 (Chillán 375 2026-10-11 05:36 y 750 2026-10-14 06:18), arriba 3 protegidas
   (se acercan a MIROVA).
 - RUTINA, D publica y K no en noches con alerta de VIIRS 750: **5**, igual que VE162-03 para V1 por otro camino.
@@ -48,11 +53,27 @@ días D-29 excluidos (13, 17 a 20 de octubre). **Sin decirle nada del 12-oct**:
 Prueba de humo MODIS (`modis_humo_salida.txt`, producción contra sí misma): COBERTURA OK; 39 de 1.092 pasadas MODIS
 de MIROVA no las tiene producción (no observadas).
 
+## Verificador con contexto limpio (Sonnet, 2026-10-24)
+
+Las 4 afirmaciones **CONFIRMADAS**, con controles positivos propios sobre copias de producción (día entero borrado,
+un sensor borrado, protegidas borradas, volcán sin archivo: todos INVALIDO) y nulos (producción contra su copia, K
+contra G: OK). El filtro nocturno es el mismo para pasadas y records (ninguna pasada cambia de clase a ±120 s) y el
+pareo minuto contra segundo tiene desfase máximo bajo 10 s y un solo candidato. Hallazgos aplicados en este PR:
+- (gravedad 3) una protegida que faltaba en un solo brazo no invalidaba: ahora basta un brazo (una prueba fijaba el
+  defecto como correcto y se reemplazó);
+- (gravedad 3) un control incompleto dejaba ciego al evaluador: ahora una protegida que un brazo tiene y el control no
+  invalida, y las demás se avisan;
+- (gravedad 2) las no observadas se agrupan por día;
+- (gravedad 2) la carga real (`cargar_lado`, `pasadas_nocturnas`) no tenía pruebas: ahora tiene dos, con un doble del
+  predicado del tablero en lugar de node (se prueba la carga y los filtros, no el predicado).
+Sin aplicar, declarado: (gravedad 1) P1b compara contra el control elegido; el sellado compara K contra D. Para V1 dan
+los mismos dos cruces.
+
 ## Pruebas y mutaciones
 
-- 23 pruebas sintéticas, con la noche del 12-oct reconstruida como caso principal.
+- 27 pruebas, con la noche del 12-oct reconstruida como caso principal.
 - Roja por aserción: la mutación E1 (la cobertura compara brazos entre sí, el defecto del 12-oct) falla por aserción.
-- Mutaciones (`mutaciones_t1_t2_t5.json` → `mutaciones_t1_t2_t5_salida.txt`): **20 de 20 atrapadas por aserción** con
+- Mutaciones (`mutaciones_t1_t2_t5.json` → `mutaciones_t1_t2_t5_salida.txt`): **28 de 28 atrapadas por aserción** con
   control de caída. Cuatro vivas en la primera corrida (borde inferior de la ventana, P1b con el control sin record,
   record no publicado con VRP, FALSO_POSITIVO en RUTINA) pidieron cuatro pruebas nuevas.
 

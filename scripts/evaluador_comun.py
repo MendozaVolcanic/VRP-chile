@@ -9,9 +9,10 @@ comparando brazos entre sí; se ve partiendo de las pasadas de MIROVA. Eso hace 
 
 - T1, cobertura contra la referencia: cada pasada de MIROVA (`clase_mirova.resumir_pasadas`, una por pasada a
   ±120 s) se busca en cada lado (brazos y control, que suele ser producción). Es INVÁLIDO POR INSTRUMENTO, antes de
-  leer ningún veredicto: (a) una protegida (lectura A) sin record en TODOS los brazos que el control sí tiene; (b) un
-  volcán, sensor y día con pasadas de MIROVA y cero records en un brazo. Los días declarados como excluidos (D-29) no
-  cuentan y se informan.
+  leer ningún veredicto: (a) una protegida (lectura A) sin record en algún brazo y que el control sí tiene (basta un
+  brazo: uno con menos cobertura sesga igual que un hueco común, verificador de #904); (b) un volcán, sensor y día con
+  pasadas de MIROVA y cero records en un brazo; (c) una protegida que algún brazo tiene y el control no (el control no
+  sirve de vara de cobertura). Los días declarados como excluidos (D-29) no cuentan y se informan.
 - T2, «no observado» como estado propio: si ningún lado (ni el control) tiene record de la pasada, no se sabe si el
   volcán cayó fuera del gránulo, si la escena fue inválida (el procesador devuelve None sin dejar record,
   `pipeline/process_viirs.py`, «if not np.any(roi_mask): return None») o si hubo un hueco común con el control. Esa
@@ -116,15 +117,27 @@ def cobertura(T, recs_por_lado, control, dias_excluidos=()):
         for r in recs:
             con_rec[lado][(r["vol"], r["b"], r["dt"].strftime("%Y-%m-%d"))] += 1
     protegidas_sin_record, alertas_sin_record, excluidas = [], [], []
+    control_sin_protegida, control_sin_record = [], 0
     dias_mirova = collections.Counter()
+    no_obs_dia = collections.Counter()
     for f in T:
         p = f["pasada"]
         dias_mirova[(p.volcano, p.sensor_bucket, f["dia"])] += 1
-        en_ninguno = all(f["rec"][b] is None for b in brazos)
-        if not (en_ninguno and f["rec"][control] is not None and p.estado == "alerta"):
+        if f["cob"][control] == NO_OBSERVADO and f["dia"] not in excl:
+            no_obs_dia[f["dia"]] += 1
+        faltan = [b for b in brazos if f["rec"][b] is None]
+        tienen = [b for b in brazos if f["rec"][b] is not None]
+        if f["rec"][control] is None and tienen and f["dia"] not in excl:
+            # Verificador de #904, hallazgo 2: el control no cubre lo que un brazo sí; no sirve de vara de cobertura.
+            if f["protegida"]:
+                control_sin_protegida.append("%s (MIROVA %s MW) la tiene %s" % (f["clave"], p.vrp_mw, ", ".join(tienen)))
+            else:
+                control_sin_record += 1
+        # Verificador de #904, hallazgo 1: basta que falte en UN brazo (un brazo con menos cobertura sesga igual).
+        if not (faltan and f["rec"][control] is not None and p.estado == "alerta"):
             continue
         destino = excluidas if f["dia"] in excl else (protegidas_sin_record if f["protegida"] else alertas_sin_record)
-        destino.append("%s (MIROVA %s MW)" % (f["clave"], p.vrp_mw))
+        destino.append("%s (MIROVA %s MW) falta en %s" % (f["clave"], p.vrp_mw, ", ".join(faltan)))
     dias_vacios = []
     for (vol, b, dia), n in sorted(dias_mirova.items()):
         for lado in brazos:
@@ -137,10 +150,14 @@ def cobertura(T, recs_por_lado, control, dias_excluidos=()):
         c = collections.Counter(f["cob"][lado] for f in T if f["dia"] not in excl)
         resumen[lado] = {"pasadas": sum(c.values()), OBSERVADO: c[OBSERVADO], FALTA: c[FALTA],
                          NO_OBSERVADO: c[NO_OBSERVADO]}
-    veredicto = INVALIDO if (protegidas_sin_record or dias_vacios) else COBERTURA_OK
+    veredicto = INVALIDO if (protegidas_sin_record or dias_vacios or control_sin_protegida) else COBERTURA_OK
     return {"veredicto": veredicto, "protegidas_sin_record_en_brazos": protegidas_sin_record,
             "dias_con_pasadas_de_mirova_y_sin_records": dias_vacios,
+            "control_sin_protegida_que_un_brazo_tiene": control_sin_protegida,
+            "aviso_control_sin_record_que_un_brazo_tiene": control_sin_record,
             "aviso_alertas_no_protegidas_sin_record_en_brazos": alertas_sin_record,
+            # Verificador de #904, hallazgo 3: las no observadas por día dejan ver un hueco común con el control.
+            "no_observado_por_dia": dict(sorted(no_obs_dia.items(), key=lambda x: (-x[1], x[0]))),
             "en_dias_excluidos": excluidas, "por_lado": resumen}
 
 
@@ -291,14 +308,19 @@ def main(argv=None):
         res["cobertura"]["veredicto"] = INVALIDO
     c = res["cobertura"]
     print("COBERTURA CONTRA MIROVA:", c["veredicto"])
-    print("  protegidas sin record en todos los brazos que el control tiene:", len(c["protegidas_sin_record_en_brazos"]))
+    print("  protegidas sin record en algún brazo que el control tiene:", len(c["protegidas_sin_record_en_brazos"]))
     for x in c["protegidas_sin_record_en_brazos"][:20]:
         print("    ", x)
     print("  volcán-sensor-día con pasadas de MIROVA y sin records en un brazo:",
           len(c["dias_con_pasadas_de_mirova_y_sin_records"]))
     for x in c["dias_con_pasadas_de_mirova_y_sin_records"][:20]:
         print("    ", x)
-    print("  aviso: alertas no protegidas sin record en los brazos que el control tiene:",
+    print("  protegidas que algún brazo tiene y el control no:", len(c["control_sin_protegida_que_un_brazo_tiene"]))
+    for x in c["control_sin_protegida_que_un_brazo_tiene"][:20]:
+        print("    ", x)
+    print("  aviso: pasadas que algún brazo tiene y el control no:", c["aviso_control_sin_record_que_un_brazo_tiene"])
+    print("  no observadas por día (las 5 más):", list(c["no_observado_por_dia"].items())[:5])
+    print("  aviso: alertas no protegidas sin record en algún brazo que el control tiene:",
           len(c["aviso_alertas_no_protegidas_sin_record_en_brazos"]))
     print("  en días excluidos (no cuentan):", len(c["en_dias_excluidos"]))
     print("  volcanes sin archivo:", {k: v for k, v in faltan.items() if v})

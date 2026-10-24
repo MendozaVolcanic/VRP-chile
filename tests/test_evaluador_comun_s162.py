@@ -52,18 +52,40 @@ def test_protegida_sin_record_en_todos_los_brazos_que_produccion_tiene_es_invali
     lados = {"prod": PROD_12, "K": list(BRAZO_12), "D": list(BRAZO_12)}
     T, c = evaluar(REF_12, lados)
     assert c["veredicto"] == ec.INVALIDO
-    assert c["protegidas_sin_record_en_brazos"] == ["%s|VIIRS750|2026-10-12 05:18:02 (MIROVA 8.44 MW)" % CH]
+    assert c["protegidas_sin_record_en_brazos"] == ["%s|VIIRS750|2026-10-12 05:18:02 (MIROVA 8.44 MW) falta en D, K" % CH]
     # La alerta no protegida de las 05:54 se avisa, no invalida.
     assert c["aviso_alertas_no_protegidas_sin_record_en_brazos"] == [
-        "%s|VIIRS750|2026-10-12 05:54:20 (MIROVA 0.4 MW)" % CH]
+        "%s|VIIRS750|2026-10-12 05:54:20 (MIROVA 0.4 MW) falta en D, K" % CH]
     # Lo que el evaluador viejo hacía: comparar brazos entre sí. Son idénticos y eso no dice nada.
     assert [r["dt"] for r in lados["K"]] == [r["dt"] for r in lados["D"]]
 
 
-def test_si_un_solo_brazo_la_tiene_no_es_falla_comun_de_cobertura():
+def test_protegida_que_falta_en_un_solo_brazo_tambien_invalida():
+    # Verificador de #904, hallazgo 1 (gravedad 3): un brazo con menos cobertura sesga el veredicto igual que un hueco
+    # común. Antes esto daba COBERTURA OK (y una prueba lo fijaba como correcto).
     lados = {"prod": PROD_12, "K": BRAZO_12 + [rec("2026-10-12 05:18", disp=3.0)], "D": list(BRAZO_12)}
     _, c = evaluar(REF_12, lados)
-    assert c["protegidas_sin_record_en_brazos"] == []
+    assert c["veredicto"] == ec.INVALIDO
+    assert c["protegidas_sin_record_en_brazos"] == ["%s|VIIRS750|2026-10-12 05:18:02 (MIROVA 8.44 MW) falta en D" % CH]
+
+
+def test_control_que_no_tiene_una_protegida_que_un_brazo_si_tiene_invalida():
+    # Verificador de #904, hallazgo 2 (gravedad 3): con un control incompleto (K sin el 12-oct) la pasada quedaba
+    # «no observada» y el evaluador daba OK. Un control así no sirve de vara de cobertura.
+    lados = {"K": list(BRAZO_12), "prod": PROD_12}
+    _, c = evaluar(REF_12, lados, control="K")
+    assert c["veredicto"] == ec.INVALIDO
+    assert c["control_sin_protegida_que_un_brazo_tiene"] == [
+        "%s|VIIRS750|2026-10-12 05:18:02 (MIROVA 8.44 MW) la tiene prod" % CH]
+    assert c["aviso_control_sin_record_que_un_brazo_tiene"] == 1   # la alerta de 0,40 de las 05:54
+
+
+def test_no_observado_se_agrupa_por_dia_para_ver_huecos_comunes():
+    # Verificador de #904, hallazgo 3: dos de las seis no observadas de V1 caen el 12-oct, el día del hueco de NASA.
+    ref = REF_12 + [fila("2026-10-11 05:00:00", "RUTINA", 0.0)]
+    lados = {"prod": [r for r in PROD_12 if r["dt"].hour != 4], "K": [r for r in PROD_12 if r["dt"].hour != 4]}
+    _, c = evaluar(ref, lados)
+    assert c["no_observado_por_dia"] == {"2026-10-12": 1, "2026-10-11": 1}
 
 
 def test_dia_excluido_no_cuenta_pero_se_informa():
@@ -242,3 +264,39 @@ def test_rutina_no_observada_no_cuenta():
     lados = {"prod": [], "D": [rec("2026-10-13 05:00", disp=0.2)]}
     r = ec.publicaciones_sobre_rutina(ec.tabla_por_pasada(pasadas(ref), lados, "prod"), ["prod", "D"])
     assert r["D"]["rutinas_observadas"] == 0 and r["D"]["publica_en_noche_sin_alerta"] == []
+
+
+# ------------------------------------------------------------------ carga real (verificador de #904, hallazgo 4)
+def test_cargar_lado_filtra_ventana_sensor_y_dia_e_informa_volcanes_sin_archivo(tmp_path, monkeypatch):
+    import json
+    import banco_paridad as bp
+    vistos = []
+
+    def node_falso(casos):
+        vistos.extend(casos)
+        return [[None, None, None, 0.7, True] for _ in casos]
+
+    monkeypatch.setattr(bp, "correr_node", node_falso)
+    base = {"distance_class": "summit", "primary_cluster": {"vrp_mw": 0.7}, "vrp_mw": 0.7}
+    recs = [dict(base, datetime_utc="2026-10-12 05:18", sensor="VIIRS_NOAA21_750"),   # entra
+            dict(base, datetime_utc="2026-10-12 17:30", sensor="VIIRS_NOAA21_750"),   # de día: fuera
+            dict(base, datetime_utc="2026-10-30 05:18", sensor="VIIRS_NOAA21_750"),   # fuera de la ventana
+            dict(base, datetime_utc="2026-10-12 03:00", sensor="MODIS_AQUA")]          # sensor no pedido
+    (tmp_path / "Lascar.json").write_text(json.dumps({"records": recs}), encoding="utf-8")
+    out, faltan = ec.cargar_lado(tmp_path, ("2026-10-01", "2026-10-20"), ("VIIRS750",), bp._coords_por_volcan(),
+                                 {v: 5.0 for v in bp.VOLS})
+    assert [(r["vol"], r["b"], r["dt"].strftime("%H:%M"), r["pub"], r["disp"]) for r in out] == [
+        ("Lascar", "VIIRS750", "05:18", True, 0.7)]
+    assert len(vistos) == 1 and vistos[0][1] == 5.0
+    assert "Lascar" not in faltan and len(faltan) == len(bp.VOLS) - 1
+
+
+def test_pasadas_nocturnas_filtra_igual_que_los_records():
+    import banco_paridad as bp
+    filas = [fila("2026-10-12 05:18:02", "ALERTA_TERMICA", 2.0, vol="Lascar"),
+             fila("2026-10-12 17:30:00", "ALERTA_TERMICA", 2.0, vol="Lascar"),
+             fila("2026-10-12 05:18:02", "ALERTA_TERMICA", 2.0, vol="Lascar", sensor="MODIS"),
+             fila("2026-10-30 05:18:02", "ALERTA_TERMICA", 2.0, vol="Lascar")]
+    ps = ec.pasadas_nocturnas(filas, ("2026-10-01", "2026-10-20"), ("VIIRS750",), bp._coords_por_volcan(), "union",
+                              "original")
+    assert [(p.volcano, p.sensor_bucket, p.instante.strftime("%H:%M")) for p in ps] == [("Lascar", "VIIRS750", "05:18")]

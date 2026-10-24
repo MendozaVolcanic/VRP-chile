@@ -6,8 +6,8 @@
   {
    "id": "E1",
    "archivo": "scripts/evaluador_comun.py",
-   "viejo": "if not (en_ninguno and f[\"rec\"][control] is not None and p.estado == \"alerta\"):",
-   "nuevo": "if not (en_ninguno and False and p.estado == \"alerta\"):",
+   "viejo": "if not (faltan and f[\"rec\"][control] is not None and p.estado == \"alerta\"):",
+   "nuevo": "if not (faltan and False and p.estado == \"alerta\"):",
    "que": "cobertura compara brazos entre si (el defecto del 12-oct)"
   },
   {
@@ -55,8 +55,8 @@
   {
    "id": "E8",
    "archivo": "scripts/evaluador_comun.py",
-   "viejo": "veredicto = INVALIDO if (protegidas_sin_record or dias_vacios) else COBERTURA_OK",
-   "nuevo": "veredicto = INVALIDO if (protegidas_sin_record) else COBERTURA_OK",
+   "viejo": "(protegidas_sin_record or dias_vacios or control_sin_protegida)",
+   "nuevo": "(protegidas_sin_record or control_sin_protegida)",
    "que": "un dia vacio no invalida"
   },
   {
@@ -142,6 +142,62 @@
    "viejo": "base = [f for f in T if f[\"dia\"] not in excl and f[\"pasada\"].estado == \"rutina\"",
    "nuevo": "base = [f for f in T if f[\"dia\"] not in excl and f[\"pasada\"].estado in (\"rutina\", \"fp\")",
    "que": "FALSO_POSITIVO entra como RUTINA"
+  },
+  {
+   "id": "E21",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if not (faltan and f[\"rec\"][control]",
+   "nuevo": "if not (len(faltan) == len(brazos) and f[\"rec\"][control]",
+   "que": "solo invalida si falta en todos los brazos (hallazgo 1)"
+  },
+  {
+   "id": "E22",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if f[\"rec\"][control] is None and tienen and f[\"dia\"] not in excl:",
+   "nuevo": "if False:",
+   "que": "no revisa si el control cubre lo que un brazo tiene (hallazgo 2)"
+  },
+  {
+   "id": "E23",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "(protegidas_sin_record or dias_vacios or control_sin_protegida)",
+   "nuevo": "(protegidas_sin_record or dias_vacios)",
+   "que": "control incompleto no invalida"
+  },
+  {
+   "id": "E24",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if bp.es_pasada_diurna_descartada(b, lat, lon,",
+   "nuevo": "if False and bp.es_pasada_diurna_descartada(b, lat, lon,",
+   "que": "carga sin filtro diurno de records"
+  },
+  {
+   "id": "E25",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if bp.es_pasada_diurna_descartada(p.sensor_bucket,",
+   "nuevo": "if False and bp.es_pasada_diurna_descartada(p.sensor_bucket,",
+   "que": "pasadas de MIROVA sin filtro diurno"
+  },
+  {
+   "id": "E26",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "faltan.append(vol)",
+   "nuevo": "pass",
+   "que": "volcan sin archivo no se informa"
+  },
+  {
+   "id": "E27",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "no_obs_dia[f[\"dia\"]] += 1",
+   "nuevo": "pass",
+   "que": "no agrupa no observadas por dia"
+  },
+  {
+   "id": "E28",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if b not in sensores or not (ventana[0] <= t[:10] <= ventana[1]):",
+   "nuevo": "if b not in sensores:",
+   "que": "carga sin filtro de ventana"
   }
  ]
 }
