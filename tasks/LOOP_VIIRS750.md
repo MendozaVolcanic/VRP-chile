@@ -16,10 +16,11 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 1. [hecho y verificado] **V750-C**: `experiments/_s162_v750c/INFORME.md`, con la marca del verificador.
 2. [hecho] Verificador limpio de V750-C (Fable 5.1): `experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`.
    Confirma los números; corrige la atribución: dos piezas (interpolación dentro de la caja sensible; ROI fuera).
-3. [segunda vuelta] Pre-registro V750-B v2 (`607062ba7`): decisiones resueltas por la coordinadora bajo D-48 y
-   anotadas; segunda vuelta del verificador con otro modelo (Sonnet) corriendo, escribe en
-   `experiments/_s162_v750b/verificador_v2/`. Si da conforme queda sellado; el **2026-11-03** generar los objetivos
-   (`objetivos_v750b.py --hasta 2026-11-02`) y pedir el despacho a la coordinadora con el sha256.
+3. [v3, esperando la decisión de sello de la coordinadora] Pre-registro V750-B v3 (`81a5cfcd2`). Segunda vuelta
+   (Sonnet): «conforme con cambios», VB2-01 a VB2-15, todos hechos o declarados. Batería sellada
+   `bateria_regla_v750b.py` 11/11. Recomendado sellar sin tercera vuelta (VB2-01/02 probados por los escenarios del
+   verificador); VB2-02 (SIN SUSTRATO sólo con neto ≤ 0) es decisión de la coordinadora bajo D-48. El **2026-11-03**:
+   `objetivos_v750b.py --hasta 2026-11-02` (escribe también `sin_granulo_v750b.json`), commitear, pedir despacho con sha256.
 4. [borrador] Pre-registro V750-A: `experiments/_s162_v750a/PREREGISTRO_V750A.md` (equivalencia, censo, sombra; brazos
    K, P, P-def, P-sinfiltro, Kgeo, K×1,2, O). Prueba de equivalencia hecha y probada (roja sin módulo, 6/6 mutaciones).
    Falta: analizador `evaluar_v750a.py` (conviene después del resultado de V750-B, que fija la ROI) y su verificador.
@@ -75,3 +76,7 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 - 2026-10-24 ~17:50 UTC, vuelta 5. Coordinadora resolvió DN-1 bajo D-48 y pidió segunda vuelta (VB-01 cambió la regla);
   anotado y lanzada con Sonnet. Prueba de equivalencia de V750-A: roja sin módulo (salida 2), identidad 1.020 casos y
   10 recortes en verde, 6 de 6 mutaciones atrapadas por aserción, control caído.
+- 2026-10-24 ~18:40 UTC, vuelta 6. Segunda vuelta del verificador (Sonnet): conforme con cambios. Hechos: desempate
+  sin brazos peores con la tabla (VB2-01), SIN SUSTRATO con neto ≤ 0 (VB2-02), banderas marcadas y camino para leer
+  con faltantes (VB2-03/04), controles con filo (VB2-06), batería que comprueba sola 11 escenarios (VB2-05; encontró
+  un defecto propio de la v3, corregido), y VB2-07 a VB2-15. Ensayo real: compuerta abierta, censo 503/503 en posición.
