@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~17:55 UTC (S162): V750-B v3 y t1 sin huecos; cobertura del marco de V375 OK
+- V750-B: segunda vuelta (Sonnet) «conforme con cambios»; v3 `81a5cfcd2` con VB2-01 (desempate exige «no peor»
+  también con la tabla sola) y VB2-02 (lectura conservadora, **confirmada con D-48**: SIN SUSTRATO es «no peor» sólo
+  con neto en 0 o a favor); batería sellada de 11 escenarios, 11/11. Pedida una **tercera vuelta corta sobre el delta**
+  v2→v3 (Fable): cada vuelta anterior encontró un G3 en la regla de decisión. Sello efectivo si da conforme sin tocar la
+  regla.
+- t1 de MOD-B sin huecos: 1.814/1.814 records ok, K2 = K, 0 re-corridas, commit `ffbb36248` en las 8 partes; 24 a 48
+  min por job: las 24 partes sumarán ~15 h de runner, no 47. Artefactos en `D:\vrp-trabajo\temporales\s162_mxd03\t1\`.
+- V375: cobertura de #904 aplicada al marco desde la rama del instrumento (`ff452671c`): COBERTURA OK, 0 alertas y 0
+  protegidas sin record de producción (adenda 2, `a01d50f57`); el veredicto deja de ser provisional por esa causa.
+
 ### 2026-10-24 17:28 UTC, hora de los runs (S162): t1 de MOD-B terminada; lote de V375 despachado
 - t1 de MOD-B (40112510038): 9 de 9 jobs success (~50 min, menos que las 2 h estimadas); `loop-modis` revisa cobertura.
 - Humo de V375 (40115765406) success en 2 min 15 s; OK de `loop-viirs375`: Láscar 2026-04-05 05:30 protegida, port
