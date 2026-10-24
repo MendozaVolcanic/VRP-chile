@@ -392,11 +392,19 @@ def main():
     externos["procedencia"] = {"estado": "OK" if len(commits) == 1 else "INDECIDIBLE", "commits": commits,
                                "partes": sorted(c.get("parte") for c in cab)}
     pobf = {(f["vol"], f["dt"]): f for g in pob["granulos"] for f in g["records"]}
-    filas = []
+    filas, distintas = [], []
     for r in crudas:
-        base = dict(pobf.get((r.get("vol"), r.get("dt")), {}))
-        base.update(r)
+        # la etiqueta, el cenit y las marcas de la poblacion congelada mandan sobre lo que repite el arnes
+        pf = pobf.get((r.get("vol"), r.get("dt")), {})
+        if pf and r.get("estado") == "ok" and any(r.get(k) != pf.get(k) for k in ("lab", "z", "r_nulos")):
+            distintas.append((r.get("vol"), r.get("dt")))
+        base = dict(r)
+        base.update(pf)
         filas.append(base)
+    externos["union"] = {"estado": "INDECIDIBLE" if distintas else "OK", "distintas": distintas[:20],
+                         "sin_poblacion": sum(1 for r in crudas if (r.get("vol"), r.get("dt")) not in pobf)}
+    if externos["union"]["sin_poblacion"]:
+        externos["union"]["estado"] = "INDECIDIBLE"
     externos["geometria"] = control_geometria(filas)
     externos["cableado"] = control_cableado(filas)
     vara = None
