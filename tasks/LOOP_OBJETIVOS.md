@@ -569,6 +569,25 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~16:20 UTC (S162): V750-C cerrado con verificador limpio (loop-viirs750)
+- Rama `claude/s162-viirs750-f63ef4`, commit `5b56c77da`, verificador Fable 5.1. **Dos piezas callan las cumbres tibias
+  que K deja en 0 MW, no una**: dentro de la caja sensible 7x7 (38 de 60) las calla la **interpolación lineal** (vecino
+  más cercano en la misma grilla recupera 23, en la celda exacta de K; aísla interpolador y fase, no la ausencia de
+  remuestreo); fuera de la caja (22: Tupungatito 17, PCC 4, Láscar 1) las calla la **ROI** (la celda de K está a 4,4-5,4
+  km del centro de la grilla de MIROVA, con umbrales conservadores). Las 7 protegidas que pierde la caja por defecto son
+  todas de PCC (lacolito a 7,7 km). **La magnitud la da el fondo del código**: mismo código y píxeles con fondo de anillo
+  0,458 contra 0,999 (K 0,510). Recorte, regresión del pase 2, K1/mínimos y compuerta no deciden. La «caja por defecto»
+  es un supuesto de una matriz de ejemplo de 2023; el `.m` (l. 105-125) dice que la ROI se ajusta por volcán.
+- Consecuencia: D17 (remuestreo con interpolación lineal) es condición del paquete también para la detección, y la ROI
+  de PCC y Tupungatito (V750-B) es la otra pieza obligatoria.
+- Borradores en la rama: `experiments/_s162_v750b/PREREGISTRO_V750B.md` (brazos B0, B0e, B1, B2, B3, B4, K más el
+  brazo nativo N0/N1 de S_C; 32 trozos, ~2 h; guarda grillas GEO ~170 MB y ventanas nativas ~30 MB), `_s162_v750a/
+  PREREGISTRO_V750A.md`, `_s162_v750f/PASO_A_PASO_O2.md` (para Nicolás). V750-B **no se despacha todavía**: falta su
+  prueba local, su verificador, la cobertura del instrumento (#904) y el sello de Nicolás.
+- Sesiones nuevas abiertas por las hijas (vistas en `git worktree list`): `D:\vrp-trabajo\s162-mxd03` (rama
+  `s162-mxd03-codigo`, de loop-modis) y `D:\vrp-trabajo\worktrees\s162-instrumento-tareas` (`instrumento/evaluador-t3`,
+  de loop-instrumento). Sus ids `local_…` todavía no me los avisaron.
+
 ### 2026-10-24 15:51 UTC, hora del servidor (S162): vuelta de la coordinadora
 - Sin runs vivos en GitHub; NRT verde (último 13:49 UTC; vigilar que vuelvan los despachos de las :10). Disco C: 43 GB,
   D: 9,7 GB (bajó 1,3 GB desde la limpieza: lo usan las hijas; parada en 3 GB).
