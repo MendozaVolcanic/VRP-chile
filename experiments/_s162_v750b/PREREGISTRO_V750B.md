@@ -48,7 +48,6 @@ Octave en 791 de 791 escenas, S159 O1) sobre la grilla GEO con interpolación li
 | **B3** O-círculo | círculo de radio `inner_radius_km` (lista del tablero, `banco_paridad.inner_desde_html`) en el centro | el resto del 21 × 21 |
 | **B4** O-sens-PT | B1 en Cordón Caulle y Tupungatito; B0 en los otros nueve | |
 | **K** | producción (`calculate_vrp` de `pipeline/process_viirs_mod.py` sobre el mismo gránulo) | |
-| B0e (informativo) | la matriz de ejemplo del OSF tal cual: 7 × 7 central | 21 × 19 (filas 22 a 42, columnas 24 a 42) |
 
 Además, dos brazos de diagnóstico que **no deciden V750-B** (son la confirmación de V750-C, mismo gránulo y misma
 corrida):
@@ -61,6 +60,10 @@ corrida):
 N0 y N1 corren sólo en el subconjunto **S_C**: las 66 cumbres negativas y las 48 cumbres con alerta de V750-C, las
 alertas que deciden de la ventana y 300 negativos limpios sin ningún píxel de K, sorteados con semilla 162 entre los de
 la ventana (lista fija en `objetivos_sc.json`, que se commitea antes del despacho).
+
+Sin brazo con la matriz de ejemplo tal cual (anillo de 21 × 19 en vez de 21 × 21): en el `.m` la zona 0 y la zona 1
+usan los mismos umbrales conservadores (`MIROVA_VIIRS750_hotspot_detection.m` l. 389-395), así que el tamaño del anillo
+no puede cambiar ninguna máscara (medido: 0 de 510 grillas de N). Lo único que decide es dónde está la zona sensible.
 
 **Insumos que el run guarda** (para no volver a bajar gránulos en la ablación local siguiente): la grilla GEO lineal
 (`m13`, `m15`, float32) de todas las pasadas, y la ventana nativa (`lat`, `lon`, `M13`, `M15`, fila y columna del
@@ -107,7 +110,7 @@ Por brazo, contra MIROVA, en T y en O por separado y en T ∪ O (con la tabla so
 
 ## 6. Regla de decisión (escrita antes de ver los datos)
 
-1. **Elegible** (B0e no entra: es informativo, para ver si la simetrización de B0 decide algo): P1 = 0 en T y en O, con la tabla sola **y** con tabla más OCR. Un brazo que pierde una protegida no
+1. **Elegible**: P1 = 0 en T y en O, con la tabla sola **y** con tabla más OCR. Un brazo que pierde una protegida no
    entra al paquete, aunque gane en P2.
 2. Entre los elegibles, cada uno contra B1 por P2 (regla D-45). Se elige el que GANA contra B1; si dos ganan, el de menor
    E en T ∪ O.

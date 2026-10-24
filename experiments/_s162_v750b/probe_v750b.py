@@ -56,13 +56,10 @@ def cajas(celda_crater, inner_km):
     b3 = b0.copy()
     b3[b3 == 2] = 1
     b3[dk <= inner_km] = 2
-    # B0e: la matriz de ejemplo del paquete OSF tal cual (VJ1 2023-05-19; experiments/_s158_audit_r2/rb/00_box_mat.txt):
-    # BOX == 1 en filas 22..42 y columnas 24..42 (21 x 19, no simétrica), BOX == 2 en 30..36. Informativo (verificador
-    # de V750-C, VV-01: B0 la simetriza a 21 x 21).
-    b0e = np.zeros((N, N))
-    b0e[22:43, 24:43] = 1
-    b0e[30:37, 30:37] = 2
-    return {"B0": b0, "B0e": b0e, "B1": b1, "B2": b2, "B3": b3}
+    # Sin brazo «21 x 19» (la matriz de ejemplo tal cual): en el .m la zona 0 y la zona 1 usan los MISMOS umbrales
+    # conservadores (MIROVA_VIIRS750_hotspot_detection.m l. 389-395), así que el tamaño del anillo no cambia ninguna
+    # máscara; medido: 0 de 510 grillas de N (prueba_local_510, primera versión). Sólo decide dónde está la zona 2.
+    return {"B0": b0, "B1": b1, "B2": b2, "B3": b3}
 
 
 def oraculo_caja(m13, m15, dayflag, sg, box, semillas=None):
@@ -181,7 +178,6 @@ def prueba_sin_red_v750b():
     assert np.array_equal(cj["B0"], PG.caja_mirova())
     assert not (cj["B1"] == 1).any() and (cj["B1"] == 2).sum() == 21 * 21
     assert np.array_equal(cj["B2"], cj["B0"]), "cráter en el centro: B2 tiene que ser B0"
-    assert (cj["B0e"] == 1).sum() == 350 and (cj["B0e"] == 2).sum() == 49, "B0e: los conteos de 00_box_mat.txt"
     cj2 = cajas((C - 6, C - 6), 7.0)   # Tupungatito: 4,9 km al NW
     assert (cj2["B2"] == 2).sum() == 49 and cj2["B2"][C - 6, C - 6] == 2 and cj2["B2"][C, C] == 1
     assert cj2["B3"][C, C] == 2 and (cj2["B3"] == 2).sum() > 49

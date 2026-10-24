@@ -41,8 +41,8 @@ import banco_paridad as B  # noqa: E402
 from clase_mirova import alerta_protegida  # noqa: E402
 import mirova_v750_r2 as ORA  # noqa: E402
 
-CAJAS = ("B0", "B0e", "B1", "B2", "B3")
-BRAZOS = ("K", "B0", "B0e", "B1", "B2", "B3", "B4")   # B0e informativo: no entra a §6
+CAJAS = ("B0", "B1", "B2", "B3")
+BRAZOS = ("K", "B0", "B1", "B2", "B3", "B4")
 PREF = ("B4", "B2", "B1", "B3")          # §6.3: cercanía al .m
 VOL_SENS = ("PuyehueCordonCaulle", "Tupungatito")
 FRONTERA_OCR = "2026-06-13"
@@ -304,7 +304,7 @@ def main():
                 linea = (f"   {b:3s} prot {m['n_prot']:4d} P1 {m['P1']:3d} | P1b abajo {m['P1b_abajo']:3d} arriba "
                          f"{m['P1b_arriba']:3d} | E {m['E']:4d} (bajas sin publicar {m['E_baja']} de {m['n_baja']}, "
                          f"neg publicados {m['E_neg']} de {m['n_neg']})")
-                if b not in ("B1", "K", "B0e"):
+                if b not in ("B1", "K"):
                     reg, neto, nb, prr = p2(b, v, canal)
                     linea += f" | P2 contra B1: {reg} (neto {neto}, bloques {nb}, p gana {prr['gana']}, pierde {prr['pierde']})"
                     veredicto[(b, v, canal)] = (m["P1"], reg, m["E"])
