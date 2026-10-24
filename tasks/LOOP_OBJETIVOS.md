@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~22:20 UTC (S162): lote V375-B2 completo; loop-modis cerrado
+- Lote V375-B2 (40131572769): 1.220/1.220 pasadas con resultado, 1.185 grillas; los 26 rojos son exit 2 de diseño
+  (comprobado por la coordinadora en 21: 1 o 2 pasadas sin procesar, sin Traceback). Control de vida 20/20 ok; muestra
+  1.165 ok y 35 `volcan_fuera_del_granulo` (2,9 %, mismo gránulo que producción, píxel más cercano a 5,8-30,5 km, 16
+  pasadas partidas): «no observado». Artefactos en `C:\vrp-trabajo\temporales\s162_v375\run_40131572769\` (144 MB).
+  Evaluación en curso, verificador limpio antes de informar.
+- `loop-modis` cerró con /cierre: traspaso en el bloque 0 de `tasks/LOOP_MODIS.md` (`claude/s162-modis-774bb0`
+  `7824fd1fc`). Pendiente para su próxima sesión: PR del veredicto de MOD-B, A61 de las 48 protegidas, candado de MOD-D.
+
 ### 2026-10-24 ~21:25 UTC (S162): MOD-B VERIFICADO: CUMPLE SIN DAÑO
 - Verificador Fable alto, código independiente (`s162-mxd03-codigo` `afb3fcdea`, `experiments/_s162_mxd03/resultado/`):
   5.465/5.465 pasadas, un solo commit, 0 errores, 0 duplicados; P1 0 de 48 protegidas perdidas; P2 bajo 35° EMPATE;
