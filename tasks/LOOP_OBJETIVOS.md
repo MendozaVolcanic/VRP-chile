@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 17:59 UTC, hora del servidor (S162): lote V375 con 6 jobs en exit 2 (no son caídas)
+- Run 40116289866: 9 success, 6 failure, 8 en curso, 5 en cola. Los 6 failure (probe 1, 8, 9, 10, 11, 13) tienen cada
+  uno 1 pasada con `estado=volcan_fuera_del_granulo` y salen con exit 2 por diseño; los artefactos se suben igual.
+  Pasado a `loop-viirs375` para que distinga «gránulo distinto al de producción» (cobertura) de «no observado» (fuera
+  del denominador, regla de #904) antes de evaluar. Nada relanzado.
+- V750-B: VB3-01 aplicado (`93d34d5aa`), medición de mutaciones (13 más control de caída, batería de 19 escenarios) en
+  curso.
+
 ### 2026-10-24 ~18:10 UTC (S162): fase 0 del instrumento terminada; su loop detenido
 - `loop-instrumento`: las 7 tareas en #902 a #905, los cuatro con CI verde, verificador limpio aplicado y mutaciones
   atrapadas por aserción; ninguno toca `pipeline/`; ninguno mergeado (merges de Nicolás). Loop de la hija detenido.
