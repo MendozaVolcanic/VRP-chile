@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~15:20 UTC (S162): cúmulos armados por la matriz del barrido (sin verificar todavía)
+- Agente Fable (`experiments/_s162_vuelta2/CUMULOS_POR_MATRIZ.md`): `cluster_hotspots` agrupa por vecindad 3x3 de
+  índices (clustering.py:96); lejos del nadir los barridos se solapan y VIIRS borra filas, así que vecinos en el suelo
+  no lo son en la matriz. En VIIRS 750 (publica `pc.vrp_mw`) se publica a veces un fragmento sin el píxel más
+  caliente: pegando fragmentos cambian 8 de 338 publicaciones de las ventanas K, todas hacia arriba (4 de 82
+  protegidas, 1 cruza 1 MW); en la historia 61 de 2.070. VIIRS 375 inmune en el número (f5_core), torcido en
+  n_pixels/centroide. También cuenta doble huellas repetidas (Chillán V750 2026-10-01 06:00, 4,2 de 11,1 MW). No está
+  en el catálogo con este nombre. Verificador limpio (Opus) despachado.
+
 ### 2026-10-24 ~15:05 UTC (S162): hueco silencioso del 12-oct en V1 del A/B de D25
 - Agente (Opus, `experiments/_s162_vuelta2/RECORD_FALTANTE_CHILLAN_12OCT.md`), comprobado por mí en el log del brazo
   control de Chillán (l. 2590-2664, n=0 en NRT de Suomi NPP y NOAA-21 para el 12-oct) y en los records (el 12-oct los
