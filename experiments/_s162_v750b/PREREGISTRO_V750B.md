@@ -1,11 +1,19 @@
 # Pre-registro V750-B (S162): la región sensible (ROI) del código de MIROVA, por volcán, en VIIRS 750
 
-Estado: **BORRADOR v2 para el sello de Nicolás**, corregido tras el verificador limpio
+Estado: **v2, en segunda vuelta de verificación** (se sella al dar conforme), corregido tras el verificador limpio
 (`verificador/VERIFICADOR_PREREGISTRO_V750B.md`, «listo para sello con cambios»; qué cambió, en §12). No se despacha
 nada hasta (1) el sello, (2) que la sesión del instrumento entregue la cobertura contra la referencia (fase 0, programa
 §8.1, #904) y (3) que la coordinadora (S162, sesión «Retomar») lo meta en el despacho combinado de la fase 1. Autor:
 sesión hija VIIRS 750 (loop `tasks/LOOP_VIIRS750.md`), 2026-10-24. Programa:
 `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` §2 y §3.
+
+**Decisiones resueltas por la coordinadora (S162) bajo D-48** (Nicolás, 2026-10-24: «sobre las decisiones mías haz lo
+que tú recomiendes»), informadas a Nicolás para que pueda revertirlas: (1) en T decide sólo la tabla, en O tabla más
+OCR; (2) sin ganador nunca se elige un brazo que PIERDE o BLOQUEA; (3) la distancia del record se mide desde el cráter,
+como producción; (4) brazo B5 con la lectura del comentario del `.m` (corona sensible, centro conservador). DN-2 pasa a
+ser **paso obligatorio de la lectura**: si gana B2 o B4, antes de proponer la adopción se documenta que es fidelidad al
+`.m` (la ROI por volcán que declaran sus l. 105-125) y no un gate nuestro (A85). El sello queda dado cuando la segunda
+vuelta del verificador (otro modelo) dé conforme.
 
 ## 1. La pregunta, como geólogo
 
@@ -122,9 +130,9 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
    configuración, no la de MIROVA). Razón: a igual desempeño manda la fidelidad al código (decisión de Nicolás del
    2026-10-21). Si B1 tampoco es elegible y nadie más lo es: NINGÚN BRAZO ELEGIBLE, y V750-A no se arma con esta ROI.
 4. P1b no decide.
-5. **Decisión para Nicolás, no del pre-registro**: B2 y B4 son ajustes por volcán. MISSION excluye gates por volcán
-   cuando son nuestros (A85), pero aquí el ajuste es de MIROVA (el comentario del `.m` lo declara). Si el elegido es B2
-   o B4, Nicolás confirma que eso es fidelidad y no un parche nuestro antes de pasarlo a V750-A.
+5. **Paso obligatorio de la lectura (D-48)**: B2 y B4 son ajustes por volcán. MISSION excluye gates por volcán cuando
+   son nuestros (A85), pero aquí el ajuste es de MIROVA (el comentario del `.m` lo declara). Si el elegido es B2 o B4,
+   antes de proponer su adopción se documenta que es fidelidad al `.m` y no un parche nuestro.
 
 ## 7. Controles (todos dentro de la compuerta: si uno cae, no se imprime veredicto)
 
