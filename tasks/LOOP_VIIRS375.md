@@ -191,3 +191,17 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   lote vacío invalida (F4, F5); potencia con tasa pareja declarada como SOSPECHA (F3). Regresión: la lectura publicada
   sale idéntica. Workflow de 48 trozos (~8,3 h de runner, ~90 min de reloj).
 - Segundo verificador limpio (Sonnet) sobre el v2 corriendo.
+
+### 2026-10-24 (vuelta 11): segundo verificador, B2 v3 listo, commits de disparo
+- La coordinadora aprobó 1.200 por D-48, condicionado a que el segundo verificador diera conforme.
+- Verificador v2 (`b2/verificador_v2/INFORME.md`): muestra, cuenta («decide B2 sola», 15 cifras con 1.200 fabricadas),
+  tamaño en la frontera y workflow CONFIRMADOS. **Hallazgo 3 (gravedad 3)**: ningún control probaba que el port
+  estuviera vivo en el run de B2 (un port muerto daba «calla» con el instrumento OK). Otros: el 93 % es condicional
+  (predictiva 0,74 a 0,80), la cobertura por lote sólo avisaba, rótulos de la salida ambiguos.
+- **B2 v3** (`ae65eaaaf`, tag `s162-v375-b2-listo`): control de vida de 20 pasadas re-medidas de S162 en el mismo run
+  (ids 5000 a 5019, fuera de todo denominador; control 2.2b); la cobertura del lote que decide da NO DECIDE; línea
+  «VEREDICTO B». Probado con runs fabricados: vivo, 20 de 20 iguales; muerto, INVALIDO. Regresión: lo publicado sólo
+  cambia en los dos rótulos. Objetivos sha256 `f3285f3a…b419` (1.220 entradas).
+- Disparo armado sobre `ca034d66e`: humo `74e368f6e` (tag `s162-v375-b2-disparo-humo`, pasadas 5000 y 3000), lote
+  `a9331d51c` (tag `s162-v375-b2-disparo-lote`, 48 trozos). Pedido de sello y despacho enviado a la coordinadora: el
+  hallazgo 3 está arreglado y probado pero no re-verificado; que lo confirme ella.
