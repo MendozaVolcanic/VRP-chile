@@ -215,3 +215,15 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
 - Humo 40128648709: success, 2 de 2 ok; control 5000 (Láscar) M14 5 px y 1,4126318824 MW = S162; muestra 3000 (Isluga)
   0 px, K re-corrido «far» 0,194 que no publica = record. Artefactos en `C:\vrp-trabajo\temporales\s162_v375\run_40128648709\`.
   Informado a la coordinadora; el OK al lote espera la re-verificación de Fable.
+
+### 2026-10-24 (vuelta 13): Fable CONFORME, sello firme, OK al lote de B2
+- Re-verificación del delta v2→v3 (Fable, `b2/verificador_v3/INFORME.md`): **CONFORME**. El control de vida atrapa solo
+  (aislado del recálculo) seis modos de port roto; con un lote sano da SILENCIO ACOTADO. H1 (gravedad 3): el control
+  dependía del archivo de objetivos; arreglado en `evaluar.py` (lote nuevo sin control da INVALIDO), probado con su caso
+  (`muerto_v2obj`) y con el sano. El archivo del disparo sí trae el control (mismo blob `1999237b` en el listo y en el
+  lote; sha LF `a7dd6b0d`, CRLF `f3285f3a`).
+- Sello firme por D-48 y adenda 1 (H1 a H5) en `b2/PREREGISTRO_B2.md`, commit `09ab70123`. **OK al lote** enviado a la
+  coordinadora (commit de lote `a9331d51c`, 48 jobs). Siguiente: evaluar el run cuando llegue (cobertura del lote antes
+  de leer, verificador limpio antes de informar).
+- Artefactos falsos del verificador v3 (1,8 GB) en `C:\vrp-trabajo\temporales\s162_v375\verif_v3\`: borrables cuando se
+  cierre B2.
