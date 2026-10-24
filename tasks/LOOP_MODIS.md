@@ -64,7 +64,7 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] E1. Leer cómo grilla el port MODIS y qué hay en disco; decidir si la ablación se puede hacer sin red.
 - [x] E2. Verificador limpio: los números se reproducen, la lectura del bow tie NO (VCD-03/04). Retirada con marca: D28 SIN DATO; la costura de barrido es SOSPECHA; E-2 con matiz (sólo bajo 1 MW, cenit con fecha). Ronda 2 CORRIENDO.
 - [x] C3. Lote de MOD-C leído (run 40120713181, artefactos en `C:/vrp-trabajo/temporales/s162_negmodis/run_40120713181/`): **INDECIDIBLE** (2 de 390, ΔE −18,1 [−43,8; +40,1]); controles en verde; informe `experiments/_s162_modis_negativos/INFORME.md` (`11570ab30`). Verificador limpio del resultado CORRIENDO (Fable alto).
-- [ ] E3. Ablación real del bow tie (`c805fed19`, `experiments/_s162_modis_bowtie/real/`): reproducción 403 de 403; método A (conserva el barrido anterior) sin huecos reales; con A las 11 protegidas siguen publicando y las 2 de neg_resto se apagan (SOSPECHA, post hoc); signo de la magnitud SIN DATO (depende de qué copia conserva MIROVA). Verificador limpio CORRIENDO.
+- [x] E3. Ablación real del bow tie, verificada (`f49e57dd7`): método A sin huecos y 11 protegidas intactas se sostienen; la regla B mataría una protegida; el efecto no queda confinado al foco (sigma global del umbral de cumbre) y los cambios de publicación son al filo; signo de la magnitud SIN DATO. MOD-D adenda 2: PM-sin_dup con A, informativo.
 
 ### MOD-D, paquete MODIS contra K
 - [x] D1. (borrador en `experiments/_s162_modis_paquete/PREREGISTRO.md`) Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
@@ -87,6 +87,12 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 2. ~~D35 y marcas A113~~: **resuelta** (D-48): van en el PR del veredicto de MOD-B, no antes (tarea B10).
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 (vuelta 13): E3 verificada; t3 corriendo
+- Verificador de E3: B1 a B3 confirmados (reproducción bit a bit), B4 refutado en parte (VBT-02: el efecto pasa por la
+  sigma global del umbral de cumbre, no sólo por el foco duplicado; VBT-01: flips al filo). Marca en el informe; adenda
+  2 informativa en MOD-D. Seguimiento S-1 enviado a la coordinadora (toca también los A/B de remuestreo de V750).
+- t3 de MOD-B (40126381034) despachada por la coordinadora; watch en segundo plano.
 
 ### 2026-10-24 19:40 UTC (vuelta 12): t2 completa
 - t2 de MOD-B (40122029477): 1.837 de 1.837 records en las partes 8 a 15, sin errores, K = data/ y K2 = K en todas,
