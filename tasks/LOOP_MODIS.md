@@ -85,6 +85,16 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 
 ## Bitácora (la más nueva arriba)
 
+### 2026-10-24 (vuelta 10): MOD-C verificado; diagnóstico de las dos publicaciones; t2 en curso
+- Verificador limpio del resultado de MOD-C: INDECIDIBLE confirmado (re-corrida byte a byte; regla propia también
+  INDECIDIBLE). Correcciones: VRC-01 (denominadores mezclados en la comparación con K) y VRC-05 (las dos publicaciones
+  dependen de B22 y MxD03; son decisivas) (`da8a68f91`).
+- La coordinadora decidió con D-48: sin lote nuevo; lo resuelve el censo de MOD-D. Pidió diagnóstico físico de las dos:
+  Láscar 05-11 = calor real del cráter (VIIRS de los tres satélites y MIROVA en VIIRS esa noche; píxel aislado de 4,7 K
+  a 0,20 km); Llaima 07-24 = artefacto de gradiente a 63° (nada en 10 pasadas ni en 11 noches; campo con 14,1 K de
+  rango de TIR y excesos de los dos signos). `experiments/_s162_modis_negativos/diagnostico/` (`10542ae1c`).
+- t2 de MOD-B (40122029477) corriendo; E3 (ablación real) corriendo en el subagente.
+
 ### 2026-10-24 (vuelta 9): MOD-C leído
 - MOD-C (40120713181): 7 trozos en rojo por las 10 pasadas no evaluables previstas (8 volcán fuera del gránulo, 2
   escenas inválidas), sin errores de proceso. Veredicto pre-registrado: INDECIDIBLE (el port publica en 2 de 390
