@@ -127,7 +127,8 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
 2. **Gana**: un elegible distinto de B1 que en P2 contra B1, sobre T ∪ O con el canal que decide, da GANA, y que con
    la tabla sola (T ∪ O) **no es peor** que B1. «No es peor» = GANA o EMPATE, o SIN SUSTRATO con el neto en 0 o a
    favor (con 4 bloques o menos la prueba no puede rechazar, y un neto en contra no se premia). Si ganan dos o más,
-   el de menor E (T ∪ O, canal que decide). Multiplicidad: se contrastan hasta cinco brazos contra B1, cada uno al
+   el de menor E (T ∪ O, canal que decide), y a igual E el primero en el orden de cercanía al `.m` del punto 3
+   (VB3-01, aprobado por la coordinadora bajo D-48). Multiplicidad: se contrastan hasta cinco brazos contra B1, cada uno al
    5 % de una cola; no se corrige (los brazos están muy correlacionados y todos los candidatos ya cumplen P1 = 0), y
    se declara: la probabilidad de que algún brazo gane sólo por azar es mayor que 5 %.
 3. **Si ninguno gana**: se elige entre B1 y los elegibles que **no son peores** que B1 ni con el canal que decide ni

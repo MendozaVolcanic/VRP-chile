@@ -341,6 +341,14 @@ informar("SG una protegida sin gránulo", "sin veredicto",
 # SGx (VB3-02): el archivo de pasadas sin gránulo es de otra lista de objetivos: SIN DATO, sin veredicto.
 informar("SGx archivo sin gránulo de otra lista", "sin veredicto", correr("SGx", base(), sha_ajeno=True), rc=3, roi=None)
 
+# S3 (VB3-01): B3 y B0 (B4 en Láscar) apagan los mismos 6 negativos que B1 publica: los dos GANAN con el mismo E. B0 no
+# es elegible (pierde las 3 de PCC). A igual E manda el orden de cercanía al .m: B4 antes que B3.
+p = base()
+for n in range(6):
+    p.pasada("Lascar", f"2026-09-{1 + n:02d} 05:00", "neg_limpio", {**todos(b=False, k=False), "B1": True, "B2": True,
+                                                                    "B5": True})
+informar("S3 B3 y B4 ganan con el mismo E", "§6.2: a igual E, el orden del §6.3: B4", correr("S3", p), roi="B4")
+
 (a.dest / "mutaciones_salida.txt").write_text("\n".join(out) + "\n", encoding="utf-8")
 print("\n== BATERÍA:", "TODOS LOS ESCENARIOS COMO SE ESPERA" if not FALLAS else f"FALLAS {FALLAS}")
 sys.exit(1 if FALLAS else 0)

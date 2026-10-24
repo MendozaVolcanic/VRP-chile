@@ -448,7 +448,8 @@ def main():
     # §6.2: GANA contra B1 en el canal que decide sobre T y O juntos, y no es peor con la tabla sola
     ganan = [b for b in elegibles if b != "B1" and ver[(b, "TO", "decide")][1] == "GANA" and no_peor(b, "tabla")]
     if ganan:
-        elegido = min(ganan, key=lambda b: ver[(b, "TO", "decide")][2])
+        # a igual E, el orden de cercanía al .m del §6.3 (VB3-01, aprobado por la coordinadora bajo D-48)
+        elegido = min(ganan, key=lambda b: (ver[(b, "TO", "decide")][2], PREF.index(b)))
         motivo = f"gana contra B1 (§6.2): {ganan}"
     else:
         # §6.3: sin ganadores, entre B1 y los que no son peores que B1 ni en el canal que decide ni con la tabla sola
