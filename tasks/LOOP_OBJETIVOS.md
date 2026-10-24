@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~12:45 UTC (S162): loop reactivado (sesión dueña S162, /loop dinámico), vuelta 1 con 5 agentes
+- Nicolás: «Como seguimos? Realiza todo lo que pueda en paralelo» y «Este trabajo debe quedar en loop». S162 es la
+  sesión dueña del loop (una sola, memoria S153); despertador de respaldo cada ~30 min, los agentes avisan al terminar.
+- Despachados, todos de sólo lectura y con carpeta propia en el scratchpad de S162 (`vuelta1\<agente>`), sin commits:
+  (1) verificador limpio de la lectura de D25 (Fable, high); (2) por qué D25 baja las 2 protegidas de Chillán, más
+  los puntos de Chillán de #864 (Fable, high); (3) qué son las pasadas de VIIRS 750 que D25 enciende o recupera
+  (Fable, high); (4) revisión de #900 y medición de volcán-día de MODIS sin pasadas, para la decisión 3 (Opus);
+  (5) inventario de worktrees, borradores y temporales, sin borrar (Sonnet).
+- Decisión pendiente de Nicolás: qué hacer con D25 (recomendación: no adoptar por ahora). Los agentes 1 a 3 la informan.
+
 ### 2026-10-24 ~12:30 UTC (S162): D25 LEÍDO: DECIDE NICOLÁS
 - Evaluador del tag `s161-d25-lectura` sin cambios (sha256 `93c26d62...fec2`), numpy 2.4.4, sobre los artefactos
   `s146ab-todo` de V1 (39530508296, intento 2), V2a (39575542584) y V2b (39612909810); cobertura pareja en los tres.
