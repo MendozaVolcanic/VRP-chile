@@ -18,8 +18,8 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 
 | id | qué | estado |
 |---|---|---|
-| V375-B | pre-registro del lote de negativos limpios neg_resto para el port (D-36, aprobado) | listo para sellar (`b9e9c9f97`): verificador limpio pasado y corregido; entregado a la coordinadora; falta el sello de Nicolás |
-| V375-C | pre-registro de los 10 brazos de ROI (mismo lote que B) | listo para sellar (`b9e9c9f97`), mismo estado que B |
+| V375-B | lote de negativos limpios neg_resto para el port (D-36) | **TERMINADO** (run 40116289866, verificado): NO RESUELTO por la regla (lote solo 4,10 % contra 3,85 %), del lado del silencio |
+| V375-C | 10 brazos de ROI (mismo lote que B) | **TERMINADO** (verificado): caja **C13** en el cráter; compuesto por volcán valida en O; V375-D no necesario |
 | V375-E | pre-registro del paquete V375 contra K, curva de cenit contra la de MIROVA | listo y verificado (`b9e9c9f97`); no despachable hasta PD1, PD3 y el evaluador común del instrumento (M con d′) |
 | V375-D | números propios de 375 | sólo si B o C lo exigen (disparador en `PREREGISTRO_C.md` §5.3) |
 | V375-F | Chillán sobre 3 MW (port 0,939, n 6) | después de V375-E |
@@ -155,3 +155,15 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   negativos 2,03 %, P2 contra K GANA, M 0,999 (n 265). Las mismas 6 protegidas perdidas en todos los brazos (3 que K
   publica, las 3 sólo OCR, 0 de la tabla).
 - Verificador limpio (Sonnet) lanzado sobre el resultado; NO informar a Nicolás como hecho hasta que vuelva.
+
+### 2026-10-24 (vuelta 8): resultado VERIFICADO, `35e9560c2`
+- Verificador limpio (`resultado_run40116289866/verificador/INFORME.md`): CONFIRMA el instrumento, las 11 no
+  observadas, C13 global y por volcán, V375-D no necesario; ningún hallazgo cambia un veredicto. Reproduce todo con una
+  implementación propia. Reparos: B en el lote solo depende de tratar neg_pub como muestra (113 de 133; como censo la cota
+  baja a 3,80 % y se resolvería): **no se cambia la regla**, se informa como sensibilidad; «4 de 434» es la unión (lote:
+  4 de 389); las 6 protegidas perdidas por los 10 brazos son de Suomi NPP, sólo OCR y del lote S159 (riesgo para el veto
+  de V375-E, esperan V375-A); una línea sellada de B editada (adenda 1 de B).
+- Informe: `experiments/_s162_v375/resultado_run40116289866/INFORME.md`. Va a PD1: **caja C13** (cráter de
+  `volcanoes.yaml`); V375-D no se abre; B NO RESUELTO (resolverlo pide otra muestra de neg_resto, no reinterpretar).
+- Cola: V375-B y V375-C **terminados**. Siguiente: V375-E (espera PD1 de Nicolás, PD3 en `pipeline/` y #903/#905), y
+  después V375-F. El loop queda en espera.
