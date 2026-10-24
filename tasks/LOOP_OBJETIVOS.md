@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~20:05 UTC (S162): t2 de MOD-B sin huecos; t3 despachada
+- t2 (40122029477): 1.837/1.837 records ok, K2 = K, K = data/, commit `ffbb36248` en las 8 partes (24 a 52 min por
+  job). Llevan 3.651 de 5.465 pasadas. Artefactos en `D:\vrp-trabajo\temporales\s162_mxd03\t2\`.
+- **t3: run 40126381034**. Con ella salen las tres tandas; `loop-modis` evalúa las tres juntas con verificador limpio.
+
 ### 2026-10-24 ~19:40 UTC (S162): V375-B2 dimensionado en 1.200 noches; t2 de MOD-B casi lista
 - V375-B2: el primer verificador mostró que la v1 reutilizaba S162 (en la frontera declaraba «calla» en 11-20 % de los
   casos cuando no correspondía); en la v2 decide sólo la muestra nueva de neg_resto. Tamaño: **1.200 noches** (con la
