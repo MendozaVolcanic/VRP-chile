@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~18:25 UTC (S162): V750-B SELLADO bajo D-48
+- Condición cumplida: 13 de 13 mutaciones atrapadas por aserción (las 11 de la tercera vuelta más VB3-01 y VB3-02), con
+  la identidad PASA y el control de caída CAÍDA, cada una corriendo la batería entera de 19 escenarios
+  (`experiments/_s162_v750b/mutar_bateria_salida.txt`). Ensayo con datos reales: compuerta abierta, censo 503/503
+  iguales en posición, control positivo 7 y 7, negativo 0 bloques.
+- **Sellado**: commit `1af6c3cd8`, tag `s162-v750b-sellado` (en el remoto). El 2026-11-03 la hija genera
+  `objetivos_v750b.json` y `sin_granulo_v750b.json` desde el tag y pide el despacho con sus sha256.
+
 ### 2026-10-24 17:59 UTC, hora del servidor (S162): lote V375 con 6 jobs en exit 2 (no son caídas)
 - Run 40116289866: 9 success, 6 failure, 8 en curso, 5 en cola. Los 6 failure (probe 1, 8, 9, 10, 11, 13) tienen cada
   uno 1 pasada con `estado=volcan_fuera_del_granulo` y salen con exit 2 por diseño; los artefactos se suben igual.
