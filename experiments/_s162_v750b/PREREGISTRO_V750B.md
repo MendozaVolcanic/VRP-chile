@@ -155,7 +155,9 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
 
 ## 8. Predicciones (para poder fallar)
 
-- B0: pierde 6 o más protegidas (todas de Cordón Caulle); no elegible.
+- B0: pierde 6 o más protegidas (todas de Cordón Caulle); no elegible. (Verificador v3, VB3-04: esto no es una
+  predicción que pueda fallar con veredicto, porque el control positivo de §7 exige que B0 pierda alguna; si no la
+  pierde, no hay veredicto.)
 - B1: 0 protegidas perdidas; negativos limpios del orden de 15 en 5.353 (censo) más lo que agregue la ventana extendida.
 - B2: como MIROVA ubica el calor de Cordón Caulle a 4,6 a 10,5 km del centro y el cráter del yaml está a 7,6 km,
   predigo que pierde alguna protegida de Cordón Caulle (no elegible).
@@ -191,8 +193,13 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
   línea de veredicto sale marcada con el motivo y el código de salida es 5. No se edita el analizador después del
   sello. La bandera `--censo-omitido-solo-pruebas` es sólo para baterías sintéticas: cubre sólo el censo, marca el
   veredicto «SIN CENSO, NO VALE PARA EL RUN» y sale con código 4.
-- Pasadas sin gránulo: el generador las escribe en `sin_granulo_v750b.json` (se commitea con los objetivos) y el
-  analizador las cuenta como SIN DATO; una protegida entre ellas frena la lectura.
+- Pasadas sin gránulo: el generador las escribe en `sin_granulo_v750b.json`, atado por sha256 a
+  `objetivos_v750b.json` (se commitean juntos); el analizador **exige** el archivo y que corresponda a esa lista (si
+  falta o es de otra lista, la cobertura queda SIN DATO y no hay veredicto), y cuenta sus pasadas como SIN DATO; una
+  protegida entre ellas frena la lectura. Comando de lectura: agregar `--sin-granulo
+  experiments/_s162_v750b/sin_granulo_v750b.json`.
+- `--solo-controles` sale 0 sólo con la compuerta abierta; cerrada, 3. Con el censo pedido y fallado, la bandera de
+  pruebas no lo reemplaza. El 2 % de cobertura se cuenta sobre las pasadas que cuentan (sin «fuera» ni «sin_crater»).
 - El artefacto siempre lleva el log del trozo, así que `if-no-files-found: error` no avisa de un trozo muerto; lo
   avisa el paso del probe en rojo (`pipefail`) y, en la lectura, las pasadas «sin resultado», que cuentan como SIN DATO.
 
@@ -210,12 +217,14 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
 - Prueba sin red del probe en verde (`python probe_v750b.py --sin-red`); prueba local sobre las 510 grillas de N
   (`prueba_local_510_salida.txt`): B0 y B1 iguales a N en 510 de 510, B2 y B3 cambian máscaras en Cordón Caulle y
   Tupungatito; ensayo del analizador sólo con controles (`ensayo_analizador_salida.txt`).
-- **Batería sellada de la regla**: `bateria_regla_v750b.py` (comprueba sola el resultado esperado de 11 escenarios,
-  los 8 del primer verificador y V1, V3 y V6 de la segunda vuelta; sale 1 si alguno no coincide) →
-  `bateria_regla_v750b_salida.txt`: todos como se espera. Encontró un defecto de la propia v3 (la bandera de pruebas
-  abría también la cobertura), corregido antes de sellar. Límite declarado: la segunda vuelta mostró que la batería
-  de la v2 dejaba vivas 14 de 22 mutaciones del analizador; la v3 suma los escenarios que las mataban, pero el
-  conteo de mutaciones no se re-midió sobre la v3.
+- **Batería sellada de la regla**: `bateria_regla_v750b.py` (comprueba sola el resultado esperado de 18 escenarios:
+  los 8 del primer verificador, V1, V3 y V6 de la segunda vuelta, y S1, S2, E5b, E3b, KD, SG y SGx agregados tras la
+  tercera; sale 1 si alguno no coincide) → `bateria_regla_v750b_salida.txt`. Encontró un defecto de la propia v3
+  (la bandera de pruebas abría también la cobertura), corregido. Su nulo se mide con `verificador_v3/mutar_v3.py`
+  (11 mutaciones de una línea del analizador): la tercera vuelta midió 5 de 11 atrapadas con 11 escenarios (VB3-03;
+  el texto anterior de este punto decía que la v3 «suma los escenarios que las mataban», y eso valía para 3 de 11);
+  los 7 escenarios nuevos están hechos para las 6 que sobrevivían, y la medición sobre la batería de 18 se anota en
+  la bitácora y en §12.
 - Centro de las zonas: las de la grilla se centran en la celda (33, 33) y las del brazo nativo en el centro del TIF,
   que cae en los índices (32,75; 33,25): un cuarto de celda (unos 0,19 km) por eje. Sólo afecta la comparación del
   brazo nativo con la grilla y se declara.

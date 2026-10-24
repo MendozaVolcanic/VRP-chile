@@ -101,9 +101,6 @@ def main():
     pob = [p for p in pob if p["hora_utc"][:10] not in EXCLUIDOS and p["hora_utc"] < CORTE_SNPP]
     sin_g = [(p["volcan"], p["hora_utc"], p["lab"], p.get("protegida")) for p in pob if not p.get("granule")]
     print(f"pasadas sin gránulo (fuera de la lista, SIN DATO declarado; VB-05): {len(sin_g)} {sin_g[:20]}")
-    (AQUI / "sin_granulo_v750b.json").write_text(json.dumps(
-        [{"volcan": v, "hora_utc": h, "lab": lab, "protegida": pr} for v, h, lab, pr in sin_g], ensure_ascii=False),
-        encoding="utf-8")   # VB2-07: el analizador las lee y cuentan como SIN DATO
     pob = [p for p in pob if p.get("granule")]
     SEL = _modulo("sel", N_DIR / "02_seleccion.py")
     G = SEL.grillas()
@@ -119,6 +116,12 @@ def main():
         e["id"] = n
     texto = json.dumps(pob, ensure_ascii=False, default=str)
     (AQUI / "objetivos_v750b.json").write_text(texto, encoding="utf-8")
+    # VB2-07 y VB3-02: las pasadas sin gránulo van a un archivo atado por sha256 a la lista de objetivos; el analizador
+    # lo exige y comprueba que corresponda a ESTA lista
+    (AQUI / "sin_granulo_v750b.json").write_text(json.dumps(
+        {"objetivos_sha256": hashlib.sha256(texto.encode("utf-8")).hexdigest(),
+         "pasadas": [{"volcan": v, "hora_utc": h, "lab": lab, "protegida": pr} for v, h, lab, pr in sin_g]},
+        ensure_ascii=False), encoding="utf-8")
     print(f"objetivos: {len(pob)} | S_C: cumbres en 0 MW {nc}, alertas que deciden {na}, negativos sin K {nn} | "
           f"sha256 "
           f"{hashlib.sha256(texto.encode('utf-8')).hexdigest()}")

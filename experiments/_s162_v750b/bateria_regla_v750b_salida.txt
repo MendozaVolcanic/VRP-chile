@@ -65,4 +65,46 @@
    cobertura (ok, no_obs, SIN DATO)=('19', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
    P2 contra B1 (TO, todo): {}
 
+== S1 B2 gana con el canal que decide y pierde con la tabla sola
+   esperado por la regla escrita: §6.2 y §6.3: B2 fuera; ROI B4
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('58', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'GANA', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== S2 B4 peor con el canal que decide y no peor con la tabla
+   esperado por la regla escrita: §6.3: B4 fuera; ROI B2
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B2 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('41', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'SIN SUSTRATO', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E5b B2 y B3 ganan de verdad; B2 con más E
+   esperado por la regla escrita: §6.2: el de menor E, B3
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B3 (gana contra B1 (§6.2)
+   cobertura (ok, no_obs, SIN DATO)=('46', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'GANA', 'B3': 'GANA', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E3b una protegida SIN DATO bajo el 2 %
+   esperado por la regla escrita: sin veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('117', '{}', '1') protegidas SIN DATO=[('Lascar', '2026-07-30 05:00')] control positivo=3
+   P2 contra B1 (TO, todo): {}
+
+== KD una protegida con K distinto de producción
+   esperado por la regla escrita: sin veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('37', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {}
+
+== SG una protegida sin gránulo
+   esperado por la regla escrita: sin veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('37', '{}', '0') protegidas SIN DATO=[('Lascar', '2026-07-01 05:00')] control positivo=3
+   P2 contra B1 (TO, todo): {}
+
+== SGx archivo sin gránulo de otra lista
+   esperado por la regla escrita: sin veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('37', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {}
+
 == BATERÍA: TODOS LOS ESCENARIOS COMO SE ESPERA

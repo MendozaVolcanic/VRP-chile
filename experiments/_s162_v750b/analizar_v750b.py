@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import collections
 import copy
+import hashlib
 import json
 import random
 import statistics
@@ -212,15 +213,25 @@ def main():
     prot_sin = [(obj[i]["volcan"], obj[i]["hora_utc"]) for i in sin if obj[i].get("protegida")]
     # VB2-07: las pasadas sin gránulo nunca llegan al probe; el generador las deja en un archivo y aquí cuentan como
     # SIN DATO, y una protegida entre ellas también frena la lectura
+    # VB3-02: el archivo es obligatorio y tiene que corresponder a esta lista de objetivos; si falta o no corresponde,
+    # es SIN DATO (cierra la cobertura), nunca «cero pasadas sin gránulo»
     sg = Path(a.sin_granulo)
-    sin_g = json.loads(sg.read_text(encoding="utf-8")) if sg.exists() else []
-    pr(f"   pasadas sin gránulo (del generador, {sg.name if sg.exists() else 'archivo ausente'}): {len(sin_g)}")
+    sha_obj = hashlib.sha256(Path(a.objetivos).read_bytes()).hexdigest()
+    sg_ok, sin_g = False, []
+    if sg.exists():
+        dsg = json.loads(sg.read_text(encoding="utf-8"))
+        sg_ok = isinstance(dsg, dict) and dsg.get("objetivos_sha256") == sha_obj
+        sin_g = dsg.get("pasadas", []) if sg_ok else []
+    pr(f"   pasadas sin gránulo (del generador): {len(sin_g)}"
+       + ("" if sg_ok else f" | ARCHIVO {'AUSENTE' if not sg.exists() else 'DE OTRA LISTA DE OBJETIVOS'}: SIN DATO"))
     prot_sin += [(x["volcan"], x["hora_utc"]) for x in sin_g if x.get("protegida")]
     pr("   protegidas no observadas (fuera del denominador, por nombre):",
        [(obj[i]["volcan"], obj[i]["hora_utc"], part[i]) for i in obj if part[i] in ("fuera", "sin_crater")
         and obj[i].get("protegida")] or "ninguna")
     pr("   protegidas SIN DATO (falla de cobertura, no de brazo):", prot_sin or "ninguna")
-    cob_ok = len(sin) + len(sin_g) <= MAX_SIN_DATO * max(1, len(obj) + len(sin_g) - no_obs["fuera"]) and not prot_sin
+    # VB3-07: el denominador del 2 % es el de las pasadas que cuentan (sin «fuera» ni «sin_crater»)
+    den_cob = max(1, len(obj) + len(sin_g) - no_obs["fuera"] - no_obs["sin_crater"])
+    cob_ok = sg_ok and len(sin) + len(sin_g) <= MAX_SIN_DATO * den_cob and not prot_sin
     pr("== cobertura:", "SUFICIENTE" if cob_ok else
        f"INSUFICIENTE (más de {MAX_SIN_DATO:.0%} sin procesar o una protegida): relanzar con SOLO las faltantes")
 
@@ -398,14 +409,16 @@ def main():
     if a.censo_omitido_solo_pruebas:
         aviso, rc_final = "[SIN CENSO, NO VALE PARA EL RUN] " + aviso, 4
     cob_pasa = cob_ok or bool(a.leer_con_faltantes)
-    censo_pasa = censo_ok or a.censo_omitido_solo_pruebas or bool(a.leer_con_faltantes)
+    # VB3-06: la bandera de pruebas sólo reemplaza un censo AUSENTE; un censo que corrió y falló cierra igual
+    censo_pedido = bool(a.censo_art and a.censo_objetivos)
+    censo_pasa = censo_ok or (a.censo_omitido_solo_pruebas and not censo_pedido) or bool(a.leer_con_faltantes)
     gen_ok = bool(nidx) and c_nulo == 0 and k_ok
     todo_ok = gen_ok and ctrl_roi and cob_pasa and censo_pasa
     pr("== compuerta del veredicto (generales, ROI, cobertura y censo):", "ABIERTA" if todo_ok else "CERRADA",
        aviso.strip())
     if a.solo_controles or not todo_ok:
         pr("== sin veredicto:", "--solo-controles" if a.solo_controles else "controles caídos o SIN DATO")
-        return salir(0 if a.solo_controles else 3)
+        return salir(0 if (a.solo_controles and todo_ok) else 3)   # VB3-05: compuerta cerrada = 3 siempre
 
     # ---------------------------------------------------------------- métricas y regla §6
     ver = {}

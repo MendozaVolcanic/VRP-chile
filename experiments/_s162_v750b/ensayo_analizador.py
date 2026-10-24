@@ -66,7 +66,11 @@ def main():
                        "oraculo": orc, "brazos": {"K": r["brazos"]["K"]}})
     (a.dest / "art").mkdir(parents=True, exist_ok=True)
     (a.dest / "art" / "resultados_00.json").write_text(json.dumps(salida, default=float), encoding="utf-8")
-    (a.dest / "objetivos_ensayo.json").write_text(json.dumps(objs, ensure_ascii=False, default=str), encoding="utf-8")
+    texto = json.dumps(objs, ensure_ascii=False, default=str)
+    (a.dest / "objetivos_ensayo.json").write_text(texto, encoding="utf-8")
+    import hashlib   # v3: el analizador exige el archivo de pasadas sin gránulo atado a la lista (VB3-02)
+    (a.dest / "sin_granulo_ensayo.json").write_text(json.dumps(
+        {"objetivos_sha256": hashlib.sha256(texto.encode("utf-8")).hexdigest(), "pasadas": []}), encoding="utf-8")
     print(f"ensayo: {len(objs)} objetivos, {len(salida)} resultados en {a.dest}")
 
 

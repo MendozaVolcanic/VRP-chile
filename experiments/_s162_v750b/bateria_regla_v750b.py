@@ -105,10 +105,16 @@ class Pob:
             r["estado"] = "grilla_incompleta"
         self.res.append(r)
 
-    def escribir(self, d):
+    def escribir(self, d, sin_granulo=(), sha_ajeno=False):
+        """v3: también el archivo de pasadas sin gránulo, atado por sha256 a la lista (VB3-02); sha_ajeno lo ata a otra."""
+        import hashlib
         (d / "art").mkdir(parents=True, exist_ok=True)
         (d / "art" / "resultados_00.json").write_text(json.dumps(self.res), encoding="utf-8")
-        (d / "objetivos.json").write_text(json.dumps(self.objs), encoding="utf-8")
+        texto = json.dumps(self.objs)
+        (d / "objetivos.json").write_text(texto, encoding="utf-8")
+        sha = hashlib.sha256(texto.encode("utf-8")).hexdigest()
+        (d / "sin_granulo.json").write_text(json.dumps(
+            {"objetivos_sha256": ("0" * 64) if sha_ajeno else sha, "pasadas": list(sin_granulo)}), encoding="utf-8")
 
 
 def todos(k=True, b=True):
@@ -136,12 +142,12 @@ def base(con_pcc=True):
     return p
 
 
-def correr(nombre, p):
+def correr(nombre, p, sin_granulo=(), sha_ajeno=False):
     d = a.dest / nombre
-    p.escribir(d)
+    p.escribir(d, sin_granulo, sha_ajeno)
     o = subprocess.run([sys.executable, str(ANALIZAR), "--art", str(d / "art"), "--objetivos",
                         str(d / "objetivos.json"), "--evaluador", str(EVAL), "--salida", str(d / "salida.txt"),
-                        "--censo-omitido-solo-pruebas"],
+                        "--censo-omitido-solo-pruebas", "--sin-granulo", str(d / "sin_granulo.json")],
                        capture_output=True, text=True, cwd=str(A), timeout=600, encoding="utf-8", errors="replace")
     txt = o.stdout + o.stderr
     (d / "stdout.txt").write_text(txt, encoding="utf-8")
@@ -291,6 +297,49 @@ for n in range(6):
 for n in range(10):
     p.pasada("Lascar", f"2026-04-{10 + n:02d} 05:00", "neg_limpio", todos(b=False, k=False))
 informar("V6 oráculo muerto", "sin veredicto", correr("V6", p), rc=3, roi=None)
+
+# ---------------------------------------------------------------- escenarios de la tercera vuelta (verificador_v3)
+# S1 (mata M2): B2 GANA con el canal que decide (15 bajas sólo del OCR que B1 no publica) pero PIERDE con la tabla sola
+# (6 negativos de más): §6.2 no lo deja ganar y §6.3 no lo admite. ROI B4.
+p = base()
+for n in range(15):
+    p.pasada("Lascar", f"2026-09-{1 + n:02d} 05:00", "pos",
+             {**todos(), "B1": False, "B0": False, "B3": False, "B5": False, "B2": True}, tabla=False, ocr_vrp=0.4)
+for n in range(6):
+    p.pasada("Lascar", f"2026-09-{20 + n:02d} 05:00", "neg_limpio", {**todos(b=False, k=False), "B2": True})
+informar("S1 B2 gana con el canal que decide y pierde con la tabla sola", "§6.2 y §6.3: B2 fuera; ROI B4",
+         correr("S1", p), roi="B4")
+# S2 (mata M3): B0 (B4 en Láscar) no publica 4 bajas sólo del OCR: con el canal que decide SIN SUSTRATO neto +4; con la
+# tabla sola, 0 bloques. §6.3: B4 no entra; ROI B2 (igual a B1 aquí).
+p = base()
+for n in range(4):
+    p.pasada("Lascar", f"2026-09-{1 + n:02d} 05:00", "pos", {**todos(), "B0": False, "B5": False}, tabla=False, ocr_vrp=0.4)
+informar("S2 B4 peor con el canal que decide y no peor con la tabla", "§6.3: B4 fuera; ROI B2", correr("S2", p), roi="B2")
+# E5b (mata M7): B3 y B2 GANAN de verdad; B2 con más E. B3 apaga 8 negativos que B1 publica; B2 apaga los mismos y además
+# pierde 1 baja (neto -7 en 9 bloques, p 10/512). §6.2: el de menor E, B3.
+p = base()
+for n in range(8):
+    p.pasada("Lascar", f"2026-09-{1 + n:02d} 05:00", "neg_limpio", {**todos(b=False, k=False), "B1": True, "B0": True,
+                                                                    "B5": True})
+p.pasada("Lascar", "2026-09-20 05:00", "pos", {**todos(), "B2": False}, vrp_mirova=0.3)
+informar("E5b B2 y B3 ganan de verdad; B2 con más E", "§6.2: el de menor E, B3", correr("E5b", p), roi="B3")
+# E3b (mata M9): una protegida con grilla incompleta en una población de más de 100 pasadas (bajo el 2 %): la protegida
+# SIN DATO frena sola la lectura.
+p = base()
+for n in range(80):
+    p.pasada("Lascar", f"2026-08-{1 + n % 28:02d} 0{n // 28}:30", "neg_limpio", todos(b=False, k=False))
+p.pasada("Lascar", "2026-07-30 05:00", "pos", todos(), vrp_mirova=2.0, grilla_incompleta=True)
+informar("E3b una protegida SIN DATO bajo el 2 %", "sin veredicto", correr("E3b", p), rc=3, roi=None)
+# K distinta (mata M10): producción no publicó una protegida que el K del run sí publica: K = producción cierra.
+p = base()
+p.objs[5]["pub_prod"] = False
+informar("KD una protegida con K distinto de producción", "sin veredicto", correr("KD", p), rc=3, roi=None)
+# SG (mata M5): una protegida sin gránulo en el archivo del generador frena la lectura.
+informar("SG una protegida sin gránulo", "sin veredicto",
+         correr("SG", base(), sin_granulo=[{"volcan": "Lascar", "hora_utc": "2026-07-01 05:00", "lab": "pos",
+                                            "protegida": True}]), rc=3, roi=None)
+# SGx (VB3-02): el archivo de pasadas sin gránulo es de otra lista de objetivos: SIN DATO, sin veredicto.
+informar("SGx archivo sin gránulo de otra lista", "sin veredicto", correr("SGx", base(), sha_ajeno=True), rc=3, roi=None)
 
 (a.dest / "mutaciones_salida.txt").write_text("\n".join(out) + "\n", encoding="utf-8")
 print("\n== BATERÍA:", "TODOS LOS ESCENARIOS COMO SE ESPERA" if not FALLAS else f"FALLAS {FALLAS}")
