@@ -53,7 +53,7 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 
 - [ ] B8. Evaluar el humo cuando llegue el run id (artefactos a `D:\vrp-trabajo\temporales\s162_mxd03\humo\`, evaluador desde checkout del tag, VMX-12) y dar el OK para las tandas.
 - [ ] B10. PR del veredicto de MOD-B con D35 en `docs/MIROVA_DIVERGENCES.md` y las marcas A113 en D18 y `docs/SINTOMAS.md` §3 (decisión D-48 aplicada por la coordinadora).
-- [ ] B9. (t1 = run 40112510038, en curso desde 16:38 UTC; t2 después de MOD-C) Evaluar las tres tandas (vara con `vara_mxd03.py --evaluar`, luego `evaluar_mxd03.py --art --vara --ref`), informe y verificador limpio del resultado.
+- [ ] B9. (t1 = run 40112510038 COMPLETA: 1.814 de 1.814, sin errores, K = data/ y K2 = K en todas; artefactos en `D:/vrp-trabajo/temporales/s162_mxd03/t1/`. t2 después del lote V375 y de MOD-C) Evaluar las tres tandas (vara con `vara_mxd03.py --evaluar`, luego `evaluar_mxd03.py --art --vara --ref`), informe y verificador limpio del resultado.
 
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
 - [x] C1. (`21b800259`, redactado por subagente Opus y revisado) Pre-registro del lote (300 a 400 de las 5.093 noches neg_resto), selección con semilla, objetivos, regla de
@@ -84,6 +84,12 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 2. ~~D35 y marcas A113~~: **resuelta** (D-48): van en el PR del veredicto de MOD-B, no antes (tarea B10).
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 17:30 UTC (vuelta 8): t1 completa
+- t1 de MOD-B (40112510038): 9 de 9 jobs en success; 1.814 de 1.814 records en las 8 partes, 0 errores, K igual a
+  `data/` en todos (nada retenido para el control 4), K2 = K, commit del tag en todas. 24 a 48 min por job: las 24
+  partes van a costar del orden de 15 h de runner, no 47.
+- La coordinadora reordenó por cupo: lote V375 (40116289866), luego MOD-C, luego t2.
 
 ### 2026-10-24 (vuelta 7): etapa completa
 - Ronda 2 del verificador de MOD-C/D/E: MOD-C despachable tal cual; MOD-E arreglado; MOD-D v2 lista para el sello de
