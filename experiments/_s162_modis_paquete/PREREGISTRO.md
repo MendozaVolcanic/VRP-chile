@@ -1,6 +1,16 @@
 # Pre-registro S162 MOD-D: el paquete MODIS del código de MIROVA contra K (censo retrospectivo en el arnés), v2
 
-> **BORRADOR v2 para el sello.** Escrito el 2026-10-24 por la sesión hija de MODIS (loop `tasks/LOOP_MODIS.md`) antes
+## SELLO DE LAS REGLAS (2026-10-24, decisión D-48)
+
+**Reglas de la v2 SELLADAS** por la decisión D-48 de Nicolás, 2026-10-24: «sobre las decisiones mías haz lo que tú
+recomiendes». La aplicó la coordinadora S162 (sesión «Retomar») sobre la recomendación de esta sesión (§11, cinco
+puntos, todos «sí») e informó a Nicolás para que pueda revertirla. Quedan selladas la población, los brazos, las pruebas
+del §4, la prueba de Chillán del §5 con sus casos borde, la precedencia del §6 y los controles del §8. **No queda
+sellado el despacho**: el candado del §10 (evaluador, arnés, workflow) y su verificador con contexto limpio siguen siendo
+requisito antes de pedirlo. Todo cambio desde aquí va como adenda fechada.
+
+
+> **v2, reglas selladas el 2026-10-24 (arriba). Texto previo del encabezado:** BORRADOR v2 para el sello. Escrito el 2026-10-24 por la sesión hija de MODIS (loop `tasks/LOOP_MODIS.md`) antes
 > de correr ningún brazo. La v1 (commit `e4feb6f57` de la rama `claude/s162-modis-774bb0`) la revisó un verificador con
 > contexto limpio (Fable alto, `experiments/_s162_modis_verif_cde/INFORME.md`, VCD-01, 02, 05, 06, 09, 11, 12 y 13, y
 > la lista D3 de su §5); esta v2 cierra cada regla que obligaba a decidir después de mirar. Nicolás autorizó el programa

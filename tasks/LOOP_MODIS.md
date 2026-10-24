@@ -52,6 +52,7 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] B7. (2026-10-24, mensaje a la coordinadora) Pedido de despacho a la coordinadora (tag, tres tandas de 8 partes, ~47 h de runner).
 
 - [ ] B8. Evaluar el humo cuando llegue el run id (artefactos a `D:\vrp-trabajo\temporales\s162_mxd03\humo\`, evaluador desde checkout del tag, VMX-12) y dar el OK para las tandas.
+- [ ] B10. PR del veredicto de MOD-B con D35 en `docs/MIROVA_DIVERGENCES.md` y las marcas A113 en D18 y `docs/SINTOMAS.md` §3 (decisión D-48 aplicada por la coordinadora).
 - [ ] B9. (t1 = run 40112510038, en curso desde 16:38 UTC; t2 después de MOD-C) Evaluar las tres tandas (vara con `vara_mxd03.py --evaluar`, luego `evaluar_mxd03.py --art --vara --ref`), informe y verificador limpio del resultado.
 
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
@@ -78,9 +79,9 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 
 ## Decisiones para Nicolás (con recomendación)
 
-1. Sellar las reglas de MOD-D v2 (§11 de su pre-registro): recomendado sí; el candado viene después de MOD-B y MOD-C.
-2. D35 y las marcas A113 del pre-registro de MxD03 (§11 punto 9) en el catálogo: recomendado en el PR del veredicto de
-   MOD-B, no antes.
+1. ~~Sellar las reglas de MOD-D v2~~: **resuelta** por la coordinadora con D-48 (2026-10-24), sobre mi recomendación;
+   anotada en el pre-registro. El candado sigue pendiente (D3).
+2. ~~D35 y marcas A113~~: **resuelta** (D-48): van en el PR del veredicto de MOD-B, no antes (tarea B10).
 
 ## Bitácora (la más nueva arriba)
 
