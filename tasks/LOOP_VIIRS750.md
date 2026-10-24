@@ -16,11 +16,10 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 1. [hecho y verificado] **V750-C**: `experiments/_s162_v750c/INFORME.md`, con la marca del verificador.
 2. [hecho] Verificador limpio de V750-C (Fable 5.1): `experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`.
    Confirma los números; corrige la atribución: dos piezas (interpolación dentro de la caja sensible; ROI fuera).
-3. [en verificación] Pre-registro V750-B: `experiments/_s162_v750b/PREREGISTRO_V750B.md`, con probe, workflow,
-   objetivos y analizador. Prueba local en verde (B0 y B1 = N en 510/510; B2 y B3 actúan en PCC y Tupungatito) y
-   ensayo del analizador con controles en verde. Verificador Fable del pre-registro corriendo; escribe en
-   `experiments/_s162_v750b/verificador/VERIFICADOR_PREREGISTRO_V750B.md`. Después: corregir, mandarlo a la
-   coordinadora con comandos y tamaños para el sello (DN-1).
+3. [listo para sello] Pre-registro V750-B v2: `experiments/_s162_v750b/PREREGISTRO_V750B.md` (`62e6ea194`).
+   Verificador Fable: «listo para sello con cambios», VB-01 a VB-16, todos corregidos (§12). Batería de mutaciones v2
+   en verde (8 de 8) y ensayo con el censo: compuerta abierta. Mandado a la coordinadora con comandos y tamaños; ella
+   pide el sello y despacha (no antes del 2026-11-03, porque la ventana llega al 11-02).
 4. [borrador] Pre-registro V750-A: `experiments/_s162_v750a/PREREGISTRO_V750A.md` (equivalencia, censo, sombra; brazos
    K, P, P-def, P-sinfiltro, Kgeo, K×1,2, O). Falta su §11 (analizador, test de equivalencia rojo) y su verificador.
 5. [hecho] Paso a paso de V750-F para Nicolás: `experiments/_s162_v750f/PASO_A_PASO_O2.md` (paquete comprobado, md5 OK).
@@ -29,8 +28,10 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 
 ## Decisiones para Nicolás
 
-- **DN-1 (para el sello de V750-B)**: sellar `experiments/_s162_v750b/PREREGISTRO_V750B.md` cuando su §11 esté hecho y
-  verificado. Recomendación: sí.
+- **DN-1 (sello de V750-B)**: sellar `experiments/_s162_v750b/PREREGISTRO_V750B.md` v2. Al sellar confirma cuatro
+  lecturas que tomé conservadoras tras el verificador: en T decide sólo la tabla; sin ganador nunca se elige un brazo
+  que pierde o bloquea; la distancia del record se mide desde el cráter; brazo B5 con la lectura del comentario del
+  `.m`. Recomendación: sí a las cuatro y al sello.
 - **DN-2 (V750-B §6.5)**: si gana una ROI por volcán (B4 o B2), confirmar que es fidelidad al `.m` (MIROVA declara que
   ajusta la ROI por volcán) y no un gate nuestro de los que excluye A85. Recomendación: tratarla como fidelidad.
 - **DN-3 (V750-F, la haces tú)**: correr O2 en MATLAB Online, ~15 min, paso a paso en
@@ -64,3 +65,9 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
   ensayo encontró que importar `evaluar_d25.py` arrastra todo el evaluador de D25: el analizador ahora extrae la prueba
   de signos con ast, probada en 6 casos de resultado conocido. Workflow del probe escrito (artefactos en C:, pedido de
   la coordinadora). Verificador del pre-registro lanzado.
+- 2026-10-24 ~17:30 UTC, vuelta 4. Verificador del pre-registro V750-B entregó (listo para sello con cambios, 16
+  hallazgos). Corregidos todos: regla §6 (VB-01, VB-08), canal que decide (VB-03), SIN DATO con nombre y salida 2
+  (VB-04, VB-05), controles en la compuerta (VB-06), ancla en el cráter (VB-07), brazo B5 (VB-09), cajas nativas en km
+  (VB-10), 12-oct fuera (VB-11), K distinto de producción con tope (VB-12), citas (VB-13), artefacto vacío (VB-14),
+  placebo (VB-15), cobertura en el cráter (VB-16), sha256 del evaluador fijado. Batería v2 8/8; ensayo con el censo
+  503/503. Enviado a la coordinadora. Prueba de equivalencia de V750-A corriendo con mutaciones.
