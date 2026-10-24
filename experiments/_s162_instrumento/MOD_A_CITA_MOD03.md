@@ -23,14 +23,24 @@ Tarea MOD-A del programa por sensor (`docs/superpowers/specs/2026-10-24-programa
    acoplados a sus geolocalizaciones con corrección de terreno (`VNP03MOD`/`VJ103MOD` y `VNP03IMG`/`VJ103IMG`).
 3. Los productos se obtuvieron por los sistemas de distribución LANCE y LAADS de NASA.
 
+## Qué dice además en otras páginas (agregado tras el verificador)
+
+- **El NRT corre el mismo procedimiento** (p. 3 del PDF, índice 2, «Methods, Input data»: los insumos son productos NRT
+  de LANCE y/o de archivo de LAADS; p. 6, índice 5: para los volcanes de la lista NRT de MIROVA los datos se procesaron
+  con LANCE desde su inclusión, y lo anterior se reprocesó con LAADS, con «the procedure described above»). El paper no
+  separa dos cadenas, así que la frase de la p. 4 alcanza al NRT. (Primera versión de esta nota: decía «describe el
+  archivo, no el NRT»; era falso y lo corrigió el verificador.)
+- **Hay remuestreo a una grilla UTM** de 50 × 50 km centrada en la cumbre del GVP, con 1.000 m en MODIS, 750 m en VIIRS
+  M y 375 m en VIIRS I (p. 5, índice 4).
+- **El código del remuestreo no se publica**: la disponibilidad de código (p. 21, índice 20) dice que las rutinas de
+  adquisición, remuestreo de imagen, automatización y difusión son propias de la infraestructura de MIROVA y no se
+  distribuyen; sólo se distribuye la detección.
+
 ## Qué NO dice (límites de la cita)
 
-- **No dice cómo se usa la geolocalización**: ni si se lee la latitud y longitud de cada píxel desde MOD03, ni si se
-  interpola desde los puntos de amarre, ni cómo entra en el remuestreo a la grilla. «Se usaron junto con» no es «cada
-  píxel se ubica con MOD03».
-- **Describe el archivo, no el NRT**: es el data paper del conjunto 2000 a 2025 (OSF v2.5). A105 ya marcó que el OSF
-  es un producto filtrado y distinto del canal de tiempo casi real que clonamos. Que el NRT de hoy use MOD03 es
-  coherente con el texto pero **no está escrito** ahí.
+- **No dice cómo se usa la geolocalización dentro del remuestreo**: ni si se lee la latitud y longitud de cada píxel
+  desde MOD03, ni si se interpola desde los puntos de amarre, ni el método de remuestreo (vecino más cercano u otro).
+  «Se usaron junto con» no es «cada píxel se ubica con MOD03», y el código que lo diría no es público.
 - No nombra NOAA-21 (`VJ202MOD`, `VJ202IMG`): el archivo termina en 2025.
 
 ## Sobre «P1 y P3 discrepan»
@@ -45,9 +55,19 @@ queda como SOSPECHA hasta que la coordinadora indique el texto de P3.
 
 - «MIROVA usa MOD03 con corrección de terreno» como **insumo declarado del archivo**: **CONFIRMADO** (p. 4, párrafo 1,
   leído en imagen). Coincide con lo que decía `tasks/BLOQUE_ARRANQUE_S159.md:74` y con `docs/BEYOND_MIROVA_EXTENSIONS.md:327`.
-- «MIROVA ubica cada píxel MODIS con MOD03 en su cadena NRT»: **SIN LOCALIZAR** en este paper. Lo que sí es medido es
+- «El NRT de MIROVA usa esos mismos productos»: **CONFIRMADO** por el mismo paper (p. 3 y p. 6).
+- «MIROVA ubica cada píxel MODIS con MOD03 (y no por interpolación) antes de remuestrear»: **SIN LOCALIZAR** en este
+  paper, y el código de remuestreo está declarado no publicado (p. 21). Lo que sí es medido es
   nuestro lado: hoy `pipeline/process_modis.py` interpola las coordenadas de 5 km y baja MxD03 sin usarlo
   (`experiments/_s152_paper_revision/INFORME_CAMBIOS_PAPER_v1.md:111`, memoria `project_modis_geo_interp_offset`).
 - Consecuencia para MOD-B (MxD03 sobre K, D-19, tarea 1.30): la cita respalda **que** MIROVA tiene MOD03 a mano; la
   forma de usarlo sigue siendo una elección nuestra que el pre-registro debe declarar como tal, no como copia de
-  MIROVA. La rebaja «en disputa» de §10 del programa puede pasar a: confirmado como insumo, sin localizar como método.
+  MIROVA. La rebaja «en disputa» de §10 del programa puede pasar a: confirmado como insumo, también en el NRT; sin
+localizar como método.
+
+## Verificación
+
+Verificador con contexto limpio (Sonnet, 2026-10-24), leyendo las páginas renderizadas: **CONFIRMADO CON MATIZ**. La
+cita de la p. 4 y el sha256 están bien; refutó dos frases de la primera versión de «Qué NO dice» (el NRT y el
+remuestreo), corregidas arriba con las páginas que dio, que comprobé de nuevo en la capa de texto como localizador.
+Matiz suyo: la búsqueda de «terrain», «geolocation» y MOD03 en las 25 páginas fue por capa de texto, no en imagen.
