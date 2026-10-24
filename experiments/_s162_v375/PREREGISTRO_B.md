@@ -102,7 +102,7 @@ puede esconder en la cuenta: las dos salen impresas antes del veredicto.
   ENCIENDE DE MAS si el IC bootstrap queda entero sobre 0; si no, NO RESUELTO.
 - Se informan siempre: regla del centroide; los diez brazos; volcán, tramo (T, O1, O2: #535 el 2026-08-29), cenit cada
   10°, canal, lote (S159 o S162) y pasadas partidas aparte; la lista de cada negativo que el port publica con su VRP.
-- **Qué lote decide** (`PREREGISTRO_C.md` §5.5): el lote S162 solo, con los pesos recalculados dentro del lote; la
+- **Qué lote decide** (`PREREGISTRO_C.md` §5.5; adenda 1 de C, 2026-10-24, arreglo del evaluador sin cambio de reglas): el lote S162 solo, con los pesos recalculados dentro del lote; la
   unión con S159 (ya vista: 0 de 45 en neg_resto) confirma. Si el veredicto B del lote y el de la unión no coinciden,
   B queda NO RESUELTO (depende del lote visto). En el humo sobre S159 solo (`humo_s159_salida.txt`), B da NO RESUELTO
   con cota 10,4 % en neg_resto (Wilson sobre n efectivo 33: la muestra de S159 tenía pesos desparejos), que es

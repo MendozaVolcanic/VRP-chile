@@ -197,3 +197,14 @@ apagado por flag o sólo MODIS), y no se quiso que esa diferencia, por chica que
 
 La cobertura contra la referencia de MIROVA se aplica al evaluar con el código de la sesión del instrumento (PR #904,
 rama `instrumento/evaluador-comun`, sin mergear), declarando su commit (instrucción de la coordinadora, 2026-10-24).
+
+## Adenda 1 (2026-10-24, después del humo del run 40115765406 y antes del lote)
+
+El humo (pasadas 1011 y 1062) fue la primera vez que el evaluador corrió con datos del lote S162, y destapó un error en
+el camino que sólo corre con ellos: cuando decide el lote, el veto se cuenta sobre la unión (§5.5), y la unión trae
+volcanes sin pasadas en el lote; el compuesto por volcán no les encontraba brazo y el evaluador caía (KeyError). Arreglo
+en `evaluar.py::compuesto`: un volcán sin elección queda en M14, la misma regla que §5.2 ya aplica a un volcán sin
+pasadas en T. **No cambia ninguna regla de este pre-registro**: con el lote de S159 solo la salida queda idéntica byte a
+byte (`humo_s159_salida.txt`), y hay una prueba nueva en `probar_evaluar.py` §3. El runner no usa el evaluador, así que
+los commits de disparo no cambian. Salida del evaluador con el humo: `humo_run40115765406_salida.txt` (controles en
+verde: recálculo sin red = runner 467 de 467, K re-corrido = publicado 151 de 151; sus lecturas no se leen).

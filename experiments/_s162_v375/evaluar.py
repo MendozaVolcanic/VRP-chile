@@ -407,8 +407,11 @@ def elegir_por_volcan(filas, candidatos, rng):
 
 
 def compuesto(filas, elec):
+    """Un volcán sin elección (no tiene pasadas en el subconjunto que eligió, por ejemplo el lote S162 frente a las
+    protegidas de la unión que cuenta el veto) queda en M14, igual que un volcán sin pasadas en T. Lo destapó el humo
+    del run 40115765406 (KeyError con Villarrica)."""
     for x in filas:
-        a = elec[x["vol"]]
+        a = elec.get(x["vol"], (BR.REFERENCIA, REGLA_DECIDE))
         x["X"][("POR_VOLCAN", REGLA_DECIDE)] = x["X"][a]
         x["V"][("POR_VOLCAN", REGLA_DECIDE)] = x["V"][a]
 

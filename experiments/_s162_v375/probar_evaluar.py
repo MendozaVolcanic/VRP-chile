@@ -168,6 +168,14 @@ def prueba_3():
     d3 = EV.decidir(fo, N_neg, 0.5, np.random.default_rng(1), [R, C13, C14], R,
                     {"recall_bajo": 1.0, "recall_prot": 1.0}, "prueba")
     assert d3["valida_en_O"] == "SIN SUSTRATO EN O", d3["valida_en_O"]
+    # el veto se cuenta sobre un conjunto (la unión) con un volcán que el subconjunto que decide no tiene: ese volcán
+    # queda en M14 y no rompe (lo destapó el humo del run 40115765406)
+    otro = fila("pos_prot", "W", 20, h="W|z<=40", tramo="O1", X=True, K=True, prot=True, mir=2.0)
+    otro["X"] = {R: True, C13: True, C14: True}
+    otro["V"] = {k: 2.0 for k in otro["X"]}
+    d4 = EV.decidir(fr, N_neg, 0.5, np.random.default_rng(1), [R, C13, C14], R,
+                    {"recall_bajo": 1.0, "recall_prot": 1.0}, "prueba", veto=fr + [otro])
+    assert d4["global"] == "C13" and otro["X"][("POR_VOLCAN", "cercano")] is True, d4["global"]
     fr[-1]["X"][C13] = False
     d2 = EV.decidir(fr, N_neg, 0.5, np.random.default_rng(1), [R, C13, C14], R,
                     {"recall_bajo": 1.0, "recall_prot": 1.0}, "prueba")
