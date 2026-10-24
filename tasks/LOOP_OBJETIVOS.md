@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~13:50 UTC (S162): diagnóstico de lo que D25 publica de más en VIIRS 750 (sin verificar todavía)
+- Agente Fable (scratchpad S162 `vuelta1\encendidas_v750\INFORME.md`): las 127 pasadas de VIIRS 750 que D publica y K no
+  (V1 45, V2 82) son un mismo objeto: un píxel junto al cráter que sólo entra por el segundo pase sin condicionar, al
+  que K recorta a 0,0 MW y D le da 0,17 a 0,60 MW. Recuperadas y encendidas indistinguibles (29 variables, AUC máx
+  0,67, no significativo). En 32 de 37 encendidas MIROVA alertó esa noche en VIIRS 375 y la 375 del mismo barrido
+  publica a ~0,30 km (A109: no independiente). D25 no agrega ninguna noche nueva ni apaga nada en VIIRS 750.
+  Lectura del agente: fuente sub-píxel que 375 m resuelve y 750 m diluye (cat. b A54), no artefacto.
+- Verificador limpio (Opus) despachado.
+
 ### 2026-10-24 ~13:35 UTC (S162): diagnóstico de las 2 protegidas de Chillán (sin verificar todavía)
 - Agente Fable (informe en scratchpad S162 `vuelta1\chillan_p1b\INFORME.md`): en Chillán el signo de D25 lo decide la
   temperatura del ANILLO (la cumbre está siempre a 259-269 K); las dos protegidas caen en noches de anillo frío
