@@ -21,8 +21,10 @@ comparando brazos entre sí; se ve partiendo de las pasadas de MIROVA. Eso hace 
 - T5, P1b en las dos direcciones (cruces de 1 MW del valor publicado entre control y brazo) y publicaciones sobre
   pasadas que la tabla de MIROVA lista como RUTINA (VE162-03), que P2 no cuenta cuando otra pasada de la noche alertó.
 
-Las pruebas viven en `tests/test_evaluador_comun_s162.py`. El placebo de ganancia y el comparador d′ (T3) van en un
-PR aparte sobre este mismo módulo.
+- T3, magnitud M con el comparador de ganancia d′ (D-28) y el placebo K×1,2 y K×0,8; P2 con la prueba de signos por
+  bloque noche-volcán (D-45) y los tres placebos de D-44 (ver el bloque T3 más abajo).
+
+Las pruebas viven en `tests/test_evaluador_comun_s162.py` y `tests/test_evaluador_comun_t3_s162.py`.
 """
 from __future__ import annotations
 
@@ -30,10 +32,14 @@ import argparse
 import bisect
 import collections
 import json
+import math
 import os
+import random
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+
+import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -89,6 +95,7 @@ def tabla_por_pasada(pasadas, recs_por_lado, control, tol_s=TOL_S):
     idx = {lado: indexar_records(recs) for lado, recs in recs_por_lado.items()}
     alertas_noche = {(p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d"))
                      for p in pasadas if p.estado == "alerta"}
+    fp_noche = {(p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d")) for p in pasadas if p.estado == "fp"}
     T = []
     for p in pasadas:
         rec = {lado: record_de(ix, p, tol_s) for lado, ix in idx.items()}
@@ -103,7 +110,8 @@ def tabla_por_pasada(pasadas, recs_por_lado, control, tol_s=TOL_S):
                 cob[lado] = NO_OBSERVADO
         T.append({"pasada": p, "clave": clave(p), "dia": p.instante.strftime("%Y-%m-%d"), "rec": rec, "cob": cob,
                   "protegida": cm.es_protegida(p),
-                  "noche_con_alerta": (p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d")) in alertas_noche})
+                  "noche_con_alerta": (p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d")) in alertas_noche,
+                  "noche_con_fp": (p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d")) in fp_noche})
     return T
 
 
@@ -213,6 +221,355 @@ def publicaciones_sobre_rutina(T, lados, dias_excluidos=()):
         out[lado] = {"rutinas_observadas": len(base), "publica_en_noche_con_alerta": con,
                      "publica_en_noche_sin_alerta": sin}
     return out
+
+
+# ===========================================================================================================
+# T3: magnitud M con el comparador de ganancia d′ (D-28) y su placebo; P2 con la prueba de signos (D-45) y los
+# placebos de D-44. Portado de experiments/_s157_prereg_d25/evaluar_d25.py (tag s161-d25-lectura, 724e43452), que
+# sólo sirve a VIIRS y al A/B de D25; acá queda para cualquier sensor y cualquier A/B nuevo. Las constantes y semillas
+# son las selladas allí (D-27, D-28, D-30, D-32, D-45): un evaluador nuevo que quiera otras las declara en su
+# pre-registro. La equivalencia con el original se prueba en experiments/_s162_instrumento/t3_equivalencia.py.
+#
+# POR QUÉ M necesita comparador: K queda bajo MIROVA (razón 0,5 a 0,65), así que cualquier brazo que sólo multiplique
+# la magnitud de K por 1,2 «se acerca» a MIROVA en promedio y la regla simétrica le da MEJORA (R2-8 de AUDIT_S158_R2).
+# d′ pregunta otra cosa: si el brazo queda más cerca de MIROVA que una ganancia UNIFORME del mismo tamaño (K×ĝ), o sea
+# si sube los pares que debe subir. Para una ganancia pareja d′ es 0 y el MEJORA no cuenta.
+# POR QUÉ P2 con signos por bloque: las pasadas de una noche comparten volcán y atmósfera; bajo el nulo el control y el
+# brazo son intercambiables dentro de una noche, y cambiarlos invierte todos los aportes de esa noche a la vez.
+# ===========================================================================================================
+N_BOOT, SEMILLA = 10000, 157
+N_MIN_PARES, N_MIN_NOCHES = 5, 3
+N_CALIB, MAX_FALSOS_CALIB = 200, 0.05
+MIN_VOLCANES_MEJORA, MIN_PARES_VOLCAN = 2, 3
+MIN_PARES_PODER = 20
+PLACEBO_GANANCIAS = (1.2, 0.8)
+NOTA_COMPARADOR = "sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)"
+NOTA_CALIB_DPRIMA = "la calibración de d′ falla: no se sabe si D sube los pares correctos (ADENDA_PLACEBO.md §5, D-30)"
+SEMILLA_CALIB_DPRIMA = SEMILLA + 3       # 160, D-32
+N_CALIB_DPRIMA = 1000                    # D-32
+DEC_DPRIMA = 12
+SEMILLA_P2_SIGNOS = SEMILLA + 5          # 162, D-45
+N_SORTEOS_P2_SIGNOS = 10000
+MAX_B_EXACTO_P2 = 20
+MAX_B_SIN_SUSTRATO_P2 = 4
+TOPE_P2_DEN = 20
+UMBRAL_M_PROTEGIDA = cm.UMBRAL_PROTEGIDA_MW
+
+
+def pesos_bloque(bloques, n_boot=N_BOOT, semilla=SEMILLA):
+    """(n_boot x n_pares): cuántas veces entra cada par al remuestrear BLOQUES (noche-volcán) con reposición."""
+    uniq = sorted(set(bloques))
+    idx = np.array([uniq.index(b) for b in bloques])
+    rng = np.random.default_rng(semilla)
+    elegidos = rng.integers(0, len(uniq), size=(n_boot, len(uniq)))
+    cuenta = np.zeros((n_boot, len(uniq)), dtype=np.int64)
+    np.add.at(cuenta, (np.repeat(np.arange(n_boot), len(uniq)), elegidos.ravel()), 1)
+    return cuenta[:, idx]
+
+
+def medianas_ponderadas(d, W):
+    o = np.argsort(d)
+    ds, Ws = np.asarray(d, dtype=np.float64)[o], W[:, o]
+    cs = np.cumsum(Ws, axis=1)
+    tot = cs[:, -1]
+    lo_r, hi_r = (tot - 1) // 2, tot // 2
+    i_lo = (cs <= lo_r[:, None]).sum(axis=1)
+    i_hi = (cs <= hi_r[:, None]).sum(axis=1)
+    return (ds[i_lo] + ds[i_hi]) / 2.0
+
+
+def medianas_ponderadas_filas(Dm, W):
+    Dm = np.asarray(Dm, dtype=np.float64)
+    o = np.argsort(Dm, axis=1, kind="stable")
+    ds, Ws = np.take_along_axis(Dm, o, axis=1), np.take_along_axis(W, o, axis=1)
+    cs = np.cumsum(Ws, axis=1)
+    tot = cs[:, -1]
+    lo_r, hi_r = (tot - 1) // 2, tot // 2
+    i_lo = (cs <= lo_r[:, None]).sum(axis=1)
+    i_hi = (cs <= hi_r[:, None]).sum(axis=1)
+    filas = np.arange(Dm.shape[0])
+    return (ds[filas, i_lo] + ds[filas, i_hi]) / 2.0
+
+
+def regla_m(d, W):
+    """MEJORA si el intervalo al 95 % de la mediana de d queda entero bajo 0; EMPEORA si entero sobre 0."""
+    meds = medianas_ponderadas(d, W)
+    lo, hi = np.percentile(meds, 2.5), np.percentile(meds, 97.5)
+    return ("MEJORA" if hi < 0 else "EMPEORA" if lo > 0 else "NEUTRO"), float(lo), float(hi)
+
+
+def d_par(k_mw, d_mw, m_mw):
+    """Cuánto se acerca el brazo a MIROVA en ese par (negativo = más cerca), en unidades de log10."""
+    return abs(math.log10(d_mw / m_mw)) - abs(math.log10(k_mw / m_mw))
+
+
+def calibrar_simetrico(d, W, bloques, n_rep=N_CALIB, semilla=SEMILLA + 2):
+    """D-27: el signo de d se sortea por bloque (nulo de mediana 0); devuelve (falsos MEJORA, falsos EMPEORA, poder)."""
+    rng = np.random.default_rng(semilla)
+    bl = list(bloques)
+    uniq = sorted(set(bl)); idx = np.array([uniq.index(b) for b in bl])
+    a = np.abs(np.asarray(d, dtype=np.float64))
+    falsos = collections.Counter()
+    for _ in range(n_rep):
+        falsos[regla_m(rng.choice((-1.0, 1.0), size=len(uniq))[idx] * a, W)[0]] += 1
+    poder = regla_m(-a, W)[0] == "MEJORA" if np.any(a > 0) else False
+    return falsos["MEJORA"] / n_rep, falsos["EMPEORA"] / n_rep, bool(poder)
+
+
+def comparar_con_ganancia(P, W, bloques):
+    """D-28 §2 y §3 con D-30 (respuesta 2) y D-32: la regla simétrica sobre d′ = |log10(D/M)| − |log10(ĝ·K/M)|."""
+    K = np.array([p["k"] for p in P], dtype=np.float64)
+    Dv = np.array([p["d"] for p in P], dtype=np.float64)
+    M = np.array([p["m"] for p in P], dtype=np.float64)
+    lK, lD = np.log10(K / M), np.log10(Dv / M)
+    g = lD - lK
+    g_hat = float(np.median(g))
+    dp = np.round(np.abs(lD) - np.abs(lK + g_hat), DEC_DPRIMA)
+    g_b = medianas_ponderadas(g, W)
+    Dp = np.round(np.abs(lD)[None, :] - np.abs(lK[None, :] + g_b[:, None]), DEC_DPRIMA)
+    meds = medianas_ponderadas_filas(Dp, W)
+    lo, hi = float(np.percentile(meds, 2.5)), float(np.percentile(meds, 97.5))
+    r_p = "MEJORA" if hi < 0 else "EMPEORA" if lo > 0 else "NEUTRO"
+    f_mej, f_emp, poder = calibrar_simetrico(dp, W, bloques, n_rep=N_CALIB_DPRIMA, semilla=SEMILLA_CALIB_DPRIMA)
+    calibrada = f_mej <= MAX_FALSOS_CALIB
+    vols_neg, vols_n, g_vol = 0, 0, {}
+    for v_ in sorted({p["clave"].split("|")[0] for p in P}):
+        sel = np.array([p["clave"].startswith(v_ + "|") for p in P])
+        if sel.sum() >= MIN_PARES_VOLCAN:
+            vols_n += 1; vols_neg += float(np.median(dp[sel])) < 0
+        gv = float(np.median(g[sel]))
+        g_vol[v_] = {"n": int(sel.sum()), "log": gv, "factor": float(10 ** gv)}
+    return {"g_hat_log": g_hat, "g_hat_factor": float(10 ** g_hat),
+            "g_hat_ic95": [float(np.percentile(g_b, 2.5)), float(np.percentile(g_b, 97.5))],
+            "g_hat_por_volcan": g_vol, "regla_dprima": r_p, "dprima_mediana": float(np.median(dp)),
+            "ic95_dprima": [lo, hi], "dprima_max_abs": float(np.max(np.abs(dp))),
+            "falsos_mejora_dprima": f_mej, "falsos_empeora_dprima": f_emp, "calibrada_dprima": calibrada,
+            "poder_dprima": poder if len(P) >= MIN_PARES_PODER else None,
+            "volcanes_con_dprima_negativa": vols_neg, "volcanes_con_3_pares_dprima": vols_n,
+            "dprima_da_mejora": bool(r_p == "MEJORA" and calibrada and vols_neg >= MIN_VOLCANES_MEJORA)}
+
+
+def decidir_estrato(P, modo, comparador=True, ok_ctrl=True):
+    """M de un estrato (pares k, d, m, clave, bloque) con la calibración simétrica (D-27) y el comparador (D-28).
+
+    modo: "decide" (MEJORA y EMPEORA cuentan), "bloquea" (sólo EMPEORA cuenta) o "informa". Sin sustrato (menos de 5
+    pares o de 3 noches): SIN SUSTRATO. comparador=False es sólo para informar el placebo «sin comparador»."""
+    bl = [p["bloque"] for p in P]
+    if len(P) < N_MIN_PARES or len(set(bl)) < N_MIN_NOCHES:
+        return "SIN SUSTRATO", {"n": len(P), "noches": len(set(bl)), "modo": modo}
+    d = np.array([d_par(p["k"], p["d"], p["m"]) for p in P])
+    W = pesos_bloque(bl)
+    r, lo, hi = regla_m(d, W)
+    vols_neg, vols_n = 0, 0
+    for v_ in sorted({p["clave"].split("|")[0] for p in P}):
+        dv = [x for x, p in zip(d, P) if p["clave"].startswith(v_ + "|")]
+        if len(dv) >= MIN_PARES_VOLCAN:
+            vols_n += 1; vols_neg += float(np.median(dv)) < 0
+    nota = ""
+    f_mej, f_emp, poder = calibrar_simetrico(d, W, bl)
+    calibrada = (f_emp <= MAX_FALSOS_CALIB) if modo == "bloquea" else (f_mej <= MAX_FALSOS_CALIB and f_emp <= MAX_FALSOS_CALIB)
+    if modo == "informa":
+        r_dec = r
+    elif not ok_ctrl or not calibrada:
+        r_dec = "INDECIDIBLE"
+    elif modo == "bloquea" and r == "MEJORA":
+        r_dec = "NEUTRO"
+    elif r == "MEJORA" and vols_neg < MIN_VOLCANES_MEJORA:
+        r_dec, nota = "NEUTRO", "MEJORA sostenida por menos de %d volcanes (adenda, H4)" % MIN_VOLCANES_MEJORA
+    else:
+        r_dec = r
+    detalle = {"n": len(P), "noches": len(set(bl)), "modo": modo, "regla": r, "d_mediana": float(np.median(d)),
+               "ic95": [lo, hi], "razon_K": float(np.median([p["k"] / p["m"] for p in P])),
+               "razon_D": float(np.median([p["d"] / p["m"] for p in P])),
+               "falsos_mejora": f_mej, "falsos_empeora": f_emp, "volcanes_con_d_negativa": vols_neg,
+               "volcanes_con_3_pares": vols_n, "nota": nota, "calibrada": calibrada,
+               "poder": poder if len(P) >= MIN_PARES_PODER else None}
+    if comparador and modo != "informa":
+        detalle.update(comparar_con_ganancia(P, W, bl))
+        if r_dec == "MEJORA" and not detalle["calibrada_dprima"]:
+            r_dec = "INDECIDIBLE"
+            detalle["nota"] = "%s (falsos MEJORA de d′ %.3f, tope %.2f)" % (
+                NOTA_CALIB_DPRIMA, detalle["falsos_mejora_dprima"], MAX_FALSOS_CALIB)
+        elif r_dec == "MEJORA" and not detalle["dprima_da_mejora"]:
+            r_dec = "NEUTRO"
+            detalle["nota"] = NOTA_COMPARADOR
+    return r_dec, detalle
+
+
+def placebo_ganancia(P, modo, ganancias=PLACEBO_GANANCIAS):
+    """El brazo placebo D = K×g. Sin comparador muestra cuánto aprobaría una ganancia cualquiera; con comparador tiene
+    que quedar sin MEJORA (d′ es 0 idénticamente). Informa: no vuelve inválido nada (D-28 §2.5)."""
+    out = {}
+    for g in ganancias:
+        Pg = [dict(p, d=p["k"] * g) for p in P]
+        out[str(g)] = {"sin_comparador": decidir_estrato(Pg, modo, comparador=False)[0],
+                       "con_comparador": decidir_estrato(Pg, modo, comparador=True)[0]}
+    return out
+
+
+def pares_m(T, control, brazo, estrato_de, excluir=lambda f: False, dias_excluidos=()):
+    """Pares de M: alertas de MIROVA con VRP que los dos lados publican con magnitud mayor que 0, observadas por los
+    dos (T2). `estrato_de(f)` da el nombre del estrato de la fila (por sensor, cenit, kernel...) o None."""
+    excl = set(dias_excluidos)
+    pares, salen = collections.defaultdict(list), collections.Counter()
+    for f in T:
+        p = f["pasada"]
+        if f["dia"] in excl or p.estado != "alerta" or not p.vrp_mw or excluir(f) or not observada_en(f, control, brazo):
+            continue
+        c, b = f["rec"][control], f["rec"][brazo]
+        if _pub(c) != _pub(b):
+            salen["%s publica, %s no" % ((control, brazo) if _pub(c) else (brazo, control))] += 1
+            continue
+        if not (_pub(c) and _disp(c) > 0 and _disp(b) > 0):
+            continue
+        nom = estrato_de(f)
+        if nom is None:
+            continue
+        pares[nom].append({"k": _disp(c), "d": _disp(b), "m": p.vrp_mw, "clave": f["clave"],
+                           "bloque": "%s|%s" % (p.volcano, f["dia"])})
+    return dict(pares), dict(salen)
+
+
+# ----------------------------------------------------------------------------------------------- P2 (D-45)
+def clase_p2(f, excluir=lambda f: False):
+    """alerta_mb (alerta de MIROVA bajo 1 MW: error si no se publica), negativo (negativo limpio: RUTINA de la tabla en
+    un volcán, sensor y día sin alerta ni FALSO_POSITIVO de MIROVA: error si se publica) u otra."""
+    p = f["pasada"]
+    if excluir(f):
+        return "otra"
+    if p.estado == "alerta" and not f["protegida"]:
+        return "alerta_mb"
+    if p.estado == "rutina" and p.fuente == "CONS" and not f["noche_con_alerta"] and not f["noche_con_fp"]:
+        return "negativo"
+    return "otra"
+
+
+def es_error(f, lado, excluir=lambda f: False):
+    c = clase_p2(f, excluir)
+    pub = _pub(f["rec"][lado])
+    return (c == "alerta_mb" and not pub) or (c == "negativo" and pub)
+
+
+def contribuciones_p2(T, control, brazo, excluir=lambda f: False, dias_excluidos=()):
+    """Pasadas discordantes (error en un lado y no en el otro), observadas por los dos: +1 si el error es sólo del
+    brazo, -1 si es sólo del control. El bloque es volcán|día."""
+    excl = set(dias_excluidos)
+    out = []
+    for f in sorted(T, key=lambda f: f["clave"]):
+        if f["dia"] in excl or not observada_en(f, control, brazo):
+            continue
+        ec_, eb = es_error(f, control, excluir), es_error(f, brazo, excluir)
+        if ec_ != eb:
+            out.append({"clave": f["clave"], "c": 1 if eb else -1, "bloque": "%s|%s" % (f["pasada"].volcano, f["dia"])})
+    return out
+
+
+def prueba_signos_p2(sumas, neto, n_sorteos=N_SORTEOS_P2_SIGNOS, semilla=SEMILLA_P2_SIGNOS):
+    """D-45 §2.3 a §2.5: exacta con 20 bloques o menos (enumeración por convolución), si no 10.000 sorteos."""
+    B = len(sumas)
+    if B <= MAX_B_EXACTO_P2:
+        dist = {0: 1}
+        for x in sumas:
+            nueva = collections.Counter()
+            for v, k in dist.items():
+                nueva[v + x] += k
+                nueva[v - x] += k
+            dist = nueva
+        den = 2 ** B
+        return {"metodo": "exacto", "gana": [sum(k for v, k in dist.items() if v <= neto), den],
+                "pierde": [sum(k for v, k in dist.items() if v >= neto), den],
+                "dos_colas": [sum(k for v, k in dist.items() if abs(v) >= abs(neto)), den], "minimo": [1, den]}
+    rng = np.random.default_rng(semilla)
+    S = rng.choice((-1, 1), size=(n_sorteos, B))
+    tot = S @ np.asarray(sumas, dtype=np.int64)
+    den = int(n_sorteos) + 1
+    return {"metodo": "sorteos", "gana": [1 + int((tot <= neto).sum()), den],
+            "pierde": [1 + int((tot >= neto).sum()), den],
+            "dos_colas": [1 + int((np.abs(tot) >= abs(neto)).sum()), den], "minimo": [1, den]}
+
+
+def regla_signos_p2(neto, B, pr):
+    """D-45 §2.6 y §2.7 (comparación con el 5 % en enteros)."""
+    if B <= MAX_B_SIN_SUSTRATO_P2:
+        return "SIN SUSTRATO"
+    if neto < 0 and TOPE_P2_DEN * pr["gana"][0] <= pr["gana"][1]:
+        return "GANA"
+    if neto > 0 and TOPE_P2_DEN * pr["pierde"][0] <= pr["pierde"][1]:
+        return "PIERDE"
+    if neto > 0:
+        return "BLOQUEA"
+    return "EMPATE"
+
+
+def decidir_p2(contrib):
+    """P2 con la prueba de signos por bloque noche-volcán (D-45). Devuelve (resultado, detalle)."""
+    neto = sum(x["c"] for x in contrib)
+    por_bloque = collections.Counter()
+    for x in contrib:
+        por_bloque[x["bloque"]] += int(x["c"])
+    sumas = [por_bloque[b] for b in sorted(por_bloque)]
+    pr = prueba_signos_p2(sumas, neto)
+    det = {"neto": neto, "n_discordantes": len(contrib), "B": len(sumas), "metodo": pr["metodo"],
+           "p_gana": pr["gana"][0] / pr["gana"][1], "p_pierde": pr["pierde"][0] / pr["pierde"][1],
+           "p_dos_colas": pr["dos_colas"][0] / pr["dos_colas"][1]}
+    return regla_signos_p2(neto, len(sumas), pr), det
+
+
+# ----------------------------------------------------------------------------------------------- placebos de D-44
+def placebo_p2(T, control, tipo, fraccion, semilla, excluir=lambda f: False, dias_excluidos=()):
+    """Un brazo sintético a partir del control, a nivel de tabla (cambia `pub`, no los records), y su P2 contra el
+    control. Los tres de D-44 (verificador de D-42, V42-10), que SÍ pueden fallar:
+      a: apaga una fracción de las publicaciones del control en negativos limpios: tiene que dar GANA donde hay sustrato;
+      b: apaga una fracción de sus publicaciones en alertas bajo 1 MW: tiene que dar PIERDE;
+      c: simétrico por BLOQUE noche-volcán (corrige V42-21: el placebo de S160 sorteaba por pasada, y el nulo de P2 es
+         por bloque). Lado +1: alertas bajo 1 MW publicadas (se apagan) y negativos limpios sin publicar (se
+         encienden); lado -1: negativos publicados (se apagan) y alertas sin publicar (se encienden). Se toman sin
+         reposición round(fracción·N) bloques al azar de los N que tienen pasadas de LOS DOS lados; en cada uno se tira
+         una moneda justa y se voltean m = mín(n₊, n₋) pasadas del lado que salió. El aporte del bloque es ±m con
+         probabilidad 1/2 exacta, así que el neto tiene distribución simétrica y la tasa de GANA y PIERDE es la de
+         falsos de P2. (Primera versión: volteaba el bloque entero de un lado; como los bloques +1 traen más pasadas
+         que los -1, el neto salía sesgado y dio 11 PIERDE de 40 en la prueba sintética.)
+    Devuelve (resultado de P2, detalle con cuántas pasadas se tocaron y cuántos bloques eran elegibles)."""
+    excl = set(dias_excluidos)
+    rng = random.Random(semilla)
+    elegibles = [f for f in T if f["dia"] not in excl and f["cob"][control] == OBSERVADO]
+    voltear = set()
+    faltaron = 0
+    if tipo in ("a", "b"):
+        buscada = "negativo" if tipo == "a" else "alerta_mb"
+        pool = sorted(f["clave"] for f in elegibles if clase_p2(f, excluir) == buscada and _pub(f["rec"][control]))
+        voltear = set(rng.sample(pool, int(round(fraccion * len(pool)))))
+    elif tipo == "c":
+        lados = {+1: collections.defaultdict(list), -1: collections.defaultdict(list)}
+        for f in elegibles:
+            c, pub = clase_p2(f, excluir), _pub(f["rec"][control])
+            s = (+1 if pub else -1) if c == "alerta_mb" else (-1 if pub else +1) if c == "negativo" else 0
+            if s:
+                lados[s]["%s|%s" % (f["pasada"].volcano, f["dia"])].append(f["clave"])
+        bloques = sorted(set(lados[+1]) & set(lados[-1]))
+        faltaron = len(set(lados[+1]) ^ set(lados[-1]))      # bloques con un solo lado: no sirven al placebo
+        for b in rng.sample(bloques, int(round(fraccion * len(bloques)))):
+            s = rng.choice((+1, -1))
+            m = min(len(lados[+1][b]), len(lados[-1][b]))
+            voltear.update(rng.sample(sorted(lados[s][b]), m))
+    else:
+        raise ValueError("placebo %r: a, b o c" % tipo)
+    nombre = "_placebo_%s" % tipo
+    for f in T:
+        r = f["rec"][control]
+        if f["clave"] in voltear:
+            f["rec"][nombre] = dict(r, pub=not _pub(r), disp=(0.0 if _pub(r) else 0.3))
+        else:
+            f["rec"][nombre] = r
+        f["cob"][nombre] = f["cob"][control]
+    try:
+        res, det = decidir_p2(contribuciones_p2(T, control, nombre, excluir, dias_excluidos))
+    finally:
+        for f in T:
+            f["rec"].pop(nombre, None)
+            f["cob"].pop(nombre, None)
+    det.update(tocadas=len(voltear), bloques_de_un_solo_lado=faltaron)
+    return res, det
 
 
 # ------------------------------------------------------------------------------------------- carga real

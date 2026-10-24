@@ -1,0 +1,154 @@
+{
+ "pruebas": [
+  "tests/test_evaluador_comun_t3_s162.py"
+ ],
+ "mutaciones": [
+  {
+   "id": "F1",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if comparador and modo != \"informa\":",
+   "nuevo": "if False:",
+   "que": "sin comparador d′"
+  },
+  {
+   "id": "F2",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "dp = np.round(np.abs(lD) - np.abs(lK + g_hat), DEC_DPRIMA)",
+   "nuevo": "dp = np.round(np.abs(lD) - np.abs(lK), DEC_DPRIMA)",
+   "que": "d′ sin la ganancia"
+  },
+  {
+   "id": "F3",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "return (\"MEJORA\" if hi < 0 else",
+   "nuevo": "return (\"MEJORA\" if lo < 0 else",
+   "que": "MEJORA con el intervalo cruzando 0"
+  },
+  {
+   "id": "F4",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "a = np.abs(np.asarray(d, dtype=np.float64))",
+   "nuevo": "a = np.asarray(d, dtype=np.float64)",
+   "que": "calibracion sin valor absoluto"
+  },
+  {
+   "id": "F5",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "elif r == \"MEJORA\" and vols_neg < MIN_VOLCANES_MEJORA:",
+   "nuevo": "elif False:",
+   "que": "MEJORA de un solo volcan cuenta"
+  },
+  {
+   "id": "F6",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "elif modo == \"bloquea\" and r == \"MEJORA\":",
+   "nuevo": "elif False:",
+   "que": "estrato que bloquea deja pasar MEJORA"
+  },
+  {
+   "id": "F7",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if len(P) < N_MIN_PARES or len(set(bl)) < N_MIN_NOCHES:",
+   "nuevo": "if len(P) < N_MIN_PARES:",
+   "que": "sin el minimo de noches"
+  },
+  {
+   "id": "F8",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "\"gana\": [sum(k for v, k in dist.items() if v <= neto), den]",
+   "nuevo": "\"gana\": [sum(k for v, k in dist.items() if v < neto), den]",
+   "que": "cola de GANA sin el igual"
+  },
+  {
+   "id": "F9",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if B <= MAX_B_SIN_SUSTRATO_P2:",
+   "nuevo": "if B < MAX_B_SIN_SUSTRATO_P2:",
+   "que": "borde de sin sustrato"
+  },
+  {
+   "id": "F10",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "    if neto > 0:\n        return \"BLOQUEA\"",
+   "nuevo": "    if False:\n        return \"BLOQUEA\"",
+   "que": "no bloquea"
+  },
+  {
+   "id": "F11",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": " and not f[\"noche_con_fp\"]:",
+   "nuevo": ":",
+   "que": "negativo limpio con FALSO_POSITIVO en la noche"
+  },
+  {
+   "id": "F12",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "and not f[\"noche_con_alerta\"] and",
+   "nuevo": "and",
+   "que": "negativo limpio con alerta en la noche"
+  },
+  {
+   "id": "F13",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "(c == \"negativo\" and pub)",
+   "nuevo": "(c == \"negativo\" and not pub)",
+   "que": "error del negativo al reves"
+  },
+  {
+   "id": "F14",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "\"c\": 1 if eb else -1",
+   "nuevo": "\"c\": 1",
+   "que": "signo del aporte"
+  },
+  {
+   "id": "F15",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "buscada = \"negativo\" if tipo == \"a\" else \"alerta_mb\"",
+   "nuevo": "buscada = \"alerta_mb\" if tipo == \"a\" else \"negativo\"",
+   "que": "placebos a y b cruzados"
+  },
+  {
+   "id": "F16",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "m = min(len(lados[+1][b]), len(lados[-1][b]))",
+   "nuevo": "m = len(lados[s][b])",
+   "que": "placebo c no simetrico"
+  },
+  {
+   "id": "F17",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "            f[\"rec\"].pop(nombre, None)",
+   "nuevo": "            pass",
+   "que": "el placebo deja rastro en la tabla"
+  },
+  {
+   "id": "F18",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if _pub(c) != _pub(b):",
+   "nuevo": "if False:",
+   "que": "pares de M con un solo lado publicando"
+  },
+  {
+   "id": "F19",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "\"con_comparador\": decidir_estrato(Pg, modo, comparador=True)[0]",
+   "nuevo": "\"con_comparador\": decidir_estrato(Pg, modo, comparador=False)[0]",
+   "que": "placebo con comparador apagado"
+  },
+  {
+   "id": "F20",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "return abs(math.log10(d_mw / m_mw)) - abs(math.log10(k_mw / m_mw))",
+   "nuevo": "return abs(math.log10(k_mw / m_mw)) - abs(math.log10(d_mw / m_mw))",
+   "que": "d invertido"
+  },
+  {
+   "id": "F21",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if f[\"dia\"] in excl or p.estado != \"alerta\" or not p.vrp_mw or excluir(f) or not observada_en(f, control, brazo):",
+   "nuevo": "if f[\"dia\"] in excl or p.estado != \"alerta\" or not p.vrp_mw or excluir(f):",
+   "que": "pares de M sin el filtro de no observado"
+  }
+ ]
+}
