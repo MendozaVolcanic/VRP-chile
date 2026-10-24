@@ -1,0 +1,116 @@
+== 1. cobertura (A108): objetivos 1458 con estado ok 1447
+   ('S159', 'neg_pub', 'ok') 20
+   ('S159', 'neg_resto', 'ok') 45
+   ('S159', 'pos_bajo', 'ok') 45
+   ('S159', 'pos_prot', 'ok') 39
+   ('S162', 'neg_pub', 'ok') 113
+   ('S162', 'neg_resto', 'ok') 389
+   ('S162', 'neg_resto', 'volcan_fuera_del_granulo') 11
+   ('S162', 'pos_bajo', 'ok') 155
+   ('S162', 'pos_prot', 'ok') 41
+   ('S162b', 'neg_resto', 'ok') 600
+   SIN DATO: 11 [(1019, 'S162', 'Llaima', '2026-04-06 06:54', 'neg_resto', 'volcan_fuera_del_granulo'), (1184, 'S162', 'Lascar', '2026-07-23 06:30', 'neg_resto', 'volcan_fuera_del_granulo'), (1192, 'S162', 'Villarrica', '2026-07-29 04:42', 'neg_resto', 'volcan_fuera_del_granulo'), (1232, 'S162', 'PuyehueCordonCaulle', '2026-08-20 04:30', 'neg_resto', 'volcan_fuera_del_granulo'), (1318, 'S162', 'NevadosDeChillan', '2026-04-10 06:30', 'neg_resto', 'volcan_fuera_del_granulo'), (1403, 'S162', 'Llaima', '2026-06-14 04:30', 'neg_resto', 'volcan_fuera_del_granulo'), (1485, 'S162', 'Villarrica', '2026-08-11 06:24', 'neg_resto', 'volcan_fuera_del_granulo'), (1556, 'S162', 'NevadosDeChillan', '2026-09-22 06:36', 'neg_resto', 'volcan_fuera_del_granulo'), (1601, 'S162', 'Copahue', '2026-04-10 07:00', 'neg_resto', 'volcan_fuera_del_granulo'), (1611, 'S162', 'NevadosDeChillan', '2026-05-12 07:00', 'neg_resto', 'volcan_fuera_del_granulo'), (1673, 'S162', 'Lastarria', '2026-09-12 06:54', 'neg_resto', 'volcan_fuera_del_granulo')]
+   cobertura del marco contra MIROVA, canal union (evaluador común ff452671c): alertas 1208, sin record de producción 0 (protegidas 0) -> COBERTURA OK
+   cobertura del marco contra MIROVA, canal tabla (evaluador común ff452671c): alertas 882, sin record de producción 0 (protegidas 0) -> COBERTURA OK
+
+== 2. controles (antes de leer)
+  2.1 recálculo sin red = runner: 13427 de 13427 (pasada x brazo; S159: M14, PIX7, SENS; S162: los 10)
+  2.2 K re-corrido publica igual que el record publicado: 1447 de 1447 (1.000); sin K re-corrido 0; la lectura de K usa lo publicado
+      distintos: []
+  pesos: estratos sin ninguna pasada ok (su N queda sin representar): []
+  2.3 control positivo: protegidas de Láscar o Chillán con píxeles en M14: 65 de 65
+  2.4 nulo M14 contra M14: discordantes en 0 bloques, neto +0.000 -> SIN SUSTRATO
+  2.5 NUNCA: recall protegidas [0, 80], bajo [0, 200]; protegidas perdidas que K publica 77; P2 contra M14 PIERDE (neto +568.0, B 180); MISSION contra K PIERDE PROTEGIDA
+  2.6 PLACEBO (M14 x 1.2): misma publicación True; P2 contra M14 SIN SUSTRATO (B 0); mediana de M placebo / M14 = 1.200; cruces de 1 MW: baja 1 contra 2, sube 0 contra 0
+  ESTADO DEL INSTRUMENTO: OK | avisos de cobertura: []
+
+== 3. V375-B: silencio del port (M14) en los negativos limpios
+  neg_resto: publica 14 de 1034; ponderado 0.0136, IC (Wilson sobre n efectivo 1033) [0.0081; 0.0226]
+  neg_pub (censo): publica 38 de 133
+  todos los negativos limpios: 0.0240 [0.0188; 0.0328] contra K 0.0385 -> SILENCIO ACOTADO BAJO K
+  MISSION del port (M14) contra K: ΔE +201.2, IC bootstrap [+164.1; +237.0], cota honesta superior +237.0 -> PIERDE PROTEGIDA
+  regla cercano: neg_resto [14, 1034], negativos 0.0240 -> SILENCIO ACOTADO BAJO K
+  regla centroide: neg_resto [14, 1034], negativos 0.0240 -> SILENCIO ACOTADO BAJO K
+  por tramo (M14, publica port / K / n): {'O1|neg': '18/51/486', 'O1|pos': '66/81/87', 'O2|neg': '16/39/327', 'O2|pos': '63/79/83', 'T|neg': '18/43/354', 'T|pos': '83/107/110'}
+
+== 4. V375-C: brazos de ROI (regla «cercano» decide; «centroide» informa)
+  K: recall ponderado protegidas 0.963 bajo 1 MW 0.951
+  M14      P1 perdidas 6 de 80 (K publica 3, tabla 0); recall bajo 0.686 [0.618; 0.747]; negativos 0.0240; P1b baja 2 sube 0; P2 vs M14 SIN SUSTRATO (neto +0.0, B 0); P2 vs K PIERDE; MISSION K PIERDE PROTEGIDA; M 0.998 n 212
+  M13      P1 perdidas 6 de 80 (K publica 3, tabla 0); recall bajo 0.686 [0.618; 0.747]; negativos 0.0178; P1b baja 2 sube 0; P2 vs M14 GANA (neto -21.6, B 8); P2 vs K PIERDE; MISSION K PIERDE PROTEGIDA; M 0.998 n 212
+  M21      P1 perdidas 6 de 80 (K publica 3, tabla 0); recall bajo 0.785 [0.723; 0.837]; negativos 0.0344; P1b baja 2 sube 0; P2 vs M14 GANA (neto -58.4, B 32); P2 vs K PIERDE; MISSION K PIERDE PROTEGIDA; M 0.998 n 232
+  C13      P1 perdidas 6 de 80 (K publica 3, tabla 0); recall bajo 0.954 [0.916; 0.976]; negativos 0.0234; P1b baja 2 sube 0; P2 vs M14 GANA (neto -256.9, B 70); P2 vs K GANA; MISSION K PIERDE PROTEGIDA; M 0.999 n 265
+  C14      P1 perdidas 6 de 80 (K publica 3, tabla 0); recall bajo 0.959 [0.922; 0.979]; negativos 0.0294; P1b baja 2 sube 0; P2 vs M14 GANA (neto -241.1, B 62); P2 vs K GANA; MISSION K PIERDE PROTEGIDA; M 0.998 n 266
+  C21      P1 perdidas 6 de 80 (K publica 3, tabla 0); recall bajo 0.959 [0.922; 0.979]; negativos 0.0369; P1b baja 2 sube 0; P2 vs M14 GANA (neto -215.2, B 73); P2 vs K EMPATE; MISSION K PIERDE PROTEGIDA; M 0.999 n 266
+  PIX7     P1 perdidas 7 de 80 (K publica 4, tabla 1); recall bajo 0.578 [0.508; 0.644]; negativos 0.0124; P1b baja 3 sube 0; P2 vs M14 PIERDE (neto +62.8, B 43); P2 vs K PIERDE; MISSION K PIERDE PROTEGIDA; M 0.990 n 189
+  SENS     P1 perdidas 6 de 80 (K publica 3, tabla 0); recall bajo 0.959 [0.922; 0.979]; negativos 0.0458; P1b baja 2 sube 0; P2 vs M14 GANA (neto -184.3, B 76); P2 vs K BLOQUEA; MISSION K PIERDE PROTEGIDA; M 0.999 n 266
+  CIRC     P1 perdidas 6 de 80 (K publica 3, tabla 0); recall bajo 0.959 [0.922; 0.979]; negativos 0.0521; P1b baja 1 sube 0; P2 vs M14 GANA (neto -162.6, B 85); P2 vs K BLOQUEA; MISSION K PIERDE PROTEGIDA; M 0.999 n 266
+  SENS_PT  P1 perdidas 6 de 80 (K publica 3, tabla 0); recall bajo 0.959 [0.922; 0.979]; negativos 0.0328; P1b baja 2 sube 0; P2 vs M14 GANA (neto -229.2, B 60); P2 vs K EMPATE; MISSION K PIERDE PROTEGIDA; M 0.998 n 266
+  M14      (centroide) P1 perdidas 11, recall bajo 0.676, negativos 0.0240
+  M13      (centroide) P1 perdidas 11, recall bajo 0.676, negativos 0.0178
+  M21      (centroide) P1 perdidas 11, recall bajo 0.775, negativos 0.0344
+  C13      (centroide) P1 perdidas 11, recall bajo 0.944, negativos 0.0234
+  C14      (centroide) P1 perdidas 11, recall bajo 0.949, negativos 0.0294
+  C21      (centroide) P1 perdidas 11, recall bajo 0.949, negativos 0.0369
+  PIX7     (centroide) P1 perdidas 12, recall bajo 0.572, negativos 0.0124
+  SENS     (centroide) P1 perdidas 11, recall bajo 0.939, negativos 0.0439
+  CIRC     (centroide) P1 perdidas 11, recall bajo 0.949, negativos 0.0521
+  SENS_PT  (centroide) P1 perdidas 11, recall bajo 0.949, negativos 0.0328
+  K en el marco entero (censo de la población de S159, sin los días excluidos): recall protegidas 0.963 (80), bajo 1 MW 0.957 (949)
+
+  -- decisión sobre: unión S159 + S162 (confirma) (1447 pasadas; veto de protegidas sobre 1447) --
+  N representado por clase: {'pos_prot': 80.0, 'pos_bajo': 949.0, 'neg_pub': 133.0, 'neg_resto': 3323.0}
+  B estricto (z 2,241, informa): cota 0.0344 -> SILENCIO ACOTADO BAJO K
+  B: neg_resto [14, 1034], IC (0.008099263180760027, 0.022636134621390858); negativos 0.0240 [0.018782943156731933, 0.03276038059805608] contra K 0.0385 -> SILENCIO ACOTADO BAJO K; MISSION M14 contra K PIERDE PROTEGIDA
+  M13      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -21.6, B 8)
+  M21      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -58.4, B 32)
+  C13      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -256.9, B 70)
+  C14      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -241.1, B 62)
+  C21      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -215.2, B 73)
+  PIX7     protegidas que M14 publica y el brazo no: 1; P2 contra M14 PIERDE (neto +62.8, B 43)
+  SENS     protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -184.3, B 76)
+  CIRC     protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -162.6, B 85)
+  SENS_PT  protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -229.2, B 60)
+  brazo global: C13 | candidatos: ['C13', 'C14', 'C21', 'CIRC', 'M13', 'M21', 'SENS', 'SENS_PT']
+  por volcán, elegido en T: {'Llaima': 'M13', 'PuyehueCordonCaulle': 'C13', 'Tupungatito': 'C13'} (los demás M14)
+  validación en O: protegidas que M14 publica y el compuesto no 0; P2 contra M14 GANA (neto -145.8, B 39); P2 contra K GANA -> VALIDA EN O
+  V375-D: NO NECESARIO por B ni por C | protegidas sólo OCR que K publica y el brazo global no: 3 (esperan V375-A)
+
+  -- decisión sobre: lotes S162+S162b (DECIDE) (1298 pasadas; veto de protegidas sobre 1447) --
+  N representado por clase: {'pos_prot': 65.0, 'pos_bajo': 920.0, 'neg_pub': 130.0, 'neg_resto': 3323.0}
+  B estricto (z 2,241, informa): cota 0.0392 -> NO RESUELTO
+  B: neg_resto [14, 989], IC (0.00857248210371777, 0.023826720909991855); negativos 0.0244 [0.015965386572380655, 0.03696300835286744] contra K 0.0385 -> SILENCIO ACOTADO BAJO K; MISSION M14 contra K ENCIENDE DE MAS
+  M13      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -22.5, B 8)
+  M21      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -56.9, B 27)
+  C13      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -255.4, B 61)
+  C14      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -239.9, B 53)
+  C21      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -211.8, B 63)
+  PIX7     protegidas que M14 publica y el brazo no: 1; P2 contra M14 BLOQUEA (neto +44.0, B 34)
+  SENS     protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -182.9, B 65)
+  CIRC     protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -162.8, B 74)
+  SENS_PT  protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -226.7, B 51)
+  brazo global: C13 | candidatos: ['C13', 'C14', 'C21', 'CIRC', 'M13', 'M21', 'SENS', 'SENS_PT']
+  por volcán, elegido en T: {'Llaima': 'PIX7', 'PuyehueCordonCaulle': 'C13', 'Tupungatito': 'C13'} (los demás M14)
+  validación en O: protegidas que M14 publica y el compuesto no 0; P2 contra M14 GANA (neto -145.0, B 34); P2 contra K EMPATE -> VALIDA EN O
+  V375-D: NO NECESARIO por B ni por C | protegidas sólo OCR que K publica y el brazo global no: 3 (esperan V375-A)
+
+== 4b. acuerdo entre el lote nuevo (decide) y la unión (confirma), PREREGISTRO_C.md §5.5
+  B: S162 SILENCIO ACOTADO BAJO K | unión SILENCIO ACOTADO BAJO K -> DE ACUERDO
+  global: S162 C13 | unión C13 -> DE ACUERDO
+  valida_en_O: S162 VALIDA EN O | unión VALIDA EN O -> DE ACUERDO
+  V375_D_necesario: S162 False | unión False -> DE ACUERDO
+
+== 5. estratos del brazo global y de M14 (publica / K / n)
+  volcán M14: {'Chaiten|neg': '2/23/157', 'Chaiten|pos': '9/9/9', 'Copahue|neg': '0/0/151', 'Copahue|pos': '2/2/2', 'Isluga|neg': '2/2/20', 'Isluga|pos': '52/50/53', 'Lascar|neg': '3/5/41', 'Lascar|pos': '70/71/74', 'Lastarria|neg': '30/43/81', 'Lastarria|pos': '22/23/25', 'Llaima|neg': '6/1/155', 'Llaima|pos': '1/1/1', 'NevadosDeChillan|neg': '2/5/127', 'NevadosDeChillan|pos': '29/27/29', 'PlanchonPeteroa|neg': '2/8/91', 'PlanchonPeteroa|pos': '17/18/18', 'PuyehueCordonCaulle|neg': '0/32/120', 'PuyehueCordonCaulle|pos': '3/34/34', 'Tupungatito|neg': '4/11/80', 'Tupungatito|pos': '0/25/28', 'Villarrica|neg': '1/3/144', 'Villarrica|pos': '7/7/7'}
+  volcán C13: {'Chaiten|neg': '2/23/157', 'Chaiten|pos': '9/9/9', 'Copahue|neg': '0/0/151', 'Copahue|pos': '2/2/2', 'Isluga|neg': '2/2/20', 'Isluga|pos': '52/50/53', 'Lascar|neg': '3/5/41', 'Lascar|pos': '69/71/74', 'Lastarria|neg': '29/43/81', 'Lastarria|pos': '22/23/25', 'Llaima|neg': '0/1/155', 'Llaima|pos': '1/1/1', 'NevadosDeChillan|neg': '2/5/127', 'NevadosDeChillan|pos': '29/27/29', 'PlanchonPeteroa|neg': '2/8/91', 'PlanchonPeteroa|pos': '17/18/18', 'PuyehueCordonCaulle|neg': '1/32/120', 'PuyehueCordonCaulle|pos': '33/34/34', 'Tupungatito|neg': '6/11/80', 'Tupungatito|pos': '24/25/28', 'Villarrica|neg': '5/3/144', 'Villarrica|pos': '7/7/7'}
+  tramo M14: {'O1|neg': '18/51/486', 'O1|pos': '66/81/87', 'O2|neg': '16/39/327', 'O2|pos': '63/79/83', 'T|neg': '18/43/354', 'T|pos': '83/107/110'}
+  tramo C13: {'O1|neg': '19/51/486', 'O1|pos': '80/81/87', 'O2|neg': '15/39/327', 'O2|pos': '76/79/83', 'T|neg': '18/43/354', 'T|pos': '109/107/110'}
+  cenit 10° M14: {'0|neg': '5/19/97', '0|pos': '26/31/32', '10|neg': '10/20/68', '10|pos': '31/35/36', '20|neg': '4/18/96', '20|pos': '39/47/48', '30|neg': '5/22/142', '30|pos': '30/41/41', '40|neg': '9/25/121', '40|pos': '37/47/50', '50|neg': '12/19/205', '50|pos': '32/42/46', '60|neg': '7/10/422', '60|pos': '17/24/27', '70|neg': '0/0/16'}
+  cenit 10° C13: {'0|neg': '8/19/97', '0|pos': '32/31/32', '10|neg': '6/20/68', '10|pos': '35/35/36', '20|neg': '4/18/96', '20|pos': '47/47/48', '30|neg': '5/22/142', '30|pos': '41/41/41', '40|neg': '9/25/121', '40|pos': '44/47/50', '50|neg': '6/19/205', '50|pos': '44/42/46', '60|neg': '14/10/422', '60|pos': '22/24/27', '70|neg': '0/0/16'}
+  canal M14: {'neg|neg': '52/133/1167', 'ocr|pos': '29/38/45', 'tabla|pos': '183/229/235'}
+  canal C13: {'neg|neg': '52/133/1167', 'ocr|pos': '34/38/45', 'tabla|pos': '231/229/235'}
+  lote M14: {'S159|neg': '7/20/65', 'S159|pos': '64/76/84', 'S162|neg': '35/113/502', 'S162|pos': '148/191/196', 'S162b|neg': '10/0/600'}
+  lote C13: {'S159|neg': '9/20/65', 'S159|pos': '75/76/84', 'S162|neg': '34/113/502', 'S162|pos': '190/191/196', 'S162b|neg': '9/0/600'}
+  partidas (aparte): [('Chaiten', '2026-05-02 05:30', 'neg_pub', False, True), ('Copahue', '2026-06-19 05:30', 'neg_resto', False, False), ('PlanchonPeteroa', '2026-07-27 05:18', 'neg_resto', False, False), ('NevadosDeChillan', '2026-09-08 06:54', 'neg_resto', False, False), ('Lastarria', '2026-09-11 05:54', 'neg_pub', False, True), ('Isluga', '2026-04-11 06:06', 'pos_bajo', True, True), ('Villarrica', '2026-04-16 06:18', 'neg_resto', False, False), ('Chaiten', '2026-04-17 06:00', 'neg_pub', False, True), ('Isluga', '2026-06-08 06:18', 'pos_bajo', True, True), ('PlanchonPeteroa', '2026-07-05 04:36', 'neg_resto', False, False), ('Tupungatito', '2026-08-27 04:42', 'neg_resto', False, False), ('Chaiten', '2026-08-28 06:06', 'neg_resto', False, False), ('Villarrica', '2026-09-28 06:24', 'neg_resto', False, False), ('Llaima', '2026-07-31 07:00', 'neg_resto', False, False), ('Copahue', '2026-08-29 04:42', 'neg_resto', False, False), ('Copahue', '2026-09-23 06:54', 'neg_resto', False, False), ('Copahue', '2026-04-09 06:00', 'neg_resto', False, False), ('Lastarria', '2026-04-28 05:00', 'neg_resto', True, False), ('Isluga', '2026-05-12 05:36', 'neg_resto', False, False), ('Llaima', '2026-05-28 05:42', 'neg_resto', False, False), ('PlanchonPeteroa', '2026-06-07 05:54', 'neg_resto', False, False), ('Chaiten', '2026-07-08 04:36', 'neg_resto', False, False), ('NevadosDeChillan', '2026-09-19 06:48', 'neg_resto', False, False), ('Lastarria', '2026-09-22 05:48', 'neg_resto', False, False), ('Llaima', '2026-09-25 06:36', 'neg_resto', False, False), ('Chaiten', '2026-05-03 06:00', 'neg_resto', False, False), ('Llaima', '2026-05-07 06:24', 'neg_resto', False, False), ('Villarrica', '2026-05-23 06:24', 'neg_resto', False, False), ('NevadosDeChillan', '2026-06-07 06:42', 'neg_resto', False, False), ('PlanchonPeteroa', '2026-07-30 06:42', 'neg_resto', False, False), ('Lastarria', '2026-09-09 05:36', 'neg_resto', False, False), ('Villarrica', '2026-08-22 06:54', 'neg_resto', False, False), ('Villarrica', '2026-09-18 06:48', 'neg_resto', False, False), ('Llaima', '2026-10-04 06:48', 'neg_resto', False, False), ('Villarrica', '2026-08-09 04:36', 'neg_pub', False, True), ('PuyehueCordonCaulle', '2026-07-10 06:24', 'neg_resto', False, False), ('Chaiten', '2026-08-12 06:06', 'neg_pub', False, True), ('PuyehueCordonCaulle', '2026-10-09 06:18', 'neg_resto', False, False)]
+  protegida de cráter (V375-A): PENDIENTE de la sesión del instrumento; se informará al lado de la lectura A
+
+VEREDICTO: los de §3 y §4b; avisos de cobertura: []
