@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="24" skipped="0" tests="37" time="56.037" timestamp="2026-10-22T09:59:58.432597-03:00" hostname="Nico"><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_los_numeros_de_la_calibracion_son_los_sellados" time="0.002"><failure message="AssertionError: falta SEMILLA_CALIB_P2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'SEMILLA_CALIB_P2')">def test_los_numeros_de_la_calibracion_son_los_sellados():
+&gt;       _tiene("SEMILLA_CALIB_P2")
+
+tests\test_evaluar_d25_calib_p2_s160.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'SEMILLA_CALIB_P2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta SEMILLA_CALIB_P2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'SEMILLA_CALIB_P2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados" time="0.001"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">def test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados():
+        """Fija semilla, número de sorteos, sorteo por bloque y la regla aplicada a cada sorteo a la vez: el detalle de P2
+        trae las mismas tres fracciones que el oráculo escrito aparte con los literales de la adenda."""
+&gt;       _tiene("calibrar_p2")
+
+tests\test_evaluar_d25_calib_p2_s160.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_sorteo_es_por_bloque_y_no_por_pasada" time="0.002"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">def test_el_sorteo_es_por_bloque_y_no_por_pasada():
+        """Tres noches de cuatro pasadas, todas con error sólo de D: sin calibrar, PIERDE. Con el signo sorteado por noche,
+        las tres caen del mismo lado en 1 de cada 4 sorteos (12,5 % por cola): la calibración falla y queda INDECIDIBLE.
+        Sorteando por pasada, una noche casi nunca queda entera de un lado y la regla saldría «calibrada» (S156: V34-01)."""
+&gt;       _tiene("calibrar_p2")
+
+tests\test_evaluar_d25_calib_p2_s160.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.05-0.05-True]" time="0.002"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B85DD60&gt;
+f_gana = 0.05, f_pierde = 0.05, calibrada = True
+
+    @pytest.mark.parametrize("f_gana,f_pierde,calibrada", [
+        (0.05, 0.05, True),      # en el tope: 50 de 1.000 por cola es calibrada
+        (0.051, 0.0, False),     # una sola cola pasada basta
+        (0.0, 0.051, False),     # la otra cola sola también basta
+        (0.06, 0.0, False),      # tope del 5 %, no del 10 %
+        (0.0, 0.08, False),
+    ])
+    def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, calibrada):
+&gt;       _calibracion_forzada(monkeypatch, f_gana, f_pierde)
+
+tests\test_evaluar_d25_calib_p2_s160.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_evaluar_d25_calib_p2_s160.py:86: in _calibracion_forzada
+    _tiene("calibrar_p2")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.051-0.0-False]" time="0.002"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B85E4E0&gt;
+f_gana = 0.051, f_pierde = 0.0, calibrada = False
+
+    @pytest.mark.parametrize("f_gana,f_pierde,calibrada", [
+        (0.05, 0.05, True),      # en el tope: 50 de 1.000 por cola es calibrada
+        (0.051, 0.0, False),     # una sola cola pasada basta
+        (0.0, 0.051, False),     # la otra cola sola también basta
+        (0.06, 0.0, False),      # tope del 5 %, no del 10 %
+        (0.0, 0.08, False),
+    ])
+    def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, calibrada):
+&gt;       _calibracion_forzada(monkeypatch, f_gana, f_pierde)
+
+tests\test_evaluar_d25_calib_p2_s160.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_evaluar_d25_calib_p2_s160.py:86: in _calibracion_forzada
+    _tiene("calibrar_p2")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.051-False]" time="0.002"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B85F7D0&gt;
+f_gana = 0.0, f_pierde = 0.051, calibrada = False
+
+    @pytest.mark.parametrize("f_gana,f_pierde,calibrada", [
+        (0.05, 0.05, True),      # en el tope: 50 de 1.000 por cola es calibrada
+        (0.051, 0.0, False),     # una sola cola pasada basta
+        (0.0, 0.051, False),     # la otra cola sola también basta
+        (0.06, 0.0, False),      # tope del 5 %, no del 10 %
+        (0.0, 0.08, False),
+    ])
+    def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, calibrada):
+&gt;       _calibracion_forzada(monkeypatch, f_gana, f_pierde)
+
+tests\test_evaluar_d25_calib_p2_s160.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_evaluar_d25_calib_p2_s160.py:86: in _calibracion_forzada
+    _tiene("calibrar_p2")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.06-0.0-False]" time="0.001"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B861910&gt;
+f_gana = 0.06, f_pierde = 0.0, calibrada = False
+
+    @pytest.mark.parametrize("f_gana,f_pierde,calibrada", [
+        (0.05, 0.05, True),      # en el tope: 50 de 1.000 por cola es calibrada
+        (0.051, 0.0, False),     # una sola cola pasada basta
+        (0.0, 0.051, False),     # la otra cola sola también basta
+        (0.06, 0.0, False),      # tope del 5 %, no del 10 %
+        (0.0, 0.08, False),
+    ])
+    def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, calibrada):
+&gt;       _calibracion_forzada(monkeypatch, f_gana, f_pierde)
+
+tests\test_evaluar_d25_calib_p2_s160.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_evaluar_d25_calib_p2_s160.py:86: in _calibracion_forzada
+    _tiene("calibrar_p2")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.08-False]" time="0.001"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B862B70&gt;
+f_gana = 0.0, f_pierde = 0.08, calibrada = False
+
+    @pytest.mark.parametrize("f_gana,f_pierde,calibrada", [
+        (0.05, 0.05, True),      # en el tope: 50 de 1.000 por cola es calibrada
+        (0.051, 0.0, False),     # una sola cola pasada basta
+        (0.0, 0.051, False),     # la otra cola sola también basta
+        (0.06, 0.0, False),      # tope del 5 %, no del 10 %
+        (0.0, 0.08, False),
+    ])
+    def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, calibrada):
+&gt;       _calibracion_forzada(monkeypatch, f_gana, f_pierde)
+
+tests\test_evaluar_d25_calib_p2_s160.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_evaluar_d25_calib_p2_s160.py:86: in _calibracion_forzada
+    _tiene("calibrar_p2")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche0-GANA]" time="0.002"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B860B00&gt;
+por_noche = [[-1], [-1], [-1], [-1], [-1], [-1], ...], sin_calibrar = 'GANA'
+
+    @pytest.mark.parametrize("por_noche,sin_calibrar", [
+        ([[-1]] * 12, "GANA"),
+        ([[+1]] * 12, "PIERDE"),
+        ([[+1]] * 6 + [[-1]] * 4, "BLOQUEA"),
+        ([[+1]] * 4 + [[-1]] * 6, "EMPATE"),
+    ])
+    def test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado(monkeypatch, por_noche, sin_calibrar):
+        """Adenda §2.5: «P2 de ese sensor queda INDECIDIBLE, sea cual sea su resultado sin calibrar, que se informa al lado».
+        Un PIERDE sin calibrar tampoco cuenta."""
+&gt;       _calibracion_forzada(monkeypatch, 0.5, 0.5)
+
+tests\test_evaluar_d25_calib_p2_s160.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_evaluar_d25_calib_p2_s160.py:86: in _calibracion_forzada
+    _tiene("calibrar_p2")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche1-PIERDE]" time="0.001"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B862480&gt;
+por_noche = [[1], [1], [1], [1], [1], [1], ...], sin_calibrar = 'PIERDE'
+
+    @pytest.mark.parametrize("por_noche,sin_calibrar", [
+        ([[-1]] * 12, "GANA"),
+        ([[+1]] * 12, "PIERDE"),
+        ([[+1]] * 6 + [[-1]] * 4, "BLOQUEA"),
+        ([[+1]] * 4 + [[-1]] * 6, "EMPATE"),
+    ])
+    def test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado(monkeypatch, por_noche, sin_calibrar):
+        """Adenda §2.5: «P2 de ese sensor queda INDECIDIBLE, sea cual sea su resultado sin calibrar, que se informa al lado».
+        Un PIERDE sin calibrar tampoco cuenta."""
+&gt;       _calibracion_forzada(monkeypatch, 0.5, 0.5)
+
+tests\test_evaluar_d25_calib_p2_s160.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_evaluar_d25_calib_p2_s160.py:86: in _calibracion_forzada
+    _tiene("calibrar_p2")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche2-BLOQUEA]" time="0.002"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B8EAAE0&gt;
+por_noche = [[1], [1], [1], [1], [1], [1], ...], sin_calibrar = 'BLOQUEA'
+
+    @pytest.mark.parametrize("por_noche,sin_calibrar", [
+        ([[-1]] * 12, "GANA"),
+        ([[+1]] * 12, "PIERDE"),
+        ([[+1]] * 6 + [[-1]] * 4, "BLOQUEA"),
+        ([[+1]] * 4 + [[-1]] * 6, "EMPATE"),
+    ])
+    def test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado(monkeypatch, por_noche, sin_calibrar):
+        """Adenda §2.5: «P2 de ese sensor queda INDECIDIBLE, sea cual sea su resultado sin calibrar, que se informa al lado».
+        Un PIERDE sin calibrar tampoco cuenta."""
+&gt;       _calibracion_forzada(monkeypatch, 0.5, 0.5)
+
+tests\test_evaluar_d25_calib_p2_s160.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_evaluar_d25_calib_p2_s160.py:86: in _calibracion_forzada
+    _tiene("calibrar_p2")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche3-EMPATE]" time="0.002"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B8E9C10&gt;
+por_noche = [[1], [1], [1], [1], [-1], [-1], ...], sin_calibrar = 'EMPATE'
+
+    @pytest.mark.parametrize("por_noche,sin_calibrar", [
+        ([[-1]] * 12, "GANA"),
+        ([[+1]] * 12, "PIERDE"),
+        ([[+1]] * 6 + [[-1]] * 4, "BLOQUEA"),
+        ([[+1]] * 4 + [[-1]] * 6, "EMPATE"),
+    ])
+    def test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado(monkeypatch, por_noche, sin_calibrar):
+        """Adenda §2.5: «P2 de ese sensor queda INDECIDIBLE, sea cual sea su resultado sin calibrar, que se informa al lado».
+        Un PIERDE sin calibrar tampoco cuenta."""
+&gt;       _calibracion_forzada(monkeypatch, 0.5, 0.5)
+
+tests\test_evaluar_d25_calib_p2_s160.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_evaluar_d25_calib_p2_s160.py:86: in _calibracion_forzada
+    _tiene("calibrar_p2")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_bloquea_no_se_calibra_y_su_fraccion_se_informa" time="0.001"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B8EAF00&gt;
+
+    def test_bloquea_no_se_calibra_y_su_fraccion_se_informa(monkeypatch):
+        """Adenda §2.6: con la calibración OK, BLOQUEA sigue como está aunque bajo el nulo bloquee en muchos sorteos."""
+&gt;       _calibracion_forzada(monkeypatch, 0.0, 0.0, f_bloquea=0.9)
+
+tests\test_evaluar_d25_calib_p2_s160.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_evaluar_d25_calib_p2_s160.py:86: in _calibracion_forzada
+    _tiene("calibrar_p2")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_sin_sustrato_y_controles_caidos_no_se_calibran_pero_informan" time="0.001"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">def test_sin_sustrato_y_controles_caidos_no_se_calibran_pero_informan():
+        """Adenda §2: la calibración va después del SIN SUSTRATO y sólo con los controles OK; §2.7: se informa siempre."""
+&gt;       _tiene("calibrar_p2")
+
+tests\test_evaluar_d25_calib_p2_s160.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_con_muchas_noches_la_calibracion_pasa_y_decide" time="0.001"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">def test_con_muchas_noches_la_calibracion_pasa_y_decide():
+        """Control de poder: un efecto repartido en 12 noches sigue decidiendo (la calibración no lo apaga)."""
+&gt;       _tiene("calibrar_p2")
+
+tests\test_evaluar_d25_calib_p2_s160.py:181: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_global_ventana_con_p2_indecidible" time="0.001"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">def test_global_ventana_con_p2_indecidible():
+        """Adenda §2.5: como hoy con un M INDECIDIBLE, la ventana queda INDECIDIBLE, salvo un VETADO de P1, que manda antes."""
+&gt;       _tiene("calibrar_p2")
+
+tests\test_evaluar_d25_calib_p2_s160.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_lectura_pendiente_p2_indecidible_en_un_sensor_y_pierde_calibrado_en_el_otro" time="0.001"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">def test_lectura_pendiente_p2_indecidible_en_un_sensor_y_pierde_calibrado_en_el_otro():
+        """NO es regla sellada: documenta lo que hace hoy global_ventana, sin cambio (PIERDE se mira antes que INDECIDIBLE,
+        H2 de ADENDA_CALIBRACION.md §4). La adenda D-42 §2.5 dice «Como hoy con un M INDECIDIBLE» y también «salvo un
+        VETADO de P1»; en este caso cruzado las dos frases no dicen lo mismo. Pregunta abierta para Nicolás (README de
+        experiments/_s159/instrumentos/calib_p2/)."""
+&gt;       _tiene("calibrar_p2")
+
+tests\test_evaluar_d25_calib_p2_s160.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_intervalo_de_p2_usa_la_semilla_y_los_remuestreos_sellados" time="0.001"><failure message="AssertionError: falta calibrar_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'calibrar_p2')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002654B85D970&gt;
+
+    def test_el_intervalo_de_p2_usa_la_semilla_y_los_remuestreos_sellados(monkeypatch):
+        """V34-03 (m05, m06): toda matriz de pesos que arma P2 sale de 10.000 remuestreos con la semilla 157 (la de M)."""
+&gt;       _tiene("calibrar_p2")
+
+tests\test_evaluar_d25_calib_p2_s160.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'calibrar_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta calibrar_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'calibrar_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_intervalo_de_p2_es_el_95_por_ciento_exacto" time="0.063" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_los_bordes_del_intervalo_son_estrictos[PIERDE]" time="0.002"><failure message="AssertionError: falta regla_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'regla_p2')">lado = 'PIERDE'
+
+    @pytest.mark.parametrize("lado", ["PIERDE", "GANA"])
+    def test_los_bordes_del_intervalo_son_estrictos(lado):
+        """V34-03 (m08) y D-34 §5.4: PIERDE exige el intervalo ENTERO sobre 0 (lo &gt; 0), GANA entero bajo 0 (hi &lt; 0). Un
+        intervalo que toca 0 no decide; con el neto en contra de D, BLOQUEA."""
+&gt;       _tiene("regla_p2")
+
+tests\test_evaluar_d25_calib_p2_s160.py:245: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'regla_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta regla_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'regla_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_los_bordes_del_intervalo_son_estrictos[GANA]" time="0.002"><failure message="AssertionError: falta regla_p2 (D-42)&#10;assert False&#10; +  where False = hasattr(X, 'regla_p2')">lado = 'GANA'
+
+    @pytest.mark.parametrize("lado", ["PIERDE", "GANA"])
+    def test_los_bordes_del_intervalo_son_estrictos(lado):
+        """V34-03 (m08) y D-34 §5.4: PIERDE exige el intervalo ENTERO sobre 0 (lo &gt; 0), GANA entero bajo 0 (hi &lt; 0). Un
+        intervalo que toca 0 no decide; con el neto en contra de D, BLOQUEA."""
+&gt;       _tiene("regla_p2")
+
+tests\test_evaluar_d25_calib_p2_s160.py:245: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'regla_p2'
+
+    def _tiene(nombre):
+&gt;       assert hasattr(X, nombre), "falta %s (D-42)" % nombre
+E       AssertionError: falta regla_p2 (D-42)
+E       assert False
+E        +  where False = hasattr(X, 'regla_p2')
+
+tests\test_evaluar_d25_calib_p2_s160.py:47: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.05-MEJORA]" time="9.253" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.051-INDECIDIBLE]" time="8.635" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.06-INDECIDIBLE]" time="8.685" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.09-INDECIDIBLE]" time="9.035" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_dprima_mal_calibrada_no_toca_un_estrato_donde_d_no_da_mejora" time="8.746" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_estrato_203_se_cuenta" time="0.006"><failure message="AssertionError: contar no informa el estrato del hallazgo 203&#10;assert 'estrato_203' in {'M_pares': 0, 'M_pares_con_magnitud_distinta': 0, 'M_placebo': {}, 'M_por_volcan': {}, ...}">def test_el_estrato_203_se_cuenta():
+        """Control positivo sintético (NOTA_ESTRATO_203.md, «Qué se informa»): las seis pasadas con cumbre de K en 0,0 MW
+        entran a la tabla con su clase, y los totales dan 4 que D recupera, 2 que enciende y 0 sin cambio."""
+        T, prot, R, cfg, res_ctrl = _armar_203(0.0)
+        ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Isluga": 5.0})
+&gt;       assert "estrato_203" in info, "contar no informa el estrato del hallazgo 203"
+E       AssertionError: contar no informa el estrato del hallazgo 203
+E       assert 'estrato_203' in {'M_pares': 0, 'M_pares_con_magnitud_distinta': 0, 'M_placebo': {}, 'M_por_volcan': {}, ...}
+
+tests\test_evaluar_d25_calib_p2_s160.py:340: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_estrato_203_no_decide" time="0.007"><failure message="AssertionError: sin poder: el estrato no se contó&#10;assert ('estrato_203' in {'M_pares': 0, 'M_pares_con_magnitud_distinta': 0, 'M_placebo': {}, 'M_por_volcan': {}, ...})">def test_el_estrato_203_no_decide():
+        """El mismo conjunto con la cumbre de K en 0,3 MW queda fuera del estrato, y todos los veredictos son idénticos:
+        la pertenencia al estrato 203 no entra a P1, P1b, P2 ni M (y global_ventana sólo lee `ver`)."""
+        def correr(pc_vrp_k):
+            T, prot, R, cfg, res_ctrl = _armar_203(pc_vrp_k)
+            return X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Isluga": 5.0})
+        a, b = correr(0.0), correr(0.3)
+&gt;       assert "estrato_203" in a[1] and a[1]["estrato_203"]["n"] == 6, "sin poder: el estrato no se contó"
+E       AssertionError: sin poder: el estrato no se contó
+E       assert ('estrato_203' in {'M_pares': 0, 'M_pares_con_magnitud_distinta': 0, 'M_placebo': {}, 'M_por_volcan': {}, ...})
+
+tests\test_evaluar_d25_calib_p2_s160.py:357: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_estrato_203_es_solo_viirs_750_y_solo_cumbre" time="0.006"><failure message="AssertionError: contar no informa el estrato del hallazgo 203&#10;assert 'estrato_203' in {'M_pares': 0, 'M_pares_con_magnitud_distinta': 0, 'M_placebo': {}, 'M_por_volcan': {}, ...}">def test_el_estrato_203_es_solo_viirs_750_y_solo_cumbre():
+        """VIIRS 375 no entra; un cúmulo de K en 0,0 con distance_class far no es de cumbre; uno ausente con summit sí."""
+        T, prot, R, cfg, res_ctrl = _armar_203(0.0)
+        TKD = T[("K", "D")]
+        k375 = "Isluga|VIIRS375|2026-09-01 05:20"
+        TKD[k375] = {"control": _fila(False, "neg_limpio"), "brazo": _fila(True, "neg_limpio", 0.2)}
+        R["K"][k375], R["D"][k375] = {"pc_vrp": 0.0, "dc": "summit"}, {"pc_vrp": 0.2, "dc": "summit"}
+        prot[k375] = {"A": False, "B": False, "alerta_solo_ocr": False}
+        R["K"]["Isluga|VIIRS750|2026-09-01 05:10"] = {"pc_vrp": 0.0, "dc": "far"}
+        R["K"]["Isluga|VIIRS750|2026-09-02 05:10"] = {"pc_vrp": None, "dc": "summit"}
+        ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Isluga": 5.0})
+&gt;       assert "estrato_203" in info, "contar no informa el estrato del hallazgo 203"
+E       AssertionError: contar no informa el estrato del hallazgo 203
+E       assert 'estrato_203' in {'M_pares': 0, 'M_pares_con_magnitud_distinta': 0, 'M_placebo': {}, 'M_por_volcan': {}, ...}
+
+tests\test_evaluar_d25_calib_p2_s160.py:382: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_poder_las_perturbaciones_existen" time="4.556" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_cabecera_de_d29_es_la_primera_linea" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_exclusion_llega_a_los_crudos" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_exclusion_llega_a_la_referencia_de_cobertura" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_exclusion_llega_a_la_tabla_y_la_fecha_es_utc" time="0.002" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_los_controles_pasan_y_el_veredicto_vale" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_el_json_trae_la_calibracion_de_p2_y_el_estrato_203" time="0.001"><failure message="AssertionError: ('original', 'VIIRS375', 'calibrada')&#10;assert 'calibrada' in {'discordantes': [], 'ic95': None, 'n_discordantes': 0, 'neto': 0, ...}">simetrica = ({'P4': {'cambia_distance_class': [], 'movidas': 0, 'movidas_protegidas': []}, 'P5': {'apagadas_por_filtro_del_tablero...o prueba que el flag se leyó, H8)\n', {'en_excluidos': 35, 'esperado': {'VIIRS375': 53, 'VIIRS750': 52}, 'movidos': 1})
+
+    def test_el_json_trae_la_calibracion_de_p2_y_el_estrato_203(simetrica):
+        """D-42 §2.7: «Se informa siempre, en el detalle de P2 del JSON». NOTA_ESTRATO_203.md: tabla y totales."""
+        res, out, _ = simetrica
+        for regla in ("original", "SN"):
+            info = res["por_regla"][regla]["info"]
+            for s in ("VIIRS375", "VIIRS750"):
+                for campo in ("calibrada", "falsos_gana", "falsos_pierde", "falsos_bloquea", "n_sorteos",
+                              "semilla_calibracion", "resultado_sin_calibrar"):
+&gt;                   assert campo in info["P2|%s" % s], (regla, s, campo)
+E                   AssertionError: ('original', 'VIIRS375', 'calibrada')
+E                   assert 'calibrada' in {'discordantes': [], 'ic95': None, 'n_discordantes': 0, 'neto': 0, ...}
+
+tests\test_evaluar_d25_punta_a_punta_s160.py:194: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_marca_de_la_calibracion_sellada_llega_al_estado" time="5.181" /></testsuite></testsuites>

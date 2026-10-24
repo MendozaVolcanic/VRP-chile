@@ -1,0 +1,29 @@
+reanudando desde m13 (el control m00 y las anteriores ya corrieron, ver la salida previa)
+m00  control: copia sin mutar (las dos pruebas)                                                      control    OK, 0 fallas           (control no repetido)
+m13  bloque por volcan solo (sin la noche)                                                           D-34 5.3   ATRAPADA por asercion  1 failed, 10 passed in 0.88s
+        asercion: test_contar_usa_el_signo_de_errores_y_trae_la_lista
+m14  regla (b) D-33 con margen 3 en vez de 2                                                         D-34 5.8   ATRAPADA por asercion  1 failed, 10 passed in 0.98s
+        asercion: test_contar_informa_las_reglas_a_y_b_sin_decidir
+m15  intervalo al 90 % en P2 (percentiles 5 y 95)                                                    D-34 5.3   NO ATRAPADA            11 passed in 0.57s
+m16  tope de la calibracion de d' al 10 % en vez de 5 %                                              D-32       NO ATRAPADA            31 passed in 172.09s (0:02:52)
+m17  999 repeticiones en la calibracion de d'                                                        D-32       ATRAPADA por asercion  1 failed, 30 passed in 176.34s (0:02:56)
+        asercion: test_la_calibracion_de_dprima_usa_la_semilla_y_las_repeticiones_selladas
+m18  otra semilla en la calibracion de d' (SEMILLA + 4)                                              D-32       ATRAPADA por asercion  2 failed, 29 passed in 196.87s (0:03:16)
+        asercion: test_si_d_mejora_y_la_calibracion_de_dprima_falla_queda_indecidible
+        asercion: test_la_calibracion_de_dprima_usa_la_semilla_y_las_repeticiones_selladas
+m19  la calibracion de d' exige la cola EMPEORA en vez de la de MEJORA                               D-30.2     ATRAPADA por asercion  2 failed, 29 passed in 174.81s (0:02:54)
+        asercion: test_si_d_mejora_y_la_calibracion_de_dprima_falla_queda_indecidible
+        asercion: test_la_calibracion_de_dprima_solo_mira_la_cola_de_mejora
+m20  la marca NO VALE PARA DECIDIR no llega al estado de la ventana (solo al JSON)                   D-30.4     NO ATRAPADA            31 passed in 173.46s (0:02:53)
+m21  combinar no arrastra la marca de validez                                                        D-30.4     ATRAPADA por asercion  1 failed, 30 passed in 175.81s (0:02:55)
+        asercion: test_un_veredicto_con_la_calibracion_sellada_no_vale_para_decidir
+m22  INDECIDIBLE por d' aunque d no de MEJORA (sobre-alcance de D-30.1)                              D-30.1     NO ATRAPADA            31 passed in 188.97s (0:03:08)
+m23  INDECIDIBLE de d' se decide con la cola EMPEORA ademas (calibrada = ambas colas) y NEUTRO donde va INDECIDIBLE D-30.1     ATRAPADA por asercion  1 failed, 30 passed in 183.89s (0:03:03)
+        asercion: test_si_d_mejora_y_la_calibracion_de_dprima_falla_queda_indecidible
+
+RESUMEN: 7 de 11 mutaciones propias atrapadas por asercion
+   NO atrapada: m15 intervalo al 90 % en P2 (percentiles 5 y 95) (NO ATRAPADA)
+   NO atrapada: m16 tope de la calibracion de d' al 10 % en vez de 5 % (NO ATRAPADA)
+   NO atrapada: m20 la marca NO VALE PARA DECIDIR no llega al estado de la ventana (solo al JSON) (NO ATRAPADA)
+   NO atrapada: m22 INDECIDIBLE por d' aunque d no de MEJORA (sobre-alcance de D-30.1) (NO ATRAPADA)
+exit 0

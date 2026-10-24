@@ -1,0 +1,134 @@
+ en NO CUMPLE."""
+        T, prot, R, cfg, res_ctrl = _armar(6, 1)
+        ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Lascar": 5.0})
+        i = info["P2|VIIRS375"]
+        assert i.get("resultado_sin_calibrar") == "PIERDE", "sin poder: %s" % i.get("resultado_sin_calibrar")
+>       assert ver["P2|VIIRS375"] == "BLOQUEA", "contar publica %s" % ver["P2|VIIRS375"]
+E       AssertionError: contar publica INDECIDIBLE
+E       assert 'INDECIDIBLE' == 'BLOQUEA'
+E         
+E         - BLOQUEA
+E         + INDECIDIBLE
+
+tests\test_evaluar_d25_signos_p2_s161.py:429: AssertionError
+____________ test_imprimir_muestra_la_regla_nueva_y_lo_que_informa ____________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x0000023D86FD3B60>
+
+    def test_imprimir_muestra_la_regla_nueva_y_lo_que_informa(capsys):
+        """El informe de texto dice qué regla decidió (D-45, valores-p, método) y deja a la vista D-34 y D-42."""
+        T, prot, R, cfg, res_ctrl = _armar(7, 0)
+        ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Lascar": 5.0})
+        capsys.readouterr()
+        X.imprimir("SN", ver, info, "estado")
+        out = capsys.readouterr().out
+        linea = next((l for l in out.splitlines() if l.strip().startswith("P2 VIIRS375")), "")
+>       assert "D-45" in linea and "PIERDE" in linea, linea
+E       AssertionError:    P2 VIIRS375 INDECIDIBLE (D-34) | neto D menos K +7, IC95 [7.0, 7.0] | discordantes 7 en 7 noches | suma K 7, D 14 | noches con error K 7, D 7
+E       assert ('D-45' in '   P2 VIIRS375 INDECIDIBLE (D-34) | neto D menos K +7, IC95 [7.0, 7.0] | discordantes 7 en 7 noches | suma K 7, D 14 | noches con error K 7, D 7')
+
+tests\test_evaluar_d25_signos_p2_s161.py:442: AssertionError
+__________ test_e2e_el_json_trae_el_detalle_de_d45_y_lo_que_informa ___________
+
+e2e = ({'P4': {'cambia_distance_class': [], 'movidas': 0, 'movidas_protegidas': []}, 'P5': {'apagadas_por_filtro_del_tablero...N): NO CUMPLE (veto) | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)\n', 25)
+
+    def test_e2e_el_json_trae_el_detalle_de_d45_y_lo_que_informa(e2e):
+        """§4: siempre que P2 se calcule, el detalle del JSON trae neto, B, bloques de suma no nula, sumas de bloque,
+        valores-p, método, p mínimo, semilla y sorteos, la regla, y lo de §3 (D-34 con su intervalo, D-42 entera)."""
+        res, out, apagadas = e2e
+        assert apagadas >= 10, "sin poder: sólo %d publicaciones de K apagadas en D" % apagadas
+        assert res["controles_ok"] is True and all(res["cableado"].values()), (res["controles_ok"], res["cableado"])
+        for regla in ("original", "SN"):
+            for s in ("VIIRS375", "VIIRS750"):
+                i = res["por_regla"][regla]["info"]["P2|%s" % s]
+                for campo in CAMPOS_D45 + CAMPOS_INFORMA:
+>                   assert campo in i, (regla, s, campo)
+E                   AssertionError: ('original', 'VIIRS375', 'B')
+E                   assert 'B' in {'calibrada': False, 'discordantes': [{'clase_mirova': 'pos', 'contribucion': 1, 'error_de': 'D', 'hora': '2026-10-01 ...ucion': 1, 'error_de': 'D', 'hora': '2026-10-10 05:54', ...}, ...], 'falsos_bloquea': 0.329, 'falsos_gana': 0.071, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:521: AssertionError
+___________ test_e2e_el_veredicto_sale_de_los_valores_p_del_detalle ___________
+
+e2e = ({'P4': {'cambia_distance_class': [], 'movidas': 0, 'movidas_protegidas': []}, 'P5': {'apagadas_por_filtro_del_tablero...N): NO CUMPLE (veto) | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)\n', 25)
+
+    def test_e2e_el_veredicto_sale_de_los_valores_p_del_detalle(e2e):
+        """El veredicto de cada sensor y regla es el que dan, con §2.6 y §2.7, los campos que el mismo JSON informa (las
+        fracciones, en enteros). Y VIIRS 375 tiene sustrato: hay al menos un P2 que se calcula con B >= 5."""
+        res, out, apagadas = e2e
+        con_sustrato = 0
+        for regla in ("original", "SN"):
+            for s in ("VIIRS375", "VIIRS750"):
+                i = res["por_regla"][regla]["info"]["P2|%s" % s]
+                v = res["por_regla"][regla]["veredicto"]["P2|%s" % s]
+                for campo in ("B", "neto", "p_gana_fraccion", "p_pierde_fraccion"):
+>                   assert campo in i, (regla, s, campo)
+E                   AssertionError: ('original', 'VIIRS375', 'B')
+E                   assert 'B' in {'calibrada': False, 'discordantes': [{'clase_mirova': 'pos', 'contribucion': 1, 'error_de': 'D', 'hora': '2026-10-01 ...ucion': 1, 'error_de': 'D', 'hora': '2026-10-10 05:54', ...}, ...], 'falsos_bloquea': 0.329, 'falsos_gana': 0.071, ...}
+
+tests\test_evaluar_d25_signos_p2_s161.py:538: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_las_constantes_de_la_prueba_de_signos_son_las_selladas
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_siete_noches_del_mismo_lado_deciden_con_p_1_de_128[1-PIERDE]
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_siete_noches_del_mismo_lado_deciden_con_p_1_de_128[-1-GANA]
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_seis_contra_una_con_siete_noches_no_decide[1-BLOQUEA]
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_seis_contra_una_con_siete_noches_no_decide[-1-EMPATE]
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_cinco_noches_del_mismo_lado_deciden_a_una_cola[1-PIERDE]
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_cinco_noches_del_mismo_lado_deciden_a_una_cola[-1-GANA]
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_la_cola_de_gana_es_menor_o_igual_y_la_de_pierde_mayor_o_igual
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_cuatro_noches_dan_sin_sustrato[1]
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_cuatro_noches_dan_sin_sustrato[-1]
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_b_cuenta_los_bloques_de_suma_cero
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_el_signo_es_por_bloque_y_no_por_pasada
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_con_b_20_el_metodo_es_exacto_y_reproduce_la_enumeracion
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_con_b_21_son_10000_sorteos_con_semilla_162_y_el_mas_uno
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_el_detalle_dice_la_semilla_y_los_sorteos_que_se_usaron
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_un_sorteo_con_una_noche_grande_es_por_bloque
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_neto_cero_es_empate_y_no_bloquea
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_neto_positivo_sin_llegar_bloquea
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_con_muchas_noches_decide_en_las_dos_direcciones
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_controles_caidos_dejan_indecidible_e_informan
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_la_regla_que_decide_es_d45
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_d34_y_d42_se_informan_y_no_deciden
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_d42_calibrada_informa_el_resultado_de_d34
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_d34_y_d42_conservan_su_propio_minimo[por_noche0-SIN SUSTRATO]
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_d34_y_d42_conservan_su_propio_minimo[por_noche1-PIERDE]
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_las_sumas_de_bloque_son_el_multiconjunto
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_contar_publica_el_veredicto_de_d45_y_la_ventana_lo_lee
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_contar_no_publica_el_resultado_de_d34
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_imprimir_muestra_la_regla_nueva_y_lo_que_informa
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_e2e_el_json_trae_el_detalle_de_d45_y_lo_que_informa
+FAILED tests/test_evaluar_d25_signos_p2_s161.py::test_e2e_el_veredicto_sale_de_los_valores_p_del_detalle
+31 failed in 14.17s
+
+evaluador de c13cf5808 | pruebas 31 | fallan por aserción 31 | por otra excepción 0 | errores 0 | pasan 0
+   ROJA por aserción: test_las_constantes_de_la_prueba_de_signos_son_las_selladas
+   ROJA por aserción: test_siete_noches_del_mismo_lado_deciden_con_p_1_de_128[1-PIERDE]
+   ROJA por aserción: test_siete_noches_del_mismo_lado_deciden_con_p_1_de_128[-1-GANA]
+   ROJA por aserción: test_seis_contra_una_con_siete_noches_no_decide[1-BLOQUEA]
+   ROJA por aserción: test_seis_contra_una_con_siete_noches_no_decide[-1-EMPATE]
+   ROJA por aserción: test_cinco_noches_del_mismo_lado_deciden_a_una_cola[1-PIERDE]
+   ROJA por aserción: test_cinco_noches_del_mismo_lado_deciden_a_una_cola[-1-GANA]
+   ROJA por aserción: test_la_cola_de_gana_es_menor_o_igual_y_la_de_pierde_mayor_o_igual
+   ROJA por aserción: test_cuatro_noches_dan_sin_sustrato[1]
+   ROJA por aserción: test_cuatro_noches_dan_sin_sustrato[-1]
+   ROJA por aserción: test_b_cuenta_los_bloques_de_suma_cero
+   ROJA por aserción: test_el_signo_es_por_bloque_y_no_por_pasada
+   ROJA por aserción: test_con_b_20_el_metodo_es_exacto_y_reproduce_la_enumeracion
+   ROJA por aserción: test_con_b_21_son_10000_sorteos_con_semilla_162_y_el_mas_uno
+   ROJA por aserción: test_el_detalle_dice_la_semilla_y_los_sorteos_que_se_usaron
+   ROJA por aserción: test_un_sorteo_con_una_noche_grande_es_por_bloque
+   ROJA por aserción: test_neto_cero_es_empate_y_no_bloquea
+   ROJA por aserción: test_neto_positivo_sin_llegar_bloquea
+   ROJA por aserción: test_con_muchas_noches_decide_en_las_dos_direcciones
+   ROJA por aserción: test_controles_caidos_dejan_indecidible_e_informan
+   ROJA por aserción: test_la_regla_que_decide_es_d45
+   ROJA por aserción: test_d34_y_d42_se_informan_y_no_deciden
+   ROJA por aserción: test_d42_calibrada_informa_el_resultado_de_d34
+   ROJA por aserción: test_d34_y_d42_conservan_su_propio_minimo[por_noche0-SIN SUSTRATO]
+   ROJA por aserción: test_d34_y_d42_conservan_su_propio_minimo[por_noche1-PIERDE]
+   ROJA por aserción: test_las_sumas_de_bloque_son_el_multiconjunto
+   ROJA por aserción: test_contar_publica_el_veredicto_de_d45_y_la_ventana_lo_lee
+   ROJA por aserción: test_contar_no_publica_el_resultado_de_d34
+   ROJA por aserción: test_imprimir_muestra_la_regla_nueva_y_lo_que_informa
+   ROJA por aserción: test_e2e_el_json_trae_el_detalle_de_d45_y_lo_que_informa
+   ROJA por aserción: test_e2e_el_veredicto_sale_de_los_valores_p_del_detalle

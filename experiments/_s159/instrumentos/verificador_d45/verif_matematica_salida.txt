@@ -1,0 +1,38 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+evaluador: C:\vrp-trabajo\s159-evaluador\experiments\_s157_prereg_d25\evaluar_d25.py
+constantes: 162 10000 20 4 20
+1. exacto = enumeracion por bits (14 B x 6 conjuntos = 84)             OK 84 de 84
+2. B = 20 exacto = bits (2^20)                                         OK [524288, 1048576]
+3a. B = 21 metodo sorteos, semilla 162, 10.000, den 10.001             OK 
+3b. B = 21 numerador = 1 + m con generador propio                      OK [651, 10001] vs 1+650
+3c. B = 21 el +1 cuenta: numerador >= 1 aunque m = 0                   OK 
+   (informa) B = 21 con las sumas en orden inverso: gana [697, 10001] contra [651, 10001] en orden de clave
+4a. ningun k/2^B vale 1/20 (B 1..30)                                   OK 
+4b. 10.001 no es multiplo de 20                                        OK 
+4c. enteros = flotante en todo k/2^B, B 5..20 (sin empates posibles)   OK 0 diferencias
+5. B=4 neto -4 p 1/16 -> SIN SUSTRATO                                  OK SIN SUSTRATO
+5. B=5 neto<0 p=50/1000 (5 % justo) -> GANA                            OK GANA
+5. B=5 neto<0 p=51/1000 -> EMPATE                                      OK EMPATE
+5. B=5 neto>0 p=50/1000 -> PIERDE                                      OK PIERDE
+5. B=5 neto>0 p=51/1000 -> BLOQUEA                                     OK BLOQUEA
+5. B=5 neto=0 -> EMPATE aunque p chico                                 OK EMPATE
+5. B=5 neto<0 con p PIERDE chico y GANA grande -> EMPATE (no cruza colas) OK EMPATE
+5. B=5 neto>0 con p GANA chico -> BLOQUEA (no cruza colas)             OK BLOQUEA
+5. B=21 neto<0 p=500/10001 -> GANA (20*500=10000<=10001)               OK GANA
+5. B=21 neto<0 p=501/10001 -> EMPATE (10020>10001)                     OK EMPATE
+6. tasa exacta GANA <= 5 % para B 5..20 (bloques +-1)                  OK maxima 1577/32768 = 4.8126 % en B=18
+   tabla B: tasa: 5: 0.0312, 6: 0.0156, 7: 0.0078, 8: 0.0352, 9: 0.0195, 10: 0.0107, 11: 0.0327, 12: 0.0193, 13: 0.0461, 14: 0.0287, 15: 0.0176, 16: 0.0384, 17: 0.0245, 18: 0.0481, 19: 0.0318, 20: 0.0207
+7a. 7 noches +1 -> PIERDE p=1/128                                      OK 
+7b. 6 contra 1 -> BLOQUEA p=8/128                                      OK 
+7c. 7 noches -1 -> GANA                                                OK 
+   (informa) 6 noches de +2 contra 1 de -1: PIERDE p_pierde [2, 128]
+8a. controles caidos -> INDECIDIBLE                                    OK 
+8b. 4 noches de 30 errores de D -> SIN SUSTRATO (no bloquea)           OK 
+8c. sin discordantes -> SIN SUSTRATO, B 0, sin excepcion               OK [1, 1]
+9. B=5 con un bloque de suma 0; neto -4; EMPATE (p 2/32)               OK 
+   D-46 punto 3: P(alguna de 16 celdas-cola sobre 5 %) = 0.668 (NOTA_D46 dice 0,67)
+   D-46 punto 2: P(X >= 3 de 40 | p = 0,032) = 0.1356 (NOTA_D46 dice 0,136)
+   Wilson 8/320 = [1.3, 4.9]; 4/320 = [0.5, 3.2]; 3/40 = [2.6, 19.9]
+11. CONTROL POSITIVO: la mutacion en memoria se detecta (debe decir FALLA) FALLA esperado FALLA
+
+RESULTADO: todas las comprobaciones OK y el control positivo falla como debe

@@ -1,0 +1,99 @@
+no_decide():
+        """El mismo conjunto con la cumbre de K en 0,3 MW queda fuera del estrato, y todos los veredictos son idénticos:
+        la pertenencia al estrato 203 no entra a P1, P1b, P2 ni M (y global_ventana sólo lee `ver`)."""
+        def correr(pc_vrp_k):
+            T, prot, R, cfg, res_ctrl = _armar_203(pc_vrp_k)
+            return X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Isluga": 5.0})
+        a, b = correr(0.0), correr(0.3)
+>       assert "estrato_203" in a[1] and a[1]["estrato_203"]["n"] == 6, "sin poder: el estrato no se contó"
+E       AssertionError: sin poder: el estrato no se contó
+E       assert ('estrato_203' in {'M_pares': 0, 'M_pares_con_magnitud_distinta': 0, 'M_placebo': {}, 'M_por_volcan': {}, ...})
+
+tests\test_evaluar_d25_calib_p2_s160.py:357: AssertionError
+_____________ test_el_estrato_203_es_solo_viirs_750_y_solo_cumbre _____________
+
+    def test_el_estrato_203_es_solo_viirs_750_y_solo_cumbre():
+        """VIIRS 375 no entra; un cúmulo de K en 0,0 con distance_class far no es de cumbre; uno ausente con summit sí."""
+        T, prot, R, cfg, res_ctrl = _armar_203(0.0)
+        TKD = T[("K", "D")]
+        k375 = "Isluga|VIIRS375|2026-09-01 05:20"
+        TKD[k375] = {"control": _fila(False, "neg_limpio"), "brazo": _fila(True, "neg_limpio", 0.2)}
+        R["K"][k375], R["D"][k375] = {"pc_vrp": 0.0, "dc": "summit"}, {"pc_vrp": 0.2, "dc": "summit"}
+        prot[k375] = {"A": False, "B": False, "alerta_solo_ocr": False}
+        R["K"]["Isluga|VIIRS750|2026-09-01 05:10"] = {"pc_vrp": 0.0, "dc": "far"}
+        R["K"]["Isluga|VIIRS750|2026-09-02 05:10"] = {"pc_vrp": None, "dc": "summit"}
+        ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Isluga": 5.0})
+>       assert "estrato_203" in info, "contar no informa el estrato del hallazgo 203"
+E       AssertionError: contar no informa el estrato del hallazgo 203
+E       assert 'estrato_203' in {'M_pares': 0, 'M_pares_con_magnitud_distinta': 0, 'M_placebo': {}, 'M_por_volcan': {}, ...}
+
+tests\test_evaluar_d25_calib_p2_s160.py:382: AssertionError
+___________ test_el_json_trae_la_calibracion_de_p2_y_el_estrato_203 ___________
+
+simetrica = ({'P4': {'cambia_distance_class': [], 'movidas': 0, 'movidas_protegidas': []}, 'P5': {'apagadas_por_filtro_del_tablero...o prueba que el flag se leyó, H8)\n', {'en_excluidos': 35, 'esperado': {'VIIRS375': 53, 'VIIRS750': 52}, 'movidos': 1})
+
+    def test_el_json_trae_la_calibracion_de_p2_y_el_estrato_203(simetrica):
+        """D-42 §2.7: «Se informa siempre, en el detalle de P2 del JSON». NOTA_ESTRATO_203.md: tabla y totales."""
+        res, out, _ = simetrica
+        for regla in ("original", "SN"):
+            info = res["por_regla"][regla]["info"]
+            for s in ("VIIRS375", "VIIRS750"):
+                for campo in ("calibrada", "falsos_gana", "falsos_pierde", "falsos_bloquea", "n_sorteos",
+                              "semilla_calibracion", "resultado_sin_calibrar"):
+>                   assert campo in info["P2|%s" % s], (regla, s, campo)
+E                   AssertionError: ('original', 'VIIRS375', 'calibrada')
+E                   assert 'calibrada' in {'discordantes': [], 'ic95': None, 'n_discordantes': 0, 'neto': 0, ...}
+
+tests\test_evaluar_d25_punta_a_punta_s160.py:194: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_los_numeros_de_la_calibracion_son_los_sellados
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_sorteo_es_por_bloque_y_no_por_pasada
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_tope_es_5_por_ciento_en_cada_cola[0.05-0.05-True]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_tope_es_5_por_ciento_en_cada_cola[0.051-0.0-False]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.051-False]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_tope_es_5_por_ciento_en_cada_cola[0.06-0.0-False]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.08-False]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche0-GANA]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche1-PIERDE]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche2-BLOQUEA]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche3-EMPATE]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_bloquea_no_se_calibra_y_su_fraccion_se_informa
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_sin_sustrato_y_controles_caidos_no_se_calibran_pero_informan
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_con_muchas_noches_la_calibracion_pasa_y_decide
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_global_ventana_con_p2_indecidible
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_lectura_pendiente_p2_indecidible_en_un_sensor_y_pierde_calibrado_en_el_otro
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_intervalo_de_p2_usa_la_semilla_y_los_remuestreos_sellados
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_los_bordes_del_intervalo_son_estrictos[PIERDE]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_los_bordes_del_intervalo_son_estrictos[GANA]
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_estrato_203_se_cuenta
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_estrato_203_no_decide
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_estrato_203_es_solo_viirs_750_y_solo_cumbre
+FAILED tests/test_evaluar_d25_punta_a_punta_s160.py::test_el_json_trae_la_calibracion_de_p2_y_el_estrato_203
+24 failed, 13 passed in 51.96s
+
+evaluador de 5f986a209 | pruebas 37 | fallan por aserción 24 | por otra excepción 0 | errores 0
+   ROJA por aserción: test_los_numeros_de_la_calibracion_son_los_sellados
+   ROJA por aserción: test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados
+   ROJA por aserción: test_el_sorteo_es_por_bloque_y_no_por_pasada
+   ROJA por aserción: test_el_tope_es_5_por_ciento_en_cada_cola[0.05-0.05-True]
+   ROJA por aserción: test_el_tope_es_5_por_ciento_en_cada_cola[0.051-0.0-False]
+   ROJA por aserción: test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.051-False]
+   ROJA por aserción: test_el_tope_es_5_por_ciento_en_cada_cola[0.06-0.0-False]
+   ROJA por aserción: test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.08-False]
+   ROJA por aserción: test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche0-GANA]
+   ROJA por aserción: test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche1-PIERDE]
+   ROJA por aserción: test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche2-BLOQUEA]
+   ROJA por aserción: test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche3-EMPATE]
+   ROJA por aserción: test_bloquea_no_se_calibra_y_su_fraccion_se_informa
+   ROJA por aserción: test_sin_sustrato_y_controles_caidos_no_se_calibran_pero_informan
+   ROJA por aserción: test_con_muchas_noches_la_calibracion_pasa_y_decide
+   ROJA por aserción: test_global_ventana_con_p2_indecidible
+   ROJA por aserción: test_lectura_pendiente_p2_indecidible_en_un_sensor_y_pierde_calibrado_en_el_otro
+   ROJA por aserción: test_el_intervalo_de_p2_usa_la_semilla_y_los_remuestreos_sellados
+   ROJA por aserción: test_los_bordes_del_intervalo_son_estrictos[PIERDE]
+   ROJA por aserción: test_los_bordes_del_intervalo_son_estrictos[GANA]
+   ROJA por aserción: test_el_estrato_203_se_cuenta
+   ROJA por aserción: test_el_estrato_203_no_decide
+   ROJA por aserción: test_el_estrato_203_es_solo_viirs_750_y_solo_cumbre
+   ROJA por aserción: test_el_json_trae_la_calibracion_de_p2_y_el_estrato_203
