@@ -108,11 +108,14 @@ jobs:
         run: |
           VERDICT=$(python -c "import json; print(json.load(open('data/audit_continuous/latest.json'))['verdict'])")
           echo "verdict: $VERDICT"
+          # S162 (PR162-01 de la revision de #900): un sensor sin juzgar desde un cese de plataforma (n bajo el
+          # minimo) no esta en banda; sus flags no pueden dispararse y desaparecerian del issue sin aviso.
+          python -c "import json; d=json.load(open('data/audit_continuous/latest.json')); print('\n'.join('- '+a for a in (d.get('plataformas') or {}).get('avisos') or []) or '- ninguno')" > /tmp/plataformas.txt
           if [ "$VERDICT" = "FUERA_DE_BANDA" ]; then
             python -c "import json; print('\n'.join('- '+f for f in json.load(open('data/audit_continuous/latest.json'))['flags']))" > /tmp/flags.txt
             gh issue create \
               --title "⚠ Auto-audit semanal FUERA DE BANDA — $(date -u +%F)" \
-              --body "$(printf 'El auto-audit semanal (criterios eje2 S119 por detector, ventana rodante 60d) detectó paridad fuera de banda:\n\n%s\n\nJuzga SOLO el detector vigente (clave detector de latest.json); el otro se informa en por_detector (S156).\nDetalle: `data/audit_continuous/latest.json` · Bandas: recall cráter ref-5pp (S119); magnitud mediana publicada por volcán y sensor [0.7-1.4]x; alerta protegida de MIROVA (lectura A, 1 MW o más) sin publicar: cualquiera, sin mínimo de noches.\nProtocolo: verificar data fresca primero (A8), clasificar categoría física (A54) antes de proponer fix.' "$(cat /tmp/flags.txt)")"
+              --body "$(printf 'El auto-audit semanal (criterios eje2 S119 por detector, ventana rodante 60d) detectó paridad fuera de banda:\n\n%s\n\nJuzga SOLO el detector vigente (clave detector de latest.json); el otro se informa en por_detector (S156).\nDetalle: `data/audit_continuous/latest.json` · Bandas: recall cráter ref-5pp (S119); magnitud mediana publicada por volcán y sensor [0.7-1.4]x; alerta protegida de MIROVA (lectura A, 1 MW o más) sin publicar: cualquiera, sin mínimo de noches.\nProtocolo: verificar data fresca primero (A8), clasificar categoría física (A54) antes de proponer fix.\n\nSensores sin juzgar por un cese de plataforma (no se midieron, no están en banda):\n\n%s' "$(cat /tmp/flags.txt)" "$(cat /tmp/plataformas.txt)")"
           fi
           # S150 (auditoria S150, D-02): DEGRADADO no abria issue, y es el veredicto de un apagon del NRT
           # o de un scraper muerto, o sea justo lo que alguien tiene que saber. Un issue por incidente:
@@ -126,7 +129,7 @@ jobs:
               python -c "import json; print('\n'.join('- '+f for f in json.load(open('data/audit_continuous/latest.json'))['flags']) or '- ninguno')" > /tmp/flags.txt
               gh issue create \
                 --title "⚠ Auto-audit semanal DEGRADADO: $(date -u +%F)" \
-                --body "$(printf 'El auto-audit semanal no puede interpretar esta ventana:\n\n%s\n\nUn DEGRADADO no es una falla de detección: suele ser un apagón del NRT (revisar nrt-healthcheck y el vencimiento de EARTHDATA_TOKEN), el scraper de MIROVA detenido o la frontera de detector de frontend/cambio_detector.js atrás de los datos.\n\nFlags de la corrida (sin interpretar):\n\n%s\n\nDetalle: `data/audit_continuous/latest.json`.' "$(cat /tmp/avisos.txt)" "$(cat /tmp/flags.txt)")"
+                --body "$(printf 'El auto-audit semanal no puede interpretar esta ventana:\n\n%s\n\nUn DEGRADADO no es una falla de detección: suele ser un apagón del NRT (revisar nrt-healthcheck y el vencimiento de EARTHDATA_TOKEN), el scraper de MIROVA detenido o la frontera de detector de frontend/cambio_detector.js atrás de los datos.\n\nFlags de la corrida (sin interpretar):\n\n%s\n\nSensores sin juzgar por un cese de plataforma (no se midieron, no están en banda):\n\n%s\n\nDetalle: `data/audit_continuous/latest.json`.' "$(cat /tmp/avisos.txt)" "$(cat /tmp/flags.txt)" "$(cat /tmp/plataformas.txt)")"
             else
               echo "ya hay un issue DEGRADADO abierto; no se abre otro"
             fi

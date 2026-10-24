@@ -313,6 +313,11 @@ def test_no_regresion_contra_el_codigo_de_main_previo(tmp_path, monkeypatch):
                     "la no regresion del CI es test_no_regresion_las_claves_de_siempre_no_cambian")
     antes, hist_a = _correr_main(base, tmp_path, monkeypatch, "base")
     despues, hist_d = _correr_main(aa, tmp_path, monkeypatch, "nuevo")
+    # S161 agregó `plataformas` (y su línea de historial) después del commit base; el insumo es de antes del
+    # cese de Suomi NPP, así que no recorta nada y todo lo demás tiene que quedar idéntico.
+    assert despues.pop("plataformas")["juzga_desde"] == {s: None for s in aa.SENSORS}
+    for h in hist_d:
+        assert h.pop("plataformas_juzga_desde") == {s: None for s in aa.SENSORS}
     assert _sin_claves_nuevas(despues) == antes
     assert despues["verdict"] == antes["verdict"]
     assert despues["avisos_detector"] == antes["avisos_detector"]
