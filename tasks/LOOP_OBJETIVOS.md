@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~18:50 UTC (S162): MOD-C terminado (preliminar INDECIDIBLE); t2 de MOD-B despachada
+- MOD-C (40120713181): 7 trozos en exit 2 de diseño (8 volcán fuera del gránulo, 2 escenas inválidas), sin errores de
+  proceso; artefactos en `C:\vrp-trabajo\temporales\s162_negmodis\run_40120713181\` (108 MB). **Preliminar, sin
+  verificador**: con la regla sellada INDECIDIBLE: el port publica en 2 de 390 neg_resto evaluables (0,51 %; Láscar
+  2026-05-11 07:55, 0,30 MW a 1 km, cenit 38°; Llaima 2026-07-24 01:05, 0,43 MW a 2 km, cenit 63°; ambos de 1 píxel).
+  ΔE −18,1 [−43,8; +40,1]. Controles en verde (K = publicado 403/403; 13 controles iguales a S159; 11 protegidas
+  publican). La cota de 9,4 % de S159 queda reemplazada por una tasa medida. Informe `experiments/_s162_modis_negativos/
+  INFORME.md` (`claude/s162-modis-774bb0` `11570ab30`).
+- **t2 de MOD-B: run 40122029477**. t3 cuando termine.
+
 ### 2026-10-24 18:26 UTC, hora de los runs (S162): lote V375 completo; MOD-C despachado
 - Lote V375 (40116289866) terminado en «failure» sólo por los exit 2 de diseño: 709 pasadas con resultado, 698 ok y
   11 `volcan_fuera_del_granulo`, todas neg_resto. Diagnóstico de `loop-viirs375`: **«no observado», no falla de
