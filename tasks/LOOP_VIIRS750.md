@@ -18,8 +18,8 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
    `experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`. Al llegar: leer, contrastar, commitear, marcar A113 si refuta.
 3. [borrador] Pre-registro V750-B: `experiments/_s162_v750b/PREREGISTRO_V750B.md`. Falta su §11 (probe, objetivos,
    analizador, prueba sin red) y su verificador antes del sello.
-4. [pendiente] Pre-registro V750-A (paquete del código contra K: P, P-def, P-sinfiltro, Kgeo) y prueba de
-   equivalencia contra el oráculo.
+4. [borrador] Pre-registro V750-A: `experiments/_s162_v750a/PREREGISTRO_V750A.md` (equivalencia, censo, sombra; brazos
+   K, P, P-def, P-sinfiltro, Kgeo, K×1,2, O). Falta su §11 (analizador, test de equivalencia rojo) y su verificador.
 5. [pendiente] Paso a paso de V750-F (O2 en MATLAB Online) para Nicolás.
 6. [pendiente] Resumen para la coordinadora (nota en la carpeta compartida + SendMessage corto).
 7. [después] V750-D (subsumido por V750-A salvo que no se adopte); V750-E (diurno) al final.
@@ -45,3 +45,6 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
   el remuestreo conserva 54 % del exceso nativo); el fondo del código da la magnitud (anillo 0,458 contra 0,999).
   SOSPECHA FUERTE por usar sustitutos; el brazo nativo va en el run de V750-B (N0/N1). Verificador Fable lanzado.
   Borrador del pre-registro V750-B escrito. Coordinadora avisada del hallazgo de los npz y de que no abro sub-sesiones.
+- 2026-10-24 vuelta 1 (sigue). Borrador del pre-registro V750-A escrito: P = remuestreo GEO lineal + `.m` literal + ROI
+  de V750-B, sin modo de un píxel ni D9; validación por equivalencia + censo + sombra desde el 11-03; el laboratorio
+  sigue con K si P se adopta (A117).
