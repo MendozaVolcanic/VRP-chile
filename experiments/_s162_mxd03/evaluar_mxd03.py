@@ -246,6 +246,14 @@ def regla_vara(terra, aqua):
     return "NO DETIENE"
 
 
+def vara_desde_estado(estado):
+    """El estado de evaluar_sola.vara (lectura 3, 1.23) ya exige el mismo signo en los dos satelites para decir
+    INTERP MAS CERCA; con signos opuestos da SESGO POR SATELITE. SIN VARA, INDECIDIBLE y MXD03 MAS CERCA no detienen."""
+    if estado == "INTERP MAS CERCA":
+        return "DETIENE"
+    return "SESGO POR SATELITE" if estado == "SESGO POR SATELITE" else "NO DETIENE"
+
+
 # ------------------------------------------------------------------ controles
 def control_k2(filas):
     return "OK" if all(f.get("k2_igual") for f in filas if _ok(f)) else "INDECIDIBLE"
@@ -376,7 +384,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--art", required=True)
     ap.add_argument("--poblacion", default=str(AQUI / "poblacion.json"))
-    ap.add_argument("--vara", default=None, help="salida de vara_mxd03.py (estado por satelite)")
+    ap.add_argument("--vara", default=None, help="vara_resultado.json de vara_mxd03.py --evaluar")
     ap.add_argument("--ref", default=None, help="carpeta con los CSV congelados: verifica su sha256 contra MANIFIESTO")
     a = ap.parse_args()
     pob = json.load(open(a.poblacion, encoding="utf-8"))
@@ -410,7 +418,8 @@ def main():
     vara = None
     if a.vara:
         v = json.load(open(a.vara, encoding="utf-8"))
-        vara = regla_vara(v["terra"], v["aqua"])
+        vara = vara_desde_estado(v["estado"])
+        externos["vara_cruda"] = {"estado": "OK", "estado_evaluar_sola": v["estado"]}
     res = evaluar_filas(filas, recorridos, vara=vara, externos=externos, esperadas=list(pobf))
     res["veredicto"] = veredicto(res)
     print("VEREDICTO:", res["veredicto"])
