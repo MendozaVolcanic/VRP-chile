@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~17:40 UTC (S162): V375-B/C salen sin esperar a V750-B; orden de despachos
+- V750-B no sale antes del 2026-11-03; el lote de V375-B y V375-C (709 pasadas, ~4,9 h de runner) no depende de esa
+  fecha, así que sale antes. Sello aplicado con D-48 sobre la recomendación de `loop-viirs375` (D-36 y la ROI ya
+  aprobadas), revocable por Nicolás.
+- Orden por cupo (NRT 11 jobs, tope 20): t1 de MOD-B (en curso) → MOD-C (8 jobs) → humo V375 → lote V375 con OK al
+  humo → t2 → t3 de MOD-B → V750-B desde el 03-11. La cobertura de #904 se aplica al evaluar desde la rama del
+  instrumento, declarando el commit, aunque #904 no esté mergeado.
+- `loop-viirs750`: prueba de equivalencia de V750-A escrita y probada antes de la implementación (`76a1e6f53`; roja
+  hoy porque el módulo no existe; contra el oráculo pasa en 1.020 casos y 10 recortes nativos; 6 mutaciones
+  atrapadas). `loop-instrumento`: hallazgos del verificador de #905 cerrados (P2 suma por bloque noche-volcán).
+
 ### 2026-10-24 17:10 UTC, hora del servidor (S162): vuelta; el hueco del NRT de la tarde es normal
 - t1 de MOD-B (40112510038): 2 trozos terminados en verde, 6 en curso. Disco C: 42 GB, D: 9,7 GB.
 - NRT sin correr desde las 13:49 UTC: **normal**. Los despachos horarios de cron-job.org van de 04:10 a 12:10 UTC (la
