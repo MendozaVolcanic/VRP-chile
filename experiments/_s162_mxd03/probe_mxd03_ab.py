@@ -68,6 +68,7 @@ sys.path.insert(0, str(RAIZ / "experiments/_s151_mxd03_cumulo_121"))
 P = _cargar("probe_etiquetas", "experiments/_s151_mxd03_etiquetas/probe_etiquetas.py")   # brazo, publica, E/S
 Q = _cargar("probe_cumulo", "experiments/_s151_mxd03_cumulo_121/probe_cumulo.py")        # trasladar, resumir
 S = _cargar("probe_sola", "experiments/_s151_mxd03_sola_123/probe_sola.py")              # nulo en km, pico
+P151 = _cargar("probe151", "experiments/_s151_probe_mod03/probe_mod03.py")              # control 1 (geometria)
 
 from pipeline import process_modis as pm  # noqa: E402
 from pipeline.geo_utils import get_detection_anchor  # noqa: E402
@@ -80,6 +81,7 @@ NULOS = tuple("R%02d" % k for k in range(K_NULOS))
 CAMPOS_DIAG = ("t_bg_k", "t_max_k", "diag_n_first_pass_pixels", "diag_n_first_pass_summit",
                "diag_n_second_pass_recapture", "diag_sigma_bg_k", "diag_n_bg_anillo", "sensor_zenith_deg",
                "sensor_azimuth_deg", "geo_class")
+CONTROL_S151 = "MYD021KM.A2026073.0705"       # §8 control 1: Lascar, hacia el sensor 2,581 km (S151 y M)
 TOL_VRP = 0.001
 CENIT_R = 35.0                                # §3: los nulos solo con cenit <= 35 grados (lo fija poblacion.json)
 BRAZOS_BASE = (("K", "interp"), ("K2", "interp"), ("X", "mxd03"))                               # §8 control 4: primary_cluster.vrp_mw a 0,001 MW
@@ -286,6 +288,11 @@ def main():
             if lat_m.shape != datos["lat"].shape:
                 raise ValueError(f"MxD03 {lat_m.shape} y L1B {datos['lat'].shape} no calzan")
             n_fill = int(np.isnan(lat_m).sum())
+            # control 1 (§8): instrumento de geometria de S151, el mismo nucleo `comparar` que uso M
+            glat, glon, saz, szen = P151._leer_geo(geo)
+            latc, lonc, _rad = P151._leer_l1b(l1b)
+            ilat = pm._interp_geo(latc, glat.shape[0], glat.shape[1]).astype(np.float64)
+            ilon = pm._interp_geo(lonc, glat.shape[0], glat.shape[1]).astype(np.float64)
             for f in g["records"]:
                 fila = {"tipo": "record", "clave": clave, "l1b": Path(l1b).name, "geo": Path(geo).name,
                         "n_fill_mxd03": n_fill}
@@ -299,6 +306,13 @@ def main():
                     volcan = vol_cache[f["vol"]]
                     fila.update(medir_record(l1b, geo, volcan, rp.VOLCANIC_FEATURES.get(volcan["name"]), datos,
                                              (lat_m, lon_m), f, clave))
+                    vent = get_detection_anchor(volcan)
+                    nulo = P151.comparar(ilat, ilon, latc, lonc, saz, szen, pm._interp_geo, None, vent=vent)
+                    fila["nulo_geo_crater_km"] = round(math.hypot(nulo["obs_barrido_km"], nulo["obs_traza_km"]), 6)
+                    if clave == CONTROL_S151 and f["vol"] == "Lascar":
+                        c = P151.comparar(glat, glon, latc, lonc, saz, szen, pm._interp_geo, None, vent=vent)
+                        fila["control_s151"] = {k: c.get(k) for k in ("obs_hacia_sensor_km", "obs_traza_km",
+                                                                      "obs_barrido_km")}
                     fila["estado"] = "ok"
                     if fila["decide"] and fila["k_difiere_de_guardado"]:
                         fila["retenido_para_sha"] = f["codigo_sha"]

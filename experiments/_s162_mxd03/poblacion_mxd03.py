@@ -112,10 +112,13 @@ def main():
     manif = AQUI / "MANIFIESTO.json"
 
     sucio = git("status", "--porcelain", "--", "data/mirova_equivalent")
-    head = git("rev-parse", "HEAD")
-    print("checkout:", head, "| data/mirova_equivalent modificado:", bool(sucio))
-    if sucio:
-        sys.exit("data/mirova_equivalent tiene cambios locales: la poblacion tiene que salir del main congelado")
+    head = git("merge-base", "HEAD", "origin/main")       # el main congelado: la rama del tag sale de el
+    rutas = ("data/mirova_equivalent", "pipeline", "scripts", "volcanoes.yaml", "frontend")
+    distinto = subprocess.run(["git", "diff", "--quiet", head, "HEAD", "--", *rutas], cwd=RAIZ).returncode
+    print("main congelado:", head, "| data/ modificado localmente:", bool(sucio),
+          "| HEAD distinto del main congelado en", rutas, ":", bool(distinto))
+    if sucio or distinto:
+        sys.exit("la poblacion tiene que salir del main congelado sin cambios en data/, pipeline/, scripts/ ni frontend/")
 
     if args.sin_bajar:
         m = json.loads(manif.read_text(encoding="utf-8"))
@@ -161,11 +164,12 @@ def main():
     filas_out, tab = [], collections.Counter()
     for r in modis:
         e = extra[(r["vol"], r["dt"].strftime("%Y-%m-%d %H:%M"), r["sensor"])]
-        lab = r["lab"]
+        lab, vrp_mirova = r["lab"], None
         if lab == "pos":
             vrps = [f["vrp_mw"] or 0 for f in bp.parear(por_vb.get((r["vol"], "MODIS"), []), r["dt"], TOL_S)
                     if bp.es_alerta(f["tipo"])]
             lab = "protegida" if max(vrps) >= 1.0 else "bajo1"
+            vrp_mirova = max(vrps)            # M (§6): el VRP de MIROVA de la pasada (la mayor alerta a 120 s)
         t, s = tramo(r["z"]), lado(r["sensor"], e["az"])
         hermanos = [o for o in por_vs[(r["vol"], r["sensor"])]
                     if o is not r and abs((o["dt"] - r["dt"]).total_seconds()) == 300]
@@ -173,7 +177,7 @@ def main():
         expuesta = bool(pcd is not None and r["vol"] in inner and abs(pcd - inner[r["vol"]]) < DELTA.get((t, s), 0))
         fila = {"vol": r["vol"], "dt": r["dt"].strftime("%Y-%m-%d %H:%M"), "noche": r["noche"], "sensor": r["sensor"],
                 "granule": e["granule"], "clave": clave_granulo(e["granule"]), "z": r["z"], "az": e["az"],
-                "tramo": t, "lado": s, "lab": lab, "pub_guardada": int(bool(r.get("pub"))),
+                "tramo": t, "lado": s, "lab": lab, "vrp_mirova": vrp_mirova, "pub_guardada": int(bool(r.get("pub"))),
                 "pc_vrp_guardada": e["pc_vrp_guardada"], "dc_guardada": e["dc_guardada"],
                 "pc_dist_guardada": pcd, "inner": inner.get(r["vol"]), "expuesta": expuesta,
                 "partida": bool(hermanos), "hermanos_lab": sorted(h["lab"] for h in hermanos),
