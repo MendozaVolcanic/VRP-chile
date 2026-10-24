@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~21:10 UTC (S162): V375-B2 sellado firme; lote despachado
+- Re-verificación del delta v2→v3 (Fable, contexto limpio) CONFORME: el control de vida atrapa por sí solo seis modos de
+  port roto (no detecta, detecta todo, magnitud doblada, muerto sólo en el control, caída de 3 de 20, control ausente)
+  con VEREDICTO B INVALIDO, y con lote sano da SILENCIO ACOTADO. H1 (la fuerza del control vivía en el archivo de
+  objetivos) cubierto también en el evaluador. Sello firme por D-48 (`claude/s162-viirs375-c1b864` `1d81fe9f8`).
+- **Lote V375-B2: run 40131572769** (1.220 pasadas, 48 trozos, max-parallel 8). Corrida vacía del vigilar-osf viejo:
+  40131571938.
+
 ### 2026-10-24 ~21:00 UTC (S162): MOD-B (MxD03 sobre K) PRELIMINAR: CUMPLE SIN DAÑO
 - Censo completo 5.465/5.465 pasadas en 24 partes, sin errores; K = data/, K2 = K. 13 controles en verde. P1 sin
   protegidas perdidas; P2 bajo 35° EMPATE (ΔX −1, ruido 4); vara VIIRS: **MxD03 más cerca por 0,73 km** (IC 0,49 a
