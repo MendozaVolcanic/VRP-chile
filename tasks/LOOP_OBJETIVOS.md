@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~13:20 UTC (S162): vuelta 1, entregaron el verificador de D25 y la revisión de #900
+- Verificador limpio de D25 (Fable): veredicto CONFIRMADO bit a bit (re-corrida de V1, V2, tabla sola y 17-19 oct);
+  cuatro detalles del README corregidos y verificación guardada en `lectura_s162/verificacion/` (`ded217af4`).
+- Revisión de #900 (Opus): hace lo que dice, salida idéntica a main antes del corte; costo PR162-01 (G2): desde el
+  informe del 9-nov VIIRS queda sin juzgar en silencio (11 flags a 6). Recomienda mergear con un aviso. Despachado un
+  implementador en el worktree del PR para el aviso (PR162-01) y `leer_ceses` robusto (PR162-04), sin merge.
+- Decisión 3 medida: MODIS sin pasada nocturna en 7 de 2.607 volcán-días (0,27 %, 2026-03-01 a 10-23, sólo Láscar e
+  Isluga); Suomi NPP 220 (8,4 %) con 20 días mudos en los 11 a la vez; en vivo 10 a 23-oct, 0 de 154. El archivo
+  esconde los silencios en vivo (backfills): un modo estricto se mide por plataforma con `first_processed_utc`.
+  Informe: scratchpad S162 `vuelta1\pr900_modis\INFORME.md` (se copia a la rama del PR como REVISION_S162.md).
+
 ### 2026-10-24 ~12:45 UTC (S162): loop reactivado (sesión dueña S162, /loop dinámico), vuelta 1 con 5 agentes
 - Nicolás: «Como seguimos? Realiza todo lo que pueda en paralelo» y «Este trabajo debe quedar en loop». S162 es la
   sesión dueña del loop (una sola, memoria S153); despertador de respaldo cada ~30 min, los agentes avisan al terminar.
