@@ -129,3 +129,31 @@ quedaron atendidos.
 | H5: el 11 a 20 % del v1 era condicional a lo ya visto (sin condicionar, ~2 %) | 1 | §3 |
 | H6: dependencia temporal y por noche que la binomial no modela (SOSPECHA) | 1 | se declara: la potencia es aproximada |
 | H7: el reparto por trozos descarga 1.220 gránulos contra 667 únicos | 1 | se acepta (el runner borra cada gránulo después de usarlo); costo, no sesgo |
+
+## Sello (2026-10-24)
+
+**SELLADO** por la coordinadora S162 con la autorización vigente de Nicolás, **D-48 (2026-10-24: «sobre las decisiones mías
+haz lo que tú recomiendes»)**: tamaño de 1.200 aprobado y sello condicionado a dos cosas que se cumplieron. (1) Una
+re-verificación con contexto limpio y otro modelo (Fable) del delta v2→v3 que rompió el port a mano:
+`verificador_v3/INFORME.md`, **CONFORME**; el control de vida atrapa por sí solo, sin el recálculo, un port que no detecta
+nada, uno que detecta todo, uno con la magnitud doblada, uno muerto sólo en el control, una caída de 3 de 20 y el control
+ausente, y con un lote sano y completo el veredicto sale SILENCIO ACOTADO (el control no bloquea siempre). (2) El humo
+(run 40128648709): control 5000 reproducido exacto, muestra 3000 en 0 píxeles. Revocable por Nicolás. Texto sellado: el
+del tag `s162-v375-b2-listo` (commit `ae65eaaaf`); lo que cambie va abajo como adenda.
+
+## Adenda 1 (2026-10-24, tras el verificador v3 y antes del lote)
+
+- **H1 (gravedad 3)**: el control de vida existía sólo si el archivo de objetivos traía el lote CTL. `evaluar.py` ahora
+  declara INVALIDO POR INSTRUMENTO si decide un lote nuevo y no hay control (`sin_control_vida`). El archivo del disparo
+  sí lo trae: el blob de `objetivos_v375_b2.json` es el mismo en `s162-v375-b2-listo` y en `s162-v375-b2-disparo-lote`
+  (`1999237b…`); su sha256 es `a7dd6b0d…e955` con fin de línea LF (como lo lee el runner) y `f3285f3a…b419` con CRLF (como
+  lo escribe Python en Windows, el que cita §3). Es el mismo contenido.
+- **H2 (gravedad 2)**: el control CTL sí entra a los controles 2.1 (recálculo) y 2.2 (K re-corrido), que cuentan pares por
+  pasada; «fuera de todo denominador» vale para las lecturas que deciden y la cobertura. No mueve veredictos.
+- **H3 (gravedad 1)**: el NO DECIDE por cobertura mira los lotes de `--deciden`, no el lote del que sale neg_pub (S162:
+  113 de 113 ok). Se declara.
+- **H4 (SOSPECHA)**: 20 pasadas de control no ven una rotura limitada a una plataforma o tramo ausente de ellas. Límite de
+  diseño.
+- **H5 (SOSPECHA, error conservador)**: si NASA reprocesó un gránulo del control, el control puede dar INVALIDO sin port
+  roto; antes de concluir «port roto» se leen la lista `distintas` y los nombres de archivo.
+- Ninguno de estos cambios toca el runner ni los commits de disparo.

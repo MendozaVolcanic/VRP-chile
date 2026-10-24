@@ -713,6 +713,11 @@ def main(argv=None):
     # del lote CTL son re-mediciones de pasadas de S162 en el MISMO run del lote que decide; M14 tiene que dar los mismos
     # npix y VRP que en S162 (mismo gránulo, mismo código). Un port muerto o una dependencia rota no pasa esto.
     ctl = [i for i, o in obj.items() if o["lote"] == "CTL"]
+    if [l for l in a.deciden if l not in ("S159", "S162")] and not ctl:
+        # verificador v3 de B2, H1: el control de vida no puede depender de que el archivo de objetivos lo traiga. Si
+        # decide un lote nuevo (sin positivos propios) y no hay lote CTL, nada prueba que el port esté vivo.
+        pr("  2.2b control de vida: AUSENTE con un lote nuevo que decide -> INVALIDO POR INSTRUMENTO")
+        veredicto_instr.append("sin_control_vida")
     if ctl:
         ok_ctl = [i for i in ctl if i in arms]
         dif = [(i, obj[i]["volcan"], obj[i]["hora_utc"], obj[i]["ref_M14"], (arms[i]["M14"]["npix"], arms[i]["M14"]["vrp_mw"]))
