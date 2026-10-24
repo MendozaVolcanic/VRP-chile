@@ -208,3 +208,18 @@ pasadas en T. **No cambia ninguna regla de este pre-registro**: con el lote de S
 byte (`humo_s159_salida.txt`), y hay una prueba nueva en `probar_evaluar.py` §3. El runner no usa el evaluador, así que
 los commits de disparo no cambian. Salida del evaluador con el humo: `humo_run40115765406_salida.txt` (controles en
 verde: recálculo sin red = runner 467 de 467, K re-corrido = publicado 151 de 151; sus lecturas no se leen).
+
+## Adenda 2 (2026-10-24, antes del lote): cobertura del marco contra la referencia de MIROVA
+
+El control §4.1 de `PREREGISTRO_B.md` pedía la cobertura contra la referencia de la sesión del instrumento. Se aplicó con
+su evaluador común sin mergear (PR #904, commit `ff452671c72e477e466ef7fa2ed59432be96f8b5`, extraído con `git archive` y
+corrido tal cual), como indicó la coordinadora. Como el lote es una muestra sorteada desde los records de producción, la
+pregunta es si alguna alerta de MIROVA del marco no tenía record de producción y nunca pudo sortearse:
+`cobertura_marco.py` corre `evaluador_comun.cobertura` con producción (records de 533398f8f) como único lado, sobre la
+ventana del marco sin los días excluidos y con las cuatro capas de la referencia que cargó el marco de S159.
+
+Resultado (`cobertura_marco_salida.txt`): **COBERTURA OK en los dos canales**. Las 1.208 alertas nocturnas de VIIRS 375
+(unión) y las 882 de la tabla tienen record de producción; 0 alertas y 0 protegidas sin record. Control: las 1.029 alertas
+«pos» del marco están todas entre las observadas, y las 179 observadas que no están en el marco son exactamente las
+alertas sólo OCR anteriores al 2026-06-13, que por A119 no deciden. El evaluador lee este archivo con
+`--cobertura cobertura_marco.json` y el veredicto deja de ser PROVISIONAL por esa causa. No cambia ninguna regla.

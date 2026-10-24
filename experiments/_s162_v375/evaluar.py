@@ -566,7 +566,16 @@ def main(argv=None):
                "no decide (§4.1)")
             veredicto_instr.append(f"cobertura_{c}")
     if a.cobertura:
-        pr("   cobertura contra la referencia (instrumento):", Path(a.cobertura).read_text(encoding="utf-8")[:2000])
+        # salida de cobertura_marco.py (evaluador común del instrumento sobre el MARCO, con producción como único lado)
+        cobm = json.loads(Path(a.cobertura).read_text(encoding="utf-8"))
+        for canal in ("union", "tabla"):
+            c = cobm[canal]
+            sin_rec = [x for x in c["no_observadas"]]
+            pr(f"   cobertura del marco contra MIROVA, canal {canal} (evaluador común {cobm['commit_evaluador_comun'][:9]}):"
+               f" alertas {c['alertas']}, sin record de producción {len(sin_rec)} (protegidas "
+               f"{sum(1 for x in sin_rec if x['protegida'])}) -> {c['veredicto_evaluador_comun']}")
+            if sin_rec or c["veredicto_evaluador_comun"] != "COBERTURA OK":
+                veredicto_instr.append(f"cobertura_marco_{canal}")
     else:
         pr("   cobertura contra la referencia de MIROVA (alertas sin record nuestro, 14 en el marco): PENDIENTE de la "
            "sesión del instrumento (fase 0). Sin ella el veredicto no se declara final (§4.1).")
@@ -785,7 +794,7 @@ def main(argv=None):
         pr("  protegida de cráter (V375-A): PENDIENTE de la sesión del instrumento; se informará al lado de la lectura A")
     if invalido:
         pr("\nVEREDICTO: INVALIDO POR INSTRUMENTO", veredicto_instr)
-    elif "cobertura_referencia_pendiente" in veredicto_instr:
+    elif any(v == "cobertura_referencia_pendiente" or v.startswith("cobertura_marco") for v in veredicto_instr):
         pr("\nVEREDICTO: PROVISIONAL, falta la cobertura contra la referencia de MIROVA (instrumento, fase 0); "
            "avisos:", veredicto_instr)
     else:
