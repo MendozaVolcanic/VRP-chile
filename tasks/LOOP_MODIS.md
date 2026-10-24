@@ -53,7 +53,7 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 
 - [ ] B8. Evaluar el humo cuando llegue el run id (artefactos a `D:\vrp-trabajo\temporales\s162_mxd03\humo\`, evaluador desde checkout del tag, VMX-12) y dar el OK para las tandas.
 - [ ] B10. PR del veredicto de MOD-B con D35 en `docs/MIROVA_DIVERGENCES.md` y las marcas A113 en D18 y `docs/SINTOMAS.md` §3 (decisión D-48 aplicada por la coordinadora).
-- [ ] B9. (t1 = 40112510038 y t2 = 40122029477 COMPLETAS: 1.814 + 1.837 de 3.651, sin errores, K = data/ y K2 = K en todas; artefactos en `D:/vrp-trabajo/temporales/s162_mxd03/t1/` y `/t2/`. t3 por lanzar) Evaluar las tres tandas juntas (vara con `vara_mxd03.py --evaluar`, luego `evaluar_mxd03.py --art --vara --ref`), informe y verificador limpio del resultado.
+- [ ] B9. Tres tandas evaluadas (`1aaaf709c`, rama `s162-mxd03-codigo`, `experiments/_s162_mxd03/resultado/`): **CUMPLE SIN DAÑO** (P1 sin pérdida; P2 ≤ 35° EMPATE ΔX −1 ruido 4; vara MXD03 MAS CERCA n 65; M NEUTRO; 13 controles en verde; 5.465 de 5.465). Condiciona: auditoría A61 de 48 protegidas movidas (P4); signo de P2 sin Cordón Caulle distinto. Verificador limpio del resultado CORRIENDO.
 
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
 - [x] C1. (`21b800259`, redactado por subagente Opus y revisado) Pre-registro del lote (300 a 400 de las 5.093 noches neg_resto), selección con semilla, objetivos, regla de
@@ -87,6 +87,12 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 2. ~~D35 y marcas A113~~: **resuelta** (D-48): van en el PR del veredicto de MOD-B, no antes (tarea B10).
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 20:45 UTC (vuelta 14): MOD-B evaluado
+- t3 (40126381034) completa: 5.465 de 5.465 en las 24 partes, 0 errores, K = data/ y K2 = K en todas.
+- Evaluación conjunta (sin el humo): CUMPLE SIN DAÑO con las reglas selladas; vara VIIRS MXD03 MAS CERCA bajo 35° (0,73
+  km, IC 0,49 a 1,10, Terra y Aqua del mismo signo); M neutro con ĝ 1,00. Condiciona la adopción: auditoría espacial A61
+  de las 48 protegidas cuyo cúmulo se mueve. Verificador limpio del resultado lanzado (Fable alto).
 
 ### 2026-10-24 (vuelta 13): E3 verificada; t3 corriendo
 - Verificador de E3: B1 a B3 confirmados (reproducción bit a bit), B4 refutado en parte (VBT-02: el efecto pasa por la
