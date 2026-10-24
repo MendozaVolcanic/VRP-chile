@@ -16,19 +16,20 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 1. [hecho y verificado] **V750-C**: `experiments/_s162_v750c/INFORME.md`, con la marca del verificador.
 2. [hecho] Verificador limpio de V750-C (Fable 5.1): `experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`.
    Confirma los números; corrige la atribución: dos piezas (interpolación dentro de la caja sensible; ROI fuera).
-3. [listo para sello] Pre-registro V750-B v2: `experiments/_s162_v750b/PREREGISTRO_V750B.md` (`62e6ea194`).
-   Verificador Fable: «listo para sello con cambios», VB-01 a VB-16, todos corregidos (§12). Batería de mutaciones v2
-   en verde (8 de 8) y ensayo con el censo: compuerta abierta. Mandado a la coordinadora con comandos y tamaños; ella
-   pide el sello y despacha (no antes del 2026-11-03, porque la ventana llega al 11-02).
+3. [segunda vuelta] Pre-registro V750-B v2 (`607062ba7`): decisiones resueltas por la coordinadora bajo D-48 y
+   anotadas; segunda vuelta del verificador con otro modelo (Sonnet) corriendo, escribe en
+   `experiments/_s162_v750b/verificador_v2/`. Si da conforme queda sellado; el **2026-11-03** generar los objetivos
+   (`objetivos_v750b.py --hasta 2026-11-02`) y pedir el despacho a la coordinadora con el sha256.
 4. [borrador] Pre-registro V750-A: `experiments/_s162_v750a/PREREGISTRO_V750A.md` (equivalencia, censo, sombra; brazos
-   K, P, P-def, P-sinfiltro, Kgeo, K×1,2, O). Falta su §11 (analizador, test de equivalencia rojo) y su verificador.
+   K, P, P-def, P-sinfiltro, Kgeo, K×1,2, O). Prueba de equivalencia hecha y probada (roja sin módulo, 6/6 mutaciones).
+   Falta: analizador `evaluar_v750a.py` (conviene después del resultado de V750-B, que fija la ROI) y su verificador.
 5. [hecho] Paso a paso de V750-F para Nicolás: `experiments/_s162_v750f/PASO_A_PASO_O2.md` (paquete comprobado, md5 OK).
 6. [pendiente] Resumen para la coordinadora (nota en la carpeta compartida + SendMessage corto).
 7. [después] V750-D (subsumido por V750-A salvo que no se adopte); V750-E (diurno) al final.
 
 ## Decisiones para Nicolás
 
-- **DN-1 (sello de V750-B)**: sellar `experiments/_s162_v750b/PREREGISTRO_V750B.md` v2. Al sellar confirma cuatro
+- ~~**DN-1**~~ resuelta por la coordinadora bajo D-48 (2026-10-24). Texto original: **DN-1 (sello de V750-B)**: sellar `experiments/_s162_v750b/PREREGISTRO_V750B.md` v2. Al sellar confirma cuatro
   lecturas que tomé conservadoras tras el verificador: en T decide sólo la tabla; sin ganador nunca se elige un brazo
   que pierde o bloquea; la distancia del record se mide desde el cráter; brazo B5 con la lectura del comentario del
   `.m`. Recomendación: sí a las cuatro y al sello.
@@ -71,3 +72,6 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
   (VB-10), 12-oct fuera (VB-11), K distinto de producción con tope (VB-12), citas (VB-13), artefacto vacío (VB-14),
   placebo (VB-15), cobertura en el cráter (VB-16), sha256 del evaluador fijado. Batería v2 8/8; ensayo con el censo
   503/503. Enviado a la coordinadora. Prueba de equivalencia de V750-A corriendo con mutaciones.
+- 2026-10-24 ~17:50 UTC, vuelta 5. Coordinadora resolvió DN-1 bajo D-48 y pidió segunda vuelta (VB-01 cambió la regla);
+  anotado y lanzada con Sonnet. Prueba de equivalencia de V750-A: roja sin módulo (salida 2), identidad 1.020 casos y
+  10 recortes en verde, 6 de 6 mutaciones atrapadas por aserción, control caído.
