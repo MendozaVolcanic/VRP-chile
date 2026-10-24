@@ -43,13 +43,25 @@ Referencia unificada del snapshot del repo (`origin/main` 80b819828): 45.344 fil
 
 ## Pruebas
 
-- `tests/test_clase_mirova_pasadas_s162.py`: 26 pruebas (canal, ventana y borde de 120 s, no encadenar, tabla
-  manda, estados, umbral de 1 MW, SN, no mutar la entrada, los motivos de cráter y sus bordes).
+- `tests/test_clase_mirova_pasadas_s162.py`: 28 pruebas (canal, ventana y borde de 120 s, no encadenar, tabla
+  manda, estados y su orden, cruce de 1 MW entre tabla y OCR, umbral de 1 MW, SN, no mutar la entrada, los motivos
+  de cráter y sus bordes).
 - Roja por aserción: la mutación M1 (la semántica vieja, la tabla deja de mandar) hace fallar 3 pruebas por aserción.
-- Mutaciones (`mutar.py`, `mutaciones_t4_t6.json` → `mutaciones_t4_t6_salida.txt`): **20 de 20 atrapadas por
+- Mutaciones (`mutar.py`, `mutaciones_t4_t6.json` → `mutaciones_t4_t6_salida.txt`): **22 de 22 atrapadas por
   aserción**, con control de caída (una mutación que hace caer las pruebas con otra excepción no cuenta; la primera
   versión de M10 cayó y se reescribió). Dos mutaciones vivas en la primera corrida (lectura B con RUTINA de VRP, y el
   hito de Suomi NPP alcanzando a MODIS) pidieron dos pruebas nuevas.
+
+## Verificador con contexto limpio (Sonnet, 2026-10-24)
+
+**CONFIRMADAS las cinco afirmaciones**, gravedad máxima 2. Reprodujo 479 = 479 y 0 contradicciones, y mostró que no
+es cero por construcción: con dos filas contradictorias inventadas el mismo script da 2 y 2. En la referencia real las
+469 filas OCR con fila de tabla a ±120 s están a menos de 10 s de ella, y la separación mínima entre pasadas del mismo
+volcán y sensor es de 300 s (la ventana no junta ni separa pasadas reales hoy). Hallazgos aplicados: (1) el orden de
+estados quedó igual al de `banco_paridad.etiquetar` (sin geometría nunca le gana a FALSO_POSITIVO ni a RUTINA); (2) se
+agregó `ocr_cruza_1mw` (tabla y OCR dicen alerta a distinto lado de 1 MW; decide la tabla; 0 casos hoy); (3) y (4)
+documentados en el docstring: el hito de Suomi NPP es por día (el arreglo llegó a las 14:01 UTC del 9-oct) y el de
+distancia también alcanza a MODIS (1 pasada). Cifras de la medición sin cambio tras los arreglos.
 
 ## Límites
 

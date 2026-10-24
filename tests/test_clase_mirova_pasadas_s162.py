@@ -69,6 +69,23 @@ def test_canal_tabla_ignora_el_ocr_aunque_diga_otra_cosa():
         assert p.vrp_mw == 0.9 and not cm.es_protegida(p), canal
 
 
+def test_alerta_de_tabla_y_ocr_a_distinto_lado_de_1_mw_se_marca_y_decide_la_tabla():
+    filas = [fila("2026-10-12 05:18:02", "ALERTA_TERMICA", 0.9),
+             fila("2026-10-12 05:18:00", "ALERTA_TERMICA_OCR", 1.5, source="OCR")]
+    p = una(cm.resumir_pasadas(filas, regla_minimas="original"))
+    assert p.ocr_cruza_1mw and not p.ocr_contradice_tabla and not cm.es_protegida(p)
+    filas[1] = dict(filas[1], vrp_mw=0.95)
+    assert not una(cm.resumir_pasadas(filas, regla_minimas="original")).ocr_cruza_1mw
+
+
+def test_sin_geometria_nunca_le_gana_a_falso_positivo_ni_a_rutina():
+    # Mismo orden que banco_paridad.etiquetar (verificador de #903, hallazgo 1).
+    sg = fila("2026-10-15 05:00:00", "ALERTA_SIN_GEOMETRIA_OCR", 22.13, source="OCR", dist=None, sin_geo=True)
+    for otro in ("FALSO_POSITIVO_OCR", "RUTINA"):
+        o = fila("2026-10-15 05:00:30", otro, 0.0 if otro == "RUTINA" else 3.0, source="OCR")
+        assert una(cm.resumir_pasadas([sg, o], regla_minimas="original")).estado != "sin_geometria", otro
+
+
 def test_canal_desconocido_falla_fuerte():
     try:
         cm.resumir_pasadas([], canal="ocr")

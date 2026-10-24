@@ -72,7 +72,8 @@ def main():
     print("pasadas con el OCR contradiciendo a la tabla:", len(contra))
     print("  por (tabla, ocr):", dict(Counter((p.estado, cm._estado([f for f in p.filas if f["source"] != "CONS"])[0])
                                          for p in contra)))
-    print("  de ellas, con alerta OCR de 1 MW o mas:",
+    print("pasadas con alerta en tabla y OCR a distinto lado de 1 MW (ocr_cruza_1mw):", sum(p.ocr_cruza_1mw for p in pas_o))
+    print("  de las contradictorias, con alerta OCR de 1 MW o mas:",
           sum(1 for p in contra if any(f["source"] != "CONS" and f.get("tipo") in cm.TIPOS_ALERTA
                                        and (f.get("vrp_mw") or 0) >= 1 for f in p.filas)))
 

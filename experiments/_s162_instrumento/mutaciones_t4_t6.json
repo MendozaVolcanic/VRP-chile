@@ -85,7 +85,7 @@
   {
    "id": "M12",
    "archivo": "scripts/clase_mirova.py",
-   "viejo": "contradice = bool(tabla and ocr and _estado(ocr)[0] != estado)",
+   "viejo": "contradice = bool(tabla and ocr and e_ocr != estado)",
    "nuevo": "contradice = False",
    "que": "no marca la contradiccion OCR contra tabla"
   },
@@ -144,6 +144,20 @@
    "viejo": "return p.estado == \"alerta\"",
    "nuevo": "return p.estado in (\"alerta\", \"fp\")",
    "que": "lectura A cuenta FALSO_POSITIVO"
+  },
+  {
+   "id": "M21",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "            cruza = bool(estado == \"alerta\"",
+   "nuevo": "            cruza = False and bool(estado == \"alerta\"",
+   "que": "no marca el cruce de 1 MW entre tabla y OCR"
+  },
+  {
+   "id": "M22",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "        (\"rutina\", [f for f in filas if f.get(\"tipo\") == \"RUTINA\"]),\n        (\"sin_geometria\", [f for f in filas if f.get(\"sin_geometria\") or f.get(\"tipo\") == \"ALERTA_SIN_GEOMETRIA_OCR\"]),",
+   "nuevo": "        (\"sin_geometria\", [f for f in filas if f.get(\"sin_geometria\") or f.get(\"tipo\") == \"ALERTA_SIN_GEOMETRIA_OCR\"]),\n        (\"rutina\", [f for f in filas if f.get(\"tipo\") == \"RUTINA\"]),",
+   "que": "sin geometria le gana a RUTINA (orden de banco_paridad)"
   }
  ]
 }
