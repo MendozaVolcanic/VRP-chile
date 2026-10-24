@@ -38,30 +38,45 @@ Estado: `[ ]` pendiente, `[~]` en curso, `[v]` en verificación, `[x]` lista (PR
   `documentacion/Coppola_2026_SciData_Global_VRP_Dataset_s41597-026-08100-7.pdf` (`page.get_pixmap(dpi=200)`, A95) y
   citar qué dice de MOD03 (P1 y P3 discrepan). Entregable: nota en `experiments/_s162_instrumento/MOD_A_CITA_MOD03.md`,
   render fuera del repo público (feedback S158). Sin código.
-- [v] **T4+T6 en un PR**: #903 (`instrumento/clase-pasada`), 26 pruebas, 20 de 20 mutaciones por aserción, efecto hoy
-  0 (latente). Verificador Sonnet corriendo (usa el worktree de D: para mutar: NO tocar D: hasta que entregue).
-- [v] **T4. Una sola definición de alerta y protegida** en `scripts/clase_mirova.py`: canal (tabla, OCR, tabla sola),
+- [x] **T4+T6 en un PR**: #903 (`instrumento/clase-pasada`), 28 pruebas, 22 de 22 mutaciones por aserción, efecto hoy
+  0 (latente). Verificador limpio, hallazgos aplicados, CI verde.
+- [x] **T4. Una sola definición de alerta y protegida** en `scripts/clase_mirova.py`: canal (tabla, OCR, tabla sola),
   regla SN, pareo ±120 s, distancia compatible, marca de fuente lejana, y el arreglo del riesgo latente de
   `clase_mirova.py:65-75` (una fila OCR de alerta cuenta protegida aunque la tabla diga FALSO_POSITIVO en la misma
   pasada; `experiments/_s159/mirova_v1_auditoria/INFORME.md:246-250`). La decisión debe ser por PASADA, no por fila.
-- [v] **T6. V375-A, «protegida de cráter»**, informada al lado de la lectura A sin reemplazarla: excluye filas sólo
+- [x] **T6. V375-A, «protegida de cráter»**, informada al lado de la lectura A sin reemplazarla: excluye filas sólo
   OCR de Suomi NPP antes del hito 2026-10-09 (`HITO_SNPP`) y fuentes lejanas (`experiments/_s159/portes/INFORME.md`
   P-5). Depende de T4.
-- [v] **T1. Cobertura contra la referencia de MIROVA** (#904, verificado, CI verde) en un evaluador común (`scripts/evaluador_comun.py` o similar):
+- [x] **T1. Cobertura contra la referencia de MIROVA** (#904, verificado, CI verde) en un evaluador común (`scripts/evaluador_comun.py` o similar):
   por brazo y producción, pasadas de la referencia sin record a ±120 s por volcán, sensor y día; una protegida sin
   record en todos los brazos que producción sí tiene, o un día con pasadas de MIROVA y cero records en un brazo, es
   INVALIDO POR INSTRUMENTO antes del veredicto. Caso de prueba obligatorio: el 2026-10-12 de V1 de D25.
-- [v] **T2. «No observado» como estado propio** (#904), fuera del denominador (volcán fuera del gránulo, escena inválida).
-- [v] **T5. P1b en las dos direcciones** (#904) (cruces de 1 MW hacia arriba y hacia abajo) y conteo de publicaciones sobre
+- [x] **T2. «No observado» como estado propio** (#904), fuera del denominador (volcán fuera del gránulo, escena inválida).
+- [x] **T5. P1b en las dos direcciones** (#904) (cruces de 1 MW hacia arriba y hacia abajo) y conteo de publicaciones sobre
   pasadas RUTINA (VE162-03).
-- [v] **T3. Placebo de ganancia y comparador d′ (D-28) en el evaluador común** (#905, verificador corriendo), reutilizable por VIIRS y MODIS, con
+- [x] **T3. Placebo de ganancia y comparador d′ (D-28) en el evaluador común** (#905, verificador limpio, 24 de 24
+  mutaciones, CI verde), reutilizable por VIIRS y MODIS, con
   los placebos de D-44; hoy sólo en `evaluar_d25.py` (rama `s159-evaluador-d25`, tag `s161-d25-lectura`).
 
 ## 3. Decisiones pendientes (para la coordinadora o Nicolás)
 
-(ninguna todavía)
+Ninguna bloquea. Avisos para la coordinadora (detalle en el traspaso de la carpeta compartida):
+1. La cobertura es más estricta que el texto de §8.1: basta que una protegida falte en UN brazo, y también invalida
+   un control que no tiene una protegida que un brazo sí (verificador de #904). Recomendación: dejarlo así.
+2. En la definición nueva la tabla manda sobre el OCR (los sellados unían filas); hoy 0 contradicciones, y el
+   evaluador las cuenta en cada corrida.
+3. Correr los placebos de D-44 con el evaluador común sobre producción antes de leer el primer A/B nuevo.
 
 ## 4. Bitácora (la más nueva arriba)
+
+### 2026-10-24 ~19:45 UTC: FASE 0 DEL INSTRUMENTO TERMINADA; loop detenido
+- Verificador de #905: APROBADO CON OBSERVACIONES. Gravedad 3 (P2 por bloque sin prueba: las dos mutaciones del
+  verificador, bloque = pasada y suma por pasada, vivían) cerrada con dos pruebas; gravedad 2: `ok_ctrl` en
+  `decidir_p2` y conteo de contradicciones OCR/tabla en cada corrida (V1: 0). 24 pruebas, **24 de 24** mutaciones.
+- CI verde en los cuatro: #902, #903, #904 y #905. Ninguno toca `pipeline/`.
+- Traspaso: `C:\Users\nmend\AppData\Roaming\Claude\side-session-notes\local_4152952c-6afd-433a-82b3-b07575feee3b\INSTRUMENTO_fase0_traspaso.md`.
+- Pendiente fuera de mis 7 tareas: §8.6 (estratificación automática, tarea 1.35); separar «no observado» de «hueco
+  común de NASA» con los logs del run. El worktree de D: se puede borrar cuando se mergee la pila.
 
 ### 2026-10-24 ~18:30 UTC: T3 con PR (#905); verificador corriendo
 - Mutaciones de T3, primera tanda 16 de 21: F1 caía por construcción (prueba leía clave inexistente), F4 casi
