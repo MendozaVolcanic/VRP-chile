@@ -24,7 +24,6 @@ from __future__ import annotations
 import argparse
 import collections
 import copy
-import importlib.util
 import json
 import random
 import statistics
@@ -47,6 +46,38 @@ PREF = ("B4", "B2", "B1", "B3")          # §6.3: cercanía al .m
 VOL_SENS = ("PuyehueCordonCaulle", "Tupungatito")
 FRONTERA_OCR = "2026-06-13"
 C = 33
+
+
+NOMBRES_SIGNOS = ("SEMILLA", "SEMILLA_P2_SIGNOS", "N_SORTEOS_P2_SIGNOS", "MAX_B_EXACTO_P2", "MAX_B_SIN_SUSTRATO_P2",
+                  "TOPE_P2_DEN", "prueba_signos_p2", "regla_signos_p2")
+
+
+def cargar_signos(ruta):
+    """Extrae de evaluar_d25.py (tag s161-d25-lectura), con ast y sin copiar a mano, el texto literal de la prueba de
+    signos de D-45 y de sus constantes, y lo ejecuta aparte: importar el archivo entero arrastra todo el evaluador
+    de D25 (evaluar_fk y otros), que aquí no hace falta. Falla si falta alguna pieza."""
+    import ast
+    import types
+    src = Path(ruta).read_text(encoding="utf-8")
+    arbol = ast.parse(src)
+    piezas = []
+    for nodo in arbol.body:
+        if isinstance(nodo, ast.FunctionDef):
+            nombres = {nodo.name}
+        elif isinstance(nodo, ast.Assign):   # incluye las asignaciones dobles (`N_BOOT, SEMILLA = 10000, 157`)
+            nombres = {e.id for t in nodo.targets for e in (t.elts if isinstance(t, ast.Tuple) else [t])
+                       if isinstance(e, ast.Name)}
+        else:
+            continue
+        if nombres & set(NOMBRES_SIGNOS):
+            piezas.append((nombres, ast.get_source_segment(src, nodo)))
+    faltan = set(NOMBRES_SIGNOS) - set().union(*(n for n, _ in piezas))
+    assert not faltan, f"evaluar_d25.py sin {faltan}"
+    m = types.ModuleType("signos_d45")
+    m.__dict__.update({"collections": collections, "np": np})
+    exec(compile("\n\n".join(t for _, t in piezas), str(ruta), "exec"), m.__dict__)
+    assert m.SEMILLA_P2_SIGNOS == 162 and m.MAX_B_EXACTO_P2 == 20 and m.TOPE_P2_DEN == 20
+    return m
 
 
 def cargar(dirs):
@@ -128,9 +159,7 @@ def main():
     ap.add_argument("--solo-controles", action="store_true")
     ap.add_argument("--salida", default=str(AQUI / "analizar_v750b_salida.txt"))
     a = ap.parse_args()
-    spec = importlib.util.spec_from_file_location("ev", a.evaluador)
-    EV = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(EV)
+    EV = cargar_signos(a.evaluador)
     obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}
     res = cargar(a.art)
     inner = B.inner_desde_html()
