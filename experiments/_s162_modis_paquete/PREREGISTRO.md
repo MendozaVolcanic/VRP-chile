@@ -202,3 +202,13 @@ Estrato informativo nuevo, para cada brazo y cada publicación en un negativo li
 
 Láscar 2026-05-11 07:55 queda anotada desde ya como candidata a experimental (señal real que MIROVA calla en MODIS).
 Esta adenda entra al evaluador del candado del §10 y pasa por el mismo verificador limpio antes del despacho.
+
+## Adenda 2 (2026-10-24, informativa): la ablación real del bow tie
+
+`experiments/_s162_modis_bowtie/real/INFORME.md` y su verificador: con datos reales, el método A (quitar los centros que
+el barrido anterior ya cubre) no abre huecos y deja las 11 protegidas del lote de MOD-C intactas; la regla de filas de
+borde (B) mataría una protegida de Chillán de 5,18 MW. El efecto no queda confinado al foco duplicado (pasa por la sigma
+global del umbral de cumbre del oráculo) y los cambios de publicación ocurren al filo del umbral. Consecuencia para este
+censo, sin cambiar ninguna regla sellada: si se agrega un brazo sin duplicados, es **PM-sin_dup con el método A**,
+**informativo** (como PM-geo5 y PM-sens), y **nunca la regla B**. Agregarlo exige una adenda fechada antes del candado,
+con el método A tal como está en `experiments/_s162_modis_bowtie/real/comun.py` y su blob.

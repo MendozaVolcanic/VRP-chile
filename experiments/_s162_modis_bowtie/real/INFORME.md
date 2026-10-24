@@ -1,5 +1,20 @@
 # S162 MOD-E real: el bow tie de MODIS (D28) en el código de MIROVA, con los recortes nativos del lote 40120713181
 
+> ⚠️ **Verificado con contexto limpio el 2026-10-24** (Fable alto, `verificador/INFORME.md`; las cinco salidas y los
+> dos json se reproducen bit a bit). **Se sostiene**: la reproducción del lote (403 de 403, también B21 y geometría de
+> 5 km); el método A sin huecos reales (huella sacada de la geolocalización, 1,0 a 1,7 km a lo largo; sus rendijas
+> cierran con la huella x1,05 a x1,10, las de B y C ni con x1,5; A deja todavía 8,4 % del suelo bajo dos barridos porque
+> quita sólo centros cubiertos); con A las 11 protegidas publican; B mataría la protegida de Chillán 2026-10-01 08:35
+> (5,18 MW de MIROVA, VBT-03, gravedad 5 si se adoptara). **No se sostiene**: que el efecto quede confinado al foco
+> duplicado (VBT-02: en Láscar 79, con el cráter visto una vez, la magnitud sube 8,7 % porque quitar duplicados a 8 km
+> cambia la sigma global con que el oráculo arma el umbral de cumbre); y el 2 a 0 en `neg_resto` no es una propiedad
+> robusta del método: los dos cambios de publicación ocurren al filo, con márgenes de NTI de 1e-6 a 8e-4 (VBT-01). «El
+> signo depende de la copia» vale en 1 de 3 casos, y el estrato «cráter bajo 2+ huellas» toma 91 de 102 sobre 50° pero
+> deja fuera 1 de los 2 cambios de publicación. Seguimiento del verificador (S-1): el umbral de cumbre del oráculo usa la
+> sigma de toda la grilla de 51 km, lo que acopla cualquier A/B de remuestreo (D17, D28) a lo que pase en el borde de la
+> escena. Texto original conservado:
+
+
 2026-10-24. Sólo lectura: nada en `pipeline/`, `data/` ni `frontend/`. Insumos: los 403 recortes nativos y los
 resultados del lote `C:\vrp-trabajo\temporales\s162_negmodis\run_40120713181\`, los objetivos
 `experiments\_s162_modis_negativos\objetivos_neg_resto_modis.json` y el port del árbol base
