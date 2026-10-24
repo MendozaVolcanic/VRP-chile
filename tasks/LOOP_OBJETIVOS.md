@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~12:30 UTC (S162): D25 LEÍDO: DECIDE NICOLÁS
+- Evaluador del tag `s161-d25-lectura` sin cambios (sha256 `93c26d62...fec2`), numpy 2.4.4, sobre los artefactos
+  `s146ab-todo` de V1 (39530508296, intento 2), V2a (39575542584) y V2b (39612909810); cobertura pareja en los tres.
+- **Veredicto combinado: DECIDE NICOLÁS.** P1 CUMPLE en las dos ventanas y sensores. P1b: 2 protegidas de Chillán
+  bajan de 1 MW con D (V375 10-11 05:36, V750 10-14 06:18). P2 BLOQUEA en V1 VIIRS 750 (neto +6, 26 noches, p 0,16) y
+  en V2 VIIRS 375 sólo con SN (neto +1, p 0,50). M MEJORA sólo en V1 VIIRS 750 cenit ≤ 40°; en los demás estratos D
+  sube la magnitud como una ganancia uniforme (d mejora, d′ no). Tabla de latest.php sola en V1: mismo veredicto.
+- Brazo del 17 al 19-oct (39756261926), aparte: INDECIDIBLE por falta de sustrato; no cambia nada.
+- Informe y salidas: `experiments/_s157_prereg_d25/lectura_s162/` en `s159-evaluador-d25` (`e634f819f`). Nada en
+  producción (A45).
+
 ### 2026-10-23 ~20:45 UTC (S161): CIERRE de la sesión
 - Sin trabajo en curso: ningún agente ni proceso propio vivo; `s159-evaluador-d25` limpia e igual al remoto en
   `a7418e01d`; sesiones laterales terminadas (#897 y #899 mergeados; #898, #900 y #901 en borrador con CI verde).
