@@ -114,3 +114,18 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
 - Comandos entregados a la coordinadora. **Siguiente**: cuando avise el run del humo, bajarlo a
   `C:\vrp-trabajo\temporales\s162_v375\`, revisar (estado ok en las 2, K re-corrido = publicado, grilla guardada,
   recálculo = runner) y darle el OK; después, el lote.
+
+### 2026-10-24 (vuelta 5): humo en verde, OK dado; cobertura del marco OK
+- Humo run **40115765406** (success, 2 min 15 s; artefactos en `C:\vrp-trabajo\temporales\s162_v375\run_40115765406\`):
+  2 de 2 ok; Láscar 2026-04-05 05:30 port 1,521 MW en los 10 brazos contra MIROVA 1,52; K re-corrido 1,086 = publicado;
+  Tupungatito 2026-05-04 06:30 en 0 píxeles y K no publica. Recálculo = runner 467 de 467; K 151 de 151. **OK dado a la
+  coordinadora**; el lote sale después de MOD-C.
+- El humo destapó un KeyError del evaluador en el camino del lote S162 (compuesto por volcán con el veto sobre la unión):
+  arreglado sin cambiar reglas, adenda 1 de C (`a6a02071b`).
+- **Cobertura del marco** con el evaluador común del instrumento (#904, `ff452671c`, sin mergear, corrido desde su árbol):
+  COBERTURA OK, 1.208 alertas (unión) y 882 (tabla) con record de producción, 0 sin record; las 179 observadas fuera del
+  marco son las sólo OCR antes del 06-13 (A119). Adenda 2 de C (`a01d50f57`). Referencia del marco reconstruida en
+  `C:\vrp-trabajo\temporales\s162_v375\ref_marco\` (tabla y OCR de S159 más respaldo e histórico de `ca034d66e`).
+- **Siguiente**: cuando avise el run del lote, bajarlo a `C:\vrp-trabajo\temporales\s162_v375\run_<RUN>\`, correr
+  `evaluar.py --art162 <run> --cobertura cobertura_marco.json`, y pasar el resultado por un verificador limpio antes
+  de informarlo.
