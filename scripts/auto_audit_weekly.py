@@ -464,11 +464,22 @@ def leer_ceses(path=None):
             datos = json.load(fh)
         ceses = []
         for c in datos["ceses"]:
+            # S162 (PR162-04 de la revisión de #900): un sensor null tumbaba el audit (AttributeError, sin
+            # latest.json ni issue) y `sensores` como cadena o un sensor de ningún bucket dejaban la lista sin
+            # recortar nada y sin decirlo. Se tratan igual que una lista ilegible: error, aviso y DEGRADADO.
+            sensores = c["sensores"]
+            if not isinstance(sensores, list) or not sensores or not all(isinstance(x, str) for x in sensores):
+                raise ValueError(f"cese de {c.get('plataforma')}: 'sensores' tiene que ser una lista no vacía "
+                                 f"de nombres de sensor y viene {sensores!r}")
+            desconocidos = [x for x in sensores if our_bucket(x) is None]
+            if desconocidos:
+                raise ValueError(f"cese de {c.get('plataforma')}: sensores que no son de ningún bucket del "
+                                 f"audit: {desconocidos}")
             desde = datetime.strptime(c["desde_utc"], "%Y-%m-%dT%H:%M:%SZ")
             dia = desde.date() + timedelta(days=0 if (desde.hour, desde.minute, desde.second) == (0, 0, 0)
                                            else 1)
             ceses.append({"plataforma": c["plataforma"], "desde_utc": c["desde_utc"],
-                          "sensores": sorted({our_bucket(s) for s in c["sensores"]} - {None}),
+                          "sensores": sorted({our_bucket(x) for x in sensores}),
                           "primer_dia_sin": dia.isoformat()})
         return ceses, None
     except (OSError, ValueError, KeyError, TypeError) as e:
@@ -494,6 +505,32 @@ def partir_por_plataformas(mir, desde):
     for k, v in mir.items():
         (aparte if es_aparte(k[1], k[2], desde) else juzgadas)[k] = v
     return juzgadas, aparte
+
+
+def sensores_sin_juzgar(recall, desde, ceses, mir_aparte):
+    """{sensor: estado} de los sensores que perdieron una plataforma y, desde el cese, no juntan MIN_N_RECALL
+    noches con alerta.
+
+    POR QUÉ (S162, PR162-01 de la revisión de #900, experiments/_s161_audit_cese/REVISION_S162.md): con la
+    ventana partida en el cese, VIIRS arranca de cero y tarda de una a tres semanas en juntar el mínimo.
+    Mientras tanto sus flags de recall no pueden dispararse y, sin aviso, los flags vigentes desaparecen del
+    informe (11 a 6 en la simulación del 2026-11-09): se leería «se arregló» cuando es «no se midió» (A87).
+    Un sensor sin juzgar no es un sensor en banda. No degrada el veredicto: se informa en latest.json, en la
+    consola y en el cuerpo del issue."""
+    estado = {}
+    for s in SENSORS:
+        d = desde.get(s)
+        n = (recall.get(s) or {}).get("n_noches", 0)
+        if not d or n >= MIN_N_RECALL:
+            continue
+        plats = sorted({c["plataforma"] for c in ceses if s in c["sensores"] and c["primer_dia_sin"] == d})
+        n_aparte = sum(1 for k in mir_aparte if k[1] == s)
+        aviso = (f"{s} sin juzgar: {n} noches con alerta de MIROVA desde el cese de {', '.join(plats)} (se juzga "
+                 f"desde {d}), bajo el mínimo de {MIN_N_RECALL}; su recall no puede dar flag y eso no es estar en "
+                 f"banda. Lo anterior al cese ({n_aparte} noches) está en plataformas.aparte y no decide")
+        estado[s] = {"juzga_desde": d, "plataformas": plats, "n_noches": n, "minimo": MIN_N_RECALL,
+                     "n_noches_aparte": n_aparte, "aviso": aviso}
+    return estado
 
 
 def aplicar_d9(alertas, modo=REGLA_MINIMAS, filas_ref=None):
@@ -966,6 +1003,7 @@ def main():
 
     # 4. Flags contra bandas
     flags = flags_de_evaluacion(ev)
+    sin_juzgar = sensores_sin_juzgar(ev["recall"], desde_plat, ceses, mir_aparte)
     if integrity["parse_errors"]:
         flags.append(f"integridad: {len(integrity['parse_errors'])} JSON con parse error")
     if integrity["duplicates_total"]:
@@ -1087,6 +1125,8 @@ def main():
         "avisos_detector": avisos_detector,
         # S161: desde qué día se juzga cada sensor y lo de antes del cese (detector vigente), sin flags.
         "plataformas": {"ceses": ceses, "juzga_desde": desde_plat, "error": error_ceses,
+                        # S162: sensores sin juzgar por n bajo el mínimo desde el cese (no están en banda).
+                        "sin_juzgar": sin_juzgar, "avisos": [v["aviso"] for v in sin_juzgar.values()],
                         "aparte": (evaluar_detector(mir_aparte, ours, vistos, vigente, frontera)
                                    if mir_aparte else None)},
         "alertas_protegidas": {"lectura": "A", "umbral_mw": cm.UMBRAL_PROTEGIDA_MW, "lista": protegidas,
@@ -1138,6 +1178,8 @@ def main():
         print(f"DETECTOR: {a}")
     for av in cobertura_avisos:
         print(f"COBERTURA: {av}")
+    for v in sin_juzgar.values():
+        print(f"SIN JUZGAR: {v['aviso']}")
     print(f"VEREDICTO: {out['verdict']}" + (f" — {len(flags)} flags" if flags else ""))
     for fl in flags:
         print("  ⚠", fl)
