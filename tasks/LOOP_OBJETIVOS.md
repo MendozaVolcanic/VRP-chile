@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~18:10 UTC (S162): fase 0 del instrumento terminada; su loop detenido
+- `loop-instrumento`: las 7 tareas en #902 a #905, los cuatro con CI verde, verificador limpio aplicado y mutaciones
+  atrapadas por aserción; ninguno toca `pipeline/`; ninguno mergeado (merges de Nicolás). Loop de la hija detenido.
+  #889 (R2.1, toca `pipeline/`) sigue en borrador y sin rebase.
+- V750-B: tercera vuelta corta lanzada (`439968ec1`, con nulo de la batería medido rompiendo una copia del analizador).
+  Lote V375 (40116289866) en curso, la hija cuenta los 28 trozos antes de evaluar.
+
 ### 2026-10-24 ~17:55 UTC (S162): V750-B v3 y t1 sin huecos; cobertura del marco de V375 OK
 - V750-B: segunda vuelta (Sonnet) «conforme con cambios»; v3 `81a5cfcd2` con VB2-01 (desempate exige «no peor»
   también con la tabla sola) y VB2-02 (lectura conservadora, **confirmada con D-48**: SIN SUSTRATO es «no peor» sólo
