@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~15:05 UTC (S162): hueco silencioso del 12-oct en V1 del A/B de D25
+- Agente (Opus, `experiments/_s162_vuelta2/RECORD_FALTANTE_CHILLAN_12OCT.md`), comprobado por mí en el log del brazo
+  control de Chillán (l. 2590-2664, n=0 en NRT de Suomi NPP y NOAA-21 para el 12-oct) y en los records (el 12-oct los
+  brazos sólo traen NOAA-20): NASA reprocesó Suomi NPP y NOAA-21 del 12-oct el 19-oct y CMR no los devolvió cuando
+  corrió V1 (2026-10-21 04:50 UTC). A los tres brazos les faltan 44 pasadas que producción tiene, entre ellas la
+  protegida de Chillán NOAA-21 05:18 (MIROVA 8,44 MW en 750; producción 3,46 MW summit).
+- **Defecto del instrumento (no de producción)**: el hueco pasó cuatro filtros sin aviso: búsqueda vacía no es falla
+  (`fetch.py:1087-1088` en 66961f65), la cobertura del A/B compara brazos entre sí, el evaluador busca protegidas sin
+  record sólo entre pasadas con record (`evaluar_d25.py:988`, 999-1001) y la tolerancia de 5 % contra producción
+  (l. 81, 1006-1007) no lo ve. 9 protegidas VIIRS de V1 sin record, todas de Chillán (7 del 18-oct, ya en D-29).
+- No cambia la recomendación de D25 (no adoptar). Para A/B futuros: la cobertura debe contar pasadas protegidas sin
+  record contra la referencia, no sólo contra los brazos ni con tolerancia agregada.
+
 ### 2026-10-24 ~14:50 UTC (S162): verificador de VIIRS 750; recomendación final de D25 a Nicolás; vuelta 2 lanzada
 - Verificador limpio (Opus, `experiments/_s162_vuelta1/VERIFICADOR_ENCENDIDAS.md`): son 126 pasadas con D-29 (no 127),
   todas un píxel de cumbre que entra por el segundo pase sin compuerta y que K deja en 0,0 MW; D publica el 100 % de
