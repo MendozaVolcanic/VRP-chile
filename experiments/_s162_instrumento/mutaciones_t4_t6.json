@@ -1,0 +1,149 @@
+{
+ "pruebas": [
+  "tests/test_clase_mirova_pasadas_s162.py",
+  "tests/test_clase_mirova_s151.py",
+  "tests/test_regla_minimas_d9_s151.py"
+ ],
+ "mutaciones": [
+  {
+   "id": "M1",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "decide = tabla or ocr",
+   "nuevo": "decide = tabla + ocr",
+   "que": "la tabla deja de mandar (fila por fila, la semantica vieja)"
+  },
+  {
+   "id": "M2",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "(t - t0).total_seconds() > ventana_s",
+   "nuevo": "(t - t0).total_seconds() >= ventana_s",
+   "que": "borde de la ventana de 120 s"
+  },
+  {
+   "id": "M3",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "            if not actual:\n                t0 = t",
+   "nuevo": "            if True:\n                t0 = t",
+   "que": "la ventana encadena (se mide desde la ultima fila)"
+  },
+  {
+   "id": "M4",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "filas = [f for f in filas if f.get(\"source\") == \"CONS\"]",
+   "nuevo": "filas = filas",
+   "que": "canal tabla deja entrar el OCR"
+  },
+  {
+   "id": "M5",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "filas = aplicar_regla_minimas(filas, regla_minimas, umbral_minima_mw).filas",
+   "nuevo": "filas = filas",
+   "que": "no aplica la regla D-9"
+  },
+  {
+   "id": "M6",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "if p.vrp_mw is None or p.vrp_mw < umbral:",
+   "nuevo": "if p.vrp_mw is None or p.vrp_mw <= umbral:",
+   "que": "borde de 1 MW"
+  },
+  {
+   "id": "M7",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "return p.estado != \"rutina\"",
+   "nuevo": "return True",
+   "que": "lectura B cuenta RUTINA"
+  },
+  {
+   "id": "M8",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "dia < HITO_OCR_SNPP",
+   "nuevo": "dia <= HITO_OCR_SNPP",
+   "que": "borde del hito de Suomi NPP"
+  },
+  {
+   "id": "M9",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "dia < HITO_OCR_DISTANCIA",
+   "nuevo": "dia <= HITO_OCR_DISTANCIA",
+   "que": "borde del hito de distancia del OCR"
+  },
+  {
+   "id": "M10",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "motivos.append(\"plataforma_desconocida_antes_del_hito\")",
+   "nuevo": "pass",
+   "que": "plataforma desconocida pasa por crater"
+  },
+  {
+   "id": "M11",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "elif p.dist_km > radio_km:",
+   "nuevo": "elif p.dist_km >= radio_km:",
+   "que": "borde del radio del crater"
+  },
+  {
+   "id": "M12",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "contradice = bool(tabla and ocr and _estado(ocr)[0] != estado)",
+   "nuevo": "contradice = False",
+   "que": "no marca la contradiccion OCR contra tabla"
+  },
+  {
+   "id": "M13",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "top = max(con_vrp,",
+   "nuevo": "top = min(con_vrp,",
+   "que": "VRP de la pasada = menor alerta"
+  },
+  {
+   "id": "M14",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "(\"alerta\", [f for f in filas if f.get(\"tipo\") in TIPOS_ALERTA]),",
+   "nuevo": "(\"alerta\", [f for f in filas if str(f.get(\"tipo\") or \"\").startswith(\"ALERTA\")]),",
+   "que": "sin geometria cuenta como alerta"
+  },
+  {
+   "id": "M15",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "    if p.solo_ocr:\n        if dia",
+   "nuevo": "    if True:\n        if dia",
+   "que": "las marcas del OCR alcanzan a la tabla"
+  },
+  {
+   "id": "M16",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "elif \"SNPP\" in plataforma.upper():",
+   "nuevo": "elif \"NOAA\" in plataforma.upper():",
+   "que": "marca la plataforma equivocada"
+  },
+  {
+   "id": "M17",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "if p.sensor_bucket.startswith(\"VIIRS\") and dia < HITO_OCR_SNPP:",
+   "nuevo": "if dia < HITO_OCR_SNPP:",
+   "que": "el hito de Suomi NPP alcanza a MODIS"
+  },
+  {
+   "id": "M18",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "    if canal not in CANALES:\n        raise ValueError",
+   "nuevo": "    if False:\n        raise ValueError",
+   "que": "canal desconocido cae en silencio"
+  },
+  {
+   "id": "M19",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "                return estado, None, None",
+   "nuevo": "                return estado, 0.0, None",
+   "que": "alerta sin VRP toma 0"
+  },
+  {
+   "id": "M20",
+   "archivo": "scripts/clase_mirova.py",
+   "viejo": "return p.estado == \"alerta\"",
+   "nuevo": "return p.estado in (\"alerta\", \"fp\")",
+   "que": "lectura A cuenta FALSO_POSITIVO"
+  }
+ ]
+}

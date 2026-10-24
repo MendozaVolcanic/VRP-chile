@@ -142,6 +142,9 @@ def test_lectura_b_cuenta_falso_positivo_de_la_tabla_y_nunca_rutina():
     assert not cm.es_protegida(p) and cm.es_protegida(p, lectura="B")
     r = una(cm.resumir_pasadas([fila("2026-10-12 05:18:02", "RUTINA", 0.0)], regla_minimas="original"))
     assert not cm.es_protegida(r, lectura="B")
+    # Una RUTINA con VRP (fila mal formada del scraper) tampoco: la B excluye el estado, no sólo el VRP 0.
+    r2 = una(cm.resumir_pasadas([fila("2026-10-12 05:18:02", "RUTINA", 2.0)], regla_minimas="original"))
+    assert not cm.es_protegida(r2, lectura="B")
 
 
 def test_regla_sn_por_defecto_vuelve_rutina_la_alerta_minima_de_viirs375():
@@ -191,6 +194,12 @@ def test_el_hito_de_snpp_es_el_9_de_octubre():
     pd = una(cm.resumir_pasadas([desde], regla_minimas="original"))
     assert not cm.protegida_de_crater(pa, radio_km=5.0, plataforma="VIIRS_SNPP")[0]
     assert cm.protegida_de_crater(pd, radio_km=5.0, plataforma="VIIRS_SNPP")[0]
+
+
+def test_el_hito_de_suomi_npp_no_alcanza_a_modis():
+    f = fila("2026-09-14 06:18:00", "ALERTA_TERMICA_OCR", 2.0, source="OCR", sensor="MODIS", dist=1.0)
+    p = una(cm.resumir_pasadas([f], regla_minimas="original"))
+    assert cm.protegida_de_crater(p, radio_km=5.0) == (True, ())
 
 
 def test_solo_ocr_antes_de_la_distancia_medida_no_es_de_crater():
