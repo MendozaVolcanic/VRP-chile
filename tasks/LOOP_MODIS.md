@@ -54,15 +54,15 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
 - [x] C1. (`21b800259`, redactado por subagente Opus y revisado) Pre-registro del lote (300 a 400 de las 5.093 noches neg_resto), selección con semilla, objetivos, regla de
   decisión (Wilson), para el despacho combinado de la fase 1. Guardar el recorte nativo de cada pasada (lo pide MOD-E).
-- [ ] C2. Verificador limpio del pre-registro y entrega a la coordinadora.
+- [ ] C2. Verificador limpio del pre-registro y entrega a la coordinadora. (CORRIENDO: Fable alto, carpeta `experiments/_s162_modis_verif_cde/`)
 
 ### MOD-E, bow tie (D28), ablación local
 - [x] E1. Leer cómo grilla el port MODIS y qué hay en disco; decidir si la ablación se puede hacer sin red.
-- [ ] E2. Ablación (o veredicto de sustrato) con verificador limpio.
+- [ ] E2. Ablación (o veredicto de sustrato) con verificador limpio. (informe `e4feb6f57`; verificador CORRIENDO junto con C2 y D2)
 
 ### MOD-D, paquete MODIS contra K
 - [x] D1. (borrador en `experiments/_s162_modis_paquete/PREREGISTRO.md`) Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
-- [ ] D2. Verificador limpio del pre-registro.
+- [ ] D2. Verificador limpio del pre-registro. (CORRIENDO, el mismo de C2)
 
 ### MOD-A (la hace la sesión del instrumento)
 - [ ] A1. Usar la cita de MOD03 de Coppola 2026 p. 4 cuando la entregue (afecta §2 del pre-registro de MxD03).
@@ -75,6 +75,13 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 (ninguna todavía)
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 16:05 UTC (vuelta 3): MOD-E a 3 MW, informe, segundo verificador
+- Ablación sintética a 3 MW: quitar duplicados no cambia la mediana hasta 45° de barrido (S/T 1,000 a 1,005) y la
+  BAJA un 25 % a 50° de barrido, 58° de cenit (0,754, n 19), con 24 a 20 detecciones de 40. Conservarlos (el port)
+  inflaría respecto de MIROVA sólo en lo muy oblicuo: no explica la subida de Láscar entre 25 y 48°.
+- Informe de MOD-E (`experiments/_s162_modis_bowtie/INFORME.md`); MOD-D agrega el brazo PM-sin_dup.
+- Segundo verificador limpio (Fable alto) para MOD-C, MOD-D y MOD-E. El de MOD-B sigue corriendo.
 
 ### 2026-10-24 (vuelta 2): evaluador, vara, MOD-C, MOD-E paso 1 y 2, borrador de MOD-D
 - B5: evaluador con las 12 pruebas del §8: 0 de 12 contra `evaluar_vacio.py`, 12 de 12 con el real, 5 de 5 mutaciones
