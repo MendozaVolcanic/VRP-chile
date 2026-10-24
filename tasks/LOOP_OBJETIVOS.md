@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 20:38 UTC, hora del servidor (S162): las tres tandas de MOD-B terminadas; humo de V375-B2 OK
+- t3 de MOD-B (40126381034): 9/9 success. Las tres tandas corridas (t1 40112510038, t2 40122029477, t3 40126381034);
+  `loop-modis` evalúa las tres juntas con verificador limpio.
+- Humo de V375-B2 (40128648709) success: control de vida 5000 (Láscar 2026-04-25 05:54) M14 5 píxeles y 1,4126318824
+  MW, exacto a S162; muestra 3000 (Isluga neg_resto) 0 píxeles. El lote espera la re-verificación del delta v2→v3
+  (Fable, rompiendo el port en copias). NRT corriendo ahora (11 jobs).
+
 ### 2026-10-24 ~20:30 UTC (S162): humo de V375-B2 despachado; el lote espera una re-verificación corta
 - V375-B2 v3 (`ae65eaaaf`, tag `s162-v375-b2-listo`): el segundo verificador dio CONFIRMADO EN PARTE con un G3 (ningún
   control probaba que el port estuviera vivo; un port muerto daba «calla»); arreglado con 20 pasadas de control
