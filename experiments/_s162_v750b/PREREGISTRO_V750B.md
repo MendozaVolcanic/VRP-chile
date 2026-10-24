@@ -1,6 +1,6 @@
 # Pre-registro V750-B (S162): la región sensible (ROI) del código de MIROVA, por volcán, en VIIRS 750
 
-Estado: **v3**, corregido tras dos verificadores limpios: el primero (Fable 5.1,
+Estado: **v3, en tercera vuelta corta sobre el delta v2 a v3** (con conforme sin cambios en la regla queda sellada, D-48), corregido tras dos verificadores limpios: el primero (Fable 5.1,
 `verificador/VERIFICADOR_PREREGISTRO_V750B.md`, «listo para sello con cambios») y la segunda vuelta (Sonnet,
 `verificador_v2/VERIFICADOR_V2_PREREGISTRO_V750B.md`, «conforme con cambios»); qué cambió en cada vuelta, en §12. No se despacha
 nada hasta (1) el sello, (2) que la sesión del instrumento entregue la cobertura contra la referencia (fase 0, programa
@@ -242,7 +242,8 @@ Por brazo, contra MIROVA, en T, en O y en T ∪ O, con el canal que decide y, al
 De la v2 a la v3 (segunda vuelta, Sonnet; decisiones de diseño bajo D-48 por la coordinadora):
 
 - VB2-01: el desempate tampoco puede elegir un brazo peor que B1 con la tabla sola.
-- VB2-02: SIN SUSTRATO sólo cuenta como «no peor» con el neto en 0 o a favor (lectura conservadora).
+- VB2-02: SIN SUSTRATO sólo cuenta como «no peor» con el neto en 0 o a favor (lectura conservadora), **confirmada por
+  la coordinadora bajo D-48** (2026-10-24).
 - VB2-03 y VB2-04: la bandera de pruebas marca el veredicto y sale con código 4; camino escrito para leer con
   faltantes (`--leer-con-faltantes`, código 5), sin editar el analizador después del sello.
 - VB2-05 y VB2-06: batería que comprueba sola sus 11 escenarios; control positivo que exige que B1 publique lo que
