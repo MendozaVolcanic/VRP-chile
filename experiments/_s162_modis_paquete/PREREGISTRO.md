@@ -104,8 +104,13 @@ Población: las 10 alertas MODIS de Chillán del censo (9 protegidas, 1 bajo 1 M
 4. **ES DEL SENSOR** si la mediana de PM/MIROVA en los pares con cenit sobre 30° (el corte que separa en K: 0,14 a 0,21
    de 35 a 51°, contra 0,64 a 0,85 bajo 30°) queda bajo 0,8 **y** la de los pares con cenit de 30° o menos queda en
    [0,8; 1,25]: el código trasladado reproduce a MIROVA de frente y no de lado.
-5. **SIN RESOLVER** en cualquier otro caso, con la lista pasada por pasada.
-Precedencia: 3 antes que 4. Esta prueba no entra al veredicto del §6: lo acompaña.
+5. **SIN SUSTRATO** si hay menos de 5 pares (con 4 la prueba de signos no puede bajar de p = 1/16 = 0,0625: la regla 3
+   sería inalcanzable). Un par con las dos distancias iguales (empate exacto) sale de la prueba y se lista. Si el grupo
+   de cenit de 30° o menos o el de más de 30° queda vacío, la regla 4 no se cumple (verificador, ronda 2, VCD-16).
+6. **SIN RESOLVER** en cualquier otro caso, con la lista pasada por pasada.
+Nota (VCD-17): el corte de 30° se eligió mirando a K en estos mismos 7 pares; es pre-registrado respecto de PM, y
+cualquier corte entre 23,6° y 35,1° da la misma partición (4 pares bajo, 3 sobre).
+Precedencia: 5 (SIN SUSTRATO) primero, después 3 y luego 4. Esta prueba no entra al veredicto del §6: lo acompaña.
 
 ## 6. Veredicto del censo (primera fila que se cumpla, en este orden)
 
