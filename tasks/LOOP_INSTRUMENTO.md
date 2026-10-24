@@ -33,7 +33,7 @@ devolvió los gránulos reprocesados, y la cobertura comparaba brazos entre sí,
 
 Estado: `[ ]` pendiente, `[~]` en curso, `[v]` en verificación, `[x]` lista (PR + CI verde + verificador limpio).
 
-- [v] **T7. MOD-A, la cita de MOD03.** PR #902 (`instrumento/mod-a-cita`); verificador Sonnet: CONFIRMADO CON MATIZ,
+- [x] **T7. MOD-A, la cita de MOD03.** PR #902 (`instrumento/mod-a-cita`); verificador Sonnet: CONFIRMADO CON MATIZ,
   dos frases corregidas. Falta: CI con conclusión. Es documento: listo al dar verde. Renderizar a imagen la p. 4 de
   `documentacion/Coppola_2026_SciData_Global_VRP_Dataset_s41597-026-08100-7.pdf` (`page.get_pixmap(dpi=200)`, A95) y
   citar qué dice de MOD03 (P1 y P3 discrepan). Entregable: nota en `experiments/_s162_instrumento/MOD_A_CITA_MOD03.md`,
@@ -62,6 +62,19 @@ Estado: `[ ]` pendiente, `[~]` en curso, `[v]` en verificación, `[x]` lista (PR
 (ninguna todavía)
 
 ## 4. Bitácora (la más nueva arriba)
+
+### 2026-10-24 ~16:50 UTC: T4+T6 verificado; T1+T2+T5 con PR (#904); T3 escrito en borrador
+- **#902 (MOD-A)**: CI verde. LISTA.
+- **#903 (T4+T6)**: verificador Sonnet CONFIRMADO, gravedad máx. 2; aplicados sus hallazgos (orden de estados igual a
+  `banco_paridad.etiquetar`, `ocr_cruza_1mw`, hitos por día documentados). 28 pruebas, 22 de 22 mutaciones.
+- **#904 (T1+T2+T5, apilado sobre #903)**: `scripts/evaluador_comun.py`. Sobre V1 de D25 real, sin decirle nada del
+  12-oct: INVALIDO por las 2 protegidas de Chillán 05:18; 42 pasadas faltantes por brazo; las 5 alertas no protegidas
+  del informe; RUTINA (D no K, noche con alerta, 750) = 5, igual que VE162-03. MODIS humo: OK. 23 pruebas, 20 de 20
+  mutaciones (4 vivas en la primera corrida pidieron pruebas). Verificador Sonnet corriendo (usa el worktree de D:).
+- **T3**: bloque escrito en el scratchpad (`...\scratchpad\t3\bloque_t3.py`): M con D-27/D-28/D-30/D-32, placebo de
+  ganancia, P2 con D-45, placebos D-44 a nivel de tabla con el (c) por bloque noche-volcán (corrige V42-21).
+  Falta: pruebas, equivalencia contra `evaluar_d25.py` del tag `s161-d25-lectura` (importado read-only desde
+  `C:\vrp-trabajo\s159-evaluador`), mutaciones, PR apilado sobre #904, verificador.
 
 ### 2026-10-24 ~16:00 UTC: MOD-A y T4+T6 con PR; verificadores
 - **T7 MOD-A**: Coppola 2026 p. 4 renderizada: MOD03/MYD03 con corrección de terreno como insumo; el verificador
