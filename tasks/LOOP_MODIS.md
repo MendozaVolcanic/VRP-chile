@@ -45,23 +45,23 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] B3. (`dcdfeaaf3`, `cfa3330d9`) Arnés `probe_mxd03_ab.py` (brazos K, K2, X, R0 a R19 en ≤ 35°, X_fondo y X_det en las que cambian), partes por
   gránulo, con prueba sintética sin HDF (pyhdf no corre en Windows).
 - [x] B4. (`15c517da1`) Workflow de disparo (`"on":` entre comillas, `EARTHDATA_TOKEN` que falla vacío, `ubuntu-24.04`, 24 partes).
-- [ ] B5a. Vara VIIRS congelada ANTES del despacho (adaptar `construir_vara_viirs.py` de 1.23 al censo de la ventana).
-- [ ] B5. Evaluador `evaluar_mxd03.py` + `probar_evaluar_mxd03.py` (las 12 pruebas del §8, rojas antes, verdes
+- [x] B5a. (`87e91adf0`) Vara VIIRS congelada ANTES del despacho (adaptar `construir_vara_viirs.py` de 1.23 al censo de la ventana).
+- [x] B5. (`f10ea9b79`, `91a3055ff`) Evaluador `evaluar_mxd03.py` + `probar_evaluar_mxd03.py` (las 12 pruebas del §8, rojas antes, verdes
   después) y las 5 mutaciones con control de caída.
-- [ ] B6. Verificador con contexto limpio, de otro modelo, sobre arnés y evaluador.
+- [ ] B6. Verificador con contexto limpio, de otro modelo, sobre arnés y evaluador. (Fable, alto, CORRIENDO; escribe en `D:rp-trabajo\s162-mxd03\experiments\_s162_mxd03erificador\`)
 - [ ] B7. Pedido de despacho a la coordinadora (tag, tres tandas de 8 partes, ~47 h de runner).
 
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
-- [ ] C1. Pre-registro del lote (300 a 400 de las 5.093 noches neg_resto), selección con semilla, objetivos, regla de
+- [x] C1. (`21b800259`, redactado por subagente Opus y revisado) Pre-registro del lote (300 a 400 de las 5.093 noches neg_resto), selección con semilla, objetivos, regla de
   decisión (Wilson), para el despacho combinado de la fase 1. Guardar el recorte nativo de cada pasada (lo pide MOD-E).
 - [ ] C2. Verificador limpio del pre-registro y entrega a la coordinadora.
 
 ### MOD-E, bow tie (D28), ablación local
-- [ ] E1. Leer cómo grilla el port MODIS y qué hay en disco; decidir si la ablación se puede hacer sin red.
+- [x] E1. Leer cómo grilla el port MODIS y qué hay en disco; decidir si la ablación se puede hacer sin red.
 - [ ] E2. Ablación (o veredicto de sustrato) con verificador limpio.
 
 ### MOD-D, paquete MODIS contra K
-- [ ] D1. Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
+- [x] D1. (borrador en `experiments/_s162_modis_paquete/PREREGISTRO.md`) Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
 - [ ] D2. Verificador limpio del pre-registro.
 
 ### MOD-A (la hace la sesión del instrumento)
@@ -75,6 +75,27 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 (ninguna todavía)
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 (vuelta 2): evaluador, vara, MOD-C, MOD-E paso 1 y 2, borrador de MOD-D
+- B5: evaluador con las 12 pruebas del §8: 0 de 12 contra `evaluar_vacio.py`, 12 de 12 con el real, 5 de 5 mutaciones
+  atrapadas cada una por su prueba. Dos defectos míos atrapados: la prueba 9 estaba mal armada (con X = 0,97 K las
+  protegidas de 1,0 MW cruzaban a P1b, y eso es correcto) y, en la punta a punta, la unión población-arnés dejaba que
+  el arnés pisara la etiqueta congelada (ahora manda la población y hay control de unión).
+- B5a: vara VIIRS congelada antes del despacho con el instrumento de 1.23: 83 de 92 alertas con vara estricta, 65 con
+  cenit ≤ 35°.
+- B6 lanzado: verificador Fable alto, contexto limpio, preámbulo canónico entero.
+- C1: pre-registro de MOD-C (subagente): 400 pasadas del marco de 5.055, regla Jeffreys, CONFIRMA sólo con 0 de 400,
+  INDECIDIBLE con 1 a 7, REFUTA con 8 o más; K re-corrido; recortes nativos para MOD-E (~307 MB); 1,27 h de runner.
+  Dato: en S159 se sortearon 38 de `neg_resto` (no 37): 36 evaluables. Falta su verificador.
+- E1/E2 (MOD-E): las grillas del port en D: no traen píxeles nativos: la ablación real espera los recortes de MOD-C.
+  Sin red: (1) port/MIROVA por cenit en las 89 alertas de S159: 0,964 bajo 25°, 1,052 de 25 a 40°, 1,115 de 40 a 50°;
+  tendencia significativa (ρ 0,29, p 0,005) y también dentro de Láscar solo (ρ 0,295, p 0,008). (2) Ablación sintética
+  con geometría de barrido MODIS: quitar duplicados no mueve la mediana en ningún ángulo (S/T = 1,00 a 1 MW), sólo la
+  dispersión por pasada, y cuando la mueve la SUBE: el bow tie empujaría port/MIROVA hacia abajo, al revés de lo que se
+  ve. Lectura provisional: D28 no explica la tendencia (falta 3 MW y verificador).
+- Hallazgo para MOD-D: las 2 protegidas de Chillán a 58° que K y K+MxD03 no ven, el port SÍ las ve (0,837 y 1,734).
+- D1: borrador de MOD-D (censo del paquete en el arnés: K, K33, PM, PM-geo5, PM-sens, placebo; P2 por signos D-45;
+  Chillán con tres salidas). Falta verificador.
 
 ### 2026-10-24 (vuelta 1): sello, censo, arnés, workflow; MOD-C delegado
 - B1 hecho: sello D-48 con adenda de 5 puntos en el pre-registro (`cd3d12984`).
