@@ -97,3 +97,20 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   pudo elegir. Una protegida en esa lista que el port sí vería es una falla de cobertura del marco y se informa antes
   del veredicto. La cobertura del lote (pasadas sorteadas sin estado ok) ya la hace `evaluar.py` §1.
 - P1b de T5 lo tengo propio en `evaluar.py`; si el instrumento lo pide común, uso el suyo y comparo los dos.
+
+### 2026-10-24 (vuelta 4): sello por D-48 y commits de disparo
+- La coordinadora adelanta el lote (V750-B no sale antes del 2026-11-03) y sella B y C con **D-48** (Nicolás,
+  2026-10-24: «sobre las decisiones mías haz lo que tú recomiendes»; verificado en su `tasks/LOOP_OBJETIVOS.md`), sobre
+  la recomendación de 709 pasadas; revocable por Nicolás. Anotado en los dos pre-registros: commit `19d7f5e98`, tag
+  `s162-v375-bc-sello`.
+- **Hallazgo antes de disparar**: el `pipeline/` de `loop/activo` (mi rama) difiere del de 533398f8f (el código que
+  escribió los records del marco) en 12 archivos (S157: λ por banda de MODIS apagada, perfiles de D25). Para que el
+  control «K re-corrido = publicado» compare el mismo detector, el disparo NO sale de mi rama: los commits se armaron sin
+  checkout sobre el árbol de `ca034d66e` (`pipeline/` idéntico a 533398f8f, ya trae el port y el oráculo) más
+  `experiments/_s162_v375/` del sello (idéntico) y el workflow: humo `fd0ba12bb` (tag `s162-v375-disparo-humo`, 1 job,
+  pasadas 1011 y 1062) y lote `798cac8ea` (tag `s162-v375-disparo-lote`, hijo del humo, 28 trozos). Sólo `main` y ramas
+  propias disparan otros workflows por push: la rama `s162-v375-disparo` corre sólo éste. Autoprueba sin red del runner
+  pasada sobre el árbol exacto del lote (extraído con `git archive` limitado a rutas, 8,8 MB).
+- Comandos entregados a la coordinadora. **Siguiente**: cuando avise el run del humo, bajarlo a
+  `C:\vrp-trabajo\temporales\s162_v375\`, revisar (estado ok en las 2, K re-corrido = publicado, grilla guardada,
+  recálculo = runner) y darle el OK; después, el lote.
