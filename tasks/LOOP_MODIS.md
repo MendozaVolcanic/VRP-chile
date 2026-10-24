@@ -6,6 +6,104 @@ Coordinadora: sesión «Retomar» (`local_4152952c-6afd-433a-82b3-b07575feee3b`)
 y la única que escribe `tasks/LOOP_OBJETIVOS.md`. Programa: `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`
 §5 (MOD-A a MOD-E). Notas compartidas: `C:\Users\nmend\AppData\Roaming\Claude\side-session-notes\local_4152952c-6afd-433a-82b3-b07575feee3b`.
 
+## 0. Cierre de la sesión hija MODIS (2026-10-24, 20:55 UTC, hora del servidor)
+
+Estado fijado sin trabajo de MODIS en vuelo (la única corrida en cola en GitHub es un lote de VIIRS 375 de otra sesión).
+Ramas verificadas contra el remoto: `claude/s162-modis-774bb0` y `s162-mxd03-codigo` (`afb3fcdea`). Tags en el remoto:
+`s162-mxd03-tag` (sobre `ffbb36248`) y `s162-base-portes` (`0e18e1053`). Sin commitear a propósito: las copias de
+trabajo de los verificadores (`experiments/_s162_modis_verif_cde/arbol/` y `copias/` en esta rama;
+`experiments/_s162_mxd03/resultado/verificador/copias/` en la de D:), que son copias de código y artefactos.
+
+### a. Todo en una pantalla
+
+| pieza | estado | evidencia |
+|---|---|---|
+| MOD-B, MxD03 sobre K | **TERMINADO: CUMPLE SIN DAÑO, verificado** (P1 sin pérdida; P2 ≤ 35° empate, ΔX −1 con ruido 4; vara VIIRS MXD03 MAS CERCA; M neutro). 5.465 de 5.465 pasadas | rama `s162-mxd03-codigo` `afb3fcdea`, `experiments/_s162_mxd03/resultado/INFORME.md` y `verificador/INFORME_VERIFICADOR.md`; runs 40111997157 (humo), 40112510038, 40122029477, 40126381034 |
+| MOD-B, adopción | **A MEDIAS**: falta el PR del veredicto (D35, A113, BEYOND §12, cita de MOD-A), la auditoría A61 de 48 protegidas y los seguimientos; después tag, TDD del flag y el sí de Nicolás | cola B10, B11, B12 |
+| MOD-C, negativos `neg_resto` del port | **TERMINADO: INDECIDIBLE, verificado** (el port publica en 2 de 390; ΔE −18,1 [−43,8; +40,1]). Diagnóstico de las dos: Láscar 05-11 calor real, Llaima 07-24 artefacto de gradiente a 63° | `experiments/_s162_modis_negativos/INFORME.md`, `verificador_resultado/`, `diagnostico/`; run 40120713181 |
+| MOD-E, bow tie (D28) | **TERMINADO**: sintético retirado; ablación real verificada (método A sin huecos deja las 11 protegidas intactas; regla de filas de borde mataría una; efecto no confinado al foco; signo de la magnitud SIN DATO) | `experiments/_s162_modis_bowtie/INFORME.md` (marca) y `real/INFORME.md` (marca) |
+| MOD-D, paquete MODIS contra K | **A MEDIAS**: pre-registro v2 con reglas SELLADAS (D-48) y adendas 1 y 2 informativas; falta el candado (evaluador, arnés, workflow, verificador) | `experiments/_s162_modis_paquete/PREREGISTRO.md`; cola D3 |
+| MOD-A, cita de MOD03 | entregada por la sesión del instrumento en el PR #902 (abierto); falta incorporarla al §2 del pre-registro de MxD03 | PR #902, rama `instrumento/mod-a-cita` |
+
+### b. Decisiones que espera el dueño
+
+| # | pregunta | opciones | recomendación |
+|---|---|---|---|
+| 1 | ¿Cómo entra MxD03 a producción? | sola, como flag propio ahora; o dentro del paquete MODIS (MOD-D) | **dentro del paquete**, salvo que el paquete se atrase más de un mes (después del 2026-11-24); en los dos casos con tag, TDD que reproduzca X, auditoría A61 y su sí (A45). La coordinadora la aplicó con D-48 |
+| 2 | ¿Resolver el «gana contra K» de MODIS con otro lote? | otro lote de negativos; o el censo de MOD-D | **el censo de MOD-D** (ya decidido por la coordinadora con D-48) |
+| 3 | ¿Mergear el PR #902 (MOD-A)? | mergear; esperar | **mergear** con CI verde: refuerza el respaldo bibliográfico de MxD03 y de D17 |
+
+### c. Lo aprendido
+
+- **Un brazo de ablación hay que medirlo sobre su insumo antes de leerlo** (regla general del workspace, ya en la memoria:
+  `feedback_s162_brazo_que_no_hace_lo_que_dice.md`). El brazo «sin duplicados» del sintético abría huecos y la lectura cayó.
+- **Un control que siempre da OK no es un control** (regla general): «vara_cruda» del evaluador de MxD03 era un registro y
+  se contó como control; el verificador lo marcó. Contar sólo lo que puede fallar.
+- **Una vara que da lo mismo con la referencia de otra noche mide otra cosa** (regla general): la vara VIIRS de MxD03 mide
+  cercanía al cráter de Láscar, no al calor de esa noche. Correr el placebo de la referencia antes de leer una vara.
+- **Una afirmación de «se ejercitó» exige el registro que lo muestre** (regla general): escribí que el humo ejercitaba el
+  control 4 y nunca se ejecutó.
+- **Heredoc con escapes** (regla general, ya conocida de S144): barras invertidas dentro de un heredoc pasado a Python se
+  volvieron caracteres reales y rompieron código y rutas cuatro veces en esta sesión, y dos heredocs con comillas
+  mezcladas no llegaron a correr. Escribir el script con la herramienta de archivos y comprobar con `py_compile` y
+  `grep` antes de commitear.
+- Propio del proyecto: el umbral de cumbre del oráculo usa la sigma de toda la grilla de 51 km (S-1 del verificador de
+  E3): todo A/B de remuestreo (D17, D28) queda acoplado al borde de la escena.
+
+### d. Problemas abiertos e hipótesis
+
+- **CONFIRMADO**: con MxD03 las 48 protegidas con cúmulo quedan más cerca del cráter (mediana 1,46 km); en el borde del
+  barrido `_interp_geo` corre el píxel 10 a 16 km (15 records, cenit 63 a 75°); en 36 records de 8 gránulos X pierde
+  píxeles sin geolocalización MxD03 que K conserva; el control del módulo de R acepta valores absurdos con relleno (2
+  gránulos).
+- **CONFIRMADO**: K/MIROVA de Chillán en la población congelada es 0,635 (n 7), de 0,64-0,85 bajo 30° de cenit a
+  0,14-0,21 de 35 a 51°; el port de S159 detecta las dos protegidas de Chillán a 58° que K no ve.
+- **SOSPECHA**: `_interp_geo` interpola el relleno −999 sin enmascararlo.
+- **SOSPECHA**: la publicación del port en Llaima 2026-07-24 01:05 es un desfase entre bandas sobre el gradiente a 63°.
+- **SOSPECHA**: quitar duplicados del bow tie cierra las publicaciones en `neg_resto` (2 eventos, al filo, post hoc).
+- **SIN DATO**: qué copia del bow tie conserva MIROVA; el efecto de D28 sobre la magnitud.
+
+### e. Lo que ya está cerrado y no hay que rehacer
+
+- El A/B de MxD03 sobre K (veredicto verificado). No re-correr: los artefactos están en
+  `D:\vrp-trabajo\temporales\s162_mxd03\tandas\` y el resultado en la rama.
+- El lote de negativos de MOD-C y su diagnóstico (no hay lote nuevo: lo cubre el censo de MOD-D).
+- La regla de «filas de borde» para quitar duplicados: descartada (mata una protegida y abre huecos).
+- La lectura del sintético del bow tie: retirada; no citarla.
+- Las reglas de MOD-D v2: selladas; todo cambio va como adenda fechada.
+
+### f. Prompt para la próxima sesión
+
+```text
+Sesión de MODIS de VRP Chile (continúa la sesión hija S162 de MODIS). Español de Chile con formas de tú, sin guiones
+largos, rutas absolutas, explicar como geólogo.
+
+1. Verifica antes de creer: en C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile haz git fetch origin
+   --prune; compara git ls-remote de origin/claude/s162-modis-774bb0 (cola en tasks/LOOP_MODIS.md) y de
+   origin/s162-mxd03-codigo (código y resultado de MxD03, worktree D:\vrp-trabajo\s162-mxd03) con lo que dice el bloque
+   «0. Cierre» de tasks/LOOP_MODIS.md. Mira el estado del PR #902 (MOD-A) y si la coordinadora S162 sigue viva.
+2. Lee en este orden: CLAUDE.md del proyecto (A45, A90, A104, A110, A113, A115, A119); tasks/LOOP_MODIS.md entero;
+   experiments/_s162_mxd03/resultado/INFORME.md y verificador/INFORME_VERIFICADOR.md (rama s162-mxd03-codigo);
+   experiments/_s162_modis_paquete/PREREGISTRO.md (reglas selladas y adendas 1 y 2).
+3. Trabajo, en este orden:
+   a. PR del veredicto de MOD-B, sobre origin/main: D35 en docs/MIROVA_DIVERGENCES.md (geolocalización MODIS), marcas
+      A113 en D18 y en docs/SINTOMAS.md §3, la candidata Láscar 2026-05-11 07:55 en docs/BEYOND_MIROVA_EXTENSIONS.md §12,
+      y la cita de MOD-A (PR #902) en el §2 del pre-registro de MxD03. Avisa a la coordinadora antes de abrirlo (docs
+      compartidos). CI con conclusión antes de darlo por listo.
+   b. Auditoría espacial A61 de las 48 protegidas cuyo cúmulo se mueve con MxD03 (§6 P4 del pre-registro de MxD03),
+      con los artefactos ya bajados; y los seguimientos: relleno −999 en _interp_geo, los 36 records que X pierde, el
+      corrimiento de 10 a 16 km en el borde del barrido, el control del módulo de R con relleno. Verificador limpio.
+   c. Candado de MOD-D: evaluador con pruebas que fallen contra un vacío y mutaciones con control de caída, arnés que
+      envuelva el probe de PORTES (K, K33, PM, PM-geo5, PM-sens, placebo; PM-sin_dup con el método A sólo si se agrega
+      por adenda), estrato informativo de la adenda 1 (soporte independiente por publicación en negativos), workflow con
+      el molde de MOD-C, verificador limpio. Recién entonces pedir el despacho a la coordinadora.
+4. Reglas duras: nada en pipeline/ sin tag defensivo y el sí explícito de Nicolás para ese cambio (A45); nunca despaches
+   tú, todo despacho se pide a la coordinadora; sólo EARTHDATA_TOKEN (A71); git add por archivo; nunca git stash para
+   probar; verificador con contexto limpio de otro modelo antes de aceptar un resultado; parada si C: o D: bajan de 3 GB
+   (D: estaba en 9,6 GB).
+5. Si la sesión no alcanza: deja la cola de tasks/LOOP_MODIS.md al día y cierra con /cierre.
+```
+
 ## Reglas de este loop
 
 - Sólo mi worktree y mi rama. No escribo `tasks/LOOP_OBJETIVOS.md` ni archivos de instrumento, VIIRS 750 o VIIRS 375.
@@ -21,7 +119,7 @@ y la única que escribe `tasks/LOOP_OBJETIVOS.md`. Programa: `docs/superpowers/s
 ## Dónde se construye MOD-B
 
 El `pipeline/` de `main` va 708 commits adelante de `loop/activo` (11 archivos, 631 líneas), así que el arnés se
-construye y se prueba sobre `main`: worktree `D:\vrp-trabajo\s162-mxd03` (en el disco D:), rama `s162-mxd03-codigo` (cortada de
+construye y se prueba sobre `main`: worktree `D:\vrp-trabajo\s162-mxd03` (en el disco D:), rama `s162-mxd03-codigo` (cortada de
 `origin/main` `80b819828`, sin upstream, checkout parcial: `data/` sólo `mirova_equivalent` y `mirova_reference`).
 Carpeta `experiments/_s162_mxd03/`. El tag `s162-mxd03-codigo` irá sobre esa rama (adenda del sello, punto 2). Al
 terminar, la carpeta se trae también a esta rama.
@@ -51,32 +149,33 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] B6. Verificador limpio (Fable alto), dos rondas: «listo con cambios chicos» y luego «se puede despachar el humo»; 9 + 3 hallazgos, arreglados o como reglas de operación. Commit final `ffbb36248` (rama `s162-mxd03-codigo`).
 - [x] B7. (2026-10-24, mensaje a la coordinadora) Pedido de despacho a la coordinadora (tag, tres tandas de 8 partes, ~47 h de runner).
 
-- [ ] B8. Evaluar el humo cuando llegue el run id (artefactos a `D:\vrp-trabajo\temporales\s162_mxd03\humo\`, evaluador desde checkout del tag, VMX-12) y dar el OK para las tandas.
+- [x] B8. (humo 40111997157: controles en verde, OK dado) Evaluar el humo cuando llegue el run id (artefactos a `D:\vrp-trabajo\temporales\s162_mxd03\humo\`, evaluador desde checkout del tag, VMX-12) y dar el OK para las tandas.
 - [ ] B10. PR del veredicto de MOD-B con D35 en `docs/MIROVA_DIVERGENCES.md` y las marcas A113 en D18 y `docs/SINTOMAS.md` §3 (decisión D-48 aplicada por la coordinadora). Además en ese PR: la candidata Láscar 2026-05-11 en BEYOND §12 (X1).
-- [ ] B11. Auditoría espacial A61 de las 48 protegidas cuyo cúmulo se mueve (§6 P4), antes de cualquier adopción; y los seguimientos de la adopción: relleno −999 en `_interp_geo`, 36 records con píxeles sin MxD03, control del módulo de R con relleno (VRB-01).
+- [ ] B11. Auditoría espacial A61 de las 48 protegidas cuyo cúmulo se mueve (§6 P4), antes de cualquier adopción; y los seguimientos de la adopción: relleno −999 en `_interp_geo` (SOSPECHA), 36 records con píxeles sin MxD03 que K conserva, el corrimiento de 10 a 16 km de `_interp_geo` en el borde del barrido (15 records, cenit 63 a 75°), el control del módulo de R que acepta relleno (VRB-01).
+- [ ] B12. Adopción (sólo con su sí, A45): dentro del paquete MODIS (MOD-D) salvo atraso de más de un mes; tag defensivo, flag `enable_modis_geo_mxd03` con TDD que reproduzca X record por record, FICHA SDA, marca en las tres vistas, aviso a OVDAS.
 - [x] B9. **CUMPLE SIN DAÑO, verificado** (`afb3fcdea`, `experiments/_s162_mxd03/resultado/`, verificador limpio Fable): P1 sin pérdida, P2 ≤ 35° EMPATE, vara MXD03 MAS CERCA (pero mide cercanía al cráter de Láscar, no al calor de la noche: VRB-02), M neutro en la mediana con 17 de 79 alertas cambiando más de 10 %; las 48 protegidas quedan más cerca del cráter con X (1,46 km). Veredicto enviado a la coordinadora.
 
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
 - [x] C1. (`21b800259`, redactado por subagente Opus y revisado) Pre-registro del lote (300 a 400 de las 5.093 noches neg_resto), selección con semilla, objetivos, regla de
   decisión (Wilson), para el despacho combinado de la fase 1. Guardar el recorte nativo de cada pasada (lo pide MOD-E).
-- [x] C2. Verificador limpio (Fable alto): se sostiene, 3 grietas arregladas (adenda 1, `5f40f604d`); entregado a la coordinadora para la fase 1. Ronda 2 CORRIENDO.
+- [x] C2. Verificador limpio (Fable alto): se sostiene, 3 grietas arregladas (adenda 1, `5f40f604d`); entregado a la coordinadora para la fase 1. Ronda 2: «se puede despachar tal como está». Resultado: C3.
 
 ### MOD-E, bow tie (D28), ablación local
 - [x] E1. Leer cómo grilla el port MODIS y qué hay en disco; decidir si la ablación se puede hacer sin red.
-- [x] E2. Verificador limpio: los números se reproducen, la lectura del bow tie NO (VCD-03/04). Retirada con marca: D28 SIN DATO; la costura de barrido es SOSPECHA; E-2 con matiz (sólo bajo 1 MW, cenit con fecha). Ronda 2 CORRIENDO.
-- [x] C3. Lote de MOD-C leído (run 40120713181, artefactos en `C:/vrp-trabajo/temporales/s162_negmodis/run_40120713181/`): **INDECIDIBLE** (2 de 390, ΔE −18,1 [−43,8; +40,1]); controles en verde; informe `experiments/_s162_modis_negativos/INFORME.md` (`11570ab30`). Verificador limpio del resultado CORRIENDO (Fable alto).
+- [x] E2. Verificador limpio: los números se reproducen, la lectura del bow tie NO (VCD-03/04). Retirada con marca: D28 SIN DATO; la costura de barrido es SOSPECHA; E-2 con matiz (sólo bajo 1 MW, cenit con fecha). La ronda 2 lo aprobó.
+- [x] C3. Lote de MOD-C leído (run 40120713181, artefactos en `C:/vrp-trabajo/temporales/s162_negmodis/run_40120713181/`): **INDECIDIBLE** (2 de 390, ΔE −18,1 [−43,8; +40,1]); controles en verde; informe `experiments/_s162_modis_negativos/INFORME.md`; verificado con contexto limpio (`da8a68f91`); diagnóstico de las dos publicaciones en `diagnostico/`.
 - [x] E3. Ablación real del bow tie, verificada (`f49e57dd7`): método A sin huecos y 11 protegidas intactas se sostienen; la regla B mataría una protegida; el efecto no queda confinado al foco (sigma global del umbral de cumbre) y los cambios de publicación son al filo; signo de la magnitud SIN DATO. MOD-D adenda 2: PM-sin_dup con A, informativo.
 
 ### MOD-D, paquete MODIS contra K
 - [x] D1. (borrador en `experiments/_s162_modis_paquete/PREREGISTRO.md`) Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
-- [x] D2. Verificador limpio: v1 tenía reglas que obligaban a decidir después de mirar; v2 las cierra (`ce71a4ab1`). Ronda 2 CORRIENDO.
-- [ ] D3. (incluye la adenda 1 informativa: soporte independiente y candidatas a experimental) Candado de MOD-D (evaluador, arnés, workflow, verificador) después de MOD-B y MOD-C.
+- [x] D2. Verificador limpio: v1 tenía reglas que obligaban a decidir después de mirar; v2 las cierra (`ce71a4ab1`); ronda 2: lista para el sello; reglas SELLADAS con D-48 (`de3141b6e`).
+- [ ] D3. Candado de MOD-D (evaluador, arnés, workflow, verificador), ya posible: MOD-B y MOD-C entregaron. Incluye el estrato informativo de la adenda 1 (soporte independiente por publicación en negativos, candidatas a experimental) y, si se agrega por adenda, el brazo PM-sin_dup con el método A (adenda 2). Luego pedir el despacho a la coordinadora.
 
 ### Perfil experimental (candidatas)
 - [ ] X1. Anotar en `docs/BEYOND_MIROVA_EXTENSIONS.md` §12 la candidata Láscar 2026-05-11 07:55 (señal real del cráter que MIROVA calla en MODIS; diagnóstico de MOD-C), en el PR del veredicto de MOD-B o de MOD-D (archivo compartido: no tocarlo suelto).
 
 ### MOD-A (la hace la sesión del instrumento)
-- [ ] A1. Usar la cita de MOD03 de Coppola 2026 p. 4 cuando la entregue (afecta §2 del pre-registro de MxD03).
+- [ ] A1. Entregada en el PR #902 (abierto): Coppola 2026 p. 4, MOD03/MYD03 con corrección de terreno como insumo, y el NRT con el mismo procedimiento (p. 3 y 6). Incorporarla al §2 del pre-registro de MxD03 en el PR del veredicto (B10).
 
 ### Cierre de esta etapa
 - [x] Z1. Resumen para la coordinadora (notas compartidas `MODIS_avance.md` y mensaje, 2026-10-24).
