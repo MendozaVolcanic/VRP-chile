@@ -30,6 +30,8 @@ import seleccion as S  # noqa: E402
 SEMILLA = 163
 N_NUEVO = 1200
 ID0 = 3000
+ID_CTL = 5000   # la muestra usa 3000 a 4199
+ART162 = Path("C:/vrp-trabajo/temporales/s162_v375/run_40116289866")   # artefactos del lote S162
 
 
 def main():
@@ -78,7 +80,32 @@ def main():
         e["id"] = ID0 + i
     claves = [(e["volcan"], e["hora_utc"]) for e in out]
     assert len(set(claves)) == len(claves) and not set(claves) & vistos
-    print("gránulos únicos:", len({e["granule"] for e in out}))
+    # Control de vida (PREREGISTRO_B2.md §4; verificador v2, hallazgo 3): B2 sólo trae neg_resto, así que un port
+    # muerto daría 0 de 1.200 y «calla». Se re-miden en el mismo run 20 pasadas ya medidas en S162: 12 protegidas de
+    # Láscar y Chillán con píxeles en M14 (sorteadas, semilla 164), las 4 neg_resto que M14 publicó y 4 neg_resto en 0.
+    # El runner tiene que reproducirlas EXACTAS (mismo gránulo, mismo código). Lote «CTL», clase «control_vida»: no
+    # entran a ningún denominador.
+    R = {}
+    for f in sorted(ART162.rglob("resultados_VIIRS375_*.json")):
+        for r in json.loads(f.read_text(encoding="utf-8")):
+            R[r["id"]] = r
+    o162 = {o["id"]: o for o in bc["pasadas"]}
+    def con_px(i):
+        return R.get(i, {}).get("estado") == "ok" and R[i]["port"]["M14"]["npix"] > 0
+    prot = sorted(i for i, o in o162.items() if o["clase"] == "pos_prot" and o["volcan"] in ("Lascar", "NevadosDeChillan")
+                  and con_px(i))
+    enc = sorted(i for i, o in o162.items() if o["clase"] == "neg_resto" and con_px(i))
+    cero = sorted(i for i, o in o162.items() if o["clase"] == "neg_resto" and R.get(i, {}).get("estado") == "ok"
+                  and not R[i]["port"]["M14"]["npix"])
+    rc = random.Random(SEMILLA + 1)
+    ctl = rc.sample(prot, 12) + enc + rc.sample(cero, 4)
+    for n, i in enumerate(ctl):
+        o = o162[i]
+        out.append({**o, "id": ID_CTL + n, "id_ref": i, "lote": "CTL", "clase": "control_vida",
+                    "clase_ref": o["clase"], "ref_M14": [R[i]["port"]["M14"]["npix"], R[i]["port"]["M14"]["vrp_mw"]]})
+    print(f"control de vida: {len(ctl)} pasadas de S162 (protegidas {12}, neg_resto encendidas {len(enc)}, en 0 4); "
+          f"artefactos de referencia {ART162}")
+    print("gránulos únicos (muestra + control):", len({e["granule"] for e in out}))
     (AQUI / "objetivos_v375_b2.json").write_text(json.dumps(
         {"meta": {"semilla": SEMILLA, "excluidos": S.EXCLUIDOS, "estratos_neg_resto": meta,
                   "poblacion_sha256": S.sha256(S.POB),

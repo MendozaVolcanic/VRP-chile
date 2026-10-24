@@ -247,7 +247,7 @@ def armar(obj, res, arms_por_id, inner, pub_k_rerun, vk_rerun, k_usa_recorrido, 
     """Una fila por pasada ok con: clase, peso, estrato, publica y magnitud por (brazo, regla), y K."""
     filas = []
     for i, o in obj.items():
-        if i not in arms_por_id:
+        if i not in arms_por_id or o["lote"] == "CTL":   # el control de vida no entra a ningún denominador
             continue
         r = res[i]
         z = (r.get("geometria_centro") or {}).get("sensor_zenith", o.get("z"))
@@ -709,6 +709,25 @@ def main(argv=None):
     tasa_k_neg = N_neg["neg_pub"] / (N_neg["neg_pub"] + N_neg["neg_resto"])
     filas = armar(obj, res, arms_por_id, inner, pub_k, vk, k_usa_recorrido, pesos)
 
+    # 2.2b control de vida del lote nuevo (V375-B2, b2/PREREGISTRO_B2.md §4; verificador v2, hallazgo 3): las pasadas
+    # del lote CTL son re-mediciones de pasadas de S162 en el MISMO run del lote que decide; M14 tiene que dar los mismos
+    # npix y VRP que en S162 (mismo gránulo, mismo código). Un port muerto o una dependencia rota no pasa esto.
+    ctl = [i for i, o in obj.items() if o["lote"] == "CTL"]
+    if ctl:
+        ok_ctl = [i for i in ctl if i in arms]
+        dif = [(i, obj[i]["volcan"], obj[i]["hora_utc"], obj[i]["ref_M14"], (arms[i]["M14"]["npix"], arms[i]["M14"]["vrp_mw"]))
+               for i in ok_ctl if not (arms[i]["M14"]["npix"] == obj[i]["ref_M14"][0] and (
+                   (arms[i]["M14"]["vrp_mw"] is None and obj[i]["ref_M14"][1] is None) or (
+                       arms[i]["M14"]["vrp_mw"] is not None and obj[i]["ref_M14"][1] is not None
+                       and abs(arms[i]["M14"]["vrp_mw"] - obj[i]["ref_M14"][1]) < TOL_RECALCULO_MW)))]
+        vivos = sum(1 for i in ok_ctl if arms[i]["M14"]["npix"])
+        pr(f"  2.2b control de vida del lote nuevo: {len(ok_ctl)} de {len(ctl)} re-medidas ok; iguales a S162 "
+           f"{len(ok_ctl) - len(dif)}; con píxeles {vivos}")
+        if dif:
+            pr("      distintas:", dif[:10])
+        if len(ok_ctl) < 0.9 * len(ctl) or dif or not vivos:
+            veredicto_instr.append("control_vida")
+
     # 2.3 control positivo
     cp = [x for x in filas if x["c"] == "pos_prot" and x["vol"] in ("Lascar", "NevadosDeChillan")]
     n_cp = sum(1 for x in cp if x["npix"][(BR.REFERENCIA, REGLA_DECIDE)])
@@ -762,7 +781,8 @@ def main(argv=None):
           "recall_bajo": tasa_ponderada([x for x in filas if x["c"] == "pos_bajo"], lambda x: x["K"])[0]}
     resumen["K"] = lk
 
-    pr("\n== 3. V375-B: silencio del port (M14) en los negativos limpios")
+    pr("\n== 3. V375-B: silencio del port (M14) en los negativos limpios, sobre TODAS las pasadas (informa; el veredicto "
+       "de B es la línea «VEREDICTO B» de 4b)")
     sB = resumen["brazos"][f"M14|{REGLA_DECIDE}"]
     s = sB["silencio"]
     pr(f"  neg_resto: publica {s['neg_resto']['crudo'][0]} de {s['neg_resto']['crudo'][1]}; ponderado "
@@ -825,10 +845,22 @@ def main(argv=None):
         resumen["acuerdo"] = None
     else:
         acuerdo = {k: dec_n[k] == dec_u[k] for k in ("B", "global", "valida_en_O", "V375_D_necesario")}
+        etq = "+".join(a.deciden) + (f" (neg_pub de {a.neg_pub_de})" if a.neg_pub_de else "")
         for k, v in acuerdo.items():
-            pr(f"  {k}: S162 {dec_n[k]} | unión {dec_u[k]} -> "
+            pr(f"  {k}: {etq} {dec_n[k]} | unión {dec_u[k]} -> "
                f"{'DE ACUERDO' if v else 'DEPENDE DEL LOTE VISTO: NO RESUELTO'}")
         resumen["acuerdo"] = acuerdo
+        # La línea que es el veredicto de B (verificador v2 de B2, hallazgo 5). Si un lote que decide pasa el umbral de
+        # cobertura (10 % SIN DATO en su clase), B no decide (PREREGISTRO_B.md §4.1; B2 §4).
+        hueco = [v for v in veredicto_instr if any(v.startswith(f"cobertura_{l}_") for l in a.deciden)]
+        if invalido:
+            vb = "INVALIDO POR INSTRUMENTO"
+        elif hueco:
+            vb = f"NO DECIDE (cobertura del lote que decide: {hueco})"
+        else:
+            vb = dec_n["B"] if acuerdo["B"] else "NO RESUELTO (depende del lote visto)"
+        pr(f"  VEREDICTO B ({etq} decide, unión confirma): {vb}")
+        resumen["veredicto_B"] = vb
     global_ = (dec_n or dec_u)["global"]
     pr("\n== 5. estratos del brazo global y de M14 (publica / K / n)")
     for nom, fn in (("volcán", lambda x: x["vol"]), ("tramo", lambda x: x["tramo"]),

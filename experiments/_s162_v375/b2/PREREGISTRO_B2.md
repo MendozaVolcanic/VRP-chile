@@ -2,10 +2,11 @@
 
 > Escrito antes de despachar la muestra y antes de ver ninguna de sus pasadas. Lo que cambie después del sello va en una
 > adenda fechada al final. Es MEDICIÓN: no adopta nada ni toca `pipeline/`, `data/` ni `frontend/`.
-> Estado: **BORRADOR v2, sin sellar.** Lo pidió la coordinadora S162 con D-48 (2026-10-24: «una segunda muestra de neg_resto
+> Estado: **BORRADOR v3, sin sellar.** Lo pidió la coordinadora S162 con D-48 (2026-10-24: «una segunda muestra de neg_resto
 > disjunta de la primera, pre-registrada ANTES de mirar nada nuevo, con la misma regla sellada y el tamaño que la regla
 > necesite para decidir»). El borrador v1 (commit `987e4f814`) pasó por un verificador limpio (`verificador/INFORME.md`);
-> esta versión aplica sus correcciones (§8). Falta un segundo verificador, el sello y el despacho.
+> el v2 (commit `7ff23cc3a`) pasó por un segundo verificador (`verificador_v2/INFORME.md`); esta versión aplica las
+> correcciones de los dos (§8 y §9). Falta el sello y el despacho.
 
 ## 1. Por qué
 
@@ -30,15 +31,18 @@ decide: **M14**. Publica = el predicado del tablero con node sobre el record sin
 - El mismo marco que V375-B (población congelada de S159, sha256 `c08602de…f8f3`, sin el 12, 13 y 17 a 20 de octubre).
 - **1.200 pasadas neg_resto nuevas**, ninguna de S159 ni de S162 (lo comprueba el script), semilla 163 (la siguiente a
   la 162 de S162), asignadas por estrato volcán x cenit proporcional al tamaño del estrato en el marco: pesos entre 2,72 y
-  2,83, ningún estrato sin pasadas. Tramos: T 346, O1 517, O2 337. 41 partidas, informadas aparte. 658 gránulos. sha256
-  de `objetivos_v375_b2.json`: `6328988b…019a`. Quedan 1.678 neg_resto sin medir en el marco.
+  2,83, ningún estrato sin pasadas. Tramos: T 346, O1 517, O2 337. 41 partidas, informadas aparte. Quedan 1.678
+  neg_resto sin medir en el marco. Al archivo se agregan las 20 pasadas del control de vida (§4), sin tocar la muestra:
+  1.220 entradas, 667 gránulos, sha256 de `objetivos_v375_b2.json` `f3285f3a…b419` (ids de la muestra 3000 a 4199, del control 5000 a 5019).
 - **Por qué 1.200 y por qué B2 sola** (`tamano_b2.py` → `tamano_b2_salida.txt`). Las 133 noches neg_pub del marco ya
   están todas medidas, así que la cota de neg_pub queda fija en la de S162 (31 de 113, 36,5 %) y ocupa 48,6 de las 133,0
   publicaciones que permite la vara: para decidir, la cota de neg_resto tiene que quedar en 2,54 % o menos. Decidiendo
   **B2 sola** en neg_resto, con la tasa observada (1,16 % ponderada): 600 nuevas deciden en 59 % de los casos, 1.000 en
-  88 %, **1.200 en 93 %**, 1.500 en 98 %. En la frontera (tasa real 2,54 %) la regla declara SILENCIO ACOTADO en 1 a 3 % de
-  los casos, el nominal. El borrador v1 (S162 + 600) decidía más barato pero, por reutilizar lo ya visto, declaraba ACOTADO
-  en la frontera entre 11 y 20 % de los casos (misma salida, segunda tabla): por eso se descartó. Si la tasa real del port
+  88 %, **1.200 en 93 %**, 1.500 en 98 %. Ese 93 % es condicional a la tasa puntual: integrando la incertidumbre de 4 de
+  389, la probabilidad de decidir baja a 0,74 a 0,80 (verificador v2). En la frontera (tasa real 2,54 %) la regla declara
+  SILENCIO ACOTADO en 1 a 3 % de los casos, el nominal. El borrador v1 (S162 + 600) se descartó por reutilizar lo ya
+  visto: condicionado a las 4 de 389 ya observadas, declaraba ACOTADO en la frontera entre 11 y 20 % de los casos (misma
+  salida, segunda tabla); sin condicionar, cerca de 2 % (verificador v2, H5). La razón de fondo es la de C §5.5. Si la tasa real del port
   fuera 1,7 % o más, ni 1.200 alcanzan a la mitad: entonces B queda NO RESUELTO con más muestra, y eso también es una
   respuesta (el port no queda claramente bajo K).
 - **Supuesto que se declara** (verificador v1, F3, SOSPECHA): la simulación supone una tasa pareja. Los 4 eventos de S162
@@ -50,10 +54,18 @@ decide: **M14**. Publica = el predicado del tablero con node sobre el record sin
 
 Los siete de `../PREREGISTRO_B.md` §4, más:
 - **Cobertura por lote** (verificador v1, F4): el umbral de 10 % de SIN DATO se aplica también al lote B2 por separado; si
-  B2 lo pasa, la lectura de B2 se informa y no decide. Las pasadas «volcán fuera del gránulo» con el mismo gránulo que el
+  B2 lo pasa, el veredicto de B es NO DECIDE (`evaluar.py` lo escribe en la línea del veredicto, verificador v2). Las pasadas «volcán fuera del gránulo» con el mismo gránulo que el
   record de producción son «no observadas» por la regla de #904: salen del denominador y su estrato se re-pondera.
 - **Lote que decide vacío** (verificador v1, F5): si un lote de `--deciden` no tiene ninguna pasada ok, el evaluador
   declara INVALIDO POR INSTRUMENTO.
+- **Control de vida en el mismo run** (verificador v2, hallazgo 3): B2 sólo trae neg_resto, así que los controles
+  positivos de B (que leen S159 y S162) no prueban que el port esté vivo en ESTE run; un port muerto o una dependencia
+  rota darían 0 de 1.200 y «calla». Por eso el run re-mide 20 pasadas ya medidas en S162 (lote CTL, fuera de todo
+  denominador): 12 protegidas de Láscar y Chillán con píxeles (sorteadas, semilla 164), las 4 neg_resto que M14
+  publicó y 4 neg_resto en 0. M14 tiene que dar los mismos npix y VRP que en S162 (a 1e-6 MW) en todas las que salgan
+  ok, al menos 18 de 20 tienen que salir ok y alguna tiene que tener píxeles; si no, INVALIDO POR INSTRUMENTO
+  (`evaluar.py`, control 2.2b). Las dependencias de Python del workflow no están fijadas a versión (igual que en B):
+  este control es el que ve si una cambió algo.
 - La cobertura del marco contra MIROVA ya está medida (`../cobertura_marco_salida.txt`, COBERTURA OK): es el mismo marco.
 
 ## 5. Regla
@@ -64,7 +76,9 @@ La regla sellada de V375-B (`../PREREGISTRO_B.md` §5), sin cambios en la cuenta
 de B2 + neg_pub de S162** (`evaluar.py --deciden S162b --neg-pub-de S162`), con los pesos recalculados dentro de ese
 conjunto. neg_pub entra como la muestra de 113 de S162 (no como censo: lo pide la coordinadora y es la regla de B) porque
 no queda ninguna sin medir. SILENCIO ACOTADO BAJO K si la cota superior conservadora de todos los negativos limpios queda
-bajo 3,85 %; ENCIENDE DE MAS si la inferior queda sobre 3,85 %; NO RESUELTO si no.
+bajo 3,85 %; ENCIENDE DE MAS si la inferior queda sobre 3,85 %; NO RESUELTO si no. **El veredicto es la línea
+«VEREDICTO B» de la sección 4b de `evaluar_salida.txt`**; la sección 3 (B sobre todas las pasadas) se informa y no
+decide (verificador v2, hallazgo 5).
 
 Es fiel a la lógica sellada de C §5.5 (decide lo no visto) en la parte que puede serlo: los datos de neg_resto que deciden
 son todos nuevos. La parte de neg_pub ya se vio y no tiene reemplazo; se declara.
@@ -85,7 +99,8 @@ humo con 2 pasadas y después el lote, como en V375-B. Lo despacha la coordinado
 
 No mide neg_pub nuevo (no queda en el marco). No cambia la regla de B ni cuenta neg_pub como censo. No mide pasadas fuera
 del marco congelado. No decide nada de V375-C (terminado): los brazos se corren porque son gratis, y el bloque de V375-C
-de esta corrida (las secciones 4 y 4b del evaluador) **no se lee** (verificador v1, F10), porque B2 sólo trae neg_resto.
+de esta corrida **no se lee** (verificador v1, F10), porque B2 sólo trae neg_resto: de las secciones 4 y 4b del evaluador
+sólo se leen la decisión B, su acuerdo con la unión y la línea «VEREDICTO B».
 
 ## 8. Revisión tras el verificador del borrador v1 (2026-10-24, `verificador/INFORME.md`, Sonnet)
 
@@ -99,3 +114,18 @@ de esta corrida (las secciones 4 y 4b del evaluador) **no se lee** (verificador 
 | F6: «con 2 % ningún tamaño de hasta 1.200 llega a la mitad» era falso en 1.200 (0,55) | 1 | reescrito con la tabla nueva |
 | F7 a F9: pesos al quitar las no observadas, tres miradas formales, etiquetas | 1 | los pesos se re-ponderan como en B (se informa); el resto, cosmético |
 | F10: el bloque de V375-C de la corrida nueva puede cambiar y no se dice que no se lee | 1 | §7 |
+
+## 9. Revisión tras el segundo verificador (2026-10-24, `verificador_v2/INFORME.md`, Sonnet, sobre el v2 `7ff23cc3a`)
+
+Confirmó la muestra (disjunta, del marco, sha reproducible), la cuenta de «decide B2 sola» (con 1.200 pasadas fabricadas,
+su cuenta a mano coincide a 15 cifras), el tamaño en la frontera y el workflow, y que los hallazgos del primer verificador
+quedaron atendidos.
+
+| hallazgo | gravedad | cambio |
+|---|---|---|
+| 3: ningún control prueba que el port esté vivo en el run de B2; un port muerto da «calla» con el instrumento en OK (reproducido) | 3 | control de vida de 20 pasadas re-medidas de S162 (§4) |
+| 4: el 93 % es condicional a la tasa puntual (predictiva 0,74 a 0,80); la cobertura por lote sólo avisaba | 2 | declarado en §3; la cobertura del lote que decide da NO DECIDE |
+| 5: tres lecturas de B en la salida, 4b rotulaba «S162» y §7 decía que 4 y 4b no se leen | 2 | la línea «VEREDICTO B» es la que decide; rótulo del conjunto que decide; §7 corregido |
+| H5: el 11 a 20 % del v1 era condicional a lo ya visto (sin condicionar, ~2 %) | 1 | §3 |
+| H6: dependencia temporal y por noche que la binomial no modela (SOSPECHA) | 1 | se declara: la potencia es aproximada |
+| H7: el reparto por trozos descarga 1.220 gránulos contra 667 únicos | 1 | se acepta (el runner borra cada gránulo después de usarlo); costo, no sesgo |
