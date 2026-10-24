@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~17:30 UTC (S162): V750-B v2 listo; sello por D-48 condicionado a una segunda vuelta del verificador
+- `loop-viirs750`: pre-registro V750-B v2 (`claude/s162-viirs750-f63ef4` `62e6ea194`); verificador Fable «listo para
+  sello con cambios», 16 hallazgos corregidos (VB-01: el desempate podía elegir un brazo que PIERDE contra B1). Ensayo
+  sobre las 510 grillas de N: B0 y B1 iguales al censo 503/503, K igual a producción 503/503, control positivo 7 (PCC).
+  Brazos B0, B1, B2, B3, B4, B5, K más el diagnóstico N0/N1 (confirma V750-C en el mismo run). Ventana 2026-04-01 a
+  2026-11-02 12:59 UTC sin 12, 13 y 17-20 oct: **despacho no antes del 2026-11-03**.
+- Aplicado con D-48 sobre las lecturas conservadoras de la hija: T decide la tabla sola, O tabla+OCR; sin ganador nunca
+  un brazo que PIERDE o BLOQUEA; distancia desde el cráter; B5 con la lectura del comentario del `.m`. DN-2 como paso
+  obligatorio de la lectura (si gana B2 o B4, documentar fidelidad al `.m` y no gate propio, A85). Sello efectivo
+  cuando la **segunda vuelta del verificador** sobre la v2 dé conforme (pedida: VB-01 cambió la regla de decisión).
+  Revocable por Nicolás.
+
 ### 2026-10-24 ~17:15 UTC (S162): MOD-D sellado por D-48; instrumento con sus 7 tareas en PR
 - `loop-modis`: MOD-C con segunda ronda del verificador («se puede despachar tal como está»; disparo `ffc1abc1b` sin
   cambios); MOD-E verificado (D28 SIN DATO); MOD-D v2 listo para el sello de reglas. **Aplicado por la coordinadora con
