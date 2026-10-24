@@ -16,12 +16,16 @@ Las dos preguntas del instrumento. (1) Si la medición no viera el cenit, un nul
 que la lectura. El nulo de VIIRS 750 (los mismos pares ordenados por hora) NO sirve en 375: medido sobre la población
 de S159 (linea_base_curva_salida.txt), el VRP de MIROVA baja de una pasada a la siguiente de la misma noche (mediana
 0,818, n 365), así que el orden por hora también cae (0,786) aunque la pasada oblicua sea la más tardía sólo en 110 de
-229 noches. El nulo de aquí son los PARES DE CENIT PARECIDO: en la misma noche y volcán, dos pasadas con alerta de MIROVA
-que difieren en menos de 5° de cenit, en orden al azar (semilla 162); en MIROVA da 0,98. Si el IC de MIROVA por cenit
-contiene la mediana de ese nulo, la curva de MIROVA no se separa de «plana» y se marca. El mismo nulo se aplica a la
-razón doble:
-si nuestra razón contra MIROVA cambia entre dos pasadas de cenit parecido, hay un sesgo de pasada a pasada que no es el
-cenit (por ejemplo, de plataforma) y se declara (NULO SESGADO). (2) Una noche sin dos pasadas con alerta de MIROVA y
+229 noches. El nulo de aquí son los PARES DE CENIT PARECIDO:
+en la misma noche y volcán, dos pasadas con alerta de MIROVA que difieren en menos de 5° de cenit, ordenadas con la MISMA
+regla que la lectura (la de menor cenit primero). Mide si el método, con su selección (las dos con alerta, las dos
+publicadas), da una razón doble distinta de 1 cuando casi no hay diferencia de cenit: si la da, NULO SESGADO. En un
+borrador el orden del nulo se sorteaba; el verificador (verificador/INFORME.md) mostró que así d y 1/d son
+equiprobables y el nulo no puede fallar (con un sesgo de plataforma de x0,3 lo marcaba en 6 % de las corridas, el
+nivel del azar). Un sesgo de PLATAFORMA (nuestra razón contra MIROVA distinta en Suomi NPP, NOAA-20 y NOAA-21) no lo ve
+ningún nulo de pares: se mide aparte con sesgo_plataforma() y con la razón doble separada en pares de la misma
+plataforma y de plataformas distintas. Si el IC de MIROVA por cenit contiene la mediana de MIROVA en el nulo, la curva
+de MIROVA no se separa de «plana» y se marca (no bloquea). (2) Una noche sin dos pasadas con alerta de MIROVA y
 publicación nuestra no entra; la versión «no condicionada» cuenta como 0 la pasada que no publicamos (no publicar una
 alerta oblicua es la caída más grande posible) y se informa al lado.
 """
@@ -63,6 +67,7 @@ def pares_por_noche(pasadas, campo_vrp, campo_pub, dz_min=DZ_MIN, condicionar=Tr
         t = sorted([a, b], key=lambda p: p["hora"])  # para el nulo: el mismo par, ordenado por hora
         vt = [((p.get(campo_vrp) or 0.0) if p.get(campo_pub) else 0.0) for p in t]
         out.append({"vol": vol, "noche": noche, "z": [a["z"], b["z"]], "mir": [a["mir"], b["mir"]], "x": [va, vb],
+                    "plat": [a.get("plat"), b.get("plat")],
                     "r_mir": b["mir"] / a["mir"], "r_x": vb / va, "d": (vb / va) / (b["mir"] / a["mir"]),
                     "r_mir_hora": t[1]["mir"] / t[0]["mir"],
                     "r_x_hora": (vt[1] / vt[0]) if vt[0] > 0 else float("nan")})
@@ -71,8 +76,8 @@ def pares_por_noche(pasadas, campo_vrp, campo_pub, dz_min=DZ_MIN, condicionar=Tr
 
 def pares_nulo(pasadas, campo_vrp, campo_pub, dz_max=DZ_NULO, condicionar=True, semilla=SEMILLA):
     """El nulo: por noche-volcán, el par de pasadas con alerta de MIROVA de menor diferencia de cenit, si es menor que
-    dz_max; el orden del par se sortea (semilla fija). Mismas claves que pares_por_noche."""
-    rng = np.random.default_rng(semilla)
+    dz_max, ordenado como la lectura (menor cenit primero). Mismas claves que pares_por_noche. `semilla` no se usa
+    (queda en la firma por compatibilidad)."""
     por = collections.defaultdict(list)
     for p in pasadas:
         if p.get("z") is None or not (p.get("mir") or 0) > 0:
@@ -91,7 +96,7 @@ def pares_nulo(pasadas, campo_vrp, campo_pub, dz_max=DZ_NULO, condicionar=True, 
                     mejor = (dz, lst[i], lst[j])
         if mejor is None:
             continue
-        a, b = (mejor[1], mejor[2]) if rng.random() < 0.5 else (mejor[2], mejor[1])
+        a, b = sorted([mejor[1], mejor[2]], key=lambda p: (p["z"], p["hora"]))   # la misma regla que la lectura
         va = (a.get(campo_vrp) or 0.0) if a.get(campo_pub) else 0.0
         vb = (b.get(campo_vrp) or 0.0) if b.get(campo_pub) else 0.0
         if va <= 0:
@@ -99,6 +104,25 @@ def pares_nulo(pasadas, campo_vrp, campo_pub, dz_max=DZ_NULO, condicionar=True, 
         out.append({"vol": vol, "noche": noche, "z": [a["z"], b["z"]], "r_mir": b["mir"] / a["mir"], "r_x": vb / va,
                     "d": (vb / va) / (b["mir"] / a["mir"])})
     return out
+
+
+def sesgo_plataforma(pasadas, campo_vrp, campo_pub, margen=math.log10(1.25)):
+    """Mediana de log10(nuestro VRP / VRP de MIROVA) por plataforma, en las pasadas con alerta de MIROVA que publicamos,
+    con su IC por bootstrap. SESGADO si dos plataformas difieren en más de log10(1,25) con los IC sin solaparse."""
+    por = collections.defaultdict(list)
+    for p in pasadas:
+        if (p.get("mir") or 0) > 0 and p.get(campo_pub) and (p.get(campo_vrp) or 0) > 0 and p.get("plat"):
+            por[p["plat"]].append(math.log10(p[campo_vrp] / p["mir"]))
+    res = {k: mediana_ic(v) for k, v in sorted(por.items())}
+    sesgo = False
+    ks = list(res)
+    for i in range(len(ks)):
+        for j in range(i + 1, len(ks)):
+            a, b = res[ks[i]], res[ks[j]]
+            if abs(a[0] - b[0]) > margen and (a[1][1] < b[1][0] or b[1][1] < a[1][0]):
+                sesgo = True
+    return {"por_plataforma": {k: {"mediana_log10": v[0], "ic": v[1], "n": v[2], "factor": 10 ** v[0]}
+                               for k, v in res.items()}, "sesgado": sesgo}
 
 
 def mediana_ic(vals, n_boot=2000, semilla=SEMILLA):
@@ -119,6 +143,9 @@ def resumen(pares, tramos=((0, 50), (50, 90)), nulo=None):
         out[nom] = {k: mediana_ic([p[k] for p in sel]) for k in ("r_mir", "r_x", "d", "r_mir_hora", "r_x_hora")}
         out[nom]["bajo_1_mir"] = sum(1 for p in sel if p["r_mir"] < 1)
         out[nom]["n_noches"] = len(sel)
+    for nom, sel in (("misma plataforma", [p for p in pares if p.get("plat") and p["plat"][0] == p["plat"][1]]),
+                     ("plataformas distintas", [p for p in pares if p.get("plat") and p["plat"][0] != p["plat"][1]])):
+        out[nom] = {"d": mediana_ic([p["d"] for p in sel]), "n_noches": len(sel)}
     if nulo is not None:
         out["nulo"] = {k: mediana_ic([p[k] for p in nulo]) for k in ("r_mir", "r_x", "d")}
         out["nulo"]["n_noches"] = len(nulo)

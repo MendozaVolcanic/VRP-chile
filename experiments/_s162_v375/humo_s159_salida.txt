@@ -56,8 +56,9 @@
   SENS     (centroide) P1 perdidas 9, recall bajo 0.905, negativos 0.0481
   CIRC     (centroide) P1 perdidas 9, recall bajo 0.905, negativos 0.0757
   SENS_PT  (centroide) P1 perdidas 9, recall bajo 0.905, negativos 0.0149
+  K en el marco entero (censo de la población de S159, sin los días excluidos): recall protegidas 0.963 (80), bajo 1 MW 0.957 (949)
 
-  -- decisión sobre: unión S159 + S162 (confirma) (149 pasadas) --
+  -- decisión sobre: unión S159 + S162 (confirma) (149 pasadas; veto de protegidas sobre 149) --
   N representado por clase: {'pos_prot': 80.0, 'pos_bajo': 949.0, 'neg_pub': 133.0, 'neg_resto': 3323.0}
   B: neg_resto [0, 45], IC (0.0, 0.1045112679430029); negativos 0.0091 [0.0033872864747413276, 0.11971126071471555] contra K 0.0385 -> NO RESUELTO; MISSION M14 contra K PIERDE PROTEGIDA
   M13      protegidas que M14 publica y el brazo no: 0; P2 contra M14 SIN SUSTRATO (neto +0.0, B 0)
@@ -70,8 +71,8 @@
   CIRC     protegidas que M14 publica y el brazo no: 0; P2 contra M14 EMPATE (neto -43.8, B 16)
   SENS_PT  protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -254.0, B 13)
   brazo global: C13 | candidatos: ['C13', 'C14', 'C21', 'SENS_PT']
-  por volcán, elegido en T: {'PuyehueCordonCaulle': 'C13', 'Tupungatito': 'M21'} (los demás M14)
-  validación en O: protegidas que M14 publica y el compuesto no 0; P2 contra M14 GANA (neto -110.7, B 6); P2 contra K EMPATE -> VALIDA EN O
+  por volcán, elegido en T: {'PuyehueCordonCaulle': 'C13', 'Tupungatito': 'C13'} (los demás M14)
+  validación en O: protegidas que M14 publica y el compuesto no 0; P2 contra M14 GANA (neto -123.3, B 8); P2 contra K GANA -> VALIDA EN O
   V375-D: NO NECESARIO por B ni por C | protegidas sólo OCR que K publica y el brazo global no: 3 (esperan V375-A)
 
 == 4b. acuerdo entre el lote nuevo (decide) y la unión (confirma), PREREGISTRO_C.md §5.5
@@ -90,3 +91,5 @@
   lote C13: {'S159|neg': '9/20/65', 'S159|pos': '75/76/84'}
   partidas (aparte): [('Villarrica', '2026-08-09 04:36', 'neg_pub', False, True), ('PuyehueCordonCaulle', '2026-07-10 06:24', 'neg_resto', False, False), ('Chaiten', '2026-08-12 06:06', 'neg_pub', False, True), ('PuyehueCordonCaulle', '2026-10-09 06:18', 'neg_resto', False, False)]
   protegida de cráter (V375-A): PENDIENTE de la sesión del instrumento; se informará al lado de la lectura A
+
+VEREDICTO: PROVISIONAL, falta la cobertura contra la referencia de MIROVA (instrumento, fase 0); avisos: ['cobertura_pos_prot', 'cobertura_pos_bajo', 'cobertura_neg_pub', 'cobertura_neg_resto', 'cobertura_referencia_pendiente']

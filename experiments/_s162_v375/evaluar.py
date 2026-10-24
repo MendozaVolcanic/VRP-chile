@@ -388,20 +388,21 @@ def estratos(filas, a, clave_fn):
 
 def elegir_por_volcan(filas, candidatos, rng):
     """A115: el brazo por volcán se ELIGE en la ventana T (2026-04-01 a 06-12, decide la tabla sola) y se VALIDA en O.
-    Elección: entre los brazos sin protegida perdida en T, el de menor suma ponderada de errores bajo 1 MW en T; empate
-    a M14 y después en el orden de BRAZOS (los más chicos primero). Un volcán sin pasadas en T queda en M14."""
+    Elección: entre los brazos sin protegida perdida en T, el de menor suma ponderada de errores bajo 1 MW en T; a igual
+    suma (a 1e-6), M14 si está entre los empatados y si no la caja más chica (ORDEN_DESEMPATE, la misma regla que el
+    brazo global; corrección del verificador, verificador/INFORME.md). Un volcán sin pasadas en T queda en M14."""
     T = [x for x in filas if x["tramo"] == "T"]
     elec = {}
     for vol in sorted({x["vol"] for x in filas}):
         tv = [x for x in T if x["vol"] == vol]
-        mejor = ((BR.REFERENCIA, REGLA_DECIDE), float("inf"))
+        cand = []
         for a in candidatos:
             if any(x["c"] == "pos_prot" and not x["X"][a] for x in tv):
                 continue
             e = sum(x["w"] for x in tv if err(x, a))
-            if e < mejor[1] - TOL or (abs(e - mejor[1]) < TOL and a[0] == BR.REFERENCIA):
-                mejor = (a, e)
-        elec[vol] = mejor[0] if tv else (BR.REFERENCIA, REGLA_DECIDE)
+            orden = ORDEN_DESEMPATE.index(a[0]) if a[0] in ORDEN_DESEMPATE else len(ORDEN_DESEMPATE)
+            cand.append((round(e, 6), 0 if a[0] == BR.REFERENCIA else 1, orden, a))
+        elec[vol] = min(cand)[3] if (tv and cand) else (BR.REFERENCIA, REGLA_DECIDE)
     return elec
 
 
@@ -410,6 +411,19 @@ def compuesto(filas, elec):
         a = elec[x["vol"]]
         x["X"][("POR_VOLCAN", REGLA_DECIDE)] = x["X"][a]
         x["V"][("POR_VOLCAN", REGLA_DECIDE)] = x["V"][a]
+
+
+def k_marco():
+    """Recall de K (lo publicado) en TODO el marco: la población congelada de S159 trae pub_prod de cada pasada, así
+    que el recall de K no se estima, se cuenta (corrección del verificador: el disparador (b) comparaba contra la
+    estimación de K en la muestra)."""
+    pob = json.loads((RAIZ / "experiments/_s159/portes/poblacion_completa.json").read_text(encoding="utf-8"))["pasadas"]
+    m = [o for o in pob if o["b"] == "VIIRS375" and o["decide"] and o["lab"] == "pos" and
+         o["hora_utc"][:10] not in EXCLUIDOS]
+    pr_ = [o for o in m if o["protegida"]]
+    ba = [o for o in m if not o["protegida"]]
+    return {"recall_prot": sum(bool(o["pub_prod"]) for o in pr_) / len(pr_), "n_prot": len(pr_),
+            "recall_bajo": sum(bool(o["pub_prod"]) for o in ba) / len(ba), "n_bajo": len(ba)}
 
 
 def repesar(filas, meta):
@@ -425,9 +439,14 @@ def repesar(filas, meta):
     return out
 
 
-def decidir(filas, N_neg, tasa_k_neg, rng, candidatos, ref, lk, etiqueta):
-    """PREREGISTRO_B.md §5 y PREREGISTRO_C.md §5.1 a §5.3 sobre un conjunto de filas (la unión o un lote)."""
-    pr(f"\n  -- decisión sobre: {etiqueta} ({len(filas)} pasadas) --")
+def decidir(filas, N_neg, tasa_k_neg, rng, candidatos, ref, lk, etiqueta, veto=None):
+    """PREREGISTRO_B.md §5 y PREREGISTRO_C.md §5.1 a §5.3 sobre un conjunto de filas (la unión o un lote).
+    `veto`: las filas sobre las que se cuentan las protegidas perdidas (por defecto las mismas). Las protegidas son
+    CENSO: el veto no se estima, se cuenta, y se cuenta siempre sobre la unión, también cuando decide el lote S162 (si
+    no, 39 de las 80 protegidas, las de S159, quedarían fuera del veto; verificador/INFORME.md). `lk`: el recall de K
+    en el MARCO entero (censo, exacto), no en la muestra."""
+    veto = filas if veto is None else veto
+    pr(f"\n  -- decisión sobre: {etiqueta} ({len(filas)} pasadas; veto de protegidas sobre {len(veto)}) --")
     cub = {c: sum(x["w"] for x in filas if x["c"] == c) for c in ("pos_prot", "pos_bajo", "neg_pub", "neg_resto")}
     pr("  N representado por clase:", {c: round(v, 1) for c, v in cub.items()})
     lb = lecturas(filas, ref, rng, N_neg, tasa_k_neg)
@@ -440,7 +459,7 @@ def decidir(filas, N_neg, tasa_k_neg, rng, candidatos, ref, lk, etiqueta):
     for a in candidatos:
         if a == ref:
             continue
-        nuevas = sum(1 for x in filas if x["c"] == "pos_prot" and x["X"][ref] and not x["X"][a])
+        nuevas = sum(1 for x in veto if x["c"] == "pos_prot" and x["X"][ref] and not x["X"][a])
         v = p2(filas, a, ref)
         pr(f"  {a[0]:8s} protegidas que M14 publica y el brazo no: {nuevas}; P2 contra M14 {v['veredicto']} "
            f"(neto {v['neto']:+.1f}, B {v['B']})")
@@ -452,33 +471,45 @@ def decidir(filas, N_neg, tasa_k_neg, rng, candidatos, ref, lk, etiqueta):
     # §5.2: por volcán, elegido en T y validado en O
     elec = elegir_por_volcan(filas, candidatos, rng)
     compuesto(filas, elec)
+    if veto is not filas:
+        compuesto(veto, elec)
     O = [x for x in filas if x["tramo"] != "T"]
     pv = ("POR_VOLCAN", REGLA_DECIDE)
-    nuevas_o = sum(1 for x in O if x["c"] == "pos_prot" and x["X"][ref] and not x["X"][pv])
+    nuevas_o = sum(1 for x in veto if x["tramo"] != "T" and x["c"] == "pos_prot" and x["X"][ref] and not x["X"][pv])
     p2o = p2(O, pv, ref)
     p2ok = p2(O, pv, "K")
     out["eleccion"] = {v: b for v, (b, _) in elec.items()}
-    out["valida_en_O"] = nuevas_o == 0 and p2o["veredicto"] not in ("PIERDE", "BLOQUEA")
+    # corrección del verificador: validar exige GANA, igual que el brazo global (EMPATE o SIN SUSTRATO no validan)
+    if nuevas_o:
+        estado = "NO VALIDA EN O (pierde protegidas que M14 publica)"
+    elif p2o["veredicto"] == "GANA":
+        estado = "VALIDA EN O"
+    elif p2o["veredicto"] == "SIN SUSTRATO":
+        estado = "SIN SUSTRATO EN O"
+    else:
+        estado = "NO VALIDA EN O"
+    out["valida_en_O"] = estado
     pr("  por volcán, elegido en T:", {v: b for v, b in out["eleccion"].items() if b != BR.REFERENCIA},
        "(los demás M14)")
     pr(f"  validación en O: protegidas que M14 publica y el compuesto no {nuevas_o}; P2 contra M14 "
-       f"{p2o['veredicto']} (neto {p2o['neto']:+.1f}, B {p2o['B']}); P2 contra K {p2ok['veredicto']} -> "
-       f"{'VALIDA EN O' if out['valida_en_O'] else 'NO VALIDA EN O'}")
+       f"{p2o['veredicto']} (neto {p2o['neto']:+.1f}, B {p2o['B']}); P2 contra K {p2ok['veredicto']} -> {estado}")
     # §5.3: disparador de V375-D. La pérdida contra K se mide con la TABLA sola (el canal más creíble; las protegidas
-    # sólo OCR se informan y esperan la etiqueta de cráter de V375-A).
+    # sólo OCR se informan y esperan la etiqueta de cráter de V375-A). El recall de K es el del marco (censo).
     ag = (out["global"], REGLA_DECIDE)
     lg = lecturas(filas, ag, rng, N_neg, tasa_k_neg)
-    perd_tabla_k = sum(1 for x in filas if x["c"] == "pos_prot" and x["tabla"] and x["K"] and not x["X"][ag])
+    perd_tabla_k = sum(1 for x in veto if x["c"] == "pos_prot" and x["tabla"] and x["K"] and not x["X"][ag])
+    perd_k = sum(1 for x in veto if x["c"] == "pos_prot" and x["K"] and not x["X"][ag])
     mot = []
     if out["B"] == "ENCIENDE DE MAS":
         mot.append("B: el port enciende de más en negativos")
     if lg["recall_bajo"]["ic_kish"][1] < lk["recall_bajo"]:
-        mot.append("C: con el brazo global el recall bajo 1 MW queda entero bajo el de K")
+        mot.append(f"C: con el brazo global el IC del recall bajo 1 MW ({lg['recall_bajo']['ic_kish'][1]:.3f} arriba) "
+                   f"queda entero bajo el de K en el marco ({lk['recall_bajo']:.3f})")
     if perd_tabla_k > 0:
         mot.append(f"C: el brazo global pierde {perd_tabla_k} protegidas de la tabla que K publica")
     out["V375_D"] = mot
     out["V375_D_necesario"] = bool(mot)
-    out["perdidas_ocr_que_K_publica"] = lg["P1"]["perdidas_que_K_publica"] - perd_tabla_k
+    out["perdidas_ocr_que_K_publica"] = perd_k - perd_tabla_k
     pr("  V375-D:", "NECESARIO: " + "; ".join(mot) if mot else "NO NECESARIO por B ni por C",
        f"| protegidas sólo OCR que K publica y el brazo global no: {out['perdidas_ocr_que_K_publica']} "
        "(esperan V375-A)")
@@ -716,11 +747,14 @@ def main(argv=None):
         pr(f"  {b:8s} (centroide) P1 perdidas {lc['P1']['perdidas']}, recall bajo {lc['recall_bajo']['pond']:.3f}, "
            f"negativos {lc['silencio']['negativos']['pond']:.4f}")
     # PREREGISTRO_C.md §5.1 a §5.3 y §5.5: decide el lote S162 (no visto antes del sello); la unión confirma
-    dec_u = decidir(filas, N_neg, tasa_k_neg, rng, candidatos, ref, lk, "unión S159 + S162 (confirma)")
+    lkm = k_marco()
+    pr(f"  K en el marco entero (censo de la población de S159, sin los días excluidos): recall protegidas "
+       f"{lkm['recall_prot']:.3f} ({lkm['n_prot']}), bajo 1 MW {lkm['recall_bajo']:.3f} ({lkm['n_bajo']})")
+    resumen["K_marco"] = lkm
+    dec_u = decidir(filas, N_neg, tasa_k_neg, rng, candidatos, ref, lkm, "unión S159 + S162 (confirma)")
     f162 = repesar([x for x in filas if x["lote"] == "S162"], meta)
-    lk162 = {"recall_prot": tasa_ponderada([x for x in f162 if x["c"] == "pos_prot"], lambda x: x["K"])[0],
-             "recall_bajo": tasa_ponderada([x for x in f162 if x["c"] == "pos_bajo"], lambda x: x["K"])[0]}
-    dec_n = decidir(f162, N_neg, tasa_k_neg, rng, candidatos, ref, lk162, "lote S162 solo (DECIDE)") if f162 else None
+    dec_n = (decidir(f162, N_neg, tasa_k_neg, rng, candidatos, ref, lkm, "lote S162 solo (DECIDE)", veto=filas)
+             if f162 else None)
     resumen["decision_union"], resumen["decision_s162"] = dec_u, dec_n
     pr("\n== 4b. acuerdo entre el lote nuevo (decide) y la unión (confirma), PREREGISTRO_C.md §5.5")
     if dec_n is None:
@@ -748,6 +782,11 @@ def main(argv=None):
         pr("  protegida de cráter (V375-A): PENDIENTE de la sesión del instrumento; se informará al lado de la lectura A")
     if invalido:
         pr("\nVEREDICTO: INVALIDO POR INSTRUMENTO", veredicto_instr)
+    elif "cobertura_referencia_pendiente" in veredicto_instr:
+        pr("\nVEREDICTO: PROVISIONAL, falta la cobertura contra la referencia de MIROVA (instrumento, fase 0); "
+           "avisos:", veredicto_instr)
+    else:
+        pr("\nVEREDICTO: los de §3 y §4b; avisos de cobertura:", veredicto_instr)
     Path(a.salida).write_text("\n".join(L) + "\n", encoding="utf-8")
     Path(a.json).write_text(json.dumps(resumen, default=str, indent=1), encoding="utf-8")
     return resumen

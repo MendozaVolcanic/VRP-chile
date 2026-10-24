@@ -32,8 +32,12 @@ def main():
             continue
         vk = o.get("f5_core") if o.get("f5_core") is not None else o.get("pc_vrp")
         pas.append({"vol": o["volcan"], "hora": o["hora_utc"], "z": o["z"], "mir": o["mirova_vrp"],
-                    "K": bool(o["pub_prod"]), "VK": vk})
+                    "K": bool(o["pub_prod"]), "VK": vk, "plat": o.get("sensor")})
     print("pasadas con alerta de MIROVA que deciden:", len(pas))
+    sp = CC.sesgo_plataforma(pas, "VK", "K")
+    print("sesgo de plataforma de K contra MIROVA (factor mediano, IC, n):",
+          {k: (round(v["factor"], 3), [round(10 ** x, 3) for x in v["ic"]], v["n"]) for k, v in sp["por_plataforma"].items()},
+          "-> SESGADO" if sp["sesgado"] else "-> sin sesgo de plataforma")
     for nom, cond in (("condicionada (las dos pasadas publicadas)", True), ("sin condicionar (no publica = 0)", False)):
         for tr, f in (("todo", lambda p: True), ("T", lambda p: p["hora"][:10] < "2026-06-13"),
                       ("O", lambda p: p["hora"][:10] >= "2026-06-13")):
@@ -46,10 +50,12 @@ def main():
                   f"{fm(t['d'])} -> {CC.veredicto(r)}")
             print(f"   curva de MIROVA separada del nulo: {CC.curva_mirova_separada(r)}")
             nu = r["nulo"]
-            print(f"   nulo de cenit parecido (< 5°, orden al azar): noches {nu['n_noches']}; MIROVA {fm(nu['r_mir'])}; "
+            print(f"   nulo de cenit parecido (< 5°, ordenado como la lectura): noches {nu['n_noches']}; MIROVA {fm(nu['r_mir'])}; "
                   f"K {fm(nu['r_x'])}; d {fm(nu['d'])}")
             for k, v in r.items():
-                if k not in ("todas", "nulo"):
+                if k in ("misma plataforma", "plataformas distintas"):
+                    print(f"   {k}: noches {v['n_noches']}; d {fm(v['d'])}")
+                elif k not in ("todas", "nulo"):
                     print(f"   {k}: noches {v['n_noches']}; MIROVA {fm(v['r_mir'])}; K {fm(v['r_x'])}; d {fm(v['d'])}")
             if tr == "todo" and cond:
                 # controles del instrumento (PREREGISTRO_E.md §4): ganancia pareja no mueve d; ganancia que crece con

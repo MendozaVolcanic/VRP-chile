@@ -4,7 +4,8 @@
 > sello va en una adenda fechada al final. Es el pre-registro de una ADOPCIÓN posible: la implementación, el sello, el
 > tag defensivo y el despacho pasan por A45 (el sí de Nicolás, cada uno). Estado: **BORRADOR, sin sellar**; depende de
 > PD1 (la ROI, V375-C), de PD3 (la vía de proceso en `pipeline/` detrás de flag) y del evaluador común de la sesión del
-> instrumento (programa §8.3: placebo y comparador d′ fuera de `evaluar_d25.py`).
+> instrumento (programa §8.3: placebo y comparador d′ fuera de `evaluar_d25.py`). Pasó por el verificador limpio junto
+> con B y C (`verificador/INFORME.md`); sus correcciones a E están en §3, §4 y §5.4.
 
 ## 1. Pregunta
 
@@ -41,7 +42,9 @@ La atribución pieza a pieza no es de aquí: va en ablaciones locales sobre las 
 
 1. **Equivalencia (PD3)**. La vía de `pipeline/`, corrida sobre los gránulos del lote de B y C (859 pasadas con grilla
    guardada), reproduce al port de `brazos.py` pasada por pasada: misma cantidad de alertados y VRP a 1e-3 MW en el
-   99 % o más, y **las 80 protegidas idénticas**. Si no, el paquete no es el código y no se sigue.
+   99 % o más, **la publicación idéntica en el 100 % de las pasadas** y las 80 protegidas idénticas. Si no, el paquete
+   no es el código y no se sigue. (El verificador mostró que tolerar 1 % de pasadas distintas, ~8 de 859, es del tamaño
+   del efecto que B mide en negativos: por eso la publicación no tiene tolerancia.)
 2. **Lectura retrospectiva** sobre la unión de B y C (marco de S159, del 2026-04-01 al 2026-10-21, sin el 12, 13 y 17 a
    20 de octubre), con los pesos de `PREREGISTRO_B.md` §3. Ventanas T y O por separado, O1 y O2 (#535) por separado.
 3. **Sombra prospectiva confirmatoria** desde el **2026-11-03** (ventana P del programa, sin Suomi NPP: otro régimen),
@@ -55,8 +58,12 @@ denominador, K re-corrido, control positivo, nulo, NUNCA, PLACEBO), y para la cu
 probados sobre K en `linea_base_curva_salida.txt`):
 
 - **Nulo de cenit parecido**: en la misma noche y volcán, el par de pasadas con alerta de MIROVA que difieren en menos
-  de 5° de cenit, en orden al azar. La razón doble de ese nulo tiene que contener 1 (en K: 1,035 [0,784; 1,182], 37
-  noches); si no, NULO SESGADO y la curva no se lee. El nulo de 750 (los mismos pares ordenados por hora) **no sirve en
+  de 5° de cenit, **ordenado con la misma regla que la lectura** (la de menor cenit primero). La razón doble de ese nulo
+  tiene que contener 1 (en K: 1,162 [0,940; 1,626], 37 noches); si no, NULO SESGADO y la curva no se lee. En el borrador
+  el orden del nulo se sorteaba y el verificador mostró que así no puede fallar (d y 1/d equiprobables).
+- **Sesgo de plataforma** (que ningún nulo de pares ve): mediana de nuestro VRP sobre el de MIROVA por plataforma; SESGADO
+  si dos difieren en más de un factor 1,25 con los IC sin solaparse. En K: NOAA-20 0,66, NOAA-21 0,64, Suomi NPP 0,61, sin
+  sesgo. Casi todos los pares oblicuo y menos oblicuo son de plataformas distintas (214 de 215). El nulo de 750 (los mismos pares ordenados por hora) **no sirve en
   375**: el VRP de MIROVA baja de una pasada a la siguiente de la misma noche (mediana 0,818, n 365), y el orden por
   hora cae casi igual que el orden por cenit (0,786 contra 0,778).
 - **Ganancia pareja** (x 1,2 a todas las pasadas): la razón doble no se mueve (en K: 0,766 → 0,766).
@@ -86,17 +93,23 @@ publicar = 0, informa). Veredicto: SIN SUSTRATO con menos de 8 noches en la lect
 nulo no contiene 1; **CAE MAS QUE MIROVA** si el IC de la mediana de D queda entero bajo 1; CAE MENOS QUE MIROVA si
 queda entero sobre 1; **REPRODUCE LA CURVA** si lo contiene y la mediana está en [0,8; 1,25]; NO RESUELTO en otro caso.
 Se informa al lado si la curva de MIROVA misma se separa del nulo (en la ventana O no se separa: 0,857 [0,707; 1,077]
-contra un nulo de 1,074); esa marca no bloquea, porque D compara las dos caídas en los mismos pares. Por tramo de la
+contra un nulo de MIROVA de 0,947); esa marca no bloquea, porque D compara las dos caídas en los mismos pares. Por tramo de la
 pasada oblicua (menos de 50°, 50° o más) y por volcán (Chillán aparte, V375-F).
 Vara de K, medida antes: **CAE MAS QUE MIROVA**, 0,766 [0,722; 0,861].
 
 ### 5.4 Regla de adopción del paquete (para PD4, decide Nicolás con A45)
 
 El paquete P **cumple** si, en la lectura retrospectiva Y en la sombra prospectiva: (a) P1 no pierde ninguna protegida
-que K publica; (b) P2 contra K da GANA o EMPATE (no PIERDE ni BLOQUEA) y el silencio no da ENCIENDE DE MAS; (c) M da
+que K publica (lectura A, todos los canales: decisión 4 del programa, «decide la lectura A»); (b) P2 contra K da GANA o EMPATE (no PIERDE ni BLOQUEA) y el silencio no da ENCIENDE DE MAS; (c) M da
 MEJORA con d′ dando MEJORA (no sólo una ganancia) o, si d no mejora, no EMPEORA; (d) la curva da REPRODUCE LA CURVA,
 o al menos el IC de D del paquete queda entero sobre el de K. Si (a) falla en cualquiera de las dos, **no cumple**.
 Si la retrospectiva cumple y la sombra no tiene sustrato a las 30 noches, la decisión es de Nicolás con lo que haya.
+
+**Riesgo conocido para (a), dicho antes de medir.** En el lote de S159 el port pierde 3 protegidas que K publica, las
+tres sólo OCR (dos de Tupungatito y una de Isluga), y las pierden los diez brazos de ROI por igual. V375-C las saca de
+la elección de caja (no las causa la caja), pero aquí siguen siendo veto. Si en el lote nuevo aparecen más del mismo
+tipo, (a) falla por ellas aunque la etiqueta de protegida de cráter de V375-A diga que son fuentes lejanas: cambiar la
+vara para esas filas es una decisión de Nicolás, con la etiqueta de V375-A delante, no de este pre-registro.
 
 ## 6. Lo que este pre-registro no hace
 

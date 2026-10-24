@@ -71,6 +71,10 @@ def procesar(o, V, destino, outdir):
                                  geom.get("sensor_azimuth", 0), geom.get("solar_azimuth", 0))
         r["dayflag"], r["sunglint"] = dayflag, sg
         mir, tir = PP.grillar(crop, g, g["epsg"])
+        # los brazos corren sobre la grilla tal como se guarda (float32): así el recálculo sin red del evaluador parte
+        # del mismo número y el control 2.1 no puede fallar por precisión (verificador/INFORME.md, float32)
+        mir = mir.astype(np.float32).astype(np.float64)
+        tir = tir.astype(np.float32).astype(np.float64)
         if np.isnan(mir).sum() > mir.size // 2:
             r["port_estado"] = "grilla_incompleta"
         v = V[o["volcan"]]

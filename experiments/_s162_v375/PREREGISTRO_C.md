@@ -3,8 +3,8 @@
 > Escrito antes de despachar el lote y antes de ver ningún resultado de los brazos nuevos. Lo que cambie después del
 > sello va en una adenda fechada al final. Es MEDICIÓN: no adopta nada ni toca `pipeline/`, `data/` ni `frontend/`.
 > Comparte lote, runner y evaluador con V375-B (`PREREGISTRO_B.md`, §2 a §4 valen aquí).
-> Estado: **BORRADOR, sin sellar.** Falta el verificador con contexto limpio, el sello de Nicolás y el despacho combinado
-> de la fase 1 (coordinadora).
+> Estado: **BORRADOR, sin sellar.** El verificador con contexto limpio ya pasó (`verificador/INFORME.md`) y sus
+> correcciones están en §8; falta el sello de Nicolás y el despacho combinado de la fase 1 (coordinadora).
 
 ## 1. Pregunta
 
@@ -49,7 +49,9 @@ cinco, 0,00.
 | CIRC | celdas a `inner_radius_km` o menos del cráter | 201 a 8.746 | «círculo del tablero como caja sensible» |
 | SENS_PT | SENS en Cordón Caulle y Tupungatito, M14 en los demás | | «O-sens sólo en PCC y Tupungatito» |
 
-La caja de escena (ROI1) y todo lo demás del código quedan iguales en todos los brazos. Controles virtuales: NUNCA y
+La caja de escena (ROI1) y todo lo demás del código quedan iguales en todos los brazos. En 9 de los 11 volcanes el
+cráter está a 2,1 km o menos de M y las cajas C y M casi coinciden: en la práctica el brazo global se decide en Cordón
+Caulle y Tupungatito, que es para lo que existe el compuesto por volcán de §5.2. Controles virtuales: NUNCA y
 PLACEBO (M14 x 1,2), definidos en `PREREGISTRO_B.md` §4.
 
 ## 3. Población y muestra
@@ -105,14 +107,16 @@ protegida que pierden los diez brazos por igual no la causa la caja.
 ### 5.2 Brazo por volcán (A115: se elige en T, se valida en O)
 
 En la ventana T, para cada volcán, entre los diez brazos sin protegida perdida en T, el de menor suma ponderada de
-errores bajo 1 MW en T; empates a M14 y después en el orden de la tabla. El compuesto (cada volcán con su brazo) se lee
-**sólo en O**: VALIDA EN O si no pierde ninguna protegida que M14 publica y P2 contra M14 no sale PIERDE ni BLOQUEA. Se
-informa también contra K.
+errores bajo 1 MW en T; a igual suma, M14 si está entre los empatados y si no la caja más chica (el orden de §5.1). El
+compuesto (cada volcán con su brazo) se lee **sólo en O**: VALIDA EN O si no pierde ninguna protegida que M14 publica y
+P2 contra M14 da **GANA** (la misma vara que el brazo global); SIN SUSTRATO EN O con 4 bloques o menos; NO VALIDA EN O en
+otro caso. Se informa también contra K.
 
 ### 5.3 Disparador de V375-D (números propios de 375)
 
 V375-D se abre si: (a) B da ENCIENDE DE MAS; o (b) con el brazo global el intervalo del recall bajo 1 MW queda entero bajo
-el de K; o (c) el brazo global pierde protegidas **de la tabla** (`latest.php`) que K publica. Las protegidas sólo OCR
+el recall de K **en el marco entero** (K tiene `pub_prod` en cada pasada de la población, así que su recall no se
+estima: es censo, 0,957 en las 949 alertas bajo 1 MW); o (c) el brazo global pierde protegidas **de la tabla** (`latest.php`) que K publica. Las protegidas sólo OCR
 que se pierden se informan con su número y esperan la etiqueta de cráter de V375-A: el verificador de S159 (V-2, V-3)
 mostró que en Suomi NPP antes del 2026-10-09 la distancia de la fila OCR puede ser de otra pasada, y con la tabla sola el
 port no pierde ninguna. Si no se cumple ninguna, V375-D no se abre por B ni por C (el programa §4 lo deja «sólo si B o C
@@ -126,6 +130,8 @@ el paquete de 375 (V375-E) es de Nicolás en PD1, con esto delante; el correo a 
 
 ### 5.5 Qué lote decide
 
+El **veto de protegidas** (§5.1, §5.2 y §5.3 c) se cuenta siempre sobre la **unión**: las protegidas son censo (80 de
+80), el veto no se estima sino que se cuenta, y si decidiera sólo el lote nuevo 39 de las 80 quedarían fuera.
 Las 149 pasadas de S159 ya se vieron (el informe de S159 con M14, PIX7 y SENS, y el humo de este evaluador con los diez
 brazos, §6). Por eso **decide el lote S162 solo** (709 pasadas no vistas, con los pesos recalculados dentro del lote) y
 la unión confirma. Para cada decisión (B, brazo global, validación por volcán, disparador de V375-D): si el lote y la
@@ -153,3 +159,24 @@ dos cosas, y las dos se declaran:
 No elige umbrales distintos de los del `.m` (eso es V375-D). No mide el día. No mide pasadas después del 2026-10-21. No
 toca la regla de publicación del tablero (decisión 5 del programa: «mantener el predicado de cumbre y medir
 P-sinfiltro», que es de V375-E). No reemplaza la lectura A.
+
+## 8. Revisión tras el verificador limpio (2026-10-24, `verificador/INFORME.md`, Sonnet)
+
+El verificador midió el commit `041e7fc43` (los pre-registros no cambiaron durante su trabajo). Lo que cambió aquí por
+él, todo antes del sello y antes de ver ningún dato del lote nuevo:
+
+| hallazgo del verificador | gravedad | cambio |
+|---|---|---|
+| VALIDA EN O aceptaba EMPATE y SIN SUSTRATO (podía perder hasta 4 alertas contra M14 y validar) | 3 | §5.2 exige GANA, como el global; prueba nueva en `probar_evaluar.py` §3 |
+| el disparador (b) comparaba el extremo del port contra el PUNTO de K en la muestra | 3 | §5.3 (b) contra el recall de K en el marco entero (censo, 0,957) |
+| el desempate por volcán seguía el orden de la tabla y no la caja más chica (en el humo elegía M21 en Tupungatito, peor en O) | 3 | §5.2 usa el orden de §5.1 |
+| «decide el lote S162 solo» dejaba sin representar 15 de 80 protegidas, 29 de 949 alertas bajo 1 MW y 17 de 3.323 negativos | 2 | el veto se cuenta sobre la unión (§5.5); la cobertura del lote se imprime en cada decisión |
+| las cajas C y M casi coinciden en 9 de 11 volcanes | 2 | se declara en §2 |
+| el veredicto no repetía que falta la cobertura contra la referencia | 1 | el evaluador termina con «VEREDICTO: PROVISIONAL» mientras falte |
+| la grilla se guarda en float32 y el runner corría en float64 | 1 | el runner corre los brazos sobre la grilla ya redondeada a float32 (`probe_v375.py`) |
+
+Lo que el verificador CONFIRMÓ: la población, los pesos de la unión (6,8 a 8,5 en neg_resto), la cota de Wilson con 0
+de 445 (0,86 %), el hash de la selección, el evaluador idéntico línea a línea al humo con la caché, la prueba de signos
+igual a la sellada en 2.000 de 2.000 juegos, y 0 falsos GANA o PIERDE en 400 corridas con brazos intercambiables.
+Con las correcciones, el humo sobre S159 (visto, no decide) elige C13 en Cordón Caulle y en Tupungatito y valida en O
+con GANA contra M14 y contra K.

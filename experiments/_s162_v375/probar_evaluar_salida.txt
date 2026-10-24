@@ -6,7 +6,7 @@
 2e. elección por volcán: el brazo mejor en O y peor en T no se elige
 2f. ponderada 0.526 (cruda 0,100), n efectivo 3.31
 
-  -- decisión sobre: prueba (13 pasadas) --
+  -- decisión sobre: prueba (13 pasadas; veto de protegidas sobre 13) --
   N representado por clase: {'pos_prot': 3.0, 'pos_bajo': 100.0, 'neg_pub': 0, 'neg_resto': 0}
   B: neg_resto [0, 0], IC (nan, nan); negativos nan [nan, nan] contra K 0.5000 -> NO RESUELTO; MISSION M14 contra K ENCIENDE DE MAS
   C13      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -100.0, B 10)
@@ -16,14 +16,24 @@
   validación en O: protegidas que M14 publica y el compuesto no 0; P2 contra M14 GANA (neto -50.0, B 5); P2 contra K SIN SUSTRATO -> VALIDA EN O
   V375-D: NO NECESARIO por B ni por C | protegidas sólo OCR que K publica y el brazo global no: 0 (esperan V375-A)
 
-  -- decisión sobre: prueba (13 pasadas) --
+  -- decisión sobre: prueba (13 pasadas; veto de protegidas sobre 13) --
+  N representado por clase: {'pos_prot': 3.0, 'pos_bajo': 100.0, 'neg_pub': 0, 'neg_resto': 0}
+  B: neg_resto [0, 0], IC (nan, nan); negativos nan [nan, nan] contra K 0.5000 -> NO RESUELTO; MISSION M14 contra K ENCIENDE DE MAS
+  C13      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -50.0, B 5)
+  C14      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -50.0, B 5)
+  brazo global: C13 | candidatos: ['C13', 'C14']
+  por volcán, elegido en T: {'V': 'C13'} (los demás M14)
+  validación en O: protegidas que M14 publica y el compuesto no 0; P2 contra M14 SIN SUSTRATO (neto +0.0, B 0); P2 contra K PIERDE -> SIN SUSTRATO EN O
+  V375-D: NECESARIO: C: con el brazo global el IC del recall bajo 1 MW (0.763 arriba) queda entero bajo el de K en el marco (1.000) | protegidas sólo OCR que K publica y el brazo global no: 0 (esperan V375-A)
+
+  -- decisión sobre: prueba (13 pasadas; veto de protegidas sobre 13) --
   N representado por clase: {'pos_prot': 3.0, 'pos_bajo': 100.0, 'neg_pub': 0, 'neg_resto': 0}
   B: neg_resto [0, 0], IC (nan, nan); negativos nan [nan, nan] contra K 0.5000 -> NO RESUELTO; MISSION M14 contra K ENCIENDE DE MAS
   C13      protegidas que M14 publica y el brazo no: 1; P2 contra M14 GANA (neto -100.0, B 10)
   C14      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -100.0, B 10)
   brazo global: C14 | candidatos: ['C14']
   por volcán, elegido en T: {'V': 'C13'} (los demás M14)
-  validación en O: protegidas que M14 publica y el compuesto no 1; P2 contra M14 GANA (neto -50.0, B 5); P2 contra K SIN SUSTRATO -> NO VALIDA EN O
+  validación en O: protegidas que M14 publica y el compuesto no 1; P2 contra M14 GANA (neto -50.0, B 5); P2 contra K SIN SUSTRATO -> NO VALIDA EN O (pierde protegidas que M14 publica)
   V375-D: NO NECESARIO por B ni por C | protegidas sólo OCR que K publica y el brazo global no: 0 (esperan V375-A)
-3. decidir: desempate a la caja más chica; una protegida perdida respecto de M14 saca al brazo; repesar ok
+3. decidir: desempate a la caja más chica; validar en O exige GANA; una protegida perdida respecto de M14 saca al brazo; repesar ok
 PRUEBAS DEL EVALUADOR OK

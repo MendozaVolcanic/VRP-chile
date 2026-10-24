@@ -159,11 +159,20 @@ def prueba_3():
     d = EV.decidir(fr, N_neg, 0.5, np.random.default_rng(1), [R, C13, C14], R,
                    {"recall_bajo": 1.0, "recall_prot": 1.0}, "prueba")
     assert d["global"] == "C13" and d["candidatos"] == ["C13", "C14"], d["global"]
+    assert d["valida_en_O"] == "VALIDA EN O", d["valida_en_O"]
+    # si en O el compuesto es igual a M14, la validación no puede salir VALIDA (corrección del verificador)
+    fo = [dict(x, X=dict(x["X"]), V=dict(x["V"])) for x in fr]
+    for x in fo:
+        if x["tramo"] != "T":
+            x["X"][C13] = x["X"][C14] = x["X"][R]
+    d3 = EV.decidir(fo, N_neg, 0.5, np.random.default_rng(1), [R, C13, C14], R,
+                    {"recall_bajo": 1.0, "recall_prot": 1.0}, "prueba")
+    assert d3["valida_en_O"] == "SIN SUSTRATO EN O", d3["valida_en_O"]
     fr[-1]["X"][C13] = False
     d2 = EV.decidir(fr, N_neg, 0.5, np.random.default_rng(1), [R, C13, C14], R,
                     {"recall_bajo": 1.0, "recall_prot": 1.0}, "prueba")
     assert d2["global"] == "C14", d2["global"]
-    print("3. decidir: desempate a la caja más chica; una protegida perdida respecto de M14 saca al brazo; repesar ok")
+    print("3. decidir: desempate a la caja más chica; validar en O exige GANA; una protegida perdida respecto de M14 saca al brazo; repesar ok")
 
 
 def main():

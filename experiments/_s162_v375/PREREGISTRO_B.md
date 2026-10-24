@@ -3,8 +3,9 @@
 > Escrito antes de despachar el lote y antes de ver ningún resultado del port sobre las pasadas nuevas. Lo que cambie
 > después del sello va en una adenda fechada al final, nunca reescribiendo esto. Es MEDICIÓN: no adopta nada ni toca
 > `pipeline/`, `data/` ni `frontend/`. Comparte lote, runner y evaluador con V375-C (`PREREGISTRO_C.md`).
-> Estado: **BORRADOR, sin sellar.** D-36 lo aprobó Nicolás («300 a 400 negativos de ese estrato por sensor»); falta el
-> verificador con contexto limpio, el sello y que la coordinadora lo meta en el despacho combinado de la fase 1.
+> Estado: **BORRADOR, sin sellar.** D-36 lo aprobó Nicolás («300 a 400 negativos de ese estrato por sensor»); el verificador
+> limpio ya pasó (`verificador/INFORME.md`, correcciones en `PREREGISTRO_C.md` §8); falta el sello y que la coordinadora
+> lo meta en el despacho combinado de la fase 1.
 
 ## 1. Pregunta
 
@@ -69,7 +70,8 @@ MIROVA informa el píxel cercano aunque haya uno lejano más brillante (Láscar 
    y no decide. **Cobertura contra la referencia de MIROVA**: la entrega la sesión del instrumento (fase 0, programa §8.1);
    sin ella el veredicto no se declara final (el evaluador lo marca).
 2. **Recálculo sin red = runner**: los diez brazos recalculados sobre la grilla guardada dan npix y VRP iguales (a 1e-6
-   MW) a lo que calculó el runner, en el 100 % de las pasadas x brazo. Si no, INVALIDO POR INSTRUMENTO.
+   MW) a lo que calculó el runner, en el 100 % de las pasadas x brazo. Si no, INVALIDO POR INSTRUMENTO. El runner corre
+   los brazos sobre la grilla ya redondeada a float32, la misma que guarda, para que este control no falle por precisión.
 3. **K re-corrido = publicado**: si la publicación de K re-corrido difiere de la del record de `data/` en más del 5 %
    de las pasadas, la lectura de K usa lo re-corrido y se dice.
 4. **Control positivo**: alguna protegida de Láscar o Chillán tiene píxeles en M14; si no, el port está muerto.
