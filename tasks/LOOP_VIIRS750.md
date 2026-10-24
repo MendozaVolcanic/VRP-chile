@@ -13,9 +13,11 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 
 ## Cola (en orden)
 
-1. [en curso] **V750-C, ablación del oráculo en local** (`experiments/_s162_v750c/`). Sin red ni sello.
-2. [pendiente] Verificador limpio de V750-C (otro modelo, sólo título, ruta y script).
-3. [pendiente] Pre-registro V750-B (ROI por volcán: PCC y Tupungatito) para el despacho combinado de fase 1.
+1. [hecho, sin verificar] **V750-C, ablación del oráculo en local**: `experiments/_s162_v750c/INFORME.md` (`8cc1cba83`).
+2. [en curso] Verificador limpio de V750-C (Fable, esfuerzo alto, en segundo plano): escribe
+   `experiments/_s162_v750c/verificador/VERIFICADOR_V750C.md`. Al llegar: leer, contrastar, commitear, marcar A113 si refuta.
+3. [borrador] Pre-registro V750-B: `experiments/_s162_v750b/PREREGISTRO_V750B.md`. Falta su §11 (probe, objetivos,
+   analizador, prueba sin red) y su verificador antes del sello.
 4. [pendiente] Pre-registro V750-A (paquete del código contra K: P, P-def, P-sinfiltro, Kgeo) y prueba de
    equivalencia contra el oráculo.
 5. [pendiente] Paso a paso de V750-F (O2 en MATLAB Online) para Nicolás.
@@ -24,7 +26,10 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
 
 ## Decisiones para Nicolás
 
-(ninguna todavía)
+- **DN-1 (para el sello de V750-B)**: sellar `experiments/_s162_v750b/PREREGISTRO_V750B.md` cuando su §11 esté hecho y
+  verificado. Recomendación: sí.
+- **DN-2 (V750-B §6.5)**: si gana una ROI por volcán (B4 o B2), confirmar que es fidelidad al `.m` (MIROVA declara que
+  ajusta la ROI por volcán) y no un gate nuestro de los que excluye A85. Recomendación: tratarla como fidelidad.
 
 ## Bitácora
 
@@ -35,3 +40,8 @@ nuevo antes de que el instrumento entregue la cobertura contra la referencia (fa
   con esas grillas. Sustitutos locales: (a) `F_L_hot_pc` de los resultados de N es la radiancia nativa M13 del píxel
   de K, comparable con la celda de la grilla; (b) 10 recortes nativos de R2 en
   `experiments/_s158_audit_r2/granulos/run_39641637298/` (rama s159-pruebas), todos alertas, ninguna cumbre de 0 MW.
+- 2026-10-24 ~15:45 UTC, vuelta 1. **V750-C hecho** (`8cc1cba83`): controles 510/510; el remuestreo lineal calla
+  las cumbres tibias (censo 60: el `.m` 1, piezas de K sueltas ≤ 5, todas juntas 8, vecino más cercano 23, grilla R2 13;
+  el remuestreo conserva 54 % del exceso nativo); el fondo del código da la magnitud (anillo 0,458 contra 0,999).
+  SOSPECHA FUERTE por usar sustitutos; el brazo nativo va en el run de V750-B (N0/N1). Verificador Fable lanzado.
+  Borrador del pre-registro V750-B escrito. Coordinadora avisada del hallazgo de los npz y de que no abro sub-sesiones.
