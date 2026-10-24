@@ -18,6 +18,14 @@ y la única que escribe `tasks/LOOP_OBJETIVOS.md`. Programa: `docs/superpowers/s
   worktree y rama, con cola propia enlazada desde aquí, sin despachar por su cuenta; aviso a la coordinadora con nombre e
   id `local_…`. Sub-sesiones abiertas: ninguna.
 
+## Dónde se construye MOD-B
+
+El `pipeline/` de `main` va 708 commits adelante de `loop/activo` (11 archivos, 631 líneas), así que el arnés se
+construye y se prueba sobre `main`: worktree `D:rp-trabajo\s162-mxd03`, rama `s162-mxd03-codigo` (cortada de
+`origin/main` `80b819828`, sin upstream, checkout parcial: `data/` sólo `mirova_equivalent` y `mirova_reference`).
+Carpeta `experiments/_s162_mxd03/`. El tag `s162-mxd03-codigo` irá sobre esa rama (adenda del sello, punto 2). Al
+terminar, la carpeta se trae también a esta rama.
+
 ## Insumos (dónde están)
 
 Los informes de S159 no están en `loop/activo`: viven en `origin/s159-pruebas` (y `origin/s159-portes`). Copia de
@@ -28,15 +36,16 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 ## Cola (en el orden del programa)
 
 ### MOD-B, MxD03 sobre K (D-19, tarea 1.30)
-- [ ] B1. Anotar el sello D-48 en el pre-registro v2 (texto y fecha), con las respuestas del §11 según la
+- [x] B1. (`cd3d12984`) Anotar el sello D-48 en el pre-registro v2 (texto y fecha), con las respuestas del §11 según la
   recomendación, y una adenda declarada con lo que cambia al implementar (D34 del catálogo ya está tomada por el código
   de MIROVA V750: la divergencia nueva sería D35; tag sobre un commit de disparo, no sobre `main`; censo re-medido en el
   sha que se congele).
-- [ ] B2. Re-medir el censo (records, gránulos, ≤ 35°, etiquetas) sobre el `origin/main` que se congele y la referencia
+- [x] B2. (rama `s162-mxd03-codigo`, `7413ac463`, `cfa3330d9`) Re-medir el censo (records, gránulos, ≤ 35°, etiquetas) sobre el `origin/main` que se congele y la referencia
   remota congelada (`MANIFIESTO.json`, sha256 LF).
-- [ ] B3. Arnés `probe_mxd03_ab.py` (brazos K, K2, X, R0 a R19 en ≤ 35°, X_fondo y X_det en las que cambian), partes por
+- [x] B3. (`dcdfeaaf3`, `cfa3330d9`) Arnés `probe_mxd03_ab.py` (brazos K, K2, X, R0 a R19 en ≤ 35°, X_fondo y X_det en las que cambian), partes por
   gránulo, con prueba sintética sin HDF (pyhdf no corre en Windows).
-- [ ] B4. Workflow de disparo (`"on":` entre comillas, `EARTHDATA_TOKEN` que falla vacío, `ubuntu-24.04`, 24 partes).
+- [x] B4. (`15c517da1`) Workflow de disparo (`"on":` entre comillas, `EARTHDATA_TOKEN` que falla vacío, `ubuntu-24.04`, 24 partes).
+- [ ] B5a. Vara VIIRS congelada ANTES del despacho (adaptar `construir_vara_viirs.py` de 1.23 al censo de la ventana).
 - [ ] B5. Evaluador `evaluar_mxd03.py` + `probar_evaluar_mxd03.py` (las 12 pruebas del §8, rojas antes, verdes
   después) y las 5 mutaciones con control de caída.
 - [ ] B6. Verificador con contexto limpio, de otro modelo, sobre arnés y evaluador.
@@ -66,6 +75,24 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 (ninguna todavía)
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-24 (vuelta 1): sello, censo, arnés, workflow; MOD-C delegado
+- B1 hecho: sello D-48 con adenda de 5 puntos en el pre-registro (`cd3d12984`).
+- B2: el censo re-medido sobre `main` `80b819828` con la referencia de hoy (consolidado `47303dcd`, OCR `534003b3`,
+  sha256 en `MANIFIESTO.json`) **reproduce exacto** el del pre-registro: 5.465 records, 1.232 gránulos, 2.046 con cenit
+  ≤ 35° en 511, etiquetas 50/42/5.110/253/10 con K publicando 48/32/39/6/0, 222 mitades partidas, 12 `codigo_sha`, las
+  4 protegidas expuestas (más 3 bajo 1 MW). Los 5.465 son versión estándar.
+- B3: arnés sobre el núcleo ya verificado de 1.17/1.21/1.23 (import, sin copiar). La prueba sintética atrapó un defecto
+  real mío (el reemplazo del fondo capturaba la función ya parcheada: recursión) y una aserción ciega (M2 comparaba
+  contra la misma función mutada). Final: caso base OK y 4 de 4 mutaciones atrapadas por aserción.
+- B4: workflow con push a ramas de disparo (`s162-mxd03-humo`, `-t1`, `-t2`, `-t3`), humo de 3 gránulos; control 4 en
+  un paso propio (`recorrer_en_sha.py` + `k_en_sha.py`: worktree del commit viejo, proceso aparte).
+- Hallazgo menor: la prueba sintética de 1.17 (`probar_probe_mxd03.py`) falla con K en `deteccion_cambia` (con K el
+  cúmulo cambia de magnitud al cruzar el umbral dual); expectativa vieja, no la toco.
+- `comparar_con_ganancia` (d′ de D-28) no está en `main`: M se informa con el intervalo de `regla_m` sobre d y d′ como
+  estimación puntual (lo prevé el §8).
+- MOD-C delegado a un subagente en segundo plano (carpeta `experiments/_s162_modis_negativos/` de esta rama, sin
+  commits del subagente).
 
 ### 2026-10-24 (vuelta 0): arranque
 - Leídos: programa (§1, §2, §5, §7, §9, §11), pre-registro MxD03 v2, informes M, PORTES y su verificador, Chillán MODIS,
