@@ -42,8 +42,12 @@ Por la tabla del pre-registro §8 d: M mejora en una sola ventana (V1) y P2 bloq
 ## Brazo del 17 al 19 de octubre (D-35, run 39756261926): NO ENTRA AL VEREDICTO
 
 Evaluado con la configuración de V1 vaciando en memoria la exclusión de D-29 (`envoltorios/s17_sensibilidad.py`):
-271 pasadas por brazo, controles OK, P1 CUMPLE (6 y 6), P2 SIN SUSTRATO (0 y 1 noches), M INDECIDIBLE (calibración de
-d′ mal calibrada en un estrato de 6 pares). Chillán V375 0,456 → 0,493, V750 0,447 → 0,508. Igual con la tabla sola.
+271 pasadas por brazo, controles OK, P1 CUMPLE (6 y 6), P2 SIN SUSTRATO (0 y 1 noches), M INDECIDIBLE: la calibración
+de d queda mal calibrada (cola EMPEORA 0,055 contra 0,05) en VIIRS 375 sin kernel con cenit > 40°, 7 pares en 4 noches
+(corregido por el verificador, V162-01; la primera versión lo atribuía a d′ en un estrato de 6 pares). Chillán V375
+0,456 → 0,493, V750 0,447 → 0,508. Igual con la tabla sola. Comando: `python envoltorios/s17_sensibilidad.py --ventana
+V1 --desde 2026-10-17 --hasta 2026-10-19 --raiz <S17> --logs <S17>/logs --calibracion simetrica --out s17.json`
+(agregar `solo_tabla` como primer argumento para la variante con la tabla sola).
 
 ## Cómo se reproduce
 
@@ -56,5 +60,15 @@ python experiments/_s157_prereg_d25/evaluar_d25.py --ventana V2 --raiz <V2a> --r
 python experiments/_s157_prereg_d25/evaluar_d25.py --combinar v1.json v2.json
 ```
 
-Salidas completas en `salidas/` (logs, JSON y la cobertura de cada run). Lectura mecánica, sin verificador limpio de
-la interpretación.
+Salidas completas en `salidas/` (logs, JSON y la cobertura de cada run).
+
+Notas del verificador: el run de V1 figura en `failure` sólo porque el intento 2 no pudo publicar su rama de salidas
+(push rechazado); su artefacto y la cobertura están completos (V162-02). El sha256 `93c26d62...` es el del archivo con
+CRLF del checkout de Windows; el blob de git (LF) da `2e557697...`, con contenido idéntico al del tag (V162-03).
+
+## Verificación
+
+Verificador con contexto limpio (Fable 5.1, high): re-corrió el evaluador sobre V1, V2, V1 con la tabla sola y el brazo
+del 17 al 19, y los cinco JSON y el combinado salen idénticos bit a bit; recomputó P2 por enumeración exacta (V1 VIIRS
+750 p PIERDE 0,1635 contra 0,1619 por sorteos). Afirmaciones (a) a (e) CONFIRMADAS; (f) y (g) CONFIRMADAS EN PARTE por
+los detalles corregidos arriba. Informe completo en `verificacion/INFORME.md`.
