@@ -18,7 +18,7 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 
 | id | qué | estado |
 |---|---|---|
-| V375-B | lote de negativos limpios neg_resto para el port (D-36) | **TERMINADO** (run 40116289866, verificado): NO RESUELTO por la regla (lote solo 4,10 % contra 3,85 %), del lado del silencio |
+| V375-B | lote de negativos limpios neg_resto para el port (D-36) | **RESUELTO con V375-B2** (run 40131572769, verificado): SILENCIO ACOTADO BAJO K, 6 de 1.165 en neg_resto, cota 2,48 % contra 3,85 % |
 | V375-C | 10 brazos de ROI (mismo lote que B) | **TERMINADO** (verificado): caja **C13** en el cráter; compuesto por volcán valida en O; V375-D no necesario |
 | V375-E | pre-registro del paquete V375 contra K, curva de cenit contra la de MIROVA | listo y verificado (`b9e9c9f97`); no despachable hasta PD1, PD3 y el evaluador común del instrumento (M con d′) |
 | V375-D | números propios de 375 | sólo si B o C lo exigen (disparador en `PREREGISTRO_C.md` §5.3) |
@@ -239,3 +239,16 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   (0,52 % [0,24; 1,12]); todos los negativos 1,55 % [1,00; 2,48] contra 3,85 %. La unión confirma (1,70 % [1,43; 2,20]);
   la lectura estricta también (2,65 %). Las líneas de C de esta corrida no se leen (§7 de B2).
 - Verificador limpio (Sonnet) del resultado corriendo; no informar como hecho hasta que vuelva.
+
+### 2026-10-24 (vuelta 15): B2 VERIFICADO, V375-B resuelto; loop en pausa
+- Verificador limpio del resultado (Sonnet, `b2/resultado_run40131572769/verificador/INFORME.md`): **CONFIRMADO**.
+  Recuento propio: las mismas 6 publicaciones (1 píxel, 0,01 a 0,04 MW); cota a mano igual a 15 cifras; salida
+  re-corrida idéntica; las 35 no observadas no alcanzan a mover el veredicto (harían falta 13 a 15 publicando).
+  Matices: la unión no es confirmación independiente (73 % del lote que decide); «calla al menos tanto como K» no es
+  «no enciende nada nuevo» (unas 17 noches de 3.323 donde K calla).
+- Informe: `b2/resultado_run40131572769/INFORME.md` (commit `52f255721`). **V375-B resuelto a favor del silencio.**
+- Estado de la cola: V375-B (resuelto), V375-C (C13), V375-D (no se abre) terminados. V375-E espera PD1 (Nicolás), PD3
+  (vía en `pipeline/`, A45) y #903/#905. V375-F después de E. **Loop en pausa**: no hay tarea avanzable sin esas
+  entregas. Para retomar: `/loop` con el mismo prompt cuando la coordinadora avise PD1 o PD3.
+- Limpieza pendiente (no destructiva hasta que Nicolás o la coordinadora lo digan): artefactos falsos del verificador v3
+  en `C:rp-trabajo	emporales\s162_v375erif_v3\` (1,8 GB).
