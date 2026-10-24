@@ -167,3 +167,17 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   `volcanoes.yaml`); V375-D no se abre; B NO RESUELTO (resolverlo pide otra muestra de neg_resto, no reinterpretar).
 - Cola: V375-B y V375-C **terminados**. Siguiente: V375-E (espera PD1 de Nicolás, PD3 en `pipeline/` y #903/#905), y
   después V375-F. El loop queda en espera.
+
+### 2026-10-24 (vuelta 9): V375-B2 pedido por la coordinadora (D-48)
+- Pedido: segunda muestra de neg_resto disjunta, pre-registrada antes de mirar nada, misma regla sellada, sin contar
+  neg_pub como censo, tamaño el que la regla necesite.
+- Traba medida: las 133 neg_pub del marco ya están todas medidas, así que en el conjunto que decide su cota queda fija
+  (31 de 113, 36,5 %); la cota de neg_resto tiene que bajar de 2,80 % a 2,54 %. Simulación (`b2/tamano_b2_salida.txt`):
+  con la tasa observada (1,16 %), 400 nuevas deciden en 91 %, **600 en 95 %**, 800 en 97 %; con tasa real de 2 %, ninguna.
+- Borrador `b2/PREREGISTRO_B2.md` (commits `33567bd91`, `987e4f814`): 600 neg_resto nuevas, semilla 163, decide S162 +
+  B2 con la regla sellada; se declara la segunda mirada (inflación hasta 5 % por cola) y se informa la lectura estricta
+  (z 2,241). Ya visto al probar el evaluador: estricta 4,49 % con S162, 3,68 % con la unión. Evaluador extendido
+  (`--objetivos-extra`, `--art-extra`, `--deciden`); regresión: la lectura publicada sale idéntica salvo el rótulo y la
+  línea estricta. Workflow `b2/probe-s162-v375-b2.yml` (24 trozos, rama `s162-v375-b2-disparo`).
+- Verificador limpio (Sonnet) del pre-registro corriendo. Después: correcciones, sello por D-48, commits de disparo
+  (humo y lote sobre `ca034d66e`) y pedido de despacho a la coordinadora.
