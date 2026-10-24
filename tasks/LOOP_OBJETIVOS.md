@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~19:30 UTC (S162): V375-B y V375-C verificados (PD1 de VIIRS 375)
+- Verificador limpio (Sonnet), sin hallazgos que cambien veredictos; informe `experiments/_s162_v375/
+  resultado_run40116289866/INFORME.md` (`claude/s162-viirs375-c1b864` `35e9560c2`). Instrumento: 709/709 pasadas,
+  recálculo = runner 7.427/7.427, K = publicado 847/847, cobertura del marco 0 alertas sin record.
+- **V375-C: la caja de cumbre va en el CRÁTER de `volcanoes.yaml`, brazo C13 (13 × 13 celdas de 375 m)**. Recall bajo
+  1 MW de 0,69 (caja de S159) a 0,95 [0,92; 0,98], a la par de K (0,957); P2 contra K GANA; negativos 2,03 %; M 0,999.
+  La ganancia está en Cordón Caulle y Tupungatito (cráter a 7,6 y 4,8 km del centro del TIF). V375-D no se abre.
+- **V375-B: NO RESUELTO** con la regla sellada (port 4 de 389 neg_resto; unión 0,95 % [0,37; 2,38]; la cota de 8,5 %
+  baja a 2,4 %). ENCIENDE DE MÁS descartado. Con D-48: segunda muestra disjunta de neg_resto, pre-registrada antes de
+  mirar, con la misma regla.
+- Riesgo para V375-E: los 10 brazos pierden las mismas 6 protegidas, todas Suomi NPP sólo OCR del lote de S159 (K publica
+  3); lo decide V375-A (#903).
+
 ### 2026-10-24 ~19:15 UTC (S162): diagnóstico físico de las dos publicaciones de MOD-C (SOSPECHA fuerte, sin verificador)
 - Láscar 2026-05-11 07:55 (Aqua, 38°): **calor real del cráter** (K publica el cráter esa noche en VIIRS 375 y 750 de
   los tres satélites a 0,03-0,31 km; MIROVA alertó en VIIRS esa noche y en casi todas las vecinas; su MODIS dice RUTINA
