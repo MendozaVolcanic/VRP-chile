@@ -1,0 +1,96 @@
+name: "Probe S162 MxD03 sobre K (A/B de solo lectura, tarea 1.30)"
+
+# A/B de MxD03 sobre K. Pre-registro sellado: experiments/_s159/mxd03_prereg/PREREGISTRO_MXD03.md (sello D-48 y su
+# adenda). Arnes: experiments/_s162_mxd03/probe_mxd03_ab.py; control 4: recorrer_en_sha.py.
+# Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# Se dispara con un push a una de las ramas de disparo (workflow_dispatch solo existe desde main, S73), siempre desde
+# el tag s162-mxd03-codigo (A108, S152). Una rama, una tanda; la siguiente recien cuando la anterior termino:
+#   s162-mxd03-humo  3 granulos (Lascar 03-27 protegida, Chillan 10-10 expuesta, Cordon Caulle 10-11 <= 35 grados)
+#   s162-mxd03-t1    partes 0 a 7      s162-mxd03-t2  partes 8 a 15      s162-mxd03-t3  partes 16 a 23
+# A43: "on" entre comillas. S141: pipefail con tee. A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si
+# viene vacio. MODIS solo en Linux (pyhdf). A15: ~2 h estimadas por parte (pre-registro §9); timeout 300 min.
+"on":
+  push:
+    branches: ["s162-mxd03-humo", "s162-mxd03-t1", "s162-mxd03-t2", "s162-mxd03-t3"]
+
+concurrency:
+  group: probe-s162-mxd03
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      partes: ${{ steps.p.outputs.partes }}
+      solo: ${{ steps.p.outputs.solo }}
+    steps:
+      - id: p
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            s162-mxd03-humo) echo 'partes=[0]' >> "$GITHUB_OUTPUT"
+                             echo 'solo=MYD021KM.A2026086.0710,MYD021KM.A2026283.0740,MOD021KM.A2026284.0140' >> "$GITHUB_OUTPUT" ;;
+            s162-mxd03-t1) echo 'partes=[0,1,2,3,4,5,6,7]' >> "$GITHUB_OUTPUT"; echo 'solo=' >> "$GITHUB_OUTPUT" ;;
+            s162-mxd03-t2) echo 'partes=[8,9,10,11,12,13,14,15]' >> "$GITHUB_OUTPUT"; echo 'solo=' >> "$GITHUB_OUTPUT" ;;
+            s162-mxd03-t3) echo 'partes=[16,17,18,19,20,21,22,23]' >> "$GITHUB_OUTPUT"; echo 'solo=' >> "$GITHUB_OUTPUT" ;;
+            *) echo "rama desconocida ${GITHUB_REF_NAME}"; exit 1 ;;
+          esac
+
+  probe:
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        parte: ${{ fromJSON(needs.plan.outputs.partes) }}
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+          node --version
+      - name: Arnes
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          mkdir -p out
+          echo "commit $(git rev-parse HEAD) ref ${GITHUB_REF_NAME}" | tee out/procedencia_${{ matrix.parte }}.txt
+          python experiments/_s162_mxd03/probe_mxd03_ab.py --parte ${{ matrix.parte }} --out out \
+            --solo "${{ needs.plan.outputs.solo }}" 2>&1 | tee out/probe_${{ matrix.parte }}.log
+      - name: Control 4 (re-corrida en el codigo_sha del record)
+        if: always()
+        env:
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          python experiments/_s162_mxd03/recorrer_en_sha.py --out out --parte ${{ matrix.parte }} 2>&1 \
+            | tee out/recorrer_${{ matrix.parte }}.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s162-mxd03-${{ github.ref_name }}-parte-${{ matrix.parte }}
+          path: |
+            out/*.jsonl
+            out/*.log
+            out/*.txt
+          retention-days: 30
+          if-no-files-found: error

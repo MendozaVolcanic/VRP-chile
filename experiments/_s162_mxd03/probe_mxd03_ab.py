@@ -243,7 +243,7 @@ def main():
     ap.add_argument("--parte", type=int, required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--poblacion", default=str(AQUI / "poblacion.json"))
-    ap.add_argument("--solo", default="", help="claves de granulo separadas por coma (depuracion)")
+    ap.add_argument("--solo", default="", help="claves de granulo separadas por coma (humo)")
     args = ap.parse_args()
     if not os.environ.get("EARTHDATA_TOKEN", "").strip():
         sys.exit("EARTHDATA_TOKEN vacio: el probe no usa usuario y clave (A71).")
@@ -253,8 +253,8 @@ def main():
     pob = json.load(open(args.poblacion, encoding="utf-8"))
     por_clave = {g["clave"]: g for g in pob["granulos"]}
     claves = pob["partes"][args.parte]
-    if args.solo:
-        claves = [c for c in claves if c in set(args.solo.split(","))]
+    if args.solo:   # humo: claves de cualquier parte (la salida se rotula con --parte igual)
+        claves = [c for c in sorted(por_clave) if c in set(args.solo.split(","))]
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     hdf, retenidos = out / "hdf", out / "retenidos"
