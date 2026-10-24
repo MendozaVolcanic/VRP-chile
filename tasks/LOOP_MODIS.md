@@ -48,7 +48,7 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] B5a. (`87e91adf0`) Vara VIIRS congelada ANTES del despacho (adaptar `construir_vara_viirs.py` de 1.23 al censo de la ventana).
 - [x] B5. (`f10ea9b79`, `91a3055ff`) Evaluador `evaluar_mxd03.py` + `probar_evaluar_mxd03.py` (las 12 pruebas del §8, rojas antes, verdes
   después) y las 5 mutaciones con control de caída.
-- [ ] B6. Verificador con contexto limpio, de otro modelo, sobre arnés y evaluador. (Fable, alto, CORRIENDO; escribe en `D:rp-trabajo\s162-mxd03\experiments\_s162_mxd03erificador\`)
+- [ ] B6. Verificador con contexto limpio, de otro modelo, sobre arnés y evaluador. (Fable, alto, CORRIENDO; escribe en la carpeta verificador de experiments/_s162_mxd03/ del worktree de D:)
 - [ ] B7. Pedido de despacho a la coordinadora (tag, tres tandas de 8 partes, ~47 h de runner).
 
 ### MOD-C, negativos neg_resto del port MODIS (D-36)
