@@ -3,12 +3,14 @@
 
 POR QUÉ. V375-B quedó NO RESUELTO por la regla sellada (`../resultado_run40116289866/INFORME.md`). La coordinadora
 resolvió con D-48 (2026-10-24) una segunda muestra de neg_resto, pre-registrada antes de mirar nada nuevo, con la misma
-regla. El tamaño sale de `tamano_b2.py`: 600 noches dan 95 % de probabilidad de decidir con la tasa observada.
+regla. El tamaño sale de `tamano_b2.py`: con B2 sola decidiendo neg_resto (la lógica sellada de C §5.5: decide lo no
+visto; verificador del borrador, b2/verificador/INFORME.md F1), 1.200 noches dan 93 % de probabilidad de decidir con la
+tasa observada.
 
 Mismo marco que `../seleccion.py` (población congelada de S159, sin el 12, 13 y 17 a 20 de octubre, sólo pasadas que
-deciden). Asignación por estrato volcán x cenit para que el conjunto que decide (S162 + B2) quede lo más proporcional
-posible al tamaño del estrato (la misma función `asignar`, con las de S162 como «viejas»). Semilla 163 (la siguiente
-a la 162 del lote S162). Ids desde 3000.
+deciden). Asignación por estrato volcán x cenit proporcional al tamaño del estrato EN EL MARCO (B2 decide sola, así que
+es B2 la que tiene que ser proporcional), con restos mayores y sin pasar de lo que queda sin medir en cada estrato.
+Semilla 163 (la siguiente a la 162 del lote S162). Ids desde 3000.
 Uso: python -I seleccion_b2.py
 """
 from __future__ import annotations
@@ -26,7 +28,7 @@ sys.path.insert(0, str(AQUI.parent))
 import seleccion as S  # noqa: E402
 
 SEMILLA = 163
-N_NUEVO = 600
+N_NUEVO = 1200
 ID0 = 3000
 
 
@@ -47,9 +49,12 @@ def main():
                     key=lambda o: (o["volcan"], o["hora_utc"]))
     disp = collections.Counter(S.estrato(o) for o in quedan)
     print("quedan sin medir:", len(quedan))
-    # `asignar` limita por N - viejos; aquí el límite real es lo que queda (sin S159 ni S162)
-    Nlim = {h: s162.get(h, 0) + disp.get(h, 0) for h in N}
-    asig = S.asignar(Nlim, s162, N_NUEVO)
+    tot = sum(N.values())
+    ideal = {h: N_NUEVO * N[h] / tot for h in N}
+    asig = {h: min(disp.get(h, 0), int(ideal[h])) for h in N}
+    while sum(asig.values()) < N_NUEVO:
+        cand = sorted([h for h in N if asig[h] < disp.get(h, 0)], key=lambda h: (-(ideal[h] - asig[h]), h))
+        asig[cand[0]] += 1
     rng = random.Random(SEMILLA)
     por_h = collections.defaultdict(list)
     for o in quedan:
@@ -59,9 +64,9 @@ def main():
         if asig[h]:
             sel += rng.sample(por_h[h], asig[h])
     meta = {h: {"N": N[h], "n_s162": s162.get(h, 0), "n_b2": sum(1 for o in sel if S.estrato(o) == h)} for h in sorted(N)}
-    w = [m["N"] / (m["n_s162"] + m["n_b2"]) for m in meta.values() if m["n_s162"] + m["n_b2"]]
-    print(f"nuevas {len(sel)}; peso de S162 + B2 mín {min(w):.2f} máx {max(w):.2f}; estratos sin pasadas: "
-          f"{[h for h, m in meta.items() if not m['n_s162'] + m['n_b2']]}")
+    w = [m["N"] / m["n_b2"] for m in meta.values() if m["n_b2"]]
+    print(f"nuevas {len(sel)}; peso de B2 sola mín {min(w):.2f} máx {max(w):.2f}; estratos sin pasadas de B2: "
+          f"{[h for h, m in meta.items() if not m['n_b2']]}")
     print("por tramo:", dict(sorted(collections.Counter(S.tramo(o["hora_utc"]) for o in sel).items())),
           "| partidas:", sum(bool(o.get("partida")) for o in sel))
     out = []

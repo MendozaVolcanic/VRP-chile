@@ -546,6 +546,7 @@ def main(argv=None):
     ap.add_argument("--objetivos-extra", nargs="*", default=[], help="más archivos de objetivos (p. ej. el de B2)")
     ap.add_argument("--art-extra", nargs="*", default=[], help="carpetas de artefactos de los lotes extra")
     ap.add_argument("--deciden", nargs="+", default=["S162"], help="lotes del conjunto que decide")
+    ap.add_argument("--neg-pub-de", default=None, help="lote del que sale neg_pub en el conjunto que decide (B2: S162)")
     ap.add_argument("--salida", default=str(AQUI / "evaluar_salida.txt"))
     ap.add_argument("--json", default=str(AQUI / "evaluar.json"))
     a = ap.parse_args(argv)
@@ -592,6 +593,15 @@ def main(argv=None):
             pr(f"   AVISO: {c} tiene {n_s} de {n_c} SIN DATO (más del 10 %): la lectura de esa clase se informa pero "
                "no decide (§4.1)")
             veredicto_instr.append(f"cobertura_{c}")
+    # V375-B2 (verificador del borrador, F4): el mismo umbral, también por lote, para que un lote que decide no
+    # esconda su hueco detrás de los otros
+    for lote in sorted({o["lote"] for o in obj.values()}):
+        for c in ("pos_prot", "pos_bajo", "neg_pub", "neg_resto"):
+            n_c = sum(1 for o in obj.values() if o["clase"] == c and o["lote"] == lote)
+            n_s = sum(1 for x in sin if x[4] == c and x[1] == lote)
+            if n_c and n_s / n_c > 0.10:
+                pr(f"   AVISO: lote {lote}, {c}: {n_s} de {n_c} SIN DATO (más del 10 %)")
+                veredicto_instr.append(f"cobertura_{lote}_{c}")
     if a.cobertura:
         # salida de cobertura_marco.py (evaluador común del instrumento sobre el MARCO, con producción como único lado)
         cobm = json.loads(Path(a.cobertura).read_text(encoding="utf-8"))
@@ -791,7 +801,20 @@ def main(argv=None):
        f"{lkm['recall_prot']:.3f} ({lkm['n_prot']}), bajo 1 MW {lkm['recall_bajo']:.3f} ({lkm['n_bajo']})")
     resumen["K_marco"] = lkm
     dec_u = decidir(filas, N_neg, tasa_k_neg, rng, candidatos, ref, lkm, "unión S159 + S162 (confirma)")
-    f162 = repesar([x for x in filas if x["lote"] in a.deciden], meta)
+    # V375-B2 §5.1: con --neg-pub-de, la clase neg_pub del conjunto que decide se toma de ese lote (en el marco no queda
+    # ninguna neg_pub sin medir; las 113 de S162 entran como muestra, no como censo)
+    def en_decide(x):
+        if a.neg_pub_de and x["c"] == "neg_pub":
+            return x["lote"] == a.neg_pub_de
+        return x["lote"] in a.deciden
+    vacios = [l for l in a.deciden if not any(x["lote"] == l for x in filas)]
+    if vacios:
+        # verificador del borrador de B2, F5: un lote que decide sin ninguna pasada ok no puede decidir en silencio
+        pr("  INVALIDO POR INSTRUMENTO: lotes que deciden sin ninguna pasada ok:", vacios)
+        veredicto_instr.append("lote_que_decide_vacio")
+        invalido = True
+        resumen["invalido"] = True
+    f162 = repesar([x for x in filas if en_decide(x)], meta)
     dec_n = (decidir(f162, N_neg, tasa_k_neg, rng, candidatos, ref, lkm,
                      f"lotes {'+'.join(a.deciden)} (DECIDE)", veto=filas)
              if f162 else None)
