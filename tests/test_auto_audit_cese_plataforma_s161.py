@@ -216,3 +216,75 @@ def test_control_la_protegida_perdida_antes_del_cese_sigue_siendo_flag(correr):
     prot = [f for f in out["flags"] if f.startswith("alerta protegida sin publicar")]
     assert len(prot) == 1 and "Villarrica VIIRS375" in prot[0]
     assert out["verdict"] == "FUERA_DE_BANDA"
+
+
+# ------------------------------------------------------------------ S162: hallazgos PR162-01 y PR162-04
+# Revisión independiente de #900: experiments/_s161_audit_cese/REVISION_S162.md.
+UNA_SEMANA = datetime.combine(PRIMER_DIA + timedelta(days=6), datetime.min.time()).replace(
+    hour=12, tzinfo=timezone.utc)
+
+
+def test_viirs_sin_juzgar_por_n_bajo_el_minimo_lo_dice(correr, capsys):
+    """PR162-01. Una semana después del cese VIIRS 375 junta 7 noches con alerta, bajo el mínimo de 15: sus
+    flags de recall no pueden dispararse y, sin aviso, el informe se leería como «se arregló» cuando es «no se
+    midió» (A87). Tiene que quedar escrito en latest.json y dicho en la consola. VIIRS 750 no tiene ninguna
+    noche con alerta después del cese en el escenario, así que tampoco se juzga; MODIS no perdió plataforma."""
+    out, _ = correr(hoy=UNA_SEMANA)
+    assert out["recall"]["VIIRS375"]["n_noches"] == 7 < aa.MIN_N_RECALL
+    plat = out.get("plataformas") or {}
+    sj = plat.get("sin_juzgar") or {}
+    assert set(sj) == {"VIIRS375", "VIIRS750"}, "un sensor sin juzgar desde el cese no queda escrito"
+    v = sj["VIIRS375"]
+    assert (v.get("n_noches"), v.get("minimo"), v.get("juzga_desde"), v.get("n_noches_aparte")) == \
+        (7, aa.MIN_N_RECALL, PRIMER_DIA.isoformat(), 35)
+    avisos = plat.get("avisos") or []
+    assert len(avisos) == 2
+    a375 = [a for a in avisos if a.startswith("VIIRS375 sin juzgar")]
+    assert len(a375) == 1 and "plataformas.aparte" in a375[0]
+    consola = capsys.readouterr().out
+    assert all(a in consola for a in avisos), "el aviso no sale en la consola"
+    # Con n suficiente el sensor sí se juzga y no sale como sin juzgar (20 noches de VIIRS 375).
+    out, _ = correr(hoy=DESPUES)
+    assert set((out.get("plataformas") or {}).get("sin_juzgar") or {}) == {"VIIRS750"}
+
+
+def test_el_issue_lleva_los_sensores_sin_juzgar(tmp_path):
+    """PR162-01, la otra mitad: el cuerpo del issue (FUERA_DE_BANDA y DEGRADADO) se arma en el workflow, no en
+    el script. Se ejecuta el mismo comando que el workflow usa para listar los avisos."""
+    import re
+    import subprocess
+    wf = (ROOT / ".github" / "workflows" / "audit-weekly.yml").read_text(encoding="utf-8")
+    m = re.search(r'python -c "([^"]*)" > /tmp/plataformas\.txt', wf)
+    assert m, "el workflow no arma la lista de sensores sin juzgar para el issue"
+    assert wf.count('"$(cat /tmp/plataformas.txt)"') == 2, "los dos cuerpos de issue tienen que llevarla"
+    salida = tmp_path / "data" / "audit_continuous"
+    salida.mkdir(parents=True)
+    aviso = "VIIRS375 sin juzgar: 7 noches con alerta desde el cese"
+    (salida / "latest.json").write_text(json.dumps({"plataformas": {"avisos": [aviso]}}), encoding="utf-8")
+    r = subprocess.run([sys.executable, "-c", m.group(1)], cwd=tmp_path, capture_output=True, text=True,
+                       encoding="utf-8")
+    assert r.returncode == 0, r.stderr
+    assert r.stdout.strip() == "- " + aviso
+    (salida / "latest.json").write_text(json.dumps({"plataformas": {"avisos": []}}), encoding="utf-8")
+    r = subprocess.run([sys.executable, "-c", m.group(1)], cwd=tmp_path, capture_output=True, text=True,
+                       encoding="utf-8")
+    assert r.returncode == 0 and r.stdout.strip() == "- ninguno"
+
+
+@pytest.mark.parametrize("sensores", [[None], "VIIRS_SNPP", ["SENSOR_INVENTADO"]],
+                         ids=["sensor_null", "cadena_en_vez_de_lista", "sensor_desconocido"])
+def test_lista_de_ceses_mal_formada_degrada_con_mensaje(correr, tmp_path, sensores):
+    """PR162-04. Con un sensor null el audit moría (AttributeError) antes de escribir latest.json; con
+    `sensores` como cadena o un sensor que no es de ningún bucket, no recortaba nada y no lo decía. Lo mismo
+    que con la lista ilegible: aviso de cobertura que nombra el cese y DEGRADADO."""
+    p = tmp_path / "ceses_mal.json"
+    p.write_text(json.dumps({"ceses": [{"plataforma": "Suomi NPP", "sensores": sensores,
+                                         "desde_utc": CESE.strftime("%Y-%m-%dT%H:%M:%SZ")}]}), encoding="utf-8")
+    try:
+        out, _ = correr(ceses_json=p)
+    except Exception as e:  # noqa: BLE001
+        pytest.fail(f"el audit muere con la lista mal formada ({type(e).__name__}: {e}) y no escribe latest.json")
+    avisos = [a for a in out["cobertura"]["avisos"] if "ceses_esperados" in a]
+    assert avisos, "la lista mal formada no recorta y nadie lo dice"
+    assert "Suomi NPP" in avisos[0], "el aviso no dice qué cese está mal"
+    assert out["verdict"] == "DEGRADADO"
