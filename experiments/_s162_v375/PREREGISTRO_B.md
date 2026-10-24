@@ -3,9 +3,9 @@
 > Escrito antes de despachar el lote y antes de ver ningún resultado del port sobre las pasadas nuevas. Lo que cambie
 > después del sello va en una adenda fechada al final, nunca reescribiendo esto. Es MEDICIÓN: no adopta nada ni toca
 > `pipeline/`, `data/` ni `frontend/`. Comparte lote, runner y evaluador con V375-C (`PREREGISTRO_C.md`).
-> Estado: **BORRADOR, sin sellar.** D-36 lo aprobó Nicolás («300 a 400 negativos de ese estrato por sensor»); el verificador
-> limpio ya pasó (`verificador/INFORME.md`, correcciones en `PREREGISTRO_C.md` §8); falta el sello y que la coordinadora
-> lo meta en el despacho combinado de la fase 1.
+> Estado: **SELLADO el 2026-10-24** (ver «Sello» al final). D-36 lo aprobó Nicolás («300 a 400 negativos de ese estrato por sensor»); el verificador
+> limpio ya pasó (`verificador/INFORME.md`, correcciones en `PREREGISTRO_C.md` §8); sellado por D-48 y metido por la coordinadora
+> en los despachos de la fase 1.
 
 ## 1. Pregunta
 
@@ -119,3 +119,20 @@ disparo que no se mergea, y el despacho lo pide la coordinadora (S162) con la li
 
 709 pasadas a ~25 s cada una (S159: 24,6 s con K re-corrido) ≈ 4,9 h de runner; en 28 trozos de ~25 pasadas, ~12 min
 cada uno; con 8 en paralelo, ~50 min de reloj. Artefactos: grillas de ~110 kB por pasada, ~80 MB en total.
+
+## Sello (2026-10-24)
+
+**SELLADO** por la coordinadora S162 («Retomar», local_4152952c) con la autorización vigente de Nicolás, **D-48
+(2026-10-24): «sobre las decisiones mías haz lo que tú recomiendes»** (registrada en `tasks/LOOP_OBJETIVOS.md` de la
+coordinadora), sobre la recomendación de esta sesión: el lote completo de 709 pasadas nuevas. D-36 (el lote de negativos)
+y la medición de la ROI ya estaban aprobadas. **Revocable por Nicolás.** Desde este sello el texto de arriba no se
+reescribe: lo que cambie va en una adenda fechada debajo.
+
+Commit del sello: el que lleva el tag `s162-v375-bc-sello`. El disparo corre sobre el árbol de `ca034d66e` (rama
+`s159-portes`, con `pipeline/` idéntico a `533398f8f`, el código que escribió los records del marco: así el control
+«K re-corrido = publicado» compara el mismo detector) más `experiments/_s162_v375/` de este commit y el workflow. Esto
+se decidió antes del sello: el `pipeline/` de `loop/activo` difiere del de 533398f8f en 12 archivos (trabajo de S157,
+apagado por flag o sólo MODIS), y no se quiso que esa diferencia, por chica que sea, entrara al control de K.
+
+La cobertura contra la referencia de MIROVA se aplica al evaluar con el código de la sesión del instrumento (PR #904,
+rama `instrumento/evaluador-comun`, sin mergear), declarando su commit (instrucción de la coordinadora, 2026-10-24).

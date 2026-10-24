@@ -3,8 +3,8 @@
 > Escrito antes de despachar el lote y antes de ver ningún resultado de los brazos nuevos. Lo que cambie después del
 > sello va en una adenda fechada al final. Es MEDICIÓN: no adopta nada ni toca `pipeline/`, `data/` ni `frontend/`.
 > Comparte lote, runner y evaluador con V375-B (`PREREGISTRO_B.md`, §2 a §4 valen aquí).
-> Estado: **BORRADOR, sin sellar.** El verificador con contexto limpio ya pasó (`verificador/INFORME.md`) y sus
-> correcciones están en §8; falta el sello de Nicolás y el despacho combinado de la fase 1 (coordinadora).
+> Estado: **SELLADO el 2026-10-24** (ver «Sello» al final). El verificador con contexto limpio ya pasó (`verificador/INFORME.md`) y sus
+> correcciones están en §8; sellado por D-48 (ver al final).
 
 ## 1. Pregunta
 
@@ -180,3 +180,20 @@ de 445 (0,86 %), el hash de la selección, el evaluador idéntico línea a líne
 igual a la sellada en 2.000 de 2.000 juegos, y 0 falsos GANA o PIERDE en 400 corridas con brazos intercambiables.
 Con las correcciones, el humo sobre S159 (visto, no decide) elige C13 en Cordón Caulle y en Tupungatito y valida en O
 con GANA contra M14 y contra K.
+
+## Sello (2026-10-24)
+
+**SELLADO** por la coordinadora S162 («Retomar», local_4152952c) con la autorización vigente de Nicolás, **D-48
+(2026-10-24): «sobre las decisiones mías haz lo que tú recomiendes»** (registrada en `tasks/LOOP_OBJETIVOS.md` de la
+coordinadora), sobre la recomendación de esta sesión: el lote completo de 709 pasadas nuevas. D-36 (el lote de negativos)
+y la medición de la ROI ya estaban aprobadas. **Revocable por Nicolás.** Desde este sello el texto de arriba no se
+reescribe: lo que cambie va en una adenda fechada debajo.
+
+Commit del sello: el que lleva el tag `s162-v375-bc-sello`. El disparo corre sobre el árbol de `ca034d66e` (rama
+`s159-portes`, con `pipeline/` idéntico a `533398f8f`, el código que escribió los records del marco: así el control
+«K re-corrido = publicado» compara el mismo detector) más `experiments/_s162_v375/` de este commit y el workflow. Esto
+se decidió antes del sello: el `pipeline/` de `loop/activo` difiere del de 533398f8f en 12 archivos (trabajo de S157,
+apagado por flag o sólo MODIS), y no se quiso que esa diferencia, por chica que sea, entrara al control de K.
+
+La cobertura contra la referencia de MIROVA se aplica al evaluar con el código de la sesión del instrumento (PR #904,
+rama `instrumento/evaluador-comun`, sin mergear), declarando su commit (instrucción de la coordinadora, 2026-10-24).
