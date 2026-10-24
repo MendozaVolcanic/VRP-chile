@@ -143,3 +143,15 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   su estrato se re-pondera; 11 de 400 neg_resto (2,75 %). Conservador para el port, porque la vara de K (133 / 3.456) sí
   las cuenta. Sin relanzar (bajaría el mismo gránulo). Informado a la coordinadora.
 - Evaluación corriendo (`resultado_run40116289866/`); después, verificador limpio antes de informar.
+
+### 2026-10-24 (vuelta 7): lectura del lote (SIN VERIFICAR todavía), commit `20719dc8f`
+- Instrumento: recálculo sin red = runner 7.427 de 7.427; K re-corrido = publicado 847 de 847; controles nulo, NUNCA
+  y PLACEBO en verde; cobertura del marco OK; ningún estrato sin representar.
+- **B**: el port (M14) publica 4 de 434 neg_resto (0,95 % [0,37; 2,38]; la cota de 8,5 % de S159 baja a 2,4 %). Todos
+  los negativos: unión 2,01 % [1,46; 3,39] contra K 3,85 %, SILENCIO ACOTADO; lote S162 solo 2,17 % [1,23; 4,10], NO
+  RESUELTO. Por §5.5, **B = NO RESUELTO (depende del lote visto)**.
+- **C**: global **C13** en el lote y en la unión; por volcán C13 en Cordón Caulle y en Tupungatito, **VALIDA EN O** en
+  los dos; **V375-D no necesario** en los dos. C13: recall bajo 1 MW 0,954 [0,916; 0,976] contra K 0,957 (marco),
+  negativos 2,03 %, P2 contra K GANA, M 0,999 (n 265). Las mismas 6 protegidas perdidas en todos los brazos (3 que K
+  publica, las 3 sólo OCR, 0 de la tabla).
+- Verificador limpio (Sonnet) lanzado sobre el resultado; NO informar a Nicolás como hecho hasta que vuelva.
