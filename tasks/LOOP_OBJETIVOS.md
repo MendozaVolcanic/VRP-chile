@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 17:21 UTC, hora de los runs (S162): humo de V375 despachado
+- `loop-viirs375` armó los disparos sobre el árbol de `ca034d66e` (pipeline/ idéntico a `533398f8f`, el que escribió los
+  records del marco) para que «K re-corrido = publicado» compare el mismo detector. Comprobado: el humo `fd0ba12bb` sólo
+  agrega `experiments/_s162_v375/` y `.github/workflows/probe-s162-v375.yml`; el lote `798cac8ea` sólo cambia 4 líneas
+  del workflow. Tags `s162-v375-bc-sello`, `s162-v375-disparo-humo`, `s162-v375-disparo-lote` subidos.
+- **Humo: run 40115765406** (2 pasadas, 1 job, junto a t1 de MOD-B: 9 jobs). Efecto lateral: el árbol viejo trae el
+  `vigilar-osf-mirova.yml` inválido de S158, y el push dejó una corrida sin jobs (40115764552); inocuo para el probe.
+  Lección para disparos sobre árboles viejos: revisar qué otros workflows del árbol corren por push.
+- Lote (28 jobs, max-parallel 8, ~50 min de reloj) con el OK de la hija, después de MOD-C.
+
 ### 2026-10-24 ~17:40 UTC (S162): V375-B/C salen sin esperar a V750-B; orden de despachos
 - V750-B no sale antes del 2026-11-03; el lote de V375-B y V375-C (709 pasadas, ~4,9 h de runner) no depende de esa
   fecha, así que sale antes. Sello aplicado con D-48 sobre la recomendación de `loop-viirs375` (D-36 y la ROI ya
