@@ -569,6 +569,30 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~16:30 UTC (S162): programa por sensor, cuatro sesiones hijas con loop, decisiones de Nicolás aplicadas
+- Programa escrito: `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` (`b05d60527`): pasar de palancas
+  sueltas a «el paquete del código de MIROVA por sensor con brazos de diagnóstico»; D17 pasa a pieza obligatoria.
+- Nicolás: «Sí, abre las cuatro sesiones hijas [...] cada una con su loop». Abiertas, cada una en su worktree desde
+  `loop/activo`, con su cola en `tasks/LOOP_<X>.md` y despachos pedidos a esta coordinadora: `loop-instrumento`
+  (fase 0, rama `s162-instrumento`), `loop-viirs750` (`s162-viirs750`), `loop-viirs375` (`s162-viirs375`),
+  `loop-modis` (`s162-modis`). Esta sesión lleva el turno de los A/B (máx 2) y es la única que escribe este archivo.
+- **Decisión de Nicolás (D-48, 2026-10-24): «sobre las decisiones mías haz lo que tú recomiendes»**, sobre las 14 del
+  §9 del programa más las del traspaso S162. Aplicado:
+  - D25 NO SE ADOPTA: marca al inicio de D25 en `docs/MIROVA_DIVERGENCES.md` (la divergencia sigue ABIERTA; el camino es
+    el fondo del programa dentro del paquete). Pruebas que leen el catálogo: 68 passed, 2 xfailed.
+  - Paquete por sensor, validación por equivalencia + censo + sombra prospectiva, etiqueta de protegida de cráter
+    informada al lado, filtro de publicación con predicado de cumbre y P-sinfiltro medido, ROI de PCC y Tupungatito a
+    medir, D-36 (lote de negativos 375 y MODIS), MxD03 sellado (D-19) para correrlo, vía «código MIROVA» detrás de flag
+    tras PD1, D9 fuera del paquete medido, tope de cordura aparte, diurno después: pasan a las colas de las hijas.
+  - #888 cerrado (superado por contenido; rama en el remoto).
+  - Limpieza segura: 9 worktrees verificados limpios y con su commit en el remoto, quitados con `git worktree remove`
+    (ramas intactas, incluidas `s159-oraculo-censo` y `s159-portes`). C: 35 → 44 GB, D: 8,6 → 11 GB.
+- **No aplicado, necesita a Nicolás**: los merges de #900, #901 y #898 (CI verde, CLEAN; el clasificador de permisos
+  bloquea merges a main, como en S158); borrar las carpetas no versionadas (`D:\vrp-trabajo\mirova-v1`, temporales de
+  pytest en `D:\vrp-trabajo\temporales\`, `experiments/_s140`, `experiments/_s160_espacial/data`); correr O2 en MATLAB
+  Online; enviar el correo a Coppola (`docs/audit_s139/BORRADOR_CORREO_COPPOLA.md`). #889 (toca `pipeline/`, en conflicto
+  con main) queda en la cola de `loop-instrumento`.
+
 ### 2026-10-24 ~15:45 UTC (S162): verificador de los cúmulos por matriz; Nicolás pide programa por sensor en sesiones hijas con loop propio
 - Verificador limpio (Opus, `experiments/_s162_vuelta2/VERIFICADOR_CUMULOS_MATRIZ.md`, origin/main 80b819828):
   CM162-01 CONFIRMADO EN PARTE (G3): mecanismo y los dos casos se reproducen; en K cambian 7 a 13 de 290
