@@ -88,15 +88,16 @@ def kish(w):
     return float(w.sum() ** 2 / (w ** 2).sum()) if len(w) and (w ** 2).sum() > 0 else 0.0
 
 
-def tasa_ponderada(filas, f):
-    """(tasa ponderada, IC de Wilson sobre el n efectivo de Kish). Con pesos parejos es la Wilson cruda."""
+def tasa_ponderada(filas, f, z=1.96):
+    """(tasa ponderada, IC de Wilson sobre el n efectivo de Kish). Con pesos parejos es la Wilson cruda. `z` sólo cambia
+    en la lectura estricta de V375-B2, que se informa y no decide."""
     w = np.array([x["w"] for x in filas], float)
     if not len(w):
         return float("nan"), (float("nan"), float("nan")), 0.0
     k = np.array([bool(f(x)) for x in filas], float)
     p = float((w * k).sum() / w.sum())
     ne = kish(w)
-    return p, wilson(p * ne, ne), ne
+    return p, wilson(p * ne, ne, z), ne
 
 
 def prueba_signos(sumas, neto, n_sorteos=N_SORTEOS, semilla=SEMILLA):
@@ -454,6 +455,17 @@ def decidir(filas, N_neg, tasa_k_neg, rng, candidatos, ref, lk, etiqueta, veto=N
     pr("  N representado por clase:", {c: round(v, 1) for c, v in cub.items()})
     lb = lecturas(filas, ref, rng, N_neg, tasa_k_neg)
     out = {"B": lb["silencio"]["veredicto"], "B_detalle": lb["silencio"], "MISSION_M14_K": lb["MISSION_K"]}
+    # V375-B2 §5.2: lectura estricta (informa, no decide): el mismo B con z = 2,241 (1,25 % por cola), la corrección de
+    # Bonferroni por mirar dos veces la misma pregunta (S162 y S162 + B2)
+    rs = [x for x in filas if x["c"] == "neg_resto"]
+    ps = [x for x in filas if x["c"] == "neg_pub"]
+    pr_s, ic_rs, _ = tasa_ponderada(rs, lambda x: x["X"][ref], z=2.241)
+    pp_s, ic_ps, _ = tasa_ponderada(ps, lambda x: x["X"][ref], z=2.241)
+    if ps and abs(sum(x["w"] for x in ps) - len(ps)) < 1e-9:
+        ic_ps = (pp_s, pp_s)
+    hi_s = (N_neg["neg_pub"] * ic_ps[1] + N_neg["neg_resto"] * ic_rs[1]) / (N_neg["neg_pub"] + N_neg["neg_resto"])
+    out["B_estricto"] = {"cota_sup": hi_s, "veredicto": "SILENCIO ACOTADO BAJO K" if hi_s < tasa_k_neg else "NO RESUELTO"}
+    pr(f"  B estricto (z 2,241, informa): cota {out['B_estricto']['cota_sup']:.4f} -> {out['B_estricto']['veredicto']}")
     pr(f"  B: neg_resto {lb['silencio']['neg_resto']['crudo']}, IC {lb['silencio']['neg_resto']['ic_kish']}; "
        f"negativos {lb['silencio']['negativos']['pond']:.4f} {lb['silencio']['negativos']['ic_conservador']} contra K "
        f"{tasa_k_neg:.4f} -> {out['B']}; MISSION M14 contra K {lb['MISSION_K']['veredicto']}")
@@ -529,6 +541,11 @@ def main(argv=None):
     ap.add_argument("--cobertura", default=None, help="salida del instrumento (fase 0): pasadas de MIROVA sin record")
     ap.add_argument("--protegida-crater", default=None, help="V375-A: lista de protegidas de cráter (se informa)")
     ap.add_argument("--sin-s159", action="store_true", help="sólo para pruebas: no suma el lote de S159")
+    # V375-B2 (b2/PREREGISTRO_B2.md): una segunda muestra de neg_resto (lote S162b) con sus artefactos, y qué lotes
+    # forman el conjunto que decide. Por defecto, lo de V375-B y V375-C: sólo S162.
+    ap.add_argument("--objetivos-extra", nargs="*", default=[], help="más archivos de objetivos (p. ej. el de B2)")
+    ap.add_argument("--art-extra", nargs="*", default=[], help="carpetas de artefactos de los lotes extra")
+    ap.add_argument("--deciden", nargs="+", default=["S162"], help="lotes del conjunto que decide")
     ap.add_argument("--salida", default=str(AQUI / "evaluar_salida.txt"))
     ap.add_argument("--json", default=str(AQUI / "evaluar.json"))
     a = ap.parse_args(argv)
@@ -538,6 +555,10 @@ def main(argv=None):
     o162 = json.loads(Path(a.objetivos).read_text(encoding="utf-8"))
     meta = o162["meta"]["estratos"]
     obj = {o["id"]: dict(o) for o in o162["pasadas"]}
+    for f in a.objetivos_extra:
+        for o in json.loads(Path(f).read_text(encoding="utf-8"))["pasadas"]:
+            assert o["id"] not in obj, ("id repetido entre objetivos", o["id"])
+            obj[o["id"]] = dict(o)
     if not a.sin_s159:
         for o in json.loads((RAIZ / "experiments/_s159/portes/objetivos_portes.json").read_text(encoding="utf-8")):
             if o["b"] == "VIIRS375" and o["hora_utc"][:10] not in EXCLUIDOS:
@@ -545,6 +566,12 @@ def main(argv=None):
     res = {}
     res.update({i: r for i, r in leer_resultados(a.art159).items() if i in obj and obj[i]["lote"] == "S159"})
     res.update({i: r for i, r in leer_resultados(a.art162).items() if i in obj and obj[i]["lote"] == "S162"})
+    art_de = {}
+    for d in a.art_extra:
+        for i, r in leer_resultados(d).items():
+            if i in obj and obj[i]["lote"] not in ("S159", "S162"):
+                res[i] = r
+                art_de[i] = d
     cache = json.loads(Path(a.cache).read_text(encoding="utf-8")) if Path(a.cache).exists() else {}
     ok = {i for i, r in res.items() if r.get("estado") == "ok" and r.get("port") is not None}
     veredicto_instr = []
@@ -588,7 +615,7 @@ def main(argv=None):
     dif = []
     for i in sorted(ok):
         o, r = obj[i], res[i]
-        art = a.art159 if o["lote"] == "S159" else a.art162
+        art = a.art159 if o["lote"] == "S159" else (a.art162 if o["lote"] == "S162" else art_de[i])
         rec = recalcular(o, r, art, V, cache)
         if rec is None:
             pr("   sin grilla:", i)
@@ -764,8 +791,9 @@ def main(argv=None):
        f"{lkm['recall_prot']:.3f} ({lkm['n_prot']}), bajo 1 MW {lkm['recall_bajo']:.3f} ({lkm['n_bajo']})")
     resumen["K_marco"] = lkm
     dec_u = decidir(filas, N_neg, tasa_k_neg, rng, candidatos, ref, lkm, "unión S159 + S162 (confirma)")
-    f162 = repesar([x for x in filas if x["lote"] == "S162"], meta)
-    dec_n = (decidir(f162, N_neg, tasa_k_neg, rng, candidatos, ref, lkm, "lote S162 solo (DECIDE)", veto=filas)
+    f162 = repesar([x for x in filas if x["lote"] in a.deciden], meta)
+    dec_n = (decidir(f162, N_neg, tasa_k_neg, rng, candidatos, ref, lkm,
+                     f"lotes {'+'.join(a.deciden)} (DECIDE)", veto=filas)
              if f162 else None)
     resumen["decision_union"], resumen["decision_s162"] = dec_u, dec_n
     pr("\n== 4b. acuerdo entre el lote nuevo (decide) y la unión (confirma), PREREGISTRO_C.md §5.5")
