@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~14:20 UTC (S162): #900 con el aviso de VIIRS sin juzgar, CI verde, listo para Nicolás
+- Implementador (Opus) en `s161-auto-audit-cese-snpp`, head `7ab5e64f6`: `leer_ceses` valida la lista (PR162-04) y
+  `sensores_sin_juzgar` deja el aviso en consola, latest.json (`plataformas.sin_juzgar`) y en el cuerpo de los issues
+  (audit-weekly.yml). Rojas 5 por aserción contra `a7d1c0b91`; suite completa en árbol quieto 2.432 passed, 0 fallas;
+  26-oct y 2-nov idénticos a main; 9-nov trae los dos avisos. CI `pytest` SUCCESS (run 40100161260), CLEAN, borrador.
+- Supuesto declarado: el aviso no abre issue por sí solo si el lunes sale VERDE. Seguimientos: magnitudes por volcán
+  bajo `MIN_N_RATIO` sin aviso individual; guiones largos viejos en el título del issue y la línea VEREDICTO.
+
 ### 2026-10-24 ~14:05 UTC (S162): inventario de limpieza entregado; informes de la vuelta 1 al repo
 - Inventario (Sonnet, sólo lectura): 14 worktrees sin cambios versionados, todas sus ramas en el remoto. BORRAR SEGURO
   ~2,9 GB en D: y ~7,7 GB en C: (9 directorios de worktree, clon `D:\vrp-trabajo\mirova-v1`, temporales de pytest,
