@@ -121,6 +121,34 @@ def test_prueba_de_signos_sin_sustrato_y_bloquea():
     assert ec.regla_signos_p2(-3, 5, ec.prueba_signos_p2(sumas, -3)) == "EMPATE"
 
 
+def test_decidir_p2_suma_por_bloque_noche_volcan_no_por_pasada():
+    # Verificador de #905 (gravedad 3): el centro de D-45. Seis noches con dos aportes +1 cada una: el nulo voltea la
+    # noche entera, así que son 6 bloques de suma 2 (p = 1/64), no 12 pasadas sueltas (p = 1/4096).
+    contrib = [{"clave": "c%d%d" % (i, j), "c": 1, "bloque": "Lascar|2026-10-%02d" % (i + 1)}
+               for i in range(6) for j in range(2)]
+    res, det = ec.decidir_p2(contrib)
+    assert (res, det["neto"], det["B"], det["p_pierde"]) == ("PIERDE", 12, 6, 1 / 64)
+    # Un bloque mixto (+1 y -1 en la misma noche) suma 0 pero cuenta en B (D-45 §2.2).
+    mixto = contrib + [{"clave": "x1", "c": 1, "bloque": "Isluga|2026-10-09"},
+                       {"clave": "x2", "c": -1, "bloque": "Isluga|2026-10-09"}]
+    res, det = ec.decidir_p2(mixto)
+    assert (det["neto"], det["B"], det["p_pierde"]) == (12, 7, 2 / 128)
+
+
+def test_decidir_p2_con_controles_caidos_es_indecidible():
+    contrib = [{"clave": "c%d" % i, "c": 1, "bloque": "Lascar|2026-10-%02d" % (i + 1)} for i in range(8)]
+    assert ec.decidir_p2(contrib)[0] == "PIERDE"
+    assert ec.decidir_p2(contrib, ok_ctrl=False)[0] == "INDECIDIBLE"
+
+
+def test_contribuciones_p2_arma_el_bloque_con_volcan_y_dia():
+    T = _tabla([_f(1, "ALERTA_TERMICA", 0.4), _f(2, "ALERTA_TERMICA", 0.3)], [_r(1, True), _r(2, True)])
+    T = [dict(f, rec=dict(f["rec"], D=dict(f["rec"]["prod"], pub=False)), cob=dict(f["cob"], D=f["cob"]["prod"]))
+         for f in T]
+    c = ec.contribuciones_p2(T, "prod", "D")
+    assert [x["bloque"] for x in c] == ["Lascar|2026-10-12", "Lascar|2026-10-12"] and [x["c"] for x in c] == [1, 1]
+
+
 def test_prueba_de_signos_por_sorteos_desde_21_bloques():
     pr = ec.prueba_signos_p2([1] * 21, 21)
     assert pr["metodo"] == "sorteos" and pr["minimo"] == [1, 10001] and pr["pierde"][0] >= 1
