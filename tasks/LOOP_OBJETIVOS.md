@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~14:35 UTC (S162): verificador de Chillán: una protegida es defecto de K, la otra efecto real de D25
+- Verificador limpio (Opus, `experiments/_s162_vuelta1/VERIFICADOR_CHILLAN.md`):
+  - **CH162-01 CONFIRMADO, defecto de K en producción** (no de D25): en V750 Chillán 2026-10-14 06:18 el cúmulo
+    publicado es la media de dos píxeles a lados opuestos del cráter y deja fuera al de 1,89 MW; con ese píxel D
+    publicaría 1,363 MW y no cruzaría 1 MW. Mismo patrón en 4 protegidas V750 de V1, todas de Chillán.
+  - **VC162-01 (G3, nuevo)**: en pasadas oblicuas los cúmulos se arman por posición en la matriz del barrido, no por
+    geografía (V375 multi-cúmulo con píxeles de cúmulos distintos a menos de 0,30 km: 3/91 bajo 30°, 26/51 sobre
+    50°). Mecanismo (bow tie) SOSPECHA. No está en el catálogo de divergencias.
+  - La protegida V375 del 11-oct sí es efecto genuino de D25 (halo de vecinos 265-270 K contra anillo 262 K).
+  - CH162-04 CONFIRMADO: el programa de MIROVA aparta los 8 vecinos (dilata 3x3), interpola, suma todo y no recorta;
+    D25 tal como está no es el fondo de MIROVA en V750.
+  - VC162-02: P1b sólo mira hacia abajo; D sube 3 protegidas V750 sobre 1 MW y baja 1. VC162-04: alerta protegida
+    V750 Chillán 2026-10-12 05:18 sin record en ningún brazo (SOSPECHA).
+
 ### 2026-10-24 ~14:20 UTC (S162): #900 con el aviso de VIIRS sin juzgar, CI verde, listo para Nicolás
 - Implementador (Opus) en `s161-auto-audit-cese-snpp`, head `7ab5e64f6`: `leer_ceses` valida la lista (PR162-04) y
   `sensores_sin_juzgar` deja el aviso en consola, latest.json (`plataformas.sin_juzgar`) y en el cuerpo de los issues
