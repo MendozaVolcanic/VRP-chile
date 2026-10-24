@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-24 ~14:50 UTC (S162): verificador de VIIRS 750; recomendación final de D25 a Nicolás; vuelta 2 lanzada
+- Verificador limpio (Opus, `experiments/_s162_vuelta1/VERIFICADOR_ENCENDIDAS.md`): son 126 pasadas con D-29 (no 127),
+  todas un píxel de cumbre que entra por el segundo pase sin compuerta y que K deja en 0,0 MW; D publica el 100 % de
+  esos cúmulos (D25 no selecciona nada: VE162-02, la palanca real es el segundo pase, D19/D2). Recuperadas y
+  encendidas no se separan (AUC 0,682, p corregido 0,146; poder sólo para separaciones fuertes). Que sean calor real es
+  plausible pero el 750 de MIROVA calla ahí: bajo la vara de la réplica no rescata a D25; candidatas a `experimental`.
+  VE162-01: una «recuperada» de PCC (2026-04-30 06:06) está a 16,7 km o más de la alerta de MIROVA. VE162-03: 9
+  publicaciones de D sobre pasadas RUTINA que P2 no cuenta.
+- Síntesis para Nicolás: **recomendación NO adoptar D25 tal como está** (no es el fondo del programa de MIROVA, que
+  dilata 3x3, interpola, suma todo y no recorta; en magnitud actúa como ganancia pareja; en V750 publica lo que el
+  segundo pase deja pasar). Lo que sí sale: el defecto de selección de K (CH162-01, VC162-01) y el «fondo del
+  programa» como candidato del pre-registro R2.3.
+- Vuelta 2 (sólo lectura): cúmulos armados por la matriz del barrido en pasadas oblicuas (Fable) y la alerta
+  protegida de Chillán V750 2026-10-12 05:18 sin record (Opus).
+
 ### 2026-10-24 ~14:35 UTC (S162): verificador de Chillán: una protegida es defecto de K, la otra efecto real de D25
 - Verificador limpio (Opus, `experiments/_s162_vuelta1/VERIFICADOR_CHILLAN.md`):
   - **CH162-01 CONFIRMADO, defecto de K en producción** (no de D25): en V750 Chillán 2026-10-14 06:18 el cúmulo
