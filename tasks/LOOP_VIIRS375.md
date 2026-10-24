@@ -75,3 +75,13 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   `C:\Users\nmend\AppData\Roaming\Claude\side-session-notes\local_4152952c-6afd-433a-82b3-b07575feee3b\VIIRS375_entrega_fase1.md`
   y SendMessage. No despaché nada. **Siguiente**: esperar el sello de Nicolás, la cobertura y V375-A del instrumento y el
   despacho de la coordinadora; cuando lleguen los artefactos, correr `evaluar.py` y pasar el resultado por un verificador.
+
+### 2026-10-24 (vuelta 2): respuesta de la coordinadora y estado del instrumento
+- La coordinadora mete V375-B, V375-C y V375-E en el despacho combinado de la fase 1 con V750-B y MOD-C, y pedirá un
+  solo sello a Nicolás para los cuatro cuando estén los verificadores de V750-B y MOD-C. Me avisa con el número del run.
+- Instrumento (leído en su `tasks/LOOP_INSTRUMENTO.md`, sin tocarlo): **V375-A hecha** como `protegida_de_crater` en
+  `scripts/clase_mirova.py` (PR #903, sin mergear; cráter VIIRS 375: 123 de 248 protegidas). **Cobertura contra la
+  referencia (su T1) todavía no.** Hallazgo suyo que me toca: 76 protegidas VIIRS sólo OCR sin ningún record de
+  producción a ±10 min (ninguna entra a mi marco, que parte de nuestros records; van con la cobertura).
+- Tarea nueva en la cola: cuando #903 se mergee, que `evaluar.py` llame a `protegida_de_crater` directamente (hoy espera
+  un archivo en `--protegida-crater`), con prueba; cuando llegue T1, conectarla en `--cobertura`.
