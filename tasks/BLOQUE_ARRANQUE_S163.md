@@ -44,6 +44,7 @@ Sesiones hijas (todas linkeadas a la coordinadora `local_4152952c-6afd-433a-82b3
 | 6 | O2 en MATLAB Online (15 min) | correrlo; no | **correrlo**: cierra la banda de 1,82× del fondo en alertas de 1 píxel; paso a paso en `experiments/_s162_v750f/PASO_A_PASO_O2.md` de `claude/s162-viirs750-f63ef4` |
 | 7 | Correo a Coppola sobre la ROI por volcán | enviarlo; no | **enviarlo** (borrador en `docs/audit_s139/BORRADOR_CORREO_COPPOLA.md`, agregar los números de V750-C y V375-C) |
 | 8 | #889 (cobertura del NRT con cero gránulos; toca `pipeline/fetch.py`, en conflicto) | rebase y A45; cerrar | **rebase en una sesión aparte**, con tag y tu sí |
+| 9 | ¿Las protegidas sólo OCR de Suomi NPP anteriores al 2026-10-09 vetan la adopción de los paquetes? (128 de 234 en VIIRS 375) | que veten con la lectura A; que decida la regla de «protegida de cráter» de #903, informando la lectura A al lado | **que decida la regla de cráter**, después de un verificador limpio del informe del subagente 4: las 6 medidas tienen distancia y clase prestadas de otra pasada y su VRP es de un objeto a 9-29 km |
 
 ## c. Lo aprendido
 
@@ -72,8 +73,15 @@ Del proyecto (rutear al `CLAUDE.md` del proyecto y al catálogo cuando se mergee
   06:18, Láscar 2026-05-05 06:06 cruza 1 MW); es D17 y lo subsume el paquete.
 - **CONFIRMADO**: el umbral de cumbre del código de MIROVA usa la sigma de toda la grilla de 51 km (S-1); acopla todo A/B
   de remuestreo al borde de la escena. Diagnóstico obligatorio en V750-A §5 y MOD-D.
-- **CONFIRMADO**: 6 protegidas de Suomi NPP sólo OCR que todos los brazos de VIIRS 375 pierden; si son del cráter lo
-  decide el subagente 4 con la regla de #903.
+- **Resuelto por el subagente 4, sin verificador limpio todavía** (rama `s162-v375-protegidas-snpp` `014a1ab61`,
+  `experiments/_s162_v375/protegidas_snpp/INFORME.md`): las 6 protegidas de Suomi NPP que pierden los brazos de VIIRS 375
+  **no son protegidas de cráter** con la regla de #903 (0 de 6, `ocr_snpp_antes_del_hito`; la tabla de latest.php no trae
+  ninguna; la cabecera «Last Update» de la imagen es de una pasada 18 a 102 min posterior; el VRP sí es de su pasada y
+  calza con píxeles a 8,7-29 km del cráter). Las 3 que K publica, las publica por un píxel débil del cráter (0,008 a
+  0,041 MW, bajo el NONE de D-9), no por el objeto lejano. Contadas con la lectura A vetarían el paquete; **128 de las
+  234 protegidas A de VIIRS 375 son sólo OCR anteriores al 2026-10-09** (composición del resto SOSPECHA). Decisión de
+  Nicolás (§b, fila 9). Hallazgo lateral H3 (SOSPECHA hasta verificar): el tablero muestra hoy records del detector
+  anterior en fechas previas al 2026-09-18 (Láscar 2026-08-22 05:06 summit 0,034 MW, que con K no aparecería).
 - **SOSPECHA**: `_interp_geo` interpola el relleno −999 sin enmascararlo (subagente 1).
 - **SOSPECHA**: el corte de Suomi NPP alcanza también a LANCE NRT; confirmar el 2026-11-03 (caso C-06).
 - **CONFIRMADO por simulación** (subagente 5, `experiments/_s162_vuelta3/AUTOAUDIT_LUNES_26.md`, origin/main `f9e22f8d6`,

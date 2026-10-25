@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-25 ~03:00 UTC (S162): las 6 protegidas SNPP de VIIRS 375 no son de cráter (sin verificador)
+- Subagente 4 (Fable; `s162-v375-protegidas-snpp` `014a1ab61`): con la regla de #903 tal cual, 0 de 6 son protegidas de
+  cráter (`ocr_snpp_antes_del_hito`; la tabla no trae ninguna; cabecera de la imagen de una pasada posterior; VRP de un
+  objeto a 8,7-29 km). Las 3 que K publica son por un píxel débil del cráter bajo el NONE de D-9. Estrato grande: 128 de
+  234 protegidas A de VIIRS 375 son sólo OCR anteriores al 2026-10-09. Decisión 9 del bloque S163 (recomendación: que
+  decida la regla de cráter, tras verificador limpio). H3 (SOSPECHA): el tablero muestra records del detector anterior
+  antes del 2026-09-18. Quedan 2 subagentes en vuelo (A61 de MxD03 y analizador V750-A).
+
 ### 2026-10-25 ~02:45 UTC (S162): PR #906 del veredicto de MxD03 (borrador, CI verde)
 - Subagente 2: #906 (rama `s162-pr-veredicto-mxd03` sobre origin/main `f9e22f8d6`): D35 nueva en el catálogo con la cita
   de MOD-A, marcas A113 en D18, SINTOMAS §3, BEYOND §12 (fila MEJ-7, Láscar 2026-05-11, SOSPECHA fuerte),
