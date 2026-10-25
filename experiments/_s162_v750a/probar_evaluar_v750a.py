@@ -10,8 +10,9 @@ esperada), no por excepción.
 
 Escenarios (población base B: 5 noches x Láscar y Villarrica con una protegida en T y otras tantas en O, donde P da la
 magnitud de MIROVA y K un factor 0,3 a 0,75; 6 negativos limpios por ventana que K publica y P no; en O una protegida de
-Cordón Caulle que P publica y P-def no, decidida por la escena; una alerta baja de Láscar que P-def no publica con el
-cráter muy sobre los dos umbrales; un negativo lejano que sólo P-sinfiltro publica):
+Cordón Caulle que P publica y P-def no, decidida por la escena (con u1 distinto de u2 en la zona 2); una alerta baja de
+Láscar que P-def no publica con el cráter muy sobre los dos umbrales; una alerta baja de Villarrica que P-def no publica
+porque cambió el cráter con el mismo umbral; un negativo lejano que sólo P-sinfiltro publica):
   E00 base: CUMPLE el censo; S-1 nombra la protegida de Cordón Caulle y no la de Láscar; P-sinfiltro +1 contra P.
   E01 P pierde una protegida que K publica (O): NO CUMPLE por P1.
   E02 una protegida que ni K ni P publican: no es veto, se lista; CUMPLE.
@@ -36,6 +37,10 @@ cráter muy sobre los dos umbrales; un negativo lejano que sólo P-sinfiltro pub
   E20 sombra sin bloques bajo 1 MW y P1 = 0: CUMPLE sólo por veto (SIN SUSTRATO).
   E21 sombra con P2 PIERDE: NO CUMPLE.
   E22 el archivo de pasadas sin gránulo es de otra lista: cobertura INSUFICIENTE (salida 3).
+  E24 P2 BLOQUEA en T (neto +2 en 6 bloques): NO CUMPLE (§6.2 excluye PIERDE y BLOQUEA).
+  E25 P2 en T decidido por 6 alertas bajo 1 MW que P publica y K no (sin negativos): CUMPLE.
+  E26 protegida sólo del OCR en O que K publica y P no: NO CUMPLE en tabla más OCR y no con la tabla sola.
+  E27 O alerta otra celda con el mismo VRP (máscara distinta): §6.1 NO SE CUMPLE (salida 6).
   E23 sombra con P2 BLOQUEA (neto +2 en 6 bloques): CUMPLE (LECTURA: §6.3 sólo excluye PIERDE).
 Uso: python probar_evaluar_v750a.py --dest <carpeta temporal> [--analizador <ruta>] [--evaluador <evaluar_d25.py>]
      [--solo E00,E03]
@@ -68,10 +73,11 @@ mutaciones: TODAS COMO SE ESPERA
 """
 
 
-def diag(c=0.2, u=0.04, sd=0.010, zona=2):
+def diag(c=0.2, u=0.04, sd=0.010, zona=2, u1=None):
     """Diagnóstico del .m que deja el productor del artefacto para el S-1: sd y umbrales de cada pase y la celda
-    decisiva del cráter (contraste NTI y ETI, pase y zona)."""
-    p = {"sd_nti": sd, "sd_eti": sd, "u_nti1": u, "u_nti2": u, "u_eti1": u, "u_eti2": u}
+    decisiva del cráter (contraste NTI y ETI, pase y zona). u es el umbral de la zona 2 (u2); u1 el de las zonas 0 y 1."""
+    u1 = u if u1 is None else u1
+    p = {"sd_nti": sd, "sd_eti": sd, "u_nti1": u1, "u_nti2": u, "u_eti1": u1, "u_eti2": u}
     return {"pasada1": dict(p), "pasada2": dict(p),
             "celda_decisiva": {"pase": 1, "zona": zona, "c_nti": c, "c_eti": c}}
 
@@ -172,9 +178,9 @@ def base(p_de=None, negs_T="gana", negs_O="gana", extra=None, pcc_pdef=None, gem
         for n in range(6):
             dia = f"{mes}-{20 + n:02d}"
             vol = ("Lascar", "Villarrica", "Tupungatito")[n % 3]
-            if modo == "gana":        # K publica y P no: el error es de K
+            if modo == "gana" or (modo == "bloquea" and n >= 4):   # K publica y P no: el error es de K
                 pb.pasada(vol, f"{dia} 05:00", "neg_limpio", K=0.2, P=None)
-            elif modo == "pierde":    # P publica y K no: el error es de P
+            elif modo in ("pierde", "bloquea"):                    # P publica y K no: el error es de P
                 pb.pasada(vol, f"{dia} 05:00", "neg_limpio", K=None, P=0.2)
             else:                     # ninguno publica: no hay bloque
                 pb.pasada(vol, f"{dia} 05:00", "neg_limpio", K=None, P=None)
@@ -184,10 +190,14 @@ def base(p_de=None, negs_T="gana", negs_O="gana", extra=None, pcc_pdef=None, gem
     # contraste del cráter (0,05) queda entre el umbral de P (0,04) y el de P-def (0,06)
     pb.pasada("PuyehueCordonCaulle", "2026-07-28 06:30", "pos", K=1.2, P=3.0,
               Pdef=3.0 if pcc_pdef == "publica" else None, mirova_vrp=3.0,
-              dP=diag(c=0.05, u=0.04), dPdef=diag(c=0.05, u=0.06, sd=0.012), dO=diag(c=0.05, u=0.04), z=35.0)
+              dP=diag(c=0.05, u=0.04, u1=0.10), dPdef=diag(c=0.05, u=0.06, sd=0.012, u1=0.10),
+              dO=diag(c=0.05, u=0.04, u1=0.10), z=35.0)
     # O: alerta baja de Láscar que P-def no publica con el cráter muy sobre los dos umbrales (no la decide la escena)
     pb.pasada("Lascar", "2026-07-29 06:30", "pos", K=0.3, P=0.6, Pdef=None, mirova_vrp=0.6,
               dP=diag(c=0.2, u=0.04), dPdef=diag(c=0.2, u=0.06, sd=0.012))
+    # O: alerta baja de Villarrica que P-def no publica porque cambió el CRÁTER (0,03 contra 0,05) con el mismo umbral
+    pb.pasada("Villarrica", "2026-07-29 06:40", "pos", K=0.25, P=0.5, Pdef=None, mirova_vrp=0.5,
+              dP=diag(c=0.05, u=0.04), dPdef=diag(c=0.03, u=0.04))
     # O: negativo lejano que P detecta a 11 km: P no lo publica (far), P-sinfiltro sí
     pb.pasada("Lascar", "2026-07-30 05:00", "neg_limpio", K=None, P=0.4, far=True)
     if gemelo_negs:
@@ -241,6 +251,26 @@ def _p_distinto_de_o(banda):
     return f
 
 
+def _bajas_T(pb):
+    """6 alertas bajo 1 MW en T que P publica y K no: P2 se decide por las bajas, no por los negativos."""
+    for n in range(6):
+        pb.pasada(("Lascar", "Villarrica")[n % 2], f"2026-05-{10 + n:02d} 06:00", "pos", K=None, P=0.3,
+                  mirova_vrp=0.4)
+
+
+def _prot_solo_ocr(pb):
+    """Protegida sólo del OCR en O que K publica y P no: P1 en tabla más OCR, no con la tabla sola."""
+    pb.pasada("Villarrica", "2026-07-31 06:40", "pos", K=0.9, P=None, mirova_vrp=2.0, tabla=False)
+
+
+def _o_otra_celda(pb):
+    """O alerta la celda vecina con el mismo VRP: la máscara difiere aunque el VRP no."""
+    j = next(i for i, o in enumerate(pb.objs) if o["volcan"] == "Villarrica"
+             and o["hora_utc"].startswith("2026-07-11"))
+    px = pb.res[j]["paquete"]["O"]["pixeles"][0]
+    pb.res[j]["paquete"]["O"]["pixeles"] = [[px[0], px[1] + 1] + px[2:]]
+
+
 def _k_distinto(pb):
     for o in pb.objs[:2]:
         o["pub_prod"] = not o["pub_prod"]
@@ -268,12 +298,13 @@ ESCENARIOS = {
                        ("== compuerta del veredicto", ["ABIERTA"]),
                        ("== §6.1 equivalencia: CUMPLE", []),
                        ("   S-1 al lado del veredicto", ["PuyehueCordonCaulle 2026-07-28 06:30"]),
-                       ("== S-1 par (P, Pdef)", ["publicación distinta 2", "decididas por la escena 1",
+                       ("== S-1 par (P, Pdef)", ["publicación distinta 3", "decididas por la escena 1",
                                                  "PuyehueCordonCaulle 2026-07-28 06:30", "c/u 1.25/1.25",
                                                  "Δsd nti1 mediana 0.0000 máx 0.0020"]),
                        ("== P-sinfiltro contra P", ["neto 1"])],
                 no_tiene=["== §6 censo: NO CUMPLE", "== §6 censo: INFORMAR"],
-                no_contiene=[("== S-1 par (P, Pdef)", "Lascar 2026-07-29 06:30")]),
+                no_contiene=[("== S-1 par (P, Pdef)", "Lascar 2026-07-29 06:30"),
+                             ("== S-1 par (P, Pdef)", "Villarrica 2026-07-29 06:40")]),
     "E01": dict(pob=lambda: base(extra=_p1_en_O), rc=0,
                 tiene=[("== §6 censo: NO CUMPLE", ["P1"])], no_tiene=["== §6 censo: CUMPLE"]),
     "E02": dict(pob=lambda: base(extra=_prot_nadie), rc=0,
@@ -330,6 +361,15 @@ ESCENARIOS = {
                 tiene=[("== §6.3 sombra: CUMPLE", ["SIN SUSTRATO"])]),
     "E21": dict(pob=lambda: esc_sombra(negs="pierde"), fase="sombra", rc=0,
                 tiene=[("== §6.3 sombra: NO CUMPLE", ["P2"])], no_tiene=["== §6.3 sombra: CUMPLE"]),
+    "E24": dict(pob=lambda: base(negs_T="bloquea"), rc=0,
+                tiene=[("== §6 censo: NO CUMPLE", ["T/tabla: P2 BLOQUEA"])], no_tiene=["== §6 censo: CUMPLE"]),
+    "E25": dict(pob=lambda: base(negs_T="nada", extra=_bajas_T), rc=0,
+                tiene=[("== §6 censo: CUMPLE", [])], no_tiene=["== §6 censo: NO CUMPLE"]),
+    "E26": dict(pob=lambda: base(extra=_prot_solo_ocr), rc=0,
+                tiene=[("== §6 censo: NO CUMPLE", ["O/todo: P1 1"])], no_tiene=["== §6 censo: CUMPLE"],
+                no_contiene=[("== §6 censo: NO CUMPLE", "O/tabla: P1")]),
+    "E27": dict(pob=lambda: base(extra=_o_otra_celda), rc=6,
+                tiene=[("== §6.1 equivalencia: NO SE CUMPLE", ["Villarrica 2026-07-11"])], no_tiene=["== §6 censo:"]),
     "E23": dict(pob=lambda: esc_sombra(negs="bloquea"), fase="sombra", rc=0,
                 tiene=[("== §6.3 sombra: CUMPLE", ["BLOQUEA"])]),
     "E22": dict(pob=lambda: base(), sg_otra=True, rc=3,
