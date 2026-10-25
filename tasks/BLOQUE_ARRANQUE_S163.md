@@ -76,7 +76,13 @@ Del proyecto (rutear al `CLAUDE.md` del proyecto y al catálogo cuando se mergee
   decide el subagente 4 con la regla de #903.
 - **SOSPECHA**: `_interp_geo` interpola el relleno −999 sin enmascararlo (subagente 1).
 - **SOSPECHA**: el corte de Suomi NPP alcanza también a LANCE NRT; confirmar el 2026-11-03 (caso C-06).
-- **SOSPECHA**: el próximo auto-audit (lunes 26) abre un issue con la lista nueva y no la de #864 (subagente 5).
+- **CONFIRMADO por simulación** (subagente 5, `experiments/_s162_vuelta3/AUTOAUDIT_LUNES_26.md`, origin/main `f9e22f8d6`,
+  validado reproduciendo los 10 flags de #864 con el reloj del 19-oct): el lunes 26 el auto-audit da FUERA_DE_BANDA con
+  11 flags (los 10 de #864 más Puyehue VIIRS 750 0,517x, n 10) y **abre un issue NUEVO sin cerrar #864** (quedarían dos
+  abiertos con los mismos flags). Con o sin #900 sale igual (#900 recién recorta en el informe del 9-nov). Casi todo lo
+  que cambia es del instrumento (frontera de K en 2025-02-15 y ventana de 60 días). Bordes: MODIS recall 69,2 % con n 13
+  (el flag exige 15); Chillán V750 a 0,006 de la banda; si el NRT se atrasa 2 días, sale DEGRADADO. Recomendación:
+  cuando aparezca el issue del 26, cerrar #864 con un comentario que apunte al nuevo.
 - **SIN DATO**: qué copia del bow tie conserva MIROVA; el efecto de D28 sobre la magnitud.
 
 ## e. Lo que ya está cerrado y no hay que rehacer

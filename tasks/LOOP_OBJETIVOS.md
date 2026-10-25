@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-25 ~02:30 UTC (S162): entregó el subagente del auto-audit del lunes
+- Simulación con el `auto_audit_weekly.py` real y reloj fijo (validada reproduciendo los 10 flags de #864): el lunes 26
+  sale FUERA_DE_BANDA con 11 flags (Puyehue VIIRS 750 0,517x nuevo) y abre un issue nuevo sin cerrar #864; #900 no
+  cambia nada antes del 9-nov. Informe en `experiments/_s162_vuelta3/AUTOAUDIT_LUNES_26.md`. Quedan 4 subagentes en vuelo.
+
 ### 2026-10-25 ~02:15 UTC (S162): relevos preparados; cinco subagentes lanzados desde la coordinadora
 - Revisión de las hijas: `loop-instrumento` terminado; `loop-viirs375` en pausa (PD1 completo, espera la vía de
   proceso y #903/#905; su rama no estaba en el remoto y la subió la coordinadora, `c0215a97d`); `loop-modis` cerrado
