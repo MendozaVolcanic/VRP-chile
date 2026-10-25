@@ -118,9 +118,9 @@ MUTACIONES = {
             'if o["lab"] != "pos" or not o.get("decide"):', 'if o["lab"] != "pos":'),
     "M43": ("§7 (L8): el nulo K contra K acepta M MEJORA o EMPEORA",
             'and g_m in ("NEUTRO", "SIN SUSTRATO")', 'and g_m in ("NEUTRO", "SIN SUSTRATO", "MEJORA", "EMPEORA")'),
-    "M44": ("§6.3: la sombra mira sólo la tabla",
-            'for canal in CANALES:\n            m, nadie = metricas("P", "TODO", canal)',
-            'for canal in ("tabla",):\n            m, nadie = metricas("P", "TODO", canal)'),
+    "M44": ("§6.3: en la sombra P1 se mide sólo con la tabla (la versión anterior de esta mutación sólo hacía caer el "
+            "programa: regs['todo'] quedaba sin definir)",
+            'm, nadie = metricas("P", "TODO", canal)', 'm, nadie = metricas("P", "TODO", "tabla")'),
     "M45": ("§6.2: la razón de M se exige sólo en la ventana O",
             "if rz is None or not (BANDA_RAZON[0] <= rz <= BANDA_RAZON[1]):",
             'if v == "O" and (rz is None or not (BANDA_RAZON[0] <= rz <= BANDA_RAZON[1])):'),
@@ -180,9 +180,12 @@ def main():
     ap.add_argument("--dest", required=True, type=Path)
     ap.add_argument("--evaluador", required=True, type=Path)
     ap.add_argument("--hilos", type=int, default=4)
+    ap.add_argument("--solo", default="", help="ids de mutaciones a correr (IDENTIDAD y CAIDA van siempre)")
     a = ap.parse_args()
+    sel = {x for x in a.solo.split(",") if x}
     a.dest.mkdir(parents=True, exist_ok=True)
-    trabajos = [("IDENTIDAD", None, None)] + [(k, v[1], v[2]) for k, v in MUTACIONES.items()]
+    mut = {k: v for k, v in MUTACIONES.items() if not sel or k in sel or k == "CAIDA"}
+    trabajos = [("IDENTIDAD", None, None)] + [(k, v[1], v[2]) for k, v in mut.items()]
     with ThreadPoolExecutor(a.hilos) as ex:
         res = {r[0]: r for r in ex.map(lambda t: correr(a.dest, a.evaluador, *t), trabajos)}
     L = []
@@ -192,16 +195,18 @@ def main():
         L.append(s)
 
     ident = res["IDENTIDAD"]
+    if sel:
+        pr(f"(corrida parcial: --solo {a.solo})")
     pr(f"IDENTIDAD | {ident[1]} (tiene que ser PASA) | rc {ident[2]} | {ident[3][:200]}")
     malos = 0 if ident[1] == "PASA" else 1
-    for nom, (que, _v, _n) in MUTACIONES.items():
+    for nom, (que, _v, _n) in mut.items():
         _, est, rc, linea, atrapan = res[nom]
         esperado = "CAÍDA" if nom == "CAIDA" else "ATRAPADA"
         malos += est != esperado
         pr(f"{nom} | {est} (tiene que ser {esperado}) | rc {rc} | {que} | {linea[:120]} | escenarios que fallan "
            f"{atrapan}")
-    n_mut = len(MUTACIONES) - 1
-    atr = sum(1 for k in MUTACIONES if k != "CAIDA" and res[k][1] == "ATRAPADA")
+    n_mut = len(mut) - 1
+    atr = sum(1 for k in mut if k != "CAIDA" and res[k][1] == "ATRAPADA")
     ctrl = ident[1] == "PASA" and res["CAIDA"][1] == "CAÍDA"
     pr(f"== RESUMEN: {atr} de {n_mut} mutaciones atrapadas por aserción; controles "
        f"{'como deben' if ctrl else 'FALLAN'}; {'TODO COMO SE ESPERA' if malos == 0 else f'{malos} FUERA DE LO ESPERADO'}")
