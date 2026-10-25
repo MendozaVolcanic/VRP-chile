@@ -16,6 +16,12 @@ Estado de las hijas al 2026-10-25 ~01:00 UTC:
   (`claude/s162-viirs750-f63ef4` `27973d13a`). Camino crítico del programa: el analizador de V750-A y la vía de proceso
   «código MIROVA» en `pipeline/`, de la que dependen V375-E y MOD-D. **Relevo necesario: sesión 2 de abajo.**
 
+**Actualización 2026-10-25 ~02:15 UTC.** La coordinadora lanzó cinco subagentes que hacen parte de este trabajo, cada uno
+con su rama en el remoto: A61 de MxD03 (`s162-a61-mxd03`), PR del veredicto de MxD03 (`s162-pr-veredicto-mxd03`),
+analizador de V750-A (`s162-v750a-evaluador`), las 6 protegidas de Suomi NPP de VIIRS 375 (`s162-v375-protegidas-snpp`)
+y la simulación del auto-audit del lunes. Cada relevo empieza leyendo esas ramas y no repite esas tareas: MODIS 2 parte
+por el candado de MOD-D; VIIRS 750 2 parte por la vía de proceso en `pipeline/`.
+
 ## Sesión 1: Loop MODIS 2 (veredicto MxD03, A61 y candado MOD-D)
 
 Worktree nuevo desde la rama `claude/s162-modis-774bb0`. Prompt: el bloque «f. Prompt para la próxima sesión» de

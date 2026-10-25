@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-25 ~02:15 UTC (S162): relevos preparados; cinco subagentes lanzados desde la coordinadora
+- Revisión de las hijas: `loop-instrumento` terminado; `loop-viirs375` en pausa (PD1 completo, espera la vía de
+  proceso y #903/#905; su rama no estaba en el remoto y la subió la coordinadora, `c0215a97d`); `loop-modis` cerrado
+  con traspaso; `loop-viirs750` con su loop detenido. Relevos de MODIS y VIIRS 750 preparados en
+  `tasks/BRIEFS_SESIONES_S162.md` (`649d14a66`); no se abrieron porque la app no abre sesiones desde el control remoto.
+- Nicolás: «Sí lo que recomiendes, si necesitas seguir en otra con retomar puedes hacerlo». Lanzados como subagentes,
+  cada uno en su worktree y con su rama empujada al remoto, para que su resultado sobreviva a esta sesión:
+  1. A61 de las 48 protegidas de MxD03 y los cuatro seguimientos del verificador (Fable) → rama `s162-a61-mxd03`,
+     `C:\vrp-trabajo\s162-a61\experiments\_s162_mxd03\a61\INFORME.md`.
+  2. PR del veredicto de MxD03 (D35, marcas A113 en D18 y SINTOMAS §3, Láscar 05-11 en BEYOND §12, cita de MOD-A) en
+     borrador, sin merge (Opus) → rama `s162-pr-veredicto-mxd03`.
+  3. Analizador de V750-A con TDD, mutaciones y verificador (Opus) → rama `s162-v750a-evaluador`.
+  4. Las 6 protegidas de Suomi NPP que pierden los brazos de VIIRS 375, con la regla de #903 (Fable) → rama
+     `s162-v375-protegidas-snpp`.
+  5. Simulación del auto-audit del lunes 26 sin y con #900 (Sonnet) → scratchpad de S162 `vuelta3\autoaudit_lunes`.
+- Los relevos de MODIS y VIIRS 750 tienen que partir leyendo esas ramas (las tareas 1, 2 y 3 ya no son suyas).
+
 ### 2026-10-24 ~22:45 UTC (S162): V375-B RESUELTO con B2: SILENCIO ACOTADO BAJO K (verificado)
 - Verificador limpio (Sonnet, CONFIRMADO; `claude/s162-viirs375-c1b864` `52f255721`, `experiments/_s162_v375/b2/
   resultado_run40131572769/INFORME.md`): en 1.165 noches limpias nuevas el port publica 6 (0,52 % [0,24; 1,12]), todas
