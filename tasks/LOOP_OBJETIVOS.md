@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-25 ~07:30 UTC (S162): analizador de V750-A terminado; los 5 subagentes entregaron; loop coordinador detenido
+- Subagente 3 (Opus; `s162-v750a-evaluador` `7d5e723c6`): `evaluar_v750a.py` con 50 pruebas, 52/52 mutaciones
+  atrapadas, verificador Sonnet «listo con cambios» corregido (sin segunda vuelta). Lecturas L2, L4, L7, L18 para el
+  sello de V750-A (DN-4). Defecto previo en `analizar_v750b.py` (sellado): pasada «ok» sin una caja del oráculo sale del
+  denominador sin contarse SIN DATO; adenda informativa antes de leer V750-B el 2026-11-03. Contrato pendiente: el S-1
+  necesita que el productor de artefactos exponga los contrastes de la celda decisiva.
+- Sin trabajo en vuelo de la coordinadora: los cinco subagentes entregaron, sin runs del loop. El loop coordinador se
+  detiene aquí (la próxima acción es abrir los relevos desde el computador y el despacho de V750-B el 2026-11-03);
+  retomar con /retomar sobre `tasks/BLOQUE_ARRANQUE_S163.md`.
+
 ### 2026-10-25 ~03:10 UTC (S162): A61 de MxD03 hecha; defecto del relleno de geolocalización en producción
 - Subagente 1 (Fable; `s162-a61-mxd03` `56f721d99`): las 48 protegidas quedan con MxD03 a 0,15-0,89 km del cráter (con
   K 0,81-3,20), mismos píxeles reubicados en 44, reselección de vecinos en 4, ninguna se fue a otro objeto; §6 P4 se
