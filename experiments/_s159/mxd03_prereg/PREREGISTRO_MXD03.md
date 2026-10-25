@@ -92,6 +92,21 @@ tienen detección en ningún brazo (M H4: no es la geolocalización).
 
 ## 2. Las tres preguntas de `docs/MISSION.md`
 
+> ⚠️ **S162, cita de MOD-A agregada después del sello y del resultado** (A113; no cambia ninguna regla ni el veredicto).
+> (1) **Sobre el matiz «Voz pasiva, producto de archivo» del punto 1**: la tarea MOD-A (PR #902,
+> `experiments/_s162_instrumento/MOD_A_CITA_MOD03.md` en la rama `instrumento/mod-a-cita`, `70208beb7`; páginas leídas
+> renderizadas a imagen, verificador de contexto limpio: CONFIRMADO CON MATIZ) confirmó la cita de la p. 4 como insumo
+> y mostró que el NRT corre el mismo procedimiento: en la p. 3 del PDF los insumos son productos NRT de LANCE o de
+> archivo de LAADS, y en la p. 6 los volcanes de la lista NRT se procesan con LANCE desde su inclusión con el
+> procedimiento ya descrito. El paper no separa dos cadenas, así que «no dice que el NRT lo aplique» ya no vale: el
+> insumo queda **CONFIRMADO también en el NRT**. Lo que sigue **SIN LOCALIZAR** es el método: si cada píxel se ubica con
+> MOD03 o se interpola, y cómo se remuestrea a la grilla UTM de la p. 5; el código del remuestreo no se publica (p. 21).
+> Usar MxD03 por píxel, como hace el brazo X, sigue siendo una elección nuestra. (2) **Sobre el «registrarlo como D34»
+> del punto 2** (y el «D34» del §11, punto 9): D34 está tomada desde S158 por el código de MIROVA para VIIRS 750; la
+> divergencia quedó registrada como **D35** en `docs/MIROVA_DIVERGENCES.md`, con el veredicto del A/B (CUMPLE SIN
+> DAÑO, verificado; `experiments/_s162_mxd03/resultado/INFORME.md`, rama `s162-mxd03-codigo`, `afb3fcdea`). Texto de
+> abajo conservado tal como se selló.
+
 **1. ¿Está en los papers de MIROVA?** **Sí, con matices.** Coppola et al. 2026 (Scientific Data,
 `documentacion/Coppola_2026_SciData_Global_VRP_Dataset_s41597-026-08100-7.pdf`, p. 4, primer párrafo, leído renderizando
 la página a imagen, A95): «For the MODIS period (2000-2025), Level 1B calibrated radiance products (MOD021KM and
