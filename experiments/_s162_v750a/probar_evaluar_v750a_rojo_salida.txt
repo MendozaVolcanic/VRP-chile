@@ -1,4 +1,4 @@
-E00 | FALLA | falta una línea «== §6 censo: CUMPLE» con [] ; falta una línea «== compuerta del veredicto» con ['ABIERTA'] ; falta una línea «== §6.1 equivalencia: CUMPLE» con [] ; falta una línea «   S-1 al lado del veredicto» con ['PuyehueCordonCaulle 2026-07-28 06:30'] ; falta una línea «== S-1 par (P, Pdef)» con ['publicación distinta 2', 'decididas por la escena 1', 'PuyehueCordonCaulle 2026-07-28 06:30', 'c/u 1.25/1.25', 'Δsd nti1 mediana 0.0000 máx 0.0020'] ; falta una línea «== P-sinfiltro contra P» con ['neto 1']
+E00 | FALLA | falta una línea «== §6 censo: CUMPLE» con [] ; falta una línea «== compuerta del veredicto» con ['ABIERTA'] ; falta una línea «== §6.1 equivalencia: CUMPLE» con [] ; falta una línea «   S-1 al lado del veredicto» con ['PuyehueCordonCaulle 2026-07-28 06:30'] ; falta una línea «== S-1 par (P, Pdef)» con ['publicación distinta 3', 'decididas por la escena 1', 'PuyehueCordonCaulle 2026-07-28 06:30', 'c/u 1.25/1.25', 'Δsd nti1 mediana 0.0000 máx 0.0020'] ; falta una línea «== P-sinfiltro contra P» con ['neto 1']
 E01 | FALLA | falta una línea «== §6 censo: NO CUMPLE» con ['P1']
 E02 | FALLA | falta una línea «== §6 censo: CUMPLE» con [] ; falta una línea «   protegidas que ni K ni P publican» con ['Villarrica 2026-07-31 06:00']
 E03 | FALLA | falta una línea «== §6 censo: NO CUMPLE» con ['P2']
@@ -20,9 +20,13 @@ E18 | FALLA | falta una línea «== §6.3 sombra: CUMPLE» con []
 E19 | FALLA | falta una línea «== §6.3 sombra: NO CUMPLE» con ['P1']
 E20 | FALLA | falta una línea «== §6.3 sombra: CUMPLE» con ['SIN SUSTRATO']
 E21 | FALLA | falta una línea «== §6.3 sombra: NO CUMPLE» con ['P2']
+E24 | FALLA | falta una línea «== §6 censo: NO CUMPLE» con ['T/tabla: P2 BLOQUEA']
+E25 | FALLA | falta una línea «== §6 censo: CUMPLE» con []
+E26 | FALLA | falta una línea «== §6 censo: NO CUMPLE» con ['O/todo: P1 1']
+E27 | FALLA | código de salida 0, se esperaba 6 ; falta una línea «== §6.1 equivalencia: NO SE CUMPLE» con ['Villarrica 2026-07-11']
 E23 | FALLA | falta una línea «== §6.3 sombra: CUMPLE» con ['BLOQUEA']
 E22 | FALLA | código de salida 0, se esperaba 3 ; falta una línea «== cobertura: INSUFICIENTE» con [] ; falta una línea «== compuerta del veredicto» con ['CERRADA']
-== PRUEBAS: FALLAS 24 de 24
+== PRUEBAS: FALLAS 28 de 28
 exit 1
 
-(2026-10-24, línea base ROJA: probar_evaluar_v750a.py contra un analizador VACÍO que no lee ni imprime nada y sale 0. Los 24 escenarios fallan POR ASERCIÓN, ninguno por excepción.)
+(2026-10-24, línea base ROJA: probar_evaluar_v750a.py contra un analizador VACÍO que no lee ni imprime nada y sale 0. Los 28 escenarios fallan POR ASERCIÓN, ninguno por excepción. Primera versión, commit aea251c27: 24 de 24 antes de escribir el analizador; E24 a E27 se agregaron después, al buscar reglas que ninguna prueba vigilaba (BLOQUEA en el censo, P2 por alertas bajas, canal tabla contra OCR, máscara con el mismo VRP), y también fallan por aserción contra el vacío.)
