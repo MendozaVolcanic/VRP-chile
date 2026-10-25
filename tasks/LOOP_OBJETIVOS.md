@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-25 ~03:10 UTC (S162): A61 de MxD03 hecha; defecto del relleno de geolocalización en producción
+- Subagente 1 (Fable; `s162-a61-mxd03` `56f721d99`): las 48 protegidas quedan con MxD03 a 0,15-0,89 km del cráter (con
+  K 0,81-3,20), mismos píxeles reubicados en 44, reselección de vecinos en 4, ninguna se fue a otro objeto; §6 P4 se
+  cumple. Defecto de producción (G3): sin estado «sin dato» de geolocalización, el relleno −999 hace escribir negativos
+  sobre escenas sin cráter (2 de 5.465). `final_hotspot_dist_km` de MODIS se mide desde el centro del volcán (A46).
+  Falta verificador limpio de este informe y del de las protegidas SNPP. Queda 1 subagente en vuelo (analizador V750-A).
+
 ### 2026-10-25 ~03:00 UTC (S162): las 6 protegidas SNPP de VIIRS 375 no son de cráter (sin verificador)
 - Subagente 4 (Fable; `s162-v375-protegidas-snpp` `014a1ab61`): con la regla de #903 tal cual, 0 de 6 son protegidas de
   cráter (`ocr_snpp_antes_del_hito`; la tabla no trae ninguna; cabecera de la imagen de una pasada posterior; VRP de un

@@ -82,7 +82,17 @@ Del proyecto (rutear al `CLAUDE.md` del proyecto y al catálogo cuando se mergee
   234 protegidas A de VIIRS 375 son sólo OCR anteriores al 2026-10-09** (composición del resto SOSPECHA). Decisión de
   Nicolás (§b, fila 9). Hallazgo lateral H3 (SOSPECHA hasta verificar): el tablero muestra hoy records del detector
   anterior en fechas previas al 2026-09-18 (Láscar 2026-08-22 05:06 summit 0,034 MW, que con K no aparecería).
-- **SOSPECHA**: `_interp_geo` interpola el relleno −999 sin enmascararlo (subagente 1).
+- **A61 de MxD03 hecha (subagente 1, Fable, sin verificador limpio todavía**; rama `s162-a61-mxd03` `56f721d99`,
+  `experiments/_s162_mxd03/a61/INFORME.md`): las 48 protegidas con cúmulo quedan con MxD03 a 0,15-0,89 km del cráter
+  (mediana 0,34; con K 1,58), 48 de 48 dentro del inner y más cerca; en 44 son los mismos píxeles reubicados y en 4
+  reselección de vecinos del cráter de Láscar; ninguna se fue a otro objeto; VIIRS de otro gránulo esa noche las
+  confirma (46 de 47 más cerca). **La condición §6 P4 se cumple: nada espacial frena la adopción.**
+- **CONFIRMADO por el subagente 1, defecto de producción (G3, sin verificador)**: el relleno −999 de la geolocalización
+  contamina `_interp_geo` y no existe el estado «sin dato»: en 2 de 5.465 records (Lastarria 2026-04-23 01:50, Planchón
+  Peteroa 2026-03-18 08:05) el cráter cae en el bloque sin geolocalización y los detectores escriben un negativo sobre una
+  escena sin cráter. Diseñarlo en el mismo flag de MxD03. Además: en MODIS `final_hotspot_dist_km` se mide desde el centro
+  del volcán, no desde el cráter (`process_modis.py:560, :1151, :1363`; Láscar a 0,68 km), lo que apaga una protegida
+  frágil por la etiqueta (A46); el gránulo `MOD021KM.A2026213.0300` trae cenit de 68-75°, imposible para MODIS.
 - **SOSPECHA**: el corte de Suomi NPP alcanza también a LANCE NRT; confirmar el 2026-11-03 (caso C-06).
 - **CONFIRMADO por simulación** (subagente 5, `experiments/_s162_vuelta3/AUTOAUDIT_LUNES_26.md`, origin/main `f9e22f8d6`,
   validado reproduciendo los 10 flags de #864 con el reloj del 19-oct): el lunes 26 el auto-audit da FUERA_DE_BANDA con
