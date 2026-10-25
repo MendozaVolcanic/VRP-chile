@@ -2407,6 +2407,18 @@ para un A/B, no para afirmar el origen exacto.
 
 ## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (A/B corrido S130 → NO ADOPTAR; divergencia de fidelidad literal, prioridad baja)** S129/S130
 
+> ⚠️ **S162, sobre el «El cierre vale con la geolocalización MODIS de hoy [...] Si se corrige, la caja se vuelve a
+> medir» de la marca S151 de abajo** (A113; D35): el A/B de MxD03 sobre K dio **CUMPLE SIN DAÑO**, verificado con
+> contexto limpio (`experiments/_s162_mxd03/resultado/INFORME.md` y `resultado/verificador/INFORME_VERIFICADOR.md`,
+> rama `s162-mxd03-codigo`, `afb3fcdea`). Con MxD03 las 48 protegidas con cúmulo quedan todas más cerca del cráter
+> (mediana 1,46 km, máximo 2,49), y la protegida de Láscar del 2026-03-27 07:10 que vetó la caja pasa de 3,20 a
+> 0,89 km del cráter (`resultado/verificador/anomalias_desplazamiento_salida.txt`, l. 50). Pero producción sigue con
+> `_interp_geo`: la condición «si se corrige» todavía no se cumple y el veto sigue valiendo. Cuando MxD03 se adopte
+> (dentro del paquete MODIS, D-48), la caja se vuelve a medir sobre X (pre-registro de MxD03, §10 y §11 punto 11); que
+> la caja deje de perder esa alerta es SOSPECHA hasta esa medición. El A/B mide el efecto de cambiar de geolocalización
+> y no separa los dos mecanismos que la marca S151 deja SIN VERIFICAR (interpolación de 5 a 1 km o paralaje de la
+> cumbre), porque MxD03 cambia las dos cosas a la vez: reemplaza la interpolación y trae la corrección de terreno.
+
 > ⚠️ **S160, propagación de S158 sobre el «igual para todos» del título** (pendiente U3 de
 > `experiments/_s158_audit_r2/m1/INFORME.md`; hallazgo 286 de `experiments/_s160_audit/v4/INFORME.md` §3): los
 > comentarios del código de MIROVA dicen que sus ROI «can be shifted, reshaped or resized» por volcán
@@ -3367,3 +3379,75 @@ D25, D26, D29, D32 y el GAP #A.
 **Alcance**: sólo VIIRS 750. La estructura se puede trasladar a MODIS y VIIRS 375 con cita (Campus 2022 p. 7: el
 algoritmo de VIIRS «is the same used for MODIS»); los números no (§5 del informe). Si el código prevalece sobre el
 paper cuando difieren lo decide Nicolás (§7 del informe).
+
+---
+
+## D35: La geolocalización MODIS: interpolamos la grilla de 5 km del propio L1B (`_interp_geo`); MIROVA declara MOD03 y MYD03 con corrección de terreno. **ABIERTA (registrada S162; el A/B sobre K dio CUMPLE SIN DAÑO, verificado con contexto limpio; adopción pendiente dentro del paquete MODIS, con el sí de Nicolás, A45)** S162
+
+**Qué hace MIROVA.** Coppola et al. 2026 (Scientific Data,
+`documentacion/Coppola_2026_SciData_Global_VRP_Dataset_s41597-026-08100-7.pdf`, sha256 `2b157f48…`), leído
+renderizando las páginas a imagen (A95) en la tarea MOD-A: PR #902, `experiments/_s162_instrumento/MOD_A_CITA_MOD03.md`
+en la rama `instrumento/mod-a-cita` (`70208beb7`), con verificador de contexto limpio que dio CONFIRMADO CON MATIZ.
+- p. 4 del PDF, primer párrafo: para el período MODIS se usaron MOD021KM y MYD021KM «together with the corresponding
+  MOD03 and MYD03 Terrain-Corrected Geolocation products». **CONFIRMADO como insumo.**
+- p. 3 y p. 6 del PDF: los volcanes de la lista NRT se procesan con LANCE con el mismo procedimiento descrito; el paper
+  no separa dos cadenas. **CONFIRMADO que el NRT usa esos mismos productos.**
+- p. 5 del PDF: remuestreo a una grilla UTM de 50 × 50 km centrada en la cumbre del GVP, de 1.000 m en MODIS (eso es D17).
+- p. 21 del PDF: las rutinas de remuestreo no se distribuyen. **SIN LOCALIZAR** si cada píxel se ubica con MOD03 o se
+  interpola desde puntos de amarre, y con qué método se remuestrea. «Se usaron junto con» no es «cada píxel se ubica con
+  MOD03»: la forma de usar MxD03 en el A/B de abajo es una elección nuestra, no una copia de MIROVA.
+
+**Qué hacemos.** `pipeline/process_modis.py` (main `f9e22f8d6`): las l. 265-266 leen la latitud y la longitud que el
+MOD021KM trae cada 5 píxeles, las l. 292-294 las estiran a 1 km con `_interp_geo` (l. 385, interpolación lineal con
+`scipy.ndimage.zoom`), y `calculate_vrp` recibe el MxD03 y lo ignora (l. 513, «accepted for API compatibility but not
+used»). Igual se baja y se exige: `scripts/run_pipeline.py:247-250` salta el gránulo si el MxD03 falta. Lo medido antes
+del A/B: el píxel del cráter queda corrido hacia el lado del sensor y el corrimiento crece con el cenit (marca S151 de
+D18: hasta 3,5 km a 45° en Láscar; frente M de S159, `experiments/_s159/m/INFORME.md` H2 y H3: mediana 2,82 km con
+cenit de 40 a 50° y 5,04 km sobre 50° del lado del frame 0).
+
+**Qué midió el A/B** (MOD-B, tarea 1.30, decisión D-19; reglas selladas con D-48). Pre-registro
+`experiments/_s159/mxd03_prereg/PREREGISTRO_MXD03.md` (el sello y su adenda viven en la rama `s162-mxd03-codigo`).
+Código del tag `s162-mxd03-tag` (`ffbb36248`, con `pipeline/` igual al main `80b819828`); runs 40111997157 (humo),
+40112510038, 40122029477 y 40126381034. Resultado en `experiments/_s162_mxd03/resultado/INFORME.md` y verificador en
+`experiments/_s162_mxd03/resultado/verificador/INFORME_VERIFICADOR.md`, rama `s162-mxd03-codigo` (`afb3fcdea`). Brazos:
+K (producción), K2 (K otra vez, identidad), X (K con la posición de MxD03) y R0 a R19 (traslaciones al azar, el nulo
+bajo 35° de cenit).
+- Censo: 5.465 de 5.465 pasadas MODIS, 0 errores; K igual a `data/` y K2 igual a K en las 5.465.
+- **P1, veto: SIN PÉRDIDA.** K publica 48 de las 50 protegidas y X publica las mismas 48; las 2 que K no publica son
+  Chillán a 58° de cenit, fuera por diseño. P1b vacío (ninguna protegida baja de 1 MW).
+- **P2 bajo 35° (decide): EMPATE.** ΔX = −1 sobre n 1.861 (S(K) 34), con un ruido de 4 en las 20 semillas.
+- **Vara VIIRS (sólo puede detener): MXD03 MAS CERCA.** Bajo 35°, el píxel MODIS más caliente queda 0,73 km más cerca
+  del objeto que ve VIIRS 375 esa noche (IC 0,49 a 1,10 km; n 65, 57 noches; Terra y Aqua del mismo signo).
+- M, magnitud (informa): NEUTRO, mediana de d 0,000 (n 79).
+- Sobre 35° (informa): ΔX = −4 (S(K) 15, n 3.185); cambian 8 pasadas, sobre todo negativos de Cordón Caulle y Chaitén
+  vistos muy de lado.
+- **Veredicto: CUMPLE SIN DAÑO.** El §1 del pre-registro pide no leerlo como mejora: dice que el cambio no daña la
+  réplica.
+
+**Matices del verificador** (ninguno mueve el veredicto):
+- R1, R3 y R4 CONFIRMADOS; R2 CONFIRMADO EN PARTE: los «13 controles» son 12 que pueden fallar, porque «vara cruda»
+  siempre da OK (`evaluar_mxd03.py`, l. 471). Es un registro, no un control.
+- VRB-02: la vara da lo mismo con la referencia VIIRS de otra noche (placebo, 5 semillas). Mide cercanía al cráter de
+  Láscar, donde casi siempre está el calor, y no cercanía al calor de esa noche.
+- VRB-03: la mediana 0,000 de M esconde dispersión: 17 de 79 alertas cambian la magnitud más de 10 % y 6 más de 30 %
+  (hasta X/K 0,48).
+- R4, más fuerte que el resumen: las 48 protegidas con cúmulo quedan todas más cerca del cráter con X (mediana 1,46 km,
+  máximo 2,49). El +1 de P2 sin Cordón Caulle es una sola alerta bajo 1 MW de Láscar (2026-04-02 07:45) que X apaga por
+  el fondo, no por la posición.
+- VRB-07: en el borde del barrido `_interp_geo` corre el píxel 10 a 16 km (15 records, cenit 63 a 75°).
+- VRB-01: el control del módulo del nulo acepta un módulo absurdo en 2 gránulos con relleno de MxD03 (afecta a un
+  negativo que nadie publica). VRB-05: la rama de re-corrida del control 4 nunca se ejercitó, ni en el humo.
+- Seguimientos de la adopción: `_interp_geo` interpola el relleno −999 sin enmascararlo (SOSPECHA); en 36 records de 8
+  gránulos X pierde píxeles sin geolocalización MxD03 que K conserva (CONFIRMADO), y la adopción tiene que declararlo.
+
+**Estado.** ABIERTA: producción sigue con `_interp_geo`. Recomendación aplicada con D-48: adoptar MxD03 dentro del
+paquete MODIS (MOD-D), salvo que el paquete se atrase más de un mes (después del 2026-11-24). Lo que falta, según el §10
+del pre-registro y la cola de MODIS: la auditoría espacial A61 de las 48 protegidas que se mueven (§6 P4), los
+seguimientos de arriba, tag defensivo, flag `enable_modis_geo_mxd03` con TDD que reproduzca X record por record, el sí de
+Nicolás (A45), FICHA SDA, marca visible en las tres vistas y aviso a OVDAS. Después de adoptar se vuelve a medir la caja
+de D18 sobre X (§11, punto 11). MxD03 es necesario para la paridad de posición, no suficiente: el remuestreo a la grilla
+de MIROVA (D17, D28) sigue abierto.
+
+**Hijos marcados en el mismo PR (A113):** D18 (sobre su marca S151), `docs/SINTOMAS.md` §3,
+`docs/BEYOND_MIROVA_EXTENSIONS.md` §12, `docs/DISENO_D17_REMUESTREO_UTM.md` §4.7 (geolocalización) y el §2 del
+pre-registro de MxD03.
