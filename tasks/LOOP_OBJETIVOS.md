@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-25 ~02:45 UTC (S162): PR #906 del veredicto de MxD03 (borrador, CI verde)
+- Subagente 2: #906 (rama `s162-pr-veredicto-mxd03` sobre origin/main `f9e22f8d6`): D35 nueva en el catálogo con la cita
+  de MOD-A, marcas A113 en D18, SINTOMAS §3, BEYOND §12 (fila MEJ-7, Láscar 2026-05-11, SOSPECHA fuerte),
+  DISENO_D17 §4.7 y el §2 del pre-registro de MxD03. CI `pytest` SUCCESS; suite 2.418 passed. Seguimientos: Coppola
+  2026 falta en la lista de papers de `docs/MISSION.md`; `docs/FICHA_SDA_VRP_CHILE.md:29` y `docs/paper/sec5_methods.md:7`
+  dicen que usamos MOD03 (se baja y no se usa): corregir en la adopción. Marca A113 agregada al §10 del programa.
+
 ### 2026-10-25 ~02:30 UTC (S162): entregó el subagente del auto-audit del lunes
 - Simulación con el `auto_audit_weekly.py` real y reloj fijo (validada reproduciendo los 10 flags de #864): el lunes 26
   sale FUERA_DE_BANDA con 11 flags (Puyehue VIIRS 750 0,517x nuevo) y abre un issue nuevo sin cerrar #864; #900 no

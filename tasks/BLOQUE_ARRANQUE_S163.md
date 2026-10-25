@@ -36,7 +36,7 @@ Sesiones hijas (todas linkeadas a la coordinadora `local_4152952c-6afd-433a-82b3
 
 | # | pregunta | opciones | recomendación |
 |---|---|---|---|
-| 1 | Merges (el clasificador de permisos bloquea los merges a main de Claude) | mergear tú; o agregar una regla de permiso | **mergear #900 antes del 2026-11-02** (aviso de VIIRS sin juzgar tras el cese); después #902 a #905 (instrumento) y #901, #898 (registro). Todos con CI verde |
+| 1 | Merges (el clasificador de permisos bloquea los merges a main de Claude) | mergear tú; o agregar una regla de permiso | **mergear #900 antes del 2026-11-02** (aviso de VIIRS sin juzgar tras el cese); después #902 a #905 (instrumento), **#906** (veredicto de MxD03: D35, marcas A113 en D18, SINTOMAS §3, BEYOND §12, DISENO_D17 §4.7 y el pre-registro; CI verde, suite 2.418 passed; mergear después de #902, al que cita) y #901, #898 (registro). Todos con CI verde |
 | 2 | Abrir los relevos MODIS 2 y VIIRS 750 2 | desde el computador, pedirlo a la coordinadora; o abrir sesión con el prompt de `tasks/BRIEFS_SESIONES_S162.md` | **abrir los dos** después de leer los resultados de los cinco subagentes |
 | 3 | Adopción de MxD03 | sola ahora; o dentro del paquete MODIS | **dentro del paquete** (D-48), salvo que el paquete se atrase más de un mes; requiere A61, tag, TDD y tu sí (A45) |
 | 4 | Vía de proceso «código MIROVA» en `pipeline/` | construirla detrás de flag; esperar | **construirla** (VIIRS 750 primero, V375 y MODIS la reutilizan); encenderla sólo con tu sí |
