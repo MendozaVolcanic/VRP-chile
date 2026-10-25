@@ -49,6 +49,7 @@ import hashlib
 import json
 import math
 import random
+import re
 import statistics
 import sys
 import types
@@ -72,6 +73,7 @@ GANANCIA_PLACEBO = 1.2                   # §3, programa §2
 TOL_VRP_EQUIV = 1e-6                     # §4.1: VRP a 1e-6 MW en el runner
 BANDA_RAZON = (0.9, 1.1)                 # §6.2: mediana de la razón de P en las protegidas
 MIN_MUT_LOCAL = 5                        # §6.1: «5 de 5 mutaciones atrapadas por aserción» (LECTURA L2)
+MIN_CASOS_LOCAL = (1020, 10)             # §4.1: 510 grillas de N con 2 cajas (E1) y los 10 recortes nativos de R2 (E3)
 PARES_S1 = (("P", "Pdef"), ("P", "O"), ("Pdef", "O"))   # §5, S-1: los brazos que comparten la detección del .m
 VOL_ROI = "PuyehueCordonCaulle"          # §7, control positivo de la ROI
 
@@ -181,12 +183,15 @@ def leer_equivalencia_local(ruta):
     if not ruta or not Path(ruta).exists():
         return False, "salida de la prueba local AUSENTE (SIN DATO)"
     lin = Path(ruta).read_text(encoding="utf-8").splitlines()
-    verde = any(x.startswith("VERDE:") for x in lin) and not any(x.startswith("ROJA") for x in lin)
+    casos = [tuple(int(n) for n in re.findall(r"E1 (\d+) casos, E3 (\d+) recortes", x)[0])
+             for x in lin if x.startswith("VERDE:") and re.search(r"E1 \d+ casos, E3 \d+ recortes", x)]
+    verde = (any(c[0] >= MIN_CASOS_LOCAL[0] and c[1] >= MIN_CASOS_LOCAL[1] for c in casos)
+             and not any(x.startswith("ROJA") for x in lin))
     todas = any(x.strip() == "mutaciones: TODAS COMO SE ESPERA" for x in lin)
     n_atr = sum("atrapada por aserción" in x for x in lin)
     caida = any("control_que_se_cae" in x and "caída" in x for x in lin)
     ok = verde and todas and n_atr >= MIN_MUT_LOCAL and caida
-    return ok, (f"prueba local: verde {verde}, mutaciones todas como se espera {todas}, atrapadas {n_atr} "
+    return ok, (f"prueba local: verde con los casos del §4.1 {verde} {casos}, mutaciones todas como se espera {todas}, atrapadas {n_atr} "
                 f"(mínimo {MIN_MUT_LOCAL}), control caído {caida}")
 
 
@@ -240,7 +245,7 @@ def main(argv=None):
     for i in obj:
         r = res.get(i) or {}
         if part[i] is None:
-            motivo_sin[i] = r.get("estado", "sin_resultado")[:40]
+            motivo_sin[i] = str(r.get("estado") or "sin_estado")[:40]
         elif part[i] == "observada" and r.get("dayflag") != 0:
             motivo_sin[i] = "diurna"
         elif part[i] == "observada" and falta_brazo(r):
@@ -316,7 +321,7 @@ def main(argv=None):
             caso(i, "Pdef", rec_paq(i, "Pdef"))
             caso(i, "O", rec_paq(i, "O"))
             caso(i, "Psinfiltro", rec_sinfiltro(i))
-            if isinstance((res[i].get("brazos") or {}).get("Kgeo"), dict):
+            if isinstance((res[i].get("brazos") or {}).get("Kgeo"), dict) and "record" in res[i]["brazos"]["Kgeo"]:
                 caso(i, "Kgeo", rec_k(i, "Kgeo"))
     PUB = {k: bool(p[4]) for k, p in zip(idx, B.correr_node(casos))} if casos else {}
 
@@ -338,7 +343,8 @@ def main(argv=None):
         if pub(i, "P"):
             base = rec_p(i)
             a0 = copy.deepcopy(base)
-            a0["primary_cluster"]["vrp_mw"] = 0.0
+            if a0.get("primary_cluster"):
+                a0["primary_cluster"]["vrp_mw"] = 0.0
             a0["vrp_mw"] = 0.0
             b0 = copy.deepcopy(base)
             b0["distance_class"] = "far"
@@ -361,10 +367,10 @@ def main(argv=None):
     k_dist = sorted({i for i in oks0 if bool(obj[i].get("pub_prod")) != pub(i, "K")}
                     | {i for i in oks0 if abs((vrp(i, "K") or 0) - (obj[i].get("pc_vrp") or 0)) > 0.001})
     k_dist_prot = [nombre(i) for i in k_dist if obj[i].get("protegida")]
-    k_ok = len(k_dist) <= AB.MAX_K_DISTINTO * max(1, len(oks0)) and not k_dist_prot
+    k_ok = not k_dist                      # §7: «en todas las pasadas ok» (L18; V750-B toleraba 1 %)
     pr(f"== control K = producción: distintas {len(k_dist)} de {len(oks0)} (protegidas {k_dist_prot or 'ninguna'}): "
        f"{'OK' if k_ok else 'FALLA'}; lista {[nombre(i) for i in k_dist]}")
-    oks = [i for i in oks0 if i not in set(k_dist)]   # §7: salen de todos los brazos y se listan arriba
+    oks = list(oks0)                       # con K distinto la compuerta ya está cerrada
 
     def p2(b, ref, v, canal):
         """Copia de analizar_v750b.p2: e = 1 si la pasada es un error bajo 1 MW; c = e(b) - e(ref) por bloque
@@ -411,7 +417,9 @@ def main(argv=None):
         pl_dist = [nombre(i) for i in oks if pub(i, "Kx12") != pub(i, "K")]
         ctrl["placebo (publicación)"] = not pl_dist
         pr(f"== control placebo K×1,2 (publicación): distintas de K {len(pl_dist)} de {len(oks)} "
-           f"{pl_dist[:10]}: {'OK' if not pl_dist else 'FALLA'}")
+           f"{pl_dist[:10]}: {'OK' if not pl_dist else 'FALLA'}"
+           + ("" if not pl_dist else " (el predicado del tablero sí mira la magnitud en sus filtros de artefacto: "
+                                     "isCirrusArtifact e isDiffuseFieldArtifact; ver L7)"))
         # placebo, M con el comparador: d′ es 0 para una ganancia pareja, así que M no lo puede dar por mejor
         pl_m = {}
         for v in VENTANAS:
@@ -445,8 +453,34 @@ def main(argv=None):
         pr("== sin veredicto:", "--solo-controles" if a.solo_controles else "controles caídos o SIN DATO")
         return salir(0 if (a.solo_controles and todo_ok) else 3)
 
+    # ---------------------------------------------------------------- §6.1 equivalencia (censo)
+    if censo:
+        dist, banda = [], []
+        for i in oks0:
+            p, o_ = res[i]["paquete"]["P"], res[i]["paquete"]["O"]
+            mp = sorted((x[0], x[1]) for x in p.get("pixeles") or [])
+            mo = sorted((x[0], x[1]) for x in o_.get("pixeles") or [])
+            if mp != mo or abs((p.get("vrp_mw") or 0.0) - (o_.get("vrp_mw") or 0.0)) > TOL_VRP_EQUIV:
+                (banda if res[i].get("banda_triangulacion") else dist).append(i)
+
+        def etq_eq(i):
+            dP, dO = res[i]["paquete"]["P"].get("diag"), res[i]["paquete"]["O"].get("diag")
+            if not (diag_valido(dP) and diag_valido(dO)):
+                return nombre(i) + " (S-1 SIN DATO)"
+            return nombre(i) + (" (decidida por la escena, no por el cráter: bloquea igual)"
+                                if decidida_por_escena(dP, dO) else "")
+        local_ok, local_txt = leer_equivalencia_local(a.equivalencia_local)
+        pr("   P distinto de O dentro de la banda de triangulación (se listan aparte):", [nombre(i) for i in banda]
+           or "ninguna")
+        if dist or not local_ok:
+            pr(f"== §6.1 equivalencia: NO SE CUMPLE (runner: {len(dist)} pasadas distintas fuera de la banda "
+               f"{[etq_eq(i) for i in dist][:20]}; local: {local_txt}): se arregla la vía y se repite §4.1; "
+               "el censo no se mira")
+            return salir(6)
+        pr(f"== §6.1 equivalencia: CUMPLE (runner: 0 pasadas distintas fuera de la banda de {len(oks0)}; {local_txt})")
+
     # ---------------------------------------------------------------- S-1, diagnóstico de la sigma de escena
-    s1_prot, s1_sin_diag_prot = set(), set()
+    s1_prot, s1_sin_diag_prot, s1_filas = set(), set(), []
     if censo:
         for A, Bb in PARES_S1:
             con, sd_ = [], []
@@ -455,6 +489,13 @@ def main(argv=None):
                 if diag_valido(dA) and diag_valido(dB):
                     con.append(i)
                     sd_.append(delta_sd(dA, dB))
+            for i in con:
+                dA, dB = res[i]["paquete"][A]["diag"], res[i]["paquete"][Bb]["diag"]
+                s1_filas.append({"par": f"{A}|{Bb}", "pasada": nombre(i), "id": i, "volcan": obj[i]["volcan"],
+                                 "cenit": AB.tramo_z(obj[i].get("z")), "protegida": etiqueta(obj[i], "decide") == "prot",
+                                 "delta_sd": delta_sd(dA, dB), "margen_A_nti_eti": list(margenes(dA)),
+                                 "margen_B_nti_eti": list(margenes(dB)), "publica": [pub(i, A), pub(i, Bb)],
+                                 "decidida_por_escena": decidida_por_escena(dA, dB)})
             cambia = [i for i in oks0 if pub(i, A) != pub(i, Bb)]
             esc = [i for i in cambia if i in set(con) and decidida_por_escena(res[i]["paquete"][A]["diag"],
                                                                              res[i]["paquete"][Bb]["diag"])]
@@ -481,31 +522,9 @@ def main(argv=None):
                f"{dict(collections.Counter(obj[i]['volcan'] for i in esc))} y por cenit "
                f"{dict(collections.Counter(AB.tramo_z(obj[i].get('z')) for i in esc))}")
 
-    # ---------------------------------------------------------------- §6.1 equivalencia (censo)
-    if censo:
-        dist, banda = [], []
-        for i in oks0:
-            p, o_ = res[i]["paquete"]["P"], res[i]["paquete"]["O"]
-            mp = sorted((x[0], x[1]) for x in p.get("pixeles") or [])
-            mo = sorted((x[0], x[1]) for x in o_.get("pixeles") or [])
-            if mp != mo or abs((p.get("vrp_mw") or 0.0) - (o_.get("vrp_mw") or 0.0)) > TOL_VRP_EQUIV:
-                (banda if res[i].get("banda_triangulacion") else dist).append(i)
-
-        def etq_eq(i):
-            dP, dO = res[i]["paquete"]["P"].get("diag"), res[i]["paquete"]["O"].get("diag")
-            if not (diag_valido(dP) and diag_valido(dO)):
-                return nombre(i) + " (S-1 SIN DATO)"
-            return nombre(i) + (" (decidida por la escena, no por el cráter: bloquea igual)"
-                                if decidida_por_escena(dP, dO) else "")
-        local_ok, local_txt = leer_equivalencia_local(a.equivalencia_local)
-        pr("   P distinto de O dentro de la banda de triangulación (se listan aparte):", [nombre(i) for i in banda]
-           or "ninguna")
-        if dist or not local_ok:
-            pr(f"== §6.1 equivalencia: NO SE CUMPLE (runner: {len(dist)} pasadas distintas fuera de la banda "
-               f"{[etq_eq(i) for i in dist][:20]}; local: {local_txt}): se arregla la vía y se repite §4.1; "
-               "el censo no se mira")
-            return salir(6)
-        pr(f"== §6.1 equivalencia: CUMPLE (runner: 0 pasadas distintas fuera de la banda de {len(oks0)}; {local_txt})")
+        f_s1 = Path(a.salida).with_name(Path(a.salida).stem + "_s1_por_pasada.json")
+        f_s1.write_text(json.dumps(s1_filas, ensure_ascii=False, indent=1), encoding="utf-8")
+        pr(f"== S-1 por pasada (a), (b) y (c) de §5: {len(s1_filas)} filas en {f_s1}")
 
     # ---------------------------------------------------------------- métricas por ventana y canal
     def metricas(b, v, canal):
@@ -535,9 +554,12 @@ def main(argv=None):
         m["E"] = m["E_baja"] + m["E_neg"]
         return m, nadie
 
-    def razon_prot(b, v, canal):
+    def razon_prot(b, v, canal, exigir_k=True):
+        """§6.2 sobre el conjunto de §5 (L4): protegidas que publican K y el brazo, con VRP de los dos y de MIROVA.
+        exigir_k=False sólo informa (las protegidas que publica el brazo, aunque K no)."""
         rz = sorted(vrp(i, b) / obj[i]["mirova_vrp"] for i in oks
                     if etiqueta(obj[i], canal) == "prot" and en_ventana(obj[i], v) and pub(i, b)
+                    and (pub(i, "K") and vrp(i, "K") > 0 or not exigir_k)
                     and obj[i].get("mirova_vrp") and vrp(i, b) > 0)
         return (statistics.median(rz) if rz else None), len(rz)
 
@@ -567,6 +589,9 @@ def main(argv=None):
                    f"{prr['gana']}, pierde {prr['pierde']}) | M razón en protegidas {rz_txt} (n {nrz}) | M comparador "
                    f"{rm} (pares {len(Pm)}, ĝ {det.get('g_hat_factor', '-')}, d′ {det.get('regla_dprima', '-')}, "
                    f"nota «{det.get('nota', '')}») -> {'cumple' if not motivos else 'no cumple: ' + '; '.join(motivos)}")
+                rz2, n2 = razon_prot("P", v, canal, exigir_k=False)
+                pr(f"   razón en protegidas que publica P aunque K no (informa, no decide): "
+                   f"{'-' if rz2 is None else f'{rz2:.3f}'} (n {n2})")
                 pl = decidir_m([dict(p, d=p["k"] * GANANCIA_PLACEBO) for p in Pm], comparador=False)[0]
                 pr(f"   placebo K×1,2 SIN comparador (informa, como evaluar_d25.py): {pl}")
         pr("   protegidas que ni K ni P publican (se listan, no vetan):", sorted(nadie_tot) or "ninguna")
@@ -583,11 +608,12 @@ def main(argv=None):
            sorted(s1_prot) or "ninguna", "| protegidas con publicación distinta y S-1 SIN DATO:",
            sorted(s1_sin_diag_prot) or "ninguna")
     else:
-        motivos, regs, sin_sus = [], {}, True
+        motivos, regs, sin_sus, n_prot = [], {}, True, 0
         for canal in CANALES:
             m, nadie = metricas("P", "TODO", canal)
             reg, neto, nb, _ = p2("P", "K", "TODO", canal)
             regs[canal] = reg
+            n_prot += m["n_prot"]
             sin_sus = sin_sus and reg == "SIN SUSTRATO"
             if m["P1"]:
                 motivos.append(f"{canal}: P1 {m['P1']}")
@@ -599,7 +625,8 @@ def main(argv=None):
             pr("== §6.3 sombra: NO CUMPLE (" + "; ".join(motivos) + ")" + (" " + aviso if aviso else ""))
         else:
             pr(f"== §6.3 sombra: CUMPLE (P1 = 0; P2 tabla {regs['tabla']}, todo {regs['todo']}"
-               + ("; con 4 bloques o menos la sombra sólo veta" if sin_sus else "") + ")" + (" " + aviso if aviso else ""))
+               + ("; con 4 bloques o menos la sombra sólo veta" if sin_sus else "")
+               + ("; SIN PROTEGIDAS: P1 no pudo vetar" if not n_prot else "") + ")" + (" " + aviso if aviso else ""))
 
     # ---------------------------------------------------------------- informativo
     brazos_inf = ("K", "P") + (("Pdef", "Psinfiltro", "Kgeo") if censo else ())
