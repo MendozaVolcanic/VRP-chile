@@ -14,7 +14,88 @@ de que el instrumento entregue la cobertura contra la referencia (fase 0, PD0); 
 parada si C: o D: bajan de 3 GB. Puedo abrir sesiones propias (permiso de Nicolás vía coordinadora, 2026-10-24), cada
 una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora con nombre e id; hoy no hay ninguna.
 
-## Cola (en el orden del programa)
+## 0. Cierre de la sesión VIIRS 375 (2026-10-24, S162)
+
+Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
+evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).
+
+### a. Todo en una pantalla
+
+| qué | estado | evidencia |
+|---|---|---|
+| V375-B (silencio del port en noches limpias) | **RESUELTO**: SILENCIO ACOTADO BAJO K | V375-B2, run 40131572769: neg_resto 6 de 1.165, todos los negativos 1,55 % [1,00; 2,48] contra 3,85 %; verificado (Sonnet, CONFIRMADO); `experiments/_s162_v375/b2/resultado_run40131572769/INFORME.md` |
+| V375-C (caja de cumbre en 375) | **TERMINADO**: caja **C13** en el cráter de `volcanoes.yaml`; compuesto por volcán valida en O | run 40116289866: recall bajo 1 MW 0,69 (M14) a 0,95 [0,92; 0,98], K 0,957; verificado; `experiments/_s162_v375/resultado_run40116289866/INFORME.md` |
+| V375-D (números propios de 375) | **NO SE ABRE** | disparador de `PREREGISTRO_C.md` §5.3 no cumplido en el lote ni en la unión |
+| V375-E (paquete contra K) | pre-registro listo y verificado; **no despachable** | `experiments/_s162_v375/PREREGISTRO_E.md`; espera PD1, PD3 y #903/#905 |
+| V375-F (Chillán sobre 3 MW) | pendiente | va después de V375-E |
+| V375-A | de la sesión del instrumento, PR #903 sin mergear | `evaluar.py --protegida-crater` la recibe |
+| Cobertura del marco contra MIROVA | COBERTURA OK | `experiments/_s162_v375/cobertura_marco_salida.txt` (evaluador común de #904, `ff452671c`) |
+| Rama | `claude/s162-viirs375-c1b864`, sin mergear a `loop/activo` | ver el commit de cierre; artefactos en `C:\vrp-trabajo\temporales\s162_v375\` (240 MB, no en el repo) |
+
+### b. Decisiones que espera Nicolás
+
+| # | pregunta | opciones | recomendación |
+|---|---|---|---|
+| 1 | PD1: qué caja lleva el paquete de VIIRS 375 | C13 en todos los volcanes; C13 sólo en Cordón Caulle y Tupungatito y M14 en el resto; preguntarle a Coppola la ROI real | **C13 en todos** (en los otros nueve es casi la misma caja que M14) y mandar igual el correo a Coppola (`docs/audit_s139/BORRADOR_CORREO_COPPOLA.md`), que vale más que cualquier brazo |
+| 2 | Las 6 protegidas sólo OCR de Suomi NPP que pierden todos los brazos (y K publica 3) | que decida la lectura A (veto de adopción en V375-E); que decida la etiqueta de cráter de V375-A | **esperar V375-A (#903)** y decidir con esa etiqueta delante; no cambiar la vara sin medirla |
+| 3 | Mergear la rama de esta sesión a `loop/activo` | sí; no | **sí, por la coordinadora**: sólo agrega `experiments/_s162_v375/`, `tasks/LOOP_VIIRS375.md` y archivos del port de S159 idénticos a `ca034d66e` |
+
+### c. Lo aprendido
+
+Regla general del workspace (en la memoria `feedback_s162_v375_lecciones.md`):
+1. Un lote que sólo trae negativos no prueba que el detector esté vivo: un detector muerto da «calla» con el instrumento en
+   verde. Va un control de vida en el MISMO run (re-medir casos ya medidos con señal) y el evaluador tiene que exigirlo.
+2. Una segunda muestra para resolver un NO RESUELTO decide sola, sin reutilizar la primera: reutilizarla declaraba el
+   veredicto en la frontera entre 11 y 20 % de las veces en vez del 2,5 % nominal.
+3. Python `write_text` en Windows escribe CRLF: el sha256 del archivo en disco no es el del blob de git (LF). Declarar
+   los dos o hashear el blob.
+4. Barras invertidas en heredocs de bash rompen rutas de Windows (`\v`, `\t`, `\r`): tercera vez en esta sesión. Para
+   editar, la herramienta Edit o rutas con `/`.
+Propias del proyecto (en `experiments/_s162_v375/` y los informes):
+5. El nulo por hora de la curva de cenit de VIIRS 750 no sirve en 375: el VRP de MIROVA baja de una pasada a la siguiente
+   de la misma noche (mediana 0,818, n 365). Nulo correcto: pares de cenit parecido ordenados como la lectura.
+6. El commit de disparo tiene que traer el `pipeline/` que escribió los records del marco (aquí `ca034d66e` = 533398f8f),
+   no el de la rama de trabajo, o el control «K re-corrido = publicado» compara dos detectores.
+
+### d. Problemas abiertos e hipótesis
+
+- CONFIRMADO: K cae más que MIROVA con el cenit en VIIRS 375 (razón doble 0,766 [0,722; 0,861]; sobre 50°, 0,733).
+- CONFIRMADO: el port pierde las mismas 6 protegidas sólo OCR de Suomi NPP en los diez brazos (0 de la tabla).
+- SOSPECHA: esas 6 son filas OCR con la distancia de otra pasada (patrón A119), no pérdidas reales.
+- SOSPECHA: la caída del VRP de MIROVA de una pasada a la siguiente es de plataforma (NOAA-21, SNPP, NOAA-20).
+- SOSPECHA: heterogeneidad por volcán en neg_resto (Lastarria 2 de 12 en S162, 0 de 40 en B2) que el intervalo agrupado no
+  modela.
+- SOSPECHA: el control de vida (6 de 11 volcanes) no ve una rotura limitada a los otros cinco o a una plataforma.
+
+### e. Cerrado, no rehacer
+
+- V375-B: resuelto con B2; no reinterpretar el NO RESUELTO del lote S162 ni contar neg_pub como censo.
+- V375-C: C13 es el brazo global y el compuesto valida en O; las líneas de C de la corrida de B2 no se leen (§7 de B2).
+- Las 46 «volcán fuera del gránulo» de los dos lotes son no observadas (mismo gránulo que producción): no relanzar.
+- La cobertura del marco contra MIROVA está medida (0 alertas sin record): no repetirla para el mismo marco.
+- Los artefactos falsos de los verificadores ya se borraron; se regeneran con `b2/verificador_v3/fabricar.py`.
+
+### f. Prompt para la próxima sesión
+
+```text
+Retoma la sesión de VIIRS 375 de VRP Chile (S162, hija de la coordinadora «Retomar»). Español de Chile, formas de tú,
+sin guiones largos, rutas absolutas, explicar como geólogo.
+1. Verifica antes de creer: en el worktree C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s162-viirs375-c1b864
+   corre git fetch, git status -sb, y compara git rev-parse HEAD con git ls-remote origin -h refs/heads/claude/s162-viirs375-c1b864.
+   Mira si los PR #903, #904 y #905 se mergearon (gh pr view N --repo MendozaVolcanic/VRP-chile) y si Nicolás decidió PD1
+   (la caja de VIIRS 375) en tasks/LOOP_OBJETIVOS.md de la coordinadora.
+2. Lee en orden: CLAUDE.md del proyecto; tasks/LOOP_VIIRS375.md (§0 de cierre); experiments/_s162_v375/resultado_run40116289866/INFORME.md;
+   experiments/_s162_v375/b2/resultado_run40131572769/INFORME.md; experiments/_s162_v375/PREREGISTRO_E.md.
+3. Trabajo, en orden: (a) si #903 entró, conectar protegida_de_crater en evaluar.py (hoy espera un archivo) y releer las 6
+   protegidas sólo OCR; (b) si PD1 está decidido, poner la caja en PREREGISTRO_E.md como adenda; (c) V375-E sólo cuando
+   exista la vía en pipeline/ (PD3, A45) y el evaluador común con d′ (#905); (d) V375-F después de E.
+4. Reglas duras: nada en pipeline/ sin pre-registro sellado, verificador limpio, tag defensivo y el sí de Nicolás (A45);
+   todo despacho de GitHub Actions se pide a la coordinadora (local_4152952c); sólo EARTHDATA_TOKEN; git add por archivo;
+   nunca git stash; verificador con contexto limpio de otro modelo antes de aceptar un resultado; parar si C: o D: bajan de 3 GB.
+5. Si la sesión no alcanza: anota en la bitácora de tasks/LOOP_VIIRS375.md qué quedó a medias, commitea y avisa a la coordinadora.
+```
+
+## 0-prev. Cola (en el orden del programa)
 
 | id | qué | estado |
 |---|---|---|
@@ -28,7 +109,7 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `evaluar.py --cobertura`), V375-A
 (instrumento), evaluador común con placebo y d′ (instrumento, para E), el despacho combinado de la fase 1 (coordinadora).
 
-## Decisiones para Nicolás (con recomendación)
+## 0-prev. Decisiones para Nicolás (con recomendación, ya resueltas: sello por D-48, 709 pasadas, marco sin extender)
 
 1. **Sellar V375-B y V375-C** después del verificador limpio. Recomendación: sí, con las correcciones que pida el
    verificador en una adenda.
