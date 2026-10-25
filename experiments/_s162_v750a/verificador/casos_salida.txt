@@ -1,0 +1,175 @@
+##### CA_razon_sin_K (rc 0)
+   == cobertura: objetivos 60 con resultado 60
+      observadas: 60 | no observadas (fuera del denominador): {} | SIN DATO: 0
+      SIN DATO por motivo: {}
+      pasadas sin gránulo (del generador): 0
+      protegidas no observadas (fuera del denominador): ninguna
+      protegidas SIN DATO (falla de cobertura, no de brazo): ninguna
+   == cobertura: SUFICIENTE
+   == control nulo del contador: 95 perturbaciones; las que no dan lo esperado: 0 (tiene que ser 0, con al menos una perturbación): OK
+   == control K = producción: distintas 0 de 60 (protegidas ninguna): OK; lista []
+   == control placebo K×1,2 (publicación): distintas de K 0 de 60 []: OK
+   == control placebo K×1,2 (M con comparador, tiene que no dar MEJORA): {'T/tabla': 'NEUTRO', 'T/todo': 'NEUTRO', 'O/tabla': 'NEUTRO', 'O/todo': 'NEUTRO'}: OK
+   == control nulo K contra K gemelo: P2 SIN SUSTRATO (neto 0, bloques 0), M NEUTRO (tiene que ser P2 EMPATE o SIN SUSTRATO y M sin separación): OK
+   == control positivo de la ROI: protegidas de Cordón Caulle que P publica y P-def pierde 1 ['PuyehueCordonCaulle 2026-07-28 06:30'] (1 o más): OK
+   == compuerta del veredicto (controles de §7 y cobertura): ABIERTA  
+   == S-1 par (P, Pdef): pasadas con diagnóstico 60 (SIN DATO 0) | Δsd nti1 mediana 0.0000 máx 0.0020 | Δsd eti1 mediana 0.0000 máx 0.0020 | Δsd nti2 mediana 0.0000 máx 0.0020 | Δsd eti2 mediana 0.0000 máx 0.0020 | publicación distinta 3 | decididas por la escena 1: ['PuyehueCordonCaulle 2026-07-28 06:30 (P c/u 1.25/1.25, Pdef c/u 0.83/0.83)']
+      S-1 (P, Pdef) decididas por la escena, por volcán {'PuyehueCordonCaulle': 1} y por cenit {'30-40': 1}
+   == S-1 par (P, O): pasadas con diagnóstico 60 (SIN DATO 0) | Δsd nti1 mediana 0.0000 máx 0.0000 | Δsd eti1 mediana 0.0000 máx 0.0000 | Δsd nti2 mediana 0.0000 máx 0.0000 | Δsd eti2 mediana 0.0000 máx 0.0000 | publicación distinta 0 | decididas por la escena 0: []
+      S-1 (P, O) decididas por la escena, por volcán {} y por cenit {}
+   == S-1 par (Pdef, O): pasadas con diagnóstico 60 (SIN DATO 0) | Δsd nti1 mediana 0.0000 máx 0.0020 | Δsd eti1 mediana 0.0000 máx 0.0020 | Δsd nti2 mediana 0.0000 máx 0.0020 | Δsd eti2 mediana 0.0000 máx 0.0020 | publicación distinta 3 | decididas por la escena 1: ['PuyehueCordonCaulle 2026-07-28 06:30 (Pdef c/u 0.83/0.83, O c/u 1.25/1.25)']
+      S-1 (Pdef, O) decididas por la escena, por volcán {'PuyehueCordonCaulle': 1} y por cenit {'30-40': 1}
+      P distinto de O dentro de la banda de triangulación (se listan aparte): ninguna
+   == §6.1 equivalencia: CUMPLE (runner: 0 pasadas distintas fuera de la banda de 60; prueba local: verde True, mutaciones todas como se espera True, atrapadas 6 (mínimo 5), control caído True)
+   == §6.2 ventana T, canal tabla: P1 0 (de 10 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 10) | M comparador MEJORA (pares 10, ĝ 2.041241452319315, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana T, canal todo: P1 0 (de 10 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 10) | M comparador MEJORA (pares 10, ĝ 2.041241452319315, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana O, canal tabla: P1 0 (de 23 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 2.000 (n 23) | M comparador MEJORA (pares 13, ĝ 2.0, d′ MEJORA, nota «») -> no cumple: M razón 2.000
+   == §6.2 ventana O, canal todo: P1 0 (de 23 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 2.000 (n 23) | M comparador MEJORA (pares 13, ĝ 2.0, d′ MEJORA, nota «») -> no cumple: M razón 2.000
+      protegidas que ni K ni P publican (se listan, no vetan): ninguna
+   == §6 censo: NO CUMPLE (O/tabla: M razón 2.000; O/todo: M razón 2.000)
+      S-1 al lado del veredicto: protegidas decididas por la escena, no por el cráter: ['PuyehueCordonCaulle 2026-07-28 06:30'] | protegidas con publicación distinta y S-1 SIN DATO: ninguna
+##### CB_estado_None (rc 1)
+   Traceback (most recent call last):
+   TypeError: 'NoneType' object is not subscriptable
+##### CC_sombra_sin_pc (rc 1)
+   == cobertura: objetivos 24 con resultado 24
+      observadas: 24 | no observadas (fuera del denominador): {} | SIN DATO: 0
+      SIN DATO por motivo: {}
+      pasadas sin gránulo (del generador): 0
+      protegidas no observadas (fuera del denominador): ninguna
+      protegidas SIN DATO (falla de cobertura, no de brazo): ninguna
+   == cobertura: SUFICIENTE
+   Traceback (most recent call last):
+   TypeError: 'NoneType' object does not support item assignment
+##### CD_sin_granulo_prot (rc 3)
+   == cobertura: objetivos 48 con resultado 48
+      observadas: 48 | no observadas (fuera del denominador): {} | SIN DATO: 0
+      SIN DATO por motivo: {}
+      pasadas sin gránulo (del generador): 1
+      protegidas no observadas (fuera del denominador): ninguna
+      protegidas SIN DATO (falla de cobertura, no de brazo): ['Lascar 2026-04-10 06:10']
+   == cobertura: INSUFICIENTE (más de 2% sin procesar o una protegida): relanzar con SOLO las faltantes
+   == control nulo del contador: 71 perturbaciones; las que no dan lo esperado: 0 (tiene que ser 0, con al menos una perturbación): OK
+   == control K = producción: distintas 0 de 48 (protegidas ninguna): OK; lista []
+   == control placebo K×1,2 (publicación): distintas de K 0 de 48 []: OK
+   == control placebo K×1,2 (M con comparador, tiene que no dar MEJORA): {'T/tabla': 'NEUTRO', 'T/todo': 'NEUTRO', 'O/tabla': 'NEUTRO', 'O/todo': 'NEUTRO'}: OK
+   == control nulo K contra K gemelo: P2 SIN SUSTRATO (neto 0, bloques 0), M NEUTRO (tiene que ser P2 EMPATE o SIN SUSTRATO y M sin separación): OK
+   == control positivo de la ROI: protegidas de Cordón Caulle que P publica y P-def pierde 1 ['PuyehueCordonCaulle 2026-07-28 06:30'] (1 o más): OK
+   == compuerta del veredicto (controles de §7 y cobertura): CERRADA  
+   == sin veredicto: controles caídos o SIN DATO
+##### CE_fuera_sin_crater_diurna (rc 3)
+   == cobertura: objetivos 48 con resultado 48
+      observadas: 45 | no observadas (fuera del denominador): {'fuera': 1, 'sin_crater': 1} | SIN DATO: 1
+      SIN DATO por motivo: {'diurna': 1}
+      pasadas sin gránulo (del generador): 0
+      protegidas no observadas (fuera del denominador): ['Lascar 2026-04-10 06:10', 'Villarrica 2026-04-10 06:10']
+      protegidas SIN DATO (falla de cobertura, no de brazo): ['Lascar 2026-04-11 06:15']
+   == cobertura: INSUFICIENTE (más de 2% sin procesar o una protegida): relanzar con SOLO las faltantes
+   == control nulo del contador: 65 perturbaciones; las que no dan lo esperado: 0 (tiene que ser 0, con al menos una perturbación): OK
+   == control K = producción: distintas 0 de 45 (protegidas ninguna): OK; lista []
+   == control placebo K×1,2 (publicación): distintas de K 0 de 45 []: OK
+   == control placebo K×1,2 (M con comparador, tiene que no dar MEJORA): {'T/tabla': 'INDECIDIBLE', 'T/todo': 'INDECIDIBLE', 'O/tabla': 'NEUTRO', 'O/todo': 'NEUTRO'}: OK
+   == control nulo K contra K gemelo: P2 SIN SUSTRATO (neto 0, bloques 0), M NEUTRO (tiene que ser P2 EMPATE o SIN SUSTRATO y M sin separación): OK
+   == control positivo de la ROI: protegidas de Cordón Caulle que P publica y P-def pierde 1 ['PuyehueCordonCaulle 2026-07-28 06:30'] (1 o más): OK
+   == compuerta del veredicto (controles de §7 y cobertura): CERRADA  
+   == sin veredicto: controles caídos o SIN DATO
+##### CF_sin_diag (rc 0)
+   == cobertura: objetivos 48 con resultado 48
+      observadas: 48 | no observadas (fuera del denominador): {} | SIN DATO: 0
+      SIN DATO por motivo: {}
+      pasadas sin gránulo (del generador): 0
+      protegidas no observadas (fuera del denominador): ninguna
+      protegidas SIN DATO (falla de cobertura, no de brazo): ninguna
+   == cobertura: SUFICIENTE
+   == control nulo del contador: 71 perturbaciones; las que no dan lo esperado: 0 (tiene que ser 0, con al menos una perturbación): OK
+   == control K = producción: distintas 0 de 48 (protegidas ninguna): OK; lista []
+   == control placebo K×1,2 (publicación): distintas de K 0 de 48 []: OK
+   == control placebo K×1,2 (M con comparador, tiene que no dar MEJORA): {'T/tabla': 'NEUTRO', 'T/todo': 'NEUTRO', 'O/tabla': 'NEUTRO', 'O/todo': 'NEUTRO'}: OK
+   == control nulo K contra K gemelo: P2 SIN SUSTRATO (neto 0, bloques 0), M NEUTRO (tiene que ser P2 EMPATE o SIN SUSTRATO y M sin separación): OK
+   == control positivo de la ROI: protegidas de Cordón Caulle que P publica y P-def pierde 1 ['PuyehueCordonCaulle 2026-07-28 06:30'] (1 o más): OK
+   == compuerta del veredicto (controles de §7 y cobertura): ABIERTA  
+   == S-1 par (P, Pdef): pasadas con diagnóstico 47 (SIN DATO 1) | Δsd nti1 mediana 0.0000 máx 0.0020 | Δsd eti1 mediana 0.0000 máx 0.0020 | Δsd nti2 mediana 0.0000 máx 0.0020 | Δsd eti2 mediana 0.0000 máx 0.0020 | publicación distinta 3 | decididas por la escena 0: []
+      S-1 (P, Pdef) decididas por la escena, por volcán {} y por cenit {}
+   == S-1 par (P, O): pasadas con diagnóstico 47 (SIN DATO 1) | Δsd nti1 mediana 0.0000 máx 0.0000 | Δsd eti1 mediana 0.0000 máx 0.0000 | Δsd nti2 mediana 0.0000 máx 0.0000 | Δsd eti2 mediana 0.0000 máx 0.0000 | publicación distinta 0 | decididas por la escena 0: []
+      S-1 (P, O) decididas por la escena, por volcán {} y por cenit {}
+   == S-1 par (Pdef, O): pasadas con diagnóstico 48 (SIN DATO 0) | Δsd nti1 mediana 0.0000 máx 0.0020 | Δsd eti1 mediana 0.0000 máx 0.0020 | Δsd nti2 mediana 0.0000 máx 0.0020 | Δsd eti2 mediana 0.0000 máx 0.0020 | publicación distinta 3 | decididas por la escena 1: ['PuyehueCordonCaulle 2026-07-28 06:30 (Pdef c/u 0.83/0.83, O c/u 1.25/1.25)']
+      S-1 (Pdef, O) decididas por la escena, por volcán {'PuyehueCordonCaulle': 1} y por cenit {'30-40': 1}
+      P distinto de O dentro de la banda de triangulación (se listan aparte): ninguna
+   == §6.1 equivalencia: CUMPLE (runner: 0 pasadas distintas fuera de la banda de 48; prueba local: verde True, mutaciones todas como se espera True, atrapadas 6 (mínimo 5), control caído True)
+   == §6.2 ventana T, canal tabla: P1 0 (de 10 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 10) | M comparador MEJORA (pares 10, ĝ 2.041241452319315, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana T, canal todo: P1 0 (de 10 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 10) | M comparador MEJORA (pares 10, ĝ 2.041241452319315, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana O, canal tabla: P1 0 (de 11 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 11) | M comparador MEJORA (pares 13, ĝ 2.0, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana O, canal todo: P1 0 (de 11 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 11) | M comparador MEJORA (pares 13, ĝ 2.0, d′ MEJORA, nota «») -> cumple
+      protegidas que ni K ni P publican (se listan, no vetan): ninguna
+   == §6 censo: CUMPLE §6.1, §6.2 y §6.4 en T y O, con la tabla sola y con tabla más OCR; falta la sombra (§6.3) para proponer P a Nicolás (A45)
+      S-1 al lado del veredicto: protegidas decididas por la escena, no por el cráter: ['PuyehueCordonCaulle 2026-07-28 06:30'] | protegidas con publicación distinta y S-1 SIN DATO: ['PuyehueCordonCaulle 2026-07-28 06:30']
+##### CG_kgeo_sin_record (rc 1)
+   == cobertura: objetivos 48 con resultado 48
+      observadas: 48 | no observadas (fuera del denominador): {} | SIN DATO: 0
+      SIN DATO por motivo: {}
+      pasadas sin gránulo (del generador): 0
+      protegidas no observadas (fuera del denominador): ninguna
+      protegidas SIN DATO (falla de cobertura, no de brazo): ninguna
+   == cobertura: SUFICIENTE
+   Traceback (most recent call last):
+   KeyError: 'record'
+##### CH_pos_no_decide (rc 0)
+   == cobertura: objetivos 49 con resultado 49
+      observadas: 49 | no observadas (fuera del denominador): {} | SIN DATO: 0
+      SIN DATO por motivo: {}
+      pasadas sin gránulo (del generador): 0
+      protegidas no observadas (fuera del denominador): ninguna
+      protegidas SIN DATO (falla de cobertura, no de brazo): ninguna
+   == cobertura: SUFICIENTE
+   == control nulo del contador: 71 perturbaciones; las que no dan lo esperado: 0 (tiene que ser 0, con al menos una perturbación): OK
+   == control K = producción: distintas 0 de 49 (protegidas ninguna): OK; lista []
+   == control placebo K×1,2 (publicación): distintas de K 0 de 49 []: OK
+   == control placebo K×1,2 (M con comparador, tiene que no dar MEJORA): {'T/tabla': 'NEUTRO', 'T/todo': 'NEUTRO', 'O/tabla': 'NEUTRO', 'O/todo': 'NEUTRO'}: OK
+   == control nulo K contra K gemelo: P2 SIN SUSTRATO (neto 0, bloques 0), M NEUTRO (tiene que ser P2 EMPATE o SIN SUSTRATO y M sin separación): OK
+   == control positivo de la ROI: protegidas de Cordón Caulle que P publica y P-def pierde 1 ['PuyehueCordonCaulle 2026-07-28 06:30'] (1 o más): OK
+   == compuerta del veredicto (controles de §7 y cobertura): ABIERTA  
+   == S-1 par (P, Pdef): pasadas con diagnóstico 49 (SIN DATO 0) | Δsd nti1 mediana 0.0000 máx 0.0020 | Δsd eti1 mediana 0.0000 máx 0.0020 | Δsd nti2 mediana 0.0000 máx 0.0020 | Δsd eti2 mediana 0.0000 máx 0.0020 | publicación distinta 3 | decididas por la escena 1: ['PuyehueCordonCaulle 2026-07-28 06:30 (P c/u 1.25/1.25, Pdef c/u 0.83/0.83)']
+      S-1 (P, Pdef) decididas por la escena, por volcán {'PuyehueCordonCaulle': 1} y por cenit {'30-40': 1}
+   == S-1 par (P, O): pasadas con diagnóstico 49 (SIN DATO 0) | Δsd nti1 mediana 0.0000 máx 0.0000 | Δsd eti1 mediana 0.0000 máx 0.0000 | Δsd nti2 mediana 0.0000 máx 0.0000 | Δsd eti2 mediana 0.0000 máx 0.0000 | publicación distinta 0 | decididas por la escena 0: []
+      S-1 (P, O) decididas por la escena, por volcán {} y por cenit {}
+   == S-1 par (Pdef, O): pasadas con diagnóstico 49 (SIN DATO 0) | Δsd nti1 mediana 0.0000 máx 0.0020 | Δsd eti1 mediana 0.0000 máx 0.0020 | Δsd nti2 mediana 0.0000 máx 0.0020 | Δsd eti2 mediana 0.0000 máx 0.0020 | publicación distinta 3 | decididas por la escena 1: ['PuyehueCordonCaulle 2026-07-28 06:30 (Pdef c/u 0.83/0.83, O c/u 1.25/1.25)']
+      S-1 (Pdef, O) decididas por la escena, por volcán {'PuyehueCordonCaulle': 1} y por cenit {'30-40': 1}
+      P distinto de O dentro de la banda de triangulación (se listan aparte): ninguna
+   == §6.1 equivalencia: CUMPLE (runner: 0 pasadas distintas fuera de la banda de 49; prueba local: verde True, mutaciones todas como se espera True, atrapadas 6 (mínimo 5), control caído True)
+   == §6.2 ventana T, canal tabla: P1 0 (de 10 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 10) | M comparador MEJORA (pares 10, ĝ 2.041241452319315, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana T, canal todo: P1 0 (de 10 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 10) | M comparador MEJORA (pares 10, ĝ 2.041241452319315, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana O, canal tabla: P1 0 (de 11 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 11) | M comparador MEJORA (pares 13, ĝ 2.0, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana O, canal todo: P1 0 (de 11 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 11) | M comparador MEJORA (pares 13, ĝ 2.0, d′ MEJORA, nota «») -> cumple
+      protegidas que ni K ni P publican (se listan, no vetan): ninguna
+   == §6 censo: CUMPLE §6.1, §6.2 y §6.4 en T y O, con la tabla sola y con tabla más OCR; falta la sombra (§6.3) para proponer P a Nicolás (A45)
+      S-1 al lado del veredicto: protegidas decididas por la escena, no por el cráter: ['PuyehueCordonCaulle 2026-07-28 06:30'] | protegidas con publicación distinta y S-1 SIN DATO: ninguna
+##### CI_dos_volcanes_misma_noche (rc 0)
+   == cobertura: objetivos 60 con resultado 60
+      observadas: 60 | no observadas (fuera del denominador): {} | SIN DATO: 0
+      SIN DATO por motivo: {}
+      pasadas sin gránulo (del generador): 0
+      protegidas no observadas (fuera del denominador): ninguna
+      protegidas SIN DATO (falla de cobertura, no de brazo): ninguna
+   == cobertura: SUFICIENTE
+   == control nulo del contador: 83 perturbaciones; las que no dan lo esperado: 0 (tiene que ser 0, con al menos una perturbación): OK
+   == control K = producción: distintas 0 de 60 (protegidas ninguna): OK; lista []
+   == control placebo K×1,2 (publicación): distintas de K 0 de 60 []: OK
+   == control placebo K×1,2 (M con comparador, tiene que no dar MEJORA): {'T/tabla': 'NEUTRO', 'T/todo': 'NEUTRO', 'O/tabla': 'NEUTRO', 'O/todo': 'NEUTRO'}: OK
+   == control nulo K contra K gemelo: P2 SIN SUSTRATO (neto 0, bloques 0), M NEUTRO (tiene que ser P2 EMPATE o SIN SUSTRATO y M sin separación): OK
+   == control positivo de la ROI: protegidas de Cordón Caulle que P publica y P-def pierde 1 ['PuyehueCordonCaulle 2026-07-28 06:30'] (1 o más): OK
+   == compuerta del veredicto (controles de §7 y cobertura): ABIERTA  
+   == S-1 par (P, Pdef): pasadas con diagnóstico 60 (SIN DATO 0) | Δsd nti1 mediana 0.0000 máx 0.0020 | Δsd eti1 mediana 0.0000 máx 0.0020 | Δsd nti2 mediana 0.0000 máx 0.0020 | Δsd eti2 mediana 0.0000 máx 0.0020 | publicación distinta 3 | decididas por la escena 1: ['PuyehueCordonCaulle 2026-07-28 06:30 (P c/u 1.25/1.25, Pdef c/u 0.83/0.83)']
+      S-1 (P, Pdef) decididas por la escena, por volcán {'PuyehueCordonCaulle': 1} y por cenit {'30-40': 1}
+   == S-1 par (P, O): pasadas con diagnóstico 60 (SIN DATO 0) | Δsd nti1 mediana 0.0000 máx 0.0000 | Δsd eti1 mediana 0.0000 máx 0.0000 | Δsd nti2 mediana 0.0000 máx 0.0000 | Δsd eti2 mediana 0.0000 máx 0.0000 | publicación distinta 0 | decididas por la escena 0: []
+      S-1 (P, O) decididas por la escena, por volcán {} y por cenit {}
+   == S-1 par (Pdef, O): pasadas con diagnóstico 60 (SIN DATO 0) | Δsd nti1 mediana 0.0000 máx 0.0020 | Δsd eti1 mediana 0.0000 máx 0.0020 | Δsd nti2 mediana 0.0000 máx 0.0020 | Δsd eti2 mediana 0.0000 máx 0.0020 | publicación distinta 3 | decididas por la escena 1: ['PuyehueCordonCaulle 2026-07-28 06:30 (Pdef c/u 0.83/0.83, O c/u 1.25/1.25)']
+      S-1 (Pdef, O) decididas por la escena, por volcán {'PuyehueCordonCaulle': 1} y por cenit {'30-40': 1}
+      P distinto de O dentro de la banda de triangulación (se listan aparte): ninguna
+   == §6.1 equivalencia: CUMPLE (runner: 0 pasadas distintas fuera de la banda de 60; prueba local: verde True, mutaciones todas como se espera True, atrapadas 6 (mínimo 5), control caído True)
+   == §6.2 ventana T, canal tabla: P1 0 (de 10 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -12, bloques 12, p gana [1, 4096], pierde [4096, 4096]) | M razón en protegidas 1.000 (n 10) | M comparador MEJORA (pares 10, ĝ 2.041241452319315, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana T, canal todo: P1 0 (de 10 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -12, bloques 12, p gana [1, 4096], pierde [4096, 4096]) | M razón en protegidas 1.000 (n 10) | M comparador MEJORA (pares 10, ĝ 2.041241452319315, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana O, canal tabla: P1 0 (de 11 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 11) | M comparador MEJORA (pares 13, ĝ 2.0, d′ MEJORA, nota «») -> cumple
+   == §6.2 ventana O, canal todo: P1 0 (de 11 protegidas) | P1b abajo 0 arriba 0 | P2 contra K GANA (neto -6, bloques 6, p gana [1, 64], pierde [64, 64]) | M razón en protegidas 1.000 (n 11) | M comparador MEJORA (pares 13, ĝ 2.0, d′ MEJORA, nota «») -> cumple
+      protegidas que ni K ni P publican (se listan, no vetan): ninguna
+   == §6 censo: CUMPLE §6.1, §6.2 y §6.4 en T y O, con la tabla sola y con tabla más OCR; falta la sombra (§6.3) para proponer P a Nicolás (A45)
+      S-1 al lado del veredicto: protegidas decididas por la escena, no por el cráter: ['PuyehueCordonCaulle 2026-07-28 06:30'] | protegidas con publicación distinta y S-1 SIN DATO: ninguna
