@@ -403,6 +403,12 @@ barrido completo.
 
 ### 4.7 MODIS: lo que tiene que pasar antes
 
+> ⚠️ **S162, sobre el punto 1** (A113; D35 de `docs/MIROVA_DIVERGENCES.md`): el A/B de MxD03 sobre K dio CUMPLE SIN
+> DAÑO, verificado con contexto limpio (rama `s162-mxd03-codigo`, `afb3fcdea`), pero el prerrequisito sigue sin
+> cumplirse: producción usa `_interp_geo` y todavía no hay flag (la adopción va dentro del paquete MODIS, con el sí de
+> Nicolás, A45). El «1 a 3 km» es el rango típico: en el borde del barrido el corrimiento llega a 10 a 16 km (15
+> records, cenit 63 a 75°, VRB-07 del verificador). Texto conservado.
+
 1. **Geolocalización.** `_interp_geo` (`pipeline/process_modis.py:385`) ignora el desfase de la grilla de 5 km y corre
    el píxel 1 a 3 km hacia el nadir (S151, PR #826 y #828). Remuestrear con esa posición pone cada muestra en la celda
    equivocada. El pipeline ya baja MxD03 (1 km, con corrección de terreno) y no lo usa; no hay flag para leerlo. Es
