@@ -793,7 +793,11 @@ def main(argv=None):
     pr(f"  neg_resto: publica {s['neg_resto']['crudo'][0]} de {s['neg_resto']['crudo'][1]}; ponderado "
        f"{s['neg_resto']['pond']:.4f}, IC (Wilson sobre n efectivo {s['neg_resto']['n_eff']:.0f}) "
        f"[{s['neg_resto']['ic_kish'][0]:.4f}; {s['neg_resto']['ic_kish'][1]:.4f}]")
-    pr(f"  neg_pub (censo): publica {s['neg_pub']['crudo'][0]} de {s['neg_pub']['crudo'][1]}")
+    # el rótulo dice «censo» sólo si de verdad lo es (peso 1 en todas); en un subconjunto es muestra (verificador del
+    # resultado de B2, H1)
+    es_censo = s["neg_pub"]["ic"][0] == s["neg_pub"]["ic"][1]
+    pr(f"  neg_pub ({'censo' if es_censo else 'muestra'}, todas las pasadas): publica {s['neg_pub']['crudo'][0]} de "
+       f"{s['neg_pub']['crudo'][1]}")
     pr(f"  todos los negativos limpios: {s['negativos']['pond']:.4f} [{s['negativos']['ic_conservador'][0]:.4f}; "
        f"{s['negativos']['ic_conservador'][1]:.4f}] contra K {tasa_k_neg:.4f} -> {s['veredicto']}")
     m = sB["MISSION_K"]

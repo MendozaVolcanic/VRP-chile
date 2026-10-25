@@ -252,3 +252,7 @@ Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `eval
   entregas. Para retomar: `/loop` con el mismo prompt cuando la coordinadora avise PD1 o PD3.
 - Limpieza pendiente (no destructiva hasta que Nicolás o la coordinadora lo digan): artefactos falsos del verificador v3
   en `C:/vrp-trabajo/temporales/s162_v375/verif_v3/` (1,8 GB).
+- Limpieza hecha (pedido de Nicolás «continúa con lo que recomiendes», 2026-10-24): borrados los artefactos falsos del
+  verificador v3 (12 casos fabricados, 1,9 GB; regenerables con `b2/verificador_v3/fabricar.py`). Los runs reales siguen en
+  `C:/vrp-trabajo/temporales/s162_v375/` (240 MB). Rótulo de neg_pub de la sección 3 del evaluador: dice censo o muestra
+  según los pesos (verificador del resultado de B2, H1); lo publicado sólo cambia en esa línea.
