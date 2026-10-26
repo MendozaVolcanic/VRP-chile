@@ -153,7 +153,7 @@
   {
    "id": "M22",
    "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
-   "viejo": "            if f[\"protegida\"]:\n                prob.append(\"I4a",
+   "viejo": "            if f[\"pasada\"].estado == \"alerta\":\n                prob.append(\"I4a",
    "nuevo": "            if False:\n                prob.append(\"I4a",
    "que": "I4a apagada"
   },
@@ -289,6 +289,55 @@
    "viejo": "    prot = [f for f in obs_d if f[\"protegida\"]]",
    "nuevo": "    prot = [f for f in obs_d if f[\"pasada\"].estado == \"alerta\"]",
    "que": "P cuenta alertas bajo 1 MW"
+  },
+  {
+   "id": "M43",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "        return (f[\"pasada\"].volcano, f[\"pasada\"].sensor_bucket, f[\"dia\"], f[\"es_dia\"])",
+   "nuevo": "        return (f[\"pasada\"].volcano, f[\"pasada\"].sensor_bucket, f[\"dia\"])",
+   "que": "día con alerta vuelve a mirar el día UTC entero"
+  },
+  {
+   "id": "M44",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    T = [f for f in T if f[\"clave\"] not in excl_k]",
+   "nuevo": "    T = T",
+   "que": "excluir claves no saca las pasadas"
+  },
+  {
+   "id": "M45",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "            if f[\"pasada\"].estado == \"alerta\":\n                prob.append(\"I4a",
+   "nuevo": "            if f[\"protegida\"]:\n                prob.append(\"I4a",
+   "que": "I4a sólo mira protegidas"
+  },
+  {
+   "id": "M46",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "        if n:\n            distintos.append(\"I5 %d records",
+   "nuevo": "        if False:\n            distintos.append(\"I5 %d records",
+   "que": "I5 no exige los mismos records"
+  },
+  {
+   "id": "M47",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "g is not None and g < UMBRAL_REFLEJO_GRADOS",
+   "nuevo": "g is not None and g > UMBRAL_REFLEJO_GRADOS",
+   "que": "filtro de reflejo al revés"
+  },
+  {
+   "id": "M48",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "c = math.cos(sz) * math.cos(soz) - math.sin(sz)",
+   "nuevo": "c = math.cos(sz) * math.cos(soz) + math.sin(sz)",
+   "que": "signo de la fórmula de MIROVA"
+  },
+  {
+   "id": "M49",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    banderas_por_periodo(T)\n",
+   "nuevo": "    pass\n",
+   "que": "no se recalculan las banderas por periodo"
   },
   {
    "id": "C-CAIDA",

@@ -61,6 +61,7 @@ def armar(ref):
     T = ec.tabla_por_pasada(pas, {"ctrl": ctrl, "diurno": brazo}, "ctrl")
     for f in T:
         f["es_dia"] = ev.es_dia_vol(f["pasada"].volcano, f["pasada"].instante)
+    ev.banderas_por_periodo(T)
     ev.completar_control_diurno(T, "ctrl", "diurno")
     return T, sint
 

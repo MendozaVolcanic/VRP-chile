@@ -254,16 +254,79 @@ def test_qn_es_del_control_de_noche_y_no_del_brazo():
     assert r["compuertas"]["indecidible"] != []
 
 
-def test_negativo_exige_dia_sin_alerta_ni_falso_positivo_de_noche():
+def test_negativo_diurno_mira_solo_el_periodo_diurno():
     e = Escena().base()
-    # día 25: alerta nocturna de Láscar en VIIRS 375; la RUTINA diurna de ese día no es negativo
+    # día 25: alerta NOCTURNA de Láscar en VIIRS 375; su RUTINA del mediodía sigue siendo negativo (periodo aparte)
     e.noche("Lascar", V375, 25, estado="alerta", vrp=0.3, pub=True, disp=0.3)
     e.dia("Lascar", V375, 25, pub_b=True)
-    # día 26: FALSO_POSITIVO diurno en Isluga; su RUTINA diurna tampoco
+    # día 26: FALSO_POSITIVO diurno en Isluga; su RUTINA diurna no es negativo
     e.dia("Isluga", V375, 26, estado="fp", vrp=0.5, hora=16)
     e.dia("Isluga", V375, 26, pub_b=True)
+    # día 27: alerta diurna bajo 1 MW en Llaima a las 16; su RUTINA de las 18 no es negativo
+    e.dia("Llaima", V375, 27, estado="alerta", vrp=0.4, hora=16)
+    e.dia("Llaima", V375, 27, pub_b=True, hora=18)
     m = e.evaluar()["por_sensor"][V375]
-    assert m["neto"] == 0 and m["pub_otra"] == 2
+    assert m["neg_pub"] == 1 and m["pub_otra"] == 2
+    # neto: +1 por Láscar; la alerta de Llaima no la publica ninguno de los dos (el control no mira el día), sin
+    # discordancia
+    assert m["neto"] == 1
+
+
+def test_negativo_nocturno_no_mira_el_dia():
+    e = Escena().base()
+    # Q_n: el negativo nocturno de Láscar del día 1 (publicado por el control) sigue siendo negativo aunque haya una
+    # alerta diurna ese mismo día
+    e.dia("Lascar", V375, 1, estado="alerta", vrp=0.4, hora=19)
+    assert e.evaluar()["por_sensor"][V375]["Qn"] == pytest.approx(0.1)
+
+
+def test_excluir_una_protegida_no_vuelve_negativas_a_sus_vecinas():
+    e = Escena().base()
+    e.dia("Lascar", V375, 24, estado="alerta", vrp=3.0, hora=16, pub_b=True, disp_b=2.0)
+    e.dia("Lascar", V375, 24, hora=18, pub_b=True)              # RUTINA del mismo día: «otra»
+    clave = "Lascar|VIIRS375|2026-08-24 16:00:00"
+    m = e.evaluar(excluir_claves={clave})["por_sensor"][V375]
+    assert m["neg_pub"] == 0 and m["pub_otra"] == 1 and m["P_obs"] == 0
+
+
+def test_i4a_vigila_tambien_alertas_bajo_1mw():
+    e = Escena().base()
+    e.dia("Lascar", V375, 28, estado="alerta", vrp=0.4, con_record=False)
+    assert any("I4a" in x for x in e.evaluar()["compuertas"]["invalido"])
+
+
+def test_i5_records_nocturnos_en_un_solo_brazo():
+    e = Escena().base()
+    e.rb.append(rec("Copahue", V375, t(9, 6), pub=False))      # una pasada nocturna sin MIROVA que sólo el brazo tiene
+    r = e.evaluar()
+    assert any("I5" in x and "brazo" in x for x in r["compuertas"]["indecidible"])
+
+
+def test_angulo_de_reflejo_formula_de_mirova():
+    # acimuts opuestos con zenits iguales: el satélite mira justo el reflejo del sol (0°); mismo acimut: 60°
+    r = {"sz": 30.0, "sa": 100.0, "soz": 30.0, "soa": 280.0}       # opuestos: reflejo especular exacto, 0°
+    assert ev.angulo_reflejo(r) == pytest.approx(0.0, abs=1e-6)
+    r = {"sz": 30.0, "sa": 100.0, "soz": 30.0, "soa": 100.0}       # mismo lado: 60°
+    assert ev.angulo_reflejo(r) == pytest.approx(60.0, abs=1e-6)
+    assert ev.angulo_reflejo({"sz": 30.0, "sa": None, "soz": 30.0, "soa": 100.0}) is None
+
+
+def test_filtro_de_reflejo_apaga_solo_diurnas_bajo_12_grados():
+    recs = [{"es_dia": True, "b": V750, "pub": True, "disp": 0.5, "sz": 30.0, "sa": 100.0, "soz": 30.0, "soa": 280.0},
+            {"es_dia": True, "b": V750, "pub": True, "disp": 0.5, "sz": 30.0, "sa": 100.0, "soz": 30.0, "soa": 100.0},
+            {"es_dia": False, "b": V750, "pub": True, "disp": 0.5, "sz": 30.0, "sa": 100.0, "soz": 30.0, "soa": 280.0}]
+    out = ev.aplicar_filtro_reflejo(recs)
+    assert [r["pub"] for r in out] == [False, True, True]
+    assert recs[0]["pub"] is True                                  # no toca la entrada
+
+
+def test_m4_por_ventana():
+    e = Escena().base()
+    e.dia("Lascar", V375, 22, estado="alerta", vrp=3.0, pub_b=True, disp_b=2.5)
+    m = ev.evaluar(e.pasadas, {C: e.rc, B: e.rb}, C, B, opcion="e-i", p_sup=P_SUP, sha=SHA,
+                   ventanas=[("Wa", "2026-08-01", "2026-08-15"), ("Wb", "2026-08-16", "2026-08-31")])["por_sensor"][V375]
+    assert m["por_ventana"]["Wb"]["P"] == 1 and m["por_ventana"]["Wa"]["P_obs"] == 0
+    assert m["P_1mw"] == 1
 
 
 def test_alerta_minima_cuenta_como_negativo_con_sn():

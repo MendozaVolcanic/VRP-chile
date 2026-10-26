@@ -12,9 +12,9 @@ evaluador común (`clase_mirova.resumir_pasadas`, ±120 s, regla de mínimas SN 
   * protegida: pasada diurna VIIRS con alerta de 1 MW o más (lectura A, D-4);
   * alerta_mb: pasada diurna VIIRS con alerta bajo 1 MW (con SN, las de 0,05 MW o menos de VIIRS 375 ya son RUTINA);
   * negativo: pasada diurna de la TABLA (CONS), RUTINA, en un volcán, sensor y día UTC sin ninguna alerta ni
-    FALSO_POSITIVO de MIROVA, de noche o de día (la definición de `evaluador_comun.clase_p2` aplicada al día UTC
-    entero);
-  * otra: el resto (FALSO_POSITIVO, RUTINA en un día con alerta, pasadas sólo OCR sin alerta, sin geometría).
+    FALSO_POSITIVO DIURNO de MIROVA (la definición de `evaluador_comun.clase_p2`, mirada por periodo: verificador V2);
+  * otra: el resto (FALSO_POSITIVO, RUTINA en un día con alerta o FALSO_POSITIVO diurno, sólo OCR sin alerta, sin
+    geometría).
 
 Además mide la vara de cobertura que el evaluador usa para el día (el control no tiene records diurnos, así que no
 sirve de vara): la fracción de pasadas NOCTURNAS de MIROVA sin record en producción (`data/mirova_equivalent/`), por
@@ -107,19 +107,23 @@ def cargar_ref_arbol():
 
 
 def clasificar(pasadas, coords):
-    """(pasada, es_dia, clase) para cada pasada; clase sólo tiene sentido en las diurnas VIIRS."""
-    alerta_dia = {(p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d")) for p in pasadas if p.estado == "alerta"}
-    fp_dia = {(p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d")) for p in pasadas if p.estado == "fp"}
-    out = []
+    """(pasada, es_dia, clase). «Día con alerta» y «día con FALSO_POSITIVO» se miran por PERIODO, igual que el
+    evaluador (`evaluar_diurno_k.banderas_por_periodo`, verificador V2 y V7): una pasada diurna sólo mira las diurnas
+    de su volcán, sensor y día UTC, y una nocturna sólo las nocturnas."""
+    marcadas = []
     for p in pasadas:
         if p.volcano not in coords:
             continue
         lat, lon = coords[p.volcano]
-        dia = es_dia(lat, lon, p.instante)
-        k = (p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d"))
+        marcadas.append((p, es_dia(lat, lon, p.instante)))
+    k = lambda p, d: (p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d"), d)  # noqa: E731
+    alerta_dia = {k(p, d) for p, d in marcadas if p.estado == "alerta"}
+    fp_dia = {k(p, d) for p, d in marcadas if p.estado == "fp"}
+    out = []
+    for p, dia in marcadas:
         if p.estado == "alerta":
             c = "protegida" if cm.es_protegida(p) else "alerta_mb"
-        elif p.estado == "rutina" and p.fuente == "CONS" and k not in alerta_dia and k not in fp_dia:
+        elif p.estado == "rutina" and p.fuente == "CONS" and k(p, dia) not in alerta_dia and k(p, dia) not in fp_dia:
             c = "negativo"
         else:
             c = "otra"

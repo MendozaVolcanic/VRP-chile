@@ -196,9 +196,11 @@ def compuerta_i4(T, recs_b, brazo, p_sup):
         filas = [f for f in T if _sensor_dia(f, s)]
         sin = [f for f in filas if f["rec"][brazo] is None]
         for f in sin:
-            if f["protegida"]:
-                prob.append("I4a %s: protegida diurna sin record del brazo (MIROVA %s MW)" % (f["clave"],
-                                                                                         f["pasada"].vrp_mw))
+            # verificador V10: toda alerta diurna (protegida o bajo 1 MW) se vigila una por una; con 10 alertas bajo
+            # 1 MW en VIIRS 375, perder unas pocas achicaría D y el neto en silencio.
+            if f["pasada"].estado == "alerta":
+                prob.append("I4a %s: alerta diurna sin record del brazo (MIROVA %s MW)" % (f["clave"],
+                                                                                      f["pasada"].vrp_mw))
         vacios = sorted({(f["pasada"].volcano, s, f["dia"]) for f in filas
                          if dia_b[(f["pasada"].volcano, s, f["dia"])] == 0})
         for v in vacios:
@@ -224,7 +226,25 @@ def compuerta_i5(recs_c, recs_b):
             distintos.append("I5 %s|%s|%s: control %s %.4f, brazo %s %.4f" % (
                 k[0], k[1], k[2].strftime("%Y-%m-%d %H:%M"), rc["pub"], rc["disp"] or 0, rb["pub"], rb["disp"] or 0))
     solo = {"solo_control": len(set(ic) - set(ib)), "solo_brazo": len(set(ib) - set(ic))}
+    # verificador V6: «noches intactas» exige también los mismos records nocturnos en los dos brazos.
+    for lado, n in solo.items():
+        if n:
+            distintos.append("I5 %d records nocturnos sólo en el %s" % (n, lado.split("_")[1]))
     return distintos, solo
+
+
+def banderas_por_periodo(T):
+    """«Día con alerta» y «día con FALSO_POSITIVO» por periodo (verificador V2 y V7): una pasada diurna mira sólo las
+    pasadas DIURNAS de su volcán, sensor y día UTC, y una nocturna sólo las nocturnas. De día MIROVA usa otros umbrales
+    y su pasada es una mirada aparte: una alerta de la madrugada no hace que su RUTINA del mediodía deje de ser un
+    silencio de MIROVA, y un día al que a la tabla le falta la noche no cambia la clase de sus pasadas diurnas. De noche
+    es la misma definición del evaluador común, que sólo ve pasadas nocturnas."""
+    def k(f):
+        return (f["pasada"].volcano, f["pasada"].sensor_bucket, f["dia"], f["es_dia"])
+    alerta = {k(f) for f in T if f["pasada"].estado == "alerta"}
+    fp = {k(f) for f in T if f["pasada"].estado == "fp"}
+    for f in T:
+        f["noche_con_alerta"], f["noche_con_fp"] = k(f) in alerta, k(f) in fp
 
 
 def completar_control_diurno(T, control, brazo):
@@ -236,7 +256,39 @@ def completar_control_diurno(T, control, brazo):
             f["cob"][control] = ec.OBSERVADO
 
 
-def metricas_sensor(T, recs_b, control, brazo, s):
+def elevacion(vol, instante):
+    from pipeline.store import _solar_elevation
+    lat, lon = coords()[vol]
+    return _solar_elevation(lat, lon, instante.replace(tzinfo=None))
+
+
+def angulo_reflejo(r):
+    """Ángulo de reflejo especular, fórmula del README del código de MIROVA (OSF zm62w, l. 32 a 36), con los ángulos
+    que el record guarda en el punto reportado (process_viirs.py, observation_geometry). None si falta alguno."""
+    import math
+    v = [r.get(k) for k in ("sz", "sa", "soz", "soa")]
+    if any(x is None for x in v):
+        return None
+    sz, sa, soz, soa = (math.radians(float(x)) for x in v)
+    c = math.cos(sz) * math.cos(soz) - math.sin(sz) * math.sin(soz) * math.cos(soa - sa)
+    return math.degrees(math.acos(max(-1.0, min(1.0, c))))
+
+
+UMBRAL_REFLEJO_GRADOS = 12.0       # código de MIROVA de VIIRS 750, l. 87 (informativo aquí, §7)
+
+
+def aplicar_filtro_reflejo(recs_b):
+    """Variante INFORMATIVA (§7): copia de los records del brazo en que las publicaciones diurnas con ángulo de
+    reflejo menor que 12° quedan sin publicar, como hace MIROVA con la escena entera. No cambia la entrada."""
+    out = []
+    for r in recs_b:
+        g = angulo_reflejo(r) if r.get("es_dia") else None
+        out.append(dict(r, pub=False, disp=0.0) if (r.get("pub") and g is not None and g < UMBRAL_REFLEJO_GRADOS)
+                   else r)
+    return out
+
+
+def metricas_sensor(T, recs_b, control, brazo, s, ventanas=()):
     excl = lambda f, s=s: not _sensor_dia(f, s)  # noqa: E731
     contrib = ec.contribuciones_p2(T, control, brazo, excluir=excl)
     p2, det = ec.decidir_p2(contrib)
@@ -271,6 +323,18 @@ def metricas_sensor(T, recs_b, control, brazo, s):
         "protegidas_recuperadas": [f["clave"] for f in prot if pub(f, brazo)],
         "protegidas_no_publicadas": [f["clave"] for f in prot if not pub(f, brazo)],
         "negativos_publicados": [f["clave"] for f in neg_pub],
+        # informativo (verificador V3 y V8)
+        "P_1mw": sum(1 for f in prot if pub(f, brazo) and ec._disp(f["rec"][brazo]) >= cm.UMBRAL_PROTEGIDA_MW),
+        "neg_pub_por_elevacion": dict(collections.Counter(
+            ("0-30" if e <= 30 else "30-60" if e <= 60 else ">60")
+            for e in (elevacion(f["pasada"].volcano, f["pasada"].instante) for f in neg_pub))),
+        "por_ventana": {w: {"P": sum(pub(f, brazo) for f in prot if d0 <= f["dia"] <= d1),
+                            "P_obs": sum(1 for f in prot if d0 <= f["dia"] <= d1),
+                            "amb": sum(pub(f, brazo) for f in amb if d0 <= f["dia"] <= d1),
+                            "amb_obs": sum(1 for f in amb if d0 <= f["dia"] <= d1),
+                            "neg_pub": sum(1 for f in neg_pub if d0 <= f["dia"] <= d1),
+                            "neg_obs": sum(1 for f in neg_d if d0 <= f["dia"] <= d1)}
+                        for w, d0, d1 in ventanas},
     }
 
 
@@ -302,16 +366,21 @@ def evaluar(pasadas, recs_por_lado, control, brazo, opcion, p_sup, sha, ventanas
         raise ValueError("opción del caso e %r: %s" % (opcion, OPCIONES_E))
     p_sup = dict(p_sup_override or p_sup)
     excl_d, excl_k = set(excluir_dias), set(excluir_claves)
-    pas = [p for p in pasadas if p.instante.strftime("%Y-%m-%d") not in excl_d and ec.clave(p) not in excl_k]
+    pas = [p for p in pasadas if p.instante.strftime("%Y-%m-%d") not in excl_d]
     recs = {lado: [r for r in rs if r["dt"].strftime("%Y-%m-%d") not in excl_d] for lado, rs in recs_por_lado.items()}
     rc, rb = recs[control], recs[brazo]
     marcadas = [_Marcada(p, es_dia_vol(p.volcano, p.instante)) for p in pas]
+    marcadas_eval = [m for m in marcadas if ec.clave(m._p) not in excl_k]
     comp = {"invalido": list(problemas_log), "indecidible": []}
     comp["invalido"] += compuerta_i1(recs, sha)
-    comp["invalido"] += compuerta_i2(rc, rb, marcadas, ventanas)
+    comp["invalido"] += compuerta_i2(rc, rb, marcadas_eval, ventanas)
     T = ec.tabla_por_pasada(pas, recs, control)
     for f, m in zip(T, marcadas):
         f["es_dia"] = m._es_dia
+    banderas_por_periodo(T)
+    # verificador V5: las pasadas excluidas salen DESPUÉS de marcar los días con alerta, así no vuelven negativos a
+    # sus vecinas.
+    T = [f for f in T if f["clave"] not in excl_k]
     Tn = [f for f in T if not f["es_dia"] or f["pasada"].sensor_bucket not in SENSORES_DIA]
     cob_n = ec.cobertura(Tn, recs, control)
     if cob_n["veredicto"] != ec.COBERTURA_OK:
@@ -326,7 +395,7 @@ def evaluar(pasadas, recs_por_lado, control, brazo, opcion, p_sup, sha, ventanas
         completar_control_diurno(T, control, brazo)
     por_sensor, i6 = {}, {}
     for s in SENSORES_DIA:
-        m = metricas_sensor(T, rb, control, brazo, s)
+        m = metricas_sensor(T, rb, control, brazo, s, ventanas)
         m["veredicto"], m["caso"] = veredicto_sensor(m, opcion)
         por_sensor[s] = m
         i6[s] = compuerta_i6(T, brazo, s)
@@ -335,7 +404,7 @@ def evaluar(pasadas, recs_por_lado, control, brazo, opcion, p_sup, sha, ventanas
     glob = veredicto_global(comp, r1, {s: m["veredicto"] for s, m in por_sensor.items()})
     return {"global": glob, "compuertas": comp, "por_sensor": por_sensor, "i6": i6, "r1": r1, "T": T,
             "cobertura_nocturna": cob_n, "cobertura_diurna": det4, "noche_solo_un_lado": solo,
-            "pasadas": len(pas), "pasadas_diurnas_viirs": sum(1 for f in T if f["es_dia"]
+            "pasadas": len(T), "pasadas_diurnas_viirs": sum(1 for f in T if f["es_dia"]
                                                               and f["pasada"].sensor_bucket in SENSORES_DIA)}
 
 
@@ -391,7 +460,9 @@ def cargar_brazo(raices, brazo, ventanas, inner):
                 recs.append({"vol": vol, "b": b, "dt": dt, "es_dia": dia, "t1": r.get("triggered_test1"),
                              "fuente_hotspot": r.get("final_hotspot_source"),
                              "sha": (r.get("regimen") or {}).get("codigo_sha"),
-                             "diag_dia": r.get("diag_umbrales_diurnos")})
+                             "diag_dia": r.get("diag_umbrales_diurnos"),
+                             "sz": r.get("sensor_zenith_deg"), "sa": r.get("sensor_azimuth_deg"),
+                             "soz": r.get("solar_zenith_deg"), "soa": r.get("solar_azimuth_deg")})
                 slim = {kk: r.get(kk) for kk in bp.CAMPOS_JS if kk != "anomaly_pixels"}
                 if r.get("f5_core_vrp_mw") is None:
                     slim["anomaly_pixels"] = [{kk: px.get(kk) for kk in ("lat", "lon", "vrp_mw", "bt_k")}
@@ -475,9 +546,9 @@ def main(argv=None):
             brazo: cargar_brazo(a.raiz, brazo, ventanas, inner)}
     logs = problemas_de_logs(a.raiz, (control, brazo), control)
 
-    def pasadas(canal, vent=ventanas, vols=None):
+    def pasadas(canal, vent=ventanas, vols=None, regla=REGLA_MINIMAS, umbral=cm.UMBRAL_MINIMA_MW):
         out = []
-        for p in cm.resumir_pasadas(filas, canal=canal, regla_minimas=REGLA_MINIMAS):
+        for p in cm.resumir_pasadas(filas, canal=canal, regla_minimas=regla, umbral_minima_mw=umbral):
             d = p.instante.strftime("%Y-%m-%d")
             if p.volcano not in coords() or p.sensor_bucket not in SENSORES_NOCHE:
                 continue
@@ -504,6 +575,25 @@ def main(argv=None):
                  "sin_reflejo": evaluar(pasadas("union"), recs, control, brazo, excluir_claves=reflejo, **kw)["global"]}
     final, motivo = veredicto_final(principal["global"], variantes)
     imprimir(principal, variantes, final, motivo, a.opcion_e)
+    # Informativo, no decide (§6.4 y §7; verificador V3 y V4)
+    info = {"minimas_SE": evaluar(pasadas("union", regla="SE"), recs, control, brazo, **kw)["global"],
+            "minimas_original": evaluar(pasadas("union", regla="original"), recs, control, brazo, **kw)["global"],
+            "minimas_SN_0,04": evaluar(pasadas("union", umbral=cm.UMBRAL_MINIMA_VARIANTE_MW), recs, control, brazo,
+                                       **kw)["global"]}
+    rb12 = aplicar_filtro_reflejo(recs[brazo])
+    sin_angulos = sum(1 for r in recs[brazo] if r["es_dia"] and r["pub"] and angulo_reflejo(r) is None)
+    apagadas = sum(1 for r0, r1 in zip(recs[brazo], rb12) if r0["pub"] and not r1["pub"])
+    con12 = evaluar(pasadas("union"), {control: recs[control], brazo: rb12}, control, brazo, **kw)
+    info["con_filtro_reflejo_12"] = con12["global"]
+    print()
+    print("INFORMATIVO (no decide): %s" % info)
+    print("filtro de reflejo de 12°: apaga %d publicaciones diurnas del brazo; %d publicaciones diurnas sin ángulos"
+          % (apagadas, sin_angulos))
+    for s in SENSORES_DIA:
+        m12 = con12["por_sensor"][s]
+        print("  con filtro %s: %s (caso %s), negativos %d de %d, protegidas %d de %d" % (
+            s, m12["veredicto"], m12["caso"], m12["neg_pub"], m12["neg_obs"], m12["P"], m12["P_obs"]))
+        print("  %s desproporción (1.13 a) sobre lo nuestro): %s" % (s, desproporcion(recs[brazo], s)))
     if a.w1:
         w1 = next(w for w in sk.VENTANAS if w[0] == "W1")
         v1 = [(w1[0], w1[1], w1[2])]
@@ -519,6 +609,29 @@ def main(argv=None):
                                               "motivo": motivo}, ensure_ascii=False, indent=1, default=str),
                                   encoding="utf-8")
     return 0
+
+
+def desproporcion(recs_b, s, ventana_h=72, umbral=3.16):
+    """Instrumento a) del estudio 1.13 sobre las publicaciones diurnas del brazo: magnitud diurna contra la mayor
+    publicación nocturna del brazo, mismo volcán y sensor, a ±72 h; desproporcionada sobre T = 3,16, aislada si no
+    hay ninguna nocturna. Informativo (§7)."""
+    from datetime import timedelta
+    noc = collections.defaultdict(list)
+    for r in recs_b:
+        if r["b"] == s and not r["es_dia"] and r["pub"] and (r["disp"] or 0) > 0:
+            noc[r["vol"]].append((r["dt"], r["disp"]))
+    c = collections.Counter()
+    for r in recs_b:
+        if r["b"] != s or not r["es_dia"] or not r["pub"]:
+            continue
+        vec = [d for t, d in noc[r["vol"]] if abs(t - r["dt"]) <= timedelta(hours=ventana_h)]
+        if not vec:
+            c["aislada"] += 1
+        elif (r["disp"] or 0) / max(vec) > umbral:
+            c["desproporcionada"] += 1
+        else:
+            c["consistente"] += 1
+    return dict(c)
 
 
 def _dias(desde, hasta):
@@ -571,6 +684,9 @@ def imprimir(r, variantes, final, motivo, opcion):
                  m["Qn_den"], m["D"], m["alertas_recuperadas"], m["alertas_obs"], m["neg_1mw"], m["pub_otra"], m["razon_mag_mediana"]))
         print("   -> %s (caso %s, opción %s)" % (m["veredicto"], m["caso"], opcion))
         print("   I6:", {k: v for k, v in r["i6"][s].items() if k != "problemas"})
+        print("   M4 por ventana:", m["por_ventana"])
+        print("   protegidas recuperadas publicadas con 1 MW o más: %d; negativos publicados por elevación solar: %s"
+              % (m["P_1mw"], m["neg_pub_por_elevacion"]))
     print("GLOBAL (principal):", r["global"])
     print("VARIANTES:", variantes)
     print("VEREDICTO FINAL (§6.4):", final, ("| " + motivo) if motivo else "")
