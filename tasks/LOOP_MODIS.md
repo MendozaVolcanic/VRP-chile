@@ -26,6 +26,7 @@ no despachado todavía**. Ramas verificadas contra el remoto: `claude/s162-modis
 | Candado de MOD-D | **ENTREGADO**: tres vueltas de verificador (Fable, Fable, Sonnet), la última «se puede despachar el humo tal como está»; 37 pruebas (37/37 fallan por aserción contra el vacío), 37/37 mutaciones atrapadas, arnés 6/6, manifiesto de 41 archivos, ensayo en seco 7/7, adenda 4 y su apéndice | `s162-modd-candado` `865174abe`, tag `s162-modd-tag`; `experiments/_s162_modis_paquete/` |
 | Humo de MOD-D | **PEDIDO a S164**, no despachado (comando: `git push origin 865174abeea01a1bad726ce25dd70cf0d00ae7eb:refs/heads/s162-modd-humo`) | mensaje a S164, 2026-10-26 ~13:45 UTC |
 | Tandas t1 a t3 de MOD-D | **PENDIENTES** del humo | cola D4 |
+| **Actualización 2026-10-26 ~14:10 UTC** | S164 despachó el humo (run 40333783937): **PASA**, verificado (Sonnet, «pasa con reparos, ninguno bloquea»); **tanda t1 pedida** a S164 (`git push origin 865174abeea01a1bad726ce25dd70cf0d00ae7eb:refs/heads/s162-modd-t1`). La próxima sesión evalúa cada tanda y pide la siguiente (cola D4c) | `experiments/_s162_modis_paquete/humo_40333783937/` |
 
 ### b. Decisiones que espera el dueño
 
