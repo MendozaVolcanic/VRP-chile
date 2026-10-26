@@ -509,7 +509,7 @@ Ejecución sistemática del catálogo de divergencias (`docs/MIROVA_DIVERGENCES_
 > manda el default, A89). Los **tres** procesadores lo consumen en las **dos** ramas, y las dos
 > ramas están encendidas (`ENABLE_DNTI_CONTEXTUAL_PATH`, `ENABLE_FIRST_PASS_TESTS_2_AND_3`):
 > `process_modis.py:696/704` y `:866-867`, `process_viirs.py:1071/1079` y `:1272-1273`,
-> `process_viirs_mod.py:705/713` y `:854-855`. El filtro de borde va siempre activo dentro de
+> `process_viirs_mod.py:736/744` y `:854-855`. El filtro de borde va siempre activo dentro de
 > `build_unsuitable_mask`.
 >
 > Consecuencia: el A/B **F2.1** que este bloque propone más abajo **no se puede correr como está**,
@@ -1318,7 +1318,7 @@ Chaiten pendiente S63).
 > VRP de MIROVA. (2) En VIIRS 750 el código de MIROVA hace lo contrario: borra los alertados, **dilata** la exclusión
 > 3, 5 o 7 celdas según cuántos sean (con 4 o menos se van justo los 8 vecinos) e interpola el fondo con
 > `fillmissing2` desde más afuera, sin recorte (`MIROVA_VIIRS750_VRP.m` l. 63 a 85). En M-band nuestro kernel ni corre
-> (`pipeline/process_viirs_mod.py:460-467`). Para MODIS y VIIRS 375 no hay código; el respaldo posible es Coppola 2016a
+> (`pipeline/process_viirs_mod.py:461-468`). Para MODIS y VIIRS 375 no hay código; el respaldo posible es Coppola 2016a
 > p. 8 renderizada («arithmetic mean of all the pixels surrounding the active one (or around the active cluster)»),
 > que no dice «8 vecinos» ni excluye vecinos tibios. Los resultados empíricos de S61/S62 no cambian; cambia que el
 > fix no es «literal». Texto conservado por historia.
@@ -2452,7 +2452,7 @@ para un A/B, no para afirmar el origen exacto.
 > al primer pase. El segundo pase (`second_pass_adjacent`) recibe
 > `is_summit_mask = vent_dist_per_pixel <= inner_radius_km`, o sea el círculo de siempre
 > (`pipeline/process_viirs.py:1313`, y el mismo patrón en `process_modis.py:923` y
-> `process_viirs_mod.py:892`), corre sin condicionar sobre toda la escena y vuelve a capturar con
+> `process_viirs_mod.py:923`), corre sin condicionar sobre toda la escena y vuelve a capturar con
 > el umbral permisivo lo que el primer pase acaba de rechazar con el estricto. Medido en los 51
 > negativos limpios de fuera de la caja: el primer pase cae de 86 a 7 píxeles y la recaptura sube
 > de 98 a 175; el cúmulo publicado queda idéntico en los 51. **D18 nunca se ha medido con la caja
@@ -2860,7 +2860,7 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 **S141, siete textos más del grupo, páginas renderizadas** (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-07 y P-02): fondo = media de los píxeles que rodean al alertado o al cúmulo, nunca mediana ni anillo regional. Coppola et al. 2013 (JVGR 249, p. 46, Apéndice 2, bajo la ec. A.1); Coppola et al. 2020 (Front. Earth Sci. 7:362, p. 3, bajo la ecuación del VRP); Campus et al. 2022 (Sensors 22, 1713, p. 7, §3.2, bajo la ec. 2); Aveni et al. 2023 (Remote Sens. 15, 2528, p. 8, §3.3, bajo la ec. 3: vecinos «non-alerted»); Coppola et al. 2023 (Front. Earth Sci. 11:1240107, p. 3, §2.2, ec. 1, y p. 6, Tabla 1, fila Tot_Lmir_bk); Campus et al. 2024 (Bull. Volcanol. 86:25, p. 3, columna derecha, bajo la ec. 1, y ec. 2). **Segunda divergencia dentro de D25**: Campus 2024 precisa que cada píxel alertado tiene **su propio** fondo (media de sus vecinos) y que el fondo total es la **suma** de esos fondos; la columna Tot_Lmir_bk del archivo v1 es esa suma («Sum of MIR background radiance from all alerted pixels», Coppola 2023 Tabla 1). Lo nuestro usa un único `t_bg` para todos los píxeles del cúmulo. Para comparar `diag_L_bg_w_m2_sr_um` (T7, S140) con Tot_Lmir_bk hay que dividir este último por Npix. Ningún texto visto menciona recortar a cero el exceso negativo: esa mitad de la pregunta 4 del correo sigue abierta.
 
-**Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:571-579`, 1023; `process_viirs_mod.py:1012`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1044-1052`); `delta_L` recortado a 0 (`process_modis.py:1060`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
+**Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:571-579`, 1023; `process_viirs_mod.py:1043`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1044-1052`); `delta_L` recortado a 0 (`process_modis.py:1060`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
 
 **S142, flag (OFF en producción).** `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375` calcula, en VIIRS 375, el fondo de cada píxel alertado como la media de la **radiancia** de sus vecinos no alertados (`pipeline/vrp_regimes.py:neighbor_mean_radiance_background`). Cuando los 8 vecinos están alertados, la ventana crece hasta `vrp_bg_neighbor_max_half_px` (3 = 7x7, decisión abierta), y si aun así no hay vecinos, se usa el fondo de hoy como respaldo, contado en `diag_bg_vecinos_n_sin_vecinos`. Entra en el bloque contextual (`anomaly_pixels`, cúmulo, F5) y en los dos recomputes del Test 1. Pisa al kernel 3x3 opt-in. El recorte a cero **no** cambia. MODIS y VIIRS 750 siguen con la mediana. En la escena sintética del plan, el cráter pasa de 0,0 a ~0,097 MW. Brazos: `pipeline/profiles/_s142_ab_*.yaml` (S143). Plan: `docs/superpowers/plans/2026-09-15-flags-d22-d25.md`.
 
@@ -3235,7 +3235,7 @@ es una de las que llevan matiz, ver su §4**) y comprobado de nuevo acá al escr
 - `ENABLE_BT_PATH_HOT = False` leído de `pipeline.profile` con `VRP_PROFILE=mirova_equivalent`, no
   del YAML (A89). `ENABLE_DUAL_ROI_BT = True` **sí** construye la máscara, pero
   `process_viirs.py:997` la pone en cero (lo mismo en `process_modis.py:660` y
-  `process_viirs_mod.py:640`), así que el `true` del YAML no significa que el
+  `process_viirs_mod.py:671`), así que el `true` del YAML no significa que el
   camino decida.
 - El contador `diag_n_bt_path` vale 0 en las 2.360 pasadas nocturnas de la ventana desde el
   2026-09-01 (457 MODIS, 954 VIIRS 375, 949 VIIRS 750), pero eso **no es evidencia

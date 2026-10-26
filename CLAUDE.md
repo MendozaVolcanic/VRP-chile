@@ -950,7 +950,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     desenlace **NO está en producción**: `ENABLE_TEST1_NTI_INTEGRAL = False` (verificado
     con `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
     print(p.ENABLE_TEST1_NTI_INTEGRAL)"`), y la rama `compute_test1_nti` existe **sólo en
-    `process_viirs.py:213/1112`** (era 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:62` (era 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:163`
+    `process_viirs.py:213/1112`** (era 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:62` (era 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:164` (era 163 hasta S162, por la línea de import de la vía «código MIROVA»)
     (eran 674/665; líneas actualizadas S131) importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
     describe sigue viva en los 3 sensores.** Ni encendiendo el flag se cura MODIS/V750,
     que es donde el píxel grande amplifica el gradiente (A80). Caso de manual de A87:
@@ -1263,7 +1263,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 
   **El corolario incómodo**: las cinco veces el error fue de quien estaba **auditando**,
   no de quien escribió el código — y dos de esas veces el texto correcto ya estaba en el
-  repo (el docstring de `process_viirs_mod.py:466` (era 465 hasta S149, 439 tras la 8b de S140, 438 antes, 436 hasta S135, 416 en S131 y 409 antes) nombraba los 5 volcanes opt-in desde
+  repo (el docstring de `process_viirs_mod.py:467` (era 466 hasta S162, cuando la vía «código MIROVA» agregó una línea de import, 465 hasta S149, 439 tras la 8b de S140, 438 antes, 436 hasta S135, 416 en S131 y 409 antes) nombraba los 5 volcanes opt-in desde
   S72). La técnica se equivoca en la misma dirección que el defecto que busca, así que un
   hallazgo de la forma «esto está muerto» exige verificación cruzada antes de reportarse.
   Detalle: `docs/AUDIT_S127.md` + T9 en `docs/PROTOCOLO_AUDITORIA_PROFUNDA.md`.

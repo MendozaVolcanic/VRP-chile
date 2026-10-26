@@ -348,10 +348,18 @@ def append_record(volcano_name: str, record: dict,
     #   (afecta schema, dashboard, audits, OSF mapping).
     MAX_HOTSPOT_DIST_KM = max_hotspot_dist_km if max_hotspot_dist_km is not None else 5.0
 
+    # S162 V750-A: un record de la vía «código MIROVA» (pipeline/mirova_v750_codigo.py, flag
+    # enable_v750_codigo_mirova, APAGADO) no pasa por las tres compuertas de la era K de abajo
+    # (filtro de píxeles por distancia, geocerca de hotspot_dist_km y tope de píxeles por cúmulo):
+    # el código de MIROVA no las tiene, y si la vía pasara por ellas en el NRT, la sombra mediría
+    # otro paquete que el censo, que lee la vía antes del almacén (A118). Con el flag apagado
+    # ningún record trae la marca y este archivo se comporta como antes, bit a bit.
+    _via_mirova = record.get("via_codigo_mirova") is True
+
     # S35 H8: filtro pixel-por-pixel ANTES de los normalizaciones de VRP.
     # Esto garantiza que vrp_mir_mw refleje SOLO los pixels in_range, y que
     # los downstream consumers (audit, dashboard) vean datos consistentes.
-    if enable_pixel_level_distance_filter:
+    if enable_pixel_level_distance_filter and not _via_mirova:
         _filter_pixels_by_distance(record, MAX_HOTSPOT_DIST_KM)
 
     if "vrp_mir_mw" in record and "vrp_mw" not in record:
@@ -390,7 +398,7 @@ def append_record(volcano_name: str, record: dict,
     # el zero-out histórico. Garantiza que vrp_mw=0 cuando solo hay señal far.
     # F47 H4 modificación: si cluster_rescues, en vez de zero-out el rollup
     # gana el cluster vent-anchored y se reescriben los campos hotspot/final.
-    if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
+    if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM and not _via_mirova:
         if cluster_rescues:
             # F47 rescate — cluster vent-anchored gana al FP single far.
             vrp_eruption = pc_vrp
@@ -444,7 +452,7 @@ def append_record(volcano_name: str, record: dict,
     # el cap es per-volcano (yaml override `max_cluster_pixels: 12` solo
     # Villarrica). Sin override (None ó 0) → comportamiento legacy.
     # Ver docs/F52_VILLARRICA_OVER_ESTIMATION_S77.md.
-    if max_cluster_pixels is not None and max_cluster_pixels > 0:
+    if max_cluster_pixels is not None and max_cluster_pixels > 0 and not _via_mirova:
         pc_for_cap = record.get("primary_cluster") or {}
         pc_n_pixels = pc_for_cap.get("n_pixels") or 0
         if pc_n_pixels > max_cluster_pixels:
