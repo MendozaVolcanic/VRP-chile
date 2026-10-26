@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~11:40 UTC (S163): O2 MODIS confirmado contra MATLAB; sesión del paper
+- `loop-modis-2` (`experiments/_s163_o2_modis/RESULTADO_O2_MODIS_MATLAB.md`, verificador Sonnet en
+  `verificador_matlab/INFORME.md`): la regla reproduce el fondo de MATLAB R2026b en 404 de 404 filas y 191 de 191 escenas
+  MODIS, incluidos los 6 bloques 2 × 2 que estaban en SOSPECHA (máx 5,55e-17); el port y el marco cambiado quedan a 1,06e-4.
+  El port no es MATLAB en 1 píxel (24 de 87 iguales), ni en 2 × 2, ni en formas dispersas. Alcance: 161 de 191 escenas de
+  Láscar, huecos de 3 × 3; MATLAB no extrapola (159 celdas sin rellenar en 10 escenas, ninguna alerta). SIN DATO que MIROVA
+  use ese `.m` para MODIS. **Con D-48**: la columna M con la regla en MOD-D deja de ser preliminar; la vía de MODIS, cuando
+  exista, reutiliza la función de #907. Mutaciones del candado: 18 de 31 atrapadas hasta ahora.
+- Nicolás pidió revisar el paper (estado, estructura, uso de IA y doble chequeos): sesión aparte «Paper VRP Chile: estado,
+  estructura y riesgos de la IA» (`local_41e333ef-587b-4af7-96db-c19cc7f3b9b5`), entrega en `docs/paper/` con PR en
+  borrador.
+
 ### 2026-10-26 ~11:20 UTC (S163, vuelta 13): tres sesiones en paralelo; borradores viejos resueltos
 - Nicolás: «Sí, lanza las tres sesiones en paralelo (unificar evidencia S162 y S159, pendientes del instrumento,
   pre-registro del A/B diurno sobre K) y cierra o integra los borradores viejos como recomiendas». MATLAB: ya entregó todo
