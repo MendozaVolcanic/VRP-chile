@@ -1,0 +1,247 @@
+..FFF.FFFFFFF                                                            [100%]
+================================== FAILURES ===================================
+___________ test_cero_granulos_no_es_completa_y_no_es_falla[False] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000027E7F873E60>
+capsys = <_pytest.capture.CaptureFixture object at 0x0000027E7F870050>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_cero_granulos_no_es_compl0')
+estricto = False
+
+    @pytest.mark.parametrize("estricto", [False, True])
+    def test_cero_granulos_no_es_completa_y_no_es_falla(monkeypatch, capsys, tmp_path, estricto):
+        cod, out, cob = _correr(monkeypatch, capsys, tmp_path, PASADO, _buscador(PASADO, vacio=True), estricto)
+>       assert "Cobertura: completa" not in out, "cero gránulos se informó como cobertura completa (R2-9)"
+E       AssertionError: cero gránulos se informó como cobertura completa (R2-9)
+E       assert 'Cobertura: completa' not in '=== [VRP pr....\n\nDone.\n'
+E         
+E         'Cobertura: completa' is contained here:
+E           026-10-18
+E           Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         ? +++++++++++++++++++
+E           
+E           Done.
+
+tests\test_cobertura_incidencias_s159.py:118: AssertionError
+____________ test_cero_granulos_no_es_completa_y_no_es_falla[True] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000027E7F8144A0>
+capsys = <_pytest.capture.CaptureFixture object at 0x0000027E7F816090>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_cero_granulos_no_es_compl1')
+estricto = True
+
+    @pytest.mark.parametrize("estricto", [False, True])
+    def test_cero_granulos_no_es_completa_y_no_es_falla(monkeypatch, capsys, tmp_path, estricto):
+        cod, out, cob = _correr(monkeypatch, capsys, tmp_path, PASADO, _buscador(PASADO, vacio=True), estricto)
+>       assert "Cobertura: completa" not in out, "cero gránulos se informó como cobertura completa (R2-9)"
+E       AssertionError: cero gránulos se informó como cobertura completa (R2-9)
+E       assert 'Cobertura: completa' not in '=== [VRP pr....\n\nDone.\n'
+E         
+E         'Cobertura: completa' is contained here:
+E           026-10-18
+E           Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         ? +++++++++++++++++++
+E           
+E           Done.
+
+tests\test_cobertura_incidencias_s159.py:118: AssertionError
+_________ test_cero_granulos_por_la_ventana_tambien_queda_registrado __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000027E7F839940>
+capsys = <_pytest.capture.CaptureFixture object at 0x0000027E7F839040>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_cero_granulos_por_la_vent0')
+
+    def test_cero_granulos_por_la_ventana_tambien_queda_registrado(monkeypatch, capsys, tmp_path):
+        """El camino por ventana (S157) devuelve [] para un día sin gránulos sin pasar por search_granules por día."""
+        monkeypatch.setenv("VRP_BUSQUEDA_VENTANA", "1")
+        monkeypatch.setenv("VRP_VENTANA_BUSQUEDA", "2026-10-16:2026-10-18")
+        cod, out, cob = _correr(monkeypatch, capsys, tmp_path, PASADO, _buscador(PASADO, vacio=True), False)
+>       assert "Cobertura: completa" not in out
+E       AssertionError: assert 'Cobertura: completa' not in '=== [VRP pr....\n\nDone.\n'
+E         
+E         'Cobertura: completa' is contained here:
+E           026-10-18
+E           Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         ? +++++++++++++++++++
+E           
+E           Done.
+
+tests\test_cobertura_incidencias_s159.py:133: AssertionError
+___________ test_l1b_sin_geolocalizacion_queda_registrado[False-0] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000027E7E7AB770>
+capsys = <_pytest.capture.CaptureFixture object at 0x0000027E7E7AB9B0>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_l1b_sin_geolocalizacion_q0')
+estricto = False, codigo = 0
+
+    @pytest.mark.parametrize("estricto,codigo", [(False, 0), (True, 3)])
+    def test_l1b_sin_geolocalizacion_queda_registrado(monkeypatch, capsys, tmp_path, estricto, codigo):
+        cod, out, cob = _correr(monkeypatch, capsys, tmp_path, PASADO, _buscador(PASADO, sin_geo=True), estricto)
+>       assert "Cobertura: completa" not in out, "un L1B sin geolocalización se descartó en silencio (VB-1)"
+E       AssertionError: un L1B sin geolocalización se descartó en silencio (VB-1)
+E       assert 'Cobertura: completa' not in '=== [VRP pr....\n\nDone.\n'
+E         
+E         'Cobertura: completa' is contained here:
+E           t filter)
+E           Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         ? +++++++++++++++++++
+E           
+E           Done.
+
+tests\test_cobertura_incidencias_s159.py:154: AssertionError
+____________ test_l1b_sin_geolocalizacion_queda_registrado[True-3] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000027E7F83B410>
+capsys = <_pytest.capture.CaptureFixture object at 0x0000027E7F8396A0>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_l1b_sin_geolocalizacion_q1')
+estricto = True, codigo = 3
+
+    @pytest.mark.parametrize("estricto,codigo", [(False, 0), (True, 3)])
+    def test_l1b_sin_geolocalizacion_queda_registrado(monkeypatch, capsys, tmp_path, estricto, codigo):
+        cod, out, cob = _correr(monkeypatch, capsys, tmp_path, PASADO, _buscador(PASADO, sin_geo=True), estricto)
+>       assert "Cobertura: completa" not in out, "un L1B sin geolocalización se descartó en silencio (VB-1)"
+E       AssertionError: un L1B sin geolocalización se descartó en silencio (VB-1)
+E       assert 'Cobertura: completa' not in '=== [VRP pr....\n\nDone.\n'
+E         
+E         'Cobertura: completa' is contained here:
+E           t filter)
+E           Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         ? +++++++++++++++++++
+E           
+E           Done.
+
+tests\test_cobertura_incidencias_s159.py:154: AssertionError
+_________ test_geolocalizacion_que_no_llega_al_disco_queda_registrada _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000027E7E7A9310>
+capsys = <_pytest.capture.CaptureFixture object at 0x0000027E7E7AB890>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_geolocalizacion_que_no_ll0')
+
+    def test_geolocalizacion_que_no_llega_al_disco_queda_registrada(monkeypatch, capsys, tmp_path):
+        """El par se encontró, pero sólo el L1B quedó en disco: process_date lo descartaba con un print."""
+        def baja_solo_l1b(gs, d):
+            d.mkdir(parents=True, exist_ok=True)
+            p = d / "MOD021KM.A2026291.0535.061.nrt.hdf"
+            p.write_bytes(b"x")
+            return [p]
+        monkeypatch.setattr(fetch, "download_granules", baja_solo_l1b)
+        cod, out, cob = _correr(monkeypatch, capsys, tmp_path, PASADO, _buscador(PASADO), True)
+>       assert "Cobertura: completa" not in out
+E       AssertionError: assert 'Cobertura: completa' not in '=== [VRP pr....\n\nDone.\n'
+E         
+E         'Cobertura: completa' is contained here:
+E           \20261018
+E           Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         ? +++++++++++++++++++
+E           
+E           Done.
+
+tests\test_cobertura_incidencias_s159.py:168: AssertionError
+____________________ test_dia_en_curso_es_parcial[False-0] ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000027E7E7ABAA0>
+capsys = <_pytest.capture.CaptureFixture object at 0x0000027E7E7ABBC0>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_dia_en_curso_es_parcial_F0')
+estricto = False, codigo = 0
+
+    @pytest.mark.parametrize("estricto,codigo", [(False, 0), (True, 3)])
+    def test_dia_en_curso_es_parcial(monkeypatch, capsys, tmp_path, estricto, codigo):
+        hoy = _hoy()
+        cod, out, cob = _correr(monkeypatch, capsys, tmp_path, hoy, _buscador(hoy), estricto)
+>       assert "Cobertura: completa" not in out, "el día en curso se informó como cobertura completa (R2-9)"
+E       AssertionError: el día en curso se informó como cobertura completa (R2-9)
+E       assert 'Cobertura: completa' not in '=== [VRP pr....\n\nDone.\n'
+E         
+E         'Cobertura: completa' is contained here:
+E           t filter)
+E           Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         ? +++++++++++++++++++
+E           
+E           Done.
+
+tests\test_cobertura_incidencias_s159.py:179: AssertionError
+____________________ test_dia_en_curso_es_parcial[True-3] _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000027E7F83AED0>
+capsys = <_pytest.capture.CaptureFixture object at 0x0000027E7F83BDA0>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_dia_en_curso_es_parcial_T0')
+estricto = True, codigo = 3
+
+    @pytest.mark.parametrize("estricto,codigo", [(False, 0), (True, 3)])
+    def test_dia_en_curso_es_parcial(monkeypatch, capsys, tmp_path, estricto, codigo):
+        hoy = _hoy()
+        cod, out, cob = _correr(monkeypatch, capsys, tmp_path, hoy, _buscador(hoy), estricto)
+>       assert "Cobertura: completa" not in out, "el día en curso se informó como cobertura completa (R2-9)"
+E       AssertionError: el día en curso se informó como cobertura completa (R2-9)
+E       assert 'Cobertura: completa' not in '=== [VRP pr....\n\nDone.\n'
+E         
+E         'Cobertura: completa' is contained here:
+E           t filter)
+E           Cobertura: completa (ninguna búsqueda ni descarga fallida).
+E         ? +++++++++++++++++++
+E           
+E           Done.
+
+tests\test_cobertura_incidencias_s159.py:179: AssertionError
+__________ test_dia_parcial_depende_del_reloj_no_de_la_fecha_pedida ___________
+
+    def test_dia_parcial_depende_del_reloj_no_de_la_fecha_pedida():
+        """Unidad: el día 2026-10-18 es parcial a las 02:00 del 19 (dentro de la latencia mínima) y no a las 04:00."""
+        d = datetime(2026, 10, 18)
+>       assert fetch.dia_incompleto(d, ahora=datetime(2026, 10, 18, 23, 0))
+               ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'pipeline.fetch' has no attribute 'dia_incompleto'
+
+tests\test_cobertura_incidencias_s159.py:189: AttributeError
+_____________ test_reproc_brazos_cuenta_lo_que_el_estricto_cuenta _____________
+
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_reproc_brazos_cuenta_lo_q0')
+
+    def test_reproc_brazos_cuenta_lo_que_el_estricto_cuenta(tmp_path):
+        _spec2 = importlib.util.spec_from_file_location("reproc_brazos_s159", RAIZ / "scripts" / "reproc_brazos.py")
+        rb = importlib.util.module_from_spec(_spec2)
+        _spec2.loader.exec_module(rb)
+    
+        def ejecutar(cmd, env=None, stdout=None, stderr=None):
+            cob = Path(cmd[cmd.index("--cobertura-json") + 1])
+            cob.parent.mkdir(parents=True, exist_ok=True)
+            cob.write_text(json.dumps({"fallas": [], "n": 0, "incidencias": [
+                {"tipo": "sin_geolocalizacion", "cuenta_estricto": True, "volcan": "Lascar", "fecha": "2026-09-01"},
+                {"tipo": "sin_granulos", "cuenta_estricto": False, "volcan": "Lascar", "fecha": "2026-09-01"}]}),
+                encoding="utf-8")
+    
+            class R:
+                returncode = 0
+            return R()
+        salida = tmp_path / "c.json"
+>       assert rb.correr("Lascar", "2026-09-01", "2026-09-01", ["p"], tmp_path, estricto=True,
+                         cobertura_json=salida, ejecutar=ejecutar) == 3
+E       AssertionError: assert 0 == 3
+E        +  where 0 = <function correr at 0x0000027E7FBAD120>('Lascar', '2026-09-01', '2026-09-01', ['p'], WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_reproc_brazos_cuenta_lo_q0'), estricto=True, cobertura_json=WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1218/test_reproc_brazos_cuenta_lo_q0/c.json'), ejecutar=<function test_reproc_brazos_cuenta_lo_que_el_estricto_cuenta.<locals>.ejecutar at 0x0000027E7FBAC540>)
+E        +    where <function correr at 0x0000027E7FBAD120> = <module 'reproc_brazos_s159' from 'C:\\vrp-trabajo\\s159-instrumentos\\scripts\\reproc_brazos.py'>.correr
+
+tests\test_cobertura_incidencias_s159.py:214: AssertionError
+---------------------------- Captured stdout call -----------------------------
+[brazos] Lascar 2026-09-01 p rc=0 0s
+============================== warnings summary ===============================
+tests/test_cobertura_incidencias_s159.py::test_cero_granulos_por_la_ventana_tambien_queda_registrado
+  C:\vrp-trabajo\s159-instrumentos\pipeline\fetch.py:537: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    ahora = ahora or datetime.utcnow()
+
+tests/test_cobertura_incidencias_s159.py::test_dia_en_curso_es_parcial[False-0]
+tests/test_cobertura_incidencias_s159.py::test_dia_en_curso_es_parcial[True-3]
+  C:\vrp-trabajo\s159-instrumentos\tests\test_cobertura_incidencias_s159.py:100: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().strftime("%Y-%m-%d")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_cobertura_incidencias_s159.py::test_cero_granulos_no_es_completa_y_no_es_falla[False]
+FAILED tests/test_cobertura_incidencias_s159.py::test_cero_granulos_no_es_completa_y_no_es_falla[True]
+FAILED tests/test_cobertura_incidencias_s159.py::test_cero_granulos_por_la_ventana_tambien_queda_registrado
+FAILED tests/test_cobertura_incidencias_s159.py::test_l1b_sin_geolocalizacion_queda_registrado[False-0]
+FAILED tests/test_cobertura_incidencias_s159.py::test_l1b_sin_geolocalizacion_queda_registrado[True-3]
+FAILED tests/test_cobertura_incidencias_s159.py::test_geolocalizacion_que_no_llega_al_disco_queda_registrada
+FAILED tests/test_cobertura_incidencias_s159.py::test_dia_en_curso_es_parcial[False-0]
+FAILED tests/test_cobertura_incidencias_s159.py::test_dia_en_curso_es_parcial[True-3]
+FAILED tests/test_cobertura_incidencias_s159.py::test_dia_parcial_depende_del_reloj_no_de_la_fecha_pedida
+FAILED tests/test_cobertura_incidencias_s159.py::test_reproc_brazos_cuenta_lo_que_el_estricto_cuenta
+10 failed, 3 passed, 3 warnings in 4.00s

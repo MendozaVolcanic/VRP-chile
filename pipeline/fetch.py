@@ -7,7 +7,8 @@
 #                 NASA (CMR), primero el producto definitivo y despues el de tiempo casi real (LANCE), y baja
 #                 solo las pasadas nocturnas. Una plataforma con cese anunciado no se busca para los dias
 #                 enteros posteriores al cese (S161). Lo que no se pudo buscar o bajar, y lo que dio cero en
-#                 toda la corrida, queda en la cobertura que informa scripts/run_pipeline.py.
+#                 toda la corrida, queda en la cobertura que informa scripts/run_pipeline.py; tambien, por
+#                 volcan y dia, la busqueda vacia, el L1B sin geolocalizacion y el dia parcial (S159, I1).
 # Modelo/método : Reglas deterministicas de busqueda y descarga. Sin aprendizaje automatico.
 # Datos entrada : Catalogo CMR y granulos MOD021KM/MYD021KM, MOD03/MYD03, VNP02IMG/VJ102IMG/VJ202IMG,
 #                 VNP02MOD/VJ102MOD/VJ202MOD y sus geolocalizaciones; scripts/ceses_esperados.json. SIN datos
@@ -764,9 +765,50 @@ def fallas_de_cobertura() -> list[dict]:
 
 
 def limpiar_fallas() -> None:
-    """Olvida las fallas y el conteo por plataforma (inicio de una corrida)."""
+    """Olvida las fallas, el conteo por plataforma y las incidencias (inicio de una corrida)."""
     _FALLAS.clear()
     _PLATAFORMAS.clear()
+    _INCIDENCIAS.clear()
+
+
+# ── S159 (tarea I1; AUDIT_S158_R2, R2-9 y VB-1): incidencias de cobertura que no son fallas ──────────
+# POR QUÉ: la cobertura sólo contaba búsquedas y descargas que FALLARON, así que tres situaciones salían como
+# «Cobertura: completa» sin serlo. (1) Una búsqueda que responde vacía para un volcán y un día: puede ser normal (la
+# plataforma no pasó sobre el volcán) o un catálogo vacío, como el 2026-10-18 en que CMR devolvía cero gránulos de todo
+# el día (R2-13). Este módulo no tiene un modelo de órbita para distinguirlas, así que se registra SIN JUICIO y no
+# cuenta como falla ni en modo estricto. El conteo por plataforma de S161 (_PLATAFORMAS) sólo avisa cuando una
+# plataforma dio cero en TODA la corrida; esto deja dicho el volcán y el día aunque la plataforma haya entregado en
+# otros. (2) Un L1B sin su geolocalización (el 20-oct CMR tenía 72 MOD021KM NRT contra 68 MOD03, VB-1): se descartaba
+# en silencio; es pérdida segura y cuenta en modo estricto. (3) Un día que no había terminado, más la latencia mínima
+# de LANCE, cuando se buscó: es parcial por construcción (el NRT procesa siempre el día en curso); cuenta en modo
+# estricto. El NRT no usa el modo estricto: su código de salida no cambia.
+# Valor: si la incidencia cuenta para --estricto-cobertura.
+TIPOS_INCIDENCIA = {"sin_granulos": False, "sin_geolocalizacion": True, "dia_parcial": True}
+# Latencia de LANCE NRT: «~3h» (CLAUDE.md del proyecto, Constraints técnicos: «NASA LANCE NRT ~3h latencia»).
+# Se usa como la MÍNIMA: un día más joven que su fin más esto seguro está incompleto; uno más viejo todavía puede
+# estarlo (Standard publicado a medias, gránulos que llegan tarde) y eso el código no lo puede saber.
+LATENCIA_MINIMA_NRT_H = 3
+_INCIDENCIAS: list = []
+
+
+def registrar_incidencia(tipo: str, volcan, fecha, plataforma=None, motivo: str = "") -> None:
+    """Anota una incidencia de cobertura (TIPOS_INCIDENCIA). No es una falla: no entra en fallas_de_cobertura()."""
+    if tipo not in TIPOS_INCIDENCIA:
+        raise ValueError("tipo de incidencia desconocido: %r" % tipo)
+    _INCIDENCIAS.append({"tipo": tipo, "cuenta_estricto": TIPOS_INCIDENCIA[tipo], "volcan": volcan,
+                         "fecha": fecha, "plataforma": plataforma, "motivo": str(motivo)[:200]})
+
+
+def incidencias_de_cobertura() -> list[dict]:
+    """Incidencias registradas desde el último limpiar_fallas()."""
+    return [dict(i) for i in _INCIDENCIAS]
+
+
+def dia_incompleto(date: datetime, ahora: datetime | None = None) -> bool:
+    """True si al momento `ahora` (UTC) el día UTC de `date` todavía no terminó más LATENCIA_MINIMA_NRT_H."""
+    inicio = datetime(date.year, date.month, date.day)
+    ahora = ahora or datetime.utcnow()
+    return ahora < inicio + timedelta(days=1, hours=LATENCIA_MINIMA_NRT_H)
 
 
 def _contar_plataforma(platform: str, campo: str, desde: datetime | None = None) -> None:
@@ -1108,7 +1150,8 @@ def _filter_nighttime_granules(granules: list, lat: float, lon: float,
 def fetch_for_volcano(volcano: dict, date: datetime,
                       tmp_dir: Path, sensors: list[str] = None,
                       skip_noaa20: bool = False,
-                      nighttime_only: bool = True) -> dict[str, list[Path]]:
+                      nighttime_only: bool = True,
+                      ahora: datetime | None = None) -> dict[str, list[Path]]:
     """
     Download all relevant L1B + geolocation granules for a volcano on a given date.
 
@@ -1156,6 +1199,10 @@ def fetch_for_volcano(volcano: dict, date: datetime,
         all_platforms = [(p, l, g) for p, l, g in all_platforms if "NOAA20" not in p]
 
     fecha_str = date.strftime("%Y-%m-%d")
+    # S159 (I1): el día en curso (o recién terminado) es parcial por construcción; una vez por volcán y día.
+    if dia_incompleto(date, ahora):
+        registrar_incidencia("dia_parcial", volcano.get("name", "?"), fecha_str, None,
+                             "el día UTC no había terminado más %d h de latencia de LANCE" % LATENCIA_MINIMA_NRT_H)
     for platform, l1b_key, geo_key in all_platforms:
         # S161 POR QUÉ: después de un cese anunciado (Suomi NPP, 2026-11-02 13:00 UTC) los gránulos
         # no van a existir; buscarlos da cero, que el log no distingue de «no pasó». Se salta la
@@ -1178,6 +1225,11 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             if len(_FALLAS) == n_fallas_antes:
                 _contar_plataforma(platform, "con_granulos" if l1b_granules else "sin_granulos")
             if not l1b_granules:
+                # S159 (I1): «no devolvió nada» y «no pudo buscar» son cosas distintas. Si la búsqueda falló,
+                # ya quedó como falla (cortacircuito o error) y no se duplica; si respondió vacía, sin juicio.
+                if len(_FALLAS) == n_fallas_antes:
+                    registrar_incidencia("sin_granulos", volcano.get("name", "?"), fecha_str, platform,
+                                         "la búsqueda de %s respondió sin gránulos" % l1b_key)
                 continue
 
             # Pre-download nighttime filter: skip daytime granules entirely.
@@ -1203,6 +1255,12 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             geo_granules = search_granules(geo_key, lat, lon, radius, date)
             _diag(f"SEARCH_GEO_DONE {platform} n_geo={len(geo_granules)}")
             matched = _match_granules(l1b_granules, geo_granules)
+            # S159 (I1, VB-1): _match_granules descarta en silencio los L1B sin geolocalización.
+            sin_geo = len(l1b_granules) - len(matched)
+            if sin_geo and len(_FALLAS) == n_fallas_antes:
+                registrar_incidencia("sin_geolocalizacion", volcano.get("name", "?"), fecha_str, platform,
+                                     "%d de %d L1B sin su geolocalización en el catálogo (%s)"
+                                     % (sin_geo, len(l1b_granules), geo_key))
             etapa, producto = "descarga", l1b_key
             platform_dir = tmp_dir / platform
             paths = []

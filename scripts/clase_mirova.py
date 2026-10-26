@@ -109,7 +109,7 @@ SENSORES_MINIMA = ("VIIRS375",)
 MODOS_MINIMAS = ("SN", "SE", "original")
 MODO_MINIMAS = "SN"
 TIPO_MINIMA_SE = "ALERTA_MINIMA_SE"
-VENTANA_S = 120   # la del pareo del etiquetador (banco_paridad.TOL_S)
+VENTANA_S = 120   # ÚNICA definición del pareo con MIROVA (±s); banco_paridad.TOL_S la importa (S159, I3)
 
 
 def _instante(fecha_utc: str) -> datetime:

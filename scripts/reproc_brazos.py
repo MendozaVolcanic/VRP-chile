@@ -15,7 +15,8 @@ se lee al importar (pipeline/profile.py) y no se puede cambiar dentro de un proc
 Los brazos escriben cada uno en su data_subdir y corren en serie, nunca a la vez (A47).
 
 Salida: código 1 si algún brazo falló en algún día (sigue con el resto, para no perder los demás días); con
---estricto-cobertura, 3 si alguna búsqueda o descarga no se pudo hacer; 0 si no.
+--estricto-cobertura, 3 si alguna búsqueda o descarga no se pudo hacer, o si un L1B quedó sin
+geolocalización o un día era parcial (S159); 0 si no. Las búsquedas sin gránulos se informan y no cuentan.
 
 Uso:
   python scripts/reproc_brazos.py --volcano Lascar --start 2026-09-01 --end 2026-09-20 \
@@ -76,7 +77,7 @@ def correr(volcan: str, ini: str, fin: str, perfiles: list[str], trabajo, overwr
                 "VRP_CACHE_BUSQUEDA_DIR": str(trabajo / "busquedas"),
                 "VRP_TMP_DIR": str(granulos),
                 "VRP_CONSERVAR_GRANULOS": "1"})
-    fallidos, fallas = [], []
+    fallidos, fallas, incidencias = [], [], []
     for fecha in fechas(ini, fin):
         for perfil in perfiles:
             cob = trabajo / "cobertura" / f"{perfil}_{fecha}.json"
@@ -91,23 +92,30 @@ def correr(volcan: str, ini: str, fin: str, perfiles: list[str], trabajo, overwr
             if r.returncode != 0:
                 fallidos.append((fecha, perfil, r.returncode))
             if cob.exists():
-                for f in json.loads(cob.read_text(encoding="utf-8")).get("fallas", []):
+                leido = json.loads(cob.read_text(encoding="utf-8"))
+                for f in leido.get("fallas", []):
                     fallas.append(dict(f, perfil=perfil))
+                # S159 (I1): incidencias que no son fallas (sin gránulos, L1B sin geolocalización, día parcial).
+                for i in leido.get("incidencias", []):
+                    incidencias.append(dict(i, perfil=perfil))
             elif r.returncode == 0:
                 fallidos.append((fecha, perfil, "sin archivo de cobertura"))
         shutil.rmtree(granulos / volcan / fecha.replace("-", ""), ignore_errors=True)
         # Día a día y no al final: si el paso muere por timeout, lo ya visto queda escrito (verificador S157).
         if cobertura_json:
             Path(cobertura_json).parent.mkdir(parents=True, exist_ok=True)
-            Path(cobertura_json).write_text(json.dumps({"fallas": fallas, "n": len(fallas), "hasta": fecha},
+            Path(cobertura_json).write_text(json.dumps({"fallas": fallas, "n": len(fallas), "incidencias": incidencias,
+                                                        "hasta": fecha},
                                                        ensure_ascii=False, indent=1), encoding="utf-8")
     if fallidos:
         print(f"::error::reproc_brazos {volcan}: {len(fallidos)} corridas de brazo fallaron: {fallidos[:10]}",
               flush=True)
         return 1
-    if fallas:
-        print(f"::warning::reproc_brazos {volcan}: {len(fallas)} búsquedas o descargas fallidas "
-              f"(días: {sorted({f.get('fecha') for f in fallas})[:12]})", flush=True)
+    cuentan = [i for i in incidencias if i.get("cuenta_estricto")]
+    if fallas or cuentan:
+        print(f"::warning::reproc_brazos {volcan}: {len(fallas)} búsquedas o descargas fallidas y {len(cuentan)} "
+              f"incidencias que cuentan (L1B sin geolocalización o día parcial) "
+              f"(días: {sorted({f.get('fecha') for f in fallas + cuentan})[:12]})", flush=True)
         return 3 if estricto else 0
     return 0
 
