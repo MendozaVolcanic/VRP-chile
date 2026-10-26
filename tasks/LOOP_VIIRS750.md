@@ -37,7 +37,14 @@ defensivo `pre-s162-via-mirova` (`deaf8f59b`). Cola de este relevo:
 - R4 [2026-11-03] objetivos de V750-B desde su tag y pedido de despacho con los sha256 (paso 2 de abajo); la lectura
   va con `adenda1/leer_v750b.py` (adenda 1 CONFIRMADA por S163 bajo D-48 el 2026-10-26, sobre `7aa2788a0`). S163 pide
   para el despacho: objetivos y su sha256, el tag desde el que se despacha, el número de jobs y el comando exacto del
-  workflow (`probe-s162-v750b.yml`).
+  workflow (`probe-s162-v750b.yml`). **Ensayo hecho el 2026-10-26** sobre main `cff07d173` (los archivos de V750-B son
+  idénticos al tag sellado): `python experiments/_s162_v750b/objetivos_v750b.py --data data/mirova_equivalent --ref-dest
+  C:/vrp-trabajo/temporales/v750b_ensayo/ref --hasta 2026-10-25` → 5.781 objetivos, 0 sin gránulo, 279 alertas de MIROVA
+  (103 protegidas), 0 alertas sin record nuestro, 41 s. Los archivos del ensayo se borraron (no son los definitivos).
+  El 2026-11-03: el mismo comando con `--hasta 2026-11-02` sobre el main de ese día, commitear objetivos_v750b.json,
+  sin_granulo_v750b.json y poblacion_completa.json con su sha256 y pedir el despacho a S164.
+- R7 [hecho] #907 mergeado por S164 (merge `cff07d173`, tag `pre-s164-merge-907`, Tests verde). Flag apagado. Avisado a
+  loop-viirs375 que la vía está en main.
 - R5 [HECHO, `d4f1c891c` y `a16aa14b4` en `s162-via-mirova`, PR #907, CI verde] la regla de MATLAB la halló el
   subagente de S163 (Delaunay con desempate simbólico, x = fila); portada: VRP 166/166 contra MATLAB, fondo 84/84,
   Etna exacto; oro de 8 escenas en `tests/data/`; equivalencia contra el módulo independiente de S163; nulo del módulo
