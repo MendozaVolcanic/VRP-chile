@@ -569,6 +569,22 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~11:20 UTC (S163, vuelta 13): tres sesiones en paralelo; borradores viejos resueltos
+- Nicolás: «Sí, lanza las tres sesiones en paralelo (unificar evidencia S162 y S159, pendientes del instrumento,
+  pre-registro del A/B diurno sobre K) y cierra o integra los borradores viejos como recomiendas». MATLAB: ya entregó todo
+  lo necesario (O2 de V750, MODIS y V375); detenerlo no afecta.
+- Sesiones abiertas (cada una en su worktree desde main, reportan a S163, ninguna despacha ni mergea):
+  `unificar-evidencia` (`local_60e2df4b-710b-4476-938e-79bdaf0837e8`): lleva a main la evidencia de S159 y S162 repartida
+  en ramas (no toca las ramas de las hijas vivas); `instrumento-pendientes` (`local_bad70f2d-a64f-4eec-98f8-0497c3601256`):
+  placebos de D-44 sobre producción, tarea 1.35, «no observado» frente a hueco de NASA; `diurno-k-prereg`
+  (`local_bd4d68e7-100e-412a-9456-3f89c7beb7e4`): pre-registro, arnés y evaluador del A/B diurno sobre K (D-10, tarea 1.32),
+  sin despachar.
+- Borradores viejos: **#886 y #887 mergeados** (squash `e9ef99cbe` y `047bd5692`; sólo `experiments/_s158_*`, CI verde);
+  **#776, #880 y #890 cerrados** con comentario (los dos primeros meterían workflows de probe en main; #890 por D25 no
+  adoptada y el placebo ya en #905). Sus ramas se conservan.
+- Ajustes propuestos al programa por sensor (pendiente de escribir en el spec): O2 cerrado y vara M = regla exacta de
+  MATLAB en los tres paquetes; V375-D fuera; D17 como pieza central de los paquetes.
+
 ### 2026-10-26 ~10:55 UTC (S163, vuelta 12): MATLAB corrió los paquetes de MODIS y VIIRS 375
 - Nicolás volvió a entrar a MathWorks. Entradas bajadas dentro de MATLAB con `websave` desde los commits verificados y
   comprobadas por md5 (MODIS `89479be35`: 3 de 3; V375 `138a931ee`: 4 de 4). MATLAB R2026b.
