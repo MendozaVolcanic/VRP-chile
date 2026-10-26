@@ -33,7 +33,7 @@ nuestras matrices, el VRP de MATLAB queda a una mediana de |log(VRP/MIROVA)| de 
 regrillado mueve el VRP de MATLAB con una dispersión mediana de **0,134** en log por pasada, comparable a la diferencia
 entre variantes del fondo cuando difieren (**0,182**) y las variantes sólo difieren en el **39 %** de las escenas
 chilenas de un píxel. Con verdad sembrada, harían falta del orden de **50 a 100 pasadas** de un píxel pareadas para
-que MATLAB gane en el 80 a 90 % de los casos; tenemos 6.
+que MATLAB gane en el 80 % de los casos; tenemos 6.
 
 Consecuencia práctica: la pregunta «¿cuál fondo es el de MIROVA?» se cierra por la vía del código (punto 1), no por la
 vía del dato (punto 2). La vía del dato no puede cerrarla con lo que hay en disco, porque el ruido de NUESTRA cadena de
@@ -63,7 +63,7 @@ regrillado (D17) domina.
   Según la lectura de S159 (`leer_o2_salida.txt` de la coordinadora), los tres modelos previos difieren de MATLAB en
   más de 1 % en 32 (shim), 26 (segundo port) y 45 (primer port) de 166 escenas.
 - NULO MEDIDO. `nulo_166.py` → `nulo_166_salida.txt`: 20 triangulaciones al azar (rotura de empates aleatoria,
-  interpolación exacta) calzan con MATLAB en VER_NULO166. En Etna sola, la probabilidad de que una regla al azar caiga
+  interpolación exacta) calzan con MATLAB en una mediana de **93** y un máximo de **110** de 166 escenas, y en una mediana de **41** y un máximo de **57** de las 73 de un píxel. Ninguna se acerca a 166. En Etna sola, la probabilidad de que una regla al azar caiga
   en el valor del OSF es **0,0175** por candidato (35 de 2000 triangulaciones al azar; `etna_ancla_salida.txt`), y de
   las 8 simetrías del marco de la regla perturbada sólo 1 acierta: Etna sola no habría bastado, las 166 escenas sí.
 - CONFIANZA. CONFIRMADO que la regla reproduce a MATLAB en estas 166 escenas (y en Etna). SOSPECHA, no dato, el
@@ -98,7 +98,7 @@ regrillado (D17) domina.
   las pasadas salvo una del primer port: ahí la discrepancia con MIROVA (mediana 0,089, con un extremo de +0,93 en
   Cordón Caulle 2026-10-16) es puro ruido de pareo y de regrillado, no de fondo.
 - NULOS MEDIDOS (1 px, 6 pasadas): el margen observado entre la primera (segundo port) y la segunda (shim) es 0,0000;
-  con el VRP de MIROVA barajado entre pasadas, el margen nulo tiene mediana VER_NULO_GLOBAL y p(margen ≥ observado) = 1,000.
+  con el VRP de MIROVA barajado entre pasadas, el margen nulo tiene mediana 0,0202 y p(margen ≥ observado) = 1,000.
   El barajado dentro de cada volcán sólo admite 4 permutaciones distintas (Láscar y Cordón Caulle tienen 2 pasadas;
   los demás, 1): es degenerado y lo informo sólo para que conste. Bootstrap por pasada de (mejor modelo − MATLAB):
   observado −0,0044, IC 95 % [−0,0977, +0,0596], MATLAB mejor en el 19,7 % de las réplicas.
@@ -109,10 +109,15 @@ regrillado (D17) domina.
 - POTENCIA (pregunta 2 del instrumento, con verdad sembrada: MIROVA simulada = MATLAB × ruido lognormal, sobre las 73
   escenas de un píxel de O2). Probabilidad de que MATLAB gane estricto:
 
-  VER_POTENCIA
+  | σ del ruido de pareo (log) | n = 6 | n = 20 | n = 50 | n = 100 | n = 300 |
+  |---|---|---|---|---|---|
+  | 0,132 (control de 2 a 4 px) | 0,38 | 0,64 | 0,81 | 0,93 | 1,00 |
+  | 0,198 (piso de la grilla) | 0,37 | 0,60 | 0,78 | 0,88 | 0,99 |
+  | 0,286 (lo observado en 1 px) | 0,33 | 0,48 | 0,71 | 0,80 | 0,96 |
+  | 0,050 (ruido chico, control) | 0,52 | 0,78 | 0,94 | 1,00 | 1,00 |
 
   Con 6 pasadas el método no supera mucho el azar (0,25 entre cuatro); con el ruido medido harían falta del orden de
-  50 a 100 pasadas de un píxel pareadas para ganar en el 80 a 90 % de las veces. El instrumento sí puede dar distinto
+  50 a 100 pasadas de un píxel pareadas para ganar en el 80 % de las veces. El instrumento sí puede dar distinto
   de cero; lo que falta es n.
 - CONFIANZA. CONFIRMADO que con estos datos no separa. GRAVEDAD 2: no cambia nada publicado, pero impide usar la
   comparación contra MIROVA como árbitro del fondo; para eso queda H1.
@@ -131,7 +136,7 @@ regrillado (D17) domina.
 | `correr_octave_s163.m` | re-corre la detección y el shim de S159 sobre las mismas entradas; Etna da 5 px, L_hot 1,965342180 y L_bk 1,062919411, lo mismo que S159 H2 (`correr_octave_s163_salida.txt`) | sí: 462 de 791 escenas con alerta |
 | `etna_ancla.py` | L_hot de Etna igual al OSF; 0 aristas ilegales en los 8 candidatos | sí: las 8 simetrías dan 5 valores distintos; nulo de 2000 triangulaciones con 70 valores distintos |
 | `pert_contra_matlab.py` | mismas alertas que MATLAB y L_hot idéntico en las 166; sólo cambia el fondo | sí: el marco cambiado falla en 124 de 166 |
-| `nulo_166.py` | mismo VRP del `.m`, con roturas de empate al azar | sí: ver su salida |
+| `nulo_166.py` | mismo VRP del `.m`, con roturas de empate al azar | sí: 20 roturas al azar dan entre 78 y 110 calces, nunca 166 |
 | `pareo_mirova.py` | L_hot de MATLAB en todas las variantes; pareo por volcán, sensor y minuto; radio comprobado | sí: verdad sembrada (potencia); con σ chico 0,05 y n = 100 gana en ≈ 0,99 |
 
 ## 3. Qué NO miré y qué queda SIN DATO
