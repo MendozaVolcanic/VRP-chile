@@ -569,6 +569,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 16:16 UTC (S164, vuelta 14): verificador del censo de MOD-D confirma DECIDE NICOLÁS; llevado a Nicolás
+- Verificador limpio Fable alto (commit `9ea9a1786` de `claude/s162-modis-2-0dd578`, = remoto; carpeta
+  `experiments/_s162_modis_paquete/censo/verificador/`, con `CAMINOS.md` escrito antes de medir): «el veredicto DECIDE
+  NICOLÁS se sostiene». Recalculó P1, P1b, P2 y M con código propio (P2: K 49, PM 8, neto -41 en 50 bloques; M: 78 pares, IC
+  [-0,335; -0,153]); 12 controles verdes; cobertura 5.465 de 5.465; de los 189 excluidos ninguno es protegida ni lo
+  publica K.
+- Todo el DECIDE cuelga del P1b de Láscar 2026-04-25 07:35 (1 píxel; PM 0,973, bajo 1 MW por 0,027, por el desempate del
+  relleno del fondo). Con la regla `fillmissing2` de MATLAB da 1,1124 MW y ninguna de las 48 protegidas queda bajo 1 MW con K
+  sobre 1: sería **fila 6, CANDIDATO**. La regla sellada manda el VRP del port, y sigue SIN DATO que MIROVA use ese `.m` en
+  MODIS. En sentido contrario, 20 protegidas pasan de K < 1 a PM ≥ 1 MW. Chillán SIN RESOLVER (6 de 7, p 8/128): límite de
+  la regla, no déficit del sensor (sobre 30° el PM da 1,12).
+- Menores sin efecto: el PREREGISTRO de la rama no tenía las adendas 3 y 4 (ahora idéntico al del tag); la adenda 3.11 dice
+  149 y son 150 (anotado en `LEEME`, texto sellado intacto); el run de S159 39712862945 terminó en failure pero su dato es
+  consistente; 5 pasadas crepusculares, efecto nulo con y sin D33.
+- Recomendación de `loop-modis-2` y de la coordinadora: tratarlo como CANDIDATO a la fase 3 (vía en `pipeline/` con la regla
+  de MATLAB, reutilizando `pipeline/mirova_v750_codigo.py`, flag apagado), con tag defensivo y el sí explícito de Nicolás
+  antes (A45). Pregunta llevada a Nicolás.
+
 ### 2026-10-26 16:03 UTC (S164, vuelta 13): censo de MOD-D completo y evaluado; DECIDE NICOLÁS (verificador en curso)
 - Conteo (`contar_tanda.py`, salidas `experiments/_s162_modis_paquete/contar_t{1,2,3}_salida.txt` de
   `claude/s162-modis-2-0dd578`): t1 1.814/1.814, t2 1.837/1.837, t3 1.814/1.814; **5.465 de 5.465 ok**, sin faltantes ni
