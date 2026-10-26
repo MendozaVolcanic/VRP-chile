@@ -93,7 +93,8 @@ Los 3 records de diferencia con `main` son pasadas NRT de la última noche que e
 | 2026-10-24 | la subagente 4 de S162 lee `data/` de su rama y ve el C0 | `INFORME.md` de S162, H3 |
 
 En `2ca366cdc`, en `014a1ab61` (punta de la rama de S162) y en `8471add46^`, el record de Láscar 2026-08-22 05:06 Suomi
-NPP es `triggered_test1 True`, `test1_roi`, `summit`, 0,034 MW a 0,732 km, sin marca. En `8471add46` pasa a
+NPP es `triggered_test1 True`, `test1_roi`, `summit`, `primary_cluster.vrp_mw` 0,034 MW con
+`primary_cluster.centroid_dist_km` 0,732 km (`final_hotspot_dist_km` vale 0,0), sin marca. En `8471add46` pasa a
 `_s154_reproc_k_historico` en `3695f6758`, `far`, 0,511 MW a 8,23 km. La frontera que S162 tomó del mensaje del
 backfill (2026-09-18) era real entre el 2026-10-18 y el 2026-10-21; desde #883 ya no hay frontera en los datos
 (`DATOS_K_DESDE_UTC = "2025-02-15T00:00:00Z"`, `frontend/cambio_detector.js:32`).
@@ -163,4 +164,24 @@ cruzó con MIROVA: cuántas de esas 2.730 noches eran alertas de MIROVA no está
 
 ## 6. Verificación independiente (entregable 4)
 
-VERIFICADOR_PLACEHOLDER
+Subagente Sonnet con contexto limpio (sólo título, ruta y scripts), encargado de refutar. Veredicto: **CONFIRMADO**,
+con sondas propias sobre `origin/main` `32812b925` (unos commits NRT después; 72.441 records):
+
+- Los 72.441 traen `regimen`; las 53 combinaciones de perfil y sha descienden de `34cea39e4`; los tres flags de K en
+  el YAML en `34cea39e4`, `3695f6758` y `deaf8f59b`, con las claves que lee `pipeline/profile.py`.
+- En los 45 JSON de `data/mirova_equivalent/`: 0 con `triggered_test1` y 0 con fuente `test1`/`test1_roi`; en el tag
+  `pre-s158-reemplazo-k`, 24.363 y 13.886 (la sonda ve C0 cuando existe).
+- **Prueba nueva, independiente de la marca y del predicado**: de los 59.800 records C0 del tag, buscados por
+  (sensor, `datetime_utc`) en `main`, 59.710 existen y son distintos, 90 no están (son los de `data/_c0_residuales/`)
+  y **0 son idénticos**. Ningún C0 pasó intacto.
+- Pages: `Villarrica.json` y `Llaima.json` desplegados (Last-Modified 2026-10-26 02:42 GMT) sin ningún C0. Las vistas
+  `index.html`, `diario.html`, `mosaico.html` y `comparacion.html` piden `data/mirova_equivalent/` (y `data/mirova/`);
+  ninguna pide `data/_c0_residuales/`; no hay service worker ni IndexedDB.
+
+NO VERIFICADO por el verificador: los 9.538 publicados y la tabla de noches (no re-corrió node); la afirmación de 0 C0
+publicados no depende de ellos, porque el corpus ya tiene 0 C0. Hallazgos propios, incorporados: (1) el «0,732 km» del
+caso C0 es `centroid_dist_km` del cúmulo, no `final_hotspot_dist_km` (corregido en §3.4); (2) los 34 volcanes fuera del
+cron (2.843 records de abril de 2026) no traen `regimen` ni `triggered_test1`, son de otra generación del esquema y
+ninguna vista los carga como serie; (3) **las vistas de laboratorio no son K por diseño**: `frontend/experimental/index.html`
+lee `data/experimental_v2/` y `beyond-mirova.html` lee `data/_s99_test1_eq16/` (perfil con Test 1). No son el tablero
+operacional que pregunta H3, pero un operador que entre ahí ve otro detector; conviene que sigan rotuladas como tales.
