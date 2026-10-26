@@ -38,6 +38,13 @@ MUT = {
     "fill_ejes_cambiados": ("    filas, cols = np.indices(A.shape)\n    ok = np.isfinite(A)",
                             "    cols, filas = np.indices(A.shape)\n    ok = np.isfinite(A)", "ATRAPADA"),
     "fill_lexico_invertido": ("key=lambda t: t[0])", "key=lambda t: t[0][::-1])", "ATRAPADA"),
+    # rivales estructurados (verificador de S163, rama s163-o2-alternativa c95483d31): las otras simetrías del marco
+    # calzan 159 a 160 de 166 escenas de O2, así que «ejes cambiados» sola es un control débil
+    **{f"fill_simetria_{nom}": ("    filas, cols = np.indices(A.shape)\n    ok = np.isfinite(A)",
+                                f"    filas, cols = (lambda f, c: {expr})(*np.indices(A.shape))\n    ok = np.isfinite(A)",
+                                "ATRAPADA")
+       for nom, expr in (("menos_fila", "(-f, c)"), ("menos_col", "(f, -c)"), ("menos_ambas", "(-f, -c)"),
+                         ("col_menos_fila", "(c, -f)"), ("menos_col_fila", "(-c, f)"), ("menos_col_menos_fila", "(-c, -f)"))},
     "control_que_se_cae": ("    m13 = np.asarray(m13, float)\n    vacio = np.zeros(m13.shape, bool)",
                            "    raise RuntimeError('mutación de control')", "CAÍDA"),
 }

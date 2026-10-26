@@ -35,6 +35,7 @@ def main():
     assert hashlib.md5(rp.read_bytes()).hexdigest() == MD5_RESULTADO, "resultado_o2.mat no es el de S163"
     S, R = sio.loadmat(a.o2 / "entradas_o2.mat"), sio.loadmat(rp)
     n_vrp = ok_vrp = n_bk = ok_bk = qh_mal = 0
+    fuera = []
     peor = 0.0
     for k in range(S["M13"].shape[2]):
         al = R["ALERTAS"][k, 0].ravel().astype(int) - 1
@@ -58,8 +59,18 @@ def main():
             n_bk += 1
             ok_bk += np.nanmax(np.abs(MV._fillmissing2_lineal(enm) - bk)[h]) < 1e-12
             qh_mal += np.nanmax(np.abs(ORA._fillmissing2_lineal(enm) - bk)[h]) > 1e-9
+            # verificador de S163: la extrapolación (vecino más cercano fuera de la envolvente convexa de las celdas
+            # con dato) casi no está probada; esas escenas se cuentan aparte, como NO CUBIERTAS por el oro
+            from scipy.spatial import Delaunay
+            fil, col = np.indices(enm.shape)
+            dt = Delaunay(np.column_stack([fil[~h], col[~h]]).astype(float))
+            n_fuera = int((dt.find_simplex(np.column_stack([fil[h], col[h]]).astype(float)) < 0).sum())
+            if n_fuera:
+                fuera.append((k, n_fuera))
     print(f"VRP igual a MATLAB (1e-12 relativo): {ok_vrp} de {n_vrp} | peor diferencia relativa {peor:.2e}")
     print(f"fondo igual a MATLAB celda por celda: {ok_bk} de {n_bk}")
+    print(f"escenas con celdas del hueco FUERA de la envolvente convexa (extrapolación por vecino más cercano): "
+          f"{len(fuera)} {fuera} -> el oro las iguala, pero con tan pocas la extrapolación queda NO CUBIERTA como regla")
     print(f"control, fillmissing2 de Qhull: fondos distintos de MATLAB {qh_mal} de {n_bk} (tiene que ser más de 0)")
     bien = ok_vrp == n_vrp and ok_bk == n_bk and n_vrp >= 166 and n_bk >= 84 and qh_mal > 0
     print("== oro:", "VERDE" if bien else "ROJO")
