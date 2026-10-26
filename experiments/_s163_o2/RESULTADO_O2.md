@@ -1,5 +1,15 @@
 # O2: el código de MIROVA corrido en MATLAB (S163, 2026-10-26)
 
+> ⚠️ **Verificado y corregido en parte (S163, verificador limpio Sonnet, `verificador/INFORME.md` en esta carpeta).**
+> Afirmaciones 1 a 3 y los conteos de la 4 CONFIRMADOS (cabecera del .mat: GLNXA64, no Octave; Etna a 3e-10; detección
+> re-corrida en Octave 11.3, 0 de 311, con control de mutantes que sí difiere). **La consecuencia final queda REFUTADA tal
+> como está escrita**: en las 51 escenas de un píxel con vecindad 5 × 5 intacta, el fondo de MATLAB es **siempre el
+> promedio de los dos puntos de la misma fila a ±2 columnas** (51 de 51, a 1e-9): es el desempate de la diagonal en un
+> cuadrado de cuatro puntos cocirculares, y el shim elige la otra diagonal en 16 de 51. Un port con esa regla reproduce
+> esos casos; la vara sí puede ser un port, validado contra estas 166 salidas. Sin evidencia todavía para 2 o más píxeles,
+> huecos mayores ni vecindades con NaN. Además, entre 1e-9 y 1 % hay 33, 39 y 35 escenas que el resumen no mencionaba, y el
+> máximo del segundo port es 0,77 (el 0,82 es del shim y del primer port). El texto original sigue abajo, como historia.
+
 ## Qué se hizo
 
 El paquete O2 de S159 (`C:\vrp-trabajo\s159-pruebas\experiments\_s159\o1\o2_paquete\`, rama `s160-auditoria`) se corrió en
