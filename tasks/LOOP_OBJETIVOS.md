@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 21:30 UTC (S164, vuelta 21): PARADA POR DISCO, C: en 2,9 GB
+- C: bajó de 8,1 GB (20:59) a 2,9 GB libres (21:30); D: de 11 a 7,8 GB. Candidato visible: el worktree nuevo
+  `.claude/worktrees/funny-kepler-68f0ef` (de la sesión `modd-fase3`, que arrancó en su segundo intento) y lo que esa
+  sesión esté escribiendo; además, paquetes nuevos en `.git/objects/pack` de los fetch del día. No medido en detalle.
+- Avisada la parada a `modd-fase3` (en cola), `loop-viirs750-2`, `loop-modis-2` y `diurno-k-prereg`: dejar de escribir en
+  disco, sólo commits chicos, no borrar nada. W2 del diurno sigue en GitHub (8 de 22 jobs a las 21:30).
+- Propuesto a Nicolás: mandar a la papelera los worktrees de sesiones terminadas e integradas (limpios, rama en el
+  remoto) y vaciarla él.
+
 ### 2026-10-26 18:39 UTC (S164, vuelta 20): revisión de W1 por diurno-k-prereg; I4c falla por un hueco de NASA
 - Revisión (rama `claude/s163-diurno-k-prereg-5c4f44` `e150b4cfd`, `experiments/_s163_diurno_k/w1/REVISION_W1.md`):
   diurno 88 min 27 s → W2 a W6 enteras (confirmado). Cableado sano: los 513 records con el sha sellado, 0 con Test 1,
