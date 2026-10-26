@@ -6,7 +6,110 @@ Coordinadora: sesión «Retomar» (`local_4152952c-6afd-433a-82b3-b07575feee3b`)
 y la única que escribe `tasks/LOOP_OBJETIVOS.md`. Programa: `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`
 §5 (MOD-A a MOD-E). Notas compartidas: `C:\Users\nmend\AppData\Roaming\Claude\side-session-notes\local_4152952c-6afd-433a-82b3-b07575feee3b`.
 
-## 0. Cierre de la sesión hija MODIS (2026-10-24, 20:55 UTC, hora del servidor)
+## 0. Cierre del relevo MODIS 2 (2026-10-26, 13:47 UTC, hora del servidor)
+
+Estado fijado **sin trabajo mío en vuelo** (los procesos de Python que corrían al cerrar son de otras sesiones: mutaciones
+de V750-A y servidores). Lo único pendiente fuera de esta sesión es el **humo de MOD-D, pedido a la coordinadora S164 y
+no despachado todavía**. Ramas verificadas contra el remoto: `claude/s162-modis-2-0dd578` (esta cola), `s162-modd-candado`
+= `865174abe` con el tag `s162-modd-tag` (anotado `28a665c05`), `s162-a61-mxd03` = `72f85df71`. Coordinadora vigente:
+**S164** (`local_34f868ef-c156-4906-9b6c-e691fc445650`); S163 cerró a las 12:35 UTC.
+
+### a. Todo en una pantalla
+
+| pieza | estado | evidencia |
+|---|---|---|
+| A61 de MxD03 (48 protegidas) | **VERIFICADA** (Opus): P4 se sostiene (mismo calor, al cráter). Corrige: E4 refutada (los 0,0 eran OCR de 0 fijo), H4 es −27 a +48 %, 46 de 48 mismos píxeles; VA61-01: ~215 records con el cráter en el borde del gránulo guardados como negativos | `s162-a61-mxd03` `72f85df71`, `experiments/_s162_mxd03/a61/verificador/INFORME_VERIFICADOR.md` |
+| Plan del flag de MxD03 (posición por píxel, «sin dato», distancia desde el cráter) | **ESCRITO**, TDD, nada en `pipeline/` (A45) | `docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md` (esta rama) |
+| PR #910 (sello D-48 del pre-registro de MxD03 en main; FICHA, paper y MISSION) | **MERGEADO** | PR #910 |
+| O2 MODIS en MATLAB (404 escenas, 191 distintas) | **VERIFICADO** (Sonnet): la regla de `fillmissing2` es MATLAB en 191/191, incluidos los 2 × 2; el port no lo es en 1 píxel (24 de 87 iguales) ni en 2 × 2 (0 de 6) | `experiments/_s163_o2_modis/RESULTADO_O2_MODIS_MATLAB.md` y `verificador_matlab/` (`3a51df069`) |
+| `experiments/_s162_modis_verif_cde/arbol` y `copias` | **SUBIDOS** (pedido de S163) | `cac483b74` |
+| Candado de MOD-D | **ENTREGADO**: tres vueltas de verificador (Fable, Fable, Sonnet), la última «se puede despachar el humo tal como está»; 37 pruebas (37/37 fallan por aserción contra el vacío), 37/37 mutaciones atrapadas, arnés 6/6, manifiesto de 41 archivos, ensayo en seco 7/7, adenda 4 y su apéndice | `s162-modd-candado` `865174abe`, tag `s162-modd-tag`; `experiments/_s162_modis_paquete/` |
+| Humo de MOD-D | **PEDIDO a S164**, no despachado (comando: `git push origin 865174abeea01a1bad726ce25dd70cf0d00ae7eb:refs/heads/s162-modd-humo`) | mensaje a S164, 2026-10-26 ~13:45 UTC |
+| Tandas t1 a t3 de MOD-D | **PENDIENTES** del humo | cola D4 |
+
+### b. Decisiones que espera el dueño
+
+| # | pregunta | opciones | recomendación |
+|---|---|---|---|
+| 1 | ¿Los huecos de vigilancia VC3-01 a VC3-14 de la tercera vuelta se arreglan antes de las tandas? | arreglar antes de t1 (nuevo manifiesto, nuevo tag, otra vuelta corta); dejarlos para la lectura | **dejarlos para la lectura**: son de gravedad 1 a 2, todos en dirección segura, y tocar el candado obliga a re-taggear y re-verificar. Sólo si el humo obliga a tocar el candado igual, sumarlos en ese mismo cambio |
+| 2 | Adopción de MxD03 | dentro del paquete MODIS (D-48); sola si el paquete se atrasa más allá del 2026-11-24 | **dentro del paquete**, con el plan del flag y el sí de Nicolás (A45) |
+
+### c. Lo aprendido
+
+- **Un archivo que se sube a otro sistema y se comprueba por md5 no puede pasar por la normalización de fin de línea**
+  (regla general del workspace): el `.m` del OSF trae CRLF y `core.autocrlf` lo commiteó en LF; MATLAB habría rechazado
+  el md5. Se arregla con `*.m -text` y `*.mat -text` en un `.gitattributes` de la carpeta, y se comprueba el md5 con
+  `git show HEAD:<archivo> | md5sum`, no sobre el archivo del disco. Destino: memoria del workspace.
+- **Los escapes en heredoc rompieron rutas tres veces más** (`\v` y `\t` en `D:\vrp-trabajo\temporales`, `\\n` hecho
+  salto de línea dentro de un literal de Python). La regla de S144 sigue valiendo: escribir con la herramienta de
+  archivos o construir la cadena con `chr(92)`, y comprobar con `grep -c $'\x0b'` antes de commitear.
+- **Crear la rama de disparo ES despachar** (propio del proyecto): en un workflow con `"on": push` a una rama, crearla
+  dispara. El tag lo empuja quien arma el candado; la rama de disparo, sólo la coordinadora.
+- **Con el computador cargado por otras sesiones, una batería con node tarda 6 veces más** (mutaciones a ~45 min en vez
+  de ~6): repartir las mutaciones en grupos paralelos y leer el progreso en sus temporales, porque la salida con búfer
+  no aparece hasta el final.
+- **Un verificador que lee archivos mientras otro los edita mide un árbol que nadie commitea** (refuerzo de A112, regla
+  general): la segunda vuelta lo vio y lo declaró. Editar recién cuando el verificador entregue, o commitear antes y
+  darle el sha.
+- Propio del proyecto: **la diagonal que elige un relleno por triangulación depende de qué celdas tienen valor, no de
+  la radiancia**; con el mismo hueco en una grilla llena, port y MATLAB coinciden siempre, y difieren cuando cambia la
+  posición del foco o hay bordes de barrido vacíos. Una prueba sintética que no varíe la geometría no puede ver la
+  diferencia. Con 1 píxel, MATLAB promedia las dos celdas a dos columnas del foco.
+
+### d. Problemas abiertos e hipótesis
+
+- **CONFIRMADO**: la regla de `fillmissing2` de `s163-o2-alternativa` reproduce el fondo de MATLAB R2026b en 191 de 191
+  escenas MODIS (161 de Láscar; huecos de 3 × 3). **SIN DATO** que MIROVA use ese `.m` (el de VIIRS 750) para MODIS.
+- **CONFIRMADO**: el pipeline no tiene estado «sin dato» de geolocalización; con relleno sobre el cráter escribe un
+  negativo (2 records seguros). **SOSPECHA**: que en los ~215 records con el píxel MxD03 más cercano en el borde del
+  gránulo el cráter quede de verdad fuera (el censo de MOD-D guarda ahora `crater_mxd03.dist_km` y `vecinos_validos`
+  para medirlo).
+- **CONFIRMADO** por la tercera vuelta: 6 de las 31 mutaciones anteriores se re-corrieron sobre el código de hoy y
+  siguen atrapadas; **SOSPECHA** (baja) sobre las otras 25, cuyo código no cambió.
+- **SIN DATO**: qué copia del bow tie conserva MIROVA; el efecto de D28 sobre la magnitud.
+
+### e. Lo que ya está cerrado y no hay que rehacer
+
+- La A61 de MxD03 y su verificación; el veredicto CUMPLE SIN DAÑO de MxD03 (MOD-B).
+- La comparación O2 MODIS contra MATLAB y su verificación; la vara del fondo con la regla (y que la columna de M con
+  la regla no es preliminar: decisión de S163 con D-48).
+- El candado de MOD-D: tres vueltas de verificador, la regla 1 (b) de la adenda 4 aprobada por S163 (05:40 UTC). No
+  re-verificar el candado entero: si cambia algo, una vuelta corta sobre el diff.
+- PR #910 mergeado; `arbol` y `copias` de `_s162_modis_verif_cde` subidos.
+
+### f. Prompt para la próxima sesión
+
+```text
+Sesión de MODIS de VRP Chile (continúa el relevo MODIS 2, cerrado el 2026-10-26 13:47 UTC). Español de Chile con
+formas de tú, sin guiones largos, rutas absolutas, explicar como geólogo.
+
+1. Verifica antes de creer: git fetch origin --prune; compara git ls-remote de origin/claude/s162-modis-2-0dd578 (cola
+   en tasks/LOOP_MODIS.md, bloque «0. Cierre del relevo MODIS 2»), de origin/s162-modd-candado (865174abe) y del tag
+   s162-modd-tag con lo que dice ese bloque; mira si existe la rama s162-modd-humo y si el workflow probe-s162-modd.yml
+   ya corrió (gh run list --workflow probe-s162-modd.yml). Pregunta a la coordinadora vigente (S164,
+   local_34f868ef-c156-4906-9b6c-e691fc445650, o la que la reemplace) por el run id del humo.
+2. Lee: CLAUDE.md del proyecto (A45, A90, A104, A108, A110, A112, A113, A115, A119); tasks/LOOP_MODIS.md entero;
+   experiments/_s162_modis_paquete/PREREGISTRO.md (adendas 1 a 4 y el apéndice); verificador_candado_r3/INFORME.md.
+3. Trabajo, en este orden:
+   a. Evaluar el humo (cola D4): artefactos a D:\vrp-trabajo\temporales\s162_modd\humo\, worktree del tag
+      (C:\vrp-trabajo\s162-modd, checkout de s162-modd-tag), evaluar_paquete.py --art <carpeta> --ref
+      D:/vrp-trabajo/temporales/s162_mxd03/ref --commit 865174abeea01a1bad726ce25dd70cf0d00ae7eb, y el criterio de la
+      adenda 3.14 (job de pruebas verde, 5 pasadas «ok», K = data/ en las que deciden, PM = S159 en las dos comunes).
+      Verificador limpio de otro modelo antes de dar el OK.
+   b. Si pasa, pedir a la coordinadora las tandas t1, t2 y t3, una a la vez (cada una 8 partes; la siguiente cuando la
+      anterior termine: el grupo de concurrencia guarda un solo run pendiente).
+   c. Después de las tres tandas: evaluar el censo con el evaluador del tag, m_con_regla_matlab.py aparte, verificador
+      limpio, y el informe del veredicto (CANDIDATO / NO CANDIDATO / DECIDE NICOLÁS / INDECIDIBLE).
+4. Reglas duras: nada en pipeline/ sin tag defensivo y el sí de Nicolás (A45); nunca despaches tú, ni crees ramas de
+   disparo (crearla es despachar); sólo EARTHDATA_TOKEN (A71); git add por archivo; nunca git stash; no edites un
+   archivo mientras un verificador o una batería lo lee (A112); verificador con contexto limpio de otro modelo antes de
+   aceptar un resultado; escribe archivos con la herramienta de archivos, no con heredocs con barras invertidas; parada
+   si C: o D: bajan de 3 GB (al cerrar: 15 GB y 8,4 GB).
+5. Si la sesión no alcanza: deja la cola de tasks/LOOP_MODIS.md al día y cierra con /cierre.
+```
+
+
+## 0-prev. Cierre de la sesión hija MODIS (2026-10-24, 20:55 UTC, hora del servidor)
 
 Estado fijado sin trabajo de MODIS en vuelo (la única corrida en cola en GitHub es un lote de VIIRS 375 de otra sesión).
 Ramas verificadas contra el remoto: `claude/s162-modis-774bb0` y `s162-mxd03-codigo` (`afb3fcdea`). Tags en el remoto:
@@ -14,7 +117,7 @@ Ramas verificadas contra el remoto: `claude/s162-modis-774bb0` y `s162-mxd03-cod
 trabajo de los verificadores (`experiments/_s162_modis_verif_cde/arbol/` y `copias/` en esta rama;
 `experiments/_s162_mxd03/resultado/verificador/copias/` en la de D:), que son copias de código y artefactos.
 
-### a. Todo en una pantalla
+### a-prev. Todo en una pantalla
 
 | pieza | estado | evidencia |
 |---|---|---|
