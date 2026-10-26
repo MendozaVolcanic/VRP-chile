@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~13:20 UTC (S164, vuelta 2): D-39 verificado y paso 1 hecho; la pausa del scraper la negó el clasificador
+- `d39-mirova-v1` entregó (informe en su rama `claude/s163-d39-mirova-v1-710f72` `49de07d65`,
+  `experiments/_s163_d39_mirova_v1/INFORME.md`; verificador limpio Fable 5.1, ningún REFUTADO): 0 llaves perdidas y 0 campos
+  cambiados en el consolidado y en el OCR, +2.351 filas repuestas, todas reales. Hace falta sumar
+  `s163/d39-reposicion-y-bucle` (`dd606a65a`): el bucle viejo volvió a perder 241 filas el 2026-10-24 17:44 UTC, dos de
+  ellas protegidas (Villarrica MODIS 2026-05-29 19:55, 1,83 MW; Chillán VIIRS 375 2026-10-24 05:48, 2,36 MW).
+- Comprobación propia (CSV bajados por raw, sin clonar el repo de 14 GB): 2.351 llaves de reposición, 0 presentes en
+  `main` `5bb1c8edf`, las dos protegidas presentes en la reposición y ausentes de `main`; unión = 45.367 = 43.016 + 2.351.
+  El diff `main...dd606a65a` no toca `registro_vrp_consolidado.csv` ni `registro_vrp_ocr.csv` (sólo código, pruebas y el
+  archivo de reposición).
+- Paso 1: `fix/referencia-estable` avanzó por fast-forward a `dd606a65a`; CI del PR #26 en verde (6 de 6, run 40328078318).
+- Paso 2 (`gh workflow disable` de `main.yml` y `ocr_workflow.yml`): **negado por el clasificador de permisos** («Interfere
+  With Workloads»). No se intentó por otra vía. El scraper sigue corriendo normal; nada cambió en `main` de Mirova-v1.
+  Los pasos 2 a 6 los hace Nicolás o da el permiso.
+
 ### 2026-10-26 12:38 UTC (S164, vuelta 1): relevo tomado; estado verificado contra el remoto
 - `loop/activo` = remoto en `4d41d78eb`; `main` en `b09a7b321`. Disco: C: 16 GB, D: 8,4 GB libres.
 - NRT: 5 corridas verdes seguidas (08:10 a 11:10 UTC), la de 12:10 en curso; último dato en `data/mirova_equivalent/`
