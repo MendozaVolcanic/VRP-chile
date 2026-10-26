@@ -64,7 +64,7 @@ defensivo `pre-s162-via-mirova` (`deaf8f59b`). Cola de este relevo:
   falta y usar las 166 salidas de MATLAB como vara de M en V750-A. Otra corrida de MATLAB: paquete con .mat, .m,
   correr_*.m y md5, y se le pide a S163.
 
-**Coordinadora desde el 2026-10-26 12:35 UTC: S164** (`local_34f868ef-c156-4906-9b6c-e691fc445650`; antes S163
+**Coordinadora desde el 2026-10-26 ~22:40 UTC: S165** (`local_332414ba-52bf-466f-a862-74f868174d75`). La parada por disco sigue: M34 y M36 esperan a que Nicolás vacíe la papelera; V750-B (R4) sigue el 2026-11-03. Antes, desde el 2026-10-26 12:35 UTC: S164 (`local_34f868ef-c156-4906-9b6c-e691fc445650`; antes S163
 `local_8a135e90-b711-4bb9-9dec-ff02036f206b`, y antes S162). Despachos, avisos y resultados van a ella.
 
 - R6 [HECHO, espera el merge de S164] **Cableado aprobado por Nicolás** (vía S163, «continúa con todo lo que
