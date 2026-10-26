@@ -154,6 +154,12 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    - Coppola 2020 Frontiers (review sistema MIROVA).
    - Coppola 2024 cap Springer (review pedagógico).
    - Coppola 2025 Fernandina (NRT moderno).
+   - Coppola et al. 2026 Scientific Data (base global de VRP, OSF v2.5;
+     `documentacion/Coppola_2026_SciData_Global_VRP_Dataset_s41597-026-08100-7.pdf`). Leído renderizando las
+     páginas a imagen (`experiments/_s162_instrumento/MOD_A_CITA_MOD03.md`, PR #902): los insumos MODIS son
+     `MOD021KM`/`MYD021KM` «together with the corresponding MOD03 and MYD03 Terrain-Corrected Geolocation
+     products» (p. 4 del PDF), y el NRT corre el mismo procedimiento (p. 3 y 6); hay remuestreo a una grilla UTM
+     de 50 × 50 km (p. 5) cuyo código no se publica (p. 21). Su base no está supervisada a mano (A105).
    - Coppola 2022 Sabancaya (k VIIRS I4).
    - Campus 2022 / Campus 2024 Vulcano (k VIIRS).
    - Aveni 2024 RSE TIRVolcH (Stefan-Boltzmann TIR).
