@@ -1,8 +1,9 @@
 # Pre-registro V750-B (S162): la región sensible (ROI) del código de MIROVA, por volcán, en VIIRS 750
 
 > ⚠️ **Adenda 1 (2026-10-25, informativa, agregada después del sello; ver al final)**: el analizador sellado deja caer
-> sin contar la pasada «ok» a la que le falta una caja del oráculo. La lectura del 2026-11-03 corre antes
-> `adenda1/cobertura_cajas_v750b.py`. Ninguna regla cambia y el analizador no se edita.
+> sin contar la pasada «ok» a la que le falta una caja del oráculo. La lectura del 2026-11-03 se hace con
+> `adenda1/leer_v750b.py`, que corre antes el compañero `adenda1/cobertura_cajas_v750b.py` y no deja pasar al
+> analizador si cierra. Ninguna regla cambia y el analizador no se edita.
 
 Estado: **SELLADO bajo D-48** (2026-10-24; condición de la coordinadora cumplida: la batería atrapa por aserción 13 de 13
 mutaciones del analizador, con la copia sin mutar y la mutación que sólo se cae como controles, `mutar_bateria_salida.txt`),
@@ -300,22 +301,37 @@ de SIN DATO o una protegida SIN DATO no se lee el veredicto, y que se relanzan s
 caja del oráculo es un brazo que no corrió. La adenda aplica esa regla a un caso que el código no cubría; las métricas,
 la regla del §6 y los controles del §7 quedan como están, y el analizador no se edita (§9).
 
-**Cómo se lee el 2026-11-03.** Antes del comando de lectura del §9, con los mismos `--art`, `--objetivos` y
-`--sin-granulo`:
+**Cómo se lee el 2026-11-03** (versión 2, tras el verificador de la adenda, VAD-01 a VAD-05). En lugar del comando
+del §9 se usa el lector, que corre el compañero y sólo entonces el analizador sellado, con los mismos argumentos que
+el §9 y rutas absolutas (`<repo>` es la raíz del árbol de lectura; el compañero no se puede saltar):
 
-    python experiments/_s162_v750b/adenda1/cobertura_cajas_v750b.py --art <artefactos> --objetivos objetivos_v750b.json --sin-granulo experiments/_s162_v750b/sin_granulo_v750b.json
+    python <repo>/experiments/_s162_v750b/adenda1/leer_v750b.py --art <artefactos> --objetivos <repo>/experiments/_s162_v750b/objetivos_v750b.json --sin-granulo <repo>/experiments/_s162_v750b/sin_granulo_v750b.json --evaluador <evaluar_d25.py del tag> --censo-art D:\vrp-trabajo\temporales\s159_oraculo\censo_39713438252 --censo-objetivos <objetivos.json del censo S159>
 
-- Sale 0 y dice «cobertura con las cajas: SUFICIENTE»: se lee con el analizador como dice el §9.
-- Sale 3 y dice INSUFICIENTE mientras el analizador dice SUFICIENTE: manda el compañero. Se relanzan con `SOLO` las
-  pasadas que lista como «falta caja» y se vuelve a leer; si siguen faltando, se declaran y la coordinadora decide con
-  Nicolás si se lee igual con `--leer-con-faltantes` (§9), con la lista en el motivo.
-- Con 0 pasadas sin caja el compañero da el mismo SIN DATO y el mismo veredicto de cobertura que el analizador
-  (escenarios A4 y A6, comprobados contra el analizador sellado). Una pasada que el compañero cuenta como «falta caja»
-  queda fuera de las métricas igual que en el analizador; lo único que agrega es contarla en la cobertura.
+- Compañero SUFICIENTE: el lector corre el analizador y sale con su código.
+- Compañero INSUFICIENTE por pasadas sin caja (la llave falta; el analizador las dejaría caer): no se lee. Se relanzan
+  con `SOLO` las pasadas que lista como «falta caja» y se vuelve a leer; si siguen faltando, la coordinadora decide con
+  Nicolás si se lee igual con `--leer-con-faltantes "<motivo>"` (§9): el lector marca cada línea de la salida con
+  «[LEÍDO CON FALTANTES DE LA ADENDA: motivo]» y sale 5.
+- **Caja ilegible** (la llave está pero vale `null`, o le falta `npix`, `vrp_mw` o `pixeles`; VAD-03 y VAD-04): el
+  analizador la cuenta como observada y después se cae (`null`) o la lee como «no publica» sin aviso (`{}`). Esa pasada
+  cierra la cobertura siempre, haya el porcentaje que haya, y **no se puede leer ni con `--leer-con-faltantes`**: se
+  relanza.
+- Sin cajas faltantes ni ilegibles el compañero da el mismo SIN DATO y el mismo veredicto de cobertura que el
+  analizador sellado (escenarios A4, A6 y A11 a A17, cada uno comprobado contra el analizador). Una pasada que el
+  compañero cuenta como «falta caja» queda fuera de las métricas igual que en el analizador; una con caja ilegible, en
+  cambio, quedaría DENTRO si se leyera, y por eso no se lee. (La versión 1 de este punto decía que toda pasada «falta
+  caja» quedaba fuera; era falso para la caja `null`, VAD-03.)
 
 **Pruebas.** `adenda1/probar_adenda1.py`: roja por aserción sin el compañero (`probar_adenda1_rojo_salida.txt`), verde
 con él (`probar_adenda1_salida.txt`). Nulo: `adenda1/mutar_adenda1.py` (`mutar_adenda1_salida.txt`), siete mutaciones
 de una línea del compañero, la copia sin mutar y una mutación que sólo se cae. La primera corrida del nulo dejó pasar
 dos (la protegida que no frena cuando está bajo el 2 %, y la diurna contada dos veces); se agregaron los escenarios A7
-y A8 y se volvió a medir. Verificador limpio: `adenda1/verificador/`.
+y A8 y se volvió a medir. Verificador limpio (Sonnet 5.5, `adenda1/verificador/INFORME.md`): LISTO CON CAMBIOS, sin
+hallazgos de gravedad 4 o 5; el defecto del analizador y el caso «no debería ocurrir con el probe sellado» quedan
+confirmados. Cambios hechos por sus hallazgos: VAD-01 (lector con la compuerta), VAD-02 (comando con rutas absolutas),
+VAD-03 y VAD-04 (cajas ilegibles cierran siempre), VAD-05 (escenarios A11 a A17 por las siete roturas suyas que la
+batería dejaba pasar, más A9, A10 y L1 a L4, y esas roturas sumadas al nulo). VAD-06: la salida roja demuestra sólo que
+sin compañero no hay lectura; el peso de la prueba está en el nulo. VAD-07 (que «sin cambiar ninguna regla» es una
+lectura conservadora del §4 b, que no nombra la caja) se acepta tal cual. VAD-08 (una protegida «fuera» o «sin
+cráter» no frena) es el diseño sellado y queda fuera de esta adenda.
 

@@ -1,10 +1,21 @@
 identidad: PASA (se espera PASA)
-M1 no mira las cajas: ATRAPADA (se espera ATRAPADA) | ['A1 falta caja contada', 'A1 nombrada con la caja', 'A1 protegida cierra', 'A2 bajo el 2 %: SUFICIENTE y listada', 'A3 sobre el 2 %: INSUFICIENTE', 'A5 caja va
-M2 caja vacía cuenta como presente: ATRAPADA (se espera ATRAPADA) | ['A5 caja vacía = faltante']
+M1 no mira las cajas: ATRAPADA (se espera ATRAPADA) | ['A1 falta caja contada', 'A1 nombrada con la caja', 'A1 protegida cierra', 'A2 bajo el 2 %: SUFICIENTE y listada', 'A3 sobre el 2 %: INSUFICIENTE', 'A7 protegi
+M2 caja null cuenta como legible: ATRAPADA (se espera ATRAPADA) | ['A5 caja null = ilegible, cierra', 'A9 caja null cierra bajo el 2 %']
 M3 falta caja no frena si es protegida: ATRAPADA (se espera ATRAPADA) | ['A7 protegida bajo el 2 % igual cierra']
 M4 falta caja fuera del 2 %: ATRAPADA (se espera ATRAPADA) | ['A1 falta caja contada', 'A3 sobre el 2 %: INSUFICIENTE']
 M5 sin gránulo ajeno aceptado: ATRAPADA (se espera ATRAPADA) | ['A6 sin gránulo ajeno: INSUFICIENTE', 'A6 identidad con el analizador']
 M6 cuenta también las diurnas: ATRAPADA (se espera ATRAPADA) | ['A8 diurna contada una vez']
-M7 salida 0 siempre: ATRAPADA (se espera ATRAPADA) | ['A1 protegida cierra', 'A3 sobre el 2 %: INSUFICIENTE', 'A5 caja vacía = faltante', 'A6 sin gránulo ajeno: INSUFICIENTE', 'A7 protegida bajo el 2 % igual cierr
+M7 salida 0 siempre: ATRAPADA (se espera ATRAPADA) | ['A1 protegida cierra', 'A3 sobre el 2 %: INSUFICIENTE', 'A5 caja null = ilegible, cierra', 'A6 sin gránulo ajeno: INSUFICIENTE', 'A7 protegida bajo el 2 % igua
+V2 borde del 2 % sin incluir: ATRAPADA (se espera ATRAPADA) | ['A11 borde exacto del 2 %', 'A11 identidad con el analizador', 'A13 denominador con las sin gránulo', 'A13 identidad con el analizador']
+V3 denominador con fuera y sin_crater: ATRAPADA (se espera ATRAPADA) | ['A12 denominador sin las fuera', 'A12 identidad con el analizador']
+V4 denominador sin las sin gránulo: ATRAPADA (se espera ATRAPADA) | ['A13 denominador con las sin gránulo', 'A13 identidad con el analizador']
+V5 protegida sin gránulo no frena: ATRAPADA (se espera ATRAPADA) | ['A14 protegida sin gránulo cierra', 'A14 identidad con el analizador']
+V6 protegida SIN DATO no frena: ATRAPADA (se espera ATRAPADA) | ['A15 protegida SIN DATO cierra', 'A15 identidad con el analizador']
+V7 cuenta sin_crater sin cajas: ATRAPADA (se espera ATRAPADA) | ['A16 sin_crater sin cajas no cuenta']
+V8 dayflag ausente no es SIN DATO: ATRAPADA (se espera ATRAPADA) | ['A17 dayflag ausente es SIN DATO', 'A17 identidad con el analizador']
+M8 cajas ilegibles no cierran: ATRAPADA (se espera ATRAPADA) | ['A5 caja null = ilegible, cierra', 'A9 caja null cierra bajo el 2 %', 'A10 caja {} cierra']
+M9 caja {} cuenta como legible: ATRAPADA (se espera ATRAPADA) | ['A10 caja {} cierra']
+LM1 lector deja pasar con INSUFICIENTE: ATRAPADA (se espera ATRAPADA) | ['L1 lector con protegida sin caja: no corre el analizador', 'L3 lector con faltantes declarados: corre el analizador y marca cada línea', 'L4 lector con caja i
 control que se cae: CAÍDA (se espera CAÍDA)
 mutaciones: TODAS COMO SE ESPERA
+mut rc=0

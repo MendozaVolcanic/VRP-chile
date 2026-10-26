@@ -64,7 +64,7 @@ class Pob:
         self.objs, self.res = [], []
 
     def pasada(self, hora, lab="neg_limpio", vrp_mirova=None, sin_caja=(), caja_vacia=(), estado="ok", dayflag=0,
-               cob=COB, volcan="Lascar"):
+               cob=COB, volcan="Lascar", caja_rara=None):
         i = len(self.objs)
         if lab == "pos":
             filas = [{"fecha_utc": hora + ":00", "tipo": "ALERTA_TERMICA", "vrp_mw": vrp_mirova, "dist_km": 0.5,
@@ -80,6 +80,8 @@ class Pob:
             "pc_vrp": 0.5 if pub else 0.0, "pc_n": 1 if pub else None, "granule": f"g{i}", "en_sc": False,
             "celda_crater": [32, 33], "inner_km": 5.0})
         r = {"id": i, "volcan": volcan, "hora_utc": hora, "estado": estado, "dayflag": dayflag, "sunglint": 40.0}
+        if dayflag == "ausente":
+            del r["dayflag"]
         if estado == "volcan_fuera_del_granulo":
             self.res.append(r)
             return i
@@ -94,6 +96,8 @@ class Pob:
             r["oraculo"] = {b: (PUB if pub else NOPUB) for b in CAJAS if b not in sin_caja}
             for b in caja_vacia:
                 r["oraculo"][b] = None
+            for b, v in (caja_rara or {}).items():
+                r["oraculo"][b] = v
         self.res.append(r)
         return i
 
@@ -136,6 +140,7 @@ def analizador(d, evaluador):
 
 
 CAIDAS = []
+LECTOR = AQUI / "leer_v750b.py"
 
 
 def companero(ruta, d):
@@ -145,11 +150,13 @@ def companero(ruta, d):
     c = re.search(r"== cobertura con las cajas: (SUFICIENTE|INSUFICIENTE)", out)
     if "Traceback" in out:
         CAIDAS.append(d.name)
+    mi = re.search(r"cajas ilegibles: (\d+)", out)
     lista = re.findall(r"falta caja: id (\d+) [^\n]*?cajas faltantes \[([^\]]*)\]", out)
     if not (m and c):
         return rc, None, out
     return rc, {"total": int(m.group(1)), "sellado": int(m.group(2)), "sin_g": int(m.group(3)),
-                "falta": int(m.group(4)), "cob": c.group(1), "lista": lista}, out
+                "falta": int(m.group(4)), "cob": c.group(1), "lista": lista,
+                "ilegibles": int(mi.group(1)) if mi else None}, out
 
 
 def main():
@@ -157,6 +164,7 @@ def main():
     ap.add_argument("--companero", default=str(AQUI / "cobertura_cajas_v750b.py"))
     ap.add_argument("--evaluador", default="", help="evaluar_d25.py del tag s161-d25-lectura (sólo para D1 y A4)")
     ap.add_argument("--dest", default="")
+    ap.add_argument("--lector", default=str(AQUI / "leer_v750b.py"))
     a = ap.parse_args()
     dest = Path(a.dest) if a.dest else Path(tempfile.mkdtemp(prefix="adenda1_"))
     ev = Path(a.evaluador) if a.evaluador else None
@@ -247,7 +255,8 @@ def main():
     rc, c, out = companero(a.companero, d)
     chequear("A5 lectura", c is not None, f"salida {rc}")
     if c:
-        chequear("A5 caja vacía = faltante", c["falta"] == 1 and c["cob"] == "INSUFICIENTE" and rc == 3, f"{c}")
+        chequear("A5 caja null = ilegible, cierra", c["ilegibles"] == 1 and c["falta"] == 0
+                 and c["cob"] == "INSUFICIENTE" and rc == 3, f"{c}")
 
     # A6: archivo sin gránulo de otra lista
     p = base()
@@ -282,6 +291,93 @@ def main():
     chequear("A8 lectura", c is not None, f"salida {rc}")
     if c:
         chequear("A8 diurna contada una vez", c["sellado"] == 1 and c["falta"] == 0 and c["total"] == 1, f"{c}")
+
+    # agregados tras el verificador de la adenda (verificador/INFORME.md, VAD-01 a VAD-05)
+    def con_analizador(nombre, d, c):
+        """Donde no falta ninguna caja, el compañero tiene que dar lo mismo que el analizador sellado (VAD-05)."""
+        if not ev or c is None:
+            return
+        an, outa = analizador(d, ev)
+        chequear(f"{nombre} identidad con el analizador", an is not None and an[2] == c["sellado"]
+                 and an[3] == c["sin_g"] and an[4] == c["cob"], f"analizador {an} contra compañero {c}")
+
+    def caso(nombre, p, cond, detalle, sin_granulo=(), identidad=True):
+        d = esc(nombre)
+        p.escribir(d, sin_granulo=sin_granulo)
+        rc, c, out = companero(a.companero, d)
+        chequear(f"{nombre} lectura", c is not None, f"salida {rc}")
+        if c:
+            chequear(f"{nombre} {detalle}", cond(rc, c), f"{c}, salida {rc}")
+            if identidad:
+                con_analizador(nombre, d, c)
+        return d
+
+    # A9 (VAD-03): caja null en una no protegida, 1 de 100: el analizador se caería; cierra igual
+    p = base(n_neg=95)
+    p.pasada("2026-08-21 05:00", caja_vacia=("B2",))
+    caso("A9", p, lambda rc, c: c["ilegibles"] == 1 and c["cob"] == "INSUFICIENTE" and rc == 3,
+         "caja null cierra bajo el 2 %", identidad=False)
+    # A10 (VAD-04): caja {} (sin npix ni vrp_mw ni pixeles): el analizador la leería como «no publica»; cierra
+    p = base(n_neg=95)
+    p.pasada("2026-08-22 05:00", caja_rara={"B3": {}})
+    caso("A10", p, lambda rc, c: c["ilegibles"] == 1 and c["cob"] == "INSUFICIENTE" and rc == 3, "caja {} cierra",
+         identidad=False)
+    # A11 (VAD-05, V2): borde exacto, 2 SIN DATO en 100: SUFICIENTE (el 2 % incluye el borde)
+    p = base(n_neg=96)
+    for j in range(2):
+        p.res[10 + j]["estado"] = "error_K"
+    caso("A11", p, lambda rc, c: c["cob"] == "SUFICIENTE" and c["sellado"] == 2, "borde exacto del 2 %")
+    # A12 (V3): 100 objetivos, 10 fuera y 2 SIN DATO: el denominador es 90, así que 2 pasa el 2 % (1,8): INSUFICIENTE
+    p = base(n_neg=86)
+    for j in range(10):
+        p.pasada(f"2026-08-{1 + j:02d} 09:00", estado="volcan_fuera_del_granulo")
+    for j in range(2):
+        p.res[10 + j]["estado"] = "error_K"
+    caso("A12", p, lambda rc, c: c["cob"] == "INSUFICIENTE", "denominador sin las fuera")
+    # A13 (V4): 99 objetivos + 1 sin gránulo y 1 error de K: denominador 100, 2 SIN DATO: SUFICIENTE
+    p = base(n_neg=95)
+    p.res[10]["estado"] = "error_K"
+    caso("A13", p, lambda rc, c: c["cob"] == "SUFICIENTE" and c["total"] == 2, "denominador con las sin gránulo",
+         sin_granulo=[{"volcan": "Lascar", "hora_utc": "2026-09-01 05:00", "protegida": False}])
+    # A14 (V5): una protegida sin gránulo entre 200: cierra
+    p = base(n_neg=196)
+    caso("A14", p, lambda rc, c: c["cob"] == "INSUFICIENTE", "protegida sin gránulo cierra",
+         sin_granulo=[{"volcan": "Lascar", "hora_utc": "2026-09-02 05:00", "protegida": True}])
+    # A15 (V6): una protegida con error de K entre 200: cierra
+    p = base(n_neg=196)
+    p.res[0]["estado"] = "error_K"
+    caso("A15", p, lambda rc, c: c["cob"] == "INSUFICIENTE" and c["sellado"] == 1, "protegida SIN DATO cierra")
+    # A16 (V7): una sin_crater sin cajas no es «falta caja» (no observada, fuera del denominador)
+    p = base(n_neg=95)
+    p.pasada("2026-08-23 05:00", cob=COB_SIN_CRATER, sin_caja=CAJAS)
+    caso("A16", p, lambda rc, c: c["cob"] == "SUFICIENTE" and c["falta"] == 0 and c["total"] == 0,
+         "sin_crater sin cajas no cuenta")
+    # A17 (V8): una pasada sin dayflag es SIN DATO del analizador
+    p = base(n_neg=95)
+    p.pasada("2026-08-24 05:00", dayflag="ausente")
+    caso("A17", p, lambda rc, c: c["sellado"] == 1, "dayflag ausente es SIN DATO")
+
+    # L1 a L3 (VAD-01): el lector no deja pasar al analizador si el compañero cierra
+    if ev:
+        def lector(d, extra=()):
+            return correr([sys.executable, str(a.lector), "--art", str(d / "art"), "--objetivos", str(d / "objetivos.json"),
+                           "--sin-granulo", str(d / "sin_granulo.json"), "--evaluador", str(ev), "--solo-controles",
+                           "--censo-omitido-solo-pruebas", "--salida", str(d / "lector.txt"), *extra])
+        rc, out = lector(dest / "D1_A1")
+        chequear("L1 lector con protegida sin caja: no corre el analizador",
+                 rc == 3 and "== compuerta del veredicto" not in out, f"salida {rc}")
+        rc, out = lector(dest / "A4")
+        # el analizador corre y sale con SU código (aquí 3: la población sintética no trae el control positivo de
+        # Cordón Caulle, así que su propia compuerta cierra; eso es del analizador, no del lector)
+        chequear("L2 lector con cobertura buena: corre el analizador", rc in (0, 3) and "== compuerta del veredicto" in out
+                 and "== LECTOR:" not in out, f"salida {rc}")
+        rc, out = lector(dest / "A3", ("--leer-con-faltantes", "prueba"))
+        chequear("L3 lector con faltantes declarados: corre el analizador y marca cada línea",
+                 "[LEÍDO CON FALTANTES DE LA ADENDA: prueba] == compuerta del veredicto" in out
+                 and "\n== compuerta del veredicto" not in out, f"salida {rc}")
+        rc, out = lector(dest / "A9", ("--leer-con-faltantes", "prueba"))
+        chequear("L4 lector con caja ilegible: no se lee ni con faltantes", rc == 3
+                 and "== compuerta del veredicto" not in out, f"salida {rc}")
 
     for f in filas:
         print(f)
