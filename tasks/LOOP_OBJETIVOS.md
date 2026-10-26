@@ -569,6 +569,25 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~14:15 UTC (S164, vuelta 5): cierre de VIIRS 375 integrado; #914 mergeado (placebos D-44, tarea 1.35, causa de huecos)
+- `loop-viirs375` cerró: adenda 1 de `experiments/_s162_v375/PREREGISTRO_E.md` con PD1, **sin sellar**; traspaso para la
+  sesión que lleve la vía a 375 en la carpeta compartida de S162 (`VIIRS375_via_375_traspaso.md`): el procesador de 375 es
+  `process_viirs.py` (A45), necesita pre-registro PD3 con tag y el sí de Nicolás. Integrado a `loop/activo` (`e9dac40d4`).
+- `instrumento-pendientes` entregó #914 (sólo `scripts/evaluador_comun.py`, su prueba y
+  `experiments/_s163_instrumento_pendientes/`; CI verde; verificador Sonnet limpio, gravedad 2 aplicadas; 28 de 28
+  mutaciones atrapadas por aserción). **Mergeado** (squash `b8b3519c2`). Resultados (`INFORME.md` de esa carpeta):
+  - Placebo simétrico en 14 celdas: GANA 4,09 % [3,60; 4,64], PIERDE 3,11 % [2,68; 3,59]: **P2 queda calibrado**.
+    **BLOQUEA sale en 40,3 % sin ningún efecto**: un BLOQUEA no es evidencia contra un brazo.
+  - Poder: con 25 % o más tocado, GANA y PIERDE en 36 a 40 de 40, salvo MODIS O con 25 % (PIERDE SIN SUSTRATO).
+  - Tarea 1.35: el evaluador informa por tramo de 10° de cenit y por régimen; por tramo, el placebo da SIN SUSTRATO en 75
+    de 78 filas (la calibración por tramo no se puede medir). Razón K/MIROVA de V375 en O: 0,81 (0 a 10°) a 0,40 (60 a 70°).
+  - `--cobertura` da la causa de cada ausencia; sobre producción siempre `sin_registro`, porque `nrt.yml` no guarda el JSON.
+- Abiertos que dejó: (a) **aplicado con D-48**: un hueco de NASA en una ventana de A/B se declara en el pre-registro y el
+  día se excluye en todos los brazos por igual (rescatarlo de LAADS es opcional y va aparte); (b) guardar
+  `--cobertura-json` en `nrt.yml` (toca `.github/`, el NRT): tarea pendiente, sin urgencia; (c) el ruido entre runners
+  sólo se mide con un brazo gemelo despachado: pendiente, entra en el próximo A/B; (d) #864: se cierra cuando aparezca el
+  auto-audit nuevo.
+
 ### 2026-10-26 ~13:45 UTC (S164, vuelta 4): rama de VIIRS 375 integrada; PD1 decidida bajo D-48 (C13 en todos)
 - `loop-viirs375` entregó su rama `claude/s162-viirs375-c1b864` en `815118277` (= remoto). Integrada a `loop/activo` con
   merge commit `461a77be4`: 209 archivos, 64 MB, todo en `experiments/_s159/portes/`, `experiments/_s158_audit_r2/`,
