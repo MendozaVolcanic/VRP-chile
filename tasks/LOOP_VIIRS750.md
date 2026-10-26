@@ -35,7 +35,9 @@ defensivo `pre-s162-via-mirova` (`deaf8f59b`). Cola de este relevo:
   parche propuesto en `experiments/_s162_v750a/cableado_pendiente/` (aplica limpio, 6 pruebas verdes). Entra sólo
   con el sí de Nicolás, pedido por S163.
 - R4 [2026-11-03] objetivos de V750-B desde su tag y pedido de despacho con los sha256 (paso 2 de abajo); la lectura
-  corre antes el compañero de la adenda 1.
+  va con `adenda1/leer_v750b.py` (adenda 1 CONFIRMADA por S163 bajo D-48 el 2026-10-26, sobre `7aa2788a0`). S163 pide
+  para el despacho: objetivos y su sha256, el tag desde el que se despacha, el número de jobs y el comando exacto del
+  workflow (`probe-s162-v750b.yml`).
 - R5 [HECHO, `d4f1c891c` y `a16aa14b4` en `s162-via-mirova`, PR #907, CI verde] la regla de MATLAB la halló el
   subagente de S163 (Delaunay con desempate simbólico, x = fila); portada: VRP 166/166 contra MATLAB, fondo 84/84,
   Etna exacto; oro de 8 escenas en `tests/data/`; equivalencia contra el módulo independiente de S163; nulo del módulo
@@ -48,8 +50,15 @@ defensivo `pre-s162-via-mirova` (`deaf8f59b`). Cola de este relevo:
   falta y usar las 166 salidas de MATLAB como vara de M en V750-A. Otra corrida de MATLAB: paquete con .mat, .m,
   correr_*.m y md5, y se le pide a S163.
 
-**Coordinadora desde el 2026-10-26: S163** (`local_8a135e90-b711-4bb9-9dec-ff02036f206b`), no S162. Despachos,
-avisos y resultados van a ella.
+**Coordinadora desde el 2026-10-26 12:35 UTC: S164** (`local_34f868ef-c156-4906-9b6c-e691fc445650`; antes S163
+`local_8a135e90-b711-4bb9-9dec-ff02036f206b`, y antes S162). Despachos, avisos y resultados van a ella.
+
+- R6 [HECHO, espera el merge de S164] **Cableado aprobado por Nicolás** (vía S163, «continúa con todo lo que
+  recomiendes apruebo los últimos 3 puntos»), flag apagado: PR #907 en `f96b379e7` (rebasado sobre main con #911; tag
+  defensivo `pre-rebase-s162-via-mirova` sobre `a16aa14b4`). La vía reconoce el volcán por coordenadas (sin cambiar la
+  firma ni run_pipeline.py). Bit a bit del almacén 6.143/6.143; suite 2.582 aprobadas, 0 fallas; verificador Sonnet
+  listo con cambios, todos hechos; CI verde. Avisado a S164 el 2026-10-26 ~13:20 UTC. fillmissing2: NaN fuera de la
+  envolvente, como MATLAB. Workflow opcional del NRT real (`probe-s162-bitabit-nrt.yml`): S164 lo deja para después.
 
 ## Cola (en orden)
 
