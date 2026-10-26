@@ -43,7 +43,7 @@ defensivo `pre-s162-via-mirova` (`deaf8f59b`). Cola de este relevo:
   (103 protegidas), 0 alertas sin record nuestro, 41 s. Los archivos del ensayo se borraron (no son los definitivos).
   El 2026-11-03: el mismo comando con `--hasta 2026-11-02` sobre el main de ese día, commitear objetivos_v750b.json,
   sin_granulo_v750b.json y poblacion_completa.json con su sha256 y pedir el despacho a S164.
-- R8 [en curso] **Medidor final de V750-A** (63 mutaciones, 4 hilos, 2026-10-26 11:24 a 18:38 UTC, salida en
+- R8 [DETENIDO POR DISCO, 2026-10-26 21:30 UTC, orden de la coordinadora S164: C: en 2,9 GB; se retoma cuando ella avise] Repetición con un hilo de las 4 caídas, parcial: M1 ATRAPADA (FALLAS 2 de 61), M33 ATRAPADA (FALLAS 1 de 61), M34 CAÍDA otra vez (la batería murió tras E27 sin línea de pruebas; 3,3 GB de RAM libre a esa hora, SOSPECHA de memoria), M36 y el control CAIDA sin terminar (SIN DATO). Para retomar: `--solo M34,M36 --hilos 1`. **Medidor final de V750-A** (63 mutaciones, 4 hilos, 2026-10-26 11:24 a 18:38 UTC, salida en
   `experiments/_s162_v750a/mutar_evaluar_v750a_salida.txt`). **Resultado: 58 de 62 mutaciones atrapadas por aserción,
   identidad PASA, control CAIDA cae 61 de 61; 4 fuera de lo esperado, todas CAÍDA.** Repetición de las 4 con un hilo
   lanzada a las 18:40 UTC (scratchpad `mutar_v750a_caidas.txt`). Detalle: identidad PASA, todas atrapadas por aserción
