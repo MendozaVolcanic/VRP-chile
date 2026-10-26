@@ -1,0 +1,116 @@
+
+== S1 B2 GANA con el canal que decide y PIERDE con la tabla sola
+   regla escrita (§6 / §9): §6.2 exige «no peor con la tabla sola»: B2 no gana ni entra a §6.3; ROI = B4
+   rc: 4
+   roi: B4
+   motivo: ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3
+   elegibles: ['B1', 'B2', 'B3', 'B4']
+   compuerta: ABIERTA
+   marcas: ['SIN CENSO, NO VALE PARA EL RUN']
+   cobertura: SUFICIENTE
+   sin_granulo: ('archivo ausente', '0')
+   p2_decide: {'B0': 'SIN SUSTRATO neto 0 B 0', 'B2': 'GANA neto -9 B 21', 'B3': 'SIN SUSTRATO neto 0 B 0', 'B4': 'SIN SUSTRATO neto 0 B 0', 'B5': 'SIN SUSTRATO neto 0 B 0'}
+   p2_tabla: {'B0': 'SIN SUSTRATO neto 0 B 0', 'B2': 'PIERDE neto 6 B 6', 'B3': 'SIN SUSTRATO neto 0 B 0', 'B4': 'SIN SUSTRATO neto 0 B 0', 'B5': 'SIN SUSTRATO neto 0 B 0'}
+
+== S1 con la condición de la tabla quitada de §6.2 (mutación M2)
+   regla escrita (§6 / §9): si la ROI cambia a B2, S1 mide esa condición
+   rc: 4
+   roi: B2
+   motivo: gana contra B1 (§6.2
+
+== S2 B4 (= B0 en Láscar) peor con el canal que decide (SIN SUSTRATO, neto +4) y neto 0 con la tabla sola
+   regla escrita (§6 / §9): §6.3 exige no peor en los dos canales: B4 no entra; ROI = B2
+   rc: 4
+   roi: B2
+   motivo: ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3
+   elegibles: ['B1', 'B2', 'B3', 'B4']
+   compuerta: ABIERTA
+   marcas: ['SIN CENSO, NO VALE PARA EL RUN']
+   cobertura: SUFICIENTE
+   sin_granulo: ('archivo ausente', '0')
+   p2_decide: {'B0': 'SIN SUSTRATO neto 4 B 4', 'B2': 'SIN SUSTRATO neto 0 B 0', 'B3': 'SIN SUSTRATO neto 0 B 0', 'B4': 'SIN SUSTRATO neto 4 B 4', 'B5': 'SIN SUSTRATO neto 4 B 4'}
+   p2_tabla: {'B0': 'SIN SUSTRATO neto 0 B 0', 'B2': 'SIN SUSTRATO neto 0 B 0', 'B3': 'SIN SUSTRATO neto 0 B 0', 'B4': 'SIN SUSTRATO neto 0 B 0', 'B5': 'SIN SUSTRATO neto 0 B 0'}
+
+== S2 con la condición del canal que decide quitada de §6.3 (mutación M3)
+   regla escrita (§6 / §9): si la ROI cambia a B4, S2 mide esa condición
+   rc: 4
+   roi: B4
+   motivo: ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3
+
+== S3 B3 y B4 GANAN con el mismo E (B2 y B5 iguales a B1)
+   regla escrita (§6 / §9): §6.2 no escribe el desempate a igual E; por cercanía al .m (§6.3) sería B4; el código toma min() sobre el orden de CANDIDATOS
+   rc: 4
+   roi: B3
+   motivo: gana contra B1 (§6.2
+   elegibles: ['B1', 'B2', 'B3', 'B4']
+   compuerta: ABIERTA
+   marcas: ['SIN CENSO, NO VALE PARA EL RUN']
+   cobertura: SUFICIENTE
+   sin_granulo: ('archivo ausente', '0')
+   p2_decide: {'B0': 'GANA neto -6 B 6', 'B2': 'SIN SUSTRATO neto 0 B 0', 'B3': 'GANA neto -6 B 6', 'B4': 'GANA neto -6 B 6', 'B5': 'SIN SUSTRATO neto 0 B 0'}
+   p2_tabla: {'B0': 'GANA neto -6 B 6', 'B2': 'SIN SUSTRATO neto 0 B 0', 'B3': 'GANA neto -6 B 6', 'B4': 'GANA neto -6 B 6', 'B5': 'SIN SUSTRATO neto 0 B 0'}
+
+== S4a archivo de pasadas sin gránulo con UNA protegida
+   regla escrita (§6 / §9): §9: cobertura INSUFICIENTE, sin veredicto, rc 3
+   rc: 3
+   roi: None
+   compuerta: CERRADA
+   cobertura: INSUFICIENTE
+   sin_granulo: ('sin_granulo.json', '1')
+
+== S4b la ruta del archivo de pasadas sin gránulo NO existe
+   regla escrita (§6 / §9): ¿qué hace el analizador con un archivo ausente?
+   rc: 4
+   roi: B4
+   compuerta: ABIERTA
+   cobertura: SUFICIENTE
+   sin_granulo: ('archivo ausente', '0')
+   marcas: ['SIN CENSO, NO VALE PARA EL RUN']
+
+== S4c una pasada sin gránulo NO protegida sobre 41 objetivos (1/42 = 2,4 % > 2 %)
+   regla escrita (§6 / §9): §9: cobertura INSUFICIENTE, rc 3
+   rc: 3
+   roi: None
+   compuerta: CERRADA
+   cobertura: INSUFICIENTE
+   sin_granulo: ('sin_granulo.json', '1')
+
+== S5a sin censo, con --leer-con-faltantes (sin la bandera de pruebas)
+   regla escrita (§6 / §9): §9: la bandera cubre «el control del censo no se puede correr»: veredicto marcado LEÍDO CON FALTANTES, rc 5
+   rc: 5
+   roi: B4
+   compuerta: ABIERTA
+   marcas: ['LEÍDO CON FALTANTES: prueba del verificador v3']
+
+== S5b las dos banderas a la vez (sin censo)
+   regla escrita (§6 / §9): las dos marcas en la línea de la ROI; rc 4 o 5 (el código elige 4)
+   rc: 4
+   roi: B4
+   compuerta: ABIERTA
+   marcas: ['SIN CENSO, NO VALE PARA EL RUN']
+
+== S5c --solo-controles con la compuerta cerrada (sin censo ni banderas que lo cubran)
+   regla escrita (§6 / §9): sin veredicto; ¿qué código de salida?
+   rc: 0
+   roi: None
+   compuerta: CERRADA
+
+== S5d censo con 0 pasadas comunes (carpeta vacía, objetivos vacíos)
+   regla escrita (§6 / §9): censo FALLA (bool(cnt) exige al menos una), rc 3
+   rc: 3
+   roi: None
+   compuerta: CERRADA
+
+== S5e oráculo muerto con las dos banderas
+   regla escrita (§6 / §9): §9: las banderas no cubren el control de la ROI: CERRADA, rc 3
+   rc: 3
+   roi: None
+   compuerta: CERRADA
+   marcas: ['SIN CENSO, NO VALE PARA EL RUN']
+
+== S5f K distinta de producción en 1 de 41 (y es protegida) con las dos banderas
+   regla escrita (§6 / §9): §7 y §9: K = producción no lo cubre ninguna bandera: CERRADA, rc 3
+   rc: 3
+   roi: None
+   compuerta: CERRADA
+   marcas: ['SIN CENSO, NO VALE PARA EL RUN']

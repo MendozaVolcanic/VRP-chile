@@ -1,0 +1,66 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf
+== controles
+  'todos' publica en 13 de 403 (el lector del lote dio 13: 11 protegidas + Llaima 1120 + Lascar 1251)
+  'todos' = resultado del lote en npix: 403 de 403
+  A_centro_cubierto_ant: quita algo en 311 pasadas; la grilla cambia en 299; pasadas sin quitar nada con grilla distinta (tiene que ser 0): 0
+  A_centro_cubierto_sig: quita algo en 311 pasadas; la grilla cambia en 300; pasadas sin quitar nada con grilla distinta (tiene que ser 0): 0
+  A_huella_entera_ant: quita algo en 311 pasadas; la grilla cambia en 299; pasadas sin quitar nada con grilla distinta (tiene que ser 0): 0
+  B_filas_borde: quita algo en 312 pasadas; la grilla cambia en 300; pasadas sin quitar nada con grilla distinta (tiene que ser 0): 0
+  C_sin_det0: quita algo en 403 pasadas; la grilla cambia en 403; pasadas sin quitar nada con grilla distinta (tiene que ser 0): 0
+
+== cambios de publicacion contra 'todos' (gana = publica con el metodo y no con todos; pierde = al reves)
+  neg_resto (n 390; 'todos' publica en 2)
+     A_centro_cubierto_ant    publica   0 | gana 0 [] | pierde 2 [1120, 1251] | npix distinto en 2
+     A_centro_cubierto_sig    publica   1 | gana 0 [] | pierde 1 [1120] | npix distinto en 1
+     A_huella_entera_ant      publica   0 | gana 0 [] | pierde 2 [1120, 1251] | npix distinto en 2
+     B_filas_borde            publica   1 | gana 0 [] | pierde 1 [1251] | npix distinto en 1
+     C_sin_det0               publica   2 | gana 1 [1093] | pierde 1 [1251] | npix distinto en 2
+  control_s159 protegidas (n 11; 'todos' publica en 11)
+     A_centro_cubierto_ant    publica  11 | gana 0 [] | pierde 0 [] | npix distinto en 4
+     A_centro_cubierto_sig    publica  11 | gana 0 [] | pierde 0 [] | npix distinto en 3
+     A_huella_entera_ant      publica  11 | gana 0 [] | pierde 0 [] | npix distinto en 4
+     B_filas_borde            publica  10 | gana 0 [] | pierde 1 [141] | npix distinto en 4
+     C_sin_det0               publica  10 | gana 0 [] | pierde 1 [89] | npix distinto en 4
+  control_s159 no protegidas (n 2; 'todos' publica en 0)
+     A_centro_cubierto_ant    publica   0 | gana 0 [] | pierde 0 [] | npix distinto en 0
+     A_centro_cubierto_sig    publica   0 | gana 0 [] | pierde 0 [] | npix distinto en 0
+     A_huella_entera_ant      publica   0 | gana 0 [] | pierde 0 [] | npix distinto en 0
+     B_filas_borde            publica   0 | gana 0 [] | pierde 0 [] | npix distinto en 0
+     C_sin_det0               publica   0 | gana 0 [] | pierde 0 [] | npix distinto en 0
+
+== por estrato (neg_resto + controles): pasadas con publicacion distinta / npix distinto, por metodo
+  por cenit:
+     25-40  n  78  Ac_ant: 1/2  Ac_sig: 0/1  Ah_ant: 1/2  B: 1/2  C: 1/2
+     40-50  n  71  Ac_ant: 0/0  Ac_sig: 0/0  Ah_ant: 0/0  B: 0/0  C: 0/0
+     z<25   n  98  Ac_ant: 0/0  Ac_sig: 0/0  Ah_ant: 0/0  B: 0/0  C: 2/3
+     z>=50  n 156  Ac_ant: 1/4  Ac_sig: 1/3  Ah_ant: 1/4  B: 1/3  C: 0/1
+  por crater en det 0 o 9:
+     False  n 343  Ac_ant: 2/6  Ac_sig: 1/4  Ah_ant: 2/6  B: 2/5  C: 3/5
+     True   n  60  Ac_ant: 0/0  Ac_sig: 0/0  Ah_ant: 0/0  B: 0/0  C: 0/1
+  por crater con 2+ huellas (todos):
+     False  n 255  Ac_ant: 1/2  Ac_sig: 0/1  Ah_ant: 1/2  B: 1/2  C: 3/5
+     True   n 148  Ac_ant: 1/4  Ac_sig: 1/3  Ah_ant: 1/4  B: 1/3  C: 0/1
+
+== magnitud en las pasadas donde 'todos' detecta (VRP en MW; razon metodo/todos; MIROVA de la tabla de objetivos)
+  id    volcan               hora              z     det_cr hu  MIROVA   todos(np)  A_centro_cubierto_ant  A_centro_cubierto_sig  A_huella_entera_ant  B_filas_borde  C_sin_det0
+     19 Lascar               2026-04-05 01:35  13.0  0      1   1.980   2.126(2) 2.126(2) x1.000 P | 2.126(2) x1.000 P | 2.126(2) x1.000 P | 2.126(2) x1.000 P | 2.676(3) x1.258 P
+     23 Lascar               2026-04-18 01:50  27.6  8      1   2.060   2.415(2) 2.415(2) x1.000 P | 2.415(2) x1.000 P | 2.415(2) x1.000 P | 2.415(2) x1.000 P | 1.596(2) x0.661 P
+     31 Lascar               2026-05-03 01:45  25.3  1      1   1.140   1.381(2) 1.381(2) x1.000 P | 1.381(2) x1.000 P | 1.381(2) x1.000 P | 1.381(2) x1.000 P | 1.444(2) x1.045 P
+     65 NevadosDeChillan     2026-10-15 01:05  57.6  7      2   1.720   2.982(5) 3.157(4) x1.059 P | 2.829(5) x0.949 P | 3.157(4) x1.059 P | 3.096(4) x1.038 P | 3.126(4) x1.048 P
+     75 Lascar               2026-03-10 07:50  40.5  4      1   1.970   1.772(4) 1.772(4) x1.000 P | 1.779(4) x1.004 P | 1.772(4) x1.000 P | 1.779(4) x1.004 P | 1.772(4) x1.000 P
+     79 Lascar               2026-03-15 07:45  30.5  2      1   2.220   1.953(3) 2.123(4) x1.087 P | 2.123(4) x1.087 P | 2.123(4) x1.087 P | 2.123(4) x1.087 P | 2.135(4) x1.093 P
+     83 Lascar               2026-03-27 07:10  39.9  4      1   1.000   1.175(3) 1.175(3) x1.000 P | 1.175(3) x1.000 P | 1.175(3) x1.000 P | 1.175(3) x1.000 P | 1.175(3) x1.000 P
+     89 Lascar               2026-04-07 07:35  11.3  1      1   2.290   1.878(2) 1.878(2) x1.000 P | 1.878(2) x1.000 P | 1.878(2) x1.000 P | 1.878(2) x1.000 P | 0.000(0) x0.000 -
+     97 Lascar               2026-04-25 07:35   2.4  6      1   1.280   0.973(1) 0.973(1) x1.000 P | 0.973(1) x1.000 P | 0.973(1) x1.000 P | 0.973(1) x1.000 P | 0.973(1) x1.000 P
+    141 NevadosDeChillan     2026-10-01 08:35  50.5  1      2   5.180   5.795(8) 5.432(7) x0.937 P | 4.773(7) x0.824 P | 5.432(7) x0.937 P | 0.000(0) x0.000 - | 5.758(8) x0.994 P
+    147 NevadosDeChillan     2026-10-12 07:20  58.2  1      2   2.180   1.824(3) 1.674(4) x0.918 P | 1.343(2) x0.736 P | 1.674(4) x0.918 P | 2.728(5) x1.496 P | 1.751(3) x0.960 P
+   1120 Llaima               2026-07-24 01:05  62.9  8      2   0.000   0.430(1) 0.000(0) x0.000 - | 0.000(0) x0.000 - | 0.000(0) x0.000 - | 0.413(1) x0.959 P | 0.435(1) x1.010 P
+   1251 Lascar               2026-05-11 07:55  38.1  8      1   0.000   0.297(1) 0.000(0) x0.000 - | 0.251(1) x0.846 P | 0.000(0) x0.000 - | 0.000(0) x0.000 - | 0.000(0) x0.000 -
+  protegidas, port/MIROVA con todos                   : n 11 de 11, mediana 1.074, rango [0.760; 1.734]
+  protegidas, port/MIROVA con A_centro_cubierto_ant   : n 11 de 11, mediana 1.049, rango [0.760; 1.835]
+  protegidas, port/MIROVA con A_centro_cubierto_sig   : n 11 de 11, mediana 0.956, rango [0.616; 1.645]
+  protegidas, port/MIROVA con A_huella_entera_ant     : n 11 de 11, mediana 1.049, rango [0.760; 1.835]
+  protegidas, port/MIROVA con B_filas_borde           : n 10 de 11, mediana 1.123, rango [0.760; 1.800]
+  protegidas, port/MIROVA con C_sin_det0              : n 10 de 11, mediana 1.037, rango [0.760; 1.818]
+exit 0

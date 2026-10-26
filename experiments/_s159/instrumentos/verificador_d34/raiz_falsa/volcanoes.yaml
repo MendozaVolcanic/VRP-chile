@@ -1,0 +1,847 @@
+volcanoes:
+- name: PuyehueCordonCaulle
+  region: Los Ríos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Puyehue - Cordón Caulle
+  lat: -40.59
+  lon: -72.117
+  radius_km: 25
+  # S62 inner=7 INTENTADO pero REVERTIDO post-reproc (run 26072886354):
+  # - Preview offline predijo ratio mediano 3.51× → 1.86× (-47%)
+  # - Reproc real con inner=7 dio 3.64× (peor que baseline 3.51×)
+  # - Recall mejoró 86 → 89 pero ratio empeoró
+  # LECCIÓN S62 (A18): preview offline filtra records existentes; el reproc
+  # REAL cambia vent_anchored cluster selection desde cero. ALWAYS validar
+  # con reproc real, NO confiar en preview offline para parámetros que
+  # afectan cluster selection. Vuelve a 20 (MIROVA KML oficial).
+  # Investigación distinta S63: cluster lejano cone vs lacolito MODIS.
+  inner_radius_km: 20  # MIROVA KML oficial — summit/far visual
+  gvp_id: 357150
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Persistent fumarolic/hydrothermal anomaly since 2011-2012 eruption
+  vent_lat: -40.525499
+  vent_lon: -72.146137
+  vent_radius_km: 3
+  # S81 ADOPTADO clon MIROVA literal (Nicolás explícito): coords del KMZ
+  # oficial VIIRS375 parsing fresco S80/S81 = centro bbox UTM 51×51 km que
+  # MIROVA web usa para definir su ROI. Auditoría S81 frente #10 detectó
+  # 1.39 km de diferencia con el valor previo empírico S48 (centroide
+  # térmico MODIS). En PCC ~98% de detecciones son VIIRS, así que el
+  # alineamiento bit-a-bit con MIROVA web pesa más que el ancla MODIS al
+  # lacolito. Idea preservada como "centroide térmico empírico" en
+  # docs/BEYOND_MIROVA_EXTENSIONS.md §PCC_VENT_ANCHOR para eventual
+  # adopción dual-anchor cuando hacks no-MIROVA estén autorizados.
+  # Tag defensivo: pre-s81-pcc-mirova-center.
+  mirova_center_lat: -40.5903
+  mirova_center_lon: -72.1187
+  # S63 ADOPCIÓN: A/B kernel-bg validó cura masiva (run 26115708153).
+  # Audit 97 ALERTAS (60 CONS + 37 OCR) window 80d con pc.vrp_mw:
+  #   LEGACY ratio mediano 3.64× → NEW 0.29× (-92%)
+  #   Recall 89/97 mantenido
+  #   En rango [0.5, 2.0]: 11% → 30%
+  #   Aceptable ≤3×: 47% → 91%
+  #   Max ratio: 148× → 10×
+  # Confirma hipótesis S62 paralelo: PCC ΔT 11.2K (régimen Muy Bajo
+  # igual Villarrica/Lastarria/Chaiten) → kernel-bg cura. Refuta H_S61
+  # 'ring gradient positivo PCC no responde a kernel-bg' (era especulativa).
+  # NOTA: ratio 0.29× indica leve sub-estimación, pero 91% aceptable y
+  # recall completo. Monitorear post-deploy si algún caso específico
+  # necesita ajuste fino.
+  local_kernel_bg: true
+- name: Villarrica
+  region: Araucanía  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Villarrica
+  lat: -39.42
+  lon: -71.93
+  # mirova_center extraído de kmz/Villarrica_VIIRS750_Last_GE.kmz GroundOverlay LatLonBox (S80)
+  mirova_center_lat: -39.42177
+  mirova_center_lon: -71.93391
+  radius_km: 25
+  inner_radius_km: 5  # MIROVA KML oficial — summit/far visual
+  # S99 DF-1 — lava lake magmático sub-píxel: habilita Eq.16 (Coppola 2024) para la
+  # magnitud Test 1 cuando enable_test1_lava_lake_eq16 está ON (A/B S99). Verificado
+  # S51/S52 (lava lake oculto <300m del cráter). NO aplica a cráteres fumarólicos.
+  lava_lake_magmatic: true
+  # F52-A/S77 (A45) — cap n_pixels del cluster para descartar agregaciones
+  # glaciares marginales (Pichillancahue NW del cráter). Audit S77 confirmó
+  # ratio mediano 10.91× vs MIROVA por clusters 16-86 px con ΔT 5-11K
+  # (nieve/glaciar, no lava real). Otros Tier A NO necesitan cap (sus
+  # clusters grandes son lava legítima). Ver docs/F52_VILLARRICA_OVER_ESTIMATION_S77.md.
+  max_cluster_pixels: 12
+  gvp_id: 357120
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Open lava lake, frequent thermal anomalies. Crater puntual.
+  vent_lat: -39.420227
+  vent_lon: -71.939876
+  vent_radius_km: 2
+  # S58 H_S57/S58 audit: median(ring 5-25km) sesgado caliente por lago
+  # Villarrica al N. Local kernel 3x3 (Coppola 2024 L1129) compensa.
+  # Solo aplica con profile flag enable_local_kernel_bg ON.
+  local_kernel_bg: true
+  # S26: cuerpos de agua nocturnos generan FPs masivos verano (lagos ~9°C
+  # vs ambiente nevado ~0°C → ΔBT 5-15K trigger eruption-path). En jan-mar
+  # 2026 se observaron 88 records con vrp_mw > 100 MW clusterizados aquí.
+  # Distancias del vent: lago Villarrica NW 16 km, Calafquén SW 24 km.
+  # Radios chicos para no tocar summit (inner=5 km).
+  exclude_zones:
+    - name: "Lago Villarrica"
+      lat: -39.27
+      lon: -72.09
+      radius_km: 7.0
+    - name: "Lago Calafquen"
+      lat: -39.56
+      lon: -72.14
+      radius_km: 5.0
+- name: Lascar
+  region: Antofagasta  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Láscar
+  lat: -23.369
+  lon: -67.732
+  # mirova_center extraído de kmz/Lascar_VIIRS375_Last_GE.kmz GroundOverlay LatLonBox (S80)
+  mirova_center_lat: -23.37041
+  mirova_center_lon: -67.73102
+  radius_km: 25
+  inner_radius_km: 5  # MIROVA KML oficial — summit/far visual
+  gvp_id: 355100
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Frequent fumarolic activity and occasional eruptions. MIROVA avg dist 1.1km.
+  vent_lat: -23.36293
+  vent_lon: -67.731416
+  vent_radius_km: 3
+  # S39 D4 per-vol: cráter activo permanente — ring 1-3km contaminado por
+  # calor crónico → L_bg local alto → ΔL clip 0 con Test 1 path. Fix: usar
+  # L_bg global anillo 5-25km. Confirmed S38 análisis 9 FN: 1/9 Lascar TP
+  # con triggered_test1 + vrp=0 → recuperable con flag ON.
+  lbg_global_compatible: true
+  # S16 P3.6: zonas excluidas (cuerpos de agua/salares irradiando calor
+  # nocturno que el bbox 50x50 km incluye y generan FPs masivos).
+  # Salar de Atacama: 4326 pixels FP en VIIRS_SNPP 2026-04-08 -> VRP 1437 MW.
+  exclude_zones:
+    - name: "Salar de Atacama"
+      lat: -23.5
+      lon: -68.2
+      radius_km: 25.0
+- name: Antuco
+  region: Biobío  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Antuco
+  lat: -37.406
+  lon: -71.349
+  radius_km: 5
+  gvp_id: 357080
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2979m. Horseshoe caldera.
+- name: Copahue
+  region: Biobío  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Copahue
+  lat: -37.856
+  lon: -71.183
+  # mirova_center extraído de kmz/Copahue_VIIRS375_Last_GE.kmz GroundOverlay LatLonBox (S80)
+  mirova_center_lat: -37.85617
+  mirova_center_lon: -71.18458
+  radius_km: 25
+  inner_radius_km: 4  # MIROVA KML oficial — summit/far visual
+  gvp_id: 357090
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Active crater lake, recurring thermal unrest. Crater puntual.
+  vent_lat: -37.856
+  vent_lon: -71.183
+  vent_radius_km: 2
+  # S58 H_S58_PER_VOL: ratio 50× inflación (audit S58, basado en OSF agregado).
+  # Lago El Agrio cráter activo sesga ring 5-25km hacia caliente.
+  # S61 REVERTIDO: audit window-aligned vs MIROVA CSV NRT (window 04-16/05-15)
+  # mostró ratio LEGACY/MIROVA mediano = 1.14× = ya calibrado.
+  # El target real es MIROVA NRT (no OSF agregado histórico). Aplicar fix
+  # kernel local bajaría magnitudes ya correctas → riesgo under-detection.
+  # Agente lagos S60 confirmó: Caviahue tibio aporta contaminación moderada
+  # pero ya alineada con MIROVA NRT actual.
+  local_kernel_bg: false
+  # S26: Lago Caviahue / Laguna del Agrio ~14 km SE del vent (lado Argentina).
+  # Auditoría empírica S26 sobre data fresca: 107 hotspots clusterizados
+  # @(-37.876,-71.025). Radio 4 km cubre cluster sin tocar summit
+  # (inner_radius=4 km, distancia vent → exclude más cercano = 14-4 = 10 km).
+  # NOTA: Copahue tiene laguna crater ácida activa muy chica adentro del
+  # vent_radius — no confundir con lago Caviahue grande lejos.
+  exclude_zones:
+    - name: "Lago Caviahue"
+      lat: -37.876
+      lon: -71.025
+      radius_km: 4.0
+- name: DescabezadoGrande
+  region: Maule  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Descabezado Grande
+  lat: -35.58
+  lon: -70.75
+  radius_km: 5
+  gvp_id: 357050
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 3953m. Ice-filled caldera. Last eruption 1933.
+- name: CerroAzulQuizapu
+  region: Maule  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Cerro Azul - Quizapu
+  lat: -35.653
+  lon: -70.761
+  radius_km: 5
+  gvp_id: 357060
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: 1932 Plinian eruption VEI 5. SERNAGEOMIN Cat.1.
+- name: LagunaDelMaule
+  region: Maule  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Laguna del Maule
+  lat: -36.056836
+  lon: -70.501398
+  radius_km: 5
+  gvp_id: 357061
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic field/caldera. Ongoing uplift ~20 cm/yr since 2007. Centro en la
+    laguna.
+- name: NevadoDeLongavi
+  region: Maule  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Nevado de Longaví
+  lat: -36.193
+  lon: -71.161
+  radius_km: 5
+  gvp_id: 357063
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Glacier-covered stratovolcano 3242m. Fumarolic.
+- name: NevadosDeChillan
+  region: Ñuble  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Nevados de Chillán
+  lat: -36.863
+  lon: -71.377
+  # mirova_center extraído de kmz/ChillanNevadosde_VIIRS750_Last_GE.kmz GroundOverlay LatLonBox (S80)
+  mirova_center_lat: -36.86483
+  mirova_center_lon: -71.38068
+  radius_km: 25
+  inner_radius_km: 5  # MIROVA KML oficial — summit/far visual
+  gvp_id: 357070
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Nicanor crater, active dome growth 2018-2024. Recent lava flows.
+  vent_lat: -36.863
+  vent_lon: -71.377
+  vent_radius_km: 2
+  # S42: NdC tiene cráter Nicanor con domo activo + flujos lava recientes
+  # → ring 1-3km cráter contaminado por calor crónico. Análisis S39 de 3 alertas
+  # NdC: 2/3 muestran patrón D4 (Test 1 dispara, primary cráter cercano,
+  # vrp=0 por L_bg local). Activar D4 selectivo similar a Lascar/Lastarria.
+  lbg_global_compatible: true
+- name: Callaqui
+  region: Biobío  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Callaqui
+  lat: -37.92
+  lon: -71.45
+  radius_km: 5
+  gvp_id: 357091
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Ice-capped stratovolcano. Last phreatic 1980.
+- name: Lonquimay
+  region: Araucanía  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Lonquimay
+  lat: -38.38
+  lon: -71.58
+  radius_km: 5
+  gvp_id: 357100
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2865m. 1988-1990 Navidad flank eruption.
+- name: Tolhuaca
+  region: Araucanía  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Tolhuaca
+  lat: -38.31
+  lon: -71.645
+  radius_km: 5
+  gvp_id: 357106
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2806m. Geothermal field.
+- name: Llaima
+  region: Araucanía  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Llaima
+  lat: -38.692
+  lon: -71.729
+  # mirova_center extraído de kmz/Llaima_VIIRS375_Last_GE.kmz GroundOverlay LatLonBox (S80)
+  mirova_center_lat: -38.69215
+  mirova_center_lon: -71.73063
+  radius_km: 25
+  inner_radius_km: 5  # MIROVA KML oficial — summit/far visual
+  gvp_id: 357110
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: One of Chile's most active. Last eruption 2008-2009. Summit crater.
+  vent_lat: -38.692
+  vent_lon: -71.729
+  vent_radius_km: 2
+  # S58 H_S58_PER_VOL: Lago Conguillío al N sesga ring caliente. Patrón
+  # Villarrica-like según audit S58 (gradiente negativo ΔBT max-median).
+  # Local kernel 3x3 compensa.
+  # S61 REVERTIDO: audit window-aligned vs MIROVA CSV NRT (window 04-16/05-15)
+  # mostró ratio LEGACY/MIROVA mediano = 1.01× = calibradísimo.
+  # Agente lagos S60 confirmó: Conguillío es lago frío de alta montaña (5-15°C
+  # de deshielo), sin geotermia. Contraste térmico bajo vs terreno andino frío
+  # → no contamina ring relevantemente. Fix kernel bajaría magnitudes ya
+  # correctas → dañino.
+  local_kernel_bg: false
+  # S26: Lago Conguillío ~10 km NE genera FPs ya documentados
+  # (project_llaima_thermal.md: 139 FPs ruido térmico). Auditoría empírica
+  # S26 sobre data fresca: 184 hotspots clusterizados @(-38.634,-71.639).
+  # Radio 4 km cubre cluster sin tocar summit (inner_radius=5 km, distancia
+  # vent → exclude más cercano = 10-4 = 6 km).
+  exclude_zones:
+    - name: "Lago Conguillío"
+      lat: -38.634
+      lon: -71.639
+      radius_km: 4.0
+- name: Sollipulli
+  region: Araucanía  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Sollipulli
+  lat: -38.97
+  lon: -71.52
+  radius_km: 5
+  gvp_id: 357111
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Ice-filled caldera 4 km wide. Last eruption ~2950 BCE.
+- name: Quetrupillan
+  region: Araucanía  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Quetrupillán
+  lat: -39.496
+  lon: -71.722
+  radius_km: 5
+  gvp_id: 357121
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2360m in Villarrica NP. Fumarolic.
+- name: Lanin
+  region: Araucanía  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Lanín
+  lat: -39.633
+  lon: -71.503
+  radius_km: 5
+  gvp_id: 357122
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 3747m. Border volcano. Holocene activity.
+- name: MochoChoshuenco
+  region: Los Ríos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Mocho-Choshuenco
+  lat: -39.927
+  lon: -72.027
+  radius_km: 5
+  gvp_id: 357130
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Ice-capped twin volcanoes. Last eruption 1937.
+- name: CarranLosVenados
+  region: Los Ríos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Carrán-Los Venados
+  lat: -40.35
+  lon: -72.07
+  radius_km: 5
+  gvp_id: 357140
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic field. Last phreatic eruption 1979.
+- name: AntillancaCasablanca
+  region: Los Lagos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Antillanca-Casablanca
+  lat: -40.77
+  lon: -72.15
+  radius_km: 5
+  gvp_id: 358001
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic group near Puyehue NP. Holocene eruptions.
+- name: Osorno
+  region: Los Lagos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Osorno
+  lat: -41.1
+  lon: -72.493
+  radius_km: 5
+  gvp_id: 358010
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2652m. Iconic cone. Last eruption 1869.
+- name: Calbuco
+  region: Los Lagos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Calbuco
+  lat: -41.33
+  lon: -72.614
+  radius_km: 5
+  gvp_id: 358020
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Major 2015 eruption VEI 4. SERNAGEOMIN Cat.1.
+- name: YateHornopiren
+  region: Los Lagos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Yate-Hornopirén
+  lat: -41.76
+  lon: -72.39
+  radius_km: 5
+  gvp_id: 358022
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic complex. Holocene activity.
+- name: Huequi
+  region: Los Lagos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Huequi
+  lat: -42.377
+  lon: -72.578
+  radius_km: 5
+  gvp_id: 358030
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano. Last eruption 1920. Fumarolic.
+- name: Michinmahuida
+  region: Los Lagos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Michinmahuida
+  lat: -42.79
+  lon: -72.44
+  radius_km: 5
+  gvp_id: 358040
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Glacier-covered stratovolcano. Last eruption ~1835.
+- name: Chaiten
+  region: Los Lagos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Chaitén
+  lat: -42.833
+  lon: -72.646
+  # mirova_center extraído de kmz/Chaiten_VIIRS750_Last_GE.kmz GroundOverlay LatLonBox (S80)
+  mirova_center_lat: -42.83496
+  mirova_center_lon: -72.65005
+  radius_km: 25
+  inner_radius_km: 5  # MIROVA KML oficial — summit/far visual
+  gvp_id: 358041
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Rhyolitic dome from 2008 eruption. Persistent fumarolic activity.
+  vent_lat: -42.8344815
+  vent_lon: -72.6528875
+  vent_radius_km: 3
+  # S63 ADOPCIÓN: A/B kernel-bg validó cura masiva del gap (run 26094823809).
+  # Audit 20 ALERTAS (10 CONS + 10 OCR) window 80d con pc.vrp_mw:
+  #   LEGACY ratio mediano 9.78× → NEW 2.23× (-77%)
+  #   Recall 20/20 mantenido
+  #   Aceptable ≤3×: 35% → 60%
+  # Patrón térmico Muy Bajo (ΔT 10.5K) + ring bosque Patagónico frío
+  # cura con kernel local 3×3 (Coppola 2024 L1129). Mismo mecanismo
+  # Villarrica/PP/Lastarria.
+  local_kernel_bg: true
+- name: CorcovadoYanteles
+  region: Los Lagos  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Corcovado-Yanteles
+  lat: -43.183
+  lon: -72.8
+  radius_km: 5
+  gvp_id: 358050
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2300m. Holocene eruptions.
+- name: Melimoyu
+  region: Aysén  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Melimoyu
+  lat: -44.08
+  lon: -72.88
+  radius_km: 5
+  gvp_id: 358052
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Ice-capped stratovolcano 2400m. Holocene eruptions.
+- name: Mentolat
+  region: Aysén  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Mentolat
+  lat: -44.67
+  lon: -73.08
+  radius_km: 5
+  gvp_id: 358054
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano on island in Aysén fjords. Holocene eruptions.
+- name: MacaCay
+  region: Aysén  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Macá-Cay
+  lat: -45.1
+  lon: -73.2
+  radius_km: 5
+  gvp_id: 358055
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic complex. 1991 possible eruption.
+- name: Hudson
+  region: Aysén  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Hudson
+  lat: -45.9
+  lon: -72.97
+  radius_km: 5
+  gvp_id: 358057
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Major eruptions 1971, 1991 VEI 5. SERNAGEOMIN Cat.1. Ice-filled caldera.
+- name: Tinguiririca
+  region: O'Higgins  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Tinguiririca
+  lat: -34.814
+  lon: -70.352
+  radius_km: 5
+  gvp_id: 357030
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 4280m. Phreatic explosion 1994.
+- name: PlanchonPeteroa
+  region: Maule  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Planchón-Peteroa
+  lat: -35.24
+  lon: -70.568
+  radius_km: 25
+  inner_radius_km: 3  # MIROVA KML oficial — summit/far visual
+  gvp_id: 357040
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Active crater lake, fumarolic emissions. Border volcano. MIROVA avg dist
+    1.2km.
+  vent_lat: -35.241099
+  vent_lon: -70.573345
+  vent_radius_km: 3
+  # S58 H_S58_PER_VOL: ratio 5.1x inflación (audit S58). Laguna del cráter
+  # + valles glaciares sesgan ring caliente. Local kernel cura.
+  local_kernel_bg: true
+  # MIROVA scene center (KMZ GroundOverlay LatLonBox) offset 1.87 km N of
+  # Nicolas vent; MIROVA anchors on old Planchon crater, not new Peteroa SW.
+  mirova_center_lat: -35.2232
+  mirova_center_lon: -70.5695
+- name: Lastarria
+  region: Antofagasta  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Lastarria
+  lat: -25.168
+  lon: -68.507
+  # mirova_center extraído de kmz/Lastarria_VIIRS375_Last_GE.kmz GroundOverlay LatLonBox (S80)
+  mirova_center_lat: -25.16837
+  mirova_center_lon: -68.50807
+  radius_km: 25
+  inner_radius_km: 3  # MIROVA KML oficial — summit/far visual
+  gvp_id: 355120
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Intense fumarolic field, sulphur deposits. High-altitude (5697m). MIROVA
+    avg dist 1.6km.
+  vent_lat: -25.168
+  vent_lon: -68.507
+  vent_radius_km: 3
+  # S39 D4 per-vol: fumarolas intensas permanentes (sulphur deposits) — ring
+  # 1-3km contaminado por calor fumarólico crónico → L_bg local alto → ΔL clip 0
+  # con Test 1 path. Fix: usar L_bg global anillo 5-25km.
+  lbg_global_compatible: true
+  # S62 ADOPCIÓN: A/B kernel-bg validó cura masiva del gap.
+  # Audit 131 ALERTAS (CONS+OCR window 80d) con pc.vrp_mw:
+  #   LEGACY ratio mediano 6.78× → NEW 1.07× (-84%)
+  #   En rango [0.5, 2.0]: 17% → 59% (×3.5)
+  #   Aceptable ≤3×: 34% → 81%
+  # Patrón térmico Muy Bajo (ΔT ~12K) + ring desierto Atacama frío cura con
+  # kernel local 3×3 (Coppola 2024 L1129). Run 26072884472.
+  local_kernel_bg: true
+- name: Isluga
+  region: Tarapacá  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Isluga
+  lat: -19.15
+  lon: -68.83
+  # mirova_center extraído de kmz/Isluga_VIIRS750_Last_GE.kmz GroundOverlay LatLonBox (S80)
+  mirova_center_lat: -19.15212
+  mirova_center_lon: -68.83269
+  radius_km: 25
+  inner_radius_km: 5  # MIROVA KML oficial — summit/far visual
+  gvp_id: 355030
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Fumarolic activity at summit crater. High-altitude (5550m).
+  vent_lat: -19.15
+  vent_lon: -68.83
+  vent_radius_km: 2
+- name: Taapaca
+  region: Arica y Parinacota  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Taapaca
+  lat: -18.1
+  lon: -69.5
+  radius_km: 5
+  gvp_id: 355011
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Dacitic dome complex, 5860m. Last eruption ~320 BCE.
+- name: Parinacota
+  region: Arica y Parinacota  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Parinacota
+  lat: -18.166
+  lon: -69.142
+  radius_km: 5
+  gvp_id: 355012
+  country: Chile/Bolivia
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 6336m. Holocene sector collapse.
+- name: Guallatiri
+  region: Arica y Parinacota  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Guallatiri
+  lat: -18.42
+  lon: -69.09
+  radius_km: 5
+  gvp_id: 355020
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 6071m. Persistent fumaroles. Last eruption 1960.
+- name: Irruputuncu
+  region: Tarapacá  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Irruputuncu
+  lat: -20.73
+  lon: -68.55
+  radius_km: 5
+  gvp_id: 355040
+  country: Chile/Bolivia
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 5163m. Persistent fumaroles, SO2 emissions.
+- name: OlcaParuma
+  region: Tarapacá  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Olca-Paruma
+  lat: -20.942
+  lon: -68.503
+  radius_km: 5
+  gvp_id: 355050
+  country: Chile/Bolivia
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic complex 5407m on border ridge.
+- name: Ollague
+  region: Antofagasta  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Ollagüe
+  lat: -21.3
+  lon: -68.18
+  radius_km: 5
+  gvp_id: 355060
+  country: Chile/Bolivia
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 5868m. Persistent fumaroles, summit dome.
+- name: SanPedro
+  region: Antofagasta  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: San Pedro
+  lat: -21.88
+  lon: -68.4
+  radius_km: 5
+  gvp_id: 355070
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 6145m. Last eruption ~1960.
+- name: Putana
+  region: Antofagasta  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: Putana
+  lat: -22.557
+  lon: -67.853
+  radius_km: 5
+  gvp_id: 355090
+  country: Chile/Bolivia
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Vigorous fumaroles, 5890m. Last eruption ~1810.
+- name: SanJose
+  region: Metropolitana  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  display_name: San José
+  lat: -33.789
+  lon: -69.897
+  radius_km: 5
+  gvp_id: 357020
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 5856m. Near Santiago. Last eruption 1960.
+- name: Tupungatito
+  region: Metropolitana  # S132 R14 — fuente de verdad; el guard G9 exige que las 3 vistas coincidan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
+  display_name: Tupungatito
+  lat: -33.4
+  lon: -69.8
+  # mirova_center extraído de kmz/Tupungatito_VIIRS750_Last_GE.kmz GroundOverlay LatLonBox (S80)
+  mirova_center_lat: -33.42694
+  mirova_center_lon: -69.80039
+  radius_km: 25
+  inner_radius_km: 7  # MIROVA KML oficial — summit/far visual
+  gvp_id: 357010
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Fumarolic activity, glacier-covered. High-altitude (5682m). MIROVA avg dist
+    4km.
+  vent_lat: -33.389044
+  vent_lon: -69.826374
+  vent_radius_km: 5
+  # S65 REMOVED mirova_center: análisis exhaustivo S64 reveló que el cráter
+  # activo (lago cratérico con fumarolas, coord confirmada Nicolás
+  # -33.388686, -69.826254) coincide con vent_lat actual (~40m off).
+  # MIROVA reporta dist ≈5km (banda densa en PNG Distance MIROVA) que matchea
+  # exactamente dist(mirova_center_S16, vent_lat) = 4.87 km — confirma cráter
+  # activo Nicolás es lo que MIROVA reporta.
+  # El mirova_center_lat=-33.4269 (S16) era bbox center KMZ, NO centroide de
+  # actividad. Causaba que vent_anchored eligiera FPs del flanco SE (bin
+  # 108 records 49% nuestros = falsos positivos sistemáticos por nieve/glaciar).
+  # Predicción S65: removiendo mirova_center, vent_anchored ancla en
+  # vent_lat=cráter activo → gap LEGACY 10.37× cura a ~1-3× (similar Lastarria
+  # post-fix 1.07× / Chaiten 2.23×).
+  # Ver H_S64_TUPUNGATITO_MIROVA_CENTER_OFFSET en HYPOTHESIS_LOG.md
+  # S16 P3.6: Embalse El Yeso a 25-27 km SE del vent. Bbox lo incluye ->
+  # FPs 58-205 MW en abril 2026.
+  exclude_zones:
+    - name: "Embalse El Yeso"
+      lat: -33.67
+      lon: -70.08
+      radius_km: 5.0
+  # Whitelist: laguna cratérica activa (preserva detecciones reales del lago).
+  active_water_bodies:
+    - name: "crater_lake_tupungatito"
+      lat: -33.4269
+      lon: -69.8004
+      radius_km: 1.0

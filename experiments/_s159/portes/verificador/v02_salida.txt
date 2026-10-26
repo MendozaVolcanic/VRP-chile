@@ -1,0 +1,30 @@
+[referencia MIROVA] la ventana 2026-03-01 a 2026-10-21 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+filas de referencia nocturnas indexadas: 19688
+
+== VIIRS375 (combinada), alertas que el port encuentra con otra pasada de MIROVA a (30, 180) min
+   mismo (port/MIROVA misma pasada): n 40 mediana 1.000 [0.972, 1.021] mediana|ln| 0.025; a <5 %: 24 (60%); en [0,8;1,25]: 33 (82%)
+   otra  (port/MIROVA otra pasada) : n 40 mediana 1.128 [0.717, 3.284] mediana|ln| 0.698; a <5 %: 1 (2%); en [0,8;1,25]: 6 (15%)
+   nulo  (MIROVA/MIROVA)          : n 40 mediana 1.283 [0.708, 3.290] mediana|ln| 0.811; a <5 %: 0 (0%); en [0,8;1,25]: 6 (15%)
+
+== VIIRS375 (tabla_sola), alertas que el port encuentra con otra pasada de MIROVA a (30, 180) min
+   mismo (port/MIROVA misma pasada): n 30 mediana 1.000 [0.961, 1.007] mediana|ln| 0.018; a <5 %: 18 (60%); en [0,8;1,25]: 24 (80%)
+   otra  (port/MIROVA otra pasada) : n 30 mediana 0.957 [0.680, 1.937] mediana|ln| 0.550; a <5 %: 2 (7%); en [0,8;1,25]: 6 (20%)
+   nulo  (MIROVA/MIROVA)          : n 30 mediana 1.199 [0.680, 2.075] mediana|ln| 0.622; a <5 %: 0 (0%); en [0,8;1,25]: 4 (13%)
+
+== MODIS (combinada), alertas que el port encuentra con otra pasada de MIROVA a (60, 480) min
+   mismo (port/MIROVA misma pasada): n 30 mediana 1.038 [0.913, 1.142] mediana|ln| 0.129; a <5 %: 6 (20%); en [0,8;1,25]: 20 (67%)
+   otra  (port/MIROVA otra pasada) : n 30 mediana 1.105 [0.745, 1.528] mediana|ln| 0.410; a <5 %: 2 (7%); en [0,8;1,25]: 7 (23%)
+   nulo  (MIROVA/MIROVA)          : n 30 mediana 1.123 [0.775, 1.566] mediana|ln| 0.376; a <5 %: 1 (3%); en [0,8;1,25]: 11 (37%)
+
+== MODIS (tabla_sola), alertas que el port encuentra con otra pasada de MIROVA a (60, 480) min
+   mismo (port/MIROVA misma pasada): n 30 mediana 1.038 [0.913, 1.142] mediana|ln| 0.129; a <5 %: 6 (20%); en [0,8;1,25]: 20 (67%)
+   otra  (port/MIROVA otra pasada) : n 30 mediana 1.074 [0.603, 1.525] mediana|ln| 0.503; a <5 %: 1 (3%); en [0,8;1,25]: 7 (23%)
+   nulo  (MIROVA/MIROVA)          : n 30 mediana 1.005 [0.697, 1.436] mediana|ln| 0.381; a <5 %: 0 (0%); en [0,8;1,25]: 11 (37%)

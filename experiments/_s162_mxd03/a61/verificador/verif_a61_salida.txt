@@ -1,0 +1,167 @@
+records tipo=record: 5465 | estado ok: 5465 | estados: {'ok': 5465}
+protegidas 50 | K publica y cumulo en K y X: 48 | claves (vol,dt) unicas: 48
+
+== M1 (E1) distancias al vent
+   P1: si X se hubiera ido lejos, dx creceria; P2: si X==K, dx==dk en todas (se cuenta). Control: pc_dist del pipeline vs mi haversine desde r['vent'].
+   max |mi dist - pc_dist del pipeline|: 0.0009 km (n 48) -> el vent del arnes es el ancla del pipeline
+   X: min 0.049 mediana 0.342 max 0.892 | K: min 0.336 mediana 1.583 max 3.202 | X<K en 48 de 48 | dx==dk en 0
+   X p10 (indice n//10 ordenado) 0.147 | X en orden: [0.05, 0.08, 0.13, 0.14, 0.15, 0.17]
+   dentro del inner K 48 X 48 | dc K!=X: 0 | dc de K: {'summit': 48}
+   NULO R (mismo modulo, rumbo sorteado): el cumulo queda mas cerca del vent que K en 270 de 800 brazos (33.8 %); X: 48 de 48
+
+== M2 (E2) identidad del pixel con variables que NO dependen de la geolocalizacion
+   P1: si X tomara otro pixel, t_max (BT del pixel mas caliente del cumulo) cambiaria salvo empate; P2: control: brazos R con cambio de npx o de pc_vrp>5 %.
+   grupos recomputados desde el csv: {1: 26, 3: 4, 2: 18}
+   grupo 1 (n 26): t_max_k igual K/X en 20 | n_first_pass igual en 26
+   grupo 2 (n 18): t_max_k igual K/X en 14 | n_first_pass igual en 16
+      Lascar 2026-03-07 07:35 z=10.3 npx 2/2 t_max 283.54/283.54 first 2/2 recap 0/0 res 0.001 | crater idx (93,791) pico idx (93,791)
+      Lascar 2026-03-16 01:35 z=10.4 npx 2/2 t_max 287.45/287.45 first 1/1 recap 1/1 res 0.007 | crater idx (1431,792) pico idx (1431,792)
+      Lascar 2026-03-24 01:55 z=30.7 npx 2/2 t_max 287.31/287.31 first 1/0 recap 1/2 res 0.042 | crater idx (756,338) pico idx (756,338)
+      Lascar 2026-05-03 01:45 z=25.3 npx 2/2 t_max 285.98/285.98 first 0/0 recap 2/2 res 0.045 | crater idx (2002,397) pico idx (2005,400)
+      Lascar 2026-03-20 07:40 z=18.3 npx 4/4 t_max 281.92/281.92 first 2/2 recap 2/2 res 0.268 | crater idx (200,879) pico idx (200,879)
+      Nevados 2026-10-16 08:15 z=19.9 npx 3/3 t_max 296.76/296.76 first 2/2 recap 1/1 res 0.162 | crater idx (189,895) pico idx (189,896)
+      Lascar 2026-03-14 01:55 z=31.6 npx 2/2 t_max 287.6/287.6 first 1/1 recap 1/1 res 0.027 | crater idx (1356,329) pico idx (1356,329)
+      Nevados 2026-10-01 01:45 z=2.3 npx 2/2 t_max 290.83/290.83 first 1/1 recap 1/1 res 0.001 | crater idx (1512,650) pico idx (1512,651)
+      Nevados 2026-10-16 01:40 z=3.2 npx 2/2 t_max 299.74/299.74 first 2/2 recap 0/0 res 0.002 | crater idx (1770,711) pico idx (1770,712)
+      Lascar 2026-03-09 07:10 z=35.7 npx 2/2 t_max 284.28/283.33 first 0/0 recap 2/2 res 0.019 | crater idx (1444,284) pico idx (1445,280)
+      Lascar 2026-03-02 07:40 z=23.2 npx 2/2 t_max 284.33/284.33 first 0/0 recap 2/2 res 0.025 | crater idx (236,933) pico idx (236,933)
+      Lascar 2026-03-21 01:35 z=10.9 npx 2/2 t_max 286.1/286.1 first 2/2 recap 0/0 res 0.016 | crater idx (1128,798) pico idx (1128,798)
+      Nevados 2026-10-10 07:40 z=35.1 npx 2/2 t_max 277.84/278.26 first 1/1 recap 1/1 res 0.089 | crater idx (1817,291) pico idx (1817,291)
+      Lascar 2026-03-19 01:55 z=31.2 npx 2/2 t_max 285.42/285.42 first 1/1 recap 1/1 res 0.033 | crater idx (1065,333) pico idx (1065,333)
+      Nevados 2026-10-15 07:35 z=44.3 npx 2/2 t_max 289.54/289.54 first 2/3 recap 1/0 res 0.156 | crater idx (1147,194) pico idx (1150,194)
+      Lascar 2026-03-17 07:20 z=17.4 npx 2/2 t_max 283.02/282.39 first 1/1 recap 1/1 res 0.004 | crater idx (1746,483) pico idx (1746,483)
+      Lascar 2026-04-07 07:35 z=11.3 npx 2/2 t_max 282.28/282.28 first 1/1 recap 1/1 res 0.006 | crater idx (1900,801) pico idx (1900,801)
+      Lascar 2026-03-27 07:10 z=39.9 npx 1/1 t_max 282.98/282.74 first 0/0 recap 1/1 res 0.001 | crater idx (1293,240) pico idx (1289,237)
+   grupo 3 (n 4): t_max_k igual K/X en 3 | n_first_pass igual en 2
+      Lascar 2026-03-06 01:35 z=9.3 npx 2/2 t_max 288.92/288.92 first 0/0 recap 2/2 res 0.532 | crater idx (1999,781) pico idx (2004,784)
+      Lascar 2026-03-05 07:55 z=48.7 npx 1/1 t_max 282.23/282.23 first 1/0 recap 1/2 res 1.86 | crater idx (780,1202) pico idx (777,1202)
+      Lascar 2026-03-09 01:55 z=32.0 npx 2/1 t_max 288.31/288.31 first 1/0 recap 1/1 res 0.658 | crater idx (1646,324) pico idx (1646,324)
+      Lascar 2026-04-18 01:50 z=27.6 npx 3/3 t_max 285.12/285.49 first 2/2 recap 1/1 res 0.544 | crater idx (1089,372) pico idx (1089,372)
+   CONTROL POSITIVO t_max: brazos (X y R, todos los records) con npx distinto a K: 41; t_max distinto en 8 (19.5 %)
+   brazos con npx igual a K: 2598; con t_max distinto: 616
+   residuo en grupo 1 (mismo pixel por indice) contra cenit y separacion |crater-pico| en indices:
+      res 2.404 z 50.5 dlinea 3 dframe 0 NevadosDeChillan 2026-10-01 08:35
+      res 0.302 z 34.5 dlinea 1 dframe 0 Lascar 2026-04-28 07:50
+      res 0.140 z 3.6 dlinea 1 dframe 0 Lascar 2026-04-12 07:30
+      res 0.001 z 40.5 dlinea 0 dframe 0 Lascar 2026-03-10 07:50
+      res 0.001 z 36.3 dlinea 0 dframe 0 Lascar 2026-03-28 07:50
+      res 0.001 z 30.5 dlinea 0 dframe 0 Lascar 2026-03-15 07:45
+      res > 0,3 en grupo 1: 2 de 26 | dlinea >= 10 (otro escaneo) en: 0
+
+== M3 (E3) vara VIIRS
+   P1: si la vara fuera el mismo granulo, dt VIIRS == dt MODIS; P2: si la vara solo midiera el vent, X->VIIRS no seria menor que X->vent.
+   meta: main_congelado 80b819828f | ventana_h 6.0 | sensores ['VIIRS_SNPP', 'VIIRS_NOAA20', 'VIIRS_NOAA21']
+   con vara: 47 | separacion temporal minima MODIS-VIIRS (min): min 46 mediana 141 max 258 | iguales a 0: 0
+   satelites VIIRS: {'VIIRS_NOAA20': 50, 'VIIRS_NOAA21': 23, 'VIIRS_SNPP': 33}
+   objeto VIIRS al vent: mediana 0.17, max 0.69 | X al objeto VIIRS mas cerca que X al vent en 23 de 47 | mediana X->VIIRS 0.38 vs X->vent 0.35
+   correlacion de Spearman-aprox (rangos) entre X->VIIRS y X->vent: 0.71
+
+== M4 (E4) Distancia_km de MIROVA contra la celda de la grilla FIJA de MIROVA (TIF 51x51)
+   P1: si la hipotesis de celda de referencia fuera la equivocada, las distancias predichas no calzarian; P2: control: distancia predicha con posicion al azar dentro de 2 km.
+   protegidas con alguna distancia CONS: 44 | con 0,0 en CONS: 0 | con 0,0 en CONS u OCR: 30 | 0,0 solo por OCR: 30
+   brazo K, referencia = celda del centro de la grilla: calza con alguna distancia CONS en 4 de 44
+   brazo K, referencia = celda del crater de la grilla: calza con alguna distancia CONS en 12 de 44
+   brazo X, referencia = celda del centro de la grilla: calza con alguna distancia CONS en 12 de 44
+   brazo X, referencia = celda del crater de la grilla: calza con alguna distancia CONS en 0 de 44
+   NULO (posicion al azar a <= 2 km del vent, 20 por protegida): calza ref centro 22.6 %, ref crater 26.7 %
+   celda del vent y celda central por volcan: {'Lascar': ((24, 25), (25, 25)), 'NevadosDeChillan': ((25, 25), (25, 25)), 'Villarrica': ((25, 24), (25, 25))}
+   detalle (vol dt | CONS | OCR | K centro/crater | X centro/crater):
+      Lascar 2026-04-12 07:30 | CONS [2.0] | OCR [] | K 2.24/1.41 | X 1.0/0.0
+      Lascar 2026-03-06 01:35 | CONS [1.41] | OCR [0.0] | K 1.0/2.0 | X 1.0/0.0
+      Lascar 2026-03-07 07:35 | CONS [2.0] | OCR [0.0] | K 1.0/2.0 | X 1.0/0.0
+      Lascar 2026-04-20 01:30 | CONS [1.0] | OCR [0.0] | K 0.0/1.0 | X 1.0/0.0
+      Lascar 2026-03-16 01:35 | CONS [1.0] | OCR [] | K 0.0/1.0 | X 1.0/0.0
+      Lascar 2026-03-24 01:55 | CONS [1.41] | OCR [0.0] | K 2.24/2.0 | X 1.41/1.0
+      Lascar 2026-05-03 01:45 | CONS [1.41] | OCR [] | K 1.41/2.24 | X 1.0/0.0
+      Lascar 2026-03-20 07:40 | CONS [2.0] | OCR [0.0] | K 1.0/2.0 | X 1.0/0.0
+      Lascar 2026-03-26 01:35 | CONS [2.0] | OCR [0.0] | K 2.24/1.41 | X 1.0/0.0
+      Lascar 2026-03-29 01:55 | CONS [1.41] | OCR [0.0] | K 2.83/2.24 | X 1.0/0.0
+      Lascar 2026-05-10 01:25 | CONS [1.0] | OCR [0.0] | K 0.0/1.0 | X 1.0/0.0
+      Lascar 2026-03-15 07:45 | CONS [1.41] | OCR [0.0] | K 0.0/1.0 | X 1.0/0.0
+      Lascar 2026-03-05 07:55 | CONS [2.24] | OCR [0.0] | K 1.41/1.0 | X 1.0/0.0
+      Lascar 2026-04-28 07:50 | CONS [2.0] | OCR [0.0] | K 3.0/2.0 | X 1.0/0.0
+      Lascar 2026-04-23 01:50 | CONS [1.41] | OCR [] | K 2.24/2.0 | X 1.41/1.0
+      Nevados 2026-10-16 08:15 | CONS [1.41] | OCR [] | K 2.0/2.0 | X 1.0/1.0
+      Lascar 2026-05-03 07:45 | CONS [1.41] | OCR [0.0] | K 2.0/1.0 | X 1.0/0.0
+      Nevados 2026-10-01 08:35 | CONS [2.24] | OCR [] | K 1.41/1.41 | X 1.0/1.0
+      Lascar 2026-03-14 01:55 | CONS [1.41] | OCR [0.0] | K 1.0/1.41 | X 1.0/0.0
+      Lascar 2026-04-08 01:50 | CONS [1.41] | OCR [] | K 1.41/2.24 | X 1.0/0.0
+      Lascar 2026-04-25 01:30 | CONS [1.0] | OCR [0.0] | K 1.41/1.0 | X 1.0/0.0
+      Nevados 2026-10-01 01:45 | CONS [1.41] | OCR [] | K 2.0/2.0 | X 1.0/1.0
+      Nevados 2026-10-16 01:40 | CONS [1.41] | OCR [] | K 2.0/2.0 | X 0.0/0.0
+      Lascar 2026-03-09 07:10 | CONS [1.41] | OCR [] | K 2.83/2.24 | X 1.0/0.0
+      Lascar 2026-03-11 01:35 | CONS [1.0] | OCR [0.0] | K 1.0/2.0 | X 1.0/0.0
+      Lascar 2026-06-27 01:35 | CONS [1.41] | OCR [1.49] | K 1.0/1.41 | X 1.0/0.0
+      Lascar 2026-04-05 01:35 | CONS [] | OCR [] | K 3.16/2.24 | X 1.0/0.0
+      Lascar 2026-03-02 07:40 | CONS [2.0] | OCR [] | K 0.0/1.0 | X 1.0/0.0
+      Lascar 2026-03-12 07:25 | CONS [1.41] | OCR [0.0] | K 3.16/2.24 | X 1.0/0.0
+      Nevados 2026-10-05 07:50 | CONS [1.0] | OCR [] | K 2.24/2.24 | X 0.0/0.0
+      Lascar 2026-03-09 01:55 | CONS [1.41] | OCR [0.0] | K 2.24/2.83 | X 1.0/0.0
+      Lascar 2026-03-21 01:35 | CONS [1.41] | OCR [0.0] | K 1.41/1.0 | X 1.0/0.0
+      Lascar 2026-06-03 07:45 | CONS [1.0] | OCR [0.0] | K 3.0/2.0 | X 1.0/0.0
+      Lascar 2026-04-25 07:35 | CONS [2.0] | OCR [0.0] | K 2.24/1.41 | X 1.0/0.0
+      Lascar 2026-03-10 07:50 | CONS [1.41] | OCR [0.0] | K 0.0/1.0 | X 1.0/0.0
+      Lascar 2026-04-04 07:20 | CONS [1.41] | OCR [0.0] | K 2.24/1.41 | X 1.0/0.0
+      Lascar 2026-03-01 01:40 | CONS [1.0] | OCR [0.0] | K 2.24/1.41 | X 1.0/0.0
+      Nevados 2026-10-10 07:40 | CONS [1.41] | OCR [] | K 2.24/2.24 | X 0.0/0.0
+      Lascar 2026-03-19 01:55 | CONS [] | OCR [0.0] | K 2.0/2.24 | X 1.41/1.0
+      Lascar 2026-04-18 01:50 | CONS [] | OCR [0.0] | K 1.41/1.0 | X 1.0/0.0
+      Lascar 2026-03-04 07:15 | CONS [] | OCR [0.0] | K 2.83/2.24 | X 1.0/0.0
+      Nevados 2026-10-15 07:35 | CONS [2.24] | OCR [] | K 2.0/2.0 | X 0.0/0.0
+      Lascar 2026-04-30 01:30 | CONS [1.0] | OCR [0.0] | K 2.0/1.0 | X 1.0/0.0
+      Lascar 2026-03-17 07:20 | CONS [1.0] | OCR [0.0] | K 2.24/1.41 | X 1.0/0.0
+      Lascar 2026-03-28 07:50 | CONS [1.41] | OCR [0.0] | K 0.0/1.0 | X 1.0/0.0
+      Lascar 2026-04-07 07:35 | CONS [2.0] | OCR [0.0] | K 3.16/2.24 | X 1.0/0.0
+      Villarr 2026-09-04 07:50 | CONS [1.41] | OCR [] | K 1.0/1.41 | X 1.0/0.0
+      Lascar 2026-03-27 07:10 | CONS [1.41] | OCR [] | K 3.16/3.0 | X 1.41/1.0
+   E4 literal: con 0,0 (CONS u OCR) 30 | de ellas con 0,0 en CONS 0
+
+== M5 (H5) final_dist medido desde el centroide del volcan
+   P1: si final_dist se midiera desde el vent, final_dist == pc_dist en cumulos de 1 pixel con final==pc; P2: se cuenta cuantas veces coincide con cada ancla.
+   brazos con final (todos los records, todos los brazos): 3042 | final_dist == dist desde vent (±11 m): 381 | == desde centroide (solo Lascar/NdC/Villarrica): 2276
+   Lascar: centroide a 0.678 km del vent, rumbo S
+   Lascar 2026-03-12 07:25 brazos far: [('R07', 4.384, 5.05, 'far', 0), ('R08', 4.646, 5.29, 'far', 0), ('R09', 4.795, 5.41, 'far', 0), ('R10', 4.827, 5.4, 'far', 0), ('R11', 4.742, 5.26, 'far', 0)]
+   en esos, pc_dist <= inner (5) y final_dist > 5: 5 de 5 | pub 0 en 5
+
+== M6 (H7) lado contra frame del pixel del crater
+   {'centro': 3763, 'f<100': 906, 'f>1253': 796, 'f<100 otro': 47} | horas UTC de los mal etiquetados: {('MODIS_AQUA', '21'): 38, ('MODIS_TERRA', '12'): 9}
+   records por (sensor, hora UTC) en horas 11,12,21,22,23: {('MODIS_AQUA', '21'): 43, ('MODIS_TERRA', '12'): 9}
+   records en horas 12/21/22 UTC: 52 | de ellos lado 'otro': 52 | frame<100: 47 | frame>1253: 0
+   protegidas en horas 12/21/22: 0
+
+== M7 (H1/H6) posiciones absurdas y modulo de R
+   PlanchonPeteroa 2026-03-18 08:05 lab neg_limpio z 50.0 n_fill 54190 desp 103470.6 km | K anillo 255 n_anom 0 | X anillo 397 n_anom 0 | pub 0/0 | nulos km_pedido None aplicado None
+   Lastarria 2026-04-23 01:50 lab neg_limpio z 17.1 n_fill 203100 desp 25741.9 km | K anillo 405 n_anom 0 | X anillo 441 n_anom 0 | pub 0/0 | nulos km_pedido 25741.907 aplicado 25741.9082
+   records con n_fill>0: 36 | anillo K-X: >0 en 27, <0 en 9, =0 en 0 | fuera del p5-p95 del nulo (-40, 14): <p5 2, >p95 1
+   mediana anillo K-X con relleno 4.5 vs sin relleno 4.0
+
+== M8 (H2) error de indice de scipy.ndimage.zoom(order=1) con nodo grueso en 5i+2
+   271->1354: error en 0 +2.00, en el ultimo -1.00, cruza 0 en 902, min -1.00 max +2.00
+   406->2030: error en 0 +2.00, en el ultimo -2.00, cruza 0 en 1015, min -2.00 max +2.00
+   modelo vs mediana por tramo de frame (de seguimientos_salida.txt §2):
+      [   0,  10) mediana 8.44 modelo 9.29 -> +10 %
+      [  10,  40) mediana 7.05 modelo 7.87 -> +12 %
+      [  40, 100) mediana 5.15 modelo 5.79 -> +12 %
+      [ 100, 300) mediana 2.97 modelo 3.15 -> +6 %
+      [ 300, 600) mediana 1.55 modelo 1.21 -> -22 %
+      [ 600, 902) mediana 1.15 modelo 0.32 -> -72 %
+      [ 902,1100) mediana 1.13 modelo 0.31 -> -73 %
+      [1100,1300) mediana 1.90 modelo 1.66 -> -13 %
+      [1300,1340) mediana 3.35 modelo 3.53 -> +5 %
+      [1340,1354) mediana 4.26 modelo 4.62 -> +8 %
+
+== M9 (propio) pixel del crater pegado al borde del granulo (crater posiblemente fuera del granulo)
+   P1: si el crater estuviera fuera del granulo, el pixel MxD03 mas cercano estaria en la primera/ultima linea o frame; P2: se reporta la distancia de ese pixel al vent no disponible: SIN DATO de distancia.
+   records con el pixel del crater en linea 0/1/2028/2029 o frame 0/1353: 219 | por lab: {'neg_limpio': 150, 'sin_info': 68, 'bajo1': 1} | publica K: 0
+      PuyehueCordonCaulle 2026-03-16 03:10 MOD021KM.A2026075.0310 lab neg_limpio linea 628 frame 0 z 65.2 n_anom K 0 pub K 0 anillo K 127
+      Lascar 2026-04-09 00:55 MOD021KM.A2026099.0055 lab sin_info linea 222 frame 1353 z 65.0 n_anom K 0 pub K 0 anillo K 107
+      Villarrica 2026-04-30 03:00 MOD021KM.A2026120.0300 lab neg_limpio linea 1746 frame 0 z 65.2 n_anom K 0 pub K 0 anillo K 52
+      Copahue 2026-05-04 02:20 MOD021KM.A2026124.0220 lab neg_limpio linea 2029 frame 268 z 37.3 n_anom K 0 pub K 0 anillo K 35
+      Tupungatito 2026-05-12 02:40 MOD021KM.A2026132.0240 lab neg_limpio linea 1636 frame 0 z 65.1 n_anom K 0 pub K 0 anillo K 88
+      Llaima 2026-05-25 02:55 MOD021KM.A2026145.0255 lab neg_limpio linea 1848 frame 0 z 65.1 n_anom K 0 pub K 0 anillo K 51
+      Lascar 2026-09-09 00:40 MOD021KM.A2026252.0040 lab neg_limpio linea 80 frame 1353 z 65.0 n_anom K 0 pub K 0 anillo K 102
+      Chaiten 2026-04-29 07:00 MYD021KM.A2026119.0700 lab neg_limpio linea 0 frame 102 z 53.8 n_anom K 0 pub K 0 anillo K 12
+      Chaiten 2026-03-30 02:30 MOD021KM.A2026089.0230 lab sin_info linea 0 frame 434 z 22.1 n_anom K 0 pub K 0 anillo K 300
+      NevadosDeChillan 2026-07-29 02:40 MOD021KM.A2026210.0240 lab neg_limpio linea 2029 frame 14 z 63.6 n_anom K 0 pub K 0 anillo K 24
+      PuyehueCordonCaulle 2026-08-08 01:00 MOD021KM.A2026220.0100 lab neg_limpio linea 1542 frame 1353 z 65.2 n_anom K 0 pub K 0 anillo K 48
+      PuyehueCordonCaulle 2026-08-21 01:15 MOD021KM.A2026233.0115 lab neg_limpio linea 2029 frame 1253 z 54.1 n_anom K 0 pub K 0 anillo K 363

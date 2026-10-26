@@ -1,0 +1,4546 @@
+{
+ "ventana": "V2",
+ "desde": "2026-04-01",
+ "hasta": "2026-06-12",
+ "brazos": [
+  "K",
+  "D"
+ ],
+ "dias_excluidos": [],
+ "sha256_index_html": "f711c61dfb96555b8d203ce0e127dc6c5f86e63d692b435c79b7d45fa7d0ba02",
+ "calibracion": "simetrica",
+ "vale_para_decidir": true,
+ "motivo_validez": "calibración simétrica (D-27) con el comparador (D-28)",
+ "placebo": {
+  "ganancias_informadas": [
+   1.2,
+   0.8
+  ],
+  "comparador": true
+ },
+ "referencia_ok": true,
+ "cobertura_ok": true,
+ "version_ok": true,
+ "cableado": {
+  "K": true,
+  "D": true
+ },
+ "determinismo_ok": true,
+ "controles_ok": true,
+ "por_regla": {
+  "original": {
+   "veredicto": {
+    "P1|VIIRS375": "CUMPLE",
+    "P1b|VIIRS375": "SIN CRUCES",
+    "P1|VIIRS750": "CUMPLE",
+    "P1b|VIIRS750": "SIN CRUCES",
+    "P2|VIIRS375": "EMPATE",
+    "P2|VIIRS750": "EMPATE",
+    "M|VIIRS750|z<=40": "NEUTRO",
+    "M|VIIRS750|z>40": "NEUTRO",
+    "M|VIIRS375|sin_kernel|z<=40": "NEUTRO",
+    "M|VIIRS375|sin_kernel|z>40": "NEUTRO",
+    "M|VIIRS375|kernel|z<=40": "NEUTRO",
+    "M|VIIRS375|kernel|z>40": "EMPEORA"
+   },
+   "info": {
+    "regla": "original",
+    "P1|VIIRS375": {
+     "protegidas_que_K_publica": 38,
+     "netas": [],
+     "ruidosas": [],
+     "pendientes": [],
+     "solo_ocr_snpp": [],
+     "cruces_1MW": [],
+     "descartadas_por_repeticion": []
+    },
+    "P1|VIIRS750": {
+     "protegidas_que_K_publica": 42,
+     "netas": [],
+     "ruidosas": [],
+     "pendientes": [],
+     "solo_ocr_snpp": [],
+     "cruces_1MW": [],
+     "descartadas_por_repeticion": []
+    },
+    "P2|VIIRS375": {
+     "neto": -1,
+     "n_discordantes": 13,
+     "noches_discordantes": 12,
+     "B": 12,
+     "bloques_suma_no_nula": 12,
+     "sumas_bloque": [
+      -2,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "metodo": "exacto",
+     "p_gana": 0.5,
+     "p_pierde": 0.693359375,
+     "p_dos_colas": 1.0,
+     "p_gana_fraccion": [
+      2048,
+      4096
+     ],
+     "p_pierde_fraccion": [
+      2840,
+      4096
+     ],
+     "p_dos_colas_fraccion": [
+      4096,
+      4096
+     ],
+     "p_minimo": 0.000244140625,
+     "p_minimo_fraccion": [
+      1,
+      4096
+     ],
+     "semilla_signos": null,
+     "n_sorteos_signos": null,
+     "tope_p2": "5 % por cola",
+     "regla": "D-45 (ADENDA_SIGNOS_P2.md): prueba de signos por bloque noche-volcán, una cola por dirección al 5 %; D-34 y D-42 informan, no deciden",
+     "ic95": [
+      -9.0,
+      6.0
+     ],
+     "resultado_sin_calibrar": "EMPATE",
+     "resultado_d42": "EMPATE",
+     "calibrada": true,
+     "falsos_gana": 0.018,
+     "falsos_pierde": 0.015,
+     "falsos_bloquea": 0.483,
+     "n_sorteos": 1000,
+     "semilla_calibracion": 161,
+     "tope_por_cola": 0.05,
+     "nota_calibracion": "",
+     "suma_K": 63,
+     "suma_D": 62,
+     "ruido_gemelo": 0.0,
+     "neto_igual_a_suma_D_menos_suma_K": true,
+     "regla_a_gemelo": "GANA",
+     "regla_b_d33": "PENDIENTE DE DIAGNOSTICO POR PASADA (GANA por 1)",
+     "discordantes": [
+      {
+       "volcan": "Copahue",
+       "sensor": "VIIRS375",
+       "hora": "2026-06-07 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.044,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-06 05:06",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.16,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.085,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-08 06:12",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.069,
+       "pc_vrp_mw_D": 0.053,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-11 05:12",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.06,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.063,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-14 06:00",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.08,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.053,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS375",
+       "hora": "2026-05-06 04:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.03,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.035,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS375",
+       "hora": "2026-05-07 06:18",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.04,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "NevadosDeChillan",
+       "sensor": "VIIRS375",
+       "hora": "2026-05-14 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.06,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.084,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "NevadosDeChillan",
+       "sensor": "VIIRS375",
+       "hora": "2026-05-16 06:06",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.17,
+       "pc_vrp_mw_D": 0.066,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "NevadosDeChillan",
+       "sensor": "VIIRS375",
+       "hora": "2026-06-06 06:12",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.054,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "NevadosDeChillan",
+       "sensor": "VIIRS375",
+       "hora": "2026-06-07 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.057,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-10 04:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.05,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.072,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-10 06:24",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.13,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.076,
+       "error_de": "K",
+       "contribucion": -1
+      }
+     ],
+     "noches_con_error_K": 58,
+     "noches_con_error_D": 58
+    },
+    "P2|VIIRS750": {
+     "neto": -2,
+     "n_discordantes": 44,
+     "noches_discordantes": 43,
+     "B": 43,
+     "bloques_suma_no_nula": 43,
+     "sumas_bloque": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      2
+     ],
+     "metodo": "sorteos",
+     "p_gana": 0.43995600439956006,
+     "p_pierde": 0.6705329467053295,
+     "p_dos_colas": 0.8845115488451155,
+     "p_gana_fraccion": [
+      4400,
+      10001
+     ],
+     "p_pierde_fraccion": [
+      6706,
+      10001
+     ],
+     "p_dos_colas_fraccion": [
+      8846,
+      10001
+     ],
+     "p_minimo": 9.999000099990002e-05,
+     "p_minimo_fraccion": [
+      1,
+      10001
+     ],
+     "semilla_signos": 162,
+     "n_sorteos_signos": 10000,
+     "tope_p2": "5 % por cola",
+     "regla": "D-45 (ADENDA_SIGNOS_P2.md): prueba de signos por bloque noche-volcán, una cola por dirección al 5 %; D-34 y D-42 informan, no deciden",
+     "ic95": [
+      -15.0,
+      11.0
+     ],
+     "resultado_sin_calibrar": "EMPATE",
+     "resultado_d42": "EMPATE",
+     "calibrada": true,
+     "falsos_gana": 0.027,
+     "falsos_pierde": 0.029,
+     "falsos_bloquea": 0.406,
+     "n_sorteos": 1000,
+     "semilla_calibracion": 161,
+     "tope_por_cola": 0.05,
+     "nota_calibracion": "",
+     "suma_K": 46,
+     "suma_D": 44,
+     "ruido_gemelo": 0.0,
+     "neto_igual_a_suma_D_menos_suma_K": true,
+     "regla_a_gemelo": "GANA",
+     "regla_b_d33": "PENDIENTE DE DIAGNOSTICO POR PASADA (GANA por 2)",
+     "discordantes": [
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-06 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.206,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-07 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.19,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.307,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-12 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.18,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.296,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-17 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.402,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-18 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.395,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-28 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.33,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.414,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-03 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.413,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-06 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.373,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-19 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.284,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-23 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.297,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-28 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.24,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.342,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-02 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.26,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.278,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-07 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.2,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.243,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-08 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.21,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.219,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-18 05:24",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.26,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.342,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-22 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.346,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-28 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.5,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.269,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-12 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.3,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.357,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lastarria",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-22 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.2,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-09 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.18,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.36,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-12 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.437,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-17 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.33,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.443,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-25 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.28,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.416,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-08 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.26,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.452,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-30 06:06",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.41,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.478,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-26 05:24",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.44,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.566,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-30 06:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.268,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-05 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.603,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-07 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.36,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-08 05:24",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.17,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.509,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-12 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.3,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.367,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-13 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.26,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.429,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-21 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.262,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-24 05:24",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.413,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-11 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.406,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-12 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.24,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.451,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-19 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.376,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-23 06:18",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.356,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-24 05:12",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.19,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.32,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-27 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.24,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.497,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-31 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.18,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.552,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-05 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.299,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-08 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.339,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-08 06:18",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.264,
+       "error_de": "D",
+       "contribucion": 1
+      }
+     ],
+     "noches_con_error_K": 45,
+     "noches_con_error_D": 42
+    },
+    "estrato_203": {
+     "sensor": "VIIRS750",
+     "n": 82,
+     "recupera_D": 23,
+     "enciende_D": 21,
+     "no_cambia": 0,
+     "otros_cambios": 38,
+     "pasadas": [
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-06 05:54",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.206,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-07 05:36",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.19,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.307,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-08 05:48",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.281,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-12 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.18,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.296,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-17 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.402,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-18 05:30",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.395,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-19 05:42",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.401,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-24 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.338,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-28 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.33,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.414,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-03 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.413,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-04 06:06",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.349,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-06 05:24",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.308,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-06 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.373,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-15 06:00",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.374,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-19 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.284,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-20 06:06",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.283,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-21 05:48",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.27,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-22 05:30",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.214,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-23 05:30",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.297,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-28 05:36",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.24,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.342,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-31 06:00",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.244,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-02 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.26,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.278,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-05 06:06",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.363,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-07 05:48",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.2,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.243,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-08 05:30",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.21,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.219,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-11 05:18",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.208,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-11 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.348,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-04-02 05:30",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.308,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-04-28 04:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.286,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-08 05:12",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.258,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-18 05:24",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.26,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.342,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-22 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.346,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-25 06:12",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.391,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-28 05:36",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.5,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.269,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-30 06:18",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.262,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-06-07 04:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.296,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-06-12 05:54",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.3,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.357,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Lastarria",
+       "hora": "2026-05-22 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.2,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-09 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.18,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.36,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-10 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.409,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-12 05:36",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.437,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-17 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.33,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.443,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-20 05:36",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.572,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-25 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.28,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.416,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-06-06 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.422,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-06-08 05:30",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.26,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.452,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-06-11 06:00",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.287,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "hora": "2026-04-30 06:06",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.41,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.478,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "hora": "2026-05-14 05:48",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.401,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "hora": "2026-05-22 05:00",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.514,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "hora": "2026-05-26 05:24",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.44,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.566,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "hora": "2026-05-30 06:42",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.268,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-03 05:48",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.391,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-04 05:30",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.441,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-05 05:30",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.603,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-07 05:42",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.36,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-08 05:24",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.17,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.509,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-12 05:48",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.3,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.367,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-13 05:30",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.26,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.429,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-14 05:42",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.4,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-15 05:24",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.434,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-21 05:30",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.262,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-24 05:24",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.413,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-24 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.443,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-25 05:36",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.419,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-26 05:36",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.449,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-09 06:12",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.207,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-10 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.361,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-11 05:54",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.406,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-12 05:36",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.24,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.451,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-19 05:54",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.376,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-20 05:36",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.48,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-23 06:18",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.356,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-24 05:12",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.19,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.32,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-27 05:36",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.24,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.497,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-27 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.434,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-30 05:48",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.574,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-31 05:30",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.18,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.552,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-06-05 05:36",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.299,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-06-08 05:30",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.339,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-06-08 06:18",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.264,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-06-11 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.243,
+       "error_p2_de": null
+      }
+     ],
+     "nota": "informa, no decide (NOTA_ESTRATO_203.md)"
+    },
+    "M_salen": {
+     "D publica, K no": 30
+    },
+    "M_pares_con_magnitud_distinta": 491,
+    "M_pares": 491,
+    "M_placebo": {
+     "VIIRS750|z<=40": {
+      "1.2": "MEJORA",
+      "0.8": "EMPEORA"
+     },
+     "VIIRS750|z>40": {
+      "1.2": "NEUTRO",
+      "0.8": "EMPEORA"
+     },
+     "VIIRS375|sin_kernel|z<=40": {
+      "1.2": "MEJORA",
+      "0.8": "EMPEORA"
+     },
+     "VIIRS375|sin_kernel|z>40": {
+      "1.2": "NEUTRO",
+      "0.8": "EMPEORA"
+     }
+    },
+    "M|VIIRS750|z<=40": {
+     "n": 64,
+     "noches": 64,
+     "modo": "decide",
+     "regla": "MEJORA",
+     "d_mediana": -0.11015874677021059,
+     "ic95": [
+      -0.14940477562192406,
+      -0.08488906137119806
+     ],
+     "razon_K": 0.5396718146718147,
+     "razon_D": 0.9182539682539683,
+     "falsos_mejora": 0.015,
+     "falsos_empeora": 0.03,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 3,
+     "volcanes_con_3_pares": 3,
+     "nota": "sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)",
+     "calibrada": true,
+     "poder": true,
+     "g_hat_log": 0.15224262157504415,
+     "g_hat_factor": 1.419850509337658,
+     "g_hat_ic95": [
+      0.1147555155178327,
+      0.19741060588281306
+     ],
+     "g_hat_por_volcan": {
+      "Isluga": {
+       "n": 11,
+       "log": 0.9009969974860997,
+       "factor": 7.961538461538461
+      },
+      "Lascar": {
+       "n": 41,
+       "log": 0.12000239701327625,
+       "factor": 1.3182640144665458
+      },
+      "PuyehueCordonCaulle": {
+       "n": 11,
+       "log": 0.1511855237212293,
+       "factor": 1.4163987138263667
+      },
+      "Tupungatito": {
+       "n": 1,
+       "log": 1.3481902885897983,
+       "factor": 22.294117647058815
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": -0.009914943568999999,
+     "ic95_dprima": [
+      -0.0488320758935,
+      0.018474327184375
+     ],
+     "dprima_max_abs": 1.289163080878,
+     "falsos_mejora_dprima": 0.028,
+     "falsos_empeora_dprima": 0.024,
+     "calibrada_dprima": true,
+     "poder_dprima": true,
+     "volcanes_con_dprima_negativa": 2,
+     "volcanes_con_3_pares_dprima": 3,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS750|z>40": {
+     "n": 27,
+     "noches": 22,
+     "modo": "decide",
+     "regla": "MEJORA",
+     "d_mediana": -0.1656501753807132,
+     "ic95": [
+      -0.19467842642308314,
+      -0.09544176259452643
+     ],
+     "razon_K": 0.5111111111111111,
+     "razon_D": 0.9012499999999999,
+     "falsos_mejora": 0.025,
+     "falsos_empeora": 0.025,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 1,
+     "volcanes_con_3_pares": 1,
+     "nota": "MEJORA sostenida por menos de 2 volcanes (adenda, H4)",
+     "calibrada": true,
+     "poder": true,
+     "g_hat_log": 0.18056395030687966,
+     "g_hat_factor": 1.5155279503105588,
+     "g_hat_ic95": [
+      0.1398624788992019,
+      0.2400006692464919
+     ],
+     "g_hat_por_volcan": {
+      "Isluga": {
+       "n": 1,
+       "log": 0.6706364056920839,
+       "factor": 4.68421052631579
+      },
+      "Lascar": {
+       "n": 24,
+       "log": 0.18740034951535445,
+       "factor": 1.539573224723564
+      },
+      "PuyehueCordonCaulle": {
+       "n": 2,
+       "log": 0.11704160301668404,
+       "factor": 1.3093073414159544
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": -0.014114476116,
+     "ic95_dprima": [
+      -0.051838298695074995,
+      0.012045643131912307
+     ],
+     "dprima_max_abs": 0.822851227045,
+     "falsos_mejora_dprima": 0.032,
+     "falsos_empeora_dprima": 0.02,
+     "calibrada_dprima": true,
+     "poder_dprima": true,
+     "volcanes_con_dprima_negativa": 1,
+     "volcanes_con_3_pares_dprima": 1,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS375|sin_kernel|z<=40": {
+     "n": 108,
+     "noches": 107,
+     "modo": "decide",
+     "regla": "MEJORA",
+     "d_mediana": -0.10507528454147146,
+     "ic95": [
+      -0.13150773617776762,
+      -0.06872205383157345
+     ],
+     "razon_K": 0.5788787878787879,
+     "razon_D": 0.8440007788161994,
+     "falsos_mejora": 0.025,
+     "falsos_empeora": 0.035,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 3,
+     "volcanes_con_3_pares": 3,
+     "nota": "sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)",
+     "calibrada": true,
+     "poder": true,
+     "g_hat_log": 0.1213677720546221,
+     "g_hat_factor": 1.3224150161729002,
+     "g_hat_ic95": [
+      0.07971298947069577,
+      0.19367368337507945
+     ],
+     "g_hat_por_volcan": {
+      "Copahue": {
+       "n": 1,
+       "log": 0.04626043732435875,
+       "factor": 1.112398609501738
+      },
+      "Isluga": {
+       "n": 36,
+       "log": 0.1480470406718336,
+       "factor": 1.4061998286263087
+      },
+      "Lascar": {
+       "n": 39,
+       "log": 0.031262091315252344,
+       "factor": 1.074637747197667
+      },
+      "Tupungatito": {
+       "n": 32,
+       "log": 0.3610200502150568,
+       "factor": 2.2962546576033036
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": -0.005956749375000001,
+     "ic95_dprima": [
+      -0.033966086509,
+      0.00969834229
+     ],
+     "dprima_max_abs": 1.125786842827,
+     "falsos_mejora_dprima": 0.028,
+     "falsos_empeora_dprima": 0.031,
+     "calibrada_dprima": true,
+     "poder_dprima": true,
+     "volcanes_con_dprima_negativa": 2,
+     "volcanes_con_3_pares_dprima": 3,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS375|sin_kernel|z>40": {
+     "n": 97,
+     "noches": 90,
+     "modo": "bloquea",
+     "regla": "MEJORA",
+     "d_mediana": -0.1355101644829224,
+     "ic95": [
+      -0.2143645236582324,
+      -0.09029866088795135
+     ],
+     "razon_K": 0.394,
+     "razon_D": 0.6477922077922078,
+     "falsos_mejora": 0.015,
+     "falsos_empeora": 0.025,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 3,
+     "volcanes_con_3_pares": 3,
+     "nota": "",
+     "calibrada": true,
+     "poder": true,
+     "g_hat_log": 0.18435329291604996,
+     "g_hat_factor": 1.528809218950064,
+     "g_hat_ic95": [
+      0.12474713891608344,
+      0.26666919117886095
+     ],
+     "g_hat_por_volcan": {
+      "Copahue": {
+       "n": 1,
+       "log": -0.06869042505263889,
+       "factor": 0.8537084398976982
+      },
+      "Isluga": {
+       "n": 26,
+       "log": 0.22435061233025452,
+       "factor": 1.6762956280487358
+      },
+      "Lascar": {
+       "n": 45,
+       "log": 0.0988071226386627,
+       "factor": 1.255472263868066
+      },
+      "Llaima": {
+       "n": 1,
+       "log": -0.08280007994682297,
+       "factor": 0.8264182895850974
+      },
+      "Tupungatito": {
+       "n": 24,
+       "log": 0.553469050237605,
+       "factor": 3.5765891129852387
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": -0.030011230742,
+     "ic95_dprima": [
+      -0.0815214616695,
+      0.016732121751
+     ],
+     "dprima_max_abs": 0.878276895373,
+     "falsos_mejora_dprima": 0.026,
+     "falsos_empeora_dprima": 0.02,
+     "calibrada_dprima": true,
+     "poder_dprima": true,
+     "volcanes_con_dprima_negativa": 2,
+     "volcanes_con_3_pares_dprima": 3,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS375|kernel|z<=40": {
+     "n": 103,
+     "noches": 98,
+     "modo": "informa",
+     "regla": "NEUTRO",
+     "d_mediana": 0.0004339329072781603,
+     "ic95": [
+      -0.0008827126654760709,
+      0.0011988813186984415
+     ],
+     "razon_K": 0.9628571428571429,
+     "razon_D": 0.9561904761904763,
+     "falsos_mejora": 0.01,
+     "falsos_empeora": 0.025,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 3,
+     "volcanes_con_3_pares": 5,
+     "nota": "",
+     "calibrada": true,
+     "poder": true
+    },
+    "M|VIIRS375|kernel|z>40": {
+     "n": 92,
+     "noches": 79,
+     "modo": "informa",
+     "regla": "EMPEORA",
+     "d_mediana": 0.003039483721166865,
+     "ic95": [
+      0.0020779679925377326,
+      0.003684086212616955
+     ],
+     "razon_K": 0.8611538461538462,
+     "razon_D": 0.8495454545454545,
+     "falsos_mejora": 0.015,
+     "falsos_empeora": 0.03,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 1,
+     "volcanes_con_3_pares": 4,
+     "nota": "",
+     "calibrada": true,
+     "poder": true
+    },
+    "M_por_volcan": {
+     "Chaiten|VIIRS375": {
+      "n": 12,
+      "razon_K": 1.2265555555555556,
+      "razon_D": 1.2198333333333333
+     },
+     "Copahue|VIIRS375": {
+      "n": 2,
+      "razon_K": 1.2391666666666667,
+      "razon_D": 1.1376190476190475
+     },
+     "Isluga|VIIRS375": {
+      "n": 62,
+      "razon_K": 0.5271818181818182,
+      "razon_D": 0.8615767045454545
+     },
+     "Isluga|VIIRS750": {
+      "n": 12,
+      "razon_K": 0.21818181818181817,
+      "razon_D": 1.3976315789473683
+     },
+     "Lascar|VIIRS375": {
+      "n": 84,
+      "razon_K": 0.5638203463203464,
+      "razon_D": 0.6817647058823528
+     },
+     "Lascar|VIIRS750": {
+      "n": 65,
+      "razon_K": 0.5364864864864864,
+      "razon_D": 0.852542372881356
+     },
+     "Lastarria|VIIRS375": {
+      "n": 74,
+      "razon_K": 0.8628095238095238,
+      "razon_D": 0.8555714285714284
+     },
+     "Llaima|VIIRS375": {
+      "n": 1,
+      "razon_K": 1.4762499999999998,
+      "razon_D": 1.22
+     },
+     "PlanchonPeteroa|VIIRS375": {
+      "n": 43,
+      "razon_K": 1.0725,
+      "razon_D": 1.0699999999999998
+     },
+     "PuyehueCordonCaulle|VIIRS375": {
+      "n": 61,
+      "razon_K": 0.7721428571428571,
+      "razon_D": 0.7625
+     },
+     "PuyehueCordonCaulle|VIIRS750": {
+      "n": 13,
+      "razon_K": 0.735,
+      "razon_D": 0.8880733944954128
+     },
+     "Tupungatito|VIIRS375": {
+      "n": 56,
+      "razon_K": 0.2973076923076923,
+      "razon_D": 0.8424
+     },
+     "Tupungatito|VIIRS750": {
+      "n": 1,
+      "razon_K": 0.053125000000000006,
+      "razon_D": 1.184375
+     },
+     "Villarrica|VIIRS375": {
+      "n": 5,
+      "razon_K": 1.0014285714285713,
+      "razon_D": 1.0004761904761905
+     }
+    }
+   },
+   "estado": "SIN EFECTO",
+   "mejora": false,
+   "empeora": false
+  },
+  "SN": {
+   "veredicto": {
+    "P1|VIIRS375": "CUMPLE",
+    "P1b|VIIRS375": "SIN CRUCES",
+    "P1|VIIRS750": "CUMPLE",
+    "P1b|VIIRS750": "SIN CRUCES",
+    "P2|VIIRS375": "BLOQUEA",
+    "P2|VIIRS750": "EMPATE",
+    "M|VIIRS750|z<=40": "NEUTRO",
+    "M|VIIRS750|z>40": "NEUTRO",
+    "M|VIIRS375|sin_kernel|z<=40": "NEUTRO",
+    "M|VIIRS375|sin_kernel|z>40": "NEUTRO",
+    "M|VIIRS375|kernel|z<=40": "NEUTRO",
+    "M|VIIRS375|kernel|z>40": "EMPEORA"
+   },
+   "info": {
+    "regla": "SN",
+    "P1|VIIRS375": {
+     "protegidas_que_K_publica": 38,
+     "netas": [],
+     "ruidosas": [],
+     "pendientes": [],
+     "solo_ocr_snpp": [],
+     "cruces_1MW": [],
+     "descartadas_por_repeticion": []
+    },
+    "P1|VIIRS750": {
+     "protegidas_que_K_publica": 42,
+     "netas": [],
+     "ruidosas": [],
+     "pendientes": [],
+     "solo_ocr_snpp": [],
+     "cruces_1MW": [],
+     "descartadas_por_repeticion": []
+    },
+    "P2|VIIRS375": {
+     "neto": 1,
+     "n_discordantes": 11,
+     "noches_discordantes": 11,
+     "B": 11,
+     "bloques_suma_no_nula": 11,
+     "sumas_bloque": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "metodo": "exacto",
+     "p_gana": 0.7255859375,
+     "p_pierde": 0.5,
+     "p_dos_colas": 1.0,
+     "p_gana_fraccion": [
+      1486,
+      2048
+     ],
+     "p_pierde_fraccion": [
+      1024,
+      2048
+     ],
+     "p_dos_colas_fraccion": [
+      2048,
+      2048
+     ],
+     "p_minimo": 0.00048828125,
+     "p_minimo_fraccion": [
+      1,
+      2048
+     ],
+     "semilla_signos": null,
+     "n_sorteos_signos": null,
+     "tope_p2": "5 % por cola",
+     "regla": "D-45 (ADENDA_SIGNOS_P2.md): prueba de signos por bloque noche-volcán, una cola por dirección al 5 %; D-34 y D-42 informan, no deciden",
+     "ic95": [
+      -5.0,
+      7.0
+     ],
+     "resultado_sin_calibrar": "BLOQUEA",
+     "resultado_d42": "BLOQUEA",
+     "calibrada": true,
+     "falsos_gana": 0.026,
+     "falsos_pierde": 0.035,
+     "falsos_bloquea": 0.46,
+     "n_sorteos": 1000,
+     "semilla_calibracion": 161,
+     "tope_por_cola": 0.05,
+     "nota_calibracion": "",
+     "suma_K": 65,
+     "suma_D": 66,
+     "ruido_gemelo": 0.0,
+     "neto_igual_a_suma_D_menos_suma_K": true,
+     "regla_a_gemelo": "PIERDE",
+     "regla_b_d33": "PENDIENTE DE DIAGNOSTICO POR PASADA (PIERDE por 1)",
+     "discordantes": [
+      {
+       "volcan": "Copahue",
+       "sensor": "VIIRS375",
+       "hora": "2026-06-07 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.044,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-06 05:06",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.16,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.085,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-08 06:12",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.069,
+       "pc_vrp_mw_D": 0.053,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-11 05:12",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.06,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.063,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-14 06:00",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.08,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.053,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS375",
+       "hora": "2026-05-07 06:18",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.04,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "NevadosDeChillan",
+       "sensor": "VIIRS375",
+       "hora": "2026-05-14 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.06,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.084,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "NevadosDeChillan",
+       "sensor": "VIIRS375",
+       "hora": "2026-05-16 06:06",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.17,
+       "pc_vrp_mw_D": 0.066,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "NevadosDeChillan",
+       "sensor": "VIIRS375",
+       "hora": "2026-06-06 06:12",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.054,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "NevadosDeChillan",
+       "sensor": "VIIRS375",
+       "hora": "2026-06-07 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.057,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS375",
+       "hora": "2026-04-10 06:24",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.13,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.076,
+       "error_de": "K",
+       "contribucion": -1
+      }
+     ],
+     "noches_con_error_K": 58,
+     "noches_con_error_D": 59
+    },
+    "P2|VIIRS750": {
+     "neto": -2,
+     "n_discordantes": 44,
+     "noches_discordantes": 43,
+     "B": 43,
+     "bloques_suma_no_nula": 43,
+     "sumas_bloque": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      2
+     ],
+     "metodo": "sorteos",
+     "p_gana": 0.43995600439956006,
+     "p_pierde": 0.6705329467053295,
+     "p_dos_colas": 0.8845115488451155,
+     "p_gana_fraccion": [
+      4400,
+      10001
+     ],
+     "p_pierde_fraccion": [
+      6706,
+      10001
+     ],
+     "p_dos_colas_fraccion": [
+      8846,
+      10001
+     ],
+     "p_minimo": 9.999000099990002e-05,
+     "p_minimo_fraccion": [
+      1,
+      10001
+     ],
+     "semilla_signos": 162,
+     "n_sorteos_signos": 10000,
+     "tope_p2": "5 % por cola",
+     "regla": "D-45 (ADENDA_SIGNOS_P2.md): prueba de signos por bloque noche-volcán, una cola por dirección al 5 %; D-34 y D-42 informan, no deciden",
+     "ic95": [
+      -15.0,
+      11.0
+     ],
+     "resultado_sin_calibrar": "EMPATE",
+     "resultado_d42": "EMPATE",
+     "calibrada": true,
+     "falsos_gana": 0.027,
+     "falsos_pierde": 0.029,
+     "falsos_bloquea": 0.406,
+     "n_sorteos": 1000,
+     "semilla_calibracion": 161,
+     "tope_por_cola": 0.05,
+     "nota_calibracion": "",
+     "suma_K": 46,
+     "suma_D": 44,
+     "ruido_gemelo": 0.0,
+     "neto_igual_a_suma_D_menos_suma_K": true,
+     "regla_a_gemelo": "GANA",
+     "regla_b_d33": "PENDIENTE DE DIAGNOSTICO POR PASADA (GANA por 2)",
+     "discordantes": [
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-06 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.206,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-07 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.19,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.307,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-12 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.18,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.296,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-17 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.402,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-18 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.395,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-28 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.33,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.414,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-03 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.413,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-06 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.373,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-19 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.284,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-23 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.297,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-28 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.24,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.342,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-02 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.26,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.278,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-07 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.2,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.243,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Isluga",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-08 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.21,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.219,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-18 05:24",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.26,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.342,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-22 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.346,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-28 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.5,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.269,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lascar",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-12 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.3,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.357,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Lastarria",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-22 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.2,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-09 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.18,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.36,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-12 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.437,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-17 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.33,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.443,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-25 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.28,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.416,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-08 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.26,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.452,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-30 06:06",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.41,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.478,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-26 05:24",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.44,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.566,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-30 06:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.268,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-05 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.603,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-07 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.36,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-08 05:24",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.17,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.509,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-12 05:48",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.3,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.367,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-13 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.26,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.429,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-21 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.262,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-04-24 05:24",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.413,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-11 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.406,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-12 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.24,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.451,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-19 05:54",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.376,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-23 06:18",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.356,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-24 05:12",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.19,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.32,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-27 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.24,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.497,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-05-31 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "pos",
+       "vrp_mirova": 0.18,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.552,
+       "error_de": "K",
+       "contribucion": -1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-05 05:36",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.299,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-08 05:30",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.339,
+       "error_de": "D",
+       "contribucion": 1
+      },
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-06-08 06:18",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.264,
+       "error_de": "D",
+       "contribucion": 1
+      }
+     ],
+     "noches_con_error_K": 45,
+     "noches_con_error_D": 42
+    },
+    "estrato_203": {
+     "sensor": "VIIRS750",
+     "n": 82,
+     "recupera_D": 23,
+     "enciende_D": 21,
+     "no_cambia": 0,
+     "otros_cambios": 38,
+     "pasadas": [
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-06 05:54",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.206,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-07 05:36",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.19,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.307,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-08 05:48",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.281,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-12 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.18,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.296,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-17 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.402,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-18 05:30",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.395,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-19 05:42",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.401,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-24 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.338,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-04-28 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.33,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.414,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-03 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.413,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-04 06:06",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.349,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-06 05:24",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.308,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-06 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.373,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-15 06:00",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.374,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-19 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.284,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-20 06:06",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.283,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-21 05:48",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.27,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-22 05:30",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.214,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-23 05:30",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.297,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-28 05:36",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.24,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.342,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-05-31 06:00",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.244,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-02 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.26,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.278,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-05 06:06",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.363,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-07 05:48",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.2,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.243,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-08 05:30",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.21,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.219,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-11 05:18",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.208,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Isluga",
+       "hora": "2026-06-11 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.348,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-04-02 05:30",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.308,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-04-28 04:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.286,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-08 05:12",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.258,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-18 05:24",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.26,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.342,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-22 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.346,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-25 06:12",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.391,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-28 05:36",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.5,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.269,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-05-30 06:18",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.262,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-06-07 04:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.296,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Lascar",
+       "hora": "2026-06-12 05:54",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.3,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.357,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Lastarria",
+       "hora": "2026-05-22 05:48",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.2,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-09 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.18,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.36,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-10 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.409,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-12 05:36",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.437,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-17 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.33,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.443,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-20 05:36",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.572,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-05-25 05:42",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.28,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.416,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-06-06 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.422,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-06-08 05:30",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.26,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.452,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PlanchonPeteroa",
+       "hora": "2026-06-11 06:00",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.287,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "hora": "2026-04-30 06:06",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.41,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.478,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "hora": "2026-05-14 05:48",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.401,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "hora": "2026-05-22 05:00",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.514,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "hora": "2026-05-26 05:24",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.44,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.566,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "PuyehueCordonCaulle",
+       "hora": "2026-05-30 06:42",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.268,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-03 05:48",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.391,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-04 05:30",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.441,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-05 05:30",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.603,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-07 05:42",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.36,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-08 05:24",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.17,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.509,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-12 05:48",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.3,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.367,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-13 05:30",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.26,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.429,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-14 05:42",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.4,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-15 05:24",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.434,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-21 05:30",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.262,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-24 05:24",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.413,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-24 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.443,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-25 05:36",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.419,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-04-26 05:36",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.449,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-09 06:12",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.207,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-10 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.361,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-11 05:54",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.406,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-12 05:36",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.24,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.451,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-19 05:54",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.376,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-20 05:36",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.48,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-23 06:18",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.356,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-24 05:12",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.19,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.32,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-27 05:36",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.24,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.497,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-27 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.434,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-30 05:48",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.574,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-05-31 05:30",
+       "clase_mirova": "alerta",
+       "vrp_mirova": 0.18,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.552,
+       "error_p2_de": "K"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-06-05 05:36",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.299,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-06-08 05:30",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.339,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-06-08 06:18",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.264,
+       "error_p2_de": "D"
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-06-11 05:54",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.243,
+       "error_p2_de": null
+      }
+     ],
+     "nota": "informa, no decide (NOTA_ESTRATO_203.md)"
+    },
+    "M_salen": {
+     "D publica, K no": 28
+    },
+    "M_pares_con_magnitud_distinta": 467,
+    "M_pares": 467,
+    "M_placebo": {
+     "VIIRS750|z<=40": {
+      "1.2": "MEJORA",
+      "0.8": "EMPEORA"
+     },
+     "VIIRS750|z>40": {
+      "1.2": "NEUTRO",
+      "0.8": "EMPEORA"
+     },
+     "VIIRS375|sin_kernel|z<=40": {
+      "1.2": "MEJORA",
+      "0.8": "EMPEORA"
+     },
+     "VIIRS375|sin_kernel|z>40": {
+      "1.2": "NEUTRO",
+      "0.8": "EMPEORA"
+     }
+    },
+    "M|VIIRS750|z<=40": {
+     "n": 64,
+     "noches": 64,
+     "modo": "decide",
+     "regla": "MEJORA",
+     "d_mediana": -0.11015874677021059,
+     "ic95": [
+      -0.14940477562192406,
+      -0.08488906137119806
+     ],
+     "razon_K": 0.5396718146718147,
+     "razon_D": 0.9182539682539683,
+     "falsos_mejora": 0.015,
+     "falsos_empeora": 0.03,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 3,
+     "volcanes_con_3_pares": 3,
+     "nota": "sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)",
+     "calibrada": true,
+     "poder": true,
+     "g_hat_log": 0.15224262157504415,
+     "g_hat_factor": 1.419850509337658,
+     "g_hat_ic95": [
+      0.1147555155178327,
+      0.19741060588281306
+     ],
+     "g_hat_por_volcan": {
+      "Isluga": {
+       "n": 11,
+       "log": 0.9009969974860997,
+       "factor": 7.961538461538461
+      },
+      "Lascar": {
+       "n": 41,
+       "log": 0.12000239701327625,
+       "factor": 1.3182640144665458
+      },
+      "PuyehueCordonCaulle": {
+       "n": 11,
+       "log": 0.1511855237212293,
+       "factor": 1.4163987138263667
+      },
+      "Tupungatito": {
+       "n": 1,
+       "log": 1.3481902885897983,
+       "factor": 22.294117647058815
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": -0.009914943568999999,
+     "ic95_dprima": [
+      -0.0488320758935,
+      0.018474327184375
+     ],
+     "dprima_max_abs": 1.289163080878,
+     "falsos_mejora_dprima": 0.028,
+     "falsos_empeora_dprima": 0.024,
+     "calibrada_dprima": true,
+     "poder_dprima": true,
+     "volcanes_con_dprima_negativa": 2,
+     "volcanes_con_3_pares_dprima": 3,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS750|z>40": {
+     "n": 27,
+     "noches": 22,
+     "modo": "decide",
+     "regla": "MEJORA",
+     "d_mediana": -0.1656501753807132,
+     "ic95": [
+      -0.19467842642308314,
+      -0.09544176259452643
+     ],
+     "razon_K": 0.5111111111111111,
+     "razon_D": 0.9012499999999999,
+     "falsos_mejora": 0.025,
+     "falsos_empeora": 0.025,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 1,
+     "volcanes_con_3_pares": 1,
+     "nota": "MEJORA sostenida por menos de 2 volcanes (adenda, H4)",
+     "calibrada": true,
+     "poder": true,
+     "g_hat_log": 0.18056395030687966,
+     "g_hat_factor": 1.5155279503105588,
+     "g_hat_ic95": [
+      0.1398624788992019,
+      0.2400006692464919
+     ],
+     "g_hat_por_volcan": {
+      "Isluga": {
+       "n": 1,
+       "log": 0.6706364056920839,
+       "factor": 4.68421052631579
+      },
+      "Lascar": {
+       "n": 24,
+       "log": 0.18740034951535445,
+       "factor": 1.539573224723564
+      },
+      "PuyehueCordonCaulle": {
+       "n": 2,
+       "log": 0.11704160301668404,
+       "factor": 1.3093073414159544
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": -0.014114476116,
+     "ic95_dprima": [
+      -0.051838298695074995,
+      0.012045643131912307
+     ],
+     "dprima_max_abs": 0.822851227045,
+     "falsos_mejora_dprima": 0.032,
+     "falsos_empeora_dprima": 0.02,
+     "calibrada_dprima": true,
+     "poder_dprima": true,
+     "volcanes_con_dprima_negativa": 1,
+     "volcanes_con_3_pares_dprima": 1,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS375|sin_kernel|z<=40": {
+     "n": 108,
+     "noches": 107,
+     "modo": "decide",
+     "regla": "MEJORA",
+     "d_mediana": -0.10507528454147146,
+     "ic95": [
+      -0.13150773617776762,
+      -0.06872205383157345
+     ],
+     "razon_K": 0.5788787878787879,
+     "razon_D": 0.8440007788161994,
+     "falsos_mejora": 0.025,
+     "falsos_empeora": 0.035,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 3,
+     "volcanes_con_3_pares": 3,
+     "nota": "sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)",
+     "calibrada": true,
+     "poder": true,
+     "g_hat_log": 0.1213677720546221,
+     "g_hat_factor": 1.3224150161729002,
+     "g_hat_ic95": [
+      0.07971298947069577,
+      0.19367368337507945
+     ],
+     "g_hat_por_volcan": {
+      "Copahue": {
+       "n": 1,
+       "log": 0.04626043732435875,
+       "factor": 1.112398609501738
+      },
+      "Isluga": {
+       "n": 36,
+       "log": 0.1480470406718336,
+       "factor": 1.4061998286263087
+      },
+      "Lascar": {
+       "n": 39,
+       "log": 0.031262091315252344,
+       "factor": 1.074637747197667
+      },
+      "Tupungatito": {
+       "n": 32,
+       "log": 0.3610200502150568,
+       "factor": 2.2962546576033036
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": -0.005956749375000001,
+     "ic95_dprima": [
+      -0.033966086509,
+      0.00969834229
+     ],
+     "dprima_max_abs": 1.125786842827,
+     "falsos_mejora_dprima": 0.028,
+     "falsos_empeora_dprima": 0.031,
+     "calibrada_dprima": true,
+     "poder_dprima": true,
+     "volcanes_con_dprima_negativa": 2,
+     "volcanes_con_3_pares_dprima": 3,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS375|sin_kernel|z>40": {
+     "n": 94,
+     "noches": 87,
+     "modo": "bloquea",
+     "regla": "MEJORA",
+     "d_mediana": -0.13713710367477186,
+     "ic95": [
+      -0.22435061233025452,
+      -0.0935563710004686
+     ],
+     "razon_K": 0.3952,
+     "razon_D": 0.6394090909090908,
+     "falsos_mejora": 0.025,
+     "falsos_empeora": 0.03,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 3,
+     "volcanes_con_3_pares": 3,
+     "nota": "",
+     "calibrada": true,
+     "poder": true,
+     "g_hat_log": 0.17697476237545035,
+     "g_hat_factor": 1.5030546183756703,
+     "g_hat_ic95": [
+      0.1189504638776512,
+      0.2542196279176375
+     ],
+     "g_hat_por_volcan": {
+      "Copahue": {
+       "n": 1,
+       "log": -0.06869042505263889,
+       "factor": 0.8537084398976982
+      },
+      "Isluga": {
+       "n": 26,
+       "log": 0.22435061233025452,
+       "factor": 1.6762956280487358
+      },
+      "Lascar": {
+       "n": 42,
+       "log": 0.08929644295877576,
+       "factor": 1.2282773489459802
+      },
+      "Llaima": {
+       "n": 1,
+       "log": -0.08280007994682297,
+       "factor": 0.8264182895850974
+      },
+      "Tupungatito": {
+       "n": 24,
+       "log": 0.553469050237605,
+       "factor": 3.5765891129852387
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": -0.0371424658945,
+     "ic95_dprima": [
+      -0.08663906657849998,
+      0.0054719195
+     ],
+     "dprima_max_abs": 0.885655425913,
+     "falsos_mejora_dprima": 0.026,
+     "falsos_empeora_dprima": 0.026,
+     "calibrada_dprima": true,
+     "poder_dprima": true,
+     "volcanes_con_dprima_negativa": 2,
+     "volcanes_con_3_pares_dprima": 3,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS375|kernel|z<=40": {
+     "n": 96,
+     "noches": 93,
+     "modo": "informa",
+     "regla": "NEUTRO",
+     "d_mediana": 0.000784527084685363,
+     "ic95": [
+      -0.0004132202803684567,
+      0.0013246465055230389
+     ],
+     "razon_K": 0.951873015873016,
+     "razon_D": 0.9422077922077923,
+     "falsos_mejora": 0.005,
+     "falsos_empeora": 0.035,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 2,
+     "volcanes_con_3_pares": 5,
+     "nota": "",
+     "calibrada": true,
+     "poder": true
+    },
+    "M|VIIRS375|kernel|z>40": {
+     "n": 78,
+     "noches": 67,
+     "modo": "informa",
+     "regla": "EMPEORA",
+     "d_mediana": 0.0033281986089079146,
+     "ic95": [
+      0.0029859936858493974,
+      0.0039908039299547775
+     ],
+     "razon_K": 0.7760714285714285,
+     "razon_D": 0.7633928571428571,
+     "falsos_mejora": 0.02,
+     "falsos_empeora": 0.04,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 1,
+     "volcanes_con_3_pares": 4,
+     "nota": "",
+     "calibrada": true,
+     "poder": true
+    },
+    "M_por_volcan": {
+     "Chaiten|VIIRS375": {
+      "n": 12,
+      "razon_K": 1.2265555555555556,
+      "razon_D": 1.2198333333333333
+     },
+     "Copahue|VIIRS375": {
+      "n": 2,
+      "razon_K": 1.2391666666666667,
+      "razon_D": 1.1376190476190475
+     },
+     "Isluga|VIIRS375": {
+      "n": 62,
+      "razon_K": 0.5271818181818182,
+      "razon_D": 0.8615767045454545
+     },
+     "Isluga|VIIRS750": {
+      "n": 12,
+      "razon_K": 0.21818181818181817,
+      "razon_D": 1.3976315789473683
+     },
+     "Lascar|VIIRS375": {
+      "n": 81,
+      "razon_K": 0.5673809523809524,
+      "razon_D": 0.666547619047619
+     },
+     "Lascar|VIIRS750": {
+      "n": 65,
+      "razon_K": 0.5364864864864864,
+      "razon_D": 0.852542372881356
+     },
+     "Lastarria|VIIRS375": {
+      "n": 58,
+      "razon_K": 0.7672222222222222,
+      "razon_D": 0.7565873015873016
+     },
+     "Llaima|VIIRS375": {
+      "n": 1,
+      "razon_K": 1.4762499999999998,
+      "razon_D": 1.22
+     },
+     "PlanchonPeteroa|VIIRS375": {
+      "n": 39,
+      "razon_K": 0.9690322580645161,
+      "razon_D": 0.9680645161290322
+     },
+     "PuyehueCordonCaulle|VIIRS375": {
+      "n": 60,
+      "razon_K": 0.7648214285714285,
+      "razon_D": 0.756905737704918
+     },
+     "PuyehueCordonCaulle|VIIRS750": {
+      "n": 13,
+      "razon_K": 0.735,
+      "razon_D": 0.8880733944954128
+     },
+     "Tupungatito|VIIRS375": {
+      "n": 56,
+      "razon_K": 0.2973076923076923,
+      "razon_D": 0.8424
+     },
+     "Tupungatito|VIIRS750": {
+      "n": 1,
+      "razon_K": 0.053125000000000006,
+      "razon_D": 1.184375
+     },
+     "Villarrica|VIIRS375": {
+      "n": 5,
+      "razon_K": 1.0014285714285713,
+      "razon_D": 1.0004761904761905
+     }
+    }
+   },
+   "estado": "DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS375: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: SIN EFECTO",
+   "mejora": false,
+   "empeora": true
+  }
+ },
+ "ruido_frac": {
+  "original": {},
+  "SN": {}
+ },
+ "estado": "DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS375: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: SIN EFECTO",
+ "mejora": false,
+ "empeora": true,
+ "P4": {
+  "movidas": 3,
+  "movidas_protegidas": [],
+  "cambia_distance_class": [
+   "Isluga|VIIRS375|2026-04-01 05:48 far->summit",
+   "Isluga|VIIRS375|2026-04-04 04:54 far->summit",
+   "Isluga|VIIRS375|2026-04-06 06:30 far->summit",
+   "Isluga|VIIRS375|2026-04-08 06:12 far->summit",
+   "Tupungatito|VIIRS375|2026-05-02 06:12 far->summit",
+   "NevadosDeChillan|VIIRS375|2026-05-16 06:06 far->summit"
+  ]
+ },
+ "P5": {
+  "d9_capped_K_D": {
+   "False->False": 6769
+  },
+  "modo_un_pixel_K_D": {
+   "None->None": 5198,
+   "True->True": 1547,
+   "False->False": 21,
+   "False->True": 3
+  },
+  "discarded_reason_cambia": [],
+  "apagadas_por_filtro_del_tablero": {}
+ },
+ "sin_geometria": {}
+}

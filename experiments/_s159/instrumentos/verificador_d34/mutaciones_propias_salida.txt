@@ -1,0 +1,25 @@
+m00  control: copia sin mutar (las dos pruebas)                                                      control    OK, 0 fallas           31 passed in 195.92s (0:03:15)
+m01  BLOQUEA con el lado invertido (neto < 0 bloquea)                                                D-34 5.5   ATRAPADA por asercion  2 failed, 9 passed in 1.02s
+        asercion: test_d_que_gana_todo_en_una_sola_noche_da_empate
+        asercion: test_neto_en_contra_chico_bloquea_sin_dar_pierde
+m02  SIN SUSTRATO con 4 pasadas en vez de 5                                                          D-34 5.6   ATRAPADA por asercion  1 failed, 10 passed in 1.00s
+        asercion: test_sin_sustrato_con_menos_de_5_pasadas_o_3_noches[por_noche0]
+m03  SIN SUSTRATO con 2 noches en vez de 3                                                           D-34 5.6   ATRAPADA por asercion  1 failed, 10 passed in 1.01s
+        asercion: test_sin_sustrato_con_menos_de_5_pasadas_o_3_noches[por_noche1]
+m04  las noches del sustrato se cuentan como pasadas                                                 D-34 5.6   ATRAPADA por asercion  1 failed, 10 passed in 0.97s
+        asercion: test_sin_sustrato_con_menos_de_5_pasadas_o_3_noches[por_noche1]
+m05  otra semilla en el bootstrap de P2 (no la de M)                                                 D-34 5.3   NO ATRAPADA            11 passed in 0.69s
+m06  1.000 remuestreos en P2 en vez de 10.000                                                        D-34 5.3   NO ATRAPADA            11 passed in 0.67s
+m07  GANA con el borde (hi <= 0)                                                                     D-34 5.4   ATRAPADA por asercion  1 failed, 10 passed in 1.01s
+        asercion: test_d_que_gana_todo_en_una_sola_noche_da_empate
+m08  PIERDE con el borde (lo >= 0)                                                                   D-34 5.4   NO ATRAPADA            11 passed in 0.65s
+m09  las pasadas con error en los dos brazos entran al neto (union en vez de diferencia simetrica)   D-34 5.1   ATRAPADA por asercion  1 failed, 10 passed in 1.12s
+        asercion: test_contar_usa_el_signo_de_errores_y_trae_la_lista
+m10  la lista atribuye el error al brazo equivocado                                                  D-34 5.7   ATRAPADA por asercion  1 failed, 10 passed in 1.09s
+        asercion: test_contar_usa_el_signo_de_errores_y_trae_la_lista
+m11  BLOQUEA cambia el texto pero no marca la ventana (empeora sigue False)                          D-34 5.5   ATRAPADA por asercion  1 failed, 10 passed in 0.88s
+        asercion: test_p2_que_bloquea_no_deja_cumplir
+m12  SIN SUSTRATO bloquea como BLOQUEA                                                               D-34 5.6   ATRAPADA por asercion  1 failed, 10 passed in 0.88s
+        asercion: test_p2_sin_sustrato_no_bloquea
+mutacion m13 'bloque por volcan solo (sin la noche)': el texto original aparece 2 veces (se esperaba 1): '"bloque": "%s|%s" % (k.split("|")[0], k.split("|")[2][:10])}'
+exit 1

@@ -1,0 +1,20 @@
+pasadas MODIS en los resultados: 150 | estados: {'ok': 149, 'volcan_fuera_del_granulo': 1}
+segundos por pasada (procesar, K incluido): n 149, media 9.1, mediana 9.2, p95 11.0, max 12.3, suma 1361
+  pasadas sin `segundos` (salieron antes del final de procesar): [(57, 'volcan_fuera_del_granulo')]
+segundos de K por pasada: n 149, media 1.69, mediana 1.70, max 2.0 -> K es 18.5 % del tiempo por pasada
+  solo neg_resto: n 37, media 8.3
+
+jobs MODIS (API de GitHub):
+  probe (MODIS, 0, 6)  success  job   364 s | paso Probe  254 s | suma de pasadas 248.6 s (25 pasadas) | fuera de las pasadas 115.4 s
+  probe (MODIS, 1, 6)  success  job   329 s | paso Probe  241 s | suma de pasadas 235.0 s (25 pasadas) | fuera de las pasadas  94.0 s
+  probe (MODIS, 2, 6)  success  job   334 s | paso Probe  235 s | suma de pasadas 230.3 s (25 pasadas) | fuera de las pasadas 103.7 s
+  probe (MODIS, 3, 6)  failure  job   308 s | paso Probe  200 s | suma de pasadas 189.3 s (25 pasadas) | fuera de las pasadas 118.7 s
+  probe (MODIS, 4, 6)  success  job   317 s | paso Probe  227 s | suma de pasadas 220.3 s (25 pasadas) | fuera de las pasadas  96.7 s
+  probe (MODIS, 5, 6)  success  job   333 s | paso Probe  242 s | suma de pasadas 237.1 s (25 pasadas) | fuera de las pasadas  95.9 s
+  pasos fijos por job (media s): {'Set up job': 1.0, 'Run actions/checkout@v5': 61.5, 'Dependencias': 30.3, 'Upload artifact': 1.3}
+  total runner MODIS S159: 0.551 h en 6 jobs; fijo por job (job menos suma de pasadas, incluye prueba sin red e instalacion) media 104 s
+
+== proyeccion para 410 pasadas en 8 trozos (media y p95 por pasada medidos arriba)
+  con K re-corrido  : 1.27 h de runner; cada job ~9.5 min (con p95 por pasada 11.1 min)
+  sin K             : 1.08 h de runner; cada job ~8.1 min (con p95 por pasada 11.1 min)
+  costo de guardar el recorte nativo: SIN DATO en el runner (ver 05_prueba_envoltorio_salida.txt)
