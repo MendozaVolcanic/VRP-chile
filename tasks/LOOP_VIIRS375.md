@@ -50,6 +50,13 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 > tocar ningún veredicto (`evaluar_con_crater_salida.txt`, el resto de la salida idéntico a B2): **las 6 protegidas que
 > pierden C13 y M14 y las 3 que pierde K no son de cráter**; sólo PIX7 pierde una de cráter (Cordón Caulle,
 > 2026-06-07). Coincide con lo que informó S163 de su verificador. Para V375-E faltan la vía (#907, espera A45) y PD1.
+>
+> **(2), condición (a) cumplida, 2026-10-26.** Un verificador limpio de S163 (Sonnet) confirmó la regla de relleno con
+> implementación independiente (rama s163-o2-alternativa c95483d31). Su reserva es que la extrapolación en el borde
+> casi no está probada. `o2_375/envolvente_v375.py` lo mide: **0 de 422 escenas tienen celdas de alerta fuera de la
+> envolvente convexa**, así que el vecino más cercano nunca entra en L_bk. Hay 12 escenas con celdas del hueco fuera de
+> la envolvente, por los NaN de la orilla de la pasada, pero esas celdas no se suman, y el relleno lineal sólo usa
+> celdas conocidas como vértices. La magnitud queda igual. Falta (b), MATLAB.
 
 Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
 evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).
