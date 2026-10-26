@@ -302,7 +302,13 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
   columna deja de ser preliminar, con alcance (161 de 191 escenas de Láscar, huecos de 3 × 3, SIN DATO que MIROVA use
   ese `.m` en MODIS) y el script fuera de línea que la calcula, probado antes de leer el censo.
 
-- [ ] D4. **Humo despachado por S164: run 40333783937** (2026-10-26 13:48 UTC, head `865174abe`, rama
+- [x] D4bis. **HUMO PASA** (2026-10-26 ~14:10 UTC): 23 pasadas «ok», 0 errores, K = data/ en las 23, PM = S159 en 4 de
+  4 comunes, procedencia y manifiesto del tag; INDECIDIBLE sólo por cobertura (faltan 5.442) y contador (17 de 50
+  negativos). Verificador limpio (Sonnet): «pasa con reparos, ninguno bloquea» (VH-01 a VH-05: Villarrica cayó a 8,4 km
+  del gránulo y no ejercitó el port en el borde; `k33_igual_k` False en 22/22 por campos diag; ~3,8 s por pasada, las 17 h
+  estimadas sobran). Evidencia en `experiments/_s162_modis_paquete/humo_40333783937/` (esta rama). Tanda t1 pedida a S164.
+- [ ] D4c. Tandas: t1 (partes 0 a 7) pedida; t2 y t3 recién cuando la anterior termine (un solo run pendiente por grupo).
+- [x] D4. **Humo despachado por S164: run 40333783937** (2026-10-26 13:48 UTC, head `865174abe`, rama
   `s162-modd-humo`). Evaluar cuando termine (A108: contar las 5 pasadas con fila «ok», no basta el job verde): bajar artefactos a `D:\vrp-trabajo\temporales\s162_modd\humo\`, evaluar desde el checkout del tag con `evaluar_paquete.py --art ... --ref D:/vrp-trabajo/temporales/s162_mxd03/ref --commit 865174abeea01a1bad726ce25dd70cf0d00ae7eb`, y el criterio de la adenda 3.14. Si pasa, pedir las tandas t1, t2 y t3 (una a la vez).
 - [ ] D5. Después del humo (no antes del censo): VC3-01 a VC3-14 de la tercera vuelta (huecos de vigilancia, gravedad 1 a 2), si se toca el candado para las tandas; si no, quedan para la lectura.
 
