@@ -1,0 +1,33 @@
+6. md5 resultado_v375.mat: 71d0f8218a445c337560efd73d904374 OK
+K 422 len E 422 len V 422 BK dtype float32 (134, 134, 422)
+orden: posicion en etiquetas == 1..K: True | en vara == 1..K: True | ids iguales: True
+orden: vara['posicion'] == etiquetas['posicion'] por indice: True
+3. LHOT vs RAD[ALE col-mayor]: max rel 0.00e+00, escenas > 1e-12: 0
+   LHOT vs RAD[ALE fila-mayor] (debe fallar): escenas > 1e-12: 407 de 422, max rel 1.594
+   LHOT vs l_hot de la vara: max rel 0.00e+00
+   l_hot_port etiquetas vs LHOT: max rel 0.00e+00
+   NPIX == NAL: True | NPIX == etiquetas npix: True | distribucion NAL [  0 188 105  73  56]
+   alertas_matlab (etiquetas) == ALE: True
+   ALE dentro de 1..N*N y sin duplicados: True | ALE relleno tras NAL: n/a
+1. DL MATLAB vs vara: max rel 1.03e-15, escenas > 1e-9: 0, mediana 0.00e+00
+   min |DL| 3.613e-03, DL negativos: 0, DL==0: 0
+   max abs dif DL 2.22e-16
+   DL == LHOT-LBK: max abs 0.00e+00
+   vrp_vara_mw == dl*C375: max rel 0.00e+00; VRP .m == DL*C750: max rel 2.20e-16
+4. MATLAB vs port: escenas > 1e-9: 137, max rel 0.830; > 1e-6: 137
+   vara vs port (>1e-6): 137; coincide el conjunto de escenas que difieren (MATLAB!=port vs vara!=port): True
+   en las que no difieren del port, DL MATLAB vs port max rel: 6.27e-16
+   (denominador port) max rel 4.879
+5. LBK vs sum(BK single en alertas): max rel 5.85e-08, escenas > 1e-6: 0, > 1e-9: 253
+   LBK vs l_bk de la vara: max rel 3.19e-16
+2. Etna: NPIX 5, LHOT 1.965342180, LBK 1.072886152, VRP 9889528.4 W, DL 0.892456028; alertas [2180 2181 2247 2314 2248]
+   LBK Etna - 1.072886152 = -3.0178526344570855e-10 | VRP W - 9889528.4 = -0.03834539093077183
+   salida_matlab_v375.txt: MATLAB 26.2.0.3386108 (R2026b) | fillmissing2: /MATLAB/toolbox/matlab/datafun/fillmissing2.m | imdilate: /MATLAB/toolbox/images/images/imdilate.m | Etna: npix 5, Tot_Lmir_hot 1.965342180, Tot_Lmir_bk 1.072886152, VRP 9889528.4 W |       (OSF v2.5: npix 5, Tot_Lmir_hot 1.965342180, Tot_Lmir_bk 1.072886152, VRP 9889528.4 W) | 422 escenas, 11.2 s; NPIX 1 a 4: 422 de 422 | Listo: resultado_v375.mat | 
+
+== ligadura resultado <-> entradas: BK fuera del hueco dilatado debe ser single(RAD) exacto ==
+escenas donde BK(fuera del hueco) != RAD: 0 de 422 | BK todo finito: False | hueco: cambia respecto de RAD en todas: True
+RAD con NaN (celdas): 37614 | escenas con algun NaN: 12 | NaN en BK: 38955 | escenas con alertas en el borde (fila o col 0/133): 0
+escenas con hueco dilatado tocando el borde: 5
+grilla_sha256 == sha256(RAD[:,:,n] bytes single C-order): 0 de 422
+   (orden Fortran): 0
+   (float64 C-order): 0
