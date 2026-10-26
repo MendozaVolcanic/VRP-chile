@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~10:55 UTC (S163, vuelta 12): MATLAB corrió los paquetes de MODIS y VIIRS 375
+- Nicolás volvió a entrar a MathWorks. Entradas bajadas dentro de MATLAB con `websave` desde los commits verificados y
+  comprobadas por md5 (MODIS `89479be35`: 3 de 3; V375 `138a931ee`: 4 de 4). MATLAB R2026b.
+- **MODIS**: 404 escenas en 2,0 s (npix 1: 168, 2: 132, 3: 77, 4: 27). `resultado_o2_modis.mat` md5
+  d20cf7ddd3b6ba015c7b474afe627085, `salida_matlab_modis.txt` da9e409f9958c4e4e40fda7142e27ec9.
+- **VIIRS 375**: Etna exacto al OSF (Tot_Lmir_bk 1,072886152; VRP 9.889.528,4 W); 422 escenas en 11,2 s.
+  `resultado_v375.mat` md5 71d0f8218a445c337560efd73d904374, `salida_matlab_v375.txt` 53def07b353129ae9100629af1c65bf0.
+- md5 iguales en MATLAB Drive y tras la descarga; copiados a las carpetas de cada hija (sin seguimiento: los commitean
+  ellas) y avisadas. Con esto se puede sacar el PRELIMINAR de las varas de MODIS y V375 si calzan con la regla.
+
 ### 2026-10-26 ~10:50 UTC (S163, vuelta 11): Nicolás aprueba #909, el cableado de V750 y D-39; #909 mergeado
 - Nicolás: «continúa con todo lo que recomiendes apruebo los últimos 3 puntos» (cableado de V750 y merge de #909 bajo A45;
   D-39; volver a entrar a MathWorks) y luego «investiga bien lo de mirova-v1, no queremos perder datos, lanza una sesión
