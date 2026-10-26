@@ -191,6 +191,14 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
   `fillmissing2` de MATLAB, fuera de línea, con las grillas que guarda el censo; sin cambiar reglas selladas. Escribirla
   cuando entregue el verificador del candado (no cambiarle el pre-registro mientras lo lee) y verificarla.
 
+- [x] O5. O2 MODIS corrido en MATLAB por la coordinadora: la regla de `fillmissing2` es MATLAB en 191/191 escenas,
+  verificado (Sonnet, `3a51df069`). Decisión de la coordinadora (D-48, 2026-10-26): la columna de M con la regla en
+  MOD-D deja de ser preliminar; la vía futura en `pipeline/` reutiliza la función de `pipeline/mirova_v750_codigo.py`
+  (#907), no scipy.
+- [ ] O6. Cuando entregue la ronda 2 del candado (no antes: la está leyendo): escribir en la adenda 4 punto 5 que la
+  columna deja de ser preliminar, con alcance (161 de 191 escenas de Láscar, huecos de 3 × 3, SIN DATO que MIROVA use
+  ese `.m` en MODIS) y el script fuera de línea que la calcula, probado antes de leer el censo.
+
 ### Perfil experimental (candidatas)
 - [x] X1. (en #906) Anotar en `docs/BEYOND_MIROVA_EXTENSIONS.md` §12 la candidata Láscar 2026-05-11 07:55 (señal real del cráter que MIROVA calla en MODIS; diagnóstico de MOD-C), en el PR del veredicto de MOD-B o de MOD-D (archivo compartido: no tocarlo suelto).
 
