@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 22:55 UTC (S164): cierre de la coordinadora; relevo a S165
+- Nicolás: «has lo que recomiendes» (la recomendación incluía cerrar). Loop de S164 detenido. Traspaso en
+  `tasks/BLOQUE_ARRANQUE_S165.md`. Estado fijado con trabajo en curso: W2 del diurno (run 40379112237, 12 de 22 jobs a
+  las 22:50) y la sesión `modd-fase3` (fase 3 de MOD-D, con la parada por disco). `loop-modis-2`, `loop-viirs750-2`,
+  `d39-mirova-v1` y `diurno-k-prereg` siguen abiertas; la nueva coordinadora les avisa su id.
+
 ### 2026-10-26 22:50 UTC (S164, vuelta 23): 11 worktrees terminados a la papelera; 4 sesiones archivadas
 - Nicolás: «has lo que recomiendes». Antes de mover, cada uno comprobado limpio (0 cambios seguidos) y con su HEAD en la
   rama del remoto; los archivos sin seguir eran copias, cachés y TIF bajados.
