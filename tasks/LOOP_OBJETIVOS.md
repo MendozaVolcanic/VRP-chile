@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~04:05 UTC (S163, vuelta 9): #889 reemplazado por #909 (borrador, espera a Nicolás)
+- `rebase-889` (`local_cc8da696-d46e-4b43-8cf9-74c0744abfdd`): #889 cerrado con comentario a **#909** (rama
+  `s163-instrumentos`, `2ce1c8310` sobre main `691e4d588`, CI verde, «no mergear sin el sí de Nicolás»); el force-push a la
+  rama vieja lo bloquearon los permisos; tag `pre-s163-rebase-889` (`d0968e389`). Conservado: I1 (incidencias de cobertura
+  por volcán y día, fusionado con la cobertura por plataforma de #897; código de salida del NRT sigue en 0 sin el modo
+  estricto), I3 (`banco_paridad.TOL_S` seguía como literal 120; ningún número cambia) y A (xfail del tope de cordura de V375;
+  `store.py` sin tocar). Retirado: I2 (ya en #890; D25 no se adopta; el placebo vive en #905). Evidencia: 11 rojas sobre
+  main, 12 de 12 mutaciones, suite 2.528 sin fallas, verificador Sonnet sin regresión.
+- **Decide Nicolás**: (1) merge de #909 (toca el NRT); (2) aceptar que los reprocesos con `--estricto-cobertura` salgan con 3
+  cuando tocan el día en curso o un L1B sin geolocalización (frecuencia histórica SIN DATO); (3) #890. No cubierto: VA61-01
+  vive dentro de `process_modis` (otro trabajo, A45) y el estado «sin dato» no llega a `data/` ni al tablero.
+
 ### 2026-10-26 ~04:45 UTC (S163, vuelta 8): #908 mergeado; regla de MATLAB confirmada; V375-D no hace falta por magnitud
 - **#908 mergeado** con commit de merge (`a6d3935cc`), CI verde sobre `94fdd7aaf`: main ya tiene la bitácora, los traspasos
   S152 a S163, el programa por sensor y la marca de D25. Lo que difiere hoy entre main y loop/activo son sólo los datos NRT
