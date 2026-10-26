@@ -177,14 +177,18 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] O1. Paquete O2 MODIS para MATLAB (`experiments/_s163_o2_modis/`, `89479be35`): 404 escenas de 1 a 4 píxeles,
   identidad 404 de 404, md5 comprobados en el remoto. No corrido: la sesión de MathWorks expiró; queda como prueba de
   oro para cuando Nicolás vuelva a entrar.
-- [ ] O2. Después del candado: vara PRELIMINAR del fondo de las 404 escenas con la regla de `fillmissing2` que reproduce
+- [x] O2. (`21de8dcd5`, verificador Sonnet y marca `38df75a02`: 191 escenas distintas, ruido de 9 % en 1 píxel, 4 píxeles extrapolado) Después del candado: vara PRELIMINAR del fondo de las 404 escenas con la regla de `fillmissing2` que reproduce
   MATLAB en 166 de 166 escenas (`experiments/_s163_o2alt/delaunay_perturbado.py`, rama `s163-o2-alternativa`
   `cd812c746`; su verificador limpio estaba en curso). Marcarla PRELIMINAR.
-- [ ] O3. Después del candado: PR chico a main con el sello D-48 y la adenda (`cd3d12984`) de
+- [x] O3. (PR #910, CI verde, mergeado por la coordinadora) Después del candado: PR chico a main con el sello D-48 y la adenda (`cd3d12984`) de
   `experiments/_s159/mxd03_prereg/PREREGISTRO_MXD03.md` (main lo presenta como «BORRADOR v2 PARA EL SELLO»), más los
   seguimientos de #906 pendientes en main: `docs/FICHA_SDA_VRP_CHILE.md:29` y `docs/paper/sec5_methods.md:7` dicen que
   usamos MOD03; `docs/MISSION.md` no nombra a Coppola 2026. Si se toca `docs/MIROVA_DIVERGENCES.md`, tomar la
   resolución de D25 de `a907c44f3` (PR #908). Nada en `pipeline/`.
+
+- [ ] O4. Adenda 4 de MOD-D (aprobada por la coordinadora con D-48): M informada también con la regla de
+  `fillmissing2` de MATLAB, fuera de línea, con las grillas que guarda el censo; sin cambiar reglas selladas. Escribirla
+  cuando entregue el verificador del candado (no cambiarle el pre-registro mientras lo lee) y verificarla.
 
 ### Perfil experimental (candidatas)
 - [x] X1. (en #906) Anotar en `docs/BEYOND_MIROVA_EXTENSIONS.md` §12 la candidata Láscar 2026-05-11 07:55 (señal real del cráter que MIROVA calla en MODIS; diagnóstico de MOD-C), en el PR del veredicto de MOD-B o de MOD-D (archivo compartido: no tocarlo suelto).
