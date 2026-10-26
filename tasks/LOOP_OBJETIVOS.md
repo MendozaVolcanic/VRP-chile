@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-25 (S162): O2 sin sesión de MathWorks; correo a Coppola en espera; verificador de las protegidas SNPP
+- Nicolás: «haz tú lo de MATLAB; el correo a Coppola aún no lo enviaremos; el resto haz lo que recomiendes».
+- O2: no hay MATLAB local y en su Chrome no hay sesión de MathWorks (matlab.mathworks.com pide iniciar sesión); Claude
+  no inicia sesión con credenciales. Pendiente de Nicolás: iniciar sesión en MathWorks en su Chrome; con la sesión
+  abierta, la coordinadora sube los cuatro archivos de `C:\vrp-trabajo\s159-pruebas\experiments\_s159\o1\o2_paquete\`,
+  corre `correr_o2` y baja `resultado_o2.mat` (paso a paso en `experiments/_s162_v750f/PASO_A_PASO_O2.md`).
+- Correo a Coppola: en espera por decisión de Nicolás.
+- Decisión 9 (protegidas sólo OCR de Suomi NPP): lanzado el verificador limpio (Opus) del informe del subagente 4,
+  rama `s162-verif-protegidas-snpp`; con su conforme se aplica la recomendación (que decida la regla de cráter de #903,
+  informando la lectura A al lado). Merges y borrado de carpetas siguen siendo de Nicolás (clasificador y regla de no
+  borrar archivos de forma permanente).
+
 ### 2026-10-25 (S162): relevos abiertos; loop coordinador reanudado
 - Nicolás: «continúa con todo lo que recomiendes, ¿hay que abrir nuevas sesiones? ¿en qué quedaron las otras?». Abiertos
   desde el computador: `loop-modis-2` (`local_0af7e1d8-7bde-4a4d-b8a3-6cf256a36c67`, desde `claude/s162-modis-774bb0`:
