@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-26 ~14:15 UTC (S164, vuelta 5): cierre de VIIRS 375 integrado; #914 mergeado (placebos D-44, tarea 1.35, causa de huecos)
+### 2026-10-26 13:46 UTC (S164, vuelta 5): cierre de VIIRS 375 integrado; #914 mergeado (placebos D-44, tarea 1.35, causa de huecos)
 - `loop-viirs375` cerró: adenda 1 de `experiments/_s162_v375/PREREGISTRO_E.md` con PD1, **sin sellar**; traspaso para la
   sesión que lleve la vía a 375 en la carpeta compartida de S162 (`VIIRS375_via_375_traspaso.md`): el procesador de 375 es
   `process_viirs.py` (A45), necesita pre-registro PD3 con tag y el sí de Nicolás. Integrado a `loop/activo` (`e9dac40d4`).
@@ -588,7 +588,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   sólo se mide con un brazo gemelo despachado: pendiente, entra en el próximo A/B; (d) #864: se cierra cuando aparezca el
   auto-audit nuevo.
 
-### 2026-10-26 ~13:45 UTC (S164, vuelta 4): rama de VIIRS 375 integrada; PD1 decidida bajo D-48 (C13 en todos)
+### 2026-10-26 13:25 UTC (S164, vuelta 4): rama de VIIRS 375 integrada; PD1 decidida bajo D-48 (C13 en todos)
 - `loop-viirs375` entregó su rama `claude/s162-viirs375-c1b864` en `815118277` (= remoto). Integrada a `loop/activo` con
   merge commit `461a77be4`: 209 archivos, 64 MB, todo en `experiments/_s159/portes/`, `experiments/_s158_audit_r2/`,
   `experiments/_s162_v375/` y `tasks/LOOP_VIIRS375.md`; 0 archivos de `pipeline/`, `data/` ni `frontend/`. Los dos `.mat`
@@ -603,7 +603,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   `experiments/_s162_v375/brazos.py`), marcar el record con `via_codigo_mirova: True`, y después sello, censo, sombra, tag
   y el sí de Nicolás (A45). Es trabajo de una sesión nueva: la de VIIRS 375 pasó los 60 mensajes.
 
-### 2026-10-26 ~13:30 UTC (S164, vuelta 3): #907 mergeado (cableado de la vía V750, flag apagado)
+### 2026-10-26 13:21 UTC (S164, vuelta 3): #907 mergeado (cableado de la vía V750, flag apagado)
 - `loop-viirs750-2` entregó #907 en `f96b379e7` (6 commits sobre `b09a7b321`; tag `pre-rebase-s162-via-mirova` sobre
   la versión previa `a16aa14b4`). Suite en árbol quieto: 2.582 aprobadas, 29 omitidas, 2 xfail, 0 fallas
   (`experiments/_s162_v750a/suite_via_salida_cola.txt`). Verificador limpio Sonnet: LISTO CON CAMBIOS, ninguno sobre el
@@ -617,7 +617,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 - Tag defensivo `pre-s164-merge-907` sobre `main` `14453e3f6`; merge commit `cff07d173`; Tests en `main` verde
   (run 40329188081). Encender la vía sigue exigiendo el sello de V750-A, censo, sombra, tag y el sí de Nicolás.
 
-### 2026-10-26 ~13:05 UTC (S164, vuelta 2): D-39 verificado y paso 1 hecho; la pausa del scraper la negó el clasificador
+### 2026-10-26 13:12 UTC (S164, vuelta 2): D-39 verificado y paso 1 hecho; la pausa del scraper la negó el clasificador
 - `d39-mirova-v1` entregó (informe en su rama `claude/s163-d39-mirova-v1-710f72` `49de07d65`,
   `experiments/_s163_d39_mirova_v1/INFORME.md`; verificador limpio Fable 5.1, ningún REFUTADO): 0 llaves perdidas y 0 campos
   cambiados en el consolidado y en el OCR, +2.351 filas repuestas, todas reales. Hace falta sumar
