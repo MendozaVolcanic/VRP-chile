@@ -200,7 +200,9 @@ reintenta sin rebasar») y #896 (`2ba670463`, la alarma de llaves perdidas). En 
 
 ## 7. Plan de despliegue con vuelta atrás (punto 5)
 
-Lo ejecuta la coordinadora o Nicolás; yo no pausé ni mergeé nada.
+Lo ejecuta Nicolás: el 2026-10-26 S164 hizo el paso 1 y el clasificador de permisos le negó el paso 2. **El bloque exacto
+para copiar y pegar, con el valor esperado en cada verificación, está en `PASOS_PARA_NICOLAS.md`** (en esta carpeta).
+Yo no pausé ni mergeé nada.
 
 1. **Sumar la rama de S163 al PR.** Mergear `s163/d39-reposicion-y-bucle` (`dd606a65a1`) en `fix/referencia-estable`: son dos
    commits sobre su cabeza, avance rápido. Esperar el CI de #26 en verde con conclusión, no «0 checks» (A39, enmienda S142).
