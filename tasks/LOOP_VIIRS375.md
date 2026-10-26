@@ -28,6 +28,18 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 > con sus bytes CRLF (md5 b0ceebb2 y ddffea36, se corrigió una conversión a LF que había hecho git), control de Etna;
 > prueba local 422 de 422 y control negativo 407 de 422; md5 servidos por GitHub comprobados. Entregado a S163, que lo
 > corre en MATLAB Online. **(2) espera `resultado_v375.mat`. (3) pendiente.**
+>
+> **(2) PRELIMINAR, 2026-10-26** (commit `04d7151d2`). La sesión de MATLAB venció; S163 pasó la regla de `fillmissing2`
+> que reproduce a MATLAB en 166 de 166 escenas de O2 (`delaunay_perturbado.py` de `cd812c746`, x = fila, y = columna).
+> `o2_375/vara_preliminar_375.py`: Etna exacto (Tot_Lmir_bk 1,072886152), 0 aristas ilegales, 137 de 422 escenas
+> cambian respecto del port (p90 0,16 relativo). `evaluar.py --vrp-vara` con el mismo comando de B2: instrumento OK,
+> P1, P2, recall y VEREDICTO B idénticos; M 0,998 a 0,999 en M14 y M13, 0,990 a 0,993 en PIX7, **C13 igual (0,999)**
+> (`o2_375/evaluar_con_vara_salida.txt`). En las positivas de 1 a 4 px la mediana contra MIROVA no se mueve
+> (`o2_375/magnitud_vara_375_salida.txt`). **Lectura: el fondo de 1 a 4 px no cambia la magnitud de V375-C; V375-D no
+> hace falta por magnitud.** Sigue PRELIMINAR hasta (a) el verificador de la regla (S163) y (b) la prueba de oro en
+> MATLAB con `entradas_v375.mat`; si MATLAB no calza con la vara, se re-corre con `--vrp-vara` sobre su salida.
+> Error propio corregido en la misma corrida: la primera vez sustituí también las 20 pasadas del control de vida y el
+> instrumento salió INVALIDO; el control compara runner contra S162 y no es magnitud, ya no se sustituye.
 
 Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
 evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).
