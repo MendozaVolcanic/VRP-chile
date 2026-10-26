@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~05:10 UTC (S163): vara MODIS preliminar verificada; #910 mergeado; adenda de M para MOD-D aprobada
+- `loop-modis-2` (`38df75a02`, `experiments/_s163_o2_modis/RESULTADO_VARA_PRELIMINAR.md`, verificador Sonnet en
+  `verificador_vara/INFORME.md`): con la regla, el hueco calza con el del `.m` en 404 de 404, pero son **191 escenas
+  distintas (161 de Láscar)**, no 404. En 1 píxel no hay sesgo sino ruido por escena (típico 9,1 %, máx 3,8 veces; el port
+  elige la otra pareja de celdas en 139 de 168); la regla en 1 píxel equivale al promedio de las dos celdas a dos columnas
+  (167 de 168). Efecto en 4 píxeles por bloques 2 × 2 que ningún caso de VIIRS validó contra MATLAB: SOSPECHA. SIN DATO que
+  el fondo de MODIS en MIROVA sea el del `.m` de VIIRS 750 (MIROVA no publicó código MODIS) y que la regla no dependa de la
+  grilla. Prueba de oro en MATLAB pendiente (sesión de MathWorks expirada).
+- **Aprobada con D-48** la recomendación de MODIS: adenda informativa a MOD-D, antes de leer el censo, que informe M también
+  con esta regla, fuera de línea, con las grillas que guarda el censo. No cambia ninguna regla sellada.
+- **#910 mergeado** (squash, CI verde; sólo docs): sello D-48 del pre-registro de MxD03 y los seguimientos de #906
+  (FICHA_SDA:29, paper sec5:7, que además decía banda 21 primaria, y Coppola 2026 en MISSION). Cierra el segundo conflicto
+  del inventario.
+
 ### 2026-10-26 ~04:40 UTC (S163): adenda 1 de V750-B CONFIRMADA bajo D-48
 - Verificador Sonnet de la adenda (`claude/s162-viirs750-2-918174`, `experiments/_s162_v750b/adenda1/verificador/
   INFORME.md`): LISTO CON CAMBIOS, sin gravedad 4 o 5; confirmó el defecto (escenario: 68 de 69 observadas, 0 SIN DATO,
