@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-25 (S162): relevo de la coordinadora
+- Nicolás: «lanza esa nueva sesión que recomiendas». Abierta `coordinadora-s163` (`local_8a135e90-b711-4bb9-9dec-ff02036f206b`)
+  en este mismo checkout, con el traspaso S163. S162 detiene su loop aquí: desde ahora la única coordinadora (y la única
+  que despacha y escribe este archivo) es S163; ella avisa a las hijas su id. El verificador de las protegidas SNPP que
+  lanzó S162 entrega en la rama `s162-verif-protegidas-snpp`.
+
 ### 2026-10-25 (S162): adenda 1 de V750-B escrita (loop-viirs750-2)
 - `claude/s162-viirs750-2-918174` `e7c56af0b`: el analizador sellado (`analizar_v750b.py` l. 205-209) deja caer sin
   contar la pasada «ok» sin una caja del oráculo (escenario D1 lo demuestra); la adenda no edita el analizador: el
