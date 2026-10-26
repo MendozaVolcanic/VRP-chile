@@ -21,6 +21,13 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 > 6 protegidas sólo OCR de Suomi NPP (rama `s162-verif-protegidas-snpp`, `3c6836076`) confirmó que **no son de cráter**,
 > y S163 aplica la decisión 9 con D-48 (anotado en su `tasks/LOOP_OBJETIVOS.md` §6). Al retomar, leer esa decisión antes
 > de tocar el veto de V375-E (decisión b.2 de abajo).
+>
+> **Retomado, 2026-10-25/26 (pedido de S163)**: tareas (1) paquete MATLAB de las escenas V375 de 1 a 4 píxeles, (2) con
+> esa vara re-medir la magnitud de V375-C y decidir V375-D, (3) dejar V375-E listo. **(1) HECHO**: `experiments/_s162_v375/o2_375/`
+> (commit `138a931ee`): 422 escenas (188 de 1 px, 105 de 2, 73 de 3, 56 de 4) en 381 pasadas, .m de MIROVA sin cambios
+> con sus bytes CRLF (md5 b0ceebb2 y ddffea36, se corrigió una conversión a LF que había hecho git), control de Etna;
+> prueba local 422 de 422 y control negativo 407 de 422; md5 servidos por GitHub comprobados. Entregado a S163, que lo
+> corre en MATLAB Online. **(2) espera `resultado_v375.mat`. (3) pendiente.**
 
 Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
 evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).
