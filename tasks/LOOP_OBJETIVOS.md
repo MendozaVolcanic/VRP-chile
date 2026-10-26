@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~02:45 UTC (S163): loop-modis-2 al día; su rama sí estaba en el remoto
+- Comprobado con `git ls-remote`: `claude/s162-modis-2-0dd578` = `557e4ae79` (la subió ~01:50; mi consulta de 01:58 fue
+  antes de que apareciera), `s162-a61-mxd03` = `72f85df71`, `s162-modd-candado` = `04a86a90e`.
+- Verificador limpio (Opus) de la A61 de MxD03: **P4 se sostiene** (nada espacial frena la adopción); E4 refutada (H4 va
+  de −27 a +48 %, no ±27 %); **VA61-01: ~215 records con el cráter en el borde del gránulo guardados como negativos**
+  (misma familia que el defecto del relleno −999: falta el estado «sin dato»; entra al diseño del flag de MxD03,
+  `docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md` en su rama, sin tocar `pipeline/`).
+- Candado de MOD-D en curso (19 pruebas rojas contra el vacío, mutaciones corriendo, falta verificador). Sin despacho
+  pedido todavía.
+
 ### 2026-10-26 ~02:40 UTC (S163, vuelta 3): O2 a los otros sensores; trabajo repartido en paralelo
 - Nicolás: «¿no tienes que hacer esto mismo para los otros sensores? ... continúa con todo lo que falte, abre nuevas
   sesiones si es necesario, en paralelo y en loop». OSF zm62w sin cambios desde el 2026-08-19 (logs de la API): MIROVA
