@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-25 (S162): adenda 1 de V750-B escrita (loop-viirs750-2)
+- `claude/s162-viirs750-2-918174` `e7c56af0b`: el analizador sellado (`analizar_v750b.py` l. 205-209) deja caer sin
+  contar la pasada «ok» sin una caja del oráculo (escenario D1 lo demuestra); la adenda no edita el analizador: el
+  compañero `experiments/_s162_v750b/adenda1/cobertura_cajas_v750b.py` se corre antes de la lectura del 2026-11-03 y
+  manda si dice INSUFICIENTE. Prueba roja sin el compañero, verde con él; nulo 7/7. Se confirma con D-48 cuando
+  entregue su verificador Sonnet.
+- Pregunta de Nicolás «¿por qué necesitas MATLAB?»: explicado (la triangulación de `fillmissing2` decide el fondo en
+  alertas de un píxel, hasta 1,8×; no cambia qué se publica). Alternativa propuesta: calibrar la variante de interpolación
+  contra el VRP que MIROVA publicó en sus alertas de un píxel (A1, A115), con un subagente; espera su respuesta.
+
 ### 2026-10-25 (S162): O2 sin sesión de MathWorks; correo a Coppola en espera; verificador de las protegidas SNPP
 - Nicolás: «haz tú lo de MATLAB; el correo a Coppola aún no lo enviaremos; el resto haz lo que recomiendes».
 - O2: no hay MATLAB local y en su Chrome no hay sesión de MathWorks (matlab.mathworks.com pide iniciar sesión); Claude
