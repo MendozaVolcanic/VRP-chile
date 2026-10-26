@@ -76,6 +76,10 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 > versión anterior de `experiments/_s162_v375/evaluar.py`. Al integrar habrá conflicto add/add en ese archivo: **gana
 > la versión de esta rama**, que desciende de la de main y agrega `--vrp-vara` y la etiqueta de cráter. `o2_375/` vive
 > sólo en esta rama.
+>
+> **Relevo, 2026-10-26:** S163 cerró a las 12:35 UTC; la coordinadora ahora es **S164**
+> (`local_34f868ef-c156-4906-9b6c-e691fc445650`). Despachos y resultados se le piden y mandan a ella. Reglas sin cambio:
+> A45, sólo EARTHDATA_TOKEN, nunca git stash, ramas siempre en el remoto.
 
 Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
 evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).
