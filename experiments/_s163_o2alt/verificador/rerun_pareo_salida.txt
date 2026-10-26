@@ -1,0 +1,133 @@
+[referencia MIROVA] la ventana 2026-03-01 a 2026-10-16 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+
+REFERENCIA (tabla, Sensor VIIRS = 750):
+  Chaiten_2026-10-06_0530                ALERTA_TERMICA VRP 0.18 dist 0.0
+  Lascar_2026-09-26_0548                 ALERTA_TERMICA VRP 0.74 dist 1.5
+  Lascar_2026-10-08_0542                 ALERTA_TERMICA VRP 0.36 dist 0.75
+  Llaima_2026-10-10_0554                 RUTINA VRP 0.0 dist 0.0
+  NevadosDeChillan_2026-10-10_0554       ALERTA_TERMICA VRP 13.13 dist 1.06
+  PuyehueCordonCaulle_2026-10-10_0554    ALERTA_TERMICA VRP 1.19 dist 7.83
+  PuyehueCordonCaulle_2026-10-16_0542    ALERTA_TERMICA VRP 0.61 dist 7.65
+  Tupungatito_2026-03-01_0536            sin fila
+  Tupungatito_2026-08-21_0548            ALERTA_TERMICA VRP 0.19 dist 5.03
+  Villarrica_2026-09-19_0548             ALERTA_TERMICA VRP 0.45 dist 1.06
+pasadas con alerta de MIROVA y VRP > 0: 8 de 10
+
+escenas chilenas con alerta (MATLAB): 83; detección Octave = MATLAB en todas (assert)
+
+escenas pareadas: 82; con radio propio a > 1,5 km del de MIROVA (probable otro objeto): 0 -> []
+  Chaiten_2026-10-06_0530                nearest caja_def        np=1 r=0.00 km (MIROVA 0.00) MIROVA 0.18 | MATLAB 0.2151 shim 0.2151 R2 0.2151 O1 0.2151
+  Chaiten_2026-10-06_0530                nearest anillo_sensible np=1 r=0.00 km (MIROVA 0.00) MIROVA 0.18 | MATLAB 0.2151 shim 0.2151 R2 0.2151 O1 0.2151
+  Lascar_2026-09-26_0548                 nearest caja_def        np=1 r=0.75 km (MIROVA 1.50) MIROVA 0.74 | MATLAB 0.8155 shim 0.8155 R2 0.8155 O1 0.7259
+  Lascar_2026-09-26_0548                 nearest anillo_sensible np=1 r=0.75 km (MIROVA 1.50) MIROVA 0.74 | MATLAB 0.8155 shim 0.8155 R2 0.8155 O1 0.7259
+  Lascar_2026-10-08_0542                 linear  caja_def        np=1 r=0.75 km (MIROVA 0.75) MIROVA 0.36 | MATLAB 0.3284 shim 0.3284 R2 0.3284 O1 0.1928
+  Lascar_2026-10-08_0542                 linear  anillo_sensible np=1 r=0.75 km (MIROVA 0.75) MIROVA 0.36 | MATLAB 0.3284 shim 0.3284 R2 0.3284 O1 0.1928
+  Lascar_2026-10-08_0542                 nearest caja_def        np=1 r=0.75 km (MIROVA 0.75) MIROVA 0.36 | MATLAB 0.4391 shim 0.4391 R2 0.4391 O1 0.2778
+  Lascar_2026-10-08_0542                 nearest anillo_sensible np=1 r=0.75 km (MIROVA 0.75) MIROVA 0.36 | MATLAB 0.4391 shim 0.4391 R2 0.4391 O1 0.2778
+  NevadosDeChillan_2026-10-10_0554       nearest caja_def        np=2 r=0.00 km (MIROVA 1.06) MIROVA 13.13 | MATLAB 11.6504 shim 11.6504 R2 11.6504 O1 11.6504
+  NevadosDeChillan_2026-10-10_0554       nearest anillo_sensible np=2 r=0.00 km (MIROVA 1.06) MIROVA 13.13 | MATLAB 11.6504 shim 11.6504 R2 11.6504 O1 11.6504
+  NevadosDeChillan_2026-10-10_0554       linear  caja_def        np=5 r=0.00 km (MIROVA 1.06) MIROVA 13.13 | MATLAB 12.3651 shim 12.3671 R2 12.3671 O1 12.3833
+  NevadosDeChillan_2026-10-10_0554       linear  anillo_sensible np=5 r=0.00 km (MIROVA 1.06) MIROVA 13.13 | MATLAB 12.3651 shim 12.3671 R2 12.3671 O1 12.3833
+  PuyehueCordonCaulle_2026-10-10_0554    linear  anillo_sensible np=1 r=7.83 km (MIROVA 7.83) MIROVA 1.19 | MATLAB 0.9450 shim 0.7880 R2 0.7880 O1 0.9450
+  PuyehueCordonCaulle_2026-10-10_0554    nearest anillo_sensible np=1 r=7.83 km (MIROVA 7.83) MIROVA 1.19 | MATLAB 1.0037 shim 0.8066 R2 0.8066 O1 1.0037
+  PuyehueCordonCaulle_2026-10-16_0542    linear  anillo_sensible np=1 r=7.83 km (MIROVA 7.65) MIROVA 0.61 | MATLAB 0.7353 shim 0.6669 R2 0.6669 O1 0.7353
+  PuyehueCordonCaulle_2026-10-16_0542    nearest anillo_sensible np=2 r=7.65 km (MIROVA 7.65) MIROVA 0.61 | MATLAB 1.5414 shim 1.5414 R2 1.5414 O1 1.5414
+  Villarrica_2026-09-19_0548             nearest caja_def        np=1 r=0.75 km (MIROVA 1.06) MIROVA 0.45 | MATLAB 0.4212 shim 0.7438 R2 0.7438 O1 0.7438
+  Villarrica_2026-09-19_0548             nearest anillo_sensible np=1 r=0.75 km (MIROVA 1.06) MIROVA 0.45 | MATLAB 0.4212 shim 0.7438 R2 0.7438 O1 0.7438
+  Villarrica_2026-09-19_0548             linear  caja_def        np=2 r=0.75 km (MIROVA 1.06) MIROVA 0.45 | MATLAB 0.4745 shim 0.4745 R2 0.4745 O1 0.4745
+  Villarrica_2026-09-19_0548             linear  anillo_sensible np=2 r=0.75 km (MIROVA 1.06) MIROVA 0.45 | MATLAB 0.4745 shim 0.4745 R2 0.4745 O1 0.4745
+
+=== TABLA (resumen por pasada) ===
+
+  1 px, todas las variantes de grilla: 6 pasadas, 50 escenas -> ['Chaiten_2026-10-06_0530', 'Lascar_2026-09-26_0548', 'Lascar_2026-10-08_0542', 'PuyehueCordonCaulle_2026-10-10_0554', 'PuyehueCordonCaulle_2026-10-16_0542', 'Villarrica_2026-09-19_0548']
+    matlab  n_pasadas  6 | mediana |log(VRP/MIROVA)| 0.1928 | sesgo mediano +0.1825 (x1.200) | por pasada Lascar10-08:+0.199 Puyehu10-10:-0.200 Villar09-19:+0.312 Lascar09-26:-0.137 Puyehu10-16:+0.187 Chaite10-06:+0.178
+    shim    n_pasadas  6 | mediana |log(VRP/MIROVA)| 0.1884 | sesgo mediano +0.1336 (x1.143) | por pasada Lascar10-08:+0.199 Puyehu10-10:-0.401 Villar09-19:+0.388 Lascar09-26:-0.077 Puyehu10-16:+0.089 Chaite10-06:+0.178
+    r2      n_pasadas  6 | mediana |log(VRP/MIROVA)| 0.1884 | sesgo mediano +0.1336 (x1.143) | por pasada Lascar10-08:+0.199 Puyehu10-10:-0.401 Villar09-19:+0.374 Lascar09-26:-0.137 Puyehu10-16:+0.089 Chaite10-06:+0.178
+    o1      n_pasadas  6 | mediana |log(VRP/MIROVA)| 0.1936 | sesgo mediano +0.0505 (x1.052) | por pasada Lascar10-08:-0.259 Puyehu10-10:-0.200 Villar09-19:+0.374 Lascar09-26:-0.077 Puyehu10-16:+0.187 Chaite10-06:+0.178
+    signos MATLAB contra shim: MATLAB mas cerca en 2, mas lejos en 2, empate en 2 pasadas
+    signos MATLAB contra r2: MATLAB mas cerca en 2, mas lejos en 1, empate en 3 pasadas
+    signos MATLAB contra o1: MATLAB mas cerca en 2, mas lejos en 1, empate en 3 pasadas
+
+  1 px, radio compatible (<=1,5 km): 6 pasadas, 50 escenas -> ['Chaiten_2026-10-06_0530', 'Lascar_2026-09-26_0548', 'Lascar_2026-10-08_0542', 'PuyehueCordonCaulle_2026-10-10_0554', 'PuyehueCordonCaulle_2026-10-16_0542', 'Villarrica_2026-09-19_0548']
+    matlab  n_pasadas  6 | mediana |log(VRP/MIROVA)| 0.1928 | sesgo mediano +0.1825 (x1.200) | por pasada Lascar10-08:+0.199 Puyehu10-10:-0.200 Villar09-19:+0.312 Lascar09-26:-0.137 Puyehu10-16:+0.187 Chaite10-06:+0.178
+    shim    n_pasadas  6 | mediana |log(VRP/MIROVA)| 0.1884 | sesgo mediano +0.1336 (x1.143) | por pasada Lascar10-08:+0.199 Puyehu10-10:-0.401 Villar09-19:+0.388 Lascar09-26:-0.077 Puyehu10-16:+0.089 Chaite10-06:+0.178
+    r2      n_pasadas  6 | mediana |log(VRP/MIROVA)| 0.1884 | sesgo mediano +0.1336 (x1.143) | por pasada Lascar10-08:+0.199 Puyehu10-10:-0.401 Villar09-19:+0.374 Lascar09-26:-0.137 Puyehu10-16:+0.089 Chaite10-06:+0.178
+    o1      n_pasadas  6 | mediana |log(VRP/MIROVA)| 0.1936 | sesgo mediano +0.0505 (x1.052) | por pasada Lascar10-08:-0.259 Puyehu10-10:-0.200 Villar09-19:+0.374 Lascar09-26:-0.077 Puyehu10-16:+0.187 Chaite10-06:+0.178
+    signos MATLAB contra shim: MATLAB mas cerca en 2, mas lejos en 2, empate en 2 pasadas
+    signos MATLAB contra r2: MATLAB mas cerca en 2, mas lejos en 1, empate en 3 pasadas
+    signos MATLAB contra o1: MATLAB mas cerca en 2, mas lejos en 1, empate en 3 pasadas
+
+  2-4 px (control), todas: 4 pasadas, 22 escenas -> ['Lascar_2026-09-26_0548', 'NevadosDeChillan_2026-10-10_0554', 'PuyehueCordonCaulle_2026-10-16_0542', 'Villarrica_2026-09-19_0548']
+    matlab  n_pasadas  4 | mediana |log(VRP/MIROVA)| 0.0893 | sesgo mediano +0.0560 (x1.058) | por pasada Nevado10-10:-0.120 Villar09-19:+0.053 Lascar09-26:+0.059 Puyehu10-16:+0.927
+    shim    n_pasadas  4 | mediana |log(VRP/MIROVA)| 0.0893 | sesgo mediano +0.0560 (x1.058) | por pasada Nevado10-10:-0.120 Villar09-19:+0.053 Lascar09-26:+0.059 Puyehu10-16:+0.927
+    r2      n_pasadas  4 | mediana |log(VRP/MIROVA)| 0.0893 | sesgo mediano +0.0560 (x1.058) | por pasada Nevado10-10:-0.120 Villar09-19:+0.053 Lascar09-26:+0.059 Puyehu10-16:+0.927
+    o1      n_pasadas  4 | mediana |log(VRP/MIROVA)| 0.0893 | sesgo mediano +0.0373 (x1.038) | por pasada Nevado10-10:-0.120 Villar09-19:+0.016 Lascar09-26:+0.059 Puyehu10-16:+0.927
+    signos MATLAB contra shim: MATLAB mas cerca en 0, mas lejos en 0, empate en 4 pasadas
+    signos MATLAB contra r2: MATLAB mas cerca en 0, mas lejos en 0, empate en 4 pasadas
+    signos MATLAB contra o1: MATLAB mas cerca en 0, mas lejos en 1, empate en 3 pasadas
+
+  2-4 px (control), radio compatible: 4 pasadas, 22 escenas -> ['Lascar_2026-09-26_0548', 'NevadosDeChillan_2026-10-10_0554', 'PuyehueCordonCaulle_2026-10-16_0542', 'Villarrica_2026-09-19_0548']
+    matlab  n_pasadas  4 | mediana |log(VRP/MIROVA)| 0.0893 | sesgo mediano +0.0560 (x1.058) | por pasada Nevado10-10:-0.120 Villar09-19:+0.053 Lascar09-26:+0.059 Puyehu10-16:+0.927
+    shim    n_pasadas  4 | mediana |log(VRP/MIROVA)| 0.0893 | sesgo mediano +0.0560 (x1.058) | por pasada Nevado10-10:-0.120 Villar09-19:+0.053 Lascar09-26:+0.059 Puyehu10-16:+0.927
+    r2      n_pasadas  4 | mediana |log(VRP/MIROVA)| 0.0893 | sesgo mediano +0.0560 (x1.058) | por pasada Nevado10-10:-0.120 Villar09-19:+0.053 Lascar09-26:+0.059 Puyehu10-16:+0.927
+    o1      n_pasadas  4 | mediana |log(VRP/MIROVA)| 0.0893 | sesgo mediano +0.0373 (x1.038) | por pasada Nevado10-10:-0.120 Villar09-19:+0.016 Lascar09-26:+0.059 Puyehu10-16:+0.927
+    signos MATLAB contra shim: MATLAB mas cerca en 0, mas lejos en 0, empate en 4 pasadas
+    signos MATLAB contra r2: MATLAB mas cerca en 0, mas lejos en 0, empate en 4 pasadas
+    signos MATLAB contra o1: MATLAB mas cerca en 0, mas lejos en 1, empate en 3 pasadas
+
+  5+ px: 1 pasadas, 10 escenas -> ['NevadosDeChillan_2026-10-10_0554']
+    matlab  n_pasadas  1 | mediana |log(VRP/MIROVA)| 0.0005 | sesgo mediano +0.0005 (x1.000) | por pasada Nevado10-10:+0.000
+    shim    n_pasadas  1 | mediana |log(VRP/MIROVA)| 0.0004 | sesgo mediano +0.0004 (x1.000) | por pasada Nevado10-10:+0.000
+    r2      n_pasadas  1 | mediana |log(VRP/MIROVA)| 0.0004 | sesgo mediano +0.0004 (x1.000) | por pasada Nevado10-10:+0.000
+    o1      n_pasadas  1 | mediana |log(VRP/MIROVA)| 0.0012 | sesgo mediano +0.0012 (x1.001) | por pasada Nevado10-10:+0.001
+    signos MATLAB contra shim: MATLAB mas cerca en 0, mas lejos en 1, empate en 0 pasadas
+    signos MATLAB contra r2: MATLAB mas cerca en 0, mas lejos en 1, empate en 0 pasadas
+    signos MATLAB contra o1: MATLAB mas cerca en 1, mas lejos en 0, empate en 0 pasadas
+
+  escena por defecto (guardada, lineal, caja_def), cualquier npix: 3 pasadas, 3 escenas -> ['Lascar_2026-10-08_0542', 'NevadosDeChillan_2026-10-10_0554', 'Villarrica_2026-09-19_0548']
+    matlab  n_pasadas  3 | mediana |log(VRP/MIROVA)| 0.0600 | sesgo mediano -0.0600 (x0.942) | por pasada Lascar10-08:-0.092 Nevado10-10:-0.060 Villar09-19:+0.053
+    shim    n_pasadas  3 | mediana |log(VRP/MIROVA)| 0.0599 | sesgo mediano -0.0599 (x0.942) | por pasada Lascar10-08:-0.092 Nevado10-10:-0.060 Villar09-19:+0.053
+    r2      n_pasadas  3 | mediana |log(VRP/MIROVA)| 0.0599 | sesgo mediano -0.0599 (x0.942) | por pasada Lascar10-08:-0.092 Nevado10-10:-0.060 Villar09-19:+0.053
+    o1      n_pasadas  3 | mediana |log(VRP/MIROVA)| 0.0585 | sesgo mediano -0.0585 (x0.943) | por pasada Lascar10-08:-0.624 Nevado10-10:-0.059 Villar09-19:+0.053
+    signos MATLAB contra shim: MATLAB mas cerca en 0, mas lejos en 1, empate en 2 pasadas
+    signos MATLAB contra r2: MATLAB mas cerca en 0, mas lejos en 1, empate en 2 pasadas
+    signos MATLAB contra o1: MATLAB mas cerca en 1, mas lejos en 1, empate en 1 pasadas
+
+en las 50 escenas pareadas de 1 px, variantes distintas de MATLAB (>1e-9): {'matlab': 0, 'shim': 15, 'r2': 13, 'o1': np.int64(29)}
+pasadas de 1 px donde alguna variante difiere de MATLAB: ['Chaiten_2026-10-06_0530', 'Lascar_2026-09-26_0548', 'Lascar_2026-10-08_0542', 'PuyehueCordonCaulle_2026-10-10_0554', 'PuyehueCordonCaulle_2026-10-16_0542', 'Villarrica_2026-09-19_0548']
+
+PISO (a) dispersión de log(VRP MATLAB) entre variantes de grilla de una misma pasada (MAD):
+  Chaiten_2026-10-06_0530                n= 9 MAD 0.000
+  Lascar_2026-09-26_0548                 n=16 MAD 0.136
+  Lascar_2026-10-08_0542                 n=15 MAD 0.134
+  NevadosDeChillan_2026-10-10_0554       n=19 MAD 0.063
+  Villarrica_2026-09-19_0548             n=19 MAD 0.172
+PISO (a) mediana de la MAD por pasada: 0.134 (en log natural)
+SEÑAL (b) |log(variante/MATLAB)| en escenas chilenas de 1 px: mediana 0.0000, fracción > 0: 0.386, mediana de las > 0: 0.182
+
+=== NULOS ===
+  1 px, todas: 6 pasadas | ganador observado r2, segunda shim, margen 0.0000
+    nulo barajado dentro de volcán (4 permutaciones distintas posibles): p(margen>=obs) 1.000; ganadores {'r2': 1458, 'matlab': 542}
+    nulo barajado global: p(margen>=obs) 1.000; mediana del margen nulo 0.0202; ganadores {'matlab': 651, 'r2': 554, 'o1': 260, 'shim': 535}
+    bootstrap por pasada de (segunda - ganador): mediana +0.0000, IC 95 % [-0.0539, +0.0136], fracción <= 0: 0.445
+    (mejor modelo - MATLAB) observado -0.0044; bootstrap por pasada mediana +0.0000, IC 95 % [-0.0977, +0.0596], fracción > 0 (MATLAB mejor): 0.197
+  1 px, radio compatible: 6 pasadas | ganador observado r2, segunda shim, margen 0.0000
+    nulo barajado dentro de volcán (4 permutaciones distintas posibles): p(margen>=obs) 1.000; ganadores {'r2': 1525, 'matlab': 475}
+    nulo barajado global: p(margen>=obs) 1.000; mediana del margen nulo 0.0133; ganadores {'shim': 543, 'matlab': 626, 'r2': 592, 'o1': 239}
+    bootstrap por pasada de (segunda - ganador): mediana +0.0000, IC 95 % [-0.0539, +0.0136], fracción <= 0: 0.440
+    (mejor modelo - MATLAB) observado -0.0044; bootstrap por pasada mediana +0.0000, IC 95 % [-0.0977, +0.0596], fracción > 0 (MATLAB mejor): 0.195
+
+=== POTENCIA (verdad sembrada = MATLAB) sobre 73 escenas de 1 px de O2 con VRP > 0 en las 4 ===
+  sigma control 2-4 px = 0.132: P(MATLAB gana estricto) n=6: 0.38 | n=20: 0.64 | n=50: 0.81 | n=100: 0.93 | n=300: 1.00 | n=1000: 1.00
+  sigma piso (a) grilla = 0.198: P(MATLAB gana estricto) n=6: 0.37 | n=20: 0.60 | n=50: 0.78 | n=100: 0.88 | n=300: 0.99 | n=1000: 1.00
+  sigma 1 px observado (MATLAB) = 0.286: P(MATLAB gana estricto) n=6: 0.33 | n=20: 0.48 | n=50: 0.71 | n=100: 0.80 | n=300: 0.96 | n=1000: 1.00
+  sigma chico 0,05 = 0.050: P(MATLAB gana estricto) n=6: 0.52 | n=20: 0.78 | n=50: 0.94 | n=100: 1.00 | n=300: 1.00 | n=1000: 1.00
+  (azar entre 4 variantes = 0,25; con empates muchas escenas no separan nada porque las variantes coinciden)
