@@ -72,7 +72,8 @@ CANALES = ("tabla", "todo")              # §6.2: con la tabla sola Y con tabla 
 GANANCIA_PLACEBO = 1.2                   # §3, programa §2
 TOL_VRP_EQUIV = 1e-6                     # §4.1: VRP a 1e-6 MW en el runner
 BANDA_RAZON = (0.9, 1.1)                 # §6.2: mediana de la razón de P en las protegidas
-MIN_MUT_LOCAL = 5                        # §6.1: «5 de 5 mutaciones atrapadas por aserción» (LECTURA L2)
+MIN_MUT_LOCAL = 6                        # §6.1: las 6 mutaciones del §4.1 atrapadas (L2, resuelta por D-48: era «5 de 5»)
+TMAX_FILTROS_ARTEFACTO = 278.15          # §7 (L7): isCirrusArtifact (<273,15 K) e isDiffuseFieldArtifact (<278,15 K)
 MIN_CASOS_LOCAL = (1020, 10)             # §4.1: 510 grillas de N con 2 cajas (E1) y los 10 recortes nativos de R2 (E3)
 PARES_S1 = (("P", "Pdef"), ("P", "O"), ("Pdef", "O"))   # §5, S-1: los brazos que comparten la detección del .m
 VOL_ROI = "PuyehueCordonCaulle"          # §7, control positivo de la ROI
@@ -367,10 +368,13 @@ def main(argv=None):
     k_dist = sorted({i for i in oks0 if bool(obj[i].get("pub_prod")) != pub(i, "K")}
                     | {i for i in oks0 if abs((vrp(i, "K") or 0) - (obj[i].get("pc_vrp") or 0)) > 0.001})
     k_dist_prot = [nombre(i) for i in k_dist if obj[i].get("protegida")]
-    k_ok = not k_dist                      # §7: «en todas las pasadas ok» (L18; V750-B toleraba 1 %)
+    # §7 (L18, resuelta por D-48): la tolerancia de V750-B, mismo probe y misma población. Hasta 1 % de pasadas con K
+    # distinto de producción y ninguna protegida; esas pasadas salen de TODOS los brazos y se listan (las diferencias
+    # de máquina entre runners existen: S152, argsort inestable según la CPU)
+    k_ok = len(k_dist) <= AB.MAX_K_DISTINTO * max(1, len(oks0)) and not k_dist_prot
     pr(f"== control K = producción: distintas {len(k_dist)} de {len(oks0)} (protegidas {k_dist_prot or 'ninguna'}): "
        f"{'OK' if k_ok else 'FALLA'}; lista {[nombre(i) for i in k_dist]}")
-    oks = list(oks0)                       # con K distinto la compuerta ya está cerrada
+    oks = [i for i in oks0 if i not in set(k_dist)]   # §7: salen de todos los brazos y se listan arriba
 
     def p2(b, ref, v, canal):
         """Copia de analizar_v750b.p2: e = 1 si la pasada es un error bajo 1 MW; c = e(b) - e(ref) por bloque
@@ -413,13 +417,18 @@ def main(argv=None):
 
     ctrl = {"nulo del contador": nulo_ok, "K = producción": k_ok}
     if censo:
-        # placebo, publicación: el predicado no mira la magnitud salvo VRP > 0
-        pl_dist = [nombre(i) for i in oks if pub(i, "Kx12") != pub(i, "K")]
+        # placebo, publicación (L7, resuelta por D-48): el predicado del tablero mira la magnitud sólo en sus dos
+        # filtros de artefacto (isCirrusArtifact e isDiffuseFieldArtifact), y los dos exigen t_max del record bajo
+        # 278,15 K. Una diferencia K contra K×1,2 con t_max frío la explican esos filtros: se lista y no cierra. Una
+        # con t_max tibio o sin t_max no la explica nada conocido y cierra la compuerta
+        pl_todas = [i for i in oks if pub(i, "Kx12") != pub(i, "K")]
+        pl_frio = [i for i in pl_todas if (rec_k(i, "K").get("t_max_k") or 1e9) < TMAX_FILTROS_ARTEFACTO]
+        pl_dist = [nombre(i) for i in pl_todas if i not in set(pl_frio)]
         ctrl["placebo (publicación)"] = not pl_dist
-        pr(f"== control placebo K×1,2 (publicación): distintas de K {len(pl_dist)} de {len(oks)} "
-           f"{pl_dist[:10]}: {'OK' if not pl_dist else 'FALLA'}"
-           + ("" if not pl_dist else " (el predicado del tablero sí mira la magnitud en sus filtros de artefacto: "
-                                     "isCirrusArtifact e isDiffuseFieldArtifact; ver L7)"))
+        pr(f"== control placebo K×1,2 (publicación): distintas de K {len(pl_todas)} de {len(oks)}; explicadas por los "
+           f"filtros de artefacto del tablero (t_max bajo {TMAX_FILTROS_ARTEFACTO} K) {len(pl_frio)} "
+           f"{[nombre(i) for i in pl_frio][:10]}; sin explicar {len(pl_dist)} {pl_dist[:10]}: "
+           f"{'OK' if not pl_dist else 'FALLA'}")
         # placebo, M con el comparador: d′ es 0 para una ganancia pareja, así que M no lo puede dar por mejor
         pl_m = {}
         for v in VENTANAS:
@@ -554,9 +563,10 @@ def main(argv=None):
         m["E"] = m["E_baja"] + m["E_neg"]
         return m, nadie
 
-    def razon_prot(b, v, canal, exigir_k=True):
-        """§6.2 sobre el conjunto de §5 (L4): protegidas que publican K y el brazo, con VRP de los dos y de MIROVA.
-        exigir_k=False sólo informa (las protegidas que publica el brazo, aunque K no)."""
+    def razon_prot(b, v, canal, exigir_k=False):
+        """§6.2 (L4, resuelta por D-48): mediana de brazo/MIROVA en las protegidas que el brazo publica, con VRP del
+        brazo y de MIROVA mayores que 0, publique K o no: la calibración es de P, y una P que publica al doble donde K
+        calla tiene que fallar. exigir_k=True sólo informa (el subconjunto que publican K y el brazo)."""
         rz = sorted(vrp(i, b) / obj[i]["mirova_vrp"] for i in oks
                     if etiqueta(obj[i], canal) == "prot" and en_ventana(obj[i], v) and pub(i, b)
                     and (pub(i, "K") and vrp(i, "K") > 0 or not exigir_k)
@@ -589,8 +599,8 @@ def main(argv=None):
                    f"{prr['gana']}, pierde {prr['pierde']}) | M razón en protegidas {rz_txt} (n {nrz}) | M comparador "
                    f"{rm} (pares {len(Pm)}, ĝ {det.get('g_hat_factor', '-')}, d′ {det.get('regla_dprima', '-')}, "
                    f"nota «{det.get('nota', '')}») -> {'cumple' if not motivos else 'no cumple: ' + '; '.join(motivos)}")
-                rz2, n2 = razon_prot("P", v, canal, exigir_k=False)
-                pr(f"   razón en protegidas que publica P aunque K no (informa, no decide): "
+                rz2, n2 = razon_prot("P", v, canal, exigir_k=True)
+                pr(f"   razón en protegidas que publican K y P (informa, no decide): "
                    f"{'-' if rz2 is None else f'{rz2:.3f}'} (n {n2})")
                 pl = decidir_m([dict(p, d=p["k"] * GANANCIA_PLACEBO) for p in Pm], comparador=False)[0]
                 pr(f"   placebo K×1,2 SIN comparador (informa, como evaluar_d25.py): {pl}")

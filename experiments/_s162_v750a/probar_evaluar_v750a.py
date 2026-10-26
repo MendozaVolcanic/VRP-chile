@@ -44,10 +44,13 @@ porque cambió el cráter con el mismo umbral; un negativo lejano que sólo P-si
   E23 sombra con P2 BLOQUEA (neto +2 en 6 bloques): CUMPLE (LECTURA: §6.3 sólo excluye PIERDE).
 Agregados tras el verificador limpio (verificador/INFORME.md, VA-01 a VA-08), cada uno fija una regla que una rotura de
 una línea dejaba pasar:
-  E28 una sola pasada no protegida con K distinto de producción: compuerta cerrada (L18).
+  E28 una sola pasada no protegida con K distinto de producción entre 109: control OK (hasta 1 %, L18 por D-48), la
+      pasada sale de los brazos (P2 en T pasa de 6 a 5 bloques) y se lista; CUMPLE.
   E29 K publica igual pero su VRP difiere 0,01 MW de producción: compuerta cerrada.
-  E30 K de 9,0 MW con t_max 270 K: K x 1,2 cae en el filtro de cirro del tablero; el control del placebo cae (L7).
-  E31 12 protegidas que K no publica y P publica al doble: no entran a la razón (L4); CUMPLE.
+  E30 K de 9,0 MW con t_max 270 K: K x 1,2 cae en el filtro de cirro del tablero; la diferencia la explica el filtro
+      (t_max bajo 278,15 K), se lista y el control no cae (L7 por D-48); CUMPLE.
+  E31 12 protegidas que K no publica y P publica al doble: entran a la razón (L4 por D-48): NO CUMPLE por M razón 2,0;
+      la razón sobre las que publican K y P (1,0) se imprime al lado.
   E32 y E33 P = 0,85 y 1,15 x MIROVA: NO CUMPLE por la razón (bordes de la banda).
   E34 2 pasadas sin gránulo del generador: cobertura INSUFICIENTE.
   E35 y E36 con 10 negativos de relleno, 1 pasada en error: SUFICIENTE si no es protegida, INSUFICIENTE si lo es.
@@ -61,6 +64,10 @@ una línea dejaba pasar:
   E47 sombra con una protegida sólo del OCR que P pierde: NO CUMPLE en tabla más OCR, no con la tabla sola.
   E48 P = 1,3 x MIROVA sólo en T: NO CUMPLE por la razón en T y no en O.
   E49 sombra sin protegidas: CUMPLE marcado «SIN PROTEGIDAS».
+Agregados al resolver L2, L4, L7 y L18 por D-48 (relevo VIIRS 750, 2026-10-25):
+  E50 dos pasadas no protegidas con K distinto entre 110 (más del 1 %): compuerta cerrada (L18).
+  E51 prueba local con 5 mutaciones atrapadas: §6.1 no se cumple (L2: son 6 de 6).
+  E52 una sola protegida con el VRP de K distinto de producción entre 110 (bajo el 1 %): cierra igual (L18).
 La población base suma para el S-1: celda de Cordón Caulle en el pase 2 y la zona 2 (el pase 1 y la zona 1 con otro
 umbral), una alerta de Tupungatito cuyo NTI cruza entre los umbrales pero el ETI no, y un diagnóstico mal formado.
 Una caída nativa del analizador (código fuera de 0, 3, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
@@ -246,7 +253,7 @@ def base(p_de=None, negs_T="gana", negs_O="gana", extra=None, pcc_pdef=None, gem
             pb.pasada(("Lascar", "Villarrica")[n % 2], f"2026-08-{10 + n:02d} 05:00", "neg_limpio", K=None, P=None,
                       gemelo=0.2)
     for n in range(relleno):
-        pb.pasada("Villarrica", f"2026-08-{1 + n:02d} 04:00", "neg_limpio", K=None, P=None)
+        pb.pasada("Villarrica", f"2026-{8 + n // 28:02d}-{1 + n % 28:02d} 04:00", "neg_limpio", K=None, P=None)
     if extra:
         extra(pb)
     return pb
@@ -325,6 +332,13 @@ def _k_distinto_uno(pb):
     pb.objs[j]["pub_prod"] = False
 
 
+def _k_distinto_dos(pb):
+    """Dos pasadas no protegidas con K distinto de producción: más del 1 % de 110 (L18)."""
+    js = [i for i, o in enumerate(pb.objs) if o["lab"] == "neg_limpio" and o["pub_prod"]][:2]
+    for j in js:
+        pb.objs[j]["pub_prod"] = False
+
+
 def _pc_vrp_distinto(pb):
     """K publica igual que producción pero su VRP difiere en 0,01 MW (más que 0,001)."""
     pb.objs[0]["pc_vrp"] = round(pb.objs[0]["pc_vrp"] + 0.01, 3)
@@ -336,7 +350,7 @@ def _placebo_publica_distinto(pb):
 
 
 def _protegidas_que_k_no(pb):
-    """12 protegidas en O que K no publica y P publica al doble de MIROVA: no entran a la razón de §6.2 (L4)."""
+    """12 protegidas en O que K no publica y P publica al doble de MIROVA: entran a la razón de §6.2 (L4 por D-48)."""
     for n in range(12):
         pb.pasada(("Lascar", "Villarrica")[n % 2], f"2026-08-{10 + n:02d} 06:00", "pos", K=None, P=4.0,
                   mirova_vrp=2.0)
@@ -472,17 +486,29 @@ ESCENARIOS = {
     "E27": dict(pob=lambda: base(extra=_o_otra_celda), rc=6,
                 tiene=[("== §6.1 equivalencia: NO SE CUMPLE", ["Villarrica 2026-07-11", "decidida por la escena"])],
                 no_tiene=["== §6 censo:"]),
-    "E28": dict(pob=lambda: base(extra=_k_distinto_uno), rc=3,
-                tiene=[("== control K = producción", ["FALLA"]), ("== compuerta del veredicto", ["CERRADA"])],
-                no_tiene=["== §6 censo:"]),
+    "E28": dict(pob=lambda: base(relleno=60, extra=_k_distinto_uno), rc=0,
+                tiene=[("== control K = producción", ["distintas 1 de 109", "OK", "Lascar 2026-04-20"]),
+                       ("== §6.2 ventana T, canal tabla", ["P2 contra K GANA (neto -5, bloques 5"]),
+                       ("== §6 censo: CUMPLE", [])]),
+    "E50": dict(pob=lambda: base(relleno=61, extra=_k_distinto_dos), rc=3,
+                tiene=[("== control K = producción", ["distintas 2 de 110", "FALLA"]),
+                       ("== compuerta del veredicto", ["CERRADA"])], no_tiene=["== §6 censo:"]),
     "E29": dict(pob=lambda: base(extra=_pc_vrp_distinto), rc=3,
                 tiene=[("== control K = producción", ["FALLA"])], no_tiene=["== §6 censo:"]),
-    "E30": dict(pob=lambda: base(extra=_placebo_publica_distinto), rc=3,
-                tiene=[("== control placebo K×1,2 (publicación)", ["FALLA", "Lascar 2026-07-31 05:30"]),
-                       ("== compuerta del veredicto", ["CERRADA"])], no_tiene=["== §6 censo:"]),
+    "E30": dict(pob=lambda: base(extra=_placebo_publica_distinto), rc=0,
+                tiene=[("== control placebo K×1,2 (publicación)", ["explicadas por los filtros de artefacto del tablero "
+                                                                   "(t_max bajo 278.15 K) 1", "Lascar 2026-07-31 05:30",
+                                                                   "sin explicar 0", "OK"]),
+                       ("== compuerta del veredicto", ["ABIERTA"]), ("== §6 censo: CUMPLE", [])]),
     "E31": dict(pob=lambda: base(extra=_protegidas_que_k_no), rc=0,
-                tiene=[("== §6 censo: CUMPLE", []),
-                       ("   razón en protegidas que publica P aunque K no", ["2.000"])]),
+                tiene=[("== §6 censo: NO CUMPLE", ["O/tabla: M razón 2.000"]),
+                       ("   razón en protegidas que publican K y P", ["1.000"])],
+                no_tiene=["== §6 censo: CUMPLE"], no_contiene=[("== §6 censo: NO CUMPLE", "T/tabla: M razón")]),
+    "E52": dict(pob=lambda: base(relleno=61, extra=_pc_vrp_distinto), rc=3,
+                tiene=[("== control K = producción", ["distintas 1 de 110", "FALLA"]),
+                       ("== compuerta del veredicto", ["CERRADA"])], no_tiene=["== §6 censo:"]),
+    "E51": dict(pob=lambda: base(), verde=_sin_lineas("recorte "), rc=6,
+                tiene=[("== §6.1 equivalencia: NO SE CUMPLE", ["atrapadas 5", "mínimo 6"])], no_tiene=["== §6 censo:"]),
     "E32": dict(pob=lambda: base(p_de=lambda m, k: 0.85 * m), rc=0,
                 tiene=[("== §6 censo: NO CUMPLE", ["M razón 0.850"])], no_tiene=["== §6 censo: CUMPLE"]),
     "E33": dict(pob=lambda: base(p_de=lambda m, k: 1.15 * m), rc=0,

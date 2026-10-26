@@ -97,7 +97,8 @@ P = para cada pasada nocturna de VIIRS 750 y cada volcán Tier A:
 - **P2** E = alertas bajo 1 MW sin publicar + negativos limpios publicados; P contra K por la prueba de signos por
   bloque noche-volcán (D-45, `regla_signos_p2` de `experiments/_s157_prereg_d25/evaluar_d25.py`, tag
   `s161-d25-lectura`).
-- **M** magnitud: razón brazo/MIROVA en las alertas que publican los dos, con el comparador de ganancia pareja
+- **M** magnitud: razón brazo/MIROVA en las alertas que publican los dos (el brazo y MIROVA; L4, ver §10b), con el
+  comparador de ganancia pareja (que se arma sobre las alertas que publican K y el brazo)
   (D-28, D-30, D-32: `evaluar_d25.py` del mismo tag) y el placebo K×1,2: M sólo dice «P mide mejor» si separa a P de
   K **y** de K×1,2.
 - Todo por tramo de 10° de cenit, por volcán y por canal. Curva de razón por cenit comparada contra la de MIROVA
@@ -122,13 +123,18 @@ P = para cada pasada nocturna de VIIRS 750 y cada volcán Tier A:
 
 P se propone a Nicolás para producción (A45) si y sólo si:
 
-1. **Equivalencia** (§4.1): 0 pasadas distintas fuera de la banda de triangulación, en local y en el runner; 5 de 5
-   mutaciones atrapadas por aserción.
+1. **Equivalencia** (§4.1): 0 pasadas distintas fuera de la banda de triangulación, en local y en el runner; **6 de 6**
+   mutaciones atrapadas por aserción (las seis del §4.1) y la de control como caída. (L2, resuelta por D-48: este punto
+   decía «5 de 5», un resto de cuando la prueba tenía cinco.)
 2. **Censo** (§4.2), en T y en O, con la tabla sola **y** con tabla más OCR:
    - P1 = 0 (ninguna protegida que K publica y P no; ninguna protegida de MIROVA que P no publique, fuera de las que K
      tampoco publica, que se listan);
    - P2 de P contra K: GANA o EMPATE (no PIERDE ni BLOQUEA);
-   - M: mediana de la razón de P entre 0,9 y 1,1 en las protegidas, y el comparador separa a P de K×1,2.
+   - M: mediana de la razón P/MIROVA entre 0,9 y 1,1 (bordes incluidos) en **todas las protegidas que P publica**, con
+     VRP de P y de MIROVA mayores que 0, publique K o no; y el comparador separa a P de K×1,2. (L4, resuelta por D-48:
+     la calibración que se exige es la de P. Si P publica al doble de MIROVA justo en las protegidas que K no ve, eso
+     es un defecto de P, y una razón restringida a las que también publica K lo escondería. La razón sobre las que
+     publican K y P, que es el conjunto del comparador, se imprime al lado y no decide.)
 3. **Sombra** (§4.3): P1 = 0; si hay sustrato, P2 no PIERDE.
 4. Los controles de §7 en verde.
 
@@ -140,12 +146,23 @@ V750-D (Kgeo) pasa a tener su propio A/B (programa §3).
 
 | control | qué tiene que dar |
 |---|---|
-| K = producción | publica igual y `pc.vrp_mw` a 0,001 MW en todas las pasadas ok |
+| K = producción | publica igual y `pc.vrp_mw` a 0,001 MW; se toleran hasta 1 % de pasadas ok distintas y ninguna protegida, que salen de todos los brazos y se listan por nombre (L18, resuelta por D-48: la tolerancia de V750-B, mismo probe y misma población; con cero, una diferencia de máquina entre runners como la de S152 cerraría la compuerta sin defecto del paquete) |
 | P = O | §4.1 en el runner |
 | control positivo de la ROI | P-def pierde al menos una protegida de Cordón Caulle |
-| placebo | K×1,2: P1 y P2 iguales a K por construcción en la publicación (el predicado no mira la magnitud salvo VRP > 0); M lo tiene que separar de K |
+| placebo | K×1,2: en la publicación, igual a K salvo donde los filtros de artefacto del tablero miran la magnitud; M lo tiene que separar de K (ver la nota de abajo) |
 | nulo | K contra K (gemelo en otro proceso del mismo runner) da P2 EMPATE o SIN SUSTRATO y M sin separación |
 | cobertura | §8.1 del programa: lista vacía o explicada |
+
+**Nota del placebo (L7, resuelta por D-48).** La frase que estaba en la tabla, «el predicado no mira la magnitud salvo
+VRP > 0», es falsa para el tablero de hoy: `isCirrusArtifact` (`frontend/index.html:1336-1340`: `t_max_k` bajo 273,15 K
+y VRP de cumbre sobre 10 MW) e `isDiffuseFieldArtifact` (`:1355-1363`: `t_max_k` bajo 278,15 K, 100 píxeles o más, VRP
+de 50 MW o más y menos de 1 MW por píxel) miran la magnitud, así que un K de 9,0 MW con `t_max` 270 K publica y el mismo
+por 1,2 no (verificador del analizador, VA-02). Físicamente son los filtros del tablero contra el cirro frío y el campo
+difuso sobre fondo gélido. El control queda como compuerta, con esta forma: una diferencia de publicación K contra
+K×1,2 en una pasada cuyo record de K tiene `t_max_k` bajo 278,15 K la explican esos dos filtros (los dos exigen ese
+`t_max`), se lista por nombre y no cierra; cualquier otra diferencia cierra. Con el predicado de hoy la segunda clase no
+se puede producir: esa mitad del control sólo atraparía un filtro nuevo del tablero que mire la magnitud (se declara en
+`LECTURAS_EVALUAR_V750A.md`, A116).
 
 ## 8. Predicciones (para poder fallar)
 
@@ -172,6 +189,23 @@ pierde contra P** en P2. Kgeo: cambia 7 a 13 de ~290 publicaciones de K, todas h
 - La ROI (V750-B), el diurno (V750-E), VIIRS 375 y MODIS.
 - No cambia la vara: lectura A, regla SN y corte de 1 MW quedan como están.
 - La adopción misma: la decide Nicolás con los resultados en la mano (A45).
+
+## 10b. Lecturas resueltas bajo D-48 (2026-10-25)
+
+Nicolás (2026-10-24, D-48): «sobre las decisiones mías haz lo que tú recomiendes». La sesión VIIRS 750 2 resolvió con
+su recomendación las cuatro lecturas que el analizador dejó para el sello (`LECTURAS_EVALUAR_V750A.md`); quedan
+informadas a Nicolás y son revocables antes del sello:
+
+| lectura | decisión | por qué |
+|---|---|---|
+| L2 | §6.1 exige 6 de 6 mutaciones (no 5 de 5) | son las seis del §4.1; el «5» era un resto |
+| L4 | razón de M sobre todas las protegidas que P publica | revierte la lectura que tomó el analizador tras VA-03: la vara es la calibración de P; la otra se imprime al lado |
+| L7 | placebo de publicación: las diferencias con `t_max` de K bajo 278,15 K se listan y no cierran | la premisa de §7 era falsa (VA-02); esos dos filtros son los únicos que miran la magnitud |
+| L18 | K = producción con la tolerancia de V750-B (1 %, ninguna protegida) | revierte la de cero que tomó el analizador tras VA-01: mismo probe y misma población que V750-B, y los runners tienen diferencias de máquina (S152) |
+
+Cada una cambia el analizador y su prueba en el mismo commit; los escenarios E28, E30, E31, E50, E51 y E52 de
+`probar_evaluar_v750a.py` las fijan y salen rojos contra el analizador anterior (E28, E30, E31, E51; E50 y E52 vigilan
+el tope y la protegida).
 
 ## 11. Pendiente antes del sello
 

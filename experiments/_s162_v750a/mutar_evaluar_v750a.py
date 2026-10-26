@@ -11,7 +11,9 @@ tiene que salir CAÍDA).
 La copia mutada vive en esta misma carpeta con otro nombre (`_mut_<id>_evaluar_v750a.py`), así resuelve las mismas
 rutas que el original, y se borra al terminar. Las corridas van en paralelo (cada una con su carpeta de destino).
 M29 a M52 se agregaron tras el verificador limpio (VA-01 a VA-07): cada una rompe una regla que sus
-roturas V01 a V41 mostraron sin vigilar.
+roturas V01 a V41 mostraron sin vigilar. M53 a M56 (y M15, M29, M50, M52 reescritas) son de la resolución de L2, L4, L7
+y L18 por D-48 (relevo VIIRS 750, 2026-10-25). La antigua M50 («el placebo de publicación siempre pasa») ya no se puede
+atrapar: con el predicado de hoy toda diferencia K contra K×1,2 tiene t_max frío y se explica (A116, LECTURAS).
 Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4]
 Salida: 0 si los controles salen como deben y todas las mutaciones quedan ATRAPADAS; 1 si no.
 """
@@ -59,7 +61,7 @@ MUTACIONES = {
             'ctrl["nulo K contra K gemelo"] = g_reg in ("EMPATE", "SIN SUSTRATO") and',
             'ctrl["nulo K contra K gemelo"] = g_reg in ("EMPATE", "SIN SUSTRATO", "PIERDE") and'),
     "M15": ("§7: K = producción siempre pasa",
-            "k_ok = not k_dist ", "k_ok = True "),
+            "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO", "k_ok = True or len(k_dist) <= AB.MAX_K_DISTINTO"),
     "M16": ("cobertura: el archivo de pasadas sin gránulo se acepta sin comprobar que sea de esta lista",
             "cob_ok = sg_ok and len(sin) + len(sin_g)", "cob_ok = len(sin) + len(sin_g)"),
     "M17": ("compuerta: con controles caídos igual se lee el veredicto",
@@ -89,8 +91,8 @@ MUTACIONES = {
             "s1_prot.add(nombre(i))", "pass"),
     "M28": ("P-sinfiltro (L11, informa): la distancia no se neutraliza",
             'r["distance_class"] = "summit"', "pass"),
-    "M29": ("§7 (L18): K = producción sólo mira las protegidas",
-            "k_ok = not k_dist ", 'k_ok = not [i for i in k_dist if obj[i].get("protegida")] '),
+    "M29": ("§7 (L18): K = producción sólo mira las protegidas (sin el tope del 1 %)",
+            "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO * max(1, len(oks0)) and not k_dist_prot", "k_ok = not k_dist_prot"),
     "M30": ("§7: el VRP de K contra producción con tolerancia de 1000 MW",
             'abs((vrp(i, "K") or 0) - (obj[i].get("pc_vrp") or 0)) > 0.001',
             'abs((vrp(i, "K") or 0) - (obj[i].get("pc_vrp") or 0)) > 1000'),
@@ -134,12 +136,20 @@ MUTACIONES = {
             'PARES_S1 = (("P", "Pdef"), ("P", "O"), ("Pdef", "O"))', 'PARES_S1 = (("P", "Pdef"), ("P", "O"))'),
     "M49": ("§6.1 (L12): la marca «decidida por la escena» nunca sale en la equivalencia",
             "if decidida_por_escena(dP, dO) else \"\")", "if False else \"\")"),
-    "M50": ("§7 (L7): el control de publicación del placebo siempre pasa",
-            'ctrl["placebo (publicación)"] = not pl_dist', 'ctrl["placebo (publicación)"] = True'),
+    "M50": ("§7 (L7): ninguna diferencia del placebo se explica por los filtros (todas cierran)",
+            "< TMAX_FILTROS_ARTEFACTO]", "< 0]"),
     "M51": ("§6.3 (L19): la sombra sin protegidas no lo dice",
             '+ ("; SIN PROTEGIDAS: P1 no pudo vetar" if not n_prot else "")', '+ ""'),
-    "M52": ("§6.2 (L4): la razón de M no exige que K publique",
-            'and (pub(i, "K") and vrp(i, "K") > 0 or not exigir_k)', "and (True or not exigir_k)"),
+    "M52": ("§6.2 (L4 por D-48): la razón de M exige que K publique",
+            "def razon_prot(b, v, canal, exigir_k=False):", "def razon_prot(b, v, canal, exigir_k=True):"),
+    "M53": ("§7 (L18): una protegida con K distinto ya no cierra si cabe en el 1 %",
+            "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO * max(1, len(oks0)) and not k_dist_prot", "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO * max(1, len(oks0))"),
+    "M54": ("§7 (L18): las pasadas con K distinto no salen de los brazos",
+            "oks = [i for i in oks0 if i not in set(k_dist)]", "oks = list(oks0)"),
+    "M55": ("§7 (L18): tolerancia de K = producción en 5 % en vez de 1 %",
+            "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO * max", "k_ok = len(k_dist) <= 0.05 * max"),
+    "M56": ("§6.1 (L2 por D-48): mínimo de 5 mutaciones atrapadas en vez de 6",
+            "MIN_MUT_LOCAL = 6 ", "MIN_MUT_LOCAL = 5 "),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),
