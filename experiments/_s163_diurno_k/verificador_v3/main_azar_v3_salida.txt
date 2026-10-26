@@ -1,0 +1,28 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+reflejo probable (1.13): 17 pasadas; filas del estudio dentro de las ventanas sin pasada: 0 []
+COMPUERTAS: inválido 0, indecidible 0
+cobertura diurna: {'VIIRS375': {'pasadas_diurnas': 2547, 'sin_record': 0, 'p_sup': 0.0011027919466183107}, 'VIIRS750': {'pasadas_diurnas': 2499, 'sin_record': 0, 'p_sup': 0.005918999529652914}}
+noche, records en un solo brazo: {'solo_control': 0, 'solo_brazo': 0}
+R1 (protegidas que el control publica y el brazo no): 0
+VIIRS375: P2 PIERDE (neto +126, B 132, p_gana 1.0000, p_pierde 0.0001) | protegidas 20 de 26 | alertas<1MW 6 de 10 | negativos 132 de 2246 (Q_d 0.0588) | Q_n 0.0623 (1606) | D True (26 de 36 alertas) | neg>=1MW 0 | pub en «otra» 11 | razón mag 1.0
+   -> DECIDE NICOLÁS CON M4 (caso e-ii, opción e-ii)
+   I6: {'a': {'resultado': 'GANA', 'bloques': 64, 'tocadas': 66}, 'b': {'resultado': 'SIN SUSTRATO', 'bloques': 3, 'tocadas': 3}, 'c_falsos': 1}
+   M4 por ventana: {'W2': {'P': 11, 'P_obs': 11, 'amb': 0, 'amb_obs': 1, 'neg_pub': 33, 'neg_obs': 485}, 'W3': {'P': 1, 'P_obs': 1, 'amb': 1, 'amb_obs': 2, 'neg_pub': 18, 'neg_obs': 386}, 'W4': {'P': 3, 'P_obs': 5, 'amb': 4, 'amb_obs': 4, 'neg_pub': 30, 'neg_obs': 490}, 'W5': {'P': 3, 'P_obs': 4, 'amb': 1, 'amb_obs': 2, 'neg_pub': 33, 'neg_obs': 525}, 'W6': {'P': 2, 'P_obs': 5, 'amb': 0, 'amb_obs': 1, 'neg_pub': 18, 'neg_obs': 360}}
+   protegidas recuperadas publicadas con 1 MW o más: 20; negativos publicados por elevación solar: {'0-30': 60, '30-60': 70, '>60': 2}
+VIIRS750: P2 PIERDE (neto +124, B 113, p_gana 1.0000, p_pierde 0.0001) | protegidas 4 de 6 | alertas<1MW 0 de 0 | negativos 124 de 2433 (Q_d 0.0510) | Q_n 0.0437 (2382) | D True (4 de 6 alertas) | neg>=1MW 0 | pub en «otra» 0 | razón mag 1.0
+   -> DECIDE NICOLÁS CON M4 (caso e-ii, opción e-ii)
+   I6: {'a': {'resultado': 'GANA', 'bloques': 58, 'tocadas': 62}, 'b': {'resultado': 'SIN SUSTRATO', 'bloques': 0, 'tocadas': 0}, 'c_falsos': 2}
+   M4 por ventana: {'W2': {'P': 1, 'P_obs': 1, 'amb': 0, 'amb_obs': 0, 'neg_pub': 31, 'neg_obs': 608}, 'W3': {'P': 0, 'P_obs': 0, 'amb': 0, 'amb_obs': 0, 'neg_pub': 16, 'neg_obs': 405}, 'W4': {'P': 2, 'P_obs': 2, 'amb': 0, 'amb_obs': 0, 'neg_pub': 22, 'neg_obs': 509}, 'W5': {'P': 0, 'P_obs': 1, 'amb': 0, 'amb_obs': 0, 'neg_pub': 37, 'neg_obs': 529}, 'W6': {'P': 1, 'P_obs': 2, 'amb': 0, 'amb_obs': 0, 'neg_pub': 18, 'neg_obs': 382}}
+   protegidas recuperadas publicadas con 1 MW o más: 4; negativos publicados por elevación solar: {'0-30': 44, '30-60': 78, '>60': 2}
+GLOBAL (principal): DECIDE NICOLÁS CON M4
+VARIANTES: {'tabla': 'DECIDE NICOLÁS CON M4', 'sin_W2': 'DECIDE NICOLÁS CON M4', 'sin_reflejo': 'DECIDE NICOLÁS CON M4', 'otra_como_negativo': 'DECIDE NICOLÁS CON M4'}
+VEREDICTO FINAL (§6.4): DECIDE NICOLÁS CON M4 
+
+INFORMATIVO (no decide): {'minimas_SE': 'DECIDE NICOLÁS CON M4', 'minimas_original': 'DECIDE NICOLÁS CON M4', 'minimas_SN_0,04': 'DECIDE NICOLÁS CON M4', 'con_filtro_reflejo_12': 'DECIDE NICOLÁS CON M4'}
+  ¿alguna variante de mínimas cambia el veredicto principal (DECIDE NICOLÁS CON M4)? {'minimas_SE': False, 'minimas_original': False, 'minimas_SN_0,04': False, 'con_filtro_reflejo_12': False}
+filtro de reflejo de 12°: apaga 0 publicaciones diurnas del brazo; 0 publicaciones diurnas sin ángulos
+  con filtro VIIRS375: DECIDE NICOLÁS CON M4 (caso e-ii), negativos 132 de 2246, protegidas 20 de 26
+  VIIRS375 desproporción (1.13 a) sobre lo nuestro): {'consistente': 128, 'desproporcionada': 15, 'aislada': 26}
+  con filtro VIIRS750: DECIDE NICOLÁS CON M4 (caso e-ii), negativos 124 de 2433, protegidas 4 de 6
+  VIIRS750 desproporción (1.13 a) sobre lo nuestro): {'consistente': 73, 'aislada': 52, 'desproporcionada': 3}
+noche, records en los dos brazos con otros campos distintos (informativo, V-N5): 0 []

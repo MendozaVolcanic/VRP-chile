@@ -176,6 +176,8 @@ def test_i6_juicio_de_placebos():
     assert ev.juzgar_i6("EMPATE", 5, 0) != []                # con sustrato tiene que ver la mejora
     assert ev.juzgar_i6("GANA", 9, 7) == []                  # dos colas: hasta 10 % por sorteo (V-N3)
     assert ev.juzgar_i6("GANA", 9, 8) != []                  # P(Bin(40; 0,10) >= 8) = 0,042
+    assert ev.juzgar_i6("GANA", 9, 7, 4) == []
+    assert ev.juzgar_i6("GANA", 9, 7, 5) != []               # V3-4: 5 GANA de 40 ya falla aunque la suma no
 
 
 def test_i4_cota_binomial():
@@ -668,3 +670,30 @@ def test_huella_ignora_volatiles_y_diagnosticos():
     assert ev.huella_record(dict(base, processed_utc="x", first_processed_utc="y", regimen={"a": 1},
                                  diag_mu_deti=0.1)) == h
     assert ev.huella_record(dict(base, final_hotspot_lat=-23.38)) != h
+
+
+def test_completo_otra_como_negativo_incluye_falsos_positivos():
+    # V3-1: el escenario del verificador v2 (una protegida y publicaciones en pasadas FALSO_POSITIVO diurnas)
+    c = Completa().protegida(datetime(2026, 7, 25, 16, 0))
+    for h in (17, 18, 19):
+        ins = datetime(2026, 7, 26 + (h - 17), h, 30)
+        c.filas.append(fila("Isluga", V375, ins, "FALSO_POSITIVO", 0.5))
+        c.rb.append(rec("Isluga", V375, ins, pub=True, disp=0.3, diag=True))
+    r = c.correr()
+    assert r["principal"]["global"] == "ADOPTAR"
+    assert r["variantes"]["otra_como_negativo"] == "NO ADOPTAR"
+    assert r["final"] == "DECIDE NICOLÁS"
+
+
+def test_i6_cuenta_los_gana_del_placebo_simetrico():
+    # V3-4: el tope propio de GANA necesita que el conteo de GANA sea el de correr las semillas a mano, y que en esta
+    # escena pueda ser distinto de cero (25 bloques con negativos publicados y sin publicar).
+    import evaluador_comun as ec
+    e = Escena().base()
+    for d in range(1, 26):
+        for h, pub in ((14, True), (15, True), (19, False), (20, False)):
+            e.dia(VOLS[(d + 3) % 11], V375, d, hora=h, pub_b=pub)
+    r = e.evaluar()
+    excl = lambda f: not (f["es_dia"] and f["pasada"].sensor_bucket == V375)  # noqa: E731
+    a_mano = sum(ec.placebo_p2(r["T"], B, "c", 1.0, sem, excluir=excl)[0] == "GANA" for sem in ev.SEMILLAS_C)
+    assert a_mano >= 1 and r["i6"][V375]["c_gana"] == a_mano

@@ -48,6 +48,9 @@ SEMILLAS_C = tuple(range(161, 201))      # 40 semillas del placebo simétrico
 # Verificador v2, V-N3: cada sorteo del placebo c es falso si da GANA o PIERDE, dos pruebas de una cola al 5 %, así que
 # la tasa nominal por sorteo es de hasta 10 % (medida: 7,2 a 8,3 %). P(Bin(40; 0,10) >= 8) = 0,042: con 8 o más falla.
 MAX_FALSOS_C = 7
+# Verificador v3, V3-4: lo que lleva a adoptar es el lado GANA, y la suma deja pasar 7 GANA y 0 PIERDE. Tope propio
+# para GANA: P(Bin(40; 0,05) >= 5) = 0,048, con 5 o más falla.
+MAX_GANA_C = 4
 FRACCION_A = 0.5
 INVALIDO, INDECIDIBLE = "INVÁLIDO POR INSTRUMENTO", "INDECIDIBLE"
 ADOPTAR, NO_ADOPTAR, SIN_CAMBIO = "ADOPTAR", "NO ADOPTAR", "SIN CAMBIO"
@@ -140,13 +143,16 @@ def veredicto_final(principal, variantes):
     return principal, ""
 
 
-def juzgar_i6(res_a, bloques_a, falsos_c):
-    """§5 I6: placebo a tiene que dar GANA con 5 bloques o más; el simétrico no puede dar 5 falsos o más de 40."""
+def juzgar_i6(res_a, bloques_a, falsos_c, gana_c=0):
+    """§5 I6: placebo a tiene que dar GANA con 5 bloques o más; el simétrico no puede dar 8 falsos (GANA o PIERDE) o
+    más de 40, ni 5 GANA o más."""
     prob = []
     if bloques_a >= MIN_BLOQUES_PLACEBO and res_a != "GANA":
         prob.append("placebo a: %s con %d bloques (tenía que dar GANA)" % (res_a, bloques_a))
     if falsos_c > MAX_FALSOS_C:
         prob.append("placebo c: %d de %d con GANA o PIERDE (máximo %d)" % (falsos_c, len(SEMILLAS_C), MAX_FALSOS_C))
+    if gana_c > MAX_GANA_C:
+        prob.append("placebo c: %d de %d con GANA (máximo %d)" % (gana_c, len(SEMILLAS_C), MAX_GANA_C))
     return prob
 
 
@@ -365,13 +371,14 @@ def compuerta_i6(T, brazo, s):
     excl = lambda f, s=s: not _sensor_dia(f, s)  # noqa: E731
     res_a, det_a = ec.placebo_p2(T, brazo, "a", FRACCION_A, 161, excluir=excl)
     res_b, det_b = ec.placebo_p2(T, brazo, "b", FRACCION_A, 161, excluir=excl)
-    falsos = 0
+    falsos = gana = 0
     for sem in SEMILLAS_C:
         res_c, _ = ec.placebo_p2(T, brazo, "c", 1.0, sem, excluir=excl)
         falsos += res_c in ("GANA", "PIERDE")
+        gana += res_c == "GANA"
     return {"a": {"resultado": res_a, "bloques": det_a["B"], "tocadas": det_a["tocadas"]},
             "b": {"resultado": res_b, "bloques": det_b["B"], "tocadas": det_b["tocadas"]},
-            "c_falsos": falsos, "problemas": juzgar_i6(res_a, det_a["B"], falsos)}
+            "c_falsos": falsos, "c_gana": gana, "problemas": juzgar_i6(res_a, det_a["B"], falsos, gana)}
 
 
 def r1_perdidas(T, control, brazo):
@@ -390,6 +397,11 @@ def evaluar(pasadas, recs_por_lado, control, brazo, opcion, p_sup, sha, ventanas
     p_sup = dict(p_sup_override or p_sup)
     excl_d, excl_k = set(excluir_dias), set(excluir_claves)
     pas = [p for p in pasadas if p.instante.strftime("%Y-%m-%d") not in excl_d]
+    if otra_como_negativo:
+        # Verificador v3, V3-1: en la variante (d) también las pasadas FALSO_POSITIVO diurnas de la tabla cuentan como
+        # RUTINA (MIROVA no alertó en el radio), así que lo que el brazo publique ahí pesa como publicación de más.
+        pas = [p._replace(estado="rutina") if (p.estado == "fp" and p.fuente == "CONS" and p.sensor_bucket in SENSORES_DIA
+                                               and es_dia_vol(p.volcano, p.instante)) else p for p in pas]
     recs = {lado: [r for r in rs if r["dt"].strftime("%Y-%m-%d") not in excl_d] for lado, rs in recs_por_lado.items()}
     rc, rb = recs[control], recs[brazo]
     marcadas = [_Marcada(p, es_dia_vol(p.volcano, p.instante)) for p in pas]

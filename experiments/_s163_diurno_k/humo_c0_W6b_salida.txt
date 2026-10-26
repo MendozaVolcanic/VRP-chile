@@ -1,4 +1,4 @@
-# Prueba de humo del evaluador (v3) sobre una corrida REAL del A/B sobre C0 (W6b, run 39097155412, rama s151-ab-diurno/39097155412),
+# Prueba de humo del evaluador (v3.1) sobre una corrida REAL del A/B sobre C0 (W6b, run 39097155412, rama s151-ab-diurno/39097155412),
 # con --recorte 2026-10-08,2026-10-14. Lo esperado: INVALIDO por I1 (C0 tiene el Test 1 y no es K) y metricas distintas de cero.
 # Comando: python -I experiments/_s163_diurno_k/evaluar_diurno_k.py --raiz <W6b> --brazos _s151_ab_diurno_control,_s151_ab_diurno_on --ref <ref 047bd5692> --sha-codigo eb97779f4c0e1a40df20182a60921c1778bced1a --opcion-e e-ii --recorte 2026-10-08,2026-10-14
 [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
@@ -10,12 +10,12 @@ noche, records en un solo brazo: {'solo_control': 0, 'solo_brazo': 0}
 R1 (protegidas que el control publica y el brazo no): 0
 VIIRS375: P2 PIERDE (neto +157, B 58, p_gana 1.0000, p_pierde 0.0001) | protegidas 4 de 4 | alertas<1MW 1 de 1 | negativos 158 de 174 (Q_d 0.9080) | Q_n 0.8939 (132) | D False (5 de 5 alertas) | neg>=1MW 70 | pub en «otra» 27 | razón mag 0.8961480075901328
    -> NO ADOPTAR (caso d, opción e-ii)
-   I6: {'a': {'resultado': 'GANA', 'bloques': 45, 'tocadas': 79}, 'b': {'resultado': 'SIN SUSTRATO', 'bloques': 0, 'tocadas': 0}, 'c_falsos': 3}
+   I6: {'a': {'resultado': 'GANA', 'bloques': 45, 'tocadas': 79}, 'b': {'resultado': 'SIN SUSTRATO', 'bloques': 0, 'tocadas': 0}, 'c_falsos': 3, 'c_gana': 1}
    M4 por ventana: {'W6': {'P': 4, 'P_obs': 4, 'amb': 1, 'amb_obs': 1, 'neg_pub': 158, 'neg_obs': 174}}
    protegidas recuperadas publicadas con 1 MW o más: 4; negativos publicados por elevación solar: {'30-60': 144, '>60': 14}
 VIIRS750: P2 PIERDE (neto +94, B 42, p_gana 1.0000, p_pierde 0.0001) | protegidas 1 de 1 | alertas<1MW 0 de 0 | negativos 94 de 207 (Q_d 0.4541) | Q_n 0.3016 (189) | D False (1 de 1 alertas) | neg>=1MW 44 | pub en «otra» 4 | razón mag 0.9807807807807808
    -> NO ADOPTAR (caso d, opción e-ii)
-   I6: {'a': {'resultado': 'GANA', 'bloques': 29, 'tocadas': 47}, 'b': {'resultado': 'SIN SUSTRATO', 'bloques': 0, 'tocadas': 0}, 'c_falsos': 3}
+   I6: {'a': {'resultado': 'GANA', 'bloques': 29, 'tocadas': 47}, 'b': {'resultado': 'SIN SUSTRATO', 'bloques': 0, 'tocadas': 0}, 'c_falsos': 3, 'c_gana': 3}
    M4 por ventana: {'W6': {'P': 1, 'P_obs': 1, 'amb': 0, 'amb_obs': 0, 'neg_pub': 94, 'neg_obs': 207}}
    protegidas recuperadas publicadas con 1 MW o más: 1; negativos publicados por elevación solar: {'30-60': 90, '>60': 4}
 GLOBAL (principal): INVÁLIDO POR INSTRUMENTO
