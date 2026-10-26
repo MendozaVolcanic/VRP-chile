@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 16:41 UTC (S164, vuelta 16): Nicolás aprueba MOD-D como CANDIDATO y la fase 3
+- Nicolás, textual: «Apruebo MOD-D como CANDIDATO: lleva la vía a pipeline/ con la regla de MATLAB, flag apagado, tag
+  defensivo antes del primer edit.»
+- Alcance aprobado: vía «código MIROVA» para MODIS en `pipeline/`, con el relleno de fondo de la regla `fillmissing2` de
+  MATLAB, detrás de un flag APAGADO, reutilizando lo que sirva de `pipeline/mirova_v750_codigo.py` (#907). Tag defensivo en
+  el remoto antes del primer edit (A45). Criterios de merge, iguales a los de #907: producción bit a bit igual con el flag
+  apagado (con control que sí cambia), suite completa en árbol quieto con 0 fallas, CI verde y verificador limpio de otro
+  modelo; el merge lo hace la coordinadora. **Encender** el flag no está aprobado: exige censo, sombra, tag y otro sí.
+- Pasado a `loop-modis-2` con las palabras textuales.
+
 ### 2026-10-26 16:33 UTC (S164, vuelta 15): auto-audit nuevo #915; #864 cerrado apuntando a él
 - #915 (2026-10-26 16:10 UTC, detector K, ventana 60 d). Respecto de #864 (2026-10-19), **nuevo**: recall MODIS 62,5 %
   (n = 16, banda 95); magnitud de Cordón Caulle VIIRS 750 0,375× (n = 11); alerta protegida MODIS de Chillán sin publicar
