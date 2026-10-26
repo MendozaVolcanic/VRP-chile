@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~03:40 UTC (S163): loop-viirs750-2 corrige un desvío de A45; cableado de la vía espera el sí de Nicolás
+- Había editado sin commitear `pipeline/process_viirs_mod.py` y `pipeline/store.py` para cablear la vía «código MIROVA»;
+  los devolvió a origin/main. El cableado queda como parche propuesto (`experiments/_s162_v750a/cableado_pendiente/
+  cableado.patch`, aplica limpio, 6 pruebas verdes; tag `pre-s162-via-mirova` existe): (a) `calculate_vrp` de V750 llama a
+  la vía dentro de `ENABLE_V750_CODIGO_MIROVA` (apagado); (b) `store.py` deja pasar los records `via_codigo_mirova=True`
+  sin geocerca, filtro de píxeles por distancia ni tope por cúmulo (compuertas de K que el `.m` no tiene); (c)
+  `run_pipeline` pasa el nombre del volcán. Con el flag apagado, inerte. **Planteado a Nicolás (A45).**
+- PR en borrador aparte (rama `s162-via-mirova`, sin archivos A45): `pipeline/mirova_v750_codigo.py`,
+  `pipeline/grillas_mirova.yaml`, flag en `pipeline/profile.py`, pruebas (equivalencia contra el oráculo roja a verde 1.020
+  + 10, nulo 8/8, 35 propias).
+
 ### 2026-10-26 ~03:30 UTC (S163, vuelta 4): ocho PR mergeados; O2 verificado; #889 a su sesión
 - Nicolás: «sí a mergear, sí a rebasar si es lo que recomiendas; borra los temporales que ya no tengan uso; el correo a
   Coppola aún no». Mergeados por squash vía API, en orden: #900 (`5bb0c120c`), #902 (`c0f176908`), #903 (`744d8190b`),
