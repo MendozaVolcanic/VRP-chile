@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26, servidor 11:48 UTC (S163, vuelta 14): primer NRT con #909 en verde; sesiones de paper, congreso y retrospectiva
+- NRT de las 11:10 UTC (`b43f4ee4f`, incluye #909): **success**. El log ya registra la cobertura por volcán («Cobertura NO
+  COMPLETA: 1 incidencias (ninguna búsqueda ni descarga fallida)»): es el día en curso, parcial por construcción, como avisó
+  `rebase-889`; el código de salida no cambia. Sin issue nuevo del auto-audit todavía.
+- Sesiones abiertas a pedido de Nicolás: «Presentaciones del Congreso Geológico 2026» (`local_ad3af6f7-bad7-4dfe-9535-
+  2069fc795630`, en `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\congreso geologico 2026\`, mejora
+  `AT8-7_VRP_Chile.pptx` y `AT3-6_IA_multiplicador.pptx` sin sobrescribirlas) y «Retrospectiva del proceso VRP Chile: plan»
+  (`local_09e29bf2-a78f-4ef3-96af-9ee2f8b361b6`: qué funcionó, qué no, auditorías, prompts, errores evitables, lo logrado
+  sin Coppola, rol de Nicolás, tiempo y rango de tokens), base común para el paper y las charlas.
+- Disco: C: 18 GB, D: 8,5 GB (varias sesiones trabajando); sin riesgo aún (parada bajo 3 GB).
+
 ### 2026-10-26 ~11:50 UTC (S163): O2-375 cerrado contra MATLAB; la regla no extrapola como MATLAB
 - `loop-viirs375` (`dbe9af431`, `o2_375/verificador_matlab/INFORME.md`, verificador Sonnet CONFIRMADO): el ΔL de MATLAB
   difiere de la vara en 0 de 422 escenas (máx 1,03e-15); el control contra el port falla donde debe (137 escenas, máx
