@@ -140,7 +140,9 @@ def test_discrimina_binomial_exacta():
     ({"invalido": [], "indecidible": ["y"]}, [], {V375: "ADOPTAR", V750: "ADOPTAR"}, "INDECIDIBLE"),
     ({"invalido": [], "indecidible": []}, ["p"], {V375: "ADOPTAR", V750: "ADOPTAR"}, "INVÁLIDO POR INSTRUMENTO"),
     ({"invalido": [], "indecidible": []}, [], {V375: "ADOPTAR", V750: "SIN CAMBIO"}, "ADOPTAR"),
-    ({"invalido": [], "indecidible": []}, [], {V375: "ADOPTAR", V750: "ADOPTAR"}, "ADOPTAR"),
+    # V-N7: un ADOPTAR de VIIRS 750 (rama diurna con la Tabla 1, no con el código de MIROVA) no se adopta solo
+    ({"invalido": [], "indecidible": []}, [], {V375: "ADOPTAR", V750: "ADOPTAR"}, "DECIDE NICOLÁS"),
+    ({"invalido": [], "indecidible": []}, [], {V375: "SIN CAMBIO", V750: "ADOPTAR"}, "DECIDE NICOLÁS"),
     ({"invalido": [], "indecidible": []}, [], {V375: "SIN CAMBIO", V750: "SIN CAMBIO"}, "NO ADOPTAR"),
     ({"invalido": [], "indecidible": []}, [], {V375: "NO ADOPTAR", V750: "SIN CAMBIO"}, "NO ADOPTAR"),
     ({"invalido": [], "indecidible": []}, [], {V375: "ADOPTAR", V750: "NO ADOPTAR"}, "DECIDE NICOLÁS"),
@@ -172,8 +174,8 @@ def test_i6_juicio_de_placebos():
     assert ev.juzgar_i6("GANA", 5, 0) == []
     assert ev.juzgar_i6("SIN SUSTRATO", 4, 0) == []          # menos de 5 bloques: se informa, no falla
     assert ev.juzgar_i6("EMPATE", 5, 0) != []                # con sustrato tiene que ver la mejora
-    assert ev.juzgar_i6("GANA", 9, 4) == []
-    assert ev.juzgar_i6("GANA", 9, 5) != []                  # 5 falsos de 40 ya es más que el azar
+    assert ev.juzgar_i6("GANA", 9, 7) == []                  # dos colas: hasta 10 % por sorteo (V-N3)
+    assert ev.juzgar_i6("GANA", 9, 8) != []                  # P(Bin(40; 0,10) >= 8) = 0,042
 
 
 def test_i4_cota_binomial():
@@ -513,3 +515,156 @@ def test_logs_flags_brazo(tmp_path):
     assert any("ENABLE_TEST1_PATH" in x for x in ev.problemas_de_logs([raiz], (C, B), C))
     (raiz / "logs" / ("%s_Lascar.log" % B)).unlink()
     assert any("sin línea FLAGS_BRAZO" in x for x in ev.problemas_de_logs([raiz], (C, B), C))
+
+
+# ------------------------------------------------------------------------------------------- v3 (verificador v2)
+def fila(vol, sensor, instante, tipo="RUTINA", vrp=0.0, fuente="CONS"):
+    return {"volcano": vol, "sensor_bucket": sensor, "fecha_utc": instante.strftime("%Y-%m-%d %H:%M:%S"),
+            "tipo": tipo, "vrp_mw": vrp, "dist_km": 1.0, "source": fuente}
+
+
+class Completa:
+    """Filas de referencia (no pasadas) y records, para probar evaluar_completo (V-N2): las variantes del §6.4."""
+    VENT = [("W2", "2026-06-13", "2026-06-30"), ("W3", "2026-07-20", "2026-07-31")]
+
+    def __init__(self):
+        self.filas, self.rc, self.rb = [], [], []
+        for i in range(10):                                   # noches y días neutros en W3
+            ins_n, ins_d = datetime(2026, 7, 20 + i, 5, 0), datetime(2026, 7, 20 + i, 17, 0)
+            vol = VOLS[i % 11]
+            for sens in (V375, V750):
+                self.filas += [fila(vol, sens, ins_n), fila(vol, sens, ins_d)]
+                self.rc.append(rec(vol, sens, ins_n))
+                self.rb.append(rec(vol, sens, ins_n))
+                self.rb.append(rec(vol, sens, ins_d, diag=True))
+        for d in (14, 15):                                    # W2 también tiene pasadas (I2)
+            for sens in (V375, V750):
+                ins = datetime(2026, 6, d, 17, 0)
+                self.filas.append(fila("Isluga", sens, ins))
+                self.rb.append(rec("Isluga", sens, ins, diag=True))
+
+    def protegida(self, instante, fuente="CONS", vol="Lascar", sens=V375):
+        tipo = "ALERTA_TERMICA" if fuente == "CONS" else "ALERTA_TERMICA_OCR"
+        self.filas.append(fila(vol, sens, instante, tipo, 3.0, fuente))
+        self.rb.append(rec(vol, sens, instante, pub=True, disp=2.0, diag=True))
+        return self
+
+    def correr(self, filas_1_13=()):
+        return ev.evaluar_completo(self.filas, {C: self.rc, B: self.rb}, C, B, "e-ii", P_SUP, SHA, self.VENT, (),
+                                   filas_1_13)
+
+
+def test_completo_neutro_y_protegida_de_tabla():
+    r = Completa().correr()
+    assert r["principal"]["global"] == "NO ADOPTAR" and r["final"] == "NO ADOPTAR"
+    r = Completa().protegida(datetime(2026, 7, 25, 18, 0)).correr()
+    assert r["principal"]["global"] == "ADOPTAR"
+    assert r["variantes"] == {"tabla": "ADOPTAR", "sin_W2": "ADOPTAR", "sin_reflejo": "ADOPTAR",
+                              "otra_como_negativo": "ADOPTAR"}
+    assert r["final"] == "ADOPTAR"
+
+
+def test_completo_variante_tabla_saca_al_ocr():
+    r = Completa().protegida(datetime(2026, 7, 25, 18, 0), fuente="OCR").correr()
+    assert r["principal"]["global"] == "ADOPTAR" and r["variantes"]["tabla"] == "NO ADOPTAR"
+    assert r["final"] == "DECIDE NICOLÁS"
+
+
+def test_completo_variante_sin_w2():
+    r = Completa().protegida(datetime(2026, 6, 20, 18, 0)).correr()
+    assert r["principal"]["global"] == "ADOPTAR" and r["variantes"]["sin_W2"] == "NO ADOPTAR"
+    assert r["variantes"]["tabla"] == "ADOPTAR"
+
+
+def test_completo_variante_sin_reflejo():
+    c = Completa().protegida(datetime(2026, 7, 25, 18, 0))
+    f113 = [{"volcano": "Lascar", "sensor_bucket": V375, "fecha_utc": "2026-07-25 18:00:40", "clase": "desproporcionada"},
+            {"volcano": "Lascar", "sensor_bucket": V375, "fecha_utc": "2026-07-25 18:00:40", "clase": "consistente"}]
+    r = c.correr(f113)
+    assert len(r["reflejo"]) == 1 and r["variantes"]["sin_reflejo"] == "NO ADOPTAR"
+    assert r["final"] == "DECIDE NICOLÁS"
+
+
+def test_completo_otra_como_negativo():
+    c = Completa().protegida(datetime(2026, 7, 25, 16, 0))
+    for h in (17, 18, 19):                                    # RUTINA del mismo periodo: «otra», el brazo publica
+        ins = datetime(2026, 7, 25, h, 30)
+        c.filas.append(fila("Lascar", V375, ins))
+        c.rb.append(rec("Lascar", V375, ins, pub=True, disp=0.3, diag=True))
+    r = c.correr()
+    assert r["principal"]["global"] == "ADOPTAR"
+    assert r["variantes"]["otra_como_negativo"] == "NO ADOPTAR"   # 3 negativos publicados, 1 alerta: D no cumple
+    assert r["final"] == "DECIDE NICOLÁS"
+
+
+def test_completo_informa_minimas_y_reflejo_12():
+    r = Completa().protegida(datetime(2026, 7, 25, 18, 0)).correr()
+    assert set(r["info"]) == {"minimas_SE", "minimas_original", "minimas_SN_0,04", "con_filtro_reflejo_12"}
+    assert r["reflejo12"]["sin_angulos"] == 1                 # los records sintéticos no traen ángulos
+
+
+def test_p_sup_de_vara():
+    v = {V375: {"sin_record_produccion": 0, "pasadas_nocturnas": 2715},
+         V750: {"sin_record_produccion": 9, "pasadas_nocturnas": 2650}}
+    p = ev.p_sup_de_vara(v)
+    assert p[V375] == pytest.approx(0.0011028, abs=1e-6) and p[V750] == pytest.approx(0.0059190, abs=1e-6)
+
+
+def test_es_dia_con_sol_bajo():
+    from pipeline.store import _solar_elevation
+    lat, lon = ev.coords()["Lascar"]
+    t0 = datetime(2026, 8, 1, 10, 0)
+    for m in range(0, 600, 5):                                # primer minuto con el sol entre 1 y 10 grados
+        ins = t0 + timedelta(minutes=m)
+        if 1 < _solar_elevation(lat, lon, ins) < 10:
+            break
+    assert ev.es_dia_vol("Lascar", ins) is True
+    assert ev.es_dia_vol("Lascar", datetime(2026, 8, 1, 5, 0)) is False
+
+
+def test_cargar_brazo_dedupe_y_modis_diurno(tmp_path):
+    import json as _json
+    base = {"distance_class": "summit", "vrp_mw": 0.0, "primary_cluster": None, "anomaly_pixels": [],
+            "regimen": {"codigo_sha": SHA}, "sensor_zenith_deg": 10.0, "sensor_azimuth_deg": 20.0,
+            "solar_zenith_deg": 40.0, "solar_azimuth_deg": 50.0}
+    recs = [dict(base, sensor="VIIRS_SNPP", datetime_utc="2026-07-21 05:00"),
+            dict(base, sensor="VIIRS_SNPP", datetime_utc="2026-07-21 05:00"),          # duplicado
+            dict(base, sensor="VIIRS_SNPP", datetime_utc="2026-07-21 17:00"),
+            dict(base, sensor="MODIS_AQUA", datetime_utc="2026-07-21 18:00"),          # MODIS de día: fuera
+            dict(base, sensor="MODIS_AQUA", datetime_utc="2026-07-21 06:00"),
+            dict(base, sensor="VIIRS_SNPP", datetime_utc="2026-08-21 05:00")]          # fuera de ventana
+    (tmp_path / B).mkdir()
+    (tmp_path / B / "Lascar.json").write_text(_json.dumps({"records": recs}), encoding="utf-8")
+    import banco_paridad as bp
+    out = ev.cargar_brazo([tmp_path], B, [("W3", "2026-07-20", "2026-07-31")], bp.inner_desde_html())
+    assert sorted((r["b"], r["dt"].hour, r["es_dia"]) for r in out) == [("MODIS", 6, False), (V375, 5, False),
+                                                                         (V375, 17, True)]
+    assert all(r["sz"] == 10.0 and r["soa"] == 50.0 and r["sha"] == SHA and r["huella"] for r in out)
+
+
+def test_i3_no_se_tapa_con_un_record_diurno():
+    e = Escena().base()
+    ins = t(27, 5)
+    e.pasadas.append(pas("Llaima", V375, ins, "alerta", 4.0))   # protegida nocturna sin record en ningún brazo
+    e.dia("Llaima", V375, 27)                                   # pero el brazo tiene un record diurno ese día
+    assert any("I3" in x for x in e.evaluar()["compuertas"]["invalido"])
+
+
+def test_huella_nocturna_informa_sin_decidir():
+    e = Escena().base()
+    for r in e.rc:
+        r["huella"] = "x"
+    for r in e.rb:
+        r["huella"] = "x"
+    e.rb[3]["huella"] = "y"
+    r = e.evaluar()
+    assert len(r["noche_records_distintos_en_otros_campos"]) == 1
+    assert r["compuertas"]["indecidible"] == []
+
+
+def test_huella_ignora_volatiles_y_diagnosticos():
+    base = {"sensor": "VIIRS_SNPP", "datetime_utc": "2026-07-21 05:00", "final_hotspot_lat": -23.37}
+    h = ev.huella_record(base)
+    assert ev.huella_record(dict(base, processed_utc="x", first_processed_utc="y", regimen={"a": 1},
+                                 diag_mu_deti=0.1)) == h
+    assert ev.huella_record(dict(base, final_hotspot_lat=-23.38)) != h

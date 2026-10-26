@@ -90,9 +90,9 @@
   {
    "id": "M13",
    "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
-   "viejo": "MAX_FALSOS_C = 4 ",
-   "nuevo": "MAX_FALSOS_C = 5 ",
-   "que": "placebo c tolera 5 falsos"
+   "viejo": "MAX_FALSOS_C = 7",
+   "nuevo": "MAX_FALSOS_C = 8",
+   "que": "placebo c tolera 8 falsos"
   },
   {
    "id": "M14",
@@ -335,9 +335,107 @@
   {
    "id": "M49",
    "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
-   "viejo": "    banderas_por_periodo(T)\n",
+   "viejo": "    banderas_por_periodo(T, otra_como_negativo)\n",
    "nuevo": "    pass\n",
    "que": "no se recalculan las banderas por periodo"
+  },
+  {
+   "id": "X1",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"tabla\": evaluar(pasadas_de(filas, \"tabla\", ventanas), recs",
+   "nuevo": "\"tabla\": evaluar(pasadas_de(filas, \"union\", ventanas), recs",
+   "que": "variante tabla usa la unión (verificador v2)"
+  },
+  {
+   "id": "X2",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"sin_W2\": evaluar(pas_u, recs, control, brazo, excluir_dias=dias_w2, **kw)",
+   "nuevo": "\"sin_W2\": evaluar(pas_u, recs, control, brazo, **kw)",
+   "que": "variante sin W2 no excluye (verificador v2)"
+  },
+  {
+   "id": "X3",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "float(beta.ppf(1 - ALFA, vara",
+   "nuevo": "float(beta.ppf(1 - 3 * ALFA, vara",
+   "que": "p_sup al 85 % (verificador v2)"
+  },
+  {
+   "id": "X4",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"sin_reflejo\": evaluar(pas_u, recs, control, brazo, excluir_claves=reflejo, **kw)",
+   "nuevo": "\"sin_reflejo\": evaluar(pas_u, recs, control, brazo, **kw)",
+   "que": "variante sin reflejo no excluye (verificador v2)"
+  },
+  {
+   "id": "X5",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "                if b == \"MODIS\" and dia:\n                    continue          # MODIS diurno",
+   "nuevo": "                if False:\n                    continue          # MODIS diurno",
+   "que": "entra MODIS diurno (verificador v2)"
+  },
+  {
+   "id": "X6",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "                if k in vistos:\n                    continue\n",
+   "nuevo": "",
+   "que": "sin deduplicar (verificador v2)"
+  },
+  {
+   "id": "X7",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    return _solar_elevation(lat, lon, instante.replace(tzinfo=None)) > 0",
+   "nuevo": "    return _solar_elevation(lat, lon, instante.replace(tzinfo=None)) > 25",
+   "que": "día con el sol sobre 25 grados (verificador v2)"
+  },
+  {
+   "id": "M50",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if por_sensor.get(\"VIIRS750\") == ADOPTAR:\n",
+   "nuevo": "    if False:\n",
+   "que": "VIIRS 750 adopta solo"
+  },
+  {
+   "id": "M51",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "        if otra_como_negativo and f[\"es_dia\"]:",
+   "nuevo": "        if False:",
+   "que": "variante otra como negativo no hace nada"
+  },
+  {
+   "id": "M52",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    cob_n = ec.cobertura(Tn, {lado: [r for r in rs if not r[\"es_dia\"]] for lado, rs in recs.items()}, control)",
+   "nuevo": "    cob_n = ec.cobertura(Tn, recs, control)",
+   "que": "I3 con records diurnos"
+  },
+  {
+   "id": "M53",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "            if ic[k] is not None and ib[k] is not None and ic[k] != ib[k]]",
+   "nuevo": "            if False]",
+   "que": "huella nocturna no compara"
+  },
+  {
+   "id": "M54",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"otra_como_negativo\": evaluar(pas_u, recs, control, brazo, otra_como_negativo=True, **kw)[\"global\"]",
+   "nuevo": "\"otra_como_negativo\": principal[\"global\"]",
+   "que": "variante d no se calcula"
+  },
+  {
+   "id": "M55",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "                                    and not k.startswith(\"diag_\")}",
+   "nuevo": "}",
+   "que": "la huella vuelve a incluir los diag_"
+  },
+  {
+   "id": "M56",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "CAMPOS_VOLATILES = (\"updated\", \"processed_utc\", \"first_processed_utc\", \"regimen\")",
+   "nuevo": "CAMPOS_VOLATILES = (\"updated\", \"processed_utc\", \"regimen\")",
+   "que": "first_processed_utc deja de ser volátil"
   },
   {
    "id": "C-CAIDA",

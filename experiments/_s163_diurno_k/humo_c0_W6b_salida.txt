@@ -1,9 +1,9 @@
-# Prueba de humo del evaluador (v2) sobre una corrida REAL del A/B sobre C0 (W6b, run 39097155412, rama s151-ab-diurno/39097155412),
+# Prueba de humo del evaluador (v3) sobre una corrida REAL del A/B sobre C0 (W6b, run 39097155412, rama s151-ab-diurno/39097155412),
 # con --recorte 2026-10-08,2026-10-14. Lo esperado: INVALIDO por I1 (C0 tiene el Test 1 y no es K) y metricas distintas de cero.
 # Comando: python -I experiments/_s163_diurno_k/evaluar_diurno_k.py --raiz <W6b> --brazos _s151_ab_diurno_control,_s151_ab_diurno_on --ref <ref 047bd5692> --sha-codigo eb97779f4c0e1a40df20182a60921c1778bced1a --opcion-e e-ii --recorte 2026-10-08,2026-10-14
 [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
 RECORTE DE PRUEBA 2026-10-08 a 2026-10-14: esto NO es la evaluación que decide
-reflejo probable (1.13): 0 pasadas; filas del estudio dentro de W2 a W6 sin pasada: 0 []
+reflejo probable (1.13): 0 pasadas; filas del estudio dentro de las ventanas sin pasada: 0 []
 COMPUERTAS: inválido 68, indecidible 0
 cobertura diurna: {'VIIRS375': {'pasadas_diurnas': 208, 'sin_record': 0, 'p_sup': 0.0011027919466183107}, 'VIIRS750': {'pasadas_diurnas': 217, 'sin_record': 1, 'p_sup': 0.005918999529652914}}
 noche, records en un solo brazo: {'solo_control': 0, 'solo_brazo': 0}
@@ -19,13 +19,15 @@ VIIRS750: P2 PIERDE (neto +94, B 42, p_gana 1.0000, p_pierde 0.0001) | protegida
    M4 por ventana: {'W6': {'P': 1, 'P_obs': 1, 'amb': 0, 'amb_obs': 0, 'neg_pub': 94, 'neg_obs': 207}}
    protegidas recuperadas publicadas con 1 MW o más: 1; negativos publicados por elevación solar: {'30-60': 90, '>60': 4}
 GLOBAL (principal): INVÁLIDO POR INSTRUMENTO
-VARIANTES: {'tabla': 'INVÁLIDO POR INSTRUMENTO', 'sin_W2': 'INVÁLIDO POR INSTRUMENTO', 'sin_reflejo': 'INVÁLIDO POR INSTRUMENTO'}
+VARIANTES: {'tabla': 'INVÁLIDO POR INSTRUMENTO', 'sin_W2': 'INVÁLIDO POR INSTRUMENTO', 'sin_reflejo': 'INVÁLIDO POR INSTRUMENTO', 'otra_como_negativo': 'INVÁLIDO POR INSTRUMENTO'}
 VEREDICTO FINAL (§6.4): INVÁLIDO POR INSTRUMENTO 
 
 INFORMATIVO (no decide): {'minimas_SE': 'INVÁLIDO POR INSTRUMENTO', 'minimas_original': 'INVÁLIDO POR INSTRUMENTO', 'minimas_SN_0,04': 'INVÁLIDO POR INSTRUMENTO', 'con_filtro_reflejo_12': 'INVÁLIDO POR INSTRUMENTO'}
+  ¿alguna variante de mínimas cambia el veredicto principal (INVÁLIDO POR INSTRUMENTO)? {'minimas_SE': False, 'minimas_original': False, 'minimas_SN_0,04': False, 'con_filtro_reflejo_12': False}
 filtro de reflejo de 12°: apaga 0 publicaciones diurnas del brazo; 0 publicaciones diurnas sin ángulos
   con filtro VIIRS375: NO ADOPTAR (caso d), negativos 158 de 174, protegidas 4 de 4
   VIIRS375 desproporción (1.13 a) sobre lo nuestro): {'consistente': 129, 'desproporcionada': 141}
   con filtro VIIRS750: NO ADOPTAR (caso d), negativos 94 de 207, protegidas 1 de 1
   VIIRS750 desproporción (1.13 a) sobre lo nuestro): {'desproporcionada': 27, 'consistente': 106, 'aislada': 8}
+noche, records en los dos brazos con otros campos distintos (informativo, V-N5): 4 ['Copahue|MODIS|2026-10-11 01:45', 'Copahue|MODIS|2026-10-14 02:00', 'Lastarria|MODIS|2026-10-13 07:55', 'Villarrica|MODIS|2026-10-13 08:00']
 (se omiten las lineas I1a, todas del mismo tipo: los flags de C0 no son los de K)

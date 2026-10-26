@@ -1,8 +1,10 @@
 # Pre-registro del A/B diurno de VIIRS sobre K (tarea 1.32, decisión D-10, issue #813)
 
-Estado: **v2, corregida con el verificador limpio** (Sonnet 5.5, `verificador/INFORME.md`, 13 hallazgos; qué se
-cambió por cada uno en el §12). La regla cambió (§6.5, definición de negativo, I4 e I5), así que **espera una segunda
-verificación limpia** y después el sello (2026-10-26, S163, sesión `diurno-k-prereg`). Nada de esto se despacha sin el sello y el candado `preregistro_aprobado=si` del workflow. Todo
+Estado: **v3, corregida con dos verificaciones limpias** (Sonnet 5.5; la primera, `verificador/INFORME.md`, 13
+hallazgos, §12; la segunda, `verificador_v2/INFORME.md`, 9 hallazgos nuevos y los arreglos de la primera confirmados, §13).
+La v3 cambió poco de la regla (umbral del placebo c, VIIRS 750 no adopta solo, una variante más de robustez); los
+cambios están probados con mutaciones y se le piden a una tercera mirada acotada a ese diff (§13). Después, el sello
+(2026-10-26, S163, sesión `diurno-k-prereg`). Nada de esto se despacha sin el sello y el candado `preregistro_aprobado=si` del workflow. Todo
 número de este documento sale de un `*_salida.txt` de esta carpeta; ninguno se transcribe de memoria.
 
 ## 0. Relación con lo que ya está sellado (leer primero)
@@ -96,8 +98,13 @@ difiere en dos puntos del día, que este A/B **no** cambia y declara:
   SOSPECHA, no medido).
 
 Para VIIRS 375 no hay código de MIROVA en `main`, y ningún paper da números diurnos de VIIRS: la Tabla 1 es la única
-fuente citable. Si el resultado de VIIRS 750 sale con publicaciones de más, el primer candidato a probar es el filtro
-de 12° y el K1 de -0,5, en el programa de VIIRS 750 (V750-B), no aquí.
+fuente citable. **Para VIIRS 750, en cambio, manda el código** (`docs/MISSION.md`, decisión de Nicolás del 2026-10-21:
+«cuando el paper y el código difieren, manda el código»). La rama diurna usa la Tabla 1, así que lo que este A/B mida en
+VIIRS 750 de día no es la configuración de MIROVA: por eso un ADOPTAR de VIIRS 750 no se adopta solo (§6.3; verificador
+v2, V-N7). Si VIIRS 750 sale con publicaciones de más, el candidato a probar es el K1 de -0,5, en el programa de VIIRS
+750 (V750-B). El filtro de 12° probablemente no explica nada: en la muestra real de C0 no apaga ninguna publicación y la
+marca S158 de `CLAUDE.md` dice que ninguna de 17.859 pasadas diurnas del OSF tiene reflejo bajo 10° (verificador v2,
+V-N8).
 
 ## 3. Ventanas y sustrato
 
@@ -202,7 +209,8 @@ Cualquiera de I1 a I4 que falle: **INVÁLIDO POR INSTRUMENTO**, no se lee ningú
   ventana y sensor con pasadas diurnas de MIROVA; el control trae **cero** records VIIRS diurnos; ningún record
   nocturno del brazo trae `diag_umbrales_diurnos`.
 - **I3, cobertura nocturna contra la referencia**: `evaluador_comun.cobertura` sobre las pasadas nocturnas de los tres
-  sensores, control contra brazo, da COBERTURA OK.
+  sensores y **sólo con los records nocturnos**, control contra brazo, da COBERTURA OK (verificador v2, V-N6: con los
+  records de día, un record diurno del brazo tapaba un día sin ningún record nocturno).
 - **I4, cobertura diurna contra la referencia.** De día el control no sirve de vara; la vara es la noche de producción.
   (a) Toda alerta diurna VIIRS de MIROVA (protegida o bajo 1 MW) tiene record del brazo (verificador V10: la v1 vigilaba
   sólo las protegidas, y perder unas pocas de las 10 alertas bajo 1 MW achicaba D y el neto en silencio). (b) Ningún volcán, sensor y día con pasadas diurnas de MIROVA
@@ -214,15 +222,26 @@ Cualquiera de I1 a I4 que falle: **INVÁLIDO POR INSTRUMENTO**, no se lee ningú
   correr (SIN DATO), por eso la vara es la noche.
 - **I5, noches intactas** (la G3 de la adenda). Los dos brazos tienen **los mismos records nocturnos** (verificador V6:
   la v1 sólo comparaba los que estaban en los dos y un record faltante pasaba sin marca) y, en cada uno, la misma
-  publicación y la misma magnitud publicada (con eso no hay cruces de 1 MW en ninguna dirección). Una discordancia da
+  publicación y la misma magnitud publicada (con eso no hay cruces de 1 MW en ninguna dirección). La G3 de la adenda
+  pedía el record entero; aquí decide lo que lee el criterio (publicación y magnitud) y las diferencias en otros campos
+  (posición, cúmulo, diagnósticos) se **informan** con su lista (`huella` del record sin los campos volátiles), porque un
+  desempate que depende de la CPU (S152, D-16, D-22) cambia campos que no deciden y haría INDECIDIBLE el A/B por nada
+  (verificador v2, V-N5: es una protección menor que la G3, y se dice). La huella deja fuera los campos volátiles
+  (`updated`, `processed_utc`, `first_processed_utc`, `regimen`) y los `diag_*`, que difieren entre dos corridas del
+  mismo código por punto flotante. En la prueba de humo sobre C0 quedan así 4 de 725 records nocturnos distintos,
+  todos MODIS (el desempate del top-100 que depende de la CPU, D-16): es lo que este informativo tiene que mostrar. Una discordancia da
   INDECIDIBLE con la lista; se repiten esos volcanes en los dos brazos desde el mismo tag. Si reaparece en el mismo
   record, es cableado (INVÁLIDO); si cambia entre intentos, es un desempate que depende de la CPU (S152, D-16, D-22) y
   se usa el intento sin discordancia, declarado como desviación.
 - **I6, el criterio puede ver lo que mide.** Los placebos de D-44 (`evaluador_comun.placebo_p2`), armados sobre el
   brazo diurno en las pasadas diurnas de cada sensor: (a) apagar la mitad de sus publicaciones en negativos diurnos
   tiene que dar GANA cuando eso toca 5 bloques o más (si toca menos se informa SIN SUSTRATO); (c) el simétrico por
-  bloque, fracción 1, con 40 semillas (161 a 200), no puede dar GANA o PIERDE en 5 o más de 40 (P(Bin(40; 0,05) ≥ 5)
-  = 0,048, `binom.sf`). (b), apagar la mitad de sus alertas bajo 1 MW publicadas, se informa: con 10 alertas en VIIRS
+  bloque, fracción 1, con 40 semillas (161 a 200), no puede dar GANA o PIERDE en 8 o más de 40. Cada sorteo es falso si
+  da GANA **o** PIERDE, dos pruebas de una cola al 5 %: la tasa nominal por sorteo es de hasta 10 % (el verificador v2
+  midió 7,2 a 8,3 % con la estructura real, `verificador_v2/medidas4_salida.txt`), y P(Bin(40; 0,10) ≥ 8) = 0,042. La
+  v1 y la v2 usaban 5 de 40 con la tasa de una sola cola, y con un brazo ruidoso caían en INDECIDIBLE 16 a 23 % de las
+  veces por nada (V-N3). Este placebo es además **lo único que mide el tamaño real de la prueba de signos**: el nulo
+  del §5.1 (i) no puede, porque un brazo al azar casi siempre suma +1 y nunca puede dar GANA. (b), apagar la mitad de sus alertas bajo 1 MW publicadas, se informa: con 10 alertas en VIIRS
   375 y ninguna en 750 casi nunca tendrá sustrato. Además, antes de despachar, el nulo de P2 se midió sobre la
   estructura real de bloques de W2 a W6 con un brazo sintético que publica al azar (§5.1). **Límite declarado**
   (verificador V9): con un brazo callado, que es justo el caso en que se adopta, el placebo a toca menos de 5 bloques y
@@ -253,15 +272,19 @@ daba lo mismo salvo e-i en VIIRS 375: 4 y 4 de 200, y Q_n de 3,51 % y 0,94 %.)
 
 ### 5.2 Batería, mutaciones y prueba de humo
 
-- **Batería** (`test_evaluar_diurno_k.py`, 65 pruebas desde la v2): cada caso a a e del §6.2, el §6.3, el §6.4, cada compuerta I1
+- **Batería** (`test_evaluar_diurno_k.py`, 78 pruebas desde la v3; 65 en la v2): cada caso a a e del §6.2, el §6.3, el §6.4, cada compuerta I1
   a I6 con un escenario que la hace fallar, la definición de negativo, el control sintético, R1, Q_n del control, la
   prueba D, el borde de 1 MW, la lectura de los logs y, desde la v2, el negativo por periodo, la exclusión que no
   vuelve negativas a las vecinas, la alerta bajo 1 MW sin record, los records nocturnos en un solo brazo, el ángulo de
   reflejo y el M4 por ventana. Se escribió antes del evaluador: contra un stub fallaron las 53
   que había entonces (`probar_salida_roja.txt`).
 - **Mutaciones** (`mutaciones.json`, corredor `experiments/_s162_instrumento/mutar.py`, que cuenta como atrapada sólo
-  la que falla por aserción según el JUnit, nunca por excepción): **48 de 48 atrapadas por aserción en la v2**
-  (`mutaciones_salida.txt`; la salida dice «48 de 49» porque cuenta la de control, que tiene que quedar fuera). En la
+  la que falla por aserción según el JUnit, nunca por excepción): **60 de 60 atrapadas por aserción en la v3**
+  (`mutaciones_salida.txt`; la salida dice «60 de 61» porque cuenta la de control, que tiene que quedar fuera); entre
+  ellas las 7 que el verificador v2 escribió sobre `main()` y el cargador (X1 a X7), que en la v2 sobrevivían, y 5 sobre
+  lo nuevo de la v3. En la v2 fueron 48 de 48. Después de esa corrida se ajustó la huella nocturna (fuera los `diag_*`
+  y `first_processed_utc`, ver I5); ese ajuste tiene su prueba y sus mutaciones (3 de 3 atrapadas,
+  `mutaciones_huella_salida.txt`), y las dos nuevas quedan en `mutaciones.json` para la próxima corrida completa. En la
   v1 fueron 41 de 41 tras cerrar con aserciones nuevas las cuatro que la primera corrida dejó vivas o caídas (borde de
   la cola de I4c, sha abreviado que fallaba por excepción, P2 diurno que contaba la noche, P que contaba alertas bajo
   1 MW); la v2 agrega 7 mutaciones sobre lo nuevo (negativo por periodo, exclusión después de las banderas, I4a de toda
@@ -322,16 +345,21 @@ La rama diurna abre los dos sensores con un solo flag, así que el veredicto glo
 - algún sensor DECIDE NICOLÁS: **DECIDE NICOLÁS CON M4**;
 - un sensor ADOPTAR y el otro NO ADOPTAR: **DECIDE NICOLÁS** (adoptar uno solo pide un flag por sensor, un parche en
   `pipeline/` que va con A45);
-- los dos en ADOPTAR o SIN CAMBIO, con al menos un ADOPTAR: **ADOPTAR**;
+- VIIRS 750 en ADOPTAR (y ninguno de los casos anteriores): **DECIDE NICOLÁS**, porque para VIIRS 750 manda el código
+  de MIROVA y la rama diurna no lo sigue (§2.2; verificador v2, V-N7). Adoptarlo pide antes llevar la rama de VIIRS 750
+  al código (K1 de -0,5; parche en `pipeline/`, A45) o separar el flag por sensor;
+- los dos en ADOPTAR o SIN CAMBIO, con al menos un ADOPTAR y VIIRS 750 en SIN CAMBIO: **ADOPTAR**;
 - los dos en NO ADOPTAR o SIN CAMBIO: **NO ADOPTAR**.
 
 ### 6.4 Robustez (cuándo el resultado depende de algo frágil)
 
-El veredicto global se recalcula en tres variantes: (a) **tabla sola**; (b) **sin W2**, la ventana cuyos positivos son
+El veredicto global se recalcula en cuatro variantes: (a) **tabla sola**; (b) **sin W2**, la ventana cuyos positivos son
 todos del OCR; (c) **sin las protegidas diurnas de reflejo probable** según el estudio 1.13 (`experiments/_s151_alertas_diurnas/real_o_reflejo_filas.json`,
 clase desproporcionada o aislada: 17 pasadas de W2 a W6, 13 de VIIRS 375 y 4 de VIIRS 750). Las pasadas excluidas
 salen **después** de marcar los días con alerta (verificador V5: en la v1 salían antes y 12 pasadas vecinas pasaban de
-«otra» a «negativo»). Si el veredicto principal es ADOPTAR o NO ADOPTAR y alguna variante da otro
+«otra» a «negativo»); (d) **«otra» como negativo**: toda RUTINA diurna de la tabla cuenta como negativo aunque su
+periodo tenga una alerta o un FALSO_POSITIVO, para que lo que el brazo publique en esas 265 y 60 pasadas pese
+(verificador v2, V-N4: sin esta variante, el caso b adoptaba un brazo con 60 publicaciones ahí). Si el veredicto principal es ADOPTAR o NO ADOPTAR y alguna variante da otro
 veredicto global, el resultado es **DECIDE NICOLÁS**, informando cuál cambió y por qué. Es la regla §3.2 de la adenda
 sellada, extendida: cuando el resultado depende del OCR o del reflejo, no se resuelve solo. Las variantes de la regla
 de mínimas que pide `docs/MISSION.md` (criterio, punto 5: SE, la original y SN con 0,05 exacto como alerta, umbral
@@ -403,12 +431,18 @@ de aceptarla.
   línea del workflow, pero cambia el árbol del tag: si la coordinadora lo quiere, se hace antes del tag y se dice.
 - **Costo estimado** (con la corrida sobre C0, la única medida: control 15 a 24 min y diurno 40 a 58 min, máximo 66,
   por media ventana y volcán; sin el Test 1 puede bajar, no está medido): W2 a W6 son 83 días; unos 11 volcanes × 83
-  días × (2,2 + 5,5) min por volcán-día ≈ 117 h de runner, es decir **unas 39 h de reloj con `max-parallel: 3`** (unas 20
+  días × (2,2 + 5,5) min por volcán-día ≈ 117 h de runner (los minutos por volcán-día son el medio de los rangos
+  divididos por unos 9 días por media ventana; con 8,3 días de promedio los extremos van de 1,8 a 2,9 y de 4,8 a 7,0,
+  verificador v2, V-N9), es decir **unas 39 h de reloj con `max-parallel: 3`** (unas 20
   con 6), más W1 (menos de 1 h).
 - **Cobertura**: leer `cobertura.txt` de cada corrida antes de mirar nada; un job corto se repite con el mismo tag y se
   une (D-13).
 - **Objetivos y sus sha256**: `objetivos_sha256.txt` (los blobs de git de cada archivo del que depende el despacho y la
-  evaluación). Quien sella, sella esos contenidos; el verificador y la coordinadora comprueban con
+  evaluación; desde la v3 también el predicado del tablero `frontend/index.html`, `pipeline/store.py` (define día),
+  `volcanoes.yaml` (coordenadas), la clasificación del estudio 1.13 y el corredor de mutaciones: verificador v2, V-N1).
+  **La evaluación se corre desde un `git archive` del commit sellado**, no desde el árbol de trabajo: el predicado del
+  tablero se lee de `frontend/index.html`, que cambió cinco veces desde K y que habrá que corregir para los records
+  diurnos antes de cualquier flip. Quien sella, sella esos contenidos; el verificador y la coordinadora comprueban con
   `git diff <commit del sello> -- experiments/_s163_diurno_k/ pipeline/profiles/_s154_ab_diurno_k_*.yaml
   .github/workflows/reproc-s151-ab-diurno.yml` que nada cambió antes del tag. Los sha256 son de los blobs de git (`git
   show <commit>:<ruta> | sha256sum`): en un árbol de Windows con CRLF el archivo da otro sha sin haber cambiado.
@@ -435,10 +469,13 @@ python -I experiments/_s163_diurno_k/evaluar_diurno_k.py --raiz <W2> ... --raiz 
    perfiles, workflow, tag y cableado (§0).
 2. La **opción del caso e**: e-ii (recomendada desde la v2: decide él con M4) o e-i (ADOPTAR si Q_d ≤ Q_n, con la
    región que mostró el verificador a la vista) (§6.5).
-3. Que la regla de robustez del §6.4 (tabla sola, sin W2, sin reflejo probable) mande a DECIDE NICOLÁS.
+3. Que la regla de robustez del §6.4 (tabla sola, sin W2, sin reflejo probable, «otra» como negativo) mande a DECIDE
+   NICOLÁS.
 4. Que el negativo diurno se mire **por periodo** (§4): una RUTINA del mediodía es negativo aunque la madrugada del
    mismo día UTC haya alertado. Es una definición nueva respecto del evaluador común aplicado al día entero.
 5. Que no haya W7 hasta que la referencia de MIROVA esté reparada (§3).
+6. Que un ADOPTAR de VIIRS 750 pase a DECIDE NICOLÁS mientras la rama diurna de VIIRS 750 no siga el código de MIROVA
+   (§2.2, §6.3).
 
 ## 11. Desviaciones registradas después de ver datos
 
@@ -469,3 +506,30 @@ las mutaciones (el corredor modifica archivos del repo).
 
 Como la regla cambió (opción recomendada, definición de negativo, I4a, I5), la v2 **necesita su propia verificación
 limpia** antes del sello (lección S162: una regla corregida se re-verifica).
+
+
+## 13. Segunda verificación limpia (de la v2) y qué cambió en la v3 (2026-10-26)
+
+Otra instancia de Sonnet 5.5, sin la conversación ni el informe de la primera hasta después de escribir su lista de
+caminos (`verificador_v2/CAMINOS.md`); commit verificado `bf8e24dd`. Resultado: los arreglos del §12 hacen lo que dicen
+(11 CONFIRMADO, 2 CONFIRMADO EN PARTE: V3, que no decía si las mínimas cambiaban el veredicto, y V7); el nulo se
+reproduce idéntico; 48 de 48 mutaciones atrapadas en una copia aparte; batería 65 de 65; sha256 de los blobs 16 de 16;
+cifras del §3 y la Tabla 1 renderizada, confirmadas. **No encontró un camino por el que un brazo al azar o callado salga
+ADOPTAR**: con tasas de 0,01 % a 0,5 % un brazo al azar adopta como máximo 0,42 % de las veces (VIIRS 375) y 0,09 %
+(VIIRS 750). Hallazgos nuevos y qué se hizo:
+
+| ID | gravedad | hallazgo | qué se hizo |
+|---|---|---|---|
+| V-N1 | 3 | el predicado «publica» (`frontend/index.html`) y otras dependencias no estaban sellados | sellados en `objetivos_sha256.txt`; la evaluación corre desde un `git archive` del commit sellado (§8) |
+| V-N2 | 3 | `main()`, las variantes, la vara de cobertura y el cargador no tenían prueba: 7 mutaciones suyas sobrevivían | `main()` partido en `evaluar_completo`, `p_sup_de_vara` y `pasadas_de`; 12 pruebas nuevas; las 7 mutaciones del verificador entran a `mutaciones.json` |
+| V-N3 | 2 | el placebo c contaba dos colas con el umbral de una: INDECIDIBLE 16 a 23 % de las veces | umbral a 8 de 40 con la tasa de dos colas (§5, I6) |
+| V-N4 | 2 | el caso b adoptaba con 60 publicaciones en «otra» | variante (d) «otra como negativo» en la robustez (§6.4) |
+| V-N5 | 2 | I5 compara menos que la G3 que reemplaza | decide con publicación y magnitud; el record entero se informa (§5, I5) |
+| V-N6 | 2 | I3 se tapaba con un record diurno | I3 cuenta sólo records nocturnos (§5) |
+| V-N7 | 2 | para VIIRS 750 manda el código de MIROVA y la rama diurna usa la Tabla 1 | un ADOPTAR de VIIRS 750 pasa a DECIDE NICOLÁS (§2.2, §6.3) |
+| V-N8 | 1 | el filtro de 12° probablemente no cambia nada | declarado (§2.2); la variante informativa se mantiene |
+| V-N9 | 1 | la salida no decía si las mínimas cambian el veredicto; el costo no se deriva de sus cifras; 10 de 200 no certifica 5 % | la salida lo dice; el costo explica su derivación (§8); e-i ya no es la recomendada |
+
+Esta v3 cambia tres cosas de la regla (umbral del placebo c, VIIRS 750, variante d), todas en la dirección de no adoptar
+de más. Están cubiertas por pruebas y mutaciones (§5.2) y se le pide a un tercer verificador limpio que mire sólo ese
+diff contra la v2 (`verificador_v3/`).

@@ -45,7 +45,9 @@ SENSORES_NOCHE = ("VIIRS375", "VIIRS750", "MODIS")
 ALFA = 0.05
 MIN_BLOQUES_PLACEBO = 5                  # D-45: con 4 bloques o menos P2 da SIN SUSTRATO
 SEMILLAS_C = tuple(range(161, 201))      # 40 semillas del placebo simétrico
-MAX_FALSOS_C = 4                         # P(Bin(40; 0,05) >= 5) = 0,048: con 5 o más falla
+# Verificador v2, V-N3: cada sorteo del placebo c es falso si da GANA o PIERDE, dos pruebas de una cola al 5 %, así que
+# la tasa nominal por sorteo es de hasta 10 % (medida: 7,2 a 8,3 %). P(Bin(40; 0,10) >= 8) = 0,042: con 8 o más falla.
+MAX_FALSOS_C = 7
 FRACCION_A = 0.5
 INVALIDO, INDECIDIBLE = "INVÁLIDO POR INSTRUMENTO", "INDECIDIBLE"
 ADOPTAR, NO_ADOPTAR, SIN_CAMBIO = "ADOPTAR", "NO ADOPTAR", "SIN CAMBIO"
@@ -118,6 +120,11 @@ def veredicto_global(comp, r1, por_sensor):
     if DECIDE_M4 in vs:
         return DECIDE_M4
     if ADOPTAR in vs and NO_ADOPTAR in vs:
+        return DECIDE
+    if por_sensor.get("VIIRS750") == ADOPTAR:
+        # Verificador v2, V-N7: para VIIRS 750 manda el código de MIROVA (docs/MISSION.md, decisión del 2026-10-21), y
+        # de día su código usa K1 -0,5 y descarta la escena con reflejo bajo 12°; la rama diurna usa la Tabla 1 (-0,6) y
+        # no filtra. Un ADOPTAR de VIIRS 750 medido con otra configuración no se adopta solo.
         return DECIDE
     if ADOPTAR in vs:
         return ADOPTAR
@@ -233,7 +240,7 @@ def compuerta_i5(recs_c, recs_b):
     return distintos, solo
 
 
-def banderas_por_periodo(T):
+def banderas_por_periodo(T, otra_como_negativo=False):
     """«Día con alerta» y «día con FALSO_POSITIVO» por periodo (verificador V2 y V7): una pasada diurna mira sólo las
     pasadas DIURNAS de su volcán, sensor y día UTC, y una nocturna sólo las nocturnas. De día MIROVA usa otros umbrales
     y su pasada es una mirada aparte: una alerta de la madrugada no hace que su RUTINA del mediodía deje de ser un
@@ -245,6 +252,22 @@ def banderas_por_periodo(T):
     fp = {k(f) for f in T if f["pasada"].estado == "fp"}
     for f in T:
         f["noche_con_alerta"], f["noche_con_fp"] = k(f) in alerta, k(f) in fp
+        if otra_como_negativo and f["es_dia"]:
+            # Verificador v2, V-N4 (variante d del §6.4): toda RUTINA diurna de la tabla cuenta como negativo, aunque su
+            # periodo tenga una alerta o un FALSO_POSITIVO de MIROVA. Así lo que el brazo publique en «otra» pesa.
+            f["noche_con_alerta"] = f["noche_con_fp"] = False
+
+
+def huellas_nocturnas_distintas(recs_c, recs_b):
+    """Verificador v2, V-N5, INFORMATIVO: records nocturnos presentes en los dos brazos cuyo contenido difiere en algún
+    campo fuera de los volátiles y de los `diag_*` (ver huella_record), aunque publiquen igual. La G3 de la adenda
+    pedía el record entero; aquí decide la publicación y la magnitud (I5) porque es lo único que lee el criterio, y un
+    desempate que depende de la CPU (S152, D-16, D-22) cambia campos que no deciden. Se listan para que se vean."""
+    def idx(recs):
+        return {(r["vol"], r["b"], r["dt"]): r.get("huella") for r in recs if not r["es_dia"]}
+    ic, ib = idx(recs_c), idx(recs_b)
+    return ["%s|%s|%s" % (k[0], k[1], k[2].strftime("%Y-%m-%d %H:%M")) for k in sorted(set(ic) & set(ib))
+            if ic[k] is not None and ib[k] is not None and ic[k] != ib[k]]
 
 
 def completar_control_diurno(T, control, brazo):
@@ -357,7 +380,7 @@ def r1_perdidas(T, control, brazo):
 
 
 def evaluar(pasadas, recs_por_lado, control, brazo, opcion, p_sup, sha, ventanas, excluir_claves=(),
-            excluir_dias=(), p_sup_override=None, problemas_log=()):
+            excluir_dias=(), p_sup_override=None, problemas_log=(), otra_como_negativo=False):
     """Una evaluación completa (§5 y §6) sobre pasadas de MIROVA y records ya cargados (con `pub`, `disp`, `es_dia`,
     `t1`, `fuente_hotspot`, `sha`, `diag_dia`). `excluir_claves` y `excluir_dias` arman las variantes del §6.4."""
     if not re.fullmatch(r"[0-9a-f]{40}", str(sha)):
@@ -377,12 +400,14 @@ def evaluar(pasadas, recs_por_lado, control, brazo, opcion, p_sup, sha, ventanas
     T = ec.tabla_por_pasada(pas, recs, control)
     for f, m in zip(T, marcadas):
         f["es_dia"] = m._es_dia
-    banderas_por_periodo(T)
+    banderas_por_periodo(T, otra_como_negativo)
     # verificador V5: las pasadas excluidas salen DESPUÉS de marcar los días con alerta, así no vuelven negativos a
     # sus vecinas.
     T = [f for f in T if f["clave"] not in excl_k]
     Tn = [f for f in T if not f["es_dia"] or f["pasada"].sensor_bucket not in SENSORES_DIA]
-    cob_n = ec.cobertura(Tn, recs, control)
+    # Verificador v2, V-N6: la cobertura nocturna cuenta sólo records nocturnos; con los de día, un record diurno del
+    # brazo tapaba un día sin ningún record nocturno.
+    cob_n = ec.cobertura(Tn, {lado: [r for r in rs if not r["es_dia"]] for lado, rs in recs.items()}, control)
     if cob_n["veredicto"] != ec.COBERTURA_OK:
         comp["invalido"].append("I3: cobertura nocturna %s (protegidas %d, días vacíos %d, control sin protegida %d)" % (
             cob_n["veredicto"], len(cob_n["protegidas_sin_record_en_brazos"]),
@@ -391,6 +416,7 @@ def evaluar(pasadas, recs_por_lado, control, brazo, opcion, p_sup, sha, ventanas
     comp["invalido"] += p4
     i5, solo = compuerta_i5(rc, rb)
     comp["indecidible"] += i5
+    huellas = huellas_nocturnas_distintas(rc, rb)
     if not any("I2: el control" in x for x in comp["invalido"]):
         completar_control_diurno(T, control, brazo)
     por_sensor, i6 = {}, {}
@@ -404,6 +430,7 @@ def evaluar(pasadas, recs_por_lado, control, brazo, opcion, p_sup, sha, ventanas
     glob = veredicto_global(comp, r1, {s: m["veredicto"] for s, m in por_sensor.items()})
     return {"global": glob, "compuertas": comp, "por_sensor": por_sensor, "i6": i6, "r1": r1, "T": T,
             "cobertura_nocturna": cob_n, "cobertura_diurna": det4, "noche_solo_un_lado": solo,
+            "noche_records_distintos_en_otros_campos": huellas,
             "pasadas": len(T), "pasadas_diurnas_viirs": sum(1 for f in T if f["es_dia"]
                                                               and f["pasada"].sensor_bucket in SENSORES_DIA)}
 
@@ -426,6 +453,19 @@ def sha256(p):
         for b in iter(lambda: fh.read(1 << 20), b""):
             h.update(b)
     return h.hexdigest()
+
+
+CAMPOS_VOLATILES = ("updated", "processed_utc", "first_processed_utc", "regimen")
+
+
+def huella_record(r):
+    """sha1 del record sin los campos volátiles ni los diagnósticos `diag_*` (para la comparación informativa de la
+    noche, V-N5). Los `diag_*` quedan fuera porque no deciden nada y algunos (diag_mu_deti, diag_sd_deti) difieren entre
+    dos corridas del mismo código por punto flotante: en la prueba de humo sobre C0 lo hacían en 64 a 67 de 71 records
+    nocturnos de Chaitén y tapaban cualquier diferencia de posición o de cúmulo."""
+    return hashlib.sha1(json.dumps({k: v for k, v in r.items() if k not in CAMPOS_VOLATILES
+                                    and not k.startswith("diag_")}, sort_keys=True,
+                                   default=str).encode("utf-8")).hexdigest()
 
 
 def cargar_brazo(raices, brazo, ventanas, inner):
@@ -458,6 +498,7 @@ def cargar_brazo(raices, brazo, ventanas, inner):
                 if b == "MODIS" and dia:
                     continue          # MODIS diurno sigue apagado en los dos brazos (no entra a nada)
                 recs.append({"vol": vol, "b": b, "dt": dt, "es_dia": dia, "t1": r.get("triggered_test1"),
+                             "huella": huella_record(r),
                              "fuente_hotspot": r.get("final_hotspot_source"),
                              "sha": (r.get("regimen") or {}).get("codigo_sha"),
                              "diag_dia": r.get("diag_umbrales_diurnos"),
@@ -507,6 +548,61 @@ def problemas_de_logs(raices, brazos, control):
     return prob
 
 
+def p_sup_de_vara(vara):
+    """§5 I4c: cota superior de Clopper-Pearson al 95 % (una cola) de la tasa nocturna de producción sin record."""
+    from scipy.stats import beta
+    return {s: float(beta.ppf(1 - ALFA, vara[s]["sin_record_produccion"] + 1,
+                              vara[s]["pasadas_nocturnas"] - vara[s]["sin_record_produccion"]))
+            for s in SENSORES_DIA}
+
+
+def pasadas_de(filas, canal, ventanas, vols=None, regla=REGLA_MINIMAS, umbral=cm.UMBRAL_MINIMA_MW):
+    """Pasadas de MIROVA de las ventanas, VIIRS de día y de noche y MODIS sólo de noche."""
+    out = []
+    for p in cm.resumir_pasadas(filas, canal=canal, regla_minimas=regla, umbral_minima_mw=umbral):
+        d = p.instante.strftime("%Y-%m-%d")
+        if p.volcano not in coords() or p.sensor_bucket not in SENSORES_NOCHE:
+            continue
+        if vols and p.volcano not in vols:
+            continue
+        if not any(w[1] <= d <= w[2] for w in ventanas):
+            continue
+        if p.sensor_bucket == "MODIS" and es_dia_vol(p.volcano, p.instante):
+            continue
+        out.append(p)
+    return out
+
+
+def evaluar_completo(filas, recs, control, brazo, opcion, p_sup, sha, ventanas, problemas_log=(), filas_1_13=()):
+    """El veredicto del §6 con su robustez (§6.4) y lo informativo (§6.4 y §7), a partir de las filas de la referencia
+    y los records ya cargados. Separado de main() para que la batería lo pruebe (verificador v2, V-N2)."""
+    kw = dict(opcion=opcion, p_sup=p_sup, sha=sha, ventanas=ventanas, problemas_log=problemas_log)
+    pas_u = pasadas_de(filas, "union", ventanas)
+    principal = evaluar(pas_u, recs, control, brazo, **kw)
+    dias_w2 = {d.strftime("%Y-%m-%d") for w, d0, d1 in ventanas if w == "W2" for d in _dias(d0, d1)}
+    reflejo, sin_pareo = claves_reflejo(pas_u, filas_1_13)
+    sin_pareo = [x for x in sin_pareo if any(w[1] <= x.split("|")[2][:10] <= w[2] for w in ventanas)]
+    variantes = {"tabla": evaluar(pasadas_de(filas, "tabla", ventanas), recs, control, brazo, **kw)["global"],
+                 "sin_W2": evaluar(pas_u, recs, control, brazo, excluir_dias=dias_w2, **kw)["global"],
+                 "sin_reflejo": evaluar(pas_u, recs, control, brazo, excluir_claves=reflejo, **kw)["global"],
+                 "otra_como_negativo": evaluar(pas_u, recs, control, brazo, otra_como_negativo=True, **kw)["global"]}
+    final, motivo = veredicto_final(principal["global"], variantes)
+    info = {"minimas_SE": evaluar(pasadas_de(filas, "union", ventanas, regla="SE"), recs, control, brazo,
+                                  **kw)["global"],
+            "minimas_original": evaluar(pasadas_de(filas, "union", ventanas, regla="original"), recs, control, brazo,
+                                        **kw)["global"],
+            "minimas_SN_0,04": evaluar(pasadas_de(filas, "union", ventanas, umbral=cm.UMBRAL_MINIMA_VARIANTE_MW), recs,
+                                       control, brazo, **kw)["global"]}
+    rb12 = aplicar_filtro_reflejo(recs[brazo])
+    con12 = evaluar(pas_u, {control: recs[control], brazo: rb12}, control, brazo, **kw)
+    info["con_filtro_reflejo_12"] = con12["global"]
+    reflejo12 = {"apagadas": sum(1 for r0, r1 in zip(recs[brazo], rb12) if r0["pub"] and not r1["pub"]),
+                 "sin_angulos": sum(1 for r in recs[brazo] if r["es_dia"] and r["pub"] and angulo_reflejo(r) is None),
+                 "por_sensor": con12["por_sensor"]}
+    return {"principal": principal, "variantes": variantes, "final": final, "motivo": motivo, "info": info,
+            "reflejo": reflejo, "reflejo_sin_pareo": sin_pareo, "reflejo12": reflejo12}
+
+
 def main(argv=None):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(description="Evaluador del A/B diurno sobre K (PREREGISTRO.md)")
@@ -531,11 +627,7 @@ def main(argv=None):
         print("REFERENCIA DISTINTA DE LA DEL PRE-REGISTRO (sha256): %s. No se decide." % distintos)
         return 3
     filas = sk.cargar_ref(ref)
-    vara = sus["vara_cobertura_nocturna_produccion"]
-    from scipy.stats import beta
-    p_sup = {s: float(beta.ppf(1 - ALFA, vara[s]["sin_record_produccion"] + 1,
-                               vara[s]["pasadas_nocturnas"] - vara[s]["sin_record_produccion"]))
-             for s in SENSORES_DIA}
+    p_sup = p_sup_de_vara(sus["vara_cobertura_nocturna_produccion"])
     inner = bp.inner_desde_html()
     ventanas = [(w[0], w[1], w[2]) for w in sk.VENTANAS if w[0] in sk.DECIDEN]
     if a.recorte:
@@ -545,55 +637,28 @@ def main(argv=None):
     recs = {control: cargar_brazo(a.raiz, control, ventanas, inner),
             brazo: cargar_brazo(a.raiz, brazo, ventanas, inner)}
     logs = problemas_de_logs(a.raiz, (control, brazo), control)
-
-    def pasadas(canal, vent=ventanas, vols=None, regla=REGLA_MINIMAS, umbral=cm.UMBRAL_MINIMA_MW):
-        out = []
-        for p in cm.resumir_pasadas(filas, canal=canal, regla_minimas=regla, umbral_minima_mw=umbral):
-            d = p.instante.strftime("%Y-%m-%d")
-            if p.volcano not in coords() or p.sensor_bucket not in SENSORES_NOCHE:
-                continue
-            if vols and p.volcano not in vols:
-                continue
-            if not any(w[1] <= d <= w[2] for w in vent):
-                continue
-            if p.sensor_bucket == "MODIS" and es_dia_vol(p.volcano, p.instante):
-                continue
-            out.append(p)
-        return out
-
-    kw = dict(opcion=a.opcion_e, p_sup=p_sup, sha=a.sha_codigo, ventanas=ventanas, problemas_log=logs)
-    principal = evaluar(pasadas("union"), recs, control, brazo, **kw)
-    w2 = next(w for w in sk.VENTANAS if w[0] == "W2")
-    dias_w2 = {d.strftime("%Y-%m-%d") for d in _dias(w2[1], w2[2])}
-    pas_u = pasadas("union")
-    reflejo, sin_pareo = claves_reflejo(pas_u, _filas_1_13())
-    en_ventana = [x for x in sin_pareo if any(w[1] <= x.split("|")[2][:10] <= w[2] for w in ventanas)]
-    print("reflejo probable (1.13): %d pasadas; filas del estudio dentro de W2 a W6 sin pasada: %d %s"
-          % (len(reflejo), len(en_ventana), en_ventana[:5]))
-    variantes = {"tabla": evaluar(pasadas("tabla"), recs, control, brazo, **kw)["global"],
-                 "sin_W2": evaluar(pasadas("union"), recs, control, brazo, excluir_dias=dias_w2, **kw)["global"],
-                 "sin_reflejo": evaluar(pasadas("union"), recs, control, brazo, excluir_claves=reflejo, **kw)["global"]}
-    final, motivo = veredicto_final(principal["global"], variantes)
+    r = evaluar_completo(filas, recs, control, brazo, a.opcion_e, p_sup, a.sha_codigo, ventanas, logs, _filas_1_13())
+    principal, variantes, final, motivo = r["principal"], r["variantes"], r["final"], r["motivo"]
+    print("reflejo probable (1.13): %d pasadas; filas del estudio dentro de las ventanas sin pasada: %d %s"
+          % (len(r["reflejo"]), len(r["reflejo_sin_pareo"]), r["reflejo_sin_pareo"][:5]))
     imprimir(principal, variantes, final, motivo, a.opcion_e)
-    # Informativo, no decide (§6.4 y §7; verificador V3 y V4)
-    info = {"minimas_SE": evaluar(pasadas("union", regla="SE"), recs, control, brazo, **kw)["global"],
-            "minimas_original": evaluar(pasadas("union", regla="original"), recs, control, brazo, **kw)["global"],
-            "minimas_SN_0,04": evaluar(pasadas("union", umbral=cm.UMBRAL_MINIMA_VARIANTE_MW), recs, control, brazo,
-                                       **kw)["global"]}
-    rb12 = aplicar_filtro_reflejo(recs[brazo])
-    sin_angulos = sum(1 for r in recs[brazo] if r["es_dia"] and r["pub"] and angulo_reflejo(r) is None)
-    apagadas = sum(1 for r0, r1 in zip(recs[brazo], rb12) if r0["pub"] and not r1["pub"])
-    con12 = evaluar(pasadas("union"), {control: recs[control], brazo: rb12}, control, brazo, **kw)
-    info["con_filtro_reflejo_12"] = con12["global"]
     print()
-    print("INFORMATIVO (no decide): %s" % info)
+    print("INFORMATIVO (no decide): %s" % r["info"])
+    print("  ¿alguna variante de mínimas cambia el veredicto principal (%s)? %s"
+          % (principal["global"], {k: v != principal["global"] for k, v in r["info"].items()}))
     print("filtro de reflejo de 12°: apaga %d publicaciones diurnas del brazo; %d publicaciones diurnas sin ángulos"
-          % (apagadas, sin_angulos))
+          % (r["reflejo12"]["apagadas"], r["reflejo12"]["sin_angulos"]))
     for s in SENSORES_DIA:
-        m12 = con12["por_sensor"][s]
+        m12 = r["reflejo12"]["por_sensor"][s]
         print("  con filtro %s: %s (caso %s), negativos %d de %d, protegidas %d de %d" % (
             s, m12["veredicto"], m12["caso"], m12["neg_pub"], m12["neg_obs"], m12["P"], m12["P_obs"]))
         print("  %s desproporción (1.13 a) sobre lo nuestro): %s" % (s, desproporcion(recs[brazo], s)))
+    print("noche, records en los dos brazos con otros campos distintos (informativo, V-N5): %d %s"
+          % (len(principal["noche_records_distintos_en_otros_campos"]),
+             principal["noche_records_distintos_en_otros_campos"][:10]))
+
+    def pasadas(canal, vent, vols=None):
+        return pasadas_de(filas, canal, vent, vols)
     if a.w1:
         w1 = next(w for w in sk.VENTANAS if w[0] == "W1")
         v1 = [(w1[0], w1[1], w1[2])]
