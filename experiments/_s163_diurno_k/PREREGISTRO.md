@@ -494,11 +494,12 @@ python -I experiments/_s163_diurno_k/evaluar_diurno_k.py --raiz <W2> ... --raiz 
 
 ## 11. Desviaciones registradas después de ver datos
 
-### Adenda 1 (2026-10-26, escrita hacia las 18:45 UTC): días con hueco de NASA en la compuerta I4
+### Adenda 1 (2026-10-26; primera versión hacia las 18:45 UTC, versión vigente hacia las 18:50 UTC, con (b')): días con hueco de NASA en la compuerta I4
 
 **Cuándo y desde qué datos.** Nace de W1 (run 40364164845, Láscar, 1 al 20 de marzo), que es **informativa** (§3 y
 §8). Se escribe **antes de que exista cualquier dato de W2 a W6**: a esa hora W2 (run 40379112237) estaba en cola, sin
-salidas. La aprobó la coordinadora S164 con D-48 a las 18:39 UTC, con las condiciones que siguen. El detalle de W1 está
+salidas. La aprobó la coordinadora S164 con D-48 a las 18:39 UTC, con las condiciones que siguen, y eligió (b') en vez de (b)
+después de ver W1 (punto 2). El detalle de W1 está
 en `w1/REVISION_W1.md` y `w1/revisar_w1_salida.txt`.
 
 **El fenómeno.** En W1 a la compuerta I4c le faltan records del brazo diurno en 3 de 37 pasadas diurnas de VIIRS 375 y
@@ -509,31 +510,39 @@ los dos brazos; repetir el job no lo arregla, que es el único remedio que el §
 
 **La regla** (mecánica, de fuera del A/B, sin decisiones caso a caso):
 1. Un día d se excluye **de los dos brazos y de todas las cuentas** (el mecanismo `excluir_dias` del evaluador, el
-   mismo de D-29) si, para algún sensor VIIRS s, se cumplen las dos:
-   (a) el catálogo CMR de NASA devuelve **0 gránulos** de alguna plataforma de s ese día sobre la caja de los 11
-       volcanes (-72,5 -39,5 a -67,5 -23,0; VIIRS 375: `VNP02IMG`, `VJ102IMG`, `VJ202IMG`; VIIRS 750: `VNP02MOD`,
-       `VJ102MOD`, `VJ202MOD`), y
-   (b) el **control** pierde al menos una pasada **nocturna** de MIROVA de s ese día (sin record a ±120 s).
-2. La lista la entrega un script aparte, `dias_excluidos_nasa.py`, con la hora de la consulta a CMR y la evidencia de
-   cada día; el evaluador sellado (`evaluar_diurno_k.py`, sha en `objetivos_sha256.txt`) **no se toca** y se corre con
-   esa lista. Pruebas: `test_dias_excluidos_nasa.py` (11, rojo primero en `w1/dias_excluidos_salida_roja.txt`);
-   mutaciones: 8 de 8 atrapadas por aserción y el control de caída como CAÍDA
+   mismo de D-29) si, para alguna plataforma VIIRS P, se cumplen las dos:
+   (a)  el catálogo CMR de NASA devuelve **0 gránulos** del producto L1B de P ese día sobre la caja de los 11 volcanes
+        (-72,5 -39,5 a -67,5 -23,0; `VNP02IMG`, `VJ102IMG`, `VJ202IMG`, `VNP02MOD`, `VJ102MOD`, `VJ202MOD`), y
+   (b') el **control no tiene ningún record de P** ese día, contado con el campo `sensor` del record, que nombra la
+        plataforma (`VIIRS_SNPP`, `VIIRS_SNPP_750`, `VIIRS_NOAA20`, ...).
+   (a) dice que NASA no tiene el dato; (b'), que nuestro pipeline tampoco lo tuvo, también de noche, donde el brazo
+   diurno no actúa. Las dos preguntan lo mismo: si alguien pudo tener ese dato.
+2. **La condición (b) se cambió a (b') después de ver W1**, por decisión de la coordinadora S164. La primera versión de
+   esta adenda (commit `7d0a1dac`, nunca aplicada a W2 a W6) decía (b): «el control pierde al menos una pasada nocturna
+   de MIROVA de ese sensor ese día». Motivo del cambio: (b) medía lo que MIROVA listó de noche y no si el dato existía.
+   En W1, el 11 y el 12 de marzo NASA no tiene ningún gránulo de Suomi NPP y el control no tiene ningún record de Suomi
+   NPP, pero la tabla de MIROVA no lista pasadas nocturnas de Suomi NPP de Láscar esos días, así que (b) no se cumplía
+   y esos días quedaban dentro como si fueran una falla del brazo. W1 es informativa: el cambio no se apoya en ningún
+   dato de W2 a W6, que no existe a esta hora.
+3. La lista la entrega un script aparte, `dias_excluidos_nasa.py`, con la hora de la consulta a CMR y la evidencia de
+   cada día, y la salida informa **las dos versiones**: la lista que decide (a y b') y la de la regla (b) original. El
+   evaluador sellado (`evaluar_diurno_k.py`, sha en `objetivos_sha256.txt`) **no se toca** y se corre con la lista que
+   decide. Pruebas: `test_dias_excluidos_nasa.py` (18; la salida roja de la primera versión en
+   `w1/dias_excluidos_salida_roja.txt`); mutaciones: 9 de 9 atrapadas por aserción y el control de caída como CAÍDA
    (`mutaciones_dias_excluidos_salida.txt`).
-3. **Si I4 vuelve a fallar después de excluir, el resultado es INVÁLIDO POR INSTRUMENTO.**
-4. Los días excluidos se declaran en el informe del resultado, con su evidencia.
+4. **Si I4 vuelve a fallar después de excluir, el resultado es INVÁLIDO POR INSTRUMENTO.**
+5. Los días excluidos se declaran en el informe del resultado, con su evidencia.
+6. **La regla queda fija desde el commit de esta versión de la adenda para W2 a W6**, que todavía no tienen datos.
 
-**Qué da en W1** (`w1/dias_excluidos_w1_salida.txt`): excluye **sólo el 2026-03-10**. El 11 y el 12 CMR tampoco tiene
-gránulos de Suomi NPP, pero la tabla de MIROVA no lista pasadas nocturnas de Suomi NPP de Láscar esos días, así que (b)
-no se cumple. Con el 10 excluido, I4c sigue fallando (1 de 34 en VIIRS 375 y 2 de 37 en VIIRS 750) y **W1 queda
-INVÁLIDA**, como manda la condición 3. Es informativa: no cambia nada de W2 a W6. En W2 a W6 el catálogo CMR tiene
-gránulos todos los días en los seis productos (`w1/revisar_w1_salida.txt`), así que no se espera que la regla excluya
-días enteros ahí.
-
-**Informado, no decide: la variante (b')**. El script informa además los días en que CMR no tiene gránulos de una
-plataforma y el **control no tiene ningún record de esa plataforma** (el campo `sensor` del record la nombra). En W1
-esa variante da el 10, 11 y 12 de marzo. La diferencia con (b) es que (b) depende de que MIROVA haya listado una pasada
-nocturna de esa plataforma ese día; (b') no. Se le preguntó a la coordinadora si prefiere (b'); si se elige antes de
-leer W2 a W6, va como adenda 2. Mientras tanto decide (b).
+**Qué da en W1** (`w1/dias_excluidos_w1_salida.txt`):
+- Con la regla que decide (a y b'): excluye el **10, 11 y 12 de marzo** (en los tres, Suomi NPP en las bandas I y M).
+  Sin esos días la cobertura diurna queda completa (0 de 31 en VIIRS 375 y 0 de 33 en VIIRS 750), todas las compuertas
+  pasan, y el veredicto informativo de W1 es DECIDE NICOLÁS CON M4 (VIIRS 375: 4 de 5 protegidas y 4 de 16 negativos
+  diurnos; VIIRS 750: SIN CAMBIO).
+- Con la regla (b) original, informativa: excluye sólo el 10 de marzo, I4c sigue fallando (1 de 34 y 2 de 37) y W1
+  saldría INVÁLIDA.
+- En W2 a W6 el catálogo CMR tiene gránulos todos los días en los seis productos (`w1/revisar_w1_salida.txt`), así que
+  no se espera que la regla excluya días enteros ahí.
 
 ## 12. Verificación limpia de la v1 y qué cambió (2026-10-26)
 

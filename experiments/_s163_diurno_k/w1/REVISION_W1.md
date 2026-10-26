@@ -49,8 +49,10 @@ datos; un hueco parcial (algunos gránulos de un día) no está descartado.
 ## Lo que el pre-registro sellado no dice
 
 ⚠️ **Resuelto el mismo día**: la coordinadora S164 aprobó con D-48 (18:39 UTC) una regla de exclusión con criterio
-mecánico, escrita como adenda 1 en el §11 del pre-registro (`dias_excluidos_nasa.py`). Con esa regla W1 excluye sólo
-el 2026-03-10 e I4c sigue fallando: W1 queda INVÁLIDA (informativa). La propuesta original, conservada por historia:
+mecánico, escrita como adenda 1 en el §11 del pre-registro (`dias_excluidos_nasa.py`), y después eligió la condición
+por plataforma (b'). Con ella W1 excluye el 10, 11 y 12 de marzo, I4 pasa y W1 da DECIDE NICOLÁS CON M4 (informativa);
+con la condición (b) original sólo se excluía el 10 y W1 quedaba INVÁLIDA. La propuesta original, conservada por
+historia:
 
 El §5 no prevé un hueco permanente del archivo de NASA. Propuesta de desviación, a registrar en el §11 sólo si la
 aprueban la coordinadora o Nicolás: cuando I4 falle, las pasadas sin record que caen en días en que CMR no tiene
