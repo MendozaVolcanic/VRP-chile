@@ -173,6 +173,19 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 
 - [x] F1. (relevo, `74a5f855b`) Plan con TDD del flag de MxD03 para la adopción dentro del paquete: `docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md` (posición por píxel, estado «sin dato» con regla a confirmar en el censo de MOD-D, distancia de la etiqueta desde el cráter). Nada en `pipeline/` sin tag y sí de Nicolás.
 
+### Pedidos de la coordinadora S163 (`local_8a135e90-b711-4bb9-9dec-ff02036f206b`, 2026-10-26)
+- [x] O1. Paquete O2 MODIS para MATLAB (`experiments/_s163_o2_modis/`, `89479be35`): 404 escenas de 1 a 4 píxeles,
+  identidad 404 de 404, md5 comprobados en el remoto. No corrido: la sesión de MathWorks expiró; queda como prueba de
+  oro para cuando Nicolás vuelva a entrar.
+- [ ] O2. Después del candado: vara PRELIMINAR del fondo de las 404 escenas con la regla de `fillmissing2` que reproduce
+  MATLAB en 166 de 166 escenas (`experiments/_s163_o2alt/delaunay_perturbado.py`, rama `s163-o2-alternativa`
+  `cd812c746`; su verificador limpio estaba en curso). Marcarla PRELIMINAR.
+- [ ] O3. Después del candado: PR chico a main con el sello D-48 y la adenda (`cd3d12984`) de
+  `experiments/_s159/mxd03_prereg/PREREGISTRO_MXD03.md` (main lo presenta como «BORRADOR v2 PARA EL SELLO»), más los
+  seguimientos de #906 pendientes en main: `docs/FICHA_SDA_VRP_CHILE.md:29` y `docs/paper/sec5_methods.md:7` dicen que
+  usamos MOD03; `docs/MISSION.md` no nombra a Coppola 2026. Si se toca `docs/MIROVA_DIVERGENCES.md`, tomar la
+  resolución de D25 de `a907c44f3` (PR #908). Nada en `pipeline/`.
+
 ### Perfil experimental (candidatas)
 - [x] X1. (en #906) Anotar en `docs/BEYOND_MIROVA_EXTENSIONS.md` §12 la candidata Láscar 2026-05-11 07:55 (señal real del cráter que MIROVA calla en MODIS; diagnóstico de MOD-C), en el PR del veredicto de MOD-B o de MOD-D (archivo compartido: no tocarlo suelto).
 
