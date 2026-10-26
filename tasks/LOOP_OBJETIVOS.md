@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~18:50 UTC (S164, vuelta 20): revisión de W1 por diurno-k-prereg; I4c falla por un hueco de NASA
+- Revisión (rama `claude/s163-diurno-k-prereg-5c4f44` `e150b4cfd`, `experiments/_s163_diurno_k/w1/REVISION_W1.md`):
+  diurno 88 min 27 s → W2 a W6 enteras (confirmado). Cableado sano: los 513 records con el sha sellado, 0 con Test 1,
+  147 diurnos con umbrales diurnos, noches idénticas. Costo re-estimado: ~55 h de runner, ~18 h de reloj.
+- **I4c INVÁLIDO en W1**: al diurno le faltan 3 de 37 pasadas diurnas de MIROVA en V375 y 4 de 40 en V750, todas del 10,
+  11 y 12 de marzo; al control, 2 nocturnas esos días. CMR: 0 gránulos de VNP02IMG y VNP02MOD esos tres días (hueco
+  permanente de Suomi NPP, común a los dos brazos). En W2 a W6 CMR tiene gránulos todos los días en los seis productos.
+- **Aprobado con D-48** (coherente con la regla de la vuelta 5): un día con 0 gránulos en CMR de esa plataforma y con
+  pasadas nocturnas perdidas también en el control se excluye en los dos brazos (`excluir_dias`, como D-29), se declara, se
+  recalcula I4 y si sigue fallando es INVÁLIDO. Condiciones: adenda fechada en el §11 antes de cualquier dato de W2 a W6;
+  criterio mecánico externo al A/B; evaluador sellado intacto (script aparte con pruebas y verificador limpio); PR a `main`.
+  Informado a Nicolás.
+
 ### 2026-10-26 18:35 UTC (S164, vuelta 19): W1 del diurno terminada; W2 despachada entera (run 40379112237)
 - W1 (run 40364164845): success; control 31 min (16:58 a 17:29), brazo diurno **88 min** (16:58 a 18:26), recolectar
   18:28. Salidas en la rama `s151-ab-diurno/40364164845` (`f2e98e998`). `cobertura.txt`: 183 pasadas nocturnas por brazo,
