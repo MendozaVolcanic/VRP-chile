@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~04:30 UTC (S163, vuelta 5): H3 refutado; paquete O2 de MODIS listo; temporales a la papelera
+- **H3 REFUTADO para el tablero de hoy** (`audit-h3-tablero`, rama `claude/s163-audit-h3-6c292b` `5a349caa9`,
+  `experiments/_s163_h3/INFORME.md`, verificador Sonnet CONFIRMADO): en origin/main `0b233221f`, 0 de 72.438 records Tier
+  A sin K y 0 de 9.538 publicados por el predicado del tablero (node); Pages igual. H3 era cierto sólo en la rama de S162,
+  nacida antes de #883 (desplegado el 2026-10-21 11:48 UTC, que cambió 2.730 de 5.603 noches de publica a no publica).
+  No se reprocesa nada. Marca A113 pendiente sobre el H3 del informe de S162 (`s162-v375-protegidas-snpp`).
+- `loop-modis-2` entregó el paquete O2 de MODIS (`claude/s162-modis-2-0dd578` `89479be35`, `experiments/_s163_o2_modis/`,
+  404 escenas de 1 a 4 píxeles, 168 de 1 píxel; md5 del remoto comprobados). **No corrido todavía**: el Chrome de Nicolás
+  dejó de responder a la extensión (capturas y lectura de texto fallan en MATLAB); se le pidió revisarlo.
+- Temporales a la **papelera de Windows** (no borrado permanente), tras comprobar que ninguno se usa: `D:\vrp-trabajo\
+  mirova-v1` (885 MB; clon limpio y al día con GitHub en `fix/referencia-estable`), `D:\vrp-trabajo\temporales\
+  pytest-of-nmend`, `pytest_tmp`, `s157_prereg_merge`, `s157_saturacion`, `s157_smoke`, `s157_verif874` (0 citas en main y
+  loop/activo, sin escrituras desde el 24-oct). Se conservan las carpetas citadas como evidencia de veredictos cerrados y
+  `D:\vrp-trabajo\temporales\s158_d17` (worktree registrado). `C:\vrp-trabajo\temporales\s162_v375\verif_v3\` ya no
+  existía (la borró loop-viirs375). Pendiente medir `experiments/_s140` y `_s160_espacial/data` contra las ramas remotas.
+- Pendiente de Nicolás que salió en la revisión: D-39 (bucle de push del scraper Mirova-v1, Mirova-v1#26).
+
 ### 2026-10-26 ~03:40 UTC (S163): loop-viirs750-2 corrige un desvío de A45; cableado de la vía espera el sí de Nicolás
 - Había editado sin commitear `pipeline/process_viirs_mod.py` y `pipeline/store.py` para cablear la vía «código MIROVA»;
   los devolvió a origin/main. El cableado queda como parche propuesto (`experiments/_s162_v750a/cableado_pendiente/
