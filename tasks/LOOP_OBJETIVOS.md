@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 16:33 UTC (S164, vuelta 15): auto-audit nuevo #915; #864 cerrado apuntando a él
+- #915 (2026-10-26 16:10 UTC, detector K, ventana 60 d). Respecto de #864 (2026-10-19), **nuevo**: recall MODIS 62,5 %
+  (n = 16, banda 95); magnitud de Cordón Caulle VIIRS 750 0,375× (n = 11); alerta protegida MODIS de Chillán sin publicar
+  2026-10-25 07:20 UTC (MIROVA 3,79 MW; la noche sí se publicó en otra pasada). **Siguen**: recall VIIRS 750 74,0 % (n = 50;
+  era 73,3 con n = 30); Chillán bajo 0,7× en los tres sensores (MODIS 0,56, V375 0,662, V750 0,683); Tupungatito V375 0,41×
+  (era 0,266); las cinco protegidas de #864 (las dos de Tupungatito con referencia sospechosa, sólo OCR de Suomi NPP).
+- Lectura: el grueso es Chillán en erupción y MODIS, el frente que ataca MOD-D (el censo da 20 protegidas que pasan de
+  K < 1 a PM ≥ 1 MW). Las tres protegidas MODIS de Chillán perdidas son exactamente ese síntoma. No se toca nada sin el sí
+  de Nicolás.
+- #864 cerrado con comentario que apunta a #915.
+
 ### 2026-10-26 16:16 UTC (S164, vuelta 14): verificador del censo de MOD-D confirma DECIDE NICOLÁS; llevado a Nicolás
 - Verificador limpio Fable alto (commit `9ea9a1786` de `claude/s162-modis-2-0dd578`, = remoto; carpeta
   `experiments/_s162_modis_paquete/censo/verificador/`, con `CAMINOS.md` escrito antes de medir): «el veredicto DECIDE
