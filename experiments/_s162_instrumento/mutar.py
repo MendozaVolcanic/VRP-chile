@@ -44,6 +44,8 @@ def correr(pruebas, xml):
 
 
 def main(spec_path, salida_path):
+    # con python -I no se lee PYTHONIOENCODING y la consola de Windows es cp1252 (un «′» la hacía caer al final)
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     spec = json.loads(Path(spec_path).read_text(encoding="utf-8"))
     pruebas = spec["pruebas"]
     lineas = []
