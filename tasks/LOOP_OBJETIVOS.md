@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 13:48 UTC (S164, vuelta 6): humo de MOD-D despachado (run 40333783937)
+- `loop-modis-2` pidió el humo tras tres vueltas de verificador (la tercera, Sonnet, `verificador_candado_r3/INFORME.md`:
+  «se puede despachar el humo tal como está»).
+- Comprobado antes de despachar: tag `s162-modd-tag` (anotado `28a665c05`) en el remoto sobre `865174abe` = cabeza de
+  `s162-modd-candado`; respecto del `main` congelado `80b819828`, fuera de `experiments/` sólo cambian
+  `.github/workflows/probe-s162-modd.yml` y `probe-s162-mxd03.yml` (este no se dispara con la rama del humo); sin push ni
+  escritura en `data/`; sólo `EARTHDATA_TOKEN`, que falla si viene vacío (A71); `"on":` entre comillas; ningún NRT en
+  curso (NRT 11 más 3 jobs del humo, bajo el cupo de 20).
+- Despacho: `git push origin 865174abe...:refs/heads/s162-modd-humo` a las 13:48 UTC; run **40333783937** (plan, prueba
+  sin red ~15 min, probe de 5 gránulos con timeout 240 min). Lo evalúa `loop-modis-2` con `evaluar_paquete.py` desde el
+  checkout del tag; criterio de la adenda 3.14 (job de pruebas verde, 5 pasadas con fila «ok», K reproduce `data/` en las
+  que deciden, el PM reproduce a S159 en Láscar 2026-03-14 07:05 y Chillán 2026-10-16 01:40).
+
 ### 2026-10-26 13:46 UTC (S164, vuelta 5): cierre de VIIRS 375 integrado; #914 mergeado (placebos D-44, tarea 1.35, causa de huecos)
 - `loop-viirs375` cerró: adenda 1 de `experiments/_s162_v375/PREREGISTRO_E.md` con PD1, **sin sellar**; traspaso para la
   sesión que lleve la vía a 375 en la carpeta compartida de S162 (`VIIRS375_via_375_traspaso.md`): el procesador de 375 es
