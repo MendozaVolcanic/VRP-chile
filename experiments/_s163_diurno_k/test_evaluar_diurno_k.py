@@ -697,3 +697,27 @@ def test_i6_cuenta_los_gana_del_placebo_simetrico():
     excl = lambda f: not (f["es_dia"] and f["pasada"].sensor_bucket == V375)  # noqa: E731
     a_mano = sum(ec.placebo_p2(r["T"], B, "c", 1.0, sem, excluir=excl)[0] == "GANA" for sem in ev.SEMILLAS_C)
     assert a_mano >= 1 and r["i6"][V375]["c_gana"] == a_mano
+
+
+def test_variante_d_no_toca_los_falsos_positivos_nocturnos():
+    # Verificador v3.1, V1: la reclasificación de la variante d es sólo diurna. Un FALSO_POSITIVO nocturno que el
+    # control publica no puede pasar a negativo nocturno (cambiaría Q_n).
+    e = Escena().base()
+    e.noche("Isluga", V375, 15, estado="fp", vrp=0.5, pub=True, disp=0.3)   # día sin otras pasadas nocturnas
+    r0 = e.evaluar()
+    r1 = e.evaluar(otra_como_negativo=True)
+    assert r0["por_sensor"][V375]["Qn"] == pytest.approx(0.1)
+    assert r1["por_sensor"][V375]["Qn"] == pytest.approx(0.1)
+
+
+def test_i6_el_tope_de_gana_llega_al_juicio(monkeypatch):
+    # Verificador v3.1, V2: con el tope de GANA en 0 y una escena donde el placebo c da al menos un GANA, I6 tiene que
+    # fallar; si compuerta_i6 no le pasara los GANA a juzgar_i6, no fallaría.
+    e = Escena().base()
+    for d in range(1, 26):
+        for h, pub in ((14, True), (15, True), (19, False), (20, False)):
+            e.dia(VOLS[(d + 3) % 11], V375, d, hora=h, pub_b=pub)
+    monkeypatch.setattr(ev, "MAX_GANA_C", 0)
+    r = e.evaluar()
+    assert r["i6"][V375]["c_gana"] >= 1
+    assert any("con GANA" in x for x in r["compuertas"]["indecidible"])

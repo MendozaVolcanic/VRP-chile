@@ -1,12 +1,12 @@
 # Pre-registro del A/B diurno de VIIRS sobre K (tarea 1.32, decisión D-10, issue #813)
 
-Estado: **v3.1, corregida con tres verificaciones limpias** (la tercera, acotada al diff de la v2 a la v3, §14) (Sonnet 5.5; la primera, `verificador/INFORME.md`, 13
+Estado: **v3.1, corregida con cuatro verificaciones limpias** (la tercera, acotada al diff de la v2 a la v3, §14; la
+cuarta, al diff de la v3 a la v3.1, CONFORME, §15) (Sonnet 5.5; la primera, `verificador/INFORME.md`, 13
 hallazgos, §12; la segunda, `verificador_v2/INFORME.md`, 9 hallazgos nuevos y los arreglos de la primera confirmados, §13).
 La v3 cambió poco de la regla (umbral del placebo c, VIIRS 750 no adopta solo, una variante más de robustez) y la
 tercera mirada no encontró ningún camino nuevo a un ADOPTAR indebido. La v3.1 cierra sus hallazgos con dos cambios más
-estrictos (la variante d incluye los FALSO_POSITIVO diurnos; el placebo c tiene tope propio de GANA) que **no tienen
-verificador limpio propio**, sólo pruebas y mutaciones (§14). Después, el sello (2026-10-26, S163, sesión
-`diurno-k-prereg`). Nada de esto se despacha sin el sello y el candado `preregistro_aprobado=si` del workflow. Todo
+estrictos (la variante d incluye los FALSO_POSITIVO diurnos; el placebo c tiene tope propio de GANA), que una cuarta
+verificación limpia dio por conformes (§15). Después, el sello (2026-10-26, S163, sesión `diurno-k-prereg`). Nada de esto se despacha sin el sello y el candado `preregistro_aprobado=si` del workflow. Todo
 número de este documento sale de un `*_salida.txt` de esta carpeta; ninguno se transcribe de memoria.
 
 ## 0. Relación con lo que ya está sellado (leer primero)
@@ -277,7 +277,7 @@ daba lo mismo salvo e-i en VIIRS 375: 4 y 4 de 200, y Q_n de 3,51 % y 0,94 %.)
 
 ### 5.2 Batería, mutaciones y prueba de humo
 
-- **Batería** (`test_evaluar_diurno_k.py`, 80 pruebas desde la v3.1; 78 en la v3, 65 en la v2): cada caso a a e del §6.2, el §6.3, el §6.4, cada compuerta I1
+- **Batería** (`test_evaluar_diurno_k.py`, 82 pruebas; 78 en la v3, 65 en la v2): cada caso a a e del §6.2, el §6.3, el §6.4, cada compuerta I1
   a I6 con un escenario que la hace fallar, la definición de negativo, el control sintético, R1, Q_n del control, la
   prueba D, el borde de 1 MW, la lectura de los logs y, desde la v2, el negativo por periodo, la exclusión que no
   vuelve negativas a las vecinas, la alerta bajo 1 MW sin record, los records nocturnos en un solo brazo, el ángulo de
@@ -368,7 +368,8 @@ clase desproporcionada o aislada: 17 pasadas de W2 a W6, 13 de VIIRS 375 y 4 de 
 salen **después** de marcar los días con alerta (verificador V5: en la v1 salían antes y 12 pasadas vecinas pasaban de
 «otra» a «negativo»); (d) **«otra» como negativo**: toda RUTINA diurna de la tabla cuenta como negativo aunque su
 periodo tenga una alerta o un FALSO_POSITIVO, y también las pasadas FALSO_POSITIVO diurnas de la tabla (MIROVA no
-alertó en el radio), para que lo que el brazo publique en esas 265 y 60 pasadas pese (verificador v2, V-N4: sin esta
+alertó en el radio), para que lo que el brazo publique en esas pasadas pese (la variante suma 263 negativos diurnos en
+VIIRS 375 y 59 en VIIRS 750; las 2 y 1 pasadas «sin geometría» siguen fuera) (verificador v2, V-N4: sin esta
 variante el caso b adoptaba un brazo con 60 publicaciones ahí; verificador v3, V3-1: la v3 dejaba fuera los
 FALSO_POSITIVO propios, que eran justo los de ese escenario). Si el veredicto principal es ADOPTAR o NO ADOPTAR y alguna variante da otro
 veredicto global, el resultado es **DECIDE NICOLÁS**, informando cuál cambió y por qué. Es la regla §3.2 de la adenda
@@ -573,3 +574,27 @@ dio 62 de 62).
 **Incidente de máquina:** el verificador v3 cuenta que, al buscar sus procesos para detenerlos, terminó por error tres
 procesos de Python con `evaluar_diurno_k.py` en la línea de comandos; eran los suyos, pero no descarta que alguno fuera
 de otra sesión.
+
+
+## 15. Cuarta verificación limpia (del diff de la v3 a la v3.1) (2026-10-26)
+
+Pedida por la coordinadora S164: una regla que cambia después de verificada se vuelve a verificar. Otra instancia de
+Sonnet 5.5, acotada al diff `987a7601..9700e4e0`, con sus caminos escritos antes de abrir el diff
+(`verificador_v31/CAMINOS.md`) y con la regla de no terminar procesos salvo por el PID propio. **Resultado: conforme.**
+Los cuatro cambios están confirmados en el código; no hay camino a un ADOPTAR que la v3 no diera (la variante d y el
+tope de GANA sólo degradan a DECIDE NICOLÁS o INDECIDIBLE); 80 de 80 pruebas; 29 de 29 sha256 contra los blobs; el
+comando del §8 da vacío, y no vacío con un control positivo; M57 a M59 atrapadas en una copia aparte; 0 pasadas
+nocturnas o MODIS cambian con la reclasificación en la referencia congelada. Hallazgos (0 de gravedad 3 o más):
+
+| ID | gravedad | hallazgo | qué se hizo (v3.1, sin tocar el evaluador) |
+|---|---|---|---|
+| V1 | 2 | ninguna prueba vigilaba el filtro de día de la reclasificación de la variante d | prueba nueva con un FALSO_POSITIVO nocturno; mutación M60 atrapada (`mutaciones_v32_salida.txt`) |
+| V2 | 2 | ninguna prueba vigilaba que `compuerta_i6` le pase los GANA a `juzgar_i6` | prueba nueva con el tope en 0; mutación M61 atrapada |
+| V3 | 2 | SOSPECHA: la variante d falla I6 por azar algo más seguido (2 de 20 contra 0 de 20 con un brazo ruidoso) | declarado: cada falla lleva a INDECIDIBLE en esa variante y a DECIDE NICOLÁS en el final; dirección segura, con costo de revisión humana |
+| V4 | 1 | I6 se evalúa unas 10 veces por corrida (principal y variantes, dos sensores); la tasa conjunta de falso fallo estimada es de 2,4 a 5,9 % | declarado, misma dirección que V3 |
+| V5 | 1 | la variante d suma 263 y 59 negativos, no 265 y 60 | corregido (§6.4) |
+| V6 | 1 | leer FALSO_POSITIVO como «MIROVA no alertó» es la lectura más estricta (MIROVA sí vio calor, fuera del radio) | se mantiene: es una variante de robustez y está para ser estricta; el principal sigue a `clase_p2`, que deja el FALSO_POSITIVO fuera de los negativos |
+| V7 | 1 | el comando del §8 es de bash; una ruta mal escrita en el sello daría vacío; `pytest.ini` no está sellado; `git archive` en Windows entrega CRLF | declarado: el comando se corre en Git Bash; quien sella cuenta que las 29 rutas existan en el commit; los sha256 se comparan contra blobs, no contra archivos extraídos |
+
+El evaluador (`evaluar_diurno_k.py`) no cambió después de esta verificación: su sha256 es el verificado. Cambiaron la
+batería (dos pruebas), `mutaciones.json` (M60 y M61) y este texto.
