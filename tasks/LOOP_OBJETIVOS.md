@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 15:17 UTC (S164, vuelta 10): t1 contada completa; pre-registro diurno listo para el sello de Nicolás
+- t1 de MOD-D contada por `loop-modis-2` con `experiments/_s162_modis_paquete/contar_tanda.py`: 1.814 de 1.814 pasadas con
+  fila «ok», 8 partes BIEN (0 faltan, 0 sobran, 0 repetidas, cabecera con el commit del tag), 0 retenidas, 39 «volcán
+  fuera del gránulo» (salen por motivo sellado). t2 (40344051900) en curso.
+- Pre-registro diurno sobre K: cuarta verificación limpia (Sonnet, sólo el diff v3 a v3.1) **CONFORME**; ningún camino
+  nuevo a ADOPTAR; las dos reservas de cobertura de pruebas cerradas (M60, M61 atrapadas); el evaluador no cambió después
+  de verificado. **Sha para el sello: `68687d2d4`** (= remoto), informe en
+  `experiments/_s163_diurno_k/verificador_v31/INFORME.md` de esa rama. Llevado a Nicolás (D-10, §10 del pre-registro).
+
 ### 2026-10-26 14:54 UTC (S164, vuelta 9): t1 de MOD-D terminada; t2 despachada (run 40344051900)
 - t1 (run 40336655402): completed success, 10 de 10 jobs en verde, ~45 min de reloj (cuadra con VH-04). La cobertura por
   parte la cuenta la sesión que evalúe (A108).
