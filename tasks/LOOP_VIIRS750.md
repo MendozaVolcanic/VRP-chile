@@ -11,6 +11,39 @@ MODIS; nada en `pipeline/` sin pre-registro sellado, verificador limpio, tag y e
 nuevo antes de que el instrumento entregue la cobertura contra la referencia (fase 0); sólo `EARTHDATA_TOKEN`; nunca
 `git stash`; `git add` por archivo; parada si C: o D: bajan de 3 GB libres (D: ~8,6 GB al empezar: no copiar grillas).
 
+## Relevo (sesión VIIRS 750 2, desde el 2026-10-25 ~22:40 hora de Chile)
+
+Rama `claude/s162-viirs750-2-918174` (sale de `s162-v750a-evaluador` `7d5e723c6`), worktree
+`C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s162-viirs750-2-918174`. La vía en
+`pipeline/` va aparte: rama `s162-via-mirova` desde `origin/main`, worktree `C:\vrp-trabajo\s162-via-mirova`, tag
+defensivo `pre-s162-via-mirova` (`deaf8f59b`). Cola de este relevo:
+
+- R1 [hecho, falta verificador] **Adenda 1 de V750-B** (`e7c56af0b`): el analizador sellado deja caer sin contar la
+  pasada «ok» sin una caja del oráculo; compañero `experiments/_s162_v750b/adenda1/cobertura_cajas_v750b.py`, prueba
+  roja/verde (23 chequeos, identidad con el analizador en A4 y A6), nulo 7/7. Verificador Sonnet en curso
+  (`adenda1/verificador/`). Coordinadora avisada; la confirma ella bajo D-48.
+- R2 [hecho, falta verificador y medidor] **V750-A, L2/L4/L7/L18 por D-48** (`9f9ae9259`): 6 de 6; razón de M sobre
+  todas las protegidas que P publica; placebo con t_max frío explicado; K = producción con 1 %. Batería 53/53. Medidor
+  de mutaciones corriendo; segunda vuelta del verificador (Fable) en curso (`experiments/_s162_v750a/verificador_v2/`).
+- R3 [hecho, falta suite y PR] **Vía «código MIROVA» V750** en `s162-via-mirova`: módulo, grilla por volcán (regla
+  GEO con las filas de sur a norte: Y0 = ul_y - 25062,5, probada contra el yaml), flag apagado; equivalencia ROJA a
+  VERDE (1.020 + 10); nulo del módulo real 8/8. PR en borrador. **Corrección A45 (aviso de S162)**: había editado
+  `process_viirs_mod.py` y `store.py` antes del sí de Nicolás; se devolvieron a `origin/main` y el cableado quedó como
+  parche propuesto en `experiments/_s162_v750a/cableado_pendiente/` (aplica limpio, 6 pruebas verdes). Entra sólo
+  con el sí de Nicolás, pedido por S163.
+- R4 [2026-11-03] objetivos de V750-B desde su tag y pedido de despacho con los sha256 (paso 2 de abajo); la lectura
+  corre antes el compañero de la adenda 1.
+- R5 [pendiente, antes de cerrar la vía] **fillmissing2 exacto de MATLAB** (pedido de S163, 2026-10-26): O2 corrió en
+  MATLAB R2026b (rama `s163-o2-paquete` `9b755f315`, `experiments/_s163_o2/RESULTADO_O2.md`): detección igual a Octave en
+  311 de 311, pero ningún modelo de `fillmissing2` reproduce el VRP de MATLAB (más de 1 % en 32, 26 y 45 de 166).
+  Tarea: un `fillmissing2` en Python que dé MATLAB en las 166 escenas con alerta (las de 1 píxel a menos de 1e-6
+  relativo), con prueba roja contra los ports actuales y mutaciones; si no se logra exacto, documentar la regla que
+  falta y usar las 166 salidas de MATLAB como vara de M en V750-A. Otra corrida de MATLAB: paquete con .mat, .m,
+  correr_*.m y md5, y se le pide a S163.
+
+**Coordinadora desde el 2026-10-26: S163** (`local_8a135e90-b711-4bb9-9dec-ff02036f206b`), no S162. Despachos,
+avisos y resultados van a ella.
+
 ## Cola (en orden)
 
 **Estado al 2026-10-24 ~19:30 UTC: loop DETENIDO a propósito** (lo que sigue espera fechas o decisiones externas;
