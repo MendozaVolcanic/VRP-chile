@@ -1,0 +1,48 @@
+
+== E0 control positivo: B2 y B0 pierden una protegida de PCC
+   esperado por la regla escrita: elegibles sin B0 ni B2 (B4 = B1 en PCC, sigue); control positivo del analizador = 1
+   codigo: rc=0 elegibles=['B1', 'B3', 'B4'] ROI=B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('36', '{}', '0') protegidas SIN DATO=ninguna control positivo=2
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'SIN SUSTRATO', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E1 B4, B2 y B0 PIERDEN contra B1 (8 negativos de mas en 8 bloques); B3 = B1
+   esperado por la regla escrita: 6.2: nadie GANA; 6.3 cubre empates o BLOQUEA, no PIERDE; un brazo que pierde con p = 1/256 no es igual desempeno: deberia quedar B1 (o B3), nunca B4
+   codigo: rc=0 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B1 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('43', '{}', '0') protegidas SIN DATO=ninguna control positivo=1
+   P2 contra B1 (TO, todo): {'B0': 'PIERDE', 'B2': 'PIERDE', 'B3': 'SIN SUSTRATO', 'B4': 'PIERDE', 'B5': 'PIERDE'}
+
+== E2 protegida SOLO por el OCR en T (CONS 0,6 / OCR 1,3); B2 no la publica
+   esperado por la regla escrita: programa 2 y A119: en T decide la tabla sola, no es protegida en T; B2 deberia seguir elegible (pierde una baja, no una protegida)
+   codigo: rc=0 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('36', '{}', '0') protegidas SIN DATO=ninguna control positivo=1
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'SIN SUSTRATO', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E3 una protegida con error de K y otra con grilla incompleta
+   esperado por la regla escrita: las dos en protegidas SIN DATO y en SIN DATO, no en no observadas
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('35', '{}', '2') protegidas SIN DATO=[('Lascar', '2026-07-30 05:00'), ('Lascar', '2026-07-31 05:00')] control positivo=1
+   P2 contra B1 (TO, todo): {}
+
+== E4 control positivo del analizador en 0 (B0 no pierde ninguna de PCC)
+   esperado por la regla escrita: 7: el instrumento no ve la ROI: no deberia imprimirse veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('34', '{}', '0') protegidas SIN DATO=ninguna control positivo=0
+   P2 contra B1 (TO, todo): {}
+
+== E5 B2 y B3 GANAN contra B1; B2 con mas E
+   esperado por la regla escrita: 6.2: el de menor E en T u O: B3
+   codigo: rc=0 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B3 (gana contra B1 (§6.2)
+   cobertura (ok, no_obs, SIN DATO)=('43', '{}', '0') protegidas SIN DATO=ninguna control positivo=1
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'EMPATE', 'B3': 'GANA', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E6 B2 apaga 6 negativos de B1 y pierde 6 bajas que solo el OCR trae (O)
+   esperado por la regla escrita: con todo: neto 0 (EMPATE); con la tabla sola: GANA. 6.2 no dice que canal decide
+   codigo: rc=0 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('47', '{}', '0') protegidas SIN DATO=ninguna control positivo=1
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'EMPATE', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E7 un negativo con record de K = None (ROI vacia o store sin escribir)
+   esperado por la regla escrita: la pasada deberia quedar SIN DATO para K y el resto seguir; el analizador no deberia caerse
+   codigo: rc=0 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('36', '{}', '0') protegidas SIN DATO=ninguna control positivo=1
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'SIN SUSTRATO', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}

@@ -1,0 +1,72 @@
+name: "Probe S162 V750-B, ROI del codigo de MIROVA y brazo nativo (solo lectura)"
+
+# Pre-registro: experiments/_s162_v750b/PREREGISTRO_V750B.md (sellado antes de este disparo); probe:
+# experiments/_s162_v750b/probe_v750b.py (reusa experiments/_s159/n/probe_n.py de origin/main).
+# Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# Se dispara con un push a la rama s162-v750b-disparo (workflow_dispatch solo existe desde main, S73). No se mergea.
+# Copia de experiments/_s162_v750b/probe-s162-v750b.yml en .github/workflows/ de la rama de disparo.
+# A43: "on" entre comillas. S141: pipefail con tee; el script sale 2 si falta una pasada.
+# A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio (el par usuario y clave esta vencido).
+# A15: censo S159, 5.746 pasadas en 32 trozos, 1 h 31 min; aca ~6.900 mas el brazo nativo en ~600 -> timeout 120.
+"on":
+  push:
+    branches: ["s162-v750b-disparo"]
+
+concurrency:
+  group: probe-s162-v750b
+  cancel-in-progress: false
+
+env:
+  SOLO: ""
+  NCHUNKS: "32"
+  OBJETIVOS: "experiments/_s162_v750b/objetivos_v750b.json"
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s162_v750b/probe_v750b.py --objetivos "$OBJETIVOS" --out out \
+            --chunk ${{ matrix.chunk }} --nchunks "$NCHUNKS" --solo "$SOLO" 2>&1 | tee out/probe_${{ matrix.chunk }}.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s162-v750b-chunk-${{ matrix.chunk }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            out/*.json
+            out/*.log
+            out/*.npz

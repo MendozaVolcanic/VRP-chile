@@ -1,0 +1,26 @@
+# mutar_v3.py sobre el arbol limpio (origin/main 710ea22ca + _s162_v750b de 439968ec1 + evaluar_d25.py del tag); 11 mutaciones, una linea cada una
+# ATRAPADA = la bateria sellada sale 1; SOBREVIVE = sale 0 con la regla rota
+M1 | ATRAPADA | esperaba atraparla: V3 | no_peor: SIN SUSTRATO siempre es «no peor», sin mirar el neto (vuelve a la v2; VB2-02) | == BATERÍA: FALLAS [('V3 SIN SUSTRATO con neto en contra', ['ROI B4 != B1'])]
+M2 | SOBREVIVE | esperaba atraparla: ninguno conocido | §6.2 ganan: se quita la condición «no peor con la tabla sola» | == BATERÍA: TODOS LOS ESCENARIOS COMO SE ESPERA
+M3 | SOBREVIVE | esperaba atraparla: ninguno conocido | §6.3 cand: se quita «no peor en el canal que decide» (queda sólo la tabla sola) | == BATERÍA: TODOS LOS ESCENARIOS COMO SE ESPERA
+M4 | ATRAPADA | esperaba atraparla: V1 | §6.3 cand: se quita «no peor con la tabla sola» (vuelve a la v2; VB2-01) | == BATERÍA: FALLAS [('V1 B2 EMPATA con el canal que decide pero PIERDE con la tabla sola', ['ROI B2 != B1'])]
+M5 | SOBREVIVE | esperaba atraparla: ninguno conocido | VB2-07: las pasadas sin gránulo no se leen (sin_g siempre vacío) | == BATERÍA: TODOS LOS ESCENARIOS COMO SE ESPERA
+M6 | ATRAPADA | esperaba atraparla: E3 | CONTROL POSITIVO: la cobertura siempre pasa (el defecto que la batería v3 declaró haber atrapado) | == BATERÍA: FALLAS [('E3 una protegida con error de K y otra con grilla incompleta', ['rc 4 != 3', 'ROI B4 != None'])]
+M7 | SOBREVIVE | esperaba atraparla: E5 | §6.2: entre los que ganan se elige el de MAYOR E | == BATERÍA: TODOS LOS ESCENARIOS COMO SE ESPERA
+M8 | ATRAPADA | esperaba atraparla: V6 | control positivo: se quita la exigencia de que B1 publique 3 o más (VB2-06) | == BATERÍA: FALLAS [('V6 oráculo muerto', ['rc 4 != 3', 'ROI None != None'])]
+M9 | SOBREVIVE | esperaba atraparla: E3 (sólo si el 2 % no la tapa) | cobertura: una protegida SIN DATO ya no frena la lectura (queda sólo el 2 %) | == BATERÍA: TODOS LOS ESCENARIOS COMO SE ESPERA
+M10 | SOBREVIVE | esperaba atraparla: ninguno conocido | compuerta: K = producción deja de cerrar la compuerta | == BATERÍA: TODOS LOS ESCENARIOS COMO SE ESPERA
+M11 | ATRAPADA | esperaba atraparla: todos los que tienen veredicto | etiqueta: la marca «SIN CENSO» no se escribe en la línea de la ROI | == BATERÍA: FALLAS [('E0 control positivo: B2 y B0 pierden una protegida de PCC', ['veredicto sin la marca SIN CENSO']), ('E1 B4, B2 y B0 PIERDEN contra B1 (8 negativos de mas en 8 bloques); B3 = B1', ['veredicto sin la marca SIN CENSO']), ('E2 protegida SOLO por el OCR en T (CONS 0,6 / OCR 1,3); B2 no la publica', ['veredicto sin la marca SIN CENSO']), ('E5 B2 y B3 GANAN contra B1; B2 con mas E', ['veredicto sin la marca SIN CENSO']), ('E6 B2 apaga 6 negativos de B1 y pierde 6 bajas que solo el OCR trae (O)', ['veredicto sin la marca SIN CENSO']), ('E7 un negativo con record de K = None (ROI vacia o store sin escribir)', ['veredicto sin la marca SIN CENSO']), ('V1 B2 EMPATA con el canal que decide pero PIERDE con la tabla sola', ['veredicto sin la marca SIN CENSO']), ('V3 SIN SUSTRATO con neto en contra', ['veredicto sin la marca SIN CENSO'])]
+
+# linea FALLAS de cada mutacion atrapada
+--- bat_M1_stdout.txt: FALLAS [('V3 SIN SUSTRATO con neto en contra', ['ROI B4 != B1'])]
+--- bat_M2_stdout.txt: 
+--- bat_M3_stdout.txt: 
+--- bat_M4_stdout.txt: FALLAS [('V1 B2 EMPATA con el canal que decide pero PIERDE con la tabla sola', ['ROI B2 != B1'])]
+--- bat_M5_stdout.txt: 
+--- bat_M6_stdout.txt: FALLAS [('E3 una protegida con error de K y otra con grilla incompleta', ['rc 4 != 3', 'ROI B4 != None'])]
+--- bat_M7_stdout.txt: 
+--- bat_M8_stdout.txt: FALLAS [('V6 oráculo muerto', ['rc 4 != 3', 'ROI None != None'])]
+--- bat_M10_stdout.txt: 
+--- bat_M11_stdout.txt: FALLAS [('E0 control positivo: B2 y B0 pierden una protegida de PCC', ['veredicto sin la marca SIN CENSO']), ('E1 B4, B2 y B0 PIERDEN contra B1 (8 negativos de mas en 8 bloques); B3 = B1', ['veredicto sin la marca SIN CENSO']), ('E2 protegida SOLO por el OCR en T (CONS 0,6 / OCR 1,3); B2 no la publica', ['veredicto sin la marca SIN CENSO']), ('E5 B2 y B3 GANAN contra B1; B2 con mas E', ['veredicto
+--- bat_M9_stdout.txt: 

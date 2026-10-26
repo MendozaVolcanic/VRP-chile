@@ -1,0 +1,110 @@
+
+== E0 control positivo: B2 y B0 pierden una protegida de PCC
+   esperado por la regla escrita: elegibles sin B0 ni B2 (B4 = B1 en PCC, sigue); control positivo del analizador = 1
+   codigo: rc=4 elegibles=['B1', 'B3', 'B4'] ROI=B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('38', '{}', '0') protegidas SIN DATO=ninguna control positivo=4
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'SIN SUSTRATO', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E1 B4, B2 y B0 PIERDEN contra B1 (8 negativos de mas en 8 bloques); B3 = B1
+   esperado por la regla escrita: 6.2: nadie GANA; 6.3 cubre empates o BLOQUEA, no PIERDE; un brazo que pierde con p = 1/256 no es igual desempeno: deberia quedar B1 (o B3), nunca B4
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B1 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('45', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'PIERDE', 'B2': 'PIERDE', 'B3': 'SIN SUSTRATO', 'B4': 'PIERDE', 'B5': 'PIERDE'}
+
+== E2 protegida SOLO por el OCR en T (CONS 0,6 / OCR 1,3); B2 no la publica
+   esperado por la regla escrita: programa 2 y A119: en T decide la tabla sola, no es protegida en T; B2 deberia seguir elegible (pierde una baja, no una protegida)
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('38', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'SIN SUSTRATO', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E3 una protegida con error de K y otra con grilla incompleta
+   esperado por la regla escrita: las dos en protegidas SIN DATO y en SIN DATO, no en no observadas
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('37', '{}', '2') protegidas SIN DATO=[('Lascar', '2026-07-30 05:00'), ('Lascar', '2026-07-31 05:00')] control positivo=3
+   P2 contra B1 (TO, todo): {}
+
+== E4 control positivo del analizador en 0 (B0 no pierde ninguna de PCC)
+   esperado por la regla escrita: 7: el instrumento no ve la ROI: no deberia imprimirse veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('34', '{}', '0') protegidas SIN DATO=ninguna control positivo=0
+   P2 contra B1 (TO, todo): {}
+
+== E5 B2 y B3 GANAN contra B1; B2 con mas E
+   esperado por la regla escrita: 6.2: el de menor E en T u O: B3
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B3 (gana contra B1 (§6.2)
+   cobertura (ok, no_obs, SIN DATO)=('45', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'EMPATE', 'B3': 'GANA', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E6 B2 apaga 6 negativos de B1 y pierde 6 bajas que solo el OCR trae (O)
+   esperado por la regla escrita: con todo: neto 0 (EMPATE); con la tabla sola: GANA. 6.2 no dice que canal decide
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('49', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'EMPATE', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E7 un negativo con record de K = None (ROI vacia o store sin escribir)
+   esperado por la regla escrita: la pasada deberia quedar SIN DATO para K y el resto seguir; el analizador no deberia caerse
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('38', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'SIN SUSTRATO', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== V1 B2 EMPATA con el canal que decide pero PIERDE con la tabla sola
+   esperado por la regla escrita: §6.3: B2 no puede ser elegido
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B1 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('49', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'PIERDE', 'B2': 'EMPATE', 'B3': 'SIN SUSTRATO', 'B4': 'PIERDE', 'B5': 'PIERDE'}
+
+== V3 SIN SUSTRATO con neto en contra
+   esperado por la regla escrita: §6.3: un brazo peor en todos los bloques no se elige por fidelidad
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B1 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('41', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'SIN SUSTRATO', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== V6 oráculo muerto
+   esperado por la regla escrita: sin veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('19', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {}
+
+== S1 B2 gana con el canal que decide y pierde con la tabla sola
+   esperado por la regla escrita: §6.2 y §6.3: B2 fuera; ROI B4
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('58', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'GANA', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== S2 B4 peor con el canal que decide y no peor con la tabla
+   esperado por la regla escrita: §6.3: B4 fuera; ROI B2
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B2 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3)
+   cobertura (ok, no_obs, SIN DATO)=('41', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'SIN SUSTRATO', 'B3': 'SIN SUSTRATO', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E5b B2 y B3 ganan de verdad; B2 con más E
+   esperado por la regla escrita: §6.2: el de menor E, B3
+   codigo: rc=4 elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B3 (gana contra B1 (§6.2)
+   cobertura (ok, no_obs, SIN DATO)=('46', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {'B0': 'SIN SUSTRATO', 'B2': 'GANA', 'B3': 'GANA', 'B4': 'SIN SUSTRATO', 'B5': 'SIN SUSTRATO'}
+
+== E3b una protegida SIN DATO bajo el 2 %
+   esperado por la regla escrita: sin veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('117', '{}', '1') protegidas SIN DATO=[('Lascar', '2026-07-30 05:00')] control positivo=3
+   P2 contra B1 (TO, todo): {}
+
+== KD una protegida con K distinto de producción
+   esperado por la regla escrita: sin veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('37', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {}
+
+== SG una protegida sin gránulo
+   esperado por la regla escrita: sin veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('37', '{}', '0') protegidas SIN DATO=[('Lascar', '2026-07-01 05:00')] control positivo=3
+   P2 contra B1 (TO, todo): {}
+
+== SGx archivo sin gránulo de otra lista
+   esperado por la regla escrita: sin veredicto
+   codigo: rc=3 elegibles=None ROI=None (None)
+   cobertura (ok, no_obs, SIN DATO)=('37', '{}', '0') protegidas SIN DATO=ninguna control positivo=3
+   P2 contra B1 (TO, todo): {}
+
+== BATERÍA: TODOS LOS ESCENARIOS COMO SE ESPERA

@@ -1,0 +1,98 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+pasadas nocturnas con oraculo: 510
+prot78 78
+pos48 48
+censo60 60
+
+== censo60: detecta en la celda de K, tol 0 / tol 1 (3x3) / tol 2 (5x5); n = 60
+brazo              tol0 tol1 tol2   distancias en celdas de los que caen a tol<=2
+O                     1    1    1   Counter({np.int64(0): 1})
+O_8vec                5    5    5   Counter({np.int64(0): 5})
+O_todoK_sincomp       8    8    8   Counter({np.int64(0): 8})
+O_sens                4    4    4   Counter({np.int64(0): 4})
+O_circ                4    4    4   Counter({np.int64(0): 4})
+geo_nearest          23   23   23   Counter({0: 23})
+geo_cubic             7    7    7   Counter({0: 7})
+r2_linear            13   13   13   Counter({0: 13})
+r2_nearest           26   26   26   Counter({0: 26})
+zona de la caja por defecto donde cae la celda de K: {1: 19, 2: 38, 0: 3}
+distancia de la celda de K al centro de la grilla (km): mediana 1.5 | max 24.76
+pasadas sin resultado del runner (SIN DATO) por variante: {'geo_nearest': 0, 'geo_cubic': 0, 'r2_linear': 0, 'r2_nearest': 0}
+
+== pos48: detecta en la celda de K, tol 0 / tol 1 (3x3) / tol 2 (5x5); n = 48
+brazo              tol0 tol1 tol2   distancias en celdas de los que caen a tol<=2
+O                    30   33   33   Counter({np.int64(0): 30, np.int64(1): 3})
+O_8vec               31   32   32   Counter({np.int64(0): 31, np.int64(1): 1})
+O_todoK_sincomp      42   43   43   Counter({np.int64(0): 42, np.int64(1): 1})
+O_sens               41   44   44   Counter({np.int64(0): 41, np.int64(1): 3})
+O_circ               41   44   44   Counter({np.int64(0): 41, np.int64(1): 3})
+geo_nearest          30   31   31   Counter({0: 30, 1: 1})
+geo_cubic            27   30   30   Counter({0: 27, 1: 3})
+r2_linear            19   19   19   Counter({0: 19})
+r2_nearest           29   30   30   Counter({0: 29, 1: 1})
+zona de la caja por defecto donde cae la celda de K: {2: 33, 0: 1, 1: 14}
+distancia de la celda de K al centro de la grilla (km): mediana 1.28 | max 24.85
+pasadas sin resultado del runner (SIN DATO) por variante: {'geo_nearest': 0, 'geo_cubic': 0, 'r2_linear': 0, 'r2_nearest': 0}
+
+== V9 Tupungatito en el censo: n = 17
+  geo_nearest      tol0 0 tol1 0 | con algun pixel 0 | distancias: Counter({'inf': 17})
+  r2_nearest       tol0 0 tol1 0 | con algun pixel 0 | distancias: Counter({'inf': 17})
+  O                tol0 0 tol1 0 | con algun pixel 0 | distancias: Counter({'inf': 17})
+  O_todoK_sincomp  tol0 3 tol1 3 | con algun pixel 3 | distancias: Counter({'inf': 14, '0': 3})
+  Tupungatito: motivo_vacio / nan_m13 / n_abs,n_p1,n_p2 de geo_linear y geo_nearest en el runner (SIN DATO o cero real):
+    id 1000 2026-04-05 05:30 z 16.96 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.331 rc (28, 29) zona 1
+    id 1016 2026-06-08 05:30 z 17.32 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.321 rc (27, 29) zona 1
+    id 1024 2026-07-04 05:48 z 5.13 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.127 rc (27, 30) zona 1
+    id 1043 2026-09-17 05:42 z 5.32 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.382 rc (27, 30) zona 1
+    id 1057 2026-04-07 05:42 z 3.79 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.308 rc (27, 30) zona 1
+    id 1075 2026-05-23 06:18 z 53.59 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.217 rc (27, 29) zona 1
+    id 1079 2026-06-08 06:18 z 53.58 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.468 rc (28, 29) zona 1
+    id 1082 2026-06-30 06:06 z 41.29 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.434 rc (28, 29) zona 1
+    id 1004 2026-04-21 05:30 z 17.33 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.413 rc (27, 30) zona 1
+    id 1007 2026-05-11 05:54 z 24.72 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.231 rc (28, 30) zona 1
+    id 1025 2026-07-06 05:06 z 48.67 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.098 rc (28, 30) zona 1
+    id 1083 2026-07-06 05:54 z 24.61 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.049 rc (27, 30) zona 1
+    id 1099 2026-09-08 05:54 z 26.04 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.309 rc (28, 29) zona 1
+    id 1066 2026-04-24 05:24 z 28.03 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.341 rc (28, 29) zona 1
+    id 1073 2026-05-19 05:54 z 24.5 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.51 rc (28, 29) zona 1
+    id 1077 2026-06-05 05:36 z 7.78 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.183 rc (27, 30) zona 1
+    id 1091 2026-08-13 05:42 z 4.63 | lin: motivo None nan 0 abs/p1/p2 0/0/0 | near: motivo None nan 0 abs/p1/p2 0/0/0 | K pc_dist 0.357 rc (28, 29) zona 1
+  motivo_vacio en el censo entero (geo_nearest): {('Tupungatito', None): 17, ('Isluga', None): 22, ('PlanchonPeteroa', None): 6, ('Lascar', None): 10, ('Lastarria', None): 1, ('PuyehueCordonCaulle', None): 4}
+  por volcan, geo_nearest tol1: {'Isluga': 14, 'PlanchonPeteroa': 3, 'Lascar': 6}
+  por volcan, censo: {'Tupungatito': 17, 'Isluga': 22, 'PlanchonPeteroa': 6, 'Lascar': 10, 'Lastarria': 1, 'PuyehueCordonCaulle': 4}
+
+== V3: exceso de grilla (celda exacta de K vs max 3x3) / exceso nativo (F de K); estratos por halo k de F
+  censo60: max 3x3 -> mediana 0.536 [q1 0.401, q3 0.689] n=60 | celda exacta -> mediana 0.545 [q1 0.330, q3 0.667] n=60
+  censo60: por halo k del fondo de F (k=3 si <=4 alertados en la escena): k=3: mediana 0.536 [q1 0.401, q3 0.689] n=60
+  censo60: n_hot de K en la escena (define el halo de F): Counter({1: 59, 2: 1})
+  pos48: max 3x3 -> mediana 0.780 [q1 0.545, q3 0.948] n=48 | celda exacta -> mediana 0.802 [q1 0.612, q3 0.953] n=48
+  pos48: por halo k del fondo de F (k=3 si <=4 alertados en la escena): k=3: mediana 0.780 [q1 0.545, q3 0.948] n=48
+  pos48: n_hot de K en la escena (define el halo de F): Counter({1: 46, 2: 2})
+
+== V8: protegidas que deciden; O pierde / O_sens u O_circ recupera; donde cae el pixel mas radiante
+  id 141 PuyehueCordonCaulle 2026-09-18 05:24 MIROVA 1.43 inner 20.0 | O_sens: publica True npix 1 vrp 0.744 | pico a 7.83 km del centro, zonas(caja def) {1: 1} | K pc_dist 0.302 pc_vrp 0.536 dc summit
+  id 141 PuyehueCordonCaulle 2026-09-18 05:24 MIROVA 1.43 inner 20.0 | O_circ: publica True npix 3 vrp 1.811 | pico a 7.83 km del centro, zonas(caja def) {0: 1, 1: 2} | K pc_dist 0.302 pc_vrp 0.536 dc summit
+  id 364 PuyehueCordonCaulle 2026-07-03 05:48 MIROVA 1.0 inner 20.0 | O_sens: publica True npix 1 vrp 0.528 | pico a 7.83 km del centro, zonas(caja def) {1: 1} | K pc_dist 0.31 pc_vrp 0.364 dc summit
+  id 364 PuyehueCordonCaulle 2026-07-03 05:48 MIROVA 1.0 inner 20.0 | O_circ: publica True npix 2 vrp 1.195 | pico a 7.83 km del centro, zonas(caja def) {0: 1, 1: 1} | K pc_dist 0.31 pc_vrp 0.364 dc summit
+  id 220 PuyehueCordonCaulle 2026-05-25 05:42 MIROVA 1.01 inner 20.0 | O_sens: publica True npix 1 vrp 0.931 | pico a 7.83 km del centro, zonas(caja def) {1: 1} | K pc_dist 0.096 pc_vrp 1.017 dc summit
+  id 220 PuyehueCordonCaulle 2026-05-25 05:42 MIROVA 1.01 inner 20.0 | O_circ: publica True npix 1 vrp 0.931 | pico a 7.83 km del centro, zonas(caja def) {1: 1} | K pc_dist 0.096 pc_vrp 1.017 dc summit
+  id 69 PuyehueCordonCaulle 2026-06-07 05:54 MIROVA 1.2 inner 20.0 | O_sens: publica True npix 2 vrp 1.192 | pico a 7.65 km del centro, zonas(caja def) {1: 2} | K pc_dist 0.227 pc_vrp 0.882 dc summit
+  id 69 PuyehueCordonCaulle 2026-06-07 05:54 MIROVA 1.2 inner 20.0 | O_circ: publica True npix 2 vrp 1.192 | pico a 7.65 km del centro, zonas(caja def) {1: 2} | K pc_dist 0.227 pc_vrp 0.882 dc summit
+  id 231 PuyehueCordonCaulle 2026-06-05 05:36 MIROVA 1.09 inner 20.0 | O_sens: publica True npix 2 vrp 1.287 | pico a 7.83 km del centro, zonas(caja def) {1: 2} | K pc_dist 0.178 pc_vrp 0.622 dc summit
+  id 231 PuyehueCordonCaulle 2026-06-05 05:36 MIROVA 1.09 inner 20.0 | O_circ: publica True npix 2 vrp 1.287 | pico a 7.83 km del centro, zonas(caja def) {1: 2} | K pc_dist 0.178 pc_vrp 0.622 dc summit
+  id 257 PuyehueCordonCaulle 2026-07-06 05:54 MIROVA 1.02 inner 20.0 | O_sens: publica True npix 2 vrp 1.025 | pico a 7.65 km del centro, zonas(caja def) {1: 2} | K pc_dist 0.542 pc_vrp 0.113 dc summit
+  id 257 PuyehueCordonCaulle 2026-07-06 05:54 MIROVA 1.02 inner 20.0 | O_circ: publica True npix 2 vrp 1.025 | pico a 7.65 km del centro, zonas(caja def) {1: 2} | K pc_dist 0.542 pc_vrp 0.113 dc summit
+  id 334 PuyehueCordonCaulle 2026-10-10 05:54 MIROVA 1.19 inner 20.0 | O_sens: publica True npix 2 vrp 1.193 | pico a 7.83 km del centro, zonas(caja def) {1: 2} | K pc_dist None pc_vrp None dc None
+  id 334 PuyehueCordonCaulle 2026-10-10 05:54 MIROVA 1.19 inner 20.0 | O_circ: publica True npix 2 vrp 1.193 | pico a 7.83 km del centro, zonas(caja def) {1: 2} | K pc_dist None pc_vrp None dc None
+  publica: O 71/78  O_sens 78  O_circ 78
+
+== V5 desde ablacion_por_pasada_auditor.csv: negativos limpios del lote 195, ventana 2026-04-02 06:24 a 2026-10-17 06:00
+  O                publica   4 (peso    4.0) | por volcan {'Lascar': 3, 'Isluga': 1} | con algun pixel 4
+  geo_nearest      publica  25 (peso  114.3) | por volcan {'Chaiten': 1, 'Isluga': 12, 'PlanchonPeteroa': 1, 'Lascar': 9, 'NevadosDeChillan': 1, 'Villarrica': 1} | con algun pixel 25
+  r2_linear        publica  15 (peso   84.5) | por volcan {'Isluga': 7, 'PlanchonPeteroa': 1, 'Lascar': 6, 'NevadosDeChillan': 1} | con algun pixel 15
+  O_todoK_sincomp  publica  18 (peso   42.8) | por volcan {'PuyehueCordonCaulle': 10, 'Lascar': 5, 'Isluga': 1, 'Villarrica': 1, 'Llaima': 1} | con algun pixel 20
+
+== V6 desde el CSV: alertas que deciden 181; razon O/MIROVA por volcan
+  O          Chaiten 0.861 n=1 | Isluga 0.997 n=24 | Lascar 0.999 n=79 | NevadosDeChillan 0.998 n=28 | PlanchonPeteroa 0.994 n=8 | Villarrica 1.042 n=5
+  O_fanillo  Chaiten 0.518 n=1 | Isluga 0.329 n=4 | Lascar 0.421 n=61 | NevadosDeChillan 0.684 n=22 | PlanchonPeteroa 1.724 n=1
+  O_sinhalo  Chaiten 1.406 n=1 | Isluga 0.682 n=24 | Lascar 0.935 n=79 | NevadosDeChillan 0.966 n=28 | PlanchonPeteroa 0.913 n=8 | Villarrica 1.296 n=5
