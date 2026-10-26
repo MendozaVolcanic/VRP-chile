@@ -302,7 +302,8 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
   columna deja de ser preliminar, con alcance (161 de 191 escenas de Láscar, huecos de 3 × 3, SIN DATO que MIROVA use
   ese `.m` en MODIS) y el script fuera de línea que la calcula, probado antes de leer el censo.
 
-- [ ] D4. Evaluar el humo cuando la coordinadora mande el run id: bajar artefactos a `D:\vrp-trabajo\temporales\s162_modd\humo\`, evaluar desde el checkout del tag con `evaluar_paquete.py --art ... --ref D:/vrp-trabajo/temporales/s162_mxd03/ref --commit 865174abeea01a1bad726ce25dd70cf0d00ae7eb`, y el criterio de la adenda 3.14. Si pasa, pedir las tandas t1, t2 y t3 (una a la vez).
+- [ ] D4. **Humo despachado por S164: run 40333783937** (2026-10-26 13:48 UTC, head `865174abe`, rama
+  `s162-modd-humo`). Evaluar cuando termine (A108: contar las 5 pasadas con fila «ok», no basta el job verde): bajar artefactos a `D:\vrp-trabajo\temporales\s162_modd\humo\`, evaluar desde el checkout del tag con `evaluar_paquete.py --art ... --ref D:/vrp-trabajo/temporales/s162_mxd03/ref --commit 865174abeea01a1bad726ce25dd70cf0d00ae7eb`, y el criterio de la adenda 3.14. Si pasa, pedir las tandas t1, t2 y t3 (una a la vez).
 - [ ] D5. Después del humo (no antes del censo): VC3-01 a VC3-14 de la tercera vuelta (huecos de vigilancia, gravedad 1 a 2), si se toca el candado para las tandas; si no, quedan para la lectura.
 
 ### Perfil experimental (candidatas)
