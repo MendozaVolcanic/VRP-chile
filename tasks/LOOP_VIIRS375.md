@@ -80,6 +80,23 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 > **Relevo, 2026-10-26:** S163 cerró a las 12:35 UTC; la coordinadora ahora es **S164**
 > (`local_34f868ef-c156-4906-9b6c-e691fc445650`). Despachos y resultados se le piden y mandan a ella. Reglas sin cambio:
 > A45, sólo EARTHDATA_TOKEN, nunca git stash, ramas siempre en el remoto.
+>
+> **La vía de proceso de V375-E ya está en main, 2026-10-26** (aviso de loop-viirs750-2, sin verificar aquí): PR #907,
+> merge cff07d173, `pipeline/mirova_v750_codigo.py`, con el flag apagado. Para 375 trae:
+> - `grilla_del_volcan(nombre, paso_m=375)`: la grilla de 134 celdas, con filas de sur a norte y puntos en
+>   `pipeline/grillas_mirova.yaml` (los 11 Tier A);
+> - `caja_roi("crater", n=134, celda_crater=..., lado_sensible=13, ...)`: la caja C13;
+> - el `fillmissing2` de MATLAB, que deja **NaN fuera de la envolvente**, como MATLAB (resuelve la reserva del verificador
+>   de O2-375);
+> - `vrp_mirova(..., coef=...)`, con el coeficiente como argumento.
+> Lo que falta para despachar E:
+> 1. El detector `detectar_mirova` es el del .m de 750 m; **los números de 375 no están**. Los de `brazos.py` (port de
+>    S159) habría que llevarlos a la vía o justificar por qué valen los de 750 en 375.
+> 2. El record de la vía tiene que llevar `via_codigo_mirova: True` (store.py le salta la geocerca, el filtro de
+>    distancia y el tope por cúmulo).
+> 3. PD1 (caja C13 para todos, mi recomendación).
+> 4. Encender la vía exige sello, censo, sombra, tag y el sí de Nicolás (A45).
+> Nota con detalle en la carpeta compartida de S162, `VIIRS750_2_via_mirova.md`.
 
 Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
 evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).
