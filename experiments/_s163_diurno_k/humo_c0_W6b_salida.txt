@@ -1,0 +1,20 @@
+# Prueba de humo del evaluador sobre una corrida REAL del A/B sobre C0 (W6b, run 39097155412, rama s151-ab-diurno/39097155412),
+# con --recorte 2026-10-08,2026-10-14. Lo esperado: INVALIDO por I1 (C0 tiene el Test 1 y no es K) y metricas distintas de cero.
+# Comando: python -I experiments/_s163_diurno_k/evaluar_diurno_k.py --raiz <W6b> --brazos _s151_ab_diurno_control,_s151_ab_diurno_on --ref <ref 047bd5692> --sha-codigo eb97779f4c0e1a40df20182a60921c1778bced1a --opcion-e e-i --recorte 2026-10-08,2026-10-14
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+RECORTE DE PRUEBA 2026-10-08 a 2026-10-14: esto NO es la evaluación que decide
+reflejo probable (1.13): 0 pasadas; filas del estudio dentro de W2 a W6 sin pasada: 0 []
+COMPUERTAS: inválido 68, indecidible 0
+cobertura diurna: {'VIIRS375': {'pasadas_diurnas': 208, 'sin_record': 0, 'p_sup': 0.0011027919466183107}, 'VIIRS750': {'pasadas_diurnas': 217, 'sin_record': 1, 'p_sup': 0.005918999529652914}}
+noche, records en un solo brazo: {'solo_control': 0, 'solo_brazo': 0}
+R1 (protegidas que el control publica y el brazo no): 0
+VIIRS375: P2 PIERDE (neto +108, B 39, p_gana 1.0000, p_pierde 0.0001) | protegidas 4 de 4 | alertas<1MW 1 de 1 | negativos 109 de 121 (Q_d 0.9008) | Q_n 0.8943 (123) | D False (5 de 5 alertas) | neg>=1MW 49 | pub en «otra» 76 | razón mag 0.8961480075901328
+   -> NO ADOPTAR (caso d, opción e-i)
+   I6: {'a': {'resultado': 'GANA', 'bloques': 32, 'tocadas': 54}, 'b': {'resultado': 'SIN SUSTRATO', 'bloques': 0, 'tocadas': 0}, 'c_falsos': 1}
+VIIRS750: P2 PIERDE (neto +82, B 37, p_gana 1.0000, p_pierde 0.0001) | protegidas 1 de 1 | alertas<1MW 0 de 0 | negativos 82 de 182 (Q_d 0.4505) | Q_n 0.3027 (185) | D False (1 de 1 alertas) | neg>=1MW 35 | pub en «otra» 16 | razón mag 0.9807807807807808
+   -> NO ADOPTAR (caso d, opción e-i)
+   I6: {'a': {'resultado': 'GANA', 'bloques': 26, 'tocadas': 41}, 'b': {'resultado': 'SIN SUSTRATO', 'bloques': 0, 'tocadas': 0}, 'c_falsos': 2}
+GLOBAL (principal): INVÁLIDO POR INSTRUMENTO
+VARIANTES: {'tabla': 'INVÁLIDO POR INSTRUMENTO', 'sin_W2': 'INVÁLIDO POR INSTRUMENTO', 'sin_reflejo': 'INVÁLIDO POR INSTRUMENTO'}
+VEREDICTO FINAL (§6.4): INVÁLIDO POR INSTRUMENTO 
+(se omiten las lineas I1a, todas del mismo tipo: los flags de C0 no son los de K)
