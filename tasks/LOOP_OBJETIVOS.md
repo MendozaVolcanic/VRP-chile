@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~02:25 UTC (S163, vuelta 2): O2 corrido en MATLAB; verificador lanzado
+- Nicolás activó MATLAB Online basic (llenó él el formulario de empresa y teléfono). La subida por el navegador no tomó
+  archivos (MATLAB corre en un marco aislado y MATLAB Drive ignora la entrada puesta por programa), así que el paquete se
+  publicó en la rama `s163-o2-paquete` (sin tocar el checkout) y MATLAB lo bajó con `websave`; md5 dentro de MATLAB
+  iguales a los originales (los `.m` de MIROVA se publicaron sin normalizar fines de línea).
+- Resultado (R2026b, `fillmissing2` y `colfilt` de MATLAB): **Etna exacto al OSF** (Tot_Lmir_bk 1,072886152; VRP
+  9.889.528,4 W); **detección igual a Octave en 311 de 311**; **VRP: ningún modelo de `fillmissing2` es MATLAB** (>1 % en
+  32, 26 y 45 de 166; en un píxel hay casos donde MATLAB no calza con ninguno, Villarrica 09-19 nearest 0,4212 contra
+  0,7438). Consecuencia: en alertas de un píxel la vara de magnitud es la salida de MATLAB o un port nuevo validado contra
+  ella. Todo en `s163-o2-paquete` `9b755f315`, `experiments/_s163_o2/RESULTADO_O2.md`. **Sin verificador todavía**:
+  lanzado uno limpio (Sonnet), entrega en `C:\vrp-trabajo\s163-verif-o2\INFORME.md`.
+- Al subagente de la alternativa a O2 se le pidió sumar MATLAB como cuarta variante y decir si su VRP reproduce lo que
+  MIROVA publicó mejor que los tres modelos (cierra el camino de punta a punta).
+
 ### 2026-10-26 ~02:10 UTC, servidor 01:56 al abrir (S163, vuelta 1): relevo tomado; decisión 9 aplicada; alternativa a O2 lanzada
 - Coordinadora S163 = `local_8a135e90-b711-4bb9-9dec-ff02036f206b`. A pedido de Nicolás se separó de S162 (ya es sesión
   de nivel superior): las hijas siguen anidadas bajo S162 y sus avisos automáticos le llegan a ella, así que se les pidió
