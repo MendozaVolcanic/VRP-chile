@@ -569,6 +569,26 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~03:30 UTC, servidor 03:16 (S163, vuelta 6): regla de MATLAB identificada; dos paquetes esperan MATLAB
+- **Alternativa a O2 entregada** (subagente Opus, `s163-o2-alternativa` `cd812c746`, `experiments/_s163_o2alt/INFORME.md`):
+  (1) **regla de `fillmissing2` identificada**: Delaunay con perturbación simbólica estilo CGAL (x = fila, y = columna),
+  relleno lineal; reproduce el VRP de MATLAB en **166 de 166** escenas (máx 1,55e-15) y el fondo completo en 84 de 84;
+  control de ejes cambiados 42 de 166; nulo de 20 desempates al azar, máx 110 de 166. SOSPECHA (no medido) que MATLAB use
+  CGAL por dentro. (2) **Contra lo que MIROVA publicó, NO SEPARA**: 6 pasadas de 1 px pareadas, IC 95 % del bootstrap
+  cruza 0, el margen no supera el nulo; domina el ruido del regrillado propio (0,134 en log VRP); harían falta 50 a 100
+  pasadas. **Sin verificador todavía**: lanzado uno limpio (Sonnet) con implementación independiente, entrega en
+  `C:\vrp-trabajo\s163-verif-regla\INFORME.md`.
+- `loop-viirs750-2` llegaba a 79 de 84 por su lado (perturbación y·(1+1e-6)): avisado para no duplicar; su tarea pasa a
+  portar la regla como función de la vía, con prueba de oro contra `resultado_o2.mat`.
+- Paquetes para MATLAB listos y comprobados: MODIS (`89479be35`, 404 escenas) y VIIRS 375 (`138a931ee`, 422 escenas,
+  `experiments/_s162_v375/o2_375/`). **No corridos**: la sesión de MathWorks del Chrome de Nicolás expiró (la pestaña volvió
+  al inicio de sesión) y Claude no inicia sesión. Mientras tanto, las hijas pueden calcular la vara con la regla local,
+  marcada PRELIMINAR; MATLAB queda como prueba de oro.
+- `#907` (vía «código MIROVA», sin archivos A45) abierto en borrador por `loop-viirs750-2`; adenda 1 de V750-B: verificador
+  Sonnet «listo con cambios», en arreglo. Ramas de las hijas en el remoto (ls-remote 03:16). Runs fallidos de
+  `vigilar-osf-mirova.yml` a las 03:01 y 03:16: ruido conocido de S162 (disparo sobre árbol viejo), no producción. Sin
+  issue nuevo del auto-audit todavía (el de la semana pasada se abrió a las 16:29 UTC).
+
 ### 2026-10-26 ~04:30 UTC (S163, vuelta 5): H3 refutado; paquete O2 de MODIS listo; temporales a la papelera
 - **H3 REFUTADO para el tablero de hoy** (`audit-h3-tablero`, rama `claude/s163-audit-h3-6c292b` `5a349caa9`,
   `experiments/_s163_h3/INFORME.md`, verificador Sonnet CONFIRMADO): en origin/main `0b233221f`, 0 de 72.438 records Tier
