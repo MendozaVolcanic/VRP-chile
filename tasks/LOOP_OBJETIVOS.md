@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-26 ~13:20 UTC (S164, vuelta 2): D-39 verificado y paso 1 hecho; la pausa del scraper la negó el clasificador
+### 2026-10-26 ~13:05 UTC (S164, vuelta 2): D-39 verificado y paso 1 hecho; la pausa del scraper la negó el clasificador
 - `d39-mirova-v1` entregó (informe en su rama `claude/s163-d39-mirova-v1-710f72` `49de07d65`,
   `experiments/_s163_d39_mirova_v1/INFORME.md`; verificador limpio Fable 5.1, ningún REFUTADO): 0 llaves perdidas y 0 campos
   cambiados en el consolidado y en el OCR, +2.351 filas repuestas, todas reales. Hace falta sumar
