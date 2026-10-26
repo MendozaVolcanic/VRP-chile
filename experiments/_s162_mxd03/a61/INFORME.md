@@ -1,5 +1,28 @@
 # Auditoría espacial A61 de las protegidas que MxD03 mueve (S162, MOD-B, §6 P4 del pre-registro)
 
+> ⚠️ **Verificado con contexto limpio el 2026-10-25 (Opus 5.5, `verificador/INFORME_VERIFICADOR.md`).** La
+> conclusión del §6 P4 **se sostiene y sale más firme**: el cúmulo de X es el mismo calor que el de K, puesto en el
+> cráter, y ninguna protegida se fue a otro objeto. Lo que **no** debe pasar tal cual a la FICHA, a D35 ni al aviso a
+> OVDAS (el texto de abajo se conserva como historia):
+> - **E4 REFUTADA**: las 30 `Distancia_km` 0,0 son todas del OCR anterior al 2026-06-13, cuando el OCR escribía 0
+>   fijo (35 de 35 alertas MODIS; `scripts/calidad_referencia_mirova.py:29`). La tabla no trae ningún 0,0 en las 48,
+>   y contra la celda de la grilla fija de MIROVA ni K ni X calzan mejor que una posición al azar (VA61-03).
+> - **H4, la cifra**: la magnitud de una alerta individual se mueve de **−27 % a +48 %** (X/K 0,729 a 1,479), no
+>   «hasta ±27 %». El +48 % (Láscar 2026-03-27 07:10) es el mismo píxel: lo mueve el fondo, no una reselección.
+> - **E2**: son los mismos píxeles en **46 de 48** (identidad medida con la radiancia MIR del cúmulo, que no depende
+>   de la posición); reselección real en **2** (Láscar 2026-03-05 07:55 y 2026-03-09 01:55), no 4. El residuo de este
+>   informe no prueba identidad (da 2,40 km en un píxel idéntico; VA61-02).
+> - **E1**: el mínimo de X es **0,049 km** y el de K **0,336 km** (0,15 y 0,81 son los p10).
+> - **H1, el conteo**: los 2 records son un piso. En **unos 215** (3,9 %) el píxel MxD03 más cercano al cráter cae en
+>   la primera o última línea o frame del gránulo, 16 a 20 veces lo esperable al azar, con el anillo de fondo recortado,
+>   y el pipeline los guarda como noches observadas sin anomalía (VA61-01; que el cráter quede realmente fuera es
+>   SOSPECHA). Que en X el cráter quede sin posición es SIN DATO.
+> - **H2**: el modelo de desfase **no** reproduce el dato «dentro de 10 %» en todos los tramos (−72 % y −73 % en dos);
+>   sí cerca del borde, hasta 12 %. **H3**: en 27 de 36 records con relleno K conserva **más** anillo que X; lo
+>   sostenible es que K pierde más sólo en los 3 records con el bloque sobre la zona. **H5**: el margen mínimo de X al
+>   borde del inner medido desde el centro es **3,56 km**, no 4,1. **H7**: 47 de **52** records de crepúsculo.
+>   **H8**: Lastarria tampoco tiene `vent` propio. **H9**: el control de georreferencia del TIF es circular.
+
 ## En una pantalla
 
 1. **Las 48 protegidas con cúmulo quedan con X a 0,15 a 0,89 km del cráter (mediana 0,34 km), 48 de 48 dentro del inner y 48 de 48 más cerca que con K (0,81 a 3,20 km, mediana 1,58).** En 44 de 48 el cúmulo de X son **los mismos píxeles** que el de K, reubicados (26 por índice del píxel, 18 por residuo < 0,3 km contra el corrimiento del gránulo); en 4 hay reselección de píxeles vecinos del cráter de Láscar (X/K de 0,73 a 0,97). **Ninguna se fue a otro objeto.** La condición del §6 P4 se cumple.
