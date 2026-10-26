@@ -569,6 +569,25 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~03:30 UTC (S163, vuelta 4): ocho PR mergeados; O2 verificado; #889 a su sesión
+- Nicolás: «sí a mergear, sí a rebasar si es lo que recomiendas; borra los temporales que ya no tengan uso; el correo a
+  Coppola aún no». Mergeados por squash vía API, en orden: #900 (`5bb0c120c`), #902 (`c0f176908`), #903 (`744d8190b`),
+  #904 (`d96fa5f4d`, base cambiada a main), #906 (`b498cffe8`), #901 (`e8a7f3aa1`), #898 (`32812b925`), #905 (`691e4d588`).
+  #905 quedó en conflicto tras el squash de #904: tag `pre-s163-rebase-905`, rebase de sus 2 commits propios sobre main
+  (51 pruebas del instrumento en verde local), push con lease, CI verde (run 40260060896) y merge. CI de main sobre
+  `691e4d588`: pendiente al escribir esto (los intermedios se cancelaron por los merges seguidos).
+- #889: sesión `rebase-889` (`local_cc8da696-d46e-4b43-8cf9-74c0744abfdd`): tag, rebase sobre main, retirar lo que #903 a
+  #905 superan (probablemente I3 e I2), conservar I1 (estado «sin dato» de cobertura en el NRT), borrador con «no mergear
+  sin el sí de Nicolás» (toca `pipeline/fetch.py`).
+- **O2 verificado** (Sonnet, `C:\vrp-trabajo\s163-verif-o2\INFORME.md`, copiado a `s163-o2-paquete` `60fd6f98c`):
+  afirmaciones 1 a 3 y conteos CONFIRMADOS (cabecera GLNXA64, no Octave). **H1**: en las 51 escenas de un píxel con
+  vecindad intacta MATLAB rellena siempre con el promedio de la fila a ±2 columnas (desempate de diagonal); la frase «la
+  vara no puede ser un port» queda REFUTADA (marca A113 en `RESULTADO_O2.md`). Pasado a `loop-viirs750-2` para el port
+  exacto.
+- D-10 (#813) ya estaba decidida (opción 1, 2026-10-15): rama diurna VIIRS apagada por flag (#821); el A/B diurno sobre el
+  detector anterior dio NO ADOPTAR; **falta repetirlo sobre K (tarea 1.32)**: pendiente sin dueño, entra al inventario.
+- Inventario de trabajo paralelo S158-S163 (pedido de Nicolás): subagente de sólo lectura en curso.
+
 ### 2026-10-26 ~02:45 UTC (S163): loop-modis-2 al día; su rama sí estaba en el remoto
 - Comprobado con `git ls-remote`: `claude/s162-modis-2-0dd578` = `557e4ae79` (la subió ~01:50; mi consulta de 01:58 fue
   antes de que apareciera), `s162-a61-mxd03` = `72f85df71`, `s162-modd-candado` = `04a86a90e`.
