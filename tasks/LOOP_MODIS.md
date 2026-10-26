@@ -169,7 +169,7 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 ### MOD-D, paquete MODIS contra K
 - [x] D1. (borrador en `experiments/_s162_modis_paquete/PREREGISTRO.md`) Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
 - [x] D2. Verificador limpio: v1 tenía reglas que obligaban a decidir después de mirar; v2 las cierra (`ce71a4ab1`); ronda 2: lista para el sello; reglas SELLADAS con D-48 (`de3141b6e`).
-- [ ] D3. **EN CURSO (relevo, rama `s162-modd-candado`, worktree `C:\vrp-trabajo\s162-modd`)**: arnés `probe_paquete.py` (6 de 6 mutaciones atrapadas), diagnóstico S-1, evaluador `evaluar_paquete.py` (19 de 19 pruebas; contra el vacío 19 de 19 fallan por aserción), mutaciones del evaluador, ensayo en seco sobre S159, workflow `probe-s162-modd.yml`, adenda 3 (PM-sin_dup NO se agrega). Falta: cerrar mutaciones, verificador limpio del candado, tag y pedido de despacho. Texto previo: Candado de MOD-D (evaluador, arnés, workflow, verificador), ya posible: MOD-B y MOD-C entregaron. Incluye el estrato informativo de la adenda 1 (soporte independiente por publicación en negativos, candidatas a experimental) y, si se agrega por adenda, el brazo PM-sin_dup con el método A (adenda 2). Luego pedir el despacho a la coordinadora.
+- [ ] D3. **CASI LISTO** (2026-10-26 ~05:50 UTC): candado en `s162-modd-candado` `ff2ced531`; verificador ronda 1 (Fable): «con cambios chicos», VCM-01 a VCM-06 arreglados en la adenda 4; 33 pruebas (33/33 fallan contra el vacío), arnés 6/6, manifiesto de 39 archivos; corriendo: 31 mutaciones en tres grupos (salidas `mutar_evaluar_paquete_salida_v3_g*.txt`) y verificador ronda 2 (Fable, `verificador_candado_r2/`). Después: tag, rama de disparo `s162-modd-humo` y pedido a la coordinadora S163. Texto anterior: **EN CURSO (relevo, rama `s162-modd-candado`, worktree `C:\vrp-trabajo\s162-modd`)**: arnés `probe_paquete.py` (6 de 6 mutaciones atrapadas), diagnóstico S-1, evaluador `evaluar_paquete.py` (19 de 19 pruebas; contra el vacío 19 de 19 fallan por aserción), mutaciones del evaluador, ensayo en seco sobre S159, workflow `probe-s162-modd.yml`, adenda 3 (PM-sin_dup NO se agrega). Falta: cerrar mutaciones, verificador limpio del candado, tag y pedido de despacho. Texto previo: Candado de MOD-D (evaluador, arnés, workflow, verificador), ya posible: MOD-B y MOD-C entregaron. Incluye el estrato informativo de la adenda 1 (soporte independiente por publicación en negativos, candidatas a experimental) y, si se agrega por adenda, el brazo PM-sin_dup con el método A (adenda 2). Luego pedir el despacho a la coordinadora.
 
 - [x] F1. (relevo, `74a5f855b`) Plan con TDD del flag de MxD03 para la adopción dentro del paquete: `docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md` (posición por píxel, estado «sin dato» con regla a confirmar en el censo de MOD-D, distancia de la etiqueta desde el cráter). Nada en `pipeline/` sin tag y sí de Nicolás.
 
@@ -186,7 +186,8 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
   usamos MOD03; `docs/MISSION.md` no nombra a Coppola 2026. Si se toca `docs/MIROVA_DIVERGENCES.md`, tomar la
   resolución de D25 de `a907c44f3` (PR #908). Nada en `pipeline/`.
 
-- [ ] O4. Adenda 4 de MOD-D (aprobada por la coordinadora con D-48): M informada también con la regla de
+- [x] O4. (adenda 4 en `s162-modd-candado` `ff2ced531`; también arregla VCM-01 a VCM-06 del verificador del candado;
+  regla 1 (b) aprobada por la coordinadora S163 el 2026-10-26 05:40 UTC) Adenda 4 de MOD-D: M informada también con la regla de
   `fillmissing2` de MATLAB, fuera de línea, con las grillas que guarda el censo; sin cambiar reglas selladas. Escribirla
   cuando entregue el verificador del candado (no cambiarle el pre-registro mientras lo lee) y verificarla.
 
@@ -206,6 +207,10 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 2. ~~D35 y marcas A113~~: **resuelta** (D-48): van en el PR del veredicto de MOD-B, no antes (tarea B10).
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-26 (relevo MODIS 2, vuelta 2): O2 MODIS, vara preliminar, #910, adenda 4 de MOD-D
+- Paquete O2 MODIS para MATLAB (404 escenas) y vara preliminar con la regla de fillmissing2 (verificada: 191 escenas distintas, ruido de 9 % en 1 píxel). PR #910 a main mergeado (sello del pre-registro de MxD03).
+- Candado de MOD-D: ronda 1 del verificador, adenda 4, regla 1 (b) aprobada (D-48). Mutaciones y ronda 2 en curso.
 
 ### 2026-10-25 (relevo MODIS 2, vuelta 1): A61 verificada, candado de MOD-D armado, plan del flag
 - Verificador limpio (Opus) de la A61: P4 se sostiene; marca de correcciones al inicio del INFORME (`s162-a61-mxd03` `72f85df71`).
