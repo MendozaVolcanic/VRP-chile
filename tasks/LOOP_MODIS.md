@@ -6,7 +6,100 @@ Coordinadora: sesión «Retomar» (`local_4152952c-6afd-433a-82b3-b07575feee3b`)
 y la única que escribe `tasks/LOOP_OBJETIVOS.md`. Programa: `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`
 §5 (MOD-A a MOD-E). Notas compartidas: `C:\Users\nmend\AppData\Roaming\Claude\side-session-notes\local_4152952c-6afd-433a-82b3-b07575feee3b`.
 
-## 0. Cierre del relevo MODIS 2 (2026-10-26, 13:47 UTC, hora del servidor)
+## 0. Cierre del relevo MODIS 2: censo de MOD-D verificado (2026-10-26, 16:17 UTC, hora del servidor)
+
+Estado fijado **sin trabajo en vuelo**: el verificador del censo entregó, el loop está detenido y no queda ningún
+workflow mío corriendo. La coordinadora S164 (`local_34f868ef-c156-4906-9b6c-e691fc445650`) le llevó el veredicto a
+Nicolás. **Hasta que conteste, nada en `pipeline/`.**
+
+### a. Todo en una pantalla
+
+| pieza | estado | evidencia |
+|---|---|---|
+| Humo MOD-D | pasa (23 pasadas ok), verificado «pasa con reparos» | run 40333783937; `experiments/_s162_modis_paquete/humo_40333783937/` |
+| Tandas del censo | completas: 5.465/5.465 ok, 0 faltan, 0 repetidas | t1 run **40336655402** (1.814), t2 run **40344051900** (1.837), t3 run **40349358358** (1.814); `contar_t{1,2,3}_salida.txt` |
+| Evaluación del censo | **DECIDE NICOLÁS** (fila 5 del §6 por P1b = 1), 12 controles en verde | `censo/evaluar_censo_salida.txt`, `censo/resultado_censo.json` (commit 953540853) |
+| M con la regla de MATLAB | MEJORA también, IC [−0,320; −0,169] | `censo/m_con_regla_censo_salida.txt` |
+| Verificador limpio (Fable alto) | «DECIDE NICOLÁS se sostiene» | `censo/verificador/INFORME.md` y `LEEME.md` (commit 9ea9a1786) |
+| PREREGISTRO de la rama | alineado con el del tag (le faltaban las adendas 3 y 4) | `git diff s162-modd-tag -- experiments/_s162_modis_paquete/PREREGISTRO.md` vacío |
+| Candado, tag, worktree | sin cambios | tag `s162-modd-tag` sobre `865174abe`, worktree `C:\vrp-trabajo\s162-modd` |
+| Datos del censo | en disco local, fuera del repo | `D:\vrp-trabajo\temporales\s162_modd\censo\` (3 runs) |
+
+Resultado del censo en una línea por regla: P1 sin pérdida; **P1b = 1** (Láscar 2026-04-25 07:35, K 1,245 MW, PM 0,973,
+MIROVA 1,28, alerta de 1 píxel; con `fillmissing2` de MATLAB el PM da 1,112 y ninguna de las 48 protegidas baja);
+20 protegidas suben de K < 1 a PM ≥ 1; P2 GANA (K 49 errores, PM 8, neto −41, 50 bloques); M MEJORA (78 pares, la
+llevan 70 de Láscar); curva de cenit del PM 0,93 a 1,10 contra MIROVA, K 0,63 a 0,21; Chillán SIN RESOLVER (6 de 7,
+p = 8/128).
+
+### b. Decisiones que espera el dueño
+
+| # | pregunta | opciones | recomendación |
+|---|---|---|---|
+| 1 | ¿Qué se hace con el veredicto DECIDE NICOLÁS de MOD-D? | (a) CANDIDATO a la fase 3; (b) NO CANDIDATO; (c) otro censo con la regla de MATLAB sellada antes | **(a)**: el único P1b es de 1 píxel, 0,027 MW bajo el corte y depende del desempate del relleno; con la regla de MATLAB, que coincide con MATLAB en 191/191 escenas, no queda ninguno; P2 y M ganan con claridad |
+| 2 | Adopción de MxD03 dentro del paquete | sí / no / después | después de la 1: el plan TDD ya está en `docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md` |
+
+**Qué haría la fase 3 si Nicolás dice (a).** Tag defensivo `pre-s16x-paquete-modis` y su sí explícito antes del primer
+edit (A45). Flag nuevo en `pipeline/profiles/mirova_equivalent.yaml`, **apagado**, que en `process_modis.py` reemplace la
+detección K por la del port (`.m` de MIROVA adaptado a MODIS), con el relleno del fondo según la regla de `fillmissing2`
+de MATLAB. Reutilizar `pipeline/mirova_v750_codigo.py` (#907) y portar ahí `delaunay_perturbado.py` (blob f273a47a) en
+vez de duplicarlo. TDD: primero las pruebas que fijan el caso de Láscar 2026-04-25 (1,112 MW) y la identidad con el port
+del censo, después el código. Encender el flag recién con un reproceso verificado y el sí de Nicolás en el dashboard.
+
+### c. Lo aprendido
+
+- **Un verificador no se lanza mientras se edita lo que lee** (A112, cuarta vez en este relevo): el r2 del candado vio
+  ediciones en vivo y hubo que hacer una tercera vuelta. Regla general del workspace.
+- **El documento que gobernó un resultado tiene que viajar con él**: el resultado del censo quedó en una rama cuyo
+  pre-registro no tenía las adendas que lo decidieron. Al copiar resultados desde un tag, copiar también los documentos
+  que el tag sella. Propio del proyecto (va al catálogo de reglas en el próximo cierre de coordinadora).
+- **Un veredicto que depende de un empate se informa con su sensibilidad**: el P1b cambia de lado con el desempate del
+  relleno; la regla sellada se respeta, pero la decisión del dueño necesita ver las dos lecturas. Regla general.
+
+### d. Problemas abiertos e hipótesis
+
+- **CONFIRMADO**: la adenda 3.11 dice «149 pasadas del lote» y son 150 (una con el volcán fuera del gránulo). Sin efecto.
+  Texto sellado, no se edita; anotado en `censo/verificador/LEEME.md`.
+- **CONFIRMADO**: el run de S159 39712862945 terminó en «failure» (job MODIS 3 de 6), pero su dato se reproduce a 1e-6.
+  **SOSPECHA** la causa del fallo: no se miró el log.
+- **CONFIRMADO**: 5 pasadas crepusculares (dayflag 1, cenit solar 89 a 90°) dentro del censo nocturno, sin efecto.
+- **SOSPECHA**: que MIROVA use para MODIS el mismo `.m` que publicó para V750 (SIN DATO).
+- Pendientes de antes que siguen abiertos: VC3-01 a VC3-14 (bloque 0-prev).
+
+### e. Lo que ya está cerrado y no hay que rehacer
+
+- Cobertura del censo (5.465/5.465, tres tandas contadas) y su evaluación verificada: **no re-correr el censo** salvo
+  que Nicolás pida la opción (c).
+- Candado de MOD-D (tres vueltas de verificador, 37/37 mutaciones atrapadas).
+- O2 MODIS: la regla de `fillmissing2` reproduce a MATLAB en 191/191 escenas.
+- A61 de MxD03 verificada (P4 se sostiene).
+
+### f. Prompt para la próxima sesión
+
+```text
+Sesión de MODIS de VRP Chile (continúa tras el relevo MODIS 2, cerrado el 2026-10-26 16:17 UTC con el censo de MOD-D
+verificado). Español de Chile con formas de tú, sin guiones largos, rutas absolutas, explicar como geólogo.
+
+1. Verifica antes de creer: git fetch origin --prune; compara origin/claude/s162-modis-2-0dd578 (debe incluir
+   9ea9a1786 o posterior) con el bloque «0. Cierre del relevo MODIS 2: censo de MOD-D verificado» de
+   tasks/LOOP_MODIS.md. Pregunta a la coordinadora vigente (S164, local_34f868ef-c156-4906-9b6c-e691fc445650, o la que
+   la reemplace) qué contestó Nicolás sobre MOD-D (decisión 1 del bloque).
+2. Lee: CLAUDE.md del proyecto (A45, A104, A108, A112, A113, A119); el bloque 0 de tasks/LOOP_MODIS.md;
+   experiments/_s162_modis_paquete/censo/verificador/LEEME.md e INFORME.md; PREREGISTRO.md (adendas 1 a 4).
+3. Trabajo según la respuesta:
+   a. Si es CANDIDATO: escribe el plan de la fase 3 (skill writing-plans + test-driven-development) tal como lo describe
+      el bloque 0, sección b. Tag defensivo y sí explícito de Nicolás ANTES del primer edit en pipeline/ (A45). Flag
+      apagado; reutiliza pipeline/mirova_v750_codigo.py (#907).
+   b. Si es NO CANDIDATO: anótalo en el catálogo con la razón y pasa a MOD-C / MOD-E de la cola.
+   c. Si pide otro censo con la regla de MATLAB sellada: adenda nueva al pre-registro ANTES de mirar nada, candado,
+      verificador, y pedir los despachos a la coordinadora.
+4. Reglas duras: nada en pipeline/ sin tag defensivo y el sí de Nicolás (A45); nunca despaches tú ni crees ramas de
+   disparo; sólo EARTHDATA_TOKEN (A71); git add por archivo; nunca git stash; no edites lo que un verificador lee
+   (A112); verificador limpio de otro modelo antes de aceptar un resultado; archivos con la herramienta de archivos,
+   no heredocs con barras invertidas; parada si C: o D: bajan de 3 GB (al cerrar: C 5,7 GB, D 8,1 GB).
+5. Si la sesión no alcanza: cola de tasks/LOOP_MODIS.md al día y /cierre.
+```
+
+## 0-prev. Cierre del relevo MODIS 2, primer cierre (2026-10-26, 13:47 UTC, hora del servidor)
 
 Estado fijado **sin trabajo mío en vuelo** (los procesos de Python que corrían al cerrar son de otras sesiones: mutaciones
 de V750-A y servidores). Lo único pendiente fuera de esta sesión es el **humo de MOD-D, pedido a la coordinadora S164 y
@@ -110,7 +203,7 @@ formas de tú, sin guiones largos, rutas absolutas, explicar como geólogo.
 ```
 
 
-## 0-prev. Cierre de la sesión hija MODIS (2026-10-24, 20:55 UTC, hora del servidor)
+## 0-prev2. Cierre de la sesión hija MODIS (2026-10-24, 20:55 UTC, hora del servidor)
 
 Estado fijado sin trabajo de MODIS en vuelo (la única corrida en cola en GitHub es un lote de VIIRS 375 de otra sesión).
 Ramas verificadas contra el remoto: `claude/s162-modis-774bb0` y `s162-mxd03-codigo` (`afb3fcdea`). Tags en el remoto:
