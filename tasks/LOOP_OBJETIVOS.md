@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 12:38 UTC (S164, vuelta 1): relevo tomado; estado verificado contra el remoto
+- `loop/activo` = remoto en `4d41d78eb`; `main` en `b09a7b321`. Disco: C: 16 GB, D: 8,4 GB libres.
+- NRT: 5 corridas verdes seguidas (08:10 a 11:10 UTC), la de 12:10 en curso; último dato en `data/mirova_equivalent/`
+  a las 10:48 UTC (Copahue).
+- Ramas de las seis sesiones en el remoto e iguales al local: `claude/s162-modis-2-0dd578` `cac483b74`,
+  `claude/s162-viirs750-2-918174` `fb95d62ba`, `claude/s162-viirs375-c1b864` `7c9faed07`,
+  `claude/s163-d39-mirova-v1-710f72` `f3b002ea9`, `claude/s163-instrumento-pendientes-ab5a2d` `f391376a0`,
+  `claude/s163-diurno-k-prereg-5c4f44` `ce20f9cf0`; `s162-modd-candado` `ff2ced531`. `s162-via-mirova` (#907) está en el
+  remoto en `a16aa14b4`, el worktree local quedó atrás en `3a02ad28f` (no importa: manda el remoto).
+- Abiertos: PR #907, #912, #913 (borradores); issues #864 (auto-audit 2026-10-19) y #813 (D-10). Mirova-v1#26 OPEN.
+- `experiments/_s162_v750b/objetivos_v750b.json` no existe en ninguna rama ni tag; sí el generador `objetivos_v750b.py`
+  (también en el tag `s162-v750b-sellado`). Para el 2026-11-03 hay que generarlo, commitear y anotar su sha256. Avisado
+  a `loop-viirs750-2`.
+- Avisado el relevo a las seis sesiones (cinco entregados, `diurno-k-prereg` en cola porque estaba en un turno).
+
 ### 2026-10-26 12:35 UTC (S163): cierre de la coordinadora; relevo a S164
 - Nicolás: «sí, cierra y abre la siguiente con lo que corresponda y necesario para seguir con todo». Loop de S163 detenido.
   Traspaso en `tasks/BLOQUE_ARRANQUE_S164.md`. Estado fijado con trabajo en curso: `loop-modis-2`, `loop-viirs750-2`,
