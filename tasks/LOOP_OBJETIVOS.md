@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~12:15 UTC (S163, vuelta 15): #911 mergeado (evidencia S159 a S163 en main); entregas del paper y del congreso
+- **#911 mergeado** (squash `b09a7b321`; CI verde; 1.091 archivos, todos en `experiments/`, comprobado con `git diff
+  --name-only`; 62,5 MB): evidencia verificada de 13 ramas (oráculo y PORTES de S159, línea D25, MODIS, V375, V750 a/b/c/f,
+  O2, O2 alternativa, H3). Quedaron fuera a propósito el `PREREGISTRO_MXD03.md` (el de main es más nuevo), las colas de las
+  hijas vivas, 6 tests de D25 y un workflow de probe. Citas rotas de 54 a 12: 4 viven en ramas de hijas, 6 nunca se
+  commitearon (`_s160_audit/f1b/matriz_instrumentos.csv`, `_s160_audit/f4/propagacion.csv`, `_s160_espacial/data`,
+  `_s162_modis_verif_cde/arbol`, `_s162_v750b/objetivos_v750b.json`, `_s162_v750b/sin_granulo_v750b.json`). Avisadas las
+  hijas de los 10 choques add/add previstos (en los 10 manda la versión de la hija). Hallazgo lateral: las copias viejas de
+  los `.m` de MIROVA en main (`_s158_d17_diseno/osf_codigo_mirova`, `_s159/o1/o2_paquete`, `prueba_o2_en_octave`) tienen md5
+  distinto del OSF (normalización de fines de línea); las de `_s163_o2` sí son byte a byte.
+- Paper: **#912** en borrador (informe de estado, estructura, políticas de IA y lista de chequeo; dos verificadores limpios;
+  manuscrito sin tocar). Congreso: propuesta lámina por lámina en
+  `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\congreso geologico 2026\2_PRESENTACIONES\PROPUESTA_REVISION_2026-10-26.md`
+  (verificador: 15 afirmaciones, 0 refutadas, 6 precisadas); los mazos nuevos esperan el visto bueno de Nicolás.
+
 ### 2026-10-26, servidor 11:48 UTC (S163, vuelta 14): primer NRT con #909 en verde; sesiones de paper, congreso y retrospectiva
 - NRT de las 11:10 UTC (`b43f4ee4f`, incluye #909): **success**. El log ya registra la cobertura por volcán («Cobertura NO
   COMPLETA: 1 incidencias (ninguna búsqueda ni descarga fallida)»): es el día en curso, parcial por construcción, como avisó
