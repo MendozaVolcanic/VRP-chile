@@ -578,6 +578,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   apagado (con control que sí cambia), suite completa en árbol quieto con 0 fallas, CI verde y verificador limpio de otro
   modelo; el merge lo hace la coordinadora. **Encender** el flag no está aprobado: exige censo, sombra, tag y otro sí.
 - Pasado a `loop-modis-2` con las palabras textuales.
+- 16:43 UTC: `loop-modis-2` no la empieza (sesión larga). Traspaso en `tasks/LOOP_MODIS.md` §b2 «FASE 3 APROBADA» de
+  `claude/s162-modis-2-0dd578` `e15e50153` (= remoto): la vía es el PM del censo (`experiments/_s159/portes/mirova_port.py`,
+  MODIS, `leer_modis`) con la regla de MATLAB; reutilizar `detectar_mirova`, `_fillmissing2_lineal`, `vrp_mirova`,
+  `caja_roi`, `remuestrear_grilla`, `grilla_del_volcan` y `procesar_grilla` de `pipeline/mirova_v750_codigo.py`,
+  parametrizando por sensor (A102); archivos: ese módulo, `profile.py`, `process_modis.py`, `store.py`, quizás
+  `grillas_mirova.yaml` (SIN DATO) y la ficha SDA; siete pruebas (entre ellas Láscar 2026-04-25 07:35 = 1,1124 MW). La
+  sesión nueva confirma el sí con Nicolás en su propio chat antes del primer edit (S157). Falta abrirla.
 
 ### 2026-10-26 16:33 UTC (S164, vuelta 15): auto-audit nuevo #915; #864 cerrado apuntando a él
 - #915 (2026-10-26 16:10 UTC, detector K, ventana 60 d). Respecto de #864 (2026-10-19), **nuevo**: recall MODIS 62,5 %
