@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-26 ~18:50 UTC (S164, vuelta 20): revisión de W1 por diurno-k-prereg; I4c falla por un hueco de NASA
+### 2026-10-26 18:39 UTC (S164, vuelta 20): revisión de W1 por diurno-k-prereg; I4c falla por un hueco de NASA
 - Revisión (rama `claude/s163-diurno-k-prereg-5c4f44` `e150b4cfd`, `experiments/_s163_diurno_k/w1/REVISION_W1.md`):
   diurno 88 min 27 s → W2 a W6 enteras (confirmado). Cableado sano: los 513 records con el sha sellado, 0 con Test 1,
   147 diurnos con umbrales diurnos, noches idénticas. Costo re-estimado: ~55 h de runner, ~18 h de reloj.
