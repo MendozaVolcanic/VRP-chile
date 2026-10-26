@@ -1,6 +1,6 @@
 # S159: arreglo de los instrumentos que rompió la auditoría S158 (segunda ronda)
 
-> ⚠️ **S163**: esta rama se reescribió sobre `main` (`691e4d588`). I1, I3 y A se conservan, fusionados con #897; I2 ya había salido a #890 y D25 se decidió NO ADOPTAR (D-48). Lo que quedó y por qué: `experiments/_s163_rebase_889/NOTAS.md`. La rama de S159 está en el tag `pre-s163-rebase-889`. Las rutas `C:\vrp-trabajo\...` de abajo son del worktree de S159. Texto de S159 conservado por historia.
+> ⚠️ **S163**: lo que todavía aporta este trabajo se reescribió sobre `main` (`691e4d588`) en la rama `s163-instrumentos` (PR #909), que reemplaza a #889. I1, I3 y A se conservan, fusionados con #897; I2 ya había salido a #890 y D25 se decidió NO ADOPTAR (D-48). Lo que quedó y por qué: `experiments/_s163_rebase_889/NOTAS.md`. La rama de S159 está en el tag `pre-s163-rebase-889`. Las rutas `C:\vrp-trabajo\...` de abajo son del worktree de S159. Texto de S159 conservado por historia.
 
 Worktree `C:\vrp-trabajo\s159-instrumentos`, rama `s159-instrumentos`, cortada de `origin/main` en `ac60cc9f2`.
 No toca el detector: ni `pipeline/process_*.py`, ni `pipeline/store.py`, ni ningún perfil. Hallazgos de origen en

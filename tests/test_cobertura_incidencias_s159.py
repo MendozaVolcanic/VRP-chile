@@ -216,3 +216,22 @@ def test_reproc_brazos_cuenta_lo_que_el_estricto_cuenta(tmp_path):
     assert rb.correr("Lascar", "2026-09-01", "2026-09-01", ["p"], tmp_path, estricto=False,
                      cobertura_json=salida, ejecutar=ejecutar) == 0
     assert len(json.loads(salida.read_text(encoding="utf-8"))["incidencias"]) == 2
+
+
+# ---------------------------------------------------------------- fallas e incidencias a la vez (S163, verificador)
+
+@pytest.mark.parametrize("estricto,codigo", [(False, 0), (True, 3)])
+def test_fallas_e_incidencias_juntas_se_informan_las_dos(capsys, tmp_path, estricto, codigo):
+    """Una búsqueda caída y un día parcial en la misma corrida: el resumen nombra las dos y el NRT sigue en 0."""
+    fallas = [{"volcan": "Lascar", "fecha": PASADO, "plataforma": "MODIS_TERRA", "etapa": "busqueda",
+               "motivo": "simulado"}]
+    incidencias = [{"tipo": "dia_parcial", "cuenta_estricto": True, "volcan": "Lascar", "fecha": PASADO,
+                    "plataforma": None, "motivo": "simulado"}]
+    ruta = tmp_path / "c.json"
+    cod = rp.informar_cobertura(fallas, ruta_json=ruta, estricto=estricto, incidencias=incidencias)
+    out = capsys.readouterr().out
+    assert cod == codigo
+    assert "Cobertura INCOMPLETA" in out and "Además, 1 incidencias" in out, out
+    assert "Cobertura: completa" not in out
+    cob = json.loads(ruta.read_text(encoding="utf-8"))
+    assert cob["n"] == 1 and cob["n_incidencias"] == 1
