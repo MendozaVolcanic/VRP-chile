@@ -46,7 +46,11 @@ El mismo catálogo CMR tiene gránulos **todos los días** de W2 a W6 en los sei
 `VJ202IMG`, `VNP02MOD`, `VJ102MOD`, `VJ202MOD`), sobre la misma caja. No se espera que I4c caiga por un día entero sin
 datos; un hueco parcial (algunos gránulos de un día) no está descartado.
 
-## Lo que el pre-registro sellado no dice (para decidir, no aplicado)
+## Lo que el pre-registro sellado no dice
+
+⚠️ **Resuelto el mismo día**: la coordinadora S164 aprobó con D-48 (18:39 UTC) una regla de exclusión con criterio
+mecánico, escrita como adenda 1 en el §11 del pre-registro (`dias_excluidos_nasa.py`). Con esa regla W1 excluye sólo
+el 2026-03-10 e I4c sigue fallando: W1 queda INVÁLIDA (informativa). La propuesta original, conservada por historia:
 
 El §5 no prevé un hueco permanente del archivo de NASA. Propuesta de desviación, a registrar en el §11 sólo si la
 aprueban la coordinadora o Nicolás: cuando I4 falle, las pasadas sin record que caen en días en que CMR no tiene

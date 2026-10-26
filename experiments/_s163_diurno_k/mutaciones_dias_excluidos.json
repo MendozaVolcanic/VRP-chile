@@ -1,0 +1,70 @@
+{
+ "pruebas": [
+  "experiments/_s163_diurno_k/test_dias_excluidos_nasa.py"
+ ],
+ "mutaciones": [
+  {
+   "id": "D1",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "        out |= sin & set(faltas.get(s, ()))",
+   "nuevo": "        out |= sin | set(faltas.get(s, ()))",
+   "que": "basta una de las dos condiciones"
+  },
+  {
+   "id": "D2",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "        out |= sin & set(faltas.get(s, ()))",
+   "nuevo": "        out |= sin",
+   "que": "sólo CMR, sin la condición del control"
+  },
+  {
+   "id": "D3",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "        sin = set().union(*(set(vacios.get(p, ())) for p in prods))",
+   "nuevo": "        sin = set().union(*(set(vacios.get(p, ())) for p in list(prods)[:1]))",
+   "que": "sólo mira Suomi NPP"
+  },
+  {
+   "id": "D4",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "        if ev.es_dia_vol(p.volcano, t):\n            continue",
+   "nuevo": "        if False:\n            continue",
+   "que": "cuenta también las pasadas diurnas"
+  },
+  {
+   "id": "D5",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "abs((x - t).total_seconds()) <= cm.VENTANA_S",
+   "nuevo": "abs((x - t).total_seconds()) <= 600",
+   "que": "pareo a 10 min"
+  },
+  {
+   "id": "D6",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "        if not r[\"es_dia\"]:\n            idx",
+   "nuevo": "        if True:\n            idx",
+   "que": "records diurnos del control cubren noches"
+  },
+  {
+   "id": "D7",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "\"control_pierde_noches\": sorted(s for s, ds in faltas.items() if d in ds)}",
+   "nuevo": "\"control_pierde_noches\": []}",
+   "que": "evidencia vacía"
+  },
+  {
+   "id": "D8",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "    return sorted({d for p, ds in vacios.items() for d in ds if d not in dias_con_records.get(p, set())})",
+   "nuevo": "    return sorted({d for p, ds in vacios.items() for d in ds})",
+   "que": "b' sin mirar los records"
+  },
+  {
+   "id": "C-CAIDA",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "    out = set()\n    for s, prods in PRODUCTOS.items():",
+   "nuevo": "    raise RuntimeError(\"control de caida\")\n    for s, prods in PRODUCTOS.items():",
+   "que": "CONTROL: tiene que salir CAIDA"
+  }
+ ]
+}
