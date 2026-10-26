@@ -66,8 +66,8 @@ reprodujeron. Ninguno es exótico: son exactamente los riesgos que documenta la 
 
 **Decisiones que te tocan** (§5): revista y quién escribe el texto (la primera, porque cambia todo lo demás); el
 marco del paper; si se espera al paquete de VIIRS 750 (V750-B no se despacha antes
-del 2026-11-03); la ventana de validación; qué hacer con el «más allá de MIROVA»; el correo a Coppola antes o después;
-y el texto de la declaración de IA.
+del 2026-11-03); la ventana de validación; qué hacer con el «más allá de MIROVA»; el correo a Coppola antes o después (nunca se envió);
+el texto de la declaración de IA; y la licencia, porque hoy el repo es público pero no tiene ninguna (N-18).
 
 ---
 
@@ -109,6 +109,8 @@ discusión y conclusiones (`docs/paper/README.md:24`), así que también entra.
 | N-15 | `PAPER_VRP_CHILE_DRAFT_S72.md:194`, `:352` | «796 passed (S119)» | número de julio | DESACTUALIZADA |
 | N-16 | repo público citado como disponibilidad de datos (`PAPER_VRP_CHILE_DRAFT_S72.md:348-355`) | el repo es el material suplementario | `origin/main` tiene 78 imágenes de páginas de papers (88 PNG en `experiments/_s146_auditoria/`, `_s149_audit/`, `_s150_audit/`, `_s158_audit/` y `_s158_audit_r2/`, de los que 10 son figuras de gránulos), unas 34 de SP426.5 (derechos de la Geological Society) y otras del capítulo de Springer, Campus 2024 y Aveni 2024, sin licencia abierta; sólo Campus 2022 y Coppola 2023 son CC BY, y Coppola 2026 es CC BY-NC-ND y un PDF con copyright (`documentacion/steffke_harris_2011_review_hotspot_algorithms_10.1007-s00445-011-0487-7.pdf`); la regla de S158 dice que los renders van fuera del repo público | FALTA (limpiar antes de enviar) |
 | N-17 | `PAPER_VRP_CHILE_DRAFT_S72.md:357-370` | agradecimiento con declaración de IA | el texto existe pero no está contrastado con la política de la revista (§3) | FALTA |
+| N-18 | `PAPER_VRP_CHILE_DRAFT_S72.md:79-80`, `:344` | «published under MIT license»; «Código MIT» | el repo es público pero **no tiene licencia** (sin archivo `LICENSE` en `origin/main`; `gh repo view --json licenseInfo` vacío, 2026-10-26); el propio esqueleto la deja por decidir (`:350`, `:471`). Sin licencia es «código público», no «abierto» (lo detectó la retrospectiva del proceso, `docs/PLAN_PROCESO_VRP_CHILE_S163.md` §0, PR #913) | FALSA |
+| N-19 | `PAPER_VRP_CHILE_DRAFT_S72.md:62-66`, `:182` | coeficientes «empirically calibrated against the MIROVA OSF v2.5 database (median error ≤0.17%)» | el 0,17 % es el desajuste entre la **fórmula de Di Bella** para VIIRS 750 y el coeficiente reconstruido desde las 48.360 filas del OSF (`experiments/21_results.json:67-69`, 0,1689 %); MODIS y VIIRS 375 calzan con error del orden de 1e-14 (`:57`, `:81`). No es un error de calibración, y además la fórmula que calza es de un paper de INGV Catania (A9; S152 T-3) | REBAJADA |
 
 Cuento de N-9 a N-13 como **errores de la redacción asistida**: tienen la forma de lo que documenta la literatura
 (§3.2) y ninguno lo habría producido alguien leyendo el PDF.
@@ -127,7 +129,7 @@ El marco de S72 («la primera implementación», «validada») dependía de una 
 que no medía lo que decía (N-12). El marco de reproducibilidad no depende de ninguna de las dos, y aprovecha lo que el
 proyecto sí encontró:
 
-1. **Una réplica abierta, operando, con evaluación en las dos direcciones.** Alertas de MIROVA que perdemos y
+1. **Una réplica pública (abierta cuando tenga licencia, N-18), operando, con evaluación en las dos direcciones.** Alertas de MIROVA que perdemos y
    publicaciones nuestras donde MIROVA miró y no vio nada (negativos limpios), con alertas protegidas de 1 MW o más,
    regla SN, por sensor y por tramo de calidad de la referencia (`docs/MISSION.md:81-131`). Ese diseño de evaluación
    es reutilizable para cualquier réplica de un producto satelital.
@@ -338,6 +340,7 @@ significa que lo hace una persona mirando la fuente, no un agente; un agente pue
 | G10 | La declaración de IA dice la verdad y está completa | contrastarla con la traza: código, raspado y OCR de la referencia, figuras, corrección de estilo, búsqueda bibliográfica | Volcanica §4.2 y §5.3 |
 | G11 | Ninguna conclusión más general que lo medido | por frase de resumen y conclusiones: ¿qué volcán, qué sensor, qué ventana? | Peters y Chin-Yee 2025 (§3.4); S152 grave 3 (Láscar sola enunciada como MODIS) |
 | G12 | La sección no reproduce frases de los papers fuente | comparar los párrafos de §2 contra las páginas de Coppola 2016a y Campus 2022 que resumen; el editor correrá un detector de similitud | Lee et al. 2023 (§3.4) |
+| G13 | Toda premisa de proceso o de historia del proyecto (qué se envió, qué se midió, qué numeración D) contra su fuente | leer `docs/PLAN_PROCESO_VRP_CHILE_S163.md` §0 (PR #913) antes de escribir; ojo con las dos numeraciones D (`docs/DRIFTS_S17.md` y `docs/MIROVA_DIVERGENCES.md` no coinciden) | N-18, N-19; la cifra «1 a 3 %» de sobre-publicación con K es en realidad 2,5 y 3,7 % en VIIRS 375 (V1 y V2, `experiments/_s153_fk_v2/`) según ese plan |
 
 ### 4.2 Citas y bibliografía
 
@@ -418,8 +421,9 @@ desde el 2026-09-22, así que no sirven como imagen de la erupción.
 | D4 | `paper_numbers.py` adopta unión histórica, regla SN, negativos limpios y protegidas (decisión (b) de S152) | sí, y mejor aún: que lea el evaluador común del programa (§8, punto 3) en vez de tener su propia definición |
 | D5 | «más allá de MIROVA» | fuera de este paper; segundo paper cuando exista la validación contra OVDAS y SWIR |
 | D6 | declaración de IA | según la política de la revista (§3.1). El borrador de S72 la pone en agradecimientos (`PAPER_VRP_CHILE_DRAFT_S72.md:357-370`); Volcanica la pide en métodos (§4.2 y §5.3). Partir del borrador de §3.3, punto 5 |
-| D7 | Coppola: contacto | antes de enviar, no después: el correo ya está redactado (`docs/audit_s139/BORRADOR_CORREO_COPPOLA.md`), el programa por sensor recomienda mandarlo (§9, punto 6), y además hay que preguntar por el uso de los datos de mirovaweb.it y por la ROI por volcán |
+| D7 | Coppola: contacto | antes de enviar, no después: el correo está redactado desde S139 y **nunca se envió** (`docs/audit_s139/BORRADOR_CORREO_COPPOLA.md`; `docs/PLAN_PROCESO_VRP_CHILE_S163.md` §0), el programa por sensor recomienda mandarlo (§9, punto 6), y además hay que preguntar por el uso de los datos de mirovaweb.it y por la ROI por volcán |
 | D8 | coautores SERNAGEOMIN / OVDAS | definirlos antes de escribir la discusión operacional |
+| D9 | licencia del código y de los datos | elegirla (y confirmarla con SERNAGEOMIN) antes de enviar: sin licencia el repo no es reutilizable y no se puede llamar «abierto» (N-18). Con licencia, archivar la versión en Zenodo para el DOI |
 
 ---
 
@@ -438,6 +442,11 @@ cada una, no el informe (protocolo de verificación en cadena). Sus informes y l
   aplicadas: la posición de COPE es de 2023 pero la versión en línea es de 2024; lo de agradecimientos y métodos de
   ICMJE está en su sección II.A.4, no en la página de IA. La página de AGU dio 403 en vivo y se leyó en Wayback
   (2026-09-22).
+
+- **Agregado después de los verificadores** (aviso de la sesión de retrospectiva del proceso, PR #913): N-18, N-19, G13
+  y D9, y que el correo a Coppola nunca se envió. N-18 y N-19 los comprobé yo (sin `LICENSE` en `origin/main` y
+  `licenseInfo` vacío; `experiments/21_results.json:57`, `:67-69` y `:81`); el «2,5 y 3,7 %» de G13 lo cito de ese plan
+  sin medirlo. No pasaron por un verificador con contexto limpio.
 
 ## 7. Lo que este informe no verificó
 
