@@ -2,7 +2,8 @@
 """S162 V750-A: compara record por record el JSON de un volcán producido por main y por la rama del cableado.
 
 Ignora sólo la hora de proceso (`processed_utc`, `first_processed_utc`), que cambia entre corridas por construcción.
-Instrumento: si los dos archivos están vacíos no hay nada comparado y el resultado es SIN DATO (salida 2), no VERDE;
+Instrumento: si en alguno de los dos lados no hay un solo record de VIIRS 750 (el procesador que cambia) el resultado es
+SIN DATO (salida 2), no VERDE (verificador del cableado, VC-03);
 si algún record de la rama trae `via_codigo_mirova`, el flag no estaba apagado y es ROJO.
 Uso: python comparar_bitabit_nrt.py <json de main> <json de la rama>
 """
@@ -33,8 +34,12 @@ def main(a, b):
           f"distintos {len(distintos)} | con la marca de la vía {len(marcados)}")
     for k in (solo_a + solo_b + distintos + marcados)[:20]:
         print("   ", k)
-    if not A and not B:
-        print("== bit a bit: SIN DATO (ningún record en los dos)")
+    # verificador del cableado, VC-03: sin un solo record de VIIRS 750 en algún lado, la vía no se puso a prueba
+    por_sensor = lambda D: {s: sum(1 for k in D if k[1] == s) for s in sorted({k[1] for k in D})}  # noqa: E731
+    print("   por sensor, main:", por_sensor(A), "| rama:", por_sensor(B))
+    n750 = [sum(1 for k in D if str(k[1]).endswith("_750")) for D in (A, B)]
+    if min(n750) == 0:
+        print(f"== bit a bit: SIN DATO (records de VIIRS 750: main {n750[0]}, rama {n750[1]})")
         return 2
     bien = not (solo_a or solo_b or distintos or marcados)
     print("== bit a bit:", "VERDE" if bien else "ROJO")

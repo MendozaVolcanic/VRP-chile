@@ -118,3 +118,38 @@ def test_almacen_no_aplica_las_compuertas_de_k_a_la_via(tmp_path, monkeypatch, m
     store.append_record("TestVolcano", r, max_hotspot_dist_km=25.0, max_cluster_pixels=12,
                         enable_pixel_level_distance_filter=True, inner_radius_km=5.0)
     assert r["vrp_mw"] == vrp_esperado
+
+
+@pytest.mark.parametrize("marca", ["sin_grilla", 1, "true", False, None])
+def test_solo_la_marca_true_salta_las_compuertas(tmp_path, monkeypatch, marca):
+    """Verificador del cableado, VC-01: con el flag encendido los records de K de un volcán sin grilla llevan
+    `via_codigo_mirova: "sin_grilla"`; si la comparación fuera por veracidad y no `is True`, esos records de K se
+    saltarían la geocerca. Cualquier marca distinta de True tiene que sufrir las compuertas como K."""
+    from pipeline import store
+    monkeypatch.setattr(store, "DATA_DIR", tmp_path)
+    r = _record_via(False)
+    r["via_codigo_mirova"] = marca
+    store.append_record("TestVolcano", r, max_hotspot_dist_km=25.0, max_cluster_pixels=12,
+                        enable_pixel_level_distance_filter=True, inner_radius_km=5.0)
+    assert r["vrp_mw"] == 0.0
+
+
+@pytest.mark.parametrize("marca", [True, False])
+def test_filtro_de_pixeles_por_distancia_sólo_para_k(tmp_path, monkeypatch, marca):
+    """Verificador del cableado, VC-01: el filtro de píxeles por distancia (H8, S35) poda los píxeles lejanos de un
+    record de K; a un record de la vía no lo toca. Población: 1 píxel cerca y 1 a 40 km, con el cúmulo cerca."""
+    from pipeline import store
+    monkeypatch.setattr(store, "DATA_DIR", tmp_path)
+    r = {"datetime_utc": "2026-10-10 05:54", "sensor": "VIIRS_NOAA20_750", "vrp_mw": 2.0, "vrp_mir_mw": 2.0,
+         "vrp_vent_mw": 0.0, "hotspot_lat": -38.69, "hotspot_lon": -71.73, "hotspot_dist_km": 0.5,
+         "primary_cluster": {"vrp_mw": 2.0, "n_pixels": 1, "centroid_lat": -38.69, "centroid_lon": -71.73,
+                             "centroid_dist_km": 0.5, "single_pixel_mode": False},
+         "anomaly_pixels": [{"lat": -38.69, "lon": -71.73, "dist_km": 0.5, "bt_k": 300.0, "vrp_mw": 1.5},
+                            {"lat": -38.33, "lon": -71.73, "dist_km": 40.0, "bt_k": 290.0, "vrp_mw": 0.5}],
+         "distance_class": "summit", "product_version": "standard"}
+    if marca:
+        r["via_codigo_mirova"] = True
+    store.append_record("TestVolcano", r, max_hotspot_dist_km=25.0, enable_pixel_level_distance_filter=True,
+                        inner_radius_km=5.0)
+    assert len(r["anomaly_pixels"]) == (2 if marca else 1)
+
