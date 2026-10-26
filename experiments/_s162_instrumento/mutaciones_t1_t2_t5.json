@@ -1,0 +1,203 @@
+{
+ "pruebas": [
+  "tests/test_evaluador_comun_s162.py"
+ ],
+ "mutaciones": [
+  {
+   "id": "E1",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if not (faltan and f[\"rec\"][control] is not None and p.estado == \"alerta\"):",
+   "nuevo": "if not (faltan and False and p.estado == \"alerta\"):",
+   "que": "cobertura compara brazos entre si (el defecto del 12-oct)"
+  },
+  {
+   "id": "E2",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "elif lado != control and hay_ctrl:",
+   "nuevo": "elif lado != control:",
+   "que": "no observado se confunde con falta de cobertura"
+  },
+  {
+   "id": "E3",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "i = bisect.bisect_left(ts, p.instante - timedelta(seconds=tol_s))",
+   "nuevo": "i = bisect.bisect_left(ts, p.instante - timedelta(seconds=tol_s - 61))",
+   "que": "ventana de pareo mas corta por abajo"
+  },
+  {
+   "id": "E4",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if mejor is None or d < mejor[0]:",
+   "nuevo": "if mejor is None:",
+   "que": "toma el primer record, no el mas cercano"
+  },
+  {
+   "id": "E5",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "(protegidas_sin_record if f[\"protegida\"] else alertas_sin_record)",
+   "nuevo": "alertas_sin_record",
+   "que": "protegida faltante va al aviso"
+  },
+  {
+   "id": "E6",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "    brazos = sorted(l for l in recs_por_lado if l != control)\n    excl = set(dias_excluidos)",
+   "nuevo": "    brazos = sorted(l for l in recs_por_lado if l != control)\n    excl = set()",
+   "que": "ignora los dias excluidos"
+  },
+  {
+   "id": "E7",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if con_rec[lado][(vol, b, dia)] == 0:",
+   "nuevo": "if False:",
+   "que": "no mira dias sin records"
+  },
+  {
+   "id": "E8",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "(protegidas_sin_record or dias_vacios or control_sin_protegida)",
+   "nuevo": "(protegidas_sin_record or control_sin_protegida)",
+   "que": "un dia vacio no invalida"
+  },
+  {
+   "id": "E9",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "return all(f[\"cob\"][l] == OBSERVADO for l in lados)",
+   "nuevo": "return any(f[\"cob\"][l] == OBSERVADO for l in lados)",
+   "que": "basta que un lado observe"
+  },
+  {
+   "id": "E10",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "_disp(c) >= umbral > _disp(b)",
+   "nuevo": "_disp(c) > umbral > _disp(b)",
+   "que": "borde de 1 MW en P1b abajo"
+  },
+  {
+   "id": "E11",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if f[\"protegida\"] and _pub(c) and _pub(b) and",
+   "nuevo": "if f[\"protegida\"] and _pub(c) and",
+   "que": "P1b abajo cuenta una perdida (P1) como cruce"
+  },
+  {
+   "id": "E12",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if _pub(b) and _disp(b) >= umbral > _disp(c):",
+   "nuevo": "if _pub(b) and _disp(b) >= umbral:",
+   "que": "P1b arriba cuenta lo que ya estaba sobre 1 MW"
+  },
+  {
+   "id": "E13",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if f[\"dia\"] in excl or not observada_en(f, control, brazo):",
+   "nuevo": "if f[\"dia\"] in excl:",
+   "que": "P1b sin el filtro de no observado"
+  },
+  {
+   "id": "E14",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": " and f[\"pasada\"].fuente == \"CONS\"\n",
+   "nuevo": "\n",
+   "que": "RUTINA del OCR cuenta"
+  },
+  {
+   "id": "E15",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "con = [f[\"clave\"] for f in base if _pub(f[\"rec\"][lado]) and f[\"noche_con_alerta\"]]",
+   "nuevo": "con = [f[\"clave\"] for f in base if _pub(f[\"rec\"][lado])]",
+   "que": "no separa noche con alerta"
+  },
+  {
+   "id": "E16",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "for p in pasadas if p.estado == \"alerta\"}",
+   "nuevo": "for p in pasadas if p.estado in (\"alerta\", \"rutina\")}",
+   "que": "noche con alerta mal definida"
+  },
+  {
+   "id": "E17",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "return float((r or {}).get(\"disp\") or 0.0) if _pub(r) else 0.0",
+   "nuevo": "return float((r or {}).get(\"disp\") or 0.0)",
+   "que": "valor publicado de un record no publicado"
+  },
+  {
+   "id": "E18",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "    if control not in recs_por_lado:\n        raise ValueError",
+   "nuevo": "    if False:\n        raise ValueError",
+   "que": "control desconocido pasa en silencio"
+  },
+  {
+   "id": "E19",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if f[\"dia\"] in excl or not observada_en(f, control, brazo):",
+   "nuevo": "if not observada_en(f, control, brazo):",
+   "que": "P1b ignora los dias excluidos"
+  },
+  {
+   "id": "E20",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "base = [f for f in T if f[\"dia\"] not in excl and f[\"pasada\"].estado == \"rutina\"",
+   "nuevo": "base = [f for f in T if f[\"dia\"] not in excl and f[\"pasada\"].estado in (\"rutina\", \"fp\")",
+   "que": "FALSO_POSITIVO entra como RUTINA"
+  },
+  {
+   "id": "E21",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if not (faltan and f[\"rec\"][control]",
+   "nuevo": "if not (len(faltan) == len(brazos) and f[\"rec\"][control]",
+   "que": "solo invalida si falta en todos los brazos (hallazgo 1)"
+  },
+  {
+   "id": "E22",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if f[\"rec\"][control] is None and tienen and f[\"dia\"] not in excl:",
+   "nuevo": "if False:",
+   "que": "no revisa si el control cubre lo que un brazo tiene (hallazgo 2)"
+  },
+  {
+   "id": "E23",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "(protegidas_sin_record or dias_vacios or control_sin_protegida)",
+   "nuevo": "(protegidas_sin_record or dias_vacios)",
+   "que": "control incompleto no invalida"
+  },
+  {
+   "id": "E24",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if bp.es_pasada_diurna_descartada(b, lat, lon,",
+   "nuevo": "if False and bp.es_pasada_diurna_descartada(b, lat, lon,",
+   "que": "carga sin filtro diurno de records"
+  },
+  {
+   "id": "E25",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if bp.es_pasada_diurna_descartada(p.sensor_bucket,",
+   "nuevo": "if False and bp.es_pasada_diurna_descartada(p.sensor_bucket,",
+   "que": "pasadas de MIROVA sin filtro diurno"
+  },
+  {
+   "id": "E26",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "faltan.append(vol)",
+   "nuevo": "pass",
+   "que": "volcan sin archivo no se informa"
+  },
+  {
+   "id": "E27",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "no_obs_dia[f[\"dia\"]] += 1",
+   "nuevo": "pass",
+   "que": "no agrupa no observadas por dia"
+  },
+  {
+   "id": "E28",
+   "archivo": "scripts/evaluador_comun.py",
+   "viejo": "if b not in sensores or not (ventana[0] <= t[:10] <= ventana[1]):",
+   "nuevo": "if b not in sensores:",
+   "que": "carga sin filtro de ventana"
+  }
+ ]
+}
