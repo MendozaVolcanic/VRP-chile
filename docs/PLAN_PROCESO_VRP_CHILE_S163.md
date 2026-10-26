@@ -334,6 +334,16 @@ Propuesta de contenido (cada punto con su caso):
 | 7 tiempo y costo | declaración de uso de IA | una cifra con su rango | completo |
 | 8 qué haría distinto | discusión | cierre | completo |
 
+**Límite de la columna «paper».** Según la sesión del paper (`docs/paper/REVISION_S163.md` §3, rama
+`s163-paper-revision`, PR #912; no comprobado en esta sesión), la política de IA de Volcanica (v1.2, 2026-08-12,
+`https://jvolcanica.org/docs/policies/AI-policy.pdf`, §1.1 y §3.2) **prohíbe el texto generado por IA en el
+manuscrito** y no permite usarla para el resumen (§3.3); sí admite código hecho con IA, detallado en métodos (§4.2).
+Copernicus/EGU (NHESS, GMD) también prohíbe el texto generado. Consecuencia para este plan: en el paper, los
+capítulos sólo aportan **evidencia, números y scripts**; la prosa la escribe Nicolás. La declaración de uso de IA
+(capítulos 4 y 7) tiene que describir el código y la verificación hechos con IA, no redactar el texto. La revista
+está en `jvolcanica.org` (`volcanica.org` es un dominio estacionado). Para la memoria y las charlas no rige esa
+política, pero conviene declarar igual qué hizo la IA.
+
 La sesión del congreso ya tiene casos buenos y malos con fuente
 (`congreso geologico 2026\2_PRESENTACIONES\PROPUESTA_REVISION_2026-10-26.md` §4) que coinciden con los capítulos
 2, 3 y 5: usar esa lista y no duplicarla.
@@ -350,6 +360,7 @@ La sesión del congreso ya tiene casos buenos y malos con fuente
 - Presentar la regla de MATLAB como «reproducimos a MIROVA»: reproduce a MATLAB.
 - Atribuir a la IA decisiones de Nicolás, o al revés (D-33 y D-34).
 - Dar un costo único: siempre rango, y decir que no es lo pagado.
+- Llevar al manuscrito texto redactado por la IA (incluido el de este plan): Volcanica lo prohíbe (§3).
 
 ## 5. Coordinación
 
