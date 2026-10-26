@@ -1,0 +1,38 @@
+# A/B S151 (tarea 1.4 del loop), brazo A1: la anomalia MAYOR de la escena con el codigo de hoy.
+#
+# EL FENOMENO. En el recuadro de 25 km de un volcan puede haber de noche mas de una fuente de calor:
+# el crater y, por ejemplo, un incendio, un salar que guarda calor o un campo geotermal. MIROVA
+# informa una sola por pasada; segun la decision de Nicolas (2026-10-09) la de mayor energia.
+# Produccion elige el cumulo pegado al crater (vent_anchored, S38). Este brazo apaga esa preferencia
+# y deja que cluster_hotspots ordene por energia (estrategia "vrp_max" de pipeline/clustering.py).
+#
+# LO QUE ESTE BRAZO NO ALCANZA (experiments/_s151_ab_vrp_max/PREREGISTRO.md §1): si el Test 1 dispara
+# en el crater y el pixel mas energetico de la escena esta lejos, la Regla D
+# (pipeline/test1_integrated.py::resolve_test1_source_priority) devuelve la fuente al Test 1, el
+# cumulo vuelve a ser el del crater y el ancla honesta pone la posicion en el crater. En esas
+# pasadas este brazo es identico al control. La regla completa de MIROVA es el brazo A2, que
+# necesita un cambio de codigo (ciclo A45) y no existe todavia.
+#
+# CRITERIO: pre-registrado ANTES de correr en experiments/_s151_ab_vrp_max/PREREGISTRO.md.
+# NO OPERACIONAL: data_subdir aislado (A47), fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s151_ab_vrp_max
+description: >
+  Brazo A1: identico a mirova_equivalent salvo enable_vent_anchored_clustering en false
+  (seleccion del cumulo por energia). Los tres sensores.
+
+paths:
+  # S153, ADOPCION DE K (regla experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848): la replica apago el
+  # Test 1 integrado y encendio la conectiva max y la banda 22. Este perfil hereda de mirova_equivalent y su
+  # significado era la produccion de ANTES de K mas su propio cambio, asi que congela aca esos flags con el valor
+  # previo (como experimental.yaml en S150) para resolver igual que antes de la adopcion. Lo vigila
+  # tests/test_guard_perfiles_congelados_s153.py.
+  enable_test1_path: true
+  enable_tests_23_prose_branch: false
+  enable_vent_anchored_clustering: false
+
+output:
+  data_subdir: _s151_ab_vrp_max
+
+# S153 (K): banda 21 primaria congelada; el porque esta en el comentario S153 de `paths:`.
+enable_modis_b22_primary: false

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VRP Chile — Beyond MIROVA (experimental)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<style>
+  :root { --bg:#0a1929; --panel:#0e2236; --blue:#4fc3f7; --muted:#7a8fa6; --line:#1a3a5c;
+          --prox:#e53935; --ext:#ff9800; --disp:#9e9e9e; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:#cfe3f5; font-family:system-ui,Segoe UI,Roboto,sans-serif; font-size:14px; }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); }
+  h1 { margin:0; font-size:1.1rem; color:#fff; }
+  h1 small { color:var(--muted); font-weight:normal; font-size:0.72rem; }
+  .lab-badge { background:#3a1212; color:#ffb4b4; border:1px solid #7a2a2a; border-radius:4px;
+               padding:2px 8px; font-size:0.66rem; margin-left:8px; font-weight:600; }
+  a.back { color:var(--muted); text-decoration:none; border:1px solid var(--line); padding:4px 10px; border-radius:4px; font-size:0.78rem; }
+  main { padding:18px 20px; }
+  .explain { color:var(--muted); font-size:0.8rem; line-height:1.55; margin:0 0 14px; max-width:1000px; }
+  .explain b { color:#cfe3f5; }
+  .controls { display:flex; gap:16px; align-items:center; margin-bottom:12px; flex-wrap:wrap; }
+  select { background:var(--panel); color:#cfe3f5; border:1px solid var(--line); border-radius:5px; padding:6px 10px; font-size:0.84rem; cursor:pointer; }
+  .slider-box { display:flex; flex-direction:column; gap:2px; font-size:0.74rem; color:var(--muted); min-width:200px; }
+  .slider-box .row { display:flex; align-items:center; gap:8px; }
+  .slider-box input[type=range] { flex:1; }
+  .slider-box b { color:#cfe3f5; font-variant-numeric:tabular-nums; }
+  .layout { display:grid; grid-template-columns:1fr 300px; gap:16px; align-items:start; }
+  #map { height:560px; border-radius:8px; border:1px solid var(--line); }
+  .side { display:flex; flex-direction:column; gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; }
+  .zone-row { display:flex; align-items:center; gap:9px; margin:7px 0; font-size:0.82rem; }
+  .zone-row .dot { width:13px; height:13px; border-radius:50%; border:1px solid #0008; flex:0 0 auto; }
+  .zone-row .z-name { color:#cfe3f5; font-weight:600; }
+  .zone-row .z-meta { color:var(--muted); font-size:0.74rem; margin-left:auto; text-align:right; }
+  .note { color:var(--muted); font-size:0.74rem; line-height:1.5; margin-top:6px; }
+  .note b { color:#cfe3f5; }
+  .pill { display:inline-block; background:#13314d; border:1px solid var(--line); border-radius:4px; padding:1px 6px; font-size:0.72rem; color:var(--blue); }
+  @media(max-width:820px){ .layout{ grid-template-columns:1fr; } #map{ height:420px; } }
+  nav.tabs { display:flex; gap:4px; margin:0 0 16px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .tab-btn { background:var(--panel); color:var(--muted); border:1px solid var(--line); border-bottom:none;
+             padding:8px 14px; border-radius:6px 6px 0 0; cursor:pointer; font-size:0.82rem; }
+  .tab-btn.active { background:var(--bg); color:var(--blue); border-color:var(--blue); border-bottom:1px solid var(--bg); margin-bottom:-1px; font-weight:600; }
+  .pane { display:none; } .pane.active { display:block; }
+  .chart-wrap { height:300px; position:relative; }
+  .soon { color:var(--muted); font-size:0.84rem; border:1px dashed var(--line); border-radius:8px; padding:24px; text-align:center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>VRP Chile — Beyond MIROVA <span class="lab-badge">⚠ LABORATORIO · experimental · la detección NO cambia</span></h1>
+  <div style="margin-top:6px;">
+    <small>Objetivo (2) de la misión: <b style="color:#cfe3f5">extensión volcánica documentada</b> — mostrar el calor real
+    que el algoritmo de Coppola captura y MIROVA NRT no publica. Solo display, sobre la data fiel <code>mirova_equivalent</code>.</small>
+    &nbsp; <a class="back" href="../index.html">← Dashboard operacional</a>
+  </div>
+</header>
+
+<main>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="ext">2a · Extensión cat-b</button>
+    <button class="tab-btn" data-tab="fid">1 · Fidelidad vs MIROVA</button>
+    <button class="tab-btn" data-tab="eq16">2b · Eq.16 lava lake</button>
+  </nav>
+
+  <section class="pane active" id="pane-ext">
+  <div class="explain">
+    <b>Panel 2a · separá la señal real de la cola de ruido.</b> El dashboard operacional muestra solo el cráter
+    (summit) y oculta lo de afuera. Acá ves <b>todas</b> las detecciones, incluidas las que MIROVA no publica.
+    Las tres zonas no son grados de confianza — son <b>objetos físicos distintos</b>:
+    rojo = foco proximal del cráter (= alerta MIROVA), naranja = <b>extensión cat-b real</b> (lava lake, lacolito,
+    campo fumarólico), gris = cola de dispersión del píxel (ruido geométrico VIIRS750). La extensión es física
+    <b>por volcán</b>: arrastrá los radios para definir dónde termina el cuerpo volcánico real y empieza el ruido.
+    <span class="pill">la detección no se toca — solo el color</span>
+  </div>
+
+  <div class="controls">
+    <div>
+      <label style="font-size:0.78rem;color:var(--muted)">Volcán</label><br>
+      <select id="volc"></select>
+    </div>
+    <div class="slider-box">
+      <div class="row"><span class="dot" style="width:11px;height:11px;border-radius:50%;background:var(--prox)"></span>
+        Radio proximal <b id="prox-val">—</b> km</div>
+      <input type="range" id="prox-r" min="0.5" max="15" step="0.5">
+    </div>
+    <div class="slider-box">
+      <div class="row"><span class="dot" style="width:11px;height:11px;border-radius:50%;background:var(--ext)"></span>
+        Radio extensión <b id="ext-val">—</b> km</div>
+      <input type="range" id="ext-r" min="1" max="30" step="0.5">
+    </div>
+    <div class="slider-box">
+      <label style="font-size:0.8rem;color:#cfe3f5"><input type="checkbox" id="hide-disp"> ocultar dispersión (gris)</label>
+      <div style="font-size:0.7rem;color:var(--muted);max-width:340px">los grises de decenas-cientos de MW son calor scene-wide NO volcánico (incendios, salares) que el dashboard operacional ya filtra — acá se muestran a propósito (audit S120: 99.8% de los &gt;50 MW son de esta clase)</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div id="map"></div>
+    <div class="side">
+      <div class="card">
+        <div style="font-size:0.82rem;color:#cfe3f5;font-weight:600;margin-bottom:6px" id="zone-title">—</div>
+        <div class="zone-row"><span class="dot" style="background:var(--prox)"></span>
+          <span class="z-name">Proximal</span><span class="z-meta" id="z-prox">—</span></div>
+        <div class="zone-row"><span class="dot" style="background:var(--ext)"></span>
+          <span class="z-name">Extensión cat-b</span><span class="z-meta" id="z-ext">—</span></div>
+        <div class="zone-row"><span class="dot" style="background:var(--disp)"></span>
+          <span class="z-name">Dispersión / ruido</span><span class="z-meta" id="z-disp">—</span></div>
+        <div class="note" id="zone-note"></div>
+      </div>
+      <div class="card">
+        <div class="note"><b>Cómo medir.</b> Los radios se miden desde el <b>cráter físico</b> (vent, círculo blanco).
+        El círculo rojo punteado es el <code>inner_radius</code> oficial MIROVA. PCC es bicéntrico (Puyehue + lacolito
+        Cordón Caulle a ~7.8 km) y trae su clasificación documentada precargada.</div>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <section class="pane" id="pane-fid">
+    <div class="explain">
+      <b>Panel 1 · ¿seguimos la curva de MIROVA?</b> Nuestra serie (<code>pc.vrp_mw</code> máximo diario, summit) y la de
+      MIROVA (CSV consolidado NRT, máximo diario) superpuestas, mismo volcán y ventana, escala log MW. Si las dos líneas
+      van juntas, somos fieles en magnitud y tiempo. El <b>ratio mediano</b> resume el sesgo (1.0× = perfecto).
+      <span class="pill">se nutre del A/B de robo de cluster en curso</span>
+    </div>
+    <div class="controls">
+      <div><label style="font-size:0.78rem;color:var(--muted)">Volcán</label><br><select id="fid-volc"></select></div>
+      <div><label style="font-size:0.78rem;color:var(--muted)">Ventana</label><br>
+        <select id="fid-win"><option value="90">90 días</option><option value="180" selected>180 días</option><option value="365">1 año</option></select></div>
+    </div>
+    <div class="legend" style="display:flex;gap:14px;font-size:0.76rem;color:var(--muted);margin:0 0 8px">
+      <span><span class="dot" style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#4fc3f7"></span> VRP Chile</span>
+      <span><span class="dot" style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#ffb74d"></span> MIROVA</span>
+    </div>
+    <div class="card"><div class="chart-wrap"><canvas id="fid-canvas"></canvas></div></div>
+    <div class="note" id="fid-stat" style="margin-top:10px"></div>
+    <div class="note" style="margin-top:10px;border-left:3px solid #ab47bc;padding-left:10px">
+      <b>Segundo ground truth independiente — AVTOD (Reath et al. 2019).</b> El catálogo
+      <b>ASTER Volcanic Thermal Output Database</b> (90 m, análisis manual, grupo Pritchard/Coppola)
+      es una fuente <b>independiente de MIROVA</b>. Establece correlación AVTOD↔MIROVA en 9 volcanes
+      latinoamericanos, de los cuales <b>5 son Tier A chilenos</b>: Villarrica, Láscar, Llaima, Chaitén,
+      Copahue (r²=0.87 global). AVTOD clasifica <b>Villarrica en la clase térmica más alta</b> (&gt;35 °C
+      sobre fondo, lava lake). Su métrica es <b>°C sobre fondo</b> (no VRP en watts); el máximo °C-AB fue
+      el mejor análogo del VRP de MIROVA. <span style="color:var(--muted)">El caveat físico de Reath —
+      "el píxel más caliente de ASTER cabe dentro del píxel más caliente de MODIS; el MIR-method es más
+      sensible sobre ~600 K"— coincide con nuestro hallazgo sub-píxel (MODIS reparte en 1 km lo que
+      VIIRS375 resuelve como un foco; ver <code>docs/AUDIT_S122_C2_PASO0.md</code>).</span>
+      <b>Máx °C sobre fondo AVTOD (ASTER, 2000-2017), verificado:</b> Villarrica/Llaima 120 (saturado,
+      lava lake) · Láscar 100 · Chaitén 80 · Copahue 57 · NdC 48 · PP 44 · PCC 35 · Isluga 31 ·
+      Tupungatito 24 · Lastarria 20. <b>Corroboración independiente:</b> AVTOD le da a PCC solo 35 °C
+      (su máx fue la erupción 2011) — confirma que nuestros records path-D de alta magnitud en PCC son
+      artefacto difuso, no un volcán de cientos de MW.
+      <span class="pill">Table S1 en data/mirova_reference/avtod_reath2019_chile.csv · overlay per-fecha pendiente de digitalizar Figs S11-S19</span>
+    </div>
+  </section>
+
+  <section class="pane" id="pane-eq16">
+    <div class="explain">
+      <b>Panel 2b · magnitud del lava lake con Eq.16 (Coppola 2024).</b> La Eq.16 despeja el <b>área</b> del
+      exceso MIR puro asumiendo un cuerpo pequeño a ~1000 K — ignora el anillo de nieve "tibia" que el
+      Test 1 crudo integra alrededor del cráter en invierno. Resultado medido (jun-2026, lago reactivado):
+      la Eq.16 <b>no recupera hacia arriba, corrige hacia abajo</b> el sobre-registro invernal y aterriza
+      en la banda que MIROVA-OCR observó al cráter. Implementada flag-OFF (perfil aislado, no toca el operacional).
+    </div>
+    <div class="soon" id="eq16-status">Cargando data del perfil <code>_s99_test1_eq16</code>…</div>
+    <div class="card"><div class="chart-wrap"><canvas id="eq16-canvas"></canvas></div></div>
+    <div class="explain" style="font-size:0.8rem">Serie <b>Villarrica</b>, máx diario summit del cluster primario.
+      <span style="color:#4fc3f7">Azul = operacional fiel (crudo)</span> ·
+      <span style="color:#ff9800">naranja = Eq.16</span> (mismo pipeline con
+      <code>enable_test1_lava_lake_eq16</code>, T_e = 1000 K, Coppola 2024 Eq. 15-16; la detección NO cambia,
+      solo la magnitud del Test 1) ·
+      <span style="color:#9e9e9e">banda gris = MIROVA-OCR jun-2026 (0.28–0.54 MW al cráter)</span>, el ground
+      truth del lago reactivado. Donde el azul se dispara sobre la banda gris, es la nieve del ROI, no el lago;
+      el naranja cae dentro de la banda.</div>
+  </section>
+</main>
+
+<script>
+// ===========================================================================
+// VRP Chile — Beyond MIROVA (experimental). Standalone, NO toca el dashboard
+// operacional. Reutiliza convenciones de comparacion.html/index.html.
+// Panel 2a: afinador interactivo de zonas geo (proximal/extensión/dispersión).
+// ===========================================================================
+const BASE_PATH = (() => {
+  const p = window.location.pathname;
+  if (p.includes('/frontend/')) return '/';
+  return '../';   // servido como sitio: experimental/ está un nivel bajo la raíz
+})();
+
+const TIER_A = [
+  { name:"Lascar",            display:"Láscar",              lat:-23.369, lon:-67.732, inner:5,  vent_lat:-23.362930, vent_lon:-67.731416 },
+  { name:"Lastarria",         display:"Lastarria",           lat:-25.168, lon:-68.507, inner:3,  vent_lat:-25.168,    vent_lon:-68.507 },
+  { name:"Tupungatito",       display:"Tupungatito",         lat:-33.400, lon:-69.800, inner:7,  vent_lat:-33.389044, vent_lon:-69.826374 },
+  { name:"PlanchonPeteroa",   display:"Planchón-Peteroa",    lat:-35.240, lon:-70.568, inner:3,  vent_lat:-35.240,    vent_lon:-70.568 },
+  { name:"NevadosDeChillan",  display:"Nevados de Chillán",  lat:-36.863, lon:-71.377, inner:5,  vent_lat:-36.863,    vent_lon:-71.377 },
+  { name:"Copahue",           display:"Copahue",             lat:-37.856, lon:-71.183, inner:4,  vent_lat:-37.856,    vent_lon:-71.183 },
+  { name:"Llaima",            display:"Llaima",              lat:-38.692, lon:-71.729, inner:5,  vent_lat:-38.692,    vent_lon:-71.729 },
+  { name:"Villarrica",        display:"Villarrica",          lat:-39.420, lon:-71.930, inner:5,  vent_lat:-39.420292, vent_lon:-71.939908 },
+  { name:"PuyehueCordonCaulle", display:"Puyehue-Cordón Caulle", lat:-40.590, lon:-72.117, inner:20, vent_lat:-40.525499, vent_lon:-72.146137 },
+  { name:"Chaiten",           display:"Chaitén",             lat:-42.833, lon:-72.646, inner:5,  vent_lat:-42.833,    vent_lon:-72.646 },
+  { name:"Isluga",            display:"Isluga",              lat:-19.150, lon:-68.830, inner:5,  vent_lat:-19.150,    vent_lon:-68.830 },
+];
+
+// Zonas documentadas por volcán (preset de los sliders). Solo donde hay dato físico
+// publicado; el resto arranca en inner / 2×inner para que Nicolás afine.
+//  proxR = radio del foco proximal (km desde el vent); extR = límite externo de la
+//  extensión cat-b (más allá = dispersión/ruido).
+const ZONE_PRESETS = {
+  // PCC: el lacolito 2011 es un cuerpo CHICO — ~0.8 km³ emplazado a 20-200 m de
+  // profundidad, con área de uplift ~2 km² (Castro et al. 2016, Nat. Comms.
+  // ncomms13585). Extensión = cuerpo + halo térmico al píxel 375 m ≈ 2 km desde el
+  // vent 2011. S120: Nicolás corrigió el preset previo 8.5 km (venía del quiebre de
+  // dispersión S115, no del cuerpo físico — quedaba grande).
+  PuyehueCordonCaulle: { proxR:4, extR:2, note:"Lacolito Cordón Caulle 2011: ~2 km² de uplift, 0.8 km³, 20-200 m de profundidad (Castro et al. 2016, Nat. Comms.). Extensión ≈ cuerpo + halo térmico, ~2 km del vent 2011; más allá = dispersión." },
+  // Lastarria: campo fumarólico Lazufre, offset N (geo_class=extension presente). Distancia a afinar.
+  Lastarria: { proxR:3, extR:6, note:"Campo fumarólico Lazufre al N (cat-b real, dato de campo A69). Radio a afinar con tu criterio." },
+  // Villarrica: lava lake en el cráter (sub-píxel proximal); halo cercano. A afinar.
+  Villarrica: { proxR:5, extR:8, note:"Lava lake en el cráter (proximal sub-píxel). El halo cercano puede ser real; afinar." },
+};
+
+function parseUtcMs(s){ if(s==null)return NaN; let t=String(s).replace(" ","T"); if(!/[zZ]$|[+-]\d\d:?\d\d$/.test(t))t+="Z"; return new Date(t).getTime(); }
+function sensorBucket(s){ if(!s)return"?"; if(s.startsWith("MODIS"))return"MODIS"; if(s.endsWith("_750"))return"VIIRS750"; if(s.startsWith("VIIRS"))return"VIIRS375"; return"?"; }
+function havKm(la1,lo1,la2,lo2){ const R=6371,r=Math.PI/180; const p1=la1*r,p2=la2*r,dp=(la2-la1)*r,dl=(lo2-lo1)*r;
+  const a=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2; return 2*R*Math.asin(Math.sqrt(a)); }
+const el = (id) => document.getElementById(id);
+
+async function loadVolcanoData(name){
+  try{ const r=await fetch(`${BASE_PATH}data/mirova_equivalent/${encodeURIComponent(name)}.json`); if(!r.ok)return null; return await r.json(); }
+  catch(e){ return null; }
+}
+// TODAS las detecciones (summit + far), vrp>0 — incluye lo que el operacional oculta.
+function ourAllDetections(data, volc){
+  const out=[];
+  for(const r of (data?.records||[])){
+    const pc=r.primary_cluster||{};
+    const vrp=pc.vrp_mw||0;
+    if(vrp<=0) continue;
+    const cl=pc.centroid_lat, co=pc.centroid_lon;
+    if(cl==null||co==null) continue;
+    out.push({ dt:r.datetime_utc, sensor:sensorBucket(r.sensor), vrp, cl, co,
+      distVent: havKm(cl,co,volc.vent_lat,volc.vent_lon),
+      distGVP:  havKm(cl,co,volc.lat,volc.lon) });
+  }
+  return out;
+}
+
+let map=null, layer=null, ringsLayer=null, curVolc=null, curDets=null;
+
+function classify(d, proxR, extR){
+  // PCC bicéntrico: proximal Puyehue por GVP, lacolito por vent (documentado S115).
+  if(curVolc.name==="PuyehueCordonCaulle"){
+    if(d.distVent>extR) return "disp";
+    if(d.distGVP<proxR) return "prox";
+    return "ext";
+  }
+  if(d.distVent<=proxR) return "prox";
+  if(d.distVent<=extR)  return "ext";
+  return "disp";
+}
+const ZC = { prox:"#e53935", ext:"#ff9800", disp:"#9e9e9e" };
+
+async function selectVolcano(name){
+  curVolc = TIER_A.find(v=>v.name===name);
+  const preset = ZONE_PRESETS[name] || { proxR:curVolc.inner, extR:Math.min(30, curVolc.inner*2),
+    note:"Sin zona de extensión documentada — afinala con tu criterio (radio donde termina el cuerpo volcánico real)." };
+  el("prox-r").value = preset.proxR; el("ext-r").value = preset.extR;
+  el("zone-note").innerHTML = "<b>Nota:</b> " + preset.note;
+
+  if(!map){
+    map = L.map("map",{zoomControl:true});
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      {attribution:"Esri", maxZoom:18, noWrap:true}).addTo(map);
+    ringsLayer = L.layerGroup().addTo(map);
+    layer = L.layerGroup().addTo(map);
+  }
+  map.setView([curVolc.vent_lat, curVolc.vent_lon], 11);
+  const data = await loadVolcanoData(name);
+  curDets = data ? ourAllDetections(data, curVolc) : [];
+  el("zone-title").textContent = `${curVolc.display} · ${curDets.length} detecciones (vrp>0)`;
+  redraw();
+  setTimeout(()=>map.invalidateSize(), 60);
+}
+
+function redraw(){
+  if(!curVolc) return;
+  // clamp extR>=proxR solo para zonas CONCÉNTRICAS; PCC es bicéntrico (proximal desde
+  // GVP, extensión desde el vent 2011) y su extR=2 < proxR=4 es legítimo (Castro 2016).
+  const proxR=parseFloat(el("prox-r").value);
+  const extRraw=parseFloat(el("ext-r").value);
+  const extR=(curVolc && curVolc.name==="PuyehueCordonCaulle") ? extRraw : Math.max(extRraw, proxR);
+  el("prox-val").textContent=proxR.toFixed(1); el("ext-val").textContent=extR.toFixed(1);
+
+  // anillos guía
+  ringsLayer.clearLayers();
+  L.circle([curVolc.lat,curVolc.lon],{radius:curVolc.inner*1000,color:"#e57373",weight:1,fill:false,dashArray:"5 5"}).addTo(ringsLayer)
+    .bindTooltip(`inner_radius MIROVA ${curVolc.inner} km`);
+  L.circle([curVolc.vent_lat,curVolc.vent_lon],{radius:proxR*1000,color:ZC.prox,weight:1,fill:false}).addTo(ringsLayer);
+  L.circle([curVolc.vent_lat,curVolc.vent_lon],{radius:extR*1000,color:ZC.ext,weight:1,fill:false,dashArray:"3 4"}).addTo(ringsLayer);
+  L.marker([curVolc.lat,curVolc.lon]).addTo(ringsLayer).bindTooltip("GVP (ancla MIROVA)");
+  L.circleMarker([curVolc.vent_lat,curVolc.vent_lon],{radius:5,color:"#fff",fillColor:"#222",fillOpacity:1,weight:1.5}).addTo(ringsLayer)
+    .bindTooltip("Cráter (vent)");
+
+  // detecciones
+  layer.clearLayers();
+  const c={prox:0,ext:0,disp:0}, mw={prox:0,ext:0,disp:0};
+  const hideDisp = el("hide-disp") && el("hide-disp").checked;
+  for(const d of curDets){
+    const cls=classify(d,proxR,extR); c[cls]++; mw[cls]+=d.vrp;
+    if(hideDisp && cls==="disp") continue;   // se ocultan del mapa, siguen contadas
+    L.circleMarker([d.cl,d.co],{radius:3.6,color:"#0008",weight:0.5,fillColor:ZC[cls],fillOpacity:0.8}).addTo(layer)
+      .bindTooltip(`${d.sensor} · ${d.vrp.toFixed(2)} MW · cráter ${d.distVent.toFixed(1)} km`);
+  }
+  const fmt=(n,s)=>`${n} det · ${s.toFixed(1)} MW`;
+  el("z-prox").textContent=fmt(c.prox,mw.prox);
+  el("z-ext").textContent =fmt(c.ext, mw.ext);
+  el("z-disp").textContent=fmt(c.disp,mw.disp);
+}
+
+// ====================== PANEL 1 — FIDELIDAD vs MIROVA ======================
+// Nombre del volcán tal cual aparece en el CSV consolidado MIROVA (variantes A14).
+const CSV_NAME = { Lascar:"Lascar", Lastarria:"Lastarria", Tupungatito:"Tupungatito",
+  PlanchonPeteroa:"PlanchonPeteroa", NevadosDeChillan:"Nevados de Chillan", Copahue:"Copahue",
+  Llaima:"Llaima", Villarrica:"Villarrica", PuyehueCordonCaulle:"Puyehue-Cordon Caulle",
+  Chaiten:"Chaiten", Isluga:"Isluga" };
+let _mirovaCsv=null;
+async function loadMirovaCsv(){
+  if(_mirovaCsv) return _mirovaCsv;
+  try{
+    let r=await fetch(`${BASE_PATH}latest_consolidado.csv`);
+    if(!r.ok) r=await fetch(`${BASE_PATH}01_05_2026_registro_vrp_consolidado.csv`);
+    if(!r.ok){ _mirovaCsv=[]; return _mirovaCsv; }
+    const lines=(await r.text()).split("\n"); const h=lines[0].split(","); const ix=(n)=>h.indexOf(n);
+    const out=[];
+    for(let i=1;i<lines.length;i++){ const c=lines[i].split(","); if(c.length<8) continue;
+      if(c[ix("Tipo_Registro")]!=="ALERTA_TERMICA") continue;
+      out.push({ volc:c[ix("Volcan")], dt:c[ix("Fecha_Satelite_UTC")], vrp:parseFloat(c[ix("VRP_MW")])||0 }); }
+    _mirovaCsv=out; return out;
+  }catch(e){ _mirovaCsv=[]; return _mirovaCsv; }
+}
+const dayKey=(s)=>{ const t=parseUtcMs(s); return isNaN(t)?null:new Date(t).toISOString().slice(0,10); };
+function dailyMaxOurs(data){ const m={}; for(const r of (data?.records||[])){ if(r.distance_class!=="summit")continue;
+  const v=(r.primary_cluster||{}).vrp_mw||0; if(v<=0)continue; const k=dayKey(r.datetime_utc); if(!k)continue;
+  if(!(k in m)||v>m[k]) m[k]=v; } return m; }
+function dailyMaxMirova(rows){ const m={}; for(const r of rows){ const v=r.vrp||0; if(v<=0)continue;
+  const k=dayKey(r.dt); if(!k)continue; if(!(k in m)||v>m[k]) m[k]=v; } return m; }
+
+let fidChart=null;
+async function renderFid(){
+  const volc=TIER_A.find(v=>v.name===el("fid-volc").value); if(!volc) return;
+  const winDays=parseInt(el("fid-win").value,10);
+  const [data,csv]=await Promise.all([loadVolcanoData(volc.name), loadMirovaCsv()]);
+  const ours=dailyMaxOurs(data);
+  const mir=dailyMaxMirova(csv.filter(r=>r.volc===CSV_NAME[volc.name]));
+  // eje temporal: últimos winDays desde el último dato de cualquier fuente
+  const allDays=[...Object.keys(ours),...Object.keys(mir)].sort();
+  if(!allDays.length){ el("fid-stat").innerHTML="Sin datos para este volcán."; if(fidChart){fidChart.destroy();fidChart=null;} return; }
+  const lastMs=parseUtcMs(allDays[allDays.length-1]+"T00:00Z");
+  const cutMs=lastMs - winDays*86400000;
+  const days=[]; for(let t=cutMs;t<=lastMs;t+=86400000) days.push(new Date(t).toISOString().slice(0,10));
+  const sOurs=days.map(d=>ours[d]!=null?ours[d]:null);
+  const sMir =days.map(d=>mir[d]!=null?mir[d]:null);
+  // ratio mediano geométrico en días donde ambos detectan
+  const ratios=[]; for(const d of days){ if(ours[d]>0&&mir[d]>0) ratios.push(Math.log10(ours[d]/mir[d])); }
+  ratios.sort((a,b)=>a-b); const medR=ratios.length?Math.pow(10,ratios[Math.floor(ratios.length/2)]):null;
+  const nBoth=ratios.length;
+
+  if(fidChart) fidChart.destroy();
+  fidChart=new Chart(el("fid-canvas").getContext("2d"),{ type:"line",
+    data:{ labels:days, datasets:[
+      { label:"VRP Chile", data:sOurs, borderColor:"#4fc3f7", backgroundColor:"#4fc3f7", pointRadius:2, spanGaps:false, borderWidth:1.6, tension:0 },
+      { label:"MIROVA", data:sMir, borderColor:"#ffb74d", backgroundColor:"#ffb74d", pointRadius:2, spanGaps:false, borderWidth:1.6, tension:0 } ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ x:{ ticks:{ color:"#7a8fa6", maxTicksLimit:8 }, grid:{ color:"#1a3a5c55" } },
+               y:{ type:"logarithmic", title:{display:true,text:"VRP (MW, máx diario)",color:"#7a8fa6"}, ticks:{color:"#7a8fa6"}, grid:{color:"#1a3a5c55"} } } } });
+  el("fid-stat").innerHTML = `<b>${volc.display}</b> · <b>${nBoth}</b> días donde ambos detectan · `
+    + `ratio mediano nuestro/MIROVA = <b>${medR?medR.toFixed(2)+"×":"—"}</b> (1.0× = calibración perfecta). `
+    + `Sobre la línea de MIROVA = sobre-estimamos; debajo = sub-estimamos.`;
+}
+
+// ====================== PANEL 2b — Eq.16 (magnitud recuperada) ======================
+let eqChart=null, _eqTried=false;
+async function renderEq16(){
+  if(_eqTried && eqChart) return;
+  _eqTried=true;
+  const box=el("eq16-status");
+  let eq=null;
+  try{ const r=await fetch(`${BASE_PATH}data/_s99_test1_eq16/Villarrica.json`); if(r.ok) eq=await r.json(); }catch(e){}
+  if(!eq){ box.innerHTML="<b>No se pudo cargar la data de este panel.</b> El archivo <code>data/_s99_test1_eq16/Villarrica.json</code> no respondió. Si falta, se regenera con el workflow <code>reproc-s120-eq16-villarrica</code> (Actions). La detección operacional no se toca — perfil aislado."; return; }
+  const op=await loadVolcanoData("Villarrica");
+  const mOp=dailyMaxOurs(op), mEq=dailyMaxOurs(eq);
+  const d0=Object.keys(mEq).sort()[0];
+  if(!d0){ box.textContent="El perfil _s99_test1_eq16 existe pero no tiene días summit con VRP>0 en la ventana reprocesada."; return; }
+  const shown=[...new Set([...Object.keys(mOp),...Object.keys(mEq)])].sort().filter(d=>d>=d0);
+  // banda de referencia MIROVA-OCR jun-2026 (lago reactivado, medido al cráter — verificado S119)
+  const OCR_LO=0.28, OCR_HI=0.54;
+  const medEq=Object.values(mEq).sort((a,b)=>a-b)[Math.floor(Object.keys(mEq).length/2)];
+  const medOp=Object.values(mOp).filter((_,i,a)=>true).sort((a,b)=>a-b);
+  const medOpV=medOp.length?medOp[Math.floor(medOp.length/2)]:null;
+  box.innerHTML=`<b>${Object.keys(mEq).length}</b> días con Eq.16 (ventana desde ${d0}). `
+    +`Mediana diaria: crudo <b>${medOpV?medOpV.toFixed(2):"—"} MW</b> vs Eq.16 <b>${medEq?medEq.toFixed(2):"—"} MW</b> `
+    +`vs MIROVA-OCR 0.28–0.54 MW. El crudo sobre-registra por la nieve del ROI invernal; la Eq.16 aterriza en la banda MIROVA.`;
+  if(eqChart) eqChart.destroy();
+  eqChart=new Chart(el("eq16-canvas").getContext("2d"),{ type:"line",
+    data:{ labels:shown, datasets:[
+      { label:"Operacional (crudo)", data:shown.map(d=>mOp[d]??null), borderColor:"#4fc3f7", backgroundColor:"#4fc3f7", pointRadius:2.5, spanGaps:true, borderWidth:1.6, tension:0 },
+      { label:"Eq.16",  data:shown.map(d=>mEq[d]??null), borderColor:"#ff9800", backgroundColor:"#ff9800", pointRadius:2.5, spanGaps:true, borderWidth:1.6, tension:0 },
+      { label:"MIROVA-OCR ↑", data:shown.map(()=>OCR_HI), borderColor:"#9e9e9e", borderDash:[4,4], pointRadius:0, borderWidth:1, fill:false, tension:0 },
+      { label:"MIROVA-OCR ↓", data:shown.map(()=>OCR_LO), borderColor:"#9e9e9e", borderDash:[4,4], pointRadius:0, borderWidth:1, fill:"-1", backgroundColor:"rgba(158,158,158,0.15)", tension:0 } ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:"#cfe3f5" } } },
+      scales:{ x:{ ticks:{ color:"#7a8fa6", maxTicksLimit:10 }, grid:{ color:"#1a3a5c55" } },
+               y:{ type:"logarithmic", title:{display:true,text:"VRP (MW, máx diario summit)",color:"#7a8fa6"}, ticks:{color:"#7a8fa6"}, grid:{color:"#1a3a5c55"} } } } });
+}
+
+// ====================== TABS ======================
+function setupTabs(){
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".pane").forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      const t=btn.dataset.tab; el("pane-"+t).classList.add("active");
+      if(t==="ext" && map) setTimeout(()=>map.invalidateSize(),60);
+      if(t==="fid") renderFid();
+      if(t==="eq16") renderEq16();
+    });
+  });
+}
+
+function init(){
+  const sel=el("volc");
+  for(const v of TIER_A){ const o=document.createElement("option"); o.value=v.name; o.textContent=v.display; sel.appendChild(o); }
+  sel.value="PuyehueCordonCaulle";   // showcase documentado
+  sel.addEventListener("change", ()=>selectVolcano(sel.value));
+  el("prox-r").addEventListener("input", redraw);
+  el("ext-r").addEventListener("input", redraw);
+  el("hide-disp").addEventListener("change", redraw);
+  // fidelidad
+  const fs=el("fid-volc");
+  for(const v of TIER_A){ const o=document.createElement("option"); o.value=v.name; o.textContent=v.display; fs.appendChild(o); }
+  fs.value="Lascar";
+  fs.addEventListener("change", renderFid);
+  el("fid-win").addEventListener("change", renderFid);
+  setupTabs();
+  selectVolcano("PuyehueCordonCaulle");
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# A/B S151 (tarea 1.6 del loop). GEMELO del control (_s146_ab_control = produccion): identico salvo el nombre y
+# el directorio de salida.
+#
+# PARA QUE. En el A/B de F y K contra produccion, una "perdida" es una alerta que el control publica y el
+# candidato no. El ruido entre dos jobs (granulos estandar contra casi real, cortes de NASA, punto flotante que
+# mueve uno o dos pixeles, S150) puede fabricar o esconder una perdida. El ruido de la familia sin Test 1 ya se
+# midio (gemelo de B, S149 y S150) y en VIIRS el par F y K es un gemelo gratis (la banda 22 solo la lee
+# process_modis.py). El del control, que lleva el Test 1 integrado y suma un disco de 3 km, nunca se midio.
+# Este perfil lo mide: el mismo control corrido dos veces tiene que dar la misma decision de publicar.
+# Pre-registro: experiments/_s151_prereg_fk_11/PREREGISTRO.md.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s151_ab_control_gemelo
+description: >
+  Gemelo del control de produccion, para medir el determinismo del brazo contra el que se cuentan las perdidas.
+
+output:
+  data_subdir: _s151_ab_control_gemelo
+
+# S153, ADOPCION DE K (regla experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848): la replica apago el
+# Test 1 integrado y encendio la conectiva max y la banda 22. Este perfil hereda de mirova_equivalent y su
+# significado era la produccion de ANTES de K mas su propio cambio, asi que congela aca esos flags con el valor
+# previo (como experimental.yaml en S150) para resolver igual que antes de la adopcion. Lo vigila
+# tests/test_guard_perfiles_congelados_s153.py.
+paths:
+  enable_test1_path: true
+  enable_tests_23_prose_branch: false
+
+# S153 (K): banda 21 primaria congelada; el porque esta en el comentario S153 de `paths:`.
+enable_modis_b22_primary: false

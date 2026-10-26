@@ -1,0 +1,17 @@
+# VRP-Chile — profile: _test1_nti_covalidation_enabled (S104 A/B)
+#
+# Brazo ENABLED del A/B de co-validación NTI del Test1 (realineamiento MIROVA).
+# Idéntico a mirova_equivalent EXCEPTO enable_test1_nti_covalidation: true → el
+# Test1 integrado solo cuenta píxeles que también pasaron un path NTI relativo
+# (Path C nti_rel ∪ Path D dNTI contextual), excluyendo el terreno tibio
+# topográfico (NTI plano) que arrastra el centroide ~9 km al N en los nevados.
+# Coppola 2024 Eq.13. Diseño: docs/superpowers/specs/2026-06-09-test1-nti-covalidation-design.md
+# Causa raíz: docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md
+extends: mirova_equivalent
+profile: _test1_nti_covalidation_enabled
+description: >
+  A/B S104 brazo ENABLED: co-validación NTI del Test1 (gate Path C ∪ Path D).
+paths:
+  enable_test1_nti_covalidation: true
+output:
+  data_subdir: _test1_nti_covalidation_enabled

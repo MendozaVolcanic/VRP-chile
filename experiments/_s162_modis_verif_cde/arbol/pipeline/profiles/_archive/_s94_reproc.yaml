@@ -1,0 +1,32 @@
+# S94 F2 — perfil de reproceso histórico de VALIDACIÓN (no operacional).
+#
+# Propósito: regenerar el histórico de los 11 Tier A con la config operacional
+# ACTUAL (vent_anchored + bt_path OFF S40 + cap D9 + gates intra-radio S84/S85)
+# para limpiar la deuda histórica que el NRT no reprocesa:
+#   - Láscar feb-2026: el pipeline viejo eligió el clúster del Salar (off-nadir,
+#     A36) en vez del cráter → recall-al-cráter MODIS bajo (S88, AUDIT_S94 §2).
+#   - Picos de campo frío sin capear (Tupungatito 190 MW, PCC 337 MW) pre-cap-D9.
+#
+# Es VALIDACIÓN + BASELINE para el A/B de F5' (magnitud campo-frío VIIRS): este
+# reproc es el brazo "config actual" contra el que se medirá F5'.
+#
+# `extends: mirova_equivalent` hereda EXACTAMENTE la config operacional (todos los
+# flags, thresholds, geometría). Solo cambia data_subdir para aislar el output y
+# NO contaminar data/mirova_equivalent/ (A47: perfil distinto + dir aislado = el
+# patrón seguro para reproc; el NRT operacional sigue intacto). Promoción a
+# operacional = decisión explícita de Nicolás después de validar (A45).
+#
+# Uso: workflow reproc-s94-f2-validation.yml en GH Actions (MODIS no corre local
+# por pyhdf roto en Windows, regla S15). Matrix POR VOLCÁN (no por fecha → cada
+# job escribe su propio JSON, sin race A47/S25). Ventana completa 2026-01-29→05-29.
+
+extends: mirova_equivalent
+
+profile: _s94_reproc
+description: >
+  Validación S94 F2: reproceso histórico 11 Tier A con config operacional actual
+  (heredada de mirova_equivalent vía extends) en data_subdir aislado. Limpia
+  deuda Salar/cold-field + baseline para A/B de F5'.
+
+output:
+  data_subdir: _s94_reproc

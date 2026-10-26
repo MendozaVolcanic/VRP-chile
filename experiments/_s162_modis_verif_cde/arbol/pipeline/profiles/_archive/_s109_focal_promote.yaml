@@ -1,0 +1,13 @@
+# VRP-Chile — profile: _s109_focal_promote (S109 promoción magnitud focal MODIS)
+#
+# = mirova_equivalent YA flipeado (enable_focal_cluster_magnitude: true desde la
+# adopción A45) → reproc histórico a data_subdir AISLADO (A47, no toca operacional
+# directo). El merge_promote_focal.py luego copia SOLO los records MODIS curados a
+# data/mirova_equivalent (VIIRS byte-idéntico, guard de cobertura anti-underfetch).
+# MODIS necesita pyhdf (GH Linux). Ancla MODIS sigue OFF (espera D11).
+extends: mirova_equivalent
+profile: _s109_focal_promote
+description: >
+  Promoción S109 magnitud núcleo-focal MODIS (mirova_equivalent flag ON, dir aislado).
+output:
+  data_subdir: _s109_focal_promote

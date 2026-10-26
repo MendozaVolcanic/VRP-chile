@@ -1,0 +1,13 @@
+# A/B S101 — palanca sec³ MODIS, brazo ON (nadir-FIJO = como resamplea MIROVA).
+# nadir_fixed=True → A_pix uniforme 1 km² (sin corrección sec³ por scan angle).
+# MIROVA resamplea a grid 1km de área constante (papers Coppola 2016a SP426.5, eje A
+# auditoría S101). El ratio (off/on) por record común = el factor de inflación sec³ puro.
+# OJO: el WOOSTER_COEFF se calibró con sec³ activo (S14, error ≤0.17% vs OSF); este
+# brazo NO recalibra el coeficiente — sirve para AISLAR la palanca geométrica, NO para
+# magnitud final. Adoptar nadir-fijo exigiría re-validar el coeficiente (A63).
+# data_subdir aislado (NO toca operacional, A47).
+extends: mirova_equivalent
+output:
+  data_subdir: _sec3_modis_nadir_on
+paths:
+  enable_nadir_fixed_pixel_area_modis: true

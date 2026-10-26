@@ -1,0 +1,13 @@
+# S102 — 3er brazo A/B: nadir-fijo VIIRS ON + ctxpeak OFF (medición, NO adopción).
+# Aísla si ctxpeak (adoptado S100) era un parche del drift sec³: si nadir SOLO
+# (sin ctxpeak) da ratio ~1.0 y 0 FN, la raíz reemplaza al parche (MISSION/A55).
+# Comparar contra _viirs_nadir_ab (nadir+ctxpeak) y operacional (sec³+ctxpeak).
+# Diseño: docs/superpowers/specs/2026-06-06-viirs-nadir-ctxpeak-interaction-design.md
+# data_subdir aislado (NO toca operacional, A47).
+extends: mirova_equivalent
+output:
+  data_subdir: _viirs_nadir_noctx_ab
+paths:
+  enable_nadir_fixed_pixel_area_viirs: true
+  enable_test1_contextual_filter: false
+  enable_test1_contextual_keep_peak: false

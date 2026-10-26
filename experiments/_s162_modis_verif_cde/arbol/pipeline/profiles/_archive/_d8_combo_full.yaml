@@ -1,0 +1,83 @@
+# A/B PROFILE: D8 combo full (S38 C.1) — vent_anchored + H8 + lbg_global.
+#
+# A/B S38 vent_anchored (run 25749336998) mostró +9.6pp recall pero
+# análisis 9 FN restantes reveló que 5/9 son D4 (Test 1 dispara, primary
+# cráter cercano correcto, pero vrp=0 por L_bg local contaminado en
+# volcanes con geotermal crónico: Tupungatito fumarola, Lascar cráter).
+#
+# Fix D4 existe desde S33: enable_test1_lbg_global=true usa L_bg del
+# anillo background global 5-25km en vez del ring 1-3km Test 1.
+#
+# Combo C.1 (este perfil):
+#   - enable_vent_anchored_clustering: true (S38 D8 fix)
+#   - enable_pixel_level_distance_filter: true (H8 fix S35)
+#   - enable_test1_lbg_global: true (D4 fix S33)
+#
+# Estimación recall: 92.2% (vent_anchored solo) → 95-96% potencial.
+#
+# A/B contra _d8_combo_disabled (todos OFF, control idéntico a operacional).
+
+profile: _d8_combo_full
+description: >
+  A/B S38 C.1 — combo D8+D4: vent_anchored + H8 + lbg_global. Captura
+  5/9 FN persistentes de vent_anchored solo (Tupungatito + Lascar D4).
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  enable_test1_pixel_filter: false
+  # H_D8_5 paths REFUTADOS S37 — permanecen OFF
+  enable_eti_quadratic_scene: false
+  enable_second_pass_adjacent: false
+  enable_sum_vrp_reporting: false
+  # Combo S38 C.1 — los 3 fixes ON
+  enable_pixel_level_distance_filter: true   # H8 S35
+  enable_test1_lbg_global: true               # D4 S33
+  enable_vent_anchored_clustering: true       # D8 S38
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _d8_combo_full

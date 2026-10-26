@@ -1,0 +1,80 @@
+# A/B PROFILE: H_D8_5 (S37) DISABLED — control aislado para A/B.
+#
+# Idéntico a _h_d8_5_full pero con los TRES flags H_D8_5 en OFF + data_subdir
+# distinto. Sirve como control para el A/B test: comparamos H_D8_5 enabled
+# vs disabled sobre el MISMO set de granules, evitando contaminar el
+# operacional `mirova_equivalent.yaml`.
+#
+# Si comparáramos contra `mirova_equivalent` directamente, el reproc del
+# control sobreescribiría `data/mirova_equivalent/<vol>.json` que es el
+# dashboard publicado. Usando este perfil control, ambos lados del A/B
+# escriben a `data/_h_d8_5_*/` aislado.
+#
+# Las únicas diferencias _h_d8_5_full vs _h_d8_5_disabled son los 3 flags.
+# Todo lo demás (thresholds, paths actuales, sensors) es idéntico.
+
+profile: _h_d8_5_disabled
+description: >
+  Control A/B S37 H_D8_5 — idéntico a _h_d8_5_full salvo los tres flags
+  H_D8_5 en OFF. Mide el efecto neto del fix sobre las mismas granules.
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+  c2_dnti_summit_night: 5.0
+  c2_dnti_scene_night: 10.0
+  c2_deti_summit_night: 5.0
+  c2_deti_scene_night: 10.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  enable_test1_pixel_filter: false
+  enable_pixel_level_distance_filter: false
+  # H_D8_5 — los tres flags OFF (vs ON en _h_d8_5_full)
+  enable_eti_quadratic_scene: false
+  enable_second_pass_adjacent: false
+  enable_sum_vrp_reporting: false
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _h_d8_5_disabled

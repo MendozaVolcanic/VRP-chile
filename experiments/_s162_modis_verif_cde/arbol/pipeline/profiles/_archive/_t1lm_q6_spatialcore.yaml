@@ -1,0 +1,16 @@
+# VRP-Chile — profile: _t1lm_q6_spatialcore (S112 Parte B, brazo Q6 = compacidad espacial)
+#
+# Parte A ON + fondo global + recorte de compacidad ESPACIAL (S99 Candidato B): suma SOLO
+# el foco compacto alrededor del píxel de máxima energía (conserva el pico, anti-FN). Si el
+# global infla porque suma el halo nival difuso, recortar al núcleo replica lo que MIROVA
+# reporta. Discriminante espacial (no térmico). Variante "filtros de compacidad" del diseño.
+# data_subdir aislado (A47).
+extends: mirova_equivalent
+profile: _t1lm_q6_spatialcore
+description: >
+  A/B S112 Test1-lowmag — Q6 compacidad espacial (spatial-core) + fondo global.
+paths:
+  enable_test1_priority_weak_cluster: true
+  enable_test1_spatial_core: true
+output:
+  data_subdir: _t1lm_q6_spatialcore

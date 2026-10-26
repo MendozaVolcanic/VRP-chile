@@ -1,0 +1,27 @@
+# S94 F2 — perfil de reproceso VIIRS-only LOCAL (no operacional).
+#
+# Hereda la config operacional ACTUAL (extends mirova_equivalent) pero procesa
+# SOLO VIIRS375 + VIIRS750 (modis: false), para correr LOCAL en Windows sin pyhdf
+# (que solo necesita MODIS, regla S15). Disco transitorio ~2-2.5 GB/día-volcán,
+# borrado por run_pipeline.py:325 tras cada día → no acumula.
+#
+# Composición con el reproc MODIS: store.py deduplica por (datetime_utc, sensor),
+# así que los records VIIRS (subdir _s94_reproc_viirs) y MODIS (subdir
+# _s94_reproc_modis / GH Actions) se unen luego por un merge sin pisarse.
+#
+# Aislado en data_subdir propio (A47). Promoción a operacional = OK Nicolás (A45).
+
+extends: mirova_equivalent
+
+profile: _s94_reproc_viirs
+description: >
+  Reproceso VIIRS-only (375+750) local de validación S94 F2, config operacional
+  heredada, en data_subdir aislado. Se combina luego con el reproc MODIS.
+
+sensors:
+  modis: false
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _s94_reproc_viirs

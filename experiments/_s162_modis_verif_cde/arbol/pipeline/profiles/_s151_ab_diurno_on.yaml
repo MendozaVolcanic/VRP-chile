@@ -1,0 +1,35 @@
+# A/B S151 diurno (D-10, issue #813). Brazo DIURNO: produccion con la rama diurna VIIRS encendida.
+#
+# EL FENOMENO. MIROVA procesa VIIRS tambien de dia, con la columna diurna de la Tabla 1 de
+# Coppola 2016a (p. 7: K1 = -0,6, C1 = 0,02, C2 = 15 en las dos ROI). Este brazo enciende
+# enable_daytime_viirs y NADA MAS: el flag abre por si solo el filtro previo a la descarga
+# (fetch.py), el salto del granulo (scripts/run_pipeline.py), los umbrales del procesador y el
+# rechazo de store.py, todos a traves de pipeline/diurno.py (A118). El workflow corre SIN
+# --no-night-filter justamente para probar eso (en S92 el A/B diurno de MODIS abrio una sola
+# compuerta y midio cero).
+#
+# La clave va en la seccion `paths:`, que es de donde la lee pipeline/profile.py
+# (`_p.get("enable_daytime_viirs")`, A89). Comprobado con pipeline.profile, no con el YAML.
+#
+# CRITERIO: pre-registrado ANTES de correr, en experiments/_s151_ab_diurno/PREREGISTRO.md.
+# NO OPERACIONAL: data_subdir aislado (A47), fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s151_ab_diurno_on
+description: >
+  Brazo diurno: identico al control salvo enable_daytime_viirs en true (solo VIIRS 375 y 750).
+
+paths:
+  # S153, ADOPCION DE K (regla experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848): la replica apago el
+  # Test 1 integrado y encendio la conectiva max y la banda 22. Este perfil hereda de mirova_equivalent y su
+  # significado era la produccion de ANTES de K mas su propio cambio, asi que congela aca esos flags con el valor
+  # previo (como experimental.yaml en S150) para resolver igual que antes de la adopcion. Lo vigila
+  # tests/test_guard_perfiles_congelados_s153.py.
+  enable_test1_path: true
+  enable_tests_23_prose_branch: false
+  enable_daytime_viirs: true
+
+output:
+  data_subdir: _s151_ab_diurno_on
+
+# S153 (K): banda 21 primaria congelada; el porque esta en el comentario S153 de `paths:`.
+enable_modis_b22_primary: false

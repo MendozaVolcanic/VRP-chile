@@ -1,0 +1,12 @@
+# VRP-Chile — profile: _modis_localmag_base (S107 §2 A/B, brazo BASELINE)
+#
+# Brazo base: flag OFF, reproc con el MISMO código y fechas que los brazos ON,
+# para comparación apples-to-apples (aísla el efecto del flag de la deriva
+# reproc-vs-NRT). data_subdir aislado (A47). MODIS necesita pyhdf (GH Linux).
+# NO toca operacional. Design: docs/superpowers/specs/2026-06-13-magnitud-modis-fondo-local-design.md
+extends: mirova_equivalent
+profile: _modis_localmag_base
+description: >
+  A/B S107 fondo-local magnitud MODIS, brazo BASE (enable_local_cluster_magnitude OFF).
+output:
+  data_subdir: _modis_localmag_base

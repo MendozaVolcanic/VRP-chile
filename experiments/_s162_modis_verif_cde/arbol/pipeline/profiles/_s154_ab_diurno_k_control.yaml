@@ -1,0 +1,22 @@
+# A/B diurno sobre K (S154, tarea 1.32). CONTROL: la réplica con K tal cual, rama diurna apagada.
+#
+# POR QUÉ. El A/B W2 a W6 corrió sobre C0 (`_s151_ab_diurno_*`) y su NO ADOPTAR no se traslada a K: de día el Test 1
+# integrado, que K quitó, dispara en 2.000 de 2.077 publicaciones de VIIRS 375 en negativos limpios
+# (experiments/_s151_ab_diurno/salidas/W2_W6_s154/verificador/INFORME.md, H4). Este brazo tiene que ser
+# EXACTAMENTE producción: lo vigila tests/test_perfiles_diurno_k_s154.py resolviendo todas las constantes.
+# Declara los tres flags de K con su valor, porque tests/test_guard_perfiles_congelados_s153.py exige que todo
+# perfil derivado los escriba (A117): si la réplica cambia, este control no la sigue en silencio.
+# NO OPERACIONAL: fuera del cron NRT. NO DESPACHAR sin la adenda del pre-registro sellada por Nicolás.
+extends: mirova_equivalent
+profile: _s154_ab_diurno_k_control
+description: >
+  Control del A/B diurno sobre K: la réplica K tal cual (enable_daytime_viirs en false).
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+output:
+  data_subdir: _s154_ab_diurno_k_control
+
+enable_modis_b22_primary: true

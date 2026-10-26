@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VRP Chile — LABORATORIO (experimental)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --bg: #1a1a2e; --surface: #16213e; --card: #0f3460;
+      --border: #1a3a5c; --text: #e0e6f0; --muted: #7a8fa6;
+      --green: #00d084; --yellow: #ffc107; --orange: #ff7043; --red: #f44336;
+      --blue: #2196f3; --cyan: #00bcd4; --purple: #9c27b0;
+      --modis: #ff8c00; --v375: #e91e63; --v750: #00bcd4; --vent: #7c4dff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #0d1b2a 0%, #1a2744 100%);
+      border-bottom: 2px solid #1e3a5f;
+      padding: 14px 24px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; letter-spacing: 1px; }
+    .logo span { color: var(--orange); }
+    .header-sub { font-size: 0.78rem; color: var(--muted); }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .status-label { font-size: 0.75rem; color: var(--green); display: flex; align-items: center; gap: 6px; }
+    #updated-label { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── Controls ── */
+    .controls {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 10px 24px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
+    }
+    .controls label { font-size: 0.78rem; color: var(--muted); }
+    select {
+      background: var(--card); color: var(--text); border: 1px solid var(--border);
+      border-radius: 5px; padding: 5px 10px; font-size: 0.78rem; cursor: pointer;
+    }
+    .scale-btn {
+      padding: 4px 14px; border-radius: 4px; border: 1px solid var(--border);
+      background: var(--card); color: var(--muted); font-size: 0.75rem; cursor: pointer;
+    }
+    .scale-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .sensor-legend { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-left: auto; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--muted); cursor: pointer; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+    .legend-item.dim { opacity: 0.35; }
+
+    /* ── Main layout ── */
+    main { padding: 20px 24px; max-width: 1600px; margin: 0 auto; }
+
+    /* ── Volcano grid (overview cards) ── */
+    .volcano-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px; margin-bottom: 24px;
+    }
+    .volcano-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; cursor: pointer;
+      transition: all 0.2s; position: relative; overflow: hidden;
+    }
+    .volcano-card:hover { border-color: var(--blue); transform: translateY(-1px); }
+    .volcano-card.active { border-color: var(--blue); background: #0d2744; }
+    .volcano-card.alert-high  { border-color: var(--red); }
+    .volcano-card.alert-mod   { border-color: var(--orange); }
+    .volcano-card.alert-low   { border-color: var(--yellow); }
+    .volcano-card.alert-vlow  { border-color: var(--green); }
+    .vc-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+    .vc-name { font-size: 0.82rem; font-weight: 600; line-height: 1.2; }
+    .vc-region { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+    .alert-badge {
+      font-size: 0.60rem; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+      white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-vlow  { background: rgba(0,208,132,0.15); color: var(--green); border: 1px solid var(--green); }
+    .badge-low   { background: rgba(255,193,7,0.15);  color: var(--yellow); border: 1px solid var(--yellow); }
+    .badge-mod   { background: rgba(255,112,67,0.15); color: var(--orange); border: 1px solid var(--orange); }
+    .badge-high  { background: rgba(244,67,54,0.15);  color: var(--red);    border: 1px solid var(--red); }
+    .badge-none  { background: rgba(122,143,166,0.1); color: var(--muted);  border: 1px solid var(--border); }
+    .vc-vrp { font-size: 1.3rem; font-weight: 700; margin-top: 4px; }
+    .vc-vrp-sub { font-size: 0.65rem; color: var(--muted); }
+    .vc-sensors { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+    .sensor-pill {
+      font-size: 0.60rem; padding: 1px 6px; border-radius: 3px;
+      font-weight: 600; letter-spacing: 0.3px;
+    }
+    .pill-modis { background: rgba(255,140,0,0.2);  color: var(--modis); }
+    .pill-v375  { background: rgba(233,30,99,0.2);  color: var(--v375);  }
+    .pill-v750  { background: rgba(0,188,212,0.2);  color: var(--v750);  }
+    .vc-time { font-size: 0.62rem; color: var(--muted); margin-top: 6px; }
+
+    /* ── Detail panel ── */
+    .detail-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 20px;
+    }
+    .detail-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .detail-title { font-size: 1.1rem; font-weight: 700; }
+    .detail-coords { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── Stats row ── */
+    .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; min-width: 120px;
+    }
+    .stat-box .label { font-size: 0.68rem; color: var(--muted); margin-bottom: 2px; }
+    .stat-box .val   { font-size: 1.3rem; font-weight: 700; }
+    .stat-box .unit  { font-size: 0.65rem; color: var(--muted); }
+
+    /* ── Energy bands (like MIROVA background) ── */
+    .energy-bands { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+    .energy-bands span { font-size: 0.68rem; color: var(--muted); margin-right: 6px; }
+    .band { padding: 3px 10px; border-radius: 3px; font-size: 0.68rem; font-weight: 600; }
+    .band-nd   { background: rgba(122,143,166,0.15); color: var(--muted); }
+    .band-vlow { background: rgba(0,208,132,0.15);   color: var(--green); }
+    .band-low  { background: rgba(255,193,7,0.15);   color: var(--yellow); }
+    .band-mod  { background: rgba(255,112,67,0.15);  color: var(--orange); }
+    .band-high { background: rgba(244,67,54,0.15);   color: var(--red); }
+
+    /* ── Chart ── */
+    .chart-wrapper { position: relative; height: 340px; }
+    .chart-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+    .chart-tab {
+      padding: 4px 14px; border-radius: 5px; border: 1px solid var(--border);
+      background: var(--card); color: var(--muted); font-size: 0.75rem; cursor: pointer;
+    }
+    .chart-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+    /* ── Recent events table ── */
+    .events-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 16px; }
+    .events-table th {
+      text-align: left; padding: 6px 10px; color: var(--muted);
+      border-bottom: 1px solid var(--border); font-weight: 500; font-size: 0.68rem;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .events-table td { padding: 6px 10px; border-bottom: 1px solid rgba(30,58,92,0.5); }
+    .events-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .vrp-cell { font-weight: 700; }
+
+    .msg { text-align: center; padding: 60px; color: var(--muted); font-size: 0.88rem; }
+
+    /* ── Alert summary bar ── */
+    .alert-summary {
+      display: flex; gap: 8px; padding: 8px 24px; background: var(--surface);
+      border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center;
+    }
+    .alert-summary .summary-label { font-size: 0.72rem; color: var(--muted); margin-right: 4px; }
+    .alert-box {
+      display: flex; align-items: center; gap: 6px; padding: 4px 12px;
+      border-radius: 6px; border: 1px solid var(--border); background: var(--card); min-width: 80px;
+    }
+    .alert-box .ab-count { font-size: 1.1rem; font-weight: 700; }
+    .alert-box .ab-label { font-size: 0.65rem; color: var(--muted); line-height: 1.2; }
+    .alert-box.ab-high  { border-color: var(--red); }
+    .alert-box.ab-high .ab-count { color: var(--red); }
+    .alert-box.ab-mod   { border-color: var(--orange); }
+    .alert-box.ab-mod .ab-count { color: var(--orange); }
+    .alert-box.ab-low   { border-color: var(--yellow); }
+    .alert-box.ab-low .ab-count { color: var(--yellow); }
+    .alert-box.ab-vlow  { border-color: var(--green); }
+    .alert-box.ab-vlow .ab-count { color: var(--green); }
+    .alert-box.ab-nd .ab-count { color: var(--muted); }
+
+    /* ── Overview map ── */
+    .overview-section {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
+    }
+    @media (max-width: 900px) { .overview-section { grid-template-columns: 1fr; } }
+    .overview-map-container {
+      height: 420px; border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border); background: var(--card);
+    }
+    .nrt-table-container {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px; overflow-y: auto; max-height: 420px;
+    }
+    .nrt-table-container h3 { font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; }
+    .nrt-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+    .nrt-table th {
+      text-align: left; padding: 5px 8px; color: var(--muted);
+      border-bottom: 1px solid var(--border); font-weight: 500; font-size: 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: var(--surface);
+    }
+    .nrt-table td { padding: 4px 8px; border-bottom: 1px solid rgba(30,58,92,0.3); cursor: pointer; }
+    .nrt-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+    /* ── UTC clock ── */
+    #utc-clock { font-family: 'Consolas', monospace; font-size: 0.78rem; color: var(--cyan); letter-spacing: 1px; }
+
+    /* ── Map panel ── */
+    .map-container {
+      height: 400px; border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border); margin-top: 16px;
+    }
+    .map-header {
+      display: flex; align-items: center; gap: 10px; margin-top: 20px; margin-bottom: 8px;
+    }
+    .map-header h3 { font-size: 0.88rem; font-weight: 600; }
+    .map-legend { display: flex; gap: 12px; margin-left: auto; font-size: 0.68rem; color: var(--muted); }
+    .map-legend-item { display: flex; align-items: center; gap: 4px; }
+    .map-legend-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; }
+
+    /* ── Action buttons ── */
+    .action-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .action-btn {
+      padding: 5px 14px; border-radius: 5px; border: 1px solid var(--border);
+      background: var(--card); color: var(--muted); font-size: 0.72rem; cursor: pointer;
+      display: flex; align-items: center; gap: 5px; transition: all 0.2s;
+    }
+    .action-btn:hover { border-color: var(--blue); color: var(--text); }
+    .action-btn svg { width: 14px; height: 14px; }
+
+    /* ── Multi-chart layout ── */
+    .charts-grid {
+      display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 12px;
+    }
+    .charts-grid.dual { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 900px) { .charts-grid.dual { grid-template-columns: 1fr; } }
+    .chart-panel {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px;
+    }
+    .chart-panel h4 { font-size: 0.78rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+    .chart-panel .chart-wrapper { height: 280px; }
+  </style>
+</head>
+<body>
+
+<div style="background:#b71c1c;color:#fff;padding:6px 24px;text-align:center;font-size:0.9rem;font-weight:600;letter-spacing:0.5px;">
+  ⚠ MODO LABORATORIO — NO OPERACIONAL.
+  Esta página usa umbrales experimentales y puede contener falsos positivos.
+  Para uso operacional ir al <a href="../" style="color:#fff;text-decoration:underline;">dashboard principal</a>.
+  · Vista <a href="beyond-mirova.html" style="color:#ffd54f;text-decoration:underline;">Beyond MIROVA</a> (zonas geo · fidelidad · Eq.16)
+</div>
+
+<header>
+  <div>
+    <div class="logo">VRP <span>Chile</span> · LAB</div>
+    <div class="header-sub">Perfil experimental · MODIS + VIIRS · NASA Earthdata</div>
+  </div>
+  <div class="header-right">
+    <div class="status-label">
+      <div class="status-dot"></div>
+      Sistema Operativo
+    </div>
+    <span id="utc-clock"></span>
+    <span id="updated-label"></span>
+  </div>
+</header>
+
+<div class="alert-summary" id="alert-summary"></div>
+
+<div class="controls">
+  <div>
+    <label for="days-select">Período </label>
+    <select id="days-select">
+      <option value="7">7 días</option>
+      <option value="30" selected>30 días</option>
+      <option value="60">60 días</option>
+      <option value="90">90 días</option>
+      <option value="0">Todo</option>
+    </select>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center;">
+    <label>Escala </label>
+    <button class="scale-btn active" id="btn-linear">Lineal</button>
+    <button class="scale-btn" id="btn-log">Logarítmica</button>
+  </div>
+  <div class="sensor-legend" id="sensor-legend"></div>
+</div>
+
+<main>
+  <div class="overview-section" id="overview-section">
+    <div class="overview-map-container" id="overview-map"></div>
+    <div class="nrt-table-container">
+      <h3>Últimas detecciones NRT (todos los volcanes)</h3>
+      <table class="nrt-table">
+        <thead><tr><th>Fecha UTC</th><th>Volcán</th><th>VRP (MW)</th><th>Sensor</th></tr></thead>
+        <tbody id="nrt-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="volcano-grid" id="volcano-grid"></div>
+  <div id="detail"></div>
+</main>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const VOLCANOES = [
+  // === Zona Norte CVZ (N→S) ===
+  { name: "Taapaca",              display: "Taapaca",                region: "Arica y Parinacota", lat: -18.100, lon: -69.500, radius_km: 10 },
+  { name: "Parinacota",           display: "Parinacota",             region: "Arica y Parinacota", lat: -18.166, lon: -69.142, radius_km: 10 },
+  { name: "Guallatiri",           display: "Guallatiri",             region: "Arica y Parinacota", lat: -18.420, lon: -69.090, radius_km: 10 },
+  { name: "Isluga",               display: "Isluga",                 region: "Tarapacá",      lat: -19.150, lon: -68.830, radius_km: 10, hasMirova: true,  vent_lat: -19.150, vent_lon: -68.830 },
+  { name: "Irruputuncu",          display: "Irruputuncu",            region: "Tarapacá",      lat: -20.730, lon: -68.550, radius_km: 10 },
+  { name: "OlcaParuma",           display: "Olca-Paruma",            region: "Tarapacá",      lat: -20.942, lon: -68.503, radius_km: 10 },
+  { name: "Ollague",              display: "Ollagüe",                region: "Antofagasta",   lat: -21.300, lon: -68.180, radius_km: 10 },
+  { name: "SanPedro",             display: "San Pedro",              region: "Antofagasta",   lat: -21.880, lon: -68.400, radius_km: 10 },
+  { name: "Putana",               display: "Putana",                 region: "Antofagasta",   lat: -22.557, lon: -67.853, radius_km: 10 },
+  { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",   lat: -23.369, lon: -67.732, radius_km: 10, hasMirova: true,  vent_lat: -23.369, vent_lon: -67.732 },
+  { name: "Lastarria",            display: "Lastarria",              region: "Atacama",        lat: -25.168, lon: -68.507, radius_km: 10, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
+  // === Zona Central SVZ ===
+  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 10, hasMirova: true,  vent_lat: -33.400, vent_lon: -69.800 },
+  { name: "SanJose",              display: "San José",               region: "Metropolitana",  lat: -33.789, lon: -69.897, radius_km: 10 },
+  { name: "Tinguiririca",         display: "Tinguiririca",           region: "O'Higgins",     lat: -34.814, lon: -70.352, radius_km: 10 },
+  { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 10, hasMirova: true,  vent_lat: -35.240, vent_lon: -70.568 },
+  { name: "DescabezadoGrande",    display: "Descabezado Grande",     region: "Maule",         lat: -35.580, lon: -70.750, radius_km: 10 },
+  { name: "CerroAzulQuizapu",     display: "Cerro Azul-Quizapu",     region: "Maule",         lat: -35.653, lon: -70.761, radius_km: 10 },
+  { name: "LagunaDelMaule",       display: "Laguna del Maule",       region: "Maule",         lat: -36.020, lon: -70.580, radius_km: 15 },
+  { name: "NevadoDeLongavi",      display: "Nevado de Longaví",      region: "Maule",         lat: -36.193, lon: -71.161, radius_km: 10 },
+  { name: "NevadosDeChillan",     display: "Nevados de Chillán",     region: "Ñuble",         lat: -36.863, lon: -71.377, radius_km: 10, hasMirova: true,  vent_lat: -36.863, vent_lon: -71.377 },
+  { name: "Antuco",               display: "Antuco",                 region: "Biobío",        lat: -37.406, lon: -71.349, radius_km: 10 },
+  { name: "Copahue",              display: "Copahue",                region: "Biobío",        lat: -37.856, lon: -71.183, radius_km: 10, hasMirova: true,  vent_lat: -37.856, vent_lon: -71.183 },
+  { name: "Callaqui",             display: "Callaqui",               region: "Biobío",        lat: -37.920, lon: -71.450, radius_km: 10 },
+  // === Zona Sur SVZ ===
+  { name: "Lonquimay",            display: "Lonquimay",              region: "Araucanía",     lat: -38.380, lon: -71.580, radius_km: 10 },
+  { name: "Tolhuaca",             display: "Tolhuaca",               region: "Araucanía",     lat: -38.310, lon: -71.645, radius_km: 10 },
+  { name: "Llaima",               display: "Llaima",                 region: "Araucanía",     lat: -38.692, lon: -71.729, radius_km: 10, hasMirova: true,  vent_lat: -38.692, vent_lon: -71.729 },
+  { name: "Sollipulli",           display: "Sollipulli",             region: "Araucanía",     lat: -38.970, lon: -71.520, radius_km: 10 },
+  { name: "Villarrica",           display: "Villarrica",             region: "Araucanía",     lat: -39.420, lon: -71.930, radius_km: 10, hasMirova: true,  vent_lat: -39.420, vent_lon: -71.930 },
+  { name: "Quetrupillan",         display: "Quetrupillán",           region: "Araucanía",     lat: -39.496, lon: -71.722, radius_km: 10 },
+  { name: "Lanin",                display: "Lanín",                  region: "Araucanía",     lat: -39.633, lon: -71.503, radius_km: 10 },
+  { name: "MochoChoshuenco",      display: "Mocho-Choshuenco",       region: "Los Ríos",      lat: -39.927, lon: -72.027, radius_km: 10 },
+  { name: "CarranLosVenados",     display: "Carrán-Los Venados",     region: "Los Ríos",      lat: -40.350, lon: -72.070, radius_km: 10 },
+  { name: "PuyehueCordonCaulle",  display: "Puyehue–Cordón Caulle",  region: "Los Ríos",      lat: -40.590, lon: -72.117, radius_km: 15, hasMirova: true,  vent_lat: -40.585, vent_lon: -72.020 },
+  { name: "AntillancaCasablanca", display: "Antillanca-Casablanca",  region: "Los Lagos",     lat: -40.770, lon: -72.150, radius_km: 10 },
+  { name: "Osorno",               display: "Osorno",                 region: "Los Lagos",     lat: -41.100, lon: -72.493, radius_km: 10 },
+  { name: "Calbuco",              display: "Calbuco",                region: "Los Lagos",     lat: -41.330, lon: -72.614, radius_km: 10 },
+  { name: "YateHornopiren",       display: "Yate-Hornopirén",        region: "Los Lagos",     lat: -41.760, lon: -72.390, radius_km: 10 },
+  { name: "Huequi",               display: "Huequi",                 region: "Los Lagos",     lat: -42.377, lon: -72.578, radius_km: 10 },
+  { name: "Michinmahuida",        display: "Michinmahuida",          region: "Los Lagos",     lat: -42.790, lon: -72.440, radius_km: 10 },
+  { name: "Chaiten",              display: "Chaitén",                region: "Los Lagos",     lat: -42.833, lon: -72.646, radius_km: 10, hasMirova: true,  vent_lat: -42.833, vent_lon: -72.646 },
+  // === Zona Austral ===
+  { name: "CorcovadoYanteles",    display: "Corcovado-Yanteles",     region: "Los Lagos",     lat: -43.183, lon: -72.800, radius_km: 10 },
+  { name: "Melimoyu",             display: "Melimoyu",               region: "Aysén",         lat: -44.080, lon: -72.880, radius_km: 10 },
+  { name: "Mentolat",             display: "Mentolat",               region: "Aysén",         lat: -44.670, lon: -73.080, radius_km: 10 },
+  { name: "MacaCay",              display: "Macá-Cay",               region: "Aysén",         lat: -45.100, lon: -73.200, radius_km: 10 },
+  { name: "Hudson",               display: "Hudson",                 region: "Aysén",         lat: -45.900, lon: -72.970, radius_km: 15 },
+];
+
+const SENSORS = [
+  { key: "MODIS",    label: "MODIS (1km)",     color: "#ff8c00" },
+  { key: "VIIRS375", label: "VIIRS 375m",      color: "#e91e63" },
+  { key: "VIIRS750", label: "VIIRS 750m",      color: "#00bcd4" },
+  { key: "MIROVA",   label: "MIROVA ref.",     color: "#ffc107" },
+];
+
+// MIROVA energy scale (MW)
+const LEVELS = [
+  { key: "nd",   label: "Sin datos",   max: 0,    cls: "badge-none",  cardCls: "" },
+  { key: "vlow", label: "Muy Bajo",    max: 1,    cls: "badge-vlow",  cardCls: "alert-vlow" },
+  { key: "low",  label: "Bajo",        max: 10,   cls: "badge-low",   cardCls: "alert-low"  },
+  { key: "mod",  label: "Moderado",    max: 100,  cls: "badge-mod",   cardCls: "alert-mod"  },
+  { key: "high", label: "Alto",        max: 1000, cls: "badge-high",  cardCls: "alert-high" },
+  { key: "vhigh",label: "Muy Alto",   max: Infinity, cls: "badge-high", cardCls: "alert-high" },
+];
+
+function getLevel(vrp) {
+  if (!vrp || vrp <= 0) return LEVELS[0];
+  for (const l of LEVELS.slice(1)) if (vrp < l.max) return l;
+  return LEVELS[LEVELS.length - 1];
+}
+
+const sensorVisible = { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: true };
+let currentVolcano = VOLCANOES[0];
+let currentDays = 30;
+let logScale = false;
+let charts = {};
+let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
+
+// ── Base path detection (local preview vs GitHub Pages) ─────────────────────
+// Local dev:  /frontend/experimental/index.html  → need "/" to reach /data/
+// GitHub Pages: /VRP-chile/experimental/index.html → need "../" to reach /VRP-chile/data/
+const BASE_PATH = (() => {
+  const path = window.location.pathname;
+  if (path.includes('/frontend/')) return '/';
+  return '../';
+})();
+
+// ── Fetch ───────────────────────────────────────────────────────────────────
+async function fetchJSON(url) {
+  try {
+    const r = await fetch(url + "?_=" + Date.now());
+    return r.ok ? r.json() : null;
+  } catch { return null; }
+}
+
+async function loadVolcano(v) {
+  const [data, mirova] = await Promise.all([
+    fetchJSON(BASE_PATH + "data/experimental_v2/" + v.name + ".json"),  // S124: serie nueva; data/experimental/ es legacy (config S15)
+    v.hasMirova ? fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json") : Promise.resolve(null),
+  ]);
+  allData[v.name] = {
+    records:       data?.records   || [],
+    mirovaRecords: mirova?.records || [],
+    updated:       data?.updated   || null,
+    // S124: `null` = el fetch falló (404, red, JSON roto). NO es lo mismo que
+    // "cargó y no hay detecciones". Sin esta distinción una serie faltante se
+    // muestra como "SIN DATOS / sin detección" en los 45 volcanes, que un
+    // operador lee como "no hay actividad volcánica" — el mismo modo de fallo
+    // engañoso que tuvo el panel Eq.16 durante dos meses.
+    loadFailed:    data === null,
+  };
+}
+
+// S124 — decir la verdad cuando el dato no está.
+// Un panel que muestra "sin detección" porque no pudo bajar el archivo miente
+// en la dirección más peligrosa para monitoreo volcánico: hacia la calma.
+function reportDataAvailability() {
+  const fallidos = VOLCANOES.filter(v => allData[v.name]?.loadFailed).length;
+  const id = "data-availability-banner";
+  document.getElementById(id)?.remove();
+  if (!fallidos) return;
+
+  const todos = fallidos === VOLCANOES.length;
+  const el = document.createElement("div");
+  el.id = id;
+  el.style.cssText = "margin:8px 12px;padding:10px 14px;border-radius:8px;" +
+    "border:1px solid #b45309;background:#78350f;color:#fde68a;" +
+    "font-size:13px;line-height:1.5";
+  el.innerHTML = todos
+    ? "<b>No se pudo cargar la serie experimental.</b> Los volcanes aparecen sin " +
+      "datos porque falta el archivo, <b>no porque no haya actividad</b>. Esta vista " +
+      "consume <code>data/experimental_v2/</code>, que sólo existe si se corre un reproceso " +
+      "o un despacho manual del perfil experimental (desde S141 ya no corre en el cron NRT, " +
+      "y lo que el cron generó antes nunca se guardó); la serie anterior quedó en <code>data/experimental/</code> " +
+      "y no se mezcla con esta a propósito (se generó con otra configuración). " +
+      "Para tener historia acá hace falta un reproceso."
+    : "<b>Serie incompleta:</b> no se pudo cargar el dato de " + fallidos + " de " +
+      VOLCANOES.length + " volcanes. Los que aparecen sin datos pueden ser un " +
+      "archivo faltante, no ausencia de actividad.";
+  const anchor = document.querySelector("main") || document.body;
+  anchor.insertBefore(el, anchor.firstChild);
+}
+
+// ── Data helpers ─────────────────────────────────────────────────────────────
+function filterDays(records, days) {
+  if (!days) return records;
+  const cutoff = Date.now() - days * 86400000;
+  return records.filter(r => new Date(r.datetime_utc).getTime() >= cutoff);
+}
+
+function toDailyMax(records, key) {
+  const m = new Map();
+  for (const r of records) {
+    const v = r[key]; if (v == null) continue;
+    const d = r.datetime_utc.slice(0, 10);
+    if (!m.has(d) || v > m.get(d)) m.set(d, v);
+  }
+  return [...m.entries()].sort().map(([x, y]) => ({ x, y }));
+}
+
+function toMirovaDaily(records) {
+  const m = new Map();
+  for (const r of records) {
+    const d = (r.datetime_utc || "").slice(0, 10); if (!d) continue;
+    const v = parseFloat(r.VRP_MW ?? r.vrp_mw ?? 0);
+    if (!m.has(d) || v > m.get(d)) m.set(d, v);
+  }
+  return [...m.entries()].sort().map(([x, y]) => ({ x, y }));
+}
+
+function latestVRP(records) {
+  // Returns the max VRP from the last 48h across all sensors
+  const cutoff = Date.now() - 48 * 3600000;
+  let max = 0;
+  for (const r of records) {
+    if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    if (v > max) max = v;
+  }
+  return max;
+}
+
+function latestSensors(records) {
+  const cutoff = Date.now() - 48 * 3600000;
+  const seen = new Set();
+  for (const r of records) {
+    if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    if (v > 0) seen.add(sensorGroup(r.sensor));
+  }
+  return seen;
+}
+
+function sensorGroup(sensor) {
+  if (!sensor) return null;
+  if (sensor.startsWith("MODIS")) return "MODIS";
+  if (sensor.includes("750")) return "VIIRS750";
+  if (sensor.startsWith("VIIRS")) return "VIIRS375";
+  return null;
+}
+
+function lastEventTime(records) {
+  let latest = null;
+  for (const r of records) {
+    if (!latest || r.datetime_utc > latest) latest = r.datetime_utc;
+  }
+  return latest;
+}
+
+// ── DOM helpers ──────────────────────────────────────────────────────────────
+function el(tag, cls) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  return e;
+}
+
+// ── Volcano cards ─────────────────────────────────────────────────────────────
+function buildCards() {
+  const grid = document.getElementById("volcano-grid");
+  while (grid.firstChild) grid.removeChild(grid.firstChild);
+
+  VOLCANOES.forEach(v => {
+    const d = allData[v.name] || { records: [], mirovaRecords: [] };
+    const vrp = latestVRP(d.records);
+    const level = getLevel(vrp);
+    const sensors = latestSensors(d.records);
+    const lastTime = lastEventTime(d.records);
+
+    const card = el("div", "volcano-card" + (v === currentVolcano ? " active" : "") +
+                    (level.cardCls ? " " + level.cardCls : ""));
+    card.addEventListener("click", () => {
+      currentVolcano = v;
+      buildCards();
+      renderDetail();
+    });
+
+    // Header
+    const hdr = el("div", "vc-header");
+    const nameDiv = el("div");
+    const nm = el("div", "vc-name"); nm.textContent = v.display;
+    const rg = el("div", "vc-region"); rg.textContent = v.region;
+    nameDiv.append(nm, rg);
+    const badge = el("span", "alert-badge " + level.cls);
+    badge.textContent = level.label;
+    hdr.append(nameDiv, badge);
+
+    // VRP
+    const vrpEl = el("div", "vc-vrp");
+    vrpEl.style.color = vrp > 0 ? (level.key === "vlow" ? "var(--green)" :
+                                   level.key === "low"  ? "var(--yellow)" :
+                                   level.key === "mod"  ? "var(--orange)" : "var(--red)") : "var(--muted)";
+    vrpEl.textContent = vrp > 0 ? vrp.toFixed(2) : "—";
+    const vrpSub = el("div", "vc-vrp-sub"); vrpSub.textContent = vrp > 0 ? "MW (48h max)" : "sin detección";
+
+    // Sensor pills
+    const pills = el("div", "vc-sensors");
+    if (sensors.has("MODIS")) { const p = el("span","sensor-pill pill-modis"); p.textContent = "MODIS"; pills.appendChild(p); }
+    if (sensors.has("VIIRS375")) { const p = el("span","sensor-pill pill-v375"); p.textContent = "VIIRS 375m"; pills.appendChild(p); }
+    if (sensors.has("VIIRS750")) { const p = el("span","sensor-pill pill-v750"); p.textContent = "VIIRS 750m"; pills.appendChild(p); }
+
+    // Last update
+    const time = el("div", "vc-time");
+    time.textContent = lastTime ? "Último: " + lastTime.slice(0, 16) + " UTC" : "Sin datos";
+
+    card.append(hdr, vrpEl, vrpSub, pills, time);
+    grid.appendChild(card);
+  });
+}
+
+// ── Detail panel ─────────────────────────────────────────────────────────────
+function renderDetail() {
+  const panel = document.getElementById("detail");
+  for (const c of Object.values(charts)) c.destroy();
+  charts = {};
+  while (panel.firstChild) panel.removeChild(panel.firstChild);
+
+  const v = currentVolcano;
+  const d = allData[v.name] || { records: [], mirovaRecords: [] };
+  const filtered   = filterDays(d.records, currentDays);
+  const mFiltered  = filterDays(d.mirovaRecords, currentDays);
+
+  if (d.updated) {
+    document.getElementById("updated-label").textContent =
+      "Act: " + d.updated.replace("T"," ").slice(0,16) + " UTC";
+  }
+
+  // Stats
+  const allVrp = filtered.map(r => r.vrp_mw ?? r.vrp_mir_mw ?? 0).filter(v => v > 0);
+  const maxVrp  = allVrp.length ? Math.max(...allVrp) : 0;
+  const meanVrp = allVrp.length ? allVrp.reduce((a,b)=>a+b)/allVrp.length : 0;
+  const level   = getLevel(maxVrp);
+
+  const dp = el("div", "detail-panel");
+
+  // Header
+  const dh = el("div", "detail-header");
+  const dt = el("div", "detail-title"); dt.textContent = v.display;
+  const badge = el("span", "alert-badge " + level.cls); badge.textContent = level.label;
+  const dc = el("div", "detail-coords");
+  // coords will be added from volcanoes config — hardcoded for now
+  dh.append(dt, badge);
+  dp.appendChild(dh);
+
+  // Energy scale bands legend
+  const eb = el("div", "energy-bands");
+  const ebLabel = el("span"); ebLabel.textContent = "Escala MIROVA:";
+  eb.appendChild(ebLabel);
+  [
+    ["band-nd","Sin datos"], ["band-vlow","<1 MW Muy Bajo"],
+    ["band-low","1–10 MW Bajo"], ["band-mod","10–100 MW Moderado"],
+    ["band-high",">100 MW Alto"]
+  ].forEach(([cls, txt]) => {
+    const b = el("span", "band " + cls); b.textContent = txt; eb.appendChild(b);
+  });
+  dp.appendChild(eb);
+
+  // Stats row
+  const sr = el("div", "stats-row");
+  function addStat(label, val, unit, color) {
+    const box = el("div","stat-box");
+    const l = el("div","label"); l.textContent = label;
+    const vEl = el("div","val"); vEl.textContent = val;
+    if (color) vEl.style.color = color;
+    const u = el("div","unit"); u.textContent = unit;
+    box.append(l, vEl, u);
+    sr.appendChild(box);
+  }
+  // VRE (Volcanic Radiated Energy) — cumulative integral of VRP
+  // VRE = sum(VRP_i * dt_i), each observation ~ 6h window (4 passes/day)
+  const DT_HOURS = 6;
+  let vre_gj = 0;
+  for (const r of filtered) {
+    const v_mw = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    if (v_mw > 0) vre_gj += v_mw * DT_HOURS * 3.6; // MW * h * 3.6 = GJ
+  }
+
+  addStat("Max VRP", maxVrp > 0 ? maxVrp.toFixed(2) : "—", "MW", level.key !== "nd" ? "var(--green)" : null);
+  addStat("Promedio activo", meanVrp > 0 ? meanVrp.toFixed(2) : "—", "MW (>0)");
+  addStat("VRE acumulada", vre_gj > 0 ? vre_gj.toFixed(1) : "—", "GJ", vre_gj > 0 ? "var(--cyan)" : null);
+  addStat("Detecciones", String(allVrp.length), "granules");
+  addStat("Total granules", String(filtered.length), "procesados");
+  dp.appendChild(sr);
+
+  // ── Export CSV buttons ──
+  const actionRow = el("div", "action-row");
+  const csvBtn = el("button", "action-btn");
+  csvBtn.textContent = "\u2B73 Exportar CSV (periodo)";
+  csvBtn.addEventListener("click", () => exportCSV(v, filtered));
+  actionRow.appendChild(csvBtn);
+
+  const csvAllBtn = el("button", "action-btn");
+  csvAllBtn.textContent = "\u2B73 Exportar CSV (todos)";
+  csvAllBtn.addEventListener("click", () => exportCSV(v, d.records));
+  actionRow.appendChild(csvAllBtn);
+  dp.appendChild(actionRow);
+
+  // Chart tabs
+  const tabs = el("div", "chart-tabs");
+  const tabNames = ["VRP", "Distancia", "VRE Acumulada", "MIROVA Comparar"];
+  const tabBtns = tabNames.map((name, i) => {
+    const btn = el("button", "chart-tab" + (i === 0 ? " active" : ""));
+    btn.textContent = name;
+    btn.dataset.idx = i;
+    tabs.appendChild(btn);
+    return btn;
+  });
+  dp.appendChild(tabs);
+
+  // Charts grid — VRP main chart + secondary chart side by side
+  const chartsGrid = el("div", "charts-grid");
+
+  const vrpPanel = el("div", "chart-panel");
+  vrpPanel.id = "vrp-panel";
+  const vrpCW = el("div","chart-wrapper");
+  const vrpCanvas = el("canvas"); vrpCanvas.id = "main-chart";
+  vrpCW.appendChild(vrpCanvas);
+  vrpPanel.appendChild(vrpCW);
+  chartsGrid.appendChild(vrpPanel);
+
+  const secPanel = el("div", "chart-panel");
+  secPanel.id = "secondary-panel";
+  secPanel.style.display = "none";
+  const secTitle = el("h4"); secTitle.id = "sec-chart-title";
+  const secCW = el("div","chart-wrapper");
+  const secCanvas = el("canvas"); secCanvas.id = "sec-chart";
+  secCW.appendChild(secCanvas);
+  secPanel.append(secTitle, secCW);
+  chartsGrid.appendChild(secPanel);
+
+  dp.appendChild(chartsGrid);
+
+  // Events table
+  const tTitle = el("div"); tTitle.style.cssText = "font-size:.8rem;font-weight:600;margin:16px 0 8px";
+  tTitle.textContent = "Últimas detecciones (VRP > 0)";
+  dp.appendChild(tTitle);
+
+  const tbl = el("table","events-table");
+  const thead = el("thead");
+  const hrow = el("tr");
+  ["Fecha UTC", "Sensor", "VRP (MW)", "Dist (km)", "T max (K)", "T fondo (K)", "Píxeles"].forEach(h => {
+    const th = el("th"); th.textContent = h; hrow.appendChild(th);
+  });
+  thead.appendChild(hrow);
+  tbl.appendChild(thead);
+
+  const tbody = el("tbody");
+  const recent = filtered
+    .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0)
+    .sort((a,b) => b.datetime_utc.localeCompare(a.datetime_utc))
+    .slice(0, 20);
+
+  if (recent.length === 0) {
+    const row = el("tr"); const td = el("td"); td.colSpan = 7;
+    td.textContent = "Sin detecciones en el período"; td.style.color = "var(--muted)";
+    td.style.textAlign = "center"; td.style.padding = "20px";
+    row.appendChild(td); tbody.appendChild(row);
+  } else {
+    recent.forEach(r => {
+      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      const tmax = r.t_max_k ?? r.t_max_i04_k ?? null;
+      const tbg  = r.t_bg_k ?? null;
+      const npx  = r.n_anomalous_pixels ?? null;
+      const lv   = getLevel(vrp);
+      const row  = el("tr");
+      const dist = r.hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null);
+      const isVent = (r.n_vent_pixels ?? 0) > 0 && (r.n_anomalous_pixels ?? 0) === 0;
+      [
+        r.datetime_utc,
+        r.sensor,
+        vrp.toFixed(3),
+        isVent ? "vent" : (dist != null ? dist.toFixed(1) : "—"),
+        tmax != null ? tmax.toFixed(1) : "—",
+        tbg  != null ? tbg.toFixed(1)  : "—",
+        npx  != null ? String(npx)     : "—",
+      ].forEach((val, i) => {
+        const td = el("td");
+        td.textContent = val;
+        if (i === 2) { td.className = "vrp-cell"; td.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : "red") + ")"; }
+        if (i === 1) td.style.color = "var(--muted)";
+        row.appendChild(td);
+      });
+      tbody.appendChild(row);
+    });
+  }
+  tbl.appendChild(tbody);
+  dp.appendChild(tbl);
+
+  // ── Hotspot Map ──────────────────────────────────────────────────────────
+  const mapHdr = el("div", "map-header");
+  const mapTitle = el("h3"); mapTitle.textContent = "Mapa de anomalías térmicas";
+  const mapLeg = el("div", "map-legend");
+  [
+    ["#e91e63", "VIIRS 375m"], ["#00bcd4", "VIIRS 750m"], ["#ff8c00", "MODIS"],
+    ["#7c4dff", "Vent-path"], ["#ffc107", "Cráter/Vent"], ["#7a8fa6", "Radio búsqueda"]
+  ].forEach(([color, label]) => {
+    const item = el("div", "map-legend-item");
+    const dot = el("div", "map-legend-dot");
+    dot.style.borderColor = color;
+    dot.style.background = color + "33";
+    const lbl = document.createTextNode(label);
+    item.append(dot, lbl); mapLeg.appendChild(item);
+  });
+  mapHdr.append(mapTitle, mapLeg);
+  dp.appendChild(mapHdr);
+
+  const mapDiv = el("div", "map-container");
+  mapDiv.id = "hotspot-map";
+  dp.appendChild(mapDiv);
+
+  panel.appendChild(dp);
+
+  // Initialize Leaflet map after DOM is ready
+  setTimeout(() => {
+    if (!document.getElementById("hotspot-map")) return;
+    const map = L.map("hotspot-map", { zoomControl: true }).setView([v.lat, v.lon], 12);
+
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: "Esri World Imagery", maxZoom: 18,
+    }).addTo(map);
+
+    // Search radius circle
+    L.circle([v.lat, v.lon], {
+      radius: v.radius_km * 1000, color: "#7a8fa6", weight: 1,
+      fillColor: "#7a8fa6", fillOpacity: 0.05, dashArray: "5,5",
+    }).addTo(map);
+
+    // Volcano center marker
+    L.circleMarker([v.lat, v.lon], {
+      radius: 6, color: "#fff", weight: 2, fillColor: "#ff5722",
+      fillOpacity: 0.9,
+    }).addTo(map).bindPopup(`<b>${v.display}</b><br>Centro referencia`);
+
+    // Vent marker (if exists)
+    if (v.vent_lat && v.vent_lon) {
+      L.circleMarker([v.vent_lat, v.vent_lon], {
+        radius: 5, color: "#fff", weight: 1.5, fillColor: "#ffc107",
+        fillOpacity: 0.9,
+      }).addTo(map).bindPopup("Vent fumarólico");
+    }
+
+    // Hotspot markers from detections — show ALL anomalous pixels per record
+    // Include vent-only detections (no hotspot_lat but vrp > 0 from vent-path)
+    const hotspots = filtered
+      .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0)
+      .sort((a, b) => a.datetime_utc.localeCompare(b.datetime_utc));
+
+    const colorMap = {
+      "MODIS_TERRA": "#ff8c00", "MODIS_AQUA": "#ffb347",
+      "VIIRS_SNPP": "#e91e63", "VIIRS_NOAA20": "#f06292",
+      "VIIRS_SNPP_750": "#00bcd4", "VIIRS_NOAA20_750": "#4dd0e1",
+    };
+
+    const allPts = [];
+    hotspots.forEach((r, i) => {
+      const color = colorMap[r.sensor] || "#fff";
+      const recencyOpacity = 0.3 + 0.7 * (i / Math.max(1, hotspots.length - 1));
+
+      // Use anomaly_pixels array if available (new format), else fallback to single hotspot,
+      // else vent-only detection plotted at the volcano vent coordinates
+      const isVentOnly = r.hotspot_lat == null && (!r.anomaly_pixels || r.anomaly_pixels.length === 0);
+      const pixels = (r.anomaly_pixels && r.anomaly_pixels.length > 0)
+        ? r.anomaly_pixels
+        : (r.hotspot_lat != null ? [{
+            lat: r.hotspot_lat, lon: r.hotspot_lon,
+            dist_km: r.hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
+            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0
+          }] : (v.vent_lat ? [{
+            lat: v.vent_lat, lon: v.vent_lon,
+            dist_km: 0, bt_k: r.t_max_k ?? r.t_max_i04_k,
+            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, vent_only: true
+          }] : []));
+
+      pixels.forEach((px, pxIdx) => {
+        const size = Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5));
+        const isPrimary = pxIdx === 0;
+        const pxOpacity = isPrimary ? recencyOpacity : recencyOpacity * 0.7;
+        const ventOnly = isVentOnly || px.vent_only;
+
+        L.circleMarker([px.lat, px.lon], {
+          radius: ventOnly ? 3 : size,
+          color: ventOnly ? "#7c4dff" : (isPrimary ? "#fff" : "#aaa"),
+          weight: ventOnly ? 1 : (isPrimary ? 1.5 : 0.8),
+          fillColor: ventOnly ? "#7c4dff" : color,
+          fillOpacity: ventOnly ? pxOpacity * 0.5 : pxOpacity,
+          dashArray: ventOnly ? "3,3" : null,
+        }).addTo(map).bindPopup(
+          `<b>${r.sensor}</b>${ventOnly ? " (vent-path)" : (!isPrimary ? " (pixel #" + (pxIdx+1) + ")" : "")}<br>` +
+          `${r.datetime_utc} UTC<br>` +
+          `VRP: ${px.vrp_mw.toFixed(4)} MW<br>` +
+          `BT: ${px.bt_k ?? "?"} K<br>` +
+          `Distancia: ${ventOnly ? "vent" : (px.dist_km ?? "?")} km`
+        );
+        allPts.push([px.lat, px.lon]);
+      });
+    });
+
+    // Fit bounds to show all hotspots + volcano
+    if (allPts.length > 0) {
+      allPts.push([v.lat, v.lon]);
+      if (v.vent_lat) allPts.push([v.vent_lat, v.vent_lon]);
+      map.fitBounds(L.latLngBounds(allPts).pad(0.3));
+    }
+  });
+
+  // Build chart datasets
+  function buildDatasets() {
+    const ds = [];
+    const modis = filtered.filter(r => r.sensor?.startsWith("MODIS"));
+    const v375  = filtered.filter(r => r.sensor?.startsWith("VIIRS") && !r.sensor.includes("750"));
+    const v750  = filtered.filter(r => r.sensor?.includes("750"));
+
+    if (sensorVisible.MODIS && modis.length) {
+      const terra = modis.filter(r => r.sensor === "MODIS_TERRA");
+      const aqua  = modis.filter(r => r.sensor === "MODIS_AQUA");
+      if (terra.length) ds.push({ label:"MODIS Terra", data:toDailyMax(terra,"vrp_mw"), backgroundColor:"#ff8c00cc", borderColor:"#ff8c00", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (aqua.length)  ds.push({ label:"MODIS Aqua",  data:toDailyMax(aqua, "vrp_mw"), backgroundColor:"#ffb347cc", borderColor:"#ffb347", borderWidth:1, borderRadius:2, borderSkipped:false });
+    }
+    if (sensorVisible.VIIRS750 && v750.length) {
+      const snpp750   = v750.filter(r => r.sensor === "VIIRS_SNPP_750");
+      const noaa750   = v750.filter(r => r.sensor === "VIIRS_NOAA20_750");
+      if (snpp750.length)  ds.push({ label:"VIIRS SNPP 750m",   data:toDailyMax(snpp750,"vrp_mw"),   backgroundColor:"#00bcd4cc", borderColor:"#00bcd4", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa750.length)  ds.push({ label:"VIIRS NOAA-20 750m",data:toDailyMax(noaa750,"vrp_mw"),   backgroundColor:"#4dd0e1cc", borderColor:"#4dd0e1", borderWidth:1, borderRadius:2, borderSkipped:false });
+    }
+    if (sensorVisible.VIIRS375 && v375.length) {
+      const snpp375   = v375.filter(r => r.sensor === "VIIRS_SNPP");
+      const noaa375   = v375.filter(r => r.sensor === "VIIRS_NOAA20");
+      if (snpp375.length)  ds.push({ label:"VIIRS SNPP 375m",   data:toDailyMax(snpp375,"vrp_mir_mw"), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa375.length)  ds.push({ label:"VIIRS NOAA-20 375m",data:toDailyMax(noaa375,"vrp_mir_mw"), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
+    }
+    if (sensorVisible.MIROVA && mFiltered.length) {
+      ds.push({
+        label:"MIROVA VIIRS375 (ref.)", data:toMirovaDaily(mFiltered),
+        type:"line", order:0,
+        borderColor:"#ffc107", backgroundColor:"transparent",
+        borderWidth:2, pointRadius:3, pointBackgroundColor:"#ffc107", tension:0,
+      });
+    }
+    return ds;
+  }
+
+  // ── Distance vs Time data ──
+  function buildDistanceData() {
+    const pts = [];
+    for (const r of filtered) {
+      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      if (vrp <= 0) continue;
+      const dist = r.hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
+      if (dist == null) continue;
+      pts.push({ x: r.datetime_utc.slice(0,10), y: dist, vrp: vrp, sensor: r.sensor });
+    }
+    return pts;
+  }
+
+  // ── VRE cumulative data ──
+  function buildVREData() {
+    const sorted = [...filtered]
+      .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0)
+      .sort((a,b) => a.datetime_utc.localeCompare(b.datetime_utc));
+    let cumulative = 0;
+    return sorted.map(r => {
+      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      cumulative += vrp * DT_HOURS * 3.6; // GJ
+      return { x: r.datetime_utc.slice(0,10), y: parseFloat(cumulative.toFixed(2)) };
+    });
+  }
+
+  // ── MIROVA comparison data ──
+  function buildComparisonData() {
+    const ds = [];
+    // Our data (daily max, all sensors combined)
+    const ours = filtered.filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0);
+    if (ours.length) {
+      const ourDaily = new Map();
+      for (const r of ours) {
+        const d = r.datetime_utc.slice(0,10);
+        const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+        if (!ourDaily.has(d) || v > ourDaily.get(d)) ourDaily.set(d, v);
+      }
+      ds.push({
+        label: "VRP Chile (max diario)",
+        data: [...ourDaily.entries()].sort().map(([x,y]) => ({x,y})),
+        type: "bar",
+        backgroundColor: "#2196f3aa", borderColor: "#2196f3", borderWidth: 1,
+        borderRadius: 2, borderSkipped: false, order: 1,
+      });
+    }
+    // MIROVA reference
+    if (mFiltered.length) {
+      ds.push({
+        label: "MIROVA (referencia)",
+        data: toMirovaDaily(mFiltered),
+        type: "line", order: 0,
+        borderColor: "#ffc107", backgroundColor: "transparent",
+        borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: "#ffc107", tension: 0,
+      });
+    }
+    return ds;
+  }
+
+  function drawChart() {
+    if (charts["main-chart"]) { charts["main-chart"].destroy(); delete charts["main-chart"]; }
+    const c = document.getElementById("main-chart");
+    if (!c) return;
+    const ds = buildDatasets();
+    charts["main-chart"] = new Chart(c.getContext("2d"), {
+      type: "bar",
+      data: { datasets: ds },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode:"index", intersect:false },
+        plugins: {
+          legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12, padding:12 } },
+          tooltip: {
+            backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
+            titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
+            callbacks: { label: ctx => " " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" }
+          }
+        },
+        scales: {
+          x: { type:"time", time:{ unit:"day", tooltipFormat:"yyyy-MM-dd" },
+            grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10}, maxRotation:45 } },
+          y: { type: logScale ? "logarithmic" : "linear", min: logScale ? undefined : 0,
+            grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10} },
+            title:{ display:true, text:"VRP (MW)", color:"#7a8fa6", font:{size:10} } }
+        }
+      }
+    });
+  }
+
+  function drawSecondary(mode) {
+    const secP = document.getElementById("secondary-panel");
+    const secT = document.getElementById("sec-chart-title");
+    const secC = document.getElementById("sec-chart");
+    if (!secP || !secC) return;
+
+    if (charts["sec-chart"]) { charts["sec-chart"].destroy(); delete charts["sec-chart"]; }
+
+    if (mode === 0) { // VRP only — hide secondary
+      secP.style.display = "none";
+      document.querySelector(".charts-grid").classList.remove("dual");
+      return;
+    }
+
+    secP.style.display = "";
+    document.querySelector(".charts-grid").classList.add("dual");
+
+    if (mode === 1) { // Distance vs Time
+      secT.textContent = "Distancia al crater vs Tiempo";
+      const distData = buildDistanceData();
+      const sensorColors = {
+        "MODIS_TERRA":"#ff8c00","MODIS_AQUA":"#ffb347",
+        "VIIRS_SNPP":"#e91e63","VIIRS_NOAA20":"#f06292",
+        "VIIRS_SNPP_750":"#00bcd4","VIIRS_NOAA20_750":"#4dd0e1"
+      };
+      charts["sec-chart"] = new Chart(secC.getContext("2d"), {
+        type: "scatter",
+        data: { datasets: [{
+          label: "Distancia (km)",
+          data: distData.map(p => ({ x: p.x, y: p.y })),
+          pointRadius: distData.map(p => Math.max(3, Math.min(12, 3 + Math.log10(p.vrp + 0.01) * 4))),
+          pointBackgroundColor: distData.map(p => (sensorColors[p.sensor] || "#fff") + "cc"),
+          pointBorderColor: distData.map(p => sensorColors[p.sensor] || "#fff"),
+          pointBorderWidth: 1,
+        }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
+              titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
+              callbacks: {
+                title: items => items[0] ? distData[items[0].dataIndex]?.x || "" : "",
+                label: item => {
+                  const p = distData[item.dataIndex];
+                  return p ? [p.sensor, "Dist: " + p.y.toFixed(1) + " km", "VRP: " + p.vrp.toFixed(3) + " MW"] : [];
+                }
+              }
+            }
+          },
+          scales: {
+            x: { type:"time", time:{ unit:"day", tooltipFormat:"yyyy-MM-dd" },
+              grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10}, maxRotation:45 } },
+            y: { min: 0, grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10} },
+              title:{ display:true, text:"Distancia (km)", color:"#7a8fa6", font:{size:10} } }
+          }
+        }
+      });
+
+    } else if (mode === 2) { // VRE Cumulative
+      secT.textContent = "Energia Radiada Acumulada (VRE)";
+      const vreData = buildVREData();
+      charts["sec-chart"] = new Chart(secC.getContext("2d"), {
+        type: "line",
+        data: { datasets: [{
+          label: "VRE (GJ)",
+          data: vreData,
+          borderColor: "#00bcd4", backgroundColor: "rgba(0,188,212,0.1)",
+          fill: true, borderWidth: 2, pointRadius: 0, tension: 0.3,
+        }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12 } },
+            tooltip: {
+              backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
+              titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
+              callbacks: { label: ctx => " VRE: " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) : "0") + " GJ" }
+            }
+          },
+          scales: {
+            x: { type:"time", time:{ unit:"day", tooltipFormat:"yyyy-MM-dd" },
+              grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10}, maxRotation:45 } },
+            y: { min: 0, grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10} },
+              title:{ display:true, text:"VRE (GJ)", color:"#7a8fa6", font:{size:10} } }
+          }
+        }
+      });
+
+    } else if (mode === 3) { // MIROVA Comparison
+      secT.textContent = "Comparacion VRP Chile vs MIROVA";
+      const compDS = buildComparisonData();
+      charts["sec-chart"] = new Chart(secC.getContext("2d"), {
+        type: "bar",
+        data: { datasets: compDS },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode:"index", intersect:false },
+          plugins: {
+            legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12, padding:12 } },
+            tooltip: {
+              backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
+              titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
+              callbacks: { label: ctx => " " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" }
+            }
+          },
+          scales: {
+            x: { type:"time", time:{ unit:"day", tooltipFormat:"yyyy-MM-dd" },
+              grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10}, maxRotation:45 } },
+            y: { type: logScale ? "logarithmic" : "linear", min: logScale ? undefined : 0,
+              grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10} },
+              title:{ display:true, text:"VRP (MW)", color:"#7a8fa6", font:{size:10} } }
+          }
+        }
+      });
+    }
+  }
+
+  // Tab switching
+  let activeTab = 0;
+  tabBtns.forEach((btn, i) => {
+    btn.addEventListener("click", () => {
+      tabBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeTab = i;
+      drawChart();
+      drawSecondary(i);
+    });
+  });
+
+  setTimeout(() => { drawChart(); drawSecondary(0); }, 50);
+}
+
+// ── Sensor legend ─────────────────────────────────────────────────────────────
+function buildLegend() {
+  const legend = document.getElementById("sensor-legend");
+  while (legend.firstChild) legend.removeChild(legend.firstChild);
+  SENSORS.forEach(s => {
+    const item = el("div", "legend-item" + (sensorVisible[s.key] ? "" : " dim"));
+    const dot = el("div","legend-dot"); dot.style.background = s.color;
+    const lbl = document.createTextNode(s.label);
+    item.append(dot, lbl);
+    item.addEventListener("click", () => {
+      sensorVisible[s.key] = !sensorVisible[s.key];
+      item.classList.toggle("dim", !sensorVisible[s.key]);
+      renderDetail();
+    });
+    legend.appendChild(item);
+  });
+}
+
+// ── UTC Clock ────────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const hh = String(now.getUTCHours()).padStart(2,"0");
+  const mm = String(now.getUTCMinutes()).padStart(2,"0");
+  const ss = String(now.getUTCSeconds()).padStart(2,"0");
+  document.getElementById("utc-clock").textContent = hh + ":" + mm + ":" + ss + " UTC";
+}
+
+// ── Alert summary bar ────────────────────────────────────────────────────────
+function buildAlertSummary() {
+  const bar = document.getElementById("alert-summary");
+  while (bar.firstChild) bar.removeChild(bar.firstChild);
+
+  const counts = { high: 0, mod: 0, low: 0, vlow: 0, nd: 0 };
+  for (const v of VOLCANOES) {
+    const d = allData[v.name] || { records: [] };
+    const vrp = latestVRP(d.records);
+    const lv = getLevel(vrp);
+    if (lv.key === "high" || lv.key === "vhigh") counts.high++;
+    else if (lv.key === "mod") counts.mod++;
+    else if (lv.key === "low") counts.low++;
+    else if (lv.key === "vlow") counts.vlow++;
+    else counts.nd++;
+  }
+
+  const lbl = el("span", "summary-label"); lbl.textContent = "Estado actual:";
+  bar.appendChild(lbl);
+
+  [
+    ["ab-high", counts.high, ">100 MW", "Alto"],
+    ["ab-mod",  counts.mod,  "10\u2013100 MW", "Moderado"],
+    ["ab-low",  counts.low,  "1\u201310 MW", "Bajo"],
+    ["ab-vlow", counts.vlow, "<1 MW", "Muy Bajo"],
+    ["ab-nd",   counts.nd,   "", "Sin datos"],
+  ].forEach(([cls, count, range, label]) => {
+    const box = el("div", "alert-box " + cls);
+    const c = el("span", "ab-count"); c.textContent = count;
+    const l = el("span", "ab-label");
+    l.textContent = label;
+    if (range) {
+      l.appendChild(document.createElement("br"));
+      l.appendChild(document.createTextNode(range));
+    }
+    box.append(c, l);
+    bar.appendChild(box);
+  });
+}
+
+// ── Overview map ─────────────────────────────────────────────────────────────
+let overviewMap = null;
+let overviewMarkers = [];
+
+function buildOverviewMap() {
+  const container = document.getElementById("overview-map");
+  if (!container) return;
+
+  if (!overviewMap) {
+    overviewMap = L.map("overview-map", { zoomControl: true }).setView([-33.5, -70.5], 4);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: "Esri", maxZoom: 18,
+    }).addTo(overviewMap);
+  }
+
+  // Clear old markers
+  overviewMarkers.forEach(m => overviewMap.removeLayer(m));
+  overviewMarkers = [];
+
+  const alertColors = { nd: "#7a8fa6", vlow: "#00d084", low: "#ffc107", mod: "#ff7043", high: "#f44336", vhigh: "#f44336" };
+
+  VOLCANOES.forEach(v => {
+    const d = allData[v.name] || { records: [] };
+    const vrp = latestVRP(d.records);
+    const lv = getLevel(vrp);
+    const color = alertColors[lv.key] || "#7a8fa6";
+    const size = lv.key === "nd" ? 6 : Math.max(7, Math.min(16, 7 + vrp * 2));
+
+    const marker = L.circleMarker([v.lat, v.lon], {
+      radius: size, color: "#fff", weight: 1.5,
+      fillColor: color, fillOpacity: 0.85,
+    }).addTo(overviewMap);
+
+    marker.bindPopup(
+      "<b>" + v.display + "</b><br>" +
+      lv.label + (vrp > 0 ? " \u2014 " + vrp.toFixed(2) + " MW" : "") + "<br>" +
+      "<small>" + v.region + "</small>"
+    );
+
+    marker.on("click", () => {
+      currentVolcano = v;
+      buildCards();
+      renderDetail();
+    });
+
+    overviewMarkers.push(marker);
+  });
+}
+
+// ── NRT global table ─────────────────────────────────────────────────────────
+function buildNRTTable() {
+  const tbody = document.getElementById("nrt-tbody");
+  if (!tbody) return;
+  while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
+  // Collect all detections from all volcanoes, last 7 days
+  const cutoff = Date.now() - 7 * 86400000;
+  const allDetections = [];
+  for (const v of VOLCANOES) {
+    const d = allData[v.name] || { records: [] };
+    for (const r of d.records) {
+      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      if (vrp <= 0) continue;
+      const t = new Date(r.datetime_utc).getTime();
+      if (t < cutoff) continue;
+      allDetections.push({ volcano: v, record: r, vrp: vrp });
+    }
+  }
+
+  allDetections.sort((a, b) => b.record.datetime_utc.localeCompare(a.record.datetime_utc));
+
+  const show = allDetections.slice(0, 30);
+  if (show.length === 0) {
+    const row = el("tr");
+    const td = el("td"); td.colSpan = 4; td.textContent = "Sin detecciones recientes";
+    td.style.cssText = "color:var(--muted);text-align:center;padding:20px";
+    row.appendChild(td); tbody.appendChild(row);
+    return;
+  }
+
+  show.forEach(det => {
+    const lv = getLevel(det.vrp);
+    const row = el("tr");
+    row.addEventListener("click", () => {
+      currentVolcano = det.volcano;
+      buildCards();
+      renderDetail();
+    });
+
+    const tdDate = el("td"); tdDate.textContent = det.record.datetime_utc;
+    const tdVolc = el("td"); tdVolc.textContent = det.volcano.display; tdVolc.style.fontWeight = "600";
+    const tdVrp = el("td"); tdVrp.textContent = det.vrp.toFixed(3);
+    tdVrp.style.fontWeight = "700";
+    tdVrp.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : lv.key === "nd" ? "muted" : "red") + ")";
+    const tdSensor = el("td"); tdSensor.textContent = det.record.sensor; tdSensor.style.color = "var(--muted)";
+
+    row.append(tdDate, tdVolc, tdVrp, tdSensor);
+    tbody.appendChild(row);
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  buildLegend();
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Days
+  document.getElementById("days-select").addEventListener("change", e => {
+    currentDays = parseInt(e.target.value);
+    buildCards();
+    renderDetail();
+  });
+
+  // Scale
+  document.getElementById("btn-linear").addEventListener("click", () => {
+    logScale = false;
+    document.getElementById("btn-linear").classList.add("active");
+    document.getElementById("btn-log").classList.remove("active");
+    renderDetail();
+  });
+  document.getElementById("btn-log").addEventListener("click", () => {
+    logScale = true;
+    document.getElementById("btn-log").classList.add("active");
+    document.getElementById("btn-linear").classList.remove("active");
+    renderDetail();
+  });
+
+  // Load all volcanoes in parallel
+  await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+  reportDataAvailability();
+
+  buildAlertSummary();
+  buildCards();
+  buildOverviewMap();
+  buildNRTTable();
+  renderDetail();
+
+  // Auto-refresh every 5 minutes
+  setInterval(async () => {
+    await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+    buildAlertSummary();
+    buildCards();
+    buildOverviewMap();
+    buildNRTTable();
+    renderDetail();
+  }, 5 * 60 * 1000);
+}
+
+// ── CSV Export ────────────────────────────────────────────────────────────────
+function exportCSV(volcano, records) {
+  const headers = [
+    "datetime_utc","sensor","vrp_mw","vrp_mir_mw","vrp_tir_mw","vrp_vent_mw",
+    "n_anomalous_pixels","hotspot_lat","hotspot_lon","hotspot_dist_km",
+    "t_bg_k","t_max_k","t_max_i04_k","t_max_i05_k",
+    "nti_max","nti_bg","n_nti_anomalous","granule"
+  ];
+  const rows = [headers.join(",")];
+  for (const r of records) {
+    const vals = headers.map(h => {
+      const v = r[h];
+      if (v == null) return "";
+      if (typeof v === "string" && v.includes(",")) return '"' + v + '"';
+      return String(v);
+    });
+    rows.push(vals.join(","));
+  }
+  const csv = rows.join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = volcano.name + "_VRP_" + new Date().toISOString().slice(0,10) + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+# ============================================================================
+# experimental_ndc_focus — v2 (S124, corregido tras audit)
+# ============================================================================
+# UNA sola diferencia con la replica: el umbral (0.005 MW vs 0.02).
+#
+# La v1 ademas cambiaba el ancla (vent=Nicanor) y el inner (1 km), y esas dos
+# cosas alteran la DETECCION, no solo el filtro: el dual-ROI de Coppola aplica
+# 5 sigma dentro del inner y 10 sigma fuera, asi que con inner=1 km la zona de
+# 1-5 km exigia el doble de senal que en la replica, y el ROI del Test 1
+# integrado cambiaba de tamano. Resultado medido: noches marginales que la
+# replica detectaba y el experimental no (06-22, 06-23, 08-21...), con
+# radiometria IDENTICA (n_test1_pixels 0 vs 98 en la misma pasada). Eso
+# contaminaba la comparacion: diferencias de GEOMETRIA disfrazadas de
+# diferencias de UMBRAL.
+#
+# El "foco de 500 m al crater Nicanor" NO es del pipeline: se aplica en el
+# ANALISIS (experiments/_s124_ndc_focus/*, constante FOCO_KM), filtrando por
+# distancia del centroid al crater. Asi la deteccion es identica a la replica
+# y el foco es solo una lupa de lectura.
+#
+# NO OPERACIONAL. data_subdir aislado; el reproceso debe cubrir la ventana
+# COMPLETA usada por las figuras para no mezclar configs v1/v2.
+# ============================================================================
+extends: mirova_equivalent
+profile: experimental_ndc_focus
+description: >
+  Foco del crater Nicanor (NdC), v2: deteccion IDENTICA a la replica, solo el
+  umbral mas bajo (0.005 MW). El recorte espacial vive en el analisis.
+thresholds:
+  # ⚠️ S147: 0.005 -> 0.0, mismo defecto y mismo origen que en `experimental.yaml`.
+  # La cabecera de este archivo dice "UNA sola diferencia con la replica: el umbral
+  # (0.005 MW vs 0.02)", y eso valia en S124. S130 bajo el piso del operacional a 0.0
+  # en los tres sensores, asi que desde entonces este perfil tenia el piso MAS ALTO
+  # que la replica: su unica diferencia declarada apuntaba al reves de su proposito.
+  # Con el operacional en 0.0 ya no queda umbral por debajo del cual mirar, asi que la
+  # diferenciacion de este perfil se evaporo junto con la del laboratorio general. Ver
+  # docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md, que es por donde tiene que volver.
+  # Guard: tests/test_guard_laboratorio_no_mas_ciego_s147.py
+  min_vrp_mw_viirs375: 0.0
+sensors:
+  modis: false
+  viirs_375: true
+  viirs_750: false
+output:
+  data_subdir: experimental_ndc_focus
+
+# S153, ADOPCION DE K (regla experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848): la replica apago el
+# Test 1 integrado y encendio la conectiva max y la banda 22. Este perfil hereda de mirova_equivalent y su
+# significado era la produccion de ANTES de K mas su propio cambio, asi que congela aca esos flags con el valor
+# previo (como experimental.yaml en S150) para resolver igual que antes de la adopcion. Lo vigila
+# tests/test_guard_perfiles_congelados_s153.py.
+paths:
+  enable_test1_path: true
+  enable_tests_23_prose_branch: false
+
+# S153 (K): banda 21 primaria congelada; el porque esta en el comentario S153 de `paths:`.
+enable_modis_b22_primary: false

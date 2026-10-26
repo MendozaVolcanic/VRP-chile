@@ -1,0 +1,120 @@
+# VRP-Chile — profile: _p3_1_disabled (S24 A/B test)
+#
+# CLON byte-a-byte de mirova_equivalent.yaml con UNA SOLA diferencia:
+# enable_dnti_dual_roi: false. Todos los demás parámetros idénticos.
+#
+# Propósito S24: validar cuantitativamente que P3.1 (dual-ROI thresholds
+# summit/scene, Coppola 2016a Table 2) aporta señal. S15 implementó el
+# fix sin nunca medir su contribución aislada. Este profile habilita un
+# A/B sobre 14 días × 3 Tier A (Tup/Cha/Las) preservando el resto del
+# pipeline igual al operacional.
+#
+# data_subdir: _p3_1_disabled (NO contamina dashboard operacional).
+# Borrar tras decisión S24 (mantener / quitar / refinar P3.1).
+
+profile: _p3_1_disabled
+description: >
+  A/B control: mirova_equivalent con enable_dnti_dual_roi=false. Mide la
+  contribución aislada de P3.1 dual-ROI vs P3.2 single-ROI.
+
+# --- Detection thresholds ---
+# Applied inside process_modis.py / process_viirs.py / process_viirs_mod.py
+thresholds:
+  # Eruption-scale MIR anomaly floor (pixel BT must exceed t_bg + this)
+  anomaly_threshold_k: 5.0
+  # TIR (I05) floor for VIIRS TIRVolcH secondary path
+  tir_threshold_k: 0.5
+  # Sigma multipliers for the background-noise floor (effective threshold
+  # is max(fixed_floor, n_sigma * sigma_bg))
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  # Vent-scale path — permissive threshold applied only within vent_radius_km
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  # Coppola 2015 Test 1 NTI-path (F1, session 9)
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  # MODIS extras
+  cloud_mask_bt_k: 260.0
+  max_sigma_component_k: 7.0
+  # S12 2026-04-15: piso VRP por sensor para paridad MIROVA estricta.
+  # Cualquier detección por debajo del piso se trata como no-detección
+  # (vrp_mw = 0) en este perfil. Los valores coinciden exactamente con
+  # el mínimo VRP observado en MIROVA consolidado 14042026 por sensor,
+  # usando comparación >= para preservar TODAS las refs conocidas:
+  #   VIIRS375: min observado 0.02 MW (PCC, Lastarria, n=2)
+  #   VIIRS750: min observado 0.15 MW (Lascar, n=1)
+  #   MODIS:    min observado 0.27 MW (Lascar, n=1)
+  # El perfil experimental queda sin floor (detección más sensible para
+  # investigación de señales sub-MIROVA).
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  # S12 E4: mirova_equivalent mantiene min_vent_pixels=1 (actual).
+  # Experimental prueba con 2 para medir impacto en FPs.
+  min_vent_pixels: 1
+  # S12 F1b: cap on the sigma contribution for VENT-path gating.
+  # Without this, high-sigma backgrounds (Tupungatito orográfico,
+  # Lastarria nieve parcial) produced effective vent thresholds of
+  # 6–10 K, which killed real weak signals of 1–2 K ΔT. The cap
+  # preserves noise protection (max(1K, N·σ)) at volcanoes with
+  # clean bg while releasing volcanoes with noisy bg. 3K is 1/2
+  # of the eruption-path cap (7K) because vent-path is already
+  # more permissive by design.
+  max_vent_sigma_contrib_k: 3.0
+  # Path C parameters (inactive in this profile but defined for schema parity)
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  # P3.2 S15: dNTI contextual 8-vecinos (Coppola 2016a SP 426.5).
+  # C1 absoluto del umbral local dNTI = NTI_pixel - median(8 vecinos).
+  # 0.003 = summit ROI segun paper. 0.010 scene ROI (reservado para P3.1).
+  dnti_contextual_c1: 0.003
+  # P3.1 S15: dual-ROI thresholds (Coppola 2016a Table 2).
+  # Aplica cuando enable_dnti_dual_roi=true: summit sensible + scene
+  # estricto. Justificacion fisica: OSF Lastarria 25 anos tiene 80%
+  # refs en 0-3 km; Path D solo (P3.2) capturaba 55% pixels a 15-25 km
+  # (Lazufre) que MIROVA descarta. scene 3.3x mas estricto lo corta.
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  # MODIS-specific vent threshold (inactive: enable_vent_path_modis is false)
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+
+# --- Background annulus geometry (km) ---
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+# --- Detection paths ---
+paths:
+  enable_eruption_path: true
+  enable_vent_path: true
+  # S12 E1: MODIS vent-path reactivado. Audit experimental mostró que
+  # MODIS vent con threshold=2.5K + floor=0.3MW da +3 TP / -19 FP en
+  # Lascar — neto positivo. Las condiciones estrictas (2.5K > VIIRS 1K,
+  # floor 0.3 MW > sin floor) compensan el menor SNR del pixel 1km.
+  enable_vent_path_modis: true
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  # NTI relative path disabled in operational profile until validated.
+  enable_nti_relative_path: false
+  # P3.2 S15: habilitar gate contextual dNTI 8-vecinos (Path D).
+  # Reduce sobreestimacion VRP por heterogeneidad terreno (Lastarria
+  # ratio 19.87 pre-fix). Ver tasks/plan_s15_p3_2_dnti_contextual.md.
+  enable_dnti_contextual_path: true
+  # P3.1 S15: cuando true, Path D usa thresholds distintos summit vs scene
+  # (C1_SUMMIT / C1_SCENE). Cuando false, usa C1 unico (comportamiento
+  # P3.2 original). Requiere enable_dnti_contextual_path=true para tener
+  # efecto.
+  enable_dnti_dual_roi: false
+
+# --- Sensor activation ---
+# true = process granules from this sensor in this profile.
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+# --- Output location ---
+output:
+  data_subdir: _p3_1_disabled

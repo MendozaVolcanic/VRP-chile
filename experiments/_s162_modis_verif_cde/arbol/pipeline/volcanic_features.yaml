@@ -1,0 +1,84 @@
+# volcanic_features.yaml — catálogo de features volcánicas catalogadas por volcán
+# para el campo `geo_class` (S88 Frente B, diseño:
+# docs/superpowers/specs/2026-05-29-s88-pc-classification-design.md).
+#
+# Propósito: un cluster `primary_cluster` que cae FUERA del inner_radius_km del
+# vent pero DENTRO de ext_km de una de estas features se etiqueta
+# `geo_class="extension"` (feature volcánica real no publicada por MIROVA —
+# categoría b del marco S86, docs/AUDIT_S86.md). Sin feature cercana → "far".
+# El cluster dentro del inner_radius siempre gana → "summit".
+#
+# REGLA DE INTEGRIDAD (S88): las coordenadas aquí DEBEN ser verificadas contra
+# Smithsonian GVP / KMZ MIROVA / archivo del repo. NO inventar. Una feature sin
+# coord verificada se deja como TODO comentado, NO con un número falso. Por eso
+# este archivo arranca casi vacío: S86 IDENTIFICÓ los nombres de las features
+# (Cerro Blanco, Lazufre, Pichi-Llaima, El Agrio, Planchón N) pero el repo NO
+# tiene sus coords GVP. Conseguirlas es una tarea de investigación (S89).
+#
+# Estado S88: summit/far operativo para los 11 Tier A (geometría inner_radius
+# pura, ya verificada). "extension" solo dispara donde hay coord verificada.
+#
+# Estructura por volcán:
+#   <VolcanName>:
+#     - name: <descripción de la feature>
+#       lat: <float>
+#       lon: <float>
+#       ext_km: <float>   # radio alrededor de la feature para contar "extension"
+#       source: <cita de dónde viene la coord>
+
+# --- Features con coordenada VERIFICADA ---
+
+PuyehueCordonCaulle:
+  # Centroide térmico empírico del lacolito 2011 SE, derivado S48 promediando
+  # scenes MODIS con n_pixels>2500 del mirova-tif-archive. Documentado en
+  # docs/BEYOND_MIROVA_EXTENSIONS.md §10 (EXT-12). El lacolito difuso 707 km²
+  # (A20/A24) se extiende al SE del cone; este punto marca su foco térmico.
+  # NOTA: inner_radius_km de PCC = 20 km, así que casi todo el campo del
+  # lacolito ya cae como "summit". Esta feature captura los focos MODIS más
+  # lejanos (~11-18 km off del mirova_center) que igual quedan dentro de 20 km.
+  # Se mantiene por completitud; su efecto marginal es chico dado el inner=20.
+  - name: "Lacolito Cordón Caulle 2011 (centroide térmico empírico)"
+    lat: -40.582
+    lon: -72.131
+    ext_km: 4.0
+    source: "docs/BEYOND_MIROVA_EXTENSIONS.md §10 (S48 MODIS tif-archive centroid)"
+
+Lastarria:
+  # Lazufre / Cordón del Azufre — sistema regional: inflación InSAR persistente
+  # + flujos de azufre, a ~12 km al SW del vent (inner_radius Lastarria = 3 km).
+  # Categoría (a) "feature volcánica REAL del complejo" del catálogo S85
+  # (F_S81_C_1_ZONES_CATALOG.md cluster 17, confianza "alta"). Es la ÚNICA
+  # sub-feature S86 que merece entrada propia: vive GENUINAMENTE fuera del
+  # inner_radius. Las otras 4 quedaron resueltas SIN entrada (ver bloque abajo).
+  # INTEGRIDAD (S88): la coord es el centroide EMPÍRICO del cluster de detección
+  # (archivo del repo = fuente aceptada por este header), NO una coord GVP de
+  # catálogo — mismo estándar que el lacolito PCC arriba. La coord GVP del
+  # Cordón del Azufre (-25.333,-68.517) está ~18 km del vent; la anomalía térmica
+  # real está en el extremo N del sistema (cerca de Lastarria) = lo que captura
+  # el centroide. ext_km=5 según la acción sugerida en el catálogo S85.
+  - name: "Lazufre / Cordón del Azufre (centroide empírico cluster 17 S85)"
+    lat: -25.174
+    lon: -68.627
+    ext_km: 5.0
+    source: "docs/F_S81_C_1_ZONES_CATALOG.md cluster 17 (S85, centroide de detección; confianza alta; ref Frontiers Earth Sci 2023 DOI 10.3389/feart.2023.1197363 sulfur flows Lastarria)"
+
+# --- Features S86 RESUELTAS SIN entrada (investigación S89) ---
+# Las 4 restantes que S86 nombró NO necesitan entrada en este catálogo. El
+# fenómeno de fondo: la grilla MIROVA (inner_radius circular) ya abraza la
+# mayoría de estas sub-features porque están pegadas al cráter principal.
+#
+# - Cerro Blanco (NevadosDeChillan): centroide empírico (-36.831,-71.397) a
+#   4.0 km del vent < inner_radius 5 km → YA cae "summit". No hace falta entrada.
+# - Pichi-Llaima (Llaima): centroide empírico (-38.696,-71.743) a 1.28 km del
+#   vent << inner_radius 5 km → YA cae "summit". No hace falta entrada.
+# - Cráter El Agrio (Copahue): ES el cráter principal (GVP: "recent activity
+#   focused at the Agrio crater"). El vent de Copahue en volcanoes.yaml ya es
+#   El Agrio → "summit" por inner_radius 4 km. No es sub-feature.
+# - Planchón N (PlanchonPeteroa): NO se halló coord verificada distinta del
+#   centro del complejo (Wikipedia/GVP colapsan "Planchón" al centro PP). El
+#   catálogo S85 no tiene cluster categoría (a) para Planchón N. Regla S88:
+#   no inventar coord → queda como TODO genuino hasta conseguir coord catalogada.
+# (Fuentes: F_S81_C_1_ZONES_CATALOG.md S85; GVP Copahue vn=357090 / PP vn=357040.)
+#
+# Villarrica (lava lake) y Tupungatito (cráter cumbre): son el vent mismo →
+# "summit" por inner_radius, NO necesitan entrada aquí.

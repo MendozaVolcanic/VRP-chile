@@ -1,0 +1,259 @@
+# VRP-Chile — profile: _r2_C2_8_summit (OPERACIONAL post-S29)
+#
+# Profile que el cron NRT corre cada 2h. Sincronizado con _mirova_literal
+# en S29 — clon literal MIROVA con Test 1 integrated-ROI activo en los 3
+# sensores que MIROVA usa (MODIS B21 + VIIRS I04 + VIIRS M13).
+#
+# Metodología activa (ver docs/MIROVA_DIVERGENCES.md S27/S28/S29):
+# - cap MAX_SIGMA_COMPONENT_K=999K (sin cap; antes 7K era parche S15).
+# - vent-path OFF (no en papers MIROVA; reemplazado por Test 1).
+# - cloud_mask_bt_k=0 (Laiolo 2026: MIROVA NRT no filtra nubes).
+# - dual-ROI BT ON con 5σ summit / 10σ scene (Coppola 2016a Tabla 1).
+# - dNTI dual-ROI summit/scene ON (P3.1).
+# - Test 1 integrated-ROI ON en MODIS B21 + VIIRS I04 + M13 (S27-S29).
+# - exclude_zones OFF (parche pre-S27 removido).
+#
+# data_subdir: _r2_C2_8_summit (lo que renderiza el dashboard publicado).
+
+profile: _r2_C2_8_summit
+description: "Ronda 2: C2_summit=8 (mas estricto, ver impacto FPs)"
+
+# --- Detection thresholds ---
+# Applied inside process_modis.py / process_viirs.py / process_viirs_mod.py
+thresholds:
+  # Eruption-scale MIR anomaly floor (pixel BT must exceed t_bg + this)
+  anomaly_threshold_k: 5.0
+  # TIR (I05) floor for VIIRS TIRVolcH secondary path
+  tir_threshold_k: 0.5
+  # Sigma multipliers for the background-noise floor (effective threshold
+  # is max(fixed_floor, n_sigma * sigma_bg))
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  # Vent-scale path — permissive threshold applied only within vent_radius_km
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  # Coppola 2015 Test 1 NTI-path (F1, session 9)
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  # MODIS extras
+  # S27 MIROVA literal: cloud_mask_bt_k=0 desactiva máscara de nubes.
+  # Laiolo 2026 textual: "no atmospheric correction or cloud-contamination
+  # automatic filtering is applied". MIROVA NRT no filtra nubes.
+  cloud_mask_bt_k: 0.0
+  # S27 MIROVA literal: cap=999K efectivo desactivado.
+  # El cap=7K (S15 Tema F) anula la diferenciación summit/scene de MIROVA
+  # porque clipea N·σ scene=10 cuando σ_bg>0.7K (común en escena).
+  max_sigma_component_k: 999.0
+  # S12 2026-04-15: piso VRP por sensor para paridad MIROVA estricta.
+  # Cualquier detección por debajo del piso se trata como no-detección
+  # (vrp_mw = 0) en este perfil. Los valores coinciden exactamente con
+  # el mínimo VRP observado en MIROVA consolidado 14042026 por sensor,
+  # usando comparación >= para preservar TODAS las refs conocidas:
+  #   VIIRS375: min observado 0.02 MW (PCC, Lastarria, n=2)
+  #   VIIRS750: min observado 0.15 MW (Lascar, n=1)
+  #   MODIS:    min observado 0.27 MW (Lascar, n=1)
+  # El perfil experimental queda sin floor (detección más sensible para
+  # investigación de señales sub-MIROVA).
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  # S12 E4: mirova_equivalent mantiene min_vent_pixels=1 (actual).
+  # Experimental prueba con 2 para medir impacto en FPs.
+  min_vent_pixels: 1
+  # S12 F1b: cap on the sigma contribution for VENT-path gating.
+  # Without this, high-sigma backgrounds (Tupungatito orográfico,
+  # Lastarria nieve parcial) produced effective vent thresholds of
+  # 6–10 K, which killed real weak signals of 1–2 K ΔT. The cap
+  # preserves noise protection (max(1K, N·σ)) at volcanoes with
+  # clean bg while releasing volcanoes with noisy bg. 3K is 1/2
+  # of the eruption-path cap (7K) because vent-path is already
+  # more permissive by design.
+  # S27 MIROVA literal: cap vent-path tampoco aplica (vent-path off de todos
+  # modos), pero por consistencia se desactiva el cap también.
+  max_vent_sigma_contrib_k: 999.0
+  # Path C parameters (inactive in this profile but defined for schema parity)
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  # P3.2 S15: dNTI contextual 8-vecinos (Coppola 2016a SP 426.5).
+  # C1 absoluto del umbral local dNTI = NTI_pixel - median(8 vecinos).
+  # 0.003 = summit ROI segun paper. 0.010 scene ROI (reservado para P3.1).
+  dnti_contextual_c1: 0.003
+  # P3.1 S15: dual-ROI thresholds (Coppola 2016a Table 2).
+  # Aplica cuando enable_dnti_dual_roi=true: summit sensible + scene
+  # estricto. Justificacion fisica: OSF Lastarria 25 anos tiene 80%
+  # refs en 0-3 km; Path D solo (P3.2) capturaba 55% pixels a 15-25 km
+  # (Lazufre) que MIROVA descarta. scene 3.3x mas estricto lo corta.
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  # MODIS-specific vent threshold (inactive: enable_vent_path_modis is false)
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  # S27 MIROVA literal — N·sigma differential summit/scene (Coppola 2016a Tabla 1).
+  # Activos solo cuando enable_dual_roi_bt=true.
+  # Sustituyen al n_sigma_mir=3.0 plano para diferenciar región summit (5σ noche)
+  # vs scene (10σ noche). Esa diferenciación es lo que reemplaza al ad-hoc
+  # cap=7K + exclude_zones que usábamos.
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+
+# --- Background annulus geometry (km) ---
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+# --- Detection paths ---
+paths:
+  enable_eruption_path: true
+  # S27 MIROVA literal: vent-path NO existe en papers MIROVA.
+  # Coppola 2015 §2.2 Test 1 integrated-ROI cumple rol equivalente
+  # para sub-pixel cuando aplica. Vent-path entero queda como infra
+  # disponible en _mirova_legacy y experimental.
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  # NTI relative path disabled in operational profile until validated.
+  enable_nti_relative_path: false
+  # P3.2 S15: habilitar gate contextual dNTI 8-vecinos (Path D).
+  # Coppola 2016a SP 426.5 — sí está en papers MIROVA, mantener.
+  enable_dnti_contextual_path: true
+  # P3.1 S15: dual-ROI dNTI summit/scene — Coppola 2016a Table 2.
+  # Validado A/B S24 (mantener).
+  enable_dnti_dual_roi: true
+  # S27 MIROVA literal: Test 1 integrated-ROI ACTIVADO (Coppola 2015 §2.2 Eq.1).
+  # Paper MIROVA core, foundational del sistema. Detecta señal sub-pixel
+  # espacialmente distribuida que el path BT pixel-por-pixel pierde con
+  # 5σ summit (Lastarria 71 alertas reales 0.11 MW mediana, Villarrica lava
+  # lake 0.05-0.21 MW). Tenerlo OFF previamente era omisión, no decisión
+  # basada en papers — corregido S27 análisis multi-sensor. Cierre H_S27_1
+  # de D4 en docs/MIROVA_DIVERGENCES.md.
+  enable_test1_path: true
+  # S27 MIROVA literal: dual-ROI BT ACTIVADO. Aplica thresholds
+  # N_SIGMA_MIR_SUMMIT=5σ vs N_SIGMA_MIR_SCENE=10σ según distancia
+  # al vent (Coppola 2016a Tabla 1).
+  enable_dual_roi_bt: true
+  # S27 MIROVA literal: exclude_zones (parche nuestro, no en papers MIROVA)
+  # desactivadas. MIROVA NO usa máscaras geográficas; depende de N·σ
+  # scene=10 para suprimir lagos/salares como FP.
+  enable_exclude_zones: false
+  # S32 P2 Driver B Phase 1 — REFUTADO S33 (commit b9a6857 retirado).
+  # El audit S32 que "validó" Phase 1 (recall paridad 73.6% / ratio 1.66×)
+  # estaba contaminado por bug `mirovaEqVrp` que NO validaba pc.centroid_dist_km
+  # contra inner_radius. Clusters Salar Atacama/lago a 22-30km del cráter
+  # con final_hotspot_source=test1 (que pone dist_class=summit) se contaban
+  # como TPs falsos.
+  # Re-audit S33 con métrica corregida (pipeline/audit_metrics.py +
+  # experiments/76_audit_independent.py, ambos coincidentes):
+  #   Driver A solo:        recall 74.2%, ratio 2.53×
+  #   Driver A + Phase 1:   recall 55.6%, ratio 1.39× (-18.6pp recall)
+  # Phase 1 destruye señal real validada por MIROVA en Lastarria/Villarrica/
+  # Planchón (eventos "Muy Bajo" sub-pixel del cráter — fumarolas con BT
+  # poco arriba bg). El filtro 5σ pixel-level elimina los pixels marginales
+  # del cluster Test 1 contiguo y rompe la detección summit.
+  # Ver docs/PROCESS_RULES_S33.md y experiments/74-76 audit completo.
+  enable_test1_pixel_filter: false
+
+  # **ADOPTADO S38 Bloque B (2026-05-12)** — vent_anchored cluster selection
+  # + H8 pixel-level filter.
+  #
+  # Antecedente: A/B vent_anchored solo (run 25749336998) +9.6pp recall
+  # (82.8% → 92.2%), +11 TP, 0 regresiones per-vol. Combo C.1 con D4 fix
+  # adicional (run 25762044191) ANULÓ ganancia por regresión Tupungatito
+  # (glaciar) — D4 descartado, queda en S39+ para activación per-vol.
+  #
+  # Validación previa al merge:
+  #   - R2 pixel-level 5 casos canónicos (Lascar Salar→cráter, Puyehue
+  #     lacolito, Tupungatito control, Isluga, Lastarria): mecanismo
+  #     confirmado, 0 regresiones.
+  #   - 30d preview (run 25768334206, 10/11 vol completos): +11 TP neto,
+  #     ratio_med 3.54→3.52× estable, 9 días positivos vs 4 negativos
+  #     (artefacto Planchón data faltante).
+  #
+  # Mecanismo:
+  #   - vent_anchored: clusters dentro de inner_radius_km tienen prioridad
+  #     sobre lejanos, luego por proximity asc (pipeline/clustering.py).
+  #     Resuelve bug D8 estructural (primary = Salar lejano → primary =
+  #     cráter cercano).
+  #   - H8 pixel-level filter: en store.append_record, filtra pixels lejanos
+  #     individualmente en lugar del all-or-nothing legacy. Sin H8, si el
+  #     pixel más caliente está fuera de radius_km, se descartaba TODO
+  #     anomaly_pixels. Combo con vent_anchored: pixels lejanos del Salar
+  #     se filtran, cráter cercano se preserva.
+  #
+  # Próximo cron NRT 2h aplica el nuevo comportamiento.
+  enable_vent_anchored_clustering: true
+  enable_pixel_level_distance_filter: true
+
+  # **ADOPTADO S39 (2026-05-13)** — D4 per-volcano: enable_test1_lbg_global
+  # con gating per-vol vía field `lbg_global_compatible` en volcanoes.yaml.
+  #
+  # Combo S38 C.1 mostró que D4 fix UNIVERSAL regresiona Tupungatito + Planchón
+  # (glaciares fríos donde L_bg global > local empeora ΔL). Fix S39: profile
+  # flag ON pero pipeline solo aplica D4 cuando lbg_global_compatible=true
+  # para ese volcán. Marcados true: Lascar (cráter permanente),
+  # Lastarria (fumarolas crónicas).
+  #
+  # A/B S39 (run 25797247811, 11/11 success) validó:
+  #   - Recall preservado: 92.2% en ambos (vent_anchored vs D4 per-vol)
+  #   - ratio_med MEJORA 3.82× → 3.00× (-21%), records TP ahora con VRP más
+  #     cercano al MIROVA real. Lascar y Lastarria principales beneficiarios.
+  #   - 0 regresiones per-vol (Tupungatito, Planchón sin cambio gracias al
+  #     gating per-vol).
+  #
+  # Mecanismo: cuando Test 1 dispara y el ring 1-3km del cráter está caliente
+  # (fumarola crónica), L_bg local está contaminado → ΔL clip 0 → vrp inflado
+  # o subestimado. D4 fix usa L_bg del anillo background global 5-25km que
+  # NO está contaminado por la actividad del cráter mismo.
+  enable_test1_lbg_global: true
+
+  # **ADOPTADO S40 (2026-05-13)** — cleanup paths viejos: bt_path_hot OFF.
+  #
+  # Análisis empírico S39 sobre 1846 TPs en 11 vol Tier A operacional 30d
+  # mostró que bt_path_hot solo contribuye exclusivamente en 0-6 records
+  # (test1_hot y dnti_ctx_hot cubrían >99% de las detecciones).
+  #
+  # A/B run 25804811234 (11/11 success, window 15d):
+  #   - Recall 90.5% → **92.2%** (+1.7pp, +2 TP)
+  #   - ratio_med 3.00× → 3.00× (idéntico)
+  #   - Isluga +2 TP (mejora directa por menos ruido en anomaly_pixels)
+  #   - Lascar/Lastarria/Tupungatito/etc: +0 (sin regresión)
+  #
+  # Mecanismo físico: bt_path_hot metía pixels lejanos calientes (Salar
+  # bordes, terreno cálido) al hot_mask combined. Con vent_anchored
+  # eligiendo cluster summit como primary, esos pixels lejanos quedaban
+  # como ruido contaminando el top-100 anomaly_pixels. Sin bt_path, las
+  # detecciones son solo del path Test 1 (Coppola 2015 §2.2 integrated-ROI)
+  # + dnti contextual (Coppola 2016a Tests 2/3 abreviados) — más limpio
+  # y más alineado con el paper.
+  #
+  # Acerca el operacional al clon literal MIROVA: paper Coppola 2016a NO
+  # menciona "bt_path puro" como detector. Los detectores son contextuales
+  # sobre NTI/dETI (Tests 2/3 conjunción) + integrated-ROI (Test 1 Eq.1).
+  enable_bt_path_hot: false
+
+  # Ronda 2 overrides
+  c2_summit_override: 8.0
+
+  # S46 ADOPTED — drift234 (Coppola 2016a literal first-pass + second-pass).
+  # A/B Ronda 1 (run 25934224248, audit 87_results.md) demostró:
+  # - F1 89.2% -> 89.9% (+0.69pp)
+  # - MODIS recall 92.3% -> 100% (recupera 3 FN-far Lascar: clusters Salar
+  #   Atacama desplazados a cráter via second-pass bg recompute)
+  # - Ratio mediano VRP 1.72x -> 1.21x (mejor paridad MIROVA)
+  # - Precision intacta (84.6% -> 84.8%)
+  # Sin regresión per-volcán observada.
+  enable_first_pass_tests_2_and_3: true
+  enable_dual_roi_first_pass: true
+  enable_second_pass_adjacent: true
+  enable_dual_roi_second_pass: true
+
+# --- Sensor activation ---
+# true = process granules from this sensor in this profile.
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+# --- Output location ---
+output:
+  data_subdir: _r2_C2_8_summit

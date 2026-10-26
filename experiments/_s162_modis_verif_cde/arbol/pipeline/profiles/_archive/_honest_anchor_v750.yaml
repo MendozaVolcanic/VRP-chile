@@ -1,0 +1,16 @@
+# VRP-Chile — profile: _honest_anchor_v750 (S106 A45, validacion espejo V750)
+#
+# Brazo de validacion del ancla honesta en VIIRS 750m (espejo PR #401). Hereda
+# mirova_equivalent (V375 ya ON en produccion) + activa el flag V750. Criterio
+# duro pre-registrado (mismo que V375, design 2026-06-11 §4): trig_t1/recall
+# IDENTICOS pareados al granule vs produccion; posiciones V750 mejoran (mediana
+# 2.89 km -> ~cluster/crater); destape verificado limpio offline
+# (probe_v750_destape.py: 93 flips far->summit, 0 con pc.vrp>5MW).
+extends: mirova_equivalent
+profile: _honest_anchor_v750
+description: >
+  A/B S106 ancla honesta VIIRS750 (test1 -> vent, espejo V375).
+paths:
+  enable_honest_anchor_viirs750: true
+output:
+  data_subdir: _honest_anchor_v750

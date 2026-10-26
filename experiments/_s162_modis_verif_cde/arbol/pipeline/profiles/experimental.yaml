@@ -1,0 +1,88 @@
+# VRP-Chile — profile: experimental
+#
+# REESCRITO EN S124. Antes de esto el perfil era una copia literal de la
+# configuración de S15 y se había quedado ~100 sesiones atrás: no tenía Test 1
+# integrado (S27), ni dual-ROI (S85), ni nadir-fijo (S102/S103), ni ancla al
+# cráter (S98), ni el guard de coherencia A46 (S113). Con los pisos de VRP en
+# 0.0 y sin nada de eso, el resultado no era "más sensible", era ruido:
+#
+#   Nevados de Chillán 2026, este perfil vs el operacional
+#     VRP mediano ............ 5.686 MW   vs  0.357 MW
+#     VRP máximo ............. 522 MW     vs  7.7 MW
+#     distancia mediana ...... 25.4 km    vs  2.77 km   (o sea: en el borde
+#                              del radio de búsqueda, no en el volcán)
+#     detecciones a ≤1 km .... 0 de 344   vs  87
+#
+# Un laboratorio sirve para ver señal que el producto operacional descarta, no
+# para ver cosas que no están. Ahora hereda TODO el operacional y diverge en una
+# sola dimensión deliberada: el piso de magnitud.
+#
+# La data histórica en data/experimental/ quedó obsoleta con este cambio (fue
+# generada con la configuración vieja). Hay que reprocesar antes de comparar.
+
+extends: mirova_equivalent
+profile: experimental
+description: >
+  Laboratorio. Hereda la detección operacional completa. S147: sus pisos de
+  magnitud, que desde S130 lo hacían MÁS ciego que el operacional, quedaron en
+  0.0, así que hoy es idéntico al operacional salvo el directorio de salida. Su
+  diferenciación real está diseñada y sin implementar: sensibilidad por zona
+  (docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md).
+
+thresholds:
+  # ⚠️ S147: estos pisos se ponen en 0.0, y el texto de abajo explica por qué el
+  # razonamiento de S124 dejó de valer. Se conserva por historia.
+  #
+  # Cuando S124 escribió este bloque, los pisos OPERACIONALES eran VIIRS375 0.02 /
+  # VIIRS750 0.15 / MODIS 0.05, así que poner 0.005 / 0.05 / 0.02 acá SÍ era bajarlos.
+  # Pero S130 sacó el piso del perfil operacional y lo dejó en 0.0 en los tres
+  # sensores, y nadie actualizó el laboratorio. Desde entonces, durante 17 sesiones,
+  # el perfil declarado "laboratorio para ver la señal débil que MIROVA no publica"
+  # fue estrictamente MÁS CIEGO que el operacional: medido en S147 sobre la ventana
+  # desde el 2026-08-29, sus pisos anulan 5 records de 1.755 con magnitud (1 de 969
+  # en VIIRS375, 4 de 265 en VIIRS750, 0 de 521 en MODIS) y no agregan ninguno.
+  # El comentario de `pipeline/store.py` que dice "el perfil experimental usa pisos
+  # más bajos" quedó falso en el mismo momento.
+  #
+  # El miedo original ("sin piso, cada fluctuación del fondo entra como detección")
+  # era razonable contra la configuración VIEJA del laboratorio, que además de no
+  # tener piso no tenía Test 1, ni dual-ROI, ni nadir fijo, ni ancla al cráter. Con
+  # la detección operacional heredada completa, el piso 0.0 es exactamente lo que
+  # corre hoy en producción: no es una apuesta, es la línea base.
+  #
+  # CONSECUENCIA, y es el punto: con esto el laboratorio queda IGUAL al operacional
+  # salvo el directorio de salida. O sea que hoy no aporta nada, y eso ahora está
+  # dicho en voz alta en vez de estar escondido detrás de tres números. La
+  # diferenciación real del laboratorio NO va por el piso de magnitud (que sólo
+  # recorta lo ya detectado) sino por el UMBRAL DE DETECCIÓN por zona:
+  # ver docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md.
+  min_vrp_mw_viirs375: 0.0
+  min_vrp_mw_viirs750: 0.0
+  min_vrp_mw_modis: 0.0
+
+# S150 (AUDIT_S149 Fase 0 tarea 3 y Fase 5; decision de Nicolas 2026-10-09): el laboratorio queda CONGELADO
+# en la deteccion de produccion de hoy. POR QUE: la replica va a cambiar (conectiva max, sin Test 1, banda 22,
+# etiqueta MODIS desde el cumulo, quizas sin tope D9 ni compuerta D22) para parecerse mas a MIROVA, y cada
+# uno de esos cambios hace que vea MENOS. Como este perfil hereda de mirova_equivalent, sin estas lineas se
+# arrastraria con la replica y perderiamos justo lo que hoy vemos de mas (las anomalias debiles reales que
+# MIROVA no publica). Cada valor de abajo es el de produccion al 2026-10-09; los vigila
+# tests/test_experimental_congelado_s150.py. Cambiarlos es una decision sobre el laboratorio, no un efecto
+# lateral de cambiar la replica.
+enable_modis_b22_primary: false
+enable_modis_distance_class_from_cluster: false
+
+paths:
+  enable_test1_path: true
+  enable_tests_23_prose_branch: false
+  enable_tests_23_no_bt_gate_viirs375: false
+  path_d_only_cap_mw: 5.0
+
+output:
+  # S124 — subdir NUEVO a proposito. `data/experimental/` contiene la serie
+  # generada con la configuracion vieja (S15), que producia ruido: en Nevados
+  # de Chillan daba VRP mediano 5.686 MW y maximos de 522 MW a 25 km del
+  # crater. Mezclar en un mismo JSON registros de dos configuraciones
+  # distintas hace la serie ininterpretable — nada en el record dice con que
+  # config se genero. La serie vieja queda intacta como legacy y esta arranca
+  # limpia.
+  data_subdir: experimental_v2

@@ -1,0 +1,11 @@
+# A/B S101 — palanca sec³ MODIS, brazo OFF (sec³ ACTIVO = comportamiento operacional).
+# Mide cuánto del campo difuso MODIS inflado es geometría de escaneo off-nadir.
+# Este brazo = igual que mirova_equivalent (nadir_fixed=False → sec³ on). Se reprocesa
+# fresco para comparar contra el brazo ON sobre los mismos granules (records comunes).
+# data_subdir aislado (NO toca operacional, A47). Ver design doc
+# docs/superpowers/specs/2026-06-05-frente-modis-campo-difuso-design.md §4bis.
+extends: mirova_equivalent
+output:
+  data_subdir: _sec3_modis_nadir_off
+paths:
+  enable_nadir_fixed_pixel_area_modis: false

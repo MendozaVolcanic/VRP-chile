@@ -1,0 +1,34 @@
+# A/B S142, Fase 1 VIIRS 375: literal completo + ablaciones. Brazo CONTROL.
+#
+# EL FENÓMENO. En un cono nevado, de noche, el cráter con lava sub-píxel es más frío que el valle.
+# Cuatro reglas del pipeline, acopladas, deciden si se ve y con cuánto: la compuerta de temperatura
+# de los Tests 2 y 3 (D22), el fondo del VRP como mediana del anillo regional (D25), el segundo pase
+# que corre sin detección previa (D2) y keep_peak (D19). Quitar una sola no mide nada (S138).
+#
+# Este brazo es la producción de hoy, reprocesada con el mismo código que los demás.
+# CRITERIO: pre-registrado ANTES de correr en docs/PREREGISTRO_AB_D22_D25_S143.md, con verificador limpio.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron.
+extends: mirova_equivalent
+profile: _s142_ab_control
+description: >
+  Brazo control: flags de producción; sólo VIIRS 375.
+
+sensors:
+  modis: false
+  viirs_375: true
+  viirs_750: false
+
+output:
+  data_subdir: _s142_ab_control
+
+# S153, ADOPCION DE K (regla experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848): la replica apago el
+# Test 1 integrado y encendio la conectiva max y la banda 22. Este perfil hereda de mirova_equivalent y su
+# significado era la produccion de ANTES de K mas su propio cambio, asi que congela aca esos flags con el valor
+# previo (como experimental.yaml en S150) para resolver igual que antes de la adopcion. Lo vigila
+# tests/test_guard_perfiles_congelados_s153.py.
+paths:
+  enable_test1_path: true
+  enable_tests_23_prose_branch: false
+
+# S153 (K): banda 21 primaria congelada; el porque esta en el comentario S153 de `paths:`.
+enable_modis_b22_primary: false

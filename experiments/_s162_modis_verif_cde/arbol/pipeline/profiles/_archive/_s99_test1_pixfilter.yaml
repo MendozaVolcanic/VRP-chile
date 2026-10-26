@@ -1,0 +1,15 @@
+# VRP-Chile — profile: _s99_test1_pixfilter (S99 A/B — Candidato A)
+#
+# Candidato A: filtro por-píxel existente. Cuando Test 1 dispara, intersecta la
+# mask con el umbral dual-ROI 5σ summit / 10σ scene (Coppola 2016a Tabla 1) antes
+# de sumar VRP. Riesgo conocido: FN en focos sub-píxel (Villarrica lava lake no
+# supera el umbral por-píxel) → el A/B mide eso contra el canario Villarrica.
+# Diseño: docs/superpowers/specs/2026-06-03-test1-magnitude-compactness-design.md
+extends: mirova_equivalent
+profile: _s99_test1_pixfilter
+description: >
+  Candidato A A/B S99: enable_test1_pixel_filter (filtro por-píxel dual-ROI).
+paths:
+  enable_test1_pixel_filter: true
+output:
+  data_subdir: _s99_test1_pixfilter

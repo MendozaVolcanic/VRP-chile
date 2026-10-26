@@ -1,0 +1,16 @@
+# VRP-Chile — profile: _modis_focalmag_ctxpure (S109 §1 A/B, CANARIO)
+#
+# Núcleo focal/contextual SIN keep-peak: el VRP del cluster suma SOLO los píxeles
+# contextualmente anómalos. Mide cuánto del residuo aporta el solo-pico: si → 0 en los
+# inflados = campo topográfico puro sin foco contextual (confirma el diagnóstico A69).
+# En Lascar/foco discreto debe PRESERVAR (si cae a ~0, viola C4 → keep-peak obligatorio).
+# data_subdir aislado (A47). MODIS necesita pyhdf (GH Linux).
+extends: mirova_equivalent
+profile: _modis_focalmag_ctxpure
+description: >
+  A/B S109 magnitud núcleo-focal MODIS, brazo ctx PURO (sin keep-peak, canario).
+paths:
+  enable_focal_cluster_magnitude: true
+  focal_cluster_keep_peak: false
+output:
+  data_subdir: _modis_focalmag_ctxpure

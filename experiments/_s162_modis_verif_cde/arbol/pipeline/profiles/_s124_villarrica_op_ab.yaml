@@ -1,0 +1,34 @@
+# A/B S124 — Villarrica bajo el algoritmo operacional UNIFORME (issue #513).
+#
+# Villarrica es el unico Tier A que el cron procesa con un perfil dedicado
+# congelado en abril (mirova_equivalent_villarrica_test1): 32 constantes
+# efectivas distintas del operacional, escribiendo en la MISMA base que los
+# otros 10. Su serie publicada no es comparable con el resto.
+#
+# Decision de Nicolas (2026-08-25): lo que respete la mision de replicar
+# MIROVA. Eso es UN algoritmo uniforme para los 11 — este A/B mide que pasa
+# con Villarrica bajo el operacional puro antes de tocar el cron (A45).
+#
+# Brazo unico: mirova_equivalent sin modificar, data_subdir aislado.
+# El "brazo B" es la serie ya publicada (perfil congelado) — no hay que
+# recomputarla. Comparacion: recall/ratio vs MIROVA CONS∪OCR sobre la
+# misma ventana + el escalon de junio (0.06 -> 2.1 MW medianos).
+extends: mirova_equivalent
+profile: _s124_villarrica_op_ab
+description: >
+  A/B Villarrica bajo el operacional uniforme (issue 513). Aislado, no toca
+  ni el cron ni data/mirova_equivalent/.
+output:
+  data_subdir: _s124_villarrica_op_ab
+
+# S153, ADOPCION DE K (regla experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848): la replica apago el
+# Test 1 integrado y encendio la conectiva max y la banda 22. Este perfil hereda de mirova_equivalent y su
+# significado era la produccion de ANTES de K mas su propio cambio, asi que congela aca esos flags con el valor
+# previo (como experimental.yaml en S150) para resolver igual que antes de la adopcion. Lo vigila
+# tests/test_guard_perfiles_congelados_s153.py.
+paths:
+  enable_test1_path: true
+  enable_tests_23_prose_branch: false
+
+# S153 (K): banda 21 primaria congelada; el porque esta en el comentario S153 de `paths:`.
+enable_modis_b22_primary: false

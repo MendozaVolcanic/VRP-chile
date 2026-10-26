@@ -1,0 +1,8 @@
+# S102 — Promoción nadir-fijo MODIS. Hereda mirova_equivalent (YA flipeado en main:
+# enable_nadir_fixed_pixel_area_modis:true + min_vrp_mw_modis:0.05) => reproc con la
+# config operacional EXACTA, en un data_subdir aislado para el merge con guard
+# anti-underfetch (#345). Solo se promueven los records MODIS (VIIRS intacto).
+# MODIS necesita pyhdf (GH Linux). NO toca operacional durante el reproc (A47).
+extends: mirova_equivalent
+output:
+  data_subdir: _s102_nadir_promote

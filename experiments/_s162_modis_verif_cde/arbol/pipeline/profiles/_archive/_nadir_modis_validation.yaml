@@ -1,0 +1,14 @@
+# Validación S101 — nadir-fijo MODIS sobre los 11 Tier A (medición, NO adopción).
+# Restaura el clon literal MIROVA (calibración S14 + A/B sec³ + papers coinciden:
+# MIROVA usa A_pix nadir-fijo, el sec³ activo es drift). min_vrp_mw_modis=0.0 (sin
+# piso) para ver la distribución COMPLETA y elegir el piso óptimo en el análisis
+# (el piso 0.27 con nadir vuelve FN ~5 confirmados Lascar — audit_nadir_safety.py).
+# data_subdir aislado (NO toca operacional, A47). VIIRS queda con sec³ (scope MODIS).
+# Ver design doc 2026-06-05-frente-modis-campo-difuso-design.md §10.
+extends: mirova_equivalent
+output:
+  data_subdir: _nadir_modis_validation
+paths:
+  enable_nadir_fixed_pixel_area_modis: true
+thresholds:
+  min_vrp_mw_modis: 0.0

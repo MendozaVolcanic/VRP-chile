@@ -1,0 +1,74 @@
+# S46 Ronda 1 — _drift7_both_only.
+#
+# Drift #7 completo (MODIS + VIIRS): A_pix nadir-fijo en los 3 sensores
+# (MODIS=1 km², VIIRS I=0.140625 km², VIIRS M=0.5625 km²). Replica clon
+# literal MIROVA respecto a área del píxel.
+
+profile: _drift7_both_only
+description: "Ronda 1 S46 — drift #7 completo MODIS+VIIRS (A_pix nadir-fijo 3 sensores)"
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  enable_test1_pixel_filter: false
+  enable_vent_anchored_clustering: true
+  enable_pixel_level_distance_filter: true
+  enable_test1_lbg_global: true
+  enable_bt_path_hot: false
+  # S46 drifts
+  enable_test1_k1_retire_from_hot_mask: false
+  enable_test1_k1_bg_exclude: false
+  enable_first_pass_tests_2_and_3: false
+  enable_dual_roi_first_pass: false
+  enable_second_pass_adjacent: false
+  enable_dual_roi_second_pass: false
+  enable_nadir_fixed_pixel_area_modis: true
+  enable_nadir_fixed_pixel_area_viirs: true
+  viirs_c2_override_night: null
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _drift7_both_only
