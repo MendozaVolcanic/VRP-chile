@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 12:35 UTC (S163): cierre de la coordinadora; relevo a S164
+- Nicolás: «sí, cierra y abre la siguiente con lo que corresponda y necesario para seguir con todo». Loop de S163 detenido.
+  Traspaso en `tasks/BLOQUE_ARRANQUE_S164.md`. Estado fijado con trabajo en curso: `loop-modis-2`, `loop-viirs750-2`,
+  `loop-viirs375`, `d39-mirova-v1`, `instrumento-pendientes` y `diurno-k-prereg` siguen corriendo; la nueva coordinadora
+  les avisa su id.
+
 ### 2026-10-26 ~12:15 UTC (S163, vuelta 15): #911 mergeado (evidencia S159 a S163 en main); entregas del paper y del congreso
 - **#911 mergeado** (squash `b09a7b321`; CI verde; 1.091 archivos, todos en `experiments/`, comprobado con `git diff
   --name-only`; 62,5 MB): evidencia verificada de 13 ramas (oráculo y PORTES de S159, línea D25, MODIS, V375, V750 a/b/c/f,
