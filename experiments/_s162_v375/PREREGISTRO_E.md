@@ -116,3 +116,28 @@ vara para esas filas es una decisión de Nicolás, con la etiqueta de V375-A del
 No implementa nada (PD3 es otra tarea con su propio pre-registro de implementación y A45). No mide el día. No mide
 Chillán sobre 3 MW como pregunta propia (V375-F, después de esto). No mezcla la ventana P con la O: son regímenes
 distintos (cese de Suomi NPP).
+
+## 7. Adenda 1 (2026-10-26, S164): PD1, dependencias cumplidas y la vara de la equivalencia
+
+Escrita antes de que exista la vía de 375 y antes de ver ningún resultado del paquete. Sigue en **BORRADOR, sin sellar**.
+
+1. **PD1 decidida**: caja **C13 en todos los volcanes**, centrada en el cráter de `volcanoes.yaml` (coordinadora S164,
+   bajo D-48). El brazo P usa C13; P-def sigue con M14 para separar el efecto de la ROI. Base: V375-C
+   (`resultado_run40116289866/INFORME.md`) y la etiqueta de cráter (`evaluar_con_crater_salida.txt`): las 6 protegidas
+   que C13 pierde, igual que M14, son sólo OCR de Suomi NPP antes del hito y ninguna es de cráter.
+2. **Dependencias que ya están en main**: evaluador común con placebo y d′ (#904 y #905), alerta y protegida por pasada
+   y protegida de cráter (#903), y la vía «código MIROVA» (#907, merge cff07d173, `pipeline/mirova_v750_codigo.py`, con el
+   flag apagado). Esa vía trae el detector del `.m` de 750 m y **no** los números de 375. Llevarla a 375 es la tarea de
+   implementación (PD3) y tiene su propio pre-registro y A45.
+3. **La vara del paso 1 (equivalencia) cambia en el fondo de 1 a 4 píxeles.** La vía de main rellena con el
+   `fillmissing2` de MATLAB y `brazos.py` con el port viejo, que en las escenas de 1 a 4 píxeles da otro fondo en 137 de
+   422 (hasta 0,83 relativo; `o2_375/comparar_matlab_375_salida.txt`). Por eso la equivalencia del VRP se mide contra
+   `brazos.py` con el fondo de MATLAB en esas escenas: `o2_375/matlab_v375.json`, la salida de MATLAB, que coincide con
+   la regla de relleno en 422 de 422 (`o2_375/verificador_matlab/INFORME.md`, CONFIRMADO). Sobre 4 píxeles se mide
+   contra `brazos.py` tal cual. Si ahí no calza, se mira primero el relleno. La exigencia de **publicación idéntica en
+   el 100 %** no cambia. Con ese fondo la publicación de los diez brazos ya resultó idéntica
+   (`o2_375/evaluar_con_matlab_salida.txt`: P1, P2, recall y VEREDICTO B iguales).
+4. Cada record de la vía lleva `via_codigo_mirova: True` (store.py le salta la geocerca, el filtro por distancia y el
+   tope por cúmulo). Un record sin esa marca no entra en la lectura del brazo P.
+5. Lo que el riesgo de §5.4 dejaba abierto ya tiene etiqueta: las 3 protegidas de S159 que el port pierde y K publica
+   son `ocr_snpp_antes_del_hito`. Igual siguen siendo veto. Cambiar la vara para esas filas lo decide Nicolás.

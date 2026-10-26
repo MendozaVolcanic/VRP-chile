@@ -14,7 +14,44 @@ de que el instrumento entregue la cobertura contra la referencia (fase 0, PD0); 
 parada si C: o D: bajan de 3 GB. Puedo abrir sesiones propias (permiso de Nicolás vía coordinadora, 2026-10-24), cada
 una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora con nombre e id; hoy no hay ninguna.
 
-## 0. Cierre de la sesión VIIRS 375 (2026-10-24, S162)
+## 0. Cierre de la sesión VIIRS 375, segunda vuelta (2026-10-26, coordinadora S164)
+
+Estado fijado sin trabajo en vuelo: ningún proceso, subagente ni despacho vivo (el verificador de MATLAB se detuvo
+después de entregar). Coordinadora: **S164** (`local_34f868ef-c156-4906-9b6c-e691fc445650`). La rama hasta 815118277
+está integrada a `loop/activo` (461a77be4); lo de este cierre va en commits posteriores de la misma rama.
+
+**a. En una pantalla**
+
+| qué | estado | evidencia |
+|---|---|---|
+| O2-375, paquete MATLAB | HECHO | 138a931ee; corrido por S163 en R2026b |
+| fondo de 1 a 4 px contra MATLAB | CALZA 422 de 422, sin PRELIMINAR | dbe9af431, `o2_375/comparar_matlab_375_salida.txt`, verificador CONFIRMADO |
+| magnitud de V375-C con el fondo de MATLAB | no cambia (C13 0,999); **V375-D no hace falta** | `o2_375/evaluar_con_matlab_salida.txt` |
+| alertas fuera de la envolvente | 0 de 422 | da0693783, `o2_375/envolvente_v375_salida.txt` |
+| V375-A (protegida de cráter) cableado | 70 de 81 de cráter; las 6 que pierde C13 no lo son | e48843858, `evaluar_con_crater_salida.txt` |
+| PD1 | decidida: **C13 en todos** (S164, D-48) | `PREREGISTRO_E.md` §7 |
+| V375-E | pre-registro con adenda 1, **sin sellar**; espera la vía 375 | `PREREGISTRO_E.md`; traspaso en la carpeta compartida, `VIIRS375_via_375_traspaso.md` |
+
+**b. Decisiones que esperan.** Ninguna de esta sesión. La próxima la abre Nicolás desde la tarjeta de S164; la
+implementación de la vía 375 en `process_viirs.py` pide su sí (A45).
+
+**c. Lo aprendido** (persistido en `feedback_s162_v375_lecciones.md`): (1) al sustituir un valor en un evaluador,
+excluye los controles que comparan contra el valor original (el control de vida salió INVÁLIDO por eso); (2) para
+etiquetar protegidas usa las filas que el objetivo guardó, no la referencia del checkout, que pierde filas; (3)
+`grep -c` con cero coincidencias corta una cadena `&&`, otra vez (REGLA GENERAL, S144).
+
+**d. Abierto.** CONFIRMADO: la regla de relleno de S163 en Python rellena fuera de la envolvente y MATLAB deja NaN (la
+vía de #907 ya hace lo de MATLAB, según loop-viirs750-2; SOSPECHA hasta verlo en el código). SOSPECHA: `grilla_sha256`
+de las etiquetas es el hash del `.npz`, no de RAD (explicaría la reserva del verificador).
+
+**e. Cerrado, no rehacer.** V375-B (B2), V375-C (C13), V375-D (no), O2-375 (calza), V375-A en el evaluador.
+
+**f. Prompt de la próxima sesión** (la que adapta la vía a 375): leer `VIIRS375_via_375_traspaso.md` de la carpeta
+compartida de S162, `experiments/_s162_v375/PREREGISTRO_E.md` §7 y esta bitácora; verificar contra `origin/main` que
+`pipeline/mirova_v750_codigo.py` sigue como dice el traspaso; escribir el pre-registro de implementación (PD3) y pedir
+el sí de Nicolás antes de tocar `process_viirs.py`.
+
+## 0-prev. Cierre de la sesión VIIRS 375 (2026-10-24, S162)
 
 > **Relevo, 2026-10-25**: la coordinadora ahora es **S163** (`local_8a135e90-b711-4bb9-9dec-ff02036f206b`), no S162.
 > Despachos y resultados se le piden y mandan a ella. Informado por S163, sin verificar aquí: el verificador limpio de las
