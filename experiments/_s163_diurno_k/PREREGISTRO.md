@@ -533,6 +533,22 @@ los dos brazos; repetir el job no lo arregla, que es el único remedio que el §
 4. **Si I4 vuelve a fallar después de excluir, el resultado es INVÁLIDO POR INSTRUMENTO.**
 5. Los días excluidos se declaran en el informe del resultado, con su evidencia.
 6. **La regla queda fija desde el commit de esta versión de la adenda para W2 a W6**, que todavía no tienen datos.
+7. **Cómo se evalúa con la lista** (verificador de la adenda, V1: el `main()` sellado no recibe la lista). Lo hace
+   `evaluar_con_exclusion.py`: carga lo mismo que el `main()` sellado, saca de la referencia y de los records de los dos
+   brazos los días de la lista y llama a la misma `evaluar_completo` del evaluador sellado. Eso equivale a
+   `evaluar(..., excluir_dias=lista)` (comprobado por el verificador sobre W1, `verificador_adenda1/va_glue.py`, y fijado
+   en `test_evaluar_con_exclusion.py`, que también prueba la consulta a CMR con su paginación; 5 de 5 mutaciones
+   atrapadas, `mutaciones_exclusion_salida.txt`). Además imprime, por día excluido, cuántas pasadas de MIROVA de cada
+   clase salen de la cuenta (V4). El comando del §8 pasa a ser:
+   `python -I experiments/_s163_diurno_k/dias_excluidos_nasa.py --raiz <W2> ... --raiz <W6> --ref <ref> --salida <exc.json>`
+   y después
+   `python -I experiments/_s163_diurno_k/evaluar_con_exclusion.py --raiz <W2> ... --raiz <W6> --ref <ref> --sha-codigo <40> --opcion-e e-ii --excluidos <exc.json>`.
+8. **Sello de lo nuevo** (V3): `objetivos_adenda1_sha256.txt` guarda los sha256 de los blobs de los dos scripts, sus
+   pruebas y sus mutaciones; `objetivos_sha256.txt` del sello original no se toca.
+9. **Límite declarado** (V5): la regla sólo ve huecos de **día completo** de una plataforma. Un hueco parcial (algunos
+   gránulos de un día) no se excluye. El verificador encontró uno en W6: el 2026-10-13 Suomi NPP no tiene gránulos de
+   noche en CMR; como la tabla de MIROVA no lista pasadas nocturnas VIIRS ese día, no debería tocar I3 ni I4 (inferido,
+   no medido). Si un hueco parcial hace fallar I4, rige el punto 4: INVÁLIDO.
 
 **Qué da en W1** (`w1/dias_excluidos_w1_salida.txt`):
 - Con la regla que decide (a y b'): excluye el **10, 11 y 12 de marzo** (en los tres, Suomi NPP en las bandas I y M).
