@@ -40,6 +40,16 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 > MATLAB con `entradas_v375.mat`; si MATLAB no calza con la vara, se re-corre con `--vrp-vara` sobre su salida.
 > Error propio corregido en la misma corrida: la primera vez sustituí también las 20 pasadas del control de vida y el
 > instrumento salió INVALIDO; el control compara runner contra S162 y no es magnitud, ya no se sustituye.
+>
+> **V375-A cableado, 2026-10-26.** #903, #904 y #905 están en main (744d8190b, d96fa5f4d, 691e4d588; CI verde, según
+> S163). `protegidas_crater_v375.py` aplica `protegida_de_crater` de #903 (copiada de main sin cambios, sha256
+> 89755f4d) a las 81 protegidas de los lotes, armando cada pasada con las filas de MIROVA que el objetivo guardó al
+> seleccionarse. La primera versión usó la referencia del checkout y 4 de Chillán (15 y 16 de octubre) quedaron sin
+> pasada, porque ese snapshot perdió sus filas de tabla. Resultado: 70 de 81 de cráter; las 11 restantes, todas
+> `ocr_snpp_antes_del_hito`. `evaluar.py --protegida-crater protegidas_crater_v375.json` lo informa al lado de P1 sin
+> tocar ningún veredicto (`evaluar_con_crater_salida.txt`, el resto de la salida idéntico a B2): **las 6 protegidas que
+> pierden C13 y M14 y las 3 que pierde K no son de cráter**; sólo PIX7 pierde una de cráter (Cordón Caulle,
+> 2026-06-07). Coincide con lo que informó S163 de su verificador. Para V375-E faltan la vía (#907, espera A45) y PD1.
 
 Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
 evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).

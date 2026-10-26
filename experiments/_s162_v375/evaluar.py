@@ -904,7 +904,27 @@ def main(argv=None):
         if global_ != BR.REFERENCIA:
             pr(f"  {nom} {global_}:", estratos(filas, (global_, REGLA_DECIDE), fn))
     pr("  partidas (aparte):", [(x["vol"], x["hora"], x["c"], publica(x, ref), x["K"]) for x in filas if x["part"]])
-    if a.protegida_crater:
+    if a.protegida_crater and a.protegida_crater.endswith(".json"):
+        # V375-A (#903): la etiqueta de cráter de protegidas_crater_v375.py, AL LADO de la lectura A; no cambia P1 ni
+        # ningún veredicto (PREREGISTRO_C §4, PREREGISTRO_E §5)
+        etq_c = json.loads(Path(a.protegida_crater).read_text(encoding="utf-8"))["protegidas"]
+        prot = [x for x in filas if x["c"] == "pos_prot"]
+        sin_e = [x["i"] for x in prot if str(x["i"]) not in etq_c]
+        n_cr = sum(1 for x in prot if etq_c.get(str(x["i"]), {}).get("de_crater"))
+        pr(f"  protegida de cráter (V375-A, al lado de la lectura A): {n_cr} de {len(prot)} protegidas son de cráter; "
+           f"sin etiqueta {len(sin_e)} {sin_e[:10]}")
+        resumen["protegida_crater"] = {}
+        for clave in [("K", "")] + [(b, REGLA_DECIDE) for b in BR.BRAZOS]:
+            perd = [x for x in prot if not (x["K"] if clave[0] == "K" else x["X"][clave])]
+            de_cr = [x for x in perd if etq_c.get(str(x["i"]), {}).get("de_crater")]
+            otras = [(x["vol"], x["hora"], "+".join(etq_c.get(str(x["i"]), {}).get("motivos") or ["sin_etiqueta"]))
+                     for x in perd if not etq_c.get(str(x["i"]), {}).get("de_crater")]
+            resumen["protegida_crater"][clave[0]] = {"perdidas": len(perd), "de_crater": len(de_cr), "no_de_crater": otras}
+            pr(f"    {clave[0]:8s} perdidas {len(perd)}: de cráter {len(de_cr)} "
+               f"{[(x['vol'], x['hora'], round(x['mir'], 2)) for x in de_cr][:8]}; no de cráter {len(otras)} {otras[:8]}")
+        if sin_e:
+            veredicto_instr.append("crater_sin_etiqueta")
+    elif a.protegida_crater:
         pr("  protegida de cráter (V375-A):", Path(a.protegida_crater).read_text(encoding="utf-8")[:2000])
     else:
         pr("  protegida de cráter (V375-A): PENDIENTE de la sesión del instrumento; se informará al lado de la lectura A")
