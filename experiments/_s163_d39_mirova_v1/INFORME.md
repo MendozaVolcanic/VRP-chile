@@ -8,8 +8,8 @@
   repo de datos completo). Scripts y salidas en `D:\vrp-trabajo\s163-d39\scripts\`, copia de los `.py` y `.txt` en
   `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\experiments\_s163_d39_mirova_v1\`. Las simulaciones
   corren sobre copias en `D:\vrp-trabajo\s163-d39\sim\` y `D:\vrp-trabajo\s163-d39\mut\`, nunca sobre el repo vivo.
-- **Lo único que escribí fuera de mis carpetas:** la rama `s163/d39-reposicion-y-bucle` de Mirova-v1 (commit
-  `2ad6dd8730`, sobre la cabeza del PR). Nada en `main` de Mirova-v1 ni de VRP Chile. No pausé ningún workflow.
+- **Lo único que escribí fuera de mis carpetas:** la rama `s163/d39-reposicion-y-bucle` de Mirova-v1 (commits
+  `2ad6dd8730` y `dd606a65a1`, sobre la cabeza del PR). Nada en `main` de Mirova-v1 ni de VRP Chile. No pausé ningún workflow.
 
 ## Veredicto
 
@@ -17,6 +17,13 @@
 no pierde ni corrompe ninguna fila (medido fila a fila, abajo). Pero el PR, tal como está, deja afuera 241 filas que el
 consolidado perdió **después** de armado el PR, entre ellas dos alertas protegidas, y no tiene ninguna prueba que vigile
 el bucle de push del workflow, que es justo donde nace la pérdida. La rama corrige las dos cosas.
+
+Con la rama sumada, la evidencia cumple el criterio de Nicolás: **0 filas perdidas y 0 filas existentes cambiadas en las dos
+direcciones** (consolidado y OCR, fila a fila, con verificador limpio que lo re-midió), 2.351 filas repuestas que existen
+todas en la historia, y cero pérdidas no explicadas desde la base del PR en un barrido de las 1.239 versiones. Condiciones
+del despliegue (sección 7): tag defensivo, `main.yml` y `ocr_workflow.yml` en pausa sin corridas en vuelo, y regenerar la
+reposición contra el `main` ya quieto. Lo único que el PR empeora en apariencia es que ~6 % de las corridas del OCR van a
+quedar en rojo en vez de mezclar a ciegas (riesgo 1); no pierde datos y tiene un arreglo aparte.
 
 ## 1. Lo que pasó después de abierto el PR: un episodio nuevo el 2026-10-24
 
@@ -172,14 +179,18 @@ reintenta sin rebasar») y #896 (`2ba670463`, la alarma de llaves perdidas). En 
 
 ## 6. Riesgos que quedan con el PR mergeado
 
-1. **El push del OCR ahora aborta en rojo si el rebase choca.** Sin `-X ours`, un choque (por ejemplo, el scraper y el OCR
-   escriben la misma imagen con bytes distintos, hallazgo 409 de la auditoría: 24 veces en 60 días el scraper reescribió una imagen que había
-   agregado el OCR) deja esa corrida del OCR sin empujar. No borra nada que ya esté en `main`; las filas de esa hora
-   entran en la corrida siguiente si MIROVA sigue mostrando la pasada en sus imágenes. Medido en los registros de las
-   corridas del OCR (`s14_contar_choques_ocr.py` / `s14_salida.txt`, sobre `s14_ocr_push_lineas.txt`): de 191 corridas
-   exitosas del 2026-10-22 18:00 al 2026-10-26 11:00 UTC, 181 rebasaron y **ninguna tuvo que mezclar un archivo** (0
-   «CONFLICT», 0 «Auto-merging», 0 «Cannot merge binary», 0 «could not apply»); 190 empujaron al primer intento. Con el
-   PR, un rebase que choque dejaría esa corrida en rojo; en esta ventana habría pasado 0 veces. Riesgo bajo, no nulo.
+1. **El push del OCR ahora aborta en rojo si el rebase choca, y hoy choca en ~6 % de las corridas.** Mi primer
+   barrido de los registros (`s14_contar_choques_ocr.py` / `s14_salida.txt`: 191 corridas, 181 rebases, 0 «CONFLICT»,
+   0 «Auto-merging») **no sirve para esta pregunta**: con `-X ours` git resuelve el choque sin imprimir nada (lo comprobó
+   el verificador en el registro de la mezcla del 24-oct, que tampoco muestra «Auto-merging»). El instrumento era ciego.
+   El verificador reconstruyó con git cada push (V5, `verificador/v07_choques_ocr.py`): en 332 pushes de 300 corridas
+   (2026-10-20 21:00 a 2026-10-26 12:00 UTC), **18 (5,7 %) tenían el mismo CSV cambiado por los dos lados**, siempre por
+   **otra corrida del OCR solapada**: el cron `5 * * * *`, que GitHub ejecuta con 1 a 33 min de atraso, cae encima del
+   despacho externo de :00 y :30, y `cancel-in-progress: true` cancela a la vieja cuando ya empujó (V1). Hoy esos choques
+   se resuelven a ciegas a favor del remoto (SOSPECHA fuerte de que el OCR pierde filas de esa corrida en silencio); con
+   el PR, esas corridas quedan en rojo y no empujan. **No borra nada que ya esté en `main`**; las filas de esa corrida
+   las vuelve a leer la siguiente si MIROVA sigue mostrando la pasada. Arreglo recomendado, aparte del PR: sacar el cron
+   del OCR de la grilla del despachador (o quitar uno de los dos) y que el OCR parta de `origin/main` al empezar.
 2. **El vigilante de dato** (nuevo, cron :07 y :37) se pone en rojo si el consolidado no se actualiza en 60 min: una pausa
    larga durante el merge dispara un correo. Mantener la pausa bajo 30 min o esperar ese rojo.
 3. **Una llave repetida que entre a `main` por otro camino** (un commit a mano) deja al scraper en rojo en todos los ciclos
@@ -191,8 +202,8 @@ reintenta sin rebasar») y #896 (`2ba670463`, la alarma de llaves perdidas). En 
 
 Lo ejecuta la coordinadora o Nicolás; yo no pausé ni mergeé nada.
 
-1. **Sumar la rama de S163 al PR.** Mergear `s163/d39-reposicion-y-bucle` en `fix/referencia-estable` (es un commit sobre su
-   cabeza, avance rápido). Esperar el CI de #26 en verde con conclusión, no «0 checks» (A39, enmienda S142).
+1. **Sumar la rama de S163 al PR.** Mergear `s163/d39-reposicion-y-bucle` (`dd606a65a1`) en `fix/referencia-estable`: son dos
+   commits sobre su cabeza, avance rápido. Esperar el CI de #26 en verde con conclusión, no «0 checks» (A39, enmienda S142).
 2. **Pausar los escritores de datos**, para que nada corra con el código viejo mientras se mergea:
    ```bash
    gh workflow disable main.yml -R MendozaVolcanic/Mirova-v1
@@ -247,12 +258,36 @@ Lo ejecuta la coordinadora o Nicolás; yo no pausé ni mergeé nada.
 Si algo dañara el consolidado, **no** restaurar el archivo del tag a ciegas (borraría las pasadas nuevas desde el tag):
 reponer desde el tag con el mismo `reponer_filas.py`, que sólo agrega llaves que faltan.
 
-## 8. SEGUIMIENTOS, SIN DATO y lo que no miré
+## 8. Verificador con contexto limpio
+
+Fable 5.1, esfuerzo high, sin ver mi razonamiento; recibió sólo las diez afirmaciones y dónde se midieron. Informe
+completo: `VERIFICADOR_INFORME.md` (copia de `D:\vrp-trabajo\s163-d39\verificador\INFORME.md`), scripts y salidas en
+`verificador\`. Ningún REFUTADO.
+
+| afirmación | veredicto | nota |
+|---|---|---|
+| A1 episodio del 24-oct y nada más perdido desde la base | CONFIRMADO ENTERO | barrido de las 1.239 versiones, una por una: única versión con pérdidas o repetidas `53b1e6d3c0`; 0 pérdidas transitorias |
+| A2 mecanismo en los registros | CONFIRMADO | V1: la corrida `40116786605` figura «cancelled» y empujó |
+| A3 consolidado, 0 perdidas y 0 cambiadas | CONFIRMADO | re-corrida propia; V8: la simulación no inserta pasadas nuevas (sólo refresca 33) |
+| A4 OCR, sólo las 647 notas | CONFIRMADO para filas existentes | V6: el PR baja a «baja» la confianza de las alertas futuras del método de grupo; nadie filtra por eso |
+| A5 filas a reponer reales | CONFIRMADO, más fuerte | las 2.351 idénticas campo a campo (UTC incluidas) a la fila de algún padre de los 17 episodios |
+| A6 Chillán 15 y 16-oct sin fila de tabla | CONFIRMADO ENTERO | barrido de 562 versiones; SOSPECHA: son las mismas pasadas de la tabla con hora leída gruesa |
+| A7 suite 167 y 170 | CONFIRMADO | re-corrida propia; GitHub da #26 MERGEABLE y CLEAN |
+| A8 prueba nueva y mutaciones | CONFIRMADO EN PARTE | V2: 2 mutaciones caían por `ValueError` y no por aserción. **Corregido** en `dd606a65a1`; re-medido: las 12 atrapadas, «sin guarda» y «sin reset» ahora por `AssertionError` (`s15b_salida.txt`) |
+| A9 R13 en VRP Chile | CONFIRMADO | |
+| A10 basta pausar `main.yml` y `ocr_workflow.yml` | CONFIRMADO EN PARTE | V3: `archivar_evidencia.yml` y `graficos_completo.yml` conservan `-X ours` (no tocan CSV); V4: pausar no cancela la corrida en vuelo, hay que esperar a que no quede ninguna (paso 2 del plan) |
+
+Aviso del verificador: una limpieza de procesos suya mató `bash.exe` de más, posiblemente la terminal de otra sesión.
+
+## 9. SEGUIMIENTOS, SIN DATO y lo que no miré
 
 - **SIN DATO:** por qué el scraper nunca guardó las pasadas de Chillán del 15 y 16-oct que el OCR sí tiene (punto 3).
 - **SEGUIMIENTO:** el archivo del PR atribuye 29 filas de abril a un episodio que no las pierde; la lista de episodios de
   abril de la auditoría está incompleta. No cambia la reposición (las filas son reales).
-- **SEGUIMIENTO:** la corrida `40116786605` aparece «cancelled» en la lista aunque empujó con éxito (`e47b0d5b60`); con
-  `cancel-in-progress: true` una corrida cancelada puede haber escrito igual. El PR pasa a `false`.
+- **SEGUIMIENTO:** la corrida `40116786605` aparece «cancelled» aunque empujó (`e47b0d5b60`, V1): con
+  `cancel-in-progress: true` una corrida cancelada puede haber escrito. El PR lo pasa a `false` en `main.yml`, pero
+  `ocr_workflow.yml` sigue con `true` y con el cron encima del despacho (riesgo 1).
+- **SEGUIMIENTO:** `archivar_evidencia.yml` y `graficos_completo.yml` siguen mezclando con `-X ours` (V3). No tocan CSV de
+  datos hoy; mismo patrón que el PR erradica.
 - **No miré:** las imágenes de MIROVA; la reposición contra pérdidas anteriores a la base del PR más allá de lo que verificó
   la auditoría del 22-oct (sus 2.110); los workflows de otros repos que leen Mirova-v1.

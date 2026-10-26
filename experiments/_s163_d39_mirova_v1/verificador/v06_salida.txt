@@ -1,0 +1,85 @@
+== control: main.yml del PR (mut/): tests 3 failures 0 errors 0 skipped 0
+   pasa test_push_concurrente_no_pierde_ni_duplica
+   pasa test_paso_de_push_no_mezcla_datos_como_texto
+   pasa test_push_del_ocr_no_resuelve_choques_a_ciegas
+Exception in thread Thread-7 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f in position 2116: character maps to <undefined>
+== linea base: main.yml de main (f5fe3b9a64): tests 3 failures 2 errors 0 skipped 0
+   FALLA test_push_concurrente_no_pierde_ni_duplica: [AssertionError] AssertionError: el push perdio 1 llaves
+   FALLA test_paso_de_push_no_mezcla_datos_como_texto: [AssertionError] assert ('-X ours' not in 'git config ... subir."\nfi'
+   pasa test_push_del_ocr_no_resuelve_choques_a_ciegas
+== main.yml de la rama s163 (2ad6dd8730): tests 3 failures 0 errors 0 skipped 0
+   pasa test_push_concurrente_no_pierde_ni_duplica
+   pasa test_paso_de_push_no_mezcla_datos_como_texto
+   pasa test_push_del_ocr_no_resuelve_choques_a_ciegas
+Exception in thread Thread-11 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f in position 948: character maps to <undefined>
+== R2 main.yml sin reset a origin/main: tests 3 failures 2 errors 0 skipped 0
+   FALLA test_push_concurrente_no_pierde_ni_duplica: [AssertionError] AssertionError: Guarda de llaves OK: monitoreo_satelital/registro_vrp_consolidado.csv
+   FALLA test_paso_de_push_no_mezcla_datos_como_texto: [OTRA EXCEPCION] ValueError: substring not found
+   pasa test_push_del_ocr_no_resuelve_choques_a_ciegas
+Exception in thread Thread-13 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f in position 2112: character maps to <undefined>
+== R2 main.yml vuelve el pull -X ours antes del push: tests 3 failures 2 errors 0 skipped 0
+   FALLA test_push_concurrente_no_pierde_ni_duplica: [AssertionError] AssertionError: el push perdio 1 llaves
+   FALLA test_paso_de_push_no_mezcla_datos_como_texto: [AssertionError] assert ('-X ours' not in 'git config ...tos"; exit 1'
+   pasa test_push_del_ocr_no_resuelve_choques_a_ciegas
+== R3 main.yml sin guarda: tests 3 failures 1 errors 0 skipped 0
+   pasa test_push_concurrente_no_pierde_ni_duplica
+   FALLA test_paso_de_push_no_mezcla_datos_como_texto: [OTRA EXCEPCION] ValueError: substring not found
+   pasa test_push_del_ocr_no_resuelve_choques_a_ciegas
+== R2 ocr_workflow vuelve -X ours: tests 3 failures 1 errors 0 skipped 0
+   pasa test_push_concurrente_no_pierde_ni_duplica
+   pasa test_paso_de_push_no_mezcla_datos_como_texto
+   FALLA test_push_del_ocr_no_resuelve_choques_a_ciegas: [AssertionError] assert ('-X ours' not in 'git config ... subir."\nfi'
+Exception in thread Thread-19 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f in position 979: character maps to <undefined>
+== mutacion propia: main.yml con fetch sin reset pero con pull --rebase SIN -X ours: tests 3 failures 2 errors 0 skipped 0
+   FALLA test_push_concurrente_no_pierde_ni_duplica: [AssertionError] AssertionError: Already up to date.
+   FALLA test_paso_de_push_no_mezcla_datos_como_texto: [AssertionError] assert 'rebase' not in 'git config ...tos"; exit 1'
+   pasa test_push_del_ocr_no_resuelve_choques_a_ciegas
+FIN

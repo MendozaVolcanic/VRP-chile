@@ -1,0 +1,34 @@
+94ccb8430862e1123b33f1cb3ef698b5 */d/vrp-trabajo/s163-d39/verificador/ciclo_A/monitoreo_satelital/registro_vrp_consolidado.csv
+94ccb8430862e1123b33f1cb3ef698b5 */d/vrp-trabajo/s163-d39/verificador/ciclo_B/monitoreo_satelital/registro_vrp_consolidado.csv
+=== A: scraper (main) + backfill
+🔵 INICIO SCRAPER V17 (+ Tupungatito)
+🔵 Filas leídas desde latest.php: 528
+✅ Proceso completado correctamente.
+scraper: salida 0 (sin sys.exit)
+   Ultima_Actualizacion_UTC: rellenadas 0 | vacias por ambigua 11 | inexistente 0 | ilegible 0 | sin hora de Chile 94
+   sin cambios
+=== B: reponer + scraper (PR) + backfill + guarda + reponer de nuevo
+reponer_filas: 2351 filas repuestas
+🔵 INICIO SCRAPER V17 (+ Tupungatito)
+🔵 Filas leídas desde latest.php: 528
+✅ Proceso completado correctamente.
+scraper: SystemExit 0
+   - ambigua: Ultima_Actualizacion=2026-04-04 23:45:46 | Lastarria | MODIS | pasada 2026-04-04 19:25:00 UTC
+   escrito
+Guarda de llaves OK: monitoreo_satelital/registro_vrp_consolidado.csv
+guarda rc=0
+reponer_filas: 0 filas repuestas
+=== OCR A (main)
+guardar_ocr sin eventos: ok
+backfill_horas_utc.py exit 0 |    sin cambios 
+reconciliar_latest.py exit 0 | 🔁 Reconciliación OCR↔latest.php: 0 eventos reclasificados a FALSO_POSITIVO 
+merger_maestro.py exit 0 | ================================================================================ 
+=== OCR B (PR)
+guardar_ocr sin eventos: ok
+backfill_horas_utc.py exit 0 |    sin cambios 
+reparar_mojibake.py exit 0 | reparar_mojibake: 647 notas reparadas en monitoreo_satelital/registro_vrp_ocr.csv 
+reconciliar_latest.py exit 0 | 🔁 Reconciliación OCR↔latest.php: 0 eventos reclasificados a FALSO_POSITIVO 
+merger_maestro.py exit 0 | ================================================================================ 
+Guarda de llaves OK: monitoreo_satelital/registro_vrp_ocr.csv
+guarda ocr rc=0
+FIN
