@@ -42,6 +42,14 @@ sys.path.insert(0, str(RAIZ / "experiments/_s158_audit_r2/granulos"))
 sys.path.insert(0, str(RAIZ / "experiments/_s162_v750c"))
 import mirova_v750_r2 as ORA  # noqa: E402
 import oraculo_ablacion as OA  # noqa: E402
+sys.path.insert(0, str(RAIZ / "experiments/_s163_o2alt"))
+import delaunay_perturbado as DP  # noqa: E402
+
+# S162 (relevo VIIRS 750 2, tras O2 en MATLAB): el fillmissing2 del oráculo era el de Qhull, que no es el de MATLAB
+# (41 de 84 fondos). El de MATLAB es un Delaunay con desempate simbólico (S163, experiments/_s163_o2alt/INFORME.md H1:
+# 166 de 166 VRP de O2). La referencia de esta prueba usa esa regla, tomada del módulo INDEPENDIENTE del subagente de
+# S163 (no del port del pipeline), así que E1 compara dos implementaciones de la misma regla, no una consigo misma.
+ORA._fillmissing2_lineal = lambda A, jitter=0.0, semilla=0: DP.rellenar(A, "xy_fila_col")[0]
 
 N, CELDA = 67, 750.0
 RUNS = ("run_39682867040", "run_39693661527", "run_39680724047")

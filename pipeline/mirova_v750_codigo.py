@@ -13,9 +13,10 @@
 #                 datos personales.
 # Variables     : NTI, contraste NTI y ETI contra la media 3 x 3, umbrales por región (BOX), fondo M13
 #                 interpolado, VRP = suma de (L - L_fondo) x 1,97e7 x 0,5625 / 1e6.
-# Limitaciones  : fillmissing2 de MATLAB no documenta su triangulación: el fondo puede variar en la banda de
-#                 triangulación (experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py, docstring). La ROI por
-#                 volcán la decide V750-B. El umbral contextual depende de la sigma de TODA la grilla (S-1).
+# Limitaciones  : fillmissing2 de MATLAB no documenta su triangulación; se reproduce con un Delaunay de desempate
+#                 simbólico que iguala a MATLAB R2026b en 166 de 166 escenas (S163 O2), sin que el mecanismo interno
+#                 de MATLAB esté verificado. La ROI por volcán la decide V750-B. El umbral contextual depende de la
+#                 sigma de TODA la grilla (S-1).
 # Refs/datos    : MIROVA_VIIRS750_hotspot_detection.m y MIROVA_VIIRS750_VRP.m (copia con hashes en
 #                 experiments/_s158_d17_diseno/osf_codigo_mirova/); oráculo validado contra Octave en 791 de 791
 #                 escenas (S159 O1). Ficha: docs/FICHA_SDA_VRP_CHILE.md
@@ -34,9 +35,11 @@ Diego Coppola en OSF (https://osf.io/zm62w/, doi 10.17605/OSF.IO/ZM62W), v1.0, b
     WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. (Texto completo: experiments/_s158_d17_diseno/osf_codigo_mirova/
     LICENSE.txt.)
 
-La traducción sigue, línea por línea, al oráculo `experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py`, y la
-prueba `experiments/_s162_v750a/equivalencia_v750a.py` exige que este módulo dé la misma máscara índice por índice,
-el mismo VRP a 1e-9 relativo y la misma grilla que ese oráculo. Lo que se agrega al oráculo no cambia ninguna
+La traducción sigue, línea por línea, al oráculo `experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py`, salvo el
+`fillmissing2`, que aquí es el de MATLAB (desempate simbólico; ver más abajo): la prueba
+`experiments/_s162_v750a/equivalencia_v750a.py` exige la misma máscara índice por índice, la misma grilla y el mismo
+VRP a 1e-9 relativo que ese oráculo con el mismo `fillmissing2`, y `tests/test_mirova_v750_codigo_s162.py` y
+`experiments/_s162_v750a/oro_fillmissing2_o2.py` comparan el fondo y el VRP contra las salidas de MATLAB de O2. Lo que se agrega al oráculo no cambia ninguna
 máscara: la grilla por volcán (regla GEO), la caja por volcán, el record con el esquema de hoy y los contrastes de la
 celda decisiva para el diagnóstico S-1 (PREREGISTRO_V750A.md §5).
 
@@ -351,24 +354,131 @@ def detectar_mirova(m13, m15, box, dayflag, sunglint, devolver_diag=False):
     return _salida(mask, d)
 
 
+# ---------------------------------------------------------------------------------------------------- fillmissing2
+# POR QUÉ esta triangulación y no la de scipy: en una grilla regular cuatro centros vecinos están en un mismo círculo,
+# así que la triangulación de Delaunay no es única, y el fondo bajo un píxel caliente depende de qué diagonal se elige
+# (en un hueco de 3 x 3 los cuatro vecinos del medio son cocirculares y el centro cae justo sobre esa arista). MATLAB
+# rompe cada empate como una perturbación simbólica al estilo CGAL (orden lexicográfico y orientación) en el marco
+# x = fila, y = columna. Con esa regla el VRP es el de MATLAB R2026b en 166 de 166 escenas de O2 (máximo 1,55e-15) y el
+# fondo completo en 84 de 84, incluida Etna al valor del OSF v2.5; con los ejes cambiados calza en 42 de 166 y Qhull
+# en 41 de 84 fondos. Regla hallada por el subagente de la coordinadora S163 (rama s163-o2-alternativa, commit
+# cd812c746, experiments/_s163_o2alt/INFORME.md H1 y delaunay_perturbado.py); aquí se porta tal cual, sin el control de
+# aristas ilegales, que vive en la prueba. Que MATLAB use CGAL por dentro es SOSPECHA: lo medido es la igualdad.
+
+def _orient(a, b, c):
+    v = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    return (v > 0) - (v < 0)
+
+
+def _incircle(a, b, c, d):
+    """> 0 si d está dentro del círculo de a, b, c (antihorario). Entero exacto."""
+    adx, ady = a[0] - d[0], a[1] - d[1]
+    bdx, bdy = b[0] - d[0], b[1] - d[1]
+    cdx, cdy = c[0] - d[0], c[1] - d[1]
+    ad, bd, cd = adx * adx + ady * ady, bdx * bdx + bdy * bdy, cdx * cdx + cdy * cdy
+    v = adx * (bdy * cd - bd * cdy) - ady * (bdx * cd - bd * cdx) + ad * (bdx * cdy - bdy * cdx)
+    return (v > 0) - (v < 0)
+
+
+def _lado_perturbado(p0, p1, p2, p):
+    """side_of_oriented_circle(p0, p1, p2, p, perturb=true) de CGAL: +1 dentro, -1 fuera; p0 p1 p2 antihorario."""
+    s = _incircle(p0, p1, p2, p)
+    if s != 0:
+        return s
+    pts = sorted([(tuple(p0), 0), (tuple(p1), 1), (tuple(p2), 2), (tuple(p), 3)], key=lambda t: t[0])
+    for i in (3, 2):
+        quien = pts[i][1]
+        if quien == 3:
+            return -1
+        o = 0
+        if quien == 2:
+            o = _orient(p0, p1, p)
+        elif quien == 1:
+            o = _orient(p0, p, p2)
+        elif quien == 0:
+            o = _orient(p, p1, p2)
+        if o != 0:
+            return o
+    raise RuntimeError("perturbación sin decidir")
+
+
+def _triangular_perturbado(P):
+    """Delaunay único por perturbación simbólica: Qhull de partida y volteos de Lawson con el predicado perturbado,
+    en aritmética entera, hasta que ninguna arista lo viole. Devuelve triángulos (i, j, k) antihorarios."""
+    from scipy.spatial import Delaunay
+    tri = Delaunay(P.astype(float))
+    if len(tri.coplanar):
+        raise RuntimeError("Qhull dejó puntos fuera de la triangulación")
+    pts = [tuple(int(v) for v in q) for q in P]
+    T = []
+    for s in tri.simplices:
+        i, j, k = (int(x) for x in s)
+        o = _orient(pts[i], pts[j], pts[k])
+        if o == 0:
+            raise RuntimeError("triángulo plano en la triangulación inicial")
+        T.append([i, j, k] if o > 0 else [i, k, j])
+    ar = {}
+    for t, (i, j, k) in enumerate(T):
+        ar[(i, j)] = t
+        ar[(j, k)] = t
+        ar[(k, i)] = t
+    pila = list(ar.keys())
+    while pila:
+        a, b = pila.pop()
+        t1, t2 = ar.get((a, b)), ar.get((b, a))
+        if t1 is None or t2 is None:
+            continue
+        c = [v for v in T[t1] if v != a and v != b][0]
+        d = [v for v in T[t2] if v != a and v != b][0]
+        if _lado_perturbado(pts[a], pts[b], pts[c], pts[d]) > 0:
+            if _orient(pts[c], pts[a], pts[d]) <= 0 or _orient(pts[d], pts[b], pts[c]) <= 0:
+                raise RuntimeError("volteo sobre cuadrilátero no convexo")
+            for e in ((a, b), (b, c), (c, a), (b, a), (a, d), (d, b)):
+                ar.pop(e, None)
+            T[t1], T[t2] = [c, a, d], [d, b, c]
+            for t in (t1, t2):
+                i, j, k = T[t]
+                ar[(i, j)] = t
+                ar[(j, k)] = t
+                ar[(k, i)] = t
+            pila.extend([(a, d), (d, b), (b, c), (c, a)])
+    return T
+
+
 def _fillmissing2_lineal(A):
-    """fillmissing2(A,'linear') aproximado: Delaunay lineal, vecino más cercano fuera de la envolvente (como el
-    oráculo; la triangulación de una grilla regular no es única, ver la ficha)."""
+    """fillmissing2(A, 'linear') de MATLAB: interpolación lineal sobre el Delaunay perturbado (x = fila, y = columna)
+    de las celdas con dato; vecino más cercano fuera de la envolvente (Etna, con NaN de borde, lo confirma)."""
     from scipy.interpolate import griddata
-    n, m = A.shape
-    yy, xx = np.mgrid[0:n, 0:m].astype(float)
-    ok = ~np.isnan(A)
-    pts = np.column_stack([yy[ok], xx[ok]])
-    falt = ~ok
-    out = A.copy()
-    if falt.any():
-        q = np.column_stack([yy[falt], xx[falt]])
-        v = griddata(pts, A[ok], q, method="linear")
-        if np.isnan(v).any():
-            vn = griddata(pts, A[ok], q, method="nearest")
-            v = np.where(np.isnan(v), vn, v)
-        out[falt] = v
-    return out
+    A = np.asarray(A, float)
+    filas, cols = np.indices(A.shape)
+    ok = np.isfinite(A)
+    B = A.copy()
+    if ok.all() or not ok.any():
+        return B
+    P = np.column_stack([filas[ok], cols[ok]]).astype(np.int64)
+    val = A[ok]
+    T = _triangular_perturbado(P)
+    Q = np.column_stack([filas[~ok], cols[~ok]]).astype(np.int64)
+    Ta = np.array(T)
+    tx, ty = P[Ta, 0], P[Ta, 1]
+    xmin, xmax, ymin, ymax = tx.min(1), tx.max(1), ty.min(1), ty.max(1)
+    out = np.full(len(Q), np.nan)
+    for qi, (qx, qy) in enumerate(Q):
+        for t in np.nonzero((xmin <= qx) & (qx <= xmax) & (ymin <= qy) & (qy <= ymax))[0]:
+            i, j, k = T[t]
+            a, b, c = P[i], P[j], P[k]
+            den = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+            w1 = (b[0] - qx) * (c[1] - qy) - (b[1] - qy) * (c[0] - qx)
+            w2 = (c[0] - qx) * (a[1] - qy) - (c[1] - qy) * (a[0] - qx)
+            w3 = (a[0] - qx) * (b[1] - qy) - (a[1] - qy) * (b[0] - qx)
+            if w1 >= 0 and w2 >= 0 and w3 >= 0:
+                out[qi] = (w1 * val[i] + w2 * val[j] + w3 * val[k]) / den
+                break
+    if np.isnan(out).any():
+        sin = np.isnan(out)
+        out[sin] = griddata(P.astype(float), val, Q[sin].astype(float), method="nearest")
+    B[~ok] = out
+    return B
 
 
 def vrp_mirova(m13, mascara, coef=COEF_VRP_V750):
