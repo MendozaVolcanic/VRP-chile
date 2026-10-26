@@ -569,6 +569,28 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~04:15 UTC (S163, vuelta 7): inventario del trabajo paralelo; loop/activo a main (#908); worktrees liberados
+- Inventario S158-S163 (subagente de sólo lectura, `scratchpad\INVENTARIO_PARALELO.md` de S163). Conflictos reales sólo
+  tres: (1) encabezado de D25 en `docs/MIROVA_DIVERGENCES.md` (main con la marca S158, loop/activo con la S162): resuelto
+  en loop/activo conservando las dos (`a907c44f3`); (2) `claude/s162-modis-2` contra main en ese trozo y en
+  `PREREGISTRO_MXD03.md`, que main (#906) presenta como borrador cuando ya está sellado: pedido a `loop-modis-2` un PR chico
+  con el sello, la adenda y los seguimientos de #906 (FICHA_SDA:29, sec5_methods:7, Coppola 2026 en MISSION); (3) #889, ya
+  en su sesión.
+- **Huérfano mayor: loop/activo no llegaba a main desde #816 (15-oct, 421 commits)**. Abierto **#908** (loop/activo a main,
+  339 archivos, sólo `docs/`, `tasks/`, `experiments/` y `CLAUDE.md`, comprobado con `git diff --stat`), con merge commit
+  para que los próximos no choquen. Otros huérfanos que quedan anotados: PORTES y censo del oráculo de S159
+  (`s159-oraculo-censo`, 110 archivos sin PR); evidencia de S162 repartida en ~7 ramas (MOD-B, A61, SNPP, O2, H3, V375) sin
+  plan de unión; borradores viejos #776, #880, #886, #887, #890 sin decidir; pendientes del instrumento terminado
+  (placebos D-44 sobre producción, tarea 1.35, «no observado» frente a hueco de NASA); A/B diurno sobre K (tarea 1.32).
+- Las dos explicaciones de O2 no se contradicen: «promedio de la fila a ±2» (verificador de O2) es el caso de un píxel de la
+  regla general de Delaunay con desempate (alternativa a O2), que `loop-viirs750-2` ya portó a la vía (166 de 166, 84 de 84).
+- Worktrees a la papelera (limpios y con su commit en el remoto, comprobado uno por uno): `C:\vrp-trabajo\
+  s162-negmodis-disparo`, `s162-pr-mxd03`, `s162-v375-prot`, `s162-verif-snpp`, `D:\vrp-trabajo\temporales\s158_d17`,
+  `D:\vrp-trabajo\worktrees\s162-instrumento-tareas`; `git worktree prune`. No tocados: los de `.claude\worktrees` de
+  sesiones viejas y los que tienen copias de verificador sin seguimiento (`s162-modis-774bb0`, `s162-v750a-eval`,
+  `s162-a61`, `D:\vrp-trabajo\s162-mxd03`, `s159-pruebas`); `C:\vrp-trabajo\s162-modd` tiene 14 archivos sin commitear de
+  `loop-modis-2` (activo).
+
 ### 2026-10-26 ~03:30 UTC, servidor 03:16 (S163, vuelta 6): regla de MATLAB identificada; dos paquetes esperan MATLAB
 - **Alternativa a O2 entregada** (subagente Opus, `s163-o2-alternativa` `cd812c746`, `experiments/_s163_o2alt/INFORME.md`):
   (1) **regla de `fillmissing2` identificada**: Delaunay con perturbación simbólica estilo CGAL (x = fila, y = columna),
