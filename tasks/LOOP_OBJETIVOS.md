@@ -578,6 +578,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   carga de memoria de varias sesiones a la vez; no se toca (es configuración del sistema). Las tandas de MOD-D corren en
   GitHub, no en el disco local.
 - Regla vigente: bajo 3 GB en C: o D: se para. `loop-viirs750-2` detiene su medidor si C: baja de 3 GB.
+- Corrección: parte de la subida de 4,7 a 5,8 GB la explica `loop-viirs750-2`, que sacó su worktree
+  `C:rp-trabajo\s162-via-mirova` (1,2 GB, rama mergeada en #907 y en el remoto) y temporales ya leídos. Liberar el
+  espacio indica **borrado definitivo, no papelera**: contra la regla del proyecto, aunque no se perdió nada (todo está en
+  git). Recordado a la sesión: desde ahora, sólo papelera.
 
 ### 2026-10-26 15:26 UTC (S164, vuelta 11): t2 de MOD-D terminada; t3 despachada (run 40349358358)
 - t2 (run 40344051900): completed success, 10 de 10 jobs, ~32 min. La cuenta `loop-modis-2` con `contar_tanda.py`.
