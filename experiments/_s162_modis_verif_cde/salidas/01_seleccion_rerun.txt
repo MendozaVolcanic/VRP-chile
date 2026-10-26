@@ -1,0 +1,55 @@
+insumos: poblacion_completa.json cb48ddd4c90498aaff5bdd3a3341ea3e7688337c (esperado cb48ddd4c90498aaff5bdd3a3341ea3e7688337c) | objetivos_portes.json 7455d89c5312acc435f2e740fb39c43990478e0f (esperado 7455d89c5312acc435f2e740fb39c43990478e0f)
+meta de la poblacion: {"ventanas": {"VIIRS375": ["2026-04-01", "2026-10-21"], "MODIS": ["2026-03-01", "2026-10-21"]}, "referencia": {"registro_vrp_consolidado.csv": "fe2d0a571bf22b89ef8afda67a245d8adbcaefff", "registro_vrp_ocr.csv": "4ddd54810fe343ab28d5242ba25f53e2343850e7"}, "data_records": "origin/main 533398f8f", "tol_pareo_s": 120, "regla_minimas": "SN", "lectura_protegida": "A"}
+
+== MODIS en la poblacion congelada: 5306 pasadas (pos + negativos limpios, ['2026-03-01', '2026-10-21'])
+  sin 17 a 20 de octubre y solo las que deciden: 5224
+  clases: {'neg_pub': 39, 'neg_resto': 5093, 'pos_bajo': 42, 'pos_prot': 50} (S159, 02_seleccion_salida.txt: pos_prot 50, neg_resto 5093, pos_bajo 42, neg_pub 39)
+
+== A119, canal por canal (MODIS)
+  alertas MODIS solo del OCR (la tabla no alerta): 0; de ellas con fila RUTINA en la tabla (serian negativo con la tabla sola): 0; K no publica en 0
+  neg_resto por canal con fila de MIROVA: {('CONS',): 5093}
+  tipos de fila OCR dentro de neg_resto: {}
+
+== ya sorteadas en S159 (neg_resto MODIS): 38; ids [4, 6, 9, 13, 18, 25, 32, 36, 38, 41, 48, 49, 52, 53, 55, 56, 57, 58, 60, 61, 68, 72, 85, 95, 99, 102, 103, 109, 127, 130, 131, 132, 134, 135, 136, 139, 142, 146]
+  marco del sorteo (estrato sin las ya sorteadas): 5055
+
+== sorteo: n = 400, semilla 162, asignacion proporcional volcan x cenit
+   Chaiten                z<=40  N_h  224  n_h  18  peso 12.44
+   Chaiten                z>40   N_h  336  n_h  27  peso 12.44
+   Copahue                z<=40  N_h  216  n_h  17  peso 12.71
+   Copahue                z>40   N_h  273  n_h  22  peso 12.41
+   Isluga                 z<=40  N_h  175  n_h  14  peso 12.50
+   Isluga                 z>40   N_h  221  n_h  17  peso 13.00
+   Lascar                 z<=40  N_h   95  n_h   7  peso 13.57
+   Lascar                 z>40   N_h  183  n_h  14  peso 13.07
+   Lastarria              z<=40  N_h  184  n_h  14  peso 13.14
+   Lastarria              z>40   N_h  237  n_h  19  peso 12.47
+   Llaima                 z<=40  N_h  226  n_h  18  peso 12.56
+   Llaima                 z>40   N_h  268  n_h  21  peso 12.76
+   NevadosDeChillan       z<=40  N_h  200  n_h  16  peso 12.50
+   NevadosDeChillan       z>40   N_h  262  n_h  21  peso 12.48
+   PlanchonPeteroa        z<=40  N_h  204  n_h  16  peso 12.75
+   PlanchonPeteroa        z>40   N_h  281  n_h  22  peso 12.77
+   PuyehueCordonCaulle    z<=40  N_h  201  n_h  16  peso 12.56
+   PuyehueCordonCaulle    z>40   N_h  300  n_h  24  peso 12.50
+   Tupungatito            z<=40  N_h  199  n_h  16  peso 12.44
+   Tupungatito            z>40   N_h  268  n_h  21  peso 12.76
+   Villarrica             z<=40  N_h  222  n_h  18  peso 12.33
+   Villarrica             z>40   N_h  280  n_h  22  peso 12.73
+  pesos: min 12.33 max 13.57 (autoponderada si son casi iguales); suma 5055.0 (= marco 5055)
+  partidas elegidas: 10
+  por mes: {'2026-03': 49, '2026-04': 41, '2026-05': 57, '2026-06': 60, '2026-07': 53, '2026-08': 58, '2026-09': 52, '2026-10': 30}
+  por plataforma: {'MODIS_AQUA': 208, 'MODIS_TERRA': 192}
+  tramos A104: antes de #535 (2026-08-28 23:00 UTC) 315, desde 85; antes de 2026-09-18 349
+  sha de los records elegidos: {'3695f67580e8de5fcf3653786ea61def0187ecb4': 338, '34cea39e4b64f0862e4bad949016a57ea181f8c4': 49, '57d18ad782ffb9572f25ef884ae61d608f6c6e01': 8, 'e0c90caa7247466297d3ed6453052519c07992ca': 3, '34c23d1a0796fe8a7032677364ae3af4c5d7ef20': 1, '3218a66b73f8f6186c7b842ccfc433cd76defda6': 1}
+
+== cota de Wilson (95 %) con 0 eventos, para el tamano
+   n  37: superior 0.0941 -> 475.5 pasadas del marco
+   n 100: superior 0.0370 -> 187.0 pasadas del marco
+   n 200: superior 0.0188 -> 95.3 pasadas del marco
+   n 300: superior 0.0126 -> 63.9 pasadas del marco
+   n 350: superior 0.0109 -> 54.9 pasadas del marco
+   n 400: superior 0.0095 -> 48.1 pasadas del marco
+  granulos unicos: 325 | ids 1000 a 1399
+  control de instrumento (lote S159, mismo id): [(83, 'Lascar', '2026-03-27 07:10', 'pos_prot'), (97, 'Lascar', '2026-04-25 07:35', 'pos_prot'), (75, 'Lascar', '2026-03-10 07:50', 'pos_prot'), (89, 'Lascar', '2026-04-07 07:35', 'pos_prot'), (19, 'Lascar', '2026-04-05 01:35', 'pos_prot'), (79, 'Lascar', '2026-03-15 07:45', 'pos_prot'), (31, 'Lascar', '2026-05-03 01:45', 'pos_prot'), (23, 'Lascar', '2026-04-18 01:50', 'pos_prot'), (99, 'PuyehueCordonCaulle', '2026-04-27 07:20', 'neg_resto'), (55, 'NevadosDeChillan', '2026-08-23 02:35', 'neg_resto')]
+escrito objetivos_rerun.json sha 02ee29f8edc269aefa65874e6a834ff1fb41ec75

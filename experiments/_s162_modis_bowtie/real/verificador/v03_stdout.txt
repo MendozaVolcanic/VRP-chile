@@ -1,0 +1,7 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf
+(a) linea[0,0] % 10 de los 403 recortes evaluables: {0: 106, 2: 74, 4: 84, 6: 74, 8: 65} -> 297 recortes NO empiezan en frontera de barrido; comun.geometria usa la linea del granulo, asi que la asignacion no depende de donde empieza el recorte
+(b) control positivo: con linea + 1, la mascara de A_centro_cubierto_ant cambia en 156 de 156 pasadas z>=50 (tiene que ser ~todas); en el nadir (z<15) queda igual (vacia) en 55 de 55
+(c) z<15: salto en u entre detectores vecinos del mismo barrido, mediana 1000 m; salto del detector 9 al detector 0 del barrido siguiente, mediana 1089 m (n 55); negativo = el barrido siguiente arranca ATRAS del anterior (bow tie)
+(c) z>=50: salto en u entre detectores vecinos del mismo barrido, mediana 1692 m; salto del detector 9 al detector 0 del barrido siguiente, mediana -5262 m (n 156); negativo = el barrido siguiente arranca ATRAS del anterior (bow tie)
+exit 0

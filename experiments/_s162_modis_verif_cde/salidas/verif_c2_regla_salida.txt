@@ -1,0 +1,42 @@
+filas: 149 | DeltaE_otros punto: -44.0
+IC DeltaE_otros [-59.50, -29.50]
+
+== analítico: cuantiles de Jeffreys Beta(x+0,5; n-x+0,5) por 5.055, n = 400
+  x 0: p en [0.00000; 0.00626] -> +[0.0; 31.6] pasadas; punto -44 + 0.0
+  x 1: p en [0.00027; 0.01162] -> +[1.4; 58.8] pasadas; punto -44 + 12.6
+  x 2: p en [0.00104; 0.01594] -> +[5.3; 80.6] pasadas; punto -44 + 25.3
+  x 7: p en [0.00786; 0.03405] -> +[39.7; 172.1] pasadas; punto -44 + 88.5
+  x 8: p en [0.00950; 0.03738] -> +[48.0; 189.0] pasadas; punto -44 + 101.1
+
+== fronteras de x por semilla (n = 400, N_MARCO 5.055)
+  semilla 163: CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8; monótona True
+  semilla 164: CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8; monótona True
+  semilla 165: CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8; monótona True
+  semilla 166: CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8; monótona True
+  semilla 167: CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8; monótona True
+  semilla 168: CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8; monótona True
+  semilla 169: CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8; monótona True
+  semilla 170: CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8; monótona True
+  semilla 171: CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8; monótona True
+  semilla 172: CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8; monótona True
+  fronteras distintas entre semillas: [(1, 8)]
+
+== sensibilidad al denominador: N_MARCO 5.093 en vez de 5.055 (semilla del auditor)
+  CONFIRMA hasta x 0, INDECIDIBLE 1 a 7, REFUTA desde 8
+
+== monotonía y n mínimo que confirma con x = 0 (semilla del auditor)
+  n 300: x0 -> INDECIDIBLE (hi +0.9); INDECIDIBLE desde 0; REFUTA desde 7; monótona True
+  n 310: x0 -> CONFIRMA (hi -0.4); INDECIDIBLE desde 1; REFUTA desde 7; monótona True
+  n 320: x0 -> CONFIRMA (hi -1.6); INDECIDIBLE desde 1; REFUTA desde 7; monótona True
+  n 330: x0 -> CONFIRMA (hi -2.7); INDECIDIBLE desde 1; REFUTA desde 7; monótona True
+  n 340: x0 -> CONFIRMA (hi -3.8); INDECIDIBLE desde 1; REFUTA desde 7; monótona True
+  n 350: x0 -> CONFIRMA (hi -4.8); INDECIDIBLE desde 1; REFUTA desde 8; monótona True
+  n 360: x0 -> CONFIRMA (hi -5.8); INDECIDIBLE desde 1; REFUTA desde 8; monótona True
+  n 370: x0 -> CONFIRMA (hi -6.7); INDECIDIBLE desde 1; REFUTA desde 8; monótona True
+  n 380: x0 -> CONFIRMA (hi -7.7); INDECIDIBLE desde 1; REFUTA desde 8; monótona True
+  n 390: x0 -> CONFIRMA (hi -8.6); INDECIDIBLE desde 1; REFUTA desde 8; monótona True
+  n 400: x0 -> CONFIRMA (hi -9.4); INDECIDIBLE desde 1; REFUTA desde 8; monótona True
+
+== lo que el IC de x = 0 NO incluye: la cota de Wilson (la 'cota conservadora' del auditor) y qué pasa si el estrato pos_bajo (censo, 42 de 42) se trata como fijo
+  cota conservadora x0 n400: +18.6 (nunca confirma, declarado por el auditor)
+  pos_bajo fijo: IC DeltaE_otros [-57.7; -31.3]; con x0 n400 IC total [-55.4; -10.1] (más angosto: el auditor lo declara y no lo usa)

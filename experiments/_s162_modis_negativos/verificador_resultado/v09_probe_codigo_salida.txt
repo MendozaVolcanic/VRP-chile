@@ -1,0 +1,97 @@
+== probe_portes.py: manejo de errores, faltan, chunk ==
+21:Uso: python probe_portes.py --objetivos objetivos_portes.json --out out --sensor VIIRS375 --chunk 0 --nchunks 8
+34:import traceback
+59:        except Exception as e:  # noqa: BLE001  (ReadTimeout de CMR)
+76:        except Exception as e:  # noqa: BLE001
+306:        r["estado"] = err
+317:            r["estado"] = "volcan_fuera_del_granulo"
+322:            r["estado"] = "volcan_fuera_del_granulo"
+339:            r["port_estado"] = "grilla_incompleta"
+356:            except Exception as e:  # noqa: BLE001
+357:                r["K"] = {"error": f"{type(e).__name__}: {e}", "traza": traceback.format_exc()[-1200:]}
+358:        r["estado"] = "ok"
+359:    except Exception as e:  # noqa: BLE001
+360:        r["estado"] = f"error: {type(e).__name__}: {e}"
+361:        r["traza"] = traceback.format_exc()[-1500:]
+366:            except OSError:
+413:    ap.add_argument("--chunk", type=int, default=0)
+414:    ap.add_argument("--nchunks", type=int, default=1)
+435:    mias = [o for n, o in enumerate(objs) if n % a.nchunks == a.chunk]
+436:    print(f"{a.sensor or 'todos'} chunk {a.chunk}/{a.nchunks}: {len(mias)} pasadas", flush=True)
+437:    resultados, faltan = [], 0
+438:    for o in mias:
+442:        except Exception as e:  # noqa: BLE001
+444:                 "estado": f"error: {type(e).__name__}: {e}", "traza": traceback.format_exc()[-1500:]}
+445:        if r.get("estado") != "ok":
+446:            faltan += 1
+449:        print(f"   estado={r.get('estado')} {r.get('segundos')} s | port {pf.get('npix')} px {pf.get('vrp_mw')} | "
+452:        (outdir / f"resultados_{a.sensor or 'todos'}_{a.chunk:02d}.json").write_text(
+454:    print(f"pasadas sin procesar: {faltan} de {len(mias)}", flush=True)
+455:    return 2 if faltan else 0
+
+== lineas 395-459 ==
+            if foco:
+                mir[np.hypot(xs - X0, ys - Y0) < 0.7 * paso] *= 3.0
+            crop = {"lat": np.asarray(la), "lon": np.asarray(lo), "mir": mir, "tir": tir}
+            gm, gt = grillar(crop, g, epsg)
+            res[foco] = MP.correr(gm, gt, g, X0, Y0, 0, 100.0, cfg, semillas=0)
+        print(b, "sin foco npix", res[False]["npix"], "| con foco npix", res[True]["npix"], "vrp", res[True]["vrp_mw"],
+              "pixeles", res[True]["pixeles"][:3], flush=True)
+        assert res[False]["npix"] == 0, f"{b}: control negativo sintético con alertas"
+        assert res[True]["npix"] >= 1 and all(p[2] == 2 and p[3] <= 1.5 * paso / 1000 for p in res[True]["pixeles"]), \
+            f"{b}: el foco no cae en la caja de cumbre"
+    print("PRUEBA SIN RED OK", flush=True)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--objetivos", default=str(AQUI / "objetivos_portes.json"))
+    ap.add_argument("--out", default="out")
+    ap.add_argument("--sensor", default="")
+    ap.add_argument("--chunk", type=int, default=0)
+    ap.add_argument("--nchunks", type=int, default=1)
+    ap.add_argument("--solo", default="")
+    ap.add_argument("--sin-red", action="store_true")
+    a = ap.parse_args()
+    prueba_sin_red()
+    if a.sin_red:
+        return 0
+    if not os.environ.get("EARTHDATA_TOKEN", "").strip():
+        print("EARTHDATA_TOKEN vacio: no se corre (A71)")
+        return 1
+    from pipeline.fetch import auth
+    auth()
+    outdir = Path(a.out)
+    outdir.mkdir(parents=True, exist_ok=True)
+    destino = Path(os.environ.get("VRP_TMP_DIR", "/tmp/vrp_tmp")) / "granulos"
+    objs = json.loads(Path(a.objetivos).read_text(encoding="utf-8"))
+    if a.sensor:
+        objs = [o for o in objs if o["b"] == a.sensor]
+    if a.solo:
+        quiero = {int(x) for x in a.solo.split(",")}
+        objs = [o for o in objs if o["id"] in quiero]
+    mias = [o for n, o in enumerate(objs) if n % a.nchunks == a.chunk]
+    print(f"{a.sensor or 'todos'} chunk {a.chunk}/{a.nchunks}: {len(mias)} pasadas", flush=True)
+    resultados, faltan = [], 0
+    for o in mias:
+        print(f"== {o['id']} {o['volcan']} {o['hora_utc']} {o['granule']}", flush=True)
+        try:
+            r = procesar(o, destino, outdir)
+        except Exception as e:  # noqa: BLE001
+            r = {"id": o["id"], "volcan": o["volcan"], "hora_utc": o["hora_utc"], "b": o["b"],
+                 "estado": f"error: {type(e).__name__}: {e}", "traza": traceback.format_exc()[-1500:]}
+        if r.get("estado") != "ok":
+            faltan += 1
+        pf = (r.get("port") or {}).get("fisica") or {}
+        kr = ((r.get("K") or {}).get("record") or {})
+        print(f"   estado={r.get('estado')} {r.get('segundos')} s | port {pf.get('npix')} px {pf.get('vrp_mw')} | "
+              f"K pc {(kr.get('primary_cluster') or {}).get('vrp_mw')} dc {kr.get('distance_class')}", flush=True)
+        resultados.append(r)
+        (outdir / f"resultados_{a.sensor or 'todos'}_{a.chunk:02d}.json").write_text(
+            json.dumps(resultados, default=float), encoding="utf-8")
+    print(f"pasadas sin procesar: {faltan} de {len(mias)}", flush=True)
+    return 2 if faltan else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
