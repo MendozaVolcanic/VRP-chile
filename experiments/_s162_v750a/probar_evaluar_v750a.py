@@ -68,6 +68,15 @@ Agregados al resolver L2, L4, L7 y L18 por D-48 (relevo VIIRS 750, 2026-10-25):
   E50 dos pasadas no protegidas con K distinto entre 110 (más del 1 %): compuerta cerrada (L18).
   E51 prueba local con 5 mutaciones atrapadas: §6.1 no se cumple (L2: son 6 de 6).
   E52 una sola protegida con el VRP de K distinto de producción entre 110 (bajo el 1 %): cierra igual (L18).
+Agregados tras la segunda vuelta del verificador (verificador_v2/INFORME.md, VB-A01 a VB-A07):
+  E53 y E54 P = 0,9 y 1,1 x MIROVA: la razón no entra a los motivos (los bordes de la banda están incluidos; el
+      comparador da NEUTRO a esa ganancia pareja, conducta de evaluar_d25.py anotada por el verificador).
+  E55 la pasada con K distinto (dentro del 1 %) y P distinto de O: §6.1 la sigue mirando y no se cumple (la
+      equivalencia P = O se exige sobre todas las observadas, con K o sin K).
+  E56 sombra, 1 pasada con K distinto de 24 (más del 1 %): compuerta cerrada. E57 la misma con 114: no cierra, se lista.
+  E58 una protegida sólo del OCR con K distinto, entre 111: cierra («ninguna protegida» es tabla más OCR).
+  E59 K de 45.000 MW con t_max tibio: K x 1,2 pasa el tope de 50.000 MW del tablero; explicada, se lista y no cierra.
+  E60 prueba local con seis líneas «atrapada» pero una de otra pieza: §6.1 no se cumple (las seis se exigen por nombre).
 La población base suma para el S-1: celda de Cordón Caulle en el pase 2 y la zona 2 (el pase 1 y la zona 1 con otro
 umbral), una alerta de Tupungatito cuyo NTI cruza entre los umbrales pero el ETI no, y un diagnóstico mal formado.
 Una caída nativa del analizador (código fuera de 0, 3, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
@@ -339,6 +348,34 @@ def _k_distinto_dos(pb):
         pb.objs[j]["pub_prod"] = False
 
 
+def _k_distinto_y_p_distinto_de_o(pb):
+    """La pasada con K distinto (negativo de Láscar del 2026-04-20) tiene además una celda que O alerta y P no."""
+    _k_distinto_uno(pb)
+    j = next(i for i, o in enumerate(pb.objs) if o["volcan"] == "Lascar" and o["hora_utc"] == "2026-04-20 05:00")
+    pb.res[j]["paquete"]["O"] = salida_paquete(0.1, "Lascar")
+
+
+def _sombra_k_distinto(relleno):
+    def f():
+        pb = esc_sombra()
+        j = next(i for i, o in enumerate(pb.objs) if o["lab"] == "neg_limpio" and o["pub_prod"])
+        pb.objs[j]["pub_prod"] = False
+        for n in range(relleno):
+            pb.pasada("Villarrica", f"2026-12-{1 + n % 28:02d} {n // 28:02d}:30", "neg_limpio", K=None, P=None)
+        return pb
+    return f
+
+
+def _protegida_ocr_k_distinto(pb):
+    """Protegida sólo del OCR (O) que K publica pero producción no: K distinto en una protegida."""
+    pb.pasada("Villarrica", "2026-08-05 06:40", "pos", K=0.9, P=0.9, mirova_vrp=2.0, tabla=False, pub_prod=False)
+
+
+def _k_en_el_tope(pb):
+    """K de 45.000 MW con t_max 300 K publica; por 1,2 = 54.000 MW el tablero lo lleva a 0 (tope de 50.000 MW)."""
+    pb.pasada("Lascar", "2026-07-31 05:30", "neg_limpio", K=45000.0, P=None, k_tmax=300.0)
+
+
 def _pc_vrp_distinto(pb):
     """K publica igual que producción pero su VRP difiere en 0,01 MW (más que 0,001)."""
     pb.objs[0]["pc_vrp"] = round(pb.objs[0]["pc_vrp"] + 0.01, 3)
@@ -497,13 +534,37 @@ ESCENARIOS = {
                 tiene=[("== control K = producción", ["FALLA"])], no_tiene=["== §6 censo:"]),
     "E30": dict(pob=lambda: base(extra=_placebo_publica_distinto), rc=0,
                 tiene=[("== control placebo K×1,2 (publicación)", ["explicadas por los filtros de artefacto del tablero "
-                                                                   "(t_max bajo 278.15 K) 1", "Lascar 2026-07-31 05:30",
+                                                                   "(t_max bajo 278.15 K) o su tope de 50000 MW 1", "Lascar 2026-07-31 05:30",
                                                                    "sin explicar 0", "OK"]),
                        ("== compuerta del veredicto", ["ABIERTA"]), ("== §6 censo: CUMPLE", [])]),
     "E31": dict(pob=lambda: base(extra=_protegidas_que_k_no), rc=0,
                 tiene=[("== §6 censo: NO CUMPLE", ["O/tabla: M razón 2.000"]),
                        ("   razón en protegidas que publican K y P", ["1.000"])],
                 no_tiene=["== §6 censo: CUMPLE"], no_contiene=[("== §6 censo: NO CUMPLE", "T/tabla: M razón")]),
+    "E53": dict(pob=lambda: base(p_de=lambda m, k: round(0.9 * m, 3)), rc=0,
+                tiene=[("== §6 censo:", []), ("== §6.2 ventana T, canal tabla", ["M razón en protegidas 0.900"])],
+                no_contiene=[("== §6 censo:", "M razón")]),
+    "E54": dict(pob=lambda: base(p_de=lambda m, k: round(1.1 * m, 3)), rc=0,
+                tiene=[("== §6 censo:", []), ("== §6.2 ventana T, canal tabla", ["M razón en protegidas 1.100"])],
+                no_contiene=[("== §6 censo:", "M razón")]),
+    "E55": dict(pob=lambda: base(relleno=60, extra=_k_distinto_y_p_distinto_de_o), rc=6,
+                tiene=[("== control K = producción", ["distintas 1 de 109", "OK"]),
+                       ("== §6.1 equivalencia: NO SE CUMPLE", ["Lascar 2026-04-20 05:00"])], no_tiene=["== §6 censo:"]),
+    "E56": dict(pob=_sombra_k_distinto(0), fase="sombra", rc=3,
+                tiene=[("== control K = producción", ["distintas 1 de 24", "FALLA"])],
+                no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
+    "E57": dict(pob=_sombra_k_distinto(90), fase="sombra", rc=0,
+                tiene=[("== control K = producción", ["distintas 1 de 114", "OK", "Lascar 2026-11-12 05:00"]),
+                       ("== §6.3 sombra: CUMPLE", [])]),
+    "E58": dict(pob=lambda: base(relleno=62, extra=_protegida_ocr_k_distinto), rc=3,
+                tiene=[("== control K = producción", ["distintas 1 de 112", "Villarrica 2026-08-05 06:40", "FALLA"])],
+                no_tiene=["== §6 censo:"]),
+    "E59": dict(pob=lambda: base(extra=_k_en_el_tope), rc=0,
+                tiene=[("== control placebo K×1,2 (publicación)", ["tope de 50000 MW 1", "Lascar 2026-07-31 05:30",
+                                                                   "sin explicar 0", "OK"]),
+                       ("== §6 censo: CUMPLE", [])]),
+    "E60": dict(pob=lambda: base(), verde=VERDE.replace("mutación fondo_anillo ", "mutación otra_pieza   "), rc=6,
+                tiene=[("== §6.1 equivalencia: NO SE CUMPLE", ["por nombre: 5 de 6"])], no_tiene=["== §6 censo:"]),
     "E52": dict(pob=lambda: base(relleno=61, extra=_pc_vrp_distinto), rc=3,
                 tiene=[("== control K = producción", ["distintas 1 de 110", "FALLA"]),
                        ("== compuerta del veredicto", ["CERRADA"])], no_tiene=["== §6 censo:"]),

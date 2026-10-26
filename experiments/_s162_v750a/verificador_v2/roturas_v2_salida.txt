@@ -1,0 +1,25 @@
+R1: L4: los bordes 0,9 y 1,1 quedan FUERA de la banda (§6.2 dice bordes incluidos)
+R1 [autor E00,E06,E31,E32,E33,E48] | PASA | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (6) | fallan [] caen []
+R1 [propios C1,C2] | ATRAPADA | rc 1 | == CASOS V2: FALLAS 2 de 2 | fallan ['C1', 'C2'] caen []
+R2: L18: K = producción deja de aplicarse en la fase sombra
+R2 [autor E14,E18,E19,E20,E21,E23,E28,E47,E49,E50,E52] | PASA | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (11) | fallan [] caen []
+R2 [propios C5,C7] | ATRAPADA | rc 1 | == CASOS V2: FALLAS 2 de 2 | fallan ['C5', 'C7'] caen []
+R3: L18: «ninguna protegida» mira sólo la tabla (una protegida sólo del OCR con K distinto no cierra)
+R3 [autor E14,E28,E50,E52] | PASA | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (4) | fallan [] caen []
+R3 [propios C4] | ATRAPADA | rc 1 | == CASOS V2: FALLAS 1 de 1 | fallan ['C4'] caen []
+R4: L18 y §6.1: la pasada con K distinto sale también de la equivalencia del runner (lo que el texto dice)
+R4 [autor E08,E09,E27,E28] | PASA | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (4) | fallan [] caen []
+R4 [propios C10] | ATRAPADA | rc 1 | == CASOS V2: FALLAS 1 de 1 | fallan ['C10'] caen []
+R5: L4: la razón vacía (ninguna protegida publicada por P) cumple
+R5 [autor E00,E01,E06,E31,E44] | PASA | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (5) | fallan [] caen []
+R5 [propios C8] | ATRAPADA | rc 1 | == CASOS V2: FALLAS 1 de 1 | fallan ['C8'] caen []
+R6: L7: la diferencia sin explicar deja de cerrar (el control siempre pasa)
+R6 [autor E00,E30] | PASA | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (2) | fallan [] caen []
+R6 [propios C3,C9] | ATRAPADA | rc 1 | == CASOS V2: FALLAS 2 de 2 | fallan ['C3', 'C9'] caen []
+R7: L7: t_max ausente cuenta como frío (explicada)
+R7 [autor E00,E30] | PASA | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (2) | fallan [] caen []
+R7 [propios C3] | PASA | rc 0 | == CASOS V2: TODOS COMO SE ESPERA (1) | fallan [] caen []
+R8: L18: el 1 % se calcula sobre las pasadas que quedan (circular: con pocas, nunca cierra)
+R8 [autor E14,E28,E50,E52] | PASA | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (4) | fallan [] caen []
+R8 [propios C5] | PASA | rc 0 | == CASOS V2: TODOS COMO SE ESPERA (1) | fallan [] caen []
+rc=0

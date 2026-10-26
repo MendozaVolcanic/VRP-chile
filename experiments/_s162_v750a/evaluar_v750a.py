@@ -74,6 +74,8 @@ TOL_VRP_EQUIV = 1e-6                     # §4.1: VRP a 1e-6 MW en el runner
 BANDA_RAZON = (0.9, 1.1)                 # §6.2: mediana de la razón de P en las protegidas
 MIN_MUT_LOCAL = 6                        # §6.1: las 6 mutaciones del §4.1 atrapadas (L2, resuelta por D-48: era «5 de 5»)
 TMAX_FILTROS_ARTEFACTO = 278.15          # §7 (L7): isCirrusArtifact (<273,15 K) e isDiffuseFieldArtifact (<278,15 K)
+TOPE_TABLERO_MW = 50000.0                # §7 (L7, VB-A01): mirovaEqVrp devuelve 0 sobre 50.000 MW (index.html:1182)
+MUT_LOCAL = ("k1_y_minimos", "ocho_vecinos", "fondo_sin_halo", "recorte", "fondo_anillo", "remuestreo_vecino")
 MIN_CASOS_LOCAL = (1020, 10)             # §4.1: 510 grillas de N con 2 cajas (E1) y los 10 recortes nativos de R2 (E3)
 PARES_S1 = (("P", "Pdef"), ("P", "O"), ("Pdef", "O"))   # §5, S-1: los brazos que comparten la detección del .m
 VOL_ROI = "PuyehueCordonCaulle"          # §7, control positivo de la ROI
@@ -190,10 +192,13 @@ def leer_equivalencia_local(ruta):
              and not any(x.startswith("ROJA") for x in lin))
     todas = any(x.strip() == "mutaciones: TODAS COMO SE ESPERA" for x in lin)
     n_atr = sum("atrapada por aserción" in x for x in lin)
+    # VB-A06: las seis del §4.1 por nombre, no sólo seis líneas cualesquiera
+    nombradas = [m for m in MUT_LOCAL
+                 if any(re.search(rf"mutación {m}\s+atrapada por aserción", x) for x in lin)]
     caida = any("control_que_se_cae" in x and "caída" in x for x in lin)
-    ok = verde and todas and n_atr >= MIN_MUT_LOCAL and caida
+    ok = verde and todas and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL) and caida
     return ok, (f"prueba local: verde con los casos del §4.1 {verde} {casos}, mutaciones todas como se espera {todas}, atrapadas {n_atr} "
-                f"(mínimo {MIN_MUT_LOCAL}), control caído {caida}")
+                f"(mínimo {MIN_MUT_LOCAL}; las seis del §4.1 por nombre: {len(nombradas)} de {len(MUT_LOCAL)}), control caído {caida}")
 
 
 def main(argv=None):
@@ -421,12 +426,14 @@ def main(argv=None):
         # filtros de artefacto (isCirrusArtifact e isDiffuseFieldArtifact), y los dos exigen t_max del record bajo
         # 278,15 K. Una diferencia K contra K×1,2 con t_max frío la explican esos filtros: se lista y no cierra. Una
         # con t_max tibio o sin t_max no la explica nada conocido y cierra la compuerta
+        # VB-A01: y el tope de 50.000 MW de mirovaEqVrp, que tampoco es un defecto del paquete
         pl_todas = [i for i in oks if pub(i, "Kx12") != pub(i, "K")]
-        pl_frio = [i for i in pl_todas if (rec_k(i, "K").get("t_max_k") or 1e9) < TMAX_FILTROS_ARTEFACTO]
+        pl_frio = [i for i in pl_todas if (rec_k(i, "K").get("t_max_k") or 1e9) < TMAX_FILTROS_ARTEFACTO
+                   or vrp(i, "K") <= TOPE_TABLERO_MW < vrp(i, "K") * GANANCIA_PLACEBO]
         pl_dist = [nombre(i) for i in pl_todas if i not in set(pl_frio)]
         ctrl["placebo (publicación)"] = not pl_dist
         pr(f"== control placebo K×1,2 (publicación): distintas de K {len(pl_todas)} de {len(oks)}; explicadas por los "
-           f"filtros de artefacto del tablero (t_max bajo {TMAX_FILTROS_ARTEFACTO} K) {len(pl_frio)} "
+           f"filtros de artefacto del tablero (t_max bajo {TMAX_FILTROS_ARTEFACTO} K) o su tope de {TOPE_TABLERO_MW:.0f} MW {len(pl_frio)} "
            f"{[nombre(i) for i in pl_frio][:10]}; sin explicar {len(pl_dist)} {pl_dist[:10]}: "
            f"{'OK' if not pl_dist else 'FALLA'}")
         # placebo, M con el comparador: d′ es 0 para una ganancia pareja, así que M no lo puede dar por mejor

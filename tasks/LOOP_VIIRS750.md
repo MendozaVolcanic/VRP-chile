@@ -18,13 +18,16 @@ Rama `claude/s162-viirs750-2-918174` (sale de `s162-v750a-evaluador` `7d5e723c6`
 `pipeline/` va aparte: rama `s162-via-mirova` desde `origin/main`, worktree `C:\vrp-trabajo\s162-via-mirova`, tag
 defensivo `pre-s162-via-mirova` (`deaf8f59b`). Cola de este relevo:
 
-- R1 [hecho, falta verificador] **Adenda 1 de V750-B** (`e7c56af0b`): el analizador sellado deja caer sin contar la
-  pasada «ok» sin una caja del oráculo; compañero `experiments/_s162_v750b/adenda1/cobertura_cajas_v750b.py`, prueba
-  roja/verde (23 chequeos, identidad con el analizador en A4 y A6), nulo 7/7. Verificador Sonnet en curso
-  (`adenda1/verificador/`). Coordinadora avisada; la confirma ella bajo D-48.
-- R2 [hecho, falta verificador y medidor] **V750-A, L2/L4/L7/L18 por D-48** (`9f9ae9259`): 6 de 6; razón de M sobre
-  todas las protegidas que P publica; placebo con t_max frío explicado; K = producción con 1 %. Batería 53/53. Medidor
-  de mutaciones corriendo; segunda vuelta del verificador (Fable) en curso (`experiments/_s162_v750a/verificador_v2/`).
+- R1 [hecho y verificado; falta que S163 la confirme bajo D-48] **Adenda 1 de V750-B** (`e7c56af0b`, v2 `7aa2788a0`):
+  el analizador sellado deja caer sin contar la pasada «ok» sin una caja del oráculo. Verificador Sonnet: LISTO CON
+  CAMBIOS, todos hechos: lector `adenda1/leer_v750b.py` (no deja pasar al analizador si el compañero cierra), cajas
+  ilegibles cierran siempre, comando con rutas absolutas. Batería 52/52, nulo 17/17. **El 2026-11-03 se lee con el
+  lector** (comando al final de `PREREGISTRO_V750B.md`).
+- R2 [hecho y verificado; falta el medidor final] **V750-A, L2/L4/L7/L18 por D-48** (`9f9ae9259`) y segunda vuelta del
+  verificador (Fable, `experiments/_s162_v750a/verificador_v2/INFORME.md`: listo con cambios de texto, ninguna lectura
+  abre adopción falsa). Corregido: VB-A01 (el tope de 50.000 MW del tablero también explica el placebo; la frase «no se
+  puede producir» era falsa), VB-A02 (§6.1 y S-1 sobre todas las observadas, escrito), VB-A03 a A06 (E53 a E60, M57 a
+  M62), VB-A07 (con menos de 100 pasadas el 1 % es cero, escrito). Batería 61/61. Medidor de 62 mutaciones corriendo.
 - R3 [hecho, falta suite y PR] **Vía «código MIROVA» V750** en `s162-via-mirova`: módulo, grilla por volcán (regla
   GEO con las filas de sur a norte: Y0 = ul_y - 25062,5, probada contra el yaml), flag apagado; equivalencia ROJA a
   VERDE (1.020 + 10); nulo del módulo real 8/8. PR en borrador. **Corrección A45 (aviso de S162)**: había editado
@@ -33,7 +36,11 @@ defensivo `pre-s162-via-mirova` (`deaf8f59b`). Cola de este relevo:
   con el sí de Nicolás, pedido por S163.
 - R4 [2026-11-03] objetivos de V750-B desde su tag y pedido de despacho con los sha256 (paso 2 de abajo); la lectura
   corre antes el compañero de la adenda 1.
-- R5 [pendiente, antes de cerrar la vía] **fillmissing2 exacto de MATLAB** (pedido de S163, 2026-10-26): O2 corrió en
+- R5 [HECHO, `d4f1c891c` y `a16aa14b4` en `s162-via-mirova`, PR #907, CI verde] la regla de MATLAB la halló el
+  subagente de S163 (Delaunay con desempate simbólico, x = fila); portada: VRP 166/166 contra MATLAB, fondo 84/84,
+  Etna exacto; oro de 8 escenas en `tests/data/`; equivalencia contra el módulo independiente de S163; nulo del módulo
+  17/17 con seis simetrías rivales; extrapolación fuera de la envolvente marcada NO CUBIERTA (sólo Etna). Texto original:
+  **fillmissing2 exacto de MATLAB** (pedido de S163, 2026-10-26): O2 corrió en
   MATLAB R2026b (rama `s163-o2-paquete` `9b755f315`, `experiments/_s163_o2/RESULTADO_O2.md`): detección igual a Octave en
   311 de 311, pero ningún modelo de `fillmissing2` reproduce el VRP de MATLAB (más de 1 % en 32, 26 y 45 de 166).
   Tarea: un `fillmissing2` en Python que dé MATLAB en las 166 escenas con alerta (las de 1 píxel a menos de 1e-6

@@ -146,7 +146,7 @@ V750-D (Kgeo) pasa a tener su propio A/B (programa §3).
 
 | control | qué tiene que dar |
 |---|---|
-| K = producción | publica igual y `pc.vrp_mw` a 0,001 MW; se toleran hasta 1 % de pasadas ok distintas y ninguna protegida, que salen de todos los brazos y se listan por nombre (L18, resuelta por D-48: la tolerancia de V750-B, mismo probe y misma población; con cero, una diferencia de máquina entre runners como la de S152 cerraría la compuerta sin defecto del paquete) |
+| K = producción | publica igual y `pc.vrp_mw` a 0,001 MW; se toleran hasta 1 % de pasadas ok distintas y ninguna protegida (de la tabla o del OCR); con menos de 100 pasadas ok el 1 % es cero, así que una sola cierra (VB-A07). Esas pasadas salen de P1, P2, M y de los controles que comparan contra K, y se listan por nombre; la equivalencia P = O (§6.1) y el S-1 se siguen midiendo sobre TODAS las observadas, porque no dependen de K (VB-A02) (L18, resuelta por D-48: la tolerancia de V750-B, mismo probe y misma población; con cero, una diferencia de máquina entre runners como la de S152 cerraría la compuerta sin defecto del paquete) |
 | P = O | §4.1 en el runner |
 | control positivo de la ROI | P-def pierde al menos una protegida de Cordón Caulle |
 | placebo | K×1,2: en la publicación, igual a K salvo donde los filtros de artefacto del tablero miran la magnitud; M lo tiene que separar de K (ver la nota de abajo) |
@@ -158,11 +158,14 @@ VRP > 0», es falsa para el tablero de hoy: `isCirrusArtifact` (`frontend/index.
 y VRP de cumbre sobre 10 MW) e `isDiffuseFieldArtifact` (`:1355-1363`: `t_max_k` bajo 278,15 K, 100 píxeles o más, VRP
 de 50 MW o más y menos de 1 MW por píxel) miran la magnitud, así que un K de 9,0 MW con `t_max` 270 K publica y el mismo
 por 1,2 no (verificador del analizador, VA-02). Físicamente son los filtros del tablero contra el cirro frío y el campo
-difuso sobre fondo gélido. El control queda como compuerta, con esta forma: una diferencia de publicación K contra
-K×1,2 en una pasada cuyo record de K tiene `t_max_k` bajo 278,15 K la explican esos dos filtros (los dos exigen ese
-`t_max`), se lista por nombre y no cierra; cualquier otra diferencia cierra. Con el predicado de hoy la segunda clase no
-se puede producir: esa mitad del control sólo atraparía un filtro nuevo del tablero que mire la magnitud (se declara en
-`LECTURAS_EVALUAR_V750A.md`, A116).
+difuso sobre fondo gélido. Hay un tercer sitio, que la versión anterior de esta nota omitía (segunda vuelta del
+verificador, VB-A01): `mirovaEqVrp` devuelve 0 sobre 50.000 MW (`frontend/index.html:1182`), el tope de cordura del
+tablero, sin mirar `t_max`. El control queda como compuerta, con esta forma: una diferencia de publicación K contra
+K×1,2 en una pasada cuyo record de K tiene `t_max_k` bajo 278,15 K (los dos filtros exigen ese `t_max`) o cuyo VRP de K
+queda bajo el tope y el de K×1,2 sobre él, se lista por nombre y no cierra; cualquier otra diferencia cierra. La
+versión anterior decía que con el predicado de hoy la otra clase no se puede producir: era falso, el tope la producía.
+Con las tres explicaciones, esa mitad del control sólo atraparía un sitio nuevo del tablero que mire la magnitud (se
+declara en `LECTURAS_EVALUAR_V750A.md`, A116).
 
 ## 8. Predicciones (para poder fallar)
 
@@ -198,14 +201,16 @@ informadas a Nicolás y son revocables antes del sello:
 
 | lectura | decisión | por qué |
 |---|---|---|
-| L2 | §6.1 exige 6 de 6 mutaciones (no 5 de 5) | son las seis del §4.1; el «5» era un resto |
+| L2 | §6.1 exige 6 de 6 mutaciones (no 5 de 5), las seis del §4.1 por nombre (VB-A06) | son las seis del §4.1; el «5» era un resto |
 | L4 | razón de M sobre todas las protegidas que P publica | revierte la lectura que tomó el analizador tras VA-03: la vara es la calibración de P; la otra se imprime al lado |
-| L7 | placebo de publicación: las diferencias con `t_max` de K bajo 278,15 K se listan y no cierran | la premisa de §7 era falsa (VA-02); esos dos filtros son los únicos que miran la magnitud |
-| L18 | K = producción con la tolerancia de V750-B (1 %, ninguna protegida) | revierte la de cero que tomó el analizador tras VA-01: mismo probe y misma población que V750-B, y los runners tienen diferencias de máquina (S152) |
+| L7 | placebo de publicación: las diferencias con `t_max` de K bajo 278,15 K, o que cruzan el tope de 50.000 MW del tablero, se listan y no cierran | la premisa de §7 era falsa (VA-02); los dos filtros de artefacto y el tope son los sitios del tablero que miran la magnitud (el tope lo agregó VB-A01) |
+| L18 | K = producción con la tolerancia de V750-B (1 %, ninguna protegida de la tabla o del OCR; con menos de 100 pasadas, ninguna); las distintas salen de P1, P2, M y los controles contra K, no de §6.1 ni del S-1 | revierte la de cero que tomó el analizador tras VA-01: mismo probe y misma población que V750-B, y los runners tienen diferencias de máquina (S152); la equivalencia no depende de K (VB-A02) |
 
 Cada una cambia el analizador y su prueba en el mismo commit; los escenarios E28, E30, E31, E50, E51 y E52 de
 `probar_evaluar_v750a.py` las fijan y salen rojos contra el analizador anterior (E28, E30, E31, E51; E50 y E52 vigilan
-el tope y la protegida).
+el tope y la protegida). La segunda vuelta del verificador (Fable 5.1, `verificador_v2/INFORME.md`): listo con
+cambios de texto, ninguna de las cuatro abre un veredicto de adopción falso; sus hallazgos VB-A01 a VB-A07 se
+corrigieron con E53 a E60 y las mutaciones M57 a M62.
 
 ## 11. Pendiente antes del sello
 
