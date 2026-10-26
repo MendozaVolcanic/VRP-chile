@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~04:20 UTC (S163): V375-A cableado; la referencia del checkout perdió filas de Chillán
+- `loop-viirs375` (`e48843858`): `protegidas_crater_v375.py` aplica `protegida_de_crater` de #903 (copiada de main sin
+  cambios) a las 81 protegidas de S159, S162 y S162b: 70 de cráter; las 11 que no, todas por `ocr_snpp_antes_del_hito`.
+  C13 y M14 pierden 6 protegidas y K 3, todas no de cráter; sólo PIX7 pierde una de cráter (Cordón Caulle 2026-06-07).
+  Informado al lado de P1, sin tocar veredictos. Coincide con el verificador de las protegidas SNPP.
+- **Hallazgo lateral**: la referencia de MIROVA del checkout **perdió las filas de tabla de 4 protegidas de Chillán (15 y
+  16 de octubre)**; el evaluador tuvo que usar las filas guardadas en los objetivos al seleccionarse. Es la misma familia
+  que D-39 (bucle de push del scraper Mirova-v1 que pierde filas; Mirova-v1#26 sin mergear): suma peso a esa decisión de
+  Nicolás.
+- Para V375-E sólo faltan la vía (#907 y su cableado, A45) y PD1.
+
 ### 2026-10-26 ~04:05 UTC (S163, vuelta 9): #889 reemplazado por #909 (borrador, espera a Nicolás)
 - `rebase-889` (`local_cc8da696-d46e-4b43-8cf9-74c0744abfdd`): #889 cerrado con comentario a **#909** (rama
   `s163-instrumentos`, `2ce1c8310` sobre main `691e4d588`, CI verde, «no mergear sin el sí de Nicolás»); el force-push a la
