@@ -57,6 +57,20 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 > envolvente convexa**, así que el vecino más cercano nunca entra en L_bk. Hay 12 escenas con celdas del hueco fuera de
 > la envolvente, por los NaN de la orilla de la pasada, pero esas celdas no se suman, y el relleno lineal sólo usa
 > celdas conocidas como vértices. La magnitud queda igual. Falta (b), MATLAB.
+>
+> **(2) CERRADA, 2026-10-26: la vara calza con MATLAB y deja de ser PRELIMINAR.** S163 corrió el paquete en MATLAB
+> R2026b (`o2_375/resultado_v375.mat`, md5 71d0f821; consola `salida_matlab_v375.txt`). Etna sale igual al OSF.
+> `comparar_matlab_375.py`: ΔL de MATLAB contra la vara distinto en **0 de 422** (máx rel 1,03e-15); el control contra el
+> port falla donde debe (137, máx 0,83). Con `--vrp-vara o2_375/matlab_v375.json` el evaluador da lo mismo que con la vara
+> (`o2_375/evaluar_con_matlab_salida.txt`): instrumento OK, VEREDICTO B igual, C13 M 0,999. Verificador limpio (Sonnet),
+> `o2_375/verificador_matlab/INFORME.md`: **CONFIRMADO**, las 6 afirmaciones con código propio. Comprobó además que BK
+> fuera del hueco es single(RAD) en las 422, lo que ata la salida a las entradas; que la vara se commiteó 7 h antes de que
+> existiera la salida; y que un Delaunay sin perturbar difiere en 22 de 58, así que la tolerancia distingue
+> triangulaciones. Hallazgo para S163 (gravedad 1): **fuera de la envolvente convexa MATLAB deja NaN y la regla en Python
+> rellena** (38.955 celdas en las 12 escenas con NaN de la orilla; ninguna toca una alerta). Usada en otra población, la
+> regla necesita el chequeo de alerta dentro de la envolvente (`envolvente_v375.py`). **Lectura final de V375-C: el fondo
+> de 1 a 4 px no cambia la magnitud y V375-D no hace falta.** Sólo vale para alertas de 1 a 4 píxeles dentro de la
+> envolvente, que es lo que se midió.
 
 Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
 evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).
