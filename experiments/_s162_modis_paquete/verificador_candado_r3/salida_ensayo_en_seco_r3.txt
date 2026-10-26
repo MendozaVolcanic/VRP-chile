@@ -1,0 +1,46 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+pasadas del lote S159 unidas a la poblacion: 150
+VEREDICTO: INDECIDIBLE
+  control k_produccion   OK
+  control port_s159      OK
+  control placebo        OK
+  control contador       OK
+  control cobertura      INDECIDIBLE
+  control manifiesto     OK
+  control blobs          OK
+  control predicado      INDECIDIBLE
+  control procedencia    INDECIDIBLE
+  control referencia     OK
+  control reetiquetado   OK
+  control union          OK
+  PM       P1 SIN PERDIDA (0) | P1b 1 | P2 GANA neto -25 B 29 (S_K 30, S_b 5) | M MEJORA n 78
+  PM-geo5  P1 VETADO (3) | P1b 5 | P2 GANA neto -15 B 27 (S_K 30, S_b 15) | M MEJORA n 71
+  PM-sens  P1 SIN PERDIDA (0) | P1b 1 | P2 GANA neto -25 B 29 (S_K 30, S_b 5) | M MEJORA n 78
+  K33      P1 SIN PERDIDA (0) | P1b 27 | P2 SIN SUSTRATO neto 0 B 0 (S_K 30, S_b 30) | M SIN PARES n 0
+  PM-pixel P1 SIN PERDIDA (0) | P1b 1 | P2 GANA neto -25 B 29 (S_K 30, S_b 5) | M MEJORA n 78
+  PM-b21   P1 VETADO (28) | P1b 0 | P2 BLOQUEA neto 12 B 50 (S_K 30, S_b 42) | M MEJORA n 20
+  Chillan: {'estado': 'SIN RESOLVER', 'n_pares': 7, 'b_mas_cerca': 6, 'mediana_razon': 1.057635189669088, 'mediana_z_le30': 1.0332628503089967, 'mediana_z_gt30': 1.118783783783784}
+  S-1: {'n_ok': 0, 'n_identidad_falla': 0} {}
+  protegidas fuera del denominador: []
+  cruce con el K de MOD-B: None
+  manifiesto usado (blob, cotejar con git ls-tree del tag): c3bc1c3af46960345b5cf9c6971357f9b921f56d
+escrito C:\Users\nmend\AppData\Local\Temp\tmp6evzxwfn\res.json
+
+bril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+
+== lo que el ensayo exige
+  cobertura INDECIDIBLE                            SI
+  port_s159 OK con 148 comunes y 91 con pixeles    SI
+  veredicto INDECIDIBLE                            SI
+  predicado INDECIDIBLE (la cabecera del ensayo no trae el hash del tablero) SI
+  referencia y reetiquetado OK                     SI
+  procedencia INDECIDIBLE (sin --commit)           SI
+  manifiesto OK                                    SI
+rc 0
