@@ -69,6 +69,21 @@
    "nuevo": "\"regimen\": metricas_por_estrato(T, a.control, brazos, estrato_cenit, excl)"},
   {"id": "E23", "archivo": "scripts/evaluador_comun.py", "que": "el CLI no le pasa la cobertura al lado",
    "viejo": "res[\"huecos\"] = huecos(T, {l: (cargar_eventos_cobertura(rutas_cob[l]) if l in rutas_cob else None) for l in lados},",
-   "nuevo": "res[\"huecos\"] = huecos(T, {l: None for l in lados},"}
+   "nuevo": "res[\"huecos\"] = huecos(T, {l: None for l in lados},"},
+  {"id": "E24", "archivo": "scripts/evaluador_comun.py", "que": "verificador S1: el CLI no le pasa los días excluidos a huecos",
+   "viejo": "for l in lados},\n                           excl)",
+   "nuevo": "for l in lados},\n                           ())"},
+  {"id": "E25", "archivo": "scripts/evaluador_comun.py", "que": "verificador S2: el CLI no le pasa los días excluidos al estrato de cenit",
+   "viejo": "\"cenit\": metricas_por_estrato(T, a.control, brazos, estrato_cenit, excl)",
+   "nuevo": "\"cenit\": metricas_por_estrato(T, a.control, brazos, estrato_cenit, ())"},
+  {"id": "E26", "archivo": "scripts/evaluador_comun.py", "que": "verificador S2 bis: ni al estrato de régimen",
+   "viejo": "\"regimen\": metricas_por_estrato(T, a.control, brazos, estrato_regimen, excl)",
+   "nuevo": "\"regimen\": metricas_por_estrato(T, a.control, brazos, estrato_regimen, ())"},
+  {"id": "E27", "archivo": "scripts/evaluador_comun.py", "que": "verificador S3: estratos sin ordenar",
+   "viejo": "for nom, Ts in sorted(grupos.items()):",
+   "nuevo": "for nom, Ts in grupos.items():"},
+  {"id": "E28", "archivo": "scripts/evaluador_comun.py", "que": "--cobertura de un lado inexistente se ignora",
+   "viejo": "    if ajenos:\n        ap.error(",
+   "nuevo": "    if False:\n        ap.error("}
  ]
 }

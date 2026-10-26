@@ -309,7 +309,7 @@ def test_huecos_respeta_dias_excluidos():
 
 
 # ------------------------------------------------------------------ CLI
-def test_main_informa_estratos_y_causas_sin_tocar_el_veredicto(tmp_path, monkeypatch):
+def _correr_main(tmp_path, monkeypatch, extra=(), nombre_cob="K"):
     import banco_paridad as bp
     import referencia_mirova_unificada as rmu
     lados = {"prod": [dict(r, z=40.0) for r in PROD_12], "K": [dict(r, z=40.0) for r in BRAZO_12]}
@@ -318,14 +318,42 @@ def test_main_informa_estratos_y_causas_sin_tocar_el_veredicto(tmp_path, monkeyp
     monkeypatch.setattr(bp, "inner_desde_html", lambda: {})
     monkeypatch.setattr(ec, "cargar_lado", lambda d, *a: (lados[Path(d).name], []))
     monkeypatch.setattr(ec, "pasadas_nocturnas", lambda ref, *a: pasadas(ref))
-    (tmp_path / "cob").mkdir()
+    (tmp_path / "cob").mkdir(exist_ok=True)
     _json_cobertura(tmp_path / "cob" / "c1.json", incidencias=[_inc("sin_granulos", "VIIRS_NOAA21_750")])
     _json_cobertura(tmp_path / "cob" / "c2.json", fallas=[_falla("descarga", "VIIRS_SNPP_750")])
     salida = tmp_path / "s.json"
     cod = ec.main(["--lado", "prod=%s" % (tmp_path / "prod"), "--lado", "K=%s" % (tmp_path / "K"),
                    "--control", "prod", "--desde", "2026-10-01", "--hasta", "2026-10-20", "--ref", str(tmp_path),
-                   "--cobertura", "K=%s" % (tmp_path / "cob" / "c*.json"), "--salida", str(salida)])
-    res = json.loads(salida.read_text(encoding="utf-8"))
+                   "--cobertura", "%s=%s" % (nombre_cob, tmp_path / "cob" / "c*.json"), "--salida", str(salida)]
+                  + list(extra))
+    return cod, json.loads(salida.read_text(encoding="utf-8"))
+
+
+def test_main_respeta_los_dias_excluidos_en_estratos_y_causas(tmp_path, monkeypatch):
+    """Verificador de este PR (S1, S2): main podía pasarles () a huecos y a los estratos sin que nada fallara."""
+    _, res = _correr_main(tmp_path, monkeypatch, extra=["--excluir-dias", "2026-10-12"])
+    assert res["huecos"]["K"]["por_causa"] == {} and res["huecos"]["K"]["protegidas"] == []
+    assert res["estratos"]["cenit"] == {} and res["estratos"]["regimen"] == {}
+
+
+def test_main_rechaza_cobertura_de_un_lado_que_no_existe(tmp_path, monkeypatch):
+    """Un --cobertura con un nombre mal escrito dejaba el lado sin registro sin avisar."""
+    try:
+        _correr_main(tmp_path, monkeypatch, nombre_cob="k")
+        salio = None
+    except SystemExit as e:
+        salio = e.code
+    assert salio == 2, "main tenía que salir con error de argumentos (2), salió con %r" % (salio,)
+
+
+def test_estratos_salen_en_orden_de_lectura():
+    T, _ = _tabla_variada()
+    est = ec.metricas_por_estrato(T, "prod", ["D"], ec.estrato_cenit)
+    assert list(est) == sorted(est)
+
+
+def test_main_informa_estratos_y_causas_sin_tocar_el_veredicto(tmp_path, monkeypatch):
+    cod, res = _correr_main(tmp_path, monkeypatch)
     assert cod == 2 and res["cobertura"]["veredicto"] == ec.INVALIDO
     assert res["huecos"]["K"]["por_causa"] == {ec.CAUSA_HUECO: {ec.FALTA: 2}}   # la falla de c2 manda
     assert res["huecos"]["prod"]["por_causa"] == {}

@@ -26,27 +26,40 @@ def wilson(k, n, z=1.96):
 
 
 d = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-grupos = {}
-for c in d["celdas"]:
-    duplicada = c["ventana"] == "O" and c["canal"] == "tabla" and c["sensor"] in ("VIIRS750", "MODIS")
-    for x in c["placebo_c"]:
-        if duplicada:
+
+
+def agrupar(excluir, titulo):
+    grupos = {}
+    for c in d["celdas"]:
+        if excluir(c):
             continue
-        metodo = "exacta (B<=20)" if x["B_mediana"] <= 20 else "sorteos (B>20)"
-        for clave in (("fraccion %.2f" % x["fraccion"], "todas"), ("fraccion %.2f" % x["fraccion"], metodo),
-                      ("todas", "todas")):
-            g = grupos.setdefault(clave, {"GANA": 0, "PIERDE": 0, "n": 0, "celdas": 0})
-            g["GANA"] += x["GANA"]["k"]
-            g["PIERDE"] += x["PIERDE"]["k"]
-            g["n"] += x["n"]
-            g["celdas"] += 1
-print("Placebo simétrico (c), celdas independientes (sin O-tabla de VIIRS 750 y MODIS)")
-for (fr, met), g in sorted(grupos.items()):
-    lg, hg = wilson(g["GANA"], g["n"])
-    lp, hp = wilson(g["PIERDE"], g["n"])
-    print("%-15s %-16s celdas %2d  GANA %4d/%5d = %.2f %% (IC95 %.2f a %.2f)  PIERDE %4d/%5d = %.2f %% (IC95 %.2f a %.2f)"
-          % (fr, met, g["celdas"], g["GANA"], g["n"], 100 * g["GANA"] / g["n"], 100 * lg, 100 * hg,
-             g["PIERDE"], g["n"], 100 * g["PIERDE"] / g["n"], 100 * lp, 100 * hp))
+        for x in c["placebo_c"]:
+            metodo = "exacta (B<=20)" if x["B_mediana"] <= 20 else "sorteos (B>20)"
+            for clave in (("fraccion %.2f" % x["fraccion"], "todas"), ("fraccion %.2f" % x["fraccion"], metodo),
+                          ("todas", "todas")):
+                g = grupos.setdefault(clave, {"GANA": 0, "PIERDE": 0, "BLOQUEA": 0, "n": 0, "celdas": 0})
+                g["GANA"] += x["GANA"]["k"]
+                g["PIERDE"] += x["PIERDE"]["k"]
+                g["BLOQUEA"] += x["resultados"].get("BLOQUEA", 0)
+                g["n"] += x["n"]
+                g["celdas"] += 1
+    print(titulo)
+    for (fr, met), g in sorted(grupos.items()):
+        lg, hg = wilson(g["GANA"], g["n"])
+        lp, hp = wilson(g["PIERDE"], g["n"])
+        print("%-15s %-16s celdas %2d  GANA %4d/%5d = %.2f %% (IC95 %.2f a %.2f)  PIERDE %4d/%5d = %.2f %% "
+              "(IC95 %.2f a %.2f)  BLOQUEA %4d/%5d = %.1f %%"
+              % (fr, met, g["celdas"], g["GANA"], g["n"], 100 * g["GANA"] / g["n"], 100 * lg, 100 * hg,
+                 g["PIERDE"], g["n"], 100 * g["PIERDE"] / g["n"], 100 * lp, 100 * hp,
+                 g["BLOQUEA"], g["n"], 100 * g["BLOQUEA"] / g["n"]))
+
+
+agrupar(lambda c: c["ventana"] == "O" and c["canal"] == "tabla" and c["sensor"] in ("VIIRS750", "MODIS"),
+        "Placebo simétrico (c), sin O-tabla de VIIRS 750 y MODIS (mismo sustrato de P2 que O-unión)")
+# Verificador de S163: O-unión y O-tabla de VIIRS 375 comparten casi todo el sustrato, y todas las celdas usan las
+# mismas semillas; la variante estricta deja una sola celda O por sensor. El IC95 de arriba queda algo angosto.
+agrupar(lambda c: c["ventana"] == "O" and c["canal"] == "tabla",
+        "Variante estricta: sin ninguna celda O-tabla")
 # Comprobación de la premisa de duplicado: placebo c idéntico en O union y O tabla para VIIRS 750 y MODIS.
 por = {(c["ventana"], c["sensor"], c["canal"]): c for c in d["celdas"]}
 for s in ("VIIRS750", "MODIS"):

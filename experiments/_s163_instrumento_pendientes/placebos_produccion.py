@@ -198,11 +198,17 @@ def escribir_resumen(out):
             o["no_observado"], s["alerta_mb"], s["alerta_mb_publicadas"], s["negativos"], s["negativos_publicados"],
             i["p2_discordantes"], i["p1b_abajo"], i["p1b_arriba"]))
     L += ["", "## P2: placebo simétrico (c), tasa de falsos (debe quedar bajo 5 % por cola)", "",
-          "| ventana | sensor | canal | fracción | GANA | PIERDE | SIN SUSTRATO | B mediana |", "|---|---|---|---|---|---|---|---|"]
+          "BLOQUEA (D-45: el neto va en contra del brazo sin llegar a significancia) no es un falso de la prueba: sin "
+          "ningún efecto sale cerca de la mitad de las veces que el neto no es cero. Un BLOQUEA no es evidencia contra "
+          "un brazo (verificador de S163).", "",
+          "| ventana | sensor | canal | fracción | GANA | PIERDE | BLOQUEA | SIN SUSTRATO | B mediana |",
+          "|---|---|---|---|---|---|---|---|---|"]
     for c in out["celdas"]:
         for x in c["placebo_c"]:
-            L.append("| %s | %s | %s | %.2f | %s | %s | %s | %d |" % (
+            bl = x["resultados"].get("BLOQUEA", 0)
+            L.append("| %s | %s | %s | %.2f | %s | %s | %s | %s | %d |" % (
                 c["ventana"], c["sensor"], c["canal"], x["fraccion"], _t(x["GANA"]), _t(x["PIERDE"]),
+                _t({"k": bl, "n": x["n"], "tasa": bl / x["n"], "ic95": wilson(bl, x["n"])}),
                 _t(x["SIN_SUSTRATO"]), x["B_mediana"]))
     L += ["", "## P2: poder (a debe dar GANA, b debe dar PIERDE)", "",
           "| ventana | sensor | canal | fracción | a: GANA | a: SIN SUSTRATO | b: PIERDE | b: SIN SUSTRATO |",
@@ -244,4 +250,9 @@ def escribir_resumen(out):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    if sys.argv[1] == "--solo-resumen":
+        # Regenera el resumen desde un JSON ya corrido (no repite los placebos).
+        Path(sys.argv[3]).write_text(escribir_resumen(json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))),
+                                     encoding="utf-8")
+    else:
+        main(sys.argv[1], sys.argv[2])

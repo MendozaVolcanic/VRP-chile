@@ -817,6 +817,10 @@ def main(argv=None):
     ventana = (a.desde, a.hasta)
     coords, inner = bp._coords_por_volcan(), bp.inner_desde_html()
     lados = dict(x.split("=", 1) for x in a.lado)
+    # Verificador de S163: un --cobertura con un nombre mal escrito dejaba ese lado «sin registro» sin avisar.
+    ajenos = sorted({x.split("=", 1)[0] for x in a.cobertura} - set(lados))
+    if ajenos:
+        ap.error("--cobertura de lados que no existen: %s (lados: %s)" % (", ".join(ajenos), ", ".join(sorted(lados))))
     recs, faltan = {}, {}
     for nombre, d in lados.items():
         recs[nombre], faltan[nombre] = cargar_lado(d, ventana, sensores, coords, inner)
