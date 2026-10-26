@@ -1,0 +1,70 @@
+{
+ "pruebas": [
+  "experiments/_s163_diurno_k/test_evaluar_con_exclusion.py"
+ ],
+ "mutaciones": [
+  {
+   "id": "G1",
+   "archivo": "experiments/_s163_diurno_k/evaluar_con_exclusion.py",
+   "viejo": "    f = [x for x in filas if str(x[\"fecha_utc\"])[:10] not in dias]",
+   "nuevo": "    f = list(filas)",
+   "que": "no saca las filas de la referencia"
+  },
+  {
+   "id": "G2",
+   "archivo": "experiments/_s163_diurno_k/evaluar_con_exclusion.py",
+   "viejo": "    r = {lado: [x for x in rs if x[\"dt\"].strftime(\"%Y-%m-%d\") not in dias] for lado, rs in recs_por_lado.items()}",
+   "nuevo": "    r = {lado: list(rs) for lado, rs in recs_por_lado.items()}",
+   "que": "no saca los records"
+  },
+  {
+   "id": "G3",
+   "archivo": "experiments/_s163_diurno_k/evaluar_con_exclusion.py",
+   "viejo": "            out[d][\"%s %s %s\" % (p.sensor_bucket, \"día\" if ev.es_dia_vol(p.volcano, p.instante) else \"noche\", clase)] += 1",
+   "nuevo": "            out[d][\"%s %s %s\" % (p.sensor_bucket, \"día\", clase)] += 1",
+   "que": "lo que sale no separa noche"
+  },
+  {
+   "id": "G4",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "        if len(e) < 2000:\n            break\n        pagina += 1",
+   "nuevo": "        break",
+   "que": "CMR sin paginar"
+  },
+  {
+   "id": "G5",
+   "archivo": "experiments/_s163_diurno_k/dias_excluidos_nasa.py",
+   "viejo": "    return {x for x in ((dt.date.fromisoformat(desde) + dt.timedelta(i)).isoformat() for i in range(n)) if not dias[x]}",
+   "nuevo": "    return {x for x in ((dt.date.fromisoformat(desde) + dt.timedelta(i)).isoformat() for i in range(n - 1)) if not dias[x]}",
+   "que": "CMR pierde el último día"
+  },
+  {
+   "id": "G6",
+   "archivo": "experiments/_s163_diurno_k/evaluar_con_exclusion.py",
+   "viejo": "    r = ev.evaluar_completo(filas_x, recs_x, control, brazo, a.opcion_e,",
+   "nuevo": "    r = ev.evaluar_completo(filas, recs, control, brazo, a.opcion_e,",
+   "que": "main no aplica la lista"
+  },
+  {
+   "id": "G7",
+   "archivo": "experiments/_s163_diurno_k/evaluar_con_exclusion.py",
+   "viejo": "    r = ev.evaluar_completo(filas_x, recs_x, control, brazo, a.opcion_e,",
+   "nuevo": "    r = ev.evaluar_completo(filas_x, recs_x, control, brazo, \"e-i\",",
+   "que": "main fija la opción e"
+  },
+  {
+   "id": "G8",
+   "archivo": "experiments/_s163_diurno_k/evaluar_con_exclusion.py",
+   "viejo": "    if malos:\n        print(\"DÍAS EXCLUIDOS QUE NO SON FECHAS",
+   "nuevo": "    if False:\n        print(\"DÍAS EXCLUIDOS QUE NO SON FECHAS",
+   "que": "main no valida la lista"
+  },
+  {
+   "id": "C-CAIDA",
+   "archivo": "experiments/_s163_diurno_k/evaluar_con_exclusion.py",
+   "viejo": "    dias = set(dias)\n    f = [x",
+   "nuevo": "    raise RuntimeError(\"control de caida\")\n    f = [x",
+   "que": "CONTROL: tiene que salir CAIDA"
+  }
+ ]
+}
