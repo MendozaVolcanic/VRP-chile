@@ -569,6 +569,32 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~02:10 UTC, servidor 01:56 al abrir (S163, vuelta 1): relevo tomado; decisión 9 aplicada; alternativa a O2 lanzada
+- Coordinadora S163 = `local_8a135e90-b711-4bb9-9dec-ff02036f206b`. A pedido de Nicolás se separó de S162 (ya es sesión
+  de nivel superior): las hijas siguen anidadas bajo S162 y sus avisos automáticos le llegan a ella, así que se les pidió
+  por mensaje que manden resultados y pidan despachos a S163. Avisadas `loop-modis-2`, `loop-viirs750-2` y `loop-viirs375`.
+- Estado verificado: `loop/activo` = remoto (`4e8865435`); runs sin nada del loop (NRT verde 01:10 UTC); PRs #898 a #906
+  abiertos y CLEAN (#889 DIRTY); issue #864 abierto; disco C: 26 GB, D: 9,6 GB. **La rama de `loop-modis-2`
+  (`claude/s162-modis-2-0dd578`) no está en el remoto**: se le pidió subirla.
+- **Decisión 9 aplicada con D-48** tras el verificador limpio (Opus, `s162-verif-protegidas-snpp` `3c6836076`,
+  `experiments/_s162_v375/protegidas_snpp/verificador/INFORME.md`): para las 6 protegidas de Suomi NPP, CONFIRMADO que no
+  son de cráter por tres evidencias independientes de la fecha (cabecera de la imagen 18 a 102 min posterior en 6 de 6;
+  VRP de su pasada que calza con el total del port, nulo 0 de 2.000; K publica 279, 288 y 289 sólo por un píxel del cráter
+  bajo 0,05 MW). Se juzgan con la regla de cráter de #903. Correcciones al informe del subagente 4: las distancias son a
+  8,2 a 28,9 km **del cráter** (el informe medía al centro de MIROVA, VP162-01); la corroboración de NOAA-20 en 294 mira otro
+  objeto a 34,75 km (VP162-02, queda SIN DATO). **Para el estrato NO se extiende tal cual** (VP162-03): de las 128
+  protegidas sólo OCR anteriores al 2026-10-09, 48 son Suomi NPP con record nuestro, 9 NOAA, 71 sin record a 3 min, y 88
+  caen también por el hito de distancia; iguales a las 6 en sentido estricto, 11. Regla que queda: **cada adopción de un
+  paquete de VIIRS 375 informa al lado la lectura A y separa tres grupos: (i) los 11 como las 6, (ii) los sin
+  plataforma, (iii) los que la regla saca también por `ocr_sin_distancia_medida`**; nunca se presenta el 128 como «128
+  casos como estas 6». Revocable por Nicolás.
+- Adenda 1 de V750-B: su verificador Sonnet todavía no entrega (carpeta `adenda1/verificador/` sin INFORME); se confirma
+  con D-48 cuando dé conforme.
+- Alternativa a O2 lanzada (subagente Opus, sólo lectura, worktree `C:\vrp-trabajo\s163-o2alt`, rama
+  `s163-o2-alternativa` desde `s160-auditoria`): calibrar las variantes de `fillmissing2` contra el VRP que MIROVA publicó
+  en sus alertas de VIIRS 750 de un píxel, con control de 2 a 4 píxeles, nulo medido y veredicto SEPARA / NO SEPARA /
+  INDECIDIBLE. Después, verificador limpio de otro modelo. O2 queda como confirmación opcional.
+
 ### 2026-10-25 (S162): relevo de la coordinadora
 - Nicolás: «lanza esa nueva sesión que recomiendas». Abierta `coordinadora-s163` (`local_8a135e90-b711-4bb9-9dec-ff02036f206b`)
   en este mismo checkout, con el traspaso S163. S162 detiene su loop aquí: desde ahora la única coordinadora (y la única
