@@ -1,0 +1,20 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+filas de la referencia: 45344 por fuente {'CONS': 44215, 'OCR': 1129}
+
+== T4: protegidas lectura A, regla de minimas original en las dos
+vieja (claves al minuto): 479  nueva (pasadas a +-120 s): 479
+claves protegidas en la vieja que la nueva no cubre: 0
+protegidas nuevas cuyas filas de alerta caen en mas de un minuto (la vieja las contaba doble): 0
+pasadas con el OCR contradiciendo a la tabla: 0
+  por (tabla, ocr): {}
+pasadas con alerta en tabla y OCR a distinto lado de 1 MW (ocr_cruza_1mw): 0
+  de las contradictorias, con alerta OCR de 1 MW o mas: 0
+
+== nueva, regla SN (decidida), por canal y sensor
+union 479 {'VIIRS375': 248, 'VIIRS750': 162, 'MODIS': 69} solo_ocr 175
+tabla 304 {'VIIRS375': 119, 'VIIRS750': 117, 'MODIS': 68} solo_ocr 0
+
+== T6: protegida de crater (union, SN), radio = inner_radius_km del tablero
+MODIS protegidas A 69 de crater 68 motivos {'ocr_sin_distancia_medida': 1}
+VIIRS375 protegidas A 248 de crater 123 motivos {'ocr_sin_distancia_medida': 94, 'ocr_snpp_antes_del_hito': 48, 'plataforma_desconocida_antes_del_hito': 71, 'sin_distancia': 1}
+VIIRS750 protegidas A 162 de crater 118 motivos {'ocr_sin_distancia_medida': 36, 'ocr_snpp_antes_del_hito': 37, 'plataforma_desconocida_antes_del_hito': 5, 'sin_distancia': 2}
