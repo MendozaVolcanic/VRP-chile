@@ -89,13 +89,15 @@ def test_con_fecha_el_aviso_aparece_despues_del_header_y_dice_lo_que_debe():
     js = f"""
     const M = require({json.dumps(str(MODULO))});
     const d = docFalso();
-    const e = M.insertarAviso(d, {json.dumps(FECHA)});
-    M.insertarAviso(d, {json.dumps(FECHA)});   // idempotente: no duplica
+    const e = M.insertarAviso(d, {json.dumps(FECHA)}, {json.dumps(FECHA)});
+    M.insertarAviso(d, {json.dumps(FECHA)}, {json.dumps(FECHA)});   // idempotente: no duplica
     process.stdout.write(JSON.stringify([texto(e), d.body.children.map(c => c.tag), e.id]));
     """
     txt, hijos, ident = node(js)
-    assert txt.startswith("Desde el 19 oct 2026 14:05 UTC la réplica usa el detector K (sin el Test 1 integrado; "
-                          "ver ficha SDA). Las comparaciones que crucen esa fecha mezclan dos detectores.")
+    # S155: el aviso nombra la fecha de observación de los datos (frontera) y, aparte, la de producción.
+    assert txt.startswith("Los datos con fecha de observación desde el 19 oct 2026 son del detector K (sin el Test 1 "
+                          "integrado; ver ficha SDA) y los anteriores, del detector C0; la réplica corre K en producción "
+                          "desde el 19 oct 2026 14:05 UTC. Las series que crucen el 19 oct 2026 mezclan dos detectores")
     assert "Ficha SDA" in txt
     assert hijos == ["header", "div"] and ident == "aviso-cambio-detector"
 
@@ -124,6 +126,9 @@ def test_camino_del_navegador_con_la_constante_completada(tmp_path):
     # S154: la constante ya está completada con la hora del merge de #850; se reemplaza el valor que tenga (null o fecha).
     completado, n = re.subn(r'const CAMBIO_DETECTOR_UTC = (null|"[^"]*");', f"const CAMBIO_DETECTOR_UTC = {json.dumps(FECHA)};", src)
     assert n == 1
+    # S155: la línea y el aviso dependen además de la frontera de los datos; también se completa.
+    completado, n = re.subn(r'const DATOS_K_DESDE_UTC = (null|"[^"]*");', f"const DATOS_K_DESDE_UTC = {json.dumps(FECHA)};", completado)
+    assert n == 1
     archivo = tmp_path / "cambio_detector_completado.js"
     archivo.write_text(completado, encoding="utf-8")
     js = r"""
@@ -138,7 +143,7 @@ def test_camino_del_navegador_con_la_constante_completada(tmp_path):
     registrados, const, aviso = node(js, str(archivo))
     assert registrados == ["cambioDetector"]
     assert const == FECHA
-    assert aviso == "Desde el 19 oct 2026 14:05 UTC la réplica"
+    assert aviso == "Los datos con fecha de observación desde "
 
 
 def test_el_modulo_no_toca_el_criterio_de_publicacion():

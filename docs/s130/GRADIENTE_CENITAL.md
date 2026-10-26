@@ -1,5 +1,7 @@
 # S130 · El sub-reporte crece con el ángulo cenital — y MIROVA es plano
 
+> ⚠️ **S157 (A113, tarea 1.34)**: la curva que mide este documento sigue en pie, pero su explicación por el remuestreo de MIROVA (D17) quedó retirada por la tarea 1.14 (`experiments/_s151_presupuesto_magnitud/README.md` §3.2): el Npix de MIROVA no crece hacia el borde y lo que empeora es nuestro fondo. El mecanismo está SIN ATRIBUIR (`docs/SINTOMAS.md` §1). Texto original conservado por historia.
+
 Verificación del segundo frente de fidelidad (el remuestreo), con el control de
 instrumento que faltaba. **El diagnóstico se confirma en VIIRS y no está probado en
 MODIS.**

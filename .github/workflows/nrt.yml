@@ -179,6 +179,13 @@ jobs:
         timeout-minutes: 50
         run: |
           set -o pipefail
+          # S160 (hallazgo 247, A71): un secret ausente llega vacío; sin token earthaccess cae al par
+          # usuario y clave vencido, hace hasta 8 logins por job y bloquea la cuenta. Cortar antes.
+          # Test: tests/test_guard_token_vacio_cron_s160.py.
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacío. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea la cuenta (A71)."
+            exit 1
+          fi
           # S131: los inputs del dispatch entran por env (no interpolados en el shell)
           ARGS=()
           if [ -n "$VRP_DATE" ]; then ARGS+=(--date "$VRP_DATE"); fi
@@ -213,6 +220,13 @@ jobs:
         timeout-minutes: 50
         run: |
           set -o pipefail
+          # S160 (hallazgo 247, A71): un secret ausente llega vacío; sin token earthaccess cae al par
+          # usuario y clave vencido, hace hasta 8 logins por job y bloquea la cuenta. Cortar antes.
+          # Test: tests/test_guard_token_vacio_cron_s160.py.
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacío. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea la cuenta (A71)."
+            exit 1
+          fi
           # S131: los inputs del dispatch entran por env (no interpolados en el shell)
           ARGS=()
           if [ -n "$VRP_DATE" ]; then ARGS+=(--date "$VRP_DATE"); fi

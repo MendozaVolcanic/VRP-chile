@@ -68,8 +68,17 @@ def _correr(vista, casos):
 
 
 def _records_reales():
+    """Records reales de la serie publicada y, desde S158, tambien de la sombra C0 y de los residuos
+    C0 apartados. El predicado se aplica a cualquier record; el defecto que vigila (cumulo en 0 MW con
+    el Test 1 disparado) solo lo produce el detector anterior, y desde el reemplazo del historico con
+    K (tarea 1.24) ya no queda en la serie publicada: su sustrato vive en data/experimental_v2/ (la
+    sombra, C0 desde el 2026-10-02) y en data/_c0_residuales/."""
     casos, claves = [], []
-    for f in sorted(glob.glob(os.path.join(ROOT, "data", "mirova_equivalent", "*.json"))):
+    archivos = []
+    for sub in ("mirova_equivalent", "experimental_v2", "_c0_residuales"):
+        archivos += [f for f in sorted(glob.glob(os.path.join(ROOT, "data", sub, "*.json")))
+                     if not f.endswith("_recent.json")]
+    for f in archivos:
         nombre = os.path.splitext(os.path.basename(f))[0]
         with open(f, encoding="utf-8") as fp:
             d = json.load(fp)
@@ -93,7 +102,9 @@ def test_valida_implica_cumulo_con_energia_en_records_reales(vista):
     expuestos = [i for i, c in enumerate(casos)
                  if c["primary_cluster"] and (c["primary_cluster"]["vrp_mw"] or 0) <= 0
                  and c["triggered_test1"] is True]
-    assert len(expuestos) > 100, f"sin sustrato: solo {len(expuestos)} records con cumulo en 0 y Test 1"
+    # S158: el umbral era > 100 con la serie entera en C0 (S139 midio 2.219). Tras el reemplazo con K
+    # quedan 27 en la sombra y 3 en los residuos (medido S158); la sombra crece cada dia.
+    assert len(expuestos) >= 20, f"sin sustrato: solo {len(expuestos)} records con cumulo en 0 y Test 1"
     res = _correr(vista, casos)
     malos = [claves[i] for i, (c, v) in enumerate(zip(casos, res))
              if v and c["primary_cluster"] and (c["primary_cluster"]["vrp_mw"] or 0) <= 0]
@@ -117,11 +128,15 @@ def test_el_caso_de_referencia_sigue_en_los_datos():
     """Ancla real del control sintetico: Chaiten 2025-03-16 05:24 VIIRS_SNPP_750, summit, cumulo de
     2 pixeles en 0,0 MW y Test 1 disparado. OJO: el caso que citaba el verificador S138 para P5
     (Tupungatito 2026-08-21 05:30 V750) tiene `triggered_test1 = False` y `vrp_mw = 0`, asi que el
-    dashboard ya no lo contaba: es un ejemplo de D25 (crater en 0 MW), no de P5. Verificado S139."""
-    with open(os.path.join(ROOT, "data", "mirova_equivalent", "Chaiten.json"), encoding="utf-8") as fp:
+    dashboard ya no lo contaba: es un ejemplo de D25 (crater en 0 MW), no de P5. Verificado S139.
+
+    S158: el record de Chaiten se reproceso con K y ya no es de esta clase. El ancla pasa a un residuo
+    C0 apartado, que no se reescribe: Lastarria 2026-08-05 05:24 VIIRS_SNPP (data/_c0_residuales/),
+    summit, cumulo en 0,0 MW y Test 1 disparado (verificado S158)."""
+    with open(os.path.join(ROOT, "data", "_c0_residuales", "Lastarria.json"), encoding="utf-8") as fp:
         recs = json.load(fp)["records"]
-    r = [x for x in recs if x["datetime_utc"] == "2025-03-16 05:24" and x["sensor"] == "VIIRS_SNPP_750"]
-    assert r, "no esta el record Chaiten 2025-03-16 05:24 VIIRS_SNPP_750"
+    r = [x for x in recs if x["datetime_utc"] == "2026-08-05 05:24" and x["sensor"] == "VIIRS_SNPP"]
+    assert r, "no esta el residuo Lastarria 2026-08-05 05:24 VIIRS_SNPP"
     assert r[0]["distance_class"] == "summit"
     assert (r[0]["primary_cluster"]["vrp_mw"] or 0) == 0 and r[0].get("triggered_test1") is True
 

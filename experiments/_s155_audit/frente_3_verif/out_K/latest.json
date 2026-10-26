@@ -1,0 +1,182 @@
+{
+ "generated_utc": "2026-10-19T11:06:48Z",
+ "window": [
+  "2026-08-20",
+  "2026-10-19"
+ ],
+ "ventana_falsas": [
+  "2026-09-01",
+  "2026-10-19"
+ ],
+ "cobertura": {
+  "cobertura_propia_pct": 52.5,
+  "dias_con_datos": 32,
+  "dias_ventana": 61,
+  "ultimo_dia_con_datos": "2026-10-19",
+  "cola_sin_datos_dias": 0,
+  "gt_ultima_fecha_csv": "2026-10-19",
+  "gt_stale_dias": 0,
+  "alertas_diurnas_excluidas": 33,
+  "avisos": [
+   "cobertura propia 52.5% < 80.0% (32/61 días con datos)"
+  ]
+ },
+ "criteria": "eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR, referencia filtrada a pasadas nocturnas con la misma regla del pipeline (_reject_daytime, S124)",
+ "recall": {
+  "MODIS": {
+   "n_noches": 12,
+   "noches_sin_datos": 2,
+   "recall_crater_pct": 66.7,
+   "recall_dash_pct": 66.7
+  },
+  "VIIRS750": {
+   "n_noches": 30,
+   "noches_sin_datos": 25,
+   "recall_crater_pct": 73.3,
+   "recall_dash_pct": 73.3
+  },
+  "VIIRS375": {
+   "n_noches": 104,
+   "noches_sin_datos": 110,
+   "recall_crater_pct": 92.3,
+   "recall_dash_pct": 92.3
+  }
+ },
+ "magnitud_ratio_by_vol": {
+  "Chaiten": {
+   "n_noches": 4,
+   "ratio_mediano": 0.765
+  },
+  "Isluga": {
+   "n_noches": 22,
+   "ratio_mediano": 0.469
+  },
+  "Lascar": {
+   "n_noches": 16,
+   "ratio_mediano": 0.399
+  },
+  "Lastarria": {
+   "n_noches": 12,
+   "ratio_mediano": 0.736
+  },
+  "NevadosDeChillan": {
+   "n_noches": 37,
+   "ratio_mediano": 0.635
+  },
+  "PlanchonPeteroa": {
+   "n_noches": 10,
+   "ratio_mediano": 0.83
+  },
+  "PuyehueCordonCaulle": {
+   "n_noches": 12,
+   "ratio_mediano": 0.633
+  },
+  "Tupungatito": {
+   "n_noches": 10,
+   "ratio_mediano": 0.364
+  },
+  "Villarrica": {
+   "n_noches": 3,
+   "ratio_mediano": 0.827
+  }
+ },
+ "magnitud_ratio_by_npix": {
+  "1px": {
+   "n_noches": 28,
+   "ratio_mediano": 0.731
+  },
+  "2px": {
+   "n_noches": 46,
+   "ratio_mediano": 0.523
+  },
+  "3-5px": {
+   "n_noches": 45,
+   "ratio_mediano": 0.541
+  },
+  "6+px": {
+   "n_noches": 7,
+   "ratio_mediano": 0.614
+  }
+ },
+ "falsas_publicaciones": {
+  "por_sensor": {
+   "MODIS": {
+    "n_neg_limpio": 646,
+    "n_publica": 7,
+    "falsas_pub_pct": 1.1
+   },
+   "VIIRS750": {
+    "n_neg_limpio": 918,
+    "n_publica": 10,
+    "falsas_pub_pct": 1.1
+   },
+   "VIIRS375": {
+    "n_neg_limpio": 615,
+    "n_publica": 11,
+    "falsas_pub_pct": 1.8
+   }
+  },
+  "por_regimen": {
+   "focal": {
+    "MODIS": {
+     "n_neg_limpio": 285,
+     "n_publica": 7,
+     "falsas_pub_pct": 2.5,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS750": {
+     "n_neg_limpio": 384,
+     "n_publica": 9,
+     "falsas_pub_pct": 2.3,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS375": {
+     "n_neg_limpio": 195,
+     "n_publica": 10,
+     "falsas_pub_pct": 5.1,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": false
+    }
+   },
+   "nevado": {
+    "MODIS": {
+     "n_neg_limpio": 361,
+     "n_publica": 0,
+     "falsas_pub_pct": 0.0,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS750": {
+     "n_neg_limpio": 534,
+     "n_publica": 1,
+     "falsas_pub_pct": 0.2,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS375": {
+     "n_neg_limpio": 420,
+     "n_publica": 1,
+     "falsas_pub_pct": 0.2,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": false
+    }
+   }
+  },
+  "alarma": false,
+  "nota": "medición sin alarma (decisión Nicolás S140); la banda es la de terminado de la spec §2, no un umbral de regresión"
+ },
+ "integrity": {
+  "parse_errors": [],
+  "duplicates_total": 0
+ },
+ "flags": [
+  "recall VIIRS750 73.3% < banda 79.5% (n=30)",
+  "recall VIIRS375 92.3% < banda 93.4% (n=104)",
+  "magnitud NevadosDeChillan 0.635x < 0.7 (SUB-estima, n=37) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md",
+  "magnitud PuyehueCordonCaulle 0.633x < 0.7 (SUB-estima, n=12) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md",
+  "magnitud Tupungatito 0.364x < 0.7 (SUB-estima, n=10) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md"
+ ],
+ "verdict": "DEGRADADO"
+}

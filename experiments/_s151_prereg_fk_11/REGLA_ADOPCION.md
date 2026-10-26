@@ -134,7 +134,36 @@ evidencia, y el paquete lo dice.
      días de `diario.html` se leería como «la erupción declina»;
    - el aviso a los consumidores: OVDAS y Integracion_Plataformas (`MAPA_WORKSPACE.md`);
    - **el sí explícito de Nicolás** antes del merge (A45), que incluye la pre-autorización de la reversión del paso 9.
-9. **Sombra: el laboratorio congelado en C0.** `experimental-diario.yml` ya corre a diario los 11 Tier A con C0
+9. ⚠️ **Lectura decidida el 2026-10-19 (S156), viendo un caso concreto.** La primera corrida de la vigilancia
+   (`scripts/vigilancia_sombra.py`) encontró una protegida A que la sombra publica y producción calla, confirmada en la
+   cabecera: Puyehue-Cordón Caulle, VIIRS 750 (NOAA-21), 2026-10-10 05:54 UTC, 1,19 MW; mismo objeto que MIROVA
+   (auditoría espacial A61) y misma pasada publicada por K en VIIRS 375. Es dato reprocesado con K, anterior a la
+   adopción y fuera de las ventanas del A/B. La regla no decía desde cuándo cuenta la vigilancia. Nicolás eligió («lo
+   que recomiendes», ante la recomendación B de la sesión): (a) **la unidad es la pasada**, como en el veto P1 del A/B;
+   no se reinterpreta a noche; (b) **la vigilancia del paso 9 cuenta desde la adopción** (`CAMBIO_DETECTOR_UTC`,
+   2026-10-18 09:57:30 UTC): sólo lo posterior dispara reversión o investigación y suma a la duración. Lo anterior
+   (datos K reprocesados) se informa como **retrospectivo**, no dispara, y una pérdida retrospectiva va a investigación
+   con un issue que se abre a mano (el retrospectivo es fijo: la sombra existe desde el 2026-10-02 y no crece hacia
+   atrás, así que no hace falta automatizarlo). El caso de PCC es el primero de esa clase. El corte es al segundo. Esta lectura se tomó **después** de ver el caso, y quien la
+   revise debe leerla así. Nota de implementación (no es decisión): la cota de (i) que la regla cita (V1, 16 de 194) es
+   de VIIRS 375, donde C0 no perdió ninguna Muy Bajo, así que es la pérdida diferencial; en MODIS y VIIRS 750 el A/B no
+   guardó el diferencial por pasada y (i) se informa sin disparar. Evidencia: `experiments/_s156_autoaudit/sombra/`.
+   **Dos decisiones más de Nicolás el mismo día**, ante los verificadores 2 y 3 (elegidas entre opciones, con la
+   recomendación de la sesión): (c) **(i) coherente con D-9**: las mínimas (0,05 MW o menos, NONE en el banner) no
+   cuentan, y la cota es la del A/B medida con la regla SE: 7 de 161 en V1 y 12 de 343 en V2, derivadas de
+   `experiments/_s153_fk_v2/v1.json` y `v2.json` (`reglas_d9.SE`; el denominador exacto no quedó guardado y se tomó el
+   menor posible, que da la cota más alta). La cita «(V1: 16 de 194)» de abajo es la de la etiqueta original, que
+   contaba 9 mínimas; (d) **las pasadas ya juzgadas** se anotan en `sombra_pasadas_juzgadas.json` (junto a esta regla)
+   y no vuelven a disparar; (e) **cumplido el plazo** (29 protegidas o 120 días), una candidata se sigue informando pero
+   ya no está pre-autorizada: decide Nicolás. Notas de implementación (verificador 4, no son decisiones nuevas): el
+   plazo se mide pasada por pasada (dentro si es una de las primeras 29 protegidas vistas, la 29.ª incluida, y anterior
+   al vencimiento), que es la letra «hasta ver 29»; y una pasada juzgada sale sólo de la reversión, porque lo juzgado
+   fue si revertir, no lo que vio la sombra. (f) **Decisión de Nicolás, mismo día, ante el verificador 5**: una racha
+   de persistencia ya investigada se anota en la sección `rachas` del mismo archivo y deja de disparar; si se alarga con
+   una noche nueva, vuelve a disparar (sin esto la racha disparaba todos los días para siempre). Texto original
+   conservado:
+
+   **Sombra: el laboratorio congelado en C0.** `experimental-diario.yml` ya corre a diario los 11 Tier A con C0
    (`experimental_v2`). Cada semana se cuentan contra MIROVA producción (K) y sombra (C0) con el mismo evaluador.
    - **Duración por protegidas, no por días:** hasta ver **29 protegidas A nocturnas** en la sombra, o 120 días, lo que
      ocurra primero. Con 29, una pérdida de una de cada diez protegidas se vería con 95 % de probabilidad

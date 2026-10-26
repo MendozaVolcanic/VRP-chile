@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
-<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) -->
+<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) -->
   <style>
     .rango-ctl { display:inline-flex; gap:4px; align-items:center; }
     .rango-ctl[hidden] { display:none; }
@@ -541,7 +541,7 @@
 
     <h3 style="color:#ffab91;margin:20px 0 8px 0;">Métricas de desempeño (S119 — auditoría integral post-flip C2, 2026-07-01)</h3>
     <div style="background:#0a1320;border-left:3px solid #ffc107;padding:12px 16px;margin:12px 0;border-radius:0 4px 4px 0;font-size:0.92rem;">
-      <b>Algoritmo operacional:</b> Coppola 2016a literal (Tests 2∧3 dual-ROI 5σ/10σ + second-pass +
+      <b style="color:#ffc107;">⚠️ Aviso (2026-10-20):</b> estas métricas se midieron en julio de 2026 con el detector anterior (C0: con el Test 1 integrado, la conectiva más permisiva en los Tests 2 y 3 y la banda 21 en MODIS). Desde el 18 oct 2026 la réplica usa el detector K, y en las series los datos son de K desde la observación del 18 sep 2026. Con K, en las dos ventanas de la prueba de adopción, VIIRS 375 m publicó 239 de 260 y 400 de 426 pasadas con alerta de MIROVA (C0, todas) y VIIRS 750 m 28 de 42 y 91 de 117 (C0, 32 y 95): un silencio de VIIRS en una noche de actividad débil pesa menos de lo que sugiere el recall de abajo. Ninguna alerta de 1 MW o más que decida quedó sin publicar (en VIIRS 375 m, 19 de 21: las dos que faltan, de Tupungatito, resultaron focos lejanos al leerlas con la distancia de su propia imagen). Detalle en la ficha SDA v1.9. Texto original:<br><br><b>Algoritmo operacional:</b> Coppola 2016a literal (Tests 2∧3 dual-ROI 5σ/10σ + second-pass +
       ETI cuadrático + kernel 8-vecinos, σ global per-imagen) + área nadir-fija los 3 sensores (S102-S103,
       calibración Wooster OSF) + magnitud focal (S109-S112) + <b>gates intra-radio OFF</b> (S118, clon
       literal — A/B 0 robos de cluster en 214 noches).<br><br>
@@ -1621,7 +1621,7 @@ function isSummitDetection(r) {
 // ctx_cluster) el marcador PRIMARIO es esa ancla. S154 (D-24, aprobado por Nicolás el 2026-10-18): ctx_cluster
 // se agrega a la lista porque su final_hotspot ES el centroide del cúmulo publicado, mientras que
 // anomaly_pixels[0] es el píxel de más energía de toda la escena y puede caer a 25 km (Láscar 2026-10-10 05:06,
-// dibujado en un salar con «summit» y 0,28 km en la tabla); con K (#850) todos los records son ctx_cluster.
+// dibujado en un salar con «summit» y 0,28 km en la tabla); con K (#850) todos los records son ctx_cluster. [⚠️ S157: no todos; desde la observación del 2026-09-18 hay 52 records `eruption`, todos MODIS, y en los 24 summit la distancia de anomaly_pixels[0] es igual a la de final_hotspot (experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt y v_eruption_marcador.txt).]
 // Los anomaly_pixels siguen detrás, bajo el toggle «Todos los pixels» (evidencia preservada, regla S18).
 // Guard: tests/test_marcador_mapa_ctx_cluster_s154.py.
 function pixelesDelMarcador(r, v) {

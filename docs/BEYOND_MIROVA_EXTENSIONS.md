@@ -303,3 +303,38 @@ Cuando termine el clon literal (post adopción F2.1 unsuitable filters + Tupunga
 3. **EXT-8 AVTOD cross-validation**: integrar al workflow validation antes de publication.
 
 Cuando Nicolás decida priorizar alguna extension específica → mover de "backlog" a "in_progress" + abrir tarea + iniciar implementación.
+
+## 12. Donde VRP Chile podría hacerlo MEJOR que MIROVA (vivo, desde S159)
+
+> Pedido de Nicolás (2026-10-21): «ve dejando esas cosas anotadas para nuestros futuros desarrollos». Cada sesión
+> que encuentre una agrega una fila aquí, con su evidencia, en el mismo PR del hallazgo.
+>
+> Dos reglas para leer esta lista. (1) **Primero igualar a MIROVA, lo demás va al perfil `experimental`**: nada de
+> esto entra a `mirova_equivalent`, que es la réplica. (2) **«Mejor» no se mide contra MIROVA** (A115): se mide contra
+> actividad conocida del OVDAS, SWIR de alta resolución (Landsat OLI, Sentinel 2 MSI) o la física del sensor. Hasta
+> tener esa medición, cada fila es una hipótesis y lo dice su estado.
+
+| id | qué | por qué podría ser mejor | evidencia | estado |
+|---|---|---|---|---|
+| MEJ-1 | **Trazabilidad por pasada**: cada record guarda su gránulo, sus diagnósticos (`diag_*`), el cúmulo y su clase | MIROVA publica una tabla filtrada (el OSF no es supervisado ni tiene datos por píxel, A105), vuelve a servir TIF viejos bajo horas nuevas (md5 repetido, A106) y sus TIF están congelados desde el 2026-09-22; el OCR puede leer la imagen de otra pasada. Para un SDA (CPLT N°372) poder reconstruir cada alerta es un requisito, no un lujo | A105, A106, `reference_mirova_tif_congelados_20260922`, `reference_ocr_imagen_de_otra_pasada` | fortaleza actual |
+| MEJ-2 | **Fondo del VRP determinista con un solo píxel** | El fondo de MIROVA (`fillmissing2`, interpolación lineal sobre una triangulación de Delaunay) no es único en una grilla regular: con un píxel alertado el VRP varía hasta 1,82 veces según la triangulación (45 de 178 escenas de un píxel difieren más de 5 %). Un fondo con regla fija daría la misma magnitud siempre. La réplica igual tiene que copiar la triangulación de MATLAB (O2) | `experiments/_s159/o1/INFORME.md` H1; `docs/AUDIT_S158_R2.md` §2 | idea; el problema está medido |
+| MEJ-3 | **La misma fórmula a todo ángulo** | En el OSF, el 24 % de las filas VIIRS 750 sobre 50,0° de cenit no cumple la fórmula del propio código de MIROVA (razón mediana 0,51, de 0,20 a 0,81, siempre menor que 1); bajo 50° la cumple el 100 %. No son las zonas de agregación del sensor (refutado). Si es un defecto de MIROVA, nosotros no lo tenemos; si es una corrección deliberada (por ejemplo, un subconjunto de píxeles), habría que entenderla antes de llamarla defecto | `experiments/_s159/p2/INFORME.md` H3; `experiments/_s159/geo/INFORME.md` parte S | SOSPECHA; causa desconocida |
+| MEJ-4 | **Grilla anclada al cráter** | El centro de la grilla de MIROVA queda a 0,2, 1,9 y 2,8 km de nuestra coordenada en Láscar, Planchón-Peteroa y Tupungatito, con una caja de cumbre de ±2,6 km. En Tupungatito el cráter podría quedar al borde de la caja sensible de MIROVA; nosotros anclamos al cráter (A63). Falta comprobar que nuestra coordenada sea el cráter activo y si esto explica la alerta de Tupungatito a 5 km que ninguna variante reproduce | `experiments/_s159/geo/INFORME.md` hallazgo 2; `docs/AUDIT_S158_R2.md` §3 | SOSPECHA; probar en la ola 2 con la grilla correcta |
+| MEJ-5 | **Señal real bajo el umbral de MIROVA** (lago de lava de Villarrica, Lazufre, lacolito de Cordón Caulle) | MIROVA no la publica; nosotros la detectamos. Es la categoría b de A54 | A54, A68, `docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md` | documentado; diseño del perfil experimental hecho |
+| MEJ-6 | **Día con mejor filtro de reflejo solar** | MIROVA procesa el día con umbrales más altos y un rechazo de reflejo solar bajo 12°, y aun así publicó un artefacto solar de 760 MW en Láscar que se limpia a mano (A76). Nosotros rechazamos todo el día y perdemos 3 alertas protegidas diurnas de Chillán. Un filtro solar mejor que el de 12° podría recuperar el día sin los artefactos | A76; `docs/AUDIT_S158_R2.md` R2-10 y VB-3; D-10 | idea |
+| MEJ-7 | **Foco puntual del cráter que MIROVA calla en MODIS**: candidata Láscar 2026-05-11 07:55 UTC (Aqua, cenit 38°) | El port MODIS (tag `s162-base-portes`, no producción) publica un solo píxel a 0,20 km del cráter, de 0,30 MW, con 4,7 K de MIR sobre TIR contra 1,8 K del percentil 99 del anillo de 5 a 25 km y 1,2 K como máximo en sus 8 vecinos, sin nube y fuera de la costura. Esa noche K publica el cráter en VIIRS 375 y 750 de los tres satélites (05:00 a 05:54 UTC) y MIROVA alertó en VIIRS (1,24 y 1,73 MW), pero dejó su MODIS de las 07:55 en RUTINA; en las noches vecinas alertó casi todas, también en MODIS. Para la réplica es un costo (publicar donde MIROVA calló); físicamente parece calor real del cráter. Con banda 21 o con la geolocalización de 5 km la publicación desaparece (VRC-05 del verificador de MOD-C): depende de MxD03 (D35) | `experiments/_s162_modis_negativos/diagnostico/INFORME.md` y `experiments/_s162_modis_negativos/INFORME.md` punto 3, rama `claude/s162-modis-774bb0` (`7824fd1fc`); run 40120713181 | SOSPECHA fuerte, sin verificador propio; la mide el censo de MOD-D. «Mejor» se valida contra OVDAS o SWIR, no contra MIROVA (A115) |
+
+Los MEJ-7 a MEJ-10 que aparecen en `experiments/_s159/m/INFORME.md` y en `experiments/_s159/biblio_2026/INFORME.md` son
+ids locales de esos frentes, anteriores a esta fila y nunca subidos a la tabla: no son el MEJ-7 de aquí.
+
+> ⚠️ **S162, sobre la geolocalización MODIS del párrafo que sigue** (A113; D35 de `docs/MIROVA_DIVERGENCES.md`): MOD-A
+> (PR #902) confirmó MOD03 y MYD03 como insumo de MIROVA, también en el NRT (Coppola 2026, p. 4, con p. 3 y p. 6), y
+> dejó SIN LOCALIZAR cómo los usa: el código del remuestreo no se publica (p. 21). El A/B de MxD03 sobre K dio CUMPLE
+> SIN DAÑO, verificado; eso dice que el cambio no daña la réplica, no que copie el método de MIROVA, y la adopción sigue
+> pendiente. El «hasta 3,4 km» quedó corto: en el borde del barrido `_interp_geo` corre el píxel 10 a 16 km (15 records,
+> cenit 63 a 75°, VRB-07 del verificador del A/B). Texto conservado.
+
+**Al revés, donde MIROVA hace algo mejor y hay que copiarlo** (no son extensiones; son la paridad): la
+geolocalización MODIS desde MOD03 con corrección de terreno (Coppola 2026 Sci Data p. 4; nosotros interpolamos y nos
+corremos hasta 3,4 km), la suma de todos los píxeles alertados y el fondo sin recorte. Lista completa en
+`docs/AUDIT_S158_R2.md` §0.

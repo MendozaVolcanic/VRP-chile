@@ -1,0 +1,178 @@
+{
+ "generated_utc": "2026-10-19T11:06:33Z",
+ "window": [
+  "2026-08-20",
+  "2026-10-19"
+ ],
+ "ventana_falsas": [
+  "2026-09-01",
+  "2026-10-19"
+ ],
+ "cobertura": {
+  "cobertura_propia_pct": 100.0,
+  "dias_con_datos": 61,
+  "dias_ventana": 61,
+  "ultimo_dia_con_datos": "2026-10-19",
+  "cola_sin_datos_dias": 0,
+  "gt_ultima_fecha_csv": "2026-10-14",
+  "gt_stale_dias": 5,
+  "alertas_diurnas_excluidas": 27,
+  "avisos": []
+ },
+ "criteria": "eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR, referencia filtrada a pasadas nocturnas con la misma regla del pipeline (_reject_daytime, S124)",
+ "recall": {
+  "MODIS": {
+   "n_noches": 12,
+   "noches_sin_datos": 0,
+   "recall_crater_pct": 66.7,
+   "recall_dash_pct": 58.3
+  },
+  "VIIRS750": {
+   "n_noches": 51,
+   "noches_sin_datos": 0,
+   "recall_crater_pct": 78.4,
+   "recall_dash_pct": 78.4
+  },
+  "VIIRS375": {
+   "n_noches": 204,
+   "noches_sin_datos": 0,
+   "recall_crater_pct": 95.6,
+   "recall_dash_pct": 95.6
+  }
+ },
+ "magnitud_ratio_by_vol": {
+  "Chaiten": {
+   "n_noches": 12,
+   "ratio_mediano": 1.055
+  },
+  "Isluga": {
+   "n_noches": 46,
+   "ratio_mediano": 0.503
+  },
+  "Lascar": {
+   "n_noches": 40,
+   "ratio_mediano": 0.441
+  },
+  "Lastarria": {
+   "n_noches": 23,
+   "ratio_mediano": 0.71
+  },
+  "NevadosDeChillan": {
+   "n_noches": 34,
+   "ratio_mediano": 0.684
+  },
+  "PlanchonPeteroa": {
+   "n_noches": 17,
+   "ratio_mediano": 0.838
+  },
+  "PuyehueCordonCaulle": {
+   "n_noches": 33,
+   "ratio_mediano": 0.876
+  },
+  "Tupungatito": {
+   "n_noches": 23,
+   "ratio_mediano": 0.54
+  },
+  "Villarrica": {
+   "n_noches": 14,
+   "ratio_mediano": 0.831
+  }
+ },
+ "magnitud_ratio_by_npix": {
+  "1px": {
+   "n_noches": 75,
+   "ratio_mediano": 0.75
+  },
+  "2px": {
+   "n_noches": 74,
+   "ratio_mediano": 0.643
+  },
+  "3-5px": {
+   "n_noches": 60,
+   "ratio_mediano": 0.476
+  },
+  "6+px": {
+   "n_noches": 33,
+   "ratio_mediano": 0.812
+  }
+ },
+ "falsas_publicaciones": {
+  "por_sensor": {
+   "MODIS": {
+    "n_neg_limpio": 966,
+    "n_publica": 51,
+    "falsas_pub_pct": 5.3
+   },
+   "VIIRS750": {
+    "n_neg_limpio": 1366,
+    "n_publica": 128,
+    "falsas_pub_pct": 9.4
+   },
+   "VIIRS375": {
+    "n_neg_limpio": 877,
+    "n_publica": 292,
+    "falsas_pub_pct": 33.3
+   }
+  },
+  "por_regimen": {
+   "focal": {
+    "MODIS": {
+     "n_neg_limpio": 425,
+     "n_publica": 40,
+     "falsas_pub_pct": 9.4,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS750": {
+     "n_neg_limpio": 564,
+     "n_publica": 69,
+     "falsas_pub_pct": 12.2,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": true
+    },
+    "VIIRS375": {
+     "n_neg_limpio": 267,
+     "n_publica": 87,
+     "falsas_pub_pct": 32.6,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": true
+    }
+   },
+   "nevado": {
+    "MODIS": {
+     "n_neg_limpio": 541,
+     "n_publica": 11,
+     "falsas_pub_pct": 2.0,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS750": {
+     "n_neg_limpio": 802,
+     "n_publica": 59,
+     "falsas_pub_pct": 7.4,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS375": {
+     "n_neg_limpio": 610,
+     "n_publica": 205,
+     "falsas_pub_pct": 33.6,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": true
+    }
+   }
+  },
+  "alarma": false,
+  "nota": "medición sin alarma (decisión Nicolás S140); la banda es la de terminado de la spec §2, no un umbral de regresión"
+ },
+ "integrity": {
+  "parse_errors": [],
+  "duplicates_total": 0
+ },
+ "flags": [
+  "recall VIIRS750 78.4% < banda 79.5% (n=51)",
+  "magnitud NevadosDeChillan 0.684x < 0.7 (SUB-estima, n=34) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md",
+  "magnitud Tupungatito 0.54x < 0.7 (SUB-estima, n=23) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md"
+ ],
+ "verdict": "FUERA_DE_BANDA"
+}

@@ -1,0 +1,158 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+pares cargados: 2523 | dayflag=0: 2523 | solar_zenith>90: 2523
+pares nocturnos: 2523 {'V375': 2218, 'MODIS': 260, 'V750': 45}
+pares con deteccion nuestra (pc no nulo y n_anom > 0): 2433 {'V375': 2139, 'MODIS': 249, 'V750': 45}
+pares SIN deteccion nuestra (MIROVA alerta, nosotros nada): 90 {'MODIS': 11, 'V375': 79}
+
+=== razon nuestra / MIROVA (mediana, p25, p75) por familia; n ===
+MODIS {'rec_vrp': (249, 0.649, 0.408, 0.845), 'pc_vrp': (249, 0.505, 0.335, 0.721), 'pub': (249, 0.505, 0.335, 0.721), 'sum_vrp_listed': (249, 0.648, 0.408, 0.844)}
+V375 {'rec_vrp': (2139, 0.83, 0.563, 1.233), 'pc_vrp': (2139, 0.539, 0.343, 0.815), 'pub': (2139, 0.678, 0.457, 0.982), 'sum_vrp_listed': (2113, 0.837, 0.573, 1.24)}
+V750 {'rec_vrp': (45, 0.813, 0.709, 0.996), 'pc_vrp': (45, 0.701, 0.54, 0.945), 'pub': (45, 0.701, 0.54, 0.945), 'sum_vrp_listed': (45, 0.82, 0.713, 0.996)}
+
+razon rec_vrp (escena) por volcan y familia: (n, mediana, p25, p75)
+  MODIS Copahue              escena (4, 1.144, 0.978, 1.301)  pc (4, 0.86, 0.59, 1.264)  pub (4, 0.86, 0.59, 1.264)
+  MODIS Lascar               escena (223, 0.628, 0.363, 0.787)  pc (223, 0.492, 0.327, 0.655)  pub (223, 0.492, 0.327, 0.655)
+  MODIS NevadosDeChillan     escena (12, 0.873, 0.682, 1.198)  pc (12, 0.816, 0.649, 1.121)  pub (12, 0.816, 0.649, 1.121)
+  MODIS PlanchonPeteroa      escena (10, 1.213, 1.068, 1.361)  pc (10, 1.213, 1.068, 1.361)  pub (10, 1.213, 1.068, 1.361)
+  V375  Chaiten              escena (74, 1.179, 0.941, 1.64)  pc (74, 0.961, 0.697, 1.174)  pub (74, 1.178, 0.941, 1.615)
+  V375  Copahue              escena (55, 0.642, 0.203, 1.229)  pc (55, 0.642, 0.318, 1.042)  pub (55, 0.705, 0.375, 1.177)
+  V375  Isluga               escena (474, 0.585, 0.358, 0.852)  pc (474, 0.375, 0.198, 0.581)  pub (474, 0.444, 0.266, 0.677)
+  V375  Lascar               escena (511, 0.671, 0.512, 0.862)  pc (511, 0.472, 0.354, 0.623)  pub (511, 0.598, 0.462, 0.771)
+  V375  Lastarria            escena (383, 1.385, 0.955, 2.177)  pc (383, 0.667, 0.409, 1.015)  pub (383, 0.827, 0.566, 1.185)
+  V375  Llaima               escena (26, 1.056, 0.685, 1.363)  pc (26, 1.031, 0.685, 1.33)  pub (26, 1.056, 0.81, 1.332)
+  V375  NevadosDeChillan     escena (45, 1.017, 0.792, 1.39)  pc (45, 0.836, 0.223, 1.139)  pub (45, 0.907, 0.634, 1.219)
+  V375  PlanchonPeteroa      escena (217, 0.964, 0.73, 1.289)  pc (217, 0.831, 0.582, 1.157)  pub (217, 0.927, 0.67, 1.238)
+  V375  PuyehueCordonCaulle  escena (330, 0.924, 0.652, 1.301)  pc (330, 0.515, 0.359, 0.743)  pub (330, 0.758, 0.553, 1.075)
+  V375  Villarrica           escena (24, 1.237, 1.081, 1.622)  pc (24, 1.232, 0.968, 1.581)  pub (24, 1.228, 0.985, 1.584)
+  V750  Copahue              escena (7, 0.886, 0.818, 1.009)  pc (7, 0.878, 0.73, 1.009)  pub (7, 0.878, 0.73, 1.009)
+  V750  Lascar               escena (17, 0.709, 0.586, 0.813)  pc (17, 0.586, 0.469, 0.697)  pub (17, 0.586, 0.469, 0.697)
+  V750  Llaima               escena (1, 0.282, 0.282, 0.282)  pc (1, 0.282, 0.282, 0.282)  pub (1, 0.282, 0.282, 0.282)
+  V750  NevadosDeChillan     escena (20, 0.992, 0.796, 1.293)  pc (20, 0.775, 0.63, 1.038)  pub (20, 0.775, 0.63, 1.038)
+
+records con n_anom > n_listed (lista truncada a 100): 224 de 2433
+records con rec_vrp != sum_vrp_listed (>1 %): 43
+
+=== Afirmacion 1, lectura A: VRP' = sum_i A k max(L_i - bk_M, 0)/1e6 sobre nuestros pixeles listados ===
+control positivo (fondo nuestro x 1,2): fraccion de pares con v_lista > 0 en que la magnitud BAJA: 0.9878 n = 2385
+
+razon contra MIROVA ANTES (nuestro fondo) y DESPUES (fondo medio de MIROVA, misma pasada), por familia:
+  MODIS: n=249 antes (0.648, 0.408, 0.844) despues (0.841, 0.666, 1.005) | pares en que cambia >10 %: 194 | pixeles recortados a 0 con bk_M: 1 de 405
+  V375: n=2139 antes (0.83, 0.564, 1.233) despues (0.885, 0.647, 1.215) | pares en que cambia >10 %: 1095 | pixeles recortados a 0 con bk_M: 54 de 4937
+  V750: n=45 antes (0.82, 0.713, 0.996) despues (0.856, 0.725, 0.961) | pares en que cambia >10 %: 22 | pixeles recortados a 0 con bk_M: 0 de 167
+por volcan (V375):
+  Chaiten              n=  74 antes (1.177, 0.941, 1.643) despues (1.01, 0.859, 1.287)
+  Copahue              n=  55 antes (0.641, 0.208, 1.229) despues (1.018, 0.696, 1.311)
+  Isluga               n= 474 antes (0.585, 0.358, 0.852) despues (0.871, 0.587, 1.115)
+  Lascar               n= 511 antes (0.671, 0.513, 0.862) despues (0.738, 0.603, 0.931)
+  Lastarria            n= 383 antes (1.384, 0.955, 2.177) despues (1.242, 0.857, 2.051)
+  Llaima               n=  26 antes (1.056, 0.686, 1.363) despues (1.024, 0.775, 1.255)
+  NevadosDeChillan     n=  45 antes (1.017, 0.792, 1.39) despues (0.969, 0.736, 1.272)
+  PlanchonPeteroa      n= 217 antes (0.963, 0.73, 1.292) despues (0.888, 0.719, 1.167)
+  PuyehueCordonCaulle  n= 330 antes (0.923, 0.652, 1.301) despues (0.84, 0.629, 1.188)
+  Villarrica           n=  24 antes (1.233, 1.082, 1.623) despues (1.117, 0.96, 1.324)
+
+=== Afirmacion 1, lectura B: fondo nuestro vs fondo medio por pixel de MIROVA (radiancia W m-2 sr-1 um-1) ===
+  MODIS: n=249 fuente del fondo {'anillo': 239, 'local': 10}
+     L_bg nuestro (implicito en la lista) mediana 0.1341 | bk_M mediana 0.1222 | razon L_bg_ours/bk_M mediana 1.076 p25 1.034 p75 1.131
+     L_hot nuestro medio 0.1741 | hot_M medio 0.1592 | razon mediana 1.061
+     dL medio nuestro 0.0368 | dL medio MIROVA 0.0344
+     MW que explica el fondo (n_ours x A k x dbg): mediana 0.2421 | brecha VRP_M - VRP_ours mediana 0.5193 | fraccion de la brecha explicada por el fondo (mediana de dbg_mw/brecha donde brecha>0): 0.463 (n=215)
+  V375: n=2139 fuente del fondo {'anillo': 1111, 'local': 1028}
+     L_bg nuestro (implicito en la lista) mediana 0.0844 | bk_M mediana 0.0758 | razon L_bg_ours/bk_M mediana 1.033 p25 0.951 p75 1.175
+     L_hot nuestro medio 0.1561 | hot_M medio 0.1342 | razon mediana 1.118
+     dL medio nuestro 0.0559 | dL medio MIROVA 0.0462
+     MW que explica el fondo (n_ours x A k x dbg): mediana 0.0135 | brecha VRP_M - VRP_ours mediana 0.0526 | fraccion de la brecha explicada por el fondo (mediana de dbg_mw/brecha donde brecha>0): 0.120 (n=1349)
+  V750: n=45 fuente del fondo {'anillo': 45}
+     L_bg nuestro (implicito en la lista) mediana 0.2584 | bk_M mediana 0.2528 | razon L_bg_ours/bk_M mediana 0.961 p25 0.883 p75 1.134
+     L_hot nuestro medio 0.6204 | hot_M medio 0.6104 | razon mediana 1.196
+     dL medio nuestro 0.3147 | dL medio MIROVA 0.2672
+     MW que explica el fondo (n_ours x A k x dbg): mediana -0.3500 | brecha VRP_M - VRP_ours mediana 1.4723 | fraccion de la brecha explicada por el fondo (mediana de dbg_mw/brecha donde brecha>0): 0.115 (n=34)
+por volcan (V375), razon L_bg_ours/bk_M y L_hot_ours/hot_M (medianas):
+  Chaiten              n=  74 bg 0.966 hot 0.993 n_ours/Npix 1.00 fuente {'local': 74}
+  Copahue              n=  55 bg 1.068 hot 1.095 n_ours/Npix 1.00 fuente {'anillo': 55}
+  Isluga               n= 474 bg 1.192 hot 1.162 n_ours/Npix 0.60 fuente {'anillo': 474}
+  Lascar               n= 511 bg 1.163 hot 1.259 n_ours/Npix 0.50 fuente {'anillo': 511}
+  Lastarria            n= 383 bg 0.954 hot 1.079 n_ours/Npix 1.00 fuente {'local': 383}
+  Llaima               n=  26 bg 0.953 hot 1.260 n_ours/Npix 1.00 fuente {'anillo': 26}
+  NevadosDeChillan     n=  45 bg 0.889 hot 1.062 n_ours/Npix 1.00 fuente {'anillo': 45}
+  PlanchonPeteroa      n= 217 bg 0.958 hot 1.164 n_ours/Npix 0.67 fuente {'local': 217}
+  PuyehueCordonCaulle  n= 330 bg 0.977 hot 1.026 n_ours/Npix 0.88 fuente {'local': 330}
+  Villarrica           n=  24 bg 0.933 hot 1.092 n_ours/Npix 1.00 fuente {'local': 24}
+
+=== Afirmacion 2 (OSF): razon de escena = f_n x f_dL contra el cenit ===
+cenit nuestro vs SatZen del OSF: mediana |dif| grados: 0.07 p95: 0.63
+
+MODIS (n=249): mediana por tramo de cenit nuestro
+            n  r_escena  f_n   f_dl   r_pc  f_n_pc  f_dl_pc  r_pub
+zbin                                                              
+[0, 20)   104     0.763  1.0  0.983  0.642    1.00    0.859  0.642
+[20, 30)   57     0.650  0.5  1.224  0.549    0.50    0.873  0.549
+[30, 40)   55     0.467  0.5  1.107  0.415    0.50    0.846  0.415
+[40, 50)   28     0.333  0.5  0.966  0.333    0.45    0.798  0.333
+[50, 60)    5     0.504  0.5  1.431  0.253    0.25    1.387  0.253
+  Spearman con el cenit: {'r_rec_vrp': -0.369, 'f_n': -0.42, 'f_dl': -0.035, 'r_pc_vrp': -0.39, 'f_n_pc': -0.496, 'f_dl_pc': 0.038, 'r_pub': -0.39}
+  pendiente de log(r_rec_vrp) sobre log(sec z): -1.602
+  pendiente de log(f_n) sobre log(sec z): -1.545
+  pendiente de log(f_dl) sobre log(sec z): -0.086
+  pendiente de log(r_pc_vrp) sobre log(sec z): -1.727
+
+V375 (n=2139): mediana por tramo de cenit nuestro
+            n  r_escena    f_n   f_dl   r_pc  f_n_pc  f_dl_pc  r_pub
+zbin                                                                
+[0, 20)   531     1.023  1.000  1.257  0.713   0.500    1.108  0.833
+[20, 30)  278     0.899  0.750  1.293  0.598   0.500    1.148  0.720
+[30, 40)  321     0.787  0.667  1.276  0.514   0.500    1.173  0.635
+[40, 50)  382     0.691  0.600  1.235  0.462   0.400    1.163  0.597
+[50, 60)  390     0.688  0.500  1.259  0.430   0.450    1.130  0.537
+[60, 70)  237     0.618  0.500  1.250  0.475   0.455    1.258  0.599
+  Spearman con el cenit: {'r_rec_vrp': -0.331, 'f_n': -0.298, 'f_dl': -0.025, 'r_pc_vrp': -0.224, 'f_n_pc': -0.253, 'f_dl_pc': 0.021, 'r_pub': -0.229}
+  pendiente de log(r_rec_vrp) sobre log(sec z): -0.714
+  pendiente de log(f_n) sobre log(sec z): -0.662
+  pendiente de log(f_dl) sobre log(sec z): -0.034
+  pendiente de log(r_pc_vrp) sobre log(sec z): -0.508
+
+V750 (n=45): mediana por tramo de cenit nuestro
+           n  r_escena   f_n   f_dl   r_pc  f_n_pc  f_dl_pc  r_pub
+zbin                                                              
+[0, 20)   15     0.964  0.60  1.627  0.820   0.500    1.447  0.820
+[20, 30)   8     0.749  0.55  1.402  0.699   0.500    1.385  0.699
+[30, 40)   9     0.764  0.50  1.567  0.525   0.333    1.404  0.525
+[40, 50)   5     0.759  0.50  1.332  0.634   0.400    1.584  0.634
+[50, 60)   5     0.994  1.00  1.043  0.994   1.000    1.043  0.994
+[60, 70)   3     0.886  1.00  1.038  0.408   0.400    1.021  0.408
+  Spearman con el cenit: {'r_rec_vrp': -0.221, 'f_n': 0.031, 'f_dl': -0.342, 'r_pc_vrp': -0.268, 'f_n_pc': -0.062, 'f_dl_pc': -0.275, 'r_pub': -0.268}
+  pendiente de log(r_rec_vrp) sobre log(sec z): -0.187
+  pendiente de log(f_n) sobre log(sec z): 0.310
+  pendiente de log(f_dl) sobre log(sec z): -0.497
+  pendiente de log(r_pc_vrp) sobre log(sec z): -0.339
+
+por volcan (V375 y MODIS), Spearman de razon de escena, f_n y f_dL con el cenit; n:
+  MODIS Copahue: n=4 (< 15, no se calcula)
+  MODIS Lascar               n= 223 {'r_rec_vrp': -0.41, 'f_n': -0.42, 'f_dl': -0.06, 'r_pc_vrp': -0.41} | mediana r_escena z<30: 0.69 (n=146) z>=50: 0.19 (n=2) | f_n z<30 0.67 z>=50 0.50 | f_dl z<30 0.98 z>=50 0.38
+  MODIS NevadosDeChillan: n=12 (< 15, no se calcula)
+  MODIS PlanchonPeteroa: n=10 (< 15, no se calcula)
+  V375  Chaiten              n=  74 {'r_rec_vrp': -0.21, 'f_n': -0.31, 'f_dl': -0.01, 'r_pc_vrp': 0.15} | mediana r_escena z<30: 1.23 (n=39) z>=50: 1.30 (n=9) | f_n z<30 1.00 z>=50 1.00 | f_dl z<30 1.17 z>=50 1.30
+  V375  Copahue              n=  55 {'r_rec_vrp': -0.16, 'f_n': -0.27, 'f_dl': -0.0, 'r_pc_vrp': -0.07} | mediana r_escena z<30: 0.89 (n=25) z>=50: 0.70 (n=13) | f_n z<30 1.00 z>=50 0.50 | f_dl z<30 0.84 z>=50 1.25
+  V375  Isluga               n= 474 {'r_rec_vrp': -0.45, 'f_n': -0.32, 'f_dl': -0.11, 'r_pc_vrp': -0.46} | mediana r_escena z<30: 0.77 (n=167) z>=50: 0.37 (n=161) | f_n z<30 0.67 z>=50 0.43 | f_dl z<30 1.14 z>=50 0.95
+  V375  Lascar               n= 511 {'r_rec_vrp': -0.4, 'f_n': -0.16, 'f_dl': -0.16, 'r_pc_vrp': -0.5} | mediana r_escena z<30: 0.84 (n=161) z>=50: 0.57 (n=146) | f_n z<30 0.60 z>=50 0.50 | f_dl z<30 1.33 z>=50 1.13
+  V375  Lastarria            n= 383 {'r_rec_vrp': -0.36, 'f_n': -0.49, 'f_dl': 0.2, 'r_pc_vrp': 0.32} | mediana r_escena z<30: 1.74 (n=153) z>=50: 1.06 (n=120) | f_n z<30 1.50 z>=50 0.67 | f_dl z<30 1.26 z>=50 1.54
+  V375  Llaima               n=  26 {'r_rec_vrp': -0.31, 'f_n': -0.17, 'f_dl': -0.01, 'r_pc_vrp': -0.17} | mediana r_escena z<30: 1.23 (n=12) z>=50: 1.08 (n=6) | f_n z<30 1.00 z>=50 1.00 | f_dl z<30 1.37 z>=50 1.32
+  V375  NevadosDeChillan     n=  45 {'r_rec_vrp': -0.27, 'f_n': -0.17, 'f_dl': -0.16, 'r_pc_vrp': -0.21} | mediana r_escena z<30: 1.10 (n=18) z>=50: 0.84 (n=18) | f_n z<30 1.00 z>=50 0.91 | f_dl z<30 1.24 z>=50 1.10
+  V375  PlanchonPeteroa      n= 217 {'r_rec_vrp': -0.13, 'f_n': -0.06, 'f_dl': -0.04, 'r_pc_vrp': -0.05} | mediana r_escena z<30: 0.97 (n=112) z>=50: 0.82 (n=30) | f_n z<30 0.67 z>=50 0.50 | f_dl z<30 1.60 z>=50 1.57
+  V375  PuyehueCordonCaulle  n= 330 {'r_rec_vrp': -0.36, 'f_n': -0.44, 'f_dl': 0.32, 'r_pc_vrp': -0.19} | mediana r_escena z<30: 1.17 (n=101) z>=50: 0.69 (n=124) | f_n z<30 1.00 z>=50 0.50 | f_dl z<30 1.06 z>=50 1.30
+  V375  Villarrica           n=  24 {'r_rec_vrp': -0.14, 'f_n': 0.25, 'f_dl': -0.47, 'r_pc_vrp': -0.23} | mediana r_escena z<30: 1.24 (n=21) z>=50: nan (n=0) | f_n z<30 1.00 z>=50 nan | f_dl z<30 1.78 z>=50 nan
+  V750 Copahue: n=7 (< 15, no se calcula)
+  V750  Lascar               n=  17 {'r_rec_vrp': -0.59, 'f_n': -0.18, 'f_dl': -0.18, 'r_pc_vrp': -0.41} | mediana r_escena z<30: 0.81 (n=10) z>=50: nan (n=0) | f_n z<30 0.50 z>=50 nan | f_dl z<30 1.70 z>=50 nan
+  V750 Llaima: n=1 (< 15, no se calcula)
+  V750  NevadosDeChillan     n=  20 {'r_rec_vrp': -0.21, 'f_n': -0.02, 'f_dl': -0.4, 'r_pc_vrp': -0.26} | mediana r_escena z<30: 1.00 (n=11) z>=50: 1.04 (n=4) | f_n z<30 0.75 z>=50 1.00 | f_dl z<30 1.35 z>=50 1.04
+
+=== Afirmacion 4: nuestro conteo contra Npix de MIROVA ===
+  MODIS: n=249 | n_anom/Npix mediana 0.50 p25 0.50 p75 1.00 | n_anom > Npix 6, = 77, < 166 | pc_n/Npix mediana 0.50 | pc_n > Npix 5, = 74, < 170
+     Npix MIROVA mediana 3 max 18 | n_anom nuestro mediana 1 max 6 | pc_n mediana 1
+  V375: n=2139 | n_anom/Npix mediana 0.67 p25 0.50 p75 1.00 | n_anom > Npix 354, = 535, < 1250 | pc_n/Npix mediana 0.50 | pc_n > Npix 50, = 483, < 1606
+     Npix MIROVA mediana 3 max 19 | n_anom nuestro mediana 2 max 17 | pc_n mediana 1
+  V750: n=45 | n_anom/Npix mediana 0.50 p25 0.43 p75 0.83 | n_anom > Npix 4, = 6, < 35 | pc_n/Npix mediana 0.50 | pc_n > Npix 2, = 4, < 39
+     Npix MIROVA mediana 5 max 15 | n_anom nuestro mediana 3 max 11 | pc_n mediana 2
+Npix de MIROVA en TODOS los pares (incluidos sin deteccion nuestra):         count  50%   max || fam                      || MODIS   260.0  2.0  18.0 || V375   2218.0  3.0  19.0 || V750     45.0  5.0  15.0
+
+guardado pares_osf_analizados.csv

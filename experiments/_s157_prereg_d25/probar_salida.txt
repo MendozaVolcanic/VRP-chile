@@ -1,0 +1,31 @@
+nulo           OK     estado SIN EFECTO | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8) | M {'M|VIIRS750|z<=40': 'NEUTRO', 'M|VIIRS750|z>40': 'NEUTRO', 'M|VIIRS375|sin_kernel|z<=40': 'NEUTRO', 'M|VIIRS375|sin_kernel|z>40': 'NEUTRO', 'M|VIIRS375|kernel|z<=40': 'NEUTRO', 'M|VIIRS375|kernel|z>40': 'NEUTRO'}
+   pares VIIRS 750 en el nulo: 39
+modis          OK     cableado {'K': True, 'G': True, 'D': False}, estado INDECIDIBLE | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+huella         OK     cableado {'K': True, 'G': True, 'D': False}
+flag           OK     cableado {'K': True, 'G': True, 'D': False}
+determ         OK     determinismo False (100 apagadas en K')
+mejora750      OK     M {'M|VIIRS750|z<=40': 'MEJORA', 'M|VIIRS750|z>40': 'NEUTRO'} | estado MEJORA
+   sellada (calibración 'ambos'): M {'M|VIIRS750|z<=40': 'INDECIDIBLE', 'M|VIIRS750|z>40': 'INDECIDIBLE'} | estado INDECIDIBLE
+empeora750     OK     estado DECIDE NICOLAS (M empeora, sin mejora) | P1b: protegidas que cruzan 1 MW hacia abajo, decide Nicolas
+bloq_mejora    OK     regla MEJORA, decide NEUTRO, estado SIN EFECTO (n 59)
+bloq_empeora   OK     estado DECIDE NICOLAS (M empeora, sin mejora)
+kernel         OK     regla kernel ['MEJORA', 'MEJORA'], estado SIN EFECTO (n 30)
+corte          OK     estado SIN EFECTO, M sin kernel z<=40 NEUTRO (n mejorados 23, todos de 40 a 50°)
+un_volcan      OK     estado SIN EFECTO | notas ['', 'MEJORA sostenida por menos de 2 volcanes (adenda, H4)'] (n 32)
+veto           OK     Lascar|VIIRS375|2026-10-01 05:18 -> NO CUMPLE (veto) | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+veto_gemelo    OK     P1 INDECIDIBLE
+snpp           OK     Isluga|VIIRS375|2026-09-28 05:12 -> P1 CUMPLE
+p1b            OK     estado SIN EFECTO | P1b: protegidas que cruzan 1 MW hacia abajo, decide Nicolas
+p2             OK     30 negativos -> NO CUMPLE (suma de errores) | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+p2_m_indec     OK     M VIIRS 750 ['INDECIDIBLE', 'INDECIDIBLE'] -> NO CUMPLE (suma de errores)
+v2_nulo        OK     estado SIN EFECTO | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+v2_veto        OK     estado PENDIENTE DE REPETICION | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+rep_si         OK     P1 VETADO, estado NO CUMPLE (veto) | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+rep_no         OK     P1 CUMPLE, estado SIN EFECTO | ATENCIÓN: D25 no cambió ninguna magnitud (la huella sólo prueba que el flag se leyó, H8)
+combinar       OK     CUMPLE | DECIDE NICOLAS (M mejora en una sola ventana) | NO CUMPLE (veto)
+estratos       OK     z 40 -> <=40 decide; 40,5 -> >40 bloquea; kernel informa; VIIRS 750 decide
+orden          OK     la regla más estricta manda entre original y SN
+calibracion    OK     nulo sellado: falsos MEJORA por pasada 0.235, por bloques 0.045
+calib_simetrica OK     nulo simétrico: por pasada MEJORA 0.285 EMPEORA 0.265; por bloques 0.020 y 0.025; poder True
+
+RESUMEN: 27 de 27 casos OK

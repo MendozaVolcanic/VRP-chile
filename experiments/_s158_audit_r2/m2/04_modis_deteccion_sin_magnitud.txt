@@ -1,0 +1,49 @@
+volcanes con local_kernel_bg: ['PuyehueCordonCaulle', 'Villarrica', 'Chaiten', 'PlanchonPeteroa', 'Lastarria']
+('MODIS', 'K'): records    777 | con pixeles anomalos     26 | de ellos pc.vrp_mw==0:     1 | sin pc:    0
+('MODIS', 'pre'): records  13788 | con pixeles anomalos    593 | de ellos pc.vrp_mw==0:    36 | sin pc:    0
+('VIIRS375', 'K'): records   1566 | con pixeles anomalos    437 | de ellos pc.vrp_mw==0:     7 | sin pc:    0
+('VIIRS375', 'pre'): records  27256 | con pixeles anomalos   9253 | de ellos pc.vrp_mw==0:   271 | sin pc:    0
+('VIIRS750', 'K'): records   1553 | con pixeles anomalos    118 | de ellos pc.vrp_mw==0:    32 | sin pc:    0
+('VIIRS750', 'pre'): records  27028 | con pixeles anomalos   2615 | de ellos pc.vrp_mw==0:   568 | sin pc:    0
+
+pc.vrp_mw == 0 CON cumulo dentro del inner (deteccion del crater que el tablero no ve), por (sensor, tramo, volcan):
+   ('MODIS', 'K', 'Lascar') 1
+   ('MODIS', 'pre', 'Isluga') 3
+   ('MODIS', 'pre', 'Lascar') 29
+   ('MODIS', 'pre', 'NevadosDeChillan') 3
+   ('MODIS', 'pre', 'Tupungatito') 1
+   ('VIIRS375', 'K', 'Isluga') 6
+   ('VIIRS375', 'K', 'NevadosDeChillan') 1
+   ('VIIRS375', 'pre', 'Copahue') 28
+   ('VIIRS375', 'pre', 'Isluga') 57
+   ('VIIRS375', 'pre', 'Lascar') 10
+   ('VIIRS375', 'pre', 'Llaima') 2
+   ('VIIRS375', 'pre', 'NevadosDeChillan') 28
+   ('VIIRS375', 'pre', 'Tupungatito') 139
+   ('VIIRS750', 'K', 'Isluga') 11
+   ('VIIRS750', 'K', 'Lascar') 12
+   ('VIIRS750', 'K', 'NevadosDeChillan') 1
+   ('VIIRS750', 'K', 'PlanchonPeteroa') 3
+   ('VIIRS750', 'K', 'PuyehueCordonCaulle') 1
+   ('VIIRS750', 'K', 'Tupungatito') 2
+   ('VIIRS750', 'pre', 'Chaiten') 2
+   ('VIIRS750', 'pre', 'Isluga') 182
+   ('VIIRS750', 'pre', 'Lascar') 83
+   ('VIIRS750', 'pre', 'Lastarria') 4
+   ('VIIRS750', 'pre', 'NevadosDeChillan') 2
+   ('VIIRS750', 'pre', 'PlanchonPeteroa') 32
+   ('VIIRS750', 'pre', 'PuyehueCordonCaulle') 54
+   ('VIIRS750', 'pre', 'Tupungatito') 200
+   ('VIIRS750', 'pre', 'Villarrica') 6
+
+MODIS con fondo local del kernel (diag_L_bg_local presente), por (volcan, tramo): {('Chaiten', 'pre'): 3, ('Lastarria', 'pre'): 3, ('PlanchonPeteroa', 'pre'): 17, ('PlanchonPeteroa', 'K'): 1, ('PuyehueCordonCaulle', 'pre'): 129, ('PuyehueCordonCaulle', 'K'): 8, ('Villarrica', 'pre'): 5, ('Villarrica', 'K'): 2}
+
+ejemplos MODIS (volcan, dt, sensor, t_max, t_bg, n_px, vrp_mw, L_bg_local):
+   ('Isluga', '2025-02-28 06:45', 'MODIS_AQUA', 275.98, 270.28, 1, 0, None)
+   ('Isluga', '2025-04-12 06:55', 'MODIS_AQUA', 273.71, 267.38, 1, 0, None)
+   ('Isluga', '2025-06-04 07:00', 'MODIS_AQUA', 271.61, 265.52, 1, 0, None)
+   ('Lascar', '2025-02-28 06:45', 'MODIS_AQUA', 284.59, 270.05, 2, 0, None)
+   ('Lascar', '2025-05-18 01:50', 'MODIS_TERRA', 281.6, 265.97, 1, 0, None)
+   ('Lascar', '2025-08-21 06:40', 'MODIS_AQUA', 276.88, 262.61, 1, 0, None)
+   ('Lascar', '2025-08-24 02:20', 'MODIS_TERRA', 275.21, 261.35, 1, 0, None)
+   ('Lascar', '2025-11-01 01:45', 'MODIS_TERRA', 283.83, 266.91, 1, 0, None)

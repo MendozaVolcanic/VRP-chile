@@ -1,0 +1,30 @@
+# S162: pruebas nuevas de PR162-01 y PR162-04 (tests/test_auto_audit_cese_plataforma_s161.py, texto final) contra el head a7d1c0b91 de #900, sin el cambio.
+# Método (sin stash): git archive a7d1c0b91 de scripts/, pipeline/, volcanoes.yaml, pytest.ini y .github/workflows/audit-weekly.yml a un temporal, con la prueba final copiada en tests/.
+# python -m pytest tests/test_auto_audit_cese_plataforma_s161.py -q -rA --tb=line -p no:cacheprovider
+# Resultado: 5 failed (las 5 nuevas, por aserción; sensor_null por pytest.fail, que captura el AttributeError con que moría el audit), 9 passed (las de S161).
+E   AssertionError: un sensor sin juzgar desde el cese no queda escrito
+<temporal>\tests\test_auto_audit_cese_plataforma_s161.py:236: AssertionError: un sensor sin juzgar desde el cese no queda escrito
+E   AssertionError: el workflow no arma la lista de sensores sin juzgar para el issue
+<temporal>\tests\test_auto_audit_cese_plataforma_s161.py:258: AssertionError: el workflow no arma la lista de sensores sin juzgar para el issue
+E   AttributeError: 'NoneType' object has no attribute 'startswith'
+E   Failed: el audit muere con la lista mal formada (AttributeError: 'NoneType' object has no attribute 'startswith') y no escribe latest.json
+<temporal>\tests\test_auto_audit_cese_plataforma_s161.py:286: Failed: el audit muere con la lista mal formada (AttributeError: 'NoneType' object has no attribute 'startswith') y no escribe latest.json
+E   AssertionError: la lista mal formada no recorta y nadie lo dice
+<temporal>\tests\test_auto_audit_cese_plataforma_s161.py:288: AssertionError: la lista mal formada no recorta y nadie lo dice
+E   AssertionError: la lista mal formada no recorta y nadie lo dice
+<temporal>\tests\test_auto_audit_cese_plataforma_s161.py:288: AssertionError: la lista mal formada no recorta y nadie lo dice
+PASSED tests/test_auto_audit_cese_plataforma_s161.py::test_recall_de_viirs_se_juzga_solo_despues_del_cese
+PASSED tests/test_auto_audit_cese_plataforma_s161.py::test_magnitud_de_viirs_se_juzga_solo_despues_del_cese
+PASSED tests/test_auto_audit_cese_plataforma_s161.py::test_falsas_de_viirs_solo_despues_del_cese
+PASSED tests/test_auto_audit_cese_plataforma_s161.py::test_lo_de_antes_del_cese_se_informa_aparte
+PASSED tests/test_auto_audit_cese_plataforma_s161.py::test_el_primer_dia_sin_snpp_es_el_mismo_que_el_del_nrt
+PASSED tests/test_auto_audit_cese_plataforma_s161.py::test_lista_de_ceses_ilegible_degrada
+PASSED tests/test_auto_audit_cese_plataforma_s161.py::test_control_antes_del_cese_no_cambia_nada
+PASSED tests/test_auto_audit_cese_plataforma_s161.py::test_control_modis_no_se_recorta
+PASSED tests/test_auto_audit_cese_plataforma_s161.py::test_control_la_protegida_perdida_antes_del_cese_sigue_siendo_flag
+FAILED tests/test_auto_audit_cese_plataforma_s161.py::test_viirs_sin_juzgar_por_n_bajo_el_minimo_lo_dice
+FAILED tests/test_auto_audit_cese_plataforma_s161.py::test_el_issue_lleva_los_sensores_sin_juzgar
+FAILED tests/test_auto_audit_cese_plataforma_s161.py::test_lista_de_ceses_mal_formada_degrada_con_mensaje[sensor_null]
+FAILED tests/test_auto_audit_cese_plataforma_s161.py::test_lista_de_ceses_mal_formada_degrada_con_mensaje[cadena_en_vez_de_lista]
+FAILED tests/test_auto_audit_cese_plataforma_s161.py::test_lista_de_ceses_mal_formada_degrada_con_mensaje[sensor_desconocido]
+5 failed, 9 passed in 1.45s

@@ -1,0 +1,106 @@
+name: "Probe S157: busqueda por ventana y brazos en el mismo job, tag contra rama"
+
+# POR QUE. El cambio de S157 (pipeline/fetch.py busca en CMR una vez por producto y por ventana;
+# scripts/reproc_brazos.py corre los brazos de un A/B en el mismo job) tiene que dar los MISMOS records que el
+# codigo de antes. Este probe corre el mismo volcan y la misma ventana con el codigo del tag
+# pre-s157-busqueda-ventana (cada brazo por separado, como hoy) y con la rama (los dos brazos con el driver), y
+# sube los JSON y los tiempos. La comparacion la hace experiments/_s157_busqueda_ventana/comparar_records.py.
+#
+# NO PUSHEA a ningun lado: solo artefactos. Grupo de concurrencia propio. A lo mas 4 jobs.
+# Se dispara con un push a la rama s157-validar-busqueda (workflow_dispatch solo existe en la rama por defecto).
+# A43: "on" entre comillas. A71: SOLO EARTHDATA_TOKEN; sin token falla al instante.
+"on":
+  push:
+    branches: ["s157-validar-busqueda"]
+  workflow_dispatch:
+
+concurrency:
+  group: probe-s157-busqueda-ventana
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  correr:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          # Chillan, dias con producto standard (LAADS). Lascar, dias recientes: mezcla standard y NRT (LANCE).
+          - {codigo: tag, vol: NevadosDeChillan, ini: "2026-09-10", fin: "2026-09-13"}
+          - {codigo: rama, vol: NevadosDeChillan, ini: "2026-09-10", fin: "2026-09-13"}
+          - {codigo: tag, vol: Lascar, ini: "2026-10-18", fin: "2026-10-19"}
+          - {codigo: rama, vol: Lascar, ini: "2026-10-18", fin: "2026-10-19"}
+    env:
+      PERFILES: "mirova_equivalent,_s146_ab_sin_test1"
+    steps:
+      - name: Checkout del codigo a medir
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.codigo == 'tag' && 'pre-s157-busqueda-ventana' || github.sha }}
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Credenciales presentes
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "::error::EARTHDATA_TOKEN vacio (A71)"; exit 1; fi
+          git log --oneline -1
+
+      - name: Dependencias
+        run: |
+          set -euo pipefail
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+
+      - name: Correr y medir
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          CODIGO: ${{ matrix.codigo }}
+          VOL: ${{ matrix.vol }}
+          INI: ${{ matrix.ini }}
+          FIN: ${{ matrix.fin }}
+        timeout-minutes: 140
+        run: |
+          set -euo pipefail
+          mkdir -p logs salida
+          # El store arranca vacio: la salida es exactamente lo que produjo esta corrida.
+          for P in $(echo "$PERFILES" | tr ',' ' '); do rm -f "data/$P/$VOL.json"; done
+          T0=$(date +%s)
+          if [ "$CODIGO" = "tag" ]; then
+            for P in $(echo "$PERFILES" | tr ',' ' '); do
+              T1=$(date +%s)
+              python scripts/run_pipeline.py --profile "$P" --volcano "$VOL" --start "$INI" --end "$FIN" \
+                --overwrite > "logs/${P}_${VOL}.log" 2>&1
+              echo "brazo $P $(( $(date +%s) - T1 )) s" | tee -a logs/tiempos.txt
+            done
+          else
+            python scripts/reproc_brazos.py --volcano "$VOL" --start "$INI" --end "$FIN" --perfiles "$PERFILES" \
+              --trabajo "$RUNNER_TEMP/brazos" --logs logs --overwrite --cobertura-json logs/cobertura.json \
+              | tee logs/brazos.txt
+          fi
+          echo "total $CODIGO $VOL $(( $(date +%s) - T0 )) s" | tee -a logs/tiempos.txt
+          for P in $(echo "$PERFILES" | tr ',' ' '); do
+            mkdir -p "salida/$P"
+            if [ -f "data/$P/$VOL.json" ]; then cp "data/$P/$VOL.json" "salida/$P/"; fi
+          done
+          cp -r logs salida/
+
+      - name: Subir
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe-s157-${{ matrix.codigo }}-${{ matrix.vol }}
+          path: salida
+          retention-days: 30
+          if-no-files-found: error

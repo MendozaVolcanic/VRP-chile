@@ -134,13 +134,29 @@ jobs:
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
           VRP_PROFILE_IN: ${{ github.event.inputs.profile }}
         timeout-minutes: 170
+        # S157: run_pipeline busca en CMR una vez por producto y por ventana del trozo
+        # (pipeline/fetch.py). --estricto-cobertura: si una busqueda o una descarga no se
+        # pudo hacer (CMR caido, host caido), el job sale con 3 en vez de verde con dias
+        # vacios, y el trozo NO se sube (paso siguiente sin always): main conserva lo que
+        # tenia y el trozo se relanza. Antes, con CMR caido, 5 de 27 jobs salieron verdes
+        # sin un solo dato (experiments/_s157_busqueda_ventana/MEDICION.md, seccion 3).
         run: |
           python scripts/run_pipeline.py \
             --profile "$VRP_PROFILE_IN" \
             --volcano ${{ matrix.job.vol }} \
             --start ${{ matrix.job.start }} \
             --end ${{ matrix.job.end }} \
-            --overwrite
+            --overwrite \
+            --estricto-cobertura \
+            --cobertura-json cobertura/cobertura.json
+      - name: Guardar la cobertura del trozo (tambien si fallo)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-${{ matrix.job.vol }}-${{ matrix.job.idx }}-${{ matrix.job.start }}_${{ matrix.job.end }}
+          path: cobertura/cobertura.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Guardar el trozo
         # Sin `if: always()` a proposito: un trozo incompleto no debe pasar por
         # hecho — el merge lo reportaria como ventana cubierta cuando no lo esta.
@@ -164,9 +180,10 @@ jobs:
     # se encola detras y el segundo lo DESPLAZA. Es el mismo mecanismo que CLAUDE.md
     # ya documenta para la matrix de nrt.yml ("a nivel job se perderian 9 volcanes").
     #
-    # Por que es seguro salir del grupo compartido: el paso `Commit` de mas abajo ya
-    # reintenta `pull --rebase` + `push` cinco veces con backoff, que es la defensa
-    # real contra la carrera de refs que cerro el PR #502 -- el grupo compartido solo
+    # Por que es seguro salir del grupo compartido: el paso de union de mas abajo
+    # reintenta fetch + union contra la base de main + push cinco veces con backoff
+    # (S157; antes era `pull --rebase` + `push`), que es la defensa real contra la
+    # carrera de refs que cerro el PR #502 -- el grupo compartido solo
     # agregaba el riesgo de perder runs encolados. Mismo criterio y misma razon que
     # reproc-s124-ndc-focus.yml y reproc-s124-villarrica-op-ab.yml.
     concurrency:
@@ -188,50 +205,80 @@ jobs:
         with:
           pattern: chunk-*
           path: chunks
-      - name: Unir por volcan
+      - name: Unir con lo que main ya tiene y subir
+        # S157: el merge parte del archivo que main tiene HOY (--base) y conserva
+        # lo que queda fuera de las ventanas de esta corrida.
+        #
+        # POR QUE: antes el archivo se escribia SOLO con los trozos de la corrida,
+        # asi que relanzar dos trozos caidos de un volcan borraba en main todo el
+        # resto de su historico (NevadosDeChillan, S157). Y la base no puede salir
+        # del checkout de este job: el checkout es el sha del DESPACHO, que puede
+        # ser horas mas viejo que main (otra corrida del mismo perfil, o un rearme
+        # a mano, pudo escribir el archivo despues). Por eso cada intento hace
+        # fetch de main, se para encima, relee la base, une y empuja en avance
+        # rapido. Si main se movio entre el fetch y el push, el push se rechaza y
+        # el intento siguiente vuelve a leer la base: nunca se une contra una base
+        # vieja. Ya no se usa `pull --rebase -X theirs` sobre los JSON: rebasar un
+        # JSON unido contra otra version del mismo archivo es justo la carrera de
+        # S25 que este workflow vino a evitar.
+        #
+        # Lo que NO cubre: dentro de SUS ventanas la corrida manda. Si otra corrida
+        # escribio despues del despacho en esas MISMAS fechas, se pisa. Dos corridas
+        # del mismo perfil no deben solaparse en fechas (el grupo de concurrencia
+        # por perfil ya las pone en fila, pero no evita el solape de ventanas).
+        #
+        # El script se copia antes: al pararse en main el arbol pasa a ser el de
+        # main, y el merge tiene que ser el del despacho (es solo stdlib).
         env:
           PROFILE: ${{ github.event.inputs.profile }}
           VOLCANOES: ${{ github.event.inputs.volcanoes }}
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
         run: |
-          ls -R chunks || true
-          set -e
-          for VOL in $(echo "$VOLCANOES" | tr ',' ' '); do
-            FILES=$(ls chunks/chunk-"$VOL"-*/"$VOL".json 2>/dev/null || true)
-            if [ -z "$FILES" ]; then
-              echo "AVISO: $VOL no dejo ningun trozo, se omite"
-              continue
-            fi
-            # --ventanas: cada trozo aporta SOLO los records de SU ventana.
-            # POR QUE (bug encontrado S124): el job hace checkout del archivo
-            # completo y reprocesa solo su tramo, pero sube el archivo ENTERO
-            # -- con los otros meses en su version vieja adentro. El merge
-            # ordenaba por `updated` y ganaba el ultimo, asi que el trozo que
-            # terminaba al final imponia SU version de TODOS los meses,
-            # resucitando data que otro trozo acababa de reprocesar. Sintoma
-            # real: un reproceso 05-01..08-27 dejo mayo fresco y junio/julio/
-            # agosto 100% identicos a la corrida anterior, con el run en verde.
-            # Solo afecta subdirs que YA tenian data.
-            VENT=""
-            for F in $FILES; do
-              W=$(basename "$(dirname "$F")" | sed "s/^chunk-$VOL-[0-9]*-//")
-              VENT="$VENT ${W%%_*}:${W##*_}"
-            done
-            python scripts/merge_chunk_stores.py \
-              --out "data/$PROFILE/$VOL.json" --ventanas $VENT -- $FILES
-          done
-      - name: Commit
-        env:
-          PROFILE: ${{ github.event.inputs.profile }}
-        run: |
+          # GitHub corre esto con `bash -e`; los errores se manejan a mano abajo
+          # (igual que el paso Commit anterior): un `git add` sin archivos o un
+          # push rechazado no deben cortar el bucle de reintentos.
           set +e
+          ls -R chunks || true
+          MERGE="$RUNNER_TEMP/merge_chunk_stores.py"
+          cp scripts/merge_chunk_stores.py "$MERGE" || exit 1
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          git add -f "data/$PROFILE"/*.json
-          git diff --staged --quiet && { echo "no changes"; exit 0; }
-          git commit -m "data(reproc): $PROFILE $VRP_START..$VRP_END ($VRP_VOLCANOES)"
+          unir() {
+            for VOL in $(echo "$VOLCANOES" | tr ',' ' '); do
+              FILES=$(ls chunks/chunk-"$VOL"-*/"$VOL".json 2>/dev/null || true)
+              if [ -z "$FILES" ]; then
+                echo "AVISO: $VOL no dejo ningun trozo, se omite (main queda como estaba)"
+                continue
+              fi
+              # --ventanas: cada trozo aporta SOLO los records de SU ventana.
+              # POR QUE (bug encontrado S124): el job hace checkout del archivo
+              # completo y reprocesa solo su tramo, pero sube el archivo ENTERO
+              # -- con los otros meses en su version vieja adentro. Sin esto el
+              # trozo que terminaba al final imponia SU version de TODOS los
+              # meses, resucitando data que otro trozo acababa de reprocesar.
+              VENT=""
+              for F in $FILES; do
+                W=$(basename "$(dirname "$F")" | sed "s/^chunk-$VOL-[0-9]*-//")
+                VENT="$VENT ${W%%_*}:${W##*_}"
+              done
+              BASE="$RUNNER_TEMP/base-$VOL.json"
+              rm -f "$BASE"
+              # sin `|| return 1` un cp fallido (bajo set +e) uniria SIN base y volveria
+              # a borrar el historico (hallazgo del verificador)
+              if [ -f "data/$PROFILE/$VOL.json" ]; then cp "data/$PROFILE/$VOL.json" "$BASE" || return 1; fi
+              python "$MERGE" --out "data/$PROFILE/$VOL.json" --base "$BASE" \
+                --ventanas $VENT -- $FILES || return 1
+            done
+          }
           for attempt in 1 2 3 4 5; do
-            git pull --rebase -X theirs origin main && git push && exit 0
-            git rebase --abort 2>/dev/null
+            git fetch -q --depth=1 origin main && git checkout -q -f -B reproc-merge FETCH_HEAD || { sleep $((attempt * 10)); continue; }
+            unir || { echo "ERROR: fallo el merge"; exit 1; }
+            git add -f "data/$PROFILE"/*.json 2>/dev/null
+            if git diff --staged --quiet; then echo "no changes"; exit 0; fi
+            git commit -q -m "data(reproc): $PROFILE $VRP_START..$VRP_END ($VOLCANOES)"
+            git push origin HEAD:main && exit 0
+            echo "push rechazado (main se movio): releo la base y repito"
             sleep $((attempt * 10))
           done
           echo "all push attempts failed"; exit 1

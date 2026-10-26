@@ -1,0 +1,50 @@
+records totales: 74811
+por sensor: Counter({'V375': 29985, 'V750': 29743, 'MODIS': 15083})
+sensores crudos: [('VIIRS_NOAA20', 10157), ('VIIRS_NOAA20_750', 10060), ('VIIRS_NOAA21', 9917), ('VIIRS_SNPP', 9911), ('VIIRS_NOAA21_750', 9866), ('VIIRS_SNPP_750', 9817), ('MODIS_AQUA', 7654), ('MODIS_TERRA', 7429)]
+referencia desde 2026-01-10 19:06:00 claves sensor: ['MODIS', 'VIIRS', 'VIIRS375']
+
+==================== V750 ====================
+records V750 con primary_cluster: 2733 ; sin: 27010
+cumulo de cumbre (centroid_dist_km <= inner yaml): 2359 ; con pc.vrp_mw == 0: 595 (25.2 %)
+ventana obs: 2025-02-15 05:42 a 2026-10-21 05:48
+ceros por volcan: {'Chaiten': 2, 'Isluga': 193, 'Lascar': 95, 'Lastarria': 4, 'NevadosDeChillan': 3, 'PlanchonPeteroa': 35, 'PuyehueCordonCaulle': 55, 'Tupungatito': 202, 'Villarrica': 6}
+ceros por distance_class: {'summit': 595}
+ceros por n_pixels: {1: 587, 2: 8}
+ceros d9_capped: 0  single_pixel_mode: 595
+causa (anomaly_pixels a <= inner+1,5 km del centro): {'todos bt<=t_bg': 592, 'sin anomaly_pixels cerca': 3}
+  tol  8 min, obs >= 2026-01-10: ceros=293 MIROVA miro=149 alerta=64 protegida(>=1MW)=0 solo RUTINA=84
+  tol  8 min, obs >= 2026-03-01: ceros=235 MIROVA miro=132 alerta=54 protegida(>=1MW)=0 solo RUTINA=78
+  tol  8 min, obs >= 2026-06-13: ceros=117 MIROVA miro=74 alerta=26 protegida(>=1MW)=0 solo RUTINA=48
+  tol 60 min, obs >= 2026-01-10: ceros=293 MIROVA miro=268 alerta=96 protegida(>=1MW)=11 solo RUTINA=171
+  tol 60 min, obs >= 2026-03-01: ceros=235 MIROVA miro=230 alerta=84 protegida(>=1MW)=9 solo RUTINA=146
+  tol 60 min, obs >= 2026-06-13: ceros=117 MIROVA miro=113 alerta=42 protegida(>=1MW)=4 solo RUTINA=71
+
+ceros V750 con alerta >=1 MW de MIROVA a <=8 min:
+
+==================== MODIS ====================
+records MODIS con primary_cluster: 619 ; sin: 14464
+cumulo de cumbre (centroid_dist_km <= inner yaml): 549 ; con pc.vrp_mw == 0: 37 (6.7 %)
+ventana obs: 2025-02-15 03:15 a 2026-10-18 07:50
+ceros por volcan: {'Isluga': 3, 'Lascar': 30, 'NevadosDeChillan': 3, 'Tupungatito': 1}
+ceros por distance_class: {'summit': 37}
+ceros por n_pixels: {1: 35, 2: 2}
+ceros d9_capped: 0  single_pixel_mode: 37
+causa (anomaly_pixels a <= inner+1,5 km del centro): {'todos bt<=t_bg': 37}
+  tol  8 min, obs >= 2026-01-10: ceros=23 MIROVA miro=20 alerta=9 protegida(>=1MW)=1 solo RUTINA=11
+  tol  8 min, obs >= 2026-03-01: ceros=16 MIROVA miro=14 alerta=5 protegida(>=1MW)=0 solo RUTINA=9
+  tol  8 min, obs >= 2026-06-13: ceros=3 MIROVA miro=3 alerta=3 protegida(>=1MW)=0 solo RUTINA=0
+  tol 60 min, obs >= 2026-01-10: ceros=23 MIROVA miro=20 alerta=9 protegida(>=1MW)=1 solo RUTINA=11
+  tol 60 min, obs >= 2026-03-01: ceros=16 MIROVA miro=14 alerta=5 protegida(>=1MW)=0 solo RUTINA=9
+  tol 60 min, obs >= 2026-06-13: ceros=3 MIROVA miro=3 alerta=3 protegida(>=1MW)=0 solo RUTINA=0
+
+==================== processed_utc ====================
+records con processed_utc: 71968 de 74811
+processed_utc < 2026-10-18T09:57:30Z: 0
+min processed_utc: 2026-10-18T10:03:43Z  max: 2026-10-21T11:30:09Z
+first_processed_utc presentes: 9800 ; < K: 1092
+codigo_sha distintos: 38  records sin regimen.codigo_sha: 2843
+records por si su codigo_sha desciende del squash de K 34cea39e: {'contiene K': 71968}
+control positivo: 34cea39e ancestro de HEAD rc = 0 ; control negativo: HEAD ancestro de 34cea39e rc = 1
+records con obs < 2026-09-18: 70915 ; de ellos processed_utc < K: 0 ; sin processed_utc: 2843
+processed_utc por dia: [('2026-10-18', 33379), ('2026-10-19', 35501), ('2026-10-20', 2849), ('2026-10-21', 239), ('none', 2843)]
+origen: Counter({'actions': 71968, None: 2843})

@@ -1,0 +1,161 @@
+{
+  "ventana": [
+    "2026-06-25",
+    "2026-08-24"
+  ],
+  "brazos": [
+    "control",
+    "corona"
+  ],
+  "banda": [
+    0.7,
+    1.4
+  ],
+  "diurnas_descartadas": 22,
+  "por_volcan": {
+    "Villarrica": {
+      "control": {
+        "n": 7,
+        "mediana": 0.86,
+        "ic95": [
+          0.684,
+          0.908
+        ],
+        "en_banda": true
+      },
+      "corona": {
+        "n": 7,
+        "mediana": 0.86,
+        "ic95": [
+          0.684,
+          0.908
+        ],
+        "en_banda": true
+      }
+    },
+    "PlanchonPeteroa": {
+      "control": {
+        "n": 14,
+        "mediana": 1.068,
+        "ic95": [
+          0.861,
+          1.287
+        ],
+        "en_banda": true
+      },
+      "corona": {
+        "n": 14,
+        "mediana": 1.068,
+        "ic95": [
+          0.861,
+          1.287
+        ],
+        "en_banda": true
+      }
+    },
+    "Lascar": {
+      "control": {
+        "n": 34,
+        "mediana": 0.491,
+        "ic95": [
+          0.462,
+          0.583
+        ],
+        "en_banda": false
+      },
+      "corona": {
+        "n": 34,
+        "mediana": 0.491,
+        "ic95": [
+          0.462,
+          0.583
+        ],
+        "en_banda": false
+      }
+    },
+    "PuyehueCordonCaulle": {
+      "control": {
+        "n": 21,
+        "mediana": 0.734,
+        "ic95": [
+          0.633,
+          0.878
+        ],
+        "en_banda": true
+      },
+      "corona": {
+        "n": 21,
+        "mediana": 0.734,
+        "ic95": [
+          0.633,
+          0.878
+        ],
+        "en_banda": true
+      }
+    },
+    "NevadosDeChillan": {
+      "control": {
+        "n": 3,
+        "mediana": 1.543,
+        "ic95": [
+          1.122,
+          2.25
+        ],
+        "en_banda": false
+      },
+      "corona": {
+        "n": 3,
+        "mediana": 1.543,
+        "ic95": [
+          1.122,
+          2.25
+        ],
+        "en_banda": false
+      }
+    }
+  },
+  "criterios": {
+    "1_volcanes_en_banda": {
+      "por_brazo": {
+        "control": "3/5",
+        "corona": "3/5"
+      },
+      "salieron_de_banda": [],
+      "cumple": true
+    },
+    "2_villarrica_baja": {
+      "control": 0.86,
+      "corona": 0.86,
+      "cumple": false
+    },
+    "3_lascar_canario": {
+      "caida_magnitud": 0.0,
+      "tope": 0.2,
+      "detecciones_control": 378,
+      "detecciones_corona": 378,
+      "cumple": true
+    },
+    "4_evento_ndc_0616": {
+      "dispara_control": false,
+      "dispara_corona": false,
+      "cumple": true
+    },
+    "5_cero_detecciones_perdidas": {
+      "perdidas": {},
+      "cumple": true
+    },
+    "6_control_interno": {
+      "movidos": {},
+      "cumple": true
+    },
+    "7_corona_degradada": {
+      "records": 2185,
+      "degradados": 0,
+      "pct": 0.0
+    }
+  },
+  "veredicto": "NO ADOPTAR",
+  "criterios_que_fallan": [
+    "2_villarrica_baja"
+  ]
+}

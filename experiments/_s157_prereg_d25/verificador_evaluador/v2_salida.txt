@@ -1,0 +1,11 @@
+nulo: estado SIN EFECTO cobertura_ok True
+A corte_mut (CORTE 50): estado SIN EFECTO | M sin_kernel z<=40 NEUTRO (n 65, d mediana +0.0000, ic [0.0, 0.0]) | n movidos 40-50° 23
+   el caso 'corte' de las pruebas PASA (no la ve) con la mutación
+B masc sellada (ambos): P2 V375 PIERDE | M V750 {'M|VIIRS750|z<=40': 'INDECIDIBLE', 'M|VIIRS750|z>40': 'INDECIDIBLE'} | estado INDECIDIBLE
+B masc mejora: P2 V375 PIERDE | M V750 {'M|VIIRS750|z<=40': 'MEJORA', 'M|VIIRS750|z>40': 'MEJORA'} | estado NO CUMPLE (suma de errores)
+C cob: quitadas 23 de 115 pasadas VIIRS 375 de Lascar en los tres brazos -> cobertura_ok False, estado INDECIDIBLE
+E snpp: protegidas A publicadas por K en la ventana de prueba 66, de ellas sólo OCR de Suomi NPP 7 (['Isluga|VIIRS375|2026-09-28 05:12', 'Isluga|VIIRS375|2026-10-03 05:18', 'NevadosDeChillan|VIIRS375|2026-09-29 05:00'])
+D version: Lascar|VIIRS375|2026-10-01 05:18 cambiada en D -> version_ok False, estado INDECIDIBLE
+G snpp: original P1 V375 CUMPLE | sin la exclusión P1 V375 VETADO (clave Isluga|VIIRS375|2026-09-28 05:12)
+H bloq_mut: M sin_kernel z>40 MEJORA, estado MEJORA (el caso bloq_mejora exige NEUTRO y SIN EFECTO)
+F calib: falsos MEJORA | signo por par: boot por pasada 0.025, por bloques 0.040 | signo por bloque: por pasada 0.235, por bloques 0.045

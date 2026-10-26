@@ -577,6 +577,12 @@ enable_bt_sat_secondary_guard: true
 # 10,8 a 0,9 %. ON. Va junto con la conectiva `max`: con la banda 21, `max` apaga el detector MODIS (S147, S150).
 enable_modis_b22_primary: true
 
+# S157 - lambda por banda en la vuelta a radiancia de MODIS (pipeline/process_modis.py, lambda_mir_por_pixel).
+# Con B22 primaria la temperatura sale de B22 (3,959 um) y volvia a radiancia con la lambda de B21 (3,929 um):
+# la magnitud MODIS queda 1,053 a 1,075 veces mas baja que la radiancia medida (experiments/_s157_lambda_b22/).
+# OFF hasta que Nicolas decida (A45); con OFF el procesador es bit a bit el de antes.
+enable_modis_mir_lambda_por_banda: false
+
 # S132 - distance_class de MODIS desde el primary_cluster (decision #4). OFF: espera la
 # medicion sobre los records persistidos + el OK de Nicolas (S113 cerro esta cara del bug
 # A46 midiendola sobre VIIRS; la evidencia nueva es de MODIS).

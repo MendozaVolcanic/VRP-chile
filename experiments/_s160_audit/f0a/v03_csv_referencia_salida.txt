@@ -1,0 +1,35 @@
+latest_consolidado.csv sha256 bc1522c24c924cb5
+registro_vrp_ocr.csv sha256 94679246acbd0db5
+filas tabla 42410 filas ocr 1122
+tipos tabla: [('RUTINA', 39827), ('ALERTA_TERMICA', 1655), ('FALSO_POSITIVO', 928)]
+tipos ocr: [('ALERTA_TERMICA_OCR', 987), ('FALSO_POSITIVO_OCR', 94), ('ALERTA_SIN_GEOMETRIA_OCR', 41)]
+
+[tabla sola] ventana 2026-01-10 19:06:00 -> 2026-10-21 20:05:00
+  VIIRS alertas=315 min=0.090 <=0: 0 <5: 297 mediana=0.60
+     RUTINA n=15046 con VRP==0: 15045 con VRP!=0: 1
+  VIIRS375 alertas=1231 min=0.010 <=0: 0 <5: 1207 mediana=0.20
+     RUTINA n=12814 con VRP==0: 12802 con VRP!=0: 12
+  MODIS alertas=109 min=0.130 <=0: 0 <5: 97 mediana=1.15
+     RUTINA n=11967 con VRP==0: 11966 con VRP!=0: 1
+  filas de cualquier tipo con VRP < 0: 0 []
+  filas con VRP vacio o no numerico: 0
+
+[combinado tabla + OCR] ventana 2026-01-10 19:06:00 -> 2026-10-21 20:05:00
+  VIIRS alertas=410 min=0.090 <=0: 0 <5: 377 mediana=1.00
+     RUTINA n=15046 con VRP==0: 15045 con VRP!=0: 1
+  VIIRS375 alertas=2123 min=0.010 <=0: 0 <5: 2073 mediana=0.23
+     RUTINA n=12814 con VRP==0: 12802 con VRP!=0: 12
+  MODIS alertas=150 min=0.130 <=0: 0 <5: 132 mediana=1.23
+     RUTINA n=11967 con VRP==0: 11966 con VRP!=0: 1
+  filas de cualquier tipo con VRP < 0: 0 []
+  filas con VRP vacio o no numerico: 0
+
+[solo OCR] ventana 2026-01-20 05:12:00 -> 2026-10-20 17:30:00
+  VIIRS alertas=95 min=1.000 <=0: 0 <5: 80 mediana=2.00
+     RUTINA n=0 con VRP==0: 0 con VRP!=0: 0
+  VIIRS375 alertas=892 min=0.010 <=0: 0 <5: 866 mediana=0.27
+     RUTINA n=0 con VRP==0: 0 con VRP!=0: 0
+  MODIS alertas=41 min=1.000 <=0: 0 <5: 35 mediana=2.00
+     RUTINA n=0 con VRP==0: 0 con VRP!=0: 0
+  filas de cualquier tipo con VRP < 0: 0 []
+  filas con VRP vacio o no numerico: 0

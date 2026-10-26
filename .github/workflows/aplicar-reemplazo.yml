@@ -1,0 +1,98 @@
+name: "Aplicar un reemplazo de datos sobre main (regenera, nunca rebasa)"
+
+# POR QUE EXISTE (S158)
+# =====================
+# El reemplazo del historico con K (tarea 1.24, PR #883) choco dos veces con el NRT, que cada hora escribe en
+# los mismos JSON de data/mirova_equivalent/. Fusionar trozos de un JSON de 30 MB con lo que escribio el NRT no
+# tiene una resolucion correcta, y el NRT rebasa con `-X theirs`, que hace ganar al commit que se reaplica (no al
+# remoto, como dice el comentario de nrt.yml). Lo que funciono a mano fue volver a correr el script de reemplazo,
+# que es determinista, sobre el main del momento. Este workflow hace eso: en cada intento vuelve a origin/main,
+# regenera con el script, corre las pruebas y empuja; si el push pierde la carrera, repite desde origin/main.
+#
+# QUE NO HACE: no rebasa, no fusiona trozos, no entra al grupo push-main (GitHub guarda un solo pendiente por
+# grupo y un despacho aca podria expulsar un NRT encolado, S125/S126). Por eso lleva su bucle de reintento, que es
+# la otra defensa que acepta el guard de pushers (test_guard_declarado_vs_efectivo_s131 g4).
+#
+# USO: el script (bajo experiments/) y su codigo tienen que estar YA en main, en un PR de codigo previo, con sus
+# pruebas. Ejemplo: experiments/_s158_reemplazo/aplicar_11.sh. Guard: tests/test_workflow_aplicar_reemplazo_s158.py.
+# Toda aplicacion en produccion pide antes el si explicito de Nicolas (A45) y un tag defensivo.
+"on":
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: 'Escribe "si" (Nicolas aprobo este reemplazo, A45)'
+        required: true
+      script:
+        description: "Script bash bajo experiments/ que regenera los datos sobre el arbol (determinista)"
+        required: true
+      pruebas:
+        description: "Archivos de prueba que deben pasar antes de empujar (separados por espacio)"
+        required: true
+      tag:
+        description: "Tag defensivo a crear sobre origin/main antes del primer intento (vacio = no crear)"
+        required: false
+        default: ""
+      mensaje:
+        description: "Mensaje del commit"
+        required: true
+
+concurrency:
+  group: aplicar-reemplazo
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  aplicar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Validar entradas
+        run: |
+          if [ "${{ inputs.confirmacion }}" != "si" ]; then echo "::error::falta la confirmacion"; exit 1; fi
+          case "${{ inputs.script }}" in
+            experiments/*) ;;
+            *) echo "::error::el script tiene que vivir bajo experiments/"; exit 1 ;;
+          esac
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get update -qq && sudo apt-get install -y -qq libhdf4-dev
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Regenerar sobre main, probar y empujar
+        env:
+          SCRIPT: ${{ inputs.script }}
+          PRUEBAS: ${{ inputs.pruebas }}
+          TAG: ${{ inputs.tag }}
+          MENSAJE: ${{ inputs.mensaje }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin main
+          if [ -n "$TAG" ]; then
+            git tag -a "$TAG" -m "defensivo antes de $SCRIPT" origin/main
+            git push -q origin "$TAG"
+            echo "tag $TAG = $(git rev-parse origin/main)"
+          fi
+          # Cada intento parte de origin/main y regenera: si el NRT empujo entre medio, no hay nada que fusionar.
+          for attempt in 1 2 3 4 5; do
+            git fetch -q origin main && git reset --hard origin/main
+            bash "$SCRIPT" && python -m pytest -q $PRUEBAS
+            git add -A data experiments
+            if git diff --cached --quiet; then echo "nada que commitear"; exit 0; fi
+            git commit -q -m "$MENSAJE"
+            if git push origin HEAD:main; then echo "empujado en el intento $attempt"; exit 0; fi
+            sleep $((attempt * 30))
+          done
+          echo "::error::el push perdio la carrera 5 veces"; exit 1
