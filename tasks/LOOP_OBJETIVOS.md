@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 14:54 UTC (S164, vuelta 9): t1 de MOD-D terminada; t2 despachada (run 40344051900)
+- t1 (run 40336655402): completed success, 10 de 10 jobs en verde, ~45 min de reloj (cuadra con VH-04). La cobertura por
+  parte la cuenta la sesión que evalúe (A108).
+- t2 (partes 8 a 15): `git push origin 865174abe...:refs/heads/s162-modd-t2` a las 14:54 UTC, run **40344051900**, mismo
+  tag `s162-modd-tag`. t3 cuando termine t2.
+
 ### 2026-10-26 14:30 UTC (S164, vuelta 8): pre-registro del diurno sobre K recibido; falta verificar la v3.1
 - `diurno-k-prereg` entregó el pre-registro del A/B diurno sobre K (1.32, D-10, #813): rama
   `claude/s163-diurno-k-prereg-5c4f44` `9700e4e0b` (en el remoto), `experiments/_s163_diurno_k/PREREGISTRO.md` v3.1, sha256
