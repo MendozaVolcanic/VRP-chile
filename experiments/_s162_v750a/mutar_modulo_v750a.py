@@ -38,6 +38,11 @@ MUT = {
     "fill_ejes_cambiados": ("    filas, cols = np.indices(A.shape)\n    ok = np.isfinite(A)",
                             "    cols, filas = np.indices(A.shape)\n    ok = np.isfinite(A)", "ATRAPADA"),
     "fill_lexico_invertido": ("key=lambda t: t[0])", "key=lambda t: t[0][::-1])", "ATRAPADA"),
+    # MATLAB no extrapola fuera de la envolvente (S163): un relleno por vecino más cercano ahí tiene que caer en el oro
+    "fill_vecino_fuera": ("    B[~ok] = out          # lo que ningún triángulo cubre",
+                          "    out = np.where(np.isnan(out), __import__('scipy.interpolate', fromlist=['griddata'])"
+                          ".griddata(P.astype(float), val, Q.astype(float), method='nearest'), out)\n"
+                          "    B[~ok] = out          # lo que ningún triángulo cubre", "ATRAPADA"),
     # rivales estructurados (verificador de S163, rama s163-o2-alternativa c95483d31): las otras simetrías del marco
     # calzan 159 a 160 de 166 escenas de O2, así que «ejes cambiados» sola es un control débil
     **{f"fill_simetria_{nom}": ("    filas, cols = np.indices(A.shape)\n    ok = np.isfinite(A)",
@@ -61,18 +66,26 @@ def correr(nombre, viejo, nuevo, a):
         r = subprocess.run([sys.executable, str(AQUI / "equivalencia_v750a.py"), "--insumos", a.insumos, "--grillas",
                             a.grillas, "--recortes", a.recortes, "--modulo", f"pipeline._mut_{nombre}"],
                            capture_output=True, text=True, encoding="utf-8", errors="replace")
+        # el oro de MATLAB (fondo celda por celda, con su patrón de NaN) corre también contra la copia: hay roturas
+        # que ningún VRP de la equivalencia ve, como rellenar fuera de la envolvente (no hay alertados ahí)
+        o = subprocess.run([sys.executable, str(AQUI / "oro_fillmissing2_o2.py"), "--o2", a.o2,
+                            "--modulo", f"pipeline._mut_{nombre}"],
+                           capture_output=True, text=True, encoding="utf-8", errors="replace") if a.o2 else None
     finally:
         copia.unlink()
     out = r.stdout + r.stderr
-    if r.returncode == 0 and "VERDE:" in out:
-        estado = "VERDE"
-    elif "Traceback" in out:
+    oro = (o.stdout + o.stderr) if o is not None else ""
+    if "Traceback" in out or "Traceback" in oro:
         estado = "CAÍDA"
-    elif r.returncode == 1 and "ROJA:" in out:
+    elif (r.returncode == 1 and "ROJA:" in out) or (o is not None and o.returncode == 1 and "== oro: ROJO" in oro):
         estado = "ATRAPADA"
+    elif r.returncode == 0 and "VERDE:" in out and (o is None or (o.returncode == 0 and "== oro: VERDE" in oro)):
+        estado = "VERDE"
     else:
-        estado = f"OTRA (salida {r.returncode})"
+        estado = f"OTRA (salida {r.returncode}/{o.returncode if o is not None else '-'})"
     linea = next((x for x in out.splitlines() if x.startswith(("VERDE", "ROJA"))), out.strip().splitlines()[-1:])
+    if o is not None:
+        linea = f"{linea} | oro {next((x for x in oro.splitlines() if x.startswith('== oro')), '?')}"
     return nombre, estado, linea
 
 
@@ -82,6 +95,7 @@ def main():
     ap.add_argument("--grillas", required=True)
     ap.add_argument("--recortes", required=True)
     ap.add_argument("--hilos", type=int, default=7)
+    ap.add_argument("--o2", default="", help="carpeta con entradas_o2.mat y resultado_o2.mat: corre también el oro")
     a = ap.parse_args()
     with ThreadPoolExecutor(a.hilos) as ex:
         res = list(ex.map(lambda kv: correr(kv[0], kv[1][0], kv[1][1], a), MUT.items()))

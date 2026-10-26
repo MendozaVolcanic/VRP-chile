@@ -102,6 +102,25 @@ def _referencias():
     return yaml.safe_load(_GRILLAS_YAML.read_text(encoding="utf-8"))["volcanes"]
 
 
+@lru_cache(maxsize=1)
+def _volcanes_yaml():
+    import yaml
+    ruta = Path(__file__).resolve().parents[1] / "volcanoes.yaml"
+    return [(v["name"], float(v["lat"]), float(v["lon"]))
+            for v in yaml.safe_load(ruta.read_text(encoding="utf-8"))["volcanoes"]]
+
+
+def volcan_por_coordenadas(lat, lon, tol_grados=1e-6):
+    """Nombre del volcán de volcanoes.yaml cuyas coordenadas son (lat, lon), o None. El procesador recibe las del yaml
+    tal cual (run_pipeline pasa volcano["lat"], volcano["lon"]), así que la igualdad es exacta salvo redondeo."""
+    if lat is None or lon is None:
+        return None
+    for nombre, la, lo in _volcanes_yaml():
+        if abs(la - float(lat)) <= tol_grados and abs(lo - float(lon)) <= tol_grados:
+            return nombre
+    return None
+
+
 def n_celdas(paso_m):
     """Regla GEO: centros en X0 - 25000 : paso : X0 + 25000 (como el rango de MATLAB): floor(50000 / paso) + 1."""
     return int(math.floor(2 * MEDIA_GRILLA_M / paso_m)) + 1
@@ -447,8 +466,11 @@ def _triangular_perturbado(P):
 
 def _fillmissing2_lineal(A):
     """fillmissing2(A, 'linear') de MATLAB: interpolación lineal sobre el Delaunay perturbado (x = fila, y = columna)
-    de las celdas con dato; vecino más cercano fuera de la envolvente (Etna, con NaN de borde, lo confirma)."""
-    from scipy.interpolate import griddata
+    de las celdas con dato; FUERA de la envolvente convexa queda NaN, porque MATLAB no extrapola (Etna: 230 celdas en
+    NaN en el fondo de MATLAB R2026b; confirmado con MATLAB real en VIIRS 375, 38.955 celdas en 12 escenas, y en MODIS,
+    159 en 10; coordinadora S163, 2026-10-26). La versión anterior ponía el vecino más cercano y el oro no lo vio porque
+    comparaba con nanmax, que se salta los NaN de MATLAB. Con `sum(..., 'omitnan')` del .m un NaN bajo una alerta se
+    descarta de L_bk y un valor extrapolado se sumaría: no da lo mismo."""
     A = np.asarray(A, float)
     filas, cols = np.indices(A.shape)
     ok = np.isfinite(A)
@@ -474,10 +496,7 @@ def _fillmissing2_lineal(A):
             if w1 >= 0 and w2 >= 0 and w3 >= 0:
                 out[qi] = (w1 * val[i] + w2 * val[j] + w3 * val[k]) / den
                 break
-    if np.isnan(out).any():
-        sin = np.isnan(out)
-        out[sin] = griddata(P.astype(float), val, Q[sin].astype(float), method="nearest")
-    B[~ok] = out
+    B[~ok] = out          # lo que ningún triángulo cubre (fuera de la envolvente) queda NaN, como en MATLAB
     return B
 
 

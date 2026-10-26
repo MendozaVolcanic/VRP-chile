@@ -169,9 +169,31 @@ def test_fondo_y_vrp_iguales_a_matlab():
         enm = _hueco(m13, mask)
         h = np.isnan(enm)
         B = MV._fillmissing2_lineal(enm)
+        # mismas celdas en NaN que MATLAB (fuera de la envolvente MATLAB no extrapola) y el resto a 1e-12; un nanmax
+        # solo se saltaría esos NaN, que es como la versión anterior de esta prueba dio por buena una extrapolación
+        assert np.array_equal(np.isnan(B[h]), np.isnan(bk[h])), k
         assert np.nanmax(np.abs(B - bk)[h]) < 1e-12, k
         v = MV.vrp_mirova(m13, mask)
         assert v["VRP_MW"] == pytest.approx(vrp, rel=1e-12) and v["L_bk"] == pytest.approx(lbk, rel=1e-12), k
+
+
+def test_fuera_de_la_envolvente_queda_nan_como_matlab():
+    """Etna trae NaN de borde: MATLAB deja 230 celdas del hueco en NaN y el VRP no cambia (no hay alertados ahí). Un
+    relleno por vecino más cercano fuera de la envolvente (lo que hacía la versión anterior) tiene que fallar."""
+    from scipy.interpolate import griddata
+    k, m13, mask, bk, vrp, lbk = _oro()[0]
+    assert k == 0
+    enm = _hueco(m13, mask)
+    h = np.isnan(enm)
+    B = MV._fillmissing2_lineal(enm)
+    assert int(np.isnan(bk[h]).sum()) == 230 and int(np.isnan(B[h]).sum()) == 230
+    fil, col = np.indices(enm.shape)
+    ok = ~h
+    vecino = B.copy()
+    sin = np.isnan(vecino)
+    vecino[sin] = griddata(np.column_stack([fil[ok], col[ok]]).astype(float), enm[ok],
+                           np.column_stack([fil[sin], col[sin]]).astype(float), method="nearest")
+    assert not np.array_equal(np.isnan(vecino[h]), np.isnan(bk[h]))
 
 
 def test_el_oro_discrimina():

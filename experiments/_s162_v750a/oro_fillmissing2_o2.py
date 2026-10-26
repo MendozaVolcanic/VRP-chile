@@ -4,7 +4,8 @@
 POR QUÉ. La prueba de tests/ lleva 8 escenas; ésta recorre las 166 con alerta: VRP de pipeline/mirova_v750_codigo.py
 contra el VRP de MATLAB (1e-12 relativo) y, en las que guardan la matriz de fondo (las 191 primeras), el fondo celda por
 celda en el hueco. Control: el mismo recorrido con el fillmissing2 de Qhull (el del oráculo viejo) tiene que fallar en
-varias, o el instrumento no distingue.
+varias, o el instrumento no distingue. El fondo se compara con el patrón de NaN de MATLAB (fuera de la envolvente MATLAB
+no extrapola), no con nanmax, que se saltaba esas celdas y así dio por bueno un vecino más cercano en Etna.
 Uso: python oro_fillmissing2_o2.py --o2 <carpeta con entradas_o2.mat y resultado_o2.mat de la rama s163-o2-paquete>
 """
 from __future__ import annotations
@@ -21,7 +22,7 @@ from scipy.ndimage import binary_dilation
 RAIZ = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RAIZ))
 sys.path.insert(0, str(RAIZ / "experiments/_s158_audit_r2/oraculo"))
-from pipeline import mirova_v750_codigo as MV  # noqa: E402
+import importlib  # noqa: E402
 import mirova_v750_r2 as ORA  # noqa: E402
 
 MD5_RESULTADO = "1f7fdc4bed0f8cb6223204bbce42ba43"
@@ -30,7 +31,9 @@ MD5_RESULTADO = "1f7fdc4bed0f8cb6223204bbce42ba43"
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--o2", required=True, type=Path)
+    ap.add_argument("--modulo", default="pipeline.mirova_v750_codigo", help="para el nulo: una copia mutada del módulo")
     a = ap.parse_args()
+    MV = importlib.import_module(a.modulo)
     rp = a.o2 / "resultado_o2.mat"
     assert hashlib.md5(rp.read_bytes()).hexdigest() == MD5_RESULTADO, "resultado_o2.mat no es el de S163"
     S, R = sio.loadmat(a.o2 / "entradas_o2.mat"), sio.loadmat(rp)
@@ -57,7 +60,9 @@ def main():
             enm[binary_dilation(np.isnan(enm), structure=np.ones((kk, kk), bool))] = np.nan
             h = np.isnan(enm)
             n_bk += 1
-            ok_bk += np.nanmax(np.abs(MV._fillmissing2_lineal(enm) - bk)[h]) < 1e-12
+            Bm = MV._fillmissing2_lineal(enm)
+            # el patrón de NaN tiene que ser el de MATLAB (no extrapola fuera de la envolvente); nanmax solo se lo salta
+            ok_bk += bool(np.array_equal(np.isnan(Bm[h]), np.isnan(bk[h])) and np.nanmax(np.abs(Bm - bk)[h]) < 1e-12)
             qh_mal += np.nanmax(np.abs(ORA._fillmissing2_lineal(enm) - bk)[h]) > 1e-9
             # verificador de S163: la extrapolación (vecino más cercano fuera de la envolvente convexa de las celdas
             # con dato) casi no está probada; esas escenas se cuentan aparte, como NO CUBIERTAS por el oro
@@ -69,8 +74,8 @@ def main():
                 fuera.append((k, n_fuera))
     print(f"VRP igual a MATLAB (1e-12 relativo): {ok_vrp} de {n_vrp} | peor diferencia relativa {peor:.2e}")
     print(f"fondo igual a MATLAB celda por celda: {ok_bk} de {n_bk}")
-    print(f"escenas con celdas del hueco FUERA de la envolvente convexa (extrapolación por vecino más cercano): "
-          f"{len(fuera)} {fuera} -> el oro las iguala, pero con tan pocas la extrapolación queda NO CUBIERTA como regla")
+    print(f"escenas con celdas del hueco FUERA de la envolvente convexa (MATLAB las deja en NaN): "
+          f"{len(fuera)} {fuera} (en VIIRS 750 sólo Etna; VIIRS 375 y MODIS lo confirmaron con MATLAB real en 22 escenas)")
     print(f"control, fillmissing2 de Qhull: fondos distintos de MATLAB {qh_mal} de {n_bk} (tiene que ser más de 0)")
     bien = ok_vrp == n_vrp and ok_bk == n_bk and n_vrp >= 166 and n_bk >= 84 and qh_mal > 0
     print("== oro:", "VERDE" if bien else "ROJO")

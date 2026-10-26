@@ -159,11 +159,12 @@ CITAS_CLAUDE_MD = [
     # S140: corridas por el import de product_version (8b) y por el fondo persistido (T7).
     ("pipeline/process_viirs.py", 83, "FLAG_DNS"),
     # S149: +1 en los tres procesadores por el import de roi1_summit_mask (A118, la caja al segundo pase).
-    ("pipeline/process_viirs_mod.py", 466, "Villarrica/PP/Lastarria/Chaiten/PCC"),
+    # S162: +1 en process_viirs_mod.py por el import de ENABLE_V750_CODIGO_MIROVA (la vía «código MIROVA»).
+    ("pipeline/process_viirs_mod.py", 467, "Villarrica/PP/Lastarria/Chaiten/PCC"),
     ("pipeline/process_viirs.py", 213, "compute_test1_nti"),
     # S147: 59 -> 62, la cabecera FICHA crecio al retirar la cita bibliografica de D30.
     ("pipeline/process_modis.py", 62, "compute_test1_mir"),
-    ("pipeline/process_viirs_mod.py", 163, "compute_test1_mir"),
+    ("pipeline/process_viirs_mod.py", 164, "compute_test1_mir"),
     ("scripts/build_c2ab_windows.py", 64, "registro_vrp_ocr.csv"),
 ]
 
