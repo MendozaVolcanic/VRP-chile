@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 15:26 UTC (S164, vuelta 11): t2 de MOD-D terminada; t3 despachada (run 40349358358)
+- t2 (run 40344051900): completed success, 10 de 10 jobs, ~32 min. La cuenta `loop-modis-2` con `contar_tanda.py`.
+- t3 (partes 16 a 23): `git push origin 865174abe...:refs/heads/s162-modd-t3` a las 15:26 UTC, run **40349358358**; con
+  ella se completan las tres tandas del censo de MOD-D. Después de t3 queda libre el cupo para el A/B diurno (si Nicolás
+  lo sella).
+
 ### 2026-10-26 15:17 UTC (S164, vuelta 10): t1 contada completa; pre-registro diurno listo para el sello de Nicolás
 - t1 de MOD-D contada por `loop-modis-2` con `experiments/_s162_modis_paquete/contar_tanda.py`: 1.814 de 1.814 pasadas con
   fila «ok», 8 partes BIEN (0 faltan, 0 sobran, 0 repetidas, cabecera con el commit del tag), 0 retenidas, 39 «volcán
