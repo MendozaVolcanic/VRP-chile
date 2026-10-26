@@ -308,8 +308,11 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
   negativos). Verificador limpio (Sonnet): «pasa con reparos, ninguno bloquea» (VH-01 a VH-05: Villarrica cayó a 8,4 km
   del gránulo y no ejercitó el port en el borde; `k33_igual_k` False en 22/22 por campos diag; ~3,8 s por pasada, las 17 h
   estimadas sobran). Evidencia en `experiments/_s162_modis_paquete/humo_40333783937/` (esta rama). Tanda t1 pedida a S164.
-- [ ] D4c. Tandas: **t1 despachada por S164: run 40336655402** (2026-10-26 14:07 UTC, head `865174abe`, rama
-  `s162-modd-t1`, partes 0 a 7); t2 y t3 las despacha S164 cuando termine la anterior (un solo run pendiente por
+- [ ] D4c. Tandas: **t1 = run 40336655402** (terminó 10/10 success; **contada**: 1.814 de 1.814 pasadas «ok», 8 partes
+  BIEN, 0 faltan, 0 repetidas, 0 retenidas para sha, 39 «volcán fuera del gránulo»; `contar_tanda.py` y su salida en
+  `experiments/_s162_modis_paquete/`, artefactos en `D:\vrp-trabajo\temporales\s162_modd\t1\`); **t2 = run 40344051900**
+  (despachada 14:54 UTC, rama `s162-modd-t2`, partes 8 a 15); t3 (partes 16 a 23) cuando termine t2. Antes:
+  **t1 despachada por S164: run 40336655402** (2026-10-26 14:07 UTC, head `865174abe`, rama `s162-modd-t1`, partes 0 a 7); t2 y t3 las despacha S164 cuando termine la anterior (un solo run pendiente por
   grupo). Al terminar cada una: bajar artefactos a `D:\vrp-trabajo\temporales\s162_modd\t1\` (t2, t3), contar filas
   «ok» y errores por parte (A108), y al final de las tres evaluar el censo entero desde el checkout del tag.
 - [x] D4. **Humo despachado por S164: run 40333783937** (2026-10-26 13:48 UTC, head `865174abe`, rama
