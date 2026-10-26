@@ -71,6 +71,11 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 > regla necesita el chequeo de alerta dentro de la envolvente (`envolvente_v375.py`). **Lectura final de V375-C: el fondo
 > de 1 a 4 px no cambia la magnitud y V375-D no hace falta.** Sólo vale para alertas de 1 a 4 píxeles dentro de la
 > envolvente, que es lo que se midió.
+>
+> **Para integrar esta rama (aviso de S163, 2026-10-26):** #911 metió en main la evidencia de S159 a S163, con una
+> versión anterior de `experiments/_s162_v375/evaluar.py`. Al integrar habrá conflicto add/add en ese archivo: **gana
+> la versión de esta rama**, que desciende de la de main y agrega `--vrp-vara` y la etiqueta de cráter. `o2_375/` vive
+> sólo en esta rama.
 
 Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
 evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).
