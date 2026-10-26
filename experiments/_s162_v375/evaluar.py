@@ -547,6 +547,9 @@ def main(argv=None):
     ap.add_argument("--art-extra", nargs="*", default=[], help="carpetas de artefactos de los lotes extra")
     ap.add_argument("--deciden", nargs="+", default=["S162"], help="lotes del conjunto que decide")
     ap.add_argument("--neg-pub-de", default=None, help="lote del que sale neg_pub en el conjunto que decide (B2: S162)")
+    # O2-375: el VRP de las escenas de 1 a 4 píxeles con el fondo de MATLAB (o la vara PRELIMINAR que lo imita) en vez
+    # del fondo del port; sólo cambia la magnitud de esas escenas, la detección no (o2_375/LEEME_O2_375.md)
+    ap.add_argument("--vrp-vara", default=None, help="o2_375/vara_preliminar_375.json: VRP por (pasada, brazo)")
     ap.add_argument("--salida", default=str(AQUI / "evaluar_salida.txt"))
     ap.add_argument("--json", default=str(AQUI / "evaluar.json"))
     a = ap.parse_args(argv)
@@ -651,6 +654,27 @@ def main(argv=None):
     if dif:
         pr("      distintos:", dif[:20])
         veredicto_instr.append("recalculo")
+    if a.vrp_vara:
+        vara = json.loads(Path(a.vrp_vara).read_text(encoding="utf-8"))
+        n_sust = n_falta = 0
+        for e in vara["escenas"]:
+            if obj.get(e["id"], {}).get("lote") == "CTL":
+                continue    # el control de vida compara el runner contra S162: no es magnitud, no se sustituye
+            for b in e["brazos"]:
+                if e["id"] not in arms or b not in arms[e["id"]]:
+                    n_falta += 1
+                    continue
+                p = arms[e["id"]][b]
+                # la vara se armó sobre esta misma máscara y este mismo VRP del port; si no calza, no se sustituye
+                if p.get("npix") != e["npix"] or p.get("vrp_mw") is None or abs(p["vrp_mw"] - e["vrp_port_mw"]) > 1e-6:
+                    n_falta += 1
+                    continue
+                arms[e["id"]] = {**arms[e["id"]], b: {**p, "vrp_mw": e["vrp_vara_mw"]}}   # copia: la caché no se toca
+                n_sust += 1
+        pr(f"  2.1b VRP de 1 a 4 px sustituido por la vara ({vara['regla'].get('estado', '?')}): {n_sust} (pasada x "
+           f"brazo); sin calzar {n_falta}")
+        if n_falta:
+            veredicto_instr.append("vara_sin_calzar")
 
     # node: K re-corrido y cada brazo con cada regla
     casos, idx = [], []
