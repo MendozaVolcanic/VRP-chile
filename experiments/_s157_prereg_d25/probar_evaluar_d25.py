@@ -5,7 +5,9 @@ S140). Los brazos se fabrican desde los records con K en disco (la copia unida d
 del 2026-09-18, producción desde ahí), con la línea FLAGS_BRAZO igual que la escribe el workflow.
 
 Casos V1 (ventana de prueba 2026-09-18 a 2026-10-18, donde producción ya es K; 7 volcanes):
-  nulo            K, K' y D idénticos (D con la huella de D25)            -> controles OK, P1 sin pérdidas, P2 EMPATE,
+  nulo            K, K' y D idénticos (D con la huella de D25)            -> controles OK, P1 sin pérdidas, P2 SIN
+                                                                              SUSTRATO (D-34: 0 discordantes; la regla
+                                                                              del gemelo, informada, da EMPATE),
                                                                               M sin MEJORA ni EMPEORA, SIN EFECTO
   modis           D trae un record MODIS                                  -> cableado de D roto, INDECIDIBLE
   huella          D sin la huella de D25                                  -> cableado de D roto
@@ -24,6 +26,9 @@ Casos V1 (ventana de prueba 2026-09-18 a 2026-10-18, donde producción ya es K; 
   p2              D publica en 30 negativos limpios de VIIRS 375          -> P2 PIERDE, NO CUMPLE (suma)
   p2_m_indec      lo mismo con M de VIIRS 750 INDECIDIBLE (sellada)       -> sigue NO CUMPLE (suma): H2
   un_volcan       D mejora VIIRS 750 sólo en Chillán (simétrica)          -> MEJORA de un volcán no cuenta: SIN EFECTO
+  placebo         el nulo: K x 1,2 y K x 0,8 se informan sin comparador   -> no invalida (S159, D-28 §2.5)
+  placebo_x1.2    D = K x 1,2 en todos los pares de M                      -> ningún MEJORA, d′ idénticamente 0 (D-28 §3 i)
+  placebo_x0.8    D = K x 0,8 en todos los pares de M                      -> ningún MEJORA, d′ = 0, EMPEORA por d (§3 i, iii)
 Casos V2 (2026-04-01 a 2026-06-12, sin gemelo, tabla sola, dos despachos, --ruido-de):
   v2_nulo         K y D idénticos                                         -> controles OK, SIN EFECTO
   v2_veto         D apaga una protegida A                                 -> PENDIENTE DE REPETICION
@@ -112,6 +117,8 @@ def escribir(caso, arms, flags=None, partir=None):
 
 
 def correr(caso, raices, ventana, desde, hasta, extra=()):
+    """S159, D-28 (ADENDA_PLACEBO.md): el placebo ya no es compuerta, así que todos los casos corren con el evaluador
+    tal cual (la salida --omitir-placebo-solo-prueba de la primera versión se retiró)."""
     out = TMP / caso / "out.json"
     cmd = [sys.executable, str(AQUI / "evaluar_d25.py"), "--ventana", ventana, "--out", str(out), "--tmp", str(TMP / caso / "tmp"),
            "--vols", ",".join(VOLS if ventana == "V1" else [v for v in VOLS if v != "NevadosDeChillan"]),
@@ -194,9 +201,20 @@ def main():
     mv = m_veredictos(res)
     check("nulo", res["controles_ok"] and all(res["cableado"].values()) and res["estado"].startswith("SIN EFECTO")
           and not any(v in ("MEJORA", "EMPEORA") for v in mv.values())
-          and all(regla(res)["veredicto"]["P2|%s" % s] == "EMPATE" for s in X.SENS),
+          # D-34 (ADENDA_GEMELO.md §5.6): con D = K no hay pasadas discordantes, así que P2 es SIN SUSTRATO (antes
+          # EMPATE, con la regla del gemelo), y la regla anterior, que se sigue informando, da EMPATE
+          and all(regla(res)["veredicto"]["P2|%s" % s] == "SIN SUSTRATO" for s in X.SENS)
+          and all(regla(res)["info"]["P2|%s" % s]["regla_a_gemelo"] == "EMPATE" for s in X.SENS),
           "estado %s | M %s" % (res["estado"], mv))
     n_v750 = len(pares(t, lambda k, c: "|VIIRS750|" in k))
+    # S159, D-28 §2.5: el placebo (K x 1,2 y K x 0,8 sin comparador) se informa por estrato y no invalida; el nulo
+    # sigue SIN EFECTO y ningún veredicto queda INVALIDO.
+    pl = regla(res)["info"].get("M_placebo", {})
+    decide = [nom for nom, modo in X.ESTRATOS if modo != "informa" and regla(res)["veredicto"]["M|%s" % nom] != "SIN SUSTRATO"]
+    check("placebo", decide and all(set(pl.get(nom, {})) == {"1.2", "0.8"} for nom in decide)
+          and not res["estado"].startswith("INVALIDO") and "PLACEBO" not in regla(res)["veredicto"]
+          and all("g_hat_factor" in regla(res)["info"]["M|%s" % nom] for nom in decide),
+          "placebo sin comparador %s | estado %s" % (pl, res["estado"]))
     print("   pares VIIRS 750 en el nulo: %d" % n_v750)
     json.dump({"ruido_frac": res["ruido_frac"]}, open(TMP / "ruido_v1.json", "w", encoding="utf-8"))
 
@@ -225,8 +243,14 @@ def main():
     mv = m_veredictos(res)
     check("mejora750", "MEJORA" in (mv["M|VIIRS750|z<=40"], mv["M|VIIRS750|z>40"]) and res["estado"].startswith("MEJORA"),
           "M %s | estado %s" % ({k: v for k, v in mv.items() if "750" in k}, res["estado"]))
-    res_s = correr("sellada", escribir("sellada", dict(arms0, D=con_huella(mover(base, sel, "mitad")))), "V1", *V1)
+    res_s = correr("sellada", escribir("sellada", dict(arms0, D=con_huella(mover(base, sel, "mitad")))), "V1", *V1,
+                   extra=["--calibracion", "sellada"])   # S159: el default ya es la simétrica (sello D-27)
     print("   sellada (calibración 'ambos'): M %s | estado %s" % ({k: v for k, v in m_veredictos(res_s).items() if "750" in k}, res_s["estado"]))
+    # D-30, respuesta 4 (ADENDA_PLACEBO.md §5): con la calibración sellada el comparador no se aplica y el veredicto
+    # no vale para decidir; con la simétrica (mejora750, recién corrido) sí.
+    check("sellada_marca", res_s.get("vale_para_decidir") is False and "NO VALE PARA DECIDIR" in res_s["estado"]
+          and res.get("vale_para_decidir") is True,
+          "sellada vale_para_decidir %s | simétrica (mejora750) %s" % (res_s.get("vale_para_decidir"), res.get("vale_para_decidir")))
     res = correr("empeora750", escribir("empeora750", dict(arms0, D=con_huella(mover(base, sel, 1 / 20)))), "V1", *V1, extra=mej)
     mv = m_veredictos(res)
     check("empeora750", "EMPEORA" in (mv["M|VIIRS750|z<=40"], mv["M|VIIRS750|z>40"]) and res["estado"].startswith("DECIDE NICOLAS (M empeora"),
@@ -250,6 +274,19 @@ def main():
     check("corte", res["estado"].startswith("SIN EFECTO") and m_veredictos(res)["M|VIIRS375|sin_kernel|z<=40"] != "MEJORA",
           "estado %s, M sin kernel z<=40 %s (n mejorados %d, todos de 40 a 50°)" % (
               res["estado"], m_veredictos(res)["M|VIIRS375|sin_kernel|z<=40"], len(sel)))
+
+    # D-28 §3 (i): un brazo que es sólo una ganancia uniforme (K x 1,2 y K x 0,8 en todos los pares de M) no puede dar
+    # MEJORA en ningún estrato; K x 0,8 sigue dando EMPEORA por d (iii).
+    todos_m = pares(t, lambda k, c: True)
+    for caso, g in (("placebo_x1.2", 1.2), ("placebo_x0.8", 0.8)):
+        res = correr(caso, escribir(caso, dict(arms0, D=con_huella(mover(base, todos_m, g)))), "V1", *V1)
+        mv = m_veredictos(res)
+        dmax = max(regla(res)["info"]["M|%s" % nom].get("dprima_max_abs", 0.0) for nom, modo in X.ESTRATOS
+                   if modo != "informa" and mv["M|%s" % nom] != "SIN SUSTRATO")
+        reglas_d = {k: regla(res)["info"][k].get("regla") for k in mv}
+        ok = (not any(v == "MEJORA" for k, v in mv.items() if "|kernel|" not in k) and dmax == 0.0
+              and (g != 0.8 or "EMPEORA" in mv.values()))
+        check(caso, ok, "M %s | regla sobre d %s | max |d′| %r | estado %s" % (mv, reglas_d, dmax, res["estado"]))
 
     # un volcán solo (adenda, H4): D lleva hacia MIROVA sólo a Chillán en VIIRS 750
     sel = pares(t, lambda k, c: "|VIIRS750|" in k and k.startswith("NevadosDeChillan|"))
@@ -301,7 +338,8 @@ def main():
         r.update(distance_class="summit", f5_core_vrp_mw=0.5, diag_bg_vecinos_n_sin_vecinos=0,
                  primary_cluster={"n_pixels": 1, "vrp_mw": 0.5, "centroid_lat": r.get("volcano_lat"),
                                   "centroid_lon": r.get("volcano_lon"), "centroid_dist_km": 0.5})
-    res = correr("p2_m_indec", escribir("p2_m_indec", dict(arms0, D=Dh)), "V1", *V1)
+    res = correr("p2_m_indec", escribir("p2_m_indec", dict(arms0, D=Dh)), "V1", *V1,
+                 extra=["--calibracion", "sellada"])   # S159: el default ya es la simétrica (sello D-27)
     mi = [v for k, v in m_veredictos(res).items() if "750" in k]
     check("p2_m_indec", "INDECIDIBLE" in mi and res["estado"].startswith("NO CUMPLE (suma"), "M VIIRS 750 %s -> %s" % (mi, res["estado"]))
 

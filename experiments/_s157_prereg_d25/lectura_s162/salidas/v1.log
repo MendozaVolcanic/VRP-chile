@@ -1,0 +1,301 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-08-29 a 2026-10-18 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-29 a 2026-10-18 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+== EVALUADO SIN 2026-10-13, 2026-10-17, 2026-10-18, 2026-10-19, 2026-10-20 (D-29: CMR no sirvió esos días; fuera en los tres brazos y en la cobertura)
+== VENTANA V1: 2026-08-29 a 2026-10-18 | volcanes 11 | brazos ('K', 'G', 'D') | decide tabla y OCR | predicado sha256 f711c61dfb96555b8d203ce0e127dc6c5f86e63d692b435c79b7d45fa7d0ba02
+   volcanes con kernel local en VIIRS 375 (volcanoes.yaml): ['Chaiten', 'Lastarria', 'PlanchonPeteroa', 'PuyehueCordonCaulle', 'Villarrica']
+   calibración de M: simétrica con opción A (ADENDA_CALIBRACION.md l. 3 a 8, sello D-27 de Nicolás, vigente)
+   comparador de M (ADENDA_PLACEBO.md, sello D-28): MEJORA sólo si d y d′ (D contra K×ĝ) dan MEJORA, EMPEORA sobre d; placebo K x 1.2 y K x 0.8 informado sin comparador
+   referencia congelada MendozaVolcanic/Mirova-v1@35a5ea86748e8d1ebbe62ea48e19d4a2ddc14360: principales y capas (consolidado_filas_perdidas.csv 254 filas, respaldo_20260408.csv 0 filas) OK
+
+== 1. COBERTURA (A108), sólo VIIRS 375 y 750
+   cobertura pareja: OK
+
+== 2. VERSIÓN DEL PRODUCTO: protegidas con versión distinta entre brazos 0 []
+
+== 3. CABLEADO (línea FLAGS_BRAZO de cada job y huella en los records)
+   K  OK
+   G  OK
+   D  OK
+
+== 4. DETERMINISMO DE LA PUBLICACIÓN (K' contra K)
+   VIIRS375  2271 pasadas, misma decisión  2271 | OK
+   VIIRS750  2253 pasadas, misma decisión  2253 | OK
+
+== CONTROLES GENERALES: OK
+
+== REGLA DE ALERTAS MÍNIMAS: original
+   P1 VIIRS375 CUMPLE | protegidas que K publica 24, netas 0, ruidosas 0, pendientes 0, sólo OCR Suomi NPP 7
+   P1b VIIRS375 LISTA (decide Nicolas) ['NevadosDeChillan|VIIRS375|2026-10-11 05:36 | K 1.225 MW -> D 0.909 MW | MIROVA 1.38']
+   P2 VIIRS375 EMPATE (D-45, prueba de signos por bloque) | neto D menos K -1 | B 13 noches (suma no nula 13) | p GANA 0.5000, PIERDE 0.7095, dos colas 1.0000 (informa) | exacto, p mínimo 0.000122 | semilla None, sorteos None | discordantes 13 | suma K 40, D 39 | noches con error K 37, D 35
+      sumas de bloque: [-1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1]
+      informan, no deciden (D-45 §3): D-34 sin calibrar EMPATE, IC95 [-7.0, 7.0] | D-42 INDECIDIBLE (calibración FALLA, falsos GANA 0.053 PIERDE 0.042, tope 0.05 por cola, BLOQUEA 0.456, 1000 sorteos, semilla 161) | la calibración de P2 falla: con estas noches no se distingue de un nulo (ADENDA_CALIBRACION_P2.md, D-42) (falsos GANA 0.053, PIERDE 0.042, tope 0.05 por cola)
+      informan, no deciden: (a) ruido del gemelo 0.0 -> GANA | (b) D-33 -> PENDIENTE DE DIAGNOSTICO POR PASADA (GANA por 1)
+      discordante: Isluga VIIRS375 2026-09-13 05:12 | K False D True | pos VRP 0.07 | pc.vrp_mw K 0.0 D 0.061 | error de K
+      discordante: Isluga VIIRS375 2026-09-19 05:42 | K False D True | pos VRP 0.06 | pc.vrp_mw K 0.363 D 0.069 | error de K
+      discordante: Isluga VIIRS375 2026-09-22 04:48 | K False D True | pos VRP 0.06 | pc.vrp_mw K 0.406 D 0.047 | error de K
+      discordante: Isluga VIIRS375 2026-10-06 06:24 | K False D True | pos VRP 0.06 | pc.vrp_mw K 0.0 D 0.067 | error de K
+      discordante: Lascar VIIRS375 2026-09-10 05:48 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.156 D 0.034 | error de D
+      discordante: NevadosDeChillan VIIRS375 2026-09-04 05:30 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.12 D 0.055 | error de D
+      discordante: NevadosDeChillan VIIRS375 2026-09-05 05:48 | K False D True | pos VRP 0.14 | pc.vrp_mw K 0.0 D 0.11 | error de K
+      discordante: NevadosDeChillan VIIRS375 2026-09-06 05:48 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.067 | error de D
+      discordante: NevadosDeChillan VIIRS375 2026-09-08 05:54 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.052 D 0.066 | error de D
+      discordante: NevadosDeChillan VIIRS375 2026-09-13 06:00 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.088 | error de D
+      discordante: NevadosDeChillan VIIRS375 2026-09-14 05:42 | K False D True | pos VRP 0.09 | pc.vrp_mw K 0.0 D 0.086 | error de K
+      discordante: NevadosDeChillan VIIRS375 2026-09-16 06:00 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.109 | error de D
+      discordante: Tupungatito VIIRS375 2026-09-17 04:48 | K False D True | pos VRP 0.05 | pc.vrp_mw K 0.0 D 0.051 | error de K
+   P1 VIIRS750 CUMPLE | protegidas que K publica 22, netas 0, ruidosas 0, pendientes 0, sólo OCR Suomi NPP 2
+   P1b VIIRS750 LISTA (decide Nicolas) ['NevadosDeChillan|VIIRS750|2026-10-14 06:18 | K 1.173 MW -> D 0.632 MW | MIROVA 2.0']
+   P2 VIIRS750 BLOQUEA (D-45, prueba de signos por bloque) | neto D menos K +6 | B 26 noches (suma no nula 26) | p GANA 0.9137, PIERDE 0.1619, dos colas 0.3246 (informa) | sorteos, p mínimo 0.0001 | semilla 162, sorteos 10000 | discordantes 26 | suma K 29, D 35 | noches con error K 29, D 35
+      sumas de bloque: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      informan, no deciden (D-45 §3): D-34 sin calibrar BLOQUEA, IC95 [-4.0, 16.0] | D-42 BLOQUEA (calibración OK, falsos GANA 0.013 PIERDE 0.014, tope 0.05 por cola, BLOQUEA 0.42, 1000 sorteos, semilla 161)
+      informan, no deciden: (a) ruido del gemelo 0.0 -> PIERDE | (b) D-33 -> PIERDE
+      discordante: Isluga VIIRS750 2026-09-05 05:42 | K False D True | pos VRP 0.24 | pc.vrp_mw K 0.0 D 0.305 | error de K
+      discordante: Isluga VIIRS750 2026-09-06 05:42 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.263 | error de D
+      discordante: Isluga VIIRS750 2026-09-16 05:54 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.347 | error de D
+      discordante: Isluga VIIRS750 2026-09-20 06:00 | K False D True | pos VRP 0.16 | pc.vrp_mw K 0.0 D 0.253 | error de K
+      discordante: Isluga VIIRS750 2026-09-23 05:24 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.29 | error de D
+      discordante: Isluga VIIRS750 2026-10-06 05:24 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.291 | error de D
+      discordante: Isluga VIIRS750 2026-10-08 05:42 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.371 | error de D
+      discordante: Isluga VIIRS750 2026-10-09 05:24 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.272 | error de D
+      discordante: Isluga VIIRS750 2026-10-14 05:30 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.289 | error de D
+      discordante: Lascar VIIRS750 2026-09-11 05:48 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.333 | error de D
+      discordante: Lascar VIIRS750 2026-09-13 06:00 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.325 | error de D
+      discordante: Lascar VIIRS750 2026-09-20 06:00 | K False D True | pos VRP 0.19 | pc.vrp_mw K 0.0 D 0.205 | error de K
+      discordante: Lascar VIIRS750 2026-09-21 05:42 | K False D True | pos VRP 0.22 | pc.vrp_mw K 0.0 D 0.281 | error de K
+      discordante: Lascar VIIRS750 2026-09-22 05:24 | K False D True | pos VRP 0.24 | pc.vrp_mw K 0.0 D 0.259 | error de K
+      discordante: Lascar VIIRS750 2026-09-24 05:54 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.385 | error de D
+      discordante: Lascar VIIRS750 2026-10-02 06:00 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.493 | error de D
+      discordante: Lascar VIIRS750 2026-10-08 05:42 | K False D True | pos VRP 0.36 | pc.vrp_mw K 0.0 D 0.437 | error de K
+      discordante: NevadosDeChillan VIIRS750 2026-10-01 04:42 | K False D True | pos VRP 0.09 | pc.vrp_mw K 0.0 D 0.167 | error de K
+      discordante: PlanchonPeteroa VIIRS750 2026-09-27 05:54 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.362 | error de D
+      discordante: PlanchonPeteroa VIIRS750 2026-10-05 05:48 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.26 | error de D
+      discordante: PlanchonPeteroa VIIRS750 2026-10-16 05:42 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.336 | error de D
+      discordante: PuyehueCordonCaulle VIIRS750 2026-09-07 05:30 | K False D True | pos VRP 0.38 | pc.vrp_mw K 0.0 D 0.466 | error de K
+      discordante: PuyehueCordonCaulle VIIRS750 2026-09-11 05:36 | K False D True | pos VRP 0.49 | pc.vrp_mw K 0.0 D 0.318 | error de K
+      discordante: Tupungatito VIIRS750 2026-09-08 05:54 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.344 | error de D
+      discordante: Tupungatito VIIRS750 2026-09-17 05:42 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.262 | error de D
+      discordante: Villarrica VIIRS750 2026-09-17 05:42 | K False D True | pos VRP 0.16 | pc.vrp_mw K 0.0 D 0.401 | error de K
+   estrato 203 (VIIRS 750, cumbre de K en 0,0 MW; informa, no decide): 44 pasadas | D recupera 10, enciende 16, no cambia 0, otros cambios 18
+      203: Isluga 2026-09-05 05:42 | alerta VRP 0.24 | publica K False D True | pc.vrp_mw K 0.0 D 0.305 | error de P2 K
+      203: Isluga 2026-09-06 05:42 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.263 | error de P2 D
+      203: Isluga 2026-09-16 05:36 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.299 | error de P2 None
+      203: Isluga 2026-09-16 05:54 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.347 | error de P2 D
+      203: Isluga 2026-09-20 06:00 | alerta VRP 0.16 | publica K False D True | pc.vrp_mw K 0.0 D 0.253 | error de P2 K
+      203: Isluga 2026-09-22 05:42 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.269 | error de P2 None
+      203: Isluga 2026-09-23 05:24 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.29 | error de P2 D
+      203: Isluga 2026-10-01 05:18 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.284 | error de P2 None
+      203: Isluga 2026-10-06 05:24 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.291 | error de P2 D
+      203: Isluga 2026-10-06 06:00 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.309 | error de P2 None
+      203: Isluga 2026-10-08 05:42 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.371 | error de P2 D
+      203: Isluga 2026-10-09 05:24 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.272 | error de P2 D
+      203: Isluga 2026-10-14 05:30 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.289 | error de P2 D
+      203: Lascar 2026-08-30 05:54 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.283 | error de P2 None
+      203: Lascar 2026-09-01 06:24 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.254 | error de P2 None
+      203: Lascar 2026-09-11 05:48 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.333 | error de P2 D
+      203: Lascar 2026-09-13 06:00 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.325 | error de P2 D
+      203: Lascar 2026-09-14 06:18 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.339 | error de P2 None
+      203: Lascar 2026-09-16 05:54 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.323 | error de P2 None
+      203: Lascar 2026-09-20 05:24 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.405 | error de P2 None
+      203: Lascar 2026-09-20 06:00 | alerta VRP 0.19 | publica K False D True | pc.vrp_mw K 0.0 D 0.205 | error de P2 K
+      203: Lascar 2026-09-21 05:42 | alerta VRP 0.22 | publica K False D True | pc.vrp_mw K 0.0 D 0.281 | error de P2 K
+      203: Lascar 2026-09-22 05:24 | alerta VRP 0.24 | publica K False D True | pc.vrp_mw K 0.0 D 0.259 | error de P2 K
+      203: Lascar 2026-09-24 05:54 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.385 | error de P2 D
+      203: Lascar 2026-09-25 06:12 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.312 | error de P2 None
+      203: Lascar 2026-10-01 05:18 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.45 | error de P2 None
+      203: Lascar 2026-10-01 05:54 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.48 | error de P2 None
+      203: Lascar 2026-10-02 05:36 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.281 | error de P2 None
+      203: Lascar 2026-10-02 06:00 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.493 | error de P2 D
+      203: Lascar 2026-10-08 05:24 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.305 | error de P2 None
+      203: Lascar 2026-10-08 05:42 | alerta VRP 0.36 | publica K False D True | pc.vrp_mw K 0.0 D 0.437 | error de P2 K
+      203: NevadosDeChillan 2026-10-01 04:42 | alerta VRP 0.09 | publica K False D True | pc.vrp_mw K 0.0 D 0.167 | error de P2 K
+      203: PlanchonPeteroa 2026-09-27 05:54 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.362 | error de P2 D
+      203: PlanchonPeteroa 2026-10-05 05:48 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.26 | error de P2 D
+      203: PlanchonPeteroa 2026-10-16 05:42 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.336 | error de P2 D
+      203: PuyehueCordonCaulle 2026-09-07 05:30 | alerta VRP 0.38 | publica K False D True | pc.vrp_mw K 0.0 D 0.466 | error de P2 K
+      203: PuyehueCordonCaulle 2026-09-07 06:18 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.324 | error de P2 None
+      203: PuyehueCordonCaulle 2026-09-07 06:54 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.322 | error de P2 None
+      203: PuyehueCordonCaulle 2026-09-11 05:36 | alerta VRP 0.49 | publica K False D True | pc.vrp_mw K 0.0 D 0.318 | error de P2 K
+      203: PuyehueCordonCaulle 2026-10-16 06:18 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.514 | error de P2 None
+      203: Tupungatito 2026-09-08 05:54 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.344 | error de P2 D
+      203: Tupungatito 2026-09-15 06:00 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.302 | error de P2 None
+      203: Tupungatito 2026-09-17 05:42 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.262 | error de P2 D
+      203: Villarrica 2026-09-17 05:42 | alerta VRP 0.16 | publica K False D True | pc.vrp_mw K 0.0 D 0.401 | error de P2 K
+   M (pares que salen: {'D publica, K no': 17})
+      VIIRS750|z<=40             decide   n  25 noches  25 | razón K 0.655 D 1.039 | d -0.132 [-0.348, -0.036] | nulo MEJORA 0.015 EMPEORA 0.020 OK | poder True -> MEJORA
+         volcanes con d negativa 3 de 3 con 3 pares o más 
+         comparador D-28: ĝ x1.883 [x1.179, x3.101] | d′ -0.099 [-0.240, -0.007] | nulo de d′ MEJORA 0.010 EMPEORA 0.010 OK | volcanes con d′ negativa 3 de 3 -> d′ MEJORA
+         ĝ por volcán (informa, no decide): Chaiten x1.870 (n 1), Lascar x5.160 (n 6), NevadosDeChillan x1.095 (n 9), PuyehueCordonCaulle x1.913 (n 8), Villarrica x3.101 (n 1)
+      VIIRS750|z>40              decide   n  18 noches  12 | razón K 0.325 D 0.496 | d -0.155 [-0.304, -0.094] | nulo MEJORA 0.020 EMPEORA 0.040 OK | poder None -> NEUTRO
+         volcanes con d negativa 1 de 1 con 3 pares o más | MEJORA sostenida por menos de 2 volcanes (adenda, H4)
+         comparador D-28: ĝ x1.427 [x1.240, x2.656] | d′ -0.022 [-0.149, +0.072] | nulo de d′ MEJORA 0.027 EMPEORA 0.027 OK | volcanes con d′ negativa 0 de 1 -> d′ NEUTRO
+         ĝ por volcán (informa, no decide): Lascar x2.229 (n 1), NevadosDeChillan x1.413 (n 14), PlanchonPeteroa x1.071 (n 1), PuyehueCordonCaulle x6.079 (n 2)
+      VIIRS375|sin_kernel|z<=40  decide   n  75 noches  71 | razón K 0.552 D 0.928 | d -0.163 [-0.203, -0.089] | nulo MEJORA 0.010 EMPEORA 0.020 OK | poder True -> NEUTRO
+         volcanes con d negativa 4 de 4 con 3 pares o más | sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)
+         comparador D-28: ĝ x1.606 [x1.492, x1.803] | d′ -0.031 [-0.052, +0.002] | nulo de d′ MEJORA 0.021 EMPEORA 0.026 OK | volcanes con d′ negativa 2 de 4 -> d′ NEUTRO
+         ĝ por volcán (informa, no decide): Isluga x1.714 (n 32), Lascar x1.708 (n 16), NevadosDeChillan x1.041 (n 11), Tupungatito x1.886 (n 16)
+      VIIRS375|sin_kernel|z>40   bloquea  n  68 noches  56 | razón K 0.432 D 0.713 | d -0.141 [-0.256, -0.054] | nulo MEJORA 0.010 EMPEORA 0.010 OK | poder True -> NEUTRO[referencia MIROVA] la ventana 2026-08-29 a 2026-10-18 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+
+         volcanes con d negativa 4 de 4 con 3 pares o más 
+         comparador D-28: ĝ x1.777 [x1.286, x2.084] | d′ -0.001 [-0.042, +0.063] | nulo de d′ MEJORA 0.025 EMPEORA 0.027 OK | volcanes con d′ negativa 3 de 4 -> d′ NEUTRO
+         ĝ por volcán (informa, no decide): Isluga x1.972 (n 20), Lascar x1.782 (n 17), NevadosDeChillan x1.046 (n 21), Tupungatito x2.236 (n 10)
+      VIIRS375|kernel|z<=40      informa  n  56 noches  52 | razón K 1.026 D 1.021 | d -0.001 [-0.003, +0.001] | nulo MEJORA 0.005 EMPEORA 0.015 OK | poder True -> NEUTRO
+         volcanes con d negativa 4 de 5 con 3 pares o más 
+      VIIRS375|kernel|z>40       informa  n  34 noches  29 | razón K 1.051 D 1.042 | d -0.000 [-0.003, +0.003] | nulo MEJORA 0.020 EMPEORA 0.045 OK | poder True -> NEUTRO
+         volcanes con d negativa 1 de 3 con 3 pares o más 
+   pares de M con magnitud distinta entre K y D: 274 de 276
+   placebo de M sin comparador (D-28 §2.5, informa, no invalida):
+      VIIRS750|z<=40             K x 1.2 -> MEJORA, K x 0.8 -> EMPEORA
+      VIIRS750|z>40              K x 1.2 -> NEUTRO, K x 0.8 -> EMPEORA
+      VIIRS375|sin_kernel|z<=40  K x 1.2 -> MEJORA, K x 0.8 -> EMPEORA
+      VIIRS375|sin_kernel|z>40   K x 1.2 -> NEUTRO, K x 0.8 -> EMPEORA
+      Chillán VIIRS375   n 32 razón K 0.575 D 0.605 (informa)
+      Chillán VIIRS750   n 23 razón K 0.385 D 0.556 (informa)
+   estado con la regla original: DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS750: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: MEJORA | P1b: protegidas que cruzan 1 MW hacia abajo, decide Nicolas
+
+== REGLA DE ALERTAS MÍNIMAS: SN
+   P1 VIIRS375 CUMPLE | protegidas que K publica 24, netas 0, ruidosas 0, pendientes 0, sólo OCR Suomi NPP 7
+   P1b VIIRS375 LISTA (decide Nicolas) ['NevadosDeChillan|VIIRS375|2026-10-11 05:36 | K 1.225 MW -> D 0.909 MW | MIROVA 1.38']
+   P2 VIIRS375 EMPATE (D-45, prueba de signos por bloque) | neto D menos K +0 | B 12 noches (suma no nula 12) | p GANA 0.6128, PIERDE 0.6128, dos colas 1.0000 (informa) | exacto, p mínimo 0.000244 | semilla None, sorteos None | discordantes 12 | suma K 45, D 45 | noches con error K 37, D 36
+      sumas de bloque: [-1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1]
+      informan, no deciden (D-45 §3): D-34 sin calibrar EMPATE, IC95 [-6.0, 6.0] | D-42 EMPATE (calibración OK, falsos GANA 0.016 PIERDE 0.018, tope 0.05 por cola, BLOQUEA 0.376, 1000 sorteos, semilla 161)
+      informan, no deciden: (a) ruido del gemelo 0.0 -> EMPATE | (b) D-33 -> EMPATE
+      discordante: Isluga VIIRS375 2026-09-13 05:12 | K False D True | pos VRP 0.07 | pc.vrp_mw K 0.0 D 0.061 | error de K
+      discordante: Isluga VIIRS375 2026-09-19 05:42 | K False D True | pos VRP 0.06 | pc.vrp_mw K 0.363 D 0.069 | error de K
+      discordante: Isluga VIIRS375 2026-09-22 04:48 | K False D True | pos VRP 0.06 | pc.vrp_mw K 0.406 D 0.047 | error de K
+      discordante: Isluga VIIRS375 2026-10-06 06:24 | K False D True | pos VRP 0.06 | pc.vrp_mw K 0.0 D 0.067 | error de K
+      discordante: Lascar VIIRS375 2026-09-10 05:48 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.156 D 0.034 | error de D
+      discordante: NevadosDeChillan VIIRS375 2026-09-04 05:30 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.12 D 0.055 | error de D
+      discordante: NevadosDeChillan VIIRS375 2026-09-05 05:48 | K False D True | pos VRP 0.14 | pc.vrp_mw K 0.0 D 0.11 | error de K
+      discordante: NevadosDeChillan VIIRS375 2026-09-06 05:48 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.067 | error de D
+      discordante: NevadosDeChillan VIIRS375 2026-09-08 05:54 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.052 D 0.066 | error de D
+      discordante: NevadosDeChillan VIIRS375 2026-09-13 06:00 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.088 | error de D
+      discordante: NevadosDeChillan VIIRS375 2026-09-14 05:42 | K False D True | pos VRP 0.09 | pc.vrp_mw K 0.0 D 0.086 | error de K
+      discordante: NevadosDeChillan VIIRS375 2026-09-16 06:00 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.109 | error de D
+   P1 VIIRS750 CUMPLE | protegidas que K publica 22, netas 0, ruidosas 0, pendientes 0, sólo OCR Suomi NPP 2
+   P1b VIIRS750 LISTA (decide Nicolas) ['NevadosDeChillan|VIIRS750|2026-10-14 06:18 | K 1.173 MW -> D 0.632 MW | MIROVA 2.0']
+   P2 VIIRS750 BLOQUEA (D-45, prueba de signos por bloque) | neto D menos K +6 | B 26 noches (suma no nula 26) | p GANA 0.9137, PIERDE 0.1619, dos colas 0.3246 (informa) | sorteos, p mínimo 0.0001 | semilla 162, sorteos 10000 | discordantes 26 | suma K 29, D 35 | noches con error K 29, D 35
+      sumas de bloque: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      informan, no deciden (D-45 §3): D-34 sin calibrar BLOQUEA, IC95 [-4.0, 16.0] | D-42 BLOQUEA (calibración OK, falsos GANA 0.013 PIERDE 0.014, tope 0.05 por cola, BLOQUEA 0.42, 1000 sorteos, semilla 161)
+      informan, no deciden: (a) ruido del gemelo 0.0 -> PIERDE | (b) D-33 -> PIERDE
+      discordante: Isluga VIIRS750 2026-09-05 05:42 | K False D True | pos VRP 0.24 | pc.vrp_mw K 0.0 D 0.305 | error de K
+      discordante: Isluga VIIRS750 2026-09-06 05:42 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.263 | error de D
+      discordante: Isluga VIIRS750 2026-09-16 05:54 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.347 | error de D
+      discordante: Isluga VIIRS750 2026-09-20 06:00 | K False D True | pos VRP 0.16 | pc.vrp_mw K 0.0 D 0.253 | error de K
+      discordante: Isluga VIIRS750 2026-09-23 05:24 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.29 | error de D
+      discordante: Isluga VIIRS750 2026-10-06 05:24 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.291 | error de D
+      discordante: Isluga VIIRS750 2026-10-08 05:42 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.371 | error de D
+      discordante: Isluga VIIRS750 2026-10-09 05:24 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.272 | error de D
+      discordante: Isluga VIIRS750 2026-10-14 05:30 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.289 | error de D
+      discordante: Lascar VIIRS750 2026-09-11 05:48 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.333 | error de D
+      discordante: Lascar VIIRS750 2026-09-13 06:00 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.325 | error de D
+      discordante: Lascar VIIRS750 2026-09-20 06:00 | K False D True | pos VRP 0.19 | pc.vrp_mw K 0.0 D 0.205 | error de K
+      discordante: Lascar VIIRS750 2026-09-21 05:42 | K False D True | pos VRP 0.22 | pc.vrp_mw K 0.0 D 0.281 | error de K
+      discordante: Lascar VIIRS750 2026-09-22 05:24 | K False D True | pos VRP 0.24 | pc.vrp_mw K 0.0 D 0.259 | error de K
+      discordante: Lascar VIIRS750 2026-09-24 05:54 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.385 | error de D
+      discordante: Lascar VIIRS750 2026-10-02 06:00 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.493 | error de D
+      discordante: Lascar VIIRS750 2026-10-08 05:42 | K False D True | pos VRP 0.36 | pc.vrp_mw K 0.0 D 0.437 | error de K
+      discordante: NevadosDeChillan VIIRS750 2026-10-01 04:42 | K False D True | pos VRP 0.09 | pc.vrp_mw K 0.0 D 0.167 | error de K
+      discordante: PlanchonPeteroa VIIRS750 2026-09-27 05:54 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.362 | error de D
+      discordante: PlanchonPeteroa VIIRS750 2026-10-05 05:48 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.26 | error de D
+      discordante: PlanchonPeteroa VIIRS750 2026-10-16 05:42 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.336 | error de D
+      discordante: PuyehueCordonCaulle VIIRS750 2026-09-07 05:30 | K False D True | pos VRP 0.38 | pc.vrp_mw K 0.0 D 0.466 | error de K
+      discordante: PuyehueCordonCaulle VIIRS750 2026-09-11 05:36 | K False D True | pos VRP 0.49 | pc.vrp_mw K 0.0 D 0.318 | error de K
+      discordante: Tupungatito VIIRS750 2026-09-08 05:54 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.344 | error de D
+      discordante: Tupungatito VIIRS750 2026-09-17 05:42 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.262 | error de D
+      discordante: Villarrica VIIRS750 2026-09-17 05:42 | K False D True | pos VRP 0.16 | pc.vrp_mw K 0.0 D 0.401 | error de K
+   estrato 203 (VIIRS 750, cumbre de K en 0,0 MW; informa, no decide): 44 pasadas | D recupera 10, enciende 16, no cambia 0, otros cambios 18
+      203: Isluga 2026-09-05 05:42 | alerta VRP 0.24 | publica K False D True | pc.vrp_mw K 0.0 D 0.305 | error de P2 K
+      203: Isluga 2026-09-06 05:42 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.263 | error de P2 D
+      203: Isluga 2026-09-16 05:36 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.299 | error de P2 None
+      203: Isluga 2026-09-16 05:54 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.347 | error de P2 D
+      203: Isluga 2026-09-20 06:00 | alerta VRP 0.16 | publica K False D True | pc.vrp_mw K 0.0 D 0.253 | error de P2 K
+      203: Isluga 2026-09-22 05:42 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.269 | error de P2 None
+      203: Isluga 2026-09-23 05:24 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.29 | error de P2 D
+      203: Isluga 2026-10-01 05:18 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.284 | error de P2 None
+      203: Isluga 2026-10-06 05:24 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.291 | error de P2 D
+      203: Isluga 2026-10-06 06:00 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.309 | error de P2 None
+      203: Isluga 2026-10-08 05:42 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.371 | error de P2 D
+      203: Isluga 2026-10-09 05:24 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.272 | error de P2 D
+      203: Isluga 2026-10-14 05:30 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.289 | error de P2 D
+      203: Lascar 2026-08-30 05:54 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.283 | error de P2 None
+      203: Lascar 2026-09-01 06:24 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.254 | error de P2 None
+      203: Lascar 2026-09-11 05:48 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.333 | error de P2 D
+      203: Lascar 2026-09-13 06:00 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.325 | error de P2 D
+      203: Lascar 2026-09-14 06:18 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.339 | error de P2 None
+      203: Lascar 2026-09-16 05:54 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.323 | error de P2 None
+      203: Lascar 2026-09-20 05:24 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.405 | error de P2 None
+      203: Lascar 2026-09-20 06:00 | alerta VRP 0.19 | publica K False D True | pc.vrp_mw K 0.0 D 0.205 | error de P2 K
+      203: Lascar 2026-09-21 05:42 | alerta VRP 0.22 | publica K False D True | pc.vrp_mw K 0.0 D 0.281 | error de P2 K
+      203: Lascar 2026-09-22 05:24 | alerta VRP 0.24 | publica K False D True | pc.vrp_mw K 0.0 D 0.259 | error de P2 K
+      203: Lascar 2026-09-24 05:54 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.385 | error de P2 D
+      203: Lascar 2026-09-25 06:12 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.312 | error de P2 None
+      203: Lascar 2026-10-01 05:18 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.45 | error de P2 None
+      203: Lascar 2026-10-01 05:54 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.48 | error de P2 None
+      203: Lascar 2026-10-02 05:36 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.281 | error de P2 None
+      203: Lascar 2026-10-02 06:00 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.493 | error de P2 D
+      203: Lascar 2026-10-08 05:24 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.305 | error de P2 None
+      203: Lascar 2026-10-08 05:42 | alerta VRP 0.36 | publica K False D True | pc.vrp_mw K 0.0 D 0.437 | error de P2 K
+      203: NevadosDeChillan 2026-10-01 04:42 | alerta VRP 0.09 | publica K False D True | pc.vrp_mw K 0.0 D 0.167 | error de P2 K
+      203: PlanchonPeteroa 2026-09-27 05:54 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.362 | error de P2 D
+      203: PlanchonPeteroa 2026-10-05 05:48 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.26 | error de P2 D
+      203: PlanchonPeteroa 2026-10-16 05:42 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.336 | error de P2 D
+      203: PuyehueCordonCaulle 2026-09-07 05:30 | alerta VRP 0.38 | publica K False D True | pc.vrp_mw K 0.0 D 0.466 | error de P2 K
+      203: PuyehueCordonCaulle 2026-09-07 06:18 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.324 | error de P2 None
+      203: PuyehueCordonCaulle 2026-09-07 06:54 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.322 | error de P2 None
+      203: PuyehueCordonCaulle 2026-09-11 05:36 | alerta VRP 0.49 | publica K False D True | pc.vrp_mw K 0.0 D 0.318 | error de P2 K
+      203: PuyehueCordonCaulle 2026-10-16 06:18 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.514 | error de P2 None
+      203: Tupungatito 2026-09-08 05:54 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.344 | error de P2 D
+      203: Tupungatito 2026-09-15 06:00 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.302 | error de P2 None
+      203: Tupungatito 2026-09-17 05:42 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.262 | error de P2 D
+      203: Villarrica 2026-09-17 05:42 | alerta VRP 0.16 | publica K False D True | pc.vrp_mw K 0.0 D 0.401 | error de P2 K
+   M (pares que salen: {'D publica, K no': 16})
+      VIIRS750|z<=40             decide   n  25 noches  25 | razón K 0.655 D 1.039 | d -0.132 [-0.348, -0.036] | nulo MEJORA 0.015 EMPEORA 0.020 OK | poder True -> MEJORA
+         volcanes con d negativa 3 de 3 con 3 pares o más 
+         comparador D-28: ĝ x1.883 [x1.179, x3.101] | d′ -0.099 [-0.240, -0.007] | nulo de d′ MEJORA 0.010 EMPEORA 0.010 OK | volcanes con d′ negativa 3 de 3 -> d′ MEJORA
+         ĝ por volcán (informa, no decide): Chaiten x1.870 (n 1), Lascar x5.160 (n 6), NevadosDeChillan x1.095 (n 9), PuyehueCordonCaulle x1.913 (n 8), Villarrica x3.101 (n 1)
+      VIIRS750|z>40              decide   n  18 noches  12 | razón K 0.325 D 0.496 | d -0.155 [-0.304, -0.094] | nulo MEJORA 0.020 EMPEORA 0.040 OK | poder None -> NEUTRO
+         volcanes con d negativa 1 de 1 con 3 pares o más | MEJORA sostenida por menos de 2 volcanes (adenda, H4)
+         comparador D-28: ĝ x1.427 [x1.240, x2.656] | d′ -0.022 [-0.149, +0.072] | nulo de d′ MEJORA 0.027 EMPEORA 0.027 OK | volcanes con d′ negativa 0 de 1 -> d′ NEUTRO
+         ĝ por volcán (informa, no decide): Lascar x2.229 (n 1), NevadosDeChillan x1.413 (n 14), PlanchonPeteroa x1.071 (n 1), PuyehueCordonCaulle x6.079 (n 2)
+      VIIRS375|sin_kernel|z<=40  decide   n  73 noches  70 | razón K 0.544 D 0.909 | d -0.168 [-0.206, -0.094] | nulo MEJORA 0.015 EMPEORA 0.040 OK | poder True -> NEUTRO
+         volcanes con d negativa 4 de 4 con 3 pares o más | sube en promedio, no en los pares correctos (ADENDA_PLACEBO.md, D-28)
+         comparador D-28: ĝ x1.606 [x1.494, x1.788] | d′ -0.031 [-0.053, +0.001] | nulo de d′ MEJORA 0.020 EMPEORA 0.021 OK | volcanes con d′ negativa 2 de 4 -> d′ NEUTRO
+         ĝ por volcán (informa, no decide): Isluga x1.714 (n 32), Lascar x1.708 (n 16), NevadosDeChillan x1.041 (n 11), Tupungatito x1.886 (n 14)
+      VIIRS375|sin_kernel|z>40   bloquea  n  61 noches  50 | razón K 0.426 D 0.670 | d -0.142 [-0.256, -0.054] | nulo MEJORA 0.015 EMPEORA 0.025 OK | poder True -> NEUTRO
+         volcanes con d negativa 4 de 4 con 3 pares o más 
+         comparador D-28: ĝ x1.638 [x1.221, x1.926] | d′ -0.025 [-0.064, +0.046] | nulo de d′ MEJORA 0.015 EMPEORA 0.016 OK | volcanes con d′ negativa 2 de 4 -> d′ NEUTRO[referencia MIROVA] la ventana 2026-08-29 a 2026-10-18 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+
+         ĝ por volcán (informa, no decide): Isluga x1.972 (n 20), Lascar x1.772 (n 15), NevadosDeChillan x1.045 (n 20), Tupungatito x2.260 (n 6)
+      VIIRS375|kernel|z<=40      informa  n  49 noches  45 | razón K 0.988 D 0.979 | d +0.000 [-0.002, +0.001] | nulo MEJORA 0.005 EMPEORA 0.010 OK | poder True -> NEUTRO
+         volcanes con d negativa 2 de 5 con 3 pares o más 
+      VIIRS375|kernel|z>40       informa  n  28 noches  24 | razón K 0.853 D 0.849 | d +0.002 [-0.002, +0.004] | nulo MEJORA 0.030 EMPEORA 0.015 OK | poder True -> NEUTRO
+         volcanes con d negativa 0 de 2 con 3 pares o más 
+   pares de M con magnitud distinta entre K y D: 252 de 254
+   placebo de M sin comparador (D-28 §2.5, informa, no invalida):
+      VIIRS750|z<=40             K x 1.2 -> MEJORA, K x 0.8 -> EMPEORA
+      VIIRS750|z>40              K x 1.2 -> NEUTRO, K x 0.8 -> EMPEORA
+      VIIRS375|sin_kernel|z<=40  K x 1.2 -> MEJORA, K x 0.8 -> EMPEORA
+      VIIRS375|sin_kernel|z>40   K x 1.2 -> NEUTRO, K x 0.8 -> EMPEORA
+      Chillán VIIRS375   n 31 razón K 0.578 D 0.601 (informa)
+      Chillán VIIRS750   n 23 razón K 0.385 D 0.556 (informa)
+   estado con la regla SN: DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS750: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: MEJORA | P1b: protegidas que cruzan 1 MW hacia abajo, decide Nicolas
+
+== P4 Y P5 (informan)
+   P4: cúmulos movidos más de 0.01 km 1 (protegidas 0: []) | cambia distance_class 8 ['Lascar|VIIRS375|2026-09-10 05:48 far->summit', 'Isluga|VIIRS375|2026-09-19 05:42 far->summit', 'Isluga|VIIRS375|2026-09-22 04:48 far->summit', 'Isluga|VIIRS375|2026-09-23 05:06 far->summit', 'Isluga|VIIRS375|2026-10-05 05:00 far->summit']
+   P5: {"d9_capped_K_D": {"False->False": 4523, "False->True": 1}, "modo_un_pixel_K_D": {"None->None": 3705, "True->True": 791, "False->False": 25, "True->False": 3}, "discarded_reason_cambia": [], "apagadas_por_filtro_del_tablero": {}}
+   alertas sin geometría (informan, no deciden): 18
+
+== VEREDICTO DE LA VENTANA V1 (manda la regla más estricta de original y SN): DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS750: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: MEJORA | P1b: protegidas que cruzan 1 MW hacia abajo, decide Nicolas
+
+real	5m14.462s
+user	0m0.016s
+sys	0m0.047s
