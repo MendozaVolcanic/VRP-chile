@@ -2837,6 +2837,21 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 ## D25: El fondo del VRP es la mediana de un anillo regional de 5 a 25 km, no la media de los píxeles que rodean al activo; y el exceso se recorta a cero. **ABIERTA (registrada S138, H-S138-01; es la palanca real detrás de A6 y del cráter en 0,0 MW)** S138
 
+> ⚠️ **S162 (2026-10-24): el A/B de D25 sobre K se leyó y D25 tal como está NO SE ADOPTA (decisión de Nicolás:
+> «sobre las decisiones mías haz lo que tú recomiendes», sobre la recomendación de no adoptar).** La divergencia sigue
+> ABIERTA, pero la palanca deja de ser «la media de los vecinos del paper». Veredicto sellado: DECIDE NICOLÁS (P1
+> limpio; P2 BLOQUEA en V1 VIIRS 750, neto +6, p 0,16, y en V2 VIIRS 375 con SN; M MEJORA sólo en V1 VIIRS 750 cenit
+> ≤ 40°; en los demás estratos actúa como ganancia pareja, d mejora y d′ no), confirmado bit a bit por verificador
+> limpio (`experiments/_s157_prereg_d25/lectura_s162/` en la rama `s159-evaluador-d25`). Por qué no: (1) el fondo del
+> programa operacional de MIROVA en VIIRS 750 (`MIROVA_VIIRS750_VRP.m:63-85`) aparta justo los vecinos que D25 promedia
+> (dilata 3/5/7 celdas), interpola con `fillmissing2`, suma todos los alertados y no recorta; (2) en VIIRS 750 D25
+> publica el 100 % de los cúmulos de cumbre que K deja en 0 MW, que entran por el segundo pase sin compuerta, sin
+> seleccionar (`experiments/_s162_vuelta1/VERIFICADOR_ENCENDIDAS.md`); (3) de las dos protegidas de Chillán que D25
+> baja de 1 MW, una es un defecto de selección de K (D17, `experiments/_s162_vuelta1/VERIFICADOR_CHILLAN.md`) y la otra
+> un halo tibio junto al cráter. El camino que queda es el fondo del programa dentro del paquete del código por sensor
+> (`docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`, V750-A, V375-E, MOD-D). Lo que sigue se conserva
+> como historia.
+>
 > ⚠️ **S158, código de MIROVA** (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3 punto 12 y §4.3): el fondo del VRP de MIROVA en VIIRS 750 no es la media de los vecinos no alertados: pone en NaN los alertados más un halo (cuadrado de 3, 5 o 7 celdas según npix ≤ 4, ≤ 30, > 30), interpola linealmente por debajo (`fillmissing2`) y no recorta ΔL a cero. El brazo D del pre-registro de S157 toma justo el halo que MIROVA aparta: si cumple, no es la adopción del fondo de MIROVA.
 
 **El paper** (p. 8, ecuación 6): el fondo es "the arithmetic mean of all the pixels surrounding the active one"; no necesita recorte.

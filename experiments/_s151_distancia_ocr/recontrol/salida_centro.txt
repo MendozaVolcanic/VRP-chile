@@ -1,0 +1,114 @@
+imagenes en la muestra 429, con geometria leida 429
+desfase del dibujo por mes (dias; mediana, p10, p90, n):
+   2026-05: +0.53 [+0.40, +0.72] n=66
+   2026-06: +0.52 [+0.42, +0.62] n=88
+   2026-07: +0.48 [-0.15, +0.54] n=77
+   2026-08: +0.52 [+0.48, +0.64] n=77
+   2026-09: +0.50 [+0.46, +0.60] n=88
+   2026-10: +0.52 [+0.48, +0.58] n=33
+imagenes calibradas 429; marcadores leidos 11350; pareos totales 8101
+marcadores sin pasada conocida que los explique: 3249 de 11350 (28.6 %)
+
+== pasadas de control con distancia > 24,5 km (fuera del panel 0-25 km): 181 de 1549; con marcador a su hora y a 24-25 km: 18
+
+== CONTROL: pasadas de la tabla VIIRS 375 con VRP > 0 y Dist.png de la muestra 1 a 25 dias despues: 1368
+   ventana: 2026-04-14 05:06:02 a 2026-10-11 06:36:01
+   recall del dibujo (marcador a +-0.12 d y +-0.6 km): 1349 de 1368 (98.6 %)
+      ALERTA_TERMICA: 887 de 898
+      FALSO_POSITIVO: 462 de 470
+   clase de la eliminacion: {'unico': 726, 'solapado': 377, 'ambiguo': 250, 'sin_marcador': 15}
+   'unico' (un solo marcador sin explicar en la columna): n=726, error |est - tabla| mediana 0.07 km, p90 0.64 km, max 23.96 km
+      ALERTA_TERMICA: n=452, mediana 0.06, p90 0.88
+      FALSO_POSITIVO: n=274, mediana 0.09, p90 0.31
+   'solapado'/'ambiguo': n=627; la distancia real cae en [kmin, kmax] +-0.6: 614 (97.9 %); ancho del intervalo mediana 0.41 km, p90 14.19
+   cerca/lejos a limite MIROVA (5 km, Tupungatito 7): correctas 1203, incorrectas 41, indecidibles 109 (sobre 1353)
+   cerca/lejos a 3 km: correctas 1165, incorrectas 33, indecidibles 155 (sobre 1353)
+   cerca/lejos a 10 km: correctas 1138, incorrectas 34, indecidibles 181 (sobre 1353)
+   solo pasadas de la tabla LEJANAS (dist > limite): n=596; recall del dibujo 588; clases {'unico': 322, 'ambiguo': 171, 'solapado': 97, 'sin_marcador': 6}
+      'unico' lejanas: n=322, error mediana 0.08 km, p90 0.41 km
+   'unico' con error > 2 km: 37
+                     vol                    t            tipo  dist        est  n_col  n_otras                                                          imagen
+41                Lascar  2026-10-08 05:42:01  ALERTA_TERMICA  1.19  22.086721      2        2               data_png_Lascar_20261012_074938_VIIRS375_Dist.png
+44                Lascar  2026-10-08 04:48:02  ALERTA_TERMICA  1.19  22.086721      2        2               data_png_Lascar_20261012_074938_VIIRS375_Dist.png
+75                Isluga  2026-10-03 05:36:01  ALERTA_TERMICA  0.84  22.899729      2        1               data_png_Isluga_20261004_095224_VIIRS375_Dist.png
+87                Lascar  2026-10-01 06:18:01  ALERTA_TERMICA  1.19  20.189702      2        2               data_png_Lascar_20261004_095349_VIIRS375_Dist.png
+99           Tupungatito  2026-09-29 05:18:01  ALERTA_TERMICA  5.41   9.729730      2        1          data_png_Tupungatito_20260930_071322_VIIRS375_Dist.png
+101               Isluga  2026-09-28 06:18:02  ALERTA_TERMICA  0.53  16.644022      2        2               data_png_Isluga_20260930_070606_VIIRS375_Dist.png
+103          Tupungatito  2026-09-28 05:36:01  ALERTA_TERMICA  5.21  22.567568      2        1          data_png_Tupungatito_20260930_071322_VIIRS375_Dist.png
+105               Isluga  2026-09-28 05:30:01  ALERTA_TERMICA  0.84  16.644022      2        2               data_png_Isluga_20260930_070606_VIIRS375_Dist.png
+150            Lastarria  2026-09-21 06:06:01  ALERTA_TERMICA  1.35  24.390244      2        1            data_png_Lastarria_20260922_073938_VIIRS375_Dist.png
+197      PlanchonPeteroa  2026-09-15 06:18:01  ALERTA_TERMICA  2.02  22.628726      2        1      data_png_PlanchonPeteroa_20260918_074809_VIIRS375_Dist.png
+205          Tupungatito  2026-09-14 05:42:02  ALERTA_TERMICA  5.21  13.108108      2        2          data_png_Tupungatito_20260918_074318_VIIRS375_Dist.png
+326  PuyehueCordonCaulle  2026-08-31 05:06:02  ALERTA_TERMICA  3.35   7.702703      2        1  data_png_PuyehueCordonCaulle_20260902_101524_VIIRS375_Dist.png
+358               Isluga  2026-08-26 05:48:01  ALERTA_TERMICA  0.84  24.796748      3        2               data_png_Isluga_20260827_105306_VIIRS375_Dist.png
+363            Lastarria  2026-08-25 06:12:01  ALERTA_TERMICA  1.55  10.162602      2        1            data_png_Lastarria_20260827_105411_VIIRS375_Dist.png
+400            Lastarria  2026-08-21 05:42:01  ALERTA_TERMICA  2.40   5.691057      2        1            data_png_Lastarria_20260827_105411_VIIRS375_Dist.png
+
+== ALERTA_SIN_GEOMETRIA_OCR VIIRS 375: 11; clases {'sin_imagen': 7, 'solapado': 2, 'ambiguo': 1, 'unico': 1}
+                    vol                    t    vrp       clase       est      kmin       kmax  n_col  n_otras                                                       imagen
+0   PuyehueCordonCaulle  2026-10-15 06:42:00   0.11  sin_imagen       NaN       NaN        NaN    NaN      NaN                                                          NaN
+1            Villarrica  2026-10-15 06:42:00   0.23  sin_imagen       NaN       NaN        NaN    NaN      NaN                                                          NaN
+2      ChillanNevadosde  2026-10-15 05:00:00  22.13  sin_imagen       NaN       NaN        NaN    NaN      NaN                                                          NaN
+3      ChillanNevadosde  2026-10-14 18:42:02   4.24  sin_imagen       NaN       NaN        NaN    NaN      NaN                                                          NaN
+4   PuyehueCordonCaulle  2026-10-14 05:18:00   0.08  sin_imagen       NaN       NaN        NaN    NaN      NaN                                                          NaN
+5                Isluga  2026-10-14 05:12:00   0.08  sin_imagen       NaN       NaN        NaN    NaN      NaN                                                          NaN
+6                Isluga  2026-10-13 18:18:01   1.46  sin_imagen       NaN       NaN        NaN    NaN      NaN                                                          NaN
+7      ChillanNevadosde  2026-10-11 06:12:00   0.42     ambiguo       NaN  1.216216  23.378378    4.0      2.0  data_png_ChillanNevadosde_20261012_065449_VIIRS375_Dist.png
+8                Isluga  2026-10-11 06:06:00   0.19    solapado       NaN  0.542005   0.542005    1.0      2.0            data_png_Isluga_20261012_074849_VIIRS375_Dist.png
+9      ChillanNevadosde  2026-10-10 06:30:00  12.17       unico  0.540541  0.540541   0.540541    3.0      4.0  data_png_ChillanNevadosde_20261012_065449_VIIRS375_Dist.png
+10      PlanchonPeteroa  2026-10-10 06:30:00   0.04    solapado       NaN  2.032520   2.032520    1.0      1.0   data_png_PlanchonPeteroa_20261012_075117_VIIRS375_Dist.png
+
+== ALERTA_TERMICA_OCR VIIRS 375 con 0 fijo (antes del 2026-06-13): 482; clases {'sin_imagen': 202, 'unico': 125, 'solapado': 81, 'ambiguo': 39, 'sin_marcador': 35}
+   cubiertas por la muestra: 280 desde 2026-04-14 05:36:00 | sin imagen: 202 (la mas nueva sin imagen: 2026-04-13 18:24:00 )
+   'unico' que caen LEJOS del limite de alerta: 50; intervalo entero lejos: 35
+                     vol                    t   vrp        est                                                          imagen
+2                 Lascar  2026-06-12 05:36:00  0.53  16.621253               data_png_Lascar_20260614_063725_VIIRS375_Dist.png
+4    PuyehueCordonCaulle  2026-06-12 05:06:02  0.12  19.189189  data_png_PuyehueCordonCaulle_20260614_070400_VIIRS375_Dist.png
+5                 Lascar  2026-06-12 05:00:02  1.04  16.621253               data_png_Lascar_20260614_063725_VIIRS375_Dist.png
+8    PuyehueCordonCaulle  2026-06-10 06:18:00  0.10   7.702703  data_png_PuyehueCordonCaulle_20260614_070400_VIIRS375_Dist.png
+9    PuyehueCordonCaulle  2026-06-10 05:42:02  0.06   7.702703  data_png_PuyehueCordonCaulle_20260614_070400_VIIRS375_Dist.png
+14   PuyehueCordonCaulle  2026-06-08 06:24:02  0.23   8.243243  data_png_PuyehueCordonCaulle_20260610_100855_VIIRS375_Dist.png
+22                Isluga  2026-06-07 17:24:02  1.05  24.796748               data_png_Isluga_20260610_095904_VIIRS375_Dist.png
+28   PuyehueCordonCaulle  2026-06-06 05:54:00  0.08   6.486486  data_png_PuyehueCordonCaulle_20260610_100855_VIIRS375_Dist.png
+32   PuyehueCordonCaulle  2026-06-05 06:30:01  0.37   7.702703  data_png_PuyehueCordonCaulle_20260606_080905_VIIRS375_Dist.png
+40   PuyehueCordonCaulle  2026-06-05 05:36:02  0.91   8.243243  data_png_PuyehueCordonCaulle_20260606_080905_VIIRS375_Dist.png
+48   PuyehueCordonCaulle  2026-06-04 06:30:00  0.06   7.297297  data_png_PuyehueCordonCaulle_20260606_080905_VIIRS375_Dist.png
+51   PuyehueCordonCaulle  2026-06-04 05:54:02  0.39   7.297297  data_png_PuyehueCordonCaulle_20260606_080905_VIIRS375_Dist.png
+65   PuyehueCordonCaulle  2026-06-01 05:12:02  0.08   7.702703  data_png_PuyehueCordonCaulle_20260602_092605_VIIRS375_Dist.png
+85                Isluga  2026-05-30 06:18:00  0.53  12.059621               data_png_Isluga_20260602_091304_VIIRS375_Dist.png
+91                Isluga  2026-05-30 05:42:02  0.33  12.059621               data_png_Isluga_20260602_091304_VIIRS375_Dist.png
+93   PuyehueCordonCaulle  2026-05-30 05:00:01  0.32   8.513514  data_png_PuyehueCordonCaulle_20260602_092605_VIIRS375_Dist.png
+98             Lastarria  2026-05-29 05:00:00  0.27  21.815718            data_png_Lastarria_20260602_091608_VIIRS375_Dist.png
+100               Isluga  2026-05-29 04:54:00  0.86  19.105691               data_png_Isluga_20260602_091304_VIIRS375_Dist.png
+120            Lastarria  2026-05-24 19:00:00  4.98  11.382114            data_png_Lastarria_20260525_130749_VIIRS375_Dist.png
+121            Lastarria  2026-05-24 18:24:02  2.87  11.382114            data_png_Lastarria_20260525_130749_VIIRS375_Dist.png
+131  PuyehueCordonCaulle  2026-05-22 05:54:01  0.61   8.243243  data_png_PuyehueCordonCaulle_20260525_131433_VIIRS375_Dist.png
+138  PuyehueCordonCaulle  2026-05-19 06:48:01  0.28   8.513514  data_png_PuyehueCordonCaulle_20260521_071209_VIIRS375_Dist.png
+139  PuyehueCordonCaulle  2026-05-19 06:30:00  0.49   8.513514  data_png_PuyehueCordonCaulle_20260521_071209_VIIRS375_Dist.png
+145  PuyehueCordonCaulle  2026-05-19 05:54:02  0.71   8.513514  data_png_PuyehueCordonCaulle_20260521_071209_VIIRS375_Dist.png
+147  PuyehueCordonCaulle  2026-05-19 04:48:00  0.46   8.513514  data_png_PuyehueCordonCaulle_20260521_071209_VIIRS375_Dist.png
+148            Lastarria  2026-05-19 04:48:00  0.68  19.376694            data_png_Lastarria_20260521_072103_VIIRS375_Dist.png
+157            Lastarria  2026-05-16 05:42:00  0.83  11.111111            data_png_Lastarria_20260517_060236_VIIRS375_Dist.png
+159  PuyehueCordonCaulle  2026-05-16 05:12:02  0.46   7.567568  data_png_PuyehueCordonCaulle_20260517_060013_VIIRS375_Dist.png
+168               Llaima  2026-05-15 05:30:02  0.29  21.486486               data_png_Llaima_20260517_055928_VIIRS375_Dist.png
+180            Lastarria  2026-05-12 17:42:00  1.13  10.298103            data_png_Lastarria_20260513_095715_VIIRS375_Dist.png
+190               Lascar  2026-05-11 05:36:00  1.38   5.691057               data_png_Lascar_20260513_095616_VIIRS375_Dist.png
+192               Lascar  2026-05-11 05:00:02  0.34   5.691057               data_png_Lascar_20260513_095616_VIIRS375_Dist.png
+194  PuyehueCordonCaulle  2026-05-10 06:00:00  0.23   7.702703  data_png_PuyehueCordonCaulle_20260513_100302_VIIRS375_Dist.png
+195               Lascar  2026-05-10 05:54:00  1.48  15.582656               data_png_Lascar_20260513_095616_VIIRS375_Dist.png
+199               Lascar  2026-05-10 05:18:02  1.21  15.582656               data_png_Lascar_20260513_095616_VIIRS375_Dist.png
+209            Lastarria  2026-05-08 19:00:00  3.98  10.937500            data_png_Lastarria_20260509_050543_VIIRS375_Dist.png
+210            Lastarria  2026-05-08 18:24:02  3.98  10.937500            data_png_Lastarria_20260509_050543_VIIRS375_Dist.png
+215  PuyehueCordonCaulle  2026-05-05 05:54:00  0.23  17.027027  data_png_PuyehueCordonCaulle_20260509_050226_VIIRS375_Dist.png
+235            Lastarria  2026-05-02 05:06:00  2.36  19.361413            data_png_Lastarria_20260509_050543_VIIRS375_Dist.png
+242            Lastarria  2026-04-30 17:36:02  5.06  10.937500            data_png_Lastarria_20260509_050543_VIIRS375_Dist.png
+245  PuyehueCordonCaulle  2026-04-28 05:48:02  0.27   7.702703  data_png_PuyehueCordonCaulle_20260509_050226_VIIRS375_Dist.png
+246               Lascar  2026-04-28 05:48:02  2.73   6.317935               data_png_Lascar_20260509_050511_VIIRS375_Dist.png
+253               Lascar  2026-04-25 05:36:00  1.39  22.622283               data_png_Lascar_20260509_050511_VIIRS375_Dist.png
+255               Lascar  2026-04-25 05:00:02  1.72  22.622283               data_png_Lascar_20260509_050511_VIIRS375_Dist.png
+259            Lastarria  2026-04-23 18:06:02  3.90  11.480978            data_png_Lastarria_20260509_050543_VIIRS375_Dist.png
+260  PuyehueCordonCaulle  2026-04-23 06:18:00  0.08   7.702703  data_png_PuyehueCordonCaulle_20260509_050226_VIIRS375_Dist.png
+271            Lastarria  2026-04-18 06:06:00  0.11  20.040761            data_png_Lastarria_20260509_050543_VIIRS375_Dist.png
+273            Lastarria  2026-04-18 04:42:01  1.29  20.040761            data_png_Lastarria_20260509_050543_VIIRS375_Dist.png
+276            Lastarria  2026-04-16 18:36:02  2.82   9.578804            data_png_Lastarria_20260509_050543_VIIRS375_Dist.png
+279               Isluga  2026-04-14 05:36:00  0.10  24.796196               data_png_Isluga_20260509_050443_VIIRS375_Dist.png

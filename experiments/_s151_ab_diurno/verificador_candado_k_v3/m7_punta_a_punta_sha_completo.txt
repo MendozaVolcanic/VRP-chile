@@ -1,0 +1,554 @@
+[brazos] control _s154_ab_diurno_k_control, diurno _s154_ab_diurno_k_on, base k | regla G1: cola exacta | W2: decide Nicolás si cumple sin W2
+== A/B DIURNO DE VIIRS (D-10) | raíces ['D:\\vrp-trabajo\\temporales\\v3_raices_k\\W2a', 'D:\\vrp-trabajo\\temporales\\v3_raices_k\\W2b', 'D:\\vrp-trabajo\\temporales\\v3_raices_k\\W3a', 'D:\\vrp-trabajo\\temporales\\v3_raices_k\\W3b', 'D:\\vrp-trabajo\\temporales\\v3_raices_k\\W4a', 'D:\\vrp-trabajo\\temporales\\v3_raices_k\\W4b', 'D:\\vrp-trabajo\\temporales\\v3_raices_k\\W5a', 'D:\\vrp-trabajo\\temporales\\v3_raices_k\\W5b', 'D:\\vrp-trabajo\\temporales\\v3_raices_k\\W6a', 'D:\\vrp-trabajo\\temporales\\v3_raices_k\\W6b']
+   predicado del tablero: frontend/index.html sha256 6af3325ac7f2cad932355f0b399954427ebe878244c0583700952a0ed4806083
+   referencia: consolidado registro_vrp_consolidado.csv sha256 9f8542374de2ea50 | ocr registro_vrp_ocr.csv sha256 8e3fb2abac72c5c8 | respaldo registro_vrp_consolidado_respaldo_20260408.csv sha256 183aff7f38c6ca9e | historico consolidado_filas_perdidas.csv sha256 5a68bd7fb4c38604
+   ventanas con los dos brazos: ['W2', 'W3', 'W4', 'W5', 'W6'] | records control 9762, diurno 17552 (pasadas repetidas entre raíces, gana la última: 0/0)
+
+== 1. CABLEADO (línea FLAGS_BRAZO de cada job, A89; ningún VIIRS saltado por diurno en el brazo diurno, A118)
+   control  OK
+   diurno   OK
+   fuera de la palanca los dos brazos leyeron lo mismo: OK
+   H2a: 9762 records del control y 17552 del diurno leídos
+   records de los dos brazos sin Test 1 y con codigo_sha ffffffff0123 (adenda K §4 H2a): OK
+
+== 2. NULO 1 (§5.1, por sensor): records diurnos con umbrales diurnos en el brazo diurno, ninguno en el control
+   W2: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 863, 'VIIRS750': 853}, 0 MODIS diurnos | control 0 diurnos -> OK
+   W3: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 561, 'VIIRS750': 559}, 0 MODIS diurnos | control 0 diurnos -> OK
+   W4: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 906, 'VIIRS750': 898}, 0 MODIS diurnos | control 0 diurnos -> OK
+   W5: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 949, 'VIIRS750': 937}, 0 MODIS diurnos | control 0 diurnos -> OK
+   W6: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 635, 'VIIRS750': 629}, 0 MODIS diurnos | control 0 diurnos -> OK
+
+== 3. REFERENCIA: la base que se lee reproduce sustrato.json del pre-registro? SÍ
+
+== 4. ÍNDICE (banco_paridad.indexar_referencia con la rama diurna encendida mientras indexa; A118)
+   W1: flag encendido, el índice ve 77 de 77 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+   W2: flag encendido, el índice ve 1201 de 1201 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+   W3: flag encendido, el índice ve 835 de 835 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+   W4: flag encendido, el índice ve 1069 de 1069 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+   W5: flag encendido, el índice ve 1129 de 1129 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+   W6: flag encendido, el índice ve 784 de 784 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+
+== 5. COBERTURA DIURNA (§5.4): positivos y pasadas diurnas de la tabla en el brazo diurno
+   W   sensor   positivos: no proc/sin pub/pub tabla: no proc/sin pub/pub   motivo en el log de las no procesadas
+   W2  VIIRS375 0/3/8 de 11                  0/67/506 de 573              -
+   W2  VIIRS750 0/1/0 de 1                   3/479/134 de 616             {'sin rastro en el log': 3}
+   W3  VIIRS375 0/0/1 de 1                   0/60/364 de 424              -
+   W3  VIIRS750 0/0/0 de 0                   1/295/114 de 410             {'sin rastro en el log': 1}
+   W4  VIIRS375 0/1/4 de 5                   0/59/481 de 540              -
+   W4  VIIRS750 0/1/1 de 2                   4/354/165 de 523             {'sin rastro en el log': 4}
+   W5  VIIRS375 0/0/4 de 4                   0/60/515 de 575              -
+   W5  VIIRS750 0/1/0 de 1                   7/376/166 de 549             {'sin rastro en el log': 7}
+   W6  VIIRS375 0/0/5 de 5                   0/31/368 de 399              -
+   W6  VIIRS750 0/0/2 de 2                   2/223/160 de 385             {'sin rastro en el log': 2}
+
+== 6. MÉTRICAS (§4; denominadores = pasadas PROCESADAS por el brazo diurno)
+   ventanas                 sensor    M1 recall diurno         M2 q_neg                 M3 q_dia                
+   W2 a W6                  ambos      78.1 % (25/32)           59.4 % (2781/4683)       59.7 % (2973/4977)     
+   W2 a W6 Láscar           ambos      85.7 % (6/7)             55.0 % (210/382)         55.7 % (239/429)       
+   W2 a W6 resto            ambos      76.0 % (19/25)           59.8 % (2571/4301)       60.1 % (2734/4548)     
+   W2 a W6                  VIIRS375   84.6 % (22/26)           89.2 % (2075/2325)       89.0 % (2234/2511)     
+   W2 a W6 Láscar           VIIRS375   85.7 % (6/7)             90.2 % (165/183)         89.4 % (193/216)       
+   W2 a W6 resto            VIIRS375   84.2 % (16/19)           89.2 % (1910/2142)       88.9 % (2041/2295)     
+   W2 a W6                  VIIRS750   50.0 % (3/6)             29.9 % (706/2358)        30.0 % (739/2466)      
+   W2 a W6 Láscar           VIIRS750    -   (0/0)               22.6 % (45/199)          21.6 % (46/213)        
+   W2 a W6 resto            VIIRS750   50.0 % (3/6)             30.6 % (661/2159)        30.8 % (693/2253)      
+   W3 a W6 (sin W2)         ambos      85.0 % (17/20)           61.3 % (2199/3587)       61.5 % (2333/3791)     
+   W3 a W6 (sin W2) Láscar  ambos     100.0 % (2/2)             58.5 % (185/316)         58.6 % (195/333)       
+   W3 a W6 (sin W2) resto   ambos      83.3 % (15/18)           61.6 % (2014/3271)       61.8 % (2138/3458)     
+   W3 a W6 (sin W2)         VIIRS375   93.3 % (14/15)           89.3 % (1622/1817)       89.2 % (1728/1938)     
+   W3 a W6 (sin W2) Láscar  VIIRS375  100.0 % (2/2)             90.0 % (144/160)         90.6 % (154/170)       
+   W3 a W6 (sin W2) resto   VIIRS375   92.3 % (12/13)           89.2 % (1478/1657)       89.0 % (1574/1768)     
+   W3 a W6 (sin W2)         VIIRS750   60.0 % (3/5)             32.6 % (577/1770)        32.6 % (605/1853)      
+   W3 a W6 (sin W2) Láscar  VIIRS750    -   (0/0)               26.3 % (41/156)          25.2 % (41/163)        
+   W3 a W6 (sin W2) resto   VIIRS750   60.0 % (3/5)             33.2 % (536/1614)        33.4 % (564/1690)      
+   W2                       ambos      66.7 % (8/12)            53.1 % (582/1096)        54.0 % (640/1186)      
+   W2 Láscar                ambos      80.0 % (4/5)             37.9 % (25/66)           45.8 % (44/96)         
+   W2 resto                 ambos      57.1 % (4/7)             54.1 % (557/1030)        54.7 % (596/1090)      
+   W2                       VIIRS375   72.7 % (8/11)            89.2 % (453/508)         88.3 % (506/573)       
+   W2 Láscar                VIIRS375   80.0 % (4/5)             91.3 % (21/23)           84.8 % (39/46)         
+   W2 resto                 VIIRS375   66.7 % (4/6)             89.1 % (432/485)         88.6 % (467/527)       
+   W2                       VIIRS750    0.0 % (0/1)             21.9 % (129/588)         21.9 % (134/613)       
+   W2 Láscar                VIIRS750    -   (0/0)                9.3 % (4/43)            10.0 % (5/50)          
+   W2 resto                 VIIRS750    0.0 % (0/1)             22.9 % (125/545)         22.9 % (129/563)       
+   W3                       ambos     100.0 % (1/1)             57.2 % (457/799)         57.4 % (478/833)       
+   W3 Láscar                ambos       -   (0/0)               51.4 % (37/72)           51.4 % (37/72)         
+   W3 resto                 ambos     100.0 % (1/1)             57.8 % (420/727)         58.0 % (441/761)       
+   W3                       VIIRS375  100.0 % (1/1)             86.1 % (347/403)         85.8 % (364/424)       
+   W3 Láscar                VIIRS375    -   (0/0)               83.8 % (31/37)           83.8 % (31/37)         
+   W3 resto                 VIIRS375  100.0 % (1/1)             86.3 % (316/366)         86.0 % (333/387)       
+   W3                       VIIRS750    -   (0/0)               27.8 % (110/396)         27.9 % (114/409)       
+   W3 Láscar                VIIRS750    -   (0/0)               17.1 % (6/35)            17.1 % (6/35)          
+   W3 resto                 VIIRS750    -   (0/0)               28.8 % (104/361)         28.9 % (108/374)       
+   W4                       ambos      71.4 % (5/7)             60.6 % (600/990)         61.0 % (646/1059)      
+   W4 Láscar                ambos     100.0 % (1/1)             62.0 % (57/92)           61.5 % (59/96)         
+   W4 resto                 ambos      66.7 % (4/6)             60.5 % (543/898)         61.0 % (587/963)       
+   W4                       VIIRS375   80.0 % (4/5)             88.8 % (445/501)         89.1 % (481/540)       
+   W4 Láscar                VIIRS375  100.0 % (1/1)             91.5 % (43/47)           91.8 % (45/49)         
+   W4 resto                 VIIRS375   75.0 % (3/4)             88.5 % (402/454)         88.8 % (436/491)       
+   W4                       VIIRS750   50.0 % (1/2)             31.7 % (155/489)         31.8 % (165/519)       
+   W4 Láscar                VIIRS750    -   (0/0)               31.1 % (14/45)           29.8 % (14/47)         
+   W4 resto                 VIIRS750   50.0 % (1/2)             31.8 % (141/444)         32.0 % (151/472)       
+   W5                       ambos      80.0 % (4/5)             61.2 % (654/1068)        61.0 % (681/1117)      
+   W5 Láscar                ambos     100.0 % (1/1)             63.2 % (60/95)           63.3 % (62/98)         
+   W5 resto                 ambos      75.0 % (3/4)             61.0 % (594/973)         60.7 % (619/1019)      
+   W5                       VIIRS375  100.0 % (4/4)             89.9 % (491/546)         89.6 % (515/575)       
+   W5 Láscar                VIIRS375  100.0 % (1/1)             93.9 % (46/49)           94.1 % (48/51)         
+   W5 resto                 VIIRS375  100.0 % (3/3)             89.5 % (445/497)         89.1 % (467/524)       
+   W5                       VIIRS750    0.0 % (0/1)             31.2 % (163/522)         30.6 % (166/542)       
+   W5 Láscar                VIIRS750    -   (0/0)               30.4 % (14/46)           29.8 % (14/47)         
+   W5 resto                 VIIRS750    0.0 % (0/1)             31.3 % (149/476)         30.7 % (152/495)       
+   W6                       ambos     100.0 % (7/7)             66.8 % (488/730)         67.5 % (528/782)       
+   W6 Láscar                ambos       -   (0/0)               54.4 % (31/57)           55.2 % (37/67)         
+   W6 resto                 ambos     100.0 % (7/7)             67.9 % (457/673)         68.7 % (491/715)       
+   W6                       VIIRS375  100.0 % (5/5)             92.4 % (339/367)         92.2 % (368/399)       
+   W6 Láscar                VIIRS375    -   (0/0)               88.9 % (24/27)           90.9 % (30/33)         
+   W6 resto                 VIIRS375  100.0 % (5/5)             92.6 % (315/340)         92.3 % (338/366)       
+   W6                       VIIRS750  100.0 % (2/2)             41.0 % (149/363)         41.8 % (160/383)       
+   W6 Láscar                VIIRS750    -   (0/0)               23.3 % (7/30)            20.6 % (7/34)          
+   W6 resto                 VIIRS750  100.0 % (2/2)             42.6 % (142/333)         43.8 % (153/349)       
+
+== 7. G3, NOCHES INTACTAS (nulos 2 y 3; pares clasificados con unir_intentos.comparar más el predicado del tablero, desviación D2): records nocturnos control 9762, diurno 9762 | faltan 0, sobran 0 [] | versión de producto o gránulo distintos 0 | pares por categoría {'igual': 5089, 'tolerancia': 4515, 'orden': 67, 'borde': 87, 'hotspot_escena': 4, 'distinto': 0} | campos de los distintos ninguno [] -> CUMPLE
+   admitido (orden, informa): Chaiten|MODIS_AQUA|2026-06-19 08:10: ['anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_AQUA|2026-07-27 07:45: ['anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_AQUA|2026-07-31 08:35: ['anomaly_pixels', 'discarded_anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_AQUA|2026-09-09 07:45: ['anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_AQUA|2026-09-10 08:25: ['anomaly_pixels', 'discarded_anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_AQUA|2026-09-18 08:30: ['anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_AQUA|2026-09-20 08:10: ['anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_AQUA|2026-10-03 08:10: ['anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_TERRA|2026-06-20 01:50: ['anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_TERRA|2026-07-31 02:20: ['discarded_anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_TERRA|2026-09-01 01:55: ['anomaly_pixels']
+   admitido (orden, informa): Chaiten|MODIS_TERRA|2026-09-19 02:10: ['anomaly_pixels']
+   admitido (orden, informa): Lastarria|MODIS_AQUA|2026-06-13 07:35: ['anomaly_pixels']
+   admitido (orden, informa): Lastarria|MODIS_AQUA|2026-07-20 08:05: ['anomaly_pixels']
+   admitido (orden, informa): Lastarria|MODIS_AQUA|2026-07-22 07:45: ['anomaly_pixels']
+   admitido (orden, informa): Lastarria|MODIS_AQUA|2026-09-02 08:10: ['anomaly_pixels']
+   admitido (orden, informa): Lastarria|MODIS_AQUA|2026-09-04 07:45: ['anomaly_pixels']
+   admitido (orden, informa): Lastarria|MODIS_AQUA|2026-09-07 08:05: ['anomaly_pixels']
+   admitido (orden, informa): Lastarria|MODIS_AQUA|2026-10-13 07:55: ['anomaly_pixels', 'discarded_anomaly_pixels']
+   admitido (orden, informa): Lastarria|MODIS_TERRA|2026-07-22 01:30: ['anomaly_pixels']
+   admitido (orden, informa): NevadosDeChillan|MODIS_AQUA|2026-10-02 07:35: ['anomaly_pixels', 'discarded_anomaly_pixels']
+   admitido (orden, informa): PlanchonPeteroa|MODIS_AQUA|2026-06-20 07:10: ['anomaly_pixels']
+   admitido (orden, informa): PlanchonPeteroa|MODIS_AQUA|2026-08-17 07:55: ['anomaly_pixels']
+   admitido (orden, informa): PlanchonPeteroa|MODIS_TERRA|2026-06-18 02:15: ['anomaly_pixels']
+   admitido (orden, informa): PlanchonPeteroa|MODIS_TERRA|2026-08-14 01:40: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-06-13 07:40: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-06-18 07:35: ['anomaly_pixels', 'discarded_anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-06-19 08:10: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-06-21 07:50: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-06-25 07:05: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-06-27 08:20: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-06-28 07:20: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-07-27 07:40: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-07-28 08:20: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-07-31 07:00: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-07-31 08:35: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-08-24 07:25: ['discarded_anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-08-25 08:05: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-08-26 08:40: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-08-27 07:40: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-08-28 08:20: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-08-31 08:35: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-10-02 07:35: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_AQUA|2026-10-05 07:50: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-06-13 02:15: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-06-23 02:10: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-06-24 01:10: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-06-25 01:50: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-07-28 02:05: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-07-30 01:45: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-07-31 02:20: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-08-25 02:15: ['discarded_anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-08-27 01:55: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-08-29 01:35: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-08-30 02:15: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-10-01 01:45: ['anomaly_pixels']
+   admitido (orden, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-10-04 02:05: ['anomaly_pixels']
+   admitido (orden, informa): Tupungatito|MODIS_AQUA|2026-09-10 08:20: ['anomaly_pixels', 'discarded_anomaly_pixels']
+   admitido (orden, informa): Tupungatito|MODIS_TERRA|2026-08-19 01:40: ['anomaly_pixels', 'discarded_anomaly_pixels']
+   admitido (orden, informa): Villarrica|MODIS_AQUA|2026-06-24 08:05: ['anomaly_pixels']
+   admitido (orden, informa): Villarrica|MODIS_AQUA|2026-07-25 08:05: ['discarded_anomaly_pixels']
+   admitido (orden, informa): Villarrica|MODIS_AQUA|2026-07-27 07:40: ['discarded_anomaly_pixels']
+   admitido (orden, informa): Villarrica|MODIS_AQUA|2026-07-31 08:35: ['anomaly_pixels']
+   admitido (orden, informa): Villarrica|MODIS_AQUA|2026-09-02 08:15: ['anomaly_pixels']
+   admitido (orden, informa): Villarrica|MODIS_AQUA|2026-10-13 08:00: ['anomaly_pixels', 'discarded_anomaly_pixels']
+   admitido (orden, informa): Villarrica|MODIS_TERRA|2026-07-27 01:25: ['anomaly_pixels']
+   admitido (orden, informa): Villarrica|MODIS_TERRA|2026-09-01 01:55: ['anomaly_pixels']
+   admitido (borde, informa): Chaiten|MODIS_AQUA|2026-07-30 08:00: píxeles (control, diurno) {'anomaly_pixels': [76, 76]}, campos distintos []
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-06-13 07:40: píxeles (control, diurno) {'anomaly_pixels': [71, 71]}, campos distintos []
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-06-19 08:10: píxeles (control, diurno) {'anomaly_pixels': [74, 72], 'discarded_anomaly_pixels': [26, 28]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-06-21 07:50: píxeles (control, diurno) {'anomaly_pixels': [80, 79], 'discarded_anomaly_pixels': [20, 21]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-06-24 08:05: píxeles (control, diurno) {'anomaly_pixels': [87, 87]}, campos distintos []
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-07-30 07:55: píxeles (control, diurno) {'anomaly_pixels': [80, 81], 'discarded_anomaly_pixels': [20, 19]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-08-15 08:15: píxeles (control, diurno) {'anomaly_pixels': [70, 71], 'discarded_anomaly_pixels': [30, 29]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-08-24 07:25: píxeles (control, diurno) {'anomaly_pixels': [74, 74]}, campos distintos ['final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg']
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-08-29 07:20: píxeles (control, diurno) {'anomaly_pixels': [75, 75]}, campos distintos []
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-09-02 08:10: píxeles (control, diurno) {'anomaly_pixels': [84, 86], 'discarded_anomaly_pixels': [16, 14]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-09-02 08:15: píxeles (control, diurno) {'anomaly_pixels': [83, 83]}, campos distintos []
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-09-10 08:20: píxeles (control, diurno) {'anomaly_pixels': [75, 73], 'discarded_anomaly_pixels': [25, 27]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Copahue|MODIS_AQUA|2026-09-20 08:10: píxeles (control, diurno) {'anomaly_pixels': [78, 79], 'discarded_anomaly_pixels': [22, 21]}, campos distintos ['discarded_n_pixels', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'vrp_mir_mw']
+   admitido (borde, informa): Copahue|MODIS_TERRA|2026-06-13 02:15: píxeles (control, diurno) {'anomaly_pixels': [85, 85]}, campos distintos []
+   admitido (borde, informa): Copahue|MODIS_TERRA|2026-07-27 01:25: píxeles (control, diurno) {'anomaly_pixels': [70, 70]}, campos distintos []
+   admitido (borde, informa): Copahue|MODIS_TERRA|2026-08-22 01:55: píxeles (control, diurno) {'anomaly_pixels': [85, 85]}, campos distintos ['final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg']
+   admitido (borde, informa): Copahue|MODIS_TERRA|2026-08-26 01:15: píxeles (control, diurno) {'anomaly_pixels': [88, 87], 'discarded_anomaly_pixels': [12, 13]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Copahue|MODIS_TERRA|2026-08-29 01:35: píxeles (control, diurno) {'anomaly_pixels': [82, 82]}, campos distintos []
+   admitido (borde, informa): Copahue|MODIS_TERRA|2026-08-30 02:15: píxeles (control, diurno) {'anomaly_pixels': [82, 81], 'discarded_anomaly_pixels': [18, 19]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Copahue|MODIS_TERRA|2026-10-11 01:45: píxeles (control, diurno) {'anomaly_pixels': [72, 69], 'discarded_anomaly_pixels': [28, 31]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Copahue|MODIS_TERRA|2026-10-14 02:00: píxeles (control, diurno) {'anomaly_pixels': [77, 75], 'discarded_anomaly_pixels': [23, 25]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Isluga|MODIS_AQUA|2026-07-25 08:00: píxeles (control, diurno) {'anomaly_pixels': [84, 84]}, campos distintos []
+   admitido (borde, informa): Isluga|MODIS_AQUA|2026-07-30 07:50: píxeles (control, diurno) {'anomaly_pixels': [82, 81], 'discarded_anomaly_pixels': [18, 19]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Isluga|MODIS_AQUA|2026-08-17 07:50: píxeles (control, diurno) {'anomaly_pixels': [91, 91]}, campos distintos []
+   admitido (borde, informa): Isluga|MODIS_AQUA|2026-08-25 08:00: píxeles (control, diurno) {'anomaly_pixels': [82, 81], 'discarded_anomaly_pixels': [18, 19]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Isluga|MODIS_TERRA|2026-08-24 01:40: píxeles (control, diurno) {'anomaly_pixels': [79, 79]}, campos distintos []
+   admitido (borde, informa): Lascar|MODIS_AQUA|2026-07-20 08:05: píxeles (control, diurno) {'anomaly_pixels': [78, 78]}, campos distintos ['final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg']
+   admitido (borde, informa): Lascar|MODIS_AQUA|2026-07-22 07:45: píxeles (control, diurno) {'anomaly_pixels': [69, 70], 'discarded_anomaly_pixels': [31, 30]}, campos distintos ['discarded_n_pixels', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-06-13 07:40: píxeles (control, diurno) {'anomaly_pixels': [69, 68], 'discarded_anomaly_pixels': [31, 32]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-06-19 08:10: píxeles (control, diurno) {'anomaly_pixels': [75, 75]}, campos distintos []
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-06-21 07:50: píxeles (control, diurno) {'anomaly_pixels': [75, 76], 'discarded_anomaly_pixels': [25, 24]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-06-24 08:05: píxeles (control, diurno) {'anomaly_pixels': [60, 62], 'discarded_anomaly_pixels': [40, 38]}, campos distintos ['discarded_n_pixels', 'final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-07-20 08:10: píxeles (control, diurno) {'anomaly_pixels': [74, 78], 'discarded_anomaly_pixels': [26, 22]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-07-22 07:50: píxeles (control, diurno) {'anomaly_pixels': [85, 84], 'discarded_anomaly_pixels': [15, 16]}, campos distintos ['discarded_n_pixels', 'final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-07-24 07:25: píxeles (control, diurno) {'anomaly_pixels': [67, 67]}, campos distintos ['final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-07-25 08:05: píxeles (control, diurno) {'anomaly_pixels': [87, 87]}, campos distintos ['final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-07-30 07:55: píxeles (control, diurno) {'anomaly_pixels': [85, 85]}, campos distintos []
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-07-31 08:35: píxeles (control, diurno) {'anomaly_pixels': [85, 87], 'discarded_anomaly_pixels': [15, 13]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-08-24 07:25: píxeles (control, diurno) {'anomaly_pixels': [81, 80], 'discarded_anomaly_pixels': [19, 20]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-08-25 08:05: píxeles (control, diurno) {'anomaly_pixels': [88, 88]}, campos distintos []
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-08-28 08:20: píxeles (control, diurno) {'anomaly_pixels': [76, 76]}, campos distintos []
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-08-29 07:20: píxeles (control, diurno) {'anomaly_pixels': [85, 85]}, campos distintos []
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-08-30 07:55: píxeles (control, diurno) {'anomaly_pixels': [77, 77], 'discarded_anomaly_pixels': [23, 23]}, campos distintos ['hotspot_dist_km', 'hotspot_lat', 'hotspot_lon']
+   admitido (borde, informa): Llaima|MODIS_AQUA|2026-09-20 08:10: píxeles (control, diurno) {'anomaly_pixels': [79, 79]}, campos distintos []
+   admitido (borde, informa): Llaima|MODIS_TERRA|2026-06-13 02:15: píxeles (control, diurno) {'anomaly_pixels': [70, 73], 'discarded_anomaly_pixels': [30, 27]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_TERRA|2026-07-25 01:45: píxeles (control, diurno) {'anomaly_pixels': [77, 78], 'discarded_anomaly_pixels': [23, 22]}, campos distintos ['discarded_n_pixels', 'final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_TERRA|2026-07-27 01:25: píxeles (control, diurno) {'anomaly_pixels': [75, 75]}, campos distintos ['final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg']
+   admitido (borde, informa): Llaima|MODIS_TERRA|2026-07-28 02:05: píxeles (control, diurno) {'anomaly_pixels': [94, 93], 'discarded_anomaly_pixels': [6, 7]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_TERRA|2026-07-30 01:45: píxeles (control, diurno) {'anomaly_pixels': [77, 77], 'discarded_anomaly_pixels': [23, 23]}, campos distintos []
+   admitido (borde, informa): Llaima|MODIS_TERRA|2026-07-31 02:20: píxeles (control, diurno) {'anomaly_pixels': [88, 88]}, campos distintos ['final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg']
+   admitido (borde, informa): Llaima|MODIS_TERRA|2026-08-26 01:15: píxeles (control, diurno) {'anomaly_pixels': [77, 74], 'discarded_anomaly_pixels': [23, 26]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_TERRA|2026-08-27 01:55: píxeles (control, diurno) {'anomaly_pixels': [77, 78], 'discarded_anomaly_pixels': [23, 22]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Llaima|MODIS_TERRA|2026-08-29 01:35: píxeles (control, diurno) {'anomaly_pixels': [68, 68], 'discarded_anomaly_pixels': [32, 32]}, campos distintos ['final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg']
+   admitido (borde, informa): Llaima|MODIS_TERRA|2026-08-30 02:15: píxeles (control, diurno) {'anomaly_pixels': [84, 83], 'discarded_anomaly_pixels': [16, 17]}, campos distintos ['discarded_n_pixels', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'vrp_mir_mw']
+   admitido (borde, informa): NevadosDeChillan|MODIS_AQUA|2026-08-14 07:40: píxeles (control, diurno) {'anomaly_pixels': [70, 69], 'discarded_anomaly_pixels': [30, 31]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): NevadosDeChillan|MODIS_AQUA|2026-08-15 08:15: píxeles (control, diurno) {'anomaly_pixels': [70, 71], 'discarded_anomaly_pixels': [30, 29]}, campos distintos ['discarded_n_pixels', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'vrp_mir_mw']
+   admitido (borde, informa): NevadosDeChillan|MODIS_AQUA|2026-10-06 08:25: píxeles (control, diurno) {'anomaly_pixels': [72, 71], 'discarded_anomaly_pixels': [28, 29]}, campos distintos ['discarded_n_pixels', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'vrp_mir_mw']
+   admitido (borde, informa): NevadosDeChillan|MODIS_TERRA|2026-08-14 01:40: píxeles (control, diurno) {'anomaly_pixels': [75, 76], 'discarded_anomaly_pixels': [25, 24]}, campos distintos ['discarded_n_pixels', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'vrp_mir_mw']
+   admitido (borde, informa): NevadosDeChillan|MODIS_TERRA|2026-09-01 01:55: píxeles (control, diurno) {'anomaly_pixels': [84, 86], 'discarded_anomaly_pixels': [16, 14]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): NevadosDeChillan|MODIS_TERRA|2026-10-06 01:45: píxeles (control, diurno) {'anomaly_pixels': [80, 81], 'discarded_anomaly_pixels': [20, 19]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-07-20 08:10: píxeles (control, diurno) {'anomaly_pixels': [73, 72], 'discarded_anomaly_pixels': [27, 28]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-07-22 07:45: píxeles (control, diurno) {'anomaly_pixels': [72, 73], 'discarded_anomaly_pixels': [28, 27]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-07-23 08:25: píxeles (control, diurno) {'anomaly_pixels': [78, 74], 'discarded_anomaly_pixels': [22, 26]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-07-24 07:25: píxeles (control, diurno) {'anomaly_pixels': [56, 57], 'discarded_anomaly_pixels': [44, 43]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-07-25 08:00: píxeles (control, diurno) {'anomaly_pixels': [82, 80], 'discarded_anomaly_pixels': [18, 20]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-07-27 07:40: píxeles (control, diurno) {'anomaly_pixels': [82, 84], 'discarded_anomaly_pixels': [18, 16]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-07-28 08:20: píxeles (control, diurno) {'anomaly_pixels': [74, 71], 'discarded_anomaly_pixels': [26, 29]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-07-29 07:20: píxeles (control, diurno) {'anomaly_pixels': [67, 67]}, campos distintos []
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-07-30 07:55: píxeles (control, diurno) {'anomaly_pixels': [78, 78], 'discarded_anomaly_pixels': [22, 22]}, campos distintos []
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-08-14 07:35: píxeles (control, diurno) {'anomaly_pixels': [83, 83], 'discarded_anomaly_pixels': [17, 17]}, campos distintos []
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-08-15 08:15: píxeles (control, diurno) {'anomaly_pixels': [78, 81], 'discarded_anomaly_pixels': [22, 19]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-08-17 07:55: píxeles (control, diurno) {'anomaly_pixels': [81, 81], 'discarded_anomaly_pixels': [19, 19]}, campos distintos []
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-08-19 07:30: píxeles (control, diurno) {'anomaly_pixels': [74, 74]}, campos distintos []
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-08-22 07:45: píxeles (control, diurno) {'anomaly_pixels': [73, 74], 'discarded_anomaly_pixels': [27, 26]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-09-01 07:35: píxeles (control, diurno) {'anomaly_pixels': [80, 80], 'discarded_anomaly_pixels': [20, 20]}, campos distintos []
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-09-02 08:10: píxeles (control, diurno) {'anomaly_pixels': [66, 67], 'discarded_anomaly_pixels': [34, 33]}, campos distintos ['discarded_n_pixels', 'final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-09-04 07:50: píxeles (control, diurno) {'anomaly_pixels': [73, 74], 'discarded_anomaly_pixels': [27, 26]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-09-07 08:05: píxeles (control, diurno) {'anomaly_pixels': [68, 67], 'discarded_anomaly_pixels': [32, 33]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_AQUA|2026-09-09 07:45: píxeles (control, diurno) {'anomaly_pixels': [72, 74], 'discarded_anomaly_pixels': [28, 26]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_TERRA|2026-07-20 01:45: píxeles (control, diurno) {'anomaly_pixels': [67, 66], 'discarded_anomaly_pixels': [33, 34]}, campos distintos ['discarded_n_pixels', 'final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_TERRA|2026-07-23 02:05: píxeles (control, diurno) {'anomaly_pixels': [80, 80]}, campos distintos []
+   admitido (borde, informa): Tupungatito|MODIS_TERRA|2026-07-24 01:05: píxeles (control, diurno) {'anomaly_pixels': [72, 72]}, campos distintos []
+   admitido (borde, informa): Tupungatito|MODIS_TERRA|2026-07-25 01:45: píxeles (control, diurno) {'anomaly_pixels': [73, 77], 'discarded_anomaly_pixels': [27, 23]}, campos distintos ['discarded_n_pixels', 'final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_TERRA|2026-07-27 01:25: píxeles (control, diurno) {'anomaly_pixels': [72, 76], 'discarded_anomaly_pixels': [28, 24]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_TERRA|2026-07-28 02:05: píxeles (control, diurno) {'anomaly_pixels': [69, 71], 'discarded_anomaly_pixels': [31, 29]}, campos distintos ['discarded_n_pixels', 'vrp_mir_mw']
+   admitido (borde, informa): Tupungatito|MODIS_TERRA|2026-07-30 01:45: píxeles (control, diurno) {'anomaly_pixels': [79, 79]}, campos distintos []
+   admitido (borde, informa): Tupungatito|MODIS_TERRA|2026-08-16 01:20: píxeles (control, diurno) {'anomaly_pixels': [80, 80]}, campos distintos []
+   admitido (hotspot_escena, informa): Copahue|MODIS_AQUA|2026-06-18 07:30: píxeles (control, diurno) iguales como conjunto, campos distintos ['discarded_reason', 'final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'final_hotspot_source', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'vrp_mw']
+   admitido (hotspot_escena, informa): Lascar|MODIS_TERRA|2026-07-22 01:30: píxeles (control, diurno) iguales como conjunto, campos distintos ['hotspot_dist_km', 'hotspot_lat', 'hotspot_lon']
+   admitido (hotspot_escena, informa): PuyehueCordonCaulle|MODIS_TERRA|2026-06-18 02:15: píxeles (control, diurno) iguales como conjunto, campos distintos ['final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg']
+   admitido (hotspot_escena, informa): Tupungatito|MODIS_TERRA|2026-08-17 02:00: píxeles (control, diurno) iguales como conjunto, campos distintos ['hotspot_dist_km', 'hotspot_lat', 'hotspot_lon']
+   campos excluidos de la comparación: ('updated', 'processed_utc', 'regimen', 'first_processed_utc') (first_processed_utc agregado, ver PREGUNTAS del pre-registro)
+
+== 8. G1 Y G2 (regla de alertas mínimas: original, la que decide)
+   G1 W2 a W6 (decide)           M1  78.1 % - q_neg  59.4 % = +0.1874 | p95 del nulo barajado +0.2503 (mediana +0.1874) | 32 positivos, 4683 negativos procesados -> FALLA
+      cola exacta (adenda K §3.1): P(nulo >= D) = 0.5166 | p95 exacto +0.2503 | decide: cola exacta
+   G1 W3 a W6 (sin W2, decide)   M1  85.0 % - q_neg  61.3 % = +0.2370 | p95 del nulo barajado +0.2370 (mediana +0.1364) | 20 positivos, 3587 negativos procesados -> FALLA
+      cola exacta (adenda K §3.1): P(nulo >= D) = 0.1025 | p95 exacto +0.2370 | decide: cola exacta
+   G1 W1 (informa, A119)         SIN DATOS
+   controles del nulo (§5.5): cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.045 contra 0.049 exacto (± 0.021) | brazo que publica sólo en positivos pasa G1: sí -> OK
+   G2 VIIRS375 publica en 2234 de 2511 pasadas diurnas de la tabla procesadas | p_MIROVA 13/2511 = 0.0052 (Clopper-Pearson 95 % [0.0028, 0.0088]) | P(X >= 2234) = 0 | falla desde 20 -> FALLA
+   G2 VIIRS750 publica en 739 de 2466 pasadas diurnas de la tabla procesadas | p_MIROVA 2/2483 = 0.0008 (Clopper-Pearson 95 % [0.0001, 0.0029]) | P(X >= 739) = 0 | falla desde 6 -> FALLA
+
+== 9. M4: alertas protegidas recuperadas contra publicaciones en negativos diurnos limpios (por sensor y ventana)
+   W2 VIIRS375 recuperadas   8 | agregadas en negativos limpios  453
+      recuperada: Lascar|VIIRS375|2026-06-24 17:36
+      recuperada: Lascar|VIIRS375|2026-06-24 18:00
+      recuperada: Lascar|VIIRS375|2026-06-28 17:30
+      recuperada: Lascar|VIIRS375|2026-06-28 18:24
+      recuperada: Lastarria|VIIRS375|2026-06-28 17:30
+      recuperada: Lastarria|VIIRS375|2026-06-28 18:06
+      recuperada: Lastarria|VIIRS375|2026-06-28 18:24
+      recuperada: Lastarria|VIIRS375|2026-06-29 17:42
+      agregada:   Chaiten|VIIRS375|2026-06-13 18:00
+      agregada:   Chaiten|VIIRS375|2026-06-13 19:36
+      agregada:   Chaiten|VIIRS375|2026-06-14 17:42
+      agregada:   Chaiten|VIIRS375|2026-06-14 19:18
+      agregada:   Chaiten|VIIRS375|2026-06-15 18:06
+      agregada:   Chaiten|VIIRS375|2026-06-15 18:42
+      agregada:   Chaiten|VIIRS375|2026-06-15 19:00
+      agregada:   Chaiten|VIIRS375|2026-06-15 19:48
+      agregada:   Chaiten|VIIRS375|2026-06-16 18:42
+      agregada:   Chaiten|VIIRS375|2026-06-16 19:30
+      agregada:   Chaiten|VIIRS375|2026-06-16 20:06
+      agregada:   Chaiten|VIIRS375|2026-06-17 18:24
+      agregada:   Chaiten|VIIRS375|2026-06-18 18:54
+      agregada:   Chaiten|VIIRS375|2026-06-18 19:42
+      agregada:   Chaiten|VIIRS375|2026-06-20 18:48
+      (y 438 agregadas más, en el JSON)
+   W2 VIIRS750 recuperadas   0 | agregadas en negativos limpios  129
+      agregada:   Chaiten|VIIRS750|2026-06-13 18:00
+      agregada:   Chaiten|VIIRS750|2026-06-13 19:36
+      agregada:   Chaiten|VIIRS750|2026-06-14 18:24
+      agregada:   Chaiten|VIIRS750|2026-06-14 19:18
+      agregada:   Chaiten|VIIRS750|2026-06-15 19:00
+      agregada:   Chaiten|VIIRS750|2026-06-16 18:42
+      agregada:   Chaiten|VIIRS750|2026-06-16 19:30
+      agregada:   Chaiten|VIIRS750|2026-06-20 19:06
+      agregada:   Chaiten|VIIRS750|2026-06-21 18:48
+      agregada:   Chaiten|VIIRS750|2026-06-22 19:18
+      agregada:   Chaiten|VIIRS750|2026-06-24 18:36
+      agregada:   Chaiten|VIIRS750|2026-06-24 19:12
+      agregada:   Chaiten|VIIRS750|2026-06-27 19:24
+      agregada:   Chaiten|VIIRS750|2026-06-30 17:42
+      agregada:   Chaiten|VIIRS750|2026-06-30 19:18
+      (y 114 agregadas más, en el JSON)
+   W3 VIIRS375 recuperadas   1 | agregadas en negativos limpios  347
+      recuperada: Isluga|VIIRS375|2026-07-25 17:24
+      agregada:   Chaiten|VIIRS375|2026-07-20 17:48
+      agregada:   Chaiten|VIIRS375|2026-07-20 18:06
+      agregada:   Chaiten|VIIRS375|2026-07-20 19:48
+      agregada:   Chaiten|VIIRS375|2026-07-21 17:48
+      agregada:   Chaiten|VIIRS375|2026-07-21 18:30
+      agregada:   Chaiten|VIIRS375|2026-07-21 19:06
+      agregada:   Chaiten|VIIRS375|2026-07-23 17:54
+      agregada:   Chaiten|VIIRS375|2026-07-23 18:30
+      agregada:   Chaiten|VIIRS375|2026-07-23 18:48
+      agregada:   Chaiten|VIIRS375|2026-07-23 19:36
+      agregada:   Chaiten|VIIRS375|2026-07-23 20:12
+      agregada:   Chaiten|VIIRS375|2026-07-24 17:36
+      agregada:   Chaiten|VIIRS375|2026-07-24 18:12
+      agregada:   Chaiten|VIIRS375|2026-07-24 18:30
+      agregada:   Chaiten|VIIRS375|2026-07-24 19:18
+      (y 332 agregadas más, en el JSON)
+   W3 VIIRS750 recuperadas   0 | agregadas en negativos limpios  110
+      agregada:   Chaiten|VIIRS750|2026-07-20 18:06
+      agregada:   Chaiten|VIIRS750|2026-07-21 17:48
+      agregada:   Chaiten|VIIRS750|2026-07-21 18:30
+      agregada:   Chaiten|VIIRS750|2026-07-21 19:06
+      agregada:   Chaiten|VIIRS750|2026-07-22 19:06
+      agregada:   Chaiten|VIIRS750|2026-07-23 17:54
+      agregada:   Chaiten|VIIRS750|2026-07-23 18:30
+      agregada:   Chaiten|VIIRS750|2026-07-23 18:48
+      agregada:   Chaiten|VIIRS750|2026-07-24 18:30
+      agregada:   Chaiten|VIIRS750|2026-07-27 18:18
+      agregada:   Chaiten|VIIRS750|2026-07-27 18:54
+      agregada:   Chaiten|VIIRS750|2026-07-30 18:00
+      agregada:   Chaiten|VIIRS750|2026-07-30 19:42
+      agregada:   Chaiten|VIIRS750|2026-07-31 17:42
+      agregada:   Copahue|VIIRS750|2026-07-20 18:06
+      (y 95 agregadas más, en el JSON)
+   W4 VIIRS375 recuperadas   4 | agregadas en negativos limpios  445
+      recuperada: Lascar|VIIRS375|2026-08-27 17:42
+      recuperada: PuyehueCordonCaulle|VIIRS375|2026-08-20 17:30
+      recuperada: Villarrica|VIIRS375|2026-08-17 19:06
+      recuperada: Villarrica|VIIRS375|2026-08-21 18:54
+      agregada:   Chaiten|VIIRS375|2026-08-13 18:00
+      agregada:   Chaiten|VIIRS375|2026-08-13 20:18
+      agregada:   Chaiten|VIIRS375|2026-08-14 17:42
+      agregada:   Chaiten|VIIRS375|2026-08-14 18:36
+      agregada:   Chaiten|VIIRS375|2026-08-14 19:24
+      agregada:   Chaiten|VIIRS375|2026-08-14 20:00
+      agregada:   Chaiten|VIIRS375|2026-08-16 17:42
+      agregada:   Chaiten|VIIRS375|2026-08-16 18:00
+      agregada:   Chaiten|VIIRS375|2026-08-16 19:24
+      agregada:   Chaiten|VIIRS375|2026-08-16 19:42
+      agregada:   Chaiten|VIIRS375|2026-08-17 18:24
+      agregada:   Chaiten|VIIRS375|2026-08-17 19:00
+      agregada:   Chaiten|VIIRS375|2026-08-17 19:24
+      agregada:   Chaiten|VIIRS375|2026-08-19 18:42
+      agregada:   Chaiten|VIIRS375|2026-08-19 19:30
+      (y 430 agregadas más, en el JSON)
+   W4 VIIRS750 recuperadas   1 | agregadas en negativos limpios  155
+      recuperada: Tupungatito|VIIRS750|2026-08-20 17:30
+      agregada:   Chaiten|VIIRS750|2026-08-14 19:24
+      agregada:   Chaiten|VIIRS750|2026-08-20 19:48
+      agregada:   Chaiten|VIIRS750|2026-08-20 20:06
+      agregada:   Chaiten|VIIRS750|2026-08-21 17:48
+      agregada:   Chaiten|VIIRS750|2026-08-21 19:48
+      agregada:   Chaiten|VIIRS750|2026-08-23 18:48
+      agregada:   Chaiten|VIIRS750|2026-08-26 19:54
+      agregada:   Chaiten|VIIRS750|2026-08-29 20:18
+      agregada:   Chaiten|VIIRS750|2026-08-30 17:42
+      agregada:   Chaiten|VIIRS750|2026-08-30 18:18
+      agregada:   Copahue|VIIRS750|2026-08-15 18:18
+      agregada:   Copahue|VIIRS750|2026-08-15 19:06
+      agregada:   Copahue|VIIRS750|2026-08-16 19:24
+      agregada:   Copahue|VIIRS750|2026-08-20 19:48
+      agregada:   Copahue|VIIRS750|2026-08-26 18:12
+      (y 140 agregadas más, en el JSON)
+   W5 VIIRS375 recuperadas   4 | agregadas en negativos limpios  491
+      recuperada: Chaiten|VIIRS375|2026-09-11 18:12
+      recuperada: Isluga|VIIRS375|2026-09-14 18:42
+      recuperada: Lascar|VIIRS375|2026-09-19 17:30
+      recuperada: Villarrica|VIIRS375|2026-09-18 19:06
+      agregada:   Chaiten|VIIRS375|2026-09-01 17:42
+      agregada:   Chaiten|VIIRS375|2026-09-01 19:42
+      agregada:   Chaiten|VIIRS375|2026-09-02 17:42
+      agregada:   Chaiten|VIIRS375|2026-09-02 18:24
+      agregada:   Chaiten|VIIRS375|2026-09-02 19:24
+      agregada:   Chaiten|VIIRS375|2026-09-03 19:06
+      agregada:   Chaiten|VIIRS375|2026-09-03 19:48
+      agregada:   Chaiten|VIIRS375|2026-09-04 18:42
+      agregada:   Chaiten|VIIRS375|2026-09-04 19:30
+      agregada:   Chaiten|VIIRS375|2026-09-04 20:06
+      agregada:   Chaiten|VIIRS375|2026-09-05 19:12
+      agregada:   Chaiten|VIIRS375|2026-09-05 20:06
+      agregada:   Chaiten|VIIRS375|2026-09-06 17:48
+      agregada:   Chaiten|VIIRS375|2026-09-06 19:30
+      agregada:   Chaiten|VIIRS375|2026-09-06 19:48
+      (y 476 agregadas más, en el JSON)
+   W5 VIIRS750 recuperadas   0 | agregadas en negativos limpios  163
+      agregada:   Chaiten|VIIRS750|2026-09-01 18:48
+      agregada:   Chaiten|VIIRS750|2026-09-01 19:42
+      agregada:   Chaiten|VIIRS750|2026-09-02 19:00
+      agregada:   Chaiten|VIIRS750|2026-09-05 18:24
+      agregada:   Chaiten|VIIRS750|2026-09-06 19:48
+      agregada:   Chaiten|VIIRS750|2026-09-07 18:30
+      agregada:   Chaiten|VIIRS750|2026-09-07 19:30
+      agregada:   Chaiten|VIIRS750|2026-09-10 18:12
+      agregada:   Chaiten|VIIRS750|2026-09-14 19:00
+      agregada:   Chaiten|VIIRS750|2026-09-15 18:36
+      agregada:   Chaiten|VIIRS750|2026-09-16 18:00
+      agregada:   Chaiten|VIIRS750|2026-09-16 19:06
+      agregada:   Chaiten|VIIRS750|2026-09-17 18:00
+      agregada:   Chaiten|VIIRS750|2026-09-17 18:48
+      agregada:   Chaiten|VIIRS750|2026-09-17 19:42
+      (y 148 agregadas más, en el JSON)
+   W6 VIIRS375 recuperadas   5 | agregadas en negativos limpios  339
+      recuperada: NevadosDeChillan|VIIRS375|2026-10-01 18:42
+      recuperada: NevadosDeChillan|VIIRS375|2026-10-08 19:30
+      recuperada: NevadosDeChillan|VIIRS375|2026-10-10 18:18
+      recuperada: NevadosDeChillan|VIIRS375|2026-10-10 18:54
+      recuperada: NevadosDeChillan|VIIRS375|2026-10-11 19:36
+      agregada:   Chaiten|VIIRS375|2026-10-01 18:36
+      agregada:   Chaiten|VIIRS375|2026-10-01 19:24
+      agregada:   Chaiten|VIIRS375|2026-10-01 20:00
+      agregada:   Chaiten|VIIRS375|2026-10-02 18:00
+      agregada:   Chaiten|VIIRS375|2026-10-02 18:18
+      agregada:   Chaiten|VIIRS375|2026-10-02 20:00
+      agregada:   Chaiten|VIIRS375|2026-10-03 18:00
+      agregada:   Chaiten|VIIRS375|2026-10-03 18:48
+      agregada:   Chaiten|VIIRS375|2026-10-03 19:24
+      agregada:   Chaiten|VIIRS375|2026-10-03 19:42
+      agregada:   Chaiten|VIIRS375|2026-10-04 17:42
+      agregada:   Chaiten|VIIRS375|2026-10-05 19:06
+      agregada:   Chaiten|VIIRS375|2026-10-05 19:48
+      agregada:   Chaiten|VIIRS375|2026-10-06 20:06
+      agregada:   Chaiten|VIIRS375|2026-10-07 17:30
+      (y 324 agregadas más, en el JSON)
+   W6 VIIRS750 recuperadas   2 | agregadas en negativos limpios  149
+      recuperada: NevadosDeChillan|VIIRS750|2026-10-01 18:42
+      recuperada: NevadosDeChillan|VIIRS750|2026-10-10 18:18
+      agregada:   Chaiten|VIIRS750|2026-10-01 19:24
+      agregada:   Chaiten|VIIRS750|2026-10-01 20:00
+      agregada:   Chaiten|VIIRS750|2026-10-03 18:00
+      agregada:   Chaiten|VIIRS750|2026-10-03 18:48
+      agregada:   Chaiten|VIIRS750|2026-10-03 19:24
+      agregada:   Chaiten|VIIRS750|2026-10-04 19:24
+      agregada:   Chaiten|VIIRS750|2026-10-05 19:06
+      agregada:   Chaiten|VIIRS750|2026-10-08 18:06
+      agregada:   Chaiten|VIIRS750|2026-10-08 18:54
+      agregada:   Chaiten|VIIRS750|2026-10-08 19:30
+      agregada:   Chaiten|VIIRS750|2026-10-09 18:30
+      agregada:   Chaiten|VIIRS750|2026-10-09 19:12
+      agregada:   Chaiten|VIIRS750|2026-10-09 19:30
+      agregada:   Chaiten|VIIRS750|2026-10-10 18:48
+      agregada:   Chaiten|VIIRS750|2026-10-11 19:36
+      (y 134 agregadas más, en el JSON)
+   (informa) publicaciones diurnas del brazo diurno dentro de las ventanas sin pasada de la tabla ni positivo a 120 s: {'VIIRS375': 1220, 'VIIRS750': 494}
+
+== 10. M5 (informa, NO entra al criterio): publicación del CONTROL en negativos limpios nocturnos, etiquetados con la rama diurna apagada
+   W2 a W6  MODIS  12.4 % (230/1862) | VIIRS375  88.8 % (1370/1543) | VIIRS750  22.2 % (528/2375)
+
+== 11. AVISOS (informan, no cambian el veredicto)
+   poder (§5.6): con 32 positivos y q_neg  59.4 % la desviación de M1 bajo azar es ~0.087
+   SATURACIÓN (A114) VIIRS375: q_neg  89.2 % (2075/2325) en la banda del Test 1 encendido; en ese sensor el A/B no puede decidir nada sobre la Tabla 1 diurna
+   M1 sube de 0 a  78.1 %: mejora de más de 30 %, exige auditoría independiente antes de aceptarla
+
+== 12. REGLA DE ALERTAS MÍNIMAS D-9 (informa; decide «original»)
+
+== 12.SN regla SN (INFORMA)
+   G1 W2 a W6 (decide)           M1  78.1 % - q_neg  59.4 % = +0.1874 | p95 del nulo barajado +0.2503 (mediana +0.1874) | 32 positivos, 4683 negativos procesados -> FALLA
+      cola exacta (adenda K §3.1): P(nulo >= D) = 0.5166 | p95 exacto +0.2503 | decide: cola exacta
+   G1 W3 a W6 (sin W2, decide)   M1  85.0 % - q_neg  61.3 % = +0.2370 | p95 del nulo barajado +0.2370 (mediana +0.1364) | 20 positivos, 3587 negativos procesados -> FALLA
+      cola exacta (adenda K §3.1): P(nulo >= D) = 0.1025 | p95 exacto +0.2370 | decide: cola exacta
+   G1 W1 (informa, A119)         SIN DATOS
+   controles del nulo (§5.5): cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.045 contra 0.049 exacto (± 0.021) | brazo que publica sólo en positivos pasa G1: sí -> OK
+   G2 VIIRS375 publica en 2234 de 2511 pasadas diurnas de la tabla procesadas | p_MIROVA 13/2511 = 0.0052 (Clopper-Pearson 95 % [0.0028, 0.0088]) | P(X >= 2234) = 0 | falla desde 20 -> FALLA
+   G2 VIIRS750 publica en 739 de 2466 pasadas diurnas de la tabla procesadas | p_MIROVA 2/2483 = 0.0008 (Clopper-Pearson 95 % [0.0001, 0.0029]) | P(X >= 739) = 0 | falla desde 6 -> FALLA
+   veredicto con SN: NO ADOPTAR (G1 falla en W2 a W6: FALLA)
+
+== 12.SE regla SE (INFORMA)
+   G1 W2 a W6 (decide)           M1  78.1 % - q_neg  59.4 % = +0.1874 | p95 del nulo barajado +0.2503 (mediana +0.1874) | 32 positivos, 4683 negativos procesados -> FALLA
+      cola exacta (adenda K §3.1): P(nulo >= D) = 0.5166 | p95 exacto +0.2503 | decide: cola exacta
+   G1 W3 a W6 (sin W2, decide)   M1  85.0 % - q_neg  61.3 % = +0.2370 | p95 del nulo barajado +0.2370 (mediana +0.1364) | 20 positivos, 3587 negativos procesados -> FALLA
+      cola exacta (adenda K §3.1): P(nulo >= D) = 0.1025 | p95 exacto +0.2370 | decide: cola exacta
+   G1 W1 (informa, A119)         SIN DATOS
+   controles del nulo (§5.5): cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.045 contra 0.049 exacto (± 0.021) | brazo que publica sólo en positivos pasa G1: sí -> OK
+   G2 VIIRS375 publica en 2234 de 2511 pasadas diurnas de la tabla procesadas | p_MIROVA 13/2511 = 0.0052 (Clopper-Pearson 95 % [0.0028, 0.0088]) | P(X >= 2234) = 0 | falla desde 20 -> FALLA
+   G2 VIIRS750 publica en 739 de 2466 pasadas diurnas de la tabla procesadas | p_MIROVA 2/2483 = 0.0008 (Clopper-Pearson 95 % [0.0001, 0.0029]) | P(X >= 739) = 0 | falla desde 6 -> FALLA
+   veredicto con SE: NO ADOPTAR (G1 falla en W2 a W6: FALLA)
+
+== VEREDICTO (§6 con la adenda K): NO ADOPTAR (G1 falla en W2 a W6: FALLA)
+
+--- stderr (ultimas 40 lineas)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-07-20 a 2026-07-31 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-13 a 2026-08-31 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-13 a 2026-08-31 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-09-01 a 2026-09-20 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-09-01 a 2026-09-20 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-10-01 a 2026-10-14 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-10-01 a 2026-10-14 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-06-13 a 2026-06-30 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-07-20 a 2026-07-31 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-13 a 2026-08-31 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-09-01 a 2026-09-20 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-10-01 a 2026-10-14 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+rc=0

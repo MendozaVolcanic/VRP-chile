@@ -1,0 +1,178 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-03-01 a 2026-03-20 pisa 7 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-03-01 a 2026-03-20 pisa 7 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-06-13 a 2026-06-30 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-06-13 a 2026-06-30 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-07-20 a 2026-07-31 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-07-20 a 2026-07-31 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-13 a 2026-08-31 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-13 a 2026-08-31 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-09-01 a 2026-09-20 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-09-01 a 2026-09-20 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-10-01 a 2026-10-14 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-10-01 a 2026-10-14 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+== A/B DIURNO DE VIIRS (D-10) | raíces ['C:\\Users\\nmend\\AppData\\Local\\Temp\\claude\\C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile\\cff03576-753b-42f8-9fbe-94d701ccca96\\scratchpad\\w1\\W1_union']
+   predicado del tablero: frontend/index.html sha256 95b21f7fa3224d3efbe3e409c672c43a3fd98097264ec650b80ba06f806ba646
+   referencia: consolidado registro_vrp_consolidado.csv sha256 9f8542374de2ea50 | ocr registro_vrp_ocr.csv sha256 01d93f6d53f012e4 | respaldo registro_vrp_consolidado_respaldo_20260408.csv sha256 183aff7f38c6ca9e | historico consolidado_filas_perdidas.csv sha256 5a68bd7fb4c38604
+   ventanas con los dos brazos: ['W1'] | records control 183, diurno 330 (pasadas repetidas entre raíces, gana la última: 0/0)
+
+== 1. CABLEADO (línea FLAGS_BRAZO de cada job, A89; ningún VIIRS saltado por diurno en el brazo diurno, A118)
+   control  OK
+   diurno   OK
+   fuera de la palanca los dos brazos leyeron lo mismo: OK
+
+== 2. NULO 1 (§5.1, por sensor): records diurnos con umbrales diurnos en el brazo diurno, ninguno en el control
+   W1: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 74, 'VIIRS750': 73}, 0 MODIS diurnos | control 0 diurnos -> OK
+
+== 3. REFERENCIA: la base que se lee reproduce sustrato.json del pre-registro? SÍ
+
+== 4. ÍNDICE (banco_paridad.indexar_referencia con la rama diurna encendida mientras indexa; A118)
+   W1: flag encendido, el índice ve 77 de 77 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+   W2: flag encendido, el índice ve 1201 de 1201 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+   W3: flag encendido, el índice ve 835 de 835 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+   W4: flag encendido, el índice ve 1069 de 1069 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+   W5: flag encendido, el índice ve 1129 de 1129 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+   W6: flag encendido, el índice ve 784 de 784 pasadas del universo | flag apagado, filas VIIRS diurnas indexadas: 0
+
+== 5. COBERTURA DIURNA (§5.4): positivos y pasadas diurnas de la tabla en el brazo diurno
+   W   sensor   positivos: no proc/sin pub/pub tabla: no proc/sin pub/pub   motivo en el log de las no procesadas
+   W1  VIIRS375 0/0/5 de 5                   3/7/27 de 37                 {'sin rastro en el log': 3}
+   W1  VIIRS750 0/0/0 de 0                   4/33/3 de 40                 {'sin rastro en el log': 4}
+
+== 6. MÉTRICAS (§4; denominadores = pasadas PROCESADAS por el brazo diurno)
+   ventanas                 sensor    M1 recall diurno         M2 q_neg                 M3 q_dia                
+   W2 a W6                  ambos       -   (0/0)                -   (0/0)                -   (0/0)             
+   W2 a W6 Láscar           ambos       -   (0/0)                -   (0/0)                -   (0/0)             
+   W2 a W6 resto            ambos       -   (0/0)                -   (0/0)                -   (0/0)             
+   W2 a W6                  VIIRS375    -   (0/0)                -   (0/0)                -   (0/0)             
+   W2 a W6 Láscar           VIIRS375    -   (0/0)                -   (0/0)                -   (0/0)             
+   W2 a W6 resto            VIIRS375    -   (0/0)                -   (0/0)                -   (0/0)             
+   W2 a W6                  VIIRS750    -   (0/0)                -   (0/0)                -   (0/0)             
+   W2 a W6 Láscar           VIIRS750    -   (0/0)                -   (0/0)                -   (0/0)             
+   W2 a W6 resto            VIIRS750    -   (0/0)                -   (0/0)                -   (0/0)             
+   W3 a W6 (sin W2)         ambos       -   (0/0)                -   (0/0)                -   (0/0)             
+   W3 a W6 (sin W2) Láscar  ambos       -   (0/0)                -   (0/0)                -   (0/0)             
+   W3 a W6 (sin W2) resto   ambos       -   (0/0)                -   (0/0)                -   (0/0)             
+   W3 a W6 (sin W2)         VIIRS375    -   (0/0)                -   (0/0)                -   (0/0)             
+   W3 a W6 (sin W2) Láscar  VIIRS375    -   (0/0)                -   (0/0)                -   (0/0)             
+   W3 a W6 (sin W2) resto   VIIRS375    -   (0/0)                -   (0/0)                -   (0/0)             
+   W3 a W6 (sin W2)         VIIRS750    -   (0/0)                -   (0/0)                -   (0/0)             
+   W3 a W6 (sin W2) Láscar  VIIRS750    -   (0/0)                -   (0/0)                -   (0/0)             
+   W3 a W6 (sin W2) resto   VIIRS750    -   (0/0)                -   (0/0)                -   (0/0)             
+   W1                       ambos     100.0 % (5/5)             33.3 % (14/42)           42.9 % (30/70)         
+   W1 Láscar                ambos     100.0 % (5/5)             33.3 % (14/42)           42.9 % (30/70)         
+   W1 resto                 ambos       -   (0/0)                -   (0/0)                -   (0/0)             
+   W1                       VIIRS375  100.0 % (5/5)             72.2 % (13/18)           79.4 % (27/34)         
+   W1 Láscar                VIIRS375  100.0 % (5/5)             72.2 % (13/18)           79.4 % (27/34)         
+   W1 resto                 VIIRS375    -   (0/0)                -   (0/0)                -   (0/0)             
+   W1                       VIIRS750    -   (0/0)                4.2 % (1/24)             8.3 % (3/36)          
+   W1 Láscar                VIIRS750    -   (0/0)                4.2 % (1/24)             8.3 % (3/36)          
+   W1 resto                 VIIRS750    -   (0/0)                -   (0/0)                -   (0/0)             
+
+== 7. G3, NOCHES INTACTAS (nulos 2 y 3): records nocturnos control 183, diurno 183 | faltan 0, sobran 0 [] | versión de producto o gránulo distintos 0 | campos distintos {'diag_mu_deti': 179, 'diag_sd_deti': 170} ["Lascar|MODIS_AQUA|2026-03-01 07:00: ['diag_mu_deti', 'diag_sd_deti']", "Lascar|MODIS_AQUA|2026-03-02 07:40: ['diag_mu_deti', 'diag_sd_deti']", "Lascar|MODIS_AQUA|2026-03-04 07:15: ['diag_mu_deti', 'diag_sd_deti']", "Lascar|MODIS_AQUA|2026-03-05 07:55: ['diag_mu_deti', 'diag_sd_deti']", "Lascar|MODIS_AQUA|2026-03-06 06:55: ['diag_mu_deti', 'diag_sd_deti']"] -> FALLA (noches distintas campo a campo: defecto del cableado)
+   campos excluidos de la comparación: ('updated', 'processed_utc', 'regimen', 'first_processed_utc') (first_processed_utc agregado, ver PREGUNTAS del pre-registro)
+
+== 8. G1 Y G2 (regla de alertas mínimas: original, la que decide)
+   G1 W2 a W6 (decide)           SIN SUSTRATO
+   G1 W3 a W6 (sin W2, decide)   SIN SUSTRATO
+   G1 W1 (informa, A119)         M1 100.0 % - q_neg  33.3 % = +0.6667 | p95 del nulo barajado +0.6667 (mediana +0.4429) | 5 positivos, 42 negativos procesados -> FALLA
+   controles del nulo (§5.5): sin sustrato para controlar el nulo -> FALLA
+   G2 VIIRS375 publica en 0 de 0 pasadas diurnas de la tabla procesadas | p_MIROVA 13/2511 = 0.0052 (Clopper-Pearson 95 % [0.0028, 0.0088]) | P(X >= 0) = - | falla desde None -> SIN SUSTRATO
+   G2 VIIRS750 publica en 0 de 0 pasadas diurnas de la tabla procesadas | p_MIROVA 2/2483 = 0.0008 (Clopper-Pearson 95 % [0.0001, 0.0029]) | P(X >= 0) = - | falla desde None -> SIN SUSTRATO
+
+== 9. M4: alertas protegidas recuperadas contra publicaciones en negativos diurnos limpios (por sensor y ventana)
+   W1 VIIRS375 recuperadas   5 | agregadas en negativos limpios   13
+      recuperada: Lascar|VIIRS375|2026-03-07 18:42
+      recuperada: Lascar|VIIRS375|2026-03-13 18:06
+      recuperada: Lascar|VIIRS375|2026-03-13 18:24
+      recuperada: Lascar|VIIRS375|2026-03-14 18:06
+      recuperada: Lascar|VIIRS375|2026-03-19 18:12
+      agregada:   Lascar|VIIRS375|2026-03-02 18:12
+      agregada:   Lascar|VIIRS375|2026-03-03 18:12
+      agregada:   Lascar|VIIRS375|2026-03-04 17:36
+      agregada:   Lascar|VIIRS375|2026-03-04 17:54
+      agregada:   Lascar|VIIRS375|2026-03-05 17:36
+      agregada:   Lascar|VIIRS375|2026-03-09 18:00
+      agregada:   Lascar|VIIRS375|2026-03-10 17:42[referencia MIROVA] la ventana 2026-03-01 a 2026-03-20 pisa 7 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+
+      agregada:   Lascar|VIIRS375|2026-03-11 19:06
+      agregada:   Lascar|VIIRS375|2026-03-16 17:30
+      agregada:   Lascar|VIIRS375|2026-03-17 18:54
+      agregada:   Lascar|VIIRS375|2026-03-18 18:12
+      agregada:   Lascar|VIIRS375|2026-03-18 18:36
+      agregada:   Lascar|VIIRS375|2026-03-20 19:18
+   W1 VIIRS750 recuperadas   0 | agregadas en negativos limpios    1
+      agregada:   Lascar|VIIRS750|2026-03-20 17:54
+   (informa) publicaciones diurnas del brazo diurno dentro de las ventanas sin pasada de la tabla ni positivo a 120 s: {'VIIRS375': 30, 'VIIRS750': 2}
+
+== 10. M5 (informa, NO entra al criterio): publicación del CONTROL en negativos limpios nocturnos, etiquetados con la rama diurna apagada
+   W1       MODIS   0.0 % (0/5) | VIIRS375   -   (0/0) | VIIRS750   0.0 % (0/3)
+
+== 11. AVISOS (informan, no cambian el veredicto)
+
+== 12. REGLA DE ALERTAS MÍNIMAS D-9 (informa; decide «original»)
+
+== 12.SN regla SN (INFORMA)
+   G1 W2 a W6 (decide)           SIN SUSTRATO
+   G1 W3 a W6 (sin W2, decide)   SIN SUSTRATO
+   G1 W1 (informa, A119)         M1 100.0 % - q_neg  33.3 % = +0.6667 | p95 del nulo barajado +0.6667 (mediana +0.4429) | 5 positivos, 42 negativos procesados -> FALLA
+   controles del nulo (§5.5): sin sustrato para controlar el nulo -> FALLA
+   G2 VIIRS375 publica en 0 de 0 pasadas diurnas de la tabla procesadas | p_MIROVA 13/2511 = 0.0052 (Clopper-Pearson 95 % [0.0028, 0.0088]) | P(X >= 0) = - | falla desde None -> SIN SUSTRATO
+   G2 VIIRS750 publica en 0 de 0 pasadas diurnas de la tabla procesadas | p_MIROVA 2/2483 = 0.0008 (Clopper-Pearson 95 % [0.0001, 0.0029]) | P(X >= 0) = - | falla desde None -> SIN SUSTRATO
+   veredicto con SN: INDECIDIBLE (controles del nulo barajado)
+
+== 12.SE regla SE (INFORMA)
+   G1 W2 a W6 (decide)           SIN SUSTRATO
+   G1 W3 a W6 (sin W2, decide)   SIN SUSTRATO
+   G1 W1 (informa, A119)         M1 100.0 % - q_neg  33.3 % = +0.6667 | p95 del nulo barajado +0.6667 (mediana +0.4429) | 5 positivos, 42 negativos procesados -> FALLA
+   controles del nulo (§5.5): sin sustrato para controlar el nulo -> FALLA
+   G2 VIIRS375 publica en 0 de 0 pasadas diurnas de la tabla procesadas | p_MIROVA 13/2511 = 0.0052 (Clopper-Pearson 95 % [0.0028, 0.0088]) | P(X >= 0) = - | falla desde None -> SIN SUSTRATO
+   G2 VIIRS750 publica en 0 de 0 pasadas diurnas de la tabla procesadas | p_MIROVA 2/2483 = 0.0008 (Clopper-Pearson 95 % [0.0001, 0.0029]) | P(X >= 0) = - | falla desde None -> SIN SUSTRATO
+   veredicto con SE: INDECIDIBLE (controles del nulo barajado)
+
+== VEREDICTO (§6, regla original): INDECIDIBLE (controles del nulo barajado)

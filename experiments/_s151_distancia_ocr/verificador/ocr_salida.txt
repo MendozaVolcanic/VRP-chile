@@ -1,0 +1,41 @@
+filas OCR con distancia > 0: 451 | por sensor {'VIIRS375': 426, 'VIIRS': 21, 'MODIS': 4}
+
+######## imagen PRIMERA 1-25 d (variante A)
+tramo | n | VIIRS375 | con imagen | dup tabla (err OCR-tabla med/p90, >2km) | marcador en su columna a la dist OCR | unico n, err med/p90, >2km | intervalo contiene OCR | lado: decididas, cambian | firma otra pasada (tabla posterior / marcador posterior sin propio)
+1 <06-11 | 50 | 46 | 36 | 44 (0.00/0.00, 0) | 23/36 | 7, 0.12/0.49, 0 | 15/16 | 18, 0 (cerca->lejos 0, lejos->cerca 0) | 9 de 13 sin marcador propio (tabla posterior 9, marcador posterior 3)
+      sin_marcador 13, indecidible 5; tipos {'FALSO_POSITIVO_OCR': 50}
+2 06-11..12 | 1 | 1 | 1 | 1 (0.00/0.00, 0) | 1/1 | 1, 0.06/0.06, 0 | 0/0 | 1, 0 (cerca->lejos 0, lejos->cerca 0) | 0 de 0 sin marcador propio (tabla posterior 0, marcador posterior 0)
+      sin_marcador 0, indecidible 0; tipos {'FALSO_POSITIVO_OCR': 1}
+3 06-13..08-05 | 168 | 160 | 160 | 71 (0.06/4.14, 9) | 110/160 | 69, 0.54/14.20, 22 | 57/73 | 124, 21 (cerca->lejos 20, lejos->cerca 1) | 19 de 50 sin marcador propio (tabla posterior 19, marcador posterior 11)
+      sin_marcador 18, indecidible 18; tipos {'ALERTA_TERMICA_OCR': 152, 'FALSO_POSITIVO_OCR': 16}
+4 08-06..10-08 | 220 | 209 | 209 | 117 (0.06/3.75, 18) | 163/209 | 100, 0.13/15.89, 28 | 81/107 | 188, 23 (cerca->lejos 21, lejos->cerca 2) | 9 de 46 sin marcador propio (tabla posterior 6, marcador posterior 9)
+      sin_marcador 2, indecidible 19; tipos {'ALERTA_TERMICA_OCR': 214, 'FALSO_POSITIVO_OCR': 6}
+5 >=10-09 | 12 | 10 | 7 | 10 (0.04/0.19, 0) | 7/7 | 4, 0.01/0.14, 0 | 3/3 | 5, 0 (cerca->lejos 0, lejos->cerca 0) | 0 de 0 sin marcador propio (tabla posterior 0, marcador posterior 0)
+      sin_marcador 0, indecidible 2; tipos {'ALERTA_TERMICA_OCR': 11, 'FALSO_POSITIVO_OCR': 1}
+
+######## imagen MAS RECIENTE 1-25 d (variante C)
+tramo | n | VIIRS375 | con imagen | dup tabla (err OCR-tabla med/p90, >2km) | marcador en su columna a la dist OCR | unico n, err med/p90, >2km | intervalo contiene OCR | lado: decididas, cambian | firma otra pasada (tabla posterior / marcador posterior sin propio)
+1 <06-11 | 50 | 46 | 36 | 44 (0.00/0.00, 0) | 22/36 | 7, 0.07/0.39, 0 | 14/15 | 19, 0 (cerca->lejos 0, lejos->cerca 0) | 10 de 14 sin marcador propio (tabla posterior 10, marcador posterior 3)
+      sin_marcador 14, indecidible 3; tipos {'FALSO_POSITIVO_OCR': 50}
+2 06-11..12 | 1 | 1 | 1 | 1 (0.00/0.00, 0) | 1/1 | 1, 0.06/0.06, 0 | 0/0 | 1, 0 (cerca->lejos 0, lejos->cerca 0) | 0 de 0 sin marcador propio (tabla posterior 0, marcador posterior 0)
+      sin_marcador 0, indecidible 0; tipos {'FALSO_POSITIVO_OCR': 1}
+3 06-13..08-05 | 168 | 160 | 160 | 71 (0.06/4.14, 9) | 117/160 | 72, 0.68/14.70, 24 | 64/80 | 129, 23 (cerca->lejos 23, lejos->cerca 0) | 18 de 43 sin marcador propio (tabla posterior 14, marcador posterior 16)
+      sin_marcador 8, indecidible 23; tipos {'ALERTA_TERMICA_OCR': 152, 'FALSO_POSITIVO_OCR': 16}
+4 08-06..10-08 | 220 | 209 | 209 | 117 (0.06/3.75, 18) | 162/209 | 102, 0.14/15.83, 30 | 78/105 | 188, 25 (cerca->lejos 23, lejos->cerca 2) | 11 de 47 sin marcador propio (tabla posterior 7, marcador posterior 11)
+      sin_marcador 2, indecidible 19; tipos {'ALERTA_TERMICA_OCR': 214, 'FALSO_POSITIVO_OCR': 6}
+5 >=10-09 | 12 | 10 | 7 | 10 (0.04/0.19, 0) | 7/7 | 4, 0.01/0.14, 0 | 3/3 | 5, 0 (cerca->lejos 0, lejos->cerca 0) | 0 de 0 sin marcador propio (tabla posterior 0, marcador posterior 0)
+      sin_marcador 0, indecidible 2; tipos {'ALERTA_TERMICA_OCR': 11, 'FALSO_POSITIVO_OCR': 1}
+
+[A] distancia OCR fuera de la lectura de la serie (km; unico=|dif|, intervalo=distancia al intervalo) por tramo:
+   1 <06-11: n=23 mediana 0.02 p90 0.39 >2km 1 (4.3 %); de las >2km, con firma otra pasada 1
+   2 06-11..12: n=1 mediana 0.06 p90 0.06 >2km 0 (0.0 %); de las >2km, con firma otra pasada 0
+   3 06-13..08-05: n=142 mediana 0.13 p90 8.48 >2km 34 (23.9 %); de las >2km, con firma otra pasada 20
+   4 08-06..10-08: n=207 mediana 0.06 p90 7.88 >2km 49 (23.7 %); de las >2km, con firma otra pasada 21
+   5 >=10-09: n=7 mediana 0.00 p90 0.23 >2km 0 (0.0 %); de las >2km, con firma otra pasada 0
+
+[C] distancia OCR fuera de la lectura de la serie (km; unico=|dif|, intervalo=distancia al intervalo) por tramo:
+   1 <06-11: n=22 mediana 0.07 p90 0.54 >2km 1 (4.5 %); de las >2km, con firma otra pasada 1
+   2 06-11..12: n=1 mediana 0.06 p90 0.06 >2km 0 (0.0 %); de las >2km, con firma otra pasada 0
+   3 06-13..08-05: n=152 mediana 0.12 p90 8.49 >2km 36 (23.7 %); de las >2km, con firma otra pasada 23
+   4 08-06..10-08: n=207 mediana 0.13 p90 8.52 >2km 51 (24.6 %); de las >2km, con firma otra pasada 24
+   5 >=10-09: n=7 mediana 0.00 p90 0.23 >2km 0 (0.0 %); de las >2km, con firma otra pasada 0

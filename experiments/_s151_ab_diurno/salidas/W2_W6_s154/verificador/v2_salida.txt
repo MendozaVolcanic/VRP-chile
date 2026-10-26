@@ -1,0 +1,69 @@
+== 1. pareo propio contra el del evaluador: 5018 pasadas, 0 con estado distinto
+   VIIRS375 pos   total 26 | procesadas 26 | publicadas 22
+   VIIRS375 neg   total 2325 | procesadas 2325 | publicadas 2077
+   VIIRS375 tabla total 2511 | procesadas 2511 | publicadas 2236
+   VIIRS750 pos   total 6 | procesadas 6 | publicadas 3
+   VIIRS750 neg   total 2375 | procesadas 2358 | publicadas 731
+   VIIRS750 tabla total 2483 | procesadas 2466 | publicadas 766
+
+== 2. de qué camino vienen las publicaciones diurnas del brazo diurno (W2 a W6)
+   VIIRS375 pos   publicadas   22 | final_hotspot_source {'test1_roi': 11, 'ctx_cluster': 11} | triggered_test1 22 | con píxeles del primer pase 22
+   VIIRS375 neg   publicadas 2077 | final_hotspot_source {'test1_roi': 987, 'ctx_cluster': 1090} | triggered_test1 2000 | con píxeles del primer pase 1874
+   VIIRS375 tabla publicadas 2236 | final_hotspot_source {'test1_roi': 1094, 'ctx_cluster': 1142} | triggered_test1 2154 | con píxeles del primer pase 2027
+   VIIRS750 pos   publicadas    3 | final_hotspot_source {'ctx_cluster': 3} | triggered_test1 2 | con píxeles del primer pase 3
+   VIIRS750 neg   publicadas  731 | final_hotspot_source {'test1_roi': 389, 'ctx_cluster': 342} | triggered_test1 493 | con píxeles del primer pase 486
+   VIIRS750 tabla publicadas  766 | final_hotspot_source {'test1_roi': 409, 'ctx_cluster': 357} | triggered_test1 520 | con píxeles del primer pase 511
+   VIIRS375 todos los records diurnos publicados: 3473 | fuentes {'test1_roi': 1674, 'ctx_cluster': 1799}
+   VIIRS750 todos los records diurnos publicados: 1291 | fuentes {'ctx_cluster': 610, 'test1_roi': 681}
+
+== 3. contrafactual «sin Test 1»: publicada sólo si el cúmulo publicado es contextual (ctx_cluster)
+   W2 a W6 ambos sensores: M1 14/32 = 0.438 | q_neg 1432/4683 = 0.306
+      VIIRS375: M1 11/26 | q_neg 1090/2325 | G2 tabla 1142 de 2511 (umbral de falla con ese n: 20; P(X>=x) = 0)
+      VIIRS750: M1 3/6 | q_neg 342/2358 | G2 tabla 357 de 2466 (umbral de falla con ese n: 6; P(X>=x) = 0)
+   W3 a W6 ambos sensores: M1 14/20 = 0.700 | q_neg 1189/3587 = 0.331
+      VIIRS375: M1 11/15 | q_neg 874/1817 | G2 tabla 915 de 1938 (umbral de falla con ese n: 16; P(X>=x) = 0)
+      VIIRS750: M1 3/5 | q_neg 315/1770 | G2 tabla 328 de 1853 (umbral de falla con ese n: 5; P(X>=x) = 0)
+   positivos publicados (W2 a W6) y su fuente:
+      Chaiten|VIIRS375|2026-09-11 18:12 | ctx_cluster | pc 0.518 MW a 0.618 km | t1 True | primer pase 33
+      Isluga|VIIRS375|2026-07-25 17:24 | test1_roi | pc 1.071 MW a 2.197 km | t1 True | primer pase 2
+      Isluga|VIIRS375|2026-09-14 18:42 | test1_roi | pc 0.459 MW a 0.944 km | t1 True | primer pase 6
+      Lascar|VIIRS375|2026-06-24 17:36 | test1_roi | pc 0.477 MW a 2.547 km | t1 True | primer pase 13
+      Lascar|VIIRS375|2026-06-24 18:00 | test1_roi | pc 0.604 MW a 2.784 km | t1 True | primer pase 18
+      Lascar|VIIRS375|2026-06-28 17:30 | test1_roi | pc 0.558 MW a 2.876 km | t1 True | primer pase 11
+      Lascar|VIIRS375|2026-06-28 18:24 | test1_roi | pc 0.220 MW a 0.499 km | t1 True | primer pase 20
+      Lascar|VIIRS375|2026-08-27 17:42 | test1_roi | pc 0.518 MW a 1.903 km | t1 True | primer pase 8
+      Lascar|VIIRS375|2026-09-19 17:30 | ctx_cluster | pc 0.365 MW a 1.888 km | t1 True | primer pase 73
+      Lastarria|VIIRS375|2026-06-28 17:30 | test1_roi | pc 0.212 MW a 1.664 km | t1 True | primer pase 5
+      Lastarria|VIIRS375|2026-06-28 18:06 | test1_roi | pc 0.260 MW a 2.084 km | t1 True | primer pase 5
+      Lastarria|VIIRS375|2026-06-28 18:24 | test1_roi | pc 0.268 MW a 1.888 km | t1 True | primer pase 14
+      Lastarria|VIIRS375|2026-06-29 17:42 | test1_roi | pc 0.325 MW a 2.416 km | t1 True | primer pase 11
+      NevadosDeChillan|VIIRS375|2026-10-01 18:42 | ctx_cluster | pc 3.032 MW a 0.577 km | t1 True | primer pase 767
+      NevadosDeChillan|VIIRS375|2026-10-08 19:30 | ctx_cluster | pc 0.708 MW a 2.352 km | t1 True | primer pase 1510
+      NevadosDeChillan|VIIRS375|2026-10-10 18:18 | ctx_cluster | pc 3.074 MW a 0.829 km | t1 True | primer pase 40
+      NevadosDeChillan|VIIRS375|2026-10-10 18:54 | ctx_cluster | pc 4.723 MW a 0.742 km | t1 True | primer pase 65
+      NevadosDeChillan|VIIRS375|2026-10-11 19:36 | ctx_cluster | pc 6.421 MW a 1.143 km | t1 True | primer pase 388
+      NevadosDeChillan|VIIRS750|2026-10-01 18:42 | ctx_cluster | pc 4.302 MW a 0.821 km | t1 True | primer pase 12
+      NevadosDeChillan|VIIRS750|2026-10-10 18:18 | ctx_cluster | pc 3.266 MW a 0.305 km | t1 True | primer pase 6
+      PuyehueCordonCaulle|VIIRS375|2026-08-20 17:30 | ctx_cluster | pc 0.147 MW a 1.699 km | t1 True | primer pase 133
+      Tupungatito|VIIRS750|2026-08-20 17:30 | ctx_cluster | pc 5.000 MW a 6.043 km | t1 False | primer pase 68
+      Villarrica|VIIRS375|2026-08-17 19:06 | ctx_cluster | pc 1.305 MW a 0.051 km | t1 True | primer pase 12
+      Villarrica|VIIRS375|2026-08-21 18:54 | ctx_cluster | pc 1.456 MW a 0.093 km | t1 True | primer pase 14
+      Villarrica|VIIRS375|2026-09-18 19:06 | ctx_cluster | pc 1.833 MW a 0.07 km | t1 True | primer pase 18
+
+== 4. nulo EXACTO de G1 (convolución de hipergeométricas por volcán x sensor)
+   W2 a W6: {'D_obs': 0.18163436899423446, 'X_obs': 25, 'P': 32, 'N': 4683, 'K': 2833, 'media_D': 0.16707601547816336, 'P(nulo>=D)': 0.5222763730360632, 'P(nulo>D)': 0.31390254722979777, 'cuantil95_D': 0.27602498398462527}
+   W2 a W6 contrafactual sin Test 1: {'D_obs': 0.13171311125347002, 'X_obs': 14, 'P': 32, 'N': 4683, 'K': 1446, 'media_D': 0.04749378767292067, 'P(nulo>=D)': 0.19440766942734117, 'P(nulo>D)': 0.10628610523580245, 'cuantil95_D': 0.1946401879137305}
+   W3 a W6: {'D_obs': 0.23026205742960693, 'X_obs': 17, 'P': 20, 'N': 3587, 'K': 2240, 'media_D': 0.10668057079577618, 'P(nulo>=D)': 0.10576798738251672, 'P(nulo>D)': 0.02529488453739089, 'cuantil95_D': 0.23026205742960693}
+   W3 a W6 contrafactual sin Test 1: {'D_obs': 0.3685252299972121, 'X_obs': 14, 'P': 20, 'N': 3587, 'K': 1203, 'media_D': 0.027099799731357, 'P(nulo>=D)': 0.0009673502772073163, 'P(nulo>D)': 0.00015867906888962673, 'cuantil95_D': 0.21768887649846674}
+
+== 5. control, noches, negativos limpios (M5): fuentes de lo publicado
+   MODIS: publica 234 de 1862 | fuentes {'eruption': 163, 'test1': 51, 'cluster_rescue': 20}
+   VIIRS375: publica 1370 de 1543 | fuentes {'test1_roi': 747, 'ctx_cluster': 623}
+   VIIRS750: publica 555 de 2375 | fuentes {'test1_roi': 349, 'ctx_cluster': 206}
+
+== 6. W2 (sólo OCR) contra el resto, contrafactual: positivos publicados por ctx_cluster
+   W2: 12 positivos, publicados 8, por ctx_cluster 0
+   W3: 1 positivos, publicados 1, por ctx_cluster 0
+   W4: 7 positivos, publicados 5, por ctx_cluster 4
+   W5: 5 positivos, publicados 4, por ctx_cluster 3
+   W6: 7 positivos, publicados 7, por ctx_cluster 7

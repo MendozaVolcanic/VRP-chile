@@ -1,0 +1,34 @@
+id,ids_provisionales,titulo,archivo_linea,confianza,gravedad,eje,comando_reproduccion,salida_cruda
+H-T1,"101,901,903",La tabla pierde filas en la mezcla de texto del bucle de push de Mirova-v1,scraper.py:240; .github/workflows/main.yml:67-71,CONFIRMADO,5,tabla,python -I 01_bisect_perdidas.py D:/vrp-trabajo/mirova-v1; verificador_frente1/v08_rebase_real_ternas.py,salida_01.txt; salida_01b.txt; salida_02.txt; salida_04.txt; salida_05.txt; salida_08.txt; verificador_frente1/v08_salida.txt
+H-O1,201,Metodo de grupo de pixeles rojos pone focos lejanos dentro del radio y sigue activo,ocr_utils.py:293; ocr_utils.py:307-312; ocr_utils.py:1266-1311,CONFIRMADO (semantica de pixeles SOSPECHA),5,ocr,python -I frente2_ocr/precision_A.py,frente2_ocr/precision_A_salida.txt; verificador_ocr/v03_precision_propia_salida.txt
+H-P1,"401,402,404,407",Scraper y OCR fallan en silencio (exit 0) y los vigilantes miden actividad,scraper.py:130-248; scraper_ocr.py:762-771; visualizador.py:819-828; scripts/heartbeat_site.py:29-33,CONFIRMADO,4,operacion,grep -c 'Filas leídas desde latest.php: 0$' monitoreo_satelital/bitacora_robot.txt,frente4_operacion/INFORME.md §2
+H-P2,406,latest.php muestra solo la ultima pasada de cada volcan y sensor; huecos pierden pasadas,scraper.py:135; main.yml:3-4,CONFIRMADO (perdida por hueco: estimacion),3,operacion,python -I frente4_operacion/m06_ventana_visible.py,frente4_operacion/m06_salida.txt; frente4_operacion/m05_salida.txt
+H-V1,102,La copia corrupta 81dd25ce3 la fabrico el sync de VRP Chile (rebase -X theirs),VRP Chile .github/workflows/sync-mirova-csv.yml:191,CONFIRMADO,3,cadena de copias,python -I 07_reproduccion_vrp_sync.py C:/vrp-trabajo/s159-pruebas D:/vrp-trabajo/mirova-v1 <tmp>,salida_07.txt; verificador_frente1/v08_salida.txt
+H-O2,202,Antes de V31 la estrella de una pasada se copiaba a otras celdas,ocr_utils.py:1130-1204; scraper_ocr.py:475-486,CONFIRMADO EN PARTE,3,ocr,python -I frente2_ocr/geometria_compartida.py,frente2_ocr/geometria_compartida_salida.txt; verificador_ocr/v05_estrella_compartida_salida.txt
+H-O3,208,Alertas OCR diurnas sin filtro bajo 10 MW,scraper_ocr.py:63; scraper_ocr.py:669-675,CONFIRMADO,3,ocr,python -I frente2_ocr/diurnas_solo_ocr.py,frente2_ocr/diurnas_solo_ocr_salida.txt; verificador_ocr/v04_prior_tabla_salida.txt
+H-O4,951,Metodo_Validacion no registra el metodo real,scraper_ocr.py:701; ocr_utils.py:1308; ocr_utils.py:1364,CONFIRMADO,3,ocr,leer codigo,verificador_ocr/INFORME.md
+H-O5,203,Las 39 reescrituras de VRP Chile son manuales; rastro incompleto,commits b88e7cb45f 52ff007401; reconciliar_latest.py:46-54,CONFIRMADO,2,ocr,python -I frente2_ocr/atribuir_h1.py,frente2_ocr/atribuir_h1_salida.txt
+H-P3,405,Disparador externo sin respaldo ni registro de credencial,main.yml:3-4,CONFIRMADO,3,operacion,leer workflow,frente4_operacion/INFORME.md
+H-P4,403,Un sensor renombrado abre una serie paralela,scraper.py:168; scraper.py:184-188,CONFIRMADO (simulado),3,operacion,frente4_operacion/m08,frente4_operacion/INFORME.md
+H-O6,204,La correccion automatica solo baja alertas y solo si la tabla lista la pasada,reconciliar_latest.py:35-44,CONFIRMADO,3,ocr,,frente2_ocr/INFORME.md
+H-O7,205,Correccion manual 2a34d8e42e dio a Isluga la distancia de otra pasada,commit 2a34d8e42e,CONFIRMADO,3,ocr,,frente2_ocr/INFORME.md
+H-O8,206,647 notas OCR en mojibake (abierto desde S139 H203),commit ffc7a97d8b,CONFIRMADO,3,ocr,,frente2_ocr/INFORME.md
+H-O9,207,592 de 987 ALERTA_TERMICA_OCR con Distancia_km 0,scraper_ocr.py:650-658,CONFIRMADO,3,ocr,,frente2_ocr/INFORME.md
+H-L1,(orquestador),clase_mirova.py cuenta como protegida una alerta OCR aunque la tabla perdida dijera FALSO_POSITIVO (0 casos hoy),VRP Chile scripts/clase_mirova.py:65-75; scripts/referencia_mirova_unificada.py:172-177,CONFIRMADO (latente),2,VRP Chile,python -I 12_ocr_vs_perdidas.py D:/vrp-trabajo/mirova-v1,salida_12.txt
+G-209,209,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,2,,,
+G-210,210,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,2,,,
+G-211,211,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,2,,,
+G-212,212,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,2,,,
+G-213,213,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,2,,,
+G-414,414,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,2,,,
+G-408,408,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,2,,,
+G-409,409,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,2,,,
+G-410,410,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,2,,,
+G-952,952,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,2,,,
+G-214,214,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,1,,,
+G-411,411,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,1,,,
+G-412,412,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,1,,,
+G-413,413,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,1,,,
+G-415,415,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,1,,,
+G-904,904,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,1,,,
+G-905,905,"ver informe del frente (gravedad baja, sin verificador)",,ver frente,1,,,
