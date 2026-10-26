@@ -308,7 +308,12 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
   negativos). Verificador limpio (Sonnet): «pasa con reparos, ninguno bloquea» (VH-01 a VH-05: Villarrica cayó a 8,4 km
   del gránulo y no ejercitó el port en el borde; `k33_igual_k` False en 22/22 por campos diag; ~3,8 s por pasada, las 17 h
   estimadas sobran). Evidencia en `experiments/_s162_modis_paquete/humo_40333783937/` (esta rama). Tanda t1 pedida a S164.
-- [ ] D4d. **CENSO EVALUADO, VERIFICADOR EN CURSO** (2026-10-26 ~16:00 UTC; `953540853`, carpeta
+- [x] D4e. **VERIFICADOR DEL CENSO: «DECIDE NICOLÁS se sostiene»** (Fable alto, `censo/verificador/`, LEEME con lo que
+  viaja con el veredicto). Corregido: PREREGISTRO de la rama = el del tag. Notas: 149 → 150 en la adenda 3.11 (sin
+  efecto); run S159 «failure» con dato consistente. **Pendiente: decisión de Nicolás** (P1b de 1 píxel que con la regla
+  de MATLAB queda en 1,112 MW; recomendación: CANDIDATO a fase 3 con la regla de MATLAB en pipeline/, previo tag y sí
+  explícito, A45).
+- [x] D4d. **CENSO EVALUADO, VERIFICADOR EN CURSO** (2026-10-26 ~16:00 UTC; `953540853`, carpeta
   `experiments/_s162_modis_paquete/censo/`): 5.465/5.465 pasadas ok (t3 = 1.814/1.814, contada), todos los controles en
   verde. Veredicto del evaluador: **DECIDE NICOLÁS** por P1b = 1 (Láscar 2026-04-25 07:35: K 1,245 MW, PM 0,973, MIROVA
   1,28; alerta de 1 píxel; con la regla de fillmissing2 de MATLAB el PM daría 1,112). P1 sin pérdida; P2 GANA (K 49

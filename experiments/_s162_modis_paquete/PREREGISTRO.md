@@ -212,3 +212,115 @@ global del umbral de cumbre del oráculo) y los cambios de publicación ocurren 
 censo, sin cambiar ninguna regla sellada: si se agrega un brazo sin duplicados, es **PM-sin_dup con el método A**,
 **informativo** (como PM-geo5 y PM-sens), y **nunca la regla B**. Agregarlo exige una adenda fechada antes del candado,
 con el método A tal como está en `experiments/_s162_modis_bowtie/real/comun.py` y su blob.
+
+## Adenda 3 (2026-10-25, informativa): lo que fija el candado al implementar
+
+Escrita por la sesión de relevo de MODIS antes de despachar nada. **No cambia ninguna regla sellada** (población,
+brazos, pruebas del §4, Chillán del §5, precedencia del §6, controles del §8). Fija lo que el texto sellado dejaba
+abierto y que el evaluador tuvo que decidir para poder correr; cada punto pasa por el verificador limpio del candado.
+
+1. **Árbol del censo**: rama `s162-modd-candado`, cortada de `s162-mxd03-codigo` (main congelado `80b819828`, el de
+   MOD-B). Se le copiaron sin cambios los blobs sellados del port (`probe_portes.py 8ec50e7b`, `mirova_port.py
+   96769a89`; el oráculo `07da7010` ya estaba igual en main) y `04_analizar.py` de S159. `evaluar_d25.py` de main es
+   OTRA versión (blob `d26e215f`, sin `comparar_con_ganancia`): la del commit `ded217af4` (blob `1dbabf65`) va como
+   `evaluar_d25_ded217af4.py` y el evaluador y el workflow comprueban su hash.
+2. **Grilla por volcán**: `grillas.json`, la de los objetivos de S159 (igual a la de MOD-C), 11 volcanes.
+3. **K**: el brazo de MOD-B (`probe_mxd03_ab.brazo`, misma función de producción y mismo main). Control 1 = el de MOD-B
+   (`control_arnes` con la re-corrida en el `codigo_sha`, `recorrer_en_sha.py` sin cambios), más que el predicado del
+   evaluador dé para K la misma publicación que el del runner. **K33**: el mismo brazo con
+   `ENABLE_MODIS_MIR_LAMBDA_POR_BANDA` parchado en `pipeline.process_modis` (lo lee al llamarse, `:600`).
+4. **PM, PM-geo5, PM-sens**: `probe_portes.procesar` sin cambios, con `sin_k=True`, sobre los mismos archivos ya
+   bajados (sólo `bajar_par` se reemplaza por enlaces duros: no hay descarga doble). Las variantes `pixel` y
+   `fisica_b21` que el probe corre igual se guardan e informan.
+5. **«Magnitud mostrada»** = la de `mirovaEqVrpDisplay` del predicado con node, en P1b (como dice el §4) y también en M
+   (el §4 no lo dice para M; se elige lo mismo para medir lo que el operador ve; `pc.vrp_mw` de K va en el record).
+6. **Pasadas no evaluables por el port** (estado del probe distinto de «ok», escena inválida o grilla con más de la
+   mitad vacía) salen del denominador de TODOS los brazos (§8 control 5) y se cuentan por motivo. Una **protegida**
+   que caiga ahí se lista junto al veredicto (informa; no la cuenta P1 porque el §8 la saca del denominador).
+7. **P2**: las mitades de pasada partida cuya hermana es `sin_info` se cuentan (el §4 no las excluye, a diferencia de
+   MOD-B); cuántas discordantes son de ese tipo se informa.
+8. **Chillán, regla 5**: «pares» = pares sin empate exacto (la razón de la regla es la prueba de signos).
+9. **Adenda 1**: «el otro MODIS» = el otro satélite; ventana ±6 h; «MIROVA alertó en cualquier canal» = una fila de
+   alerta de la referencia congelada (regla SN), de cualquier sensor, del mismo volcán.
+10. **Control 4**: además de (a) y (b), P2 del PM tiene que contar exactamente 50 errores más con la inyección.
+11. **Control 2**: hay 149 pasadas del lote 39712862945 en la población; 148 evaluables (una con escena inválida sale
+    del denominador, §8 control 5), 91 de ellas con píxeles del port; si ninguna común tiene píxeles, INDECIDIBLE.
+12. **Informativos nuevos**: diagnóstico S-1 (`diagnostico_s1.py`: umbral de cumbre con la sigma de toda la grilla y
+    con la de la ROI1, con identidad contra el oráculo en cada pasada); estrato «borde del gránulo» (VA61-01 del
+    verificador de la A61: píxel MxD03 más cercano al cráter en la primera o última línea o frame); K33 igual a K; cruce
+    del K de este censo con el de MOD-B.
+13. **PM-sin_dup no se agrega**: pediría guardar el recorte nativo de cada pasada (0,3 a 0,7 MB, 1,6 a 3,7 GB en el
+    censo, medido en MOD-C) y el método de MIROVA para D28 sigue SIN DATO. Queda para un lote propio.
+14. **Humo** (rama `s162-modd-humo`, 5 gránulos): Láscar 2026-03-14 07:05 y Chillán 2026-10-16 01:40 (comunes con S159:
+    el PM tiene que dar el npix y el VRP de S159), Láscar 2026-03-27 07:10 (protegida), Chillán 2026-10-10 07:40
+    (expuesta) y Villarrica 2026-04-30 03:00 (cráter en el frame 0, VA61-01). El humo pasa si el job de pruebas sin red
+    sale verde, las 5 pasadas tienen fila «ok», K reproduce data/ en las que deciden y el PM reproduce a S159 en las
+    dos comunes. Recién entonces se piden las tres tandas.
+
+## Adenda 4 (2026-10-26, 05:30 UTC; antes de despachar nada): lo que corrigió el verificador del candado, y M con la regla de MATLAB
+
+Origen: el verificador con contexto limpio del candado (Fable, `verificador_candado/INFORME.md`, veredicto «se puede
+despachar el humo con cambios chicos») y la vara del fondo de MATLAB del O2 de S163 (`experiments/_s163_o2_modis/`,
+rama `claude/s162-modis-2-0dd578`, verificada). La coordinadora S163 aprobó con D-48 la parte informativa de M (punto
+5). El punto 1 (b) **endurece** una regla: **APROBADO por la coordinadora S163 con D-48**, registrado aquí el
+2026-10-26 a las 05:40 UTC (hora del servidor de GitHub), antes de cualquier despacho, con tres condiciones: que quede
+escrito aquí con fecha y hora (hecho), que la segunda vuelta del verificador lo cubra, y que la batería lo ejercite por
+los dos motivos sellados con K publicando (`t12` por «volcán fuera del gránulo», `t33` por «escena inválida»).
+
+1. **VCM-01, el denominador vuelve a ser el del §8.5 sellado.** La adenda 3.6 sacaba del denominador más de lo que el
+   §8.5 permite (también fallas del port y «grilla incompleta»), y con eso una protegida que K publica podía dejar de
+   vetar P1. Queda así: (a) sólo «volcán fuera del gránulo» y «escena inválida» (el `.m` la declara así) salen del
+   denominador; «grilla incompleta» del probe, sola, no saca la pasada; una falla del arnés o del port (error, gránulo
+   no encontrado, descarga vacía) no es una propiedad de la escena y deja el control 5 en rojo (INDECIDIBLE, se repite
+   la parte). (b) **Regla nueva, más estricta (sujeta a aprobación)**: si una protegida que K publica queda fuera del
+   denominador por uno de los dos motivos sellados, el veredicto no puede ser CANDIDATO: va a la fila 5 del §6 (DECIDE
+   NICOLÁS) con su lista. POR QUÉ: el port no la habría publicado, y el §4 la contaría como pérdida; sacarla en silencio
+   podía torcer un NO CANDIDATO en CANDIDATO.
+2. **VCM-02, el candado cubre el arnés y el evaluador**: `MANIFIESTO_CANDADO.json` (hash LF de cada archivo del que
+   dependen el arnés, el evaluador y las pruebas, armado importándolos, más los datos fijos y el workflow), comprobado
+   por el workflow en los dos jobs y por el evaluador; y la procedencia exige que todos los jobs sean del commit del tag
+   (`evaluar_paquete.py --commit <sha>`; sin él, INDECIDIBLE).
+3. **VCM-03 y VCM-04, la batería vigila más**: entran las 8 pruebas del verificador que siguen aplicando (bloque por
+   noche, Chillán 6 de 7, P1 sólo con K publicando, alerta bajo 1 MW sin publicar, regla 4 con la banda baja, empate,
+   grupo vacío, el mismo MODIS no es soporte), las de los puntos 1 y 6, y una del `npix` del control 2. Las mutaciones
+   suben a 31 (las 6 del verificador que aplican y 6 de esta adenda). El job de pruebas corre también la batería contra
+   el evaluador real y contra el vacío.
+4. **VCM-06**: K33 pasa por el mismo predicado y la misma magnitud mostrada que los demás brazos (el arnés guarda
+   también su record, `k33_slim`). VCM-05 (un solo run pendiente por grupo de concurrencia) se cumple por procedimiento:
+   una tanda a la vez.
+5. **M con la regla de `fillmissing2` de MATLAB (informa, fuera de línea)**. El VRP del port en alertas de 1 a 4
+   píxeles depende de cómo se rompe el empate de la triangulación del relleno, y el de MATLAB es otro (O2 de S163,
+   confirmado en 166 de 166 escenas de VIIRS 750; en MODIS la diferencia típica en 1 píxel es 9 %, sin sesgo). Con las
+   grillas 51 × 51 que el censo guarda (`grilla_NNNN.npz`, variante `fisica`) y la máscara de alertas del PM, se
+   recalcula el VRP del PM con esa regla (`experiments/_s163_o2_modis/delaunay_perturbado.py`, blob f273a47a, marco
+   x = fila) y se informa M también con ese VRP, al lado del sellado. No cambia la regla sellada de M (que usa el VRP del
+   port), ni ninguna publicación (la regla sólo toca el fondo). El script se escribe y se prueba antes de leer el censo.
+
+### Adenda 4, apéndice (2026-10-26, 11:51 UTC, hora del servidor; antes de despachar nada)
+
+Segunda vuelta del verificador del candado (Fable, `verificador_candado_r2/INFORME.md`: «se puede despachar el humo con
+cambios chicos»; la regla 1 (b) hace lo aprobado y en la fila correcta) y decisión de la coordinadora S163 sobre M.
+Nada de esto cambia una regla sellada.
+
+1. **VCR-01 y VCR-02**: la batería vigila ahora que el veto de P1 manda sobre una protegida fuera del denominador (`t34`)
+   y que un negativo fuera del denominador con K publicando no entra a la lista ni lleva a DECIDE NICOLÁS (`t12`).
+2. **VCR-03**: el evaluador informa el hash del manifiesto que usó (cotejar con `git ls-tree <tag>`), y **el censo se lee
+   desde el checkout del tag**, no desde un árbol posterior. El M con la regla de MATLAB (punto 5) va en un **script
+   aparte** que lee `resultado_paquete.json` y las grillas; no se edita `evaluar_paquete.py` después del tag.
+3. **VCR-04**: `--commit` exige el sha completo de 40 caracteres e igual; un prefijo da INDECIDIBLE (`t35`).
+4. **VCR-05**: el punto 1 (a) de esta adenda dice que «grilla incompleta», sola, no saca la pasada. En los datos el caso no
+   existe: con más de la mitad de la grilla MIR vacía el `.m` declara siempre «escena inválida» (`probe_portes.py:338`,
+   `mirova_v750_r2.py:148-156`), así que una protegida así sale por ese motivo sellado y va a DECIDE NICOLÁS por la regla
+   1 (b), no a P1. La frase queda como descripción del código, sin efecto práctico.
+5. **VCR-06**: «K publica» de una protegida fuera del denominador sale del predicado del evaluador sobre el record de K,
+   como en las evaluables; si no coincide con lo que dijo el runner, el control 5 queda en rojo (`t37`).
+6. **VCR-07 y VCR-08**: `externos_de_entrada` tiene pruebas (procedencia y uso del manifiesto, `t35` y `t36`), y la prueba
+   del arnés exige `k33_slim`. **VCR-09**: el paso del vacío en el workflow falla explícitamente. **VCR-10**: textos.
+7. Mutaciones: 37 (las 31 anteriores, todas atrapadas por aserción en la corrida v3, más 6 de esta ronda).
+8. **M con la regla de MATLAB deja de ser preliminar** (decisión de la coordinadora S163 con D-48, 2026-10-26): la regla
+   reproduce el fondo de MATLAB R2026b en 191 de 191 escenas MODIS distintas, incluidos los bloques 2 × 2, con 12
+   órdenes de separación del port (`experiments/_s163_o2_modis/RESULTADO_O2_MODIS_MATLAB.md` y su verificador, rama
+   `claude/s162-modis-2-0dd578`). **Alcance**: 161 de esas 191 escenas son de Láscar, todas con hueco de 3 × 3 (4 píxeles
+   o menos), y queda **SIN DATO** que MIROVA use ese `.m` (el de VIIRS 750) para MODIS. La columna se informa al lado de
+   la sellada; no la reemplaza. Si una vía «código MIROVA» llega a `pipeline/`, reutiliza la función ya portada en
+   `pipeline/mirova_v750_codigo.py` (#907), no scipy.
