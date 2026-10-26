@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~04:40 UTC (S163): adenda 1 de V750-B CONFIRMADA bajo D-48
+- Verificador Sonnet de la adenda (`claude/s162-viirs750-2-918174`, `experiments/_s162_v750b/adenda1/verificador/
+  INFORME.md`): LISTO CON CAMBIOS, sin gravedad 4 o 5; confirmó el defecto (escenario: 68 de 69 observadas, 0 SIN DATO,
+  compuerta abierta) y que con el probe sellado no debería ocurrir. Cambios hechos (VAD-01 a VAD-05): lector
+  `adenda1/leer_v750b.py` que corre el compañero y no deja pasar al analizador si cierra; rutas absolutas; caja `null` o
+  `{}` = «caja ilegible», cierra siempre; escenarios A9 a A17 y L1 a L4. Batería 52 de 52; nulo 17 de 17, identidad PASA,
+  control CAÍDA. VAD-07 y VAD-08 aceptados tal cual.
+- Comprobado por la coordinadora sobre `7aa2788a0`: `analizar_v750b.py` **idéntico** al tag `s162-v750b-sellado`; el diff
+  del pre-registro sólo agrega la marca y la sección de la adenda; ninguna regla cambia. **Confirmada con D-48.** El
+  2026-11-03 la lectura se hace con el comando del lector (final de `PREREGISTRO_V750B.md`).
+
 ### 2026-10-26, servidor 04:27 UTC (S163, vuelta 10): CI de main verde tras #908; reserva del borde medida en V375
 - CI de main verde sobre `a6d3935cc` (merge de #908). NRT corriendo (04:10). Sin issue nuevo del auto-audit. Disco C: 25 GB,
   D: 9,6 GB. Ramas de las hijas en el remoto.
