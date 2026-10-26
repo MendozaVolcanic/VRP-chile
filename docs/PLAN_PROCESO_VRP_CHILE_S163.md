@@ -37,16 +37,16 @@ hay que cambiarlas.
 | «Sin ayuda de Coppola» | Sin contacto directo, sí. Pero desde el 2026-07-24 hay código de MIROVA publicado por el propio Coppola (OSF zm62w, MIT), y la réplica de VIIRS 750 se apoya en él. Decir «sin contacto con el autor, con su material público» | `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md:11-12` |
 | Sobre-publicación «de 85-88 % a 1-3 %» | **De 88,2 y 85,4 % a 2,5 y 3,7 %** en negativos limpios de VIIRS 375. V1, del 2026-08-29 al 10-08: C0 publica 734 de 832 y K 21 de 832. V2, del 2026-03-01 al 06-12 (VIIRS desde abril): C0 863 de 1.010, K 37 de 1.010 | `experiments/_s153_fk_v2/v1.log:151,153`; `v2.log:225-226` |
 | Recall por noche «ventana de 60 días» | Los números son correctos (VIIRS 375 96,8 % con n 93; VIIRS 750 73,3 % con n 30; MODIS 66,7 % con n 12), pero la ventana va del 2026-08-20 al 10-19 (61 días) y el archivo se sobrescribe cada semana. Hay que citar el commit `2e1bc0e31`. Con n 12, el 66,7 % de MODIS es frágil | `data/audit_continuous/latest.json` l. 3-6, 19, 30-44 en `2e1bc0e31` |
-| Magnitud baja de Chillán y Tupungatito «con causa principal D17» | **No está medido.** El issue #864 dice «causa sin medir». La bitácora dice que la dependencia con el ángulo no es D17 y que lo que empeora es nuestro fondo. En Tupungatito la atribución es «fondo del anillo (parte D17)», PARCIAL | issue #864; `LOOP_OBJETIVOS.md` l. 261 y 428-430; `experiments/_s161_estado_864/INFORME.md` l. 165-177 (rama loop) |
+| Magnitud baja de Chillán y Tupungatito «con causa principal D17» | **No está medido como causa principal.** Chillán: «causa sin medir» (issue #864; MODIS 0,485 «sin descomponer aparte»). Tupungatito: «fondo del anillo (parte D17)», con verificador PARCIAL. La bitácora dice además que la dependencia con el ángulo no es D17 y que lo que empeora es nuestro fondo | issue #864; `LOOP_OBJETIVOS.md` l. 261 y 428-430; `experiments/_s161_estado_864/INFORME.md` l. 165-177 (rama loop) |
 | Coeficientes «con error ≤0,17 %» | El 0,17 % es el error de la fórmula de Di Bella para VIIRS 750. El coeficiente adoptado (11.081.250) coincide con la mediana del OSF con error casi cero. Y no es un ajuste: es **reconstruir** el coeficiente desde 48.360 filas publicadas y compararlo con las fórmulas | `experiments/21_results.json` l. 5-6, 57, 62, 69, 81 |
-| «Drifts D1-D7 en S17» y «parches S22-S26» | S17 encontró 5 divergencias; D6 y D7 llegaron en S20 y S23, y la lista D1-D7 es una consolidación de S80. Además hay **dos numeraciones D distintas** (`DRIFTS_S17.md` y `MIROVA_DIVERGENCES.md`). Los parches retirados en S27 vienen de S6 a S26 | `docs/DRIFTS_S17.md:9`; `docs/SESSION_INDEX.md:18,23`; memoria `project_s26_parches_no_mirova.md` |
+| «Drifts D1-D7 en S17» y «parches S22-S26» | S17 encontró 5 divergencias; D6 y D7 se agregaron después al mismo archivo (S21 y S23). Además hay **dos numeraciones D distintas**: en `DRIFTS_S17.md` D1 es «Kernel 8-vecinos: median vs mean» y en `MIROVA_DIVERGENCES.md` D1 es «Granularidad». Los parches retirados en S27 vienen de S6 a S26 | `docs/DRIFTS_S17.md:9,12,126`; `docs/MIROVA_DIVERGENCES.md:16`; memoria `project_s26_parches_no_mirova.md` |
 
 Dos más que no venían en el encargo pero que cualquier pieza puede repetir:
 
 - **«Código abierto».** El repositorio es público pero **no tiene licencia** (`gh api repos/MendozaVolcanic/VRP-chile`:
   `license: null`, consultado hoy). Mientras no haya licencia, decir «código público», no «abierto».
-- **«Recall 50 → 80 % en S27».** Desde S147 está **SIN INSTRUMENTO**: era circular, y el único A/B limpio dio 6
-  contra 6 (`docs/audit_s147/VERIFICADOR_H_A01.md:23`; `docs/MISSION.md:386-391`). No usarlo como logro.
+- **«Recall 50 → 80 % en S27».** Desde S147 está **SIN INSTRUMENTO**: era circular (`docs/audit_s147/VERIFICADOR_H_A01.md:23`), y el único A/B
+  limpio dio 6 contra 6 (mismo archivo, l. 50-54; `docs/MISSION.md:386-391`). No usarlo como logro.
 
 ---
 
@@ -56,18 +56,20 @@ Dos más que no venían en el encargo pero que cualquier pieza puede repetir:
 |---|---|---|
 | Inicio | 2026-04-04, commit `de88fdcfe` | `git log --reverse origin/main` |
 | Sesiones numeradas | S1 a S163; ritmo muy desigual: S1 a S80 en siete semanas (al 2026-05-26), S80 a S163 en cinco meses | mensajes de commit; la cuenta de sesiones reales (no números) está POR MEDIR (§6) |
-| PR | 867 en total, 856 mergeados, el primero el 2026-05-10 (antes se commiteaba directo) | `actividad_repo.out` |
-| Commits en `main` | 12.299: 2.096 humanos o de Claude a nombre de Nicolás, 10.203 de bots (NRT, sincronización con Mirova-v1) | `actividad_repo.out` |
-| Días con commit humano | 120 de 206 días calendario | `actividad_repo.out` |
-| Tokens (ventana en disco: 2026-05-20 a 10-26) | 48.143 respuestas del modelo, 59 % de subagentes. Salida 27,6 M; lectura de caché 14.697 M; escritura de caché 436 M | `medir_transcripts.out` |
-| Costo equivalente a API de esa ventana | **USD 6.754 a 9.572** (rango por los supuestos de precio de caché) | `costo_equivalente_api.out` |
+| PR | 867 en total al bajar `prs.json` (869 horas después), 856 mergeados, el primero el 2026-05-10 (antes se commiteaba directo) | `actividad_repo.out` |
+| Commits en `main` | 12.299: 2.096 a nombre de Nicolás (los escribe él o Claude; el script no los separa), 10.203 de bots (NRT, sincronización con Mirova-v1) | `actividad_repo.out` |
+| Días con commit a nombre de Nicolás | 120 de 206 días calendario | `actividad_repo.out` |
+| Tokens (ventana en disco: 2026-05-20 a 10-26 12:11 UTC) | 48.614 respuestas del modelo, 59 % de subagentes. Salida 38,0 M; lectura de caché 14.853 M; escritura de caché 438 M | `medir_transcripts.out` |
+| Costo equivalente a API de esa ventana | **USD 8.275 a 9.944** (rango por el supuesto de precio de escritura de caché) | `costo_equivalente_api.out` |
 | Horas activas en esa ventana | 217 a 288 horas de reloj; 256 a 344 horas-sesión (las sesiones en paralelo suman) | `medir_tiempo.out` |
-| Reglas de método | 104 reglas A con párrafo propio (A1 a A119; 15 números sin párrafo); al menos 18 llevan una marca posterior de que cayeron, se rebajaron o se matizaron | `reglas_A.out` (el 18 es un piso: el patrón no reconoce todas las formas de marca) |
+| Reglas de método | 104 reglas A con párrafo propio (A1 a A119; 15 números sin párrafo); al menos 18 llevan una marca posterior de que cayeron, se rebajaron o se matizaron | `reglas_A.out` (el 18 es un piso: el patrón no reconoce todas las formas de marca; ej. A76) |
 
 **Cómo leer el costo.** No es lo que pagó Nicolás: si usa suscripción, pagó la cuota. Es lo que costaría el
 mismo tráfico por la API, con la tabla de precios de la skill `claude-api` (cacheada el 2026-10-06). El rango
-sale de dos supuestos declarados en el script: escritura de caché a 1,25 o 2 veces el precio de entrada, y
-lectura de caché al precio publicado o, cuando la tabla no lo da, entre 0,05 y 0,1 veces la entrada. La lectura
+sale del supuesto declarado en el script sobre la escritura de caché (1,25 o 2 veces el precio de entrada,
+según la duración del caché); la lectura de caché va al precio publicado o, cuando la tabla no lo da, a 0,1
+veces la entrada. Corrección del verificador: la primera versión del script tomaba la primera línea de cada
+respuesta, que trae un marcador en vez del total de salida, y subcontaba la salida en ~35 %; ya está arreglado. La lectura
 de caché domina (casi 15 mil millones de tokens), que es lo esperable en sesiones largas que releen el mismo
 contexto. **Lo que falta**: de S1 a ~S62 (2026-04-04 a 05-19, 37 días con commit humano) no hay transcripts en
 disco, porque Claude Code los borra; ese tramo está POR MEDIR (§6).
@@ -88,9 +90,9 @@ cambio llegó porque la pregunta anterior se agotó o resultó mal planteada.
 | etapa | sesiones y fechas | qué se buscaba | qué se logró | qué se abandonó y por qué |
 |---|---|---|---|---|
 | 1 | S1-S16, 04-04 a 04-23 | pipeline VIIRS y MODIS para 11 volcanes | calibración contra OSF v2.5 en S14 (`docs/SESSION_INDEX.md:13`, commit `5478bce66`) | el sigma-gating de S12 bajó el recall de Tupungatito de 0,977 a 0,5 (`SESSION_INDEX.md:11,15`) |
-| 2 | S17-S26, 04-23 a 04-29 | contrastar código con papers | NOAA-21 faltante (Láscar 0,52 a 0,86); se descubre que Di Bella no es MIROVA y que hay 9 parches sin paper (`SESSION_INDEX.md:17,20`) | en S27 se retiran vent-path, `exclude_zones` y Regla D (`MISSION.md:323-325`); tres retiros eran parciales (`:322,326,328`) |
+| 2 | S17-S26, 04-23 a 04-29 | contrastar código con papers | NOAA-21 faltante (Láscar 0,52 a 0,86); se descubre que Di Bella no es MIROVA y que hay 9 parches sin paper (`SESSION_INDEX.md:17,20`) | en S27 se retiran vent-path, `exclude_zones` y Regla D (`MISSION.md:323-325`); dos retiros eran parciales (`:322`, el tope de 7 K, sólo neutralizado por valor; `:326`, la Regla D Test 1-priority siguió activa) y los pisos VRP recién se retiraron en S130 (#571, `:328`) |
 | 3 | S27-S80, 04-29 a 05-26 | «MIROVA literal» y calibración por volcán | Test 1 integrado; kernel local; consolidación de S80 | el «50 a 80 %» de S27 quedó sin instrumento en S147; el Test 1 integrado resultó ser un detector propio (D30) |
-| 4 | S81-S100, 05-26 a 06-03 | explicar la precisión de 0,024 | S86: 95,4 % de 3.687 «falsos positivos» son anomalías reales o fallas del cruce (`docs/AUDIT_S86.md:12-21`) | gates intra-radio S83-S85 retirados en S118 (#474) por redundantes |
+| 4 | S81-S100, 05-26 a ~06-03 (bloque de arranque S100) | explicar la precisión de 0,024 | S86: 95,4 % de 3.687 «falsos positivos» son anomalías reales o fallas del cruce (`docs/AUDIT_S86.md:12-21`) | gates intra-radio S83-S85 retirados en S118 (#474) por redundantes |
 | 5 | S101-S123, 06-05 a 08-09 | magnitud y posición | nadir fijo: Láscar MODIS 2,87 a 1,38 veces; VIIRS 375 global 2,27 a 0,78 (`docs/S102_...`, `docs/S103_...`); sesgo topográfico (S104) | D11 «irreducible» (S114) se rebajó tres veces (`MIROVA_DIVERGENCES.md:1547-1570`) |
 | 6 | S124-S146, 08-26 a 09-20 | ¿los cierres se sostienen? | S139: la brecha es sobre-publicación, no recall (A98); S146: de 50 cierres sin respaldo, 27 se verifican, 5 en parte, 7 se refutan, 1 queda sin evidencia y 10 no eran cierres (`docs/AUDIT_S146.md:31-40`) | cayeron o se reabrieron D8, D11, D16, D26 y GAP #A |
 | 7 | S147-S153, 09-20 a 10-18 | fijar el criterio y adoptar un detector | criterio de victoria (Nicolás, 2026-10-13, `MISSION.md:81-95`); regla de adopción escrita antes del resultado (#848); K a producción (#850, 2026-10-18 09:57:30 UTC) | se apaga el Test 1 integrado |
@@ -117,16 +119,17 @@ máquina. Hay que separar con cuidado lo que está probado de lo que no.
 |---|---|---|
 | Coeficientes VRP reconstruidos desde 48.360 filas del OSF; los adoptados coinciden con la mediana con error casi cero | VERIFICADO (con el matiz del §0) | `experiments/21_results.json` |
 | Lectura del código de MIROVA para VIIRS 750: de 13 puntos del detector, 3 iguales y 10 distintos | VERIFICADO | `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md:19-20` |
-| Port del código validado contra Octave en 791 de 791 escenas; reproduce su magnitud a ±1 a 3 % | SIN VERIFICAR en esta sesión (lo cita la sesión del congreso) | «spec por sensor §1», `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` |
-| Regla exacta del fondo `fillmissing2` de MATLAB: 166 de 166 escenas (VIIRS 750), 404 de 404 filas en 191 escenas (MODIS), 422 de 422 escenas (VIIRS 375), contra MATLAB real | VERIFICADO | `LOOP_OBJETIVOS.md` l. 584-598 y 758 |
-| Detector K en producción con regla de adopción previa: 0 alertas protegidas perdidas que decidan, negativos de 88,2/85,4 % a 2,5/3,7 % | VERIFICADO | `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`; `v1.log`, `v2.log`; `MISSION.md:7-17` |
+| Port del código de VIIRS 750: **detección** idéntica a Octave en 791 de 791 escenas (600 de ellas sintéticas); en **magnitud**, mediana 0,999 (cuartiles 0,978 y 1,007) sólo en las 145 de 181 alertas que ese código detecta, y con un píxel la diferencia llega a 1,82 veces | EN PARTE (es un candidato, no producción) | `experiments/_s159/o1/INFORME.md` l. 8-19; propuesta del congreso l. 89 |
+| Regla exacta del fondo `fillmissing2` de MATLAB: 166 de 166 escenas (VIIRS 750; la mitad son variantes construidas desde 10 pasadas reales), 404 de 404 filas en 191 escenas (MODIS; el alcance son 161 escenas de Láscar con huecos de 3 × 3), 422 de 422 escenas (VIIRS 375), contra MATLAB real | VERIFICADO, con esos alcances | `LOOP_OBJETIVOS.md` l. 584-602 y 758; propuesta del congreso l. 90 |
+| Detector K en producción con regla de adopción previa: con la lectura A de alerta protegida (D-4), 0 protegidas perdidas que decidan; negativos de 88,2/85,4 % a 2,5/3,7 %. Con la lectura B, V1 de VIIRS 375 queda VETADO (12 perdidas netas) | VERIFICADO con la lectura A | `v1.log` l. 63-72; `v2.log` l. 109; `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`; `v1.log`, `v2.log`; `MISSION.md:7-17` |
 
 **Lo que sigue abierto** (decirlo en la misma lámina o párrafo):
 - La regla de MATLAB reproduce a MATLAB; no está probado que reproduzca lo que MIROVA publicó en alertas de un
-  píxel (6 pasadas, el intervalo cruza cero; harían falta 50 a 100). Y no hay dato de que MIROVA use ese `.m`
-  para MODIS (`LOOP_OBJETIVOS.md` l. 596). MATLAB deja NaN fuera de la envolvente convexa (l. 588-589).
+  píxel (6 pasadas, el intervalo cruza cero; harían falta 50 a 100; `LOOP_OBJETIVOS.md` l. 760-761). Y no hay
+  dato de que MIROVA use ese `.m` para MODIS (l. 601-602). MATLAB deja NaN fuera de la envolvente convexa
+  (l. 589-590).
 - Sólo hay código de MIROVA para VIIRS 750; MODIS y VIIRS 375 se infieren de papers y datos.
-- Magnitud baja en Chillán y Tupungatito: causa sin medir (§0).
+- Magnitud baja: en Chillán, causa sin medir; en Tupungatito, atribuida en parte al fondo del anillo (§0).
 - El recall de VIIRS 750 (73,3 %) y de MODIS (66,7 %) está lejos del de VIIRS 375 (96,8 %), con n chicos.
 
 **Tabla 2.1** «verificado contra qué»: cada pieza, contra qué referencia (OSF, Octave, MATLAB, tabla del sitio,
@@ -151,12 +154,14 @@ dice medir. Cada fase nació de un error concreto, y las reglas A son el registr
 Fuente: informe del subagente de método. **Hallazgo para destacar**: según
 `docs/PROTOCOLO_AUDITORIA_PROFUNDA.md:226-248` (S128), lo que rinde es el **eje de comparación nuevo**, no la
 profundidad: las auditorías con menos de 20 % de eje nuevo sólo produjeron deuda documental, y las de 50 % o
-más produjeron todos los cambios del pipeline.
+más produjeron todos los cambios del pipeline. **Salvedad**: la propia tabla de esa fuente pone a S125 (35 % de
+eje nuevo) con el factor 2 en magnitud, y el cierre de D11 de S114 (58 %) cayó después; citarlo con eso.
 
 **Figura 3.1.** Reglas A por tramo de 20 sesiones, marcando cuáles cayeron después
-(`reglas_A.out`: S1-S20 4, S21-S40 5, S41-S60 3, S61-S80 27, S81-S100 5, S101-S120 22, S121-S140 17,
-S141-S160 21). **POR MEDIR**: clasificar a mano las marcas (el script da un piso de 18), y anotar qué fase
-del método nació en cada tramo. Tres fases (mutaciones, pre-registro, otro modelo) no tienen regla A: decidir si
+(`reglas_A.out`: S1-S20 6, S21-S40 3, S41-S60 8, S61-S80 27, S81-S100 5, S101-S120 22, S121-S140 14,
+S141-S160 19). La sesión de origen se busca antes de la primera marca de advertencia; en las reglas cuyo
+párrafo empieza con una marca (A69, A82 a A85) queda corrida una a cinco sesiones. **POR MEDIR**: revisar el
+origen a mano, clasificar las marcas (el script da un piso de 18) y anotar qué fase del método nació en cada tramo. Tres fases (mutaciones, pre-registro, otro modelo) no tienen regla A: decidir si
 se registran o si el relato lo dice como hueco del propio registro.
 
 ### Capítulo 4. Los prompts y la forma de trabajar con la IA (G)
@@ -182,7 +187,7 @@ tests, un dueño único por loop, y verificadores que no heredan el contexto del
 - Sesiones hijas con loop (S162): una rama vivió 12 h sólo en disco; una hija editó archivos de producción sin el
   sí de Nicolás (memoria `feedback_s162_a45_antes_del_primer_edit.md`); una aprobación reenviada entre sesiones no vale.
 - Sesiones largas: pasados ~45 intercambios hubo 3 errores; se acordó cerrar a ~30 (memoria `feedback_s154_duracion_sesion.md:11-19`).
-- 65 PR en tres sesiones (S76-S78) llevaron al tope de PR por sesión (A53).
+- 65 PR en tres sesiones (S76-S78) llevaron al tope de PR por sesión (`docs/META_RULES_S80.md:15-17`, A53).
 
 **Guías.** `GUIA_MAESTRA_AUDITORIAS.md` (preámbulo anti-fabricación, plantilla del verificador l. 315-340) sí es
 evidencia del proyecto. Las `GUIA_PROMPTING_*.md` son pautas oficiales de prompting, no registro de lo que pasó:
@@ -208,15 +213,17 @@ sostiene con la tabla que sigue.)
 | Cita corrupta de Coppola 2023 §2.5 («5 %», «aleatorios») | escrita S110, detectada S146 | no registrado | marca en A76; A95(a), leer la página renderizada |
 | «482 píxeles» que ningún campo reproduce | S123, detectado S146 | no registrado; queda SIN VERIFICAR | A87 |
 | 2.527 a 9.196 con la tasa plana (cambió el denominador) | S130 | una discrepancia «bloqueante» pasó a nota al pie | A90 |
-| Cuatro cierres caídos el mismo día | S145 | «un cierre falso apagaba tres frentes»; 50 de 89 cierres sin respaldo | A111 |
-| D11 «irreducible» | S114, cayó en S124, S138, S146 | «cuesta sesiones enteras»; dos horas de PDF hallaron lo que 23 sesiones de documentos derivados no | A95, A113 |
+| Cuatro cierres caídos el mismo día | S145 | «un cierre falso apagaba tres frentes»; el censo halló 50 de 89 cierres sin respaldo citado, y al revisarlos (S146) 7 se refutaron y 1 quedó sin evidencia | A111 |
+| D11 «irreducible» | S114, cayó en S124, S138, S146 | «cuesta sesiones enteras» | A95, A113 |
+| «No quedan gaps de fidelidad literal» | escrito tras S114, refutado S137 (D21, D22) | dos horas de PDF hallaron lo que 23 sesiones de documentos derivados no (memoria `feedback_s137_cierre_circular.md:19-21`) | A95 |
 | Rebaja sin propagar a `MISSION.md` | S146 | no registrado | A113 |
 | Regex inventada por un subagente | S77 | conclusión #1 del PR #196 inválida (corregida en #197) | A48 |
 | Parches contra la misión (orígenes S6 a S26) | demolidos S27 | 10 sesiones midiendo «MIROVA con parches» | las 3 preguntas de `MISSION.md` |
 | JSON corrupto por reprocesos en paralelo | S77 | no registrado | A47 |
 | `return` borrado al insertar código | S79-S80 | 1 sesión sin detectar | A49, A50 |
 | `stash pop` de un stash ajeno | S137, repetido S161 | archivos ajenos reaplicados | A96 |
-| Suite corriendo mientras se edita | S145 | en S153, una corrida de más de 1 h inválida | A112 |
+| Suite corriendo mientras se edita | S145 | línea base con fallas fantasma que cambiaban de identidad | A112 |
+| Dos sesiones sobre el mismo loop y worktree | S153 | una corrida de mutaciones de más de 1 h inválida | memoria `feedback_s153_una_sesion_duena_del_loop.md` |
 | Merge con el CI en rojo (#676) | S142 | `main` con un test fallando | enmienda S142 de A39 |
 | Bloqueo de la cuenta Earthdata | S104, S146 | 10 min cada vez; en S146, 9 jobs reintentando | A71 |
 | `timeout` copiado de un template | S129 | 8 de 15 jobs muertos, 6 h de CI | guard `test_guard_timeout_vs_ventana_s129.py` |
@@ -234,29 +241,35 @@ sesiones; los de código, una o dos.
 
 ### Capítulo 6. El rol de Nicolás (G, O)
 
-**Mensaje.** La IA hizo casi todo el trabajo de máquina; las decisiones de qué medir, contra qué y cuándo parar
-fueron de Nicolás, y su conocimiento de los volcanes corrigió a la IA donde los números parecían bien.
+**Mensaje.** La IA hizo casi todo el trabajo de máquina. Las decisiones de valor (qué error es peor, contra qué
+se mide, qué entra a producción) pasaron por Nicolás, pero muchas fueron **aprobar la recomendación de la IA**,
+no elegir entre alternativas propias: hay que separar las dos cosas. Y su conocimiento de los volcanes corrigió
+a la IA donde los números parecían bien.
 
 **Decisiones.** El loop numeró sus decisiones de D-1 a D-48, de mediados de octubre al 2026-10-24 (D-48) (`LOOP_OBJETIVOS.md` §5,
-l. 516-568; D-46 a D-48 en la bitácora, l. 1305-1308, 1470-1471 y 1500). Antes del loop: criterio de victoria
-(2026-10-13, `MISSION.md:81`), regla de la anomalía mayor (2026-10-09, `MISSION.md:221`), «para VIIRS 750 manda el
-código» (2026-10-21). Las de más peso: D-4 (qué es una alerta protegida), D-9 (alertas mínimas), D-13 (repetir y
+l. 516-568; D-46 a D-48 en la bitácora, l. 1305-1308, 1470-1471 y 1500). Antes de que el loop numerara sus
+decisiones: criterio de victoria (2026-10-13, `MISSION.md:81`; queda como regla de juego del loop, l. 25-30) y
+regla de la anomalía mayor (2026-10-09, `MISSION.md:221`). La regla de que para VIIRS 750 manda el código de
+MIROVA es texto de `MISSION.md:144`, derivado de una aprobación general de Nicolás, no una frase suya. Las de más peso: D-4 (qué es una alerta protegida), D-9 (alertas mínimas), D-13 (repetir y
 unir intentos aunque tome más tiempo, contra la recomendación del loop), D-20 y D-21 (regla y merge de K), D-48
-(«sobre las decisiones mías haz lo que tú recomiendes», aplicada a 14 decisiones).
+(«sobre las decisiones mías haz lo que tú recomiendes», aplicada a 14 decisiones). Aprobaciones en bloque de
+la recomendación del loop: D-14 a D-16 «sí a todo» (l. 563), D-17 y D-18 «continúa con todo» (l. 560), D-30
+«acepto tus recomendaciones» (l. 535), D-34 (l. 531), D-46 (l. 1500) y D-48.
 
 **Donde corrigió a la IA** (`CLAUDE.md`): A38 (S73, lo paró antes de un borrado masivo), A45 (S75, «¿no tienes que
 salvar la configuración actual antes?»), A62 (S97, insistió en Tupungatito hasta que se cavó hondo), A68 (S103,
 «hay demasiado» en el mapa), A72 (S104, ocultar en el tablero un artefacto que no se debía generar), A77 (S112,
 NdC: insistió cinco veces y tenía razón), A115 (S147, un umbral inventado que el dato ya respondía), y el freno al
-fan-out de S120. **Corrección al encargo**: A97 no menciona a Nicolás. **Caso inverso**: D-33, la IA mostró que la
+fan-out de S120 (memoria `feedback_s120_fanout_consumo.md`, no `CLAUDE.md`). **Corrección al encargo**: A97 no menciona a Nicolás. **Caso inverso**: D-33, la IA mostró que la
 opción que Nicolás había elegido era peor y él la reemplazó por D-34 el mismo día (l. 531-532).
 
 **Lo que no se habría hecho sin él**: el criterio de victoria (es una decisión de valor sobre qué error es peor en
 monitoreo volcánico), las lecturas físicas que separan artefacto de señal real (A54, A72), y los sellos de cada
-pre-registro, que por diseño el agente no puede poner (`LOOP_OBJETIVOS.md` l. 46-48).
+pre-registro, que por diseño el agente no puede poner (`LOOP_OBJETIVOS.md` l. 44-46).
 
 **Tabla 6.1** decisiones D por fecha y tipo (sello, merge a producción, criterio, alcance). **Script POR HACER**:
-`decisiones_D.py`, que lea la tabla del §5 y la bitácora. **POR MEDIR**: cuánto tiempo pasó entre que una decisión
+`decisiones_D.py`, que lea la tabla del §5 y la bitácora y separe «eligió Nicolás» de «aprobó la recomendación».
+**POR MEDIR**: cuánto tiempo pasó entre que una decisión
 quedó lista y Nicolás respondió (es el cuello de botella real del loop), y cuántos mensajes escribió él
 (`medir_tiempo.out` da 581, pero es un techo: incluye encargos entre sesiones como este).
 
@@ -267,21 +280,24 @@ prueba con un operador real (cuánto tarda en leer una alerta, cuántas descarta
 
 ### Capítulo 7. Tiempo y costo (G)
 
-**Mensaje.** Fue barato en dinero y caro en atención. El costo equivalente a API de la ventana medida
-(USD 6.754 a 9.572) es chico frente al tiempo que costó revisar; las 217 a 288 horas de reloj de sesiones activas no
-son horas de Nicolás frente a la pantalla, pero sí el tiempo durante el cual hubo trabajo que él debía revisar.
+**Mensaje (hipótesis por medir).** El costo en dinero se puede medir y es acotado: USD 8.275 a 9.944 equivalentes
+a API en la ventana con transcripts. Lo que no está medido es la atención de Nicolás: las 217 a 288 horas de
+reloj de sesiones activas no son horas suyas frente a la pantalla, pero sí el tiempo durante el cual hubo trabajo
+que él debía revisar. Si el relato quiere decir «barato en dinero, caro en atención», primero hay que medir lo
+segundo.
 
 | medida | valor | estado |
 |---|---|---|
 | Tokens y costo, 2026-05-20 a 10-26 | arriba, §1 | VERIFICADO (script) |
-| Tokens por mes | la salida pasa de 1,6 M (fin de mayo) a 14,0 M (octubre) | VERIFICADO (`medir_transcripts.out`) |
+| Tokens por mes | la salida pasa de 2,1 M (fin de mayo) a 12,9 M (septiembre) y 15,2 M (octubre) | VERIFICADO (`medir_transcripts.out`) |
 | Costo de S1 a ~S62 | sin transcripts | POR MEDIR |
 | Horas de Nicolás | no se separan de las de la sesión | POR MEDIR |
 
-**Método propuesto para el tramo sin transcripts.** Dos cotas, y decir las dos: (a) cota baja, cero costo extra
-(si se quiere hablar sólo de lo medido); (b) cota alta, el costo por día activo de la primera ventana medida
-(fines de mayo) por los 37 días con commit humano antes del 2026-05-20. Si Nicolás tiene el registro de
-facturación o de uso de su cuenta, eso reemplaza la estimación. Nunca dar un número único.
+**Método propuesto para el tramo sin transcripts.** Primero, pedir a Nicolás el registro de uso o facturación de su
+cuenta: si existe, reemplaza cualquier estimación. Si no, una **estimación por extrapolación** (no una cota): el
+costo por día activo de la primera ventana medida (fines de mayo) por los 37 días con commit a nombre de Nicolás
+antes del 2026-05-20, informada con un rango amplio, porque no hay razón para suponer que abril fue más barato que
+mayo. Nunca dar un número único.
 
 **Figura 7.1.** Tokens de salida por mes y por modelo (`medir_transcripts.out`). Se ve el salto de octubre:
 sesiones paralelas, loops y verificadores de otro modelo.
@@ -294,7 +310,8 @@ Propuesta de contenido (cada punto con su caso):
    sino la sobre-publicación (A98).
 2. **Leer el paper renderizado y vigilar las fuentes del autor desde el inicio**: citas del grupo equivocado
    (A9), citas corruptas (A76) y el código de MIROVA descubierto con tres meses de atraso.
-3. **Un cierre sólo con script y nulo medido**: el censo de S145 y S146 encontró 50 de 89 cierres sin respaldo.
+3. **Un cierre sólo con script y nulo medido**: el censo de S145 encontró 50 de 89 cierres sin respaldo citado, y
+   al revisarlos en S146, 7 eran falsos y 1 quedó sin evidencia.
 4. **Pre-registro desde el primer A/B**, no desde el S151.
 5. **Una sola sesión dueña de cada loop y de cada rama**, con worktree propio desde el principio (A44, A47, S153).
 6. **Licencia y declaración de uso de IA** desde el primer commit público.
@@ -354,3 +371,15 @@ lista de casos de la propuesta del congreso (§4 de ese archivo) y el estado del
 7. **Vida de cada error** (`vida_de_errores.py`) para la figura 5.1.
 8. **Fracción de hallazgos que trae el verificador** frente al buscador, en las auditorías S134 a S162.
 9. Resolver las fechas contradictorias de `docs/SESSION_INDEX.md` (S1-S8 y S14).
+
+## 7. Verificación de este documento
+
+Lo revisó un verificador con contexto limpio de otro modelo (Sonnet 5.5), que recibió sólo el documento y las
+rutas de las fuentes. Listó 78 afirmaciones comprobables y verificó 62: 47 VERIFICADAS, 11 EN PARTE, 0 FALSAS y
+4 NO ENCONTRADAS. Todas las EN PARTE y NO ENCONTRADAS se corrigieron en esta versión. Las de más peso: el script de
+tokens subcontaba la salida en ~35 % (arreglado; el costo subió de USD 6.754 a 9.572 a USD 8.275 a 9.944), el
+port de VIIRS 750 reproduce la detección en Octave pero la magnitud sólo en parte, el «0 protegidas perdidas» de K
+vale con la lectura A, el capítulo 6 atribuía a Nicolás decisiones que fueron aprobaciones de la recomendación de
+la IA, y `reglas_A.py` asignaba a algunas reglas la sesión de la marca que las rebajó. Quedaron sin comprobar 16
+afirmaciones de menor peso (fechas internas de las etapas 3 a 5 y las celdas del capítulo 1 que remiten al informe
+del subagente de trayectoria): antes de usarlas en una pieza publicada, comprobarlas contra su fuente.

@@ -14,7 +14,8 @@ BASE = os.path.expanduser("~/.claude/projects")
 carpetas = [d for d in os.listdir(BASE) if "VRP-Chile" in d or d.startswith("D--vrp-trabajo")]
 tot = collections.Counter(); por_modelo = collections.defaultdict(collections.Counter)
 por_mes = collections.defaultdict(collections.Counter)
-n_arch = 0; n_resp = 0; tmin = None; tmax = None; vistos = set()
+CAMPOS = ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens")
+n_arch = 0; n_resp = 0; tmin = None; tmax = None; vistos = {}
 sesiones = collections.Counter()
 for c in carpetas:
     for f in glob.glob(os.path.join(BASE, c, "**", "*.jsonl"), recursive=True):
@@ -32,16 +33,23 @@ for c in carpetas:
                 m = o.get("message") or {}
                 u = m.get("usage") if isinstance(m, dict) else None
                 if not u: continue
-                # una respuesta puede repetirse en varias lineas (bloques); contar por id
+                # una respuesta se escribe en varias lineas (una por bloque) y su output_tokens
+                # crece: la primera trae un marcador (1) y la ultima el total. Se guarda el
+                # MAXIMO por campo y por respuesta (verificador S163: la primera linea subcontaba
+                # la salida en ~35 %).
                 rid = (m.get("id"), o.get("requestId"))
-                if rid in vistos: continue
-                vistos.add(rid); n_resp += 1
-                mod = m.get("model", "?")
-                mes = (ts or "?")[:7]
-                for k in ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens"):
-                    v = u.get(k) or 0
-                    tot[k] += v; por_modelo[mod][k] += v; por_mes[mes][k] += v
-                sesiones["subagente" if es_sub else "principal"] += 1
+                if rid not in vistos:
+                    vistos[rid] = {"mod": m.get("model", "?"), "mes": (ts or "?")[:7],
+                                   "tipo": "subagente" if es_sub else "principal",
+                                   **{k: 0 for k in CAMPOS}}
+                r = vistos[rid]
+                for k in CAMPOS:
+                    r[k] = max(r[k], u.get(k) or 0)
+for r in vistos.values():
+    n_resp += 1
+    sesiones[r["tipo"]] += 1
+    for k in CAMPOS:
+        tot[k] += r[k]; por_modelo[r["mod"]][k] += r[k]; por_mes[r["mes"]][k] += r[k]
 print(f"carpetas={len(carpetas)} archivos_jsonl={n_arch} respuestas_unicas={n_resp}")
 print(f"ventana_de_timestamps: {tmin} a {tmax} (UTC)")
 print("respuestas por tipo:", dict(sesiones))

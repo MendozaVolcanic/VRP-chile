@@ -31,12 +31,21 @@ for m in re.finditer(r"\n- \*\*A(\d+)[.\s,]", txt):
     ini = m.start()
     sig = re.search(r"\n- \*\*A\d+[.\s,]|\n## ", txt[ini + 5:])
     cuerpo = txt[ini: ini + 5 + (sig.start() if sig else 4000)]
-    ses = re.search(r"\(S(\d+)", cuerpo) or re.search(r"\bS(\d+)\b", cuerpo)
-    if ses is None:
+    # el origen se busca SOLO antes de la primera marca de advertencia: las marcas citan la
+    # sesion que rebajo la regla, no la que la escribio (verificador S163: A3, A10, A23 salian
+    # con la sesion de la marca)
+    antes = cuerpo.split("⚠", 1)[0]
+    ses = re.search(r"\(S(\d+)", antes)
+    suelta = re.search(r"\bS(\d+)\b", antes)  # una "SNN" suelta puede ser un ejemplo (A25 cita S33)
+    if ses is not None:
+        origen = int(ses.group(1))
+    elif n <= 26:  # A1-A26 viven bajo los encabezados "## Reglas operacionales SNN"
         hs = re.findall(r"## Reglas operacionales S(\d+)", txt[:ini])
         origen = int(hs[-1]) if hs else None
-    else:
-        origen = int(ses.group(1))
+    elif suelta is not None:
+        origen = int(suelta.group(1))
+    else:  # despues de A26 no hay encabezado: se hereda la sesion de la regla anterior
+        origen = reglas[max(reglas)][0] if reglas else None
     marcas = sorted({x.upper() for x in MARCA.findall(cuerpo)})
     reglas[n] = (origen, marcas)
 
