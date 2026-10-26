@@ -32,6 +32,12 @@ MUT = {
                          "u_abs, s1, s2, n1, n2, e1, e2 = -0.7, 10, 5, 0.02, 0.010, 0.01, 0.010", "ATRAPADA"),
     "remuestreo_vecino": ('(X, Y), method="linear"))', '(X, Y), method="nearest"))', "ATRAPADA"),
     "radio_recorte_30": ("RADIO_RECORTE_KM = 45.0 ", "RADIO_RECORTE_KM = 30.0 ", "ATRAPADA"),
+    # el fillmissing2 de MATLAB (S163): cada pieza del desempate tiene que importar
+    "fill_sin_desempate": ("if _lado_perturbado(pts[a], pts[b], pts[c], pts[d]) > 0:",
+                           "if _incircle(pts[a], pts[b], pts[c], pts[d]) > 0:", "ATRAPADA"),
+    "fill_ejes_cambiados": ("    filas, cols = np.indices(A.shape)\n    ok = np.isfinite(A)",
+                            "    cols, filas = np.indices(A.shape)\n    ok = np.isfinite(A)", "ATRAPADA"),
+    "fill_lexico_invertido": ("key=lambda t: t[0])", "key=lambda t: t[0][::-1])", "ATRAPADA"),
     "control_que_se_cae": ("    m13 = np.asarray(m13, float)\n    vacio = np.zeros(m13.shape, bool)",
                            "    raise RuntimeError('mutación de control')", "CAÍDA"),
 }

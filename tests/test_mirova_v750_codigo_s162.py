@@ -135,11 +135,54 @@ def test_etna_igual_al_oraculo_y_a_produccion_de_miroVA():
     m = MV.detectar_mirova(S["ZI_M13"], S["ZI_M15"], S["BOX"], int(S["dayflag"].item()), sg)
     ref = ORA.detectar(S["ZI_M13"], S["ZI_M15"], S["BOX"], int(S["dayflag"].item()), sg)[0]
     assert np.array_equal(m, ref) and int(m.sum()) == 5
-    v, vr = MV.vrp_mirova(S["ZI_M13"], m), ORA.vrp(S["ZI_M13"], ref)
-    assert v["VRP_MW"] == pytest.approx(vr["VRP_MW"], rel=1e-9)
+    v = MV.vrp_mirova(S["ZI_M13"], m)
     assert v["L_hot"] == pytest.approx(1.965342180, rel=1e-8)
-    # el fondo de fillmissing2 tiene una banda de triangulación de ~3 % (control_etna_salida.txt): VRP contra el OSF
-    assert v["VRP_MW"] * 1e6 / 9889528.362 == pytest.approx(1.0, abs=0.03)
+    # con el fillmissing2 de MATLAB el fondo es el de producción al último decimal publicado (Tot_Lmir_bk 1,072886152)
+    assert v["L_bk"] == pytest.approx(1.072886152, abs=1e-9)
+    assert v["VRP_MW"] * 1e6 == pytest.approx(9889528.362, rel=1e-8)
+
+
+ORO = REPO / "tests/data/fillmissing2_matlab_o2.npz"
+
+
+def _oro():
+    """8 escenas de O2 con la salida de MATLAB R2026b (S163, resultado_o2.mat md5 1f7fdc4b...ba43): Etna, alertas de
+    1, 2, 5, 8 y 11 píxeles, incluidas la de Villarrica 2026-09-19 05:48 (MATLAB 0,4212 MW, los ports viejos 0,7438) y
+    tres que un desempate por estiramiento de filas no reproduce."""
+    z = np.load(ORO)
+    return [(int(z["k_o2"][n]), z[f"m13_{n}"], z[f"mask_{n}"], z[f"bk_{n}"], float(z[f"vrp_{n}"]), float(z[f"lbk_{n}"]))
+            for n in range(len(z["k_o2"]))]
+
+
+def _hueco(m13, mask):
+    from scipy.ndimage import binary_dilation
+    enm = m13.copy()
+    enm[mask] = np.nan
+    k = 3 if mask.sum() <= 4 else (5 if mask.sum() <= 30 else 7)
+    enm[binary_dilation(np.isnan(enm), structure=np.ones((k, k), bool))] = np.nan
+    return enm
+
+
+def test_fondo_y_vrp_iguales_a_matlab():
+    """Prueba de oro: el fondo celda por celda y el VRP, contra MATLAB, en las 8 escenas."""
+    for k, m13, mask, bk, vrp, lbk in _oro():
+        enm = _hueco(m13, mask)
+        h = np.isnan(enm)
+        B = MV._fillmissing2_lineal(enm)
+        assert np.nanmax(np.abs(B - bk)[h]) < 1e-12, k
+        v = MV.vrp_mirova(m13, mask)
+        assert v["VRP_MW"] == pytest.approx(vrp, rel=1e-12) and v["L_bk"] == pytest.approx(lbk, rel=1e-12), k
+
+
+def test_el_oro_discrimina():
+    """Pregunta 1 del instrumento: un fillmissing2 que no es el de MATLAB (Qhull de scipy, el del oráculo) falla en al
+    menos 4 de las 8: si el oro no distinguiera, la prueba de arriba no probaría nada."""
+    import mirova_v750_r2 as ORA
+    malas = 0
+    for k, m13, mask, bk, vrp, lbk in _oro():
+        enm = _hueco(m13, mask)
+        malas += np.nanmax(np.abs(ORA._fillmissing2_lineal(enm) - bk)[np.isnan(enm)]) > 1e-9
+    assert malas >= 4
 
 
 def _escena(caliente=True, fila=33, col=33):
@@ -152,8 +195,11 @@ def _escena(caliente=True, fila=33, col=33):
     return MV.temperatura_a_radiancia(T13, MV.LAMBDA_M13), MV.temperatura_a_radiancia(T15, MV.LAMBDA_M15)
 
 
-def test_sintetico_igual_al_oraculo():
+def test_sintetico_igual_al_oraculo(monkeypatch):
+    """Máscara idéntica al oráculo; el VRP con el mismo fillmissing2 (el de MATLAB) en los dos, así que esto mira el
+    resto del .m del VRP: halo, suma de los alertados, coeficiente."""
     import mirova_v750_r2 as ORA
+    monkeypatch.setattr(ORA, "_fillmissing2_lineal", lambda A, jitter=0.0, semilla=0: MV._fillmissing2_lineal(A))
     m13, m15 = _escena()
     for tipo in ("def", "sens", "corona"):
         box = MV.caja_roi(tipo)
