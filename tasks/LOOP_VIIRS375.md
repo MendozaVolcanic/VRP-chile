@@ -16,6 +16,12 @@ una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora 
 
 ## 0. Cierre de la sesión VIIRS 375 (2026-10-24, S162)
 
+> **Relevo, 2026-10-25**: la coordinadora ahora es **S163** (`local_8a135e90-b711-4bb9-9dec-ff02036f206b`), no S162.
+> Despachos y resultados se le piden y mandan a ella. Informado por S163, sin verificar aquí: el verificador limpio de las
+> 6 protegidas sólo OCR de Suomi NPP (rama `s162-verif-protegidas-snpp`, `3c6836076`) confirmó que **no son de cráter**,
+> y S163 aplica la decisión 9 con D-48 (anotado en su `tasks/LOOP_OBJETIVOS.md` §6). Al retomar, leer esa decisión antes
+> de tocar el veto de V375-E (decisión b.2 de abajo).
+
 Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
 evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).
 
@@ -90,7 +96,7 @@ sin guiones largos, rutas absolutas, explicar como geólogo.
    protegidas sólo OCR; (b) si PD1 está decidido, poner la caja en PREREGISTRO_E.md como adenda; (c) V375-E sólo cuando
    exista la vía en pipeline/ (PD3, A45) y el evaluador común con d′ (#905); (d) V375-F después de E.
 4. Reglas duras: nada en pipeline/ sin pre-registro sellado, verificador limpio, tag defensivo y el sí de Nicolás (A45);
-   todo despacho de GitHub Actions se pide a la coordinadora (local_4152952c); sólo EARTHDATA_TOKEN; git add por archivo;
+   todo despacho de GitHub Actions se pide a la coordinadora S163 (local_8a135e90-b711-4bb9-9dec-ff02036f206b); sólo EARTHDATA_TOKEN; git add por archivo;
    nunca git stash; verificador con contexto limpio de otro modelo antes de aceptar un resultado; parar si C: o D: bajan de 3 GB.
 5. Si la sesión no alcanza: anota en la bitácora de tasks/LOOP_VIIRS375.md qué quedó a medias, commitea y avisa a la coordinadora.
 ```
