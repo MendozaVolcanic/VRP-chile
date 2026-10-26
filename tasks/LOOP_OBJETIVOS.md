@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 14:30 UTC (S164, vuelta 8): pre-registro del diurno sobre K recibido; falta verificar la v3.1
+- `diurno-k-prereg` entregó el pre-registro del A/B diurno sobre K (1.32, D-10, #813): rama
+  `claude/s163-diurno-k-prereg-5c4f44` `9700e4e0b` (en el remoto), `experiments/_s163_diurno_k/PREREGISTRO.md` v3.1, sha256
+  de 29 archivos en `objetivos_sha256.txt`; traspaso en la carpeta compartida de S163 (`diurno-k-prereg_traspaso.md`).
+  Tres verificaciones limpias, pero **los dos cambios de la v3.1** (variante d con FALSO_POSITIVO; tope de GANA del
+  placebo c) **no tienen verificador propio**: pedido uno corto sobre ese diff antes de llevarlo al sello.
+- Lo que sella Nicolás (§10): reemplazo de la regla G1/G2 de la ADENDA_K (D-25); caso e (e-ii recomendado); robustez del
+  §6.4 a DECIDE; negativo diurno por periodo; sin W7 hasta reparar la referencia (D-39); VIIRS 750 no adopta solo.
+- Costo estimado: ~117 h de runner, ~39 h de reloj con 3 en paralelo. Va después de las tandas t1 a t3 de MOD-D.
+- Aviso: el verificador v3 terminó tres procesos de Python por línea de comandos (quizás no todos suyos). Segunda vez hoy
+  que un verificador mata procesos de más (la otra, en D-39 con `bash.exe`): pedido matar sólo por PID propio.
+- NRT: sin corridas a las 13:10 ni 14:10 UTC; es el patrón conocido (cron externo de 01:10 a 12:10 UTC; en la tarde sólo
+  el `schedule` de GitHub, atrasado). Todas verdes.
+
 ### 2026-10-26 14:07 UTC (S164, vuelta 7): humo de MOD-D aceptado; tanda t1 despachada (run 40336655402)
 - Humo (run 40333783937, success 13:55 UTC): PASA según `loop-modis-2`, con verificador limpio Sonnet («pasa con reparos,
   ninguno bloquea pedir las tandas»). Contado (A108): 23 pasadas de los 5 gránulos con fila «ok», 0 errores; K recalculado
