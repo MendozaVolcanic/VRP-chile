@@ -1,0 +1,483 @@
+{
+ "pruebas": [
+  "experiments/_s163_diurno_k/test_evaluar_diurno_k.py"
+ ],
+ "mutaciones": [
+  {
+   "id": "M01",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if m[\"p2\"] == \"GANA\":\n        return ADOPTAR, \"a\"",
+   "nuevo": "    if m[\"p2\"] == \"PIERDE\":\n        return ADOPTAR, \"a\"",
+   "que": "caso a mira PIERDE en vez de GANA"
+  },
+  {
+   "id": "M02",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if m[\"neto\"] <= 0:",
+   "nuevo": "    if m[\"neto\"] < 0:",
+   "que": "neto 0 deja de contar como no empeora"
+  },
+  {
+   "id": "M03",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "con_beneficio = m[\"P\"] >= 1 and m[\"D\"]",
+   "nuevo": "con_beneficio = m[\"P\"] >= 1",
+   "que": "se quita la prueba D"
+  },
+  {
+   "id": "M04",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "con_beneficio = m[\"P\"] >= 1 and m[\"D\"]",
+   "nuevo": "con_beneficio = m[\"P\"] > 1 and m[\"D\"]",
+   "que": "exige 2 protegidas"
+  },
+  {
+   "id": "M05",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "if opcion == \"e-i\" and m[\"Qd\"] <= m[\"Qn\"]:",
+   "nuevo": "if opcion == \"e-i\" and m[\"Qd\"] < m[\"Qn\"]:",
+   "que": "Q_d igual a Q_n deja de bastar"
+  },
+  {
+   "id": "M06",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "if opcion == \"e-i\" and m[\"Qd\"] <= m[\"Qn\"]:",
+   "nuevo": "if m[\"Qd\"] <= m[\"Qn\"]:",
+   "que": "e-ii adopta como e-i"
+  },
+  {
+   "id": "M07",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "return (SIN_CAMBIO if not m[\"publica\"] else NO_ADOPTAR), \"c\"",
+   "nuevo": "return SIN_CAMBIO, \"c\"",
+   "que": "publicar sin beneficio pasa por SIN CAMBIO"
+  },
+  {
+   "id": "M08",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if ADOPTAR in vs and NO_ADOPTAR in vs:\n        return DECIDE",
+   "nuevo": "    if ADOPTAR in vs and NO_ADOPTAR in vs:\n        return ADOPTAR",
+   "que": "sensores mezclados adoptan"
+  },
+  {
+   "id": "M09",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if DECIDE_M4 in vs:\n        return DECIDE_M4",
+   "nuevo": "    if False:\n        return DECIDE_M4",
+   "que": "un sensor en DECIDE no manda"
+  },
+  {
+   "id": "M10",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if r1:\n",
+   "nuevo": "    if False:\n",
+   "que": "R1 con compuertas en verde no invalida"
+  },
+  {
+   "id": "M11",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if principal in (ADOPTAR, NO_ADOPTAR):",
+   "nuevo": "    if principal in (ADOPTAR,):",
+   "que": "robustez sólo para ADOPTAR"
+  },
+  {
+   "id": "M12",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "if bloques_a >= MIN_BLOQUES_PLACEBO and res_a != \"GANA\":",
+   "nuevo": "if bloques_a > MIN_BLOQUES_PLACEBO and res_a != \"GANA\":",
+   "que": "placebo a exige 6 bloques"
+  },
+  {
+   "id": "M13",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "MAX_FALSOS_C = 7",
+   "nuevo": "MAX_FALSOS_C = 8",
+   "que": "placebo c tolera 8 falsos"
+  },
+  {
+   "id": "M14",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "return bool(binom.sf(x - 1, n, p_sup) < ALFA)",
+   "nuevo": "return bool(binom.sf(x, n, p_sup) < ALFA)",
+   "que": "cola de I4c corrida en uno"
+  },
+  {
+   "id": "M15",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "return bool(binom.sf(recuperadas - 1, alertas_obs, qd) < ALFA)",
+   "nuevo": "return bool(binom.sf(recuperadas, alertas_obs, qd) < ALFA)",
+   "que": "cola de D corrida en uno"
+  },
+  {
+   "id": "M16",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if qd <= 0:\n        return True",
+   "nuevo": "    if qd <= 0:\n        return False",
+   "que": "D falla cuando no publica en negativos"
+  },
+  {
+   "id": "M17",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "t1 = [r for r in recs if r.get(\"t1\") is True or r.get(\"fuente_hotspot\") in FUENTES_TEST1]",
+   "nuevo": "t1 = [r for r in recs if r.get(\"t1\") is True]",
+   "que": "I1 no mira test1_roi"
+  },
+  {
+   "id": "M18",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "otro = [r for r in recs if r.get(\"sha\") != sha]",
+   "nuevo": "otro = []",
+   "que": "I1 no mira el sha"
+  },
+  {
+   "id": "M19",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "dia_c = [r for r in recs_c if r[\"b\"] in SENSORES_DIA and r[\"es_dia\"]]",
+   "nuevo": "dia_c = []",
+   "que": "I2 no mira el día del control"
+  },
+  {
+   "id": "M20",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "noche_diag = [r for r in recs_b if not r[\"es_dia\"] and r.get(\"diag_dia\")]",
+   "nuevo": "noche_diag = []",
+   "que": "I2 no mira umbrales diurnos de noche"
+  },
+  {
+   "id": "M21",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "            if hay_mirova and not hay_b:",
+   "nuevo": "            if False:",
+   "que": "I2 no exige que la palanca actúe"
+  },
+  {
+   "id": "M22",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "            if f[\"pasada\"].estado == \"alerta\":\n                prob.append(\"I4a",
+   "nuevo": "            if False:\n                prob.append(\"I4a",
+   "que": "I4a apagada"
+  },
+  {
+   "id": "M23",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "if dia_b[(f[\"pasada\"].volcano, s, f[\"dia\"])] == 0})",
+   "nuevo": "if dia_b[(f[\"pasada\"].volcano, s, f[\"dia\"])] == -1})",
+   "que": "I4b apagada"
+  },
+  {
+   "id": "M24",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "(rc[\"pub\"] and round(float(rc[\"disp\"] or 0), 6)",
+   "nuevo": "(False and round(float(rc[\"disp\"] or 0), 6)",
+   "que": "I5 no mira la magnitud"
+  },
+  {
+   "id": "M25",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "if bool(rc[\"pub\"]) != bool(rb[\"pub\"]) or",
+   "nuevo": "if False or",
+   "que": "I5 no mira la publicación"
+  },
+  {
+   "id": "M26",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "            f[\"cob\"][control] = ec.OBSERVADO",
+   "nuevo": "            pass",
+   "que": "el control sintético no queda observado"
+  },
+  {
+   "id": "M27",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "neg_n = [f for f in T if not f[\"es_dia\"]",
+   "nuevo": "neg_n = [f for f in T if f[\"es_dia\"]",
+   "que": "Q_n de día"
+  },
+  {
+   "id": "M28",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"Qn\": sum(pub(f, control) for f in neg_n)",
+   "nuevo": "\"Qn\": sum(pub(f, brazo) for f in neg_n)",
+   "que": "Q_n del brazo"
+  },
+  {
+   "id": "M29",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "if ec._disp(f[\"rec\"][brazo]) >= cm.UMBRAL_PROTEGIDA_MW)",
+   "nuevo": "if ec._disp(f[\"rec\"][brazo]) > cm.UMBRAL_PROTEGIDA_MW)",
+   "que": "1 MW exacto no es clase Bajo"
+  },
+  {
+   "id": "M30",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"publica\": any(r[\"pub\"] for r in recs_b if r[\"es_dia\"] and r[\"b\"] == s),",
+   "nuevo": "\"publica\": True,",
+   "que": "siempre publica"
+  },
+  {
+   "id": "M31",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if cob_n[\"veredicto\"] != ec.COBERTURA_OK:",
+   "nuevo": "    if False:",
+   "que": "I3 apagada"
+  },
+  {
+   "id": "M32",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "recs = {lado: [r for r in rs if r[\"dt\"].strftime(\"%Y-%m-%d\") not in excl_d] for lado, rs in recs_por_lado.items()}",
+   "nuevo": "recs = {lado: list(rs) for lado, rs in recs_por_lado.items()}",
+   "que": "excluir días no saca records"
+  },
+  {
+   "id": "M34",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "FRACCION_A = 0.5",
+   "nuevo": "FRACCION_A = 0.0",
+   "que": "placebo a no toca nada"
+  },
+  {
+   "id": "M35",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if not re.fullmatch(r\"[0-9a-f]{40}\", str(sha)):",
+   "nuevo": "    if False:",
+   "que": "acepta sha abreviado"
+  },
+  {
+   "id": "M36",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    Tn = [f for f in T if not f[\"es_dia\"] or f[\"pasada\"].sensor_bucket not in SENSORES_DIA]",
+   "nuevo": "    Tn = T",
+   "que": "I3 mira también el día"
+  },
+  {
+   "id": "M37",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"D\": discrimina(rec_alertas, len(prot) + len(amb), qd)",
+   "nuevo": "\"D\": True",
+   "que": "D siempre cumple"
+  },
+  {
+   "id": "M38",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "and ec._pub(f[\"rec\"][control]) and not ec._pub(f[\"rec\"][brazo])]",
+   "nuevo": "and not ec._pub(f[\"rec\"][brazo])]",
+   "que": "R1 cuenta protegidas que nadie publica"
+  },
+  {
+   "id": "M39",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "        falsos += res_c in (\"GANA\", \"PIERDE\")",
+   "nuevo": "        falsos += 0",
+   "que": "placebo c no cuenta"
+  },
+  {
+   "id": "M40",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "esperado = dict(declarado, ENABLE_DAYTIME_VIIRS=(brazo != control),",
+   "nuevo": "esperado = dict(declarado, ENABLE_DAYTIME_VIIRS=(brazo == control),",
+   "que": "logs: palanca al revés"
+  },
+  {
+   "id": "M41",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    excl = lambda f, s=s: not _sensor_dia(f, s)  # noqa: E731\n    contrib",
+   "nuevo": "    excl = lambda f, s=s: False  # noqa: E731\n    contrib",
+   "que": "P2 diurno cuenta también la noche"
+  },
+  {
+   "id": "M42",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    prot = [f for f in obs_d if f[\"protegida\"]]",
+   "nuevo": "    prot = [f for f in obs_d if f[\"pasada\"].estado == \"alerta\"]",
+   "que": "P cuenta alertas bajo 1 MW"
+  },
+  {
+   "id": "M43",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "        return (f[\"pasada\"].volcano, f[\"pasada\"].sensor_bucket, f[\"dia\"], f[\"es_dia\"])",
+   "nuevo": "        return (f[\"pasada\"].volcano, f[\"pasada\"].sensor_bucket, f[\"dia\"])",
+   "que": "día con alerta vuelve a mirar el día UTC entero"
+  },
+  {
+   "id": "M44",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    T = [f for f in T if f[\"clave\"] not in excl_k]",
+   "nuevo": "    T = T",
+   "que": "excluir claves no saca las pasadas"
+  },
+  {
+   "id": "M45",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "            if f[\"pasada\"].estado == \"alerta\":\n                prob.append(\"I4a",
+   "nuevo": "            if f[\"protegida\"]:\n                prob.append(\"I4a",
+   "que": "I4a sólo mira protegidas"
+  },
+  {
+   "id": "M46",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "        if n:\n            distintos.append(\"I5 %d records",
+   "nuevo": "        if False:\n            distintos.append(\"I5 %d records",
+   "que": "I5 no exige los mismos records"
+  },
+  {
+   "id": "M47",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "g is not None and g < UMBRAL_REFLEJO_GRADOS",
+   "nuevo": "g is not None and g > UMBRAL_REFLEJO_GRADOS",
+   "que": "filtro de reflejo al revés"
+  },
+  {
+   "id": "M48",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "c = math.cos(sz) * math.cos(soz) - math.sin(sz)",
+   "nuevo": "c = math.cos(sz) * math.cos(soz) + math.sin(sz)",
+   "que": "signo de la fórmula de MIROVA"
+  },
+  {
+   "id": "M49",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    banderas_por_periodo(T, otra_como_negativo)\n",
+   "nuevo": "    pass\n",
+   "que": "no se recalculan las banderas por periodo"
+  },
+  {
+   "id": "X1",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"tabla\": evaluar(pasadas_de(filas, \"tabla\", ventanas), recs",
+   "nuevo": "\"tabla\": evaluar(pasadas_de(filas, \"union\", ventanas), recs",
+   "que": "variante tabla usa la unión (verificador v2)"
+  },
+  {
+   "id": "X2",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"sin_W2\": evaluar(pas_u, recs, control, brazo, excluir_dias=dias_w2, **kw)",
+   "nuevo": "\"sin_W2\": evaluar(pas_u, recs, control, brazo, **kw)",
+   "que": "variante sin W2 no excluye (verificador v2)"
+  },
+  {
+   "id": "X3",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "float(beta.ppf(1 - ALFA, vara",
+   "nuevo": "float(beta.ppf(1 - 3 * ALFA, vara",
+   "que": "p_sup al 85 % (verificador v2)"
+  },
+  {
+   "id": "X4",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"sin_reflejo\": evaluar(pas_u, recs, control, brazo, excluir_claves=reflejo, **kw)",
+   "nuevo": "\"sin_reflejo\": evaluar(pas_u, recs, control, brazo, **kw)",
+   "que": "variante sin reflejo no excluye (verificador v2)"
+  },
+  {
+   "id": "X5",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "                if b == \"MODIS\" and dia:\n                    continue          # MODIS diurno",
+   "nuevo": "                if False:\n                    continue          # MODIS diurno",
+   "que": "entra MODIS diurno (verificador v2)"
+  },
+  {
+   "id": "X6",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "                if k in vistos:\n                    continue\n",
+   "nuevo": "",
+   "que": "sin deduplicar (verificador v2)"
+  },
+  {
+   "id": "X7",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    return _solar_elevation(lat, lon, instante.replace(tzinfo=None)) > 0",
+   "nuevo": "    return _solar_elevation(lat, lon, instante.replace(tzinfo=None)) > 25",
+   "que": "día con el sol sobre 25 grados (verificador v2)"
+  },
+  {
+   "id": "M50",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    if por_sensor.get(\"VIIRS750\") == ADOPTAR:\n",
+   "nuevo": "    if False:\n",
+   "que": "VIIRS 750 adopta solo"
+  },
+  {
+   "id": "M51",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "        if otra_como_negativo and f[\"es_dia\"]:",
+   "nuevo": "        if False:",
+   "que": "variante otra como negativo no hace nada"
+  },
+  {
+   "id": "M52",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    cob_n = ec.cobertura(Tn, {lado: [r for r in rs if not r[\"es_dia\"]] for lado, rs in recs.items()}, control)",
+   "nuevo": "    cob_n = ec.cobertura(Tn, recs, control)",
+   "que": "I3 con records diurnos"
+  },
+  {
+   "id": "M53",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "            if ic[k] is not None and ib[k] is not None and ic[k] != ib[k]]",
+   "nuevo": "            if False]",
+   "que": "huella nocturna no compara"
+  },
+  {
+   "id": "M54",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"otra_como_negativo\": evaluar(pas_u, recs, control, brazo, otra_como_negativo=True, **kw)[\"global\"]",
+   "nuevo": "\"otra_como_negativo\": principal[\"global\"]",
+   "que": "variante d no se calcula"
+  },
+  {
+   "id": "M55",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "                                    and not k.startswith(\"diag_\")}",
+   "nuevo": "}",
+   "que": "la huella vuelve a incluir los diag_"
+  },
+  {
+   "id": "M56",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "CAMPOS_VOLATILES = (\"updated\", \"processed_utc\", \"first_processed_utc\", \"regimen\")",
+   "nuevo": "CAMPOS_VOLATILES = (\"updated\", \"processed_utc\", \"regimen\")",
+   "que": "first_processed_utc deja de ser volátil"
+  },
+  {
+   "id": "M57",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "        pas = [p._replace(estado=\"rutina\") if (p.estado == \"fp\"",
+   "nuevo": "        pas = [p._replace(estado=\"rutina\") if (False and p.estado == \"fp\"",
+   "que": "variante d no incluye los FALSO_POSITIVO"
+  },
+  {
+   "id": "M58",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "MAX_GANA_C = 4",
+   "nuevo": "MAX_GANA_C = 5",
+   "que": "tope de GANA del placebo c a 5"
+  },
+  {
+   "id": "M59",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "        gana += res_c == \"GANA\"",
+   "nuevo": "        gana += 0",
+   "que": "no cuenta los GANA del placebo c"
+  },
+  {
+   "id": "M60",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "and es_dia_vol(p.volcano, p.instante)) else p for p in pas]",
+   "nuevo": ") else p for p in pas]",
+   "que": "la variante d reclasifica también los FALSO_POSITIVO nocturnos (verificador v3.1, N3)"
+  },
+  {
+   "id": "M61",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "\"problemas\": juzgar_i6(res_a, det_a[\"B\"], falsos, gana)}",
+   "nuevo": "\"problemas\": juzgar_i6(res_a, det_a[\"B\"], falsos)}",
+   "que": "los GANA no llegan al juicio (verificador v3.1, N1)"
+  },
+  {
+   "id": "C-CAIDA",
+   "archivo": "experiments/_s163_diurno_k/evaluar_diurno_k.py",
+   "viejo": "    p_sup = dict(p_sup_override or p_sup)",
+   "nuevo": "    raise RuntimeError(\"control de caida\")",
+   "que": "CONTROL: tiene que salir CAIDA, no ATRAPADA"
+  }
+ ]
+}

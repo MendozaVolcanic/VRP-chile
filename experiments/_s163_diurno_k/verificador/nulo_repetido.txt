@@ -1,0 +1,19 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+pasadas: 10411; diurnas VIIRS con record sintético: 5046
+  VIIRS375: {'negativo': 1487, 'otra': 1024, 'alerta_mb': 10, 'protegida': 26}
+  VIIRS750: {'negativo': 2223, 'otra': 270, 'protegida': 6}
+control positivo (sólo las alertas) VIIRS375: P2 GANA neto -10, P 26 de 26, Q_d 0.0000, Q_n 0.0351 (de 1482 negativos nocturnos de producción), D True -> e-i ADOPTAR / e-ii ADOPTAR
+control positivo (sólo las alertas) VIIRS750: P2 SIN SUSTRATO neto +0, P 6 de 6, Q_d 0.0000, Q_n 0.0094 (de 2335 negativos nocturnos de producción), D True -> e-i ADOPTAR / e-ii ADOPTAR
+control negativo (todas las diurnas) VIIRS375: P2 PIERDE neto +1477, P 26 de 26, Q_d 1.0000, Q_n 0.0351 (de 1482 negativos nocturnos de producción), D False -> e-i NO ADOPTAR / e-ii NO ADOPTAR
+control negativo (todas las diurnas) VIIRS750: P2 PIERDE neto +2223, P 6 de 6, Q_d 1.0000, Q_n 0.0094 (de 2335 negativos nocturnos de producción), D False -> e-i NO ADOPTAR / e-ii NO ADOPTAR
+azar q=0.005 VIIRS375 (200 rep): GANA 0, ADOPTAR e-i 4, ADOPTAR e-ii 0, D cumple 5, P>=1 33
+azar q=0.005 VIIRS750 (200 rep): GANA 0, ADOPTAR e-i 10, ADOPTAR e-ii 0, D cumple 10, P>=1 10
+azar q=0.020 VIIRS375 (200 rep): GANA 0, ADOPTAR e-i 4, ADOPTAR e-ii 0, D cumple 4, P>=1 79
+azar q=0.020 VIIRS750 (200 rep): GANA 0, ADOPTAR e-i 0, ADOPTAR e-ii 0, D cumple 1, P>=1 23
+azar q=0.050 VIIRS375 (200 rep): GANA 0, ADOPTAR e-i 0, ADOPTAR e-ii 0, D cumple 5, P>=1 151
+azar q=0.050 VIIRS750 (200 rep): GANA 0, ADOPTAR e-i 0, ADOPTAR e-ii 0, D cumple 12, P>=1 47
+azar q=0.200 VIIRS375 (200 rep): GANA 0, ADOPTAR e-i 0, ADOPTAR e-ii 0, D cumple 14, P>=1 198
+azar q=0.200 VIIRS750 (200 rep): GANA 0, ADOPTAR e-i 0, ADOPTAR e-ii 0, D cumple 4, P>=1 156
+
+(i), (iii) y (iv): OK
+done 0
