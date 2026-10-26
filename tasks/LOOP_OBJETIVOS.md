@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26, servidor 04:27 UTC (S163, vuelta 10): CI de main verde tras #908; reserva del borde medida en V375
+- CI de main verde sobre `a6d3935cc` (merge de #908). NRT corriendo (04:10). Sin issue nuevo del auto-audit. Disco C: 25 GB,
+  D: 9,6 GB. Ramas de las hijas en el remoto.
+- `loop-viirs375` (`da0693783`, `o2_375/envolvente_v375.py`): 0 de 422 escenas con celdas de alerta fuera de la envolvente
+  convexa, así que la reserva del borde del verificador no toca su vara; 12 escenas tienen celdas del hueco dilatado fuera
+  (orilla de la pasada), que no entran en L_bk; magnitud igual con y sin ellas (C13 0,999). Vara PRELIMINAR sólo por la
+  prueba de oro en MATLAB.
+
 ### 2026-10-26 ~04:20 UTC (S163): V375-A cableado; la referencia del checkout perdió filas de Chillán
 - `loop-viirs375` (`e48843858`): `protegidas_crater_v375.py` aplica `protegida_de_crater` de #903 (copiada de main sin
   cambios) a las 81 protegidas de S159, S162 y S162b: 70 de cráter; las 11 que no, todas por `ocr_snpp_antes_del_hito`.
