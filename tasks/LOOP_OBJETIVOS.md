@@ -569,6 +569,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 16:58 UTC (S164, vuelta 17): pre-registro diurno SELLADO por Nicolás; W1 despachada (run 40364164845)
+- Nicolás, textual: «Sello el pre-registro diurno 68687d2d4 con las seis recomendaciones (e-ii en el caso e).» Tag
+  `s163-diurno-k-sellado` sobre `68687d2d4` (anotado con sus palabras).
+- PR #916 (sólo `experiments/_s163_diurno_k/`, 88 archivos; CI verde) mergeado con merge commit `b9288fc23`, para que el
+  commit sellado quede en la historia de `main`.
+- **Desviación operativa del §8, antes de ver datos**: el §8 dice «tag `s163-diurno-k-codigo` sobre `main` después del
+  merge», pero la comprobación del propio §8 (`git diff --stat <sello> <tag> -- <las 29 rutas de objetivos_sha256.txt>`)
+  sobre `b9288fc23` **no da vacío**: #907 y #914, mergeados hoy, cambiaron `pipeline/profile.py`, `pipeline/store.py` y
+  `scripts/evaluador_comun.py`. Con un tag sobre `main` el evaluador rechazaría sus sha256. Por eso el tag
+  `s163-diurno-k-codigo` va **sobre el commit sellado `68687d2d4`** (base `047bd5692`), donde las 29 rutas son
+  exactamente las selladas; el propósito del §8 (que el código despachado sea el sellado) se cumple al pie de la letra.
+  `tests/test_perfiles_diurno_k_s154.py` en ese commit: 3 de 3 (desde un `git archive` en el scratchpad).
+- W1 despachada a las 16:58 UTC: `gh workflow run reproc-s151-ab-diurno.yml --ref s163-diurno-k-codigo` con
+  `preregistro_aprobado=si`, 2026-03-01 a 2026-03-20, `["Lascar"]`,
+  `brazos=["_s154_ab_diurno_k_control","_s154_ab_diurno_k_on"]`, `control=_s154_ab_diurno_k_control`; run
+  **40364164845** sobre `68687d2d4`. Sirve para medir la duración del job diurno sobre K y decidir si W2 a W6 van enteras
+  (5 despachos de 22 jobs) o en mitades (10).
+
 ### 2026-10-26 16:41 UTC (S164, vuelta 16): Nicolás aprueba MOD-D como CANDIDATO y la fase 3
 - Nicolás, textual: «Apruebo MOD-D como CANDIDATO: lleva la vía a pipeline/ con la regla de MATLAB, flag apagado, tag
   defensivo antes del primer edit.»
