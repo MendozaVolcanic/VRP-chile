@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 16:25 UTC (S164, vuelta 13): censo de MOD-D completo y evaluado; DECIDE NICOLÁS (verificador en curso)
+- Conteo (`contar_tanda.py`, salidas `experiments/_s162_modis_paquete/contar_t{1,2,3}_salida.txt` de
+  `claude/s162-modis-2-0dd578`): t1 1.814/1.814, t2 1.837/1.837, t3 1.814/1.814; **5.465 de 5.465 ok**, sin faltantes ni
+  repetidos, cabecera con `865174abe` en cada parte.
+- `evaluar_paquete.py` desde el checkout del tag (commit `3a1796431`, carpeta `censo/`): **DECIDE NICOLÁS**, todos los
+  controles OK. Lo único que impide CANDIDATO es **P1b = 1**: Láscar 2026-04-25 07:35, K 1,245 MW, PM 0,973, MIROVA 1,28,
+  alerta de 1 píxel (con la regla de `fillmissing2` de MATLAB el PM da 1,112, sobre 1 MW). P1 sin pérdidas. P2 GANA (K 49
+  errores, PM 8, neto -41, 50 bloques, p 1/10001). M MEJORA (IC [-0,333; -0,153], también con la regla de MATLAB).
+  Chillán SIN RESOLVER (6 de 7, p 8/128).
+- Verificador limpio (Fable alto) en curso; informe en `D:rp-trabajo	emporales\s162_modderificador_censo\`. No se
+  lleva a Nicolás hasta que entregue.
+
 ### 2026-10-26 16:00 UTC (S164, vuelta 12): C: cayó de 15 a 4,7 GB libres sin causa en las carpetas de trabajo
 - Aviso de `loop-viirs750-2` (~15:20 UTC). Medido: 4,7 GB a las 15:53, 5,8 GB a las 16:00 (sube solo). Búsqueda de
   archivos de más de 50 MB escritos en los últimos 90 min en `C:\Users\nmend`, `C:\vrp-trabajo`, `C:\ProgramData` y
