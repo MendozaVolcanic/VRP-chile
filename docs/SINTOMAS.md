@@ -119,6 +119,14 @@ contra cat-b real, A72), no como número vigente. Un gate post-hoc sin clasifica
 
 ## 3. Posición corrida del cúmulo o del hotspot
 
+> ⚠️ **S162, sobre el «el paso siguiente es el pre-registro de MxD03 sobre K» de «Medido» y el «geolocalización MODIS
+> (`_interp_geo` contra MxD03, D-19)» de «Abierto»** (A113): el pre-registro se selló (D-48) y el A/B se corrió y dio
+> **CUMPLE SIN DAÑO**, verificado con contexto limpio: 0 protegidas perdidas, empate bajo 35° de cenit, las 48
+> protegidas con cúmulo más cerca del cráter con MxD03 (mediana 1,46 km). Ahora es la divergencia **D35** del catálogo,
+> que trae la cita de MIROVA (Coppola 2026, PR #902), los matices del verificador y lo que falta para adoptar. Sigue
+> **abierta**: producción usa `_interp_geo` hasta que MxD03 entre con el paquete MODIS y con el sí de Nicolás (A45).
+> Texto de abajo conservado por historia.
+
 **Medido**
 - Píxel MODIS del cráter corrido hacia el sensor, creciendo con el ángulo (Láscar, hasta 3,5 km a 45°): marca S151
   de D18; tareas 1.15, 1.17, 1.21 y 1.23 (rama `loop/activo`; `experiments/_s151_mxd03_etiquetas/`,
