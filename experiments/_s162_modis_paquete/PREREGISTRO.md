@@ -256,3 +256,42 @@ abierto y que el evaluador tuvo que decidir para poder correr; cada punto pasa p
     (expuesta) y Villarrica 2026-04-30 03:00 (cráter en el frame 0, VA61-01). El humo pasa si el job de pruebas sin red
     sale verde, las 5 pasadas tienen fila «ok», K reproduce data/ en las que deciden y el PM reproduce a S159 en las
     dos comunes. Recién entonces se piden las tres tandas.
+
+## Adenda 4 (2026-10-26, 05:30 UTC; antes de despachar nada): lo que corrigió el verificador del candado, y M con la regla de MATLAB
+
+Origen: el verificador con contexto limpio del candado (Fable, `verificador_candado/INFORME.md`, veredicto «se puede
+despachar el humo con cambios chicos») y la vara del fondo de MATLAB del O2 de S163 (`experiments/_s163_o2_modis/`,
+rama `claude/s162-modis-2-0dd578`, verificada). La coordinadora S163 aprobó con D-48 la parte informativa de M (punto
+5). El punto 1 (b) **endurece** una regla: **APROBADO por la coordinadora S163 con D-48**, registrado aquí el
+2026-10-26 a las 05:40 UTC (hora del servidor de GitHub), antes de cualquier despacho, con tres condiciones: que quede
+escrito aquí con fecha y hora (hecho), que la segunda vuelta del verificador lo cubra, y que la batería lo ejercite por
+los dos motivos sellados con K publicando (`t12` por «volcán fuera del gránulo», `t33` por «escena inválida»).
+
+1. **VCM-01, el denominador vuelve a ser el del §8.5 sellado.** La adenda 3.6 sacaba del denominador más de lo que el
+   §8.5 permite (también fallas del port y «grilla incompleta»), y con eso una protegida que K publica podía dejar de
+   vetar P1. Queda así: (a) sólo «volcán fuera del gránulo» y «escena inválida» (el `.m` la declara así) salen del
+   denominador; «grilla incompleta» del probe, sola, no saca la pasada; una falla del arnés o del port (error, gránulo
+   no encontrado, descarga vacía) no es una propiedad de la escena y deja el control 5 en rojo (INDECIDIBLE, se repite
+   la parte). (b) **Regla nueva, más estricta (sujeta a aprobación)**: si una protegida que K publica queda fuera del
+   denominador por uno de los dos motivos sellados, el veredicto no puede ser CANDIDATO: va a la fila 5 del §6 (DECIDE
+   NICOLÁS) con su lista. POR QUÉ: el port no la habría publicado, y el §4 la contaría como pérdida; sacarla en silencio
+   podía torcer un NO CANDIDATO en CANDIDATO.
+2. **VCM-02, el candado cubre el arnés y el evaluador**: `MANIFIESTO_CANDADO.json` (hash LF de cada archivo del que
+   dependen el arnés, el evaluador y las pruebas, armado importándolos, más los datos fijos y el workflow), comprobado
+   por el workflow en los dos jobs y por el evaluador; y la procedencia exige que todos los jobs sean del commit del tag
+   (`evaluar_paquete.py --commit <sha>`; sin él, INDECIDIBLE).
+3. **VCM-03 y VCM-04, la batería vigila más**: entran las 8 pruebas del verificador que siguen aplicando (bloque por
+   noche, Chillán 6 de 7, P1 sólo con K publicando, alerta bajo 1 MW sin publicar, regla 4 con la banda baja, empate,
+   grupo vacío, el mismo MODIS no es soporte), las de los puntos 1 y 6, y una del `npix` del control 2. Las mutaciones
+   suben a 31 (las 6 del verificador que aplican y 6 de esta adenda). El job de pruebas corre también la batería contra
+   el evaluador real y contra el vacío.
+4. **VCM-06**: K33 pasa por el mismo predicado y la misma magnitud mostrada que los demás brazos (el arnés guarda
+   también su record, `k33_slim`). VCM-05 (un solo run pendiente por grupo de concurrencia) se cumple por procedimiento:
+   una tanda a la vez.
+5. **M con la regla de `fillmissing2` de MATLAB (informa, fuera de línea)**. El VRP del port en alertas de 1 a 4
+   píxeles depende de cómo se rompe el empate de la triangulación del relleno, y el de MATLAB es otro (O2 de S163,
+   confirmado en 166 de 166 escenas de VIIRS 750; en MODIS la diferencia típica en 1 píxel es 9 %, sin sesgo). Con las
+   grillas 51 × 51 que el censo guarda (`grilla_NNNN.npz`, variante `fisica`) y la máscara de alertas del PM, se
+   recalcula el VRP del PM con esa regla (`experiments/_s163_o2_modis/delaunay_perturbado.py`, blob f273a47a, marco
+   x = fila) y se informa M también con ese VRP, al lado del sellado. No cambia la regla sellada de M (que usa el VRP del
+   port), ni ninguna publicación (la regla sólo toca el fondo). El script se escribe y se prueba antes de leer el censo.

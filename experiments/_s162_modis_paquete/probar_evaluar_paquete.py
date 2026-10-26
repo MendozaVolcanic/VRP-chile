@@ -64,7 +64,8 @@ def fila(vol, dt, lab, k=None, pm=None, geo5="=pm", sens="=pm", mirova=None, z=2
     sens = pm if sens == "=pm" else sens
     f = {"tipo": "record", "estado": "ok", "vol": vol, "dt": dt, "noche": dt[:10], "lab": lab, "z": z,
          "sensor": "MODIS_AQUA", "inner": 5.0, "vrp_mirova": mirova, "decide": False, "k_difiere_de_guardado": False,
-         "codigo_sha": "abc", "k_slim": k_slim(k), "pub": {"K": int(bool(k)), "K33": int(bool(k))},
+         "codigo_sha": "abc", "k_slim": k_slim(k), "k33_slim": k_slim(k),
+         "pub": {"K": int(bool(k)), "K33": int(bool(k))},
          "brazos": {"K": {"pc_vrp": k}, "K33": {"pc_vrp": k}}, "k33_igual_k": True, "port_estado": "ok",
          "port_grilla": None, "port": {"fisica": port(pm), "fisica_geo5km": port(geo5), "sensible": port(sens),
                                        "pixel": port(pm), "fisica_b21": port(pm)},
@@ -88,7 +89,7 @@ def base():
     return fs
 
 
-def s159_dir(td, filas, cambiar=None):
+def s159_dir(td, filas, cambiar=None, cambiar_npix=False):
     d = Path(td) / "s159"
     d.mkdir(exist_ok=True)
     f = next((x for x in filas if x["dt"] == "2026-03-27 07:10"), None)
@@ -97,16 +98,18 @@ def s159_dir(td, filas, cambiar=None):
         p = copy.deepcopy(f["port"]["fisica"])
         if cambiar:
             p["vrp_mw"] += cambiar
+        if cambiar_npix:
+            p["npix"] += 1
         filas_s159 = [{"volcan": f["vol"], "hora_utc": f["dt"], "estado": "ok", "port": {"fisica": p}}]
     (d / "resultados_MODIS_00.json").write_text(json.dumps(filas_s159), encoding="utf-8")
     return d
 
 
 def correr(E, filas, recorridos=(), esperadas=None, nuestros=(), alertas=None, ext=None, cambiar_s159=None,
-           crudas=None):
+           crudas=None, cambiar_npix_s159=False):
     filas = copy.deepcopy(filas)
     with tempfile.TemporaryDirectory() as td:
-        d = s159_dir(td, filas, cambiar_s159)
+        d = s159_dir(td, filas, cambiar_s159, cambiar_npix_s159)
         esp = [(f["vol"], f["dt"]) for f in filas] if esperadas is None else esperadas
         return E.evaluar(filas, GRILLAS, list(recorridos), dict(OK_EXT if ext is None else ext), esp,
                          filas if crudas is None else crudas, list(nuestros), alertas or {}, d)
@@ -218,9 +221,11 @@ def t12_fuera_del_denominador(E):
     fs = base() + [fila("Lascar", dia(320), "protegida", k=3.0, pm=None, mirova=3.0,
                         port_estado="volcan_fuera_del_granulo", port=None)]
     r = correr(E, fs)
-    exige(r["veredicto"] == "CANDIDATO", "fuera del denominador: veredicto %s" % r["veredicto"])
+    # adenda 4 (VCM-01): una protegida que K publica fuera del denominador no puede pasar en silencio a CANDIDATO
+    exige(r["veredicto"] == "DECIDE NICOLÁS", "fuera del denominador: veredicto %s" % r["veredicto"])
     pf = g(r, "controles", "cobertura", "protegidas_fuera_del_denominador", defecto=[])
-    exige(len(pf) == 1 and g(r, "controles", "cobertura", "fuera_del_denominador", "port_volcan_fuera_del_granulo") == 1,
+    exige(len(pf) == 1 and pf[0].get("k_publica") == 1
+          and g(r, "controles", "cobertura", "fuera_del_denominador", "volcan_fuera_del_granulo") == 1,
           "fuera del denominador: no la cuenta (%s)" % pf)
     fs2 = base() + [fila("Lascar", dia(321), "neg_limpio", k=0.4, pm=None,
                          port={"fisica": dict(port(None), motivo_vacio="escena_invalida")})]
@@ -302,6 +307,117 @@ def t19_borde_granulo(E):
     r = correr(E, fs)
     exige(g(r, "brazos", "PM", "borde_granulo", defecto={}) == {"neg_limpio|K0|PM1": 1},
           "borde del granulo: %s" % g(r, "brazos", "PM", "borde_granulo"))
+
+
+# ------------------------------------------------------------------ adenda 4 (verificador del candado, VCM-01 a VCM-06)
+def t20_falla_del_port_es_roja(E):
+    fs = base() + [fila("Lascar", dia(370), "neg_limpio", port_estado="error: ValueError: x", port=None)]
+    r = correr(E, fs)
+    exige(g(r, "controles", "cobertura", "estado") == "INDECIDIBLE"
+          and g(r, "controles", "cobertura", "n_fallas_del_instrumento") == 1 and r["veredicto"] == "INDECIDIBLE",
+          "falla del port: %s %s" % (g(r, "controles", "cobertura", "estado"), r["veredicto"]))
+
+
+def t21_grilla_incompleta_cuenta(E):
+    fs = base() + [fila("Lascar", dia(371), "protegida", k=3.0, pm=None, geo5=3.0, sens=3.0, mirova=3.0,
+                        port_grilla="grilla_incompleta")]
+    r = correr(E, fs)
+    exige(r["veredicto"] == "NO CANDIDATO" and g(r, "brazos", "PM", "p1", "estado") == "VETADO",
+          "grilla incompleta con detector corrido tiene que contar: %s" % r["veredicto"])
+
+
+def t22_protegida_fuera_que_k_calla(E):
+    fs = base() + [fila("Lascar", dia(372), "protegida", k=None, pm=None, mirova=3.0, port_estado="volcan_fuera_del_granulo",
+                        port=None)]
+    r = correr(E, fs)
+    pf = g(r, "controles", "cobertura", "protegidas_fuera_del_denominador", defecto=[])
+    exige(r["veredicto"] == "CANDIDATO" and len(pf) == 1 and pf[0].get("k_publica") == 0,
+          "protegida fuera que K tampoco publica: %s %s" % (r["veredicto"], pf))
+
+
+def t23_bloque_noche(E):          # verificador, x01 (§4 P2: dos pasadas de una noche-volcán son un bloque)
+    fs = base() + [fila("Llaima", dia(100).replace("01:05", "03:05"), "neg_limpio", k=0.2)]
+    r = correr(E, fs)
+    exige(g(r, "brazos", "PM", "p2", "B") == 6 and g(r, "brazos", "PM", "p2", "neto") == -7,
+          "bloque: B %s neto %s (esperado 6 y -7)" % (g(r, "brazos", "PM", "p2", "B"), g(r, "brazos", "PM", "p2", "neto")))
+
+
+def t24_chillan_6_de_7(E):        # verificador, x02 (§5.3: p = 8/128 no alcanza)
+    al = [fila("NevadosDeChillan", dia(500 + i), "protegida", k=0.6, pm=1.0, mirova=1.0, z=20.0) for i in range(6)]
+    al.append(fila("NevadosDeChillan", dia(506), "protegida", k=1.0, pm=0.6, mirova=1.0, z=20.0))
+    c = g(correr(E, base() + al), "chillan", defecto={})
+    exige(c.get("n_pares") == 7 and c.get("b_mas_cerca") == 6 and c.get("estado") == "SIN RESOLVER",
+          "Chillan 6 de 7: %s" % {k: c.get(k) for k in ("n_pares", "b_mas_cerca", "estado")})
+
+
+def t25_p1_k_calla(E):            # verificador, x03 (§4 P1: sólo protegidas que K publica)
+    fs = base() + [fila("Lascar", dia(300), "protegida", k=None, pm=None, mirova=3.0)]
+    r = correr(E, fs)
+    exige(g(r, "brazos", "PM", "p1", "estado") == "SIN PERDIDA" and r["veredicto"] == "CANDIDATO"
+          and g(r, "brazos", "PM", "p1", "n_protegidas_k") == 1,
+          "P1 con K callado: %s %s" % (g(r, "brazos", "PM", "p1", "estado"), r["veredicto"]))
+
+
+def t26_bajo1_sin_publicar(E):    # verificador, x04 (§4 P2: no publicar una alerta bajo 1 MW es error)
+    fs = base() + [fila("Lascar", dia(220 + i), "bajo1", k=0.5, pm=None, mirova=0.5) for i in range(2)]
+    r = correr(E, fs)
+    exige(g(r, "brazos", "PM", "p2", "neto") == -4 and g(r, "brazos", "PM", "p2", "s_b") == 2
+          and g(r, "brazos", "PM", "p2", "B") == 8, "bajo1 sin publicar: %s" % {
+              k: g(r, "brazos", "PM", "p2", k) for k in ("neto", "s_b", "B")})
+
+
+def t27_chillan_regla4_bajo(E):   # verificador, x06 (§5.4 exige la banda bajo 30 grados)
+    al = ([fila("NevadosDeChillan", dia(600 + i), "protegida", k=0.6, pm=1.6, mirova=1.0, z=20.0) for i in range(4)]
+          + [fila("NevadosDeChillan", dia(610 + i), "protegida", k=0.5, pm=0.3, mirova=1.0, z=45.0) for i in range(3)])
+    c = g(correr(E, base() + al), "chillan", defecto={})
+    exige(c.get("estado") == "SIN RESOLVER" and c.get("n_pares") == 7, "regla 4 sin banda baja: %s" % c.get("estado"))
+
+
+def t28_chillan_empate(E):        # verificador, x07 (§5.5: el empate exacto sale y se lista)
+    al = [fila("NevadosDeChillan", dia(500 + i), "protegida", k=0.6, pm=1.0, mirova=1.0, z=20.0) for i in range(5)]
+    al.append(fila("NevadosDeChillan", dia(506), "protegida", k=0.5, pm=0.5, mirova=1.0, z=20.0))
+    c = g(correr(E, base() + al), "chillan", defecto={})
+    exige(c.get("n_pares") == 5 and len(c.get("empates", [])) == 1 and c.get("estado") == "RESUELTO POR EL PAQUETE",
+          "empate: %s" % {k: c.get(k) for k in ("n_pares", "estado")})
+
+
+def t29_chillan_grupo_vacio(E):   # verificador, x08 (§5.5, VCD-16)
+    al = ([fila("NevadosDeChillan", dia(600 + i), "protegida", k=0.6, pm=1.0, mirova=1.0, z=20.0) for i in range(3)]
+          + [fila("NevadosDeChillan", dia(610 + i), "protegida", k=1.0, pm=0.6, mirova=1.0, z=20.0) for i in range(2)])
+    c = g(correr(E, base() + al), "chillan", defecto={})
+    exige(c.get("estado") == "SIN RESOLVER" and c.get("n_pares") == 5 and c.get("mediana_z_gt30") is None,
+          "grupo > 30 vacio: %s" % c.get("estado"))
+
+
+def t30_soporte_mismo_modis(E):   # verificador, x09 (adenda 1 y A109)
+    fs = base() + [fila("Copahue", "2026-05-01 03:05", "neg_limpio", pm=0.2)]
+    t = datetime(2026, 5, 1, 3, 5, tzinfo=timezone.utc)
+    nuestros = [{"vol": "Copahue", "b": "MODIS", "sensor": "MODIS_AQUA", "dt": t, "noche": "2026-05-01",
+                 "dc": "summit", "pub": 1, "disp": 0.3}]
+    s = g(correr(E, fs, nuestros=nuestros), "brazos", "PM", "soporte_adenda1", defecto={})
+    exige(s.get("n") == 1 and len(s.get("candidatas", [])) == 0, "el mismo MODIS conto como soporte: %s" % s)
+
+
+def t31_control_s159_npix(E):     # VCM-04
+    r = correr(E, base(), cambiar_npix_s159=True)
+    exige(g(r, "controles", "port_s159", "estado") == "INDECIDIBLE", "control 2 no mira npix")
+
+
+def t32_k33_por_predicado(E):     # VCM-06
+    fs = base() + [fila("Lascar", dia(380), "protegida", k=3.0, pm=3.0, mirova=3.0, k33_slim=None)]
+    r = correr(E, fs)
+    exige(g(r, "brazos", "K33", "p1", "estado") == "VETADO" and r["veredicto"] == "CANDIDATO",
+          "K33 por el predicado: %s" % g(r, "brazos", "K33", "p1", "estado"))
+
+
+def t33_protegida_fuera_por_escena_invalida(E):   # adenda 4, punto 1 (b), condición 3 de la coordinadora S163
+    fs = base() + [fila("Lascar", dia(390), "protegida", k=3.0, pm=None, mirova=3.0,
+                        port={"fisica": dict(port(None), motivo_vacio="escena_invalida")})]
+    r = correr(E, fs)
+    pf = g(r, "controles", "cobertura", "protegidas_fuera_del_denominador", defecto=[])
+    exige(r["veredicto"] == "DECIDE NICOLÁS" and len(pf) == 1 and pf[0].get("motivo") == "escena_invalida"
+          and pf[0].get("k_publica") == 1 and g(r, "brazos", "PM", "p1", "estado") == "SIN PERDIDA",
+          "protegida fuera por escena invalida: %s %s" % (r["veredicto"], pf))
 
 
 PRUEBAS = [v for k, v in sorted(globals().items()) if k.startswith("t") and k[1:3].isdigit()]

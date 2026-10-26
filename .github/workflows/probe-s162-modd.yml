@@ -67,13 +67,22 @@ jobs:
           test "$(git hash-object experiments/_s159/portes/mirova_port.py)" = "$BLOB_PORT"
           test "$(git hash-object experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py)" = "$BLOB_ORACULO"
           test "$(git hash-object experiments/_s162_modis_paquete/evaluar_d25_ded217af4.py)" = "$BLOB_D25"
-      - name: Pruebas sin red del arnes y del diagnostico S-1 (pipeline real con escena sintetica, 6 mutaciones)
+      - name: Manifiesto del candado (adenda 4, VCM-02)
+        env:
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          python -I experiments/_s162_modis_paquete/manifiesto_candado.py --comprobar 2>&1 | tee prueba_manifiesto.log
+      - name: Pruebas sin red del arnes, del diagnostico S-1 y del evaluador (bateria contra el real y contra el vacio)
         env:
           VRP_PROFILE: mirova_equivalent
         run: |
           set -o pipefail
           python -I experiments/_s162_modis_paquete/diagnostico_s1.py 2>&1 | tee prueba_s1.log
           python -I experiments/_s162_modis_paquete/probar_probe_paquete.py 2>&1 | tee prueba_arnes.log
+          python -I experiments/_s162_modis_paquete/probar_evaluar_paquete.py 2>&1 | tee prueba_evaluador.log
+          ! python -I experiments/_s162_modis_paquete/probar_evaluar_paquete.py               --modulo experiments/_s162_modis_paquete/evaluar_vacio.py > prueba_evaluador_vacio.log 2>&1
+          grep -q "pasan 0," prueba_evaluador_vacio.log && grep -q "caen 0 " prueba_evaluador_vacio.log
       - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -124,7 +133,8 @@ jobs:
           git worktree add --detach "$RUNNER_TEMP/arbol_prueba" 3695f67580e8de5fcf3653786ea61def0187ecb4
           test -f "$RUNNER_TEMP/arbol_prueba/pipeline/process_modis.py"
           git worktree remove --force "$RUNNER_TEMP/arbol_prueba"
-          echo "main congelado $base OK; blobs OK; fetch por sha y worktree OK"
+          python -I experiments/_s162_modis_paquete/manifiesto_candado.py --comprobar
+          echo "main congelado $base OK; blobs OK; manifiesto OK; fetch por sha y worktree OK"
       - name: Arnes
         env:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}

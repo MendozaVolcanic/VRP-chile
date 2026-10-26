@@ -66,8 +66,9 @@ BLOBS = {"experiments/_s159/portes/probe_portes.py": "8ec50e7bbb76c16e765a92e277
 
 
 def blob(ruta):
-    """git hash-object, sin git: sha1 de 'blob <n>\\0' + contenido (bytes tal como estan en disco)."""
-    b = (RAIZ / ruta).read_bytes()
+    """git hash-object, sin git: sha1 de 'blob <n>\\0' + contenido con fin de linea LF (como el evaluador y el
+    manifiesto; en el runner Linux los archivos ya son LF)."""
+    b = (RAIZ / ruta).read_bytes().replace(b"\r\n", b"\n")
     return hashlib.sha1(b"blob %d\0" % len(b) + b).hexdigest()
 
 
@@ -150,10 +151,11 @@ def medir_record(l1b, geo, volcan, feats, datos, latlon_m, f, clave, o, destino,
     out["k33_igual_k"] = P.registros_iguales(rk, rk33)
     # slim del record de K para el evaluador (predicado y magnitud mostrada con node, placebo)
     import banco_paridad as bp
-    out["k_slim"] = None if rk is None else {k: rk.get(k) for k in bp.CAMPOS_JS if k != "anomaly_pixels"}
-    if rk is not None:
-        out["k_slim"]["anomaly_pixels"] = [{k: p.get(k) for k in ("lat", "lon", "vrp_mw", "bt_k")}
-                                           for p in (rk.get("anomaly_pixels") or [])]
+    for clave, rec in (("k_slim", rk), ("k33_slim", rk33)):     # k33_slim: adenda 4, VCM-06
+        out[clave] = None if rec is None else {k: rec.get(k) for k in bp.CAMPOS_JS if k != "anomaly_pixels"}
+        if rec is not None:
+            out[clave]["anomaly_pixels"] = [{k: p.get(k) for k in ("lat", "lon", "vrp_mw", "bt_k")}
+                                            for p in (rec.get("anomaly_pixels") or [])]
     out["k_difiere_de_guardado"] = PB.difiere_de_guardado(f, out["brazos"]["K"], pk)
     out["decide"] = PB.decide(f)
     r = correr_port(o, l1b, geo, destino, outdir)

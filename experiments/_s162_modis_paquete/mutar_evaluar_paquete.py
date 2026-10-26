@@ -2,7 +2,7 @@
 """Mutaciones del evaluador de MOD-D, con control de caída (S156). Cada mutación es un cambio de texto sobre una copia
 de evaluar_paquete.py que rompe UNA regla sellada; la batería probar_evaluar_paquete.py tiene que atraparla con al
 menos una prueba que FALLE POR ASERCIÓN. Una mutación que hace caer las pruebas (excepción) no cuenta como atrapada: se
-informa aparte. Una mutacion puede llevar varias sustituciones (lista de pares). Control de identidad: la copia sin mutar tiene que pasar las 19 pruebas (si no, la copia misma está
+informa aparte. Una mutacion puede llevar varias sustituciones (lista de pares). Control de identidad: la copia sin mutar tiene que pasar todas las pruebas (si no, la copia misma está
 rota y nada de lo demás vale). Además, cada sustitución tiene que encontrar su texto exactamente una vez.
 Uso: python mutar_evaluar_paquete.py   (sale 1 si alguna mutación queda viva o cae, o si la identidad falla)
 """
@@ -28,7 +28,8 @@ MUTACIONES = {
                         '    if b["p2"]["estado"] == "GANA":\n        return "CANDIDATO"\n    if b["p2"]["estado"] == "PIERDE":'),
     "m_empeora_no_decide": ('or b["m"]["regla"] == "EMPEORA"', 'or b["m"]["regla"] == "EMPEORA_X"'),
     "p1b_umbral_medio": ('if _mag(f, "K") >= 1.0 > _mag(f, b):', 'if _mag(f, "K") >= 0.5 > _mag(f, b):'),
-    "escena_invalida_cuenta": ('if pf.get("motivo_vacio") == "escena_invalida" or', 'if pf.get("motivo_vacio") == "escena_x" or'),
+    "escena_invalida_cuenta": ('    if pf.get("motivo_vacio") == "escena_invalida":\n        return False, "escena_invalida"',
+                               '    if pf.get("motivo_vacio") == "escena_x":\n        return False, "escena_invalida"'),
     "placebo_sin_ganancia": ('casos.append((escalar(k, PLACEBO), f["inner"]))', 'casos.append((escalar(k, 1.0), f["inner"]))'),
     "contador_sin_inyectar": ('size=min(N_INYECTAR, len(negs))', 'size=min(0, len(negs))'),
     "chillan_sustrato_4": ("    if n < 5:\n        estado = \"SIN SUSTRATO\"", "    if n < 4:\n        estado = \"SIN SUSTRATO\""),
@@ -46,8 +47,31 @@ MUTACIONES = {
          '        if f["lab"] not in ("bajo1", "neg_limpio", "sin_info"):\n            continue\n        ek, eb'),
         ('    if f["lab"] == "neg_limpio":\n        return _pub(f, b) == 1',
          '    if f["lab"] in ("neg_limpio", "sin_info"):\n        return _pub(f, b) == 1')],
-    "cobertura_sin_duplicados": ('estado = "OK" if c["estado"] == "OK" and dup["estado"] == "OK" else "INDECIDIBLE"',
-                                 'estado = "OK" if c["estado"] == "OK" else "INDECIDIBLE"'),
+    "cobertura_sin_duplicados": ('estado = "OK" if c["estado"] == "OK" and dup["estado"] == "OK" and not fallas else',
+                                 'estado = "OK" if c["estado"] == "OK" and not fallas else'),
+    # adenda 4: las del verificador del candado que siguen aplicando (verificador_candado/mutaciones_propias.py) ...
+    "bloque_por_pasada": ('    return "%s|%s" % (f["vol"], f.get("noche") or f["dt"][:10])',
+                          '    return "%s|%s" % (f["vol"], f["dt"])'),
+    "chillan_p_flojo": ("elif med is not None and 0.8 <= med <= 1.25 and 20 * num <= den:",
+                        "elif med is not None and 0.8 <= med <= 1.25 and 10 * num <= den:"),
+    "p1_sin_mirar_k": ('if f["lab"] == "protegida" and _pub(f, "K") == 1 and _pub(f, b) == 0]',
+                       'if f["lab"] == "protegida" and _pub(f, b) == 0]'),
+    "error_bajo1_al_reves": ('    if f["lab"] == "bajo1":\n        return _pub(f, b) == 0',
+                             '    if f["lab"] == "bajo1":\n        return _pub(f, b) == 1'),
+    "chillan_regla4_sin_bajo": (
+        "    elif med_bajo is not None and med_sobre is not None and med_sobre < 0.8 and 0.8 <= med_bajo <= 1.25:",
+        "    elif med_sobre is not None and med_sobre < 0.8:"),
+    "soporte_mismo_modis": ('and abs(r["dt"] - t) <= w and (r["b"] != "MODIS" or r.get("sensor") != f["sensor"])]',
+                            'and abs(r["dt"] - t) <= w]'),
+    # ... y las de los cambios de la adenda 4
+    "falla_del_port_no_roja": ("and dup[\"estado\"] == \"OK\" and not fallas else", "and dup[\"estado\"] == \"OK\" else"),
+    "grilla_incompleta_sale": ('    if pf.get("motivo_vacio") == "escena_invalida":\n        return False, "escena_invalida"',
+                               '    if pf.get("motivo_vacio") == "escena_invalida" or f.get("port_grilla") == '
+                               '"grilla_incompleta":\n        return False, "escena_invalida"'),
+    "protegida_fuera_no_decide": ('b["m"]["regla"] == "EMPEORA" or prot_k:', 'b["m"]["regla"] == "EMPEORA":'),
+    "protegida_fuera_sin_mirar_k": ('if p.get("k_publica")]', ']'),
+    "s159_sin_npix": ('igual = a.get("npix") == r.get("npix") and (', 'igual = True and ('),
+    "k33_por_el_runner": ('        if "k33_slim" in f:', '        if False:'),
     "atribucion_vacia": ('"tambien_pierden": [x for x in ("PM-geo5", "PM-sens") if x != b and _pub(f, x) == 0]}',
                          '"tambien_pierden": []}'),
     "borde_no_mira": ('if (f.get("crater_mxd03") or {}).get("borde"):', 'if (f.get("crater_mxd03") or {}).get("bordex"):'),

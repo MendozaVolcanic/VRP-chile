@@ -93,7 +93,10 @@ def main():
                 "veredicto INDECIDIBLE": res.get("veredicto") == "INDECIDIBLE",
                 "predicado INDECIDIBLE (la cabecera del ensayo no trae el hash del tablero)": (c.get("predicado") or {}).get("estado") == "INDECIDIBLE",
                 "referencia y reetiquetado OK": (c.get("referencia") or {}).get("estado") == "OK"
-                and (c.get("reetiquetado") or {}).get("estado") == "OK"}
+                and (c.get("reetiquetado") or {}).get("estado") == "OK",
+                # adenda 4: sin --commit la procedencia no puede quedar verde; el manifiesto del arbol si
+                "procedencia INDECIDIBLE (sin --commit)": (c.get("procedencia") or {}).get("estado") == "INDECIDIBLE",
+                "manifiesto OK": (c.get("manifiesto") or {}).get("estado") == "OK"}
         for k, v in exig.items():
             print("  %-48s %s" % (k, "SI" if v else "NO"))
         sys.exit(0 if p.returncode == 0 and all(exig.values()) else 1)

@@ -48,6 +48,7 @@ AQUI = Path(__file__).resolve().parent
 RAIZ = Path(os.environ.get("MODD_RAIZ") or AQUI.parents[1])
 sys.path.insert(0, str(RAIZ / "scripts"))
 sys.path.insert(0, str(RAIZ / "experiments/_s159/portes"))
+sys.path.insert(1, str(RAIZ / "experiments/_s162_modis_paquete"))      # manifiesto_candado (copias mutadas fuera)
 
 
 def _cargar(nombre, ruta):
@@ -129,14 +130,22 @@ def predicado(casos):
     return out
 
 
+MOTIVOS_SELLADOS = ("volcan_fuera_del_granulo", "escena_invalida")   # §8 control 5, los dos únicos que salen
+
+
 def evaluable(f):
-    """El port corrió y la escena es válida: si no, la pasada sale de todos los denominadores (§8 control 5)."""
+    """§8 control 5 (adenda 4, VCM-01): sólo «volcán fuera del gránulo» y «escena inválida» salen del denominador de
+    todos los brazos. Una falla del arnés o del port (error, gránulo no encontrado, descarga vacía) NO es una propiedad
+    de la escena: sale del cálculo con su motivo y deja el control de cobertura en rojo. «grilla_incompleta» del probe
+    sola no saca la pasada: si el detector corrió, su resultado cuenta (el .m declara la escena inválida por su cuenta)."""
     if f.get("estado") != "ok":
-        return False, "arnes_" + str(f.get("estado"))
+        return False, "falla_arnes_" + str(f.get("estado"))
+    if f.get("port_estado") == "volcan_fuera_del_granulo":
+        return False, "volcan_fuera_del_granulo"
     if f.get("port_estado") != "ok" or not f.get("port"):
-        return False, "port_" + str(f.get("port_estado"))
+        return False, "falla_port_" + str(f.get("port_estado"))
     pf = f["port"].get("fisica") or {}
-    if pf.get("motivo_vacio") == "escena_invalida" or f.get("port_grilla") == "grilla_incompleta":
+    if pf.get("motivo_vacio") == "escena_invalida":
         return False, "escena_invalida"
     return True, None
 
@@ -152,13 +161,16 @@ def armar_tabla(filas, grillas):
         idx.append((i, "K"))
         casos.append((escalar(k, PLACEBO), f["inner"]))
         idx.append((i, "placebo"))
+        if "k33_slim" in f:      # adenda 4 (VCM-06): K33 por el mismo predicado y la misma magnitud mostrada
+            casos.append((f["k33_slim"], f["inner"]))
+            idx.append((i, "K33"))
         for b, m in BRAZOS_PORT.items():
             casos.append((record_port(f["port"].get(m), f["inner"], f["sensor"], grillas[f["vol"]]), f["inner"]))
             idx.append((i, b))
     for (i, b), v in zip(idx, predicado(casos)):
         filas[i].setdefault("_t", {})[b] = {"pub": v[0], "mag": v[1]}
     for f in filas:
-        if f["_evaluable"]:
+        if f["_evaluable"] and "K33" not in f["_t"]:
             k33 = (f.get("brazos") or {}).get("K33") or {}
             f["_t"]["K33"] = {"pub": int((f.get("pub") or {}).get("K33") or 0), "mag": float(k33.get("pc_vrp") or 0.0)}
     return filas
@@ -499,15 +511,19 @@ def control_contador(filas, grillas):
 
 
 def control_cobertura(filas, esperadas, crudas):
-    """§8 control 5: cada pasada de la población con fila del arnés, sin repetidas; las no evaluables por el port se
-    cuentan aparte por motivo."""
+    """§8 control 5: cada pasada de la población con fila del arnés, sin repetidas; las que salen por uno de los dos
+    motivos sellados se cuentan aparte por motivo; una falla del arnés o del port (adenda 4) deja el control en rojo."""
     c = EM.control_cobertura([f for f in filas if f.get("estado") == "ok"], esperadas)
     dup = EM.control_duplicados(crudas)
     fuera = collections.Counter(f["_motivo"] for f in filas if not f["_evaluable"])
-    prot_fuera = [{"vol": f["vol"], "dt": f["dt"], "motivo": f["_motivo"]} for f in filas
-                  if not f["_evaluable"] and f.get("lab") == "protegida"]
-    estado = "OK" if c["estado"] == "OK" and dup["estado"] == "OK" else "INDECIDIBLE"
+    fallas = [{"vol": f["vol"], "dt": f["dt"], "motivo": f["_motivo"]} for f in filas
+              if not f["_evaluable"] and f["_motivo"] not in MOTIVOS_SELLADOS]
+    prot_fuera = [{"vol": f["vol"], "dt": f["dt"], "motivo": f["_motivo"],
+                   "k_publica": int((f.get("pub") or {}).get("K") or 0)} for f in filas
+                  if not f["_evaluable"] and f.get("lab") == "protegida" and f["_motivo"] in MOTIVOS_SELLADOS]
+    estado = "OK" if c["estado"] == "OK" and dup["estado"] == "OK" and not fallas else "INDECIDIBLE"
     return {"estado": estado, "faltan": c["faltan"][:20], "n_faltan": len(c["faltan"]), "duplicadas": dup,
+            "fallas_del_instrumento": fallas[:20], "n_fallas_del_instrumento": len(fallas),
             "fuera_del_denominador": dict(fuera), "protegidas_fuera_del_denominador": prot_fuera,
             "n_evaluables": sum(1 for f in filas if f["_evaluable"])}
 
@@ -528,7 +544,10 @@ def veredicto(res):
         return "NO CANDIDATO"
     if b["p2"]["estado"] == "SIN SUSTRATO":
         return "INDECIDIBLE"
-    if b["p2"]["estado"] == "BLOQUEA" or b["p1b"]["decide"] or b["m"]["regla"] == "EMPEORA":
+    # adenda 4 (VCM-01): una protegida que K publica y que salió del denominador por un motivo sellado no puede pasar
+    # en silencio a CANDIDATO (el port no la habría publicado); va a la fila 5 con su lista
+    prot_k = [p for p in res["controles"]["cobertura"].get("protegidas_fuera_del_denominador", []) if p.get("k_publica")]
+    if b["p2"]["estado"] == "BLOQUEA" or b["p1b"]["decide"] or b["m"]["regla"] == "EMPEORA" or prot_k:
         return "DECIDE NICOLÁS"
     if b["p2"]["estado"] in ("GANA", "EMPATE"):
         return "CANDIDATO"
@@ -573,8 +592,10 @@ def cargar(art):
     return filas, recorridos, cabeceras
 
 
-def externos_de_entrada(pob, cab, crudas, ref):
+def externos_de_entrada(pob, cab, crudas, ref, commit_esperado=None):
     ext = {}
+    import manifiesto_candado as MC       # adenda 4 (VCM-02): hash de cada archivo del candado
+    ext["manifiesto"] = MC.comprobar()
     malos = {r: blob(RAIZ / r) for r, h in BLOBS_SELLADOS.items() if blob(RAIZ / r) != h}
     d25 = blob(D25_RUTA)
     cab_blobs = sorted({json.dumps(c.get("blobs"), sort_keys=True) for c in cab})
@@ -585,8 +606,10 @@ def externos_de_entrada(pob, cab, crudas, ref):
     shas = sorted({c.get("sha256_frontend_index") for c in cab})
     ext["predicado"] = {"estado": "OK" if shas == [sha_html] else "INDECIDIBLE", "local": sha_html, "jobs": shas}
     commits = sorted({c.get("commit") for c in cab})
-    ext["procedencia"] = {"estado": "OK" if len(commits) == 1 else "INDECIDIBLE", "commits": commits,
-                          "partes": sorted(c.get("parte") for c in cab)}
+    # adenda 4 (VCM-02): todos los jobs en UN commit, y ese commit es el del tag del candado (--commit)
+    ok_commit = bool(commit_esperado) and len(commits) == 1 and str(commits[0]).startswith(commit_esperado)
+    ext["procedencia"] = {"estado": "OK" if ok_commit else "INDECIDIBLE", "commits": commits,
+                          "commit_esperado": commit_esperado, "partes": sorted(c.get("parte") for c in cab)}
     if ref is None:
         ext["referencia"] = {"estado": "INDECIDIBLE", "motivo": "falta --ref: sin referencia congelada no hay veredicto"}
         return ext
@@ -667,12 +690,13 @@ def main():
     ap.add_argument("--modb", default=None)
     ap.add_argument("--s159", default=str(S159))
     ap.add_argument("--salida", default=None)
+    ap.add_argument("--commit", default=None, help="sha del tag del candado: sin el, procedencia INDECIDIBLE")
     a = ap.parse_args()
     pob = json.load(open(a.poblacion, encoding="utf-8"))
     grillas = json.load(open(GRILLAS, encoding="utf-8"))
     crudas, recorridos, cab = cargar(a.art)
     filas, union, esperadas = unir(crudas, pob)
-    ext = externos_de_entrada(pob, cab, crudas, a.ref)
+    ext = externos_de_entrada(pob, cab, crudas, a.ref, a.commit)
     ext["union"] = union
     nuestros, alertas = contexto(a.ref)
     res = evaluar(filas, grillas, recorridos, ext, esperadas, crudas, nuestros, alertas, a.s159)
