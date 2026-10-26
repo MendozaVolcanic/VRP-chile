@@ -579,7 +579,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   GitHub, no en el disco local.
 - Regla vigente: bajo 3 GB en C: o D: se para. `loop-viirs750-2` detiene su medidor si C: baja de 3 GB.
 - Corrección: parte de la subida de 4,7 a 5,8 GB la explica `loop-viirs750-2`, que sacó su worktree
-  `C:rp-trabajo\s162-via-mirova` (1,2 GB, rama mergeada en #907 y en el remoto) y temporales ya leídos. Liberar el
+  `C:\vrp-trabajo\s162-via-mirova` (1,2 GB, rama mergeada en #907 y en el remoto) y temporales ya leídos. Liberar el
   espacio indica **borrado definitivo, no papelera**: contra la regla del proyecto, aunque no se perdió nada (todo está en
   git). Recordado a la sesión: desde ahora, sólo papelera.
 
