@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~04:45 UTC (S163, vuelta 8): #908 mergeado; regla de MATLAB confirmada; V375-D no hace falta por magnitud
+- **#908 mergeado** con commit de merge (`a6d3935cc`), CI verde sobre `94fdd7aaf`: main ya tiene la bitácora, los traspasos
+  S152 a S163, el programa por sensor y la marca de D25. Lo que difiere hoy entre main y loop/activo son sólo los datos NRT
+  posteriores (4 archivos).
+- **Regla de `fillmissing2` CONFIRMADA** por verificador limpio (Sonnet) con implementación independiente (`mi_cgal.py`):
+  166 de 166 VRP, 84 de 84 fondos, sin fuga de datos de MATLAB. CONFIRMADO EN PARTE el control: otras simetrías del marco
+  calzan 159 a 160 y un desempate ±eps·x·y 153, así que el control de ejes cambiados (42) era débil; la separación sigue
+  nítida. La parte 2 (no separa contra MIROVA con 6 pasadas) CONFIRMADA. No cubierto: extrapolación fuera de la envolvente
+  (1 escena), independencia de las 166 (83 son variantes de 10 pasadas). Informe en `s163-o2-alternativa` `c95483d31`,
+  `experiments/_s163_o2alt/verificador/`. Avisadas las tres hijas, con las reservas.
+- `loop-viirs375`, tarea 2 PRELIMINAR (`04d7151d2`): con la regla, el fondo de 1 a 4 px no cambia la magnitud de V375-C
+  (veredicto B igual; M de 0,998 a 0,999 en M14 y M13); **V375-D no hace falta por magnitud**. Queda pendiente la prueba de
+  oro en MATLAB (sesión de MathWorks expirada).
+
 ### 2026-10-26 ~04:15 UTC (S163, vuelta 7): inventario del trabajo paralelo; loop/activo a main (#908); worktrees liberados
 - Inventario S158-S163 (subagente de sólo lectura, `scratchpad\INVENTARIO_PARALELO.md` de S163). Conflictos reales sólo
   tres: (1) encabezado de D25 en `docs/MIROVA_DIVERGENCES.md` (main con la marca S158, loop/activo con la S162): resuelto
