@@ -150,8 +150,8 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [x] B7. (2026-10-24, mensaje a la coordinadora) Pedido de despacho a la coordinadora (tag, tres tandas de 8 partes, ~47 h de runner).
 
 - [x] B8. (humo 40111997157: controles en verde, OK dado) Evaluar el humo cuando llegue el run id (artefactos a `D:\vrp-trabajo\temporales\s162_mxd03\humo\`, evaluador desde checkout del tag, VMX-12) y dar el OK para las tandas.
-- [ ] B10. PR del veredicto de MOD-B con D35 en `docs/MIROVA_DIVERGENCES.md` y las marcas A113 en D18 y `docs/SINTOMAS.md` §3 (decisión D-48 aplicada por la coordinadora). Además en ese PR: la candidata Láscar 2026-05-11 en BEYOND §12 (X1).
-- [ ] B11. Auditoría espacial A61 de las 48 protegidas cuyo cúmulo se mueve (§6 P4), antes de cualquier adopción; y los seguimientos de la adopción: relleno −999 en `_interp_geo` (SOSPECHA), 36 records con píxeles sin MxD03 que K conserva, el corrimiento de 10 a 16 km de `_interp_geo` en el borde del barrido (15 records, cenit 63 a 75°), el control del módulo de R que acepta relleno (VRB-01).
+- [x] B10. (hecho por subagente de la coordinadora: PR #906, borrador, CI verde; incluye X1 y A1) PR del veredicto de MOD-B con D35 en `docs/MIROVA_DIVERGENCES.md` y las marcas A113 en D18 y `docs/SINTOMAS.md` §3 (decisión D-48 aplicada por la coordinadora). Además en ese PR: la candidata Láscar 2026-05-11 en BEYOND §12 (X1).
+- [x] B11. (A61 por subagente de la coordinadora, rama `s162-a61-mxd03`; verificador limpio Opus del relevo, `72f85df71`: P4 se sostiene; E4 refutada, H4 −27 a +48 %, E2 46 de 48, VA61-01 ~215 records con el cráter en el borde del gránulo) Auditoría espacial A61 de las 48 protegidas cuyo cúmulo se mueve (§6 P4), antes de cualquier adopción; y los seguimientos de la adopción: relleno −999 en `_interp_geo` (SOSPECHA), 36 records con píxeles sin MxD03 que K conserva, el corrimiento de 10 a 16 km de `_interp_geo` en el borde del barrido (15 records, cenit 63 a 75°), el control del módulo de R que acepta relleno (VRB-01).
 - [ ] B12. Adopción (sólo con su sí, A45): dentro del paquete MODIS (MOD-D) salvo atraso de más de un mes; tag defensivo, flag `enable_modis_geo_mxd03` con TDD que reproduzca X record por record, FICHA SDA, marca en las tres vistas, aviso a OVDAS.
 - [x] B9. **CUMPLE SIN DAÑO, verificado** (`afb3fcdea`, `experiments/_s162_mxd03/resultado/`, verificador limpio Fable): P1 sin pérdida, P2 ≤ 35° EMPATE, vara MXD03 MAS CERCA (pero mide cercanía al cráter de Láscar, no al calor de la noche: VRB-02), M neutro en la mediana con 17 de 79 alertas cambiando más de 10 %; las 48 protegidas quedan más cerca del cráter con X (1,46 km). Veredicto enviado a la coordinadora.
 
@@ -169,13 +169,15 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 ### MOD-D, paquete MODIS contra K
 - [x] D1. (borrador en `experiments/_s162_modis_paquete/PREREGISTRO.md`) Pre-registro: brazos K, PM (port con D33 corregido), PM sin MxD03; el déficit de Chillán (0,485) se juzga aquí.
 - [x] D2. Verificador limpio: v1 tenía reglas que obligaban a decidir después de mirar; v2 las cierra (`ce71a4ab1`); ronda 2: lista para el sello; reglas SELLADAS con D-48 (`de3141b6e`).
-- [ ] D3. Candado de MOD-D (evaluador, arnés, workflow, verificador), ya posible: MOD-B y MOD-C entregaron. Incluye el estrato informativo de la adenda 1 (soporte independiente por publicación en negativos, candidatas a experimental) y, si se agrega por adenda, el brazo PM-sin_dup con el método A (adenda 2). Luego pedir el despacho a la coordinadora.
+- [ ] D3. **EN CURSO (relevo, rama `s162-modd-candado`, worktree `C:\vrp-trabajo\s162-modd`)**: arnés `probe_paquete.py` (6 de 6 mutaciones atrapadas), diagnóstico S-1, evaluador `evaluar_paquete.py` (19 de 19 pruebas; contra el vacío 19 de 19 fallan por aserción), mutaciones del evaluador, ensayo en seco sobre S159, workflow `probe-s162-modd.yml`, adenda 3 (PM-sin_dup NO se agrega). Falta: cerrar mutaciones, verificador limpio del candado, tag y pedido de despacho. Texto previo: Candado de MOD-D (evaluador, arnés, workflow, verificador), ya posible: MOD-B y MOD-C entregaron. Incluye el estrato informativo de la adenda 1 (soporte independiente por publicación en negativos, candidatas a experimental) y, si se agrega por adenda, el brazo PM-sin_dup con el método A (adenda 2). Luego pedir el despacho a la coordinadora.
+
+- [x] F1. (relevo, `74a5f855b`) Plan con TDD del flag de MxD03 para la adopción dentro del paquete: `docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md` (posición por píxel, estado «sin dato» con regla a confirmar en el censo de MOD-D, distancia de la etiqueta desde el cráter). Nada en `pipeline/` sin tag y sí de Nicolás.
 
 ### Perfil experimental (candidatas)
-- [ ] X1. Anotar en `docs/BEYOND_MIROVA_EXTENSIONS.md` §12 la candidata Láscar 2026-05-11 07:55 (señal real del cráter que MIROVA calla en MODIS; diagnóstico de MOD-C), en el PR del veredicto de MOD-B o de MOD-D (archivo compartido: no tocarlo suelto).
+- [x] X1. (en #906) Anotar en `docs/BEYOND_MIROVA_EXTENSIONS.md` §12 la candidata Láscar 2026-05-11 07:55 (señal real del cráter que MIROVA calla en MODIS; diagnóstico de MOD-C), en el PR del veredicto de MOD-B o de MOD-D (archivo compartido: no tocarlo suelto).
 
 ### MOD-A (la hace la sesión del instrumento)
-- [ ] A1. Entregada en el PR #902 (abierto): Coppola 2026 p. 4, MOD03/MYD03 con corrección de terreno como insumo, y el NRT con el mismo procedimiento (p. 3 y 6). Incorporarla al §2 del pre-registro de MxD03 en el PR del veredicto (B10).
+- [x] A1. (en #906) Entregada en el PR #902 (abierto): Coppola 2026 p. 4, MOD03/MYD03 con corrección de terreno como insumo, y el NRT con el mismo procedimiento (p. 3 y 6). Incorporarla al §2 del pre-registro de MxD03 en el PR del veredicto (B10).
 
 ### Cierre de esta etapa
 - [x] Z1. Resumen para la coordinadora (notas compartidas `MODIS_avance.md` y mensaje, 2026-10-24).
@@ -187,6 +189,11 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 2. ~~D35 y marcas A113~~: **resuelta** (D-48): van en el PR del veredicto de MOD-B, no antes (tarea B10).
 
 ## Bitácora (la más nueva arriba)
+
+### 2026-10-25 (relevo MODIS 2, vuelta 1): A61 verificada, candado de MOD-D armado, plan del flag
+- Verificador limpio (Opus) de la A61: P4 se sostiene; marca de correcciones al inicio del INFORME (`s162-a61-mxd03` `72f85df71`).
+- Candado de MOD-D en `s162-modd-candado` (worktree `C:\vrp-trabajo\s162-modd`); detalle en D3.
+- Plan del flag de MxD03 (F1). Sub-sesiones abiertas: ninguna.
 
 ### 2026-10-24 (vuelta 15): MOD-B verificado y entregado
 - Verificador limpio del resultado: el CUMPLE SIN DAÑO se sostiene con código independiente. Matices anotados en el
