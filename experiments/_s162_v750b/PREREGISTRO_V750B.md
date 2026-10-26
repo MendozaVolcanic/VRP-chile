@@ -1,5 +1,9 @@
 # Pre-registro V750-B (S162): la región sensible (ROI) del código de MIROVA, por volcán, en VIIRS 750
 
+> ⚠️ **Adenda 1 (2026-10-25, informativa, agregada después del sello; ver al final)**: el analizador sellado deja caer
+> sin contar la pasada «ok» a la que le falta una caja del oráculo. La lectura del 2026-11-03 corre antes
+> `adenda1/cobertura_cajas_v750b.py`. Ninguna regla cambia y el analizador no se edita.
+
 Estado: **SELLADO bajo D-48** (2026-10-24; condición de la coordinadora cumplida: la batería atrapa por aserción 13 de 13
 mutaciones del analizador, con la copia sin mutar y la mutación que sólo se cae como controles, `mutar_bateria_salida.txt`),
 corregido tras dos verificadores limpios: el primero (Fable 5.1,
@@ -275,3 +279,43 @@ De la v3 a la versión sellada (tercera vuelta, Fable, sólo sobre el delta; coo
   identidad PASA y la mutación que sólo se cae sale CAÍDA.
 - VB3-04 a VB3-07: declarado (B0 y el control positivo) o arreglado (código de `--solo-controles`, bandera de pruebas
   con censo fallado, denominador del 2 %).
+
+## Adenda 1 (2026-10-25, informativa; propuesta por la sesión VIIRS 750 2, la confirma la coordinadora bajo D-48)
+
+**Qué pasa.** `analizar_v750b.py` (l. 208-209) cuenta una pasada como observada sólo si trae las cinco cajas del oráculo
+(B0, B1, B2, B3, B5), pero la que es «ok», nocturna y con el cráter cubierto y no las trae no entra en la lista de SIN
+DATO (l. 206) ni en la de no observadas (l. 207): sale del numerador y del denominador a la vez, sin nombre. Si es una
+protegida, la cobertura sigue diciendo SUFICIENTE y la protegida queda fuera de P1 sin que nadie la haya mirado.
+Encontrado por el subagente que escribió el analizador de V750-A; demostrado en el escenario D1 de
+`adenda1/probar_adenda1.py` (25 objetivos, el analizador sellado da 24 observadas, 0 SIN DATO y cobertura SUFICIENTE con
+la protegida sin caja).
+
+**Cuánto puede pesar.** Con el probe sellado, nada esperado: `probe_v750b.py` (l. 166-169) calcula las cinco cajas
+juntas en el mismo bloque y cualquier excepción marca la pasada entera como `error`, que sí es SIN DATO. El caso sólo
+aparece si un relanzamiento con `SOLO` corre otro código, o si un artefacto llega dañado pero legible. Por eso es una
+adenda y no un arreglo: el riesgo es que el analizador calle, no que mida mal.
+
+**Por qué no cambia ninguna regla.** El §4 ya dice que una pasada con error de un brazo es SIN DATO, que con más del 2 %
+de SIN DATO o una protegida SIN DATO no se lee el veredicto, y que se relanzan sólo las faltantes. Una pasada sin una
+caja del oráculo es un brazo que no corrió. La adenda aplica esa regla a un caso que el código no cubría; las métricas,
+la regla del §6 y los controles del §7 quedan como están, y el analizador no se edita (§9).
+
+**Cómo se lee el 2026-11-03.** Antes del comando de lectura del §9, con los mismos `--art`, `--objetivos` y
+`--sin-granulo`:
+
+    python experiments/_s162_v750b/adenda1/cobertura_cajas_v750b.py --art <artefactos> --objetivos objetivos_v750b.json --sin-granulo experiments/_s162_v750b/sin_granulo_v750b.json
+
+- Sale 0 y dice «cobertura con las cajas: SUFICIENTE»: se lee con el analizador como dice el §9.
+- Sale 3 y dice INSUFICIENTE mientras el analizador dice SUFICIENTE: manda el compañero. Se relanzan con `SOLO` las
+  pasadas que lista como «falta caja» y se vuelve a leer; si siguen faltando, se declaran y la coordinadora decide con
+  Nicolás si se lee igual con `--leer-con-faltantes` (§9), con la lista en el motivo.
+- Con 0 pasadas sin caja el compañero da el mismo SIN DATO y el mismo veredicto de cobertura que el analizador
+  (escenarios A4 y A6, comprobados contra el analizador sellado). Una pasada que el compañero cuenta como «falta caja»
+  queda fuera de las métricas igual que en el analizador; lo único que agrega es contarla en la cobertura.
+
+**Pruebas.** `adenda1/probar_adenda1.py`: roja por aserción sin el compañero (`probar_adenda1_rojo_salida.txt`), verde
+con él (`probar_adenda1_salida.txt`). Nulo: `adenda1/mutar_adenda1.py` (`mutar_adenda1_salida.txt`), siete mutaciones
+de una línea del compañero, la copia sin mutar y una mutación que sólo se cae. La primera corrida del nulo dejó pasar
+dos (la protegida que no frena cuando está bajo el 2 %, y la diurna contada dos veces); se agregaron los escenarios A7
+y A8 y se volvió a medir. Verificador limpio: `adenda1/verificador/`.
+
