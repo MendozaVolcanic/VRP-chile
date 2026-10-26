@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 22:50 UTC (S164, vuelta 23): 11 worktrees terminados a la papelera; 4 sesiones archivadas
+- Nicolás: «has lo que recomiendes». Antes de mover, cada uno comprobado limpio (0 cambios seguidos) y con su HEAD en la
+  rama del remoto; los archivos sin seguir eran copias, cachés y TIF bajados.
+- **A la papelera de Windows** (no borrado definitivo): `.claude/worktrees/` gracious-merkle-6447d8, s158-audit-r2-0eeee2,
+  s162-viirs375-c1b864, s163-audit-h3-6c292b, s163-instrumento-pendientes-ab5a2d, s163-rebase-889-b45a20,
+  s163-unificar-evidencia-f6c2e9; `C:\vrp-trabajo\` s159-evaluador, s162-a61, s163-o2alt, s163-o3. `git worktree prune`
+  después: 14 worktrees registrados (eran 25).
+- **Se quedan**: `s159-pruebas` (trae `experiments/_s159/o1/o2_paquete/salida_matlab.txt` sin seguir, quizás única); los
+  de sesiones vivas (`s162-modis-2`, `s162-viirs750-2`, `s163-d39`, `s163-diurno-k-prereg`, `funny-kepler`, que es el de
+  `modd-fase3`); `C:\vrp-trabajo\s162-modd` y `s162-v750a-eval`; los de D:. Tres de sesiones de S162 que siguen abiertas
+  y los tienen ocupados (`s162-instrumento-021324`, `s162-modis-774bb0`, `s162-viirs750-f63ef4`): no se movieron.
+- Archivadas (terminadas, con su PR mergeado) para soltar sus worktrees: `rebase-889`, `unificar-evidencia`,
+  `instrumento-pendientes`, `audit-h3-tablero`.
+- El espacio se libera cuando Nicolás vacíe la papelera. C: sigue en 4,2 GB hasta entonces.
+
 ### 2026-10-26 21:50 UTC (S164, vuelta 22): adenda 1 del diurno mergeada (#917); medidor V750-A detenido por disco
 - `diurno-k-prereg` entregó la adenda 1 (regla de días con hueco de NASA con (b')): PR #917, `af5af6a17`. Fijada para W2
   a W6 desde `867cb1ec` (18:48:47 UTC, con W2 en cola y sin salidas). En W1, (b') excluye el 10, 11 y 12 de marzo e I4
