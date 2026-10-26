@@ -581,6 +581,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   recalcula I4 y si sigue fallando es INVÁLIDO. Condiciones: adenda fechada en el §11 antes de cualquier dato de W2 a W6;
   criterio mecánico externo al A/B; evaluador sellado intacto (script aparte con pruebas y verificador limpio); PR a `main`.
   Informado a Nicolás.
+- Ajuste, también con D-48: implementada al pie de la letra (`dias_excluidos_nasa.py`, 9 pruebas), la condición (b)
+  excluía sólo el 10 de marzo, porque MIROVA no listó pasadas nocturnas de Suomi NPP en Láscar el 11 y el 12, aunque CMR
+  tampoco tiene gránulos esos días: (b) medía lo que MIROVA listó, no si el dato existía. Se cambia a **(b'): el control
+  no tiene ningún record de esa plataforma ese día** (campo `sensor`; 10, 11 y 12 de marzo con 0 records de Suomi NPP en
+  los dos brazos, el 9 y el 13 sí). La adenda dirá que el cambio se hizo después de ver W1 (informativa), informará el
+  resultado con (b) y con (b'), y la regla queda fija para W2 a W6, que no tienen datos.
 
 ### 2026-10-26 18:35 UTC (S164, vuelta 19): W1 del diurno terminada; W2 despachada entera (run 40379112237)
 - W1 (run 40364164845): success; control 31 min (16:58 a 17:29), brazo diurno **88 min** (16:58 a 18:26), recolectar
