@@ -549,6 +549,13 @@ los dos brazos; repetir el job no lo arregla, que es el único remedio que el §
    gránulos de un día) no se excluye. El verificador encontró uno en W6: el 2026-10-13 Suomi NPP no tiene gránulos de
    noche en CMR; como la tabla de MIROVA no lista pasadas nocturnas VIIRS ese día, no debería tocar I3 ni I4 (inferido,
    no medido). Si un hueco parcial hace fallar I4, rige el punto 4: INVÁLIDO.
+10. **Verificación del script de unión** (Sonnet 5.5, `verificador_union/INFORME.md`): conforme con reparos; lo que
+    decide es equivalente al evaluador sellado con `excluir_dias` (9 casos con la referencia real). Reparos cerrados:
+    una prueba ejecuta `main()` y comprueba que pasa la lista y la opción del caso e (V1); la salida trae los mismos
+    informativos que el `main()` sellado: mínimas, filtro de 12°, desproporción y records nocturnos distintos (V2); y
+    la lista se valida: una fecha mal escrita o fuera de W2 a W6 hace que el script se niegue a decidir (rc 4) en vez de
+    no excluir nada en silencio (V3). Mutaciones del script de unión: 8 de 8 atrapadas (`mutaciones_exclusion_salida.txt`).
+    No decide nada de W1 (tiene su propio camino, sin exclusión, informativo).
 
 **Qué da en W1** (`w1/dias_excluidos_w1_salida.txt`):
 - Con la regla que decide (a y b'): excluye el **10, 11 y 12 de marzo** (en los tres, Suomi NPP en las bandas I y M).

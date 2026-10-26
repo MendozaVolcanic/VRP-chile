@@ -41,6 +41,21 @@ def quitar_dias(filas, recs_por_lado, dias):
     return f, r
 
 
+def validar_dias(dias, ventanas):
+    """Verificador de la unión, V3: cada día de la lista tiene que ser una fecha AAAA-MM-DD dentro de alguna ventana.
+    Una lista de otra ventana o mal escrita no excluiría nada en silencio; aquí se niega."""
+    import datetime as dt
+    malos = []
+    for d in dias:
+        try:
+            ok = dt.date.fromisoformat(str(d)).isoformat() == str(d)
+        except ValueError:
+            ok = False
+        if not ok or not any(w[1] <= str(d) <= w[2] for w in ventanas):
+            malos.append(d)
+    return malos
+
+
 def lo_que_sale(filas, dias, ventanas):
     """Por día excluido: cuántas pasadas de MIROVA de cada clase (por sensor y periodo) salen de la cuenta."""
     pas = ev.pasadas_de(filas, "union", ventanas)
@@ -76,9 +91,13 @@ def main(argv=None):
         return 3
     exc = json.loads(Path(a.excluidos).read_text(encoding="utf-8"))
     dias = list(exc["excluir_dias"])
+    ventanas = [(w[0], w[1], w[2]) for w in sk.VENTANAS if w[0] in sk.DECIDEN]
+    malos = validar_dias(dias, ventanas)
+    if malos:
+        print("DÍAS EXCLUIDOS QUE NO SON FECHAS DE W2 A W6: %s. No se decide." % malos)
+        return 4
     filas = sk.cargar_ref(ref)
     p_sup = ev.p_sup_de_vara(sus["vara_cobertura_nocturna_produccion"])
-    ventanas = [(w[0], w[1], w[2]) for w in sk.VENTANAS if w[0] in sk.DECIDEN]
     inner = bp.inner_desde_html()
     recs = {control: ev.cargar_brazo(a.raiz, control, ventanas, inner),
             brazo: ev.cargar_brazo(a.raiz, brazo, ventanas, inner)}
@@ -93,6 +112,19 @@ def main(argv=None):
     print("reflejo probable (1.13): %d pasadas" % len(r["reflejo"]))
     ev.imprimir(r["principal"], r["variantes"], r["final"], r["motivo"], a.opcion_e)
     print("INFORMATIVO (no decide): %s" % r["info"])
+    # Verificador de la unión, V2: los mismos informativos que imprime el main() sellado (§7 y §8).
+    print("  ¿alguna variante de mínimas cambia el veredicto principal (%s)? %s"
+          % (r["principal"]["global"], {k: v != r["principal"]["global"] for k, v in r["info"].items()}))
+    print("filtro de reflejo de 12°: apaga %d publicaciones diurnas del brazo; %d publicaciones diurnas sin ángulos"
+          % (r["reflejo12"]["apagadas"], r["reflejo12"]["sin_angulos"]))
+    for s in ev.SENSORES_DIA:
+        m12 = r["reflejo12"]["por_sensor"][s]
+        print("  con filtro %s: %s (caso %s), negativos %d de %d, protegidas %d de %d" % (
+            s, m12["veredicto"], m12["caso"], m12["neg_pub"], m12["neg_obs"], m12["P"], m12["P_obs"]))
+        print("  %s desproporción (1.13 a) sobre lo nuestro): %s" % (s, ev.desproporcion(recs_x[brazo], s)))
+    print("noche, records en los dos brazos con otros campos distintos (informativo): %d %s"
+          % (len(r["principal"]["noche_records_distintos_en_otros_campos"]),
+             r["principal"]["noche_records_distintos_en_otros_campos"][:10]))
     r["principal"].pop("T", None)
     if a.salida:
         Path(a.salida).write_text(json.dumps({"excluir_dias": dias, "principal": r["principal"],

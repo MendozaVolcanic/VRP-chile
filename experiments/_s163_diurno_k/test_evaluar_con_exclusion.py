@@ -92,3 +92,49 @@ def test_consulta_cmr_pagina_y_cuenta_dias(monkeypatch):
     vacios = dx.dias_sin_granulos("VNP02IMG", "2", "2026-03-10", "2026-03-13")
     assert vacios == {"2026-03-11", "2026-03-13"}                 # también el último día de la ventana
     assert len(pedidas) == 2 and "short_name=VNP02IMG" in pedidas[0] and "bounding_box=" in pedidas[0]
+
+
+def test_validar_dias():
+    v = [("W2", "2026-06-13", "2026-06-30"), ("W3", "2026-07-20", "2026-07-31")]
+    assert ex.validar_dias(["2026-06-20", "2026-07-31"], v) == []
+    assert ex.validar_dias(["2026-03-10"], v) == ["2026-03-10"]              # de otra ventana (W1)
+    assert ex.validar_dias(["2026-6-20", "20260620", "x"], v) == ["2026-6-20", "20260620", "x"]
+
+
+def test_main_aplica_la_lista_y_la_opcion(monkeypatch, tmp_path):
+    # Verificador de la unión, V1: main() tiene que pasar al evaluador las filas y los records SIN los días de la
+    # lista y la opción del caso e pedida; con una lista inválida se niega (rc 4).
+    import sustrato_k as sk
+    sus = json.loads((AQUI / "sustrato_k.json").read_text(encoding="utf-8"))
+    monkeypatch.setattr(ev, "sha256", lambda p: sus["sha256"][Path(p).name])
+    filas = [{"fecha_utc": "2026-06-20 17:00:00"}, {"fecha_utc": "2026-06-21 17:00:00"}]
+    monkeypatch.setattr(sk, "cargar_ref", lambda ref: list(filas))
+    recs = {C: [{"dt": datetime(2026, 6, 20, 5, 0)}], B: [{"dt": datetime(2026, 6, 20, 17, 0)},
+                                                         {"dt": datetime(2026, 6, 21, 17, 0)}]}
+    monkeypatch.setattr(ev, "cargar_brazo", lambda raices, lado, ventanas, inner: list(recs[lado]))
+    monkeypatch.setattr(ev, "problemas_de_logs", lambda *a: [])
+    monkeypatch.setattr(ex, "lo_que_sale", lambda *a: {})
+    visto = {}
+
+    def falso_completo(filas_x, recs_x, control, brazo, opcion, *a):
+        visto.update(filas=filas_x, recs=recs_x, opcion=opcion, control=control, brazo=brazo)
+        raise RuntimeError("alto")
+
+    monkeypatch.setattr(ev, "evaluar_completo", falso_completo)
+    exc = tmp_path / "exc.json"
+    exc.write_text(json.dumps({"excluir_dias": ["2026-06-20"]}), encoding="utf-8")
+    base = ["--raiz", str(tmp_path), "--ref", str(tmp_path), "--sha-codigo", SHA, "--excluidos", str(exc),
+            "--brazos", "%s,%s" % (C, B)]
+    try:
+        ex.main(base + ["--opcion-e", "e-ii"])
+    except RuntimeError:
+        pass
+    assert [f["fecha_utc"][:10] for f in visto["filas"]] == ["2026-06-21"]
+    assert [r["dt"].day for r in visto["recs"][B]] == [21] and visto["recs"][C] == []
+    assert visto["opcion"] == "e-ii" and (visto["control"], visto["brazo"]) == (C, B)
+    exc.write_text(json.dumps({"excluir_dias": ["2026-03-10"]}), encoding="utf-8")
+    try:
+        rc = ex.main(base + ["--opcion-e", "e-ii"])
+    except RuntimeError:
+        rc = "llegó al evaluador con una lista inválida"
+    assert rc == 4
