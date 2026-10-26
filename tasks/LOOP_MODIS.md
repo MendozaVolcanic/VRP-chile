@@ -45,6 +45,62 @@ de MATLAB. Reutilizar `pipeline/mirova_v750_codigo.py` (#907) y portar ahí `del
 vez de duplicarlo. TDD: primero las pruebas que fijan el caso de Láscar 2026-04-25 (1,112 MW) y la identidad con el port
 del censo, después el código. Encender el flag recién con un reproceso verificado y el sí de Nicolás en el dashboard.
 
+### b2. FASE 3 APROBADA: alcance para la sesión nueva (no empezada aquí)
+
+Nicolás aprobó, citado textual por la coordinadora S164: «Apruebo MOD-D como CANDIDATO: lleva la vía a pipeline/ con la
+regla de MATLAB, flag apagado, tag defensivo antes del primer edit.» **Encender el flag NO está aprobado.** La
+aprobación llegó reenviada por otra sesión (lección S157): la sesión nueva la confirma con Nicolás en su propio chat
+antes del primer edit. Esta sesión no la empieza porque ya está larga.
+
+**Condiciones del merge (las de #907):** tag defensivo en el remoto antes del primer edit (`pre-s16x-modis-codigo-mirova`);
+producción bit a bit igual con el flag apagado, con un control que sí cambie con el flag encendido; suite completa con
+el árbol quieto y 0 fallas (A112); CI verde con conclusión, no «0 checks» (A39); verificador limpio de otro modelo. PR en
+**borrador**, lo mergea la coordinadora.
+
+**Qué es la vía.** Lo que en el censo se llamó PM: el código de V750 de MIROVA portado a MODIS en
+`experiments/_s159/portes/mirova_port.py` (`MP.correr(..., MP.SENSORES["MODIS"])`), con la lectura de
+`experiments/_s159/portes/probe_portes.py::leer_modis` (banda 22 primaria fusionada con la 21 donde satura, banda 31,
+DN > 32767 a NaN, **geolocalización MxD03 de 1 km**, no la interpolada de 5 km), grillado a la grilla de MIROVA, más el
+relleno del fondo con la regla de `fillmissing2` de MATLAB (que el port del censo NO usaba: usaba su propio desempate).
+
+**Qué se reutiliza de `pipeline/mirova_v750_codigo.py` (#907, 733 líneas en `origin/main`):** `detectar_mirova`,
+`_pasada_contextual`, `_media_3x3_omitnan`, `_fillmissing2_lineal` con `_triangular_perturbado` (es la regla de MATLAB
+que este relevo verificó en 191/191 escenas MODIS: no reescribirla), `vrp_mirova` (hoy con `coef=COEF_VRP_V750`: pasar
+el de MODIS), `caja_roi`, `remuestrear_grilla`, `grilla_del_volcan(nombre, paso_m)`, `procesar_grilla`,
+`celda_de`/`posicion_de`/`latlon_de`, `radiancia_a_temperatura` con la λ del sensor. **Hay que agregar:** longitudes de
+onda y coeficiente de MODIS (tomarlos de `MP.SENSORES["MODIS"]`, verificados contra el paper antes de copiarlos,
+CLAUDE.md «constantes exactas»), lectura MODIS (L1B por la función de producción y MxD03), paso de grilla de MODIS en
+`grillas_mirova.yaml` **(VERIFICAR si ya existe; SIN DATO aquí)** y un `calcular_vrp_granulo` que acepte el sensor.
+Preferir parametrizar por sensor en el mismo módulo antes que copiarlo (A102: copias en línea de una lógica divergen).
+
+**Archivos de `pipeline/` que tocaría (todos bajo A45):**
+- `pipeline/mirova_v750_codigo.py`: parámetros por sensor, constantes y lectura de MODIS (o un `mirova_modis_codigo.py`
+  delgado que importe de él, si el parametrizado ensucia la vía de V750).
+- `pipeline/profile.py`: `ENABLE_MODIS_CODIGO_MIROVA: bool = bool(_t.get("enable_modis_codigo_mirova", False))`, junto
+  a `ENABLE_V750_CODIGO_MIROVA` (l. 902), leído de `thresholds:` (A89, S124).
+- `pipeline/process_modis.py`: bloque bajo el flag a semejanza de `process_viirs_mod.py:495-520` (volcán por
+  coordenadas, sin grilla sigue K con `via_codigo_mirova: "sin_grilla"`, A118); cabecera FICHA y comentario POR QUÉ
+  (Resolución CPLT 372).
+- `pipeline/store.py`: la excepción de las compuertas de la era K que hoy existe para V750 (l. 351) extendida al record
+  MODIS de la vía.
+- `pipeline/grillas_mirova.yaml`: sólo si falta el paso de MODIS (A63: no regenerarlo).
+- `docs/FICHA_SDA_VRP_CHILE.md`: versión nueva con la vía apagada.
+
+**Pruebas (primero en rojo, TDD):**
+1. El flag se lee de `pipeline.profile` y vale False en `mirova_equivalent` (subproceso, como
+   `tests/test_mirova_v750_codigo_s162.py:46`).
+2. **Bit a bit con el flag apagado:** el record de `calculate_vrp` en MODIS es idéntico al de `main` sobre fixtures
+   (patrón de `tests/test_mirova_v750_cableado_s162.py`); **control:** con el flag encendido el record cambia y lleva
+   la marca de la vía.
+3. **Identidad con el port del censo:** sobre 3 a 5 grillas del censo (`D:\vrp-trabajo\temporales\s162_modd\censo\`,
+   `grilla_NNNN.npz`, recortadas a fixtures chicos en `tests/fixtures/`), npix y VRP de la vía = los del port con el
+   relleno de MATLAB, es decir los de `experiments/_s162_modis_paquete/censo/m_con_regla_matlab.json`.
+4. **Caso Láscar 2026-04-25 07:35** (grilla 1611): la vía da **1,1124 MW** (el port sin la regla da 0,97308; ver
+   `censo/verificador/p1b_regla_salida.txt`). Es la prueba que fija la decisión de Nicolás.
+5. Volcán sin grilla: sigue K y el record lo dice.
+6. Actualizar el conteo de imports de `tests/test_guard_declarado_vs_efectivo_s131.py` (l. 162, como hizo #907).
+7. Mutaciones con control de caída sobre el bloque nuevo (sólo cuentan las atrapadas por aserción, S152/S156).
+
 ### c. Lo aprendido
 
 - **Un verificador no se lanza mientras se edita lo que lee** (A112, cuarta vez en este relevo): el r2 del candado vio
@@ -85,10 +141,11 @@ verificado). Español de Chile con formas de tú, sin guiones largos, rutas abso
    la reemplace) qué contestó Nicolás sobre MOD-D (decisión 1 del bloque).
 2. Lee: CLAUDE.md del proyecto (A45, A104, A108, A112, A113, A119); el bloque 0 de tasks/LOOP_MODIS.md;
    experiments/_s162_modis_paquete/censo/verificador/LEEME.md e INFORME.md; PREREGISTRO.md (adendas 1 a 4).
-3. Trabajo según la respuesta:
-   a. Si es CANDIDATO: escribe el plan de la fase 3 (skill writing-plans + test-driven-development) tal como lo describe
-      el bloque 0, sección b. Tag defensivo y sí explícito de Nicolás ANTES del primer edit en pipeline/ (A45). Flag
-      apagado; reutiliza pipeline/mirova_v750_codigo.py (#907).
+3. Trabajo según la respuesta (ACTUALIZADO: Nicolás ya aprobó CANDIDATO, ver la sección b2 del bloque 0):
+   a. Fase 3: confirma la aprobación con Nicolás en tu chat; plan con writing-plans + test-driven-development siguiendo
+      la sección b2 (alcance, archivos, reutilización, 7 pruebas); tag defensivo en el remoto ANTES del primer edit en
+      pipeline/ (A45); flag apagado; PR en borrador con bit a bit + control, suite quieta 0 fallas, CI verde y
+      verificador limpio. Lo mergea la coordinadora. Encender el flag NO está aprobado.
    b. Si es NO CANDIDATO: anótalo en el catálogo con la razón y pasa a MOD-C / MOD-E de la cola.
    c. Si pide otro censo con la regla de MATLAB sellada: adenda nueva al pre-registro ANTES de mirar nada, candado,
       verificador, y pedir los despachos a la coordinadora.
