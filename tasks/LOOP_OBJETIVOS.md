@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~13:30 UTC (S164, vuelta 3): #907 mergeado (cableado de la vía V750, flag apagado)
+- `loop-viirs750-2` entregó #907 en `f96b379e7` (6 commits sobre `b09a7b321`; tag `pre-rebase-s162-via-mirova` sobre
+  la versión previa `a16aa14b4`). Suite en árbol quieto: 2.582 aprobadas, 29 omitidas, 2 xfail, 0 fallas
+  (`experiments/_s162_v750a/suite_via_salida_cola.txt`). Verificador limpio Sonnet: LISTO CON CAMBIOS, ninguno sobre el
+  código A45, aplicados en `89e9d2855` (`experiments/_s162_v750a/verificador_cableado/INFORME.md`). Bit a bit del
+  almacén: 6.143 de 6.143 records iguales, control con la marca distinto en 32 de 45.
+- Alcance menor que el parche aprobado: sin kwarg nuevo; la vía reconoce el volcán por coordenadas, así que
+  `run_pipeline.py` y la firma de `calculate_vrp` no cambian (paridad GR1). Archivos A45: `process_viirs_mod.py` (bloque
+  dentro de `ENABLE_V750_CODIGO_MIROVA`) y `store.py` (tres compuertas saltadas sólo si `via_codigo_mirova is True`).
+- Revisión propia del diff: el flag se lee de `_t` con valor por defecto False y ningún perfil lo pone (`git grep` en
+  `pipeline/profiles/` de `origin/main`: 0). Sí de Nicolás: vuelta 11 de S163 («apruebo los últimos 3 puntos»).
+- Tag defensivo `pre-s164-merge-907` sobre `main` `14453e3f6`; merge commit `cff07d173`; Tests en `main` verde
+  (run 40329188081). Encender la vía sigue exigiendo el sello de V750-A, censo, sombra, tag y el sí de Nicolás.
+
 ### 2026-10-26 ~13:05 UTC (S164, vuelta 2): D-39 verificado y paso 1 hecho; la pausa del scraper la negó el clasificador
 - `d39-mirova-v1` entregó (informe en su rama `claude/s163-d39-mirova-v1-710f72` `49de07d65`,
   `experiments/_s163_d39_mirova_v1/INFORME.md`; verificador limpio Fable 5.1, ningún REFUTADO): 0 llaves perdidas y 0 campos
