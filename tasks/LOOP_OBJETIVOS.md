@@ -569,6 +569,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~02:40 UTC (S163, vuelta 3): O2 a los otros sensores; trabajo repartido en paralelo
+- Nicolás: «¿no tienes que hacer esto mismo para los otros sensores? ... continúa con todo lo que falte, abre nuevas
+  sesiones si es necesario, en paralelo y en loop». OSF zm62w sin cambios desde el 2026-08-19 (logs de la API): MIROVA
+  sólo publicó código de VIIRS 750. Los ports de VIIRS 375 y MODIS trasladan esa estructura, así que heredan la
+  ambigüedad del fondo de un píxel que O2 midió; el fondo de `MIROVA_VIIRS750_VRP.m` no depende del sensor (sólo el
+  coeficiente), así que MATLAB puede dar la vara para los tres. Pedido a las hijas:
+  - `loop-viirs750-2`: `fillmissing2` en Python exacto contra las 166 escenas de MATLAB (o tabla de vara para M de V750-A),
+    antes de cerrar la vía de proceso.
+  - `loop-modis-2`: paquete MATLAB con escenas MODIS de 1 a 4 píxeles de MOD-B/MOD-C, detrás de su cola actual.
+  - `loop-viirs375`: sale de la pausa; paquete MATLAB con escenas V375 de 1 a 4 píxeles, re-medir la magnitud de V375-C
+    con esa vara y decidir V375-D; dejar V375-E listo para la vía de proceso.
+  La coordinadora corre cada paquete en MATLAB Online (Chrome de Nicolás) y lo publica en una rama propia.
+- Sesión nueva `audit-h3-tablero` (`local_aea8959c-6f0f-4f19-b9b9-e8deaaf59573`, worktree desde `main`): confirmar o
+  refutar H3 (el tablero muestra records del detector anterior a K antes del 2026-09-18) con el predicado del tablero en
+  node, medir el efecto en noches y proponer (no ejecutar) un reproceso. Reporta a S163.
+- Inconcluso que sigue en manos de Nicolás: merges #900 (antes del 02-11), #902 a #906, #901, #898; #889 (rebase con A45);
+  D-10 (#813, ¿abrir el día?); correo a Coppola (en espera); borrado de temporales.
+
 ### 2026-10-26 ~02:25 UTC (S163, vuelta 2): O2 corrido en MATLAB; verificador lanzado
 - Nicolás activó MATLAB Online basic (llenó él el formulario de empresa y teléfono). La subida por el navegador no tomó
   archivos (MATLAB corre en un marco aislado y MATLAB Drive ignora la entrada puesta por programa), así que el paquete se
