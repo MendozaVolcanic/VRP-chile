@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~13:45 UTC (S164, vuelta 4): rama de VIIRS 375 integrada; PD1 decidida bajo D-48 (C13 en todos)
+- `loop-viirs375` entregó su rama `claude/s162-viirs375-c1b864` en `815118277` (= remoto). Integrada a `loop/activo` con
+  merge commit `461a77be4`: 209 archivos, 64 MB, todo en `experiments/_s159/portes/`, `experiments/_s158_audit_r2/`,
+  `experiments/_s162_v375/` y `tasks/LOOP_VIIRS375.md`; 0 archivos de `pipeline/`, `data/` ni `frontend/`. Los dos `.mat`
+  de 26 MB (`o2_375/entradas_v375.mat`, `resultado_v375.mat`) son la evidencia de MATLAB; `main` ya tiene uno de 17 MB del
+  mismo tipo (`experiments/_s163_o2/entradas_o2.mat`). Al integrar `loop/activo` a `main`, el `evaluar.py` de esta rama
+  gana el add/add con #911 (aviso de la hija).
+- **PD1 decidida con D-48** («sobre las decisiones mías haz lo que tú recomiendes»): **caja C13 en todos los volcanes**.
+  Por qué: un juego único para todos es lo que MISSION exige (per-volcán excluido, l. 77, trampa S99) y en nueve de los
+  once la C13 es casi la misma caja que M14; la alternativa (C13 sólo en Cordón Caulle y Tupungatito) es un ajuste por
+  volcán. El correo a Coppola que la hija también recomendaba **no se envía** (decisión vigente de Nicolás).
+- Lo que falta para V375-E (lista de la hija): adaptar la vía de #907 a 375 (sus números están en
+  `experiments/_s162_v375/brazos.py`), marcar el record con `via_codigo_mirova: True`, y después sello, censo, sombra, tag
+  y el sí de Nicolás (A45). Es trabajo de una sesión nueva: la de VIIRS 375 pasó los 60 mensajes.
+
 ### 2026-10-26 ~13:30 UTC (S164, vuelta 3): #907 mergeado (cableado de la vía V750, flag apagado)
 - `loop-viirs750-2` entregó #907 en `f96b379e7` (6 commits sobre `b09a7b321`; tag `pre-rebase-s162-via-mirova` sobre
   la versión previa `a16aa14b4`). Suite en árbol quieto: 2.582 aprobadas, 29 omitidas, 2 xfail, 0 fallas
