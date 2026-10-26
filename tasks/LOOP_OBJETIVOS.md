@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 21:50 UTC (S164, vuelta 22): adenda 1 del diurno mergeada (#917); medidor V750-A detenido por disco
+- `diurno-k-prereg` entregó la adenda 1 (regla de días con hueco de NASA con (b')): PR #917, `af5af6a17`. Fijada para W2
+  a W6 desde `867cb1ec` (18:48:47 UTC, con W2 en cola y sin salidas). En W1, (b') excluye el 10, 11 y 12 de marzo e I4
+  pasa (veredicto informativo: DECIDE NICOLÁS CON M4); con (b) sólo salía el 10 y W1 quedaba INVÁLIDA. El evaluador
+  sellado no se tocó: `dias_excluidos_nasa.py` (18 pruebas, 9 de 9 mutaciones) y `evaluar_con_exclusion.py` (6 pruebas,
+  8 de 8). Dos verificadores limpios Sonnet, conformes con reparos cerrados; límite declarado en el §11 (huecos parciales
+  de un día no se excluyen).
+- Comprobado: respecto del commit sellado `68687d2d4`, de las rutas selladas sólo cambia `PREREGISTRO.md`, y sólo en el
+  §11 (la línea «(ninguna; no hay datos de los brazos)» reemplazada por la adenda). CI verde; **mergeado** con merge
+  commit `49c34185c`.
+- Lectura de W2 a W6: `dias_excluidos_nasa.py --raiz <W2..W6> --ref <ref> --salida exc.json` y después
+  `evaluar_con_exclusion.py --raiz <W2..W6> --ref <ref> --sha-codigo <40> --opcion-e e-ii --excluidos exc.json`.
+- `loop-viirs750-2` detuvo el medidor de V750-A por el disco: corrida principal 58 de 62 atrapadas por aserción; de la
+  repetición, M1 y M33 atrapadas, M34 cayó otra vez (sospecha de memoria), M36 y el control de caída SIN DATO. Retoma con
+  `--solo M34,M36 --hilos 1` cuando haya espacio.
+- Disco: C: en 4,3 GB a las 21:50 (subió de 2,9).
+
 ### 2026-10-26 21:30 UTC (S164, vuelta 21): PARADA POR DISCO, C: en 2,9 GB
 - C: bajó de 8,1 GB (20:59) a 2,9 GB libres (21:30); D: de 11 a 7,8 GB. Candidato visible: el worktree nuevo
   `.claude/worktrees/funny-kepler-68f0ef` (de la sesión `modd-fase3`, que arrancó en su segundo intento) y lo que esa
