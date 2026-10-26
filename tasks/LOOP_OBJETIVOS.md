@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 16:00 UTC (S164, vuelta 12): C: cayó de 15 a 4,7 GB libres sin causa en las carpetas de trabajo
+- Aviso de `loop-viirs750-2` (~15:20 UTC). Medido: 4,7 GB a las 15:53, 5,8 GB a las 16:00 (sube solo). Búsqueda de
+  archivos de más de 50 MB escritos en los últimos 90 min en `C:\Users\nmend`, `C:\vrp-trabajo`, `C:\ProgramData` y
+  `C:\Windows\Temp`: sólo un log de 71 MB (`Empresas\Autoscan\...\programador.log`) y la caché de miniaturas; ningún
+  worktree nuevo (24); temporales de `AppData\Local\Temp` de pocos MB. El archivo de paginación está asignado en 26,6 GB
+  (uso actual 4,1, pico 4,6) con 5,2 GB de RAM libre de 31,6: **SOSPECHA** (no medida) que Windows lo agrandó por la
+  carga de memoria de varias sesiones a la vez; no se toca (es configuración del sistema). Las tandas de MOD-D corren en
+  GitHub, no en el disco local.
+- Regla vigente: bajo 3 GB en C: o D: se para. `loop-viirs750-2` detiene su medidor si C: baja de 3 GB.
+
 ### 2026-10-26 15:26 UTC (S164, vuelta 11): t2 de MOD-D terminada; t3 despachada (run 40349358358)
 - t2 (run 40344051900): completed success, 10 de 10 jobs, ~32 min. La cuenta `loop-modis-2` con `contar_tanda.py`.
 - t3 (partes 16 a 23): `git push origin 865174abe...:refs/heads/s162-modd-t3` a las 15:26 UTC, run **40349358358**; con
