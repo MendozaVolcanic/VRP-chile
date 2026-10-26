@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 18:35 UTC (S164, vuelta 19): W1 del diurno terminada; W2 despachada entera (run 40379112237)
+- W1 (run 40364164845): success; control 31 min (16:58 a 17:29), brazo diurno **88 min** (16:58 a 18:26), recolectar
+  18:28. Salidas en la rama `s151-ab-diurno/40364164845` (`f2e98e998`). `cobertura.txt`: 183 pasadas nocturnas por brazo,
+  0 faltan y 0 sobran; el brazo diurno trae 74 pasadas diurnas de VIIRS 375 y 73 de VIIRS 750, sin MODIS diurno:
+  «COBERTURA NOCTURNA PAREJA y día como se espera».
+- Regla operativa del §8: 88 × 1,45 × 1,3 = 166 min, bajo el tope de 300: **W2 a W6 van enteras** (5 despachos de 22 jobs).
+- W2 (2026-06-13 a 06-30, 11 Tier A; lista de volcanes la del §8 del pre-registro de C0) despachada a las 18:35 UTC desde
+  `s163-diurno-k-codigo` con las entradas de K explícitas: run **40379112237**. Con `max-parallel: 3`, unas 7 a 8 h.
+  W3 recién cuando W2 haya empezado y el anterior termine (un solo pendiente por grupo).
+
 ### 2026-10-26 17:55 UTC (S164, vuelta 18): Nicolás da permiso para D-39 y abre la fase 3; el disco se explicó
 - Nicolás: «te doy permiso, y abre la fase 3, pero revisa porque hemos perdido bastante espacio, quizas hay artefactos o
   archivos temporales». Después vació la papelera de Windows: C: subió a 8,7 GB, D: a 11 GB.
