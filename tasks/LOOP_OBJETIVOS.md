@@ -569,6 +569,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 17:55 UTC (S164, vuelta 18): Nicolás da permiso para D-39 y abre la fase 3; el disco se explicó
+- Nicolás: «te doy permiso, y abre la fase 3, pero revisa porque hemos perdido bastante espacio, quizas hay artefactos o
+  archivos temporales». Después vació la papelera de Windows: C: subió a 8,7 GB, D: a 11 GB.
+- **D-39**: el clasificador de permisos volvió a negar `gh workflow disable` en Mirova-v1 («Interfere With Workloads») aun
+  con el permiso en el chat. No se intentó por otra vía. Quedan dos caminos: Nicolás corre los pasos de
+  `experiments/_s163_d39_mirova_v1/PASOS_PARA_NICOLAS.md` (rama `claude/s163-d39-mirova-v1-710f72`) o agrega una regla de
+  permiso para `gh workflow` desde un terminal `claude` interactivo.
+- **Fase 3 de MOD-D**: sesión `modd-fase3` (`local_1860a1d4-d339-4319-b89f-7ebab9735b7f`) creada, pero **no arrancó**:
+  pedía 5,4 GB libres para su worktree y había 4,7. Con la papelera vaciada se puede reintentar desde esa sesión.
+- **Disco, medido**: en las 5 h previas se escribieron ~12 GB bajo `C:\Users` en 39.656 archivos; 7,08 GB de eso son
+  `VRP Chile\.git\objects\pack` (un paquete nuevo de 6,4 GB con fecha 17:45 UTC). Duplicación entre paquetes despreciable
+  (105.249 entradas, 103.150 objetos únicos). Lectura: un repack automático de git escribe el paquete nuevo entero antes de
+  borrar los viejos, así que mientras corre el repositorio ocupa casi el doble; al terminar los borra. Encaja con la caída
+  hasta 4,5 GB y la subida posterior, pero el momento en que empezó no está medido (SOSPECHA). El repositorio pesa 9,66 GB
+  por la historia de `data/`. Basura de git: 10 `tmp_pack_*` de fetches cortados (90 MB, del 19 al 26 de octubre).
+- El resto del peso fijo: 20 worktrees de la app en `.claude/worktrees` (14,6 GB), la mitad de sesiones ya terminadas e
+  integradas, todos limpios y con su rama en el remoto. Propuesto a Nicolás: mandarlos a la papelera.
+
 ### 2026-10-26 16:58 UTC (S164, vuelta 17): pre-registro diurno SELLADO por Nicolás; W1 despachada (run 40364164845)
 - Nicolás, textual: «Sello el pre-registro diurno 68687d2d4 con las seis recomendaciones (e-ii en el caso e).» Tag
   `s163-diurno-k-sellado` sobre `68687d2d4` (anotado con sus palabras).
