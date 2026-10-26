@@ -128,6 +128,8 @@ def aserciones(rf, rv, ids, grillas):
     c = rf["crater_mxd03"]
     exige(c["linea"] == T.N // 2 and c["frame"] == T.N // 2 and c["costura"] is True,
           "FOCO: crater en MxD03 (%s, %s, costura %s), esperado (40, 40, True)" % (c["linea"], c["frame"], c["costura"]))
+    exige(c.get("borde") is False and c.get("vecinos_validos") is True and c.get("dist_km") is not None and c["dist_km"] < 0.01,
+          "FOCO: borde/vecinos/distancia del crater en MxD03 %s" % c)
     exige(rf["_originales"], "FOCO: el arnes borro los archivos originales")
     exige(rf["_sobrantes"] == [], "FOCO: quedaron archivos del port en el destino: %s" % rf["_sobrantes"][:4])
     exige(rf["k_slim"] is not None and "primary_cluster" in rf["k_slim"], "FOCO: falta el record slim de K")

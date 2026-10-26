@@ -131,7 +131,17 @@ def medir_record(l1b, geo, volcan, feats, datos, latlon_m, f, clave, o, destino,
     out = {"vol": f["vol"], "dt": f["dt"], "noche": f.get("noche"), "sensor": f["sensor"], "clave": clave,
            "lab": f["lab"], "z": f["z"], "inner": volcan.get("inner_radius_km"), "id": o["id"]}
     desp = P.desplazamiento_crater(datos["lat"], datos["lon"], latlon_m[0], latlon_m[1], vent)
-    out["crater_mxd03"] = {"linea": desp["linea"], "frame": desp["frame"], "costura": desp["linea"] % 10 in (0, 9)}
+    n_l, n_f = (int(x) for x in latlon_m[0].shape)
+    i, j = desp["linea"], desp["frame"]
+    import numpy as np
+    vec = latlon_m[0][max(i - 1, 0):i + 2, max(j - 1, 0):j + 2]
+    # SIN DATO del verificador de la A61 (VA61-01, H1): a qué distancia del cráter está el píxel MxD03 más cercano y si
+    # sus 8 vecinos tienen posición (con relleno o en el borde del gránulo, el cráter puede no estar en la imagen)
+    out["crater_mxd03"] = {"linea": i, "frame": j, "costura": i % 10 in (0, 9), "forma": [n_l, n_f],
+                           "borde": i in (0, n_l - 1) or j in (0, n_f - 1),
+                           "dist_km": round(float(pm.haversine_km(vent[0], vent[1], latlon_m[0][i, j],
+                                                                  latlon_m[1][i, j])), 4),
+                           "vecinos_validos": bool(vec.size == 9 and np.isfinite(vec).all())}
     rk = PB.brazo(l1b, geo, volcan, feats, datos)[0]
     rk33 = k33(l1b, geo, volcan, feats, datos)
     pk, pk33 = P.publica([rk, rk33], f["inner"])

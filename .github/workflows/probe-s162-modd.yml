@@ -1,0 +1,159 @@
+name: "Probe S162 MOD-D, paquete MODIS (port de MIROVA) contra K (censo de solo lectura)"
+
+# Censo del paquete MODIS contra K. Pre-registro sellado: experiments/_s162_modis_paquete/PREREGISTRO.md (v2, sello
+# D-48, adendas 1 a 3). Arnes: experiments/_s162_modis_paquete/probe_paquete.py (K y K33 con la funcion de produccion,
+# brazo de MOD-B; PM, PM-geo5 y PM-sens con experiments/_s159/portes/probe_portes.py SIN MODIFICAR). Control 1 de K en
+# su codigo_sha: experiments/_s162_mxd03/recorrer_en_sha.py, el mismo de MOD-B.
+# Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# Molde: el de MOD-C (blobs sellados del port comprobados en el paso Instrumento) mas el de MOD-B (main congelado, 24
+# partes de la poblacion, re-corrida en el codigo_sha). Se dispara con un push a una rama de disparo, siempre desde el
+# tag del candado (A108, S152); una tanda a la vez, la siguiente recien cuando la anterior termino:
+#   s162-modd-humo  5 granulos (Lascar 03-14 comun con S159; Lascar 03-27 protegida; Chillan 10-10 expuesta;
+#                   Chillan 10-16 protegida comun con S159; Villarrica 04-30 03:00 con el crater en el frame 0, VA61-01)
+#   s162-modd-t1    partes 0 a 7      s162-modd-t2  partes 8 a 15      s162-modd-t3  partes 16 a 23
+# A43: "on" entre comillas. S141: pipefail con tee. A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si
+# viene vacio. MODIS solo en Linux (pyhdf). A15: S159 midio 9,1 s por pasada con K y las 5 variantes del port (mas
+# K33 ~1,7 s); unas 228 pasadas por parte son ~45 min mas la bajada por granulo: timeout 240 min (mas de 1,3 x).
+"on":
+  push:
+    branches: ["s162-modd-humo", "s162-modd-t1", "s162-modd-t2", "s162-modd-t3"]
+
+concurrency:
+  group: probe-s162-modd
+  cancel-in-progress: false
+
+env:
+  BLOB_PROBE: "8ec50e7bbb76c16e765a92e2773270c26c6ed9ac"
+  BLOB_PORT: "96769a89e6ee2233d86d973917c696cdb2405f29"
+  BLOB_ORACULO: "07da701094f5aca7f14d7d9de39741589721c478"
+  BLOB_D25: "1dbabf657407b6db0f91d9e2fc98eb16a8051873"
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      partes: ${{ steps.p.outputs.partes }}
+      solo: ${{ steps.p.outputs.solo }}
+    steps:
+      - id: p
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            s162-modd-humo) echo 'partes=[0]' >> "$GITHUB_OUTPUT"
+                            echo 'solo=MYD021KM.A2026073.0705,MYD021KM.A2026086.0710,MYD021KM.A2026283.0740,MOD021KM.A2026289.0140,MOD021KM.A2026120.0300' >> "$GITHUB_OUTPUT" ;;
+            s162-modd-t1) echo 'partes=[0,1,2,3,4,5,6,7]' >> "$GITHUB_OUTPUT"; echo 'solo=' >> "$GITHUB_OUTPUT" ;;
+            s162-modd-t2) echo 'partes=[8,9,10,11,12,13,14,15]' >> "$GITHUB_OUTPUT"; echo 'solo=' >> "$GITHUB_OUTPUT" ;;
+            s162-modd-t3) echo 'partes=[16,17,18,19,20,21,22,23]' >> "$GITHUB_OUTPUT"; echo 'solo=' >> "$GITHUB_OUTPUT" ;;
+            *) echo "rama desconocida ${GITHUB_REF_NAME}"; exit 1 ;;
+          esac
+
+  prueba:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          pip install numpy scipy pyyaml pyproj
+          node --version
+      - name: Instrumento (blobs sellados)
+        run: |
+          test "$(git hash-object experiments/_s159/portes/probe_portes.py)" = "$BLOB_PROBE"
+          test "$(git hash-object experiments/_s159/portes/mirova_port.py)" = "$BLOB_PORT"
+          test "$(git hash-object experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py)" = "$BLOB_ORACULO"
+          test "$(git hash-object experiments/_s162_modis_paquete/evaluar_d25_ded217af4.py)" = "$BLOB_D25"
+      - name: Pruebas sin red del arnes y del diagnostico S-1 (pipeline real con escena sintetica, 6 mutaciones)
+        env:
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          python -I experiments/_s162_modis_paquete/diagnostico_s1.py 2>&1 | tee prueba_s1.log
+          python -I experiments/_s162_modis_paquete/probar_probe_paquete.py 2>&1 | tee prueba_arnes.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s162-modd-${{ github.ref_name }}-prueba
+          path: prueba_*.log
+          retention-days: 30
+
+  probe:
+    needs: [plan, prueba]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        parte: ${{ fromJSON(needs.plan.outputs.partes) }}
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+          node --version
+      - name: Instrumento (blobs sellados) y codigo del job = main congelado
+        run: |
+          test "$(git hash-object experiments/_s159/portes/probe_portes.py)" = "$BLOB_PROBE"
+          test "$(git hash-object experiments/_s159/portes/mirova_port.py)" = "$BLOB_PORT"
+          test "$(git hash-object experiments/_s158_audit_r2/oraculo/mirova_v750_r2.py)" = "$BLOB_ORACULO"
+          test "$(git hash-object experiments/_s162_modis_paquete/evaluar_d25_ded217af4.py)" = "$BLOB_D25"
+          base=$(python -c "import json;print(json.load(open('experiments/_s162_mxd03/poblacion.json'))['checkout'])")
+          git fetch --depth 1 origin "$base"
+          git diff --quiet "$base" HEAD -- pipeline scripts volcanoes.yaml frontend data/mirova_equivalent \
+            || { echo "el codigo del job no es el main congelado $base"; exit 1; }
+          git fetch --depth 1 origin 3695f67580e8de5fcf3653786ea61def0187ecb4
+          git worktree add --detach "$RUNNER_TEMP/arbol_prueba" 3695f67580e8de5fcf3653786ea61def0187ecb4
+          test -f "$RUNNER_TEMP/arbol_prueba/pipeline/process_modis.py"
+          git worktree remove --force "$RUNNER_TEMP/arbol_prueba"
+          echo "main congelado $base OK; blobs OK; fetch por sha y worktree OK"
+      - name: Arnes
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          mkdir -p out
+          echo "commit $(git rev-parse HEAD) ref ${GITHUB_REF_NAME}" | tee out/procedencia_${{ matrix.parte }}.txt
+          python experiments/_s162_modis_paquete/probe_paquete.py --parte ${{ matrix.parte }} --out out \
+            --solo "${{ needs.plan.outputs.solo }}" 2>&1 | tee out/probe_${{ matrix.parte }}.log
+      - name: Control 1 (re-corrida de K en el codigo_sha del record)
+        if: always()
+        env:
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          python experiments/_s162_mxd03/recorrer_en_sha.py --out out --parte ${{ matrix.parte }} 2>&1 \
+            | tee out/recorrer_${{ matrix.parte }}.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s162-modd-${{ github.ref_name }}-parte-${{ matrix.parte }}
+          path: |
+            out/*.jsonl
+            out/*.log
+            out/*.txt
+            out/grilla_*.npz
+          retention-days: 30
+          if-no-files-found: error
