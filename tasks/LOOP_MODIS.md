@@ -311,7 +311,8 @@ grillas 51 × 51 ya remuestreadas: `mir`, `tir`, `mir_b21`, `mir_geo5`, `tir_geo
 - [ ] D4c. Tandas: **t1 = run 40336655402** (terminó 10/10 success; **contada**: 1.814 de 1.814 pasadas «ok», 8 partes
   BIEN, 0 faltan, 0 repetidas, 0 retenidas para sha, 39 «volcán fuera del gránulo»; `contar_tanda.py` y su salida en
   `experiments/_s162_modis_paquete/`, artefactos en `D:\vrp-trabajo\temporales\s162_modd\t1\`); **t2 = run 40344051900**
-  (despachada 14:54 UTC, rama `s162-modd-t2`, partes 8 a 15); t3 (partes 16 a 23) cuando termine t2. Antes:
+  (10/10 success; **contada**: 1.837 de 1.837 «ok», 8 partes BIEN, 0 retenidas, 65 «volcán fuera del gránulo»;
+  `contar_t2_salida.txt`); **t3 = run 40349358358** (despachada 15:26 UTC, rama `s162-modd-t3`, partes 16 a 23). Antes:
   **t1 despachada por S164: run 40336655402** (2026-10-26 14:07 UTC, head `865174abe`, rama `s162-modd-t1`, partes 0 a 7); t2 y t3 las despacha S164 cuando termine la anterior (un solo run pendiente por
   grupo). Al terminar cada una: bajar artefactos a `D:\vrp-trabajo\temporales\s162_modd\t1\` (t2, t3), contar filas
   «ok» y errores por parte (A108), y al final de las tres evaluar el censo entero desde el checkout del tag.
