@@ -569,6 +569,22 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~10:50 UTC (S163, vuelta 11): Nicolás aprueba #909, el cableado de V750 y D-39; #909 mergeado
+- Nicolás: «continúa con todo lo que recomiendes apruebo los últimos 3 puntos» (cableado de V750 y merge de #909 bajo A45;
+  D-39; volver a entrar a MathWorks) y luego «investiga bien lo de mirova-v1, no queremos perder datos, lanza una sesión
+  específica si es necesario».
+- **#909 mergeado** (squash `ccb378425`), tag defensivo `pre-s163-merge-909` sobre el main anterior `a73e5b241`. Toca
+  `pipeline/fetch.py` y `scripts/run_pipeline.py`: el NRT registra incidencias de cobertura; su código de salida no cambia
+  sin `--estricto-cobertura`. Vigilar las próximas corridas del NRT.
+- Cableado de la vía «código MIROVA» en V750: el sí de Nicolás pasado a `loop-viirs750-2` con sus palabras textuales;
+  flag apagado; pedido: rebase sobre main (por #909), prueba de producción bit a bit igual con el flag apagado, suite, CI y
+  verificador limpio; el merge lo hace la coordinadora.
+- **D-39**: sesión `d39-mirova-v1` (`local_57b44db2-3006-49fb-a00c-0228be793b29`) para demostrar antes de mergear
+  Mirova-v1#26 que ninguna fila se pierde ni cambia (cuenta fila a fila en las dos direcciones), que cada fila a reponer
+  existe en la historia, plan de despliegue con tag y pausa de workflows, y R13 en VRP Chile; no mergea, entrega a S163.
+- MATLAB: la pestaña sigue en el inicio de sesión de MathWorks (página gris); los paquetes de MODIS y V375 esperan que
+  Nicolás entre.
+
 ### 2026-10-26 ~05:45 UTC (S163): candado de MOD-D, adenda 4; punto (b) aprobado con D-48
 - Verificador limpio (Fable) del candado: «se puede despachar el humo con cambios chicos». VCM-01 (gravedad 3): la adenda 3
   sacaba del denominador más de lo que permite el §8.5 sellado, y una protegida que K publica pero el port no pudo evaluar
