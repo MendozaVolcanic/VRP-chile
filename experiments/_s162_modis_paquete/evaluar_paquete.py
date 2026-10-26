@@ -12,8 +12,9 @@ POR QUÉ CADA PIEZA (resumen; el detalle está en el pre-registro):
   con `regla_m` (sólo EMPEORA decide) y d′ de D-28 (`comparar_con_ganancia`, informa): todo importado del blob sellado
   de evaluar_d25.py (commit ded217af4, blob 1dbabf65, copiado sin cambios como evaluar_d25_ded217af4.py y comprobado
   por su hash).
-- Las pasadas donde el port no pudo correr (volcán fuera del gránulo, error, escena inválida) salen del denominador de
-  TODOS los brazos y se cuentan aparte (§8 control 5). Una protegida que cae ahí se lista junto al veredicto (adenda 3).
+- Sólo «volcán fuera del gránulo» y «escena inválida» sacan una pasada del denominador de TODOS los brazos (§8 control
+  5); una falla del arnés o del port deja el control 5 en rojo; una protegida que K publica y sale por uno de esos dos
+  motivos lleva el veredicto a DECIDE NICOLÁS (adenda 4, regla aprobada por la coordinadora S163).
 - PM-geo5 y PM-sens reciben el mismo cálculo como información (§6). K33, `pixel` y `fisica_b21` se informan.
 
 Las dos preguntas del instrumento:
@@ -518,9 +519,18 @@ def control_cobertura(filas, esperadas, crudas):
     fuera = collections.Counter(f["_motivo"] for f in filas if not f["_evaluable"])
     fallas = [{"vol": f["vol"], "dt": f["dt"], "motivo": f["_motivo"]} for f in filas
               if not f["_evaluable"] and f["_motivo"] not in MOTIVOS_SELLADOS]
-    prot_fuera = [{"vol": f["vol"], "dt": f["dt"], "motivo": f["_motivo"],
-                   "k_publica": int((f.get("pub") or {}).get("K") or 0)} for f in filas
-                  if not f["_evaluable"] and f.get("lab") == "protegida" and f["_motivo"] in MOTIVOS_SELLADOS]
+    sel = [f for f in filas
+           if not f["_evaluable"] and f.get("lab") == "protegida" and f["_motivo"] in MOTIVOS_SELLADOS]
+    # VCR-06 (ronda 2): «K publica» de estas pasadas sale del predicado del evaluador sobre el record de K, como en las
+    # evaluables; si no coincide con lo que dijo el runner, es una falla del instrumento (control en rojo)
+    pk = predicado([(f.get("k_slim"), f["inner"]) for f in sel])
+    prot_fuera = []
+    for f, (pub, _mag) in zip(sel, pk):
+        runner = int((f.get("pub") or {}).get("K") or 0)
+        prot_fuera.append({"vol": f["vol"], "dt": f["dt"], "motivo": f["_motivo"], "k_publica": pub,
+                           "k_publica_runner": runner})
+        if pub != runner:
+            fallas.append({"vol": f["vol"], "dt": f["dt"], "motivo": "predicado_de_K_distinto_del_runner"})
     estado = "OK" if c["estado"] == "OK" and dup["estado"] == "OK" and not fallas else "INDECIDIBLE"
     return {"estado": estado, "faltan": c["faltan"][:20], "n_faltan": len(c["faltan"]), "duplicadas": dup,
             "fallas_del_instrumento": fallas[:20], "n_fallas_del_instrumento": len(fallas),
@@ -596,6 +606,9 @@ def externos_de_entrada(pob, cab, crudas, ref, commit_esperado=None):
     ext = {}
     import manifiesto_candado as MC       # adenda 4 (VCM-02): hash de cada archivo del candado
     ext["manifiesto"] = MC.comprobar()
+    # VCR-03 (ronda 2): el hash del manifiesto que se usó, para cotejarlo con `git ls-tree <tag>` (el chequeo de arriba
+    # compara el árbol de quien lee con SU manifiesto; leer desde el checkout del tag es lo que lo ata al candado)
+    ext["manifiesto"]["blob_manifiesto"] = blob(MC.MANIFIESTO) if Path(MC.MANIFIESTO).exists() else None
     malos = {r: blob(RAIZ / r) for r, h in BLOBS_SELLADOS.items() if blob(RAIZ / r) != h}
     d25 = blob(D25_RUTA)
     cab_blobs = sorted({json.dumps(c.get("blobs"), sort_keys=True) for c in cab})
@@ -607,7 +620,8 @@ def externos_de_entrada(pob, cab, crudas, ref, commit_esperado=None):
     ext["predicado"] = {"estado": "OK" if shas == [sha_html] else "INDECIDIBLE", "local": sha_html, "jobs": shas}
     commits = sorted({c.get("commit") for c in cab})
     # adenda 4 (VCM-02): todos los jobs en UN commit, y ese commit es el del tag del candado (--commit)
-    ok_commit = bool(commit_esperado) and len(commits) == 1 and str(commits[0]).startswith(commit_esperado)
+    # VCR-04 (ronda 2): el sha completo, igual, no un prefijo
+    ok_commit = bool(commit_esperado) and len(str(commit_esperado)) == 40 and commits == [commit_esperado]
     ext["procedencia"] = {"estado": "OK" if ok_commit else "INDECIDIBLE", "commits": commits,
                           "commit_esperado": commit_esperado, "partes": sorted(c.get("parte") for c in cab)}
     if ref is None:
@@ -713,6 +727,7 @@ def main():
     print("  S-1:", {k: res["s1"][k] for k in ("n_ok", "n_identidad_falla")}, res["s1"]["tabla"])
     print("  protegidas fuera del denominador:", res["controles"]["cobertura"]["protegidas_fuera_del_denominador"])
     print("  cruce con el K de MOD-B:", res["cruce_k_modb"])
+    print("  manifiesto usado (blob, cotejar con git ls-tree del tag):", res["controles"]["manifiesto"].get("blob_manifiesto"))
     out = Path(a.salida) if a.salida else Path(a.art) / "resultado_paquete.json"
     for f in filas:
         f.pop("_t", None)

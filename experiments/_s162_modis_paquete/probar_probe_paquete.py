@@ -133,6 +133,8 @@ def aserciones(rf, rv, ids, grillas):
     exige(rf["_originales"], "FOCO: el arnes borro los archivos originales")
     exige(rf["_sobrantes"] == [], "FOCO: quedaron archivos del port en el destino: %s" % rf["_sobrantes"][:4])
     exige(rf["k_slim"] is not None and "primary_cluster" in rf["k_slim"], "FOCO: falta el record slim de K")
+    exige(rf.get("k33_slim") is not None and "primary_cluster" in rf["k33_slim"],
+          "FOCO: falta el record slim de K33 (VCR-08: sin el, el evaluador cae en silencio al K33 del runner)")
 
     exige(rv["port_estado"] == "ok", "VACIO: el probe no termino ok")
     exige(rv["pub"]["K"] == 0, "VACIO: K publica sin foco")

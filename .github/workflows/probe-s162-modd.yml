@@ -1,7 +1,7 @@
 name: "Probe S162 MOD-D, paquete MODIS (port de MIROVA) contra K (censo de solo lectura)"
 
 # Censo del paquete MODIS contra K. Pre-registro sellado: experiments/_s162_modis_paquete/PREREGISTRO.md (v2, sello
-# D-48, adendas 1 a 3). Arnes: experiments/_s162_modis_paquete/probe_paquete.py (K y K33 con la funcion de produccion,
+# D-48, adendas 1 a 4). Arnes: experiments/_s162_modis_paquete/probe_paquete.py (K y K33 con la funcion de produccion,
 # brazo de MOD-B; PM, PM-geo5 y PM-sens con experiments/_s159/portes/probe_portes.py SIN MODIFICAR). Control 1 de K en
 # su codigo_sha: experiments/_s162_mxd03/recorrer_en_sha.py, el mismo de MOD-B.
 # Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
@@ -80,9 +80,13 @@ jobs:
           set -o pipefail
           python -I experiments/_s162_modis_paquete/diagnostico_s1.py 2>&1 | tee prueba_s1.log
           python -I experiments/_s162_modis_paquete/probar_probe_paquete.py 2>&1 | tee prueba_arnes.log
+          python -I experiments/_s162_modis_paquete/m_con_regla_matlab.py --probar 2>&1 | tee prueba_m_regla.log
           python -I experiments/_s162_modis_paquete/probar_evaluar_paquete.py 2>&1 | tee prueba_evaluador.log
           ! python -I experiments/_s162_modis_paquete/probar_evaluar_paquete.py               --modulo experiments/_s162_modis_paquete/evaluar_vacio.py > prueba_evaluador_vacio.log 2>&1
-          grep -q "pasan 0," prueba_evaluador_vacio.log && grep -q "caen 0 " prueba_evaluador_vacio.log
+          # VCR-09: que falle aunque alguien agregue lineas despues
+          if ! grep -q "pasan 0," prueba_evaluador_vacio.log || ! grep -q "caen 0 " prueba_evaluador_vacio.log; then
+            echo "contra el evaluador vacio alguna prueba paso o cayo"; exit 1
+          fi
       - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4

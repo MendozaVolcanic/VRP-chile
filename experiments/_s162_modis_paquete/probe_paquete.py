@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """S162 MOD-D, arnés del censo del paquete MODIS contra K. Pre-registro sellado: experiments/_s162_modis_paquete/
-PREREGISTRO.md (v2, sello D-48, adendas 1 a 3). Sólo lectura: no escribe en data/, no commitea, no hace push.
+PREREGISTRO.md (v2, sello D-48, adendas 1 a 4). Sólo lectura: no escribe en data/, no commitea, no hace push.
 
 POR QUÉ. La pregunta sellada es si el código de MIROVA portado a MODIS (PM) publica lo que MIROVA publica y calla
 donde MIROVA calla mejor que producción (K), sin perder una protegida, sobre las 5.465 pasadas nocturnas de MOD-B.

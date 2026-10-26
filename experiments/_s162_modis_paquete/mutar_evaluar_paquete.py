@@ -72,6 +72,20 @@ MUTACIONES = {
     "protegida_fuera_sin_mirar_k": ('if p.get("k_publica")]', ']'),
     "s159_sin_npix": ('igual = a.get("npix") == r.get("npix") and (', 'igual = True and ('),
     "k33_por_el_runner": ('        if "k33_slim" in f:', '        if False:'),
+    # ronda 2 del verificador del candado (verificador_candado_r2/mutaciones_r2.py) y VCR-04/06
+    "prot_fuera_antes_que_p1": (
+        '    if b["p1"]["estado"] == "VETADO":\n        return "NO CANDIDATO"\n',
+        '    if [p for p in res["controles"]["cobertura"].get("protegidas_fuera_del_denominador", []) '
+        'if p.get("k_publica")]:\n        return "DECIDE NICOLÁS"\n    if b["p1"]["estado"] == "VETADO":\n'
+        '        return "NO CANDIDATO"\n'),
+    "fuera_toda_etiqueta": ('if not f["_evaluable"] and f.get("lab") == "protegida" and f["_motivo"] in MOTIVOS_SELLADOS]',
+                            'if not f["_evaluable"] and f["_motivo"] in MOTIVOS_SELLADOS]'),
+    "procedencia_sin_commit": ('ok_commit = bool(commit_esperado) and len(str(commit_esperado)) == 40 and commits == [commit_esperado]',
+                               'ok_commit = len(commits) == 1'),
+    "procedencia_prefijo": ('ok_commit = bool(commit_esperado) and len(str(commit_esperado)) == 40 and commits == [commit_esperado]',
+                            'ok_commit = bool(commit_esperado) and len(commits) == 1 and str(commits[0]).startswith(commit_esperado)'),
+    "manifiesto_ignorado": ('    ext["manifiesto"] = MC.comprobar()', '    ext["manifiesto"] = {"estado": "OK"}'),
+    "k_publica_del_runner": ('"k_publica": pub,', '"k_publica": runner,'),
     "atribucion_vacia": ('"tambien_pierden": [x for x in ("PM-geo5", "PM-sens") if x != b and _pub(f, x) == 0]}',
                          '"tambien_pierden": []}'),
     "borde_no_mira": ('if (f.get("crater_mxd03") or {}).get("borde"):', 'if (f.get("crater_mxd03") or {}).get("bordex"):'),

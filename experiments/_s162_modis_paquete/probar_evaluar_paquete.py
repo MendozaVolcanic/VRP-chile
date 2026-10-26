@@ -21,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
+sys.path.insert(0, str(AQUI))     # manifiesto_candado (t36), también con el evaluador vacío
 GRILLAS = json.load(open(AQUI / "grillas.json", encoding="utf-8"))
 OK_EXT = {k: "OK" for k in ("blobs", "predicado", "procedencia", "referencia", "reetiquetado", "union")}
 
@@ -231,6 +232,11 @@ def t12_fuera_del_denominador(E):
                          port={"fisica": dict(port(None), motivo_vacio="escena_invalida")})]
     r2 = correr(E, fs2)
     exige(g(r2, "brazos", "PM", "p2", "neto") == -6, "escena invalida: entro a P2")
+    # VCR-02 (ronda 2): un negativo fuera con K publicando no es una protegida: ni lista ni DECIDE NICOLÁS
+    exige(r2["veredicto"] == "CANDIDATO"
+          and g(r2, "controles", "cobertura", "protegidas_fuera_del_denominador", defecto=None) == [],
+          "un negativo fuera del denominador no es protegida: %s %s" % (
+              r2["veredicto"], g(r2, "controles", "cobertura", "protegidas_fuera_del_denominador")))
 
 
 def t13_chillan(E):
@@ -418,6 +424,62 @@ def t33_protegida_fuera_por_escena_invalida(E):   # adenda 4, punto 1 (b), condi
     exige(r["veredicto"] == "DECIDE NICOLÁS" and len(pf) == 1 and pf[0].get("motivo") == "escena_invalida"
           and pf[0].get("k_publica") == 1 and g(r, "brazos", "PM", "p1", "estado") == "SIN PERDIDA",
           "protegida fuera por escena invalida: %s %s" % (r["veredicto"], pf))
+
+
+# ------------------------------------------------------------------ ronda 2 del verificador del candado (VCR-01 a VCR-07)
+def t34_p1_veto_manda_sobre_protegida_fuera(E):   # VCR-01 (r02 del verificador)
+    fs = base() + [fila("Lascar", dia(300), "protegida", k=3.0, pm=None, geo5=None, sens=3.0, mirova=3.0),
+                   fila("Lascar", dia(320), "protegida", k=3.0, pm=None, mirova=3.0,
+                        port_estado="volcan_fuera_del_granulo", port=None)]
+    r = correr(E, fs)
+    exige(r["veredicto"] == "NO CANDIDATO"
+          and len(g(r, "controles", "cobertura", "protegidas_fuera_del_denominador", defecto=[])) == 1,
+          "P1 veto + protegida fuera tiene que ser NO CANDIDATO: %s" % r["veredicto"])
+
+
+def _cabecera(E, commit):
+    import hashlib
+    raiz = AQUI.parents[1]
+    sha = hashlib.sha256((raiz / "frontend/index.html").read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    return {"tipo": "cabecera", "parte": 0, "commit": commit, "blobs": dict(getattr(E, "BLOBS_SELLADOS", {}) or {}),
+            "sha256_frontend_index": sha}
+
+
+def t35_procedencia_exige_el_sha_completo(E):     # VCR-04 y VCR-07 (r10 del verificador)
+    fn = getattr(E, "externos_de_entrada", None)
+    exige(fn is not None, "el evaluador no tiene externos_de_entrada")
+    sha = "ff2ced5319e1e40e665e3acda60ca0a4ab041cc5"
+    casos = {"exacto": ([_cabecera(E, sha)], sha, "OK"), "sin commit": ([_cabecera(E, sha)], None, "INDECIDIBLE"),
+             "prefijo de 7": ([_cabecera(E, sha)], sha[:7], "INDECIDIBLE"), "otro": ([_cabecera(E, sha)], "0" * 40,
+                                                                                    "INDECIDIBLE"),
+             "dos commits": ([_cabecera(E, sha), _cabecera(E, "1" * 40)], sha, "INDECIDIBLE")}
+    malos = {n: fn({}, cab, [], None, c)["procedencia"]["estado"] for n, (cab, c, esp) in casos.items()
+             if fn({}, cab, [], None, c)["procedencia"]["estado"] != esp}
+    exige(not malos, "procedencia distinta de lo esperado: %s" % malos)
+
+
+def t36_evaluador_usa_el_manifiesto(E):           # VCR-07 (r13 del verificador)
+    fn = getattr(E, "externos_de_entrada", None)
+    exige(fn is not None, "el evaluador no tiene externos_de_entrada")
+    import manifiesto_candado as MC
+    orig = MC.comprobar
+    try:
+        MC.comprobar = lambda *a, **k: {"estado": "INDECIDIBLE", "distintos": {"x": "y"}}
+        ext = fn({}, [_cabecera(E, "f" * 40)], [], None, "f" * 40)
+    finally:
+        MC.comprobar = orig
+    exige((ext.get("manifiesto") or {}).get("estado") == "INDECIDIBLE",
+          "el evaluador no toma el estado del manifiesto: %s" % ext.get("manifiesto"))
+
+
+def t37_k_publica_de_la_fuera_por_el_predicado(E):   # VCR-06
+    fs = base() + [fila("Lascar", dia(395), "protegida", k=3.0, pm=None, mirova=3.0,
+                        port_estado="volcan_fuera_del_granulo", port=None, pub={"K": 0, "K33": 0})]
+    r = correr(E, fs)
+    pf = g(r, "controles", "cobertura", "protegidas_fuera_del_denominador", defecto=[])
+    exige(len(pf) == 1 and pf[0].get("k_publica") == 1 and r["veredicto"] == "INDECIDIBLE",
+          "K publica por el predicado y el runner dice que no: tiene que listarla con k_publica 1 y dejar el control en "
+          "rojo (%s, %s)" % (pf, r["veredicto"]))
 
 
 PRUEBAS = [v for k, v in sorted(globals().items()) if k.startswith("t") and k[1:3].isdigit()]

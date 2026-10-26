@@ -36,7 +36,10 @@ FIJOS = ["experiments/_s162_modis_paquete/grillas.json", "experiments/_s162_modi
          "experiments/_s162_modis_paquete/manifiesto_candado.py",
          "experiments/_s158_audit_r2/granulos/probe_granulos.py",
          "experiments/_s162_modis_paquete/mutar_evaluar_paquete.py",
-         "experiments/_s162_modis_paquete/ensayo_en_seco.py"]
+         "experiments/_s162_modis_paquete/ensayo_en_seco.py",
+         # adenda 4 punto 5: M con la regla de MATLAB, script aparte (VCR-03)
+         "experiments/_s162_modis_paquete/m_con_regla_matlab.py",
+         "experiments/_s162_modis_paquete/delaunay_perturbado.py"]
 OBLIGATORIOS = ("experiments/_s162_modis_paquete/probe_paquete.py", "experiments/_s162_modis_paquete/evaluar_paquete.py",
                 "experiments/_s159/portes/probe_portes.py", "experiments/_s159/portes/mirova_port.py")
 SONDA = r"""

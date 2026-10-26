@@ -13,6 +13,14 @@ def _brazo():
             "borde_granulo": {}}
 
 
+BLOBS_SELLADOS = {}
+
+
+def externos_de_entrada(pob, cab, crudas, ref, commit_esperado=None):
+    return {k: {"estado": "OK"} for k in ("manifiesto", "blobs", "predicado", "procedencia", "referencia",
+                                         "reetiquetado")}
+
+
 def evaluar(filas, grillas, recorridos, externos, esperadas, crudas, nuestros=(), alertas_mirova=None, dir_s159=None):
     ok = {"estado": "OK"}
     return {"veredicto": "CANDIDATO",

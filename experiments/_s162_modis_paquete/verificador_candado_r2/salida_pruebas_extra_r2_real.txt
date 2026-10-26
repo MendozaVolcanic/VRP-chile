@@ -1,0 +1,23 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+  PASA r01_veredicto_precedencia
+  PASA r02_p1_veto_y_protegida_fuera
+  PASA r03_bajo1_fuera_no_decide
+  PASA r04_neg_limpio_escena_invalida_k_publica
+  PASA r05_port_ok_sin_port_es_falla
+  PASA r06_falla_del_arnes_es_roja
+  PASA r07_grilla_incompleta_negativo_cuenta
+  PASA r08_protegida_fuera_y_p2_pierde
+  PASA r09_k_publica_de_la_fuera_es_del_runner
+    procedencia commit exacto                      -> OK           (esperado OK) 
+    procedencia sin --commit                       -> INDECIDIBLE  (esperado INDECIDIBLE) 
+    procedencia --commit vacio                     -> INDECIDIBLE  (esperado INDECIDIBLE) 
+    procedencia otro commit                        -> INDECIDIBLE  (esperado INDECIDIBLE) 
+    procedencia dos commits                        -> INDECIDIBLE  (esperado INDECIDIBLE) 
+    procedencia cabecera sin commit                -> INDECIDIBLE  (esperado INDECIDIBLE) 
+    procedencia prefijo de 7 (documenta: pasa)     -> OK           (esperado OK) 
+    procedencia prefijo de 1 (documenta: pasa)     -> OK           (esperado OK) 
+  PASA r10_procedencia
+  PASA r11_manifiesto_ve_una_alteracion
+  PASA r12_manifiesto_rojo_tumba_el_veredicto
+  PASA r13_evaluador_usa_el_manifiesto
+evaluar_paquete.py: pasan 13, fallan 0, caen 0 (de 13)
