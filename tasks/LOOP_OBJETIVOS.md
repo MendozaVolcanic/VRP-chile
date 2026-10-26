@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 14:07 UTC (S164, vuelta 7): humo de MOD-D aceptado; tanda t1 despachada (run 40336655402)
+- Humo (run 40333783937, success 13:55 UTC): PASA según `loop-modis-2`, con verificador limpio Sonnet («pasa con reparos,
+  ninguno bloquea pedir las tandas»). Contado (A108): 23 pasadas de los 5 gránulos con fila «ok», 0 errores; K recalculado
+  igual a `data/` en las 23; el PM da bit a bit el npix y el VRP de S159 en 4 de 4 pasadas comunes; procedencia con el sha
+  exacto y el manifiesto del tag. INDECIDIBLE sólo por cobertura y contador, como se espera de un humo. Reparos: VH-01
+  (Villarrica 04-30 03:00 a 8,4 km del borde del gránulo: el borde sólo lo cubre la batería sintética), VH-02 (`k33_igual_k`
+  False en 22 de 22 por campos `diag`), VH-04 (~3,8 s por pasada: las tandas serán más cortas que las 17 h estimadas).
+  Evidencia: `claude/s162-modis-2-0dd578`, `experiments/_s162_modis_paquete/humo_40333783937/`.
+- Tanda **t1** (partes 0 a 7): `git push origin 865174abe...:refs/heads/s162-modd-t1` a las 14:07 UTC, run
+  **40336655402**; mismo tag `s162-modd-tag` y workflow; `max-parallel: 8` (con el NRT de 11, 19 de 20). t2 y t3 sólo
+  cuando termine la anterior (el grupo de concurrencia guarda un solo pendiente). Las evalúa la próxima sesión de MODIS
+  (cola D4c).
+
 ### 2026-10-26 13:48 UTC (S164, vuelta 6): humo de MOD-D despachado (run 40333783937)
 - `loop-modis-2` pidió el humo tras tres vueltas de verificador (la tercera, Sonnet, `verificador_candado_r3/INFORME.md`:
   «se puede despachar el humo tal como está»).
