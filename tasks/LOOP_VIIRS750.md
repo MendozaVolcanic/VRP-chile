@@ -43,6 +43,13 @@ defensivo `pre-s162-via-mirova` (`deaf8f59b`). Cola de este relevo:
   (103 protegidas), 0 alertas sin record nuestro, 41 s. Los archivos del ensayo se borraron (no son los definitivos).
   El 2026-11-03: el mismo comando con `--hasta 2026-11-02` sobre el main de ese día, commitear objetivos_v750b.json,
   sin_granulo_v750b.json y poblacion_completa.json con su sha256 y pedir el despacho a S164.
+- R8 [en curso] **Medidor final de V750-A** (63 mutaciones, 4 hilos, 2026-10-26 11:24 a 18:38 UTC, salida en
+  `experiments/_s162_v750a/mutar_evaluar_v750a_salida.txt`). **Resultado: 58 de 62 mutaciones atrapadas por aserción,
+  identidad PASA, control CAIDA cae 61 de 61; 4 fuera de lo esperado, todas CAÍDA.** Repetición de las 4 con un hilo
+  lanzada a las 18:40 UTC (scratchpad `mutar_v750a_caidas.txt`). Detalle: identidad PASA, todas atrapadas por aserción
+  salvo M1 (la batería murió en E15 sin salida) y M33, M34 y M36 (un escenario cada una cayó con `ArrayMemoryError`
+  del sistema; las tres ya tenían fallas por aserción en otros escenarios). Al terminar: repetir esas cuatro con
+  `--solo M1,M33,M34,M36 --hilos 1` e informar atrapadas por aserción aparte de caídas y SIN DATO (pedido de S164).
 - R7 [hecho] #907 mergeado por S164 (merge `cff07d173`, tag `pre-s164-merge-907`, Tests verde). Flag apagado. Avisado a
   loop-viirs375 que la vía está en main.
 - R5 [HECHO, `d4f1c891c` y `a16aa14b4` en `s162-via-mirova`, PR #907, CI verde] la regla de MATLAB la halló el

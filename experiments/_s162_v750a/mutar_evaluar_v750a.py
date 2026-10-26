@@ -52,7 +52,7 @@ MUTACIONES = {
     "M10": ("§4.1: la banda de triangulación se ignora",
             '(banda if res[i].get("banda_triangulacion") else dist).append(i)', "dist.append(i)"),
     "M11": ("§6.1 (L2): la prueba local no exige «mutaciones: TODAS COMO SE ESPERA»",
-            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and caida", "ok = verde and n_atr >= MIN_MUT_LOCAL and caida"),
+            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL) and caida", "ok = verde and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL) and caida"),
     "M12": ("§6.1: sólo el runner decide (la prueba local deja de bloquear)",
             "if dist or not local_ok:", "if dist:"),
     "M13": ("§7 (L6): el control positivo de la ROI siempre pasa",
@@ -105,9 +105,9 @@ MUTACIONES = {
     "M35": ("cobertura: la pasada diurna deja de ser SIN DATO",
             'elif part[i] == "observada" and r.get("dayflag") != 0:', "elif False:"),
     "M36": ("§6.1 (L2): sin mínimo de mutaciones atrapadas en la prueba local",
-            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and caida", "ok = verde and todas and caida"),
+            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL) and caida", "ok = verde and todas and caida"),
     "M37": ("§6.1 (L2): sin exigir el control caído de la prueba local",
-            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and caida", "ok = verde and todas and n_atr >= MIN_MUT_LOCAL"),
+            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL) and caida", "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL)"),
     "M38": ("§6.1 (L2): la línea VERDE sin los casos del §4.1",
             "verde = (any(c[0] >= MIN_CASOS_LOCAL[0] and c[1] >= MIN_CASOS_LOCAL[1] for c in casos)",
             "verde = (bool(casos)"),
@@ -137,7 +137,7 @@ MUTACIONES = {
     "M49": ("§6.1 (L12): la marca «decidida por la escena» nunca sale en la equivalencia",
             "if decidida_por_escena(dP, dO) else \"\")", "if False else \"\")"),
     "M50": ("§7 (L7): ninguna diferencia del placebo se explica por los filtros (todas cierran)",
-            "< TMAX_FILTROS_ARTEFACTO]", "< 0]"),
+            '.get("t_max_k") or 1e9) < TMAX_FILTROS_ARTEFACTO\n', '.get("t_max_k") or 1e9) < 0\n'),
     "M51": ("§6.3 (L19): la sombra sin protegidas no lo dice",
             '+ ("; SIN PROTEGIDAS: P1 no pudo vetar" if not n_prot else "")', '+ ""'),
     "M52": ("§6.2 (L4 por D-48): la razón de M exige que K publique",
@@ -184,7 +184,12 @@ def correr(dest, evaluador, nombre, viejo=None, nuevo=None):
     try:
         o = subprocess.run([sys.executable, str(PRUEBAS), "--dest", str(sal), "--analizador", str(copia),
                             "--evaluador", str(evaluador)], capture_output=True, text=True, encoding="utf-8",
-                           errors="replace", timeout=7200, cwd=str(AQUI))
+                           errors="replace", timeout=14400, cwd=str(AQUI))
+    except subprocess.TimeoutExpired:
+        # S162 (relevo): con CPU compartida una mutación pasó las 2 h y la excepción tumbó TODO el medidor, sin un
+        # solo resultado. Un tiempo agotado es SIN DATO de esa mutación (no cuenta como atrapada) y se sigue.
+        print(f"   {nombre}: SIN DATO (tiempo agotado)", flush=True)
+        return nombre, "SIN DATO (tiempo)", None, "(tiempo agotado)", []
     finally:
         copia.unlink()
     txt = o.stdout + o.stderr
@@ -196,6 +201,7 @@ def correr(dest, evaluador, nombre, viejo=None, nuevo=None):
         estado = "ATRAPADA"
     else:
         estado = "CAÍDA"
+    print(f"   {nombre}: {estado} | {linea[:100]}", flush=True)   # en vivo: si algo cae después, esto queda
     return nombre, estado, o.returncode, linea, atrapan
 
 
