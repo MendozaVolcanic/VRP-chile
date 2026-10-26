@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-26 16:25 UTC (S164, vuelta 13): censo de MOD-D completo y evaluado; DECIDE NICOLÁS (verificador en curso)
+### 2026-10-26 16:03 UTC (S164, vuelta 13): censo de MOD-D completo y evaluado; DECIDE NICOLÁS (verificador en curso)
 - Conteo (`contar_tanda.py`, salidas `experiments/_s162_modis_paquete/contar_t{1,2,3}_salida.txt` de
   `claude/s162-modis-2-0dd578`): t1 1.814/1.814, t2 1.837/1.837, t3 1.814/1.814; **5.465 de 5.465 ok**, sin faltantes ni
   repetidos, cabecera con `865174abe` en cada parte.
@@ -578,7 +578,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   alerta de 1 píxel (con la regla de `fillmissing2` de MATLAB el PM da 1,112, sobre 1 MW). P1 sin pérdidas. P2 GANA (K 49
   errores, PM 8, neto -41, 50 bloques, p 1/10001). M MEJORA (IC [-0,333; -0,153], también con la regla de MATLAB).
   Chillán SIN RESOLVER (6 de 7, p 8/128).
-- Verificador limpio (Fable alto) en curso; informe en `D:rp-trabajo	emporales\s162_modderificador_censo\`. No se
+- Verificador limpio (Fable alto) en curso; informe en `D:\vrp-trabajo\temporales\s162_modd\verificador_censo\`. No se
   lleva a Nicolás hasta que entregue.
 
 ### 2026-10-26 16:00 UTC (S164, vuelta 12): C: cayó de 15 a 4,7 GB libres sin causa en las carpetas de trabajo
