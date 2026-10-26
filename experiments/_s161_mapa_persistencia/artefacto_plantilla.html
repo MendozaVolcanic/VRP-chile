@@ -1,0 +1,384 @@
+<meta charset="utf-8">
+<title>Persistencia de focos térmicos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/*LEAFLET_CSS*/
+</style>
+<style>
+/* Concepto: hoja de campo de un observatorio. Mapa satelital a la izquierda como pieza central, panel de capas
+   a la derecha, y debajo las tablas de persistencia mes a mes, que se leen como un registro de bitácora. */
+:root {
+  --bg: #f2f3f0; --surface: #ffffff; --fg: #1c2220; --muted: #59635f; --line: #d3d8d4;
+  --accent: #b8430f; --heat: #d24a12; --ok: #2f7d4a; --warn: #a86a00; --bad: #b3261e;
+  --v375: #c8384d; --v750: #2d65ad; --modis: #2f8a3c; --foco: #7a3f9f;
+  --map-mirova: #ffd23f; --map-inner: #3fe0ef; --map-tif: #ffffff; --map-vent: #ffe66d;
+  --f-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --f-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111513; --surface: #191f1d; --fg: #e5eae7; --muted: #9ba6a1; --line: #2d3532;
+  --accent: #ff7a3d; --heat: #ff6a2b; --ok: #6cc28a; --warn: #e3a93a; --bad: #ff7b72;
+  --v375: #ff6b80; --v750: #6aa2ee; --modis: #6cc072; --foco: #c48ce6; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111513; --surface: #191f1d; --fg: #e5eae7; --muted: #9ba6a1; --line: #2d3532;
+  --accent: #ff7a3d; --heat: #ff6a2b; --ok: #6cc28a; --warn: #e3a93a; --bad: #ff7b72;
+  --v375: #ff6b80; --v750: #6aa2ee; --modis: #6cc072; --foco: #c48ce6; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.pagina { max-width: 1320px; margin: 0 auto; padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 22px; }
+.ceja { font: 500 12px/1.3 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 600 clamp(28px, 4vw, 40px)/1.1 var(--f-display); margin: 4px 0 8px; text-wrap: balance; }
+h2 { font: 600 22px/1.2 var(--f-display); margin: 0; text-wrap: balance; }
+h3 { font: 600 15px/1.3 var(--f-body); margin: 0; }
+p { margin: 0; max-width: 72ch; }
+.lede { color: var(--muted); max-width: 80ch; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab { font: 500 14px var(--f-body); padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); color: var(--fg); cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.tab:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mapa-zona { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+#mapa { height: min(72vh, 680px); min-height: 380px; border-radius: var(--r); border: 1px solid var(--line); background: #2b3230; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.capa { display: grid; grid-template-columns: 18px 22px 1fr; gap: 6px; align-items: start; font-size: 13.5px; line-height: 1.35; cursor: pointer; }
+.capa input { margin: 2px 0 0; }
+.sw { width: 18px; height: 14px; margin-top: 2px; border-radius: 2px; }
+.nota { font-size: 12.5px; color: var(--muted); }
+.grupo { display: flex; flex-direction: column; gap: 7px; }
+.grupo + .grupo { border-top: 1px solid var(--line); padding-top: 10px; }
+.hallazgos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.tarjeta { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.tarjeta ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.veredicto { display: inline-block; font: 600 11.5px var(--f-mono); letter-spacing: .05em; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; }
+.v-conf { color: var(--ok); } .v-sin { color: var(--warn); } .v-ref { color: var(--bad); }
+.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.tabla-zona { display: flex; flex-direction: column; gap: 10px; }
+.tabla-cab { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: baseline; justify-content: space-between; }
+.desliza { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+table { border-collapse: collapse; font: 12.5px var(--f-mono); font-variant-numeric: tabular-nums; width: max-content; min-width: 100%; }
+th, td { padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-weight: 500; color: var(--muted); background: var(--surface); position: sticky; top: 0; }
+td.f, th.f { text-align: left; position: sticky; left: 0; background: var(--surface); font-family: var(--f-body); z-index: 1; }
+tr.fila-foco { cursor: pointer; }
+tr.fila-foco:hover td.f, tr.sel td.f { color: var(--accent); }
+tr.nulo td { color: var(--muted); font-style: italic; }
+td small { color: var(--muted); }
+select { font: 13px var(--f-body); padding: 5px 8px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.leyenda-calor { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.leyenda-calor span.b { width: 90px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--heat)); border: 1px solid var(--line); }
+footer { font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); padding-top: 14px; }
+footer code { font-family: var(--f-mono); font-size: 12px; word-break: break-all; }
+.leaflet-popup-content { font: 13px/1.4 var(--f-body); margin: 10px 12px; }
+.leaflet-popup-content b { font-weight: 600; }
+.leaflet-container { font-family: var(--f-body); }
+.estrella { color: var(--map-vent); font-size: 22px; line-height: 22px; text-shadow: 0 0 3px #000, 0 0 2px #000; text-align: center; }
+.etq { font: 600 11px var(--f-mono); color: #fff; text-shadow: 0 0 3px #000, 0 0 2px #000; white-space: nowrap; }
+@media (max-width: 860px) { .mapa-zona { grid-template-columns: minmax(0, 1fr); } #mapa { height: 60vh; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+</style>
+
+<div class="pagina">
+  <header>
+    <div class="ceja">VRP Chile · S161 · 2026-10-23 · sólo mide y muestra: no cambia ningún parámetro</div>
+    <h1>Persistencia de focos térmicos</h1>
+    <p class="lede">Dónde está el calor que alerta MIROVA, dónde publicamos nosotros, y qué focos se repiten mes a mes,
+      con la noche y el día separados (de día el canal MIR suma reflejo solar). Imágenes de MIROVA del 2026-05-09 al
+      2026-09-20; nuestros records nocturnos desde febrero de 2025.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Volcán">
+    <button class="tab" role="tab" id="tab-Tupungatito" data-vol="Tupungatito">Tupungatito</button>
+    <button class="tab" role="tab" id="tab-PuyehueCordonCaulle" data-vol="PuyehueCordonCaulle">Puyehue-Cordón Caulle</button>
+    <button class="tab" role="tab" id="tab-Isluga" data-vol="Isluga">Isluga</button>
+  </div>
+
+  <section class="mapa-zona">
+    <div id="mapa" role="region" aria-label="Mapa satelital"></div>
+    <aside class="panel" aria-label="Capas">
+      <div class="grupo">
+        <h3>Geometría</h3>
+        <label class="capa"><input type="checkbox" id="c-anillo" checked><span class="sw" style="border:2px dashed var(--map-mirova)"></span><span>Caja de cumbre (7 × 7) y anillo (21 × 19 celdas, asimétrico) de MIROVA</span></label>
+        <label class="capa"><input type="checkbox" id="c-inner" checked><span class="sw" style="border:2px solid var(--map-inner);border-radius:50%"></span><span>Nuestro radio interno, desde el cráter</span></label>
+        <label class="capa"><input type="checkbox" id="c-tif"><span class="sw" style="border:1px dashed var(--map-tif)"></span><span>Borde de la imagen de MIROVA (TIF) y su centro</span></label>
+      </div>
+      <div class="grupo">
+        <h3>Nuestros cúmulos publicados</h3>
+        <label class="capa"><input type="checkbox" id="c-neg" checked><span class="sw" style="background:var(--v375);clip-path:polygon(50% 0,100% 100%,0 100%)"></span><span>En noches limpias (MIROVA miró y no vio nada)</span></label>
+        <label class="capa"><input type="checkbox" id="c-pos" checked><span class="sw" style="background:var(--v375);border:1px solid var(--fg);border-radius:50%;width:12px;height:12px;margin:3px"></span><span>En pasadas con alerta de MIROVA</span></label>
+        <label class="capa"><input type="checkbox" id="c-otros"><span class="sw" style="background:var(--v375);border-radius:50%;opacity:.5;width:9px;height:9px;margin:4px"></span><span>Resto (sin etiqueta o fuera de la ventana 2026-01-10 a 10-22)</span></label>
+        <div class="nota">Color por sensor: <span style="color:var(--v375)">VIIRS 375</span> · <span style="color:var(--v750)">VIIRS 750</span> · <span style="color:var(--modis)">MODIS</span>. Toca un punto para ver hora y VRP.</div>
+      </div>
+      <div class="grupo">
+        <h3>Focos</h3>
+        <label class="capa"><input type="checkbox" id="c-focos" checked><span class="sw" style="border:2px solid var(--foco);border-radius:50%"></span><span>Focos contados (disco de 1 km)</span></label>
+        <label class="capa"><input type="checkbox" id="c-frn"><span class="sw" style="background:linear-gradient(90deg,#3b0f70,#fc8961)"></span><span>Frecuencia en los TIF de MIROVA, noche</span></label>
+        <label class="capa"><input type="checkbox" id="c-frd"><span class="sw" style="background:linear-gradient(90deg,#3b0f70,#fcffa4)"></span><span>Frecuencia en los TIF de MIROVA, día</span></label>
+        <label class="capa"><input type="checkbox" id="c-ve" checked><span class="sw" style="background:#fff;border:2px solid #000;border-radius:50%"></span><span>VE-01 y VE-02 (pasadas puntuales)</span></label>
+      </div>
+      <p class="nota" id="nota-vol"></p>
+    </aside>
+  </section>
+
+  <section class="hallazgos" id="hallazgos"></section>
+
+  <section class="tabla-zona">
+    <div class="tabla-cab">
+      <h2>Imágenes de MIROVA, noche</h2>
+      <div class="leyenda-calor"><span>0 %</span><span class="b"></span><span>100 % de las imágenes del mes</span></div>
+    </div>
+    <p class="nota">Foco presente = prominencia de 4 sigma o más a 1 km del foco, en el TIF VIIRS 375 menos su mediana de 9 × 9 píxeles. Celda = imágenes con el foco presente / imágenes con dato. La fila «azar» es la tasa en 300 puntos sorteados lejos de todo foco: lo que el método marca sin foco. Toca una fila para ubicar el foco.</p>
+    <div class="desliza"><table id="t-tif-noche"></table></div>
+  </section>
+
+  <section class="tabla-zona">
+    <div class="tabla-cab"><h2>Imágenes de MIROVA, día</h2></div>
+    <p class="nota">Mismo instrumento con el sol sobre el horizonte. No se suma a la noche: el reflejo solar en el MIR hace resaltar nubes, laderas asoleadas y nieve. Junio a agosto casi no tienen imágenes diurnas en el archivo.</p>
+    <div class="desliza"><table id="t-tif-dia"></table></div>
+  </section>
+
+  <section class="tabla-zona">
+    <div class="tabla-cab">
+      <h2>Nuestros records, noche</h2>
+      <label class="nota">Sensor <select id="sel-sensor">
+        <option value="todos los sensores">todos</option><option value="VIIRS 375">VIIRS 375</option>
+        <option value="VIIRS 750">VIIRS 750</option><option value="MODIS">MODIS</option></select></label>
+    </div>
+    <p class="nota">Pasadas con un píxel anómalo nuestro a 1 km o menos del foco; en pequeño, cuántas veces el tablero publicó un cúmulo ahí. El pipeline es sólo nocturno. Producción de origin/main db0dfe847 (2026-10-22).</p>
+    <div class="desliza"><table id="t-rec"></table></div>
+  </section>
+
+  <footer>
+    <div>Fondo: Sentinel-2 cloudless 2016, <a href="https://s2maps.eu" target="_blank" rel="noopener">s2maps.eu</a>, EOX IT Services GmbH (contiene datos Copernicus Sentinel 2016 modificados), CC BY 4.0. Imágenes térmicas: GeoTIFF y paneles «Latest Images» de MIROVA archivados en mirova-tif-archive.</div>
+    <div>Scripts y salidas: <code>C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\gracious-merkle-6447d8\experiments\_s161_mapa_persistencia\</code> (README.md con cada número y su salida).</div>
+    <div>Base: auditoría espacial S160 y su verificador (<code>experiments\_s160_espacial\verificador\INFORME.md</code>, rama loop/activo).</div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/*DATOS*/
+</script>
+<script>
+(function () {
+  const D = window.DATOS;
+  const css = getComputedStyle(document.documentElement);
+  const tok = (n) => css.getPropertyValue(n).trim();
+  const COL = { VIIRS375: tok("--v375"), VIIRS750: tok("--v750"), MODIS: tok("--modis") };
+  const fmt = (x, d = 2) => (x == null ? "s/d" : Number(x).toFixed(d).replace(".", ","));
+
+  const HALLAZGOS = {
+    Tupungatito: {
+      nota: "Cráter a 4,79 km al NW del centro de la imagen de MIROVA: cae en el anillo (fila 27), no en la caja de cumbre. Radio interno nuestro: 7 km.",
+      tarjetas: [
+        { t: "El cráter es el único foco que persiste", v: null, items: [
+          "En las imágenes de MIROVA de noche el cráter destaca en 45 de 201 (22 %), contra 0,7 % del azar. En las que MIROVA alertó, 37 de 57 (65 %); en las RUTINA, 3 de 123 (2 %).",
+          "En nuestros records el cráter aparece todos los meses desde febrero de 2025 (20 a 100 pasadas por mes). Baja en el invierno de 2026 igual que en las imágenes de MIROVA (5 meses, Spearman 0,97).",
+          "Los focos de noche al W (10 a 18 km, n1 a n5) aparecen en 11 a 36 % de las imágenes, también en RUTINA, y en nuestros records 0 o 1 vez por mes. SOSPECHA: terreno tibio de los valles, no calor volcánico."] },
+        { t: "VE-01: protegida del 2026-09-29 04:54", v: ["CONFIRMADO", "v-conf"], items: [
+          "En el panel de MIROVA esa pasada lleva VRP 1,86 MW y marco verde. Su punto más brillante (z 21,3) está a 0,02 km de nuestro píxel, a 9,40 km al E del cráter. El cráter también se ve, débil (z 10,5).",
+          "La fuente cae en el anillo de MIROVA (fila 24, columna 42, el borde E). Nuestro radio de 7 km la deja fuera: record far, no publicado.",
+          "No es persistente: en nuestros records sólo aparece el 2026-08-23 (277 K, 0,24 MW) y esa noche (302 K, 1,11 MW); en 0 de 200 imágenes nocturnas de mayo a septiembre. Qué es: SIN DATO."] },
+      ] },
+    PuyehueCordonCaulle: {
+      nota: "Cráter a 7,61 km al N del centro de la imagen de MIROVA. Radio interno nuestro: 20 km, que cubre casi todo el recuadro de MIROVA.",
+      tarjetas: [
+        { t: "El cráter persiste; la fuente del E es diurna", v: null, items: [
+          "Cráter de noche en 96 de 230 imágenes (42 %), azar 1,8 %. Con alerta de MIROVA 73 de 84 (87 %); RUTINA 20 de 137 (15 %).",
+          "La fuente a 10,7 km al E: de noche 8 de 230 (3 %); de día 19 de 54 (35 %), las 19 en mayo. Es reflejo diurno de mayo, como dijo el verificador (VE-08).",
+          "Nuestros records: el cráter todos los meses (22 a 136 pasadas por mes); el E y el S del Puyehue, 0 a 2 por mes."] },
+        { t: "Lo que publicamos lejos en noches limpias", v: null, items: [
+          "En negativos limpios publicamos 107 cúmulos: 38 a 2 km o menos del cráter y 69 más lejos (57 entre 10 y 20 km).",
+          "De esos 69, sólo 19 tienen otro a 1 km o menos: casi todos son puntos sueltos, no un foco que vuelva.",
+          "En pasadas con alerta, 303 de 309 cúmulos publicados están a 2 km o menos del cráter."] },
+        { t: "VE-02: 2026-10-21 05:48, lejos del cráter", v: ["SIN DATO", "v-sin"], items: [
+          "La escena de MIROVA está nublada: la miniatura no se puede georreferenciar (r 0,15 contra 0,09 del nulo) y el detector de puntos marca 84 máximos, así que no ubica nada.",
+          "El panel de MIROVA muestra esa pasada con VRP = 0 MW y aviso «VERY LOW»; la tabla dice 0,36 MW a 6,45 km.",
+          "Nuestros 11 píxeles de VIIRS 750 tienen 263 a 273 K sobre un fondo de 259 K, entre 9,6 y 11,9 km del cráter. SOSPECHA: claro entre nubes más que calor."] },
+      ] },
+    Isluga: {
+      nota: "El centro de la imagen de MIROVA coincide con la coordenada del yaml; el calor cae 0,8 a 1,0 km al SW (S160). Radio interno: 5 km.",
+      tarjetas: [
+        { t: "El cráter persiste; el N es débil", v: null, items: [
+          "Cráter de noche en 74 de 191 imágenes (39 %), azar 0,5 %. Con alerta 64 de 82 (78 %); RUTINA 3 de 86 (3 %).",
+          "El foco a 5,7 km al N: 37 de 190 de noche (19 %), con alerta 29 % y RUTINA 12 %. Nuestro detector lo marca en 3 pasadas de 21 meses.",
+          "La concordancia mensual con nuestros records da Spearman 0,30, porque la tasa del cráter casi no cambia de mes a mes (36 a 43 % en los TIF): no hay variación que seguir."] },
+      ] },
+  };
+
+  const map = L.map("mapa", { preferCanvas: true, zoomSnap: 0.5, attributionControl: true, maxZoom: 16 });
+  map.attributionControl.setPrefix(false);
+  L.control.scale({ imperial: false }).addTo(map);
+  const renderer = L.canvas({ padding: 0.3 });
+  let grupos = {}, vol = null, focoSel = null;
+
+  function popupCumulo(c) {
+    const lab = { neg_limpio: "noche limpia (MIROVA RUTINA)", pos: "con alerta de MIROVA", sin_info: "sin etiqueta", far_ref: "MIROVA marcó lejos (FALSO_POSITIVO)", sin_geometria: "alerta sin geometría", fuera_de_ventana: "fuera de la ventana de la referencia", minima: "alerta mínima" }[c.lab] || c.lab;
+    return `<b>${c.t} UTC</b> · ${c.sensor}<br>Cúmulo de ${c.n} px, ${fmt(c.vrp, 3)} MW<br>${fmt(c.dv)} km del cráter · ${lab}`;
+  }
+
+  function construir(v) {
+    const V = D.volcanes[v];
+    const g = {};
+    g.sat = L.layerGroup(V.sat.map((s) => L.imageOverlay(s.archivo, s.bounds, { opacity: 1 })));
+    g.sat.getLayers()[0].getAttribution = () => "Sentinel-2 cloudless 2016 © EOX (CC BY 4.0)";
+    g.anillo = L.layerGroup([
+      L.polygon(V.anillo, { color: tok("--map-mirova"), weight: 2, dashArray: "6 5", fill: false }).bindTooltip("Anillo de MIROVA (umbrales de escena)"),
+      L.polygon(V.caja, { color: tok("--map-mirova"), weight: 2.5, fill: false }).bindTooltip("Caja de cumbre de MIROVA (más sensible)"),
+    ]);
+    g.inner = L.layerGroup([L.circle(V.vent, { radius: V.inner_km * 1000, color: tok("--map-inner"), weight: 2, fill: false }).bindTooltip(`Nuestro radio interno: ${V.inner_km} km`)]);
+    g.tif = L.layerGroup([
+      L.rectangle(V.tif_bounds, { color: tok("--map-tif"), weight: 1, dashArray: "3 4", fill: false }).bindTooltip("Borde de la imagen de MIROVA"),
+      L.circleMarker(V.tif_centro, { radius: 5, color: "#000", weight: 1, fillColor: tok("--map-mirova"), fillOpacity: 1, renderer }).bindTooltip("Centro de la imagen de MIROVA"),
+    ]);
+    g.frn = V.frecuencia.noche ? L.imageOverlay(V.frecuencia.noche, V.tif_bounds, { opacity: 0.85 }) : L.layerGroup();
+    g.frd = V.frecuencia.dia ? L.imageOverlay(V.frecuencia.dia, V.tif_bounds, { opacity: 0.85 }) : L.layerGroup();
+    const neg = [], pos = [], otros = [];
+    V.capas.forEach((c) => {
+      const color = COL[c.s] || "#999";
+      if (c.lab === "neg_limpio") {
+        neg.push(L.marker([c.lat, c.lon], { icon: L.divIcon({ className: "", html: `<svg width="14" height="13" viewBox="0 0 14 13"><polygon points="7,1 13,12 1,12" fill="${color}" stroke="#000" stroke-width="1"/></svg>`, iconSize: [14, 13], iconAnchor: [7, 8] }) }).bindPopup(popupCumulo(c)));
+      } else if (c.lab === "pos") {
+        pos.push(L.circleMarker([c.lat, c.lon], { radius: 3.5, color: "#000", weight: 0.6, fillColor: color, fillOpacity: 0.9, renderer }).bindPopup(popupCumulo(c)));
+      } else {
+        otros.push(L.circleMarker([c.lat, c.lon], { radius: 2.5, color: color, weight: 0, fillColor: color, fillOpacity: 0.55, renderer }).bindPopup(popupCumulo(c)));
+      }
+    });
+    g.neg = L.layerGroup(neg); g.pos = L.layerGroup(pos); g.otros = L.layerGroup(otros);
+    g.focoCapas = {};
+    const fl = [];
+    V.focos.forEach((f) => {
+      const esCrater = f.id === "crater";
+      const col = esCrater ? tok("--map-vent") : f.origen === "S160" ? tok("--foco") : f.origen === "frecuencia_dia" ? "#fcffa4" : "#ffffff";
+      const tn = (V.tif.noche || {})[f.id], td = (V.tif.dia || {})[f.id];
+      const r = (V.records["todos los sensores"] || {})[f.id] || {};
+      const det = Object.values(r).reduce((a, x) => a + x[0], 0), npas = Object.values(r).reduce((a, x) => a + x[2], 0);
+      const pct = (t) => (t && t.total[1] ? `${t.total[0]} de ${t.total[1]} (${Math.round((100 * t.total[0]) / t.total[1])} %)` : "s/d");
+      const circ = L.circle([f.lat, f.lon], { radius: 1000, color: col, weight: esCrater ? 2.5 : 1.8, fill: true, fillOpacity: 0.06 })
+        .bindPopup(`<b>${f.id}</b> · ${f.nombre}<br>${fmt(f.dist)} km ${f.oct} del cráter<br>TIF noche: ${pct(tn)}<br>TIF día: ${pct(td)}<br>Nuestros records: ${det} de ${npas} pasadas`);
+      const etq = L.marker([f.lat, f.lon], { interactive: false, icon: L.divIcon({ className: "etq", html: esCrater ? "" : f.id, iconSize: [40, 14], iconAnchor: [-10, 18] }) });
+      g.focoCapas[f.id] = circ;
+      fl.push(circ, etq);
+    });
+    g.focos = L.layerGroup(fl);
+    const ve = [];
+    D.ve.records.filter((x) => x.vol === v).forEach((x) => {
+      x.ap.forEach((a) => ve.push(L.circleMarker([a.lat, a.lon], { radius: 4, color: "#000", weight: 1, fillColor: "#ffffff", fillOpacity: 0.95, renderer })
+        .bindPopup(`<b>${v === "Tupungatito" ? "VE-01" : "VE-02"}</b> · ${x.t} UTC · ${x.sensor}<br>Píxel nuestro: ${fmt(a.bt, 1)} K, ${fmt(a.vrp, 3)} MW<br>Fondo ${fmt(x.t_bg, 1)} K · ${x.pub ? "publicado" : "no publicado"} (${x.dc || "sin clase"})`)));
+    });
+    if (v === "Tupungatito") {
+      const m = D.ve.ve01_mirova;
+      ve.push(L.circleMarker([m.lat, m.lon], { radius: 9, color: "#ff3b3b", weight: 2.5, fill: false })
+        .bindPopup(`<b>VE-01, punto caliente en la imagen de MIROVA</b><br>2026-09-29 04:54 UTC, VRP 1,86 MW (marco verde)<br>z ${fmt(m.z, 1)} · a 0,02 km de nuestro píxel`));
+    }
+    g.ve = L.layerGroup(ve);
+    const vent = L.marker(V.vent, { icon: L.divIcon({ className: "estrella", html: "★", iconSize: [22, 22], iconAnchor: [11, 12] }) }).bindTooltip("Cráter (vent del yaml)");
+    g.vent = L.layerGroup([vent]);
+    return g;
+  }
+
+  const CAPAS = [["c-anillo", "anillo"], ["c-inner", "inner"], ["c-tif", "tif"], ["c-frn", "frn"], ["c-frd", "frd"], ["c-otros", "otros"], ["c-pos", "pos"], ["c-neg", "neg"], ["c-focos", "focos"], ["c-ve", "ve"]];
+  function aplicarCapas() {
+    CAPAS.forEach(([id, k]) => {
+      const on = document.getElementById(id).checked;
+      if (on && !map.hasLayer(grupos[k])) grupos[k].addTo(map);
+      if (!on && map.hasLayer(grupos[k])) map.removeLayer(grupos[k]);
+    });
+    grupos.vent.addTo(map);
+  }
+  CAPAS.forEach(([id]) => document.getElementById(id).addEventListener("change", aplicarCapas));
+
+  function celdaCalor(a, b, etiqueta) {
+    if (!b) return `<td>·</td>`;
+    const p = a / b;
+    const pc = Math.round(Math.min(1, p) * 85);
+    return `<td style="background:color-mix(in srgb, var(--heat) ${pc}%, transparent)${p > 0.45 ? ";color:#fff" : ""}" title="${Math.round(100 * p)} %">${etiqueta == null ? a + "/" + b : etiqueta}</td>`;
+  }
+  function nombreFoco(V, id) { const f = V.focos.find((x) => x.id === id); return f ? `${id} <small>${fmt(f.dist, 1)} km ${f.oct}</small>` : id; }
+
+  function tablaTIF(V, fr, el) {
+    const t = (V.tif || {})[fr];
+    if (!t) { el.innerHTML = "<tr><td class='f'>SIN DATO</td></tr>"; return; }
+    const meses = Object.keys(V.tif_meses[fr] || {}).sort();
+    const ids = V.focos.map((f) => f.id).filter((id) => t[id]);
+    let h = `<thead><tr><th class="f">Foco</th>${meses.map((m) => `<th>${m}</th>`).join("")}<th>Total</th>${fr === "noche" ? "<th>Con alerta</th><th>RUTINA</th>" : ""}</tr></thead><tbody>`;
+    const nulo = t[ids[0]];
+    h += `<tr class="nulo"><td class="f">azar</td>${meses.map((m) => `<td>${fmt(100 * nulo.nulo_mes[m], 1)} %</td>`).join("")}<td>${fmt(100 * nulo.nulo_total, 1)} %</td>${fr === "noche" ? "<td></td><td></td>" : ""}</tr>`;
+    ids.forEach((id) => {
+      const r = t[id];
+      h += `<tr class="fila-foco" data-foco="${id}"><td class="f">${nombreFoco(V, id)}</td>${meses.map((m) => celdaCalor(...(r.meses[m] || [0, 0]))).join("")}${celdaCalor(...r.total)}`;
+      if (fr === "noche") h += celdaCalor(...(r.alerta || [0, 0])) + celdaCalor(...(r.rutina || [0, 0]));
+      h += "</tr>";
+    });
+    el.innerHTML = h + "</tbody>";
+  }
+
+  function tablaRec(V, el) {
+    const sens = document.getElementById("sel-sensor").value;
+    const t = V.records[sens] || {};
+    const meses = D.meses_records;
+    const ids = V.focos.map((f) => f.id).filter((id) => t[id]);
+    let h = `<thead><tr><th class="f">Foco</th>${meses.map((m) => `<th>${m}</th>`).join("")}</tr></thead><tbody>`;
+    const ref = t[ids[0]] || {};
+    h += `<tr class="nulo"><td class="f">pasadas</td>${meses.map((m) => `<td>${ref[m] ? ref[m][2] : "·"}</td>`).join("")}</tr>`;
+    h += `<tr class="nulo"><td class="f">azar</td>${meses.map((m) => `<td>${ref[m] ? fmt(100 * ref[m][3], 2) + " %" : "·"}</td>`).join("")}</tr>`;
+    ids.forEach((id) => {
+      h += `<tr class="fila-foco" data-foco="${id}"><td class="f">${nombreFoco(V, id)}</td>${meses.map((m) => {
+        const x = t[id][m];
+        return x ? celdaCalor(x[0], x[2], `${x[0]} <small>(${x[1]})</small>`) : "<td>·</td>";
+      }).join("")}</tr>`;
+    });
+    el.innerHTML = h + "</tbody>";
+  }
+
+  function marcarFoco(id) {
+    focoSel = id;
+    document.querySelectorAll("tr.fila-foco").forEach((tr) => tr.classList.toggle("sel", tr.dataset.foco === id));
+    const c = grupos.focoCapas && grupos.focoCapas[id];
+    if (c) {
+      if (!document.getElementById("c-focos").checked) { document.getElementById("c-focos").checked = true; aplicarCapas(); }
+      map.flyTo(c.getLatLng(), Math.max(map.getZoom(), 12), { duration: 0.6 });
+      c.openPopup();
+      document.getElementById("mapa").scrollIntoView({ block: "nearest" });
+    }
+  }
+  document.addEventListener("click", (e) => { const tr = e.target.closest("tr.fila-foco"); if (tr) marcarFoco(tr.dataset.foco); });
+
+  function hallazgos(v) {
+    const H = HALLAZGOS[v];
+    document.getElementById("nota-vol").textContent = H.nota;
+    document.getElementById("hallazgos").innerHTML = H.tarjetas.map((c) =>
+      `<article class="tarjeta"><h3>${c.t}${c.v ? ` <span class="veredicto ${c.v[1]}">${c.v[0]}</span>` : ""}</h3><ul>${c.items.map((i) => `<li>${i}</li>`).join("")}</ul></article>`).join("");
+  }
+
+  function mostrar(v) {
+    vol = v;
+    try { localStorage.setItem("s161-vol", v); } catch (e) {}
+    document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.vol === v)));
+    Object.values(grupos).forEach((g) => { if (g && g.remove) map.removeLayer(g); });
+    grupos = construir(v);
+    grupos.sat.addTo(map);
+    aplicarCapas();
+    const V = D.volcanes[v];
+    const dlat = V.inner_km / 111.195, dlon = V.inner_km / (111.195 * Math.cos((V.vent[0] * Math.PI) / 180));
+    const b = L.latLngBounds(V.anillo).extend([[V.vent[0] - dlat, V.vent[1] - dlon], [V.vent[0] + dlat, V.vent[1] + dlon]]);
+    map.fitBounds(b.pad(0.04));
+    hallazgos(v);
+    tablaTIF(V, "noche", document.getElementById("t-tif-noche"));
+    tablaTIF(V, "dia", document.getElementById("t-tif-dia"));
+    tablaRec(V, document.getElementById("t-rec"));
+  }
+  document.getElementById("sel-sensor").addEventListener("change", () => tablaRec(D.volcanes[vol], document.getElementById("t-rec")));
+  document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => mostrar(b.dataset.vol)));
+  let ini = "Tupungatito";
+  try { const s = localStorage.getItem("s161-vol"); if (s && D.volcanes[s]) ini = s; } catch (e) {}
+  const h = (location.hash || "").slice(1);
+  if (D.volcanes[h]) ini = h;
+  mostrar(ini);
+})();
+</script>
