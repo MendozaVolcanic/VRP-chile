@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~11:50 UTC (S163): O2-375 cerrado contra MATLAB; la regla no extrapola como MATLAB
+- `loop-viirs375` (`dbe9af431`, `o2_375/verificador_matlab/INFORME.md`, verificador Sonnet CONFIRMADO): el ΔL de MATLAB
+  difiere de la vara en 0 de 422 escenas (máx 1,03e-15); el control contra el port falla donde debe (137 escenas, máx
+  0,83); Etna igual al OSF; un Delaunay sin perturbar difiere en 22 de 58, así que la tolerancia distingue triangulaciones.
+  **La vara de V375 deja de ser preliminar y V375-D queda fuera del programa.** V375-E espera la vía (#907 y su cableado) y
+  PD1.
+- **Hallazgo (gravedad 1)**: fuera de la envolvente convexa MATLAB deja NaN, y `delaunay_perturbado.rellenar` pone el vecino
+  más cercano (38.955 celdas en 12 escenas de V375; 159 en 10 de MODIS; ninguna sobre una alerta). Con `omitnan` un NaN se
+  descarta de L_bk y un extrapolado se suma. Pedido a `loop-viirs750-2`: que la función de la vía devuelva NaN fuera de la
+  envolvente, con prueba de oro y mutación.
+- Con esto, la vara de magnitud de los tres sensores queda reproducida contra MATLAB real: V750 166 de 166, MODIS 404 de
+  404, V375 422 de 422.
+
 ### 2026-10-26 ~11:40 UTC (S163): O2 MODIS confirmado contra MATLAB; sesión del paper
 - `loop-modis-2` (`experiments/_s163_o2_modis/RESULTADO_O2_MODIS_MATLAB.md`, verificador Sonnet en
   `verificador_matlab/INFORME.md`): la regla reproduce el fondo de MATLAB R2026b en 404 de 404 filas y 191 de 191 escenas
