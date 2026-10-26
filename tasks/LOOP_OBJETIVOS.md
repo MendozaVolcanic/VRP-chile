@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-26 ~05:45 UTC (S163): candado de MOD-D, adenda 4; punto (b) aprobado con D-48
+- Verificador limpio (Fable) del candado: «se puede despachar el humo con cambios chicos». VCM-01 (gravedad 3): la adenda 3
+  sacaba del denominador más de lo que permite el §8.5 sellado, y una protegida que K publica pero el port no pudo evaluar
+  dejaba de vetar P1 (podía torcer NO CANDIDATO en CANDIDATO). Arreglo en la adenda 4 (`s162-modd-candado`): (a) sólo
+  «volcán fuera del gránulo» y «escena inválida» salen del denominador; una falla del arnés o del port deja la cobertura en
+  rojo (INDECIDIBLE): instrumento, aceptado. (b) **Aprobado con D-48**: si una protegida que K publica sale del denominador
+  por esos dos motivos, el veredicto no puede ser CANDIDATO y va a la fila 5 (DECIDE NICOLÁS). Más estricto que lo sellado,
+  fijado antes de ver datos (el humo no se despachó). Condiciones: escrito con hora del servidor antes del despacho,
+  segunda vuelta del verificador que lo cubra, y un escenario de batería que lo ejercite.
+- Resto de la adenda 4: manifiesto de hashes del arnés y del evaluador comprobado en el workflow y en el evaluador;
+  procedencia exige el commit del tag; 32 pruebas y 31 mutaciones; K33 por el mismo predicado; punto informativo de M con la
+  regla de `fillmissing2`. Después: mutaciones, segunda vuelta, tag y pedido de despacho del humo.
+
 ### 2026-10-26 ~05:10 UTC (S163): vara MODIS preliminar verificada; #910 mergeado; adenda de M para MOD-D aprobada
 - `loop-modis-2` (`38df75a02`, `experiments/_s163_o2_modis/RESULTADO_VARA_PRELIMINAR.md`, verificador Sonnet en
   `verificador_vara/INFORME.md`): con la regla, el hueco calza con el del `.m` en 404 de 404, pero son **191 escenas
