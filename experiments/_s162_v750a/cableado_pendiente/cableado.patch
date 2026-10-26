@@ -1,0 +1,128 @@
+diff --git a/pipeline/process_viirs_mod.py b/pipeline/process_viirs_mod.py
+index 664e1e3b5..b34606c07 100644
+--- a/pipeline/process_viirs_mod.py
++++ b/pipeline/process_viirs_mod.py
+@@ -72,6 +72,7 @@ FLAG_DNS = {65532, 65533, 65534, 65535}
+ from pipeline.regrid import regrid_to_utm  # F70.2 grilla UTM
+ from pipeline.profile import (
+     ENABLE_UTM_REGRID,  # F70.2
++    ENABLE_V750_CODIGO_MIROVA,  # S162 V750-A
+     ANOMALY_THRESHOLD_K,
+     N_SIGMA_MIR,
+     BG_INNER_KM,
+@@ -445,10 +446,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
+                   active_water_bodies: list = None,
+                   lbg_global_compatible: bool = False,
+                   local_kernel_bg_compatible: bool = False,
+-                  lava_lake_magmatic: bool = False) -> dict | None:
++                  lava_lake_magmatic: bool = False,
++                  volcan_nombre: str | None = None) -> dict | None:
+     """
+     Calculate VRP from VIIRS 750m M-band granule (VNP02MOD / VJ102MOD).
+ 
++    Nota S162: `volcan_nombre` sólo lo usa la vía «código MIROVA» (flag
++    ENABLE_V750_CODIGO_MIROVA, apagado) para encontrar la grilla de MIROVA del
++    volcán en pipeline/grillas_mirova.yaml. Con el flag apagado se ignora.
++
+     Nota S99: `lava_lake_magmatic` se acepta por paridad de firma con
+     process_viirs (GR1) pero NO se usa aquí, Eq.16 lava lake es régimen
+     sub-píxel I-band 375m, no M-band 750m.
+@@ -491,6 +497,33 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
+     VIIRS_C2_OVERRIDE_NIGHT = _TH["viirs_c2_override"]  # override nocturno; de día None
+     _umbrales_diurnos = bool(_TH.get("dia", False))
+ 
++    # S162 V750-A: vía «código MIROVA» (pipeline/mirova_v750_codigo.py). POR QUÉ: medido en S159 y
++    # V750-C, para callar donde MIROVA calla y medir lo que mide hay que ver el volcán como lo ve
++    # MIROVA: interpolado a su grilla, con su detector, su fondo y su suma; las piezas sueltas sobre K
++    # no lo logran. Con el flag APAGADO (hoy) este bloque no corre y el procesador es el de siempre.
++    # Con el flag encendido y un volcán sin grilla de MIROVA, sigue K y el record lo dice
++    # (`via_codigo_mirova: "sin_grilla"`), para que nadie lea K creyendo que es la vía (A118).
++    _via_sin_grilla = False
++    if ENABLE_V750_CODIGO_MIROVA:
++        from . import mirova_v750_codigo as _MV
++        if volcan_nombre is not None and _MV.grilla_del_volcan(volcan_nombre) is not None:
++            _rad = _MV.leer_radiancia_l1b(l1b_path)
++            if _rad is None:
++                return None
++            _lat, _lon, _ang = _MV.leer_geo_l1b(geo_path)
++            _rec = _MV.calcular_vrp_granulo(
++                _rad, _lat, _lon, _ang, volcan_nombre,
++                vent_lat if vent_lat is not None else volcano_lat,
++                vent_lon if vent_lon is not None else volcano_lon,
++                inner_radius_km, _sensor_label_from_filename(l1b_path.name))
++            if _rec is None:
++                return None
++            _rec.update({"granule": l1b_path.name,
++                         "product_version": product_version_from_granule(l1b_path.name),
++                         "datetime_utc": _parse_datetime(l1b_path.name)})
++            return _rec
++        _via_sin_grilla = True
++
+     bands = read_viirs_mod_l1b(l1b_path)
+     if "M13" not in bands:
+         return None
+@@ -1509,6 +1542,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
+     if _umbrales_diurnos:
+         salida["diag_umbrales_diurnos"] = True
+ 
++    # S162 V750-A: con la vía encendida y un volcán sin grilla de MIROVA, el record es de K y lo dice.
++    if _via_sin_grilla:
++        salida["via_codigo_mirova"] = "sin_grilla"
++
+     return salida
+ 
+ 
+diff --git a/pipeline/store.py b/pipeline/store.py
+index da37fae0a..8b3a17e88 100644
+--- a/pipeline/store.py
++++ b/pipeline/store.py
+@@ -348,10 +348,18 @@ def append_record(volcano_name: str, record: dict,
+     #   (afecta schema, dashboard, audits, OSF mapping).
+     MAX_HOTSPOT_DIST_KM = max_hotspot_dist_km if max_hotspot_dist_km is not None else 5.0
+ 
++    # S162 V750-A: un record de la vía «código MIROVA» (pipeline/mirova_v750_codigo.py, flag
++    # enable_v750_codigo_mirova, APAGADO) no pasa por las tres compuertas de la era K de abajo
++    # (filtro de píxeles por distancia, geocerca de hotspot_dist_km y tope de píxeles por cúmulo):
++    # el código de MIROVA no las tiene, y si la vía pasara por ellas en el NRT, la sombra mediría
++    # otro paquete que el censo, que lee la vía antes del almacén (A118). Con el flag apagado
++    # ningún record trae la marca y este archivo se comporta como antes, bit a bit.
++    _via_mirova = record.get("via_codigo_mirova") is True
++
+     # S35 H8: filtro pixel-por-pixel ANTES de los normalizaciones de VRP.
+     # Esto garantiza que vrp_mir_mw refleje SOLO los pixels in_range, y que
+     # los downstream consumers (audit, dashboard) vean datos consistentes.
+-    if enable_pixel_level_distance_filter:
++    if enable_pixel_level_distance_filter and not _via_mirova:
+         _filter_pixels_by_distance(record, MAX_HOTSPOT_DIST_KM)
+ 
+     if "vrp_mir_mw" in record and "vrp_mw" not in record:
+@@ -390,7 +398,7 @@ def append_record(volcano_name: str, record: dict,
+     # el zero-out histórico. Garantiza que vrp_mw=0 cuando solo hay señal far.
+     # F47 H4 modificación: si cluster_rescues, en vez de zero-out el rollup
+     # gana el cluster vent-anchored y se reescriben los campos hotspot/final.
+-    if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
++    if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM and not _via_mirova:
+         if cluster_rescues:
+             # F47 rescate — cluster vent-anchored gana al FP single far.
+             vrp_eruption = pc_vrp
+@@ -444,7 +452,7 @@ def append_record(volcano_name: str, record: dict,
+     # el cap es per-volcano (yaml override `max_cluster_pixels: 12` solo
+     # Villarrica). Sin override (None ó 0) → comportamiento legacy.
+     # Ver docs/F52_VILLARRICA_OVER_ESTIMATION_S77.md.
+-    if max_cluster_pixels is not None and max_cluster_pixels > 0:
++    if max_cluster_pixels is not None and max_cluster_pixels > 0 and not _via_mirova:
+         pc_for_cap = record.get("primary_cluster") or {}
+         pc_n_pixels = pc_for_cap.get("n_pixels") or 0
+         if pc_n_pixels > max_cluster_pixels:
+diff --git a/scripts/run_pipeline.py b/scripts/run_pipeline.py
+index 64e0d5d96..0d09e56a7 100644
+--- a/scripts/run_pipeline.py
++++ b/scripts/run_pipeline.py
+@@ -350,6 +350,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
+                             active_water_bodies=volcano.get("active_water_bodies"),
+                             lbg_global_compatible=volcano.get("lbg_global_compatible", False),
+                             local_kernel_bg_compatible=volcano.get("local_kernel_bg", False),
++                            volcan_nombre=volcano["name"],  # S162: sólo lo usa la vía «código MIROVA» (flag apagado)
+                         )
+                         if result:
+                             store.append_record(volcano["name"], result,

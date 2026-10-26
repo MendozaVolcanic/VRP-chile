@@ -893,6 +893,14 @@ ENABLE_VRP_TIR_OUTPUT: bool = bool(_cfg.get("enable_vrp_tir_output", True))
 # apagado, y el A/B de F70.3 habría salido nulo sin ningún síntoma.
 ENABLE_UTM_REGRID: bool = bool(_t.get("enable_utm_regrid", False))
 
+# S162 V750-A, vía «código MIROVA» para VIIRS 750 (pipeline/mirova_v750_codigo.py). POR QUÉ: medido en S159 y V750-C,
+# las piezas del código operacional de MIROVA no se pueden trasplantar sueltas sobre K: el fondo del código enciende
+# cumbres tibias que MIROVA calla porque MIROVA las interpola a su grilla antes de detectar. La vía corre el paquete
+# entero (grilla de MIROVA, detector del .m, fondo del .m, suma de los alertados). APAGADA: con False no corre ninguna
+# línea del módulo y el procesador V750 es el de hoy bit a bit. Encenderla exige el sello de V750-A, su censo y su
+# sombra, tag defensivo y el sí explícito de Nicolás (A45). Va en `_t`, como todo `enable_*` (S124, A89).
+ENABLE_V750_CODIGO_MIROVA: bool = bool(_t.get("enable_v750_codigo_mirova", False))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))
