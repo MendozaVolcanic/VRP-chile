@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-25 (S162): relevos abiertos; loop coordinador reanudado
+- Nicolás: «continúa con todo lo que recomiendes, ¿hay que abrir nuevas sesiones? ¿en qué quedaron las otras?». Abiertos
+  desde el computador: `loop-modis-2` (`local_0af7e1d8-7bde-4a4d-b8a3-6cf256a36c67`, desde `claude/s162-modis-774bb0`:
+  verificador de la A61, candado de MOD-D, diseño del flag de MxD03 con «sin dato» de geolocalización) y
+  `loop-viirs750-2` (`local_94f4be0d-2b32-4570-b711-3a6f14cc8a0a`, desde `s162-v750a-evaluador`: adenda del defecto de
+  V750-B, segunda vuelta del verificador de V750-A, vía de proceso «código MIROVA» detrás de flag, despacho de V750-B el
+  2026-11-03). `loop-viirs375` borró sus 1,9 GB de artefactos fabricados del verificador y quedó en pausa.
+
 ### 2026-10-25 ~07:30 UTC (S162): analizador de V750-A terminado; los 5 subagentes entregaron; loop coordinador detenido
 - Subagente 3 (Opus; `s162-v750a-evaluador` `7d5e723c6`): `evaluar_v750a.py` con 50 pruebas, 52/52 mutaciones
   atrapadas, verificador Sonnet «listo con cambios» corregido (sin segunda vuelta). Lecturas L2, L4, L7, L18 para el
