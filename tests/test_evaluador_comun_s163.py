@@ -94,7 +94,9 @@ def _tabla_variada():
                     fila(dia + " 06:10:00", "ALERTA_TERMICA", 0.3, vol=vol)]          # alerta bajo 1 MW
             prod += [rec(dia + " 04:30", pub=False, disp=0, vol=vol, z=z), rec(dia + " 05:20", disp=1.5, vol=vol, z=z),
                      rec(dia + " 06:10", pub=False, disp=0, vol=vol, z=z + 2)]
-            D += [rec(dia + " 04:30", pub=True, disp=0.2, vol=vol, z=z), rec(dia + " 05:20", disp=0.8, vol=vol, z=z)]
+            # en la noche de 15° de Chillán el brazo publica 1,2 MW sobre la RUTINA: un cruce de P1b hacia arriba
+            sube = 1.2 if (vol, dia) == (CH, "2026-08-20") else 0.2
+            D += [rec(dia + " 04:30", pub=True, disp=sube, vol=vol, z=z), rec(dia + " 05:20", disp=0.8, vol=vol, z=z)]
     # y una noche de negativos limpios de Láscar donde el brazo publica uno y el control no
     ref += [fila("2026-10-21 04:30:00", "RUTINA", 0.0, vol="Lascar"), fila("2026-10-21 05:20:00", "RUTINA", 0.0,
                                                                               vol="Lascar")]
@@ -139,14 +141,23 @@ def test_el_agregado_coincide_con_las_funciones_de_siempre():
     contrib = ec.contribuciones_p2(T, "prod", "D")
     assert total["p2"]["D"]["neto"] == sum(x["c"] for x in contrib)
     assert total["p2"]["D"]["n_discordantes"] == len(contrib) > 0
-    assert total["p1b"]["D"]["abajo"] > 0 and total["cobertura"]["D"][ec.FALTA] > 0
+    assert total["p1b"]["D"] == {"abajo": 6, "arriba": 1} and total["cobertura"]["D"][ec.FALTA] == 6
+
+
+def test_estratos_respetan_dias_excluidos():
+    T, lados = _tabla_variada()
+    est = ec.metricas_por_estrato(T, "prod", ["D"], ec.estrato_cenit, dias_excluidos=("2026-08-20",))
+    assert "z10-20" not in est
+    assert sum(e["pasadas"] for e in est.values()) == len(T) - 6
 
 
 def test_estrato_cae_donde_dice_su_cenit():
     T, lados = _tabla_variada()
     est = ec.metricas_por_estrato(T, "prod", ["D"], ec.estrato_cenit)
+    assert sorted(est) == ["z10-20", "z20-30", "z40-50", "z60-70"]     # 15/17°, 25°, 45/47°, 65/67°
     # las protegidas de 05:20 de la noche de 45° son las únicas en z40-50: P1b abajo 2 (dos volcanes)
     assert est["z40-50"]["p1b"]["D"]["abajo"] == 2
+    assert est["z10-20"]["p1b"]["D"] == {"abajo": 2, "arriba": 1}      # la RUTINA de Chillán que sube a 1,2 MW
     assert est["z40-50"]["pasadas"] == 6          # 45° y 47°: las tres pasadas de dos volcanes
     assert est["z60-70"]["pasadas"] == 6          # 65° y 67°
     assert est["z20-30"]["pasadas"] == 2
@@ -203,12 +214,14 @@ def _falla(etapa, plataforma, volcan=CH, fecha="2026-10-12"):
 
 
 def test_cargar_eventos_lee_fallas_e_incidencias_de_varios_json(tmp_path):
-    a = _json_cobertura(tmp_path / "a.json", fallas=[_falla("busqueda", "VIIRS_NOAA21_750")])
+    a = _json_cobertura(tmp_path / "a.json", fallas=[_falla("busqueda", "VIIRS_NOAA21_750"),
+                                                     _falla("descarga", "MODIS_AQUA", volcan="Lascar")])
     b = _json_cobertura(tmp_path / "b.json", incidencias=[_inc("sin_granulos", "VIIRS_SNPP_750"),
                                                           _inc("dia_parcial", None)])
     ev = ec.cargar_eventos_cobertura([a, b])
-    assert sorted((e["tipo"], e["plataforma"]) for e in ev) == [
-        ("dia_parcial", None), ("falla_busqueda", "VIIRS_NOAA21_750"), ("sin_granulos", "VIIRS_SNPP_750")]
+    assert sorted((e["tipo"], e["plataforma"], e["volcan"], e["fecha"]) for e in ev) == [
+        ("dia_parcial", None, CH, "2026-10-12"), ("falla_busqueda", "VIIRS_NOAA21_750", CH, "2026-10-12"),
+        ("falla_descarga", "MODIS_AQUA", "Lascar", "2026-10-12"), ("sin_granulos", "VIIRS_SNPP_750", CH, "2026-10-12")]
 
 
 def _fila_T(ref=REF_12, lados=None):
@@ -317,5 +330,6 @@ def test_main_informa_estratos_y_causas_sin_tocar_el_veredicto(tmp_path, monkeyp
     assert res["huecos"]["K"]["por_causa"] == {ec.CAUSA_HUECO: {ec.FALTA: 2}}   # la falla de c2 manda
     assert res["huecos"]["prod"]["por_causa"] == {}
     assert list(res["estratos"]["cenit"]) == ["z40-50"]       # el control observa las cuatro, todas a 40°
+    assert set(res["estratos"]["regimen"]) == {"535_a_K"}
     assert res["estratos"]["regimen"]["535_a_K"]["pasadas"] == 4
     assert res["estratos"]["cenit"]["z40-50"]["p1b"]["K"] == {"abajo": 0, "arriba": 0}
