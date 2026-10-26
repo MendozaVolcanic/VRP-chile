@@ -1,6 +1,26 @@
 # O2 MODIS en MATLAB: la regla de `fillmissing2` es la de MATLAB también en MODIS (2026-10-26)
 
-**SIN VERIFICADOR LIMPIO todavía.**
+> ⚠️ **Verificado con contexto limpio el 2026-10-26 (Sonnet, `verificador_matlab/INFORME.md`).** La afirmación central
+> **se sostiene**: la regla coincide con el fondo de MATLAB en 404 de 404 filas y 191 de 191 escenas distintas, con
+> diferencia máxima 5,55e-17 en todas las celdas finitas del hueco, y la alternativa más cercana (el port o el marco
+> cambiado) está a 1,06e-4: la tolerancia separa por 12 órdenes de magnitud. El resultado es de este paquete (md5,
+> LHOT y DL recalculados, cabecera GLNXA64). Lo que **corrige o acota** del texto de abajo, que se conserva:
+> - **Alcance (VM-01, VM-05)**: los bloques 2 × 2 son sólo 6 escenas distintas, todas de Láscar y centradas; de las 191
+>   escenas, 161 son de Láscar; todas tienen hueco de 3 × 3 (4 píxeles o menos) y ninguna alerta cerca del borde. Es una
+>   equivalencia medida en una versión de MATLAB (R2026b), no un mecanismo probado; y el `.m` es el de VIIRS 750 sobre
+>   grillas MODIS remuestreadas y alertas decididas por nuestro port.
+> - **«La matriz de fondo completa dentro del hueco»** vale para las celdas finitas: MATLAB deja sin rellenar 159 celdas
+>   del hueco en 10 escenas (no extrapola fuera de la envolvente) y la regla las rellena con el vecino más cercano;
+>   ninguna es celda de alerta, así que el VRP no cambia (VM-02). SOSPECHA: con una alerta fuera de la envolvente MATLAB
+>   y la regla sí discreparían.
+> - **«Con 2 y 3 píxeles casi siempre da lo mismo»** omite que el port también falla en pares diagonales (3 de 3), un
+>   trío 8-conexo y 4 píxeles dispersos (VM-04). **«Sin sesgo»** vale en mediana y en conteo (67 sobre, 72 bajo), no en
+>   media (1,072; VM-07).
+> - Lo que **no** es medición sino decisión: que la columna de M con la regla «deje de ser preliminar» en MOD-D y que una
+>   vía «código MIROVA» en `pipeline/` tenga que usar esta regla (VM-05). La corrida en MATLAB Online y la comprobación de
+>   los md5 dentro de MATLAB las informa la coordinadora (no están en el material; VM-06).
+
+**Verificado (ver la marca de arriba).**
 
 ## Qué se corrió
 
