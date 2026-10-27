@@ -14,9 +14,10 @@ del generador sellado (días excluidos, cese de Suomi NPP, sin gránulo afuera) 
   objetivos_run_v750b.json      la lista sellada seguida de la suplementaria: es la que lee el run (OBJETIVOS);
   poblacion_supl.json           la población completa de esta corrida (para auditar).
 
-CONTROL (si falla, sale 1 y no escribe la lista del run): las pasadas `pos` y `neg_limpio` de esta corrida, con los
-mismos cortes, tienen que ser exactamente las de la lista sellada que se pasa en --sellado (mismo volcán, hora y
-gránulo). Así se ve que el cambio de filtro no tocó la población sellada, y que las dos listas salieron de los mismos
+CONTROL (si falla, sale 1 y no escribe ninguna lista): las pasadas `pos` y `neg_limpio` de esta corrida, con los
+mismos cortes, tienen que ser exactamente las de la lista sellada que se pasa en --sellado (volcán, hora, gránulo,
+etiqueta, protegida, alerta de la tabla y si decide). Se niega a escribir en la carpeta sellada o encima de salidas
+de otra corrida (sale 2; no borra nada). Así se ve que el cambio de filtro no tocó la población sellada, y que las dos listas salieron de los mismos
 records y de la misma referencia.
 
 Uso (sobre el main del día del despacho, después de generar la lista sellada con objetivos_v750b.py):
@@ -54,8 +55,51 @@ def poblacion_con_far_ref(ruta):
     return m
 
 
+SALIDAS = ("objetivos_supl_v750b.json", "sin_granulo_supl_v750b.json", "objetivos_run_v750b.json", "poblacion_supl.json",
+           "poblacion_completa.json")
+CAMPOS_CONTROL = ("volcan", "hora_utc", "granule", "lab", "protegida", "alerta_tabla", "decide")
+
+
 def clave(o):
-    return (o["volcan"], o["hora_utc"], o.get("granule"))
+    """Lo que tiene que coincidir entre una pasada de esta corrida y la de la lista sellada (VAD2-08: no sólo la hora)."""
+    return tuple(json.dumps(o.get(k), sort_keys=True, default=str) for k in CAMPOS_CONTROL)
+
+
+def recortar(pob, excluidos, corte):
+    """Los mismos cortes del generador sellado: días excluidos y cese de Suomi NPP."""
+    return [p for p in pob if p["hora_utc"][:10] not in excluidos and p["hora_utc"] < corte]
+
+
+def comparar(pob, sellado):
+    """Control: pos y neg_limpio con gránulo de esta corrida = la lista sellada, campo por campo de CAMPOS_CONTROL."""
+    pn = sorted(clave(p) for p in pob if p["lab"] in ("pos", "neg_limpio") and p.get("granule"))
+    ss = sorted(clave(o) for o in sellado)
+    return pn == ss, pn, ss
+
+
+def seleccionar_far(pob):
+    """(far_ref con gránulo, far_ref sin gránulo). dist_ref: la distancia de la primera fila FALSO_POSITIVO con distancia
+    (nunca de una fila ALERTA o RUTINA; una pasada far_ref no tiene ALERTA por definición)."""
+    far = [dict(p) for p in pob if p["lab"] == "far_ref"]
+    sin_g = [(p["volcan"], p["hora_utc"], p["lab"], p.get("protegida")) for p in far if not p.get("granule")]
+    far = [p for p in far if p.get("granule")]
+    for p in far:
+        fp = [f for f in p.get("mirova") or [] if str(f.get("tipo", "")).startswith("FALSO_POSITIVO")]
+        p["dist_ref"] = next((f["dist_km"] for f in fp if f.get("dist_km") is not None), None)
+        p["en_sc"] = False
+    return far, sin_g
+
+
+def lista_run(sellado, far):
+    """La lista que lee el run: la sellada primero y sin tocar, después la suplementaria."""
+    return list(sellado) + list(far)
+
+
+def numerar(far):
+    far.sort(key=lambda e: (e["granule"] or "", e["volcan"], e["hora_utc"]))
+    for n, e in enumerate(far):
+        e["id"] = ID0 + n
+    return far
 
 
 def main():
@@ -67,6 +111,14 @@ def main():
     ap.add_argument("--dest", default=str(AQUI))
     a = ap.parse_args()
     dest = Path(a.dest)
+    # VAD2-03 y VAD2-09: nunca en la carpeta sellada ni encima de una corrida anterior (no se borra nada)
+    if dest.resolve() == V750B.resolve():
+        print(f"--dest no puede ser la carpeta sellada ({V750B}): pisaría su poblacion_completa.json")
+        return 2
+    previos = [n for n in SALIDAS if (dest / n).exists()]
+    if previos:
+        print(f"en {dest} ya hay salidas de otra corrida {previos}: usa una carpeta nueva (no se escribe encima)")
+        return 2
     dest.mkdir(parents=True, exist_ok=True)
     G = V750B / "objetivos_v750b.py"
     spec = importlib.util.spec_from_file_location("gen_sellado", G)
@@ -80,41 +132,31 @@ def main():
     P.main()
     crudo = dest / "poblacion_completa.json"
     pob_txt = crudo.read_text(encoding="utf-8")
-    (dest / "poblacion_supl.json").write_text(pob_txt, encoding="utf-8")
-    crudo.unlink()
-    pob = json.loads(pob_txt)["pasadas"]
-    pob = [p for p in pob if p["hora_utc"][:10] not in GS.EXCLUIDOS and p["hora_utc"] < GS.CORTE_SNPP]
+    pob = recortar(json.loads(pob_txt)["pasadas"], GS.EXCLUIDOS, GS.CORTE_SNPP)
 
-    # control: pos y neg_limpio con gránulo = la lista sellada
     sellado = json.loads(Path(a.sellado).read_text(encoding="utf-8"))
-    pn = sorted(clave(p) for p in pob if p["lab"] in ("pos", "neg_limpio") and p.get("granule"))
-    ss = sorted(clave(o) for o in sellado)
-    igual = pn == ss
-    print(f"== control: pos y neg_limpio de esta corrida contra la lista sellada: {len(pn)} contra {len(ss)}, "
-          f"{'IGUALES' if igual else 'DISTINTAS'}")
+    igual, pn, ss = comparar(pob, sellado)
+    print(f"== control: pos y neg_limpio de esta corrida contra la lista sellada ({', '.join(CAMPOS_CONTROL)}): "
+          f"{len(pn)} contra {len(ss)}, {'IGUALES' if igual else 'DISTINTAS'}")
     if not igual:
         faltan, sobran = sorted(set(ss) - set(pn))[:10], sorted(set(pn) - set(ss))[:10]
         print("   en la sellada y no acá:", faltan, "| acá y no en la sellada:", sobran)
-        print("== no se escribe la lista suplementaria: las dos listas no salieron de los mismos datos")
+        crudo.rename(dest / "poblacion_supl_CONTROL_FALLIDO.json")
+        print("== no se escribe ninguna lista: las dos no salieron de los mismos datos (la población queda como "
+              "poblacion_supl_CONTROL_FALLIDO.json para auditar)")
         return 1
+    crudo.rename(dest / "poblacion_supl.json")
 
-    far = [p for p in pob if p["lab"] == "far_ref"]
-    sin_g = [(p["volcan"], p["hora_utc"], p["lab"], p.get("protegida")) for p in far if not p.get("granule")]
-    far = [p for p in far if p.get("granule")]
+    far, sin_g = seleccionar_far(pob)
     SEL = GS._modulo("sel", GS.N_DIR / "02_seleccion.py")
     grillas = SEL.grillas()
     for p in far:
         p["grilla"] = grillas[SEL.TIF.get(p["volcan"], p["volcan"])]
-        fp = [f for f in p.get("mirova") or [] if str(f.get("tipo", "")).startswith("FALSO_POSITIVO")]
-        p["dist_ref"] = next((f["dist_km"] for f in fp if f.get("dist_km") is not None), None)
-        p["en_sc"] = False
     vy = {v["name"]: v for v in yaml.safe_load((RAIZ / "volcanoes.yaml").read_text(encoding="utf-8"))["volcanoes"]}
     sys.path.insert(0, str(RAIZ / "scripts"))
     import banco_paridad as B
     GS.completar(far, vy, B.inner_desde_html())
-    far.sort(key=lambda e: (e["granule"] or "", e["volcan"]))
-    for n, e in enumerate(far):
-        e["id"] = ID0 + n
+    numerar(far)
     texto = json.dumps(far, ensure_ascii=False, default=str)
     sha_supl = hashlib.sha256(texto.encode("utf-8")).hexdigest()
     (dest / "objetivos_supl_v750b.json").write_text(texto, encoding="utf-8")
@@ -122,10 +164,10 @@ def main():
         {"objetivos_sha256": sha_supl,
          "pasadas": [{"volcan": v, "hora_utc": h, "lab": lab, "protegida": pr} for v, h, lab, pr in sin_g]},
         ensure_ascii=False), encoding="utf-8")
-    run = json.dumps(sellado + far, ensure_ascii=False, default=str)
+    run = json.dumps(lista_run(sellado, far), ensure_ascii=False, default=str)
     (dest / "objetivos_run_v750b.json").write_text(run, encoding="utf-8")
     sha_sell = hashlib.sha256(Path(a.sellado).read_bytes()).hexdigest()
-    print(f"far_ref con gránulo: {len(far)} | sin gránulo (SIN DATO declarado): {len(sin_g)} {sin_g[:20]}")
+    print(f"far_ref con gránulo: {len(far)} | sin gránulo (SIN DATO declarado): {len(sin_g)} {sin_g}")
     print(f"sha256 sellada {sha_sell}")
     print(f"sha256 suplementaria {sha_supl}")
     print(f"sha256 lista del run {hashlib.sha256(run.encode('utf-8')).hexdigest()} ({len(sellado)} + {len(far)} pasadas)")

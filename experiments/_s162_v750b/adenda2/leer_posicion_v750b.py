@@ -168,9 +168,20 @@ def main(argv=None):
     pr("   suplementarias SIN DATO por nombre:",
        [(obj[i]["volcan"], obj[i]["hora_utc"], (res.get(i) or {}).get("estado", "sin_resultado")[:30])
         for i in sorted(sin) if i in ids_p] or "ninguna")
+    pr("   suplementarias sin gránulo (del generador, SIN DATO declarado):",
+       [(x["volcan"], x["hora_utc"]) for x in dsg.get("pasadas", [])] or "ninguna")
 
     def ancla(i):
         return tuple(obj[i].get("pos_crater") or (A.C, A.C))
+
+    # VAD2-02: como el analizador sellado (§7, l. 291-298), salen de todos los brazos las pasadas en que el K del probe
+    # no reproduce la publicación de producción; así la fila «radiante» calza con B0 a B5 del veredicto sellado
+    kp = A.B.correr_node([[A.slim((res[i].get("brazos") or {}).get("K", {}).get("record")), inner[obj[i]["volcan"]]]
+                          for i in oks]) if oks else []
+    k_dist = [i for i, q in zip(oks, kp) if bool(obj[i].get("pub_prod")) != bool(q[4])]
+    pr(f"   pasadas con K distinto de producción (salen, como en el sellado): {len(k_dist)} "
+       f"{[(obj[i]['volcan'], obj[i]['hora_utc']) for i in k_dist][:20]}")
+    oks = [i for i in oks if i not in set(k_dist)]
 
     casos, idx = [], []
     for i in oks:
@@ -251,14 +262,17 @@ def main(argv=None):
     far = [i for i in oks if i in ids_p]
     pr(f"\n== pasadas far_ref (MIROVA ubicó el calor lejos; lo correcto es no publicar): observadas {len(far)}")
     for c in CAJAS_LECTURA:
-        pr("   " + c + ": " + " | ".join(
+        # VAD2-07: un 0 de «publica» sólo dice algo en las pasadas donde la caja alertó algo
+        con = sum(bool((res[i]["oraculo"][A.caja_de(c, obj[i]["volcan"])] or {}).get("npix")) for i in far)
+        pr("   " + c + f": con algún alertado {con} de {len(far)} | " + " | ".join(
             f"{b} publica {sum(pub(i, f'{c}|{b}') for i in far)}" for b in BRAZOS_POS)
            + " | lista " + str([(obj[i]["volcan"], obj[i]["hora_utc"], "".join(b[0] for b in BRAZOS_POS
                                                                                if pub(i, f"{c}|{b}")))
                                 for i in far if any(pub(i, f"{c}|{b}") for b in BRAZOS_POS)][:20]))
 
-    pr("\n== distancia de cada brazo desde el centro de la grilla contra la de MIROVA (diferencia de RADIOS, A93: cota "
-       "inferior de la separación; |delta| mediana, fracción a 1 km o menos, n)")
+    pr("\n== distancia de cada brazo desde la celda central de la grilla (33, 33; el punto de referencia de MIROVA queda "
+       "a hasta 0,35 km de ella) contra la de MIROVA (diferencia de RADIOS, A93: cota inferior de la separación; OCR "
+       "sólo desde el 2026-06-13; |delta| mediana, fracción a 1 km o menos, n)")
     for grupo, sel in (("alertas con distancia", lambda o: o["lab"] == "pos"), ("far_ref", lambda o: o["lab"] == "far_ref")):
         for c in ("B0", "B1"):
             lin = []
@@ -268,9 +282,11 @@ def main(argv=None):
                     o = obj[i]
                     if not sel(o):
                         continue
+                    # VAD2-05 (A119): la distancia del OCR no vale antes del 2026-06-13; antes de esa fecha, sólo la tabla
                     ref = o.get("dist_ref") if o["lab"] == "far_ref" else next(
                         (f.get("dist_km") for f in o.get("mirova") or [] if f.get("dist_km") is not None
-                         and str(f.get("tipo", "")).startswith("ALERTA")), None)
+                         and str(f.get("tipo", "")).startswith("ALERTA")
+                         and (f.get("source") == "CONS" or o["hora_utc"] >= A.FRONTERA_OCR)), None)
                     pt = punto(res[i]["oraculo"][A.caja_de(c, o["volcan"])], b, ancla(i), A)
                     if ref is None or pt is None:
                         continue

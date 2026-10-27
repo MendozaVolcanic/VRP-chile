@@ -61,6 +61,7 @@ def caja(pix):
 LEJANA = [(33, 34, 0.9), (33, 50, 5.0), (33, 51, 4.0)]
 BORDE = [(33, 37, 0.9), (33, 38, 0.9), (33, 39, 0.9), (33, 40, 3.0)]
 UNO = [(33, 34, 0.9)]
+PICOCERCA = [(33, 34, 5.0), (33, 50, 0.9), (33, 51, 0.9)]
 
 
 def k_record():
@@ -73,28 +74,30 @@ class Pob:
     def __init__(self):
         self.sell, self.supl, self.res = [], [], []
 
-    def pasada(self, hora, lab, pix, vrp_mirova=0.0, volcan="Lascar", dist_mirova=None, crater=(33.0, 33.0)):
+    def pasada(self, hora, lab, pix, vrp_mirova=0.0, volcan="Lascar", dist_mirova=None, crater=(33.0, 33.0),
+               dayflag=0, pub_prod=False, fuente="CONS", id_forzado=None):
         supl = lab == "far_ref"
         lista = self.supl if supl else self.sell
-        i = (100000 if supl else 0) + len(lista)
+        i = id_forzado if id_forzado is not None else (100000 if supl else 0) + len(lista)
         if lab == "pos":
             filas = [{"fecha_utc": hora + ":00", "tipo": "ALERTA_TERMICA", "vrp_mw": vrp_mirova,
-                      "dist_km": dist_mirova, "source": "CONS"}]
+                      "dist_km": dist_mirova, "source": fuente}]
         elif lab == "far_ref":
             filas = [{"fecha_utc": hora + ":00", "tipo": "FALSO_POSITIVO", "vrp_mw": vrp_mirova,
                       "dist_km": dist_mirova, "source": "CONS"}]
         else:
             filas = [{"fecha_utc": hora + ":00", "tipo": "RUTINA", "vrp_mw": 0.0, "dist_km": None, "source": "CONS"}]
         o = {"id": i, "volcan": volcan, "hora_utc": hora, "sensor": SENSOR, "lab": lab,
-             "protegida": lab == "pos" and vrp_mirova >= 1.0, "alerta_tabla": lab == "pos", "decide": True,
-             "mirova": filas, "mirova_vrp": vrp_mirova, "z": 30.0, "pub_prod": False, "dc": None, "pc_vrp": 0.0,
+             "protegida": lab == "pos" and vrp_mirova >= 1.0, "alerta_tabla": lab == "pos" and fuente == "CONS",
+             "decide": True, "mirova": filas, "mirova_vrp": vrp_mirova, "z": 30.0, "pub_prod": pub_prod, "dc": None,
+             "pc_vrp": 0.0,
              "pc_n": None, "granule": f"g{i}", "en_sc": False, "celda_crater": [int(x) for x in crater],
              "pos_crater": list(crater),
              "inner_km": 5.0}
         if supl:
             o["dist_ref"] = dist_mirova
         lista.append(o)
-        self.res.append({"id": i, "volcan": volcan, "hora_utc": hora, "estado": "ok", "dayflag": 0, "sunglint": 40.0,
+        self.res.append({"id": i, "volcan": volcan, "hora_utc": hora, "estado": "ok", "dayflag": dayflag, "sunglint": 40.0,
                          "cobertura": COB, "brazos": {"K": {"record": k_record(), "pc_pix": []}},
                          "oraculo": {b: caja(pix) for b in CAJAS}})
         return i
@@ -123,7 +126,20 @@ def poblacion():
     ids = {"P1": p.pasada("2026-07-01 05:00", "pos", LEJANA, 2.0, dist_mirova=0.8),
            "P2": p.pasada("2026-07-02 05:00", "pos", BORDE, 2.0, dist_mirova=4.0),
            "P3": p.pasada("2026-07-03 05:00", "neg_limpio", LEJANA),
-           "P4": p.pasada("2026-07-04 05:00", "far_ref", LEJANA, 3.0, dist_mirova=13.1, crater=(33.0, 30.0))}
+           "P4": p.pasada("2026-07-04 05:00", "far_ref", LEJANA, 3.0, dist_mirova=13.1, crater=(33.0, 30.0)),
+           # VAD2-04: cráter 7,5 km al W del centro y el alertado junto al cráter: sólo anclado al cráter es cumbre
+           "P10": p.pasada("2026-07-05 05:00", "pos", [(33, 24, 0.9)], 2.0, dist_mirova=6.8, crater=(33.0, 23.0)),
+           # VAD2-04: el más radiante junto al cráter y un cúmulo más débil lejos: los tres brazos publican
+           "P11": p.pasada("2026-07-06 05:00", "pos", PICOCERCA, 2.0, dist_mirova=0.8),
+           # VAD2-02: K del probe distinto de producción (producción publicó, K no): sale de todos los brazos
+           "P12": p.pasada("2026-07-07 05:00", "pos", LEJANA, 2.0, dist_mirova=0.8, pub_prod=True),
+           # VAD2-04: diurna: no entra
+           "P13": p.pasada("2026-07-08 05:00", "pos", LEJANA, 2.0, dist_mirova=0.8, dayflag=1),
+           # VAD2-04: protegida sólo del OCR (después del 2026-06-13): decide con tabla más OCR, no con la tabla sola;
+           # y su distancia sí entra a la vara 3 (desde el 13-jun el OCR la trae medida)
+           "P14": p.pasada("2026-07-09 05:00", "pos", LEJANA, 2.0, dist_mirova=0.8, fuente="OCR"),
+           # VAD2-05: alerta sólo del OCR ANTES del 2026-06-13 con distancia: no entra a la vara 3
+           "P15": p.pasada("2026-05-20 05:00", "pos", UNO, 0.4, dist_mirova=20.0, fuente="OCR")}
     return p, ids
 
 
@@ -188,25 +204,42 @@ def main():
     m1 = re.search(r"C1 cajas con un solo alertado: (\d+); con brazos distintos (\d+)", out)
     chequear("P5 C1 cuenta casos y ninguno distinto", bool(m1) and int(m1.group(1)) >= 3 and m1.group(2) == "0",
              m1.group(0) if m1 else "sin línea C1")
-    r, c, k = (linea(out, "B0", b) for b in ("radiante", "cercano", "pico"))
-    chequear("P1/P2 líneas de B0", None not in (r, c, k), f"{r} {c} {k}")
+    dec, tab = out.split("canal decide", 1)[-1].split("canal tabla", 1) if "canal tabla" in out else (out, "")
+    mk = re.search(r"K distinto de producci\S+ \(salen, como en el sellado\): (\d+)", out)
+    chequear("P12 la pasada con K distinto sale de todos los brazos", bool(mk) and mk.group(1) == "1",
+             mk.group(0) if mk else "sin línea de K distinto")
+    r, c, k = (linea(dec, "B0", b) for b in ("radiante", "cercano", "pico"))
+    chequear("P1/P2 líneas de B0 (canal decide)", None not in (r, c, k), f"{r} {c} {k}")
     if None not in (r, c, k):
-        chequear("P1+P2 radiante pierde sólo LEJANA", r["P1"] == 1, f"radiante P1 {r['P1']}")
-        chequear("P1+P2 cercano no pierde ninguna", c["P1"] == 0, f"cercano P1 {c['P1']}")
-        chequear("P1+P2 pico pierde LEJANA y BORDE", k["P1"] == 2, f"pico P1 {k['P1']}")
+        # canal decide: protegidas P1 (LEJANA), P2 (BORDE), P10 (cráter corrido), P11 (PICOCERCA), P14 (OCR, LEJANA);
+        # P12 sale por K distinto y P13 por diurna
+        chequear("P1 a P14 protegidas contadas", r["prot"] == 5 and c["prot"] == 5 and k["prot"] == 5,
+                 f"prot {r['prot']} {c['prot']} {k['prot']}")
+        chequear("radiante pierde LEJANA y la del OCR, no la del cráter corrido", r["P1"] == 2, f"radiante P1 {r['P1']}")
+        chequear("cercano no pierde ninguna", c["P1"] == 0, f"cercano P1 {c['P1']}")
+        chequear("pico pierde LEJANA, la del OCR y BORDE, no PICOCERCA", k["P1"] == 3, f"pico P1 {k['P1']}")
         chequear("P3 cercano publica el negativo LEJANA", c["E_neg"] == 1 and r["E_neg"] == 0 and k["E_neg"] == 0,
                  f"E_neg radiante {r['E_neg']} cercano {c['E_neg']} pico {k['E_neg']}")
-        chequear("P1 cambia contra radiante, con la etiqueta", "('prot', 'publica'): 1" in c["resto"]
-                 and "('neg', 'publica'): 1" in c["resto"], c["resto"].strip())
-        chequear("P2 pico calla la protegida BORDE contra radiante", "('prot', 'calla'): 1" in k["resto"], k["resto"].strip())
-    mf = re.search(r"^   B0: radiante publica (\d+) \| cercano publica (\d+) \| pico publica (\d+)", out, re.M)
-    chequear("P4 far_ref: sólo cercano publica", bool(mf) and mf.groups() == ("0", "1", "0"),
+        chequear("cambian contra radiante (cercano), exacto y sin las suplementarias",
+                 "cambian contra radiante {('prot', 'publica'): 2, ('neg', 'publica'): 1}" in c["resto"], c["resto"].strip())
+        chequear("cambian contra radiante (pico), exacto", "cambian contra radiante {('prot', 'calla'): 1}" in k["resto"],
+                 k["resto"].strip())
+        chequear("P2 de cercano contra radiante", "P2 SIN SUSTRATO (neto 1, bloques 1)" in c["resto"], c["resto"].strip())
+    r, c, k = (linea(tab, "B0", b) for b in ("radiante", "cercano", "pico"))
+    chequear("canal tabla: la protegida sólo del OCR no cuenta", None not in (r, c, k) and r["prot"] == 4
+             and (r["P1"], c["P1"], k["P1"]) == (1, 0, 2), f"{r} {c} {k}")
+    mf = re.search(r"^   B0: con alg\S+ alertado (\d+) de (\d+) \| radiante publica (\d+) \| cercano publica (\d+) \| "
+                   r"pico publica (\d+)", out, re.M)
+    chequear("P4 far_ref: sólo cercano publica, con alertado", bool(mf) and mf.groups() == ("1", "1", "0", "1", "0"),
              mf.group(0).strip() if mf else "sin línea far_ref B0")
     md = re.search(r"far_ref B0: radiante ([\d.]+) km, ([\d.]+), n=1 \| cercano ([\d.]+) km, ([\d.]+), n=1 \| "
                    r"pico ([\d.]+) km, ([\d.]+), n=1", out)
     chequear("P4 distancia desde el centro: radiante y pico calzan con MIROVA, cercano no",
              bool(md) and float(md.group(1)) <= 1 and float(md.group(5)) <= 1 and float(md.group(3)) > 5,
              md.group(0) if md else "sin línea de distancia far_ref")
+    ma = re.search(r"alertas con distancia B0: radiante ([\d.]+) km, ([\d.]+), n=(\d+) \|", out)
+    chequear("P15 la alerta OCR de antes del 13-jun no entra a la vara 3 (8 alertas, no 9)", bool(ma) and ma.group(3) == "8",
+             ma.group(0) if ma else "sin línea de distancia de alertas")
 
     # P6: sin gránulo de otra lista
     d = esc("P6")
@@ -269,6 +302,96 @@ def main():
                      f"cargó; far_ref, pos y sin_info pasan el filtro: {pasa}")
         except SystemExit as e:
             chequear(f"P9 filtro {veces} veces", veces != 1, f"se negó: {e}")
+
+    # P6b (VAD2-04, M9/M10): una suplementaria con id de la lista sellada: C3 cae
+    p2_, _ = poblacion()
+    p2_.pasada("2026-07-20 05:00", "far_ref", LEJANA, 3.0, dist_mirova=13.1, id_forzado=3)
+    d = esc("P6b")
+    p2_.escribir(d)
+    rc, out = lector(a.lector, d, a.evaluador)
+    chequear("P6b C3 cae con un id suplementario que choca con la sellada", rc == 3 and "NO LEGIBLE" in out, f"salida {rc}")
+
+    # P8c (VAD2-01, VAD2-04 S2 a S4): el separador reparte cada id una sola vez, no pisa carpetas del mismo nombre y
+    # no escribe en una carpeta con algo adentro
+    d = esc("P8c")
+    for sub, filas_ in (("uno/artefactos", [{"id": 0, "estado": "ok"}, {"id": 100000, "estado": "ok"}]),
+                        ("dos/artefactos", [{"id": 1, "estado": "ok"}, {"id": 100001, "estado": "error: x"}])):
+        q = d / sub / "chunk-3"
+        q.mkdir(parents=True)
+        (q / "resultados_03.json").write_text(json.dumps(filas_), encoding="utf-8")
+    rcs, outs = correr([sys.executable, str(a.separar), "--art", str(d / "uno/artefactos"), str(d / "dos/artefactos"),
+                        "--dest", str(d / "sep")])
+    ids = {parte: sorted(r["id"] for q in (d / "sep" / parte).rglob("resultados_*.json")
+                         for r in json.loads(q.read_text(encoding="utf-8"))) for parte in ("sellado", "supl")}
+    chequear("P8c separar: carpetas del mismo nombre no se pisan y cada id va a su parte",
+             rcs == 0 and ids == {"sellado": [0, 1], "supl": [100000, 100001]}, f"salida {rcs}, {ids}")
+    rcs2, _ = correr([sys.executable, str(a.separar), "--art", str(d / "uno/artefactos"), "--dest", str(d / "sep")])
+    chequear("P8c separar: no escribe en una carpeta con algo adentro", rcs2 == 2, f"salida {rcs2}")
+
+    # P16 (VAD2-04, G3 a G9): las funciones del generador, con datos sintéticos
+    def pp(h, lab, **kw):
+        base_ = {"volcan": "Lascar", "hora_utc": h, "granule": "g" + h, "lab": lab, "protegida": False,
+                 "alerta_tabla": False, "decide": True, "mirova": []}
+        base_.update(kw)
+        return base_
+    pob = [pp("2026-05-01 05:00", "pos", protegida=True, alerta_tabla=True), pp("2026-05-02 05:00", "neg_limpio"),
+           pp("2026-10-12 05:00", "far_ref"), pp("2026-11-02 13:30", "far_ref"),
+           pp("2026-06-01 05:00", "far_ref", mirova=[{"tipo": "ALERTA_TERMICA", "dist_km": 1.0},
+                                                       {"tipo": "FALSO_POSITIVO", "dist_km": 14.0}]),
+           pp("2026-05-03 05:00", "far_ref", granule=None), pp("2026-05-04 05:00", "sin_info")]
+    rec = GEN.recortar(pob, ("2026-10-12",), "2026-11-02 13:00")
+    chequear("P16 recortar saca el día excluido y lo posterior al cese de Suomi NPP",
+             sorted(x["hora_utc"] for x in rec) == ["2026-05-01 05:00", "2026-05-02 05:00", "2026-05-03 05:00",
+                                                    "2026-05-04 05:00", "2026-06-01 05:00"], str([x["hora_utc"] for x in rec]))
+    sellado_ok = [dict(pob[0]), dict(pob[1])]
+    sellado_mal = [dict(pob[0], protegida=False), dict(pob[1])]
+    chequear("P16 comparar: igual con la misma población, distinta si cambia una protegida",
+             GEN.comparar(rec, sellado_ok)[0] and not GEN.comparar(rec, sellado_mal)[0], "comparar")
+    far, sin_g = GEN.seleccionar_far(rec)
+    chequear("P16 seleccionar_far: sólo far_ref, sin gránulo aparte, distancia de la fila FALSO_POSITIVO, sin S_C",
+             [x["hora_utc"] for x in far] == ["2026-06-01 05:00"] and far[0]["dist_ref"] == 14.0
+             and far[0]["en_sc"] is False and [x[1] for x in sin_g] == ["2026-05-03 05:00"],
+             f"{[(x['hora_utc'], x.get('dist_ref'), x.get('en_sc')) for x in far]} {sin_g}")
+    nn = GEN.numerar([pp("2026-07-02 05:00", "far_ref", granule="b"), pp("2026-07-01 05:00", "far_ref", granule="a")])
+    chequear("P16 numerar: ids desde 100000 en orden de gránulo",
+             [(x["granule"], x["id"]) for x in nn] == [("a", 100000), ("b", 100001)], str([(x["granule"], x["id"]) for x in nn]))
+
+    chequear("P16 lista_run: la sellada primero, sin tocar, y la suplementaria después",
+             [x["id"] for x in GEN.lista_run([{"id": 0}, {"id": 1}], [{"id": 100000}])] == [0, 1, 100000], "lista_run")
+
+    # P5b (VAD2-04, M13): sin ninguna caja de un solo alertado, C1 no tiene casos y cae
+    p3_ = Pob()
+    for n in range(4):
+        p3_.pasada(f"2026-04-{1 + n:02d} 05:00", "neg_limpio", [])
+    p3_.pasada("2026-07-01 05:00", "pos", LEJANA, 2.0, dist_mirova=0.8)
+    p3_.pasada("2026-07-04 05:00", "far_ref", LEJANA, 3.0, dist_mirova=13.1)
+    d = esc("P5b")
+    p3_.escribir(d)
+    rc, out = lector(a.lector, d, a.evaluador)
+    m1 = re.search(r"C1 cajas con un solo alertado: (\d+);.*?: (OK|FALLA)", out)
+    chequear("P5b C1 sin casos cae", rc == 3 and bool(m1) and m1.groups() == ("0", "FALLA"), m1.group(0) if m1 else f"salida {rc}")
+
+    # P6c (VAD2-04, M9): una sellada con id de la suplementaria: C3 cae
+    p4_, _ = poblacion()
+    p4_.pasada("2026-07-21 05:00", "neg_limpio", [], id_forzado=100050)
+    d = esc("P6c")
+    p4_.escribir(d)
+    rc, out = lector(a.lector, d, a.evaluador)
+    chequear("P6c C3 cae con un id sellado de 100000 o más", rc == 3 and "NO LEGIBLE" in out, f"salida {rc}")
+
+    # P17 (VAD2-04, M14 y M18): la vara 3 informa B0 y B1; el SIN DATO se cuenta en su lista
+    p5_, _ = poblacion()
+    j = p5_.pasada("2026-07-22 05:00", "far_ref", LEJANA, 3.0, dist_mirova=13.1)
+    next(r for r in p5_.res if r["id"] == j)["estado"] = "error: sintetico"
+    d = esc("P17")
+    p5_.escribir(d)
+    rc, out = lector(a.lector, d, a.evaluador)
+    ms = re.search(r"selladas: observadas \d+ \| no observadas \d+ \| SIN DATO (\d+)", out)
+    mp = re.search(r"suplementarias: observadas (\d+) \| no observadas \d+ \| SIN DATO (\d+)", out)
+    chequear("P17 SIN DATO de la suplementaria en su lista, no en la sellada",
+             bool(ms and mp) and ms.group(1) == "1" and mp.groups() == ("1", "1"),   # la sellada: sólo la diurna P13
+             f"{ms.group(0) if ms else '-'} / {mp.group(0) if mp else '-'}")
+    chequear("P17 la vara 3 informa B0 y B1", "alertas con distancia B1:" in out and "far_ref B1:" in out, "vara 3")
 
     for x in filas:
         print(x)
