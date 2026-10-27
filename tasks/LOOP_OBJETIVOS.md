@@ -569,6 +569,26 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 13:36 UTC (S165, vuelta 5): #919 cumple las condiciones de merge; el clasificador niega el merge
+- #919 (MOD-D fase 3), sha final `3dcf9fcc6`, sigue en borrador. Comprobado por S165:
+  - CI pytest en verde sobre ese sha (run 40508341271), estado CLEAN.
+  - Desde `c4efdc78c`, el único cambio en `pipeline/` es un comentario de `mirova_v750_codigo.py` (D20, la banda 31
+    contra la 32 del paper).
+  - `modis_k_antes.json` no cambió, así que la identidad comprobada en la vuelta 4 sigue valiendo por la prueba que
+    corre en el CI.
+  - El veredicto del verificador (Fable alto; el autor es Opus) está en
+    `experiments/_s164_modis_codigo/verificador/INFORME.md` y en `s164_verificador_r2/INFORME_R2.md` (notas de S164):
+    flag apagado idéntico al `repr` en tres perfiles, detección igual al port en 5.321 de 5.321 pasadas, R1 a R5
+    CONFIRMADO, y cuatro huecos de gravedad 1 que ya existían.
+  - Según modd-fase3: la suite da 2.645 passed y 0 fallas con el árbol quieto, y la batería atrapa 30 de 30
+    mutaciones.
+- El merge (`gh pr ready 919` y PUT merge con `merge_method=merge` fijado al sha) lo negó el clasificador de modo
+  automático («Merge Without Review»). No se intentó por otro camino. **Queda para Nicolás**:
+  `gh pr ready 919` y después `gh pr merge 919 --merge --match-head-commit 3dcf9fcc6...` (sha completo:
+  `git ls-remote origin refs/heads/claude/s164-modis-codigo-mirova`). Encender el flag sigue sin aprobación.
+- Después del merge: poner en cola el plan de MxD03 (`docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md`, rama
+  `claude/s162-modis-2-0dd578`), y remapear por contenido la cita de A100 (`CLAUDE.md:1403`).
+
 ### 2026-10-27 12:46 UTC (S165, vuelta 4): D-39 CERRADO; identidad de #919 comprobada aparte
 - **D-39 cerrado** (lo reportó S164; S165 comprobó en el remoto lo que va marcado como comprobado). Nicolás pausó los
   workflows de Mirova-v1, puso el tag `pre-pr26-referencia-estable` (`ca7af53ae`, comprobado) y mergeó Mirova-v1#26
