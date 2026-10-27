@@ -1,0 +1,458 @@
+# Loop de VIIRS 375 (S162, sesión hija de la coordinadora «Retomar», local_4152952c)
+
+Única fuente de verdad entre vueltas. Worktree
+`C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s162-viirs375-c1b864`, rama
+`claude/s162-viirs375-c1b864`. Programa: `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` §4.
+Carpeta del trabajo: `experiments/_s162_v375/`.
+
+Reglas de esta sesión (las de la coordinadora, 2026-10-24): sólo este worktree y esta rama; no escribo
+`tasks/LOOP_OBJETIVOS.md` ni archivos de las sesiones de instrumento, VIIRS 750 o MODIS; nada en `pipeline/` sin
+pre-registro sellado, verificador limpio, tag defensivo y el sí de Nicolás (A45); **todo despacho de GitHub Actions se
+pide a la coordinadora** (SendMessage a local_4152952c) con el pre-registro y la lista de brazos; ningún A/B nuevo antes
+de que el instrumento entregue la cobertura contra la referencia (fase 0, PD0); sólo `EARTHDATA_TOKEN` (A71); nunca
+`git stash`; `git add` por archivo; verificador con contexto limpio de otro modelo antes de aceptar cualquier resultado;
+parada si C: o D: bajan de 3 GB. Puedo abrir sesiones propias (permiso de Nicolás vía coordinadora, 2026-10-24), cada
+una en su worktree, con su archivo enlazado aquí, y avisando a la coordinadora con nombre e id; hoy no hay ninguna.
+
+## 0. Cierre de la sesión VIIRS 375, segunda vuelta (2026-10-26, coordinadora S164)
+
+Estado fijado sin trabajo en vuelo: ningún proceso, subagente ni despacho vivo (el verificador de MATLAB se detuvo
+después de entregar). Coordinadora: **S164** (`local_34f868ef-c156-4906-9b6c-e691fc445650`). La rama hasta 815118277
+está integrada a `loop/activo` (461a77be4); lo de este cierre va en commits posteriores de la misma rama.
+
+**a. En una pantalla**
+
+| qué | estado | evidencia |
+|---|---|---|
+| O2-375, paquete MATLAB | HECHO | 138a931ee; corrido por S163 en R2026b |
+| fondo de 1 a 4 px contra MATLAB | CALZA 422 de 422, sin PRELIMINAR | dbe9af431, `o2_375/comparar_matlab_375_salida.txt`, verificador CONFIRMADO |
+| magnitud de V375-C con el fondo de MATLAB | no cambia (C13 0,999); **V375-D no hace falta** | `o2_375/evaluar_con_matlab_salida.txt` |
+| alertas fuera de la envolvente | 0 de 422 | da0693783, `o2_375/envolvente_v375_salida.txt` |
+| V375-A (protegida de cráter) cableado | 70 de 81 de cráter; las 6 que pierde C13 no lo son | e48843858, `evaluar_con_crater_salida.txt` |
+| PD1 | decidida: **C13 en todos** (S164, D-48) | `PREREGISTRO_E.md` §7 |
+| V375-E | pre-registro con adenda 1, **sin sellar**; espera la vía 375 | `PREREGISTRO_E.md`; traspaso en la carpeta compartida, `VIIRS375_via_375_traspaso.md` |
+
+**b. Decisiones que esperan.** Ninguna de esta sesión. La próxima la abre Nicolás desde la tarjeta de S164; la
+implementación de la vía 375 en `process_viirs.py` pide su sí (A45).
+
+**c. Lo aprendido** (persistido en `feedback_s162_v375_lecciones.md`): (1) al sustituir un valor en un evaluador,
+excluye los controles que comparan contra el valor original (el control de vida salió INVÁLIDO por eso); (2) para
+etiquetar protegidas usa las filas que el objetivo guardó, no la referencia del checkout, que pierde filas; (3)
+`grep -c` con cero coincidencias corta una cadena `&&`, otra vez (REGLA GENERAL, S144).
+
+**d. Abierto.** CONFIRMADO: la regla de relleno de S163 en Python rellena fuera de la envolvente y MATLAB deja NaN (la
+vía de #907 ya hace lo de MATLAB, según loop-viirs750-2; SOSPECHA hasta verlo en el código). SOSPECHA: `grilla_sha256`
+de las etiquetas es el hash del `.npz`, no de RAD (explicaría la reserva del verificador).
+
+**e. Cerrado, no rehacer.** V375-B (B2), V375-C (C13), V375-D (no), O2-375 (calza), V375-A en el evaluador.
+
+**f. Prompt de la próxima sesión** (la que adapta la vía a 375): leer `VIIRS375_via_375_traspaso.md` de la carpeta
+compartida de S162, `experiments/_s162_v375/PREREGISTRO_E.md` §7 y esta bitácora; verificar contra `origin/main` que
+`pipeline/mirova_v750_codigo.py` sigue como dice el traspaso; escribir el pre-registro de implementación (PD3) y pedir
+el sí de Nicolás antes de tocar `process_viirs.py`.
+
+## 0-prev. Cierre de la sesión VIIRS 375 (2026-10-24, S162)
+
+> **Relevo, 2026-10-25**: la coordinadora ahora es **S163** (`local_8a135e90-b711-4bb9-9dec-ff02036f206b`), no S162.
+> Despachos y resultados se le piden y mandan a ella. Informado por S163, sin verificar aquí: el verificador limpio de las
+> 6 protegidas sólo OCR de Suomi NPP (rama `s162-verif-protegidas-snpp`, `3c6836076`) confirmó que **no son de cráter**,
+> y S163 aplica la decisión 9 con D-48 (anotado en su `tasks/LOOP_OBJETIVOS.md` §6). Al retomar, leer esa decisión antes
+> de tocar el veto de V375-E (decisión b.2 de abajo).
+>
+> **Retomado, 2026-10-25/26 (pedido de S163)**: tareas (1) paquete MATLAB de las escenas V375 de 1 a 4 píxeles, (2) con
+> esa vara re-medir la magnitud de V375-C y decidir V375-D, (3) dejar V375-E listo. **(1) HECHO**: `experiments/_s162_v375/o2_375/`
+> (commit `138a931ee`): 422 escenas (188 de 1 px, 105 de 2, 73 de 3, 56 de 4) en 381 pasadas, .m de MIROVA sin cambios
+> con sus bytes CRLF (md5 b0ceebb2 y ddffea36, se corrigió una conversión a LF que había hecho git), control de Etna;
+> prueba local 422 de 422 y control negativo 407 de 422; md5 servidos por GitHub comprobados. Entregado a S163, que lo
+> corre en MATLAB Online. **(2) espera `resultado_v375.mat`. (3) pendiente.**
+>
+> **(2) PRELIMINAR, 2026-10-26** (commit `04d7151d2`). La sesión de MATLAB venció; S163 pasó la regla de `fillmissing2`
+> que reproduce a MATLAB en 166 de 166 escenas de O2 (`delaunay_perturbado.py` de `cd812c746`, x = fila, y = columna).
+> `o2_375/vara_preliminar_375.py`: Etna exacto (Tot_Lmir_bk 1,072886152), 0 aristas ilegales, 137 de 422 escenas
+> cambian respecto del port (p90 0,16 relativo). `evaluar.py --vrp-vara` con el mismo comando de B2: instrumento OK,
+> P1, P2, recall y VEREDICTO B idénticos; M 0,998 a 0,999 en M14 y M13, 0,990 a 0,993 en PIX7, **C13 igual (0,999)**
+> (`o2_375/evaluar_con_vara_salida.txt`). En las positivas de 1 a 4 px la mediana contra MIROVA no se mueve
+> (`o2_375/magnitud_vara_375_salida.txt`). **Lectura: el fondo de 1 a 4 px no cambia la magnitud de V375-C; V375-D no
+> hace falta por magnitud.** Sigue PRELIMINAR hasta (a) el verificador de la regla (S163) y (b) la prueba de oro en
+> MATLAB con `entradas_v375.mat`; si MATLAB no calza con la vara, se re-corre con `--vrp-vara` sobre su salida.
+> Error propio corregido en la misma corrida: la primera vez sustituí también las 20 pasadas del control de vida y el
+> instrumento salió INVALIDO; el control compara runner contra S162 y no es magnitud, ya no se sustituye.
+>
+> **V375-A cableado, 2026-10-26.** #903, #904 y #905 están en main (744d8190b, d96fa5f4d, 691e4d588; CI verde, según
+> S163). `protegidas_crater_v375.py` aplica `protegida_de_crater` de #903 (copiada de main sin cambios, sha256
+> 89755f4d) a las 81 protegidas de los lotes, armando cada pasada con las filas de MIROVA que el objetivo guardó al
+> seleccionarse. La primera versión usó la referencia del checkout y 4 de Chillán (15 y 16 de octubre) quedaron sin
+> pasada, porque ese snapshot perdió sus filas de tabla. Resultado: 70 de 81 de cráter; las 11 restantes, todas
+> `ocr_snpp_antes_del_hito`. `evaluar.py --protegida-crater protegidas_crater_v375.json` lo informa al lado de P1 sin
+> tocar ningún veredicto (`evaluar_con_crater_salida.txt`, el resto de la salida idéntico a B2): **las 6 protegidas que
+> pierden C13 y M14 y las 3 que pierde K no son de cráter**; sólo PIX7 pierde una de cráter (Cordón Caulle,
+> 2026-06-07). Coincide con lo que informó S163 de su verificador. Para V375-E faltan la vía (#907, espera A45) y PD1.
+>
+> **(2), condición (a) cumplida, 2026-10-26.** Un verificador limpio de S163 (Sonnet) confirmó la regla de relleno con
+> implementación independiente (rama s163-o2-alternativa c95483d31). Su reserva es que la extrapolación en el borde
+> casi no está probada. `o2_375/envolvente_v375.py` lo mide: **0 de 422 escenas tienen celdas de alerta fuera de la
+> envolvente convexa**, así que el vecino más cercano nunca entra en L_bk. Hay 12 escenas con celdas del hueco fuera de
+> la envolvente, por los NaN de la orilla de la pasada, pero esas celdas no se suman, y el relleno lineal sólo usa
+> celdas conocidas como vértices. La magnitud queda igual. Falta (b), MATLAB.
+>
+> **(2) CERRADA, 2026-10-26: la vara calza con MATLAB y deja de ser PRELIMINAR.** S163 corrió el paquete en MATLAB
+> R2026b (`o2_375/resultado_v375.mat`, md5 71d0f821; consola `salida_matlab_v375.txt`). Etna sale igual al OSF.
+> `comparar_matlab_375.py`: ΔL de MATLAB contra la vara distinto en **0 de 422** (máx rel 1,03e-15); el control contra el
+> port falla donde debe (137, máx 0,83). Con `--vrp-vara o2_375/matlab_v375.json` el evaluador da lo mismo que con la vara
+> (`o2_375/evaluar_con_matlab_salida.txt`): instrumento OK, VEREDICTO B igual, C13 M 0,999. Verificador limpio (Sonnet),
+> `o2_375/verificador_matlab/INFORME.md`: **CONFIRMADO**, las 6 afirmaciones con código propio. Comprobó además que BK
+> fuera del hueco es single(RAD) en las 422, lo que ata la salida a las entradas; que la vara se commiteó 7 h antes de que
+> existiera la salida; y que un Delaunay sin perturbar difiere en 22 de 58, así que la tolerancia distingue
+> triangulaciones. Hallazgo para S163 (gravedad 1): **fuera de la envolvente convexa MATLAB deja NaN y la regla en Python
+> rellena** (38.955 celdas en las 12 escenas con NaN de la orilla; ninguna toca una alerta). Usada en otra población, la
+> regla necesita el chequeo de alerta dentro de la envolvente (`envolvente_v375.py`). **Lectura final de V375-C: el fondo
+> de 1 a 4 px no cambia la magnitud y V375-D no hace falta.** Sólo vale para alertas de 1 a 4 píxeles dentro de la
+> envolvente, que es lo que se midió.
+>
+> **Para integrar esta rama (aviso de S163, 2026-10-26):** #911 metió en main la evidencia de S159 a S163, con una
+> versión anterior de `experiments/_s162_v375/evaluar.py`. Al integrar habrá conflicto add/add en ese archivo: **gana
+> la versión de esta rama**, que desciende de la de main y agrega `--vrp-vara` y la etiqueta de cráter. `o2_375/` vive
+> sólo en esta rama.
+>
+> **Relevo, 2026-10-26:** S163 cerró a las 12:35 UTC; la coordinadora ahora es **S164**
+> (`local_34f868ef-c156-4906-9b6c-e691fc445650`). Despachos y resultados se le piden y mandan a ella. Reglas sin cambio:
+> A45, sólo EARTHDATA_TOKEN, nunca git stash, ramas siempre en el remoto.
+>
+> **La vía de proceso de V375-E ya está en main, 2026-10-26** (aviso de loop-viirs750-2, sin verificar aquí): PR #907,
+> merge cff07d173, `pipeline/mirova_v750_codigo.py`, con el flag apagado. Para 375 trae:
+> - `grilla_del_volcan(nombre, paso_m=375)`: la grilla de 134 celdas, con filas de sur a norte y puntos en
+>   `pipeline/grillas_mirova.yaml` (los 11 Tier A);
+> - `caja_roi("crater", n=134, celda_crater=..., lado_sensible=13, ...)`: la caja C13;
+> - el `fillmissing2` de MATLAB, que deja **NaN fuera de la envolvente**, como MATLAB (resuelve la reserva del verificador
+>   de O2-375);
+> - `vrp_mirova(..., coef=...)`, con el coeficiente como argumento.
+> Lo que falta para despachar E:
+> 1. El detector `detectar_mirova` es el del .m de 750 m; **los números de 375 no están**. Los de `brazos.py` (port de
+>    S159) habría que llevarlos a la vía o justificar por qué valen los de 750 en 375.
+> 2. El record de la vía tiene que llevar `via_codigo_mirova: True` (store.py le salta la geocerca, el filtro de
+>    distancia y el tope por cúmulo).
+> 3. PD1 (caja C13 para todos, mi recomendación).
+> 4. Encender la vía exige sello, censo, sombra, tag y el sí de Nicolás (A45).
+> Nota con detalle en la carpeta compartida de S162, `VIIRS750_2_via_mirova.md`.
+
+Estado fijado sin trabajo en vuelo: ningún proceso ni subagente vivo, los runs 40116289866 y 40131572769 terminados y
+evaluados. Loop detenido (no hay tarea avanzable sin PD1 y PD3).
+
+### a. Todo en una pantalla
+
+| qué | estado | evidencia |
+|---|---|---|
+| V375-B (silencio del port en noches limpias) | **RESUELTO**: SILENCIO ACOTADO BAJO K | V375-B2, run 40131572769: neg_resto 6 de 1.165, todos los negativos 1,55 % [1,00; 2,48] contra 3,85 %; verificado (Sonnet, CONFIRMADO); `experiments/_s162_v375/b2/resultado_run40131572769/INFORME.md` |
+| V375-C (caja de cumbre en 375) | **TERMINADO**: caja **C13** en el cráter de `volcanoes.yaml`; compuesto por volcán valida en O | run 40116289866: recall bajo 1 MW 0,69 (M14) a 0,95 [0,92; 0,98], K 0,957; verificado; `experiments/_s162_v375/resultado_run40116289866/INFORME.md` |
+| V375-D (números propios de 375) | **NO SE ABRE** | disparador de `PREREGISTRO_C.md` §5.3 no cumplido en el lote ni en la unión |
+| V375-E (paquete contra K) | pre-registro listo y verificado; **no despachable** | `experiments/_s162_v375/PREREGISTRO_E.md`; espera PD1, PD3 y #903/#905 |
+| V375-F (Chillán sobre 3 MW) | pendiente | va después de V375-E |
+| V375-A | de la sesión del instrumento, PR #903 sin mergear | `evaluar.py --protegida-crater` la recibe |
+| Cobertura del marco contra MIROVA | COBERTURA OK | `experiments/_s162_v375/cobertura_marco_salida.txt` (evaluador común de #904, `ff452671c`) |
+| Rama | `claude/s162-viirs375-c1b864`, sin mergear a `loop/activo` | ver el commit de cierre; artefactos en `C:\vrp-trabajo\temporales\s162_v375\` (240 MB, no en el repo) |
+
+### b. Decisiones que espera Nicolás
+
+| # | pregunta | opciones | recomendación |
+|---|---|---|---|
+| 1 | PD1: qué caja lleva el paquete de VIIRS 375 | C13 en todos los volcanes; C13 sólo en Cordón Caulle y Tupungatito y M14 en el resto; preguntarle a Coppola la ROI real | **C13 en todos** (en los otros nueve es casi la misma caja que M14) y mandar igual el correo a Coppola (`docs/audit_s139/BORRADOR_CORREO_COPPOLA.md`), que vale más que cualquier brazo |
+| 2 | Las 6 protegidas sólo OCR de Suomi NPP que pierden todos los brazos (y K publica 3) | que decida la lectura A (veto de adopción en V375-E); que decida la etiqueta de cráter de V375-A | **esperar V375-A (#903)** y decidir con esa etiqueta delante; no cambiar la vara sin medirla |
+| 3 | Mergear la rama de esta sesión a `loop/activo` | sí; no | **sí, por la coordinadora**: sólo agrega `experiments/_s162_v375/`, `tasks/LOOP_VIIRS375.md` y archivos del port de S159 idénticos a `ca034d66e` |
+
+### c. Lo aprendido
+
+Regla general del workspace (en la memoria `feedback_s162_v375_lecciones.md`):
+1. Un lote que sólo trae negativos no prueba que el detector esté vivo: un detector muerto da «calla» con el instrumento en
+   verde. Va un control de vida en el MISMO run (re-medir casos ya medidos con señal) y el evaluador tiene que exigirlo.
+2. Una segunda muestra para resolver un NO RESUELTO decide sola, sin reutilizar la primera: reutilizarla declaraba el
+   veredicto en la frontera entre 11 y 20 % de las veces en vez del 2,5 % nominal.
+3. Python `write_text` en Windows escribe CRLF: el sha256 del archivo en disco no es el del blob de git (LF). Declarar
+   los dos o hashear el blob.
+4. Barras invertidas en heredocs de bash rompen rutas de Windows (`\v`, `\t`, `\r`): tercera vez en esta sesión. Para
+   editar, la herramienta Edit o rutas con `/`.
+Propias del proyecto (en `experiments/_s162_v375/` y los informes):
+5. El nulo por hora de la curva de cenit de VIIRS 750 no sirve en 375: el VRP de MIROVA baja de una pasada a la siguiente
+   de la misma noche (mediana 0,818, n 365). Nulo correcto: pares de cenit parecido ordenados como la lectura.
+6. El commit de disparo tiene que traer el `pipeline/` que escribió los records del marco (aquí `ca034d66e` = 533398f8f),
+   no el de la rama de trabajo, o el control «K re-corrido = publicado» compara dos detectores.
+
+### d. Problemas abiertos e hipótesis
+
+- CONFIRMADO: K cae más que MIROVA con el cenit en VIIRS 375 (razón doble 0,766 [0,722; 0,861]; sobre 50°, 0,733).
+- CONFIRMADO: el port pierde las mismas 6 protegidas sólo OCR de Suomi NPP en los diez brazos (0 de la tabla).
+- SOSPECHA: esas 6 son filas OCR con la distancia de otra pasada (patrón A119), no pérdidas reales.
+- SOSPECHA: la caída del VRP de MIROVA de una pasada a la siguiente es de plataforma (NOAA-21, SNPP, NOAA-20).
+- SOSPECHA: heterogeneidad por volcán en neg_resto (Lastarria 2 de 12 en S162, 0 de 40 en B2) que el intervalo agrupado no
+  modela.
+- SOSPECHA: el control de vida (6 de 11 volcanes) no ve una rotura limitada a los otros cinco o a una plataforma.
+
+### e. Cerrado, no rehacer
+
+- V375-B: resuelto con B2; no reinterpretar el NO RESUELTO del lote S162 ni contar neg_pub como censo.
+- V375-C: C13 es el brazo global y el compuesto valida en O; las líneas de C de la corrida de B2 no se leen (§7 de B2).
+- Las 46 «volcán fuera del gránulo» de los dos lotes son no observadas (mismo gránulo que producción): no relanzar.
+- La cobertura del marco contra MIROVA está medida (0 alertas sin record): no repetirla para el mismo marco.
+- Los artefactos falsos de los verificadores ya se borraron; se regeneran con `b2/verificador_v3/fabricar.py`.
+
+### f. Prompt para la próxima sesión
+
+```text
+Retoma la sesión de VIIRS 375 de VRP Chile (S162, hija de la coordinadora «Retomar»). Español de Chile, formas de tú,
+sin guiones largos, rutas absolutas, explicar como geólogo.
+1. Verifica antes de creer: en el worktree C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s162-viirs375-c1b864
+   corre git fetch, git status -sb, y compara git rev-parse HEAD con git ls-remote origin -h refs/heads/claude/s162-viirs375-c1b864.
+   Mira si los PR #903, #904 y #905 se mergearon (gh pr view N --repo MendozaVolcanic/VRP-chile) y si Nicolás decidió PD1
+   (la caja de VIIRS 375) en tasks/LOOP_OBJETIVOS.md de la coordinadora.
+2. Lee en orden: CLAUDE.md del proyecto; tasks/LOOP_VIIRS375.md (§0 de cierre); experiments/_s162_v375/resultado_run40116289866/INFORME.md;
+   experiments/_s162_v375/b2/resultado_run40131572769/INFORME.md; experiments/_s162_v375/PREREGISTRO_E.md.
+3. Trabajo, en orden: (a) si #903 entró, conectar protegida_de_crater en evaluar.py (hoy espera un archivo) y releer las 6
+   protegidas sólo OCR; (b) si PD1 está decidido, poner la caja en PREREGISTRO_E.md como adenda; (c) V375-E sólo cuando
+   exista la vía en pipeline/ (PD3, A45) y el evaluador común con d′ (#905); (d) V375-F después de E.
+4. Reglas duras: nada en pipeline/ sin pre-registro sellado, verificador limpio, tag defensivo y el sí de Nicolás (A45);
+   todo despacho de GitHub Actions se pide a la coordinadora S163 (local_8a135e90-b711-4bb9-9dec-ff02036f206b); sólo EARTHDATA_TOKEN; git add por archivo;
+   nunca git stash; verificador con contexto limpio de otro modelo antes de aceptar un resultado; parar si C: o D: bajan de 3 GB.
+5. Si la sesión no alcanza: anota en la bitácora de tasks/LOOP_VIIRS375.md qué quedó a medias, commitea y avisa a la coordinadora.
+```
+
+## 0-prev. Cola (en el orden del programa)
+
+| id | qué | estado |
+|---|---|---|
+| V375-B | lote de negativos limpios neg_resto para el port (D-36) | **RESUELTO con V375-B2** (run 40131572769, verificado): SILENCIO ACOTADO BAJO K, 6 de 1.165 en neg_resto, cota 2,48 % contra 3,85 % |
+| V375-C | 10 brazos de ROI (mismo lote que B) | **TERMINADO** (verificado): caja **C13** en el cráter; compuesto por volcán valida en O; V375-D no necesario |
+| V375-E | pre-registro del paquete V375 contra K, curva de cenit contra la de MIROVA | listo y verificado (`b9e9c9f97`); no despachable hasta PD1, PD3 y el evaluador común del instrumento (M con d′) |
+| V375-D | números propios de 375 | sólo si B o C lo exigen (disparador en `PREREGISTRO_C.md` §5.3) |
+| V375-F | Chillán sobre 3 MW (port 0,939, n 6) | después de V375-E |
+| V375-A | etiqueta de protegida de cráter | la hace la sesión del instrumento; `evaluar.py --protegida-crater` la recibe |
+
+Esperando de otros: cobertura contra la referencia de MIROVA (instrumento, `evaluar.py --cobertura`), V375-A
+(instrumento), evaluador común con placebo y d′ (instrumento, para E), el despacho combinado de la fase 1 (coordinadora).
+
+## 0-prev. Decisiones para Nicolás (con recomendación, ya resueltas: sello por D-48, 709 pasadas, marco sin extender)
+
+1. **Sellar V375-B y V375-C** después del verificador limpio. Recomendación: sí, con las correcciones que pida el
+   verificador en una adenda.
+2. **Tamaño del lote**: 709 pasadas nuevas (~4,9 h de runner, ~50 min de reloj con 8 en paralelo) para B y C juntos,
+   o sólo los 400 negativos de B (~2,8 h). Recomendación: las 709; C sin sus 155 alertas bajo 1 MW nuevas no tiene con
+   qué decidir la caja (S159 tenía 45 de 949).
+3. **Marco**: el congelado de S159, hasta el 2026-10-21. Extenderlo hasta el 2026-11-02 12:59 UTC (antes del cese de
+   Suomi NPP) sería una adenda con población nueva. Recomendación: no por ahora.
+
+## Bitácora
+
+### 2026-10-24 (vuelta 0, cierre)
+- **Hecho**: `experiments/_s162_v375/` con selección (709 pasadas nuevas, semilla 162, 531 gránulos), brazos (10 cajas),
+  runner (`probe_v375.py` + `probe-s162-v375.yml`, para la coordinadora), evaluador y tres borradores de pre-registro.
+  Commit `041e7fc43`. Código del port de S159 traído de `ca034d66e` en `29d7a5bf4`.
+- **Pruebas** (todas en verde): brazos recalculados sin red sobre las 149 grillas de S159 = runner de S159 en 149 de 149
+  (M14, PIX7, SENS); escena sintética: foco débil en el cráter de Tupungatito invisible para M14 y visible para C13, C14,
+  C21, M21, SENS, SENS_PT y CIRC; prueba de signos con pesos = la sellada de D-45 en 2.000 de 2.000 juegos; casos con
+  respuesta conocida para P2, silencio, cota honesta, elección en T, pesos y decisión.
+- **Humo del evaluador sobre el lote de S159 (ya visto)**: reproduce el informe de S159 con una implementación
+  independiente (M14: recall bajo 1 MW 0,616 contra 0,618; SENS 0,905 y negativos 0,0481 contra 0,0480; neg_resto 0 de
+  45). Controles nulo, NUNCA y PLACEBO en verde. **Cambió dos reglas, declaradas en `PREREGISTRO_C.md` §6**: el veto
+  absoluto contra K bloqueaba a los diez brazos por las mismas 3 protegidas sólo OCR (pasó a veto relativo a M14 y el
+  disparador de D cuenta la tabla sola), y se agregó desempate por caja más chica. Como ya vi los brazos nuevos sobre
+  S159, **decide el lote S162 solo** y la unión confirma (§5.5).
+- **Hallazgo de instrumento para V375-E**: el nulo de 750 (mismos pares ordenados por hora) no sirve en 375: el VRP de
+  MIROVA baja de una pasada a la siguiente de la misma noche (mediana 0,818, n 365; ¿plataforma?, SOSPECHA). Nulo nuevo:
+  pares de cenit parecido (< 5°) en orden al azar (MIROVA 0,98). Línea base de K medida: MIROVA cae 0,778 de la pasada
+  menos oblicua a la más oblicua, K 0,573; razón doble 0,766 [0,722; 0,861], CAE MAS QUE MIROVA; sobre 50°, 0,733.
+- Pendiente: verificador limpio (Sonnet) sobre los tres; resumen a la coordinadora en la carpeta de notas.
+
+### 2026-10-24 (vuelta 1): verificador limpio y entrega
+- Verificador limpio (Sonnet, `experiments/_s162_v375/verificador/INFORME.md`): el instrumento aguanta y B no tiene
+  defecto que lo invalide. Confirmó población, pesos, Wilson 0,86 % con 0 de 445, hash de la selección y la prueba de
+  signos (2.000 de 2.000; 0 falsos en 400). Encontró reglas que no podían fallar o eran más laxas que su texto; todas
+  corregidas en `b9e9c9f97` (tabla en `PREREGISTRO_C.md` §8): validar en O exige GANA; disparador (b) de D contra el
+  recall de K del marco (censo, 0,957); desempate por volcán a la caja más chica; veto de protegidas sobre la unión;
+  nulo de cenit de E ordenado como la lectura (con orden al azar d y 1/d eran equiprobables) y sesgo de plataforma
+  aparte (K: 0,66 / 0,64 / 0,61, sin sesgo); equivalencia de E sin tolerancia en la publicación; runner sobre float32.
+- Humo sobre S159 con las correcciones (visto, no decide): global C13; por volcán C13 en Cordón Caulle y en
+  Tupungatito, VALIDA EN O con GANA contra M14 y contra K; V375-D no necesario; 3 protegidas sólo OCR que pierden los
+  diez brazos (riesgo para el veto de V375-E, dicho antes de medir).
+- Entrega a la coordinadora: nota
+  `C:\Users\nmend\AppData\Roaming\Claude\side-session-notes\local_4152952c-6afd-433a-82b3-b07575feee3b\VIIRS375_entrega_fase1.md`
+  y SendMessage. No despaché nada. **Siguiente**: esperar el sello de Nicolás, la cobertura y V375-A del instrumento y el
+  despacho de la coordinadora; cuando lleguen los artefactos, correr `evaluar.py` y pasar el resultado por un verificador.
+
+### 2026-10-24 (vuelta 2): respuesta de la coordinadora y estado del instrumento
+- La coordinadora mete V375-B, V375-C y V375-E en el despacho combinado de la fase 1 con V750-B y MOD-C, y pedirá un
+  solo sello a Nicolás para los cuatro cuando estén los verificadores de V750-B y MOD-C. Me avisa con el número del run.
+- Instrumento (leído en su `tasks/LOOP_INSTRUMENTO.md`, sin tocarlo): **V375-A hecha** como `protegida_de_crater` en
+  `scripts/clase_mirova.py` (PR #903, sin mergear; cráter VIIRS 375: 123 de 248 protegidas). **Cobertura contra la
+  referencia (su T1) todavía no.** Hallazgo suyo que me toca: 76 protegidas VIIRS sólo OCR sin ningún record de
+  producción a ±10 min (ninguna entra a mi marco, que parte de nuestros records; van con la cobertura).
+- Tarea nueva en la cola: cuando #903 se mergee, que `evaluar.py` llame a `protegida_de_crater` directamente (hoy espera
+  un archivo en `--protegida-crater`), con prueba; cuando llegue T1, conectarla en `--cobertura`.
+
+### 2026-10-24 (vuelta 3): #904 y #905 abiertos, cómo conectar la cobertura
+- El instrumento abrió #904 (`scripts/evaluador_comun.py`: T1 cobertura contra la referencia, T2 «no observado», T5 P1b y
+  publicaciones sobre RUTINA) y #905 (T3 placebo y d′). #902 a #905 siguen sin mergear; los decide la coordinadora.
+- **Diseño de la conexión** (para hacerlo cuando #904 entre, sin depender de código sin mergear): `evaluador_comun`
+  compara carpetas de records por brazo (un A/B completo). Mi lote es una MUESTRA armada desde los records de
+  producción, así que su T1 se aplica al MARCO, no a los brazos: correr `cobertura()` con un solo lado, producción en
+  533398f8f (`D:\vrp-trabajo\temporales\s159_n\data_main`), sobre la ventana del marco sin los días excluidos, y
+  contar las pasadas de MIROVA (protegidas y alertas bajo 1 MW) sin record de producción: son las que el sorteo nunca
+  pudo elegir. Una protegida en esa lista que el port sí vería es una falla de cobertura del marco y se informa antes
+  del veredicto. La cobertura del lote (pasadas sorteadas sin estado ok) ya la hace `evaluar.py` §1.
+- P1b de T5 lo tengo propio en `evaluar.py`; si el instrumento lo pide común, uso el suyo y comparo los dos.
+
+### 2026-10-24 (vuelta 4): sello por D-48 y commits de disparo
+- La coordinadora adelanta el lote (V750-B no sale antes del 2026-11-03) y sella B y C con **D-48** (Nicolás,
+  2026-10-24: «sobre las decisiones mías haz lo que tú recomiendes»; verificado en su `tasks/LOOP_OBJETIVOS.md`), sobre
+  la recomendación de 709 pasadas; revocable por Nicolás. Anotado en los dos pre-registros: commit `19d7f5e98`, tag
+  `s162-v375-bc-sello`.
+- **Hallazgo antes de disparar**: el `pipeline/` de `loop/activo` (mi rama) difiere del de 533398f8f (el código que
+  escribió los records del marco) en 12 archivos (S157: λ por banda de MODIS apagada, perfiles de D25). Para que el
+  control «K re-corrido = publicado» compare el mismo detector, el disparo NO sale de mi rama: los commits se armaron sin
+  checkout sobre el árbol de `ca034d66e` (`pipeline/` idéntico a 533398f8f, ya trae el port y el oráculo) más
+  `experiments/_s162_v375/` del sello (idéntico) y el workflow: humo `fd0ba12bb` (tag `s162-v375-disparo-humo`, 1 job,
+  pasadas 1011 y 1062) y lote `798cac8ea` (tag `s162-v375-disparo-lote`, hijo del humo, 28 trozos). Sólo `main` y ramas
+  propias disparan otros workflows por push: la rama `s162-v375-disparo` corre sólo éste. Autoprueba sin red del runner
+  pasada sobre el árbol exacto del lote (extraído con `git archive` limitado a rutas, 8,8 MB).
+- Comandos entregados a la coordinadora. **Siguiente**: cuando avise el run del humo, bajarlo a
+  `C:\vrp-trabajo\temporales\s162_v375\`, revisar (estado ok en las 2, K re-corrido = publicado, grilla guardada,
+  recálculo = runner) y darle el OK; después, el lote.
+
+### 2026-10-24 (vuelta 5): humo en verde, OK dado; cobertura del marco OK
+- Humo run **40115765406** (success, 2 min 15 s; artefactos en `C:\vrp-trabajo\temporales\s162_v375\run_40115765406\`):
+  2 de 2 ok; Láscar 2026-04-05 05:30 port 1,521 MW en los 10 brazos contra MIROVA 1,52; K re-corrido 1,086 = publicado;
+  Tupungatito 2026-05-04 06:30 en 0 píxeles y K no publica. Recálculo = runner 467 de 467; K 151 de 151. **OK dado a la
+  coordinadora**; el lote sale después de MOD-C.
+- El humo destapó un KeyError del evaluador en el camino del lote S162 (compuesto por volcán con el veto sobre la unión):
+  arreglado sin cambiar reglas, adenda 1 de C (`a6a02071b`).
+- **Cobertura del marco** con el evaluador común del instrumento (#904, `ff452671c`, sin mergear, corrido desde su árbol):
+  COBERTURA OK, 1.208 alertas (unión) y 882 (tabla) con record de producción, 0 sin record; las 179 observadas fuera del
+  marco son las sólo OCR antes del 06-13 (A119). Adenda 2 de C (`a01d50f57`). Referencia del marco reconstruida en
+  `C:\vrp-trabajo\temporales\s162_v375\ref_marco\` (tabla y OCR de S159 más respaldo e histórico de `ca034d66e`).
+- **Siguiente**: cuando avise el run del lote, bajarlo a `C:\vrp-trabajo\temporales\s162_v375\run_<RUN>\`, correr
+  `evaluar.py --art162 <run> --cobertura cobertura_marco.json`, y pasar el resultado por un verificador limpio antes
+  de informarlo.
+
+### 2026-10-24 (vuelta 6): lote run 40116289866 terminado; cobertura del lote completa
+- Run **40116289866** (rama `s162-v375-disparo` en `798cac8ea`, 17:28 a 18:24 UTC): 18 jobs success, 10 failure. Los 10
+  en rojo son el exit 2 de diseño por pasadas no procesadas, no caídas. 28 de 28 artefactos bajados a
+  `C:\vrp-trabajo\temporales\s162_v375\run_40116289866\` (86 MB). **709 de 709 con resultado**: 698 ok (698 grillas) y
+  11 `volcan_fuera_del_granulo`.
+- Diagnóstico de las 11 (antes de evaluar, A108): las 11 son neg_resto (MIROVA RUTINA, K no publica). El probe bajó el
+  MISMO gránulo que el record de producción (mismo nombre, con la hora de proceso), así que no es una versión o reproceso
+  distinto como el 12-oct. El píxel más cercano del gránulo queda a 5,1 a 24,6 km del centro de la grilla: el volcán está
+  fuera o en el borde de la franja (producción deja record porque su círculo de 25 km roza el gránulo). 6 de 11 son
+  pasadas partidas (el gránulo vecino tiene el volcán). Son «no observado» por la regla de #904: salen del denominador y
+  su estrato se re-pondera; 11 de 400 neg_resto (2,75 %). Conservador para el port, porque la vara de K (133 / 3.456) sí
+  las cuenta. Sin relanzar (bajaría el mismo gránulo). Informado a la coordinadora.
+- Evaluación corriendo (`resultado_run40116289866/`); después, verificador limpio antes de informar.
+
+### 2026-10-24 (vuelta 7): lectura del lote (SIN VERIFICAR todavía), commit `20719dc8f`
+- Instrumento: recálculo sin red = runner 7.427 de 7.427; K re-corrido = publicado 847 de 847; controles nulo, NUNCA
+  y PLACEBO en verde; cobertura del marco OK; ningún estrato sin representar.
+- **B**: el port (M14) publica 4 de 434 neg_resto (0,95 % [0,37; 2,38]; la cota de 8,5 % de S159 baja a 2,4 %). Todos
+  los negativos: unión 2,01 % [1,46; 3,39] contra K 3,85 %, SILENCIO ACOTADO; lote S162 solo 2,17 % [1,23; 4,10], NO
+  RESUELTO. Por §5.5, **B = NO RESUELTO (depende del lote visto)**.
+- **C**: global **C13** en el lote y en la unión; por volcán C13 en Cordón Caulle y en Tupungatito, **VALIDA EN O** en
+  los dos; **V375-D no necesario** en los dos. C13: recall bajo 1 MW 0,954 [0,916; 0,976] contra K 0,957 (marco),
+  negativos 2,03 %, P2 contra K GANA, M 0,999 (n 265). Las mismas 6 protegidas perdidas en todos los brazos (3 que K
+  publica, las 3 sólo OCR, 0 de la tabla).
+- Verificador limpio (Sonnet) lanzado sobre el resultado; NO informar a Nicolás como hecho hasta que vuelva.
+
+### 2026-10-24 (vuelta 8): resultado VERIFICADO, `35e9560c2`
+- Verificador limpio (`resultado_run40116289866/verificador/INFORME.md`): CONFIRMA el instrumento, las 11 no
+  observadas, C13 global y por volcán, V375-D no necesario; ningún hallazgo cambia un veredicto. Reproduce todo con una
+  implementación propia. Reparos: B en el lote solo depende de tratar neg_pub como muestra (113 de 133; como censo la cota
+  baja a 3,80 % y se resolvería): **no se cambia la regla**, se informa como sensibilidad; «4 de 434» es la unión (lote:
+  4 de 389); las 6 protegidas perdidas por los 10 brazos son de Suomi NPP, sólo OCR y del lote S159 (riesgo para el veto
+  de V375-E, esperan V375-A); una línea sellada de B editada (adenda 1 de B).
+- Informe: `experiments/_s162_v375/resultado_run40116289866/INFORME.md`. Va a PD1: **caja C13** (cráter de
+  `volcanoes.yaml`); V375-D no se abre; B NO RESUELTO (resolverlo pide otra muestra de neg_resto, no reinterpretar).
+- Cola: V375-B y V375-C **terminados**. Siguiente: V375-E (espera PD1 de Nicolás, PD3 en `pipeline/` y #903/#905), y
+  después V375-F. El loop queda en espera.
+
+### 2026-10-24 (vuelta 9): V375-B2 pedido por la coordinadora (D-48)
+- Pedido: segunda muestra de neg_resto disjunta, pre-registrada antes de mirar nada, misma regla sellada, sin contar
+  neg_pub como censo, tamaño el que la regla necesite.
+- Traba medida: las 133 neg_pub del marco ya están todas medidas, así que en el conjunto que decide su cota queda fija
+  (31 de 113, 36,5 %); la cota de neg_resto tiene que bajar de 2,80 % a 2,54 %. Simulación (`b2/tamano_b2_salida.txt`):
+  con la tasa observada (1,16 %), 400 nuevas deciden en 91 %, **600 en 95 %**, 800 en 97 %; con tasa real de 2 %, ninguna.
+- Borrador `b2/PREREGISTRO_B2.md` (commits `33567bd91`, `987e4f814`): 600 neg_resto nuevas, semilla 163, decide S162 +
+  B2 con la regla sellada; se declara la segunda mirada (inflación hasta 5 % por cola) y se informa la lectura estricta
+  (z 2,241). Ya visto al probar el evaluador: estricta 4,49 % con S162, 3,68 % con la unión. Evaluador extendido
+  (`--objetivos-extra`, `--art-extra`, `--deciden`); regresión: la lectura publicada sale idéntica salvo el rótulo y la
+  línea estricta. Workflow `b2/probe-s162-v375-b2.yml` (24 trozos, rama `s162-v375-b2-disparo`).
+- Verificador limpio (Sonnet) del pre-registro corriendo. Después: correcciones, sello por D-48, commits de disparo
+  (humo y lote sobre `ca034d66e`) y pedido de despacho a la coordinadora.
+
+### 2026-10-24 (vuelta 10): verificador del B2 v1 y versión 2
+- Verificador v1 (`b2/verificador/INFORME.md`): muestra disjunta, pesos y evaluador sin cambios en lo publicado,
+  CONFIRMADOS. **F1 (gravedad 3)**: decidir con S162 + B2 reutilizaba lo ya visto, contra la lógica de C §5.5. Medido:
+  en la frontera ese diseño declaraba ACOTADO en 11 a 20 % de los casos; con B2 sola, 1 a 3 %.
+- **B2 v2** (`7ff23cc3a`): decide neg_resto de B2 sola + neg_pub de S162 (`--deciden S162b --neg-pub-de S162`); **1.200**
+  neg_resto nuevas (93 % de decidir con la tasa observada; pesos 2,72 a 2,83; sha256 `6328988b…019a`); cobertura por lote y
+  lote vacío invalida (F4, F5); potencia con tasa pareja declarada como SOSPECHA (F3). Regresión: la lectura publicada
+  sale idéntica. Workflow de 48 trozos (~8,3 h de runner, ~90 min de reloj).
+- Segundo verificador limpio (Sonnet) sobre el v2 corriendo.
+
+### 2026-10-24 (vuelta 11): segundo verificador, B2 v3 listo, commits de disparo
+- La coordinadora aprobó 1.200 por D-48, condicionado a que el segundo verificador diera conforme.
+- Verificador v2 (`b2/verificador_v2/INFORME.md`): muestra, cuenta («decide B2 sola», 15 cifras con 1.200 fabricadas),
+  tamaño en la frontera y workflow CONFIRMADOS. **Hallazgo 3 (gravedad 3)**: ningún control probaba que el port
+  estuviera vivo en el run de B2 (un port muerto daba «calla» con el instrumento OK). Otros: el 93 % es condicional
+  (predictiva 0,74 a 0,80), la cobertura por lote sólo avisaba, rótulos de la salida ambiguos.
+- **B2 v3** (`ae65eaaaf`, tag `s162-v375-b2-listo`): control de vida de 20 pasadas re-medidas de S162 en el mismo run
+  (ids 5000 a 5019, fuera de todo denominador; control 2.2b); la cobertura del lote que decide da NO DECIDE; línea
+  «VEREDICTO B». Probado con runs fabricados: vivo, 20 de 20 iguales; muerto, INVALIDO. Regresión: lo publicado sólo
+  cambia en los dos rótulos. Objetivos sha256 `f3285f3a…b419` (1.220 entradas).
+- Disparo armado sobre `ca034d66e`: humo `74e368f6e` (tag `s162-v375-b2-disparo-humo`, pasadas 5000 y 3000), lote
+  `a9331d51c` (tag `s162-v375-b2-disparo-lote`, 48 trozos). Pedido de sello y despacho enviado a la coordinadora: el
+  hallazgo 3 está arreglado y probado pero no re-verificado; que lo confirme ella.
+
+### 2026-10-24 (vuelta 12): humo de B2 despachado; re-verificación del delta
+- Humo de B2: run **40128648709** (rama `s162-v375-b2-disparo` en `74e368f6e`); vigilante en segundo plano.
+- Condición de la coordinadora para el lote: re-verificación corta, contexto limpio y OTRO modelo, sólo del delta v2→v3,
+  midiendo el nulo con el port roto a mano. Lanzada con **Fable** (los dos anteriores fueron Sonnet), con la guía de
+  prompting de Fable aplicada; informe en `b2/verificador_v3/`. Si da CONFORME y el humo sale bien, el sello queda firme
+  con D-48 y doy el OK al lote.
+- Humo 40128648709: success, 2 de 2 ok; control 5000 (Láscar) M14 5 px y 1,4126318824 MW = S162; muestra 3000 (Isluga)
+  0 px, K re-corrido «far» 0,194 que no publica = record. Artefactos en `C:\vrp-trabajo\temporales\s162_v375\run_40128648709\`.
+  Informado a la coordinadora; el OK al lote espera la re-verificación de Fable.
+
+### 2026-10-24 (vuelta 13): Fable CONFORME, sello firme, OK al lote de B2
+- Re-verificación del delta v2→v3 (Fable, `b2/verificador_v3/INFORME.md`): **CONFORME**. El control de vida atrapa solo
+  (aislado del recálculo) seis modos de port roto; con un lote sano da SILENCIO ACOTADO. H1 (gravedad 3): el control
+  dependía del archivo de objetivos; arreglado en `evaluar.py` (lote nuevo sin control da INVALIDO), probado con su caso
+  (`muerto_v2obj`) y con el sano. El archivo del disparo sí trae el control (mismo blob `1999237b` en el listo y en el
+  lote; sha LF `a7dd6b0d`, CRLF `f3285f3a`).
+- Sello firme por D-48 y adenda 1 (H1 a H5) en `b2/PREREGISTRO_B2.md`, commit `09ab70123`. **OK al lote** enviado a la
+  coordinadora (commit de lote `a9331d51c`, 48 jobs). Siguiente: evaluar el run cuando llegue (cobertura del lote antes
+  de leer, verificador limpio antes de informar).
+- Artefactos falsos del verificador v3 (1,8 GB) en `C:\vrp-trabajo\temporales\s162_v375\verif_v3\`: borrables cuando se
+  cierre B2.
+
+### 2026-10-24 (vuelta 14): lote de B2 terminado y leído (SIN VERIFICAR), `8f2499fdc`
+- Run **40131572769** (`a9331d51c`, 20:50 a 21:59 UTC): 22 success y 26 failure, todos los rojos por el exit 2 de diseño.
+  1.220 de 1.220 con resultado: CTL 20 de 20 ok; muestra 1.165 ok y 35 `volcan_fuera_del_granulo` (2,9 %; mismo gránulo
+  que el record de producción, píxel más cercano a 5,8 a 30,5 km, 16 partidas) = no observadas. Artefactos en
+  `C:\vrp-trabajo\temporales\s162_v375\run_40131572769\` (144 MB).
+- Instrumento: recálculo = runner 19.277 de 19.277; K = publicado 2.032 de 2.032; **control de vida 20 de 20 iguales a
+  S162** (16 con píxeles); nulo, NUNCA y PLACEBO en verde.
+- **VEREDICTO B: SILENCIO ACOTADO BAJO K.** Conjunto que decide (neg_resto de B2 + neg_pub de S162): neg_resto 6 de 1.165
+  (0,52 % [0,24; 1,12]); todos los negativos 1,55 % [1,00; 2,48] contra 3,85 %. La unión confirma (1,70 % [1,43; 2,20]);
+  la lectura estricta también (2,65 %). Las líneas de C de esta corrida no se leen (§7 de B2).
+- Verificador limpio (Sonnet) del resultado corriendo; no informar como hecho hasta que vuelva.
+
+### 2026-10-24 (vuelta 15): B2 VERIFICADO, V375-B resuelto; loop en pausa
+- Verificador limpio del resultado (Sonnet, `b2/resultado_run40131572769/verificador/INFORME.md`): **CONFIRMADO**.
+  Recuento propio: las mismas 6 publicaciones (1 píxel, 0,01 a 0,04 MW); cota a mano igual a 15 cifras; salida
+  re-corrida idéntica; las 35 no observadas no alcanzan a mover el veredicto (harían falta 13 a 15 publicando).
+  Matices: la unión no es confirmación independiente (73 % del lote que decide); «calla al menos tanto como K» no es
+  «no enciende nada nuevo» (unas 17 noches de 3.323 donde K calla).
+- Informe: `b2/resultado_run40131572769/INFORME.md` (commit `52f255721`). **V375-B resuelto a favor del silencio.**
+- Estado de la cola: V375-B (resuelto), V375-C (C13), V375-D (no se abre) terminados. V375-E espera PD1 (Nicolás), PD3
+  (vía en `pipeline/`, A45) y #903/#905. V375-F después de E. **Loop en pausa**: no hay tarea avanzable sin esas
+  entregas. Para retomar: `/loop` con el mismo prompt cuando la coordinadora avise PD1 o PD3.
+- Limpieza pendiente (no destructiva hasta que Nicolás o la coordinadora lo digan): artefactos falsos del verificador v3
+  en `C:/vrp-trabajo/temporales/s162_v375/verif_v3/` (1,8 GB).
+- Limpieza hecha (pedido de Nicolás «continúa con lo que recomiendes», 2026-10-24): borrados los artefactos falsos del
+  verificador v3 (12 casos fabricados, 1,9 GB; regenerables con `b2/verificador_v3/fabricar.py`). Los runs reales siguen en
+  `C:/vrp-trabajo/temporales/s162_v375/` (240 MB). Rótulo de neg_pub de la sección 3 del evaluador: dice censo o muestra
+  según los pesos (verificador del resultado de B2, H1); lo publicado sólo cambia en esa línea.

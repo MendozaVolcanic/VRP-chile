@@ -569,6 +569,536 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 11:31 UTC (S165, vuelta 1): parada por disco levantada; W2 pareja; W3 despachada; #915 Chillán
+- Relevo: S164 avisó a las 11:27 UTC que Nicolás dijo «si sigue con todo lo que recomiendes». Disco a las 11:31 UTC:
+  C: 30 GB libres, D: 7,7 GB. **Parada por disco levantada**; avisado a modd-fase3 y a Loop VIIRS 750 2 (retomar
+  `--solo M34,M36 --hilos 1`).
+- **W2** (run 40379112237): success, 23 de 23 jobs, terminó 02:03 UTC; brazo diurno de 61 a 85 min por volcán. Salidas
+  en `s151-ab-diurno/40379112237` (`9e997518b`). `cobertura.txt`: 2.154 pasadas nocturnas por brazo, 0 faltan y 0
+  sobran; el brazo diurno trae 863 pasadas diurnas de VIIRS 375 y 853 de VIIRS 750, sin MODIS diurno: «COBERTURA
+  NOCTURNA PAREJA y día como se espera».
+- **W3** (2026-07-20 a 07-31, 11 Tier A) despachada a las 11:32 UTC desde `s163-diurno-k-codigo` (`68687d2d4`) con el
+  comando del §f del bloque S165: run **40496903128**.
+- **#915, las tres protegidas MODIS de Chillán** (A8, con el JSON de `origin/main` `987877bb1`): 12-oct 07:20 Aqua y
+  25-oct 07:20 Aqua y 15-oct 01:05 Terra, cenit 58,2 / 58,0 / 57,6°. En producción, 0 píxeles anómalos en dos y un
+  píxel con VRP 0 en la del 25 (`t_max` menos `t_bg` de 5 a 9 K). Categoría A54: señal real (Chillán activo, MIROVA
+  entre 1,72 y 3,79 MW), no artefacto. Es un FN de K a cenit alto. **La SOSPECHA de MOD-D queda medida en parte**: el
+  censo (`experiments/_s162_modis_paquete/censo/resultado_censo.json`, rama `claude/s162-modis-2-0dd578`, bloque
+  `chillan.recuperadas`) recupera la del 12 (razón 0,84) y la del 15 (razón 1,73). La del 25 cae fuera de la ventana
+  del censo (2026-03-01 a 10-16): SIN DATO, aunque es el mismo patrón. El resto de #915 queda sin clasificar en esta
+  vuelta: las dos de Tupungatito llevan referencia sospechosa (sólo OCR de Suomi NPP, A119), la de PCC es V750, y las
+  magnitudes bajas tienen la causa sin medir.
+- `sync-mirova-csv` falló a las 10:30 UTC (run 40489009701: «el consolidado de MIROVA perdió llaves (177)»). Es el
+  defecto de D-39 (Mirova-v1#26), que espera los pasos de Nicolás. No hay nada que hacer de este lado.
+- `origin/main` (`987877bb1`) integrado en `loop/activo` con un merge. Dos add/add resueltos con la versión del loop
+  (`experiments/_s162_v375/evaluar.py`, `experiments/_s162_v375/PREREGISTRO_E.md`, la que trae la adenda 1 de V375-E).
+  NRT de las 10:10 UTC: success.
+
+### 2026-10-26 22:55 UTC (S164): cierre de la coordinadora; relevo a S165
+- Nicolás: «has lo que recomiendes» (la recomendación incluía cerrar). Loop de S164 detenido. Traspaso en
+  `tasks/BLOQUE_ARRANQUE_S165.md`. Estado fijado con trabajo en curso: W2 del diurno (run 40379112237, 12 de 22 jobs a
+  las 22:50) y la sesión `modd-fase3` (fase 3 de MOD-D, con la parada por disco). `loop-modis-2`, `loop-viirs750-2`,
+  `d39-mirova-v1` y `diurno-k-prereg` siguen abiertas; la nueva coordinadora les avisa su id.
+
+### 2026-10-26 22:50 UTC (S164, vuelta 23): 11 worktrees terminados a la papelera; 4 sesiones archivadas
+- Nicolás: «has lo que recomiendes». Antes de mover, cada uno comprobado limpio (0 cambios seguidos) y con su HEAD en la
+  rama del remoto; los archivos sin seguir eran copias, cachés y TIF bajados.
+- **A la papelera de Windows** (no borrado definitivo): `.claude/worktrees/` gracious-merkle-6447d8, s158-audit-r2-0eeee2,
+  s162-viirs375-c1b864, s163-audit-h3-6c292b, s163-instrumento-pendientes-ab5a2d, s163-rebase-889-b45a20,
+  s163-unificar-evidencia-f6c2e9; `C:\vrp-trabajo\` s159-evaluador, s162-a61, s163-o2alt, s163-o3. `git worktree prune`
+  después: 14 worktrees registrados (eran 25).
+- **Se quedan**: `s159-pruebas` (trae `experiments/_s159/o1/o2_paquete/salida_matlab.txt` sin seguir, quizás única); los
+  de sesiones vivas (`s162-modis-2`, `s162-viirs750-2`, `s163-d39`, `s163-diurno-k-prereg`, `funny-kepler`, que es el de
+  `modd-fase3`); `C:\vrp-trabajo\s162-modd` y `s162-v750a-eval`; los de D:. Tres de sesiones de S162 que siguen abiertas
+  y los tienen ocupados (`s162-instrumento-021324`, `s162-modis-774bb0`, `s162-viirs750-f63ef4`): no se movieron.
+- Archivadas (terminadas, con su PR mergeado) para soltar sus worktrees: `rebase-889`, `unificar-evidencia`,
+  `instrumento-pendientes`, `audit-h3-tablero`.
+- El espacio se libera cuando Nicolás vacíe la papelera. C: sigue en 4,2 GB hasta entonces.
+
+### 2026-10-26 21:50 UTC (S164, vuelta 22): adenda 1 del diurno mergeada (#917); medidor V750-A detenido por disco
+- `diurno-k-prereg` entregó la adenda 1 (regla de días con hueco de NASA con (b')): PR #917, `af5af6a17`. Fijada para W2
+  a W6 desde `867cb1ec` (18:48:47 UTC, con W2 en cola y sin salidas). En W1, (b') excluye el 10, 11 y 12 de marzo e I4
+  pasa (veredicto informativo: DECIDE NICOLÁS CON M4); con (b) sólo salía el 10 y W1 quedaba INVÁLIDA. El evaluador
+  sellado no se tocó: `dias_excluidos_nasa.py` (18 pruebas, 9 de 9 mutaciones) y `evaluar_con_exclusion.py` (6 pruebas,
+  8 de 8). Dos verificadores limpios Sonnet, conformes con reparos cerrados; límite declarado en el §11 (huecos parciales
+  de un día no se excluyen).
+- Comprobado: respecto del commit sellado `68687d2d4`, de las rutas selladas sólo cambia `PREREGISTRO.md`, y sólo en el
+  §11 (la línea «(ninguna; no hay datos de los brazos)» reemplazada por la adenda). CI verde; **mergeado** con merge
+  commit `49c34185c`.
+- Lectura de W2 a W6: `dias_excluidos_nasa.py --raiz <W2..W6> --ref <ref> --salida exc.json` y después
+  `evaluar_con_exclusion.py --raiz <W2..W6> --ref <ref> --sha-codigo <40> --opcion-e e-ii --excluidos exc.json`.
+- `loop-viirs750-2` detuvo el medidor de V750-A por el disco: corrida principal 58 de 62 atrapadas por aserción; de la
+  repetición, M1 y M33 atrapadas, M34 cayó otra vez (sospecha de memoria), M36 y el control de caída SIN DATO. Retoma con
+  `--solo M34,M36 --hilos 1` cuando haya espacio.
+- Disco: C: en 4,3 GB a las 21:50 (subió de 2,9).
+
+### 2026-10-26 21:30 UTC (S164, vuelta 21): PARADA POR DISCO, C: en 2,9 GB
+- C: bajó de 8,1 GB (20:59) a 2,9 GB libres (21:30); D: de 11 a 7,8 GB. Candidato visible: el worktree nuevo
+  `.claude/worktrees/funny-kepler-68f0ef` (de la sesión `modd-fase3`, que arrancó en su segundo intento) y lo que esa
+  sesión esté escribiendo; además, paquetes nuevos en `.git/objects/pack` de los fetch del día. No medido en detalle.
+- Avisada la parada a `modd-fase3` (en cola), `loop-viirs750-2`, `loop-modis-2` y `diurno-k-prereg`: dejar de escribir en
+  disco, sólo commits chicos, no borrar nada. W2 del diurno sigue en GitHub (8 de 22 jobs a las 21:30).
+- Propuesto a Nicolás: mandar a la papelera los worktrees de sesiones terminadas e integradas (limpios, rama en el
+  remoto) y vaciarla él.
+
+### 2026-10-26 18:39 UTC (S164, vuelta 20): revisión de W1 por diurno-k-prereg; I4c falla por un hueco de NASA
+- Revisión (rama `claude/s163-diurno-k-prereg-5c4f44` `e150b4cfd`, `experiments/_s163_diurno_k/w1/REVISION_W1.md`):
+  diurno 88 min 27 s → W2 a W6 enteras (confirmado). Cableado sano: los 513 records con el sha sellado, 0 con Test 1,
+  147 diurnos con umbrales diurnos, noches idénticas. Costo re-estimado: ~55 h de runner, ~18 h de reloj.
+- **I4c INVÁLIDO en W1**: al diurno le faltan 3 de 37 pasadas diurnas de MIROVA en V375 y 4 de 40 en V750, todas del 10,
+  11 y 12 de marzo; al control, 2 nocturnas esos días. CMR: 0 gránulos de VNP02IMG y VNP02MOD esos tres días (hueco
+  permanente de Suomi NPP, común a los dos brazos). En W2 a W6 CMR tiene gránulos todos los días en los seis productos.
+- **Aprobado con D-48** (coherente con la regla de la vuelta 5): un día con 0 gránulos en CMR de esa plataforma y con
+  pasadas nocturnas perdidas también en el control se excluye en los dos brazos (`excluir_dias`, como D-29), se declara, se
+  recalcula I4 y si sigue fallando es INVÁLIDO. Condiciones: adenda fechada en el §11 antes de cualquier dato de W2 a W6;
+  criterio mecánico externo al A/B; evaluador sellado intacto (script aparte con pruebas y verificador limpio); PR a `main`.
+  Informado a Nicolás.
+- Ajuste, también con D-48: implementada al pie de la letra (`dias_excluidos_nasa.py`, 9 pruebas), la condición (b)
+  excluía sólo el 10 de marzo, porque MIROVA no listó pasadas nocturnas de Suomi NPP en Láscar el 11 y el 12, aunque CMR
+  tampoco tiene gránulos esos días: (b) medía lo que MIROVA listó, no si el dato existía. Se cambia a **(b'): el control
+  no tiene ningún record de esa plataforma ese día** (campo `sensor`; 10, 11 y 12 de marzo con 0 records de Suomi NPP en
+  los dos brazos, el 9 y el 13 sí). La adenda dirá que el cambio se hizo después de ver W1 (informativa), informará el
+  resultado con (b) y con (b'), y la regla queda fija para W2 a W6, que no tienen datos.
+
+### 2026-10-26 18:35 UTC (S164, vuelta 19): W1 del diurno terminada; W2 despachada entera (run 40379112237)
+- W1 (run 40364164845): success; control 31 min (16:58 a 17:29), brazo diurno **88 min** (16:58 a 18:26), recolectar
+  18:28. Salidas en la rama `s151-ab-diurno/40364164845` (`f2e98e998`). `cobertura.txt`: 183 pasadas nocturnas por brazo,
+  0 faltan y 0 sobran; el brazo diurno trae 74 pasadas diurnas de VIIRS 375 y 73 de VIIRS 750, sin MODIS diurno:
+  «COBERTURA NOCTURNA PAREJA y día como se espera».
+- Regla operativa del §8: 88 × 1,45 × 1,3 = 166 min, bajo el tope de 300: **W2 a W6 van enteras** (5 despachos de 22 jobs).
+- W2 (2026-06-13 a 06-30, 11 Tier A; lista de volcanes la del §8 del pre-registro de C0) despachada a las 18:35 UTC desde
+  `s163-diurno-k-codigo` con las entradas de K explícitas: run **40379112237**. Con `max-parallel: 3`, unas 7 a 8 h.
+  W3 recién cuando W2 haya empezado y el anterior termine (un solo pendiente por grupo).
+
+### 2026-10-26 17:55 UTC (S164, vuelta 18): Nicolás da permiso para D-39 y abre la fase 3; el disco se explicó
+- Nicolás: «te doy permiso, y abre la fase 3, pero revisa porque hemos perdido bastante espacio, quizas hay artefactos o
+  archivos temporales». Después vació la papelera de Windows: C: subió a 8,7 GB, D: a 11 GB.
+- **D-39**: el clasificador de permisos volvió a negar `gh workflow disable` en Mirova-v1 («Interfere With Workloads») aun
+  con el permiso en el chat. No se intentó por otra vía. Quedan dos caminos: Nicolás corre los pasos de
+  `experiments/_s163_d39_mirova_v1/PASOS_PARA_NICOLAS.md` (rama `claude/s163-d39-mirova-v1-710f72`) o agrega una regla de
+  permiso para `gh workflow` desde un terminal `claude` interactivo.
+- **Fase 3 de MOD-D**: sesión `modd-fase3` (`local_1860a1d4-d339-4319-b89f-7ebab9735b7f`) creada, pero **no arrancó**:
+  pedía 5,4 GB libres para su worktree y había 4,7. Con la papelera vaciada se puede reintentar desde esa sesión.
+- **Disco, medido**: en las 5 h previas se escribieron ~12 GB bajo `C:\Users` en 39.656 archivos; 7,08 GB de eso son
+  `VRP Chile\.git\objects\pack` (un paquete nuevo de 6,4 GB con fecha 17:45 UTC). Duplicación entre paquetes despreciable
+  (105.249 entradas, 103.150 objetos únicos). Lectura: un repack automático de git escribe el paquete nuevo entero antes de
+  borrar los viejos, así que mientras corre el repositorio ocupa casi el doble; al terminar los borra. Encaja con la caída
+  hasta 4,5 GB y la subida posterior, pero el momento en que empezó no está medido (SOSPECHA). El repositorio pesa 9,66 GB
+  por la historia de `data/`. Basura de git: 10 `tmp_pack_*` de fetches cortados (90 MB, del 19 al 26 de octubre).
+- El resto del peso fijo: 20 worktrees de la app en `.claude/worktrees` (14,6 GB), la mitad de sesiones ya terminadas e
+  integradas, todos limpios y con su rama en el remoto. Propuesto a Nicolás: mandarlos a la papelera.
+
+### 2026-10-26 16:58 UTC (S164, vuelta 17): pre-registro diurno SELLADO por Nicolás; W1 despachada (run 40364164845)
+- Nicolás, textual: «Sello el pre-registro diurno 68687d2d4 con las seis recomendaciones (e-ii en el caso e).» Tag
+  `s163-diurno-k-sellado` sobre `68687d2d4` (anotado con sus palabras).
+- PR #916 (sólo `experiments/_s163_diurno_k/`, 88 archivos; CI verde) mergeado con merge commit `b9288fc23`, para que el
+  commit sellado quede en la historia de `main`.
+- **Desviación operativa del §8, antes de ver datos**: el §8 dice «tag `s163-diurno-k-codigo` sobre `main` después del
+  merge», pero la comprobación del propio §8 (`git diff --stat <sello> <tag> -- <las 29 rutas de objetivos_sha256.txt>`)
+  sobre `b9288fc23` **no da vacío**: #907 y #914, mergeados hoy, cambiaron `pipeline/profile.py`, `pipeline/store.py` y
+  `scripts/evaluador_comun.py`. Con un tag sobre `main` el evaluador rechazaría sus sha256. Por eso el tag
+  `s163-diurno-k-codigo` va **sobre el commit sellado `68687d2d4`** (base `047bd5692`), donde las 29 rutas son
+  exactamente las selladas; el propósito del §8 (que el código despachado sea el sellado) se cumple al pie de la letra.
+  `tests/test_perfiles_diurno_k_s154.py` en ese commit: 3 de 3 (desde un `git archive` en el scratchpad).
+- W1 despachada a las 16:58 UTC: `gh workflow run reproc-s151-ab-diurno.yml --ref s163-diurno-k-codigo` con
+  `preregistro_aprobado=si`, 2026-03-01 a 2026-03-20, `["Lascar"]`,
+  `brazos=["_s154_ab_diurno_k_control","_s154_ab_diurno_k_on"]`, `control=_s154_ab_diurno_k_control`; run
+  **40364164845** sobre `68687d2d4`. Sirve para medir la duración del job diurno sobre K y decidir si W2 a W6 van enteras
+  (5 despachos de 22 jobs) o en mitades (10).
+
+### 2026-10-26 16:41 UTC (S164, vuelta 16): Nicolás aprueba MOD-D como CANDIDATO y la fase 3
+- Nicolás, textual: «Apruebo MOD-D como CANDIDATO: lleva la vía a pipeline/ con la regla de MATLAB, flag apagado, tag
+  defensivo antes del primer edit.»
+- Alcance aprobado: vía «código MIROVA» para MODIS en `pipeline/`, con el relleno de fondo de la regla `fillmissing2` de
+  MATLAB, detrás de un flag APAGADO, reutilizando lo que sirva de `pipeline/mirova_v750_codigo.py` (#907). Tag defensivo en
+  el remoto antes del primer edit (A45). Criterios de merge, iguales a los de #907: producción bit a bit igual con el flag
+  apagado (con control que sí cambia), suite completa en árbol quieto con 0 fallas, CI verde y verificador limpio de otro
+  modelo; el merge lo hace la coordinadora. **Encender** el flag no está aprobado: exige censo, sombra, tag y otro sí.
+- Pasado a `loop-modis-2` con las palabras textuales.
+- 16:43 UTC: `loop-modis-2` no la empieza (sesión larga). Traspaso en `tasks/LOOP_MODIS.md` §b2 «FASE 3 APROBADA» de
+  `claude/s162-modis-2-0dd578` `e15e50153` (= remoto): la vía es el PM del censo (`experiments/_s159/portes/mirova_port.py`,
+  MODIS, `leer_modis`) con la regla de MATLAB; reutilizar `detectar_mirova`, `_fillmissing2_lineal`, `vrp_mirova`,
+  `caja_roi`, `remuestrear_grilla`, `grilla_del_volcan` y `procesar_grilla` de `pipeline/mirova_v750_codigo.py`,
+  parametrizando por sensor (A102); archivos: ese módulo, `profile.py`, `process_modis.py`, `store.py`, quizás
+  `grillas_mirova.yaml` (SIN DATO) y la ficha SDA; siete pruebas (entre ellas Láscar 2026-04-25 07:35 = 1,1124 MW). La
+  sesión nueva confirma el sí con Nicolás en su propio chat antes del primer edit (S157). Falta abrirla.
+
+### 2026-10-26 16:33 UTC (S164, vuelta 15): auto-audit nuevo #915; #864 cerrado apuntando a él
+- #915 (2026-10-26 16:10 UTC, detector K, ventana 60 d). Respecto de #864 (2026-10-19), **nuevo**: recall MODIS 62,5 %
+  (n = 16, banda 95); magnitud de Cordón Caulle VIIRS 750 0,375× (n = 11); alerta protegida MODIS de Chillán sin publicar
+  2026-10-25 07:20 UTC (MIROVA 3,79 MW; la noche sí se publicó en otra pasada). **Siguen**: recall VIIRS 750 74,0 % (n = 50;
+  era 73,3 con n = 30); Chillán bajo 0,7× en los tres sensores (MODIS 0,56, V375 0,662, V750 0,683); Tupungatito V375 0,41×
+  (era 0,266); las cinco protegidas de #864 (las dos de Tupungatito con referencia sospechosa, sólo OCR de Suomi NPP).
+- Lectura: el grueso es Chillán en erupción y MODIS, el frente que ataca MOD-D (el censo da 20 protegidas que pasan de
+  K < 1 a PM ≥ 1 MW). Las tres protegidas MODIS de Chillán perdidas son exactamente ese síntoma. No se toca nada sin el sí
+  de Nicolás.
+- #864 cerrado con comentario que apunta a #915.
+
+### 2026-10-26 16:16 UTC (S164, vuelta 14): verificador del censo de MOD-D confirma DECIDE NICOLÁS; llevado a Nicolás
+- Verificador limpio Fable alto (commit `9ea9a1786` de `claude/s162-modis-2-0dd578`, = remoto; carpeta
+  `experiments/_s162_modis_paquete/censo/verificador/`, con `CAMINOS.md` escrito antes de medir): «el veredicto DECIDE
+  NICOLÁS se sostiene». Recalculó P1, P1b, P2 y M con código propio (P2: K 49, PM 8, neto -41 en 50 bloques; M: 78 pares, IC
+  [-0,335; -0,153]); 12 controles verdes; cobertura 5.465 de 5.465; de los 189 excluidos ninguno es protegida ni lo
+  publica K.
+- Todo el DECIDE cuelga del P1b de Láscar 2026-04-25 07:35 (1 píxel; PM 0,973, bajo 1 MW por 0,027, por el desempate del
+  relleno del fondo). Con la regla `fillmissing2` de MATLAB da 1,1124 MW y ninguna de las 48 protegidas queda bajo 1 MW con K
+  sobre 1: sería **fila 6, CANDIDATO**. La regla sellada manda el VRP del port, y sigue SIN DATO que MIROVA use ese `.m` en
+  MODIS. En sentido contrario, 20 protegidas pasan de K < 1 a PM ≥ 1 MW. Chillán SIN RESOLVER (6 de 7, p 8/128): límite de
+  la regla, no déficit del sensor (sobre 30° el PM da 1,12).
+- Menores sin efecto: el PREREGISTRO de la rama no tenía las adendas 3 y 4 (ahora idéntico al del tag); la adenda 3.11 dice
+  149 y son 150 (anotado en `LEEME`, texto sellado intacto); el run de S159 39712862945 terminó en failure pero su dato es
+  consistente; 5 pasadas crepusculares, efecto nulo con y sin D33.
+- Recomendación de `loop-modis-2` y de la coordinadora: tratarlo como CANDIDATO a la fase 3 (vía en `pipeline/` con la regla
+  de MATLAB, reutilizando `pipeline/mirova_v750_codigo.py`, flag apagado), con tag defensivo y el sí explícito de Nicolás
+  antes (A45). Pregunta llevada a Nicolás.
+
+### 2026-10-26 16:03 UTC (S164, vuelta 13): censo de MOD-D completo y evaluado; DECIDE NICOLÁS (verificador en curso)
+- Conteo (`contar_tanda.py`, salidas `experiments/_s162_modis_paquete/contar_t{1,2,3}_salida.txt` de
+  `claude/s162-modis-2-0dd578`): t1 1.814/1.814, t2 1.837/1.837, t3 1.814/1.814; **5.465 de 5.465 ok**, sin faltantes ni
+  repetidos, cabecera con `865174abe` en cada parte.
+- `evaluar_paquete.py` desde el checkout del tag (commit `3a1796431`, carpeta `censo/`): **DECIDE NICOLÁS**, todos los
+  controles OK. Lo único que impide CANDIDATO es **P1b = 1**: Láscar 2026-04-25 07:35, K 1,245 MW, PM 0,973, MIROVA 1,28,
+  alerta de 1 píxel (con la regla de `fillmissing2` de MATLAB el PM da 1,112, sobre 1 MW). P1 sin pérdidas. P2 GANA (K 49
+  errores, PM 8, neto -41, 50 bloques, p 1/10001). M MEJORA (IC [-0,333; -0,153], también con la regla de MATLAB).
+  Chillán SIN RESOLVER (6 de 7, p 8/128).
+- Verificador limpio (Fable alto) en curso; informe en `D:\vrp-trabajo\temporales\s162_modd\verificador_censo\`. No se
+  lleva a Nicolás hasta que entregue.
+
+### 2026-10-26 16:00 UTC (S164, vuelta 12): C: cayó de 15 a 4,7 GB libres sin causa en las carpetas de trabajo
+- Aviso de `loop-viirs750-2` (~15:20 UTC). Medido: 4,7 GB a las 15:53, 5,8 GB a las 16:00 (sube solo). Búsqueda de
+  archivos de más de 50 MB escritos en los últimos 90 min en `C:\Users\nmend`, `C:\vrp-trabajo`, `C:\ProgramData` y
+  `C:\Windows\Temp`: sólo un log de 71 MB (`Empresas\Autoscan\...\programador.log`) y la caché de miniaturas; ningún
+  worktree nuevo (24); temporales de `AppData\Local\Temp` de pocos MB. El archivo de paginación está asignado en 26,6 GB
+  (uso actual 4,1, pico 4,6) con 5,2 GB de RAM libre de 31,6: **SOSPECHA** (no medida) que Windows lo agrandó por la
+  carga de memoria de varias sesiones a la vez; no se toca (es configuración del sistema). Las tandas de MOD-D corren en
+  GitHub, no en el disco local.
+- Regla vigente: bajo 3 GB en C: o D: se para. `loop-viirs750-2` detiene su medidor si C: baja de 3 GB.
+- Corrección: parte de la subida de 4,7 a 5,8 GB la explica `loop-viirs750-2`, que sacó su worktree
+  `C:\vrp-trabajo\s162-via-mirova` (1,2 GB, rama mergeada en #907 y en el remoto) y temporales ya leídos. Liberar el
+  espacio indica **borrado definitivo, no papelera**: contra la regla del proyecto, aunque no se perdió nada (todo está en
+  git). Recordado a la sesión: desde ahora, sólo papelera.
+
+### 2026-10-26 15:26 UTC (S164, vuelta 11): t2 de MOD-D terminada; t3 despachada (run 40349358358)
+- t2 (run 40344051900): completed success, 10 de 10 jobs, ~32 min. La cuenta `loop-modis-2` con `contar_tanda.py`.
+- t3 (partes 16 a 23): `git push origin 865174abe...:refs/heads/s162-modd-t3` a las 15:26 UTC, run **40349358358**; con
+  ella se completan las tres tandas del censo de MOD-D. Después de t3 queda libre el cupo para el A/B diurno (si Nicolás
+  lo sella).
+
+### 2026-10-26 15:17 UTC (S164, vuelta 10): t1 contada completa; pre-registro diurno listo para el sello de Nicolás
+- t1 de MOD-D contada por `loop-modis-2` con `experiments/_s162_modis_paquete/contar_tanda.py`: 1.814 de 1.814 pasadas con
+  fila «ok», 8 partes BIEN (0 faltan, 0 sobran, 0 repetidas, cabecera con el commit del tag), 0 retenidas, 39 «volcán
+  fuera del gránulo» (salen por motivo sellado). t2 (40344051900) en curso.
+- Pre-registro diurno sobre K: cuarta verificación limpia (Sonnet, sólo el diff v3 a v3.1) **CONFORME**; ningún camino
+  nuevo a ADOPTAR; las dos reservas de cobertura de pruebas cerradas (M60, M61 atrapadas); el evaluador no cambió después
+  de verificado. **Sha para el sello: `68687d2d4`** (= remoto), informe en
+  `experiments/_s163_diurno_k/verificador_v31/INFORME.md` de esa rama. Llevado a Nicolás (D-10, §10 del pre-registro).
+
+### 2026-10-26 14:54 UTC (S164, vuelta 9): t1 de MOD-D terminada; t2 despachada (run 40344051900)
+- t1 (run 40336655402): completed success, 10 de 10 jobs en verde, ~45 min de reloj (cuadra con VH-04). La cobertura por
+  parte la cuenta la sesión que evalúe (A108).
+- t2 (partes 8 a 15): `git push origin 865174abe...:refs/heads/s162-modd-t2` a las 14:54 UTC, run **40344051900**, mismo
+  tag `s162-modd-tag`. t3 cuando termine t2.
+
+### 2026-10-26 14:30 UTC (S164, vuelta 8): pre-registro del diurno sobre K recibido; falta verificar la v3.1
+- `diurno-k-prereg` entregó el pre-registro del A/B diurno sobre K (1.32, D-10, #813): rama
+  `claude/s163-diurno-k-prereg-5c4f44` `9700e4e0b` (en el remoto), `experiments/_s163_diurno_k/PREREGISTRO.md` v3.1, sha256
+  de 29 archivos en `objetivos_sha256.txt`; traspaso en la carpeta compartida de S163 (`diurno-k-prereg_traspaso.md`).
+  Tres verificaciones limpias, pero **los dos cambios de la v3.1** (variante d con FALSO_POSITIVO; tope de GANA del
+  placebo c) **no tienen verificador propio**: pedido uno corto sobre ese diff antes de llevarlo al sello.
+- Lo que sella Nicolás (§10): reemplazo de la regla G1/G2 de la ADENDA_K (D-25); caso e (e-ii recomendado); robustez del
+  §6.4 a DECIDE; negativo diurno por periodo; sin W7 hasta reparar la referencia (D-39); VIIRS 750 no adopta solo.
+- Costo estimado: ~117 h de runner, ~39 h de reloj con 3 en paralelo. Va después de las tandas t1 a t3 de MOD-D.
+- Aviso: el verificador v3 terminó tres procesos de Python por línea de comandos (quizás no todos suyos). Segunda vez hoy
+  que un verificador mata procesos de más (la otra, en D-39 con `bash.exe`): pedido matar sólo por PID propio.
+- NRT: sin corridas a las 13:10 ni 14:10 UTC; es el patrón conocido (cron externo de 01:10 a 12:10 UTC; en la tarde sólo
+  el `schedule` de GitHub, atrasado). Todas verdes.
+
+### 2026-10-26 14:07 UTC (S164, vuelta 7): humo de MOD-D aceptado; tanda t1 despachada (run 40336655402)
+- Humo (run 40333783937, success 13:55 UTC): PASA según `loop-modis-2`, con verificador limpio Sonnet («pasa con reparos,
+  ninguno bloquea pedir las tandas»). Contado (A108): 23 pasadas de los 5 gránulos con fila «ok», 0 errores; K recalculado
+  igual a `data/` en las 23; el PM da bit a bit el npix y el VRP de S159 en 4 de 4 pasadas comunes; procedencia con el sha
+  exacto y el manifiesto del tag. INDECIDIBLE sólo por cobertura y contador, como se espera de un humo. Reparos: VH-01
+  (Villarrica 04-30 03:00 a 8,4 km del borde del gránulo: el borde sólo lo cubre la batería sintética), VH-02 (`k33_igual_k`
+  False en 22 de 22 por campos `diag`), VH-04 (~3,8 s por pasada: las tandas serán más cortas que las 17 h estimadas).
+  Evidencia: `claude/s162-modis-2-0dd578`, `experiments/_s162_modis_paquete/humo_40333783937/`.
+- Tanda **t1** (partes 0 a 7): `git push origin 865174abe...:refs/heads/s162-modd-t1` a las 14:07 UTC, run
+  **40336655402**; mismo tag `s162-modd-tag` y workflow; `max-parallel: 8` (con el NRT de 11, 19 de 20). t2 y t3 sólo
+  cuando termine la anterior (el grupo de concurrencia guarda un solo pendiente). Las evalúa la próxima sesión de MODIS
+  (cola D4c).
+
+### 2026-10-26 13:48 UTC (S164, vuelta 6): humo de MOD-D despachado (run 40333783937)
+- `loop-modis-2` pidió el humo tras tres vueltas de verificador (la tercera, Sonnet, `verificador_candado_r3/INFORME.md`:
+  «se puede despachar el humo tal como está»).
+- Comprobado antes de despachar: tag `s162-modd-tag` (anotado `28a665c05`) en el remoto sobre `865174abe` = cabeza de
+  `s162-modd-candado`; respecto del `main` congelado `80b819828`, fuera de `experiments/` sólo cambian
+  `.github/workflows/probe-s162-modd.yml` y `probe-s162-mxd03.yml` (este no se dispara con la rama del humo); sin push ni
+  escritura en `data/`; sólo `EARTHDATA_TOKEN`, que falla si viene vacío (A71); `"on":` entre comillas; ningún NRT en
+  curso (NRT 11 más 3 jobs del humo, bajo el cupo de 20).
+- Despacho: `git push origin 865174abe...:refs/heads/s162-modd-humo` a las 13:48 UTC; run **40333783937** (plan, prueba
+  sin red ~15 min, probe de 5 gránulos con timeout 240 min). Lo evalúa `loop-modis-2` con `evaluar_paquete.py` desde el
+  checkout del tag; criterio de la adenda 3.14 (job de pruebas verde, 5 pasadas con fila «ok», K reproduce `data/` en las
+  que deciden, el PM reproduce a S159 en Láscar 2026-03-14 07:05 y Chillán 2026-10-16 01:40).
+
+### 2026-10-26 13:46 UTC (S164, vuelta 5): cierre de VIIRS 375 integrado; #914 mergeado (placebos D-44, tarea 1.35, causa de huecos)
+- `loop-viirs375` cerró: adenda 1 de `experiments/_s162_v375/PREREGISTRO_E.md` con PD1, **sin sellar**; traspaso para la
+  sesión que lleve la vía a 375 en la carpeta compartida de S162 (`VIIRS375_via_375_traspaso.md`): el procesador de 375 es
+  `process_viirs.py` (A45), necesita pre-registro PD3 con tag y el sí de Nicolás. Integrado a `loop/activo` (`e9dac40d4`).
+- `instrumento-pendientes` entregó #914 (sólo `scripts/evaluador_comun.py`, su prueba y
+  `experiments/_s163_instrumento_pendientes/`; CI verde; verificador Sonnet limpio, gravedad 2 aplicadas; 28 de 28
+  mutaciones atrapadas por aserción). **Mergeado** (squash `b8b3519c2`). Resultados (`INFORME.md` de esa carpeta):
+  - Placebo simétrico en 14 celdas: GANA 4,09 % [3,60; 4,64], PIERDE 3,11 % [2,68; 3,59]: **P2 queda calibrado**.
+    **BLOQUEA sale en 40,3 % sin ningún efecto**: un BLOQUEA no es evidencia contra un brazo.
+  - Poder: con 25 % o más tocado, GANA y PIERDE en 36 a 40 de 40, salvo MODIS O con 25 % (PIERDE SIN SUSTRATO).
+  - Tarea 1.35: el evaluador informa por tramo de 10° de cenit y por régimen; por tramo, el placebo da SIN SUSTRATO en 75
+    de 78 filas (la calibración por tramo no se puede medir). Razón K/MIROVA de V375 en O: 0,81 (0 a 10°) a 0,40 (60 a 70°).
+  - `--cobertura` da la causa de cada ausencia; sobre producción siempre `sin_registro`, porque `nrt.yml` no guarda el JSON.
+- Abiertos que dejó: (a) **aplicado con D-48**: un hueco de NASA en una ventana de A/B se declara en el pre-registro y el
+  día se excluye en todos los brazos por igual (rescatarlo de LAADS es opcional y va aparte); (b) guardar
+  `--cobertura-json` en `nrt.yml` (toca `.github/`, el NRT): tarea pendiente, sin urgencia; (c) el ruido entre runners
+  sólo se mide con un brazo gemelo despachado: pendiente, entra en el próximo A/B; (d) #864: se cierra cuando aparezca el
+  auto-audit nuevo.
+
+### 2026-10-26 13:25 UTC (S164, vuelta 4): rama de VIIRS 375 integrada; PD1 decidida bajo D-48 (C13 en todos)
+- `loop-viirs375` entregó su rama `claude/s162-viirs375-c1b864` en `815118277` (= remoto). Integrada a `loop/activo` con
+  merge commit `461a77be4`: 209 archivos, 64 MB, todo en `experiments/_s159/portes/`, `experiments/_s158_audit_r2/`,
+  `experiments/_s162_v375/` y `tasks/LOOP_VIIRS375.md`; 0 archivos de `pipeline/`, `data/` ni `frontend/`. Los dos `.mat`
+  de 26 MB (`o2_375/entradas_v375.mat`, `resultado_v375.mat`) son la evidencia de MATLAB; `main` ya tiene uno de 17 MB del
+  mismo tipo (`experiments/_s163_o2/entradas_o2.mat`). Al integrar `loop/activo` a `main`, el `evaluar.py` de esta rama
+  gana el add/add con #911 (aviso de la hija).
+- **PD1 decidida con D-48** («sobre las decisiones mías haz lo que tú recomiendes»): **caja C13 en todos los volcanes**.
+  Por qué: un juego único para todos es lo que MISSION exige (per-volcán excluido, l. 77, trampa S99) y en nueve de los
+  once la C13 es casi la misma caja que M14; la alternativa (C13 sólo en Cordón Caulle y Tupungatito) es un ajuste por
+  volcán. El correo a Coppola que la hija también recomendaba **no se envía** (decisión vigente de Nicolás).
+- Lo que falta para V375-E (lista de la hija): adaptar la vía de #907 a 375 (sus números están en
+  `experiments/_s162_v375/brazos.py`), marcar el record con `via_codigo_mirova: True`, y después sello, censo, sombra, tag
+  y el sí de Nicolás (A45). Es trabajo de una sesión nueva: la de VIIRS 375 pasó los 60 mensajes.
+
+### 2026-10-26 13:21 UTC (S164, vuelta 3): #907 mergeado (cableado de la vía V750, flag apagado)
+- `loop-viirs750-2` entregó #907 en `f96b379e7` (6 commits sobre `b09a7b321`; tag `pre-rebase-s162-via-mirova` sobre
+  la versión previa `a16aa14b4`). Suite en árbol quieto: 2.582 aprobadas, 29 omitidas, 2 xfail, 0 fallas
+  (`experiments/_s162_v750a/suite_via_salida_cola.txt`). Verificador limpio Sonnet: LISTO CON CAMBIOS, ninguno sobre el
+  código A45, aplicados en `89e9d2855` (`experiments/_s162_v750a/verificador_cableado/INFORME.md`). Bit a bit del
+  almacén: 6.143 de 6.143 records iguales, control con la marca distinto en 32 de 45.
+- Alcance menor que el parche aprobado: sin kwarg nuevo; la vía reconoce el volcán por coordenadas, así que
+  `run_pipeline.py` y la firma de `calculate_vrp` no cambian (paridad GR1). Archivos A45: `process_viirs_mod.py` (bloque
+  dentro de `ENABLE_V750_CODIGO_MIROVA`) y `store.py` (tres compuertas saltadas sólo si `via_codigo_mirova is True`).
+- Revisión propia del diff: el flag se lee de `_t` con valor por defecto False y ningún perfil lo pone (`git grep` en
+  `pipeline/profiles/` de `origin/main`: 0). Sí de Nicolás: vuelta 11 de S163 («apruebo los últimos 3 puntos»).
+- Tag defensivo `pre-s164-merge-907` sobre `main` `14453e3f6`; merge commit `cff07d173`; Tests en `main` verde
+  (run 40329188081). Encender la vía sigue exigiendo el sello de V750-A, censo, sombra, tag y el sí de Nicolás.
+
+### 2026-10-26 13:12 UTC (S164, vuelta 2): D-39 verificado y paso 1 hecho; la pausa del scraper la negó el clasificador
+- `d39-mirova-v1` entregó (informe en su rama `claude/s163-d39-mirova-v1-710f72` `49de07d65`,
+  `experiments/_s163_d39_mirova_v1/INFORME.md`; verificador limpio Fable 5.1, ningún REFUTADO): 0 llaves perdidas y 0 campos
+  cambiados en el consolidado y en el OCR, +2.351 filas repuestas, todas reales. Hace falta sumar
+  `s163/d39-reposicion-y-bucle` (`dd606a65a`): el bucle viejo volvió a perder 241 filas el 2026-10-24 17:44 UTC, dos de
+  ellas protegidas (Villarrica MODIS 2026-05-29 19:55, 1,83 MW; Chillán VIIRS 375 2026-10-24 05:48, 2,36 MW).
+- Comprobación propia (CSV bajados por raw, sin clonar el repo de 14 GB): 2.351 llaves de reposición, 0 presentes en
+  `main` `5bb1c8edf`, las dos protegidas presentes en la reposición y ausentes de `main`; unión = 45.367 = 43.016 + 2.351.
+  El diff `main...dd606a65a` no toca `registro_vrp_consolidado.csv` ni `registro_vrp_ocr.csv` (sólo código, pruebas y el
+  archivo de reposición).
+- Paso 1: `fix/referencia-estable` avanzó por fast-forward a `dd606a65a`; CI del PR #26 en verde (6 de 6, run 40328078318).
+- Paso 2 (`gh workflow disable` de `main.yml` y `ocr_workflow.yml`): **negado por el clasificador de permisos** («Interfere
+  With Workloads»). No se intentó por otra vía. El scraper sigue corriendo normal; nada cambió en `main` de Mirova-v1.
+  Los pasos 2 a 6 los hace Nicolás o da el permiso.
+
+### 2026-10-26 12:38 UTC (S164, vuelta 1): relevo tomado; estado verificado contra el remoto
+- `loop/activo` = remoto en `4d41d78eb`; `main` en `b09a7b321`. Disco: C: 16 GB, D: 8,4 GB libres.
+- NRT: 5 corridas verdes seguidas (08:10 a 11:10 UTC), la de 12:10 en curso; último dato en `data/mirova_equivalent/`
+  a las 10:48 UTC (Copahue).
+- Ramas de las seis sesiones en el remoto e iguales al local: `claude/s162-modis-2-0dd578` `cac483b74`,
+  `claude/s162-viirs750-2-918174` `fb95d62ba`, `claude/s162-viirs375-c1b864` `7c9faed07`,
+  `claude/s163-d39-mirova-v1-710f72` `f3b002ea9`, `claude/s163-instrumento-pendientes-ab5a2d` `f391376a0`,
+  `claude/s163-diurno-k-prereg-5c4f44` `ce20f9cf0`; `s162-modd-candado` `ff2ced531`. `s162-via-mirova` (#907) está en el
+  remoto en `a16aa14b4`, el worktree local quedó atrás en `3a02ad28f` (no importa: manda el remoto).
+- Abiertos: PR #907, #912, #913 (borradores); issues #864 (auto-audit 2026-10-19) y #813 (D-10). Mirova-v1#26 OPEN.
+- `experiments/_s162_v750b/objetivos_v750b.json` no existe en ninguna rama ni tag; sí el generador `objetivos_v750b.py`
+  (también en el tag `s162-v750b-sellado`). Para el 2026-11-03 hay que generarlo, commitear y anotar su sha256. Avisado
+  a `loop-viirs750-2`.
+- Avisado el relevo a las seis sesiones (cinco entregados, `diurno-k-prereg` en cola porque estaba en un turno).
+
+### 2026-10-26 12:35 UTC (S163): cierre de la coordinadora; relevo a S164
+- Nicolás: «sí, cierra y abre la siguiente con lo que corresponda y necesario para seguir con todo». Loop de S163 detenido.
+  Traspaso en `tasks/BLOQUE_ARRANQUE_S164.md`. Estado fijado con trabajo en curso: `loop-modis-2`, `loop-viirs750-2`,
+  `loop-viirs375`, `d39-mirova-v1`, `instrumento-pendientes` y `diurno-k-prereg` siguen corriendo; la nueva coordinadora
+  les avisa su id.
+
+### 2026-10-26 ~12:15 UTC (S163, vuelta 15): #911 mergeado (evidencia S159 a S163 en main); entregas del paper y del congreso
+- **#911 mergeado** (squash `b09a7b321`; CI verde; 1.091 archivos, todos en `experiments/`, comprobado con `git diff
+  --name-only`; 62,5 MB): evidencia verificada de 13 ramas (oráculo y PORTES de S159, línea D25, MODIS, V375, V750 a/b/c/f,
+  O2, O2 alternativa, H3). Quedaron fuera a propósito el `PREREGISTRO_MXD03.md` (el de main es más nuevo), las colas de las
+  hijas vivas, 6 tests de D25 y un workflow de probe. Citas rotas de 54 a 12: 4 viven en ramas de hijas, 6 nunca se
+  commitearon (`_s160_audit/f1b/matriz_instrumentos.csv`, `_s160_audit/f4/propagacion.csv`, `_s160_espacial/data`,
+  `_s162_modis_verif_cde/arbol`, `_s162_v750b/objetivos_v750b.json`, `_s162_v750b/sin_granulo_v750b.json`). Avisadas las
+  hijas de los 10 choques add/add previstos (en los 10 manda la versión de la hija). Hallazgo lateral: las copias viejas de
+  los `.m` de MIROVA en main (`_s158_d17_diseno/osf_codigo_mirova`, `_s159/o1/o2_paquete`, `prueba_o2_en_octave`) tienen md5
+  distinto del OSF (normalización de fines de línea); las de `_s163_o2` sí son byte a byte.
+- Paper: **#912** en borrador (informe de estado, estructura, políticas de IA y lista de chequeo; dos verificadores limpios;
+  manuscrito sin tocar). Congreso: propuesta lámina por lámina en
+  `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\congreso geologico 2026\2_PRESENTACIONES\PROPUESTA_REVISION_2026-10-26.md`
+  (verificador: 15 afirmaciones, 0 refutadas, 6 precisadas); los mazos nuevos esperan el visto bueno de Nicolás.
+
+### 2026-10-26, servidor 11:48 UTC (S163, vuelta 14): primer NRT con #909 en verde; sesiones de paper, congreso y retrospectiva
+- NRT de las 11:10 UTC (`b43f4ee4f`, incluye #909): **success**. El log ya registra la cobertura por volcán («Cobertura NO
+  COMPLETA: 1 incidencias (ninguna búsqueda ni descarga fallida)»): es el día en curso, parcial por construcción, como avisó
+  `rebase-889`; el código de salida no cambia. Sin issue nuevo del auto-audit todavía.
+- Sesiones abiertas a pedido de Nicolás: «Presentaciones del Congreso Geológico 2026» (`local_ad3af6f7-bad7-4dfe-9535-
+  2069fc795630`, en `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\congreso geologico 2026\`, mejora
+  `AT8-7_VRP_Chile.pptx` y `AT3-6_IA_multiplicador.pptx` sin sobrescribirlas) y «Retrospectiva del proceso VRP Chile: plan»
+  (`local_09e29bf2-a78f-4ef3-96af-9ee2f8b361b6`: qué funcionó, qué no, auditorías, prompts, errores evitables, lo logrado
+  sin Coppola, rol de Nicolás, tiempo y rango de tokens), base común para el paper y las charlas.
+- Disco: C: 18 GB, D: 8,5 GB (varias sesiones trabajando); sin riesgo aún (parada bajo 3 GB).
+
+### 2026-10-26 ~11:50 UTC (S163): O2-375 cerrado contra MATLAB; la regla no extrapola como MATLAB
+- `loop-viirs375` (`dbe9af431`, `o2_375/verificador_matlab/INFORME.md`, verificador Sonnet CONFIRMADO): el ΔL de MATLAB
+  difiere de la vara en 0 de 422 escenas (máx 1,03e-15); el control contra el port falla donde debe (137 escenas, máx
+  0,83); Etna igual al OSF; un Delaunay sin perturbar difiere en 22 de 58, así que la tolerancia distingue triangulaciones.
+  **La vara de V375 deja de ser preliminar y V375-D queda fuera del programa.** V375-E espera la vía (#907 y su cableado) y
+  PD1.
+- **Hallazgo (gravedad 1)**: fuera de la envolvente convexa MATLAB deja NaN, y `delaunay_perturbado.rellenar` pone el vecino
+  más cercano (38.955 celdas en 12 escenas de V375; 159 en 10 de MODIS; ninguna sobre una alerta). Con `omitnan` un NaN se
+  descarta de L_bk y un extrapolado se suma. Pedido a `loop-viirs750-2`: que la función de la vía devuelva NaN fuera de la
+  envolvente, con prueba de oro y mutación.
+- Con esto, la vara de magnitud de los tres sensores queda reproducida contra MATLAB real: V750 166 de 166, MODIS 404 de
+  404, V375 422 de 422.
+
+### 2026-10-26 ~11:40 UTC (S163): O2 MODIS confirmado contra MATLAB; sesión del paper
+- `loop-modis-2` (`experiments/_s163_o2_modis/RESULTADO_O2_MODIS_MATLAB.md`, verificador Sonnet en
+  `verificador_matlab/INFORME.md`): la regla reproduce el fondo de MATLAB R2026b en 404 de 404 filas y 191 de 191 escenas
+  MODIS, incluidos los 6 bloques 2 × 2 que estaban en SOSPECHA (máx 5,55e-17); el port y el marco cambiado quedan a 1,06e-4.
+  El port no es MATLAB en 1 píxel (24 de 87 iguales), ni en 2 × 2, ni en formas dispersas. Alcance: 161 de 191 escenas de
+  Láscar, huecos de 3 × 3; MATLAB no extrapola (159 celdas sin rellenar en 10 escenas, ninguna alerta). SIN DATO que MIROVA
+  use ese `.m` para MODIS. **Con D-48**: la columna M con la regla en MOD-D deja de ser preliminar; la vía de MODIS, cuando
+  exista, reutiliza la función de #907. Mutaciones del candado: 18 de 31 atrapadas hasta ahora.
+- Nicolás pidió revisar el paper (estado, estructura, uso de IA y doble chequeos): sesión aparte «Paper VRP Chile: estado,
+  estructura y riesgos de la IA» (`local_41e333ef-587b-4af7-96db-c19cc7f3b9b5`), entrega en `docs/paper/` con PR en
+  borrador.
+
+### 2026-10-26 ~11:20 UTC (S163, vuelta 13): tres sesiones en paralelo; borradores viejos resueltos
+- Nicolás: «Sí, lanza las tres sesiones en paralelo (unificar evidencia S162 y S159, pendientes del instrumento,
+  pre-registro del A/B diurno sobre K) y cierra o integra los borradores viejos como recomiendas». MATLAB: ya entregó todo
+  lo necesario (O2 de V750, MODIS y V375); detenerlo no afecta.
+- Sesiones abiertas (cada una en su worktree desde main, reportan a S163, ninguna despacha ni mergea):
+  `unificar-evidencia` (`local_60e2df4b-710b-4476-938e-79bdaf0837e8`): lleva a main la evidencia de S159 y S162 repartida
+  en ramas (no toca las ramas de las hijas vivas); `instrumento-pendientes` (`local_bad70f2d-a64f-4eec-98f8-0497c3601256`):
+  placebos de D-44 sobre producción, tarea 1.35, «no observado» frente a hueco de NASA; `diurno-k-prereg`
+  (`local_bd4d68e7-100e-412a-9456-3f89c7beb7e4`): pre-registro, arnés y evaluador del A/B diurno sobre K (D-10, tarea 1.32),
+  sin despachar.
+- Borradores viejos: **#886 y #887 mergeados** (squash `e9ef99cbe` y `047bd5692`; sólo `experiments/_s158_*`, CI verde);
+  **#776, #880 y #890 cerrados** con comentario (los dos primeros meterían workflows de probe en main; #890 por D25 no
+  adoptada y el placebo ya en #905). Sus ramas se conservan.
+- Ajustes propuestos al programa por sensor (pendiente de escribir en el spec): O2 cerrado y vara M = regla exacta de
+  MATLAB en los tres paquetes; V375-D fuera; D17 como pieza central de los paquetes.
+
+### 2026-10-26 ~10:55 UTC (S163, vuelta 12): MATLAB corrió los paquetes de MODIS y VIIRS 375
+- Nicolás volvió a entrar a MathWorks. Entradas bajadas dentro de MATLAB con `websave` desde los commits verificados y
+  comprobadas por md5 (MODIS `89479be35`: 3 de 3; V375 `138a931ee`: 4 de 4). MATLAB R2026b.
+- **MODIS**: 404 escenas en 2,0 s (npix 1: 168, 2: 132, 3: 77, 4: 27). `resultado_o2_modis.mat` md5
+  d20cf7ddd3b6ba015c7b474afe627085, `salida_matlab_modis.txt` da9e409f9958c4e4e40fda7142e27ec9.
+- **VIIRS 375**: Etna exacto al OSF (Tot_Lmir_bk 1,072886152; VRP 9.889.528,4 W); 422 escenas en 11,2 s.
+  `resultado_v375.mat` md5 71d0f8218a445c337560efd73d904374, `salida_matlab_v375.txt` 53def07b353129ae9100629af1c65bf0.
+- md5 iguales en MATLAB Drive y tras la descarga; copiados a las carpetas de cada hija (sin seguimiento: los commitean
+  ellas) y avisadas. Con esto se puede sacar el PRELIMINAR de las varas de MODIS y V375 si calzan con la regla.
+
+### 2026-10-26 ~10:50 UTC (S163, vuelta 11): Nicolás aprueba #909, el cableado de V750 y D-39; #909 mergeado
+- Nicolás: «continúa con todo lo que recomiendes apruebo los últimos 3 puntos» (cableado de V750 y merge de #909 bajo A45;
+  D-39; volver a entrar a MathWorks) y luego «investiga bien lo de mirova-v1, no queremos perder datos, lanza una sesión
+  específica si es necesario».
+- **#909 mergeado** (squash `ccb378425`), tag defensivo `pre-s163-merge-909` sobre el main anterior `a73e5b241`. Toca
+  `pipeline/fetch.py` y `scripts/run_pipeline.py`: el NRT registra incidencias de cobertura; su código de salida no cambia
+  sin `--estricto-cobertura`. Vigilar las próximas corridas del NRT.
+- Cableado de la vía «código MIROVA» en V750: el sí de Nicolás pasado a `loop-viirs750-2` con sus palabras textuales;
+  flag apagado; pedido: rebase sobre main (por #909), prueba de producción bit a bit igual con el flag apagado, suite, CI y
+  verificador limpio; el merge lo hace la coordinadora.
+- **D-39**: sesión `d39-mirova-v1` (`local_57b44db2-3006-49fb-a00c-0228be793b29`) para demostrar antes de mergear
+  Mirova-v1#26 que ninguna fila se pierde ni cambia (cuenta fila a fila en las dos direcciones), que cada fila a reponer
+  existe en la historia, plan de despliegue con tag y pausa de workflows, y R13 en VRP Chile; no mergea, entrega a S163.
+- MATLAB: la pestaña sigue en el inicio de sesión de MathWorks (página gris); los paquetes de MODIS y V375 esperan que
+  Nicolás entre.
+
+### 2026-10-26 ~05:45 UTC (S163): candado de MOD-D, adenda 4; punto (b) aprobado con D-48
+- Verificador limpio (Fable) del candado: «se puede despachar el humo con cambios chicos». VCM-01 (gravedad 3): la adenda 3
+  sacaba del denominador más de lo que permite el §8.5 sellado, y una protegida que K publica pero el port no pudo evaluar
+  dejaba de vetar P1 (podía torcer NO CANDIDATO en CANDIDATO). Arreglo en la adenda 4 (`s162-modd-candado`): (a) sólo
+  «volcán fuera del gránulo» y «escena inválida» salen del denominador; una falla del arnés o del port deja la cobertura en
+  rojo (INDECIDIBLE): instrumento, aceptado. (b) **Aprobado con D-48**: si una protegida que K publica sale del denominador
+  por esos dos motivos, el veredicto no puede ser CANDIDATO y va a la fila 5 (DECIDE NICOLÁS). Más estricto que lo sellado,
+  fijado antes de ver datos (el humo no se despachó). Condiciones: escrito con hora del servidor antes del despacho,
+  segunda vuelta del verificador que lo cubra, y un escenario de batería que lo ejercite.
+- Resto de la adenda 4: manifiesto de hashes del arnés y del evaluador comprobado en el workflow y en el evaluador;
+  procedencia exige el commit del tag; 32 pruebas y 31 mutaciones; K33 por el mismo predicado; punto informativo de M con la
+  regla de `fillmissing2`. Después: mutaciones, segunda vuelta, tag y pedido de despacho del humo.
+
+### 2026-10-26 ~05:10 UTC (S163): vara MODIS preliminar verificada; #910 mergeado; adenda de M para MOD-D aprobada
+- `loop-modis-2` (`38df75a02`, `experiments/_s163_o2_modis/RESULTADO_VARA_PRELIMINAR.md`, verificador Sonnet en
+  `verificador_vara/INFORME.md`): con la regla, el hueco calza con el del `.m` en 404 de 404, pero son **191 escenas
+  distintas (161 de Láscar)**, no 404. En 1 píxel no hay sesgo sino ruido por escena (típico 9,1 %, máx 3,8 veces; el port
+  elige la otra pareja de celdas en 139 de 168); la regla en 1 píxel equivale al promedio de las dos celdas a dos columnas
+  (167 de 168). Efecto en 4 píxeles por bloques 2 × 2 que ningún caso de VIIRS validó contra MATLAB: SOSPECHA. SIN DATO que
+  el fondo de MODIS en MIROVA sea el del `.m` de VIIRS 750 (MIROVA no publicó código MODIS) y que la regla no dependa de la
+  grilla. Prueba de oro en MATLAB pendiente (sesión de MathWorks expirada).
+- **Aprobada con D-48** la recomendación de MODIS: adenda informativa a MOD-D, antes de leer el censo, que informe M también
+  con esta regla, fuera de línea, con las grillas que guarda el censo. No cambia ninguna regla sellada.
+- **#910 mergeado** (squash, CI verde; sólo docs): sello D-48 del pre-registro de MxD03 y los seguimientos de #906
+  (FICHA_SDA:29, paper sec5:7, que además decía banda 21 primaria, y Coppola 2026 en MISSION). Cierra el segundo conflicto
+  del inventario.
+
+### 2026-10-26 ~04:40 UTC (S163): adenda 1 de V750-B CONFIRMADA bajo D-48
+- Verificador Sonnet de la adenda (`claude/s162-viirs750-2-918174`, `experiments/_s162_v750b/adenda1/verificador/
+  INFORME.md`): LISTO CON CAMBIOS, sin gravedad 4 o 5; confirmó el defecto (escenario: 68 de 69 observadas, 0 SIN DATO,
+  compuerta abierta) y que con el probe sellado no debería ocurrir. Cambios hechos (VAD-01 a VAD-05): lector
+  `adenda1/leer_v750b.py` que corre el compañero y no deja pasar al analizador si cierra; rutas absolutas; caja `null` o
+  `{}` = «caja ilegible», cierra siempre; escenarios A9 a A17 y L1 a L4. Batería 52 de 52; nulo 17 de 17, identidad PASA,
+  control CAÍDA. VAD-07 y VAD-08 aceptados tal cual.
+- Comprobado por la coordinadora sobre `7aa2788a0`: `analizar_v750b.py` **idéntico** al tag `s162-v750b-sellado`; el diff
+  del pre-registro sólo agrega la marca y la sección de la adenda; ninguna regla cambia. **Confirmada con D-48.** El
+  2026-11-03 la lectura se hace con el comando del lector (final de `PREREGISTRO_V750B.md`).
+
+### 2026-10-26, servidor 04:27 UTC (S163, vuelta 10): CI de main verde tras #908; reserva del borde medida en V375
+- CI de main verde sobre `a6d3935cc` (merge de #908). NRT corriendo (04:10). Sin issue nuevo del auto-audit. Disco C: 25 GB,
+  D: 9,6 GB. Ramas de las hijas en el remoto.
+- `loop-viirs375` (`da0693783`, `o2_375/envolvente_v375.py`): 0 de 422 escenas con celdas de alerta fuera de la envolvente
+  convexa, así que la reserva del borde del verificador no toca su vara; 12 escenas tienen celdas del hueco dilatado fuera
+  (orilla de la pasada), que no entran en L_bk; magnitud igual con y sin ellas (C13 0,999). Vara PRELIMINAR sólo por la
+  prueba de oro en MATLAB.
+
+### 2026-10-26 ~04:20 UTC (S163): V375-A cableado; la referencia del checkout perdió filas de Chillán
+- `loop-viirs375` (`e48843858`): `protegidas_crater_v375.py` aplica `protegida_de_crater` de #903 (copiada de main sin
+  cambios) a las 81 protegidas de S159, S162 y S162b: 70 de cráter; las 11 que no, todas por `ocr_snpp_antes_del_hito`.
+  C13 y M14 pierden 6 protegidas y K 3, todas no de cráter; sólo PIX7 pierde una de cráter (Cordón Caulle 2026-06-07).
+  Informado al lado de P1, sin tocar veredictos. Coincide con el verificador de las protegidas SNPP.
+- **Hallazgo lateral**: la referencia de MIROVA del checkout **perdió las filas de tabla de 4 protegidas de Chillán (15 y
+  16 de octubre)**; el evaluador tuvo que usar las filas guardadas en los objetivos al seleccionarse. Es la misma familia
+  que D-39 (bucle de push del scraper Mirova-v1 que pierde filas; Mirova-v1#26 sin mergear): suma peso a esa decisión de
+  Nicolás.
+- Para V375-E sólo faltan la vía (#907 y su cableado, A45) y PD1.
+
+### 2026-10-26 ~04:05 UTC (S163, vuelta 9): #889 reemplazado por #909 (borrador, espera a Nicolás)
+- `rebase-889` (`local_cc8da696-d46e-4b43-8cf9-74c0744abfdd`): #889 cerrado con comentario a **#909** (rama
+  `s163-instrumentos`, `2ce1c8310` sobre main `691e4d588`, CI verde, «no mergear sin el sí de Nicolás»); el force-push a la
+  rama vieja lo bloquearon los permisos; tag `pre-s163-rebase-889` (`d0968e389`). Conservado: I1 (incidencias de cobertura
+  por volcán y día, fusionado con la cobertura por plataforma de #897; código de salida del NRT sigue en 0 sin el modo
+  estricto), I3 (`banco_paridad.TOL_S` seguía como literal 120; ningún número cambia) y A (xfail del tope de cordura de V375;
+  `store.py` sin tocar). Retirado: I2 (ya en #890; D25 no se adopta; el placebo vive en #905). Evidencia: 11 rojas sobre
+  main, 12 de 12 mutaciones, suite 2.528 sin fallas, verificador Sonnet sin regresión.
+- **Decide Nicolás**: (1) merge de #909 (toca el NRT); (2) aceptar que los reprocesos con `--estricto-cobertura` salgan con 3
+  cuando tocan el día en curso o un L1B sin geolocalización (frecuencia histórica SIN DATO); (3) #890. No cubierto: VA61-01
+  vive dentro de `process_modis` (otro trabajo, A45) y el estado «sin dato» no llega a `data/` ni al tablero.
+
+### 2026-10-26 ~04:45 UTC (S163, vuelta 8): #908 mergeado; regla de MATLAB confirmada; V375-D no hace falta por magnitud
+- **#908 mergeado** con commit de merge (`a6d3935cc`), CI verde sobre `94fdd7aaf`: main ya tiene la bitácora, los traspasos
+  S152 a S163, el programa por sensor y la marca de D25. Lo que difiere hoy entre main y loop/activo son sólo los datos NRT
+  posteriores (4 archivos).
+- **Regla de `fillmissing2` CONFIRMADA** por verificador limpio (Sonnet) con implementación independiente (`mi_cgal.py`):
+  166 de 166 VRP, 84 de 84 fondos, sin fuga de datos de MATLAB. CONFIRMADO EN PARTE el control: otras simetrías del marco
+  calzan 159 a 160 y un desempate ±eps·x·y 153, así que el control de ejes cambiados (42) era débil; la separación sigue
+  nítida. La parte 2 (no separa contra MIROVA con 6 pasadas) CONFIRMADA. No cubierto: extrapolación fuera de la envolvente
+  (1 escena), independencia de las 166 (83 son variantes de 10 pasadas). Informe en `s163-o2-alternativa` `c95483d31`,
+  `experiments/_s163_o2alt/verificador/`. Avisadas las tres hijas, con las reservas.
+- `loop-viirs375`, tarea 2 PRELIMINAR (`04d7151d2`): con la regla, el fondo de 1 a 4 px no cambia la magnitud de V375-C
+  (veredicto B igual; M de 0,998 a 0,999 en M14 y M13); **V375-D no hace falta por magnitud**. Queda pendiente la prueba de
+  oro en MATLAB (sesión de MathWorks expirada).
+
 ### 2026-10-26 ~04:15 UTC (S163, vuelta 7): inventario del trabajo paralelo; loop/activo a main (#908); worktrees liberados
 - Inventario S158-S163 (subagente de sólo lectura, `scratchpad\INVENTARIO_PARALELO.md` de S163). Conflictos reales sólo
   tres: (1) encabezado de D25 en `docs/MIROVA_DIVERGENCES.md` (main con la marca S158, loop/activo con la S162): resuelto

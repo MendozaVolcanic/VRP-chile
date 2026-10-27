@@ -547,6 +547,9 @@ def main(argv=None):
     ap.add_argument("--art-extra", nargs="*", default=[], help="carpetas de artefactos de los lotes extra")
     ap.add_argument("--deciden", nargs="+", default=["S162"], help="lotes del conjunto que decide")
     ap.add_argument("--neg-pub-de", default=None, help="lote del que sale neg_pub en el conjunto que decide (B2: S162)")
+    # O2-375: el VRP de las escenas de 1 a 4 píxeles con el fondo de MATLAB (o la vara PRELIMINAR que lo imita) en vez
+    # del fondo del port; sólo cambia la magnitud de esas escenas, la detección no (o2_375/LEEME_O2_375.md)
+    ap.add_argument("--vrp-vara", default=None, help="o2_375/vara_preliminar_375.json: VRP por (pasada, brazo)")
     ap.add_argument("--salida", default=str(AQUI / "evaluar_salida.txt"))
     ap.add_argument("--json", default=str(AQUI / "evaluar.json"))
     a = ap.parse_args(argv)
@@ -651,6 +654,27 @@ def main(argv=None):
     if dif:
         pr("      distintos:", dif[:20])
         veredicto_instr.append("recalculo")
+    if a.vrp_vara:
+        vara = json.loads(Path(a.vrp_vara).read_text(encoding="utf-8"))
+        n_sust = n_falta = 0
+        for e in vara["escenas"]:
+            if obj.get(e["id"], {}).get("lote") == "CTL":
+                continue    # el control de vida compara el runner contra S162: no es magnitud, no se sustituye
+            for b in e["brazos"]:
+                if e["id"] not in arms or b not in arms[e["id"]]:
+                    n_falta += 1
+                    continue
+                p = arms[e["id"]][b]
+                # la vara se armó sobre esta misma máscara y este mismo VRP del port; si no calza, no se sustituye
+                if p.get("npix") != e["npix"] or p.get("vrp_mw") is None or abs(p["vrp_mw"] - e["vrp_port_mw"]) > 1e-6:
+                    n_falta += 1
+                    continue
+                arms[e["id"]] = {**arms[e["id"]], b: {**p, "vrp_mw": e["vrp_vara_mw"]}}   # copia: la caché no se toca
+                n_sust += 1
+        pr(f"  2.1b VRP de 1 a 4 px sustituido por la vara ({vara['regla'].get('estado', '?')}): {n_sust} (pasada x "
+           f"brazo); sin calzar {n_falta}")
+        if n_falta:
+            veredicto_instr.append("vara_sin_calzar")
 
     # node: K re-corrido y cada brazo con cada regla
     casos, idx = [], []
@@ -880,7 +904,27 @@ def main(argv=None):
         if global_ != BR.REFERENCIA:
             pr(f"  {nom} {global_}:", estratos(filas, (global_, REGLA_DECIDE), fn))
     pr("  partidas (aparte):", [(x["vol"], x["hora"], x["c"], publica(x, ref), x["K"]) for x in filas if x["part"]])
-    if a.protegida_crater:
+    if a.protegida_crater and a.protegida_crater.endswith(".json"):
+        # V375-A (#903): la etiqueta de cráter de protegidas_crater_v375.py, AL LADO de la lectura A; no cambia P1 ni
+        # ningún veredicto (PREREGISTRO_C §4, PREREGISTRO_E §5)
+        etq_c = json.loads(Path(a.protegida_crater).read_text(encoding="utf-8"))["protegidas"]
+        prot = [x for x in filas if x["c"] == "pos_prot"]
+        sin_e = [x["i"] for x in prot if str(x["i"]) not in etq_c]
+        n_cr = sum(1 for x in prot if etq_c.get(str(x["i"]), {}).get("de_crater"))
+        pr(f"  protegida de cráter (V375-A, al lado de la lectura A): {n_cr} de {len(prot)} protegidas son de cráter; "
+           f"sin etiqueta {len(sin_e)} {sin_e[:10]}")
+        resumen["protegida_crater"] = {}
+        for clave in [("K", "")] + [(b, REGLA_DECIDE) for b in BR.BRAZOS]:
+            perd = [x for x in prot if not (x["K"] if clave[0] == "K" else x["X"][clave])]
+            de_cr = [x for x in perd if etq_c.get(str(x["i"]), {}).get("de_crater")]
+            otras = [(x["vol"], x["hora"], "+".join(etq_c.get(str(x["i"]), {}).get("motivos") or ["sin_etiqueta"]))
+                     for x in perd if not etq_c.get(str(x["i"]), {}).get("de_crater")]
+            resumen["protegida_crater"][clave[0]] = {"perdidas": len(perd), "de_crater": len(de_cr), "no_de_crater": otras}
+            pr(f"    {clave[0]:8s} perdidas {len(perd)}: de cráter {len(de_cr)} "
+               f"{[(x['vol'], x['hora'], round(x['mir'], 2)) for x in de_cr][:8]}; no de cráter {len(otras)} {otras[:8]}")
+        if sin_e:
+            veredicto_instr.append("crater_sin_etiqueta")
+    elif a.protegida_crater:
         pr("  protegida de cráter (V375-A):", Path(a.protegida_crater).read_text(encoding="utf-8")[:2000])
     else:
         pr("  protegida de cráter (V375-A): PENDIENTE de la sesión del instrumento; se informará al lado de la lectura A")
