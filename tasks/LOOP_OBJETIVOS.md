@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 16:57 UTC (S165, vuelta 7): W3 pareja; W4 despachada; MxD03 y V375-E arrancadas
+- **W3** (run 40496903128): success, 22 de 22 jobs de reproceso más el de recolectar; terminó a las 16:46 UTC. Salidas
+  en `s151-ab-diurno/40496903128` (`5631255c7`). `cobertura.txt`: 1.429 pasadas nocturnas por brazo, 0 faltan y 0
+  sobran; el brazo diurno trae 561 pasadas diurnas de VIIRS 375 y 559 de VIIRS 750, sin MODIS diurno: «COBERTURA
+  NOCTURNA PAREJA y día como se espera».
+- **W4** (2026-08-13 a 08-31, 11 Tier A) despachada a las 16:57 UTC desde `s163-diurno-k-codigo` con el comando del §f:
+  run **40545948109**.
+- Nicolás arrancó, desde las tarjetas, las sesiones MxD03 en MODIS (`local_f2be5b7f`, plan
+  `2026-10-25-flag-mxd03-modis.md`) y V375-E (`local_0a1b597c`). Cada una pide el sí de A45 en su propio chat. Se les
+  avisó del disco.
+- Disco: C: bajó de 29 a 12 GB entre las 14:37 y las 16:10 UTC. Sin sesiones de VRP corriendo ni worktrees nuevos
+  hasta las ~15:40, el sospechoso es un `python run_ciclo.py` ajeno (iniciado 15:17 UTC). Desde las 16:10 se mantiene
+  en 12 GB; D: en 7,7 GB. Hay un `git diff` colgado desde el 2026-10-25 (inofensivo).
+
 ### 2026-10-27 13:50 UTC (S165, vuelta 6): #919 MERGEADO por orden de Nicolás; cita de A100 remapeada
 - Nicolás, en este chat: «Apruebo el merge de #919 (MOD-D fase 3, flag apagado) con merge commit en el sha 3dcf9fcc6.
   Mergéalo tú.». Se corrió `gh pr ready 919` y `gh pr merge 919 --merge --match-head-commit 3dcf9fcc6f2a…`: merge
