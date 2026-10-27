@@ -249,7 +249,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   perdidos en hipótesis ya implementada S15.
   - ⚠️ **El ejemplo drifteó — verificado S127.** La regla citaba
     `run_pipeline.py:220` pasando `eff_vent_lat` desde `get_effective_vent()`.
-    Hoy son las líneas **252/296/343** (252/295/342 hasta V165-03 de S165, que agregó el aviso `al_sin_dato` a la llamada MODIS; 234/277/324 hasta S161, que agregó la cabecera FICHA) y la función es **`get_detection_anchor()`**;
+    Hoy son las líneas **252/296/345** (252/295/342 hasta S165, cuando V165-03 agregó el aviso `al_sin_dato` a la llamada MODIS y V375-E dos líneas a la de VIIRS 375; 234/277/324 hasta S161, que agregó la cabecera FICHA) y la función es **`get_detection_anchor()`**;
     `get_effective_vent` quedó como alias sin llamador en producción (ver D17 y
     `docs/AUDIT_S127.md` §Hallazgo 7). **La lección vale entera**; el ejemplo no,
     como ya les pasó a A7, A13 y A17. Es la propia A6 aplicada a A6.
@@ -950,7 +950,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     desenlace **NO está en producción**: `ENABLE_TEST1_NTI_INTEGRAL = False` (verificado
     con `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
     print(p.ENABLE_TEST1_NTI_INTEGRAL)"`), y la rama `compute_test1_nti` existe **sólo en
-    `process_viirs.py:213/1112`** (era 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:64` (era 62 hasta S165, por los dos renglones de la cabecera FICHA que nombran los flags MxD03; 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:164` (era 163 hasta S162, por la línea de import de la vía «código MIROVA»)
+    `process_viirs.py:214/1170`** (era 213/1138 hasta S165, por el import y el bloque de la vía «código MIROVA» de VIIRS 375; el 1112 que decía hasta S164 ya estaba corrido; 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:64` (era 62 hasta S165, por los dos renglones de la cabecera FICHA que nombran los flags MxD03; 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:164` (era 163 hasta S162, por la línea de import de la vía «código MIROVA»)
     (eran 674/665; líneas actualizadas S131) importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
     describe sigue viva en los 3 sensores.** Ni encendiendo el flag se cura MODIS/V750,
     que es donde el píxel grande amplifica el gradiente (A80). Caso de manual de A87:
