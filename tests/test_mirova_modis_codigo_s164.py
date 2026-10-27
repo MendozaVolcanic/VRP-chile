@@ -12,9 +12,12 @@ de que nadie la encienda, cada una de estas cosas tiene su prueba aquí:
   2. con el flag apagado el procesador MODIS da bit a bit lo que daba K antes de este cambio (golden congelado con el
      árbol de pipeline/ sin tocar, `tests/datos_s164_modis/modis_k_antes.json`), y con el flag encendido el record SÍ
      cambia (control: si el flag no actuara, el "bit a bit" pasaría por construcción, A116);
-  3. sobre cinco grillas del censo la vía da los mismos píxeles alertados que el port del censo y el VRP del port con
-     la regla de MATLAB, calculado por código independiente (`delaunay_perturbado.py`, blob f273a47a del tag
-     s162-modd-tag; ver `tests/datos_s164_modis/armar_fixtures.py`);
+  3. sobre seis grillas del censo la vía da los mismos píxeles alertados y los mismos números de cada pase que el port
+     del censo, y el VRP con la regla de MATLAB, calculado por código independiente (`delaunay_perturbado.py`, blob
+     f273a47a del tag s162-modd-tag, y la envolvente convexa de scipy; ver `tests/datos_s164_modis/armar_fixtures.py`).
+     Una de las seis (PCC 2026-03-16 03:10) tiene la alerta fuera de la envolvente convexa del fondo: ahí MATLAB deja
+     NaN y el .m la descarta del fondo, así que la vía da 2,535 MW donde los instrumentos del censo, que extrapolaban
+     con el vecino más cercano, dieron 0,246 (hallazgo V164-01 del verificador; ver la prueba);
   4. el caso que decidió el CANDIDATO: Láscar 2026-04-25 07:35 da 1,1124 MW (el port con su propio desempate daba
      0,9731, bajo el corte de 1 MW de una alerta protegida);
   5. un volcán sin grilla de MIROVA sigue K y el record lo dice (A118);
@@ -80,9 +83,12 @@ def test_flag_se_lee_de_thresholds_y_llega_al_procesador():
 
 # ------------------------------------------------------------------------------------------------ constantes
 def test_constantes_de_modis_son_las_del_paper_y_de_produccion():
-    """Coppola 2016a (sp426_5.txt l. 174-180 y 374): banda 22 a 3,959 um, banda 31 a 11,03 um, RP = 18,9 A_pix dL con
-    A_pix = 1 km² (CLAUDE.md, «Reglas científicas», validado S14). Son las mismas de process_modis y del port del
-    censo; si alguien cambia una, la vía deja de ser la que se midió."""
+    """Banda 22 a 3,959 um y RP = 18,9 A_pix dL con A_pix = 1 km² son de Coppola 2016a (sp426_5.txt l. 176-177 y 374;
+    CLAUDE.md «Reglas científicas», validado S14). La banda 31 a 11,03 um NO es la del NTI del paper, que usa la 32
+    (l. 214-216; divergencia D20): es la de producción y la del port del censo, o sea la vía que se midió. La caja de
+    15 x 15 celdas tampoco es del paper (su ROI2 es todo el marco salvo la ROI1): es la de 21 celdas de 750 m del .m en
+    metros, y en umbrales no decide nada (BOX 0 y BOX 1 usan los mismos). Lo que se fija aquí es vía = producción =
+    port: si alguien cambia una, la vía deja de ser la que se midió."""
     from pipeline import process_modis as PM
     sys.path.insert(0, str(REPO / "experiments/_s159/portes"))
     import mirova_port as MP
@@ -143,7 +149,7 @@ def test_identidad_con_el_port_del_censo(pid):
     assert (d.get("n_abs") or 0, d.get("n_p1") or 0, d.get("n_p2") or 0) == (p["censo_n_abs"], p["censo_n_p1"],
                                                                                p["censo_n_p2"])
     # los números internos de cada pase (media, desvío y umbrales del contraste, regresión del ETI) son los del port
-    # del censo con las λ de MODIS: es lo que fija las λ del detector, que en estas cinco grillas no mueven la máscara
+    # del censo con las λ de MODIS: es lo que fija las λ del detector, que en estas grillas no mueven la máscara
     sys.path.insert(0, str(REPO / "experiments/_s159/portes"))
     import mirova_port as MP
     r = MV._referencias()[p["vol"]]
@@ -158,15 +164,37 @@ def test_identidad_con_el_port_del_censo(pid):
     if p["vrp_regla_matlab"] is None:
         assert v["npix"] == 0
     else:
-        assert v["VRP_MW"] == pytest.approx(p["vrp_regla_matlab"], rel=1e-9)
+        # la vía sigue a MATLAB: sin extrapolar fuera de la envolvente convexa
+        assert v["VRP_MW"] == pytest.approx(p["vrp_regla_matlab_sin_extrapolar"], rel=1e-9)
+        if p["alertas_fuera_de_la_envolvente"] == 0:
+            assert v["VRP_MW"] == pytest.approx(p["vrp_regla_matlab"], rel=1e-9)
+
+
+def test_alerta_fuera_de_la_envolvente_pcc_2026_03_16():
+    """V164-01. PCC 2026-03-16 03:10 (MIROVA no vio nada esa pasada): la única alerta queda, tras el halo de 3 x 3,
+    fuera de la envolvente convexa de las celdas con dato (borde del gránulo). MATLAB no extrapola, así que su fondo es
+    NaN y el .m (`sum(..., 'omitnan')`) no lo resta: el VRP es la radiancia entera de la celda por el coeficiente. Los
+    instrumentos del censo (el port sellado y el de la regla, blob f273a47a) rellenaban con el vecino más cercano y
+    daban 0,246 MW. No cambia ninguna decisión del censo (la publicación depende de la máscara, que es la misma, y esta
+    pasada no entra en M), pero la magnitud que publicaría la vía sí es otra, y se fija aquí."""
+    p, mir, _tir, _g, _box, mask, _d = _via_sobre_grilla(3933)
+    assert (p["vol"], p["dt"], p["lab"]) == ("PuyehueCordonCaulle", "2026-03-16 03:10", "neg_limpio")
+    assert p["alertas_fuera_de_la_envolvente"] == 1 and int(mask.sum()) == 1
+    v = MV.vrp_mirova(mir, mask, coef=MODIS["coef"])
+    assert np.isnan(v["L_bk"]) or v["L_bk"] == 0.0
+    assert v["VRP_MW"] == pytest.approx(float(mir[mask][0]) * MODIS["coef"], rel=1e-12)
+    assert v["VRP_MW"] == pytest.approx(2.5348, abs=5e-5)
+    assert p["vrp_regla_matlab"] == pytest.approx(0.2456, abs=5e-5)
+    assert p["censo_vrp_port"] == pytest.approx(0.2456, abs=5e-5)
 
 
 def test_las_fixtures_ejercen_lo_que_dicen():
-    """Control del instrumento: entre las cinco hay una sin alertas, una de un píxel (halo 3), una de 5 a 30 (halo 5),
-    y al menos una donde la regla de MATLAB y el desempate del port dan VRP distinto. Sin esa última, la identidad
-    pasaría igual con el relleno equivocado."""
+    """Control del instrumento: entre las seis hay una sin alertas, una de un píxel (halo 3), una de 5 a 30 (halo 5),
+    al menos una donde la regla de MATLAB y el desempate del port dan VRP distinto, y una con la alerta fuera de la
+    envolvente convexa. Sin las dos últimas, la identidad pasaría igual con el relleno o la extrapolación equivocados."""
     npix = [p["censo_npix"] for p in PASADAS.values()]
     assert 0 in npix and 1 in npix and any(5 <= n <= 30 for n in npix)
+    assert any(p["alertas_fuera_de_la_envolvente"] > 0 for p in PASADAS.values())
     distintas = [p for p in PASADAS.values() if p["vrp_regla_matlab"] is not None
                  and abs(p["vrp_regla_matlab"] / p["censo_vrp_port"] - 1) > 0.05]
     assert len(distintas) >= 1
@@ -372,29 +400,41 @@ def test_flag_encendido_cambia_el_record_y_sin_grilla_sigue_k_y_lo_dice(monkeypa
     assert _canon(encendido) == _canon(apagado)
 
 
-def test_extremo_a_extremo_con_granulo_sintetico_en_lascar(monkeypatch):
-    """Gránulo sintético de 1 km sobre Láscar (lat/lon como un MxD03, ángulos de noche) con un píxel caliente en el
-    cráter: con el flag encendido sale el record de la vía, distinto del de K y con la alerta en la cumbre."""
-    from pipeline import process_modis as PM
+def _granulo_lascar(caliente_este_km=0, corrimiento_este_km=0.0, az_sensor=40.0, az_sol=160.0):
+    """Gránulo sintético de 1 km sobre Láscar (lat/lon como un MxD03, de noche) con un píxel de 300 K sobre un fondo de
+    265 K a `caliente_este_km` del cráter; `corrimiento_este_km` corre el gránulo entero al este."""
     vl = _yaml_volcan("Lascar")
     n = 121
     d = (np.arange(n) - n // 2) * 1.0
     y, x = np.meshgrid(d, d, indexing="ij")
     lat = vl["lat"] - y / 111.0
-    lon = vl["lon"] + x / (111.0 * np.cos(np.radians(vl["lat"])))
-    T_mir = 265.0 + 0.0 * x
-    T_tir = 265.0 + 0.0 * x
+    lon = vl["lon"] + (x + corrimiento_este_km) / (111.0 * np.cos(np.radians(vl["lat"])))
     rng = np.random.default_rng(164)
-    T_mir = T_mir + rng.normal(0, 0.3, T_mir.shape)
-    T_tir = T_tir + rng.normal(0, 0.3, T_tir.shape)
-    T_mir[n // 2, n // 2] = 300.0
+    T_mir = 265.0 + rng.normal(0, 0.3, x.shape)
+    T_tir = 265.0 + rng.normal(0, 0.3, x.shape)
+    T_mir[n // 2, n // 2 + caliente_este_km] = 300.0
     mir = MV.temperatura_a_radiancia(T_mir, 3.959)
     tir = MV.temperatura_a_radiancia(T_tir, 11.03)
-    ang = {"sensor_zenith": np.full(lat.shape, 10.0), "sensor_azimuth": np.full(lat.shape, 0.0),
-           "solar_zenith": np.full(lat.shape, 130.0), "solar_azimuth": np.full(lat.shape, 90.0)}
+    ang = {"sensor_zenith": np.full(lat.shape, 10.0), "sensor_azimuth": np.full(lat.shape, az_sensor),
+           "solar_zenith": np.full(lat.shape, 130.0), "solar_azimuth": np.full(lat.shape, az_sol)}
+    return vl, mir, tir, lat, lon, ang
+
+
+def _via_encendida(monkeypatch, granulo):
+    from pipeline import process_modis as PM
+    _vl, mir, tir, lat, lon, ang = granulo
     monkeypatch.setattr(PM, "ENABLE_MODIS_CODIGO_MIROVA", True)
     monkeypatch.setattr(MV, "leer_radiancia_modis", lambda p: {"MIR": mir, "TIR": tir})
     monkeypatch.setattr(MV, "leer_geo_mxd03", lambda p: (lat, lon, ang))
+    return PM
+
+
+def test_extremo_a_extremo_con_granulo_sintetico_en_lascar(monkeypatch):
+    """Con el flag encendido sale el record de la vía, distinto del de K, con la alerta en la cumbre, la caja de MODIS
+    y el sun-glint calculado con los azimuts (no sólo con los cenits)."""
+    granulo = _granulo_lascar()
+    vl = granulo[0]
+    PM = _via_encendida(monkeypatch, granulo)
     visto = {}
     original = MV.procesar_grilla
 
@@ -409,6 +449,74 @@ def test_extremo_a_extremo_con_granulo_sintetico_en_lascar(monkeypatch):
     assert r["diag_codigo_mirova"]["dayflag"] == 0 and r["diag_codigo_mirova"]["roi"] == "def"
     assert r["sensor"] == "MODIS_AQUA" and r["sensor_zenith_deg"] == 10.0
     assert visto == {"n": 51, "sens": 25, "roi": 225, "familia": "MODIS"}
+    sg = MV.sunglint_deg(10.0, 130.0, 40.0, 160.0)
+    assert abs(sg - MV.sunglint_deg(10.0, 130.0, 0.0, 0.0)) > 1.0      # los azimuts importan en esta geometría
+    assert r["diag_codigo_mirova"]["sunglint"] == round(sg, 2)
+
+
+def test_extremo_a_extremo_alerta_lejos_del_crater_es_far(monkeypatch):
+    """El mismo gránulo con el píxel caliente a 9 km al este del cráter: la vía lo detecta (fuera de la caja sensible,
+    con los umbrales conservadores) y lo etiqueta `far` con inner_radius_km = 5."""
+    granulo = _granulo_lascar(caliente_este_km=9)
+    vl = granulo[0]
+    PM = _via_encendida(monkeypatch, granulo)
+    r = PM.calculate_vrp(Path("MYD021KM.A2026115.0735.061.hdf"), Path("MYD03.A2026115.0735.061.hdf"),
+                         vl["lat"], vl["lon"], vent_lat=vl["lat"], vent_lon=vl["lon"], inner_radius_km=5.0)
+    assert r["via_codigo_mirova"] is True and r["n_anomalous_pixels"] >= 1
+    assert r["primary_cluster"]["centroid_dist_km"] > 5.0 and r["distance_class"] == "far"
+
+
+def test_via_sin_cobertura_no_cae_a_k(monkeypatch):
+    """Si la vía dice que el volcán quedó fuera del gránulo (píxel más cercano al centro de la grilla a más de 5 km),
+    no hay record y K no corre: con el flag encendido, la serie es de la vía o no es (en el censo, en las 144 pasadas
+    con el volcán fuera del gránulo K tampoco publicó; verificador S164, V164-04)."""
+    granulo = _granulo_lascar(corrimiento_este_km=67.0)   # el borde oeste del gránulo queda a ~7 km del centro
+    vl = granulo[0]
+    PM = _via_encendida(monkeypatch, granulo)
+    llamadas = []
+
+    def lector_k(*_a, **_k):
+        llamadas.append(1)
+        raise _K()
+    monkeypatch.setattr(PM, "read_modis_l1b", lector_k)
+    r = "no volvió"
+    try:
+        r = PM.calculate_vrp(Path("MYD021KM.A2026115.0735.061.hdf"), Path("MYD03.A2026115.0735.061.hdf"),
+                             vl["lat"], vl["lon"], vent_lat=vl["lat"], vent_lon=vl["lon"], inner_radius_km=5.0)
+    except _K:
+        pass
+    assert llamadas == [], "con la vía encendida y el volcán fuera del gránulo, K no tiene que correr"
+    assert r is None
+
+
+def test_remuestreo_es_el_del_probe_del_censo():
+    """V164-06. El remuestreo (recorte de 45 km alrededor del centro de la grilla y griddata lineal sobre los centros
+    de celda) es la pieza que reparte el calor de un píxel aislado; tiene que ser el del probe del censo
+    (experiments/_s159/portes/probe_portes.py::grillar, blob sellado 8ec50e7b). Gránulo sintético irregular (rotado y
+    con ruido de posición) que se extiende más allá de 45 km, para que el radio y el método decidan."""
+    sys.path.insert(0, str(REPO / "experiments/_s159/portes"))
+    import probe_portes as PP
+    g = MV.grilla_del_volcan("Lascar", paso_m=1000.0, clave_roi="roi_modis")
+    rng = np.random.default_rng(1640)
+    n = 150
+    d = (np.arange(n) - n // 2) * 1.0
+    y, x = np.meshgrid(d, d, indexing="ij")
+    rot = np.radians(12.0)
+    xe, yn = x * np.cos(rot) - y * np.sin(rot), x * np.sin(rot) + y * np.cos(rot)
+    xe, yn = xe + rng.normal(0, 0.15, x.shape), yn + rng.normal(0, 0.15, x.shape)
+    lat = g["centro_lat"] + yn / 111.0
+    lon = g["centro_lon"] + xe / (111.0 * np.cos(np.radians(g["centro_lat"])))
+    mir = 0.1 + 0.002 * xe + 0.001 * yn ** 2 / 50 + rng.normal(0, 0.003, x.shape)
+    tir = 7.0 + rng.normal(0, 0.05, x.shape)
+    mir[n // 2, n // 2] = 0.4
+    mir[3, 3] = np.nan
+    a, b = MV.remuestrear_grilla(lat, lon, mir, tir, g)
+    gp = {"ul_x": g["ul_x"], "ul_y": g["ul_y"], "n": g["n"], "celda": g["paso"], "centro_lat": g["centro_lat"],
+          "centro_lon": g["centro_lon"]}
+    ra, rb = PP.grillar({"lat": lat, "lon": lon, "mir": mir, "tir": tir}, gp, g["epsg"])
+    assert np.array_equal(a, ra, equal_nan=True) and np.array_equal(b, rb, equal_nan=True)
+    assert np.isfinite(a).all()                      # el radio de 45 km cubre la grilla entera de 50 x 50 km
+    assert 0.15 < a.max() < 0.4                      # el lineal reparte el píxel caliente, no lo copia (nearest)
 
 
 def test_volcan_lejos_del_granulo_no_da_record():

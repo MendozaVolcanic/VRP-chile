@@ -73,6 +73,19 @@ MUTACIONES = [
     ("pm_flag_ignorado", PM, "    if ENABLE_MODIS_CODIGO_MIROVA:\n", "    if True:\n", "atrapada"),
     ("pm_vent_ignorado", PM, "                    vent_lat if vent_lat is not None else volcano_lat,\n",
      "                    volcano_lat,\n", "atrapada"),
+    # las cinco que el verificador S164 encontró vivas (V164-06), agregadas tras reforzar las pruebas
+    ("remuestreo_nearest", MOD, 'v[ok], (X, Y), method="linear"))', 'v[ok], (X, Y), method="nearest"))', "atrapada"),
+    ("radio_recorte_30_km", MOD, "RADIO_RECORTE_KM = 45.0 ", "RADIO_RECORTE_KM = 30.0 ", "atrapada"),
+    ("sunglint_sin_azimut", MOD, '                      geom.get("sensor_azimuth", 0.0), geom.get("solar_azimuth", 0.0))',
+     "                      0.0, 0.0)", "atrapada"),
+    ("distance_class_siempre_summit", MOD, '("summit" if dcen <= inner_km else "far")', '"summit"', "atrapada"),
+    # la vía devuelve None (volcán fuera del gránulo) y en vez de terminar ahí el procesador sigue a K
+    ("pm_via_none_cae_a_k_en_silencio", PM,
+     '                if _rec is None:\n                    return None\n                _rec.update({"granule": hdf_path.name,\n'
+     '                             "product_version": product_version_from_granule(hdf_path.name),\n'
+     '                             "datetime_utc": _parse_datetime(hdf_path.name)})\n                return _rec\n',
+     '                if _rec is not None:\n                    _rec.update({"granule": hdf_path.name})\n'
+     '                    return _rec\n', "atrapada"),
 ]
 
 
@@ -101,9 +114,13 @@ def main():
     try:
         for nombre, arch, a, b, esperado in MUTACIONES:
             if arch is not None:
+                # V164-03: con core.autocrlf=true el checkout trae CRLF; se muta sobre LF y se vuelve al final original
                 s = originales[arch].decode("utf-8")
+                crlf = "\r\n" in s
+                s = s.replace("\r\n", "\n")
                 assert s.count(a) == 1, f"{nombre}: el texto original aparece {s.count(a)} veces"
-                (REPO / arch).write_bytes(s.replace(a, b).encode("utf-8"))
+                s = s.replace(a, b)
+                (REPO / arch).write_bytes((s.replace("\n", "\r\n") if crlf else s).encode("utf-8"))
             try:
                 clase, asc, exc = correr(nombre)
             finally:

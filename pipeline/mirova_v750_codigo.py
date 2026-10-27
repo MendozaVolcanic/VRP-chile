@@ -69,8 +69,10 @@ LAMBDA_M15 = 10.763   # .m l. 145
 
 # VRP (MIROVA_VIIRS750_VRP.m l. 88-91): coeficiente de Wooster 1,97e7 por el área de la celda de 750 m en km²
 COEF_VRP_V750 = 1.97e7 * 0.5625 / 1e6
-# MODIS (S164, MOD-D fase 3): banda 22 y banda 31 (Coppola 2016a, sp426_5.txt l. 174-180, y process_modis.py), y
-# RP = 18,9 x A_pix x dL con A_pix = 1 km² nadir fijo (sp426_5.txt l. 374; CLAUDE.md «Reglas científicas», S14).
+# MODIS (S164, MOD-D fase 3): banda 22 a 3,959 um (Coppola 2016a, sp426_5.txt l. 176-177) y RP = 18,9 x A_pix x dL
+# con A_pix = 1 km² nadir fijo (sp426_5.txt l. 374; CLAUDE.md «Reglas científicas», S14). La TIR es la banda 31 a
+# 11,03 um, la de producción y la del censo MOD-D; el NTI del paper usa la banda 32 (l. 214-216), divergencia D20 que la
+# vía hereda (verificador S164, V164-02).
 LAMBDA_MODIS_B22 = 3.959
 LAMBDA_MODIS_B31 = 11.03
 COEF_VRP_MODIS = 1.89e7 * 1.0 / 1e6
