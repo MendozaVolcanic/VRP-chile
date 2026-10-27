@@ -569,6 +569,30 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 21:40 UTC (S165, vuelta 10): resto de #915 clasificado; V165-03 pedido; medición de la regla de posición en curso
+- Nicolás, en este chat: «Sí: mide primero, sin tocar pipeline/, cuántas pasadas cambian con la regla "cercano" en
+  VIIRS 750, MODIS y VIIRS 375, contra la distancia de la tabla de MIROVA. Después decido.» La medición corre en un
+  agente de sólo lectura que escribe en `experiments/_s165_regla_posicion/`.
+- Nicolás: «lanza la clasificación del resto de #915 (sólo lectura) y pídele V165-03 a la sesión de MxD03». V165-03 se
+  le pidió a la sesión MxD03 (`local_f2be5b7f`), con el sí de A45 en su chat y un tag nuevo.
+- **Resto de #915** (`experiments/_s165_issue915/INFORME.md`; `origin/main` `97ef53aa5`; consolidado de las 21:17 UTC,
+  posterior a D-39, más el snapshot del audit del 26-oct como control, con resultado idéntico). Los 6 «sin publicar» y
+  las 5 razones del issue se reproducen exactos.
+  - Tupungatito VIIRS 375, 28-sep 05:18 y 29-sep 04:54: **problema de referencia (A119), no FN, CONFIRMADO**. Nuestro
+    record ve una fuente lejana (far, 21,6 y 9,4 km, comprobado por S165), y la serie «Last Month» de MIROVA las ubica
+    a 22,6 y 9,6 km. La distancia de cráter de la fila sólo OCR viene de otra pasada, y el cráter de esas noches está
+    publicado en otra pasada.
+  - PCC VIIRS 750, 10-oct 05:54: **señal real sub-umbral (lacolito), CONFIRMADO**. En la misma pasada se publica en
+    VIIRS 375. Nicolás ya lo cerró sin cambiar K (#865, #881). Pendiente de Nicolás: registrarlo como pérdida aceptada
+    para que no reaparezca en cada audit.
+  - Magnitudes: no son pocas noches raras (al sacar una cualquiera, la mediana se mueve entre 0,01 y 0,18). Hay dos
+    regímenes. En Chillán, la razón cae con el cenit en MODIS (0,75 bajo 30° y 0,20 sobre 30°, ρ −0,83) y en VIIRS 375
+    (ρ −0,51); en VIIRS 750 el déficit es parejo y S158 R2 lo atribuye al fondo y al conteo. En PCC VIIRS 750 y
+    Tupungatito VIIRS 375 es régimen débil (S124): la razón sigue al contraste sobre el anillo (ρ +0,84 y +0,55), y
+    se cuelan noches de otro objeto (sin ellas, 0,517 y 0,618).
+  - Propuestas que decide Nicolás: que la magnitud por noche exija el mismo objeto en los dos lados, y que el audit no
+    levante flag por filas sólo OCR de Suomi NPP anteriores al 9-oct.
+
 ### 2026-10-27 21:08 UTC (S165, vuelta 9): #920 MERGEADO por orden de Nicolás; probe de MxD03 despachado
 - Nicolás, en este chat: «Apruebo el merge de #920 (MxD03 MODIS, tres flags apagados) con merge commit en el sha
   d80df4932. Mergéalo tú.». Merge commit **`ab3ff9fe3`**; `main` integrado en `loop/activo` (`4047b1833`).
