@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 23:40 UTC aprox. (S166, vuelta 1): retomada; adenda 2 de V750-B SELLADA con condición
+- Estado verificado al abrir: `loop/activo` en `9c5c348cd`, igual al remoto; `main` en `7a17af8c4`; C: 23 GB, D: 7,5 GB.
+  W4 (run 40545948109): 16 de 22 jobs en verde, 3 corriendo, 3 en cola. Último NRT (40578075719, 20:26 UTC, verde)
+  sobre `0dd52f028`, que NO contiene #920, #921 ni #922 (`git merge-base --is-ancestor`): el primero con ellos es el de
+  las 01:10 UTC.
+- S165 relevó la adenda 2: rama `claude/s162-viirs750-2-918174`, `4dbd88dce`. Comprobado en el remoto: batería 35 de 35
+  y nulo 27 de 27 en sus salidas guardadas; verificador Sonnet limpio LISTO CON CAMBIOS sobre `245fe46e5`; los 13
+  arreglos (VAD2-01 a 13) en `b2f58c5f6`, sin re-verificar.
+- Nicolás, en este chat: «Sello la adenda 2 de V750-B (rama claude/s162-viirs750-2-918174, commit 4dbd88dce). Pide antes
+  una pasada corta del verificador sobre los 13 cambios.»
+- Lanzado el verificador corto (Sonnet, contexto limpio, sólo lectura, sobre `git diff 245fe46e5 b2f58c5f6` en
+  `adenda2/` sin `verificador/`, re-corre batería y mutaciones en un `git archive` aparte). Avisado Loop VIIRS 750 2: no
+  anexar ni marcar SELLADA hasta el veredicto, rama quieta en `4dbd88dce`.
+
 ### 2026-10-27 22:50 UTC (S165, vuelta 14): #922 MERGEADO por orden de Nicolás
 - Nicolás, en este chat: «Apruebo el merge de #922 (V165-03, flag apagado) con merge commit en el sha
   0897ed5e6bb994b21fd76b941a2c4f209eccecf7. Mergéalo tú.». Merge commit **`7a17af8c4`**.
