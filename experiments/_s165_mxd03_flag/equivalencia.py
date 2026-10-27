@@ -13,8 +13,12 @@ de geolocalización, MOD021KM.A2026113.0150) y todos sus records de la població
   OFF  producción tal cual                                             -> tiene que ser el brazo K (control negativo:
        en los records donde K y X difieren, OFF da K y no X; si no, el arnés no ve el flag);
   SD   ON + ENABLE_MODIS_CRATER_SIN_DATO                               -> cuenta los records que pasan a «sin dato».
-La referencia (brazos K y X, publicación) son los 36 records de esos gránulos extraídos de los artefactos de MOD-B
+La referencia (brazos K y X, publicación) son los 18 records de esos gránulos extraídos de los artefactos de MOD-B
 (runs 40122029477 y 40126381034) a `referencia_mod_b.jsonl`, con su procedencia.
+EQUIVALENTE exige, en los 18: misma publicación, `pc.vrp_mw` a 0,001 MW y además el resumen del record idéntico al del
+brazo (ON contra X, OFF contra K). POR QUÉ el resumen: en 14 de los 18 records K y X ya coinciden en publicación y en
+`pc.vrp_mw`, así que con esos dos criterios solos el flag podría no hacer nada y salir equivalente (verificador S165,
+V165-02); en el resumen K y X difieren en los 18.
 
 Uso (lo despacha la coordinadora con .github/workflows/probe-mxd03-equivalencia.yml):
     python experiments/_s165_mxd03_flag/equivalencia.py --out out
@@ -135,7 +139,8 @@ def main():
     salida.close()
     print(json.dumps(tot, ensure_ascii=False))
     ok = (tot["errores"] == 0 and tot["n"] == len(ref) and tot["on_pub_vrp"] == tot["n"]
-          and tot["off_pub_vrp"] == tot["n"] and tot["control_negativo_ok"] == tot["kx_difieren"])
+          and tot["off_pub_vrp"] == tot["n"] and tot["on_resumen"] == tot["n"] and tot["off_resumen"] == tot["n"]
+          and tot["control_negativo_ok"] == tot["kx_difieren"])
     print("EQUIVALENTE" if ok else "NO EQUIVALENTE: revisar equivalencia.jsonl")
     sys.exit(0 if ok else 2)
 

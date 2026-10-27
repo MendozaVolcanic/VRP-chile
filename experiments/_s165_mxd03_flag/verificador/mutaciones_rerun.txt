@@ -1,0 +1,73 @@
+inicio 17:43:51 HEAD 4164d4547bc0ae0ac17a1c159bab3423fa405911
+control_sin_mutacion           esperado=viva        resultado=viva      OK
+control_caida                  esperado=caida       resultado=caida     OK
+     test_crater_cubierto_en_el_interior: 'RuntimeError: control de caida'
+     test_crater_en_un_bloque_de_relleno_no_esta_cubierto: 'RuntimeError: control de caida'
+perfil_lee_la_raiz             esperado=atrapada    resultado=atrapada  OK
+     test_flag_se_lee_de_thresholds_y_no_de_la_raiz[enable_modis_geo_mxd03-ENABLE_MODIS_GEO_MXD03]: 'assert (False, False) == (True, True)\n  \n  At index 0 diff: False != True\n  Use -v to get more diff'
+yaml_geo_encendido             esperado=atrapada    resultado=atrapada  OK
+     test_posicion_sin_flag_es_la_de_siempre_y_no_lee_el_mxd03: "AssertionError: assert ('interp_5km_mxd03_ilegible' == 'interp_5km'\n  \n  - interp_5km\n  + interp_5km_mxd03_ile"
+     test_flags_existen_y_estan_apagados[mirova_equivalent]: 'AssertionError: ENABLE_MODIS_GEO_MXD03\nassert (True is False)'
+yaml_dist_encendido            esperado=atrapada    resultado=atrapada  OK
+     test_dist_de_etiqueta_desde_el_crater_con_flag: 'assert array([[4.4]]) is array([[5.05]])\n +  where array([[4.4]]) = <function dist_de_etiqueta at 0x00000205FF'
+     test_flags_existen_y_estan_apagados[mirova_equivalent]: 'AssertionError: ENABLE_MODIS_DIST_DESDE_CRATER\nassert (True is False)'
+lector_lat_lon_cruzados        esperado=atrapada    resultado=atrapada  OK
+     test_leer_mxd03_usa_el_lector_de_la_via_codigo_mirova: 'assert (array([[-67.,  nan]]) is array([[-23.,  nan]]))'
+geo_flag_ignorado              esperado=atrapada    resultado=atrapada  OK
+     test_posicion_con_flag_es_mxd03: "AssertionError: assert ('interp_5km' == 'mxd03'\n  \n  - mxd03\n  + interp_5km)"
+     test_posicion_mxd03_queda_en_float32_como_el_brazo_x: "AssertionError: assert np.float32(0.0) == np.float32(-23.123455)\n +  where np.float32(-23.123455) = <class 'nu"
+geo_siempre_encendido          esperado=atrapada    resultado=atrapada  OK
+     test_posicion_sin_flag_es_la_de_siempre_y_no_lee_el_mxd03: "AssertionError: assert ('interp_5km_mxd03_ilegible' == 'interp_5km'\n  \n  - interp_5km\n  + interp_5km_mxd03_ile"
+     test_apagado_bit_a_bit_con_el_tag: 'assert \'{"crater_bor...nt_mw": 0.0}}\' == \'{"crater_bor...nt_mw": 0.0}}\'\n  \n  - {"crater_borde": {"anomaly_pixe'
+geo_sin_control_forma          esperado=atrapada    resultado=atrapada  OK
+     test_mxd03_que_no_calza_cae_a_la_interpolada_y_lo_dice: "AssertionError: assert ('mxd03' == 'interp_5km_mxd03_no_calza'\n  \n  - interp_5km_mxd03_no_calza\n  + mxd03)"
+geo_ilegible_sin_marca         esperado=atrapada    resultado=atrapada  OK
+     test_mxd03_ilegible_o_ausente_cae_a_la_interpolada_y_lo_dice[None]: "AssertionError: assert ('interp_5km' == 'interp_5km_mxd03_ilegible'\n  \n  - interp_5km_mxd03_ilegible\n  + inter"
+     test_mxd03_ilegible_o_ausente_cae_a_la_interpolada_y_lo_dice[geo.hdf]: "AssertionError: assert ('interp_5km' == 'interp_5km_mxd03_ilegible'\n  \n  - interp_5km_mxd03_ilegible\n  + inter"
+geo_fuente_no_se_escribe       esperado=atrapada    resultado=atrapada  OK
+     test_geo_cambia_la_posicion_y_lo_declara: "AssertionError: assert None == 'mxd03'\n +  where None = <built-in method get of dict object at 0x000001348056E"
+     test_geo_con_relleno_sin_estado_sigue_dando_record: "AssertionError: assert ({'anomaly_pixels': [{'bt_k': 288.67, 'dist_km': 5.01, 'lat': -39.37495, 'lon': -71.94,"
+geo_fuente_siempre             esperado=atrapada    resultado=atrapada  OK
+     test_apagado_bit_a_bit_con_el_tag: 'assert \'{"crater_bor...nt_mw": 0.0}}\' == \'{"crater_bor...nt_mw": 0.0}}\'\n  \n  Skipping 936 identical leading ch'
+     test_apagado_bit_a_bit_en_las_escenas_s142: 'assert \'{"nevado": {...nt_mw": 0.0}}\' == \'{"nevado": {...nt_mw": 0.0}}\'\n  \n  Skipping 923 identical leading ch'
+geo_no_se_usa                  esperado=atrapada    resultado=atrapada  OK
+     test_geo_cambia_la_posicion_y_lo_declara: 'assert -39.37495 == -39.39296801801802 ± 2.0e-05\n  \n  comparison failed\n  Obtained: -39.37495\n  Expected: -39.'
+     test_geo_y_sin_dato_no_escriben_record_sin_crater[crater_relleno]: "AssertionError: assert {'anomaly_pixels': [{'bt_k': 288.67, 'dist_km': 5.01, 'lat': -39.37495, 'lon': -71.94, "
+sin_dato_flag_ignorado         esperado=atrapada    resultado=atrapada  OK
+     test_sin_dato_solo_con_mxd03_y_con_el_flag: 'AssertionError: assert True is False\n +  where True = <function sin_dato_de_geolocalizacion at 0x000002767F6FF'
+     test_geo_con_relleno_sin_estado_sigue_dando_record: 'assert (None is not None)'
+sin_dato_con_interpolada       esperado=atrapada    resultado=atrapada  OK
+     test_sin_dato_solo_con_mxd03_y_con_el_flag: 'AssertionError: assert True is False\n +  where True = <function sin_dato_de_geolocalizacion at 0x0000021D3A6EF'
+sin_dato_no_corta              esperado=atrapada    resultado=atrapada  OK
+     test_geo_y_sin_dato_no_escriben_record_sin_crater[crater_relleno]: "AssertionError: assert {'anomaly_pixels': [{'bt_k': 288.67, 'dist_km': 5.01, 'lat': -39.37495, 'lon': -71.94, "
+     test_geo_y_sin_dato_no_escriben_record_sin_crater[crater_borde]: "AssertionError: assert {'anomaly_pixels': [], 'datetime_utc': '2026-07-19 03:00', 'diag_L_bg_local_w_m2_sr_um'"
+sin_dato_ancla_en_el_centro    esperado=atrapada    resultado=atrapada  OK
+     test_geo_y_sin_dato_no_escriben_record_sin_crater[crater_relleno]: "AssertionError: assert {'anomaly_pixels': [{'bt_k': 288.67, 'dist_km': 5.01, 'lat': -39.37495, 'lon': -71.94, "
+     test_los_tres_juntos: "AssertionError: assert ({'anomaly_pixels': [{'bt_k': 288.67, 'dist_km': 4.33, 'lat': -39.37495, 'lon': -71.94,"
+borde_ignorado                 esperado=atrapada    resultado=atrapada  OK
+     test_crater_en_la_primera_o_ultima_linea_o_frame_no_esta_cubierto[0-4]: 'assert True is False\n +  where True = <function crater_cubierto at 0x0000023CE93BC040>(array([[-23.   , -23.  '
+     test_crater_en_la_primera_o_ultima_linea_o_frame_no_esta_cubierto[8-4]: 'assert True is False\n +  where True = <function crater_cubierto at 0x0000023CE93BC040>(array([[-23.   , -23.  '
+solo_ultima_linea              esperado=atrapada    resultado=atrapada  OK
+     test_crater_en_la_primera_o_ultima_linea_o_frame_no_esta_cubierto[0-4]: 'assert True is False\n +  where True = <function crater_cubierto at 0x000001B27FD08040>(array([[-23.   , -23.  '
+     test_crater_en_la_primera_o_ultima_linea_o_frame_no_esta_cubierto[4-0]: 'assert True is False\n +  where True = <function crater_cubierto at 0x000001B27FD08040>(array([[-23.   , -23.  '
+vecinos_ignorados              esperado=atrapada    resultado=atrapada  OK
+     test_crater_en_un_bloque_de_relleno_no_esta_cubierto: 'assert True is False\n +  where True = <function crater_cubierto at 0x0000018463DAC0E0>(array([[-23.   , -23.  '
+     test_vecino_sin_posicion_basta_para_sin_dato: 'assert True is False\n +  where True = <function crater_cubierto at 0x0000018463DAC0E0>(array([[-23.   , -23.  '
+dist_flag_ignorado             esperado=atrapada    resultado=atrapada  OK
+     test_dist_de_etiqueta_desde_el_crater_con_flag: 'assert array([[5.05]]) is array([[4.4]])\n +  where array([[5.05]]) = <function dist_de_etiqueta at 0x000001D4B'
+     test_dist_desde_el_crater_llega_a_todos_sus_consumidores: "AssertionError: assert ('far' == 'far'\n  \n    far and 'far' == 'summit'\n  \n  - summit\n  + far)"
+dist_siempre_desde_crater      esperado=atrapada    resultado=atrapada  OK
+     test_dist_de_etiqueta_desde_el_crater_con_flag: 'assert array([[4.4]]) is array([[5.05]])\n +  where array([[4.4]]) = <function dist_de_etiqueta at 0x00000168FB'
+     test_apagado_bit_a_bit_con_el_tag: 'assert \'{"crater_bor...nt_mw": 0.0}}\' == \'{"crater_bor...nt_mw": 0.0}}\'\n  \n  Skipping 55 identical leading cha'
+dist_no_llega_al_pixel         esperado=atrapada    resultado=atrapada  OK
+     test_dist_desde_el_crater_llega_a_todos_sus_consumidores: "AssertionError: assert ('far' == 'far'\n  \n    far and 'far' == 'summit'\n  \n  - summit\n  + far)"
+     test_los_tres_juntos: "AssertionError: assert 'far' == 'summit'\n  \n  - summit\n  + far"
+anillo_desde_el_crater         esperado=atrapada    resultado=atrapada  OK
+     test_dist_desde_el_crater_llega_a_todos_sus_consumidores: 'AssertionError: diag_n_bg_anillo\nassert 1874 == 1872'
+dist_no_llega_al_test1         esperado=no_cubierta resultado=viva      OK
+
+mutaciones reales atrapadas por aserción: 22 de 22
+controles: sin mutación viva, caída caida
+declaradas no cubiertas: ['dist_no_llega_al_test1']
+todo como se esperaba
+rc=0 fin 17:55:35

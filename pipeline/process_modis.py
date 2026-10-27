@@ -688,7 +688,10 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # S165: distancia con que se escribe el `dist_km` de cada píxel anómalo (y de ahí `hotspot_dist_km`,
     # `final_hotspot_dist_km` y la etiqueta). Apagado, es `dist`. Los otros usos de `dist` se quedan desde el centro
     # a propósito: el anillo de fondo (`bg_mask`, geometría del ROI, D17) y el diagnóstico `diag_t_max_dist_km`, que
-    # no decide nada y es comparable con todo el histórico sólo si no cambia de origen.
+    # no decide nada y es comparable con todo el histórico sólo si no cambia de origen. Aguas abajo, store.py también
+    # lee esta distancia: el filtro de píxeles (`_filter_pixels_by_distance`) y la geocerca de `hotspot_dist_km`
+    # contra radius_km pasan a medir desde el cráter con el flag (verificador S165, V165-01: sobre data/ de marzo a
+    # octubre de 2026, 0 píxeles MODIS salen de la cerca y 1 descartado vuelve a entrar, PCC 2026-05-03 07:50).
     dist_etiqueta = dist_de_etiqueta(dist, vent_dist_per_pixel)
 
 
