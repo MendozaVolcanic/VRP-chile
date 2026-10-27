@@ -569,6 +569,35 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 18:30 UTC (S165, vuelta 8): #920 (MxD03, tres flags apagados) cumple las condiciones; V375-E con decisión de posición
+- **#920** (sesión MxD03, rama `claude/s165-mxd03-flags`, sha `d80df4932`, borrador). Comprobado por S165:
+  - CI pytest en verde sobre ese sha y estado CLEAN.
+  - El tag `pre-s165-mxd03-modis` está sobre `d94f25191` (main con #919).
+  - En `pipeline/` toca sólo `process_modis.py`, `profile.py` y `profiles/mirova_equivalent.yaml` (los tres flags en
+    `false`, en `thresholds:`). Además agrega `.github/workflows/probe-mxd03-equivalencia.yml`.
+  - Con `pipeline.profile`, los flags `ENABLE_MODIS_GEO_MXD03`, `_CRATER_SIN_DATO`, `_DIST_DESDE_CRATER`,
+    `_CODIGO_MIROVA` y `ENABLE_V750_CODIGO_MIROVA` dan False.
+  - **El arnés sintético S142 completo (helpers, modis, v375, v750, perfil), corrido con `git archive` del tag y de la
+    rama, da salida idéntica byte a byte.** El nevado de MODIS publica 4,635 MW, así que la comparación no es trivial.
+  - Según la sesión: A45 dado por Nicolás en su chat («Sí, los tres apagados»); suite 2.678 y 0 fallas con el árbol
+    quieto; mutaciones 22 de 22. El verificador Fable 5.1 da A1, A2, A4 a A7 y A9 CONFIRMADO, y A3 y A8 en parte
+    (`experiments/_s165_mxd03_flag/verificador/`). V165-01, 02 y 04 están corregidos; V165-03 queda pendiente
+    antes de encender «sin dato» (la pasada descartada no queda como incidencia).
+  - Para la decisión de encender: «sin dato» deja fuera 223 de 5.465 pasadas del censo (ninguna publicada por K;
+    1 alerta bajo 1 MW, Villarrica 2026-09-25 08:05). La distancia desde el cráter cambia 5 publicaciones, todas de
+    PCC en negativos limpios (de más), y no gana ninguna alerta.
+  - Merge pendiente del sí de Nicolás (el clasificador niega el merge sin revisión humana). Después del merge: despachar
+    `probe-mxd03-equivalencia.yml` (sólo lectura) y remapear la cita de A100 (con #920, `keep_peak` pasa de la 1259 a
+    la 1350).
+- **V375-E** (sesión `local_0a1b597c`, worktree `cranky-payne-f7d913`). Con el flag apagado, la salida es idéntica bit
+  a bit en los 3 perfiles y en 6.143 de 6.143 records del almacén. La equivalencia con el port da NO EQUIVALENTE por
+  una sola causa, la regla de posición de `procesar_grilla` (`_cumulo_del_mas_radiante`, compartida por V750, MODIS y
+  375): en 8 pasadas (4 protegidas: Isluga 06-17, 09-28 y 10-03, Láscar 10-01) hay un píxel débil en el cráter y una
+  fuente más radiante a 7 a 34 km. La vía etiqueta far y calla; el port («cercano») publica. **Decide Nicolás**
+  (alternativas A a D en `V375E_regla_de_posicion.md` de las notas de esa sesión; recomendación: B medida antes en los
+  tres sensores, sólo lectura). Choca con la decisión del 2026-10-09 («anomalía MAYOR»).
+- W4 (run 40545948109) en curso. Disco: C: 12 GB, D: 7,1 GB.
+
 ### 2026-10-27 16:57 UTC (S165, vuelta 7): W3 pareja; W4 despachada; MxD03 y V375-E arrancadas
 - **W3** (run 40496903128): success, 22 de 22 jobs de reproceso más el de recolectar; terminó a las 16:46 UTC. Salidas
   en `s151-ab-diurno/40496903128` (`5631255c7`). `cobertura.txt`: 1.429 pasadas nocturnas por brazo, 0 faltan y 0
