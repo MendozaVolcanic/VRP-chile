@@ -156,7 +156,8 @@ CITAS_CLAUDE_MD = [
     ("frontend/index.html", 1595, "isValidDetection"),
     # S151: predicado del tope D9, citado en la marca S151 de A23.
     # S164: 1056 -> 1094, +1 por el import de ENABLE_MODIS_CODIGO_MIROVA y +37 por el bloque de la vía «código MIROVA».
-    ("pipeline/process_modis.py", 1094, "_path_d_cap_active"),
+    # S165: 1094 -> 1182 (+88): imports y cabecera FICHA de los flags MxD03, sus funciones nuevas y su cableado.
+    ("pipeline/process_modis.py", 1182, "_path_d_cap_active"),
     # S140: corridas por el import de product_version (8b) y por el fondo persistido (T7).
     ("pipeline/process_viirs.py", 83, "FLAG_DNS"),
     # S149: +1 en los tres procesadores por el import de roi1_summit_mask (A118, la caja al segundo pase).
@@ -164,7 +165,8 @@ CITAS_CLAUDE_MD = [
     ("pipeline/process_viirs_mod.py", 467, "Villarrica/PP/Lastarria/Chaiten/PCC"),
     ("pipeline/process_viirs.py", 213, "compute_test1_nti"),
     # S147: 59 -> 62, la cabecera FICHA crecio al retirar la cita bibliografica de D30.
-    ("pipeline/process_modis.py", 62, "compute_test1_mir"),
+    # S165: 62 -> 64, la cabecera FICHA nombra los tres flags MxD03 apagados.
+    ("pipeline/process_modis.py", 64, "compute_test1_mir"),
     ("pipeline/process_viirs_mod.py", 164, "compute_test1_mir"),
     ("scripts/build_c2ab_windows.py", 64, "registro_vrp_ocr.csv"),
 ]

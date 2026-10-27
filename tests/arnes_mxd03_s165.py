@@ -9,8 +9,9 @@ resultado:
     5,0 km al norte del centro y 4,32 km del cráter, con inner 4,6 km. Hoy sale `far`; midiendo desde el cráter, `summit`.
   * `mxd03_corrido`: la misma escena, pero el MxD03 ubica cada píxel 2 km más al sur que la grilla interpolada (el
     desfase 5i contra 5i+2, A61 H2). Con la posición del MxD03 cambian la latitud del píxel y su distancia.
-  * `crater_relleno`: el MxD03 trae relleno (NaN tras limpiar el -999) en cinco líneas alrededor del cráter. Con MxD03 y
-    el estado «sin dato», no hay record.
+  * `crater_relleno`: el MxD03 trae relleno (NaN tras limpiar el -999) en tres líneas al norte del cráter, que dejan sin
+    posición a un vecino del píxel del cráter pero no a los del centro del volcán. Con MxD03 y el estado «sin dato», no
+    hay record.
   * `crater_borde`: el MxD03 deja el cráter fuera de la imagen, más allá de la primera línea. Con MxD03 y «sin dato», no
     hay record.
 Las escenas usan la malla y el cono térmico del arnés S142 (tests/arnes_sintetico_s142.py), sin modificarlo.
@@ -67,8 +68,10 @@ def escena(tipo, semilla=3):
     elif tipo == "mxd03_corrido":
         lat_m = (lat - 2.0 * KM_LAT).astype(np.float32)
     elif tipo == "crater_relleno":
-        lat_m[C - 2:C + 3, :] = np.nan
-        lon_m[C - 2:C + 3, :] = np.nan
+        # Relleno en las líneas C+2 a C+4: el píxel más cercano al cráter (fila C+1, a 0,32 km) tiene un vecino sin
+        # posición, y el del centro del volcán (fila C) no. Así la escena distingue desde qué punto se juzga.
+        lat_m[C + 2:C + 5, :] = np.nan
+        lon_m[C + 2:C + 5, :] = np.nan
     elif tipo == "crater_borde":
         # La última fila (la más al norte) queda en el centro del volcán: el cráter, 0,68 km más al norte, cae fuera.
         lat_m = (lat - C * KM_LAT).astype(np.float32)
@@ -104,7 +107,10 @@ def correr_en_subproceso(tmp_dir, flags=(), perfil="mirova_equivalent"):
         cmd += ["--flag", f"{f}=True"]
     r = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True, timeout=900,
                        env={**os.environ, "VRP_PROFILE": perfil, "PYTHONIOENCODING": "utf-8"})
-    assert r.returncode == 0, r.stderr[-4000:]
+    # RuntimeError y no assert: un subproceso que muere es una caída, no una aserción que falla; así la batería de
+    # mutaciones no cuenta como atrapada una mutación que sólo rompe el código (S152, S156).
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr[-4000:])
     return salida.read_text(encoding="utf-8")
 
 
