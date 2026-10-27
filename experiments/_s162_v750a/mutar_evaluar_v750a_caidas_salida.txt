@@ -1,0 +1,19 @@
+# Repetición con un hilo de las 4 mutaciones que cayeron en la corrida principal (M1, M33, M34, M36).
+# Tramo 1: 2026-10-26 18:39 UTC, --solo M1,M33,M34,M36; detenido por disco a las ~21:30 UTC (orden de la coordinadora S164).
+# El medidor no alcanzó a escribir su resumen: sólo quedan las líneas en vivo. M34 cayó otra vez (batería muerta tras E27, sin línea).
+   IDENTIDAD: PASA | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (61)
+   M1: ATRAPADA | == PRUEBAS: FALLAS 2 de 61
+   M33: ATRAPADA | == PRUEBAS: FALLAS 1 de 61
+   M34: CAÍDA | (sin línea de pruebas)
+
+# Tramo 2: 2026-10-27 11:34 a 12:27 UTC, --solo M34,M36 (aviso de disco de la coordinadora S165). Identidad y control CAIDA corren siempre.
+   IDENTIDAD: PASA | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (61)
+   M34: ATRAPADA | == PRUEBAS: FALLAS 1 de 61
+   M36: ATRAPADA | == PRUEBAS: FALLAS 3 de 61
+   CAIDA: CAÍDA | == PRUEBAS: CAÍDAS 61 (fallas por aserción 0) de 61
+(corrida parcial: --solo M34,M36)
+IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (61)
+M34 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | cobertura: una protegida SIN DATO ya no frena sola | == PRUEBAS: FALLAS 1 de 61 | escenarios que fallan ['E36']
+M36 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6.1 (L2): sin mínimo de mutaciones atrapadas en la prueba local | == PRUEBAS: FALLAS 3 de 61 | escenarios que fallan ['E60', 'E51', 'E38']
+CAIDA | CAÍDA (tiene que ser CAÍDA) | rc 2 | CONTROL: el analizador sólo se cae (excepción al cargar los objetivos) | == PRUEBAS: CAÍDAS 61 (fallas por aserción 0) de 61 | escenarios que fallan []
+== RESUMEN: 2 de 2 mutaciones atrapadas por aserción; controles como deben; TODO COMO SE ESPERA
