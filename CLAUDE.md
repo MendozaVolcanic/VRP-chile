@@ -249,7 +249,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   perdidos en hipótesis ya implementada S15.
   - ⚠️ **El ejemplo drifteó — verificado S127.** La regla citaba
     `run_pipeline.py:220` pasando `eff_vent_lat` desde `get_effective_vent()`.
-    Hoy son las líneas **252/295/342** (234/277/324 hasta S161, que agregó la cabecera FICHA) y la función es **`get_detection_anchor()`**;
+    Hoy son las líneas **252/296/345** (252/295/342 hasta S165, cuando V165-03 agregó el aviso `al_sin_dato` a la llamada MODIS y V375-E dos líneas a la de VIIRS 375; 234/277/324 hasta S161, que agregó la cabecera FICHA) y la función es **`get_detection_anchor()`**;
     `get_effective_vent` quedó como alias sin llamador en producción (ver D17 y
     `docs/AUDIT_S127.md` §Hallazgo 7). **La lección vale entera**; el ejemplo no,
     como ya les pasó a A7, A13 y A17. Es la propia A6 aplicada a A6.
@@ -435,7 +435,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   las dos frases de esta regla que dicen que el tope «funciona» sólo quieren decir que recorta. No está
   medido que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02: el paper no lo sostiene), y el tope
   se arma con el fondo de la escena bajo 270 K sin que ningún píxel pase por temperatura ni por NTI
-  absoluto (`pipeline/process_modis.py:1185`, era 1094 hasta S165, 1056 hasta S164 y 1009 hasta S157). Corpus al 2026-10-14 (65.705 records): 1.565 cúmulos
+  absoluto (`pipeline/process_modis.py:1191`, era 1185 hasta V165-03, 1094 hasta S165, 1056 hasta S164 y 1009 hasta S157). Corpus al 2026-10-14 (65.705 records): 1.565 cúmulos
   topados en 5,0 exacto (277 `summit`), los 1.565 con `primary_cluster.d9_capped`, y **343 cúmulos
   sobre 5 MW** (110 `summit`), así que «0 records sobre 5 MW» vale sólo para la población de S113 (A90).
   Script: `experiments/_s150_meta_audit/verif_docs/contar_topados_d9.py`. Marca de S146 conservada:
@@ -1400,7 +1400,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   `final_hotspot_source == "test1"` y el Test 1 integrado está apagado (D10, D30; 0 de 3.687 records con esa fuente
   desde la observación del 2026-09-18, `experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt`). El «nunca
   apagarlo solo» vale para el detector anterior. El keep-peak focal de MODIS y VIIRS 750 (`FOCAL_CLUSTER_KEEP_PEAK`,
-  `pipeline/process_modis.py:1172`) es otro mecanismo y sigue corriendo. **A100. `keep_peak` daba paridad por accidente** con un píxel a ~3 km del cráter (S139): nunca apagarlo solo.
+  `pipeline/process_modis.py:1356`, donde la llamada lo pasa como `keep_peak=`; la cita decía 1172 y ya estaba corrida antes de S165, V16503-03) es otro mecanismo y sigue corriendo. **A100. `keep_peak` daba paridad por accidente** con un píxel a ~3 km del cráter (S139): nunca apagarlo solo.
 - **A101. Las citas `file:line` se remapean por contenido** (`difflib` contra `origin/main`, sólo bloques
   idénticos), nunca por aritmética ni en citas históricas deliberadas como A6 y A49 (S141).
 - **A102. Al corregir una función, buscar también las copias en línea de su lógica** (S141): el detector
