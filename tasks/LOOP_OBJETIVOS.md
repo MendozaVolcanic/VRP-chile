@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 11:43 UTC (S165, vuelta 2): loop/activo integrado a main (#918, merge commit)
+- Nicolás (en el chat de S164, 11:33 UTC, relevado por S164): «apruebo lo que tu recomiendes». S165 y modd-fase3
+  pasaron a ser sesiones de primer nivel y la coordinación queda entera en S165.
+- **#918** (de `loop/activo` a `main`): 100 commits y 45 archivos, sólo `experiments/_s162_v375/` y `tasks/`. No toca
+  `pipeline/`, `data/`, `frontend/` ni `.github/`, y ningún test lee esos archivos (grep sobre `tests/`). CI pytest en
+  verde (4 min 37 s), estado CLEAN. Mergeado con merge commit por la API: `cc16b3a7f`. `origin/main..origin/loop/activo`
+  da 0, y `loop/activo` avanzó en fast-forward a `cc16b3a7f`.
+- W3 (run 40496903128) en cola detrás del NRT de las 11:10 UTC. modd-fase3 tiene en el remoto el tag
+  `pre-s16x-modis-codigo-mirova` (sobre `987877bb1`); su rama `claude/s164-modis-codigo-mirova` todavía no está en el
+  remoto, y se le pidió subirla. El plan de MxD03 (`docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md`) vive en
+  `claude/s162-modis-2-0dd578` y entra a la cola cuando la fase 3 entregue su PR.
+- Esperan a Nicolás: los pasos de D-39 (`PASOS_PARA_NICOLAS.md`, `claude/s163-d39-mirova-v1-710f72` `c10cad031`), la
+  sesión V375-E con su sí de A45, los mazos del congreso, la licencia del repo y la política de IA de Volcanica.
+
 ### 2026-10-27 11:31 UTC (S165, vuelta 1): parada por disco levantada; W2 pareja; W3 despachada; #915 Chillán
 - Relevo: S164 avisó a las 11:27 UTC que Nicolás dijo «si sigue con todo lo que recomiendes». Disco a las 11:31 UTC:
   C: 30 GB libres, D: 7,7 GB. **Parada por disco levantada**; avisado a modd-fase3 y a Loop VIIRS 750 2 (retomar
