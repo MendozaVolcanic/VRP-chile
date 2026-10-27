@@ -901,6 +901,13 @@ ENABLE_UTM_REGRID: bool = bool(_t.get("enable_utm_regrid", False))
 # sombra, tag defensivo y el sí explícito de Nicolás (A45). Va en `_t`, como todo `enable_*` (S124, A89).
 ENABLE_V750_CODIGO_MIROVA: bool = bool(_t.get("enable_v750_codigo_mirova", False))
 
+# S164 MOD-D fase 3, la misma vía para MODIS (pipeline/mirova_v750_codigo.py con FAMILIAS["MODIS"]). POR QUÉ: el censo
+# MOD-D (5.465 pasadas nocturnas, verificado) midió que el código de MIROVA portado a MODIS, con el fondo según la regla
+# de fillmissing2 de MATLAB, se equivoca menos que K contra MIROVA (8 errores contra 49) y acerca la magnitud. Nicolás lo
+# aprobó como CANDIDATO (2026-10-26) y confirmó que entra APAGADA: con False no corre ninguna línea de la vía y el
+# procesador MODIS es el de hoy bit a bit. Encenderla exige reproceso verificado y el sí de Nicolás (A45). En `_t`.
+ENABLE_MODIS_CODIGO_MIROVA: bool = bool(_t.get("enable_modis_codigo_mirova", False))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))

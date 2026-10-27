@@ -1,22 +1,26 @@
 # ════════════════════════════════════════════════════════════════════
 # FICHA SDA · mirova_v750_codigo.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
-# Objetivo      : Vía de proceso «código MIROVA» para VIIRS 750 m (M13/M15): ver el volcán como lo ve MIROVA,
-#                 interpolado a su grilla fija, con su detector, su fondo y su suma. APAGADA por flag
-#                 (enable_v750_codigo_mirova, S162); con el flag apagado no corre nada de este archivo.
+# Objetivo      : Vía de proceso «código MIROVA» para VIIRS 750 m (M13/M15) y para MODIS (B22 con B21 donde satura,
+#                 B31; S164, MOD-D fase 3): ver el volcán como lo ve MIROVA, interpolado a su grilla fija, con su
+#                 detector, su fondo y su suma. APAGADA por flag en cada sensor (enable_v750_codigo_mirova, S162;
+#                 enable_modis_codigo_mirova, S164); con los flags apagados no corre nada de este archivo.
 # Lógica        : (1) remuestreo lineal del gránulo a la grilla UTM de MIROVA del volcán (regla GEO, S159);
 #                 (2) MIROVA_VIIRS750_hotspot_detection.m: NTI absoluto (K1 -0,7) + dos pasadas contextuales
 #                 de NTI y ETI con umbral max(mu + s*sd, piso) por región; (3) MIROVA_VIIRS750_VRP.m: fondo por
 #                 interpolación lineal bajo un halo dilatado, sin recorte, sumado sobre TODOS los alertados.
 # Modelo/método : Port literal del código operacional de MIROVA (Coppola, OSF zm62w, MIT). Reglas físicas
 #                 deterministicas, sin ML (punto 5.5 Res.372).
-# Datos entrada : Radiancia VIIRS M13 (4,05 um) y M15 (10,76 um) del L1B y geolocalización del L1B GEO. SIN
-#                 datos personales.
+# Datos entrada : Radiancia VIIRS M13 (4,05 um) y M15 (10,76 um) del L1B y geolocalización del L1B GEO; en MODIS,
+#                 radiancia B22 (3,959 um, con B21 donde B22 satura) y B31 (11,03 um) del MxD021KM y geolocalización
+#                 de 1 km del MxD03. SIN datos personales.
 # Variables     : NTI, contraste NTI y ETI contra la media 3 x 3, umbrales por región (BOX), fondo M13
-#                 interpolado, VRP = suma de (L - L_fondo) x 1,97e7 x 0,5625 / 1e6.
+#                 interpolado, VRP = suma de (L - L_fondo) x 1,97e7 x 0,5625 / 1e6 (V750) o x 1,89e7 x 1,0 / 1e6
+#                 (MODIS, Coppola 2016a Ec. 7).
 # Limitaciones  : fillmissing2 de MATLAB no documenta su triangulación; se reproduce con un Delaunay de desempate
 #                 simbólico que iguala a MATLAB R2026b en 166 de 166 escenas (S163 O2), sin que el mecanismo interno
 #                 de MATLAB esté verificado. La ROI por volcán la decide V750-B. El umbral contextual depende de la
-#                 sigma de TODA la grilla (S-1).
+#                 sigma de TODA la grilla (S-1). En MODIS es SOSPECHA que MIROVA use este mismo .m (lo publicado es
+#                 el de VIIRS 750): la vía es el paquete que midió el censo MOD-D (S162), umbrales del .m incluidos.
 # Refs/datos    : MIROVA_VIIRS750_hotspot_detection.m y MIROVA_VIIRS750_VRP.m (copia con hashes en
 #                 experiments/_s158_d17_diseno/osf_codigo_mirova/); oráculo validado contra Octave en 791 de 791
 #                 escenas (S159 O1). Ficha: docs/FICHA_SDA_VRP_CHILE.md
@@ -65,14 +69,37 @@ LAMBDA_M15 = 10.763   # .m l. 145
 
 # VRP (MIROVA_VIIRS750_VRP.m l. 88-91): coeficiente de Wooster 1,97e7 por el área de la celda de 750 m en km²
 COEF_VRP_V750 = 1.97e7 * 0.5625 / 1e6
+# MODIS (S164, MOD-D fase 3): banda 22 a 3,959 um (Coppola 2016a, sp426_5.txt l. 176-177) y RP = 18,9 x A_pix x dL
+# con A_pix = 1 km² nadir fijo (sp426_5.txt l. 374; CLAUDE.md «Reglas científicas», S14). La TIR es la banda 31 a
+# 11,03 um, la de producción y la del censo MOD-D; el NTI del paper usa la banda 32 (l. 214-216), divergencia D20 que la
+# vía hereda (verificador S164, V164-02).
+LAMBDA_MODIS_B22 = 3.959
+LAMBDA_MODIS_B31 = 11.03
+COEF_VRP_MODIS = 1.89e7 * 1.0 / 1e6
 
 PASO_V750_M = 750.0
+PASO_MODIS_M = 1000.0
 MEDIA_GRILLA_M = 25000.0   # regla GEO: centros en X0 - 25000 : paso : X0 + 25000
 RADIO_RECORTE_KM = 45.0    # como probe_n.grillar: sólo se interpolan los píxeles a menos de 45 km
 FLAG_MIN_DN = 65528        # DN >= 65528 son banderas en el L1B de VIIRS (UserGuide Aug 2021, Tabla C.1)
 TIPOS_ROI = ("def", "sens", "crater", "inner", "corona")
 
 _GRILLAS_YAML = Path(__file__).resolve().parent / "grillas_mirova.yaml"
+
+# Lo único que el .m hace depender del sensor, más lo que vive fuera del .m (grilla, caja, lectura). POR QUÉ una tabla
+# y no una copia del módulo para MODIS: una lógica copiada en línea diverge (A102); así VIIRS 750 y MODIS corren las
+# mismas funciones y sólo cambian estos números. La caja de MODIS es la «fisica» del censo MOD-D: el mismo tamaño en
+# metros que la de 750 m (±2.625 m sensible, ±7.875 m conservadora alrededor de X0, Y0), o sea 5 x 5 y 15 x 15 celdas
+# de 1 km (experiments/_s159/portes/mirova_port.py::caja). dist_max_centro_km: como el probe del censo, si el píxel más
+# cercano al centro de la grilla está a más de 5 km el volcán quedó fuera del gránulo (VIIRS 750 no tiene ese corte).
+FAMILIAS = {
+    "VIIRS750": {"paso_m": PASO_V750_M, "lam_mir": LAMBDA_M13, "lam_tir": LAMBDA_M15, "coef": COEF_VRP_V750,
+                 "lado_sensible": 7, "lado_anillo": 21, "bandas": ("M13", "M15"), "clave_roi": "roi_v750",
+                 "dist_max_centro_km": None},
+    "MODIS": {"paso_m": PASO_MODIS_M, "lam_mir": LAMBDA_MODIS_B22, "lam_tir": LAMBDA_MODIS_B31, "coef": COEF_VRP_MODIS,
+              "lado_sensible": 5, "lado_anillo": 15, "bandas": ("MIR", "TIR"), "clave_roi": "roi_modis",
+              "dist_max_centro_km": 5.0},
+}
 
 
 # ---------------------------------------------------------------------------------------------------- Planck
@@ -126,14 +153,14 @@ def n_celdas(paso_m):
     return int(math.floor(2 * MEDIA_GRILLA_M / paso_m)) + 1
 
 
-def grilla_del_volcan(nombre, paso_m=PASO_V750_M):
+def grilla_del_volcan(nombre, paso_m=PASO_V750_M, clave_roi="roi_v750"):
     """Grilla de MIROVA del volcán, o None si no está en grillas_mirova.yaml.
 
     POR QUÉ: MIROVA interpola cada gránulo a una grilla UTM fija por volcán; ver el volcán como MIROVA exige usar
     SU grilla, no la geometría de barrido. Columnas de oeste a este desde X0 - 25000; filas de SUR a norte desde
     Y0 - 25000, así que la esquina norte es Y0 - 25000 + (n - 1) paso + paso / 2 (no simétrica con la oeste).
     Devuelve el mismo dict que usan probe_n y la prueba de equivalencia: epsg, ul_x, ul_y, centro_lat, centro_lon,
-    más n y paso."""
+    más n y paso. La ROI sale de la clave del sensor (roi_v750, roi_modis); si el yaml no la trae, "def"."""
     r = _referencias().get(nombre)
     if r is None:
         return None
@@ -141,7 +168,15 @@ def grilla_del_volcan(nombre, paso_m=PASO_V750_M):
     return {"epsg": int(r["epsg"]), "ul_x": float(r["x0"]) - MEDIA_GRILLA_M - paso_m / 2,
             "ul_y": float(r["y0"]) - MEDIA_GRILLA_M + (n - 1) * paso_m + paso_m / 2,
             "centro_lat": float(r["centro_lat"]), "centro_lon": float(r["centro_lon"]), "n": n, "paso": paso_m,
-            "roi": r.get("roi_v750", "def")}
+            "roi": r.get(clave_roi, "def")}
+
+
+def _haversine(lat, lon, lat0, lon0):
+    """Distancia en km (R = 6371), la misma expresión que el recorte de remuestrear_grilla y que el probe del censo."""
+    dlat, dlon = np.radians(lat - lat0), np.radians(lon - lon0)
+    a = np.sin(dlat / 2) ** 2 + np.cos(np.radians(lat)) * np.cos(np.radians(lat0)) * np.sin(dlon / 2) ** 2
+    with np.errstate(invalid="ignore"):
+        return 6371.0 * 2 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
 
 
 def remuestrear_grilla(lat, lon, m13, m15, grilla, radio_km=RADIO_RECORTE_KM):
@@ -268,7 +303,8 @@ def _mean_omitnan(x):
     return float(v.mean()) if v.size else np.nan
 
 
-def _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, excluidos, s1, s2, n1, n2, e1, e2):
+def _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, excluidos, s1, s2, n1, n2, e1, e2,
+                       lam_mir=LAMBDA_M13):
     """contextualDetectionPass, .m l. 252-400: tres máscaras (BOX 0, 1 y 2), diagnóstico y los mapas de contraste.
 
     POR QUÉ: el detector compara cada celda con la media de sus 8 vecinos MÁS ella misma, en NTI y en ETI (el NTI
@@ -291,7 +327,7 @@ def _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, excluidos, s1, s2, 
     if np.isnan(mu + s2 * sd):
         u_nti2 = n2
 
-    m13_esp = temperatura_a_radiancia(bt15, LAMBDA_M13)            # l. 319-320
+    m13_esp = temperatura_a_radiancia(bt15, lam_mir)               # l. 319-320 (λ MIR del sensor, l. 144)
     with np.errstate(invalid="ignore", divide="ignore"):
         nti_esp = (m13_esp - m15) / (m13_esp + m15)                 # l. 324-326
     nti_esp[excluidos] = np.nan                                     # l. 328-329
@@ -317,13 +353,15 @@ def _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, excluidos, s1, s2, 
     return a0, a1, a2, diag, c_nti, c_eti
 
 
-def detectar_mirova(m13, m15, box, dayflag, sunglint, devolver_diag=False):
+def detectar_mirova(m13, m15, box, dayflag, sunglint, devolver_diag=False, lam_mir=LAMBDA_M13,
+                    lam_tir=LAMBDA_M15):
     """MIROVA_VIIRS750_hotspot_detection.m. Devuelve la máscara booleana de alertados (o (máscara, diag)).
 
     POR QUÉ las piezas: el Test 1 (NTI > -0,7 de noche) es una alerta directa y además saca esas celdas del fondo
     del primer pase contextual; el segundo pase repite la regresión sin las alertas del primero. Sin compuerta de
     temperatura, sin modo de un píxel y sin tope de magnitud (el código no los tiene). El diag lleva, por pase,
-    mu, sd y umbrales, y los mapas de contraste para la celda decisiva (S-1)."""
+    mu, sd y umbrales, y los mapas de contraste para la celda decisiva (S-1). lam_mir y lam_tir son las longitudes de
+    onda del .m l. 144-145 (M13 y M15 por defecto; en MODIS, B22 y B31): lo único del detector que depende del sensor."""
     m13 = np.asarray(m13, float)
     vacio = np.zeros(m13.shape, bool)
 
@@ -343,7 +381,7 @@ def detectar_mirova(m13, m15, box, dayflag, sunglint, devolver_diag=False):
     m2 = np.where(box == 2, 1.0, np.nan)
     excl = np.isnan(box)                                             # l. 140
 
-    bt15 = radiancia_a_temperatura(m15, LAMBDA_M15)                  # l. 150
+    bt15 = radiancia_a_temperatura(m15, lam_tir)                     # l. 150
     with np.errstate(invalid="ignore"):
         frio = bt15 <= 200                                           # l. 151
     bt15[frio] = np.nan                                              # l. 153
@@ -363,9 +401,11 @@ def detectar_mirova(m13, m15, box, dayflag, sunglint, devolver_diag=False):
 
     with np.errstate(invalid="ignore"):
         absol = nti_roi > u_abs                                      # l. 206
-    p1 = _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, absol, s1, s2, n1, n2, e1, e2)   # l. 211-218
+    p1 = _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, absol, s1, s2, n1, n2, e1, e2,
+                            lam_mir=lam_mir)                                                     # l. 211-218
     ctx1 = p1[0] | p1[1] | p1[2]
-    p2 = _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, absol | ctx1, s1, s2, n1, n2, e1, e2)  # l. 228-235
+    p2 = _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, absol | ctx1, s1, s2, n1, n2, e1, e2,
+                            lam_mir=lam_mir)                                                     # l. 228-235
     mask = ctx1 | absol | p2[0] | p2[1] | p2[2]                      # l. 241-248 (unión de las siete listas)
     d.update({"pasada1": p1[3], "pasada2": p2[3], "n_abs": int(absol.sum()), "n_p1": int(ctx1.sum()),
               "n_p2": int((p2[0] | p2[1] | p2[2]).sum()), "nti": nti_roi,
@@ -604,14 +644,19 @@ def _cumulo_del_mas_radiante(mascara, m13):
 
 
 def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inner_km, sensor,
-                    coef=COEF_VRP_V750):
+                    coef=None, familia="VIIRS750"):
     """Detección + VRP + record (esquema de hoy) sobre una grilla ya remuestreada.
 
     Record: vrp_mw = primary_cluster.vrp_mw = VRP de la UNIÓN de los alertados (lo que publica MIROVA, D32);
     posición, centroide y distance_class = el cúmulo 8-conexo de la alertada más radiante, con la distancia medida
     desde el cráter (pos_crater, posición fraccionaria en la grilla, como producción mide desde
-    get_detection_anchor). Sin modo de un píxel y sin tope D9 (N-5: el tope recorta una erupción real)."""
-    mascara, d = detectar_mirova(m13g, m15g, box, dayflag, sunglint, devolver_diag=True)
+    get_detection_anchor). Sin modo de un píxel y sin tope D9 (N-5: el tope recorta una erupción real). familia elige
+    las longitudes de onda y el coeficiente (FAMILIAS); coef, si se da, reemplaza al de la familia."""
+    cfg = FAMILIAS[familia]
+    coef = cfg["coef"] if coef is None else coef
+    lam = cfg["lam_mir"]
+    mascara, d = detectar_mirova(m13g, m15g, box, dayflag, sunglint, devolver_diag=True, lam_mir=lam,
+                                 lam_tir=cfg["lam_tir"])
     v = vrp_mirova(m13g, mascara, coef=coef)
     celda_c = (int(round(pos_crater[0])), int(round(pos_crater[1])))
     paso_km = float(grilla.get("paso", PASO_V750_M)) / 1000.0
@@ -635,19 +680,19 @@ def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inne
     pico = max(cu, key=lambda p: m13g[p])
     plat, plon = latlon_de(grilla, *pico)
     dpico = float(np.hypot(pico[0] - pos_crater[0], pico[1] - pos_crater[1]) * paso_km)
-    t_max = float(radiancia_a_temperatura(np.array([m13g[pico]]), LAMBDA_M13)[0])
+    t_max = float(radiancia_a_temperatura(np.array([m13g[pico]]), lam)[0])
     dc = None if inner_km is None else ("summit" if dcen <= inner_km else "far")
     pix = []
     for f, k in zip(*np.nonzero(mascara)):
         la, lo = latlon_de(grilla, f, k)
         pix.append({"lat": round(la, 5), "lon": round(lo, 5),
                     "dist_km": round(float(np.hypot(f - pos_crater[0], k - pos_crater[1]) * paso_km), 2),
-                    "bt_k": round(float(radiancia_a_temperatura(np.array([m13g[f, k]]), LAMBDA_M13)[0]), 2),
+                    "bt_k": round(float(radiancia_a_temperatura(np.array([m13g[f, k]]), lam)[0]), 2),
                     "fila": int(f), "col": int(k)})
     rec.update({
         "vrp_mw": vrp_mw, "t_max_k": round(t_max, 2), "distance_class": dc, "anomaly_pixels": pix,
         # fondo medio del .m bajo los alertados, en temperatura de brillo (para el log y el tablero; no decide nada)
-        "t_bg_k": round(float(radiancia_a_temperatura(np.array([v["L_bk"] / v["npix"]]), LAMBDA_M13)[0]), 2),
+        "t_bg_k": round(float(radiancia_a_temperatura(np.array([v["L_bk"] / v["npix"]]), lam)[0]), 2),
         "primary_cluster": {"vrp_mw": vrp_mw, "n_pixels": len(cu), "centroid_lat": round(clat, 5),
                             "centroid_lon": round(clon, 5), "centroid_dist_km": round(dcen, 3),
                             "single_pixel_mode": False},
@@ -699,35 +744,72 @@ def leer_geo_l1b(ruta):
 
 
 def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_lon, inner_km, sensor,
-                         grilla=None, tipo_roi=None):
+                         grilla=None, tipo_roi=None, familia="VIIRS750"):
     """Del gránulo (radiancia y geolocalización ya leídas) al record, para un volcán con grilla de MIROVA.
 
     Devuelve None si el volcán no tiene grilla en grillas_mirova.yaml (el llamador decide qué hacer: la vía no
-    inventa una grilla) o si el gránulo no cubre el volcán (menos de 100 píxeles en el recorte de 45 km)."""
-    g = grilla or grilla_del_volcan(nombre_volcan)
+    inventa una grilla) o si el gránulo no cubre el volcán (menos de 100 píxeles en el recorte de 45 km o, en MODIS,
+    el píxel más cercano al centro a más de 5 km). familia: "VIIRS750" (rad con M13 y M15) o "MODIS" (rad con MIR y
+    TIR, ver leer_radiancia_modis)."""
+    cfg = FAMILIAS[familia]
+    g = grilla or grilla_del_volcan(nombre_volcan, paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"])
     if g is None:
         return None
     lat = np.asarray(lat, float)
     lon = np.asarray(lon, float)
-    dlat, dlon = np.radians(lat - g["centro_lat"]), np.radians(lon - g["centro_lon"])
-    a = np.sin(dlat / 2) ** 2 + np.cos(np.radians(lat)) * np.cos(np.radians(g["centro_lat"])) * np.sin(dlon / 2) ** 2
-    with np.errstate(invalid="ignore"):
-        dist = 6371.0 * 2 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
+    dist = _haversine(lat, lon, g["centro_lat"], g["centro_lon"])
     sel = np.isfinite(dist) & (dist < RADIO_RECORTE_KM)
     if sel.sum() < 100:
         return None
     i0 = np.unravel_index(np.nanargmin(np.where(sel, dist, np.inf)), dist.shape)
+    if cfg["dist_max_centro_km"] is not None and dist[i0] > cfg["dist_max_centro_km"]:
+        return None
     geom = {k: float(np.asarray(v)[i0]) for k, v in (angulos or {}).items() if v is not None}
     dayflag = 0 if geom.get("solar_zenith", 180.0) > 90 else 1
     sg = sunglint_deg(geom.get("sensor_zenith", 0.0), geom.get("solar_zenith", 0.0),
                       geom.get("sensor_azimuth", 0.0), geom.get("solar_azimuth", 0.0))
-    m13g, m15g = remuestrear_grilla(lat, lon, rad["M13"], rad["M15"], g)
+    b_mir, b_tir = cfg["bandas"]
+    m13g, m15g = remuestrear_grilla(lat, lon, rad[b_mir], rad[b_tir], g)
     pos = posicion_de(g, vent_lat, vent_lon)
     celda = celda_de(g, vent_lat, vent_lon)
     box = caja_roi(tipo_roi or g.get("roi", "def"), n=g["n"], celda_crater=celda, inner_km=inner_km,
-                   paso_m=g["paso"])
-    rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor)
+                   lado_sensible=cfg["lado_sensible"], lado_anillo=cfg["lado_anillo"], paso_m=g["paso"])
+    rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia)
     rec["diag_codigo_mirova"].update({"dayflag": dayflag, "sunglint": round(sg, 2),
                                       "celdas_sin_dato": int(np.isnan(m13g).sum())})
     rec.update({f"{k}_deg": round(v, 2) for k, v in geom.items()})
     return rec
+
+
+# ---------------------------------------------------------------------------------------------------- MODIS (S164)
+def leer_radiancia_modis(ruta):
+    """MIR y TIR de MODIS en radiancia (W m-2 sr-1 um-1, float64), como el probe del censo MOD-D
+    (experiments/_s159/portes/probe_portes.py::leer_modis): las bandas por el lector de producción (DN > 32767 a NaN,
+    MODIS L1B C7 UserGuide 5.6) y la MIR fusionada con la banda 22 primaria y la 21 donde la 22 satura (Coppola 2016a,
+    la banda L21ok). POR QUÉ siempre B22 primaria y no el flag de producción: es la vía que midió el censo."""
+    from .process_modis import read_modis_l1b, merge_mir_bands
+    d = read_modis_l1b(ruta)
+    b21, b22, b31 = (np.asarray(d[k], np.float64) for k in ("band21", "band22", "band31"))
+    return {"MIR": merge_mir_bands(b21, b22, True), "TIR": b31}
+
+
+def leer_geo_mxd03(ruta):
+    """lat, lon (float64) y ángulos de observación en grados del MxD03 (geolocalización de 1 km).
+
+    POR QUÉ el MxD03 y no la grilla de 5 km del MxD021KM que interpola producción: el censo MOD-D corrió con el MxD03,
+    y la interpolada corre las posiciones 1 a 3 km hacia el nadir (memoria S151, project_modis_geo_interp_offset); el
+    censo la midió aparte (fisica_geo5km) y no es la vía aprobada. Como el probe del censo: fuera de rango a NaN y los
+    ángulos con su factor de escala, sin enmascararlos."""
+    from pyhdf.SD import SD, SDC
+    sd = SD(str(ruta), SDC.READ)
+    lat = sd.select("Latitude").get().astype(np.float64)
+    lon = sd.select("Longitude").get().astype(np.float64)
+    ang = {}
+    for k, nm in (("sensor_zenith", "SensorZenith"), ("sensor_azimuth", "SensorAzimuth"),
+                  ("solar_zenith", "SolarZenith"), ("solar_azimuth", "SolarAzimuth")):
+        s = sd.select(nm)
+        ang[k] = s.get().astype(np.float64) * float(s.attributes().get("scale_factor", 1.0))
+    sd.end()
+    lat[(lat < -90) | (lat > 90)] = np.nan
+    lon[(lon < -180) | (lon > 180)] = np.nan
+    return lat, lon, ang

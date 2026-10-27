@@ -155,7 +155,8 @@ CITAS_CLAUDE_MD = [
     # S153: 1594 -> 1595, +1 por el script cambio_detector.js (marca de la adopción de K) en la cabecera.
     ("frontend/index.html", 1595, "isValidDetection"),
     # S151: predicado del tope D9, citado en la marca S151 de A23.
-    ("pipeline/process_modis.py", 1056, "_path_d_cap_active"),
+    # S164: 1056 -> 1094, +1 por el import de ENABLE_MODIS_CODIGO_MIROVA y +37 por el bloque de la vía «código MIROVA».
+    ("pipeline/process_modis.py", 1094, "_path_d_cap_active"),
     # S140: corridas por el import de product_version (8b) y por el fondo persistido (T7).
     ("pipeline/process_viirs.py", 83, "FLAG_DNS"),
     # S149: +1 en los tres procesadores por el import de roi1_summit_mask (A118, la caja al segundo pase).
