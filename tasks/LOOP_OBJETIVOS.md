@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 12:46 UTC (S165, vuelta 4): D-39 CERRADO; identidad de #919 comprobada aparte
+- **D-39 cerrado** (lo reportó S164; S165 comprobó en el remoto lo que va marcado como comprobado). Nicolás pausó los
+  workflows de Mirova-v1, puso el tag `pre-pr26-referencia-estable` (`ca7af53ae`, comprobado) y mergeó Mirova-v1#26
+  (`7f4ea069b`, 2026-10-27 12:31:11 UTC, comprobado). Según S164, antes del merge el PR se actualizó (`e259d0d7e`, CI
+  6/6) por 297 filas más perdidas en dos mezclas posteriores a la revisión (26-oct 15:37 y 27-oct 09:12), 3 de ellas
+  protegidas de Láscar. Total: 2.648 filas y 23 protegidas. La primera corrida repuso 2.648 filas y la segunda 0; el OCR
+  reparó 647 notas; s20 dio VERDE (0 llaves perdidas, mojibake 0). El sync de VRP Chile volvió a verde: run
+  40505762684, success a las 12:41 UTC (comprobado). Los workflows de Mirova-v1 están activos de nuevo (comprobado).
+  **A90: el consolidado ganó 2.648 filas, así que todo conteo contra la referencia anterior a las 12:41 UTC del
+  2026-10-27 no es comparable con uno posterior.**
+- **#919, identidad bit a bit comprobada por S165 aparte de la hija**: con `git archive` del tag
+  `pre-s16x-modis-codigo-mirova` (pipeline/, tests/ y volcanoes.yaml) se corrió `tests/arnes_sintetico_s142.py
+  --solo modis`. La salida es idéntica a `tests/datos_s164_modis/modis_k_antes.json` de `c4efdc78c` en las tres escenas
+  (nevado, nevado_vecino_tibio, plana), y la del nevado publica 4,635 MW (no trivial). Según modd-fase3, la suite da
+  2.640 passed, 29 skipped, 2 xfailed y 0 fallas, con el árbol quieto, y el control encendido cambia. Falta sólo el
+  verificador (Fable alto, desde las 12:11 UTC). La cita de A100 queda pendiente fuera del PR.
+
 ### 2026-10-27 12:36 UTC (S165, vuelta 3): V750-A completo; #919 de MOD-D fase 3 en borrador; W3 corriendo
 - Disco: C: 30 GB libres, D: 7,7 GB. NRT de las 11:10 UTC en verde; el de las 12:10 UTC está corriendo.
 - **Medidor de V750-A COMPLETO**: 62 de 62 mutaciones atrapadas por aserción. Son 58 en la corrida principal
