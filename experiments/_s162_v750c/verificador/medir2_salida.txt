@@ -1,0 +1,35 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+censo: 60
+
+== censo 60: recuperados ('enK') por zona de la caja por defecto donde cae la celda de K
+  zona de la celda de K: {1: 19, 2: 38, 0: 3} | por volcan: {'Isluga': {2: 22}, 'Lascar': {2: 9, 1: 1}, 'Lastarria': {2: 1}, 'PlanchonPeteroa': {2: 6}, 'PuyehueCordonCaulle': {0: 3, 1: 1}, 'Tupungatito': {1: 17}}
+  O                enK por zona: {2: 1}
+  O_8vec           enK por zona: {2: 5}
+  O_sens           enK por zona: {1: 3, 2: 1}
+  O_circ           enK por zona: {1: 3, 2: 1}
+  O_todoK_sincomp  enK por zona: {1: 3, 2: 5}
+  geo_nearest      enK por zona: {2: 23}
+  geo_cubic        enK por zona: {2: 7}
+  r2_linear        enK por zona: {2: 13}
+  r2_nearest       enK por zona: {2: 26}
+
+== distancia de la celda de K al centro de la grilla de MIROVA (km), por volcan (censo):
+  Isluga                 mediana 0.75 min 0.00 max 1.06 n=22 | inner_radius_km 5.0 | mitad de la caja sensible 7x7: 2.625
+  Lascar                 mediana 1.50 min 0.75 max 4.24 n=10 | inner_radius_km 5.0 | mitad de la caja sensible 7x7: 2.625
+  Lastarria              mediana 2.70 min 2.70 max 2.70 n=1 | inner_radius_km 3.0 | mitad de la caja sensible 7x7: 2.625
+  PlanchonPeteroa        mediana 2.02 min 1.50 max 2.37 n=6 | inner_radius_km 3.0 | mitad de la caja sensible 7x7: 2.625
+  PuyehueCordonCaulle    mediana 10.56 min 7.83 max 24.76 n=4 | inner_radius_km 20.0 | mitad de la caja sensible 7x7: 2.625
+  Tupungatito            mediana 4.80 min 4.37 max 5.41 n=17 | inner_radius_km 7.0 | mitad de la caja sensible 7x7: 2.625
+
+== censo 60: margen del pase 1 del .m en el entorno de K con los umbrales de SU zona vs con los de zona 2 (sensible)
+  zona 0: margen propio mediana 0.108 [q1 0.107, q3 0.167] n=3 | con umbrales de zona 2 mediana 0.524 [q1 0.502, q3 0.762] n=3 | pasarian con zona 2: 0
+  zona 1: margen propio mediana 0.212 [q1 0.179, q3 0.250] n=19 | con umbrales de zona 2 mediana 0.755 [q1 0.714, q3 0.879] n=19 | pasarian con zona 2: 3
+  zona 2: margen propio mediana 0.702 [q1 0.584, q3 0.869] n=38 | con umbrales de zona 2 mediana 0.702 [q1 0.584, q3 0.869] n=38 | pasarian con zona 2: 1
+  Tupungatito (17): margen propio mediana 0.214 [q1 0.187, q3 0.255] n=17 | con umbrales de zona 2 mediana 0.802 [q1 0.714, q3 0.893] n=17
+  (control: el margen con zona 2 nunca es menor que el propio; aserto en el bucle)
+
+== Tupungatito en el censo con las cajas sensibles (brazo recalculado):
+  O_sens           enK 3/17
+  O_circ           enK 3/17
+  O_8vec           enK 0/17
+  O_todoK_sincomp  enK 3/17

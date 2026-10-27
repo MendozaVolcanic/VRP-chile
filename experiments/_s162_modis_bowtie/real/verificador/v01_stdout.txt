@@ -1,0 +1,14 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf
+evaluables: 403 de 413 objetivos MODIS
+ventana de los datos: 2026-03-01 01:35 a 2026-10-21 08:05 UTC
+variantes guardadas por el lote: ['fisica', 'fisica_b21', 'fisica_geo5km', 'pixel', 'sensible']
+(1) B21 primaria rearmada = port.fisica_b21 del lote: 403 de 403; pasadas con deteccion en fisica_b21: 5; distintos: []
+    B21 rearmada distinta de fisica (B22) del lote en 15 de 403 pasadas (en las 390 sin deteccion un 'igual' vacio no distingue nada: el control del auditor solo informa sobre 13)
+(2) geo 5 km rearmada = port.fisica_geo5km del lote: 403 de 403; con deteccion: 11; distintos: []
+    la grilla MIR con geo 5 km difiere de la grilla con MxD03 en 403 de 403 pasadas (control: una geolocalizacion distinta tiene que mover la grilla)
+(3) comparador: igual(port, lote) en 141 = True
+    una celda corrida una columna -> igual = False (tiene que ser False)
+    VRP + 2e-9 MW -> igual = False (tiene que ser False)
+    lat/lon corridas una fila -> grilla MIR distinta: True; igual(port, lote) = False (tiene que ser False); npix 8 -> 6
+exit 0

@@ -1,0 +1,62 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-03-01 a 2026-10-16 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+main congelado: 80b819828f16e19ceacbd21dc7c4e474d46122b4 | data/ modificado localmente: False | HEAD distinto del main congelado en ('data/mirova_equivalent', 'pipeline', 'scripts', 'volcanoes.yaml', 'frontend') : False
+referencia: {"registro_vrp_consolidado.csv": {"sha_commit": "47303dcdee295fd97c4372ecb5871a24957f3a20", "sha256_lf": "8ec5d918310b681fafff268ef4e33fa15139fb86045e0e7489c9b0bc5522138b", "bytes": 8236935}, "registro_vrp_ocr.csv": {"sha_commit": "534003b3b51fe321c730d21fd9cb767487f433d6", "sha256_lf": "fd7a709885ba410c44a349e11c1704349c61744ea7daa479444a8897d5cd1888", "bytes": 529693}}
+filas de referencia nocturnas indexadas en la ventana: 19260
+records MODIS en la ventana: 5465
+por etiqueta: {'bajo1': 42, 'far_ref': 10, 'neg_limpio': 5110, 'protegida': 50, 'sin_info': 253} | suma 5465
+K publica por etiqueta: {'bajo1_pubK': 32, 'far_ref_pubK': 0, 'neg_limpio_pubK': 39, 'protegida_pubK': 48, 'sin_info_pubK': 6}
+   ('25-40', 'f0', 'bajo1') 4
+   ('25-40', 'f0', 'neg_limpio') 479
+   ('25-40', 'f0', 'protegida') 12
+   ('25-40', 'f0', 'sin_info') 16
+   ('25-40', 'otro', 'bajo1') 4
+   ('25-40', 'otro', 'far_ref') 1
+   ('25-40', 'otro', 'neg_limpio') 456
+   ('25-40', 'otro', 'protegida') 3
+   ('25-40', 'otro', 'sin_info') 17
+   ('40-50', 'f0', 'bajo1') 2
+   ('40-50', 'f0', 'far_ref') 1
+   ('40-50', 'f0', 'neg_limpio') 444
+   ('40-50', 'f0', 'protegida') 1
+   ('40-50', 'f0', 'sin_info') 15
+   ('40-50', 'otro', 'bajo1') 4
+   ('40-50', 'otro', 'neg_limpio') 401
+   ('40-50', 'otro', 'protegida') 2
+   ('40-50', 'otro', 'sin_info') 26
+   ('<=25', 'f0', 'bajo1') 11
+   ('<=25', 'f0', 'far_ref') 4
+   ('<=25', 'f0', 'neg_limpio') 608
+   ('<=25', 'f0', 'protegida') 9
+   ('<=25', 'f0', 'sin_info') 33
+   ('<=25', 'otro', 'bajo1') 16
+   ('<=25', 'otro', 'far_ref') 2
+   ('<=25', 'otro', 'neg_limpio') 632
+   ('<=25', 'otro', 'protegida') 20
+   ('<=25', 'otro', 'sin_info') 42
+   ('>50', 'f0', 'bajo1') 1
+   ('>50', 'f0', 'far_ref') 1
+   ('>50', 'f0', 'neg_limpio') 1052
+   ('>50', 'f0', 'protegida') 1
+   ('>50', 'f0', 'sin_info') 52
+   ('>50', 'otro', 'far_ref') 1
+   ('>50', 'otro', 'neg_limpio') 1038
+   ('>50', 'otro', 'protegida') 2
+   ('>50', 'otro', 'sin_info') 52
+control Lascar 2026-03-27 07:10: ['protegida'] (esperado [protegida]) OK
+control NevadosDeChillan 2026-06-01 08:15: ['neg_limpio'] (esperado [neg_limpio]) OK
+control PuyehueCordonCaulle 2026-06-19 01:15: ['neg_limpio'] (esperado [neg_limpio]) OK
+granulos 1232; records con cenit <= 35: 2046 en 511 granulos
+mitades de pasada partida: 222; expuestas: [('Lascar', '2026-03-04 01:55', 'bajo1'), ('Lascar', '2026-03-09 07:10', 'protegida'), ('Lascar', '2026-03-14 07:05', 'bajo1'), ('Lascar', '2026-03-27 07:10', 'protegida'), ('Lascar', '2026-04-08 01:50', 'protegida'), ('Lascar', '2026-04-27 07:15', 'bajo1'), ('NevadosDeChillan', '2026-10-10 07:40', 'protegida')]
+codigo_sha distintos: 12; mayores: [('3695f6758', 4614), ('34cea39e4', 652), ('57d18ad78', 144), ('e0c90caa7', 38), ('76398cafb', 3), ('959778a16', 3)]
+product_version: {'standard': 5465}
+partes 24: corridas estimadas por parte min 2386 max 2389 total 57315
+escrito D:\vrp-trabajo\s162-mxd03\experiments\_s162_mxd03\poblacion.json

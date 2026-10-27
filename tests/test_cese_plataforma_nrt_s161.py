@@ -61,6 +61,12 @@ def _limpio(monkeypatch):
     monkeypatch.setattr(fetch.earthaccess, "search_data", _red_prohibida)
     monkeypatch.setattr(fetch.earthaccess, "download", _red_prohibida)
     monkeypatch.setattr(fetch, "auth", lambda: None)
+    # S163 (port de I1 de #889): estas pruebas simulan el día siguiente al cese, que hoy está en el futuro, y el
+    # control «completa» usa ANTES (ocho días antes del cese), que fue «hoy» hace poco. Con I1 un día sin terminar más
+    # la latencia de LANCE es «día parcial» y cuenta en modo estricto, así que su resultado pasaría a depender del
+    # reloj. Acá se mide el cese y la plataforma muda, no el reloj: el día parcial lo prueba
+    # tests/test_cobertura_incidencias_s159.py.
+    monkeypatch.setattr(fetch, "dia_incompleto", lambda date, ahora=None: False)
     monkeypatch.setenv("VRP_BUSQUEDA_VENTANA", "0")
     for v in ("VRP_VENTANA_BUSQUEDA", "VRP_CACHE_BUSQUEDA_DIR", "GITHUB_STEP_SUMMARY", "GITHUB_ACTIONS"):
         monkeypatch.delenv(v, raising=False)

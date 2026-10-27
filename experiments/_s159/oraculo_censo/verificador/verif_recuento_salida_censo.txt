@@ -1,0 +1,63 @@
+== carga propia de crudos
+   D:\vrp-trabajo\temporales\s159_oraculo\run_39713438252: ids vistos 5746, duplicados dentro del run 0 []
+   ids con resultado: 5746 de 5746 | ids de crudos fuera de objetivos: 0
+   estados: {'ok': 5620, 'volcan_fuera_del_granulo': 106, 'sin_granulo_VNP02MOD|sin_granulo_por_ventana': 10, 'sin_granulo_VJ202MOD|sin_granulo_por_ventana': 10}
+   ok 5620 | fuera 106 | SIN DATO 20
+   SIN DATO por dia: {'2026-10-12': 20}
+   ok con estado ok pero sin alguna caja o sin record K: 0
+== record K del mismo granulo que el objetivo: granule distinto 9, hora distinta 0, sensor distinto 0
+== record sintetico: reimplementacion vs record_oraculo copiado, distintos 0 de 11240
+== poblacion ok: negativos 5353 | alertas 267 (deciden 253: protegidas 78, bajo 1 MW 175; solo OCR antes del 06-13 14)
+   negativos cuyas filas de MIROVA no son todas RUTINA: 0
+== (a) negativos limpios publicados, recuento propio sobre 5353 ok
+   K 54 | O-def 5 | O-sens 15
+   produccion (pub_prod de objetivos.json) en los mismos 5353 ok: 54
+   produccion en TODOS los negativos de la poblacion (5476): 54 | en los 'fuera': 0 | en SIN DATO: 1
+   O-def: encendidos 1, apagados 50
+      enc 1362 Isluga 2026-07-15 05:36: K dc=summit pc={'n_pixels': 1, 'vrp_mw': 0.0, 'centroid_lat': -19.15761, 'centroid_lon': -68.83514, 'centroid_dist_km': 1.003, 'single_pixel_mode': True, 'geo_class': 'summit'} n_px=1 vrp_mw=0 | O npix=1 vrp=0.151 dmax_px=0.75 km inner=5.0
+   O-sens: encendidos 7, apagados 46
+      enc 69 Tupungatito 2026-04-05 05:30: K dc=summit pc={'n_pixels': 1, 'vrp_mw': 0.0, 'centroid_lat': -33.3903, 'centroid_lon': -69.82961, 'centroid_dist_km': 0.331, 'single_pixel_mode': True, 'geo_class': 'summit'} n_px=1 vrp_mw=0 | O npix=1 vrp=0.330 dmax_px=4.80 km inner=7.0
+      enc 193 Tupungatito 2026-04-16 05:24: K dc=None pc=None n_px=0 vrp_mw=0 | O npix=1 vrp=0.241 dmax_px=5.03 km inner=7.0
+      enc 928 Tupungatito 2026-06-10 04:54: K dc=None pc=None n_px=0 vrp_mw=0 | O npix=1 vrp=0.047 dmax_px=6.71 km inner=7.0
+      enc 1362 Isluga 2026-07-15 05:36: K dc=summit pc={'n_pixels': 1, 'vrp_mw': 0.0, 'centroid_lat': -19.15761, 'centroid_lon': -68.83514, 'centroid_dist_km': 1.003, 'single_pixel_mode': True, 'geo_class': 'summit'} n_px=1 vrp_mw=0 | O npix=1 vrp=0.151 dmax_px=0.75 km inner=5.0
+      enc 2899 Tupungatito 2026-04-24 05:24: K dc=summit pc={'n_pixels': 1, 'vrp_mw': 0.0, 'centroid_lat': -33.39102, 'centroid_lon': -69.82918, 'centroid_dist_km': 0.341, 'single_pixel_mode': True, 'geo_class': 'summit'} n_px=1 vrp_mw=0 | O npix=1 vrp=0.227 dmax_px=4.80 km inner=7.0
+      enc 3334 Tupungatito 2026-06-05 05:36: K dc=summit pc={'n_pixels': 1, 'vrp_mw': 0.0, 'centroid_lat': -33.38771, 'centroid_lon': -69.82523, 'centroid_dist_km': 0.183, 'single_pixel_mode': True, 'geo_class': 'summit'} n_px=1 vrp_mw=0 | O npix=1 vrp=0.208 dmax_px=5.03 km inner=7.0
+      enc 5708 PuyehueCordonCaulle 2026-10-09 06:54: K dc=None pc=None n_px=0 vrp_mw=0 | O npix=1 vrp=0.416 dmax_px=5.03 km inner=20.0
+== control 1 propio sobre 5620 ok: pub distinta 0; pc.vrp_mw distinto 0; pares None-None (no comparan nada) 5198; K con pc None 5198; K con pc 0,0 MW 109; K con pc = 5,0 exacto (tope D9) 0
+   SHA de codigo de los records de produccion (regimen.codigo_sha) en ok: 15 distintos; el control pasa en todos
+== (b) ramas del predicado (columnas de node) por tipo de record, sobre 5620 ok
+   K: summit 363, valid 313, artefacto termico 0, disp>0 255, publica 255 | con cumulo/pixeles 422
+      con cumulo y sin publicar: {'cumulo con 0,0 MW': 108, 'no summit (etiqueta far o descartado)': 59}
+   O-def: summit 210, valid 213, artefacto termico 0, disp>0 210, publica 210 | con cumulo/pixeles 213
+      con cumulo y sin publicar: {'no summit (etiqueta far o descartado)': 3}
+   O-sens: summit 269, valid 298, artefacto termico 1, disp>0 269, publica 268 | con cumulo/pixeles 298
+      con cumulo y sin publicar: {'no summit (etiqueta far o descartado)': 29, 'artefacto termico': 1}
+   K con etiqueta far pero cumulo con energia dentro del inner (A46 cara b, via que el oraculo no tiene): 0; de ellos negativos 0, alertas que deciden 0 (protegidas 0)
+   O-def: con pixeles pero vrp redondeado a 0,000 (no publica por redondeo) 0; publicaciones 210, con algun pixel alertado fuera del inner y centroide dentro 0 []; distancia maxima de un pixel publicado 2.70 km
+   O-sens: con pixeles pero vrp redondeado a 0,000 (no publica por redondeo) 0; publicaciones 268, con algun pixel alertado fuera del inner y centroide dentro 0 []; distancia maxima de un pixel publicado 10.09 km
+== alertas que deciden: quien publica (ok)
+   protegidas (78) K vs O-def: ambos 71, solo K (O pierde) 6, solo O (O gana) 0, ninguno 1 | K publica 77, O-def publica 71
+   protegidas (78) K vs O-sens: ambos 77, solo K (O pierde) 0, solo O (O gana) 1, ninguno 0 | K publica 77, O-sens publica 78
+   bajo 1 MW (175) K vs O-def: ambos 77, solo K (O pierde) 33, solo O (O gana) 44, ninguno 21 | K publica 110, O-def publica 121
+   bajo 1 MW (175) K vs O-sens: ambos 102, solo K (O pierde) 8, solo O (O gana) 59, ninguno 6 | K publica 110, O-sens publica 161
+   protegidas que K NO publica: [('PuyehueCordonCaulle', '2026-10-10 05:54', 1.19, None, None, {'O-def': False, 'O-sens': True})]
+   protegidas que O-def pierde, con la geometria del oraculo: [('PuyehueCordonCaulle', '2026-06-07 05:54', 1.2, 'pc_prod', 0.882, 'pc_dist', 0.227, 'Odef npix', 0, 'Osens npix', 2, 'Osens dist', 7.731), ('PuyehueCordonCaulle', '2026-09-18 05:24', 1.43, 'pc_prod', 0.536, 'pc_dist', 0.302, 'Odef npix', 0, 'Osens npix', 1, 'Osens dist', 7.83), ('PuyehueCordonCaulle', '2026-05-25 05:42', 1.01, 'pc_prod', 1.017, 'pc_dist', 0.096, 'Odef npix', 0, 'Osens npix', 1, 'Osens dist', 7.83), ('PuyehueCordonCaulle', '2026-06-05 05:36', 1.09, 'pc_prod', 0.622, 'pc_dist', 0.178, 'Odef npix', 0, 'Osens npix', 2, 'Osens dist', 7.731), ('PuyehueCordonCaulle', '2026-07-06 05:54', 1.02, 'pc_prod', 0.113, 'pc_dist', 0.542, 'Odef npix', 0, 'Osens npix', 2, 'Osens dist', 7.731), ('PuyehueCordonCaulle', '2026-07-03 05:48', 1.0, 'pc_prod', 0.364, 'pc_dist', 0.31, 'Odef npix', 0, 'Osens npix', 1, 'Osens dist', 7.83)]
+== dE recomputado (mismas definiciones del pre-registro seccion 4)
+   O-def: dE = (54+5) - (65+54) = -60; SIN DATO: negativos 17, bajo 1 MW 2, protegidas 1; rango [-62, -43] (supone que K no publica ninguna SIN DATO; si K publicara las 17 negativas SIN DATO el piso seria -79)
+   O-sens: dE = (14+15) - (65+54) = -90; SIN DATO: negativos 17, bajo 1 MW 2, protegidas 1; rango [-92, -73] (supone que K no publica ninguna SIN DATO; si K publicara las 17 negativas SIN DATO el piso seria -109)
+== (c) lectura con la tabla de latest.php sola: alertas que deciden solo por OCR (alerta_tabla False, desde 06-13) salen del denominador
+   alertas que deciden solo por OCR, ok: 5 [('NevadosDeChillan', '2026-10-01 05:24', 9.0, 'prot', 'K', True, 'Odef', True, 'Osens', True), ('Lascar', '2026-06-27 05:54', 1.0, 'prot', 'K', True, 'Odef', True, 'Osens', True), ('PuyehueCordonCaulle', '2026-07-03 05:48', 1.0, 'prot', 'K', True, 'Odef', False, 'Osens', True), ('NevadosDeChillan', '2026-10-01 06:00', 10.0, 'prot', 'K', True, 'Odef', True, 'Osens', True), ('NevadosDeChillan', '2026-10-05 06:24', 7.0, 'prot', 'K', True, 'Odef', True, 'Osens', True)]
+   SIN DATO que deciden solo por OCR: []
+   O-def tabla sola: protegidas 73 (perdidas 5, ganadas 0); bajo 1 MW 175 sin publicar K 65, O 54; dE = (54+5) - (65+54) = -60
+   O-sens tabla sola: protegidas 73 (perdidas 0, ganadas 1); bajo 1 MW 175 sin publicar K 65, O 14; dE = (14+15) - (65+54) = -90
+== negativos publicados por mes (K / O-def / O-sens / n ok)
+   2026-04: K 7 / O-def 0 / O-sens 4 / 745
+   2026-05: K 8 / O-def 0 / O-sens 2 / 770
+   2026-06: K 10 / O-def 2 / O-sens 4 / 737
+   2026-07: K 10 / O-def 1 / O-sens 1 / 727
+   2026-08: K 6 / O-def 1 / O-sens 2 / 930
+   2026-09: K 9 / O-def 0 / O-sens 0 / 957
+   2026-10: K 4 / O-def 1 / O-sens 2 / 487
+== control positivo del contador propio
+   K con distance_class forzado a far: publica 0 de 5353 (esperado 0)
+   negativos sin publicar por O-def con cumulo inyectado de 0,3 MW: publican 5348 de 5348 (esperado todos)

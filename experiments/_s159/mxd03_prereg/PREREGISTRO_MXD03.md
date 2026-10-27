@@ -1,5 +1,44 @@
 # Pre-registro S159 (tarea 1.30, decisión D-19): geolocalización MODIS desde MxD03, sobre K
 
+## SELLO (2026-10-24, decisión D-48 de Nicolás)
+
+**Texto del sello.** Nicolás, 2026-10-24, sobre las 14 decisiones del §9 del programa
+`docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`: «sobre las decisiones mías haz lo que tú
+recomiendes». La recomendación 9 de ese programa era «MxD03: sellar el pre-registro v2 y correrlo; adoptarla dentro del
+paquete MODIS salvo que se atrase más de un mes». Registrada por la coordinadora S162 como D-48 en
+`tasks/LOOP_OBJETIVOS.md` (`loop/activo`, `c8423ce9a`). Anotado por la sesión hija de MODIS (loop `tasks/LOOP_MODIS.md`)
+el 2026-10-24, 15:23 UTC (hora del servidor de GitHub, A86).
+
+**Qué queda sellado.** La v2 entera (§0 a §11) tal como estaba en `origin/s159-pruebas` `812624cc6`, con las doce
+respuestas del §11 iguales a su «Recomendado»: (1) pregunta y brazos K, K2, X, R0 a R19; (2) X en el arnés, sin tocar
+`pipeline/` hasta el veredicto; (3) arnés partido por gránulo; (4) P2 sobre 35° sólo informa; (5) nulo de P2 con el
+percentil 95 de 20 semillas; (6) M sólo informa; (7) ventana 2026-03-01 a 2026-10-16; (8) V-VIIRS sólo detiene y V-TIF
+sólo informa; (9) documentos del sello en el mismo PR; (10) CRS de los TIF MODIS medido antes del candado; (11) D18 se
+re-mide después; (12) un CUMPLE SIN DAÑO abre la adopción por fidelidad literal. Y la regla de plazo del programa: si el
+veredicto se atrasa más de un mes (después del 2026-11-24), MxD03 deja de esperar a este A/B y entra al paquete MODIS
+(MOD-D) como pieza a medir ahí.
+
+**Adenda de implementación (declarada al sellar, antes de escribir el arnés y de correr nada).** Lo que la v2 no podía
+saber y cambia al implementarla. Nada de esto toca la pregunta, los brazos, las métricas ni las reglas del §6:
+1. **D34 ya existe.** El catálogo usa D34 desde S158 (código operacional de MIROVA V750). La divergencia de la
+   geolocalización MODIS se registra como **D35** (§2 punto 2 y §11 punto 9 dicen «D34»: léase D35).
+2. **El candado no se mergea a `main` antes del tag.** Los merges a `main` los hace Nicolás (el clasificador de
+   permisos los bloquea, S158). El §9 pasos 2 y 5 se cumplen así: el tag `s162-mxd03-codigo` va sobre un commit que es
+   `origin/main` del momento más sólo la carpeta del experimento y el workflow de disparo; antes del tag se comprueba
+   `git diff <main congelado> <tag> -- pipeline/ scripts/ volcanoes.yaml frontend/` vacío. El brazo K corre así el
+   `pipeline/` de producción de ese `main`, que es lo que pedía «producción del tag».
+3. **El censo se re-mide en el `main` que se congele** (A90): los números del §5 son de `7689c487a`; el reproceso NRT y
+   las subidas a estándar pueden moverlos. El script del censo se corre de nuevo y su salida reemplaza la tabla como
+   población del A/B; si cambian, se informan las dos.
+4. **El evaluador, el arnés y el workflow no existían** en ninguna rama al sellar (comprobado sobre todas las ramas
+   locales y remotas). Se construyen en la carpeta `experiments/_s162_mxd03/`, con el diseño del §8, y pasan por las
+   pruebas rojas, las mutaciones y el verificador con contexto limpio antes del pedido de despacho.
+5. **El despacho lo pide esta sesión a la coordinadora S162**, que lleva el turno de los A/B; las sesiones hijas no
+   despachan. Si el workflow no está en `main`, se dispara por push a una rama de disparo que apunta al tag (como en M
+   y PORTES), en vez de `gh workflow run`.
+
+Texto previo del encabezado, conservado por historia:
+
 **BORRADOR v2 PARA EL SELLO DE NICOLÁS.** La v1 la escribió una sesión lateral del loop el 2026-10-21, antes de correr
 ningún brazo y antes de escribir una línea en `pipeline/`. Un verificador con contexto limpio la revisó y dio LISTO
 CON CAMBIOS (`verificador/INFORME.md`, commit `464152853`, hallazgos H1 a H9). Esta v2 incorpora los nueve, más el

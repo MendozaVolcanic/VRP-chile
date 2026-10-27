@@ -1,0 +1,30 @@
+C0 VIIRS 375 test1_roi con píxeles a <= 7.0 km: 1130; con T_local despejable: 1130; coherentes (todos sus píxeles dan el mismo T a 0,3 K): 1130
+dT_local = t_bg(5-25 km) - T_local(1-3 km), pasadas coherentes: mediana 13.00 K, p10 8.91, p90 22.35; T_local < t_bg en 1130 de 1130
+  cenital <30    n 129  dT_local mediana 14.71 K
+  cenital 30-50  n 140  dT_local mediana 14.03 K
+  cenital >=50   n 165  dT_local mediana 14.58 K
+  verano (nov-mar)       n 144  dT_local mediana 11.07 K
+  transición (abr, oct)  n 249  dT_local mediana 12.05 K
+  invierno (may-sep)     n 737  dT_local mediana 14.19 K
+
+pasadas K pareadas con la tabla (d_pasadas): 141; dT_local de la misma pasada en 74
+estrato              n   R     G     alza_fondo G_local f_area G_local·f_area  R_C0
+todas                141  0.36  0.37  3.57       1.30    1.38   1.72            0.67
+cenital <30           66  0.45  0.47  3.04       1.41    1.12   1.60            0.76
+cenital 30-50         47  0.28  0.28  4.68       1.18    1.70   1.92            0.58
+cenital >=50          28  0.25  0.25  4.16       0.91    1.80   1.64            0.57
+lado este             76  0.34  0.35  3.40       1.10    1.39   1.56            0.61
+lado oeste            65  0.39  0.39  3.94       1.48    1.35   1.99            0.73
+sólo dT de la misma pasada  74  0.35  0.36  3.64       1.21    1.40   1.61            0.76
+
+fondo que cierra cada pasada (K bajo la mediana del anillo, mediana por pasada), contra el fondo local de C0:
+estrato                     n   dT_local  dT_cierra  dT_cierra_con_area  (sin solución)
+todas                      141    14.6       8.0        5.0              (10)
+cenital <30                 66    14.7       7.0        5.0              (1)
+cenital 30-50               47    14.0      10.2        4.2              (4)
+cenital >=50                28    14.6      14.1        5.5              (5)
+lado este                   76    14.6      10.1        5.9              (10)
+lado oeste                  65    14.7       6.8        3.8              (0)
+sólo dT de la misma pasada  74    13.4       8.1        4.7              (5)
+
+reparto del déficit en logaritmo natural (medianas por pasada): -ln R 1.02 = fondo 1.27 + área 0.32 + resto -0.54 (los términos son medianas por separado: no suman exacto)

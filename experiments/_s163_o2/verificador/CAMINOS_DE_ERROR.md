@@ -1,0 +1,9 @@
+# Caminos por los que cada afirmacion podria estar mal (escrito ANTES de leer el informe)
+
+1. Entradas byte a byte: el MATLAB corrio otros archivos (version modificada .m, entradas regeneradas, .mat reescrito); el md5 declarado es de otro archivo; se comparo contra una copia distinta del paquete S159; se reordenaron escenas.
+2. Etna exacto: la cifra 1,072886152 viene de una corrida de Octave; el "exacto" es redondeo a 9 decimales; el OSF de referencia es otro dato; VRP 9.889.528,4 W coincide solo por tolerancia ancha.
+3. Deteccion 0 distintas: comparar contra la salida de Octave equivocada (o contra si misma); comparar solo cantidad y no listas; el conteo 166/311 sale de otra cosa; listas ordenadas distinto; la escena sin alerta cuenta como igual trivialmente.
+4. VRP: resultado_o2.mat es en realidad Octave (version_matlab, cabecera .mat v5 de Octave vs MATLAB, patron identico al shim); umbral 1 % esconde diferencias; los conteos 32/26/45 y 101/101/86 no suman 166 (32+101=133, 26+101=127, 45+86=131; quedan 33, 39, 35 en zona intermedia 1e-9..1 %), el maximo 0,82 podria ser relativo vs absoluto; division por cero con VRP nulo; el orden de escenas de las matrices R2/O1 distinto al de MATLAB (comparacion cruzada de escenas); NaN se descartan.
+5. Villarrica 2026-09-19 05:48 nearest: 0,4212 vs 0,7438: la diferencia viene de la deteccion (otros pixeles) y no del fondo; las "alertas de un pixel" no son de un pixel; el modelo nearest no es el que fillmissing2 usa; hora UTC vs local; escena equivocada por indice.
+6. Consecuencia: generaliza de pocos casos; los puertos podrian estar mal por un error de port y no por una diferencia intrinseca de fillmissing2; sin MATLAB propio no se puede decidir; "ningun port" es demasiado fuerte si la muestra de pares es de un solo pixel.
+Instrumento: cada script debe poder dar distinto de cero (control: comparar shim contra original debe dar diferencias).

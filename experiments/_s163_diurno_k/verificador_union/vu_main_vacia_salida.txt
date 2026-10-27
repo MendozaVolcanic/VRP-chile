@@ -1,0 +1,31 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+Traceback (most recent call last):
+  File "C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s163-diurno-k-prereg-5c4f44\experiments\_s163_diurno_k\verificador_union\vu_main.py", line 30, in <module>
+    rc1,o1,t1=corre(ev.main, comun+["--salida",str(tmp/"s_sellado.json")])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s163-diurno-k-prereg-5c4f44\experiments\_s163_diurno_k\verificador_union\vu_main.py", line 19, in corre
+    rc=fn(args)
+       ^^^^^^^^
+  File "C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s163-diurno-k-prereg-5c4f44\experiments\_s163_diurno_k\evaluar_diurno_k.py", line 652, in main
+    r = evaluar_completo(filas, recs, control, brazo, a.opcion_e, p_sup, a.sha_codigo, ventanas, logs, _filas_1_13())
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s163-diurno-k-prereg-5c4f44\experiments\_s163_diurno_k\evaluar_diurno_k.py", line 604, in evaluar_completo
+    "minimas_original": evaluar(pasadas_de(filas, "union", ventanas, regla="original"), recs, control, brazo,
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s163-diurno-k-prereg-5c4f44\experiments\_s163_diurno_k\evaluar_diurno_k.py", line 439, in evaluar
+    i6[s] = compuerta_i6(T, brazo, s)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s163-diurno-k-prereg-5c4f44\experiments\_s163_diurno_k\evaluar_diurno_k.py", line 372, in compuerta_i6
+    res_a, det_a = ec.placebo_p2(T, brazo, "a", FRACCION_A, 161, excluir=excl)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s163-diurno-k-prereg-5c4f44\scripts\evaluador_comun.py", line 573, in placebo_p2
+    res, det = decidir_p2(contribuciones_p2(T, control, nombre, excluir, dias_excluidos))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s163-diurno-k-prereg-5c4f44\scripts\evaluador_comun.py", line 516, in decidir_p2
+    pr = prueba_signos_p2(sumas, neto)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s163-diurno-k-prereg-5c4f44\scripts\evaluador_comun.py", line 483, in prueba_signos_p2
+    S = rng.choice((-1, 1), size=(n_sorteos, B))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "numpy/random/_generator.pyx", line 1007, in numpy.random._generator.Generator.choice
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 1.75 MiB for an array with shape (10000, 23) and data type int64

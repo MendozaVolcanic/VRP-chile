@@ -1,0 +1,51 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+global_ventana de C:\vrp-trabajo\s159-evaluador\experiments\_s157_prereg_d25\evaluar_d25.py
+== P2 cruzado entre sensores (P1 CUMPLE en los dos, M NEUTRO en todos)
+   P2 V375 INDECIDIBLE  V750 INDECIDIBLE  -> INDECIDIBLE
+   P2 V375 INDECIDIBLE  V750 PIERDE       -> NO CUMPLE (suma de errores)
+   P2 V375 INDECIDIBLE  V750 GANA         -> INDECIDIBLE
+   P2 V375 INDECIDIBLE  V750 EMPATE       -> INDECIDIBLE
+   P2 V375 INDECIDIBLE  V750 BLOQUEA      -> INDECIDIBLE
+   P2 V375 INDECIDIBLE  V750 SIN SUSTRATO -> INDECIDIBLE
+   P2 V375 PIERDE       V750 INDECIDIBLE  -> NO CUMPLE (suma de errores)
+   P2 V375 PIERDE       V750 PIERDE       -> NO CUMPLE (suma de errores)
+   P2 V375 PIERDE       V750 GANA         -> NO CUMPLE (suma de errores)
+   P2 V375 PIERDE       V750 EMPATE       -> NO CUMPLE (suma de errores)
+   P2 V375 PIERDE       V750 BLOQUEA      -> NO CUMPLE (suma de errores)
+   P2 V375 PIERDE       V750 SIN SUSTRATO -> NO CUMPLE (suma de errores)
+   P2 V375 GANA         V750 INDECIDIBLE  -> INDECIDIBLE
+   P2 V375 GANA         V750 PIERDE       -> NO CUMPLE (suma de errores)
+   P2 V375 GANA         V750 GANA         -> SIN EFECTO
+   P2 V375 GANA         V750 EMPATE       -> SIN EFECTO
+   P2 V375 GANA         V750 BLOQUEA      -> DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS750: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: SIN EFECTO
+   P2 V375 GANA         V750 SIN SUSTRATO -> SIN EFECTO
+   P2 V375 EMPATE       V750 INDECIDIBLE  -> INDECIDIBLE
+   P2 V375 EMPATE       V750 PIERDE       -> NO CUMPLE (suma de errores)
+   P2 V375 EMPATE       V750 GANA         -> SIN EFECTO
+   P2 V375 EMPATE       V750 EMPATE       -> SIN EFECTO
+   P2 V375 EMPATE       V750 BLOQUEA      -> DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS750: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: SIN EFECTO
+   P2 V375 EMPATE       V750 SIN SUSTRATO -> SIN EFECTO
+   P2 V375 BLOQUEA      V750 INDECIDIBLE  -> INDECIDIBLE
+   P2 V375 BLOQUEA      V750 PIERDE       -> NO CUMPLE (suma de errores)
+   P2 V375 BLOQUEA      V750 GANA         -> DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS375: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: SIN EFECTO
+   P2 V375 BLOQUEA      V750 EMPATE       -> DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS375: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: SIN EFECTO
+   P2 V375 BLOQUEA      V750 BLOQUEA      -> DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS375, VIIRS750: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: SIN EFECTO
+   P2 V375 BLOQUEA      V750 SIN SUSTRATO -> DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS375: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: SIN EFECTO
+   P2 V375 SIN SUSTRATO V750 INDECIDIBLE  -> INDECIDIBLE
+   P2 V375 SIN SUSTRATO V750 PIERDE       -> NO CUMPLE (suma de errores)
+   P2 V375 SIN SUSTRATO V750 GANA         -> SIN EFECTO
+   P2 V375 SIN SUSTRATO V750 EMPATE       -> SIN EFECTO
+   P2 V375 SIN SUSTRATO V750 BLOQUEA      -> DECIDE NICOLAS (P2 con neto en contra de D sin llegar a PIERDE en VIIRS750: bloquea CUMPLE, ADENDA_GEMELO.md D-34) | M: SIN EFECTO
+   P2 V375 SIN SUSTRATO V750 SIN SUSTRATO -> SIN EFECTO
+== «como hoy con un M INDECIDIBLE»: M VIIRS750|z<=40 INDECIDIBLE, P2 variando
+   M INDECIDIBLE, P2 V375 PIERDE       V750 EMPATE       -> NO CUMPLE (suma de errores)
+   M INDECIDIBLE, P2 V375 EMPATE       V750 EMPATE       -> INDECIDIBLE
+   M INDECIDIBLE, P2 V375 BLOQUEA      V750 EMPATE       -> INDECIDIBLE
+   M INDECIDIBLE, P2 V375 GANA         V750 GANA         -> INDECIDIBLE
+   M INDECIDIBLE, P2 V375 INDECIDIBLE  V750 PIERDE       -> NO CUMPLE (suma de errores)
+== controles: VETADO manda antes; CUMPLE/GANA/GANA sin M -> SIN EFECTO
+   VETADO + P2 INDECIDIBLE/PIERDE -> NO CUMPLE (veto)
+   CUMPLE + GANA/GANA -> SIN EFECTO
+== combinar sobre dos ventanas (JSON minimo): V1 INDECIDIBLE, V2 NO CUMPLE (suma de errores) y al reves
+== VEREDICTO COMBINADO: NO CUMPLE (suma de errores) | por ventana [('V1', 'INDECIDIBLE'), ('V2', 'NO CUMPLE (suma de errores)')]
+   combinar -> NO CUMPLE (suma de errores)

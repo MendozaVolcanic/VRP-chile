@@ -1,0 +1,54 @@
+== diff PREREGISTRO.md disparo ffc1abc1b -> HEAD ==
+ .../_s162_modis_negativos/07_leer_lote_salida.txt  | 37 +++++++++++++++++
+ experiments/_s162_modis_negativos/INFORME.md       | 48 ++++++++++++++++++++++
+ experiments/_s162_modis_negativos/PREREGISTRO.md   | 15 +++++--
+ 3 files changed, 96 insertions(+), 4 deletions(-)
+diff --git a/experiments/_s162_modis_negativos/PREREGISTRO.md b/experiments/_s162_modis_negativos/PREREGISTRO.md
+index ac1b72854..7db077f75 100644
+--- a/experiments/_s162_modis_negativos/PREREGISTRO.md
++++ b/experiments/_s162_modis_negativos/PREREGISTRO.md
+@@ -129,17 +129,17 @@ pesa lo mismo que una alerta débil perdida.
+ 2. **K re-corrido = publicado**: publica igual y `pc.vrp_mw` a 0,001 MW. Toda diferencia se lista; si pasa del 5 %,
+    la lectura se informa también contra K re-corrido.
+ 3. **Control de instrumento contra S159** (A116: en un estrato donde se espera 0, hay que mostrar que el instrumento
+-   puede dar distinto de 0): las 10 pasadas de control dan el mismo `npix` y VRP del port `fisica` que en S159 (a 1e-6
++   puede dar distinto de 0): las 13 pasadas de control dan el mismo `npix` y VRP del port `fisica` que en S159 (a 1e-6
+    MW), y las 11 protegidas publican. Si no, la cadena cambió y el lote no se lee.
+ 4. **Prueba sin red del envoltorio en el runner** (job `prueba`, que el lote necesita para arrancar): identidad del
+-   port con y sin envoltorio, índices del recorte y 6 de 6 mutaciones atrapadas por aserción.
++   port con y sin envoltorio, índices y ángulos del recorte y 8 de 8 mutaciones atrapadas por aserción.
+ 5. **Recorte nativo guardado** en todas las evaluables (se informa; no bloquea la lectura de x, sí la tarea MOD-E).
+ 
+ ## 7. Costo medido (`04_costo.py` → `04_costo_salida.txt`)
+ 
+ Del lote S159 (resultados por pasada y API de GitHub, `jobs_39712862945.json`): 9,1 s por pasada MODIS (mediana 9,2;
+ p95 11,0; K incluido), 104 s fijos por job (checkout de 61 s, dependencias 30 s, prueba sin red del probe). Los 6 jobs
+-MODIS de S159 sumaron 0,551 h. Proyección para 410 pasadas en 8 trozos (413 con los 3 controles agregados: lo mismo dentro del redondeo): **1,27 h de runner**, unos 9,5 min por job
++MODIS de S159 sumaron 0,551 h. Proyección para 410 pasadas en 8 trozos (413 con los 3 controles agregados: **1,28 h**, medido por el verificador): **1,27 h de runner**, unos 9,5 min por job
+ (11,1 con el p95 por pasada). El job `prueba` es nuevo: SIN DATO en el runner; en este computador la prueba tarda 61 a
+ 82 s, así que el job debería rondar 3 min (estimado). Guardar un recorte sintético de 136 × 136 tomó 0,04 s
+ (`05_prueba_envoltorio_salida.txt`).
+@@ -162,7 +162,7 @@ MODIS de S159 sumaron 0,551 h. Proyección para 410 pasadas en 8 trozos (413 con
+ - **Prueba** (`05_prueba_envoltorio.py` → `_salida.txt`): gránulo sintético de 300 × 280, volcán en (170, 100), foco
+   que el port detecta (npix 1, VRP 4,61 MW). Pasa: mismo resultado del port en las 5 variantes y misma grilla con y sin
+   envoltorio; las 7 capas guardadas son el píxel (linea, frame) del gránulo; `read_modis_l1b` transparente fuera de
+-  `leer_modis`. Mutaciones atrapadas por aserción: 6 de 6 (línea corrida en 1, frames al revés, B21 guardada como B22,
++  `leer_modis`. Mutaciones atrapadas por aserción: 6 de 6 en la v1, 8 de 8 desde la adenda 1 (línea corrida en 1, frames al revés, B21 guardada como B22,
+   lat de 5 km guardada como la del MxD03, recorte alterado, B31 de la fila siguiente). El sintético **no simula el bow
+   tie**: prueba que los índices identifican el píxel, no que haya duplicados.
+ 
+@@ -213,3 +213,10 @@ y el workflow es válido, de sólo lectura y por token. Tres grietas, arregladas
+ - **VCD-14**: `07_leer_lote.py` trata `motivo_vacio = sunglint` como no evaluable (de noche no debería ocurrir; si
+   ocurre, no es «el port calla»).
+ Nada de esto toca la pregunta, la muestra, la regla de decisión ni el costo.
++
++## Adenda 2 (2026-10-24, antes de despachar): ronda 2 del verificador
++
++`experiments/_s162_modis_verif_cde/ronda2/INFORME.md`: **se puede despachar tal como está**; los tres arreglos de la
++adenda 1 hacen lo que dicen. VCD-15 (gravedad 1): el texto todavía decía 10 controles, 6 de 6 mutaciones y 1,27 h para
++413; corregido arriba. El nombre del paso del workflow («6 mutaciones») queda como está: es cosmético, y cambiarlo
++separaría este archivo del commit de disparo `ffc1abc1b` que ya armó la coordinadora.
+
+== commits de la carpeta despues del disparo ==
+11570ab30 S162 MOD-C: resultado del lote 40120713181: INDECIDIBLE (el port publica en 2 de 390 neg_resto; DeltaE -18,1 [-43,8; +40,1]); controles en verde
+b6edffb92 S162 MODIS: ronda 2 del verificador de MOD-C/D/E (MOD-C despachable, MOD-D v2 lista para el sello de reglas); textos de MOD-C y casos borde de Chillan en MOD-D

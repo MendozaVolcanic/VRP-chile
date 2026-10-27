@@ -1,0 +1,91 @@
+
+== C0 control positivo: B2 pierde una protegida
+   esperado por la regla escrita: B2 fuera de los elegibles
+   codigo: rc=0 compuerta=ABIERTA elegibles=['B1', 'B3', 'B4'] ROI=B4
+   P2 TO decide: {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 TO tabla : {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+
+== V1 B2 EMPATA con todo pero PIERDE con la tabla sola
+   esperado por la regla escrita: §6.3 «nunca uno que PIERDE o BLOQUEA»: ¿cuenta la tabla sola? el §6.2 si la exige para ganar
+   codigo: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B2
+   P2 TO decide: {'B0': 'PIERDE(neto 6, bl 6)', 'B2': 'EMPATE(neto 0, bl 12)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'PIERDE(neto 6, bl 6)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 TO tabla : {'B0': 'PIERDE(neto 6, bl 6)', 'B2': 'PIERDE(neto 6, bl 6)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'PIERDE(neto 6, bl 6)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+
+== V2 B1 pierde una protegida (B1 no elegible)
+   esperado por la regla escrita: §6.3: «si B1 tampoco es elegible y nadie mas lo es: NINGUN»; si otros lo son, ¿contra quien se comparan?
+   codigo: rc=0 compuerta=ABIERTA elegibles=['B2', 'B4'] ROI=B4
+   P2 TO decide: {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 TO tabla : {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+
+== V3 B2 y B4 publican 4 negativos de mas en 4 noches (neto +4, 4 bloques)
+   esperado por la regla escrita: D-45: con 4 bloques o menos SIN SUSTRATO; ¿se elige por fidelidad un brazo estrictamente peor?
+   codigo: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4
+   P2 TO decide: {'B0': 'SIN SUSTRATO(neto 4, bl 4)', 'B2': 'SIN SUSTRATO(neto 4, bl 4)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 4, bl 4)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 TO tabla : {'B0': 'SIN SUSTRATO(neto 4, bl 4)', 'B2': 'SIN SUSTRATO(neto 4, bl 4)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 4, bl 4)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+
+== V4 sin censo y sin bandera
+   esperado por la regla escrita: compuerta CERRADA, rc 3, sin veredicto
+   codigo: rc=3 compuerta=CERRADA elegibles=None ROI=None
+   P2 TO decide: {}
+   P2 TO tabla : {}
+
+== V5 bandera --censo-omitido-solo-pruebas puesta en una corrida con datos
+   esperado por la regla escrita: el veredicto no deberia poder confundirse con uno valido: ¿la linea ROI elegida lo dice?
+   codigo: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4
+   P2 TO decide: {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 TO tabla : {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   | == control B0 y B1 = censo S159: OMITIDO POR --censo-omitido-solo-pruebas. PRUEBA SINTÉTICA: ESTE VEREDICTO NO VALE PARA EL RUN
+   | == §6 ROI elegida: B4 (ninguno gana contra B1; orden de cercanía al .m entre los que no pierden (§6.3))
+   | == compuerta del veredicto (generales, ROI y censo): ABIERTA
+
+== V6 oraculo muerto: B0 a B5 no publican nada (produccion si)
+   esperado por la regla escrita: el control positivo deberia exigir que B1 SI publique lo que B0 pierde; con oraculo muerto deberia caer
+   codigo: rc=0 compuerta=ABIERTA elegibles=[] ROI=None
+   P2 TO decide: {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 TO tabla : {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   | == control positivo (B0 pierde protegidas de Cordón Caulle): 1 ['2026-09-01 05:00'] (tiene que ser 1 o más)
+
+== V7 una protegida donde K no publica y produccion si
+   esperado por la regla escrita: §7: «hay una protegida: se detiene» (compuerta CERRADA)
+   codigo: rc=3 compuerta=CERRADA elegibles=None ROI=None
+   P2 TO decide: {}
+   P2 TO tabla : {}
+   | == control K = producción: distintas 1 de 96 (protegidas [('Lascar', '2026-07-30 05:00')]); K sin record 0; lista [('Lascar', '2026-07-30 05:00')]
+
+== V8 K distinto en una pasada no protegida (<1 %)
+   esperado por la regla escrita: sale de los brazos, se lista, compuerta ABIERTA
+   codigo: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4
+   P2 TO decide: {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 TO tabla : {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   | == control K = producción: distintas 1 de 116 (protegidas ninguna); K sin record 0; lista [('Lascar', '2026-07-31 05:00')]
+
+== V9 record de K = None donde produccion publico una protegida
+   esperado por la regla escrita: K distinto de produccion en una protegida: CERRADA
+   codigo: rc=3 compuerta=CERRADA elegibles=None ROI=None
+   P2 TO decide: {}
+   P2 TO tabla : {}
+   | == control K = producción: distintas 1 de 36 (protegidas [('Lascar', '2026-07-29 05:00')]); K sin record 1; lista [('Lascar', '2026-07-29 05:00')]
+
+== V10 protegida con celdas sin dato en el 7 x 7 del crater
+   esperado por la regla escrita: contada aparte y fuera del denominador; ¿listada por nombre?
+   codigo: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4
+   P2 TO decide: {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 TO tabla : {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   |    observadas: 35 | no observadas (fuera del denominador): {'sin_crater': 1} | SIN DATO: 0
+   |    protegidas SIN DATO (falla de cobertura, no de brazo): ninguna
+
+== V11 B2 y B3 ganan; B3 tiene menor E
+   esperado por la regla escrita: ROI = B3
+   codigo: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B3
+   P2 TO decide: {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'EMPATE(neto -5, bl 9)', 'B3': 'GANA(neto -7, bl 7)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 TO tabla : {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'EMPATE(neto -5, bl 9)', 'B3': 'GANA(neto -7, bl 7)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+
+== V12 seccion nativa con 3 pasadas S_C
+   esperado por la regla escrita: N0 detecta en el pixel de K en 3 de 3 (cenit 40-50), N1 en 0; sin caida
+   codigo: rc=0 compuerta=ABIERTA elegibles=['B1', 'B2', 'B3', 'B4'] ROI=B4
+   P2 TO decide: {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   P2 TO tabla : {'B0': 'SIN SUSTRATO(neto 0, bl 0)', 'B2': 'SIN SUSTRATO(neto 0, bl 0)', 'B3': 'SIN SUSTRATO(neto 0, bl 0)', 'B4': 'SIN SUSTRATO(neto 0, bl 0)', 'B5': 'SIN SUSTRATO(neto 0, bl 0)'}
+   | == V750-C, brazo nativo (cajas en km): pasadas de S_C con nativo 3
+   |    cumbre0_neg cenit 40-50 n=3 | N0: en el píxel de K 3, con algún píxel 3 (grilla B0: 0) | N1: en el píxel de K 0, con algún píxel 0 (grilla B1: 0)
+   |    cumbre0_neg cenit todo n=3 | N0: en el píxel de K 3, con algún píxel 3 (grilla B0: 0) | N1: en el píxel de K 0, con algún píxel 0 (grilla B1: 0)
+   rc 0 | ultimas lineas: ['   neg_sin_K cenit 40-50 n=3 | N0: en el píxel de K 3, con algún píxel 3 (grilla B0: 0) | N1: en el píxel de K 0, con algún píxel 0 (grilla B1: 0)', '   neg_sin_K cenit todo n=3 | N0: en el píxel de K 3, con algún píxel 3 (grilla B0: 0) | N1: en el píxel de K 0, con algún píxel 0 (grilla B1: 0)', '[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent']

@@ -1,0 +1,40 @@
+# Grilla fija de MIROVA por volcán (regla GEO, S159): punto de referencia (X0, Y0) en UTM.
+#
+# POR QUÉ. MIROVA no procesa el gránulo en su geometría de barrido: lo interpola a una grilla UTM fija por volcán, y
+# esa interpolación reparte el calor de un píxel aislado (V750-C, experiments/_s162_v750c/INFORME.md). Para ver el
+# volcán como lo ve MIROVA hay que usar SU grilla. Una sola regla arma las tres (VIIRS 375, VIIRS 750 y MODIS):
+# centros de celda en X0 - 25000 : paso : X0 + 25000 (y de sur a norte), con (X0, Y0) el UTM del punto de referencia
+# de MIROVA para el volcán. Se cumple a 1 m en las tres grillas de los 11 volcanes (experiments/_s159/geo/INFORME.md
+# l. 16-20, rama s159-pruebas).
+#
+# De dónde salen los números: la esquina superior izquierda de los GeoTIFF VIIRS 375 UTM de MIROVA del 14 y 15 de
+# septiembre de 2026 (experiments/_s158_d17_diseno/grilla_tif_salida.txt, rama s159-pruebas, redondeada a 0,1 m), más
+# media celda de 375 m y 25 km. Las columnas van de oeste a este y las filas de SUR a norte, así que la esquina
+# norte no es simétrica: con n = floor(50000 / paso) + 1 celdas, ul_x = X0 - 25000 - paso / 2 y
+# ul_y = Y0 - 25000 + (n - 1) paso + paso / 2. Con paso 375 (n = 134): X0 = ul_x + 25187,5 e Y0 = ul_y - 25062,5.
+# La misma regla da la esquina de 750 m (n = 67) en (-187,5; -187,5) de la de 375 m y la de MODIS (n = 51) en
+# (-312,5; +437,5), que son los desfases medidos en los 11 volcanes (INFORME GEO, H1). El centro en grados es el que
+# trae el mismo TIF y sólo se usa para el recorte de 45 km antes de interpolar (como probe_n.grillar).
+#
+# A63: NO regenerar este archivo desde otra fuente sin revisar. tests/test_mirova_v750_codigo_s162.py comprueba que
+# cada grilla derivada reproduce la esquina del TIF de 375 m y la de 750 m que usó el censo S159 (ul_375 - 187,5).
+# En 8 volcanes (X0, Y0) es el lat/lon del yaml; en Lascar, PlanchonPeteroa y Tupungatito es otro punto, de
+# coordenadas redondas (a 233, 1.885 y 2.787 m del yaml; INFORME GEO, punto 2).
+#
+# roi_v750: la región sensible del código de MIROVA para el volcán. Hoy "def" en todos (la matriz de ejemplo del .m:
+# 7 x 7 sensible al centro dentro de 21 x 21); la decide V750-B (experiments/_s162_v750b/PREREGISTRO_V750B.md, lectura
+# el 2026-11-03) y se cambia aquí con su lectura, nunca antes. Valores posibles en pipeline/mirova_v750_codigo.py,
+# caja_roi().
+
+volcanes:
+  Chaiten:             {epsg: 32718, x0: 692393.7, y0: 5255041.2, centro_lat: -42.83359, centro_lon: -72.64674, roi_v750: def}
+  NevadosDeChillan:    {epsg: 32719, x0: 288107.9, y0: 5917686.7, centro_lat: -36.86356, centro_lon: -71.37772, roi_v750: def}
+  Copahue:             {epsg: 32719, x0: 307952.7, y0: 5807915.1, centro_lat: -37.85656, centro_lon: -71.18373, roi_v750: def}
+  Isluga:              {epsg: 32719, x0: 517876.4, y0: 7882565.6, centro_lat: -19.15057, centro_lon: -68.83059, roi_v750: def}
+  Lascar:              {epsg: 32719, x0: 629801.4, y0: 7414948.7, centro_lat: -23.37058, centro_lon: -67.73061, roi_v750: def}
+  Lastarria:           {epsg: 32719, x0: 549681.0, y0: 7216357.8, centro_lat: -25.16858, centro_lon: -68.50762, roi_v750: def}
+  Llaima:              {epsg: 32719, x0: 262650.2, y0: 5713865.6, centro_lat: -38.69255, centro_lon: -71.72974, roi_v750: def}
+  PlanchonPeteroa:     {epsg: 32719, x0: 357300.7, y0: 6101099.3, centro_lat: -35.22356, centro_lon: -70.56870, roi_v750: def}
+  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: def}
+  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: def}
+  Villarrica:          {epsg: 32719, x0: 247771.4, y0: 5632515.7, centro_lat: -39.42055, centro_lon: -71.93075, roi_v750: def}

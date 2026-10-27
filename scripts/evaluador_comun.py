@@ -24,13 +24,19 @@ comparando brazos entre sí; se ve partiendo de las pasadas de MIROVA. Eso hace 
 - T3, magnitud M con el comparador de ganancia d′ (D-28) y el placebo K×1,2 y K×0,8; P2 con la prueba de signos por
   bloque noche-volcán (D-45) y los tres placebos de D-44 (ver el bloque T3 más abajo).
 
-Las pruebas viven en `tests/test_evaluador_comun_s162.py` y `tests/test_evaluador_comun_t3_s162.py`.
+- S163, tarea 1.35: las métricas también por tramo de 10° de cenit del sensor y por régimen (antes de #535, de #535 a
+  K, desde K); informan, no deciden. Y la causa de cada pasada ausente (hueco de NASA, búsqueda vacía, sin incidencia,
+  sin registro) con el JSON de cobertura del run (#909).
+
+Las pruebas viven en `tests/test_evaluador_comun_s162.py`, `tests/test_evaluador_comun_t3_s162.py` y
+`tests/test_evaluador_comun_s163.py`.
 """
 from __future__ import annotations
 
 import argparse
 import bisect
 import collections
+import glob
 import json
 import math
 import os
@@ -110,6 +116,8 @@ def tabla_por_pasada(pasadas, recs_por_lado, control, tol_s=TOL_S):
                 cob[lado] = NO_OBSERVADO
         T.append({"pasada": p, "clave": clave(p), "dia": p.instante.strftime("%Y-%m-%d"), "rec": rec, "cob": cob,
                   "protegida": cm.es_protegida(p),
+                  # S163 (1.35): el cenit es el del record del control (mismo gránulo que el brazo); sin record, None.
+                  "z": (rec[control] or {}).get("z"), "regimen": regimen(p.instante),
                   "noche_con_alerta": (p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d")) in alertas_noche,
                   "noche_con_fp": (p.volcano, p.sensor_bucket, p.instante.strftime("%Y-%m-%d")) in fp_noche})
     return T
@@ -220,6 +228,157 @@ def publicaciones_sobre_rutina(T, lados, dias_excluidos=()):
         sin = [f["clave"] for f in base if _pub(f["rec"][lado]) and not f["noche_con_alerta"]]
         out[lado] = {"rutinas_observadas": len(base), "publica_en_noche_con_alerta": con,
                      "publica_en_noche_sin_alerta": sin}
+    return out
+
+
+# ===========================================================================================================
+# S163, tarea 1.35: estratos por cenit del sensor y por régimen. POR QUÉ: un píxel oblicuo es más grande y más
+# deformado, y en Chillán la razón contra MIROVA cae con el cenit (experiments/_s154_chillan/razon_por_cenit.py,
+# atribución SIN ATRIBUIR); un agregado promedia esa curva y una ventana con más pasadas de borde se lee como efecto del
+# brazo (A90, A114). Y una ventana que cruza #535 (máscara de nube de 260 K, A104) o la adopción de K mezcla regímenes.
+# El programa por sensor (§2) pide todo por tramos de 10° de cenit. Los estratos INFORMAN: no tocan cobertura(), p1b()
+# ni ningún veredicto (tests/test_evaluador_comun_s163.py lo fija). Los tramos del auto-audit (banco_paridad.zbin, 4
+# tramos anchos) son otra definición, más gruesa; aquí manda el programa.
+# ===========================================================================================================
+ANCHO_TRAMO_CENIT = 10
+# Mismos cortes que el resto del proyecto (prueba de guarda): auto_audit_weekly.CORTE_535 y CAMBIO_DETECTOR_UTC del
+# frontend, que lee vigilancia_sombra.leer_adopcion (K, #850). En producción los datos son todos de K tras el reproceso
+# (#883): estos cortes no separan detectores ahí, separan temporada y canal de referencia; en un brazo sí pueden.
+CORTE_535 = datetime(2026, 8, 28, 23, 0)
+CORTE_K = datetime(2026, 10, 18, 9, 57, 30)
+REGIMENES = ("antes_535", "535_a_K", "desde_K")
+
+
+def tramo_cenit(z):
+    """'z00-10', 'z10-20', ... según el cenit del sensor en grados; sin cenit, 'sin_cenit' (estrato aparte)."""
+    if z is None:
+        return "sin_cenit"
+    lo = int(float(z) // ANCHO_TRAMO_CENIT) * ANCHO_TRAMO_CENIT
+    return "z%02d-%02d" % (lo, lo + ANCHO_TRAMO_CENIT)
+
+
+def regimen(instante):
+    """Régimen por la hora UTC (naive) de la pasada de MIROVA."""
+    if instante < CORTE_535:
+        return "antes_535"
+    return "535_a_K" if instante < CORTE_K else "desde_K"
+
+
+def estrato_cenit(f):
+    return tramo_cenit(f["z"])
+
+
+def estrato_regimen(f):
+    return f["regimen"]
+
+
+def metricas_por_estrato(T, control, brazos, estrato_de, dias_excluidos=()):
+    """Las métricas del evaluador recalculadas dentro de cada estrato (`estrato_de(f)` da su nombre).
+
+    Por estrato: pasadas, estados de cobertura por lado, P1b (cuántos cruces abajo y arriba), publicaciones sobre RUTINA
+    y P2 (neto, discordantes y bloques, sin regla: informa). Cada pasada cae en un solo estrato, así que las cuentas
+    suman el agregado. La marca «noche con alerta» viene de la tabla entera: una RUTINA de 60° en una noche con alerta a
+    20° sigue siendo de noche con alerta."""
+    excl = set(dias_excluidos)
+    grupos = collections.defaultdict(list)
+    for f in T:
+        if f["dia"] not in excl:
+            grupos[estrato_de(f)].append(f)
+    lados = [control] + list(brazos)
+    out = {}
+    for nom, Ts in sorted(grupos.items()):
+        cob = {l: collections.Counter({OBSERVADO: 0, FALTA: 0, NO_OBSERVADO: 0}) for l in lados}
+        for f in Ts:
+            for l in lados:
+                cob[l][f["cob"][l]] += 1
+        rut = publicaciones_sobre_rutina(Ts, lados)
+        e = {"pasadas": len(Ts), "cobertura": {l: dict(c) for l, c in cob.items()},
+             "rutina": {l: {"rutinas_observadas": r["rutinas_observadas"],
+                            "publica_en_noche_con_alerta": len(r["publica_en_noche_con_alerta"]),
+                            "publica_en_noche_sin_alerta": len(r["publica_en_noche_sin_alerta"])}
+                        for l, r in rut.items()},
+             "p1b": {}, "p2": {}}
+        for b in brazos:
+            p = p1b(Ts, control, b)
+            e["p1b"][b] = {"abajo": len(p["abajo"]), "arriba": sum(len(v) for v in p["arriba"].values())}
+            contrib = contribuciones_p2(Ts, control, b)
+            e["p2"][b] = {"neto": sum(x["c"] for x in contrib), "n_discordantes": len(contrib),
+                          "B": len({x["bloque"] for x in contrib})}
+        out[nom] = e
+    return out
+
+
+# ===========================================================================================================
+# S163: causa de cada pasada ausente, con la cobertura que deja el run (#909). POR QUÉ: una pasada que MIROVA publicó
+# y que un lado no tiene puede ser legítima (el gránulo llegó y no dejó record: volcán fuera de la escena, escena
+# inválida) o un hueco de NASA. El 2026-10-12, en V1 de D25, CMR respondió vacío para NOAA-21 y Suomi NPP y el job dijo
+# «Cobertura: completa» (experiments/_s162_vuelta2/RECORD_FALTANTE_CHILLAN_12OCT.md). Desde #909 el JSON de
+# --cobertura-json trae las fallas (búsqueda o descarga) y las incidencias (sin_granulos, sin_geolocalizacion,
+# dia_parcial) por volcán, día y plataforma. fetch registra sin_granulos «sin juicio» porque no sabe si debía haber
+# pasada; aquí sí se sabe algo más: MIROVA tuvo una pasada de ese sensor ese día. Como su CSV no trae plataforma, una
+# búsqueda vacía en UNA plataforma del sensor deja la ausencia como hueco PROBABLE, no seguro. Informa: no cambia
+# cobertura() ni su veredicto (decidir si un hueco de NASA invalida es del pre-registro).
+# ===========================================================================================================
+CAUSA_HUECO = "hueco_nasa"                 # búsqueda o descarga fallida, L1B sin geolocalización o día parcial
+CAUSA_VACIA = "busqueda_vacia"             # el catálogo respondió vacío en una plataforma del sensor: hueco probable
+CAUSA_SIN_INCIDENCIA = "sin_incidencia"    # el run no registró nada: no observado legítimo (o pérdida del proceso)
+CAUSA_SIN_REGISTRO = "sin_registro_de_cobertura"   # el lado no trae JSON de cobertura: causa desconocida
+_TIPOS_HUECO = ("falla_busqueda", "falla_descarga", "sin_geolocalizacion", "dia_parcial")
+
+
+def cargar_eventos_cobertura(rutas):
+    """Fallas e incidencias de uno o más JSON de `run_pipeline.py --cobertura-json`, en una sola lista de eventos
+    {tipo, volcan, fecha, plataforma}. Las fallas quedan como 'falla_<etapa>'."""
+    out = []
+    for ruta in rutas:
+        d = json.loads(Path(ruta).read_text(encoding="utf-8"))
+        for x in d.get("fallas") or []:
+            out.append({"tipo": "falla_%s" % (x.get("etapa") or "busqueda"), "volcan": x.get("volcan"),
+                        "fecha": x.get("fecha"), "plataforma": x.get("plataforma")})
+        for x in d.get("incidencias") or []:
+            out.append({"tipo": x.get("tipo"), "volcan": x.get("volcan"), "fecha": x.get("fecha"),
+                        "plataforma": x.get("plataforma")})
+    return out
+
+
+def causa_ausencia(f, lado, eventos):
+    """Causa de que `lado` no tenga record de la pasada `f`, o None si lo tiene. `eventos`: los del lado, o None si el
+    lado no trajo cobertura. Un evento explica la ausencia si es del mismo volcán (o sin volcán) y día, y de una
+    plataforma del mismo sensor (o sin plataforma: día parcial, falla general)."""
+    import banco_paridad as bp
+    if f["rec"][lado] is not None:
+        return None
+    if eventos is None:
+        return CAUSA_SIN_REGISTRO
+    p = f["pasada"]
+    tipos = {e["tipo"] for e in eventos
+             if e.get("fecha") == f["dia"] and e.get("volcan") in (None, p.volcano)
+             and (e.get("plataforma") is None or bp.bucket(e["plataforma"]) == p.sensor_bucket)}
+    if tipos & set(_TIPOS_HUECO):
+        return CAUSA_HUECO
+    if "sin_granulos" in tipos:
+        return CAUSA_VACIA
+    return CAUSA_SIN_INCIDENCIA
+
+
+def huecos(T, eventos_por_lado, dias_excluidos=()):
+    """Por lado: pasadas sin record contadas por causa y estado de cobertura, y la lista de protegidas sin record con su
+    causa. `eventos_por_lado[lado]` es la lista de `cargar_eventos_cobertura` o None (sin cobertura)."""
+    excl = set(dias_excluidos)
+    out = {}
+    for lado, eventos in eventos_por_lado.items():
+        por = collections.defaultdict(collections.Counter)
+        prot = []
+        for f in T:
+            if f["dia"] in excl:
+                continue
+            c = causa_ausencia(f, lado, eventos)
+            if c is None:
+                continue
+            por[c][f["cob"][lado]] += 1
+            if f["protegida"]:
+                prot.append("%s (MIROVA %s MW) %s %s" % (f["clave"], f["pasada"].vrp_mw, f["cob"][lado], c))
+        out[lado] = {"por_causa": {c: dict(n) for c, n in sorted(por.items())}, "protegidas": prot}
     return out
 
 
@@ -604,7 +763,7 @@ def cargar_lado(directorio, ventana, sensores, coords, inner):
             lat, lon = coords[vol]
             if bp.es_pasada_diurna_descartada(b, lat, lon, dt.replace(tzinfo=__import__("datetime").timezone.utc)):
                 continue
-            recs.append({"vol": vol, "b": b, "dt": dt, "sensor": r.get("sensor")})
+            recs.append({"vol": vol, "b": b, "dt": dt, "sensor": r.get("sensor"), "z": r.get("sensor_zenith_deg")})
             slim = {k: r.get(k) for k in bp.CAMPOS_JS if k != "anomaly_pixels"}
             if r.get("f5_core_vrp_mw") is None:
                 slim["anomaly_pixels"] = [{k: p.get(k) for k in ("lat", "lon", "vrp_mw", "bt_k")}
@@ -643,6 +802,8 @@ def main(argv=None):
     ap.add_argument("--canal", default="union", choices=cm.CANALES)
     ap.add_argument("--regla-minimas", default=cm.MODO_MINIMAS, choices=cm.MODOS_MINIMAS)
     ap.add_argument("--excluir-dias", default="", help="días UTC separados por coma (D-29)")
+    ap.add_argument("--cobertura", action="append", default=[],
+                    help="NOMBRE=RUTA (repetible): JSON de --cobertura-json del run de ese lado, o un patrón glob")
     ap.add_argument("--salida", help="JSON de salida")
     a = ap.parse_args(argv)
     import banco_paridad as bp
@@ -656,6 +817,10 @@ def main(argv=None):
     ventana = (a.desde, a.hasta)
     coords, inner = bp._coords_por_volcan(), bp.inner_desde_html()
     lados = dict(x.split("=", 1) for x in a.lado)
+    # Verificador de S163: un --cobertura con un nombre mal escrito dejaba ese lado «sin registro» sin avisar.
+    ajenos = sorted({x.split("=", 1)[0] for x in a.cobertura} - set(lados))
+    if ajenos:
+        ap.error("--cobertura de lados que no existen: %s (lados: %s)" % (", ".join(ajenos), ", ".join(sorted(lados))))
     recs, faltan = {}, {}
     for nombre, d in lados.items():
         recs[nombre], faltan[nombre] = cargar_lado(d, ventana, sensores, coords, inner)
@@ -671,7 +836,17 @@ def main(argv=None):
            "ocr_cruza_1mw": sum(p.ocr_cruza_1mw for p in pasadas),
            "cobertura": cobertura(T, recs, a.control, excl),
            "p1b": {b: p1b(T, a.control, b, dias_excluidos=excl) for b in brazos},
-           "rutina": publicaciones_sobre_rutina(T, list(lados), excl)}
+           "rutina": publicaciones_sobre_rutina(T, list(lados), excl),
+           # S163 (1.35): informan, no deciden.
+           "estratos": {"cenit": metricas_por_estrato(T, a.control, brazos, estrato_cenit, excl),
+                        "regimen": metricas_por_estrato(T, a.control, brazos, estrato_regimen, excl)}}
+    # S163: causa de las ausencias con la cobertura del run (lado sin --cobertura: causa desconocida).
+    rutas_cob = collections.defaultdict(list)
+    for x in a.cobertura:
+        nombre, patron = x.split("=", 1)
+        rutas_cob[nombre] += sorted(glob.glob(patron)) or [patron]
+    res["huecos"] = huecos(T, {l: (cargar_eventos_cobertura(rutas_cob[l]) if l in rutas_cob else None) for l in lados},
+                           excl)
     if any(faltan.values()) and res["cobertura"]["veredicto"] == COBERTURA_OK:
         res["cobertura"]["veredicto"] = INVALIDO
     c = res["cobertura"]
@@ -701,6 +876,17 @@ def main(argv=None):
     for lado, r in res["rutina"].items():
         print("RUTINA %s: de %d observadas, publica %d en noche con alerta y %d en noche sin alerta" % (
             lado, r["rutinas_observadas"], len(r["publica_en_noche_con_alerta"]), len(r["publica_en_noche_sin_alerta"])))
+    for lado, h in res["huecos"].items():
+        print("AUSENCIAS %s por causa: %s; protegidas sin record: %d" % (lado, h["por_causa"], len(h["protegidas"])))
+        for x in h["protegidas"][:10]:
+            print("    ", x)
+    for eje, est in res["estratos"].items():
+        print("ESTRATOS por %s (informan, no deciden):" % eje)
+        for nom, e in est.items():
+            print("  %-10s pasadas %5d | %s" % (nom, e["pasadas"], " | ".join(
+                "%s: P1b %d/%d, P2 neto %+d en %d discordantes" % (b, e["p1b"][b]["abajo"], e["p1b"][b]["arriba"],
+                                                                  e["p2"][b]["neto"], e["p2"][b]["n_discordantes"])
+                for b in brazos)))
     if a.salida:
         Path(a.salida).write_text(json.dumps(res, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
     return 0 if c["veredicto"] == COBERTURA_OK else 2

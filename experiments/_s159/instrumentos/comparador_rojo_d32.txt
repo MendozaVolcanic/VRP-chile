@@ -1,0 +1,18 @@
+.F                                                                       [100%]
+================================== FAILURES ===================================
+__ test_la_calibracion_de_dprima_usa_la_semilla_y_las_repeticiones_selladas ___
+
+    def test_la_calibracion_de_dprima_usa_la_semilla_y_las_repeticiones_selladas():
+        """D-32 (ADENDA_PLACEBO.md \xa75.3), cita textual de Nicol\xe1s: \xabS\xed: sube las repeticiones de la calibraci\xf3n de d\u2032 (por
+        ejemplo a 1.000) y sella esa semilla y ese número antes del tag, para que una sola semilla no decida V2 VIIRS 750.»
+        Con 200, la semilla fija dejaba V2 VIIRS 750 z<=40 en 11 falsos de 200 contra un tope de 10 (H2 del verificador)."""
+        assert hasattr(X, "N_CALIB_DPRIMA"), "el n\xfamero de repeticiones de la calibraci\xf3n de d\u2032 no es una constante"
+>       assert X.N_CALIB_DPRIMA == 1000, "repeticiones de d\u2032 %s, sellado 1.000 (D-32)" % X.N_CALIB_DPRIMA
+E       AssertionError: repeticiones de d\u2032 200, sellado 1.000 (D-32)
+E       assert 200 == 1000
+E        +  where 200 = X.N_CALIB_DPRIMA
+
+tests\test_evaluar_d25_placebo_s159.py:293: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_la_calibracion_de_dprima_usa_la_semilla_y_las_repeticiones_selladas
+1 failed, 1 passed, 18 deselected in 6.00s

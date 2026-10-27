@@ -1,0 +1,15 @@
+funcion: C:\vrp-trabajo\s162-a61\pipeline\process_modis.py sha256 fuente: 592cba5ce24b2b3b
+grilla gruesa sintetica: (406, 271) (esperado 406 x 271)
+
+== (a) error de indice de `_interp_geo` (valor interpolado menos indice real), en pixeles
+   a lo largo del barrido (frame): frame 0 -> +2.00 | frame 902 -> +0.00 | frame 1353 -> -1.00 | min -1.00 max +2.00
+   a lo largo de la traza (linea): linea 0 -> +2.00 | linea 1014 -> +0.00 | linea 2029 -> -2.00 | min -2.00 max +2.00
+   frame donde el error cruza 0: 902 | lectura: en el frame 0 el pixel recibe la posicion del pixel 2.0 frames hacia el nadir; en el 1353, la del pixel 1.0 frames hacia el nadir
+   control positivo (interpolacion con el nodo grueso en 5i+2, extrapolacion lineal en el borde): error max |0.0000| px | frame 0..3: [-0.0, -0.0, 0.0, 0.0] | frame 1350..1353: [0.0, 0.0, 0.0, 0.0]
+
+== (b) bloque de relleno -999 en la grilla gruesa
+   pixeles finos con -999 exacto: 197684 | pixeles finos CONTAMINADOS (valor entre el real y -999): 13540
+   lineas finas contaminadas: 10, de la 496 a la 651 (el bloque grueso 100:130 cubre las finas 502 a 647)
+   ejemplo de latitudes contaminadas (columna 600): [-31.780000686645508, -225.6999969482422, -419.6300048828125, -613.5499877929688, -807.469970703125, -858.4299926757812]
+   lectura: una latitud de -400 o -800 no cae en ningun ROI, pero el pixel existe con un valor absurdo y nadie lo enmascara aguas abajo: grep -n -- '-999' pipeline/process_modis.py y grep -n 'isfinite(lat' dan 0 lineas (verificado aparte).
+   nota: si el relleno de la grilla de 5 km del L1B fuera NaN en vez de -999, `zoom` propagaria NaN a los vecinos (mismo alcance de 1 celda gruesa).

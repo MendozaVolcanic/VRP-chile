@@ -1,0 +1,105 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+== VENTANA V1: 2026-10-17 a 2026-10-19 | volcanes 11 | brazos ('K', 'G', 'D') | decide la tabla sola | predicado sha256 f711c61dfb96555b8d203ce0e127dc6c5f86e63d692b435c79b7d45fa7d0ba02
+   volcanes con kernel local en VIIRS 375 (volcanoes.yaml): ['Chaiten', 'Lastarria', 'PlanchonPeteroa', 'PuyehueCordonCaulle', 'Villarrica']
+   calibración de M: simétrica con opción A (ADENDA_CALIBRACION.md l. 3 a 8, sello D-27 de Nicolás, vigente)
+   comparador de M (ADENDA_PLACEBO.md, sello D-28): MEJORA sólo si d y d′ (D contra K×ĝ) dan MEJORA, EMPEORA sobre d; placebo K x 1.2 y K x 0.8 informado sin comparador
+   referencia congelada MendozaVolcanic/Mirova-v1@35a5ea86748e8d1ebbe62ea48e19d4a2ddc14360: principales y capas (consolidado_filas_perdidas.csv 254 filas, respaldo_20260408.csv 0 filas) OK
+
+== 1. COBERTURA (A108), sólo VIIRS 375 y 750
+   cobertura pareja: OK
+
+== 2. VERSIÓN DEL PRODUCTO: protegidas con versión distinta entre brazos 0 []
+
+== 3. CABLEADO (línea FLAGS_BRAZO de cada job y huella en los records)
+   K  OK
+   G  OK
+   D  OK
+
+== 4. DETERMINISMO DE LA PUBLICACIÓN (K' contra K)
+   VIIRS375   136 pasadas, misma decisión   136 | OK
+   VIIRS750   135 pasadas, misma decisión   135 | OK
+
+== CONTROLES GENERALES: OK
+
+== REGLA DE ALERTAS MÍNIMAS: original
+   P1 VIIRS375 CUMPLE | protegidas que K publica 6, netas 0, ruidosas 0, pendientes 0, sólo OCR Suomi NPP 0
+   P1b VIIRS375 SIN CRUCES []
+   P2 VIIRS375 SIN SUSTRATO (D-45, prueba de signos por bloque) | neto D menos K +0 | B 0 noches (suma no nula 0) | p GANA 1.0000, PIERDE 1.0000, dos colas 1.0000 (informa) | exacto, p mínimo 1 | semilla None, sorteos None | discordantes 0 | suma K 1, D 1 | noches con error K 1, D 1
+      sumas de bloque: []
+      informan, no deciden (D-45 §3): D-34 sin calibrar SIN SUSTRATO, IC95 None | D-42 SIN SUSTRATO (calibración no corre, falsos GANA None PIERDE None, tope 0.05 por cola, BLOQUEA None, None sorteos, semilla None) | no se calibra: sin sustrato para D-34 (D-34 §5.6)
+      informan, no deciden: (a) ruido del gemelo 0.0 -> EMPATE | (b) D-33 -> EMPATE
+   P1 VIIRS750 CUMPLE | protegidas que K publica 6, netas 0, ruidosas 0, pendientes 0, sólo OCR Suomi NPP 0
+   P1b VIIRS750 SIN CRUCES []
+   P2 VIIRS750 SIN SUSTRATO (D-45, prueba de signos por bloque) | neto D menos K +1 | B 1 noches (suma no nula 1) | p GANA 1.0000, PIERDE 0.5000, dos colas 1.0000 (informa) | exacto, p mínimo 0.5 | semilla None, sorteos None | discordantes 1 | suma K 0, D 1 | noches con error K 0, D 1
+      sumas de bloque: [1]
+      informan, no deciden (D-45 §3): D-34 sin calibrar SIN SUSTRATO, IC95 None | D-42 SIN SUSTRATO (calibración no corre, falsos GANA None PIERDE None, tope 0.05 por cola, BLOQUEA None, None sorteos, semilla None) | no se calibra: sin sustrato para D-34 (D-34 §5.6)
+      informan, no deciden: (a) ruido del gemelo 0.0 -> PIERDE | (b) D-33 -> PENDIENTE DE DIAGNOSTICO POR PASADA (PIERDE por 1)
+      discordante: Tupungatito VIIRS750 2026-10-18 05:42 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.271 | error de D
+   estrato 203 (VIIRS 750, cumbre de K en 0,0 MW; informa, no decide): 2 pasadas | D recupera 0, enciende 1, no cambia 0, otros cambios 1
+      203: Tupungatito 2026-10-17 05:24 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.274 | error de P2 None
+      203: Tupungatito 2026-10-18 05:42 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.271 | error de P2 D
+   M (pares que salen: {})
+      VIIRS750|z<=40             decide   n 2 noches 1 -> SIN SUSTRATO
+      VIIRS750|z>40              decide   n 4 noches 2 -> SIN SUSTRATO
+      VIIRS375|sin_kernel|z<=40  decide   n   6 noches   6 | razón K 0.537 D 0.965 | d -0.067 [-0.331, +0.072] | nulo MEJORA 0.050 EMPEORA 0.025 OK | poder None -> NEUTRO
+         volcanes con d negativa 0 de 0 con 3 pares o más 
+         comparador D-28: ĝ x1.488 [x1.080, x4.432] | d′ +0.023 [-0.113, +0.212] | nulo de d′ MEJORA 0.031 EMPEORA 0.025 OK | volcanes con d′ negativa 0 de 0 -> d′ NEUTRO
+         ĝ por volcán (informa, no decide): Isluga x1.488 (n 2), NevadosDeChillan x1.080 (n 2), Tupungatito x4.432 (n 2)
+      VIIRS375|sin_kernel|z>40   bloquea  n   7 noches   4 | razón K 0.378 D 0.503 | d -0.039 [-0.645, -0.037] | nulo MEJORA 0.060 EMPEORA 0.055 MAL CALIBRADA | poder None -> INDECIDIBLE
+         volcanes con d negativa 1 de 1 con 3 pares o más 
+         comparador D-28: ĝ x1.145 [x1.090, x4.420] | d′ +0.020 [+0.000, +0.043] | nulo de d′ MEJORA 0.064 EMPEORA 0.061 MAL CALIBRADA | volcanes con d′ negativa 0 de 1 -> d′ NEUTRO
+         ĝ por volcán (informa, no decide): Isluga x1.305 (n 2), NevadosDeChillan x1.090 (n 4), Tupungatito x4.420 (n 1)
+      VIIRS375|kernel|z<=40      informa  n 2 noches 2 -> SIN SUSTRATO
+      VIIRS375|kernel|z>40       informa  n 2 noches 2 -> SIN SUSTRATO
+   pares de M con magnitud distinta entre K y D: 23 de 23
+   placebo de M sin comparador (D-28 §2.5, informa, no invalida):
+      VIIRS375|sin_kernel|z<=40  K x 1.2 -> NEUTRO, K x 0.8 -> EMPEORA
+      VIIRS375|sin_kernel|z>40   K x 1.2 -> INDECIDIBLE, K x 0.8 -> INDECIDIBLE
+      Chillán VIIRS375   n 6 razón K 0.456 D 0.493 (informa)
+      Chillán VIIRS750   n 6 razón K 0.447 D 0.508 (informa)
+   estado con la regla original: INDECIDIBLE
+
+== REGLA DE ALERTAS MÍNIMAS: SN
+   P1 VIIRS375 CUMPLE | protegidas que K publica 6, netas 0, ruidosas 0, pendientes 0, sólo OCR Suomi NPP 0
+   P1b VIIRS375 SIN CRUCES []
+   P2 VIIRS375 SIN SUSTRATO (D-45, prueba de signos por bloque) | neto D menos K +0 | B 0 noches (suma no nula 0) | p GANA 1.0000, PIERDE 1.0000, dos colas 1.0000 (informa) | exacto, p mínimo 1 | semilla None, sorteos None | discordantes 0 | suma K 2, D 2 | noches con error K 2, D 2
+      sumas de bloque: []
+      informan, no deciden (D-45 §3): D-34 sin calibrar SIN SUSTRATO, IC95 None | D-42 SIN SUSTRATO (calibración no corre, falsos GANA None PIERDE None, tope 0.05 por cola, BLOQUEA None, None sorteos, semilla None) | no se calibra: sin sustrato para D-34 (D-34 §5.6)
+      informan, no deciden: (a) ruido del gemelo 0.0 -> EMPATE | (b) D-33 -> EMPATE
+   P1 VIIRS750 CUMPLE | protegidas que K publica 6, netas 0, ruidosas 0, pendientes 0, sólo OCR Suomi NPP 0
+   P1b VIIRS750 SIN CRUCES []
+   P2 VIIRS750 SIN SUSTRATO (D-45, prueba de signos por bloque) | neto D menos K +1 | B 1 noches (suma no nula 1) | p GANA 1.0000, PIERDE 0.5000, dos colas 1.0000 (informa) | exacto, p mínimo 0.5 | semilla None, sorteos None | discordantes 1 | suma K 0, D 1 | noches con error K 0, D 1
+      sumas de bloque: [1]
+      informan, no deciden (D-45 §3): D-34 sin calibrar SIN SUSTRATO, IC95 None | D-42 SIN SUSTRATO (calibración no corre, falsos GANA None PIERDE None, tope 0.05 por cola, BLOQUEA None, None sorteos, semilla None) | no se calibra: sin sustrato para D-34 (D-34 §5.6)
+      informan, no deciden: (a) ruido del gemelo 0.0 -> PIERDE | (b) D-33 -> PENDIENTE DE DIAGNOSTICO POR PASADA (PIERDE por 1)
+      discordante: Tupungatito VIIRS750 2026-10-18 05:42 | K False D True | neg_limpio VRP None | pc.vrp_mw K 0.0 D 0.271 | error de D
+   estrato 203 (VIIRS 750, cumbre de K en 0,0 MW; informa, no decide): 2 pasadas | D recupera 0, enciende 1, no cambia 0, otros cambios 1
+      203: Tupungatito 2026-10-17 05:24 | otra VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.274 | error de P2 None
+      203: Tupungatito 2026-10-18 05:42 | negativo limpio VRP None | publica K False D True | pc.vrp_mw K 0.0 D 0.271 | error de P2 D
+   M (pares que salen: {})
+      VIIRS750|z<=40             decide   n 2 noches 1 -> SIN SUSTRATO
+      VIIRS750|z>40              decide   n 4 noches 2 -> SIN SUSTRATO
+      VIIRS375|sin_kernel|z<=40  decide   n   5 noches   5 | razón K 0.605 D 0.919 | d -0.095 [-0.466, -0.028] | nulo MEJORA 0.045 EMPEORA 0.020 OK | poder None -> NEUTRO
+         volcanes con d negativa 0 de 0 con 3 pares o más | MEJORA sostenida por menos de 2 volcanes (adenda, H4)
+         comparador D-28: ĝ x1.273 [x1.067, x2.924] | d′ +0.000 [-0.135, +0.000] | nulo de d′ MEJORA 0.000 EMPEORA 0.000 OK | volcanes con d′ negativa 0 de 0 -> d′ NEUTRO
+         ĝ por volcán (informa, no decide): Isluga x1.488 (n 2), NevadosDeChillan x1.080 (n 2), Tupungatito x2.924 (n 1)
+      VIIRS375|sin_kernel|z>40   bloquea  n   7 noches   4 | razón K 0.378 D 0.503 | d -0.039 [-0.645, -0.037] | nulo MEJORA 0.060 EMPEORA 0.055 MAL CALIBRADA | poder None -> INDECIDIBLE
+         volcanes con d negativa 1 de 1 con 3 pares o más 
+         comparador D-28: ĝ x1.145 [x1.090, x4.420] | d′ +0.020 [+0.000, +0.043] | nulo de d′ MEJORA 0.064 EMPEORA 0.061 MAL CALIBRADA | volcanes con d′ negativa 0 de 1 -> d′ NEUTRO
+         ĝ por volcán (informa, no decide): Isluga x1.305 (n 2), NevadosDeChillan x1.090 (n 4), Tupungatito x4.420 (n 1)
+      VIIRS375|kernel|z<=40      informa  n 2 noches 2 -> SIN SUSTRATO
+      VIIRS375|kernel|z>40       informa  n 2 noches 2 -> SIN SUSTRATO
+   pares de M con magnitud distinta entre K y D: 22 de 22
+   placebo de M sin comparador (D-28 §2.5, informa, no invalida):
+      VIIRS375|sin_kernel|z<=40  K x 1.2 -> NEUTRO, K x 0.8 -> EMPEORA
+      VIIRS375|sin_kernel|z>40   K x 1.2 -> INDECIDIBLE, K x 0.8 -> INDECIDIBLE
+      Chillán VIIRS375   n 6 razón K 0.456 D 0.493 (informa)
+      Chillán VIIRS750   n 6 razón K 0.447 D 0.508 (informa)
+   estado con la regla SN: INDECIDIBLE
+
+== P4 Y P5 (informan)
+   P4: cúmulos movidos más de 0.01 km 0 (protegidas 0: []) | cambia distance_class 0 []
+   P5: {"d9_capped_K_D": {"False->False": 271}, "modo_un_pixel_K_D": {"True->True": 44, "None->None": 213, "True->False": 2, "False->False": 12}, "discarded_reason_cambia": [], "apagadas_por_filtro_del_tablero": {}}
+   alertas sin geometría (informan, no deciden): 0
+
+== VEREDICTO DE LA VENTANA V1 (manda la regla más estricta de original y SN): INDECIDIBLE
