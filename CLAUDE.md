@@ -435,7 +435,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   las dos frases de esta regla que dicen que el tope «funciona» sólo quieren decir que recorta. No está
   medido que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02: el paper no lo sostiene), y el tope
   se arma con el fondo de la escena bajo 270 K sin que ningún píxel pase por temperatura ni por NTI
-  absoluto (`pipeline/process_modis.py:1056`, era 1009 hasta S157). Corpus al 2026-10-14 (65.705 records): 1.565 cúmulos
+  absoluto (`pipeline/process_modis.py:1094`, era 1056 hasta S164 y 1009 hasta S157). Corpus al 2026-10-14 (65.705 records): 1.565 cúmulos
   topados en 5,0 exacto (277 `summit`), los 1.565 con `primary_cluster.d9_capped`, y **343 cúmulos
   sobre 5 MW** (110 `summit`), así que «0 records sobre 5 MW» vale sólo para la población de S113 (A90).
   Script: `experiments/_s150_meta_audit/verif_docs/contar_topados_d9.py`. Marca de S146 conservada:
