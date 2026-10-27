@@ -581,7 +581,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                   exclude_zones: list = None,
                   active_water_bodies: list = None,
                   lbg_global_compatible: bool = False,
-                  local_kernel_bg_compatible: bool = False) -> dict | None:
+                  local_kernel_bg_compatible: bool = False,
+                  al_sin_dato=None) -> dict | None:
     """
     Calculate VRP from MODIS L1B granule.
 
@@ -595,6 +596,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         vent_radius_km: Radius for vent-scale search.
         inner_radius_km: MIROVA-style visual classification radius (S14 D1).
             If None, distance_class is None.
+        al_sin_dato: S165 (V165-03). Se llama con un texto cuando la pasada se descarta
+            porque el cráter no tiene posición (ENABLE_MODIS_CRATER_SIN_DATO, apagado);
+            run_pipeline lo anota como incidencia de cobertura. None: sólo el print.
 
     Returns dict or None if granule does not cover volcano.
     """
@@ -673,6 +677,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         else (volcano_lat, volcano_lon)
     if sin_dato_de_geolocalizacion(lat, lon, _ancla_lat, _ancla_lon, geo_fuente):
         print(f"  MODIS {hdf_path.name}: crater sin posicion en el granulo (sin dato, no se escribe record)")
+        if al_sin_dato is not None:
+            al_sin_dato(f"cráter sin posición en el gránulo (borde o relleno del MxD03): {hdf_path.name}")
         return None
     # Per-pixel ground area corrected for off-nadir scan geometry
     pixel_areas = modis_pixel_areas(

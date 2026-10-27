@@ -783,7 +783,11 @@ def limpiar_fallas() -> None:
 # de LANCE, cuando se buscó: es parcial por construcción (el NRT procesa siempre el día en curso); cuenta en modo
 # estricto. El NRT no usa el modo estricto: su código de salida no cambia.
 # Valor: si la incidencia cuenta para --estricto-cobertura.
-TIPOS_INCIDENCIA = {"sin_granulos": False, "sin_geolocalizacion": True, "dia_parcial": True}
+# S165 (V165-03): (4) una pasada MODIS que ENABLE_MODIS_CRATER_SIN_DATO (apagado) descarta porque el cráter no tiene
+# posición en el gránulo: noche sin dato, no noche observada. No cuenta en modo estricto (Nicolás, S165): sale de la
+# geometría de la órbita, se repite igual en todos los brazos de un A/B y repetir el job no la recupera (A108).
+TIPOS_INCIDENCIA = {"sin_granulos": False, "sin_geolocalizacion": True, "dia_parcial": True,
+                    "crater_sin_dato": False}
 # Latencia de LANCE NRT: «~3h» (CLAUDE.md del proyecto, Constraints técnicos: «NASA LANCE NRT ~3h latencia»).
 # Se usa como la MÍNIMA: un día más joven que su fin más esto seguro está incompleto; uno más viejo todavía puede
 # estarlo (Standard publicado a medias, gránulos que llegan tarde) y eso el código no lo puede saber.
