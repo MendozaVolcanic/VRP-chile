@@ -15,7 +15,7 @@
 # Limitaciones  : Artefacto solar diurno (mitigado: solo noche en produccion; la rama diurna D-10 esta
 #                 apagada por flag, ver diurno.py), contaminacion por nieve/nube, falsos positivos sub-umbral.
 # Refs/datos    : Coppola 2016a, Aveni et al. 2024 (RSE), Campus et al. 2022 (Sensors). Entrenamiento: No
-#                 aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
+#                 aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md. Vía «código MIROVA» APAGADA (S165, enable_v375_codigo_mirova): pipeline/mirova_v750_codigo.py
 # ════════════════════════════════════════════════════════════════════
 """
 process_viirs.py: Calculate VRP from VIIRS VNP02IMG / VJ102IMG L1B granules.
@@ -88,6 +88,7 @@ FLAG_DNS = {65532, 65533, 65534, 65535}  # Missing_EV, Bowtie_Deleted, Cal_Fail,
 from pipeline.regrid import regrid_to_utm  # F70.2 grilla UTM
 from pipeline.profile import (
     ENABLE_UTM_REGRID,  # F70.2
+    ENABLE_V375_CODIGO_MIROVA,  # S165 V375-E
     ANOMALY_THRESHOLD_K,
     TIR_THRESHOLD_K,
     N_SIGMA_MIR,
@@ -753,6 +754,37 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     C2_DETI_SCENE_NIGHT = _TH["c2_deti_scene"]        # noche 10 / día 15
     VIIRS_C2_OVERRIDE_NIGHT = _TH["viirs_c2_override"]  # override nocturno; de día None
     _umbrales_diurnos = bool(_TH.get("dia", False))
+
+    # S165 V375-E: vía «código MIROVA» para VIIRS 375 (pipeline/mirova_v750_codigo.py, FAMILIAS["VIIRS375"]). POR QUÉ:
+    # V375-C midió que ver el volcán como lo ve MIROVA (el gránulo interpolado a su grilla de 375 m, su detector con la
+    # caja C13 en el cráter, su fondo rellenado como fillmissing2 de MATLAB y la suma de todos los alertados) da la
+    # magnitud de MIROVA al milésimo, donde K la da a dos tercios. Con el flag APAGADO (hoy) este bloque no corre y el
+    # procesador es el de siempre. Con el flag encendido y un volcán sin grilla de MIROVA, sigue K y el record lo dice
+    # (`via_codigo_mirova: "sin_grilla"`), para que nadie lea K creyendo que es la vía (A118). El volcán se reconoce por
+    # sus coordenadas de volcanoes.yaml, que run_pipeline ya pasa, como en VIIRS 750 y MODIS (la firma no cambia, GR1).
+    _via_sin_grilla = False
+    if ENABLE_V375_CODIGO_MIROVA:
+        from . import mirova_v750_codigo as _MV
+        _fam = _MV.FAMILIAS["VIIRS375"]
+        volcan_nombre = _MV.volcan_por_coordenadas(volcano_lat, volcano_lon)
+        if volcan_nombre is not None and _MV.grilla_del_volcan(volcan_nombre, paso_m=_fam["paso_m"],
+                                                              clave_roi=_fam["clave_roi"]) is not None:
+            _rad = _MV.leer_radiancia_l1b(l1b_path, bandas=_fam["bandas"])
+            if _rad is None:
+                return None
+            _lat, _lon, _ang = _MV.leer_geo_l1b(geo_path)
+            _rec = _MV.calcular_vrp_granulo(
+                _rad, _lat, _lon, _ang, volcan_nombre,
+                vent_lat if vent_lat is not None else volcano_lat,
+                vent_lon if vent_lon is not None else volcano_lon,
+                inner_radius_km, _sensor_label_from_filename(l1b_path.name), familia="VIIRS375")
+            if _rec is None:
+                return None
+            _rec.update({"granule": l1b_path.name,
+                         "product_version": product_version_from_granule(l1b_path.name),
+                         "datetime_utc": _parse_datetime(l1b_path.name)})
+            return _rec
+        _via_sin_grilla = True
 
     bands = read_viirs_l1b(l1b_path)
     geo = read_viirs_geo(geo_path)
@@ -2247,6 +2279,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # rama diurna actuó (flag ON y Sol sobre el horizonte); con el flag OFF el record es el de hoy.
     if _umbrales_diurnos:
         record["diag_umbrales_diurnos"] = True
+
+    # S165 V375-E: con la vía encendida y un volcán sin grilla de MIROVA, el record es de K y lo dice.
+    if _via_sin_grilla:
+        record["via_codigo_mirova"] = "sin_grilla"
 
     return record
 

@@ -315,12 +315,14 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                                 max_cluster_pixels=volcano.get("max_cluster_pixels"),
                                                 inner_radius_km=volcano.get("inner_radius_km"),
                                                 volcanic_features=VOLCANIC_FEATURES.get(volcano["name"]))
-                            vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
-                                        f"({result['n_vent_pixels']}px)"
+                            # S165: con .get, porque un record de la vía «código MIROVA» (flag apagado hoy) no trae
+                            # los campos de K y el KeyError salía como ERROR de un record ya guardado.
+                            vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw')} MW "
+                                        f"({result.get('n_vent_pixels')}px)"
                                         if eff_vent_lat is not None else "")
-                            print(f"  {result['sensor']} (375m) | VRP_MIR={result['vrp_mir_mw']} MW | "
-                                  f"VRP_TIR={result['vrp_tir_mw']} MW | "
-                                  f"T_max={result['t_max_i04_k']} K"
+                            print(f"  {result['sensor']} (375m) | VRP_MIR={result.get('vrp_mir_mw')} MW | "
+                                  f"VRP_TIR={result.get('vrp_tir_mw')} MW | "
+                                  f"T_max={result.get('t_max_i04_k')} K"
                                   f"{vent_str}")
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")

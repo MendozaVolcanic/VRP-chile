@@ -76,9 +76,20 @@ COEF_VRP_V750 = 1.97e7 * 0.5625 / 1e6
 LAMBDA_MODIS_B22 = 3.959
 LAMBDA_MODIS_B31 = 11.03
 COEF_VRP_MODIS = 1.89e7 * 1.0 / 1e6
+# VIIRS 375 (S165, V375-E): bandas I4 a 3,74 um e I5 a 11,45 um (pipeline/process_viirs.py, I04_LAMBDA y la inversión
+# de Planck de I05) y RP = 18,0 x A_pix x dL con A_pix = 0,140625 km² nadir fijo (CLAUDE.md «Reglas científicas», S14,
+# validado contra el OSF de MIROVA). Son los números del port de V375-B/C (experiments/_s159/portes/mirova_port.py,
+# SENSORES["VIIRS375"]).
+LAMBDA_I4 = 3.74
+LAMBDA_I5 = 11.45
+COEF_VRP_V375 = 1.80e7 * 0.140625 / 1e6
 
 PASO_V750_M = 750.0
 PASO_MODIS_M = 1000.0
+PASO_V375_M = 375.0
+# ROI1 de VIIRS 375: la «física» de S159, el mismo tamaño en metros que el anillo de 21 celdas de 750 m del .m (±7.875 m
+# alrededor de X0, Y0), o sea 42 x 42 celdas de 375 m (mirova_port.HALF_ROI1_M).
+HALF_ROI1_V375_M = 10.5 * 750.0
 MEDIA_GRILLA_M = 25000.0   # regla GEO: centros en X0 - 25000 : paso : X0 + 25000
 RADIO_RECORTE_KM = 45.0    # como probe_n.grillar: sólo se interpolan los píxeles a menos de 45 km
 FLAG_MIN_DN = 65528        # DN >= 65528 son banderas en el L1B de VIIRS (UserGuide Aug 2021, Tabla C.1)
@@ -99,6 +110,11 @@ FAMILIAS = {
     "MODIS": {"paso_m": PASO_MODIS_M, "lam_mir": LAMBDA_MODIS_B22, "lam_tir": LAMBDA_MODIS_B31, "coef": COEF_VRP_MODIS,
               "lado_sensible": 5, "lado_anillo": 15, "bandas": ("MIR", "TIR"), "clave_roi": "roi_modis",
               "dist_max_centro_km": 5.0},
+    # VIIRS 375 (S165): la caja no sale del yaml sino de PD1 (C13 en todos, S164 bajo D-48), ver caja_v375; el corte de
+    # 5 km al centro es el del probe de V375-B/C (experiments/_s162_v375/probe_v375.py).
+    "VIIRS375": {"paso_m": PASO_V375_M, "lam_mir": LAMBDA_I4, "lam_tir": LAMBDA_I5, "coef": COEF_VRP_V375,
+                 "lado_sensible": 13, "lado_anillo": None, "bandas": ("I04", "I05"), "clave_roi": "roi_v375",
+                 "dist_max_centro_km": 5.0, "roi1_half_m": HALF_ROI1_V375_M},
 }
 
 
@@ -168,7 +184,7 @@ def grilla_del_volcan(nombre, paso_m=PASO_V750_M, clave_roi="roi_v750"):
     return {"epsg": int(r["epsg"]), "ul_x": float(r["x0"]) - MEDIA_GRILLA_M - paso_m / 2,
             "ul_y": float(r["y0"]) - MEDIA_GRILLA_M + (n - 1) * paso_m + paso_m / 2,
             "centro_lat": float(r["centro_lat"]), "centro_lon": float(r["centro_lon"]), "n": n, "paso": paso_m,
-            "roi": r.get(clave_roi, "def")}
+            "roi": r.get(clave_roi, "def"), "x0": float(r["x0"]), "y0": float(r["y0"])}
 
 
 def _haversine(lat, lon, lat0, lon0):
@@ -274,6 +290,31 @@ def caja_roi(tipo="def", n=None, celda_crater=None, inner_km=None, lado_sensible
         b[np.hypot(r - c, q - c) * paso_m / 1000.0 <= inner_km] = 2
     else:
         raise ValueError(f"tipo de ROI desconocido: {tipo!r} (válidos {TIPOS_ROI})")
+    return b
+
+
+def caja_v375(grilla, vent_lat, vent_lon, lado_sensible=13, half_roi1_m=HALF_ROI1_V375_M):
+    """BOX de VIIRS 375 (S165, PD1 = C13 en todos los volcanes): 1 en la ROI1 física de S159 (las celdas cuyo centro
+    está a ±half_roi1_m de X0, Y0 en las dos coordenadas), 2 en el cuadro de lado_sensible x lado_sensible celdas
+    centrado en la celda cuyo centro es el más cercano al cráter (recortado al borde), 0 fuera.
+
+    POR QUÉ no caja_roi: en la grilla de 134 celdas X0 no cae en un centro de celda (25.000 m no es múltiplo de 375), así
+    que la ROI1 de 42 x 42 no es un cuadro centrado en n // 2; y V375-C midió la caja con brazos.caja(..., "C13", ...),
+    que elige la celda del cráter por el centro más cercano. Esta función reproduce esa caja celda por celda (prueba
+    test_caja_de_375_es_la_del_brazo_c13_en_los_volcanes_con_grilla). La ROI1 no cambia la detección (las BOX 0 y 1
+    tienen los mismos umbrales en el .m), pero se conserva igual al port para que la comparación sea limpia."""
+    from pyproj import Transformer
+    n, paso = int(grilla["n"]), float(grilla["paso"])
+    xs = grilla["ul_x"] + paso * (np.arange(n) + 0.5)
+    ys = grilla["ul_y"] - paso * (np.arange(n) + 0.5)
+    b = np.zeros((n, n))
+    en_x = np.abs(xs - grilla["x0"]) <= half_roi1_m
+    en_y = np.abs(ys - grilla["y0"]) <= half_roi1_m
+    b[np.ix_(en_y, en_x)] = 1
+    xc, yc = Transformer.from_crs("EPSG:4326", f"EPSG:{grilla['epsg']}", always_xy=True).transform(vent_lon, vent_lat)
+    i0, j0 = int(np.argmin(np.abs(ys - yc))), int(np.argmin(np.abs(xs - xc)))
+    h = (lado_sensible - 1) // 2
+    b[max(i0 - h, 0):i0 + h + 1, max(j0 - h, 0):j0 + h + 1] = 2
     return b
 
 
@@ -703,14 +744,15 @@ def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inne
 
 
 # ---------------------------------------------------------------------------------------------------- gránulo
-def leer_radiancia_l1b(ruta):
-    """M13 y M15 en radiancia (W m-2 sr-1 um-1) del L1B, con las banderas (DN >= 65528) en NaN; el código de
-    MIROVA trabaja en radiancia, no en temperatura de brillo."""
+def leer_radiancia_l1b(ruta, bandas=("M13", "M15")):
+    """M13 y M15 (o las bandas pedidas: I04 e I05 en VIIRS 375) en radiancia (W m-2 sr-1 um-1) del L1B, con las
+    banderas (DN >= 65528) en NaN; el código de MIROVA trabaja en radiancia, no en temperatura de brillo. En 375 es la
+    lectura del probe de V375-B/C (experiments/_s159/portes/probe_portes.py::leer_viirs)."""
     import h5py
     out = {}
     with h5py.File(ruta, "r") as f:
         obs = f["observation_data"]
-        for b in ("M13", "M15"):
+        for b in bandas:
             if b not in obs:
                 return None
             ds = obs[b]
@@ -748,9 +790,9 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
     """Del gránulo (radiancia y geolocalización ya leídas) al record, para un volcán con grilla de MIROVA.
 
     Devuelve None si el volcán no tiene grilla en grillas_mirova.yaml (el llamador decide qué hacer: la vía no
-    inventa una grilla) o si el gránulo no cubre el volcán (menos de 100 píxeles en el recorte de 45 km o, en MODIS,
-    el píxel más cercano al centro a más de 5 km). familia: "VIIRS750" (rad con M13 y M15) o "MODIS" (rad con MIR y
-    TIR, ver leer_radiancia_modis)."""
+    inventa una grilla) o si el gránulo no cubre el volcán (menos de 100 píxeles en el recorte de 45 km o, en MODIS y
+    VIIRS 375, el píxel más cercano al centro a más de 5 km). familia: "VIIRS750" (rad con M13 y M15), "MODIS" (rad
+    con MIR y TIR, ver leer_radiancia_modis) o "VIIRS375" (rad con I04 e I05; la caja es siempre caja_v375)."""
     cfg = FAMILIAS[familia]
     g = grilla or grilla_del_volcan(nombre_volcan, paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"])
     if g is None:
@@ -771,9 +813,13 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
     b_mir, b_tir = cfg["bandas"]
     m13g, m15g = remuestrear_grilla(lat, lon, rad[b_mir], rad[b_tir], g)
     pos = posicion_de(g, vent_lat, vent_lon)
-    celda = celda_de(g, vent_lat, vent_lon)
-    box = caja_roi(tipo_roi or g.get("roi", "def"), n=g["n"], celda_crater=celda, inner_km=inner_km,
-                   lado_sensible=cfg["lado_sensible"], lado_anillo=cfg["lado_anillo"], paso_m=g["paso"])
+    if cfg.get("roi1_half_m") is not None:
+        # VIIRS 375: la caja de PD1 (C13 en el cráter dentro de la ROI1 física), igual en todos los volcanes
+        box = caja_v375(g, vent_lat, vent_lon, lado_sensible=cfg["lado_sensible"], half_roi1_m=cfg["roi1_half_m"])
+    else:
+        celda = celda_de(g, vent_lat, vent_lon)
+        box = caja_roi(tipo_roi or g.get("roi", "def"), n=g["n"], celda_crater=celda, inner_km=inner_km,
+                       lado_sensible=cfg["lado_sensible"], lado_anillo=cfg["lado_anillo"], paso_m=g["paso"])
     rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia)
     rec["diag_codigo_mirova"].update({"dayflag": dayflag, "sunglint": round(sg, 2),
                                       "celdas_sin_dato": int(np.isnan(m13g).sum())})
