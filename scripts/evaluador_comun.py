@@ -321,6 +321,10 @@ def metricas_por_estrato(T, control, brazos, estrato_de, dias_excluidos=()):
 # ===========================================================================================================
 CAUSA_HUECO = "hueco_nasa"                 # búsqueda o descarga fallida, L1B sin geolocalización o día parcial
 CAUSA_VACIA = "busqueda_vacia"             # el catálogo respondió vacío en una plataforma del sensor: hueco probable
+# S165 (V165-03, V16503-01): con ENABLE_MODIS_CRATER_SIN_DATO (apagado) MODIS descarta la pasada cuyo cráter no tiene
+# posición en el gránulo y lo anota como `crater_sin_dato`. No es un hueco de NASA ni una pérdida: es un descarte que el
+# brazo decidió. Va después del hueco (una falla manda) y antes de la búsqueda vacía (el descarte es un hecho).
+CAUSA_SIN_DATO_CRATER = "crater_sin_dato"
 CAUSA_SIN_INCIDENCIA = "sin_incidencia"    # el run no registró nada: no observado legítimo (o pérdida del proceso)
 CAUSA_SIN_REGISTRO = "sin_registro_de_cobertura"   # el lado no trae JSON de cobertura: causa desconocida
 _TIPOS_HUECO = ("falla_busqueda", "falla_descarga", "sin_geolocalizacion", "dia_parcial")
@@ -356,6 +360,8 @@ def causa_ausencia(f, lado, eventos):
              and (e.get("plataforma") is None or bp.bucket(e["plataforma"]) == p.sensor_bucket)}
     if tipos & set(_TIPOS_HUECO):
         return CAUSA_HUECO
+    if "crater_sin_dato" in tipos:
+        return CAUSA_SIN_DATO_CRATER
     if "sin_granulos" in tipos:
         return CAUSA_VACIA
     return CAUSA_SIN_INCIDENCIA

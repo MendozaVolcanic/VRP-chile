@@ -9,8 +9,8 @@ MOD-D, serían 223 de 5.465 pasadas MODIS que desaparecerían sin aviso.
 
 Decisiones (Nicolás, chat de la sesión S165, 2026-10-27): se anota como incidencia nueva `crater_sin_dato` y NO
 cuenta en modo estricto. El modo estricto existe para que un brazo de un A/B con pasadas de menos por un corte de
-NASA se repita (A108); este descarte sale de la geometría de la órbita, se repite igual en todos los brazos y
-repetir el job no lo recupera.
+NASA se repita (A108); este descarte sale de la geometría de la órbita y repetir el job no lo recupera. Contra un
+control sin el flag (el A/B que decida encenderlo) lo explica `evaluador_comun.CAUSA_SIN_DATO_CRATER`.
 
 Con el flag apagado la corrida es idéntica, bit a bit, a la del tag pre-s165-v165-03-sin-dato (golden congelado
 antes de tocar pipeline/ y scripts/, `tests/datos_s165_mxd03/sin_dato_corrida_*_antes.json`).
@@ -164,3 +164,22 @@ def test_el_resumen_nombra_el_caso(capsys, tmp_path, estricto):
     assert cod == 0
     assert "Cobertura: completa" not in out
     assert "cráter sin posición" in out and "no cuenta en modo estricto" in out
+
+
+# ---------------------------------------------------------------- el evaluador de los A/B la reconoce (V16503-01)
+
+def test_el_evaluador_distingue_la_pasada_sin_dato_de_una_perdida():
+    """Verificador de #922 (V16503-01): `evaluador_comun.causa_ausencia` no conocía el tipo y devolvía «el run no
+    registró nada» para una pasada cuyo único evento era la incidencia. En el A/B que decida encender el flag, las
+    pasadas descartadas quedarían indistinguibles de una pérdida del proceso. Se reusa la pasada de VIIRS 750 de la
+    prueba S163 porque la función empareja por volcán, día y sensor; en producción el tipo sólo lo anota MODIS."""
+    import test_evaluador_comun_s163 as T163
+    from scripts import evaluador_comun as ec
+    f = [x for x in T163._fila_T() if x["pasada"].instante.strftime("%H:%M") == "05:18"][0]
+    ev = {"tipo": "crater_sin_dato", "volcan": T163.CH, "fecha": "2026-10-12", "plataforma": "VIIRS_NOAA21_750"}
+    assert ec.causa_ausencia(f, "K", [ev]) == ec.CAUSA_SIN_DATO_CRATER
+    falla = {"tipo": "falla_busqueda", "volcan": T163.CH, "fecha": "2026-10-12", "plataforma": "VIIRS_NOAA21_750"}
+    assert ec.causa_ausencia(f, "K", [ev, falla]) == ec.CAUSA_HUECO          # una falla de NASA manda
+    vacia = {"tipo": "sin_granulos", "volcan": T163.CH, "fecha": "2026-10-12", "plataforma": "VIIRS_SNPP_750"}
+    assert ec.causa_ausencia(f, "K", [vacia, ev]) == ec.CAUSA_SIN_DATO_CRATER  # el descarte es un hecho, la vacía no
+    assert ec.causa_ausencia(f, "K", [dict(ev, volcan="Lascar")]) == ec.CAUSA_SIN_INCIDENCIA

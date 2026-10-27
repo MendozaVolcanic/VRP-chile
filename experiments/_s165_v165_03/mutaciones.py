@@ -25,6 +25,7 @@ REPO = Path(__file__).resolve().parents[2]
 PM = "pipeline/process_modis.py"
 FE = "pipeline/fetch.py"
 RP = "scripts/run_pipeline.py"
+EV = "scripts/evaluador_comun.py"
 PRUEBAS = ["tests/test_crater_sin_dato_incidencia_s165.py", "tests/test_cobertura_incidencias_s159.py",
            "tests/test_guard_mxd03_flags_s165.py"]
 
@@ -59,6 +60,9 @@ MUTACIONES = [
     ("titulo_borrado", RP,
      ',\n               "crater_sin_dato": "cráter sin posición en el gránulo MODIS (sin dato, no se escribió record)"}',
      "}", "atrapada"),
+    # evaluador de los A/B (V16503-01)
+    ("evaluador_no_conoce_el_tipo", EV, '    if "crater_sin_dato" in tipos:\n        return CAUSA_SIN_DATO_CRATER\n', "",
+     "atrapada"),
 ]
 
 
@@ -82,7 +86,7 @@ def correr(nombre):
 
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
-    originales = {a: (REPO / a).read_bytes() for a in (PM, FE, RP)}
+    originales = {a: (REPO / a).read_bytes() for a in (PM, FE, RP, EV)}
     resumen = []
     try:
         for nombre, arch, a, b, esperado in MUTACIONES:

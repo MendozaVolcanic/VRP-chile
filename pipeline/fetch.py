@@ -785,7 +785,7 @@ def limpiar_fallas() -> None:
 # Valor: si la incidencia cuenta para --estricto-cobertura.
 # S165 (V165-03): (4) una pasada MODIS que ENABLE_MODIS_CRATER_SIN_DATO (apagado) descarta porque el cráter no tiene
 # posición en el gránulo: noche sin dato, no noche observada. No cuenta en modo estricto (Nicolás, S165): sale de la
-# geometría de la órbita, se repite igual en todos los brazos de un A/B y repetir el job no la recupera (A108).
+# órbita y repetir el job no la recupera (A108); contra un control sin el flag la explica evaluador_comun, no el estricto.
 TIPOS_INCIDENCIA = {"sin_granulos": False, "sin_geolocalizacion": True, "dia_parcial": True,
                     "crater_sin_dato": False}
 # Latencia de LANCE NRT: «~3h» (CLAUDE.md del proyecto, Constraints técnicos: «NASA LANCE NRT ~3h latencia»).
