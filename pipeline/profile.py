@@ -908,6 +908,14 @@ ENABLE_V750_CODIGO_MIROVA: bool = bool(_t.get("enable_v750_codigo_mirova", False
 # procesador MODIS es el de hoy bit a bit. Encenderla exige reproceso verificado y el sí de Nicolás (A45). En `_t`.
 ENABLE_MODIS_CODIGO_MIROVA: bool = bool(_t.get("enable_modis_codigo_mirova", False))
 
+# S165 V375-E (PD3), la misma vía para VIIRS 375 (pipeline/mirova_v750_codigo.py con FAMILIAS["VIIRS375"]: bandas I4 e
+# I5, grilla de 134 x 134 de 375 m, caja C13 en el cráter de PD1). POR QUÉ: V375-C midió que el código de MIROVA llevado
+# a 375 da la magnitud de MIROVA al milésimo (C13: 0,999) donde K la da a dos tercios; antes de medir el paquete contra K
+# (experiments/_s162_v375/PREREGISTRO_E.md) la vía tiene que vivir en pipeline/. Nicolás autorizó cablearla APAGADA
+# (A45, 2026-10-27, tag pre-s165-via-375): con False no corre ninguna línea de la vía y el procesador de 375 es el de hoy
+# bit a bit. Encenderla exige el sí de Nicolás (A45). En `_t`.
+ENABLE_V375_CODIGO_MIROVA: bool = bool(_t.get("enable_v375_codigo_mirova", False))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))

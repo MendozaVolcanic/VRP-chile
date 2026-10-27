@@ -950,7 +950,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     desenlace **NO está en producción**: `ENABLE_TEST1_NTI_INTEGRAL = False` (verificado
     con `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
     print(p.ENABLE_TEST1_NTI_INTEGRAL)"`), y la rama `compute_test1_nti` existe **sólo en
-    `process_viirs.py:213/1112`** (era 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:62` (era 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:164` (era 163 hasta S162, por la línea de import de la vía «código MIROVA»)
+    `process_viirs.py:214/1170`** (era 213/1138 hasta S165, por el import y el bloque de la vía «código MIROVA» de VIIRS 375; el 1112 que decía hasta S164 ya estaba corrido; 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:62` (era 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:164` (era 163 hasta S162, por la línea de import de la vía «código MIROVA»)
     (eran 674/665; líneas actualizadas S131) importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
     describe sigue viva en los 3 sensores.** Ni encendiendo el flag se cura MODIS/V750,
     que es donde el píxel grande amplifica el gradiente (A80). Caso de manual de A87:
