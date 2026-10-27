@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 12:36 UTC (S165, vuelta 3): V750-A completo; #919 de MOD-D fase 3 en borrador; W3 corriendo
+- Disco: C: 30 GB libres, D: 7,7 GB. NRT de las 11:10 UTC en verde; el de las 12:10 UTC está corriendo.
+- **Medidor de V750-A COMPLETO**: 62 de 62 mutaciones atrapadas por aserción. Son 58 en la corrida principal
+  (`b8e9a0779`) más M1, M33, M34 y M36 repetidas con 1 hilo. Identidad: PASA en 61 de 61. Control CAIDA: cae en 61 de
+  61, con 0 fallas por aserción. Comprobado en `origin/claude/s162-viirs750-2-918174` `ac0987fc4`,
+  `experiments/_s162_v750a/mutar_evaluar_v750a_caidas_salida.txt`. R4 (objetivos V750-B) sigue fijado para el
+  2026-11-03.
+- **#919** (MOD-D fase 3, borrador, `c4efdc78c`): CI pytest en verde, CLEAN. En `pipeline/` toca `mirova_v750_codigo.py`,
+  `process_modis.py` y `profile.py` (`ENABLE_MODIS_CODIGO_MIROVA`, False por defecto). El cambio al guard G8 sólo
+  corre el ancla de 1056 a 1094, junto con `CLAUDE.md:438` en el mismo commit. Aparte, y desde antes: la cita
+  `process_modis.py:1172` de A100 (`CLAUDE.md:1403`) ya estaba vieja en main (FOCAL_CLUSTER_KEEP_PEAK está en las
+  líneas 1221 y 1474); se le avisó a modd-fase3. Faltan para mergear: la identidad bit a bit con el flag apagado más un
+  control que cambie, la suite sobre un árbol quieto y el verificador limpio.
+- W3 (run 40496903128) corriendo: 4 jobs terminados, 3 en curso y 15 en cola.
+
 ### 2026-10-27 11:43 UTC (S165, vuelta 2): loop/activo integrado a main (#918, merge commit)
 - Nicolás (en el chat de S164, 11:33 UTC, relevado por S164): «apruebo lo que tu recomiendes». S165 y modd-fase3
   pasaron a ser sesiones de primer nivel y la coordinación queda entera en S165.
