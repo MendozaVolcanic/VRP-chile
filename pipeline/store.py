@@ -606,9 +606,11 @@ def append_record(volcano_name: str, record: dict,
     # NO cambia deteccion ni `vrp_mw`: es un campo descriptivo mas, como geo_class.
     # Solo I-band 375 m - en MODIS y VIIRS750 el pixel grueso hace saltar el ancla a
     # fuentes ajenas (caso PCC MODIS 2026-05-30: pico a 12,82 km, 8 -> 22 MW).
-    # S165 V375-E: no para un record de la vía «código MIROVA» (`via_codigo_mirova is True`). Sus píxeles no traen
-    # vrp_mw por píxel, así que el núcleo sumaría 0 y el tablero, que prefiere este campo, publicaría 0 MW; y la vía
-    # informa la suma de TODOS los alertados, que es lo que publica MIROVA (D32): recortarla sería volver a K.
+    # S165 V375-E: no para un record de la vía «código MIROVA» (`via_codigo_mirova is True`). La vía informa la suma de
+    # TODOS los alertados, que es lo que publica MIROVA (D32), y el núcleo F5 es un recorte de K. Sus píxeles no traen
+    # vrp_mw por píxel, así que el núcleo daría 0,0: el tablero no lo usaría (cae a pc.vrp_mw con núcleo <= 0,
+    # frontend/index.html:1313), pero quedaría escrito en el JSON y scripts/paper_numbers.py:102 lo lee como magnitud
+    # (verificador V165-01; el comentario anterior decía que el tablero publicaría 0 MW, y era falso).
     if inner_radius_km is not None and es_viirs_iband(record.get("sensor")) and not _via_mirova:
         _core = f5_core_vrp_mw(record, inner_radius_km)
         if _core is not None:

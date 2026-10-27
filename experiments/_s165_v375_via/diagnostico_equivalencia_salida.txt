@@ -1,6 +1,6 @@
 veredicto pre-registrado (no cambia): NO EQUIVALENTE
 
-(1) VRP: 40 de 329 con alertas fuera de 0.001 MW contra la vara; de ellas 40 calzan con el port usando el fondo de la regla de MATLAB. Todas sobre 4 píxeles: True. Contando esas, 329 de 329 dentro de tolerancia.
+(1) VRP: 40 de 329 con alertas fuera de 0.001 MW contra la vara; de ellas 40 calzan con el port cuando éste usa la misma regla de relleno que la vía (la de MATLAB según S163; sobre 4 píxeles no hay salida de MATLAB para 375, así que no es una comparación contra MATLAB). Todas sobre 4 píxeles: True. Contando esas, 329 de 329 dentro de tolerancia.
 
 (2) publicación con «cercano»: 8 pasadas distintas de 2012
    228 Isluga 2026-06-17 05:06 protegida=True npix=6 | publica vía=False port=True | cúmulo más radiante de la vía a 15.632 km del cráter, alertado más cercano del port a 0.884 km de X0, Y0, inner 5.0 | misma máscara y VRP: True
@@ -11,6 +11,7 @@ veredicto pre-registrado (no cambia): NO EQUIVALENTE
    1638 Lastarria 2026-06-28 05:36 protegida=False npix=3 | publica vía=False port=True | cúmulo más radiante de la vía a 33.861 km del cráter, alertado más cercano del port a 2.129 km de X0, Y0, inner 3.0 | misma máscara y VRP: True
    1647 Lascar 2026-07-24 05:48 protegida=False npix=4 | publica vía=False port=True | cúmulo más radiante de la vía a 7.302 km del cráter, alertado más cercano del port a 0.559 km de X0, Y0, inner 5.0 | misma máscara y VRP: True
    1662 Lascar 2026-08-21 05:24 protegida=False npix=3 | publica vía=False port=True | cúmulo más radiante de la vía a 26.2 km del cráter, alertado más cercano del port a 0.884 km de X0, Y0, inner 5.0 | misma máscara y VRP: True
+   con la misma máscara y el VRP dentro de 0.001 MW contra la vara PRE-REGISTRADA: 3 de 8; las demás, sólo contra el port con la regla de relleno de diagnóstico (verificador V165-04)
    con la misma máscara y el mismo VRP (sólo difiere la regla de posición): 8 de 8; protegidas: 4; en todas la vía calla y el port publica: True
 
 Lectura: la vía de 375 detecta y mide igual que el port; publica distinto sólo donde la escena tiene un alertado cerca del cráter y otro más radiante lejos. Qué regla de posición es la de MIROVA es una decisión de método que afecta también a VIIRS 750 y MODIS (procesar_grilla es compartida): no se cambia en este PR.

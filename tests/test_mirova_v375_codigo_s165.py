@@ -329,8 +329,9 @@ def _record_via_iband(marca):
 
 
 def test_almacen_no_recorta_con_el_nucleo_f5_la_suma_de_la_via(tmp_path, monkeypatch):
-    """Los píxeles de la vía no traen vrp_mw por píxel: el núcleo F5 los sumaría como 0 y el tablero, que prefiere
-    f5_core_vrp_mw, publicaría 0 MW donde la vía midió la suma de MIROVA."""
+    """Los píxeles de la vía no traen vrp_mw por píxel: el núcleo F5 daría 0,0 y quedaría escrito en el JSON, donde
+    scripts/paper_numbers.py lo lee como magnitud (el tablero no: con núcleo <= 0 cae a pc.vrp_mw, verificador
+    V165-01). Y la vía informa la suma de todos los alertados (D32), que el núcleo de K recortaría."""
     from pipeline import store
     monkeypatch.setattr(store, "DATA_DIR", tmp_path)
     r = _record_via_iband(True)

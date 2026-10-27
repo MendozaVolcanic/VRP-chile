@@ -24,6 +24,7 @@ enciende la vía: el flag entra apagado y encenderlo es otra decisión de Nicol�
    `via_codigo_mirova: "sin_grilla"` (A118). Cada record de la vía lleva `via_codigo_mirova: True`.
 4. **Dos cableados que el traspaso no nombra, hallados al leer el camino del record** (SOSPECHA hasta que la prueba roja
    lo muestre):
+   - ⚠️ **Razón corregida en la adenda 1 (§6, V165-01)**: el tablero no habría publicado 0 MW. Texto original:
    - `store.py:609` calcula `f5_core_vrp_mw` para todo record I-band. Los píxeles de la vía no traen `vrp_mw` por píxel,
      así que el núcleo sumaría 0 y el tablero, que prefiere `f5_core_vrp_mw` (`frontend/index.html:1255`), publicaría
      0 MW donde la vía midió la suma de MIROVA. El núcleo F5 es un recorte de K; MIROVA suma todos los alertados (D32).
@@ -85,3 +86,23 @@ limpio, de otro modelo, sobre el diff y estos criterios, antes de declarar el PR
 No enciende el flag, no crea el perfil de la sombra, no despacha GitHub Actions (el bit a bit de un día de NRT en el
 mismo runner lo despacha la coordinadora con `probe-s162-bitabit-nrt.yml`; aquí se deja `comparar_bitabit_nrt.py`
 adaptado a 375), no sella `PREREGISTRO_E.md` y no conecta el evaluador común.
+
+## 6. Adenda 1 (2026-10-27, después de medir; correcciones del verificador limpio)
+
+Escrita después de ver la equivalencia y el informe del verificador (`verificador/INFORME.md`). No cambia ningún
+criterio ni el veredicto; corrige dos afirmaciones mías.
+
+1. **V165-01, la razón del cambio en `store.py` era falsa.** El núcleo F5 de un record de la vía da 0,0, pero el
+   tablero no publicaría 0 MW: con núcleo 0 o menor cae a `pc.vrp_mw` (`frontend/index.html:1313`, guarda de S96),
+   medido por el verificador con el predicado JS real. El cambio se mantiene por dos razones que sí se sostienen: la
+   vía informa la suma de todos los alertados (D32) y el núcleo es un recorte de K; y sin el cambio quedaría escrito
+   `f5_core_vrp_mw: 0.0`, que `scripts/paper_numbers.py:102` lee como magnitud. Corregidos el comentario de
+   `store.py`, la FICHA v1.15 y el docstring de la prueba.
+2. **V165-04, cómo se dice el diagnóstico.** (a) «Calza con la regla de MATLAB» quiere decir que la vía y el port
+   coinciden cuando los dos usan la misma regla de relleno (la de `delaunay_perturbado.py` de S163, la que la vía porta);
+   sobre 4 píxeles no hay salida de MATLAB para 375, así que no es una comparación contra MATLAB. (b) De las 8 pasadas
+   de publicación distinta, las 8 tienen la máscara idéntica; con la vara pre-registrada (el port tal cual sobre 4
+   píxeles) sólo 3 tienen además el VRP dentro de 1e-3 MW, y las otras 5 lo tienen sólo con la regla de relleno de
+   diagnóstico. En las 8 el record de la vía está a 7 a 34 km del cráter y el alertado cercano del port a 2,1 km o
+   menos: una diferencia de VRP de 0,07 MW o menos no puede cambiar `summit` por `far`, que es lo que separa la
+   publicación.

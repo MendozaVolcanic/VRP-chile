@@ -30,7 +30,8 @@ con = [f for f in d["filas"] if f["npix_p"] > 0]
 fuera = [f for f in con if f["dvrp"] > TOL]
 por_relleno = [f for f in fuera if f["dvrp_regla"] is not None and f["dvrp_regla"] <= TOL]
 print(f"\n(1) VRP: {len(fuera)} de {len(con)} con alertas fuera de {TOL} MW contra la vara; de ellas {len(por_relleno)} "
-      f"calzan con el port usando el fondo de la regla de MATLAB. Todas sobre 4 píxeles: "
+      f"calzan con el port cuando éste usa la misma regla de relleno que la vía (la de MATLAB según S163; sobre 4 "
+      f"píxeles no hay salida de MATLAB para 375, así que no es una comparación contra MATLAB). Todas sobre 4 píxeles: "
       f"{all(f['npix_p'] > 4 for f in fuera)}. Contando esas, {len(con) - len(fuera) + len(por_relleno)} de {len(con)} "
       "dentro de tolerancia.")
 
@@ -45,6 +46,9 @@ for x in dif:
     print(f"   {f['i']} {f['volcan']} {f['hora']} protegida={f['prot']} npix={f['npix_p']} | publica vía={f['pub_via']} "
           f"port={f['pub_port']['cercano']} | cúmulo más radiante de la vía a {x[6]} km del cráter, alertado más "
           f"cercano del port a {x[7]} km de X0, Y0, inner {x[8]} | misma máscara y VRP: {solo}")
+con_vara = sum(1 for x in dif if F[x[0]]["misma_mascara"] and F[x[0]]["dvrp"] <= TOL)
+print(f"   con la misma máscara y el VRP dentro de {TOL} MW contra la vara PRE-REGISTRADA: {con_vara} de {len(dif)}; "
+      "las demás, sólo contra el port con la regla de relleno de diagnóstico (verificador V165-04)")
 print(f"   con la misma máscara y el mismo VRP (sólo difiere la regla de posición): {solo_pos} de {len(dif)}; "
       f"protegidas: {sum(F[x[0]]['prot'] for x in dif)}; en todas la vía calla y el port publica: "
       f"{all((not F[x[0]]['pub_via']) and F[x[0]]['pub_port']['cercano'] for x in dif)}")
