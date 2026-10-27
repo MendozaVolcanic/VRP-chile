@@ -260,6 +260,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             active_water_bodies=volcano.get("active_water_bodies"),
                             lbg_global_compatible=volcano.get("lbg_global_compatible", False),
                             local_kernel_bg_compatible=volcano.get("local_kernel_bg", False),
+                            al_sin_dato=_crater_sin_dato(volcano, date, platform),  # S165 (V165-03)
                         )
                         if result:
                             store.append_record(volcano["name"], result,
@@ -397,6 +398,15 @@ def _sin_geolocalizacion(volcano: dict, date: datetime, platform: str, l1b: Path
                                f"L1B en disco sin su geolocalización: {l1b.name}")
 
 
+def _crater_sin_dato(volcano: dict, date: datetime, platform: str):
+    """S165 (V165-03): aviso que process_modis.calculate_vrp llama cuando descarta la pasada porque el cráter no tiene
+    posición en el gránulo (ENABLE_MODIS_CRATER_SIN_DATO, apagado). Sin esto la pasada desaparecía y la cobertura
+    decía «completa». No cuenta en modo estricto (pipeline/fetch.py, TIPOS_INCIDENCIA)."""
+    def anotar(motivo: str) -> None:
+        fetch.registrar_incidencia("crater_sin_dato", volcano["name"], date.strftime("%Y-%m-%d"), platform, motivo)
+    return anotar
+
+
 def _time_key(filename: str) -> str:
     """Extract YYYYDDDHHMI time key from granule filename."""
     parts = filename.split(".")
@@ -450,6 +460,8 @@ def informar_cobertura(fallas: list, ruta_json=None, estricto: bool = False,
     volcán y día: búsqueda sin gránulos (sin juicio: no cuenta ni en modo estricto), L1B sin
     geolocalización y día parcial (cuentan en modo estricto). Con cualquiera de ellas el resumen deja
     de decir «completa». Sin modo estricto el código de salida sigue en 0 (el NRT no cambia de color).
+    S165 (V165-03): `crater_sin_dato`, la pasada MODIS que ENABLE_MODIS_CRATER_SIN_DATO (apagado)
+    descarta porque el cráter no tiene posición en el gránulo; no cuenta en modo estricto.
     """
     import json
     from collections import defaultdict
@@ -524,7 +536,8 @@ def _informar_incidencias(incidencias: list, hay_fallas: bool) -> None:
     titulos = {"sin_granulos": "sin gránulos, sin juicio (la búsqueda respondió vacía; el código no sabe si "
                                "debía haber pasada)",
                "sin_geolocalizacion": "L1B sin geolocalización (descartados sin procesar)",
-               "dia_parcial": "día parcial (no había terminado más la latencia mínima de LANCE)"}
+               "dia_parcial": "día parcial (no había terminado más la latencia mínima de LANCE)",
+               "crater_sin_dato": "cráter sin posición en el gránulo MODIS (sin dato, no se escribió record)"}
     if hay_fallas:
         print(f"Además, {len(incidencias)} incidencias de cobertura.")
     else:

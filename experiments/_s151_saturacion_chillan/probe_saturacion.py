@@ -78,6 +78,10 @@ def argumentos_calculate_vrp(familia, volcan):
     }
     if familia == "V375":
         kw["lava_lake_magmatic"] = volcan.get("lava_lake_magmatic", False)
+    if familia == "MODIS":
+        # S165 (V165-03): aviso de la pasada sin dato. El probe no lleva cobertura, así que no la anota; None no
+        # cambia lo que calculate_vrp devuelve.
+        kw["al_sin_dato"] = None
     return kw
 
 
