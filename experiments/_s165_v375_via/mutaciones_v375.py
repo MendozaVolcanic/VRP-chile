@@ -33,7 +33,10 @@ PRUEBAS = ["tests/test_mirova_v375_codigo_s165.py", "tests/test_mirova_v750_codi
            "tests/test_mirova_v750_cableado_s162.py", "tests/test_mirova_modis_codigo_s164.py",
            "tests/test_f5_core_python_s132.py"]
 COPIAR = ["pipeline", "tests", "scripts", "frontend", "volcanoes.yaml", "pytest.ini", "experiments/_s162_v375",
-          "experiments/_s159/portes", "experiments/_s158_audit_r2/oraculo"]
+          "experiments/_s159/portes", "experiments/_s158_audit_r2/oraculo",
+          # datos que leen dos pruebas vecinas (paridad F5 con el JavaScript, Etna del OSF); sin ellos el control sin
+          # mutación sale «atrapada» y la batería no vale (primera corrida, 2026-10-27)
+          "data/mirova_equivalent", "experiments/_s158_d17_diseno/osf_codigo_mirova"]
 
 # (nombre, archivo, texto original, texto mutado, esperado)
 MUTACIONES = [

@@ -210,7 +210,7 @@ def test_leer_radiancia_l1b_lee_las_bandas_i(tmp_path):
             ds.attrs["scale_factor"] = np.float32(sf)
             ds.attrs["add_offset"] = np.float32(1.0)
     rad = MV.leer_radiancia_l1b(ruta, bandas=_fam()["bandas"])
-    assert sorted(rad) == ["I04", "I05"]
+    assert rad is not None and sorted(rad) == ["I04", "I05"]     # si ignorara las bandas pedidas, buscaría M13
     assert rad["I04"][0, 0] == 51.0 and rad["I05"][1, 1] == 76.0 and np.isnan(rad["I04"][0, 1])
     assert MV.leer_radiancia_l1b(ruta) is None          # el default sigue siendo M13/M15 (VIIRS 750)
 
@@ -347,4 +347,4 @@ def test_almacen_si_calcula_el_nucleo_f5_para_k(tmp_path, monkeypatch, marca):
     for q, w in zip(r["anomaly_pixels"], (10.0, 4.0)):
         q["vrp_mw"] = w
     store.append_record("TestVolcano", r, inner_radius_km=5.0)
-    assert r["f5_core_vrp_mw"] == pytest.approx(14.0)
+    assert r.get("f5_core_vrp_mw") == pytest.approx(14.0)      # .get: si el almacén no lo calcula, falla por aserción
