@@ -97,7 +97,8 @@ criterio ni el veredicto; corrige dos afirmaciones mías.
    medido por el verificador con el predicado JS real. El cambio se mantiene por dos razones que sí se sostienen: la
    vía informa la suma de todos los alertados (D32) y el núcleo es un recorte de K; y sin el cambio quedaría escrito
    `f5_core_vrp_mw: 0.0`, que `scripts/paper_numbers.py:102` lee como magnitud. Corregidos el comentario de
-   `store.py`, la FICHA v1.15 y el docstring de la prueba.
+   `store.py`, la FICHA v1.15 (v1.16 desde el merge de #920, que tomó la v1.15 para los flags MxD03 de MODIS) y el
+   docstring de la prueba.
 2. **V165-04, cómo se dice el diagnóstico.** (a) «Calza con la regla de MATLAB» quiere decir que la vía y el port
    coinciden cuando los dos usan la misma regla de relleno (la de `delaunay_perturbado.py` de S163, la que la vía porta);
    sobre 4 píxeles no hay salida de MATLAB para 375, así que no es una comparación contra MATLAB. (b) De las 8 pasadas

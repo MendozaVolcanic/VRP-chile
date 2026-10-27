@@ -2,7 +2,7 @@
   "volcano": "Villarrica",
   "source": "registro_vrp_consolidado.csv (text-scraped from mirovaweb.it) + registro_vrp_ocr.csv (OCR de las imagenes)",
   "note": "S150: incluye alertas del OCR marcadas source='ocr' (valores leidos de la imagen de MIROVA; pueden traer la imagen de otra pasada, docs/S150_IMAGENES_SNPP.md). Para calibrar magnitud usar solo source='consolidado'.",
-  "generated_at": "2026-10-27T11:01:43Z",
+  "generated_at": "2026-10-27T12:45:47Z",
   "records": [
     {
       "datetime_utc": "2026-01-13 05:48",
@@ -56,9 +56,9 @@
       "datetime_utc": "2026-03-08 06:00",
       "sensor": "VIIRS375",
       "VRP_MW": 0.21,
-      "distancia_km": 0.0,
-      "clasificacion": "Bajo",
-      "source": "ocr"
+      "distancia_km": 0.84,
+      "clasificacion": "Muy Bajo",
+      "source": "consolidado"
     },
     {
       "datetime_utc": "2026-03-12 06:00",
@@ -67,6 +67,14 @@
       "distancia_km": 0.0,
       "clasificacion": "Bajo",
       "source": "ocr"
+    },
+    {
+      "datetime_utc": "2026-04-09 06:00",
+      "sensor": "VIIRS375",
+      "VRP_MW": 0.11,
+      "distancia_km": 0.84,
+      "clasificacion": "Muy Bajo",
+      "source": "consolidado"
     },
     {
       "datetime_utc": "2026-05-11 06:00",
@@ -125,6 +133,15 @@
       "source": "ocr"
     },
     {
+      "datetime_utc": "2026-05-29 19:55",
+      "sensor": "MODIS",
+      "VRP_MW": 1.83,
+      "distancia_km": 2.0,
+      "clasificacion": "Bajo",
+      "source": "consolidado",
+      "dia": true
+    },
+    {
       "datetime_utc": "2026-05-30 05:48",
       "sensor": "VIIRS375",
       "VRP_MW": 0.22,
@@ -176,6 +193,14 @@
       "datetime_utc": "2026-07-06 05:54",
       "sensor": "VIIRS375",
       "VRP_MW": 0.26,
+      "distancia_km": 0.84,
+      "clasificacion": "Muy Bajo",
+      "source": "consolidado"
+    },
+    {
+      "datetime_utc": "2026-07-20 05:48",
+      "sensor": "VIIRS375",
+      "VRP_MW": 0.08,
       "distancia_km": 0.84,
       "clasificacion": "Muy Bajo",
       "source": "consolidado"
@@ -241,9 +266,9 @@
       "datetime_utc": "2026-08-21 05:48",
       "sensor": "VIIRS375",
       "VRP_MW": 1.82,
-      "distancia_km": 0.95,
+      "distancia_km": 0.84,
       "clasificacion": "Bajo",
-      "source": "ocr"
+      "source": "consolidado"
     },
     {
       "datetime_utc": "2026-08-22 18:36",
@@ -387,15 +412,6 @@
   ],
   "nota_dia": "S151: 'dia': true marca una pasada con el Sol sobre el horizonte del volcan (pipeline.store._solar_elevation > 0). De dia el infrarrojo medio suma luz solar reflejada y parte de estas alertas son reflejo en nubes, no calor (A76; experiments/_s151_alertas_diurnas/README.md). La replica es solo nocturna. 'records' trae lo de siempre (la tabla a cualquier hora, ahora con la marca, y el OCR nocturno); 'records_dia_ocr' trae las alertas diurnas del OCR, solo para dibujar en el tablero como referencia. No usarlas en metricas de paridad.",
   "records_dia_ocr": [
-    {
-      "datetime_utc": "2026-05-29 19:55",
-      "sensor": "MODIS",
-      "VRP_MW": 1.0,
-      "distancia_km": 0.0,
-      "clasificacion": "Medio",
-      "source": "ocr",
-      "dia": true
-    },
     {
       "datetime_utc": "2026-06-03 19:06",
       "sensor": "VIIRS375",

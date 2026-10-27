@@ -908,6 +908,22 @@ ENABLE_V750_CODIGO_MIROVA: bool = bool(_t.get("enable_v750_codigo_mirova", False
 # procesador MODIS es el de hoy bit a bit. Encenderla exige reproceso verificado y el sí de Nicolás (A45). En `_t`.
 ENABLE_MODIS_CODIGO_MIROVA: bool = bool(_t.get("enable_modis_codigo_mirova", False))
 
+# S165, geolocalización MxD03 de MODIS (plan 2026-10-25-flag-mxd03-modis). POR QUÉ: `_interp_geo` estira la grilla de
+# 5 km del MxD021KM como si cada muestra estuviera en el píxel 5i cuando está en el 5i+2, y cada píxel recibe la
+# posición de su vecino: el cráter queda corrido 1 a 3 km hacia el nadir y hasta 11,5 km en el borde del barrido (A61
+# H2). El A/B MOD-B (5.465 pasadas) dio CUMPLE SIN DAÑO con la posición del MxD03. Tres flags, cada uno se mide aparte:
+#   GEO_MXD03: la posición de cada píxel sale del MxD03 (si no se puede leer o no calza, la interpolada, y el record
+#              lo declara en `geo_fuente`);
+#   CRATER_SIN_DATO: sólo con GEO_MXD03; si el cráter cae en relleno o en el borde del gránulo, no hay record (una
+#              pasada que no miró el cráter no es un negativo; A61 H1, VA61-01);
+#   DIST_DESDE_CRATER: la distancia del píxel anómalo, y con ella la etiqueta summit/far, se mide desde el cráter y no
+#              desde el centro del volcán (A61 H5); el anillo de fondo no cambia (D17).
+# APAGADOS: con False el procesador MODIS es bit a bit el del tag pre-s165-mxd03-modis. Encenderlos es decisión de
+# Nicolás (A45). En `_t`, como todo `enable_*` (S124, A89).
+ENABLE_MODIS_GEO_MXD03: bool = bool(_t.get("enable_modis_geo_mxd03", False))
+ENABLE_MODIS_CRATER_SIN_DATO: bool = bool(_t.get("enable_modis_crater_sin_dato", False))
+ENABLE_MODIS_DIST_DESDE_CRATER: bool = bool(_t.get("enable_modis_dist_desde_crater", False))
+
 # S165 V375-E (PD3), la misma vía para VIIRS 375 (pipeline/mirova_v750_codigo.py con FAMILIAS["VIIRS375"]: bandas I4 e
 # I5, grilla de 134 x 134 de 375 m, caja C13 en el cráter de PD1). POR QUÉ: V375-C midió que el código de MIROVA llevado
 # a 375 da la magnitud de MIROVA al milésimo (C13: 0,999) donde K la da a dos tercios; antes de medir el paquete contra K
