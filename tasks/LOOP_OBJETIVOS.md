@@ -569,6 +569,31 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 11:31 UTC (S165, vuelta 1): parada por disco levantada; W2 pareja; W3 despachada; #915 Chillán
+- Relevo: S164 avisó a las 11:27 UTC que Nicolás dijo «si sigue con todo lo que recomiendes». Disco a las 11:31 UTC:
+  C: 30 GB libres, D: 7,7 GB. **Parada por disco levantada**; avisado a modd-fase3 y a Loop VIIRS 750 2 (retomar
+  `--solo M34,M36 --hilos 1`).
+- **W2** (run 40379112237): success, 23 de 23 jobs, terminó 02:03 UTC; brazo diurno de 61 a 85 min por volcán. Salidas
+  en `s151-ab-diurno/40379112237` (`9e997518b`). `cobertura.txt`: 2.154 pasadas nocturnas por brazo, 0 faltan y 0
+  sobran; el brazo diurno trae 863 pasadas diurnas de VIIRS 375 y 853 de VIIRS 750, sin MODIS diurno: «COBERTURA
+  NOCTURNA PAREJA y día como se espera».
+- **W3** (2026-07-20 a 07-31, 11 Tier A) despachada a las 11:32 UTC desde `s163-diurno-k-codigo` (`68687d2d4`) con el
+  comando del §f del bloque S165: run **40496903128**.
+- **#915, las tres protegidas MODIS de Chillán** (A8, con el JSON de `origin/main` `987877bb1`): 12-oct 07:20 Aqua y
+  25-oct 07:20 Aqua y 15-oct 01:05 Terra, cenit 58,2 / 58,0 / 57,6°. En producción, 0 píxeles anómalos en dos y un
+  píxel con VRP 0 en la del 25 (`t_max` menos `t_bg` de 5 a 9 K). Categoría A54: señal real (Chillán activo, MIROVA
+  entre 1,72 y 3,79 MW), no artefacto. Es un FN de K a cenit alto. **La SOSPECHA de MOD-D queda medida en parte**: el
+  censo (`experiments/_s162_modis_paquete/censo/resultado_censo.json`, rama `claude/s162-modis-2-0dd578`, bloque
+  `chillan.recuperadas`) recupera la del 12 (razón 0,84) y la del 15 (razón 1,73). La del 25 cae fuera de la ventana
+  del censo (2026-03-01 a 10-16): SIN DATO, aunque es el mismo patrón. El resto de #915 queda sin clasificar en esta
+  vuelta: las dos de Tupungatito llevan referencia sospechosa (sólo OCR de Suomi NPP, A119), la de PCC es V750, y las
+  magnitudes bajas tienen la causa sin medir.
+- `sync-mirova-csv` falló a las 10:30 UTC (run 40489009701: «el consolidado de MIROVA perdió llaves (177)»). Es el
+  defecto de D-39 (Mirova-v1#26), que espera los pasos de Nicolás. No hay nada que hacer de este lado.
+- `origin/main` (`987877bb1`) integrado en `loop/activo` con un merge. Dos add/add resueltos con la versión del loop
+  (`experiments/_s162_v375/evaluar.py`, `experiments/_s162_v375/PREREGISTRO_E.md`, la que trae la adenda 1 de V375-E).
+  NRT de las 10:10 UTC: success.
+
 ### 2026-10-26 22:55 UTC (S164): cierre de la coordinadora; relevo a S165
 - Nicolás: «has lo que recomiendes» (la recomendación incluía cerrar). Loop de S164 detenido. Traspaso en
   `tasks/BLOQUE_ARRANQUE_S165.md`. Estado fijado con trabajo en curso: W2 del diurno (run 40379112237, 12 de 22 jobs a
