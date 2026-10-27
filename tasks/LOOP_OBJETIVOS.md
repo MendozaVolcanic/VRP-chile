@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 21:08 UTC (S165, vuelta 9): #920 MERGEADO por orden de Nicolás; probe de MxD03 despachado
+- Nicolás, en este chat: «Apruebo el merge de #920 (MxD03 MODIS, tres flags apagados) con merge commit en el sha
+  d80df4932. Mergéalo tú.». Merge commit **`ab3ff9fe3`**; `main` integrado en `loop/activo` (`4047b1833`).
+- Cita de A100 remapeada otra vez por contenido: `keep_peak=FOCAL_CLUSTER_KEEP_PEAK` del cúmulo focal pasa de la línea
+  1259 a la 1350.
+- `probe-mxd03-equivalencia.yml` (tarea 4 del plan; sólo lectura, flag encendido en memoria contra el brazo X de MOD-B,
+  apagado contra K) despachado desde `main`: run **40584157486**.
+- #921 (V375-E): CI en verde sobre `2702f6fe2`. Se le pidió a la sesión que haga merge de `origin/main` (choca con #920
+  en `profile.py`, `CLAUDE.md`, la ficha SDA y el guard G8), corra la suite y el CI, y avise el sha nuevo. La regla de
+  posición sigue esperando a Nicolás.
+- W4 (run 40545948109): 10 de 22 jobs en verde. Disco: C: 12 GB, D: 7,7 GB.
+
 ### 2026-10-27 18:30 UTC (S165, vuelta 8): #920 (MxD03, tres flags apagados) cumple las condiciones; V375-E con decisión de posición
 - **#920** (sesión MxD03, rama `claude/s165-mxd03-flags`, sha `d80df4932`, borrador). Comprobado por S165:
   - CI pytest en verde sobre ese sha y estado CLEAN.
