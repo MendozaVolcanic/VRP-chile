@@ -18,6 +18,8 @@
 #                 localizable (ese numero es Heap et al., mecanica de rocas). Ver D30 y la nota
 #                 bibliografica de pipeline/test1_integrated.py.
 #                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md. Vía «código MIROVA» APAGADA (S164, enable_modis_codigo_mirova): pipeline/mirova_v750_codigo.py
+#                 Posición por píxel del MxD03, pasada sin cráter = sin dato y etiqueta desde el cráter: APAGADAS
+#                 (S165, enable_modis_geo_mxd03 / enable_modis_crater_sin_dato / enable_modis_dist_desde_crater).
 # ════════════════════════════════════════════════════════════════════
 """
 process_modis.py: Calculate VRP from MODIS MOD021KM / MYD021KM L1B granules.
@@ -102,6 +104,9 @@ WOOSTER_COEFF = 18.9
 from pipeline.profile import (
     ENABLE_UTM_REGRID,  # F70.2
     ENABLE_MODIS_CODIGO_MIROVA,  # S164 MOD-D fase 3
+    ENABLE_MODIS_GEO_MXD03,  # S165, posición por píxel del MxD03
+    ENABLE_MODIS_CRATER_SIN_DATO,  # S165, cráter sin posición -> sin record
+    ENABLE_MODIS_DIST_DESDE_CRATER,  # S165, distancia de la etiqueta desde el cráter
     ANOMALY_THRESHOLD_K,
     N_SIGMA,
     BG_INNER_KM,
@@ -498,6 +503,75 @@ def _regrid_modis_granule(data: dict, center_lat: float, center_lon: float,
     return out
 
 
+# S165, geolocalización MxD03 (plan 2026-10-25-flag-mxd03-modis). Tres piezas, cada una con su flag APAGADO.
+def leer_mxd03(geo_path):
+    """Latitude y Longitude por píxel del MxD03 (1 km), sin interpolar.
+
+    POR QUÉ un solo lector: el de la vía «código MIROVA» (S164) ya lee el MxD03 como el probe del censo MOD-D, con el
+    relleno (-999, escaneos sin efemérides) y todo valor fuera de rango a NaN. Un segundo lector sería una copia de esa
+    lógica que puede divergir (A102)."""
+    from . import mirova_v750_codigo as _MV
+    lat, lon, _ang = _MV.leer_geo_mxd03(geo_path)
+    return lat, lon
+
+
+def posicion_de_calculo(data, geo_path):
+    """(lat, lon, fuente) con que calculate_vrp ubica cada píxel.
+
+    POR QUÉ: `_interp_geo` le da a cada píxel la posición de su vecino (A61 H2); el MxD03 trae la de cada uno. Con
+    ENABLE_MODIS_GEO_MXD03 apagado, la de siempre y no se toca el MxD03. Si el MxD03 falta, no se puede leer o no
+    calza con el L1B, se usa la interpolada y el record lo declara en `geo_fuente`: la pasada no se pierde y nadie lee
+    la interpolada creyendo que es el MxD03 (A118)."""
+    if not ENABLE_MODIS_GEO_MXD03:
+        return data["lat"], data["lon"], "interp_5km"
+    try:
+        if geo_path is None:
+            raise FileNotFoundError("sin MxD03")
+        lat_m, lon_m = leer_mxd03(geo_path)
+    except Exception:
+        return data["lat"], data["lon"], "interp_5km_mxd03_ilegible"
+    if np.shape(lat_m) != np.shape(data["lat"]) or np.shape(lon_m) != np.shape(data["lon"]):
+        return data["lat"], data["lon"], "interp_5km_mxd03_no_calza"
+    # float32, como el brazo X de MOD-B (experiments/_s151_mxd03_etiquetas/probe_etiquetas.py::procesar_brazo): el
+    # MxD03 guarda float32 y el lector lo sube a float64; volver a float32 es exacto y deja las distancias como se midieron.
+    return np.asarray(lat_m, np.float32), np.asarray(lon_m, np.float32), "mxd03"
+
+
+def crater_cubierto(lat, lon, vent_lat, vent_lon):
+    """¿Está el cráter en la imagen?
+
+    POR QUÉ: si el píxel con posición más cercano al cráter está en la primera o última línea o frame del gránulo, o a
+    alguno de sus 8 vecinos le falta posición, el cráter puede no estar en la imagen (A61 H1, VA61-01). Una pasada así
+    no es una noche observada sin anomalía: es una noche sin dato. Medido en el censo MOD-D (5.465 pasadas, MxD03
+    real; experiments/_s165_mxd03_flag/paso0_regla_sin_dato_salida.txt): deja fuera 223 (221 de borde, 2 de relleno),
+    ninguna que K publicara; las cubiertas tienen el píxel a 2,6 km o menos del cráter."""
+    d = haversine_km(vent_lat, vent_lon, lat, lon)
+    if not np.isfinite(d).any():
+        return False
+    i, j = np.unravel_index(np.nanargmin(d), d.shape)
+    n_l, n_f = d.shape
+    if i in (0, n_l - 1) or j in (0, n_f - 1):
+        return False
+    return bool(np.isfinite(lat[i - 1:i + 2, j - 1:j + 2]).all() and np.isfinite(lon[i - 1:i + 2, j - 1:j + 2]).all())
+
+
+def sin_dato_de_geolocalizacion(lat, lon, vent_lat, vent_lon, geo_fuente):
+    """Sólo con la posición del MxD03 (donde el relleno ya es NaN) y con ENABLE_MODIS_CRATER_SIN_DATO encendido. Con la
+    interpolada el relleno no es NaN y la regla no puede decir nada."""
+    if not (ENABLE_MODIS_CRATER_SIN_DATO and geo_fuente == "mxd03"):
+        return False
+    return not crater_cubierto(lat, lon, vent_lat, vent_lon)
+
+
+def dist_de_etiqueta(dist, vent_dist_per_pixel):
+    """Distancia de cada píxel con que se escribe su `dist_km` y, por ahí, la etiqueta summit/far.
+
+    POR QUÉ: el cúmulo ya se mide desde el cráter y la etiqueta desde el centro del volcán; en Láscar los dos puntos
+    están a 0,68 km y una alerta real queda `far` por eso (A61 H5, A46). Con ENABLE_MODIS_DIST_DESDE_CRATER apagado,
+    la de siempre. El anillo de fondo NO cambia: sigue usando `dist` (geometría del ROI, D17)."""
+    return vent_dist_per_pixel if ENABLE_MODIS_DIST_DESDE_CRATER else dist
+
+
 def calculate_vrp(hdf_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
                   radius_km: float = 15.0,
@@ -511,8 +585,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     """
     Calculate VRP from MODIS L1B granule.
 
-    geo_path is accepted for API compatibility but not used:
-    geolocation is embedded in MOD021KM.
+    geo_path (MxD03): sólo se lee con la vía «código MIROVA» (S164) o con
+    ENABLE_MODIS_GEO_MXD03 (S165), los dos apagados; si no, la geolocalización
+    es la grilla de 5 km del MOD021KM interpolada (`_interp_geo`).
 
     Args:
         vent_lat/vent_lon: Optional vent coordinates for weak-signal detection.
@@ -589,8 +664,16 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     if ENABLE_UTM_REGRID:
         data = _regrid_modis_granule(data, volcano_lat, volcano_lon)
 
-    lat = data["lat"]
-    lon = data["lon"]
+    # S165: con ENABLE_MODIS_GEO_MXD03 apagado devuelve data["lat"], data["lon"] y el procesador es el de siempre. Con
+    # ENABLE_UTM_REGRID encendido la grilla remuestreada no calza con el MxD03 y la fuente lo declara.
+    lat, lon, geo_fuente = posicion_de_calculo(data, geo_path)
+    # S165: una pasada en que el cráter no tiene posición no se escribe (sin dato, no negativo). Mismo `None` que
+    # cuando el volcán no está en el gránulo (más abajo): un record con estado obligaría a cambiar las tres vistas.
+    _ancla_lat, _ancla_lon = (vent_lat, vent_lon) if vent_lat is not None and vent_lon is not None \
+        else (volcano_lat, volcano_lon)
+    if sin_dato_de_geolocalizacion(lat, lon, _ancla_lat, _ancla_lon, geo_fuente):
+        print(f"  MODIS {hdf_path.name}: crater sin posicion en el granulo (sin dato, no se escribe record)")
+        return None
     # Per-pixel ground area corrected for off-nadir scan geometry
     pixel_areas = modis_pixel_areas(
         lat.shape, nadir_fixed=ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS
@@ -602,6 +685,14 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         vent_dist_per_pixel = haversine_km(vent_lat, vent_lon, lat, lon)
     else:
         vent_dist_per_pixel = dist
+    # S165: distancia con que se escribe el `dist_km` de cada píxel anómalo (y de ahí `hotspot_dist_km`,
+    # `final_hotspot_dist_km` y la etiqueta). Apagado, es `dist`. Los otros usos de `dist` se quedan desde el centro
+    # a propósito: el anillo de fondo (`bg_mask`, geometría del ROI, D17) y el diagnóstico `diag_t_max_dist_km`, que
+    # no decide nada y es comparable con todo el histórico sólo si no cambia de origen. Aguas abajo, store.py también
+    # lee esta distancia: el filtro de píxeles (`_filter_pixels_by_distance`) y la geocerca de `hotspot_dist_km`
+    # contra radius_km pasan a medir desde el cráter con el flag (verificador S165, V165-01: sobre data/ de marzo a
+    # octubre de 2026, 0 píxeles MODIS salen de la cerca y 1 descartado vuelve a entrar, PCC 2026-05-03 07:50).
+    dist_etiqueta = dist_de_etiqueta(dist, vent_dist_per_pixel)
 
 
     # D18 (S130): la geometria del ROI1. El paper dice CAJA de 5x5 km igual para
@@ -1178,7 +1269,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             anomaly_pixels.append({
                 "lat": round(float(lat[r, c]), 5),
                 "lon": round(float(lon[r, c]), 5),
-                "dist_km": round(float(dist[r, c]), 2),
+                "dist_km": round(float(dist_etiqueta[r, c]), 2),
                 "bt_k": round(float(hotpix_bt[idx]), 2),
                 "vrp_mw": round(float(per_pixel_vrp_mw[idx]), 4),
             })
@@ -1490,7 +1581,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             # S94 (PR #294) en process_viirs.py:1486. Poblar desde t1_vrp_2d (los
             # mismos píxeles que ya alimentan pc.vrp_mw). NO cambia detección ni
             # magnitud: solo serializa píxeles ya calculados.
-            anomaly_pixels = build_anomaly_pixels(t1_vrp_2d, lat, lon, dist, bt_mir)
+            anomaly_pixels = build_anomaly_pixels(t1_vrp_2d, lat, lon, dist_etiqueta, bt_mir)
             # S38: aplicar también strategy vent-anchored al cluster Test 1.
             _t1_strategy = ("vent_anchored" if (ENABLE_VENT_ANCHORED_CLUSTERING
                                                  and inner_radius_km is not None)
@@ -1659,13 +1750,19 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "product_version": product_version_from_granule(hdf_path.name),
         "datetime_utc": _parse_datetime(hdf_path.name),
         # S122: geometría de observación en el punto reportado (research).
+        # S165: se busca con `lat, lon` (la posición con que se calculó; con ENABLE_MODIS_GEO_MXD03 apagado es la misma
+        # data["lat"]): el punto reportado está en esa grilla, y así se reproduce el brazo X de MOD-B.
         **observation_geometry(
-            data["lat"], data["lon"], data.get("angles"),
+            lat, lon, data.get("angles"),
             final_hotspot_lat if final_hotspot_lat is not None else vent_lat,
             final_hotspot_lon if final_hotspot_lon is not None else vent_lon,
         ),
         # S164: sólo con la vía «código MIROVA» encendida y sin poder correr; con el flag apagado no aparece.
         **({"via_codigo_mirova": _via_marca} if _via_marca is not None else {}),
+        # S165: de dónde salió la posición de cada píxel; sólo con ENABLE_MODIS_GEO_MXD03 encendido, para que con el
+        # flag apagado el record sea bit a bit el de antes. Los ángulos de arriba siguen saliendo de la grilla de 5 km
+        # (no entran en la detección; así se reproduce el brazo X de MOD-B).
+        **({"geo_fuente": geo_fuente} if ENABLE_MODIS_GEO_MXD03 else {}),
     }
 
 

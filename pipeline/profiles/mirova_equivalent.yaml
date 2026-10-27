@@ -132,6 +132,12 @@ thresholds:
   # cap=7K + exclude_zones que usábamos.
   n_sigma_mir_summit: 5.0
   n_sigma_mir_scene: 10.0
+  # S165, geolocalizacion MxD03 de MODIS (plan docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md). Los tres
+  # APAGADOS: con false el procesador MODIS es bit a bit el del tag pre-s165-mxd03-modis. Encender cualquiera
+  # exige el si de Nicolas (A45). Van en `thresholds:`, que es donde los lee pipeline/profile.py (S124, A89).
+  enable_modis_geo_mxd03: false          # posicion por pixel del MxD03 en vez de _interp_geo (A61 H2, MOD-B)
+  enable_modis_crater_sin_dato: false    # crater sin posicion en el granulo -> sin record, no negativo (A61 H1, VA61-01)
+  enable_modis_dist_desde_crater: false  # dist_km del pixel anomalo y etiqueta summit/far desde el crater (A61 H5)
 
 # --- Background annulus geometry (km) ---
 background:
