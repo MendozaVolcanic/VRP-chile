@@ -17,7 +17,7 @@
 #                 2015 (BV 77:55)" se RETIRO en S147: no corresponde a ningun articulo
 #                 localizable (ese numero es Heap et al., mecanica de rocas). Ver D30 y la nota
 #                 bibliografica de pipeline/test1_integrated.py.
-#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
+#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md. Vía «código MIROVA» APAGADA (S164, enable_modis_codigo_mirova): pipeline/mirova_v750_codigo.py
 # ════════════════════════════════════════════════════════════════════
 """
 process_modis.py: Calculate VRP from MODIS MOD021KM / MYD021KM L1B granules.
@@ -101,6 +101,7 @@ WOOSTER_COEFF = 18.9
 # E2b': Sigma cap for detection threshold (MAX_SIGMA_COMPONENT_K).
 from pipeline.profile import (
     ENABLE_UTM_REGRID,  # F70.2
+    ENABLE_MODIS_CODIGO_MIROVA,  # S164 MOD-D fase 3
     ANOMALY_THRESHOLD_K,
     N_SIGMA,
     BG_INNER_KM,
@@ -543,6 +544,43 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     DNTI_CONTEXTUAL_C1_SUMMIT = _TH["c1_summit"]  # noche 0.003 / día 0.02
     DNTI_CONTEXTUAL_C1_SCENE = _TH["c1_scene"]    # noche 0.010 / día 0.02
     DNTI_CONTEXTUAL_C1 = _TH["c1_summit"]         # single-ROI: noche 0.003 / día 0.02
+
+    # S164 MOD-D fase 3: vía «código MIROVA» para MODIS (pipeline/mirova_v750_codigo.py, FAMILIAS["MODIS"]). POR QUÉ:
+    # el censo MOD-D midió que ver el volcán como lo ve MIROVA (el gránulo interpolado a su grilla de 1 km, su
+    # detector, su fondo rellenado con la regla de fillmissing2 de MATLAB y la suma de todos los alertados) se equivoca
+    # menos que K contra MIROVA (8 errores contra 49) y acerca la magnitud. Es ese paquete entero, con la
+    # geolocalización de 1 km del MxD03 y la banda 22 primaria, no piezas sueltas sobre K. Con el flag APAGADO (hoy)
+    # este bloque no corre y el procesador es el de siempre. Con el flag encendido, cuando la vía no puede correr
+    # (volcán sin grilla de MIROVA, sin MxD03 o con un MxD03 de otra forma) sigue K y el record lo dice en
+    # `via_codigo_mirova`, para que nadie lea K creyendo que es la vía (A118). El volcán se reconoce por sus
+    # coordenadas de volcanoes.yaml, que run_pipeline ya pasa, como en VIIRS 750 (la firma de calculate_vrp no cambia).
+    _via_marca = None
+    if ENABLE_MODIS_CODIGO_MIROVA:
+        from . import mirova_v750_codigo as _MV
+        _fam = _MV.FAMILIAS["MODIS"]
+        volcan_nombre = _MV.volcan_por_coordenadas(volcano_lat, volcano_lon)
+        if volcan_nombre is None or _MV.grilla_del_volcan(volcan_nombre, paso_m=_fam["paso_m"],
+                                                          clave_roi=_fam["clave_roi"]) is None:
+            _via_marca = "sin_grilla"
+        elif geo_path is None:
+            _via_marca = "sin_mxd03"
+        else:
+            _rad = _MV.leer_radiancia_modis(hdf_path)
+            _lat, _lon, _ang = _MV.leer_geo_mxd03(geo_path)
+            if np.shape(_lat) != np.shape(_rad["MIR"]):
+                _via_marca = "geo_distinta"
+            else:
+                _rec = _MV.calcular_vrp_granulo(
+                    _rad, _lat, _lon, _ang, volcan_nombre,
+                    vent_lat if vent_lat is not None else volcano_lat,
+                    vent_lon if vent_lon is not None else volcano_lon,
+                    inner_radius_km, _sensor_modis(hdf_path.name), familia="MODIS")
+                if _rec is None:
+                    return None
+                _rec.update({"granule": hdf_path.name,
+                             "product_version": product_version_from_granule(hdf_path.name),
+                             "datetime_utc": _parse_datetime(hdf_path.name)})
+                return _rec
 
     data = read_modis_l1b(hdf_path)
 
@@ -1615,7 +1653,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             fp_diag["n_bg_used"] if fp_diag is not None else 0),
         # S46 Task 5: second_pass_adjacent recapture diag (Drift #4).
         "diag_n_second_pass_recapture": n_second_pass_recapture,
-        "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",
+        "sensor": _sensor_modis(hdf_path.name),
         "granule": hdf_path.name,
         # S140 (8b): MODIS marca el NRT con `.NRT.`, no con `_NRT`; el detector reconoce los dos.
         "product_version": product_version_from_granule(hdf_path.name),
@@ -1626,7 +1664,13 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             final_hotspot_lat if final_hotspot_lat is not None else vent_lat,
             final_hotspot_lon if final_hotspot_lon is not None else vent_lon,
         ),
+        # S164: sólo con la vía «código MIROVA» encendida y sin poder correr; con el flag apagado no aparece.
+        **({"via_codigo_mirova": _via_marca} if _via_marca is not None else {}),
     }
+
+
+def _sensor_modis(filename: str) -> str:
+    return "MODIS_TERRA" if "MOD0" in filename else "MODIS_AQUA"
 
 
 def _parse_datetime(filename: str) -> str:
