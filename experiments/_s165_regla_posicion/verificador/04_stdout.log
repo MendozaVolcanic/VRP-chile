@@ -1,0 +1,67 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+== procedencia: {"head": "cdf2c1b95e28f4bdd16debe040e83784c1c9a164", "origin_main": "bd711db630bfa79f2a5ed9789f6b63d750524e78", "difieren_de_origin_main": [], "sin_commitear": []}
+   regla importada igual a origin/main: {"modulo": "C:\\Users\\nmend\\OneDrive\\Escritorio\\claude\\Volcanologia\\VRP Chile\\pipeline\\mirova_v750_codigo.py", "_cumulo_del_mas_radiante": true, "procesar_grilla": true}
+
+== MODIS: censo 5465 records, 5321 grillas; por lab {'neg_limpio': 5110, 'sin_info': 253, 'bajo1': 42, 'protegida': 50, 'far_ref': 10}
+   SIN DATO (lab, estado, port_estado): {('sin_info', 'ok', 'volcan_fuera_del_granulo'): 52, ('neg_limpio', 'ok', 'volcan_fuera_del_granulo'): 92}
+
+== MODIS: 5321 pasadas evaluadas, 109 con alertados; por clase {'neg_limpio': 5018, 'resto': 211, 'protegida': 50, 'bajo1': 42}
+   reglas propias contra comun.reglas: difieren en 0 de 109; contra el record de procesar_grilla (donde hay grilla): difieren en 0
+   MODIS | regla cerc_cr: cambian 1 de 5321
+      protegida  (n    50): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      bajo1      (n    42): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      neg_limpio (n  5018): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      resto      (n   211): con «cercano» publica y la vía no   1 | la vía publica y con «cercano» calla   0
+   MODIS | regla cerc_ref: cambian 1 de 5321
+      protegida  (n    50): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      bajo1      (n    42): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      neg_limpio (n  5018): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      resto      (n   211): con «cercano» publica y la vía no   1 | la vía publica y con «cercano» calla   0
+   ids que cambian: [1563]
+   cruces del inner con cerc_cr (sin mirar la publicación): 1; de ellos sin cambio de publicación: 0; geometría «calla» (vía dentro, cerc_cr fuera): 0
+   cruces del inner con cerc_ref (sin mirar la publicación): 1; de ellos sin cambio de publicación: 0; geometría «calla» (vía dentro, cerc_ref fuera): 0
+
+== VIIRS 750: cajas guardadas por el oráculo: {('geo_linear', 'geo_linear_anillo_sensible'): 5640}
+   SIN DATO (lab, estado): {('neg_limpio', 'volcan_fuera_del_granulo'): 106}
+
+== VIIRS 750: 5640 pasadas evaluadas, 216 con alertados; por clase {'neg_limpio': 5370, 'bajo1': 177, 'protegida': 93}
+   reglas propias contra comun.reglas: difieren en 0 de 216; contra el record de procesar_grilla (donde hay grilla): difieren en 0
+   VIIRS 750 | regla cerc_cr: cambian 1 de 5640
+      protegida  (n    93): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      bajo1      (n   177): con «cercano» publica y la vía no   1 | la vía publica y con «cercano» calla   0
+      neg_limpio (n  5370): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      resto      (n     0): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+   VIIRS 750 | regla cerc_ref: cambian 2 de 5640
+      protegida  (n    93): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      bajo1      (n   177): con «cercano» publica y la vía no   2 | la vía publica y con «cercano» calla   0
+      neg_limpio (n  5370): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      resto      (n     0): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+   ids que cambian: [1892, 4139]
+   cruces del inner con cerc_cr (sin mirar la publicación): 1; de ellos sin cambio de publicación: 0; geometría «calla» (vía dentro, cerc_cr fuera): 0
+   cruces del inner con cerc_ref (sin mirar la publicación): 2; de ellos sin cambio de publicación: 0; geometría «calla» (vía dentro, cerc_ref fuera): 0
+   ... 400 de 2078 (158 s)
+   ... 800 de 2078 (258 s)
+   ... 1200 de 2078 (294 s)
+   ... 1600 de 2078 (314 s)
+   ... 2000 de 2078 (332 s)
+
+== VIIRS 375: pipeline/ de main (familia VIIRS375 y caja_v375 ya en origin/main tras #921)
+   SIN DATO (clase, estado): {('neg_resto', 'volcan_fuera_del_granulo'): 46, ('control_vida', 'sin_resultado'): 20}
+
+== VIIRS 375: 2012 pasadas evaluadas, 329 con alertados; por clase {'protegida': 80, 'neg_limpio': 1732, 'bajo1': 200}
+   reglas propias contra comun.reglas: difieren en 0 de 329; contra el record de procesar_grilla (donde hay grilla): difieren en 0
+   VIIRS 375 | regla cerc_cr: cambian 8 de 2012
+      protegida  (n    80): con «cercano» publica y la vía no   4 | la vía publica y con «cercano» calla   0
+      bajo1      (n   200): con «cercano» publica y la vía no   4 | la vía publica y con «cercano» calla   0
+      neg_limpio (n  1732): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      resto      (n     0): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+   VIIRS 375 | regla cerc_ref: cambian 8 de 2012
+      protegida  (n    80): con «cercano» publica y la vía no   4 | la vía publica y con «cercano» calla   0
+      bajo1      (n   200): con «cercano» publica y la vía no   4 | la vía publica y con «cercano» calla   0
+      neg_limpio (n  1732): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      resto      (n     0): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+   ids que cambian: [228, 233, 293, 298, 1570, 1638, 1647, 1662]
+   cruces del inner con cerc_cr (sin mirar la publicación): 8; de ellos sin cambio de publicación: 0; geometría «calla» (vía dentro, cerc_cr fuera): 0
+   cruces del inner con cerc_ref (sin mirar la publicación): 8; de ellos sin cambio de publicación: 0; geometría «calla» (vía dentro, cerc_ref fuera): 0
+
+listo en 398 s

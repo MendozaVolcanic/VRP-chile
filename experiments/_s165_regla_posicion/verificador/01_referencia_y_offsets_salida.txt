@@ -1,0 +1,39 @@
+== referencia: {"registro_vrp_consolidado.csv": "cb91eb506c37cff0b83164dd602d8a5340277637", "registro_vrp_ocr.csv": "cfc57c4d8bc57c5ccd5219ff3a91749dae167b97"}
+
+== (a) filas de la tabla (CONS) por tipo, sensor y ventana del censo, Tier A
+   MODIS (2026-03-01 a 2026-10-16): 10609 filas; {'RUTINA': 10469, 'FALSO_POSITIVO': 41, 'ALERTA_TERMICA': 99}
+      FALSO_POSITIVO por volcán: {'PuyehueCordonCaulle': 1, 'Isluga': 3, 'Chaiten': 4, 'Copahue': 4, 'Lascar': 1, 'Llaima': 15, 'NevadosDeChillan': 2, 'PlanchonPeteroa': 1, 'Villarrica': 5, 'Lastarria': 1, 'Tupungatito': 4}
+      FALSO_POSITIVO nocturnas (hora UTC 00 a 12): 10 | dist mediana (km): 24.7
+      OCR: 38 filas; {'FALSO_POSITIVO_OCR': 2, 'ALERTA_TERMICA_OCR': 36}
+   VIIRS750 (2026-04-01 a 2026-10-21): 12704 filas; {'ALERTA_TERMICA': 259, 'RUTINA': 12365, 'FALSO_POSITIVO': 80}
+      FALSO_POSITIVO por volcán: {'Lascar': 7, 'Isluga': 8, 'Copahue': 10, 'Llaima': 12, 'NevadosDeChillan': 17, 'PlanchonPeteroa': 4, 'PuyehueCordonCaulle': 1, 'Villarrica': 3, 'Chaiten': 1, 'Lastarria': 7, 'Tupungatito': 10}
+      FALSO_POSITIVO nocturnas (hora UTC 00 a 12): 19 | dist mediana (km): 20.634999999999998
+      OCR: 62 filas; {'ALERTA_TERMICA_OCR': 51, 'FALSO_POSITIVO_OCR': 3, 'ALERTA_SIN_GEOMETRIA_OCR': 8}
+   VIIRS375 (2026-04-01 a 2026-10-21): 12244 filas; {'ALERTA_TERMICA': 1028, 'FALSO_POSITIVO': 728, 'RUTINA': 10488}
+      FALSO_POSITIVO por volcán: {'Lascar': 129, 'Isluga': 82, 'Copahue': 33, 'Llaima': 53, 'NevadosDeChillan': 61, 'PlanchonPeteroa': 60, 'PuyehueCordonCaulle': 7, 'Villarrica': 24, 'Chaiten': 11, 'Lastarria': 214, 'Tupungatito': 54}
+      FALSO_POSITIVO nocturnas (hora UTC 00 a 12): 338 | dist mediana (km): 19.285
+      OCR: 797 filas; {'FALSO_POSITIVO_OCR': 64, 'ALERTA_TERMICA_OCR': 700, 'ALERTA_SIN_GEOMETRIA_OCR': 33}
+
+== (b) Distancia_km de las alertas de la tabla con VRP > 0: ¿alguna vez 0,0?
+   MODIS: 125 alertas con distancia; con 0,0 km: 2; valores más frecuentes: [(1.41, 49), (1.0, 49), (2.0, 13), (2.24, 7), (2.83, 3), (0.0, 2), (3.61, 1), (3.16, 1)]
+   VIIRS750: 346 alertas con distancia; con 0,0 km: 14; valores más frecuentes: [(1.5, 69), (1.68, 68), (0.75, 65), (7.83, 32), (1.06, 30), (7.65, 20), (0.0, 14), (2.37, 10)]
+   VIIRS375: 1343 alertas con distancia; con 0,0 km: 11; valores más frecuentes: [(0.84, 124), (0.53, 124), (1.55, 119), (1.19, 103), (2.4, 80), (5.21, 78), (2.02, 57), (1.5, 49)]
+   (FALSO_POSITIVO y RUTINA aparte)
+   MODIS FALSO_POSITIVO: 46; con 0,0 km: 0; mín dist 6.4
+   VIIRS750 FALSO_POSITIVO: 97; con 0,0 km: 0; mín dist 5.03
+   VIIRS375 FALSO_POSITIVO: 851; con 0,0 km: 0; mín dist 3.46
+
+== (c) desfase cráter (get_detection_anchor) contra la referencia X0, Y0 de grillas_mirova.yaml, por volcán
+   volcán | inner_km | cráter a X0,Y0 (km) | cráter a celda (33,33) de la grilla 750 (km) | una celda-cráter sola: cerc_ref > inner?
+   Chaiten                 5    0.587    0.334   False
+   Copahue                 4    0.001    0.354   False
+   Isluga                  5    0.001    0.354   False
+   Lascar                  5    0.797    1.041   False
+   Lastarria               3    0.001    0.354   False
+   Llaima                  5    0.001    0.354   False
+   NevadosDeChillan        5    0.001    0.354   False
+   PlanchonPeteroa         3    2.065    1.776   False
+   PuyehueCordonCaulle    20    7.579    7.751   False
+   Tupungatito             7    4.833    4.908   False
+   Villarrica              5    0.851    0.631   False
+   (si el desfase es mayor que el inner, un píxel en el cráter queda far con cerc_ref: ahí la dirección «calla» es posible por el punto de medida, no por la regla)

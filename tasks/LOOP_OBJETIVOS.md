@@ -569,6 +569,31 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 23:00 UTC (S165, vuelta 12): regla de posición medida y verificada; probe MxD03 en verde; #922 en curso
+- **Regla de posición** (`experiments/_s165_regla_posicion/INFORME.md`; verificador Fable con contexto limpio en
+  `verificador/INFORME.md`). Sólo lectura. La regla de la vía se importó de `main`: mide desde el centroide del cúmulo
+  más radiante (`get_detection_anchor`), con frontera `<=`. Pasadas que cambian de publicación con «cercano», todas en
+  la dirección «publica donde la vía calla»:
+
+  | sensor | pasadas | cambian | protegidas | otras |
+  |---|---|---|---|---|
+  | VIIRS 375 | 2.012 | 8 | 4 (censo de 80) | 4 bajo 1 MW |
+  | MODIS | 5.321 | 1 | 0 | 1: Láscar 2026-03-30, que publicaría 11,7 MW como cumbre en una pasada que MIROVA ubicó a 26,87 km |
+  | VIIRS 750 | 5.640 | 1 (2 midiendo desde X0, Y0) | 0 | 1 a 2 bajo 1 MW |
+
+  Reproducido con código independiente, con el nulo medido.
+  - **H1 (gravedad 4)**: en VIIRS los universos excluyen por construcción las pasadas en que MIROVA publicó una fuente
+    lejana (338 en VIIRS 375 y 19 en VIIRS 750, sin grillas). Por eso los conteos de VIIRS son cota inferior.
+  - **Cotejo con `Distancia_km` de MIROVA**: sólo 3 filas de la configuración que decide (2 a favor de «cercano» y 1
+    de la vía). La regla de MIROVA sigue SIN DETERMINAR (V-2 de S159 abierta).
+  - **H2**: el «38 de 38» queda rebajado. El píxel pico calza mejor con la distancia de MIROVA (56 a 3) que el centroide
+    de la vía (12 de 39 a media celda).
+  - Decide Nicolás.
+- `probe-mxd03-equivalencia` (run 40584157486): success. 18 de 18 records con el flag encendido iguales al brazo X de
+  MOD-B, y 18 de 18 apagados iguales a K (control). 1 cráter sin dato, 0 errores.
+- #922 (V165-03): merge de main hecho (`0df7b5257`), suite 2.723 y 0 fallas; esperan el CI y el verificador.
+- Disco: C: 25 GB, D: 7,5 GB. W4 en 12 de 22.
+
 ### 2026-10-27 22:10 UTC (S165, vuelta 11): #921 MERGEADO por orden de Nicolás; las tres vías en main, apagadas
 - Nicolás, en este chat: «Apruebo el merge de #921 (V375-E, flag apagado) con merge commit en el sha
   65458a8302e70e184e39feee018091c719464f97. Mergéalo tú.». Merge commit **`bd711db63`**; `main` integrado en

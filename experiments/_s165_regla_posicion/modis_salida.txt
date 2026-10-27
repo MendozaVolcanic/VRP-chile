@@ -1,0 +1,55 @@
+== 0. procedencia
+   código: {"head": "556f1d2f4654c83f219c37470909e1b315874409", "origin_main": "97ef53aa5a865a17f307698a2e999213625ff8d6", "difieren_de_origin_main": [], "sin_commitear": []}
+   regla de posición importada igual a origin/main: {"modulo": "C:\\Users\\nmend\\OneDrive\\Escritorio\\claude\\Volcanologia\\VRP Chile\\pipeline\\mirova_v750_codigo.py", "_cumulo_del_mas_radiante": true, "procesar_grilla": true}
+   censo MOD-D: 5465 records, 5321 grillas guardadas; ventana 2026-03-01 01:35 a 2026-10-16 08:15
+   inner del tablero distinto del de volcanoes.yaml en: []
+   control del predicado (summit a 1 km publica, far a 9 km no): [True, False] OK
+   SIN DATO: {'ok|volcan_fuera_del_granulo': 144} | evaluadas: 5321 | máx diferencia de grilla vía contra el probe (m): 0.0
+   evaluadas por clase: {'neg_limpio': 5018, 'resto': 211, 'protegida': 50, 'bajo1': 42}
+
+== 1. controles del instrumento
+   pasadas con alertados de la vía: 109; misma máscara que el port «fisica» del censo: 5321 de 5321 (con alertados en alguno: 109)
+   máscaras distintas (id, volcán, hora, npix vía, npix port): []
+   la regla de comun reproduce la distancia y la clase del record de procesar_grilla: 109 de 109
+   el constructor de record de VIIRS 750 (comun.record_desde_pixeles) da el mismo record recortado que procesar_grilla: 109 de 109
+   la referencia del censo (X0, Y0 de grillas.json) calza con el q[3] del port: 109 de 109
+   el almacén cambió la distance_class de alguna variante: 0
+
+== 2. cambios de publicación (predicado del tablero con node)
+   MODIS | regla cerc_cr: cambian 1 de 5321
+      protegida  (n    50): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      bajo1      (n    42): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      neg_limpio (n  5018): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      resto      (n   211): con «cercano» publica y la vía no   1 | la vía publica y con «cercano» calla   0
+   MODIS | regla cerc_ref: cambian 1 de 5321
+      protegida  (n    50): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      bajo1      (n    42): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      neg_limpio (n  5018): con «cercano» publica y la vía no   0 | la vía publica y con «cercano» calla   0
+      resto      (n   211): con «cercano» publica y la vía no   1 | la vía publica y con «cercano» calla   0
+   distancias distintas por más de una celda (1 km) entre vía y cercano, sin importar la publicación: {'cerc_cr': 1, 'cerc_ref': 4}
+   detalle de las que cambian:
+      {"id": 1563, "volcan": "Lascar", "hora": "2026-03-30 07:25", "lab": "far_ref", "clase": "resto", "npix_via": 3, "vrp_via": 11.685, "pub_via": false, "pub_cerc_cr": true, "pub_cerc_ref": true, "d": {"via": 26.221, "cerc_cr": 0.255, "cerc_ref": 1.0, "via_ref": 26.87}, "n_cumulo": 1, "inner": 5}
+
+   referencia de MIROVA usada para el cotejo: {"registro_vrp_consolidado.csv": {"sha_commit": "cb91eb506c37cff0b83164dd602d8a5340277637", "fecha_commit": "2026-10-27T21:21:07Z", "sha256": "811c4c07e38e55dc768197c9eb9e6e5df3659c41c39aa8f43d8e408a611f7ef4"}, "registro_vrp_ocr.csv": {"sha_commit": "cfc57c4d8bc57c5ccd5219ff3a91749dae167b97", "fecha_commit": "2026-10-27T13:06:30Z", "sha256": "01c9478d614a59017348fc7f95ae4cffc359b314d5852cf2c6d13b7f831fba6b"}}
+       1563 Lascar 2026-03-30 07:25 MIROVA hoy: [{'source': 'CONS', 'tipo': 'FALSO_POSITIVO', 'vrp_mw': 11.31, 'dist_km': 26.87}]
+
+== MODIS: cotejo con la Distancia_km de MIROVA (celda 1.0 km)
+   via_ref contra cerc_ref (mismo punto de referencia (el del censo): sólo cambia la regla)
+      canal CONS (DECIDE): 1 filas en 1 pasadas | más cerca de MIROVA: via_ref 1, cerc_ref 0, empate 0 | sólo filas ALERTA: via_ref 0, cerc_ref 0, empate 0 (de 0) | a media celda o menos: via_ref 1, cerc_ref 0
+         {"volcan": "Lascar", "hora": "2026-03-30 07:25", "clase": "resto", "tipo": "FALSO_POSITIVO", "vrp_mirova": 11.31, "dist_mirova": 26.87, "via_ref": 26.87, "cerc_ref": 1.0, "gana": "via_ref", "dentro_media_celda": {"via_ref": true, "cerc_ref": false}}
+      canal OCR (informa): 0 filas en 0 pasadas | más cerca de MIROVA: via_ref 0, cerc_ref 0, empate 0 | sólo filas ALERTA: via_ref 0, cerc_ref 0, empate 0 (de 0) | a media celda o menos: via_ref 0, cerc_ref 0
+   via contra cerc_ref (como están implementadas: vía desde el cráter, cercano de evaluar.py desde X0, Y0)
+      canal CONS (DECIDE): 2 filas en 2 pasadas | más cerca de MIROVA: via 1, cerc_ref 1, empate 0 | sólo filas ALERTA: via 0, cerc_ref 0, empate 0 (de 0) | a media celda o menos: via 0, cerc_ref 1
+         {"volcan": "Lascar", "hora": "2026-03-30 07:25", "clase": "resto", "tipo": "FALSO_POSITIVO", "vrp_mirova": 11.31, "dist_mirova": 26.87, "via": 26.221, "cerc_ref": 1.0, "gana": "via", "dentro_media_celda": {"via": false, "cerc_ref": false}}
+         {"volcan": "PlanchonPeteroa", "hora": "2026-05-31 02:00", "clase": "resto", "tipo": "FALSO_POSITIVO", "vrp_mirova": 2.31, "dist_mirova": 20.25, "via": 19.204, "cerc_ref": 20.248, "gana": "cerc_ref", "dentro_media_celda": {"via": false, "cerc_ref": true}}
+      canal OCR (informa): 0 filas en 0 pasadas | más cerca de MIROVA: via 0, cerc_ref 0, empate 0 | sólo filas ALERTA: via 0, cerc_ref 0, empate 0 (de 0) | a media celda o menos: via 0, cerc_ref 0
+   pico_ref contra cerc_ref (informa: la alertada más radiante contra la más cercana, desde la referencia)
+      canal CONS (DECIDE): 4 filas en 4 pasadas | más cerca de MIROVA: pico_ref 4, cerc_ref 0, empate 0 | sólo filas ALERTA: pico_ref 2, cerc_ref 0, empate 0 (de 2) | a media celda o menos: pico_ref 3, cerc_ref 0
+         {"volcan": "Lascar", "hora": "2026-03-29 01:55", "clase": "protegida", "tipo": "ALERTA_TERMICA", "vrp_mirova": 2.94, "dist_mirova": 1.41, "pico_ref": 1.414, "cerc_ref": 0.0, "gana": "pico_ref", "dentro_media_celda": {"pico_ref": true, "cerc_ref": false}}
+         {"volcan": "Lascar", "hora": "2026-03-30 07:25", "clase": "resto", "tipo": "FALSO_POSITIVO", "vrp_mirova": 11.31, "dist_mirova": 26.87, "pico_ref": 26.87, "cerc_ref": 1.0, "gana": "pico_ref", "dentro_media_celda": {"pico_ref": true, "cerc_ref": false}}
+         {"volcan": "NevadosDeChillan", "hora": "2026-05-21 02:00", "clase": "resto", "tipo": "FALSO_POSITIVO", "vrp_mirova": 35.26, "dist_mirova": 17.12, "pico_ref": 17.029, "cerc_ref": 16.0, "gana": "pico_ref", "dentro_media_celda": {"pico_ref": true, "cerc_ref": false}}
+         {"volcan": "NevadosDeChillan", "hora": "2026-10-01 08:35", "clase": "protegida", "tipo": "ALERTA_TERMICA", "vrp_mirova": 5.18, "dist_mirova": 2.24, "pico_ref": 1.414, "cerc_ref": 0.0, "gana": "pico_ref", "dentro_media_celda": {"pico_ref": false, "cerc_ref": false}}
+      canal OCR (informa): 1 filas en 1 pasadas | más cerca de MIROVA: pico_ref 1, cerc_ref 0, empate 0 | sólo filas ALERTA: pico_ref 1, cerc_ref 0, empate 0 (de 1) | a media celda o menos: pico_ref 0, cerc_ref 0
+         {"volcan": "Lascar", "hora": "2026-03-29 01:55", "clase": "protegida", "tipo": "ALERTA_TERMICA_OCR", "vrp_mirova": 2.0, "dist_mirova": 2.05, "pico_ref": 1.414, "cerc_ref": 0.0, "gana": "pico_ref", "dentro_media_celda": {"pico_ref": false, "cerc_ref": false}}
+
+listo en 63 s
