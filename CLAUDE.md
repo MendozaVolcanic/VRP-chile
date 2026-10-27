@@ -1400,7 +1400,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   `final_hotspot_source == "test1"` y el Test 1 integrado está apagado (D10, D30; 0 de 3.687 records con esa fuente
   desde la observación del 2026-09-18, `experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt`). El «nunca
   apagarlo solo» vale para el detector anterior. El keep-peak focal de MODIS y VIIRS 750 (`FOCAL_CLUSTER_KEEP_PEAK`,
-  `pipeline/process_modis.py:1172`) es otro mecanismo y sigue corriendo. **A100. `keep_peak` daba paridad por accidente** con un píxel a ~3 km del cráter (S139): nunca apagarlo solo.
+  `pipeline/process_modis.py:1259`, era 1172 hasta #919 de S164, remapeada por contenido en S165) es otro mecanismo y sigue corriendo. **A100. `keep_peak` daba paridad por accidente** con un píxel a ~3 km del cráter (S139): nunca apagarlo solo.
 - **A101. Las citas `file:line` se remapean por contenido** (`difflib` contra `origin/main`, sólo bloques
   idénticos), nunca por aritmética ni en citas históricas deliberadas como A6 y A49 (S141).
 - **A102. Al corregir una función, buscar también las copias en línea de su lógica** (S141): el detector

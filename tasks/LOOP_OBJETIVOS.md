@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 13:50 UTC (S165, vuelta 6): #919 MERGEADO por orden de Nicolás; cita de A100 remapeada
+- Nicolás, en este chat: «Apruebo el merge de #919 (MOD-D fase 3, flag apagado) con merge commit en el sha 3dcf9fcc6.
+  Mergéalo tú.». Se corrió `gh pr ready 919` y `gh pr merge 919 --merge --match-head-commit 3dcf9fcc6f2a…`: merge
+  commit **`d94f25191`**. `main` integrado en `loop/activo` (`d5eb917c8`). Con `VRP_PROFILE=mirova_equivalent`,
+  `pipeline.profile` da `ENABLE_MODIS_CODIGO_MIROVA False` y `ENABLE_V750_CODIGO_MIROVA False`: la vía entra apagada.
+  Encenderla sigue sin aprobar (exige reproceso verificado y A45).
+- Cita de A100 remapeada por contenido (A101): `CLAUDE.md:1403` decía `pipeline/process_modis.py:1172`, que era la
+  línea `keep_peak=FOCAL_CLUSTER_KEEP_PEAK` del cúmulo focal en `f101d7304`. Hoy esa misma línea, con el mismo bloque
+  alrededor, es la 1259. El guard G8 da 19 passed.
+- Siguiente en la cola de MODIS: el plan de MxD03 (`docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md`, rama
+  `claude/s162-modis-2-0dd578`; tres flags apagados en un PR). No corre sin tag defensivo y el sí de Nicolás (A45).
+- W3 (run 40496903128): 8 de 22 jobs en verde a las 13:37 UTC.
+
 ### 2026-10-27 13:36 UTC (S165, vuelta 5): #919 cumple las condiciones de merge; el clasificador niega el merge
 - #919 (MOD-D fase 3), sha final `3dcf9fcc6`, sigue en borrador. Comprobado por S165:
   - CI pytest en verde sobre ese sha (run 40508341271), estado CLEAN.
