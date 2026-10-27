@@ -55,6 +55,23 @@ P = para cada pasada nocturna de VIIRS 750 y cada volcán Tier A:
 | **Kgeo** | K con agrupación geográfica (`cluster_pixels_geographic`, sin llamador hoy) y huellas deduplicadas | diagnóstico de CM162; sólo decide V750-D si P no se adopta |
 | **K×1,2** | K con su VRP multiplicado por 1,2 | placebo de ganancia (programa §2): la métrica M tiene que distinguir P de un K escalado |
 | **O** | el oráculo (port de R2) sobre la misma grilla | identidad: P tiene que ser O |
+| **P-cercano** | P con el record ubicado en el alertado más cercano al cráter | brazo de posición (§6 bis) |
+| **P-pico** | P con el record ubicado en el alertado de mayor M13 | brazo de posición (§6 bis) |
+
+**Brazos de posición (decisión de Nicolás del 2026-10-27, programa §7, rama `loop/activo` `72928820b`).** Sus palabras:
+«Sí: no fijes la regla todavía; mídela como brazo (radiante, cercano y pico) en los A/B de cada sensor contra lo que
+publica MIROVA». P, P-cercano y P-pico comparten **la misma detección y el mismo VRP** (la unión de los alertados del
+`.m`); sólo cambia el punto desde donde se mide la distancia del record al cráter, y con ella la clase `summit` o `far`
+que decide si el tablero publica. **P** (radiante) es lo que hace hoy la vía: el centroide del cúmulo 8-conexo del
+alertado más radiante. Físicamente, la regla decide sólo en una escena: un píxel débil junto al cráter y una fuente más
+radiante lejos (otro foco, borde de nube, incendio). Con radiante el record queda lejano y el tablero calla; con cercano
+queda en la cumbre y el tablero publica la suma, que viene sobre todo de la fuente lejana; con pico manda el píxel más
+radiante solo, sin promediar su cúmulo. Medido por S165 (`experiments/_s165_regla_posicion/INFORME.md`, en
+`loop/activo`): en VIIRS 750 «cercano» cambia 1 a 2 de 5.640 pasadas, siempre publicando de más; la distancia de MIROVA
+calza mejor con el píxel pico que con el centroide. La población de §4.2 suma las pasadas `far_ref` (MIROVA publicó una
+fuente lejana: fila FALSO_POSITIVO de la tabla y ninguna ALERTA), que V750-B corre si Nicolás sella su adenda 2
+(`experiments/_s162_v750b/adenda2/ADENDA2_V750B.md`); sin ellas, el §6 bis se lee igual y se declara que la vara de
+las pasadas lejanas quedó SIN DATO.
 
 ## 4. Las tres pruebas, en orden (fases 3 y 4 del programa)
 
@@ -119,9 +136,32 @@ P = para cada pasada nocturna de VIIRS 750 y cada volcán Tier A:
   para la prueba de equivalencia de §4.1: una diferencia de máscara P contra O que sólo se explique por la sigma de
   escena se informa así, y bloquea igual (la vía tiene que reproducir también la escena).
 
+## 6 bis. Regla de posición (escrita antes de ver los datos; se aplica antes del §6)
+
+Los tres brazos de posición se comparan contra lo que publica MIROVA. La vara es la de §5 más las pasadas lejanas:
+
+- **E_lejana**: pasadas `far_ref` en que el brazo publica (MIROVA vio el calor y lo ubicó lejos del cráter; publicarlo
+  como cumbre es publicar de más). Entra a la prueba de signos sumada a E, en el mismo bloque noche-volcán: **P2'** es
+  la prueba de signos de D-45 sobre E + E_lejana.
+- **Elegible**: P1 = 0 en T y en O, con la tabla sola y con tabla más OCR (la misma condición de P1 del §6.2).
+- **Gana**: un elegible distinto de P (radiante) que en P2' contra P, sobre T ∪ O con el canal que decide, da GANA, y
+  que con la tabla sola no es peor que P (GANA o EMPATE, o SIN SUSTRATO con el neto en 0 o a favor). Si ganan los dos,
+  el de menor E + E_lejana; a igual valor, P-pico (la distancia de MIROVA calza mejor con el pico, S165).
+- **Si ninguno gana**: P (radiante), si es elegible. Razón: es lo que hace hoy la vía y lo que midió el censo, y a igual
+  desempeño no se cambia sin evidencia.
+- **Si P no es elegible**: el elegible que no es peor que P en P2' ni con el canal que decide ni con la tabla sola; si
+  son los dos, el de menor E + E_lejana y a igual valor P-pico. Si ninguno: NINGUNA POSICIÓN ELEGIBLE, y P no se adopta.
+- El §6 se evalúa después sobre P con la posición elegida (en adelante, «P» es ese brazo).
+- **Multiplicidad**: dos contrastes contra P, cada uno al 5 % de una cola, sin corregir; se declara que la probabilidad
+  de que alguno gane sólo por azar es mayor que 5 %.
+- **Descriptivas, no deciden**: las pasadas que cambian de publicación contra P, por nombre y etiqueta; en las
+  pasadas lejanas, cuántas tienen algún alertado (un cero de E_lejana sin alertados no dice nada); y la distancia de
+  cada brazo desde la celda central de la grilla contra la `Distancia_km` de MIROVA (OCR sólo desde el 2026-06-13,
+  A119; diferencia de radios, A93).
+
 ## 6. Regla de adopción (escrita antes de ver los datos)
 
-P se propone a Nicolás para producción (A45) si y sólo si:
+P (con la posición elegida en el §6 bis) se propone a Nicolás para producción (A45) si y sólo si:
 
 1. **Equivalencia** (§4.1): 0 pasadas distintas fuera de la banda de triangulación, en local y en el runner; **6 de 6**
    mutaciones atrapadas por aserción (las seis del §4.1) y la de control como caída. (L2, resuelta por D-48: este punto
@@ -214,6 +254,10 @@ corrigieron con E53 a E60 y las mutaciones M57 a M62.
 
 ## 11. Pendiente antes del sello
 
+- **Brazos de posición (§3 y §6 bis, agregados el 2026-10-27)**: el texto está; falta el analizador (P-cercano y
+  P-pico desde los mismos píxeles del paquete, E_lejana, P2' y la regla del §6 bis), sus escenarios en
+  `probar_evaluar_v750a.py`, sus mutaciones en `mutar_evaluar_v750a.py`, la corrida completa del medidor (unas 7 h,
+  con disco y CPU libres) y un verificador limpio de este agregado.
 - Resultado de V750-B (la ROI) y del brazo nativo N0/N1 (confirma V750-C).
 - Analizador `evaluar_v750a.py` con la regla de §6, probado sin red (nulo, placebo y control positivo sobre las 510
   grillas de N), y su verificador limpio.
