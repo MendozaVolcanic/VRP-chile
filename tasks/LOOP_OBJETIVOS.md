@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 22:10 UTC (S165, vuelta 11): #921 MERGEADO por orden de Nicolás; las tres vías en main, apagadas
+- Nicolás, en este chat: «Apruebo el merge de #921 (V375-E, flag apagado) con merge commit en el sha
+  65458a8302e70e184e39feee018091c719464f97. Mergéalo tú.». Merge commit **`bd711db63`**; `main` integrado en
+  `loop/activo`.
+- Antes del merge, S165 corrió el arnés S142 completo con `git archive` de `65458a830` y de `origin/main` `97ef53aa5`:
+  salida idéntica byte a byte. CI pytest en verde, estado CLEAN. Después del merge, `pipeline.profile` da
+  `ENABLE_V750_CODIGO_MIROVA`, `ENABLE_MODIS_CODIGO_MIROVA`, `ENABLE_V375_CODIGO_MIROVA` y `ENABLE_MODIS_GEO_MXD03`
+  en False.
+- **Las tres vías «código MIROVA» (V750 #907, MODIS #919, V375 #921) y MxD03 (#920) están en `main` con los flags
+  apagados.** Para encender cualquiera: la regla de posición compartida (medición en curso en
+  `experiments/_s165_regla_posicion/`), el reproceso verificado y el sí de Nicolás (A45).
+- Pendiente de V375-E: el bit a bit de un día de NRT (`experiments/_s162_v750a/probe-s162-bitabit-nrt.yml` más
+  `experiments/_s165_v375_via/comparar_bitabit_nrt_v375.py`). Para despacharlo hay que llevar el yml a
+  `.github/workflows/` (S73) y comparar el tag `pre-s165-via-375` con `main`. Queda para S166.
+- V165-03 (MxD03 «sin dato» como incidencia): rama `claude/s165-v165-03-sin-dato` (`faa158541`) en el remoto, tag
+  `pre-s165-v165-03-sin-dato` sobre `97ef53aa5`, sí de A45 dado por Nicolás en el chat de esa sesión; en curso.
+
 ### 2026-10-27 21:40 UTC (S165, vuelta 10): resto de #915 clasificado; V165-03 pedido; medición de la regla de posición en curso
 - Nicolás, en este chat: «Sí: mide primero, sin tocar pipeline/, cuántas pasadas cambian con la regla "cercano" en
   VIIRS 750, MODIS y VIIRS 375, contra la distancia de la tabla de MIROVA. Después decido.» La medición corre en un
