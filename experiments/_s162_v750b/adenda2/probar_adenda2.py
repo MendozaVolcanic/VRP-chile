@@ -25,7 +25,9 @@ Escenarios:
   P7  analizador distinto del sellado (una línea cambiada): C4 cae, salida 3.
   P8  separar_resultados: el analizador sellado da la MISMA salida (byte a byte) sobre los resultados sin la
       suplementaria que sobre la parte sellada de los resultados con ella.
-  P9  el generador cambia el filtro de etiquetas sólo si aparece una vez: con 0 o 2 apariciones se niega.
+  P9  el generador cambia el filtro de etiquetas sólo si aparece una vez (con 0 o 2 apariciones se niega), y con el
+      cambio far_ref pasa el filtro, pos también y sin_info sigue afuera.
+Salida: 0 todo como se espera; 1 alguna falla por aserción; 2 el lector se cayó (traceback).
 Uso: python probar_adenda2.py --evaluador <evaluar_d25.py del tag s161-d25-lectura> [--lector <ruta>] [--dest <tmp>]
 """
 from __future__ import annotations
@@ -130,13 +132,19 @@ def correr(cmd):
     return r.returncode, r.stdout + r.stderr
 
 
+CAIDAS = []
+
+
 def lector(ruta, d, ev, analizador=None):
     cmd = [sys.executable, str(ruta), "--art", str(d / "art"), "--objetivos", str(d / "objetivos.json"),
            "--objetivos-supl", str(d / "supl.json"), "--sin-granulo-supl", str(d / "sin_granulo_supl.json"),
            "--evaluador", str(ev), "--salida", str(d / "lector.txt")]
     if analizador:
         cmd += ["--analizador", str(analizador)]
-    return correr(cmd)
+    rc, out = correr(cmd)
+    if "Traceback" in out:
+        CAIDAS.append(d.name)
+    return rc, out
 
 
 def linea(out, caja_, brazo):
@@ -151,10 +159,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--evaluador", required=True)
     ap.add_argument("--lector", default=str(AQUI / "leer_posicion_v750b.py"))
+    ap.add_argument("--separar", default=str(AQUI / "separar_resultados_v750b.py"))
+    ap.add_argument("--generador", default=str(AQUI / "objetivos_supl_v750b.py"))
     ap.add_argument("--dest", default="")
     a = ap.parse_args()
     dest = Path(a.dest) if a.dest else Path(tempfile.mkdtemp(prefix="adenda2_"))
-    filas, fallas, caidas = [], [], []
+    filas, fallas = [], []
 
     def chequear(nombre, cond, detalle):
         filas.append(f"{'OK   ' if cond else 'FALLA'} {nombre}: {detalle}")
@@ -173,8 +183,6 @@ def main():
     d = esc("sana")
     p.escribir(d)
     rc, out = lector(a.lector, d, a.evaluador)
-    if "Traceback" in out:
-        caidas.append("sana")
     chequear("P5 controles en verde y salida 0", rc == 0 and "controles C1 a C4: EN VERDE" in out,
              f"salida {rc}: " + (out[-400:].replace("\n", " | ") if rc else ""))
     m1 = re.search(r"C1 cajas con un solo alertado: (\d+); con brazos distintos (\d+)", out)
@@ -210,10 +218,15 @@ def main():
     # P7: analizador cambiado
     d = esc("P7")
     p.escribir(d)
-    otro = d / "analizar_otro.py"
+    # la copia va al lado del sellado (sus rutas son relativas a su carpeta): si el lector la aceptara, correría
+    # sin caerse y la falla sería por aserción, no por caída; temporal que se borra en el acto
+    otro = V750B / "_p7_analizar_otro.py"
     src = ANALIZAR.read_text(encoding="utf-8")
     otro.write_text(src.replace("MAX_SIN_DATO = 0.02", "MAX_SIN_DATO = 0.03", 1), encoding="utf-8")
-    rc, out = lector(a.lector, d, a.evaluador, analizador=otro)
+    try:
+        rc, out = lector(a.lector, d, a.evaluador, analizador=otro)
+    finally:
+        otro.unlink()
     chequear("P7 C4 cae con otro analizador", rc == 3 and "DISTINTO DEL TAG" in out, f"salida {rc}")
 
     # P8: separar no cambia la lectura sellada
@@ -222,7 +235,7 @@ def main():
     sin_supl = d / "art"
     d2 = esc("P8b")
     p.escribir(d2, con_supl=True)
-    rcs, outs = correr([sys.executable, str(AQUI / "separar_resultados_v750b.py"), "--art", str(d2 / "art"),
+    rcs, outs = correr([sys.executable, str(a.separar), "--art", str(d2 / "art"),
                         "--dest", str(d2 / "sep")])
     salidas = []
     for art, nom in ((sin_supl, "a"), (d2 / "sep" / "sellado", "b")):
@@ -240,26 +253,31 @@ def main():
              salidas[0] is not None and sc != salidas[0], "distinta" if sc != salidas[0] else "igual")
 
     # P9: el generador se niega si el filtro no aparece exactamente una vez
-    sys.path.insert(0, str(AQUI))
-    import objetivos_supl_v750b as GEN
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("gen_supl", a.generador)
+    GEN = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(GEN)
+    sello = 'if r["lab"] not in ("pos", "neg_limpio"):'
     for veces in (0, 1, 2):
         f = dest / f"pob_{veces}.py"
-        f.write_text("VENTANA = None\n" + ("def g(r):\n    " + GEN.FILTRO_SELLADO + "\n        return 0\n") * veces,
+        f.write_text("".join(f"def g{n}(r):\n    {sello}\n        return 0\n    return 1\n" for n in range(veces)),
                      encoding="utf-8")
         try:
             m = GEN.poblacion_con_far_ref(f)
-            ok = veces == 1 and GEN.FILTRO_SUPL in f.read_text(encoding="utf-8").replace(GEN.FILTRO_SELLADO, GEN.FILTRO_SUPL)
-            chequear(f"P9 filtro {veces} veces", ok and hasattr(m, "g"), "cargó")
+            pasa = [getattr(m, f"g{n}")({"lab": lab}) for n in range(veces) for lab in ("far_ref", "pos", "sin_info")]
+            chequear(f"P9 filtro {veces} veces", veces == 1 and pasa == [1, 1, 0],
+                     f"cargó; far_ref, pos y sin_info pasan el filtro: {pasa}")
         except SystemExit as e:
             chequear(f"P9 filtro {veces} veces", veces != 1, f"se negó: {e}")
 
     for x in filas:
         print(x)
-    if caidas:
-        print("CAÍDAS:", caidas)
-    print(f"== PRUEBAS: {'TODOS LOS ESCENARIOS COMO SE ESPERA' if not fallas and not caidas else 'FALLAS ' + str(len(fallas))} "
-          f"({len(filas)})")
-    return 0 if not fallas and not caidas else 1
+    if CAIDAS:
+        print("== CAÍDA DEL LECTOR en:", CAIDAS)
+        return 2
+    print(f"== PRUEBAS: {'TODOS LOS ESCENARIOS COMO SE ESPERA' if not fallas else 'FALLAS ' + str(len(fallas))} "
+          f"({len(filas)})" + (f": {fallas}" if fallas else ""))
+    return 0 if not fallas else 1
 
 
 if __name__ == "__main__":
