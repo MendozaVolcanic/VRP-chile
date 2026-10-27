@@ -141,6 +141,19 @@ compuerta, segundo pase con regresión, fondo sin recorte, suma, sin modo de un 
 pieza va en la ablación local. Aislar lo separable con riesgo propio sobre las protegidas: ROI, filtro de publicación,
 geolocalización MODIS, D33, diurno, agrupación.
 
+**Regla de posición del record (decisión de Nicolás, 2026-10-27, S165).** Sus palabras: «Sí: no fijes la regla
+todavía; mídela como brazo (radiante, cercano y pico) en los A/B de cada sensor contra lo que publica MIROVA».
+- Los A/B de fase 4 (V750-A, V375-E y MOD-D) llevan tres brazos de posición sobre la misma detección:
+  - **radiante**: centroide del cúmulo de la alertada más radiante, lo que hace hoy `procesar_grilla`;
+  - **cercano**: el alertado más cercano al cráter;
+  - **pico**: el píxel de mayor radiancia.
+- La vara es lo que publica MIROVA. Cuentan también las pasadas en que MIROVA publicó una fuente lejana
+  (`FALSO_POSITIVO` de la tabla), que la medición de S165 no pudo mirar en VIIRS (338 en VIIRS 375 y 19 en VIIRS 750).
+- Evidencia: `experiments/_s165_regla_posicion/INFORME.md` y `verificador/INFORME.md`. «Cercano» cambia 8 de 2.012
+  pasadas en VIIRS 375 (4 protegidas), 1 de 5.321 en MODIS (una publicación de más) y 1 a 2 de 5.640 en VIIRS 750.
+  La distancia de MIROVA calza mejor con el píxel pico que con el centroide.
+- Si un pre-registro ya está sellado, los brazos entran por adenda, antes de ver los datos.
+
 ## 8. Arreglos del instrumento antes de cualquier A/B nuevo
 
 Existe R2.1 en #889 (borrador, toca `pipeline/fetch.py` y `scripts/run_pipeline.py`: A45). Falta:

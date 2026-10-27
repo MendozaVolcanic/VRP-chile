@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 22:22 UTC (S165, vuelta 13): regla de posición, DECIDIDO medirla como brazo
+- Nicolás, en este chat: «Sí: no fijes la regla todavía; mídela como brazo (radiante, cercano y pico) en los A/B de cada
+  sensor contra lo que publica MIROVA.» Queda anotado en `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`
+  §7. Los A/B de fase 4 (V750-A, V375-E y MOD-D) llevan los tres brazos de posición; si su pre-registro ya está sellado,
+  entran por adenda antes de ver los datos. Se avisó a Loop VIIRS 750 2 (V750-B y V750-A).
+- `procesar_grilla` sigue con «radiante», sin cambios. Las tres vías están apagadas, así que no cambia nada publicado.
+
 ### 2026-10-27 23:00 UTC (S165, vuelta 12): regla de posición medida y verificada; probe MxD03 en verde; #922 en curso
 - **Regla de posición** (`experiments/_s165_regla_posicion/INFORME.md`; verificador Fable con contexto limpio en
   `verificador/INFORME.md`). Sólo lectura. La regla de la vía se importó de `main`: mide desde el centroide del cúmulo
