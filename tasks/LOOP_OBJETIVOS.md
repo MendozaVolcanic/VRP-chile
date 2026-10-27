@@ -569,6 +569,30 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-27 22:50 UTC (S165, vuelta 14): #922 MERGEADO por orden de Nicolás
+- Nicolás, en este chat: «Apruebo el merge de #922 (V165-03, flag apagado) con merge commit en el sha
+  0897ed5e6bb994b21fd76b941a2c4f209eccecf7. Mergéalo tú.». Merge commit **`7a17af8c4`**.
+- Antes del merge, S165 comprobó:
+  - el arnés S142 completo, con `git archive` de `origin/main` (con #920 y #921) y de `0897ed5e6`, da salida idéntica
+    byte a byte;
+  - el aviso nuevo (`al_sin_dato` en `process_modis.calculate_vrp`, incidencia `crater_sin_dato` en `fetch.py`) sólo se
+    dispara dentro de `sin_dato_de_geolocalizacion`, que devuelve False si `ENABLE_MODIS_CRATER_SIN_DATO` está apagado;
+  - la incidencia nueva no cuenta en modo estricto;
+  - CI en verde y estado CLEAN.
+- Después del merge, el único `ENABLE_MODIS_*` o `*_CODIGO_MIROVA` encendido en producción es `ENABLE_MODIS_B22_PRIMARY`
+  (K, desde #850).
+- Conflicto en `CLAUDE.md` al traer main a `loop/activo`: la cita de A100 quedó en `process_modis.py:1356` (la de main,
+  V16503-03), con el historial 1350, 1259 y 1172. Guard G8: 19 passed.
+- Seguimientos del verificador de #922 para S166: V16503-04 (14 citas viejas en `docs/MIROVA_DIVERGENCES.md`) y
+  V16503-05 (`backfill_nov_2025.py` sin informe de cobertura).
+- Decisiones de Nicolás que siguen abiertas (para el §b de S166):
+  - que el audit no marque alertas sólo OCR de Suomi NPP anteriores al 9-oct;
+  - que la magnitud por noche exija el mismo objeto en los dos lados;
+  - registrar como pérdida aceptada la de PCC VIIRS 750 del 10-oct;
+  - sellar la adenda 2 de V750-B antes del 2026-11-03;
+  - mazos, política de IA de la revista y licencia;
+  - correo a Coppola en espera.
+
 ### 2026-10-27 22:22 UTC (S165, vuelta 13): regla de posición, DECIDIDO medirla como brazo
 - Nicolás, en este chat: «Sí: no fijes la regla todavía; mídela como brazo (radiante, cercano y pico) en los A/B de cada
   sensor contra lo que publica MIROVA.» Queda anotado en `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`
