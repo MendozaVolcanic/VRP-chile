@@ -112,13 +112,13 @@ def celdas_anillo():
 
 def pasada(i, celdas, clase, vol="Lascar", hora="2026-07-01 05:00", pub_prod=1, lote="S162", tabla=True, prot=None,
            inner=5.0, crater=CR, ref=CR, vrp=1.5, mirova_vrp=None, dist_ref=None, mirova=None, rec_mal=None,
-           vrp_port=None, dc_mal=False, m14=None, ref_m14=None, vrp_port_vieja=None):
+           vrp_port=None, dc_mal=False, m14=None, ref_m14=None, vrp_port_vieja=None, sensor="VIIRS_NOAA20"):
     m, L, dist, rec = escena(celdas, crater, ref, inner, vrp, rec_mal)
     prot = clase == "pos_prot" if prot is None else prot
     o = {"id": i, "lote": lote, "clase": clase, "estrato": f"{vol}|z<=40", "volcan": vol, "hora_utc": hora,
          "protegida": prot, "mirova_vrp": (mirova_vrp if mirova_vrp is not None else (1.5 if prot else 0.3)
                                            if clase.startswith("pos") else 0.0),
-         "alerta_tabla": tabla, "partida": False, "pub_prod": pub_prod, "z": 20.0, "sensor": "VIIRS_NOAA20",
+         "alerta_tabla": tabla, "partida": False, "pub_prod": pub_prod, "z": 20.0, "sensor": sensor,
          "mirova": mirova or [], "dist_ref": dist_ref}
     if ref_m14 is not None:
         o["ref_M14"] = ref_m14
@@ -412,6 +412,30 @@ def main(argv=None):
         pasada(5, celdas_anillo(), "pos_prot", hora="2026-06-19 05:00", inner=1.0)])
     ok("ningún brazo pasa el veto", out["regla_posicion"]["veredicto"].startswith("NINGUN BRAZO PASA EL VETO"),
        out["regla_posicion"]["veredicto"])
+
+    # ---------------- §8.13 (N-3, sellado): protegida sólo OCR de Suomi NPP anterior al 2026-10-09 no veta
+    def prot_lejana(i, vol, hora, sensor, tabla):
+        return pasada(i, celdas_lejana(), "pos_prot", vol=vol, hora=hora, sensor=sensor, tabla=tabla)
+    casos_n3 = [("SNPP OCR 09-28 (no veta)", prot_lejana(3, "Isluga", "2026-09-28 05:12", "VIIRS_SNPP", False), False),
+                ("NOAA-21 OCR 06-17 (veta)", prot_lejana(3, "Isluga", "2026-06-17 05:06", "VIIRS_NOAA21", False), True),
+                ("NOAA-21 OCR 10-01 (veta)", prot_lejana(3, "Lascar", "2026-10-01 05:18", "VIIRS_NOAA21", False), True),
+                ("SNPP de la tabla 09-28 (veta)", prot_lejana(3, "Isluga", "2026-09-28 05:12", "VIIRS_SNPP", True), True),
+                ("SNPP OCR el 10-09 (veta)", prot_lejana(3, "Isluga", "2026-10-09 05:12", "VIIRS_SNPP", False), True)]
+    for nom, caso, veta in casos_n3:
+        out, f = correr(base_marco() + lejana_vacia() + [caso])
+        rp = out["regla_posicion"]
+        v1 = out["vara1"]["radiante"]
+        if veta:
+            ok(f"§8.13: {nom}: veta a radiante y a pico en la regla, y cuenta en el P1 que veta",
+               [tuple(x) for x in rp["detalle"]["veto"]["radiante"]] == [(caso[0]["volcan"], caso[0]["hora_utc"])]
+               and rp["detalle"]["veto"]["pico"] and not rp["detalle"]["informadas_aparte_n3"]
+               and len(v1["P1_veto_n3"]) == 1 and not v1["P1_aparte_n3"], (rp["detalle"]["veto"], v1.get("P1_veto_n3")))
+        else:
+            ok(f"§8.13: {nom}: no veta en la regla ni en el P1 que veta; se informa aparte",
+               not rp["detalle"]["veto"]["radiante"] and [tuple(x) for x in rp["detalle"]["informadas_aparte_n3"]]
+               == [(caso[0]["volcan"], caso[0]["hora_utc"])] and not v1["P1_veto_n3"] and len(v1["P1_aparte_n3"]) == 1
+               and v1["lecturas"]["P1"]["perdidas_que_K_publica"] == 1,
+               (rp["detalle"]["veto"], rp["detalle"].get("informadas_aparte_n3"), v1.get("P1_veto_n3")))
 
     # ---------------- arreglos del verificador (VE2-01, VE2-04, VE2-06, VE2-09)
     out, f = correr(base_marco() + lejana_vacia() + [

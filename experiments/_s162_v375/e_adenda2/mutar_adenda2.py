@@ -109,6 +109,11 @@ MUTACIONES = [
     ("L61", LP, '        return veredicto.split()[1]', '        return "RADIANTE"'),
     ("L62", LP, 'fuera_v = [i for i in con_v if abs(pasadas[i]["vrp_via"] - pasadas[i]["vrp_port_vieja"]) > TOL_VRP_MW]',
      'fuera_v = []'),
+    # ---- lector: §8.13 (N-3, sellado)
+    ("L63", LP, '    prot_k = [x for x in prot_k if not no_veta_n3(x)]', '    prot_k = list(prot_k)'),
+    ("L64", LP, 'and x.get("sensor") == SENSOR_SNPP and x["hora"][:10] < HITO_N3', 'and x["hora"][:10] < HITO_N3'),
+    ("L65", LP, 'if x["c"] == "pos_prot" and x["K"] and not x["X"][("VIA", a)] and not no_veta_n3(x)]',
+     'if x["c"] == "pos_prot" and x["K"] and not x["X"][("VIA", a)]]'),
     # ---- generador
     ("G19", GF, '"capas_locales": dep["capas"](),', '"capas_locales": {},'),
     ("G01", GF, 'for f in p.get("mirova") or []) else "far_ocr"', 'for f in p.get("mirova") or [] if False) else "far_ocr"'),

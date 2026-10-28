@@ -66,7 +66,9 @@ CLASES_FAR = ("far_tabla", "far_ocr")
 FRONTERA_OCR = "2026-06-13"         # A119: antes, el OCR no tiene distancia medida
 TOL_DIST_KM = 5e-4 + 1e-9           # C5: el record redondea a 1e-3 km (media unidad, más el error de coma flotante)
 UMBRAL_COBERTURA = 0.10
-TOL_VRP_MW = 1e-3                   # §3.1: VRP a 1e-3 MW en el 99 % o más
+SENSOR_SNPP = "VIIRS_SNPP"           # §8.13 (N-3)
+HITO_N3 = "2026-10-09"
+TOL_VRP_MW = 1e-3                  # §3.1: VRP a 1e-3 MW en el 99 % o más
 FRAC_VRP = 0.99
 ID_FAR = (20000, 29000)
 ID_CTLF = (29000, 30000)
@@ -303,12 +305,22 @@ def resultado_rp(veredicto):
     return veredicto
 
 
+def no_veta_n3(x):
+    """§8.13 (N-3), sellado por Nicolás el 2026-10-28: una protegida sólo del OCR (sin alerta de la tabla) de Suomi NPP
+    anterior al 2026-10-09 se informa aparte y no veta, ni en la regla de posición ni en el §5.4 (a), igual que en el
+    auto-audit (PR #924). La de la tabla, la de otra plataforma o la de ese día en adelante siguen vetando."""
+    return x["c"] == "pos_prot" and not x["tabla"] and x.get("sensor") == SENSOR_SNPP and x["hora"][:10] < HITO_N3
+
+
 def regla_posicion(filas, E, far_ok=True, solo_tabla=False):
     """§8.5. filas: marco + far_tabla (sin CTL ni CTLF). solo_tabla: el veto cuenta sólo protegidas con alerta de la
     tabla (informa). Devuelve (veredicto, detalle)."""
     det = {"veto": {}, "pares": {}}
     marco = [x for x in filas if x["c"] not in CLASES_FAR]
     prot_k = [x for x in marco if x["c"] == "pos_prot" and x["K"] and (x["tabla"] or not solo_tabla)]
+    # §8.13 (N-3, sellado por Nicolás): la protegida sólo del OCR de Suomi NPP anterior al hito no veta; se informa aparte
+    det["informadas_aparte_n3"] = [(x["vol"], x["hora"]) for x in prot_k if no_veta_n3(x)]
+    prot_k = [x for x in prot_k if not no_veta_n3(x)]
     # VE2-01: el veto de la posición cuenta sólo lo que depende de la posición, la protegida que K publica, el brazo
     # calla y OTRO brazo publica. La que callan los tres no la arregla ninguna regla de posición: se informa aparte y
     # sigue siendo veto del paquete en el §5.4 (a), no de esta elección.
@@ -491,6 +503,7 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
     for x in filas:
         p = pasadas[x["i"]]
         x["dref"] = obj[x["i"]].get("dist_ref")
+        x["sensor"] = obj[x["i"]].get("sensor")
         x["dmiro"] = distancias_mirova(obj[x["i"]])
         x["dist_ref"] = None if not p["dist"] else {a: p["dist"][f"{a}_ref"] for a in BRAZOS_POS}
     marco = [x for x in filas if x["c"] not in CLASES_FAR]
@@ -525,7 +538,15 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
     for a in BRAZOS_POS:
         lk = E.lecturas(marco, ("VIA", a), rng, N_neg, tasa_k_neg)
         p2k = E.p2(marco, ("VIA", a), "K")
-        out["vara1"][a] = {"lecturas": lk, "P2_K": p2k}
+        # §8.13 (N-3): el P1 que veta en el §5.4 (a) deja fuera las protegidas sólo OCR de Suomi NPP anteriores al hito;
+        # el P1 de evaluar.py (todas) se sigue informando al lado
+        veta = [(x["vol"], x["hora"]) for x in marco
+                if x["c"] == "pos_prot" and x["K"] and not x["X"][("VIA", a)] and not no_veta_n3(x)]
+        aparte = [(x["vol"], x["hora"]) for x in marco
+                  if x["c"] == "pos_prot" and x["K"] and not x["X"][("VIA", a)] and no_veta_n3(x)]
+        out["vara1"][a] = {"lecturas": lk, "P2_K": p2k, "P1_veto_n3": veta, "P1_aparte_n3": aparte}
+        pr(f"  {a:9s} P1 que veta (§5.4 a con §8.13): {len(veta)} {veta[:6]}; informadas aparte (Suomi NPP OCR antes "
+           f"del hito): {len(aparte)} {aparte[:6]}")
         pr(f"  {a:9s} P1: perdidas {lk['P1']['perdidas']} de {lk['P1']['de']}, que K publica "
            f"{lk['P1']['perdidas_que_K_publica']} {lk['P1']['lista'][:6]} | recall prot {lk['recall_prot']['crudo']} "
            f"bajo {lk['recall_bajo']['crudo']} | silencio {lk['silencio']['veredicto']} | P2 contra K {p2k['veredicto']} "
@@ -581,6 +602,8 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
     out["regla_posicion"] = {"veredicto": ver, "detalle": det}
     out["pesos"] = {f"{c}|{h}": round(w, 6) for (c, h), w in sorted(pesos.items())}
     pr("\n== regla de posición (§8.5)")
+    pr("  informadas aparte por §8.13 (protegidas sólo OCR de Suomi NPP antes del 2026-10-09; no vetan):",
+       det["informadas_aparte_n3"])
     pr("  pérdidas comunes a los tres brazos (no dependen de la posición; veto del paquete en §5.4 a):",
        det["perdidas_comunes"])
     pr("  veto (protegida que K publica, el brazo calla y otro brazo publica):", {a: det["veto"][a] for a in BRAZOS_POS})
