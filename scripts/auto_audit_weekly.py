@@ -595,7 +595,8 @@ def nuestros_por_noche(records_por_volcan, win, frontera):
     `pub` es la magnitud que el tablero publica: el núcleo F5 en VIIRS 375 (`f5_core_vrp_mw`, A10 matiz
     S132) y `pc.vrp_mw` en los otros dos (F3-06: el audit medía un número que no se publica).
     """
-    ours = defaultdict(lambda: {"crater": [], "dash": [], "pub": [], "npix": [], "z_pub": [], "dt_pub": []})
+    ours = defaultdict(lambda: {"crater": [], "dash": [], "pub": [], "npix": [], "z_pub": [], "dt_pub": [],
+                                "ll_pub": []})
     vistos, dias = set(), set()
     fuera, n_det = defaultdict(int), defaultdict(int)
     for vol, records in records_por_volcan.items():
@@ -628,6 +629,9 @@ def nuestros_por_noche(records_por_volcan, win, frontera):
                     # S157: cenit y hora de CADA publicación, en paralelo a `pub` (estratos de agregar_estratos).
                     ours[key]["z_pub"].append(rec.get("sensor_zenith_deg"))
                     ours[key]["dt_pub"].append(dt[:16])
+                    # S166: posición del cúmulo de CADA publicación, para la cota de separación contra el
+                    # objeto de MIROVA (noches_otro_objeto). Sin centroide queda (None, None): no se inventa.
+                    ours[key]["ll_pub"].append((pc.get("centroid_lat"), pc.get("centroid_lon")))
                     # S124: el conteo de pixeles es la variable que estratifica
                     # los DOS modos de falla (ver bloque de estratificación).
                     ours[key]["npix"].append(len(rec.get("anomaly_pixels") or []))
@@ -669,19 +673,31 @@ def _mediana(xs):
     return round(statistics.median(xs), 3)
 
 
-def evaluar_detector(mir, ours, vistos, detector, frontera):
-    """Recall y magnitud sobre las noches de MIROVA de UN detector."""
+def evaluar_detector(mir, ours, vistos, detector, frontera, excluir=None):
+    """Recall y magnitud sobre las noches de MIROVA de UN detector.
+
+    `excluir` (S166): {(volcán, sensor, fecha): motivo} de `noches_otro_objeto`. Esas noches salen SÓLO de
+    la magnitud publicada por volcán y sensor (la que decide el flag) y se informan en `magnitud_otro_objeto`
+    con la mediana que daría con todas. El recall, la mediana por volcán y los bins por píxel no cambian.
+    """
+    excluir = excluir or {}
     mir_d = {k: v for k, v in mir.items() if k[0] in VOLS and detector_de_noche(k[2], frontera) == detector}
     recall = recall_por_sensor(mir_d, vistos, ours, SENSORS, set(VOLS))
-    por_vol, por_vs, pasadas_vs, por_npix = (defaultdict(list) for _ in range(4))
+    por_vol, por_vs, pasadas_vs, por_npix, todas_vs, otro_vs = (defaultdict(list) for _ in range(6))
     for (vol, s, fecha), mvrp in mir_d.items():
         o = ours.get((vol, s, fecha))
         if not (o and o["dash"]) or mvrp <= 0:
             continue
         r_pc = max(o["dash"]) / mvrp
         por_vol[vol].append(r_pc)
-        por_vs[f"{vol}|{s}"].append(max(o["pub"]) / mvrp)
-        pasadas_vs[f"{vol}|{s}"].append(len(o["pub"]))
+        todas_vs[f"{vol}|{s}"].append(max(o["pub"]) / mvrp)
+        motivo = excluir.get((vol, s, fecha))
+        if motivo:
+            otro_vs[f"{vol}|{s}"].append({"fecha": fecha, "ratio": round(max(o["pub"]) / mvrp, 3),
+                                          "motivo": motivo})
+        else:
+            por_vs[f"{vol}|{s}"].append(max(o["pub"]) / mvrp)
+            pasadas_vs[f"{vol}|{s}"].append(len(o["pub"]))
         # S124 — estratificación por conteo de píxeles. La mediana sola
         # promedia dos modos de falla OPUESTOS y los vuelve invisibles:
         # en régimen débil (1-2 px) sub-integramos y en campo difuso
@@ -705,7 +721,113 @@ def evaluar_detector(mir, ours, vistos, detector, frontera):
             for k, r in sorted(por_vs.items())},
         "magnitud_ratio_by_npix": {b: {"n_noches": len(r), "ratio_mediano": _mediana(r)}
                                    for b, r in sorted(por_npix.items()) if r},
+        # S166: noches que compararon otro objeto, fuera de la mediana publicada; aparte, sin flag.
+        "magnitud_otro_objeto": {
+            k: {"n_noches_excluidas": len(v), "noches": sorted(v, key=lambda x: x["fecha"]),
+                "con_todas": {"n_noches": len(todas_vs[k]), "ratio_mediano": _mediana(todas_vs[k])}}
+            for k, v in sorted(otro_vs.items())},
     }
+
+
+# --- S166 (issue #915): magnitud por noche sólo cuando nuestro máximo y el de MIROVA son el mismo objeto ---
+# POR QUÉ (fenómeno → mecanismo): la razón de magnitud de una noche divide nuestro máximo publicado por el
+# máximo de MIROVA, y eso mide calibración sólo si los dos miran la misma fuente de calor. En #915 no siempre
+# era así: en PCC VIIRS 750 el máximo nuestro del 2026-10-10 era la cola dispersa a 18,5 km del centro de
+# MIROVA contra el lacolito a 7,83 km, y en Tupungatito VIIRS 375 cinco noches tenían como máximo de MIROVA
+# una fila sólo OCR que no era del cráter (experiments/_s165_issue915/INFORME.md, rama loop/activo). Esas
+# noches no hablan de calibración y empujan la mediana que decide el flag.
+# Dos pruebas de «otro objeto», ninguna de «mismo objeto»:
+#   (a) la COTA INFERIOR de separación: |radio nuestro − Distancia_km de MIROVA|, los dos desde el centro de
+#       MIROVA (el origen de su Distancia_km, mirova_center de volcanoes.yaml). Sin acimut (A93) dos radios
+#       no dan la distancia entre puntos: una cota grande prueba objetos distintos, una chica no prueba el
+#       mismo. El corte va en las unidades del objeto (A91, A115): la cota supera el inner_radius_km del
+#       volcán, o sea que los dos no caben juntos dentro del radio de cumbre;
+#   (b) el máximo de MIROVA es una pasada sólo OCR de Suomi NPP anterior al hito A119, donde la distancia
+#       puede ser de otra pasada (y entonces (a) no dice nada).
+# Sin centro, sin centroide nuestro o sin distancia de MIROVA la cota no se calcula y la noche QUEDA: no
+# se inventa una distancia. Test: tests/test_auto_audit_referencia_s166.py.
+def _centros_mirova():
+    """Centro de la grilla de MIROVA por volcán (origen de su Distancia_km), de volcanoes.yaml."""
+    with open(VOLCANOES_YAML, encoding="utf-8") as fh:
+        return {v["name"]: (v["mirova_center_lat"], v["mirova_center_lon"])
+                for v in yaml.safe_load(fh)["volcanoes"]
+                if v.get("mirova_center_lat") is not None and v.get("mirova_center_lon") is not None}
+
+
+def _km(a, b):
+    """Distancia en km entre dos (lat, lon), con el haversine del pipeline (una sola implementación)."""
+    import numpy as np
+    from pipeline.scan_geometry import haversine_km
+    return float(haversine_km(a[0], a[1], np.asarray(b[0]), np.asarray(b[1])))
+
+
+def _plataforma_snpp(recs, b, instante):
+    """¿Algún record nuestro del sensor `b` a ±TOL_PASADA_S del instante es de Suomi NPP? El CSV de MIROVA
+    no trae la plataforma: se reconoce por nuestro record de la misma pasada, como en alertas_protegidas."""
+    try:
+        t = datetime.fromisoformat(instante[:19])
+    except (TypeError, ValueError):
+        return False
+    for r in recs:
+        dt = r.get("datetime_utc")
+        if not dt or our_bucket(r.get("sensor", "")) != b or "SNPP" not in (r.get("sensor") or ""):
+            continue
+        try:
+            if abs((datetime.fromisoformat(dt[:16]) - t).total_seconds()) <= TOL_PASADA_S:
+                return True
+        except ValueError:
+            continue
+    return False
+
+
+def info_pasadas_mirova(alertas, instantes, records_por_volcan, filas_ref=None):
+    """Por noche (volcán, sensor, fecha), qué es la pasada que da el máximo de MIROVA: sus distancias
+    (todas las filas de alerta de esa pasada, del cargador y de la referencia unificada) y si es sólo OCR de
+    Suomi NPP anterior al hito A119. `instantes` es el de noches_mirova_con_instante."""
+    import banco_paridad as bp  # noqa: E402  (es_alerta: una sola implementación, A102)
+    por_pasada = defaultdict(lambda: {"dists": set(), "fuentes": set()})
+    filas = list(alertas) + [f for f in (filas_ref or []) if bp.es_alerta(f.get("tipo") or "")]
+    for f in filas:
+        if not f.get("fecha_utc"):
+            continue
+        p = por_pasada[cm.clave_pasada(f)]
+        if f.get("dist_km") is not None:
+            p["dists"].add(f["dist_km"])
+        if f.get("source"):
+            p["fuentes"].add(f["source"])
+    out = {}
+    for (vol, b, fecha), inst in instantes.items():
+        p = por_pasada.get((vol, b, inst[:16])) or {"dists": set(), "fuentes": set()}
+        solo_ocr_snpp = (p["fuentes"] == {"OCR"} and inst[:10] < HITO_OCR_SUOMI_NPP
+                         and _plataforma_snpp(records_por_volcan.get(vol, []), b, inst))
+        out[(vol, b, fecha)] = {"instante": inst[:16], "dists": sorted(p["dists"]),
+                                "solo_ocr_snpp_antes_hito": solo_ocr_snpp}
+    return out
+
+
+def noches_otro_objeto(mir, ours, info, centros):
+    """{(volcán, sensor, fecha): motivo} de las noches en que nuestro máximo publicado y el de MIROVA son,
+    probadamente, objetos distintos (criterios (a) y (b) del bloque S166)."""
+    out = {}
+    for key, mvrp in mir.items():
+        vol, b, fecha = key
+        o, i_m = ours.get(key), info.get(key)
+        if not (o and o["dash"] and o.get("ll_pub")) or mvrp <= 0 or not i_m:
+            continue
+        if i_m["solo_ocr_snpp_antes_hito"]:
+            out[key] = (f"máximo de MIROVA sólo OCR de Suomi NPP ({i_m['instante']}) antes del "
+                        f"{HITO_OCR_SUOMI_NPP}: su distancia puede ser de otra pasada (A119)")
+            continue
+        i = max(range(len(o["pub"])), key=lambda j: o["pub"][j])   # la misma pasada que da max(pub)
+        ll, centro, inner = o["ll_pub"][i], centros.get(vol), INNER.get(vol)
+        if None in ll or not centro or inner is None or not i_m["dists"]:
+            continue
+        r_nuestro = _km(centro, ll)
+        cota = min(abs(r_nuestro - d) for d in i_m["dists"])
+        if cota > inner:
+            out[key] = (f"cota inferior de separación {cota:.2f} km > inner_radius_km {inner} (nuestro cúmulo "
+                        f"a {r_nuestro:.2f} km del centro de MIROVA, MIROVA a {i_m['dists']} km; A93)")
+    return out
 
 
 # --- S157 (tarea 1.35 del loop): estratos por cenit del sensor y por régimen, SIN veredicto ---
@@ -895,7 +1017,8 @@ def alertas_protegidas(filas, recs_banco, win, frontera, diurna=None):
                       "detector_records": sorted({_detector_banco(r, frontera) for r in cand}),
                       "noche_publicada_otra_pasada": any(r["pub"] for r in otras),
                       "referencia_sospechosa": (fuentes[k] == {"OCR"} and minuto[:10] < HITO_OCR_SUOMI_NPP
-                                                and any("SNPP" in (r.get("sensor") or "") for r in cand))})
+                                                and any("SNPP" in (r.get("sensor") or "") for r in cand)),
+                      "perdida_aceptada": k in PERDIDAS_ACEPTADAS})
     return lista
 
 
@@ -914,6 +1037,23 @@ def _hito_ocr_suomi_npp():
 
 HITO_OCR_SUOMI_NPP = _hito_ocr_suomi_npp()
 
+# S166 (issue #915): pérdidas de alerta protegida ya decididas, que no vuelven a levantar flag cada semana.
+# POR QUÉ: PCC VIIRS 750 2026-10-10 05:54 (MIROVA 1,19 MW, de la tabla, a 7,83 km) es la señal débil del
+# lacolito de Cordón Caulle: dos píxeles contiguos que se bajan el contraste uno al otro en el promedio de 8
+# vecinos, y con la conectiva `max` de K el Test 2 no llega por 6 y 15 %. Es un FN real de VIIRS 750, pero
+# en la misma pasada lo publicamos en VIIRS 375 (NOAA-21, 0,688 MW), así que el operador lo vio, y Nicolás
+# lo cerró sin cambiar el detector (#865, cerrado el 2026-10-20; PR #881, experiments/_s157_pcc865/): la
+# única palanca, `min` en VIIRS 750, cuesta 314 negativos limpios más. Sin esta lista reaparecía en cada
+# audit (#915). La clave es exacta (volcán, sensor, minuto de clave_pasada): ninguna otra pasada, ni la de
+# 04:54 de esa noche, ni otro sensor, ni otro día, queda aceptada. Se sigue informando, como aceptada, en
+# `informado_aparte`. Agregar una pasada acá es una decisión de Nicolás con su issue, no un ajuste del audit.
+# Test: tests/test_auto_audit_referencia_s166.py.
+PERDIDAS_ACEPTADAS = {
+    ("PuyehueCordonCaulle", "VIIRS750", "2026-10-10 05:54"):
+        "lacolito de Cordón Caulle, FN de VIIRS 750 publicado en VIIRS 375 en la misma pasada; "
+        "decidido sin cambiar K en #865 y PR #881",
+}
+
 
 def avisos_protegidas_sin_record(lista, vigente):
     """S160 (V3-01 de docs/AUDIT_S160.md): protegidas de MIROVA en pasadas de las que no tenemos record.
@@ -927,17 +1067,47 @@ def avisos_protegidas_sin_record(lista, vigente):
             for p in lista if p["detector"] == vigente and p["estado"] == "sin_record"]
 
 
+def _noche_txt(p):
+    return ("la noche sí se publicó en otra pasada" if p["noche_publicada_otra_pasada"]
+            else "ninguna otra pasada de esa noche se publicó")
+
+
+def _es_aparte(p):
+    """S166: protegida que no decide el veredicto (referencia sospechosa A119 o pérdida aceptada)."""
+    return bool(p.get("referencia_sospechosa") or p.get("perdida_aceptada"))
+
+
 def flags_protegidas(lista, vigente):
+    """Una línea por protegida sin publicar del detector vigente. S166: las de `_es_aparte` no son flag,
+    van a `protegidas_aparte` (tests/test_auto_audit_referencia_s166.py)."""
     out = []
     for p in lista:
-        if p["detector"] != vigente or p["estado"] != "sin_publicar":
+        if p["detector"] != vigente or p["estado"] != "sin_publicar" or _es_aparte(p):
             continue
-        noche = ("la noche sí se publicó en otra pasada" if p["noche_publicada_otra_pasada"]
-                 else "ninguna otra pasada de esa noche se publicó")
-        sospecha = (f"; referencia sospechosa: sólo OCR de Suomi NPP antes del {HITO_OCR_SUOMI_NPP}, la "
-                    "distancia puede ser de otra pasada (A119)" if p.get("referencia_sospechosa") else "")
         out.append(f"alerta protegida sin publicar: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, "
-                   f"MIROVA {p['vrp_mirova_mw']} MW (detector {p['detector']}; {noche}{sospecha})")
+                   f"MIROVA {p['vrp_mirova_mw']} MW (detector {p['detector']}; {_noche_txt(p)})")
+    return out
+
+
+def protegidas_aparte(lista, vigente):
+    """S166 (issue #915): protegidas sin publicar del detector vigente que se informan SIN flag.
+
+    POR QUÉ: (1) con `referencia_sospechosa` la fila es sólo OCR de Suomi NPP anterior al hito A119 y su
+    distancia y clase pueden ser de otra pasada: en #915 las dos de Tupungatito (28 y 29 de septiembre) eran
+    objetos lejanos que nosotros vemos y clasificamos `far`, no el cráter. La protegida sigue protegida por su
+    VRP, pero no hay cómo saber si es una alerta de cráter. (2) La pérdida aceptada ya está decidida
+    (PERDIDAS_ACEPTADAS). Las dos quedan a la vista en latest.json y en el cuerpo del issue, sin cambiar el
+    veredicto. Nada se borra de la referencia."""
+    out = []
+    for p in lista:
+        if p["detector"] != vigente or p["estado"] != "sin_publicar" or not _es_aparte(p):
+            continue
+        k = (p["volcano"], p["sensor"], p["fecha_utc"])
+        motivo = (f"pérdida aceptada: {PERDIDAS_ACEPTADAS[k]}" if p.get("perdida_aceptada") else
+                  f"referencia sospechosa: sólo OCR de Suomi NPP antes del {HITO_OCR_SUOMI_NPP}, la distancia "
+                  "y la clase pueden ser de otra pasada (A119)")
+        out.append(f"protegida sin publicar, sin flag: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, "
+                   f"MIROVA {p['vrp_mirova_mw']} MW (detector {p['detector']}; {_noche_txt(p)}; {motivo})")
     return out
 
 
@@ -994,7 +1164,11 @@ def main():
     ours, vistos = nuestros["ours"], nuestros["vistos"]
 
     # 3. Recall y magnitud, un detector a la vez. Sólo el vigente decide flags.
-    por_detector = {det: evaluar_detector(mir, ours, vistos, det, frontera) for det in ("C0", "K")
+    #    S166: las noches que comparan otro objeto salen de la magnitud publicada (noches_otro_objeto).
+    info_mir = info_pasadas_mirova(alertas, inst_mir, records_por_volcan, filas_ref)
+    otro_objeto = noches_otro_objeto(mir, ours, info_mir, _centros_mirova())
+    por_detector = {det: evaluar_detector(mir, ours, vistos, det, frontera, excluir=otro_objeto)
+                    for det in ("C0", "K")
                     if det == vigente or any(detector_de_noche(k[2], frontera) == det for k in mir)}
     ev = por_detector[vigente]
     recall_original = recall_por_sensor(
@@ -1127,10 +1301,18 @@ def main():
         "plataformas": {"ceses": ceses, "juzga_desde": desde_plat, "error": error_ceses,
                         # S162: sensores sin juzgar por n bajo el mínimo desde el cese (no están en banda).
                         "sin_juzgar": sin_juzgar, "avisos": [v["aviso"] for v in sin_juzgar.values()],
-                        "aparte": (evaluar_detector(mir_aparte, ours, vistos, vigente, frontera)
+                        "aparte": (evaluar_detector(mir_aparte, ours, vistos, vigente, frontera,
+                                                    excluir=otro_objeto)
                                    if mir_aparte else None)},
         "alertas_protegidas": {"lectura": "A", "umbral_mw": cm.UMBRAL_PROTEGIDA_MW, "lista": protegidas,
                                "error": error_banco},
+        # S166 (issue #915): lo que se informa SIN decidir el veredicto. El workflow lo copia al issue.
+        "informado_aparte": {
+            "protegidas": protegidas_aparte(protegidas or [], vigente),
+            "magnitud_otro_objeto": ev["magnitud_otro_objeto"],
+            "nota": ("no levanta flag ni cambia el veredicto: protegidas con referencia sospechosa (A119) o "
+                     "pérdida aceptada (PERDIDAS_ACEPTADAS), y noches de magnitud que comparan otro objeto"),
+        },
         "falsas_publicaciones": falsas,
         "integrity": integrity,
         "flags": flags,
@@ -1174,6 +1356,11 @@ def main():
         if p["estado"] != "publicada":
             print(f"  protegida {p['estado']:<12} [{p['detector']}] {p['volcano']} {p['sensor']} "
                   f"{p['fecha_utc']} MIROVA {p['vrp_mirova_mw']} MW")
+    for a in out["informado_aparte"]["protegidas"]:
+        print(f"APARTE: {a}")
+    for k, m in ev["magnitud_otro_objeto"].items():
+        print(f"APARTE: magnitud {k}: {m['n_noches_excluidas']} noches con otro objeto fuera de la mediana "
+              f"(con todas: {m['con_todas']['ratio_mediano']}x, n={m['con_todas']['n_noches']})")
     for a in avisos_detector:
         print(f"DETECTOR: {a}")
     for av in cobertura_avisos:
