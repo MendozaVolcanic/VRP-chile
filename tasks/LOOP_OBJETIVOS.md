@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 13:30 UTC aprox. (S167, vuelta 3): programa por sensor actualizado (sin commitear), en verificador
+- Resumen por sensor de sólo lectura (subagente): `digest_sensores.md` en el scratchpad de S167. La coordinadora
+  comprobó por su cuenta los PR #889 a #922, V750-C (dos piezas), B2 de V375 (0,52 %), MOD-C y que el cuerpo de
+  `PREREGISTRO_E.md` sigue en borrador en el tag (sólo la adenda 2 está sellada).
+- `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`: marcas A113 en §1, §2, §3, §4, §5, §7, §8, §9
+  y §11, y §12 nuevo (estado y camino a PD4 por sensor; orden MODIS, VIIRS 375, VIIRS 750; seis decisiones con
+  recomendación). Sin commitear hasta que lo revise un verificador limpio (Sonnet), lanzado.
+- Hallazgos nuevos para Nicolás: el cuerpo de V375-E (§1 a §7, con la regla de adopción §5.4) sigue sin sello; no
+  existe perfil de sombra y los tres pre-registros de fase 4 lo piden; la vía V750 lleva `roi_v750: def` en los 11
+  volcanes, la caja que pierde las protegidas de PCC.
+
 ### 2026-10-28 13:03 UTC (S167, vuelta 2): V750-A con los arreglos VP-01 a VP-03 en el remoto
 - Loop VIIRS 750 2: **`5c45c0c07`** en `claude/s162-viirs750-2-918174` (comprobado con `ls-remote`). Contra `58d62bd8f`
   sólo cambian 5 archivos, todos en `experiments/_s162_v750a/` (comprobado). Según el autor: medidor sobre los 16
