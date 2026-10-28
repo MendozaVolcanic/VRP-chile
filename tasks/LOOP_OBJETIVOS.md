@@ -569,6 +569,22 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 11:40 UTC (S166, vuelta 17): W5 pareja, W6 despachada; adenda 2 de V375-E corregida
+- La sesión de S166 se reinició (el proceso anterior salió hacia las 08:00 UTC; el loop no corrió entre las 07:33 y las
+  11:37).
+- **W5** (40617142287): success, 23 de 23; `cobertura.txt` en `s151-ab-diurno/40617142287` (`d835531ba`): 2.386 pasadas
+  nocturnas por brazo, 0 faltan y 0 sobran; 949 diurnas de VIIRS 375 y 937 de VIIRS 750, sin MODIS: PAREJA.
+- **W6** (2026-10-01 a 10-14) despachada a las 11:37 UTC desde el tag `s163-diurno-k-codigo`: run **40681454167**, sha
+  `68687d2d4`.
+- **V375-E adenda 2 corregida**: `349409880` en `origin/claude/adoring-wright-dc0404`. Sólo cambia
+  `experiments/_s162_v375/`, todo dentro del §8 del pre-registro; `evaluar.py` y `brazos.py` sin cambios desde
+  `6c80ce7c0`. **Batería corrida por S166** en un árbol LF propio (`D:\vrp-trabajo\temporales\s166_coord_v375e`, con
+  `GIT_DIR` al repo): «RESULTADO: 135 de 135». Nulo según el autor: 80 de 81 en CRLF; no lo re-corrió S166. N-3 (las
+  protegidas sólo OCR de Suomi NPP antes del hito no vetan) quedó como opción en §8.13, sin aplicar.
+- NRT: 12 records con el código nuevo, todos MODIS e iguales; VIIRS todavía sin record nuevo (los NRT reprocesan el
+  2026-10-21 sin cambios). La sesión MOD-D fase 4 cayó con «OAuth access token has expired»: hay que reautenticarla.
+- Disco C: **4,6 GB**, sigue bajando sin causa VRP identificada.
+
 ### 2026-10-28 06:55 UTC aprox. (S166, vuelta 16): verificador corto de la adenda 2 de V375-E
 - Veredicto: **SELLABLE CON CAMBIOS MENORES** (`D:\vrp-trabajo\temporales\s166_ver_v375e\INFORME.md`, sobre
   `e037b8326`). Lo sellado intacto (45 archivos, 0 borrados; `evaluar.py`, `brazos.py` y los objetivos sin cambios).
