@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 13:03 UTC (S167, vuelta 2): V750-A con los arreglos VP-01 a VP-03 en el remoto
+- Loop VIIRS 750 2: **`5c45c0c07`** en `claude/s162-viirs750-2-918174` (comprobado con `ls-remote`). Contra `58d62bd8f`
+  sólo cambian 5 archivos, todos en `experiments/_s162_v750a/` (comprobado). Según el autor: medidor sobre los 16
+  escenarios nuevos, 22 de 23 mutaciones atrapadas por aserción, identidad PASA, control CAÍDA; M82 es SIN DATO (la
+  batería murió sin traza al cruzar el reinicio de la sesión), no una mutación viva. El medidor completo (M1 a M85
+  sobre los 74 escenarios, salida entera a disco) parte cuando termine la batería de identidad (26 de 74). SIN
+  VERIFICAR por S167. El sello (§b 2) sigue esperando ese medidor.
+
 ### 2026-10-28 13:00 UTC (S167, vuelta 1): retomada; estado del traspaso comprobado
 - `loop/activo` en `e6bcc4351`, igual al remoto; `main` en `ba61c330f`. Hora del servidor 12:57:51 UTC. Disco C: 18 GB,
   D: 7,0 GB.
