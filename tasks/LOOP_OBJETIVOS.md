@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 02:00 UTC aprox. (S166, vuelta 7): V750-A con los tres brazos de posición (borrador)
+- Loop VIIRS 750 2: brazos radiante, cercano y pico en el analizador de V750-A, commit `8b9156476` (en el remoto,
+  comprobado; `experiments/_s162_v750b/` intacto desde `609fa1c88`). Lecturas L20 a L27 en
+  `LECTURAS_EVALUAR_V750A.md`. Según el autor: 13 escenarios nuevos (E61 a E73), rojos 13 de 13 contra el analizador
+  anterior; batería 74 de 74; mutaciones M63 a M80, 18 de 18 atrapadas, pero **corridas sólo sobre los 13
+  escenarios nuevos**. El medidor completo sobre los 74 (8 a 14 h) queda pendiente. Hay dos piezas declaradas sin
+  mutación que las cubra (E_lejana con la tabla sola; «elegible» con tabla más OCR). Verificador limpio (Sonnet) lanzado
+  por esa sesión. SIN VERIFICAR por S166.
+
 ### 2026-10-28 01:48 UTC (S166, vuelta 6): W4 pareja; W5 despachada
 - **W4** (run 40545948109): success, 23 de 23 jobs; salidas en `s151-ab-diurno/40545948109` (`633779107`).
   `cobertura.txt`: 2.266 pasadas nocturnas por brazo, 0 faltan y 0 sobran; el brazo diurno trae 906 pasadas diurnas de
