@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 21:40 UTC (S167, vuelta 8): W6 pareja; corrida lejana de V375-E despachada; lectura del diurno en curso
+- El equipo se suspendió dos veces (15:42 a 20:27 y 20:28 a 21:37 UTC, eventos Kernel-Power 42/107, según Loop VIIRS
+  750 2): el loop de S167 no corrió entre las 15:39 y las 20:28 UTC, y el medidor de V750-A se detiene con el equipo
+  (va identidad PASA, M1 y M2 atrapadas; ~39 h de equipo despierto en total).
+- **W6** (40681454167): success, 23 de 23. `cobertura.txt` en `s151-ab-diurno/40681454167` (`e70c3146a`): 1.593
+  pasadas nocturnas por brazo, 0 faltan y 0 sobran; 672 diurnas de VIIRS 375 y 665 de VIIRS 750, sin MODIS diurno:
+  PAREJA.
+- **Corrida lejana de V375-E despachada** (§8.8): commit `a57b0dca7` = tag `s166-v375e-adenda2-sellada` (`67838f2a5`)
+  más sólo `.github/workflows/probe-s166-v375e-far.yml` (blob `054e3153a`, el mismo de `e_adenda2/`, LF, `on` como
+  string), armado sin cambiar de rama y empujado a `s166-v375e-far-disparo` (no se mergea). Run **40773794395**. Lista:
+  350 pasadas (330 lejanas + 20 de control), 14 trozos.
+- Lectura de W2 a W6 (adenda 1, `--opcion-e e-ii`) lanzada en un subagente sobre árboles `autocrlf=false` en
+  `D:\vrp-trabajo\temporales\s167_diurno_lectura\`; después, verificador limpio de otro modelo.
+
 ### 2026-10-28 14:40 UTC (S167, vuelta 7): mutaciones de MOD-D fase 4 terminadas, pero NO VALE
 - W6: 12 de 22 jobs en verde. V750-A en `44ed62768`. Disco sin cambios (C: 18 GB, D: 7 GB).
 - MOD-D fase 4: la rama remota sigue en `ff03538dd`, pero en su worktree (`focused-pascal-db1501`, sin commitear)
