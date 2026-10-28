@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 00:30 UTC aprox. (S166, vuelta 2): verificador corto de la adenda 2 y commit corregido
+- Verificador corto (Sonnet, limpio): SELLABLE CON CAMBIOS MENORES; lo sellado intacto; 11 de 13 arreglados, VAD2-02 y
+  VAD2-11 en parte; nuevos N1 (lector sin el criterio de magnitud de `analizar_v750b.py` l. 292-293, comprobado por
+  S166), N2 y N3 (`main()` del generador sin correr entero). Informe en la carpeta de notas de S165,
+  `S166_VERIFICADOR_CORTO_ADENDA2_V750B.md`.
+- Loop VIIRS 750 2 los arregló en **`739edff39`**. S166 comprobó: en `experiments/_s162_v750b/` sólo cambia `adenda2/`;
+  `analizar_v750b.py`, `objetivos_v750b.py` y `probe_v750b.py` idénticos al tag `s162-v750b-sellado`; en un
+  `git -c core.autocrlf=false archive` propio, batería 40 de 40 (mismas etiquetas que la del autor) y mutaciones 33 de 33
+  con identidad y control. Con `git archive` normal el evaluador sale en CRLF, su sha256 no calza y el analizador
+  sellado se niega (correcto).
+- Pendiente: que Nicolás diga si el sello pasa de `4dbd88dce` a `739edff39`.
+
 ### 2026-10-27 23:40 UTC aprox. (S166, vuelta 1): retomada; adenda 2 de V750-B SELLADA con condición
 - Estado verificado al abrir: `loop/activo` en `9c5c348cd`, igual al remoto; `main` en `7a17af8c4`; C: 23 GB, D: 7,5 GB.
   W4 (run 40545948109): 16 de 22 jobs en verde, 3 corriendo, 3 en cola. Último NRT (40578075719, 20:26 UTC, verde)
