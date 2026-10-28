@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 12:05 UTC aprox. (S166, vuelta 19): «continúa con todo lo que recomiendes»
+- Nicolás, en este chat: «continua con todo lo que recomiendes, si lo mandas a papelara recuerda borrarlo de ahi
+  tambien».
+- **Merges de #923 y #924: el clasificador de modo automático los NIEGA** («Merge Without Review»), igual que en S165.
+  Se necesita la frase textual con el sha. Sin #923 no se puede despachar el bit a bit.
+- **Sello de la adenda 2 de V375-E** sobre `349409880`, con la vara nueva del paso 1 aceptada (las dos cifras a la vista)
+  y N-3 aplicado. Pedido a V375-E fase 4: cablear N-3 con pruebas y mutación, marcar SELLADA, poner el tag
+  `s166-v375e-adenda2-sellada` y devolver el sha.
+- **Disco**: archivadas las sesiones mxd03 (#920), V375-E vía (#921) y MOD-D fase 3 (#919); la app limpia sus
+  worktrees. Sacado con `git worktree remove` el del subagente del audit (limpio, rama `s166-audit-referencia` en el
+  remoto). Ninguno tenía cambios sin commitear; los ignorados eran cachés y `.claude/`. No se usó la papelera. C: pasó
+  de **4,6 a 16 GB**.
+
 ### 2026-10-28 11:50 UTC (S166, vuelta 18): dos sesiones hijas caídas por el token, sus procesos siguen
 - **Loop VIIRS 750 2** y **MOD-D fase 4** terminaron su último turno con «401 OAuth access token has expired». Sus procesos
   de fondo siguen vivos: el medidor de V750-A (`mutar_evaluar_v750a.py`, desde las 23:55 locales del 27) y las
