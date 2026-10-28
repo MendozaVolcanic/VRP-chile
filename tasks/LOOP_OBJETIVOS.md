@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 01:48 UTC (S166, vuelta 6): W4 pareja; W5 despachada
+- **W4** (run 40545948109): success, 23 de 23 jobs; salidas en `s151-ab-diurno/40545948109` (`633779107`).
+  `cobertura.txt`: 2.266 pasadas nocturnas por brazo, 0 faltan y 0 sobran; el brazo diurno trae 906 pasadas diurnas de
+  VIIRS 375 y 898 de VIIRS 750, sin MODIS diurno: «COBERTURA NOCTURNA PAREJA y día como se espera».
+- **W5** (2026-09-01 a 09-20, 11 Tier A) despachada a las 01:47 UTC desde el tag `s163-diurno-k-codigo` con el comando
+  del §f: run **40617142287**, sha `68687d2d4`, el mismo de W4.
+
 ### 2026-10-28 01:45 UTC aprox. (S166, vuelta 5): primer NRT con #920 a #922, verde pero SIN sustrato
 - Run 40612147378 (cron, sobre `7a17af8c4`): 11 de 11 jobs en verde, pero los 11 dicen «No changes to commit». En Láscar
   todas las búsquedas del 2026-10-28 respondieron vacías (día sin terminar más 3 h de LANCE), y las descargas del
