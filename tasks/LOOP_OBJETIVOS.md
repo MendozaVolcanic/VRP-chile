@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 03:15 UTC aprox. (S166, vuelta 9): censo A113 de citas tras #919 a #922
+- Censo de sólo lectura (subagente Sonnet), en `experiments/_s166/CENSO_CITAS_A113.md`: 71 citas a archivos de
+  `pipeline/` y `scripts/` que cambiaron entre `cc16b3a7f` y `7a17af8c4`. `CLAUDE.md`: 9 de 9 al día. **Una sola cita
+  corrida por los cuatro PR**: `docs/MIROVA_DIVERGENCES.md` l. 1487, `process_viirs.py:1876`, que hoy es 1908
+  (comprobado por S166 por contenido: `if (ENABLE_TEST1_CONTEXTUAL_FILTER and final_hotspot_source == "test1"`).
+  Remapeada en este commit. Los 7 tests que leen ese documento: 71 passed, 1 skipped, 1 xfailed.
+- **51 citas de `MIROVA_DIVERGENCES.md`, 6 de `MISSION.md` y 2 de `SINTOMAS.md` ya estaban viejas antes de #919**
+  (desfases de S125 a S146). Es el V16503-04 ampliado: tarea propia de remapeo por contenido (A101), con la lista «no
+  tocar» del censo (17 entradas) y 6 filas SIN VERIFICAR.
+- FICHA SDA: sin tabla de flags ni citas `archivo:línea`; cubre los cuatro PR en prosa (v1.14 a v1.17). Nada que
+  remapear. Tiene 12 líneas con guion largo o medio, previas.
+- Nota: la cadena histórica de A100 en `CLAUDE.md` dice «1172 hasta #919», pero en `cc16b3a7f` la línea era 1221; el
+  1172 ya era una cita vieja entonces. No cambia la cita vigente (1356). No se toca.
+
 ### 2026-10-28 02:55 UTC aprox. (S166, vuelta 8): primeros records escritos con #920 a #922, comprobados (sólo MODIS)
 - NRT 40619358161 (02:10, `workflow_dispatch`, sobre `1d2735e8a`, que contiene #920 a #922): success; commiteó Llaima,
   Copahue, Chaiten, PCC y Villarrica (`e3c622876` a `55c95c705`).

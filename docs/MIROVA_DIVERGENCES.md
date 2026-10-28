@@ -1484,7 +1484,7 @@ Cuando S62+S63 completen:
 
 > ⚠️ **S157, el «ADOPTADO» del encabezado ya no actúa** (propagación de K, A113; `experiments/_s155_audit/frente_1_verif/INFORME.md`
 > F1-14): el filtro contextual y el keep-peak sólo corren cuando `final_hotspot_source == "test1"`
-> (`pipeline/process_viirs.py:1876`), y con K el Test 1 integrado está apagado (D30, #850): 0 de 3.687 records con esa
+> (`pipeline/process_viirs.py:1908`, era 1876 hasta S165, remapeada por contenido en S166), y con K el Test 1 integrado está apagado (D30, #850): 0 de 3.687 records con esa
 > fuente desde la fecha de observación 2026-09-18 (`experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt`).
 > Los flags siguen en `true` en el perfil, pero no tienen sobre qué actuar. Encabezado y texto conservados por historia.
 
