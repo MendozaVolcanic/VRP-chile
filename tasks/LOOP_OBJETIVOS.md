@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 01:45 UTC aprox. (S166, vuelta 5): primer NRT con #920 a #922, verde pero SIN sustrato
+- Run 40612147378 (cron, sobre `7a17af8c4`): 11 de 11 jobs en verde, pero los 11 dicen «No changes to commit». En Láscar
+  todas las búsquedas del 2026-10-28 respondieron vacías (día sin terminar más 3 h de LANCE), y las descargas del
+  10-27 cayeron por ConnectTimeout (`nrt3.modaps` y `data.laadsdaac` marcados caídos, A64). Copahue también quedó con
+  cobertura incompleta. **No hay ningún record nuevo, así que la comprobación de #920 a #922 sigue SIN VERIFICAR**
+  (A116: un verde sin sustrato no mide nada). Pasa al próximo NRT que commitee datos.
+- Run 40613408224 (01:10, `workflow_dispatch`): cancelado. SIN DATO de quién lo disparó (probable cron externo,
+  desplazado por el grupo de concurrencia).
+
 ### 2026-10-28 01:35 UTC aprox. (S166, vuelta 4): adenda 2 de V750-B anexada y con tag
 - Loop VIIRS 750 2 la anexó a `PREREGISTRO_V750B.md`: commit **`609fa1c88`**, tag anotado
   **`s162-v750b-adenda2-sellada`** (S166 comprobó con `ls-remote` que apunta a `609fa1c88`). Comprobado por S166 entre
