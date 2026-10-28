@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 06:55 UTC aprox. (S166, vuelta 16): verificador corto de la adenda 2 de V375-E
+- Veredicto: **SELLABLE CON CAMBIOS MENORES** (`D:\vrp-trabajo\temporales\s166_ver_v375e\INFORME.md`, sobre
+  `e037b8326`). Lo sellado intacto (45 archivos, 0 borrados; `evaluar.py`, `brazos.py` y los objetivos sin cambios).
+  Batería 130 de 130. Nulo 75 de 77 en LF (L42 queda atrapada con CRLF); L20 equivalente.
+- Paso 1 (§8.6 b): corrección del instrumento con base previa (contingencia en la adenda 1, §7.3; MATLAB calza 422 de
+  422 en 1 a 4 px), pero escrita viendo #921, y sobre 4 px es una reimplementación, no salida de MATLAB. Cambia el VRP
+  del paso 1 de 289/329 (NO EQUIVALENTE) a 329/329; no cambia detección, publicación, recall ni magnitud.
+- Hallazgos: N-1 (el lector no muestra la vara vieja), N-2 (la marca A104 no salta con «SE QUEDA RADIANTE» o «NO
+  RESUELTO» en un tramo), N-3 (para Nicolás: dos de las 4 protegidas que motivan la adenda son sólo OCR de Suomi NPP
+  anteriores al hito y siguen vetando), N-4 a N-6 menores. Pasados a V375-E fase 4 para un commit nuevo; N-3 como
+  opción explícita sin aplicar.
+
 ### 2026-10-28 05:55 UTC aprox. (S166, vuelta 15): adenda 2 de V375-E entregada; verificador corto lanzado
 - V375-E fase 4 entregó la adenda 2 (`PREREGISTRO_E.md` §8, SIN SELLAR): `e037b8326` en
   `origin/claude/adoring-wright-dc0404`, en el remoto. Con diff de tres puntos contra main, no toca `pipeline/`, `data/`
