@@ -75,7 +75,7 @@ class Pob:
         self.sell, self.supl, self.res = [], [], []
 
     def pasada(self, hora, lab, pix, vrp_mirova=0.0, volcan="Lascar", dist_mirova=None, crater=(33.0, 33.0),
-               dayflag=0, pub_prod=False, fuente="CONS", id_forzado=None):
+               dayflag=0, pub_prod=False, fuente="CONS", id_forzado=None, pc_vrp=0.0):
         supl = lab == "far_ref"
         lista = self.supl if supl else self.sell
         i = id_forzado if id_forzado is not None else (100000 if supl else 0) + len(lista)
@@ -90,7 +90,7 @@ class Pob:
         o = {"id": i, "volcan": volcan, "hora_utc": hora, "sensor": SENSOR, "lab": lab,
              "protegida": lab == "pos" and vrp_mirova >= 1.0, "alerta_tabla": lab == "pos" and fuente == "CONS",
              "decide": True, "mirova": filas, "mirova_vrp": vrp_mirova, "z": 30.0, "pub_prod": pub_prod, "dc": None,
-             "pc_vrp": 0.0,
+             "pc_vrp": pc_vrp,
              "pc_n": None, "granule": f"g{i}", "en_sc": False, "celda_crater": [int(x) for x in crater],
              "pos_crater": list(crater),
              "inner_km": 5.0}
@@ -139,7 +139,11 @@ def poblacion():
            # y su distancia sí entra a la vara 3 (desde el 13-jun el OCR la trae medida)
            "P14": p.pasada("2026-07-09 05:00", "pos", LEJANA, 2.0, dist_mirova=0.8, fuente="OCR"),
            # VAD2-05: alerta sólo del OCR ANTES del 2026-06-13 con distancia: no entra a la vara 3
-           "P15": p.pasada("2026-05-20 05:00", "pos", UNO, 0.4, dist_mirova=20.0, fuente="OCR")}
+           "P15": p.pasada("2026-05-20 05:00", "pos", UNO, 0.4, dist_mirova=20.0, fuente="OCR"),
+           # N1 (verificador corto): K del probe en 0 MW y producción con 0,5 MW (misma publicación): sale igual
+           "P19": p.pasada("2026-07-10 05:00", "neg_limpio", LEJANA, pc_vrp=0.5),
+           # VAD2-07: pasada lejana sin ningún alertado: cuenta en las observadas, no en «con algún alertado»
+           "P20": p.pasada("2026-07-11 05:00", "far_ref", [], 3.0, dist_mirova=20.0)}
     return p, ids
 
 
@@ -206,7 +210,7 @@ def main():
              m1.group(0) if m1 else "sin línea C1")
     dec, tab = out.split("canal decide", 1)[-1].split("canal tabla", 1) if "canal tabla" in out else (out, "")
     mk = re.search(r"K distinto de producci\S+ \(salen, como en el sellado\): (\d+)", out)
-    chequear("P12 la pasada con K distinto sale de todos los brazos", bool(mk) and mk.group(1) == "1",
+    chequear("P12 y P19 las pasadas con K distinto (en publicación o en magnitud) salen", bool(mk) and mk.group(1) == "2",
              mk.group(0) if mk else "sin línea de K distinto")
     r, c, k = (linea(dec, "B0", b) for b in ("radiante", "cercano", "pico"))
     chequear("P1/P2 líneas de B0 (canal decide)", None not in (r, c, k), f"{r} {c} {k}")
@@ -230,7 +234,7 @@ def main():
              and (r["P1"], c["P1"], k["P1"]) == (1, 0, 2), f"{r} {c} {k}")
     mf = re.search(r"^   B0: con alg\S+ alertado (\d+) de (\d+) \| radiante publica (\d+) \| cercano publica (\d+) \| "
                    r"pico publica (\d+)", out, re.M)
-    chequear("P4 far_ref: sólo cercano publica, con alertado", bool(mf) and mf.groups() == ("1", "1", "0", "1", "0"),
+    chequear("P4 far_ref: sólo cercano publica, con alertado 1 de 2", bool(mf) and mf.groups() == ("1", "2", "0", "1", "0"),
              mf.group(0).strip() if mf else "sin línea far_ref B0")
     md = re.search(r"far_ref B0: radiante ([\d.]+) km, ([\d.]+), n=1 \| cercano ([\d.]+) km, ([\d.]+), n=1 \| "
                    r"pico ([\d.]+) km, ([\d.]+), n=1", out)
@@ -389,9 +393,69 @@ def main():
     ms = re.search(r"selladas: observadas \d+ \| no observadas \d+ \| SIN DATO (\d+)", out)
     mp = re.search(r"suplementarias: observadas (\d+) \| no observadas \d+ \| SIN DATO (\d+)", out)
     chequear("P17 SIN DATO de la suplementaria en su lista, no en la sellada",
-             bool(ms and mp) and ms.group(1) == "1" and mp.groups() == ("1", "1"),   # la sellada: sólo la diurna P13
+             bool(ms and mp) and ms.group(1) == "1" and mp.groups() == ("2", "1"),   # la sellada: sólo la diurna P13
              f"{ms.group(0) if ms else '-'} / {mp.group(0) if mp else '-'}")
     chequear("P17 la vara 3 informa B0 y B1", "alertas con distancia B1:" in out and "far_ref B1:" in out, "vara 3")
+
+    # P18 (N2 y N3 del verificador corto): generar() entero, con dependencias sintéticas y una carpeta «sellada» de
+    # mentira (la real nunca se toca: si una guarda fallara, escribiría en un temporal)
+    def dep_sint(pasadas, llamadas):
+        def poblar(dest_, hasta, data, ref_dest):
+            llamadas.append(str(dest_))
+            (Path(dest_) / "poblacion_completa.json").write_text(json.dumps({"pasadas": pasadas}), encoding="utf-8")
+
+        def completar(far_):
+            for x in far_:
+                x["celda_crater"], x["pos_crater"], x["inner_km"] = [33, 33], [33.0, 33.0], 5.0
+        return {"excluidos": ("2026-10-12",), "corte": "2026-11-02 13:00", "poblar": poblar, "completar": completar}
+
+    pas = [pp("2026-05-01 05:00", "pos", protegida=True, alerta_tabla=True), pp("2026-05-02 05:00", "neg_limpio"),
+           pp("2026-06-01 05:00", "far_ref", mirova=[{"tipo": "FALSO_POSITIVO", "dist_km": 14.0}]),
+           pp("2026-10-12 05:00", "far_ref")]
+    sell = [dict(pas[0], id=0), dict(pas[1], id=1)]
+    fs = dest / "P18_sellado.json"
+    fs.write_text(json.dumps(sell), encoding="utf-8")
+    fsm = dest / "P18_sellado_mal.json"
+    fsm.write_text(json.dumps([dict(pas[0], id=0, protegida=False), dict(pas[1], id=1)]), encoding="utf-8")
+    falsa = esc("P18_sellada_falsa")
+    import contextlib
+    import io
+
+    def gen(d_, sellado_, llamadas):
+        # una excepción de generar() es una salida equivocada (se esperaba 0, 1 o 2), no una caída de la batería: queda
+        # como rc y la aserción de cada escenario la ve (G12 y G13 del nulo revientan con FileExistsError en Windows)
+        buf = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf):
+                rc_ = GEN.generar(d_, "2026-11-02", "-", "-", sellado_, dep_sint(pas, llamadas), sellada=falsa)
+        except Exception as e:  # noqa: BLE001
+            rc_ = f"excepción {type(e).__name__}"
+        return rc_, buf.getvalue()
+
+    d = esc("P18a")
+    ll = []
+    rc, out = gen(d, fs, ll)
+    run = json.loads((d / "objetivos_run_v750b.json").read_text(encoding="utf-8")) if rc == 0 else []
+    supl_ = json.loads((d / "objetivos_supl_v750b.json").read_text(encoding="utf-8")) if rc == 0 else []
+    chequear("P18a generar() con el control bien: escribe las listas, la sellada primero y sin tocar",
+             rc == 0 and [x["id"] for x in run] == [0, 1, 100000] and run[:2] == sell
+             and [x["hora_utc"] for x in supl_] == ["2026-06-01 05:00"] and "sha256 lista del run" in out,
+             f"salida {rc}: {out.strip()[-160:]}")
+    rc, out = gen(d, fs, ll)
+    chequear("P18d generar() se niega con salidas previas en la carpeta", rc == 2 and len(ll) == 1, f"salida {rc}, poblar {len(ll)}")
+    d = esc("P18b")
+    ll = []
+    rc, out = gen(d, fsm, ll)
+    chequear("P18b generar() con el control caído: sale 1, ninguna lista, la población aparte",
+             rc == 1 and not (d / "objetivos_run_v750b.json").exists() and not (d / "objetivos_supl_v750b.json").exists()
+             and (d / "poblacion_supl_CONTROL_FALLIDO.json").exists(), f"salida {rc}")
+    rc, out = gen(d, fsm, ll)
+    chequear("P18b N2: un segundo intento fallido en la misma carpeta se niega (salida 2), no revienta",
+             rc == 2 and len(ll) == 1, f"salida {rc}, poblar {len(ll)}")
+    ll = []
+    rc, out = gen(falsa, fs, ll)
+    chequear("P18c generar() se niega en la carpeta sellada, antes de poblar", rc == 2 and not ll
+             and not any(falsa.iterdir()), f"salida {rc}, poblar {len(ll)}")
 
     for x in filas:
         print(x)

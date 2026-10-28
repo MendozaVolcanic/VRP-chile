@@ -73,6 +73,18 @@ MUT = [
      "    return list(far) + list(sellado)", "ATRAPADA"),
     ("G8 la selección toma far_ref y pos", GEN, 'far = [dict(p) for p in pob if p["lab"] == "far_ref"]',
      'far = [dict(p) for p in pob if p["lab"] in ("far_ref", "pos")]', "ATRAPADA"),
+    # las del verificador corto (N1 a N3 y su E4)
+    ("N1 K distinto sólo por publicación", LEC, "\n              or abs(vrp_k(i) - (obj[i].get(\"pc_vrp\") or 0)) > 0.001]",
+     "]", "ATRAPADA"),
+    ("E4 con algún alertado cuenta todas", LEC, "        con = sum(bool(", "        con = len(far) + 0 * sum(bool(",
+     "ATRAPADA"),
+    ("G10 generar con el control fijo IGUALES", GEN, "    if not igual:\n        faltan", "    if False:\n        faltan",
+     "ATRAPADA"),
+    ("G11 generar sin la guarda de la carpeta sellada", GEN, "    if dest.resolve() == Path(sellada).resolve():",
+     "    if False:", "ATRAPADA"),
+    ("G12 generar sin la guarda de salidas previas", GEN, "    if previos:\n", "    if False:\n", "ATRAPADA"),
+    ("G13 la población fallida no cuenta como salida previa", GEN, ', "poblacion_supl_CONTROL_FALLIDO.json")', ")",
+     "ATRAPADA"),
     ("control que se cae", LEC, "    L = []\n", '    L = []\n    raise RuntimeError("control: el lector se cae")\n', "CAÍDA"),
 ]
 

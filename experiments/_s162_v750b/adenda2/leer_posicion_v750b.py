@@ -85,6 +85,12 @@ def funciones_de_main(ruta, nombres=EXTRAER):
     return [piezas[n] for n in nombres]
 
 
+def corta(lst, n=20):
+    """VAD2-11: una lista impresa que se corta lo dice."""
+    lst = list(lst)
+    return str(lst[:n]) + (f" (y {len(lst) - n} más, cortada a {n})" if len(lst) > n else "")
+
+
 def punto(o, brazo, ancla, A):
     """(fila, columna) del punto que ubica el record según el brazo; None si la caja no alertó nada."""
     if not o or not o.get("npix") or o.get("vrp_mw") is None:
@@ -178,9 +184,14 @@ def main(argv=None):
     # no reproduce la publicación de producción; así la fila «radiante» calza con B0 a B5 del veredicto sellado
     kp = A.B.correr_node([[A.slim((res[i].get("brazos") or {}).get("K", {}).get("record")), inner[obj[i]["volcan"]]]
                           for i in oks]) if oks else []
-    k_dist = [i for i, q in zip(oks, kp) if bool(obj[i].get("pub_prod")) != bool(q[4])]
+    # N1 (verificador corto): el sellado (l. 292-293) excluye también por magnitud, |VRP de K - pc_vrp| > 0,001 MW
+    def vrp_k(i):
+        rec = (res[i].get("brazos") or {}).get("K", {}).get("record") or {}
+        return (rec.get("primary_cluster") or {}).get("vrp_mw") or 0.0
+    k_dist = [i for i, q in zip(oks, kp) if bool(obj[i].get("pub_prod")) != bool(q[4])
+              or abs(vrp_k(i) - (obj[i].get("pc_vrp") or 0)) > 0.001]
     pr(f"   pasadas con K distinto de producción (salen, como en el sellado): {len(k_dist)} "
-       f"{[(obj[i]['volcan'], obj[i]['hora_utc']) for i in k_dist][:20]}")
+       f"{corta([(obj[i]['volcan'], obj[i]['hora_utc']) for i in k_dist])}")
     oks = [i for i in oks if i not in set(k_dist)]
 
     casos, idx = [], []
@@ -205,7 +216,7 @@ def main(argv=None):
                         or len({r["primary_cluster"]["centroid_dist_km"] for r in recs}) > 1):
                     dif1.append((obj[i]["volcan"], obj[i]["hora_utc"], c))
     c1 = n1 > 0 and not dif1
-    pr(f"== C1 cajas con un solo alertado: {n1}; con brazos distintos {len(dif1)} {dif1[:10]}:", "OK" if c1 else "FALLA")
+    pr(f"== C1 cajas con un solo alertado: {n1}; con brazos distintos {len(dif1)} {corta(dif1, 10)}:", "OK" if c1 else "FALLA")
     # C2: nulo del predicado sobre la distancia
     nulo = []
     for i in oks:
@@ -257,7 +268,7 @@ def main(argv=None):
         for b in ("cercano", "pico"):
             lst = [(obj[i]["volcan"], obj[i]["hora_utc"], obj[i]["lab"], "publica" if pub(i, f"{c}|{b}") else "calla")
                    for i in oks if pub(i, f"{c}|{b}") != pub(i, f"{c}|radiante")]
-            pr(f"   {c} {b}: {len(lst)} {lst[:20]}")
+            pr(f"   {c} {b}: {len(lst)} {corta(lst)}")
 
     far = [i for i in oks if i in ids_p]
     pr(f"\n== pasadas far_ref (MIROVA ubicó el calor lejos; lo correcto es no publicar): observadas {len(far)}")
@@ -266,9 +277,9 @@ def main(argv=None):
         con = sum(bool((res[i]["oraculo"][A.caja_de(c, obj[i]["volcan"])] or {}).get("npix")) for i in far)
         pr("   " + c + f": con algún alertado {con} de {len(far)} | " + " | ".join(
             f"{b} publica {sum(pub(i, f'{c}|{b}') for i in far)}" for b in BRAZOS_POS)
-           + " | lista " + str([(obj[i]["volcan"], obj[i]["hora_utc"], "".join(b[0] for b in BRAZOS_POS
+           + " | lista " + corta([(obj[i]["volcan"], obj[i]["hora_utc"], "".join(b[0] for b in BRAZOS_POS
                                                                                if pub(i, f"{c}|{b}")))
-                                for i in far if any(pub(i, f"{c}|{b}") for b in BRAZOS_POS)][:20]))
+                                for i in far if any(pub(i, f"{c}|{b}") for b in BRAZOS_POS)]))
 
     pr("\n== distancia de cada brazo desde la celda central de la grilla (33, 33; el punto de referencia de MIROVA queda "
        "a hasta 0,35 km de ella) contra la de MIROVA (diferencia de RADIOS, A93: cota inferior de la separación; OCR "

@@ -1,6 +1,6 @@
 OK    P5 controles en verde y salida 0: salida 0: 
 OK    P5 C1 cuenta casos y ninguno distinto: C1 cajas con un solo alertado: 25; con brazos distintos 0
-OK    P12 la pasada con K distinto sale de todos los brazos: K distinto de producción (salen, como en el sellado): 1
+OK    P12 y P19 las pasadas con K distinto (en publicación o en magnitud) salen: K distinto de producción (salen, como en el sellado): 2
 OK    P1/P2 líneas de B0 (canal decide): {'prot': 5, 'P1': 2, 'E': 0, 'E_neg': 0, 'resto': ''} {'prot': 5, 'P1': 0, 'E': 1, 'E_neg': 1, 'resto': " | P2 SIN SUSTRATO (neto 1, bloques 1) | cambian contra radiante {('prot', 'publica'): 2, ('neg', 'publica'): 1}"} {'prot': 5, 'P1': 3, 'E': 0, 'E_neg': 0, 'resto': " | P2 SIN SUSTRATO (neto 0, bloques 0) | cambian contra radiante {('prot', 'calla'): 1}"}
 OK    P1 a P14 protegidas contadas: prot 5 5 5
 OK    radiante pierde LEJANA y la del OCR, no la del cráter corrido: radiante P1 2
@@ -11,12 +11,12 @@ OK    cambian contra radiante (cercano), exacto y sin las suplementarias: | P2 S
 OK    cambian contra radiante (pico), exacto: | P2 SIN SUSTRATO (neto 0, bloques 0) | cambian contra radiante {('prot', 'calla'): 1}
 OK    P2 de cercano contra radiante: | P2 SIN SUSTRATO (neto 1, bloques 1) | cambian contra radiante {('prot', 'publica'): 2, ('neg', 'publica'): 1}
 OK    canal tabla: la protegida sólo del OCR no cuenta: {'prot': 4, 'P1': 1, 'E': 0, 'E_neg': 0, 'resto': ''} {'prot': 4, 'P1': 0, 'E': 1, 'E_neg': 1, 'resto': " | P2 SIN SUSTRATO (neto 1, bloques 1) | cambian contra radiante {('prot', 'publica'): 1, ('neg', 'publica'): 1, ('otra', 'publica'): 1}"} {'prot': 4, 'P1': 2, 'E': 0, 'E_neg': 0, 'resto': " | P2 SIN SUSTRATO (neto 0, bloques 0) | cambian contra radiante {('prot', 'calla'): 1}"}
-OK    P4 far_ref: sólo cercano publica, con alertado: B0: con algún alertado 1 de 1 | radiante publica 0 | cercano publica 1 | pico publica 0
+OK    P4 far_ref: sólo cercano publica, con alertado 1 de 2: B0: con algún alertado 1 de 2 | radiante publica 0 | cercano publica 1 | pico publica 0
 OK    P4 distancia desde el centro: radiante y pico calzan con MIROVA, cercano no: far_ref B0: radiante 0.03 km, 1.00, n=1 | cercano 12.35 km, 0.00, n=1 | pico 0.35 km, 1.00, n=1
 OK    P15 la alerta OCR de antes del 13-jun no entra a la vara 3 (8 alertas, no 9): alertas con distancia B0: radiante 0.05 km, 0.75, n=8 |
 OK    P6 C3 cae con el archivo de otra lista: salida 3
 OK    P7 C4 cae con otro analizador: salida 3
-OK    P8 separar: salida del analizador sellado idéntica: separar 0: resultados separados: leídos 25, sellado 24, suplementaria 1 -> C:\Users\nmend\AppData\Local\Temp\claude\C--Users-nmend-
+OK    P8 separar: salida del analizador sellado idéntica: separar 0: resultados separados: leídos 27, sellado 25, suplementaria 2 -> C:\Users\nmend\AppData\Local\Temp\claude\C--Users-nmend-
 OK    P8 testigo: sin separar, la salida sellada SÍ cambia (cuenta los resultados de más): distinta
 OK    P9 filtro 0 veces: se negó: 01_poblacion.py: el filtro de etiquetas aparece 0 veces (tiene que ser 1): no se genera
 OK    P9 filtro 1 veces: cargó; far_ref, pos y sin_info pasan el filtro: [1, 1, 0]
@@ -31,6 +31,12 @@ OK    P16 numerar: ids desde 100000 en orden de gránulo: [('a', 100000), ('b', 
 OK    P16 lista_run: la sellada primero, sin tocar, y la suplementaria después: lista_run
 OK    P5b C1 sin casos cae: C1 cajas con un solo alertado: 0; con brazos distintos 0 []: FALLA
 OK    P6c C3 cae con un id sellado de 100000 o más: salida 3
-OK    P17 SIN DATO de la suplementaria en su lista, no en la sellada: selladas: observadas 23 | no observadas 0 | SIN DATO 1 / suplementarias: observadas 1 | no observadas 0 | SIN DATO 1
+OK    P17 SIN DATO de la suplementaria en su lista, no en la sellada: selladas: observadas 24 | no observadas 0 | SIN DATO 1 / suplementarias: observadas 2 | no observadas 0 | SIN DATO 1
 OK    P17 la vara 3 informa B0 y B1: vara 3
-== PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (35)
+OK    P18a generar() con el control bien: escribe las listas, la sellada primero y sin tocar: salida 0: f7deb57e00786eb0386bf5870e39d5396e78d60610630692b5e36de32d
+sha256 lista del run daf4506ba7f8eeafaff44f496fd9ebfd61781d7eecc490ebb94488c8810ed00e (2 + 1 pasadas)
+OK    P18d generar() se niega con salidas previas en la carpeta: salida 2, poblar 1
+OK    P18b generar() con el control caído: sale 1, ninguna lista, la población aparte: salida 1
+OK    P18b N2: un segundo intento fallido en la misma carpeta se niega (salida 2), no revienta: salida 2, poblar 1
+OK    P18c generar() se niega en la carpeta sellada, antes de poblar: salida 2, poblar 0
+== PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (40)

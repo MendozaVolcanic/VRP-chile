@@ -143,34 +143,53 @@ El veredicto de V750-B es el del segundo comando y sólo ése. El tercero inform
 
 ## 9. Pruebas
 
-- `adenda2/probar_adenda2.py` (`probar_adenda2_salida.txt`): **35 de 35** como se espera, con escenas sintéticas en el
+- `adenda2/probar_adenda2.py` (`probar_adenda2_salida.txt`): **40 de 40** como se espera, con escenas sintéticas en el
   formato del probe: LEJANA (alertado débil junto al cráter y cúmulo brillante a 13 km), BORDE (cúmulo que cruza el
   radio interior con el pico afuera), UNO (un solo alertado), PICOCERCA (el más radiante junto al cráter y un cúmulo
   más débil lejos) y una pasada con el cráter 7,5 km al W del centro. Comprueba P1 y E por brazo en los dos canales,
   los cambios contra radiante con su etiqueta (exactos, sin las suplementarias), P2, la pasada lejana (sólo cercano
-  publica, con alertado), la distancia desde el centro con el cráter corrido, la exclusión de K distinto y de la
-  diurna, la alerta sólo del OCR (cuenta en el canal que decide y no en la tabla sola; antes del 13-jun no entra a la
-  vara 3), los controles C1 (con y sin casos), C3 (tres roturas) y C4, el SIN DATO por lista, la separación (P8 y su
-  testigo, carpetas del mismo nombre, carpeta ocupada) y las funciones del generador (filtro, cortes, control,
-  selección, numeración y orden de la lista del run).
-- Nulo: `adenda2/mutar_adenda2.py` (`mutar_adenda2_salida.txt`): **27 de 27 mutaciones de una línea atrapadas por
-  aserción** (19 del lector, 2 del separador, 6 del generador), la copia sin mutar PASA y la mutación que sólo hace caer
-  al lector sale CAÍDA. Incluye las 14 del verificador que la primera versión de la batería dejaba pasar (VAD2-04).
-  Quedan sin atrapar, declaradas: el predicado leyendo la columna del VRP de display en vez de la de publicación (en
-  todas las escenas probadas las dos coinciden: un record lejano da display 0), el desempate del pico y el cruce de
-  filas y columnas del centroide (equivalentes en las escenas, sólo importan con empates o en la diagonal), y la
-  primera de las dos defensas del separador contra una carpeta ocupada (la segunda la ataja).
+  publica; una con alertado y otra sin ninguno), la distancia desde el centro con el cráter corrido, la exclusión de K
+  distinto en publicación y en magnitud (K en 0 MW con producción en 0,5 MW) y de la diurna, la alerta sólo del OCR
+  (cuenta en el canal que decide y no en la tabla sola; antes del 13-jun no entra a la vara 3), los controles C1 (con y
+  sin casos), C3 (tres roturas) y C4, el SIN DATO por lista, la separación (P8 y su testigo, carpetas del mismo nombre,
+  carpeta ocupada), las funciones del generador (filtro, cortes, control, selección, numeración y orden de la lista del
+  run) y `generar()` entero con dependencias sintéticas (P18: control bien, control caído, segundo intento fallido en
+  la misma carpeta, salidas previas y carpeta sellada, esta última con una carpeta de mentira para que una guarda rota
+  nunca escriba en la real).
+- Nulo: `adenda2/mutar_adenda2.py` (`mutar_adenda2_salida.txt`): **33 de 33 mutaciones de una línea atrapadas por
+  aserción** (21 del lector, 2 del separador, 10 del generador), la copia sin mutar PASA y la mutación que sólo hace
+  caer al lector sale CAÍDA. Incluye las 14 del verificador que la primera versión de la batería dejaba pasar (VAD2-04)
+  y las 6 del verificador corto (N1, su E4, y G10 a G13 sobre `generar()`). En G12 y G13 el `generar()` mutado lanza
+  `FileExistsError` en vez de devolver 2: la batería lo registra como salida equivocada y la aserción del escenario lo
+  ve. Quedan sin atrapar, declaradas: el predicado leyendo la columna del VRP de display en vez de la de publicación
+  (en todas las escenas probadas las dos coinciden: un record lejano da display 0), el desempate del pico y el cruce de
+  filas y columnas del centroide (equivalentes en las escenas, sólo importan con empates o en la diagonal), la primera
+  de las dos defensas del separador contra una carpeta ocupada (la segunda la ataja) y el chequeo de suma del
+  separador (E9 del verificador corto: hoy inalcanzable, porque cada fila va a una de las dos partes).
 - Límite declarado: apagar C2 no lo atrapa ninguna escena (con datos sanos el control ya da verde); se prueba por las
   mutaciones que rompen lo que vigila (L5 lo hace caer).
+- **Ensayo del segundo comando del §7 sobre datos reales** (pedido por el verificador corto, N3), 2026-10-28 00:14
+  UTC, con el `generar()` reescrito, sobre el árbol de main `bd711db63` y la ventana hasta el 2026-10-26: salida 0,
+  control IGUALES (5.841 contra 5.841, campo por campo), 20 pasadas lejanas, 0 sin gránulo; sha256 suplementaria
+  `c4d75157...`, lista del run `527788b7...` (5.841 + 20), iguales a los de la versión anterior del generador sobre los
+  mismos datos. Un segundo intento sobre la misma carpeta se niega (salida 2).
 
 ## 10. Estado y verificador
 
-- Batería: 35 de 35. Nulo: 27 de 27 atrapadas por aserción; identidad PASA; control CAÍDA.
+- Batería: 40 de 40. Nulo: 33 de 33 atrapadas por aserción; identidad PASA; control CAÍDA.
 - Verificador limpio (Sonnet 5.5, `adenda2/verificador/INFORME.md`, sobre `83405c557`): **LISTO CON CAMBIOS**, ningún
-  hallazgo de gravedad 4 o 5; la lectura sellada no se contamina y los tres brazos miden lo que dicen. Hechos todos sus
-  cambios: VAD2-01 (separador), VAD2-02 (exclusión de K distinto), VAD2-03 y VAD2-09 (el generador no escribe encima ni
-  en la carpeta sellada), VAD2-04 (escenarios y 14 mutaciones suyas al nulo), VAD2-05 (OCR de antes del 13-jun fuera de
-  la vara 3), VAD2-06 (relanzamiento, §3.3), VAD2-07 (pasadas lejanas con alertado), VAD2-08 (control campo por campo),
-  VAD2-10 (declarado), VAD2-11 (sin gránulo por nombre), VAD2-12 (celda central) y VAD2-13 (cifra 19 y `sin_geometria`).
-  Seguimiento suyo que no es de la adenda: `01_poblacion.py` escribe en el meta un commit fijo (`533398f8f`) aunque los
-  records sean de otro.
+  hallazgo de gravedad 4 o 5; la lectura sellada no se contamina y los tres brazos miden lo que dicen. Sus 13 cambios
+  quedaron en `4dbd88dce`: VAD2-01 (separador), VAD2-02 (exclusión de K distinto), VAD2-03 y VAD2-09 (el generador no
+  escribe encima ni en la carpeta sellada), VAD2-04 (escenarios y 14 mutaciones suyas al nulo), VAD2-05 (OCR de antes
+  del 13-jun fuera de la vara 3), VAD2-06 (relanzamiento, §3.3), VAD2-07 (pasadas lejanas con alertado), VAD2-08
+  (control campo por campo), VAD2-10 (declarado), VAD2-11 (sin gránulo por nombre), VAD2-12 (celda central) y VAD2-13
+  (cifra 19 y `sin_geometria`). Seguimiento suyo que no es de la adenda: `01_poblacion.py` escribe en el meta un
+  commit fijo (`533398f8f`) aunque los records sean de otro.
+- **Sello**: Nicolás selló la adenda sobre `4dbd88dce` (2026-10-28, vía la coordinadora S166), condicionado a una pasada
+  corta del verificador sobre los 13 cambios. Esa pasada (Sonnet con contexto limpio, lanzada por S166,
+  `S166_VERIFICADOR_CORTO_ADENDA2_V750B.md` en las notas compartidas) dio **SELLABLE CON CAMBIOS MENORES**: lo sellado
+  sigue intacto y batería y nulo se reproducen en un árbol aparte. Arreglos de esta versión, todos dentro de
+  `adenda2/`: N1 (el lector excluye también por magnitud, |VRP de K − pc_vrp| > 0,001 MW, como el sellado l. 292-293),
+  N2 (la población de un intento fallido cuenta como salida previa), el resto de VAD2-11 (toda lista cortada avisa
+  que lo está) y N3 (`generar()` separado de sus dependencias y probado entero, cuatro mutaciones nuevas sobre él, y el
+  ensayo del §9 sobre datos reales). El sello pasa a este commit cuando Nicolás lo confirme.

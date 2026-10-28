@@ -55,8 +55,9 @@ def poblacion_con_far_ref(ruta):
     return m
 
 
+# N2 (verificador corto): la población de un intento con el control caído también cuenta como salida previa
 SALIDAS = ("objetivos_supl_v750b.json", "sin_granulo_supl_v750b.json", "objetivos_run_v750b.json", "poblacion_supl.json",
-           "poblacion_completa.json")
+           "poblacion_completa.json", "poblacion_supl_CONTROL_FALLIDO.json")
 CAMPOS_CONTROL = ("volcan", "hora_utc", "granule", "lab", "protegida", "alerta_tabla", "decide")
 
 
@@ -102,45 +103,58 @@ def numerar(far):
     return far
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--data", required=True)
-    ap.add_argument("--ref-dest", required=True)
-    ap.add_argument("--hasta", required=True, help="último día de la ventana (YYYY-MM-DD), el mismo de la lista sellada")
-    ap.add_argument("--sellado", required=True, help="objetivos_v750b.json generado el mismo día con objetivos_v750b.py")
-    ap.add_argument("--dest", default=str(AQUI))
-    a = ap.parse_args()
-    dest = Path(a.dest)
+def dependencias_reales():
+    """Lo que generar() usa del árbol real: el generador sellado (cortes y completar), la población de N con el
+    filtro cambiado, las grillas de 02_seleccion, volcanoes.yaml y el radio interior del tablero. Separado para que la
+    batería pruebe generar() entero con dependencias sintéticas (N3 del verificador corto), sin tocar la carpeta sellada."""
+    G = V750B / "objetivos_v750b.py"
+    spec = importlib.util.spec_from_file_location("gen_sellado", G)
+    GS = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(GS)
+
+    def poblar(dest, hasta, data, ref_dest):
+        P = poblacion_con_far_ref(GS.N_DIR / "01_poblacion.py")
+        P.VENTANA = ("2026-04-01", hasta)
+        P.AQUI = dest                       # escribe poblacion_completa.json en dest; generar() lo renombra
+        sys.argv = ["01_poblacion.py", "--data", data, "--ref-dest", ref_dest]
+        P.main()
+
+    def completar(far):
+        SEL = GS._modulo("sel", GS.N_DIR / "02_seleccion.py")
+        grillas = SEL.grillas()
+        for p in far:
+            p["grilla"] = grillas[SEL.TIF.get(p["volcan"], p["volcan"])]
+        vy = {v["name"]: v for v in yaml.safe_load((RAIZ / "volcanoes.yaml").read_text(encoding="utf-8"))["volcanoes"]}
+        sys.path.insert(0, str(RAIZ / "scripts"))
+        import banco_paridad as B
+        GS.completar(far, vy, B.inner_desde_html())
+
+    return {"excluidos": GS.EXCLUIDOS, "corte": GS.CORTE_SNPP, "poblar": poblar, "completar": completar}
+
+
+def generar(dest, hasta, data, ref_dest, sellado_ruta, dep, sellada=V750B):
+    dest = Path(dest)
     # VAD2-03 y VAD2-09: nunca en la carpeta sellada ni encima de una corrida anterior (no se borra nada)
-    if dest.resolve() == V750B.resolve():
-        print(f"--dest no puede ser la carpeta sellada ({V750B}): pisaría su poblacion_completa.json")
+    if dest.resolve() == Path(sellada).resolve():
+        print(f"--dest no puede ser la carpeta sellada ({sellada}): pisaría su poblacion_completa.json")
         return 2
     previos = [n for n in SALIDAS if (dest / n).exists()]
     if previos:
         print(f"en {dest} ya hay salidas de otra corrida {previos}: usa una carpeta nueva (no se escribe encima)")
         return 2
     dest.mkdir(parents=True, exist_ok=True)
-    G = V750B / "objetivos_v750b.py"
-    spec = importlib.util.spec_from_file_location("gen_sellado", G)
-    GS = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(GS)
-
-    P = poblacion_con_far_ref(GS.N_DIR / "01_poblacion.py")
-    P.VENTANA = ("2026-04-01", a.hasta)
-    P.AQUI = dest                       # escribe poblacion_completa.json en dest; se renombra abajo
-    sys.argv = ["01_poblacion.py", "--data", a.data, "--ref-dest", a.ref_dest]
-    P.main()
+    dep["poblar"](dest, hasta, data, ref_dest)
     crudo = dest / "poblacion_completa.json"
     pob_txt = crudo.read_text(encoding="utf-8")
-    pob = recortar(json.loads(pob_txt)["pasadas"], GS.EXCLUIDOS, GS.CORTE_SNPP)
+    pob = recortar(json.loads(pob_txt)["pasadas"], dep["excluidos"], dep["corte"])
 
-    sellado = json.loads(Path(a.sellado).read_text(encoding="utf-8"))
+    sellado = json.loads(Path(sellado_ruta).read_text(encoding="utf-8"))
     igual, pn, ss = comparar(pob, sellado)
     print(f"== control: pos y neg_limpio de esta corrida contra la lista sellada ({', '.join(CAMPOS_CONTROL)}): "
           f"{len(pn)} contra {len(ss)}, {'IGUALES' if igual else 'DISTINTAS'}")
     if not igual:
         faltan, sobran = sorted(set(ss) - set(pn))[:10], sorted(set(pn) - set(ss))[:10]
-        print("   en la sellada y no acá:", faltan, "| acá y no en la sellada:", sobran)
+        print("   en la sellada y no acá (hasta 10):", faltan, "| acá y no en la sellada (hasta 10):", sobran)
         crudo.rename(dest / "poblacion_supl_CONTROL_FALLIDO.json")
         print("== no se escribe ninguna lista: las dos no salieron de los mismos datos (la población queda como "
               "poblacion_supl_CONTROL_FALLIDO.json para auditar)")
@@ -148,14 +162,7 @@ def main():
     crudo.rename(dest / "poblacion_supl.json")
 
     far, sin_g = seleccionar_far(pob)
-    SEL = GS._modulo("sel", GS.N_DIR / "02_seleccion.py")
-    grillas = SEL.grillas()
-    for p in far:
-        p["grilla"] = grillas[SEL.TIF.get(p["volcan"], p["volcan"])]
-    vy = {v["name"]: v for v in yaml.safe_load((RAIZ / "volcanoes.yaml").read_text(encoding="utf-8"))["volcanoes"]}
-    sys.path.insert(0, str(RAIZ / "scripts"))
-    import banco_paridad as B
-    GS.completar(far, vy, B.inner_desde_html())
+    dep["completar"](far)
     numerar(far)
     texto = json.dumps(far, ensure_ascii=False, default=str)
     sha_supl = hashlib.sha256(texto.encode("utf-8")).hexdigest()
@@ -166,12 +173,23 @@ def main():
         ensure_ascii=False), encoding="utf-8")
     run = json.dumps(lista_run(sellado, far), ensure_ascii=False, default=str)
     (dest / "objetivos_run_v750b.json").write_text(run, encoding="utf-8")
-    sha_sell = hashlib.sha256(Path(a.sellado).read_bytes()).hexdigest()
+    sha_sell = hashlib.sha256(Path(sellado_ruta).read_bytes()).hexdigest()
     print(f"far_ref con gránulo: {len(far)} | sin gránulo (SIN DATO declarado): {len(sin_g)} {sin_g}")
     print(f"sha256 sellada {sha_sell}")
     print(f"sha256 suplementaria {sha_supl}")
     print(f"sha256 lista del run {hashlib.sha256(run.encode('utf-8')).hexdigest()} ({len(sellado)} + {len(far)} pasadas)")
     return 0
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--data", required=True)
+    ap.add_argument("--ref-dest", required=True)
+    ap.add_argument("--hasta", required=True, help="último día de la ventana (YYYY-MM-DD), el mismo de la lista sellada")
+    ap.add_argument("--sellado", required=True, help="objetivos_v750b.json generado el mismo día con objetivos_v750b.py")
+    ap.add_argument("--dest", default=str(AQUI))
+    a = ap.parse_args()
+    return generar(a.dest, a.hasta, a.data, a.ref_dest, a.sellado, dependencias_reales())
 
 
 if __name__ == "__main__":
