@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 14:00 UTC aprox. (S167, vuelta 5): medidor completo de V750-A en marcha (~40 h)
+- Loop VIIRS 750 2: batería entera 77 de 77 sobre `5c45c0c07` (salida en `c457a1753`, según el autor; SIN VERIFICAR por
+  S167). Medidor completo M1 a M85 desde las 13:50 UTC, 3 hilos, ~1 h 21 min por corrida: del orden de 40 h.
+- Decisión de la coordinadora: no acortarlo, porque el sello de V750-A espera igual a V750-B (2026-11-03). Pedido:
+  agregar N-3 y la dependencia de la ROI antes del sello; adenda 3 de V750-B sólo si Nicolás la aprueba.
+
 ### 2026-10-28 13:55 UTC aprox. (S167, vuelta 4): programa por sensor COMMITEADO tras verificador
 - Verificador limpio (Sonnet): LISTO CON CAMBIOS (`experiments/_s167/verificador_programa/INFORME.md`). La coordinadora
   comprobó contra las fuentes los hallazgos principales (V375-E §8.5 y §8.3, MOD-D f4 l. 82, V750-A l. 3, V750-B l. 106)
