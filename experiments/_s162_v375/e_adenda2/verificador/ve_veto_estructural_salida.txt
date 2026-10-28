@@ -1,0 +1,104 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+  C2 predicado (summit publica, far no, de vuelta a summit publica): [True, False, True]
+  C1 una sola alertada => tres brazos iguales: 1 de 1
+  C5 radiante y pico recalculados = record de la vía: 8 de 8 []
+  C6 el almacén no cambia la distance_class de ninguna variante: distintas 0 []
+  equivalencia (paso 1, §8.3): máscara distinta vía/port en 0; publicación distinta vía/port, por brazo: radiante 0, cercano 0, pico 0
+  equivalencia, VRP a 0.001 MW contra la vara (§7.3 y §8.6 b): 8 de 8 (exigido 99%); fuera []
+  equivalencia: EQUIVALENTE
+  C7 control de vida del run FAR: 1 de 1 re-medidas; iguales a S162 1; con píxeles 1 []
+  K re-corrido publica igual que lo publicado: 0 de 0 (0.000); la lectura de K usa lo RE-CORRIDO
+
+== cobertura (A108)
+   ('CTLF', 'control_vida', 'ok') 1
+   ('FAR', 'far_tabla', 'ok') 1
+   ('S162', 'neg_resto', 'ok') 3
+   ('S162', 'pos_bajo', 'ok') 7
+   SIN DATO por nombre: []
+
+== vara 1: alertas y negativos limpios del marco (pesos de B §3), cada brazo contra K
+  radiante  P1: perdidas 0 de 0, que K publica 0 [] | recall prot [0, 0] bajo [1, 7] | silencio NO RESUELTO | P2 contra K PIERDE (neto +6.0, B 6) | MISSION ENCIENDE DE MAS | M 5.0
+  cercano   P1: perdidas 0 de 0, que K publica 0 [] | recall prot [0, 0] bajo [7, 7] | silencio NO RESUELTO | P2 contra K SIN SUSTRATO (neto +0.0, B 0) | MISSION NO RESUELTO | M 5.0
+  pico      P1: perdidas 0 de 0, que K publica 0 [] | recall prot [0, 0] bajo [1, 7] | silencio NO RESUELTO | P2 contra K PIERDE (neto +6.0, B 6) | MISSION ENCIENDE DE MAS | M 5.0
+  cambian de publicación contra radiante, por nombre:
+    cercano: 6 [('Lascar', '2026-09-10 05:00', 'pos_bajo', 'publica'), ('Lascar', '2026-09-11 05:00', 'pos_bajo', 'publica'), ('Lascar', '2026-09-12 05:00', 'pos_bajo', 'publica'), ('Lascar', '2026-09-13 05:00', 'pos_bajo', 'publica'), ('Lascar', '2026-09-14 05:00', 'pos_bajo', 'publica'), ('Lascar', '2026-09-15 05:00', 'pos_bajo', 'publica')]
+    pico: 0 []
+
+== vara 2: pasadas en que MIROVA publicó una fuente lejana (lo correcto es no publicar)
+  radiante  far_tabla: publica 0 de 1 (con alertado 0), por tramo {} | far_ocr (informa): 0 de 0
+            []
+  cercano   far_tabla: publica 0 de 1 (con alertado 0), por tramo {} | far_ocr (informa): 0 de 0
+            []
+  pico      far_tabla: publica 0 de 1 (con alertado 0), por tramo {} | far_ocr (informa): 0 de 0
+            []
+  K         far_tabla: publica 0 de 1 (con alertado 0), por tramo {} | far_ocr (informa): 0 de 0
+            []
+  P2-L radiante contra K (sólo far_tabla): SIN SUSTRATO (neto +0.0, B 0)
+  P2-L cercano contra K (sólo far_tabla): SIN SUSTRATO (neto +0.0, B 0)
+  P2-L pico contra K (sólo far_tabla): SIN SUSTRATO (neto +0.0, B 0)
+
+== vara 3 (informa, A93): |distancia del brazo desde X0, Y0 − Distancia_km de MIROVA|
+  radiante  {'alerta_tabla': {'n': 0}, 'alerta_ocr': {'n': 0}, 'far_tabla': {'n': 0}}
+  cercano   {'alerta_tabla': {'n': 0}, 'alerta_ocr': {'n': 0}, 'far_tabla': {'n': 0}}
+  pico      {'alerta_tabla': {'n': 0}, 'alerta_ocr': {'n': 0}, 'far_tabla': {'n': 0}}
+
+== regla de posición (§8.5)
+  veto (protegidas que K publica y el brazo calla): {'radiante': [], 'cercano': [], 'pico': []}
+  radiante|cercano: PIERDE (neto +6.0, B 6, bloques por tramo {'O2': 6})
+  radiante|pico: SIN SUSTRATO (neto +0.0, B 0, bloques por tramo {})
+  cercano|radiante: GANA (neto -6.0, B 6, bloques por tramo {'O2': 6})
+  cercano|pico: GANA (neto -6.0, B 6, bloques por tramo {'O2': 6})
+  pico|radiante: SIN SUSTRATO (neto +0.0, B 0, bloques por tramo {})
+  pico|cercano: PIERDE (neto +6.0, B 6, bloques por tramo {'O2': 6})
+  VEREDICTO POSICION: ELEGIDO CERCANO (gana a los demas)
+  informa, veto sólo con protegidas de la tabla: ELEGIDO CERCANO (gana a los demas) {'radiante': [], 'cercano': [], 'pico': []}
+sin la protegida perdida por todos: fallas=[] -> ELEGIDO CERCANO (gana a los demas) | veto={'radiante': 0, 'cercano': 0, 'pico': 0} | tabla sola: ELEGIDO CERCANO (gana a los demas)
+  C2 predicado (summit publica, far no, de vuelta a summit publica): [True, False, True]
+  C1 una sola alertada => tres brazos iguales: 1 de 1
+  C5 radiante y pico recalculados = record de la vía: 8 de 8 []
+  C6 el almacén no cambia la distance_class de ninguna variante: distintas 0 []
+  equivalencia (paso 1, §8.3): máscara distinta vía/port en 0; publicación distinta vía/port, por brazo: radiante 0, cercano 0, pico 0
+  equivalencia, VRP a 0.001 MW contra la vara (§7.3 y §8.6 b): 8 de 8 (exigido 99%); fuera []
+  equivalencia: EQUIVALENTE
+  C7 control de vida del run FAR: 1 de 1 re-medidas; iguales a S162 1; con píxeles 1 []
+  K re-corrido publica igual que lo publicado: 0 de 0 (0.000); la lectura de K usa lo RE-CORRIDO
+
+== cobertura (A108)
+   ('CTLF', 'control_vida', 'ok') 1
+   ('FAR', 'far_tabla', 'ok') 1
+   ('S162', 'neg_resto', 'ok') 3
+   ('S162', 'pos_bajo', 'ok') 7
+   ('S162', 'pos_prot', 'ok') 1
+   SIN DATO por nombre: []
+
+== vara 1: alertas y negativos limpios del marco (pesos de B §3), cada brazo contra K
+  radiante  P1: perdidas 1 de 1, que K publica 1 [('Tupungatito', '2026-08-01 05:00', 'ocr', 'K', 1.5)] | recall prot [0, 1] bajo [1, 7] | silencio NO RESUELTO | P2 contra K PIERDE (neto +6.0, B 6) | MISSION PIERDE PROTEGIDA | M 5.0
+  cercano   P1: perdidas 1 de 1, que K publica 1 [('Tupungatito', '2026-08-01 05:00', 'ocr', 'K', 1.5)] | recall prot [0, 1] bajo [7, 7] | silencio NO RESUELTO | P2 contra K SIN SUSTRATO (neto +0.0, B 0) | MISSION PIERDE PROTEGIDA | M 5.0
+  pico      P1: perdidas 1 de 1, que K publica 1 [('Tupungatito', '2026-08-01 05:00', 'ocr', 'K', 1.5)] | recall prot [0, 1] bajo [1, 7] | silencio NO RESUELTO | P2 contra K PIERDE (neto +6.0, B 6) | MISSION PIERDE PROTEGIDA | M 5.0
+  cambian de publicación contra radiante, por nombre:
+    cercano: 6 [('Lascar', '2026-09-10 05:00', 'pos_bajo', 'publica'), ('Lascar', '2026-09-11 05:00', 'pos_bajo', 'publica'), ('Lascar', '2026-09-12 05:00', 'pos_bajo', 'publica'), ('Lascar', '2026-09-13 05:00', 'pos_bajo', 'publica'), ('Lascar', '2026-09-14 05:00', 'pos_bajo', 'publica'), ('Lascar', '2026-09-15 05:00', 'pos_bajo', 'publica')]
+    pico: 0 []
+
+== vara 2: pasadas en que MIROVA publicó una fuente lejana (lo correcto es no publicar)
+  radiante  far_tabla: publica 0 de 1 (con alertado 0), por tramo {} | far_ocr (informa): 0 de 0
+            []
+  cercano   far_tabla: publica 0 de 1 (con alertado 0), por tramo {} | far_ocr (informa): 0 de 0
+            []
+  pico      far_tabla: publica 0 de 1 (con alertado 0), por tramo {} | far_ocr (informa): 0 de 0
+            []
+  K         far_tabla: publica 0 de 1 (con alertado 0), por tramo {} | far_ocr (informa): 0 de 0
+            []
+  P2-L radiante contra K (sólo far_tabla): SIN SUSTRATO (neto +0.0, B 0)
+  P2-L cercano contra K (sólo far_tabla): SIN SUSTRATO (neto +0.0, B 0)
+  P2-L pico contra K (sólo far_tabla): SIN SUSTRATO (neto +0.0, B 0)
+
+== vara 3 (informa, A93): |distancia del brazo desde X0, Y0 − Distancia_km de MIROVA|
+  radiante  {'alerta_tabla': {'n': 0}, 'alerta_ocr': {'n': 0}, 'far_tabla': {'n': 0}}
+  cercano   {'alerta_tabla': {'n': 0}, 'alerta_ocr': {'n': 0}, 'far_tabla': {'n': 0}}
+  pico      {'alerta_tabla': {'n': 0}, 'alerta_ocr': {'n': 0}, 'far_tabla': {'n': 0}}
+
+== regla de posición (§8.5)
+  veto (protegidas que K publica y el brazo calla): {'radiante': [('Tupungatito', '2026-08-01 05:00')], 'cercano': [('Tupungatito', '2026-08-01 05:00')], 'pico': [('Tupungatito', '2026-08-01 05:00')]}
+  VEREDICTO POSICION: NINGUN BRAZO PASA EL VETO
+  informa, veto sólo con protegidas de la tabla: ELEGIDO CERCANO (gana a los demas) {'radiante': [], 'cercano': [], 'pico': []}
+con 1 protegida solo-OCR que K publica y ningun brazo ve: fallas=[] -> NINGUN BRAZO PASA EL VETO | veto={'radiante': 1, 'cercano': 1, 'pico': 1} | tabla sola: ELEGIDO CERCANO (gana a los demas)

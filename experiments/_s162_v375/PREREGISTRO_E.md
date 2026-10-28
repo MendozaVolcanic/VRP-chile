@@ -209,7 +209,10 @@ Comprobado contra `origin/main` (`bd711db63` y `55c95c705`, mismo `pipeline/miro
 
 El resto del §2 (bandas I04 e I05, grilla de 134 x 134 a 375 m, coeficiente, umbrales del `.m`, sin compuerta de 3 K,
 segundo pase, suma de todos los alertados, sin modo de un píxel ni tope D9) es lo que hace `procesar_grilla` con la
-familia `VIIRS375` (docstring y cuerpo, l. 687 a 745).
+familia `VIIRS375` (docstring y cuerpo, l. 687 a 745). Dos cosas más de la vía, que la tabla no decía (verificador,
+pregunta 1): el corte de 5 km al centro de la grilla (`FAMILIAS["VIIRS375"]["dist_max_centro_km"]`, un gránulo que no
+cubre el volcán no da record), y que el relabel A46 del almacén y `geo_class` leen `pc.centroid_dist_km`, por eso las
+variantes de §8.4 reescriben ese campo.
 
 ### 8.4 Qué agrega
 
@@ -221,10 +224,18 @@ familia `VIIRS375` (docstring y cuerpo, l. 687 a 745).
    - **cercano**: el alertado más cercano al cráter; a igual distancia, el de menor (fila, columna);
    - **pico**: el alertado de mayor radiancia I4, el mismo que siembra el cúmulo, con el mismo desempate que la vía.
    Cada variante pasa por `store.append_record` y por el predicado del tablero con node, como un record de producción.
+   La variante no es un record completo (VE2-08): no mueve `centroid_lat/lon`, `final_hotspot_lat/lon` ni `n_pixels`.
+   El predicado no los lee (lee `distance_class` y `pc.centroid_dist_km`, `frontend/index.html` l. 1175 y 1179, según el
+   verificador), así que la publicación medida es la que tendría la regla; un PR que la implemente tiene que mover
+   también el marcador.
 2. **Las pasadas lejanas de MIROVA** (`e_adenda2/objetivos_far_v375.py`). Corre la población de S159
    (`experiments/_s159/portes/01_poblacion.py`) con los **mismos insumos congelados** que el marco de B y C (records de
    `533398f8f`, comprobados blob por blob; referencia de Mirova-v1 en los commits `fe2d0a57` y `4ddd5481`, bajada de esos
-   commits y no del remoto de hoy), cambiando sólo el filtro de etiquetas para dejar pasar `far_ref`. Control: las
+   commits y no del remoto de hoy; más las dos capas locales que `cargar_referencia_unificada` suma por defecto,
+   fijadas por sha256 LF en el meta de la lista: `data/mirova_reference/union_historica/consolidado_filas_perdidas.csv`
+   `2613e7cc…bf59e7` y `data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado_respaldo_20260408.csv`
+   `183aff7f…aa93568`; de la primera sacan su fila FALSO_POSITIVO 15 de las 330, VE2-02 del verificador), cambiando sólo
+   el filtro de etiquetas para dejar pasar `far_ref`. Control: las
    `pos` y `neg_limpio` de esa corrida son las del marco entrada por entrada (10.087 contra 10.087, todos los campos,
    los dos sensores). Resultado: **330 pasadas VIIRS 375 con gránulo, 0 sin gránulo**, del 2026-04-01 al 2026-10-21
    sin los días excluidos: T 117, O1 131, O2 82 (A104). Dos subclases, porque `banco_paridad.es_fp` cuenta también
@@ -235,9 +246,10 @@ familia `VIIRS375` (docstring y cuerpo, l. 687 a 745).
    de la referencia, sin quitar los días excluidos ni las pasadas con una ALERTA en la misma pasada y sin exigir un
    record nuestro; la etiqueta `far_ref` sobre la copia del marco da 330. No separé cuánto aporta cada diferencia. La lista lleva además las 20
    pasadas del control de vida de B2 (re-mediciones de S162 con su M14 de referencia), con ids desde 29000.
-   sha256 (fin de línea LF): `objetivos_far_v375.json` `d968aafe…c46c7d`, `objetivos_run_far_v375.json` (lo que lee
-   el run) `4abc0630…51ad47`, población `aff8822a…cd0a7d` (regenerable, no se commitea; copia en
-   `D:\vrp-trabajo\temporales\s166_v375e_adenda2\poblacion_far.json`). Salida: `e_adenda2/objetivos_far_v375_salida.txt`.
+   sha256 (fin de línea LF): `objetivos_far_v375.json` `a8528424…11ca1b`, `objetivos_run_far_v375.json` (lo que lee
+   el run) `28468a14…22db26`, población `aff8822a…cd0a7d` (regenerable, no se commitea; copia en
+   `D:\vrp-trabajo\temporales\s166_v375e_adenda2\poblacion_far_v2.json`). La primera versión de la lista (sin las
+   capas en el meta, `d968aafe…` y `4abc0630…`) traía las mismas 330 pasadas, campo por campo. Salida: `e_adenda2/objetivos_far_v375_salida.txt`.
 3. **Un run de sólo lectura** (`e_adenda2/probe-s166-v375e-far.yml`): el mismo `probe_v375.py` de B y C, sin cambios,
    sobre esas 350 pasadas en 14 trozos de 25, que guarda la grilla de cada una. Lo despacha la coordinadora, desde un
    tag, en una rama de disparo que no se mergea (§8.8).
@@ -261,8 +273,14 @@ familia `VIIRS375` (docstring y cuerpo, l. 687 a 745).
 - **Regla de posición (RP), decide**, sobre el marco más las `far_tabla`, con el error de posición = protegida sin
   publicar, alerta bajo 1 MW sin publicar, publicación en un negativo limpio o publicación en una `far_tabla`, cada
   pasada con su peso:
-  1. **Veto**: queda fuera todo brazo que calle una protegida (lectura A) que K publica (el mismo veto del §5.4 a).
-  2. Si queda uno solo, ése. Si no queda ninguno: «NINGÚN BRAZO PASA EL VETO» y P no cumple (a) con ninguna regla.
+  1. **Veto de la posición**: queda fuera todo brazo que calle una protegida (lectura A) que K publica **y que otro
+     brazo sí publica**. La protegida que K publica y callan los tres brazos no la arregla ninguna regla de posición:
+     se informa aparte como «pérdida común» y sigue siendo veto del paquete en el §5.4 (a), no de esta elección.
+     (Corregido por VE2-01 del verificador: con el veto entero, las 3 protegidas de Suomi NPP sólo del OCR que pierden
+     los diez brazos de V375-C, `resultado_run40116289866/verificador/INFORME.md` l. 43, habrían sacado a los tres
+     brazos sin medir nada de posición.)
+  2. Si queda uno solo, ése. Si no queda ninguno: «NINGÚN BRAZO PASA EL VETO».
+     Un ciclo (radiante vence a cercano, cercano a pico y pico a radiante) da NO RESUELTO entre los tres (VE2-09).
   3. Si quedan varios: el que **GANA** a cada uno de los otros en la prueba de signos por bloque del error de posición
      (D-45: exacta con 20 bloques o menos, si no 10.000 sorteos con semilla 162; GANA con valor-p 5 % o menos).
   4. Si ninguno gana a todos: el único que nadie vence; si nadie vence a radiante, **se queda radiante** (cambiar el
@@ -270,9 +288,17 @@ familia `VIIRS375` (docstring y cuerpo, l. 687 a 745).
      vara 3 al lado.
   5. **Sin cobertura de las lejanas** (sin run FAR, sin control de vida, o más del 10 % de las `far_tabla` SIN DATO), la
      regla **no decide**: «NO DECIDE: LAS LEJANAS SIN COBERTURA».
+  6. **Por tramo (A104, VE2-06)**: la misma regla se corre dentro de T, O1 y O2. Si en O1 o en O2 por separado queda
+     ELEGIDO otro brazo que el de la unión, el veredicto lleva la marca «A104: en O1 (u O2) sale otro brazo; decide
+     Nicolás».
   Se informan al lado, sin decidir: la misma regla con el veto contado sólo sobre protegidas de la tabla (las cuatro de
-  §8.1 son del OCR), y cuántos bloques discordantes aporta cada tramo (T, O1, O2; A104). Si la elección se apoya en un
-  solo tramo, se dice.
+  §8.1 son del OCR, y dos de ellas de Suomi NPP: VE2-07 pide leerlas con cautela por A119, aunque desde el
+  2026-06-13 el OCR ya tiene distancia), cuántos bloques discordantes aporta cada tramo, y cuántas `far_tabla` tienen
+  algún alertado en la caja (si son menos de 5, las lejanas no tienen sustrato para pesar en la elección y se dice:
+  VE2-13).
+  Dicho antes de medir (VE2-12): cada pasada pesa lo que representa en la población. Una alerta bajo 1 MW sorteada pesa
+  unas 5 (`pos_bajo` es muestra de 200 en 949), una protegida y una lejana pesan 1 (son censo), un negativo limpio
+  sorteado unas 2. Las protegidas no dependen de ese peso porque las cuida el veto.
 - **El paquete P del §5.4 es la vía con el brazo que elige la RP.** Si la RP da NO RESUELTO, el §5.4 se lee con cada
   brazo empatado y decide Nicolás. Al criterio (b) del §5.4 se le agrega: **P2-L del brazo elegido contra K no da
   PIERDE ni BLOQUEA** (publicar en la cumbre donde MIROVA ubicó el calor lejos es un error que K puede no cometer: K
@@ -322,10 +348,10 @@ retrospectiva, decide Nicolás.
 
 ### 8.9 Lectura
 
-    python -I experiments/_s162_v375/e_adenda2/leer_posicion_v375e.py --art-far <artefactos del run FAR> --salida <archivo> --json <archivo>
+    python -I experiments/_s162_v375/e_adenda2/leer_posicion_v375e.py --art-far <artefactos del run FAR> --art-s159 D:\vrp-trabajo\temporales\s159_portes\run_39712862945 --art-s162 C:\vrp-trabajo\temporales\s162_v375\run_40116289866 --art-s162b C:\vrp-trabajo\temporales\s162_v375\run_40131572769 --salida <archivo> --json <archivo>
 
-(los artefactos de S159, S162 y S162b se leen de sus rutas de siempre; `--art-s159`, `--art-s162` y `--art-s162b` las
-cambian). El orden de lectura: primero los controles, después la equivalencia por brazo (§8.6), después la RP, y recién
+(las cuatro rutas son obligatorias y no tienen valor por defecto, para que leer el marco sea siempre explícito: VE2-10).
+El orden de lectura: primero los controles, después la equivalencia por brazo (§8.6), después la RP, y recién
 entonces las lecturas del §5 con el brazo elegido.
 
 ### 8.10 Lo que esta adenda no hace
@@ -338,22 +364,56 @@ réplica (A115): vale para `mirova_equivalent`, no para `experimental`.
 
 ### 8.11 Pruebas y estado
 
-- **Batería** (`e_adenda2/probar_adenda2.py`, salida `probar_adenda2_salida.txt`): **112 de 112**, con escenas
+- **Batería** (`e_adenda2/probar_adenda2.py`, salida `probar_adenda2_salida.txt`): **130 de 130**, con escenas
   sintéticas (LEJANA, BORDE, UNO, PICOCERCA, ANILLO, cráter corrido de X0, Y0), el predicado del tablero con node, el
   almacén real y `evaluar.py` real. Cubre las tres distancias y sus desempates, la variante, cada control (C1 a C7, en
-  verde y en rojo), la equivalencia por brazo (máscara, VRP a 1e-3 MW y publicación), la elección de la vara del VRP,
-  la regla de posición con escenas y con veredictos fabricados (todas las ramas de `decidir_brazo`), el veto con la
-  tabla sola, los bloques por tramo, las tres varas, el K re-corrido, las funciones del generador y `generar()` entero
-  con dependencias sintéticas (control caído, segundo intento, carpeta del marco, records de otro commit, CRLF).
-  Además, sobre grillas reales sin leer el marco: la identidad de radiante y pico con `procesar_grilla` en las 6
-  grillas con alertados de `tests/datos_s165_v375/`, y `main()` de punta a punta sobre un artefacto falso armado con 5
-  de esas grillas rotuladas como control de vida (máscara de la vía igual a la del port C13 en 5 de 5, VRP contra la
-  vara en 5 de 5, publicación por brazo igual; sale 3 por C7, como debe con 5 de 20 re-medidas).
-- **Nulo por mutaciones** (`e_adenda2/mutar_adenda2.py`, salida `mutar_adenda2_salida.txt`): **62 de 63 mutaciones
-  de una línea atrapadas por aserción**, 0 caídas (45 del lector, 18 del generador); la copia sin mutar PASA y la que
+  verde y en rojo, C7 también con un port que calla igual que la referencia), la equivalencia por brazo (máscara, VRP a
+  1e-3 MW y publicación), la elección de la vara del VRP, la regla de posición con escenas y con veredictos fabricados
+  (todas las ramas de `decidir_brazo`, ciclo incluido), el veto que sólo cuenta lo que depende de la posición y la
+  pérdida común, la regla por tramo con la marca A104, la regla del 10 % de lejanas SIN DATO, pesos distintos de 1, el
+  veto con la tabla sola, las tres varas, el K re-corrido, el ancla de la vía en el cráter, las funciones del generador
+  y `generar()` entero con dependencias sintéticas (control caído, segundo intento, carpeta del marco, records de otro
+  commit, CRLF, capas locales en el meta). Sobre grillas reales sin leer el marco: la identidad de radiante y pico con
+  `procesar_grilla` en las 6 grillas con alertados de `tests/datos_s165_v375/`, y `main()` de punta a punta sobre un
+  artefacto falso armado con 5 de esas grillas rotuladas como control de vida (máscara de la vía igual a la del port
+  C13 en 5 de 5, VRP contra la vara en 5 de 5, publicación por brazo igual, C5 en 5 de 5, C6 sin cambios; sale 3 por C7,
+  como debe con 5 de 20 re-medidas; con un almacén que cambia la clase, C6 cae).
+- **Nulo por mutaciones** (`e_adenda2/mutar_adenda2.py`, salida `mutar_adenda2_salida.txt`): **76 de 77 mutaciones
+  de una línea atrapadas por aserción**, 0 caídas (58 del lector, 19 del generador); la copia sin mutar PASA y la que
   rompe la importación sale CAÍDA. Sobrevive una, declarada equivalente: L20 pasa a la regla de posición también las
-  `far_ocr`, pero el error de posición no las cuenta y el veto sólo mira el marco, así que no puede cambiar nada. En
-  la primera corrida sobrevivían tres más y caían tres (una lectura faltante tras un control caído, un volcán sin
-  grilla en la escena del generador, una guarda que lanza en vez de devolver 2): se arreglaron en la batería, no en el
-  código medido, y la elección de la vara pasó a una función propia (`elegir_vara`) para poder probarla.
-- **Verificador limpio**: pendiente (§8.12).
+  `far_ocr`, pero el error de posición no las cuenta y el veto sólo mira el marco, así que no puede cambiar nada. Las
+  sobrevivientes del verificador que no eran equivalentes entran como L50 a L58, y las ramas nuevas de los arreglos
+  como L46 a L49 y G19.
+  Quedan declaradas equivalentes o débiles, sin mutación propia: el pico sobre toda la máscara en vez del cúmulo (la
+  semilla del cúmulo es el máximo de toda la máscara: es el mismo píxel), la tolerancia de C1 y el inner del tablero en
+  `publicar` (la variante ya fija la clase con el inner de `volcanoes.yaml`, que coincide con el del tablero en los 11).
+
+### 8.12 Verificador limpio y arreglos
+
+Sonnet 5.5 con contexto limpio (`e_adenda2/verificador/INFORME.md`; sus caminos escritos antes de abrir la adenda,
+sha256 `bcf60fd0…be8bcf9`; servidor 2026-10-28 04:51 a 05:19 UTC; commit medido `6c80ce7c0`). El verificador declaró
+que corrió a esfuerzo bajo, aunque se le pidió alto. Veredicto: **SELLABLE CON CAMBIOS**. Reprodujo todas las cifras,
+regeneró la lista con los mismos sha256 (byte a byte), re-corrió la batería (112 de 112) y el nulo (62 de 63), confirmó
+que la §8.3 describe la vía de #921, que los tres brazos son los del programa medidos desde el ancla de producción
+(`get_detection_anchor`, 11 de 11) y que el almacén no cambia clase, VRP ni publicación de las variantes (18 de 18), y
+midió que ninguna `far_tabla` tiene `Distancia_km` de MIROVA dentro del radio del tablero (0 de 329).
+
+| hallazgo | gravedad | qué se hizo |
+|---|---|---|
+| VE2-01 el veto lo decidían pérdidas comunes a los tres brazos | 4 | el veto de la posición cuenta sólo la protegida que otro brazo publica; las comunes se informan y siguen siendo veto del §5.4 (a) (§8.5 paso 1) |
+| VE2-02 15 lejanas sacan su fila de una capa local no fijada | 2 | sha256 de las dos capas en el meta de la lista y en §8.4; lista regenerada (mismas 330 pasadas) |
+| VE2-03 una aserción de `main()` dentro de un `else` muerto | 2 | error mío al insertar el bloque CRLF; movida, y se agregó la de C5 y C6 |
+| VE2-04 16 de sus 23 mutaciones sobrevivían | 3 | pruebas nuevas para pesos distintos de 1, negativos en la regla, regla del 10 %, C7 sin píxeles, rango CTLF, ancla, ejes de `pos_ref`, borde del OCR y ciclo; sus mutaciones entran al nulo |
+| VE2-05 cableado de `main()` sin prueba | 2 | aserciones sobre C5 y C6 en `main()`, y un almacén que voltea la clase hace caer C6 |
+| VE2-06 sin veredicto por tramo | 2 | la regla corre en T, O1 y O2, con la marca A104 (§8.5 paso 6) |
+| VE2-07 las 4 protegidas motivadoras son sólo del OCR | 3, SOSPECHA | dicho en §8.5; deciden igual (lectura A, todos los canales, como el §5.4) |
+| VE2-08 la variante no mueve lat/lon | 1 | declarado en §8.4 |
+| VE2-09 un ciclo daba texto vacío | 1 | NO RESUELTO entre los tres |
+| VE2-10 el lector leía el marco por defecto | 2 | las cuatro rutas son obligatorias |
+| VE2-11 referencias internas erradas | 1 | corregidas (§8.12 existe; el yml cita §8.8) |
+| VE2-12 una alerta bajo 1 MW pesa unas 5 veces una protegida | 1 | declarado en §8.5 (es el peso de la población; las protegidas las cuida el veto) |
+| VE2-13 la regla no exige sustrato en las lejanas | 1 | el lector dice cuántas `far_tabla` tienen alertado y avisa bajo 5 |
+
+Los arreglos no se re-verificaron con contexto limpio. Se comprobaron con la batería (130 de 130) y el nulo (76 de 77).
+Si la coordinadora o Nicolás quieren una pasada corta del verificador sobre el delta, el commit de esta versión la
+permite (como hizo V750-B con su adenda 2).

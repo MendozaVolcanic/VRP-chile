@@ -157,11 +157,17 @@ def envolver(x):
     return x
 
 
-def correr(lista, art_far=True):
+def correr(lista, art_far=True, N=None, sin_dato=()):
+    """N: {(clase, estrato): N} para pesos distintos de 1; sin_dato: objetivos sin pasada procesada (SIN DATO)."""
     obj = {o["id"]: o for o, _ in lista}
     pas = {o["id"]: p for o, p in lista}
+    meta = meta_de(obj)
+    for (c, h), n in (N or {}).items():
+        meta[c][h] = {"N": n}
+    for o in sin_dato:
+        obj[o["id"]] = o
     LP.L.clear()
-    out, f = LP.analizar(pas, obj, meta_de(obj), publicar, E, art_far)
+    out, f = LP.analizar(pas, obj, meta, publicar, E, art_far)
     return envolver(out), f
 
 
@@ -394,6 +400,76 @@ def main(argv=None):
         pasada(5, celdas_anillo(), "pos_prot", hora="2026-06-19 05:00", inner=1.0)])
     ok("ningún brazo pasa el veto", out["regla_posicion"]["veredicto"] == "NINGUN BRAZO PASA EL VETO",
        out["regla_posicion"]["veredicto"])
+
+    # ---------------- arreglos del verificador (VE2-01, VE2-04, VE2-06, VE2-09)
+    out, f = correr(base_marco() + lejana_vacia() + [
+        pasada(7, [], "pos_prot", vol="Tupungatito", hora="2026-08-01 05:00", tabla=False)])
+    rp = out["regla_posicion"]
+    ok("VE2-01: la protegida que callan los tres brazos no veta la posición; queda como pérdida común",
+       not any(rp["detalle"]["veto"][a] for a in LP.BRAZOS_POS)
+       and [tuple(x) for x in rp["detalle"]["perdidas_comunes"]] == [("Tupungatito", "2026-08-01 05:00")]
+       and rp["veredicto"].startswith("SE QUEDA RADIANTE"), (rp["detalle"].get("perdidas_comunes"), rp["veredicto"]))
+    neg5 = [pasada(10, celdas_lejana(), "neg_resto", vol="Llaima", pub_prod=0)]
+    out, f = correr(base_marco(n_neg=0) + neg5 + lejana_vacia(), N={("neg_resto", "Llaima|z<=40"): 5})
+    ok("VE2-04: un negativo limpio pesa N/n (5) y entra al error de la regla (cercano publica en él)",
+       out["pesos"].get("neg_resto|Llaima|z<=40") == 5.0
+       and out["regla_posicion"]["detalle"]["pares"]["radiante|cercano"]["neto"] == -5.0,
+       (out.get("pesos"), out["regla_posicion"]["detalle"]["pares"].get("radiante|cercano")))
+    falt = [pasada(20600 + k, [], "far_tabla", vol="Lastarria", hora=f"2026-09-{k + 1:02d} 05:00", lote="FAR",
+                   pub_prod=0, dist_ref=20.0) for k in range(10)]
+    out, f = correr(base_marco() + falt[:9], sin_dato=[falt[9][0]])
+    ok("VE2-04: regla del 10 %: 9 de 10 lejanas con dato decide", not out["regla_posicion"]["veredicto"].startswith(
+        "NO DECIDE"), out["regla_posicion"]["veredicto"])
+    out, f = correr(base_marco() + falt[:8], sin_dato=[falt[8][0], falt[9][0]])
+    ok("VE2-04: regla del 10 %: 8 de 10 no decide", out["regla_posicion"]["veredicto"].startswith("NO DECIDE"),
+       out["regla_posicion"]["veredicto"])
+    lst = base_marco()
+    lst[-1] = pasada(29000, [(40, 40, 1.0), (40, 41, 1.0)], "control_vida", lote="CTLF", m14=(0, None),
+                     ref_m14=[0, None])
+    out, f = correr(lst)
+    ok("VE2-04: C7 cae si ninguna re-medida tiene píxeles (port muerto que calla igual que la referencia)", "C7" in f, f)
+    ok("VE2-04: C3 rango CTLF", LP.control_listas({28999: {"lote": "CTLF", "ref_M14": [1, 1]}}, None, None)
+       and LP.control_listas({30000: {"lote": "CTLF", "ref_M14": [1, 1]}}, None, None))
+    rx, ry = LP.pos_ref({"paso": 375.0, "ul_x": 0.0, "ul_y": 1500.0, "x0": 562.5, "y0": 375.0})
+    ok("VE2-04: pos_ref en una grilla asimétrica (fila 2,5, columna 1)", (rx, ry) == (2.5, 1.0), (rx, ry))
+    dm = LP.distancias_mirova({"hora_utc": "2026-06-13 05:00", "clase": "pos_bajo", "mirova": [
+        {"tipo": "ALERTA_TERMICA_OCR", "source": "OCR", "dist_km": 2.0, "vrp_mw": 0.4}]})
+    ok("VE2-04: el OCR del mismo 2026-06-13 entra (A119, frontera inclusiva)", dm == {"alerta_ocr": 2.0}, dm)
+
+    class MVfalso:
+        LAMBDA_I4, LAMBDA_I5 = 3.74, 11.45
+        visto = []
+
+        @classmethod
+        def posicion_de(cls, g, lat, lon):
+            cls.visto.append((lat, lon))
+            return (0.0, 0.0)
+
+        caja_v375 = staticmethod(lambda g, lat, lon: cls_box)
+        procesar_grilla = staticmethod(lambda *a, **k: {})
+        detectar_mirova = staticmethod(lambda *a, **k: np.zeros((2, 2), bool))
+    cls_box = np.zeros((2, 2))
+    LP.record_de_la_via({"sensor": "x"}, {}, None, None, {"dayflag": 0, "sunglint": 0.0},
+                        {"vent_lat": -1.0, "vent_lon": -2.0, "lat": -3.0, "lon": -4.0, "inner_radius_km": 5}, MVfalso)
+    ok("VE2-04: la vía se mide desde el cráter (vent), no desde el centro del volcán", MVfalso.visto == [(-1.0, -2.0)],
+       MVfalso.visto)
+    ok("VE2-09: un ciclo da NO RESUELTO entre los tres, con texto", LP.decidir_brazo(V3, tabla({
+        ("radiante", "cercano"): "GANA", ("cercano", "pico"): "GANA", ("pico", "radiante"): "GANA"}))[0]
+       == "NO RESUELTO ENTRE RADIANTE Y CERCANO Y PICO (ciclo; decide Nicolas)")
+    # VE2-06 (A104): la unión elige cercano por las alertas de O2 y O1 por sí solo elegiría radiante
+    o2 = [pasada(400 + k, celdas_lejana(), "pos_bajo", vol="Lascar", hora=f"2026-09-{10 + k:02d} 05:00")
+          for k in range(6)]
+    o1 = ([pasada(20700 + k, celdas_lejana(), "far_tabla", vol="Lastarria", hora=f"2026-07-{10 + k:02d} 05:00",
+                  lote="FAR", pub_prod=0, dist_ref=15.0) for k in range(6)]
+          + [pasada(500 + k, celdas_borde(), "pos_bajo", vol="Isluga", hora=f"2026-07-{20 + k:02d} 05:00")
+             for k in range(6)])
+    out, f = correr(base_marco() + o2 + o1, N={("pos_bajo", "Lascar|z<=40"): 30})
+    rp = out["regla_posicion"]
+    ok("VE2-06: por tramo O1 ELEGIDO RADIANTE y O2 ELEGIDO CERCANO",
+       str(rp["detalle"]["por_tramo"]["O1"]).startswith("ELEGIDO RADIANTE")
+       and str(rp["detalle"]["por_tramo"]["O2"]).startswith("ELEGIDO CERCANO"), rp["detalle"].get("por_tramo"))
+    ok("VE2-06: la unión elige CERCANO y queda marcada por A104", rp["veredicto"].startswith("ELEGIDO CERCANO")
+       and "A104: en O1 sale otro brazo" in rp["veredicto"], rp["veredicto"])
     lst = base_marco() + bajos + lejana_vacia() + [pasada(20900 + k, celdas_lejana(), "far_ocr", vol="Lastarria",
                                                        hora=f"2026-08-{20 + k:02d} 05:00", lote="FAR")
                                                for k in range(8)]
@@ -557,7 +633,8 @@ def main(argv=None):
             (Path(dest) / "poblacion_completa.json").write_text(json.dumps(
                 {"meta": {"referencia": ref or shas}, "pasadas": pas}), encoding="utf-8")
         return {"poblar": poblar, "vols": ["Lascar"], "control_records": lambda d, v: list(malos),
-                "grillas": lambda: {"Lascar": {"n": 134}, "Isluga": {"n": 134}}, "control_vida": GF.control_vida}
+                "grillas": lambda: {"Lascar": {"n": 134}, "Isluga": {"n": 134}}, "control_vida": GF.control_vida,
+                "capas": lambda: {"data/x.csv": "1"}}
     with tempfile.TemporaryDirectory() as t:
         t = Path(t)
         mr = t / "marco.json"
@@ -568,6 +645,9 @@ def main(argv=None):
         ok("generar: OK escribe las listas, atadas por sha256", r == 0 and (t / "a/poblacion_far.json").exists()
            and len(run["pasadas"]) == 21 and sgj["objetivos_far_sha256"] == GF.sha256_bytes(
                (t / "a/objetivos_far_v375.json").read_bytes()) and len(sgj["pasadas"]) == 1, (r, len(run["pasadas"])))
+        ok("generar: el meta fija las capas locales de la referencia (VE2-02)",
+           json.loads((t / "a/objetivos_far_v375.json").read_text(encoding="utf-8"))["meta"]["capas_locales"]
+           == {"data/x.csv": "1"})
         ok("generar: segundo intento en la misma carpeta se niega", intento(lambda: GF.generar(
             t / "a", "d", "r", marco_ruta=mr, portes=t / "portes", dep=dep())) == 2)
         r = GF.generar(t / "b", "d", "r", marco_ruta=mr, portes=t / "portes", dep=dep(extra_pos=True))
@@ -583,6 +663,14 @@ def main(argv=None):
         ok("generar: no escribe en la carpeta del marco", GF.generar(t / "portes", "d", "r", marco_ruta=mr,
                                                                     portes=t / "portes", dep=dep()) == 2
            and not (t / "portes/poblacion_completa.json").exists())
+    cap = GF.capas_locales()
+    ok("generador: capas locales reales con sus sha256 LF (filas perdidas y respaldo del 2026-04-08)", cap == {
+        "data/mirova_reference/union_historica/consolidado_filas_perdidas.csv":
+            "2613e7cc03e75c2f6b0be41d11051ae847dece00be817d305b7e77d95bbf59e7",
+        "data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado_respaldo_20260408.csv":
+            "183aff7f38c6ca9ef93c8e0951f8190dd12be2690d54dbacb7d7acabaaa93568"}, cap)
+    ok("lista del run: el meta trae esas mismas capas", json.loads((AQUI / "objetivos_far_v375.json").read_text(
+        encoding="utf-8"))["meta"]["capas_locales"] == cap)
 
     # ---------------- main() de punta a punta, sin tocar el marco: un artefacto FAR falso cuyo único contenido son 5 de
     # las grillas reales de tests/datos_s165_v375 rotuladas como control de vida (CTLF no entra a ninguna lectura).
@@ -613,6 +701,29 @@ def main(argv=None):
            rc == 3 and "C7" in (t / "s.txt").read_text(encoding="utf-8") and "C3 listas: OK" in "\n".join(LP.L), rc)
         ok("main(): el blob de pipeline/mirova_v750_codigo.py se reconoce como el de #921 aunque el checkout tenga CRLF",
            "blob a9c00eaf137896231c5cb43759b1110b1e0d539c: el de #921" in "\n".join(LP.L))
+        ok("main() sobre 5 grillas reales: máscara vía = port C13 en todas, VRP contra la vara en todas, publicación por "
+           "brazo igual", len(res) == 5 and eqv.get("mascara_distinta") == [] and eqv.get("vrp") == [5, 5]
+           and not any((eqv.get("pub_distinta") or {"x": [1]}).values()), eqv)
+        log = "\n".join(LP.L)
+        ok("main() cableado: C5 en 5 de 5 (posición y referencia de la vía) y C6 sin cambios del almacén",
+           "record de la vía: 5 de 5" in log and "distintas 0" in log and "C1 una sola alertada => tres brazos iguales: 1 de 1"
+           in log, [x for x in LP.L if x.strip().startswith(("C1", "C5", "C6"))])
+        real = LP.por_el_almacen
+
+        def almacen_que_voltea(rec, *a, **k):          # un almacén que cambia la clase de todo lo que escribe
+            r = real(rec, *a, **k)
+            if r and r.get("distance_class"):
+                r["distance_class"] = "far" if r["distance_class"] == "summit" else "summit"
+            return r
+        LP.por_el_almacen = almacen_que_voltea
+        try:
+            LP.L.clear()
+            LP.main(["--art-far", str(t / "far"), "--art-s159", str(t / "vacio"), "--art-s162", str(t / "vacio"),
+                     "--art-s162b", str(t / "vacio")])
+        finally:
+            LP.por_el_almacen = real
+        ok("VE2-05: main() con un almacén que cambia la clase: C6 cae",
+           any(x.startswith("LECTURA NO LEGIBLE") and "C6" in x for x in LP.L), [x for x in LP.L if "LEGIBLE" in x])
     # C-G1 con un checkout CRLF: el mismo archivo de records tiene que reconocerse
     lascar = Path(r"D:\vrp-trabajo\temporales\s159_n\data_main\Lascar.json")
     if lascar.exists():
@@ -625,9 +736,6 @@ def main(argv=None):
             ok("generador C-G1: un byte distinto no pasa", GF.control_records(t, ["Lascar"]) != [])
     else:
         ok("generador C-G1 con CRLF: falta la copia de 533398f8f en D: (SIN DATO)", False)
-        ok("main() sobre 5 grillas reales: máscara vía = port C13 en todas, VRP contra la vara en todas, publicación por "
-           "brazo igual", len(res) == 5 and eqv.get("mascara_distinta") == [] and eqv.get("vrp") == [5, 5]
-           and not any((eqv.get("pub_distinta") or {"x": [1]}).values()), eqv)
 
     # ---------------- la lista real del run (forma, no contenido)
     run = json.loads((AQUI / "objetivos_run_far_v375.json").read_text(encoding="utf-8"))

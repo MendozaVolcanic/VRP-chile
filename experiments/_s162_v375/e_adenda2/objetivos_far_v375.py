@@ -223,7 +223,8 @@ def generar(dest, data, ref_dest, marco_ruta=MARCO, portes=PORTES, dep=None):
     far = completar(far, dep["grillas"]())
     meta = {"marco": str(Path(marco_ruta).relative_to(RAIZ)) if Path(marco_ruta).is_relative_to(RAIZ) else str(marco_ruta),
             "marco_sha256": sha256_bytes(Path(marco_ruta).read_bytes()), "records": COMMIT_RECORDS,
-            "referencia": shas, "poblacion_far_sha256": pob_sha, "excluidos": list(EXCLUIDOS), "id0": ID0,
+            "referencia": shas, "capas_locales": dep["capas"](), "poblacion_far_sha256": pob_sha,
+            "excluidos": list(EXCLUIDOS), "id0": ID0,
             "clases": {c: sum(1 for p in far if p["clase"] == c) for c in ("far_tabla", "far_ocr")}}
     txt = json.dumps({"meta": meta, "pasadas": far}, ensure_ascii=False, indent=0, default=str)
     (dest / "objetivos_far_v375.json").write_bytes(txt.encode("utf-8"))
@@ -269,7 +270,16 @@ def dependencias_reales():
             sys.argv = viejo
 
     return {"poblar": poblar, "vols": list(B.VOLS), "control_records": control_records, "grillas": grillas_s162,
-            "control_vida": control_vida}
+            "control_vida": control_vida, "capas": capas_locales}
+
+
+def capas_locales():
+    """VE2-02 del verificador: cargar_referencia_unificada suma por defecto dos capas locales del repo (las filas que
+    la tabla de Mirova-v1 tuvo y perdió, y el respaldo del 2026-04-08), y 15 de las 330 lejanas sacan de ahí su fila
+    FALSO_POSITIVO. Se fijan por sha256 LF junto a los commits de la referencia."""
+    import referencia_mirova_unificada as R
+    return {str(Path(q).relative_to(RAIZ)).replace(chr(92), "/"): sha256_bytes(Path(q).read_bytes())
+            for q in (R.HISTORICO_RECUPERADAS, R.RESPALDO_20260408)}
 
 
 def main(argv=None):

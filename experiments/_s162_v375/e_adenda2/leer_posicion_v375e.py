@@ -70,9 +70,9 @@ TOL_VRP_MW = 1e-3                   # §3.1: VRP a 1e-3 MW en el 99 % o más
 FRAC_VRP = 0.99
 ID_FAR = (20000, 29000)
 ID_CTLF = (29000, 30000)
-ART = {"S159": r"D:\vrp-trabajo\temporales\s159_portes\run_39712862945",
-       "S162": r"C:\vrp-trabajo\temporales\s162_v375\run_40116289866",
-       "S162b": r"C:\vrp-trabajo\temporales\s162_v375\run_40131572769"}
+# VE2-10: sin rutas por defecto, para que leer el marco sea siempre explícito (no se mira antes del sello). Las de los
+# lotes para el §8.9: D:\vrp-trabajo\temporales\s159_portes\run_39712862945 (S159),
+# C:\vrp-trabajo\temporales\s162_v375\run_40116289866 (S162) y C:\vrp-trabajo\temporales\s162_v375\run_40131572769 (S162b).
 L = []
 
 
@@ -281,6 +281,8 @@ def decidir_brazo(vivos, veredicto_par):
     if len(gana) == 1:
         return f"ELEGIDO {gana[0].upper()} (gana a los demas)", gana
     no_vencidos = [a for a in vivos if not any(veredicto_par(b, a) == "GANA" for b in vivos if b != a)]
+    if not no_vencidos:          # ciclo (a vence a b, b a c, c a a): VE2-09 del verificador
+        return "NO RESUELTO ENTRE " + " Y ".join(x.upper() for x in vivos) + " (ciclo; decide Nicolas)", list(vivos)
     if len(no_vencidos) == 1:
         return f"ELEGIDO {no_vencidos[0].upper()} (nadie lo vence)", no_vencidos
     if "radiante" in no_vencidos:
@@ -293,9 +295,15 @@ def regla_posicion(filas, E, far_ok=True, solo_tabla=False):
     tabla (informa). Devuelve (veredicto, detalle)."""
     det = {"veto": {}, "pares": {}}
     marco = [x for x in filas if x["c"] not in CLASES_FAR]
+    prot_k = [x for x in marco if x["c"] == "pos_prot" and x["K"] and (x["tabla"] or not solo_tabla)]
+    # VE2-01: el veto de la posición cuenta sólo lo que depende de la posición, la protegida que K publica, el brazo
+    # calla y OTRO brazo publica. La que callan los tres no la arregla ninguna regla de posición: se informa aparte y
+    # sigue siendo veto del paquete en el §5.4 (a), no de esta elección.
+    det["perdidas_comunes"] = [(x["vol"], x["hora"]) for x in prot_k
+                               if not any(x["X"][("VIA", b)] for b in BRAZOS_POS)]
     for a in BRAZOS_POS:
-        det["veto"][a] = [(x["vol"], x["hora"]) for x in marco
-                          if x["c"] == "pos_prot" and x["K"] and not x["X"][("VIA", a)] and (x["tabla"] or not solo_tabla)]
+        det["veto"][a] = [(x["vol"], x["hora"]) for x in prot_k
+                          if not x["X"][("VIA", a)] and any(x["X"][("VIA", b)] for b in BRAZOS_POS if b != a)]
     vivos = [a for a in BRAZOS_POS if not det["veto"][a]]
     det["vivos"] = vivos
     if not far_ok:
@@ -537,9 +545,29 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
 
     # ---- regla de posición
     ver, det = regla_posicion(marco + far_t, E, far_ok=far_ok)
+    # VE2-06 (A104): la misma regla dentro de cada tramo. Si en O1 o en O2 por separado otro brazo queda ELEGIDO, la
+    # elección de la unión se marca y decide Nicolás.
+    por_tramo = {}
+    for tr in ("T", "O1", "O2"):
+        sub = [x for x in marco + far_t if x["tramo"] == tr]
+        por_tramo[tr] = regla_posicion(sub, E, far_ok=far_ok)[0] if sub else "SIN PASADAS"
+    elegido = ver.split()[1] if ver.startswith("ELEGIDO") else ("RADIANTE" if ver.startswith("SE QUEDA") else None)
+    otros = [tr for tr in ("O1", "O2") if por_tramo[tr].startswith("ELEGIDO") and elegido
+             and por_tramo[tr].split()[1] != elegido]
+    if otros:
+        ver = f"{ver} [A104: en {' y '.join(otros)} sale otro brazo; decide Nicolas]"
+    det["por_tramo"] = por_tramo
+    n_alert = sum(1 for x in far_t if x["npix"].get(("VIA", "radiante"), 0))
+    det["far_tabla_con_alertado"] = n_alert
     out["regla_posicion"] = {"veredicto": ver, "detalle": det}
+    out["pesos"] = {f"{c}|{h}": round(w, 6) for (c, h), w in sorted(pesos.items())}
     pr("\n== regla de posición (§8.5)")
-    pr("  veto (protegidas que K publica y el brazo calla):", {a: det["veto"][a] for a in BRAZOS_POS})
+    pr("  pérdidas comunes a los tres brazos (no dependen de la posición; veto del paquete en §5.4 a):",
+       det["perdidas_comunes"])
+    pr("  veto (protegida que K publica, el brazo calla y otro brazo publica):", {a: det["veto"][a] for a in BRAZOS_POS})
+    pr(f"  far_tabla con algún alertado en la caja: {n_alert}"
+       + (" (menos de 5: las lejanas no tienen sustrato para pesar en la elección; informa)" if n_alert < 5 else ""))
+    pr("  por tramo (A104):", por_tramo)
     for k, v in det.get("pares", {}).items():
         pr(f"  {k}: {v['veredicto']} (neto {v['neto']:+.1f}, B {v['B']}, bloques por tramo {v['bloques_por_tramo']})")
     pr("  VEREDICTO POSICION:", ver)
@@ -552,12 +580,12 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
 # ---------------------------------------------------------------- main (datos reales)
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--art-far", default=None)
+    ap.add_argument("--art-far", required=True)
     ap.add_argument("--objetivos-far", default=str(AQUI / "objetivos_run_far_v375.json"))
     ap.add_argument("--sin-granulo-far", default=str(AQUI / "sin_granulo_far_v375.json"))
-    ap.add_argument("--art-s159", default=ART["S159"])
-    ap.add_argument("--art-s162", default=ART["S162"])
-    ap.add_argument("--art-s162b", default=ART["S162b"])
+    ap.add_argument("--art-s159", required=True)
+    ap.add_argument("--art-s162", required=True)
+    ap.add_argument("--art-s162b", required=True)
     ap.add_argument("--salida", default=None)
     ap.add_argument("--json", default=None)
     a = ap.parse_args(argv)
