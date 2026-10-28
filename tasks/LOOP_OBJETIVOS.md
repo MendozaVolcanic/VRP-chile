@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 02:55 UTC aprox. (S166, vuelta 8): primeros records escritos con #920 a #922, comprobados (sólo MODIS)
+- NRT 40619358161 (02:10, `workflow_dispatch`, sobre `1d2735e8a`, que contiene #920 a #922): success; commiteó Llaima,
+  Copahue, Chaiten, PCC y Villarrica (`e3c622876` a `55c95c705`).
+- Los records que cambian entre `7a17af8c4` y `55c95c705` son **5, todos MODIS Aqua 2026-10-27 08:40**: el paso de NRT a
+  Standard del mismo gránulo (`product_version` nrt a standard), con `regimen.codigo_sha` = `1d2735e8a`, o sea escritos
+  por el código nuevo. Script: `experiments/_s166/nrt_campos_s166.py`. En los 5: **mismo conjunto de campos** que el
+  record que reemplazan (incluidos los de `primary_cluster`); **0** con «codigo_mirova» en el texto; cambian sólo
+  diagnósticos de fondo (`diag_*`), `granule`, `processed_utc`, `product_version` y `regimen`; `vrp_mw`,
+  `distance_class` y `primary_cluster` iguales.
+- Queda SIN VERIFICAR para VIIRS 375 y VIIRS 750 (ningún record VIIRS nuevo todavía) y para MODIS de pasada nueva. Eso lo
+  cubre el bit a bit de VIIRS 375 (pendiente: necesita un PR que lleve el probe a `.github/workflows/`).
+- W5 (40617142287): 2 jobs en verde, 3 corriendo, 17 en cola.
+
 ### 2026-10-28 02:00 UTC aprox. (S166, vuelta 7): V750-A con los tres brazos de posición (borrador)
 - Loop VIIRS 750 2: brazos radiante, cercano y pico en el analizador de V750-A, commit `8b9156476` (en el remoto,
   comprobado; `experiments/_s162_v750b/` intacto desde `609fa1c88`). Lecturas L20 a L27 en
