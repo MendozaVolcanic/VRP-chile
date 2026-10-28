@@ -256,6 +256,8 @@ def correr(dest, evaluador, nombre, viejo=None, nuevo=None, escenarios=""):
     finally:
         copia.unlink()
     txt = o.stdout + o.stderr
+    # S162 (relevo): M82 cayó sin línea de pruebas y sin traza; la salida entera de cada corrida queda en disco
+    (dest / f"salida_{nombre}.txt").write_text(txt, encoding="utf-8")
     linea = next((x for x in txt.splitlines() if x.startswith("== PRUEBAS")), "(sin línea de pruebas)")
     atrapan = [x.split(" | ")[0] for x in txt.splitlines() if " | FALLA" in x]
     if o.returncode == 0 and "TODOS LOS ESCENARIOS COMO SE ESPERA" in linea:
