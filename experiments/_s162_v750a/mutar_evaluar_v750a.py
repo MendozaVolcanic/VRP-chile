@@ -14,7 +14,8 @@ M29 a M52 se agregaron tras el verificador limpio (VA-01 a VA-07): cada una romp
 roturas V01 a V41 mostraron sin vigilar. M53 a M56 (y M15, M29, M50, M52 reescritas) son de la resolución de L2, L4, L7
 y L18 por D-48 (relevo VIIRS 750, 2026-10-25). La antigua M50 («el placebo de publicación siempre pasa») ya no se puede
 atrapar: con el predicado de hoy toda diferencia K contra K×1,2 tiene t_max frío y se explica (A116, LECTURAS).
-M63 a M80 son de los brazos de posición (§3 y §6 bis, decisión de Nicolás del 2026-10-27).
+M63 a M80 son de los brazos de posición (§3 y §6 bis, decisión de Nicolás del 2026-10-27). M81 a M85, del verificador limpio de
+esos brazos (verificador_posicion/INFORME.md: MV2, MV3, MV9, MV10 y el arreglo de VP-01).
 --escenarios (S162, brazos de posición) restringe la batería a los escenarios nombrados, en IDENTIDAD, CAIDA y cada
 mutación. Sirve para medir rápido las mutaciones de una pieza nueva contra los escenarios que la fijan (la batería entera
 tarda unos 40 min por corrida con un hilo); una mutación ATRAPADA así cae por aserción EN ESOS escenarios, pero no
@@ -212,6 +213,21 @@ MUTACIONES = {
             'con_alert = sum(bool((res[i]["paquete"]["P"] or {}).get("npix")) for i in far)', "con_alert = len(far)"),
     "M80": ("§6 bis (A119): la distancia del OCR se usa también antes del 2026-06-13",
             'and (f.get("source") == "CONS" or o["hora_utc"] >= AB.FRONTERA_OCR)', "and True"),
+    # tras el verificador limpio de los brazos de posición (verificador_posicion/INFORME.md): sus MV2, MV3, MV9 y MV10,
+    # las dos piezas que el autor había dejado sin cubrir, y la del arreglo de VP-01
+    "M81": ("§6 bis (L20, MV2): E_lejana con la tabla sola cuenta también los FALSO_POSITIVO del OCR",
+            'startswith("FALSO_POSITIVO") and f.get("source") == "CONS"', 'startswith("FALSO_POSITIVO") and True'),
+    "M82": ("§6 bis (MV3): elegible mira sólo la tabla, no tabla más OCR",
+            "for v in VENTANAS for canal in CANALES) for b in POS}",
+            'for v in VENTANAS for canal in ("tabla",)) for b in POS}'),
+    "M83": ("§6 bis (L20, MV9): para las far_ref el canal que decide es siempre la tabla sola",
+            'canal = "tabla" if o["hora_utc"] < AB.FRONTERA_OCR else "todo"\n    if canal == "tabla":',
+            'canal = "tabla"\n    if canal == "tabla":'),
+    "M84": ("§6 bis (MV10): la condición «con la tabla sola» se mide con el canal que decide",
+            'p2t = {b: p2(b, "P", "TODO", "tabla", lejana=True) for b in POS[1:]}',
+            'p2t = {b: p2(b, "P", "TODO", "decide", lejana=True) for b in POS[1:]}'),
+    "M85": ("§6 bis (VP-01): una lista descriptiva cortada a 20 no lo dice",
+            '+ (f" (y {len(lst) - n} más, cortada a {n})" if len(lst) > n else "")', '+ ""'),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),

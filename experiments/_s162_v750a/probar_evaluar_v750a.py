@@ -95,6 +95,13 @@ del radio de 5 km; pico y cercano en el cráter) y la de Llaima con el cráter c
   E71 3 far_ref sin alertados que K publica: E_lejana 0 marcado «no dice nada», y las far_ref no entran a P2 contra K.
   E72 base sin far_ref: la vara lejana es SIN DATO y la regla se lee igual (queda P).
   E73 4 alertas sólo del OCR antes del 2026-06-13: no entran a la distancia contra MIROVA (A119).
+Agregados tras el verificador limpio de los brazos de posición (verificador_posicion/INFORME.md, LISTO CON CAMBIOS;
+W3 y W4 son suyos, W5 adaptado):
+  E74 (W3) una protegida sólo del OCR que K y P publican y cercano y pico pierden (escena «anillo»): «elegible» mira
+      también tabla más OCR, así que P-cercano no es elegible aunque gane P2' y queda P (radiante).
+  E75 (W4) bajas y far_ref sólo del OCR en O: con la tabla sola E_lejana no cuenta los FALSO_POSITIVO_OCR (SIN SUSTRATO
+      con neto 0, no peor) y P-cercano gana con el canal que decide (neto -8 en 16 bloques).
+  E76 (W5) 24 pasadas que cambian contra P: la lista impresa dice que se cortó a 20 (VP-01).
 La población base suma para el S-1: celda de Cordón Caulle en el pase 2 y la zona 2 (el pase 1 y la zona 1 con otro
 umbral), una alerta de Tupungatito cuyo NTI cruza entre los umbrales pero el ETI no, y un diagnóstico mal formado.
 Una caída nativa del analizador (código fuera de 0, 3, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
@@ -515,6 +522,24 @@ def _prot_cerca_lejos(pb):
     pb.pasada("Lascar", "2026-09-01 06:00", "pos", K=1.2, P=3.0, mirova_vrp=3.0, px=px_cerca_lejos("Lascar"))
 
 
+def px_anillo(volcan):
+    """Verificador de posición (W2, W3): borde de un cuadrado de 8 celdas de radio centrado en el cráter. Es 8-conexo y su
+    centroide cae EN el cráter (summit para el radiante), pero todos sus píxeles quedan a 6 km o más (far para cercano y
+    pico). El más radiante es una esquina."""
+    f, c = CRATER[volcan]
+    pts = set()
+    for k in range(-8, 9):
+        pts.update({(f - 8, c + k), (f + 8, c + k), (f + k, c - 8), (f + k, c + 8)})
+    px = [[a, b, 2, 0.0, 1.0] for a, b in sorted(pts)]
+    px[0][4] = 2.0
+    return px
+
+
+def _prot_ocr_anillo(pb):
+    """E74 (W3): protegida de Láscar en O, sólo del OCR, que K y el radiante publican y cercano y pico pierden."""
+    pb.pasada("Lascar", "2026-09-01 06:00", "pos", K=1.2, P=3.0, mirova_vrp=3.0, px=px_anillo("Lascar"), tabla=False)
+
+
 SEIS = range(1, 7)
 NEGS_CERCANO = _escena("Villarrica", range(11, 17), "neg_limpio", px_cerca_lejos, hora="05:00")
 
@@ -778,6 +803,24 @@ ESCENARIOS = {
                         ["P (radiante) 0.50 km, 0.96, n=24", "P-cercano 0.50 km, 0.96, n=24"])],
                 no_contiene=[("   §6 bis distancia desde la celda central contra MIROVA, alertas con distancia",
                               "n=28")]),
+    "E74": dict(pob=lambda: base(extra=_y(_prot_ocr_anillo,
+                                          _escena("Lascar", range(10, 16), "pos", px_cerca_lejos, mes="2026-09"))), rc=0,
+                tiene=[("== §6 bis elegibles", ["P (radiante) sí", "P-cercano no", "P-pico no"]),
+                       ("   §6 bis P2' P-cercano", ["canal que decide GANA"]),
+                       ("== §6 bis posición elegida: P (radiante)", [])]),
+    "E75": dict(pob=lambda: base(extra=_y(_escena("Villarrica", range(1, 13), "pos", px_cerca_lejos, mes="2026-09",
+                                                  tabla=False),
+                                          _escena("Lascar", range(15, 19), "far_ref", px_cerca_lejos, mes="2026-09",
+                                                  hora="05:00", tabla=False))), rc=0,
+                tiene=[("   §6 bis P2' P-cercano", ["canal que decide GANA (neto -8, bloques 16)",
+                                                  "tabla sola SIN SUSTRATO (neto 0, bloques 0)"]),
+                       ("== §6 bis posición elegida: P-cercano", ["gana contra P"])]),
+    "E76": dict(pob=lambda: base(extra=_y(_escena("Lascar", range(1, 15), "pos", px_linea),
+                                          _escena("Villarrica", range(1, 5), "pos", px_cerca_lejos),
+                                          _escena("Villarrica", range(11, 17), "far_ref", px_cerca_lejos, mes="2026-09",
+                                                  hora="05:00"))), rc=0,
+                tiene=[("   §6 bis cambian de publicación contra P (radiante), P-cercano: 24", ["(y 4 más, cortada a 20)"]),
+                       ("== §6 bis posición elegida: P-pico", ["ganan los dos", "menor E + E_lejana"])]),
 }
 
 

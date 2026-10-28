@@ -31,7 +31,7 @@ M13, con el desempate de max(). Es la misma regla de experiments/_s162_v750b/ade
 record_pos), copiada aquí y marcada (punto_pos, rec_pos) para que el medidor de mutaciones la pueda romper. La regla del
 §6 bis (elegible, gana, desempate, NINGUNA POSICIÓN ELEGIBLE) se aplica en el censo antes del §6, y el §6 se evalúa
 después sobre el brazo elegido como «P». La vara suma E_lejana: las pasadas far_ref en que el brazo publica (P2' = la
-prueba de signos de D-45 sobre E + E_lejana por bloque noche-volcán). Las lecturas L20 a L27 de LECTURAS_EVALUAR_V750A.md
+prueba de signos de D-45 sobre E + E_lejana por bloque noche-volcán). Las lecturas L20 a L28 de LECTURAS_EVALUAR_V750A.md
 fijan lo que el texto deja abierto.
 
 Formato de los artefactos (contrato para el probe o el cálculo local que los produzca):
@@ -157,6 +157,12 @@ def en_ventana(o, v):
 
 
 # ---------------------------------------------------------------- §6 bis, brazos de posición
+def corta(lst, n=20):
+    """VP-01 (verificador de posición), como VAD2-11 de V750-B: una lista impresa que se corta lo dice."""
+    lst = list(lst)
+    return str(lst[:n]) + (f" (y {len(lst) - n} más, cortada a {n})" if len(lst) > n else "")
+
+
 def etiqueta_lejana(o, canal):
     """§6 bis (LECTURA L20): ¿la pasada es far_ref para el canal? MIROVA vio el calor y lo ubicó lejos del cráter, así
     que publicarla como cumbre es publicar de más. Con la tabla sola cuenta sólo si la fila FALSO_POSITIVO es de la
@@ -508,11 +514,14 @@ def main(argv=None):
            f"{[nombre(i) for i in pl_frio][:10]}; sin explicar {len(pl_dist)} {pl_dist[:10]}: "
            f"{'OK' if not pl_dist else 'FALLA'}")
         # placebo, M con el comparador: d′ es 0 para una ganancia pareja, así que M no lo puede dar por mejor
+        # VP-03 (LECTURA L28): sobre los pares de LOS TRES brazos de posición, porque el brazo que decide el §6 se elige
+        # después de esta compuerta; así el placebo cubre los pares de cualquiera que se elija
         pl_m = {}
         for v in VENTANAS:
             for canal in CANALES:
-                pl_m[f"{v}/{canal}"] = decidir_m([dict(p, d=p["k"] * GANANCIA_PLACEBO)
-                                                  for p in m_pares("P", v, canal)])[0]
+                for b in POS:
+                    pl_m[f"{NOM_POS[b]} {v}/{canal}"] = decidir_m([dict(p, d=p["k"] * GANANCIA_PLACEBO)
+                                                                   for p in m_pares(b, v, canal)])[0]
         ctrl["placebo (M con comparador)"] = all(r != "MEJORA" for r in pl_m.values())
         pr(f"== control placebo K×1,2 (M con comparador, tiene que no dar MEJORA): {pl_m}: "
            f"{'OK' if ctrl['placebo (M con comparador)'] else 'FALLA'}")
@@ -718,14 +727,14 @@ def main(argv=None):
         for b in POS[1:]:
             lst = [f"{nombre(i)} ({etiqueta(obj[i], 'decide') or obj[i]['lab']}, {'publica' if pub(i, b) else 'calla'})"
                    for i in oks if pub(i, b) != pub(i, "P")]
-            pr(f"   §6 bis cambian de publicación contra P (radiante), {NOM_POS[b]}: {len(lst)} {lst[:20] or 'ninguna'}")
+            pr(f"   §6 bis cambian de publicación contra P (radiante), {NOM_POS[b]}: {len(lst)} {corta(lst) if lst else 'ninguna'}")
         if far:
             con_alert = sum(bool((res[i]["paquete"]["P"] or {}).get("npix")) for i in far)
             pr(f"   §6 bis pasadas lejanas: con algún alertado {con_alert} de {len(far)}"
                + (" (sin alertados: un cero de E_lejana no dice nada)" if not con_alert else "") + " | "
                + " | ".join(f"{NOM_POS[b]} publica {sum(pub(i, b) for i in far)}" for b in POS) + " | lista "
-               + str([f"{nombre(i)} ({'/'.join(NOM_POS[b] for b in POS if pub(i, b))})" for i in far
-                      if any(pub(i, b) for b in POS)][:20]))
+               + corta([f"{nombre(i)} ({'/'.join(NOM_POS[b] for b in POS if pub(i, b))})" for i in far
+                        if any(pub(i, b) for b in POS)]))
         pr("== §6 bis distancia de cada brazo desde la celda central de la grilla contra la Distancia_km de MIROVA "
            "(diferencia de RADIOS, A93: cota inferior de la separación; OCR sólo desde el 2026-06-13, A119; |delta| "
            "mediana, fracción a 1 km o menos, n)")
