@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 14:40 UTC (S167, vuelta 7): mutaciones de MOD-D fase 4 terminadas, pero NO VALE
+- W6: 12 de 22 jobs en verde. V750-A en `44ed62768`. Disco sin cambios (C: 18 GB, D: 7 GB).
+- MOD-D fase 4: la rama remota sigue en `ff03538dd`, pero en su worktree (`focused-pascal-db1501`, sin commitear)
+  `mutar_evaluar_f4_salida.txt` terminó a las 14:35 UTC: 63 escenarios, **81 de 82 mutaciones atrapadas por aserción**,
+  M82 `excluida_sin_publicacion_ok` CAE (E58), y la línea final dice **«NO VALE: controles que no salen como deben:
+  ['CONTROL_CAIDA']»** (el control de caída salió ATRAPADA y debía salir CAE). Leído sin tocar el worktree. Pedido a la
+  sesión: arreglar el control de caída y M82, poner el §13 al día (dice 40 escenarios y 46 mutaciones) y empujar. El
+  sello (§b 1) no se pide hasta entonces.
+
 ### 2026-10-28 14:10 UTC aprox. (S167, vuelta 6): N-3 escrita en el borrador de V750-A
 - `44ed62768` (comprobado: sólo cambian `PREREGISTRO_V750A.md` +27 y `LOOP_VIIRS750.md`): N-3 en §6 ter con la misma
   regla de V375-E §8.13 (protegida sin alerta de la tabla, `VIIRS_SNPP_750`, antes del 2026-10-09: no veta, se lista
