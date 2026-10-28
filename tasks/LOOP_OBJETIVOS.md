@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 12:50 UTC aprox. (S166, vuelta 22): adenda 2 de V375-E SELLADA y con tag
+- V375-E fase 4: **`67838f2a5`**, tag anotado **`s166-v375e-adenda2-sellada`** (comprobado: apunta a ese commit). Sobre
+  `349409880`; sólo cambia `experiments/_s162_v375/` (comprobado). N-3 aplicado como regla con pruebas y mutaciones
+  L63 a L65; la vara nueva del paso 1 aceptada, con la vieja a la vista. Según el autor: batería 140 de 140, nulo 83
+  de 84 en CRLF. S166 vuelve a correr la batería en su árbol LF de D:.
+- **Despacho** (§8.8): push a una rama de disparo `s166-v375e-far-disparo`, desde el tag, con el yml copiado a
+  `.github/workflows/` (no se mergea); 14 trozos con `max-parallel: 8`, unas 2,5 h de runner. **Queda para cuando
+  termine W6** (40681454167, con 16 jobs en cola), para no pasar el cupo de 20 jobs con el NRT encima.
+- MOD-D fase 4: corrida final en marcha (unos 40 min).
+
 ### 2026-10-28 12:30 UTC (S166, vuelta 21): bit a bit VERDE en VIIRS 375 y 750
 - Run **40683093630** (`probe-s166-bitabit-nrt.yml`, `pre-s165-via-375` contra main `ba61c330f`, día 2026-10-26, mismo
   runner): success, 4 de 4. En Láscar, Chillán, PCC y Villarrica, los dos comparadores (VIIRS 375 y VIIRS 750) dan
