@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 11:55 UTC aprox. (S166, vuelta 20): #923 y #924 MERGEADOS; bit a bit despachado
+- Nicolás, en este chat, ante la pregunta «¿Me das las frases de merge de #923 y #924?» con los dos sha: «Apruebo los
+  dos». Merge con `--match-head-commit`: **#923** en `34de58c29` (sha aprobado `79d93cace`) y **#924** en `ba61c330f`
+  (sha aprobado `25fcb9c8e`).
+- `pipeline/` de main `ba61c330f` igual al de `7a17af8c4` (#922). Bit a bit despachado:
+  `probe-s166-bitabit-nrt.yml`, `ref_main=pre-s165-via-375`, `ref_rama=ba61c330f`, `fecha=2026-10-26`, run
+  **40683093630**.
+- Las sesiones caídas por el token (Loop VIIRS 750 2, MOD-D fase 4) no tomaron el mensaje de reanudación en 20 s: hay
+  que reabrirlas desde la app.
+
 ### 2026-10-28 12:05 UTC aprox. (S166, vuelta 19): «continúa con todo lo que recomiendes»
 - Nicolás, en este chat: «continua con todo lo que recomiendes, si lo mandas a papelara recuerda borrarlo de ahi
   tambien».
