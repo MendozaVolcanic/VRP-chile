@@ -14,10 +14,24 @@ Actualización de la coordinadora sobre el borrador: CM162 (cúmulos por matriz)
 publicaciones V750 en K, 1 protegida cruza 1 MW), y es **una sola divergencia con el doble conteo: D17 sin de-solape ni
 remuestreo**. Pegar fragmentos no es neutro (un negativo limpio de PCC sube de 0,447 a 3,03 MW).
 
+> ⚠️ **S167, 2026-10-28 (A113): buena parte de este programa quedó vieja.** Las fases 0 a 3 están hechas o casi, y las
+> tres vías «código MIROVA» ya están en `main`, apagadas. **El estado vigente y el camino a la adopción (PD4) de cada
+> sensor están en el §12**, que se agregó al final. Cada pasaje que cayó lleva una marca al inicio con qué cayó y la
+> evidencia; el texto viejo se conserva por historia. Insumo: un resumen de sólo lectura con evidencia por experimento
+> (S167), del que la coordinadora comprobó por su cuenta los PR, V750-C, B2 de V375 y MOD-C. La bitácora
+> (`tasks/LOOP_OBJETIVOS.md` §6) se cita por entrada (sesión y vuelta), no por línea, porque sus líneas corren.
+
 ## 1. Diagnóstico en una pantalla
 
 Criterio de victoria: `docs/MISSION.md:59-103` (ninguna protegida perdida en lectura A; suma de errores bajo 1 MW;
 recall, negativos limpios y razón de magnitud por sensor y por tramo A119).
+
+> ⚠️ **S167 (A113)**: las cifras de esta tabla son de S159 y de la ventana de #864. Cayeron o cambiaron: el «0,9 % con
+> cota de 8,5 %» de VIIRS 375 (V375-B2, run 40131572769: 6 de 1.165 noches limpias nuevas, 0,52 % [0,24; 1,12], cota
+> 2,48 %, `experiments/_s162_v375/b2/resultado_run40131572769/INFORME.md`); el «GANA NO RESUELTO» de MODIS (MOD-C
+> INDECIDIBLE con 2 de 390, y el censo de MOD-D da P2 GANA, neto −41, bitácora S164 v13 a v16); y la fila «Lo que
+> falla hoy» de VIIRS 750, donde V750-C ya dijo qué calla las cumbres (§3). El audit del 2026-10-26 (#915) da recall
+> MODIS 62,5 % (n 16) y VIIRS 750 74,0 % (n 50). Lo vigente, en el §12.
 
 | | VIIRS 750 | VIIRS 375 | MODIS |
 |---|---|---|---|
@@ -37,20 +51,35 @@ recall, negativos limpios y razón de magnitud por sensor y por tramo A119).
 2. **D25 sale del programa de la réplica**: MIROVA dilata el hueco, interpola con `fillmissing2`, suma todo y no
    recorta (`MIROVA_VIIRS750_VRP.m:63-85`); D25 en V750 publica el 100 % de las cumbres que K deja en 0 MW sin
    seleccionar (`experiments/_s162_vuelta1/VERIFICADOR_ENCENDIDAS.md`).
-3. **Las cumbres de 0 MW no las calla la compuerta**: el código de MIROVA, sin compuerta, tampoco las detecta (1 de
+3. ⚠️ **S167 (A113)**: el «SIN DATO» del final ya tiene respuesta. V750-C (`experiments/_s162_v750c/INFORME.md`,
+   corrección del verificador Fable 5.1) dice que son **dos piezas**: dentro de la caja sensible calla la interpolación
+   lineal (el vecino más cercano recupera 23 de 38, en la celda de K) y fuera de ella (Tupungatito 17, PCC 4, Láscar 1)
+   calla primero la ROI. El remuestreo nativo sigue sin brazo propio (lo mide N0/N1 dentro de V750-B). Texto original:
+   **Las cumbres de 0 MW no las calla la compuerta**: el código de MIROVA, sin compuerta, tampoco las detecta (1 de
    60 con caja por defecto, 4 de 60 con la sensible, `n/INFORME.md:256,273-274`). Qué pieza las calla es SIN DATO: de
    ahí V750-C.
 4. **D17 (remuestreo) deja de competir y pasa a ser pieza obligatoria**: con la grilla GEO el oráculo da 0,999 (±2 %)
    y 0,996 sobre 50°; MIROVA no agrupa, publica la unión. Los cúmulos por matriz (CM162) quedan subsumidos.
-5. **La ROI por volcán es el mayor riesgo para las protegidas**: con la caja por defecto el paquete V750 pierde 6
+5. ⚠️ **S167 (A113)**: V750-C cuenta **7** protegidas perdidas con la caja por defecto, todas de PCC, sobre su propia
+   población; el 6 de abajo es del censo del oráculo. Las dos cifras no se reconciliaron (poblaciones distintas). Y la
+   vía de `main` usa hoy esa caja (`roi_v750: def` en los 11 volcanes, `pipeline/grillas_mirova.yaml`). Texto original:
+   **La ROI por volcán es el mayor riesgo para las protegidas**: con la caja por defecto el paquete V750 pierde 6
    protegidas de Cordón Caulle (`oraculo_censo/INFORME.md:89-102`).
 6. **No se busca aplanar la curva con el cenit sino reproducir la de MIROVA**, que también cae (más oblicua sobre
    menos oblicua de la misma noche: MIROVA 0,503, oráculo 0,517, K 0,239; `tasks/LOOP_OBJETIVOS.md:1121-1122`).
+   ⚠️ **S167 (A113, A101)**: la cita de línea corrió; esas cifras están en la entrada «2026-10-21 (S159, dueña del
+   loop): negativo con cráter, código OSF, verificador del oblicuo; guía y censo del oráculo lanzados» de la bitácora.
 7. **El instrumento tiene un hueco que ningún control veía** (12-oct: 44 pasadas ausentes en todos los brazos, una
    protegida de 8,44 MW; `experiments/_s162_vuelta2/RECORD_FALTANTE_CHILLAN_12OCT.md`).
 8. **Suomi NPP cesa el 2026-11-02 13:00 UTC**: toda ventana posterior es otro régimen.
 
 ## 2. Reglas comunes a todos los experimentos
+
+> ⚠️ **S167 (A113)**: dos puntos cambiaron. (1) El 12-oct: V750-B y V375-E eligieron **excluirlo** en todos los
+> brazos, no rescatar gránulos de LAADS. (2) La escala: la práctica vigente es **un despacho a la vez dentro del cupo de
+> 20 jobs** (el NRT usa 11), siempre desde un tag (`tasks/BLOQUE_ARRANQUE_S167.md` §f). Se agrega una regla común
+> decidida en S166: **las protegidas sólo OCR de Suomi NPP anteriores al 2026-10-09 se informan aparte y no deciden**,
+> igual en el audit semanal (#924) y en los pre-registros (N-3 en V375-E). El resto de la sección sigue vigente.
 
 - **Ventanas (A119, A104)**: **T**, tabla sola, decide: VIIRS 2026-04-01 a 06-12, MODIS desde 2026-03-01. **O**, tabla
   más OCR: 2026-06-13 a 2026-11-02 12:59 UTC, sin el 13 ni el 17-20 de octubre (D-29); el 12-oct sólo con los gránulos
@@ -64,6 +93,16 @@ recall, negativos limpios y razón de magnitud por sensor y por tramo A119).
 - **Escala**: 5 agentes y 2 A/B a la vez en todo el proyecto. Referencia congelada por hash.
 
 ## 3. VIIRS 750 (manda el código, decisión del 2026-10-21)
+
+> ⚠️ **S167 (A113)**: estado de cada punto, con evidencia en el §12.1. **V750-C CERRADO** y verificado (dos piezas:
+> interpolación y ROI). **V750-F CERRADO**: lo corrió la coordinadora S163 en la cuenta de MATLAB Online que Nicolás
+> activó; la regla de `fillmissing2` quedó identificada (166 de 166 VRP) y portada a la vía. **V750-B SELLADO** (adenda
+> 1 informativa; adenda 2 sellada por Nicolás el 2026-10-28, tag `s162-v750b-adenda2-sellada`), sin despachar: sale el
+> 2026-11-03 **solo**, no combinado; sus brazos reales son B0 a B5, K y N0/N1. En el ensayo hasta el 2026-10-26 eran
+> 5.841 objetivos más 20 lejanas (`far_ref`); al 2026-11-02 serán unos 6.000 (§9 de su pre-registro), no los 5.746 de
+> abajo. **V750-A en BORRADOR**: la
+> implementación ya está en `main` (#907, apagada) antes del sello, y sus brazos son hoy K, K × 1,2, O, P, P-def,
+> P-sinfiltro, Kgeo, P-cercano y P-pico. V750-D y V750-E sin empezar. Texto original:
 
 - **V750-C, ablación del oráculo** (primero; 0 runs, sólo lectura, sin sello). Hipótesis: el remuestreo a la grilla
   fija reparte el exceso de una cumbre tibia y la calla. Brazos dentro del oráculo sobre las grillas de N
@@ -94,6 +133,13 @@ recall, negativos limpios y razón de magnitud por sensor y por tramo A119).
 
 ## 4. VIIRS 375 (se traslada la estructura, no los números)
 
+> ⚠️ **S167 (A113)**: estado de cada punto, con evidencia en el §12.2. **V375-A CERRADO** (#903: funciones nuevas al
+> lado de la lectura A; las viejas de `clase_mirova.py` no se tocaron porque las usan evaluadores sellados). **V375-B
+> CERRADO**, SILENCIO ACOTADO BAJO K (B2). **V375-C CERRADO** y PD1 decidida: C13 en todos (D-48, S164). **V375-D
+> DESCARTADO** (con la vara de MATLAB la magnitud de C no cambia). **V375-E**: la vía está en `main` (#921, apagada) y
+> sólo su **adenda 2 está sellada** (tag `s166-v375e-adenda2-sellada`); el cuerpo del pre-registro (§1 a §7, donde vive
+> la regla de adopción §5.4) **sigue en borrador** según su propio encabezado. V375-F sin empezar. Texto original:
+
 - **V375-A, higiene de la etiqueta de protegida** (primero, 0 runs): 5 de las 6 protegidas que «pierde» el port son
   alertas sólo OCR de Suomi NPP con fuentes a 9-24 km (`portes/INFORME.md:137-157`); con la tabla sola el port pierde 0
   de 29. Regla de «protegida de cráter» informada al lado de la lectura A, sin reemplazarla; arreglo de
@@ -108,6 +154,18 @@ recall, negativos limpios y razón de magnitud por sensor y por tramo A119).
 - **V375-F, Chillán sobre 3 MW** (port 0,939, n 6): después de V375-E.
 
 ## 5. MODIS (se traslada la estructura, no los números)
+
+> ⚠️ **S167 (A113)**: ningún punto de esta sección sigue pendiente como está escrito; evidencia en el §12.3.
+> **MOD-A CERRADO** (#902). **MOD-B CERRADO**, CUMPLE SIN DAÑO, con ~15 h de runner y no 47; MxD03 está en `main` con
+> tres flags apagados (#920, más el aviso «sin dato» de #922) y el probe 40584157486 da 18 de 18 iguales en los dos
+> sentidos. **MOD-C CERRADO**: INDECIDIBLE (2 de 390), y la pregunta pasó al censo de MOD-D. **MOD-E**: la ablación
+> está hecha con los recortes nativos reales de MOD-C (no con las grillas del port; el método A no abre huecos), pero
+> el efecto de D28 sobre la magnitud sigue SIN DATO y **D28 queda fuera de MOD-D fase 4** hasta localizar el método de
+> MIROVA (`PREREGISTRO_MODD_F4.md` l. 82 y §14).
+> **MOD-D**: el censo está hecho y Nicolás lo aprobó como CANDIDATO (2026-10-26); la vía está en `main`, apagada (#919);
+> el pre-registro de la fase 4 (brazos K, V, V-cercano, V-pico, placebo y V-grilla) está en borrador en la rama
+> `claude/s166-modd-f4`. Chillán quedó SIN RESOLVER en el censo (6 de 7, p 8/128), y su razón sobre la población
+> congelada es 0,635 (n 7), no 0,485. Texto original:
 
 - **MOD-A, la cita de MOD03** (trivial): renderizar la p. 4 de
   `documentacion/Coppola_2026_SciData_Global_VRP_Dataset_s41597-026-08100-7.pdf` y citarla (P1 y P3 discrepan).
@@ -126,6 +184,15 @@ lacolito de Cordón Caulle; la magnitud en geometría nativa. Se validan contra 
 tarea 1.11 (cronología OVDAS de Nicolás).
 
 ## 7. Fases y puntos de decisión
+
+> ⚠️ **S167 (A113)**: la tabla se mantiene como plan, pero el avance real es otro (§12): fase 0 **hecha salvo el ítem 4
+> del §8** (en parte); fase 2 **hecha**; fase 1
+> hecha **salvo V750-B** (sin despacho combinado: V375-B, V375-C y MOD-C corrieron por separado el 2026-10-24); PD1
+> decidida en VIIRS 375 (C13) y **pendiente en VIIRS 750** hasta leer V750-B; fase 3 **hecha en los tres sensores**,
+> con las vías apagadas, y **entró antes de PD1 de VIIRS 750** (la vía V750 lleva la caja por defecto). PD3 en parte:
+> V750 local sí y en runner pendiente; MODIS sobre las grillas del censo sí y desde el HDF pendiente; V375 NO
+> EQUIVALENTE por dos causas: la regla de posición (8 pasadas) y el fondo sobre 4 píxeles (40 de 329 con la vara
+> vieja; la vara nueva del paso 1, §8.6 b de V375-E, lo resuelve). Fase 4 sin datos todavía.
 
 | fase | qué | punto de decisión |
 |---|---|---|
@@ -147,6 +214,12 @@ todavía; mídela como brazo (radiante, cercano y pico) en los A/B de cada senso
   - **radiante**: centroide del cúmulo de la alertada más radiante, lo que hace hoy `procesar_grilla`;
   - **cercano**: el alertado más cercano al cráter;
   - **pico**: el píxel de mayor radiancia.
+- ⚠️ **S167 (A113)**: el «338 y 19» de abajo es el conteo del verificador de S165 sobre la copia del día. Con los
+  insumos congelados de cada pre-registro son **330 en VIIRS 375** (329 de la tabla, `PREREGISTRO_E.md` §8.4) y **20 en
+  VIIRS 750** (adenda 2 de V750-B, §6). Y la frase del píxel pico quedó matizada: el pico calza a media celda en 20 de
+  59 contra 12 de 39 del centroide (H2 del verificador de S165), y el verificador de MOD-D fase 4 (VF4-12) nota que la
+  comparación ganadora es pico contra cercano. Sigue siendo SOSPECHA. Hoy los tres brazos están cableados en V750-B
+  (adenda 2 sellada), V375-E (adenda 2 sellada, con N-3), V750-A y MOD-D fase 4 (borradores). Texto original:
 - La vara es lo que publica MIROVA. Cuentan también las pasadas en que MIROVA publicó una fuente lejana
   (`FALSO_POSITIVO` de la tabla), que la medición de S165 no pudo mirar en VIIRS (338 en VIIRS 375 y 19 en VIIRS 750).
 - Evidencia: `experiments/_s165_regla_posicion/INFORME.md` y `verificador/INFORME.md`. «Cercano» cambia 8 de 2.012
@@ -155,6 +228,14 @@ todavía; mídela como brazo (radiante, cercano y pico) en los A/B de cada senso
 - Si un pre-registro ya está sellado, los brazos entran por adenda, antes de ver los datos.
 
 ## 8. Arreglos del instrumento antes de cualquier A/B nuevo
+
+> ⚠️ **S167 (A113)**: casi todo hecho. #889 se cerró y lo reemplazó **#909** (mergeado el 2026-10-26, tag
+> `pre-s163-merge-909`). Ítems: 1 cobertura contra la referencia, **hecho** (#904, `scripts/evaluador_comun.py`); 2 «no
+> observado», **hecho** (#904; la causa de cada ausencia en #914); 3 placebo y d′ en un evaluador común, **hecho** (#905,
+> sirve también a MODIS; línea base en #914); 4 una sola definición de alerta, **en parte** (#903 agregó las funciones
+> por pasada; `alerta_protegida` y `pasadas_protegidas` quedan para los evaluadores sellados); 5 P1b y RUTINA,
+> **hecho** (#904); 6 estratificación por cenit y régimen, **hecho** (#914). Quedan abiertos de #914: `--cobertura-json`
+> en `nrt.yml` y el ruido entre runners. Texto original:
 
 Existe R2.1 en #889 (borrador, toca `pipeline/fetch.py` y `scripts/run_pipeline.py`: A45). Falta:
 1. **Cobertura contra la referencia de MIROVA**: para cada brazo y producción, pasadas de la referencia sin record a
@@ -169,6 +250,14 @@ Existe R2.1 en #889 (borrador, toca `pipeline/fetch.py` y `scripts/run_pipeline.
 6. **Estratificación automática por cenit y régimen** (tarea 1.35).
 
 ## 9. Decisiones para Nicolás (con recomendación)
+
+> ⚠️ **S167 (A113)**: estas 14 decisiones ya están tomadas. Nicolás las delegó el 2026-10-24 («sobre las decisiones
+> mías haz lo que tú recomiendes», D-48; bitácora S162 ~16:30) y se aplicaron. Excepciones: el correo a Coppola sigue
+> en espera por decisión suya del 2026-10-25; el tope de cordura de `store.py` (13) está sin hacer; el diurno (14)
+> corre hoy **sobre K** (D-10), antes del paquete; y dos no se cumplieron como estaban escritas: la 8 (V375-B y MOD-C
+> corrieron aparte, no en el despacho de V750-B) y la 11 (la vía V750 entró a `pipeline/` antes de PD1 de VIIRS 750). El punto 3 (equivalencia + censo + sombra «en vez de» A/B
+> retrospectivos) no se cumplió así: los tres pre-registros de fase 4 traen lectura retrospectiva, y MOD-D fase 4 es
+> un A/B completo (~14 h). Las decisiones abiertas hoy están en el §12.5. Texto original:
 
 1. D25: no adoptar, cerrar como «no es el fondo de MIROVA» (sí).
 2. Pasar de palancas sueltas a un paquete por sensor con brazos de diagnóstico (sí).
@@ -205,6 +294,12 @@ D35 queda registrada en el PR #906 con el veredicto de MxD03 (CUMPLE SIN DAÑO).
 
 ## 11. Sesiones hijas (cada una con su loop)
 
+> ⚠️ **S167 (A113)**: la tabla es la de S162. Las sesiones de instrumento y de VIIRS 375 cerraron (S162 y S164); MODIS
+> pasó por Loop MODIS 2, la fase 3 y ahora «MOD-D fase 4»; VIIRS 375 sigue en «V375-E fase 4»; VIIRS 750 sigue en «Loop
+> VIIRS 750 2». La coordinadora hoy es S167, no S162. En `loop/activo` sólo existen `LOOP_OBJETIVOS.md` y
+> `LOOP_VIIRS375.md`; `LOOP_VIIRS750.md` vive en la rama de Loop VIIRS 750 2 y `LOOP_MODIS.md` en `e15e50153`. Las
+> reglas entre loops siguen vigentes, salvo el «tope de 2 A/B»: hoy es un despacho a la vez (§2). Texto original:
+
 | sesión | alcance | cola y bitácora propia |
 |---|---|---|
 | Instrumento | §8, V375-A, MOD-A | `tasks/LOOP_INSTRUMENTO.md` |
@@ -217,3 +312,135 @@ Reglas entre loops: cada sesión en su worktree y su rama, sin tocar archivos de
 (grupo de un solo pendiente, tope de 2 A/B); el despacho combinado de la fase 1 lo arma la coordinadora con los brazos
 que entreguen VIIRS 750, VIIRS 375 y MODIS; nada en producción sin sello, verificador, tag y sí; parada si C: o D:
 bajan de 3 GB.
+
+## 12. Estado al 2026-10-28 y camino a la adopción (PD4), por sensor (S167)
+
+Agregado por la coordinadora S167 a pedido de Nicolás («revisa el estado del plan de los 3 sensores y adaptalos o
+actualizalos segun los nuevos resultados»). Reemplaza como estado vigente a las tablas de §1, §3 a §5, §7 y §8, que
+quedan como historia con sus marcas. Lo no medido va como SOSPECHA o SIN DATO.
+
+### 12.0 Lo que vale para los tres sensores
+
+- **Las tres vías «código MIROVA» y MxD03 están en `main`, apagadas**: V750 (#907), MODIS (#919), V375 (#921), MxD03
+  con tres flags (#920) y su aviso «sin dato» (#922). El único flag de estas familias encendido en producción es
+  `ENABLE_MODIS_B22_PRIMARY` (K, desde #850).
+- **#920 a #922 no cambian ningún record.** NRT: 12 records MODIS reescritos con el código nuevo, mismos campos, 0 con la
+  vía (`experiments/_s166/nrt_campos_s166.py`). Bit a bit del run 40683093630 (día 2026-10-26, cuatro volcanes, mismo
+  runner): VERDE en VIIRS 375 y 750, 44 records por lado, con control ROJO y detecciones reales en los dos lados
+  (`experiments/_s166/bitabit_40683093630/`). No se repite.
+- **Regla de posición como tres brazos** (radiante, cercano, pico; decisión de Nicolás del 2026-10-27, §7). Cableada en
+  V750-B (adenda 2 sellada), V375-E (adenda 2 sellada) y en los borradores de V750-A y MOD-D fase 4. **Cada
+  pre-registro elige su brazo por sensor** con su propia regla, escrita antes de ver los datos (V375-E §8.5, MOD-D
+  fase 4 §6 bis, V750-A §6 bis). `procesar_grilla` sigue con «radiante» y es compartida por los tres sensores: si un
+  sensor elige otra posición, hace falta un parámetro por sensor en esa función, y es un PR a `pipeline/` (A45).
+- **Protegidas sólo OCR de Suomi NPP anteriores al 2026-10-09**: se informan aparte y no deciden (decisión de Nicolás,
+  S166). Aplicada en el audit semanal (#924) y en V375-E (regla N-3). **Falta en V750-B**, que está sellado y es el
+  primero que se lee (en la ventana O decide tabla más OCR, l. 106 de su pre-registro), y en V750-A. MOD-D no la
+  necesita: MODIS no tiene canal de Suomi NPP.
+- **El «mismo objeto» en la magnitud por noche queda ABIERTO.** El corte por `inner_radius_km` no sirve en PCC (radio
+  20 km) y excluir las noches de Suomi NPP OCR escondía una bandera real de Chillán (bitácora S166 v12). Se retoma sólo
+  con un criterio medido contra la referencia (A115).
+- **Suomi NPP cesa el 2026-11-02 13:00 UTC.** Toda ventana posterior es otro régimen (ventana P del §2).
+- **No existe ningún perfil de sombra** en `pipeline/profiles/`, y los tres pre-registros de fase 4 piden sombra
+  prospectiva. Crearlo y sumarlo al NRT es A45 aparte, y pesa en el tiempo del NRT (50 min por job, A15).
+- **A/B diurno sobre K (D-10, #813)**: W1 a W5 con cobertura pareja; W6 despachado (run 40681454167, en curso el
+  2026-10-28). Su lectura con la
+  adenda 1 decide el diurno de VIIRS 375; en VIIRS 750 un ADOPTAR va a DECIDE NICOLÁS porque ahí manda el código; MODIS
+  diurno no entra.
+
+### 12.1 VIIRS 750
+
+**Cerrado**: V750-C (dos piezas: interpolación lineal dentro de la caja, ROI fuera; `experiments/_s162_v750c/INFORME.md`
+con su verificador), V750-F (regla de `fillmissing2` identificada y portada, bitácora S163 v2, v6, v8), fase 3 (#907).
+**Sellado sin datos**: V750-B con adendas 1 y 2. **Borrador**: V750-A (`5c45c0c07` en la rama de Loop VIIRS 750 2).
+
+Lo que falta para PD4, en orden:
+0. **Antes del 2026-11-03**: si Nicolás lo aprueba (§12.5), una adenda 3 corta de V750-B que aplique N-3, escrita
+   antes de ver datos, con su verificador.
+1. **2026-11-03**: objetivos de V750-B (`--hasta 2026-11-02`), lista suplementaria, sha256, tag y despacho desde el
+   tag con los tres cambios de la adenda 2; consulta C-06 del cese de Suomi NPP en CMR.
+2. Lectura de V750-B con sus lectores sellados (decide la ROI; N0/N1 confirma V750-C) y verificador limpio. **Esto
+   cierra PD1 de VIIRS 750.**
+3. Llevar la ROI elegida a la vía: hoy `pipeline/grillas_mirova.yaml` tiene `roi_v750: def` en los 11 volcanes, la caja
+   que pierde las protegidas de PCC (A45).
+4. V750-A: medidor completo de mutaciones (M1 a M85 sobre todos los escenarios; parte cuando termine la batería de
+   identidad), verificador de `equivalencia_v750a.py` (lo pide su §11), agregar N-3, incorporar la ROI de V750-B,
+   verificador limpio y sello. Su sello depende del resultado de V750-B (su encabezado lo dice).
+5. Run de V750-A, lectura y verificador; PD3 en runner (identidad P contra el oráculo desde el gránulo).
+6. Sombra prospectiva (perfil por crear, A45) y PD4 por A45. Si V750-A no se adopta, V750-D pasa a A/B propio.
+
+**Es el sensor más lejos de PD4**: depende de V750-B, que recién sale el 2026-11-03.
+
+### 12.2 VIIRS 375
+
+**Cerrado**: V375-A (#903), V375-B (SILENCIO ACOTADO BAJO K), V375-C (C13 en todos, PD1 decidida), V375-D (descartado),
+fase 3 (#921). **Sellado**: sólo la adenda 2 de V375-E (`67838f2a5`, tag `s166-v375e-adenda2-sellada`, con N-3 y la
+vara nueva del paso 1). **En borrador**: el cuerpo de `PREREGISTRO_E.md` (§1 a §7, con la regla de adopción §5.4).
+
+Lo que falta para PD4, en orden:
+1. Despachar la corrida de pasadas lejanas (§8.8, desde el tag, rama de disparo `s166-v375e-far-disparo`, 14 trozos,
+   ~2,5 h) **después de W6**, y contar en el log que procesó lo pedido (A108).
+2. **Sellar el cuerpo del pre-registro** antes de leer: hoy su encabezado dice que sólo la adenda 2 está sellada, y el
+   §5.4 es el que decide la adopción (decisión abierta, §12.5).
+3. Lectura local con `leer_posicion_v375e.py` sobre las poblaciones S159, S162, S162b y la corrida lejana: controles C1
+   a C7, equivalencia por brazo (§8.6), regla de posición y después el §5 con el brazo elegido; verificador limpio.
+4. Riesgo escrito antes de medir: con «radiante», Isluga 2026-06-17 y Láscar 2026-10-01 (NOAA-21) vetan el §5.4 (a)
+   aun con N-3. Si gana «cercano» o «pico», es el PR compartido a `procesar_grilla` (§12.0).
+5. Sombra (30 noches o 40 alertas; perfil por crear, A45) y PD4 por A45. Después, V375-F.
+
+**Es el sensor más cerca de PD4**: tiene sellada la parte nueva y no necesita un run largo, sólo la corrida lejana
+(~2,5 h) y la lectura.
+
+### 12.3 MODIS
+
+**Cerrado**: MOD-A (#902), MOD-B (CUMPLE SIN DAÑO; MxD03 en `main` apagada, #920 y #922), MOD-C (INDECIDIBLE, pasado al
+censo), la ablación de MOD-E (el efecto de D28 en la magnitud sigue SIN DATO y D28 queda fuera de la fase 4), censo
+de MOD-D (Nicolás lo aprobó como CANDIDATO el 2026-10-26), fase 3 (#919). **Borrador**: el pre-registro de MOD-D fase
+4 (rama `claude/s166-modd-f4`, `ff03538dd`; verificador limpio «sellar con cambios chicos», arreglos VF4-01 a VF4-12
+hechos). Su §13 commiteado dice todavía 40 escenarios y 46 de 46 mutaciones; la batería de 53 y sus mutaciones
+finales están SIN VERIFICAR (no commiteadas al 2026-10-28 13:30 UTC).
+
+Lo que falta para PD4, en orden:
+1. Commitear las mutaciones finales con el §13 al día, verificador corto de los arreglos VF4 y sello de Nicolás con
+   las 8 decisiones de su §12 (§b 1 del bloque S167).
+2. Candado del §11 (población con HEAD 200 en los días de la ventana E, probe, identidad, workflow, humo de ~25 pasadas
+   que incluye Láscar 2026-04-25 07:35 y Chillán 2026-10-25 07:20), tag y verificador.
+3. Despacho en tres tandas (~14 h de runner, cota alta), lectura y verificador. Si la identidad sale roja, no se lee
+   el resto. PD3 desde el HDF se mide aquí (en Windows no se pudo, pyhdf).
+4. Sombra de 28 noches (perfil por crear, A45) y PD4 por A45: encender `ENABLE_MODIS_CODIGO_MIROVA`; los tres flags de
+   MxD03 van aparte.
+
+**Es el segundo más cerca de PD4**: le faltan el sello, el candado de siete piezas y unas 14 h de runner. Chillán
+(cumbre nevada vista de lado) se juzga en este A/B: en el censo quedó SIN RESOLVER.
+
+### 12.4 Orden entre sensores
+
+VIIRS 375 primero (parte nueva sellada; corrida lejana de ~2,5 h y lectura), MODIS después (sello, candado y ~14 h de
+runner), VIIRS 750 al final (espera V750-B, que sale el 2026-11-03). Ninguno depende del otro, así que pueden avanzar
+en paralelo; el orden es el de los despachos, que van de a uno dentro del cupo de 20 jobs: W6 del diurno, la corrida
+lejana de V375-E, V750-B el 2026-11-03 y MOD-D fase 4 cuando tenga sello y candado. La posición se elige **por sensor**
+con la regla de cada pre-registro; la implementación en `procesar_grilla` lleva un parámetro por sensor (§12.0).
+
+### 12.5 Decisiones abiertas para Nicolás (con recomendación)
+
+1. **Sello de MOD-D fase 4**: sellar cuando sus mutaciones salgan atrapadas por aserción y un verificador corto
+   revise los arreglos VF4. *Recomendación: sí, en esas condiciones.*
+2. **Sello de V750-A**: espera el medidor completo de mutaciones, el verificador de `equivalencia_v750a.py` y el
+   resultado de V750-B (la ROI). *Recomendación: esperar.*
+3. **Sello del cuerpo de V375-E** (§1 a §7), hoy en borrador mientras su adenda 2 está sellada. *Recomendación:
+   sellarlo antes de leer, tras un verificador corto que compruebe que el cuerpo y la adenda 2 no se contradicen (sobre
+   todo el §5.4 con N-3 y los brazos de posición).*
+4. **Perfil de sombra**: ninguno existe y los tres pre-registros lo piden desde el 2026-11-03 (28 a 30 noches o 4
+   semanas). Postergarlo hasta después de cada A/B suma unas 4 semanas a cada PD4. *Recomendación: medir ahora el
+   costo en el tiempo del NRT y preparar un solo perfil aislado con las tres vías encendidas, en un PR con tag, para
+   encenderlo con su sí desde el 2026-11-03; nada de eso toca lo que publica producción.*
+5. **N-3 en V750-B**: V750-B está sellado sin la regla de las protegidas sólo OCR de Suomi NPP, que Nicolás pidió tratar
+   igual en el audit y en los pre-registros. *Recomendación: una adenda 3 corta antes del despacho del 2026-11-03,
+   escrita antes de ver datos, con verificador; y lo mismo en V750-A antes de su sello.*
+6. **Regla de posición**: cada pre-registro la elige por sensor. *Recomendación: respetar eso y, al implementar, un
+   parámetro por sensor en `procesar_grilla` (A45), en vez de esperar a leer los tres.*
+7. **El «mismo objeto» de la magnitud**: *Recomendación: dejarlo abierto hasta tener un criterio medido.*
+
+⚠️ **S167, verificador limpio (Sonnet) de esta sección**: LISTO CON CAMBIOS, 8 hallazgos de gravedad 2 o 3 y 6 de
+gravedad 1, todos aplicados (orden entre sensores, posición por sensor, sombra, MOD-E, N-3 en V750-B, §9, V750-A y
+V375). Informe en el scratchpad de S167, copiado a `experiments/_s167/verificador_programa/INFORME.md`.
