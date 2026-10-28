@@ -288,9 +288,11 @@ variantes de §8.4 reescriben ese campo.
      vara 3 al lado.
   5. **Sin cobertura de las lejanas** (sin run FAR, sin control de vida, o más del 10 % de las `far_tabla` SIN DATO), la
      regla **no decide**: «NO DECIDE: LAS LEJANAS SIN COBERTURA».
-  6. **Por tramo (A104, VE2-06)**: la misma regla se corre dentro de T, O1 y O2. Si en O1 o en O2 por separado queda
-     ELEGIDO otro brazo que el de la unión, el veredicto lleva la marca «A104: en O1 (u O2) sale otro brazo; decide
-     Nicolás».
+  6. **Por tramo (A104, VE2-06 y N-2)**: la misma regla se corre dentro de T, O1 y O2. Si O1 u O2 por separado no da
+     el mismo resultado que la unión (otro brazo, o SE QUEDA RADIANTE frente a un elegido, o NO RESUELTO, o NINGUNO), el
+     veredicto lleva la marca «A104: en O1 (u O2) el resultado es otro (…); decide Nicolás». Un tramo sin pasadas no
+     cuenta como discordancia. Dicho antes de medir: en un tramo chico lo más probable es SE QUEDA RADIANTE por falta de
+     bloques, así que esta marca puede saltar seguido; cuando salta, decide Nicolás.
   Se informan al lado, sin decidir: la misma regla con el veto contado sólo sobre protegidas de la tabla (las cuatro de
   §8.1 son del OCR, y dos de ellas de Suomi NPP: VE2-07 pide leerlas con cautela por A119, aunque desde el
   2026-06-13 el OCR ya tiene distancia), cuántos bloques discordantes aporta cada tramo, y cuántas `far_tabla` tienen
@@ -316,7 +318,9 @@ b. **La vara del VRP sobre 4 píxeles es `brazos.py` con la regla de relleno de 
    (`delaunay_perturbado.py` de S163, la función `vrp_port_con_regla_matlab` de `equivalencia_v375e.py`), en vez de
    `brazos.py` tal cual. De 1 a 4 píxeles sigue la salida de MATLAB donde la hay; en las pasadas FAR, que MATLAB no
    corrió, la misma regla por código independiente. La exigencia del 99 % no cambia, y el lector la mide también en
-   las pasadas FAR (en `equivalencia_v375e.py` sólo estaba el marco). Dicho con la
+   las pasadas FAR (en `equivalencia_v375e.py` sólo estaba el marco). El lector imprime también, al lado y sin decidir,
+   la cifra con la vara vieja del §7.3 (N-1 del verificador corto), para que el efecto de este cambio se vea en la
+   lectura (en #921 eran 289 de 329 contra 329 de 329). Dicho con la
    cautela de V165-04: sobre 4 píxeles no hay salida de MATLAB para 375, así que esto prueba que la vía y el port
    coinciden con la misma regla, no que la vía iguale a MATLAB. **Escrita después de ver el resultado de #921** (40 de
    329 fuera de tolerancia con la vara vieja, las 40 a 0,0 con la nueva): la decide Nicolás.
@@ -364,13 +368,13 @@ réplica (A115): vale para `mirova_equivalent`, no para `experimental`.
 
 ### 8.11 Pruebas y estado
 
-- **Batería** (`e_adenda2/probar_adenda2.py`, salida `probar_adenda2_salida.txt`): **130 de 130**, con escenas
+- **Batería** (`e_adenda2/probar_adenda2.py`, salida `probar_adenda2_salida.txt`): **135 de 135**, con escenas
   sintéticas (LEJANA, BORDE, UNO, PICOCERCA, ANILLO, cráter corrido de X0, Y0), el predicado del tablero con node, el
   almacén real y `evaluar.py` real. Cubre las tres distancias y sus desempates, la variante, cada control (C1 a C7, en
   verde y en rojo, C7 también con un port que calla igual que la referencia), la equivalencia por brazo (máscara, VRP a
   1e-3 MW y publicación), la elección de la vara del VRP, la regla de posición con escenas y con veredictos fabricados
   (todas las ramas de `decidir_brazo`, ciclo incluido), el veto que sólo cuenta lo que depende de la posición y la
-  pérdida común, la regla por tramo con la marca A104, la regla del 10 % de lejanas SIN DATO, pesos distintos de 1, el
+  pérdida común, la regla por tramo con la marca A104 ante cualquier resultado distinto (N-2), la cifra con la vara vieja (N-1), la regla del 10 % de lejanas SIN DATO, pesos distintos de 1, el
   veto con la tabla sola, las tres varas, el K re-corrido, el ancla de la vía en el cráter, las funciones del generador
   y `generar()` entero con dependencias sintéticas (control caído, segundo intento, carpeta del marco, records de otro
   commit, CRLF, capas locales en el meta). Sobre grillas reales sin leer el marco: la identidad de radiante y pico con
@@ -378,12 +382,13 @@ réplica (A115): vale para `mirova_equivalent`, no para `experimental`.
   artefacto falso armado con 5 de esas grillas rotuladas como control de vida (máscara de la vía igual a la del port
   C13 en 5 de 5, VRP contra la vara en 5 de 5, publicación por brazo igual, C5 en 5 de 5, C6 sin cambios; sale 3 por C7,
   como debe con 5 de 20 re-medidas; con un almacén que cambia la clase, C6 cae).
-- **Nulo por mutaciones** (`e_adenda2/mutar_adenda2.py`, salida `mutar_adenda2_salida.txt`): **76 de 77 mutaciones
-  de una línea atrapadas por aserción**, 0 caídas (58 del lector, 19 del generador); la copia sin mutar PASA y la que
+- **Nulo por mutaciones** (`e_adenda2/mutar_adenda2.py`, salida `mutar_adenda2_salida.txt`): **80 de 81 mutaciones
+  de una línea atrapadas por aserción**, 0 caídas (62 del lector, 19 del generador; en el checkout de Windows con
+  CRLF: en un árbol LF L42 sobrevive y quedan 79 de 81, N-5); la copia sin mutar PASA y la que
   rompe la importación sale CAÍDA. Sobrevive una, declarada equivalente: L20 pasa a la regla de posición también las
   `far_ocr`, pero el error de posición no las cuenta y el veto sólo mira el marco, así que no puede cambiar nada. Las
-  sobrevivientes del verificador que no eran equivalentes entran como L50 a L58, y las ramas nuevas de los arreglos
-  como L46 a L49 y G19.
+  sobrevivientes del verificador que no eran equivalentes entran como L50 a L58, las ramas nuevas de los arreglos
+  como L46 a L49 y G19, y las del verificador corto como L59 a L62.
   Quedan declaradas equivalentes o débiles, sin mutación propia: el pico sobre toda la máscara en vez del cúmulo (la
   semilla del cúmulo es el máximo de toda la máscara: es el mismo píxel), la tolerancia de C1 y el inner del tablero en
   `publicar` (la variante ya fija la clase con el inner de `volcanoes.yaml`, que coincide con el del tablero en los 11).
@@ -414,6 +419,44 @@ midió que ninguna `far_tabla` tiene `Distancia_km` de MIROVA dentro del radio d
 | VE2-12 una alerta bajo 1 MW pesa unas 5 veces una protegida | 1 | declarado en §8.5 (es el peso de la población; las protegidas las cuida el veto) |
 | VE2-13 la regla no exige sustrato en las lejanas | 1 | el lector dice cuántas `far_tabla` tienen alertado y avisa bajo 5 |
 
-Los arreglos no se re-verificaron con contexto limpio. Se comprobaron con la batería (130 de 130) y el nulo (76 de 77).
-Si la coordinadora o Nicolás quieren una pasada corta del verificador sobre el delta, el commit de esta versión la
-permite (como hizo V750-B con su adenda 2).
+**Verificador corto sobre el delta** (lanzado por la coordinadora S166; Sonnet con contexto limpio sobre
+`6c80ce7c0..e037b8326`; informe en `D:\vrp-trabajo\temporales\s166_ver_v375e\INFORME.md`): **SELLABLE CON CAMBIOS
+MENORES**. Lo ya fijado sigue intacto; batería 130 de 130; nulo 75 de 77 en un árbol LF (L42 se atrapa sólo con el
+checkout en CRLF: el 76 de 77 vale en Windows); L20 es equivalente. Su juicio sobre el §8.6 b: corrección de
+instrumento con base previa (la contingencia «se mira primero el relleno» estaba escrita en S164), escrita después de ver
+el resultado, que sobre 4 píxeles prueba que dos implementaciones de la misma regla coinciden y no que coincidan con
+MATLAB, y que sólo puede cambiar el veredicto de E por la puerta del paso 1. Arreglos de esta versión:
+
+| hallazgo | qué se hizo |
+|---|---|
+| N-1 el efecto del §8.6 b no se veía en la lectura | el lector imprime la cifra con la vara vieja, informativa (§8.6 b) |
+| N-2 la marca A104 sólo saltaba entre dos ELEGIDO distintos | salta con cualquier resultado distinto en O1 u O2 (§8.5 paso 6), con pruebas |
+| N-3 dos de las cuatro protegidas son sólo OCR de Suomi NPP antes del 2026-10-09 | opción explícita en §8.13, a decidir por Nicolás, sin aplicar |
+| N-4 la batería no es autocontenida | dicho en su encabezado: necesita el repo git (o `GIT_DIR`) y la copia de D: |
+| N-5 el nulo depende del fin de línea del checkout | dicho en el encabezado de la batería y aquí |
+| N-6 y VE2-11 el yml decía «sellada» | dice «SIN SELLAR al escribir este archivo; se despacha sólo cuando Nicolás la selle» |
+
+**VE2-07 y VE2-13 quedan abiertos, y por qué.** VE2-07 (las protegidas motivadoras son sólo del OCR) no se cierra sin
+cambiar quién veta, y eso es la opción N-3: lo decide Nicolás. VE2-13 (la regla no exige sustrato en las lejanas) se
+cerraría agregando un mínimo de `far_tabla` con alertado como condición para decidir; no lo agregué porque cambiaría la
+regla después del primer verificador sin que nadie lo haya pedido, y porque las lejanas son un censo: si pocas tienen
+un alertado en la caja, la escena que separa los brazos es rara en ese marco, no está sin medir. El lector lo dice
+(`far_tabla con algún alertado`, con aviso bajo 5), y si Nicolás quiere que bloquee, es un cambio de una línea antes
+del sello.
+
+Esta versión (N-1 a N-6) no pasó por un tercer verificador. Batería y nulo: §8.11.
+
+### 8.13 Opción a decidir por Nicolás (N-3), no aplicada
+
+Para el auto-audit, Nicolás decidió que las alertas sólo del OCR de Suomi NPP anteriores al 2026-10-09 se informan
+aparte y no deciden (PR #924, abierto al 2026-10-28). Si quiere lo mismo en E, la opción es: **las protegidas sólo del
+OCR de Suomi NPP anteriores al 2026-10-09 se informan aparte y no vetan, ni en la regla de posición (§8.5 paso 1) ni en
+el criterio (a) del §5.4.** Qué tocaría, dicho antes de medir:
+- de las cuatro del §8.1, dos dejarían de vetar a radiante: Isluga 2026-09-28 05:12 y 2026-10-03 05:18 (las dos
+  `VIIRS_SNPP`). Las otras dos (Isluga 2026-06-17 05:06 y Láscar 2026-10-01 05:18) son de NOAA-21 y siguen vetando;
+- las tres protegidas de S159 que pierden los diez brazos de V375-C y K publica (Tupungatito 2026-08-01 y 2026-09-14,
+  Isluga 2026-09-09; todas de Suomi NPP y sólo del OCR) dejarían de vetar el paquete en el §5.4 (a), que es el riesgo
+  que §5.4 y §7.5 dejaban a su decisión.
+Con la adenda tal como está, esas filas vetan (lectura A, todos los canales). El lector ya informa al lado la regla con
+el veto contado sólo sobre la tabla, que es una versión más fuerte de esta opción (saca todas las sólo OCR, no sólo
+las de Suomi NPP de antes del hito); si Nicolás elige N-3, se agrega su variante exacta antes del sello.

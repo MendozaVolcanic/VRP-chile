@@ -13,6 +13,12 @@ Escenas (cráter en la celda (40, 40), paso 0,375 km, inner 5 km salvo donde se 
   PICOCERCA  el más radiante en el cráter y un cúmulo más débil lejos: los tres summit
   ANILLO     cuadro de alertados a 1,5 km alrededor del cráter, inner 1 km: radiante summit, cercano y pico far
   VACIA      sin alertados
+Dependencias fuera de la carpeta (N-4 del verificador corto): RAIZ tiene que ser un repositorio git con el commit
+533398f8f (C-G1 lo compara con `git rev-parse`; si se corre desde un árbol extraído, GIT_DIR tiene que apuntar al repo), y
+la copia de los records de ese commit en D:/vrp-trabajo/temporales/s159_n/data_main (prueba de CRLF del generador); sin
+ellas la batería da FALLA en esas dos pruebas, no SIN DATO. El nulo (`mutar_adenda2.py`) depende además del fin de línea
+del checkout (N-5): L42 (`blob_git` sin normalizar CRLF) sólo se atrapa si `pipeline/mirova_v750_codigo.py` está en
+CRLF, como en el checkout de Windows con core.autocrlf; en un árbol LF sobrevive y el nulo da 75 de 77.
 Uso: python -I probar_adenda2.py [--dir <carpeta con los módulos a probar>]  (exit 0 si todo pasa)
 """
 from __future__ import annotations
@@ -106,7 +112,7 @@ def celdas_anillo():
 
 def pasada(i, celdas, clase, vol="Lascar", hora="2026-07-01 05:00", pub_prod=1, lote="S162", tabla=True, prot=None,
            inner=5.0, crater=CR, ref=CR, vrp=1.5, mirova_vrp=None, dist_ref=None, mirova=None, rec_mal=None,
-           vrp_port=None, dc_mal=False, m14=None, ref_m14=None):
+           vrp_port=None, dc_mal=False, m14=None, ref_m14=None, vrp_port_vieja=None):
     m, L, dist, rec = escena(celdas, crater, ref, inner, vrp, rec_mal)
     prot = clase == "pos_prot" if prot is None else prot
     o = {"id": i, "lote": lote, "clase": clase, "estrato": f"{vol}|z<=40", "volcan": vol, "hora_utc": hora,
@@ -118,6 +124,7 @@ def pasada(i, celdas, clase, vol="Lascar", hora="2026-07-01 05:00", pub_prod=1, 
         o["ref_M14"] = ref_m14
     p = {"rec": rec, "dist": dist, "npix": int(m.sum()), "inner": inner, "inner_v": inner,
          "vrp_port": (vrp if vrp_port is None else vrp_port) if dist else None, "vrp_via": vrp if dist else None,
+         "vrp_port_vieja": (vrp if vrp_port_vieja is None else vrp_port_vieja) if dist else None,
          "mascara_igual": True, "k_rec": None,
          "dc_almacen_igual": {a: not (dc_mal and a == "cercano") for a in LP.BRAZOS_POS} if dist else {},
          "m14": m14, "geom": {"sensor_zenith": 20.0}}
@@ -322,6 +329,11 @@ def main(argv=None):
     lst = base_marco() + [pasada(2, celdas_lejana(), "pos_bajo", vrp_port=1.5009)]
     out, f = correr(lst)
     ok("equivalencia: VRP a 9e-4 MW queda dentro", out["equivalencia"]["veredicto"] == "EQUIVALENTE", out["equivalencia"])
+    lst = base_marco() + [pasada(2, celdas_lejana(), "pos_bajo", vrp_port_vieja=1.6)]
+    out, f = correr(lst)
+    ok("N-1: la vara vieja se informa (2 de 3 dentro) y no cambia el veredicto (decide la nueva)",
+       out["equivalencia"]["vrp_vara_vieja"] == [2, 3] and out["equivalencia"]["vrp"] == [3, 3]
+       and out["equivalencia"]["veredicto"] == "EQUIVALENTE", out["equivalencia"])
 
     # ---------------- decidir entre brazos (veredictos fabricados)
     def tabla(d):
@@ -398,7 +410,7 @@ def main(argv=None):
     out, f = correr(base_marco() + lejana_vacia() + [
         pasada(4, celdas_lejana(), "pos_prot", hora="2026-06-18 05:00"),
         pasada(5, celdas_anillo(), "pos_prot", hora="2026-06-19 05:00", inner=1.0)])
-    ok("ningún brazo pasa el veto", out["regla_posicion"]["veredicto"] == "NINGUN BRAZO PASA EL VETO",
+    ok("ningún brazo pasa el veto", out["regla_posicion"]["veredicto"].startswith("NINGUN BRAZO PASA EL VETO"),
        out["regla_posicion"]["veredicto"])
 
     # ---------------- arreglos del verificador (VE2-01, VE2-04, VE2-06, VE2-09)
@@ -469,7 +481,26 @@ def main(argv=None):
        str(rp["detalle"]["por_tramo"]["O1"]).startswith("ELEGIDO RADIANTE")
        and str(rp["detalle"]["por_tramo"]["O2"]).startswith("ELEGIDO CERCANO"), rp["detalle"].get("por_tramo"))
     ok("VE2-06: la unión elige CERCANO y queda marcada por A104", rp["veredicto"].startswith("ELEGIDO CERCANO")
-       and "A104: en O1 sale otro brazo" in rp["veredicto"], rp["veredicto"])
+       and "A104: en O1 el resultado es otro" in rp["veredicto"], rp["veredicto"])
+    out, f = correr(base_marco() + o2 + lejana_vacia(), N={("pos_bajo", "Lascar|z<=40"): 30})
+    rp = out["regla_posicion"]
+    ok("N-2: la unión elige CERCANO, O1 da SE QUEDA RADIANTE: también se marca A104",
+       rp["veredicto"].startswith("ELEGIDO CERCANO") and str(rp["detalle"]["por_tramo"]["O1"]).startswith("SE QUEDA")
+       and "A104: en O1 el resultado es otro" in rp["veredicto"], (rp["veredicto"], rp["detalle"].get("por_tramo")))
+    out, f = correr(base_marco() + lejana_vacia())
+    rp = out["regla_posicion"]
+    ok("N-2: sin discordancia (O1 y O2 iguales a la unión, T sin pasadas) no hay marca",
+       rp["veredicto"] == "SE QUEDA RADIANTE (nadie la vence; la del codigo)"
+       and rp["detalle"]["por_tramo"]["T"] == "SIN PASADAS", (rp["veredicto"], rp["detalle"].get("por_tramo")))
+    out, f = correr(base_marco() + [pasada(20501, [], "far_tabla", vol="Lastarria", hora="2026-07-31 05:00", lote="FAR",
+                                          pub_prod=0, dist_ref=20.0)])
+    rp = out["regla_posicion"]
+    ok("N-2: un tramo sin pasadas (O2) no es discordancia", rp["detalle"]["por_tramo"]["O2"] == "SIN PASADAS"
+       and "A104" not in rp["veredicto"], (rp["veredicto"], rp["detalle"].get("por_tramo")))
+    ok("N-2: resultado_rp", [LP.resultado_rp(x) for x in (
+        "ELEGIDO PICO (gana a los demas)", "SE QUEDA RADIANTE (nadie la vence; la del codigo)",
+        "NO RESUELTO ENTRE CERCANO Y PICO (decide Nicolas)", "NINGUN BRAZO PASA EL VETO",
+        "NO DECIDE: LAS LEJANAS SIN COBERTURA")] == ["PICO", "RADIANTE", "NO RESUELTO", "NINGUN", "NO DECIDE"])
     lst = base_marco() + bajos + lejana_vacia() + [pasada(20900 + k, celdas_lejana(), "far_ocr", vol="Lastarria",
                                                        hora=f"2026-08-{20 + k:02d} 05:00", lote="FAR")
                                                for k in range(8)]

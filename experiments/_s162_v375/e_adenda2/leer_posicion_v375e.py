@@ -290,6 +290,19 @@ def decidir_brazo(vivos, veredicto_par):
     return "NO RESUELTO ENTRE " + " Y ".join(x.upper() for x in no_vencidos) + " (decide Nicolas)", no_vencidos
 
 
+def resultado_rp(veredicto):
+    """Lo que dice un veredicto de la RP, sin la explicación: el brazo (ELEGIDO x, o RADIANTE si se queda), o la clase
+    del no-resultado (NO RESUELTO, NINGUN, NO DECIDE). Para comparar la unión con cada tramo (N-2)."""
+    if veredicto.startswith("ELEGIDO"):
+        return veredicto.split()[1]
+    if veredicto.startswith("SE QUEDA RADIANTE"):
+        return "RADIANTE"
+    for k in ("NO RESUELTO", "NINGUN", "NO DECIDE"):
+        if veredicto.startswith(k):
+            return k
+    return veredicto
+
+
 def regla_posicion(filas, E, far_ok=True, solo_tabla=False):
     """§8.5. filas: marco + far_tabla (sin CTL ni CTLF). solo_tabla: el veto cuenta sólo protegidas con alerta de la
     tabla (informa). Devuelve (veredicto, detalle)."""
@@ -422,8 +435,13 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
     vrp_ok = bool(con_vrp) and len(fuera) <= (1 - FRAC_VRP) * len(con_vrp)
     pr(f"  equivalencia, VRP a {TOL_VRP_MW} MW contra la vara (§7.3 y §8.6 b): {len(con_vrp) - len(fuera)} de "
        f"{len(con_vrp)} (exigido {FRAC_VRP:.0%}); fuera {sorted(fuera, key=lambda t: -t[1])[:10]}")
+    # N-1: la misma cifra con la vara vieja del §7.3 (de 1 a 4 px MATLAB, sobre 4 brazos.py tal cual), informativa, para
+    # que el efecto del §8.6 b se vea en la lectura y no sólo en el texto (en #921: 289 de 329 contra 329 de 329)
+    con_v = [i for i in con_vrp if pasadas[i].get("vrp_port_vieja") is not None]
+    fuera_v = [i for i in con_v if abs(pasadas[i]["vrp_via"] - pasadas[i]["vrp_port_vieja"]) > TOL_VRP_MW]
+    pr(f"  equivalencia, VRP con la vara vieja del §7.3 (informa, no decide): {len(con_v) - len(fuera_v)} de {len(con_v)}")
     out["equivalencia"] = {"mascara_distinta": mm, "pub_distinta": eq, "vrp": [len(con_vrp) - len(fuera), len(con_vrp)],
-                           "vrp_fuera": fuera,
+                           "vrp_fuera": fuera, "vrp_vara_vieja": [len(con_v) - len(fuera_v), len(con_v)],
                            "veredicto": "EQUIVALENTE" if not mm and not any(eq.values()) and vrp_ok
                            else "NO EQUIVALENTE"}
     pr("  equivalencia:", out["equivalencia"]["veredicto"])
@@ -545,17 +563,18 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
 
     # ---- regla de posición
     ver, det = regla_posicion(marco + far_t, E, far_ok=far_ok)
-    # VE2-06 (A104): la misma regla dentro de cada tramo. Si en O1 o en O2 por separado otro brazo queda ELEGIDO, la
-    # elección de la unión se marca y decide Nicolás.
+    # VE2-06 y N-2 (A104): la misma regla dentro de cada tramo. Si O1 u O2 por separado no da el mismo resultado que la
+    # unión (otro brazo, SE QUEDA RADIANTE frente a un elegido, NO RESUELTO, NINGUNO), la elección se marca y decide
+    # Nicolás. Un tramo sin pasadas no cuenta como discordancia.
     por_tramo = {}
     for tr in ("T", "O1", "O2"):
         sub = [x for x in marco + far_t if x["tramo"] == tr]
         por_tramo[tr] = regla_posicion(sub, E, far_ok=far_ok)[0] if sub else "SIN PASADAS"
-    elegido = ver.split()[1] if ver.startswith("ELEGIDO") else ("RADIANTE" if ver.startswith("SE QUEDA") else None)
-    otros = [tr for tr in ("O1", "O2") if por_tramo[tr].startswith("ELEGIDO") and elegido
-             and por_tramo[tr].split()[1] != elegido]
+    otros = [tr for tr in ("O1", "O2") if por_tramo[tr] != "SIN PASADAS"
+             and resultado_rp(por_tramo[tr]) != resultado_rp(ver)]
     if otros:
-        ver = f"{ver} [A104: en {' y '.join(otros)} sale otro brazo; decide Nicolas]"
+        ver = (f"{ver} [A104: en {' y '.join(otros)} el resultado es otro ("
+               + "; ".join(f"{tr}: {por_tramo[tr]}" for tr in otros) + "); decide Nicolas]")
     det["por_tramo"] = por_tramo
     n_alert = sum(1 for x in far_t if x["npix"].get(("VIA", "radiante"), 0))
     det["far_tabla_con_alertado"] = n_alert
@@ -654,9 +673,10 @@ def main(argv=None):
             # código independiente (delaunay_perturbado.py de S163, vía equivalencia_v375e.vrp_port_con_regla_matlab)
             vara = elegir_vara(port["npix"], port["vrp_mw"], mat.get(i),
                                lambda: EQ.vrp_port_con_regla_matlab(mir, port["pixeles"]))
+            vara_vieja = elegir_vara(port["npix"], port["vrp_mw"], mat.get(i), lambda: port["vrp_mw"])   # N-1, informa
             vrp_via = float(MV.vrp_mirova(mir, mascara, coef=MV.COEF_VRP_V375)["VRP_MW"]) if mask_v else None
             pasadas[i] = {"rec": rec_a, "dist": dist, "npix": len(mask_v), "inner": inner_html.get(o["volcan"], v["inner_radius_km"]),
-                          "inner_v": v["inner_radius_km"], "vrp_port": vara, "vrp_via": vrp_via,
+                          "inner_v": v["inner_radius_km"], "vrp_port": vara, "vrp_port_vieja": vara_vieja, "vrp_via": vrp_via,
                           "geom": r.get("geometria_centro"),
                           "mascara_igual": mask_v == {(q[0], q[1]) for q in port["pixeles"]},
                           "k_rec": None if krec is None else E.slim(krec), "dc_almacen_igual": dc_ok, "m14": m14}

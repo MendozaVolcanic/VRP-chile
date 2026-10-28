@@ -103,6 +103,12 @@ MUTACIONES = [
      'return (g["x0"] - g["ul_x"]) / paso - 0.5, (g["ul_y"] - g["y0"]) / paso - 0.5'),
     ("L57", LP, '>= FRONTERA_OCR]', '> FRONTERA_OCR]'),
     ("L58", LP, 'dc_ok[b] = va is not None and va.get("distance_class") == vb.get("distance_class")', 'dc_ok[b] = True'),
+    # ---- lector: N-1 y N-2 del verificador corto
+    ("L59", LP, 'and resultado_rp(por_tramo[tr]) != resultado_rp(ver)]', 'and False]'),
+    ("L60", LP, 'if por_tramo[tr] != "SIN PASADAS"', 'if True'),
+    ("L61", LP, '        return veredicto.split()[1]', '        return "RADIANTE"'),
+    ("L62", LP, 'fuera_v = [i for i in con_v if abs(pasadas[i]["vrp_via"] - pasadas[i]["vrp_port_vieja"]) > TOL_VRP_MW]',
+     'fuera_v = []'),
     # ---- generador
     ("G19", GF, '"capas_locales": dep["capas"](),', '"capas_locales": {},'),
     ("G01", GF, 'for f in p.get("mirova") or []) else "far_ocr"', 'for f in p.get("mirova") or [] if False) else "far_ocr"'),
