@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 22:00 UTC aprox. (S167, vuelta 9): lectura del diurno W2 a W6 hecha; en verificador
+- Lector (subagente Opus, árboles `autocrlf=false` en `D:\vrp-trabajo\temporales\s167_diurno_lectura\`), según su
+  informe y SIN VERIFICAR todavía: **VIIRS 375 ADOPTAR (caso b)**: P2 EMPATE (neto 0, 10 discordantes en 9 bloques,
+  p 0,61), recupera 9 de 26 protegidas (las 9 de 1 MW o más) y 5 de 10 alertas bajo 1 MW, publica en 5 de 2.246
+  negativos (Q_d 0,22 % contra Q_n 3,67 %; 2 de esos 5 de 1 MW o más), D cumple. **VIIRS 750 ADOPTAR (caso b)**: P2 SIN
+  SUSTRATO, recupera 2 de 6 protegidas, 0 de 2.416 negativos, 2 pasadas «otra». **Global: DECIDE NICOLÁS** (§6.3: un
+  ADOPTAR de VIIRS 750 no se adopta solo). Robustez §6.4: tabla sola y «otra como negativo» dan DECIDE NICOLÁS CON M4.
+  Ningún día excluido (CMR 21:46 UTC); cobertura PAREJA en las cinco; sellos 29 de 29 y 7 de 7 (con la versión de
+  `objetivos_adenda1_sha256.txt` de `af5af6a17`; la copia dentro de `4b86059` es anterior y da 4 de 7).
+- Verificador limpio (Sonnet) lanzado: re-corre los dos scripts, la batería y las mutaciones, y mira si las
+  publicaciones diurnas de 1 MW o más son reflejo solar (A76).
+
 ### 2026-10-28 21:40 UTC (S167, vuelta 8): W6 pareja; corrida lejana de V375-E despachada; lectura del diurno en curso
 - El equipo se suspendió dos veces (15:42 a 20:27 y 20:28 a 21:37 UTC, eventos Kernel-Power 42/107, según Loop VIIRS
   750 2): el loop de S167 no corrió entre las 15:39 y las 20:28 UTC, y el medidor de V750-A se detiene con el equipo
