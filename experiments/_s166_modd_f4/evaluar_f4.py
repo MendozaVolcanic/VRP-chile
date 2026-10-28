@@ -23,7 +23,8 @@ LAS DOS PREGUNTAS DEL INSTRUMENTO:
    la marca), una identidad rota contra la vía sobre las grillas del censo, un placebo con d′ distinto de 0, un
    contador que no ve 50 publicaciones inyectadas, una pasada faltante o repetida, una variante radiante que no
    reproduce al record, o un control externo ausente dan INDECIDIBLE.
-Uso: python evaluar_f4.py --art DIR --identidad identidad.json --externos externos.json [--salida resultado.json]
+Uso: python evaluar_f4.py --art DIR --poblacion poblacion_f4.json --identidad identidad.json
+     --externos externos.json [--salida resultado.json]
 """
 from __future__ import annotations
 
@@ -75,6 +76,8 @@ MOTIVOS_SELLADOS = ("volcan_fuera_del_granulo", "escena_invalida")
 TOL_VRP_IDENTIDAD = 1e-3            # §8.2: MW
 TOL_DIST_POSICION = 6e-4            # §8.9: km (el record redondea a 0,001)
 MAX_OTRO_GRANULO = 0.01             # §8.2: fracción de las pasadas con grilla del censo
+N_GRILLAS_CENSO = 5321              # §8.2: grilla_NNNN.npz del censo MOD-D (S165 modis_salida.txt; 5.321 en disco)
+INICIO_E = "2026-10-17"             # §4: primer día del tramo E (la cola posterior al censo)
 N_INYECTAR, SEMILLA_INYECTAR = 50, 166
 VRP_INYECTADO, DIST_INYECTADA = 0.3, 0.5
 CORTE_CENIT_CHILLAN = 30.0          # §9, el corte sellado de MOD-D §5
@@ -198,11 +201,18 @@ def _ev(filas):
 
 
 # ------------------------------------------------------------------ pruebas (§6)
+def _lab(f, union=False):
+    """§5 (A119): `lab` es la etiqueta con la tabla sola, la que decide; `lab_union` la de tabla más OCR, que informa
+    (sin `lab_union` la pasada no tiene fila sólo OCR y las dos coinciden)."""
+    return f.get("lab_union", f["lab"]) if union else f["lab"]
+
+
 def p1(filas, b, ref="K"):
-    """Veto: protegidas que ref publica y b no. solo_ocr marca las que son protegidas sólo por una fila del OCR."""
+    """Veto: protegidas que ref publica y b no. Una protegida de la tabla perdida veta; una que es protegida sólo en la
+    unión con el OCR (solo_ocr) no veta: lleva a DECIDE NICOLÁS (§7, fila 5)."""
     perd = [{"vol": f["vol"], "dt": f["dt"], "z": f.get("z"), "vrp_ref": _mag(f, ref), "vrp_mirova": f.get("vrp_mirova"),
-             "solo_ocr": bool(f.get("solo_ocr"))}
-            for f in _ev(filas) if f["lab"] == "protegida" and _pub(f, ref) == 1 and _pub(f, b) == 0]
+             "solo_ocr": f["lab"] != "protegida"}
+            for f in _ev(filas) if _lab(f, True) == "protegida" and _pub(f, ref) == 1 and _pub(f, b) == 0]
     return {"estado": "VETADO" if any(not x["solo_ocr"] for x in perd) else (
         "SOLO OCR" if perd else "SIN PERDIDA"), "perdidas": perd,
         "mirova_sin_ninguno": [(f["vol"], f["dt"]) for f in _ev(filas)
@@ -223,33 +233,35 @@ def p1b(filas, b):
     return {"decide": baja, "contraria_lista": sube}
 
 
-def _error(f, b, lejana):
-    if f["lab"] == "bajo1":
+def _error(f, b, lejana, union=False):
+    lab = _lab(f, union)
+    if lab == "bajo1":
         return _pub(f, b) == 0
-    if f["lab"] == "neg_limpio":
+    if lab == "neg_limpio":
         return _pub(f, b) == 1
-    if lejana and f["lab"] == "far_ref":
+    if lejana and lab == "far_ref":
         return _pub(f, b) == 1
     return False
 
 
-def contribuciones(filas, b, ref="K", lejana=False):
+def contribuciones(filas, b, ref="K", lejana=False, union=False):
     """+1 si el error es sólo de b, -1 si es sólo de ref (signo de D-45: positivo es malo para b)."""
     labs = ("bajo1", "neg_limpio", "far_ref") if lejana else ("bajo1", "neg_limpio")
     out = []
     for f in _ev(filas):
-        if f["lab"] not in labs:
+        if _lab(f, union) not in labs:
             continue
-        er, eb = _error(f, ref, lejana), _error(f, b, lejana)
+        er, eb = _error(f, ref, lejana, union), _error(f, b, lejana, union)
         if er != eb:
-            out.append({"vol": f["vol"], "dt": f["dt"], "lab": f["lab"], "c": 1 if eb else -1, "bloque": _bloque(f),
-                        "z": f.get("z"), "solo_ocr": bool(f.get("solo_ocr"))})
+            out.append({"vol": f["vol"], "dt": f["dt"], "lab": _lab(f, union), "c": 1 if eb else -1,
+                        "bloque": _bloque(f), "z": f.get("z")})
     return out
 
 
-def p2(filas, b, ref="K", lejana=False):
-    """P2 (lejana=False, sellada en MOD-D) y P2' (lejana=True): prueba de signos por bloque noche-volcán, D-45."""
-    c = contribuciones(filas, b, ref, lejana)
+def p2(filas, b, ref="K", lejana=False, union=False):
+    """P2 (lejana=False, sellada en MOD-D) y P2' (lejana=True): prueba de signos por bloque noche-volcán, D-45.
+    union=True la repite con las etiquetas de tabla más OCR (informa, A119)."""
+    c = contribuciones(filas, b, ref, lejana, union)
     neto = sum(x["c"] for x in c)
     por_bloque = collections.Counter()
     for x in c:
@@ -259,11 +271,10 @@ def p2(filas, b, ref="K", lejana=False):
     pr = D.prueba_signos_p2(sumas, neto)
     estado = D.regla_signos_p2(neto, B, pr)
     labs = ("bajo1", "neg_limpio", "far_ref") if lejana else ("bajo1", "neg_limpio")
-    s_ref = sum(1 for f in _ev(filas) if f["lab"] in labs and _error(f, ref, lejana))
-    s_b = sum(1 for f in _ev(filas) if f["lab"] in labs and _error(f, b, lejana))
+    s_ref = sum(1 for f in _ev(filas) if _lab(f, union) in labs and _error(f, ref, lejana, union))
+    s_b = sum(1 for f in _ev(filas) if _lab(f, union) in labs and _error(f, b, lejana, union))
     return {"estado": estado, "neto": neto, "B": B, "s_ref": s_ref, "s_b": s_b, "p_gana": pr["gana"],
-            "p_pierde": pr["pierde"], "metodo": pr["metodo"], "discordantes": c,
-            "neto_sin_solo_ocr": sum(x["c"] for x in c if not x["solo_ocr"])}
+            "p_pierde": pr["pierde"], "metodo": pr["metodo"], "discordantes": c}
 
 
 def pares_m(filas, b):
@@ -349,7 +360,7 @@ def chillan(filas, b="V"):
         estado = "ES DEL SENSOR"
     else:
         estado = "SIN RESOLVER"
-    return {"estado": estado, "recuperadas": recup, "pares": pares, "empates": empates, "n_pares": n,
+    return {"estado": estado, "brazo": b, "recuperadas": recup, "pares": pares, "empates": empates, "n_pares": n,
             "b_mas_cerca": k, "p_una_cola": [num, den], "mediana_razon": med, "mediana_z_le30": med_bajo,
             "mediana_z_gt30": med_sobre}
 
@@ -416,13 +427,15 @@ def _e_total(x):
 
 
 def regla_posicion(res):
-    """Elige el brazo de posición antes del veredicto. Elegible = P1 contra K no VETADO (una pérdida sólo del OCR no
-    quita la elegibilidad: la lleva el §7 a DECIDE NICOLÁS). Gana = elegible distinto de V cuyo P2' contra V da GANA.
-    Si ganan dos, el de menor E + E_lejana; a igual valor, V-pico. Si ninguno gana, V si es elegible. Si V no es
-    elegible, el elegible no peor que V en P2'; si son dos, el de menor E + E_lejana y a igual valor V-pico; si
-    ninguno, NINGUNA."""
+    """Elige el brazo de posición antes del veredicto. Elegible = P1 contra K no VETADO y, para V-cercano y V-pico,
+    tampoco VETADO contra V (VF4-01: una posición no puede cambiar una protegida que V publica por publicaciones bajo
+    1 MW; una pérdida sólo del OCR no quita la elegibilidad: la lleva el §7 a DECIDE NICOLÁS). Gana = elegible
+    distinto de V cuyo P2' contra V da GANA. Si ganan dos, el de menor E + E_lejana; a igual valor, V-pico (preferencia
+    a priori, VF4-12). Si ninguno gana, V si es elegible. Si V no es elegible, el elegible no peor que V en P2'; si son
+    dos, el de menor E + E_lejana y a igual valor V-pico; si ninguno, NINGUNA."""
     br = res["brazos"]
-    eleg = [b for b in BRAZOS_V if br[b]["p1"]["estado"] != "VETADO"]
+    eleg = [b for b in BRAZOS_V if br[b]["p1"]["estado"] != "VETADO"
+            and (b == "V" or br[b]["p1_vs_V"]["estado"] != "VETADO")]
     otros = [b for b in eleg if b != "V"]
     ganan = [b for b in otros if br[b]["p2l_vs_V"]["estado"] == "GANA"]
 
@@ -439,18 +452,23 @@ def regla_posicion(res):
 
 
 # ------------------------------------------------------------------ controles (§8)
-def control_identidad(ident, con_grilla):
+def control_identidad(ident, filas, n_grillas_censo=None):
     """§8.2: la vía del runner (del HDF) contra la vía corrida sobre la grilla que guardó el censo MOD-D, en cada pasada
-    de C con grilla del censo. ident: {(vol, dt): {"mismo_granulo", "misma_mascara", "dvrp", "misma_clase"}};
-    con_grilla: las (vol, dt) de C evaluables con grilla del censo."""
+    de C con grilla del censo. ident: {(vol, dt): {"mismo_granulo", "misma_mascara", "dvrp", "misma_clase"}}.
+    VF4-02: el conjunto que se exige sale de la POBLACIÓN (campo grilla_censo), no del archivo de identidad, y la
+    población tiene que traer exactamente las 5.321 grillas del censo; si no, la identidad no se midió entera."""
+    n_grillas_censo = N_GRILLAS_CENSO if n_grillas_censo is None else n_grillas_censo
+    n_pob = sum(1 for f in filas if f.get("grilla_censo"))
+    con_grilla = [(f["vol"], f["dt"]) for f in _ev(filas) if f.get("grilla_censo")]
     faltan = sorted(k for k in con_grilla if k not in ident)
     otro = [k for k in con_grilla if k in ident and not ident[k]["mismo_granulo"]]
     malas = [{"clave": list(k), **ident[k]} for k in con_grilla
              if k in ident and ident[k]["mismo_granulo"] and not (
                  ident[k]["misma_mascara"] and abs(ident[k]["dvrp"]) <= TOL_VRP_IDENTIDAD and ident[k]["misma_clase"])]
     frac_otro = len(otro) / len(con_grilla) if con_grilla else 1.0
-    ok = bool(con_grilla) and not faltan and not malas and frac_otro <= MAX_OTRO_GRANULO
-    return {"estado": "OK" if ok else "INDECIDIBLE", "n_con_grilla": len(con_grilla), "n_faltan": len(faltan),
+    ok = n_pob == n_grillas_censo and bool(con_grilla) and not faltan and not malas and frac_otro <= MAX_OTRO_GRANULO
+    return {"estado": "OK" if ok else "INDECIDIBLE", "n_grillas_en_poblacion": n_pob,
+            "n_grillas_esperadas": n_grillas_censo, "n_con_grilla": len(con_grilla), "n_faltan": len(faltan),
             "faltan": faltan[:20], "n_otro_granulo": len(otro), "otro_granulo": otro[:20], "n_distintas": len(malas),
             "distintas": malas[:20]}
 
@@ -558,43 +576,62 @@ def control_contador(filas, predicado=predicado_node):
             "inyectados": len(sel), "no_pasan": no_pasan[:20], "s_v_antes": s_antes, "s_v_con_inyeccion": s_despues}
 
 
-def control_cobertura(filas, esperadas, sin_pasada_nuestra=(), predicado=predicado_node):
-    """§8.6 (A108): cada pasada de la población con una fila, sin repetidas; sólo los dos motivos sellados salen del
-    denominador; una falla del arnés o una vía que no corrió deja el control en rojo. sin_pasada_nuestra: pasadas MODIS
-    de la referencia (protegida o bajo 1 MW) sin pasada de la población a ±120 s (§8.1 del programa): en rojo."""
+def _es_e(dt):
+    return str(dt)[:10] >= INICIO_E
+
+
+def control_cobertura(filas, esperadas, sin_pasada_nuestra=None, predicado=predicado_node):
+    """§8.6 (A108): cada pasada de la población con una fila, sin repetidas ni sobrantes; sólo los dos motivos sellados
+    salen del denominador; una falla del arnés o una vía que no corrió deja el control en rojo. sin_pasada_nuestra:
+    pasadas MODIS de la referencia (protegida o bajo 1 MW) sin pasada de la población a ±120 s (programa §8.1), como
+    tuplas (vol, dt, lab): en rojo. Si la lista no viene (None), el control queda en rojo: no se midió (VF4-03).
+    Las listas van completas: el protocolo del tramo E (§7) las necesita enteras para decidir dónde está el rojo."""
     claves = [(f["vol"], f["dt"]) for f in filas]
-    rep = [k for k, n in collections.Counter(claves).items() if n > 1]
+    rep = sorted(k for k, n in collections.Counter(claves).items() if n > 1)
     faltan = sorted(set(esperadas) - set(claves))
     sobran = sorted(set(claves) - set(esperadas))
     fallas = [{"vol": f["vol"], "dt": f["dt"], "motivo": f["_motivo"]} for f in filas
               if not f["_evaluable"] and f["_motivo"] not in MOTIVOS_SELLADOS]
     # como en el sellado de MOD-D (VCR-06): «K publica» en estas pasadas sale del predicado del evaluador sobre el record
     # de K; si no coincide con lo que dijo el runner, es una falla del instrumento
-    sel = [f for f in filas if not f["_evaluable"] and f.get("lab") == "protegida" and f["_motivo"] in MOTIVOS_SELLADOS]
+    sel = [f for f in filas if not f["_evaluable"] and _lab(f, True) == "protegida" and f["_motivo"] in MOTIVOS_SELLADOS]
     prot_fuera = []
     for f, (pub, _m) in zip(sel, predicado([(f.get("k_slim"), f["inner"]) for f in sel])):
         if pub != int((f.get("pub_runner") or {}).get("K") or 0):
             fallas.append({"vol": f["vol"], "dt": f["dt"], "motivo": "predicado_de_K_distinto_del_runner"})
         if pub:
             prot_fuera.append({"vol": f["vol"], "dt": f["dt"], "motivo": f["_motivo"]})
-    sin = list(sin_pasada_nuestra)
-    ok = not rep and not faltan and not sobran and not fallas and not sin
-    return {"estado": "OK" if ok else "INDECIDIBLE", "repetidas": rep[:20], "faltan": faltan[:20],
-            "n_faltan": len(faltan), "sobran": sobran[:20], "fallas": fallas[:20], "n_fallas": len(fallas),
-            "protegidas_k_fuera": prot_fuera, "sin_pasada_nuestra": sin[:20],
+    sin_medir = sin_pasada_nuestra is None
+    sin = [tuple(x) for x in (sin_pasada_nuestra or ())]
+    ok = not rep and not faltan and not sobran and not fallas and not sin and not sin_medir
+    return {"estado": "OK" if ok else "INDECIDIBLE", "repetidas": rep, "faltan": faltan, "n_faltan": len(faltan),
+            "sobran": sobran, "fallas": fallas, "n_fallas": len(fallas), "protegidas_k_fuera": prot_fuera,
+            "sin_pasada_nuestra": sin, "sin_pasada_nuestra_no_medida": sin_medir,
             "fuera_del_denominador": dict(collections.Counter(f["_motivo"] for f in filas if not f["_evaluable"])),
             "n_evaluables": sum(1 for f in filas if f["_evaluable"])}
+
+
+def rojo_solo_en_e(cob):
+    """§7, protocolo del tramo E (VF4-06): True si la cobertura está en rojo y TODO lo que la pone en rojo es del tramo
+    E (fecha desde INICIO_E). Entonces E se excluye entero en todos los brazos y se lee C solo, declarado."""
+    if cob["estado"] == "OK" or cob["sin_pasada_nuestra_no_medida"]:
+        return False
+    dts = [k[1] for k in cob["repetidas"] + cob["faltan"] + cob["sobran"]] + [x["dt"] for x in cob["fallas"]] + \
+        [x[1] for x in cob["sin_pasada_nuestra"]]
+    return bool(dts) and all(_es_e(d) for d in dts)
 
 
 def control_k_produccion(filas):
     """§8.1: K del arnés = data/ (el arnés marca k_difiere_de_guardado y la re-corrida en el codigo_sha del record
     guardado; una diferencia no reproducida en su sha es falla), y el predicado del evaluador da la misma publicación
-    de K que el del runner."""
+    de K que el del runner. Una fila ok sin el campo k_difiere_de_guardado es falla: no se comparó (VF4-03)."""
+    sin_campo = [(f["vol"], f["dt"]) for f in filas if f.get("estado") == "ok" and "k_difiere_de_guardado" not in f]
     sin_explicar = [(f["vol"], f["dt"]) for f in filas if f.get("estado") == "ok" and f.get("k_difiere_de_guardado")
                     and not f.get("k_reproducida_en_su_sha")]
     distinto = [(f["vol"], f["dt"]) for f in _ev(filas) if _pub(f, "K") != int((f.get("pub_runner") or {}).get("K") or 0)]
-    return {"estado": "OK" if not sin_explicar and not distinto else "INDECIDIBLE",
-            "sin_explicar": sin_explicar[:20], "predicado_distinto_del_runner": distinto[:20]}
+    return {"estado": "OK" if not sin_campo and not sin_explicar and not distinto else "INDECIDIBLE",
+            "sin_campo": sin_campo[:20], "n_sin_campo": len(sin_campo), "sin_explicar": sin_explicar[:20],
+            "predicado_distinto_del_runner": distinto[:20]}
 
 
 # ------------------------------------------------------------------ veredicto (§7)
@@ -619,18 +656,18 @@ def veredicto(res):
         return "INDECIDIBLE"
     prot_k = res["controles"]["cobertura"].get("protegidas_k_fuera") or []
     if ("BLOQUEA" in est or x["p1"]["estado"] == "SOLO OCR" or x["p1b"]["decide"] or x["m"]["regla"] == "EMPEORA"
-            or prot_k):
+            or prot_k or res.get("protegidas_que_otra_posicion_publica")):
         return "DECIDE NICOLÁS"
     if est <= {"GANA", "EMPATE"}:
         return "PROPONER ADOPCIÓN"
     return "INDECIDIBLE"
 
 
-def evaluar(filas, esperadas, ident, con_grilla, externos, sin_pasada_nuestra=(), predicado=predicado_node):
+def _evaluar(filas, esperadas, ident, externos, sin_pasada_nuestra, predicado, n_grillas_censo):
     for f in filas:
         f["_evaluable"], f["_motivo"] = evaluable(f)
     armar_tabla(filas, predicado)
-    ctl = {"k_produccion": control_k_produccion(filas), "identidad": control_identidad(ident, con_grilla),
+    ctl = {"k_produccion": control_k_produccion(filas), "identidad": control_identidad(ident, filas, n_grillas_censo),
            "marca": control_marca(filas), "placebo": control_placebo(filas),
            "contador": control_contador(filas, predicado),
            "cobertura": control_cobertura(filas, esperadas, sin_pasada_nuestra, predicado),
@@ -642,20 +679,42 @@ def evaluar(filas, esperadas, ident, con_grilla, externos, sin_pasada_nuestra=()
     for b in BRAZOS_V:
         res["brazos"][b] = {"p1": p1(filas, b), "p1b": p1b(filas, b), "p2": p2(filas, b),
                             "p2l_vs_K": p2(filas, b, "K", lejana=True), "m": m(filas, b),
+                            "p2_union": {k: v for k, v in p2(filas, b, union=True).items() if k != "discordantes"},
                             "razon_protegidas": razon_protegidas(filas, b), "curva_cenit": curva_cenit(filas, b),
                             "curva_misma_noche": curva_misma_noche(filas, b)}
         if b != "V":
+            res["brazos"][b]["p1_vs_V"] = p1(filas, b, "V")
             res["brazos"][b]["p2l_vs_V"] = p2(filas, b, "V", lejana=True)
     res["curva_cenit_K"] = curva_cenit(filas, "K")
     res["curva_misma_noche_K"] = curva_misma_noche(filas, "K")
     res["posicion_elegida"], res["posicion_motivo"] = regla_posicion(res)
     res["descriptivas_posicion"] = descriptivas_posicion(filas)
     bc = res["posicion_elegida"] or "V"
+    # VF4-01: una protegida que otra regla de posición publica y la elegida no, no se cambia en silencio (§7, fila 5)
+    res["protegidas_que_otra_posicion_publica"] = sorted({(x["vol"], x["dt"]) for o in BRAZOS_V if o != bc
+                                                         for x in p1(filas, bc, o)["perdidas"]})
     res["chillan"] = chillan(filas, bc)
     res["chillan_por_tramo"] = chillan_por_tramo(filas, bc)
     res["por_tramo"] = {t: {"p2": p2([f for f in filas if f.get("tramo") == t], bc)["estado"]} for t in ("C", "E")
                         if any(f.get("tramo") == t for f in filas)}
     res["veredicto"] = veredicto(res)
+    return res
+
+
+def evaluar(filas, esperadas, ident, externos, sin_pasada_nuestra=None, predicado=predicado_node,
+            n_grillas_censo=None):
+    """El veredicto del §7, con el protocolo del tramo E: si la cobertura queda en rojo sólo por pasadas del tramo E,
+    E se excluye entero en todos los brazos (filas, esperadas y pasadas de MIROVA sin pasada nuestra) y se evalúa C
+    solo; el resultado lo declara en `e_excluido`. Un rojo que toca C deja todo INDECIDIBLE."""
+    res = _evaluar(filas, esperadas, ident, externos, sin_pasada_nuestra, predicado, n_grillas_censo)
+    if rojo_solo_en_e(res["controles"]["cobertura"]):
+        motivo = {k: res["controles"]["cobertura"][k] for k in ("repetidas", "faltan", "sobran", "fallas",
+                                                                "sin_pasada_nuestra")}
+        res = _evaluar([f for f in filas if not _es_e(f["dt"])], [k for k in esperadas if not _es_e(k[1])], ident,
+                       externos, [x for x in sin_pasada_nuestra if not _es_e(x[1])], predicado, n_grillas_censo)
+        res["e_excluido"] = motivo
+    else:
+        res["e_excluido"] = None
     return res
 
 
@@ -669,7 +728,7 @@ def cargar(art):
     return filas, cab
 
 
-def main():
+def main(argv=None, predicado=predicado_node):
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
     ap.add_argument("--art", required=True)
@@ -677,7 +736,7 @@ def main():
     ap.add_argument("--identidad", required=True, help="identidad.json de identidad_f4.py")
     ap.add_argument("--externos", required=True, help="externos.json con los controles del candado")
     ap.add_argument("--salida", default=None)
-    a = ap.parse_args()
+    a = ap.parse_args(argv)
     pob = json.load(open(a.poblacion, encoding="utf-8"))
     filas, _cab = cargar(a.art)
     por = {(p["vol"], p["dt"]): p for p in pob["pasadas"]}
@@ -685,10 +744,10 @@ def main():
         f.update({k: v for k, v in por.get((f["vol"], f["dt"]), {}).items() if k not in f})
     idn = json.load(open(a.identidad, encoding="utf-8"))
     ident = {(x["vol"], x["dt"]): x for x in idn["pasadas"]}
-    con_grilla = [tuple(k) for k in idn["con_grilla"]]
-    res = evaluar(filas, list(por), ident, con_grilla, json.load(open(a.externos, encoding="utf-8")),
-                  pob.get("sin_pasada_nuestra", ()))
-    print("VEREDICTO:", res["veredicto"], "| posición:", res["posicion_elegida"], "(%s)" % res["posicion_motivo"])
+    res = evaluar(filas, list(por), ident, json.load(open(a.externos, encoding="utf-8")),
+                  pob.get("sin_pasada_nuestra"), predicado)
+    print("VEREDICTO:", res["veredicto"], "| posición:", res["posicion_elegida"], "(%s)" % res["posicion_motivo"],
+          "| tramo E excluido:", bool(res["e_excluido"]))
     for k, c in res["controles"].items():
         print("  control %-26s %s" % (k, c if isinstance(c, str) else c.get("estado")))
     for b, x in res["brazos"].items():
@@ -696,12 +755,13 @@ def main():
             b, x["p1"]["estado"], len(x["p1b"]["decide"]), x["p2"]["estado"], x["p2"]["neto"], x["p2"]["B"],
             x["p2l_vs_K"]["estado"], x["p2l_vs_K"]["neto"], x["m"]["regla"], x["m"]["n"],
             x["razon_protegidas"]["mediana"]))
-    print("  Chillán:", {k: res["chillan"][k] for k in ("estado", "n_pares", "b_mas_cerca", "mediana_razon")})
+    print("  Chillán:", {k: res["chillan"][k] for k in ("estado", "brazo", "n_pares", "b_mas_cerca", "mediana_razon")})
     out = Path(a.salida) if a.salida else Path(a.art) / "resultado_f4.json"
     for f in filas:
         f.pop("_t", None)
     out.write_text(json.dumps(res, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
     print("escrito", out)
+    return res
 
 
 if __name__ == "__main__":

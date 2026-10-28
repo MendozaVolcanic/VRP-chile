@@ -94,11 +94,14 @@ de 5 km son los de `FAMILIAS["MODIS"]` en `main`.
   fuera del censo. Por qué termina el 26: la referencia congelada es del 2026-10-27 21:21 UTC y las pasadas del 27
   pueden no estar todavía en la tabla.
   - Los días 17 a 20 de octubre son los que D-29 sacó porque CMR no servía MOD021KM. Medido hoy, 2026-10-28 04:00
-    UTC (`cmr_cola.py`, `cmr_cola_salida.txt`, por versión, de 00 a 12 UTC en la caja de Chile): CMR sirve la versión
+    UTC (`cmr_cola.py`, `cmr_cola_salida.txt`, por versión, de 00 a 12 UTC en la caja de Chile): CMR lista la versión
     6.1 estándar, que es la que pide `pipeline/fetch.py` primero, del 17 al 26 de octubre, con tantos MxD03 como L1B en
-    cada día y plataforma (3 a 7 gránulos). Entran **si al armar la población** CMR sirve, para cada volcán y pasada
-    nocturna de esos días, el L1B y su MxD03; un día que no cumpla se excluye entero en todos los brazos y se declara en
-    la primera línea del resultado (como D-29).
+    cada día y plataforma (2 a 7 gránulos). El listado no basta: CMR puede listar entradas que dan 404 al bajarlas
+    (commit `798400dec`, el 12-oct de S159) y el verificador vio cambiar una fila del listado en una hora (VF4-07). Por
+    eso **«sirve» quiere decir que, al armar la población, una petición HEAD a la URL de descarga del L1B y a la de su
+    MxD03 responde 200 para cada volcán y pasada nocturna del día**. Un día que no cumpla se excluye entero en todos
+    los brazos y se declara en la primera línea del resultado (como D-29). Esta comprobación se hace y se guarda antes
+    del sello de la lista de días, junto con la población.
   - CMR sirve además una Collection 7 de LAADS (versión `7`) en paralelo. Ni K ni V la piden (`fetch.py` pide 6.1 y cae
     a 6.1NRT): los dos brazos leen el mismo archivo y la colección no los separa. Que MIROVA haya pasado a la 7 es SIN
     DATO.
@@ -110,8 +113,8 @@ de 5 km son los de `FAMILIAS["MODIS"]` en `main`.
 
 ## 5. La vara: lo que publica MIROVA
 
-- **Referencia congelada** posterior al cierre de D-39 (el consolidado ganó 2.648 filas el 2026-10-27, 18 protegidas
-  recuperadas en 60 días): consolidado de Mirova-v1 en el commit `cb91eb506c37cff0b83164dd602d8a5340277637`
+- **Referencia congelada** posterior al cierre de D-39 (el consolidado ganó 2.648 filas el 2026-10-27, 23 protegidas
+  de todos los sensores; `tasks/LOOP_OBJETIVOS.md` de `loop/activo`, entrada del 2026-10-27 12:46 UTC): consolidado de Mirova-v1 en el commit `cb91eb506c37cff0b83164dd602d8a5340277637`
   (2026-10-27 21:21:07 UTC) y OCR en `cfc57c4d8bc57c5ccd5219ff3a91749dae167b97` (2026-10-27 13:06:30 UTC), las mismas
   copias que usó S165 (`experiments/_s165_regla_posicion/referencia_salida.txt`). Su sha256 queda en el manifiesto del
   candado antes del despacho.
@@ -121,9 +124,12 @@ de 5 km son los de `FAMILIAS["MODIS"]` en `main`.
 - **Por qué se re-etiqueta C** y no se usan las etiquetas selladas del censo: la tabla sellada es anterior a D-39 y le
   faltaban filas, entre ellas protegidas de Láscar. Las pasadas de C cuya etiqueta cambia contra la del censo se
   listan (informa).
-- **Canal**: cada alerta lleva `solo_ocr` si es alerta sólo por una fila del OCR. Una pérdida de una protegida sólo OCR
-  no veta: va a DECIDE NICOLÁS (§7), porque el OCR es la parte menos creíble de la referencia. P2 se informa también sin
-  las pasadas sólo OCR.
+- **Canal (A119)**: cada pasada lleva dos etiquetas: `lab`, con la tabla sola, que **decide** todo (P1, P1b, P2, P2',
+  M, Chillán y curvas); y `lab_union`, con tabla más OCR, que **informa** (P2 con la unión, en `p2_union`). Única
+  excepción: una protegida de la unión que no es protegida de la tabla («sólo OCR») y que el brazo pierde no veta,
+  pero lleva el veredicto a DECIDE NICOLÁS (§7), porque perder una alerta de 1 MW o más no se deja pasar en silencio
+  aunque venga del canal menos creíble. Así lo pedía ya el texto del sello de MOD-D («tabla sola decide»), aunque su
+  evaluador usaba la unión (VF4-05).
 
 ## 6. Pruebas
 
@@ -135,7 +141,7 @@ noche-volcán.
 
 | prueba | qué cuenta | regla |
 |---|---|---|
-| **P1 veto** | protegidas que K publica y el brazo no | una que no sea sólo OCR: el brazo no es elegible (§6 bis) y el veredicto es NO ADOPTAR; sólo OCR: DECIDE NICOLÁS |
+| **P1 veto** | protegidas que K publica y el brazo no (protegida de la tabla; las de la unión que no lo son de la tabla, aparte) | una de la tabla: el brazo no es elegible (§6 bis) y el veredicto es NO ADOPTAR; sólo OCR: DECIDE NICOLÁS |
 | **P1 lista** | protegidas que ni K ni el brazo publican | se listan, no deciden |
 | **P1b** | protegidas que los dos publican, con K ≥ 1 MW y el brazo < 1 MW | una o más: DECIDE NICOLÁS. La contraria (K < 1, brazo ≥ 1) se lista |
 | **P2** (sellada en MOD-D) | E = alertas bajo 1 MW sin publicar + publicaciones en negativos limpios; +1 si el error es sólo del brazo, −1 si es sólo de K | `regla_signos_p2`: GANA, PIERDE, BLOQUEA, EMPATE, SIN SUSTRATO (4 bloques o menos) |
@@ -144,7 +150,13 @@ noche-volcán.
 | **Razón** | mediana de brazo/MIROVA en todas las protegidas que el brazo publica, publique K o no | informa, con la marca de si cae en [0,9; 1,1] (§12, decisión 4) |
 | **Curvas de cenit** | razón brazo/MIROVA y K/MIROVA por tramo de 10°; y en cada noche-volcán con dos alertas separadas por 10° o más, razón más oblicua sobre menos oblicua del brazo y de MIROVA | informan: se busca reproducir la curva de MIROVA, no aplanarla |
 
-P2 y P2' se calculan sobre C ∪ E y se informan también por tramo.
+P2 y P2' se calculan sobre C ∪ E y se informan también por tramo, y P2 también con las etiquetas de la unión
+(`p2_union`, informa).
+
+**Soporte independiente (informa; adenda 1 del sello, VF4-10)**: al leer el resultado, a cada publicación de V en un
+negativo limpio de C ∪ E se le aplica la función sellada `soporte_independiente` de `evaluar_paquete.py` (tag
+`s162-modd-tag`): si otro sensor la ve la misma noche en otro gránulo, a 6 h o menos, es candidata al perfil
+experimental. No cambia P2, que sigue contando toda publicación en un negativo limpio como costo para la réplica.
 
 **Qué cambia respecto de las reglas selladas de MOD-D** (todo lo demás se conserva tal cual):
 
@@ -152,19 +164,28 @@ P2 y P2' se calculan sobre C ∪ E y se informan también por tramo.
 |---|---|---|---|
 | brazo que decide | PM (el port) | V con la posición del §6 bis | la vía del pipeline es lo que se encendería |
 | vara | etiquetas de la referencia del censo | las de la referencia posterior a D-39 (§5) | a la del censo le faltaban filas |
+| canal | el texto decía «tabla sola decide», pero el evaluador usaba la unión con el OCR | decide la tabla sola, como decía el texto; la unión informa | A119 (VF4-05) |
 | P1 | toda pérdida veta | una pérdida sólo OCR va a DECIDE NICOLÁS | el OCR es la parte menos creíble (§12, decisión 5) |
 | P2 | sólo E | P2 y P2', decide la peor de las dos (§7) | decisión de Nicolás del 2026-10-27 (§12, decisión 3) |
 | fila 2 del veredicto | «PM pierde una protegida» | «ninguna posición elegible, o P1 VETADO» | la regla de posición va antes |
 | denominador | lo saca el port (`port_estado`) | lo saca la vía (`motivo` del arnés) | es la vía la que cubre o no al volcán |
 | Chillán | pares con las dos magnitudes | además, ambas mayores que 0 | el sellado haría log10(0) con un record publicado con magnitud 0 (no debería ocurrir; se declara) |
 | veredicto | CANDIDATO a la fase 3 | PROPONER ADOPCIÓN | es la fase 4 |
-| costura, borde del gránulo, S-1, soporte de la adenda 1 | informan | no se calculan | ya se informaron en el censo y no cambian con la vía, que tiene la misma máscara |
+| costura, borde del gránulo, S-1 | informan | no se calculan | se informaron en el censo y la vía tiene la misma máscara; en E no se informan (VF4-10, aceptado: no deciden) |
+| soporte de la adenda 1 | informa | informa, al leer (arriba) | el tramo E trae publicaciones nuevas (VF4-10) |
 
 ### 6 bis. Regla de posición (se aplica antes del §7)
 
-- **Elegible**: brazo de posición cuyo P1 contra K no está VETADO.
+- **Elegible**: brazo de posición cuyo P1 contra K no está VETADO y, si es V-cercano o V-pico, que tampoco pierde una
+  protegida de la tabla que V publica (P1 contra V). Por qué (VF4-01): sin esto, una posición podía cambiar una alerta
+  de 1 MW o más que V publica por seis publicaciones bajo 1 MW, y el criterio de victoria no admite ese canje.
 - **Gana**: un elegible distinto de V cuyo **P2' contra V** da GANA. Si ganan los dos, el de menor E + E_lejana (sus
-  errores en P2' contra K); a igual valor, V-pico (la distancia de MIROVA calza mejor con el pico, S165).
+  errores en P2' contra K); a igual valor, V-pico. Esa preferencia es **a priori**, no un resultado: la frase del
+  programa («la distancia de MIROVA calza mejor con el píxel pico») sale de la comparación del píxel pico contra el
+  alertado más cercano, y el propio informe de S165 dice que con todo en el cráter la distancia de MIROVA sigue al
+  cúmulo radiante (VF4-12). En MODIS el caso es improbable (1 de 5.321 pasadas cambia con «cercano»).
+- **Protegidas que otra posición publica**: si alguna protegida de la tabla la publica otra regla de posición y la
+  elegida no, no se cambia en silencio: el veredicto va a DECIDE NICOLÁS con la lista (§7, fila 5; VF4-01).
 - **Si ninguno gana**: V (radiante), si es elegible. Es lo que hace hoy la vía y lo que midió el censo; a igual
   desempeño no se cambia sin evidencia.
 - **Si V no es elegible**: el elegible no peor que V en P2' (GANA, EMPATE, o SIN SUSTRATO con neto 0 o a favor); si
@@ -179,12 +200,25 @@ P2 y P2' se calculan sobre C ∪ E y se informan también por tramo.
 
 | orden | condición | etiqueta |
 |---|---|---|
-| 1 | algún control del §8 en rojo | **INDECIDIBLE** (si es la identidad: se arregla la vía y se repite la identidad; no se lee el resto) |
+| 1 | algún control del §8 en rojo (después del protocolo del tramo E, abajo) | **INDECIDIBLE** |
 | 2 | ninguna posición elegible, o P1 VETADO | **NO ADOPTAR** |
 | 3 | P2 o P2' contra K da PIERDE | **NO ADOPTAR** |
 | 4 | P2 o P2' da SIN SUSTRATO | **INDECIDIBLE** |
-| 5 | P2 o P2' da BLOQUEA, o P1 sólo OCR, o P1b con alguna, o M da EMPEORA, o una protegida que K publica salió del denominador por un motivo sellado | **DECIDE NICOLÁS**, con la lista |
+| 5 | P2 o P2' da BLOQUEA, o P1 sólo OCR, o P1b con alguna, o M da EMPEORA, o una protegida que K publica salió del denominador por un motivo sellado, o una protegida que otra posición publica y la elegida no | **DECIDE NICOLÁS**, con la lista |
 | 6 | P2 y P2' dan GANA o EMPATE | **PROPONER ADOPCIÓN** (a Nicolás, A45) |
+
+**Protocolo de fallo, escrito antes de ver los datos (VF4-06):**
+- **Rojo de cobertura sólo en el tramo E** (toda pasada faltante, repetida, sobrante, con falla del arnés o de MIROVA
+  sin pasada nuestra es del 2026-10-17 en adelante): E se excluye entero en todos los brazos, se evalúa C solo y el
+  resultado lo declara en su primera línea (`e_excluido`). Por qué: E es una cola de diez días que el censo nunca
+  corrió; un 404 ahí no dice nada de la vía, y perder las 14 h de C por eso sería caro. Un rojo que toca C deja todo
+  INDECIDIBLE.
+- **Identidad en rojo**: no se lee el resto. Se busca la causa en la vía con la pasada distinta en la mano. Si hace
+  falta tocar `pipeline/`, eso es un PR propio con tag defensivo y el sí de Nicolás (A45), y después se repite la
+  corrida de V entera desde un tag nuevo (no sólo las pasadas distintas), porque la vía arreglada puede cambiar
+  cualquier pasada.
+- **Cualquier otro control en rojo**: se busca el defecto del instrumento y se repite la lectura; no se repite la
+  corrida a ciegas.
 
 El criterio de victoria de `docs/MISSION.md` (sección «Criterio de victoria de la réplica») queda así: ninguna
 protegida de 1 MW o más se pierde (filas 2 y 5), y bajo 1 MW una alerta perdida y una publicación de más pesan igual
@@ -194,9 +228,12 @@ protegida de 1 MW o más se pierde (filas 2 y 5), y bajo 1 MW una alerta perdida
 
 1. **K = producción**: en cada pasada el K del arnés se compara con el record de `data/mirova_equivalent/`; una
    diferencia se re-corre en el `codigo_sha` del record guardado (`recorrer_en_sha.py` de MOD-B) y, si no se
-   reproduce, el control queda en rojo. El predicado del evaluador da la misma publicación de K que el del runner.
+   reproduce, el control queda en rojo. El predicado del evaluador da la misma publicación de K que el del runner. Una
+   fila sin el campo `k_difiere_de_guardado` deja el control en rojo: no se comparó (VF4-03).
 2. **Identidad de punta a punta** (la pieza nueva): en cada pasada de C evaluable con grilla guardada por el censo
-   (5.321), V del runner contra V-grilla: **misma máscara** (las mismas celdas alertadas), **mismo VRP a 0,001 MW** y
+   (5.321), V del runner contra V-grilla. **El conjunto que se exige sale de la población** (campo `grilla_censo`), no
+   del archivo de identidad, y la población tiene que traer exactamente 5.321 pasadas con grilla del censo; si el
+   archivo de identidad omite una, falta (VF4-02). En cada una: **misma máscara** (las mismas celdas alertadas), **mismo VRP a 0,001 MW** y
    **misma `distance_class`**. Una sola pasada distinta con el mismo gránulo deja el control en rojo. Las pasadas con
    otro gránulo (`otro_granulo`) se cuentan y se listan; si superan el 1 % de las 5.321, el control queda en rojo
    (la identidad no se habría medido). Se informa además, por pasada, la máxima diferencia de radiancia entre la
@@ -212,7 +249,8 @@ protegida de 1 MW o más se pierde (filas 2 y 5), y bajo 1 MW una alerta perdida
    «escena inválida» (motivo del `.m`) salen del denominador de todos los brazos. Una vía que no corrió (record sin
    `via_codigo_mirova` True: `sin_mxd03`, `geo_distinta`, `sin_grilla`) o una falla del arnés deja el control en rojo.
    Toda pasada MODIS de la referencia (alerta o bajo 1 MW) sin pasada de la población a ±120 s deja el control en
-   rojo (programa §8.1). En las protegidas que salen por un motivo sellado, «K publica» se recalcula con el predicado
+   rojo (programa §8.1); la población trae esa lista siempre (vacía si no hay ninguna), y si no la trae el control
+   queda en rojo, porque no se midió (VF4-03). En las protegidas que salen por un motivo sellado, «K publica» se recalcula con el predicado
    del evaluador sobre el record de K; si no coincide con el runner, es falla del instrumento (como VCR-06 del
    sellado); si K la publica, se lista y lleva el veredicto a DECIDE NICOLÁS (§7, fila 5).
 7. **Referencia y re-etiquetado**: sha256 de las dos copias congeladas; el re-etiquetado corrido dos veces da lo mismo;
@@ -241,7 +279,8 @@ Del censo verificado y de S165, con la referencia sellada del censo (con la de h
   satura y el DN inválido (SOSPECHA).
 - **V contra K en C**: P1 0 pérdidas; P1b 0 (el único del censo, Láscar 2026-04-25 07:35, era del desempate del port;
   con la regla de MATLAB la vía da 1,1124 MW); P2 GANA con S_K ≈ 49 y S_V ≈ 8 en unos 50 bloques; M MEJORA; curva de
-  V/MIROVA de 0,93 a 1,10 por tramo, contra 0,63 a 0,21 de K.
+  V/MIROVA por tramo de 10° de 0,93; 0,97; 1,04; 1,10; 1,06 y 1,09, contra 0,63; 0,70; 0,45; 0,31; 0,22 y 0,21 de K
+  (`resultado_censo.json`, `curva_cenit` del PM y `curva_cenit_K`).
 - **Chillán**: recupera las del 09-29, 10-12 y 10-15; la del 10-25 es SIN DATO (fuera del censo). El censo dio SIN
   RESOLVER (6 de 7 pares, p = 8/128); con la cola puede cambiar.
 - **Posición**: S165 encontró en el censo una sola pasada que cambia con «cercano» (Láscar 2026-03-30 07:25, `far_ref`:
@@ -258,8 +297,9 @@ Hecho en esta entrega:
   (`mutar_evaluar_f4.py`, `mutar_evaluar_f4_salida.txt`). Cifras en el §13.
 
 Falta (después del sello, en este orden):
-1. **Población** `poblacion_f4.json`: C re-etiquetada y E armada, con `tramo`, `solo_ocr`, la lista de cambios de
-   etiqueta contra el censo y `sin_pasada_nuestra`.
+1. **Población** `poblacion_f4.json`: C re-etiquetada y E armada (con la comprobación HEAD de los días de E, §4), con
+   `lab`, `lab_union`, `tramo`, `grilla_censo`, la lista de cambios de etiqueta contra el censo y `sin_pasada_nuestra`
+   (siempre presente).
 2. **Arnés** `probe_f4.py` (sobre el molde de `probe_paquete.py` de MOD-D): por pasada, K y V desde el tag; un envoltorio
    de sólo lectura sobre `procesar_grilla` (A75) que captura grilla, radiancia, celdas alertadas y posición del cráter
    para calcular las tres distancias con `_cumulo_del_mas_radiante` de la vía; las variantes por `store.append_record`;
@@ -287,7 +327,8 @@ población agrega lo suyo por `(vol, dt)`):
 | `dist` | `{"radiante", "cercano", "pico"}` en km sin redondear, desde el cráter |
 | `pub_runner` | `{"K": 0 o 1}` del predicado corrido en el runner |
 | `k_difiere_de_guardado`, `k_reproducida_en_su_sha` | control K = producción (§8.1) |
-| de la población: `lab`, `vrp_mirova`, `solo_ocr`, `tramo` (`C` o `E`) | la vara |
+| de la población: `lab` (tabla sola), `lab_union` (tabla más OCR, si difiere), `vrp_mirova`, `tramo` (`C` o `E`), `grilla_censo` | la vara y el conjunto de la identidad |
+| de la población, aparte de las pasadas: `sin_pasada_nuestra` (lista de `[vol, dt, lab]`, siempre presente) | cobertura contra la referencia |
 
 **Costo** (estimado; se mide en el humo): el censo midió 9,1 s por pasada con descarga, cinco variantes del port y K;
 aquí son K, V y tres pasos por el almacén. Cota alta: 5.700 pasadas × 9 s ≈ 14 h de runner, en tres tandas de 8 jobs
@@ -309,6 +350,12 @@ como el censo, despachadas de a una por la coordinadora desde el tag.
    perfil de sombra con su propio `data_subdir` (A47), desde el 2026-11-03 o desde el sí de Nicolás si es posterior,
    28 noches; se lee el día 29 con P1 (veto) y P2' (no PIERDE si hay 5 bloques o más; con 4 o menos sólo veta).
    Crear ese perfil y sumarlo al NRT toca `pipeline/profiles/` y un workflow: **necesita su sí aparte** (A45).
+7. **Protocolo del tramo E** (§7): un rojo de cobertura que está sólo en la cola del 17 al 26 de octubre la saca entera
+   y se lee el censo solo (recomendado: la cola no tiene línea base y un 404 ahí no dice nada de la vía). La
+   alternativa es dejar todo INDECIDIBLE y repetir la corrida.
+8. **Una posición no puede perder una protegida que V publica, y una protegida que otra posición publica lleva a
+   DECIDE NICOLÁS** (§6 bis, recomendado: es el criterio de victoria aplicado entre brazos de posición; vale también
+   para V750-A y V375-E, que hoy no lo tienen escrito).
 
 ## 13. Instrumento entregado: batería y mutaciones
 
@@ -327,6 +374,30 @@ Qué NO prueba la batería: que el arnés escriba bien el contrato (eso es del c
 fuera de N01 y N02 (el sintético publica si el record es cumbre con VRP mayor que 0; los filtros de cirro, campo difuso
 y el tope de 50.000 MW del tablero sólo se ejercen con node). Una mutación del placebo a ganancia 1,0 no se incluyó:
 el control compara contra la misma constante y no podría verla (es un placebo inútil, no uno roto).
+
+## 13 bis. Verificador limpio y qué se hizo con cada hallazgo
+
+Primera vuelta: Sonnet, esfuerzo alto, contexto limpio, sobre `e1f6b197b` (informe en `verificador/INFORME.md`, con
+sus caminos escritos antes de leer en `verificador/CAMINOS_previos.md` y sus scripts). Veredicto: «se puede sellar CON
+CAMBIOS CHICOS»; nada que diera vuelta el veredicto con datos plausibles, cuatro huecos de instrumento de gravedad 3.
+
+| hallazgo | gravedad | qué se hizo | dónde queda fijado |
+|---|---|---|---|
+| VF4-01, la regla de posición ignora las protegidas | 3 | una posición que pierde una protegida que V publica no es elegible; una protegida que otra posición publica y la elegida no lleva a DECIDE NICOLÁS | §6 bis, §7 fila 5; E39, E40; M47, M48 |
+| VF4-02, identidad circular | 3 | el conjunto exigido sale de la población (`grilla_censo`) y tiene que sumar 5.321; `main` no acepta otro total | §8.2; E11, E41, E51; M13, M49 |
+| VF4-03, controles que pasan si falta una clave | 3 | lista `sin_pasada_nuestra` ausente y campo `k_difiere_de_guardado` ausente dan rojo | §8.1, §8.6; E42, E51; M50, M51, M67 |
+| VF4-04, 12 reglas vivas a la batería | 3 | un escenario por cada una (estado del arnés, motivo desconocido, sobrante, 50 inyectados, K = 1,0 exacto, bordes de la banda y p de Chillán, «no peor», Chillán con el brazo elegido, clase y VRP de la posición) y su mutación | E43 a E49; M55 a M66 |
+| VF4-05, A119 no aplicada | 2 | decide la tabla sola (`lab`); la unión (`lab_union`) informa; una protegida sólo OCR perdida va a DECIDE NICOLÁS | §5 «Canal», tabla de cambios; E04, E35; M35 |
+| VF4-06, sin protocolo de fallo | 2 | escrito: rojo sólo en E saca E entero; identidad roja no toca `pipeline/` sin A45 y repite V entero | §7; E50; M52 a M54 |
+| VF4-07, «CMR sirve» por listado | 2 | «sirve» = HEAD 200 de L1B y MxD03 de cada pasada, comprobado al armar la población | §4 |
+| VF4-08, el medidor contaba un error de sintaxis como atrapada | 2 | ROTA si no carga o si falla sin aserción; control nuevo CONTROL_ROTA, que tiene que salir ROTA | `mutar_evaluar_f4.py`, `probar_evaluar_f4.py` (código 3) |
+| VF4-09, `main` y `cargar` sin prueba | 2 | E51 corre `main` con archivos y lo compara con la llamada en memoria; `Uso` corregido | E51; M67 |
+| VF4-10, adendas informativas descartadas | 1 a 2 | soporte independiente de la adenda 1 vuelve, al leer; costura, borde y S-1 se aceptan fuera (no deciden) | §6 |
+| VF4-11, tres cifras | 1 | 23 protegidas (no 18), 2 a 7 gránulos (no 3 a 7), curva de K completa | §4, §5, §10 |
+| VF4-12, desempate a favor del pico | 1 | se mantiene, declarado como preferencia a priori | §6 bis |
+
+Lo que el verificador dejó SIN DATO (el arnés, la población, la identidad, el humo, los 404 de los días de E, si K del
+tramo E coincide con `data/` entre NRT y estándar) es justo lo que construye el candado del §11.
 
 ## 14. Lo que este pre-registro NO decide
 

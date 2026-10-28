@@ -5,6 +5,7 @@ escenario mide algo del evaluador y no pasa por construcción (S152, S156)."""
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
+N_GRILLAS_CENSO = 5321
 
 
 def variante_posicion(rec, regla, dists, inner):
@@ -40,4 +41,12 @@ def control_predicado(predicado=None):
 
 
 def evaluar(*a, **k):
+    return {}
+
+
+def control_identidad(*a, **k):
+    return {}
+
+
+def main(*a, **k):
     return {}
