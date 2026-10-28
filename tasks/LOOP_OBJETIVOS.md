@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 04:45 UTC (S166, vuelta 14): seis records MODIS más, iguales; VIIRS todavía sin record nuevo
+- NRT de las 04:10 (40630814546, sobre `55c95c705`): commiteó Láscar, Lastarria, Isluga, Tupungatito, PP y Copahue
+  (`cb5a2521f` a `5a1af71f9`). `experiments/_s166/nrt_campos_s166.py 55c95c705 origin/main`: 6 records, los 6 MODIS Aqua
+  del 2026-10-27, paso de NRT a Standard; mismos campos y 0 con «codigo_mirova». En total, desde el código nuevo hay 11
+  records, los 11 MODIS Aqua del 10-27. **Ningún record VIIRS escrito todavía con #920 a #922**: el último VIIRS de los
+  11 volcanes es del 2026-10-27 06:36, procesado antes. Las pasadas nocturnas del 10-28 llegan tras la latencia de LANCE.
+- W5: 8 jobs en verde, 3 corriendo, 11 en cola. Disco C: 5,2 GB, estable. #923 y #924 esperan la frase de Nicolás.
+
 ### 2026-10-28 04:15 UTC (S166, vuelta 13): #924 listo; disco C: en 5,2 GB; sesiones de MOD-D y V375-E arrancadas
 - **#924** (`25fcb9c8e`): con el punto 2 fuera, quedan el 1 y el 3. Toca `scripts/auto_audit_weekly.py`,
   `.github/workflows/audit-weekly.yml` y tres tests (14 nuevos en `tests/test_auto_audit_referencia_s166.py`; dos viejos
