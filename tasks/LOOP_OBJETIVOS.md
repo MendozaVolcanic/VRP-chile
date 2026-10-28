@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 03:50 UTC aprox. (S166, vuelta 11): §b 1 decidido; audit en manos de un subagente; tarjetas por sensor
+- Nicolás, en este chat: «has lo que recomiendes y lo que nos ayude mas a lograr los objetivos, si algo nos esta
+  confundiendo entonces no nos sirve mucho». Con eso queda decidido el §b 1: las alertas sólo OCR de Suomi NPP
+  anteriores al 2026-10-09 no levantan flag y se informan aparte.
+- Lanzado un subagente en worktree, rama `s166-audit-referencia`, para `scripts/auto_audit_weekly.py`: §b 1, §b 2 (la
+  magnitud por noche excluye las noches con otro objeto: cota de separación mayor que `inner_radius_km`, o máximo de
+  MIROVA sólo OCR de Suomi NPP antes del hito) y §b 3 (pérdida aceptada de PCC VIIRS 750 del 2026-10-10 05:54, lista
+  explícita). Con TDD y PR, sin merge.
+- #923: CI pytest en verde, CLEAN, sha `79d93cace`. Espera la frase de Nicolás.
+- Nicolás preguntó cómo va el plan de los tres sensores. Estado: VIIRS 750 con sesión viva (Loop VIIRS 750 2: V750-B y
+  su adenda 2 sellados, despacho el 2026-11-03, V750-A en borrador con los tres brazos). MODIS sin sesión viva (MOD-D
+  CANDIDATO por el censo, fase 3 en `main` con #919, la fase 4 sin pre-registro). VIIRS 375 sin sesión viva
+  (`PREREGISTRO_E.md` con adenda 1, sin sellar, sin brazos de posición). Propuestas dos tarjetas: `task_314c3e0b` (MOD-D
+  fase 4) y `task_63ac3f26` (V375-E fase 4).
+
 ### 2026-10-28 03:30 UTC aprox. (S166, vuelta 10): PR #923 del probe del bit a bit, esperando el merge
 - #923 (rama `s166-probe-bitabit`, `79d93cace` sobre main `55c95c705`): sólo agrega
   `.github/workflows/probe-s166-bitabit-nrt.yml`, la plantilla de S162 más el comparador de VIIRS 375. Sólo lectura. Con
