@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 11:50 UTC (S166, vuelta 18): dos sesiones hijas caídas por el token, sus procesos siguen
+- **Loop VIIRS 750 2** y **MOD-D fase 4** terminaron su último turno con «401 OAuth access token has expired». Sus procesos
+  de fondo siguen vivos: el medidor de V750-A (`mutar_evaluar_v750a.py`, desde las 23:55 locales del 27) y las
+  mutaciones de MOD-D (`mutar_evaluar_f4.py --paralelo 5`, desde las 04:23 locales, más hijos desde las 08:33). Nadie
+  va a leer sus resultados hasta que Nicolás reautentique esas sesiones.
+- MOD-D fase 4: su pre-registro está en el remoto como `claude/s166-modd-f4` (`e1f6b197b`); en su worktree hay cambios
+  sin commitear en 4 archivos de `experiments/_s166_modd_f4/` (los arreglos de su verificador, en curso). No se tocaron.
+- Loop VIIRS 750 2: último commit `58d62bd8f` (informe del verificador de los brazos de V750-A, LISTO CON CAMBIOS).
+- V375-E fase 4: sana, en espera del sello (`349409880`).
+
 ### 2026-10-28 11:40 UTC (S166, vuelta 17): W5 pareja, W6 despachada; adenda 2 de V375-E corregida
 - La sesión de S166 se reinició (el proceso anterior salió hacia las 08:00 UTC; el loop no corrió entre las 07:33 y las
   11:37).
