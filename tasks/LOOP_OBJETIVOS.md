@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 13:55 UTC aprox. (S167, vuelta 4): programa por sensor COMMITEADO tras verificador
+- Verificador limpio (Sonnet): LISTO CON CAMBIOS (`experiments/_s167/verificador_programa/INFORME.md`). La coordinadora
+  comprobó contra las fuentes los hallazgos principales (V375-E §8.5 y §8.3, MOD-D f4 l. 82, V750-A l. 3, V750-B l. 106)
+  y los aplicó todos: orden VIIRS 375, MODIS, VIIRS 750; posición elegida por sensor (parámetro por sensor en
+  `procesar_grilla`); sombra preparada ahora para encender el 2026-11-03 con el sí; D28 fuera de MOD-D fase 4; N-3 falta
+  en V750-B y V750-A; §9 con las decisiones 8 y 11 incumplidas como estaban escritas; dos causas de NO EQUIVALENTE en V375.
+- Commit **`ec13d3c34`**: el programa, el informe del verificador y el resumen por sensor
+  (`experiments/_s167/digest_sensores.md`). W6: 8 de 22 jobs en verde a las 13:31 UTC.
+- Siete decisiones nuevas para Nicolás en el §12.5 del programa.
+
 ### 2026-10-28 13:30 UTC aprox. (S167, vuelta 3): programa por sensor actualizado (sin commitear), en verificador
 - Resumen por sensor de sólo lectura (subagente): `digest_sensores.md` en el scratchpad de S167. La coordinadora
   comprobó por su cuenta los PR #889 a #922, V750-C (dos piezas), B2 de V375 (0,52 %), MOD-C y que el cuerpo de
