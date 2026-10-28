@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 14:10 UTC aprox. (S167, vuelta 6): N-3 escrita en el borrador de V750-A
+- `44ed62768` (comprobado: sólo cambian `PREREGISTRO_V750A.md` +27 y `LOOP_VIIRS750.md`): N-3 en §6 ter con la misma
+  regla de V375-E §8.13 (protegida sin alerta de la tabla, `VIIRS_SNPP_750`, antes del 2026-10-09: no veta, se lista
+  aparte) y el sello atado a la lectura de V750-B (§11 y encabezado). El analizador no la implementa todavía: el
+  medidor completo mide la versión sin N-3 y no se edita mientras corre (A112). **Por eso, antes del sello hace falta
+  una segunda pasada de mutaciones sobre la pieza N-3** (escenarios rojos y mutaciones que la deshagan). Medidor en
+  prioridad baja para que MOD-D vaya primero.
+
 ### 2026-10-28 14:00 UTC aprox. (S167, vuelta 5): medidor completo de V750-A en marcha (~40 h)
 - Loop VIIRS 750 2: batería entera 77 de 77 sobre `5c45c0c07` (salida en `c457a1753`, según el autor; SIN VERIFICAR por
   S167). Medidor completo M1 a M85 desde las 13:50 UTC, 3 hilos, ~1 h 21 min por corrida: del orden de 40 h.
