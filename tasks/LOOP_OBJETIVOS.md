@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 12:30 UTC (S166, vuelta 21): bit a bit VERDE en VIIRS 375 y 750
+- Run **40683093630** (`probe-s166-bitabit-nrt.yml`, `pre-s165-via-375` contra main `ba61c330f`, día 2026-10-26, mismo
+  runner): success, 4 de 4. En Láscar, Chillán, PCC y Villarrica, los dos comparadores (VIIRS 375 y VIIRS 750) dan
+  **VERDE**: 44 records en cada lado, 0 sólo en un lado, 0 distintos, 0 con la marca de la vía. Salidas en
+  `experiments/_s166/bitabit_40683093630/`.
+- **El instrumento puede fallar** (A116): con `--control` sobre el par real de Villarrica da ROJO; `--autoprueba` da OK.
+  **Hay sustrato**: hay detecciones reales iguales en los dos lados (Láscar NOAA-20 y NOAA-21; Chillán SNPP, NOAA-20,
+  SNPP 750, NOAA-20 750 y MODIS Terra a 19,9 MW; PCC MODIS Aqua). Villarrica no tuvo ningún píxel anómalo ese día.
+- Con esto, el primer punto del traspaso queda comprobado en los tres sensores: #920, #921 y #922 no cambian ningún
+  record (los 12 MODIS del NRT, más este día de VIIRS y MODIS).
+- W6 (40681454167): 3 jobs en verde, 3 corriendo, 16 en cola. C: 18 GB.
+
 ### 2026-10-28 11:55 UTC aprox. (S166, vuelta 20): #923 y #924 MERGEADOS; bit a bit despachado
 - Nicolás, en este chat, ante la pregunta «¿Me das las frases de merge de #923 y #924?» con los dos sha: «Apruebo los
   dos». Merge con `--match-head-commit`: **#923** en `34de58c29` (sha aprobado `79d93cace`) y **#924** en `ba61c330f`
