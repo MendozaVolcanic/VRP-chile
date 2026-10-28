@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 13:00 UTC (S167, vuelta 1): retomada; estado del traspaso comprobado
+- `loop/activo` en `e6bcc4351`, igual al remoto; `main` en `ba61c330f`. Hora del servidor 12:57:51 UTC. Disco C: 18 GB,
+  D: 7,0 GB.
+- Comprobado con `ls-remote`: `claude/s166-modd-f4` en `ff03538dd`, `claude/s162-viirs750-2-918174` en `58d62bd8f`
+  (los arreglos VP-01 a VP-03 todavía no están en el remoto), `claude/adoring-wright-dc0404` en `67838f2a5`; tags
+  `s166-v375e-adenda2-sellada` (anotado, `1ed94154a`) y `s162-v750b-adenda2-sellada` (`8a13de472`) presentes.
+- W6 (40681454167): `queued`, 5 jobs en verde y 17 sin terminar. NRT de las 12:10 en verde. Issues abiertos: #915 y #813.
+- Avisadas del relevo las tres sesiones hijas (MOD-D fase 4, Loop VIIRS 750 2 y V375-E fase 4); las tres figuran
+  `idle`.
+- Lanzado un subagente de sólo lectura que resume, por sensor, el estado de cada experimento del programa con
+  evidencia, insumo para actualizar `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`.
+
 ### 2026-10-28 12:55 UTC (S166, cierre): traspaso en `tasks/BLOQUE_ARRANQUE_S167.md`
 - Batería del commit sellado de V375-E (`67838f2a5`) corrida por S166 en su árbol LF: «RESULTADO: 140 de 140», 0 FALLA.
 - Cierre con trabajo en curso: W6 (40681454167), mutaciones finales de MOD-D fase 4, medidor y arreglos de V750-A. La
