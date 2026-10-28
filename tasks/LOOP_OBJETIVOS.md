@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 01:21 UTC (S166, vuelta 3): sello de la adenda 2 traspasado; §b 2, 3 y 5 decididos; §b 1 en pregunta
+- Nicolás, en este chat, ante las dos preguntas (traspasar el sello de la adenda 2 de `4dbd88dce` a `739edff39`, y
+  arrancar el loop con las recomendaciones del §b 1, 2, 3 y 5): «Lo que tú recomiendes». Quedó así:
+  - sello de la adenda 2 de V750-B **traspasado a `739edff39`**; pedido a Loop VIIRS 750 2 que la anexe, la marque
+    SELLADA y le ponga un tag;
+  - §b 2: la magnitud por noche del audit exige que el máximo nuestro y el de MIROVA sean el mismo objeto;
+  - §b 3: la pérdida de PCC VIIRS 750 del 2026-10-10 queda registrada como aceptada;
+  - §b 5: no se enciende ninguna vía ni flag por ahora.
+- §b 1 (excluir del auto-audit las alertas sólo OCR de Suomi NPP anteriores al 2026-10-09 e informarlas aparte): Nicolás
+  preguntó «¿Porque quieres excluir suomi?». Queda **en suspenso hasta su respuesta**.
+- NRT: el run 40612147378 (00:58 UTC) corre sobre `7a17af8c4`, el primero con #920, #921 y #922; el de las 01:10
+  (40613408224) salió `cancelled`. W4: 20 jobs en verde y 2 corriendo.
+
 ### 2026-10-28 00:30 UTC aprox. (S166, vuelta 2): verificador corto de la adenda 2 y commit corregido
 - Verificador corto (Sonnet, limpio): SELLABLE CON CAMBIOS MENORES; lo sellado intacto; 11 de 13 arreglados, VAD2-02 y
   VAD2-11 en parte; nuevos N1 (lector sin el criterio de magnitud de `analizar_v750b.py` l. 292-293, comprobado por
