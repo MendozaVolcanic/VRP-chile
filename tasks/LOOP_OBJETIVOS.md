@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 04:15 UTC (S166, vuelta 13): #924 listo; disco C: en 5,2 GB; sesiones de MOD-D y V375-E arrancadas
+- **#924** (`25fcb9c8e`): con el punto 2 fuera, quedan el 1 y el 3. Toca `scripts/auto_audit_weekly.py`,
+  `.github/workflows/audit-weekly.yml` y tres tests (14 nuevos en `tests/test_auto_audit_referencia_s166.py`; dos viejos
+  ajustados, S156 y S157, porque fijaban el comportamiento anterior). Suite 2738 passed, 29 skipped, 2 xfailed; CI
+  pytest en verde, CLEAN. S166 leyó el diff. SIN VERIFICAR: que el issue salga bien armado en Actions.
+- **Disco C: 5,2 GB** (ayer 23 GB). VRP explica una parte: el worktree del subagente (1,2 GB), los dos worktrees nuevos
+  de las sesiones de fase 4 y el medidor de mutaciones de V750-A (`mutar_evaluar_v750a.py`, carpetas de menos de
+  100 MB). El resto, SIN DATO. Avisadas las tres sesiones hijas. Se mantuvo en 5,2 GB entre las 03:58 y las 04:12.
+- Nicolás arrancó las dos tarjetas: V375-E fase 4 (`local_b1177c51`, worktree `adoring-wright-dc0404`) y MOD-D fase 4
+  (`local_6c14ddd3`, `focused-pascal-db1501`).
+- W5: 6 jobs en verde, 3 corriendo, 13 en cola. NRT de las 03:10 en verde sobre `55c95c705`.
+
 ### 2026-10-28 04:15 UTC aprox. (S166, vuelta 12): PR #924 del audit; el punto 2 (mismo objeto) sale
 - Subagente: #924 (`b2ae7d40f`) con los tres puntos. Suite 2748 passed. Pero el punto 2 **no reproduce** el informe de
   #915 sobre el árbol `97ef53aa5`:
