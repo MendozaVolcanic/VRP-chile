@@ -895,7 +895,8 @@ def alertas_protegidas(filas, recs_banco, win, frontera, diurna=None):
                       "detector_records": sorted({_detector_banco(r, frontera) for r in cand}),
                       "noche_publicada_otra_pasada": any(r["pub"] for r in otras),
                       "referencia_sospechosa": (fuentes[k] == {"OCR"} and minuto[:10] < HITO_OCR_SUOMI_NPP
-                                                and any("SNPP" in (r.get("sensor") or "") for r in cand))})
+                                                and any("SNPP" in (r.get("sensor") or "") for r in cand)),
+                      "perdida_aceptada": k in PERDIDAS_ACEPTADAS})
     return lista
 
 
@@ -914,6 +915,23 @@ def _hito_ocr_suomi_npp():
 
 HITO_OCR_SUOMI_NPP = _hito_ocr_suomi_npp()
 
+# S166 (issue #915): pérdidas de alerta protegida ya decididas, que no vuelven a levantar flag cada semana.
+# POR QUÉ: PCC VIIRS 750 2026-10-10 05:54 (MIROVA 1,19 MW, de la tabla, a 7,83 km) es la señal débil del
+# lacolito de Cordón Caulle: dos píxeles contiguos que se bajan el contraste uno al otro en el promedio de 8
+# vecinos, y con la conectiva `max` de K el Test 2 no llega por 6 y 15 %. Es un FN real de VIIRS 750, pero
+# en la misma pasada lo publicamos en VIIRS 375 (NOAA-21, 0,688 MW), así que el operador lo vio, y Nicolás
+# lo cerró sin cambiar el detector (#865, cerrado el 2026-10-20; PR #881, experiments/_s157_pcc865/): la
+# única palanca, `min` en VIIRS 750, cuesta 314 negativos limpios más. Sin esta lista reaparecía en cada
+# audit (#915). La clave es exacta (volcán, sensor, minuto de clave_pasada): ninguna otra pasada, ni la de
+# 04:54 de esa noche, ni otro sensor, ni otro día, queda aceptada. Se sigue informando, como aceptada, en
+# `informado_aparte`. Agregar una pasada acá es una decisión de Nicolás con su issue, no un ajuste del audit.
+# Test: tests/test_auto_audit_referencia_s166.py.
+PERDIDAS_ACEPTADAS = {
+    ("PuyehueCordonCaulle", "VIIRS750", "2026-10-10 05:54"):
+        "lacolito de Cordón Caulle, FN de VIIRS 750 publicado en VIIRS 375 en la misma pasada; "
+        "decidido sin cambiar K en #865 y PR #881",
+}
+
 
 def avisos_protegidas_sin_record(lista, vigente):
     """S160 (V3-01 de docs/AUDIT_S160.md): protegidas de MIROVA en pasadas de las que no tenemos record.
@@ -927,17 +945,47 @@ def avisos_protegidas_sin_record(lista, vigente):
             for p in lista if p["detector"] == vigente and p["estado"] == "sin_record"]
 
 
+def _noche_txt(p):
+    return ("la noche sí se publicó en otra pasada" if p["noche_publicada_otra_pasada"]
+            else "ninguna otra pasada de esa noche se publicó")
+
+
+def _es_aparte(p):
+    """S166: protegida que no decide el veredicto (referencia sospechosa A119 o pérdida aceptada)."""
+    return bool(p.get("referencia_sospechosa") or p.get("perdida_aceptada"))
+
+
 def flags_protegidas(lista, vigente):
+    """Una línea por protegida sin publicar del detector vigente. S166: las de `_es_aparte` no son flag,
+    van a `protegidas_aparte` (tests/test_auto_audit_referencia_s166.py)."""
     out = []
     for p in lista:
-        if p["detector"] != vigente or p["estado"] != "sin_publicar":
+        if p["detector"] != vigente or p["estado"] != "sin_publicar" or _es_aparte(p):
             continue
-        noche = ("la noche sí se publicó en otra pasada" if p["noche_publicada_otra_pasada"]
-                 else "ninguna otra pasada de esa noche se publicó")
-        sospecha = (f"; referencia sospechosa: sólo OCR de Suomi NPP antes del {HITO_OCR_SUOMI_NPP}, la "
-                    "distancia puede ser de otra pasada (A119)" if p.get("referencia_sospechosa") else "")
         out.append(f"alerta protegida sin publicar: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, "
-                   f"MIROVA {p['vrp_mirova_mw']} MW (detector {p['detector']}; {noche}{sospecha})")
+                   f"MIROVA {p['vrp_mirova_mw']} MW (detector {p['detector']}; {_noche_txt(p)})")
+    return out
+
+
+def protegidas_aparte(lista, vigente):
+    """S166 (issue #915): protegidas sin publicar del detector vigente que se informan SIN flag.
+
+    POR QUÉ: (1) con `referencia_sospechosa` la fila es sólo OCR de Suomi NPP anterior al hito A119 y su
+    distancia y clase pueden ser de otra pasada: en #915 las dos de Tupungatito (28 y 29 de septiembre) eran
+    objetos lejanos que nosotros vemos y clasificamos `far`, no el cráter. La protegida sigue protegida por su
+    VRP, pero no hay cómo saber si es una alerta de cráter. (2) La pérdida aceptada ya está decidida
+    (PERDIDAS_ACEPTADAS). Las dos quedan a la vista en latest.json y en el cuerpo del issue, sin cambiar el
+    veredicto. Nada se borra de la referencia."""
+    out = []
+    for p in lista:
+        if p["detector"] != vigente or p["estado"] != "sin_publicar" or not _es_aparte(p):
+            continue
+        k = (p["volcano"], p["sensor"], p["fecha_utc"])
+        motivo = (f"pérdida aceptada: {PERDIDAS_ACEPTADAS[k]}" if p.get("perdida_aceptada") else
+                  f"referencia sospechosa: sólo OCR de Suomi NPP antes del {HITO_OCR_SUOMI_NPP}, la distancia "
+                  "y la clase pueden ser de otra pasada (A119)")
+        out.append(f"protegida sin publicar, sin flag: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, "
+                   f"MIROVA {p['vrp_mirova_mw']} MW (detector {p['detector']}; {_noche_txt(p)}; {motivo})")
     return out
 
 
@@ -1131,6 +1179,12 @@ def main():
                                    if mir_aparte else None)},
         "alertas_protegidas": {"lectura": "A", "umbral_mw": cm.UMBRAL_PROTEGIDA_MW, "lista": protegidas,
                                "error": error_banco},
+        # S166 (issue #915): lo que se informa SIN decidir el veredicto. El workflow lo copia al issue.
+        "informado_aparte": {
+            "protegidas": protegidas_aparte(protegidas or [], vigente),
+            "nota": ("no levanta flag ni cambia el veredicto: protegidas sin publicar con referencia "
+                     "sospechosa (A119) o pérdida aceptada (PERDIDAS_ACEPTADAS)"),
+        },
         "falsas_publicaciones": falsas,
         "integrity": integrity,
         "flags": flags,
@@ -1174,6 +1228,8 @@ def main():
         if p["estado"] != "publicada":
             print(f"  protegida {p['estado']:<12} [{p['detector']}] {p['volcano']} {p['sensor']} "
                   f"{p['fecha_utc']} MIROVA {p['vrp_mirova_mw']} MW")
+    for a in out["informado_aparte"]["protegidas"]:
+        print(f"APARTE: {a}")
     for a in avisos_detector:
         print(f"DETECTOR: {a}")
     for av in cobertura_avisos:
