@@ -1,0 +1,50 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-03-01 a 2026-10-21 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+C-G1 OK: 11 archivos de records iguales a los blobs de 533398f8f
+referencia remota: {'registro_vrp_consolidado.csv': 'fe2d0a571bf22b89ef8afda67a245d8adbcaefff', 'registro_vrp_ocr.csv': '4ddd54810fe343ab28d5242ba25f53e2343850e7'}
+
+== VIIRS375 ventana ('2026-04-01', '2026-10-21'): pos 1230 (protegidas 108, deciden 1051), neg limpios 3551
+  P1: pos con VRP de MIROVA > 0: 1230 de 1230
+  alertas de MIROVA sin record nuestro (+-120 s, ventana total): 14
+  partidas: pos 18 neg 120
+  sin granule: pos 0 neg 0
+  pos por volcan y cenit: {('Chaiten', 'z<=40'): 38, ('Chaiten', 'z>40'): 10, ('Copahue', 'z<=40'): 1, ('Copahue', 'z>40'): 1, ('Isluga', 'z<=40'): 157, ('Isluga', 'z>40'): 117, ('Lascar', 'z<=40'): 129, ('Lascar', 'z>40'): 116, ('Lastarria', 'z<=40'): 70, ('Lastarria', 'z>40'): 71, ('Llaima', 'z<=40'): 1, ('Llaima', 'z>40'): 2, ('NevadosDeChillan', 'z<=40'): 22, ('NevadosDeChillan', 'z>40'): 28, ('PlanchonPeteroa', 'z<=40'): 84, ('PlanchonPeteroa', 'z>40'): 20, ('PuyehueCordonCaulle', 'z<=40'): 97, ('PuyehueCordonCaulle', 'z>40'): 106, ('Tupungatito', 'z<=40'): 73, ('Tupungatito', 'z>40'): 62, ('Villarrica', 'z<=40'): 25}
+  pos publica produccion: 1169 de 1230
+  neg por volcan y cenit: {('Chaiten', 'z<=40'): 164, ('Chaiten', 'z>40'): 303, ('Copahue', 'z<=40'): 170, ('Copahue', 'z>40'): 332, ('Isluga', 'z<=40'): 17, ('Isluga', 'z>40'): 36, ('Lascar', 'z<=40'): 37, ('Lascar', 'z>40'): 84, ('Lastarria', 'z<=40'): 56, ('Lastarria', 'z>40'): 114, ('Llaima', 'z<=40'): 176, ('Llaima', 'z>40'): 343, ('NevadosDeChillan', 'z<=40'): 140, ('NevadosDeChillan', 'z>40'): 266, ('PlanchonPeteroa', 'z<=40'): 94, ('PlanchonPeteroa', 'z>40'): 184, ('PuyehueCordonCaulle', 'z<=40'): 117, ('PuyehueCordonCaulle', 'z>40'): 202, ('Tupungatito', 'z<=40'): 76, ('Tupungatito', 'z>40'): 160, ('Villarrica', 'z<=40'): 170, ('Villarrica', 'z>40'): 310}
+  neg publica produccion: 137 de 3551
+  protegidas publicadas por produccion: 103 de 108
+  sha de los records (pos+neg): {'3695f67580e8de5fcf3653786ea61def0187ecb4': 4059, '34cea39e4b64f0862e4bad949016a57ea181f8c4': 835, '57d18ad782ffb9572f25ef884ae61d608f6c6e01': 71, 'e0c90caa7247466297d3ed6453052519c07992ca': 50}
+
+== MODIS ventana ('2026-03-01', '2026-10-21'): pos 96 (protegidas 54, deciden 96), neg limpios 5210
+  P1: pos con VRP de MIROVA > 0: 96 de 96
+  alertas de MIROVA sin record nuestro (+-120 s, ventana total): 0
+  partidas: pos 1 neg 117
+  sin granule: pos 0 neg 0
+  pos por volcan y cenit: {('Lascar', 'z<=40'): 72, ('Lascar', 'z>40'): 8, ('NevadosDeChillan', 'z<=40'): 7, ('NevadosDeChillan', 'z>40'): 7, ('Villarrica', 'z<=40'): 2}
+  pos publica produccion: 84 de 96
+  neg por volcan y cenit: {('Chaiten', 'z<=40'): 228, ('Chaiten', 'z>40'): 343, ('Copahue', 'z<=40'): 221, ('Copahue', 'z>40'): 279, ('Isluga', 'z<=40'): 180, ('Isluga', 'z>40'): 227, ('Lascar', 'z<=40'): 104, ('Lascar', 'z>40'): 188, ('Lastarria', 'z<=40'): 188, ('Lastarria', 'z>40'): 243, ('Llaima', 'z<=40'): 230, ('Llaima', 'z>40'): 276, ('NevadosDeChillan', 'z<=40'): 203, ('NevadosDeChillan', 'z>40'): 268, ('PlanchonPeteroa', 'z<=40'): 209, ('PlanchonPeteroa', 'z>40'): 288, ('PuyehueCordonCaulle', 'z<=40'): 229, ('PuyehueCordonCaulle', 'z>40'): 314, ('Tupungatito', 'z<=40'): 201, ('Tupungatito', 'z>40'): 277, ('Villarrica', 'z<=40'): 226, ('Villarrica', 'z>40'): 288}
+  neg publica produccion: 39 de 5210
+  protegidas publicadas por produccion: 52 de 54
+  sha de los records (pos+neg): {'3695f67580e8de5fcf3653786ea61def0187ecb4': 4410, '34cea39e4b64f0862e4bad949016a57ea181f8c4': 626, '57d18ad782ffb9572f25ef884ae61d608f6c6e01': 140, 'e0c90caa7247466297d3ed6453052519c07992ca': 32}
+
+escrito poblacion_completa.json: 10435
+C-G2 OK: referencia del marco {'registro_vrp_consolidado.csv': 'fe2d0a571bf22b89ef8afda67a245d8adbcaefff', 'registro_vrp_ocr.csv': '4ddd54810fe343ab28d5242ba25f53e2343850e7'}
+C-G3 OK: pos y neg_limpio IGUALES al marco, entrada por entrada (10087 contra 10087)
+far_ref VIIRS 375 con gránulo: 330 {'far_tabla': 329, 'far_ocr': 1}; sin gránulo: 0
+  por volcán: {'Chaiten': 5, 'Copahue': 16, 'Isluga': 55, 'Lascar': 55, 'Lastarria': 56, 'Llaima': 22, 'NevadosDeChillan': 30, 'PlanchonPeteroa': 38, 'PuyehueCordonCaulle': 4, 'Tupungatito': 38, 'Villarrica': 11}
+  por tramo: {'O1': 131, 'O2': 82, 'T': 117}
+  por subclase y tramo: {('far_ocr', 'O1'): 1, ('far_tabla', 'O1'): 130, ('far_tabla', 'O2'): 82, ('far_tabla', 'T'): 117}
+  producción publica: 122 de 330
+  distancia de MIROVA (km): mín 3.46, mediana 20.3, máx 33.7
+control de vida CTLF (re-medidas de S162, como en B2): 20 ids 29000 a 29019
+sha256 objetivos_far_v375.json: d968aafe0626c1c18e02cb81df7c6a5da3045938b54e66887ad8620b8ce46c7d
+sha256 objetivos_run_far_v375.json (lo que lee el run): 4abc0630050dab67d579c855e14f82c1685890fd13107987e678dd1d2751ad47
+sha256 poblacion_far.json: aff8822abd794c4a0c0561ddcd9b64eb174e69d7be82fd32d6f421f9f0cd0a7d

@@ -1,0 +1,69 @@
+name: "Probe S166 V375-E adenda 2 (pasadas lejanas de MIROVA), codigo de MIROVA portado a VIIRS 375 con 10 brazos de ROI y produccion K (solo lectura)"
+
+# S166, sesion hija de VIIRS 375. Criterio: experiments/_s162_v375/PREREGISTRO_E.md §8 (adenda 2, sellada antes de
+# este disparo). Lista: e_adenda2/objetivos_run_far_v375.json (330 pasadas far_ref + 20 de control de vida). Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# LO DESPACHA LA COORDINADORA (S166), nunca la sesion hija: el grupo de runners guarda un solo pendiente.
+# Plantilla: copiar a .github/workflows/ en la rama de disparo, que no se mergea. workflow_dispatch solo existe desde
+# main (S73), por eso se dispara con un push a la rama de disparo.
+# A43: "on" entre comillas. S141: pipefail con tee; el script sale 2 si falta una pasada.
+# A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio.
+# A15: ~25 pasadas por trozo a ~25 s (S159: 24,6 s con K re-corrido) ~11 min; timeout 60 (mayor que 1,3 x estimado).
+# Adenda 2: 350 pasadas en 14 trozos de 25 (PREREGISTRO_E.md §8.7).
+"on":
+  push:
+    branches: ["s166-v375e-far-disparo"]
+
+concurrency:
+  group: probe-s166-v375e-far
+  cancel-in-progress: false
+
+env:
+  SOLO: ""
+  OBJETIVOS: "experiments/_s162_v375/e_adenda2/objetivos_run_far_v375.json"
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s162_v375/probe_v375.py --objetivos "$OBJETIVOS" --out out \
+            --chunk ${{ matrix.chunk }} --nchunks 14 --solo "$SOLO" 2>&1 | tee out/probe_VIIRS375_${{ matrix.chunk }}.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s166-v375e-far-${{ matrix.chunk }}
+          path: |
+            out/*.json
+            out/*.npz
+            out/*.log
+          retention-days: 30
+          if-no-files-found: error
