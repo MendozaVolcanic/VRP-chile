@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 12:55 UTC (S166, cierre): traspaso en `tasks/BLOQUE_ARRANQUE_S167.md`
+- Batería del commit sellado de V375-E (`67838f2a5`) corrida por S166 en su árbol LF: «RESULTADO: 140 de 140», 0 FALLA.
+- Cierre con trabajo en curso: W6 (40681454167), mutaciones finales de MOD-D fase 4, medidor y arreglos de V750-A. La
+  corrida de lejanas de V375-E queda para S167, después de W6.
+
 ### 2026-10-28 12:50 UTC aprox. (S166, vuelta 22): adenda 2 de V375-E SELLADA y con tag
 - V375-E fase 4: **`67838f2a5`**, tag anotado **`s166-v375e-adenda2-sellada`** (comprobado: apunta a ese commit). Sobre
   `349409880`; sólo cambia `experiments/_s162_v375/` (comprobado). N-3 aplicado como regla con pruebas y mutaciones
