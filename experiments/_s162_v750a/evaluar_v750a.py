@@ -23,10 +23,24 @@ Brazos (§3): K (producción, control), Kgemelo (K en otro proceso del mismo run
 desde K como en evaluar_d25.py: VRP de K por 1,2, el resto igual), Kgeo (diagnóstico de V750-D, sólo informa), P, P-def
 y O (salidas del .m sobre la grilla GEO: npix, vrp_mw, píxeles y diagnóstico), P-sinfiltro (el record de P con la
 distancia neutralizada, publicado por el mismo predicado).
+Brazos de posición (§3 y §6 bis, decisión de Nicolás del 2026-10-27): P (radiante, el record de record_cumulo sin tocar),
+P-cercano y P-pico. Los tres salen de los MISMOS píxeles de paquete.P: misma detección, mismo VRP, mismo cúmulo; sólo
+cambia el punto desde donde se mide la distancia al cráter (pos_crater), y con ella la clase summit o far que decide si el
+tablero publica. Cercano = el alertado más cercano al cráter, desempate por (distancia, fila, columna); pico = el de mayor
+M13, con el desempate de max(). Es la misma regla de experiments/_s162_v750b/adenda2/leer_posicion_v750b.py (punto y
+record_pos), copiada aquí y marcada (punto_pos, rec_pos) para que el medidor de mutaciones la pueda romper. La regla del
+§6 bis (elegible, gana, desempate, NINGUNA POSICIÓN ELEGIBLE) se aplica en el censo antes del §6, y el §6 se evalúa
+después sobre el brazo elegido como «P». La vara suma E_lejana: las pasadas far_ref en que el brazo publica (P2' = la
+prueba de signos de D-45 sobre E + E_lejana por bloque noche-volcán). Las lecturas L20 a L27 de LECTURAS_EVALUAR_V750A.md
+fijan lo que el texto deja abierto.
 
 Formato de los artefactos (contrato para el probe o el cálculo local que los produzca):
-  objetivos: lista de {id, volcan, hora_utc "AAAA-MM-DD HH:MM", sensor, lab ("pos" | "neg_limpio" | otro), decide,
-    alerta_tabla, protegida, mirova [filas], mirova_vrp, pub_prod, pc_vrp, z (cenit del sensor), pos_crater [f, c]}
+  objetivos: lista de {id, volcan, hora_utc "AAAA-MM-DD HH:MM", sensor, lab ("pos" | "neg_limpio" | "far_ref" | otro),
+    decide, alerta_tabla, protegida, mirova [filas], mirova_vrp, pub_prod, pc_vrp, z (cenit del sensor), pos_crater [f, c]}
+    Las pasadas far_ref (MIROVA publicó una fuente lejana: fila FALSO_POSITIVO y ninguna ALERTA, etiqueta de
+    banco_paridad) van en la MISMA lista, como la objetivos_run_v750b.json de la adenda 2 de V750-B; sus filas mirova
+    traen el tipo FALSO_POSITIVO (tabla) o FALSO_POSITIVO_OCR (OCR) con su dist_km. etiqueta() les da None: no entran a
+    P1, P2, M ni E, sólo a E_lejana y a las descriptivas del §6 bis (L20, L21).
   resultados_*.json: lista de {id, estado, dayflag, cobertura {nan_7_crater, nan_crater},
     brazos {K, Kgemelo, [Kgeo], [P en la sombra]: {record}}, paquete {P, Pdef, O: salida del .m}, banda_triangulacion}
   salida del .m: {npix, vrp_mw, pixeles [[fila, col, zona, -, M13]], diag {pasada1, pasada2: {sd_nti, sd_eti,
@@ -79,6 +93,8 @@ MUT_LOCAL = ("k1_y_minimos", "ocho_vecinos", "fondo_sin_halo", "recorte", "fondo
 MIN_CASOS_LOCAL = (1020, 10)             # §4.1: 510 grillas de N con 2 cajas (E1) y los 10 recortes nativos de R2 (E3)
 PARES_S1 = (("P", "Pdef"), ("P", "O"), ("Pdef", "O"))   # §5, S-1: los brazos que comparten la detección del .m
 VOL_ROI = "PuyehueCordonCaulle"          # §7, control positivo de la ROI
+POS = ("P", "Pcercano", "Ppico")         # §3 y §6 bis: brazos de posición (P es el radiante, el de hoy)
+NOM_POS = {"P": "P (radiante)", "Pcercano": "P-cercano", "Ppico": "P-pico"}
 
 NOMBRES_M = ("N_BOOT", "SEMILLA", "N_MIN_PARES", "N_MIN_NOCHES", "N_CALIB", "MAX_FALSOS_CALIB",
              "MIN_VOLCANES_MEJORA", "MIN_PARES_VOLCAN", "MIN_PARES_PODER", "PLACEBO_GANANCIAS", "NOTA_COMPARADOR",
@@ -138,6 +154,40 @@ def etiqueta(o, canal):
 def en_ventana(o, v):
     h = o["hora_utc"]
     return v == "TODO" or (v == "T" and h < AB.FRONTERA_OCR) or (v == "O" and h >= AB.FRONTERA_OCR)
+
+
+# ---------------------------------------------------------------- §6 bis, brazos de posición
+def etiqueta_lejana(o, canal):
+    """§6 bis (LECTURA L20): ¿la pasada es far_ref para el canal? MIROVA vio el calor y lo ubicó lejos del cráter, así
+    que publicarla como cumbre es publicar de más. Con la tabla sola cuenta sólo si la fila FALSO_POSITIVO es de la
+    tabla (el FALSO_POSITIVO_OCR es etiqueta del scraper, A11); con tabla más OCR, toda far_ref; 'decide' es la tabla
+    sola en T y tabla más OCR en O, como etiqueta()."""
+    if o.get("lab") != "far_ref":
+        return False
+    if canal == "decide":
+        canal = "tabla" if o["hora_utc"] < AB.FRONTERA_OCR else "todo"
+    if canal == "tabla":
+        return any(str(f.get("tipo", "")).startswith("FALSO_POSITIVO") and f.get("source") == "CONS"
+                   for f in o.get("mirova") or [])
+    return True
+
+
+def punto_pos(o, brazo, ancla):
+    """(fila, columna) del punto que ubica el record según el brazo de posición (§3). Copia de
+    experiments/_s162_v750b/adenda2/leer_posicion_v750b.py::punto (misma regla y mismo desempate; se copia y no se
+    importa para que el medidor de mutaciones rompa ESTE archivo): radiante, el centroide del cúmulo 8-conexo del alertado
+    de mayor M13 (el de AB.record_cumulo); cercano, el alertado más cercano al ancla, desempate por (distancia, fila,
+    columna); pico, el alertado de mayor M13, con el desempate de max() (el primero de la lista, el que siembra el
+    cúmulo). `o` es la salida del .m con algún alertado."""
+    px = o["pixeles"]
+    if brazo == "Pcercano":
+        p = min(px, key=lambda p: (np.hypot(p[0] - ancla[0], p[1] - ancla[1]), p[0], p[1]))
+        return float(p[0]), float(p[1])
+    if brazo == "Ppico":
+        p = max(px, key=lambda p: p[4])
+        return float(p[0]), float(p[1])
+    cu = AB.cumulo_del_mas_radiante(px)
+    return float(np.mean([a for a, _ in cu])), float(np.mean([b for _, b in cu]))
 
 
 # ---------------------------------------------------------------- S-1 (§5, obligatorio, no decide)
@@ -294,6 +344,21 @@ def main(argv=None):
     def rec_p(i):
         return rec_paq(i, "P") if censo else rec_k(i, "P")
 
+    def rec_pos(i, b):
+        """§3 y §6 bis: el record de P (AB.record_cumulo, sin tocar) con la distancia al cráter, y con ella la clase
+        summit o far, medida desde el punto del brazo; el VRP, el cúmulo y el resto del record quedan iguales. Copia de
+        leer_posicion_v750b.py::record_pos; el ancla es pos_crater, como la distancia del radiante (VB-07)."""
+        r = rec_paq(i, "P")
+        if b == "P" or not r.get("primary_cluster"):
+            return r
+        ancla = anc(i)
+        f, c = punto_pos(res[i]["paquete"]["P"], b, ancla)
+        d = float(np.hypot(f - ancla[0], c - ancla[1]) * 0.75)
+        rp = copy.deepcopy(r)            # rp y no r: M28 del medidor rompe la línea de P-sinfiltro por su texto
+        rp["distance_class"] = "summit" if d <= inner[obj[i]["volcan"]] else "far"
+        rp["primary_cluster"]["centroid_dist_km"] = round(d, 3)
+        return rp
+
     def rec_sinfiltro(i):
         """P-sinfiltro (§3): el record de P con la distancia neutralizada; el resto del predicado, igual."""
         r = rec_paq(i, "P")
@@ -327,6 +392,8 @@ def main(argv=None):
             caso(i, "Pdef", rec_paq(i, "Pdef"))
             caso(i, "O", rec_paq(i, "O"))
             caso(i, "Psinfiltro", rec_sinfiltro(i))
+            for b in POS[1:]:                         # §6 bis: los brazos de posición, por el mismo predicado
+                caso(i, b, rec_pos(i, b))
             if isinstance((res[i].get("brazos") or {}).get("Kgeo"), dict) and "record" in res[i]["brazos"]["Kgeo"]:
                 caso(i, "Kgeo", rec_k(i, "Kgeo"))
     PUB = {k: bool(p[4]) for k, p in zip(idx, B.correr_node(casos))} if casos else {}
@@ -340,7 +407,8 @@ def main(argv=None):
             return (rec.get("primary_cluster") or {}).get("vrp_mw") or 0.0
         if b == "Kx12":
             return GANANCIA_PLACEBO * vrp(i, "K")
-        return res[i]["paquete"]["P" if b == "Psinfiltro" else b].get("vrp_mw") or 0.0
+        # P-sinfiltro y los brazos de posición tienen el VRP de P (sólo cambia la distancia del record)
+        return res[i]["paquete"]["P" if b in ("Psinfiltro",) + POS else b].get("vrp_mw") or 0.0
 
     # ---------------------------------------------------------------- controles (§7)
     # nulo del contador (copia de analizar_v750b): perturbar records publicados de P y publicar un negativo
@@ -381,13 +449,16 @@ def main(argv=None):
        f"{'OK' if k_ok else 'FALLA'}; lista {[nombre(i) for i in k_dist]}")
     oks = [i for i in oks0 if i not in set(k_dist)]   # §7: salen de todos los brazos y se listan arriba
 
-    def p2(b, ref, v, canal):
+    def p2(b, ref, v, canal, lejana=False):
         """Copia de analizar_v750b.p2: e = 1 si la pasada es un error bajo 1 MW; c = e(b) - e(ref) por bloque
-        (noche UTC, volcán); prueba de signos de D-45."""
+        (noche UTC, volcán); prueba de signos de D-45. lejana=True es la P2' del §6 bis: las pasadas far_ref del canal
+        suman al mismo bloque como error cuando el brazo publica (E + E_lejana)."""
         sumas = collections.defaultdict(int)
         for i in oks:
             o = obj[i]
             e = etiqueta(o, canal)
+            if lejana and etiqueta_lejana(o, canal):   # §6 bis: publicar lo que MIROVA ubicó lejos es error, como un negativo
+                e = "neg"
             if e not in ("baja", "neg") or not en_ventana(o, v):
                 continue
             err = lambda x: int((e == "baja" and not pub(i, x)) or (e == "neg" and pub(i, x)))  # noqa: E731
@@ -580,15 +651,118 @@ def main(argv=None):
                     and obj[i].get("mirova_vrp") and vrp(i, b) > 0)
         return (statistics.median(rz) if rz else None), len(rz)
 
+    # ---------------------------------------------------------------- §6 bis, regla de posición (antes del §6)
+    def e_lejana(b, v, canal):
+        """§6 bis: pasadas far_ref del canal en que el brazo publica (MIROVA vio el calor y lo ubicó lejos)."""
+        return sum(1 for i in oks if etiqueta_lejana(obj[i], canal) and en_ventana(obj[i], v) and pub(i, b))
+
+    def no_peor(reg, neto):
+        """§6 bis: GANA o EMPATE, o SIN SUSTRATO con el neto en 0 o a favor (BLOQUEA y PIERDE son peor; L22)."""
+        return reg in ("GANA", "EMPATE") or (reg == "SIN SUSTRATO" and neto <= 0)
+
+    PE, eleccion = "P", "P"
+    if censo:
+        # elegible: P1 = 0 en T y en O, con la tabla sola y con tabla más OCR (la condición de P1 del §6.2)
+        eleg = {b: all(metricas(b, v, canal)[0]["P1"] == 0 for v in VENTANAS for canal in CANALES) for b in POS}
+        # P2' contra P (radiante), sobre T ∪ O, con el canal que decide y con la tabla sola (L21)
+        p2d = {b: p2(b, "P", "TODO", "decide", lejana=True) for b in POS[1:]}
+        p2t = {b: p2(b, "P", "TODO", "tabla", lejana=True) for b in POS[1:]}
+        e_tot = {b: (metricas(b, "TODO", "decide")[0]["E"], e_lejana(b, "TODO", "decide")) for b in POS}
+
+        def menor(cands):
+            """Menor E + E_lejana; a igual valor, P-pico (S165: la distancia de MIROVA calza mejor con el pico)."""
+            return min(cands, key=lambda b: (sum(e_tot[b]), b != "Ppico"))
+
+        def desempate(cands):
+            if len(cands) < 2:
+                return ""
+            iguales = len({sum(e_tot[b]) for b in cands}) == 1
+            return "; ganan los dos: " + ("a igual valor, P-pico" if iguales else "el de menor E + E_lejana")
+
+        gan = [b for b in POS[1:] if eleg[b] and p2d[b][0] == "GANA" and no_peor(*p2t[b][:2])]
+        if gan:
+            eleccion = menor(gan)
+            motivo = "gana contra P en P2' con el canal que decide y no es peor con la tabla sola" + desempate(gan)
+        elif eleg["P"]:
+            eleccion = "P"
+            motivo = ("ninguno gana y P es elegible: es lo que hace hoy la vía y lo que midió el censo; a igual "
+                      "desempeño no se cambia sin evidencia")
+        else:
+            np_ = [b for b in POS[1:] if eleg[b] and no_peor(*p2d[b][:2]) and no_peor(*p2t[b][:2])]
+            if np_:
+                eleccion = menor(np_)
+                motivo = ("P no es elegible; es el elegible que no es peor que P en P2' con el canal que decide ni con "
+                          "la tabla sola" + desempate(np_).replace("ganan", "califican"))
+            else:
+                eleccion = None
+                motivo = "P no es elegible y ningún elegible deja de ser peor que P en P2'; P no se adopta"
+        PE = eleccion or "P"
+        pr("== §6 bis elegibles (P1 = 0 en T y O, con la tabla sola y con tabla más OCR): "
+           + " | ".join(f"{NOM_POS[b]} {'sí' if eleg[b] else 'no'}" for b in POS))
+        for b in POS:
+            et = f"E + E_lejana {sum(e_tot[b])} (E {e_tot[b][0]}, E_lejana {e_tot[b][1]})"
+            if b == "P":
+                pr(f"   §6 bis E + E_lejana {NOM_POS[b]}: {et}")
+                continue
+            (rd, nd, bd, _), (rt, nt, bt, _) = p2d[b], p2t[b]
+            pr(f"   §6 bis P2' {NOM_POS[b]} contra P (radiante), T y O: canal que decide {rd} (neto {nd}, bloques {bd}) "
+               f"| tabla sola {rt} (neto {nt}, bloques {bt}) | {et}")
+        pr(f"== §6 bis posición elegida: {NOM_POS[eleccion] if eleccion else 'NINGUNA POSICIÓN ELEGIBLE'} ({motivo})")
+        pr("   §6 bis multiplicidad: dos contrastes contra P, cada uno al 5 % de una cola, sin corregir; la probabilidad "
+           "de que alguno gane sólo por azar es mayor que 5 %")
+        # descriptivas, no deciden
+        far_obj = [i for i in obj if obj[i].get("lab") == "far_ref"]
+        far = [i for i in oks if obj[i].get("lab") == "far_ref"]
+        pr(f"== §6 bis vara lejana: far_ref en los objetivos {len(far_obj)}, observadas {len(far)}"
+           + ("" if far else ": SIN DATO (sin pasadas far_ref observadas, E_lejana vale 0 y la regla se lee igual)"))
+        for b in POS[1:]:
+            lst = [f"{nombre(i)} ({etiqueta(obj[i], 'decide') or obj[i]['lab']}, {'publica' if pub(i, b) else 'calla'})"
+                   for i in oks if pub(i, b) != pub(i, "P")]
+            pr(f"   §6 bis cambian de publicación contra P (radiante), {NOM_POS[b]}: {len(lst)} {lst[:20] or 'ninguna'}")
+        if far:
+            con_alert = sum(bool((res[i]["paquete"]["P"] or {}).get("npix")) for i in far)
+            pr(f"   §6 bis pasadas lejanas: con algún alertado {con_alert} de {len(far)}"
+               + (" (sin alertados: un cero de E_lejana no dice nada)" if not con_alert else "") + " | "
+               + " | ".join(f"{NOM_POS[b]} publica {sum(pub(i, b) for i in far)}" for b in POS) + " | lista "
+               + str([f"{nombre(i)} ({'/'.join(NOM_POS[b] for b in POS if pub(i, b))})" for i in far
+                      if any(pub(i, b) for b in POS)][:20]))
+        pr("== §6 bis distancia de cada brazo desde la celda central de la grilla contra la Distancia_km de MIROVA "
+           "(diferencia de RADIOS, A93: cota inferior de la separación; OCR sólo desde el 2026-06-13, A119; |delta| "
+           "mediana, fracción a 1 km o menos, n)")
+        for grupo, lab_, tipo_ in (("alertas con distancia", "pos", "ALERTA"), ("far_ref", "far_ref", "FALSO_POSITIVO")):
+            partes = []
+            for b in POS:
+                dd = []
+                for i in oks:
+                    o, pq = obj[i], res[i]["paquete"]["P"]
+                    if o["lab"] != lab_ or not pq.get("npix") or pq.get("vrp_mw") is None:
+                        continue
+                    ref = next((f["dist_km"] for f in o.get("mirova") or [] if f.get("dist_km") is not None
+                                and str(f.get("tipo", "")).startswith(tipo_)
+                                and (f.get("source") == "CONS" or o["hora_utc"] >= AB.FRONTERA_OCR)), None)
+                    if ref is None:
+                        continue
+                    fp, cp = punto_pos(pq, b, anc(i))
+                    dd.append(abs(float(np.hypot(fp - AB.C, cp - AB.C) * 0.75) - float(ref)))
+                partes.append(f"{NOM_POS[b]} {statistics.median(dd):.2f} km, {sum(x <= 1 for x in dd) / len(dd):.2f}, "
+                              f"n={len(dd)}" if dd else f"{NOM_POS[b]} -")
+            pr(f"   §6 bis distancia desde la celda central contra MIROVA, {grupo}: " + " | ".join(partes))
+    else:
+        pr("== §6 bis: no aplica en la sombra (LECTURA L26): la posición elegida en el censo es la del record del perfil "
+           "sombra")
+    nom_pe = NOM_POS[PE] + ("" if eleccion else ", NINGUNA POSICIÓN ELEGIBLE: se informa")
+
     if censo:
         fallas, nadie_tot = [], set()
+        if eleccion is None:
+            fallas.append(("TODO", "decide", "§6 bis: NINGUNA POSICIÓN ELEGIBLE"))
         for v in VENTANAS:
             for canal in CANALES:
-                m, nadie = metricas("P", v, canal)
+                m, nadie = metricas(PE, v, canal)
                 nadie_tot.update(nadie)
-                reg, neto, nb, prr = p2("P", "K", v, canal)
-                rz, nrz = razon_prot("P", v, canal)
-                Pm = m_pares("P", v, canal)
+                reg, neto, nb, prr = p2(PE, "K", v, canal)
+                rz, nrz = razon_prot(PE, v, canal)
+                Pm = m_pares(PE, v, canal)
                 rm, det = decidir_m(Pm)
                 motivos = []
                 if m["P1"]:
@@ -601,12 +775,12 @@ def main(argv=None):
                     motivos.append(f"M comparador {rm}")
                 fallas += [(v, canal, x) for x in motivos]
                 rz_txt = "-" if rz is None else f"{rz:.3f}"
-                pr(f"== §6.2 ventana {v}, canal {canal}: P1 {m['P1']} (de {m['n_prot']} protegidas) | P1b abajo "
+                pr(f"== §6.2 ventana {v}, canal {canal} (posición {nom_pe}): P1 {m['P1']} (de {m['n_prot']} protegidas) | P1b abajo "
                    f"{m['P1b_abajo']} arriba {m['P1b_arriba']} | P2 contra K {reg} (neto {neto}, bloques {nb}, p gana "
                    f"{prr['gana']}, pierde {prr['pierde']}) | M razón en protegidas {rz_txt} (n {nrz}) | M comparador "
                    f"{rm} (pares {len(Pm)}, ĝ {det.get('g_hat_factor', '-')}, d′ {det.get('regla_dprima', '-')}, "
                    f"nota «{det.get('nota', '')}») -> {'cumple' if not motivos else 'no cumple: ' + '; '.join(motivos)}")
-                rz2, n2 = razon_prot("P", v, canal, exigir_k=True)
+                rz2, n2 = razon_prot(PE, v, canal, exigir_k=True)
                 pr(f"   razón en protegidas que publican K y P (informa, no decide): "
                    f"{'-' if rz2 is None else f'{rz2:.3f}'} (n {n2})")
                 pl = decidir_m([dict(p, d=p["k"] * GANANCIA_PLACEBO) for p in Pm], comparador=False)[0]
@@ -620,6 +794,7 @@ def main(argv=None):
                    + "; ".join(f"{v}/{c}: {x}" for v, c, x in fallas) + ")")
         else:
             ver = "== §6 censo: NO CUMPLE (" + "; ".join(f"{v}/{c}: {x}" for v, c, x in fallas) + ")"
+        ver += f" [posición del record: {NOM_POS[eleccion] if eleccion else 'NINGUNA POSICIÓN ELEGIBLE'}]"   # §6 bis
         pr(ver + (" " + aviso if aviso else ""))
         pr("   S-1 al lado del veredicto: protegidas decididas por la escena, no por el cráter:",
            sorted(s1_prot) or "ninguna", "| protegidas con publicación distinta y S-1 SIN DATO:",
@@ -646,7 +821,7 @@ def main(argv=None):
                + ("; SIN PROTEGIDAS: P1 no pudo vetar" if not n_prot else "") + ")" + (" " + aviso if aviso else ""))
 
     # ---------------------------------------------------------------- informativo
-    brazos_inf = ("K", "P") + (("Pdef", "Psinfiltro", "Kgeo") if censo else ())
+    brazos_inf = ("K", "P") + (("Pdef", "Psinfiltro", "Kgeo") + POS[1:] if censo else ())
     pr("\n== brazos, ventana T y O juntas, canal que decide (informa)")
     for b in brazos_inf:
         if not any((i, b) in PUB for i in oks):
@@ -660,8 +835,8 @@ def main(argv=None):
             lin += f" | P2 contra K {reg} (neto {neto}, bloques {nb})"
         pr(lin)
     if censo:
-        reg, neto, nb, _ = p2("Psinfiltro", "P", "TODO", "decide")
-        pr(f"== P-sinfiltro contra P (§9.5 del programa, informa; predicción §8: empata o pierde): P2 {reg} "
+        reg, neto, nb, _ = p2("Psinfiltro", PE, "TODO", "decide")
+        pr(f"== P-sinfiltro contra P ({nom_pe}; §9.5 del programa, informa; predicción §8: empata o pierde): P2 {reg} "
            f"(neto {neto}, bloques {nb})")
     pr("\n== razón brazo/MIROVA en alertas que deciden publicadas (mediana [q1, q3] n)")
     for b in brazos_inf:

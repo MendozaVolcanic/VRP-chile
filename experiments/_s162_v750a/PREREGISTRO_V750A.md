@@ -254,10 +254,15 @@ corrigieron con E53 a E60 y las mutaciones M57 a M62.
 
 ## 11. Pendiente antes del sello
 
-- **Brazos de posición (§3 y §6 bis, agregados el 2026-10-27)**: el texto está; falta el analizador (P-cercano y
-  P-pico desde los mismos píxeles del paquete, E_lejana, P2' y la regla del §6 bis), sus escenarios en
-  `probar_evaluar_v750a.py`, sus mutaciones en `mutar_evaluar_v750a.py`, la corrida completa del medidor (unas 7 h,
-  con disco y CPU libres) y un verificador limpio de este agregado.
+- **Brazos de posición (§3 y §6 bis, agregados el 2026-10-27)**: ~~el analizador (P-cercano y P-pico desde los mismos
+  píxeles del paquete, E_lejana, P2' y la regla del §6 bis), sus escenarios y sus mutaciones~~ hechos el 2026-10-28:
+  escenarios E61 a E73 en `probar_evaluar_v750a.py`, rojos por aserción contra el analizador anterior
+  (`probar_evaluar_v750a_rojo_posicion_salida.txt`, 13 de 13) y la batería entera verde con ellos
+  (`probar_evaluar_v750a_salida.txt`, 74 de 74); mutaciones M63 a M80, 18 de 18 atrapadas por aserción sobre la batería
+  restringida a E61 a E73, con identidad y control de caída como deben (`mutar_evaluar_v750a_posicion_salida.txt`);
+  lecturas nuevas L20 a L27 en `LECTURAS_EVALUAR_V750A.md`. Falta: la corrida completa del medidor sobre la batería
+  entera (unas 7 h, con disco y CPU libres; confirma también que M63 a M80 no se caen en los escenarios viejos) y un
+  verificador limpio de este agregado.
 - Resultado de V750-B (la ROI) y del brazo nativo N0/N1 (confirma V750-C).
 - Analizador `evaluar_v750a.py` con la regla de §6, probado sin red (nulo, placebo y control positivo sobre las 510
   grillas de N), y su verificador limpio.

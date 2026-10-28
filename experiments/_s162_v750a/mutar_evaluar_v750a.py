@@ -14,7 +14,13 @@ M29 a M52 se agregaron tras el verificador limpio (VA-01 a VA-07): cada una romp
 roturas V01 a V41 mostraron sin vigilar. M53 a M56 (y M15, M29, M50, M52 reescritas) son de la resolución de L2, L4, L7
 y L18 por D-48 (relevo VIIRS 750, 2026-10-25). La antigua M50 («el placebo de publicación siempre pasa») ya no se puede
 atrapar: con el predicado de hoy toda diferencia K contra K×1,2 tiene t_max frío y se explica (A116, LECTURAS).
-Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4]
+M63 a M80 son de los brazos de posición (§3 y §6 bis, decisión de Nicolás del 2026-10-27).
+--escenarios (S162, brazos de posición) restringe la batería a los escenarios nombrados, en IDENTIDAD, CAIDA y cada
+mutación. Sirve para medir rápido las mutaciones de una pieza nueva contra los escenarios que la fijan (la batería entera
+tarda unos 40 min por corrida con un hilo); una mutación ATRAPADA así cae por aserción EN ESOS escenarios, pero no
+descarta que se caiga en otro, así que no reemplaza la corrida sin --escenarios, que es la que cuenta para el §6.
+Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4] [--solo M1,M2]
+     [--escenarios E61,E62]
 Salida: 0 si los controles salen como deben y todas las mutaciones quedan ATRAPADAS; 1 si no.
 """
 import argparse
@@ -165,13 +171,54 @@ MUTACIONES = {
             'or vrp(i, "K") <= TOPE_TABLERO_MW < vrp(i, "K") * GANANCIA_PLACEBO]', "or False]"),
     "M62": ("§6.1 (VB-A06): las seis mutaciones de la prueba local no se exigen por nombre",
             "and len(nombradas) == len(MUT_LOCAL) and caida", "and caida"),
+    # brazos de posición (§3 y §6 bis, decisión de Nicolás del 2026-10-27): cada una rompe una pieza de la regla
+    "M63": ("§6 bis: P-cercano toma el alertado más LEJANO del cráter",
+            "p = min(px, key=lambda p: (np.hypot(p[0] - ancla[0], p[1] - ancla[1]), p[0], p[1]))",
+            "p = max(px, key=lambda p: (np.hypot(p[0] - ancla[0], p[1] - ancla[1]), p[0], p[1]))"),
+    "M64": ("§6 bis: P-pico toma el alertado más DÉBIL",
+            "p = max(px, key=lambda p: p[4])", "p = min(px, key=lambda p: p[4])"),
+    "M65": ("§6 bis: el ancla de los brazos de posición es el centro de la grilla, no pos_crater",
+            "ancla = anc(i)\n", "ancla = (AB.C, AB.C)\n"),
+    "M66": ("§6 bis: E_lejana no suma a P2'",
+            "if lejana and etiqueta_lejana(o, canal):", "if False:"),
+    "M67": ("§6 bis: P2' con el canal que decide se mide contra K, no contra P",
+            'p2d = {b: p2(b, "P", "TODO", "decide", lejana=True) for b in POS[1:]}',
+            'p2d = {b: p2(b, "K", "TODO", "decide", lejana=True) for b in POS[1:]}'),
+    "M68": ("§6 bis: gana sin exigir que con la tabla sola no sea peor",
+            'and p2d[b][0] == "GANA" and no_peor(*p2t[b][:2])]', 'and p2d[b][0] == "GANA"]'),
+    "M69": ("§6 bis: desempate invertido (gana el de MAYOR E + E_lejana)",
+            'return min(cands, key=lambda b: (sum(e_tot[b]), b != "Ppico"))',
+            'return max(cands, key=lambda b: (sum(e_tot[b]), b != "Ppico"))'),
+    "M70": ("§6 bis: a igual E + E_lejana gana P-cercano, no P-pico",
+            'b != "Ppico"))', 'b != "Pcercano"))'),
+    "M71": ("§6 bis: elegible sin mirar la ventana O",
+            "for v in VENTANAS for canal in CANALES) for b in POS}", 'for v in ("T",) for canal in CANALES) for b in POS}'),
+    "M72": ("§6 bis: el §6 se evalúa siempre sobre P (radiante), no sobre el brazo elegido",
+            'PE = eleccion or "P"', 'PE = "P"'),
+    "M73": ("§6 bis: las pasadas far_ref cuentan como negativos en E (y en P1, P2 y M)",
+            'if o["lab"] == "neg_limpio":', 'if o["lab"] in ("neg_limpio", "far_ref"):'),
+    "M74": ("§6 bis: con el canal que decide basta no ser peor (EMPATE o SIN SUSTRATO ganan)",
+            'p2d[b][0] == "GANA"', "no_peor(*p2d[b][:2])"),
+    "M75": ("§6 bis: SIN SUSTRATO cuenta como «no peor» con cualquier neto",
+            '(reg == "SIN SUSTRATO" and neto <= 0)', '(reg == "SIN SUSTRATO")'),
+    "M76": ("§6 bis: si P no es elegible, se toma un elegible sin exigir que no sea peor que P",
+            "np_ = [b for b in POS[1:] if eleg[b] and no_peor(*p2d[b][:2]) and no_peor(*p2t[b][:2])]",
+            "np_ = [b for b in POS[1:] if eleg[b]]"),
+    "M77": ("§6 bis: NINGUNA POSICIÓN ELEGIBLE no entra a los motivos del §6",
+            'fallas.append(("TODO", "decide", "§6 bis: NINGUNA POSICIÓN ELEGIBLE"))', "pass"),
+    "M78": ("§6 bis: sin pasadas far_ref no se dice que la vara lejana quedó SIN DATO",
+            '("" if far else ": SIN DATO', '("" if True else ": SIN DATO'),
+    "M79": ("§6 bis: «con algún alertado» cuenta todas las far_ref",
+            'con_alert = sum(bool((res[i]["paquete"]["P"] or {}).get("npix")) for i in far)', "con_alert = len(far)"),
+    "M80": ("§6 bis (A119): la distancia del OCR se usa también antes del 2026-06-13",
+            'and (f.get("source") == "CONS" or o["hora_utc"] >= AB.FRONTERA_OCR)', "and True"),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),
 }
 
 
-def correr(dest, evaluador, nombre, viejo=None, nuevo=None):
+def correr(dest, evaluador, nombre, viejo=None, nuevo=None, escenarios=""):
     copia = AQUI / f"_mut_{nombre}_evaluar_v750a.py"
     src = ORIGINAL.read_text(encoding="utf-8")
     if viejo is not None:
@@ -183,7 +230,7 @@ def correr(dest, evaluador, nombre, viejo=None, nuevo=None):
         shutil.rmtree(sal)
     try:
         o = subprocess.run([sys.executable, str(PRUEBAS), "--dest", str(sal), "--analizador", str(copia),
-                            "--evaluador", str(evaluador)], capture_output=True, text=True, encoding="utf-8",
+                            "--evaluador", str(evaluador)] + (["--solo", escenarios] if escenarios else []), capture_output=True, text=True, encoding="utf-8",
                            errors="replace", timeout=14400, cwd=str(AQUI))
     except subprocess.TimeoutExpired:
         # S162 (relevo): con CPU compartida una mutación pasó las 2 h y la excepción tumbó TODO el medidor, sin un
@@ -212,13 +259,14 @@ def main():
     ap.add_argument("--evaluador", required=True, type=Path)
     ap.add_argument("--hilos", type=int, default=4)
     ap.add_argument("--solo", default="", help="ids de mutaciones a correr (IDENTIDAD y CAIDA van siempre)")
+    ap.add_argument("--escenarios", default="", help="restringe la batería a estos escenarios (no reemplaza la corrida entera)")
     a = ap.parse_args()
     sel = {x for x in a.solo.split(",") if x}
     a.dest.mkdir(parents=True, exist_ok=True)
     mut = {k: v for k, v in MUTACIONES.items() if not sel or k in sel or k == "CAIDA"}
     trabajos = [("IDENTIDAD", None, None)] + [(k, v[1], v[2]) for k, v in mut.items()]
     with ThreadPoolExecutor(a.hilos) as ex:
-        res = {r[0]: r for r in ex.map(lambda t: correr(a.dest, a.evaluador, *t), trabajos)}
+        res = {r[0]: r for r in ex.map(lambda t: correr(a.dest, a.evaluador, *t, escenarios=a.escenarios), trabajos)}
     L = []
 
     def pr(s):
@@ -228,6 +276,9 @@ def main():
     ident = res["IDENTIDAD"]
     if sel:
         pr(f"(corrida parcial: --solo {a.solo})")
+    if a.escenarios:
+        pr(f"(batería restringida a --escenarios {a.escenarios}: «atrapada» es por aserción en esos escenarios; no "
+           "reemplaza la corrida con la batería entera)")
     pr(f"IDENTIDAD | {ident[1]} (tiene que ser PASA) | rc {ident[2]} | {ident[3][:200]}")
     malos = 0 if ident[1] == "PASA" else 1
     for nom, (que, _v, _n) in mut.items():
