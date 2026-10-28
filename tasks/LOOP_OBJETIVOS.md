@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 04:15 UTC aprox. (S166, vuelta 12): PR #924 del audit; el punto 2 (mismo objeto) sale
+- Subagente: #924 (`b2ae7d40f`) con los tres puntos. Suite 2748 passed. Pero el punto 2 **no reproduce** el informe de
+  #915 sobre el árbol `97ef53aa5`:
+  - PCC VIIRS 750 queda en 0,375 y no en 0,517, porque la cota de 10,67 km queda bajo su `inner_radius_km` de 20. El
+    0,517 del informe sale de un corte de 3 km sin medir (A115).
+  - Tupungatito VIIRS 375 da 0,581, no 0,618: la noche del 09-17 es OCR de NOAA-20.
+  - La exclusión por Suomi NPP saca 30 noches de 10 celdas, entre ellas Chillán VIIRS 375 del 2026-10-05 (8,24 MW, en
+    erupción). Esa celda pasa de 0,662 a 0,705 y **se pierde una bandera que el informe daba por real**.
+- Decisión de la coordinadora, por el criterio de Nicolás («si algo nos está confundiendo no nos sirve»): **el punto 2
+  sale de #924**. Quedan el 1 y el 3. Pedido al subagente: quitarlo, rehacer la suite, esperar el CI y documentar los
+  números en el PR. El «mismo objeto» de la magnitud queda abierto hasta que haya un criterio medido contra la
+  referencia, no un corte inventado.
+
 ### 2026-10-28 03:50 UTC aprox. (S166, vuelta 11): §b 1 decidido; audit en manos de un subagente; tarjetas por sensor
 - Nicolás, en este chat: «has lo que recomiendes y lo que nos ayude mas a lograr los objetivos, si algo nos esta
   confundiendo entonces no nos sirve mucho». Con eso queda decidido el §b 1: las alertas sólo OCR de Suomi NPP
