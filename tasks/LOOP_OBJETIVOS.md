@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 01:35 UTC aprox. (S166, vuelta 4): adenda 2 de V750-B anexada y con tag
+- Loop VIIRS 750 2 la anexó a `PREREGISTRO_V750B.md`: commit **`609fa1c88`**, tag anotado
+  **`s162-v750b-adenda2-sellada`** (S166 comprobó con `ls-remote` que apunta a `609fa1c88`). Comprobado por S166 entre
+  `739edff39` y `609fa1c88`: en `experiments/_s162_v750b/` sólo cambia `PREREGISTRO_V750B.md` (+205), `adenda2/` queda
+  idéntica, y `analizar_v750b.py`, `objetivos_v750b.py` y `probe_v750b.py` siguen idénticos al tag
+  `s162-v750b-sellado`.
+- El 2026-11-03, Loop VIIRS 750 2 genera la lista sellada y la suplementaria (§7 de la adenda) y pide el despacho con
+  los tres cambios.
+
 ### 2026-10-28 01:21 UTC (S166, vuelta 3): sello de la adenda 2 traspasado; §b 2, 3 y 5 decididos; §b 1 en pregunta
 - Nicolás, en este chat, ante las dos preguntas (traspasar el sello de la adenda 2 de `4dbd88dce` a `739edff39`, y
   arrancar el loop con las recomendaciones del §b 1, 2, 3 y 5): «Lo que tú recomiendes». Quedó así:
