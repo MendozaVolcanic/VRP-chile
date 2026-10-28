@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 03:30 UTC aprox. (S166, vuelta 10): PR #923 del probe del bit a bit, esperando el merge
+- #923 (rama `s166-probe-bitabit`, `79d93cace` sobre main `55c95c705`): sólo agrega
+  `.github/workflows/probe-s166-bitabit-nrt.yml`, la plantilla de S162 más el comparador de VIIRS 375. Sólo lectura. Con
+  el archivo puesto, los 29 tests que leen `.github/workflows/`: 449 passed, 4 skipped. Blob en LF; `on` como string.
+- Al mergearse: despachar con `ref_main=pre-s165-via-375`, `ref_rama=<sha de main>`, `fecha=2026-10-26`, y leer los
+  dos `comparacion_*.txt` de cada volcán.
+
 ### 2026-10-28 03:15 UTC aprox. (S166, vuelta 9): censo A113 de citas tras #919 a #922
 - Censo de sólo lectura (subagente Sonnet), en `experiments/_s166/CENSO_CITAS_A113.md`: 71 citas a archivos de
   `pipeline/` y `scripts/` que cambiaron entre `cc16b3a7f` y `7a17af8c4`. `CLAUDE.md`: 9 de 9 al día. **Una sola cita
