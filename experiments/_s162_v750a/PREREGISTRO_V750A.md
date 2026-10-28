@@ -1,6 +1,7 @@
 # Pre-registro V750-A (S162): el paquete del código de MIROVA contra K en VIIRS 750
 
-Estado: **BORRADOR para el sello de Nicolás.** Depende de V750-B (la ROI) y de V750-C (que el remuestreo es pieza
+Estado: **BORRADOR para el sello de Nicolás.** El sello espera la lectura de V750-B (la ROI elegida se incorpora antes
+de sellar, §11) y depende también de V750-C (que el remuestreo es pieza
 obligatoria). Nada se implementa en `pipeline/` ni se despacha antes del sello, del verificador limpio de este
 documento, del tag defensivo y del sí de Nicolás (A45). Autor: sesión hija VIIRS 750 (`tasks/LOOP_VIIRS750.md`),
 2026-10-24. Programa: `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` §3 (V750-A), §7 (fases 3 y 4)
@@ -159,6 +160,26 @@ Los tres brazos de posición se comparan contra lo que publica MIROVA. La vara e
   cada brazo desde la celda central de la grilla contra la `Distancia_km` de MIROVA (OCR sólo desde el 2026-06-13,
   A119; diferencia de radios, A93).
 
+## 6 ter. Regla N-3 (agregada el 2026-10-28, antes de ver los datos; programa §12.0, §12.1 y §12.5)
+
+Nicolás decidió (S166) que las alertas sólo del OCR de Suomi NPP anteriores al 2026-10-09 se informan aparte y no
+deciden: en el auto-audit (#924) y en V375-E (§8.13 de su pre-registro, sellado el 2026-10-28). Aquí se aplica lo mismo:
+
+- **Qué pasadas**: protegida (`protegida`), sin alerta de la tabla (`alerta_tabla` falso, o sea que la protegida
+  existe sólo por el OCR), de Suomi NPP (`sensor == "VIIRS_SNPP_750"`) y con `hora_utc` anterior al 2026-10-09.
+- **Qué cambia**: no vetan. No cuentan en el P1 de la elegibilidad del §6 bis ni en el P1 del §6.2 (ninguna de sus
+  dos ramas: la protegida que K publica y P no, ni la protegida de MIROVA que P no publica). Con la tabla sola nunca
+  contaban, porque no tienen alerta de la tabla; la regla sólo toca el canal de tabla más OCR.
+- **Qué no cambia**: la magnitud M (§6.2) y E. Una protegida no entra a E, y la regla habla sólo del veto, igual que
+  en V375-E. La sombra (§4.3) empieza el 2026-11-03, después del hito y del cese de Suomi NPP (2026-11-02), así que no
+  tiene pasadas de esta clase.
+- **Cómo se informa**: el analizador las lista aparte por nombre (volcán, hora, cuál brazo las publica) y, por cada
+  brazo, imprime el P1 que veta sin ellas al lado del P1 que las cuenta todas. Una pérdida de esta clase se ve, pero no
+  bloquea.
+- **Implementación**: después del medidor completo que corre sobre el analizador sin N-3 (no se edita el analizador
+  mientras corre, A112), con escenarios rojos antes del cambio y mutaciones que deshagan la regla, atrapadas por
+  aserción.
+
 ## 6. Regla de adopción (escrita antes de ver los datos)
 
 P (con la posición elegida en el §6 bis) se propone a Nicolás para producción (A45) si y sólo si:
@@ -263,6 +284,10 @@ corrigieron con E53 a E60 y las mutaciones M57 a M62.
   lecturas nuevas L20 a L27 en `LECTURAS_EVALUAR_V750A.md`. Falta: la corrida completa del medidor sobre la batería
   entera (unas 7 h, con disco y CPU libres; confirma también que M63 a M80 no se caen en los escenarios viejos) y un
   verificador limpio de este agregado.
+- **El sello depende de la lectura de V750-B** (programa §12.1 paso 4 y §12.5 punto 2): la ROI que elija V750-B se
+  incorpora a P antes del sello, con sus escenarios y su medidor; sin esa lectura no se sella.
+- **Regla N-3 (§6 ter)**: escrita el 2026-10-28; falta su implementación en el analizador, escenarios y mutaciones,
+  cuando termine el medidor completo que corre sobre la versión sin N-3 (desde el 2026-10-28 13:50 UTC).
 - Resultado de V750-B (la ROI) y del brazo nativo N0/N1 (confirma V750-C).
 - Analizador `evaluar_v750a.py` con la regla de §6, probado sin red (nulo, placebo y control positivo sobre las 510
   grillas de N), y su verificador limpio.
