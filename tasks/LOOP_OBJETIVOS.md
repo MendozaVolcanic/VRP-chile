@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-28 05:55 UTC aprox. (S166, vuelta 15): adenda 2 de V375-E entregada; verificador corto lanzado
+- V375-E fase 4 entregó la adenda 2 (`PREREGISTRO_E.md` §8, SIN SELLAR): `e037b8326` en
+  `origin/claude/adoring-wright-dc0404`, en el remoto. Con diff de tres puntos contra main, no toca `pipeline/`, `data/`
+  ni `frontend/` (comprobado). Trae los tres brazos de posición y 330 pasadas lejanas (329 de la tabla deciden); lista
+  del run de 350 con 20 de control. El veto cuenta sólo las protegidas que otro brazo publica. Batería 130 de 130, nulo
+  76 de 77 (sobrevive L20, que el autor da por equivalente). Los 13 arreglos de su primer verificador no se volvieron a
+  verificar. **Punto aparte para Nicolás**: el autor escribió el cambio de la vara del paso 1 (fondo sobre 4 px con la
+  regla de MATLAB) **después** de ver #921.
+- Lanzado el verificador corto (Sonnet, limpio, sobre `6c80ce7c0..e037b8326`, árbol en D:).
+- MOD-D fase 4: pre-registro en `e1f6b197b`; espera a su verificador y las cifras de su corrida (§13).
+- W5: 10 jobs en verde, 3 corriendo, 9 en cola. C: 5,1 GB.
+
 ### 2026-10-28 04:45 UTC (S166, vuelta 14): seis records MODIS más, iguales; VIIRS todavía sin record nuevo
 - NRT de las 04:10 (40630814546, sobre `55c95c705`): commiteó Láscar, Lastarria, Isluga, Tupungatito, PP y Copahue
   (`cb5a2521f` a `5a1af71f9`). `experiments/_s166/nrt_campos_s166.py 55c95c705 origin/main`: 6 records, los 6 MODIS Aqua
