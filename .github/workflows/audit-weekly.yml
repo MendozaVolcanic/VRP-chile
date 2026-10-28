@@ -111,9 +111,9 @@ jobs:
           # S162 (PR162-01 de la revision de #900): un sensor sin juzgar desde un cese de plataforma (n bajo el
           # minimo) no esta en banda; sus flags no pueden dispararse y desaparecerian del issue sin aviso.
           python -c "import json; d=json.load(open('data/audit_continuous/latest.json')); print('\n'.join('- '+a for a in (d.get('plataformas') or {}).get('avisos') or []) or '- ninguno')" > /tmp/plataformas.txt
-          # S166 (issue #915): protegidas con referencia sospechosa (A119) o perdida aceptada, y noches de magnitud
-          # que comparan otro objeto. No deciden el veredicto, pero quien lee el issue tiene que verlas.
-          python -c "import json; d=(json.load(open('data/audit_continuous/latest.json')).get('informado_aparte') or {}); print('\n'.join(['- '+a for a in d.get('protegidas') or []] + ['- magnitud %s: %d noches con otro objeto fuera de la mediana (con todas: %sx, n=%d)' % (k, m['n_noches_excluidas'], m['con_todas']['ratio_mediano'], m['con_todas']['n_noches']) for k, m in (d.get('magnitud_otro_objeto') or {}).items()]) or '- ninguno')" > /tmp/aparte.txt
+          # S166 (issue #915): protegidas con referencia sospechosa (A119) o perdida aceptada. No deciden el
+          # veredicto, pero quien lee el issue tiene que verlas.
+          python -c "import json; d=(json.load(open('data/audit_continuous/latest.json')).get('informado_aparte') or {}); print('\n'.join('- '+a for a in d.get('protegidas') or []) or '- ninguno')" > /tmp/aparte.txt
           if [ "$VERDICT" = "FUERA_DE_BANDA" ]; then
             python -c "import json; print('\n'.join('- '+f for f in json.load(open('data/audit_continuous/latest.json'))['flags']))" > /tmp/flags.txt
             gh issue create \

@@ -266,12 +266,10 @@ def _sin_claves_nuevas(latest):
 
 
 def _sin_claves_s166(latest):
-    """S166 (issue #915): claves posteriores al commit base. El insumo no trae centroides ni filas sólo OCR,
-    así que no excluye ninguna noche y todo lo demás queda idéntico (tests/test_auto_audit_referencia_s166.py)."""
+    """S166 (issue #915): `informado_aparte` es posterior al commit base. El insumo no trae protegidas, así
+    que queda vacío y todo lo demás queda idéntico (tests/test_auto_audit_referencia_s166.py)."""
     d = copy.deepcopy(latest)
     assert d.pop("informado_aparte")["protegidas"] == []
-    for ev in d["por_detector"].values():
-        assert ev.pop("magnitud_otro_objeto") == {}
     return d
 
 
