@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 15:40 UTC aprox. (S167, vuelta 21): adenda 3 de V750-B SELLABLE; pedido el sello con tag
+- Loop VIIRS 750 2 arregló VA3-01 a 04 en `fe4802a2a`: `leer_n3_v750b.py` carga el lector sellado (sha256 LF
+  `11e0ee91...`, compañero `f250a926...`) y sólo reemplaza el paso del analizador; escenas N9 a N11.
+- Segunda pasada del mismo verificador (Sonnet): **SELLABLE**; diff sólo en `adenda3/` y la bitácora de la hija, nada
+  sellado cambia; batería 12/12, rojo 12/12, rojo contra `5b924379d` falla N9, N10 y N11, nulo 14/14, identidad PASA,
+  control CAÍDA; N1 sin B5 sale 3 igual que el sellado. Informe en `experiments/_s167/v750b_adenda3_verificador/INFORME_R2.md`.
+- Con la aprobación de Nicolás del 2026-10-29 (§12.5 punto 5, condicionada a este verificador): pedido a Loop VIIRS 750 2
+  anexar la adenda 3 marcada SELLADA y el tag `s167-v750b-adenda3-sellada`.
+
 ### 2026-10-29 14:15 UTC (S167, vuelta 20): horas de las vueltas 15 a 19 corregidas
 - Las vueltas 15 a 19 llevaban horas estimadas «aprox.» que se adelantaron hasta 35 min (la 19 decía 14:45 con el
   servidor en 14:12). Se reemplazaron por la hora del commit de cada una (A86: la hora la da el servidor, no la memoria).
