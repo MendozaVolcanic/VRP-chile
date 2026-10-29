@@ -1,0 +1,31 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+DÍAS EXCLUIDOS POR HUECO DE NASA (adenda 1, regla a y b'): []
+  consulta CMR del 2026-10-28T21:46:17Z; evidencia: {}
+  pasadas de MIROVA que salen, por día: {}
+  informativo, regla (b) original: []
+reflejo probable (1.13): 17 pasadas
+COMPUERTAS: inválido 0, indecidible 0
+cobertura diurna: {'VIIRS375': {'pasadas_diurnas': 2547, 'sin_record': 0, 'p_sup': 0.0011027919466183107}, 'VIIRS750': {'pasadas_diurnas': 2499, 'sin_record': 17, 'p_sup': 0.005918999529652914}}
+noche, records en un solo brazo: {'solo_control': 0, 'solo_brazo': 0}
+R1 (protegidas que el control publica y el brazo no): 0
+VIIRS375: P2 EMPATE (neto +0, B 9, p_gana 0.6094, p_pierde 0.6094) | protegidas 9 de 26 | alertas<1MW 5 de 10 | negativos 5 de 2246 (Q_d 0.0022) | Q_n 0.0367 (1606) | D True (14 de 36 alertas) | neg>=1MW 2 | pub en «otra» 0 | razón mag 0.9329905239687848
+   -> ADOPTAR (caso b, opción e-ii)
+   I6: {'a': {'resultado': 'SIN SUSTRATO', 'bloques': 2, 'tocadas': 2}, 'b': {'resultado': 'SIN SUSTRATO', 'bloques': 2, 'tocadas': 2}, 'c_falsos': 0, 'c_gana': 0}
+   M4 por ventana: {'W2': {'P': 0, 'P_obs': 11, 'amb': 0, 'amb_obs': 1, 'neg_pub': 1, 'neg_obs': 485}, 'W3': {'P': 0, 'P_obs': 1, 'amb': 1, 'amb_obs': 2, 'neg_pub': 2, 'neg_obs': 386}, 'W4': {'P': 3, 'P_obs': 5, 'amb': 2, 'amb_obs': 4, 'neg_pub': 0, 'neg_obs': 490}, 'W5': {'P': 1, 'P_obs': 4, 'amb': 1, 'amb_obs': 2, 'neg_pub': 1, 'neg_obs': 525}, 'W6': {'P': 5, 'P_obs': 5, 'amb': 1, 'amb_obs': 1, 'neg_pub': 1, 'neg_obs': 360}}
+   protegidas recuperadas publicadas con 1 MW o más: 9; negativos publicados por elevación solar: {'30-60': 2, '0-30': 3}
+VIIRS750: P2 SIN SUSTRATO (neto +0, B 0, p_gana 1.0000, p_pierde 1.0000) | protegidas 2 de 6 | alertas<1MW 0 de 0 | negativos 0 de 2416 (Q_d 0.0000) | Q_n 0.0093 (2375) | D True (2 de 6 alertas) | neg>=1MW 0 | pub en «otra» 2 | razón mag 1.0701747569672098
+   -> ADOPTAR (caso b, opción e-ii)
+   I6: {'a': {'resultado': 'SIN SUSTRATO', 'bloques': 0, 'tocadas': 0}, 'b': {'resultado': 'SIN SUSTRATO', 'bloques': 0, 'tocadas': 0}, 'c_falsos': 0, 'c_gana': 0}
+   M4 por ventana: {'W2': {'P': 0, 'P_obs': 1, 'amb': 0, 'amb_obs': 0, 'neg_pub': 0, 'neg_obs': 605}, 'W3': {'P': 0, 'P_obs': 0, 'amb': 0, 'amb_obs': 0, 'neg_pub': 0, 'neg_obs': 404}, 'W4': {'P': 0, 'P_obs': 2, 'amb': 0, 'amb_obs': 0, 'neg_pub': 0, 'neg_obs': 505}, 'W5': {'P': 0, 'P_obs': 1, 'amb': 0, 'amb_obs': 0, 'neg_pub': 0, 'neg_obs': 522}, 'W6': {'P': 2, 'P_obs': 2, 'amb': 0, 'amb_obs': 0, 'neg_pub': 0, 'neg_obs': 380}}
+   protegidas recuperadas publicadas con 1 MW o más: 2; negativos publicados por elevación solar: {}
+GLOBAL (principal): DECIDE NICOLÁS
+VARIANTES: {'tabla': 'DECIDE NICOLÁS CON M4', 'sin_W2': 'DECIDE NICOLÁS', 'sin_reflejo': 'DECIDE NICOLÁS', 'otra_como_negativo': 'DECIDE NICOLÁS CON M4'}
+VEREDICTO FINAL (§6.4): DECIDE NICOLÁS 
+INFORMATIVO (no decide): {'minimas_SE': 'DECIDE NICOLÁS', 'minimas_original': 'DECIDE NICOLÁS', 'minimas_SN_0,04': 'DECIDE NICOLÁS', 'con_filtro_reflejo_12': 'DECIDE NICOLÁS'}
+  ¿alguna variante de mínimas cambia el veredicto principal (DECIDE NICOLÁS)? {'minimas_SE': False, 'minimas_original': False, 'minimas_SN_0,04': False, 'con_filtro_reflejo_12': False}
+filtro de reflejo de 12°: apaga 0 publicaciones diurnas del brazo; 0 publicaciones diurnas sin ángulos
+  con filtro VIIRS375: ADOPTAR (caso b), negativos 5 de 2246, protegidas 9 de 26
+  VIIRS375 desproporción (1.13 a) sobre lo nuestro): {'consistente': 25, 'desproporcionada': 5, 'aislada': 1}
+  con filtro VIIRS750: ADOPTAR (caso b), negativos 0 de 2416, protegidas 2 de 6
+  VIIRS750 desproporción (1.13 a) sobre lo nuestro): {'consistente': 5}
+noche, records en los dos brazos con otros campos distintos (informativo): 0 []

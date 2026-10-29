@@ -569,6 +569,22 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 06:15 UTC aprox. (S167, vuelta 13): diurno W2 a W6 CONFIRMADO CON RESERVAS; va a Nicolás
+- Verificador limpio (Sonnet, segundo intento): **CONFIRMADO CON RESERVAS**. Sellos 29 de 29 y 7 de 7 en árbol propio;
+  batería 109 passed; re-corrida desde cero de los dos scripts (CMR 05:01 UTC del 29-oct, 0 días excluidos) idéntica a
+  la del lector; las 16 combinaciones del §6.3 sin diferencias. **V375 ADOPTAR (b), V750 ADOPTAR (b), global DECIDE
+  NICOLÁS.** Reflejo solar (§7): ninguna de las 36 publicaciones diurnas bajo 12° (mínimo 29,8°); Chillán 10-09 19:12
+  V375 4,07 MW, PCC 06-13 18:00 V375 1,14 MW y Chillán 10-10 18:54 V750 4,15 MW no quedan marcadas.
+- Reservas: **VD167-01** (A118): 13 publicaciones diurnas (12 V375, 1 V750) caen en pasadas que la tabla de MIROVA no
+  lista y no entran a ninguna cuenta; 7 de 1 MW o más (Tupungatito 08-30 2,25 MW sin ninguna publicación nocturna a
+  ±72 h; Villarrica 08-19 y 08-23; Lastarria 10-12; Chillán 10-01 ×2; V750 Chillán 10-01). Contadas como negativos,
+  V375 pasaría de neto 0 a +12 (caso e). **VD167-02**: el ADOPTAR de V375 es de filo (neto 0, p 0,61); con tabla sola
+  o «otra» como negativo cae en e-ii. VD167-03: el beneficio se concentra en la erupción de Chillán de W6.
+- Mutaciones: 67 de 67 atrapadas por aserción y control de caída CAÍDA, de la corrida huérfana del primer verificador
+  (`s167_diurno_verif\mutaciones_salida.txt`); la propia del segundo NO VALE (dos bucles sobre el mismo árbol). No
+  reproducidas.
+- Copiados al repo: `experiments/_s167/diurno_w2_w6/lector/` (informe y salidas) y `verificador/`.
+
 ### 2026-10-29 05:35 UTC (S167, vuelta 12): PARADA por disco; causa probable, el archivo de paginación
 - C: bajó de 15,8 GB (04:57 UTC) a 2,8 GB (05:26) y a **1,99 GB** (05:30). Detenidos el medidor de V750-A (se detuvo
   solo, 4,7 MB escritos) y las mutaciones de MOD-D fase 4 (`--paralelo 6`, PID 39988 y 6 hijos, desde las 05:04 UTC).
