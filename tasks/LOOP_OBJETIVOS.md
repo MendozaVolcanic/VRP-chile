@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 21:19 UTC (S168, vuelta 4): PR #926 que enciende la sombra, abierto; Nicolás pide menos preguntas
+- Nicolás: «Sí, prepáralo». Tag `pre-s168-encender-sombra` en `ba3788279` (main); rama `claude/s168-encender-sombra`
+  (`f48fcbe7c`, armada con índice temporal, sin checkout): `schedule: cron "0 15 * * *"` y la prueba
+  `test_el_workflow_no_corre_solo` pasa a `test_el_workflow_corre_una_vez_al_dia` (pasa con el yml nuevo, falla con el
+  viejo, comprobado en local). PR #926; CI sin dato todavía. Merge sólo con frase de Nicolás.
+- Nicolás: «me preguntas varias cosas, acaso el loop no debería permitirte continuar y probar todo?». Desde ahora el loop
+  avanza y prueba solo y le lleva sólo las compuertas de las reglas (merge, encender, A45, reglas selladas), con el
+  trabajo hecho. Memoria `feedback_s168_loop_no_preguntar`.
+
 ### 2026-10-29 21:06 UTC (S168, vuelta 3): sombra verificada; decisión de encender a Nicolás
 - Verificador limpio (Sonnet) sobre la lectura del run 40945613044: CONFIRMADO CON RESERVAS
   (`experiments/_s168/sombra_run_40945613044/VERIFICADOR.md`, `c971f1eb5`). Gravedad 3 corregida en el informe: el
