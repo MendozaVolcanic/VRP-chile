@@ -43,6 +43,12 @@
 > (restricción S73). Para medir hay que mergear primero el workflow apagado (sin schedule), lo que pide la frase de
 > Nicolás. V750-A: el medidor sigue corriendo (`mutar_evaluar_v750a.py` desde las 13:46 UTC, sesión `local_94f4be0d`).
 >
+> **20:03 UTC (`date -u`).** V375-E sellado (tag `s168-v375e-cuerpo-sellado` en `9dec64c14`, rama en `444d5d888`,
+> verificado con `ls-remote`); su lectura lejana corre. **#925 mergeado** a `main` por la frase de Nicolás «Sí, mergea
+> #925» (squash `9533f00de`, `--match-head-commit 56dd2d3c5`; el workflow sigue sin schedule, cron sólo comentado).
+> Despacho `medir=true` desde el tag `s167-sombra-medir`: Lascar, 2026-10-21 a 2026-10-28, run 40945613044. Encender
+> la sombra (agregar el schedule) sigue siendo otro sí de Nicolás, con el costo de ese run en la mano.
+>
 > Verifica todo antes de creerle a esta tabla. La bitácora viva es `tasks/LOOP_OBJETIVOS.md` §6, vueltas 1 a 23 de S167,
 > en la rama `loop/activo`. El estado de cada sensor y el camino a la adopción están en el §12 de
 > `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` (en `loop/activo`, no en `main`).
