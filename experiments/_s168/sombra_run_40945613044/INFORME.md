@@ -37,6 +37,25 @@ por job. Un schedule diario sobre 1 día por volcán costaría del orden de 3 a 
 por proporción, no medida (el repo es público, minutos ilimitados; lo que pesa es el lock del grupo y los commits, que
 disparan pages-deploy, según la nota de S167).
 
+## 3 bis. Corrección tras el verificador (`VERIFICADOR.md`, CONFIRMADO CON RESERVAS)
+
+- **El §3 partía de una premisa falsa (gravedad 3 del verificador, comprobada):** el modo diario no corre 1 día sino
+  8, porque `scripts/ventana_sombra.py:46` en `origin/main` devuelve `hoy - LOOKBACK_DIAS` (7) a `hoy`. Esta corrida
+  ya ES el costo de un job diario: ~15 min de job (907 s) para Láscar. Con 11 jobs y `max-parallel: 4`
+  (`sombra-codigo-mirova.yml:55`) son del orden de 165 min de runner y ~45 min de reloj (estimación por
+  proporción, un solo volcán medido). Queda bajo lo que estimó `experiments/_s167_sombra/COSTO.md` (mediana 20 a 22
+  min). La sombra tiene grupo propio (`group: sombra-codigo-mirova`, l. 44), así que no ocupa el lock de `push-main`:
+  la frase del §3 sobre el lock no vale. La corrida no incluyó pasadas de LANCE del día en curso.
+- **81 gránulos retenidos, 77 records (gravedad 2):** 4 de VIIRS 375 no dejaron record y nada lo avisa; según el
+  verificador (CMR), 3 no contienen el volcán; el cuarto SIN VERIFICAR. VIIRS 750 no tiene corte de distancia, así que
+  sus 32 incluyen al menos 3 pasadas que no vieron Láscar.
+- **Los ceros no distinguen** «miró y no vio» de escena inválida o reflejo solar (el motivo está en el JSON, que
+  `medir=true` no guarda). VIIRS 750 no tiene poder acá: 0 contra 0 no prueba sensibilidad.
+- **MODIS (gravedad 1):** según el verificador, por CMR el Aqua nocturno del 26-oct es la pasada de las 07:55 UTC, la
+  misma de la alerta de MIROVA; la coincidencia es de pasada, no sólo de día.
+- `salida.txt` rotula «vacio» a los 28 de VIIRS 375: el log no lo puede saber. Una de las 6 alertas de VIIRS 375
+  (0,04 MW) cae bajo D-9.
+
 ## 4. Lo que esta corrida no prueba
 
 - Los otros 10 volcanes (sólo corrió Láscar).
