@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 21:00 UTC (S168, vuelta 1): sombra leída; MOD-D f4 SELLADO
+- Run 40945613044 (sombra, `medir=true`, Láscar 21 a 28-oct) leído en `experiments/_s168/sombra_run_40945613044/`
+  (`0ba50fe2b`): 77 de 77 records de la vía, 0 errores; MODIS 17 gránulos (1 con píxeles, 26-oct 0,184 MW; MIROVA 1
+  alerta MODIS ese día, 0,29 MW), VIIRS 750 32 gránulos sin píxeles (MIROVA 0), VIIRS 375 28 gránulos con el log
+  ciego (la línea de 375 m imprime campos que la vía no llena; records no guardados). Paso del pipeline 801 s para 8
+  días; job 907 s. Verificador limpio (Sonnet) lanzado sobre la lectura; sin su veredicto no va a Nicolás.
+- MOD-D fase 4 SELLADO (informe de `local_5b198297`, verificado con `ls-remote`): tag `s168-modd-f4-sellado` (objeto
+  `d5afd302d`) en `3768e9431` = punta de `claude/s166-modd-f4`. Sin gravedad 3; VS-02 (M70 atrapada por la aserción
+  explícita de E53 sobre la caída) declarado en §13 ter, a revisar con Nicolás si exige el criterio literal. Candado del
+  §11 sin empezar: la sesión espera.
+
 ### 2026-10-29 20:52 UTC (S168, apertura): coordinadora S168 de primer nivel; loop arrancado
 - /retomar hecho a las 20:08 UTC. `loop/activo` en `9bb429122`, igual al remoto (el commit de cierre de S167 ya estaba
   subido al momento del push). Disco: C: 23 GB, D: 5,8 GB.
