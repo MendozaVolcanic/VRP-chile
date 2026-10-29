@@ -579,6 +579,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   paralelos (6 mutaciones de MOD-D más el medidor de V750-A más los navegadores) y se come el disco; también explicaría
   el mínimo de 37 MB de las 23:47 y la recuperación en minutos. Los temporales `.tmp` con nombre GUID de `Temp` suman
   ~0,6 GB: no alcanzan.
+- 05:40 UTC: C: estable en 1,99 GB. Loop VIIRS 750 2 vio a tres `headless_shell` (Chrome sin ventana, Playwright) como
+  los que más escribían (~14 GB/h a ese ritmo); cuando S167 los buscó ya no existían. Origen SIN DATO.
+- Intento de liberar espacio: tres worktrees de sesiones ARCHIVADAS (`cranky-payne-f7d913` #921, `elated-bell-62d203`
+  #920, `funny-kepler-68f0ef` #919), limpios, sin ignorados relevantes y con su HEAD en `origin/main`, ~1,2 a 1,3 GB
+  cada uno. **El clasificador negó `git worktree remove`** («Irreversible Local Destruction»). No se tocaron. Queda para
+  Nicolás.
 - Cambiar el tamaño del archivo de paginación es configuración del sistema: lo decide y lo hace Nicolás. Mientras
   tanto, nada pesado local; al relanzar, `--paralelo` 1 o 2 y temporales en D:.
 
