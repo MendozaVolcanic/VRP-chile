@@ -277,6 +277,7 @@ def E13_identidad_otro_granulo():
 def E41_identidad_grillas_declaradas():
     """VF4-02: la población tiene que traer exactamente las grillas del censo; con una de menos, la identidad no se
     midió entera aunque cada pasada presente esté bien."""
+    chk(EV.N_GRILLAS_CENSO == 5321, "las grillas del censo son 5.321: %s" % EV.N_GRILLAS_CENSO)   # VS-04
     f = mundo()
     n = sum(1 for x in f if x["grilla_censo"])
     r = correr(f, n_grillas=n + 1)
@@ -789,8 +790,11 @@ def E53_chillan_magnitud_cero():
     f += [F("NevadosDeChillan", dia(130) + " 07:20", "protegida", k=0.5, v=0.0, mir=1.0, z=15.0)]
     try:
         r = correr(f, pred=_pred_publica_cumbre)
-    except (ValueError, ZeroDivisionError) as e:  # sólo la falla del logaritmo de 0; otra excepción tiene que caer
-        # (si se atrapara cualquiera, el control de caída del medidor saldría ATRAPADA y la cifra no valdría)
+    except ValueError as e:  # sólo la falla del logaritmo de 0; otra excepción tiene que caer
+        # (si se atrapara cualquiera, el control de caída del medidor saldría ATRAPADA y la cifra no valdría). VS-02 del
+        # tercer verificador: acotada al mensaje de math.log10(0); un ValueError de otro origen cae igual
+        if "math domain error" not in str(e):
+            raise
         chk(False, "el evaluador cae con una magnitud 0 en Chillán: %r" % e)
         return
     chk(g(r, "chillan", "n_pares") == 5, "el par con magnitud 0 queda fuera: %s" % g(r, "chillan", "n_pares"))
@@ -904,6 +908,47 @@ def E61_e_via_no_corrio():
     chk(g(r, "veredicto") == "DECIDE NICOLÁS", "vía que no corrió en E: %s" % g(r, "veredicto"))
 
 
+def pred_no_publica_inyectado(casos):
+    """Predicado que publica los records normales pero no el cúmulo inyectado por el contador (lo reconoce por la marca
+    via_codigo_mirova, que los records del mundo sintético no traen)."""
+    return [(0, 0.0) if (r or {}).get("via_codigo_mirova") else x for (r, _i), x in zip(casos, pred_sintetico(casos))]
+
+
+def E62_contador_inyectado_que_no_publica():
+    """VS-03 del tercer verificador (§8.5): si los 50 cúmulos inyectados no pasan a publicar con el predicado, el contador
+    no midió nada y queda en rojo, aunque P2 sume los 50 errores (el contador fuerza la publicación en la tabla)."""
+    r = correr(mundo() + [F(VOLS[i % 5], dia(i) + " 07:00", "neg_limpio") for i in range(40)],
+               pred=pred_no_publica_inyectado)
+    chk(g(r, "controles", "contador", "inyectados") == 50, "50 inyectados: %s" % g(r, "controles", "contador"))
+    chk(len(g(r, "controles", "contador", "no_pasan") or []) > 0, "los inyectados no pasan con este predicado")
+    chk(g(r, "controles", "contador", "estado") == "INDECIDIBLE", "inyectados sin publicar: %s" %
+        g(r, "controles", "contador", "estado"))
+    chk(g(r, "veredicto") == "INDECIDIBLE", "contador en rojo: %s" % g(r, "veredicto"))
+
+
+def E63_posicion_sin_alertados():
+    """VS-05 del tercer verificador (§8.9a): sin ninguna pasada con alertados de V, la posición no se midió y el control
+    queda en rojo (un cero de pasadas no es un OK)."""
+    f = [F(VOLS[i % 5], dia(i) + " 03:00", "neg_limpio") for i in range(60)]
+    f += [F("Lascar", dia(70 + i) + " 03:00", "protegida", k=2.0, mir=2.1) for i in range(2)]
+    r = correr(f)
+    chk(g(r, "controles", "posicion", "n_con_alertados") == 0, "ninguna pasada con alertados: %s" %
+        g(r, "controles", "posicion"))
+    chk(g(r, "controles", "posicion", "estado") == "INDECIDIBLE", "posición sin alertados: %s" %
+        g(r, "controles", "posicion", "estado"))
+
+
+def E64_chillan_empate_fuera_de_pares():
+    """VS-06 del tercer verificador (§9, lectura sellada en el §13 ter): un par de Chillán en que el brazo y K quedan a
+    la misma distancia de MIROVA es un empate y no entra a la prueba de signos."""
+    f = mundo() + [F("NevadosDeChillan", dia(120 + i) + " 07:20", "protegida", k=0.5, v=1.0, mir=1.0, z=15.0)
+                   for i in range(5)]
+    f += [F("NevadosDeChillan", dia(130) + " 07:20", "protegida", k=0.8, v=0.8, mir=1.0, z=15.0)]
+    r = correr(f, pred=_pred_publica_cumbre)
+    chk(g(r, "chillan", "n_pares") == 5, "el empate queda fuera de los pares: %s" % g(r, "chillan", "n_pares"))
+    chk(len(g(r, "chillan", "empates") or []) == 1, "un empate: %s" % g(r, "chillan", "empates"))
+
+
 ESCENARIOS = [v for k, v in sorted(globals().items()) if k[:1] in "EN" and k[1:3].isdigit() and callable(v)]
 
 
@@ -913,6 +958,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--modulo", default=str(AQUI / "evaluar_f4.py"))
     ap.add_argument("--solo", default=None)
+    ap.add_argument("--traza", action="store_true", help="imprime la traza de cada escenario que cae (VS-08)")
     a = ap.parse_args()
     try:
         EV = cargar(a.modulo)
@@ -933,7 +979,7 @@ def main():
         except Exception as x:  # noqa: BLE001
             cae += 1
             print("CAE             ", e.__name__, "|", type(x).__name__, str(x)[:160], flush=True)
-            if "--traza" in sys.argv:
+            if a.traza:
                 traceback.print_exc()
     print("RESUMEN: %d escenarios, %d OK, %d fallan por aserción, %d caen" % (len(sel), ok, asercion, cae))
     sys.exit(0 if ok == len(sel) else 1 if asercion else 2)

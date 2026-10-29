@@ -1,0 +1,62 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf
+batería del arnés probe_f4.py (sha256 LF 4ff7b5a5ea31227d0d6d24ade52d565442feb3918ed5b35d7a4d9da1c55afe82)
+  OK    t_escena_contrato                    5.6 s  
+  OK    t_escena_tres_distancias             0.0 s  
+  OK    t_escena_controles_del_evaluador     0.1 s  
+  OK    t_escena_grilla_npz                  0.1 s  
+  OK    t_envoltorio_no_altera               1.9 s  
+  OK    t_fuera                              0.3 s  
+  OK    t_invalida                           1.2 s  
+  OK    t_nada                               1.3 s  
+  OK    t_sin_grilla                         0.4 s  
+  OK    t_kprod_igual                        1.5 s  
+  OK    t_kprod_distinto                     3.2 s  
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  OK    t_bajar                              0.0 s  
+  OK    t_partes                             0.0 s  
+  OK    t_humo                               0.0 s  
+  OK    t_data                               0.0 s  
+  OK    t_arbol                              0.5 s  
+  OK    t_cabecera                           0.1 s  
+  OK    t_motivo_y_marca                     0.0 s  
+escenarios: 18 de 18 OK
+
+mutaciones del arnés (cada una contra la batería entera; ATRAPADA = al menos una aserción falla y ningún escenario cae)
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA01 V-cercano y V-pico con la regla radiante | fallan: t_escena_tres_distancias | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA02 V sin el flag de la vía encendido | fallan: t_escena_contrato,t_escena_tres_distancias,t_escena_controles_del_evaluador,t_escena_grilla_npz,t_envoltorio_no_altera,t_fuera,t_invalida,t_nada,t_sin_grilla | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA03 escena inválida no se reconoce | fallan: t_invalida | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA04 k_difiere siempre False | fallan: t_kprod_distinto | caen: -
+  ATRAPADA   MA05 el vigente no se marca otro_granulo | fallan: t_bajar | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA06 el slim pierde primary_cluster | fallan: t_escena_tres_distancias,t_escena_controles_del_evaluador,t_escena_grilla_npz | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA07 distancias medidas desde la esquina de la grilla, no desde el cráter | fallan: t_escena_tres_distancias,t_escena_controles_del_evaluador | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA08 volcán fuera del gránulo sin motivo | fallan: t_fuera,t_motivo_y_marca | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA09 k_reproducida siempre True | fallan: t_kprod_distinto | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA10 todas las partes son la parte 0 | fallan: t_partes | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA11 el humo no comprueba la población | fallan: t_partes | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA12 pub_runner de K sale del primer brazo de V | fallan: t_escena_controles_del_evaluador,t_kprod_distinto | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA13 la re-corrida usa el sha del arnés, no el del guardado | fallan: t_kprod_distinto | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA14 el npz no guarda la máscara | fallan: t_escena_grilla_npz | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA15 git archive sin ruta | fallan: t_arbol | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  ATRAPADA   MA16 el cenit sale del record de K aunque haya MxD03 | fallan: t_escena_contrato | caen: -
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  VIVA       CONTROL identidad (sin mutación) (debe VIVA) | caen: 0
+  CMR/descarga fallo intento 0 MYD021KM.A2026115.0735.061.2026115190927.hdf: ConnectionError('CMR caído')
+  CAE        CONTROL caída (debe CAE) | caen: 10
+  ROTA       CONTROL rota (debe ROTA) | caen: 0
+mutaciones: 16 de 16 atrapadas por aserción sin caídas | ATRAPADA 16

@@ -3,13 +3,16 @@
 evaluador fuera del repositorio y corre la batería ENTERA (probar_evaluar_f4.py) contra la copia.
 
 Clasificación (lección S152/S156: una mutación que sólo hace caer el programa no está atrapada):
-- ATRAPADA: algún escenario falla por aserción (código 1 de la batería).
+- ATRAPADA: algún escenario falla por aserción (código 1 de la batería) y ninguno cae.
+- ATRAPADA_CON_CAIDAS: alguno falla por aserción y otro cae por excepción (VS-01 del tercer verificador): no cuenta como
+  atrapada, porque la aserción puede ser un escenario que convierte la caída en falla.
 - CAE: ningún escenario falla por aserción, pero alguno cae por excepción (código 2).
 - VIVA: la batería pasa entera (código 0).
 - ROTA: la copia no carga (error de sintaxis) o sale con código 1 sin ninguna aserción fallida (VF4-08): no cuenta.
-Tres controles: IDENTIDAD (sin mutación) tiene que salir VIVA, CONTROL_CAIDA (una excepción al entrar a evaluar)
-tiene que salir CAE y CONTROL_ROTA (un error de sintaxis) tiene que salir ROTA. Si alguno no sale como debe, el medidor está roto y la cifra no vale.
-Uso: python mutar_evaluar_f4.py [--paralelo 4] [--solo M01,M02]  (escribe mutar_evaluar_f4_salida.txt)
+Cuatro controles: IDENTIDAD (sin mutación) tiene que salir VIVA, CONTROL_CAIDA (un RuntimeError al entrar a evaluar)
+y CONTROL_CAIDA_VALUEERROR (lo mismo con ValueError, la excepción que E53 sabe convertir; VS-01) tienen que salir CAE,
+y CONTROL_ROTA (un error de sintaxis) tiene que salir ROTA. Si alguno no sale como debe, el medidor está roto y la cifra no vale.
+Uso: python mutar_evaluar_f4.py [--paralelo 4] [--solo M01,M02] [--salida ruta]  (escribe mutar_evaluar_f4_salida.txt)
 """
 from __future__ import annotations
 
@@ -30,6 +33,9 @@ MUTACIONES = [
     ("CONTROL_ROTA", "PLACEBO = 1.2", "PLACEBO = = 1.2"),
     ("CONTROL_CAIDA", "    for f in filas:\n        f[\"_evaluable\"], f[\"_motivo\"] = evaluable(f)\n    armar_tabla(filas, predicado)",
      "    raise RuntimeError(\"caida de control\")\n    armar_tabla(filas, predicado)"),
+    ("CONTROL_CAIDA_VALUEERROR",
+     "    for f in filas:\n        f[\"_evaluable\"], f[\"_motivo\"] = evaluable(f)\n    armar_tabla(filas, predicado)",
+     "    raise ValueError(\"caida de control\")\n    armar_tabla(filas, predicado)"),
     ("M01_p1_nunca_veta", 'return {"estado": "VETADO" if any(not x["solo_ocr"] for x in perd) else (',
      'return {"estado": "VETADO" if False else ('),
     ("M02_solo_ocr_como_sin_perdida", '"SOLO OCR" if perd else "SIN PERDIDA")', '"SIN PERDIDA" if perd else "SIN PERDIDA")'),
@@ -129,9 +135,52 @@ MUTACIONES = [
     # y salía CAE, que no es la mutación que se quiere medir)
     ("M82_excluida_sin_publicacion_ok",
      'fallas.append({"vol": f["vol"], "dt": f["dt"], "motivo": "sin_publicacion_de_K_del_runner"})', "pass"),
+    # M83 a M86: las mutaciones A1, A3, A6 y A8 del tercer verificador (VS-03 a VS-06), con su escenario nuevo
+    ("M83_n_grillas_censo_5322", "N_GRILLAS_CENSO = 5321 ", "N_GRILLAS_CENSO = 5322 "),
+    ("M84_posicion_sin_n", '"OK" if n and not malas else "INDECIDIBLE", "n_con_alertados"',
+     '"OK" if not malas else "INDECIDIBLE", "n_con_alertados"'),
+    ("M85_contador_sin_no_pasan", "ok = not siguen and len(sel) == N_INYECTAR and not no_pasan and",
+     "ok = not siguen and len(sel) == N_INYECTAR and"),
+    ("M86_chillan_empates_como_pares", "(empates if db == dk else pares).append(par)", "pares.append(par)"),
 ]
+CONTROLES = (("IDENTIDAD", "VIVA"), ("CONTROL_CAIDA", "CAE"), ("CONTROL_CAIDA_VALUEERROR", "CAE"),
+             ("CONTROL_ROTA", "ROTA"))
 # Cada texto a mutar tiene que aparecer exactamente una vez en evaluar_f4.py; si no, el medidor dice «NO APLICA» en vez
 # de mutar otra cosa.
+
+
+def clasificar(codigo, fallan, caen):
+    """VS-01: ATRAPADA sólo si hay aserciones y ninguna caída; con las dos, ATRAPADA_CON_CAIDAS, que no cuenta."""
+    if codigo == 1:
+        return ("ATRAPADA_CON_CAIDAS" if caen else "ATRAPADA") if fallan else "ROTA"
+    return {0: "VIVA", 2: "CAE", 3: "ROTA"}.get(codigo, "CODIGO_%s" % codigo)
+
+
+def controles_malos(clases):
+    """N-02: los controles que no salen como deben (uno ausente no se cuenta: --solo siempre los corre)."""
+    return [c for c, debe in CONTROLES if clases.get(c) != debe]
+
+
+def resumir(res):
+    """Las líneas de salida y el código de salida: 1 y «NO VALE» si algún control no sale como debe (VS-03: probado en
+    probar_mutar_f4.py)."""
+    lineas = ["%-40s %-10s %s" % r for r in res]
+    ident = dict((r[0], r[1]) for r in res)
+    muts = [r for r in res if r[0][:1] == "M" and r[0][1:3].isdigit()]
+    atr = sum(1 for r in muts if r[1] == "ATRAPADA")
+    lineas.append("")
+    lineas.append("CONTROLES: " + ", ".join("%s %s (debe ser %s)" % (c, ident.get(c), debe) for c, debe in CONTROLES))
+    lineas.append("MUTACIONES: %d de %d atrapadas por aserción; vivas %s; caen %s; atrapadas con caídas %s; rotas %s; "
+                  "no aplican %s" % (
+                      atr, len(muts), [r[0] for r in muts if r[1] == "VIVA"], [r[0] for r in muts if r[1] == "CAE"],
+                      [r[0] for r in muts if r[1] == "ATRAPADA_CON_CAIDAS"], [r[0] for r in muts if r[1] == "ROTA"],
+                      [r[0] for r in muts if r[1].startswith("NO APLICA")]))
+    # N-02 (segunda vuelta): si un control no sale como debe, la cifra no vale (con la identidad ATRAPADA, una mutación
+    # puede parecer atrapada por un escenario que falla igual sin mutar); se dice en la salida y el código es 1
+    malos = controles_malos(ident)
+    if malos:
+        lineas.append("NO VALE: controles que no salen como deben: %s" % malos)
+    return "\n".join(lineas), 1 if malos else 0
 
 
 def correr(nombre, viejo, nuevo, tmp):
@@ -150,9 +199,8 @@ def correr(nombre, viejo, nuevo, tmp):
     fallan = [ln.split()[2] for ln in p.stdout.splitlines() if ln.startswith("FALLA ASERCION")]
     # VF4-08: ATRAPADA exige al menos un escenario que falla POR ASERCIÓN; un código 1 sin ninguno (un error de sintaxis
     # al importar) o un 3 (la copia no carga) es ROTA: la mutación está mal escrita y no cuenta
-    clase = {0: "VIVA", 1: "ATRAPADA" if fallan else "ROTA", 2: "CAE", 3: "ROTA"}.get(p.returncode,
-                                                                                  "CODIGO_%s" % p.returncode)
     caen = [ln.split()[1] for ln in p.stdout.splitlines() if ln.startswith("CAE ")]
+    clase = clasificar(p.returncode, fallan, caen)
     resumen = [ln for ln in p.stdout.splitlines() if ln.startswith("RESUMEN")]
     return nombre, clase, "%s | por aserción: %s | caen: %s" % (resumen[0] if resumen else p.stderr[-300:],
                                                               ",".join(x.split("_")[0] for x in fallan) or "-",
@@ -166,30 +214,14 @@ def main():
     ap.add_argument("--solo", default=None)
     ap.add_argument("--salida", default=str(AQUI / "mutar_evaluar_f4_salida.txt"))
     a = ap.parse_args()
-    sel = [m for m in MUTACIONES if not a.solo or m[0] in ("IDENTIDAD", "CONTROL_CAIDA", "CONTROL_ROTA")
+    sel = [m for m in MUTACIONES if not a.solo or m[0] in dict(CONTROLES)
            or m[0].split("_")[0] in a.solo.split(",")]
     with tempfile.TemporaryDirectory(prefix="mut_f4_") as tmp, cf.ThreadPoolExecutor(a.paralelo) as ex:
         res = list(ex.map(lambda m: correr(*m, tmp), sel))
-    lineas = ["%-40s %-10s %s" % r for r in res]
-    ident = dict((r[0], r[1]) for r in res)
-    muts = [r for r in res if r[0][:1] == "M" and r[0][1:3].isdigit()]
-    atr = sum(1 for r in muts if r[1] == "ATRAPADA")
-    lineas.append("")
-    lineas.append("CONTROLES: identidad %s (debe ser VIVA), control de caída %s (debe ser CAE), control de mutación rota "
-                  "%s (debe ser ROTA)" % (ident.get("IDENTIDAD"), ident.get("CONTROL_CAIDA"), ident.get("CONTROL_ROTA")))
-    lineas.append("MUTACIONES: %d de %d atrapadas por aserción; vivas %s; caen %s; rotas %s; no aplican %s" % (
-        atr, len(muts), [r[0] for r in muts if r[1] == "VIVA"], [r[0] for r in muts if r[1] == "CAE"],
-        [r[0] for r in muts if r[1] == "ROTA"], [r[0] for r in muts if r[1].startswith("NO APLICA")]))
-    # N-02 (segunda vuelta): si un control no sale como debe, la cifra no vale (con la identidad ATRAPADA, una mutación
-    # puede parecer atrapada por un escenario que falla igual sin mutar); se dice en la salida y el código es 1
-    malos = [c for c, debe in (("IDENTIDAD", "VIVA"), ("CONTROL_CAIDA", "CAE"), ("CONTROL_ROTA", "ROTA"))
-             if c in ident and ident[c] != debe]
-    if malos:
-        lineas.append("NO VALE: controles que no salen como deben: %s" % malos)
-    txt = "\n".join(lineas)
+    txt, codigo = resumir(res)
     print(txt)
     Path(a.salida).write_text(txt + "\n", encoding="utf-8")
-    sys.exit(1 if malos else 0)
+    sys.exit(codigo)
 
 
 if __name__ == "__main__":
