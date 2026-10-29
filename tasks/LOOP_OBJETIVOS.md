@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 23:20 UTC (S168, vuelta 8): lectura lejana de V375-E terminada (salida cruda, sin verificar)
+- Rama `claude/s168-v375e-sello` en `7a548be11`: `experiments/_s168/v375e_lectura_lejana/`, lector sellado de
+  19:57 a 20:56 UTC, `exit=0` (no aplica VA168-01). Salida cruda (sin verificar, lo dice el propio lector): veredicto de
+  posición ELEGIDO CERCANO (único que pasa el veto); §5.2 M MEJORA en los tres brazos; §5.3 SIN SUSTRATO (esperado,
+  §9.6); §5.4 retrospectiva: cercano CUMPLE (falta la sombra), radiante y pico NO CUMPLE; PAQUETE CUMPLE (falta la
+  sombra), brazo cercano.
+- Un segundo `leer_posicion_v375e.py` corre desde las 20:59 UTC con salida a `D:rp-trabajo	emporales\s168_ver_lectura\`:
+  por la ruta, el verificador de la sesión V375-E. No se duplica; se espera su informe.
+
 ### 2026-10-29 21:36 UTC (S168, vuelta 7): MOD-D baja a un proceso; cupos repartidos
 - MOD-D detuvo `mutar_evaluar_f4.py` y `head_e.py` (8 hilos); deja terminar `probar_probe_f4.py`. Mutaciones
   reformadas (86 más 4 controles, por VS-01 a VS-06): ~6 min por copia, ~9 h en serie (según su informe).
