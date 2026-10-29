@@ -62,11 +62,12 @@ def main():
     K = constructor()
     fallas, caidas = [], []
 
-    def correr(nombre, p, extra=()):
+    def correr(nombre, p, extra=(), salida=True):
         d = a.dest / nombre
         p.escribir(d)
+        sal = ["--salida", str(d / "salida.txt")] if salida else []
         o = subprocess.run([sys.executable, a.lector, "--art", str(d / "art"), "--objetivos", str(d / "objetivos.json"),
-                            "--evaluador", a.evaluador, "--salida", str(d / "salida.txt"),
+                            "--evaluador", a.evaluador, *sal,
                             "--censo-omitido-solo-pruebas", "--sin-granulo", str(d / "sin_granulo.json"), *extra],
                            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=3600,
                            cwd=str(V750B))
@@ -189,20 +190,46 @@ def main():
     revisar("N7 dos N-3 y una de la tabla: veta por la de la tabla", rc, txt, roi="B4", fuera=("B2",), n3=2,
             p1=(("B2", "TO", "decide", 1, 3, 2),))
 
-    # N8: un analizador que no es el sellado (un comentario de más): el lector se niega con salida 2
-    ajeno = V750B / "_ajeno_analizar_v750b.py"
+    # N8: un analizador que no es el sellado (un comentario de más): el lector se niega con salida 2. La copia vive en
+    # la carpeta temporal, no en la sellada (VA3-04)
+    ajeno = a.dest / "_ajeno_analizar_v750b.py"
+    a.dest.mkdir(parents=True, exist_ok=True)
     ajeno.write_text((V750B / "analizar_v750b.py").read_text(encoding="utf-8") + "\n# ajeno\n", encoding="utf-8")
-    try:
-        rc, txt = correr("N8", K["base"](), extra=("--analizador", str(ajeno)))
-    finally:
-        ajeno.unlink()
+    rc, txt = correr("N8", K["base"](), extra=("--analizador", str(ajeno)))
     revisar("N8 analizador ajeno: se niega", rc, txt, esperado_rc=2, extra=("RECHAZO: el analizador no es el sellado",))
 
-    n = 9
+    # N9 (VA3-01): la N-3 de N1 sin la caja B5. La compuerta de la adenda 1 cierra (cobertura con las cajas
+    # INSUFICIENTE) y no se lee: salida 3, sin veredicto. El analizador solo la sacaría de las observadas sin aviso
+    p = K["base"]()
+    n3_lascar(p, "2026-09-20 05:00", pierde_b2)
+    p.res[-1]["oraculo"].pop("B5")
+    rc, txt = correr("N9", p)
+    revisar("N9 una protegida sin una caja: la compuerta de la adenda 1 no deja leer", rc, txt, esperado_rc=3,
+            extra=("cobertura con las cajas: INSUFICIENTE", "== LECTOR: cobertura con las cajas INSUFICIENTE"))
+    if "ROI elegida" in txt and "Traceback" not in txt:
+        fallas.append("N9 una protegida sin una caja: la compuerta de la adenda 1 no deja leer")
+        print("N9 | FALLA | hay veredicto con la compuerta cerrada", flush=True)
+
+    # N10: la misma con --leer-con-faltantes: se lee, con la marca de la adenda 1 en el veredicto y la regla N-3 aplicada
+    rc, txt = correr("N10", p, extra=("--leer-con-faltantes", "prueba N10"))
+    revisar("N10 con --leer-con-faltantes: se lee con la marca", rc, txt, roi="B4", n3=0,
+            extra=("[LEÍDO CON FALTANTES DE LA ADENDA: prueba N10] == §6",))
+
+    # N11 (VA3-02): --salida=ruta, sola (sin otro --salida antes), se respeta
+    p = K["base"]()
+    d11 = a.dest / "N11"
+    rc, txt = correr("N11", p, extra=(f"--salida={d11 / 'otra_salida.txt'}",), salida=False)
+    revisar("N11 --salida=ruta se respeta", rc, txt, roi="B4")
+    if not (d11 / "otra_salida.txt").exists():
+        fallas.append("N11 --salida=ruta se respeta")
+        print("N11 | FALLA | --salida=ruta no escribió en la ruta pedida", flush=True)
+
+    n = 12
     if caidas:
         print(f"== PRUEBAS: CAÍDA DEL LECTOR en {caidas} (fallas por aserción {len(fallas)}) de {n}")
         return 2
     if fallas:
+        fallas = sorted(set(fallas))   # una escena con dos aserciones caídas cuenta una vez
         print(f"== PRUEBAS: FALLAS {len(fallas)} de {n}: {fallas}")
         return 1
     print(f"== PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA ({n})")

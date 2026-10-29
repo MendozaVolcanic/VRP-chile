@@ -7,8 +7,11 @@ alguna escena se cayó con traza, y eso no es atrapar). La identidad tiene que p
 salir CAÍDA. Las copias viven al lado del lector (su ruta del analizador sellado es relativa a su carpeta) y se borran
 al terminar cada una: son temporales que crea y consume este mismo proceso.
 Sin atrapar, declaradas por equivalentes en toda escena posible: quitar el «protegida» de `no_veta_n3` (la función sólo
-se consulta sobre etiquetas «prot», que ya exigen protegida) y listar con el canal que decide en vez de «todo» (una
-pasada sin alerta de la tabla sólo es etiqueta en O, donde los dos canales coinciden).
+se consulta sobre etiquetas «prot», que ya exigen protegida); listar con el canal que decide en vez de «todo» (una
+pasada sin alerta de la tabla sólo es etiqueta en O, donde los dos canales coinciden); y en los elegibles informativos,
+`metricas(b, "O", "tabla")["P1_todas"]` por `["P1"]` (VA3-03: en el canal «tabla» una etiqueta «prot» exige alerta de
+la tabla, así que nunca es N-3 y los dos P1 coinciden). Sin cubrir por una escena: los sha256 del lector y del
+compañero de la adenda 1 (sus rutas son fijas; el del analizador sí lo cubre N8).
 Uso: python mutar_adenda3.py --evaluador <evaluar_d25.py del tag s161-d25-lectura> --dest <carpeta temporal>
 """
 from __future__ import annotations
@@ -40,7 +43,12 @@ MUT = [
      """     '    pr(f"== §6 {aviso}ROI elegida: {elegido} ({motivo}) [con la adenda 3, regla N-3]")\\n'""",
      """     '    pr(f"== §6 {aviso}ROI elegida: {elegido} ({motivo})")\\n'""", "ATRAPADA"),
     ("A12 la lista aparte no se imprime", "    for i in n3:\\n'", "    for i in []:\\n'", "ATRAPADA"),
-    ("control que se cae", "    ruta = ANALIZADOR\n", '    raise RuntimeError("control: el lector se cae")\n', "CAÍDA"),
+    ("A13 se salta la compuerta de la adenda 1", "    return a1.main(argv + [PASO])", "    return paso_analizador(argv)",
+     "ATRAPADA"),
+    ("A14 --salida reconocida sólo escrita aparte", "    if ap.parse_known_args(argv)[0].salida is None:",
+     '    if "--salida" not in argv:', "ATRAPADA"),
+    ("control que se cae", "    src = fuente_con_n3(a.analizador)\n",
+     '    raise RuntimeError("control: el lector se cae")\n', "CAÍDA"),
 ]
 
 
@@ -74,7 +82,7 @@ def main():
             estado = "ATRAPADA"
         else:
             estado = f"OTRA (salida {r.returncode})"
-        quien = re.findall(r"^(N\d) .*\| FALLA", out, re.M)
+        quien = sorted(set(re.findall(r"^(N\d+) .*?\| FALLA", out, re.M)))
         print(f"{nombre}: {estado} (se espera {espera})" + (f" | escenas que fallan {quien}" if quien else ""),
               flush=True)
         malas += estado != espera

@@ -43,31 +43,56 @@ sellado: mismas rutas, mismo oráculo, mismo predicado del tablero con node, mis
 (1) el conteo del P1 separa las N-3; (2) la línea de métricas muestra los dos P1; (3) la lista aparte y los elegibles
 sin la adenda; (4) la línea del veredicto lleva «[con la adenda 3, regla N-3]»; (5) un encabezado.
 
-**Lectura del 2026-11-03 en adelante**: el mismo procedimiento sellado (adenda 2 §3: separar resultados, leer la
-lista sellada), con un solo cambio: **el veredicto de V750-B es el de `leer_n3_v750b.py`**, con los mismos
-argumentos con que se correría `analizar_v750b.py`. El analizador sellado se corre igual al lado y su salida se
-guarda: es la regla sin N-3, que sólo informa. El despacho, el probe, los objetivos y el workflow no cambian.
+**La compuerta de la adenda 1 va primero (VA3-01).** La lectura sellada es `adenda1/leer_v750b.py` (adenda 2 §8): corre
+el compañero `cobertura_cajas_v750b.py` y, si la cobertura con las cajas no cierra, no deja pasar al analizador (salida
+3; con `--leer-con-faltantes` marca el veredicto y sigue). `leer_n3_v750b.py` carga ese lector sellado tal cual (exige
+su sha256 y el del compañero, los del tag `s162-v750b-adenda2-sellada`) y le cambia una sola cosa: el analizador que
+llama es el sellado con la adenda 3. La compuerta, sus salidas y su marca son las selladas, sin copiarlas.
+
+**Lectura del 2026-11-03 en adelante**: el mismo procedimiento sellado (adenda 2 §3 y §8: separar resultados, leer la
+lista sellada con `adenda1/leer_v750b.py`), con un solo cambio: **el veredicto de V750-B es el de
+`leer_n3_v750b.py`**, con los mismos argumentos con que se correría `adenda1/leer_v750b.py`. El lector sellado se
+corre igual al lado y su salida se guarda: es la regla sin N-3, que sólo informa. Antes de que Nicolás confirme la
+ROI (§6.5), se miran juntas la lista aparte de N-3 y la ROI de la lectura sin N-3 (VA3-05): si la N-3 cambió la ROI,
+la ROI elegida puede perder una protegida que sí era real, y eso se dice. El despacho, el probe, los objetivos y el
+workflow no cambian.
 Al generar los objetivos (R4), antes de leer cualquier resultado, se cuentan las N-3 de la lista sellada (son
 etiquetas de la referencia, no resultados) y se informan con la lista.
 
 ## 4. Pruebas
 
-- `adenda3/probar_adenda3.py` (`probar_adenda3_salida.txt`): **9 de 9** como se espera. Escenas sintéticas armadas con
+Cifras de la versión tras el verificador corto (VA3-01 a VA3-04); el detalle de cada corrida, en sus salidas.
+
+- `adenda3/probar_adenda3.py` (`probar_adenda3_salida.txt`): **12 de 12** como se espera (las 9 de abajo más N9 a
+  N11, que siguen el párrafo). Escenas sintéticas armadas con
   el constructor de la batería sellada (`bateria_regla_v750b.py`, extraído con ast), corridas por el lector entero:
   N0 la base sin N-3 (B0 y B5 siguen fuera por Cordón Caulle); N1 B2 pierde una N-3 del 2026-09-20 y sigue elegible,
   con su línea en la lista aparte y los dos P1; N2 la misma el 2026-10-09 veta (borde); N3 la misma de NOAA-20 veta;
   N4 la misma con alerta de la tabla de 0,6 MW veta; N5 la N-3 decide la ROI (B0 la pierde en Láscar, donde B4 es la
   caja B0: con la adenda B4, sin ella B2); N6 una sólo del OCR en T no es etiqueta ni se lista; N7 dos N-3 y una de la
-  tabla perdidas: veta la de la tabla (P1 1, todas 3, aparte 2); N8 un analizador que no es el sellado se rechaza.
-- Rojo antes (`probar_adenda3_rojo_salida.txt`): la misma batería contra el analizador sellado, sin la adenda: 9 de 9
-  fallan por aserción; en N1 B2 queda fuera de los elegibles y en N5 el sellado elige B2.
-- Nulo (`mutar_adenda3_salida.txt`): **12 de 12 mutaciones de una línea atrapadas por aserción** (hito con «<=»,
-  cualquier plataforma, aunque haya alerta de la tabla, hito corrido, sensor de la banda I, la N-3 vuelve a vetar,
-  sin el total de P1, la lista sin pedir etiqueta, elegibles informativos con el P1 que veta, acepta cualquier
-  analizador, veredicto sin la marca, lista sin imprimir); la identidad PASA y el control que se cae sale CAÍDA.
-  Sin atrapar, declaradas por equivalentes: quitar «protegida» de la condición (sólo se consulta sobre etiquetas
-  protegidas) y listar con el canal que decide en vez de «todo» (sin alerta de la tabla sólo hay etiqueta en O, donde
-  coinciden).
+  tabla perdidas: veta la de la tabla (P1 1, todas 3, aparte 2); N8 un analizador que no es el sellado se rechaza
+  (la copia ajena vive en la carpeta temporal, no en la sellada: VA3-04); N9 la N-3 de N1 sin la caja B5: la
+  compuerta de la adenda 1 cierra, salida 3 y sin veredicto (VA3-01); N10 la misma con `--leer-con-faltantes`: se lee,
+  con la marca de la adenda 1 en el veredicto; N11 `--salida=ruta` sola escribe en esa ruta (VA3-02).
+- Rojo contra el analizador sellado, sin la adenda (`probar_adenda3_rojo_salida.txt`): fallan por **comportamiento**
+  N1 (B2 fuera de los elegibles), N5 (B4 fuera, el sellado elige B2), N7 (P1 3) y N9 (el analizador solo lee sin
+  compuerta); las demás fallan sólo porque falta el texto de la adenda (VA3-03), y eso no prueba nada sobre la regla.
+- Rojo contra el lector anterior (`5b924379d`, sin la compuerta; `probar_adenda3_rojo_va3_salida.txt`): N9, N10 y N11
+  fallan por aserción; las otras nueve pasan, porque ese lector ya aplicaba bien la regla.
+- Nulo (`mutar_adenda3_salida.txt`): mutaciones de una línea del lector, cada una atrapada por aserción (hito con
+  «<=», cualquier plataforma, aunque haya alerta de la tabla, hito corrido, sensor de la banda I, la N-3 vuelve a
+  vetar, sin el total de P1, la lista sin pedir etiqueta, elegibles informativos con el P1 que veta, acepta cualquier
+  analizador, veredicto sin la marca, lista sin imprimir, se salta la compuerta de la adenda 1, `--salida` reconocida
+  sólo escrita aparte); la identidad PASA y el control que se cae sale CAÍDA. Sin atrapar, declaradas por
+  equivalentes: quitar «protegida» de la condición (sólo se consulta sobre etiquetas protegidas), listar con el canal
+  que decide en vez de «todo» (sin alerta de la tabla sólo hay etiqueta en O, donde coinciden) y, en los elegibles
+  informativos, el P1 que veta en vez del total con la tabla sola (en ese canal una protegida exige alerta de la
+  tabla y nunca es N-3; VA3-03). Sin cubrir por una escena: los sha256 del lector y del compañero de la adenda 1.
+- Verificador corto con contexto limpio (Sonnet, lanzado por S167, `experiments/_s167/v750b_adenda3_verificador/
+  INFORME.md` en `loop/activo`), sobre `5b924379d`: SELLABLE CON CAMBIOS MENORES, con VA3-01 (gravedad 3) como
+  condición del sello. Arreglados en esta versión: VA3-01 (compuerta de la adenda 1), VA3-02 (`--salida=ruta`),
+  VA3-03 (rojo de comportamiento separado del de texto, tercer equivalente declarado), VA3-04 (N8 fuera de la carpeta
+  sellada); VA3-05 (N5 es la regla actuando) queda dicho en el §3.
 - Comandos (rutas absolutas en la máquina de Nicolás; temporales en D:):
   `python adenda3/probar_adenda3.py --evaluador <evaluar_d25.py del tag s161-d25-lectura> --dest <carpeta>`,
   la misma con `--lector analizar_v750b.py` para el rojo, y `python adenda3/mutar_adenda3.py --evaluador <...> --dest

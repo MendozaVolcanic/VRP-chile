@@ -20,19 +20,35 @@ original; si no, el lector se niega) y se ejecuta el resultado con el `__file__`
 el oráculo, el predicado del tablero con node y la prueba de signos son los mismos. El analizador sellado se puede
 seguir corriendo tal cual: su salida es la regla sin N-3, que sólo informa.
 
-Uso: los mismos argumentos que `analizar_v750b.py` (`--art`, `--objetivos`, `--evaluador`, `--censo-art`,
-`--censo-objetivos`, `--sin-granulo`, ...). `--salida` por defecto va a esta carpeta, no a la del sellado.
-Salidas: 0, 3, 4 y 5 como el sellado; 2 si el analizador no es el sellado o un reemplazo no calza.
+La compuerta de la adenda 1 va primero (VA3-01 del verificador corto). La lectura sellada es
+`adenda1/leer_v750b.py` (adenda 2 §8): corre el compañero `cobertura_cajas_v750b.py` y, si la cobertura con las cajas
+no cierra, no deja pasar al analizador (salida 3; con `--leer-con-faltantes` marca y sigue). Este lector carga ese
+lector sellado tal cual (sha256 del tag, igual que su compañero) y le cambia una sola cosa: el analizador que llama es
+este archivo en su paso de analizador (`--n3-paso-analizador`), que corre el analizador sellado con la adenda 3. Así
+la compuerta, sus salidas y su marca son las selladas, sin copiarlas.
+
+Uso: los mismos argumentos que `adenda1/leer_v750b.py` (`--art`, `--objetivos`, `--evaluador`, `--sin-granulo`,
+`--censo-art`, `--censo-objetivos`, `--leer-con-faltantes`, ...). `--salida` por defecto va a esta carpeta, no a la del
+sellado.
+Salidas: las de `leer_v750b.py` (0, 3, 4, 5); 2 si el analizador o el lector de la adenda 1 no son los sellados, si un
+reemplazo no calza o si el compañero se cae.
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
+import importlib.util
 import sys
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 ANALIZADOR = AQUI.parent / "analizar_v750b.py"
+LECTOR_A1 = AQUI.parent / "adenda1" / "leer_v750b.py"
+COMPANERO_A1 = AQUI.parent / "adenda1" / "cobertura_cajas_v750b.py"
 SHA_ANALIZADOR_LF = "83b7159bd0666871b2e88a48c23feba4900ae28c24abd76b6cb3abf7b2593392"   # tag s162-v750b-sellado
+SHA_LECTOR_A1_LF = "11e0ee91fe77d6685e2fd3ac06ffbe18cb237fadae8d5d7e73759199689b52e2"    # tag s162-v750b-adenda2-sellada
+SHA_COMPANERO_A1_LF = "f250a926ae26435ba5101566b4f90abcf9a1e98d23de4f7a94ba95992fb1d70d"  # ídem
+PASO = "--n3-paso-analizador"
 SENSOR_N3 = "VIIRS_SNPP_750"
 HITO_N3 = "2026-10-09"
 
@@ -104,23 +120,41 @@ def fuente_con_n3(ruta):
     return src.replace(ancla, DEFINICION + ancla)
 
 
-def main(argv):
-    sys.stdout.reconfigure(encoding="utf-8")
-    ruta = ANALIZADOR
-    if "--analizador" in argv:          # sólo para las pruebas (un analizador ajeno tiene que ser rechazado)
-        k = argv.index("--analizador")
-        ruta = Path(argv[k + 1])
-        argv = argv[:k] + argv[k + 2:]
-    if "--salida" not in argv:
-        argv = argv + ["--salida", str(AQUI / "leer_n3_v750b_salida.txt")]
-    src = fuente_con_n3(ruta)
+def paso_analizador(argv):
+    """El analizador sellado con la adenda 3. Lo llama el lector de la adenda 1, después de su compuerta."""
+    ap = argparse.ArgumentParser(add_help=False)
+    ap.add_argument("--analizador", default=str(ANALIZADOR))   # sólo para las pruebas: uno ajeno se rechaza
+    a, argv = ap.parse_known_args(argv)
+    src = fuente_con_n3(a.analizador)
     if src.startswith("RECHAZO"):
         print(src, flush=True)
         return 2
-    ns = {"__name__": "analizar_v750b_con_n3", "__file__": str(ruta)}
-    exec(compile(src, str(ruta), "exec"), ns)
-    sys.argv = [str(ruta)] + argv
+    # las rutas del analizador (scripts, oráculo) son siempre las de la carpeta sellada (VA3-04)
+    ns = {"__name__": "analizar_v750b_con_n3", "__file__": str(ANALIZADOR)}
+    exec(compile(src, str(ANALIZADOR), "exec"), ns)
+    sys.argv = [str(ANALIZADOR)] + argv
     return ns["main"]()
+
+
+def main(argv):
+    sys.stdout.reconfigure(encoding="utf-8")
+    if PASO in argv:
+        return paso_analizador([x for x in argv if x != PASO])
+    for ruta, sha, que in ((LECTOR_A1, SHA_LECTOR_A1_LF, "el lector de la adenda 1"),
+                           (COMPANERO_A1, SHA_COMPANERO_A1_LF, "el compañero de cobertura de la adenda 1")):
+        if sha_lf(ruta) != sha:
+            print(f"RECHAZO: {que} no es el sellado (sha256 distinto del tag s162-v750b-adenda2-sellada)", flush=True)
+            return 2
+    # VA3-02: `--salida` se reconoce como lo haría argparse (también `--salida=ruta` y abreviaciones)
+    ap = argparse.ArgumentParser(add_help=False)
+    ap.add_argument("--salida", default=None)
+    if ap.parse_known_args(argv)[0].salida is None:
+        argv = argv + ["--salida", str(AQUI / "leer_n3_v750b_salida.txt")]
+    spec = importlib.util.spec_from_file_location("leer_v750b_sellado", LECTOR_A1)
+    a1 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(a1)
+    a1.ANALIZADOR = Path(__file__).resolve()     # su paso de analizador es este archivo con PASO
+    return a1.main(argv + [PASO])
 
 
 if __name__ == "__main__":
