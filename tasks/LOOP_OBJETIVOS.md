@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 15:23 UTC (S167, vuelta 22): adenda 3 de V750-B SELLADA y con tag
+- Anexo en **`3da2c42f8`** (comprobado: contra `fe4802a2a` sólo cambia `PREREGISTRO_V750B.md`, +118), tag anotado
+  **`s167-v750b-adenda3-sellada`** (objeto `2289d6697`, apunta a `3da2c42f8`, comprobado con `ls-remote`). El
+  2026-11-03, R4 lee con `adenda3/leer_n3_v750b.py` (el lector de la adenda 1 al lado, sólo informa) y cuenta las N-3
+  de la lista sellada al generar los objetivos.
+
 ### 2026-10-29 15:21 UTC (S167, vuelta 21): adenda 3 de V750-B SELLABLE; pedido el sello con tag
 - Loop VIIRS 750 2 arregló VA3-01 a 04 en `fe4802a2a`: `leer_n3_v750b.py` carga el lector sellado (sha256 LF
   `11e0ee91...`, compañero `f250a926...`) y sólo reemplaza el paso del analizador; escenas N9 a N11.
