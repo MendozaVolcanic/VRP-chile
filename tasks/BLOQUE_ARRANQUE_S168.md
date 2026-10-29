@@ -34,6 +34,15 @@
 > CI verde; un despacho `medir=true` sobre una ventana pasada (única prueba de MODIS y V750 en gránulos reales); una
 > frase de Nicolás que nombre el merge; después el schedule. Cada commit de la sombra dispara pages-deploy.
 >
+> **S167 reabierta por pedido de Nicolás (19:30 UTC, `date -u`).** La sesión S167 se separó del árbol de S165
+> (ahora es de primer nivel) y arrancó dos sesiones, que le reportan a ella: `s168-v375e-sello`
+> (`local_438070ff`: verificador sobre `e6675da85`, sello `s168-v375e-cuerpo-sellado` sólo sin gravedad 3, y recién
+> después la lectura lejana) y `s168-modd-sello` (`local_5b198297`: verificador de VF4, E53 y M82 sobre `314cec809` y
+> sello `s168-modd-f4-sellado`). El PR #925 tiene el CI `pytest` en verde, pero el despacho `medir=true` **no puede ir
+> antes del merge**: el workflow sólo tiene `workflow_dispatch` y GitHub sólo lo despacha desde la rama por defecto
+> (restricción S73). Para medir hay que mergear primero el workflow apagado (sin schedule), lo que pide la frase de
+> Nicolás. V750-A: el medidor sigue corriendo (`mutar_evaluar_v750a.py` desde las 13:46 UTC, sesión `local_94f4be0d`).
+>
 > Verifica todo antes de creerle a esta tabla. La bitácora viva es `tasks/LOOP_OBJETIVOS.md` §6, vueltas 1 a 23 de S167,
 > en la rama `loop/activo`. El estado de cada sensor y el camino a la adopción están en el §12 de
 > `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` (en `loop/activo`, no en `main`).
