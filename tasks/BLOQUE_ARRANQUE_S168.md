@@ -49,6 +49,11 @@
 > Despacho `medir=true` desde el tag `s167-sombra-medir`: Lascar, 2026-10-21 a 2026-10-28, run 40945613044. Encender
 > la sombra (agregar el schedule) sigue siendo otro sí de Nicolás, con el costo de ese run en la mano.
 >
+> **20:10 UTC: S168 arrancada y S167 cerrada.** A pedido de Nicolás, la coordinadora S168 (`local_9d0a6fc4`) quedó
+> como sesión de primer nivel. Las dos sesiones de sello (`local_438070ff` V375-E, `local_5b198297` MOD-D) también se
+> separaron del árbol de S167 y tienen instrucción de informarle a S168 con `SendMessage`, porque ya no hay nota
+> automática. S167 dejó de vigilar el run 40945613044: lo lee S168.
+>
 > Verifica todo antes de creerle a esta tabla. La bitácora viva es `tasks/LOOP_OBJETIVOS.md` §6, vueltas 1 a 23 de S167,
 > en la rama `loop/activo`. El estado de cada sensor y el camino a la adopción están en el §12 de
 > `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` (en `loop/activo`, no en `main`).
