@@ -1,5 +1,9 @@
 # Pre-registro V375-E (S162): el paquete del código de MIROVA en VIIRS 375 contra producción (K)
 
+> ⚠️ **Cuerpo y adenda 3 SELLADOS (S168, 2026-10-29)** sobre `e6675da85` más el commit del sello (tag
+> `s168-v375e-cuerpo-sellado`), con la condición que puso Nicolás (ningún hallazgo de gravedad 3 en el verificador limpio
+> de la adenda 3), cumplida: §9.12. Texto de la marca antes del sello:
+>
 > ⚠️ **Adenda 3 (S167, §9), SIN SELLAR**: cierra el cuerpo (§1 a §7) para el sello que aprobó Nicolás tras el
 > verificador corto del cuerpo, escrita antes de abrir el run de las lejanas o de leer el marco. **Donde una adenda
 > contradice al cuerpo o a una adenda anterior, rige la más reciente (§9.1).** El «BORRADOR, sin sellar» y las
@@ -38,6 +42,8 @@ sobre 50° de cenit **0,733 [0,608; 0,861]** (153). La meta del paquete no es ap
 **caer igual que MIROVA**: razón doble 1.
 
 ## 2. Brazos
+
+⚠️ En la retrospectiva P-def no se corre, P-sinfiltro informa y PLACEBO son los controles C8 y C9: §9.4 (VA168-05).
 
 | brazo | qué es |
 |---|---|
@@ -411,6 +417,9 @@ réplica (A115): vale para `mirova_equivalent`, no para `experimental`.
 
 ### 8.11 Pruebas y estado
 
+⚠️ Cifras del sello de la adenda 2; las vigentes (batería 165 de 165, nulo 113 de 114 con el repaso) están en §9.11
+(VA168-05).
+
 - **Batería** (`e_adenda2/probar_adenda2.py`, salida `probar_adenda2_salida.txt`): **140 de 140**, con escenas
   sintéticas (LEJANA, BORDE, UNO, PICOCERCA, ANILLO, cráter corrido de X0, Y0), el predicado del tablero con node, el
   almacén real y `evaluar.py` real. Cubre las tres distancias y sus desempates, la variante, cada control (C1 a C7, en
@@ -513,7 +522,10 @@ Texto anterior al sello, conservado: era una opción «a decidir por Nicolás, n
 
 ## 9. Adenda 3 (2026-10-29, S167): cierre del cuerpo antes del sello
 
-Estado: **SIN SELLAR**. Autor: sesión hija de VIIRS 375, a pedido de la coordinadora S167. Nicolás aprobó el 2026-10-29
+Estado: **SELLADA** el 2026-10-29 (S168) sobre `e6675da85` más el commit del sello, tag `s168-v375e-cuerpo-sellado`,
+junto con el cuerpo §1 a §7: Nicolás aprobó el sello con la condición de que el verificador limpio de esta adenda no
+trajera hallazgos de gravedad 3 (relayado por la coordinadora S167), y no trajo ninguno (§9.12). Estado antes del sello:
+SIN SELLAR. Autor: sesión hija de VIIRS 375, a pedido de la coordinadora S167. Nicolás aprobó el 2026-10-29
 («Sí a todo», programa §12.5 punto 3, relayado por la coordinadora) sellar el cuerpo (§1 a §7) después de un verificador
 corto que comprobara que no choca con la adenda 2. Ese verificador (Sonnet con contexto limpio,
 `experiments/_s167/v375e_cuerpo_verificador/INFORME.md` en `loop/activo`) dio **SELLABLE CON CAMBIOS MENORES**, con un
@@ -665,3 +677,25 @@ otras 111 no se volvieron a correr: el arreglo sólo agregó una prueba y cambi�
 nueva sólo podrían dejar de ser atrapadas por aserción si bajo alguna de ellas la prueba nueva lanzara y la batería
 cayera; eso no se midió (en la identidad no lanza). Con el repaso: 113 de 114 atrapadas por aserción, sobrevive L20
 (equivalente).
+
+### 9.12 Verificador limpio de la adenda 3 y el sello (S168)
+
+Sonnet 5.5 con contexto limpio sobre `e6675da85` (`experiments/_s168/v375e_adenda3_verificador/INFORME.md`; servidor
+2026-10-29 19:35 a 19:55 UTC), sin abrir el run de las lejanas ni el marco. Veredicto: **SELLABLE CON CAMBIOS MENORES,
+ningún hallazgo de gravedad 3**. VC167-01, 02, 03, 05, 06, 07 y 08 cerrados; VC167-04 y 09 en parte. Re-corrió la batería
+(165 de 165) y seis mutaciones con la batería nueva (L85, L94, L70, L77, L89 y L93: las seis ATRAPADA); no re-corrió el
+nulo completo, y confirmó que §9.11 lo dice. Juzgó L20 equivalente.
+
+**El código del lector no se tocó al sellar**: el sellado es el que midió el verificador. Los hallazgos se tratan así, por
+texto:
+
+| hallazgo | gravedad | tratamiento al sellar |
+|---|---|---|
+| VA168-01 si cae C3 (las listas), el lector sale 3 pero imprime igual todo el marco | 2 | lo que rige: con C3 caído la salida es 3, LECTURA NO LEGIBLE, y quien lee la salida no mira nada más allá de los controles; si se lee el marco por ese camino, la lectura queda contaminada y se dice. El arreglo en el código (pasar las fallas de C3 a `analizar`) va al lector de la sombra |
+| VA168-02 sesgo de plataforma, ganancia pareja y ganancia que crece con el cenit (§4) no están en el lector | 2 | en la retrospectiva no se calculan (la curva informa y da SIN SUSTRATO, §9.6), y el «van con la curva» de §9.4 vale sólo para la sombra. Su consecuencia en (d) se fija en el pre-registro del lector de la sombra, que pasa por Nicolás antes de leer (§9.8) |
+| VA168-03 `estado_d_sombra` exige además que la curva de K no sea SIN SUSTRATO ni NULO SESGADO | 1 | rige el código: esa condición es parte del CUMPLE de (d) en la sombra |
+| VA168-04 marca A104 junto con EMPEORA en (c) | 1 | rige el código: manda la marca A104 (DECIDE NICOLÁS); «otro estado de (c)» es CUMPLE contra NO CUMPLE, no el veredicto crudo |
+| VA168-05 marcas que faltaban (§2, §8.11) | 1 | agregadas al sellar; la mención de §8.4 en §9.1 es la aclaración de «cercano», no una marca de superado |
+| VA168-06 V375-C midió la ROI sólo en detección y una mediana de magnitud | 1 | dicho: se renuncia a atribuir a la ROI la M de §9.5 y la curva |
+| VA168-07 C8 pasa con 0 de 0; «por construcción» usa el cenit de la lista | 1 | en la lectura se informa cuántas pasadas con K entraron a C8; si son 0, C8 no prueba nada y se dice |
+| VA168-08 redondeo de 0,01 km del cercano en la sombra | 1 | va al pre-registro del lector de la sombra |
