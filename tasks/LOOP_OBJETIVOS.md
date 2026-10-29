@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 21:36 UTC (S168, vuelta 7): MOD-D baja a un proceso; cupos repartidos
+- MOD-D detuvo `mutar_evaluar_f4.py` y `head_e.py` (8 hilos); deja terminar `probar_probe_f4.py`. Mutaciones
+  reformadas (86 más 4 controles, por VS-01 a VS-06): ~6 min por copia, ~9 h en serie (según su informe).
+- Reparto decidido por la coordinadora: cupo 1, medidor de V750-A (no se toca); cupo 2, MOD-D (candado primero, después
+  mutaciones con `--paralelo 1`), que se abre cuando termine la lectura lejana de V375-E.
+
 ### 2026-10-29 21:35 UTC (S168, vuelta 6): tope de procesos pesados excedido por MOD-D; archivo de paginación encontrado
 - MOD-D (candado del §11) corría a la vez `head_e.py --hilos 8`, `mutar_evaluar_f4.py`, `poblacion_f4.py` y
   `probar_probe_f4.py`, además del medidor de V750-A (2 hilos) y la lectura de V375-E (PID nuevo 15924). Pedido a
