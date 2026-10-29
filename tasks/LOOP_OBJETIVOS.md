@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 00:10 UTC aprox. (S167, vuelta 10): corrida lejana de V375-E completa; disco C: a 37 MB y de vuelta
+- **Corrida lejana de V375-E** (40773794395): success, 14 de 14; en el log, los 14 trozos dicen «25 pasadas» y
+  «pasadas sin procesar: 0 de 25»: **350 de 350** (A108). Artefactos (14, 44 MB) en
+  `D:\vrp-trabajo\temporales\s167_v375e_far\run_40773794395\`; las otras tres rutas que pide el §8.9 existen.
+  **No se lee todavía**: `leer_posicion_v375e.py` corre de una vez los controles, la equivalencia, la regla de posición
+  y el §5, y el §5 vive en el cuerpo del pre-registro, que sigue sin sello (§12.5-3 del programa). Leer antes de
+  sellar sería sellar después de ver.
+- **Disco C: a 37 MB a las 23:47 UTC**, de vuelta a 17 GB a las 23:50. Coincide con la muerte del primer verificador del
+  diurno («stalled», mientras corría las mutaciones; SOSPECHA: temporales en C:). Se pidió pausa a MOD-D y a Loop
+  VIIRS 750 2 y se levantó a los minutos. Sin borrar nada.
+- **Diurno**: el primer verificador alcanzó a re-correr los dos scripts desde sus árboles (salida idéntica a la del
+  lector salvo la hora de CMR, comprobado con `diff` por S167) y la batería (109 passed). Lanzado un segundo verificador
+  (Sonnet) para mutaciones (con `TMP` en D:), letra del §6 y reflejo solar.
+
 ### 2026-10-28 22:00 UTC aprox. (S167, vuelta 9): lectura del diurno W2 a W6 hecha; en verificador
 - Lector (subagente Opus, árboles `autocrlf=false` en `D:\vrp-trabajo\temporales\s167_diurno_lectura\`), según su
   informe y SIN VERIFICAR todavía: **VIIRS 375 ADOPTAR (caso b)**: P2 EMPATE (neto 0, 10 discordantes en 9 bloques,
