@@ -575,7 +575,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   posición ELEGIDO CERCANO (único que pasa el veto); §5.2 M MEJORA en los tres brazos; §5.3 SIN SUSTRATO (esperado,
   §9.6); §5.4 retrospectiva: cercano CUMPLE (falta la sombra), radiante y pico NO CUMPLE; PAQUETE CUMPLE (falta la
   sombra), brazo cercano.
-- Un segundo `leer_posicion_v375e.py` corre desde las 20:59 UTC con salida a `D:rp-trabajo	emporales\s168_ver_lectura\`:
+- Un segundo `leer_posicion_v375e.py` corre desde las 20:59 UTC con salida a `D:/vrp-trabajo/temporales/s168_ver_lectura/`:
   por la ruta, el verificador de la sesión V375-E. No se duplica; se espera su informe.
 
 ### 2026-10-29 21:36 UTC (S168, vuelta 7): MOD-D baja a un proceso; cupos repartidos
