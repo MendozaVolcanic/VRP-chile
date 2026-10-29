@@ -9,6 +9,14 @@
 >   de equipo despierto (identidad PASA, M1 a M3 atrapadas).
 > - Perfil de sombra (`local_b4c997d6`, arrancada 15:42 UTC): mide el costo en el NRT y deja un PR con tag, sin encender.
 >
+> **Aterrizó después del cierre (17:15 UTC, `date -u`):** V375-E empujó la **adenda 3** (§9 de `PREREGISTRO_E.md`) en
+> `e6675da85` (rama `claude/adoring-wright-dc0404`, verificado con `ls-remote`), SIN SELLAR. Según su informe (no
+> verificado por la coordinadora): responde VC167-01 a 09 en §9.1 a §9.11; el lector corre la M con
+> `evaluador_comun.decidir_estrato` sobre la unión con A104 por tramo; la curva de cenit sale SIN SUSTRATO por
+> construcción; batería 165 de 165; mutaciones 113 de 114 atrapadas (L20 equivalente), con las 111 primeras no
+> re-corridas con la batería nueva (§9.11 lo dice). Run FAR sin abrir. **Próximo paso de S168:** verificador corto
+> sobre `e6675da85`, y sellar sólo si no trae gravedad 3.
+>
 > Verifica todo antes de creerle a esta tabla. La bitácora viva es `tasks/LOOP_OBJETIVOS.md` §6, vueltas 1 a 23 de S167,
 > en la rama `loop/activo`. El estado de cada sensor y el camino a la adopción están en el §12 de
 > `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` (en `loop/activo`, no en `main`).
