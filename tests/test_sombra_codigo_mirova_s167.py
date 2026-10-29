@@ -125,7 +125,8 @@ def test_ventana_respeta_la_fecha_minima():
 def test_ventana_por_linea_de_comandos_como_la_llama_el_workflow():
     def correr(*args):
         r = subprocess.run([sys.executable, str(ROOT / "scripts" / "ventana_sombra.py"), *args], cwd=ROOT,
-                           capture_output=True, text=True, encoding="utf-8")
+                           capture_output=True, text=True, encoding="utf-8",
+                           env=dict(os.environ, PYTHONIOENCODING="utf-8"))
         return r.returncode, r.stdout.strip()
     assert correr("--hoy", "2026-10-29") == (0, "")
     assert correr("--hoy", "2026-11-10") == (0, "2026-11-03 2026-11-10")
@@ -157,8 +158,10 @@ def test_el_workflow_corta_por_token_vacio_e_instala_pyproj():
     assert "set -o pipefail" in run
     instalar = next(s for s in d["jobs"]["process"]["steps"] if "pip install earthaccess" in s.get("run", ""))
     assert "pyproj" in instalar["run"].split()                  # remuestrear_grilla lo importa; el NRT no lo trae
-    # A15: el paso estimado tarda hasta 45 min en el peor job (experiments/_s167_sombra/COSTO.md)
-    assert paso["timeout-minutes"] >= 1.3 * 45 and d["jobs"]["process"]["timeout-minutes"] > paso["timeout-minutes"]
+    # A15 sobre el peor job OBSERVADO del NRT (56 min, comentario de nrt.yml), no sobre la estimación de COSTO.md §3,
+    # porque el costo de la vía en el runner no está medido
+    assert "56 min" in NRT.read_text(encoding="utf-8")
+    assert paso["timeout-minutes"] >= 1.3 * 56 and d["jobs"]["process"]["timeout-minutes"] > paso["timeout-minutes"]
 
 
 def test_el_workflow_commitea_solo_la_carpeta_de_la_sombra_y_con_grupo_propio():
@@ -174,6 +177,33 @@ def test_el_workflow_commitea_solo_la_carpeta_de_la_sombra_y_con_grupo_propio():
              for p in (ROOT / ".github" / "workflows").glob("*.yml") if p != WF}
     assert grupo not in otros and grupo != "push-main" and d["concurrency"]["cancel-in-progress"] is False
     assert "for attempt in 1 2 3 4 5" in commit["run"]
+
+
+def test_revisar_sombra_falla_si_la_corrida_queda_verde_sin_la_via():
+    """run_pipeline sale 0 aunque cada gránulo dé error (sin pyproj, por ejemplo): la revisión tiene que ponerlo rojo."""
+    from revisar_sombra import revisar
+    via = {"datetime_utc": "2026-11-05T06:30:00Z", "via_codigo_mirova": True}
+    k = {"datetime_utc": "2026-11-05T07:10:00Z", "via_codigo_mirova": "sin_mxd03"}
+    viejo = {"datetime_utc": "2026-11-01T06:30:00Z", "via_codigo_mirova": "sin_grilla"}   # fuera de la ventana
+    assert revisar([via, viejo], "  VIIRS_NOAA20 (375m) | ...", "2026-11-03", "2026-11-05")[0] is True
+    assert revisar([], "", "2026-11-03", "2026-11-05")[0] is False                      # vacía: zombie
+    assert revisar([via], "  ERROR processing VJ102IMG...: No module named 'pyproj'", "2026-11-03",
+                   "2026-11-05")[0] is False
+    ok, resumen = revisar([via, k], "", "2026-11-03", "2026-11-05")
+    assert ok is False and "sin_mxd03" in resumen                                        # cayó a K: se ve
+
+
+def test_la_revision_corre_despues_del_commit_aunque_algo_falle():
+    txt, d = _wf()
+    pasos = d["jobs"]["process"]["steps"]
+    nombres = [s["name"] for s in pasos]
+    i_commit = next(i for i, s in enumerate(pasos) if "git push" in s.get("run", ""))
+    i_rev = next(i for i, s in enumerate(pasos) if "scripts/revisar_sombra.py" in s.get("run", ""))
+    assert i_rev > i_commit, nombres
+    assert pasos[i_rev]["if"].startswith("always()") and "steps.correr.outputs.corrio == 'true'" in pasos[i_rev]["if"]
+    assert "data/sombra_codigo_mirova/${{ matrix.volcano }}.json" in pasos[i_rev]["run"]
+    correr = next(s for s in pasos if s.get("id") == "correr")["run"]
+    assert 'echo "corrio=true"' in correr and correr.index('echo "corrio=true"') < correr.index("run_pipeline.py")
 
 
 def test_produccion_no_nombra_la_sombra():
@@ -267,7 +297,8 @@ def test_de_punta_a_punta_la_sombra_escribe_solo_en_su_carpeta_y_produccion_qued
     pico = r["hotspot_dist_km"]
     cercano = min(p["dist_km"] for p in r["anomaly_pixels"])
     assert len(r["anomaly_pixels"]) == esperado["npix"]
-    assert all(isinstance(x, float) for x in (radiante, pico, cercano)) and cercano <= min(radiante, pico) + 0.01
+    # el pico es un píxel alertado, así que el cercano no puede quedar más lejos (el centroide sí puede quedar más cerca)
+    assert all(isinstance(x, float) for x in (radiante, pico, cercano)) and cercano <= pico + 0.01
     assert r["distance_class"] in ("summit", "far")
 
 
