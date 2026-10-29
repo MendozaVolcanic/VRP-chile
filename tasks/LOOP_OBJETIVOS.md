@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 15:42 UTC (S167, vuelta 23): #813 queda abierto; sesión del perfil de sombra arrancada
+- Nicolás, en este chat: «sigue con lo que recomiendes, hay sesiones corriendo para cada plan?». Con eso se aplica la
+  recomendación de la vuelta 17: **#813 (día en VIIRS) queda abierto, no se abre el día todavía**; se retoma cuando la
+  ROI por volcán esté decidida (V750-B el 2026-11-03 y C13 de VIIRS 375), porque 4 de las 6 falsas alarmas diurnas son
+  de PCC dentro de su `inner_radius_km` de 20. No se comentó en el issue (publicar en GitHub pide su sí aparte).
+- Procesos vivos, uno por plan: MOD-D fase 4 `mutar_evaluar_f4.py --paralelo 2` (desde 12:59 UTC), V750-A
+  `mutar_evaluar_v750a.py` en D: (desde 13:46 UTC), V375-E `mutar_adenda2.py` (desde 14:09 UTC, cambios sin commitear
+  en el cuerpo del pre-registro).
+- Arrancada la sesión del perfil de sombra (propuesta `task_9c74e995`, aprobada en el §12.5 punto 4): mide el costo en
+  el NRT y deja un PR con tag, sin encender.
+
 ### 2026-10-29 15:23 UTC (S167, vuelta 22): adenda 3 de V750-B SELLADA y con tag
 - Anexo en **`3da2c42f8`** (comprobado: contra `fe4802a2a` sólo cambia `PREREGISTRO_V750B.md`, +118), tag anotado
   **`s167-v750b-adenda3-sellada`** (objeto `2289d6697`, apunta a `3da2c42f8`, comprobado con `ls-remote`). El
