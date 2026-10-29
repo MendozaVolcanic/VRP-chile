@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 14:00 UTC aprox. (S167, vuelta 17): las 13 diurnas clasificadas; VIIRS 375 diurno pasa a DECIDE CON M4
+- Subagente de sólo lectura (`experiments/_s167/diurnas_13/`, informe, scripts y salidas): la lista de 13 se reproduce
+  exacta. **Calor volcánico probable 6** (Villarrica 08-18, 08-19, 08-23: lago de lava en el mismo punto que de noche;
+  Chillán 10-01 17:42 y 18:18 en V375 y 18:18 en V750, día de erupción con alerta diurna de MIROVA esa tarde).
+  **Artefacto probable 6, todas VIIRS 375**: PCC 06-13, 08-17, 08-24 y 10-01 a 12,7 a 18,2 km del cráter en puntos casi
+  sin historia nocturna (dentro del `inner_radius_km` de 20 de PCC), Lastarria 10-12 (5,8 veces la magnitud nocturna,
+  suelo a 300 K) y Tupungatito 08-30 (señal sólo diurna; reserva: MIROVA alertó 0,69 MW esa tarde a distancia
+  compatible, sin acimut). **Sin dato 1** (Chaitén 07-20). Ninguna es reflejo especular (33,8° a 89,8°).
+- Con sólo las 6 de artefacto como negativos, VIIRS 375 queda en neto +6 y pasa del caso b al **caso e, que con e-ii es
+  DECIDE NICOLÁS CON M4** (basta una, porque el neto estaba en 0). VIIRS 750 no cambia. Informativo: la regla sellada
+  no se toca. Sin verificador limpio propio (las clasificaciones de Villarrica y Chillán se apoyan en coherencia con lo
+  nocturno y con MIROVA, sin SWIR).
+
 ### 2026-10-29 13:30 UTC aprox. (S167, vuelta 16): cuerpo de V375-E no se sella todavía
 - Verificador corto (Sonnet, limpio) del cuerpo de `PREREGISTRO_E.md` contra su adenda 2: SELLABLE CON CAMBIOS MENORES,
   pero con **VC167-04 (gravedad 3)**: el lector no implementa §4, §5.2 (d, d′), §5.3 ni los brazos P-def, P-sinfiltro y
