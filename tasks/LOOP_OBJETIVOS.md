@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 21:06 UTC (S168, vuelta 3): sombra verificada; decisión de encender a Nicolás
+- Verificador limpio (Sonnet) sobre la lectura del run 40945613044: CONFIRMADO CON RESERVAS
+  (`experiments/_s168/sombra_run_40945613044/VERIFICADOR.md`, `c971f1eb5`). Gravedad 3 corregida en el informe: el
+  modo diario corre 8 días (`scripts/ventana_sombra.py:46`), así que el costo de un job diario es el medido, ~15 min
+  (Láscar); 11 jobs con `max-parallel: 4`, ~45 min de reloj (estimado). Gravedad 2: 4 gránulos de VIIRS 375 sin
+  record y sin aviso (3 fuera del volcán según CMR); ceros sin motivo; VIIRS 750 sin poder (0 contra 0). MODIS coincide
+  por pasada con MIROVA (07:55 del 26-oct, según el verificador).
+
 ### 2026-10-29 20:59 UTC (S168, vuelta 2): VS-02 aceptado; MOD-D arma el candado del §11
 - Nicolás: «Sí, acéptala» (M70 atrapada por la aserción explícita de E53, §13 ter). Reenviado a `local_5b198297` con
   límites: cierra VS-01, VS-03, VS-04, VS-05 y VS-08 sin tocar la regla del evaluador; sin merge ni despacho (el humo
