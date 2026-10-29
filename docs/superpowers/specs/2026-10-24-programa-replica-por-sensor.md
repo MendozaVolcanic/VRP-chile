@@ -423,6 +423,13 @@ con la regla de cada pre-registro; la implementación en `procesar_grilla` lleva
 
 ### 12.5 Decisiones abiertas para Nicolás (con recomendación)
 
+**DECIDIDAS el 2026-10-29 (~13:00 UTC)**: Nicolás, en el chat de la coordinadora S167, ante la pregunta «¿Apruebas las
+siete recomendaciones y revisar primero las 13 diurnas?»: «Sí a todo». Quedan aprobadas las siete tal como están
+escritas abajo, con sus condiciones (los sellos de MOD-D fase 4 y del cuerpo de V375-E, después de su verificador
+corto; el perfil de sombra se prepara en un PR con tag y se enciende con otro sí; la adenda 3 de V750-B antes del
+despacho), y para el A/B diurno (#813) se clasifican primero, sólo lectura, las 13 publicaciones diurnas que caen en
+pasadas que MIROVA no lista.
+
 1. **Sello de MOD-D fase 4**: sellar cuando sus mutaciones salgan atrapadas por aserción y un verificador corto
    revise los arreglos VF4. *Recomendación: sí, en esas condiciones.*
 2. **Sello de V750-A**: espera el medidor completo de mutaciones, el verificador de `equivalencia_v750a.py` y el

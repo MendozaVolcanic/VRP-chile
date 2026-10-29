@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 13:05 UTC aprox. (S167, vuelta 15): «Sí a todo»: las siete del §12.5 y las 13 diurnas primero
+- Nicolás, en este chat, ante «¿Apruebas las siete recomendaciones y revisar primero las 13 diurnas?»: «Sí a todo».
+  Anotado en el §12.5 del programa. En marcha: adenda 3 de V750-B con N-3 (Loop VIIRS 750 2, antes del 2026-11-03, con
+  verificador); verificador corto del cuerpo de V375-E contra su adenda 2 (después, sello y lectura de la corrida
+  lejana); clasificación de sólo lectura de las 13 publicaciones diurnas fuera del conteo (#813); el perfil de sombra se
+  propone como sesión propia (PR con tag, A45; encenderlo pide otro sí). El sello de MOD-D fase 4 se aplica cuando
+  llegue su corrida limpia y pase el verificador corto.
+
 ### 2026-10-29 12:55 UTC (S167, vuelta 14): parada levantada; el archivo de paginación era la causa
 - Tras un reinicio del equipo (~12:42 UTC), `pagefile.sys` bajó de 40,5 a 25 GB y `hiberfil.sys` quedó en 12,7 GB; C:
   pasó de 2,3 a **25 GB**. Confirma la sospecha de la vuelta 12: el archivo de paginación administrado por Windows crecía
