@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-29 21:00 UTC (S168, vuelta 1): sombra leída; MOD-D f4 SELLADO
+### 2026-10-29 20:56 UTC (S168, vuelta 1): sombra leída; MOD-D f4 SELLADO
 - Run 40945613044 (sombra, `medir=true`, Láscar 21 a 28-oct) leído en `experiments/_s168/sombra_run_40945613044/`
   (`0ba50fe2b`): 77 de 77 records de la vía, 0 errores; MODIS 17 gránulos (1 con píxeles, 26-oct 0,184 MW; MIROVA 1
   alerta MODIS ese día, 0,29 MW), VIIRS 750 32 gránulos sin píxeles (MIROVA 0), VIIRS 375 28 gránulos con el log
