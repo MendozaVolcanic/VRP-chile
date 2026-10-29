@@ -17,6 +17,14 @@
 > re-corridas con la batería nueva (§9.11 lo dice). Run FAR sin abrir. **Próximo paso de S168:** verificador corto
 > sobre `e6675da85`, y sellar sólo si no trae gravedad 3.
 >
+> **También después del cierre (17:27 UTC, `date -u`):** MOD-D fase 4 empujó la corrida final limpia en `314cec809`
+> (rama `claude/s166-modd-f4`, verificado con `ls-remote`); pre-registro aún BORRADOR. Según su informe (no verificado
+> por la coordinadora): árbol quieto (sha256 iguales antes y después), batería 63 de 63, 63 de 63 fallan contra el
+> evaluador vacío por aserción; mutaciones 82 de 82 atrapadas por aserción (0 vivas, 0 caen, 0 rotas); controles
+> identidad VIVA, caída CAE (58 escenarios), rota ROTA; medidor con código 0. E53 atrapa sólo ValueError y
+> ZeroDivisionError; M82 nueva (`fallas.append` por `pass`) atrapada por E58; §13 lo explica. **Próximo paso de S168:**
+> verificador corto de los arreglos VF4, E53 y M82 sobre `314cec809`, y aplicar el sello ya aprobado si pasa.
+>
 > Verifica todo antes de creerle a esta tabla. La bitácora viva es `tasks/LOOP_OBJETIVOS.md` §6, vueltas 1 a 23 de S167,
 > en la rama `loop/activo`. El estado de cada sensor y el camino a la adopción están en el §12 de
 > `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` (en `loop/activo`, no en `main`).
