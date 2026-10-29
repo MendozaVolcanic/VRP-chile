@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 05:35 UTC (S167, vuelta 12): PARADA por disco; causa probable, el archivo de paginación
+- C: bajó de 15,8 GB (04:57 UTC) a 2,8 GB (05:26) y a **1,99 GB** (05:30). Detenidos el medidor de V750-A (se detuvo
+  solo, 4,7 MB escritos) y las mutaciones de MOD-D fase 4 (`--paralelo 6`, PID 39988 y 6 hijos, desde las 05:04 UTC).
+  Tras detenerlas no queda ningún Python de VRP vivo (sólo `run_ciclo.py`, PID 33160, del proyecto Autoscan, ajeno).
+- En la raíz de C: hay `pagefile.sys` de **40,5 GB** (última escritura 05:06 UTC) y `hiberfil.sys` de **12,7 GB** (04:56
+  UTC, la suspensión). `Win32_PageFileUsage`: asignado 28.717 MB, pico 7.689 MB; RAM libre 3,9 de 31,6 GB. **SOSPECHA
+  fuerte**: el archivo de paginación administrado por el sistema crece con la presión de memoria de muchos procesos
+  paralelos (6 mutaciones de MOD-D más el medidor de V750-A más los navegadores) y se come el disco; también explicaría
+  el mínimo de 37 MB de las 23:47 y la recuperación en minutos. Los temporales `.tmp` con nombre GUID de `Temp` suman
+  ~0,6 GB: no alcanzan.
+- Cambiar el tamaño del archivo de paginación es configuración del sistema: lo decide y lo hace Nicolás. Mientras
+  tanto, nada pesado local; al relanzar, `--paralelo` 1 o 2 y temporales en D:.
+
 ### 2026-10-29 00:30 UTC aprox. (S167, vuelta 11): plazos de reloj y suspensión; MOD-D relanzada
 - Loop VIIRS 750 2: detuvo el medidor de V750-A a las 23:47 UTC (C: en 260 MB). Lo suyo ocupa 69 MB; no explica la
   caída. **Hallazgo**: M3 a M6 (y la M82 de ayer) cayeron por **tiempo agotado**, no por la mutación: los plazos eran de
