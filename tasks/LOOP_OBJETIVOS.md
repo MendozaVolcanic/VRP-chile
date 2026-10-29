@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 20:52 UTC (S168, apertura): coordinadora S168 de primer nivel; loop arrancado
+- /retomar hecho a las 20:08 UTC. `loop/activo` en `9bb429122`, igual al remoto (el commit de cierre de S167 ya estaba
+  subido al momento del push). Disco: C: 23 GB, D: 5,8 GB.
+- Verificado con `ls-remote`: tag `s168-v375e-cuerpo-sellado` (objeto `9dec64c14`, commit `444d5d888`); **sin**
+  `s168-modd-f4-sellado` (rama `claude/s166-modd-f4` en `314cec809`). Lectura lejana de V375-E corriendo en local
+  (`leer_posicion_v375e.py` sobre run 40773794395); medidor de V750-A vivo (2 hilos): dos procesos pesados, no se lanza
+  nada más local.
+- #925 mergeado (`9533f00de`); run 40945613044 de la sombra (`medir=true`, Lascar 2026-10-21 a 28) **terminó en
+  success** a las 20:18 UTC; se lee en la vuelta 1.
+- #915 y #813 abiertos. Envejeció en el bloque S168: cuerpo de V375-E ya sellado; ids de sesión de la sección f
+  reemplazados por `local_438070ff` (V375-E) y `local_5b198297` (MOD-D); `C:\pagefile.sys` no existe (sin verificar
+  dónde está el archivo de paginación).
+
 ### 2026-10-29 15:45 UTC (S167, cierre): traspaso en `tasks/BLOQUE_ARRANQUE_S168.md`
 - Cierre con trabajo en curso: mutaciones de MOD-D fase 4 (2 procesos) y de V375-E, medidor de V750-A en D:, sesión del
   perfil de sombra recién arrancada. `main` en `cc66fa57f` (sólo datos del NRT desde `ba61c330f`).
