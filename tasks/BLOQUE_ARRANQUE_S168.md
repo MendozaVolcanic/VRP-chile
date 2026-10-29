@@ -25,6 +25,15 @@
 > ZeroDivisionError; M82 nueva (`fallas.append` por `pass`) atrapada por E58; §13 lo explica. **Próximo paso de S168:**
 > verificador corto de los arreglos VF4, E53 y M82 sobre `314cec809`, y aplicar el sello ya aprobado si pasa.
 >
+> **También después del cierre (17:41 UTC, `date -u`):** el perfil de sombra quedó en el **PR en borrador #925**
+> (rama `claude/s167-perfil-sombra`, `56dd2d3c5`, tag `pre-s167-perfil-sombra`; verificado con `gh pr view` y
+> `ls-remote`; CI `pytest` todavía pendiente). APAGADO: sin merge ni schedule. Workflow aparte
+> `sombra-codigo-mirova.yml` (sólo `workflow_dispatch`, sólo `EARTHDATA_TOKEN`, instala pyproj, que el NRT no trae),
+> perfil `sombra_codigo_mirova.yaml`, ventana nunca antes del 2026-11-03. Costo y verificador en
+> `experiments/_s167_sombra/` de esa rama (no verificados por la coordinadora). **Para encender hacen falta, en orden:**
+> CI verde; un despacho `medir=true` sobre una ventana pasada (única prueba de MODIS y V750 en gránulos reales); una
+> frase de Nicolás que nombre el merge; después el schedule. Cada commit de la sombra dispara pages-deploy.
+>
 > Verifica todo antes de creerle a esta tabla. La bitácora viva es `tasks/LOOP_OBJETIVOS.md` §6, vueltas 1 a 23 de S167,
 > en la rama `loop/activo`. El estado de cada sensor y el camino a la adopción están en el §12 de
 > `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` (en `loop/activo`, no en `main`).
