@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 12:55 UTC (S167, vuelta 14): parada levantada; el archivo de paginación era la causa
+- Tras un reinicio del equipo (~12:42 UTC), `pagefile.sys` bajó de 40,5 a 25 GB y `hiberfil.sys` quedó en 12,7 GB; C:
+  pasó de 2,3 a **25 GB**. Confirma la sospecha de la vuelta 12: el archivo de paginación administrado por Windows crecía
+  con la presión de memoria de muchos procesos paralelos. Avisadas MOD-D fase 4 y Loop VIIRS 750 2: relanzar con 2
+  procesos como máximo y temporales en D:.
+- Lección general (para el cierre): **en este equipo, el paralelismo local se paga en disco C:, no sólo en CPU**: con
+  31,6 GB de RAM, 6 procesos de mutación más un medidor y navegadores hicieron crecer el archivo de paginación unos 13 GB
+  en media hora.
+
 ### 2026-10-29 06:15 UTC aprox. (S167, vuelta 13): diurno W2 a W6 CONFIRMADO CON RESERVAS; va a Nicolás
 - Verificador limpio (Sonnet, segundo intento): **CONFIRMADO CON RESERVAS**. Sellos 29 de 29 y 7 de 7 en árbol propio;
   batería 109 passed; re-corrida desde cero de los dos scripts (CMR 05:01 UTC del 29-oct, 0 días excluidos) idéntica a
