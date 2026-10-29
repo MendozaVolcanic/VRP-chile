@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 14:45 UTC aprox. (S167, vuelta 19): adenda 3 de V750-B, un arreglo antes del sello
+- Verificador corto (Sonnet, limpio): SELLABLE CON CAMBIOS MENORES, con **VA3-01 (gravedad 3) como condición**: el
+  lector nuevo `leer_n3_v750b.py` llama al analizador sin correr antes la compuerta de cobertura con las cajas
+  (`cobertura_cajas_v750b.py`, VAD-01) que sí corre el lector sellado; en N1 sin la caja B5 de Láscar el nuevo dice
+  SUFICIENTE y elige B4, el sellado dice INSUFICIENTE y sale 3. Gravedad 1: VA3-02 a 04. Comprobado: sólo se agrega
+  `adenda3/`, sha256 LF del analizador idéntico en los tres tags, batería, rojo y nulo reproducidos, predicado igual a
+  V375-E §8.13. Informe en `experiments/_s167/v750b_adenda3_verificador/INFORME.md`. Pedido el arreglo a Loop VIIRS 750 2.
+
 ### 2026-10-29 14:20 UTC aprox. (S167, vuelta 18): adenda 3 de V750-B entregada; verificador lanzado
 - Loop VIIRS 750 2: adenda 3 (N-3) en `5b924379d` (punta `d4a735ad2`), carpeta `experiments/_s162_v750b/adenda3/`.
   Según el autor: el lector aplica cinco reemplazos exactos al analizador sellado (exige su sha256 LF) y lo corre;
