@@ -2,7 +2,7 @@
   "volcano": "Lastarria",
   "source": "registro_vrp_consolidado.csv (text-scraped from mirovaweb.it) + registro_vrp_ocr.csv (OCR de las imagenes)",
   "note": "S150: incluye alertas del OCR marcadas source='ocr' (valores leidos de la imagen de MIROVA; pueden traer la imagen de otra pasada, docs/S150_IMAGENES_SNPP.md). Para calibrar magnitud usar solo source='consolidado'.",
-  "generated_at": "2026-10-29T07:02:30Z",
+  "generated_at": "2026-10-29T14:15:54Z",
   "records": [
     {
       "datetime_utc": "2026-01-11 06:24",
@@ -2003,6 +2003,15 @@
       "distancia_km": 1.35,
       "clasificacion": "Muy Bajo",
       "source": "consolidado"
+    },
+    {
+      "datetime_utc": "2026-10-29 05:30",
+      "sensor": "VIIRS375",
+      "VRP_MW": 0.3,
+      "distancia_km": null,
+      "clasificacion": "SIN_GEOMETRIA",
+      "source": "ocr",
+      "sin_geometria": true
     }
   ],
   "nota_dia": "S151: 'dia': true marca una pasada con el Sol sobre el horizonte del volcan (pipeline.store._solar_elevation > 0). De dia el infrarrojo medio suma luz solar reflejada y parte de estas alertas son reflejo en nubes, no calor (A76; experiments/_s151_alertas_diurnas/README.md). La replica es solo nocturna. 'records' trae lo de siempre (la tabla a cualquier hora, ahora con la marca, y el OCR nocturno); 'records_dia_ocr' trae las alertas diurnas del OCR, solo para dibujar en el tablero como referencia. No usarlas en metricas de paridad.",
