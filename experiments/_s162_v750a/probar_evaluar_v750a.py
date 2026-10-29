@@ -840,7 +840,7 @@ def correr(nombre, e, analizador, evaluador, dest):
     # reintenta hasta 2 veces y el reintento queda escrito en la salida.
     reint = 0
     while True:
-        o = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800)
+        o = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=21600)  # S162 relevo: el plazo es de reloj y corre con el equipo suspendido (M5 y M6 cayeron así); 6 h
         txt = o.stdout + o.stderr
         nativa = o.returncode not in (0, 3, 5, 6) and "Traceback (most recent call last)" not in txt
         if not nativa or reint >= 2:

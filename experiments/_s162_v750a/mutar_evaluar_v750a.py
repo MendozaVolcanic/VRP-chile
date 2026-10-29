@@ -247,7 +247,7 @@ def correr(dest, evaluador, nombre, viejo=None, nuevo=None, escenarios=""):
     try:
         o = subprocess.run([sys.executable, str(PRUEBAS), "--dest", str(sal), "--analizador", str(copia),
                             "--evaluador", str(evaluador)] + (["--solo", escenarios] if escenarios else []), capture_output=True, text=True, encoding="utf-8",
-                           errors="replace", timeout=14400, cwd=str(AQUI))
+                           errors="replace", timeout=259200, cwd=str(AQUI))  # 3 días: el plazo es de reloj y corre suspendido
     except subprocess.TimeoutExpired:
         # S162 (relevo): con CPU compartida una mutación pasó las 2 h y la excepción tumbó TODO el medidor, sin un
         # solo resultado. Un tiempo agotado es SIN DATO de esa mutación (no cuenta como atrapada) y se sigue.
