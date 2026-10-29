@@ -6,10 +6,11 @@ name: Sombra codigo MIROVA (vias V750, V375 y MODIS, 11 Tier A)
 # compararlas con lo que publica produccion (K) y con MIROVA. Perfil: pipeline/profiles/sombra_codigo_mirova.yaml,
 # salida en data/sombra_codigo_mirova/ (A47), que el tablero no lee.
 #
-# NO CORRE SOLO: no tiene schedule. Encenderla es otro si de Nicolas (A45), y se hace agregando aqui
-#   schedule:
-#     - cron: "0 15 * * *"
-# Antes de encenderla, un despacho con medir=true sobre una ventana pasada mide el costo real en el runner.
+# ENCENDIDA en S168 (si de Nicolas del 2026-10-29 para preparar el PR; el merge es otra frase suya; tag
+# pre-s168-encender-sombra). Antes, el despacho medir=true run 40945613044 (Lascar, 2026-10-21 a 28) midio 907 s de
+# job y 801 s de paso para 8 dias, con 77 de 77 records de la via en MODIS, VIIRS 750 y VIIRS 375
+# (experiments/_s168/sombra_run_40945613044/, verificador CONFIRMADO CON RESERVAS). Una vez al dia a las 15:00 UTC;
+# hasta el 2026-11-03 cada job sale en segundos porque ventana_sombra.py no devuelve ventana.
 #
 # POR QUE APARTE DEL NRT (medido en S167, experiments/_s167_sombra/COSTO.md): el NRT corre cada hora y su paso tarda
 # 17,7 min de mediana (maximo 29,8 en 418 jobs); un paso mas en el mismo job le sumaria unos 15 min a cada corrida y
@@ -20,6 +21,8 @@ name: Sombra codigo MIROVA (vias V750, V375 y MODIS, 11 Tier A)
 # desplazar una corrida del NRT en espera. El push se protege con el bucle de reintentos pull --rebase (guard G4).
 # A71: autentica SOLO con EARTHDATA_TOKEN y falla al instante si viene vacio. A43: "on" entre comillas.
 "on":
+  schedule:
+    - cron: "0 15 * * *"
   workflow_dispatch:
     inputs:
       volcano:
