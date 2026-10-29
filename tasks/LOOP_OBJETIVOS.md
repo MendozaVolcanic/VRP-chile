@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 14:20 UTC aprox. (S167, vuelta 18): adenda 3 de V750-B entregada; verificador lanzado
+- Loop VIIRS 750 2: adenda 3 (N-3) en `5b924379d` (punta `d4a735ad2`), carpeta `experiments/_s162_v750b/adenda3/`.
+  Según el autor: el lector aplica cinco reemplazos exactos al analizador sellado (exige su sha256 LF) y lo corre;
+  batería 9 de 9, rojo 9 de 9, nulo 12 de 12 por aserción, identidad PASA, control CAÍDA, dos equivalentes declarados.
+  Un escenario sintético (N5) muestra que la N-3 puede cambiar la ROI elegida de B2 a B4. SIN VERIFICAR por S167:
+  verificador corto limpio (Sonnet) lanzado.
+- Aparte: tras el reinicio, la limpieza de C: borró `evaluar_d25.py` del scratchpad de Loop VIIRS 750 2 y el medidor de
+  V750-A cayó en todas las mutaciones; lo restauró desde el tag (sha verificado) y relanzó todo en D: (2 hilos).
+  Identidad, M1 y M2 de la primera corrida quedan en `D:\vrp-trabajo\temporales\v750a_medidor_todo1`. Lección: el
+  scratchpad en C:\...\Temp no es lugar para insumos de una corrida de días.
+
 ### 2026-10-29 14:00 UTC aprox. (S167, vuelta 17): las 13 diurnas clasificadas; VIIRS 375 diurno pasa a DECIDE CON M4
 - Subagente de sólo lectura (`experiments/_s167/diurnas_13/`, informe, scripts y salidas): la lista de 13 se reproduce
   exacta. **Calor volcánico probable 6** (Villarrica 08-18, 08-19, 08-23: lago de lava en el mismo punto que de noche;
