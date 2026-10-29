@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 23:43 UTC (S169, apertura): coordinadora S169; /retomar hecho, hijas avisadas
+- `loop/activo` en `a57d01ea8`, igual al remoto; `main` en `443da8649` (desde `c42ee0eb7` nada en `pipeline/`,
+  `frontend/`, `.github/`). Disco: C: 21 GB, D: 5,7 GB. Paginación 3.823 de 25.600 MB en uso.
+- Sombra: workflow `active`, cron `0 15 * * *` en `main` (l. 25); única corrida, el `workflow_dispatch` de las 20:03 UTC.
+- V375-E: rama sin cambios (`7a548be11`), sin `INFORME.md` del verificador; PID 15924 vivo (stdout escrito 23:42 UTC).
+- MOD-D: rama en `3db87f50d` (23:22 UTC): candado del §11 escrito, **sin tag**; faltan ensayo en seco, mutaciones
+  reformadas (~9 h), §13 y manifiesto (`experiments/_s168/modd_f4_candado/INFORME.md`). Espera el cupo de 15924.
+- Procesos pesados: 15924 (V375-E) y el medidor de V750-A (PID 1324, 2 hilos: 24444 en M21, 26088 en M22). Dos cupos.
+- `SendMessage` a `local_438070ff` (V375-E), `local_5b198297` (MOD-D) y `local_94f4be0d` (V750): reportan a S169.
+- #915 (auto-audit fuera de banda, 2026-10-26) y #813 abiertos; avisado a Nicolás. PAT de GitHub todavía en
+  `~/.claude/settings.json` (1 coincidencia): avisado.
+
 ### 2026-10-29 23:23 UTC (S168, cierre): traspaso en `tasks/BLOQUE_ARRANQUE_S169.md`
 - Cierre por dos hitos (sombra encendida con #926, MOD-D f4 sellado) con trabajo en curso: verificador de la lectura
   lejana de V375-E (PID 15924), candado del §11 de MOD-D, medidor de V750-A. Las sesiones entregan por sus ramas
