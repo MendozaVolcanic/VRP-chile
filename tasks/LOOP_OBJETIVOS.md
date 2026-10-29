@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 23:23 UTC (S168, cierre): traspaso en `tasks/BLOQUE_ARRANQUE_S169.md`
+- Cierre por dos hitos (sombra encendida con #926, MOD-D f4 sellado) con trabajo en curso: verificador de la lectura
+  lejana de V375-E (PID 15924), candado del §11 de MOD-D, medidor de V750-A. Las sesiones entregan por sus ramas
+  `claude/s168-*` con `INFORME.md`; S169 las lee con `ls-remote`.
+
 ### 2026-10-29 23:20 UTC (S168, vuelta 8): lectura lejana de V375-E terminada (salida cruda, sin verificar)
 - Rama `claude/s168-v375e-sello` en `7a548be11`: `experiments/_s168/v375e_lectura_lejana/`, lector sellado de
   19:57 a 20:56 UTC, `exit=0` (no aplica VA168-01). Salida cruda (sin verificar, lo dice el propio lector): veredicto de
