@@ -569,7 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-29 14:45 UTC aprox. (S167, vuelta 19): adenda 3 de V750-B, un arreglo antes del sello
+### 2026-10-29 14:15 UTC (S167, vuelta 20): horas de las vueltas 15 a 19 corregidas
+- Las vueltas 15 a 19 llevaban horas estimadas «aprox.» que se adelantaron hasta 35 min (la 19 decía 14:45 con el
+  servidor en 14:12). Se reemplazaron por la hora del commit de cada una (A86: la hora la da el servidor, no la memoria).
+
+### 2026-10-29 14:09 UTC (S167, vuelta 19): adenda 3 de V750-B, un arreglo antes del sello
 - Verificador corto (Sonnet, limpio): SELLABLE CON CAMBIOS MENORES, con **VA3-01 (gravedad 3) como condición**: el
   lector nuevo `leer_n3_v750b.py` llama al analizador sin correr antes la compuerta de cobertura con las cajas
   (`cobertura_cajas_v750b.py`, VAD-01) que sí corre el lector sellado; en N1 sin la caja B5 de Láscar el nuevo dice
@@ -577,7 +581,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   `adenda3/`, sha256 LF del analizador idéntico en los tres tags, batería, rojo y nulo reproducidos, predicado igual a
   V375-E §8.13. Informe en `experiments/_s167/v750b_adenda3_verificador/INFORME.md`. Pedido el arreglo a Loop VIIRS 750 2.
 
-### 2026-10-29 14:20 UTC aprox. (S167, vuelta 18): adenda 3 de V750-B entregada; verificador lanzado
+### 2026-10-29 13:56 UTC (S167, vuelta 18): adenda 3 de V750-B entregada; verificador lanzado
 - Loop VIIRS 750 2: adenda 3 (N-3) en `5b924379d` (punta `d4a735ad2`), carpeta `experiments/_s162_v750b/adenda3/`.
   Según el autor: el lector aplica cinco reemplazos exactos al analizador sellado (exige su sha256 LF) y lo corre;
   batería 9 de 9, rojo 9 de 9, nulo 12 de 12 por aserción, identidad PASA, control CAÍDA, dos equivalentes declarados.
@@ -588,7 +592,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   Identidad, M1 y M2 de la primera corrida quedan en `D:\vrp-trabajo\temporales\v750a_medidor_todo1`. Lección: el
   scratchpad en C:\...\Temp no es lugar para insumos de una corrida de días.
 
-### 2026-10-29 14:00 UTC aprox. (S167, vuelta 17): las 13 diurnas clasificadas; VIIRS 375 diurno pasa a DECIDE CON M4
+### 2026-10-29 13:52 UTC (S167, vuelta 17): las 13 diurnas clasificadas; VIIRS 375 diurno pasa a DECIDE CON M4
 - Subagente de sólo lectura (`experiments/_s167/diurnas_13/`, informe, scripts y salidas): la lista de 13 se reproduce
   exacta. **Calor volcánico probable 6** (Villarrica 08-18, 08-19, 08-23: lago de lava en el mismo punto que de noche;
   Chillán 10-01 17:42 y 18:18 en V375 y 18:18 en V750, día de erupción con alerta diurna de MIROVA esa tarde).
@@ -601,7 +605,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   no se toca. Sin verificador limpio propio (las clasificaciones de Villarrica y Chillán se apoyan en coherencia con lo
   nocturno y con MIROVA, sin SWIR).
 
-### 2026-10-29 13:30 UTC aprox. (S167, vuelta 16): cuerpo de V375-E no se sella todavía
+### 2026-10-29 13:50 UTC (S167, vuelta 16): cuerpo de V375-E no se sella todavía
 - Verificador corto (Sonnet, limpio) del cuerpo de `PREREGISTRO_E.md` contra su adenda 2: SELLABLE CON CAMBIOS MENORES,
   pero con **VC167-04 (gravedad 3)**: el lector no implementa §4, §5.2 (d, d′), §5.3 ni los brazos P-def, P-sinfiltro y
   PLACEBO, y el §5.2 no fija qué corte decide (c). Además VC167-01 a 05 (gravedad 2: lote y pesos, contradicción §8.5
@@ -611,7 +615,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 - Pedido a V375-E fase 4: cierre del cuerpo por texto antes de leer datos (sin abrir la corrida lejana), con pruebas y
   mutaciones; después otro verificador corto y el sello con tag. La lectura de VIIRS 375 espera eso.
 
-### 2026-10-29 13:05 UTC aprox. (S167, vuelta 15): «Sí a todo»: las siete del §12.5 y las 13 diurnas primero
+### 2026-10-29 13:40 UTC (S167, vuelta 15): «Sí a todo»: las siete del §12.5 y las 13 diurnas primero
 - Nicolás, en este chat, ante «¿Apruebas las siete recomendaciones y revisar primero las 13 diurnas?»: «Sí a todo».
   Anotado en el §12.5 del programa. En marcha: adenda 3 de V750-B con N-3 (Loop VIIRS 750 2, antes del 2026-11-03, con
   verificador); verificador corto del cuerpo de V375-E contra su adenda 2 (después, sello y lectura de la corrida
