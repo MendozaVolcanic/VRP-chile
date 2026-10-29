@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 20:59 UTC (S168, vuelta 2): VS-02 aceptado; MOD-D arma el candado del §11
+- Nicolás: «Sí, acéptala» (M70 atrapada por la aserción explícita de E53, §13 ter). Reenviado a `local_5b198297` con
+  límites: cierra VS-01, VS-03, VS-04, VS-05 y VS-08 sin tocar la regla del evaluador; sin merge ni despacho (el humo
+  pide el workflow en `main`, o sea otra frase de Nicolás).
+
 ### 2026-10-29 20:56 UTC (S168, vuelta 1): sombra leída; MOD-D f4 SELLADO
 - Run 40945613044 (sombra, `medir=true`, Láscar 21 a 28-oct) leído en `experiments/_s168/sombra_run_40945613044/`
   (`0ba50fe2b`): 77 de 77 records de la vía, 0 errores; MODIS 17 gránulos (1 con píxeles, 26-oct 0,184 MW; MIROVA 1
