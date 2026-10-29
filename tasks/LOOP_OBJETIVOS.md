@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 21:35 UTC (S168, vuelta 6): tope de procesos pesados excedido por MOD-D; archivo de paginación encontrado
+- MOD-D (candado del §11) corría a la vez `head_e.py --hilos 8`, `mutar_evaluar_f4.py`, `poblacion_f4.py` y
+  `probar_probe_f4.py`, además del medidor de V750-A (2 hilos) y la lectura de V375-E (PID nuevo 15924). Pedido a
+  `local_5b198297`: en serie, `--hilos 2` como máximo. RAM libre 8,9 de 31,6 GB; C: 23 GB, D: 5,7 GB.
+- Corrige la apertura: el archivo de paginación SÍ está en `C:\pagefile.sys` (25.600 MB asignados, 4.706 MB en uso,
+  `Win32_PageFileUsage`); `Get-Item` no lo veía.
+- Sin novedades en los refs: V375-E sigue en `444d5d888` (lectura corriendo), MOD-D en `3768e9431`.
+
 ### 2026-10-29 21:30 UTC (S168, vuelta 5): #926 mergeado; la sombra queda encendida (cron 15:00 UTC)
 - Frase de Nicolás: «Sí, mergea #926». CI `pytest` verde (5 min 29 s), `CLEAN`; `gh pr merge 926 --squash
   --match-head-commit f48fcbe7c`, squash `c42ee0eb7` en `main`; el cron está en `main` (l. 25). Primera corrida con
