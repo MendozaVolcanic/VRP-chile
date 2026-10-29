@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 00:30 UTC aprox. (S167, vuelta 11): plazos de reloj y suspensión; MOD-D relanzada
+- Loop VIIRS 750 2: detuvo el medidor de V750-A a las 23:47 UTC (C: en 260 MB). Lo suyo ocupa 69 MB; no explica la
+  caída. **Hallazgo**: M3 a M6 (y la M82 de ayer) cayeron por **tiempo agotado**, no por la mutación: los plazos eran de
+  reloj y corrieron con el equipo suspendido. Alargó los plazos (6 h por escenario, 3 días por corrida, sin tocar
+  aserciones; `5323d1f3e`) y relanzó M3 a M85 sobre los 77, prioridad baja, con parada automática bajo 3 GB. Identidad y
+  M1 a M2 quedan de la primera corrida (mismo código salvo plazos): el verificador del sello debe comprobarlo.
+- MOD-D fase 4: pausó a pedido (lo suyo, ~2,5 MB). Luz verde para relanzar batería, vacío y 82 mutaciones con E53 y M82
+  arreglados, §13 al día.
+- Procesos vivos que no son de las hijas: PID 4492 (mutaciones del primer verificador del diurno, huérfano desde las
+  22:13 UTC, se deja terminar sin usarlo como verificación) y PID 29156 `cmr_reintento.py` (desde las 23:47 UTC, la
+  hora del mínimo de C:; SOSPECHA de causa, sin comprobar).
+- Lección general (para el cierre): **un plazo de reloj en un medidor local se come las suspensiones del equipo** y
+  convierte en CAE lo que es tiempo dormido.
+
 ### 2026-10-29 00:10 UTC aprox. (S167, vuelta 10): corrida lejana de V375-E completa; disco C: a 37 MB y de vuelta
 - **Corrida lejana de V375-E** (40773794395): success, 14 de 14; en el log, los 14 trozos dicen «25 pasadas» y
   «pasadas sin procesar: 0 de 25»: **350 de 350** (A108). Artefactos (14, 44 MB) en
