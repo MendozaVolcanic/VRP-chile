@@ -33,7 +33,11 @@ CONTROLES (si uno cae: exit 3 y «LECTURA NO LEGIBLE»): C1 una sola alertada =>
 menos); C2 el predicado responde a distance_class en las dos direcciones; C3 listas (ids, clases, sin gránulo atado por
 sha256); C4 evaluar.py es el del pre-registro; C5 radiante y pico recalculados = el record de la vía; C6 el almacén no
 cambia la distance_class de ninguna variante; C7 control de vida del run FAR (las 20 re-medidas de S162 dan el mismo
-M14). Una pasada sin resultado o sin grilla es SIN DATO: se cuenta antes de cualquier número.
+M14); C8 el PLACEBO (K x 1,2) publica donde K re-corrido publica; C9 el placebo de M con comparador no da MEJORA (§9.4).
+Una pasada sin resultado o sin grilla es SIN DATO: se cuenta antes de cualquier número. COMPUERTA (§9.3): si la
+equivalencia da NO EQUIVALENTE, exit 4 y no se lee la regla de posición ni el §5.
+ADENDA 3 (§9, S167): con el brazo que elige la RP, el §5.2 (M con el evaluador común), el §5.3 (curva, informa en la
+retrospectiva) y la regla del §5.4 en código (`criterios_retro`, `regla_adopcion`), todo fijado antes de leer.
 
 Uso: python -I leer_posicion_v375e.py --art-far <artefactos del run FAR> [--art-s159 ..] [--art-s162 ..]
        [--art-s162b ..] [--salida ..] [--json ..]
@@ -384,6 +388,163 @@ def distancias_mirova(o):
     return out
 
 
+# ---------------------------------------------------------------- §9 (adenda 3, S167): magnitud, curva y §5.4 en código
+# POR QUÉ. El verificador del cuerpo (VC167-03 y VC167-04) mostró que el §5.2, el §5.3 y la regla del §5.4 no tenían
+# quién los calculara, y que el §5.4 no decía qué hacer con varias salidas posibles. Si eso se escribe después de ver
+# qué brazo salió, el pre-registro pierde su valor. Aquí queda todo fijado antes de abrir el run FAR o el marco.
+MODO_M = "decide"                      # §9.5: el corte que decide (c) es la unión del marco, en modo «decide»
+CUMPLE, NO_CUMPLE, NICOLAS, INFORMA = "CUMPLE", "NO CUMPLE", "DECIDE NICOLAS", "INFORMA"
+
+
+def pares_magnitud(filas, a):
+    """§9.5: pares de M (D-27) del brazo a contra K, como `evaluador_comun.pares_m`: alertas de MIROVA con VRP (pos_prot
+    y pos_bajo) que los dos publican con magnitud mayor que 0. La de K es la de K re-corrido (VK), la única que el
+    predicado del tablero muestra en el run. Sin peso de población: el evaluador común remuestrea por bloque
+    noche-volcán (D-27); las protegidas, que son censo, pesan más que en la población, y por eso se informa también
+    por clase. Devuelve (pares, cuántas salen porque publica uno solo)."""
+    pares, salen = [], 0
+    for x in filas:
+        if not x["c"].startswith("pos") or not x["mir"] > 0:
+            continue
+        pk, pa = bool(x["K"]), bool(x["X"][a])
+        if pk != pa:
+            salen += 1
+            continue
+        k, d = x.get("VK"), x["V"].get(a)
+        if not pk or k is None or not k > 0 or d is None or not d > 0:
+            continue
+        pares.append({"k": float(k), "d": float(d), "m": float(x["mir"]), "clave": f"{x['vol']}|{x['hora']}",
+                      "bloque": x["bloque"], "z": x["z"], "c": x["c"], "tabla": x["tabla"], "tramo": x["tramo"]})
+    return pares, salen
+
+
+def estado_c(veredicto_m):
+    """§9.7 (c): MEJORA (que en modo «decide» ya exige d′ MEJORA, D-28) y NEUTRO cumplen; EMPEORA, INDECIDIBLE y SIN
+    SUSTRATO no (el instrumento no certifica que no empeore)."""
+    return CUMPLE if veredicto_m in ("MEJORA", "NEUTRO") else NO_CUMPLE
+
+
+def magnitud(filas, a, EC):
+    """§9.5: M del brazo a contra K con el evaluador común. Decide la unión; informan los cortes por tramo de 10° de
+    cenit, volcán, canal (tabla o sólo OCR) y clase. A104: si O1 u O2 por separado, con sustrato, da otro estado de (c)
+    que la unión (en cualquier dirección), se marca y decide Nicolás."""
+    P, salen = pares_magnitud(filas, a)
+    r, det = EC.decidir_estrato(P, MODO_M)
+    cortes = {"cenit": lambda p: EC.tramo_cenit(p["z"]), "volcan": lambda p: p["clave"].split("|")[0],
+              "canal": lambda p: "tabla" if p["tabla"] else "solo_ocr", "clase": lambda p: p["c"]}
+    inf = {}
+    for nom, f in cortes.items():
+        g = collections.defaultdict(list)
+        for p in P:
+            g[f(p)].append(p)
+        inf[nom] = {k: EC.decidir_estrato(v, "informa")[0] for k, v in sorted(g.items())}
+    por_tramo = {tr: EC.decidir_estrato([p for p in P if p["tramo"] == tr], MODO_M)[0] for tr in ("T", "O1", "O2")}
+    a104 = [tr for tr in ("O1", "O2") if por_tramo[tr] != "SIN SUSTRATO" and estado_c(por_tramo[tr]) != estado_c(r)]
+    return {"veredicto": r, "n": len(P), "salen_publica_uno": salen, "detalle": det, "informa": inf,
+            "por_tramo": por_tramo, "a104": a104}
+
+
+def pares_k(filas):
+    """Los pares de K consigo mismo (para el placebo de M): alertas de MIROVA con VRP que K publica con magnitud > 0."""
+    return [{"k": float(x["VK"]), "d": float(x["VK"]), "m": float(x["mir"]), "clave": f"{x['vol']}|{x['hora']}",
+             "bloque": x["bloque"]}
+            for x in filas if x["c"].startswith("pos") and x["mir"] > 0 and x["K"] and (x.get("VK") or 0) > 0]
+
+
+def control_placebo_m(filas, EC):
+    """C9 (§2 y §9.4): el placebo K x 1,2 (y x 0,8) con el comparador no puede dar MEJORA (d′ es 0 por construcción).
+    Si la da, el instrumento está roto. Devuelve (ok, detalle)."""
+    pl = EC.placebo_ganancia(pares_k(filas), MODO_M)
+    return all(v["con_comparador"] != "MEJORA" for v in pl.values()), pl
+
+
+def placebo_k(rec, factor):
+    """El record de K re-corrido con el VRP x factor (PLACEBO del §2), en los tres campos que puede mostrar el tablero."""
+    r = copy.deepcopy(rec)
+    for k in ("vrp_mw", "f5_core_vrp_mw"):
+        if r.get(k) is not None:
+            r[k] = float(r[k]) * factor
+    if r.get("primary_cluster") and r["primary_cluster"].get("vrp_mw") is not None:
+        r["primary_cluster"]["vrp_mw"] = float(r["primary_cluster"]["vrp_mw"]) * factor
+    r["_placebo_k"] = True
+    return r
+
+
+def curva(filas, a, E, CC):
+    """§9.6: la curva de cenit (`curva_cenit.py`) del brazo a (o 'K') sobre las alertas del marco, condicionada y sin
+    condicionar. En la retrospectiva INFORMA: medido sobre la lista antes de leer, el marco tiene a lo más 5 noches para el
+    nulo de cenit parecido, bajo el mínimo de 8, así que da SIN SUSTRATO por construcción."""
+    pas = [{"vol": x["vol"], "hora": x["hora"], "z": x["z"], "mir": x["mir"], "plat": x.get("sensor"),
+            "pub": bool(E.publica(x, a)), "vrp": x.get("VK") if a == "K" else x["V"].get(a)}
+           for x in filas if x["c"].startswith("pos")]
+    out = {}
+    for nom, cond in (("condicionada", True), ("sin_condicionar", False)):
+        r = CC.resumen(CC.pares_por_noche(pas, "vrp", "pub", condicionar=cond),
+                       nulo=CC.pares_nulo(pas, "vrp", "pub", condicionar=cond))
+        out[nom] = {"veredicto": CC.veredicto(r), "noches": r["todas"]["n_noches"], "noches_nulo": r["nulo"]["n_noches"],
+                    "d": r["todas"]["d"]}
+    return out
+
+
+def estado_d_sombra(cur_p, cur_k):
+    """§9.7 (d), para la SOMBRA (en la retrospectiva informa): con la curva condicionada, REPRODUCE LA CURVA cumple;
+    también cumple si el extremo inferior del IC de D del paquete supera al extremo superior del IC de D de K (cada uno
+    con sus pares, como los arma curva_cenit) y el paquete no CAE MENOS QUE MIROVA; SIN SUSTRATO y NULO SESGADO pasan a
+    Nicolás; lo demás no cumple."""
+    v = cur_p["veredicto"]
+    if v in ("SIN SUSTRATO", "NULO SESGADO"):
+        return NICOLAS
+    if v == "REPRODUCE LA CURVA":
+        return CUMPLE
+    if v != "CAE MENOS QUE MIROVA" and cur_k["veredicto"] not in ("SIN SUSTRATO", "NULO SESGADO") \
+            and cur_p["d"][1][0] > cur_k["d"][1][1]:
+        return CUMPLE
+    return NO_CUMPLE
+
+
+def criterios_retro(v1, p2l, m):
+    """§9.7: los criterios (a), (b) y (c) del §5.4 en la retrospectiva para un brazo; (d) informa (sólo decide en la
+    sombra). v1 = vara1[a], p2l = P2-L del brazo contra K, m = magnitud(...)."""
+    c = {"a": CUMPLE if not v1["P1_veto_n3"] else NO_CUMPLE,
+         "b": CUMPLE if (v1["P2_K"]["veredicto"] in ("GANA", "EMPATE", "SIN SUSTRATO")
+                         and v1["lecturas"]["silencio"]["veredicto"] != "ENCIENDE DE MAS"
+                         and p2l["veredicto"] not in ("PIERDE", "BLOQUEA")) else NO_CUMPLE,
+         "c": NICOLAS if m["a104"] else estado_c(m["veredicto"]),
+         "d": INFORMA}
+    v = list(c.values())
+    c["retrospectiva"] = NO_CUMPLE if NO_CUMPLE in v else NICOLAS if NICOLAS in v else "CUMPLE (falta la sombra)"
+    return c
+
+
+def regla_adopcion(ver_rp, det_rp, crit):
+    """§9.7: del veredicto de la RP y de los criterios por brazo, el estado del paquete en la retrospectiva. ELEGIDO o
+    SE QUEDA RADIANTE sin marca A104: el del brazo. NINGUN BRAZO PASA EL VETO: NO CUMPLE. NO RESUELTO (ciclo incluido),
+    NO DECIDE o marca A104: DECIDE NICOLAS entre los candidatos, salvo que ninguno cumpla (entonces NO CUMPLE).
+    Devuelve (estado, candidatos)."""
+    r = resultado_rp(ver_rp)
+    if r == "NINGUN":
+        return NO_CUMPLE, []
+    if r == "NO DECIDE":
+        cand = list(BRAZOS_POS)
+    elif r == "NO RESUELTO":
+        cand = list(det_rp.get("no_vencidos") or BRAZOS_POS)
+    else:
+        cand = [r.lower()]
+        if "A104" not in ver_rp:
+            return crit[cand[0]]["retrospectiva"], cand
+    if all(crit[a]["retrospectiva"] == NO_CUMPLE for a in cand):
+        return NO_CUMPLE, cand
+    return NICOLAS, cand
+
+
+def codigo_salida(fallas, out):
+    """3 si cayó un control (LECTURA NO LEGIBLE); 4 si la equivalencia no pasa (el paquete no es el código, §9.3); 0 si
+    la lectura llegó al final."""
+    if fallas:
+        return 3
+    return 4 if out.get("corte") == "NO EQUIVALENTE" else 0
+
+
 # ---------------------------------------------------------------- análisis (sin red ni grillas: lo prueba la batería)
 def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
     """pasadas: {id: {'rec': record de la vía tras el almacén (o None), 'dist': distancias(...) o None, 'npix': n,
@@ -408,6 +569,8 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
         if p.get("k_rec") is not None:
             casos.append((p["k_rec"], p["inner"]))
             idx.append((i, "Krun", ""))
+            casos.append((placebo_k(p["k_rec"], E.FACTOR_PLACEBO), p["inner"]))     # PLACEBO del §2 (C8)
+            idx.append((i, "Kplac", ""))
     base = {"vrp_mw": 0.4, "distance_class": "summit", "t_max_k": 290, "sensor": "VIIRS_NOAA20",
             "triggered_test1": False, "via_codigo_mirova": True,
             "primary_cluster": {"vrp_mw": 0.4, "centroid_dist_km": 1.0, "n_pixels": 2}}
@@ -418,6 +581,13 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
     pr(f"  C2 predicado (summit publica, far no, de vuelta a summit publica): {c2}")
     if c2 != [True, False, True]:
         fallas.append("C2")
+    # C8 (§2 y §9.4): el PLACEBO (K re-corrido con el VRP x 1,2) publica exactamente donde K re-corrido publica: 0
+    # discordantes en P1 y P2. Si no, el predicado depende de la magnitud de una forma que el pre-registro no supone.
+    dis_c8 = [i for (i, t, _) in P if t == "Kplac" and P[(i, "Kplac", "")][1] != P[(i, "Krun", "")][1]]
+    n_c8 = sum(1 for (_, t, _) in P if t == "Kplac")
+    pr(f"  C8 PLACEBO K x {E.FACTOR_PLACEBO} publica igual que K re-corrido: {n_c8 - len(dis_c8)} de {n_c8}", dis_c8[:10])
+    if dis_c8:
+        fallas.append("C8")
 
     # ---- C1, C5, C6 y equivalencia por brazo
     uno = [i for i, p in pasadas.items() if p["dist"] and p["dist"]["n_alertados"] == 1]
@@ -488,6 +658,8 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
         if obj[i].get("lote") in ("CTL", "CTLF"):
             continue
         arms[i] = {("VIA", a): (P[(i, "via", a)][1], P[(i, "via", a)][0], p["npix"]) for a in BRAZOS_POS}
+        # P-sinfiltro (§2 y §9.4): la vía publicando todo lo que detecta, sin el predicado de cumbre. Informa.
+        arms[i][("VIA", "sinfiltro")] = (p["npix"] > 0, float(p.get("vrp_via") or 0.0), p["npix"])
         if (i, "Krun", "") in P:
             pub_k[i], vk[i] = P[(i, "Krun", "")][1], P[(i, "Krun", "")][0]
         elif usa_rec:
@@ -526,14 +698,30 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
                                    for i in sorted(obj) if i not in arms and obj[i].get("lote") not in ("CTL", "CTLF")][:60])
     out["cobertura"] = {str(k): v for k, v in cob.items()}
 
+    import evaluador_comun as EC
+    ok_c9, pl = control_placebo_m(marco, EC)
+    out["placebo_m"] = pl
+    pr(f"  C9 placebo de M (K x 1,2 y x 0,8, con comparador; no puede dar MEJORA): "
+       + ", ".join(f"x{g} {v['con_comparador']} (sin comparador {v['sin_comparador']})" for g, v in pl.items()))
+    if not ok_c9:
+        fallas.append("C9")
     if fallas:
+        return out, fallas
+    # §9.3 (VC167-05): la equivalencia es compuerta. NO EQUIVALENTE en cualquier brazo corta aquí: el paquete no es el
+    # código (§3.1) y no se lee nada más. Corta todo y no sólo ese brazo, porque la máscara y el VRP son los mismos en
+    # los tres: una publicación distinta en uno viene de un VRP distinto, que toca a los tres.
+    if out["equivalencia"]["veredicto"] != "EQUIVALENTE":
+        out["corte"] = "NO EQUIVALENTE"
+        pr("")
+        pr("PAQUETE NO ES EL CODIGO (§3.1 y §9.3): la equivalencia no pasa; no se lee la regla de posición ni el §5")
         return out, fallas
 
     # ---- vara 1: marco, cada brazo contra K, con las lecturas de evaluar.py
     rng = np.random.default_rng(E.SEMILLA)
     N_neg = {c: sum(v["N"] for v in meta[c].values()) for c in E.CLASES_NEG}
     tasa_k_neg = N_neg["neg_pub"] / (N_neg["neg_pub"] + N_neg["neg_resto"])
-    pr("\n== vara 1: alertas y negativos limpios del marco (pesos de B §3), cada brazo contra K")
+    pr("\n== vara 1: alertas y negativos limpios del marco (unión S159 + S162 + S162b, pesos N_h / n_ok_h, §9.2), cada "
+       "brazo contra K (cercano = el alertado más cercano al CRÁTER, no al punto X0, Y0 de evaluar.py: VC167-08)")
     out["vara1"] = {}
     for a in BRAZOS_POS:
         lk = E.lecturas(marco, ("VIA", a), rng, N_neg, tasa_k_neg)
@@ -550,7 +738,12 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
         pr(f"  {a:9s} P1: perdidas {lk['P1']['perdidas']} de {lk['P1']['de']}, que K publica "
            f"{lk['P1']['perdidas_que_K_publica']} {lk['P1']['lista'][:6]} | recall prot {lk['recall_prot']['crudo']} "
            f"bajo {lk['recall_bajo']['crudo']} | silencio {lk['silencio']['veredicto']} | P2 contra K {p2k['veredicto']} "
-           f"(neto {p2k['neto']:+.1f}, B {p2k['B']}) | MISSION {lk['MISSION_K']['veredicto']} | M {lk['M'].get('mediana')}")
+           f"(neto {p2k['neto']:+.1f}, B {p2k['B']}) | MISSION (informa; cuenta también las de §8.13) "
+           f"{lk['MISSION_K']['veredicto']} | mediana VRP/MIROVA (informa) {lk['M'].get('mediana')}")
+    lsf = E.lecturas(marco, ("VIA", "sinfiltro"), rng, N_neg, tasa_k_neg)
+    out["vara1"]["sinfiltro"] = {"lecturas": lsf, "P2_K": E.p2(marco, ("VIA", "sinfiltro"), "K")}
+    pr(f"  P-sinfiltro (informa, §9.4): P1 perdidas {lsf['P1']['perdidas']} de {lsf['P1']['de']} | silencio "
+       f"{lsf['silencio']['veredicto']} | P2 contra K {out['vara1']['sinfiltro']['P2_K']['veredicto']}")
     pr("  cambian de publicación contra radiante, por nombre:")
     for a in ("cercano", "pico"):
         ca = [(x["vol"], x["hora"], x["c"], "publica" if x["X"][("VIA", a)] else "calla")
@@ -616,6 +809,31 @@ def analizar(pasadas, obj, meta, publicar, E, art_far_presente):
     ver_t, det_t = regla_posicion(marco + far_t, E, far_ok=far_ok, solo_tabla=True)
     out["regla_posicion_tabla_sola"] = {"veredicto": ver_t, "detalle": det_t}
     pr("  informa, veto sólo con protegidas de la tabla:", ver_t, {a: det_t["veto"][a] for a in BRAZOS_POS})
+
+    # ---- §5.2 magnitud (M) y §5.3 curva, por brazo (§9.5 y §9.6), y la regla del §5.4 en código (§9.7)
+    import curva_cenit as CC
+    pr("\n== §5.2 magnitud M contra K (evaluador común, D-27 con d′ de D-28; decide la unión del marco, modo decide)")
+    out["M"], out["curva"], out["criterios"] = {}, {"K": curva(marco, "K", E, CC)}, {}
+    for a in BRAZOS_POS:
+        m = magnitud(marco, ("VIA", a), EC)
+        out["M"][a] = m
+        d = m["detalle"]
+        pr(f"  {a:9s} M {m['veredicto']} (n {m['n']}, salen por publicar uno solo {m['salen_publica_uno']}; d mediana "
+           f"{d.get('d_mediana')}, IC {d.get('ic95')}; d′ {d.get('regla_dprima')} {d.get('ic95_dprima')}; ĝ "
+           f"{d.get('g_hat_factor')}) | por tramo {m['por_tramo']}" + (f" | A104 en {m['a104']}" if m["a104"] else ""))
+        pr(f"            informa por corte: {m['informa']}")
+    pr("\n== §5.3 curva de cenit (informa en la retrospectiva: el marco no da 8 noches de nulo, §9.6)")
+    pr(f"  K         {out['curva']['K']}")
+    for a in BRAZOS_POS:
+        out["curva"][a] = curva(marco, ("VIA", a), E, CC)
+        pr(f"  {a:9s} {out['curva'][a]}")
+    pr("\n== §5.4 en la retrospectiva (§9.7; (d) decide sólo en la sombra)")
+    for a in BRAZOS_POS:
+        out["criterios"][a] = criterios_retro(out["vara1"][a], out["vara2"][a]["P2L_K"], out["M"][a])
+        pr(f"  {a:9s} {out['criterios'][a]}")
+    est, cand = regla_adopcion(ver, det, out["criterios"])
+    out["paquete"] = {"estado_retrospectiva": est, "candidatos": cand}
+    pr(f"  PAQUETE (vía con el brazo de la RP): {est}; brazo(s) {cand}")
     return out, fallas
 
 
@@ -717,7 +935,7 @@ def main(argv=None):
         pr("LECTURA NO LEGIBLE:", fallas)
     if a.salida:
         Path(a.salida).write_text("\n".join(L) + "\n", encoding="utf-8")
-    return 3 if fallas else 0
+    return codigo_salida(fallas, out)
 
 
 if __name__ == "__main__":

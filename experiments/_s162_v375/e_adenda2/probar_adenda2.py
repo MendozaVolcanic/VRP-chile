@@ -164,8 +164,9 @@ def envolver(x):
     return x
 
 
-def correr(lista, art_far=True, N=None, sin_dato=()):
-    """N: {(clase, estrato): N} para pesos distintos de 1; sin_dato: objetivos sin pasada procesada (SIN DATO)."""
+def correr(lista, art_far=True, N=None, sin_dato=(), pub=None):
+    """N: {(clase, estrato): N} para pesos distintos de 1; sin_dato: objetivos sin pasada procesada (SIN DATO); pub: otro
+    predicado (para hacer caer un control a propósito)."""
     obj = {o["id"]: o for o, _ in lista}
     pas = {o["id"]: p for o, p in lista}
     meta = meta_de(obj)
@@ -174,7 +175,7 @@ def correr(lista, art_far=True, N=None, sin_dato=()):
     for o in sin_dato:
         obj[o["id"]] = o
     LP.L.clear()
-    out, f = LP.analizar(pas, obj, meta, publicar, E, art_far)
+    out, f = LP.analizar(pas, obj, meta, pub or publicar, E, art_far)
     return envolver(out), f
 
 
@@ -195,6 +196,197 @@ def base_marco(n_neg=3):
     lst.append(pasada(29000, [(40, 40, 1.0), (40, 41, 1.0)], "control_vida", lote="CTLF", m14=(1, 0.5),
                       ref_m14=[1, 0.5]))
     return lst
+
+
+def fila_m(vol, dia, k, d, m, tramo="O2", c="pos_bajo", tabla=True, z=20.0, pk=True, pa=True, hora="05:00"):
+    """Una fila de evaluar.armar mínima para la magnitud: K publica (pk) con VK = k, el brazo ('VIA', 'radiante')
+    publica (pa) con V = d, MIROVA m."""
+    a = ("VIA", "radiante")
+    return {"c": c, "mir": m, "K": pk, "VK": k, "X": {a: pa}, "V": {a: d}, "vol": vol, "hora": f"{dia} {hora}",
+            "bloque": f"{vol}|{dia}", "z": z, "tabla": tabla, "tramo": tramo, "sensor": "VIIRS_NOAA20"}
+
+
+def escenario_m(factor_k, factor_d, vols=("Lascar", "Isluga", "Villarrica"), dias=4, por_dia=3, tramo="O2", mes="08"):
+    """Pares de M: por volcán, `dias` noches y `por_dia` pasadas; MIROVA 1 MW (más un poco por pasada), K = m x
+    factor_k(j) y el brazo m x factor_d(j), con j el número de pasada."""
+    out, j = [], 0
+    for v in vols:
+        for n in range(dias):
+            for q in range(por_dia):
+                m = 1.0 + 0.1 * q
+                out.append(fila_m(v, f"2026-{mes}-{10 + n:02d}", m * factor_k(j), m * factor_d(j), m, tramo=tramo,
+                                  hora=f"0{q + 3}:00"))
+                j += 1
+    return out
+
+
+def adenda3():
+    """§9 (adenda 3, S167). Las lecturas reales del marco no se miran: escenas y filas fabricadas."""
+    import evaluador_comun as EC
+    import curva_cenit as CC
+    DISP = (0.3, 3.0, 0.5, 2.0, 0.4, 2.5)       # factores log-simétricos: mediana de log10 cerca de 0
+    # pares de magnitud
+    f = [fila_m("Lascar", "2026-08-01", 0.5, 0.9, 1.0), fila_m("Lascar", "2026-08-01", 0.5, 0.9, 1.0, pa=False),
+         fila_m("Lascar", "2026-08-02", None, 0.9, 1.0), fila_m("Lascar", "2026-08-03", 0.5, 0.9, 0.0),
+         fila_m("Lascar", "2026-08-04", 0.5, 0.0, 1.0), fila_m("Lascar", "2026-08-05", 0.5, 0.9, 1.0, c="neg_resto")]
+    P, salen = LP.pares_magnitud(f, ("VIA", "radiante"))
+    ok("§9.5 pares de M: sólo alertas con VRP que los dos publican con magnitud > 0; publica uno solo sale aparte",
+       len(P) == 1 and salen == 1 and P[0]["k"] == 0.5 and P[0]["d"] == 0.9 and P[0]["m"] == 1.0, (P, salen))
+    ok("§9.7 (c): MEJORA y NEUTRO cumplen; EMPEORA, INDECIDIBLE y SIN SUSTRATO no",
+       [LP.estado_c(x) for x in ("MEJORA", "NEUTRO", "EMPEORA", "INDECIDIBLE", "SIN SUSTRATO")]
+       == ["CUMPLE", "CUMPLE", "NO CUMPLE", "NO CUMPLE", "NO CUMPLE"])
+    # magnitud con el evaluador común real: el brazo da con MIROVA y K disperso, más un tramo O1 donde el brazo empeora
+    filas = escenario_m(lambda j: DISP[j % 6], lambda j: 1.0) + escenario_m(
+        lambda j: 1.0, lambda j: DISP[j % 6], vols=("Lascar", "Isluga"), dias=3, por_dia=2, tramo="O1", mes="07")
+    m = LP.magnitud(filas, ("VIA", "radiante"), EC)
+    ok("§9.5 M por tramo: O2 mejora, O1 empeora, T sin sustrato, y la marca A104 salta en O1",
+       m["por_tramo"] == {"T": "SIN SUSTRATO", "O1": "EMPEORA", "O2": "MEJORA"} and m["a104"] == ["O1"]
+       and m["n"] == 48, (m["por_tramo"], m["a104"], m["n"]))
+    ok("§9.5 M en la unión: d mejora pero d′ no (el comparador la baja a NEUTRO, D-28)", m["veredicto"] == "NEUTRO"
+       and m["detalle"].get("regla") == "MEJORA" and "sube en promedio" in m["detalle"].get("nota", ""), m["detalle"].get("nota"))
+    ok("§9.5 M informa por cenit, volcán, canal y clase", set(m["informa"]) == {"cenit", "volcan", "canal", "clase"}
+       and set(m["informa"]["volcan"]) == {"Lascar", "Isluga", "Villarrica"} and list(m["informa"]["cenit"]) == ["z20-30"],
+       m["informa"])
+    g = LP.magnitud(escenario_m(lambda j: 0.5, lambda j: 1.0), ("VIA", "radiante"), EC)
+    ok("§9.5 M: una ganancia pareja (el brazo = K x 2) no es MEJORA en modo decide (el comparador d′ la ve), y sin O1 no "
+       "hay A104", g["veredicto"] == "NEUTRO" and g["detalle"].get("regla") == "MEJORA" and g["a104"] == []
+       and g["por_tramo"]["O1"] == "SIN SUSTRATO", (g["veredicto"], g["a104"]))
+    # placebos
+    okp, pl = LP.control_placebo_m(filas, EC)
+    ok("C9: el placebo K x 1,2 y x 0,8 con comparador no da MEJORA sobre pares reales del evaluador común",
+       okp and set(pl) == {"1.2", "0.8"} and all(v["con_comparador"] != "MEJORA" for v in pl.values()), pl)
+
+    class ECfalso:
+        @staticmethod
+        def placebo_ganancia(P, modo):
+            return {"1.2": {"con_comparador": "MEJORA", "sin_comparador": "MEJORA"},
+                    "0.8": {"con_comparador": "NEUTRO", "sin_comparador": "EMPEORA"}}
+    ok("C9: un placebo que da MEJORA hace caer el control", LP.control_placebo_m(filas, ECfalso)[0] is False)
+    ok("C9: el placebo de M lleva los pares de K consigo mismo", len(LP.pares_k(filas)) == 48
+       and all(p["k"] == p["d"] for p in LP.pares_k(filas)))
+    rk = {"vrp_mw": 0.4, "f5_core_vrp_mw": 0.3, "primary_cluster": {"vrp_mw": 0.4}}
+    pk = LP.placebo_k(rk, 1.2)
+    ok("PLACEBO: x 1,2 en los tres campos del VRP, sin tocar el original",
+       abs(pk["vrp_mw"] - 0.48) < 1e-12 and abs(pk["f5_core_vrp_mw"] - 0.36) < 1e-12
+       and abs(pk["primary_cluster"]["vrp_mw"] - 0.48) < 1e-12 and rk["vrp_mw"] == 0.4 and pk["_placebo_k"], pk)
+    # C8 en el lector
+    lst = base_marco() + [pasada(2, celdas_uno(), "pos_bajo", vol="Lascar", hora="2026-07-09 05:00")]
+    lst[-1][1]["k_rec"] = copy.deepcopy(lst[-1][1]["rec"])
+    out, fa = correr(lst)
+    ok("C8: el placebo publica donde K re-corrido publica (1 de 1)", "C8" not in fa
+       and any("C8 PLACEBO" in x and ": 1 de 1" in x for x in LP.L), (fa, [x for x in LP.L if "C8" in x]))
+
+    def pub_que_voltea(casos):
+        r = publicar(casos)
+        return [(d, (not p) if rec.get("_placebo_k") else p) for (d, p), (rec, _) in zip(r, casos)]
+    out, fa = correr(lst, pub=pub_que_voltea)
+    ok("C8: si el placebo publica distinto, cae", "C8" in fa, fa)
+    viejo = LP.control_placebo_m
+    LP.control_placebo_m = lambda filas, EC: (False, {"1.2": {"con_comparador": "MEJORA", "sin_comparador": "MEJORA"}})
+    try:
+        out, fa = correr(lst)
+    finally:
+        LP.control_placebo_m = viejo
+    ok("C9 en el lector: un placebo de M con MEJORA hace caer la lectura", "C9" in fa and "regla_posicion" not in out, fa)
+    # compuerta de equivalencia (§9.3)
+    out, fa = correr(base_marco() + [pasada(2, celdas_lejana(), "pos_bajo", vrp_port=0.0)])
+    ok("§9.3 compuerta: NO EQUIVALENTE corta antes de la regla de posición y del §5",
+       out.get("corte") == "NO EQUIVALENTE" and "regla_posicion" not in out and "M" not in out and "vara1" not in out
+       and not fa, (out.get("corte"), fa))
+    ok("§9.3: el código de salida es 4 si no es equivalente, 3 si cayó un control y 0 si llegó al final",
+       (LP.codigo_salida([], {"corte": "NO EQUIVALENTE"}), LP.codigo_salida(["C1"], {"corte": "NO EQUIVALENTE"}),
+        LP.codigo_salida([], {})) == (4, 3, 0))
+    out, fa = correr(base_marco() + [pasada(2, celdas_lejana(), "pos_bajo")])
+    ok("§9.3: equivalente => sigue hasta el §5.4", "corte" not in out and out["paquete"]["estado_retrospectiva"]
+       in ("CUMPLE (falta la sombra)", "NO CUMPLE", "DECIDE NICOLAS") and set(out["criterios"]) == set(LP.BRAZOS_POS)
+       and set(out["curva"]) == {"K", *LP.BRAZOS_POS} and set(out["M"]) == set(LP.BRAZOS_POS), out.get("paquete"))
+    ok("P-sinfiltro: publica la LEJANA que radiante calla (informa)",
+       out["vara1"]["sinfiltro"]["lecturas"]["recall_bajo"]["crudo"] == [2, 2]
+       and out["vara1"]["radiante"]["lecturas"]["recall_bajo"]["crudo"] == [1, 2],
+       (out["vara1"]["sinfiltro"]["lecturas"]["recall_bajo"], out["vara1"]["radiante"]["lecturas"]["recall_bajo"]))
+    log = "\n".join(LP.L)
+    ok("VC167-07 y VC167-08: MISSION se rotula informativa y cercano se dice «al CRÁTER»",
+       "MISSION (informa; cuenta también las de §8.13)" in log and "más cercano al CRÁTER" in log)
+    ok("§9.6 curva: sin pares, SIN SUSTRATO en la condicionada y en la sin condicionar",
+       out["curva"]["K"]["condicionada"]["veredicto"] == "SIN SUSTRATO"
+       and out["curva"]["radiante"]["sin_condicionar"]["veredicto"] == "SIN SUSTRATO", out["curva"]["K"])
+    # curva con pares: K usa VK y el brazo V
+    cf = []
+    for n in range(10):
+        for z, d in ((20.0, 1.0), (60.0, 0.5)):
+            x = fila_m("Lascar", f"2026-08-{10 + n:02d}", d, d, 1.0, z=z, hora=f"0{int(z // 20)}:00")
+            cf.append(x)
+    cu = LP.curva(cf, ("VIA", "radiante"), E, CC)
+    ck = LP.curva(cf, "K", E, CC)
+    ok("§9.6 curva: 10 noches con 40° de cenit y caída a la mitad (MIROVA plana) => d 0,5 en el brazo y en K",
+       cu["condicionada"]["noches"] == 10 and abs(cu["condicionada"]["d"][0] - 0.5) < 1e-9
+       and abs(ck["condicionada"]["d"][0] - 0.5) < 1e-9 and cu["condicionada"]["noches_nulo"] == 0
+       and cu["condicionada"]["veredicto"] == "SIN SUSTRATO", cu)
+    for x in cf:
+        x["V"][("VIA", "radiante")] = 1.0
+    ok("§9.6 curva: el brazo lee V y K lee VK", abs(LP.curva(cf, ("VIA", "radiante"), E, CC)["condicionada"]["d"][0] - 1.0)
+       < 1e-9 and abs(LP.curva(cf, "K", E, CC)["condicionada"]["d"][0] - 0.5) < 1e-9)
+    for x in cf:
+        if x["z"] == 60.0:
+            x["X"][("VIA", "radiante")] = False
+    cn = LP.curva(cf, ("VIA", "radiante"), E, CC)
+    ok("§9.6 curva: si el brazo calla en el cenit alto, la condicionada pierde esas noches y K las conserva",
+       cn["condicionada"]["noches"] == 0 and LP.curva(cf, "K", E, CC)["condicionada"]["noches"] == 10, cn)
+    # §9.7 (d) para la sombra
+    D = lambda v, lo, hi: {"veredicto": v, "d": (1.0, (lo, hi), 10)}  # noqa: E731
+    ok("§9.7 (d): REPRODUCE cumple; SIN SUSTRATO y NULO SESGADO a Nicolás; sobre K cumple; CAE MENOS no; bajo K no",
+       [LP.estado_d_sombra(D("REPRODUCE LA CURVA", 0.9, 1.1), D("CAE MAS QUE MIROVA", 0.6, 0.8)),
+        LP.estado_d_sombra(D("SIN SUSTRATO", 0.9, 1.1), D("CAE MAS QUE MIROVA", 0.6, 0.8)),
+        LP.estado_d_sombra(D("NULO SESGADO", 0.9, 1.1), D("CAE MAS QUE MIROVA", 0.6, 0.8)),
+        LP.estado_d_sombra(D("CAE MAS QUE MIROVA", 0.85, 0.95), D("CAE MAS QUE MIROVA", 0.6, 0.8)),
+        LP.estado_d_sombra(D("CAE MENOS QUE MIROVA", 1.1, 1.3), D("CAE MAS QUE MIROVA", 0.6, 0.8)),
+        LP.estado_d_sombra(D("CAE MAS QUE MIROVA", 0.7, 0.9), D("CAE MAS QUE MIROVA", 0.6, 0.8)),
+        LP.estado_d_sombra(D("NO RESUELTO", 0.85, 1.4), D("SIN SUSTRATO", 0.6, 0.8))]
+       == ["CUMPLE", "DECIDE NICOLAS", "DECIDE NICOLAS", "CUMPLE", "NO CUMPLE", "NO CUMPLE", "NO CUMPLE"])
+    # §9.7 criterios en la retrospectiva
+    def v1(veto=(), p2="EMPATE", sil="NO RESUELTO"):
+        return {"P1_veto_n3": list(veto), "P2_K": {"veredicto": p2}, "lecturas": {"silencio": {"veredicto": sil}}}
+
+    def mm(v="NEUTRO", a104=()):
+        return {"veredicto": v, "a104": list(a104)}
+    L_ = {"veredicto": "EMPATE"}
+    casos = [("todo bien", v1(), L_, mm(), "CUMPLE (falta la sombra)"),
+             ("una protegida que veta", v1(veto=[("Lascar", "x")]), L_, mm(), "NO CUMPLE"),
+             ("P2 GANA", v1(p2="GANA"), L_, mm("MEJORA"), "CUMPLE (falta la sombra)"),
+             ("P2 SIN SUSTRATO", v1(p2="SIN SUSTRATO"), L_, mm(), "CUMPLE (falta la sombra)"),
+             ("P2 PIERDE", v1(p2="PIERDE"), L_, mm(), "NO CUMPLE"),
+             ("P2 BLOQUEA", v1(p2="BLOQUEA"), L_, mm(), "NO CUMPLE"),
+             ("silencio ENCIENDE DE MAS", v1(sil="ENCIENDE DE MAS"), L_, mm(), "NO CUMPLE"),
+             ("silencio acotado bajo K", v1(sil="SILENCIO ACOTADO BAJO K"), L_, mm(), "CUMPLE (falta la sombra)"),
+             ("P2-L PIERDE", v1(), {"veredicto": "PIERDE"}, mm(), "NO CUMPLE"),
+             ("P2-L BLOQUEA", v1(), {"veredicto": "BLOQUEA"}, mm(), "NO CUMPLE"),
+             ("P2-L SIN SUSTRATO", v1(), {"veredicto": "SIN SUSTRATO"}, mm(), "CUMPLE (falta la sombra)"),
+             ("M EMPEORA", v1(), L_, mm("EMPEORA"), "NO CUMPLE"),
+             ("M INDECIDIBLE", v1(), L_, mm("INDECIDIBLE"), "NO CUMPLE"),
+             ("M con A104", v1(), L_, mm("MEJORA", ["O1"]), "DECIDE NICOLAS"),
+             ("M EMPEORA con A104", v1(), L_, mm("EMPEORA", ["O2"]), "DECIDE NICOLAS"),
+             ("veto y A104 en M", v1(veto=[("x", "y")]), L_, mm("MEJORA", ["O1"]), "NO CUMPLE")]
+    malos = [(n, LP.criterios_retro(a, b, c)["retrospectiva"]) for n, a, b, c, e in casos
+             if LP.criterios_retro(a, b, c)["retrospectiva"] != e]
+    ok("§9.7 criterios (a), (b), (c) de la retrospectiva, (d) informa", not malos
+       and LP.criterios_retro(v1(), L_, mm())["d"] == "INFORMA", malos)
+    # §9.7 regla del paquete desde la RP
+    C = lambda r, c, p: {"radiante": {"retrospectiva": r}, "cercano": {"retrospectiva": c}, "pico": {"retrospectiva": p}}  # noqa: E731
+    B_, N_, X_ = "CUMPLE (falta la sombra)", "NO CUMPLE", "DECIDE NICOLAS"
+    casos = [("ELEGIDO CERCANO (gana a los demas)", {}, C(N_, B_, N_), (B_, ["cercano"])),
+             ("SE QUEDA RADIANTE (nadie la vence; la del codigo)", {}, C(N_, B_, B_), (N_, ["radiante"])),
+             ("NINGUN BRAZO PASA EL VETO", {}, C(B_, B_, B_), (N_, [])),
+             ("NO RESUELTO ENTRE CERCANO Y PICO (decide Nicolas)", {"no_vencidos": ["cercano", "pico"]}, C(B_, N_, B_),
+              (X_, ["cercano", "pico"])),
+             ("NO RESUELTO ENTRE CERCANO Y PICO (decide Nicolas)", {"no_vencidos": ["cercano", "pico"]}, C(B_, N_, N_),
+              (N_, ["cercano", "pico"])),
+             ("NO DECIDE: LAS LEJANAS SIN COBERTURA", {}, C(N_, N_, B_), (X_, ["radiante", "cercano", "pico"])),
+             ("ELEGIDO PICO (nadie lo vence) [A104: en O1 el resultado es otro (O1: SE QUEDA RADIANTE); decide Nicolas]",
+              {}, C(N_, N_, B_), (X_, ["pico"])),
+             ("ELEGIDO PICO (nadie lo vence) [A104: en O1 el resultado es otro (O1: X); decide Nicolas]", {},
+              C(B_, B_, N_), (N_, ["pico"]))]
+    malos = [(v, LP.regla_adopcion(v, d, c)) for v, d, c, e in casos if LP.regla_adopcion(v, d, c) != e]
+    ok("§9.7 regla del paquete: ELEGIDO, SE QUEDA RADIANTE, NINGUN, NO RESUELTO, NO DECIDE y A104", not malos, malos)
 
 
 def main(argv=None):
@@ -791,6 +983,9 @@ def main(argv=None):
             ok("generador C-G1: un byte distinto no pasa", GF.control_records(t, ["Lascar"]) != [])
     else:
         ok("generador C-G1 con CRLF: falta la copia de 533398f8f en D: (SIN DATO)", False)
+
+    # ---------------- adenda 3 (§9, S167): compuerta, placebos, magnitud, curva y la regla del §5.4 en código
+    adenda3()
 
     # ---------------- la lista real del run (forma, no contenido)
     run = json.loads((AQUI / "objetivos_run_far_v375.json").read_text(encoding="utf-8"))

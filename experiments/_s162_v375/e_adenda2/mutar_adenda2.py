@@ -3,7 +3,7 @@
 que la batería rechaza por aserción; una que hace caer la batería con una excepción es CAÍDA y no cuenta).
 
 Cada mutación cambia UN texto que aparece exactamente una vez en el archivo, en una copia propia de la carpeta
-(`experiments/_s162_v375/_mut_adenda2_<id>/`, borrada al terminar; cuatro a la vez), y corre `probar_adenda2.py --dir <copia>`.
+(`experiments/_s162_v375/_mut_adenda2_<id>/`, borrada al terminar; dos a la vez desde S167), y corre `probar_adenda2.py --dir <copia>`.
   ATRAPADA   la batería sale 1 con su línea RESULTADO (alguna aserción falló)
   SOBREVIVE  la batería sale 0 (la mutación no se ve)
   CAÍDA      la batería se cae (excepción, sin línea RESULTADO): no cuenta como atrapada
@@ -114,6 +114,45 @@ MUTACIONES = [
     ("L64", LP, 'and x.get("sensor") == SENSOR_SNPP and x["hora"][:10] < HITO_N3', 'and x["hora"][:10] < HITO_N3'),
     ("L65", LP, 'if x["c"] == "pos_prot" and x["K"] and not x["X"][("VIA", a)] and not no_veta_n3(x)]',
      'if x["c"] == "pos_prot" and x["K"] and not x["X"][("VIA", a)]]'),
+    # ---- lector: adenda 3 (§9, S167): compuerta, placebos, magnitud, curva y la regla del §5.4
+    ("L66", LP, '        if pk != pa:\n            salen += 1', '        if False:\n            salen += 1'),
+    ("L67", LP, 'if not pk or k is None or not k > 0 or d is None or not d > 0:', 'if not pk or k is None or not k > 0:'),
+    ("L68", LP, '        if not x["c"].startswith("pos") or not x["mir"] > 0:\n            continue\n        pk, pa',
+     '        if not x["c"].startswith("pos"):\n            continue\n        pk, pa'),
+    ("L69", LP, 'return CUMPLE if veredicto_m in ("MEJORA", "NEUTRO") else NO_CUMPLE',
+     'return CUMPLE if veredicto_m in ("MEJORA",) else NO_CUMPLE'),
+    ("L70", LP, 'MODO_M = "decide"', 'MODO_M = "informa"'),
+    ("L71", LP, 'if por_tramo[tr] != "SIN SUSTRATO" and estado_c(por_tramo[tr]) != estado_c(r)]',
+     'if estado_c(por_tramo[tr]) != estado_c(r)]'),
+    ("L72", LP, 'and estado_c(por_tramo[tr]) != estado_c(r)]', 'and False]'),
+    ("L73", LP, 'return all(v["con_comparador"] != "MEJORA" for v in pl.values()), pl',
+     'return True, pl'),
+    ("L74", LP, '            r[k] = float(r[k]) * factor', '            r[k] = float(r[k])'),
+    ("L75", LP, '    if dis_c8:\n', '    if False:\n'),
+    ("L76", LP, '    if not ok_c9:\n', '    if False:\n'),
+    ("L77", LP, '    if out["equivalencia"]["veredicto"] != "EQUIVALENTE":\n', '    if False:\n'),
+    ("L78", LP, 'return 4 if out.get("corte") == "NO EQUIVALENTE" else 0', 'return 0'),
+    ("L79", LP, '"a": CUMPLE if not v1["P1_veto_n3"] else NO_CUMPLE', '"a": CUMPLE'),
+    ("L80", LP, 'in ("GANA", "EMPATE", "SIN SUSTRATO")', 'in ("GANA", "EMPATE", "SIN SUSTRATO", "BLOQUEA")'),
+    ("L81", LP, 'and v1["lecturas"]["silencio"]["veredicto"] != "ENCIENDE DE MAS"', ''),
+    ("L82", LP, 'and p2l["veredicto"] not in ("PIERDE", "BLOQUEA")) else NO_CUMPLE',
+     'and p2l["veredicto"] not in ("PIERDE",)) else NO_CUMPLE'),
+    ("L83", LP, '"c": NICOLAS if m["a104"] else estado_c(m["veredicto"]),', '"c": estado_c(m["veredicto"]),'),
+    ("L84", LP, 'c["retrospectiva"] = NO_CUMPLE if NO_CUMPLE in v else NICOLAS if NICOLAS in v',
+     'c["retrospectiva"] = NICOLAS if NICOLAS in v else NO_CUMPLE if NO_CUMPLE in v'),
+    ("L85", LP, '    if r == "NINGUN":\n        return NO_CUMPLE, []', '    if r == "NINGUN":\n        return NICOLAS, []'),
+    ("L86", LP, '        if "A104" not in ver_rp:\n', '        if True:\n'),
+    ("L87", LP, '    if all(crit[a]["retrospectiva"] == NO_CUMPLE for a in cand):\n', '    if False:\n'),
+    ("L88", LP, 'cand = list(det_rp.get("no_vencidos") or BRAZOS_POS)', 'cand = list(BRAZOS_POS)'),
+    ("L89", LP, 'and cur_p["d"][1][0] > cur_k["d"][1][1]:', 'and cur_p["d"][1][0] > cur_k["d"][1][0]:'),
+    ("L90", LP, '    if v != "CAE MENOS QUE MIROVA" and cur_k', '    if cur_k'),
+    ("L91", LP, '    if v in ("SIN SUSTRATO", "NULO SESGADO"):\n        return NICOLAS',
+     '    if v in ("SIN SUSTRATO",):\n        return NICOLAS'),
+    ("L92", LP, 'arms[i][("VIA", "sinfiltro")] = (p["npix"] > 0,', 'arms[i][("VIA", "sinfiltro")] = (False,'),
+    ("L93", LP, '"vrp": x.get("VK") if a == "K" else x["V"].get(a)}', '"vrp": x["V"].get(("VIA", "radiante"))}'),
+    ("L94", LP, '"pub": bool(E.publica(x, a)),', '"pub": True,'),
+    ("L95", LP, 'casos.append((placebo_k(p["k_rec"], E.FACTOR_PLACEBO), p["inner"]))',
+     'casos.append((p["k_rec"], p["inner"]))'),
     # ---- generador
     ("G19", GF, '"capas_locales": dep["capas"](),', '"capas_locales": {},'),
     ("G01", GF, 'for f in p.get("mirova") or []) else "far_ocr"', 'for f in p.get("mirova") or [] if False) else "far_ocr"'),
@@ -189,7 +228,7 @@ def main():
         e, f = una("control", CONTROL)
         pr(f"CONTROL (rompe la importación): {e} {f}  (tiene que ser CAIDA)")
         cuenta = {"ATRAPADA": 0, "SOBREVIVE": 0, "CAIDA": 0}
-        with ThreadPoolExecutor(max_workers=4) as ex:      # cada mutación en su carpeta: no se pisan
+        with ThreadPoolExecutor(max_workers=2) as ex:      # cada mutación en su carpeta (dos a la vez, S167): no se pisan
             resultados = list(ex.map(lambda m: una(m[0], m), MUTACIONES))
         for m, (e, f) in zip(MUTACIONES, resultados):
             cuenta[e] += 1

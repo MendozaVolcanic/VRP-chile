@@ -1,5 +1,11 @@
 # Pre-registro V375-E (S162): el paquete del código de MIROVA en VIIRS 375 contra producción (K)
 
+> ⚠️ **Adenda 3 (S167, §9), SIN SELLAR**: cierra el cuerpo (§1 a §7) para el sello que aprobó Nicolás tras el
+> verificador corto del cuerpo, escrita antes de abrir el run de las lejanas o de leer el marco. **Donde una adenda
+> contradice al cuerpo o a una adenda anterior, rige la más reciente (§9.1).** El «BORRADOR, sin sellar» y las
+> dependencias de la cabecera que sigue describen el estado de S162: PD1 y PD3 están cumplidas (§7.1, §8.3) y el
+> evaluador común se conecta en §9.5. Cabecera original:
+>
 > Escrito antes de que exista el paquete en `pipeline/` y antes de ver ningún resultado suyo. Lo que cambie después del
 > sello va en una adenda fechada al final. Es el pre-registro de una ADOPCIÓN posible: la implementación, el sello, el
 > tag defensivo y el despacho pasan por A45 (el sí de Nicolás, cada uno). Estado: **BORRADOR, sin sellar**; depende de
@@ -9,7 +15,8 @@
 >
 > ⚠️ **Adenda 2 (S166, §8), SELLADA por Nicolás el 2026-10-28 sobre `349409880`** («continua con todo lo que
 > recomiendes», en el chat de la coordinadora S166, con las dos sub-decisiones recomendadas: la vara nueva del paso 1,
-> §8.6 b, y la regla N-3, §8.13). Lo que no es la adenda 2 sigue en borrador. Texto de la marca antes del sello: la vía ya está en `main` (#921, apagada) y Nicolás decidió medir la regla de
+> §8.6 b, y la regla N-3, §8.13). Lo que no es la adenda 2 sigue en borrador (superado: el cuerpo se cierra con la
+> adenda 3, §9). Texto de la marca antes del sello (tras §8.13 el veto (a) con radiante cae por 2 protegidas, no 4): la vía ya está en `main` (#921, apagada) y Nicolás decidió medir la regla de
 > posición como tres brazos (radiante, cercano y pico). La adenda agrega esos brazos, las 330 pasadas en que MIROVA
 > publicó una fuente lejana, una regla de posición escrita antes de ver los datos, y corrige el paso 1 donde ya no
 > describía la vía de #921. Con la regla de hoy (radiante) el veto (a) del §5.4 caería por 4 protegidas que K publica.
@@ -47,18 +54,23 @@ La atribución pieza a pieza no es de aquí: va en ablaciones locales sobre las 
 
 ## 3. Tres pasos, en orden (decisión 3 del programa)
 
-1. **Equivalencia (PD3)**. La vía de `pipeline/`, corrida sobre los gránulos del lote de B y C (859 pasadas con grilla
+1. **Equivalencia (PD3)**. (⚠️ Población, vara y compuerta precisadas por §8.6 y §9.3: se mide en todas las pasadas con
+   grilla de los cuatro lotes, no sólo en las 859 de B y C, y NO EQUIVALENTE corta la lectura con exit 4.) La vía de `pipeline/`, corrida sobre los gránulos del lote de B y C (859 pasadas con grilla
    guardada), reproduce al port de `brazos.py` pasada por pasada: misma cantidad de alertados y VRP a 1e-3 MW en el
    99 % o más, **la publicación idéntica en el 100 % de las pasadas** y las 80 protegidas idénticas. Si no, el paquete
    no es el código y no se sigue. (El verificador mostró que tolerar 1 % de pasadas distintas, ~8 de 859, es del tamaño
    del efecto que B mide en negativos: por eso la publicación no tiene tolerancia.)
-2. **Lectura retrospectiva** sobre la unión de B y C (marco de S159, del 2026-04-01 al 2026-10-21, sin el 12, 13 y 17 a
+2. **Lectura retrospectiva** (⚠️ población y pesos: §9.2, la unión de S159, S162 y S162b con pesos N_h / n_ok_h, y no
+   los de B §3) sobre la unión de B y C (marco de S159, del 2026-04-01 al 2026-10-21, sin el 12, 13 y 17 a
    20 de octubre), con los pesos de `PREREGISTRO_B.md` §3. Ventanas T y O por separado, O1 y O2 (#535) por separado.
-3. **Sombra prospectiva confirmatoria** desde el **2026-11-03** (ventana P del programa, sin Suomi NPP: otro régimen),
+3. **Sombra prospectiva confirmatoria** (⚠️ qué lee y cuándo se escribe su lector: §9.8) desde el **2026-11-03** (ventana P del programa, sin Suomi NPP: otro régimen),
    como perfil aparte con su `data_subdir`, sin tocar la vista operacional, hasta 30 noches o 40 alertas de MIROVA que
    decidan, lo que llegue último. La referencia se congela por hash en cada corte de lectura.
 
 ## 4. Controles (antes de leer)
+
+⚠️ Cuáles corre el lector de la retrospectiva y cuáles no (y por qué): §9.4; los de la curva informan en la
+retrospectiva (§9.6). Texto original:
 
 Los de `PREREGISTRO_B.md` §4 (cobertura contra la referencia de MIROVA del instrumento, SIN DATO fuera del
 denominador, K re-corrido, control positivo, nulo, NUNCA, PLACEBO), y para la curva de cenit (`curva_cenit.py`,
@@ -81,6 +93,9 @@ probados sobre K en `linea_base_curva_salida.txt`):
 
 ### 5.1 Detección (P1, P1b, P2, silencio, MISSION)
 
+⚠️ Qué lote decide y con qué pesos: §9.2 (las reglas de qué lote decide de B §5.5 y de B2 no rigen aquí). MISSION
+informa y no decide (§9.7). Texto original:
+
 Las de `PREREGISTRO_C.md` §5 y `PREREGISTRO_B.md` §5, de P contra K: P1 veto (ninguna protegida que K publica puede
 perderse; lectura A, regla SN; la protegida de cráter de V375-A al lado), P1b en las dos direcciones, P2 por la prueba
 de signos por bloque noche-volcán (D-45), silencio en negativos limpios con la cota de Wilson sobre n efectivo, MISSION
@@ -88,12 +103,18 @@ con la cota honesta del estrato de cero eventos.
 
 ### 5.2 Magnitud (M)
 
+⚠️ Qué corte decide, en qué modo y con qué pares: §9.5 (decide la unión del marco en modo «decide»; los cortes por
+cenit, volcán y canal informan). Texto original:
+
 La regla sellada de D-27 sobre d = |log10(P / MIROVA)| − |log10(K / MIROVA)| y el comparador de ganancia pareja de
 D-28 (d′ con ĝ = mediana de log10(P / K)), con la calibración de D-30 y D-32, **tomados del evaluador común de la
 sesión del instrumento** (no se reimplementan aquí). Por tramo de 10° de cenit, por volcán y por canal. El placebo da
 d′ = 0 por construcción; si no, el instrumento está roto.
 
 ### 5.3 La curva de cenit
+
+⚠️ En la retrospectiva la curva informa y no decide: el marco no da las 8 noches de nulo (§9.6). El criterio (d) se
+decide en la sombra. Texto original:
 
 Razón doble D por noche (`curva_cenit.py`), condicionada (las dos pasadas publicadas, DECIDE) y sin condicionar (no
 publicar = 0, informa). Veredicto: SIN SUSTRATO con menos de 8 noches en la lectura o en el nulo; NULO SESGADO si el
@@ -106,13 +127,18 @@ Vara de K, medida antes: **CAE MAS QUE MIROVA**, 0,766 [0,722; 0,861].
 
 ### 5.4 Regla de adopción del paquete (para PD4, decide Nicolás con A45)
 
+⚠️ Precisada por §8.5 (el paquete es la vía con el brazo de la regla de posición), §8.13 (las protegidas sólo del OCR
+de Suomi NPP anteriores al 2026-10-09 no vetan en (a)) y §9.7 (cada salida posible de cada criterio y de la regla de
+posición, mapeada a CUMPLE, NO CUMPLE o DECIDE NICOLÁS, en código). Texto original:
+
 El paquete P **cumple** si, en la lectura retrospectiva Y en la sombra prospectiva: (a) P1 no pierde ninguna protegida
 que K publica (lectura A, todos los canales: decisión 4 del programa, «decide la lectura A»); (b) P2 contra K da GANA o EMPATE (no PIERDE ni BLOQUEA) y el silencio no da ENCIENDE DE MAS; (c) M da
 MEJORA con d′ dando MEJORA (no sólo una ganancia) o, si d no mejora, no EMPEORA; (d) la curva da REPRODUCE LA CURVA,
 o al menos el IC de D del paquete queda entero sobre el de K. Si (a) falla en cualquiera de las dos, **no cumple**.
 Si la retrospectiva cumple y la sombra no tiene sustrato a las 30 noches, la decisión es de Nicolás con lo que haya.
 
-**Riesgo conocido para (a), dicho antes de medir.** En el lote de S159 el port pierde 3 protegidas que K publica, las
+**Riesgo conocido para (a), dicho antes de medir.** (⚠️ Resuelto por §8.13: Nicolás decidió que esas protegidas, sólo
+del OCR de Suomi NPP antes del 2026-10-09, se informan aparte y no vetan.) En el lote de S159 el port pierde 3 protegidas que K publica, las
 tres sólo OCR (dos de Tupungatito y una de Isluga), y las pierden los diez brazos de ROI por igual. V375-C las saca de
 la elección de caja (no las causa la caja), pero aquí siguen siendo veto. Si en el lote nuevo aparecen más del mismo
 tipo, (a) falla por ellas aunque la etiqueta de protegida de cráter de V375-A diga que son fuentes lejanas: cambiar la
@@ -126,7 +152,8 @@ distintos (cese de Suomi NPP).
 
 ## 7. Adenda 1 (2026-10-26, S164): PD1, dependencias cumplidas y la vara de la equivalencia
 
-Escrita antes de que exista la vía de 375 y antes de ver ningún resultado del paquete. Sigue en **BORRADOR, sin sellar**.
+Escrita antes de que exista la vía de 375 y antes de ver ningún resultado del paquete. Sigue en **BORRADOR, sin sellar**
+(superado: se sella con el cuerpo, §9).
 
 1. **PD1 decidida**: caja **C13 en todos los volcanes**, centrada en el cráter de `volcanoes.yaml` (coordinadora S164,
    bajo D-48). El brazo P usa C13; P-def sigue con M14 para separar el efecto de la ROI. Base: V375-C
@@ -148,6 +175,7 @@ Escrita antes de que exista la vía de 375 y antes de ver ningún resultado del 
    tope por cúmulo). Un record sin esa marca no entra en la lectura del brazo P.
 5. Lo que el riesgo de §5.4 dejaba abierto ya tiene etiqueta: las 3 protegidas de S159 que el port pierde y K publica
    son `ocr_snpp_antes_del_hito`. Igual siguen siendo veto. Cambiar la vara para esas filas lo decide Nicolás.
+   (Superado por §8.13: Nicolás lo decidió al sellar la adenda 2; no vetan.)
 
 ## 8. Adenda 2 (2026-10-28, S166): los tres brazos de posición y las pasadas lejanas de MIROVA
 
@@ -227,7 +255,8 @@ variantes de §8.4 reescriben ese campo.
    `distance_class`, `primary_cluster.centroid_dist_km` y `final_hotspot_dist_km`. Frontera inclusiva (`summit` si la
    distancia es `inner_radius_km` o menos), igual que la vía.
    - **radiante**: el record de la vía sin tocar (centroide del cúmulo 8-conexo de la alertada más radiante);
-   - **cercano**: el alertado más cercano al cráter; a igual distancia, el de menor (fila, columna);
+   - **cercano** (al cráter; no es el «cercano» de `evaluar.py`, que mide desde el punto X0, Y0 de MIROVA: VC167-08):
+     el alertado más cercano al cráter; a igual distancia, el de menor (fila, columna);
    - **pico**: el alertado de mayor radiancia I4, el mismo que siembra el cúmulo, con el mismo desempate que la vía.
    Cada variante pasa por `store.append_record` y por el predicado del tablero con node, como un record de producción.
    La variante no es un record completo (VE2-08): no mueve `centroid_lat/lon`, `final_hotspot_lat/lon` ni `n_pixels`.
@@ -264,7 +293,9 @@ variantes de §8.4 reescriben ese campo.
 
 ### 8.5 Las varas y la regla de posición (RP)
 
-- **Vara 1, alertas y negativos limpios del marco** (los pesos de `PREREGISTRO_B.md` §3): las lecturas de `evaluar.py`
+- **Vara 1, alertas y negativos limpios del marco** (los pesos de `PREREGISTRO_B.md` §3; ⚠️ superado por §9.2: la
+  unión de los tres lotes con pesos N_h / n_ok_h; MISSION y la mediana de magnitud de `evaluar.py` informan, la M que
+  decide es la de §9.5): las lecturas de `evaluar.py`
   (P1, P1b, recall, silencio, MISSION, magnitud) y la prueba de signos contra K, **para cada brazo**, tomadas de
   `evaluar.py` sin copiarlas (el lector lo identifica por sha256 LF, `2126b743…`, y no lo carga si es otro). Además,
   las pasadas que cambian de publicación contra radiante, por nombre.
@@ -294,7 +325,9 @@ variantes de §8.4 reescriben ese campo.
      código compartido exige una mejora medida); si no, **NO RESUELTO** entre los no vencidos, y decide Nicolás con la
      vara 3 al lado.
   5. **Sin cobertura de las lejanas** (sin run FAR, sin control de vida, o más del 10 % de las `far_tabla` SIN DATO), la
-     regla **no decide**: «NO DECIDE: LAS LEJANAS SIN COBERTURA».
+     regla **no decide**: «NO DECIDE: LAS LEJANAS SIN COBERTURA». (⚠️ Superado por §9.3 a: con el control de vida
+     caído no se lee nada, LECTURA NO LEGIBLE, como dice §8.7; «sin run FAR» no se alcanza desde la línea de
+     comandos; NO DECIDE queda sólo para más del 10 % de `far_tabla` SIN DATO.)
   6. **Por tramo (A104, VE2-06 y N-2)**: la misma regla se corre dentro de T, O1 y O2. Si O1 u O2 por separado no da
      el mismo resultado que la unión (otro brazo, o SE QUEDA RADIANTE frente a un elegido, o NO RESUELTO, o NINGUNO), el
      veredicto lleva la marca «A104: en O1 (u O2) el resultado es otro (…); decide Nicolás». Un tramo sin pasadas no
@@ -309,7 +342,7 @@ variantes de §8.4 reescriben ese campo.
   unas 5 (`pos_bajo` es muestra de 200 en 949), una protegida y una lejana pesan 1 (son censo), un negativo limpio
   sorteado unas 2. Las protegidas no dependen de ese peso porque las cuida el veto.
 - **El paquete P del §5.4 es la vía con el brazo que elige la RP.** Si la RP da NO RESUELTO, el §5.4 se lee con cada
-  brazo empatado y decide Nicolás. Al criterio (b) del §5.4 se le agrega: **P2-L del brazo elegido contra K no da
+  brazo empatado y decide Nicolás. (⚠️ Las demás salidas de la RP, NINGÚN, NO DECIDE y la marca A104: §9.7.) Al criterio (b) del §5.4 se le agrega: **P2-L del brazo elegido contra K no da
   PIERDE ni BLOQUEA** (publicar en la cumbre donde MIROVA ubicó el calor lejos es un error que K puede no cometer: K
   publica en 122 de las 330).
 
@@ -353,7 +386,8 @@ fin de línea LF, como lo guarda git), se avisa; C5 vigila que la regla del reco
 La coordinadora, desde un tag sobre el commit sellado: copia `e_adenda2/probe-s166-v375e-far.yml` a
 `.github/workflows/` en la rama `s166-v375e-far-disparo` (no se mergea) y empuja. Autentica sólo por `EARTHDATA_TOKEN`
 (A71). Un relanzamiento con `SOLO` lee la misma lista; antes de darlo por bueno se cuenta en su log que procesó tantas
-pasadas como ids pidió (A108). Costo: 350 pasadas, unas 2,5 h de runner. La sombra prospectiva del §3.3 lee los tres
+pasadas como ids pidió (A108). Costo: 350 pasadas, unas 2,5 h de runner. (⚠️ Lo que sigue sobre la sombra queda
+superado por §9.8: la RP no se corre en la sombra.) La sombra prospectiva del §3.3 lee los tres
 brazos desde los records (`distancias_desde_record`: radiante = `centroid_dist_km`, pico = `hotspot_dist_km`, cercano
 = el menor `dist_km` de `anomaly_pixels`, redondeado a 0,01 km por la vía), con la misma RP; si elige otro brazo que la
 retrospectiva, decide Nicolás.
@@ -364,7 +398,8 @@ retrospectiva, decide Nicolás.
 
 (las cuatro rutas son obligatorias y no tienen valor por defecto, para que leer el marco sea siempre explícito: VE2-10).
 El orden de lectura: primero los controles, después la equivalencia por brazo (§8.6), después la RP, y recién
-entonces las lecturas del §5 con el brazo elegido.
+entonces las lecturas del §5 con el brazo elegido. (⚠️ Esas lecturas del §5 ya están escritas y probadas en el
+lector, §9.5 a §9.7; no se agregan después de ver la salida de la RP. Salidas: 0, 3 control caído, 4 no equivalente.)
 
 ### 8.10 Lo que esta adenda no hace
 
@@ -440,12 +475,13 @@ MATLAB, y que sólo puede cambiar el veredicto de E por la puerta del paso 1. Ar
 |---|---|
 | N-1 el efecto del §8.6 b no se veía en la lectura | el lector imprime la cifra con la vara vieja, informativa (§8.6 b) |
 | N-2 la marca A104 sólo saltaba entre dos ELEGIDO distintos | salta con cualquier resultado distinto en O1 u O2 (§8.5 paso 6), con pruebas |
-| N-3 dos de las cuatro protegidas son sólo OCR de Suomi NPP antes del 2026-10-09 | opción explícita en §8.13, a decidir por Nicolás, sin aplicar |
+| N-3 dos de las cuatro protegidas son sólo OCR de Suomi NPP antes del 2026-10-09 | opción explícita en §8.13, a decidir por Nicolás, sin aplicar (aplicada al sellar, §8.13) |
 | N-4 la batería no es autocontenida | dicho en su encabezado: necesita el repo git (o `GIT_DIR`) y la copia de D: |
 | N-5 el nulo depende del fin de línea del checkout | dicho en el encabezado de la batería y aquí |
 | N-6 y VE2-11 el yml decía «sellada» | dice «SIN SELLAR al escribir este archivo; se despacha sólo cuando Nicolás la selle» |
 
-**VE2-07 y VE2-13 quedan abiertos, y por qué.** VE2-07 (las protegidas motivadoras son sólo del OCR) no se cierra sin
+**VE2-07 y VE2-13 quedan abiertos, y por qué.** (⚠️ Estado anterior al sello: VE2-07 quedó resuelto por la regla
+N-3, que Nicolás aplicó al sellar (§8.13); VE2-13 sigue abierto por diseño, sin cambio.) VE2-07 (las protegidas motivadoras son sólo del OCR) no se cierra sin
 cambiar quién veta, y eso es la opción N-3: lo decide Nicolás. VE2-13 (la regla no exige sustrato en las lejanas) se
 cerraría agregando un mínimo de `far_tabla` con alertado como condición para decidir; no lo agregué porque cambiaría la
 regla después del primer verificador sin que nadie lo haya pedido, y porque las lejanas son un censo: si pocas tienen
@@ -474,3 +510,158 @@ Qué toca, dicho antes de medir:
   §5.4 y §7.5 dejaban a su decisión.
 
 Texto anterior al sello, conservado: era una opción «a decidir por Nicolás, no aplicada», con el mismo contenido.
+
+## 9. Adenda 3 (2026-10-29, S167): cierre del cuerpo antes del sello
+
+Estado: **SIN SELLAR**. Autor: sesión hija de VIIRS 375, a pedido de la coordinadora S167. Nicolás aprobó el 2026-10-29
+(«Sí a todo», programa §12.5 punto 3, relayado por la coordinadora) sellar el cuerpo (§1 a §7) después de un verificador
+corto que comprobara que no choca con la adenda 2. Ese verificador (Sonnet con contexto limpio,
+`experiments/_s167/v375e_cuerpo_verificador/INFORME.md` en `loop/activo`) dio **SELLABLE CON CAMBIOS MENORES**, con un
+hallazgo de gravedad 3 (VC167-04: el lector no calculaba el §5.2 ni el §5.3, ni los brazos P-def, P-sinfiltro y PLACEBO)
+y cuatro de gravedad 2. Esta adenda los cierra por texto y en el código del lector, con pruebas y mutaciones.
+
+**Qué se sabía al escribirla.** El run de las lejanas existe (run 40773794395, 14 de 14 trabajos en verde y 350 de 350
+pasadas según su log, dato de la coordinadora) y **no se abrió**. Nada del marco se leyó. El único número nuevo es un
+conteo de diseño sobre la lista de objetivos, sin grillas, sin resultados y sin ninguna publicación
+(`e_adenda2/contar_pares_curva.py`, salida `contar_pares_curva_salida.txt`): el marco tiene 280 alertas con VRP de
+MIROVA (80 protegidas y 200 bajo 1 MW), en 34 noches-volcán con dos o más; 28 noches con 15° o más de cenit entre la
+pasada menos oblicua y la más oblicua, y 5 con un par a menos de 5° (T 7 y 2; O 21 y 3).
+
+### 9.1 Precedencia y marcas (VC167-06)
+
+Donde una adenda contradice al cuerpo o a una adenda anterior, **rige la más reciente**. Las marcas «⚠️» quedaron al
+inicio de cada pasaje superado (cabecera, marca de la adenda 2, §3.1 a §3.3, §4, §5.1 a §5.4 y su riesgo conocido,
+§7 y §7.5, y dentro de §8 los puntos 8.4, 8.5, 8.8, 8.9 y 8.12); el texto viejo se conserva. Sobre «todos los canales»
+del §5.4 (a): la protegida es la que decide según la ventana (`seleccion.py` l. 14 y 98: las alertas sólo del OCR
+anteriores al 2026-06-13 no entran al marco, A119), y entre ellas cuentan la tabla y el OCR, salvo las de §8.13.
+
+### 9.2 Población y pesos (VC167-01)
+
+La retrospectiva lee la **unión de los tres lotes del marco**: S159 (149 pasadas de 375), S162 (709) y S162b (1.200
+negativos limpios restantes, el lote de B2), 2.058 en total, más las 330 lejanas y las 20 de control de vida del run
+de las lejanas. El peso de cada pasada es **N_h / n_ok_h** por clase y estrato (volcán x cenit) sobre todo lo cargado
+con dato (las SIN DATO no cuentan en n_ok_h); las lejanas pesan 1 (censo). **Decide la unión, no un lote**: las reglas
+de qué lote decide de `PREREGISTRO_B.md` §5.5 y de B2 no rigen aquí. Con B2 dentro, el peso de un negativo limpio baja
+(Chaitén z ≤ 40: de 143/19 = 7,5 con los pesos de B §3 a 143/71 = 2,0; cálculo del verificador). Es lo que hacía el
+lector desde la adenda 2; esta sección lo escribe. El «859» del §3.1 era el lote de B y C: la equivalencia se mide en
+todas las pasadas con grilla de los cuatro lotes.
+
+### 9.3 Compuertas (VC167-02 y VC167-05)
+
+a. **Controles**: si cae cualquiera de C1 a C9 (el control de vida C7 incluido), sale 3, «LECTURA NO LEGIBLE», y no se
+   lee nada, ni el marco. Así lo hacía el código y así queda escrito, en lugar del «no decide» del §8.5 paso 5, que
+   vale ahora sólo para más del 10 % de `far_tabla` SIN DATO (la RP da NO DECIDE y el resto se lee). «Sin run FAR» no
+   se alcanza desde la línea de comandos (`--art-far` es obligatorio); la rama queda en el código sólo para la batería.
+b. **Equivalencia**: si da NO EQUIVALENTE (máscara, VRP o publicación de cualquier brazo), sale **4**, «PAQUETE NO ES EL
+   CODIGO», con los controles, la cobertura y la equivalencia impresos, y **no se lee la RP ni el §5**. Corta todo y no
+   sólo ese brazo: la máscara y el VRP son los mismos en los tres, así que una publicación distinta en uno viene de un
+   VRP distinto, que toca a los tres. Qué hacer entonces lo decide Nicolás.
+
+### 9.4 Brazos y controles del §2 y del §4 en esta lectura (VC167-04)
+
+- **PLACEBO** (K x 1,2): **C8**, el record de K re-corrido con el VRP x 1,2 (en `vrp_mw`, `f5_core_vrp_mw` y el VRP del
+  cúmulo) pasa por el predicado del tablero y tiene que publicar donde K re-corrido publica en todas las pasadas (0
+  discordantes en P1 y P2); **C9**, el placebo de M con el comparador (x 1,2 y x 0,8,
+  `evaluador_comun.placebo_ganancia` sobre los pares de K consigo mismo) no puede dar MEJORA (d′ = 0). Si cae
+  cualquiera, sale 3.
+- **P-sinfiltro**: la vía publicando toda pasada con algún alertado en la caja, sin el predicado de cumbre, con su VRP.
+  Se lee con las lecturas de `evaluar.py` y la prueba de signos contra K. **Informa, no decide.**
+- **P-def** (caja M14): **no se corre aquí.** Su papel era separar el efecto de la ROI; eso ya lo midió V375-C sobre los
+  mismos lotes (`resultado_run40116289866/INFORME.md`) y la caja quedó decidida en PD1 (§7.1).
+- **Controles de B §4**: la cobertura contra la referencia (A108, por lote y clase, con las SIN DATO por nombre) y K
+  re-corrido contra K publicado (0,95) ya los corría el lector. El control positivo, el nulo y NUNCA de B §4 prueban a
+  `evaluar.py`, que aquí se usa sin cambios e identificado por sha256 (C4): no se repiten. El control positivo de la
+  vía son C1, C5 y la equivalencia.
+- **Controles de la curva** (§4: nulo de cenit parecido, sesgo de plataforma, ganancias): van con la curva, y en la
+  retrospectiva informan (§9.6).
+
+### 9.5 Magnitud M (§5.2; VC167-04 y VC167-03)
+
+**Pares**: las alertas de MIROVA del marco con VRP (protegidas y bajo 1 MW) que el brazo y K publican con magnitud mayor
+que 0; la magnitud de K es la de K re-corrido que muestra el predicado del tablero. Una pasada que publica uno solo sale
+de M y se cuenta aparte (la ven P1 y P2). **Regla**: `evaluador_comun.decidir_estrato` en modo **«decide»**, con la
+calibración simétrica (D-27, D-30, D-32) y el comparador d′ (D-28), **sobre la unión del marco: es el único corte que
+decide (c)**. Sin peso de población: el evaluador común remuestrea por bloque noche-volcán, así que las protegidas
+(censo) pesan más que en la población; dicho antes de medir, y por eso se informa también por clase. **Informan**, en
+modo «informa»: por tramo de 10° de cenit, por volcán, por canal (alerta de la tabla o sólo del OCR) y por clase.
+**A104**: la misma regla en T, O1 y O2; si O1 u O2, con sustrato, da otro estado de (c) que la unión, en cualquier
+dirección, (c) pasa a DECIDE NICOLÁS. La mediana de VRP/MIROVA de `evaluar.py` se sigue imprimiendo y sólo informa.
+
+### 9.6 La curva de cenit (§5.3) en la retrospectiva
+
+Se calcula con `curva_cenit.py` para K y para cada brazo, condicionada y sin condicionar, sobre las alertas del marco,
+y **sólo informa**. Con el conteo de diseño, el marco tiene a lo más 5 noches para el nulo de cenit parecido (con el
+cenit de la lista; el lector usa el del run, que puede diferir algo), bajo el mínimo de 8 del §5.3: da SIN SUSTRATO por
+construcción. Además las alertas bajo 1 MW son muestra (200 de 949), así que una noche entra sólo si sus dos pasadas
+salieron sorteadas. **El criterio (d) se decide sólo en la sombra** (§9.8), donde están todas las pasadas.
+
+### 9.7 La regla del §5.4 en código (VC167-03)
+
+`criterios_retro` y `regla_adopcion` del lector. Lo que no es explícitamente favorable no cumple; las salidas que el
+§5.4 no previó pasan a Nicolás.
+
+| criterio | CUMPLE | NO CUMPLE | DECIDE NICOLÁS |
+|---|---|---|---|
+| (a) | ninguna protegida que K publica y el brazo calla, fuera de las de §8.13 (las pérdidas comunes cuentan) | una o más | nunca |
+| (b) | P2 contra K GANA, EMPATE o SIN SUSTRATO, el silencio no da ENCIENDE DE MAS y P2-L no da PIERDE ni BLOQUEA | P2 PIERDE o BLOQUEA, o ENCIENDE DE MAS, o P2-L PIERDE o BLOQUEA | nunca |
+| (c) | M MEJORA (en modo «decide» ya exige d′ MEJORA) o NEUTRO | EMPEORA, INDECIDIBLE o SIN SUSTRATO | marca A104 en M |
+| (d), retrospectiva | informa, no decide | nunca | nunca |
+| (d), sombra | REPRODUCE LA CURVA; o el extremo inferior del IC de D del paquete sobre el extremo superior del IC de D de K (cada uno con sus pares condicionados, como los arma `curva_cenit`) sin CAER MENOS QUE MIROVA | CAE MENOS QUE MIROVA, o CAE MAS o NO RESUELTO sin superar a K | SIN SUSTRATO o NULO SESGADO |
+
+Por qué SIN SUSTRATO cumple en (b): con 4 bloques discordantes o menos, el brazo y K casi no difieren en errores, y el
+texto pide «no PIERDE ni BLOQUEA». Por qué INDECIDIBLE y SIN SUSTRATO no cumplen en (c): el texto pide que no EMPEORE, y
+el instrumento no lo certifica. Por qué CAE MENOS no cumple en (d): la meta es caer igual que MIROVA (§1), no menos. Así
+queda fijado el «sobre el de K» del §5.4 (d).
+
+**Retrospectiva de un brazo**: NO CUMPLE si algún criterio no cumple; si no, DECIDE NICOLÁS si alguno lo pide; si no,
+«CUMPLE (falta la sombra)».
+
+| salida de la RP | estado del paquete en la retrospectiva |
+|---|---|
+| ELEGIDO x, o SE QUEDA RADIANTE, sin marca A104 | el del brazo |
+| NINGÚN BRAZO PASA EL VETO | NO CUMPLE (cada brazo calla una protegida que K publica) |
+| NO RESUELTO (el ciclo incluido) | DECIDE NICOLÁS entre los no vencidos (en el ciclo, los tres), salvo que ninguno cumpla: NO CUMPLE |
+| NO DECIDE (lejanas sin cobertura) | DECIDE NICOLÁS entre los tres, salvo que ninguno cumpla |
+| con marca A104 | DECIDE NICOLÁS con el brazo de la unión, salvo que no cumpla |
+
+**MISSION** (VC167-07) informa y no decide; se imprime contando también las protegidas de §8.13, rotulado así.
+
+### 9.8 La sombra (VC167-09)
+
+**La RP no se corre en la sombra.** La sombra lee el brazo que eligió la retrospectiva (o el que elija Nicolás si no
+resolvió); las tres distancias desde los records (§8.8) sólo informan. Su lector (la vara 1, la M de §9.5, la curva y
+el (d) de §9.7, con las mismas funciones de este lector) se escribe y se prueba con mutaciones antes del primer corte
+de lectura de la ventana P, y pasa por Nicolás antes de leer.
+
+### 9.9 Nombre (VC167-08)
+
+En §8 y en el reporte del lector, «cercano» es el alertado más cercano **al cráter**; el «cercano» de `evaluar.py` y de B
+y C es el más cercano al punto X0, Y0 de MIROVA. El reporte lo dice en el encabezado de la vara 1.
+
+### 9.10 Qué cambió en el código y pruebas
+
+`e_adenda2/leer_posicion_v375e.py`: C8 y C9; la compuerta de equivalencia con salida 4 (`codigo_salida`); P-sinfiltro;
+`pares_magnitud`, `magnitud`, `estado_c`, `pares_k`, `control_placebo_m`, `placebo_k`, `curva`, `estado_d_sombra`,
+`criterios_retro` y `regla_adopcion`; los rótulos de MISSION y de «cercano». `evaluar.py`, `curva_cenit.py` y
+`scripts/evaluador_comun.py` no cambian. Batería y nulo: §9.11.
+
+### 9.11 Batería y nulo
+
+**Batería**: `e_adenda2/probar_adenda2.py`, 165 de 165 (`e_adenda2/probar_adenda2_salida.txt`), sobre datos sintéticos;
+ninguna corrida sobre el marco ni sobre el run FAR.
+
+**Nulo por mutaciones** (`e_adenda2/mutar_adenda2.py`, 114 mutaciones, dos a la vez, `e_adenda2/mutar_adenda2_salida.txt`):
+identidad PASA, control de caída CAIDA; 111 atrapadas por aserción, 2 sobreviven y 1 cae. Lo que no quedó atrapado:
+
+| mutación | en el nulo completo | qué se hizo | repaso |
+|---|---|---|---|
+| L20 | sobrevive | equivalente, como en las adendas anteriores | sin cambio |
+| L85 (`NINGUN` deja de dar NO CUMPLE) | cae con `KeyError: 'ningun'` (caída no es atrapada) | se reescribió para que no caiga: `NINGUN` da DECIDE NICOLÁS | ATRAPADA |
+| L94 (la curva toma toda pasada como publicada) | sobrevive | prueba nueva: si el brazo calla en el cenit alto, la curva condicionada pierde esas noches y la de K no | ATRAPADA |
+
+El repaso (`e_adenda2/repasar_mutaciones.py L85 L94`, `e_adenda2/repasar_mutaciones_salida.txt`) corre la identidad, el
+control de caída y esas dos mutaciones con la batería de 165: identidad PASA, control CAIDA, L85 y L94 ATRAPADA. Las
+otras 111 no se volvieron a correr: el arreglo sólo agregó una prueba y cambió el texto de L85, así que con la batería
+nueva sólo podrían dejar de ser atrapadas por aserción si bajo alguna de ellas la prueba nueva lanzara y la batería
+cayera; eso no se midió (en la identidad no lanza). Con el repaso: 113 de 114 atrapadas por aserción, sobrevive L20
+(equivalente).
