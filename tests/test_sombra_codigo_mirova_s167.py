@@ -9,7 +9,8 @@ cuatro cosas que pueden fallar en silencio:
      mediría otro paquete que el que los pre-registros sellan), leído como lo lee el código (A89);
   2. que los 11 volcanes del workflow tengan grilla de MIROVA en los tres sensores (sin grilla, la vía cae a K y la
      carpeta de sombra se llenaría de K: A118);
-  3. que la sombra no escriba antes del 2026-11-03 (otro régimen) ni corra sola;
+  3. que la sombra no escriba antes del 2026-11-03 (otro régimen) y corra sola sólo una vez al día (encendida en S168
+     con el sí de Nicolás; antes no tenía schedule);
   4. que, corriendo de punta a punta, escriba sólo en data/sombra_codigo_mirova/ y deje data/mirova_equivalent/ bit
      a bit igual, con los tres brazos de posición legibles desde el record (V375-E §8.8).
 Cada grupo tiene su control: el mismo instrumento sobre producción tiene que dar distinto.
@@ -140,10 +141,14 @@ def _wf():
     return txt, yaml.safe_load(txt)
 
 
-def test_el_workflow_no_corre_solo():
+def test_el_workflow_corre_una_vez_al_dia():
+    # S168: encendida con el sí de Nicolás (tag pre-s168-encender-sombra). Un solo cron diario y ningún otro
+    # disparador automático (push o pull_request la correrían en cada commit del NRT). En el schedule no hay inputs:
+    # medir llega vacío, así que commitea, y la ventana es la de ventana_sombra.py (nada antes del 2026-11-03).
     txt, d = _wf()
     assert "on" in d and True not in d, "'on' entre comillas (A43)"
-    assert set(d["on"]) == {"workflow_dispatch"}, "sin schedule ni otro disparador: encenderla es otro sí (A45)"
+    assert set(d["on"]) == {"workflow_dispatch", "schedule"}, "sólo despacho manual y el cron diario"
+    assert d["on"]["schedule"] == [{"cron": "0 15 * * *"}], "una vez al día, 15:00 UTC"
     assert d["on"]["workflow_dispatch"]["inputs"]["medir"]["default"] is False
 
 
