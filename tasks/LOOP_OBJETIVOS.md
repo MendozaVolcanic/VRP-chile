@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 13:30 UTC aprox. (S167, vuelta 16): cuerpo de V375-E no se sella todavía
+- Verificador corto (Sonnet, limpio) del cuerpo de `PREREGISTRO_E.md` contra su adenda 2: SELLABLE CON CAMBIOS MENORES,
+  pero con **VC167-04 (gravedad 3)**: el lector no implementa §4, §5.2 (d, d′), §5.3 ni los brazos P-def, P-sinfiltro y
+  PLACEBO, y el §5.2 no fija qué corte decide (c). Además VC167-01 a 05 (gravedad 2: lote y pesos, contradicción §8.5
+  contra §8.7, salidas que el §5.4 no conoce, compuerta §3.1 sin hacer cumplir). Sin contradicción que vuelva
+  inaplicable el cuerpo; N-3 y la regla de posición coinciden con el código. Informe en
+  `experiments/_s167/v375e_cuerpo_verificador/INFORME.md`.
+- Pedido a V375-E fase 4: cierre del cuerpo por texto antes de leer datos (sin abrir la corrida lejana), con pruebas y
+  mutaciones; después otro verificador corto y el sello con tag. La lectura de VIIRS 375 espera eso.
+
 ### 2026-10-29 13:05 UTC aprox. (S167, vuelta 15): «Sí a todo»: las siete del §12.5 y las 13 diurnas primero
 - Nicolás, en este chat, ante «¿Apruebas las siete recomendaciones y revisar primero las 13 diurnas?»: «Sí a todo».
   Anotado en el §12.5 del programa. En marcha: adenda 3 de V750-B con N-3 (Loop VIIRS 750 2, antes del 2026-11-03, con
