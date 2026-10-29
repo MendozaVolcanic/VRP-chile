@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 21:30 UTC (S168, vuelta 5): #926 mergeado; la sombra queda encendida (cron 15:00 UTC)
+- Frase de Nicolás: «Sí, mergea #926». CI `pytest` verde (5 min 29 s), `CLEAN`; `gh pr merge 926 --squash
+  --match-head-commit f48fcbe7c`, squash `c42ee0eb7` en `main`; el cron está en `main` (l. 25). Primera corrida con
+  datos: 2026-11-03 15:00 UTC; antes, cada job sale en segundos. A vigilar ese día: que commitee
+  `data/sombra_codigo_mirova/` y que `revisar_sombra.py` deje el job verde.
+
 ### 2026-10-29 21:19 UTC (S168, vuelta 4): PR #926 que enciende la sombra, abierto; Nicolás pide menos preguntas
 - Nicolás: «Sí, prepáralo». Tag `pre-s168-encender-sombra` en `ba3788279` (main); rama `claude/s168-encender-sombra`
   (`f48fcbe7c`, armada con índice temporal, sin checkout): `schedule: cron "0 15 * * *"` y la prueba
