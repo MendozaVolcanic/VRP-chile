@@ -1,6 +1,11 @@
 # Pre-registro S166 MOD-D fase 4: la vía «código MIROVA» de MODIS contra K, con los tres brazos de posición
 
-Estado: **BORRADOR para el sello de Nicolás.** Escrito el 2026-10-28 por la sesión hija de MODIS de la fase 4 (reporta
+Estado: **SELLADO** (2026-10-29, S168; tag `s168-modd-f4-sellado`). Condición de Nicolás cumplida: mutaciones atrapadas
+por aserción (82 de 82, ninguna con escenarios que caen; M70 declarada en el §13 ter), control de caída CAE, §13 al
+día y el tercer verificador limpio (`experiments/_s168/modd_f4_verificador/INFORME.md`, Sonnet) sin hallazgos de
+gravedad 3. Lo que quedó de gravedad 1 y 2, en el §13 ter. El sello cubre las reglas y el evaluador; el candado del
+§11 sigue pendiente y nada se despacha sin él. Texto original del estado:
+BORRADOR para el sello de Nicolás. Escrito el 2026-10-28 por la sesión hija de MODIS de la fase 4 (reporta
 a la coordinadora S166), antes de correr ningún brazo y sin mirar ningún resultado nuevo. Nada se despacha antes del
 sello, del candado del §11 con su verificador limpio, del tag y del sí de Nicolás; nada se enciende en producción sin
 el reproceso verificado y otro sí (A45). Rutas relativas a la raíz del repo,
@@ -455,6 +460,29 @@ escribir en el documento N-03 y N-04».
 | N-06, ocho reglas vivas a la batería (X01 a X14) | 2 | un escenario por cada una: frontera del 16 al 17-oct, magnitud 0 en Chillán, elegibilidad con pérdida sólo OCR, grilla de más, tope de 1 % inclusivo, OCR en «otra posición» y en la sellada de K | §7, §6 bis, §8.2; E52 a E58; M68 a M75 |
 | N-07, dos frases que no calzaban con el código | 1 | «otra posición» incluye el OCR (lado seguro, ahora escrito); la fila P1 de §6 y la fila 2 de §7 dicen cuándo se llega a NO ADOPTAR | §6, §6 bis, §7 |
 | N-08, el soporte independiente pide entradas que el contrato no trae | 1 | se arman al leer, de `data/` en el commit del tag y de la referencia congelada | §11 |
+
+## 13 ter. Tercer verificador (para el sello) y lo que queda declarado
+
+Sonnet, contexto limpio, sobre `314cec809` (`experiments/_s168/modd_f4_verificador/INFORME.md`, con sus scripts y
+salidas). Reprodujo la batería (63 de 63) y la batería contra el vacío (63 de 63 por aserción, 0 caen) con salidas
+idénticas a las commiteadas, confirmó los cuatro sha256 del §13, corrió `--solo M70,M82` con los tres controles como
+deben (identidad VIVA, caída CAE con 58, rota ROTA) y encontró que los arreglos de VF4-01 a VF4-04 y N-01 existen en el
+código con su escenario y su mutación. M82 la atrapa E58 por aserción pura. Sin hallazgos de gravedad 3. El instrumento
+no se tocó para el sello: los sha256 del §13 siguen valiendo.
+
+| hallazgo | gravedad | qué queda |
+|---|---|---|
+| VS-01, el medidor cuenta ATRAPADA aunque otros escenarios caigan | 2 | declarado; en la corrida commiteada ninguna de las 82 tiene caídas (`caen: -` en todas), así que la cifra no cambia. A cerrar en el candado: ATRAPADA sólo con `caen` vacío y un segundo control de caída con `ValueError` |
+| VS-02, M70 se atrapa porque E53 convierte en aserción la caída por `log10(0)` | 2 | declarado: **81 de 82 por aserción pura y 1 (M70) por una aserción explícita sobre la caída**. El defecto que M70 introduce es justo esa caída y no tiene otra señal observable; el `except` sólo acepta `ValueError` y `ZeroDivisionError`. A acotar en el candado al mensaje `math domain error` |
+| VS-03, el brazo `no_pasan` del control del contador y la salida NO VALE del medidor no tienen prueba | 2 | a cerrar en el candado con un escenario que espere INDECIDIBLE y una prueba del código 1 |
+| VS-04, `N_GRILLAS_CENSO = 5321` sin aserción propia | 1 | una constante mal escrita da INDECIDIBLE (ruidoso); aserción en el candado |
+| VS-05, `control_posicion` acepta cero pasadas con alertados | 1 | en la corrida real n es grande; escenario en el candado |
+| VS-06, los empates de Chillán quedan fuera de los pares | 1 | lectura sellada: lo que hace el código, `db == dk` no es par (§9). Chillán acompaña y no decide |
+| VS-07, dos mutaciones propias del verificador vivas, casi equivalentes | 1 | ninguna |
+| VS-08, `--traza` rechazado por argparse | 1 | opción de depuración; se arregla en el candado |
+
+Lo que se cierra en el candado toca la batería y el medidor, no las reglas de `evaluar_f4.py`. Si algún arreglo
+obligara a cambiar una regla del evaluador, eso pide un sello nuevo.
 
 ## 14. Lo que este pre-registro NO decide
 
