@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-29 15:45 UTC (S167, cierre): traspaso en `tasks/BLOQUE_ARRANQUE_S168.md`
+- Cierre con trabajo en curso: mutaciones de MOD-D fase 4 (2 procesos) y de V375-E, medidor de V750-A en D:, sesión del
+  perfil de sombra recién arrancada. `main` en `cc66fa57f` (sólo datos del NRT desde `ba61c330f`).
+
 ### 2026-10-29 15:42 UTC (S167, vuelta 23): #813 queda abierto; sesión del perfil de sombra arrancada
 - Nicolás, en este chat: «sigue con lo que recomiendes, hay sesiones corriendo para cada plan?». Con eso se aplica la
   recomendación de la vuelta 17: **#813 (día en VIIRS) queda abierto, no se abre el día todavía**; se retoma cuando la
