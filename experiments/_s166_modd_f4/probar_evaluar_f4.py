@@ -294,19 +294,23 @@ def E14_via_no_corrio():
 
 
 def E15_motivo_sellado():
+    # el caso legítimo de un motivo sellado: una pasada que tampoco cubrió el censo (sin grilla; N-01, E59)
     f = mundo()
     f[0]["motivo"] = "volcan_fuera_del_granulo"
+    f[0]["grilla_censo"] = False
     r = correr(f)
     chk(g(r, "controles", "cobertura", "estado") == "OK", "motivo sellado no es falla")
     chk(g(r, "controles", "cobertura", "n_evaluables") == len(f) - 1, "motivo sellado sale del denominador")
     chk(g(r, "veredicto") == "PROPONER ADOPCIÓN", "motivo sellado: %s" % g(r, "veredicto"))
     f = mundo() + [F("Lascar", dia(90) + " 03:00", "protegida", k=1.5, v=1.5, mir=1.6)]
     f[-1]["motivo"] = "escena_invalida"
+    f[-1]["grilla_censo"] = False
     r = correr(f)
     chk(len(g(r, "controles", "cobertura", "protegidas_k_fuera") or []) == 1, "protegida de K fuera listada")
     chk(g(r, "veredicto") == "DECIDE NICOLÁS", "protegida de K fuera: %s" % g(r, "veredicto"))
     f = mundo() + [F("Lascar", dia(90) + " 03:00", "protegida", k=1.5, v=1.5, mir=1.6)]
     f[-1]["motivo"] = "escena_invalida"
+    f[-1]["grilla_censo"] = False
     f[-1]["pub_runner"] = {"K": 0}                            # el runner dijo otra cosa que el predicado del evaluador
     r = correr(f)
     chk(g(r, "controles", "cobertura", "estado") == "INDECIDIBLE", "predicado de K distinto del runner en una excluida")
@@ -755,6 +759,149 @@ def N02_node_contador():
         x["_evaluable"], x["_motivo"] = EV.evaluable(x)
     EV.armar_tabla(f, EV.predicado_node)
     chk(g(EV.control_contador(f, EV.predicado_node), "estado") == "OK", "node: contador sobre el tablero real")
+
+
+def E52_frontera_c_e():
+    """§4 y §7 (N-06, X01 y X02 de la segunda vuelta): el 2026-10-16 23:59 es del tramo C (un rojo ahí deja todo
+    INDECIDIBLE) y el 2026-10-17 00:00 ya es del tramo E (un rojo ahí saca E)."""
+    f = mundo() + [F("Lascar", "2026-10-16 23:59", "neg_limpio")]
+    f[-1]["estado"] = "error_descarga"
+    r = correr(f)
+    chk(g(r, "e_excluido") is None and g(r, "veredicto") == "INDECIDIBLE", "16-oct 23:59 es C: %s" % g(r, "veredicto"))
+    f = mundo() + [F("Lascar", "2026-10-17 00:00", "neg_limpio", tramo="E")]
+    f[-1]["estado"] = "error_descarga"
+    r = correr(f)
+    chk(g(r, "e_excluido") is not None and g(r, "veredicto") == "PROPONER ADOPCIÓN",
+        "17-oct 00:00 es E: %s" % g(r, "veredicto"))
+
+
+def _pred_publica_cumbre(casos):
+    """Publica todo record cumbre aunque su VRP sea 0 (para fijar la exigencia de magnitud mayor que 0 en Chillán)."""
+    return [(int(r is not None and r.get("distance_class") == "summit"),
+             float(((r or {}).get("primary_cluster") or {}).get("vrp_mw") or 0.0)) for r, _ in casos]
+
+
+def E53_chillan_magnitud_cero():
+    """§6 (cambio declarado, A13 del primer verificador, X03 de la segunda vuelta): un par de Chillán con magnitud 0 no
+    entra a la prueba de signos (y el evaluador no cae por el logaritmo)."""
+    f = mundo() + [F("NevadosDeChillan", dia(120 + i) + " 07:20", "protegida", k=0.5, v=1.0, mir=1.0, z=15.0)
+                   for i in range(5)]
+    f += [F("NevadosDeChillan", dia(130) + " 07:20", "protegida", k=0.5, v=0.0, mir=1.0, z=15.0)]
+    try:
+        r = correr(f, pred=_pred_publica_cumbre)
+    except (ValueError, ZeroDivisionError) as e:  # sólo la falla del logaritmo de 0; otra excepción tiene que caer
+        # (si se atrapara cualquiera, el control de caída del medidor saldría ATRAPADA y la cifra no valdría)
+        chk(False, "el evaluador cae con una magnitud 0 en Chillán: %r" % e)
+        return
+    chk(g(r, "chillan", "n_pares") == 5, "el par con magnitud 0 queda fuera: %s" % g(r, "chillan", "n_pares"))
+
+
+def E54_elegible_con_perdida_solo_ocr_contra_V():
+    """§6 bis (X04): una pérdida sólo del OCR contra V no quita la elegibilidad (lleva a DECIDE NICOLÁS). V pierde
+    una protegida de la tabla que V-cercano publica; V-cercano pierde contra V sólo una protegida del OCR."""
+    f = mundo() + [F("Lascar", dia(90) + " 03:00", "protegida", k=1.5, v=1.5, mir=1.6,
+                     vd={"radiante": 8.0, "cercano": 1.0, "pico": 8.0})]
+    f += [F("Lascar", dia(91) + " 03:00", "protegida", v=1.5, mir=1.6, solo_ocr=True,
+            vd={"radiante": 1.0, "cercano": 8.0, "pico": 1.0})]
+    r = correr(f)
+    chk(g(r, "brazos", "V-cercano", "p1_vs_V", "estado") == "SOLO OCR", "pérdida sólo OCR contra V")
+    chk(g(r, "posicion_elegida") == "V-cercano", "sigue elegible: %s" % g(r, "posicion_elegida"))
+    chk(g(r, "veredicto") == "DECIDE NICOLÁS", "la pérdida sólo OCR va a Nicolás: %s" % g(r, "veredicto"))
+
+
+def E55_identidad_grilla_de_mas():
+    """§8.2 (X05): con una grilla del censo de MÁS en la población, la identidad tampoco se midió sobre el censo."""
+    f = mundo()
+    n = sum(1 for x in f if x["grilla_censo"])
+    r = correr(f, n_grillas=n - 1)
+    chk(g(r, "controles", "identidad", "estado") == "INDECIDIBLE", "población con una grilla de más")
+
+
+def _filas_identidad(n):
+    return [{"vol": "Lascar", "dt": "2026-05-01 %04d" % i, "grilla_censo": True, "_evaluable": True, "_motivo": None}
+            for i in range(n)]
+
+
+def E56_tope_otro_granulo_inclusivo():
+    """§8.2 (X06): «si superan el 1 %»: exactamente 1 de 100 en otro gránulo pasa; 2 de 100 no."""
+    filas = _filas_identidad(100)
+    ident = {(x["vol"], x["dt"]): {"mismo_granulo": True, "misma_mascara": True, "dvrp": 0.0, "misma_clase": True}
+             for x in filas}
+    ident[(filas[0]["vol"], filas[0]["dt"])]["mismo_granulo"] = False
+    chk(g(EV.control_identidad(ident, filas, 100), "estado") == "OK", "1 % exacto pasa")
+    ident[(filas[1]["vol"], filas[1]["dt"])]["mismo_granulo"] = False
+    chk(g(EV.control_identidad(ident, filas, 100), "estado") == "INDECIDIBLE", "2 % no pasa")
+
+
+def E57_otra_posicion_con_protegida_solo_ocr():
+    """§6 bis, 3.ª viñeta (X08, N-07): una protegida sólo del OCR que otra posición publica y la elegida no también se
+    lista y lleva a DECIDE NICOLÁS (el lado seguro, ahora escrito)."""
+    f = mundo() + [F("Lascar", dia(90) + " 03:00", "protegida", v=1.5, mir=1.6, solo_ocr=True,
+                     vd={"radiante": 8.0, "cercano": 1.0, "pico": 8.0})]
+    r = correr(f)
+    chk(g(r, "posicion_elegida") == "V", "sigue V: %s" % g(r, "posicion_elegida"))
+    chk(g(r, "protegidas_que_otra_posicion_publica") == [("Lascar", dia(90) + " 03:00")],
+        "listada: %s" % g(r, "protegidas_que_otra_posicion_publica"))
+    chk(g(r, "veredicto") == "DECIDE NICOLÁS", "sólo OCR que otra posición publica: %s" % g(r, "veredicto"))
+
+
+def E58_protegida_sellada_de_k_solo_ocr():
+    """§8.6 (X14): una protegida sólo del OCR que sale con motivo sellado y que K publica también va a DECIDE NICOLÁS."""
+    f = mundo() + [F("Lascar", dia(90) + " 03:00", "protegida", k=1.5, v=1.5, mir=1.6, solo_ocr=True)]
+    f[-1]["motivo"] = "volcan_fuera_del_granulo"
+    f[-1]["grilla_censo"] = False
+    r = correr(f)
+    chk(len(g(r, "controles", "cobertura", "protegidas_k_fuera") or []) == 1, "listada")
+    chk(g(r, "controles", "cobertura", "estado") == "OK", "el motivo sellado no es rojo")
+    chk(g(r, "veredicto") == "DECIDE NICOLÁS", "protegida sólo OCR de K fuera: %s" % g(r, "veredicto"))
+    f[-1]["pub_runner"] = {}
+    r = correr(f)
+    chk(g(r, "controles", "cobertura", "estado") == "INDECIDIBLE", "sin publicación de K del runner en la sellada: rojo")
+
+
+def E59_identidad_sellada_con_grilla():
+    """§8.2 (N-01 de la segunda vuelta): una pasada con grilla del censo que el runner saca con un motivo sellado es un
+    desacuerdo de identidad. Sin declarar como otro gránulo, rojo; declarada, cuenta contra el tope de 1 %."""
+    f = mundo()
+    f[0]["motivo"] = "volcan_fuera_del_granulo"
+    r = correr(f)
+    chk(g(r, "controles", "identidad", "estado") == "INDECIDIBLE", "sellada con grilla sin explicar: rojo")
+    chk(g(r, "veredicto") == "INDECIDIBLE", "sellada con grilla: %s" % g(r, "veredicto"))
+    filas = _filas_identidad(100)
+    ident = {(x["vol"], x["dt"]): {"mismo_granulo": True, "misma_mascara": True, "dvrp": 0.0, "misma_clase": True}
+             for x in filas}
+    filas[0]["_evaluable"], filas[0]["_motivo"] = False, "escena_invalida"
+    chk(g(EV.control_identidad(ident, filas, 100), "estado") == "INDECIDIBLE", "escena inválida sin declarar: rojo")
+    ident[(filas[0]["vol"], filas[0]["dt"])]["mismo_granulo"] = False
+    chk(g(EV.control_identidad(ident, filas, 100), "estado") == "OK", "declarada como otro gránulo, 1 de 100: pasa")
+    filas[1]["_evaluable"], filas[1]["_motivo"] = False, "escena_invalida"
+    ident[(filas[1]["vol"], filas[1]["dt"])]["mismo_granulo"] = False
+    chk(g(EV.control_identidad(ident, filas, 100), "estado") == "INDECIDIBLE", "dos declaradas: superan el 1 %")
+
+
+def E60_k_produccion_none_y_sin_publicacion():
+    """§8.1 (N-05 de la segunda vuelta): k_difiere_de_guardado en None no es «no difiere», y una fila sin la
+    publicación de K del runner no se compara con un 0 por defecto."""
+    f = mundo()
+    f[0]["k_difiere_de_guardado"] = None
+    chk(g(correr(f), "controles", "k_produccion", "estado") == "INDECIDIBLE", "None no es False")
+    f = mundo()
+    f[0]["pub_runner"] = {}
+    r = correr(f)
+    chk(g(r, "controles", "k_produccion", "estado") == "INDECIDIBLE", "sin publicación de K del runner")
+    chk(g(r, "controles", "k_produccion", "n_sin_pub_runner") == 1, "contada")
+
+
+def E61_e_via_no_corrio():
+    """§7 (N-03 de la segunda vuelta): si E se excluye y entre sus fallas hay una vía que no corrió (no una descarga),
+    el veredicto no pasa de DECIDE NICOLÁS."""
+    cola = [F(VOLS[i % 5], "2026-10-%02d 03:00" % (18 + i), "neg_limpio", tramo="E") for i in range(3)]
+    f = mundo() + cola
+    f[-1]["v_marca"] = "geo_distinta"
+    r = correr(f)
+    chk(g(r, "e_excluido") is not None, "E excluido")
+    chk(len(g(r, "e_via_no_corrio") or []) == 1, "declarada: %s" % g(r, "e_via_no_corrio"))
+    chk(g(r, "veredicto") == "DECIDE NICOLÁS", "vía que no corrió en E: %s" % g(r, "veredicto"))
 
 
 ESCENARIOS = [v for k, v in sorted(globals().items()) if k[:1] in "EN" and k[1:3].isdigit() and callable(v)]

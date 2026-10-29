@@ -460,17 +460,26 @@ def control_identidad(ident, filas, n_grillas_censo=None):
     n_grillas_censo = N_GRILLAS_CENSO if n_grillas_censo is None else n_grillas_censo
     n_pob = sum(1 for f in filas if f.get("grilla_censo"))
     con_grilla = [(f["vol"], f["dt"]) for f in _ev(filas) if f.get("grilla_censo")]
+    # N-01 (segunda vuelta): una pasada con grilla del censo es, por construcción, una pasada donde el port cubrió el
+    # volcán. Si el runner la saca con un motivo sellado (volcán fuera del gránulo, escena inválida), eso es un
+    # desacuerdo de identidad: cuenta como otro gránulo (con el tope de 1 %) si la identidad lo declara así, y si no,
+    # es falla. Sin esto, una lectura rota de MxD03 se leería como «el volcán no está» y la pasada desaparecería.
+    selladas = [(f["vol"], f["dt"]) for f in filas if f.get("grilla_censo") and f.get("_motivo") in MOTIVOS_SELLADOS]
+    selladas_sin_explicar = sorted(k for k in selladas if not (k in ident and not ident[k]["mismo_granulo"]))
     faltan = sorted(k for k in con_grilla if k not in ident)
-    otro = [k for k in con_grilla if k in ident and not ident[k]["mismo_granulo"]]
+    otro = [k for k in con_grilla + selladas if k in ident and not ident[k]["mismo_granulo"]]
     malas = [{"clave": list(k), **ident[k]} for k in con_grilla
              if k in ident and ident[k]["mismo_granulo"] and not (
                  ident[k]["misma_mascara"] and abs(ident[k]["dvrp"]) <= TOL_VRP_IDENTIDAD and ident[k]["misma_clase"])]
-    frac_otro = len(otro) / len(con_grilla) if con_grilla else 1.0
-    ok = n_pob == n_grillas_censo and bool(con_grilla) and not faltan and not malas and frac_otro <= MAX_OTRO_GRANULO
+    n_medidas = len(con_grilla) + len(selladas)
+    frac_otro = len(otro) / n_medidas if n_medidas else 1.0
+    ok = n_pob == n_grillas_censo and bool(con_grilla) and not faltan and not malas and \
+        not selladas_sin_explicar and frac_otro <= MAX_OTRO_GRANULO
     return {"estado": "OK" if ok else "INDECIDIBLE", "n_grillas_en_poblacion": n_pob,
             "n_grillas_esperadas": n_grillas_censo, "n_con_grilla": len(con_grilla), "n_faltan": len(faltan),
             "faltan": faltan[:20], "n_otro_granulo": len(otro), "otro_granulo": otro[:20], "n_distintas": len(malas),
-            "distintas": malas[:20]}
+            "distintas": malas[:20], "n_selladas_con_grilla": len(selladas),
+            "selladas_sin_explicar": selladas_sin_explicar[:20], "n_selladas_sin_explicar": len(selladas_sin_explicar)}
 
 
 def control_posicion(filas):
@@ -597,7 +606,9 @@ def control_cobertura(filas, esperadas, sin_pasada_nuestra=None, predicado=predi
     sel = [f for f in filas if not f["_evaluable"] and _lab(f, True) == "protegida" and f["_motivo"] in MOTIVOS_SELLADOS]
     prot_fuera = []
     for f, (pub, _m) in zip(sel, predicado([(f.get("k_slim"), f["inner"]) for f in sel])):
-        if pub != int((f.get("pub_runner") or {}).get("K") or 0):
+        if "K" not in (f.get("pub_runner") or {}):
+            fallas.append({"vol": f["vol"], "dt": f["dt"], "motivo": "sin_publicacion_de_K_del_runner"})
+        elif pub != int(f["pub_runner"]["K"]):
             fallas.append({"vol": f["vol"], "dt": f["dt"], "motivo": "predicado_de_K_distinto_del_runner"})
         if pub:
             prot_fuera.append({"vol": f["vol"], "dt": f["dt"], "motivo": f["_motivo"]})
@@ -624,13 +635,20 @@ def rojo_solo_en_e(cob):
 def control_k_produccion(filas):
     """§8.1: K del arnés = data/ (el arnés marca k_difiere_de_guardado y la re-corrida en el codigo_sha del record
     guardado; una diferencia no reproducida en su sha es falla), y el predicado del evaluador da la misma publicación
-    de K que el del runner. Una fila ok sin el campo k_difiere_de_guardado es falla: no se comparó (VF4-03)."""
-    sin_campo = [(f["vol"], f["dt"]) for f in filas if f.get("estado") == "ok" and "k_difiere_de_guardado" not in f]
+    de K que el del runner. Una fila ok sin el campo k_difiere_de_guardado es falla: no se comparó (VF4-03). Y el campo
+    tiene que ser True o False (un None no es «no difiere»), y cada fila evaluable trae la publicación de K del runner
+    (sin ella, un default 0 coincidiría con el predicado en toda pasada donde K no publica: N-05)."""
+    sin_campo = [(f["vol"], f["dt"]) for f in filas
+                 if f.get("estado") == "ok" and not isinstance(f.get("k_difiere_de_guardado"), bool)]
+    sin_pub = [(f["vol"], f["dt"]) for f in _ev(filas) if "K" not in (f.get("pub_runner") or {})]
     sin_explicar = [(f["vol"], f["dt"]) for f in filas if f.get("estado") == "ok" and f.get("k_difiere_de_guardado")
                     and not f.get("k_reproducida_en_su_sha")]
-    distinto = [(f["vol"], f["dt"]) for f in _ev(filas) if _pub(f, "K") != int((f.get("pub_runner") or {}).get("K") or 0)]
-    return {"estado": "OK" if not sin_campo and not sin_explicar and not distinto else "INDECIDIBLE",
-            "sin_campo": sin_campo[:20], "n_sin_campo": len(sin_campo), "sin_explicar": sin_explicar[:20],
+    distinto = [(f["vol"], f["dt"]) for f in _ev(filas)
+                if "K" in (f.get("pub_runner") or {}) and _pub(f, "K") != int(f["pub_runner"]["K"])]
+    ok = not sin_campo and not sin_pub and not sin_explicar and not distinto
+    return {"estado": "OK" if ok else "INDECIDIBLE",
+            "sin_campo": sin_campo[:20], "n_sin_campo": len(sin_campo), "sin_pub_runner": sin_pub[:20],
+            "n_sin_pub_runner": len(sin_pub), "sin_explicar": sin_explicar[:20],
             "predicado_distinto_del_runner": distinto[:20]}
 
 
@@ -705,7 +723,10 @@ def evaluar(filas, esperadas, ident, externos, sin_pasada_nuestra=None, predicad
             n_grillas_censo=None):
     """El veredicto del §7, con el protocolo del tramo E: si la cobertura queda en rojo sólo por pasadas del tramo E,
     E se excluye entero en todos los brazos (filas, esperadas y pasadas de MIROVA sin pasada nuestra) y se evalúa C
-    solo; el resultado lo declara en `e_excluido`. Un rojo que toca C deja todo INDECIDIBLE."""
+    solo; el resultado lo declara en `e_excluido`. Un rojo que toca C deja todo INDECIDIBLE.
+    N-03 (segunda vuelta): si entre lo que excluyó E hay pasadas donde la vía no corrió (falla_via_*: sin MxD03,
+    geolocalización distinta, sin grilla), eso dice algo de la vía con datos nuevos, no de la descarga: E se excluye
+    igual, pero el veredicto no puede pasar de DECIDE NICOLÁS, y la lista queda en `e_via_no_corrio`."""
     res = _evaluar(filas, esperadas, ident, externos, sin_pasada_nuestra, predicado, n_grillas_censo)
     if rojo_solo_en_e(res["controles"]["cobertura"]):
         motivo = {k: res["controles"]["cobertura"][k] for k in ("repetidas", "faltan", "sobran", "fallas",
@@ -713,8 +734,12 @@ def evaluar(filas, esperadas, ident, externos, sin_pasada_nuestra=None, predicad
         res = _evaluar([f for f in filas if not _es_e(f["dt"])], [k for k in esperadas if not _es_e(k[1])], ident,
                        externos, [x for x in sin_pasada_nuestra if not _es_e(x[1])], predicado, n_grillas_censo)
         res["e_excluido"] = motivo
+        res["e_via_no_corrio"] = [x for x in motivo["fallas"] if str(x["motivo"]).startswith("falla_via_")]
+        if res["e_via_no_corrio"] and res["veredicto"] == "PROPONER ADOPCIÓN":
+            res["veredicto"] = "DECIDE NICOLÁS"
     else:
         res["e_excluido"] = None
+        res["e_via_no_corrio"] = []
     return res
 
 

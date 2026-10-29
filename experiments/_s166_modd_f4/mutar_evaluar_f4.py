@@ -79,7 +79,7 @@ MUTACIONES = [
     ("M41_variante_no_cambia_clase", '    r["distance_class"] = clase_dc(dd, inner)\n', ""),
     ("M42_p1_mira_al_brazo_contra_si_mismo", 'if _lab(f, True) == "protegida" and _pub(f, ref) == 1 and _pub(f, b) == 0]', 'if _lab(f, True) == "protegida" and _pub(f, b) == 1 and _pub(f, b) == 0]'),
     ("M43_descriptivas_vacias", 'for f in _ev(filas) if _pub(f, b) != _pub(f, "V")]', "for f in _ev(filas) if False]"),
-    ("M44_excluida_sin_cotejar_runner", 'if pub != int((f.get("pub_runner") or {}).get("K") or 0):', "if False:"),
+    ("M44_excluida_sin_cotejar_runner", 'elif pub != int(f["pub_runner"]["K"]):', "elif False:"),
     ("M45_lejanas_sin_alertados", '"con_alertados": sum(1 for f in lej if', '"con_alertados": sum(0 for f in lej if'),
     ("M46_excluida_listada_sin_publicar", "        if pub:\n            prot_fuera.append(",
      "        if True:\n            prot_fuera.append("),
@@ -87,7 +87,7 @@ MUTACIONES = [
     ("M48_otra_posicion_recupera_ignorada", '            or prot_k or res.get("protegidas_que_otra_posicion_publica")):',
      "            or prot_k):"),
     ("M49_identidad_sin_total_de_grillas", "ok = n_pob == n_grillas_censo and bool(con_grilla)", "ok = bool(con_grilla)"),
-    ("M50_k_sin_campo_ok", '"OK" if not sin_campo and not sin_explicar and not distinto', '"OK" if not sin_explicar and not distinto'),
+    ("M50_k_sin_campo_ok", "ok = not sin_campo and not sin_pub and", "ok = not sin_pub and"),
     ("M51_lista_ausente_ok", "and not sin and not sin_medir", "and not sin"),
     ("M52_sin_protocolo_e", 'if rojo_solo_en_e(res["controles"]["cobertura"]):', "if False:"),
     ("M53_protocolo_no_saca_e", '_evaluar([f for f in filas if not _es_e(f["dt"])]', "_evaluar([f for f in filas]"),
@@ -106,6 +106,29 @@ MUTACIONES = [
     ("M65_posicion_sin_vrp", 'if w.get("distance_class") == v.get("distance_class"):', "if False:"),
     ("M66_cobertura_sin_sobrantes", "and not sobran and", "and"),
     ("M67_main_sin_lista_ok", 'pob.get("sin_pasada_nuestra"), predicado', "(), predicado"),
+    # segunda vuelta del verificador: X01 a X14 (vivas con la batería de 53) y las reglas nuevas N-01, N-02, N-03, N-05
+    ("M68_frontera_e_un_dia_despues", 'INICIO_E = "2026-10-17"', 'INICIO_E = "2026-10-18"'),
+    ("M69_frontera_e_estricta", "return str(dt)[:10] >= INICIO_E", "return str(dt)[:10] > INICIO_E"),
+    ("M70_chillan_sin_magnitud_positiva", ' and _mag(f, "K") > 0 and _mag(f, b) > 0:\n            mm', ":\n            mm"),
+    ("M71_elegible_solo_sin_perdida", '(b == "V" or br[b]["p1_vs_V"]["estado"] != "VETADO")',
+     '(b == "V" or br[b]["p1_vs_V"]["estado"] == "SIN PERDIDA")'),
+    ("M72_identidad_total_minimo", "ok = n_pob == n_grillas_censo", "ok = n_pob >= n_grillas_censo"),
+    ("M73_tope_otro_granulo_exclusivo", "frac_otro <= MAX_OTRO_GRANULO", "frac_otro < MAX_OTRO_GRANULO"),
+    ("M74_otra_posicion_solo_tabla", 'for x in p1(filas, bc, o)["perdidas"]})',
+     'for x in p1(filas, bc, o)["perdidas"] if not x["solo_ocr"]})'),
+    ("M75_protegida_sellada_solo_tabla", 'not f["_evaluable"] and _lab(f, True) == "protegida"',
+     'not f["_evaluable"] and _lab(f, False) == "protegida"'),
+    ("M76_identidad_ignora_selladas", "not selladas_sin_explicar and frac_otro", "frac_otro"),
+    ("M77_selladas_no_cuentan_en_el_tope", "for k in con_grilla + selladas if k in ident", "for k in con_grilla if k in ident"),
+    ("M78_k_difiere_none_ok", 'not isinstance(f.get("k_difiere_de_guardado"), bool)', '"k_difiere_de_guardado" not in f'),
+    ("M79_sin_publicacion_de_k_ok", "ok = not sin_campo and not sin_pub and not sin_explicar",
+     "ok = not sin_campo and not sin_explicar"),
+    ("M80_e_via_no_corrio_propone", 'if res["e_via_no_corrio"] and res["veredicto"] == "PROPONER ADOPCIÓN":', "if False:"),
+    ("M81_e_via_cualquier_falla", 'if str(x["motivo"]).startswith("falla_via_")]', "]"),
+    # M82: la fila sin publicación de K del runner se acepta en silencio (con «if False» caía en el elif por KeyError
+    # y salía CAE, que no es la mutación que se quiere medir)
+    ("M82_excluida_sin_publicacion_ok",
+     'fallas.append({"vol": f["vol"], "dt": f["dt"], "motivo": "sin_publicacion_de_K_del_runner"})', "pass"),
 ]
 # Cada texto a mutar tiene que aparecer exactamente una vez en evaluar_f4.py; si no, el medidor dice «NO APLICA» en vez
 # de mutar otra cosa.
@@ -157,9 +180,16 @@ def main():
     lineas.append("MUTACIONES: %d de %d atrapadas por aserción; vivas %s; caen %s; rotas %s; no aplican %s" % (
         atr, len(muts), [r[0] for r in muts if r[1] == "VIVA"], [r[0] for r in muts if r[1] == "CAE"],
         [r[0] for r in muts if r[1] == "ROTA"], [r[0] for r in muts if r[1].startswith("NO APLICA")]))
+    # N-02 (segunda vuelta): si un control no sale como debe, la cifra no vale (con la identidad ATRAPADA, una mutación
+    # puede parecer atrapada por un escenario que falla igual sin mutar); se dice en la salida y el código es 1
+    malos = [c for c, debe in (("IDENTIDAD", "VIVA"), ("CONTROL_CAIDA", "CAE"), ("CONTROL_ROTA", "ROTA"))
+             if c in ident and ident[c] != debe]
+    if malos:
+        lineas.append("NO VALE: controles que no salen como deben: %s" % malos)
     txt = "\n".join(lineas)
     print(txt)
     Path(a.salida).write_text(txt + "\n", encoding="utf-8")
+    sys.exit(1 if malos else 0)
 
 
 if __name__ == "__main__":
