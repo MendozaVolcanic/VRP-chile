@@ -38,6 +38,9 @@ ESPERADO_POR_DIA = {
     "NRT Retry (NASA recovery)": 12,             # cron "30 1-23/2 * * *"
     "Deploy GitHub Pages": 12,                   # cron "50 */2 * * *"
     ".github/workflows/sync-mirova-csv.yml": 24,  # cron "12 * * * *"
+    # S169 (P3-09): la sombra «codigo MIROVA». Su ausencia la alerta nrt-monitor.yml (decidirSombra); aqui solo
+    # entra al reporte de puntualidad. Con una corrida al dia, 0 en 24 h es justamente lo que hay que ver.
+    "Sombra codigo MIROVA (vias V750, V375 y MODIS, 11 Tier A)": 1,  # cron "0 15 * * *"
 }
 
 # El unico workflow cuya ausencia total es accionable por si sola.
