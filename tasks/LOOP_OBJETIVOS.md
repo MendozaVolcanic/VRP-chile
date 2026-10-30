@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 11:18 UTC (S169, vuelta 33): Nicolás consideró pausar el día y eligió seguir
+- Nicolás: «pausa todos los procesos por el dia de hoy» (interrumpido) y, tras el resumen con tres opciones, «3»
+  (nada se pausa). MOD-D en M83 de ~90; el nulo del lector de V375-E parte cuando termine (aviso armado).
+
 ### 2026-10-30 10:45 UTC (S169, vuelta 32): MOD-D más lento; el nulo del lector sigue esperando el cupo
 - `mutar_evaluar_f4.py` (PID 16420) va en M77 (M72 a las 09:15 UTC: ~18 min por mutación). Con ~13 corridas más,
   termina cerca de las 14:45 UTC (estimación). El nulo del lector de V375-E (18 a 24 h) parte entonces y alcanza antes
