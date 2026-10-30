@@ -110,6 +110,14 @@ def test_vv04_una_corrida_en_curso_vieja_no_tapa_la_alerta():
     assert decidir(runs, "2026-11-05T18:30:00Z")["accion"] == "alerta"
 
 
+def test_vr2_05_frontera_de_6_h_exactas_ya_alerta():
+    """Ronda 3: «menos de 6 h» es estricto. Una corrida en curso desde hace 6,0 h exactas ya no es retraso."""
+    verde_vieja = corrida("2026-11-04T09:00:00Z", "success")
+    en_curso = corrida("2026-11-05T12:30:00Z", None, estado="in_progress")
+    assert decidir([en_curso, verde_vieja], "2026-11-05T18:30:00Z")["accion"] == "alerta"
+    assert decidir([en_curso, verde_vieja], "2026-11-05T18:29:59Z")["accion"] == "pendiente"
+
+
 def test_vv04_el_monitor_no_abre_ni_cierra_con_pendiente():
     d = yaml.safe_load(MONITOR.read_text(encoding="utf-8"))
     script = next(s for s in d["jobs"]["check"]["steps"]
