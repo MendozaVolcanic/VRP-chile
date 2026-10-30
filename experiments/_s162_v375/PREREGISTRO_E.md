@@ -784,7 +784,11 @@ caídos lleva sólo procedencia y controles.
 imprime y se escribe sólo su nombre, OK o CAE, y un motivo genérico fijo (por ejemplo «S7 CAE: más del 10 % sin dato
 en una clase de las que deciden»): ningún conteo por clase, ninguna lista y ningún nombre de pasada. El detalle de los
 controles (conteos, listas, distancias) sale sólo en la lectura que decide, con todos los controles en OK. Los
-conteos por clase, las horas y los nombres de pasadas son composición del marco.
+conteos por clase, las horas y los nombres de pasadas son composición del marco. **Antes de la parada, los dos
+contadores de la parada (noches y alertas acumuladas) se imprimen siempre, también con un control caído** (VL169-08,
+ronda 2): son lo único que dice cuánto falta, no son una lectura, y sin ellos las primeras noches (en que S6 cae por
+falta de sustrato) se leerían sólo como «LECTURA NO LEGIBLE». Con la parada alcanzada y un control caído no se
+imprimen.
 
 Los controles son:
 
@@ -798,6 +802,18 @@ Los controles son:
   lectura se corre **desde un checkout del tag del lector** (los records y la referencia se pasan por ruta desde donde
   estén). El sha256 del propio lector y el `git rev-parse HEAD` del checkout donde corre se imprimen (un archivo no puede
   llevar su propio sha256; lo fija el tag).
+  **Ronda 2 (VL169-06)**: S0 fija también `pipeline/store.py` (qué pasada es diurna), `pipeline/profile.py`,
+  `pipeline/f5_core.py` y `pipeline/profiles/mirova_equivalent.yaml` (los flags que esos módulos leen). Y el perfil no
+  puede venir de afuera: si la variable de entorno `VRP_PROFILE` está puesta con un valor distinto de
+  `mirova_equivalent`, S0 cae y no se carga nada; si no está puesta, el lector la fija en `mirova_equivalent` antes de
+  importar nada (`banco_paridad` y `evaluador_comun` sólo la ponen si falta, así que un valor del shell ganaba). Es la
+  única variable de entorno que cambia flags en los módulos que el lector carga (`grep` de `os.environ` en esos
+  módulos: `VRP_PROFILE` y `GITHUB_SHA`, que sólo escribe la marca de régimen de un record nuevo).
+  **Ronda 2 (VL169-05), linaje y checkout**: la rama del lector tiene `origin/main` mezclado (merge `dcec35a8c`), así que
+  `c42ee0eb7` es ancestro y los sha de S0 son los del linaje de `main` en ese merge; **el tag del lector se corta sobre
+  un commit que desciende de ese merge**. El checkout donde se lee tiene que haber hecho `git fetch origin` y tener
+  `c42ee0eb7` y los `codigo_sha` de los records (S8 los compara con git; un sha que git no resuelve marca régimen, así
+  que un checkout incompleto marcaría la lectura por una causa de procedimiento).
 - **S1 ventana**: el corte empieza **exactamente** el 2026-11-03 (igualdad, VS168-01), termina en la noche del corte
   (§11.8), ningún record usado queda fuera de esa ventana y las claves de pasada (volcán, sensor y hora) no se repiten.
 - **S2 predicado**: el control de identidad del predicado de `banco_paridad` (`control_identidad_predicado`) pasa, y en
@@ -818,8 +834,9 @@ Los controles son:
 - **S7 cobertura** (A108): las pasadas sin record de la vía (o con la vía en `"sin_grilla"`) son SIN DATO y se listan
   por nombre en la lectura; si en alguna clase de las que deciden (`pos_prot`, `pos_bajo`, `neg_pub`, `neg_resto`,
   `far_tabla`) pasan del 10 %, cae. Una protegida SIN DATO que K publica, además, veta en (a) (§11.6, VS168-03).
-- **S9 rezago de la referencia** (VS168-05, sólo con la parada alcanzada): la fila más nueva del consolidado (la
-  tabla) es de al menos **2 días** después de la noche del corte. Si no, la tabla y el OCR pueden no haber traído todavía
+- **S9 rezago de la referencia** (VS168-05, sólo con la parada alcanzada): la fila más nueva **de VIIRS 375** del
+  consolidado (la tabla; ronda 2, VL169-07: no la de cualquier sensor, porque el scraper puede seguir escribiendo MODIS
+  con VIIRS 375 atrasado) es de al menos **2 días** después de la noche del corte. Si no, la tabla y el OCR pueden no haber traído todavía
   las alertas de las últimas noches (una pasada quedaría `neg_limpio` porque su alerta no llegó): cae, y hay que volver a
   bajar la referencia más tarde.
 - **S10 distancias completas** (VS168-11): ninguna pasada de la vía con alertados queda sin las distancias de
@@ -828,18 +845,56 @@ Los controles son:
 
 **S8, marca de régimen (VS168-04; no hace caer la lectura, la marca).** Cada record trae `regimen.codigo_sha`, el commit
 de `main` que lo escribió, y `regimen.perfil`. Para todas las pasadas del corte, los `codigo_sha` distintos de los
-records de K y de la vía, y el de `--commit`, se comparan con git contra **`c42ee0eb7`** (#926, el commit que encendió la
-sombra) en `pipeline/` entero (código y perfiles): `git diff --name-only c42ee0eb7 <sha> -- pipeline/` tiene que salir
-vacío para cada uno. Además el perfil de los records de K tiene que ser `mirova_equivalent` y el de la vía
-`sombra_codigo_mirova`. Un sha ausente, que git no resuelve, o un perfil distinto cuentan como cambio. Si hay cambio, la
+records de K y de la vía, y el de `--commit`, se comparan con git contra **la base de la ventana**. Además el perfil de
+los records de K tiene que ser `mirova_equivalent` y el de la vía `sombra_codigo_mirova`. Un sha ausente, que git no
+resuelve, o un perfil distinto cuentan como cambio.
+
+**La base de la ventana (ronda 2, precisión de la coordinadora de S169).** No es un commit escrito a mano: es el
+`codigo_sha` de los records **de la vía** de la primera noche de la ventana con records de la vía (el 2026-11-03 si la
+sombra corrió ese día), o sea el commit de `main` del que corrió la primera sombra con datos. Si esa noche trae más de
+un `codigo_sha`, la base es el del record más temprano y los otros se comparan contra ella como cualquier otro. Si el
+record más temprano no trae `codigo_sha`, no hay base y la lectura se marca. La regla es que **todas las noches tienen
+que tener el mismo régimen que la primera**, con la comparación de abajo. Por qué no `c42ee0eb7`: antes del 2026-11-03
+pueden entrar a `main` arreglos en `scripts/`, en el workflow de la sombra o en `scripts/run_pipeline.py` (una auditoría
+del 2026-10-30 encontró defectos ahí), y como esos archivos están en lo que se compara, contra `c42ee0eb7` todas las
+noches saldrían marcadas.
+
+**El hueco que esto abre, y cómo queda a la vista.** Con la base tomada de los datos, el lector ya no comprueba que la
+primera noche haya corrido con el código que se pre-registró: si antes del 2026-11-03 entra a `main` un cambio que
+altera la vía o K (no sólo un arreglo del workflow), la ventana entera sería coherente consigo misma y no marcaría. Para
+que eso no pase en silencio, el lector **informa** (sin marcar) la misma comparación entre `c42ee0eb7` y la base, con la
+lista de archivos que cambian; la lectura la imprime en la línea del régimen. Juzgar si esos cambios tocan lo que la
+sombra mide es de Nicolás, con esa lista delante.
+
+**Qué se compara (ronda 2, VL169-03 y VL169-04; regla adoptada por la coordinadora de S169).** Los archivos que cambian
+entre la base de la ventana y el sha en `pipeline/`, `volcanoes.yaml`, `scripts/run_pipeline.py` y
+`.github/workflows/sombra-codigo-mirova.yml` (`git diff --name-only`), y de cada uno:
+- un `.py` (los de `pipeline/` y `scripts/run_pipeline.py`) cuenta como cambio si su **árbol sintáctico sin docstrings**
+  difiere (`ast.dump` de las dos versiones, quitando el docstring de módulo, clases y funciones): un comentario, un
+  docstring o la cabecera FICHA no marcan; cualquier otra diferencia sí, también en código que comparten la vía de
+  VIIRS 375, VIIRS 750 y MODIS (separar por función abriría el hueco de A89). Un `.py` que aparece, desaparece o no se
+  puede leer marca;
+- en `pipeline/profiles/` cuentan sólo `mirova_equivalent.yaml` y `sombra_codigo_mirova.yaml` (el segundo hereda del
+  primero); los demás perfiles no los carga ni K ni la vía, y un cambio ahí no marca. Un cambio en esos dos marca;
+- `pipeline/grillas_mirova.yaml` se lee en las dos versiones y de cada volcán se quitan **sólo** `roi_v750` y
+  `roi_modis` (que la vía de VIIRS 375 no lee: arma su caja con `roi1_half_m`); el resto (`epsg`, `x0`, `y0`,
+  `centro_lat`, `centro_lon` y cualquier otra clave) se compara por igualdad. Un archivo que no se puede leer, un volcán
+  nuevo o una clave nueva marcan;
+- cualquier otro archivo de esas rutas que cambie (`volcanoes.yaml`, el workflow, un `.json` o `.yaml` de `pipeline/`)
+  marca.
+Por qué así: con `pipeline/` entero la marca era casi segura en 30 noches (35 commits tocaron `pipeline/` en `main`
+desde el 2026-10-01, casi todos de otra vía o con banderas apagadas, verificador de S169) y el CUMPLE automático
+quedaba inalcanzable; y faltaban `volcanoes.yaml` (radio interior y coordenadas que deciden summit o far) y el llamador
+`scripts/run_pipeline.py` (A6). Lo que esta regla no abre: un cambio real de la vía en un `.py`, en `x0`, `y0`, centro o
+`epsg`, o en el perfil, sigue marcando. Lo que deja: un cambio en código compartido pero ajeno (MODIS o VIIRS 750 dentro
+de `mirova_v750_codigo.py`) sigue marcando, y Nicolás lo descarta mirando el diff. Si hay cambio, la
 lectura se imprime igual, rotulada con los commits y los archivos que cambiaron, y **un CUMPLE de (b), (c) o (d) pasa a
 DECIDE NICOLÁS** (§11.7). Por qué marca y no cae: no es el instrumento el que falla sino la ventana la que mezcla dos
 detectores (A104); Nicolás tiene que ver la lectura para decidir. Por qué un NO CUMPLE se queda: con dos regímenes
 mezclados no se puede certificar que la vía cumpla, pero una protegida perdida o un empeoramiento medido siguen siendo
-razones para no adoptar; dejarlo en NO CUMPLE es lo conservador. Por qué `pipeline/` entero y no sólo la vía: un
-archivo de `pipeline/` que parece de otro sensor puede tener una función que la vía o K usan, y separar a mano es el
-error de A89; si el cambio resulta ajeno a VIIRS 375, lo dice Nicolás al ver los archivos. (La propuesta del traspaso
-decía «LECTURA NO LEGIBLE y decide Nicolás»; se eligió la variante del verificador, que deja ver la lectura.)
+razones para no adoptar; dejarlo en NO CUMPLE es lo conservador. (La propuesta del traspaso decía «LECTURA NO LEGIBLE
+y decide Nicolás»; se eligió la variante del verificador, que deja ver la lectura. La primera versión comparaba
+`pipeline/` entero por nombre de archivo; la ronda 2 la reemplazó por la regla de arriba.)
 
 ### 11.5 El borde del radio (VA168-08)
 
@@ -928,13 +983,31 @@ Si a las 30 noches no hay 40 alertas, la decisión de seguir o de leer con lo qu
 que haya exige un pre-registro nuevo, porque este lector no lee antes de N.
 
 **Salidas** (`--dir-salida`, obligatorio): nunca se sobrescribe un archivo. La lectura que decide se escribe como
-`lectura_sombra_corte_<N>.txt` y `.json`; si ya existen, el lector no vuelve a leer ni a imprimir la lectura y sale 2
-(el corte que decide se lee **una sola vez**, VS168-05). Toda otra corrida (antes de la parada, o con un control caído)
-se escribe como `controles_sombra_<corte>_<hora UTC>.txt` y `.json`, con `<corte>` igual a N si ya existe o a
-`--hasta` si no. Cada salida lleva el sha256 de la referencia y de los records.
+`lectura_sombra_corte_<N>.txt` y `.json`. Toda otra corrida (antes de la parada, o con un control caído) se escribe como
+`controles_sombra_<corte>_<hora UTC>.txt` y `.json`, con `<corte>` igual a N si ya existe o a `--hasta` si no. Cada
+salida lleva el sha256 de la referencia y de los records.
 
-**Códigos de salida**: 0 lectura que decide escrita; 3 LECTURA NO LEGIBLE (cae un control); 5 parada no alcanzada (sólo
-controles y contadores); 2 la lectura de ese corte ya existe o el archivo de salida ya existe.
+**Una sola lectura por ventana, no por nombre ni por carpeta (ronda 2, VL169-01; decisión de la coordinadora de S169).**
+N depende de las etiquetas, y las etiquetas de la referencia: con otra referencia N se mueve y el nombre del archivo
+cambia, y con otra carpeta el nombre no choca (el verificador de S169 lo reprodujo con `probe_b1b.py`: dos lecturas,
+de los cortes 11-11 y 11-12, en la misma carpeta). Así que la regla es por ventana:
+- **Registro de la ventana.** Cada lectura que decide agrega, **antes de imprimir la lectura**, una línea a
+  `experiments/_s168/v375e_sombra/lecturas/REGISTRO_VENTANA_P.jsonl` (en el checkout del lector; sólo se agrega, nunca
+  se reescribe) con N, la hora del servidor, el sha256 de la referencia y de cada JSON de records, `--commit`, el sha256
+  del lector y la carpeta de salida. No lleva el estado del paquete. **Ese registro se commitea a `loop/activo` antes de
+  mostrar la lectura a nadie** (ni a la coordinadora ni a Nicolás).
+- **El lector se niega (sale 2, sin escribir nada y sin imprimir ninguna lectura)** si: en la carpeta de salida existe
+  cualquier `lectura_sombra_corte_*`; o el registro local ya tiene una lectura; o el registro de `origin/loop/activo` ya
+  tiene una lectura (lo lee con `git show`); o `origin/loop/activo` no se puede resolver (falla cerrada: hay que hacer
+  `git fetch origin`). Se comprueba antes de calcular nada.
+- **Una segunda lectura no puede pasar en silencio.** Con otra carpeta o con otra referencia en el mismo checkout, la
+  rechaza el registro local; desde otro checkout, la rechaza el de `loop/activo`; y si dos lecturas se hicieran antes de
+  que el registro llegara a `loop/activo`, al commitearlo quedan dos líneas, visibles. Una segunda lectura con otra
+  referencia exige un pre-registro nuevo.
+
+**Códigos de salida**: 0 lectura que decide escrita; 3 LECTURA NO LEGIBLE (cae un control, o `VRP_PROFILE` con otro
+valor); 5 parada no alcanzada (sólo controles y contadores); 2 la ventana ya se leyó (o no se puede comprobar) o el
+archivo de salida ya existe.
 
 ### 11.9 Lo que este lector no hace
 
@@ -943,28 +1016,28 @@ No toca `pipeline/`, `data/` ni `frontend/`, no despacha nada y no corre la regl
 
 ### 11.10 Pruebas y estado
 
-- **Batería** (`experiments/_s168/v375e_sombra/probar_sombra.py`, salida `probar_sombra_salida.txt`): **104 de 104**,
-  sobre escenas sintéticas con el predicado del tablero con node, `banco_paridad` real y las dependencias del tag. Cubre
-  las clases, la población (Suomi NPP fuera), `cargar_records` (sólo la vía, sólo VIIRS 375, sólo la ventana), los
-  brazos con la escena LEJANA, el borde y su vuelta, cada control S0 a S7 en verde y en rojo (S5 con 0 de 0, S2 con la
-  identidad del predicado caída), que con un control caído no salga nada de la población (VA168-01, también en
-  `main()`), la regla de criterios con valores fabricados en todas sus ramas, los controles de la curva (sesgo de
-  plataforma, ganancias, sin sustrato), las mitades, la parada, la regla SN, y `main()` de punta a punta sobre carpetas
-  y CSV sintéticos.
-- **Nulo por mutaciones** (`mutar_sombra.py`, 55 mutaciones de una línea, cada una en su copia): pendiente de cupo
-  pesado del equipo; sus cifras irán aquí antes del sello.
-- **S169** (`experiments/_s169/v375e_lector_arreglos/INFORME.md`): con los arreglos de §11.11 la batería pasó a
-  **190 aserciones** (unos 7 minutos por corrida en el computador de Nicolás) y el nulo a **111 mutaciones** (las 55
-  de S168, seis de ellas reescritas sobre el código nuevo; las 14 que el verificador creía sobrevivientes, una en dos
-  variantes, más V07 en tres; y 39 de las reglas nuevas). El nulo sigue **sin correr**: con 113 corridas de unos 7
-  minutos son cerca de 13 horas con un hilo. Cada regla nueva se vio en rojo rompiéndola a mano en una copia
-  (`experiments/_s169/v375e_lector_arreglos/ver_en_rojo.py`, cinco grupos). Una mutación es **equivalente** y se
-  espera que sobreviva: V04 (cruzar P2 contra K con P2-L en la llamada a `criterios_sombra`), porque en el alfabeto de
-  `regla_signos` el conjunto que (b) acepta para P2 (GANA, EMPATE, SIN SUSTRATO) es el complemento exacto del que
-  rechaza para P2-L (PIERDE, BLOQUEA), así que (b) da lo mismo con los dos órdenes.
-- **La batería no se cae por una clave ausente**: los resultados del lector se envuelven en un dict que devuelve vacío
-  para una clave que falta, y cada sección registra una excepción como aserción fallida con su nombre. La carga del
-  lector queda fuera de toda sección, así que una mutación que rompe la importación sigue saliendo CAÍDA.
+- **Batería y nulo, historia** (cifras de cada momento; las vigentes están en el punto siguiente): en S168 la batería
+  daba 104 de 104 y el nulo tenía 55 mutaciones; en la primera ronda de S169, 190 de 190 y 111. Ninguna versión del nulo
+  se ha corrido.
+- **Vigente (S169, ronda 2)**: batería y nulo con las cifras de §11.12 y de
+  `experiments/_s169/v375e_lector_arreglos/INFORME.md`, sección «Ronda 2». La batería cubre, sobre escenas sintéticas
+  con el predicado del tablero con node, `banco_paridad` real y las dependencias del tag: clases, población (Suomi NPP
+  fuera), `cargar_records`, brazos, borde y sus dos vueltas, los controles S0 a S10 en verde y en rojo, la marca S8, que
+  con un control caído o antes de la parada no salga la población, el corte en la noche de la parada, el registro de la
+  ventana, el cableado de `leer_brazo` y `main()` de punta a punta.
+- **S169, primera ronda** (historia): con los arreglos de §11.11 la batería pasó a 190 aserciones y el nulo a 111
+  mutaciones (las 55 de S168, seis reescritas; las 14 que el verificador creía sobrevivientes, en 17 mutaciones; y 39 de
+  las reglas nuevas). Cada regla nueva se vio en rojo rompiéndola a mano en una copia
+  (`experiments/_s169/v375e_lector_arreglos/ver_en_rojo.py`).
+- **V04 es equivalente** y se espera que sobreviva al nulo: cruzar P2 contra K con P2-L en la llamada a
+  `criterios_sombra` no cambia (b), porque en el alfabeto de `regla_signos` el conjunto que (b) acepta para P2 (GANA,
+  EMPATE, SIN SUSTRATO) es el complemento exacto del que rechaza para P2-L (PIERDE, BLOQUEA). Desde la ronda 2 está
+  declarada en `mutar_sombra.py` (`EQUIVALENTES`, VL169-10) y la salida la rotula.
+- **Caídas (ronda 2, VL169-02)**: los resultados del lector se envuelven en un dict que devuelve vacío para una clave
+  que falta (una clave quitada se ve como aserción fallida), y una excepción dentro de una sección se registra como
+  **CAÍDA**, no como aserción fallida: la batería sale 2. El nulo cuenta ATRAPADA sólo con salida 1 (alguna aserción
+  falló y ninguna sección se cayó); con salida 2, CAÍDA. Lo comprueban dos controles: `CONTROL` (rompe la importación)
+  y `CONTROL_SECCION` (lanza dentro de una sección); los dos tienen que salir CAÍDA.
 
 ### 11.11 Arreglos del verificador limpio de S168 (S169, 2026-10-30)
 
@@ -993,3 +1066,28 @@ Cada regla nueva quedó escrita en la sección que dice la tabla antes de tocar 
 `sensor_zenith_deg` del record de K en lugar del `geometria_centro` del run (la sombra no tiene run; el verificador lo
 dejó SIN VERIFICAR y aquí también queda así); y el Wilson que `evaluar.lecturas` aplica a `neg_resto` como si fuera
 muestra, que es más conservador que un conteo exacto para ver ENCIENDE DE MAS y es la función sellada sin cambios.
+
+### 11.12 Ronda 2: verificador limpio de S169 (2026-10-30)
+
+Verificador limpio (Sonnet) sobre `983f6f28d`: SELLABLE CON CAMBIOS, un hallazgo de gravedad 3 y seis de gravedad 2
+(`experiments/_s169/v375e_lector_verificador/INFORME.md`, en la rama `loop/activo`). Las decisiones de cómo cerrarlos
+son de la coordinadora de S169 y están escritas en la sección que dice la tabla, antes que el código.
+
+| hallazgo | gravedad | regla (sección) | tratamiento |
+|---|---|---|---|
+| VL169-01 «una sola vez» era por nombre y carpeta, no por ventana | 3 | §11.8 | una sola lectura por ventana: rc 2 sin escribir nada si hay cualquier `lectura_sombra_corte_*` en la carpeta, si el registro local o el de `loop/activo` ya tiene una lectura, o si `loop/activo` no se resuelve; registro de la ventana que se commitea a `loop/activo` antes de mostrar la lectura; probado con el caso de `probe_b1b.py` |
+| VL169-02 el nulo contaba una caída como ATRAPADA | 2 | §11.10 y esta sección | en la batería una excepción dentro de una sección es CAÍDA (sale 2), no FALLA; el nulo cuenta ATRAPADA sólo con salida 1 y ninguna sección caída; control nuevo `CONTROL_SECCION` (lanza dentro de una sección: tiene que salir CAÍDA) |
+| VL169-03 S8 marcaba por todo `pipeline/` | 2 | §11.4 S8 | AST sin docstrings para los `.py`; sólo los dos perfiles que cargan K y la vía; `grillas_mirova.yaml` sin `roi_v750` ni `roi_modis` |
+| VL169-04 S8 no miraba lo de fuera de `pipeline/` | 2 | §11.4 S8 | se suman `volcanoes.yaml`, `scripts/run_pipeline.py` y el workflow de la sombra |
+| (precisión de la coordinadora) la base de S8 | 2 | §11.4 S8 | la base deja de ser `c42ee0eb7`: es el `codigo_sha` de los records de la vía de la primera noche; todas las noches tienen que tener su régimen; la comparación entre `c42ee0eb7` y la base se informa, sin marcar (el hueco que abre está escrito en S8) |
+| VL169-05 S8 y la batería dependían de objetos git | 2 | §11.4 S0 | merge de `origin/main` en la rama (`dcec35a8c`): `c42ee0eb7` es ancestro; S0 recalculado sobre ese árbol (cambió `auto_audit_weekly.py`); el tag se corta sobre un descendiente de ese merge; el checkout de lectura hace `git fetch origin` |
+| VL169-06 VRP_PROFILE y módulos sin sha | 2 | §11.4 S0 | S0 cae si `VRP_PROFILE` trae otro perfil y lo fija si falta; suma `store.py`, `profile.py`, `f5_core.py` y `profiles/mirova_equivalent.yaml` |
+| VL169-07 S9 medía la tabla de cualquier sensor | 2 | §11.4 S9 | sólo filas de VIIRS 375 |
+| VL169-08 sin contadores con un control caído antes de la parada | 1 | §11.4 | los contadores salen siempre antes de la parada |
+| VL169-09 la comprobación en rojo es por grupos | 1 | (ninguna) | aceptado: la cierra el nulo, que rompe una regla por copia; los grupos se eligieron para no taparse y los que se taparon se repitieron |
+| VL169-10 V04 equivalente sin marca en el script | 1 | §11.10 | `EQUIVALENTES` en `mutar_sombra.py`, declarada antes de correr y rotulada en la salida |
+
+Seguimientos del verificador que quedan **aceptados sin código**: dos corridas simultáneas podrían pisar la lectura
+(el registro de la ventana y el commit a `loop/activo` lo harían visible); no hay instantánea diaria de la referencia
+(VS168-05 queda cerrado por S9 y por la lectura única, no por captura); con la parada alcanzada y un control caído el
+nombre `controles_sombra_<N>_…` revela N, no la lectura; y `--hasta` sin ceros compara como texto (la parada manda).
