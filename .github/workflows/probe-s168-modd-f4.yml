@@ -16,6 +16,8 @@ name: "Probe S168 MOD-D fase 4, via codigo MIROVA de MODIS contra K con tres pos
 # nrt.yml, sin el par usuario y clave, que esta vencido) y falla al instante si viene vacio. MODIS solo en Linux (pyhdf).
 # A15: el censo MOD-D midio 9,1 s por pasada con descarga, K y cinco variantes del port; una parte son unas 238 pasadas
 # (5.709 / 24): ~36 min mas la bajada y las re-corridas en su sha; timeout 240 min (mas de 1,3 x, como MOD-D).
+# S168 (P2-08): dependencias con version fija (las mismas con que se probo el candado en local), para que t1, t2 y
+# t3, despachadas en momentos distintos, no corran dos pipelines (A108). Las transitivas no quedan fijas.
 "on":
   workflow_dispatch:
     inputs:
@@ -89,7 +91,7 @@ jobs:
             exit 1
           fi
           pip install --upgrade pip
-          pip install requests
+          pip install requests==2.33.1
           echo "commit $(git rev-parse HEAD) ref ${GITHUB_REF}" | tee out/procedencia_head_e.txt
           python experiments/_s166_modd_f4/head_e.py --con-token --salida out/head_e.json 2>&1 | tee out/head_e.log
       - name: Upload artifact
@@ -119,7 +121,7 @@ jobs:
       - name: Dependencias
         run: |
           pip install --upgrade pip
-          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+          pip install earthaccess==0.17.0 numpy==2.4.4 h5py==3.16.0 scipy==1.17.1 pyyaml==6.0.3 pyproj==3.7.2 pandas==3.0.2
           node --version
       - name: Commit del tag y blob sellado de evaluar_d25
         env:
@@ -186,8 +188,8 @@ jobs:
         run: |
           pip install --upgrade pip
           sudo apt-get install -y libhdf4-dev
-          pip install pyhdf
-          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+          pip install pyhdf==0.11.6
+          pip install earthaccess==0.17.0 numpy==2.4.4 h5py==3.16.0 scipy==1.17.1 pyyaml==6.0.3 pyproj==3.7.2 pandas==3.0.2
           node --version
       - name: Procedencia (commit del tag), blob de evaluar_d25 y manifiesto
         env:

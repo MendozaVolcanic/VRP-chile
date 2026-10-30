@@ -39,10 +39,15 @@ FIJOS = [C + x for x in (
     "PREREGISTRO_MODD_F4.md", "poblacion_f4.json", "poblacion_f4.py", "contrato_poblacion_f4.py", "head_e.py",
     "identidad_f4.py", "probar_identidad_f4.py", "reetiquetado_f4.py", "probar_evaluar_f4.py", "evaluar_vacio.py",
     "mutar_evaluar_f4.py", "probar_mutar_f4.py", "probar_probe_f4.py", "humo_f4.txt", "manifiesto_candado_f4.py",
-    "externos_f4.py", "ensayo_en_seco_f4.py")] + [
+    "externos_f4.py", "ensayo_en_seco_f4.py",
+    # S168 (P2-07, VC169-02): lo que se carga en ejecución y la sonda no ve, y el insumo de dos controles externos
+    "externos_referencia.json", "probar_descarga_f4.py", "probar_externos_f4.py", "leer_f4.py")] + [
     "experiments/_s162_mxd03/k_en_sha.py", "experiments/_s157_prereg_d25/evaluar_d25.py", "frontend/index.html",
     ".github/workflows/probe-s168-modd-f4.yml", "volcanoes.yaml", "pipeline/grillas_mirova.yaml",
-    "pipeline/profiles/mirova_equivalent.yaml"]
+    "pipeline/profiles/mirova_equivalent.yaml",
+    # S168 (P2-07): run_pipeline (load_volcanoes, VOLCANIC_FEATURES; import perezoso en probe_f4 e identidad_f4),
+    # fetch (descarga y breaker; import perezoso en probe_f4) y el yaml de rasgos volcánicos que lee run_pipeline
+    "scripts/run_pipeline.py", "pipeline/fetch.py", "pipeline/volcanic_features.yaml"]
 OBLIGATORIOS = (C + "probe_f4.py", C + "evaluar_f4.py", C + "poblacion_f4.json", C + "identidad_f4.py",
                 C + "PREREGISTRO_MODD_F4.md", "frontend/index.html", "experiments/_s157_prereg_d25/evaluar_d25.py",
                 ".github/workflows/probe-s168-modd-f4.yml", "pipeline/mirova_v750_codigo.py",

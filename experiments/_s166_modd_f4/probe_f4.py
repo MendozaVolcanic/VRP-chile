@@ -410,14 +410,49 @@ def medir_pasada(pas, volcan, feats, l1b, geo, datos, outdir, arboles, otro_gran
 
 
 # ------------------------------------------------------------------ descarga por nombre
-def bajar_por_nombre(nombre, dest, buscar=None, descargar=None, intentos=4, espera=20):
+# S168, P2-01 (experiments/_s169/audit_patrones/f2/INFORME.md y su verificador, m01b): el circuit-breaker de descarga de
+# pipeline/fetch.py guarda los hosts caídos en el PROCESO, pensado para una corrida NRT de un día. En el arnés el proceso
+# es la parte entera (53 o 54 gránulos): un solo ConnectTimeout dejaba el host marcado para siempre, cada gránulo
+# siguiente chocaba con el breaker y gastaba 400 s de espera sin bajar nada, aunque el host ya hubiera vuelto. Por eso
+# se resetea el breaker (pipeline.fetch.reset_transient_breakers, pública) antes de CADA intento de descarga, y la parte
+# tiene un tope: TOPE_CAIDAS gránulos seguidos sin bajar por caída de host la terminan con filas no_bajado explícitas y
+# código de salida SALIDA_TOPE (el job queda rojo y esa parte se repite). pipeline/fetch.py no se toca.
+TOPE_CAIDAS = 3
+SALIDA_TOPE = 3
+MENSAJE_BREAKER = "download host(s) down this run"     # el RuntimeError de pipeline/fetch.download_granules
+
+
+def es_error_del_breaker(e):
+    """El salto inmediato del breaker de fetch.py (no gastó red): no se duerme por él."""
+    return isinstance(e, RuntimeError) and str(e).startswith(MENSAJE_BREAKER)
+
+
+def es_caida_de_host(e):
+    """ConnectTimeout o ConnectionError de requests (el host no acepta la conexión, como fetch._CONNECT_ERRORS) o el
+    salto del breaker. Un ReadTimeout u otro error no cuenta: se reintenta pero no acerca la parte al tope."""
+    if es_error_del_breaker(e):
+        return True
+    try:
+        from requests.exceptions import ConnectionError as RCE, ConnectTimeout as RCT
+    except Exception:  # noqa: BLE001
+        return False
+    return isinstance(e, (RCT, RCE))
+
+
+def bajar_por_nombre(nombre, dest, buscar=None, descargar=None, intentos=4, espera=20, reset=None, info=None):
     """El gránulo pedido por nombre (versión 6.1, o 6.1NRT si el nombre lo es). Si CMR ya no lo sirve, el vigente de
-    la misma hora (6.1) y la pasada queda marcada otro_granulo. Devuelve (ruta, otro_granulo) o (None, None)."""
+    la misma hora (6.1) y la pasada queda marcada otro_granulo. Devuelve (ruta, otro_granulo) o (None, None).
+    reset: se llama antes de cada descarga (por omisión pipeline.fetch.reset_transient_breakers, P2-01). info: si se da,
+    queda info["caida_host"] = True cuando el último intento fallido fue una caída de host (ver es_caida_de_host)."""
     if buscar is None or descargar is None:
         import earthaccess
         from pipeline.fetch import download_granules
         buscar = buscar or earthaccess.search_data
         descargar = descargar or download_granules
+    if reset is None:
+        from pipeline.fetch import reset_transient_breakers as reset
+    info = {} if info is None else info
+    info["caida_host"] = False
     short = nombre.split(".")[0]
     version = "6.1NRT" if ".NRT." in nombre else "6.1"
     patron = ".".join(nombre.split(".")[1:3])
@@ -425,22 +460,104 @@ def bajar_por_nombre(nombre, dest, buscar=None, descargar=None, intentos=4, espe
         try:
             res = buscar(short_name=short, version=version, granule_name=nombre)
             if res:
+                reset()
                 ps = descargar(res[:1], Path(dest))
                 if ps and Path(ps[0]).name == nombre:
+                    info["caida_host"] = False
                     return Path(ps[0]), False
                 for q in ps or []:
                     Path(q).unlink(missing_ok=True)
             res = buscar(short_name=short, version="6.1", granule_name=f"{short}.{patron}*")
             if not res:
+                info["caida_host"] = False
                 return None, None
+            reset()
             ps = descargar(res[:1], Path(dest))
             if not ps:
                 raise RuntimeError("descarga vacía del vigente")
+            info["caida_host"] = False
             return Path(ps[0]), Path(ps[0]).name != nombre
         except Exception as e:  # noqa: BLE001
+            info["caida_host"] = es_caida_de_host(e)
             print(f"  CMR/descarga fallo intento {intento} {nombre}: {e!r}"[:300], flush=True)
-            time.sleep(espera * (intento + 1))
+            if not es_error_del_breaker(e):
+                time.sleep(espera * (intento + 1))
     return None, None
+
+
+def fila_no_bajado(p, clave, falta, n_l1b, n_geo, motivo_arnes=None):
+    """Contrato de evaluar_f4.cargar y evaluable: tipo record, vol, dt, clave y estado no_bajado (la cobertura la cuenta
+    como falla del arnés, falla_arnes_no_bajado, no como pasada ausente)."""
+    f = {"tipo": "record", "vol": p["vol"], "dt": p["dt"], "clave": clave, "estado": "no_bajado", "falta": falta,
+         "l1b_pedido": n_l1b, "geo_pedido": n_geo}
+    if motivo_arnes:
+        f["motivo_arnes"] = motivo_arnes
+    return f
+
+
+def recorrer_granulos(grupos, salida, bajar, medir_archivo, tope=TOPE_CAIDAS):
+    """Recorre los gránulos de la parte (cada par L1B + MxD03 una vez). bajar(nombre, info) -> (ruta, otro);
+    medir_archivo(clave, ps, l1b, geo, otro_granulo, escribir) -> errores. Cada fila se escribe con flush. Con `tope`
+    gránulos seguidos sin bajar por caída de host, las pasadas que quedan se escriben como no_bajado (falta
+    "no_intentado", motivo_arnes "tope_caidas_host") y se corta. Devuelve (errores, terminada_por o None)."""
+    def escribir(f):
+        salida.write(json.dumps(f, ensure_ascii=False, default=float) + "\n")
+        salida.flush()
+
+    trabajos = []
+    for clave, lista in grupos.items():
+        por_archivo = {}
+        for p in lista:
+            por_archivo.setdefault((p.get("l1b"), p.get("geo")), []).append(p)
+        trabajos += [(clave, n_l1b, n_geo, ps) for (n_l1b, n_geo), ps in por_archivo.items()]
+    errores, seguidas, terminada = 0, 0, None
+    for i, (clave, n_l1b, n_geo, ps) in enumerate(trabajos):
+        l1b = geo = None
+        try:
+            if not n_l1b or not n_geo:
+                for p in ps:
+                    escribir({"tipo": "record", "vol": p["vol"], "dt": p["dt"], "clave": clave,
+                              "estado": "sin_nombre_en_poblacion"})
+                    errores += 1
+                continue
+            info = {}
+            l1b, otro_l = bajar(n_l1b, info)
+            otro_g = None
+            if l1b is not None:          # sin L1B no se pide el MxD03 (P2-01: no gastar otra espera)
+                info = {}
+                geo, otro_g = bajar(n_geo, info)
+            if l1b is None or geo is None:
+                for p in ps:
+                    escribir(fila_no_bajado(p, clave, "L1B" if l1b is None else "MxD03", n_l1b, n_geo))
+                    errores += 1
+                seguidas = seguidas + 1 if info.get("caida_host") else 0
+                if seguidas >= tope:
+                    terminada = "tope_caidas_host"
+                    print(f"  TOPE: {seguidas} gránulos seguidos sin bajar por caída de host; la parte se corta",
+                          flush=True)
+                    for clave2, a, b, ps2 in trabajos[i + 1:]:
+                        for p in ps2:
+                            escribir(fila_no_bajado(p, clave2, "no_intentado", a, b, motivo_arnes=terminada))
+                            errores += 1
+                    break
+                continue
+            seguidas = 0
+            errores += medir_archivo(clave, ps, l1b, geo, bool(otro_l or otro_g), escribir)
+        except Exception as e:  # noqa: BLE001
+            for p in ps:
+                escribir({"tipo": "record", "vol": p["vol"], "dt": p["dt"], "clave": clave,
+                          "estado": "error", "error": f"{type(e).__name__}: {e}"})
+                errores += 1
+        finally:
+            for q in (l1b, geo):
+                if q is not None:
+                    Path(q).unlink(missing_ok=True)
+    return errores, terminada
+
+
+def codigo_salida(errores, terminada):
+    """SALIDA_TOPE si la parte se cortó por el tope; 2 si hubo errores; 0 si no."""
+    return SALIDA_TOPE if terminada else (2 if errores else 0)
 
 
 # ------------------------------------------------------------------ población y partes
@@ -532,66 +649,42 @@ def main():
     n_pas = sum(len(v) for v in grupos.values())
     salida.write(json.dumps(cabecera(args.parte, args.de, "humo" if args.humo else "completo", n_pas, len(grupos),
                                      args.poblacion), ensure_ascii=False) + "\n")
-    errores, t0, vol_cache = 0, time.time(), {}
-    for clave, lista in grupos.items():
-        por_archivo = {}
-        for p in lista:
-            por_archivo.setdefault((p.get("l1b"), p.get("geo")), []).append(p)
-        for (n_l1b, n_geo), ps in por_archivo.items():
-            l1b = geo = None
+    t0, vol_cache = time.time(), {}
+
+    def medir_archivo(clave, ps, l1b, geo, otro_granulo, escribir):
+        err = 0
+        datos = pm.read_modis_l1b(l1b)
+        for p in ps:
             try:
-                if not n_l1b or not n_geo:
-                    for p in ps:
-                        salida.write(json.dumps({"tipo": "record", "vol": p["vol"], "dt": p["dt"], "clave": clave,
-                                                 "estado": "sin_nombre_en_poblacion"}) + "\n")
-                        errores += 1
-                    continue
-                l1b, otro_l = bajar_por_nombre(n_l1b, hdf)
-                geo, otro_g = bajar_por_nombre(n_geo, hdf)
-                if l1b is None or geo is None:
-                    for p in ps:
-                        salida.write(json.dumps({"tipo": "record", "vol": p["vol"], "dt": p["dt"], "clave": clave,
-                                                 "estado": "no_bajado", "falta": "L1B" if l1b is None else "MxD03",
-                                                 "l1b_pedido": n_l1b, "geo_pedido": n_geo}) + "\n")
-                        errores += 1
-                    continue
-                datos = pm.read_modis_l1b(l1b)
-                for p in ps:
-                    try:
-                        if p["vol"] not in vol_cache:
-                            vol_cache[p["vol"]] = rp.load_volcanoes(p["vol"])[0]
-                        v = vol_cache[p["vol"]]
-                        fila = medir_pasada(p, v, rp.VOLCANIC_FEATURES.get(v["name"]), l1b, geo, datos, out,
-                                            arboles, otro_granulo=bool(otro_l or otro_g))
-                        if fila["estado"] != "ok":
-                            errores += 1
-                    except Exception as e:  # noqa: BLE001
-                        fila = {"tipo": "record", "vol": p["vol"], "dt": p["dt"], "clave": clave, "estado": "error",
-                                "error": f"{type(e).__name__}: {e}", "traza": traceback.format_exc()[-1500:]}
-                        errores += 1
-                    salida.write(json.dumps(fila, ensure_ascii=False, default=float) + "\n")
-                    salida.flush()
-                    print(json.dumps({"vol": fila["vol"], "dt": fila["dt"], "estado": fila["estado"],
-                                      "marca": fila.get("v_marca"), "motivo": fila.get("motivo"),
-                                      "pub": fila.get("pub_runner"), "dist": fila.get("dist"),
-                                      "k_vs_data": fila.get("k_difiere_de_guardado"),
-                                      "k_sha": fila.get("k_reproducida_en_su_sha"), "s": fila.get("segundos")},
-                                     ensure_ascii=False, default=float), flush=True)
+                if p["vol"] not in vol_cache:
+                    vol_cache[p["vol"]] = rp.load_volcanoes(p["vol"])[0]
+                v = vol_cache[p["vol"]]
+                fila = medir_pasada(p, v, rp.VOLCANIC_FEATURES.get(v["name"]), l1b, geo, datos, out,
+                                    arboles, otro_granulo=otro_granulo)
+                if fila["estado"] != "ok":
+                    err += 1
             except Exception as e:  # noqa: BLE001
-                for p in ps:
-                    salida.write(json.dumps({"tipo": "record", "vol": p["vol"], "dt": p["dt"], "clave": clave,
-                                             "estado": "error", "error": f"{type(e).__name__}: {e}"}) + "\n")
-                    errores += 1
-            finally:
-                for q in (l1b, geo):
-                    if q is not None:
-                        Path(q).unlink(missing_ok=True)
+                fila = {"tipo": "record", "vol": p["vol"], "dt": p["dt"], "clave": clave, "estado": "error",
+                        "error": f"{type(e).__name__}: {e}", "traza": traceback.format_exc()[-1500:]}
+                err += 1
+            escribir(fila)
+            print(json.dumps({"vol": fila["vol"], "dt": fila["dt"], "estado": fila["estado"],
+                              "marca": fila.get("v_marca"), "motivo": fila.get("motivo"),
+                              "pub": fila.get("pub_runner"), "dist": fila.get("dist"),
+                              "k_vs_data": fila.get("k_difiere_de_guardado"),
+                              "k_sha": fila.get("k_reproducida_en_su_sha"), "s": fila.get("segundos")},
+                             ensure_ascii=False, default=float), flush=True)
+        return err
+
+    errores, terminada = recorrer_granulos(grupos, salida, lambda n, info: bajar_por_nombre(n, hdf, info=info),
+                                           medir_archivo)
     minutos = (time.time() - t0) / 60
-    salida.write(json.dumps({"tipo": "pie", "errores": errores, "minutos": round(minutos, 1),
+    salida.write(json.dumps({"tipo": "pie", "errores": errores, "minutos": round(minutos, 1), "terminada_por": terminada,
                              "s_por_pasada": round(60 * minutos / n_pas, 2) if n_pas else None}) + "\n")
     salida.close()
-    print(f"parte {args.parte}: {len(grupos)} gránulos, {n_pas} pasadas, {errores} con error, {minutos:.1f} min")
-    sys.exit(2 if errores else 0)
+    print(f"parte {args.parte}: {len(grupos)} gránulos, {n_pas} pasadas, {errores} con error, {minutos:.1f} min"
+          + (f", cortada por {terminada}" if terminada else ""))
+    sys.exit(codigo_salida(errores, terminada))
 
 
 if __name__ == "__main__":

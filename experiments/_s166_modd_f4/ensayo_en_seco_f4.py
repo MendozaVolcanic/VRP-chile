@@ -116,7 +116,9 @@ def escribir_art(d, filas, pob_bytes, commit_por_parte=None):
         c = (commit_por_parte or {}).get(i, COMMIT)
         cab = {"tipo": "cabecera", "parte": i, "de": DE, "modo": "completo", "commit": c, "tag": TAG,
                "sha256_frontend_index": A.sha256_lf(RAIZ / "frontend/index.html"),
-               "sha256_poblacion": X.sha256_lf(pob_bytes)}
+               "sha256_poblacion": X.sha256_lf(pob_bytes),
+               # S168 (P2-03, VF2-02): externos_f4.procedencia compara estos dos con los archivos de la lectura
+               "sha256_evaluar_f4": A.sha256_lf(AQUI / "evaluar_f4.py"), "sha256_probe_f4": A.sha256_lf(AQUI / "probe_f4.py")}
         lineas = [json.dumps(cab)] + [json.dumps(f, default=float, ensure_ascii=False) for f in filas[i::DE]] + \
                  [json.dumps({"tipo": "pie", "errores": 0})]
         p.write_text("\n".join(lineas) + "\n", encoding="utf-8")
@@ -127,13 +129,16 @@ def escribir_art(d, filas, pob_bytes, commit_por_parte=None):
 def ensayo(nombre, filas, pob, commit_por_parte=None):
     with tempfile.TemporaryDirectory() as d:
         pob_ruta = Path(d) / "poblacion.json"
-        pob_ruta.write_text(json.dumps(pob), encoding="utf-8")
+        # S168 (P2-05): con saltos de línea, como la población real (indent=0); en Windows write_text la deja en CRLF, y
+        # la referencia registra el sha256 LF (el del blob, como reetiquetado_f4 desde VC169-01): el ensayo ejercita así
+        # el camino de fin de línea que el JSON compacto no podía ver
+        pob_ruta.write_text(json.dumps(pob, indent=0), encoding="utf-8")
         pob_bytes = pob_ruta.read_bytes()
         ident = {"pasadas": [{"vol": p["vol"], "dt": p["dt"], "mismo_granulo": True, "misma_mascara": True,
                               "dvrp": 0.0, "misma_clase": True} for p in pob["pasadas"] if p["grilla_censo"]]}
         (Path(d) / "identidad.json").write_text(json.dumps(ident), encoding="utf-8")
         ref = {"referencia": {"estado": "OK"}, "reetiquetado": {"estado": "OK"},
-               "poblacion_sha256": X.sha256_bytes(pob_bytes)}
+               "poblacion_sha256": X.sha256_lf(pob_bytes)}
         (Path(d) / "externos_referencia.json").write_text(json.dumps(ref), encoding="utf-8")
         art = escribir_art(d, filas, pob_bytes, commit_por_parte)
         ext = X.armar(art, TAG, Path(d) / "externos_referencia.json", pob_ruta, commit_tag=COMMIT,

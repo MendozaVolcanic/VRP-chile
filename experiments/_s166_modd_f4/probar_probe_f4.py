@@ -26,6 +26,10 @@ evaluar_f4.evaluable y los controles del evaluador que se pueden correr sobre un
   DATA      registro_guardado encuentra el record de Láscar 2026-04-25 07:35 en data/ del checkout.
   ARBOL     extraer_arbol saca con git archive sólo pipeline, scripts y volcanoes.yaml (nada de data/).
   CABECERA  la cabecera trae commit, sha256 del tablero y de la población, flags apagados y el blob de evaluar_d25.
+  DESCARGA  (S168, P2-01; los cinco escenarios de probar_descarga_f4.py, contra el breaker REAL de pipeline/fetch.py)
+            un ConnectTimeout con el host recuperado no pierde más que el gránulo de la caída; sin reset sí se pierden
+            (control); con el host caído la parte se corta tras 3 gránulos con filas no_bajado escritas con flush y
+            código de salida distinto de 0; una falla que no es de host corta la racha; el error del breaker no duerme.
 MUTACIONES del arnés (copias del archivo con un cambio; cada una tiene que hacer fallar al menos una aserción y NINGÚN
 escenario puede caer, VS-01; control de identidad VIVA, de caída CAE y de mutación rota ROTA; si un control no sale
 como debe la batería escribe «NO VALE» y sale con código 1).
@@ -58,6 +62,7 @@ for _p in (RAIZ, RAIZ / "scripts", AQUI):
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
 import evaluar_f4 as E  # noqa: E402
+import probar_descarga_f4 as D  # noqa: E402  (S168, P2-01: breaker real de fetch.py, reset por intento y tope)
 
 L1B = "MYD021KM.A2026115.0735.061.2026115190927.hdf"
 GEO = "MYD03.A2026115.0735.061.2026115184805.hdf"
@@ -423,9 +428,30 @@ def t_motivo_y_marca(A):
     assert A.motivo_y_marca({}, {}) == (None, "sin_marca")
 
 
+def t_descarga_m01b(A):
+    D.t_m01b(A)
+
+
+def t_descarga_control(A):
+    D.t_m01b_control(A)
+
+
+def t_descarga_tope(A):
+    D.t_tope(A)
+
+
+def t_descarga_cadena(A):
+    D.t_cadena(A)
+
+
+def t_descarga_breaker(A):
+    D.t_breaker(A)
+
+
 ESCENARIOS = [t_escena_contrato, t_escena_tres_distancias, t_escena_controles_del_evaluador, t_escena_grilla_npz,
               t_envoltorio_no_altera, t_fuera, t_invalida, t_nada, t_sin_grilla, t_kprod_igual, t_kprod_distinto,
-              t_bajar, t_partes, t_humo, t_data, t_arbol, t_cabecera, t_motivo_y_marca]
+              t_bajar, t_partes, t_humo, t_data, t_arbol, t_cabecera, t_motivo_y_marca,
+              t_descarga_m01b, t_descarga_control, t_descarga_tope, t_descarga_cadena, t_descarga_breaker]
 
 
 def correr(A, verbose=True):
@@ -484,6 +510,17 @@ MUTACIONES = [
      '"archive", "--format=tar", sha]'),
     ("MA16 el cenit sale del record de K aunque haya MxD03",
      'z = diag.get("z_crater")', 'z = None'),
+    # S168, P2-01: la descarga
+    ("MA17 sin reset del breaker antes de la descarga del pedido",
+     "                reset()\n                ps = descargar(res[:1], Path(dest))\n                if ps and",
+     "                ps = descargar(res[:1], Path(dest))\n                if ps and"),
+    ("MA18 sin tope de caídas de host",
+     "                if seguidas >= tope:\n", "                if False:\n"),
+    ("MA19 duerme también con el error del breaker",
+     "            if not es_error_del_breaker(e):\n                time.sleep",
+     "            if True:\n                time.sleep"),
+    ("MA20 las filas no se escriben con flush",
+     "        salida.flush()\n", "        pass\n"),
 ]
 CONTROL_IDENTIDAD = ("CONTROL identidad (sin mutación)", None, None)
 CONTROL_CAIDA = ("CONTROL caída", '    publica = publica or P.publica\n',

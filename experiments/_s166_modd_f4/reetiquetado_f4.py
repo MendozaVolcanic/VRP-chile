@@ -25,6 +25,7 @@ Escribe externos_referencia.json (claves `referencia` y `reetiquetado`) y reetiq
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -40,6 +41,17 @@ import poblacion_f4 as PF  # noqa: E402
 RAIZ = PF.RAIZ
 CHECKOUT_CENSO = "80b819828f16e19ceacbd21dc7c4e474d46122b4"
 MANIF_CENSO = RAIZ / "experiments/_s162_mxd03/MANIFIESTO.json"
+
+
+def sha256_del_blob(ruta, rev="HEAD"):
+    """S168, VC169-01: el sha256 de los BYTES DEL BLOB en git (`git -c core.autocrlf=false show HEAD:<ruta>`), que es lo
+    que lee el runner Linux y cualquier checkout LF. PF.sha256 sobre la copia de Windows daba el de la copia CRLF
+    (5e0147b0...) y externos_f4 dejaba referencia y reetiquetado en INDECIDIBLE en un checkout LF. Devuelve
+    (sha256 del blob, sha256 LF de la copia local, ruta relativa); si el blob no existe, sha256 del blob None."""
+    rel = Path(ruta).resolve().relative_to(Path(RAIZ).resolve()).as_posix()
+    r = subprocess.run(["git", "-c", "core.autocrlf=false", "show", f"{rev}:{rel}"], cwd=RAIZ, capture_output=True)
+    blob = hashlib.sha256(r.stdout).hexdigest() if r.returncode == 0 else None
+    return blob, PF.sha256(ruta, lf=True), rel
 
 
 def etiquetas(pob_filas):
@@ -77,8 +89,15 @@ def main():
     pr("reetiquetado_f4.py | UTC", datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"), "| HEAD",
        PF.git("rev-parse", "HEAD"))
     pob = json.load(open(a.poblacion, encoding="utf-8"))
-    pr("población:", a.poblacion, "| sha256", PF.sha256(a.poblacion), "| checkout", pob["checkout"],
+    sha_blob, sha_local_lf, rel_pob = sha256_del_blob(a.poblacion)
+    pr("población:", rel_pob, "| sha256 del blob en HEAD", sha_blob, "| sha256 LF de la copia local", sha_local_lf,
+       "| sha256 de la copia local tal cual", PF.sha256(a.poblacion), "| checkout", pob["checkout"],
        "| head_e", pob["head_e"]["estado"])
+    if sha_blob is None or sha_blob != sha_local_lf:
+        pr("ALTO: la población local no es el blob de HEAD (sin commitear o cambiada); no se registra un sha que el "
+           "runner no va a ver")
+        (AQUI / "reetiquetado_f4_salida.txt").write_text("\n".join(L) + "\n", encoding="utf-8")
+        sys.exit(3)
 
     # ---------------- (a) referencia congelada
     ref = PF.bajar_ref(a.ref, sin_bajar=True)
@@ -168,7 +187,9 @@ def main():
                     "evidencia": "experiments/_s166_modd_f4/reetiquetado_f4_salida.txt (b) y (c)"}
     out = {"referencia": referencia, "reetiquetado": reetiquetado,
            "generado_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
-           "poblacion_sha256": PF.sha256(a.poblacion), "checkout": PF.git("rev-parse", "HEAD")}
+           "poblacion_sha256": sha_blob, "poblacion_ruta": rel_pob,
+           "poblacion_sha256_es": "sha256 de los bytes del blob en git (git -c core.autocrlf=false show HEAD:ruta)",
+           "checkout": PF.git("rev-parse", "HEAD")}
     Path(a.salida).write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     pr("referencia:", referencia["estado"], "| reetiquetado:", reetiquetado["estado"], f"| {time.time() - t0:.0f} s")
     pr("escrito", a.salida)

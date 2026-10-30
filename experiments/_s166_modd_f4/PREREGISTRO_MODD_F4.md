@@ -387,7 +387,29 @@ como el censo, despachadas de a una por la coordinadora desde el tag.
 
 ## 13. Instrumento entregado: batería y mutaciones
 
-Corrida del 2026-10-29 con el árbol quieto, `--paralelo 2` y los temporales en `D:\vrp-trabajo\temporales\` (sha256
+**Corrida vigente (candado, S168, 2026-10-30 00:15 a 11:35 UTC)**, después de cerrar VS-01 a VS-08 del tercer
+verificador en la batería y el medidor, sin tocar `evaluar_f4.py`. Un proceso (`--paralelo 1`), temporales en
+`D:\vrp-trabajo\temporales\s168_mut`, árbol quieto (sha256 de los cinco archivos del instrumento iguales antes y
+después: `experiments/_s168/modd_f4_candado/mutaciones_sha256_antes.txt` y `_despues.txt`):
+
+| qué | resultado | salida |
+|---|---|---|
+| batería (66 escenarios: E62, E63 y E64 nuevos) | 66 de 66 OK | `probar_evaluar_f4_salida.txt` |
+| la misma batería contra el evaluador vacío | 66 de 66 fallan por aserción, 0 caen | `probar_evaluar_f4_contra_vacio_salida.txt` |
+| mutaciones (82 más M83 a M86) | **86 de 86 atrapadas por aserción, ninguna con escenarios que caen**; 0 vivas, 0 caen, 0 atrapadas con caídas, 0 rotas, 0 no aplican | `mutar_evaluar_f4_salida.txt` |
+| controles | identidad VIVA; caída con `RuntimeError` CAE (61 caen); caída con `ValueError` CAE (61 caen); rota ROTA | ídem |
+| prueba del medidor (clasificación y salida «NO VALE» con código 1) | 5 de 5 OK | `probar_mutar_f4_salida.txt` |
+
+Desde esta corrida, ATRAPADA exige que ningún escenario caiga (VS-01). Con el `except` de E53 acotado al mensaje de
+`math.log10(0)` (VS-02), M70 sigue atrapada por E53 y el control con `ValueError` sale CAE.
+
+**Qué sha es el del evaluador sellado (VF2-01 de la auditoría S169).** Los sha256 de abajo se midieron sobre la copia
+de trabajo de Windows, que git escribe con fin de línea CRLF. El evaluador sellado es el mismo archivo: su blob en git
+(LF, lo que lee el runner Linux) mide `8a1edc14…` y su copia CRLF mide `c01e0824…`. Entre `314cec809` y el tag del
+sello no hay diferencias en `evaluar_f4.py` (`git diff 314cec809 s168-modd-f4-sellado -- experiments/_s166_modd_f4/evaluar_f4.py` sale
+vacío), y los cierres de VS-01 a VS-08 no lo tocaron. El manifiesto del candado registra los sha de los blobs (LF).
+
+Corrida anterior, del sello (se conserva por historia). Corrida del 2026-10-29 con el árbol quieto, `--paralelo 2` y los temporales en `D:\vrp-trabajo\temporales\` (sha256
 de `evaluar_f4.py`, `probar_evaluar_f4.py`, `evaluar_vacio.py` y `mutar_evaluar_f4.py` iguales antes y después;
 `c01e0824…`, `395f276e…`, `98d8d65b…`, `180aa8a8…`):
 
@@ -483,6 +505,27 @@ no se tocó para el sello: los sha256 del §13 siguen valiendo.
 
 Lo que se cierra en el candado toca la batería y el medidor, no las reglas de `evaluar_f4.py`. Si algún arreglo
 obligara a cambiar una regla del evaluador, eso pide un sello nuevo.
+
+**Al día con el candado (S168).** Nicolás aceptó VS-02 tal como está arriba (M70 atrapada por la aserción explícita de
+E53). Cerrados en la batería y el medidor, con la corrida vigente del §13: VS-01 (clase ATRAPADA_CON_CAIDAS, que no
+cuenta, y control de caída con `ValueError`), VS-02 (`except` acotado a `math domain error`), VS-03 (E62 y
+`probar_mutar_f4.py`), VS-04 (aserción en E41), VS-05 (E63), VS-06 (E64; la lectura sellada no cambia) y VS-08
+(`--traza`). M83 a M86 vigilan VS-03 a VS-06. VS-07 queda como estaba.
+
+Auditoría de patrones de S169 sobre el candado (`experiments/_s169/audit_patrones/f2/`, en `loop/activo`, con su
+verificador limpio). Se arreglaron en el candado, sin tocar `pipeline/` ni las reglas del evaluador: VC169-01 y P2-05
+(el sha de la población se registra sobre el blob en git, con prueba), P2-01 (el arnés resetea el circuit-breaker de
+descarga antes de cada intento y corta la parte, en rojo, tras 3 gránulos seguidos sin bajar), P2-02, P2-03 con VF2-02,
+P2-07 y P2-08 (detalle en el informe del candado). Quedan declarados, sin cambiar ningún veredicto con datos plausibles:
+
+| hallazgo | gravedad | qué queda |
+|---|---|---|
+| P2-04, la identidad compara una clase recalculada en local | 1 a 2 | el humo dice si la clase del record del runner coincide con la recalculada |
+| P2-06, la publicación de V, V-cercano y V-pico del runner no se compara con la del evaluador | 2 | sólo la de K se compara (§8.1); se informa |
+| P2-09, `VRP_PROFILE` y `F4_RAIZ` cambian la lectura sin dejar rastro | 1 a 2 | la corrida se lee con los valores por defecto y lo declara |
+| P2-10, «sin record guardado en data/» se lee como «K no difiere» | 1 a 2 | se cuenta en el humo (hoy 0 de 5.709 pasadas, según el verificador) |
+| P2-11, un MxD03 ilegible se lee como «volcán fuera del gránulo» | 1 a 2 | da error, no «fuera»; el humo mide cuántos MxD03 traen relleno |
+| P2-12, P2 con 21 bloques o más depende del generador de numpy | 1 | la versión queda registrada en el resultado (P2-02) |
 
 ## 14. Lo que este pre-registro NO decide
 
