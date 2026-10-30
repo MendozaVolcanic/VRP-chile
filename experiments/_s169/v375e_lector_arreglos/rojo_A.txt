@@ -1,0 +1,21 @@
+grupo A: roturas ['N06', 'N07', 'N27', 'N37', 'N38']
+batería: exit 1 ['RESULTADO: 179 de 190']
+stderr (cola): ['[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent']
+N06 EN ROJO: «main: la lectura que decide sale 0»
+N07 EN ROJO: «main VS168-02: con S7 caído»
+N27 EN ROJO: «S6 (VS168-08): sin sustrato (dos noches)»
+N37 EN ROJO: «main (VS168-14): sin --commit»
+N38 EN ROJO: «(b) sin neg_pub (VS168-08)»
+
+aserciones en FALLA (11):
+  S6 (VS168-08): sin sustrato (dos noches) cae aunque no dé MEJORA
+  S6 (VS168-08): en analizar, S6 sin sustrato hace caer la lectura []
+  (b) sin neg_pub (VS168-08): el silencio queda SIN SUSTRATO, sin lecturas, y el CUMPLE se rotula por falta de evidencia ('SIN SUSTRATO (faltan negativos de algun
+  main (VS168-02): antes de la parada los controles salen sin detalle (ni conteos ni nombres) 18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Plancho
+  main: la lectura que decide sale 0 y se llama lectura_sombra_corte_<N> (0, [WindowsPath('C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile/.claud
+  main (VS168-01): leer otra vez el mismo corte sale 2 y no toca la lectura 0
+  main (VS168-01): con --hasta posterior lee sólo hasta la noche de la parada y lo dice (0, [WindowsPath('C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/V
+  main VS168-02: con S1 caído (2026-11-02) no salen conteos ni nombres de pasadas 112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeter
+  main VS168-02: con S1 caído (2026-11-10) no salen conteos ni nombres de pasadas 9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa':
+  main VS168-02: con S7 caído sale 3, sólo el motivo, sin conteos por clase ni nombres de pasadas sDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e09173
+  main (VS168-14): sin --commit no corre
