@@ -114,6 +114,58 @@ def test_el_cambio_se_ve_en_la_caja_de_tupungatito(tmp_path, monkeypatch):
     assert (cajas["B4"] == 2).sum() > (cajas["B0"] == 2).sum()
 
 
+def _copia_del_yaml(tmp_path, monkeypatch):
+    """main() escribe en R.YAML; las pruebas lo apuntan a una copia del archivo de hoy."""
+    ruta = tmp_path / "grillas_mirova.yaml"
+    ruta.write_text(_texto(), encoding="utf-8")
+    monkeypatch.setattr(R, "YAML", ruta)
+    return ruta
+
+
+def _roi_del_archivo(ruta):
+    return {v: r["roi_v750"] for v, r in yaml.safe_load(ruta.read_text(encoding="utf-8"))["volcanes"].items()}
+
+
+@pytest.mark.parametrize("brazo", BRAZOS)
+def test_main_escribe_el_brazo_pedido(brazo, tmp_path, monkeypatch):
+    """P1-13 del verificador S169: el paso que escribe la ROI el día de la lectura. --escribir deja en el archivo
+    exactamente la variante del brazo pedido (no la vieja, no la de otro brazo)."""
+    ruta = _copia_del_yaml(tmp_path, monkeypatch)
+    assert R.main(["--brazo", brazo, "--escribir"]) == 0
+    assert ruta.read_text(encoding="utf-8") == R.variante(_texto(), brazo)
+    assert _roi_del_archivo(ruta) == ESPERADO[brazo]
+
+
+def test_main_sin_escribir_no_toca_el_archivo_y_muestra_el_cambio(tmp_path, monkeypatch, capsys):
+    ruta = _copia_del_yaml(tmp_path, monkeypatch)
+    assert R.main(["--brazo", "B4"]) == 0
+    assert ruta.read_text(encoding="utf-8") == _texto()
+    salida = capsys.readouterr().out
+    assert salida.count("roi_v750: sens}") == 2 and "+  Tupungatito:" in salida
+
+
+def test_main_rechaza_un_brazo_que_no_existe(tmp_path, monkeypatch):
+    ruta = _copia_del_yaml(tmp_path, monkeypatch)
+    with pytest.raises(SystemExit) as e:
+        R.main(["--brazo", "B6", "--escribir"])
+    assert e.value.code == 2
+    assert ruta.read_text(encoding="utf-8") == _texto()
+
+
+@pytest.mark.parametrize("primero,despues", [("B1", "B4"), ("B2", "B0"), ("B4", "B4")])
+def test_aplicar_dos_veces_deja_solo_el_segundo(primero, despues, tmp_path, monkeypatch):
+    """VF1-02 del verificador S169: probar un brazo y después aplicar el elegido en el mismo árbol deja valores Y
+    comentario del segundo; volver a B0 deja def en todos con la nota de B0."""
+    ruta = _copia_del_yaml(tmp_path, monkeypatch)
+    R.main(["--brazo", primero, "--escribir"])
+    R.main(["--brazo", despues, "--escribir"])
+    texto = ruta.read_text(encoding="utf-8")
+    assert _roi_del_archivo(ruta) == ESPERADO[despues]
+    assert texto.count("Puesto por la lectura de V750-B: brazo") == 1
+    assert f"brazo {despues} (scripts/roi_v750b_a_grillas.py)." in texto
+    assert texto.count('Hasta la lectura de V750-B, "def" en todos') == 1 and 'Hoy "def" en todos' not in texto
+
+
 def test_brazo_desconocido_y_archivo_ajeno_se_niegan():
     with pytest.raises(ValueError):
         R.roi_por_volcan("B6")
