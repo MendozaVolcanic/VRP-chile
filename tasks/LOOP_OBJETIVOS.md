@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 04:18 UTC (S169, vuelta 17): verificador F3 confirma; arreglo de la vigilancia de la sombra encargado
+- Verificador F3 (Opus, subagente): `experiments/_s169/audit_patrones/f3/verificador/INFORME_VERIFICADOR_F3.md`
+  (auditor y verificador copiados a `loop/activo`, `f0cbb8564`). Los 15 confirmados al menos en parte; refutado el BOM
+  de P3-01 con el formato real. Nuevo VF3-01 (un record caído deja el job rojo 8 días). Antes del 2026-11-03: P3-02,
+  P3-03, VF3-01, P3-09 y la parte de workflow de P3-04; ninguno toca `pipeline/`. Antes de la primera lectura de un
+  A/B: P3-01, P3-07 y P3-10 (`evaluador_comun.py`).
+- Agente (Opus) en worktree, rama `claude/s169-vigilancia-sombra` desde `origin/main`: pruebas en rojo primero,
+  `revisar_sombra.py` por corrida y por volcán y sensor, `--cobertura-json` y log como artefacto, y vigilancia del
+  workflow en el mecanismo que ya abre issues. Sin PR ni merge: los abre la coordinadora, con frase de Nicolás.
+
 ### 2026-10-30 04:07 UTC (S169, vuelta 16): F1 (VIIRS 750) con 19 hallazgos; los tres verificadores corren
 - Auditor F1 (Sonnet) sobre `01ffd277b`, la rama de la ROI `3c5c494b9` y los tags de V750-B:
   `D:/vrp-trabajo/temporales/s169_audit_patrones/f1_v750/INFORME.md`. Sin gravedad 4 ni 5. Limpio: las cinco sha256
