@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 00:54 UTC (S169, vuelta 6): V750-B listo para el 2026-11-03; rama de la ROI preparada
+- `local_94f4be0d`, rama `claude/s162-viirs750-2-918174` en `d67f2aa73` (informe `experiments/_s162_v750b/r4/INFORME.md`):
+  ensayo de plomería del generador con `--hasta 2026-10-29` en un árbol aparte (5.654 objetivos, 0 sin gránulo;
+  suplementario IGUALES 5.654 contra 5.654; 4 N-3 en O); lectura probada sobre la escena sintética N1; comandos del
+  2026-11-03 en su §3 y §4. El despacho del 3 es mío: `git push origin s169-v750b-objetivos-20261103:refs/heads/s162-v750b-disparo`.
+- **A vigilar el 3**: `--data` tiene que ser el `data/` de `main` de ese día; con datos viejos la lista sale más corta
+  sin aviso. El generador lee además `data/mirova_reference` y `experiments/_s158_d17_diseno`.
+- Tag `pre-s169-roi-v750` sobre `main` `443da8649` (verificado con `ls-remote`). Rama `s169-roi-v750` (`3c5c494b9`,
+  sin merge): sólo `scripts/roi_v750b_a_grillas.py` (variantes B0 a B5) y su prueba (21 de 21; 4 mutaciones atrapadas
+  por aserción); `pipeline/` sin cambios hasta elegir la ROI.
+
 ### 2026-10-30 00:47 UTC (S169, vuelta 5): merge del workflow del humo autorizado con condición; PR #927
 - Frase de Nicolás: «Sí, mergéalo» (botón de «¿Me autorizas a mergear el workflow del humo de MOD-D cuando su
   verificador diga que es mergeable?», mensaje: mergear `probe-s168-modd-f4.yml` a `main` cuando el verificador
