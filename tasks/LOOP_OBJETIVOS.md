@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 04:26 UTC (S169, vuelta 19): verificador F1 confirma; V750-B se cierra con el procedimiento del día
+- Verificador F1 (Opus, subagente): `experiments/_s169/audit_patrones/f1/verificador/INFORME.md` (en `loop/activo`,
+  `2e2c17554`). 9 CONFIRMADO, 5 EN PARTE, 0 REFUTADO, 4 nuevos (VF1-01 a 04). P1-02 y P1-03 (gravedad 3) se cierran
+  con reglas del día, sin adenda: lo sellado (`PREREGISTRO_V750B.md` l. 211 a 214) ya es más estricto que el código.
+  P1-01, 04 y 05 bajan a gravedad 2. Código no sellado: P1-13 y VF1-02 (`roi_v750b_a_grillas.py`: cuatro mutaciones
+  de `main()` sin atrapar) y P1-11 (V750-A). P1-12 depende del medidor en curso.
+- A `local_94f4be0d`: siete reglas para R4 §3 y §4 (`unset VRP_PROFILE` con eco; nunca `--leer-con-faltantes` con
+  censo FALLA; fecha máxima de `data/` mayor o igual que `--hasta`; lector desde `main` del día; sha de insumos y
+  salida nueva commiteada antes de mostrarla; ruta de `--censo-art`; cotejar volcán y hora), y los arreglos de la rama
+  de la ROI y de V750-A.
+- Las tres auditorías de patrones (F1, F2, F3) quedan verificadas. Pendientes de arreglo: F3 en curso (agente de la
+  vigilancia), F2 en MOD-D tras sus mutaciones, F1 en la sesión de V750.
+
 ### 2026-10-30 04:21 UTC (S169, vuelta 18): verificador F2 confirma; lista de arreglos del candado a MOD-D
 - Verificador F2 (Opus, subagente): `experiments/_s169/audit_patrones/f2/verificador/INFORME.md` (auditor y verificador
   en `loop/activo`, `50a1b623a`). Los 12 se sostienen en todo o en parte. P2-01 baja a gravedad 3: una sola caída con
