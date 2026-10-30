@@ -19,11 +19,25 @@ QUÉ HACE.
     reescribe los dos campos cada vez que guarda un record (nuevo o reemplazo NRT->estándar) y no toca los que ya
     estaban, así que un record de ayer no puede pasar por uno de hoy.
   - Falla (salida 1, job rojo) si: hubo `ERROR processing` en el log; la cobertura de run_pipeline (--cobertura-json)
-    falta o trae búsquedas o descargas fallidas; algún record de esta corrida no es de la vía; o un sensor esperado
-    (MODIS, VIIRS 750, VIIRS 375) no tiene ningún record de la vía de esta corrida.
-  - La única excepción, escrita en una línea propia: un sensor sin records cuyas plataformas vivas respondieron SIN
+    falta, o trae búsquedas o descargas fallidas DEL ÚLTIMO DÍA de la ventana (`fin`); algún record de esta corrida no
+    es de la vía; o un sensor esperado (MODIS, VIIRS 750, VIIRS 375) no tiene ningún record de la vía de esta corrida
+    con pasada de `fin` o de `fin` menos un día.
+  - S169 ronda 2 (verificador de 16d9e894d, VV169-01): para el control por sensor cuentan sólo las pasadas de `fin` y
+    de la víspera. Un reemplazo NRT a estándar de una pasada de hace varios días también trae `processed_utc` y sha de
+    hoy, y no prueba que el sensor haya producido esta noche.
+  - VV169-03: una búsqueda o descarga fallida de un día ANTERIOR a `fin` es NOTA, no falla. Ese día ya lo cubrió una
+    corrida previa, y si no lo cubrió, el control por sensor de esa corrida lo vio; la ventana de 8 días lo vuelve a
+    buscar. Sólo una falla del día `fin` (o sin fecha) deja el job rojo.
+  - La excepción, escrita en una línea NOTA propia: un sensor sin records cuyas plataformas vivas respondieron SIN
     GRÁNULOS el día de hoy (incidencia `sin_granulos` de pipeline/fetch.py) o están retiradas por cese anunciado. Eso es
     «miró y no hubo pasada»: la vía no tiene que inventar records, pero la revisión dice que miró.
+  - VV169-02: esa excepción no vale si a la vez quedan sin pasada los tres sensores, o VIIRS 750 y VIIRS 375 juntos.
+    Con dos plataformas VIIRS vivas y 3.000 km de franja, que ninguna pase de noche sobre un volcán chileno no es
+    físico: es un catálogo de CMR vacío, como el del 2026-10-18 (R2-13, comentario S159 en pipeline/fetch.py).
+  - VV169-05: los records de K caídos (`via_codigo_mirova` distinto de true) no se reemplazan solos (pipeline/store.py
+    sólo reemplaza con overwrite o NRT a estándar), así que el rojo dura una corrida y después el record queda. Por
+    eso cada corrida escribe, también en verde, la línea «K caídos en la ventana: N», en la salida y en el resumen del
+    job (GITHUB_STEP_SUMMARY).
   Imprime el resumen igual.
 
 Uso: python scripts/revisar_sombra.py --json data/sombra_codigo_mirova/<Volcan>.json --log pipeline.log
@@ -33,8 +47,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 SENSORES = ("MODIS", "VIIRS750", "VIIRS375")
@@ -95,16 +110,27 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensor
         return sha is None or (r.get("regimen") or {}).get("codigo_sha") == sha
 
     nuevos = [r for r in en_ventana if de_esta_corrida(r)]
+    fin_dt = _utc(fin + "T00:00:00Z")
+    if fin_dt is None:
+        raise ValueError("fin ilegible: %r" % (fin,))
+    vispera = (fin_dt - timedelta(days=1)).strftime("%Y-%m-%d")
     por_sensor = {s: 0 for s in sensores}
     otros = {}
     for r in nuevos:
         if r.get("via_codigo_mirova") is True:
             f = familia(r.get("sensor"))
-            if f in por_sensor:
+            # VV169-01: sólo pasadas de fin o de la víspera; un reemplazo de un día viejo no prueba esta noche
+            if f in por_sensor and str(r.get("datetime_utc") or "")[:10] >= vispera:
                 por_sensor[f] += 1
         else:
             k = str(r.get("via_codigo_mirova"))
             otros[k] = otros.get(k, 0) + 1
+    # VV169-05: los K caídos de toda la ventana, también los de días anteriores, para que no salgan de la vista
+    k_ventana = {}
+    for r in en_ventana:
+        if r.get("via_codigo_mirova") is not True:
+            k = str(r.get("via_codigo_mirova"))
+            k_ventana[k] = k_ventana.get(k, 0) + 1
     errores = sum(1 for ln in log_txt.splitlines() if "ERROR processing" in ln)
 
     fallas, notas = [], []
@@ -113,26 +139,44 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensor
     if cobertura is None:
         fallas.append("no hay JSON de cobertura: no se sabe qué se buscó")
     else:
-        n_fallas = len(cobertura.get("fallas") or [])
-        if n_fallas:
-            fallas.append(f"cobertura incompleta: {n_fallas} búsquedas o descargas fallidas")
+        # VV169-03: sólo las del último día (o sin fecha) dejan rojo; las de días anteriores van como NOTA
+        de_hoy, viejas = 0, {}
+        for fl in cobertura.get("fallas") or []:
+            fecha = str(fl.get("fecha") or "")
+            if fecha and fecha < fin:
+                viejas[fecha] = viejas.get(fecha, 0) + 1
+            else:
+                de_hoy += 1
+        if de_hoy:
+            fallas.append(f"cobertura incompleta: {de_hoy} búsquedas o descargas fallidas del {fin}")
+        for fecha in sorted(viejas):
+            notas.append(f"{viejas[fecha]} búsquedas o descargas fallidas del {fecha}, día anterior al último: "
+                         f"lo cubrió una corrida previa y la ventana lo vuelve a buscar")
     if "Cobertura INCOMPLETA" in log_txt and not (cobertura and cobertura.get("fallas")):
         fallas.append("el log dice «Cobertura INCOMPLETA»")
     if otros:
         fallas.append(f"records de esta corrida que no son de la vía: {otros}")
+    sin_pasada = []
     for s in sensores:
         if por_sensor[s]:
             continue
         vacias = _sin_pasada_hoy(s, cobertura or {}, fin)
         if vacias:
+            sin_pasada.append(s)
             notas.append(f"{s}: sin records de esta corrida; miró y no hubo pasada el {fin} "
                          f"(búsqueda sin gránulos en {', '.join(vacias)})")
         else:
-            fallas.append(f"{s}: ningún record de la vía escrito en esta corrida")
+            fallas.append(f"{s}: ningún record de la vía de {vispera} o {fin} escrito en esta corrida")
+    # VV169-02: ningún sensor, o ningún VIIRS, con pasada el mismo día es un catálogo vacío, no la órbita
+    if set(sensores) <= set(sin_pasada) or {"VIIRS750", "VIIRS375"} <= set(sin_pasada):
+        fallas.append(f"sin pasada a la vez en {', '.join(sin_pasada)} el {fin}: catálogo de CMR vacío, no la órbita")
 
     detalle = ", ".join(f"{s} {por_sensor[s]}" for s in sensores)
     resumen = (f"ventana {ini} a {fin}: {len(en_ventana)} records, {len(nuevos)} escritos en esta corrida (desde "
-               f"{desde_utc}; {detalle}), {sum(otros.values())} de otra fuente, {errores} errores de gránulo")
+               f"{desde_utc}; con pasada de {vispera} o {fin}: {detalle}), {sum(otros.values())} de otra fuente, "
+               f"{errores} errores de gránulo")
+    resumen += (f"\n  K caídos en la ventana: {sum(k_ventana.values())}"
+                + (f" {k_ventana} (quedan en el JSON: pipeline/store.py no los reemplaza)" if k_ventana else ""))
     for n in notas:
         resumen += "\n  NOTA " + n
     if fallas:
@@ -158,6 +202,14 @@ def main(argv=None):
     cobertura = json.loads(pc.read_text(encoding="utf-8")) if pc.exists() else None
     ok, resumen = revisar(registros, log_txt, a.ini, a.fin, a.desde_utc, cobertura, sha=a.sha or None)
     print(resumen)
+    # VV169-05: el resumen del job (GITHUB_STEP_SUMMARY) lleva siempre la línea de K caídos, también en verde
+    ruta = os.environ.get("GITHUB_STEP_SUMMARY")
+    if ruta:
+        try:
+            with open(ruta, "a", encoding="utf-8") as fh:
+                fh.write("### Revisión de la sombra (%s)\n\n```\n%s\n```\n" % ("OK" if ok else "FALLA", resumen))
+        except OSError:
+            pass
     return 0 if ok else 1
 
 
