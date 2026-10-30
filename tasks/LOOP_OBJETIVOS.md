@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 04:34 UTC (S169, vuelta 20): F1 atendida por la sesión de V750
+- `claude/s162-viirs750-2-918174` en `b5551b869`: reglas del día en `experiments/_s162_v750b/r4/INFORME.md` §3 y §4 y
+  `r4/control_previo_v750b.py` (modos `datos` y `lectura`), probado en sus casos malos. Con los datos de su rama la
+  fecha máxima de VIIRS 750 da 2026-10-18 y FALLA para `--hasta 2026-10-29`: el día 3 se usa el `data/` de `main`.
+- `s169-roi-v750` en `cd5aa300c` (comprobado con `ls-remote` y `merge-base`): `main(argv)` probado, VF1-02 arreglado,
+  32 de 32 pruebas, nulo 9 de 9 atrapadas por aserción; `pipeline/` sin cambios respecto de `443da8649`.
+- P1-11 queda para cuando termine el medidor de V750-A (no se edita `evaluar_v750a.py` mientras corre, A112). P1-12:
+  el PID 1324 es la corrida completa M3 a M85 contra los 77 escenarios; va en M31, todas atrapadas.
+
 ### 2026-10-30 04:26 UTC (S169, vuelta 19): verificador F1 confirma; V750-B se cierra con el procedimiento del día
 - Verificador F1 (Opus, subagente): `experiments/_s169/audit_patrones/f1/verificador/INFORME.md` (en `loop/activo`,
   `2e2c17554`). 9 CONFIRMADO, 5 EN PARTE, 0 REFUTADO, 4 nuevos (VF1-01 a 04). P1-02 y P1-03 (gravedad 3) se cierran
