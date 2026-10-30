@@ -57,7 +57,8 @@ Antes de seguir: las dos primeras salen 0, el control dice IGUALES, 0 sin gránu
 se le informa a la coordinadora. Luego, la rama y el tag (sin push de la rama de disparo: ese push lanza el run):
 
     cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile/.claude/worktrees/s162-viirs750-2-918174"
-    bash experiments/_s162_v750b/r4/armar_rama_disparo.sh $R4/arbol $M s167-v750b-adenda3-sellada s169-v750b-objetivos-20261103
+    tr -d '' < experiments/_s162_v750b/r4/armar_rama_disparo.sh > $R4/armar.sh   # el checkout de Windows puede traer CRLF
+    bash $R4/armar.sh $R4/arbol $M s167-v750b-adenda3-sellada s169-v750b-objetivos-20261103
     git tag -a s169-v750b-objetivos-20261103 s169-v750b-objetivos-20261103 -m "V750-B: objetivos al 2026-11-02 (main $M, carpeta de V750-B de s167-v750b-adenda3-sellada), sha256 en el mensaje del pedido"
     git push origin refs/heads/s169-v750b-objetivos-20261103 refs/tags/s169-v750b-objetivos-20261103
 
@@ -81,3 +82,13 @@ Pedido a la coordinadora: el tag, los sha256 que imprime el armado, la cuenta de
 
 El veredicto de V750-B es el del segundo comando (adenda 3 §3). El tercero y el cuarto informan. Antes de que Nicolás
 confirme la ROI (§6.5), se miran juntas la lista aparte de N-3 y la ROI sin N-3 (VA3-05).
+
+## 5. La ROI elegida, hacia la vía (preparado, sin merge)
+
+Rama `s169-roi-v750` (`3c5c494b9`), sobre el tag defensivo `pre-s169-roi-v750` (= `main` `443da8649`, A45): el script
+`scripts/roi_v750b_a_grillas.py --brazo <B0..B5> [--escribir]` reescribe sólo `roi_v750` de los 11 volcanes en
+`pipeline/grillas_mirova.yaml` (B0 def, B1 sens, B2 crater, B3 inner, B4 sens en Cordón Caulle y Tupungatito y def en
+el resto, B5 corona) y el comentario que dice qué ROI rige; la rama no cambia el YAML. Prueba
+`tests/test_roi_v750b_variantes_s169.py`: 21 de 21 (59 con la de la vía), 4 mutaciones del script atrapadas por
+aserción. El día de la lectura: en esa rama, `python scripts/roi_v750b_a_grillas.py --brazo <elegido> --escribir`,
+la prueba, commit y PR; el merge y el encendido van con la frase de Nicolás.
