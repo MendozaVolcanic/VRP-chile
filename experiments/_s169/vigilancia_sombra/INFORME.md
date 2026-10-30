@@ -152,3 +152,70 @@ queda para después de la sombra.
 de `inicio`. El verificador recomienda, después del merge y antes del 2026-11-03 15:00 UTC, un despacho
 `medir=true` de Láscar sobre 2 o 3 días pasados, y un despacho de `nrt-monitor.yml`, que debería decir «Sombra:
 inactivo» (§7 de su informe). No los hice: los despachos están fuera de esta tarea.
+
+## 6. Ronda 3
+
+El verificador corto de `f743d7b8f` (`D:/vrp-trabajo/temporales/s169_ver_vigilancia_r2/INFORME_VERIFICACION_R2.md`)
+dio MERGEABLE CON CAMBIOS. Su hallazgo central: juzgar sólo «lo que escribió hoy» tiene dos agujeros de signo
+contrario. Un día perdido se marca una sola vez, en su propia corrida, y desde el día siguiente pasa como NOTA con un
+texto («lo cubrió una corrida previa») que nadie comprueba (VR2-01). Y la víspera, reescrita hoy, puede tapar un
+catálogo vacío de hoy (VR2-02). Por qué importa: la sombra se va a leer **por noches**, así que la revisión tiene que
+mirar lo mismo que el lector va a mirar, que es el contenido de la ventana, no la actividad de la corrida.
+
+**Decisión de diseño de la coordinadora**, aplicada: la revisión juzga dos cosas distintas. (1) ¿Corrió? Esta
+corrida tiene que haber escrito al menos un record de la vía (detecta la corrida muerta). (2) ¿Está la ventana
+completa? Después del commit, para cada día de la ventana desde el 2026-11-03 y cada sensor, tiene que haber en el
+JSON al menos un record de la vía con pasada de ese día, lo haya escrito quien sea, o una prueba escrita de que no hubo
+pasada (la cobertura de esta corrida dice que todas las plataformas vivas del sensor respondieron sin gránulos ese
+mismo día, o están retiradas). Sin una cosa ni la otra es FALLA, sea hoy o un día anterior. El catálogo vacío se
+juzga por día. Los días anteriores al 2026-11-03 no se juzgan (`FECHA_MINIMA`, igual a la de
+`scripts/ventana_sombra.py`, y una prueba lo vigila).
+
+| Hallazgo | Cambio | Prueba que lo fija |
+|---|---|---|
+| VR2-01, día perdido invisible desde el día siguiente | Control por día y sensor sobre el contenido de la ventana. La NOTA de falla de búsqueda de un día anterior ya no afirma que el día quedó cubierto: dice que el control por día lo decide | `test_r3_un_dia_viejo_perdido_sigue_rojo_mientras_este_en_la_ventana` (corridas del 5 y del 9, con y sin fallas de búsqueda), `test_r3_un_dia_viejo_sin_pasada_probada_es_nota`, `test_r3_cobertura_de_otro_dia_no_prueba_la_ausencia`, `test_r3_un_dia_con_solo_un_record_de_k_es_un_dia_perdido` |
+| VR2-02, la víspera tapa un catálogo vacío | Cada día se juzga con sus propios records; el catálogo vacío se evalúa por día | `test_r3_el_catalogo_vacio_de_hoy_no_lo_tapa_la_vispera`; `test_vv01_un_record_de_ayer_escrito_hoy_no_tapa_el_dia_de_hoy` (antes exigía verde, ahora rojo sin records de hoy y verde con ellos) |
+| Corrida muerta con la ventana completa | Control «esta corrida escribió algo» | `test_a_record_de_ayer_con_el_mismo_sha_no_cuenta` (ventana completa, todo escrito antes del inicio, mismo sha) |
+| Días antes de la fecha mínima | Excluidos | `test_r3_los_dias_antes_de_la_fecha_minima_no_se_juzgan`, `test_r3_la_fecha_minima_es_la_de_ventana_sombra` |
+| VR2-03, el tachado falla abierto | `tachar_secreto_log.py` atrapa cualquier error por archivo, sigue con los demás y sale 1; el paso tiene `id: tachar` y el artefacto sube sólo con `steps.tachar.outcome == 'success'` (si falla, no se sube nada y el paso queda rojo). Tacha también `quote`, `quote_plus` y el escapado `\/` de JSON | `test_vr2_03_el_tachado_falla_cerrado`, `test_vr2_03_el_artefacto_solo_sube_si_el_tachado_salio_bien`, `test_vr2_03_tacha_las_variantes_url_y_json_del_token` |
+| VR2-04, traceback con insumos malos | `main` lee JSON, log y cobertura sin traceback; un JSON o cobertura ilegible, o `--desde-utc` vacío, es FALLA con mensaje, y la línea «K caídos» sale igual («sin dato» si el JSON no se pudo leer) | `test_vr2_04_json_corrupto_...`, `test_vr2_04_cobertura_corrupta_...`, `test_vr2_04_desde_utc_vacio_...` |
+| VR2-05, comportamientos sin prueba | Sin cambio de código | `test_vr2_05_frontera_de_6_h_exactas_ya_alerta`, `test_vr2_05_una_falla_de_cobertura_sin_fecha_es_falla`, `test_vr2_05_el_token_se_toma_sin_espacios_ni_salto_de_linea`, `test_vr2_05_con_token_vacio_no_toca_nada` |
+| Seguimiento S1 del verificador (el nulo contaba cualquier «failed») | `m4_mutaciones_r3.py` (reemplaza a `m4_mutaciones_r2.py`, que se retira; su salida `m4_r2_salida.txt` queda como historia) corre pytest con `--junitxml`, cuenta como atrapada sólo una falla por aserción y trae un control: un JS que no compila da fallas por `CalledProcessError` y sale «por aserción: 0». Todos sus temporales (copia, XML, `--basetemp`) van bajo `D:/vrp-trabajo/temporales/s169_vigilancia/` | el control `CONTROL js roto` en `m4_r3_salida.txt` |
+
+**Rojo antes.** Con las pruebas de la ronda 3 escritas y el código de `f743d7b8f`: 11 de 54 en rojo, todas por
+`AssertionError` (`D:/vrp-trabajo/temporales/s169_vigilancia/r3_rojo_antes.txt`). Las que pasaban con el código viejo
+(fecha mínima, falla sin fecha, `strip()`, token vacío, frontera de 6 h) existen para atrapar mutaciones, y el nulo
+muestra que lo hacen. Dos ajustes de pruebas después de esa corrida: `test_vr2_03_el_tachado_falla_cerrado` no le
+pasaba al script el directorio que debía fallar (lo corregí; con el script viejo seguiría roja, porque el script
+viejo se cae en el primer archivo y deja el segundo sin tachar, pero esa versión exacta no la corrí contra el código
+viejo); y la prueba del `strip()` dejaba el salto de línea en el log, así que no distinguía (el nulo lo mostró: X12
+sobrevivía; ahora el token va pegado a otro texto). También agregué `test_r3_un_dia_con_solo_un_record_de_k_...`
+porque el nulo mostró que nada atrapaba contar un K como pasada de la vía (W4).
+
+**Verde después.** Las dos pruebas nuevas: **56 de 56**. La batería completa (las dos nuevas, cadencia, monitor del
+NRT, `test_sombra_codigo_mirova_s167` y las siete guardias de workflows, incluida la de `"on"`): **224 passed, 4
+skipped** antes de los dos últimos ajustes de pruebas (`r3_guardias.txt`), y **225 passed, 4 skipped** al final, con
+el árbol quieto (`r3_guardias_final.txt`). Las 4 saltadas son las mismas de siempre
+(`test_guard_timeout_vs_ventana_s129.py:102`).
+
+**Nulo de mutaciones.** `m4_mutaciones_r3.py` (en esta carpeta; salida `m4_r3_salida.txt`). Controles: la copia sin
+tocar da 56 pruebas sin fallas, y el JS que no compila da 9 fallas por `CalledProcessError` y **0 por aserción**, o
+sea que el clasificador no cuenta una caída como atrapada. Resultado: **48 de 48 mutaciones atrapadas por aserción, 0
+sobreviven, ninguna declarada equivalente**. Son las 21 del verificador y de la ronda 2 reescritas para el código de
+hoy (A a R2), 11 de la ronda 2 (V2 a V7b; V1 desapareció con el control por día), 9 del control por día y de VR2-04
+(W1 a W9), 4 del tachado (T1 a T4) y las 4 de VR2-05 (X3, X8, X12, X13). La primera pasada de este nulo dio 46 de 48
+(W4 y X12 sobrevivían) y llevó a la prueba del record de K y al ajuste de la prueba del `strip()`; la segunda, sobre
+las pruebas finales, dio 48 de 48.
+
+**Consecuencias del diseño que conviene saber** (no son defectos, son lo que se decidió):
+- Un día perdido deja el job rojo **cada día** hasta que sale de la ventana, hasta 8 corridas, y el monitor abre su
+  issue a las 26 h. Es lo pedido: un día perdido tiene que seguir a la vista. Si hay muchos, el rojo se vuelve
+  ruido; la línea FALLA dice qué día y qué sensor, así que se distingue un día viejo de uno nuevo leyéndola.
+- VF3-01 cambia de forma: un record de K viejo no enrojece si ese día el sensor tiene otra pasada de la vía; si el K
+  es lo único de ese sensor ese día, el día cuenta como perdido y queda rojo mientras esté en la ventana. Antes de la
+  ronda 1 el rojo era por existir el K; ahora es por faltar la medición.
+- La prueba de ausencia sólo vale con la cobertura de **esta** corrida: run_pipeline busca los 8 días en cada
+  corrida, así que la tiene. Si un día la búsqueda respondió con gránulos pero ninguno dio record (gránulos de día,
+  o fuera de la grilla de la vía), ese día queda rojo sin excusa: es el falso rojo que ya estaba declarado en §4, ahora
+  con la duración de la ventana.
+- Un despacho `medir` con fechas anteriores al 2026-11-03 sólo juzga «¿corrió?» y las fallas; no tiene días que juzgar.
