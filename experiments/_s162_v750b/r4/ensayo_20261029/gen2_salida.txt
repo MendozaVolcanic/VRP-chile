@@ -1,0 +1,27 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-04-01 a 2026-10-29 pisa 7 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+referencia remota: {'registro_vrp_consolidado.csv': '0b55f61fa36225d0046364c73d077985895c3921', 'registro_vrp_ocr.csv': 'e03bda6fab1f0c4cc9332aaf7df380cb87bd5b5e'}
+records V750 nocturnos en ventana: 9253; etiquetas 120 s: {'sin_info': 3485, 'pos': 273, 'neg_limpio': 5470, 'far_ref': 19, 'sin_geometria': 6}
+cambios de etiqueta 120 s -> 480 s (V750): {('sin_info', 'neg_limpio'): 144, ('sin_info', 'pos'): 1}
+pos V750: 273 (protegidas 97, deciden 259, solo OCR antes de 2026-06-13: 14); neg limpios V750: 5470
+alertas V750 de MIROVA sin record nuestro (+-120 s): 19 {('NevadosDeChillan', 'VIIRS750'): 13, ('PuyehueCordonCaulle', 'VIIRS750'): 6}
+P1: pos con VRP de MIROVA > 0: 273 de 273
+dt al vecino de referencia (s), pos: max 2.0 | neg: max 2.0
+pos sin granule: 0 neg sin granule: 0
+pos por volcan y cenit: {('Chaiten', 'z<=40'): 2, ('Copahue', 'z<=40'): 1, ('Isluga', 'z<=40'): 29, ('Isluga', 'z>40'): 7, ('Lascar', 'z<=40'): 88, ('Lascar', 'z>40'): 37, ('NevadosDeChillan', 'z<=40'): 14, ('NevadosDeChillan', 'z>40'): 21, ('PlanchonPeteroa', 'z<=40'): 7, ('PlanchonPeteroa', 'z>40'): 2, ('PuyehueCordonCaulle', 'z<=40'): 37, ('PuyehueCordonCaulle', 'z>40'): 10, ('Tupungatito', 'z<=40'): 9, ('Tupungatito', 'z>40'): 1, ('Villarrica', 'z<=40'): 8}
+pos publica produccion: 218 de 273
+neg por volcan y cenit: {('Chaiten', 'z<=40'): 215, ('Chaiten', 'z>40'): 385, ('Copahue', 'z<=40'): 194, ('Copahue', 'z>40'): 375, ('Isluga', 'z<=40'): 132, ('Isluga', 'z>40'): 266, ('Lascar', 'z<=40'): 74, ('Lascar', 'z>40'): 176, ('Lastarria', 'z<=40'): 161, ('Lastarria', 'z>40'): 325, ('Llaima', 'z<=40'): 207, ('Llaima', 'z>40'): 380, ('NevadosDeChillan', 'z<=40'): 189, ('NevadosDeChillan', 'z>40'): 326, ('PlanchonPeteroa', 'z<=40'): 185, ('PlanchonPeteroa', 'z>40'): 338, ('PuyehueCordonCaulle', 'z<=40'): 176, ('PuyehueCordonCaulle', 'z>40'): 299, ('Tupungatito', 'z<=40'): 171, ('Tupungatito', 'z>40'): 339, ('Villarrica', 'z<=40'): 197, ('Villarrica', 'z>40'): 360}
+neg publica produccion: 1029 de 5470
+escrito poblacion_completa.json: 5762
+== control: pos y neg_limpio de esta corrida contra la lista sellada (volcan, hora_utc, granule, lab, protegida, alerta_tabla, decide): 5654 contra 5654, IGUALES
+far_ref con gránulo: 19 | sin gránulo (SIN DATO declarado): 0 []
+sha256 sellada 4d1f956d8b21bcd4362e5edb896b15f15ab78f869ca5e22c015b62ade9b5d743
+sha256 suplementaria 2e774c41cfc79110422c6fc3039765baa65767218747083f51d78690453d83f6
+sha256 lista del run b0fc254e2f018ab202d6903534187b14628b5325e93700b0b618f2b5db7f7020 (5654 + 19 pasadas)
