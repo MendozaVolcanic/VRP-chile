@@ -1,0 +1,30 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+evaluar_d25 blob cargado: 1dbabf657407b6db0f91d9e2fc98eb16a8051873 | esperado: 1dbabf657407b6db0f91d9e2fc98eb16a8051873
+
+== D1 (P-D): control_k_produccion compara pub_runner SOLO para K; V, V-cercano y V-pico nunca
+   evaluador publica V = 0 | el runner dijo V = 1
+   control_k_produccion: OK (deberia verse la discrepancia de V; solo mira K)
+   control positivo (pub_runner K=1 vs evaluador 0): INDECIDIBLE
+
+== D2 (P-D/P-B): control_identidad ignora captura_coherente, box_igual, pos_crater_igual y v_slim_dc_igual
+   con los 8 indicadores informativos en rojo: OK
+   control positivo (misma_clase False): INDECIDIBLE
+   el ident no trae procedencia: claves de una entrada = ['box_igual', 'captura_coherente', 'dt', 'dvrp', 'geom_distinta', 'grilla_igual_float32', 'max_dif_radiancia', 'misma_clase', 'misma_mascara', 'mismo_granulo', 'pos_crater_igual', 'v_slim_dc_igual', 'v_slim_vrp_igual', 'vol']
+
+== D3 (P-F): una fila del runner que no esta en la poblacion (sin 'lab') hace CAER evaluar() en vez de dar INDECIDIBLE
+   CAE con KeyError 'lab'
+   control positivo (con lab, esperada): veredicto INDECIDIBLE | cobertura OK
+
+== D4 (P-G): por_tramo informa solo P2; el pre-registro (§6, tras la tabla) pide P2 y P2' por tramo
+   claves de res['por_tramo']['C']: ['p2']
+
+== D5 (P-E): el resultado no registra la version de numpy ni la raiz usada
+   claves de primer nivel del resultado: ['brazos', 'chillan', 'chillan_por_tramo', 'controles', 'curva_cenit_K', 'curva_misma_noche_K', 'descriptivas_posicion', 'e_excluido', 'e_via_no_corrio', 'por_tramo', 'posicion_elegida', 'posicion_motivo', 'protegidas_que_otra_posicion_publica', 'veredicto']
+   'numpy' en el json del resultado: False | F4_RAIZ en uso: D:\vrp-trabajo\temporales\s169_audit_patrones\f2_modis\raiz_min
+
+== D6 (P-A): Path.write_text en Windows traduce 
+ a 
+; json.dumps compacto (el del ensayo en seco) no tiene 
+
+   indent=0 -> CRLF presentes: 5 | compacto -> CRLF presentes: 0
+   sha256 compacto igual en CRLF y LF: True | sha256 con indent distinto: True

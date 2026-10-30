@@ -1,0 +1,17 @@
+== 1. clasificar(codigo, fallan, caen)
+   (1, ['E01'], [])             -> ATRAPADA             esperado ATRAPADA             OK
+   (1, ['E01'], ['E02'])        -> ATRAPADA_CON_CAIDAS  esperado ATRAPADA_CON_CAIDAS  OK
+   (1, [], [])                  -> ROTA                 esperado ROTA                 OK
+   (2, [], ['E01'])             -> CAE                  esperado CAE                  OK
+   (0, [], [])                  -> VIVA                 esperado VIVA                 OK
+   (3, [], [])                  -> ROTA                 esperado ROTA                 OK
+== 2. cada mutacion aplica exactamente una vez a evaluar_f4.py (denominador: 89 mutaciones con texto)
+   no aplican (nombre, apariciones): []
+== 3. tamano del medidor del codigo frente a la salida commiteada
+   codigo: 86 mutaciones M01..M86, controles ['IDENTIDAD', 'CONTROL_ROTA', 'CONTROL_CAIDA', 'CONTROL_CAIDA_VALUEERROR']
+   salida commiteada: 82 mutaciones (M01..M82); lineas de control: ['IDENTIDAD', 'CONTROL_ROTA', 'CONTROL_CAIDA']
+   mutaciones del codigo que NO estan en la salida: ['M83_n_grillas_censo_5322', 'M84_posicion_sin_n', 'M85_contador_sin_no_pasan', 'M86_chillan_empates_como_pares']
+   'ATRAPADA_CON_CAIDAS' aparece en la salida commiteada: False | 'atrapadas con caídas' en su resumen: False
+== 4. codigo de salida de resumir() con mutaciones vivas / que caen / con caidas / rotas (controles bien)
+   codigo de salida: 0 | ultima linea: MUTACIONES: 0 de 5 atrapadas por aserción; vivas ['M01_a']; caen ['M02_b']; atrapadas con caídas ['M03_c']; rotas ['M04_d']; no aplican ['M05_e']
+   control positivo (CONTROL_ROTA sale VIVA): 1 | NO VALE: controles que no salen como deben: ['CONTROL_ROTA']

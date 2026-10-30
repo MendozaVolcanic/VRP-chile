@@ -1,0 +1,19 @@
+== control positivo: breaker limpio, earthaccess.download sustituido por un doble
+[diag 03:55:47Z] DOWNLOAD_START attempt=0 n=1 dest=tmpxda0q8n5 [1 items]
+[diag 03:55:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=1
+   devuelve: MYD021KM.A2026060.0735.061.2026060163012.hdf False | llamadas al doble: 1 | sleep acumulado: 0
+== caso: host marcado caido por un ConnectTimeout anterior en el MISMO proceso (nadie llama reset_transient_breakers)
+[diag 03:55:47Z] DOWNLOAD_SKIP host caído ['ladsweb.modaps.eosdis.nasa.gov'] [1 items]
+  CMR/descarga fallo intento 0 MYD021KM.A2026060.0735.061.2026060163012.hdf: RuntimeError("download host(s) down this run: ['ladsweb.modaps.eosdis.nasa.gov']")
+[diag 03:55:47Z] DOWNLOAD_SKIP host caído ['ladsweb.modaps.eosdis.nasa.gov'] [1 items]
+  CMR/descarga fallo intento 1 MYD021KM.A2026060.0735.061.2026060163012.hdf: RuntimeError("download host(s) down this run: ['ladsweb.modaps.eosdis.nasa.gov']")
+[diag 03:55:47Z] DOWNLOAD_SKIP host caído ['ladsweb.modaps.eosdis.nasa.gov'] [1 items]
+  CMR/descarga fallo intento 2 MYD021KM.A2026060.0735.061.2026060163012.hdf: RuntimeError("download host(s) down this run: ['ladsweb.modaps.eosdis.nasa.gov']")
+[diag 03:55:47Z] DOWNLOAD_SKIP host caído ['ladsweb.modaps.eosdis.nasa.gov'] [1 items]
+  CMR/descarga fallo intento 3 MYD021KM.A2026060.0735.061.2026060163012.hdf: RuntimeError("download host(s) down this run: ['ladsweb.modaps.eosdis.nasa.gov']")
+   devuelve: (None, None) | llamadas al doble: 0 | sleep acumulado por L1B: 200 s | esperas: [20, 40, 60, 80]
+   por gránulo main() pide L1B y MxD03 (sin cortocircuito): 400 s de espera sin bajar nada
+   gránulos por parte en poblacion_f4.json: ver p2_02; con el timeout de 240 min del job: alcanzan 36 gránulos antes del corte
+== grep: quien llama reset_transient_breakers en el arnés y en el workflow
+   experiments/_s166_modd_f4/probe_f4.py -> 0 apariciones
+   .github/workflows/probe-s168-modd-f4.yml -> 0 apariciones
