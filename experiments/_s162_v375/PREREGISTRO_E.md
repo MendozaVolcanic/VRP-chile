@@ -1003,7 +1003,22 @@ de los cortes 11-11 y 11-12, en la misma carpeta). Así que la regla es por vent
 - **Una segunda lectura no puede pasar en silencio.** Con otra carpeta o con otra referencia en el mismo checkout, la
   rechaza el registro local; desde otro checkout, la rechaza el de `loop/activo`; y si dos lecturas se hicieran antes de
   que el registro llegara a `loop/activo`, al commitearlo quedan dos líneas, visibles. Una segunda lectura con otra
-  referencia exige un pre-registro nuevo.
+  referencia exige un pre-registro nuevo. ⚠️ **Matiz de la ronda 3 (VL2-03)**: desde otro checkout, esto vale sólo si
+  se cumple el procedimiento de abajo; el lector lee `origin/loop/activo` tal como está en el checkout, sin bajarlo, así
+  que con una referencia vieja (sin `git fetch`) o con el registro todavía sin empujar, una segunda lectura desde otro
+  checkout no la detiene el código. Por eso el procedimiento es parte de la regla.
+
+**Procedimiento de la lectura que decide (ronda 3, VL2-03 y VL2-04; decisión de la coordinadora de S169).**
+1. Antes de correr el lector: `git fetch origin` en el checkout del lector y comprobar a mano que
+   `git show origin/loop/activo:experiments/_s168/v375e_sombra/lecturas/REGISTRO_VENTANA_P.jsonl` no traiga ya una
+   lectura de esta ventana (si el archivo no existe, no la trae).
+2. Correr el lector. **La lectura sale sólo a archivo, nunca por pantalla** (regla de código, VL2-04): en la lectura que
+   decide, por pantalla salen sólo la procedencia, los controles con su nombre y OK (sin detalle), el N del corte y la
+   ruta del archivo; las clases, los criterios, el estado del paquete y todo lo demás van únicamente al `.txt` y al
+   `.json`. Así ver la terminal no es ver la lectura.
+3. Commitear el registro (`lecturas/REGISTRO_VENTANA_P.jsonl`) y empujarlo a `loop/activo`, y comprobar con
+   `git ls-remote` que llegó, **antes de abrir el archivo de la lectura**. Recién entonces se abre y se le muestra a la
+   coordinadora y a Nicolás.
 
 **Códigos de salida**: 0 lectura que decide escrita; 3 LECTURA NO LEGIBLE (cae un control, o `VRP_PROFILE` con otro
 valor); 5 parada no alcanzada (sólo controles y contadores); 2 la ventana ya se leyó (o no se puede comprobar) o el
@@ -1096,3 +1111,39 @@ nombre `controles_sombra_<N>_…` revela N, no la lectura; y `--hasta` sin ceros
 identidad y los dos controles de caída), **sin correr**; V04 declarada equivalente. Cada regla nueva de la ronda 2 se vio
 en rojo rompiéndola a mano (`experiments/_s169/v375e_lector_arreglos/ver_en_rojo.py`, grupos F a K; detalle y
 tropiezos en el INFORME de esa carpeta, sección «Ronda 2»).
+
+### 11.13 Ronda 3: verificador corto de la ronda 2 (2026-10-30)
+
+Verificador limpio (Sonnet) sobre `9d76af91b`: LISTO PARA EL NULO CON CAMBIOS
+(`D:/vrp-trabajo/temporales/s169_ver_lector_r2/INFORME.md`, fuera del repo). Decisiones de la coordinadora de S169:
+
+| hallazgo | gravedad | regla | tratamiento |
+|---|---|---|---|
+| VL2-01 un TimeoutExpired hundía el nulo entero | 4 | nulo (abajo) | `TimeoutExpired` es CAIDA; tope de 5400 s por corrida; cada resultado se escribe al disco al terminar; una segunda corrida retoma saltándose las ya escritas |
+| VL2-02 el nulo seguía con la identidad caída | 3 | nulo (abajo) | aborta antes de mutar si la identidad no pasa o si `CONTROL` y `CONTROL_SECCION` no salen CAIDA; comprueba que corre en un checkout de `claude/s169-v375e-lector` |
+| VL2-03 otro checkout depende de commit, push y fetch | 2 | §11.8, procedimiento | `git fetch origin` y comprobar el registro de `loop/activo` antes de leer; el registro se empuja antes de abrir la lectura |
+| VL2-04 la lectura salía por pantalla | 2 | §11.8, punto 2 del procedimiento | la lectura va sólo a archivo; por pantalla, procedencia, controles sin detalle, N y la ruta |
+| VL2-05 S8 marca de más | 2 | riesgo aceptado | ver abajo |
+| VL2-06 S9 usa la tabla de VIIRS 375 de cualquier volcán | 1 | riesgo aceptado | ver abajo |
+
+**El nulo (VL2-01 y VL2-02).** `mutar_sombra.py` corre primero la identidad (la batería sobre una copia sin mutar tiene
+que pasar entera) y los dos controles (`CONTROL` rompe la importación, `CONTROL_SECCION` lanza dentro de una sección:
+los dos tienen que salir CAIDA); si algo de eso falla, **aborta sin mutar nada** y sale 2. También aborta si no corre en
+un checkout de `claude/s169-v375e-lector` (la rama, o un commit contenido en `origin/claude/s169-v375e-lector`, como el
+tag). Cada corrida de la batería tiene un tope de 5400 s, y si lo pasa cuenta como CAIDA (no atrapada). Cada resultado se
+agrega a `experiments/_s168/v375e_sombra/mutar_sombra_salida.txt` apenas termina su mutación; si el nulo se corta, la
+corrida siguiente lee ese archivo, se salta las mutaciones ya escritas y sigue. El resumen final se calcula sobre todo el
+archivo y lista una por una las CAIDA y las que sobreviven. **Código de salida**: 0 sólo si no sobrevive ninguna
+mutación que no esté declarada equivalente; 1 si sobrevive alguna; 2 si abortó.
+
+**Riesgos aceptados (decisión de la coordinadora de S169):**
+- **VL2-05, S8 marca de más.** Marca por un comentario en `volcanoes.yaml`, en el workflow o en los dos perfiles, y por
+  un cambio de AST en cualquier `.py` de `pipeline/` aunque la vía de VIIRS 375 no lo use (23 commits sobre
+  `pipeline/*.py` en `main` desde el 2026-10-01). Se acepta porque **falla cerrada**: nunca oculta un cambio real; lo
+  peor que hace es llevar un CUMPLE a DECIDE NICOLÁS con la lista de archivos impresa, para que Nicolás juzgue a mano.
+  Afinarlo más (por función o por comentario en YAML) es el hueco de A89 que la ronda 2 evitó a propósito.
+- **VL2-06, S9 usa la fila más nueva de VIIRS 375 de cualquier volcán.** Si la tabla de un volcán se atrasara y la de
+  otro no, S9 pasaría. Se acepta porque el scraper escribe la tabla de todos los volcanes en la misma corrida (que se
+  atrase uno solo es SOSPECHA del verificador, no observado) y porque el rezago de 2 días ya es un margen; si ocurriera,
+  las alertas que faltan aparecerían como negativos limpios y quedarían en el registro de la referencia, cuyo sha
+  sale en la lectura.
