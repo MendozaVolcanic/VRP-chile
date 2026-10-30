@@ -128,6 +128,9 @@ def test_lo_esperado_por_dia_coincide_con_el_cron_declarado_en_el_yml():
     esperado_de_yml = {
         "NRT VRP Pipeline (both profiles)": (".github/workflows/nrt.yml", 12),
         "Deploy GitHub Pages": (".github/workflows/pages-deploy.yml", 12),
+        # S169: un cron diario a hora fija ("0 15 * * *") cae en el `else 24` de abajo: 1 por dia
+        "Sombra codigo MIROVA (vias V750, V375 y MODIS, 11 Tier A)": (
+            ".github/workflows/sombra-codigo-mirova.yml", 1),
     }
     for nombre, (ruta, por_dia) in esperado_de_yml.items():
         src = io.open(os.path.join(RAIZ, ruta), encoding="utf-8").read()
