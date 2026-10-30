@@ -194,12 +194,13 @@ def test_revisar_sombra_falla_si_la_corrida_queda_verde_sin_la_via():
     via = [dict(proc, datetime_utc="2026-11-05T06:30:00Z", sensor=s, via_codigo_mirova=True)
            for s in ("MODIS_AQUA", "VIIRS_NOAA20_750", "VIIRS_NOAA20")]
     k = dict(proc, datetime_utc="2026-11-05T07:10:00Z", sensor="MODIS_TERRA", via_codigo_mirova="sin_mxd03")
+    # S169 ronda 3: la revisión juzga además cada día de la ventana, así que aquí la ventana es de un solo día
     viejo = dict(proc, datetime_utc="2026-11-01T06:30:00Z", via_codigo_mirova="sin_grilla")   # fuera de la ventana
-    assert revisar(via + [viejo], "  VIIRS_NOAA20 (375m) | ...", "2026-11-03", "2026-11-05", desde, cob)[0] is True
-    assert revisar([], "", "2026-11-03", "2026-11-05", desde, cob)[0] is False                # vacía: zombie
-    assert revisar(via, "  ERROR processing VJ102IMG...: No module named 'pyproj'", "2026-11-03",
+    assert revisar(via + [viejo], "  VIIRS_NOAA20 (375m) | ...", "2026-11-05", "2026-11-05", desde, cob)[0] is True
+    assert revisar([], "", "2026-11-05", "2026-11-05", desde, cob)[0] is False                # vacía: zombie
+    assert revisar(via, "  ERROR processing VJ102IMG...: No module named 'pyproj'", "2026-11-05",
                    "2026-11-05", desde, cob)[0] is False
-    ok, resumen = revisar(via + [k], "", "2026-11-03", "2026-11-05", desde, cob)
+    ok, resumen = revisar(via + [k], "", "2026-11-05", "2026-11-05", desde, cob)
     assert ok is False and "sin_mxd03" in resumen                                        # cayó a K: se ve
 
 
