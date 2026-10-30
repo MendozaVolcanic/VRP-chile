@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 03:20 UTC aprox. (S169, vuelta 10): choque entre sensores en el S8 del lector de V375-E
+- `leer_sombra_v375e.py` (`983f6f28d`) l. 334: `control_s8` hace `git diff --name-only c42ee0eb7 <sha> -- pipeline/`
+  sobre toda la carpeta. Llevar en noviembre la ROI de V750-B a `pipeline/grillas_mirova.yaml` (clave `roi_v750`)
+  marcaría el régimen de VIIRS 375 y pasaría (b), (c) y (d) a DECIDE NICOLÁS sin que cambie nada de la vía de 375.
+  Agregado como B7 al verificador en curso; el arreglo (comparar sólo lo que la vía de 375 lee) va antes del nulo.
+- Magnitud de la vía contra MIROVA, retrospectiva y ya medida: VIIRS 750 0,999 [0,978; 1,007] con el fondo del código
+  y 0,458 con el fondo de anillo como K (`experiments/_s162_v750c/INFORME.md` l. 75 y 84, V750C-2); VIIRS 375 0,999
+  (lectura lejana, brazo cercano, «informa»). MODIS: no encontré la razón de la vía contra MIROVA en `main`; la mide
+  el A/B de MOD-D fase 4 (fila «Razón», que informa, `PREREGISTRO_MODD_F4.md` l. 158).
+
 ### 2026-10-30 03:05 UTC (S169, vuelta 9): lector de la sombra arreglado; verificador de otro modelo en curso
 - Rama `claude/s169-v375e-lector` en `983f6f28d` (verificado con `ls-remote`; 13 commits sobre `3f7e8814c`), informe
   `experiments/_s169/v375e_lector_arreglos/INFORME.md`. Batería 190 de 190 (~7 min). VS168-01: `--desde` fijo en el
