@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 07:18 UTC (S169, vuelta 27): vigilancia MERGEABLE; #928 espera la frase de Nicolás
+- Verificador de la ronda 3 (Sonnet) sobre `cd8b7074f`:
+  `experiments/_s169/vigilancia_sombra_verificador/ronda3/INFORME_VERIFICACION_R3.md` (`52682a3ba`). MERGEABLE: VR2-01 a
+  05 cumplidos; la cobertura de cada corrida cubre los 8 días (`run_pipeline.py:655`), así que no hay falso rojo
+  permanente. Lo nuevo es de gravedad 2 o menos: VR3-01, un día sin pasada nocturna de MODIS (sólo gránulos de día)
+  deja rojo hasta 8 corridas (en K, Isluga 4 de 228 días y Láscar 3; arreglo posible en `revisar_sombra.py` leyendo
+  «kept 0 of N granules (night filter)» del log, sin tocar `pipeline/`); VR3-02 a 05 de gravedad 1.
+- PR #928: cabeza `cd8b7074f`, CI `pytest` SUCCESS, `CLEAN`. VR3-01 queda como arreglo aparte después del merge
+  (`scripts/revisar_sombra.py` no está en el pathspec de S8 del lector de V375-E).
+
 ### 2026-10-30 07:03 UTC (S169, vuelta 26): lector de V375-E ronda 2 lista; verificador corto antes del nulo
 - `claude/s169-v375e-lector` en `9d76af91b` (comprobado con `ls-remote`): VL169-01 a 10 y B7 aplicados; merge de
   `origin/main` en `dcec35a8c` (c42ee0eb7 ancestro); base de S8 = `codigo_sha` de la primera noche, con el hueco
