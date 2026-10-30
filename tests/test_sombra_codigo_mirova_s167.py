@@ -186,15 +186,20 @@ def test_el_workflow_commitea_solo_la_carpeta_de_la_sombra_y_con_grupo_propio():
 
 def test_revisar_sombra_falla_si_la_corrida_queda_verde_sin_la_via():
     """run_pipeline sale 0 aunque cada gránulo dé error (sin pyproj, por ejemplo): la revisión tiene que ponerlo rojo."""
+    # S169: la revisión juzga sólo lo escrito en esta corrida y por sensor (tests/test_revisar_sombra_corrida_s169.py
+    # tiene los casos de corrida vacía, sensor faltante y rojo arrastrado).
     from revisar_sombra import revisar
-    via = {"datetime_utc": "2026-11-05T06:30:00Z", "via_codigo_mirova": True}
-    k = {"datetime_utc": "2026-11-05T07:10:00Z", "via_codigo_mirova": "sin_mxd03"}
-    viejo = {"datetime_utc": "2026-11-01T06:30:00Z", "via_codigo_mirova": "sin_grilla"}   # fuera de la ventana
-    assert revisar([via, viejo], "  VIIRS_NOAA20 (375m) | ...", "2026-11-03", "2026-11-05")[0] is True
-    assert revisar([], "", "2026-11-03", "2026-11-05")[0] is False                      # vacía: zombie
-    assert revisar([via], "  ERROR processing VJ102IMG...: No module named 'pyproj'", "2026-11-03",
-                   "2026-11-05")[0] is False
-    ok, resumen = revisar([via, k], "", "2026-11-03", "2026-11-05")
+    desde, cob = "2026-11-05T15:01:00Z", {"fallas": [], "plataformas": {}, "incidencias": []}
+    proc = {"processed_utc": "2026-11-05T15:20:00Z"}
+    via = [dict(proc, datetime_utc="2026-11-05T06:30:00Z", sensor=s, via_codigo_mirova=True)
+           for s in ("MODIS_AQUA", "VIIRS_NOAA20_750", "VIIRS_NOAA20")]
+    k = dict(proc, datetime_utc="2026-11-05T07:10:00Z", sensor="MODIS_TERRA", via_codigo_mirova="sin_mxd03")
+    viejo = dict(proc, datetime_utc="2026-11-01T06:30:00Z", via_codigo_mirova="sin_grilla")   # fuera de la ventana
+    assert revisar(via + [viejo], "  VIIRS_NOAA20 (375m) | ...", "2026-11-03", "2026-11-05", desde, cob)[0] is True
+    assert revisar([], "", "2026-11-03", "2026-11-05", desde, cob)[0] is False                # vacía: zombie
+    assert revisar(via, "  ERROR processing VJ102IMG...: No module named 'pyproj'", "2026-11-03",
+                   "2026-11-05", desde, cob)[0] is False
+    ok, resumen = revisar(via + [k], "", "2026-11-03", "2026-11-05", desde, cob)
     assert ok is False and "sin_mxd03" in resumen                                        # cayó a K: se ve
 
 
