@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 11:36 UTC (S169, vuelta 34): mutaciones de MOD-D terminadas; nulo del lector de V375-E lanzado
+- PID 16420 (`mutar_evaluar_f4.py`, MOD-D) terminó a las 11:36:19 UTC. A `local_5b198297`: §13, VC169-01 y la lista
+  verificada de F2, batería, manifiesto y tag `s169-modd-f4-candado`; sólo procesos livianos (el cupo pasó al nulo).
+- Nulo del lector de V375-E lanzado a las 11:36 UTC desde `.claude/worktrees/agent-a105e5b5e327fb68f` en `5c121209c`
+  (igual al remoto, árbol limpio, sin resultados previos): `mutar_sombra.py --hilos 2`, 142 corridas, estimado 8 a 24 h.
+  Salida en `experiments/_s168/v375e_sombra/mutar_sombra_salida.txt` del worktree; stdout, stderr, hora y sha en
+  `D:/vrp-trabajo/temporales/s169_nulo_lector/`. Cupos: V750-A (PID 1324) y este nulo.
+
 ### 2026-10-30 11:18 UTC (S169, vuelta 33): Nicolás consideró pausar el día y eligió seguir
 - Nicolás: «pausa todos los procesos por el dia de hoy» (interrumpido) y, tras el resumen con tres opciones, «3»
   (nada se pausa). MOD-D en M83 de ~90; el nulo del lector de V375-E parte cuando termine (aviso armado).
