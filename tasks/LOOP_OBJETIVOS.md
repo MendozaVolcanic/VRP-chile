@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 08:15 UTC (S169, vuelta 29): lector de V375-E listo para el nulo; espera el cupo de MOD-D
+- `claude/s169-v375e-lector` en `5c121209c` (comprobado con `ls-remote`; el worktree
+  `.claude/worktrees/agent-a105e5b5e327fb68f` está en esa punta): VL2-01 y 02 arreglados en `mutar_sombra.py`
+  (timeout 5400 s como CAIDA, resultado al disco por mutación con reanudación, aborto con salida 2 si la identidad o
+  los controles fallan o si no corre en la rama, salida 1 con vivas; probado con `probar_mutar_r3.py`, 12 de 12);
+  VL2-04 (lectura sólo a archivo) en el lector, con su rotura R28 en rojo; VL2-03 como procedimiento en §11.8; VL2-05
+  y 06 aceptados en §11.13. Batería 230 de 230. Arranque del nulo: identidad verde, CONTROL y CONTROL_SECCION CAIDA,
+  salida 0 (`experiments/_s168/v375e_sombra/mutar_sombra_arranque_salida.txt`).
+- Nulo: 139 mutaciones más identidad y dos controles (142 corridas), ~8 h libre y 18 a 24 h con la carga de hoy. Se
+  lanza desde ese worktree con `--hilos 2` cuando termine `mutar_evaluar_f4.py` de MOD-D (PID 16420, vivo).
+
 ### 2026-10-30 07:25 UTC (S169, vuelta 28): verificador del lector ronda 2: el nulo se habría perdido; ronda 3
 - Verificador corto (Sonnet) sobre `9d76af91b`: `experiments/_s169/v375e_lector_verificador/ronda2/INFORME.md`. LISTO
   PARA EL NULO CON CAMBIOS, en `mutar_sombra.py`. VL2-01 (gravedad 4): un solo `TimeoutExpired` (timeout 1800 s, l. 213,
