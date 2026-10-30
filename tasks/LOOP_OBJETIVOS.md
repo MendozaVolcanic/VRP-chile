@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 00:41 UTC (S169, vuelta 4): Nicolás pide acelerar; verificador del candado adelantado
+- Nicolás: «le doy el si a todo lo que recomiendes, que podemos hacer para acelerar estas pruebas?». Se usa para el
+  trabajo preparatorio; merge a `main` y encender una vía siguen pidiendo una frase que nombre el paso.
+- Hallazgo: `probe-s168-modd-f4.yml` se despacha con `--ref <tag>` y cada job comprueba que corre en el commit del
+  tag; el archivo en `main` sólo habilita el despacho. Mergearlo antes del tag deja el humo listo apenas exista.
+- Verificador limpio (Sonnet, subagente, sólo procesos livianos) sobre el candado en `3db87f50d`: árbol en
+  `D:/vrp-trabajo/temporales/s169_ver_candado/arbol/` (`git -c core.autocrlf=false archive`, 25 MB), informe en
+  `D:/vrp-trabajo/temporales/s169_ver_candado/INFORME.md`; incluye el veredicto «workflow mergeable ya».
+- A `local_94f4be0d` (V750): ensayo de plomería del generador de V750-B con un `--hasta` anterior, comandos del
+  2026-11-03 escritos, lector probado contra un artefacto de prueba y rama con la ROI por variante (tag
+  `pre-s169-roi-v750` antes del primer edit; sin merge).
+
 ### 2026-10-30 00:28 UTC (S169, vuelta 3): el brazo cercano no necesita PR; lector de la sombra encargado
 - V375-E (`3d259c819`): decisión anotada como §10 de `PREREGISTRO_E.md` (`2a4880665`); traspaso del lector en
   `experiments/_s168/v375e_lectura_lejana/TRASPASO_LECTOR_SOMBRA.md`.
