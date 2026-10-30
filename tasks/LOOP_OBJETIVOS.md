@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 10:45 UTC (S169, vuelta 32): MOD-D más lento; el nulo del lector sigue esperando el cupo
+- `mutar_evaluar_f4.py` (PID 16420) va en M77 (M72 a las 09:15 UTC: ~18 min por mutación). Con ~13 corridas más,
+  termina cerca de las 14:45 UTC (estimación). El nulo del lector de V375-E (18 a 24 h) parte entonces y alcanza antes
+  del 2026-11-03 15:00 UTC. No se lanza como tercer proceso pesado (tope de dos).
+
 ### 2026-10-30 09:49 UTC (S169, vuelta 31): las dos pruebas de #928 en GitHub, verdes
 - Run 41034796854 (`sombra-codigo-mirova.yml`, `medir=true`, Láscar, 2026-10-28 a 30, `77bbb7c9c`): success. Láscar
   corrió todos sus pasos (commit omitido por `medir`); los otros diez se saltaron por el filtro. Revisión: «27 records,
