@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 09:37 UTC (S169, vuelta 30): #928 mergeado; despacho de prueba de la sombra
+- Frase de Nicolás: «Sí, mergea #928». Cabeza `cd8b7074f`, CI `pytest` SUCCESS, `CLEAN`, `main` sin cambios de código
+  desde la base: `gh pr merge 928 --squash --match-head-commit cd8b7074f`, squash `77bbb7c9c`. Workflows
+  `sombra-codigo-mirova.yml` y `nrt-monitor.yml` en `active`.
+- Despacho de prueba: run 41034796854 (`sombra-codigo-mirova.yml`, `medir=true`, Láscar, 2026-10-28 a 30, sobre
+  `77bbb7c9c`). Después, de a uno, `nrt-monitor.yml` manual (debe decir «Sombra: inactivo»).
+- MOD-D va en M72 de ~90 a las 09:15 UTC; el nulo del lector de V375-E espera ese cupo (aviso armado).
+
 ### 2026-10-30 08:15 UTC (S169, vuelta 29): lector de V375-E listo para el nulo; espera el cupo de MOD-D
 - `claude/s169-v375e-lector` en `5c121209c` (comprobado con `ls-remote`; el worktree
   `.claude/worktrees/agent-a105e5b5e327fb68f` está en esa punta): VL2-01 y 02 arreglados en `mutar_sombra.py`
