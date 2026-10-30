@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 00:35 UTC aprox. (S169, vuelta 3): el brazo cercano no necesita PR; lector de la sombra encargado
+- V375-E (`3d259c819`): decisión anotada como §10 de `PREREGISTRO_E.md` (`2a4880665`); traspaso del lector en
+  `experiments/_s168/v375e_lectura_lejana/TRASPASO_LECTOR_SOMBRA.md`.
+- Comprobado en `origin/main` (`c42ee0eb7`): cada record de la vía trae `anomaly_pixels` con `dist_km` redondeada a
+  0,01 km (`pipeline/mirova_v750_codigo.py`, l. 726 a 732) y `tests/test_sombra_codigo_mirova_s167.py` l. 300 a 306
+  ya calcula cercano como su mínimo: elegir cercano no toca `pipeline/` (no hay A45). Salvedad VA168-08: el redondeo
+  en el borde del radio.
+- No se pudo abrir sesión fresca (Nicolás en Remote Control): el lector de la sombra lo sigue `local_438070ff`, con
+  tag, verificador y `INFORME.md` antes del 2026-11-03 15:00 UTC; mutaciones pesadas cuando haya cupo.
+
 ### 2026-10-30 00:20 UTC aprox. (S169, vuelta 2): Nicolás elige cercano para V375-E; MOD-D en mutaciones
 - Frase de Nicolás: «Cercano decide» (botón de la pregunta «¿Qué brazo de posición lleva V375-E a la sombra?»: cercano
   decide en la sombra, como dice la regla sellada, y radiante se informa al lado, rotulado como posterior a la
