@@ -67,7 +67,8 @@ def test_una_corrida_en_curso_o_manual_no_cuenta_como_verde():
     runs = [corrida("2026-11-05T16:00:00Z", "success", evento="workflow_dispatch"),
             corrida("2026-11-05T15:00:00Z", None, estado="in_progress"),
             corrida("2026-11-04T12:00:00Z", "success")]
-    assert decidir(runs, "2026-11-05T18:30:00Z")["accion"] == "alerta"
+    # S169 ronda 2: con la de hoy en curso la respuesta es «pendiente» (VV169-04), nunca «ok»
+    assert decidir(runs, "2026-11-05T18:30:00Z")["accion"] != "ok"
 
 
 def test_la_verde_mas_nueva_manda_aunque_la_api_desordene():
@@ -89,6 +90,43 @@ def test_nrt_monitor_vigila_el_workflow_de_la_sombra():
     # el checkout ralo del monitor tiene que traer el módulo que define la decisión
     checkout = next(s for s in pasos if str(s.get("uses", "")).startswith("actions/checkout"))
     assert "scripts/nrt_monitor_decision.js" in checkout["with"]["sparse-checkout"]
+
+
+def test_vv04_la_corrida_de_hoy_en_curso_es_pendiente():
+    """GitHub retrasa el cron del minuto 0: a las 18:30 la de hoy puede seguir corriendo. No se alerta ni se cierra."""
+    verde_ayer = corrida("2026-11-04T15:00:00Z", "success")
+    for estado in ("in_progress", "queued"):
+        d = decidir([corrida("2026-11-05T15:40:00Z", None, estado=estado), verde_ayer], "2026-11-05T18:30:00Z")
+        assert d["accion"] == "pendiente", (estado, d)
+
+
+def test_vv04_una_corrida_en_curso_vieja_no_tapa_la_alerta():
+    """Más de 6 h en curso ya no es retraso: es una corrida colgada y la noche no está medida."""
+    runs = [corrida("2026-11-05T11:00:00Z", None, estado="in_progress"), corrida("2026-11-04T09:00:00Z", "success")]
+    assert decidir(runs, "2026-11-05T18:30:00Z")["accion"] == "alerta"
+    # y una despachada a mano en curso tampoco cuenta como la diaria
+    runs = [corrida("2026-11-05T17:00:00Z", None, evento="workflow_dispatch", estado="in_progress"),
+            corrida("2026-11-04T15:00:00Z", "success")]
+    assert decidir(runs, "2026-11-05T18:30:00Z")["accion"] == "alerta"
+
+
+def test_vv04_el_monitor_no_abre_ni_cierra_con_pendiente():
+    d = yaml.safe_load(MONITOR.read_text(encoding="utf-8"))
+    script = next(s for s in d["jobs"]["check"]["steps"]
+                  if "sombra-codigo-mirova.yml" in str((s.get("with") or {}).get("script", "")))["with"]["script"]
+    corte = script.index("const TITLE")
+    assert re.search(r"if \(d\.accion === 'inactivo' \|\| d\.accion === 'pendiente'\) return;", script[:corte]), (
+        "con «pendiente» el paso tiene que salir antes de tocar el issue")
+
+
+def test_r_nrt_monitor_tiene_permiso_de_issues_y_de_actions():
+    """Sin issues: write el paso cae con 403 el 2026-11-03; sin actions: read no puede listar las corridas."""
+    d = yaml.safe_load(MONITOR.read_text(encoding="utf-8"))
+    job = d["jobs"]["check"]
+    permisos = dict(d.get("permissions") or {})
+    permisos.update(job.get("permissions") or {})
+    assert permisos.get("issues") == "write", permisos
+    assert permisos.get("actions") in ("read", "write"), permisos
 
 
 def test_la_cadencia_del_cron_cuenta_la_sombra_una_vez_al_dia():
