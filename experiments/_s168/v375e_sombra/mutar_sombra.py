@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""S168 V375-E (S169: 14 del verificador, 39 de las reglas nuevas de §11.11 y 27 de la ronda 2, §11.12): nulo de la batería del lector de la sombra por mutaciones de una línea (mismo método que
+"""S168 V375-E (S169: 14 del verificador, 39 de las reglas nuevas de §11.11 y 27 de la ronda 2, §11.12, y 1 de la ronda 3, §11.13): nulo de la batería del lector de la sombra por mutaciones de una línea (mismo método que
 experiments/_s162_v375/e_adenda2/mutar_adenda2.py: S156, cuenta como ATRAPADA sólo la mutación que la batería rechaza
 por aserción; una que hace caer la batería con una excepción es CAÍDA y no cuenta).
 
@@ -13,12 +13,19 @@ raíz del repo; borrada al terminar), y corre `probar_sombra.py --dir <copia>`.
 Controles: IDENTIDAD (la copia sin mutar tiene que PASAR), CONTROL (una mutación que rompe la importación tiene que
 salir CAÍDA) y CONTROL_SECCION (una que lanza dentro de una sección tiene que salir CAÍDA, no ATRAPADA). Las
 equivalentes (EQUIVALENTES, declaradas antes de correr) se informan aparte. Hilos: --hilos (1 por defecto; el cupo pesado del equipo es compartido).
-Uso: python -I mutar_sombra.py [--hilos N] [--solo ID,ID]  (escribe mutar_sombra_salida.txt, o _repaso con --solo)
+Ronda 3 (PREREGISTRO_E.md §11.13, VL2-01 y VL2-02): aborta (sale 2) sin mutar nada si no corre en un checkout de
+claude/s169-v375e-lector, si la identidad no pasa o si CONTROL o CONTROL_SECCION no salen CAIDA; una corrida que pasa
+de TOPE_S es CAIDA; cada resultado se agrega al archivo de salida apenas termina, y una corrida nueva se salta las
+mutaciones ya escritas (retoma). Sale 0 si no sobrevive ninguna no equivalente, 1 si sobrevive alguna o falta alguna.
+Uso: python -I mutar_sombra.py [--hilos N] [--solo ID,ID] [--arranque]
+     (escribe mutar_sombra_salida.txt; _repaso con --solo; _arranque con --arranque, que sólo corre identidad y controles)
 """
 from __future__ import annotations
 
 import argparse
+import collections
 import io
+import os
 import shutil
 import subprocess
 import sys
@@ -187,6 +194,8 @@ MUTACIONES = [
     ("R25", 'else sello}', 'else []}'),
     ("R26", '    if not base:\n        cambios["base"]', '    if False:\n        cambios["base"]'),
     ("R27", '            cambios[s] = f\n    sello', '            pass\n    sello'),
+    # ---- S169 ronda 3 (VL2-04): la lectura que decide va sólo a archivo
+    ("R28", '        PANTALLA[0] = False\n', '        pass\n'),
     ("R23", '^{{commit}}")[0] != 0:\n        return None\n    return leer_registro', '^{{commit}}")[0] != 0:\n        return []\n    return leer_registro'),
 ]
 # VL169-10: equivalentes declaradas ANTES de correr (sobrevivir no las hace sospechosas)
@@ -208,9 +217,16 @@ def preparar(d, mut=None):
         (d / LS).write_text(src.replace(viejo, nuevo), encoding="utf-8")
 
 
+RAMA = "claude/s169-v375e-lector"
+TOPE_S = 5400          # ronda 3 (VL2-01): una corrida de la batería que pase de aquí es CAIDA, no hunde el nulo
+
+
 def correr(d):
-    p = subprocess.run([sys.executable, "-I", str(AQUI / "probar_sombra.py"), "--dir", str(d)],
-                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800)
+    try:
+        p = subprocess.run([sys.executable, "-I", str(AQUI / "probar_sombra.py"), "--dir", str(d)],
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=TOPE_S)
+    except subprocess.TimeoutExpired:
+        return "CAIDA", [f"pasó el tope de {TOPE_S} s"]
     falla = [x[6:].strip()[:70] for x in p.stdout.splitlines() if x.startswith("FALLA")]
     res = [x for x in p.stdout.splitlines() if x.startswith("RESULTADO")]
     if p.returncode == 0 and res:
@@ -237,44 +253,108 @@ def comprobar_unicas():
     return [(m[0], src.count(m[1])) for m in [CONTROL, CONTROL_SECCION] + MUTACIONES if src.count(m[1]) != 1]
 
 
+def _git(*args):
+    try:
+        p = subprocess.run(["git", "-C", str(AQUI.parents[2])] + list(args), capture_output=True, text=True,
+                           timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return None, ""
+    return p.returncode, p.stdout.strip()
+
+
+def en_la_rama():
+    """Ronda 3 (VL2-02): el nulo corre en un checkout de RAMA (la rama, o un commit contenido en origin/RAMA, como el
+    tag), nunca en loop/activo ni en main. Devuelve (sí o no, qué hay en HEAD)."""
+    rc, rama = _git("rev-parse", "--abbrev-ref", "HEAD")
+    if rc == 0 and rama == RAMA:
+        return True, rama
+    rc2, _ = _git("merge-base", "--is-ancestor", "HEAD", f"origin/{RAMA}")
+    return rc2 == 0 and rama not in ("loop/activo", "main"), rama
+
+
+def leer_hechas(salida):
+    """Las mutaciones ya escritas en el archivo de resultados ({id: estado}), para retomar un nulo cortado."""
+    out = {}
+    if salida.exists():
+        for x in salida.read_text(encoding="utf-8").splitlines():
+            p = x.split()
+            if len(p) >= 3 and p[0] == "MUT":
+                out[p[1]] = p[2]
+    return out
+
+
 def main(argv=None):
-    from concurrent.futures import ThreadPoolExecutor
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from datetime import datetime, timezone
     ap = argparse.ArgumentParser()
     ap.add_argument("--hilos", type=int, default=1)
     ap.add_argument("--solo", default="")
+    ap.add_argument("--arranque", action="store_true",
+                    help="sólo identidad y controles, sin mutar nada (para comprobar el arranque antes del nulo)")
     a = ap.parse_args(argv)
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-    L = []
+    salida = AQUI / ("mutar_sombra_arranque_salida.txt" if a.arranque else
+                     "mutar_sombra_repaso_salida.txt" if a.solo else "mutar_sombra_salida.txt")
 
-    def pr(s):
+    def anotar(s):
+        """Cada línea va al disco apenas se sabe (VL2-01): un corte no pierde lo hecho."""
         print(s, flush=True)
-        L.append(s)
+        with open(salida, "a", encoding="utf-8") as fh:
+            fh.write(s + "\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+
     malas = comprobar_unicas()
     if malas:
         print("mutaciones que no aparecen exactamente una vez:", malas)
         return 2
+    ok_rama, rama = en_la_rama()
+    _, head = _git("rev-parse", "HEAD")
+    anotar(f"== corrida {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | HEAD {head} ({rama}) | "
+           f"hilos {a.hilos} | tope {TOPE_S} s")
+    if not ok_rama:
+        anotar(f"ABORTA: no corre en un checkout de {RAMA} (HEAD en {rama}); no se muta nada")
+        return 2
     sel = [m for m in MUTACIONES if not a.solo or m[0] in a.solo.split(",")]
-    salida = AQUI / ("mutar_sombra_repaso_salida.txt" if a.solo else "mutar_sombra_salida.txt")
-    try:
-        e, f = una("identidad", None)
-        pr(f"IDENTIDAD (copia sin mutar): {'PASA' if e == 'SOBREVIVE' else 'FALLA ' + e} {f[:3]}")
-        e, f = una("control", CONTROL)
-        pr(f"CONTROL (rompe la importación): {e} {f}  (tiene que ser CAIDA)")
-        e, f = una("control_seccion", CONTROL_SECCION)
-        pr(f"CONTROL_SECCION (lanza dentro de una sección): {e} {f}  (tiene que ser CAIDA)")
-        cuenta = {"ATRAPADA": 0, "SOBREVIVE": 0, "CAIDA": 0}
-        with ThreadPoolExecutor(max_workers=a.hilos) as ex:
-            resultados = list(ex.map(lambda m: una(m[0], m), sel))
-        for m, (e, f) in zip(sel, resultados):
-            cuenta[e] += 1
-            pr(f"{m[0]} {e:9s} {f[:2]}" + (" (equivalente declarada)" if m[0] in EQUIVALENTES else ""))
-        pr("")
-        eq = [m[0] for m in sel if m[0] in EQUIVALENTES]
-        pr(f"RESULTADO: {cuenta['ATRAPADA']} de {len(sel)} atrapadas por aserción ({len(sel) - len(eq)} no equivalentes; "
-           f"equivalentes declaradas antes de correr: {eq}); sobreviven {cuenta['SOBREVIVE']}; caídas {cuenta['CAIDA']}")
-    finally:
-        salida.write_text("".join(x + chr(10) for x in L), encoding="utf-8")
-    return 0
+    e, f = una("identidad", None)
+    anotar(f"IDENTIDAD (copia sin mutar): {'PASA' if e == 'SOBREVIVE' else 'FALLA ' + e} {f[:3]}")
+    if e != "SOBREVIVE":
+        anotar("ABORTA: la identidad no pasa (la batería falla sin mutar nada); no se muta nada")
+        return 2
+    for nom, ctl, que in (("CONTROL", CONTROL, "rompe la importación"),
+                          ("CONTROL_SECCION", CONTROL_SECCION, "lanza dentro de una sección")):
+        e, f = una(nom.lower(), ctl)
+        anotar(f"{nom} ({que}): {e} {f}  (tiene que ser CAIDA)")
+        if e != "CAIDA":
+            anotar(f"ABORTA: {nom} no sale CAIDA; no se muta nada")
+            return 2
+    if a.arranque:
+        anotar("ARRANQUE OK: la identidad pasa y los dos controles salen CAIDA; no se mutó nada (--arranque)")
+        return 0
+    hechas = leer_hechas(salida)
+    pendientes = [m for m in sel if m[0] not in hechas]
+    anotar(f"retoma: {sum(1 for m in sel if m[0] in hechas)} ya escritas en {salida.name}, {len(pendientes)} pendientes")
+    with ThreadPoolExecutor(max_workers=a.hilos) as ex:
+        futuros = {ex.submit(una, m[0], m): m for m in pendientes}
+        for fu in as_completed(futuros):
+            m = futuros[fu]
+            try:
+                e, f = fu.result()
+            except Exception as x:      # noqa: BLE001  una mutación que rompe el instrumento no hunde a las demás
+                e, f = "CAIDA", [repr(x)[:120]]
+            anotar(f"MUT {m[0]} {e} {f[:2]}" + (" (equivalente declarada)" if m[0] in EQUIVALENTES else ""))
+    hechas = leer_hechas(salida)
+    est = {m[0]: hechas.get(m[0], "FALTA") for m in sel}
+    cuenta = collections.Counter(est.values())
+    eq = [k for k in est if k in EQUIVALENTES]
+    vivas = sorted(k for k, v in est.items() if v == "SOBREVIVE" and k not in EQUIVALENTES)
+    anotar("")
+    anotar(f"CAIDAS (no cuentan como atrapadas): {sorted(k for k, v in est.items() if v == 'CAIDA')}")
+    anotar(f"SOBREVIVEN: {sorted(k for k, v in est.items() if v == 'SOBREVIVE')} (equivalentes declaradas antes de "
+           f"correr: {eq})")
+    anotar(f"RESULTADO: {cuenta['ATRAPADA']} de {len(sel)} atrapadas por aserción ({len(sel) - len(eq)} no "
+           f"equivalentes); sobreviven {cuenta['SOBREVIVE']}; caídas {cuenta['CAIDA']}; faltan {cuenta['FALTA']}")
+    return 1 if (vivas or cuenta["FALTA"]) else 0
 
 
 if __name__ == "__main__":
