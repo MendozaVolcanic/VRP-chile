@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 09:50 UTC (S169, vuelta 31): las dos pruebas de #928 en GitHub, verdes
+- Run 41034796854 (`sombra-codigo-mirova.yml`, `medir=true`, Láscar, 2026-10-28 a 30, `77bbb7c9c`): success. Láscar
+  corrió todos sus pasos (commit omitido por `medir`); los otros diez se saltaron por el filtro. Revisión: «27 records,
+  27 escritos en esta corrida (… 27 de la vía), 0 de otra fuente, 0 errores de gránulo», «días juzgados: ninguno
+  (antes del 2026-11-03)», «K caídos en la ventana: 0». Cobertura con 2 incidencias esperables (`dia_parcial` del 30 y
+  `sin_granulos`). Artefacto `sombra-Lascar-intento-1` (3.317 bytes, `pipeline.log` y `cobertura.json`): 0
+  coincidencias de `eyJ` (prefijo de JWT). Log del job en `D:/vrp-trabajo/temporales/s169_run_41034796854_lascar.log`.
+- Run 41036195649 (`nrt-monitor.yml`, manual): success, «Sombra: inactivo (la sombra mide desde 2026-11-03T15:00:00Z)».
+- No ejercido todavía: la apertura y el cierre del issue y el juicio de días; los ve la primera corrida del 3.
+
 ### 2026-10-30 09:37 UTC (S169, vuelta 30): #928 mergeado; despacho de prueba de la sombra
 - Frase de Nicolás: «Sí, mergea #928». Cabeza `cd8b7074f`, CI `pytest` SUCCESS, `CLEAN`, `main` sin cambios de código
   desde la base: `gh pr merge 928 --squash --match-head-commit cd8b7074f`, squash `77bbb7c9c`. Workflows
