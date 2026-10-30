@@ -31,10 +31,13 @@ Salida: 0 lectura que decide escrita; 3 LECTURA NO LEGIBLE; 5 parada no alcanzad
 from __future__ import annotations
 
 import argparse
+import ast
 import collections
+import copy
 import hashlib
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from datetime import date, datetime, timedelta, timezone
@@ -61,11 +64,16 @@ SHA_SELLO_LECTOR = {
     RAIZ / "scripts" / "banco_paridad.py": "f2418f981860a784b91f12c368f6bfb298e570b040b7a173d3feb38de9d7bb3d",
     RAIZ / "scripts" / "clase_mirova.py": "efb5c6a93702070021244241d50765af9ac3ef57810e1a275c789696a6127ed0",
     RAIZ / "scripts" / "referencia_mirova_unificada.py": "0c04778552158b2d040fe3f5fa9fc906f23d7a17f91c48a90f6c045815052525",
-    RAIZ / "scripts" / "auto_audit_weekly.py": "3afd3e650ac208b37196614a6c63d32495a23951c8cf089a8db0be477cac71df",
+    RAIZ / "scripts" / "auto_audit_weekly.py": "9c4da61e4bfbe734941efd76bc72ad10df9cf43473c9ee440cd694ffebe6944e",
     RAIZ / "scripts" / "calidad_referencia_mirova.py": "824a7c6572f4ce30408aacb5159d2cfc482caf467c14cbdad10bcd1764d07a69",
     RAIZ / "pipeline" / "mirova_csv_loader.py": "74a08b41bfa80d9cf43e3fe66c9d9d670ad701505faf853df939bfe2c94b8673",
     RAIZ / "pipeline" / "diurno.py": "aff71c0677e05d7c900e592744fc2fdfe712968b7c30aaabb8c6cd4f649e0ddb",
     RAIZ / "frontend" / "index.html": "260b4a193075c772e02e1549566fbcbe85f608abef6131c5c808444f543e54b2",
+    # ronda 2 (VL169-06): qué pasada es diurna y con qué flags
+    RAIZ / "pipeline" / "store.py": "baa430d11f2868ab22835ef0486f3145c6279ad48fb155b1ce40bcfb49b5b9d1",
+    RAIZ / "pipeline" / "profile.py": "dcbbe42d7aaa9b3d02c14e0a5fcead83de4d5c86b9aa760d99486bbd70f89aea",
+    RAIZ / "pipeline" / "f5_core.py": "4e4abc7b6909b94a72ea0bef9936ebef09255f8e539a65a438872a08c43e8e53",
+    RAIZ / "pipeline" / "profiles" / "mirova_equivalent.yaml": "d15a621954c2f3ebc41772df7fcc54398cfa99517050e7043c0975fcb9b260bc",
 }
 DESDE_P = "2026-11-03"                 # §3.3 y §11.1: la ventana P empieza exactamente aquí
 SENSOR_SNPP = "VIIRS_SNPP"             # §3.3: la ventana P es sin Suomi NPP
@@ -81,12 +89,21 @@ BORDE_KM = 0.005                       # §11.5 (VA168-08)
 TOL_GANANCIA_LOG10 = 0.01              # §11.6: la ganancia pareja no mueve la mediana de D más que esto
 PARADA_NOCHES, PARADA_ALERTAS = 30, 40  # §11.8
 REZAGO_DIAS = 2                        # S9 (VS168-05)
-BASE_REGIMEN = "c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d"   # S8: #926, el commit que encendió la sombra
+SELLO_REGIMEN = "c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d"  # S8: #926, el que encendió la sombra (sólo se informa)
 PERFIL_K, PERFIL_VIA = "mirova_equivalent", "sombra_codigo_mirova"
+# S8 (ronda 2, VL169-03 y 04): qué se compara contra la base y cómo
+RUTAS_REGIMEN = ("pipeline/", "volcanoes.yaml", "scripts/run_pipeline.py", ".github/workflows/sombra-codigo-mirova.yml")
+PERFILES_REGIMEN = ("pipeline/profiles/mirova_equivalent.yaml", "pipeline/profiles/sombra_codigo_mirova.yaml")
+GRILLAS = "pipeline/grillas_mirova.yaml"
+CLAVES_ROI_IGNORADAS = ("roi_v750", "roi_modis")   # la vía de VIIRS 375 arma su caja con roi1_half_m
+# §11.8 (ronda 2, VL169-01): una sola lectura por ventana
+REGISTRO = AQUI / "lecturas" / "REGISTRO_VENTANA_P.jsonl"
+REF_REGISTRO = "origin/loop/activo"
+RUTA_REGISTRO_GIT = "experiments/_s168/v375e_sombra/lecturas/REGISTRO_VENTANA_P.jsonl"
 IDENTIDAD_ESPERADA = ([0, 1, 1, 1, 0], [1, 0])   # S2: la misma vara que banco_paridad.controles
 CUMPLE, NO_CUMPLE, NICOLAS = "CUMPLE", "NO CUMPLE", "DECIDE NICOLAS"
 # §11.4 (VS168-02): lo único que se imprime de un control fuera de la lectura que decide
-MOTIVO = {"S0": "una dependencia no es la del sello",
+MOTIVO = {"S0": "una dependencia no es la del sello, o VRP_PROFILE trae otro perfil",
           "S1": "la ventana no es la del §11.1 o hay claves de pasada repetidas",
           "S2": "el predicado no responde a la clase o no hay pasada para comprobarlo",
           "S3": "radiante y cercano difieren con un solo alertado, o no hay caso",
@@ -111,7 +128,11 @@ def sha256_lf(ruta):
 
 def cargar_deps():
     """S0: cada dependencia se identifica ANTES de importarla; si una no es la del tag o del sello del lector, no se
-    carga ninguna."""
+    carga ninguna. Ronda 2 (VL169-06): el perfil no puede venir del shell; si VRP_PROFILE trae otro valor, cae, y si no
+    está, se fija en mirova_equivalent antes de importar nada."""
+    if os.environ.get("VRP_PROFILE", PERFIL_K) != PERFIL_K:
+        return None, {"VRP_PROFILE": os.environ.get("VRP_PROFILE")}
+    os.environ["VRP_PROFILE"] = PERFIL_K
     malos = {str(p.relative_to(RAIZ)): (sha256_lf(p) if p.exists() else None)
              for p, s in list(SHA_DEPS.items()) + list(SHA_SELLO_LECTOR.items())
              if not p.exists() or sha256_lf(p) != s}
@@ -328,21 +349,93 @@ def control_s7(pob, arms):
     return bool(pob) and not falla, por
 
 
-def diff_git(a, b):
-    """Archivos de pipeline/ que cambian entre dos commits, o None si git no los resuelve."""
+def _git(*args):
+    """(código, salida) de un git sobre el checkout del lector; (None, '') si git no corre."""
     try:
-        p = subprocess.run(["git", "-C", str(RAIZ), "diff", "--name-only", a, b, "--", "pipeline/"],
-                           capture_output=True, text=True, timeout=60)
+        p = subprocess.run(["git", "-C", str(RAIZ)] + list(args), capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", timeout=60)
     except (OSError, subprocess.SubprocessError):
+        return None, ""
+    return p.returncode, p.stdout
+
+
+def nombres_git(a, b):
+    """Archivos de RUTAS_REGIMEN que cambian entre dos commits, o None si git no resuelve alguno."""
+    for r in (a, b):
+        if _git("rev-parse", "--verify", "--quiet", f"{r}^{{commit}}")[0] != 0:
+            return None
+    rc, out = _git("diff", "--name-only", a, b, "--", *RUTAS_REGIMEN)
+    return None if rc != 0 else [x for x in out.splitlines() if x.strip()]
+
+
+def mostrar_git(rev, ruta):
+    """El texto de un archivo en un commit, o None si no existe ahí."""
+    rc, out = _git("show", f"{rev}:{ruta}")
+    return out if rc == 0 else None
+
+
+def ast_sin_docstrings(texto):
+    """ast.dump del módulo sin docstrings (de módulo, clases y funciones): un comentario o un docstring no cambian esto."""
+    arbol = ast.parse(texto)
+    for nodo in ast.walk(arbol):
+        if isinstance(nodo, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and nodo.body \
+                and isinstance(nodo.body[0], ast.Expr) and isinstance(getattr(nodo.body[0], "value", None), ast.Constant) \
+                and isinstance(nodo.body[0].value.value, str):
+            nodo.body = nodo.body[1:] or [ast.Pass()]
+    return ast.dump(arbol, include_attributes=False)
+
+
+def grillas_sin_roi(texto):
+    """grillas_mirova.yaml leído, sin las claves de ROI que la vía de VIIRS 375 no lee (CLAVES_ROI_IGNORADAS)."""
+    import yaml
+    d = copy.deepcopy(yaml.safe_load(texto))
+    for v in ((d or {}).get("volcanes") or {}).values():
+        if isinstance(v, dict):
+            for k in CLAVES_ROI_IGNORADAS:
+                v.pop(k, None)
+    return d
+
+
+def cambio_significativo(ruta, viejo, nuevo):
+    """§11.4 S8 (ronda 2): si el cambio de un archivo entre la base y un sha cuenta como cambio de régimen."""
+    if ruta.startswith("pipeline/profiles/"):
+        return ruta in PERFILES_REGIMEN and viejo != nuevo
+    if viejo is None or nuevo is None:
+        return True
+    if ruta.endswith(".py"):
+        try:
+            return ast_sin_docstrings(viejo) != ast_sin_docstrings(nuevo)
+        except (SyntaxError, ValueError):
+            return True
+    if ruta == GRILLAS:
+        try:
+            return grillas_sin_roi(viejo) != grillas_sin_roi(nuevo)
+        except Exception:      # noqa: BLE001  ilegible: falla cerrada
+            return True
+    return viejo != nuevo
+
+
+def diff_git(a, b, nombres=nombres_git, mostrar=mostrar_git):
+    """Archivos cuyo cambio entre a y b cuenta como cambio de régimen (§11.4 S8), o None si git no resuelve."""
+    fs = nombres(a, b)
+    if fs is None:
         return None
-    if p.returncode != 0:
-        return None
-    return [x for x in p.stdout.splitlines() if x.strip()]
+    return [r for r in fs if cambio_significativo(r, mostrar(a, r), mostrar(b, r))]
+
+
+def base_regimen(recs_via):
+    """§11.4 S8 (ronda 2): la base de la ventana es el codigo_sha de los records de la vía de la primera noche con records
+    de la vía; con varios, el del record más temprano. None si no hay records o si ese record no trae codigo_sha."""
+    con = sorted(((r.get("datetime_utc") or "", (r.get("regimen") or {}).get("codigo_sha")) for r in recs_via),
+                 key=lambda x: x[0])
+    return con[0][1] if con else None
 
 
 def control_s8(recs_k, recs_via, commit, diff_fn):
-    """S8, marca de régimen (VS168-04): cada codigo_sha de los records y el de --commit, contra c42ee0eb7 en pipeline/;
-    perfiles mirova_equivalent y sombra_codigo_mirova. Devuelve (sin cambio, detalle)."""
+    """S8, marca de régimen (VS168-04 y ronda 2): cada codigo_sha de los records y el de --commit, contra la base de la
+    ventana (base_regimen); perfiles mirova_equivalent y sombra_codigo_mirova. Informa, sin marcar, la comparación de
+    c42ee0eb7 contra la base (el hueco escrito en §11.4 S8). Devuelve (sin cambio, detalle)."""
+    base = base_regimen(recs_via)
     shas = collections.Counter()
     perf_malos = collections.Counter()
     for recs, perfil in ((recs_k, PERFIL_K), (recs_via, PERFIL_VIA)):
@@ -353,16 +446,24 @@ def control_s8(recs_k, recs_via, commit, diff_fn):
                 perf_malos[f"{perfil}: {reg.get('perfil')}"] += 1
     shas[commit] += 0
     cambios = {}
+    if not base:
+        cambios["base"] = "sin codigo_sha en el primer record de la vía de la ventana"
     for s in sorted(shas, key=str):
         if not s:
             cambios[str(s)] = "sin sha"
             continue
-        f = diff_fn(BASE_REGIMEN, s)
+        if not base or s == base:
+            continue
+        f = diff_fn(base, s)
         if f is None:
             cambios[s] = "git no lo resuelve"
         elif f:
             cambios[s] = f
-    return not cambios and not perf_malos, {"shas": dict(shas), "cambios": cambios, "perfiles": dict(perf_malos)}
+    sello = diff_fn(SELLO_REGIMEN, base) if base else None
+    return not cambios and not perf_malos, {"base": base, "shas": dict(shas), "cambios": cambios,
+                                            "perfiles": dict(perf_malos),
+                                            "informa_c42ee0eb7_contra_base": "git no lo resuelve" if sello is None
+                                            else sello}
 
 
 def control_s9(ultima_tabla, corte):
@@ -539,7 +640,10 @@ def analizar(pob, via, kfull, inner, publicar, deps, desde, hasta, identidad_ok=
         if not ok:
             fallas.append(nom)
     if fallas:
-        return {k: out[k] for k in ("controles", "corte", "hasta_pedido", "parada_alcanzada")}, fallas
+        red = {k: out[k] for k in ("controles", "corte", "hasta_pedido", "parada_alcanzada")}
+        if not alcanzada:
+            red["parada"] = cont          # VL169-08: antes de la parada, los contadores salen aunque caiga un control
+        return red, fallas
     out["parada"] = cont
     if not alcanzada:
         return out, fallas
@@ -587,7 +691,8 @@ def reporte(out, pob, fuera, snpp, sin_record):
        f"ALCANZADA en la noche {pa['noche']}; corte que decide {out['corte']}"
        + (f" (recortado: --hasta {out['hasta_pedido']})" if out["hasta_pedido"] != out["corte"] else ""))
     rg = out["regimen"]
-    pr(f"\n== régimen (S8, contra {BASE_REGIMEN[:9]} en pipeline/): "
+    pr(f"\n== régimen (S8, contra la base de la ventana {str(rg['detalle'].get('base'))[:9]}; informa también "
+       f"{SELLO_REGIMEN[:9]} contra la base): "
        + ("SIN CAMBIO" if rg["sin_cambio"] else "CAMBIO: los CUMPLE de (b), (c) y (d) pasan a DECIDE NICOLAS")
        + f" | {rg['detalle']}")
     for a, r in out["brazos"].items():
@@ -638,13 +743,58 @@ def para_json(out, tipo):
     if tipo != "decide":
         sal = {"controles": {k: {"ok": v["ok"], "motivo": "" if v["ok"] else MOTIVO[k]}
                              for k, v in out.get("controles", {}).items()}}
-        if tipo == "provisional":
+        if out.get("parada") and not out.get("parada_alcanzada"):
             sal["parada"] = {k: out["parada"][k] for k in ("noches", "alertas", "alcanzada")}
         return sal
     sal = dict(out)
     sal["brazos"] = {a: ({k: v for k, v in r.items() if k != "criterios"} if a != DECIDE else r)
                      for a, r in out["brazos"].items()}
     return sal
+
+
+def leer_registro(texto):
+    """Las líneas de un registro de la ventana (JSON por línea); una línea ilegible cuenta como lectura (falla cerrada)."""
+    out = []
+    for x in (texto or "").splitlines():
+        if x.strip():
+            try:
+                out.append(json.loads(x))
+            except ValueError:
+                out.append({"tipo": "lectura", "ilegible": x[:80]})
+    return out
+
+
+def registro_local():
+    return leer_registro(REGISTRO.read_text(encoding="utf-8")) if REGISTRO.exists() else []
+
+
+def registro_remoto():
+    """Las líneas del registro en origin/loop/activo, [] si allí no existe, None si la rama no se resuelve."""
+    if _git("rev-parse", "--verify", "--quiet", f"{REF_REGISTRO}^{{commit}}")[0] != 0:
+        return None
+    return leer_registro(mostrar_git(REF_REGISTRO, RUTA_REGISTRO_GIT))
+
+
+def ventana_ya_leida(dsal):
+    """§11.8 (VL169-01): motivos para negarse a leer; vacío si la ventana no se ha leído."""
+    motivos = []
+    if Path(dsal).exists() and any(Path(dsal).glob("lectura_sombra_corte_*")):
+        motivos.append(f"ya hay una lectura_sombra_corte_* en {dsal}")
+    if any(r.get("tipo") == "lectura" for r in registro_local()):
+        motivos.append(f"el registro local {REGISTRO.name} ya tiene una lectura")
+    rem = registro_remoto()
+    if rem is None:
+        motivos.append(f"{REF_REGISTRO} no se puede resolver: haz git fetch origin")
+    elif any(r.get("tipo") == "lectura" for r in rem):
+        motivos.append(f"el registro de {REF_REGISTRO} ya tiene una lectura")
+    return motivos
+
+
+def anotar_registro(entrada):
+    """Agrega una línea al registro de la ventana (nunca lo reescribe)."""
+    REGISTRO.parent.mkdir(parents=True, exist_ok=True)
+    with open(REGISTRO, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(entrada, ensure_ascii=False, sort_keys=True) + "\n")
 
 
 def git_head():
@@ -671,6 +821,10 @@ def main(argv=None):
     pr("== procedencia")
     pr(f"  hora: {ahora.strftime('%Y-%m-%d %H:%M UTC')} | records de origin/main {a.commit}")
     pr(f"  lector sha256 LF {sha256_lf(Path(__file__))} | checkout del lector {git_head()}")
+    ya_leida = ventana_ya_leida(a.dir_salida)
+    if ya_leida:
+        pr(f"\nLA VENTANA YA SE LEYÓ O NO SE PUEDE COMPROBAR (§11.8): {ya_leida}; no se lee ni se escribe nada")
+        return 2
     deps, malos = cargar_deps()
     pr(f"  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: "
        f"{'OK' if deps else 'CAE: ' + MOTIVO['S0'] + ' ' + str(sorted(malos))}")
@@ -685,7 +839,8 @@ def main(argv=None):
         pr(f"  referencia congelada (sha256 LF, sin capas locales): {ref_sha}")
         coords, inner = B._coords_por_volcan(), B.inner_desde_html()
         filas_ref = cargar_referencia_unificada(Path(a.cons), Path(a.ocr), respaldo_path=None, historico_path=None)
-        ultima_tabla = max((f["fecha_utc"] for f in filas_ref if f.get("source") == "CONS"), default=None)
+        ultima_tabla = max((f["fecha_utc"] for f in filas_ref if f.get("source") == "CONS"
+                            and f.get("sensor_bucket") == "VIIRS375"), default=None)
         por_vb, ns, nv, _ = B.indexar_referencia(filas_ref, coords, (a.desde, a.hasta), regla_minimas="SN")
         recs = B.cargar_nuestros(coords, inner, (a.desde, a.hasta), data=a.data_k)
         B.etiquetar(recs, por_vb, ns, nv)
@@ -699,11 +854,6 @@ def main(argv=None):
         def publicar(casos):
             return [(x[3], x[4]) for x in B.correr_node([[E.slim(r), inn] for r, inn in casos])]
 
-        n_pre, _ = noche_parada(pob, {o["id"] for o in pob if clave(o) in via})
-        ya = Path(a.dir_salida) / f"lectura_sombra_corte_{n_pre}.txt"
-        if n_pre is not None and (ya.exists() or ya.with_suffix(".json").exists()):
-            pr(f"\nYA EXISTE {ya.name}: el corte {n_pre} no se vuelve a leer ni a escribir (§11.8)")
-            return 2
         ident = B.control_identidad_predicado()
         res, fallas = analizar(pob, via, kfull, inner, publicar, deps, a.desde, a.hasta,
                                identidad_ok=ident == IDENTIDAD_ESPERADA, ultima_tabla=ultima_tabla, commit=a.commit)
@@ -715,7 +865,7 @@ def main(argv=None):
     base = (f"lectura_sombra_corte_{corte}" if tipo == "decide"
             else f"controles_sombra_{corte}_{ahora.strftime('%Y%m%dT%H%M%S%fZ')}")
     txt, js = dsal / (base + ".txt"), dsal / (base + ".json")
-    if tipo != "decide" and (txt.exists() or js.exists()):    # la de la lectura que decide ya se miró antes
+    if txt.exists() or js.exists():
         pr(f"\nYA EXISTE {txt.name}: no se sobrescribe (§11.8)")
         return 2
     cod = {"decide": 0, "provisional": 5, "no_legible": 3}[tipo]
@@ -723,11 +873,19 @@ def main(argv=None):
         reporte_controles(res, detalle=tipo == "decide")
     if tipo == "no_legible":
         pr(f"\nLECTURA NO LEGIBLE (§11.4): caen {fallas}; no se imprime nada de la población")
+        if res.get("parada") and not res.get("parada_alcanzada"):
+            pa = res["parada"]
+            pr(f"== parada (§11.8): noches {pa['noches']} de {PARADA_NOCHES}, alertas {pa['alertas']} de "
+               f"{PARADA_ALERTAS}: NO ALCANZADA")
     elif tipo == "provisional":
         pa = res["parada"]
         pr(f"\n== parada (§11.8): noches {pa['noches']} de {PARADA_NOCHES}, alertas {pa['alertas']} de "
            f"{PARADA_ALERTAS}: NO ALCANZADA; no hay lectura")
     else:
+        anotar_registro({"tipo": "lectura", "N": corte, "hora_servidor": ahora.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                         "referencia": out["procedencia"]["referencia"], "records_k": out["procedencia"]["records_k"],
+                         "records_sombra": out["procedencia"]["records_sombra"], "commit": a.commit,
+                         "lector": out["procedencia"]["lector"], "dir_salida": str(dsal), "archivo": txt.name})
         rc = [r for r in recs if r["noche"] <= corte]
         pob_c, fuera, snpp = poblacion(rc, por_vb, B, alerta_protegida)
         pv = {k: [(dt, f) for dt, f in v if dt.strftime("%Y-%m-%d") <= corte]
