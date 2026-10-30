@@ -451,3 +451,19 @@ pasadas que MIROVA no lista.
 ⚠️ **S167, verificador limpio (Sonnet) de esta sección**: LISTO CON CAMBIOS, 8 hallazgos de gravedad 2 o 3 y 6 de
 gravedad 1, todos aplicados (orden entre sensores, posición por sensor, sombra, MOD-E, N-3 en V750-B, §9, V750-A y
 V375). Informe en el scratchpad de S167, copiado a `experiments/_s167/verificador_programa/INFORME.md`.
+
+### 12.6 Congelamiento de `pipeline/` durante la sombra (decisión de Nicolás, S169)
+
+**DECIDIDA el 2026-10-30 (03:18 UTC)**: Nicolás, en el chat de la coordinadora S169, ante la pregunta «¿Congelamos los
+cambios a pipeline/ durante la sombra, salvo la ROI de VIIRS 750?»: «Sí, congelar». La opción elegida decía: durante la
+sombra de noviembre no se mergea nada en `pipeline/` que toque las vías, salvo la ROI de VIIRS 750 y arreglos de
+emergencia del NRT, y cada excepción se anota en la bitácora.
+
+Por qué: la sombra vale porque todas sus noches corren con el mismo código. Un cambio en una vía a mitad de la ventana
+deja dos regímenes y los lectores lo marcan (S8 en el de VIIRS 375), con lo que sus criterios pasan a decidirlos
+Nicolás. Alcance:
+- Vale desde el encendido de la sombra (#926, `c42ee0eb7`) hasta que cada sensor alcance su parada.
+- Excepciones permitidas: la ROI que elija V750-B en `pipeline/grillas_mirova.yaml` (clave `roi_v750`), y un arreglo de
+  emergencia del NRT de producción. Cada una se anota en `tasks/LOOP_OBJETIVOS.md` §6 con su commit y qué sensor toca.
+- Los lectores de sombra tienen que comparar sólo lo que lee su vía, para que una excepción de otro sensor no marque el
+  régimen propio (B7 del verificador del lector de VIIRS 375, S169).
