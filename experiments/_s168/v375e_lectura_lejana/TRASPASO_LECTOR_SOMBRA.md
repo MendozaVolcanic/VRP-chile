@@ -1,5 +1,28 @@
 # Traspaso: lector de la sombra de V375-E (§9.8 y §10 de PREREGISTRO_E.md)
 
+> **Estado al 2026-10-30 01:30 UTC: el verificador del lector dio SELLABLE CON CAMBIOS con UN hallazgo de gravedad 3.**
+> Informe: `experiments/_s168/v375e_sombra/verificador/INFORME.md` (Sonnet, sobre `c44665603`; re-corrió la batería, 104
+> de 104). No hay sello ni tag del lector. El nulo (`mutar_sombra.py`) sigue sin correr. Lo que queda, en este orden:
+> arreglar §11 y el código (propuesta abajo), agregar a `mutar_sombra.py` las 14 mutaciones que el verificador cree que
+> sobreviven, re-correr la batería, el nulo cuando haya cupo pesado (`--hilos 1`), un verificador corto de otro modelo
+> sobre el delta, tag anotado del lector, INFORME.md y aviso a S169 (`local_b1bfa049`). Todo antes del 2026-11-03 15:00
+> UTC. Ningún dato de la ventana P antes de que S169 se lo lleve a Nicolás.
+>
+> **Propuesta de arreglo por hallazgo** (de esta sesión, sin aplicar; quien siga puede cambiarla, pero tiene que quedar
+> escrita antes de abrir datos):
+>
+> | hallazgo | gravedad | propuesta |
+> |---|---|---|
+> | VS168-01 el corte que decide queda libre | 3 | `--desde` tiene que ser exactamente 2026-11-03 (S1 con `==`). El corte que decide es la primera noche en que se alcanza la parada: el lector la calcula y lee sólo hasta ella aunque `--hasta` sea posterior. Antes de la parada imprime sólo controles y los contadores de la parada, **sin ninguna lectura** (así no hay cortes provisionales que mirar). `--salida` y `--json` se niegan a sobrescribir un archivo existente y llevan la fecha del corte en el nombre |
+> | VS168-02 con un control caído se imprime el detalle de S7 | 2 | con controles caídos sólo se imprime qué control cayó (nombre y motivo genérico), sin conteos ni nombres de pasadas; la batería lo comprueba buscando los conteos, no sólo «== población» |
+> | VS168-03 una protegida SIN DATO que K publica sale de P1 | 2 | cuenta como perdida en (a) (conservador) y se lista por nombre; S7 en `pos_prot` sin tolerancia o con aviso aparte |
+> | VS168-04 el régimen no está fijado | 2 | `--commit` obligatorio; un control S8 compara con git `pipeline/` entre `c42ee0eb7` (#926) y el commit de los records: si la vía o el perfil de la sombra cambiaron, LECTURA NO LEGIBLE y decide Nicolás. S0 suma el sha de `banco_paridad.py`, `clase_mirova.py`, `referencia_mirova_unificada.py` y del propio lector, y el de `frontend/index.html` se informa |
+> | VS168-05 la referencia pierde filas y tiene rezago | 2 | la referencia se baja una sola vez para el corte que decide, al menos 2 días después de su última noche, y su sha queda en la salida; filas que el scraper pierda después no cambian nada |
+> | VS168-06 (c) SIN SUSTRATO da NO CUMPLE | 2 | en la sombra, (c) SIN SUSTRATO pasa a DECIDE NICOLÁS (§5.4, última frase); INDECIDIBLE sigue sin cumplir |
+> | VS168-07 los controles de la curva no se corren para K | 2 | correrlos también para K; si caen en K, (d) pasa a DECIDE NICOLÁS |
+> | VS168-08 la batería no ata (b), (c), (d) ni S6 | 2 | aserciones sobre el valor de cada criterio y del estado en `analizar`, S6 en rojo y la rama sin `neg_pub` |
+> | VS168-09 a 14 | 1 | ver el informe; los más útiles: no publicar sin distancias se cuenta y se informa (11), radiante sin `estado` impreso (13) |
+
 > **Estado al 2026-10-30 01:15 UTC** (lo sigue haciendo esta misma sesión, por pedido de la coordinadora S169). Hecho y
 > empujado en `claude/s168-v375e-sello`: el texto del lector como §11 de `PREREGISTRO_E.md` (borrador, sin sellar), el
 > lector `experiments/_s168/v375e_sombra/leer_sombra_v375e.py`, su batería `probar_sombra.py` (104 de 104) y el nulo
