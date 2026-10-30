@@ -1,0 +1,51 @@
+--- A control sano: OK
+ventana 2026-11-03 a 2026-11-06: 3 records, 3 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 1, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+
+--- B control corrida vacia (records de ayer, ninguno nuevo): FALLA
+ventana 2026-11-03 a 2026-11-06: 3 records, 0 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 0, VIIRS750 0, VIIRS375 0), 0 de otra fuente, 0 errores de gránulo
+  FALLA: MODIS: ningún record de la vía escrito en esta corrida; VIIRS750: ningún record de la vía escrito en esta corrida; VIIRS375: ningún record de la vía escrito en esta corrida
+
+--- C FUGA: ningun record de hoy, pero 3 NRT->standard de dias 3 y 4 reescritos hoy: OK
+ventana 2026-11-03 a 2026-11-06: 3 records, 3 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 1, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+
+--- D SNPP retirada + V750 sin granulos en NOAA20 y NOAA21 (miro y no hubo): OK
+ventana 2026-11-03 a 2026-11-06: 2 records, 2 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 0, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+  NOTA VIIRS750: sin records de esta corrida; miró y no hubo pasada el 2026-11-06 (búsqueda sin gránulos en VIIRS_NOAA20_750, VIIRS_NOAA21_750)
+
+--- D2 V750: NOAA20 vacia pero NOAA21 con granulos y sin record: FALLA
+ventana 2026-11-03 a 2026-11-06: 2 records, 2 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 0, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+  FALLA: VIIRS750: ningún record de la vía escrito en esta corrida
+
+--- E CATALOGO VACIO (R2-13): todas las plataformas vivas responden [] en los 3 sensores: OK
+ventana 2026-11-03 a 2026-11-06: 3 records, 0 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 0, VIIRS750 0, VIIRS375 0), 0 de otra fuente, 0 errores de gránulo
+  NOTA MODIS: sin records de esta corrida; miró y no hubo pasada el 2026-11-06 (búsqueda sin gránulos en MODIS_TERRA, MODIS_AQUA)
+  NOTA VIIRS750: sin records de esta corrida; miró y no hubo pasada el 2026-11-06 (búsqueda sin gránulos en VIIRS_NOAA20_750, VIIRS_NOAA21_750)
+  NOTA VIIRS375: sin records de esta corrida; miró y no hubo pasada el 2026-11-06 (búsqueda sin gránulos en VIIRS_NOAA20, VIIRS_NOAA21)
+
+--- F cobertura con plataformas vacio {} (instrumento muerto): FALLA
+ventana 2026-11-03 a 2026-11-06: 2 records, 2 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 0, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+  FALLA: VIIRS750: ningún record de la vía escrito en esta corrida
+
+--- H incidencia sin_granulos de OTRO dia (no fin): FALLA
+ventana 2026-11-03 a 2026-11-06: 2 records, 2 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 0, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+  FALLA: VIIRS750: ningún record de la vía escrito en esta corrida
+
+--- J record con processed_utc == desde exacto: OK
+ventana 2026-11-03 a 2026-11-06: 3 records, 3 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 1, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+
+--- K1 B3: record de K de ayer (processed antes de desde): OK
+ventana 2026-11-03 a 2026-11-06: 4 records, 3 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 1, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+
+--- K2 B3: record de K de hoy: FALLA
+ventana 2026-11-03 a 2026-11-06: 4 records, 4 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 1, VIIRS375 1), 1 de otra fuente, 0 errores de gránulo
+  FALLA: records de esta corrida que no son de la vía: {'geo_distinta': 1}
+
+--- L K viejo reescrito hoy por upgrade NRT->standard: FALLA
+ventana 2026-11-03 a 2026-11-06: 4 records, 4 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 1, VIIRS375 1), 1 de otra fuente, 0 errores de gránulo
+  FALLA: records de esta corrida que no son de la vía: {'geo_distinta': 1}
+
+--- M fallas de busqueda en cobertura (1): FALLA
+ventana 2026-11-03 a 2026-11-06: 3 records, 3 escritos en esta corrida (desde 2026-11-06T15:00:05Z; MODIS 1, VIIRS750 1, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+  FALLA: cobertura incompleta: 1 búsquedas o descargas fallidas
+
+--- N desde-utc vacio: ValueError desde_utc ilegible: ''

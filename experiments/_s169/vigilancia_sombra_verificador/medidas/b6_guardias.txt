@@ -1,0 +1,15 @@
+        monkeypatch.setattr(vs, "leer_juzgadas", LEER_JUZGADAS_REAL)
+        out = vs.evaluar("2026-10-23")
+>       assert [p["fecha_utc"] for p in out["juzgadas"]] == ["2026-10-10 05:54"]
+E       AssertionError: assert [] == ['2026-10-10 05:54']
+E         
+E         Right contains one more item: '2026-10-10 05:54'
+E         Use -v to get more diff
+
+tests\test_vigilancia_sombra_s156.py:727: AssertionError
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: backfill-tier-a.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: nrt.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: reproc-chunked.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: sombra-codigo-mirova.yml no declara fechas por defecto parseables
+8 failed, 164 passed, 4 skipped in 47.92s

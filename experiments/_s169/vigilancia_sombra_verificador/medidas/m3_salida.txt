@@ -1,0 +1,12 @@
+ok       | control: verde de hoy 15:03, chequeo 18:30 | corrida programada verde del 2026-11-04T15:03:00Z
+alerta   | control: sin corridas, 3-nov 18:30 | ninguna corrida programada verde en lo que entrego la API
+inactivo | 3-nov 12:30 (antes de 15:00) | la sombra mide desde 2026-11-03T15:00:00Z
+alerta   | borde exacto 15:00:00Z sin corridas | ninguna corrida programada verde en lo que entrego la API
+inactivo | borde 14:59:59Z | la sombra mide desde 2026-11-03T15:00:00Z
+alerta   | hoy en curso a las 18:30 (ayer verde 15:03), corrida de hoy 15:05 in_progress | la ultima corrida programada verde es del 2026-11-04T15:03:00Z (tope 26 h)
+alerta   | ayer verde 14:50 (cron temprano), hoy en curso, 18:30 -> edad 27.7h | la ultima corrida programada verde es del 2026-11-04T14:50:00Z (tope 26 h)
+alerta   | hoy 1 job rojo (run failure), 18:30 | la ultima corrida programada verde es del 2026-11-04T15:03:00Z (tope 26 h)
+alerta   | hoy failure, chequeo 12:30 del dia siguiente (ayer verde es de hace 45 h) | la ultima corrida programada verde es del 2026-11-04T15:03:00Z (tope 26 h)
+alerta   | despacho manual verde de hoy (workflow_dispatch) con cron fallido | la ultima corrida programada verde es del 2026-11-04T15:03:00Z (tope 26 h)
+alerta   | cron cancelado (cancelled) hoy | la ultima corrida programada verde es del 2026-11-04T15:03:00Z (tope 26 h)
+alerta   | API da 30 corridas viejas (todas manuales) | ninguna corrida programada verde en lo que entrego la API

@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 05:12 UTC (S169, vuelta 22): vigilancia MERGEABLE CON CAMBIOS; segunda ronda encargada
+- Verificador (Sonnet, subagente) sobre `16d9e894d`: `experiments/_s169/vigilancia_sombra_verificador/INFORME_VERIFICACION.md`.
+  B1 a B6 confirmados al menos en parte. Suomi NPP queda fuera desde el 3 con la misma regla que `fetch.py`, así que no
+  deja rojo VIIRS. Gravedad 2: VV169-01 (los reemplazos NRT a estándar de días previos cumplen el control por sensor),
+  02 (un catálogo CMR vacío sale verde con tres NOTA), 03 (una búsqueda fallida de cualquiera de los 8 días deja rojo),
+  04 (falsa alerta del monitor si la corrida sigue a las 18:30), 05 (un K caído queda para siempre). 13 de 18
+  mutaciones atrapadas; sobreviven A, E, G, P y R. Recomienda, tras el merge, un despacho `medir=true` de Láscar del
+  2026-10-28 al 30 y un despacho manual de `nrt-monitor.yml`.
+- Devuelto al agente que arregló, con decisiones: datos del último día y el anterior para el control por sensor; tres
+  NOTA (o V750 y V375 a la vez) es FALLA; fallas de búsqueda de días previos son NOTA y sólo la del último día es FALLA;
+  «pendiente» si hay una corrida programada en curso de menos de 6 h; conteo acumulado de K caídos en el resumen; y
+  pruebas hasta atrapar A, E, G, P y R.
+
 ### 2026-10-30 04:41 UTC (S169, vuelta 21): vigilancia de la sombra arreglada; verificador en curso
 - Rama `claude/s169-vigilancia-sombra` en `16d9e894d` (sobre `origin/main` `161536698`, 10 commits, comprobado con
   `ls-remote`): `revisar_sombra.py` juzga sólo lo de esta corrida (`processed_utc` desde el inicio anotado y sha del
