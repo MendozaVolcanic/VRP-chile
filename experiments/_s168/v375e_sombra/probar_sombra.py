@@ -877,10 +877,21 @@ def main(argv=None):
                 (txt_p[-400:], out_p.get("parada")))
 
             # la lectura que decide, con la parada de prueba (25 noches y 20 alertas): N es la última noche
-            with parada_de_prueba(LS, 25, 20):
+            pantalla = io.StringIO()
+            with parada_de_prueba(LS, 25, 20), contextlib.redirect_stdout(pantalla):
                 cod, tx, jsl = correr(t / "o_dec")
+            pant = pantalla.getvalue()
             txt = tx[0].read_text(encoding="utf-8") if tx else ""
             out = json.loads(jsl[0].read_text(encoding="utf-8"), object_hook=Seguro) if jsl else Seguro()
+            chk("main (VL2-04): la lectura que decide no sale por pantalla: ni población, ni criterios, ni estado, ni el "
+                "detalle de los controles",
+                "== población" not in pant and "criterios" not in pant and "PAQUETE" not in pant
+                and "pos_prot" not in pant and "S7 OK: {" not in pant and "== cercano" not in pant, pant[-1500:])
+            chk("main (VL2-04): por pantalla salen los controles sin detalle, el N del corte y la ruta del archivo",
+                "  S7 OK\n" in pant and "corte N = 2026-11-29" in pant and "lectura_sombra_corte_2026-11-29.txt" in pant,
+                pant[-800:])
+            chk("main (VL2-04): la lectura completa sí está en el archivo",
+                "== población" in txt and "PAQUETE en la sombra" in txt and "S7 OK: {" in txt, txt[-400:])
             chk("main: la lectura que decide sale 0 y se llama lectura_sombra_corte_<N>",
                 cod == 0 and [x.name for x in tx] == ["lectura_sombra_corte_2026-11-29.txt"], (cod, tx, txt[-1500:]))
             chk("main: los controles S1 a S10 en verde", all(v["ok"] for v in out["controles"].values())
