@@ -7,7 +7,7 @@ batería, cada una sobre una copia del lector con un GRUPO de reglas rotas a la 
 mutaciones de mutar_sombra.py (ids N y V); en cada grupo se eligieron para que no se tapen entre sí. Para cada rotura se
 listan las aserciones que la batería da en FALLA; la que se esperaba ver en rojo está en ESPERA.
 
-Uso: python -I ver_en_rojo.py --grupo A|B|C|D|E|F|G|H|I|J|K [--salida <archivo>]
+Uso: python -I ver_en_rojo.py --grupo A|B|C|D|E|F|G|H|I|J|K|L [--salida <archivo>]
 """
 from __future__ import annotations
 
@@ -34,6 +34,7 @@ GRUPOS = {
     "H": ["R03", "R06", "R10", "R11", "R14", "R17", "R19", "N05"],
     "I": ["R07", "R08", "R15", "N16"],
     "K": ["R20"],   # sola: sin el rechazo, cada corrida que debía rechazarse hace la lectura entera (más de 30 min)
+    "L": ["R28"],   # ronda 3 (VL2-04)
     "J": ["R24", "R25", "R26", "R27", "R23", "N05"],   # la base de la ventana (precisión de la coordinadora)
     "F": ["CONTROL_SECCION"],   # VL169-02: tiene que salir con exit 2 (CAÍDA), no 1
 }
@@ -75,6 +76,7 @@ ESPERA = {
     "R23": "VL169-01: registro_remoto da None",
     "R24": "S8 (base de la ventana): la base es el codigo_sha", "R25": "S8 (base de la ventana): c42ee0eb7 contra la base",
     "R26": "S8 (base de la ventana): sin records de la vía", "R27": "S8 (base de la ventana): si cambia una noche del medio",
+    "R28": "main (VL2-04): la lectura que decide no sale por pantalla",
 }
 
 
