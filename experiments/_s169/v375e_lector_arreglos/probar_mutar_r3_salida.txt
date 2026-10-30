@@ -1,0 +1,61 @@
+PASA  TimeoutExpired es CAIDA y no lanza 
+PASA  el tope es 5400 s 
+== corrida 2026-10-30 07:30:54 UTC | HEAD  (claude/s169-v375e-lector) | hilos 1 | tope 5400 s
+IDENTIDAD (copia sin mutar): PASA []
+CONTROL (rompe la importación): CAIDA ['sección «x»: E']  (tiene que ser CAIDA)
+CONTROL_SECCION (lanza dentro de una sección): CAIDA ['sección «x»: E']  (tiene que ser CAIDA)
+retoma: 0 ya escritas en mutar_sombra_repaso_salida.txt, 4 pendientes
+MUT M01 CAIDA ['pasó el tope de 5400 s']
+MUT M02 SOBREVIVE []
+MUT M03 ATRAPADA ['algo']
+MUT V04 SOBREVIVE [] (equivalente declarada)
+
+CAIDAS (no cuentan como atrapadas): ['M01']
+SOBREVIVEN: ['M02', 'V04'] (equivalentes declaradas antes de correr: ['V04'])
+RESULTADO: 1 de 4 atrapadas por aserción (3 no equivalentes); sobreviven 2; caídas 1; faltan 0
+PASA  con una no equivalente viva sale 1 
+PASA  cada mutaci�n qued� escrita, M01 como CAIDA por el tope 
+== corrida 2026-10-30 07:30:54 UTC | HEAD  (claude/s169-v375e-lector) | hilos 1 | tope 5400 s
+IDENTIDAD (copia sin mutar): PASA []
+CONTROL (rompe la importación): CAIDA ['sección «x»: E']  (tiene que ser CAIDA)
+CONTROL_SECCION (lanza dentro de una sección): CAIDA ['sección «x»: E']  (tiene que ser CAIDA)
+retoma: 4 ya escritas en mutar_sombra_repaso_salida.txt, 1 pendientes
+MUT M04 ATRAPADA ['algo']
+
+CAIDAS (no cuentan como atrapadas): ['M01']
+SOBREVIVEN: ['M02', 'V04'] (equivalentes declaradas antes de correr: ['V04'])
+RESULTADO: 2 de 5 atrapadas por aserción (4 no equivalentes); sobreviven 2; caídas 1; faltan 0
+PASA  retoma: la segunda corrida s�lo corre identidad, controles y la mutaci�n nueva 
+PASA  retoma: el resumen cuenta todo el archivo 
+== corrida 2026-10-30 07:30:55 UTC | HEAD  (claude/s169-v375e-lector) | hilos 1 | tope 5400 s
+IDENTIDAD (copia sin mutar): FALLA ATRAPADA ['algo']
+ABORTA: la identidad no pasa (la batería falla sin mutar nada); no se muta nada
+PASA  identidad que falla: aborta con 2 sin mutar 
+== corrida 2026-10-30 07:30:55 UTC | HEAD  (claude/s169-v375e-lector) | hilos 1 | tope 5400 s
+IDENTIDAD (copia sin mutar): PASA []
+CONTROL (rompe la importación): SOBREVIVE []  (tiene que ser CAIDA)
+ABORTA: CONTROL no sale CAIDA; no se muta nada
+PASA  un control que no sale CAIDA: aborta con 2 sin mutar 
+== corrida 2026-10-30 07:30:55 UTC | HEAD  (claude/s169-v375e-lector) | hilos 1 | tope 5400 s
+IDENTIDAD (copia sin mutar): PASA []
+CONTROL (rompe la importación): CAIDA ['sección «x»: E']  (tiene que ser CAIDA)
+CONTROL_SECCION (lanza dentro de una sección): CAIDA ['sección «x»: E']  (tiene que ser CAIDA)
+retoma: 0 ya escritas en mutar_sombra_repaso_salida.txt, 2 pendientes
+MUT M01 ATRAPADA ['algo']
+MUT V04 SOBREVIVE [] (equivalente declarada)
+
+CAIDAS (no cuentan como atrapadas): []
+SOBREVIVEN: ['V04'] (equivalentes declaradas antes de correr: ['V04'])
+RESULTADO: 1 de 2 atrapadas por aserción (1 no equivalentes); sobreviven 1; caídas 0; faltan 0
+PASA  s�lo sobrevive la equivalente: sale 0 
+== corrida 2026-10-30 07:30:55 UTC | HEAD  (claude/s169-v375e-lector) | hilos 1 | tope 5400 s
+IDENTIDAD (copia sin mutar): PASA []
+CONTROL (rompe la importación): CAIDA ['sección «x»: E']  (tiene que ser CAIDA)
+CONTROL_SECCION (lanza dentro de una sección): CAIDA ['sección «x»: E']  (tiene que ser CAIDA)
+ARRANQUE OK: la identidad pasa y los dos controles salen CAIDA; no se mutó nada (--arranque)
+PASA  --arranque: identidad y controles, sale 0, escribe en _arranque y no muta 
+== corrida 2026-10-30 07:30:55 UTC | HEAD  (loop/activo) | hilos 1 | tope 5400 s
+ABORTA: no corre en un checkout de claude/s169-v375e-lector (HEAD en loop/activo); no se muta nada
+PASA  fuera de la rama: aborta con 2 antes de la identidad 
+PASA  en este checkout en_la_rama da s� 
+RESULTADO: 12 de 12
