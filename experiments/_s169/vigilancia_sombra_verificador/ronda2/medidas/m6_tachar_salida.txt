@@ -1,0 +1,19 @@
+OK   control: token en log y en cobertura.json se tacha en ambos
+OK   el stdout/stderr no repite el token | ::warning title=Token en pipeline.log::1 apariciones del token tachadas antes de subir el artefacto / ::warning title=Token en cobertura.json::1 apari
+OK   log sin token queda intacto
+OK   token vacio: no toca nada y sale 0 (el token que estuviera en el log sigue ahi) | sin EARTHDATA_TOKEN en el entorno: nada que tachar
+OK   sin variable: sale 0 con aviso | sin EARTHDATA_TOKEN en el entorno: nada que tachar
+OK   token solo espacios: se trata como vacio, no destroza el log
+OK   token con \n final en el entorno: se tacha igual
+INFO  SIGUE   variante url-encoded
+INFO  SIGUE   variante base64(token)
+INFO  SIGUE   variante json escapado (\/)
+INFO  SIGUE   variante token partido en 2 lineas
+INFO  tachado variante literal
+OK   token con metacaracteres de regex se tacha literal
+OK   log con bytes no UTF-8: se tacha el token y el archivo se reescribe
+INFO  bytes tras la reescritura: b'\xef\xbf\xbd\xef\xbf\xbd raro *** \xef\xbf\xbd\r\n'
+INFO  pipeline.log como directorio: rc= 1 | cobertura.json quedo tachado: False | stderr: ["PermissionError: [Errno 13] Permission denied: 'pipeline.log'"]
+OK   archivo inexistente se salta y el otro se tacha
+OK   el script lee el token solo de os.environ (no de argv)
+FALLAN 0 de 11

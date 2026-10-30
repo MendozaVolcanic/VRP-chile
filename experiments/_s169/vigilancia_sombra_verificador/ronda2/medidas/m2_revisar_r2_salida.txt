@@ -1,0 +1,49 @@
+OK   R1 control: 3 sensores con pasada de fin -> ok=True
+OK   R1 3 sensores con pasada de la vispera escrita hoy -> ok=True
+OK   R1 3 sensores con pasada de fin-2 escrita hoy (reemplazo NRT->std) -> ok=False
+OK   R1 un sensor solo con fin-3, los otros con fin -> ok=False
+OK   R1 datetime_utc 'AAAA-MM-DD HH:MM:SS' (sin T) -> ok=True
+OK   R1 datetime_utc None en los 3 (cae de la ventana) -> ok=False
+OK   R2 tres sensores vacios en todas las plataformas (catalogo vacio) -> ok=False
+OK   R2 V750 y V375 vacios, MODIS con pasada -> ok=False
+OK   R2 solo V750 vacio (NOTA) -> ok=True
+OK   R2 solo V375 vacio (NOTA) -> ok=True
+OK   R2 MODIS y V750 vacios, V375 con pasada (OK por diseno) -> ok=True
+OK   R2 MODIS y V375 vacios, V750 con pasada (OK por diseno) -> ok=True
+OK   R2 MASCARA: los 3 vacios en fin pero con records de la vispera reescritos hoy -> ok=True
+      ventana 2026-10-30 a 2026-11-06: 3 records, 3 escritos en esta corrida (desde 2026-11-06T15:00:05Z; con pasada de 2026-11-05 o 2026-11-06: MODIS 1, VIIRS750 1, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+        K caídos en la ventana: 0
+OK   R2 V750 vacio y V375 sin vacia ni record (FALLA por V375) -> ok=False
+OK   R3 falla de busqueda del dia fin -> FALLA -> ok=False
+OK   R3 falla de dia anterior (fin-1) -> NOTA y verde -> ok=True
+OK   R3 falla sin fecha -> FALLA -> ok=False
+OK   R3 falla con fecha ISO con hora de fin -> ok=False
+OK   R3 falla 'fecha' vacia -> ok=False
+OK   R3 HUECO: dia X=fin-1 perdido (sin records de X), 3 fallas de X, hoy sano -> verde -> ok=True
+      ventana 2026-10-30 a 2026-11-06: 3 records, 3 escritos en esta corrida (desde 2026-11-06T15:00:05Z; con pasada de 2026-11-05 o 2026-11-06: MODIS 1, VIIRS750 1, VIIRS375 1), 0 de otra fuente, 0 errores de gránulo
+        K caídos en la ventana: 0
+        NOTA 3 búsquedas o descargas fallidas del 2026-11-05, día anterior al último: lo cubrió una corrida previa y la ventana lo vuelve a buscar
+OK   R3 log 'Cobertura INCOMPLETA' con fallas solo viejas -> ok=True
+OK   R3 log 'Cobertura INCOMPLETA' y fallas vacias -> ok=False
+OK   R5 sano, 0 K -> ok=True
+OK   R5 sano con K escrito ayer -> verde, linea K=1 -> ok=True
+OK   R5 K de hoy -> FALLA y linea K=1 -> ok=False
+OK   R5 via None (campo ausente) escrito ayer -> ok=True
+OK   R5 FALLA por sensor, la linea K igual aparece -> ok=False
+OK    R1 cambio de mes: vispera 30-nov cuenta con fin 01-dic -> ok= True
+OK    R1 cambio de mes: 29-nov no cuenta -> ok= False
+OK    familia MODIS_AQUA MODIS
+OK    familia MODIS_TERRA MODIS
+OK    familia VIIRS_SNPP VIIRS375
+OK    familia VIIRS_NOAA21 VIIRS375
+OK    familia VIIRS_NOAA20_750 VIIRS750
+OK    familia VIIRS_NOAA21_750 VIIRS750
+OK    familia VIIRS_SNPP_750 VIIRS750
+OK    familia GOES None
+OK    R5 main verde: stdout y GITHUB_STEP_SUMMARY llevan la linea; rc= 0
+OK    R5 main rojo: linea en ambos; rc= 1
+OK    R5 main sin GITHUB_STEP_SUMMARY: solo stdout; rc= 1
+INFO R5 json corrupto: rc= 1 | linea K en stdout: False | summary: False | stderr: ['json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)']
+INFO R5 cobertura corrupta: rc= 1 | linea K en stdout: False | summary: False | stderr: ['json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)']
+INFO R5 desde-utc vacio: rc= 1 | linea K en stdout: False | summary: False | stderr: ["ValueError: desde_utc ilegible: ''"]
+FALLAN 0
