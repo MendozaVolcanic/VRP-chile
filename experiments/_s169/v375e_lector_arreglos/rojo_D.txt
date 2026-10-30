@@ -1,0 +1,63 @@
+grupo D: roturas ['N04', 'V14', 'N13', 'N16', 'N17', 'N18', 'N19', 'N20', 'N21', 'N24', 'N26', 'N39']
+batería: exit 1 ['RESULTADO: 134 de 180']
+stderr (cola): ['probar_sombra.py: error: the following arguments are required: --commit']
+N04 EN ROJO: «parada (VS168-01): la noche N es la PRIMERA»
+V14 EN ROJO: «S1 (VS168-01): desde DESPUÉS»
+N13 EN ROJO: «S0 (VS168-04): banco_paridad.py distinto»
+N16 NO SE VIO: «S8 (VS168-04): compara contra c42ee0eb7»
+N17 EN ROJO: «S8 (VS168-04): un perfil de la vía distinto»
+N18 EN ROJO: «S8 (VS168-04): el --commit también»
+N19 EN ROJO: «S8 (VS168-04): un record sin régimen»
+N20 EN ROJO: «S8 (VS168-04): un sha que git no resuelve»
+N21 EN ROJO: «S9 (VS168-05): tabla hasta 1 día»
+N24 EN ROJO: «S10 (VS168-11): una pasada con alertados y sin distancias cae»
+N26 EN ROJO: «S4 (VS168-10): radiante a 0,0004»
+N39 EN ROJO: «S7: la lista de SIN DATO va completa»
+
+aserciones en FALLA (46):
+  S0 (VS168-04): banco_paridad.py distinto del sello no carga nada {}
+  S0 (VS168-04): index.html distinto del sello no carga nada {}
+  S1 (VS168-01): desde DESPUÉS del 2026-11-03 también cae
+  S4 (VS168-10): radiante a 0,0004 km del radio con otra clase se excluye y no cae {'n': 37, 'malos': ['2026-11-05 08:00'], 'excluidas_por_redondeo': 0}
+  S7: la lista de SIN DATO va completa (sin truncar)
+  S10 (VS168-11): una pasada con alertados y sin distancias cae
+  S10 (VS168-11): brazos deja dist None si un alertado no trae dist_km, y S10 lo ve {4: {'npix': 3, 'dist': None, 'dc': 'far', 'vrp': 3.0}}
+  S9 (VS168-05): tabla hasta 1 día después del corte cae
+  S8 (VS168-04): el --commit también se compara
+  S8 (VS168-04): un sha que git no resuelve marca
+  S8 (VS168-04): un record sin régimen marca
+  S8 (VS168-04): un perfil de la vía distinto marca
+  S8 (VS168-04): un perfil de K distinto marca
+  S10 (VS168-11): en analizar, una pasada con alertados sin distancias hace caer la lectura []
+  S9 (VS168-05): en analizar, con la parada alcanzada la referencia fresca hace caer la lectura (['S6'], '2026-11-04')
+  analizar: escena principal con la parada alcanzada, sin controles caídos ['S6']
+  VS168-01: el corte que decide es la noche de la parada (recortado desde el 2026-11-20) ('2026-11-04', {})
+  (a): radiante calla la protegida LEJANA que K publica y no cumple {}
+  (a): cercano no calla ninguna y cumple
+  lejanas: cercano publica las 12 far_tabla, radiante 0, K 12 ({}, {})
+  lejanas (VS168-12): far_ocr se informa por brazo y para K
+  (b): P2-L de radiante contra K gana (calla donde K publica) {}
+  (b): P2-L de cercano contra K empata en bloques (publica igual que K) {}
+  (b) por valor (VS168-08): cercano calla los neg_pub de K, P2 GANA, silencio acotado y (b) CUMPLE ({}, {}, {})
+  sección «analizar: VA168-01, con un control caído no sale nada de la población» sin excepción TypeError("unhashable type: 'Seguro'")
+  S8 en analizar (VS168-04): un record de otro régimen marca la lectura y sus CUMPLE de (b) pasan a DECIDE NICOLAS (['S6'], None, None)
+  sección «régimen y protegida SIN DATO a nivel de analizar (con la parada de prueba)» sin excepción KeyError(('VIA', 'radiante'))
+  borde: analizar lista las dos pasadas y calcula la vuelta conjunta y la mixta (['S6'], None, None)
+  parada: 30 noches y 40 alertas, alcanzada en la noche 30
+  parada (VS168-01): la noche N es la PRIMERA con 30 noches y 40 alertas («lo que llegue último») ('N005', {'noches': 30, 'alertas': 40, 'alcanzada': True, 'noche
+  main: la lectura que decide sale 0 y se llama lectura_sombra_corte_<N> (3, [WindowsPath('C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile/.claud
+  main: los controles S1 a S10 en verde {'S1': {'ok': True, 'motivo': ''}, 'S2': {'ok': True, 'motivo': ''}, 'S3': {'ok': True, 'motivo': ''}, 'S4': {'ok': True, 
+  main: la población sale de banco_paridad con las clases de la escena == procedencia
+  main: radiante rotulado posterior a la lectura
+  main (VS168-03): la protegida SIN DATO que K publica veta a cercano y el paquete no cumple None
+  main: con la regla SN la alerta de 0,04 MW cuenta como negativo limpio (13 neg_resto, no pos_bajo) == procedencia
+  main (VS168-12): las alertas de MIROVA sin record de K se informan None
+  main (VS168-13): radiante y P-sinfiltro sin criterios ni estado, en pantalla y en el JSON 0
+  main (VS168-02): en la lectura que decide los controles salen con detalle
+  main: el estado del paquete está en la salida
+  main (VS168-01): leer otra vez el mismo corte sale 2 y no toca la lectura 3
+  main (VS168-01): con --hasta posterior lee sólo hasta la noche de la parada y lo dice (3, [WindowsPath('C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/V
+  main (VS168-01): después del corte nada entra (la protegida SIN DATO del 11-10 sí, la alerta del 11-29 no) 2026-11-05
+  main (VS168-05): con la tabla a 1 día del corte S9 cae, sale 3 y no escribe la lectura del corte (3, [WindowsPath('C:/Users/nmend/OneDrive/Escritorio/claude/Vol
+  main (VS168-05): con la tabla a 9 días del corte la lectura sí se escribe 3
+  main VS168-02: con S1 caído (2026-11-10) no salen conteos ni nombres de pasadas 8f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091
