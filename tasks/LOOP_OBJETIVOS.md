@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 05:33 UTC (S169, vuelta 23): vigilancia ronda 2 lista; PR #928 abierto; verificador corto en curso
+- `claude/s169-vigilancia-sombra` en `f743d7b8f` (comprobado con `ls-remote`): VV169-01 a 05, 07 y 08 aplicados;
+  `scripts/tachar_secreto_log.py` tacha el token antes de subir el artefacto. 39 de 39 nuevas, 208 de 208 con
+  guardias (4 saltadas preexistentes), nulo 32 de 32 atrapadas por aserción. Nada en `pipeline/`, `data/` ni
+  `frontend/`; desde la base `161536698`, `main` sólo avanzó en datos.
+- PR #928 abierto para que corra el CI. Merge sólo tras el verificador corto (Sonnet, sobre el delta
+  `16d9e894d..f743d7b8f`, con foco en el manejo del token) y con frase de Nicolás.
+
 ### 2026-10-30 05:12 UTC (S169, vuelta 22): vigilancia MERGEABLE CON CAMBIOS; segunda ronda encargada
 - Verificador (Sonnet, subagente) sobre `16d9e894d`: `experiments/_s169/vigilancia_sombra_verificador/INFORME_VERIFICACION.md`.
   B1 a B6 confirmados al menos en parte. Suomi NPP queda fuera desde el 3 con la misma regla que `fetch.py`, así que no
