@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 00:50 UTC aprox. (S169, vuelta 5): merge del workflow del humo autorizado con condición; PR #927
+- Frase de Nicolás: «Sí, mergéalo» (botón de «¿Me autorizas a mergear el workflow del humo de MOD-D cuando su
+  verificador diga que es mergeable?», mensaje: mergear `probe-s168-modd-f4.yml` a `main` cuando el verificador
+  limpio diga que es mergeable y el CI esté verde).
+- PR #927, rama `claude/s169-workflow-humo-modd` (`9cb1f4325`, armada con índice temporal sobre `main` `443da8649`):
+  sólo agrega el yml, blob `a93b978bd`, idéntico en `3db87f50d` y `743e89c48`. Sin merge hasta el veredicto del
+  verificador del candado.
+
 ### 2026-10-30 00:41 UTC (S169, vuelta 4): Nicolás pide acelerar; verificador del candado adelantado
 - Nicolás: «le doy el si a todo lo que recomiendes, que podemos hacer para acelerar estas pruebas?». Se usa para el
   trabajo preparatorio; merge a `main` y encender una vía siguen pidiendo una frase que nombre el paso.
