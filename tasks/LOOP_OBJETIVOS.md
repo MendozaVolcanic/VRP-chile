@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 04:07 UTC (S169, vuelta 16): F1 (VIIRS 750) con 19 hallazgos; los tres verificadores corren
+- Auditor F1 (Sonnet) sobre `01ffd277b`, la rama de la ROI `3c5c494b9` y los tags de V750-B:
+  `D:/vrp-trabajo/temporales/s169_audit_patrones/f1_v750/INFORME.md`. Sin gravedad 4 ni 5. Limpio: las cinco sha256
+  que exigen los lectores sellados y la equivalencia de las cajas B0 a B5 con `caja_roi` de la vía. Gravedad 3: P1-01
+  (lector del 3 desde un worktree atrasado), P1-02 (`--leer-con-faltantes` abre la compuerta aunque el censo corrió y
+  falló, contra `PREREGISTRO_V750B.md` l. 212 a 214), P1-03 (`VRP_PROFILE` del shell cambia la población), P1-04
+  (`--data` viejo sin aviso), P1-05 (veredicto sin procedencia y salida que se pisa). Nueve de gravedad 2 y cinco de 1.
+- Verificador limpio (Opus, subagente) sobre los 14 de gravedad 2 o más; clasifica cada arreglo en procedimiento del
+  día, código no sellado o regla sellada (adenda de Nicolás).
+- Corren a la vez los verificadores de F1, F2 y F3 (los tres livianos) y el agente del lector de V375-E.
+
 ### 2026-10-30 04:03 UTC (S169, vuelta 15): F2 (MOD-D) con 16 hallazgos; verificador en curso
 - Auditor F2 (Sonnet) sobre `743e89c48`: `D:/vrp-trabajo/temporales/s169_audit_patrones/f2_modis/INFORME.md`. Reglas
   del evaluador fieles al pre-registro. P2-01, gravedad 4: el circuit-breaker de descarga de `pipeline/fetch.py` es
