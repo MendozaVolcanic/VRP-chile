@@ -1,0 +1,443 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+PASA   S0: las dependencias son las del tag y del sello del lector 
+PASA   S0: con un sha distinto no carga ninguna 
+PASA   S0 (VS168-04): el sello del lector fija banco_paridad, clase_mirova, la referencia, auto_audit_weekly, la calidad, el cargador del CSV, diurno y el index.html 
+PASA   S0 (VS168-04): banco_paridad.py distinto del sello no carga nada 
+PASA   S0 (VS168-04): index.html distinto del sello no carga nada 
+PASA   clase: pos con 1,5 MW es pos_prot 
+PASA   clase: pos con 0,5 MW es pos_bajo 
+PASA   clase: neg_limpio que K publica es neg_pub 
+PASA   clase: neg_limpio que K calla es neg_resto 
+PASA   clase: FALSO_POSITIVO de la tabla es far_tabla 
+PASA   clase: FALSO_POSITIVO sólo del OCR es far_ocr 
+PASA   clase: minima, sin_geometria y sin_info quedan fuera 
+PASA   población: una pasada, protegida, con su estrato de cenit, mirova_vrp y tabla 
+PASA   población: Suomi NPP fuera y contado; MODIS fuera; sin_info contado 
+PASA   brazos: protegida LEJANA, cercano publica y radiante calla 
+PASA   brazos: lejana de la tabla, cercano publica y radiante calla 
+PASA   brazos: sin alertados nadie publica y sinfiltro tampoco 
+PASA   brazos: sinfiltro publica toda pasada con alertado, con su VRP 
+PASA   brazos: magnitud mostrada del brazo es el VRP de la vía (suma de todos) 
+PASA   brazos: distancias desde el record 
+PASA   brazos: pasada sin record de la vía no entra 
+PASA   S1: ventana desde 2026-11-03 OK 
+PASA   S1: desde antes del 2026-11-03 cae 
+PASA   S1 (VS168-01): desde DESPUÉS del 2026-11-03 también cae 
+PASA   S1: pasada fuera de la ventana cae 
+PASA   S1: clave repetida cae 
+PASA   S1: hasta antes de desde cae 
+PASA   S2: summit, far, summit da [True, False, True] 
+PASA   S2: sin pasada de la vía con VRP cae 
+PASA   S2: si la primera pasada no publica en summit, prueba con las siguientes 
+PASA   S2: un predicado que no responde a la clase cae 
+PASA   S3: pasadas de un alertado, radiante y cercano a 0,0051 km o menos 
+PASA   S3: una diferencia de 0,02 km cae 
+PASA   S3: una diferencia de 0,0062 km cae (tolerancia 0,0051) 
+PASA   S3: una diferencia de 0,0048 km pasa 
+PASA   S3: sin pasadas de un alertado cae 
+PASA   S4: radiante tiene la clase del record 
+PASA   S4: una clase distinta cae 
+PASA   S4: sin pasadas con alertados cae 
+PASA   S4 (VS168-10): radiante a 0,0004 km del radio con otra clase se excluye y no cae 
+PASA   S4 (VS168-10): a 0,002 km del radio con otra clase sí cae 
+PASA   S5: PLACEBO K x 1,2 publica igual que K 
+PASA   S5: sin records de K cae (0 de 0 no prueba nada) 
+PASA   S5: si K x 1,2 publica distinto cae 
+PASA   S6 (VS168-08): el placebo de M sin MEJORA y con sustrato pasa, e informa sus pares 
+PASA   S6 (VS168-08): un placebo que da MEJORA cae 
+PASA   S6 (VS168-08): sin sustrato (dos noches) cae aunque no dé MEJORA 
+PASA   S7: cobertura completa OK 
+PASA   S7: una protegida sin dato en 13 (7,7 %) no cae 
+PASA   S7: dos protegidas sin dato en 13 (más del 10 %) cae 
+PASA   S7: población vacía cae 
+PASA   S7: una protegida sin dato en 9 (11,1 %, sobre el umbral del 10 %) cae 
+PASA   S7: far_tabla también decide la cobertura 
+PASA   S7: la lista de SIN DATO va completa (sin truncar) 
+PASA   S10 (VS168-11): sin alertados sin distancias pasa 
+PASA   S10 (VS168-11): una pasada con alertados y sin distancias cae 
+PASA   S10 (VS168-11): brazos deja dist None si un alertado no trae dist_km, y S10 lo ve 
+PASA   S9 (VS168-05): tabla hasta 2 días después del corte pasa 
+PASA   S9 (VS168-05): tabla hasta 1 día después del corte cae 
+PASA   S9 (VS168-05): sin filas de la tabla cae 
+PASA   S8 (VS168-04): mismo régimen, sin cambio 
+PASA   S8 (VS168-04): un commit de los records que cambia pipeline/ marca 
+PASA   S8 (VS168-04): compara contra c42ee0eb7 (un record de otro commit sin cambios contra la base no marca) 
+PASA   S8 (VS168-04): el --commit también se compara 
+PASA   S8 (VS168-04): un sha que git no resuelve marca 
+PASA   S8 (VS168-04): un record sin régimen marca 
+PASA   S8 (VS168-04): un perfil de la vía distinto marca 
+PASA   S8 (VS168-04): un perfil de K distinto marca 
+FALLA  S8 (VS168-04): diff_git ve que c42ee0eb7 contra sí mismo no cambia pipeline/ None
+PASA   S8 (VS168-04): diff_git devuelve None con un sha inexistente 
+PASA   VA168-01: S1 caído, analizar devuelve sólo controles y el corte 
+PASA   S10 (VS168-11): en analizar, una pasada con alertados sin distancias hace caer la lectura 
+PASA   S2: la identidad del predicado caída hace caer S2 
+PASA   VS168-01: antes de la parada (30 y 40) analizar no lee: sólo controles y contadores 
+PASA   VS168-01: antes de la parada no corre S9 
+PASA   S6 (VS168-08): en analizar, S6 sin sustrato hace caer la lectura 
+PASA   S9 (VS168-05): en analizar, con la parada alcanzada la referencia fresca hace caer la lectura 
+PASA   analizar: escena principal con la parada alcanzada, sin controles caídos 
+PASA   VS168-01: el corte que decide es la noche de la parada (recortado desde el 2026-11-20) 
+PASA   S9 y S10 corren con la parada alcanzada 
+PASA   (a): radiante calla la protegida LEJANA que K publica y no cumple 
+PASA   (a): cercano no calla ninguna y cumple 
+PASA   lejanas: cercano publica las 12 far_tabla, radiante 0, K 12 
+PASA   lejanas (VS168-12): far_ocr se informa por brazo y para K 
+PASA   (b): P2-L de radiante contra K gana (calla donde K publica) 
+PASA   (b): P2-L de cercano contra K empata en bloques (publica igual que K) 
+PASA   (b) por valor (VS168-08): cercano calla los neg_pub de K, P2 GANA, silencio acotado y (b) CUMPLE 
+PASA   (c) por valor (VS168-08): el estado de (c) sale del veredicto de M por la tabla de §11.6 
+PASA   (d) por valor (VS168-08): curva sin sustrato da (d) DECIDE NICOLAS y el estado también 
+PASA   N-3: en la ventana P no toca ninguna fila 
+PASA   parada: 12 noches y 25 alertas con la parada de prueba 
+PASA   borde: sin pasadas de borde, estado sin motivo 
+PASA   régimen (S8): sin cambio en la escena 
+PASA   VS168-07: los controles de la curva de K se calculan 
+PASA   mitades: corte en la noche de la mediana (6 de 12 en la primera) 
+PASA   mitades: la primera tiene las noches hasta el corte y la segunda las posteriores 
+PASA   (c): M lee los pares de cercano con el evaluador común 
+PASA   informan: radiante y P-sinfiltro están en la lectura 
+PASA   cableado (VS168-08): P2 PIERDE da (b) NO CUMPLE aunque P2-L GANE 
+PASA   cableado (VS168-08): M EMPEORA da (c) NO CUMPLE 
+PASA   cableado (VS168-08): la curva del brazo REPRODUCE y la de K sin sustrato dan (d) CUMPLE (orden de los argumentos de estado_d_sombra) 
+PASA   cableado: el estado con (b) y (c) en NO CUMPLE es NO CUMPLE 
+PASA   cableado (VS168-08): P2-L PIERDE da (b) NO CUMPLE aunque P2 GANE 
+PASA   (c) (VS168-06): M SIN SUSTRATO en la sombra da (c) DECIDE NICOLAS, no NO CUMPLE 
+PASA   (d) (VS168-07): un control de la curva de K caído lleva (d) a DECIDE NICOLAS 
+PASA   S8 (VS168-04): con la marca de régimen los CUMPLE de (c) y (d) pasan a DECIDE NICOLAS 
+PASA   (a) (VS168-03): una protegida SIN DATO que K publica veta 
+PASA   (a) (VS168-03): una SIN DATO que K calla no veta pero se lista con las otras 
+PASA   (b) sin neg_pub (VS168-08): el silencio queda SIN SUSTRATO, sin lecturas, y el CUMPLE se rotula por falta de evidencia 
+PASA   S8 en analizar (VS168-04): un record de otro régimen marca la lectura y sus CUMPLE de (b) pasan a DECIDE NICOLAS 
+PASA   S8 en analizar: la marca se aplica a los brazos que informan también (no imprimen estado, pero el JSON lo omite) 
+PASA   borde: cercano a 0,003 km dentro del radio es de borde (y la lejana a 0,002 km también) 
+PASA   borde: a 0,02 km dentro no es de borde 
+PASA   borde: a 0,004 km fuera también es de borde 
+PASA   borde: a 0,0045 km fuera también es de borde (umbral 0,005) 
+PASA   borde mixto (VS168-09): la alerta en summit entra, la lejana en summit no 
+PASA   borde mixto (VS168-09): una lejana de borde en far entra 
+PASA   borde: dar vuelta la clase cambia la publicación de cercano 
+PASA   borde: analizar lista las dos pasadas y calcula la vuelta conjunta y la mixta 
+PASA   estado_final: la vuelta conjunta que cambia el estado da DECIDE NICOLAS 
+PASA   estado_final (VS168-09): la vuelta mixta que cambia el estado da DECIDE NICOLAS aunque la conjunta no 
+PASA   estado_final: las vueltas que no lo cambian dejan el estado 
+PASA   estado_final: sin borde, el estado base 
+PASA   criterios: todo favorable cumple 
+PASA   criterios: veta = [('x', 'y')] da NO CUMPLE 
+PASA   criterios: p2k = PIERDE da NO CUMPLE 
+PASA   criterios: p2k = BLOQUEA da NO CUMPLE 
+PASA   criterios: p2k = EMPATE da CUMPLE 
+PASA   criterios: p2k = SIN SUSTRATO da CUMPLE 
+PASA   criterios: silencio = ENCIENDE DE MAS da NO CUMPLE 
+PASA   criterios: silencio = NO RESUELTO da CUMPLE 
+PASA   criterios: p2l = PIERDE da NO CUMPLE 
+PASA   criterios: p2l = BLOQUEA da NO CUMPLE 
+PASA   criterios: p2l = GANA da CUMPLE 
+PASA   criterios: est_c = NO CUMPLE da NO CUMPLE 
+PASA   criterios: est_c = DECIDE NICOLAS da DECIDE NICOLAS 
+PASA   criterios: est_d = DECIDE NICOLAS da DECIDE NICOLAS 
+PASA   criterios: est_d = NO CUMPLE da NO CUMPLE 
+PASA   criterios: cae_curva = True da DECIDE NICOLAS 
+PASA   criterios: NO CUMPLE manda sobre DECIDE NICOLAS 
+PASA   criterios: la curva caída deja (d) en DECIDE NICOLAS aunque est_d cumpla 
+PASA   criterios (S8): con la marca de régimen (b), (c) y (d) CUMPLE pasan a DECIDE NICOLAS y (a) queda 
+PASA   criterios (S8): con la marca de régimen un NO CUMPLE se queda NO CUMPLE 
+PASA   (c) (VS168-06): estado_c_sombra da DECIDE NICOLAS sólo con SIN SUSTRATO 
+PASA   curva: sin sesgo, la ganancia pareja no mueve D y la del cenit lo sube 
+PASA   curva: un sesgo de plataforma x0,3 cae 
+PASA   curva: un instrumento que no es invariante a la escala hace caer la ganancia pareja 
+PASA   curva (VS168-07): los controles corren también para K y ven su sesgo 
+PASA   curva: sin pares los controles dan SIN SUSTRATO y no caen 
+PASA   curva: sin diferencia de cenit no hay pares y no cae 
+PASA   parada: los umbrales son 30 noches y 40 alertas 
+PASA   parada: 30 noches y 40 alertas, alcanzada en la noche 30 
+PASA   parada: 29 noches no alcanza 
+PASA   parada: 39 alertas no alcanza 
+PASA   parada: far y negativos no cuentan como alertas 
+PASA   parada: sin dato no cuenta 
+PASA   parada (VS168-01): la noche N es la PRIMERA con 30 noches y 40 alertas («lo que llegue último») 
+== procedencia
+  hora: 2026-10-30 03:15 UTC | records de origin/main c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d
+  lector sha256 LF da6c2accbc372a197fddea7ba96bc909432cfbb24d9d3caa484f75ca2a52af45 | checkout del lector None
+  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: OK
+  referencia congelada (sha256 LF, sin capas locales): {'cons': '0ebfb20f73f27984d442f728d3efe3cd944d2b7e43e17730aadd086eb1b7dd72', 'ocr': 'dcf78619f885116e84c5a01803f91f415142d66b48db4771ec519b7b72f8cebd'}
+  records (sha256 LF): K {'Lascar': '2ba561accd8445abc21a8238053c8229efa923513c41c10d6a5e08d0a7f98384', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'} | sombra {'Lascar': '621b4f2245bfe8fdd1716b81a8597bc8cd9166bd29e77e8ad750dbf465db4f56', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'}
+== controles (§11.4)
+  S1 OK
+  S2 OK
+  S3 OK
+  S4 OK
+  S5 OK
+  S6 OK
+  S7 OK
+  S10 OK
+
+== parada (§11.8): noches 25 de 30, alertas 24 de 40: NO ALCANZADA; no hay lectura
+PASA   main (VS168-01): antes de la parada sale 5 y escribe controles_sombra_<hasta>_<hora> 
+PASA   main (VS168-01): antes de la parada no hay población, criterios, estado ni lecturas 
+PASA   main (VS168-02): antes de la parada los controles salen sin detalle (ni conteos ni nombres) 
+PASA   main: los contadores de la parada sí salen 
+== procedencia
+  hora: 2026-10-30 03:15 UTC | records de origin/main c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d
+  lector sha256 LF da6c2accbc372a197fddea7ba96bc909432cfbb24d9d3caa484f75ca2a52af45 | checkout del lector None
+  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: OK
+  referencia congelada (sha256 LF, sin capas locales): {'cons': '0ebfb20f73f27984d442f728d3efe3cd944d2b7e43e17730aadd086eb1b7dd72', 'ocr': 'dcf78619f885116e84c5a01803f91f415142d66b48db4771ec519b7b72f8cebd'}
+  records (sha256 LF): K {'Lascar': '2ba561accd8445abc21a8238053c8229efa923513c41c10d6a5e08d0a7f98384', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'} | sombra {'Lascar': '621b4f2245bfe8fdd1716b81a8597bc8cd9166bd29e77e8ad750dbf465db4f56', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'}
+== controles (§11.4)
+  S1 OK: {'desde': '2026-11-03', 'hasta': '2026-11-29', 'fuera_de_ventana': [], 'repetidas': 0}
+  S2 OK: [True, False, True]
+  S3 OK: {'n': 12, 'malos': []}
+  S4 OK: {'n': 36, 'malos': [], 'excluidas_por_redondeo': 0}
+  S5 OK: {'n': 62, 'discordantes': 0}
+  S6 OK: {'pares': 24, 'noches': 12, 'placebo': {'1.2': {'sin_comparador': 'NEUTRO', 'con_comparador': 'NEUTRO'}, '0.8': {'sin_comparador': 'NEUTRO', 'con_comparador': 'NEUTRO'}}}
+  S7 OK: {'far_tabla': {'n': 12, 'sin_dato': 0, 'lista': []}, 'neg_pub': {'n': 12, 'sin_dato': 0, 'lista': []}, 'neg_resto': {'n': 13, 'sin_dato': 0, 'lista': []}, 'pos_bajo': {'n': 12, 'sin_dato': 0, 'lista': []}, 'pos_prot': {'n': 13, 'sin_dato': 1, 'lista': [('Lascar', '2026-11-10 05:00')]}}
+  S10 OK: {'n': 0}
+  S9 OK: {'ultima_tabla': '2026-12-08 05:00:10', 'corte': '2026-11-29'}
+
+== población (§11.2, censo, peso 1)
+  por clase: {'far_tabla': 12, 'neg_pub': 12, 'neg_resto': 13, 'pos_bajo': 12, 'pos_prot': 13}
+  fuera por etiqueta: {} | Suomi NPP fuera: 0
+  cobertura (S7): {'far_tabla': (12, 0), 'neg_pub': (12, 0), 'neg_resto': (13, 0), 'pos_bajo': (12, 0), 'pos_prot': (13, 1)}
+  SIN DATO por nombre: {'pos_prot': [('Lascar', '2026-11-10 05:00')]}
+  alertas de MIROVA sin record de K (informa): 1 {'Lascar': 1}
+
+== parada (§11.8): noches 25 de 25, alertas 24 de 20: ALCANZADA en la noche 2026-11-29; corte que decide 2026-11-29 (recortado: --hasta 2026-11-30)
+
+== régimen (S8, contra c42ee0eb7 en pipeline/): CAMBIO: los CUMPLE de (b), (c) y (d) pasan a DECIDE NICOLAS | {'shas': {'c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d': 123}, 'cambios': {'c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d': 'git no lo resuelve'}, 'perfiles': {}}
+
+== cercano (decide)
+  (a) P1 que veta: 1 [('Lascar', '2026-11-10 05:00')]; protegidas SIN DATO: [('Lascar', '2026-11-10 05:00', 'K publica')]; filas que tocaría N-3 (deben ser 0): 0
+      P1 perdidas 0 de 12, que K publica 0 [] | recall prot [12, 12] bajo [12, 12] | MISSION (informa) GANA
+  (b) P2 contra K GANA (neto -12.0, B 12) | silencio SILENCIO ACOTADO BAJO K | P2-L SIN SUSTRATO (neto +0.0, B 0)
+  (c) M NEUTRO (n 24, salen 0; d -0.3010299956639812 IC [-0.3010299956639812, -0.3010299956639812]; d′ NEUTRO [-0.301029995664, 0.0]) | informa {'cenit': {'z10-20': 'MEJORA', 'z20-30': 'SIN SUSTRATO'}, 'volcan': {'Lascar': 'MEJORA'}, 'canal': {'tabla': 'MEJORA'}, 'clase': {'pos_bajo': 'MEJORA', 'pos_prot': 'MEJORA'}}
+  (d) curva condicionada {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | sin condicionar (informa) {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | K {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)}
+      controles de la curva: {'d0': nan, 'n': 0, 'sesgo_plataforma': False, 'por_plataforma': {'VIIRS_NOAA20': {'mediana_log10': 0.0, 'ic': (0.0, 0.0), 'n': 24, 'factor': 1.0}}, 'ganancia_pareja': 'SIN SUSTRATO', 'ganancia_cenit': 'SIN SUSTRATO'}
+  lejanas (informa): publica 12 de 12 far_tabla [('Lascar', '2026-11-04 07:00', 15.0), ('Lascar', '2026-11-05 07:00', 15.0), ('Lascar', '2026-11-06 07:00', 15.0), ('Lascar', '2026-11-07 07:00', 15.0), ('Lascar', '2026-11-08 07:00', 15.0), ('Lascar', '2026-11-09 07:00', 15.0), ('Lascar', '2026-11-10 07:00', 15.0), ('Lascar', '2026-11-11 07:00', 15.0), ('Lascar', '2026-11-12 07:00', 15.0), ('Lascar', '2026-11-13 07:00', 15.0), ('Lascar', '2026-11-14 07:00', 15.0), ('Lascar', '2026-11-15 07:00', 15.0)] | far_ocr 0 de 0
+  mitades (informa, en lugar de A104): {'corte_noche': '2026-11-16', 'primera': {'M': 'MEJORA', 'P2_K': 'SIN SUSTRATO', 'n': 26}, 'segunda': {'M': 'SIN SUSTRATO', 'P2_K': 'GANA', 'n': 23}}
+  criterios: {'a': 'NO CUMPLE', 'b': 'DECIDE NICOLAS', 'c': 'DECIDE NICOLAS', 'd': 'DECIDE NICOLAS', 'estado': 'NO CUMPLE'}
+
+== radiante (informa, posterior a la lectura)
+  (a) P1 que veta: 2 [('Lascar', '2026-11-05 08:00'), ('Lascar', '2026-11-10 05:00')]; protegidas SIN DATO: [('Lascar', '2026-11-10 05:00', 'K publica')]; filas que tocaría N-3 (deben ser 0): 0
+      P1 perdidas 1 de 12, que K publica 1 [('Lascar', '2026-11-05 08:00', 'tabla', 'K', 1.6)] | recall prot [11, 12] bajo [12, 12] | MISSION (informa) PIERDE PROTEGIDA
+  (b) P2 contra K GANA (neto -12.0, B 12) | silencio SILENCIO ACOTADO BAJO K | P2-L GANA (neto -12.0, B 12)
+  (c) M NEUTRO (n 23, salen 1; d -0.3010299956639812 IC [-0.3010299956639812, -0.3010299956639812]; d′ NEUTRO [-0.301029995664, 0.0]) | informa {'cenit': {'z10-20': 'MEJORA'}, 'volcan': {'Lascar': 'MEJORA'}, 'canal': {'tabla': 'MEJORA'}, 'clase': {'pos_bajo': 'MEJORA', 'pos_prot': 'MEJORA'}}
+  (d) curva condicionada {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | sin condicionar (informa) {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | K {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)}
+      controles de la curva: {'d0': nan, 'n': 0, 'sesgo_plataforma': False, 'por_plataforma': {'VIIRS_NOAA20': {'mediana_log10': 0.0, 'ic': (0.0, 0.0), 'n': 23, 'factor': 1.0}}, 'ganancia_pareja': 'SIN SUSTRATO', 'ganancia_cenit': 'SIN SUSTRATO'}
+  lejanas (informa): publica 0 de 12 far_tabla [] | far_ocr 0 de 0
+  mitades (informa, en lugar de A104): {'corte_noche': '2026-11-16', 'primera': {'M': 'MEJORA', 'P2_K': 'SIN SUSTRATO', 'n': 26}, 'segunda': {'M': 'SIN SUSTRATO', 'P2_K': 'GANA', 'n': 23}}
+
+== P-sinfiltro (informa)
+  (a) P1 que veta: 1 [('Lascar', '2026-11-10 05:00')]; protegidas SIN DATO: [('Lascar', '2026-11-10 05:00', 'K publica')]; filas que tocaría N-3 (deben ser 0): 0
+      P1 perdidas 0 de 12, que K publica 0 [] | recall prot [12, 12] bajo [12, 12] | MISSION (informa) GANA
+  (b) P2 contra K GANA (neto -12.0, B 12) | silencio SILENCIO ACOTADO BAJO K | P2-L SIN SUSTRATO (neto +0.0, B 0)
+  (c) M NEUTRO (n 24, salen 0; d -0.3010299956639812 IC [-0.3010299956639812, -0.3010299956639812]; d′ NEUTRO [-0.301029995664, 0.0]) | informa {'cenit': {'z10-20': 'MEJORA', 'z20-30': 'SIN SUSTRATO'}, 'volcan': {'Lascar': 'MEJORA'}, 'canal': {'tabla': 'MEJORA'}, 'clase': {'pos_bajo': 'MEJORA', 'pos_prot': 'MEJORA'}}
+  (d) curva condicionada {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | sin condicionar (informa) {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | K {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)}
+      controles de la curva: {'d0': nan, 'n': 0, 'sesgo_plataforma': False, 'por_plataforma': {'VIIRS_NOAA20': {'mediana_log10': 0.0, 'ic': (0.0, 0.0), 'n': 24, 'factor': 1.0}}, 'ganancia_pareja': 'SIN SUSTRATO', 'ganancia_cenit': 'SIN SUSTRATO'}
+  lejanas (informa): publica 12 de 12 far_tabla [('Lascar', '2026-11-04 07:00', 15.0), ('Lascar', '2026-11-05 07:00', 15.0), ('Lascar', '2026-11-06 07:00', 15.0), ('Lascar', '2026-11-07 07:00', 15.0), ('Lascar', '2026-11-08 07:00', 15.0), ('Lascar', '2026-11-09 07:00', 15.0), ('Lascar', '2026-11-10 07:00', 15.0), ('Lascar', '2026-11-11 07:00', 15.0), ('Lascar', '2026-11-12 07:00', 15.0), ('Lascar', '2026-11-13 07:00', 15.0), ('Lascar', '2026-11-14 07:00', 15.0), ('Lascar', '2026-11-15 07:00', 15.0)] | far_ocr 0 de 0
+  mitades (informa, en lugar de A104): {'corte_noche': '2026-11-16', 'primera': {'M': 'MEJORA', 'P2_K': 'SIN SUSTRATO', 'n': 26}, 'segunda': {'M': 'SIN SUSTRATO', 'P2_K': 'GANA', 'n': 23}}
+
+== controles de la curva de K (§11.6): {'d0': nan, 'n': 0, 'sesgo_plataforma': False, 'por_plataforma': {'VIIRS_NOAA20': {'mediana_log10': 0.0484550065040282, 'ic': (-0.3010299956639812, 0.3010299956639812), 'n': 24, 'factor': 1.118033988749895}}, 'ganancia_pareja': 'SIN SUSTRATO', 'ganancia_cenit': 'SIN SUSTRATO'}
+
+== lejanas de K (informa): publica 12 de 12 far_tabla [('Lascar', '2026-11-04 07:00', 15.0), ('Lascar', '2026-11-05 07:00', 15.0), ('Lascar', '2026-11-06 07:00', 15.0), ('Lascar', '2026-11-07 07:00', 15.0), ('Lascar', '2026-11-08 07:00', 15.0), ('Lascar', '2026-11-09 07:00', 15.0), ('Lascar', '2026-11-10 07:00', 15.0), ('Lascar', '2026-11-11 07:00', 15.0), ('Lascar', '2026-11-12 07:00', 15.0), ('Lascar', '2026-11-13 07:00', 15.0), ('Lascar', '2026-11-14 07:00', 15.0), ('Lascar', '2026-11-15 07:00', 15.0)] | far_ocr 0 de 0
+
+== borde (§11.5): 0 []; estado con el borde dado vuelta: {}
+
+== PAQUETE en la sombra (§11.7), brazo cercano: NO CUMPLE
+PASA   main: la lectura que decide sale 0 y se llama lectura_sombra_corte_<N> 
+PASA   main: los controles S1 a S10 en verde 
+PASA   main: la población sale de banco_paridad con las clases de la escena 
+PASA   main: radiante rotulado posterior a la lectura 
+PASA   main: referencia y records con sha256 en la salida 
+PASA   main (VS168-04): el lector imprime su propio sha256 y el commit de los records 
+PASA   main: el record de VIIRS 750 de la sombra no entra 
+PASA   main (VS168-03): la protegida SIN DATO que K publica veta a cercano y el paquete no cumple 
+PASA   main: con la regla SN la alerta de 0,04 MW cuenta como negativo limpio (13 neg_resto, no pos_bajo) 
+PASA   main (VS168-12): las alertas de MIROVA sin record de K se informan 
+PASA   main (VS168-13): radiante y P-sinfiltro sin criterios ni estado, en pantalla y en el JSON 
+PASA   main (VS168-02): en la lectura que decide los controles salen con detalle 
+PASA   main: el estado del paquete está en la salida 
+== procedencia
+  hora: 2026-10-30 03:16 UTC | records de origin/main c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d
+  lector sha256 LF da6c2accbc372a197fddea7ba96bc909432cfbb24d9d3caa484f75ca2a52af45 | checkout del lector None
+  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: OK
+  referencia congelada (sha256 LF, sin capas locales): {'cons': '0ebfb20f73f27984d442f728d3efe3cd944d2b7e43e17730aadd086eb1b7dd72', 'ocr': 'dcf78619f885116e84c5a01803f91f415142d66b48db4771ec519b7b72f8cebd'}
+  records (sha256 LF): K {'Lascar': '2ba561accd8445abc21a8238053c8229efa923513c41c10d6a5e08d0a7f98384', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'} | sombra {'Lascar': '621b4f2245bfe8fdd1716b81a8597bc8cd9166bd29e77e8ad750dbf465db4f56', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'}
+
+YA EXISTE lectura_sombra_corte_2026-11-29.txt: el corte 2026-11-29 no se vuelve a leer ni a escribir (§11.8)
+PASA   main (VS168-01): leer otra vez el mismo corte sale 2 y no toca la lectura 
+== procedencia
+  hora: 2026-10-30 03:16 UTC | records de origin/main c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d
+  lector sha256 LF da6c2accbc372a197fddea7ba96bc909432cfbb24d9d3caa484f75ca2a52af45 | checkout del lector None
+  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: OK
+  referencia congelada (sha256 LF, sin capas locales): {'cons': '0ebfb20f73f27984d442f728d3efe3cd944d2b7e43e17730aadd086eb1b7dd72', 'ocr': 'dcf78619f885116e84c5a01803f91f415142d66b48db4771ec519b7b72f8cebd'}
+  records (sha256 LF): K {'Lascar': '2ba561accd8445abc21a8238053c8229efa923513c41c10d6a5e08d0a7f98384', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'} | sombra {'Lascar': '621b4f2245bfe8fdd1716b81a8597bc8cd9166bd29e77e8ad750dbf465db4f56', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'}
+== controles (§11.4)
+  S1 OK: {'desde': '2026-11-03', 'hasta': '2026-11-15', 'fuera_de_ventana': [], 'repetidas': 0}
+  S2 OK: [True, False, True]
+  S3 OK: {'n': 12, 'malos': []}
+  S4 OK: {'n': 36, 'malos': [], 'excluidas_por_redondeo': 0}
+  S5 OK: {'n': 37, 'discordantes': 0}
+  S6 OK: {'pares': 24, 'noches': 12, 'placebo': {'1.2': {'sin_comparador': 'NEUTRO', 'con_comparador': 'NEUTRO'}, '0.8': {'sin_comparador': 'NEUTRO', 'con_comparador': 'NEUTRO'}}}
+  S7 OK: {'far_tabla': {'n': 12, 'sin_dato': 0, 'lista': []}, 'neg_pub': {'n': 0, 'sin_dato': 0, 'lista': []}, 'neg_resto': {'n': 0, 'sin_dato': 0, 'lista': []}, 'pos_bajo': {'n': 12, 'sin_dato': 0, 'lista': []}, 'pos_prot': {'n': 13, 'sin_dato': 1, 'lista': [('Lascar', '2026-11-10 05:00')]}}
+  S10 OK: {'n': 0}
+  S9 OK: {'ultima_tabla': '2026-12-08 05:00:10', 'corte': '2026-11-15'}
+
+== población (§11.2, censo, peso 1)
+  por clase: {'far_tabla': 12, 'pos_bajo': 12, 'pos_prot': 13}
+  fuera por etiqueta: {} | Suomi NPP fuera: 0
+  cobertura (S7): {'far_tabla': (12, 0), 'neg_pub': (0, 0), 'neg_resto': (0, 0), 'pos_bajo': (12, 0), 'pos_prot': (13, 1)}
+  SIN DATO por nombre: {'pos_prot': [('Lascar', '2026-11-10 05:00')]}
+  alertas de MIROVA sin record de K (informa): 1 {'Lascar': 1}
+
+== parada (§11.8): noches 12 de 12, alertas 24 de 20: ALCANZADA en la noche 2026-11-15; corte que decide 2026-11-15 (recortado: --hasta 2026-11-30)
+
+== régimen (S8, contra c42ee0eb7 en pipeline/): CAMBIO: los CUMPLE de (b), (c) y (d) pasan a DECIDE NICOLAS | {'shas': {'c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d': 73}, 'cambios': {'c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d': 'git no lo resuelve'}, 'perfiles': {}}
+
+== cercano (decide)
+  (a) P1 que veta: 1 [('Lascar', '2026-11-10 05:00')]; protegidas SIN DATO: [('Lascar', '2026-11-10 05:00', 'K publica')]; filas que tocaría N-3 (deben ser 0): 0
+  (b) P2 contra K SIN SUSTRATO (neto +0.0, B 0) | silencio SIN SUSTRATO (faltan negativos de alguna clase) | P2-L SIN SUSTRATO (neto +0.0, B 0) | CUMPLE POR FALTA DE EVIDENCIA
+  (c) M NEUTRO (n 24, salen 0; d -0.3010299956639812 IC [-0.3010299956639812, -0.3010299956639812]; d′ NEUTRO [-0.301029995664, 0.0]) | informa {'cenit': {'z10-20': 'MEJORA', 'z20-30': 'SIN SUSTRATO'}, 'volcan': {'Lascar': 'MEJORA'}, 'canal': {'tabla': 'MEJORA'}, 'clase': {'pos_bajo': 'MEJORA', 'pos_prot': 'MEJORA'}}
+  (d) curva condicionada {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | sin condicionar (informa) {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | K {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)}
+      controles de la curva: {'d0': nan, 'n': 0, 'sesgo_plataforma': False, 'por_plataforma': {'VIIRS_NOAA20': {'mediana_log10': 0.0, 'ic': (0.0, 0.0), 'n': 24, 'factor': 1.0}}, 'ganancia_pareja': 'SIN SUSTRATO', 'ganancia_cenit': 'SIN SUSTRATO'}
+  lejanas (informa): publica 12 de 12 far_tabla [('Lascar', '2026-11-04 07:00', 15.0), ('Lascar', '2026-11-05 07:00', 15.0), ('Lascar', '2026-11-06 07:00', 15.0), ('Lascar', '2026-11-07 07:00', 15.0), ('Lascar', '2026-11-08 07:00', 15.0), ('Lascar', '2026-11-09 07:00', 15.0), ('Lascar', '2026-11-10 07:00', 15.0), ('Lascar', '2026-11-11 07:00', 15.0), ('Lascar', '2026-11-12 07:00', 15.0), ('Lascar', '2026-11-13 07:00', 15.0), ('Lascar', '2026-11-14 07:00', 15.0), ('Lascar', '2026-11-15 07:00', 15.0)] | far_ocr 0 de 0
+  mitades (informa, en lugar de A104): {'corte_noche': '2026-11-09', 'primera': {'M': 'MEJORA', 'P2_K': 'SIN SUSTRATO', 'n': 13}, 'segunda': {'M': 'MEJORA', 'P2_K': 'SIN SUSTRATO', 'n': 11}}
+  criterios: {'a': 'NO CUMPLE', 'b': 'DECIDE NICOLAS', 'c': 'DECIDE NICOLAS', 'd': 'DECIDE NICOLAS', 'estado': 'NO CUMPLE'}
+
+== radiante (informa, posterior a la lectura)
+  (a) P1 que veta: 2 [('Lascar', '2026-11-05 08:00'), ('Lascar', '2026-11-10 05:00')]; protegidas SIN DATO: [('Lascar', '2026-11-10 05:00', 'K publica')]; filas que tocaría N-3 (deben ser 0): 0
+  (b) P2 contra K SIN SUSTRATO (neto +0.0, B 0) | silencio SIN SUSTRATO (faltan negativos de alguna clase) | P2-L GANA (neto -12.0, B 12) | CUMPLE POR FALTA DE EVIDENCIA
+  (c) M NEUTRO (n 23, salen 1; d -0.3010299956639812 IC [-0.3010299956639812, -0.3010299956639812]; d′ NEUTRO [-0.301029995664, 0.0]) | informa {'cenit': {'z10-20': 'MEJORA'}, 'volcan': {'Lascar': 'MEJORA'}, 'canal': {'tabla': 'MEJORA'}, 'clase': {'pos_bajo': 'MEJORA', 'pos_prot': 'MEJORA'}}
+  (d) curva condicionada {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | sin condicionar (informa) {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | K {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)}
+      controles de la curva: {'d0': nan, 'n': 0, 'sesgo_plataforma': False, 'por_plataforma': {'VIIRS_NOAA20': {'mediana_log10': 0.0, 'ic': (0.0, 0.0), 'n': 23, 'factor': 1.0}}, 'ganancia_pareja': 'SIN SUSTRATO', 'ganancia_cenit': 'SIN SUSTRATO'}
+  lejanas (informa): publica 0 de 12 far_tabla [] | far_ocr 0 de 0
+  mitades (informa, en lugar de A104): {'corte_noche': '2026-11-09', 'primera': {'M': 'MEJORA', 'P2_K': 'SIN SUSTRATO', 'n': 13}, 'segunda': {'M': 'MEJORA', 'P2_K': 'SIN SUSTRATO', 'n': 11}}
+
+== P-sinfiltro (informa)
+  (a) P1 que veta: 1 [('Lascar', '2026-11-10 05:00')]; protegidas SIN DATO: [('Lascar', '2026-11-10 05:00', 'K publica')]; filas que tocaría N-3 (deben ser 0): 0
+  (b) P2 contra K SIN SUSTRATO (neto +0.0, B 0) | silencio SIN SUSTRATO (faltan negativos de alguna clase) | P2-L SIN SUSTRATO (neto +0.0, B 0) | CUMPLE POR FALTA DE EVIDENCIA
+  (c) M NEUTRO (n 24, salen 0; d -0.3010299956639812 IC [-0.3010299956639812, -0.3010299956639812]; d′ NEUTRO [-0.301029995664, 0.0]) | informa {'cenit': {'z10-20': 'MEJORA', 'z20-30': 'SIN SUSTRATO'}, 'volcan': {'Lascar': 'MEJORA'}, 'canal': {'tabla': 'MEJORA'}, 'clase': {'pos_bajo': 'MEJORA', 'pos_prot': 'MEJORA'}}
+  (d) curva condicionada {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | sin condicionar (informa) {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)} | K {'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 11, 'd': (nan, (nan, nan), 0)}
+      controles de la curva: {'d0': nan, 'n': 0, 'sesgo_plataforma': False, 'por_plataforma': {'VIIRS_NOAA20': {'mediana_log10': 0.0, 'ic': (0.0, 0.0), 'n': 24, 'factor': 1.0}}, 'ganancia_pareja': 'SIN SUSTRATO', 'ganancia_cenit': 'SIN SUSTRATO'}
+  lejanas (informa): publica 12 de 12 far_tabla [('Lascar', '2026-11-04 07:00', 15.0), ('Lascar', '2026-11-05 07:00', 15.0), ('Lascar', '2026-11-06 07:00', 15.0), ('Lascar', '2026-11-07 07:00', 15.0), ('Lascar', '2026-11-08 07:00', 15.0), ('Lascar', '2026-11-09 07:00', 15.0), ('Lascar', '2026-11-10 07:00', 15.0), ('Lascar', '2026-11-11 07:00', 15.0), ('Lascar', '2026-11-12 07:00', 15.0), ('Lascar', '2026-11-13 07:00', 15.0), ('Lascar', '2026-11-14 07:00', 15.0), ('Lascar', '2026-11-15 07:00', 15.0)] | far_ocr 0 de 0
+  mitades (informa, en lugar de A104): {'corte_noche': '2026-11-09', 'primera': {'M': 'MEJORA', 'P2_K': 'SIN SUSTRATO', 'n': 13}, 'segunda': {'M': 'MEJORA', 'P2_K': 'SIN SUSTRATO', 'n': 11}}
+
+== controles de la curva de K (§11.6): {'d0': nan, 'n': 0, 'sesgo_plataforma': False, 'por_plataforma': {'VIIRS_NOAA20': {'mediana_log10': 0.0484550065040282, 'ic': (-0.3010299956639812, 0.3010299956639812), 'n': 24, 'factor': 1.118033988749895}}, 'ganancia_pareja': 'SIN SUSTRATO', 'ganancia_cenit': 'SIN SUSTRATO'}
+
+== lejanas de K (informa): publica 12 de 12 far_tabla [('Lascar', '2026-11-04 07:00', 15.0), ('Lascar', '2026-11-05 07:00', 15.0), ('Lascar', '2026-11-06 07:00', 15.0), ('Lascar', '2026-11-07 07:00', 15.0), ('Lascar', '2026-11-08 07:00', 15.0), ('Lascar', '2026-11-09 07:00', 15.0), ('Lascar', '2026-11-10 07:00', 15.0), ('Lascar', '2026-11-11 07:00', 15.0), ('Lascar', '2026-11-12 07:00', 15.0), ('Lascar', '2026-11-13 07:00', 15.0), ('Lascar', '2026-11-14 07:00', 15.0), ('Lascar', '2026-11-15 07:00', 15.0)] | far_ocr 0 de 0
+
+== borde (§11.5): 0 []; estado con el borde dado vuelta: {}
+
+== PAQUETE en la sombra (§11.7), brazo cercano: NO CUMPLE
+PASA   main (VS168-01): con --hasta posterior lee sólo hasta la noche de la parada y lo dice 
+PASA   main (VS168-01): después del corte nada entra (la protegida SIN DATO del 11-10 sí, la alerta del 11-29 no) 
+== procedencia
+  hora: 2026-10-30 03:17 UTC | records de origin/main c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d
+  lector sha256 LF da6c2accbc372a197fddea7ba96bc909432cfbb24d9d3caa484f75ca2a52af45 | checkout del lector None
+  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: OK
+  referencia congelada (sha256 LF, sin capas locales): {'cons': '42f275690a746489ae5af2a420bef4364bab0ad3d38b7bb4a43a7ef37635cab1', 'ocr': 'dcf78619f885116e84c5a01803f91f415142d66b48db4771ec519b7b72f8cebd'}
+  records (sha256 LF): K {'Lascar': '2ba561accd8445abc21a8238053c8229efa923513c41c10d6a5e08d0a7f98384', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'} | sombra {'Lascar': '621b4f2245bfe8fdd1716b81a8597bc8cd9166bd29e77e8ad750dbf465db4f56', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'}
+== controles (§11.4)
+  S1 OK
+  S2 OK
+  S3 OK
+  S4 OK
+  S5 OK
+  S6 OK
+  S7 OK
+  S10 OK
+  S9 CAE: la referencia no llega a 2 días después de la noche del corte
+
+LECTURA NO LEGIBLE (§11.4): caen ['S9']; no se imprime nada de la población
+PASA   main (VS168-05): con la tabla a 1 día del corte S9 cae, sale 3 y no escribe la lectura del corte 
+PASA   main (VS168-05): con la tabla a 9 días del corte la lectura sí se escribe 
+== procedencia
+  hora: 2026-10-30 03:18 UTC | records de origin/main c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d
+  lector sha256 LF da6c2accbc372a197fddea7ba96bc909432cfbb24d9d3caa484f75ca2a52af45 | checkout del lector None
+  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: OK
+  referencia congelada (sha256 LF, sin capas locales): {'cons': '0ebfb20f73f27984d442f728d3efe3cd944d2b7e43e17730aadd086eb1b7dd72', 'ocr': 'dcf78619f885116e84c5a01803f91f415142d66b48db4771ec519b7b72f8cebd'}
+  records (sha256 LF): K {'Lascar': '2ba561accd8445abc21a8238053c8229efa923513c41c10d6a5e08d0a7f98384', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'} | sombra {'Lascar': '621b4f2245bfe8fdd1716b81a8597bc8cd9166bd29e77e8ad750dbf465db4f56', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'}
+== controles (§11.4)
+  S1 OK
+  S2 CAE: el predicado no responde a la clase o no hay pasada para comprobarlo
+  S3 OK
+  S4 OK
+  S5 OK
+  S6 OK
+  S7 OK
+  S10 OK
+
+LECTURA NO LEGIBLE (§11.4): caen ['S2']; no se imprime nada de la población
+PASA   main: la identidad del predicado distinta de la esperada hace caer S2 y sale 3 
+== procedencia
+  hora: 2026-10-30 03:18 UTC | records de origin/main c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d
+  lector sha256 LF da6c2accbc372a197fddea7ba96bc909432cfbb24d9d3caa484f75ca2a52af45 | checkout del lector None
+  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: OK
+  referencia congelada (sha256 LF, sin capas locales): {'cons': '0ebfb20f73f27984d442f728d3efe3cd944d2b7e43e17730aadd086eb1b7dd72', 'ocr': 'dcf78619f885116e84c5a01803f91f415142d66b48db4771ec519b7b72f8cebd'}
+  records (sha256 LF): K {'Lascar': '2ba561accd8445abc21a8238053c8229efa923513c41c10d6a5e08d0a7f98384', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'} | sombra {'Lascar': '621b4f2245bfe8fdd1716b81a8597bc8cd9166bd29e77e8ad750dbf465db4f56', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'}
+== controles (§11.4)
+  S1 CAE: la ventana no es la del §11.1 o hay claves de pasada repetidas
+  S2 OK
+  S3 OK
+  S4 OK
+  S5 OK
+  S6 OK
+  S7 OK
+  S10 OK
+
+LECTURA NO LEGIBLE (§11.4): caen ['S1']; no se imprime nada de la población
+PASA   main VA168-01: desde 2026-11-02 sale 3 sin nada de la población 
+PASA   main VS168-02: con S1 caído (2026-11-02) no salen conteos ni nombres de pasadas 
+== procedencia
+  hora: 2026-10-30 03:18 UTC | records de origin/main c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d
+  lector sha256 LF da6c2accbc372a197fddea7ba96bc909432cfbb24d9d3caa484f75ca2a52af45 | checkout del lector None
+  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: OK
+  referencia congelada (sha256 LF, sin capas locales): {'cons': '0ebfb20f73f27984d442f728d3efe3cd944d2b7e43e17730aadd086eb1b7dd72', 'ocr': 'dcf78619f885116e84c5a01803f91f415142d66b48db4771ec519b7b72f8cebd'}
+  records (sha256 LF): K {'Lascar': '2ba561accd8445abc21a8238053c8229efa923513c41c10d6a5e08d0a7f98384', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'} | sombra {'Lascar': '621b4f2245bfe8fdd1716b81a8597bc8cd9166bd29e77e8ad750dbf465db4f56', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'}
+== controles (§11.4)
+  S1 CAE: la ventana no es la del §11.1 o hay claves de pasada repetidas
+  S2 OK
+  S3 OK
+  S4 OK
+  S5 OK
+  S6 OK
+  S7 CAE: más del 10 % sin dato en una clase de las que deciden, o población vacía
+  S10 OK
+
+LECTURA NO LEGIBLE (§11.4): caen ['S1', 'S7']; no se imprime nada de la población
+PASA   main VA168-01: desde 2026-11-10 sale 3 sin nada de la población 
+PASA   main VS168-02: con S1 caído (2026-11-10) no salen conteos ni nombres de pasadas 
+== procedencia
+  hora: 2026-10-30 03:18 UTC | records de origin/main c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d
+  lector sha256 LF da6c2accbc372a197fddea7ba96bc909432cfbb24d9d3caa484f75ca2a52af45 | checkout del lector None
+  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: OK
+  referencia congelada (sha256 LF, sin capas locales): {'cons': '0ebfb20f73f27984d442f728d3efe3cd944d2b7e43e17730aadd086eb1b7dd72', 'ocr': 'dcf78619f885116e84c5a01803f91f415142d66b48db4771ec519b7b72f8cebd'}
+  records (sha256 LF): K {'Lascar': '2ba561accd8445abc21a8238053c8229efa923513c41c10d6a5e08d0a7f98384', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'} | sombra {'Lascar': '06ef0b0009bce136f3c338a20bffad65f9cde078adeb9f2f68568e48fddd672e', 'Lastarria': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Isluga': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Tupungatito': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'}
+== controles (§11.4)
+  S1 OK
+  S2 OK
+  S3 OK
+  S4 OK
+  S5 OK
+  S6 OK
+  S7 CAE: más del 10 % sin dato en una clase de las que deciden, o población vacía
+  S10 OK
+
+LECTURA NO LEGIBLE (§11.4): caen ['S7']; no se imprime nada de la población
+PASA   main VS168-02: con S7 caído sale 3, sólo el motivo, sin conteos por clase ni nombres de pasadas 
+== procedencia
+  hora: 2026-10-30 03:18 UTC | records de origin/main c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d
+  lector sha256 LF da6c2accbc372a197fddea7ba96bc909432cfbb24d9d3caa484f75ca2a52af45 | checkout del lector None
+  S0 dependencias del tag s168-v375e-cuerpo-sellado y del sello del lector: CAE: una dependencia no es la del sello ['experiments\\_s162_v375\\e_adenda2\\leer_posicion_v375e.py']
+
+LECTURA NO LEGIBLE (§11.4): caen ['S0']; no se imprime nada de la población
+PASA   main: S0 caído sale 3 sin leer nada 
+usage: probar_sombra.py [-h] --data-k DATA_K --data-sombra DATA_SOMBRA --cons
+                        CONS --ocr OCR --hasta HASTA [--desde DESDE] --commit
+                        COMMIT --dir-salida DIR_SALIDA
+probar_sombra.py: error: the following arguments are required: --commit
+PASA   main (VS168-14): sin --commit no corre 
+PASA   cargar_records: sólo la vía VIIRS 375 dentro de la ventana 
+PASA   cargar_records: sin solo_via entra también la sin_grilla 
+PASA   cargar_records: sha256 del archivo y None si falta 
+
+RESULTADO: 189 de 190

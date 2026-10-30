@@ -1,0 +1,9 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+T_d0 base (8 noches,12 alertas) dir X2 -> (0, ['lectura_sombra_corte_2026-11-11.json', 'lectura_sombra_corte_2026-11-11.txt'])
+T_d1 otra referencia (7 pos_bajo -> RUTINA), MISMO dir X2 -> (0, ['lectura_sombra_corte_2026-11-11.json', 'lectura_sombra_corte_2026-11-11.txt', 'lectura_sombra_corte_2026-11-12.json', 'lectura_sombra_corte_2026-11-12.txt'])
+T_s9a fila tardia solo de MODIS (VIIRS375 sin fila posterior al corte) -> (0, ['lectura_sombra_corte_2026-11-15.json', 'lectura_sombra_corte_2026-11-15.txt'])
+T_s9b sin fila tardia (control: S9 debe caer) -> (0, ['lectura_sombra_corte_2026-11-15.json', 'lectura_sombra_corte_2026-11-15.txt'])
+S9a lectura_sombra_corte_2026-11-15.txt ["  S9 OK: {'ultima_tabla': '2026-12-08 05:00:10', 'corte': '2026-11-15'}"]
+S9b lectura_sombra_corte_2026-11-15.txt ["  S9 OK: {'ultima_tabla': '2026-11-27 06:30:10', 'corte': '2026-11-15'}"]
+T_i 2 noches, umbrales reales -> 3 ['controles_sombra_2026-11-06_20261030T032456538112Z.json', 'controles_sombra_2026-11-06_20261030T032456538112Z.txt']
+['  S6 CAE: el placebo de M da MEJORA, o el comparador no tuvo sustrato', "LECTURA NO LEGIBLE (§11.4): caen ['S6']; no se imprime nada de la población"]
