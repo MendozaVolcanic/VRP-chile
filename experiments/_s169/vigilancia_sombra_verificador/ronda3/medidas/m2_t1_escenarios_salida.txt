@@ -1,0 +1,31 @@
+[ok   ] 01 todo presente: esperado verde, obtenido verde
+[ok   ] 02 dia medio sin MODIS, sin prueba: esperado FALLA, obtenido FALLA
+       FALLA: MODIS 2026-11-04: ningún record de la vía y ninguna prueba de que no hubo pasada
+[ok   ] 03 dia medio sin MODIS, Terra y Aqua sin granulos: esperado verde, obtenido verde
+       NOTA MODIS 2026-11-04: sin records de la vía; miró y no hubo pasada (búsqueda sin gránulos en MODIS_TERRA, MODIS_AQUA)
+[ok   ] 04 dia medio sin MODIS, solo Aqua sin granulos (Terra tuvo granulos de dia): esperado FALLA, obtenido FALLA
+       FALLA: MODIS 2026-11-04: ningún record de la vía y ninguna prueba de que no hubo pasada
+[ok   ] 05 primer dia sin MODIS, sin prueba: esperado FALLA, obtenido FALLA
+       FALLA: MODIS 2026-11-03: ningún record de la vía y ninguna prueba de que no hubo pasada
+[ok   ] 06 ultimo dia sin MODIS, sin prueba: esperado FALLA, obtenido FALLA
+       FALLA: MODIS 2026-11-05: ningún record de la vía y ninguna prueba de que no hubo pasada
+[ok   ] 07 prueba de otro dia no vale: esperado FALLA, obtenido FALLA
+       FALLA: MODIS 2026-11-04: ningún record de la vía y ninguna prueba de que no hubo pasada
+[ok   ] 08 otro tipo de incidencia no es prueba: esperado FALLA, obtenido FALLA
+       FALLA: MODIS 2026-11-04: ningún record de la vía y ninguna prueba de que no hubo pasada
+[ok   ] 09 V750 y V375 vacios el mismo dia (SNPP retirada): catalogo vacio: esperado FALLA, obtenido FALLA
+       NOTA VIIRS750 2026-11-04: sin records de la vía; miró y no hubo pasada (búsqueda sin gránulos en VIIRS_NOAA20_750, VIIRS_NOAA21_750)
+       NOTA VIIRS375 2026-11-04: sin records de la vía; miró y no hubo pasada (búsqueda sin gránulos en VIIRS_NOAA20, VIIRS_NOAA21)
+       FALLA: 2026-11-04: sin pasada a la vez en VIIRS750, VIIRS375: catálogo de CMR vacío, no la órbita
+[ok   ] 10 solo V375 vacio con NOAA20 y NOAA21 sin granulos y SNPP retirada: NOTA: esperado verde, obtenido verde
+       NOTA VIIRS375 2026-11-04: sin records de la vía; miró y no hubo pasada (búsqueda sin gránulos en VIIRS_NOAA20, VIIRS_NOAA21)
+[ok   ] 11 solo V375 vacio, NOAA21 si tuvo granulos: esperado FALLA, obtenido FALLA
+       FALLA: VIIRS375 2026-11-04: ningún record de la vía y ninguna prueba de que no hubo pasada
+[ok   ] 12 dia con solo un K es dia perdido: esperado FALLA, obtenido FALLA
+       FALLA: MODIS 2026-11-04: ningún record de la vía y ninguna prueba de que no hubo pasada
+[ok   ] 13 dias anteriores a la fecha minima no se juzgan (ini=2026-10-30): esperado verde, obtenido verde
+[ok   ] 14 ventana de un solo dia, MODIS falta: esperado FALLA, obtenido FALLA
+       FALLA: MODIS 2026-11-03: ningún record de la vía y ninguna prueba de que no hubo pasada
+[ok   ] 15 corrida que no escribio nada (todo con processed_utc anterior): esperado FALLA, obtenido FALLA
+       FALLA: ningún record de la vía escrito en esta corrida: la corrida no produjo nada
+escenarios distintos de lo esperado: 0 de 15
