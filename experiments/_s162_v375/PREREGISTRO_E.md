@@ -699,3 +699,28 @@ texto:
 | VA168-06 V375-C midió la ROI sólo en detección y una mediana de magnitud | 1 | dicho: se renuncia a atribuir a la ROI la M de §9.5 y la curva |
 | VA168-07 C8 pasa con 0 de 0; «por construcción» usa el cenit de la lista | 1 | en la lectura se informa cuántas pasadas con K entraron a C8; si son 0, C8 no prueba nada y se dice |
 | VA168-08 redondeo de 0,01 km del cercano en la sombra | 1 | va al pre-registro del lector de la sombra |
+
+## 10. Nota posterior a la lectura (S168, 2026-10-30): decisión de Nicolás sobre el brazo de la sombra
+
+**Escrita después de la lectura retrospectiva** (`experiments/_s168/v375e_lectura_lejana/INFORME.md`, commit
+`92b3b4208`). No cambia nada de lo sellado (§1 a §9): la regla de posición sellada eligió **cercano** (único brazo que
+pasa el veto) y §9.8 ya decía que la sombra lee el brazo que eligió la retrospectiva.
+
+Decisión de Nicolás (2026-10-30, ~00:20 UTC, en el chat de la coordinadora S169, relayada por ella), frase textual:
+**«Cercano decide»**, en respuesta a «¿Qué brazo de posición lleva V375-E a la sombra?», con la opción «cercano decide
+en la sombra, como dice la regla sellada, y radiante se informa al lado, rotulado como posterior a la lectura».
+
+Queda así:
+- En la sombra, **cercano decide** el §5.4 (a) a (d), con el lector de la sombra (§9.8), que se escribe, se prueba con
+  mutaciones y pasa por un verificador limpio y por Nicolás antes de abrir datos de la ventana P.
+- **Radiante se informa al lado** con el rótulo «posterior a la lectura»: la vía de `pipeline/` hoy publica con radiante,
+  y el costo de cercano en las pasadas lejanas (104 de 329 contra 13 de radiante en la retrospectiva, VL168-01 y 04) se
+  sigue mirando. La línea de radiante no decide nada.
+- Pico no se lee en la sombra (en la retrospectiva dio lo mismo que radiante en todas las lecturas).
+
+Lo que la sombra guarda para calcular cercano sin tocar `pipeline/` (comprobado contra `origin/main` `c42ee0eb7`): cada
+record de la vía trae en `anomaly_pixels` todos los alertados con `fila`, `col` y `dist_km` desde el cráter, redondeada a
+0,01 km (`pipeline/mirova_v750_codigo.py` l. 726 a 732), y el almacén no los filtra, ni los borra, ni les aplica el tope por cúmulo a un record con
+`via_codigo_mirova` (`pipeline/store.py` l. 362, 401 y 455). Cercano es el menor `dist_km`; el redondeo sólo puede cambiar la
+clase cuando ese mínimo queda a menos de 0,005 km del radio interior (VA168-08), y el lector de la sombra tiene que
+contar esos casos y decir cómo los trata antes de leer.
