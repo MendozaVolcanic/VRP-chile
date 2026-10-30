@@ -723,4 +723,123 @@ record de la vía trae en `anomaly_pixels` todos los alertados con `fila`, `col`
 0,01 km (`pipeline/mirova_v750_codigo.py` l. 726 a 732), y el almacén no los filtra, ni los borra, ni les aplica el tope por cúmulo a un record con
 `via_codigo_mirova` (`pipeline/store.py` l. 362, 401 y 455). Cercano es el menor `dist_km`; el redondeo sólo puede cambiar la
 clase cuando ese mínimo queda a menos de 0,005 km del radio interior (VA168-08), y el lector de la sombra tiene que
-contar esos casos y decir cómo los trata antes de leer.
+contar esos casos y decir cómo los trata antes de leer (lo hace §11.5).
+
+## 11. El lector de la sombra (S168, 2026-10-30)
+
+Estado: **BORRADOR, SIN SELLAR**. Escrito antes de que exista ningún dato de la ventana P (la primera corrida de la
+sombra con ventana es el 2026-11-03 a las 15:00 UTC). Cumple lo que pide §9.8 con la decisión de §10. Código:
+`experiments/_s168/v375e_sombra/leer_sombra_v375e.py`; batería y nulo en la misma carpeta. Ningún dato de la ventana P
+se abre hasta que la coordinadora se lo lleve a Nicolás con el verificador.
+
+### 11.1 Qué lee
+
+- **Records de K**: los VIIRS 375 nocturnos de `data/mirova_equivalent/` de los 11 Tier A (lo que publica producción).
+  **Records de la vía**: los VIIRS 375 de `data/sombra_codigo_mirova/` con `via_codigo_mirova` igual a `True`, pareados
+  con el de K por volcán, sensor y `datetime_utc`. Las dos carpetas se leen de un commit de `origin/main` que el lector
+  recibe y escribe en su salida, junto con el sha256 de cada JSON.
+- **Referencia de MIROVA**: el consolidado y el OCR de Mirova-v1, bajados por el lector o pasados por ruta, **congelados
+  por sha256 en cada corte** (§3.3), sin las capas locales (la historia recuperada y el respaldo del 2026-04-08 son
+  anteriores a la ventana P y no aportan filas en ella). Pareo a 120 s, regla D-9 en modo SN y protegida en lectura A,
+  igual que la retrospectiva (`experiments/_s159/portes/01_poblacion.py`, `scripts/banco_paridad.py`).
+- **Ventana P**: desde el 2026-11-03 (el lector se niega a leer antes) hasta la fecha del corte, que se pasa por línea de
+  comandos. Sin Suomi NPP (§3.3): si aparece un record de `VIIRS_SNPP` se cuenta y se deja fuera.
+
+### 11.2 Población, clases y pesos
+
+Las etiquetas de `banco_paridad.etiquetar` sobre los records de K: `pos` con protegida (lectura A, 1 MW o más) es
+`pos_prot`; el resto de `pos` es `pos_bajo` (en la ventana P toda alerta decide: es posterior al 2026-06-13, A119);
+`neg_limpio` es `neg_pub` si K publica y `neg_resto` si no; `far_ref` con una fila `FALSO_POSITIVO` de la tabla es
+`far_tabla`, y la que sólo trae filas del OCR es `far_ocr` (informa). `minima`, `sin_geometria` y `sin_info` se cuentan y
+quedan fuera, como en la retrospectiva. **No hay muestreo: toda pasada pesa 1** (censo). La regla N-3 (§8.13) no puede
+aplicar en la ventana P (es para antes del 2026-10-09); el lector la conserva y cuenta cuántas filas toca, que deberían ser 0.
+
+### 11.3 Brazos
+
+- **Cercano decide** (§10): la vía con la distancia del alertado más cercano al cráter (`distancias_desde_record` y
+  `variante` del lector sellado), por el predicado del tablero con node.
+- **Radiante informa**, rotulado «posterior a la lectura»: el record de la vía tal como se guardó.
+- **P-sinfiltro informa**: la vía publicando toda pasada con algún alertado.
+- **K** es el control: lo que publica el tablero con el record de producción, con su magnitud mostrada.
+- Pico no se lee.
+
+### 11.4 Controles (si cae uno: sale 3, «LECTURA NO LEGIBLE», y no se imprime ni se escribe nada de la población)
+
+Arreglo de VA168-01: todos los controles se calculan antes de imprimir nada de la población, y la salida con controles
+caídos lleva sólo procedencia y controles. Los controles son:
+
+- **S0 procedencia**: el sha256 (con fin de línea LF) del lector sellado `leer_posicion_v375e.py`, de `evaluar.py`, de
+  `curva_cenit.py` y de `scripts/evaluador_comun.py` son los del tag `s168-v375e-cuerpo-sellado`. Si no, ni se cargan.
+- **S1 ventana**: el corte no empieza antes del 2026-11-03, ningún record usado queda fuera de la ventana y las claves de
+  pasada (volcán, sensor y hora) no se repiten.
+- **S2 predicado**: el control de identidad del predicado de `banco_paridad` (`control_identidad_predicado`) pasa, y en
+  una pasada real de la vía con publicación el predicado responde a `distance_class` en las dos direcciones (summit
+  publica, far no, de vuelta a summit publica). Sin ninguna pasada así, S2 no se puede comprobar y cae.
+- **S3 un alertado**: en las pasadas con un solo alertado, radiante y cercano difieren en 0,0051 km o menos (el redondeo
+  de las dos distancias), con al menos un caso.
+- **S4 radiante es el record**: la variante radiante tiene la misma `distance_class` que el record guardado en todas las
+  pasadas con alertados.
+- **S5 PLACEBO** (C8): K con el VRP x 1,2 publica igual que K en todas las pasadas, **con al menos una** pasada con
+  record de K (VA168-07).
+- **S6 placebo de M** (C9): K x 1,2 y x 0,8 con el comparador no da MEJORA.
+- **S7 cobertura** (A108): las pasadas sin record de la vía (o con la vía en `"sin_grilla"`) son SIN DATO y se listan
+  por nombre; si en alguna clase de las que deciden (`pos_prot`, `pos_bajo`, `neg_pub`, `neg_resto`, `far_tabla`) pasan
+  del 10 %, cae.
+
+### 11.5 El borde del radio (VA168-08)
+
+Una pasada es **de borde** si el cercano queda a menos de 0,005 km del `inner_radius_km` del volcán, porque ahí el
+redondeo a 0,01 km puede cambiar la clase. Se tratan con la regla inclusiva sobre el valor redondeado (summit si es igual
+o menor), como la prueba de la sombra, y se listan por nombre. El lector repite todo el §11.7 con la clase de esas
+pasadas dada vuelta; **si el estado del paquete cambia, el paquete pasa a DECIDE NICOLÁS**.
+
+### 11.6 Lecturas
+
+Cada una para cercano (decide), radiante (informa) y P-sinfiltro (informa), contra K, con las funciones sin cambios de
+`evaluar.py` y del lector sellado:
+
+- **(a)** P1: protegidas que K publica y el brazo calla, por nombre. No se corre la regla de posición (§9.8), así que no
+  hay «pérdidas comunes»: toda protegida perdida que K publica veta.
+- **(b)** P2 contra K por la prueba de signos por bloque noche-volcán, silencio en negativos limpios, y P2-L (sólo
+  `far_tabla`, error = publicar).
+- **(c)** M de §9.5: `evaluador_comun.decidir_estrato` en modo «decide» sobre toda la ventana, con los cortes por cenit,
+  volcán, canal y clase en modo «informa».
+- **(d)** la curva de §9.6 con `curva_cenit` (condicionada decide, sin condicionar informa) y su estado con
+  `estado_d_sombra`, más los controles de la curva del §4 (VA168-02, abajo).
+- **Lejanas** (VL168-01 y 04, informa): cuántas `far_tabla` publica cada brazo y K, por nombre. Lo correcto es no
+  publicar; no decide nada.
+- **MISSION** informa (§9.7).
+
+**A104 en una ventana sin tramos**: la ventana P es un solo régimen (sin Suomi NPP, después de #535 y del hito del OCR),
+así que la marca A104 de §8.5 y §9.5 no aplica. En su lugar se informa, sin decidir, la M y el P2 de la primera mitad de
+las noches contra la segunda (mitad por fecha de noche: la noche de la mediana va a la primera).
+
+**Controles de la curva del §4 (VA168-02)**, sobre las pasadas con alerta de MIROVA del brazo y de K:
+- nulo de cenit parecido: ya está dentro de `curva_cenit.veredicto` (NULO SESGADO);
+- sesgo de plataforma (`curva_cenit.sesgo_plataforma`): si da SESGADO para el brazo, (d) pasa a DECIDE NICOLÁS;
+- ganancia pareja (x 1,2 a todas las pasadas del brazo): la mediana de D no se mueve más de 0,01 en log10; si se mueve,
+  el instrumento está roto y (d) pasa a DECIDE NICOLÁS;
+- ganancia que crece con el cenit (1 + 0,01 por grado sobre 20°): la mediana de D tiene que subir; si no sube, la curva no
+  ve el cenit y (d) pasa a DECIDE NICOLÁS.
+Con la curva en SIN SUSTRATO estos controles se informan y no cambian nada (el estado ya es DECIDE NICOLÁS).
+
+### 11.7 Regla del paquete en la sombra
+
+Para cercano: (a) CUMPLE si no hay ninguna protegida que K publica y cercano calla, si no NO CUMPLE; (b) y (c) como en
+la tabla de §9.7; (d) el `estado_d_sombra` de §9.7 con la curva condicionada, llevado a DECIDE NICOLÁS por los
+controles de §11.6. **Estado**: NO CUMPLE si algún criterio no cumple; si no, DECIDE NICOLÁS si alguno lo pide (o si lo
+pide el borde, §11.5); si no, CUMPLE. Junto con la retrospectiva (CUMPLE, falta la sombra, con cercano), un CUMPLE de la
+sombra es «el paquete cumple» del §5.4, y la adopción (PD4) sigue siendo decisión de Nicolás con A45.
+
+### 11.8 Parada (§3.3)
+
+El lector cuenta en cada corte las **noches** (fechas de noche con al menos una pasada de la población con dato) y las
+**alertas que deciden** (pasadas `pos_prot` y `pos_bajo` con dato). La parada se alcanza cuando hay 30 noches **y** 40
+alertas («lo que llegue último»). Antes de la parada la salida se rotula **«PROVISIONAL, no decide»**, aunque imprima
+todo. Si a las 30 noches no hay 40 alertas, la decisión de seguir o de leer con lo que haya es de Nicolás (§5.4). Cada
+corte deja en su salida el sha256 de la referencia y de los records, y no se borra: un corte nuevo se agrega al lado.
+
+### 11.9 Lo que este lector no hace
+
+No toca `pipeline/`, `data/` ni `frontend/`, no despacha nada y no corre la regla de posición. No lee MODIS ni VIIRS 750
+(sus pre-registros tienen sus propios lectores). No lee el día.
