@@ -32,6 +32,7 @@ sys.path.insert(0, str(RAIZ))
 sys.path.insert(0, str(RAIZ / "scripts"))
 
 RES = []
+CAIDAS = []      # VL169-02: excepciones dentro de una sección; la batería sale 2 si hay alguna
 COMMIT = "c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d"
 
 
@@ -75,12 +76,14 @@ def seguro(o):
 
 @contextlib.contextmanager
 def seccion(nombre):
-    """Una excepción dentro de la sección se registra como FALLA con su nombre (no cae la batería entera). La carga del
-    lector queda fuera de toda sección: una mutación que rompe la importación sigue siendo CAÍDA."""
+    """Una excepción dentro de la sección se registra como CAÍDA con su nombre (ronda 2, VL169-02): no es una aserción
+    fallida, y la batería sale 2 aunque las demás secciones sigan corriendo. Así el nulo cuenta como ATRAPADA sólo la
+    mutación que una aserción ve sin que nada se caiga. La carga del lector queda fuera de toda sección."""
     try:
         yield
     except Exception as e:      # noqa: BLE001
-        chk(f"sección «{nombre}» sin excepción", False, repr(e)[:300])
+        CAIDAS.append(nombre)
+        print(f"CAE    sección «{nombre}»: {repr(e)[:300]}", flush=True)
 
 
 class Proxy:
@@ -202,13 +205,29 @@ def main(argv=None):
         LS.SHA_DEPS[clave0] = viejo
         chk("S0: con un sha distinto no carga ninguna", d2 is None and len(m2) == 1, m2)
         chk("S0 (VS168-04): el sello del lector fija banco_paridad, clase_mirova, la referencia, auto_audit_weekly, "
-            "la calidad, el cargador del CSV, diurno y el index.html",
+            "la calidad, el cargador del CSV, diurno, el index.html y (VL169-06) store, profile, f5_core y el perfil",
             {p.name for p in LS.SHA_SELLO_LECTOR} == {"banco_paridad.py", "clase_mirova.py",
                                                         "referencia_mirova_unificada.py", "auto_audit_weekly.py",
                                                         "calidad_referencia_mirova.py", "mirova_csv_loader.py",
-                                                        "diurno.py", "index.html"}, sorted(p.name for p in LS.SHA_SELLO_LECTOR))
-        for nom in ("banco_paridad.py", "index.html"):
-            cl = next(p for p in LS.SHA_SELLO_LECTOR if p.name == nom)
+                                                        "diurno.py", "index.html", "store.py", "profile.py",
+                                                        "f5_core.py", "mirova_equivalent.yaml"},
+            sorted(p.name for p in LS.SHA_SELLO_LECTOR))
+        import os
+        vp = os.environ.get("VRP_PROFILE")
+        os.environ["VRP_PROFILE"] = "experimental"
+        d4, m4 = LS.cargar_deps()
+        chk("S0 (VL169-06): VRP_PROFILE con otro perfil no carga nada", d4 is None and "VRP_PROFILE" in m4, m4)
+        os.environ.pop("VRP_PROFILE", None)
+        d5, _ = LS.cargar_deps()
+        chk("S0 (VL169-06): sin VRP_PROFILE el lector la fija en mirova_equivalent",
+            d5 is not None and os.environ.get("VRP_PROFILE") == "mirova_equivalent", os.environ.get("VRP_PROFILE"))
+        if vp is not None:
+            os.environ["VRP_PROFILE"] = vp
+        for nom in ("banco_paridad.py", "index.html", "store.py"):
+            cl = next((p for p in LS.SHA_SELLO_LECTOR if p.name == nom), None)
+            if cl is None:          # que una mutación que quita el archivo no deje sin cargar el resto de la batería
+                chk(f"S0 (VS168-04): {nom} está en el sello del lector", False)
+                continue
             vs = LS.SHA_SELLO_LECTOR[cl]
             LS.SHA_SELLO_LECTOR[cl] = "0" * 64
             d3, m3 = LS.cargar_deps()
@@ -389,12 +408,37 @@ def main(argv=None):
         ok8b, d8b = LS.control_s8(rk_ok + [dict(regimen=dict(REG_K, codigo_sha=otro))], rv_ok, COMMIT,
                                   lambda x, y: ["pipeline/process_viirs.py"] if y == otro else [])
         chk("S8 (VS168-04): un commit de los records que cambia pipeline/ marca", not ok8b and otro in d8b["cambios"], d8b)
-        chk("S8 (VS168-04): compara contra c42ee0eb7 (un record de otro commit sin cambios contra la base no marca)",
+        chk("S8 (VS168-04): compara contra la base (un record de otro commit sin cambios contra la base no marca)",
             LS.control_s8(rk_ok + [dict(regimen=dict(REG_K, codigo_sha=otro))], rv_ok, COMMIT,
                           lambda x, y: [] if x == COMMIT else ["x"])[0])
         chk("S8 (VS168-04): el --commit también se compara",
             not LS.control_s8(rk_ok, rv_ok, otro, lambda x, y: ["pipeline/x.py"] if y == otro else [])[0])
-        chk("S8 (VS168-04): un sha que git no resuelve marca", not LS.control_s8(rk_ok, rv_ok, COMMIT, lambda x, y: None)[0])
+        chk("S8 (VS168-04): un sha que git no resuelve marca",
+            not LS.control_s8(rk_ok + [dict(regimen=dict(REG_K, codigo_sha=otro))], rv_ok, COMMIT, lambda x, y: None)[0])
+        # ronda 2, precisión de la coordinadora: la base es el codigo_sha de la vía de la primera noche
+        A_, B_ = "a" * 40, "b" * 40
+
+        def via_n(*pares):
+            return [dict(datetime_utc=h, regimen=dict(REG_VIA, codigo_sha=x)) for h, x in pares]
+        chk("S8 (base de la ventana): la base es el codigo_sha del primer record de la vía de la primera noche",
+            LS.base_regimen(via_n(("2026-11-05 05:00", B_), ("2026-11-03 06:00", "c" * 40), ("2026-11-03 05:00", A_)))
+            == A_)
+        cambia = lambda x, y: ["pipeline/mirova_v750_codigo.py"] if {x, y} == {A_, B_} else []
+        ok_m, d_m = LS.control_s8([dict(regimen=dict(REG_K, codigo_sha=A_))],
+                                  via_n(("2026-11-03 05:00", A_), ("2026-11-04 05:00", A_), ("2026-11-05 05:00", A_)), A_,
+                                  cambia)
+        chk("S8 (base de la ventana): una ventana con el mismo régimen todas las noches no marca",
+            ok_m and d_m["base"] == A_ and not d_m["cambios"], d_m)
+        ok_c, d_c = LS.control_s8([dict(regimen=dict(REG_K, codigo_sha=A_))],
+                                  via_n(("2026-11-03 05:00", A_), ("2026-11-04 05:00", B_), ("2026-11-05 05:00", A_)), A_,
+                                  cambia)
+        chk("S8 (base de la ventana): si cambia una noche del medio, marca", not ok_c and B_ in d_c["cambios"], d_c)
+        ok_s, d_s = LS.control_s8([dict(regimen=dict(REG_K, codigo_sha=A_))], via_n(("2026-11-03 05:00", A_)), A_,
+                                  lambda x, y: ["scripts/run_pipeline.py"] if x == LS.SELLO_REGIMEN else [])
+        chk("S8 (base de la ventana): c42ee0eb7 contra la base se informa sin marcar",
+            ok_s and d_s["informa_c42ee0eb7_contra_base"] == ["scripts/run_pipeline.py"], d_s)
+        chk("S8 (base de la ventana): sin records de la vía no hay base y marca",
+            not LS.control_s8(rk_ok, [], COMMIT, sin_cambio)[0])
         chk("S8 (VS168-04): un record sin régimen marca", not LS.control_s8(rk_ok + [{}], rv_ok, COMMIT, sin_cambio)[0])
         chk("S8 (VS168-04): un perfil de la vía distinto marca",
             not LS.control_s8(rk_ok, [dict(regimen=dict(REG_VIA, perfil="mirova_equivalent"))], COMMIT, sin_cambio)[0])
@@ -403,6 +447,54 @@ def main(argv=None):
         chk("S8 (VS168-04): diff_git ve que c42ee0eb7 contra sí mismo no cambia pipeline/",
             LS.diff_git(COMMIT, COMMIT) == [], LS.diff_git(COMMIT, COMMIT))
         chk("S8 (VS168-04): diff_git devuelve None con un sha inexistente", LS.diff_git(COMMIT, "0" * 40) is None)
+        chk("S8 (VL169-04): las rutas que compara son pipeline/, volcanoes.yaml, run_pipeline.py y el workflow de la "
+            "sombra", LS.RUTAS_REGIMEN == ("pipeline/", "volcanoes.yaml", "scripts/run_pipeline.py",
+                                         ".github/workflows/sombra-codigo-mirova.yml"), LS.RUTAS_REGIMEN)
+        chk("S8 (VL169-05): c42ee0eb7 se resuelve en este checkout (nombres_git contra sí mismo da vacío)",
+            LS.nombres_git(COMMIT, COMMIT) == [])
+        gr0 = ("volcanes:\n  Lascar: {epsg: 32719, x0: 629801.4, y0: 7414948.7, centro_lat: -23.37058, "
+               "centro_lon: -67.73061, roi_v750: def}\n")
+        versiones = {
+            "pipeline/grillas_mirova.yaml": (gr0, gr0.replace("roi_v750: def", "roi_v750: r5x5")),
+            "pipeline/mirova_v750_codigo.py": ('def f(x):\n    """doc."""\n    return x + 1  # suma\n',
+                                               'def f(x):\n    """otro docstring."""\n    # comentario nuevo\n    return x + 1\n'),
+            "pipeline/profiles/experimental.yaml": ("a: 1\n", "a: 2\n"),
+        }
+
+        def fake(vers):
+            return (lambda a_, b_: list(vers)), (lambda rev, ruta: vers[ruta][0 if rev == COMMIT else 1])
+        nb, mo = fake(versiones)
+        for nom, ruta in (("un cambio sólo en roi_v750", "pipeline/grillas_mirova.yaml"),
+                          ("sólo docstring y comentario en un .py", "pipeline/mirova_v750_codigo.py"),
+                          ("un perfil ajeno", "pipeline/profiles/experimental.yaml")):
+            nb1, mo1 = fake({ruta: versiones[ruta]})
+            chk(f"S8 (VL169-03): {nom} no marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb1, mostrar=mo1) == [],
+                LS.diff_git(COMMIT, "f" * 40, nombres=nb1, mostrar=mo1))
+        for nom, ruta, nuevo in (
+                ("un cambio en x0 de la grilla", "pipeline/grillas_mirova.yaml", gr0.replace("x0: 629801.4", "x0: 629802.4")),
+                ("una clave nueva en la grilla", "pipeline/grillas_mirova.yaml", gr0.replace("roi_v750: def", "roi_v750: def, z: 1")),
+                ("un volcán nuevo en la grilla", "pipeline/grillas_mirova.yaml",
+                 gr0 + "  Isluga: {epsg: 32719, x0: 1.0, y0: 2.0, centro_lat: 0, centro_lon: 0}\n"),
+                ("una grilla ilegible", "pipeline/grillas_mirova.yaml", "volcanes: [: :\n"),
+                ("un cambio de código en un .py de la vía", "pipeline/mirova_v750_codigo.py",
+                 'def f(x):\n    """doc."""\n    return x + 2\n'),
+                ("un .py que no se puede leer", "pipeline/mirova_v750_codigo.py", "def f(:\n"),
+                ("un cambio en mirova_equivalent.yaml", "pipeline/profiles/mirova_equivalent.yaml", "a: 2\n"),
+                ("un cambio en sombra_codigo_mirova.yaml", "pipeline/profiles/sombra_codigo_mirova.yaml", "a: 2\n"),
+                ("un cambio en volcanoes.yaml", "volcanoes.yaml", "b: 2\n"),
+                ("un cambio en el workflow de la sombra", ".github/workflows/sombra-codigo-mirova.yml", "c: 2\n"),
+                ("un cambio de código en run_pipeline.py", "scripts/run_pipeline.py", "x = 2\n")):
+            vv = dict(versiones)
+            viejo_def = "x = 1\n" if ruta.endswith(".py") else "a: 1\n"
+            vv[ruta] = (vv[ruta][0] if ruta in vv else viejo_def, nuevo)
+            nb2, mo2 = fake(vv)
+            chk(f"S8 (VL169-03 y 04): {nom} marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb2, mostrar=mo2) == [ruta],
+                LS.diff_git(COMMIT, "f" * 40, nombres=nb2, mostrar=mo2))
+        vn = dict(versiones)
+        vn["pipeline/nuevo.py"] = (None, "x = 1\n")
+        nb3, mo3 = (lambda a_, b_: list(vn)), (lambda rev, ruta: vn[ruta][0 if rev == COMMIT else 1])
+        chk("S8 (VL169-03): un .py nuevo en pipeline/ marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb3, mostrar=mo3)
+            == ["pipeline/nuevo.py"])
 
     # ---- analizar: VA168-01, con un control caído no sale nada de la población
     with seccion("analizar: VA168-01, con un control caído no sale nada de la población"):
@@ -410,7 +502,8 @@ def main(argv=None):
                                    diff_fn=sin_cambio)
         res_f = seguro(res_f)
         chk("VA168-01: S1 caído, analizar devuelve sólo controles y el corte",
-            fal_f == ["S1"] and set(res_f) == {"controles", "corte", "hasta_pedido", "parada_alcanzada"},
+            fal_f == ["S1"] and set(res_f) == {"controles", "corte", "hasta_pedido", "parada_alcanzada", "parada"}
+            and res_f["parada"]["noches"] == 12 and not res_f["parada_alcanzada"],
             (fal_f, list(res_f)))
         via10 = dict(via)
         k10 = (far1["volcan"], far1["sensor"], far1["hora_utc"])
@@ -419,7 +512,7 @@ def main(argv=None):
                                      diff_fn=sin_cambio)
         res_10 = seguro(res_10)
         chk("S10 (VS168-11): en analizar, una pasada con alertados sin distancias hace caer la lectura",
-            fal_10 == ["S10"] and "parada" not in res_10, fal_10)
+            fal_10 == ["S10"] and "brazos" not in res_10, fal_10)
         res_i, fal_i = LS.analizar(pob, via, kfull, inner, publicar, deps, "2026-11-03", "2026-11-20", identidad_ok=False,
                                    commit=COMMIT, diff_fn=sin_cambio)
         res_i = seguro(res_i)
@@ -744,10 +837,23 @@ def main(argv=None):
             with open(t / "ocr.csv", "w", newline="", encoding="utf-8") as fh:
                 csv.writer(fh).writerow(cab + ["Nota_Validacion"])
 
-            def correr(dsal, *extra, hasta="2026-11-30"):
-                args = ["--data-k", str(t / "k"), "--data-sombra", str(t / "s"), "--cons", str(t / "cons.csv"),
+            # el registro de la ventana va a un temporal y el de loop/activo se finge (VL169-01); el real se prueba aparte
+            remoto_real = LS.registro_remoto
+            n_reg = [0]
+
+            def nuevo_reg():
+                n_reg[0] += 1
+                LS.REGISTRO = t / f"reg_{n_reg[0]}" / "REGISTRO_VENTANA_P.jsonl"
+                return LS.REGISTRO
+            LS.registro_remoto = lambda: []
+
+            def correr(dsal, *extra, hasta="2026-11-30", cons="cons.csv", reg=None, remoto=()):
+                LS.REGISTRO = reg if reg is not None else nuevo_reg()
+                LS.registro_remoto = (lambda: None) if remoto is None else (lambda: list(remoto))
+                args = ["--data-k", str(t / "k"), "--data-sombra", str(t / "s"), "--cons", str(t / cons),
                         "--ocr", str(t / "ocr.csv"), "--hasta", hasta, "--commit", COMMIT, "--dir-salida", str(dsal)]
                 cod = LS.main(args + list(extra))
+                LS.registro_remoto = lambda: []
                 txts = sorted(Path(dsal).glob("*.txt")) if Path(dsal).exists() else []
                 jss = sorted(Path(dsal).glob("*.json")) if Path(dsal).exists() else []
                 return cod, txts, jss
@@ -803,13 +909,67 @@ def main(argv=None):
             chk("main (VS168-02): en la lectura que decide los controles salen con detalle",
                 "S7 OK: {" in txt and "detalle" in out["controles"]["S7"])
             chk("main: el estado del paquete está en la salida", "PAQUETE en la sombra" in txt and out.get("estado"))
+            reg_dec = LS.REGISTRO
+            lineas = [json.loads(x) for x in reg_dec.read_text(encoding="utf-8").splitlines()] if reg_dec.exists() else []
+            chk("main (VL169-01): la lectura que decide deja una línea en el registro, con N, la hora, los sha y sin estado",
+                len(lineas) == 1 and lineas[0].get("tipo") == "lectura" and lineas[0].get("N") == "2026-11-29"
+                and lineas[0].get("referencia", {}).get("cons") == out["procedencia"]["referencia"]["cons"]
+                and lineas[0].get("records_k") and lineas[0].get("records_sombra") and lineas[0].get("hora_servidor")
+                and "estado" not in lineas[0], lineas)
 
             # la lectura que decide no se vuelve a escribir (VS168-01 y 05)
             with parada_de_prueba(LS, 25, 20):
-                cod_r, tx_r, _ = correr(t / "o_dec")
+                cod_r, tx_r, _ = correr(t / "o_dec", reg=nuevo_reg())
             chk("main (VS168-01): leer otra vez el mismo corte sale 2 y no toca la lectura",
                 cod_r == 2 and [x.name for x in tx_r] == ["lectura_sombra_corte_2026-11-29.txt"]
                 and tx_r[0].read_text(encoding="utf-8") == txt, cod_r)
+
+            # VL169-01, el caso de probe_b1b.py: con otra referencia N se mueve; el lector se niega igual
+            filas_c = (t / "cons.csv").read_text(encoding="utf-8").splitlines()
+            cambiadas, nuevas = 0, []
+            for x in filas_c:
+                if cambiadas < 7 and " 05:30:10," in x and ",ALERTA_TERMICA," in x:
+                    x = x.replace(",0.5,1.0,ALERTA_TERMICA,", ",0.0,0.0,RUTINA,")
+                    cambiadas += 1
+                nuevas.append(x)
+            (t / "cons2.csv").write_text("\n".join(nuevas) + "\n", encoding="utf-8")
+            r1 = nuevo_reg()
+            with parada_de_prueba(LS, 9, 12):
+                cod_b0, tx_b0, _ = correr(t / "o_b1b", reg=r1)
+                cod_b1, tx_b1, _ = correr(t / "o_b1b", cons="cons2.csv", reg=r1)
+                cod_b1c, tx_b1c, _ = correr(t / "o_b1b", cons="cons2.csv", reg=nuevo_reg())
+                cod_b2, tx_b2, _ = correr(t / "o_b1b_otra", cons="cons2.csv", reg=r1)
+                cod_b3, tx_b3, _ = correr(t / "o_b1b_rem", cons="cons2.csv", remoto=[{"tipo": "lectura", "N": "x"}])
+                cod_b4, tx_b4, _ = correr(t / "o_b1b_sinref", cons="cons2.csv", remoto=None)
+                cod_b5, tx_b5, js_b5 = correr(t / "o_b1b_libre", cons="cons2.csv")
+            chk("VL169-01 (probe_b1b): la primera lectura sale 0 con corte 2026-11-12",
+                cambiadas == 7 and cod_b0 == 0 and [x.name for x in tx_b0] == ["lectura_sombra_corte_2026-11-12.txt"],
+                (cambiadas, cod_b0, tx_b0))
+            chk("VL169-01 (probe_b1b): otra referencia en la MISMA carpeta sale 2 sin escribir nada",
+                cod_b1 == 2 and [x.name for x in tx_b1] == ["lectura_sombra_corte_2026-11-12.txt"]
+                and len(r1.read_text(encoding="utf-8").splitlines()) == 1, (cod_b1, tx_b1))
+            chk("VL169-01: con el registro vacío, la guarda de la carpeta sola rechaza otra referencia en la misma carpeta",
+                cod_b1c == 2 and [x.name for x in tx_b1c] == ["lectura_sombra_corte_2026-11-12.txt"], (cod_b1c, tx_b1c))
+            chk("VL169-01: otra referencia en OTRA carpeta del mismo checkout sale 2 (el registro local) sin escribir nada",
+                cod_b2 == 2 and tx_b2 == [] and not (t / "o_b1b_otra").exists(), (cod_b2, tx_b2))
+            chk("VL169-01: desde otro checkout (registro local vacío) la rechaza el registro de loop/activo",
+                cod_b3 == 2 and tx_b3 == [], (cod_b3, tx_b3))
+            chk("VL169-01: si loop/activo no se puede resolver, sale 2 (falla cerrada)", cod_b4 == 2 and tx_b4 == [],
+                (cod_b4, tx_b4))
+            chk("VL169-01: sin ninguna de esas guardas la otra referencia SÍ da otra lectura con otro N (el mecanismo "
+                "del probe existe; lo que lo para es el registro)",
+                cod_b5 == 0 and len(tx_b5) == 1 and tx_b5[0].name != "lectura_sombra_corte_2026-11-12.txt", (cod_b5, tx_b5))
+            # el registro de verdad: lectura de loop/activo y líneas ilegibles
+            LS.registro_remoto = remoto_real
+            ref0, ruta0 = LS.REF_REGISTRO, LS.RUTA_REGISTRO_GIT
+            LS.REF_REGISTRO = "refs/heads/no-existe-s169-xyz"
+            chk("VL169-01: registro_remoto da None si la rama no se resuelve", LS.registro_remoto() is None)
+            LS.REF_REGISTRO, LS.RUTA_REGISTRO_GIT = "HEAD", "experiments/no_existe_s169/registro.jsonl"
+            chk("VL169-01: registro_remoto da [] si la rama existe y el registro no", LS.registro_remoto() == [])
+            LS.REF_REGISTRO, LS.RUTA_REGISTRO_GIT = ref0, ruta0
+            LS.registro_remoto = lambda: []
+            chk("VL169-01: una línea ilegible del registro cuenta como lectura (falla cerrada)",
+                LS.leer_registro("no es json\n") == [{"tipo": "lectura", "ilegible": "no es json"}])
 
             # el recorte: con la parada de prueba en 12 noches, N = 2026-11-15 aunque --hasta sea el 30
             with parada_de_prueba(LS, 12, 20):
@@ -827,16 +987,19 @@ def main(argv=None):
             # S9: la referencia fresca hace caer la lectura que decide
             with open(t / "cons.csv", encoding="utf-8") as fh:
                 filas_cons = fh.read()
-            (t / "cons_fresca.csv").write_text(filas_cons.replace("2026-12-08 05:00:10", "2026-11-28 05:00:10"),
+            (t / "cons_fresca.csv").write_text(filas_cons.replace('2026-12-08 05:00:10,,Lascar,VIIRS375',
+                                                                  '2026-12-08 05:00:10,,Lascar,MODIS'),
                                                encoding="utf-8")
             args9 = ["--data-k", str(t / "k"), "--data-sombra", str(t / "s"), "--cons", str(t / "cons_fresca.csv"),
                      "--ocr", str(t / "ocr.csv"), "--hasta", "2026-11-30", "--commit", COMMIT, "--dir-salida",
                      str(t / "o_s9b")]
+            nuevo_reg()
             with parada_de_prueba(LS, 25, 20):
                 cod_9b = LS.main(args9)
             tx_9b = sorted((t / "o_s9b").glob("*.txt"))
             txt_9b = tx_9b[0].read_text(encoding="utf-8") if tx_9b else ""
-            chk("main (VS168-05): con la tabla a 1 día del corte S9 cae, sale 3 y no escribe la lectura del corte",
+            chk("main (VS168-05 y VL169-07): con la fila tardía de MODIS y la última de VIIRS 375 el día del corte, S9 "
+                "cae, sale 3 y no escribe la lectura del corte",
                 cod_9b == 3 and "S9 CAE" in txt_9b and tx_9b and tx_9b[0].name.startswith("controles_sombra_2026-11-29_")
                 and "== población" not in txt_9b, (cod_9b, tx_9b, txt_9b[-800:]))
             chk("main (VS168-05): con la tabla a 9 días del corte la lectura sí se escribe", cod == 0, cod)
@@ -854,10 +1017,10 @@ def main(argv=None):
                 out2 = json.loads(js2[0].read_text(encoding="utf-8"), object_hook=Seguro) if js2 else Seguro()
                 chk(f"main VA168-01: desde {desde} sale 3 sin nada de la población",
                     cod2 == 3 and "== población" not in txt2 and "== cercano" not in txt2 and "PAQUETE" not in txt2
-                    and set(out2) == {"procedencia", "corte", "controles"}, (cod2, txt2[-800:]))
+                    and set(out2) == {"procedencia", "corte", "controles", "parada"}, (cod2, txt2[-800:]))
                 chk(f"main VS168-02: con S1 caído ({desde}) no salen conteos ni nombres de pasadas",
                     "S1 CAE: " + LS.MOTIVO["S1"] in txt2 and "'n':" not in txt2 and "sin_dato" not in txt2
-                    and "pos_prot" not in txt2 and "noches" not in txt2 and "2026-11-" not in txt2.split("== controles")[1]
+                    and "pos_prot" not in txt2 and "2026-11-" not in txt2.split("== controles")[1]
                     and out2["controles"] and all(set(v) == {"ok", "motivo"} for v in out2["controles"].values()), txt2[-1500:])
             # con S7 caído (más del 10 % de protegidas sin dato): no salen conteos (VS168-02)
             ss7 = [vm[k] for k in sorted(vm) if not (k[2].endswith("05:00") and k[2][:10] <= "2026-11-08")]
@@ -868,6 +1031,7 @@ def main(argv=None):
             args7 = ["--data-k", str(t / "k"), "--data-sombra", str(t / "s7"), "--cons", str(t / "cons.csv"),
                      "--ocr", str(t / "ocr.csv"), "--hasta", "2026-11-30", "--commit", COMMIT, "--dir-salida",
                      str(t / "o_s7")]
+            nuevo_reg()
             cod7 = LS.main(args7)
             tx7 = sorted((t / "o_s7").glob("*.txt"))
             txt7 = tx7[0].read_text(encoding="utf-8") if tx7 else ""
@@ -881,6 +1045,13 @@ def main(argv=None):
             txt3 = tx3[0].read_text(encoding="utf-8") if tx3 else ""
             chk("main: S0 caído sale 3 sin leer nada", cod3 == 3 and "== población" not in txt3
                 and "LECTURA NO LEGIBLE" in txt3 and "referencia congelada" not in txt3, txt3[-500:])
+            # VL169-08: antes de la parada, con un control caído, salen los contadores (y no la lectura)
+            cod_i, tx_i, js_i = correr(t / "o_dos", hasta="2026-11-05")
+            txt_i = tx_i[0].read_text(encoding="utf-8") if tx_i else ""
+            out_i = json.loads(js_i[0].read_text(encoding="utf-8"), object_hook=Seguro) if js_i else Seguro()
+            chk("main (VL169-08): con 2 noches cae S6, sale 3 y salen los contadores de la parada, sin lectura",
+                cod_i == 3 and "S6 CAE" in txt_i and "noches 2 de 30" in txt_i and out_i["parada"]["noches"] == 2
+                and "== población" not in txt_i and "pos_prot" not in txt_i, (cod_i, txt_i[-800:]))
             try:
                 LS.main(["--data-k", str(t / "k"), "--data-sombra", str(t / "s"), "--cons", str(t / "cons.csv"),
                          "--ocr", str(t / "ocr.csv"), "--hasta", "2026-11-30", "--dir-salida", str(t / "o_x")])
@@ -905,8 +1076,8 @@ def main(argv=None):
             chk("cargar_records: sha256 del archivo y None si falta", sh["Lascar"] and sh["Isluga"] is None, sh)
 
     n = len(RES)
-    print(f"\nRESULTADO: {sum(RES)} de {n}")
-    return 0 if all(RES) else 1
+    print(f"\nRESULTADO: {sum(RES)} de {n}" + (f"; CAIDAS: {len(CAIDAS)} {CAIDAS}" if CAIDAS else ""))
+    return 2 if CAIDAS else (0 if all(RES) else 1)
 
 
 if __name__ == "__main__":
