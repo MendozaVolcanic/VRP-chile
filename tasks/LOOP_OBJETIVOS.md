@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 04:41 UTC (S169, vuelta 21): vigilancia de la sombra arreglada; verificador en curso
+- Rama `claude/s169-vigilancia-sombra` en `16d9e894d` (sobre `origin/main` `161536698`, 10 commits, comprobado con
+  `ls-remote`): `revisar_sombra.py` juzga sólo lo de esta corrida (`processed_utc` desde el inicio anotado y sha del
+  disparo), por volcán y sensor, y lee la cobertura; `nrt-monitor.yml` y `nrt_monitor_decision.js` abren un issue si
+  pasan 26 h sin corrida programada verde desde el 2026-11-03 15:00 UTC; el workflow pasa `--cobertura-json` y sube
+  log y cobertura como artefacto. 23 pruebas nuevas, 20 en rojo contra `main` y 23 de 23 con el arreglo. Nada en
+  `pipeline/`, `data/` ni `frontend/`.
+- Verificador limpio (Sonnet, subagente): árbol en `D:/vrp-trabajo/temporales/s169_ver_vigilancia/arbol/`; mira en
+  especial si Suomi NPP cuenta como plataforma viva después del 2026-11-02 y si los `return None` de la vía dan un
+  falso rojo diario. Después: PR, frase de Nicolás y despacho `medir=true` de prueba antes del 3.
+
 ### 2026-10-30 04:34 UTC (S169, vuelta 20): F1 atendida por la sesión de V750
 - `claude/s162-viirs750-2-918174` en `b5551b869`: reglas del día en `experiments/_s162_v750b/r4/INFORME.md` §3 y §4 y
   `r4/control_previo_v750b.py` (modos `datos` y `lectura`), probado en sus casos malos. Con los datos de su rama la
