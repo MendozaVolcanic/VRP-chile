@@ -161,7 +161,8 @@ jobs:
             }
             const d = decidirSombra(runs, Date.now());
             console.log(`Sombra: ${d.accion} (${d.motivo})`);
-            if (d.accion === 'inactivo') return;
+            // S169 ronda 2 (VV169-04): con la corrida de hoy todavia en cola o corriendo no se abre ni se cierra nada.
+            if (d.accion === 'inactivo' || d.accion === 'pendiente') return;
 
             const TITLE = 'Sombra codigo MIROVA: sin corrida verde en 26 h';
             const abierto = (await github.rest.issues.listForRepo({
