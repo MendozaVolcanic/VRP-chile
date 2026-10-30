@@ -48,16 +48,23 @@ Ninguna de las dos escribe en la carpeta sellada. Salidas en `ensayo_20261029/le
     git -c core.autocrlf=false archive claude/s162-viirs750-2-918174 experiments/_s162_v750b/r4 | tar -x -C $R4/arbol
     export TEMP=$R4/tmp TMP=$R4/tmp PYTHONIOENCODING=utf-8; mkdir -p $R4/tmp
     cd $R4/arbol
+    unset VRP_PROFILE; echo "VRP_PROFILE=[${VRP_PROFILE-}]"     # P1-03: tiene que imprimir [] (vacío)
+    python experiments/_s162_v750b/r4/control_previo_v750b.py datos --data data/mirova_equivalent --hasta 2026-11-02 | tee $R4/datos_salida.txt   # P1-04: OK o no se genera
     python experiments/_s162_v750b/objetivos_v750b.py --data data/mirova_equivalent --ref-dest $R4/ref --hasta 2026-11-02 > $R4/gen1_salida.txt 2>&1; echo rc=$?
     python experiments/_s162_v750b/adenda2/objetivos_supl_v750b.py --data data/mirova_equivalent --ref-dest $R4/ref --hasta 2026-11-02 --sellado experiments/_s162_v750b/objetivos_v750b.json > $R4/gen2_salida.txt 2>&1; echo rc=$?
     python experiments/_s162_v750b/r4/contar_n3_v750b.py --objetivos experiments/_s162_v750b/objetivos_v750b.json > $R4/n3_salida.txt 2>&1; echo rc=$?
     tail -5 $R4/gen1_salida.txt; tail -6 $R4/gen2_salida.txt; cat $R4/n3_salida.txt
 
+**Reglas del día antes de generar** (auditoría de patrones S169, f1, con su verificador; se cumplen antes de mirar
+ninguna salida): (P1-03) `VRP_PROFILE` vacío: con un perfil diurno en el shell, como `_s154_ab_diurno_k_on`, la pasada
+diurna V750 de Láscar del 2026-10-15 17:00 UTC no se descarta (medido sobre `main` `443da8649`); (P1-04) la fecha máxima
+de los records VIIRS 750 de `data/` de `main` del día es mayor o igual que `--hasta`, impresa en `datos_salida.txt`.
+
 Antes de seguir: las dos primeras salen 0, el control dice IGUALES, 0 sin gránulo (o declarados), y la cuenta de N-3
 se le informa a la coordinadora. Luego, la rama y el tag (sin push de la rama de disparo: ese push lanza el run):
 
     cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile/.claude/worktrees/s162-viirs750-2-918174"
-    tr -d '' < experiments/_s162_v750b/r4/armar_rama_disparo.sh > $R4/armar.sh   # el checkout de Windows puede traer CRLF
+    tr -d '\r' < experiments/_s162_v750b/r4/armar_rama_disparo.sh > $R4/armar.sh   # el checkout de Windows puede traer CRLF
     bash $R4/armar.sh $R4/arbol $M s167-v750b-adenda3-sellada s169-v750b-objetivos-20261103
     git tag -a s169-v750b-objetivos-20261103 s169-v750b-objetivos-20261103 -m "V750-B: objetivos al 2026-11-02 (main $M, carpeta de V750-B de s167-v750b-adenda3-sellada), sha256 en el mensaje del pedido"
     git push origin refs/heads/s169-v750b-objetivos-20261103 refs/tags/s169-v750b-objetivos-20261103
@@ -67,25 +74,47 @@ Pedido a la coordinadora: el tag, los sha256 que imprime el armado, la cuenta de
 
 ## 4. Lectura (cuando la coordinadora entregue los artefactos)
 
-    R=<raíz del worktree>/experiments/_s162_v750b; EV=D:/vrp-trabajo/temporales/evaluar_d25_s161.py
-    O=<árbol de $R4>/experiments/_s162_v750b
-    python $R/adenda2/separar_resultados_v750b.py --art <artefactos> [<relanzamiento>] --dest $R4/sep
-    python $R/adenda3/leer_n3_v750b.py --art $R4/sep/sellado/<carpetas> --objetivos $O/objetivos_v750b.json \
-      --sin-granulo $O/sin_granulo_v750b.json --evaluador $EV \
-      --censo-art D:/vrp-trabajo/temporales/s159_oraculo/censo_39713438252 \
-      --censo-objetivos <objetivos.json del censo S159: experiments/_s159/oraculo_censo/objetivos.json de main> \
-      --salida $R4/veredicto_v750b.txt
-    python $R/adenda1/leer_v750b.py <los mismos argumentos> --salida $R4/sin_n3_solo_informa.txt
-    python $R/adenda2/leer_posicion_v750b.py --art <artefactos> --objetivos $O/objetivos_v750b.json \
-      --objetivos-supl $O/adenda2/objetivos_supl_v750b.json --sin-granulo-supl $O/adenda2/sin_granulo_supl_v750b.json \
-      --evaluador $EV
+Todo desde el árbol `$R4/arbol` del día (dependencias de `main` del día, carpeta de V750-B del tag sellado; P1-01), no
+desde este worktree:
 
-El veredicto de V750-B es el del segundo comando (adenda 3 §3). El tercero y el cuarto informan. Antes de que Nicolás
+    cd $R4/arbol; unset VRP_PROFILE; export TEMP=$R4/tmp TMP=$R4/tmp PYTHONIOENCODING=utf-8
+    R=experiments/_s162_v750b; EV=D:/vrp-trabajo/temporales/evaluar_d25_s161.py
+    CA=D:/vrp-trabajo/temporales/s159_oraculo/censo_39713438252
+    git -C "<worktree>" show origin/main:experiments/_s159/oraculo_censo/objetivos.json > $R4/objetivos_censo_s159.json
+    python $R/adenda2/separar_resultados_v750b.py --art <artefactos> [<relanzamiento>] --dest $R4/sep
+    python $R/r4/control_previo_v750b.py lectura --art $R4/sep/sellado/* --objetivos $R/objetivos_v750b.json \
+      --censo-art $CA --manifiesto $R4/lectura/manifiesto.json --insumo $R/sin_granulo_v750b.json $EV \
+      $R4/objetivos_censo_s159.json --argumentos "<línea exacta del lector>"      # tiene que decir OK
+    [ -e $R4/lectura/veredicto_v750b.txt ] && echo "YA EXISTE: no se pisa" || \
+    python $R/adenda3/leer_n3_v750b.py --art $R4/sep/sellado/* --objetivos $R/objetivos_v750b.json \
+      --sin-granulo $R/sin_granulo_v750b.json --evaluador $EV --censo-art $CA \
+      --censo-objetivos $R4/objetivos_censo_s159.json --salida $R4/lectura/veredicto_v750b.txt
+    python $R/adenda1/leer_v750b.py <los mismos argumentos> --salida $R4/lectura/sin_n3_solo_informa.txt
+    python $R/adenda2/leer_posicion_v750b.py --art <artefactos> --objetivos $R/objetivos_v750b.json \
+      --objetivos-supl $R/adenda2/objetivos_supl_v750b.json --sin-granulo-supl $R/adenda2/sin_granulo_supl_v750b.json \
+      --evaluador $EV > $R4/lectura/posicion_solo_informa.txt
+
+El veredicto de V750-B es el del lector de la adenda 3 (adenda 3 §3). Los otros dos informan. Antes de que Nicolás
 confirme la ROI (§6.5), se miran juntas la lista aparte de N-3 y la ROI sin N-3 (VA3-05).
+
+**Reglas del día para leer** (auditoría S169, f1; escritas antes de ver datos):
+- (P1-01) el lector corre desde `$R4/arbol`, no desde este worktree, aunque hoy dé lo mismo.
+- (VF1-01) el control previo comprueba que `--censo-art` exista y traiga resultados: con una ruta errada el analizador
+  imprime «{} FALLA», igual que un censo distinto. Si falla por la ruta, se corrige y se relee.
+- (VF1-03) el control previo coteja volcán y hora de cada resultado con el objetivo de su id; el analizador sellado
+  empareja sólo por id. Además, el sha256 de `objetivos_v750b.json` del tag de disparo tiene que ser el que se pasa.
+- (P1-02) **nunca** se pasa `--leer-con-faltantes` si la línea «== control B0 y B1 = censo S159» dice FALLA con alguna
+  clave `*_DISTINTO`: el texto sellado (pre-registro l. 211 a 214) sólo permite la bandera cuando el censo «no se puede
+  correr», y el código la acepta también para uno que corrió y salió distinto. Si dice FALLA con `{}`, es la ruta
+  (VF1-01). Si dice OK, la bandera cubre sólo la cobertura, y sólo con la decisión de la coordinadora con Nicolás.
+- (P1-05) el manifiesto guarda los sha256 de objetivos, resultados, censo, evaluador y la línea de argumentos; el
+  veredicto va a un archivo nuevo (no se pisa ninguno), y la carpeta `lectura/` se commitea en esta rama ANTES de
+  mostrarle el resultado a nadie.
 
 ## 5. La ROI elegida, hacia la vía (preparado, sin merge)
 
-Rama `s169-roi-v750` (`3c5c494b9`), sobre el tag defensivo `pre-s169-roi-v750` (= `main` `443da8649`, A45): el script
+Rama `s169-roi-v750` (`3c5c494b9`; con las pruebas de `main()` y la doble aplicación de P1-13 y VF1-02 en
+`cd5aa300c`: 32 de 32, 70 con la de la vía, nulo 9 de 9 atrapadas por aserción), sobre el tag defensivo `pre-s169-roi-v750` (= `main` `443da8649`, A45): el script
 `scripts/roi_v750b_a_grillas.py --brazo <B0..B5> [--escribir]` reescribe sólo `roi_v750` de los 11 volcanes en
 `pipeline/grillas_mirova.yaml` (B0 def, B1 sens, B2 crater, B3 inner, B4 sens en Cordón Caulle y Tupungatito y def en
 el resto, B5 corona) y el comentario que dice qué ROI rige; la rama no cambia el YAML. Prueba
