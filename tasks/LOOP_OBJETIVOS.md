@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-30 00:35 UTC aprox. (S169, vuelta 3): el brazo cercano no necesita PR; lector de la sombra encargado
+### 2026-10-30 00:28 UTC (S169, vuelta 3): el brazo cercano no necesita PR; lector de la sombra encargado
 - V375-E (`3d259c819`): decisión anotada como §10 de `PREREGISTRO_E.md` (`2a4880665`); traspaso del lector en
   `experiments/_s168/v375e_lectura_lejana/TRASPASO_LECTOR_SOMBRA.md`.
 - Comprobado en `origin/main` (`c42ee0eb7`): cada record de la vía trae `anomaly_pixels` con `dist_km` redondeada a
