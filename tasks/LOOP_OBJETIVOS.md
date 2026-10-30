@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 03:41 UTC (S169, vuelta 13): auditoría de los siete patrones en los tres frentes
+- Nicolás: «los errores que encontraste se podrían estar repitiendo en otros lados? es importante auditar para que no
+  perdamos tiempos en cosas que se pueden verificar antes». D: liberado por él: 19 GB libres (antes 5,3).
+- Siete patrones de hoy (P-A sha256 con CRLF; P-B lectura repetible o elegible; P-C régimen mal acotado; P-D caída
+  contada como acierto; P-E estado externo sin rastro; P-F salida ciega; P-G texto contra código), en memoria
+  `feedback_s169_siete_patrones_instrumentos`.
+- Tres auditores Sonnet con el preámbulo canónico, en paralelo y livianos, carpeta
+  `D:/vrp-trabajo/temporales/s169_audit_patrones/`: f1 VIIRS 750 (cadena del 2026-11-03 de V750-B sobre `01ffd277b`,
+  medidor de V750-A, rama de la ROI `3c5c494b9`), f2 MOD-D (`743e89c48`, sin repetir VC169-01 a 09), f3 infraestructura
+  común (`origin/main` `cc3887290`: workflow y scripts de la sombra, evaluador común, banco de paridad, auto-audit, logs
+  de `run_pipeline.py`). Después, verificador limpio de otro modelo sobre los hallazgos de gravedad 2 o más.
+
 ### 2026-10-30 03:30 UTC (S169, vuelta 12): verificador del lector, SELLABLE CON CAMBIOS; segunda ronda de arreglos
 - Verificador limpio (Sonnet, subagente) sobre `983f6f28d`: `experiments/_s169/v375e_lector_verificador/INFORME.md`.
   VL169-01, gravedad 3: «una sola lectura» vale por nombre y carpeta, no por ventana (otra `--dir-salida` u otra
