@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 03:05 UTC (S169, vuelta 9): lector de la sombra arreglado; verificador de otro modelo en curso
+- Rama `claude/s169-v375e-lector` en `983f6f28d` (verificado con `ls-remote`; 13 commits sobre `3f7e8814c`), informe
+  `experiments/_s169/v375e_lector_arreglos/INFORME.md`. Batería 190 de 190 (~7 min). VS168-01: `--desde` fijo en el
+  2026-11-03, el corte que decide es la noche de la parada, sin lectura antes (código 5), salida sin sobrescribir.
+  VS168-02 a 08 aplicados; dos desvíos declarados en §11 (S8 lleva (b), (c) y (d) a DECIDE NICOLÁS; S0 fija
+  `frontend/index.html`). Nulo de 111 mutaciones sin correr (~13 h con un hilo); V04 es equivalente.
+- Verificador limpio (Sonnet, subagente) sobre `983f6f28d`, árbol en `D:/vrp-trabajo/temporales/s169_ver_lector/arbol/`
+  (67 MB). Va antes del nulo: si encuentra algo, se arregla antes de gastar 13 h de cupo.
+- Corrección propia, dicha a Nicolás: la parada de la sombra es 30 noches **y** 40 alertas, «lo que llegue último»
+  (`PREREGISTRO_E.md` §3.3 l. 72 a 74 y §11.8); yo había dicho «o», la primera que llegue.
+
 ### 2026-10-30 01:29 UTC (S169, vuelta 8): lector de la sombra de V375-E con un gravedad 3; relevo a un agente propio
 - `local_438070ff` (`3f7e8814c`): lector `experiments/_s168/v375e_sombra/leer_sombra_v375e.py`, batería 104 de 104, nulo
   de 55 mutaciones sin correr; §11 de `PREREGISTRO_E.md` en borrador. Verificador limpio (Sonnet):
