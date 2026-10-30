@@ -1147,3 +1147,7 @@ mutación que no esté declarada equivalente; 1 si sobrevive alguna; 2 si abort�
   atrase uno solo es SOSPECHA del verificador, no observado) y porque el rezago de 2 días ya es un margen; si ocurriera,
   las alertas que faltan aparecerían como negativos limpios y quedarían en el registro de la referencia, cuyo sha
   sale en la lectura.
+
+**Cifras de la ronda 3** (las vigentes): batería **230 de 230** sobre el árbol final; nulo **139 mutaciones** (más la
+identidad y los dos controles), **sin correr**; su arranque (`--arranque`) pasó: identidad PASA y los dos controles
+CAIDA. R28 (la lectura por pantalla) se vio en rojo (`ver_en_rojo.py`, grupo L).
