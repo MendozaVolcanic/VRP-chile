@@ -1,5 +1,14 @@
 # Traspaso: lector de la sombra de V375-E (§9.8 y §10 de PREREGISTRO_E.md)
 
+> **Estado al 2026-10-30 01:15 UTC** (lo sigue haciendo esta misma sesión, por pedido de la coordinadora S169). Hecho y
+> empujado en `claude/s168-v375e-sello`: el texto del lector como §11 de `PREREGISTRO_E.md` (borrador, sin sellar), el
+> lector `experiments/_s168/v375e_sombra/leer_sombra_v375e.py`, su batería `probar_sombra.py` (104 de 104) y el nulo
+> `mutar_sombra.py` (55 mutaciones, **sin correr**: espera cupo pesado del equipo, MOD-D hasta ~09:15 UTC). Lanzado el
+> verificador limpio (Sonnet) sobre `c44665603`; su informe va a `experiments/_s168/v375e_sombra/verificador/INFORME.md`.
+> Falta: arreglar lo que traiga el verificador, correr el nulo (`python -I mutar_sombra.py --hilos 1`) y poner sus
+> cifras en §11.10, tag anotado del lector, INFORME.md y aviso a S169 (`local_b1bfa049`). Nada de datos de la ventana
+> P hasta que S169 se lo lleve a Nicolás.
+
 Escrito el 2026-10-30 (S168, sesión hija de VIIRS 375) para quien escriba el lector de la sombra. Rama de partida:
 `claude/s168-v375e-sello` (punta `2a4880665` o posterior). Plazo: antes de la primera corrida con datos de la ventana P,
 el **2026-11-03 a las 15:00 UTC** (`.github/workflows/sombra-codigo-mirova.yml` en `main`, #926). Reglas duras de siempre:
