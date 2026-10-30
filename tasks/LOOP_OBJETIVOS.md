@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 04:03 UTC (S169, vuelta 15): F2 (MOD-D) con 16 hallazgos; verificador en curso
+- Auditor F2 (Sonnet) sobre `743e89c48`: `D:/vrp-trabajo/temporales/s169_audit_patrones/f2_modis/INFORME.md`. Reglas
+  del evaluador fieles al pre-registro. P2-01, gravedad 4: el circuit-breaker de descarga de `pipeline/fetch.py` es
+  estado del proceso y `probe_f4.main` no lo resetea; tras una caída de host, ~400 s por gránulo sin bajar nada y ~70
+  pasadas sin fila por parte (mecanismo CONFIRMADO por el auditor, frecuencia SOSPECHA). Gravedad 3: P2-02 a 05 (el
+  evaluador no ata sus insumos; el manifiesto no ata la lectura al tag; la identidad recalcula la clase en local; el
+  ensayo en seco no podía ver VC169-01). Siete de gravedad 2 y cuatro de gravedad 1.
+- Verificador limpio (Opus, subagente) sobre los 12 de gravedad 2 o más; pide si arreglar antes del tag del candado y
+  si P2-01 se arregla sólo en `probe_f4.py`, sin tocar `fetch.py` (congelado).
+
 ### 2026-10-30 03:58 UTC (S169, vuelta 14): F3 (infraestructura común) con 16 hallazgos; verificador en curso
 - Auditor F3 (Sonnet) sobre `cc3887290`: `D:/vrp-trabajo/temporales/s169_audit_patrones/f3_comun/INFORME_F3.md`. 1 de
   gravedad 4 (P3-01: `evaluador_comun.py` da COBERTURA OK con referencia vieja, vacía o con BOM), 9 de gravedad 3
