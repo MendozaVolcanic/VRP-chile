@@ -409,6 +409,15 @@ def test_r3_cobertura_de_otro_dia_no_prueba_la_ausencia(tmp_path):
     assert rc != 0 and "2026-11-04" in out, out
 
 
+def test_r3_un_dia_con_solo_un_record_de_k_es_un_dia_perdido(tmp_path):
+    """Un record de K caído no es una pasada de la vía: si es lo único de MODIS el día 4, ese día MODIS no se midió.
+    (Consecuencia buscada del control por día: ese día sigue rojo hasta que sale de la ventana.)"""
+    k = rec(4, "MODIS_AQUA", "sha04", "2026-11-04T15:20:00Z", via="geo_distinta")
+    regs = _sin(historial(3, 5), 4, "MODIS") + [k]
+    rc, out = juzgar(tmp_path, 5, regs, cob=cobertura(5))
+    assert rc != 0 and "MODIS 2026-11-04" in out, out
+
+
 def test_r3_la_fecha_minima_es_la_de_ventana_sombra():
     sys.path.insert(0, str(ROOT / "scripts"))
     import revisar_sombra
@@ -490,7 +499,8 @@ def test_vr2_03_el_artefacto_solo_sube_si_el_tachado_salio_bien():
 
 def test_vr2_05_el_token_se_toma_sin_espacios_ni_salto_de_linea(tmp_path):
     token = "eyJ0eXAi.secreto.firma"
-    p = _tachar(tmp_path, token + "\n", {"pipeline.log": "Bearer %s\n" % token})
+    # el token va pegado a otro texto, sin el salto de línea que trae la variable: sin strip() no se encontraría
+    p = _tachar(tmp_path, token + "\n", {"pipeline.log": "Bearer %s fin de linea" % token})
     assert p.returncode == 0 and token not in (tmp_path / "pipeline.log").read_text(encoding="utf-8")
 
 
