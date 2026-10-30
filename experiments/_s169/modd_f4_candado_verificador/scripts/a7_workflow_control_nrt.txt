@@ -1,0 +1,47 @@
+{
+ "archivo": "nrt.yml",
+ "claves_toplevel": [
+  "'name'",
+  "'on'",
+  "'concurrency'",
+  "'jobs'"
+ ],
+ "on_es_str": true,
+ "on": [
+  "schedule",
+  "workflow_dispatch"
+ ],
+ "permissions_toplevel": null,
+ "concurrency": {
+  "group": "push-main",
+  "cancel-in-progress": false
+ },
+ "env_toplevel": [],
+ "secretos": [
+  "EARTHDATA_PASSWORD",
+  "EARTHDATA_TOKEN",
+  "EARTHDATA_USERNAME"
+ ],
+ "jobs": {
+  "process": {
+   "runs-on": "ubuntu-24.04",
+   "timeout": 80,
+   "permissions": {
+    "contents": "write"
+   },
+   "needs": null,
+   "if": null,
+   "push/commit/add": true,
+   "escribe data/": false,
+   "usa gh/curl": false,
+   "env_job": [],
+   "usos": [
+    "actions/checkout@v5",
+    "actions/setup-python@v6"
+   ]
+  }
+ },
+ "USERNAME/PASSWORD": true,
+ "contiene_persist_credentials": false
+}
+-----

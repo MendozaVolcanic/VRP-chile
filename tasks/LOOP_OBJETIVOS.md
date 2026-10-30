@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 01:04 UTC (S169, vuelta 7): #927 mergeado; candado de MOD-D con un gravedad 3 antes del tag
+- Verificador limpio del candado (Sonnet 5.5, subagente, 22 min, sobre `3db87f50d`):
+  `experiments/_s169/modd_f4_candado_verificador/INFORME.md` (con `caminos.md`, `hallazgos.csv` y `scripts/`).
+  **CANDADO VERIFICABLE PARA TAG CON CAMBIOS**. A1, A2, A5, A6, A7 y A8 se sostienen; A3 y A4 en parte (no re-corrió
+  lo pesado). **VC169-01, gravedad 3**: `externos_referencia.json` guarda el sha256 de la población en CRLF y el commit
+  la trae en LF: en el runner el veredicto sale INDECIDIBLE (falla cerrado). Gravedad 2: VC169-02 a 07. Gravedad 1:
+  VC169-08 y 09. Todo reenviado a `local_5b198297`, para después de las mutaciones (árbol quieto).
+- **WORKFLOW MERGEABLE YA**: sha256 LF del archivo del PR igual al verificado (`50d9fc92…`), CI `pytest` verde, `CLEAN`.
+  Con la frase de Nicolás («Sí, mergéalo», condicionada a esas dos cosas): `gh pr merge 927 --squash
+  --match-head-commit 9cb1f4325`, squash `5e03f0db2` en `main`; workflow `active`.
+- `caminos.md` del verificador trae un guion largo; no se edita porque su sha256 quedó registrado antes de abrir nada.
+
 ### 2026-10-30 00:54 UTC (S169, vuelta 6): V750-B listo para el 2026-11-03; rama de la ROI preparada
 - `local_94f4be0d`, rama `claude/s162-viirs750-2-918174` en `d67f2aa73` (informe `experiments/_s162_v750b/r4/INFORME.md`):
   ensayo de plomería del generador con `--hasta 2026-10-29` en un árbol aparte (5.654 objetivos, 0 sin gránulo;

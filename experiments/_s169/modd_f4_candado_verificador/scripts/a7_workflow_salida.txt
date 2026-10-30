@@ -1,0 +1,108 @@
+{
+ "archivo": "probe-s168-modd-f4.yml",
+ "claves_toplevel": [
+  "'name'",
+  "'on'",
+  "'concurrency'",
+  "'env'",
+  "'jobs'"
+ ],
+ "on_es_str": true,
+ "on": [
+  "workflow_dispatch"
+ ],
+ "permissions_toplevel": null,
+ "concurrency": {
+  "group": "probe-s168-modd-f4",
+  "cancel-in-progress": false
+ },
+ "env_toplevel": [
+  "BLOB_D25"
+ ],
+ "secretos": [
+  "EARTHDATA_TOKEN"
+ ],
+ "jobs": {
+  "plan": {
+   "runs-on": "ubuntu-24.04",
+   "timeout": null,
+   "permissions": null,
+   "needs": null,
+   "if": null,
+   "push/commit/add": false,
+   "escribe data/": false,
+   "usa gh/curl": false,
+   "env_job": [],
+   "usos": []
+  },
+  "head_e": {
+   "runs-on": "ubuntu-24.04",
+   "timeout": 30,
+   "permissions": {
+    "contents": "read"
+   },
+   "needs": [
+    "plan"
+   ],
+   "if": null,
+   "push/commit/add": false,
+   "escribe data/": false,
+   "usa gh/curl": false,
+   "env_job": [
+    "EARTHDATA_TOKEN"
+   ],
+   "usos": [
+    "actions/checkout@v5",
+    "actions/setup-python@v6",
+    "actions/upload-artifact@v4"
+   ]
+  },
+  "prueba": {
+   "runs-on": "ubuntu-24.04",
+   "timeout": 45,
+   "permissions": {
+    "contents": "read"
+   },
+   "needs": [
+    "plan"
+   ],
+   "if": "${{ needs.plan.outputs.sonda == 'true' }}",
+   "push/commit/add": false,
+   "escribe data/": false,
+   "usa gh/curl": false,
+   "env_job": [],
+   "usos": [
+    "actions/checkout@v5",
+    "actions/setup-python@v6",
+    "actions/upload-artifact@v4"
+   ]
+  },
+  "probe": {
+   "runs-on": "ubuntu-24.04",
+   "timeout": 240,
+   "permissions": {
+    "contents": "read"
+   },
+   "needs": [
+    "plan",
+    "prueba"
+   ],
+   "if": "${{ needs.plan.outputs.sonda == 'true' }}",
+   "push/commit/add": false,
+   "escribe data/": false,
+   "usa gh/curl": false,
+   "env_job": [
+    "EARTHDATA_TOKEN",
+    "F4_TAG"
+   ],
+   "usos": [
+    "actions/checkout@v5",
+    "actions/setup-python@v6",
+    "actions/upload-artifact@v4"
+   ]
+  }
+ },
+ "USERNAME/PASSWORD": true,
+ "contiene_persist_credentials": false
+}
+-----

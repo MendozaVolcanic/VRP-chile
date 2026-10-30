@@ -1,0 +1,30 @@
+        Este test cierra sólo la parte que se puede cerrar sin falsos positivos: que la línea
+        exista. **No** detecta el desplazamiento de una o dos líneas, que es el caso de S135 y el
+        más común, porque la línea vieja sigue existiendo; para eso está el contrato de G8, que hay
+        que actualizar a mano. Y no puede exigir que el contrato y CLAUDE.md coincidan número a
+        número, porque el documento cita a propósito líneas históricas junto a las vigentes
+        («era 208 antes de S135»), que es información deliberada y no drift.
+    
+        Se declara así, con su límite escrito, en vez de dejar un guard que parece cubrir más de lo
+        que cubre.
+        """
+>       md = _leer("CLAUDE.md")
+             ^^^^^^^^^^^^^^^^^^
+
+tests\test_guard_declarado_vs_efectivo_s131.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+rel = 'CLAUDE.md'
+
+    def _leer(rel):
+>       return open(os.path.join(ROOT, rel), encoding="utf-8", errors="replace").read()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'D:\\vrp-trabajo\\temporales\\s169_ver_candado\\arbol\\CLAUDE.md'
+
+tests\test_guard_declarado_vs_efectivo_s131.py:29: FileNotFoundError
+=========================== short test summary info ===========================
+FAILED tests/test_guard_declarado_vs_efectivo_s131.py::test_g1_productos_nasa_declarados_existen_en_fetch
+FAILED tests/test_guard_declarado_vs_efectivo_s131.py::test_g2_mitigaciones_declaradas_en_ficha_estan_encendidas
+FAILED tests/test_guard_declarado_vs_efectivo_s131.py::test_g6_index_lista_la_auditoria_mas_reciente
+FAILED tests/test_guard_declarado_vs_efectivo_s131.py::test_g8b_toda_linea_citada_en_claude_md_existe_en_su_archivo
+4 failed, 60 passed, 3 skipped in 3.75s
