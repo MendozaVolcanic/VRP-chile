@@ -1091,3 +1091,8 @@ Seguimientos del verificador que quedan **aceptados sin código**: dos corridas 
 (el registro de la ventana y el commit a `loop/activo` lo harían visible); no hay instantánea diaria de la referencia
 (VS168-05 queda cerrado por S9 y por la lectura única, no por captura); con la parada alcanzada y un control caído el
 nombre `controles_sombra_<N>_…` revela N, no la lectura; y `--hasta` sin ceros compara como texto (la parada manda).
+
+**Cifras de la ronda 2** (las vigentes): batería **227 de 227** sobre el árbol final; nulo **138 mutaciones** (más la
+identidad y los dos controles de caída), **sin correr**; V04 declarada equivalente. Cada regla nueva de la ronda 2 se vio
+en rojo rompiéndola a mano (`experiments/_s169/v375e_lector_arreglos/ver_en_rojo.py`, grupos F a K; detalle y
+tropiezos en el INFORME de esa carpeta, sección «Ronda 2»).
