@@ -92,3 +92,63 @@ Guardias de workflows y de la sombra, en una sola corrida y con el árbol quieto
   `inicio` sólo se probaron por lectura del YAML y por la función pura; no hubo despacho (prohibido en esta tarea).
   La primera evidencia real será la corrida del 2026-11-03 15:00 UTC y el chequeo de nrt-monitor de las 18:30.
 - **Fuera de alcance**: P3-01 y P3-05 a P3-16 (evaluador común, procedencia, `nan`, perfil ambiental, etc.).
+
+## 5. Ronda 2
+
+Un verificador limpio revisó `16d9e894d` (`D:/vrp-trabajo/temporales/s169_ver_vigilancia/INFORME_VERIFICACION.md`) y
+concluyó MERGEABLE CON CAMBIOS. Las decisiones son de la coordinadora; lo de abajo las aplica. Por qué importa cada
+una: la revisión diaria tiene que decir la verdad sobre **esta noche**. Un verde que se apoya en el trabajo de otro
+día (VV169-01) o en un catálogo vacío (VV169-02) hace pasar por medida una noche que no se midió. Un rojo por algo
+que ya estaba cubierto (VV169-03) o por una corrida que todavía no termina (VV169-04) acostumbra a no mirar el rojo.
+
+| Hallazgo | Decisión | Cambio | Prueba que lo fija |
+|---|---|---|---|
+| VV169-01, falso verde | El control por sensor cuenta sólo los records de esta corrida con pasada de `fin` o de `fin` menos un día | `scripts/revisar_sombra.py`: filtro `datetime_utc[:10] >= vispera` en el conteo por sensor. Un reemplazo NRT a estándar de hace días sigue contando como «de esta corrida» para el control de K, no para cumplir | `test_vv01_reemplazos_de_dias_viejos_no_cumplen...` (rojo antes) y `test_vv01_un_record_de_ayer_escrito_hoy_si_cumple` |
+| VV169-02, falso verde | FALLA si quedan sin pasada a la vez los tres sensores, o VIIRS 750 y VIIRS 375 | Igual, regla después de las NOTA: «catálogo de CMR vacío, no la órbita» | `test_vv02_catalogo_vacio_en_los_tres_sensores_es_falla`, `test_vv02_viirs_750_y_375_vacios_a_la_vez_es_falla` (rojas antes) |
+| VV169-03, falso rojo | Una falla de búsqueda o descarga de un día anterior a `fin` es NOTA; sólo la de `fin` (o sin fecha) es FALLA | Igual, y escrito en el docstring del módulo | `test_vv03_falla_de_busqueda_de_un_dia_viejo_es_nota` (roja antes), `test_g_falla_de_busqueda_del_ultimo_dia_es_falla...` |
+| VV169-04, falso rojo | Corrida `schedule` en cola o en curso creada hace menos de 6 h: «pendiente», ni alerta ni cierre | `scripts/nrt_monitor_decision.js` (`horasPendiente = 6`); `nrt-monitor.yml` sale antes de tocar el issue con `pendiente` | `test_vv04_la_corrida_de_hoy_en_curso_es_pendiente` (roja antes), `test_vv04_una_corrida_en_curso_vieja_no_tapa_la_alerta`, `test_vv04_el_monitor_no_abre_ni_cierra_con_pendiente` (roja antes) |
+| VV169-05 | No se arregla en `pipeline/store.py` (congelado); se deja a la vista | La revisión escribe siempre «K caídos en la ventana: N», con el detalle por tipo, en su salida y en el resumen del job (GITHUB_STEP_SUMMARY), también en verde y también con 0 | `test_vv05_los_k_caidos_quedan_a_la_vista...` y `test_vv05_la_linea_de_k_esta_aunque_sea_cero` (rojas antes) |
+| Mutaciones A, E, G, P, R | Pruebas que las atrapen por aserción | Sin cambio de código | `test_a_record_de_ayer_con_el_mismo_sha_no_cuenta`, `test_e_sin_granulos_de_otro_dia_no_justifica...`, `test_g_...`, `test_p_el_inicio_anotado_es_la_hora_de_la_corrida_en_el_formato_del_store` (exige `INICIO=$(date -u +%Y-%m-%dT%H:%M:%SZ)` y que ese formato sea el de `processed_utc` en `pipeline/store.py`), `test_r_nrt_monitor_tiene_permiso_de_issues_y_de_actions` |
+| VV169-07 | Que el log subido no lleve el token | Nuevo `scripts/tachar_secreto_log.py` y paso «Tachar el token en el log y la cobertura» antes del artefacto, con la misma condición `always()` | `test_vv07_el_log_se_tacha_antes_de_subirlo` (roja antes; prueba el paso y ejecuta el script con un token falso) |
+| VV169-08 | Corregir el docstring | `tests/test_revisar_sombra_corrida_s169.py`: base `161536698` | (documental) |
+
+**Rojo antes, verde después.** Con las pruebas nuevas de la ronda 2 escritas y el código de `16d9e894d`:
+`9 failed, 30 passed` (`D:/vrp-trabajo/temporales/s169_vigilancia/r2_rojo_antes.txt`), todas por aserción: VV01,
+VV02 (2), VV03, VV05 (2), VV07, VV04 (2). Las de A, E, G, P y R pasan con el código correcto a propósito: existen para
+atrapar mutaciones, y se ve abajo que lo hacen. Una prueba de la ronda 1
+(`test_una_corrida_en_curso_o_manual_no_cuenta_como_verde`) cambió su aserción a «nunca ok», porque con VV169-04 la
+respuesta correcta para una corrida de hoy en curso es «pendiente». Después del arreglo: **39 de 39** en las dos
+pruebas nuevas, y **208 passed, 4 skipped** en la batería completa (las dos nuevas, cadencia, monitor del NRT,
+`test_sombra_codigo_mirova_s167` y las siete guardias de workflows, incluida la de `"on"` entre comillas;
+`r2_guardias.txt`). Las 4 saltadas son de `test_guard_timeout_vs_ventana_s129.py:102`: «backfill-tier-a.yml,
+nrt.yml, reproc-chunked.yml, sombra-codigo-mirova.yml no declara fechas por defecto parseables», o sea que ninguna
+guardia compara hoy el timeout de la sombra con su ventana (preexistente).
+
+**Mutaciones.** `m4_mutaciones_r2.py` (en esta carpeta, adaptado del `m4_mutaciones_rapido.py` del verificador)
+copia scripts, tests, `.github` y `pipeline` a una carpeta temporal y rompe una cosa a la vez. Control: la copia sin
+tocar da `39 passed`. Resultado: **32 de 32 atrapadas por aserción, 0 sobreviven** (`m4_r2_salida.txt`). Son las 18
+del verificador (A a R, con G e I reescritas para los textos nuevos) más P2 (inicio en otro formato), R2 (sin
+`actions: read`) y 12 de la ronda 2: V1, V2, V2b, V3, V3b, V4, V4b, V4c, V5, V5b, V7 y V7b. No declaré ninguna
+equivalente.
+
+**VV169-07, lo que sí y lo que no comprobé.** Por grep: en `pipeline/fetch.py` ninguna línea imprime el token, una
+cabecera `Authorization` ni `Bearer`. Los `print` con excepción (`Failed to fetch {platform}: {e}`, l. 1282) pueden
+llevar URL de datos, que no son secretas. En earthaccess 0.17.0 (la instalada en este computador) el único log que
+toca el token es `logger.info("Using token with expiration date %s", ...)`, que imprime la fecha y no el valor.
+Además, el workflow no usa `set -x`, y el paso del perfil sólo imprime nombre y flags. **No pude comprobar** la
+versión que instala el runner, que no está fijada (`pip install earthaccess`), ni el contenido de un log real.
+Por eso el paso de tachado va antes de subir el artefacto: si el token apareciera, se reemplaza por `***` y queda un
+`::warning::` que no repite el valor.
+
+**Riesgo aceptado (VV169-05).** Un record de K caído queda en `data/sombra_codigo_mirova/` para siempre:
+`pipeline/store.py` sólo lo reemplaza con `overwrite` o en el paso NRT a estándar, y el workflow no ofrece
+`overwrite`. El job queda rojo sólo el día en que se escribe, y el issue del monitor se cierra con la corrida verde
+siguiente. Desde la ronda 2 el conteo acumulado de la ventana sale en cada resumen del job, pero **nadie lo va a
+borrar**: el lector de la sombra tiene que filtrar por `via_codigo_mirova` (P3-10, fuera de esta tarea). Arreglarlo
+de raíz (un `overwrite` en el despacho, o que store reemplace un K con un record de la vía) toca `pipeline/` y
+queda para después de la sombra.
+
+**Sigue sin probarse en GitHub**: el paso del monitor, `upload-artifact`, el tachado, el resumen del job y la línea
+de `inicio`. El verificador recomienda, después del merge y antes del 2026-11-03 15:00 UTC, un despacho
+`medir=true` de Láscar sobre 2 o 3 días pasados, y un despacho de `nrt-monitor.yml`, que debería decir «Sombra:
+inactivo» (§7 de su informe). No los hice: los despachos están fuera de esta tarea.
