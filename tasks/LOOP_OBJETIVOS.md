@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 07:25 UTC (S169, vuelta 28): verificador del lector ronda 2: el nulo se habría perdido; ronda 3
+- Verificador corto (Sonnet) sobre `9d76af91b`: `experiments/_s169/v375e_lector_verificador/ronda2/INFORME.md`. LISTO
+  PARA EL NULO CON CAMBIOS, en `mutar_sombra.py`. VL2-01 (gravedad 4): un solo `TimeoutExpired` (timeout 1800 s, l. 213,
+  sin captura) pierde todo el nulo, porque los resultados se escriben al final (l. 266 a 276); reproducido parchando
+  `subprocess.run`. VL2-02 (gravedad 3): el nulo no se detiene si la identidad falla y sale 0 siempre. VL2-03 y 04
+  (gravedad 2): la lectura sale por stdout antes de commitear el registro, y otra copia sin `fetch` puede leer dos veces.
+  S8 probado en 25 casos con commits reales (sólo `roi_v750` no marca; `x0` sí); S0 16 de 16 sha coinciden en LF.
+- Ronda 3 al agente del lector: TimeoutExpired como CAIDA, timeout 5400 s, resultado al disco por mutación con
+  reanudación, aborto si la identidad o los controles fallan, salida distinta de 0 con vivas, comprobación de la rama;
+  lectura sólo a archivo; fetch y registro empujado antes de abrir la lectura (§11); VL2-05 y 06 aceptados. El nulo
+  lo lanza la coordinadora en el cupo de MOD-D.
+
 ### 2026-10-30 07:18 UTC (S169, vuelta 27): vigilancia MERGEABLE; #928 espera la frase de Nicolás
 - Verificador de la ronda 3 (Sonnet) sobre `cd8b7074f`:
   `experiments/_s169/vigilancia_sombra_verificador/ronda3/INFORME_VERIFICACION_R3.md` (`52682a3ba`). MERGEABLE: VR2-01 a
