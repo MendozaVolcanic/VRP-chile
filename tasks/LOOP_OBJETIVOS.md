@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 04:10 UTC (S169, vuelta 14): F3 (infraestructura común) con 16 hallazgos; verificador en curso
+- Auditor F3 (Sonnet) sobre `cc3887290`: `D:/vrp-trabajo/temporales/s169_audit_patrones/f3_comun/INFORME_F3.md`. 1 de
+  gravedad 4 (P3-01: `evaluador_comun.py` da COBERTURA OK con referencia vieja, vacía o con BOM), 9 de gravedad 3
+  (entre ellos P3-02 y P3-03: `revisar_sombra.py` no ve una corrida vacía desde el 2.º día ni exige records por
+  sensor; P3-04: gránulos que la vía descarta sin rastro; P3-09: nadie vigila el run de la sombra), 5 de gravedad 2.
+- Verificador limpio (Opus, subagente) sobre los 15 de gravedad 2 o más, con títulos y archivo:línea solamente;
+  pide además, por hallazgo, si arreglarlo antes del 2026-11-03 y si toca `pipeline/`, `scripts/` o un workflow.
+- Al agente del lector: `BASE_REGIMEN` deja de ser `c42ee0eb7` fijo y pasa a ser el código de la primera noche de la
+  ventana (las demás tienen que tener el mismo régimen), porque los arreglos de infraestructura previos al 3 tocarán el
+  workflow de la sombra, que entró al pathspec de S8.
+
 ### 2026-10-30 03:41 UTC (S169, vuelta 13): auditoría de los siete patrones en los tres frentes
 - Nicolás: «los errores que encontraste se podrían estar repitiendo en otros lados? es importante auditar para que no
   perdamos tiempos en cosas que se pueden verificar antes». D: liberado por él: 19 GB libres (antes 5,3).
