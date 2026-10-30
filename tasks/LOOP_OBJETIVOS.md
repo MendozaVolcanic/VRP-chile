@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 00:13 UTC (S169, vuelta 1): V375-E leída y verificada; decisión del brazo a Nicolás
+- Rama `claude/s168-v375e-sello` en `92b3b4208`: `experiments/_s168/v375e_lectura_lejana/INFORME.md` y su verificador
+  (Sonnet 5.5, contexto limpio, re-corrida idéntica): **CONFIRMADA CON RESERVAS**, 0 de gravedad 3, 5 de gravedad 2
+  (VL168-01 a 05). PID 15924 terminó: cupo pesado libre para MOD-D.
+- Cotejado contra `lectura_salida.txt` de la rama: l. 73 ELEGIDO CERCANO; l. 74 con el veto sólo sobre la tabla SE
+  QUEDA RADIANTE; l. 50 a 56 lejanas publicadas: radiante 13, cercano 104, pico 13, K 121 de 329; l. 94 PAQUETE CUMPLE
+  (falta la sombra), brazo cercano.
+- La elección de cercano cuelga de 2 protegidas NOAA-21 sólo del OCR (Isluga 2026-06-17, Láscar 2026-10-01); T se
+  queda radiante. Llevado a Nicolás con recomendación: cercano decide (regla sellada), radiante se informa al lado en
+  la sombra, rotulado como posterior a la lectura. Sin cambios en `pipeline/`.
+- Corrección: los `SendMessage` de la apertura daban `local_9d0a6fc4` (S168) como id de S169; corregido a
+  `local_b1bfa049` en las tres sesiones.
+
 ### 2026-10-29 23:43 UTC (S169, apertura): coordinadora S169; /retomar hecho, hijas avisadas
 - `loop/activo` en `a57d01ea8`, igual al remoto; `main` en `443da8649` (desde `c42ee0eb7` nada en `pipeline/`,
   `frontend/`, `.github/`). Disco: C: 21 GB, D: 5,7 GB. Paginación 3.823 de 25.600 MB en uso.
