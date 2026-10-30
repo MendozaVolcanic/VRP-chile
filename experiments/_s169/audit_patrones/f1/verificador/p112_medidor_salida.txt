@@ -1,0 +1,40 @@
+mutar_evaluar_v750a.py: ids M distintos 85 (min M1, max M85); huecos []
+probar_evaluar_v750a.py: ids E distintos 77 (max E76)
+
+== mutar_evaluar_v750a_caidas_salida.txt: 19 lineas; mutaciones con estado 0; rango - a -; estados {}
+    # El medidor no alcanzó a escribir su resumen: sólo quedan las líneas en vivo. M34 cayó otra vez (batería muerta tras E27, sin línea).
+       IDENTIDAD: PASA | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (61)
+    # Tramo 2: 2026-10-27 11:34 a 12:27 UTC, --solo M34,M36 (aviso de disco de la coordinadora S165). Identidad y control CAIDA corren siempre.
+       IDENTIDAD: PASA | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (61)
+    IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (61)
+    M34 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | cobertura: una protegida SIN DATO ya no frena sola | == PRUEBAS: FALLAS 1 de 61 | escenarios que fallan ['E36']
+
+== mutar_evaluar_v750a_posicion_salida.txt: 25 lineas; mutaciones con estado 0; rango - a -; estados {}
+    # batería restringida a E61..E73 (--escenarios). No reemplaza la corrida completa del medidor (pendiente).
+    (batería restringida a --escenarios E61,E62,E63,E64,E65,E66,E67,E68,E69,E70,E71,E72,E73: «atrapada» es por aserción en esos escenarios; no reemplaza la corrida con la batería entera)
+    IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (13)
+    M63 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: P-cercano toma el alertado más LEJANO del cráter | == PRUEBAS: FALLAS 9 de 13 | escenarios que fallan ['E61', 'E62', 'E63', 'E64', 'E65', 'E66', 'E67', 'E68', 'E69
+    M64 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: P-pico toma el alertado más DÉBIL | == PRUEBAS: FALLAS 6 de 13 | escenarios que fallan ['E61', 'E62', 'E64', 'E65', 'E66', 'E68']
+    M65 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: el ancla de los brazos de posición es el centro de la grilla, no pos_crater | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E70']
+
+== mutar_evaluar_v750a_salida.txt: 129 lineas; mutaciones con estado 1; rango M44 a M44; estados {'cae': 1}
+       IDENTIDAD: PASA | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (61)
+    IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (61)
+    M1 | CAÍDA (tiene que ser ATRAPADA) | rc 1 | §6.2: una protegida perdida (P1) ya no entra a los motivos | (sin línea de pruebas) | escenarios que fallan ['E01']
+    M2 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6.2 (L1): P1 cuenta también las protegidas que K tampoco publica | == PRUEBAS: FALLAS 1 de 61 | escenarios que fallan ['E02']
+    M3 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6.2 (L3): P2 SIN SUSTRATO pasa | == PRUEBAS: FALLAS 1 de 61 | escenarios que fallan ['E05']
+    M4 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6.2: P2 BLOQUEA pasa | == PRUEBAS: FALLAS 1 de 61 | escenarios que fallan ['E24']
+
+== mutar_evaluar_v750a_salida_v1.txt: 34 lineas; mutaciones con estado 0; rango - a -; estados {}
+    IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (28)
+    M1 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6.2: una protegida perdida (P1) ya no entra a los motivos | == PRUEBAS: FALLAS 2 de 28 | escenarios que fallan ['E01', 'E26']
+    M2 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6.2 (L1): P1 cuenta también las protegidas que K tampoco publica | == PRUEBAS: FALLAS 1 de 28 | escenarios que fallan ['E02']
+    M3 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6.2 (L3): P2 SIN SUSTRATO pasa | == PRUEBAS: FALLAS 1 de 28 | escenarios que fallan ['E05']
+    M4 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6.2: P2 BLOQUEA pasa | == PRUEBAS: FALLAS 1 de 28 | escenarios que fallan ['E24']
+    M5 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6.2: la razón de M sin la banda 0,9 a 1,1 | == PRUEBAS: FALLAS 1 de 28 | escenarios que fallan ['E06']
+
+== segunda lectura, formato 'M<n> | ESTADO (tiene que ser X) | ... (N)'
+   mutar_evaluar_v750a_caidas_salida.txt: mutaciones 2 (M34 a M36); tamanos de bateria vistos [61]; fuera de lo esperado {}
+   mutar_evaluar_v750a_posicion_salida.txt: mutaciones 18 (M63 a M80); tamanos de bateria vistos [13]; fuera de lo esperado {}
+   mutar_evaluar_v750a_salida.txt: mutaciones 62 (M1 a M62); tamanos de bateria vistos [61]; fuera de lo esperado {'M1': ('CAÍDA', 'ATRAPADA'), 'M33': ('CAÍDA', 'ATRAPADA'), 'M34': ('CAÍDA', 'ATRAPADA'), 'M36': ('CAÍDA', 'ATRAPADA')}
+   mutar_evaluar_v750a_salida_v1.txt: mutaciones 28 (M1 a M28); tamanos de bateria vistos [28]; fuera de lo esperado {}

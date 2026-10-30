@@ -1,0 +1,163 @@
+diff --git a/scripts/clase_mirova.py b/scripts/clase_mirova.py
+index 7277c162b..277874e29 100644
+--- a/scripts/clase_mirova.py
++++ b/scripts/clase_mirova.py
+@@ -109,7 +109,7 @@ SENSORES_MINIMA = ("VIIRS375",)
+ MODOS_MINIMAS = ("SN", "SE", "original")
+ MODO_MINIMAS = "SN"
+ TIPO_MINIMA_SE = "ALERTA_MINIMA_SE"
+-VENTANA_S = 120   # la del pareo del etiquetador (banco_paridad.TOL_S)
++VENTANA_S = 120   # ÚNICA definición del pareo con MIROVA (±s); banco_paridad.TOL_S la importa (S159, I3)
+ 
+ 
+ def _instante(fecha_utc: str) -> datetime:
+@@ -176,6 +176,149 @@ def pasadas_protegidas(filas, umbral: float = UMBRAL_PROTEGIDA_MW, lectura: str
+     return {clave_pasada(f) for f in filas if alerta_protegida(f, umbral, lectura)}
+ 
+ 
++# ---------------------------------------------------------------------------------------------------------
++# S162, instrumento T4 y T6: UNA definicion de alerta y protegida, por PASADA.
++#
++# POR QUE. Las funciones de arriba juzgan fila por fila y agrupan por minuto. Dos defectos:
++# (1) si la tabla de MIROVA (latest.php, el canal mas creible, feedback S159) dice FALSO_POSITIVO o RUTINA en una
++#     pasada y el OCR de la imagen dice ALERTA de 1 MW o mas en esa misma pasada, la pasada salia protegida (riesgo
++#     latente de experiments/_s159/mirova_v1_auditoria/INFORME.md:246-250; 0 casos medidos ahi, latente);
++# (2) la fila de la tabla (05:18:02) y la del OCR (05:17:58) de una pasada caian en minutos distintos y contaban
++#     como dos pasadas.
++# Aca una pasada son las filas del mismo volcan y sensor a VENTANA_S segundos o menos de la PRIMERA (sin encadenar:
++# las pasadas reales estan a 40 min o mas). Si la tabla tiene la pasada, la tabla decide y el OCR solo se anota
++# (`ocr_contradice_tabla`); si no la tiene, decide el OCR (`solo_ocr`). Canal "tabla": el OCR no existe.
++# Las funciones de arriba NO cambian: las usan evaluadores con pre-registro sellado, que tienen que reproducirse.
++# Un evaluador nuevo usa resumir_pasadas + es_protegida, e informa el canal y la regla de minimas que uso.
++CANALES = ("union", "tabla")
++# A119: las filas del OCR no traen distancia medida hasta el 2026-06-13 (calibrada desde el 2026-06-11).
++HITO_OCR_DISTANCIA = "2026-06-13"
++# A119 y reference_ocr_imagen_de_otra_pasada: hasta aca las filas solo OCR de Suomi NPP pueden traer la distancia de
++# otra pasada (el VRP si es suyo). Mismo valor que evaluar_d25.HITO_SNPP (rama s159-evaluador-d25).
++HITO_OCR_SNPP = "2026-10-09"
++
++
++class PasadaMirova(NamedTuple):
++    volcano: str
++    sensor_bucket: str
++    instante: datetime          # el de la primera fila del grupo
++    estado: str                 # alerta | minima | fp | rutina | sin_geometria | otro
++    vrp_mw: Optional[float]     # mayor VRP de las filas que deciden con ese estado (None si ninguna lo trae)
++    dist_km: Optional[float]    # distancia de la fila de ese VRP
++    fuente: str                 # CONS u OCR: el canal que decidio
++    solo_ocr: bool              # la tabla no tiene la pasada
++    ocr_contradice_tabla: bool  # la tabla tiene la pasada y el OCR da otro estado
++    filas: tuple                # todas las filas del grupo (las del canal elegido)
++    # Verificador de #903 (hallazgo 2): tabla y OCR dicen alerta pero quedan a distinto lado de 1 MW. La tabla decide
++    # igual; esto solo deja auditarlo (0 casos el 2026-10-24).
++    ocr_cruza_1mw: bool = False
++
++
++def _estado(filas) -> tuple:
++    """Estado de un grupo de filas de UNA fuente, con el VRP y la distancia de la fila que lo define.
++
++    Mismo orden que `banco_paridad.etiquetar` (verificador de #903, hallazgo 1): alerta, minima, FALSO_POSITIVO,
++    RUTINA y recien entonces sin geometria, que nunca les gana.
++    """
++    por_estado = (
++        ("alerta", [f for f in filas if f.get("tipo") in TIPOS_ALERTA]),
++        ("minima", [f for f in filas if f.get("tipo") == TIPO_MINIMA_SE]),
++        ("fp", [f for f in filas if str(f.get("tipo") or "").startswith("FALSO_POSITIVO")]),
++        ("rutina", [f for f in filas if f.get("tipo") == "RUTINA"]),
++        ("sin_geometria", [f for f in filas if f.get("sin_geometria") or f.get("tipo") == "ALERTA_SIN_GEOMETRIA_OCR"]),
++    )
++    for estado, fs in por_estado:
++        if fs:
++            con_vrp = [f for f in fs if f.get("vrp_mw") is not None]
++            if not con_vrp:
++                return estado, None, None
++            top = max(con_vrp, key=lambda f: f["vrp_mw"])
++            return estado, top["vrp_mw"], top.get("dist_km")
++    return "otro", None, None
++
++
++def resumir_pasadas(filas, canal: str = "union", regla_minimas: str = MODO_MINIMAS,
++                    umbral_minima_mw: float = UMBRAL_MINIMA_MW, ventana_s: int = VENTANA_S) -> list:
++    """Filas normalizadas (referencia_mirova_unificada) a PasadaMirova. No modifica las filas de entrada."""
++    if canal not in CANALES:
++        raise ValueError("canal %r: tiene que ser uno de %s" % (canal, CANALES))
++    filas = list(filas)
++    if canal == "tabla":
++        filas = [f for f in filas if f.get("source") == "CONS"]
++    filas = aplicar_regla_minimas(filas, regla_minimas, umbral_minima_mw).filas
++    por_vs = defaultdict(list)
++    for f in filas:
++        por_vs[(f["volcano"], f["sensor_bucket"])].append((_instante(f["fecha_utc"]), f))
++    out = []
++    for (vol, sensor), lista in sorted(por_vs.items()):
++        lista.sort(key=lambda x: x[0])
++        grupos, actual, t0 = [], [], None
++        for t, f in lista:
++            if actual and (t - t0).total_seconds() > ventana_s:
++                grupos.append((t0, actual))
++                actual = []
++            if not actual:
++                t0 = t
++            actual.append(f)
++        if actual:
++            grupos.append((t0, actual))
++        for t0, grupo in grupos:
++            tabla = [f for f in grupo if f.get("source") == "CONS"]
++            ocr = [f for f in grupo if f.get("source") != "CONS"]
++            decide = tabla or ocr
++            estado, vrp, dist = _estado(decide)
++            e_ocr, v_ocr, _ = _estado(ocr) if (tabla and ocr) else (None, None, None)
++            contradice = bool(tabla and ocr and e_ocr != estado)
++            cruza = bool(estado == "alerta" and e_ocr == "alerta" and vrp is not None and v_ocr is not None
++                         and (vrp >= UMBRAL_PROTEGIDA_MW) != (v_ocr >= UMBRAL_PROTEGIDA_MW))
++            out.append(PasadaMirova(vol, sensor, t0, estado, vrp, dist, "CONS" if tabla else "OCR",
++                                    not tabla, contradice, tuple(grupo), cruza))
++    return out
++
++
++def es_protegida(p: PasadaMirova, lectura: str = "A", umbral: float = UMBRAL_PROTEGIDA_MW) -> bool:
++    """Lectura A (decide, D-4): alerta con VRP de `umbral` o mas. Lectura B (informa): cualquier estado salvo RUTINA."""
++    if p.vrp_mw is None or p.vrp_mw < umbral:
++        return False
++    if lectura == "A":
++        return p.estado == "alerta"
++    if lectura == "B":
++        return p.estado != "rutina"
++    raise ValueError(lectura)
++
++
++def protegida_de_crater(p: PasadaMirova, radio_km: float, plataforma: Optional[str] = None,
++                        umbral: float = UMBRAL_PROTEGIDA_MW) -> tuple:
++    """V375-A: (es_de_crater, motivos). Se informa AL LADO de la lectura A, nunca la reemplaza (programa §9.4).
++
++    Una protegida A es "de crater" si su distancia es de su propia pasada y cae dentro de `radio_km` (el
++    `inner_radius_km` del volcan). Motivos para no serlo, en orden: no_protegida; ocr_sin_distancia_medida (solo OCR
++    antes de HITO_OCR_DISTANCIA); ocr_snpp_antes_del_hito o plataforma_desconocida_antes_del_hito (solo OCR VIIRS
++    antes de HITO_OCR_SNPP; la referencia no trae plataforma, la da el record nuestro de la pasada); sin_distancia;
++    lejos_del_crater. Caso: las 5 protegidas que el port de 375 "pierde" (experiments/_s159/portes/INFORME.md P-5).
++    Los hitos son por dia UTC (verificador de #903, hallazgos 3 y 4): el arreglo de Suomi NPP llego el 2026-10-09 a las
++    14:01 UTC, asi que las filas de esa manana quedan como de crater (igual que evaluar_d25.HITO_SNPP); y el hito de
++    distancia se aplica tambien a MODIS (afecta 1 pasada, conservador).
++    """
++    if not es_protegida(p, "A", umbral):
++        return False, ("no_protegida",)
++    motivos = []
++    dia = p.instante.strftime("%Y-%m-%d")
++    if p.solo_ocr:
++        if dia < HITO_OCR_DISTANCIA:
++            motivos.append("ocr_sin_distancia_medida")
++        if p.sensor_bucket.startswith("VIIRS") and dia < HITO_OCR_SNPP:
++            if plataforma is None:
++                motivos.append("plataforma_desconocida_antes_del_hito")
++            elif "SNPP" in plataforma.upper():
++                motivos.append("ocr_snpp_antes_del_hito")
++    if p.dist_km is None:
++        motivos.append("sin_distancia")
++    elif p.dist_km > radio_km:
++        motivos.append("lejos_del_crater")
++    return not motivos, tuple(motivos)
++
++
+ def _float(v) -> Optional[float]:
+     try:
+         return float(str(v).strip())

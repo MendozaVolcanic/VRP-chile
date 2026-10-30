@@ -1,0 +1,21 @@
+analizador ../f1_v750/arbol/experiments/_s162_v750b/analizar_v750b.py sha256 LF 83b7159bd0666871b2e88a48c23feba4900ae28c24abd76b6cb3abf7b2593392
+lineas del bloque: 405 a 416
+aviso, rc_final = "", 0
+faltan = not (cob_ok and censo_ok)
+if faltan and a.leer_con_faltantes:
+    aviso, rc_final = f"[LEÍDO CON FALTANTES: {a.leer_con_faltantes}] ", 5
+if a.censo_omitido_solo_pruebas:
+    aviso, rc_final = "[SIN CENSO, NO VALE PARA EL RUN] " + aviso, 4
+cob_pasa = cob_ok or bool(a.leer_con_faltantes)
+# VB3-06: la bandera de pruebas sólo reemplaza un censo AUSENTE; un censo que corrió y falló cierra igual
+censo_pedido = bool(a.censo_art and a.censo_objetivos)
+censo_pasa = censo_ok or (a.censo_omitido_solo_pruebas and not censo_pedido) or bool(a.leer_con_faltantes)
+gen_ok = bool(nidx) and c_nulo == 0 and k_ok
+todo_ok = gen_ok and ctrl_roi and cob_pasa and censo_pasa
+----
+todo OK, sin banderas (control: ABIERTA)                                                        -> ('ABIERTA', 0, '')
+censo corrio y FALLO, sin banderas                                                              -> ('CERRADA', 0, '')
+bandera de pruebas + censo corrido y fallado (control VB3-06: CERRADA)                          -> ('CERRADA', 4, '[SIN CENSO, NO VALE PARA EL RUN] ')
+cobertura OK, censo corrio y FALLO, --leer-con-faltantes                                        -> ('ABIERTA', 5, '[LEÍDO CON FALTANTES: motivo X] ')
+cobertura INSUF, censo corrio y FALLO, --leer-con-faltantes (motivo de cobertura)               -> ('ABIERTA', 5, '[LEÍDO CON FALTANTES: faltan 3 pasadas] ')
+censo AUSENTE (no se pudo correr), --leer-con-faltantes (lo que permite el texto)               -> ('ABIERTA', 5, '[LEÍDO CON FALTANTES: censo no corre] ')
