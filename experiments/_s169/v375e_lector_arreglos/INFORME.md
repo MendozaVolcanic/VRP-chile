@@ -117,3 +117,47 @@ Cuenta: 111 mutaciones más la identidad y el control son 113 corridas de la bat
   corre `run_pipeline.py --profile sombra_codigo_mirova`; `pipeline/profile.py` l. 69 y 76 toman ese nombre;
   `pipeline/store.py` l. 93 lo escribe), pero no lo vi en un record, porque no hay ninguno y no se abren: SIN VERIFICAR
   contra datos. Si no calza, S8 marcará la lectura y lo dirá.
+
+## Ronda 2 (verificador limpio de S169, VL169-01 a 10)
+
+Hecha el 2026-10-30 desde las 03:40 UTC. El verificador (Sonnet, sobre `983f6f28d`) dejó SELLABLE CON CAMBIOS con un
+hallazgo de gravedad 3 y seis de gravedad 2 (`experiments/_s169/v375e_lector_verificador/INFORME.md`, rama
+`loop/activo`). Las decisiones de cómo cerrarlos son de la coordinadora de S169; las reglas están en el §11 antes que el
+código (tabla en §11.12; §1 a §10 siguen intactos: sha256 de las primeras 727 líneas sin CR `5af76cd5…348c`).
+
+**Merge de `origin/main`** (VL169-05): `dcec35a8c`, sin conflictos, sin rebase ni force. `c42ee0eb7` es ancestro
+(`git merge-base --is-ancestor`). S0 se recalculó sobre ese árbol: de los ocho archivos que ya fijaba sólo cambió
+`scripts/auto_audit_weekly.py` (`3afd3e65…` a `9c4da61e…`); se sumaron `pipeline/store.py`, `pipeline/profile.py`,
+`pipeline/f5_core.py` y `pipeline/profiles/mirova_equivalent.yaml`. El tag se corta sobre un descendiente de ese merge.
+
+| hallazgo | texto (§) | código (función) | aserción nueva | en rojo |
+|---|---|---|---|---|
+| VL169-01 (3) una lectura por nombre y carpeta, no por ventana | §11.8 «Una sola lectura por ventana» | `ventana_ya_leida`, `registro_local`, `registro_remoto`, `leer_registro`, `anotar_registro`; `main` se niega (rc 2, sin escribir) antes de cargar nada y anota el registro antes de imprimir la lectura | el caso de `probe_b1b.py` con parada de prueba 9 y 12: primera lectura corte 11-12; otra referencia en la misma carpeta, rc 2; en otra carpeta, rc 2 (registro local); desde otro checkout, rc 2 (registro de `loop/activo`); `loop/activo` sin resolver, rc 2; sin guardas, la otra referencia da otro N (el mecanismo existe); la línea del registro; `registro_remoto` real (None y []); la línea ilegible | sí: R16, R18, R21, R22 (G); R17, R19 (H); R20 (K); R23 y N05 (J) |
+| VL169-02 (2) caída contada como ATRAPADA | §11.10 y §11.12 | `seccion()` de la batería registra CAE y la batería sale 2; `correr()` del nulo da CAIDA con salida 2; `CONTROL_SECCION` | el control de caída (grupo F) | sí: `CONTROL_SECCION` sale con exit 2 y la sección del borde como CAE (F) |
+| VL169-03 (2) S8 marcaba por todo `pipeline/` | §11.4 S8 «Qué se compara» | `nombres_git`, `mostrar_git`, `ast_sin_docstrings`, `grillas_sin_roi`, `cambio_significativo`, `diff_git` | no marcan: sólo `roi_v750`, sólo docstring y comentario, un perfil ajeno; marcan: `x0`, clave nueva, volcán nuevo, grilla ilegible, código de un `.py` de la vía, `.py` ilegible, `.py` nuevo, los dos perfiles | sí: R05, R09 (G); R06, R10, R11 (H); R07, R08 (I) |
+| VL169-04 (2) fuera de `pipeline/` | §11.4 S8 | `RUTAS_REGIMEN` | marcan `volcanoes.yaml`, el workflow y `run_pipeline.py`; las rutas fijas | sí: R04 (G) |
+| precisión de la coordinadora: la base de S8 | §11.4 S8 «La base de la ventana» y «El hueco» | `base_regimen`; `control_s8` compara contra la base e informa `c42ee0eb7` contra la base | la base es el primer record de la vía de la primera noche; mismo régimen no marca; una noche del medio que cambia marca; `c42ee0eb7` contra la base se informa sin marcar; sin records de la vía, marca | sí: R24 a R27 (J); N16 (I) |
+| VL169-05 (2) objetos git | §11.4 S0 | merge; S0 recalculado | «c42ee0eb7 se resuelve en este checkout» | sin rotura: es procedimiento |
+| VL169-06 (2) VRP_PROFILE y módulos sin sha | §11.4 S0 | `cargar_deps` | VRP_PROFILE con otro perfil no carga; sin VRP_PROFILE lo fija; `store.py` distinto no carga; los nombres fijados | sí: R01, R02 (G); R03 (H) |
+| VL169-07 (2) S9 de cualquier sensor | §11.4 S9 | `main` filtra `sensor_bucket == "VIIRS375"` | con la fila tardía de MODIS y la última de VIIRS 375 el día del corte, S9 cae | sí: R12 (G) |
+| VL169-08 (1) sin contadores con control caído | §11.4 | `analizar` deja `parada` en la salida reducida; `main` y `para_json` los imprimen | con 2 noches cae S6, rc 3 y salen «noches 2 de 30» | sí: R13 (G); R14 (H); R15 (I) |
+| VL169-09 (1) rojo por grupos | §11.12 | ninguno | aceptado: lo cierra el nulo | no aplica |
+| VL169-10 (1) V04 sin marca | §11.10 | `EQUIVALENTES` en `mutar_sombra.py` | se rotula en la salida del nulo | no aplica |
+
+**El hueco que abre la base tomada de los datos** (escrito en §11.4 S8): el lector ya no comprueba que la primera noche
+haya corrido con el código pre-registrado; si antes del 2026-11-03 entra a `main` un cambio que altera la vía o K, la
+ventana sería coherente consigo misma y no marcaría. Queda a la vista porque la lectura informa, sin marcar, la
+comparación entre `c42ee0eb7` y la base, con la lista de archivos; juzgarla es de Nicolás.
+
+**Batería**: **227 de 227** sobre el árbol final, un proceso, en este computador, de las 06:17 a las 06:37 UTC del 2026-10-30 (salida en `experiments/_s168/v375e_sombra/probar_sombra_salida.txt`). Con el equipo cargado tarda de 15 a 20 minutos (antes, 7). Después de esa corrida no cambió ningún archivo de la batería ni del lector.
+
+**Nulo**: **no se corrió**. Tiene **138 mutaciones** (las 111 de la primera ronda, dos de ellas reescritas sobre el código nuevo, M34 y N05, y N16 ajustada a la base; y 27 de la ronda 2, R01 a R27), más la identidad y dos controles de caída (`CONTROL` y `CONTROL_SECCION`). `comprobar_unicas()` da vacío. V04 queda declarada equivalente en `EQUIVALENTES`. Cuenta: 141 corridas de la batería; a 7 minutos son unas 16 horas con un hilo, y con el equipo cargado como hoy (15 a 20 min) más de 35. Comando:
+
+```
+cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"   # o el worktree de la rama
+PYTHONIOENCODING=utf-8 C:/Users/nmend/AppData/Local/Programs/Python/Python312/python.exe -I experiments/_s168/v375e_sombra/mutar_sombra.py --hilos 1
+```
+
+**La comprobación en rojo de la ronda 2** (`ver_en_rojo.py`, grupos F a K, salidas `rojo_F.txt` a `rojo_K.txt`): las 27 roturas R y N05 y N16 salieron EN ROJO. Tres tropiezos, todos del instrumento y no del lector: G no arrancó la primera vez porque R22 y R23 tocan la misma línea (R23 pasó a J), y la segunda vez R01 hizo caer la sección S0 de la batería y arrastró a las demás (se arregló el `next` de esa prueba y G se repitió entera); I pasó el tope de 30 minutos porque R20 hace que cada corrida que debía rechazarse haga la lectura entera (R20 pasó sola a K, con tope de 90 minutos); y en H, N05 no se vio porque el registro local también rechazaba: se agregó una prueba en que sólo la guarda de la carpeta puede rechazar, y en J N05 sale EN ROJO.
+
+**Lo que quedó sin cerrar**: el nulo; un verificador corto de otro modelo sobre este delta; el tag (sobre un descendiente de `dcec35a8c`); el cenit del record de K (SIN VERIFICAR, igual que antes); el perfil `sombra_codigo_mirova` en un record real (SIN VERIFICAR contra datos); y el hueco de la base tomada de los datos, que queda informado pero no cerrado.
