@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 04:21 UTC (S169, vuelta 18): verificador F2 confirma; lista de arreglos del candado a MOD-D
+- Verificador F2 (Opus, subagente): `experiments/_s169/audit_patrones/f2/verificador/INFORME.md` (auditor y verificador
+  en `loop/activo`, `50a1b623a`). Los 12 se sostienen en todo o en parte. P2-01 baja a gravedad 3: una sola caída con
+  el host ya recuperado pierde 6 de 6 gránulos; con `reset_transient_breakers()` antes de cada intento bajan 5 de 6; se
+  arregla sólo en `probe_f4.py`. P2-03 medido: un evaluador cambiado para dar siempre PROPONER ADOPCIÓN, con el
+  manifiesto regenerado, pasa `comprobar`. VF2-01: el `evaluar_f4.py` del árbol (`8a1edc14`) no tiene el sha del §13
+  sellado (`c01e0824`), SOSPECHA de que es el cambio VS-01 a 08.
+- A `local_5b198297`: antes del tag, P2-01 (reset por intento, tope de 3 gránulos seguidos sin bajar, filas
+  `no_bajado` con flush y salida distinta de 0), P2-03 y VF2-02 (comparar contra el tag), P2-02, P2-07, P2-08
+  recomendado, y explicar VF2-01 en el §13. El resto, declarado en el §13.
+
 ### 2026-10-30 04:18 UTC (S169, vuelta 17): verificador F3 confirma; arreglo de la vigilancia de la sombra encargado
 - Verificador F3 (Opus, subagente): `experiments/_s169/audit_patrones/f3/verificador/INFORME_VERIFICADOR_F3.md`
   (auditor y verificador copiados a `loop/activo`, `f0cbb8564`). Los 15 confirmados al menos en parte; refutado el BOM
