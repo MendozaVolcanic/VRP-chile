@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 06:49 UTC (S169, vuelta 25): vigilancia ronda 3 lista; verificador corto en curso
+- `claude/s169-vigilancia-sombra` en `cd8b7074f` (comprobado con `ls-remote`; PR #928 con el CI `pytest` corriendo):
+  revisión de la ventana día por día desde el 2026-11-03 (record de la vía por día, volcán y sensor, o prueba de que no
+  hubo pasada tomada de la cobertura de esta corrida), tachado que falla cerrado, insumos corruptos con FALLA y
+  mensaje, cuatro pruebas de VR2-05. 56 de 56 de S169, 225 de 225 con guardias (4 saltadas preexistentes), nulo 48 de
+  48 atrapadas por aserción (`m4_mutaciones_r3.py`, lee el XML de pytest). Nada en `pipeline/`, `data/` ni `frontend/`.
+- Consecuencia aceptada por la coordinadora: un día con sólo records de K para un sensor cuenta como día perdido y deja
+  el job rojo hasta que sale de la ventana (pérdida real de datos de la vía; el issue del monitor refresca su cuerpo).
+- Verificador corto (Sonnet) sobre `f743d7b8f..cd8b7074f`, todo en primer plano; foco en si la cobertura de una corrida
+  cubre los días anteriores de la ventana (riesgo de falso rojo permanente).
+
 ### 2026-10-30 05:50 UTC (S169, vuelta 24): ronda 2 de la vigilancia con cambios; tercera ronda encargada
 - Verificador corto (Sonnet) sobre `16d9e894d..f743d7b8f`:
   `experiments/_s169/vigilancia_sombra_verificador/ronda2/INFORME_VERIFICACION_R2.md` (`339b54a97`; las copias de
