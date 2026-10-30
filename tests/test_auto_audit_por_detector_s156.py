@@ -217,7 +217,11 @@ def test_protegida_solo_ocr_de_suomi_npp_antes_del_hito_se_marca_sospechosa():
     lista = aa.alertas_protegidas(filas, recs, ("2026-08-20", "2026-10-19"), FRONTERA, diurna=lambda *a: False)
     assert [p["referencia_sospechosa"] for p in lista] == [True, False, False]
     flags = aa.flags_protegidas(lista, "K")
-    assert "referencia sospechosa" in flags[0] and "referencia sospechosa" not in flags[1]
+    # S166 (issue #915, decisión de Nicolás): la sospechosa ya no es flag, se informa aparte
+    # (tests/test_auto_audit_referencia_s166.py); las otras dos siguen siéndolo.
+    assert [f.split(" UTC")[0][-16:] for f in flags] == ["2026-09-29 04:54", "2026-10-12 04:54"]
+    assert not any("referencia sospechosa" in f for f in flags)
+    assert "referencia sospechosa" in aa.protegidas_aparte(lista, "K")[0]
 
 
 def test_protegidas_diurnas_no_entran():

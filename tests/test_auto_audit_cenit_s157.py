@@ -265,6 +265,14 @@ def _sin_claves_nuevas(latest):
     return d
 
 
+def _sin_claves_s166(latest):
+    """S166 (issue #915): `informado_aparte` es posterior al commit base. El insumo no trae protegidas, así
+    que queda vacío y todo lo demás queda idéntico (tests/test_auto_audit_referencia_s166.py)."""
+    d = copy.deepcopy(latest)
+    assert d.pop("informado_aparte")["protegidas"] == []
+    return d
+
+
 def test_no_regresion_las_claves_de_siempre_no_cambian(tmp_path, monkeypatch):
     """Antes = el mismo main() con el paso de estratos apagado. Todo lo que existía queda idéntico.
     Corre en el CI (no necesita historia git), a diferencia de la comparación contra el commit base."""
@@ -318,7 +326,7 @@ def test_no_regresion_contra_el_codigo_de_main_previo(tmp_path, monkeypatch):
     assert despues.pop("plataformas")["juzga_desde"] == {s: None for s in aa.SENSORS}
     for h in hist_d:
         assert h.pop("plataformas_juzga_desde") == {s: None for s in aa.SENSORS}
-    assert _sin_claves_nuevas(despues) == antes
+    assert _sin_claves_nuevas(_sin_claves_s166(despues)) == antes
     assert despues["verdict"] == antes["verdict"]
     assert despues["avisos_detector"] == antes["avisos_detector"]
     assert hist_d == hist_a
