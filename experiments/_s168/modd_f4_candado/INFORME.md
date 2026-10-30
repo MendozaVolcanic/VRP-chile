@@ -32,20 +32,24 @@ Hallazgos VS del tercer verificador cerrados en la batería y el medidor, sin to
 
 La batería pasa 66 de 66. Contra el evaluador vacío, 66 de 66 fallan por aserción y ninguno cae.
 
-## Lo que falta, en orden
+## Estado al tag (2026-10-30)
 
-1. **Esperar el cupo pesado.** Lo ocupa la lectura de V375-E (PID 15924, `leer_posicion_v375e.py`). Antes de lanzar,
-   comprobarlo con `Get-CimInstance Win32_Process`. MOD-D tiene un solo cupo, y el medidor de V750-A ocupa el otro.
-2. **Ensayo en seco.** Comando:
-   `python experiments/_s166_modd_f4/ensayo_en_seco_f4.py > experiments/_s166_modd_f4/ensayo_en_seco_f4_salida.txt 2>&1`.
-3. **Mutaciones reformadas**: 86 mutaciones más 4 controles, con `python mutar_evaluar_f4.py --paralelo 1`, `TMP` en
-   `D:\vrp-trabajo\temporales\s168_mut` y el árbol quieto (sha256 antes y después). Duran unas 9 h, a unos 6 min por copia.
-   **`mutar_evaluar_f4_salida.txt` es todavía el de la corrida de `314cec809`** (82 mutaciones, batería de 63): queda
-   viejo hasta esta corrida.
-4. Poner al día el §13 del pre-registro con la corrida nueva y regenerar el manifiesto
-   (`manifiesto_candado_f4.py --escribir`). Después, el tag del candado y su verificador limpio.
-5. El humo de unas 25 pasadas necesita el workflow en `main`, o sea un merge con una frase de Nicolás que nombre el
-   merge. Nada se despachó.
+**Tag `s169-modd-f4-candado`** (el commit lo da `git rev-parse s169-modd-f4-candado^{commit}`). Antes del tag se hizo:
+- Ensayo en seco: ensayo 1 PROPONER ADOPCIÓN sin controles en rojo; ensayo 2 INDECIDIBLE por procedencia, como debe
+  (`ensayo_en_seco_f4_salida.txt`).
+- Mutaciones del evaluador reformadas: 86 de 86 atrapadas por aserción sin caídas, cuatro controles como deben, árbol
+  quieto (`mutar_evaluar_f4_salida.txt`; §13 del pre-registro).
+- Arreglos de la auditoría S169 (VC169-01, P2-01, P2-02, P2-03 con VF2-02, P2-07 y P2-08) con sus pruebas:
+  `probar_descarga_f4_salida.txt` 5 de 5, `probar_externos_f4_salida.txt` 4 de 4, `probar_probe_f4_salida.txt` 23 de
+  23 escenarios y 20 de 20 mutaciones del arnés por aserción sin caídas. VF2-01 explicado en el §13. Lo declarado, en
+  el §13 ter.
+- Manifiesto regenerado sobre el commit del tag: 71 archivos, `--comprobar` OK (`MANIFIESTO_CANDADO_F4.json`).
+
+Falta, después del domingo 2026-11-01 12:00 UTC (uso mínimo de tokens hasta entonces):
+1. Verificador limpio del candado.
+2. PR a `main` del workflow nuevo: P2-08 fijó versiones y su sha256 LF es `4047c55a64ef855b13ebdf6f56aadba7b5bdb4ef223cd64770b81a04886489a7`.
+   El de `main` (#927) es el anterior. Merge sólo con una frase de Nicolás.
+3. Humo de unas 25 pasadas (`humo_f4.txt`) con `--ref s169-modd-f4-candado`, y recién entonces el A/B completo.
 
 ## Riesgos que el humo tiene que mirar (declarados por quienes escribieron el arnés y la identidad)
 
