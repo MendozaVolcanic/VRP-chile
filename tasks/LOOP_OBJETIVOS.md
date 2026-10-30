@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-30 09:50 UTC (S169, vuelta 31): las dos pruebas de #928 en GitHub, verdes
+### 2026-10-30 09:49 UTC (S169, vuelta 31): las dos pruebas de #928 en GitHub, verdes
 - Run 41034796854 (`sombra-codigo-mirova.yml`, `medir=true`, Láscar, 2026-10-28 a 30, `77bbb7c9c`): success. Láscar
   corrió todos sus pasos (commit omitido por `medir`); los otros diez se saltaron por el filtro. Revisión: «27 records,
   27 escritos en esta corrida (… 27 de la vía), 0 de otra fuente, 0 errores de gránulo», «días juzgados: ninguno
