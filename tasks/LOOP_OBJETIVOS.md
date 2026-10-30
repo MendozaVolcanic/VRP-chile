@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-30 00:50 UTC aprox. (S169, vuelta 5): merge del workflow del humo autorizado con condición; PR #927
+### 2026-10-30 00:47 UTC (S169, vuelta 5): merge del workflow del humo autorizado con condición; PR #927
 - Frase de Nicolás: «Sí, mergéalo» (botón de «¿Me autorizas a mergear el workflow del humo de MOD-D cuando su
   verificador diga que es mergeable?», mensaje: mergear `probe-s168-modd-f4.yml` a `main` cuando el verificador
   limpio diga que es mergeable y el CI esté verde).
