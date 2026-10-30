@@ -1,0 +1,46 @@
+grupo B: roturas ['V04', 'V05', 'V06', 'N01', 'N05', 'N09', 'N10', 'N15', 'N22', 'N25', 'N28', 'N29', 'N31', 'N32', 'N33', 'N34', 'N36']
+batería: exit 1 ['RESULTADO: 166 de 190']
+stderr (cola): ['probar_sombra.py: error: the following arguments are required: --commit']
+V04 NO SE VIO: «cableado (VS168-08): P2 PIERDE»
+V05 EN ROJO: «cableado (VS168-08): la curva»
+V06 NO SE VIO: «(d) (VS168-07): un control de la curva de K»
+N01 EN ROJO: «main (VS168-01): con --hasta posterior»
+N05 EN ROJO: «main (VS168-01): leer otra vez el mismo corte»
+N09 EN ROJO: «main VS168-02: con S1 caído»
+N10 EN ROJO: «(a) (VS168-03): una protegida SIN DATO que K publica»
+N15 EN ROJO: «criterios (S8): con la marca de régimen (b)»
+N22 EN ROJO: «S9 (VS168-05): tabla hasta 1 día»
+N25 EN ROJO: «S10 (VS168-11): en analizar»
+N28 EN ROJO: «(c) (VS168-06): M SIN SUSTRATO»
+N29 EN ROJO: «VS168-07: los controles de la curva de K se calculan»
+N31 EN ROJO: «borde mixto (VS168-09): una lejana»
+N32 EN ROJO: «estado_final (VS168-09): la vuelta mixta»
+N33 EN ROJO: «main (VS168-12): las alertas de MIROVA sin record»
+N34 EN ROJO: «lejanas (VS168-12): far_ocr»
+N36 EN ROJO: «main (VS168-13)»
+
+aserciones en FALLA (24):
+  S9 (VS168-05): tabla hasta 1 día después del corte cae
+  S10 (VS168-11): en analizar, una pasada con alertados sin distancias hace caer la lectura []
+  S9 (VS168-05): en analizar, con la parada alcanzada la referencia fresca hace caer la lectura ([], '2026-11-15')
+  lejanas (VS168-12): far_ocr se informa por brazo y para K
+  VS168-07: los controles de la curva de K se calculan
+  cableado (VS168-08): la curva del brazo REPRODUCE y la de K sin sustrato dan (d) CUMPLE (orden de los argumentos de estado_d_sombra) {'a': 'CUMPLE', 'b': 'NO CU
+  (c) (VS168-06): M SIN SUSTRATO en la sombra da (c) DECIDE NICOLAS, no NO CUMPLE {'a': 'CUMPLE', 'b': 'NO CUMPLE', 'c': 'NO CUMPLE', 'd': 'DECIDE NICOLAS', 'esta
+  S8 (VS168-04): con la marca de régimen los CUMPLE de (c) y (d) pasan a DECIDE NICOLAS {'a': 'CUMPLE', 'b': 'CUMPLE', 'c': 'CUMPLE', 'd': 'DECIDE NICOLAS', 'esta
+  (a) (VS168-03): una protegida SIN DATO que K publica veta []
+  S8 en analizar (VS168-04): un record de otro régimen marca la lectura y sus CUMPLE de (b) pasan a DECIDE NICOLAS ([], {'sin_cambio': False, 'detalle': {'shas': 
+  S8 en analizar: la marca se aplica a los brazos que informan también (no imprimen estado, pero el JSON lo omite)
+  borde mixto (VS168-09): una lejana de borde en far entra
+  estado_final (VS168-09): la vuelta mixta que cambia el estado da DECIDE NICOLAS aunque la conjunta no
+  criterios (S8): con la marca de régimen (b), (c) y (d) CUMPLE pasan a DECIDE NICOLAS y (a) queda {'a': 'CUMPLE', 'b': 'CUMPLE', 'c': 'CUMPLE', 'd': 'CUMPLE', 'e
+  (c) (VS168-06): estado_c_sombra da DECIDE NICOLAS sólo con SIN SUSTRATO
+  main (VS168-02): antes de la parada los controles salen sin detalle (ni conteos ni nombres) ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e09173
+  main (VS168-03): la protegida SIN DATO que K publica veta a cercano y el paquete no cumple []
+  main (VS168-12): las alertas de MIROVA sin record de K se informan {}
+  main (VS168-13): radiante y P-sinfiltro sin criterios ni estado, en pantalla y en el JSON 1
+  main (VS168-01): leer otra vez el mismo corte sale 2 y no toca la lectura 0
+  main (VS168-01): con --hasta posterior lee sólo hasta la noche de la parada y lo dice (3, [WindowsPath('C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/V
+  main (VS168-01): después del corte nada entra (la protegida SIN DATO del 11-10 sí, la alerta del 11-29 no) 2026-11-15
+  main VS168-02: con S1 caído (2026-11-02) no salen conteos ni nombres de pasadas 03e6e091738f525ed4a7ce13', 'Villarrica': '4112b9a18df6832f78b3cd60888edc481078e0
+  main VS168-02: con S1 caído (2026-11-10) no salen conteos ni nombres de pasadas 103e6e091738f525ed4a7ce13', 'Copahue': '4112b9a18df6832f78b3cd60888edc481078e0c1
