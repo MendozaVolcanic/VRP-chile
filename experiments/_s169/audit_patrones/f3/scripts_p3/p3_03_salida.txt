@@ -1,0 +1,17 @@
+== B1a: referencia VIEJA (ninguna fila en la ventana), control y brazo con un record de 11-05
+   (0, 'COBERTURA CONTRA MIROVA: COBERTURA OK', '[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent\n')
+== B1b: CONTROL POSITIVO: referencia al dia (alerta 3,2 MW de 11-05), control tiene el record y el brazo NO
+   (2, 'COBERTURA CONTRA MIROVA: INVALIDO POR INSTRUMENTO', '[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent\n')
+== B1c: referencia al dia, brazo y control con record: debe ser OK
+   (0, 'COBERTURA CONTRA MIROVA: COBERTURA OK', '[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent\n')
+== B2: carpeta del snapshot versionado (nombres reales del repo) pasada a --ref
+   nombre del respaldo en el snapshot: registro_vrp_consolidado_respaldo_20260408.csv | nombre que busca evaluador_comun: respaldo_20260408.csv
+   el nombre del snapshot coincide con el que busca evaluador_comun: False
+   filas con la rutina de evaluador_comun.main: 1 | filas si se pasa el respaldo por su nombre real: 2
+== B3a: consolidado con BOM utf-8 (primer encabezado '\ufeffVolcan')
+   filas leidas con BOM: 0 | sin BOM (control): 1
+== B3b: VRP_MW = 'nan' en una fila de alerta (lectura A, umbral 1 MW)
+   VRP_MW='nan'  -> _float=nan    alerta_protegida(A)=True
+   VRP_MW=''     -> _float=None   alerta_protegida(A)=False
+   VRP_MW='0.4'  -> _float=0.4    alerta_protegida(A)=False
+   VRP_MW='1.2'  -> _float=1.2    alerta_protegida(A)=True
