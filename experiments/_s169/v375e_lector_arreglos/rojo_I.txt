@@ -1,0 +1,30 @@
+grupo I: roturas ['R07', 'R08', 'R15', 'N16']
+batería: exit 1 ['RESULTADO: 206 de 227']
+stderr (cola): ['probar_sombra.py: error: the following arguments are required: --commit']
+R07 EN ROJO: «S8 (VL169-03): un perfil ajeno»
+R08 EN ROJO: «S8 (VL169-03): un cambio sólo en roi_v750»
+R15 EN ROJO: «main: los contadores de la parada sí salen»
+N16 EN ROJO: «S8 (VS168-04): compara contra»
+
+aserciones en FALLA (21):
+  S8 (VS168-04): compara contra la base (un record de otro commit sin cambios contra la base no marca)
+  S8 (base de la ventana): si cambia una noche del medio, marca {'base': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'shas': {'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  S8 (VL169-03): un cambio sólo en roi_v750 no marca ['pipeline/grillas_mirova.yaml']
+  S8 (VL169-03): un perfil ajeno no marca ['pipeline/profiles/experimental.yaml']
+  S8 (VL169-03 y 04): un cambio en x0 de la grilla marca ['pipeline/grillas_mirova.yaml', 'pipeline/profiles/experimental.yaml']
+  S8 (VL169-03 y 04): una clave nueva en la grilla marca ['pipeline/grillas_mirova.yaml', 'pipeline/profiles/experimental.yaml']
+  S8 (VL169-03 y 04): un volcán nuevo en la grilla marca ['pipeline/grillas_mirova.yaml', 'pipeline/profiles/experimental.yaml']
+  S8 (VL169-03 y 04): una grilla ilegible marca ['pipeline/grillas_mirova.yaml', 'pipeline/profiles/experimental.yaml']
+  S8 (VL169-03 y 04): un cambio de código en un .py de la vía marca ['pipeline/grillas_mirova.yaml', 'pipeline/mirova_v750_codigo.py', 'pipeline/profiles/experime
+  S8 (VL169-03 y 04): un .py que no se puede leer marca ['pipeline/grillas_mirova.yaml', 'pipeline/mirova_v750_codigo.py', 'pipeline/profiles/experimental.yaml']
+  S8 (VL169-03 y 04): un cambio en mirova_equivalent.yaml marca ['pipeline/grillas_mirova.yaml', 'pipeline/profiles/experimental.yaml', 'pipeline/profiles/mirova_
+  S8 (VL169-03 y 04): un cambio en sombra_codigo_mirova.yaml marca ['pipeline/grillas_mirova.yaml', 'pipeline/profiles/experimental.yaml', 'pipeline/profiles/somb
+  S8 (VL169-03 y 04): un cambio en volcanoes.yaml marca ['pipeline/grillas_mirova.yaml', 'pipeline/profiles/experimental.yaml', 'volcanoes.yaml']
+  S8 (VL169-03 y 04): un cambio en el workflow de la sombra marca ['pipeline/grillas_mirova.yaml', 'pipeline/profiles/experimental.yaml', '.github/workflows/sombr
+  S8 (VL169-03 y 04): un cambio de código en run_pipeline.py marca ['pipeline/grillas_mirova.yaml', 'pipeline/profiles/experimental.yaml', 'scripts/run_pipeline.p
+  S8 (VL169-03): un .py nuevo en pipeline/ marca
+  main (VS168-01): antes de la parada no hay población, criterios, estado ni lecturas ("481078e0c103e6e091738f525ed4a7ce13', 'Chaiten': '4112b9a18df6832f78b3cd608
+  main: los contadores de la parada sí salen ("18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PuyehueCordonCaulle': '4112b9a18df6832f78b3cd60888edc4
+  main VA168-01: desde 2026-11-02 sale 3 sin nada de la población (3, "7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce
+  main VA168-01: desde 2026-11-10 sale 3 sin nada de la población (3, "525ed4a7ce13', 'Llaima': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13'
+  main (VL169-08): con 2 noches cae S6, sale 3 y salen los contadores de la parada, sin lectura (3, "5ed4a7ce13', 'NevadosDeChillan': '4112b9a18df6832f78b3cd60888
