@@ -1,0 +1,42 @@
+grupo C: roturas ['V01', 'V02', 'V03', 'N02', 'N03', 'N08', 'N11', 'N12', 'N14', 'N23', 'N30', 'N35']
+batería: exit 1 ['RESULTADO: 165 de 190']
+stderr (cola): ['probar_sombra.py: error: the following arguments are required: --commit']
+V01 EN ROJO: «S6 (VS168-08): en analizar»
+V02 EN ROJO: «(b) sin neg_pub (VS168-08)»
+V03 EN ROJO: «cableado (VS168-08): M EMPEORA»
+N02 EN ROJO: «VS168-01: el corte que decide es la noche»
+N03 EN ROJO: «VS168-01: antes de la parada (30 y 40)»
+N08 EN ROJO: «main (VS168-02): antes de la parada los controles»
+N11 EN ROJO: «(a) (VS168-03): una SIN DATO que K calla»
+N12 EN ROJO: «main (VS168-03): la protegida SIN DATO»
+N14 EN ROJO: «S8 en analizar (VS168-04)»
+N23 EN ROJO: «S9 y S10 corren con la parada»
+N30 EN ROJO: «borde: analizar lista las dos pasadas»
+N35 EN ROJO: «main (VS168-13)»
+
+aserciones en FALLA (25):
+  VS168-01: antes de la parada (30 y 40) analizar no lee: sólo controles y contadores ([], ['controles', 'corte', 'hasta_pedido', 'parada_alcanzada', 'parada', 'b
+  S6 (VS168-08): en analizar, S6 sin sustrato hace caer la lectura []
+  S9 (VS168-05): en analizar, con la parada alcanzada la referencia fresca hace caer la lectura ([], '2026-11-20')
+  VS168-01: el corte que decide es la noche de la parada (recortado desde el 2026-11-20) ('2026-11-20', {'noches': 12, 'alertas': 25, 'alcanzada': True, 'noche': 
+  S9 y S10 corren con la parada alcanzada
+  (a): radiante calla la protegida LEJANA que K publica y no cumple [('Lascar', '2026-11-05 08:00'), ('Lascar', '2026-11-04 05:00'), ('Lascar', '2026-11-05 05:00'
+  (a): cercano no calla ninguna y cumple
+  (d) por valor (VS168-08): curva sin sustrato da (d) DECIDE NICOLAS y el estado también ({'veredicto': 'SIN SUSTRATO', 'noches': 0, 'noches_nulo': 12, 'd': (nan,
+  cableado (VS168-08): M EMPEORA da (c) NO CUMPLE {'a': 'CUMPLE', 'b': 'NO CUMPLE', 'c': 'CUMPLE', 'd': 'CUMPLE', 'estado': 'NO CUMPLE'}
+  (c) (VS168-06): M SIN SUSTRATO en la sombra da (c) DECIDE NICOLAS, no NO CUMPLE {'a': 'CUMPLE', 'b': 'NO CUMPLE', 'c': 'CUMPLE', 'd': 'CUMPLE', 'estado': 'NO CU
+  (a) (VS168-03): una SIN DATO que K calla no veta pero se lista con las otras [('Lascar', '2026-11-29 05:00', 'K publica'), ('Lascar', '2026-11-29 06:00', 'K cal
+  (b) sin neg_pub (VS168-08): el silencio queda SIN SUSTRATO, sin lecturas, y el CUMPLE se rotula por falta de evidencia ('NO RESUELTO', {'a': 'CUMPLE', 'b': 'CUM
+  S8 en analizar (VS168-04): un record de otro régimen marca la lectura y sus CUMPLE de (b) pasan a DECIDE NICOLAS ([], {'sin_cambio': False, 'detalle': {'shas': 
+  borde: analizar lista las dos pasadas y calcula la vuelta conjunta y la mixta ([], [('Lascar', '2026-11-06 08:00'), ('Lascar', '2026-11-07 08:00')], {'conjunta'
+  main (VS168-02): antes de la parada los controles salen sin detalle (ni conteos ni nombres) 18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'Plancho
+  main: la lectura que decide sale 0 y se llama lectura_sombra_corte_<N> (0, [WindowsPath('C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile/.claud
+  main: los controles S1 a S10 en verde {'S1': {'ok': True, 'detalle': {'desde': '2026-11-03', 'hasta': '2026-11-30', 'fuera_de_ventana': [], 'repetidas': 0}}, 'S
+  main (VS168-03): la protegida SIN DATO que K publica veta a cercano y el paquete no cumple [['Lascar', '2026-11-04 05:00'], ['Lascar', '2026-11-05 05:00'], ['La
+  main (VS168-13): radiante y P-sinfiltro sin criterios ni estado, en pantalla y en el JSON 3
+  main (VS168-01): leer otra vez el mismo corte sale 2 y no toca la lectura 0
+  main (VS168-01): con --hasta posterior lee sólo hasta la noche de la parada y lo dice (0, [WindowsPath('C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/V
+  main (VS168-05): con la tabla a 1 día del corte S9 cae, sale 3 y no escribe la lectura del corte (0, [WindowsPath('C:/Users/nmend/OneDrive/Escritorio/claude/Vol
+  main VS168-02: con S1 caído (2026-11-02) no salen conteos ni nombres de pasadas 112b9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeter
+  main VS168-02: con S1 caído (2026-11-10) no salen conteos ni nombres de pasadas 9a18df6832f78b3cd60888edc481078e0c103e6e091738f525ed4a7ce13', 'PlanchonPeteroa':
+  main VS168-02: con S7 caído sale 3, sólo el motivo, sin conteos por clase ni nombres de pasadas sDeChillan': '4112b9a18df6832f78b3cd60888edc481078e0c103e6e09173
