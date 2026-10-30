@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 05:50 UTC (S169, vuelta 24): ronda 2 de la vigilancia con cambios; tercera ronda encargada
+- Verificador corto (Sonnet) sobre `16d9e894d..f743d7b8f`:
+  `experiments/_s169/vigilancia_sombra_verificador/ronda2/INFORME_VERIFICACION_R2.md` (`339b54a97`; las copias de
+  árbol `arbol_mut*` se dejaron fuera del repo, en `D:/vrp-trabajo/temporales/s169_fuera_del_repo/`). MERGEABLE CON
+  CAMBIOS. VR2-01 (gravedad 2): un día perdido sólo se marca en su propia corrida y desde el día siguiente es NOTA; con
+  records del día siguiente el job sale verde. VR2-02: la víspera tapa un catálogo vacío de hoy. VR2-03 a 05, gravedad
+  1 (el tachado falla abierto; la línea de K no sale con insumos corruptos; cuatro mutaciones sobreviven). El agente
+  repetía su informe cada pocos minutos esperando su trabajo de fondo: se detuvo con `TaskStop`, sin procesos vivos.
+- Tercera ronda al agente del arreglo, con un cambio de diseño: además de «esta corrida escribió algo», juzgar el
+  contenido de la ventana día por día después del commit (un record de la vía por día, volcán y sensor, o prueba
+  escrita de que no hubo pasada); tachado que falla cerrado; pruebas para VR2-05; nulo que cuente sólo aserciones.
+
 ### 2026-10-30 05:33 UTC (S169, vuelta 23): vigilancia ronda 2 lista; PR #928 abierto; verificador corto en curso
 - `claude/s169-vigilancia-sombra` en `f743d7b8f` (comprobado con `ls-remote`): VV169-01 a 05, 07 y 08 aplicados;
   `scripts/tachar_secreto_log.py` tacha el token antes de subir el artefacto. 39 de 39 nuevas, 208 de 208 con
