@@ -161,3 +161,38 @@ PYTHONIOENCODING=utf-8 C:/Users/nmend/AppData/Local/Programs/Python/Python312/py
 **La comprobación en rojo de la ronda 2** (`ver_en_rojo.py`, grupos F a K, salidas `rojo_F.txt` a `rojo_K.txt`): las 27 roturas R y N05 y N16 salieron EN ROJO. Tres tropiezos, todos del instrumento y no del lector: G no arrancó la primera vez porque R22 y R23 tocan la misma línea (R23 pasó a J), y la segunda vez R01 hizo caer la sección S0 de la batería y arrastró a las demás (se arregló el `next` de esa prueba y G se repitió entera); I pasó el tope de 30 minutos porque R20 hace que cada corrida que debía rechazarse haga la lectura entera (R20 pasó sola a K, con tope de 90 minutos); y en H, N05 no se vio porque el registro local también rechazaba: se agregó una prueba en que sólo la guarda de la carpeta puede rechazar, y en J N05 sale EN ROJO.
 
 **Lo que quedó sin cerrar**: el nulo; un verificador corto de otro modelo sobre este delta; el tag (sobre un descendiente de `dcec35a8c`); el cenit del record de K (SIN VERIFICAR, igual que antes); el perfil `sombra_codigo_mirova` en un record real (SIN VERIFICAR contra datos); y el hueco de la base tomada de los datos, que queda informado pero no cerrado.
+
+## Ronda 3 (verificador corto de la ronda 2, VL2-01 a 06)
+
+Hecha el 2026-10-30 desde las 07:25 UTC. El verificador (Sonnet, sobre `9d76af91b`) dio LISTO PARA EL NULO CON CAMBIOS
+(`D:/vrp-trabajo/temporales/s169_ver_lector_r2/INFORME.md`, fuera del repo). Reglas en §11.8 (procedimiento) y §11.13
+del pre-registro, escritas antes que el código.
+
+| hallazgo | texto (§) | código | prueba | en rojo |
+|---|---|---|---|---|
+| VL2-01 (4) un TimeoutExpired hundía el nulo | §11.13 «El nulo» | `mutar_sombra.py`: `correr` devuelve CAIDA ante `TimeoutExpired`; `TOPE_S = 5400`; `anotar` escribe cada línea al disco con flush y fsync; `leer_hechas` y la retoma | `probar_mutar_r3.py` (sin batería, `subprocess.run` reemplazado): el tope da CAIDA sin lanzar; cada mutación queda escrita; la segunda corrida sólo corre identidad, controles y la mutación nueva; el resumen cuenta todo el archivo | 12 de 12 (`probar_mutar_r3_salida.txt`) |
+| VL2-02 (3) el nulo seguía con la identidad caída | §11.13 «El nulo» | `en_la_rama`; aborta con 2 si la identidad no pasa o si un control no sale CAIDA; `--arranque`; salida 1 si sobrevive una no equivalente | mismas pruebas: identidad que falla, control que no cae y fuera de la rama abortan con 2 sin mutar; sólo la equivalente viva da 0 | arranque real (abajo): identidad PASA, CONTROL y CONTROL_SECCION CAIDA, sale 0 |
+| VL2-03 (2) otro checkout | §11.8 procedimiento, puntos 1 y 3 | ninguno (procedimiento) | no aplica | no aplica |
+| VL2-04 (2) la lectura salía por pantalla | §11.8 procedimiento, punto 2 | `leer_sombra_v375e.py`: `PANTALLA` silencia `pr` en la lectura que decide; por pantalla, controles sin detalle, N y ruta | batería: «la lectura que decide no sale por pantalla», «por pantalla salen los controles sin detalle, el N y la ruta», «la lectura completa sí está en el archivo» | sí: R28 (grupo L, `rojo_L.txt`, 228 de 230 con las aserciones de pantalla en FALLA) |
+| VL2-05 (2) S8 marca de más | §11.13 riesgos aceptados | ninguno | no aplica | no aplica |
+| VL2-06 (1) S9 de cualquier volcán | §11.13 riesgos aceptados | ninguno | no aplica | no aplica |
+
+**Batería**: **230 de 230** sobre el árbol final, un proceso, de las 07:31 a las 07:42 UTC del 2026-10-30 (salida en `experiments/_s168/v375e_sombra/probar_sombra_salida.txt`).
+
+**Arranque del nulo** (`mutar_sombra.py --arranque`, de las 07:53 a las 08:13 UTC, HEAD `d8dbc0b1c` en `claude/s169-v375e-lector`; salida en `experiments/_s168/v375e_sombra/mutar_sombra_arranque_salida.txt`): IDENTIDAD PASA; CONTROL sale CAIDA (`ModuleNotFoundError`); CONTROL_SECCION sale CAIDA (la sección del borde lanza); «ARRANQUE OK», salida 0. No se mutó nada. El archivo de resultados del nulo (`mutar_sombra_salida.txt`) no existe todavía: el nulo parte limpio.
+
+**El nulo** tiene **139 mutaciones** (las 138 de la ronda 2 y R28, que apaga el silencio de la lectura), más la identidad
+y los dos controles: 142 corridas. No se corrió; sólo se corrió el arranque (`--arranque`), que se detiene después de la
+identidad y los dos controles. Comando para lanzarlo, desde el checkout de la rama `claude/s169-v375e-lector` (o el del
+tag, que desciende de `dcec35a8c`):
+
+```
+cd "<checkout de claude/s169-v375e-lector>"
+PYTHONIOENCODING=utf-8 C:/Users/nmend/AppData/Local/Programs/Python/Python312/python.exe -I experiments/_s168/v375e_sombra/mutar_sombra.py --hilos 2
+```
+
+Archivo de resultados: `experiments/_s168/v375e_sombra/mutar_sombra_salida.txt` dentro de ese checkout (en este
+worktree, `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\agent-a105e5b5e327fb68f\experiments\_s168\v375e_sombra\mutar_sombra_salida.txt`).
+Cada mutación se agrega al terminar; si el nulo se corta, el mismo comando retoma y se salta las ya escritas. Sale 0 si
+no sobrevive ninguna no equivalente, 1 si sobrevive alguna, 2 si abortó. Con dos hilos y el equipo libre son unas 8 h
+(142 corridas de unos 7 minutos, de a dos); con el equipo cargado como hoy, de 18 a 24 h.
