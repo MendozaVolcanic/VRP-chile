@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 00:20 UTC aprox. (S169, vuelta 2): Nicolás elige cercano para V375-E; MOD-D en mutaciones
+- Frase de Nicolás: «Cercano decide» (botón de la pregunta «¿Qué brazo de posición lleva V375-E a la sombra?»: cercano
+  decide en la sombra, como dice la regla sellada, y radiante se informa al lado, rotulado como posterior a la
+  lectura). Reenviado a `local_438070ff`: nota posterior a la lectura en el pre-registro, comprobar si la sombra guarda
+  lo necesario para calcular cercano fuera de `pipeline/` (si no, es un PR con A45 que va a Nicolás), y el lector de
+  la sombra (§9.8) con mutaciones, tag y verificador antes del 2026-11-03.
+- MOD-D: ensayo en seco hecho (5,8 min; ensayo 1 PROPONER ADOPCIÓN sin controles en rojo, ensayo 2 con cabecera de otro
+  commit INDECIDIBLE por procedencia); mutaciones reformadas desde las 00:15 UTC (`mutar_evaluar_f4.py --paralelo 1`,
+  PID 16420, ~9 h según la sesión). Tag anunciado: `s169-modd-f4-candado`.
+- Cupos: MOD-D y el medidor de V750-A (PID 1324). D: 5,7 GB.
+
 ### 2026-10-30 00:13 UTC (S169, vuelta 1): V375-E leída y verificada; decisión del brazo a Nicolás
 - Rama `claude/s168-v375e-sello` en `92b3b4208`: `experiments/_s168/v375e_lectura_lejana/INFORME.md` y su verificador
   (Sonnet 5.5, contexto limpio, re-corrida idéntica): **CONFIRMADA CON RESERVAS**, 0 de gravedad 3, 5 de gravedad 2
