@@ -801,7 +801,8 @@ Cada una para cercano (decide), radiante (informa) y P-sinfiltro (informa), cont
 - **(a)** P1: protegidas que K publica y el brazo calla, por nombre. No se corre la regla de posición (§9.8), así que no
   hay «pérdidas comunes»: toda protegida perdida que K publica veta.
 - **(b)** P2 contra K por la prueba de signos por bloque noche-volcán, silencio en negativos limpios, y P2-L (sólo
-  `far_tabla`, error = publicar).
+  `far_tabla`, error = publicar). Si falta una de las dos clases de negativos (`neg_pub` o `neg_resto`), el silencio
+  queda «SIN SUSTRATO» y (b) se lee sin él, y la salida lo dice; con la parada alcanzada eso no debería pasar.
 - **(c)** M de §9.5: `evaluador_comun.decidir_estrato` en modo «decide» sobre toda la ventana, con los cortes por cenit,
   volcán, canal y clase en modo «informa».
 - **(d)** la curva de §9.6 con `curva_cenit` (condicionada decide, sin condicionar informa) y su estado con
@@ -843,3 +844,16 @@ corte deja en su salida el sha256 de la referencia y de los records, y no se bor
 
 No toca `pipeline/`, `data/` ni `frontend/`, no despacha nada y no corre la regla de posición. No lee MODIS ni VIIRS 750
 (sus pre-registros tienen sus propios lectores). No lee el día.
+
+### 11.10 Pruebas y estado
+
+- **Batería** (`experiments/_s168/v375e_sombra/probar_sombra.py`, salida `probar_sombra_salida.txt`): **104 de 104**,
+  sobre escenas sintéticas con el predicado del tablero con node, `banco_paridad` real y las dependencias del tag. Cubre
+  las clases, la población (Suomi NPP fuera), `cargar_records` (sólo la vía, sólo VIIRS 375, sólo la ventana), los
+  brazos con la escena LEJANA, el borde y su vuelta, cada control S0 a S7 en verde y en rojo (S5 con 0 de 0, S2 con la
+  identidad del predicado caída), que con un control caído no salga nada de la población (VA168-01, también en
+  `main()`), la regla de criterios con valores fabricados en todas sus ramas, los controles de la curva (sesgo de
+  plataforma, ganancias, sin sustrato), las mitades, la parada, la regla SN, y `main()` de punta a punta sobre carpetas
+  y CSV sintéticos.
+- **Nulo por mutaciones** (`mutar_sombra.py`, 55 mutaciones de una línea, cada una en su copia): pendiente de cupo
+  pesado del equipo; sus cifras irán aquí antes del sello.

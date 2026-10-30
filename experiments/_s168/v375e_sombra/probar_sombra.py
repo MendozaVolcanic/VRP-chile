@@ -366,6 +366,9 @@ def main(argv=None):
                 ks = [km[k] for k in sorted(km)]
                 ss = [vm[k] for k in sorted(vm)]
                 ss.append(dict(rec_via("2026-11-04 05:00", [0.5], 0.5, 0.5, 0.5), sensor="VIIRS_NOAA20_750"))
+                # una alerta mínima (0,04 MW): con la regla D-9 en modo SN cuenta como «MIROVA no vio nada»
+                ks.append(rec_k("2026-11-29 05:00", False, 0.1))
+                ss.append(rec_via("2026-11-29 05:00", [], 0, 0, 0.0))
             (t / "k" / f"{vol}.json").write_text(json.dumps({"records": ks}), encoding="utf-8")
             (t / "s" / f"{vol}.json").write_text(json.dumps({"records": ss}), encoding="utf-8")
         cab = ["timestamp", "Fecha_Satelite_UTC", "Fecha_Captura_Chile", "Volcan", "Sensor", "VRP_MW", "Distancia_km",
@@ -380,6 +383,8 @@ def main(argv=None):
                 vrp = o["mirova_vrp"] if o["clase"].startswith("pos") else (0.4 if o["clase"] == "far_tabla" else 0.0)
                 dist = 1.0 if o["clase"].startswith("pos") else (15.0 if o["clase"] == "far_tabla" else 0.0)
                 w.writerow([0, o["hora_utc"] + ":10", "", "Lascar", "VIIRS375", vrp, dist, tipo, "Bajo", "", "", "", "NO"])
+            w.writerow([0, "2026-11-29 05:00:10", "", "Lascar", "VIIRS375", 0.04, 1.0, "ALERTA_TERMICA", "Bajo", "", "",
+                        "", "NO"])
         with open(t / "ocr.csv", "w", newline="", encoding="utf-8") as fh:
             csv.writer(fh).writerow(cab + ["Nota_Validacion"])
         sal, js = t / "salida.txt", t / "salida.json"
@@ -391,13 +396,35 @@ def main(argv=None):
         out = json.loads(js.read_text(encoding="utf-8"))
         chk("main: los controles S1 a S7 en verde", all(v["ok"] for v in out["controles"].values()), out["controles"])
         chk("main: la población sale de banco_paridad con las clases de la escena",
-            "'pos_prot': 13" in txt and "'far_tabla': 12" in txt and "'neg_pub': 12" in txt and "'neg_resto': 12" in txt, txt[:3000])
+            "'pos_prot': 13" in txt and "'far_tabla': 12" in txt and "'neg_pub': 12" in txt and "'pos_bajo': 12" in txt, txt[:3000])
         chk("main: rotulado PROVISIONAL antes de la parada", "PROVISIONAL" in txt)
         chk("main: radiante rotulado posterior a la lectura", "radiante (informa, posterior a la lectura)" in txt)
         chk("main: referencia y records con sha256 en la salida", "referencia congelada" in txt
             and out["procedencia"]["referencia"]["cons"] and out["procedencia"]["records_k"]["Lascar"])
         chk("main: el record de VIIRS 750 de la sombra no entra", "VIIRS_NOAA20_750" not in json.dumps(out))
         chk("main: el estado del paquete está en la salida", "PAQUETE en la sombra" in txt and out.get("estado"))
+        chk("main: con la regla SN la alerta de 0,04 MW cuenta como negativo limpio (13 neg_resto, no pos_bajo)",
+            "'neg_resto': 13" in txt and "'pos_bajo': 12" in txt, txt[:2500])
+        ide = LS.IDENTIDAD_ESPERADA
+        LS.IDENTIDAD_ESPERADA = ([1, 1, 1, 1, 1], [1, 1])
+        cod4 = LS.main(args)
+        LS.IDENTIDAD_ESPERADA = ide
+        chk("main: la identidad del predicado distinta de la esperada hace caer S2 y sale 3",
+            cod4 == 3 and "S2 CAE" in sal.read_text(encoding="utf-8"))
+        # cargar_records: sólo la vía, sólo VIIRS 375, sólo la ventana
+        (t / "c").mkdir()
+        rs = [rec_via("2026-11-04 05:00", [0.5], 0.5, 0.5, 0.5),
+              dict(rec_via("2026-11-04 06:00", [0.5], 0.5, 0.5, 0.5), via_codigo_mirova="sin_grilla"),
+              dict(rec_via("2026-11-04 07:00", [0.5], 0.5, 0.5, 0.5), sensor="VIIRS_NOAA21_750"),
+              rec_via("2026-11-01 05:00", [0.5], 0.5, 0.5, 0.5), rec_via("2026-12-01 05:00", [0.5], 0.5, 0.5, 0.5),
+              dict(rec_via("2026-11-04 08:00", [0.5], 0.5, 0.5, 0.5), sensor="MODIS_AQUA")]
+        (t / "c" / "Lascar.json").write_text(json.dumps({"records": rs}), encoding="utf-8")
+        cv, sh = LS.cargar_records(t / "c", ["Lascar", "Isluga"], "2026-11-03", "2026-11-30", solo_via=True)
+        chk("cargar_records: sólo la vía VIIRS 375 dentro de la ventana",
+            list(cv) == [("Lascar", "VIIRS_NOAA20", "2026-11-04 05:00")], list(cv))
+        ck, _ = LS.cargar_records(t / "c", ["Lascar"], "2026-11-03", "2026-11-30")
+        chk("cargar_records: sin solo_via entra también la sin_grilla", len(ck) == 2, list(ck))
+        chk("cargar_records: sha256 del archivo y None si falta", sh["Lascar"] and sh["Isluga"] is None, sh)
         cod2 = LS.main(args[:-6] + ["--desde", "2026-11-02", "--hasta", "2026-11-30", "--salida", str(sal),
                                     "--json", str(js)])
         txt2 = sal.read_text(encoding="utf-8")
