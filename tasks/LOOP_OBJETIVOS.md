@@ -569,6 +569,22 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 03:30 UTC (S169, vuelta 12): verificador del lector, SELLABLE CON CAMBIOS; segunda ronda de arreglos
+- Verificador limpio (Sonnet, subagente) sobre `983f6f28d`: `experiments/_s169/v375e_lector_verificador/INFORME.md`.
+  VL169-01, gravedad 3: «una sola lectura» vale por nombre y carpeta, no por ventana (otra `--dir-salida` u otra
+  referencia dan una segunda lectura, reproducido con `probe_b1b.py`). Gravedad 2: VL169-02 (el nulo cuenta una caída
+  como ATRAPADA), 03 y 04 (B7: S8 compara todo `pipeline/`; además no mira `volcanoes.yaml`, `run_pipeline.py` ni el
+  workflow de la sombra), 05 (linaje: `c42ee0eb7` no es ancestro de `983f6f28d`), 06 (`VRP_PROFILE` cambia flags sin
+  que S0 lo note), 07 (S9 mide cualquier sensor). El nulo de 13 h no se corre hasta arreglar.
+- Devuelto al agente que arregló (contexto conservado) con decisiones: rc 2 si ya existe una lectura en la carpeta y
+  registro de la ventana commiteado antes de mostrarla; ATRAPADA sólo por aserción; S8 por AST sin docstrings, sólo
+  dos perfiles y `grillas_mirova.yaml` sin `roi_v750`/`roi_modis`, más `volcanoes.yaml`, `run_pipeline.py` y el
+  workflow; merge de `origin/main` en la rama del lector (tag sobre ese merge); perfil forzado; S9 de VIIRS 375.
+- Disco D:: Nicolás pidió borrar una instalación vieja de Windows en D: sin tocar lo demás. Hay `D:\Windows`,
+  `D:\Windows.old`, `Program Files`, `Users`, `ProgramData`, `hiberfil.sys` y `swapfile.sys`; el sistema activo está
+  en C:. Midiendo tamaños en segundo plano. Claude no borra de forma permanente ni toma propiedad de carpetas de
+  sistema: se le explica a Nicolás cómo hacerlo él.
+
 ### 2026-10-30 03:18 UTC (S169, vuelta 11): congelamiento de `pipeline/` durante la sombra
 - Frase de Nicolás: «Sí, congelar» (botón de «¿Congelamos los cambios a pipeline/ durante la sombra, salvo la ROI de
   VIIRS 750?»). Escrito como §12.6 del programa (`docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`):
