@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 01:29 UTC (S169, vuelta 8): lector de la sombra de V375-E con un gravedad 3; relevo a un agente propio
+- `local_438070ff` (`3f7e8814c`): lector `experiments/_s168/v375e_sombra/leer_sombra_v375e.py`, batería 104 de 104, nulo
+  de 55 mutaciones sin correr; §11 de `PREREGISTRO_E.md` en borrador. Verificador limpio (Sonnet):
+  `experiments/_s168/v375e_sombra/verificador/INFORME.md`, **SELLABLE CON CAMBIOS**; VS168-01 gravedad 3 (el corte que
+  decide y la fecha de inicio quedan libres), 7 de gravedad 2, 6 de gravedad 1. La sesión pidió relevo por contexto.
+- Sin poder abrir sesión (Remote Control), el relevo lo hace un subagente (Opus) en worktree propio, rama
+  `claude/s169-v375e-lector` desde `3f7e8814c`: arreglos VS168-01 a 08 (texto en §11 antes que código), aserción por
+  regla nueva vista en rojo, mutaciones agregadas sin correr el nulo (sin cupo), `INFORME.md` en
+  `experiments/_s169/v375e_lector_arreglos/`. Después: nulo con cupo, verificador corto de otro modelo, tag y Nicolás.
+  Plazo: 2026-11-03 15:00 UTC. `local_438070ff` deja de editar.
+
 ### 2026-10-30 01:04 UTC (S169, vuelta 7): #927 mergeado; candado de MOD-D con un gravedad 3 antes del tag
 - Verificador limpio del candado (Sonnet 5.5, subagente, 22 min, sobre `3db87f50d`):
   `experiments/_s169/modd_f4_candado_verificador/INFORME.md` (con `caminos.md`, `hallazgos.csv` y `scripts/`).
