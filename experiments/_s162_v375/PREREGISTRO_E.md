@@ -953,8 +953,18 @@ No toca `pipeline/`, `data/` ni `frontend/`, no despacha nada y no corre la regl
   y CSV sintéticos.
 - **Nulo por mutaciones** (`mutar_sombra.py`, 55 mutaciones de una línea, cada una en su copia): pendiente de cupo
   pesado del equipo; sus cifras irán aquí antes del sello.
-- **S169** (`experiments/_s169/v375e_lector_arreglos/INFORME.md`): con los arreglos de §11.11 la batería y el nulo
-  crecieron; sus cifras están en ese informe y en la tabla de §11.11. El nulo sigue **sin correr**.
+- **S169** (`experiments/_s169/v375e_lector_arreglos/INFORME.md`): con los arreglos de §11.11 la batería pasó a
+  **190 aserciones** (unos 7 minutos por corrida en el computador de Nicolás) y el nulo a **111 mutaciones** (las 55
+  de S168, seis de ellas reescritas sobre el código nuevo; las 14 que el verificador creía sobrevivientes, una en dos
+  variantes, más V07 en tres; y 39 de las reglas nuevas). El nulo sigue **sin correr**: con 113 corridas de unos 7
+  minutos son cerca de 13 horas con un hilo. Cada regla nueva se vio en rojo rompiéndola a mano en una copia
+  (`experiments/_s169/v375e_lector_arreglos/ver_en_rojo.py`, cinco grupos). Una mutación es **equivalente** y se
+  espera que sobreviva: V04 (cruzar P2 contra K con P2-L en la llamada a `criterios_sombra`), porque en el alfabeto de
+  `regla_signos` el conjunto que (b) acepta para P2 (GANA, EMPATE, SIN SUSTRATO) es el complemento exacto del que
+  rechaza para P2-L (PIERDE, BLOQUEA), así que (b) da lo mismo con los dos órdenes.
+- **La batería no se cae por una clave ausente**: los resultados del lector se envuelven en un dict que devuelve vacío
+  para una clave que falta, y cada sección registra una excepción como aserción fallida con su nombre. La carga del
+  lector queda fuera de toda sección, así que una mutación que rompe la importación sigue saliendo CAÍDA.
 
 ### 11.11 Arreglos del verificador limpio de S168 (S169, 2026-10-30)
 
