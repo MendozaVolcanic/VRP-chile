@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-30 04:10 UTC (S169, vuelta 14): F3 (infraestructura común) con 16 hallazgos; verificador en curso
+### 2026-10-30 03:58 UTC (S169, vuelta 14): F3 (infraestructura común) con 16 hallazgos; verificador en curso
 - Auditor F3 (Sonnet) sobre `cc3887290`: `D:/vrp-trabajo/temporales/s169_audit_patrones/f3_comun/INFORME_F3.md`. 1 de
   gravedad 4 (P3-01: `evaluador_comun.py` da COBERTURA OK con referencia vieja, vacía o con BOM), 9 de gravedad 3
   (entre ellos P3-02 y P3-03: `revisar_sombra.py` no ve una corrida vacía desde el 2.º día ni exige records por
