@@ -50,7 +50,7 @@ function decidir(runs, ahoraMs, maxHoras) {
 // regla dara una alerta visible, no un verde falso.
 const SOMBRA_DESDE = '2026-11-03T15:00:00Z';
 
-function decidirSombra(runs, ahoraMs, desde = SOMBRA_DESDE, maxHoras = 26) {
+function decidirSombra(runs, ahoraMs, desde = SOMBRA_DESDE, maxHoras = 26, horasPendiente = 6) {
   if (ahoraMs < Date.parse(desde)) {
     return { accion: 'inactivo', motivo: `la sombra mide desde ${desde}`, ultima_verde: null };
   }
@@ -60,18 +60,26 @@ function decidirSombra(runs, ahoraMs, desde = SOMBRA_DESDE, maxHoras = 26) {
     .slice()
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
   const ultima = verdes[0] || null;
+  if (ultima && (ahoraMs - Date.parse(ultima.created_at)) / 3.6e6 <= maxHoras) {
+    return { accion: 'ok', motivo: `corrida programada verde del ${ultima.created_at}`, ultima_verde: ultima };
+  }
+  // S169 ronda 2 (VV169-04): GitHub retrasa el cron del minuto 0, y a las 18:30 la corrida de hoy puede seguir en cola
+  // o corriendo. Si hay una programada sin terminar creada hace menos de `horasPendiente`, todavia no se sabe: ni se
+  // alerta ni se cierra. Mas vieja que eso ya no es retraso, es una corrida colgada, y la alerta sigue.
+  const pendiente = (runs || []).find((r) => r && r.event === 'schedule' && r.status !== 'completed' &&
+    r.created_at && (ahoraMs - Date.parse(r.created_at)) / 3.6e6 < horasPendiente);
+  if (pendiente) {
+    return { accion: 'pendiente', motivo: `corrida programada del ${pendiente.created_at} todavia en ` +
+      `${pendiente.status}`, ultima_verde: ultima };
+  }
   if (!ultima) {
     return { accion: 'alerta', motivo: 'ninguna corrida programada verde en lo que entrego la API', ultima_verde: null };
   }
-  const edadHoras = (ahoraMs - Date.parse(ultima.created_at)) / 3.6e6;
-  if (edadHoras > maxHoras) {
-    return {
-      accion: 'alerta',
-      motivo: `la ultima corrida programada verde es del ${ultima.created_at} (tope ${maxHoras} h)`,
-      ultima_verde: ultima,
-    };
-  }
-  return { accion: 'ok', motivo: `corrida programada verde del ${ultima.created_at}`, ultima_verde: ultima };
+  return {
+    accion: 'alerta',
+    motivo: `la ultima corrida programada verde es del ${ultima.created_at} (tope ${maxHoras} h)`,
+    ultima_verde: ultima,
+  };
 }
 
 module.exports = { decidir, decidirSombra, SOMBRA_DESDE };
