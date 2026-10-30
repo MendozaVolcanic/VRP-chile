@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
-"""S168 V375-E (S169: 14 del verificador y 39 de las reglas nuevas, §11.11): nulo de la batería del lector de la sombra por mutaciones de una línea (mismo método que
+"""S168 V375-E (S169: 14 del verificador, 39 de las reglas nuevas de §11.11 y 27 de la ronda 2, §11.12): nulo de la batería del lector de la sombra por mutaciones de una línea (mismo método que
 experiments/_s162_v375/e_adenda2/mutar_adenda2.py: S156, cuenta como ATRAPADA sólo la mutación que la batería rechaza
 por aserción; una que hace caer la batería con una excepción es CAÍDA y no cuenta).
 
 Cada mutación cambia UN texto que aparece exactamente una vez en leer_sombra_v375e.py, en una copia propia
 (`experiments/_s168/_mut_sombra_<id>/`, a la misma profundidad que la carpeta original para que el lector encuentre la
 raíz del repo; borrada al terminar), y corre `probar_sombra.py --dir <copia>`.
-  ATRAPADA   la batería sale 1 con su línea RESULTADO (alguna aserción falló)
+  ATRAPADA   la batería sale 1 con su línea RESULTADO (alguna aserción falló y ninguna sección se cayó)
   SOBREVIVE  la batería sale 0 (la mutación no se ve)
-  CAÍDA      la batería se cae (excepción, sin línea RESULTADO): no cuenta como atrapada
-Controles: IDENTIDAD (la copia sin mutar tiene que PASAR) y CONTROL (una mutación que rompe la importación tiene que
-salir CAÍDA). Hilos: --hilos (1 por defecto; el cupo pesado del equipo es compartido).
+  CAÍDA      la batería sale 2 (alguna sección lanzó una excepción, ronda 2 VL169-02) o se cae sin línea RESULTADO:
+             no cuenta como atrapada aunque además falle alguna aserción
+Controles: IDENTIDAD (la copia sin mutar tiene que PASAR), CONTROL (una mutación que rompe la importación tiene que
+salir CAÍDA) y CONTROL_SECCION (una que lanza dentro de una sección tiene que salir CAÍDA, no ATRAPADA). Las
+equivalentes (EQUIVALENTES, declaradas antes de correr) se informan aparte. Hilos: --hilos (1 por defecto; el cupo pesado del equipo es compartido).
 Uso: python -I mutar_sombra.py [--hilos N] [--solo ID,ID]  (escribe mutar_sombra_salida.txt, o _repaso con --solo)
 """
 from __future__ import annotations
@@ -26,6 +28,9 @@ AQUI = Path(__file__).resolve().parent
 LS = "leer_sombra_v375e.py"
 
 CONTROL = ("CONTROL", "import numpy as np\n", "import numpy_no_existe as np\n")
+# VL169-02: una excepción dentro de una sección de la batería tiene que salir CAIDA, no ATRAPADA
+CONTROL_SECCION = ("CONTROL_SECCION", "    return frozenset(out)\n",
+                   "    raise RuntimeError(\"control de caída en una sección\")\n")
 MUTACIONES = [
     # ---- población y clases
     ("M01", 'return "pos_prot" if any(alerta_protegida(f) for f in ref) else "pos_bajo"',
@@ -66,7 +71,7 @@ MUTACIONES = [
     ("M31", 'len(s) / n > UMBRAL_COBERTURA:', 'len(s) / n > 0.2:'),
     ("M32", 'return bool(pob) and not falla', 'return not falla'),
     ("M33", 'if c in CLASES_DECIDEN and n and', 'if c in ("pos_prot",) and n and'),
-    ("M34", '    if fallas:\n        return {k: out[k]', '    if False:\n        return {k: out[k]'),
+    ("M34", '    if fallas:\n        red = {k: out[k]', '    if False:\n        red = {k: out[k]'),
     ("M35", '    if malos:\n        return None, malos', '    if False:\n        return None, malos'),
     ("M36", 'identidad_ok=ident == IDENTIDAD_ESPERADA,', 'identidad_ok=True,'),
     ("M37", 'regla_minimas="SN")', 'regla_minimas="original")'),
@@ -116,7 +121,7 @@ MUTACIONES = [
     ("N02", 'corte = n_par if alcanzada else hasta', 'corte = hasta'),
     ("N03", '    if not alcanzada:\n        return out, fallas\n', '    if False:\n        return out, fallas\n'),
     ("N04", 'for n in sorted(por_noche):', 'for n in sorted(por_noche, reverse=True):'),
-    ("N05", 'if n_pre is not None and (ya.exists() or ya.with_suffix(".json").exists()):', 'if False:'),
+    ("N05", 'if Path(dsal).exists() and any(Path(dsal).glob("lectura_sombra_corte_*")):', 'if False:'),
     ("N06", 'f"lectura_sombra_corte_{corte}"', 'f"lectura_sombra_corte"'),
     ("N07", "pr(f\"  {k} {'OK' if v['ok'] else 'CAE: ' + MOTIVO[k]}\")",
      "pr(f\"  {k} {'OK' if v['ok'] else 'CAE'}: {v['detalle']}\")"),
@@ -129,7 +134,7 @@ MUTACIONES = [
     ("N13", 'for p, s in list(SHA_DEPS.items()) + list(SHA_SELLO_LECTOR.items())', 'for p, s in list(SHA_DEPS.items())'),
     ("N14", 'paquete(pob, arms, deps, regimen_ok=ok8)\n    ids_borde', 'paquete(pob, arms, deps, regimen_ok=True)\n    ids_borde'),
     ("N15", '            if c[k] == CUMPLE:\n', '            if c[k] == "X":\n'),
-    ("N16", 'f = diff_fn(BASE_REGIMEN, s)', 'f = diff_fn(s, s)'),
+    ("N16", 'f = diff_fn(base, s)', 'f = diff_fn(s, s)'),
     ("N17", 'if reg.get("perfil") != perfil:', 'if False:'),
     ("N18", '    shas[commit] += 0\n', '    pass\n'),
     ("N19", '            cambios[str(s)] = "sin sha"\n', '            pass\n'),
@@ -154,7 +159,41 @@ MUTACIONES = [
     ("N37", 'ap.add_argument("--commit", required=True)', 'ap.add_argument("--commit", default=None)'),
     ("N38", '"b_sin_evidencia": (not hay_neg) and p2k["veredicto"] == "SIN SUSTRATO",', '"b_sin_evidencia": False,'),
     ("N39", '"lista": s}', '"lista": s[:10]}'),
+    # ---- S169 ronda 2 (verificador de S169, VL169-01 a 08; §11.12)
+    ("R01", '    RAIZ / "pipeline" / "store.py": "baa430d11f2868ab22835ef0486f3145c6279ad48fb155b1ce40bcfb49b5b9d1",\n', ''),
+    ("R02", 'if os.environ.get("VRP_PROFILE", PERFIL_K) != PERFIL_K:', 'if False:'),
+    ("R03", '    os.environ["VRP_PROFILE"] = PERFIL_K\n', '    pass\n'),
+    ("R04", 'RUTAS_REGIMEN = ("pipeline/", "volcanoes.yaml", ', 'RUTAS_REGIMEN = ("pipeline/", '),
+    ("R05", 'return ast_sin_docstrings(viejo) != ast_sin_docstrings(nuevo)', 'return viejo != nuevo'),
+    ("R06", 'nodo.body = nodo.body[1:] or [ast.Pass()]', 'nodo.body = nodo.body'),
+    ("R07", 'return ruta in PERFILES_REGIMEN and viejo != nuevo', 'return viejo != nuevo'),
+    ("R08", '                v.pop(k, None)\n', '                pass\n'),
+    ("R09", 'return grillas_sin_roi(viejo) != grillas_sin_roi(nuevo)', 'return False'),
+    ("R10", 'ilegible: falla cerrada\n            return True', 'ilegible: falla cerrada\n            return False'),
+    ("R11", '    if viejo is None or nuevo is None:\n        return True', '    if viejo is None or nuevo is None:\n        return False'),
+    ("R12", 'and f.get("sensor_bucket") == "VIIRS375"', 'and True'),
+    ("R13", '            red["parada"] = cont', '            pass'),
+    ("R14", '        if res.get("parada") and not res.get("parada_alcanzada"):\n            pa = res["parada"]',
+     '        if False:\n            pa = res["parada"]'),
+    ("R15", '        if out.get("parada") and not out.get("parada_alcanzada"):', '        if False:'),
+    ("R16", 'if any(r.get("tipo") == "lectura" for r in registro_local()):', 'if False:'),
+    ("R17", 'motivos.append(f"{REF_REGISTRO} no se puede resolver: haz git fetch origin")', 'pass'),
+    ("R18", '    elif any(r.get("tipo") == "lectura" for r in rem):', '    elif False:'),
+    ("R19", '        anotar_registro({"tipo": "lectura",', '        dict({"tipo": "lectura",'),
+    ("R20", '        return 2\n    deps, malos = cargar_deps()', '        pass\n    deps, malos = cargar_deps()'),
+    ("R21", 'out.append({"tipo": "lectura", "ilegible": x[:80]})', 'pass'),
+    ("R22", 'return leer_registro(mostrar_git(REF_REGISTRO, RUTA_REGISTRO_GIT))', 'return None'),
+    ("R24", 'key=lambda x: x[0])\n    return con[0][1]', 'key=lambda x: x[0], reverse=True)\n    return con[0][1]'),
+    ("R25", 'else sello}', 'else []}'),
+    ("R26", '    if not base:\n        cambios["base"]', '    if False:\n        cambios["base"]'),
+    ("R27", '            cambios[s] = f\n    sello', '            pass\n    sello'),
+    ("R23", '^{{commit}}")[0] != 0:\n        return None\n    return leer_registro', '^{{commit}}")[0] != 0:\n        return []\n    return leer_registro'),
 ]
+# VL169-10: equivalentes declaradas ANTES de correr (sobrevivir no las hace sospechosas)
+EQUIVALENTES = {
+    "V04": "en el alfabeto de regla_signos (GANA, EMPATE, SIN SUSTRATO, PIERDE, BLOQUEA) lo que (b) acepta para P2 es el "
+           "complemento exacto de lo que rechaza para P2-L, así que cruzarlos da el mismo (b) (PREREGISTRO_E §11.10)",
+}
 
 
 def preparar(d, mut=None):
@@ -178,6 +217,8 @@ def correr(d):
         return "SOBREVIVE", falla
     if p.returncode == 1 and res:
         return "ATRAPADA", falla
+    if p.returncode == 2 and res:       # VL169-02: una sección se cayó
+        return "CAIDA", [x[7:].strip()[:70] for x in p.stdout.splitlines() if x.startswith("CAE")][:2]
     return "CAIDA", (p.stderr.strip().splitlines() or ["?"])[-1:]
 
 
@@ -193,7 +234,7 @@ def una(k, mut):
 
 def comprobar_unicas():
     src = (AQUI / LS).read_text(encoding="utf-8")
-    return [(m[0], src.count(m[1])) for m in [CONTROL] + MUTACIONES if src.count(m[1]) != 1]
+    return [(m[0], src.count(m[1])) for m in [CONTROL, CONTROL_SECCION] + MUTACIONES if src.count(m[1]) != 1]
 
 
 def main(argv=None):
@@ -219,15 +260,18 @@ def main(argv=None):
         pr(f"IDENTIDAD (copia sin mutar): {'PASA' if e == 'SOBREVIVE' else 'FALLA ' + e} {f[:3]}")
         e, f = una("control", CONTROL)
         pr(f"CONTROL (rompe la importación): {e} {f}  (tiene que ser CAIDA)")
+        e, f = una("control_seccion", CONTROL_SECCION)
+        pr(f"CONTROL_SECCION (lanza dentro de una sección): {e} {f}  (tiene que ser CAIDA)")
         cuenta = {"ATRAPADA": 0, "SOBREVIVE": 0, "CAIDA": 0}
         with ThreadPoolExecutor(max_workers=a.hilos) as ex:
             resultados = list(ex.map(lambda m: una(m[0], m), sel))
         for m, (e, f) in zip(sel, resultados):
             cuenta[e] += 1
-            pr(f"{m[0]} {e:9s} {f[:2]}")
+            pr(f"{m[0]} {e:9s} {f[:2]}" + (" (equivalente declarada)" if m[0] in EQUIVALENTES else ""))
         pr("")
-        pr(f"RESULTADO: {cuenta['ATRAPADA']} de {len(sel)} atrapadas por aserción; sobreviven "
-           f"{cuenta['SOBREVIVE']}; caídas {cuenta['CAIDA']}")
+        eq = [m[0] for m in sel if m[0] in EQUIVALENTES]
+        pr(f"RESULTADO: {cuenta['ATRAPADA']} de {len(sel)} atrapadas por aserción ({len(sel) - len(eq)} no equivalentes; "
+           f"equivalentes declaradas antes de correr: {eq}); sobreviven {cuenta['SOBREVIVE']}; caídas {cuenta['CAIDA']}")
     finally:
         salida.write_text("".join(x + chr(10) for x in L), encoding="utf-8")
     return 0
