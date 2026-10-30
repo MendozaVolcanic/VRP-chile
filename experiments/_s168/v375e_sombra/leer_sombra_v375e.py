@@ -114,11 +114,13 @@ MOTIVO = {"S0": "una dependencia no es la del sello, o VRP_PROFILE trae otro per
           "S9": "la referencia no llega a 2 días después de la noche del corte",
           "S10": "hay pasadas de la vía con alertados sin distancias"}
 L = []
+PANTALLA = [True]      # §11.8 (ronda 3, VL2-04): en la lectura que decide, la lectura va sólo a archivo
 
 
 def pr(*x):
     s = " ".join(str(y) for y in x)
-    print(s, flush=True)
+    if PANTALLA[0]:
+        print(s, flush=True)
     L.append(s)
 
 
@@ -817,6 +819,7 @@ def main(argv=None):
     ap.add_argument("--dir-salida", required=True)
     a = ap.parse_args(argv)
     del L[:]
+    PANTALLA[0] = True
     ahora = datetime.now(timezone.utc)
     pr("== procedencia")
     pr(f"  hora: {ahora.strftime('%Y-%m-%d %H:%M UTC')} | records de origin/main {a.commit}")
@@ -869,6 +872,11 @@ def main(argv=None):
         pr(f"\nYA EXISTE {txt.name}: no se sobrescribe (§11.8)")
         return 2
     cod = {"decide": 0, "provisional": 5, "no_legible": 3}[tipo]
+    if tipo == "decide":
+        # VL2-04: por pantalla sólo los controles sin detalle; el detalle y la lectura van sólo al archivo
+        for k, v in res["controles"].items():
+            print(f"  {k} {'OK' if v['ok'] else 'CAE'}", flush=True)
+        PANTALLA[0] = False
     if deps:
         reporte_controles(res, detalle=tipo == "decide")
     if tipo == "no_legible":
@@ -897,6 +905,10 @@ def main(argv=None):
         else para_json(out, tipo)
     txt.write_text("\n".join(L) + "\n", encoding="utf-8")
     js.write_text(json.dumps(a_json(sal), ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+    if not PANTALLA[0]:
+        PANTALLA[0] = True
+        print(f"\nLECTURA QUE DECIDE escrita, corte N = {corte}: {txt} (y {js.name}). No la abras hasta commitear y "
+              f"empujar {REGISTRO} a loop/activo (§11.8).", flush=True)
     return cod
 
 
