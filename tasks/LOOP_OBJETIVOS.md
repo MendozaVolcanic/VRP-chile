@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-30 03:20 UTC aprox. (S169, vuelta 10): choque entre sensores en el S8 del lector de V375-E
+### 2026-10-30 03:15 UTC (S169, vuelta 10): choque entre sensores en el S8 del lector de V375-E
 - `leer_sombra_v375e.py` (`983f6f28d`) l. 334: `control_s8` hace `git diff --name-only c42ee0eb7 <sha> -- pipeline/`
   sobre toda la carpeta. Llevar en noviembre la ROI de V750-B a `pipeline/grillas_mirova.yaml` (clave `roi_v750`)
   marcaría el régimen de VIIRS 375 y pasaría (b), (c) y (d) a DECIDE NICOLÁS sin que cambie nada de la vía de 375.
