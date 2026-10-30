@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 07:03 UTC (S169, vuelta 26): lector de V375-E ronda 2 lista; verificador corto antes del nulo
+- `claude/s169-v375e-lector` en `9d76af91b` (comprobado con `ls-remote`): VL169-01 a 10 y B7 aplicados; merge de
+  `origin/main` en `dcec35a8c` (c42ee0eb7 ancestro); base de S8 = `codigo_sha` de la primera noche, con el hueco
+  declarado en §11.4. Batería 227 de 227 (15 a 20 min con el equipo cargado). Nulo: 138 mutaciones más identidad y
+  dos controles de caída, ATRAPADA sólo con salida 1; 141 corridas, ~16 h a 7 min cada una, hasta 35 h al ritmo de hoy.
+- CI de #928 (vigilancia) verde sobre `cd8b7074f`, `CLEAN`; espera el verificador de la ronda 3.
+- Plan del cupo: el nulo del lector corre en el cupo de MOD-D apenas terminen sus mutaciones (~09:15 UTC), con
+  `--hilos 2` y árbol quieto, después del verificador corto (Sonnet) que corre ahora sobre `983f6f28d..9d76af91b`.
+  Cabe antes del 2026-11-03 15:00 UTC sólo si parte hoy.
+
 ### 2026-10-30 06:49 UTC (S169, vuelta 25): vigilancia ronda 3 lista; verificador corto en curso
 - `claude/s169-vigilancia-sombra` en `cd8b7074f` (comprobado con `ls-remote`; PR #928 con el CI `pytest` corriendo):
   revisión de la ventana día por día desde el 2026-11-03 (record de la vía por día, volcán y sensor, o prueba de que no
