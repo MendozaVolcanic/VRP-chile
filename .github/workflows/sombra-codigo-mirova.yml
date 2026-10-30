@@ -160,6 +160,15 @@ jobs:
       # S169 (P3-04): el log y la cobertura vivian solo en el runner; un granulo que la via descarta (return None, sin
       # linea en el log de pipeline/, que esta congelado) o una busqueda caida no dejaban rastro recuperable. Se suben
       # aunque algo falle. El nombre lleva el intento: relanzar un job no choca con el artefacto del intento anterior.
+      # S169 ronda 2 (VV169-07): el repo es publico y GitHub enmascara secretos en el visor, no en un archivo escrito
+      # con tee. No se vio que el pipeline imprima el token, pero se tacha igual antes de subir (scripts/tachar_secreto_log.py).
+      - name: Tachar el token en el log y la cobertura
+        if: always() && steps.correr.outputs.corrio == 'true'
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          python scripts/tachar_secreto_log.py pipeline.log cobertura.json
+
       - name: Guardar log y cobertura de la corrida
         if: always() && steps.correr.outputs.corrio == 'true'
         uses: actions/upload-artifact@v4
