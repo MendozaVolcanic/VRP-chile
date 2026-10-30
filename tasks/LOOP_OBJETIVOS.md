@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-30 11:59 UTC (S169, cierre): traspaso en `tasks/BLOQUE_ARRANQUE_S170.md`; uso mínimo hasta el domingo
+- Nicolás: «de acuerdo con los 3 puntos. cierra y abre la siguiente para hacer seguimiento de lo que va en curso,
+  disminuiremos el uso a solo lo necesario hasta el reinicio del domingo» (plan semanal al 88 %, se reinicia el
+  2026-11-01 12:00 UTC). Loop detenido. Sin agentes auxiliares hasta el reinicio.
+- Quedó corriendo: el nulo del lector de V375-E (desde 11:36 UTC; identidad PASA, controles CAIDA, mutando M01 y M02),
+  el medidor de V750-A (M44 a M45) y las dos corridas cortas de MOD-D antes de su tag (`claude/s168-modd-f4-sello` en
+  `6d649f626`). Se fijó el estado con eso en curso.
+- MOD-D cambió el yml del humo (P2-08): sha256 LF nuevo `4047c55a…`; hará falta otro PR a `main` después del reinicio.
+
 ### 2026-10-30 11:36 UTC (S169, vuelta 34): mutaciones de MOD-D terminadas; nulo del lector de V375-E lanzado
 - PID 16420 (`mutar_evaluar_f4.py`, MOD-D) terminó a las 11:36:19 UTC. A `local_5b198297`: §13, VC169-01 y la lista
   verificada de F2, batería, manifiesto y tag `s169-modd-f4-candado`; sólo procesos livianos (el cupo pasó al nulo).
