@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 17:05 UTC (S170): adenda sellada, lectura del A/B pedida, tres lecciones de montaje
+- Tag `s170-modd-f4-candado-n01` sobre `a7bd7562e` («Sí, sella y lee», Nicolás). MOD-D lee el A/B con el evaluador
+  sellado sobre t1 a t3; verificador limpio de la lectura antes de aceptarla (tras el reinicio de cuota si hace falta).
+- Lecciones para `docs/META_RULES_S80.md` en la próxima revisión (memoria `feedback_s170_tres_fallas_de_montaje`):
+  (1) un yml que baja tags se ensaya desde un tag de prueba antes del humo; (2) el control de identidad del evaluador
+  se corre con el censo contra sí mismo antes de sellar; (3) todo arnés de mutaciones se detiene con C: o D: bajo 3 GB
+  y una corrida con caídas masivas sin mensaje es inválida.
+
 ### 2026-10-31 16:30 UTC (S170): adenda N-01 lista para sellar; espera la frase de Nicolás
 - MOD-D `a7bd7562e` en `claude/s170-modd-f4-adenda-n01`: §13 explica 95 de 95 (corrida completa 93 de 94 más la
   corrida 3 de identidad, 18 de 18 sin caídas, controles como deben); identidades t1 a t3 regeneradas y commiteadas
