@@ -397,6 +397,28 @@ como el censo, despachadas de a una por la coordinadora desde el tag.
 
 ## 13. Instrumento entregado: batería y mutaciones
 
+**Procedencia del runner (S170, BORRADOR, rama `claude/s170-modd-f4-procedencia`, sin sello ni tag).** Por qué: la
+adenda a N-01 se selló después de correr t1 a t3. Los jobs corrieron en `s170-modd-f4-candado` (d65fd231d) y la lectura
+se hizo con el evaluador de `s170-modd-f4-candado-n01` (a7bd7562e). El control de procedencia (§8.8) exige un solo
+commit, un solo tag y un solo evaluador, y quedó en rojo aunque el runner hizo lo mismo en los dos commits. El §7 manda
+arreglar el instrumento y repetir la lectura, no la corrida; Nicolás lo autorizó el 2026-10-31 (vía la coordinadora
+S170). La regla (`procedencia_runner.py`, mecánica, sin mirar resultados del A/B): la lectura acepta las cabeceras en el
+tag del runner sólo si (1) el commit de la lectura desciende del del runner; (2) ningún archivo que el job del runner
+ejecuta o lee para producir records cambia entre los dos (el arnés, la población, el workflow, `pipeline/`, `scripts/`,
+el tablero, `data/mirova_equivalent/`, las herramientas de re-corrida, `evaluar_d25.py` y `volcanoes.yaml`); (3) en
+`evaluar_f4.py`, que el arnés importa, no cambia nada de lo que el arnés alcanza (las definiciones que nombra, su
+cierre y las sentencias de nivel de módulo, salvo el bloque `__main__`); y (4) todas las cabeceras traen el commit y el
+nombre del tag del runner, el `evaluar_f4.py` del runner y el `probe_f4.py` de la lectura. Cualquier otra combinación
+sigue contra el tag de la lectura. La batería y el resto del evaluador sólo habilitan el job y se comprueban aparte (control
+`manifiesto`). Pruebas: `probar_procedencia_runner.py`, 4 de 4 partes (repositorio sintético: verde sólo si cambia algo
+que el arnés no alcanza; rojo si cambia un archivo del runner, una definición alcanzable o una sentencia de módulo, o si
+la lectura no desciende; cabeceras: rojo si la regla no da ok, si una trae otro commit, otro sha de `probe_f4`, otro
+evaluador u otro nombre de tag, o si mezclan los dos tags; caso real d65fd231d contra a7bd7562e compatible).
+Mutaciones de las líneas nuevas (`mutar_procedencia_runner.py`): 13 de 13 atrapadas por aserción, sin caídas, con
+identidad VIVA, caída CAE y rota ROTA, y el árbol quieto (`experiments/_s168/modd_f4_candado/procedencia_runner/`).
+Sobre los artefactos de t1 a t3, sólo el control (sin releer): con `--tag-runner s170-modd-f4-candado` queda OK, sin él
+sigue en rojo con 99.
+
 **Corrida de la adenda a N-01 (S170, BORRADOR, rama `claude/s170-modd-f4-adenda-n01`, sin sello ni tag).** La regla del
 §8.2 entra en `evaluar_f4.control_identidad` (función `_acuerdo_escena_invalida` y el caso simétrico) e
 `identidad_f4.comparar` (campo `motivo_censo`). Batería: 71 escenarios (E65 a E69 nuevos), 71 de 71 OK; contra el vacío,
