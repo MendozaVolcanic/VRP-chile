@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 13:33 UTC (S170): N-3 de V750-A cerrada; adenda N-01 en repaso de mutaciones
+- V750-A N-3: M86 a M95 atrapadas por aserción con la batería de 81; identidad y control de caída como deben
+  (`experiments/_s162_v750a/mutar_evaluar_v750a_n3_salida.txt`, rama `claude/s162-viirs750-2-918174`, sin tag).
+  Para el sello faltan la ROI de V750-B, verificador limpio y sello de Nicolás.
+- Adenda N-01: corrida completa 93 de 94 (M92 viva: «fuera del gránulo» como acuerdo); MOD-D agregó E68 y repasa
+  las 17 mutaciones del control de identidad (~2,5 h desde ~13:00 UTC). Resultado en
+  `claude/s170-modd-f4-adenda-n01` `7353287b3`. Sin tag ni lectura del A/B.
+
 ### 2026-10-31 10:40 UTC (S170): Nicolás aprueba el lector de V375-E; #915 comentado
 - **Nicolás aprobó el lector de la sombra de V375-E** tal como quedó en el tag `s170-v375e-lector` (10:38 UTC, «si
   apruebo»). Con datos de la sombra (desde el 2026-11-03) se puede leer sin esperar otra aprobación; la decisión
