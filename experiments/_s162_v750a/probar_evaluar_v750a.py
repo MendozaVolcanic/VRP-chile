@@ -102,6 +102,12 @@ W3 y W4 son suyos, W5 adaptado):
   E75 (W4) bajas y far_ref sólo del OCR en O: con la tabla sola E_lejana no cuenta los FALSO_POSITIVO_OCR (SIN SUSTRATO
       con neto 0, no peor) y P-cercano gana con el canal que decide (neto -8 en 16 bloques).
   E76 (W5) 24 pasadas que cambian contra P: la lista impresa dice que se cortó a 20 (VP-01).
+Agregados por la regla N-3 (§6 ter, S170), rojos contra el analizador sin N-3:
+  E77 la protegida sólo del OCR de E26, pero de Suomi NPP y antes del 2026-10-09: no veta (CUMPLE), se lista aparte
+      con el brazo que la publica (K) y el P1 que la cuenta queda al lado.
+  E78 la misma, el 2026-10-09: ya no es de la clase y veta (O/todo: P1 1).
+  E79 la misma antes del 2026-10-09 pero con alerta de la tabla: veta con la tabla sola y con tabla más OCR.
+  E80 en la sombra (§6.3) la regla no se aplica: la protegida sólo del OCR de Suomi NPP anterior al 2026-10-09 veta.
 La población base suma para el S-1: celda de Cordón Caulle en el pase 2 y la zona 2 (el pase 1 y la zona 1 con otro
 umbral), una alerta de Tupungatito cuyo NTI cruza entre los umbrales pero el ETI no, y un diagnóstico mal formado.
 Una caída nativa del analizador (código fuera de 0, 3, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
@@ -177,7 +183,8 @@ class Pob:
 
     def pasada(self, volcan, hora, lab, K=None, P=None, Pdef="=P", O="=P", gemelo="=K", mirova_vrp=None,
                tabla=True, z=20.0, dP=None, dPdef=None, dO=None, far=False, banda=False, estado="ok",
-               pub_prod="=K", falta=(), decide=True, dayflag=0, k_tmax=300.0, px=None, dist_ref=11.0):
+               pub_prod="=K", falta=(), decide=True, dayflag=0, k_tmax=300.0, px=None, dist_ref=11.0,
+               sensor=SENSOR):
         """px (§6 bis): píxeles alertados de P, P-def y O cuando no es el de un solo píxel en el cráter (los tres
         iguales, así la equivalencia P = O se mantiene). lab «far_ref»: MIROVA publicó una fuente lejana (fila
         FALSO_POSITIVO de la tabla, o del OCR con tabla=False, a dist_ref km, y ninguna ALERTA)."""
@@ -200,7 +207,7 @@ class Pob:
         O = P if O == "=P" else O
         gemelo = K if gemelo == "=K" else gemelo
         pp = (K is not None) if pub_prod == "=K" else pub_prod
-        self.objs.append({"id": i, "volcan": volcan, "hora_utc": hora, "sensor": SENSOR, "lab": lab,
+        self.objs.append({"id": i, "volcan": volcan, "hora_utc": hora, "sensor": sensor, "lab": lab,
                           "decide": lab == "pos" and decide, "alerta_tabla": lab == "pos" and tabla,
                           "protegida": lab == "pos" and (mirova_vrp or 0) >= 1.0, "mirova": filas,
                           "mirova_vrp": mirova_vrp if lab == "pos" else None, "pub_prod": pp,
@@ -308,7 +315,7 @@ def base(p_de=None, negs_T="gana", negs_O="gana", extra=None, pcc_pdef=None, gem
     return pb
 
 
-def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False):
+def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, sensor_ocr=SENSOR):
     """Sombra: sólo K y P (record del perfil sombra), desde el 2026-11-03."""
     pb = Pob()
     for n in range(0 if sin_prot else 6):
@@ -317,7 +324,8 @@ def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False):
             perder = p1 and n == 0 and vol == "Lascar"
             pb.pasada(vol, f"{dia} 06:00", "pos", K=1.0, P=None if perder else 2.0, mirova_vrp=2.0)
     if prot_ocr:   # protegida sólo del OCR que K publica y P no: P1 en tabla más OCR, no con la tabla sola
-        pb.pasada("Villarrica", "2026-11-11 06:30", "pos", K=1.0, P=None, mirova_vrp=2.0, tabla=False)
+        hora = "2026-11-11 06:30" if sensor_ocr == SENSOR else "2026-10-08 06:30"   # E80: Suomi NPP antes del 9-oct
+        pb.pasada("Villarrica", hora, "pos", K=1.0, P=None, mirova_vrp=2.0, tabla=False, sensor=sensor_ocr)
     for n in range(6):
         dia = f"2026-11-{12 + n:02d}"
         if negs == "gana":
@@ -538,6 +546,13 @@ def px_anillo(volcan):
 def _prot_ocr_anillo(pb):
     """E74 (W3): protegida de Láscar en O, sólo del OCR, que K y el radiante publican y cercano y pico pierden."""
     pb.pasada("Lascar", "2026-09-01 06:00", "pos", K=1.2, P=3.0, mirova_vrp=3.0, px=px_anillo("Lascar"), tabla=False)
+
+
+def _n3(hora, tabla=False):
+    """§6 ter (N-3): la protegida de E26 (Villarrica en O, K la publica y P no), de Suomi NPP a la hora dada."""
+    def f(pb):
+        pb.pasada("Villarrica", hora, "pos", K=0.9, P=None, mirova_vrp=2.0, tabla=tabla, sensor="VIIRS_SNPP_750")
+    return f
 
 
 SEIS = range(1, 7)
@@ -821,6 +836,24 @@ ESCENARIOS = {
                                                   hora="05:00"))), rc=0,
                 tiene=[("   §6 bis cambian de publicación contra P (radiante), P-cercano: 24", ["(y 4 más, cortada a 20)"]),
                        ("== §6 bis posición elegida: P-pico", ["ganan los dos", "menor E + E_lejana"])]),
+    "E77": dict(pob=lambda: base(extra=_n3("2026-07-31 06:40")), rc=0,
+                tiene=[("== §6 censo: CUMPLE", []),
+                       ("== §6 ter N-3", ["Villarrica 2026-07-31 06:40 (K)"]),
+                       ("   §6 ter P1 por brazo", ["P (radiante) 0 (contándolas 1)"]),
+                       ("== §6.2 ventana O, canal todo", ["P1 0 (", "contando las N-3 1"]),
+                       ("== §6 bis elegibles", ["P (radiante) sí"])],
+                no_tiene=["== §6 censo: NO CUMPLE"]),
+    "E78": dict(pob=lambda: base(extra=_n3("2026-10-09 06:40")), rc=0,
+                tiene=[("== §6 censo: NO CUMPLE", ["O/todo: P1 1"]),
+                       ("== §6 ter N-3", ["ninguna"])],
+                no_tiene=["== §6 censo: CUMPLE"]),
+    "E79": dict(pob=lambda: base(extra=_n3("2026-07-31 06:40", tabla=True)), rc=0,
+                tiene=[("== §6 censo: NO CUMPLE", ["O/tabla: P1 1", "O/todo: P1 1"]),
+                       ("== §6 ter N-3", ["ninguna"])],
+                no_tiene=["== §6 censo: CUMPLE"]),
+    "E80": dict(pob=lambda: esc_sombra(prot_ocr=True, sensor_ocr="VIIRS_SNPP_750"), fase="sombra", rc=0,
+                tiene=[("== §6.3 sombra: NO CUMPLE", ["todo: P1 1"])],
+                no_contiene=[("== §6.3 sombra: NO CUMPLE", "tabla: P1")]),
 }
 
 

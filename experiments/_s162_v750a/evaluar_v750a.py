@@ -95,6 +95,7 @@ PARES_S1 = (("P", "Pdef"), ("P", "O"), ("Pdef", "O"))   # §5, S-1: los brazos q
 VOL_ROI = "PuyehueCordonCaulle"          # §7, control positivo de la ROI
 POS = ("P", "Pcercano", "Ppico")         # §3 y §6 bis: brazos de posición (P es el radiante, el de hoy)
 NOM_POS = {"P": "P (radiante)", "Pcercano": "P-cercano", "Ppico": "P-pico"}
+SENSOR_N3, FRONTERA_N3 = "VIIRS_SNPP_750", "2026-10-09"   # §6 ter (N-3, S166): Suomi NPP sólo del OCR, antes del 9-oct
 
 NOMBRES_M = ("N_BOOT", "SEMILLA", "N_MIN_PARES", "N_MIN_NOCHES", "N_CALIB", "MAX_FALSOS_CALIB",
              "MIN_VOLCANES_MEJORA", "MIN_PARES_VOLCAN", "MIN_PARES_PODER", "PLACEBO_GANANCIAS", "NOTA_COMPARADOR",
@@ -149,6 +150,14 @@ def etiqueta(o, canal):
         return None
     p = prot_tabla(o) if canal == "tabla" else o.get("protegida")
     return "prot" if p else "baja"
+
+
+def es_n3(o):
+    """§6 ter (N-3): protegida que existe sólo por el OCR (sin alerta de la tabla), de Suomi NPP y anterior al
+    2026-10-09. No veta en el P1 del §6 bis ni en el del §6.2; se lista aparte y su P1 se imprime al lado. La magnitud M,
+    E y la sombra (§6.3) no cambian."""
+    return (bool(o.get("protegida")) and not o.get("alerta_tabla") and o.get("sensor") == SENSOR_N3
+            and o["hora_utc"] < FRONTERA_N3)
 
 
 def en_ventana(o, v):
@@ -623,9 +632,10 @@ def main(argv=None):
         pr(f"== S-1 por pasada (a), (b) y (c) de §5: {len(s1_filas)} filas en {f_s1}")
 
     # ---------------------------------------------------------------- métricas por ventana y canal
-    def metricas(b, v, canal):
+    def metricas(b, v, canal, n3=False):
         """P1 (§6.2): protegidas que K publica y el brazo no; P1_nadie: las que ni K ni el brazo publican (se
-        listan). P1b y E como analizar_v750b."""
+        listan). P1b y E como analizar_v750b. n3=True (§6 ter, sólo en el §6 bis y el §6.2): las de la clase N-3 van a
+        P1_n3 en vez de P1 y no vetan; P1 + P1_n3 es el P1 que las cuenta todas."""
         m = collections.Counter()
         nadie = []
         for i in oks:
@@ -636,7 +646,7 @@ def main(argv=None):
             pb, vb = pub(i, b), vrp(i, b)
             m[f"n_{e}"] += 1
             if e == "prot" and not pb and pub(i, "K"):
-                m["P1"] += 1
+                m["P1_n3" if n3 and es_n3(o) else "P1"] += 1
             if e == "prot" and not pb and not pub(i, "K"):
                 nadie.append(nombre(i))
             if e == "prot" and pb and vb < 1.0:
@@ -671,8 +681,19 @@ def main(argv=None):
 
     PE, eleccion = "P", "P"
     if censo:
+        # §6 ter (N-3): las protegidas de la clase se listan por nombre con los brazos que las publican, y por brazo el
+        # P1 que veta (sin ellas) al lado del que las cuenta todas, en T y O con tabla más OCR (con la tabla sola no son
+        # protegidas: no tienen alerta de la tabla)
+        n3_l = [i for i in oks if es_n3(obj[i]) and etiqueta(obj[i], "todo") == "prot"]
+        pr("== §6 ter N-3 (protegidas sólo del OCR de Suomi NPP anteriores al 2026-10-09; no vetan, se informan): "
+           + (corta([f"{nombre(i)} ({'/'.join(NOM_POS.get(b, b) for b in ('K',) + POS if pub(i, b)) or 'nadie'})"
+                     for i in n3_l]) if n3_l else "ninguna"))
+        pr("   §6 ter P1 por brazo, T y O, tabla más OCR, el que veta (contándolas todas): " + " | ".join(
+            f"{NOM_POS[b]} {sum(metricas(b, v, 'todo', n3=True)[0]['P1'] for v in VENTANAS)} (contándolas "
+            f"{sum(metricas(b, v, 'todo')[0]['P1'] for v in VENTANAS)})" for b in POS))
         # elegible: P1 = 0 en T y en O, con la tabla sola y con tabla más OCR (la condición de P1 del §6.2)
-        eleg = {b: all(metricas(b, v, canal)[0]["P1"] == 0 for v in VENTANAS for canal in CANALES) for b in POS}
+        eleg = {b: all(metricas(b, v, canal, n3=True)[0]["P1"] == 0 for v in VENTANAS for canal in CANALES)
+                for b in POS}
         # P2' contra P (radiante), sobre T ∪ O, con el canal que decide y con la tabla sola (L21)
         p2d = {b: p2(b, "P", "TODO", "decide", lejana=True) for b in POS[1:]}
         p2t = {b: p2(b, "P", "TODO", "tabla", lejana=True) for b in POS[1:]}
@@ -767,7 +788,7 @@ def main(argv=None):
             fallas.append(("TODO", "decide", "§6 bis: NINGUNA POSICIÓN ELEGIBLE"))
         for v in VENTANAS:
             for canal in CANALES:
-                m, nadie = metricas(PE, v, canal)
+                m, nadie = metricas(PE, v, canal, n3=True)
                 nadie_tot.update(nadie)
                 reg, neto, nb, prr = p2(PE, "K", v, canal)
                 rz, nrz = razon_prot(PE, v, canal)
@@ -784,7 +805,8 @@ def main(argv=None):
                     motivos.append(f"M comparador {rm}")
                 fallas += [(v, canal, x) for x in motivos]
                 rz_txt = "-" if rz is None else f"{rz:.3f}"
-                pr(f"== §6.2 ventana {v}, canal {canal} (posición {nom_pe}): P1 {m['P1']} (de {m['n_prot']} protegidas) | P1b abajo "
+                pr(f"== §6.2 ventana {v}, canal {canal} (posición {nom_pe}): P1 {m['P1']} (de {m['n_prot']} protegidas; "
+                   f"contando las N-3 {m['P1'] + m['P1_n3']}) | P1b abajo "
                    f"{m['P1b_abajo']} arriba {m['P1b_arriba']} | P2 contra K {reg} (neto {neto}, bloques {nb}, p gana "
                    f"{prr['gana']}, pierde {prr['pierde']}) | M razón en protegidas {rz_txt} (n {nrz}) | M comparador "
                    f"{rm} (pares {len(Pm)}, ĝ {det.get('g_hat_factor', '-')}, d′ {det.get('regla_dprima', '-')}, "
