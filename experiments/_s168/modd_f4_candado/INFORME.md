@@ -140,3 +140,35 @@ Lectura `leer_t3_salida.txt`, identidad `identidad_t3_salida.txt`, jobs `t3_run_
   (`selladas_con_grilla_t3_salida.txt`). En total son 24 + 11 + 10 = 45, las mismas 45 del censo.
 - Con la adenda implementada en la rama `claude/s170-modd-f4-adenda-n01`, la identidad de t3 queda OK, con 10 por
   acuerdo y 0 casos simétricos (`adenda_n01/control_identidad_t3_salida.txt`).
+
+## Primera lectura del A/B (S170, 2026-10-31 17:00 UTC; rama `claude/s170-modd-f4-adenda-n01`, commit `0240e0040`)
+
+Se hizo con el evaluador del tag `s170-modd-f4-candado-n01` y dio INDECIDIBLE: el control de procedencia quedó en rojo
+(99 rojos) porque los jobs corrieron en `s170-modd-f4-candado` (d65fd231d) con el evaluador previo a la adenda. El §7
+manda arreglar el instrumento y repetir la lectura; Nicolás lo autorizó. El arreglo (`procedencia_runner.py`, §13 del
+pre-registro) se verificó con contexto limpio y se selló en el tag `s170-modd-f4-lectura` (e27dc2e49).
+
+## Relectura del A/B (S170, 2026-10-31 17:53 UTC, tag `s170-modd-f4-lectura`, con `--tag-runner s170-modd-f4-candado`)
+
+Una sola corrida, sin cambiar nada. Salida completa en `lectura_ab2/leer_f4_salida.txt` y `lectura_ab2/resultado_f4.json`.
+La identidad unida es byte a byte la misma de la primera lectura (sha256 `a9b23b6f…`).
+
+**Veredicto del §7: PROPONER ADOPCIÓN** (fila 6: P2 y P2' GANAN y no se cumple ninguna fila anterior). Los 14 controles
+dan OK, incluido procedencia, que acepta el tag del runner (`acepta_runner` verdadero).
+
+Por criterio, igual que en la primera lectura:
+- Posición elegida: V (radiante; ninguna otra gana contra V). Ninguna protegida la publica otra posición y no la elegida.
+- P1: SIN PÉRDIDA, con 0 pérdidas.
+- P1b: 0 que decidan; 22 en sentido contrario, listadas.
+- P2: GANA (neto −44, B = 53, s_K = 52, s_V = 8, p = 1/10001). Con la unión también GANA. Por tramo: C GANA, E SIN
+  SUSTRATO (sólo informa).
+- P2': GANA (neto −44).
+- M: MEJORA (n = 83).
+- Razón V/MIROVA en 56 protegidas: mediana 0,983, dentro de la banda (sólo informa).
+- Chillán: RESUELTO POR EL PAQUETE (12 pares, 10 con V más cerca de MIROVA, p = 79/4096).
+
+Comparación con la primera lectura (`lectura_ab2/comparar_lecturas.py` y su salida): 0 diferencias fuera del control de
+procedencia, el veredicto que depende de él y los insumos de la lectura.
+
+Lo que no decide este A/B: el encendido de la vía en producción lo decide Nicolás (A45), con `pipeline/` congelado
+durante la sombra de noviembre.
