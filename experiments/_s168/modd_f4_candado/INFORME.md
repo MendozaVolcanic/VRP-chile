@@ -128,3 +128,15 @@ Lectura `leer_t2_salida.txt`, identidad `identidad_t2_salida.txt`, jobs `t2_run_
 - Identidad: 1.789 de 1.789 iguales, y las grillas del censo coinciden con su sha.
 - Hay 11 pasadas con grilla del censo que salen como `escena_invalida`; el censo llegó al mismo motivo en las 11
   (`selladas_con_grilla_t2_salida.txt`). Con la regla sellada quedan 11 sin explicar; con la candidata de la adenda, 0.
+
+## Tanda t3 (S170, run 41169884696, 2026-10-31)
+
+Lectura `leer_t3_salida.txt`, identidad `identidad_t3_salida.txt`, jobs `t3_run_41169884696.json`.
+- Partes 16 a 23 completas: 1.896 de 1.896 filas, todas en `ok`. Hay 0 `otro_granulo` y 0 pasadas con K distinto de
+  producción, y el commit, el tag y las versiones son los mismos que en t1 y t2.
+- Las tres tandas juntas suman 5.709 filas, que es la población entera, y 1.746 + 1.789 + 1.786 = 5.321 identidades
+  iguales, que son todas las grillas del censo.
+- Hay 10 pasadas con grilla del censo que salen como `escena_invalida`, con el censo de acuerdo en las 10
+  (`selladas_con_grilla_t3_salida.txt`). En total son 24 + 11 + 10 = 45, las mismas 45 del censo.
+- Con la adenda implementada en la rama `claude/s170-modd-f4-adenda-n01`, la identidad de t3 queda OK, con 10 por
+  acuerdo y 0 casos simétricos (`adenda_n01/control_identidad_t3_salida.txt`).
