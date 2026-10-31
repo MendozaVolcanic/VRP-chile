@@ -1,0 +1,26 @@
+OK     A sólo cambia una def que el arnés no alcanza      ok=True (espera True) {'desciende': True, 'cambiados': [], 'evaluar_distinto': []}
+OK     A sólo cambia el bloque __main__                   ok=True (espera True) {'desciende': True, 'cambiados': [], 'evaluar_distinto': []}
+OK     A cambia un archivo del runner (pipeline/)         ok=False (espera False) {'desciende': True, 'cambiados': ['pipeline/a.py'], 'evaluar_distinto': []}
+OK     A cambia el arnés                                  ok=False (espera False) {'desciende': True, 'cambiados': ['experiments/_s166_modd_f4/probe_f4.py'], 'evaluar_distinto': []}
+OK     A cambia una def alcanzable por cierre (ayuda)     ok=False (espera False) {'desciende': True, 'cambiados': [], 'evaluar_distinto': ['def:ayuda']}
+OK     A cambia la def nombrada (distancias)              ok=False (espera False) {'desciende': True, 'cambiados': [], 'evaluar_distinto': ['def:distancias']}
+OK     A cambia una sentencia de nivel de módulo          ok=False (espera False) {'desciende': True, 'cambiados': [], 'evaluar_distinto': ['sentencia_001']}
+OK     A la lectura no desciende del runner               ok=False (espera False) {'desciende': False, 'cambiados': []}
+OK               parte_a
+OK     B todas en el runner compatible                    OK (espera OK), malos 0
+OK     B la regla de compatibilidad no da ok              INDECIDIBLE (espera INDECIDIBLE), malos 13
+OK     B sin runner, todas en el runner                   INDECIDIBLE (espera INDECIDIBLE), malos 13
+OK     B una cabecera con otro commit                     INDECIDIBLE (espera INDECIDIBLE), malos 13
+OK     B una cabecera con otro sha de probe_f4            INDECIDIBLE (espera INDECIDIBLE), malos 1
+OK     B una cabecera con el evaluar_f4 de la lectura     INDECIDIBLE (espera INDECIDIBLE), malos 1
+OK     B una cabecera con otro nombre de tag              INDECIDIBLE (espera INDECIDIBLE), malos 1
+OK     B cabeceras que mezclan los dos tags               INDECIDIBLE (espera INDECIDIBLE), malos 7
+OK     B un procedencia_N.txt con otro commit             INDECIDIBLE (espera INDECIDIBLE), malos 1
+OK     B todas en el tag de la lectura, sin runner        OK (espera OK), malos 0
+OK     B todas en el tag de la lectura, con runner compatible OK (espera OK), malos 0
+OK               parte_b
+OK     C caso real d65fd231d contra a7bd7562e: ok=True {'cambiados': [], 'evaluar_distinto': []}
+OK               parte_c
+OK     D datos_runner sobre el repo real
+OK               parte_d
+RESUMEN: 4 partes, 0 fallan por aserción, 0 caen

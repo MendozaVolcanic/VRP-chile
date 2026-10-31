@@ -113,12 +113,19 @@ def manifiesto_contra_tag(base, local_bytes, tag_bytes):
     return out
 
 
-def procedencia(cab, art, commit_tag, tag, sha_evaluar=None, sha_probe=None):
+def procedencia(cab, art, commit_tag, tag, sha_evaluar=None, sha_probe=None, runner=None):
     """§8.8: todos los jobs en el commit del tag. Y (P2-03, VF2-02) el evaluar_f4.py y el probe_f4.py de la lectura son
-    los que cada cabecera dice que corrieron (sha256 LF); una cabecera sin esos campos también es mala."""
+    los que cada cabecera dice que corrieron (sha256 LF); una cabecera sin esos campos también es mala.
+    S170 (procedencia_runner.py): runner = {"commit", "tag", "sha_evaluar", "compat"}. Si la regla de compatibilidad da
+    ok y TODAS las cabeceras traen el commit del runner, se comprueba contra el tag del runner (su commit, su nombre y
+    su evaluar_f4.py) en vez del de la lectura; el probe_f4.py tiene que ser el de la lectura (la regla exige que no
+    haya cambiado). Cualquier otra combinación sigue contra el tag de la lectura."""
     malos = []
     if not cab:
         return {"estado": "INDECIDIBLE", "motivo": "sin cabeceras: no hay jobs que comprobar"}
+    acepta_runner = bool(runner and runner["compat"]["ok"] and all(c.get("commit") == runner["commit"] for c in cab))
+    if acepta_runner:
+        commit_tag, tag, sha_evaluar = runner["commit"], runner["tag"], runner["sha_evaluar"]
     for c in cab:
         if c.get("sha256_evaluar_f4") is None or c.get("sha256_evaluar_f4") != sha_evaluar:
             malos.append({"parte": c.get("parte"), "motivo": "sha256_evaluar_f4",
@@ -142,6 +149,7 @@ def procedencia(cab, art, commit_tag, tag, sha_evaluar=None, sha_probe=None):
         if not m or m.group(1) != commit_tag:
             malos.append({"archivo": p.name, "motivo": "procedencia_txt", "commit": m and m.group(1)})
     return {"estado": "OK" if not malos else "INDECIDIBLE", "commit_tag": commit_tag, "tag": tag,
+            "acepta_runner": acepta_runner, "runner": runner,
             "n_cabeceras": len(cab), "partes": partes, "malos": malos[:30], "n_malos": len(malos),
             "sha256_evaluar_f4_lectura": sha_evaluar, "sha256_probe_f4_lectura": sha_probe}
 
@@ -205,8 +213,19 @@ def insumos_lectura(cab, raiz, ruta_pob, ruta_ref, ruta_identidad, manifiesto):
             "entorno": {"VRP_PROFILE": os.environ.get("VRP_PROFILE"), "F4_RAIZ": os.environ.get("F4_RAIZ")}}
 
 
+def datos_runner(tag_runner, commit_lectura, raiz=RAIZ):
+    """S170: lo que procedencia() necesita del tag del runner, con la regla de procedencia_runner.compatible."""
+    if not tag_runner:
+        return None
+    import procedencia_runner as PR
+    commit_r = git("rev-parse", f"{tag_runner}^{{commit}}", raiz=raiz).strip()
+    return {"commit": commit_r, "tag": tag_runner,
+            "sha_evaluar": sha256_lf(git("show", f"{commit_r}:{REL_EVALUAR}", raiz=raiz, binario=True)),
+            "compat": PR.compatible(raiz, commit_r, commit_lectura)}
+
+
 def armar(art, tag, ruta_ref, ruta_pob, raiz=RAIZ, commit_tag=None, sha_tag=None, manifiesto=None,
-          manifiesto_tag=None, ruta_identidad=None):
+          manifiesto_tag=None, ruta_identidad=None, tag_runner=None):
     """commit_tag, sha_tag y manifiesto se resuelven con git y con el manifiesto si no se dan (el ensayo los da).
     manifiesto_tag: bytes del MANIFIESTO_CANDADO_F4.json del tag; si no se da, `git show <tag>:...`. Con `manifiesto`
     dado (juguete del ensayo) se usa tal cual y no se compara contra el tag."""
@@ -230,7 +249,7 @@ def armar(art, tag, ruta_ref, ruta_pob, raiz=RAIZ, commit_tag=None, sha_tag=None
                                            man_local.read_bytes() if man_local.exists() else None, manifiesto_tag)
     ext["manifiesto"] = manifiesto
     ext["procedencia"] = procedencia(cab, art, commit_tag, tag, sha_archivo(raiz / REL_EVALUAR),
-                                     sha_archivo(raiz / REL_PROBE))
+                                     sha_archivo(raiz / REL_PROBE), runner=datos_runner(tag_runner, commit_tag, raiz))
     ext["procedencia"]["insumos_lectura"] = insumos_lectura(cab, raiz, ruta_pob, ruta_ref, ruta_identidad, manifiesto)
     ext["predicado"] = predicado(cab, sha_tag, sha_local)
     assert set(E.EXTERNOS_REQUERIDOS) <= set(ext)

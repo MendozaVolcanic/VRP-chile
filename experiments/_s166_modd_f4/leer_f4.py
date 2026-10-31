@@ -48,9 +48,10 @@ def main(argv=None):
     ap.add_argument("--identidad", required=True)
     ap.add_argument("--poblacion", default=str(AQUI / "poblacion_f4.json"))
     ap.add_argument("--referencia", default=str(AQUI / "externos_referencia.json"))
+    ap.add_argument("--tag-runner", default=None, help="S170: tag en que corrieron los jobs (procedencia_runner.py)")
     a = ap.parse_args(argv)
     art = Path(a.art)
-    ext = X.armar(art, a.tag, a.referencia, a.poblacion, ruta_identidad=a.identidad)
+    ext = X.armar(art, a.tag, a.referencia, a.poblacion, ruta_identidad=a.identidad, tag_runner=a.tag_runner)
     ruta_ext = art / "externos.json"
     ruta_ext.write_text(json.dumps(ext, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
     ruta_res = art / "resultado_f4.json"

@@ -41,7 +41,9 @@ FIJOS = [C + x for x in (
     "mutar_evaluar_f4.py", "probar_mutar_f4.py", "probar_probe_f4.py", "humo_f4.txt", "manifiesto_candado_f4.py",
     "externos_f4.py", "ensayo_en_seco_f4.py",
     # S168 (P2-07, VC169-02): lo que se carga en ejecución y la sonda no ve, y el insumo de dos controles externos
-    "externos_referencia.json", "probar_descarga_f4.py", "probar_externos_f4.py", "leer_f4.py")] + [
+    "externos_referencia.json", "probar_descarga_f4.py", "probar_externos_f4.py", "leer_f4.py",
+    # S170: la procedencia del runner (import perezoso en externos_f4.datos_runner), su prueba y su medidor
+    "procedencia_runner.py", "probar_procedencia_runner.py", "mutar_procedencia_runner.py")] + [
     "experiments/_s162_mxd03/k_en_sha.py", "experiments/_s157_prereg_d25/evaluar_d25.py", "frontend/index.html",
     ".github/workflows/probe-s168-modd-f4.yml", "volcanoes.yaml", "pipeline/grillas_mirova.yaml",
     "pipeline/profiles/mirova_equivalent.yaml",
