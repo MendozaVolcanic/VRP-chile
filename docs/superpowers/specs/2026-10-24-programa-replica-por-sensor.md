@@ -489,7 +489,7 @@ cuenta noches con datos, y en VIIRS 375 además alertas); se recalculan con el m
 | 2026-11-01 12:00 | se reinicia la cuota semanal (estaba al 94 %); recién ahí el trabajo pesado | nadie |
 | 2026-11-01 / 02 | **ensayo en seco del despacho de V750-B** (comandos del §3 y §4 de `experiments/_s162_v750b/r4/INFORME.md`, sin despachar) | loop |
 | 2026-11-02 | audit semanal (#915 sigue abierto); cese de Suomi NPP 13:00, comprobar en CMR (C-06) | loop |
-| 2026-11-03 | despacho de V750-B desde su tag; 15:00 primera sombra con datos; 18:30 monitor | loop |
+| 2026-11-03 | despacho de V750-B desde su tag; primera sombra con datos (cron 15:00, pero llega con 4 a 5 h de atraso: mirar desde las 18:30 y no despachar a mano antes de las 22:00); monitor (cron 18:30, llega ~22:30). Medido en el pre-mortem S171 (171-02) | loop |
 | ~2026-11-04 a 06 | lectura de V750-B con verificador; PR de `roi_v750` (rama `s169-roi-v750`) | **Nicolás** (frase de merge) |
 | ~2026-11-06 en adelante | sello, run y lectura de V750-A | **Nicolás** (sello) |
 | **2026-11-27** | **rotar `EARTHDATA_TOKEN`** (50 días desde el 2026-10-08; vence 2026-12-07 18:03, `REGISTRO_CREDENCIALES.md` fila 1) | **Nicolás** |

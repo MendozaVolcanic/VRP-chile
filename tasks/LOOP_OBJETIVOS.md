@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 21:12 UTC (S171): pre-mortem del 2 y 3 de noviembre entregado; 171-01 en verificación
+- Pre-mortem (Fable 5.1 high, eje nuevo; `D:/vrp-trabajo/temporales/audit_s171_dia3/INFORME.md` y `hallazgos.csv`,
+  medido sobre main `478d9c086`): **ningún camino deja el 2 o el 3 sin dato sin que algo quede rojo o abra issue**
+  (`ventana_sombra.py` 13 de 13 casos; `revisar_sombra.py` rojo en 18 escenarios de falla del primer día; 109 pruebas
+  de sombra, monitor y cese pasan; 68 workflows activos). Lista de qué mirar el 2 y el 3 en su §7.
+- **171-01 (G3, SOSPECHA del auditor)**: la vía devuelve `None` sin record, log ni incidencia cuando el gránulo no cubre
+  el volcán (`pipeline/mirova_v750_codigo.py:799-808`, leído por S171; `process_viirs.py:775-783`): en Láscar 4 de 81
+  gránulos nocturnos de 8 días, los 4 de VIIRS 375. Riesgo: que el lector de V375-E cuente la ausencia como silencio
+  de la vía. En verificación con Sonnet (`D:/vrp-trabajo/temporales/ver_s171_171_01/`). Toca `pipeline/`: congelado.
+- 171-02 (CONFIRMADO, G2): el cron de la sombra llega con 4 a 5 h de atraso; corregido el calendario del §12.7.
+  171-03 (G2): un timeout de 75 min o una caída descarta los records del día del volcán (rojo, no silencio).
+  171-07 (G1): el audit-weekly del 2-nov puede abrir un segundo issue FUERA DE BANDA en vez de comentar #915.
+  171-06 (G1): el healthcheck del 3 y 4 dirá que Suomi NPP «sigue entregando» por records previos al cese en su ventana
+  de 72 h; el aviso «cese confirmado» sale el 5. 171-04, 171-05, 171-08 a 171-10 de gravedad 1 a 2.
+
 ### 2026-10-31 20:46 UTC (S171): vara candidata contra MATLAB medida; verificador y pre-mortem del día 3 lanzados
 - Vara candidata para el §4.1 de V750-A contra la salida de MATLAB R2026b de S163 (311 escenas, `resultado_o2.mat`
   md5 `1f7fdc4b…ba43`; los `.mat` estaban SIN versionar en `s159-pruebas` y se rescataron del respaldo a
