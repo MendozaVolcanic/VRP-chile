@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 14:32 UTC (S170): adenda N-01 con 94 de 94; verificador pide dos cambios de procedencia
+- MOD-D: repaso de las 17 mutaciones de identidad con E68 (12:55 a 14:07 UTC), 17 de 17; total 94 de 94; batería
+  70 de 70; `claude/s170-modd-f4-adenda-n01` `69c328019`.
+- Verificador limpio (Sonnet, `D:/vrp-trabajo/temporales/ver_s170_adenda2/INFORME.md`): SELLAR CON CAMBIOS, sólo de
+  procedencia: (1) la salida oficial de mutaciones es la corrida 1 (93 de 94); escribir en §13 cómo se llega a 94 o
+  regenerarla; (2) regenerar y commitear las identidades de t1 a t3 con el identidad_f4 nuevo (las originales no
+  traen motivo_censo). La regla está bien y t1 a t3 siguen valiendo. Pedido a MOD-D.
+
 ### 2026-10-31 13:33 UTC (S170): N-3 de V750-A cerrada; adenda N-01 en repaso de mutaciones
 - V750-A N-3: M86 a M95 atrapadas por aserción con la batería de 81; identidad y control de caída como deben
   (`experiments/_s162_v750a/mutar_evaluar_v750a_n3_salida.txt`, rama `claude/s162-viirs750-2-918174`, sin tag).
