@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 21:17 UTC (S171): 171-01 verificado, CONFIRMADO EN PARTE, baja a gravedad 2
+- Verificador Sonnet (`D:/vrp-trabajo/temporales/ver_s171_171_01/INFORME.md`): el descarte es silencioso de verdad
+  (`run_pipeline.py` con `if result:` sin `else`, sin tipo en `fetch.TIPOS_INCIDENCIA`; Láscar 21 a 28-oct: VIIRS 375
+  32 gránulos, 28 records, y el job dice «Cobertura: completa»). **Refutada la consecuencia temida**: el lector sellado
+  de V375-E (`s170-v375e-lector`, `leer_sombra_v375e.py` l. 218-242 y 342-351) no cuenta esas pasadas como silencio de
+  la vía; quedan SIN DATO fuera de los denominadores; con más de 10 % SIN DATO en una clase que decide cae S7 (l. 85) y
+  una protegida SIN DATO que K publica veta (l. 573). Pendiente menor: el SIN DATO mezcla geometría con pérdida real y
+  puede sesgar hacia el borde del barrido (SOSPECHA). El `.m` de MIROVA no salta gránulos así (l. 163-166): los cortes
+  de 100 celdas y 5 km son nuestros. Hallazgos propios VS171-171-01-a a -c, gravedad 1 a 2. Nada se arregla durante la
+  sombra (`pipeline/` congelado); se anota para después de la parada.
+
 ### 2026-10-31 21:12 UTC (S171): pre-mortem del 2 y 3 de noviembre entregado; 171-01 en verificación
 - Pre-mortem (Fable 5.1 high, eje nuevo; `D:/vrp-trabajo/temporales/audit_s171_dia3/INFORME.md` y `hallazgos.csv`,
   medido sobre main `478d9c086`): **ningún camino deja el 2 o el 3 sin dato sin que algo quede rojo o abra issue**
