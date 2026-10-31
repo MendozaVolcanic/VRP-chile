@@ -19,15 +19,31 @@ lectura lo comprueba aparte contra su propio tag (control `manifiesto`).
 from __future__ import annotations
 
 import ast
+import os
 import subprocess
+import sys
 from pathlib import Path
 
-ARCHIVOS_RUNNER = (
-    "experiments/_s166_modd_f4/probe_f4.py", "experiments/_s166_modd_f4/poblacion_f4.json",
-    "experiments/_s166_modd_f4/humo_f4.txt", "experiments/_s166_modd_f4/head_e.py",
-    ".github/workflows/probe-s168-modd-f4.yml", "pipeline/", "scripts/", "frontend/index.html",
-    "data/mirova_equivalent/", "experiments/_s162_mxd03/", "experiments/_s157_prereg_d25/evaluar_d25.py",
-    "volcanoes.yaml")
+ARCHIVOS_RUNNER = (   # una entrada por línea: mutar_procedencia_runner.py quita cada una
+    "experiments/_s166_modd_f4/probe_f4.py",
+    "experiments/_s166_modd_f4/poblacion_f4.json",
+    "experiments/_s166_modd_f4/humo_f4.txt",
+    "experiments/_s166_modd_f4/head_e.py",
+    ".github/workflows/probe-s168-modd-f4.yml",
+    "pipeline/",
+    "scripts/",
+    "frontend/index.html",
+    "data/mirova_equivalent/",
+    "experiments/_s162_mxd03/",
+    "experiments/_s151_mxd03_etiquetas/",
+    "experiments/_s151_mxd03_cumulo_121/",
+    "experiments/_s151_mxd03_sola_123/",
+    "experiments/_s151_probe_mod03/",
+    "experiments/_s157_prereg_d25/evaluar_d25.py",
+    "experiments/_s146_ab_sin_test1/evaluar.py",
+    "experiments/_s151_prereg_fk_11/evaluar_fk.py",
+    "volcanoes.yaml",
+)
 EVALUAR = "experiments/_s166_modd_f4/evaluar_f4.py"
 PROBE = "experiments/_s166_modd_f4/probe_f4.py"
 ALIAS_EVALUAR = "E"                     # probe_f4: `import evaluar_f4 as E`
@@ -51,7 +67,9 @@ def nombres_usados(fuente_probe, alias=ALIAS_EVALUAR):
 
 
 def _es_bloque_main(st):
-    return (isinstance(st, ast.If) and isinstance(st.test, ast.Compare) and isinstance(st.test.left, ast.Name)
+    """`if __name__ == "__main__":` sin else (un else sí corre al importar)."""
+    return (isinstance(st, ast.If) and not st.orelse and isinstance(st.test, ast.Compare)
+            and isinstance(st.test.left, ast.Name)
             and st.test.left.id == "__name__" and len(st.test.comparators) == 1
             and isinstance(st.test.comparators[0], ast.Constant) and st.test.comparators[0].value == "__main__")
 
@@ -94,3 +112,49 @@ def compatible(raiz, commit_runner, commit_lectura):
     distinto = sorted(k for k in set(h_r) | set(h_l) if h_r.get(k) != h_l.get(k))
     return {"ok": desciende and not cambiados and not distinto, "desciende": desciende, "cambiados": cambiados[:30],
             "evaluar_distinto": distinto[:30], "usados": sorted(usados)}
+
+
+# ------------------------------------------------------------------ guarda: lo que el arnés carga de verdad
+_RASTREO = r"""
+import sys, os
+vistos = set()
+def gancho(ev, args):
+    if ev == "open" and args and isinstance(args[0], (str, bytes, os.PathLike)):
+        vistos.add(os.path.abspath(os.fsdecode(args[0])))
+sys.addaudithook(gancho)
+sys.path.insert(0, sys.argv[1])
+import probe_f4  # noqa
+for v in sorted(vistos):
+    print(v)
+"""
+
+
+def archivos_cargados_por_probe(raiz):
+    """Los archivos del repo que se abren al importar probe_f4.py (gancho de auditoría «open», que también ve los imports
+    y las cargas por ruta). Los imports perezosos dentro de funciones caen en pipeline/ y scripts/."""
+    raiz = Path(raiz).resolve()
+    p = subprocess.run([sys.executable, "-c", _RASTREO, str(raiz / "experiments/_s166_modd_f4")], capture_output=True,
+                       text=True, encoding="utf-8", errors="replace", cwd=str(raiz),
+                       env=dict(os.environ, F4_RAIZ=str(raiz), PYTHONIOENCODING="utf-8"))
+    if p.returncode != 0:
+        raise RuntimeError("no se pudo importar probe_f4: %s" % p.stderr[-300:])
+    out = set()
+    for ln in p.stdout.splitlines():
+        if not os.path.isabs(ln):   # avisos que el pipeline imprime al importarse
+            continue
+        try:
+            rel = Path(ln).resolve().relative_to(raiz).as_posix()
+        except ValueError:
+            continue
+        if "/__pycache__/" in "/" + rel:   # el import leyó el .pyc: cuenta su fuente
+            d, f = rel.rsplit("/__pycache__/", 1) if "/" in rel.split("__pycache__")[0] else ("", rel.split("/", 1)[1])
+            rel = (d + "/" if d else "") + f.split(".")[0] + ".py"
+        if not rel.startswith(".git/"):
+            out.add(rel)
+    return out
+
+
+def no_cubiertos(cargados):
+    """Los cargados que no cubre ARCHIVOS_RUNNER (evaluar_f4.py va aparte, por lo que el arnés alcanza)."""
+    return sorted(r for r in cargados if r != EVALUAR and not any(
+        r == e or (e.endswith("/") and r.startswith(e)) for e in ARCHIVOS_RUNNER))

@@ -28,7 +28,8 @@ MUTACIONES = [
     ("R4_sin_cierre", PR, "        pend += [m.id for m in ast.walk(defs[n])", "        pass\n        [m.id for m in ast.walk(defs[n])"),
     ("R5_sin_sentencias_de_modulo", PR, 'al_importar["sentencia_%03d" % len(al_importar)] = st', "pass"),
     ("R6_main_cuenta", PR, "elif _es_bloque_main(st):", "elif False:"),
-    ("R7_pipeline_fuera", PR, '".github/workflows/probe-s168-modd-f4.yml", "pipeline/", ', '".github/workflows/probe-s168-modd-f4.yml", '),
+    ("R9_else_de_main_no_cuenta", PR, "isinstance(st, ast.If) and not st.orelse and", "isinstance(st, ast.If) and"),
+    ("R10_guarda_ciega", PR, "r != EVALUAR and not any(", "False and not any("),
     ("R8_numeracion_global", PR, 'al_importar["sentencia_%03d" % len(al_importar)] = st', 'al_importar["sentencia_%03d" % id(st)] = st'),
     ("X1_sin_compat", EX, 'runner and runner["compat"]["ok"] and all(', "runner and all("),
     ("X2_sin_todas_en_runner", EX, ' and all(c.get("commit") == runner["commit"] for c in cab))', ")"),
@@ -38,6 +39,17 @@ MUTACIONES = [
     ("X5_tag_de_la_lectura", EX, 'commit_tag, tag, sha_evaluar = runner["commit"], runner["tag"], runner["sha_evaluar"]',
      'commit_tag, sha_evaluar = runner["commit"], runner["sha_evaluar"]'),
 ]
+
+
+def _entradas():
+    """Una mutación por entrada de ARCHIVOS_RUNNER (verificador de la procedencia): la quita de la tupla."""
+    t = (AQUI / PR).read_text(encoding="utf-8")
+    bloque = t[t.index("ARCHIVOS_RUNNER = ("):t.index('EVALUAR = "')]
+    return [("L%02d_sin_%s" % (i, ln.strip().strip('",').replace("/", "_").strip("_")[-40:]), PR, ln + "\n", "")
+            for i, ln in enumerate(x for x in bloque.splitlines() if x.strip().startswith('"'))]
+
+
+MUTACIONES += _entradas()
 
 
 def clasificar(codigo, fallan, caen):

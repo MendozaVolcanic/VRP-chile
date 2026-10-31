@@ -49,7 +49,27 @@ def otra(a):
 
 if __name__ == "__main__":
     print(otra(1))
+
+if __name__ == "__main__":
+    pass
+else:
+    Y = 1
 '''
+
+
+# Lista fija, independiente del módulo bajo prueba: si una mutación quita una entrada de ARCHIVOS_RUNNER, su caso rojo
+# sigue aquí y la atrapa
+ENTRADAS = ("experiments/_s166_modd_f4/probe_f4.py", "experiments/_s166_modd_f4/poblacion_f4.json",
+            "experiments/_s166_modd_f4/humo_f4.txt", "experiments/_s166_modd_f4/head_e.py",
+            ".github/workflows/probe-s168-modd-f4.yml", "pipeline/", "scripts/", "frontend/index.html",
+            "data/mirova_equivalent/", "experiments/_s162_mxd03/", "experiments/_s151_mxd03_etiquetas/",
+            "experiments/_s151_mxd03_cumulo_121/", "experiments/_s151_mxd03_sola_123/", "experiments/_s151_probe_mod03/",
+            "experiments/_s157_prereg_d25/evaluar_d25.py", "experiments/_s146_ab_sin_test1/evaluar.py",
+            "experiments/_s151_prereg_fk_11/evaluar_fk.py", "volcanoes.yaml")
+
+
+def archivo_de(e):
+    return e + "x.txt" if e.endswith("/") else e
 
 
 def escribir(d, rel, txt):
@@ -63,6 +83,9 @@ def repo(tmp):
     d = Path(tempfile.mkdtemp(prefix="repo_", dir=tmp))   # carpeta nueva: en Windows .git/objects no se deja borrar
     git(d, "init", "-q")
     escribir(d, "pipeline/a.py", "A = 1\n")
+    for e in ENTRADAS:
+        if e != "experiments/_s166_modd_f4/probe_f4.py":
+            escribir(d, archivo_de(e), "base\n")
     c0 = None
     escribir(d, "experiments/_s166_modd_f4/probe_f4.py", "import evaluar_f4 as E\nE.distancias\n")
     escribir(d, "experiments/_s166_modd_f4/evaluar_f4.py", EV)
@@ -96,6 +119,7 @@ def parte_a(PR, tmp):
         ("cambia una def alcanzable por cierre (ayuda)", ev, "return a + 1", "return a + 2", None, False),
         ("cambia la def nombrada (distancias)", ev, "return ayuda(a)", "return ayuda(a) * 1", None, False),
         ("cambia una sentencia de nivel de módulo", ev, "X = 1", "X = 2", None, False),
+        ("cambia el else de un bloque __main__ (corre al importar)", ev, "Y = 1", "Y = 2", None, False),
     ]
     malas = 0
     for nombre, rel, v, n, desde, espera in casos:
@@ -105,6 +129,18 @@ def parte_a(PR, tmp):
         malas += not ok
         print("%s  A %-48s ok=%s (espera %s) %s" % ("OK   " if ok else "FALLA", nombre, r["ok"], espera,
                                                     {k: r[k] for k in ("desciende", "cambiados", "evaluar_distinto")}))
+    # un caso rojo por entrada de la lista del runner (verificador de la procedencia: antes sólo pipeline/ y el arnés)
+    for e in ENTRADAS:
+        rel = archivo_de(e)
+        git(d, "checkout", "-q", "-B", "l", cr)
+        pth = d / rel
+        pth.write_text(pth.read_text(encoding="utf-8") + "# cambio\n", encoding="utf-8")
+        git(d, "add", "-A")
+        cl = git(d, "commit", "-q", "-m", "cambia " + rel)
+        r = PR.compatible(d, cr, cl)
+        ok = r["ok"] is False and rel in r["cambiados"]
+        malas += not ok
+        print("%s  A cambia %-46s ok=%s (espera False)" % ("OK   " if ok else "FALLA", rel, r["ok"]))
     # no desciende: rama hermana desde la base con los mismos archivos del runner (pipeline/b.py igual), así el único
     # motivo de rojo es la ascendencia
     git(d, "checkout", "-q", "-B", "h", c0)
@@ -200,6 +236,16 @@ def parte_d(X):
     print("OK     D datos_runner sobre el repo real")
 
 
+def parte_e(PR):
+    """Guarda: todo lo que el arnés carga al importarse (rastreado, no de memoria) lo cubre ARCHIVOS_RUNNER."""
+    c = PR.archivos_cargados_por_probe(RAIZ)
+    falta = PR.no_cubiertos(c)
+    print("%s  E %d archivos cargados por probe_f4; no cubiertos: %s" % ("OK   " if not falta else "FALLA", len(c), falta))
+    chk(len(c) > 10 and not falta, "guarda de carga: %d cargados, no cubiertos %s" % (len(c), falta))
+    chk(PR.no_cubiertos({"experiments/otra_carpeta/z.py", PR.EVALUAR}) == ["experiments/otra_carpeta/z.py"],
+        "la guarda tiene que ver un archivo cargado fuera de la lista")
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
@@ -216,7 +262,8 @@ def main():
         print("NO CARGA", type(e).__name__, e)
         sys.exit(3)
     for nombre, f in (("parte_a", lambda: parte_a(PR, tmp)), ("parte_b", lambda: parte_b(X, tmp)),
-                      ("parte_c", lambda: parte_c(PR)), ("parte_d", lambda: parte_d(X))):
+                      ("parte_c", lambda: parte_c(PR)), ("parte_d", lambda: parte_d(X)),
+                      ("parte_e", lambda: parte_e(PR))):
         try:
             f()
             print("OK              ", nombre)
@@ -226,7 +273,7 @@ def main():
         except Exception as e:  # noqa: BLE001
             cae += 1
             print("CAE             ", nombre, "|", type(e).__name__, str(e)[:200])
-    print("RESUMEN: 4 partes, %d fallan por aserción, %d caen" % (asercion, cae))
+    print("RESUMEN: 5 partes, %d fallan por aserción, %d caen" % (asercion, cae))
     sys.exit(0 if not (asercion or cae) else 1 if asercion else 2)
 
 
