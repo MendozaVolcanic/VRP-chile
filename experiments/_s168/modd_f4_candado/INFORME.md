@@ -118,3 +118,13 @@ jobs en `t1_run_41166033637.json`.
   un motivo sellado, salvo que la identidad la declare de otro gránulo. Con esa regla, la identidad queda en rojo y el
   veredicto sale INDECIDIBLE. Arreglarlo cambia una regla del evaluador: pide una adenda sellada, por ejemplo que una
   pasada así cuente como acuerdo cuando el censo llegó al mismo motivo con la misma grilla. Lo decide Nicolás.
+
+## Tanda t2 (S170, run 41168080181, 2026-10-31)
+
+Lectura `leer_t2_salida.txt`, identidad `identidad_t2_salida.txt`, jobs `t2_run_41168080181.json`.
+- Partes 8 a 15 completas: 1.922 de 1.922 filas, sin faltantes, sobrantes ni repetidas, todas en `ok`. Hay 0
+  `otro_granulo`, 0 pasadas con K distinto de producción, la marca de la vía en las 1.922, el mismo commit y tag, y
+  las mismas versiones que en t1.
+- Identidad: 1.789 de 1.789 iguales, y las grillas del censo coinciden con su sha.
+- Hay 11 pasadas con grilla del censo que salen como `escena_invalida`; el censo llegó al mismo motivo en las 11
+  (`selladas_con_grilla_t2_salida.txt`). Con la regla sellada quedan 11 sin explicar; con la candidata de la adenda, 0.
