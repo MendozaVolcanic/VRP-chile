@@ -59,3 +59,43 @@ Falta, después del domingo 2026-11-01 12:00 UTC (uso mínimo de tokens hasta en
 - El censo guardó sus grillas en float32. Si la identidad sale en rojo, el diagnóstico `con_grilla_runner_en_float32`
   dice si la causa es sólo esa precisión.
 - El costo estimado es de unas 10 h de runner en tres tandas, sin medir: se mide en el humo.
+
+## Humo (S170, run 41164864021, tag `s170-modd-f4-candado`, 2026-10-31)
+
+Lectura: `leer_humo_f4.py` y su salida `leer_humo_f4_salida.txt`; identidad con `identidad_f4.py` sobre el artefacto
+(`identidad_humo.json`, `identidad_humo_salida.txt`); tiempos de los jobs en `humo_run_41164864021.json`.
+
+- Procedencia: la cabecera trae el commit `d65fd231d` y el ref del tag; los cuatro jobs terminaron en verde. La prueba
+  previa en el runner corrió el arnés, el evaluador, el evaluador vacío y el manifiesto.
+- Cobertura: 25 de 25 pasadas de `humo_f4.txt`, sin faltantes, sobrantes ni repetidas. 25 en estado `ok`.
+  Villarrica 2026-04-30 03:00 sale con «volcán fuera del gránulo», un motivo sellado legítimo: el censo tampoco lo
+  cubrió (`grilla_censo` falso).
+- Gránulos: 25 de 25 bajados por nombre (L1B y MxD03 pedidos iguales a los usados), 0 `otro_granulo`, 0
+  `CMR/descarga fallo` en `probe_0.log`.
+- K igual a producción: `k_difiere_de_guardado` falso en 25 de 25. Ninguna re-corrida en su sha, `pub_runner` con K en
+  25 de 25, la marca de la vía verdadera en 25 de 25 y el cenit tomado del MxD03 en las 25.
+- Identidad: 23 pasadas comparables (las de C con grilla del censo), 23 iguales: mismo gránulo, misma máscara, VRP a
+  0,001 MW y misma clase. La máxima diferencia de radiancia es 4,8e-7, la precisión de float32 del censo. Las otras dos
+  pasadas son la de E (Chillán 2026-10-25) y la Villarrica fuera del gránulo.
+- Tiempo: 2,41 s de mediana por pasada (máximo 2,81).
+- Señal física, que informa y no decide: Chillán 2026-10-25 07:20 (58° de cenit, la tercera pérdida MODIS del #915)
+  queda K 0 y V 2,553 MW en la cumbre, y las del 09-29, 10-12 y 10-15 también las publica V y K no. Láscar 2026-03-30
+  07:25 sigue como `far` en K y en V.
+
+**Veredicto del humo: APTO para t1.** Estimación (en la salida): 238 pasadas por parte, unos 9,6 min de pasadas más
+3,8 min fijos por parte, y unos 18 min por tanda contando la prueba previa, sin colas del runner ni re-corridas en su
+sha. Es una cota alta en descargas: el humo bajó casi un gránulo por pasada, y C tiene unas 4,4 pasadas por gránulo.
+
+Hallazgos de gravedad 1 del verificador de S170 (`D:/vrp-trabajo/temporales/ver_s170_modd/INFORME.md`):
+- VS170-MODD-01, cuatro módulos de VIIRS y del Test 1 cargados en la lectura están fuera del manifiesto. Queda
+  declarado: no son de MODIS. Antes de la lectura de t1 a t3, comprobar que no cambiaron con
+  `git diff s170-modd-f4-candado -- pipeline/process_viirs.py pipeline/process_viirs_mod.py pipeline/test1_contextual_filter.py pipeline/test1_spatial_core.py`.
+- VS170-MODD-02, versiones sueltas (node, el parche de Python, las acciones). Queda declarado: la cabecera registra
+  Python 3.11.17, numpy y scipy, y node se lee en el log de «Dependencias» de cada job. Al leer t1 a t3, comparar esas
+  versiones entre tandas.
+- VS170-MODD-03, una descarga lenta no cuenta para el tope. Queda declarado: en el humo no hubo ninguna falla de
+  descarga y la pasada más lenta tardó 2,81 s. Falla cerrado, porque la parte vence el timeout y la cobertura queda en
+  rojo.
+- VS170-MODD-04, las grillas del censo sin sha. Queda cerrado para la lectura: `grillas_censo_sha256.txt` tiene el
+  sha256 de las 5.321. Antes de correr la identidad de t1 a t3, comprobarlo con
+  `cd D:/vrp-trabajo/temporales/s162_modd/censo && sha256sum -c <ruta>/grillas_censo_sha256.txt`.
