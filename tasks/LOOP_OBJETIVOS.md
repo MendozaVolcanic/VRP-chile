@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 18:54 UTC (S171): Nicolás decide cuándo encender la vía de MIROVA en MODIS
+- Respuesta textual de Nicolás a «¿Cuándo encendemos la vía de MIROVA en MODIS?»: «cuando recomiendes». Queda
+  aceptada la recomendación del bloque S171 (b.1): **no se enciende ahora**; se enciende en la parada de la sombra
+  (30 noches **y** 40 alertas desde el 2026-11-03, lo que llegue último; `PREREGISTRO_E.md` §3.3) o en una ventana
+  planificada antes, con tag defensivo y confirmación explícita de Nicolás en ese momento (A45). Esta respuesta no
+  es el sí de A45: el encendido pide su propia frase.
+- Antes del encendido: corregir el «BORRADOR» del pre-registro de MOD-D (l. 8, 263, 400 y 428 de
+  `experiments/_s166_modd_f4/PREREGISTRO_MODD_F4.md` en `claude/s170-modd-f4-procedencia`, `e0bb1b150`) con un commit de
+  texto.
+
 ### 2026-10-31 17:29 UTC (S170): lectura del A/B de MOD-D INDECIDIBLE por procedencia; arreglo en curso
 - Lectura con `s170-modd-f4-candado-n01` (MOD-D `0240e0040`): §7 INDECIDIBLE sólo por la fila 1, procedencia: las
   cabeceras de t1 a t3 traen el tag del runner (`s170-modd-f4-candado`, `d65fd231d`) y se comparan contra el de la
