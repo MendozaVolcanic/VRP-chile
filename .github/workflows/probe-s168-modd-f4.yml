@@ -127,7 +127,10 @@ jobs:
         env:
           F4_TAG: ${{ github.event.inputs.tag }}
         run: |
-          git fetch --depth 1 origin "refs/tags/$F4_TAG:refs/tags/$F4_TAG"
+          # --force: actions/checkout ya dejo refs/tags/$F4_TAG en el commit, y el tag del candado es anotado;
+          # sin --force git rechaza pisarlo (run 41163955456). Con --force el tag local pasa a ser el publicado,
+          # que es lo que la linea siguiente compara con HEAD.
+          git fetch --force --depth 1 origin "refs/tags/$F4_TAG:refs/tags/$F4_TAG"
           test "$(git rev-parse "$F4_TAG^{commit}")" = "$(git rev-parse HEAD)"
           test "$(git hash-object experiments/_s157_prereg_d25/evaluar_d25.py)" = "$BLOB_D25"
       - name: Manifiesto del candado
@@ -195,7 +198,10 @@ jobs:
         env:
           VRP_PROFILE: mirova_equivalent
         run: |
-          git fetch --depth 1 origin "refs/tags/$F4_TAG:refs/tags/$F4_TAG"
+          # --force: actions/checkout ya dejo refs/tags/$F4_TAG en el commit, y el tag del candado es anotado;
+          # sin --force git rechaza pisarlo (run 41163955456). Con --force el tag local pasa a ser el publicado,
+          # que es lo que la linea siguiente compara con HEAD.
+          git fetch --force --depth 1 origin "refs/tags/$F4_TAG:refs/tags/$F4_TAG"
           test "$(git rev-parse "$F4_TAG^{commit}")" = "$(git rev-parse HEAD)"
           test "$(git hash-object experiments/_s157_prereg_d25/evaluar_d25.py)" = "$BLOB_D25"
           python -I experiments/_s166_modd_f4/manifiesto_candado_f4.py --comprobar
