@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 19:58 UTC (S171): ensayo en seco de V750-B completo; 16 sesiones archivadas y 18 worktrees quitados
+- **Ensayo en seco de V750-B** (pedido de Nicolás, con el §3 de `experiments/_s162_v750b/r4/INFORME.md`; árbol
+  `D:/vrp-trabajo/temporales/v750b_r4_ensayo_s171`, main `478d9c086`, tag `s167-v750b-adenda3-sellada`):
+  `VRP_PROFILE=[]`; control de datos con `--hasta 2026-11-02` FALLA como debe (fecha máxima V750 2026-10-31 07:00) y
+  con `--hasta 2026-10-30` OK; generadores rc 0, 5.945 objetivos (sha256 sellada `879e8d7b…`), suplementaria IGUALES
+  5.945 contra 5.945, 0 sin gránulo, 20 `far_ref`; N-3 4 en O (Láscar 06-27, NdC 10-01 y 10-05, PCC 07-03);
+  `armar_rama_disparo.sh` con rama de prueba `ensayo-s171-v750b-disparo` → `49d8bf1a3` sobre main, diff fuera de
+  V750-B y del workflow vacío; el yml tiene `"on"` entre comillas, corta con token vacío y no baja tags (el choque de
+  #931 no aplica). Rama de prueba borrada, nada empujado. Avisado a `local_94f4be0d` (no lo repite).
+- **Limpieza con el sí de Nicolás** («Sí, archívalas»): 16 sesiones terminadas de VRP Chile archivadas (S163 a S170,
+  pre-registros, loops viejos). Se quedan: VIIRS 750 (`local_94f4be0d`), MOD-D (`local_5b198297`) y «s162»
+  (`local_4152952c`, porque archivarla arrastra a VIIRS 750, su hija). 18 worktrees quitados; antes, todo lo no
+  versionado (464 MB, sin cachés de Python) quedó en `D:/vrp-trabajo/papelera_s171/` con los commits en
+  `LEEME_commits.txt`. Commits: 0 fuera del remoto en los 18. Disco: C: de 24 a 41 GB libres; D: 15 GB.
+
 ### 2026-10-31 19:42 UTC (S171): plan revisado, lecciones a META_RULES, V750 reporta a S171
 - Pre-registro de MOD-D con la marca de sellado en §8.2 y §13 (`25e3cc3ba`, rama `claude/s170-modd-f4-procedencia`;
   el sha del pre-registro en la punta ya no coincide con el manifiesto, a propósito: la lectura se reproduce desde el tag).
