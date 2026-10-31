@@ -156,7 +156,9 @@ MUTACIONES = [
      'x.get("dvrp") is not None)'),
     ("M92_adenda_tambien_fuera", 'if k in ident and motivo_de[k] == "escena_invalida"', 'if k in ident'),
     ("M93_adenda_sin_simetrico", '                 and ident[k].get("motivo_censo") != "escena_invalida")]', ')]'),
-    ("M94_adenda_nunca_acuerdo", '                                   and k not in por_acuerdo)', ')'),
+    ("M95_adenda_sin_mismo_granulo", 'x.get("motivo_censo") == "escena_invalida" and x.get("mismo_granulo") is True',
+     'x.get("motivo_censo") == "escena_invalida"'),
+    ("M94_adenda_nunca_acuerdo",'                                   and k not in por_acuerdo)', ')'),
 ]
 CONTROLES = (("IDENTIDAD", "VIVA"), ("CONTROL_CAIDA", "CAE"), ("CONTROL_CAIDA_VALUEERROR", "CAE"),
              ("CONTROL_ROTA", "ROTA"))

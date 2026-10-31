@@ -956,6 +956,14 @@ def E68_adenda_fuera_del_granulo_sigue_n01():
     chk(g(c, "estado") == "INDECIDIBLE", "fuera del gránulo con el acuerdo completo: %s" % g(c, "estado"))
 
 
+def E69_adenda_otro_granulo_no_es_acuerdo():
+    """Adenda a N-01: con otro gránulo, la pasada sigue contando contra el tope de 1 % aunque el resto del acuerdo se
+    cumpla; no es un acuerdo (verificador de la adenda implementada, gravedad 1)."""
+    filas = _filas_identidad(100)
+    c = EV.control_identidad(_ident_con(filas, {"mismo_granulo": False}), filas, 100)
+    chk(g(c, "n_selladas_por_acuerdo") == 0 and g(c, "n_otro_granulo") == 1, "otro gránulo no es acuerdo: %s" % c)
+
+
 def E67_adenda_caso_simetrico():
     """Adenda a N-01, caso simétrico: el censo dio escena inválida y el runner evaluó la pasada (sin motivo, sin
     alertas). Aunque máscara, VRP y clase coincidan, es un desacuerdo: rojo."""
