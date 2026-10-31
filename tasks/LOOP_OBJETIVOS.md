@@ -569,6 +569,22 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 21:25 UTC (S171): CORRECCIÓN: la equivalencia de V750-A de main sale VERDE; error de montaje propio
+- El verificador limpio (Fable 5.1 high, `D:/vrp-trabajo/temporales/ver_s171_equiv/INFORME.md`, `caminos.md` sellado
+  antes de abrir nada) **corrige la entrada de las 19 UTC «equivalencia de V750-A roja»**: S171 corrió la copia de
+  `equivalencia_v750a.py` de la rama `claude/s162-viirs750-2-918174` (sha `ca25e000`, oráculo con relleno Qhull), no la
+  de main (sha `73e94795`), que desde `3a02ad28f` le pone al oráculo el relleno de MATLAB (l. 52 y 67). Con la de main,
+  la vía de main da **VERDE 1.020/10** (comprobado por S171 con `git show`). También era falso que los `.mat` de MATLAB
+  estuvieran sin versionar: están en `experiments/_s163_o2/` de main. Los números de A2 y A3 se reproducen exactos.
+- Lo que sí queda, del verificador: **VS171-01 (G4)** la vara del criterio 1 cambió en `3a02ad28f`, después del
+  pre-registro, y el §4.1 sigue diciendo «que mirova_v750_r2»; ninguna salida de la prueba sobre la vía real está
+  registrada. **VS171-02 (G3)** el halo de 7 celdas (npix > 30) no se recorre en ninguna escena: mutarlo pasa verde.
+  **VS171-03 (G3)** la vara contra MATLAB no juzga el remuestreo (mantener E3). VS171-04/05 (G2) cobertura delgada y
+  poder real 16/3/166/2/166 sobre las 311. Pasado a `local_94f4be0d` con la corrección.
+- Lección: **antes de correr un instrumento, comprobar de qué ref sale cada archivo**; arme el árbol con `main` para el
+  módulo y con la rama para la prueba, y la prueba de la rama estaba atrasada. Un verificador con contexto limpio lo
+  vio con `sha256sum` de las dos copias.
+
 ### 2026-10-31 21:17 UTC (S171): 171-01 verificado, CONFIRMADO EN PARTE, baja a gravedad 2
 - Verificador Sonnet (`D:/vrp-trabajo/temporales/ver_s171_171_01/INFORME.md`): el descarte es silencioso de verdad
   (`run_pipeline.py` con `if result:` sin `else`, sin tipo en `fetch.TIPOS_INCIDENCIA`; Láscar 21 a 28-oct: VIIRS 375
