@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 17:29 UTC (S170): lectura del A/B de MOD-D INDECIDIBLE por procedencia; arreglo en curso
+- Lectura con `s170-modd-f4-candado-n01` (MOD-D `0240e0040`): §7 INDECIDIBLE sólo por la fila 1, procedencia: las
+  cabeceras de t1 a t3 traen el tag del runner (`s170-modd-f4-candado`, `d65fd231d`) y se comparan contra el de la
+  lectura. Los otros 13 controles OK. Los criterios (no deciden con un control en rojo): posición V, P1 sin pérdida,
+  P2 GANA (neto −44, p 1/10001), M MEJORA (mediana −0,246, n 83), razón 0,983 en 56 protegidas, Chillán resuelto.
+- Nicolás autorizó arreglar el control (§7: se repite la lectura, no la corrida) y lanzar el verificador. MOD-D lo
+  prepara en rama nueva desde `a7bd7562e`: acepta el tag del runner sólo si el tag de lectura desciende de él y no
+  cambia ningún archivo que el runner usa; pruebas y mutaciones; sin tag ni relectura hasta el verificador.
+
 ### 2026-10-31 17:05 UTC (S170): adenda sellada, lectura del A/B pedida, tres lecciones de montaje
 - Tag `s170-modd-f4-candado-n01` sobre `a7bd7562e` («Sí, sella y lee», Nicolás). MOD-D lee el A/B con el evaluador
   sellado sobre t1 a t3; verificador limpio de la lectura antes de aceptarla (tras el reinicio de cuota si hace falta).
