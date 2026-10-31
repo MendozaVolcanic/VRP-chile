@@ -509,3 +509,145 @@ def test_vr2_05_con_token_vacio_no_toca_nada(tmp_path):
         p = _tachar(tmp_path, vacio, {"pipeline.log": "linea normal\n"})
         assert p.returncode == 0, p.stdout + p.stderr
         assert (tmp_path / "pipeline.log").read_text(encoding="utf-8") == "linea normal\n"
+
+
+# ---------------------------------------------------------------- VR3-01 (S170): MODIS sólo con pasadas de día
+# experiments/_s169/vigilancia_sombra_verificador/ronda3/INFORME_VERIFICACION_R3.md (loop/activo). Terra y Aqua pasan
+# de día y de noche: la búsqueda del día trae gránulos y el filtro nocturno de pipeline/fetch.py los descarta todos,
+# sin dejar `sin_granulos` en la cobertura. La prueba de «no hubo pasada nocturna» es la línea «kept 0 of N granules
+# (night filter)» del log de ESTA corrida, bajo la cabecera «>>> volcán | día» de run_pipeline.py.
+
+def log_noche(*bloques):
+    """Log de run_pipeline: cada bloque es (día de noviembre, [(plataforma, kept, de), ...])."""
+    out = []
+    for dia, filas in bloques:
+        out.append("\n>>> Láscar | 2026-11-%02d" % dia)
+        out += ["  %s: kept %d of %d granules (night filter)" % f for f in filas]
+    return "\n".join(out) + "\n"
+
+
+def test_vr3_01_modis_solo_de_dia_en_los_dos_satelites_es_nota(tmp_path):
+    regs = _sin(historial(3, 5), 4, "MODIS")
+    log = log_noche((4, [("MODIS_TERRA", 0, 2), ("MODIS_AQUA", 0, 3)]))
+    rc, out = juzgar(tmp_path, 5, regs, log=log, cob=cobertura(5))
+    assert rc == 0, out
+    assert any("MODIS 2026-11-04" in ln and "no hubo pasada" in ln for ln in out.splitlines()), out
+
+
+def test_vr3_01_uno_solo_de_dia_y_el_otro_sin_granulos_es_nota(tmp_path):
+    regs = _sin(historial(3, 5), 4, "MODIS")
+    log = log_noche((4, [("MODIS_TERRA", 0, 2)]))
+    rc, out = juzgar(tmp_path, 5, regs, log=log,
+                     cob=cobertura(5, sin_pasada=("MODIS_AQUA",), dia_sin_pasada=4))
+    assert rc == 0, out
+
+
+def test_vr3_01_un_satelite_sin_prueba_sigue_rojo(tmp_path):
+    """Terra sólo trajo gránulos de día, pero Aqua sí pudo pasar de noche: el día sigue perdido."""
+    regs = _sin(historial(3, 5), 4, "MODIS")
+    rc, out = juzgar(tmp_path, 5, regs, log=log_noche((4, [("MODIS_TERRA", 0, 2)])), cob=cobertura(5))
+    assert rc != 0 and "MODIS 2026-11-04" in out, out
+
+
+def test_vr3_01_la_linea_de_otro_dia_no_prueba(tmp_path):
+    regs = _sin(historial(3, 5), 4, "MODIS")
+    log = log_noche((3, [("MODIS_TERRA", 0, 2), ("MODIS_AQUA", 0, 3)]), (4, []))
+    rc, out = juzgar(tmp_path, 5, regs, log=log, cob=cobertura(5))
+    assert rc != 0 and "MODIS 2026-11-04" in out, out
+
+
+def test_vr3_01_si_quedo_algun_granulo_nocturno_no_es_prueba(tmp_path):
+    regs = _sin(historial(3, 5), 4, "MODIS")
+    log = log_noche((4, [("MODIS_TERRA", 0, 2), ("MODIS_AQUA", 1, 3)]))
+    rc, out = juzgar(tmp_path, 5, regs, log=log, cob=cobertura(5))
+    assert rc != 0 and "MODIS 2026-11-04" in out, out
+
+
+def test_vr3_01_la_linea_de_otra_familia_no_prueba(tmp_path):
+    regs = _sin(historial(3, 5), 4, "MODIS")
+    log = log_noche((4, [("VIIRS_NOAA20", 0, 2), ("VIIRS_NOAA21", 0, 3)]))
+    rc, out = juzgar(tmp_path, 5, regs, log=log, cob=cobertura(5))
+    assert rc != 0 and "MODIS 2026-11-04" in out, out
+
+
+# ---------------------------------------------------------------- VR3-02 a VR3-04 (S170), gravedad 1
+
+def _revisar_directo():
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import revisar_sombra
+    return revisar_sombra
+
+
+def test_vr3_02_fechas_ilegibles_son_falla_y_no_verde():
+    """`_dias` devolvía [] con --ini o --fin ilegibles: ningún día se juzgaba y la corrida salía verde."""
+    r = _revisar_directo()
+    regs = de_la_corrida(5)
+    for ini, fin in (("", "2026-11-05"), ("2026-11-03", "hoy"), ("basura", "")):
+        ok, resumen = r.revisar(regs, "", ini, fin, "2026-11-05T15:01:00Z", cobertura(5), sha="sha05")
+        assert not ok and "ilegible" in resumen, (ini, fin, resumen)
+
+
+def test_vr3_02_control_fechas_legibles_siguen_verdes():
+    r = _revisar_directo()
+    ok, resumen = r.revisar(historial(3, 5), "", "2026-11-03", "2026-11-05", "2026-11-05T15:01:00Z",
+                            cobertura(5), sha="sha05")
+    assert ok, resumen
+
+
+def test_vr3_03_records_de_forma_inesperada_dan_falla_con_mensaje(tmp_path):
+    """Un record que no es objeto, `records` como diccionario o `regimen` como texto daban AttributeError."""
+    malos = ['{"records": [null]}', '{"records": [3, "x"]}', '{"records": {"a": 1}}',
+             json.dumps({"records": [dict(de_la_corrida(4)[0], regimen="texto")]})]
+    for crudo in malos:
+        rc, out = juzgar(tmp_path, 4, [], cob=cobertura(4), json_crudo=crudo)
+        _sin_traceback(rc, out)
+        assert "FALLA" in out, (crudo, out)
+        if "regimen" not in crudo:                     # el `regimen` de texto lo atrapa el resguardo de main()
+            assert "`records` de forma inesperada" in out, (crudo, out)
+
+
+def test_vr3_03_cobertura_de_forma_inesperada_da_falla_con_mensaje(tmp_path):
+    for cob in ('{"fallas": [1, "x"], "plataformas": {}}', '{"incidencias": [null], "plataformas": {"MODIS_AQUA": 3}}',
+                '{"plataformas": []}'):
+        rc, out = juzgar(tmp_path, 4, historial(3, 4), cob_cruda=cob)
+        _sin_traceback(rc, out)
+        assert "FALLA" in out, (cob, out)
+
+
+def test_vr3_04_y2_el_primer_dia_de_la_ventana_perdido_es_falla(tmp_path):
+    rc, out = juzgar(tmp_path, 6, _sin(historial(3, 6), 3, "VIIRS375"), cob=cobertura(6))
+    assert rc != 0 and "VIIRS375 2026-11-03" in out, out
+
+
+def test_vr3_04_y2_ventana_de_un_dia_perdida_es_falla(tmp_path):
+    regs = de_la_corrida(3, familias=("MODIS", "VIIRS750"))
+    rc, out = juzgar(tmp_path, 3, regs, ini="2026-11-03", cob=cobertura(3))
+    assert rc != 0 and "VIIRS375 2026-11-03" in out, out
+
+
+def test_vr3_04_y3_otra_incidencia_no_prueba_la_ausencia(tmp_path):
+    """Sólo `sin_granulos` prueba que no hubo pasada; una `dia_parcial` de las plataformas no."""
+    cob = cobertura(5)
+    for p in ("VIIRS_NOAA20_750", "VIIRS_NOAA21_750"):
+        cob["incidencias"].append({"tipo": "dia_parcial", "cuenta_estricto": True, "volcan": VOLCAN,
+                                   "fecha": "2026-11-05", "plataforma": p, "motivo": "día en curso"})
+    regs = historial(3, 4) + de_la_corrida(5, familias=("MODIS", "VIIRS375"))
+    rc, out = juzgar(tmp_path, 5, regs, cob=cob)
+    assert rc != 0 and "VIIRS750 2026-11-05" in out, out
+
+
+def test_vr3_04_y9_retirada_con_cese_posterior_al_dia_cuenta_como_viva(tmp_path):
+    """Suomi NPP con cese el 2026-11-06: el día 5 todavía estaba viva y su silencio no prueba nada."""
+    cob = cobertura(5, sin_pasada=("VIIRS_NOAA20_750", "VIIRS_NOAA21_750"))
+    cob["plataformas"]["VIIRS_SNPP_750"]["cese_desde"] = "2026-11-06T00:00:00Z"
+    regs = historial(3, 4) + de_la_corrida(5, familias=("MODIS", "VIIRS375"))
+    rc, out = juzgar(tmp_path, 5, regs, cob=cob)
+    assert rc != 0 and "VIIRS750 2026-11-05" in out, out
+
+
+def test_vr3_01_cero_y_algo_el_mismo_dia_y_plataforma_no_es_prueba(tmp_path):
+    """Si una búsqueda de Aqua quedó en 0 pero otra del mismo día dejó un gránulo nocturno, Aqua sí pudo pasar."""
+    regs = _sin(historial(3, 5), 4, "MODIS")
+    log = log_noche((4, [("MODIS_TERRA", 0, 2), ("MODIS_AQUA", 0, 3), ("MODIS_AQUA", 1, 2)]))
+    rc, out = juzgar(tmp_path, 5, regs, log=log, cob=cobertura(5))
+    assert rc != 0 and "MODIS 2026-11-04" in out, out

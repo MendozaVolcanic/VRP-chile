@@ -25,7 +25,9 @@ QUÉ HACE.
      VIIRS 375), tiene que haber al menos un record de la vía con pasada del día d en el JSON, lo haya escrito esta
      corrida o una anterior. Si no lo hay, la única excusa es una prueba escrita de que no hubo pasada: la cobertura de
      ESTA corrida dice que todas las plataformas vivas del sensor respondieron sin gránulos el día d (incidencia
-     `sin_granulos` de pipeline/fetch.py) o están retiradas por cese anunciado. Eso va en una línea NOTA. Sin esa
+     `sin_granulos` de pipeline/fetch.py), o que el log de ESTA corrida dice que el filtro nocturno les dejó 0
+     gránulos ese día (VR3-01: MODIS con sólo pasadas de día, ver `_solo_de_dia`), o están retiradas por cese
+     anunciado. Eso va en una línea NOTA. Sin esa
      prueba es FALLA, sea el día de hoy o uno anterior: un día perdido se sigue viendo hasta que sale de la ventana.
      Un record de K caído no cuenta como record de la vía.
   3. Catálogo vacío (VV169-02): si un mismo día quedan «sin pasada» los tres sensores, o VIIRS 750 y VIIRS 375 a la
@@ -49,6 +51,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -85,14 +88,41 @@ def _dias(ini, fin):
     return [(a + timedelta(days=i)).isoformat() for i in range((b - a).days + 1)]
 
 
-def _sin_pasada(sensor, cobertura, dia):
-    """Lista de plataformas vivas de `sensor` si TODAS respondieron sin gránulos el día `dia` (o están retiradas por
-    cese desde antes de ese día); None si alguna pudo traer gránulos o si la cobertura no nombra ninguna."""
+_CABECERA = re.compile(r"^>>> .* \| (\d{4}-\d{2}-\d{2})\s*$")
+_FILTRO_NOCHE = re.compile(r"^\s*(\S+): kept (\d+) of (\d+) granules \(night filter\)\s*$")
+
+
+def _solo_de_dia(log_txt):
+    """{(día, plataforma)} cuya búsqueda trajo gránulos y el filtro nocturno los descartó TODOS.
+
+    VR3-01 (S170, experiments/_s169/vigilancia_sombra_verificador/ronda3/INFORME_VERIFICACION_R3.md en loop/activo):
+    Terra y Aqua pasan de día y de noche, así que la búsqueda de MODIS casi nunca responde vacía, y pipeline/fetch.py
+    no deja `sin_granulos` cuando el filtro nocturno vacía la lista (`if not l1b_granules: continue`). La única
+    prueba escrita de que esa noche no hubo pasada es la línea «kept 0 of N granules (night filter)» que fetch.py
+    imprime bajo la cabecera «>>> volcán | día» de run_pipeline.py. Si el mismo día y plataforma dejó algún gránulo
+    nocturno en otra línea, no es prueba."""
+    dia, cero, algo = None, set(), set()
+    for ln in log_txt.splitlines():
+        m = _CABECERA.match(ln)
+        if m:
+            dia = m.group(1)
+            continue
+        m = _FILTRO_NOCHE.match(ln)
+        if m and dia is not None:
+            (cero if int(m.group(2)) == 0 else algo).add((dia, m.group(1)))
+    return cero - algo
+
+
+def _sin_pasada(sensor, cobertura, dia, solo_de_dia=frozenset()):
+    """Lista de plataformas vivas de `sensor` si TODAS respondieron sin gránulos el día `dia`, o sólo con gránulos de
+    día (`solo_de_dia`, del log), o están retiradas por cese desde antes de ese día; None si alguna pudo traer gránulos
+    nocturnos o si la cobertura no nombra ninguna."""
     plataformas = [p for p in (cobertura.get("plataformas") or {}) if familia(p) == sensor]
     if not plataformas:
         return None
     vacias = {i.get("plataforma") for i in cobertura.get("incidencias") or []
               if i.get("tipo") == "sin_granulos" and i.get("fecha") == dia}
+    vacias |= {p for d, p in solo_de_dia if d == dia}
     inicio_dia = _utc(dia + "T00:00:00Z")
     vivas = []
     for p in plataformas:
@@ -112,6 +142,12 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensor
     de --cobertura-json de run_pipeline, o None. `sha`: el del disparo (GITHUB_SHA); si viene, un record sólo es de esta
     corrida si lo trae. `errores_lectura`: insumos que main no pudo leer, que van como FALLA."""
     fallas, notas = list(errores_lectura), []
+    # VR3-02 (S170): con --ini o --fin ilegibles `_dias` da [] y ningún día se juzgaba: la corrida salía verde.
+    try:
+        date.fromisoformat(ini)
+        date.fromisoformat(fin)
+    except (TypeError, ValueError):
+        fallas.append(f"--ini o --fin ilegibles ({ini!r}, {fin!r}): no se puede juzgar la ventana por día")
     desde = _utc(desde_utc) if desde_utc else None
     if desde is None:
         fallas.append(f"--desde-utc vacío o ilegible ({desde_utc!r}): no se sabe qué escribió esta corrida")
@@ -169,17 +205,21 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensor
         fallas.append("ningún record de la vía escrito en esta corrida: la corrida no produjo nada")
 
     dias = _dias(ini, fin)
+    solo_de_dia = _solo_de_dia(log_txt)
     if json_ok:
         for d in dias:
             sin_pasada_d = []
             for s in sensores:
                 if (d, s) in hay:
                     continue
-                vacias = _sin_pasada(s, cobertura or {}, d)
+                vacias = _sin_pasada(s, cobertura or {}, d, solo_de_dia)
                 if vacias:
                     sin_pasada_d.append(s)
+                    de_dia = [p for p in vacias if (d, p) in solo_de_dia]
                     notas.append(f"{s} {d}: sin records de la vía; miró y no hubo pasada "
-                                 f"(búsqueda sin gránulos en {', '.join(vacias)})")
+                                 f"(búsqueda sin gránulos en {', '.join(vacias)}"
+                                 + (f"; de ellas sólo con gránulos de día: {', '.join(de_dia)}" if de_dia else "")
+                                 + ")")
                 else:
                     fallas.append(f"{s} {d}: ningún record de la vía y ninguna prueba de que no hubo pasada")
             # VV169-02: ningún sensor, o ningún VIIRS, con pasada el mismo día es un catálogo vacío, no la órbita
@@ -215,6 +255,21 @@ def _leer_json(ruta, nombre, errores):
         return None
 
 
+def _cobertura_bien_formada(c):
+    """La forma que escribe scripts/run_pipeline.py::informar_cobertura: `plataformas` objeto de objetos (o null),
+    `fallas` e `incidencias` listas de objetos."""
+    plat = c.get("plataformas")
+    plat = {} if plat is None else plat                 # `or {}` dejaría pasar una lista vacía
+    if not isinstance(plat, dict) or not all(v is None or isinstance(v, dict) for v in plat.values()):
+        return False
+    for clave in ("fallas", "incidencias"):
+        lista = c.get(clave)
+        lista = [] if lista is None else lista
+        if not isinstance(lista, list) or not all(isinstance(x, dict) for x in lista):
+            return False
+    return True
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", required=True)
@@ -233,7 +288,11 @@ def main(argv=None):
     if datos is None and Path(a.json).exists():
         registros = None
     else:
-        registros = list((datos or {}).get("records") or [])
+        registros = (datos or {}).get("records") or []
+        # VR3-03 (S170): `records` como diccionario o con elementos que no son objetos daba AttributeError
+        if not isinstance(registros, list) or not all(isinstance(r, dict) for r in registros):
+            errores.append("JSON de la sombra con `records` de forma inesperada (no es una lista de objetos)")
+            registros = None
     lg = Path(a.log)
     try:
         log_txt = lg.read_text(encoding="utf-8", errors="replace") if lg.exists() else ""
@@ -244,8 +303,20 @@ def main(argv=None):
     if cobertura is not None and not isinstance(cobertura, dict):
         errores.append("cobertura ilegible (no es un objeto)")
         cobertura = None
-    ok, resumen = revisar(registros, log_txt, a.ini, a.fin, a.desde_utc, cobertura, sha=a.sha or None,
-                          errores_lectura=errores)
+    if cobertura is not None and not _cobertura_bien_formada(cobertura):
+        # VR3-03 (S170): una cobertura de forma interna inesperada no prueba nada, aunque hoy no se la consulte
+        errores.append("cobertura de forma inesperada (`plataformas`, `fallas` o `incidencias`)")
+        cobertura = None
+    try:
+        ok, resumen = revisar(registros, log_txt, a.ini, a.fin, a.desde_utc, cobertura, sha=a.sha or None,
+                              errores_lectura=errores)
+    except (AttributeError, TypeError, KeyError, ValueError) as e:
+        # VR3-03 (S170): un insumo bien formado pero de forma interna inesperada (un `regimen` de texto, fallas o
+        # incidencias que no son objetos) no puede terminar en traceback: va como FALLA con la línea de K.
+        ok = False
+        resumen = (f"ventana {a.ini} a {a.fin}: no se pudo revisar\n  K caídos en la ventana: sin dato (insumo de "
+                   f"forma inesperada)\n  FALLA: " + "; ".join(errores + [f"insumo de forma inesperada "
+                                                                         f"({type(e).__name__}: {e})"]))
     print(resumen)
     # VV169-05: el resumen del job (GITHUB_STEP_SUMMARY) lleva siempre la línea de K caídos, también en verde
     ruta = os.environ.get("GITHUB_STEP_SUMMARY")
