@@ -140,3 +140,35 @@ Lectura `leer_t3_salida.txt`, identidad `identidad_t3_salida.txt`, jobs `t3_run_
   (`selladas_con_grilla_t3_salida.txt`). En total son 24 + 11 + 10 = 45, las mismas 45 del censo.
 - Con la adenda implementada en la rama `claude/s170-modd-f4-adenda-n01`, la identidad de t3 queda OK, con 10 por
   acuerdo y 0 casos simétricos (`adenda_n01/control_identidad_t3_salida.txt`).
+
+## Lectura del A/B (S170, 2026-10-31 17:00 UTC, evaluador sellado del tag `s170-modd-f4-candado-n01`)
+
+Nicolás autorizó sellar y leer (16:55 UTC, mensaje de la coordinadora S170). La lectura se corrió una sola vez, con
+`leer_f4.py --tag s170-modd-f4-candado-n01` sobre las 24 partes de t1, t2 y t3 y con la identidad unida
+(`identidades/identidad_t1_t2_t3.json`). No se cambió ninguna regla ni ningún umbral. Salida completa en
+`lectura_ab/leer_f4_salida.txt` y `lectura_ab/resultado_f4.json`.
+
+**Veredicto del §7: INDECIDIBLE (fila 1: un control en rojo, procedencia).** Los otros trece controles dan OK:
+k_produccion, identidad, marca, placebo, contador, cobertura, posición, predicado de clase, evaluar_d25, referencia,
+re-etiquetado, manifiesto y predicado.
+
+Por criterio, tal como lo da el evaluador:
+- Posición elegida: V (ninguna otra gana contra V). Ninguna protegida la publica otra posición y no la elegida.
+- P1: SIN PÉRDIDA, con 0 pérdidas.
+- P1b: 0 que decidan; se listan 22 en sentido contrario (K bajo 1 MW y V sobre 1 MW).
+- P2 contra K: GANA (neto −44, B = 53, s_K = 52, s_V = 8, p = 1/10001). Con la unión también GANA. Por tramo: C GANA,
+  E SIN SUSTRATO (sólo informa).
+- P2' contra K: GANA (neto −44).
+- M: MEJORA (n = 83, mediana de d −0,246). Con d′ contra la ganancia pareja también MEJORA, con ganancia ajustada 1,99.
+- Razón V/MIROVA en las 56 protegidas que V publica: mediana 0,983, dentro de [0,9; 1,1] (sólo informa).
+- Chillán (acompaña, no decide): RESUELTO POR EL PAQUETE, con 12 pares, 10 con V más cerca de MIROVA, p = 79/4096,
+  mediana 1,03 y 4 recuperadas.
+
+**Nota aparte, que no ajusta nada (`lectura_ab/desglose_procedencia.py` y su salida).** Los 99 rojos de procedencia
+son 24 cabeceras × 3 más 27 archivos `procedencia_*.txt`. En las 24 cabeceras de los jobs están el commit `d65fd231d`
+y el tag `s170-modd-f4-candado`, con los que corrieron t1 a t3, y el sha256 del evaluador previo a la adenda
+(`8a1edc14…`). La lectura compara todo eso contra el tag sellado de la adenda (`a7bd7562e`, evaluador `59399111…`). El
+arnés es el mismo: el sha256 de `probe_f4.py` coincide en las 24. Es decir, el rojo viene de que el control de
+procedencia exige que los jobs y la lectura usen el mismo tag y el mismo evaluador, y la adenda cambió el evaluador
+después de las corridas. Para un control en rojo, el protocolo del §7 dice: «se busca el defecto del instrumento y se
+repite la lectura; no se repite la corrida a ciegas». Lo decide Nicolás.
