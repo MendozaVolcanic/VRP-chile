@@ -1,0 +1,20 @@
+warning: in the working copy of 'experiments/_s157_prereg_d25/evaluar_d25.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'otro.txt', LF will be replaced by CRLF the next time Git touches it
+(1) paso VIEJO (sin --force), tag anotado, checkout como el runner:
+    git: From D:/vrp-trabajo/temporales/s168_repro_tag/origen
+    git:  ! [rejected]        candado    -> candado  (would clobber existing tag)
+  -> FALLA en el fetch
+(2) paso NUEVO (--force), mismo caso:
+    git: From D:/vrp-trabajo/temporales/s168_repro_tag/origen
+    git:  t [tag update]      candado    -> candado
+  -> PASA
+(3a) paso NUEVO, el tag publicado apunta a OTRO commit que el que corre:
+    git: From D:/vrp-trabajo/temporales/s168_repro_tag/origen
+    git:  t [tag update]      candado_movido -> candado_movido
+    git:  * [new tag]         candado        -> candado
+  -> FALLA: el tag no es el commit
+(3b) paso NUEVO, tag correcto pero el evaluador del árbol no es el sellado:
+    git: From D:/vrp-trabajo/temporales/s168_repro_tag/origen
+    git:  t [tag update]      candado    -> candado
+  -> FALLA: el evaluador no es el sellado
+git 2.53.0.windows.2
