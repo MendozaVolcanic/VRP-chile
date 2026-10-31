@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 21:55 UTC (S171): Nicolás adelanta MODIS: encender la vía sin esperar la parada, con K de guardia
+- Pregunta: «¿Adelantamos MODIS así (sí / no)?» (encender la vía de MIROVA en MODIS con regla de reversión sellada y K
+  corriendo de sombra como guardia, como K en S153). Respuesta textual de Nicolás: «hagamos todo lo recomiendas,
+  analiza diferentes perspectivas, tenemos que probar todo y acercanos a los objetivos». Reemplaza la decisión de las
+  18:54 («en la parada de la sombra»). **No es el sí de A45**: el merge del encendido pide su propia frase.
+- Plan desde el 2026-11-01 12:00 UTC (cuota al 98 % hasta entonces): (1) regla de reversión de MODIS escrita y sellada
+  antes del encendido, sobre el modelo de `vigilancia-sombra.yml` (protegida que K publica y la vía calla), con
+  verificador; (2) tag defensivo y PR que enciende `ENABLE_MODIS_CODIGO_MIROVA` en `mirova_equivalent.yaml`, con K de
+  MODIS en un perfil de guardia aislado; (3) ficha SDA (`docs/FICHA_SDA_VRP_CHILE.md`) actualizada en el mismo PR;
+  (4) excepción al congelamiento del §12.6 anotada: toca producción de MODIS, no las vías de VIIRS que mira la sombra.
+- Números vigentes de producción (K), audit continuo del 2026-10-26 (ventana rodante de 60 días,
+  `data/audit_continuous/latest.json` de main): recall MODIS 62,5 % (n 16 noches), VIIRS 750 74,0 % (n 50), VIIRS 375
+  97,3 % (n 188); falsas publicaciones en negativos limpios MODIS 1,0 % (12 de 1.194), VIIRS 750 0,8 % (13 de 1.718),
+  VIIRS 375 4,0 % (46 de 1.136; 10,5 % en régimen focal, sobre su banda).
+
 ### 2026-10-31 21:46 UTC (S171): Nicolás decide la vara del criterio 1 de V750-A: MATLAB directo
 - Pregunta: «¿Cuál debe ser la vara del criterio 1 de V750-A? MATLAB directo (recomendado) / Octave con relleno de
   MATLAB». Respuesta textual de Nicolás: «lo que tu recomiendes». Queda **MATLAB directo**: máscara índice por índice y
