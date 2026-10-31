@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 04:42 UTC (S170): lector sellado, humo verificado, t1 apto, t2 corriendo, adenda N-01 para Nicolás
+- Lector V375-E: repaso con la batería nueva atrapa N19, V07b y V07c; M22 sobrevive (equivalente). Commit
+  `3ab4b943d` en `claude/s169-v375e-lector`; tag `s170-v375e-lector` (autorización 2). Ventana P sin abrir.
+- Humo de MOD-D: verificador limpio (Sonnet) APTO PARA T1 (`D:/vrp-trabajo/temporales/ver_s170_humo/INFORME.md`).
+- t1 (run 41166033637, 03:49 a 04:17 UTC) verde; MOD-D: 1.891 de 1.891 filas, identidad 1.746 de 1.746, apto
+  (rama `claude/s168-modd-f4-sello` `d71448940`). t2 despachado 04:19 UTC (run 41168080181), corriendo.
+- **Para Nicolás**: la regla N-01 (§8.2) cuenta como «selladas sin explicar» 24 pasadas de t1 (45 en el censo) con
+  escena_invalida a la que el censo llegó por el mismo motivo; el veredicto saldría INDECIDIBLE. MOD-D prepara un
+  borrador de adenda sin sellar. Nadie lee el A/B antes de su decisión.
+- V750-A: M82 de 85, todas atrapadas.
+
 ### 2026-10-31 03:46 UTC (S170): verificadores, #929/#930/#931 mergeados, humo de MOD-D verde, autorizaciones nocturnas
 - Nicolás liberó la cuota (usar el ~10 % restante). Verificadores limpios: #929 MERGEABLE (Sonnet,
   `D:/vrp-trabajo/temporales/ver_s170_929/INFORME.md`); candado MOD-D LISTO PARA HUMO y #930 MERGEABLE (Opus,
