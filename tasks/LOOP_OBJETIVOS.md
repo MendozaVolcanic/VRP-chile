@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 20:46 UTC (S171): vara candidata contra MATLAB medida; verificador y pre-mortem del día 3 lanzados
+- Vara candidata para el §4.1 de V750-A contra la salida de MATLAB R2026b de S163 (311 escenas, `resultado_o2.mat`
+  md5 `1f7fdc4b…ba43`; los `.mat` estaban SIN versionar en `s159-pruebas` y se rescataron del respaldo a
+  `D:/vrp-trabajo/temporales/equiv_v750_s171/matlab_o2/`): vía de main 311 de 311 igual; la mutación «relleno Qhull»
+  queda atrapada (65) y las cinco del §4.1 también (en 246 escenas de control; recorte sólo en 1). Pasado a
+  `local_94f4be0d`.
+- Lanzados dos agentes Fable 5.1 (high) con el preámbulo de `docs/_prompts/PREAMBULO-AUDITOR.md` entero:
+  verificador limpio de A1 a A3 (`D:/vrp-trabajo/temporales/ver_s171_equiv/`) y pre-mortem del 2 y 3 de noviembre, eje
+  nuevo (`D:/vrp-trabajo/temporales/audit_s171_dia3/`). Prompts guardados como `PROMPT.md` en cada carpeta.
+
 ### 2026-10-31 20:18 UTC (S171): equivalencia de V750-A roja por el relleno de MATLAB; D-43 re-verificada; sombra y token en orden
 - **Equivalencia de V750-A (§4.1, criterio 1 de adopción)**: `equivalencia_v750a.py` sobre la vía de main `478d9c086`
   da ROJA (E1 VRP distinto, id 6). Aislado por commit: VERDE en `fb87ef554`, ROJA desde `e5151e0db` (relleno
