@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 21:46 UTC (S171): Nicolás decide la vara del criterio 1 de V750-A: MATLAB directo
+- Pregunta: «¿Cuál debe ser la vara del criterio 1 de V750-A? MATLAB directo (recomendado) / Octave con relleno de
+  MATLAB». Respuesta textual de Nicolás: «lo que tu recomiendes». Queda **MATLAB directo**: máscara índice por índice y
+  VRP a 1e-9 contra la salida de MATLAB R2026b de S163 (`experiments/_s163_o2/resultado_o2.mat`, md5 `1f7fdc4b…ba43`,
+  311 escenas), con las mutaciones juzgadas mutando la vía misma sobre las 311 (VS171-05). Se mantienen aparte E3
+  (remuestreo, VS171-03) y la máscara contra el oráculo de Octave en los 1.020 casos de E1 como control de detección.
+  Antes del sello: escenas con npix > 30 para el halo de 7 celdas (VS171-02) y la salida verde commiteada. Va al §4.1 y
+  §7.1 del pre-registro (en BORRADOR) por la sesión de VIIRS 750, con su verificador.
+
 ### 2026-10-31 21:25 UTC (S171): CORRECCIÓN: la equivalencia de V750-A de main sale VERDE; error de montaje propio
 - El verificador limpio (Fable 5.1 high, `D:/vrp-trabajo/temporales/ver_s171_equiv/INFORME.md`, `caminos.md` sellado
   antes de abrir nada) **corrige la entrada de las 19 UTC «equivalencia de V750-A roja»**: S171 corrió la copia de
