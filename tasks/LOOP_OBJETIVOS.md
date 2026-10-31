@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 10:40 UTC (S170): Nicolás aprueba el lector de V375-E; #915 comentado
+- **Nicolás aprobó el lector de la sombra de V375-E** tal como quedó en el tag `s170-v375e-lector` (10:38 UTC, «si
+  apruebo»). Con datos de la sombra (desde el 2026-11-03) se puede leer sin esperar otra aprobación; la decisión
+  final sigue siendo suya en la parada (30 noches y 40 alertas).
+- #915 queda abierto a propósito, con comentario que lo enlaza a MOD-D, V750-A/B y V375-E.
+- V750-A N-3: M86 a M90 atrapadas. Adenda N-01 de MOD-D: mutaciones en curso.
+
 ### 2026-10-31 05:13 UTC (S170): MOD-D t1, t2 y t3 completos; adenda N-01 en mutaciones; V750-A en M85
 - t2 (run 41168080181) apto según MOD-D: 1.922 filas, identidad 1.789 de 1.789. t3 (run 41169884696, despachado
   04:45 UTC) success sobre `d65fd231de52`: 1.896 filas, identidad 1.786 de 1.786. Total 5.709 filas (población
