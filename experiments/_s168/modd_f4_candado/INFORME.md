@@ -99,3 +99,22 @@ Hallazgos de gravedad 1 del verificador de S170 (`D:/vrp-trabajo/temporales/ver_
 - VS170-MODD-04, las grillas del censo sin sha. Queda cerrado para la lectura: `grillas_censo_sha256.txt` tiene el
   sha256 de las 5.321. Antes de correr la identidad de t1 a t3, comprobarlo con
   `cd D:/vrp-trabajo/temporales/s162_modd/censo && sha256sum -c <ruta>/grillas_censo_sha256.txt`.
+
+## Tanda t1 (S170, run 41166033637, tag `s170-modd-f4-candado`, 2026-10-31)
+
+Lectura con `leer_tanda_f4.py` (salida `leer_t1_salida.txt`), identidad en `identidad_t1_salida.txt` y tiempos de los
+jobs en `t1_run_41166033637.json`.
+- Las 8 partes salieron completas contra la partición del arnés: 1.891 de 1.891 filas, sin faltantes, sobrantes ni
+  repetidas, todas en `ok`. Hay 0 `otro_granulo`, 0 pasadas en que K difiere de producción y la marca de la vía es
+  verdadera en las 1.891.
+- Todas las cabeceras traen el commit y el tag, y las versiones del runner son una sola en las 8 partes (VS170-MODD-02).
+- Identidad: 1.746 de 1.746 iguales. Las grillas del censo coinciden con su sha256 (VS170-MODD-04) y los módulos de
+  VIIRS y del Test 1 no cambiaron desde el tag (VS170-MODD-01).
+- Tiempo: unos 17 minutos por parte y 25 en total.
+- **Defecto de regla para la lectura (no del runner).** 24 pasadas tienen grilla del censo y el runner las saca como
+  `escena_invalida`. El port del censo llegó al mismo motivo en las 24, y en todo el censo son 45
+  (`selladas_con_grilla.py` y su salida). La regla N-01 del §8.2 supone que una pasada con grilla del censo es una
+  pasada que el censo cubrió, y por eso cuenta como «sellada sin explicar» toda pasada con grilla que el runner saque por
+  un motivo sellado, salvo que la identidad la declare de otro gránulo. Con esa regla, la identidad queda en rojo y el
+  veredicto sale INDECIDIBLE. Arreglarlo cambia una regla del evaluador: pide una adenda sellada, por ejemplo que una
+  pasada así cuente como acuerdo cuando el censo llegó al mismo motivo con la misma grilla. Lo decide Nicolás.
