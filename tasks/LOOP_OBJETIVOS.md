@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 05:13 UTC (S170): MOD-D t1, t2 y t3 completos; adenda N-01 en mutaciones; V750-A en M85
+- t2 (run 41168080181) apto según MOD-D: 1.922 filas, identidad 1.789 de 1.789. t3 (run 41169884696, despachado
+  04:45 UTC) success sobre `d65fd231de52`: 1.896 filas, identidad 1.786 de 1.786. Total 5.709 filas (población
+  entera) y 5.321 identidades iguales. No se leyó el A/B.
+- Adenda N-01: verificador limpio CORRECTA CON CAMBIOS (`D:/vrp-trabajo/temporales/ver_s170_adenda/INFORME.md`);
+  MOD-D aplicó los cuatro cambios en `claude/s170-modd-f4-adenda-n01` (borrador, sin tag): batería 69 de 69; con la
+  adenda t1, t2 y t3 quedan OK (24 + 11 + 10 = 45 por acuerdo, 0 simétricos). Mutaciones completas (94 + 4
+  controles, ~10,5 h) corriendo desde 05:00 UTC. **Pendiente de Nicolás**: aprobar y sellar la adenda.
+- V750-A: 84 de 85 atrapadas, M85 corriendo. Falta N-3 (§6 ter), ROI de V750-B, verificador y sello; visto bueno
+  para implementar N-3 sin tag. No bloquea V750-B del 2026-11-03.
+
 ### 2026-10-31 04:42 UTC (S170): lector sellado, humo verificado, t1 apto, t2 corriendo, adenda N-01 para Nicolás
 - Lector V375-E: repaso con la batería nueva atrapa N19, V07b y V07c; M22 sobrevive (equivalente). Commit
   `3ab4b943d` en `claude/s169-v375e-lector`; tag `s170-v375e-lector` (autorización 2). Ventana P sin abrir.
