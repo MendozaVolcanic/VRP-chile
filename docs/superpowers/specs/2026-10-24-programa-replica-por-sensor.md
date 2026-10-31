@@ -467,3 +467,46 @@ Nicolás. Alcance:
   emergencia del NRT de producción. Cada una se anota en `tasks/LOOP_OBJETIVOS.md` §6 con su commit y qué sensor toca.
 - Los lectores de sombra tienen que comparar sólo lo que lee su vía, para que una excepción de otro sensor no marque el
   régimen propio (B7 del verificador del lector de VIIRS 375, S169).
+
+### 12.7 Estado al 2026-10-31 y calendario a la adopción (S171)
+
+Agregado por S171 a pedido de Nicolás («revisa si es necesario mejorar algún plan para ser más eficientes y alcanzar
+los objetivos»). Actualiza el §12.1 a §12.4 sin reemplazarlos. Las fechas de parada son **estimaciones** (la sombra
+cuenta noches con datos, y en VIIRS 375 además alertas); se recalculan con el monitor de la sombra.
+
+**Dónde está cada sensor**:
+- **MODIS: el más cerca.** MOD-D fase 4 leído: PROPONER ADOPCIÓN, confirmado por verificador limpio (tag
+  `s170-modd-f4-lectura`). Nicolás decidió el 2026-10-31 encenderlo en la parada de la sombra o en una ventana
+  planificada, con tag y su sí de A45 ese día (bitácora S171). Pre-registro con la marca de sellado (`25e3cc3ba`).
+- **VIIRS 375**: lector de la sombra de V375-E sellado (`s170-v375e-lector`) y aprobado; sin trabajo hasta tener datos.
+- **VIIRS 750: el camino crítico.** V750-B se despacha el 2026-11-03; de su lectura salen la ROI (excepción permitida al
+  congelamiento, §12.6) y el sello de V750-A, que después necesita su propio run y lectura.
+
+**Calendario** (UTC):
+
+| fecha | qué | quién decide |
+|---|---|---|
+| 2026-11-01 12:00 | se reinicia la cuota semanal (estaba al 94 %); recién ahí el trabajo pesado | nadie |
+| 2026-11-01 / 02 | **ensayo en seco del despacho de V750-B** (comandos del §3 y §4 de `experiments/_s162_v750b/r4/INFORME.md`, sin despachar) | loop |
+| 2026-11-02 | audit semanal (#915 sigue abierto); cese de Suomi NPP 13:00, comprobar en CMR (C-06) | loop |
+| 2026-11-03 | despacho de V750-B desde su tag; 15:00 primera sombra con datos; 18:30 monitor | loop |
+| ~2026-11-04 a 06 | lectura de V750-B con verificador; PR de `roi_v750` (rama `s169-roi-v750`) | **Nicolás** (frase de merge) |
+| ~2026-11-06 en adelante | sello, run y lectura de V750-A | **Nicolás** (sello) |
+| **2026-11-27** | **rotar `EARTHDATA_TOKEN`** (50 días desde el 2026-10-08; vence 2026-12-07 18:03, `REGISTRO_CREDENCIALES.md` fila 1) | **Nicolás** |
+| ~2026-11-30 | MODIS: 28 noches de sombra; encendido de la vía de MIROVA con tag defensivo | **Nicolás** (A45) |
+| ~2026-12-02 o después | VIIRS 375: 30 noches **y** 40 alertas; lectura del lector sellado | **Nicolás** |
+
+**Cuatro mejoras de eficiencia** (S171; las tres primeras no cambian ninguna regla sellada):
+1. **La ROI de V750 entra lo antes posible después de la lectura de V750-B.** Cada noche de la sombra de VIIRS 750 que
+   corra con la caja `def` es una noche que su lector tiene que tratar como otro régimen (§12.6). Hay que tener el PR de
+   `roi_v750` listo para mergear el mismo día de la lectura, y dejar escrita en la bitácora la noche del cambio.
+2. **Ensayar el despacho de V750-B en seco antes del 3** (lección S170: las cinco fallas de montaje se habrían evitado
+   con un ensayo barato antes del paso caro). Comprobar que `--data` es el `data/` de `main` del día y que el tag baja en
+   el runner.
+3. **Rotar el token el 2026-11-27, no el 2026-12-07.** La sombra de VIIRS 375 puede llegar a su parada después del
+   vencimiento; un token vencido no da error en el NRT si el guard de #894 no corta (comprobar ese día que el
+   `nrt-healthcheck` informa la fecha nueva). Un hueco a mitad de la sombra le resta noches a los tres sensores.
+4. **Bajar el costo de coordinación.** Hay 15 sesiones de VRP Chile sin archivar (S162 a S170) y 20 worktrees, con C: al
+   96 % y D: al 94 %. Todo su trabajo commiteado está en el remoto (S171, `git rev-list HEAD --not --remotes` = 0 en los
+   20). Archivar las sesiones terminadas y limpiar sus worktrees, con el sí de Nicolás, libera disco antes de V750-B, que
+   corre local.
