@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 23:14 UTC (S171): cierre; traspaso en tasks/BLOQUE_ARRANQUE_S172.md
+- Estado fijado sin trabajo de VRP Chile en curso (el único Python vivo es de `Empresas/Autoscan`). Cuota al 98 %; la
+  S172 arranca después del reinicio del 2026-11-01 12:00 UTC. Lecciones en la §c del bloque y en la memoria
+  `feedback_s171_lecciones`.
+
 ### 2026-10-31 21:55 UTC (S171): Nicolás adelanta MODIS: encender la vía sin esperar la parada, con K de guardia
 - Pregunta: «¿Adelantamos MODIS así (sí / no)?» (encender la vía de MIROVA en MODIS con regla de reversión sellada y K
   corriendo de sombra como guardia, como K en S153). Respuesta textual de Nicolás: «hagamos todo lo recomiendas,
