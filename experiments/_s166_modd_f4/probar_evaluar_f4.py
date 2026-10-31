@@ -948,6 +948,14 @@ def E66_adenda_no_acepta_de_mas():
     chk(g(EV.control_identidad(ident, filas, 100), "estado") == "INDECIDIBLE", "sin el campo motivo_censo: rojo")
 
 
+def E68_adenda_fuera_del_granulo_sigue_n01():
+    """Adenda a N-01: si el runner dice «volcán fuera del gránulo», N-01 rige aunque la identidad traiga todas las
+    condiciones del acuerdo con el censo en «escena inválida» (M92 de la primera corrida quedó viva sin esto)."""
+    filas = _filas_identidad(100)
+    c = EV.control_identidad(_ident_con(filas, None, "volcan_fuera_del_granulo"), filas, 100)
+    chk(g(c, "estado") == "INDECIDIBLE", "fuera del gránulo con el acuerdo completo: %s" % g(c, "estado"))
+
+
 def E67_adenda_caso_simetrico():
     """Adenda a N-01, caso simétrico: el censo dio escena inválida y el runner evaluó la pasada (sin motivo, sin
     alertas). Aunque máscara, VRP y clase coincidan, es un desacuerdo: rojo."""
