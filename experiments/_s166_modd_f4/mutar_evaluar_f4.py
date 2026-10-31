@@ -217,7 +217,10 @@ def correr(nombre, viejo, nuevo, tmp):
     caen = [ln.split()[1] for ln in p.stdout.splitlines() if ln.startswith("CAE ")]
     clase = clasificar(p.returncode, fallan, caen)
     resumen = [ln for ln in p.stdout.splitlines() if ln.startswith("RESUMEN")]
-    return nombre, clase, "%s | por aserción: %s | caen: %s" % (resumen[0] if resumen else p.stderr[-300:],
+    if os.environ.get("MUT_PROGRESO"):  # corridas largas: una línea por mutación, para no perderlo todo si se corta
+        with open(os.environ["MUT_PROGRESO"], "a", encoding="utf-8") as fh:
+            fh.write("%s %s %s\n" % (nombre, clase, resumen[0] if resumen else "-"))
+    return nombre, clase,"%s | por aserción: %s | caen: %s" % (resumen[0] if resumen else p.stderr[-300:],
                                                               ",".join(x.split("_")[0] for x in fallan) or "-",
                                                               ",".join(x.split("_")[0] for x in caen) or "-")
 
