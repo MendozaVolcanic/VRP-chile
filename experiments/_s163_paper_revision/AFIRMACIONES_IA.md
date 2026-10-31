@@ -1,0 +1,20 @@
+# Afirmaciones a verificar (parte IA en la escritura)
+
+| ID | Afirmación | Pregunta de verificación |
+|---|---|---|
+| I1 | La política de IA de Copernicus para NHESS y GMD dice «Generative AI must not be used for text or interpretations» y que el uso asistivo (gramática, legibilidad) no se declara. | Lee https://www.natural-hazards-and-earth-system-sciences.net/policies/ai_policy.html y https://www.geoscientific-model-development.net/policies/ai_policy.html. ¿Qué dicen? |
+| I2 | Elsevier permite el uso de IA en la redacción con supervisión humana, pide una sección propia de declaración que se publica, y pide el código hecho con IA en métodos. Su página dice «Policy updated June 2026». | https://www.elsevier.com/about/policies-and-standards/generative-ai-policies-for-journals |
+| I3 | Springer Nature usa un marco verde, ámbar y rojo, y escribir resultados o discusión de forma independiente con IA es «rojo» (no permitido). La guía de envío de Bull. Volcanol. pide documentar el uso de un LLM en Methods y dice que la corrección de estilo asistida no se declara. | https://www.springernature.com/gp/policies/editorial-policies/ai-manuscript-preparation (o páginas vecinas) y https://link.springer.com/journal/445/submission-guidelines |
+| I4 | AGU pide declarar el uso de IA en Materiales y Métodos; la IA no puede ser autora. | https://www.agu.org/publications/authors/policies |
+| I5 | COPE (posición «Authorship and AI tools», 2023): la IA no puede ser autora; declarar en Materiales y Métodos. | https://publicationethics.org/guidance/cope-position/authorship-and-ai-tools |
+| I6 | ICMJE (actualización de enero de 2026): la ayuda de redacción con IA se informa en agradecimientos; el uso en datos, análisis o figuras en métodos. | https://www.icmje.org/recommendations/browse/artificial-intelligence/ai-use-by-authors.html |
+| I7 | volcanica.org es hoy un dominio estacionado; la revista está en https://www.jvolcanica.org/ojs/index.php/volcanica, y su lista de verificación de envío pide aceptar la política de IA. | Revisa ambas direcciones y la página de envíos (about/submissions). |
+| I8 | Walters y Wilder 2023, Sci. Rep. 13:14045, doi 10.1038/s41598-023-41032-5: 55 % (GPT-3.5) y 18 % (GPT-4) de las citas inventadas sobre 636; 43 % y 24 % con errores sustantivos entre las reales. | Crossref + resumen. |
+| I9 | Chelli et al. 2024, J Med Internet Res 26:e53164, doi 10.2196/53164: 34 de 119 (28,6 %) referencias alucinadas con GPT-4. | Crossref + resumen. |
+| I10 | Seifi y Seyfi 2026, Crit Care Explor, doi 10.1097/cce.0000000000001474: 85 de 300 referencias inventadas por completo. | Crossref + resumen. |
+| I11 | Wu et al. 2025, Nat Commun 16:3615, doi 10.1038/s41467-025-58551-6: entre 50 y 90 % de las respuestas no están totalmente respaldadas por las fuentes que citan. | Crossref + resumen. |
+| I12 | Peters y Chin-Yee 2025, R Soc Open Sci 12:241776, doi 10.1098/rsos.241776: razón de odds 4,85 de generalización excesiva frente a resúmenes humanos; Claude 3.7 Sonnet entre los modelos. | Crossref + resumen o texto. |
+| I13 | Gao et al. 2023, npj Digit Med 6:75, doi 10.1038/s41746-023-00819-6: resúmenes generados con tamaños de cohorte inventados pero verosímiles. | Crossref + resumen. |
+| I14 | Kobak et al. 2025, Sci Adv 11:eadt3813, doi 10.1126/sciadv.adt3813: al menos 13,5 % de los resúmenes biomédicos de 2024 procesados con LLM. | Crossref + resumen. |
+| I15 | Weber-Wulff et al. 2023, Int J Educ Integr 19:26, doi 10.1007/s40979-023-00146-z: ningún detector superó 80 % de exactitud. Liang et al. 2023, Patterns 4:100779, doi 10.1016/j.patter.2023.100779: 61,3 % de falsos positivos en ensayos TOEFL. | Crossref + resumen. |
+| I16 | Chen et al. 2025, npj Digit Med 8:605, doi 10.1038/s41746-025-02008-z y Perry et al. 2026, J Bone Joint Surg, doi 10.2106/jbjs.25.01576: complacencia (siguen pedidos ilógicos, repiten la creencia del usuario). Lee et al. 2023, Proc ACM Web Conf, doi 10.1145/3543507.3583199: plagio literal, de paráfrasis y de ideas en GPT-2. | Crossref + resumen. |
