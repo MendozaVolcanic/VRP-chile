@@ -142,6 +142,12 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensor
     de --cobertura-json de run_pipeline, o None. `sha`: el del disparo (GITHUB_SHA); si viene, un record sólo es de esta
     corrida si lo trae. `errores_lectura`: insumos que main no pudo leer, que van como FALLA."""
     fallas, notas = list(errores_lectura), []
+    # VR3-02 (S170): con --ini o --fin ilegibles `_dias` da [] y ningún día se juzgaba: la corrida salía verde.
+    try:
+        date.fromisoformat(ini)
+        date.fromisoformat(fin)
+    except (TypeError, ValueError):
+        fallas.append(f"--ini o --fin ilegibles ({ini!r}, {fin!r}): no se puede juzgar la ventana por día")
     desde = _utc(desde_utc) if desde_utc else None
     if desde is None:
         fallas.append(f"--desde-utc vacío o ilegible ({desde_utc!r}): no se sabe qué escribió esta corrida")
@@ -249,6 +255,21 @@ def _leer_json(ruta, nombre, errores):
         return None
 
 
+def _cobertura_bien_formada(c):
+    """La forma que escribe scripts/run_pipeline.py::informar_cobertura: `plataformas` objeto de objetos (o null),
+    `fallas` e `incidencias` listas de objetos."""
+    plat = c.get("plataformas")
+    plat = {} if plat is None else plat                 # `or {}` dejaría pasar una lista vacía
+    if not isinstance(plat, dict) or not all(v is None or isinstance(v, dict) for v in plat.values()):
+        return False
+    for clave in ("fallas", "incidencias"):
+        lista = c.get(clave)
+        lista = [] if lista is None else lista
+        if not isinstance(lista, list) or not all(isinstance(x, dict) for x in lista):
+            return False
+    return True
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", required=True)
@@ -267,7 +288,11 @@ def main(argv=None):
     if datos is None and Path(a.json).exists():
         registros = None
     else:
-        registros = list((datos or {}).get("records") or [])
+        registros = (datos or {}).get("records") or []
+        # VR3-03 (S170): `records` como diccionario o con elementos que no son objetos daba AttributeError
+        if not isinstance(registros, list) or not all(isinstance(r, dict) for r in registros):
+            errores.append("JSON de la sombra con `records` de forma inesperada (no es una lista de objetos)")
+            registros = None
     lg = Path(a.log)
     try:
         log_txt = lg.read_text(encoding="utf-8", errors="replace") if lg.exists() else ""
@@ -278,8 +303,20 @@ def main(argv=None):
     if cobertura is not None and not isinstance(cobertura, dict):
         errores.append("cobertura ilegible (no es un objeto)")
         cobertura = None
-    ok, resumen = revisar(registros, log_txt, a.ini, a.fin, a.desde_utc, cobertura, sha=a.sha or None,
-                          errores_lectura=errores)
+    if cobertura is not None and not _cobertura_bien_formada(cobertura):
+        # VR3-03 (S170): una cobertura de forma interna inesperada no prueba nada, aunque hoy no se la consulte
+        errores.append("cobertura de forma inesperada (`plataformas`, `fallas` o `incidencias`)")
+        cobertura = None
+    try:
+        ok, resumen = revisar(registros, log_txt, a.ini, a.fin, a.desde_utc, cobertura, sha=a.sha or None,
+                              errores_lectura=errores)
+    except (AttributeError, TypeError, KeyError, ValueError) as e:
+        # VR3-03 (S170): un insumo bien formado pero de forma interna inesperada (un `regimen` de texto, fallas o
+        # incidencias que no son objetos) no puede terminar en traceback: va como FALLA con la línea de K.
+        ok = False
+        resumen = (f"ventana {a.ini} a {a.fin}: no se pudo revisar\n  K caídos en la ventana: sin dato (insumo de "
+                   f"forma inesperada)\n  FALLA: " + "; ".join(errores + [f"insumo de forma inesperada "
+                                                                         f"({type(e).__name__}: {e})"]))
     print(resumen)
     # VV169-05: el resumen del job (GITHUB_STEP_SUMMARY) lleva siempre la línea de K caídos, también en verde
     ruta = os.environ.get("GITHUB_STEP_SUMMARY")
