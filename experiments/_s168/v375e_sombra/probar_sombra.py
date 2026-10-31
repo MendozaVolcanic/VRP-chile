@@ -440,6 +440,10 @@ def main(argv=None):
         chk("S8 (base de la ventana): sin records de la vía no hay base y marca",
             not LS.control_s8(rk_ok, [], COMMIT, sin_cambio)[0])
         chk("S8 (VS168-04): un record sin régimen marca", not LS.control_s8(rk_ok + [{}], rv_ok, COMMIT, sin_cambio)[0])
+        # VS170-LEC-01 (S170, verificador del nulo, mutación N19): régimen con perfil correcto pero sin codigo_sha
+        ok_ns, d_ns = LS.control_s8(rk_ok, rv_ok + [dict(regimen=dict(REG_VIA, codigo_sha=None))], COMMIT, sin_cambio)
+        chk("S8 (VS170-LEC-01): un record de la vía con perfil bien y sin codigo_sha marca, como «sin sha»",
+            not ok_ns and d_ns["cambios"].get("None") == "sin sha", d_ns)
         chk("S8 (VS168-04): un perfil de la vía distinto marca",
             not LS.control_s8(rk_ok, [dict(regimen=dict(REG_VIA, perfil="mirova_equivalent"))], COMMIT, sin_cambio)[0])
         chk("S8 (VS168-04): un perfil de K distinto marca",
@@ -593,6 +597,20 @@ def main(argv=None):
     # ---- cableado de leer_brazo (VS168-08) y criterios nuevos (VS168-03, 06, 07)
     with seccion("cableado de leer_brazo (VS168-08) y criterios nuevos (VS168-03, 06, 07)"):
         filas_p = LS.filas_de(pob, arms, E)
+        # VS170-LEC-02 y 03 (S170, mutaciones V07b y V07c): las mitades comparan el brazo contra K y leen M en modo
+        # «informa». Sin esto, K contra K (neto 0 siempre) o M en modo «decide» pasaban la batería.
+        llamadas = []
+        Em = Proxy(E, p2=lambda f, a, ref: llamadas.append(("p2", a, ref)) or {"veredicto": "P2_" + str(a)})
+        ECm = Proxy(EC, decidir_estrato=lambda P, modo: llamadas.append(("modo", modo)) or ("M_" + modo, None))
+        mt = LS.mitades(filas_p, LS.DECIDE, dict(deps, E=Em, EC=ECm))
+        p2s = [c for c in llamadas if c[0] == "p2"]
+        modos = [c for c in llamadas if c[0] == "modo"]
+        chk("mitades (VS170-LEC-02): P2 de cada mitad es el brazo contra K, no K contra K",
+            len(p2s) == 2 and all(c == ("p2", LS.DECIDE, "K") for c in p2s)
+            and mt["primera"]["P2_K"] == mt["segunda"]["P2_K"] == "P2_" + str(LS.DECIDE), (p2s, mt))
+        chk("mitades (VS170-LEC-03): M de cada mitad se lee en modo «informa»",
+            len(modos) == 2 and all(c == ("modo", "informa") for c in modos)
+            and mt["primera"]["M"] == mt["segunda"]["M"] == "M_informa", (modos, mt))
         Nn = {"neg_pub": 12, "neg_resto": 12}
         cur = {"condicionada": {"veredicto": "REPRODUCE LA CURVA", "d": [1.0, [0.9, 1.1]]}}
         cur_k = {"condicionada": {"veredicto": "SIN SUSTRATO", "d": [None, [None, None]]}}
