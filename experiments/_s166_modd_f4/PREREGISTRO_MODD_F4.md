@@ -399,14 +399,24 @@ como el censo, despachadas de a una por la coordinadora desde el tag.
 
 **Corrida de la adenda a N-01 (S170, BORRADOR, rama `claude/s170-modd-f4-adenda-n01`, sin sello ni tag).** La regla del
 §8.2 entra en `evaluar_f4.control_identidad` (función `_acuerdo_escena_invalida` y el caso simétrico) e
-`identidad_f4.comparar` (campo `motivo_censo`). Batería: 70 escenarios (E65 a E68 nuevos), 70 de 70 OK; contra el vacío,
-70 de 70 por aserción y 0 caen. Mutaciones: M87 a M94 nuevas, y M12 con el texto nuevo (misma mutación). La primera
-corrida completa (2026-10-31 05:00 a 12:54 UTC, un proceso, árbol quieto; `adenda_n01/corrida1/`) dio 93 de 94 por
-aserción: quedó viva M92, porque ningún escenario tenía «fuera del gránulo» con todo el acuerdo. Se agregó E68 y se
-repitieron, con el mismo cuidado, las 17 mutaciones cuyo código ejecuta el control de identidad, más los cuatro
-controles (12:55 a 14:07 UTC; `adenda_n01/corrida2/`): 17 de 17 por aserción, ninguna con escenarios que caen, y los
-cuatro controles como deben. Las otras 77 no ejecutan el código que prueba E68: su clase es la de la primera corrida.
-Total: **94 de 94 atrapadas por aserción**. Sobre las tres tandas del A/B, sin leer el veredicto, la identidad pasa de
+`identidad_f4.comparar` (campo `motivo_censo`). Batería: 71 escenarios (E65 a E69 nuevos), 71 de 71 OK; contra el vacío,
+71 de 71 por aserción y 0 caen. Mutaciones: M87 a M95 nuevas, y M12 con el texto nuevo (misma mutación). Cómo se llega
+a la cifra, con sus dos salidas:
+- `experiments/_s166_modd_f4/mutar_evaluar_f4_salida.txt` es la corrida completa (2026-10-31 05:00 a 12:54 UTC, 94
+  mutaciones, batería de 69, un proceso, árbol quieto; copia y sha256 en `experiments/_s168/modd_f4_candado/adenda_n01/corrida1/`):
+  93 de 94 por aserción, con M92 viva porque ningún escenario tenía «fuera del gránulo» con todo el acuerdo.
+- Se agregaron E68 (para M92) y E69 con M95 («otro gránulo no es acuerdo», verificador de la adenda implementada), y se
+  repitieron, con la batería de 71, las 18 mutaciones cuyo código ejecuta el control de identidad (M11, M12, M13, M49,
+  M72, M73, M76, M77, M83 y M87 a M95) y los cuatro controles (14:17 a 15:41 UTC, un proceso, árbol quieto):
+  `experiments/_s166_modd_f4/mutar_evaluar_f4_salida_adenda_identidad.txt` (copia y sha256 en `adenda_n01/corrida3/`;
+  la corrida 2, de 17 con E68, queda en `adenda_n01/corrida2/`). Dio 18 de 18 por aserción, sin caídas, y los cuatro
+  controles como deben.
+- Las otras 77 mutaciones no ejecutan el código que prueban E68 y E69, así que su clase es la de la corrida completa.
+  Total: **95 de 95 atrapadas por aserción**.
+
+Identidades regeneradas con el `identidad_f4` nuevo, con `motivo_censo`:
+`experiments/_s168/modd_f4_candado/identidades/identidad_t1.json`, `_t2` y `_t3`, con sus salidas (1.746, 1.789 y
+1.786 iguales). Sobre las tres tandas, sin leer el veredicto, la identidad pasa de
 rojo a OK: 24, 11 y 10 escenas inválidas por acuerdo y 0 casos simétricos.
 
 **Corrida vigente (candado, S168, 2026-10-30 00:15 a 11:35 UTC)**, después de cerrar VS-01 a VS-08 del tercer
