@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 16:30 UTC (S170): adenda N-01 lista para sellar; espera la frase de Nicolás
+- MOD-D `a7bd7562e` en `claude/s170-modd-f4-adenda-n01`: §13 explica 95 de 95 (corrida completa 93 de 94 más la
+  corrida 3 de identidad, 18 de 18 sin caídas, controles como deben); identidades t1 a t3 regeneradas y commiteadas
+  (1.746, 1.789 y 1.786 iguales; 0 otro gránulo); E69 y M95 agregados, batería 71 de 71. Comprobado aquí con git:
+  sin cambios en `pipeline/`, `scripts/`, `data/`, `frontend/` ni `.github/`.
+- Pregunta abierta a Nicolás: sellar la adenda con tag nuevo del candado y leer el A/B de MOD-D.
+
 ### 2026-10-31 14:32 UTC (S170): adenda N-01 con 94 de 94; verificador pide dos cambios de procedencia
 - MOD-D: repaso de las 17 mutaciones de identidad con E68 (12:55 a 14:07 UTC), 17 de 17; total 94 de 94; batería
   70 de 70; `claude/s170-modd-f4-adenda-n01` `69c328019`.
