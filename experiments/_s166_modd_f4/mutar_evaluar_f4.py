@@ -49,7 +49,8 @@ MUTACIONES = [
     ("M09_m_decide_mejora", 'x["m"]["regla"] == "EMPEORA"', 'x["m"]["regla"] == "MEJORA"'),
     ("M10_tolerancia_vrp_identidad", "TOL_VRP_IDENTIDAD = 1e-3", "TOL_VRP_IDENTIDAD = 1e-2"),
     ("M11_tope_otro_granulo", "MAX_OTRO_GRANULO = 0.01", "MAX_OTRO_GRANULO = 0.02"),
-    ("M12_identidad_sin_clase", ' and ident[k]["misma_clase"])', ")"),
+    # M12: el texto cambió con la adenda a N-01 (la línea sigue con el caso simétrico); la mutación es la misma
+    ("M12_identidad_sin_clase", '<= TOL_VRP_IDENTIDAD and ident[k]["misma_clase"]', "<= TOL_VRP_IDENTIDAD"),
     ("M13_identidad_sin_faltan", "and bool(con_grilla) and not faltan and", "and bool(con_grilla) and"),
     ("M14_via_sin_marca_evaluable", 'if f.get("v_marca") is not True:', "if False:"),
     ("M15_un_solo_motivo_sellado", 'MOTIVOS_SELLADOS = ("volcan_fuera_del_granulo", "escena_invalida")',
@@ -142,6 +143,20 @@ MUTACIONES = [
     ("M85_contador_sin_no_pasan", "ok = not siguen and len(sel) == N_INYECTAR and not no_pasan and",
      "ok = not siguen and len(sel) == N_INYECTAR and"),
     ("M86_chillan_empates_como_pares", "(empates if db == dk else pares).append(par)", "pares.append(par)"),
+    # M87 a M94: la adenda a N-01 (S170, borrador), una condición por mutación, con E65 a E67
+    ("M87_adenda_sin_motivo_censo", 'return (x.get("motivo_censo") == "escena_invalida" and x.get("mismo_granulo") is True',
+     'return (x.get("mismo_granulo") is True'),
+    ("M88_adenda_sin_grilla_igual", 'and x.get("grilla_igual_float32") is True and x.get("misma_mascara") is True',
+     'and x.get("misma_mascara") is True'),
+    ("M89_adenda_sin_mascara", 'and x.get("grilla_igual_float32") is True and x.get("misma_mascara") is True',
+     'and x.get("grilla_igual_float32") is True'),
+    ("M90_adenda_sin_clase", 'and x.get("misma_clase") is True and x.get("dvrp") is not None',
+     'and x.get("dvrp") is not None'),
+    ("M91_adenda_sin_vrp", 'x.get("dvrp") is not None and abs(x["dvrp"]) <= TOL_VRP_IDENTIDAD)',
+     'x.get("dvrp") is not None)'),
+    ("M92_adenda_tambien_fuera", 'if k in ident and motivo_de[k] == "escena_invalida"', 'if k in ident'),
+    ("M93_adenda_sin_simetrico", '                 and ident[k].get("motivo_censo") != "escena_invalida")]', ')]'),
+    ("M94_adenda_nunca_acuerdo", '                                   and k not in por_acuerdo)', ')'),
 ]
 CONTROLES = (("IDENTIDAD", "VIVA"), ("CONTROL_CAIDA", "CAE"), ("CONTROL_CAIDA_VALUEERROR", "CAE"),
              ("CONTROL_ROTA", "ROTA"))

@@ -452,6 +452,14 @@ def regla_posicion(res):
 
 
 # ------------------------------------------------------------------ controles (§8)
+def _acuerdo_escena_invalida(x):
+    """Adenda a N-01: el censo llegó a «escena inválida» en la misma grilla que leyó el runner (mismo gránulo, grilla
+    igual a float32, misma máscara, mismo VRP a 0,001 MW y misma clase). Si falta un campo, no hay acuerdo."""
+    return (x.get("motivo_censo") == "escena_invalida" and x.get("mismo_granulo") is True
+            and x.get("grilla_igual_float32") is True and x.get("misma_mascara") is True
+            and x.get("misma_clase") is True and x.get("dvrp") is not None and abs(x["dvrp"]) <= TOL_VRP_IDENTIDAD)
+
+
 def control_identidad(ident, filas, n_grillas_censo=None):
     """§8.2: la vía del runner (del HDF) contra la vía corrida sobre la grilla que guardó el censo MOD-D, en cada pasada
     de C con grilla del censo. ident: {(vol, dt): {"mismo_granulo", "misma_mascara", "dvrp", "misma_clase"}}.
@@ -464,13 +472,22 @@ def control_identidad(ident, filas, n_grillas_censo=None):
     # volcán. Si el runner la saca con un motivo sellado (volcán fuera del gránulo, escena inválida), eso es un
     # desacuerdo de identidad: cuenta como otro gránulo (con el tope de 1 %) si la identidad lo declara así, y si no,
     # es falla. Sin esto, una lectura rota de MxD03 se leería como «el volcán no está» y la pasada desaparecería.
+    # Adenda a N-01 (S170, BORRADOR sin sellar): una «escena inválida» con grilla del censo es acuerdo, no desacuerdo,
+    # cuando el censo llegó al mismo motivo (la vía sobre la grilla hasheada del censo) con la misma grilla, máscara,
+    # VRP y clase. «Volcán fuera del gránulo» sigue con N-01: ése es el caso de la lectura rota de MxD03.
+    motivo_de = {(f["vol"], f["dt"]): f.get("_motivo") for f in filas}
     selladas = [(f["vol"], f["dt"]) for f in filas if f.get("grilla_censo") and f.get("_motivo") in MOTIVOS_SELLADOS]
-    selladas_sin_explicar = sorted(k for k in selladas if not (k in ident and not ident[k]["mismo_granulo"]))
+    por_acuerdo = sorted(k for k in selladas if k in ident and motivo_de[k] == "escena_invalida"
+                         and _acuerdo_escena_invalida(ident[k]))
+    selladas_sin_explicar = sorted(k for k in selladas if not (k in ident and not ident[k]["mismo_granulo"])
+                                   and k not in por_acuerdo)
     faltan = sorted(k for k in con_grilla if k not in ident)
     otro = [k for k in con_grilla + selladas if k in ident and not ident[k]["mismo_granulo"]]
     malas = [{"clave": list(k), **ident[k]} for k in con_grilla
              if k in ident and ident[k]["mismo_granulo"] and not (
-                 ident[k]["misma_mascara"] and abs(ident[k]["dvrp"]) <= TOL_VRP_IDENTIDAD and ident[k]["misma_clase"])]
+                 ident[k]["misma_mascara"] and abs(ident[k]["dvrp"]) <= TOL_VRP_IDENTIDAD and ident[k]["misma_clase"]
+                 # caso simétrico de la adenda: el censo dio escena inválida y el runner la evaluó
+                 and ident[k].get("motivo_censo") != "escena_invalida")]
     n_medidas = len(con_grilla) + len(selladas)
     frac_otro = len(otro) / n_medidas if n_medidas else 1.0
     ok = n_pob == n_grillas_censo and bool(con_grilla) and not faltan and not malas and \
@@ -478,7 +495,7 @@ def control_identidad(ident, filas, n_grillas_censo=None):
     return {"estado": "OK" if ok else "INDECIDIBLE", "n_grillas_en_poblacion": n_pob,
             "n_grillas_esperadas": n_grillas_censo, "n_con_grilla": len(con_grilla), "n_faltan": len(faltan),
             "faltan": faltan[:20], "n_otro_granulo": len(otro), "otro_granulo": otro[:20], "n_distintas": len(malas),
-            "distintas": malas[:20], "n_selladas_con_grilla": len(selladas),
+            "distintas": malas[:20], "n_selladas_con_grilla": len(selladas), "n_selladas_por_acuerdo": len(por_acuerdo),
             "selladas_sin_explicar": selladas_sin_explicar[:20], "n_selladas_sin_explicar": len(selladas_sin_explicar)}
 
 

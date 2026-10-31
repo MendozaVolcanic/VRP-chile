@@ -908,6 +908,57 @@ def E61_e_via_no_corrio():
     chk(g(r, "veredicto") == "DECIDE NICOLÁS", "vía que no corrió en E: %s" % g(r, "veredicto"))
 
 
+ACUERDO = {"mismo_granulo": True, "misma_mascara": True, "dvrp": 0.0, "misma_clase": True,
+           "grilla_igual_float32": True, "motivo_censo": "escena_invalida"}
+
+
+def _ident_con(filas, cambios=None, motivo="escena_invalida"):
+    ident = {(x["vol"], x["dt"]): {"mismo_granulo": True, "misma_mascara": True, "dvrp": 0.0, "misma_clase": True}
+             for x in filas}
+    filas[0]["_evaluable"], filas[0]["_motivo"] = False, motivo
+    ident[(filas[0]["vol"], filas[0]["dt"])] = dict(ACUERDO, **(cambios or {}))
+    return ident
+
+
+def E65_adenda_escena_invalida_de_acuerdo():
+    """Adenda a N-01 (S170, borrador): una escena inválida con grilla del censo, en que el censo llegó al mismo motivo
+    con la misma grilla, máscara, VRP y clase, es acuerdo: la identidad queda OK y no cuenta como otro gránulo."""
+    filas = _filas_identidad(100)
+    c = EV.control_identidad(_ident_con(filas), filas, 100)
+    chk(g(c, "estado") == "OK", "escena inválida con el censo de acuerdo: %s" % g(c, "estado"))
+    chk(g(c, "n_selladas_por_acuerdo") == 1 and g(c, "n_otro_granulo") == 0, "acuerdo, no otro gránulo: %s" % c)
+
+
+def E66_adenda_no_acepta_de_mas():
+    """Adenda a N-01: sin cualquiera de las condiciones, rige N-01 (rojo). También si el motivo es «volcán fuera del
+    gránulo», aunque el censo diga lo mismo."""
+    casos = [("otro motivo del censo", {"motivo_censo": None}, "escena_invalida"),
+             ("otra grilla", {"grilla_igual_float32": False}, "escena_invalida"),
+             ("otra máscara", {"misma_mascara": False}, "escena_invalida"),
+             ("otro VRP", {"dvrp": 0.01}, "escena_invalida"),
+             ("otra clase", {"misma_clase": False}, "escena_invalida"),
+             ("fuera del gránulo", {"motivo_censo": "volcan_fuera_del_granulo"}, "volcan_fuera_del_granulo")]
+    for nombre, cambios, motivo in casos:
+        filas = _filas_identidad(100)
+        chk(g(EV.control_identidad(_ident_con(filas, cambios, motivo), filas, 100), "estado") == "INDECIDIBLE",
+            "adenda con %s: tiene que quedar en rojo" % nombre)
+    filas = _filas_identidad(100)
+    ident = _ident_con(filas)
+    del ident[(filas[0]["vol"], filas[0]["dt"])]["motivo_censo"]
+    chk(g(EV.control_identidad(ident, filas, 100), "estado") == "INDECIDIBLE", "sin el campo motivo_censo: rojo")
+
+
+def E67_adenda_caso_simetrico():
+    """Adenda a N-01, caso simétrico: el censo dio escena inválida y el runner evaluó la pasada (sin motivo, sin
+    alertas). Aunque máscara, VRP y clase coincidan, es un desacuerdo: rojo."""
+    filas = _filas_identidad(100)
+    ident = {(x["vol"], x["dt"]): {"mismo_granulo": True, "misma_mascara": True, "dvrp": 0.0, "misma_clase": True}
+             for x in filas}
+    chk(g(EV.control_identidad(ident, filas, 100), "estado") == "OK", "sin escena inválida: OK")
+    ident[(filas[0]["vol"], filas[0]["dt"])]["motivo_censo"] = "escena_invalida"
+    chk(g(EV.control_identidad(ident, filas, 100), "estado") == "INDECIDIBLE", "censo inválida, runner evaluó: rojo")
+
+
 def pred_no_publica_inyectado(casos):
     """Predicado que publica los records normales pero no el cúmulo inyectado por el contador (lo reconoce por la marca
     via_codigo_mirova, que los records del mundo sintético no traen)."""

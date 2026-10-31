@@ -193,6 +193,9 @@ def comparar(p, censo_ab, censo_dir, run):
               "max_dif_radiancia": max(dif) if dif else None, "n_nan_distinto": n_nan,
               "npix_runner": int(mask_r.sum()), "npix_grilla": int(mask_g.sum()),
               "vrp_runner": vrp_r, "vrp_grilla": vrp_de(vg), "dc_runner": dc_r, "dc_grilla": vg.get("distance_class"),
+              # adenda a N-01: el motivo del censo sale de la vía sobre la grilla hasheada del censo
+              # (grillas_censo_sha256.txt), no del jsonl del censo, que no está sellado
+              "motivo_censo": (vg.get("diag_codigo_mirova") or {}).get("motivo_vacio"),
               "grilla_igual_float32": bool(mir_r.shape == zc["mir"].shape and
                                            np.array_equal(mir_r.astype(np.float32), zc["mir"], equal_nan=True) and
                                            np.array_equal(tir_r.astype(np.float32), zc["tir"], equal_nan=True)),
