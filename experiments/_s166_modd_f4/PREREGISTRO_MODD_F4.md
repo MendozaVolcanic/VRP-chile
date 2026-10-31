@@ -405,16 +405,22 @@ arreglar el instrumento y repetir la lectura, no la corrida; Nicolás lo autoriz
 S170). La regla (`procedencia_runner.py`, mecánica, sin mirar resultados del A/B): la lectura acepta las cabeceras en el
 tag del runner sólo si (1) el commit de la lectura desciende del del runner; (2) ningún archivo que el job del runner
 ejecuta o lee para producir records cambia entre los dos (el arnés, la población, el workflow, `pipeline/`, `scripts/`,
-el tablero, `data/mirova_equivalent/`, las herramientas de re-corrida, `evaluar_d25.py` y `volcanoes.yaml`); (3) en
+el tablero, `data/mirova_equivalent/`, las herramientas de re-corrida, `evaluar_d25.py` y sus dos dependencias, las
+cuatro carpetas `_s151` que `probe_mxd03_ab` carga por ruta y `volcanoes.yaml`; una guarda rastrea con un gancho de
+auditoría lo que `probe_f4.py` abre al importarse y falla si algo queda fuera de la lista); (3) en
 `evaluar_f4.py`, que el arnés importa, no cambia nada de lo que el arnés alcanza (las definiciones que nombra, su
-cierre y las sentencias de nivel de módulo, salvo el bloque `__main__`); y (4) todas las cabeceras traen el commit y el
+cierre y las sentencias de nivel de módulo, salvo un bloque `__main__` sin `else`); y (4) todas las cabeceras traen el commit y el
 nombre del tag del runner, el `evaluar_f4.py` del runner y el `probe_f4.py` de la lectura. Cualquier otra combinación
 sigue contra el tag de la lectura. La batería y el resto del evaluador sólo habilitan el job y se comprueban aparte (control
-`manifiesto`). Pruebas: `probar_procedencia_runner.py`, 4 de 4 partes (repositorio sintético: verde sólo si cambia algo
-que el arnés no alcanza; rojo si cambia un archivo del runner, una definición alcanzable o una sentencia de módulo, o si
+`manifiesto`). Pruebas: `probar_procedencia_runner.py`, 5 de 5 partes (repositorio sintético: verde sólo si cambia algo
+que el arnés no alcanza; rojo si cambia cualquiera de las 18 entradas de la lista del runner, una definición alcanzable,
+una sentencia de módulo o el `else` de un bloque `__main__`, o si
 la lectura no desciende; cabeceras: rojo si la regla no da ok, si una trae otro commit, otro sha de `probe_f4`, otro
-evaluador u otro nombre de tag, o si mezclan los dos tags; caso real d65fd231d contra a7bd7562e compatible).
-Mutaciones de las líneas nuevas (`mutar_procedencia_runner.py`): 13 de 13 atrapadas por aserción, sin caídas, con
+evaluador u otro nombre de tag, o si mezclan los dos tags; caso real d65fd231d contra a7bd7562e compatible; la guarda de
+carga no encuentra nada fuera de la lista). Límites declarados (verificador de la procedencia, gravedad 1): el análisis
+por AST no ve llamadas dinámicas (`globals()["x"]()`, `getattr`) ni distingue definiciones duplicadas (vale la última).
+Mutaciones de las líneas nuevas (`mutar_procedencia_runner.py`): 32 de 32 atrapadas por aserción (una por cada entrada
+de la lista del runner, más las de la regla, la guarda y la aceptación), sin caídas, con
 identidad VIVA, caída CAE y rota ROTA, y el árbol quieto (`experiments/_s168/modd_f4_candado/procedencia_runner/`).
 Sobre los artefactos de t1 a t3, sólo el control (sin releer): con `--tag-runner s170-modd-f4-candado` queda OK, sin él
 sigue en rojo con 99.
