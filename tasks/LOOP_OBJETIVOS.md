@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 19:42 UTC (S171): plan revisado, lecciones a META_RULES, V750 reporta a S171
+- Pre-registro de MOD-D con la marca de sellado en §8.2 y §13 (`25e3cc3ba`, rama `claude/s170-modd-f4-procedencia`;
+  el sha del pre-registro en la punta ya no coincide con el manifiesto, a propósito: la lectura se reproduce desde el tag).
+- Lecciones de S170 a `docs/META_RULES_S80.md` (`ddfb5dab2`). Calendario y cuatro mejoras en el §12.7 del programa por
+  sensor (`63aa81549`): ROI de V750 el mismo día de la lectura de V750-B, ensayo en seco del despacho, rotar el token el
+  2026-11-27 (vence 2026-12-07 18:03, `REGISTRO_CREDENCIALES.md` fila 1), archivar sesiones y limpiar worktrees.
+- Worktrees: 20, `git rev-list HEAD --not --remotes` = 0 en todos (nada commiteado se pierde al quitarlos); 5 con
+  archivos sin seguimiento. No se quitó ninguno: varios pertenecen a sesiones sin archivar; espera el sí de Nicolás.
+- Mensaje a la sesión de VIIRS 750 (`local_94f4be0d`): reporta a S171; desde el 2026-11-01 12:00 UTC, ensayo en seco
+  del despacho de V750-B y PR de `roi_v750` listo. La sesión de MOD-D (`local_5b198297`) no tiene trabajo pendiente.
+
 ### 2026-10-31 18:54 UTC (S171): Nicolás decide cuándo encender la vía de MIROVA en MODIS
 - Respuesta textual de Nicolás a «¿Cuándo encendemos la vía de MIROVA en MODIS?»: «cuando recomiendes». Queda
   aceptada la recomendación del bloque S171 (b.1): **no se enciende ahora**; se enciende en la parada de la sombra
