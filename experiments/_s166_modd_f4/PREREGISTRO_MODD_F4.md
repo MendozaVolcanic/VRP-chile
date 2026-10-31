@@ -260,6 +260,16 @@ protegida de 1 MW o más se pierde (filas 2 y 5), y bajo 1 MW una alerta perdida
    en rojo. Sin esto, una lectura rota de MxD03 se leería como «el volcán no está» y la pasada desaparecería de la
    identidad (N-01 de la segunda vuelta). Se informa además, por pasada, la máxima diferencia de radiancia entre la
    grilla del runner y la del censo.
+   **Adenda a N-01 (S170, BORRADOR pendiente del sello de Nicolás;
+   `experiments/_s168/modd_f4_candado/adenda_n01/ADENDA_N01_BORRADOR.md`).** Una pasada con grilla del censo que el runner
+   saca como «escena inválida» cuenta como acuerdo de la identidad, y no entra al tope de 1 %, si a la vez: (1) la vía
+   sobre la grilla del censo (la de `grillas_censo_sha256.txt`) llega al mismo motivo (`motivo_censo`); (2) es el mismo
+   gránulo; (3) la grilla del runner es igual a la del censo a la precisión float32; y (4) tienen la misma máscara, el
+   mismo VRP a 0,001 MW y la misma clase. Si falta cualquiera, rige N-01. «Volcán fuera del gránulo» sigue siempre con
+   N-01. Caso simétrico: una pasada con grilla del censo que el runner evalúa (sin motivo) y cuya grilla del censo da
+   «escena inválida» es un desacuerdo y deja la identidad en rojo. Por qué: el censo guardó la grilla de 45 pasadas que
+   su propio port declaró escena inválida; la premisa de N-01 («una pasada con grilla del censo es una pasada que el
+   censo cubrió») no vale para ellas.
 3. **Records de V**: toda pasada evaluable trae los tres records (V, V-cercano, V-pico), salvo que el arnés declare
    que `store.append_record` lo descartó.
 4. **Placebo**: K × 1,2 da d′ = 0 en todo par y ganancia 1,2 exacta.
@@ -386,6 +396,18 @@ como el censo, despachadas de a una por la coordinadora desde el tag.
    para V750-A y V375-E, que hoy no lo tienen escrito).
 
 ## 13. Instrumento entregado: batería y mutaciones
+
+**Corrida de la adenda a N-01 (S170, BORRADOR, rama `claude/s170-modd-f4-adenda-n01`, sin sello ni tag).** La regla del
+§8.2 entra en `evaluar_f4.control_identidad` (función `_acuerdo_escena_invalida` y el caso simétrico) e
+`identidad_f4.comparar` (campo `motivo_censo`). Batería: 70 escenarios (E65 a E68 nuevos), 70 de 70 OK; contra el vacío,
+70 de 70 por aserción y 0 caen. Mutaciones: M87 a M94 nuevas, y M12 con el texto nuevo (misma mutación). La primera
+corrida completa (2026-10-31 05:00 a 12:54 UTC, un proceso, árbol quieto; `adenda_n01/corrida1/`) dio 93 de 94 por
+aserción: quedó viva M92, porque ningún escenario tenía «fuera del gránulo» con todo el acuerdo. Se agregó E68 y se
+repitieron, con el mismo cuidado, las 17 mutaciones cuyo código ejecuta el control de identidad, más los cuatro
+controles (12:55 a 14:07 UTC; `adenda_n01/corrida2/`): 17 de 17 por aserción, ninguna con escenarios que caen, y los
+cuatro controles como deben. Las otras 77 no ejecutan el código que prueba E68: su clase es la de la primera corrida.
+Total: **94 de 94 atrapadas por aserción**. Sobre las tres tandas del A/B, sin leer el veredicto, la identidad pasa de
+rojo a OK: 24, 11 y 10 escenas inválidas por acuerdo y 0 casos simétricos.
 
 **Corrida vigente (candado, S168, 2026-10-30 00:15 a 11:35 UTC)**, después de cerrar VS-01 a VS-08 del tercer
 verificador en la batería y el medidor, sin tocar `evaluar_f4.py`. Un proceso (`--paralelo 1`), temporales en
