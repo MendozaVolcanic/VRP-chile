@@ -260,7 +260,8 @@ protegida de 1 MW o más se pierde (filas 2 y 5), y bajo 1 MW una alerta perdida
    en rojo. Sin esto, una lectura rota de MxD03 se leería como «el volcán no está» y la pasada desaparecería de la
    identidad (N-01 de la segunda vuelta). Se informa además, por pasada, la máxima diferencia de radiancia entre la
    grilla del runner y la del censo.
-   **Adenda a N-01 (S170, BORRADOR pendiente del sello de Nicolás;
+   **Adenda a N-01 (S170, SELLADA el 2026-10-31 con autorización de Nicolás, tag `s170-modd-f4-candado-n01`, `a7bd7562e`;
+   marca S171; texto original: «BORRADOR pendiente del sello de Nicolás»;
    `experiments/_s168/modd_f4_candado/adenda_n01/ADENDA_N01_BORRADOR.md`).** Una pasada con grilla del censo que el runner
    saca como «escena inválida» cuenta como acuerdo de la identidad, y no entra al tope de 1 %, si a la vez: (1) la vía
    sobre la grilla del censo (la de `grillas_censo_sha256.txt`) llega al mismo motivo (`motivo_censo`); (2) es el mismo
@@ -397,7 +398,8 @@ como el censo, despachadas de a una por la coordinadora desde el tag.
 
 ## 13. Instrumento entregado: batería y mutaciones
 
-**Procedencia del runner (S170, BORRADOR, rama `claude/s170-modd-f4-procedencia`, sin sello ni tag).** Por qué: la
+**Procedencia del runner (S170, SELLADA el 2026-10-31 con autorización de Nicolás, tag `s170-modd-f4-lectura`,
+`e27dc2e49`; marca S171; texto original: «BORRADOR, rama `claude/s170-modd-f4-procedencia`, sin sello ni tag»).** Por qué: la
 adenda a N-01 se selló después de correr t1 a t3. Los jobs corrieron en `s170-modd-f4-candado` (d65fd231d) y la lectura
 se hizo con el evaluador de `s170-modd-f4-candado-n01` (a7bd7562e). El control de procedencia (§8.8) exige un solo
 commit, un solo tag y un solo evaluador, y quedó en rojo aunque el runner hizo lo mismo en los dos commits. El §7 manda
@@ -425,7 +427,8 @@ identidad VIVA, caída CAE y rota ROTA, y el árbol quieto (`experiments/_s168/m
 Sobre los artefactos de t1 a t3, sólo el control (sin releer): con `--tag-runner s170-modd-f4-candado` queda OK, sin él
 sigue en rojo con 99.
 
-**Corrida de la adenda a N-01 (S170, BORRADOR, rama `claude/s170-modd-f4-adenda-n01`, sin sello ni tag).** La regla del
+**Corrida de la adenda a N-01 (S170, SELLADA el 2026-10-31 en el tag `s170-modd-f4-candado-n01`, `a7bd7562e`; marca
+S171; texto original: «BORRADOR, rama `claude/s170-modd-f4-adenda-n01`, sin sello ni tag»).** La regla del
 §8.2 entra en `evaluar_f4.control_identidad` (función `_acuerdo_escena_invalida` y el caso simétrico) e
 `identidad_f4.comparar` (campo `motivo_censo`). Batería: 71 escenarios (E65 a E69 nuevos), 71 de 71 OK; contra el vacío,
 71 de 71 por aserción y 0 caen. Mutaciones: M87 a M95 nuevas, y M12 con el texto nuevo (misma mutación). Cómo se llega
