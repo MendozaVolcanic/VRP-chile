@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 02:24 UTC (S170, seguimiento): nulo del lector terminado, tag de MOD-D puesto, #929 y #930 abiertos
+- 12:00 UTC C: bajó a 2,5 GB; el medidor de V750-A se detuvo solo en M43. Nicolás liberó espacio (C: 28 GB). 12:23 UTC
+  reinicio del PC: murieron todos los procesos.
+- Nulo del lector de V375-E: la corrida 1 (11:36 a 12:16) quedó inválida, 135 caídas sin mensaje (SOSPECHA: disco). La
+  corrida 2 (12:41 a 22:17, `5c121209c`) dio 129 de 138 atrapadas; sobreviven M22, N19, V07b y V07c (no equivalentes),
+  caen M29, M53, N04, R19 y V02. Nota en `side-session-notes/local_b1bfa049.../S170_nulo_lector_v375e_resultado.md`.
+  No se tocó el lector; va al verificador corto del domingo y a Nicolás.
+- MOD-D: tag `s169-modd-f4-candado` en `7188578956c4` (comprobado con ls-remote). PR #930 con el yml del humo, blob
+  idéntico al del tag (sha256 LF `4047c55a…`). Nicolás: verificador del candado el domingo tras las 12:00 UTC.
+- PR #929 (`claude/s170-vr3-01`): VR3-01 (MODIS sólo de día ya no da falso rojo), VR3-02, VR3-03 y pruebas de VR3-04;
+  152 de 152 pruebas de la sombra; control de mutaciones a mano 7 de 9 (A2 y B3 equivalentes). Sin merge.
+- Medidor de V750-A relanzado 12:41 UTC desde M44 (PID 2972, `D:/vrp-trabajo/temporales/medidor_todo5.log`).
+- Nicolás: se puede correr código y loop, sin agentes ni nada caro durante el día.
+
 ### 2026-10-30 11:59 UTC (S169, cierre): traspaso en `tasks/BLOQUE_ARRANQUE_S170.md`; uso mínimo hasta el domingo
 - Nicolás: «de acuerdo con los 3 puntos. cierra y abre la siguiente para hacer seguimiento de lo que va en curso,
   disminuiremos el uso a solo lo necesario hasta el reinicio del domingo» (plan semanal al 88 %, se reinicia el
