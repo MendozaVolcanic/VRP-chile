@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-31 03:46 UTC (S170): verificadores, #929/#930/#931 mergeados, humo de MOD-D verde, autorizaciones nocturnas
+- Nicolás liberó la cuota (usar el ~10 % restante). Verificadores limpios: #929 MERGEABLE (Sonnet,
+  `D:/vrp-trabajo/temporales/ver_s170_929/INFORME.md`); candado MOD-D LISTO PARA HUMO y #930 MERGEABLE (Opus,
+  `.../ver_s170_modd/INFORME.md`, VS170-MODD-01 a 04 de gravedad 1); lector V375-E SELLAR TRAS AGREGAR PRUEBAS
+  (Sonnet, `.../ver_s170_lector/INFORME.md`: N19 gravedad 2, V07b y V07c informativas, M22 equivalente, las 5
+  caídas atrapadas por aserción).
+- Merges con frase de Nicolás: #929 (`3257db062`), #930 (`2e9fa2cba`), #931 (`d2eb4268e`, `--force` al bajar el tag).
+- Humo 1 (run 41163955456, tag s169) falló cerrado: fetch del tag anotado rechazado («would clobber»). MOD-D lo
+  reprodujo, arregló y selló `s170-modd-f4-candado` (`d65fd231de52`). Humo 2 (run 41164864021) verde en los 4 jobs.
+- Lector V375-E: tres pruebas nuevas en `probar_sombra.py` (VS170-LEC-01 a 03), batería 233 de 233; repaso de N19,
+  V07b, V07c y M22 corriendo.
+- **Autorizado por Nicolás (03:45 UTC, «autorizo 1 y 2»)**: (1) si MOD-D declara el humo apto y un verificador
+  limpio lo confirma, despachar t1, t2 y t3 desde `s170-modd-f4-candado`, de a una, revisando cada una; (2) si el
+  repaso atrapa N19, V07b y V07c, commitear las pruebas y poner el tag del lector (sin abrir datos de la ventana P).
+
 ### 2026-10-31 02:24 UTC (S170, seguimiento): nulo del lector terminado, tag de MOD-D puesto, #929 y #930 abiertos
 - 12:00 UTC C: bajó a 2,5 GB; el medidor de V750-A se detuvo solo en M43. Nicolás liberó espacio (C: 28 GB). 12:23 UTC
   reinicio del PC: murieron todos los procesos.
