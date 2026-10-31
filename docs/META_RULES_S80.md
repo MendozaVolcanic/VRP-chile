@@ -354,3 +354,33 @@ de contexto comprobada).
   workflows `reproc-ab-*` debe ser **timeout-minutes: 140 step + 150
   job-level**. Doc operacional: ver workflow `reproc-ab-f-s81-a-intra-radio.yml`
   como template.
+
+## Lecciones durables agregadas S170 (2026-10-31; pasadas en S171)
+
+Cinco fallas de montaje de S170, no de la ciencia: todas fallaron cerradas (ningún resultado torcido) y cada una costó
+una vuelta. Detalle en `tasks/LOOP_OBJETIVOS.md` §6 (entradas S170) y en la memoria
+`feedback_s170_tres_fallas_de_montaje`. Lo común: **un ensayo barato antes del paso caro**.
+
+- **Un workflow que baja o compara tags se ensaya en el runner desde un tag de prueba antes del humo.** El humo de MOD-D
+  (run 41163955456) murió en el fetch del tag anotado, que chocaba con el que deja `actions/checkout` («would clobber
+  existing tag»); arreglo `--force` (#931). Sólo existe en el runner: ni las pruebas locales ni el verificador lo ven.
+- **El control de identidad del evaluador se corre con el censo contra sí mismo antes de sellar.** La N-01 de MOD-D
+  dejaba INDECIDIBLE 45 pasadas `escena_invalida` en que runner y censo coincidían en todo; se vio con t1 y obligó a
+  una adenda sellada después de correr (tag `s170-modd-f4-candado-n01`). Lo que no sale OK en ese ensayo es un defecto
+  de la regla.
+- **Una adenda que cambia el tag de lectura resuelve la procedencia en el mismo sello.** La primera lectura de MOD-D
+  salió INDECIDIBLE porque las cabeceras de t1 a t3 traían el tag del runner; ni el autor ni dos verificadores lo
+  vieron. Arreglo: `procedencia_runner.py` (descendencia más archivos del runner sin cambio), sellado en
+  `s170-modd-f4-lectura`.
+- **Todo arnés de mutaciones se detiene solo con C: o D: bajo 3 GB, y escribe por mutación.** El primer nulo del lector
+  de V375-E dio 135 caídas sin mensaje con C: en 2,5 GB (causa por disco: SOSPECHA, no probada); se repitió. Un nulo
+  con caídas masivas sin mensaje es corrida inválida, no resultado.
+- **La lista de dependencias del runner se deriva rastreando lo que se abre, no de memoria.** Faltaban 6 entradas
+  (cuatro carpetas `_s151` cargadas por ruta y dos de `evaluar_d25`); las encontró una guarda con gancho de auditoría
+  sobre «open».
+
+Reglas generales del workspace (S170):
+- **El verificador limpio encontró algo en 6 de 7 revisiones de S170.** Vale su costo aun con la cuota alta; acotado
+  a una pregunta y con un modelo distinto del autor cuesta ~2 % del plan cada uno.
+- **Al ir a dormir, Nicolás puede autorizar por adelantado con condiciones** («si X y un verificador lo confirma,
+  despacha»). Funcionó con t1 a t3 de MOD-D; la condición se escribe en la bitácora con su frase textual.
