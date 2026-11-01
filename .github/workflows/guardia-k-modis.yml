@@ -1,0 +1,174 @@
+name: Guardia K de MODIS (11 Tier A)
+
+# S172 (regla experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §3, rama loop/activo; diseño
+# docs/superpowers/specs/2026-11-01-encendido-modd-design.md, decisión 2; tag defensivo pre-s171-adopcion-modd).
+# POR QUE: Nicolas decidio (2026-10-31) encender la via «codigo MIROVA» en MODIS sin esperar la sombra de 28 noches,
+# con K corriendo aparte como guardia. Si MIROVA publica una alerta protegida que esta guardia publica y produccion
+# calla, se revierte el encendido el mismo dia (§4). Este workflow produce la guardia; la compara
+# scripts/vigilancia_guardia_modis.py (vigilancia-guardia-modis.yml), que abre el issue. Perfil:
+# pipeline/profiles/guardia_k_modis.yaml, salida en data/guardia_k_modis/ (A47), que el tablero no lee.
+#
+# Calcado de sombra-codigo-mirova.yml. Diferencias: solo MODIS; sin fecha minima (la guardia corre desde el merge del
+# PR A, y mientras produccion siga en K guardia y produccion tienen que publicar lo mismo: ese es el nulo medido de la
+# guardia, A110); revision propia (scripts/revisar_guardia_modis.py), porque la guardia tiene que ser K pura.
+#
+# HORA (17:40 UTC): el NRT corre a la hora en punto (cron externo cada hora y nrt.yml cada 2 h) y su reintento a las
+# :30 de las horas impares; sync-mirova-csv a las :12, reproc-watchdog a las :20, pages-deploy a las :50;
+# experimental-diario a las 14:00 y la sombra a las 15:00 con hasta 100 min de job (hasta las 16:40). 17:40 queda
+# despues de la sombra y en un minuto que no usa ningun otro cron (tests/test_guardia_k_modis_s172.py).
+#
+# CONCURRENCIA: grupo PROPIO, no `push-main`, por la misma razon que la sombra: en `push-main` podria desplazar una
+# corrida del NRT en espera. El push se protege con el bucle de reintentos pull --rebase (guard G4).
+# A71: autentica SOLO con EARTHDATA_TOKEN y falla al instante si viene vacio. A43: "on" entre comillas.
+"on":
+  schedule:
+    - cron: "40 17 * * *"
+  workflow_dispatch:
+    inputs:
+      volcano:
+        description: "Un volcan (vacio = los 11)"
+        required: false
+        default: ""
+      medir:
+        description: "Medir el costo sin commitear (pide start y end)"
+        required: false
+        type: boolean
+        default: false
+      start:
+        description: "Inicio AAAA-MM-DD (vacio = hoy y 7 dias atras, como el NRT)"
+        required: false
+        default: ""
+      end:
+        description: "Fin AAAA-MM-DD"
+        required: false
+        default: ""
+
+concurrency:
+  group: guardia-k-modis
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-24.04  # fijado como el NRT (ubuntu-latest migra a 26.04 desde el 2026-10-19)
+    timeout-minutes: 100
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 4   # como la sombra: no compite por LANCE con el dato operacional
+      matrix:
+        volcano: [Lascar, PuyehueCordonCaulle, Lastarria, Isluga, Tupungatito, PlanchonPeteroa,
+                  Chaiten, Villarrica, NevadosDeChillan, Llaima, Copahue]
+    steps:
+      - name: Filtro de volcan
+        id: plan
+        env:
+          DISPATCH_VOLCANO: ${{ github.event.inputs.volcano }}
+        run: |
+          if [ -n "$DISPATCH_VOLCANO" ] && [ "$DISPATCH_VOLCANO" != "${{ matrix.volcano }}" ]; then
+            echo "correr=false" >> "$GITHUB_OUTPUT"; echo "Salto ${{ matrix.volcano }} (filtro $DISPATCH_VOLCANO)"; exit 0
+          fi
+          echo "correr=true" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout repository
+        if: steps.plan.outputs.correr == 'true'
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        if: steps.plan.outputs.correr == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        if: steps.plan.outputs.correr == 'true'
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          # la guardia es K: no corre la via, asi que no necesita pyproj (las mismas dependencias que el NRT)
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run VRP pipeline, perfil guardia_k_modis
+        id: correr
+        if: steps.plan.outputs.correr == 'true'
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_MEDIR: ${{ github.event.inputs.medir }}
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
+        # Techo anclado al peor job OBSERVADO del NRT, 56 min (nrt.yml, Villarrica 2026-09-02): A15 pide >= 1,3 x 56 = 73.
+        # Solo MODIS deberia tardar bastante menos, pero no esta medido en el runner.
+        timeout-minutes: 75
+        run: |
+          set -o pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea la cuenta (A71)."
+            exit 1
+          fi
+          VRP_PROFILE=guardia_k_modis python -c "import pipeline.profile as p; assert p.DATA_SUBDIR == 'guardia_k_modis', p.DATA_SUBDIR; assert not p.ENABLE_MODIS_CODIGO_MIROVA; assert p.SENSOR_MODIS and not (p.SENSOR_VIIRS_375 or p.SENSOR_VIIRS_750); assert (not p.ENABLE_TEST1_PATH) and p.ENABLE_TESTS_23_PROSE_BRANCH and p.ENABLE_MODIS_B22_PRIMARY; assert not (p.ENABLE_MODIS_GEO_MXD03 or p.ENABLE_MODIS_CRATER_SIN_DATO or p.ENABLE_MODIS_DIST_DESDE_CRATER); print('perfil', p.PROFILE_NAME, '| K de MODIS, via apagada | solo MODIS | MxD03 apagado')"
+          if [ -n "$VRP_START" ] || [ -n "$VRP_END" ]; then
+            if [ -z "$VRP_START" ] || [ -z "$VRP_END" ]; then echo "::error::start y end van juntos"; exit 2; fi
+            INI="$VRP_START"; FIN="$VRP_END"
+          elif [ "$VRP_MEDIR" = "true" ]; then
+            echo "::error::el modo medir pide start y end explicitos"; exit 2
+          else
+            # los mismos 8 dias que el NRT (scripts/run_pipeline.py default_date_window: hoy y 7 atras)
+            FIN=$(date -u +%Y-%m-%d); INI=$(date -u -d "7 days ago" +%Y-%m-%d)
+          fi
+          echo "Ventana $INI a $FIN (medir=$VRP_MEDIR)"
+          # El inicio de la corrida se anota ANTES de correr; la revision cuenta solo los records con processed_utc
+          # desde aqui (como la sombra, S169 P3-02).
+          INICIO=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          { echo "corrio=true"; echo "ini=$INI"; echo "fin=$FIN"; echo "inicio=$INICIO"; } >> "$GITHUB_OUTPUT"
+          python scripts/run_pipeline.py --profile guardia_k_modis --volcano "${{ matrix.volcano }}" \
+            --start "$INI" --end "$FIN" --cobertura-json cobertura.json 2>&1 | tee pipeline.log
+          if [ "$VRP_MEDIR" = "true" ]; then echo "commit=false" >> "$GITHUB_OUTPUT"; else echo "commit=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Commit guardia data
+        if: steps.correr.outputs.commit == 'true'
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          # Solo el archivo de la guardia de este volcan: la guardia nunca commitea en data/mirova_equivalent/.
+          git add "data/guardia_k_modis/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "Sin cambios para ${{ matrix.volcano }}"; exit 0; }
+          git commit -m "Guardia K de MODIS ${{ matrix.volcano }} $(date -u '+%Y-%m-%d %H:%M UTC')"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
+
+      # run_pipeline atrapa toda excepcion por granulo y sale 0: sin esta revision, una guardia muerta (o una guardia
+      # que por error corriera la via) dejaria la vigilancia en VERDE para siempre. Va DESPUES del commit, para no
+      # perder los records buenos del dia por un granulo malo; si falla, el job queda rojo. Una sola linea a proposito.
+      - name: Revisar que salio K de MODIS
+        if: always() && steps.correr.outputs.corrio == 'true'
+        run: |
+          python scripts/revisar_guardia_modis.py --json "data/guardia_k_modis/${{ matrix.volcano }}.json" --log pipeline.log --cobertura-json cobertura.json --ini "${{ steps.correr.outputs.ini }}" --fin "${{ steps.correr.outputs.fin }}" --desde-utc "${{ steps.correr.outputs.inicio }}" --sha "${{ github.sha }}"
+
+      # Como la sombra (S169 P3-04, VV169-07, VR2-03): el log y la cobertura se suben aunque algo falle, con el token
+      # tachado antes; si el tachado no termina bien, el artefacto NO se sube.
+      - name: Tachar el token en el log y la cobertura
+        id: tachar
+        if: always() && steps.correr.outputs.corrio == 'true'
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          python scripts/tachar_secreto_log.py pipeline.log cobertura.json
+
+      - name: Guardar log y cobertura de la corrida
+        if: always() && steps.correr.outputs.corrio == 'true' && steps.tachar.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: guardia-modis-${{ matrix.volcano }}-intento-${{ github.run_attempt }}
+          path: |
+            pipeline.log
+            cobertura.json
+          if-no-files-found: warn
+          retention-days: 90

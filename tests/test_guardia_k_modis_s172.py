@@ -88,3 +88,173 @@ def test_ningun_otro_perfil_escribe_en_la_carpeta_de_la_guardia():
         if f.stem != PERFIL and ((cfg.get("output") or {}).get("data_subdir") == PERFIL):
             otros.append(f.stem)
     assert not otros
+
+
+# ------------------------------------------------------------------------------------- 2. el workflow
+def _wf():
+    txt = WF.read_text(encoding="utf-8")
+    return txt, yaml.safe_load(txt)
+
+
+def _matriz(wf):
+    return list(yaml.safe_load(wf.read_text(encoding="utf-8"))["jobs"]["process"]["strategy"]["matrix"]["volcano"])
+
+
+def _cron(wf):
+    d = yaml.safe_load(wf.read_text(encoding="utf-8"))
+    return [c["cron"] for c in (d["on"].get("schedule") or [])]
+
+
+def test_el_workflow_corre_una_vez_al_dia_con_despacho_manual():
+    txt, d = _wf()
+    assert "on" in d and True not in d, "'on' entre comillas (A43)"
+    assert set(d["on"]) == {"workflow_dispatch", "schedule"}
+    assert d["on"]["schedule"] == [{"cron": "40 17 * * *"}]
+    assert d["on"]["workflow_dispatch"]["inputs"]["medir"]["default"] is False
+
+
+def test_la_hora_no_choca_con_el_nrt_ni_con_la_sombra():
+    """El NRT corre a la hora en punto (cron externo cada hora y nrt.yml cada 2 h), su reintento a las :30 de las horas
+    impares, la sombra a las 15:00 con hasta 100 min de job. 17:40 queda después de la sombra y fuera de esos minutos."""
+    minuto, hora = _cron(WF)[0].split()[:2]
+    assert minuto not in ("0", "30", "12", "20", "50"), "minutos ocupados por nrt, nrt-retry, sync, watchdog, pages"
+    m_sombra, h_sombra = _cron(SOMBRA_WF)[0].split()[:2]
+    inicio_sombra = int(h_sombra) * 60 + int(m_sombra)
+    fin_sombra = inicio_sombra + yaml.safe_load(SOMBRA_WF.read_text(encoding="utf-8"))["jobs"]["process"][
+        "timeout-minutes"]
+    assert int(hora) * 60 + int(minuto) > fin_sombra
+
+
+def test_los_volcanes_de_la_guardia_son_los_del_nrt():
+    assert sorted(_matriz(WF)) == sorted(_matriz(NRT)) and len(_matriz(WF)) == 11
+
+
+def test_el_workflow_afirma_el_perfil_desde_pipeline_profile_y_corta_por_token_vacio():
+    txt, d = _wf()
+    paso = next(s for s in d["jobs"]["process"]["steps"] if "run_pipeline.py" in s.get("run", ""))
+    run = paso["run"]
+    assert '-z "$EARTHDATA_TOKEN"' in run and run.index('-z "$EARTHDATA_TOKEN"') < run.index("run_pipeline.py")
+    assert set(paso["env"]) >= {"EARTHDATA_TOKEN"}
+    assert "EARTHDATA_USERNAME" not in txt and "EARTHDATA_PASSWORD" not in txt       # A71: sólo token
+    assert "--profile guardia_k_modis" in run and "set -o pipefail" in run
+    # la aserción lee pipeline.profile (A89) y corre ANTES del pipeline
+    asercion = next(ln for ln in run.splitlines() if "VRP_PROFILE=guardia_k_modis python -c" in ln)
+    assert run.index(asercion) < run.index("run_pipeline.py")
+    for pieza in ("p.DATA_SUBDIR == 'guardia_k_modis'", "not p.ENABLE_MODIS_CODIGO_MIROVA", "p.SENSOR_MODIS",
+                  "not (p.SENSOR_VIIRS_375 or p.SENSOR_VIIRS_750)", "p.ENABLE_MODIS_B22_PRIMARY"):
+        assert pieza in asercion, pieza
+    assert paso["timeout-minutes"] >= 1.3 * 56 and d["jobs"]["process"]["timeout-minutes"] > paso["timeout-minutes"]
+
+
+def test_la_asercion_del_workflow_pasa_con_la_guardia_y_cae_con_produccion_y_la_sombra():
+    """Las dos preguntas del instrumento: la aserción tal cual está en el workflow pasa con el perfil de la guardia y cae
+    con otro (la sombra tiene la vía encendida y VIIRS; producción escribe en otra carpeta)."""
+    txt, d = _wf()
+    run = next(s for s in d["jobs"]["process"]["steps"] if "run_pipeline.py" in s.get("run", ""))["run"]
+    asercion = next(ln for ln in run.splitlines() if "VRP_PROFILE=guardia_k_modis python -c" in ln)
+    codigo = re.search(r'python -c "(.*)"\s*$', asercion).group(1)
+
+    def correr(perfil):
+        env = dict(os.environ, VRP_PROFILE=perfil, PYTHONIOENCODING="utf-8")
+        return subprocess.run([sys.executable, "-c", codigo], cwd=ROOT, env=env, capture_output=True,
+                              text=True, encoding="utf-8").returncode
+    assert correr(PERFIL) == 0
+    assert correr("sombra_codigo_mirova") != 0 and correr("mirova_equivalent") != 0
+
+
+def test_el_workflow_commitea_solo_la_carpeta_de_la_guardia_con_grupo_propio_y_reintento():
+    txt, d = _wf()
+    commit = next(s for s in d["jobs"]["process"]["steps"] if "git push" in s.get("run", ""))
+    assert re.findall(r'git add "([^"]+)"', commit["run"]) == ["data/guardia_k_modis/${{ matrix.volcano }}.json"]
+    assert commit["if"] == "steps.correr.outputs.commit == 'true'"
+    grupo = d["concurrency"]["group"]
+    otros = {(yaml.safe_load(p.read_text(encoding="utf-8")).get("concurrency") or {}).get("group")
+             for p in (ROOT / ".github" / "workflows").glob("*.yml") if p != WF}
+    assert grupo not in otros and grupo != "push-main" and d["concurrency"]["cancel-in-progress"] is False
+    assert "for attempt in 1 2 3 4 5" in commit["run"]
+
+
+def test_la_revision_corre_despues_del_commit_aunque_algo_falle():
+    txt, d = _wf()
+    pasos = d["jobs"]["process"]["steps"]
+    i_commit = next(i for i, s in enumerate(pasos) if "git push" in s.get("run", ""))
+    i_rev = next(i for i, s in enumerate(pasos) if "scripts/revisar_guardia_modis.py" in s.get("run", ""))
+    assert i_rev > i_commit
+    assert pasos[i_rev]["if"].startswith("always()") and "steps.correr.outputs.corrio == 'true'" in pasos[i_rev]["if"]
+    assert "data/guardia_k_modis/${{ matrix.volcano }}.json" in pasos[i_rev]["run"]
+    # el log se tacha antes de subirse, como en la sombra (VR2-03)
+    nombres = [s.get("name", "") for s in pasos]
+    i_tachar = next(i for i, s in enumerate(pasos) if "scripts/tachar_secreto_log.py" in s.get("run", ""))
+    i_subir = next(i for i, s in enumerate(pasos) if "upload-artifact" in str(s.get("uses", "")))
+    assert i_tachar < i_subir and "steps.tachar.outcome == 'success'" in pasos[i_subir]["if"], nombres
+
+
+def test_produccion_no_nombra_la_guardia():
+    assert PERFIL not in NRT.read_text(encoding="utf-8")
+    assert PERFIL not in (ROOT / "pipeline" / "profiles" / "mirova_equivalent.yaml").read_text(encoding="utf-8")
+
+
+# ------------------------------------------------------------------------------------- 3. la revisión de la corrida
+DESDE = "2026-11-05T17:41:00Z"
+COB = {"fallas": [], "plataformas": {"MODIS_TERRA": {}, "MODIS_AQUA": {}}, "incidencias": []}
+
+
+def _k(dt, sensor="MODIS_AQUA", proc="2026-11-05T17:50:00Z", perfil=PERFIL, **extra):
+    return dict({"datetime_utc": dt, "sensor": sensor, "processed_utc": proc,
+                 "regimen": {"perfil": perfil, "codigo_sha": "abc"}}, **extra)
+
+
+def _rev(recs, log="", ini="2026-11-05", fin="2026-11-05", cob=COB, sha="abc", desde=DESDE):
+    from revisar_guardia_modis import revisar
+    return revisar(recs, log, ini, fin, desde, cob, sha=sha)
+
+
+def test_revision_verde_con_k_de_modis_escrito_en_esta_corrida():
+    ok, resumen = _rev([_k("2026-11-05 06:30")])
+    assert ok is True, resumen
+
+
+def test_revision_roja_si_la_corrida_no_escribio_nada():
+    ok, resumen = _rev([_k("2026-11-05 06:30", proc="2026-11-04T17:50:00Z")])      # el de ayer no cuenta
+    assert ok is False and "no escribió" in resumen
+
+
+def test_revision_roja_si_la_guardia_trae_records_de_la_via():
+    """Una guardia con la vía no es K: guardia y producción dirían lo mismo y la vigilancia nunca dispararía."""
+    for marca in (True, "sin_mxd03"):
+        ok, resumen = _rev([_k("2026-11-05 06:30"), _k("2026-11-05 07:10", via_codigo_mirova=marca)])
+        assert ok is False and "vía" in resumen, marca
+
+
+def test_revision_roja_si_la_guardia_trae_viirs_o_otro_perfil():
+    assert _rev([_k("2026-11-05 06:30"), _k("2026-11-05 06:31", sensor="VIIRS_NOAA20")])[0] is False
+    assert _rev([_k("2026-11-05 06:30", perfil="mirova_equivalent")])[0] is False
+
+
+def test_revision_por_dia_un_dia_sin_modis_es_falla_salvo_prueba_de_que_no_hubo_pasada():
+    recs = [_k("2026-11-05 06:30")]
+    ok, resumen = _rev(recs, ini="2026-11-04", fin="2026-11-05")
+    assert ok is False and "2026-11-04" in resumen
+    # prueba escrita: las dos plataformas respondieron sin gránulos ese día
+    cob = dict(COB, incidencias=[{"tipo": "sin_granulos", "fecha": "2026-11-04", "plataforma": p}
+                                 for p in ("MODIS_TERRA", "MODIS_AQUA")])
+    ok, resumen = _rev(recs, ini="2026-11-04", fin="2026-11-05", cob=cob)
+    assert ok is True and "NOTA" in resumen, resumen
+
+
+def test_revision_roja_con_error_de_granulo_o_cobertura_ausente():
+    assert _rev([_k("2026-11-05 06:30")], log="ERROR processing MOD021KM...")[0] is False
+    assert _rev([_k("2026-11-05 06:30")], cob=None)[0] is False
+    assert _rev([_k("2026-11-05 06:30")], desde="")[0] is False
+
+
+def test_revision_por_linea_de_comandos_no_cae_con_traceback(tmp_path):
+    js = tmp_path / "g.json"
+    js.write_text(json.dumps({"records": "no es lista"}), encoding="utf-8")
+    cob = tmp_path / "c.json"
+    cob.write_text(json.dumps(COB), encoding="utf-8")
+    r = subprocess.run([sys.executable, str(ROOT / "scripts" / "revisar_guardia_modis.py"), "--json", str(js),
+                        "--log", str(tmp_path / "no.log"), "--cobertura-json", str(cob), "--ini", "2026-11-05",
+                        "--fin", "2026-11-05", "--desde-utc", DESDE], capture_output=True, text=True,
+                       encoding="utf-8", env=dict(os.environ, PYTHONIOENCODING="utf-8"))
+    assert r.returncode == 1 and "FALLA" in r.stdout and "Traceback" not in r.stderr
