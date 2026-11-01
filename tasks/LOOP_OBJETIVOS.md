@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-01 23:00 UTC (S172): re-sellado del lector de V375-E por claves; corrección propia sobre S0
+- **Decisión de Nicolás** (chat de S172, ante «¿Re-sello el lector de V375-E con la comparación por claves en vez de
+  archivo entero?»): «Sí, por claves». En el S8 los dos perfiles se comparan como YAML leído y sin las claves de
+  `thresholds:` que lee sólo otro sensor (`enable_modis_codigo_mirova`, `enable_v750_codigo_mirova` y los tres de
+  MxD03; consumidores por `git grep` en `origin/main` `ffccf6c9f`: sólo `process_modis.py` y `process_viirs_mod.py`),
+  igual que ya se hacía con `roi_v750` en la grilla. Rama `claude/s172-v375e-relector` desde el tag `s170-v375e-lector`,
+  worktree `D:/vrp-trabajo/worktrees/s172-relector`. Tensión declarada: S169 había dejado el afinado por clave como
+  riesgo aceptado VL2-05 por el hueco de A89; se cubre quitando las claves sólo de `thresholds:` (donde las lee
+  `profile.py`) y marcando cualquier otra ubicación.
+- **Corrección propia (A113)**: lo que S172 dejó escrito en el borrador de MOD-D (`1f41d3e9e`) de que el S0 caía con el
+  PR de MODIS es FALSO: el lector calcula los sha256 sobre su propio checkout del tag, y los 16 coinciden. Lo que sí
+  marca régimen es el S8, por el perfil (cubierto ahora) y por la aserción del workflow de la sombra si la guardia la
+  edita (`.github/workflows/sombra-codigo-mirova.yml` l. 110, comparado como texto). Por eso el borrador recomienda la
+  guardia en un perfil y un workflow nuevos, fuera del S8. Marcado en el borrador §3.
+- Pruebas nuevas (25 casos S172) y 8 mutaciones nuevas (S01 a S08; R07 retirada porque su línea ya no existe). La
+  primera corrida en rojo cayó por `AttributeError` y se paró; las mutaciones prueban el rojo. Batería verde en curso.
+
 ### 2026-10-31 23:14 UTC (S171): cierre; traspaso en tasks/BLOQUE_ARRANQUE_S172.md
 - Estado fijado sin trabajo de VRP Chile en curso (el único Python vivo es de `Empresas/Autoscan`). Cuota al 98 %; la
   S172 arranca después del reinicio del 2026-11-01 12:00 UTC. Lecciones en la §c del bloque y en la memoria

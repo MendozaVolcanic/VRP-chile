@@ -43,6 +43,15 @@ contamina VIIRS: los lectores de sombra comparan sólo lo que lee su vía (regla
 VIIRS 375, programa §12.6); **comprobar en el lector sellado `s170-v375e-lector` que un cambio en las claves de MODIS
 no marca régimen nuevo en VIIRS 375** antes de elegir esta opción.
 
+⚠️ **S172, corrección del punto (1) que sigue** (misma sesión, al preparar el re-sellado): el S0 **no cae** con el PR
+de MODIS. El lector calcula los sha256 sobre su propio checkout (`RAIZ = AQUI.parents[2]`, l. 47; el docstring dice «Se
+corre desde un checkout del tag del lector»), no sobre `main`, y los 16 archivos del sello coinciden en el checkout del
+tag (comprobado el 2026-11-01). Lo único que el encendido toca es el S8, y lo toca por dos lados: el perfil
+(`viejo != nuevo` sobre el texto entero) y, si la guardia edita la sombra, la aserción del workflow
+`.github/workflows/sombra-codigo-mirova.yml` l. 110 (`assert ... p.ENABLE_MODIS_CODIGO_MIROVA`), que está en
+`RUTAS_REGIMEN` y se compara como texto. El re-sellado por claves cubre el perfil; el workflow no: por eso la guardia
+va mejor en un perfil y un workflow nuevos (ver «Guardia recomendada» al final de esta sección). Texto original:
+
 **Resultado de S172 (lectura estática del lector en el tag, no corrido): SÍ lo marca, y la opción preferida no es
 gratis.** (1) Control S0: el lector exige el sha256 de `pipeline/profile.py`, `pipeline/store.py`,
 `pipeline/profiles/mirova_equivalent.yaml` y `frontend/index.html` iguales a los del sello (`SHA_SELLO_LECTOR`, l. 63 a
@@ -61,6 +70,21 @@ MODIS (A45). La ventana P de VIIRS 375 empieza el 2026-11-03: si el re-sellado n
 informada con el lector actual y el encendido de MODIS espera. Alternativa: un perfil de guardia nuevo, aislado
 (`data_subdir` propio, A47), sumado al workflow de la sombra; cuesta tiempo de runner (pre-mortem 171-03: el paso
 tiene 75 min).
+
+**Re-sellado por claves (decisión de Nicolás, 2026-11-01, «Sí, por claves»).** En el S8 los dos perfiles se comparan
+como YAML leído y sin las claves de `thresholds` que lee sólo otro sensor (`enable_modis_codigo_mirova`,
+`enable_v750_codigo_mirova` y los tres de MxD03; consumidores comprobados con `git grep` en `origin/main`: sólo
+`pipeline/process_modis.py` y `pipeline/process_viirs_mod.py`), igual que ya se hacía con `roi_v750` en la grilla.
+Con eso el orden de arriba cambia: los sha256 del S0 no dependen del PR de MODIS, así que el re-sellado **no espera** al
+contenido final del PR y el encendido puede llegar cualquier día de la ventana P sin marcar régimen en VIIRS 375.
+Rama `claude/s172-v375e-relector`, worktree `D:/vrp-trabajo/worktrees/s172-relector`.
+
+**Guardia recomendada (S172):** un perfil nuevo `guardia_k_modis.yaml` (`extends: mirova_equivalent`,
+`enable_modis_codigo_mirova: false`, sólo MODIS, `data_subdir` propio) corrido por un workflow nuevo. Ni el perfil (no
+está en `PERFILES_REGIMEN`) ni el workflow (no está en `RUTAS_REGIMEN`) cuentan para el S8 del lector de VIIRS 375, y no
+hay que tocar la aserción del workflow de la sombra. La sombra sigue con la vía de MODIS, que tras el encendido es
+igual a producción. Editar la sombra sólo serviría si ese cambio del workflow se mergea **antes** del primer record de
+la vía de la ventana P (la base del S8), o sea antes del 2026-11-03 ~19 UTC.
 
 La excepción al congelamiento de `pipeline/` (§12.6) se anota en la bitácora con el commit y el sensor (MODIS).
 
