@@ -13,8 +13,10 @@ Lo que esta vara no ve, y cómo se cubre:
   `equivalencia_v750a.py` (VS171-03).
 - Halo de 7 celdas (más de 30 alertados) y celdas NaN en BOX: ninguna de las 311 los recorre (censo del verificador
   S171). Se cubren con escenas sintéticas (un bloque caliente de 8 x 8 sobre una escena real de O2; NaN puestos en BOX)
-  juzgadas contra el oráculo de Octave con el relleno de MATLAB, que es un port independiente del .m (VS171-02 y 04).
-  Esa parte no es «MATLAB directo»: un O3 en MATLAB con estas escenas la reemplazaría.
+  juzgadas contra el oráculo de Octave con el relleno de MATLAB (VS171-02 y 04). Ese oráculo NO es independiente de la
+  vía: la vía se tradujo de él línea por línea y los dos rellenos salen del mismo módulo de S163 (VS172-02); sirve para
+  atrapar mutaciones de esos caminos, no como evidencia de que la vía iguala a MATLAB ahí. Esa parte no es «MATLAB
+  directo»: un O3 corrido en MATLAB con estas escenas la reemplazaría.
 
 Uso: python experiments/_s162_v750a/vara_matlab_v750a.py [--modulo pipeline.mirova_v750_codigo | --ruta <vía.py>]
      [--salida <txt>]
@@ -50,10 +52,14 @@ MUT_311 = {
     "sin_rechazo_glint": ("sunglint < 12", "sunglint < 0"),
     "sin_corte_200K": ("frio = bt15 <= 200", "frio = bt15 <= 0"),
 }
-# las que las 311 no recorren: se juzgan sobre las escenas sintéticas
+# las que las 311 no recorren: se juzgan sobre las escenas sintéticas, y cuentan como atrapadas sólo si cambian las
+# escenas de SU tipo (VS172-01: una mutación que borraba también la exclusión del borde salía «atrapada» por el borde,
+# en una escena halo, sin tocar ninguna de las de NaN en BOX)
 MUT_SINT = {
-    "halo_7_a_9": ("(5 if npix <= 30 else 7)", "(5 if npix <= 30 else 9)"),
-    "ignora_nan_de_box": ("excl = np.isnan(box)", "excl = np.zeros(box.shape, bool)"),
+    "halo_7_a_9": ("(5 if npix <= 30 else 7)", "(5 if npix <= 30 else 9)", "halo"),
+    "nan_de_box_como_zona_0": ("    box = np.array(box, float)\n    box[:, [0, -1]] = np.nan",
+                               "    box = np.nan_to_num(np.array(box, float), nan=0.0)\n    box[:, [0, -1]] = np.nan",
+                               "boxnan"),
 }
 CONTROL_CAIDA = ("def vrp_mirova(m13, mascara, coef=COEF_VRP_V750):",
                  "def vrp_mirova(m13, mascara, coef=COEF_VRP_V750):\n    raise RuntimeError('mutación de control')")
@@ -139,7 +145,8 @@ def main():
     malos += ok != NE
 
     # [2] poder: la vía mutada contra MATLAB en las 311
-    pr("== mutaciones de la vía contra MATLAB, en las 311 escenas (ATRAPADA si alguna difiere; el conteo es el poder):")
+    pr("== mutaciones de la vía contra MATLAB, en las 311 escenas (ATRAPADA si alguna difiere; el conteo es el poder):"
+       + ("" if ok == NE else " ⚠️ la vía sin mutar ya sale ROJA, así que estos conteos no miden poder (VS172-07)"))
     ORA = importlib.import_module("equivalencia_v750a").ORA   # oráculo de Octave con el relleno de MATLAB (main)
     mutadas = {k: cargar_via(k, src, v) for k, v in MUT_311.items()}
     mq = cargar_via("relleno_qhull", src)
@@ -199,13 +206,15 @@ def main():
     pr(f"   identidad (vía sin mutar): {'VERDE' if st.count('ok') == len(sint) else 'ROJA'}: {st.count('ok')} de "
        f"{len(sint)} (máscara distinta {st.count('mascara')}, VRP distinto {st.count('vrp')})")
     malos += st.count("ok") != len(sint) or n_halo == 0
-    for k, v in MUT_SINT.items():
-        r311 = NE - contra_matlab(cargar_via(k, src, v)).count("ok")
-        r = contra_oraculo(cargar_via(k, src, v))
-        n = len(sint) - r.count("ok")
-        pr(f"   {k:20s} {'ATRAPADA' if n else 'NO ATRAPADA'} en las sintéticas: {n} distintas (máscara "
-           f"{r.count('mascara')}, VRP {r.count('vrp')}); en las 311 de MATLAB: {r311} distintas")
-        malos += n == 0
+    for k, (viejo, nuevo, tipo) in MUT_SINT.items():
+        r311 = NE - contra_matlab(cargar_via(k, src, (viejo, nuevo))).count("ok")
+        r = contra_oraculo(cargar_via(k, src, (viejo, nuevo)))
+        n_obj = sum(1 for (t, *_), x in zip(sint, r) if t == tipo and x != "ok")
+        n_otro = sum(1 for (t, *_), x in zip(sint, r) if t != tipo and x != "ok")
+        pr(f"   {k:22s} {'ATRAPADA' if n_obj else 'NO ATRAPADA'} en las escenas «{tipo}»: {n_obj} de "
+           f"{sum(1 for t, *_ in sint if t == tipo)} distintas (en las del otro tipo {n_otro}; máscara "
+           f"{r.count('mascara')}, VRP {r.count('vrp')} en total); en las 311 de MATLAB: {r311} distintas")
+        malos += n_obj == 0
 
     # [4] censo de caminos de las 311 (VS171-04): cuántas escenas recorren cada rama del .m
     dia = int((E["DAY"][0] != 0).sum())

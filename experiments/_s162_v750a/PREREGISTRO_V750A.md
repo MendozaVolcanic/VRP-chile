@@ -103,9 +103,11 @@ las pasadas lejanas quedó SIN DATO.
 > 4. **Caminos que las 311 no recorren** (VS171-02 y VS171-04): ninguna tiene más de 30 alertados (halo de 7) ni celdas
 >    NaN en BOX. Se cubren con 16 escenas sintéticas armadas sobre escenas reales de O2 (8 con un bloque caliente de
 >    8 x 8, 48 a 53 alertados; 8 con NaN en BOX junto a un foco), juzgadas contra el oráculo de Octave con el relleno de
->    MATLAB, que es un port independiente del .m: la vía tiene que darles 16 de 16 y las mutaciones «halo de 7 a 9» e
->    «ignora NaN de BOX» tienen que salir atrapadas. Esa parte no es MATLAB directo; un O3 corrido en MATLAB con esas
->    escenas la reemplazaría.
+>    MATLAB: la vía tiene que darles 16 de 16, y las mutaciones «halo de 7 a 9» y «NaN de BOX como zona 0» tienen que
+>    salir atrapadas en las escenas de SU tipo (no vale una captura en las del otro tipo; verificador S172, VS172-01).
+>    Ese oráculo no es independiente de la vía (la vía se tradujo de él línea por línea y los rellenos salen del mismo
+>    módulo de S163; VS172-02): sirve para atrapar mutaciones de esos caminos, no como evidencia de que la vía iguala a
+>    MATLAB ahí. Esa parte no es MATLAB directo; un O3 corrido en MATLAB con esas escenas la reemplazaría.
 > 5. **Salidas registradas** (L2, S-1 y S-3 del verificador): `vara_matlab_v750a_salida.txt` (vía de main, VERDE) y
 >    `equivalencia_v750a_salida.txt` (E1 y E3 sobre la vía real con el sha del módulo, las mutaciones de ablación, y
 >    como triangulación la ROJA de la vara vieja con Qhull sobre la misma vía).
@@ -219,8 +221,9 @@ P (con la posición elegida en el §6 bis) se propone a Nicolás para producció
 1. **Equivalencia** (§4.1): 0 pasadas distintas fuera de la banda de triangulación, en local y en el runner; **6 de 6**
    mutaciones atrapadas por aserción (las seis del §4.1) y la de control como caída. ⚠️ **Enmienda E-1 (2026-11-01)**:
    en local, la vía VERDE contra MATLAB en las 311 escenas de O2 con las 8 mutaciones de la vía atrapadas y el control
-   como caída; VERDE en las 16 sintéticas con las dos mutaciones de esos caminos atrapadas; y E3 VERDE con las 6
-   mutaciones de `equivalencia_v750a.py` atrapadas por su pieza y la ablación sin mutar pasando (§4.1, enmienda E-1). (L2, resuelta por D-48: este punto
+   como caída; VERDE en las 16 sintéticas con las dos mutaciones de esos caminos atrapadas en las escenas de su tipo; y
+   E1 y E3 de `equivalencia_v750a.py` VERDES sobre la vía, con las 6 mutaciones atrapadas por su pieza y la ablación sin
+   mutar pasando (§4.1, enmienda E-1; E1 agregado tras VS172-06). (L2, resuelta por D-48: este punto
    decía «5 de 5», un resto de cuando la prueba tenía cinco.)
 2. **Censo** (§4.2), en T y en O, con la tabla sola **y** con tabla más OCR:
    - P1 = 0 (ninguna protegida que K publica y P no; ninguna protegida de MIROVA que P no publique, fuera de las que K
@@ -326,8 +329,11 @@ corrigieron con E53 a E60 y las mutaciones M57 a M62.
   2026-10-31: el medidor completo sobre la versión sin N-3 dio 85 de 85 atrapadas (tres corridas, la última cerró a las
   05:19 UTC); N-3 en el analizador con E77 a E80 (tres rojos antes), batería 81 de 81, y M86 a M95 10 de 10 atrapadas
   por aserción sobre la batería entera (`mutar_evaluar_v750a_n3_salida.txt`).
-- **Vara del criterio 1 (enmienda E-1 del §4.1, 2026-11-01)**: hecha en local; falta su verificador limpio, junto con
-  el resto antes del sello.
+- **Vara del criterio 1 (enmienda E-1 del §4.1, 2026-11-01)**: hecha en local y verificada con contexto limpio
+  (`D:/vrp-trabajo/temporales/ver_s172_e1/INFORME.md`: A, B y D confirmados; C y E en parte, corregidos en el mismo
+  día: VS172-01 la mutación de BOX ahora toca sólo el NaN de entrada y se atrapa 8 de 8 en sus escenas; VS172-02 el
+  oráculo de las sintéticas no se llama independiente; VS172-06 E1 en el §6.1). Queda abierto VS172-03 (gravedad 2):
+  el criterio del runner «P = O» no dice con qué relleno corre O; se fija cuando se escriba el despacho del censo.
 - Resultado de V750-B (la ROI) y del brazo nativo N0/N1 (confirma V750-C).
 - Analizador `evaluar_v750a.py` con la regla de §6, probado sin red (nulo, placebo y control positivo sobre las 510
   grillas de N), y su verificador limpio.
