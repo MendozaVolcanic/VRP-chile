@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-01 23:37 UTC (S172): PR de MODIS en preparación, tag puesto; lector re-sellado 252 de 252; trabajos en paralelo
+- **Decisiones de Nicolás** (chat de S172): ante «¿Preparo el PR de encendido de MODIS en una rama, con tag antes del
+  primer edit?»: «Sí, prepáralo»; y después: «lo que recomendabas antes también hazlo, la mini auditoría y las otras
+  cosas que valía la pena probar».
+- **Tag defensivo** `pre-s171-adopcion-modd` sobre main `d3cd0b2ae`, empujado, antes del primer edit (A45). Worktree
+  `D:/vrp-trabajo/worktrees/s172-modd-encendido`. Diseño: dos PR, A (guardia K en perfil y workflow nuevos, vigilancia
+  propia, detector `VIA_MODIS` en el audit, marca del tablero desde los datos; inerte con el flag apagado) y B (sólo el
+  flag, sus pruebas, ficha SDA y marcas A113: lo único que se revierte). `docs/superpowers/specs/2026-11-01-encendido-modd-design.md`
+  (`d24fda8f3`, rama `claude/s172-modd-encendido`). Implementa un agente; nada se abre ni se mergea sin Nicolás.
+- **Re-sellado de V375-E**: batería **252 de 252** (233 + 19 del S8 por claves) en `aa3fdcf1e`; nulo de S01 a S08 con
+  un hilo y verificador limpio (Sonnet, alto) en curso.
+- **En paralelo**: investigación de sólo lectura del déficit de magnitud de Chillán en los tres sensores (0,56 / 0,66 /
+  0,68, #915; `D:/vrp-trabajo/temporales/s172_chillan/`), consulta del estado del A/B diurno sobre K, y consulta a la
+  sesión de VIIRS 750 sobre si su lector marca régimen con el encendido de MODIS. Mini auditoría del PR (2 frentes y 2
+  verificadores) cuando el borrador exista. MxD03 queda para después del encendido (un cambio a la vez, para que la
+  guardia sepa a cuál culpar).
+
 ### 2026-11-01 23:00 UTC (S172): re-sellado del lector de V375-E por claves; corrección propia sobre S0
 - **Decisión de Nicolás** (chat de S172, ante «¿Re-sello el lector de V375-E con la comparación por claves en vez de
   archivo entero?»): «Sí, por claves». En el S8 los dos perfiles se comparan como YAML leído y sin las claves de
