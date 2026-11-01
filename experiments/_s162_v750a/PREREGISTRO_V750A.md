@@ -78,6 +78,38 @@ las pasadas lejanas quedó SIN DATO.
 
 ### 4.1 Equivalencia (PD3): la vía del pipeline reproduce al oráculo pasada por pasada
 
+> ⚠️ **Enmienda E-1 (2026-11-01, decisión de Nicolás vía la coordinadora S171/S172; hallazgo VS171-01 del verificador
+> S171, `D:/vrp-trabajo/temporales/ver_s171_equiv/INFORME.md`).** La vara del criterio 1 cambió después de este
+> pre-registro: en `3a02ad28f` la referencia de `equivalencia_v750a.py` pasó del relleno de Qhull (el de
+> `mirova_v750_r2`, que es el de Octave) al relleno de MATLAB, en el mismo commit que cableó la vía, y sin acta. Se
+> decide así, y el texto de más abajo queda como historia:
+>
+> 1. **La vara del criterio 1 es MATLAB directo.** La vía (`pipeline/mirova_v750_codigo.py`) da la misma máscara,
+>    índice por índice, y el mismo VRP (diferencia relativa de 1e-9 o menos) que la salida de MATLAB R2026b
+>    (26.2.0.3386108) en las 311 escenas de O2: `experiments/_s163_o2/entradas_o2.mat` (md5
+>    `fb849b6a96a9d348e75cf502e21a326c`) y `resultado_o2.mat` (md5 `1f7fdc4bed0f8cb6223204bbce42ba43`). Prueba:
+>    `vara_matlab_v750a.py`, que verifica los dos md5 antes de medir. Por qué: MATLAB es lo que corre MIROVA; el oráculo
+>    de Octave rellena distinto bajo el hueco del halo (S163: 41 de 84 fondos), y contra MATLAB el que acierta es la vía.
+> 2. **Las mutaciones se juzgan mutando la vía misma, en las 311 escenas** (VS171-05), sin el subconjunto de 246. Las
+>    siete de una línea (K1 y mínimos de K, ocho vecinos, fondo sin halo, recorte a cero, umbral diurno, sin rechazo por
+>    glint, sin corte de 200 K) y el relleno de Qhull tienen que salir atrapadas, y la de control que se cae, como caída.
+>    El conteo de escenas que cambia cada una se informa: es el poder de la vara.
+> 3. **Lo que MATLAB no puede juzgar se mantiene aparte.** E3 de `equivalencia_v750a.py` (el remuestreo contra la grilla
+>    lineal de R2 en los 10 recortes, con su mutación de remuestreo por vecino; VS171-03), y la máscara contra el oráculo
+>    de Octave en los 1.020 casos de E1 como control de detección. Las cinco mutaciones de ablación del §4.1 siguen
+>    corriendo ahí, con el oráculo de ablación y la referencia con el MISMO relleno (antes de S172 el oráculo de
+>    ablación seguía con Qhull y tres mutantes quedaban atrapados por el relleno, no por su pieza) y con el control
+>    «ablación sin mutar», que tiene que pasar.
+> 4. **Caminos que las 311 no recorren** (VS171-02 y VS171-04): ninguna tiene más de 30 alertados (halo de 7) ni celdas
+>    NaN en BOX. Se cubren con 16 escenas sintéticas armadas sobre escenas reales de O2 (8 con un bloque caliente de
+>    8 x 8, 48 a 53 alertados; 8 con NaN en BOX junto a un foco), juzgadas contra el oráculo de Octave con el relleno de
+>    MATLAB, que es un port independiente del .m: la vía tiene que darles 16 de 16 y las mutaciones «halo de 7 a 9» e
+>    «ignora NaN de BOX» tienen que salir atrapadas. Esa parte no es MATLAB directo; un O3 corrido en MATLAB con esas
+>    escenas la reemplazaría.
+> 5. **Salidas registradas** (L2, S-1 y S-3 del verificador): `vara_matlab_v750a_salida.txt` (vía de main, VERDE) y
+>    `equivalencia_v750a_salida.txt` (E1 y E3 sobre la vía real con el sha del módulo, las mutaciones de ablación, y
+>    como triangulación la ROJA de la vara vieja con Qhull sobre la misma vía).
+
 - Sin red, en local y en CI: sobre las 510 grillas de N, el ejemplo de Etna del OSF y los 10 recortes nativos de R2
   (más las ventanas nativas que guarde el run de V750-B), la función del pipeline da **la misma máscara** (índice por
   índice) y el mismo VRP (diferencia relativa ≤ 1e-9) que `mirova_v750_r2`. Lo mismo para el remuestreo contra
@@ -185,7 +217,10 @@ deciden: en el auto-audit (#924) y en V375-E (§8.13 de su pre-registro, sellado
 P (con la posición elegida en el §6 bis) se propone a Nicolás para producción (A45) si y sólo si:
 
 1. **Equivalencia** (§4.1): 0 pasadas distintas fuera de la banda de triangulación, en local y en el runner; **6 de 6**
-   mutaciones atrapadas por aserción (las seis del §4.1) y la de control como caída. (L2, resuelta por D-48: este punto
+   mutaciones atrapadas por aserción (las seis del §4.1) y la de control como caída. ⚠️ **Enmienda E-1 (2026-11-01)**:
+   en local, la vía VERDE contra MATLAB en las 311 escenas de O2 con las 8 mutaciones de la vía atrapadas y el control
+   como caída; VERDE en las 16 sintéticas con las dos mutaciones de esos caminos atrapadas; y E3 VERDE con las 6
+   mutaciones de `equivalencia_v750a.py` atrapadas por su pieza y la ablación sin mutar pasando (§4.1, enmienda E-1). (L2, resuelta por D-48: este punto
    decía «5 de 5», un resto de cuando la prueba tenía cinco.)
 2. **Censo** (§4.2), en T y en O, con la tabla sola **y** con tabla más OCR:
    - P1 = 0 (ninguna protegida que K publica y P no; ninguna protegida de MIROVA que P no publique, fuera de las que K
@@ -286,8 +321,13 @@ corrigieron con E53 a E60 y las mutaciones M57 a M62.
   verificador limpio de este agregado.
 - **El sello depende de la lectura de V750-B** (programa §12.1 paso 4 y §12.5 punto 2): la ROI que elija V750-B se
   incorpora a P antes del sello, con sus escenarios y su medidor; sin esa lectura no se sella.
-- **Regla N-3 (§6 ter)**: escrita el 2026-10-28; falta su implementación en el analizador, escenarios y mutaciones,
-  cuando termine el medidor completo que corre sobre la versión sin N-3 (desde el 2026-10-28 13:50 UTC).
+- **Regla N-3 (§6 ter)**: ~~escrita el 2026-10-28; falta su implementación en el analizador, escenarios y mutaciones,
+  cuando termine el medidor completo que corre sobre la versión sin N-3 (desde el 2026-10-28 13:50 UTC).~~ Hecha el
+  2026-10-31: el medidor completo sobre la versión sin N-3 dio 85 de 85 atrapadas (tres corridas, la última cerró a las
+  05:19 UTC); N-3 en el analizador con E77 a E80 (tres rojos antes), batería 81 de 81, y M86 a M95 10 de 10 atrapadas
+  por aserción sobre la batería entera (`mutar_evaluar_v750a_n3_salida.txt`).
+- **Vara del criterio 1 (enmienda E-1 del §4.1, 2026-11-01)**: hecha en local; falta su verificador limpio, junto con
+  el resto antes del sello.
 - Resultado de V750-B (la ROI) y del brazo nativo N0/N1 (confirma V750-C).
 - Analizador `evaluar_v750a.py` con la regla de §6, probado sin red (nulo, placebo y control positivo sobre las 510
   grillas de N), y su verificador limpio.

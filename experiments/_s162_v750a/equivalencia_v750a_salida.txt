@@ -1,14 +1,25 @@
-ROJA: el módulo pipeline.mirova_v750_codigo no existe todavía (No module named 'pipeline.mirova_v750_codigo')
-exit 2
+S172 (2026-11-01, enmienda E-1 del §4.1). Commit de medida 1404c15ee más la corrección del oráculo de ablación de esta misma sesión.
+vía: pipeline/mirova_v750_codigo.py, sha256 84f738374361e3a6efbfbe0e1f1a9699836feabe55e35263fc2e62a82299470b
+prueba: experiments/_s162_v750a/equivalencia_v750a.py, sha256 d069702ae474a3bc57a8c9fd4ef26c97e14e33f04a24e4e47f1284a6e0484685
+
+== la vía real (E1 contra el oráculo de Octave con el relleno de MATLAB; E3 contra la grilla lineal de R2):
+VERDE: E1 1020 casos, E3 10 recortes
+
+== mutaciones (--mutaciones), con el oráculo de ablación y la referencia con el mismo relleno:
 identidad (oráculo contra sí mismo): PASA, E1 1020 casos, E3 10 recortes
+control (ablación sin mutar, mismo relleno): PASA, E1 1020 casos, E3 10 recortes
    mutación k1_y_minimos         atrapada por aserción (E1 máscara distinta: id 58 Lascar 2026-05-28 05:36 caja def)
    mutación ocho_vecinos         atrapada por aserción (E1 máscara distinta: id 14 Lascar 2026-04-16 05:24 caja def)
    mutación fondo_sin_halo       atrapada por aserción (E1 VRP distinto: id 3 2.83417324114074 contra 3.2477495561459553)
-   mutación recorte              atrapada por aserción (E1 VRP distinto: id 392 2.5112839644679332 contra 2.481399541072971)
+   mutación recorte              atrapada por aserción (E1 VRP distinto: id 392 2.5112839644679332 contra 2.4813995410729732)
    mutación fondo_anillo         atrapada por aserción (E1 VRP distinto: id 3 1.8380243544674406 contra 3.2477495561459553)
    mutación remuestreo_vecino    atrapada por aserción (E3 grilla distinta: recorte_Chaiten_2026-10-06_0530.npz M13 máx dif 0.030206540638213597)
    mutación control_que_se_cae   caída (RuntimeError)
 mutaciones: TODAS COMO SE ESPERA
-exit 0
 
-(2026-10-24, commit 607062ba7. Primera corrida: el módulo candidato por defecto, pipeline.mirova_v750_codigo, todavía no existe: línea base ROJA, salida 2. Segunda: --mutaciones. E1 = 510 grillas de N x 2 cajas; E3 = 10 recortes nativos de R2 de origin/main.)
+
+== triangulación: la vara VIEJA (equivalencia_v750a.py de fb87ef554, oráculo con relleno de Qhull) sobre la misma vía:
+ROJA: E1 VRP distinto: id 6 1.811149945203765 contra 1.8167260187871783
+   (ROJA esperada: la vía usa el relleno de MATLAB y el oráculo viejo el de Qhull; id 6 difiere 0,3 % en el fondo)
+
+== salida previa (2026-10-24, antes de que existiera el módulo): ROJA, el módulo no existía; reemplazada por esta.

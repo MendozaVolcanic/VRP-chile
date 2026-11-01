@@ -65,6 +65,11 @@ def _rellenar_matlab(A, jitter=0.0, semilla=0):
 
 
 ORA._fillmissing2_lineal = _rellenar_matlab
+# S172: el oráculo de ablación (de donde salen las mutaciones del §4.1) seguía con el relleno de Qhull, así que cualquier
+# mutante difería de la referencia por el relleno y quedaba «atrapado» en el id 6 aunque la pieza mutada no cambiara nada
+# (k1, ocho vecinos y recorte, los tres con el mismo 1,8167 contra 1,8111). Con el mismo relleno, el mutante difiere sólo
+# por su pieza; el control «ablacion_sin_mutar» tiene que PASAR.
+OA._fillmissing2_lineal = lambda A: _rellenar_matlab(A)
 
 N, CELDA = 67, 750.0
 RUNS = ("run_39682867040", "run_39693661527", "run_39680724047")
@@ -120,7 +125,7 @@ def mutante(pieza):
         m.detectar_mirova = caer
         return m
     P = dict(OA.PIEZAS_MIROVA)
-    P.update({"k1_y_minimos": {"umbrales_k": True}, "ocho_vecinos": {"ocho_vecinos": True},
+    P.update({"ablacion_sin_mutar": {}, "k1_y_minimos": {"umbrales_k": True}, "ocho_vecinos": {"ocho_vecinos": True},
               "fondo_sin_halo": {"fondo": "sin_halo"}, "recorte": {"recorte": True},
               "fondo_anillo": {"fondo": "anillo"}}[pieza])
     # oraculo_ablacion arma su propia caja: se le pasa la del caso por un atributo del módulo durante la llamada
@@ -202,6 +207,12 @@ def main():
         n1, n3 = correr(adaptador_oraculo(), a)
         print(f"identidad (oráculo contra sí mismo): PASA, E1 {n1} casos, E3 {n3} recortes")
         malo = 0
+        try:
+            n1, n3 = correr(mutante("ablacion_sin_mutar"), a)
+            print(f"control (ablación sin mutar, mismo relleno): PASA, E1 {n1} casos, E3 {n3} recortes")
+        except Exception as e:  # noqa: BLE001
+            print(f"control (ablación sin mutar, mismo relleno): NO PASA ({str(e)[:90]}): las mutaciones no se pueden leer")
+            malo += 1
         for pieza in ("k1_y_minimos", "ocho_vecinos", "fondo_sin_halo", "recorte", "fondo_anillo",
                       "remuestreo_vecino", "control_que_se_cae"):
             try:

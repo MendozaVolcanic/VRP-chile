@@ -1,0 +1,21 @@
+vía mirova_v750_codigo.py: sha256 del texto 62d6538bbdbbc3574d2703c36d8b7e95fa420780c0089dad9edf76051b9c90f3
+referencia entradas_o2.mat: md5 fb849b6a96a9d348e75cf502e21a326c (igual al fijado)
+referencia resultado_o2.mat: md5 1f7fdc4bed0f8cb6223204bbce42ba43 (igual al fijado)
+MATLAB: 26.2.0.3386108 (R2026b)
+== VARA MATLAB (criterio 1, §4.1): VERDE: 311 de 311 escenas iguales (166 con alerta; máscara distinta 0, VRP distinto 0); diferencia relativa máxima de VRP 1.49e-15 (tolerancia 1e-09)
+== mutaciones de la vía contra MATLAB, en las 311 escenas (ATRAPADA si alguna difiere; el conteo es el poder):
+   k1_y_minimos         ATRAPADA: 16 escenas distintas (máscara 16, VRP 0)
+   ocho_vecinos         ATRAPADA: 3 escenas distintas (máscara 3, VRP 0)
+   fondo_sin_halo       ATRAPADA: 166 escenas distintas (máscara 0, VRP 166)
+   recorte              ATRAPADA: 2 escenas distintas (máscara 0, VRP 2)
+   umbral_diurno        ATRAPADA: 3 escenas distintas (máscara 3, VRP 0)
+   sin_rechazo_glint    ATRAPADA: 5 escenas distintas (máscara 5, VRP 0)
+   sin_corte_200K       ATRAPADA: 13 escenas distintas (máscara 13, VRP 0)
+   relleno_qhull        ATRAPADA: 65 escenas distintas (máscara 0, VRP 65)
+   control_que_se_cae     CAÍDA, como debe (no se cuenta como atrapada)
+== escenas sintéticas contra el oráculo de Octave con el relleno de MATLAB: 16 (8 con más de 30 alertados, halo de 7; 8 con NaN en BOX); npix del oráculo [51, 50, 50, 53, 51, 51, 49, 48, 1, 1, 1, 1, 1, 1, 1, 1]
+   identidad (vía sin mutar): VERDE: 16 de 16 (máscara distinta 0, VRP distinto 0)
+   halo_7_a_9           ATRAPADA en las sintéticas: 8 distintas (máscara 0, VRP 8); en las 311 de MATLAB: 0 distintas
+   ignora_nan_de_box    ATRAPADA en las sintéticas: 1 distintas (máscara 1, VRP 0); en las 311 de MATLAB: 1 distintas
+== censo de las 311 por rama del .m: de día 13, glint bajo 12° 5, alguna celda M15 a 200 K o menos 13, NaN en BOX 0, más de 30 alertados 0
+== RESUMEN: TODO COMO SE ESPERA
