@@ -257,8 +257,13 @@ def cluster_vrp_per_pixel_with_bg(
     t_bk_bg_k: float,
     wooster_coeff: float,
     lambda_um: float,
+    lambda_grid: np.ndarray | None = None,
 ) -> list[float]:
     """VRP (MW) de CADA píxel del cluster bajo un único fondo `t_bk_bg_k`.
+
+    `lambda_grid` (S157, opcional): λ por píxel para la vuelta a radiancia del píxel (MODIS con B22 primaria
+    y B21 donde B22 satura, ver `process_modis.lambda_mir_por_pixel`). El fondo vuelve con `lambda_um`. Sin
+    `lambda_grid` todo usa `lambda_um`, como siempre.
 
     POR QUÉ EXISTE (S127): el fondo no es una propiedad del cluster sino de la
     medición entera — si se recomputa el total con la corona Eq.6 pero los consumidores
@@ -284,7 +289,8 @@ def cluster_vrp_per_pixel_with_bg(
         if np.isnan(bt):
             out.append(0.0)
             continue
-        l_pix = C1 / (lam ** 5 * (math.exp(C2 / (lam * float(bt))) - 1))
+        lp = lam if lambda_grid is None else float(lambda_grid[i, j])
+        l_pix = C1 / (lp ** 5 * (math.exp(C2 / (lp * float(bt))) - 1))
         delta = l_pix - l_bg
         if delta < 0.0:
             delta = 0.0

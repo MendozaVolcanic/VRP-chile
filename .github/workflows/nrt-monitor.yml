@@ -135,3 +135,66 @@ jobs:
               labels: ['nrt-alert', 'priority-high'],
             });
             console.log(`Issue #${created.data.number} creado.`);
+
+      # S169 (P3-09 de experiments/_s169/audit_patrones/f3/INFORME_F3.md, en loop/activo): la sombra «codigo MIROVA»
+      # (sombra-codigo-mirova.yml, cron diario 15:00 UTC) no la vigilaba nadie. Mismo mecanismo que el NRT: la
+      # decision es una funcion pura (decidirSombra en scripts/nrt_monitor_decision.js, probada en
+      # tests/test_monitor_sombra_s169.py) y aqui solo se abre, refresca o cierra un issue. Regla de AUSENCIA: desde el
+      # 2026-11-03 15:00 UTC, sin una corrida programada verde en 26 h se abre el issue; con una verde se cierra.
+      # `if: always()`: que el paso del NRT falle es justo cuando mas interesa no quedar ciego a la sombra.
+      - name: Vigilar la sombra codigo MIROVA
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          retries: 3
+          script: |
+            const { decidirSombra } = require(`${process.env.GITHUB_WORKSPACE}/scripts/nrt_monitor_decision.js`);
+            const { owner, repo } = context.repo;
+            let runs;
+            try {
+              runs = (await github.rest.actions.listWorkflowRuns({
+                owner, repo, workflow_id: 'sombra-codigo-mirova.yml', per_page: 30 })).data.workflow_runs || [];
+            } catch (e) {
+              // Sin dato no es verde: ni se alerta ni se cierra, y el job queda rojo.
+              core.setFailed(`no pude leer las corridas de la sombra: ${e.message}`);
+              return;
+            }
+            const d = decidirSombra(runs, Date.now());
+            console.log(`Sombra: ${d.accion} (${d.motivo})`);
+            // S169 ronda 2 (VV169-04): con la corrida de hoy todavia en cola o corriendo no se abre ni se cierra nada.
+            if (d.accion === 'inactivo' || d.accion === 'pendiente') return;
+
+            const TITLE = 'Sombra codigo MIROVA: sin corrida verde en 26 h';
+            const abierto = (await github.rest.issues.listForRepo({
+              owner, repo, state: 'open', labels: 'nrt-alert', per_page: 50 })).data.find(i => i.title === TITLE);
+            const recientes = runs.slice(0, 5).map(r =>
+              `- [${r.created_at}](${r.html_url}) [${r.event}]: ${r.status} ${r.conclusion || ''}`).join('\n');
+
+            if (d.accion === 'ok') {
+              if (abierto) {
+                await github.rest.issues.createComment({ owner, repo, issue_number: abierto.number,
+                  body: `## Recuperada\n\n${d.motivo}.\n\nCierro automaticamente.` });
+                await github.rest.issues.update({ owner, repo, issue_number: abierto.number,
+                  state: 'closed', state_reason: 'completed' });
+                console.log(`Issue #${abierto.number} cerrado.`);
+              }
+              return;
+            }
+
+            const cuerpo = '**Alerta automatica de nrt-monitor (sombra codigo MIROVA)**.\n\n' +
+              `${d.motivo}. Cada noche sin corrida verde es una noche que la sombra pre-registrada no mide ` +
+              '(o que mide con datos incompletos).\n\nUltimas corridas que entrego la API:\n\n' + recientes +
+              '\n\nVerificar:\n' +
+              '1. ¿El workflow esta desactivado o GitHub no entrego el evento `schedule`? (Actions, sombra-codigo-mirova.yml)\n' +
+              '2. ¿El paso «Revisar que salieron records de la via» dice FALLA? Su ultima linea dice que sensor, cobertura o record de K.\n' +
+              '3. El log y la cobertura de cada volcan estan en los artefactos `sombra-<volcan>-intento-<n>` del run.\n' +
+              '4. ¿El secreto `EARTHDATA_TOKEN` vencio? (A71: el par usuario y clave no sirve de respaldo)\n\n' +
+              '(El cuerpo se refresca en cada chequeo sin notificar.) Generado por `.github/workflows/nrt-monitor.yml`.';
+            if (abierto) {
+              await github.rest.issues.update({ owner, repo, issue_number: abierto.number, body: cuerpo });
+              console.log(`Issue #${abierto.number}: cuerpo actualizado, sin notificar.`);
+            } else {
+              const creado = await github.rest.issues.create({ owner, repo, title: TITLE, body: cuerpo,
+                labels: ['nrt-alert', 'priority-high'] });
+              console.log(`Issue #${creado.data.number} creado.`);
+            }

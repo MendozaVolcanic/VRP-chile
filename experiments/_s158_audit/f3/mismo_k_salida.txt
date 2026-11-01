@@ -1,0 +1,53 @@
+pasadas clase 1 con píxeles listados completos: 1914; con n_nuestro >= N_M: 733
+
+(1) a igual conteo k = N_M: ΣL_hot de nuestros k más calientes / ΣL_hot MIROVA, y exceso con el fondo de MIROVA
+                                  n  N_M    hot    exc
+b     vol                 tr                          
+MODIS Lascar              <=40   71  2.0  1.085  1.332
+                          >40     4  2.0  1.104  1.754
+      PlanchonPeteroa     <=40    7  1.0  1.076  1.329
+V375  Chaiten             <=40   44  1.0  1.004  1.024
+                          >40    12  1.0  0.992  0.963
+      Copahue             <=40   15  1.0  1.012  1.049
+                          >40     4  1.0  1.009  1.034
+      Isluga              <=40   64  2.0  1.109  1.280
+                          >40    46  1.0  1.026  1.100
+      Lascar              <=40   16  4.0  1.111  1.230
+                          >40    26  2.0  1.072  1.224
+      Lastarria           <=40  124  2.0  1.132  1.645
+                          >40    66  1.0  1.050  1.241
+      NevadosDeChillan    <=40    3  3.0  1.125  1.272
+                          >40     6  7.0  1.025  1.048
+      PlanchonPeteroa     <=40   45  1.0  1.041  1.136
+                          >40    20  1.0  1.022  1.107
+      PuyehueCordonCaulle <=40   97  4.0  1.034  1.101
+                          >40    48  2.0  1.030  1.119
+      Villarrica          <=40    8  1.0  1.042  1.249
+V750  NevadosDeChillan    <=40    4  5.5  1.045  1.110
+                          >40     3  4.0  0.958  0.899
+
+(2) N_M = 1 y nosotros >= 1: nuestro píxel más caliente / el único de MIROVA (L_hot), por sensor y tramo
+            count   mean    std    min    25%    50%    75%    max
+b     tr                                                          
+MODIS <=40   42.0  1.097  0.063  1.003  1.045  1.095  1.128  1.343
+      >40     1.0  1.044    NaN  1.044  1.044  1.044  1.044  1.044
+V375  <=40  180.0  1.129  0.255  0.720  1.000  1.036  1.127  2.578
+      >40   129.0  1.075  0.205  0.948  0.987  1.025  1.069  2.310
+
+(3) fondo: L_bk medio por píxel de MIROVA / nuestro fondo de anillo (5-25 km) y / nuestro kernel local, por volcán (mediana)
+                             n  n_local  bgM_ring  bgM_local
+b     vol                                                   
+MODIS Lascar               223        0     0.915        NaN
+      NevadosDeChillan      12        0     1.301        NaN
+      PlanchonPeteroa       10       10     0.753      1.093
+V375  Chaiten               70       70     0.986      1.034
+      Copahue               23        0     0.808        NaN
+      Isluga               355        0     0.824        NaN
+      Lascar               410        0     0.856        NaN
+      Lastarria            270      270     0.971      1.046
+      NevadosDeChillan      18        0     1.169        NaN
+      PlanchonPeteroa      173      173     0.743      1.039
+      PuyehueCordonCaulle  297      297     0.945      1.025
+      Villarrica            16       16     0.624      1.077
+V750  Lascar                17        0     0.867        NaN
+      NevadosDeChillan      20        0     1.139        NaN

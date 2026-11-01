@@ -1,0 +1,54 @@
+AVISO referencia: 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+AVISO referencia: 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+filas de la tabla VIIRS 750 en ventana: 2052  sin volcán mapeado: 0  tipos: {'RUTINA': np.int64(1993), 'ALERTA_TERMICA': np.int64(51), 'FALSO_POSITIVO': np.int64(8)}
+
+CONTROL positivo: nuestros publicados según el tipo de la fila pareada de MIROVA: {'RUTINA': 13, None: 14, 'ALERTA_TERMICA': 40}
+
+Detectados en la cumbre con TODOS sus píxeles en 0 MW por el fondo del anillo, NO publicados, por tipo MIROVA: {'ALERTA_TERMICA': 7, 'RUTINA': 15, None: 8}
+   Isluga 2026-09-20 06:00 VIIRS_SNPP_750 t_bg 266.59 BT píxeles inner [263.8] | MIROVA: ALERTA_TERMICA 0.16 MW 0.75 km
+   Isluga 2026-09-22 05:42 VIIRS_NOAA20_750 t_bg 266.66 BT píxeles inner [265.22] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Isluga 2026-09-23 05:24 VIIRS_NOAA20_750 t_bg 268.01 BT píxeles inner [265.41] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Isluga 2026-10-01 05:18 VIIRS_NOAA21_750 t_bg 265.77 BT píxeles inner [263.48] | MIROVA: None None MW None km
+   Isluga 2026-10-06 05:24 VIIRS_NOAA21_750 t_bg 267.49 BT píxeles inner [265.17] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Isluga 2026-10-06 06:00 VIIRS_SNPP_750 t_bg 267.11 BT píxeles inner [264.57] | MIROVA: None None MW None km
+   Isluga 2026-10-08 05:42 VIIRS_NOAA20_750 t_bg 266.66 BT píxeles inner [266.48] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Isluga 2026-10-09 05:24 VIIRS_NOAA20_750 t_bg 267.51 BT píxeles inner [264.85] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Isluga 2026-10-12 05:48 VIIRS_SNPP_750 t_bg 267.11 BT píxeles inner [265.87] | MIROVA: ALERTA_TERMICA 0.24 MW 0.75 km
+   Isluga 2026-10-13 05:48 VIIRS_NOAA20_750 t_bg 265.95 BT píxeles inner [263.89] | MIROVA: None None MW None km
+   Isluga 2026-10-14 05:30 VIIRS_NOAA20_750 t_bg 267.0 BT píxeles inner [264.66] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Lascar 2026-09-20 05:24 VIIRS_NOAA21_750 t_bg 265.17 BT píxeles inner [263.7] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Lascar 2026-09-20 06:00 VIIRS_SNPP_750 t_bg 264.76 BT píxeles inner [260.85] | MIROVA: ALERTA_TERMICA 0.19 MW 0.75 km
+   Lascar 2026-09-21 05:42 VIIRS_SNPP_750 t_bg 264.19 BT píxeles inner [262.37] | MIROVA: ALERTA_TERMICA 0.22 MW 0.75 km
+   Lascar 2026-09-22 05:24 VIIRS_SNPP_750 t_bg 263.8 BT píxeles inner [261.94] | MIROVA: ALERTA_TERMICA 0.24 MW 0.75 km
+   Lascar 2026-09-24 05:54 VIIRS_NOAA21_750 t_bg 266.74 BT píxeles inner [266.74] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Lascar 2026-09-25 06:12 VIIRS_SNPP_750 t_bg 265.87 BT píxeles inner [265.69] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Lascar 2026-10-01 05:18 VIIRS_NOAA21_750 t_bg 263.7 BT píxeles inner [263.04] | MIROVA: None None MW None km
+   Lascar 2026-10-01 05:54 VIIRS_SNPP_750 t_bg 262.99 BT píxeles inner [262.99] | MIROVA: None None MW None km
+   Lascar 2026-10-02 05:36 VIIRS_SNPP_750 t_bg 264.76 BT píxeles inner [262.16] | MIROVA: None None MW None km
+   Lascar 2026-10-02 06:00 VIIRS_NOAA20_750 t_bg 264.85 BT píxeles inner [264.47] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Lascar 2026-10-08 05:24 VIIRS_SNPP_750 t_bg 263.2 BT píxeles inner [261.73] | MIROVA: RUTINA 0.0 MW 0.0 km
+   Lascar 2026-10-08 05:42 VIIRS_NOAA20_750 t_bg 263.5 BT píxeles inner [263.29] | MIROVA: ALERTA_TERMICA 0.36 MW 0.75 km
+   Tupungatito 2026-10-17 05:24 VIIRS_NOAA21_750 t_bg 256.31 BT píxeles inner [251.19] | MIROVA: None None MW None km
+   Tupungatito 2026-10-18 05:42 VIIRS_SNPP_750 t_bg 255.54 BT píxeles inner [252.47] | MIROVA: RUTINA 0.0 MW 0.0 km
+   PlanchonPeteroa 2026-09-27 05:54 VIIRS_NOAA20_750 t_bg 268.98 BT píxeles inner [267.0] | MIROVA: RUTINA 0.0 MW 0.0 km
+   PlanchonPeteroa 2026-10-05 05:48 VIIRS_NOAA21_750 t_bg 264.34 BT píxeles inner [262.36] | MIROVA: RUTINA 0.0 MW 0.0 km
+   PlanchonPeteroa 2026-10-16 05:42 VIIRS_NOAA21_750 t_bg 267.3 BT píxeles inner [263.26] | MIROVA: RUTINA 0.0 MW 0.0 km
+   NevadosDeChillan 2026-10-01 04:42 VIIRS_NOAA20_750 t_bg 257.35 BT píxeles inner [255.15] | MIROVA: ALERTA_TERMICA 0.09 MW 2.37 km
+   PuyehueCordonCaulle 2026-10-16 06:18 VIIRS_SNPP_750 t_bg 275.94 BT píxeles inner [275.7] | MIROVA: None None MW None km
+
+Por volcán:
+   Isluga {'ALERTA_TERMICA': 2, 'MIROVA_alerta_y_nosotros_no': 3, 'MIROVA_alerta_y_nosotros_no__con_px_inner_todo_0': 2, 'MIROVA_alerta_y_nosotros_no__sin_px_inner': 1, 'MIROVA_alerta': 3, 'RUTINA': 6, None: 3}
+   Lascar {'RUTINA': 5, 'ALERTA_TERMICA': 4, 'MIROVA_alerta_y_nosotros_no': 6, 'MIROVA_alerta_y_nosotros_no__con_px_inner_todo_0': 4, 'MIROVA_alerta_y_nosotros_no__sin_px_inner': 2, 'MIROVA_alerta': 9, None: 3}
+   Tupungatito {None: 1, 'RUTINA': 1}
+   PlanchonPeteroa {'RUTINA': 3}
+   NevadosDeChillan {'MIROVA_alerta_y_nosotros_no': 6, 'MIROVA_alerta_y_nosotros_no__con_px_inner_todo_0': 1, 'MIROVA_alerta_y_nosotros_no__sin_px_inner': 5, 'MIROVA_alerta': 38, 'ALERTA_TERMICA': 1}
+   Villarrica {'MIROVA_alerta': 1}
+   PuyehueCordonCaulle {'MIROVA_alerta': 7, 'MIROVA_alerta_y_nosotros_no': 4, 'MIROVA_alerta_y_nosotros_no__con_px_inner_todo_0': 0, 'MIROVA_alerta_y_nosotros_no__sin_px_inner': 4, None: 1}
+   Chaiten {'MIROVA_alerta': 1}
+
+Razón publicado / VRP MIROVA en pasadas ALERTA_TERMICA de VIIRS 750 que ambos publican: n=40, percentiles 10/50/90 = [0.122 0.411 0.958]
+   Lascar               n=  3 mediana 0.275
+   NevadosDeChillan     n= 32 mediana 0.416
+   Villarrica           n=  1 mediana 0.504
+   PuyehueCordonCaulle  n=  3 mediana 0.255
+   Chaiten              n=  1 mediana 1.150

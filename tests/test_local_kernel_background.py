@@ -1,3 +1,8 @@
+# ⚠️ S158 R2 (docs/AUDIT_S158_R2.md, marca A113; experiments/_s158_audit_r2/a113/INFORME.md n 5): «Coppola 2024 L1129 literal» no se sostiene. La
+# frase, renderizada (978-3-031-86841-2.pdf, p. impresa 337), es condicional y es del modelo de dos componentes,
+# no del fondo del VRP. En VIIRS 750 MIROVA aparta los vecinos adyacentes (dilatacion 3, 5 o 7) e interpola el
+# fondo con fillmissing2 (MIROVA_VIIRS750_VRP.m l. 63 a 81). Para MODIS el respaldo posible es Coppola 2016a p. 8
+# («arithmetic mean of all the pixels surrounding the active one»). Las aserciones no cambian.
 """Tests TDD para local kernel 3x3 background variant (S57).
 
 Implementa Coppola 2024 chapter L1129 literal: "T_bk is retrieved from the

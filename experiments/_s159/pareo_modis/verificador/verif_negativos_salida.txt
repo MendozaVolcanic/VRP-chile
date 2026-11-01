@@ -1,0 +1,49 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-01-10 a 2026-10-21 pisa 13 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-01-16 (tabla, todos): antes los tipos de registro eran otros (17 filas RUTINA con VRP > 0; FALSO_POSITIVO no existia)
+   - 2026-02-14 (tabla, Tupungatito): antes Tupungatito no tiene ninguna fila
+   - 2026-02-23 (tabla, Tupungatito): antes su limite de alerta era 5 km y no 7
+   - 2026-03-01 (tabla, todos): antes, sin contar a Tupungatito, la cobertura nocturna de la tabla en enero (desde el 11) era 99,0 % en MODIS, 98,6 a 99,5 % en VIIRS 375 y 95,2 a 95,7 % en VIIRS 750, y en febrero 98,2 a 99,6 %; desde marzo 99 a 100 %
+   - 2026-03-01 (ocr, VIIRS): antes el OCR corrio con siete versiones y doce metodos de validacion distintos; capturo 0,26 a 0,29 alertas por alerta de la tabla contra 0,50 a 0,89 despues, y no hubo reproceso retroactivo
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+control: pub total 3783 de 33119
+etiquetas por sensor: {'MODIS': {'sin_info': 487, 'neg_limpio': 6156, 'pos': 112, 'far_ref': 11}, 'VIIRS375': {'sin_info': 6815, 'pos': 1719, 'neg_limpio': 4260, 'far_ref': 411, 'sin_geometria': 25}, 'VIIRS750': {'sin_info': 5911, 'pos': 365, 'neg_limpio': 6819, 'far_ref': 21, 'sin_geometria': 7}}
+  MODIS neg_limpio por record 6156, publica 48
+  VIIRS375 neg_limpio por record 4260, publica 114
+  VIIRS750 neg_limpio por record 6819, publica 60
+largo de cadenas: Counter({1: 31573, 2: 773})
+MODIS: enteras 48/6022 = 0.0080; partidas (al menos uno publica) 2/128 = 0.0156; Fisher p = 0.27936; por record del miembro sin fila 2/128; fm<0,5 en 54 de 128; {'publica el otro': 2, 'solo el otro, fm<0.5': 2, 'publica el de anillo mayor': 2}
+VIIRS375: enteras 108/4113 = 0.0263; partidas (al menos uno publica) 13/147 = 0.0884; Fisher p = 0.00023; por record del miembro sin fila 8/147; fm<0,5 en 84 de 147; {'publica el de MIROVA': 6, 'publica el de anillo mayor': 12, 'publica el otro': 8, 'solo el otro, fm<0.5': 7, 'publica el de anillo menor (o ambos)': 1}
+VIIRS750: enteras 60/6650 = 0.0090; partidas (al menos uno publica) 4/169 = 0.0237; Fisher p = 0.07358; por record del miembro sin fila 4/169; fm<0,5 en 97 de 169; {'publica el otro': 4, 'solo el otro, fm<0.5': 4, 'publica el de anillo mayor': 4}
+afirmacion 2, MODIS: negativos limpios con el granulo de MIROVA bajo la mitad del anillo 54 de 6156 = 0.0088
+afirmacion 2, VIIRS375: negativos limpios con el granulo de MIROVA bajo la mitad del anillo 84 de 4260 = 0.0197
+afirmacion 2, VIIRS750: negativos limpios con el granulo de MIROVA bajo la mitad del anillo 97 de 6819 = 0.0142
+MODIS: enteras 48/6022 = 0.0080; partidas (al menos uno publica) 2/128 = 0.0156; Fisher p = 0.27936; por record del miembro sin fila 2/128; fm<0,5 en 54 de 128; {'publica el otro': 2, 'solo el otro, fm<0.5': 2, 'publica el de anillo mayor': 2}
+VIIRS375: enteras 108/4113 = 0.0263; partidas (al menos uno publica) 13/147 = 0.0884; Fisher p = 0.00023; por record del miembro sin fila 8/147; fm<0,5 en 84 de 147; {'publica el de MIROVA': 6, 'publica el de anillo mayor': 12, 'publica el otro': 8, 'solo el otro, fm<0.5': 7, 'publica el de anillo menor (o ambos)': 1}
+VIIRS750: enteras 60/6650 = 0.0090; partidas (al menos uno publica) 4/169 = 0.0237; Fisher p = 0.07358; por record del miembro sin fila 4/169; fm<0,5 en 97 de 169; {'publica el otro': 4, 'solo el otro, fm<0.5': 4, 'publica el de anillo mayor': 4}
+afirmacion 2, MODIS: negativos limpios con el granulo de MIROVA bajo la mitad del anillo 54 de 6156 = 0.0088
+afirmacion 2, VIIRS375: negativos limpios con el granulo de MIROVA bajo la mitad del anillo 84 de 4260 = 0.0197
+afirmacion 2, VIIRS750: negativos limpios con el granulo de MIROVA bajo la mitad del anillo 97 de 6819 = 0.0142
+  V375 partida publica: Lastarria VIIRS_NOAA20 [('09-11 05:48', 'sin_info', 0, 0.27), ('09-11 05:54', 'neg_limpio', 1, 0.73)]
+  V375 partida publica: Lastarria VIIRS_NOAA20 [('09-22 05:42', 'sin_info', 1, 0.52), ('09-22 05:48', 'neg_limpio', 0, 0.48)]
+  V375 partida publica: Isluga VIIRS_NOAA20 [('02-04 05:48', 'sin_info', 1, 1.0), ('02-04 05:54', 'neg_limpio', 0, 0.0)]
+  V375 partida publica: Isluga VIIRS_NOAA20 [('04-26 05:30', 'sin_info', 1, 0.93), ('04-26 05:36', 'neg_limpio', 0, 0.07)]
+  V375 partida publica: Isluga VIIRS_NOAA20 [('05-12 05:30', 'sin_info', 1, 0.93), ('05-12 05:36', 'neg_limpio', 0, 0.07)]
+  V375 partida publica: Villarrica VIIRS_NOAA20 [('02-20 05:54', 'sin_info', 1, 0.99), ('02-20 06:00', 'neg_limpio', 0, 0.01)]
+  V375 partida publica: Villarrica VIIRS_NOAA20 [('08-09 04:30', 'sin_info', 0, 0.05), ('08-09 04:36', 'neg_limpio', 1, 0.95)]
+  V375 partida publica: PuyehueCordonCaulle VIIRS_NOAA20 [('03-14 05:42', 'sin_info', 1, 0.51), ('03-14 05:48', 'neg_limpio', 1, 0.49)]
+  V375 partida publica: PuyehueCordonCaulle VIIRS_NOAA20 [('04-26 05:36', 'sin_info', 1, 0.78), ('04-26 05:42', 'neg_limpio', 0, 0.22)]
+  V375 partida publica: PuyehueCordonCaulle VIIRS_NOAA20 [('10-12 06:12', 'sin_info', 1, 1.0), ('10-12 06:18', 'neg_limpio', 0, 0.0)]
+  V375 partida publica: Chaiten VIIRS_NOAA21 [('04-17 05:54', 'sin_info', 0, 0.0), ('04-17 06:00', 'neg_limpio', 1, 1.0)]
+  V375 partida publica: Chaiten VIIRS_NOAA21 [('08-12 06:00', 'sin_info', 0, 0.43), ('08-12 06:06', 'neg_limpio', 1, 0.57)]
+  V375 partida publica: Chaiten VIIRS_NOAA20 [('05-02 05:24', 'sin_info', 0, 0.0), ('05-02 05:30', 'neg_limpio', 1, 1.0)]
+  Fisher por record, miembro neg_limpio: 6/147 contra 108/4113: p = 0.2890
+  Fisher por record, miembro sin_info: 8/147 contra 108/4113: p = 0.0619
+  esperado con dos chances a la tasa de enteras: 7.6 de 147

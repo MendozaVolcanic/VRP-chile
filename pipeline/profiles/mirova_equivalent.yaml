@@ -132,6 +132,12 @@ thresholds:
   # cap=7K + exclude_zones que usábamos.
   n_sigma_mir_summit: 5.0
   n_sigma_mir_scene: 10.0
+  # S165, geolocalizacion MxD03 de MODIS (plan docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md). Los tres
+  # APAGADOS: con false el procesador MODIS es bit a bit el del tag pre-s165-mxd03-modis. Encender cualquiera
+  # exige el si de Nicolas (A45). Van en `thresholds:`, que es donde los lee pipeline/profile.py (S124, A89).
+  enable_modis_geo_mxd03: false          # posicion por pixel del MxD03 en vez de _interp_geo (A61 H2, MOD-B)
+  enable_modis_crater_sin_dato: false    # crater sin posicion en el granulo -> sin record, no negativo (A61 H1, VA61-01)
+  enable_modis_dist_desde_crater: false  # dist_km del pixel anomalo y etiqueta summit/far desde el crater (A61 H5)
 
 # --- Background annulus geometry (km) ---
 background:
@@ -576,6 +582,12 @@ enable_bt_sat_secondary_guard: true
 # publica 39 de 39 alertas protegidas MODIS de Lascar en V2 (C0: 6) y baja la publicacion en negativos limpios de
 # 10,8 a 0,9 %. ON. Va junto con la conectiva `max`: con la banda 21, `max` apaga el detector MODIS (S147, S150).
 enable_modis_b22_primary: true
+
+# S157 - lambda por banda en la vuelta a radiancia de MODIS (pipeline/process_modis.py, lambda_mir_por_pixel).
+# Con B22 primaria la temperatura sale de B22 (3,959 um) y volvia a radiancia con la lambda de B21 (3,929 um):
+# la magnitud MODIS queda 1,053 a 1,075 veces mas baja que la radiancia medida (experiments/_s157_lambda_b22/).
+# OFF hasta que Nicolas decida (A45); con OFF el procesador es bit a bit el de antes.
+enable_modis_mir_lambda_por_banda: false
 
 # S132 - distance_class de MODIS desde el primary_cluster (decision #4). OFF: espera la
 # medicion sobre los records persistidos + el OK de Nicolas (S113 cerro esta cara del bug

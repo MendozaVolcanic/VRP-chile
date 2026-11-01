@@ -1,0 +1,52 @@
+filas: 2882 -> C:\vrp-trabajo\s159-pruebas\experiments\_s160_audit\f2\censo_bruto.csv
+  asignacion           1155
+  comparacion          353
+  volcan_yaml          268
+  return               238
+  dict_valor           152
+  recorte:round        103
+  js_comparacion       93
+  kwarg                89
+  default_arg          76
+  asignacion_aug       67
+  perfil_efectivo      66
+  js_respaldo          63
+  js_asignacion        57
+  get_respaldo         35
+  recorte:max          25
+  arg_posicional       22
+  recorte:min          9
+  js_ternario          8
+  recorte:clip         2
+  recorte:maximum      1
+== Control positivo (plan S160 §3 F2) ==
+  OK  pipeline/process_modis.py WOOSTER_COEFF = 18.9  -> pipeline/process_modis.py:87
+  OK  pipeline/process_viirs.py WOOSTER_COEFF = 18.0  -> pipeline/process_viirs.py:77
+  OK  pipeline/process_viirs_mod.py WOOSTER_COEFF = 19.7  -> pipeline/process_viirs_mod.py:66
+  OK  pipeline/profile.py DNTI_CONTEXTUAL_C1_SUMMIT = 0.003  -> pipeline/profile.py:104
+  OK  pipeline/profile.py DNTI_CONTEXTUAL_C1_SCENE = 0.01  -> pipeline/profile.py:105
+  OK  pipeline/profile.py N_SIGMA_MIR_SUMMIT = 5.0  -> pipeline/profile.py:194
+  OK  pipeline/profile.py N_SIGMA_MIR_SCENE = 10.0  -> pipeline/profile.py:195
+  OK  pipeline/profile.py N_SIGMA_MIR_DAY = 15.0  -> pipeline/profile.py:203
+  OK  pipeline/profile.py PATH_D_ONLY_CAP_MW = 5.0  -> pipeline/profile.py:824
+  OK  scripts/clase_mirova.py UMBRAL_PROTEGIDA_MW = 1.0  -> scripts/clase_mirova.py:46
+  OK  scripts/clase_mirova.py (sin nombre) = 0.05  -> scripts/clase_mirova.py:106
+  OK  scripts/banco_paridad.py TOL_S = 120  -> scripts/banco_paridad.py:76
+  OK  volcanoes.yaml PuyehueCordonCaulle.inner_radius_km = 20  -> volcanoes.yaml:18
+  OK  volcanoes.yaml Lastarria.inner_radius_km = 3  -> volcanoes.yaml:638
+== Control negativo ==
+  archivo sin constantes -> 0 filas (esperado 0)
+== Conteo por archivo: AST contra grep independiente (literales numericos fuera de comentarios) ==
+  pipeline/process_viirs.py                     AST   219  grep   275  AST/grep 0.80
+  pipeline/process_viirs_mod.py                 AST   164  grep   189  AST/grep 0.87
+  pipeline/process_modis.py                     AST   157  grep   207  AST/grep 0.76
+  scripts/auto_audit_weekly.py                  AST   113  grep   235  AST/grep 0.48
+  scripts/libro_de_cuentas.py                   AST    96  grep   144  AST/grep 0.67
+  scripts/banco_paridad.py                      AST    93  grep   173  AST/grep 0.54
+  scripts/descomponer_magnitud_osf.py           AST    84  grep   135  AST/grep 0.62
+  pipeline/fetch.py                             AST    77  grep   215  AST/grep 0.36
+  pipeline/store.py                             AST    66  grep   148  AST/grep 0.45
+  pipeline/test1_integrated.py                  AST    65  grep   127  AST/grep 0.51
+  scripts/vigilancia_sombra.py                  AST    62  grep   163  AST/grep 0.38
+  scripts/paper_numbers.py                      AST    58  grep    85  AST/grep 0.68
+== fallas: 0

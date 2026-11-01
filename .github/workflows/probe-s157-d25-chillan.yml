@@ -1,0 +1,78 @@
+name: "Probe S157 1.29, L1B de Nevados de Chillan 2026-10-18: fondo D25 y seleccion (solo lectura)"
+
+# Tarea 1.29 (pre-registro de D25 sobre K). Mide en 10 granulos de Chillan del 2026-10-18 (8 VIIRS, 2 MODIS) lo que
+# los records no guardan: el fondo real de los vecinos del pixel caliente (D25 medido, no sensibilidad) y por que los
+# vecinos tibios del cumulo no se alertaron (seleccion). Diseno, controles y predicciones escritos ANTES de correr:
+# experiments/_s157_prereg_d25/probe_l1b/README.md y probe_chillan.py.
+# Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# Se dispara con un push a la rama s157-probe-d25-chillan (workflow_dispatch solo existe desde main, S73) y queda
+# en el repo para que el resultado sea reproducible.
+# A43: "on" entre comillas. S141: pipefail con tee y el script sale 2 si falta una pasada.
+# A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio.
+# Cuota: 2 jobs en total, grupo de concurrencia propio (el NRT y los reprocesos de Chillan usan los runners).
+# A15: un par V375 pesa ~320 MB y uno V750 ~180 MB (probe de saturacion S151); 4 brazos por par, ~3 min por par
+# estimados -> VIIRS ~30 min, MODIS ~10 min. timeout 60 y 40.
+"on":
+  push:
+    branches: ["s157-probe-d25-chillan"]
+  workflow_dispatch:
+
+concurrency:
+  group: probe-s157-d25-chillan
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04  # pyhdf probado en 24.04 (ver nrt.yml)
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        familia: [VIIRS, MODIS]
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Prueba sintetica del instrumento
+        env:
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s157_prereg_d25/probe_l1b/prueba_probe.py ${{ matrix.familia == 'MODIS' && '--modis' || '' }} \
+            2>&1 | tee out/prueba_${{ matrix.familia }}.txt
+      - name: Probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          python experiments/_s157_prereg_d25/probe_l1b/probe_chillan.py --familia ${{ matrix.familia }} --out out \
+            2>&1 | tee out/probe_${{ matrix.familia }}.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s157-probe-d25-chillan-${{ matrix.familia }}
+          path: |
+            out/*.json
+            out/*.txt
+            out/*.log
+          retention-days: 30
+          if-no-files-found: error

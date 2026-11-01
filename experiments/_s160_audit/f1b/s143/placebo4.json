@@ -1,0 +1,4383 @@
+{
+ "meta": {
+  "ventana": [
+   "2026-06-01",
+   "2026-08-31"
+  ],
+  "brazos": [
+   "_s142_ab_control",
+   "_pl_id",
+   "_pl_x1.10",
+   "_pl_x1.2",
+   "_pl_desplazada"
+  ],
+  "control": "_s142_ab_control",
+  "volcanes": [
+   "Isluga",
+   "Lascar",
+   "Lastarria",
+   "PlanchonPeteroa",
+   "PuyehueCordonCaulle",
+   "Tupungatito",
+   "Chaiten",
+   "Villarrica",
+   "NevadosDeChillan"
+  ],
+  "volcanes_evaluados": [
+   "Isluga",
+   "Lascar",
+   "Lastarria",
+   "PlanchonPeteroa",
+   "PuyehueCordonCaulle",
+   "Tupungatito",
+   "Chaiten",
+   "Villarrica",
+   "NevadosDeChillan"
+  ],
+  "estratos": {
+   "Isluga": "focal",
+   "Lascar": "focal",
+   "Lastarria": "focal",
+   "PlanchonPeteroa": "focal",
+   "PuyehueCordonCaulle": "focal",
+   "Tupungatito": "nevado",
+   "Chaiten": "nevado",
+   "Villarrica": "nevado",
+   "NevadosDeChillan": "nevado"
+  },
+  "estratos_fuente": "scripts/build_c2ab_windows.py:41-42",
+  "radios": {
+   "Isluga": {
+    "inner_dashboard": 5.0,
+    "inner_yaml": 5,
+    "mirova_center": [
+     -19.15212,
+     -68.83269
+    ]
+   },
+   "Lascar": {
+    "inner_dashboard": 5.0,
+    "inner_yaml": 5,
+    "mirova_center": [
+     -23.37041,
+     -67.73102
+    ]
+   },
+   "Lastarria": {
+    "inner_dashboard": 3.0,
+    "inner_yaml": 3,
+    "mirova_center": [
+     -25.16837,
+     -68.50807
+    ]
+   },
+   "PlanchonPeteroa": {
+    "inner_dashboard": 3.0,
+    "inner_yaml": 3,
+    "mirova_center": [
+     -35.2232,
+     -70.5695
+    ]
+   },
+   "PuyehueCordonCaulle": {
+    "inner_dashboard": 20.0,
+    "inner_yaml": 20,
+    "mirova_center": [
+     -40.5903,
+     -72.1187
+    ]
+   },
+   "Tupungatito": {
+    "inner_dashboard": 7.0,
+    "inner_yaml": 7,
+    "mirova_center": [
+     -33.42694,
+     -69.80039
+    ]
+   },
+   "Chaiten": {
+    "inner_dashboard": 5.0,
+    "inner_yaml": 5,
+    "mirova_center": [
+     -42.83496,
+     -72.65005
+    ]
+   },
+   "Villarrica": {
+    "inner_dashboard": 5.0,
+    "inner_yaml": 5,
+    "mirova_center": [
+     -39.42177,
+     -71.93391
+    ]
+   },
+   "NevadosDeChillan": {
+    "inner_dashboard": 5.0,
+    "inner_yaml": 5,
+    "mirova_center": [
+     -36.86483,
+     -71.38068
+    ]
+   }
+  },
+  "dir_artefactos": "D:/vrp-trabajo/temporales/s160_audit/f1b/s143/s143_ab",
+  "prefijo": "s143ab-",
+  "procedencia": {
+   "evaluador": {
+    "archivo": "experiments/_s143_evaluador/evaluar.py",
+    "commit": "a29d6e028653fda668eabd8fe6abf6345e6f010f",
+    "modificado_sin_commit": false,
+    "blob": "1af058db80d77580812a163f1e60f1ba4fa859f6"
+   },
+   "banco_paridad": {
+    "archivo": "scripts/banco_paridad.py",
+    "commit": "9ac09b163ddd17d1a3e93bf44c5f86dc0de45a4c",
+    "modificado_sin_commit": false,
+    "blob": "384c1369dc5dc13ae2ad35169d19963c92da3a0c"
+   },
+   "sha_index_html": "85a0bd8d4f54673ac02fe57446960039c2334bf2",
+   "referencia": {
+    "fuente": "archivos locales",
+    "cons": "D:\\vrp-trabajo\\temporales\\s160_audit\\main\\latest_consolidado.csv",
+    "ocr": "D:\\vrp-trabajo\\temporales\\s160_audit\\main\\data\\mirova_reference\\mirova_v1_snapshot\\registro_vrp_ocr.csv",
+    "blob_cons": "4029c4b3f3b6cefeda8e7e40ced582df1b6b9b08",
+    "blob_ocr": "13b79ea9856c0568c1d31f03c6d156ed8ccdcc35",
+    "respaldo_20260408_blob": "3bb77309a1f5c9ec061f908436cb2bdd2d3ea303"
+   }
+  },
+  "parametros": {
+   "cota_km": 0.55,
+   "tol_pareo_s": 120,
+   "B": 1000,
+   "semilla": 143,
+   "n_min_magnitud": 30,
+   "tol_magnitud": 0.05
+  },
+  "campo_posicion_cota": "final_hotspot_si_test1",
+  "campos_posicion_disponibles": {
+   "centroide": "primary_cluster.centroid (semántica de S135)",
+   "final_hotspot_si_test1": "final_hotspot cuando final_hotspot_source es test1_roi (posición oficial del dashboard para esos records, S106/A84); el centroide en el resto"
+  },
+  "parametros_congelados": {
+   "archivo": "experiments/_s143_evaluador/parametros.json",
+   "commit": "3ee3d15beb33c290bac4e6ae7c6a732fe5ac8263",
+   "modificado_sin_commit": false,
+   "blob": "1093f01c78bf41e26bc7e2df3fcf6d5928c14c2c",
+   "contenido": {
+    "_por_que": "Los parametros de la corrida del A/B D22/D25 se congelan aca, versionados, para que no puedan elegirse despues de ver datos (H1 del verificador externo del PR #686). El evaluador los lee por defecto, la salida JSON los copia enteros con el sha de este archivo, y tests/test_evaluador_ab_s143.py comprueba uno por uno que sigan siendo estos. Cambiar cualquiera es un cambio de pre-registro: se hace antes de correr, con su razon escrita, o el brazo se juzga en una ventana nueva sin mirar (criterio 4 del pre-registro).",
+    "_fuente": "docs/PREREGISTRO_AB_D22_D25_S143.md secciones 3, 4 y 5; cota y semilla heredadas de docs/PREREGISTRO_AB_D1_D2_S135.md",
+    "ventana": [
+     "2026-06-01",
+     "2026-08-31"
+    ],
+    "volcanes": [
+     "Isluga",
+     "Lascar",
+     "Lastarria",
+     "PlanchonPeteroa",
+     "PuyehueCordonCaulle",
+     "Tupungatito",
+     "Chaiten",
+     "Villarrica",
+     "NevadosDeChillan"
+    ],
+    "brazos": [
+     "_s142_ab_control",
+     "_s142_ab_literal",
+     "_s142_ab_lit_sin_fondo",
+     "_s142_ab_lit_con_compuerta",
+     "_s142_ab_lit_sp_suelto",
+     "_s142_ab_lit_keep_peak"
+    ],
+    "control": "_s142_ab_control",
+    "prefijo": "s143ab-",
+    "cota_km": 0.55,
+    "B": 10000,
+    "semilla": 143,
+    "n_min_magnitud": 30,
+    "tol_magnitud": 0.05,
+    "campo_posicion_cota": "final_hotspot_si_test1",
+    "_unidades": {
+     "campo_posicion_cota": "con que posicion del record se mide la cota de mismo objeto: 'centroide' (primary_cluster, la semantica de S135) o 'final_hotspot_si_test1' (final_hotspot cuando final_hotspot_source es test1_roi, la posicion oficial del dashboard para esos records; el centroide en el resto). DECIDIDO por Nicolas el 2026-09-18: manda 'final_hotspot_si_test1', porque es la posicion que el propio dashboard trata como oficial y el centroide de un record del Test 1 es el footprint de la integral, arrastrado por el gradiente topografico del nevado (A69, S106/A84). El evaluador calcula y reporta LAS DOS; esta clave dice cual decide",
+     "cota_km": "presupuesto de la cota de mismo objeto (A93): semidiagonal de la celda de 375 m mas el residuo por sensor del centro de grilla",
+     "B": "replicas del bootstrap percentil del criterio 2",
+     "semilla": "semilla del bootstrap",
+     "n_min_magnitud": "pasadas pos del CONTROL a partir de las cuales un volcan entra al chequeo del criterio 3",
+     "tol_magnitud": "cuanto puede empeorar por volcan la distancia a 1 antes de contar como que empeora"
+    }
+   }
+  },
+  "parametros_efectivos": {
+   "ventana": [
+    "2026-06-01",
+    "2026-08-31"
+   ],
+   "volcanes": [
+    "Isluga",
+    "Lascar",
+    "Lastarria",
+    "PlanchonPeteroa",
+    "PuyehueCordonCaulle",
+    "Tupungatito",
+    "Chaiten",
+    "Villarrica",
+    "NevadosDeChillan"
+   ],
+   "brazos": [
+    "_pl_id",
+    "_pl_x1.10",
+    "_pl_x1.2",
+    "_pl_desplazada"
+   ],
+   "control": "_s142_ab_control",
+   "prefijo": "s143ab-",
+   "cota_km": 0.55,
+   "B": 1000,
+   "semilla": 143,
+   "n_min_magnitud": 30,
+   "tol_magnitud": 0.05,
+   "campo_posicion_cota": "final_hotspot_si_test1"
+  },
+  "parametros_igual_a_los_congelados": false,
+  "referencia_fijada_por_sha": false,
+  "n_filas_referencia_nocturnas": 7919,
+  "generado_utc": "2026-10-22T04:13:04+00:00",
+  "fusion": {
+   "tramos": [
+    [
+     "C:/Users/nmend/AppData/Local/Temp/claude/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/0a44fda0-e659-4f4d-80af-9f8577f14092/scratchpad/ab_t1_final",
+     ""
+    ],
+    [
+     "C:/Users/nmend/AppData/Local/Temp/claude/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/0a44fda0-e659-4f4d-80af-9f8577f14092/scratchpad/ab_t2",
+     ""
+    ]
+   ],
+   "conflictos": 0,
+   "faltantes": 0
+  }
+ },
+ "cobertura": {
+  "detalle": {
+   "Isluga": {
+    "_pl_id": {
+     "n_control": 318,
+     "n_brazo": 318,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.10": {
+     "n_control": 318,
+     "n_brazo": 318,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.2": {
+     "n_control": 318,
+     "n_brazo": 318,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_desplazada": {
+     "n_control": 318,
+     "n_brazo": 318,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "Lascar": {
+    "_pl_id": {
+     "n_control": 332,
+     "n_brazo": 332,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.10": {
+     "n_control": 332,
+     "n_brazo": 332,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.2": {
+     "n_control": 332,
+     "n_brazo": 332,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_desplazada": {
+     "n_control": 332,
+     "n_brazo": 332,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "Lastarria": {
+    "_pl_id": {
+     "n_control": 333,
+     "n_brazo": 333,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.10": {
+     "n_control": 333,
+     "n_brazo": 333,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.2": {
+     "n_control": 333,
+     "n_brazo": 333,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_desplazada": {
+     "n_control": 333,
+     "n_brazo": 333,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "PlanchonPeteroa": {
+    "_pl_id": {
+     "n_control": 378,
+     "n_brazo": 378,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.10": {
+     "n_control": 378,
+     "n_brazo": 378,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.2": {
+     "n_control": 378,
+     "n_brazo": 378,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_desplazada": {
+     "n_control": 378,
+     "n_brazo": 378,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "PuyehueCordonCaulle": {
+    "_pl_id": {
+     "n_control": 418,
+     "n_brazo": 418,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.10": {
+     "n_control": 418,
+     "n_brazo": 418,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.2": {
+     "n_control": 418,
+     "n_brazo": 418,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_desplazada": {
+     "n_control": 418,
+     "n_brazo": 418,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "Tupungatito": {
+    "_pl_id": {
+     "n_control": 378,
+     "n_brazo": 378,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.10": {
+     "n_control": 378,
+     "n_brazo": 378,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.2": {
+     "n_control": 378,
+     "n_brazo": 378,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_desplazada": {
+     "n_control": 378,
+     "n_brazo": 378,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "Chaiten": {
+    "_pl_id": {
+     "n_control": 435,
+     "n_brazo": 435,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.10": {
+     "n_control": 435,
+     "n_brazo": 435,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.2": {
+     "n_control": 435,
+     "n_brazo": 435,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_desplazada": {
+     "n_control": 435,
+     "n_brazo": 435,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "Villarrica": {
+    "_pl_id": {
+     "n_control": 410,
+     "n_brazo": 410,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.10": {
+     "n_control": 410,
+     "n_brazo": 410,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.2": {
+     "n_control": 410,
+     "n_brazo": 410,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_desplazada": {
+     "n_control": 410,
+     "n_brazo": 410,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   },
+   "NevadosDeChillan": {
+    "_pl_id": {
+     "n_control": 398,
+     "n_brazo": 398,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.10": {
+     "n_control": 398,
+     "n_brazo": 398,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_x1.2": {
+     "n_control": 398,
+     "n_brazo": 398,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    },
+    "_pl_desplazada": {
+     "n_control": 398,
+     "n_brazo": 398,
+     "solo_control": 0,
+     "solo_brazo": 0,
+     "product_version_distinto": 0
+    }
+   }
+  },
+  "excluidos": {},
+  "n_pasadas_v375_nocturnas": {
+   "_s142_ab_control": {
+    "Isluga": 318,
+    "Lascar": 332,
+    "Lastarria": 333,
+    "PlanchonPeteroa": 378,
+    "PuyehueCordonCaulle": 418,
+    "Tupungatito": 378,
+    "Chaiten": 435,
+    "Villarrica": 410,
+    "NevadosDeChillan": 398
+   },
+   "_pl_id": {
+    "Isluga": 318,
+    "Lascar": 332,
+    "Lastarria": 333,
+    "PlanchonPeteroa": 378,
+    "PuyehueCordonCaulle": 418,
+    "Tupungatito": 378,
+    "Chaiten": 435,
+    "Villarrica": 410,
+    "NevadosDeChillan": 398
+   },
+   "_pl_x1.10": {
+    "Isluga": 318,
+    "Lascar": 332,
+    "Lastarria": 333,
+    "PlanchonPeteroa": 378,
+    "PuyehueCordonCaulle": 418,
+    "Tupungatito": 378,
+    "Chaiten": 435,
+    "Villarrica": 410,
+    "NevadosDeChillan": 398
+   },
+   "_pl_x1.2": {
+    "Isluga": 318,
+    "Lascar": 332,
+    "Lastarria": 333,
+    "PlanchonPeteroa": 378,
+    "PuyehueCordonCaulle": 418,
+    "Tupungatito": 378,
+    "Chaiten": 435,
+    "Villarrica": 410,
+    "NevadosDeChillan": 398
+   },
+   "_pl_desplazada": {
+    "Isluga": 318,
+    "Lascar": 332,
+    "Lastarria": 333,
+    "PlanchonPeteroa": 378,
+    "PuyehueCordonCaulle": 418,
+    "Tupungatito": 378,
+    "Chaiten": 435,
+    "Villarrica": 410,
+    "NevadosDeChillan": 398
+   }
+  }
+ },
+ "noches_confirmadas": {
+  "total": 272,
+  "por_volcan": {
+   "Chaiten": 13,
+   "Isluga": 73,
+   "Lascar": 50,
+   "Lastarria": 42,
+   "NevadosDeChillan": 3,
+   "PlanchonPeteroa": 24,
+   "PuyehueCordonCaulle": 31,
+   "Tupungatito": 27,
+   "Villarrica": 9
+  },
+  "por_estrato": {
+   "nevado": 52,
+   "focal": 220
+  },
+  "fechas": {
+   "Chaiten": [
+    "2026-06-07",
+    "2026-06-08",
+    "2026-06-16",
+    "2026-06-17",
+    "2026-07-03",
+    "2026-07-04",
+    "2026-07-19",
+    "2026-07-20",
+    "2026-08-02",
+    "2026-08-18",
+    "2026-08-22",
+    "2026-08-23",
+    "2026-08-24"
+   ],
+   "Isluga": [
+    "2026-06-01",
+    "2026-06-02",
+    "2026-06-03",
+    "2026-06-04",
+    "2026-06-05",
+    "2026-06-06",
+    "2026-06-07",
+    "2026-06-08",
+    "2026-06-10",
+    "2026-06-11",
+    "2026-06-12",
+    "2026-06-13",
+    "2026-06-15",
+    "2026-06-16",
+    "2026-06-17",
+    "2026-06-18",
+    "2026-06-19",
+    "2026-06-20",
+    "2026-06-21",
+    "2026-06-22",
+    "2026-06-23",
+    "2026-06-24",
+    "2026-06-25",
+    "2026-06-26",
+    "2026-06-27",
+    "2026-06-28",
+    "2026-06-29",
+    "2026-06-30",
+    "2026-07-01",
+    "2026-07-05",
+    "2026-07-07",
+    "2026-07-08",
+    "2026-07-09",
+    "2026-07-10",
+    "2026-07-11",
+    "2026-07-12",
+    "2026-07-13",
+    "2026-07-14",
+    "2026-07-15",
+    "2026-07-16",
+    "2026-07-17",
+    "2026-07-19",
+    "2026-07-20",
+    "2026-07-21",
+    "2026-07-22",
+    "2026-07-23",
+    "2026-07-24",
+    "2026-07-25",
+    "2026-07-26",
+    "2026-07-27",
+    "2026-07-28",
+    "2026-07-29",
+    "2026-07-30",
+    "2026-07-31",
+    "2026-08-01",
+    "2026-08-02",
+    "2026-08-05",
+    "2026-08-06",
+    "2026-08-07",
+    "2026-08-08",
+    "2026-08-09",
+    "2026-08-14",
+    "2026-08-19",
+    "2026-08-20",
+    "2026-08-21",
+    "2026-08-22",
+    "2026-08-25",
+    "2026-08-26",
+    "2026-08-27",
+    "2026-08-28",
+    "2026-08-29",
+    "2026-08-30",
+    "2026-08-31"
+   ],
+   "Lascar": [
+    "2026-06-01",
+    "2026-06-03",
+    "2026-06-05",
+    "2026-06-08",
+    "2026-06-13",
+    "2026-06-14",
+    "2026-06-15",
+    "2026-06-16",
+    "2026-06-20",
+    "2026-06-21",
+    "2026-06-22",
+    "2026-06-24",
+    "2026-06-25",
+    "2026-06-26",
+    "2026-06-27",
+    "2026-06-28",
+    "2026-06-30",
+    "2026-07-07",
+    "2026-07-09",
+    "2026-07-10",
+    "2026-07-11",
+    "2026-07-12",
+    "2026-07-13",
+    "2026-07-15",
+    "2026-07-17",
+    "2026-07-24",
+    "2026-07-25",
+    "2026-07-26",
+    "2026-07-27",
+    "2026-07-29",
+    "2026-07-30",
+    "2026-08-01",
+    "2026-08-02",
+    "2026-08-03",
+    "2026-08-04",
+    "2026-08-05",
+    "2026-08-06",
+    "2026-08-07",
+    "2026-08-08",
+    "2026-08-09",
+    "2026-08-17",
+    "2026-08-20",
+    "2026-08-21",
+    "2026-08-22",
+    "2026-08-23",
+    "2026-08-26",
+    "2026-08-27",
+    "2026-08-28",
+    "2026-08-29",
+    "2026-08-30"
+   ],
+   "Lastarria": [
+    "2026-06-02",
+    "2026-06-03",
+    "2026-06-04",
+    "2026-06-05",
+    "2026-06-06",
+    "2026-06-07",
+    "2026-06-08",
+    "2026-06-12",
+    "2026-06-14",
+    "2026-06-16",
+    "2026-06-17",
+    "2026-06-21",
+    "2026-06-22",
+    "2026-06-23",
+    "2026-06-27",
+    "2026-06-29",
+    "2026-06-30",
+    "2026-07-02",
+    "2026-07-06",
+    "2026-07-07",
+    "2026-07-10",
+    "2026-07-12",
+    "2026-07-13",
+    "2026-07-15",
+    "2026-07-16",
+    "2026-07-24",
+    "2026-07-25",
+    "2026-07-26",
+    "2026-07-27",
+    "2026-07-30",
+    "2026-08-01",
+    "2026-08-02",
+    "2026-08-03",
+    "2026-08-04",
+    "2026-08-05",
+    "2026-08-07",
+    "2026-08-09",
+    "2026-08-21",
+    "2026-08-22",
+    "2026-08-25",
+    "2026-08-27",
+    "2026-08-28"
+   ],
+   "NevadosDeChillan": [
+    "2026-06-16",
+    "2026-08-18",
+    "2026-08-20"
+   ],
+   "PlanchonPeteroa": [
+    "2026-06-01",
+    "2026-06-02",
+    "2026-06-05",
+    "2026-06-06",
+    "2026-06-08",
+    "2026-06-11",
+    "2026-06-16",
+    "2026-06-17",
+    "2026-06-19",
+    "2026-06-21",
+    "2026-06-22",
+    "2026-06-25",
+    "2026-06-26",
+    "2026-06-28",
+    "2026-06-30",
+    "2026-07-02",
+    "2026-07-03",
+    "2026-07-04",
+    "2026-07-06",
+    "2026-07-07",
+    "2026-07-12",
+    "2026-08-09",
+    "2026-08-14",
+    "2026-08-31"
+   ],
+   "PuyehueCordonCaulle": [
+    "2026-06-04",
+    "2026-06-05",
+    "2026-06-06",
+    "2026-06-07",
+    "2026-06-08",
+    "2026-06-12",
+    "2026-06-14",
+    "2026-06-16",
+    "2026-06-17",
+    "2026-06-22",
+    "2026-06-28",
+    "2026-06-30",
+    "2026-07-03",
+    "2026-07-04",
+    "2026-07-05",
+    "2026-07-06",
+    "2026-07-11",
+    "2026-07-12",
+    "2026-07-18",
+    "2026-07-20",
+    "2026-07-21",
+    "2026-07-26",
+    "2026-07-29",
+    "2026-08-10",
+    "2026-08-13",
+    "2026-08-18",
+    "2026-08-19",
+    "2026-08-21",
+    "2026-08-22",
+    "2026-08-24",
+    "2026-08-31"
+   ],
+   "Tupungatito": [
+    "2026-06-01",
+    "2026-06-03",
+    "2026-06-05",
+    "2026-06-07",
+    "2026-06-08",
+    "2026-06-11",
+    "2026-06-19",
+    "2026-06-21",
+    "2026-06-22",
+    "2026-06-25",
+    "2026-06-28",
+    "2026-06-30",
+    "2026-07-02",
+    "2026-07-03",
+    "2026-07-04",
+    "2026-07-06",
+    "2026-07-07",
+    "2026-07-13",
+    "2026-07-21",
+    "2026-08-01",
+    "2026-08-13",
+    "2026-08-16",
+    "2026-08-18",
+    "2026-08-20",
+    "2026-08-21",
+    "2026-08-22",
+    "2026-08-24"
+   ],
+   "Villarrica": [
+    "2026-06-15",
+    "2026-06-16",
+    "2026-07-04",
+    "2026-07-06",
+    "2026-07-20",
+    "2026-08-18",
+    "2026-08-19",
+    "2026-08-21",
+    "2026-08-24"
+   ]
+  },
+  "aceptadas_sin_cota_calculable": {},
+  "coincidencias_de_fecha_descartadas": {
+   "Chaiten": {
+    "2026-08-10": 2.214
+   },
+   "Isluga": {
+    "2026-06-09": 0.648
+   },
+   "Lascar": {
+    "2026-06-02": 0.667,
+    "2026-06-04": 0.664,
+    "2026-06-06": 0.576,
+    "2026-06-07": 0.571,
+    "2026-06-09": 0.557,
+    "2026-06-12": 0.629,
+    "2026-06-17": 0.628,
+    "2026-06-23": 0.57,
+    "2026-06-29": 0.564,
+    "2026-07-08": 0.627,
+    "2026-07-14": 0.578
+   },
+   "Lastarria": {
+    "2026-06-01": 1.325,
+    "2026-06-13": 1.022,
+    "2026-06-25": 0.974,
+    "2026-06-28": 0.635,
+    "2026-07-01": 0.698,
+    "2026-07-11": 1.155,
+    "2026-07-14": 1.313,
+    "2026-07-17": 0.605
+   },
+   "NevadosDeChillan": {
+    "2026-07-15": 0.98,
+    "2026-08-26": 1.222
+   },
+   "PlanchonPeteroa": {
+    "2026-06-15": 0.671,
+    "2026-06-23": 0.708,
+    "2026-07-24": 0.671,
+    "2026-08-24": 0.801
+   },
+   "PuyehueCordonCaulle": {
+    "2026-06-01": 3.023,
+    "2026-06-10": 0.758,
+    "2026-06-15": 3.14,
+    "2026-06-19": 0.679,
+    "2026-06-29": 3.388,
+    "2026-07-25": 0.97
+   },
+   "Tupungatito": {
+    "2026-06-04": 3.288,
+    "2026-08-06": 1.155
+   },
+   "Villarrica": {
+    "2026-06-06": 1.367,
+    "2026-08-23": 0.587
+   }
+  },
+  "noches_publicadas_sin_filtro": {
+   "Chaiten": 14,
+   "Isluga": 74,
+   "Lascar": 61,
+   "Lastarria": 50,
+   "NevadosDeChillan": 5,
+   "PlanchonPeteroa": 28,
+   "PuyehueCordonCaulle": 37,
+   "Tupungatito": 29,
+   "Villarrica": 11
+  }
+ },
+ "noches_confirmadas_por_campo_de_posicion": {
+  "centroide": {
+   "total": 283,
+   "por_volcan": {
+    "Chaiten": 13,
+    "Isluga": 71,
+    "Lascar": 52,
+    "Lastarria": 48,
+    "NevadosDeChillan": 4,
+    "PlanchonPeteroa": 28,
+    "PuyehueCordonCaulle": 31,
+    "Tupungatito": 27,
+    "Villarrica": 9
+   },
+   "por_estrato": {
+    "nevado": 53,
+    "focal": 230
+   },
+   "fechas": {
+    "Chaiten": [
+     "2026-06-07",
+     "2026-06-08",
+     "2026-06-16",
+     "2026-06-17",
+     "2026-07-03",
+     "2026-07-04",
+     "2026-07-19",
+     "2026-07-20",
+     "2026-08-02",
+     "2026-08-18",
+     "2026-08-22",
+     "2026-08-23",
+     "2026-08-24"
+    ],
+    "Isluga": [
+     "2026-06-01",
+     "2026-06-02",
+     "2026-06-03",
+     "2026-06-04",
+     "2026-06-05",
+     "2026-06-06",
+     "2026-06-07",
+     "2026-06-08",
+     "2026-06-10",
+     "2026-06-11",
+     "2026-06-12",
+     "2026-06-13",
+     "2026-06-15",
+     "2026-06-16",
+     "2026-06-17",
+     "2026-06-18",
+     "2026-06-19",
+     "2026-06-20",
+     "2026-06-21",
+     "2026-06-22",
+     "2026-06-23",
+     "2026-06-24",
+     "2026-06-25",
+     "2026-06-26",
+     "2026-06-27",
+     "2026-06-28",
+     "2026-06-29",
+     "2026-07-01",
+     "2026-07-05",
+     "2026-07-07",
+     "2026-07-08",
+     "2026-07-09",
+     "2026-07-10",
+     "2026-07-11",
+     "2026-07-12",
+     "2026-07-13",
+     "2026-07-14",
+     "2026-07-15",
+     "2026-07-16",
+     "2026-07-17",
+     "2026-07-19",
+     "2026-07-20",
+     "2026-07-21",
+     "2026-07-23",
+     "2026-07-24",
+     "2026-07-25",
+     "2026-07-26",
+     "2026-07-27",
+     "2026-07-28",
+     "2026-07-29",
+     "2026-07-30",
+     "2026-07-31",
+     "2026-08-01",
+     "2026-08-02",
+     "2026-08-05",
+     "2026-08-06",
+     "2026-08-07",
+     "2026-08-08",
+     "2026-08-09",
+     "2026-08-14",
+     "2026-08-19",
+     "2026-08-20",
+     "2026-08-21",
+     "2026-08-22",
+     "2026-08-25",
+     "2026-08-26",
+     "2026-08-27",
+     "2026-08-28",
+     "2026-08-29",
+     "2026-08-30",
+     "2026-08-31"
+    ],
+    "Lascar": [
+     "2026-06-01",
+     "2026-06-02",
+     "2026-06-03",
+     "2026-06-05",
+     "2026-06-08",
+     "2026-06-09",
+     "2026-06-13",
+     "2026-06-14",
+     "2026-06-15",
+     "2026-06-16",
+     "2026-06-20",
+     "2026-06-21",
+     "2026-06-22",
+     "2026-06-24",
+     "2026-06-25",
+     "2026-06-26",
+     "2026-06-27",
+     "2026-06-28",
+     "2026-06-30",
+     "2026-07-07",
+     "2026-07-09",
+     "2026-07-10",
+     "2026-07-11",
+     "2026-07-12",
+     "2026-07-13",
+     "2026-07-15",
+     "2026-07-17",
+     "2026-07-24",
+     "2026-07-25",
+     "2026-07-26",
+     "2026-07-27",
+     "2026-07-29",
+     "2026-07-30",
+     "2026-08-01",
+     "2026-08-02",
+     "2026-08-03",
+     "2026-08-04",
+     "2026-08-05",
+     "2026-08-06",
+     "2026-08-07",
+     "2026-08-08",
+     "2026-08-09",
+     "2026-08-17",
+     "2026-08-20",
+     "2026-08-21",
+     "2026-08-22",
+     "2026-08-23",
+     "2026-08-26",
+     "2026-08-27",
+     "2026-08-28",
+     "2026-08-29",
+     "2026-08-30"
+    ],
+    "Lastarria": [
+     "2026-06-01",
+     "2026-06-02",
+     "2026-06-03",
+     "2026-06-04",
+     "2026-06-05",
+     "2026-06-06",
+     "2026-06-07",
+     "2026-06-08",
+     "2026-06-12",
+     "2026-06-13",
+     "2026-06-14",
+     "2026-06-16",
+     "2026-06-17",
+     "2026-06-21",
+     "2026-06-22",
+     "2026-06-23",
+     "2026-06-25",
+     "2026-06-27",
+     "2026-06-28",
+     "2026-06-29",
+     "2026-06-30",
+     "2026-07-02",
+     "2026-07-06",
+     "2026-07-07",
+     "2026-07-10",
+     "2026-07-11",
+     "2026-07-12",
+     "2026-07-13",
+     "2026-07-14",
+     "2026-07-15",
+     "2026-07-16",
+     "2026-07-24",
+     "2026-07-25",
+     "2026-07-26",
+     "2026-07-27",
+     "2026-07-30",
+     "2026-08-01",
+     "2026-08-02",
+     "2026-08-03",
+     "2026-08-04",
+     "2026-08-05",
+     "2026-08-07",
+     "2026-08-09",
+     "2026-08-21",
+     "2026-08-22",
+     "2026-08-25",
+     "2026-08-27",
+     "2026-08-28"
+    ],
+    "NevadosDeChillan": [
+     "2026-06-16",
+     "2026-07-15",
+     "2026-08-18",
+     "2026-08-20"
+    ],
+    "PlanchonPeteroa": [
+     "2026-06-01",
+     "2026-06-02",
+     "2026-06-05",
+     "2026-06-06",
+     "2026-06-08",
+     "2026-06-11",
+     "2026-06-15",
+     "2026-06-16",
+     "2026-06-17",
+     "2026-06-19",
+     "2026-06-21",
+     "2026-06-22",
+     "2026-06-23",
+     "2026-06-25",
+     "2026-06-26",
+     "2026-06-28",
+     "2026-06-30",
+     "2026-07-02",
+     "2026-07-03",
+     "2026-07-04",
+     "2026-07-06",
+     "2026-07-07",
+     "2026-07-12",
+     "2026-07-24",
+     "2026-08-09",
+     "2026-08-14",
+     "2026-08-24",
+     "2026-08-31"
+    ],
+    "PuyehueCordonCaulle": [
+     "2026-06-04",
+     "2026-06-05",
+     "2026-06-06",
+     "2026-06-07",
+     "2026-06-08",
+     "2026-06-12",
+     "2026-06-14",
+     "2026-06-16",
+     "2026-06-17",
+     "2026-06-22",
+     "2026-06-28",
+     "2026-06-30",
+     "2026-07-03",
+     "2026-07-04",
+     "2026-07-05",
+     "2026-07-06",
+     "2026-07-11",
+     "2026-07-12",
+     "2026-07-18",
+     "2026-07-20",
+     "2026-07-21",
+     "2026-07-26",
+     "2026-07-29",
+     "2026-08-10",
+     "2026-08-13",
+     "2026-08-18",
+     "2026-08-19",
+     "2026-08-21",
+     "2026-08-22",
+     "2026-08-24",
+     "2026-08-31"
+    ],
+    "Tupungatito": [
+     "2026-06-01",
+     "2026-06-03",
+     "2026-06-05",
+     "2026-06-07",
+     "2026-06-08",
+     "2026-06-11",
+     "2026-06-19",
+     "2026-06-21",
+     "2026-06-22",
+     "2026-06-25",
+     "2026-06-28",
+     "2026-06-30",
+     "2026-07-02",
+     "2026-07-03",
+     "2026-07-04",
+     "2026-07-06",
+     "2026-07-07",
+     "2026-07-13",
+     "2026-07-21",
+     "2026-08-01",
+     "2026-08-13",
+     "2026-08-16",
+     "2026-08-18",
+     "2026-08-20",
+     "2026-08-21",
+     "2026-08-22",
+     "2026-08-24"
+    ],
+    "Villarrica": [
+     "2026-06-15",
+     "2026-06-16",
+     "2026-07-04",
+     "2026-07-06",
+     "2026-07-20",
+     "2026-08-18",
+     "2026-08-19",
+     "2026-08-21",
+     "2026-08-24"
+    ]
+   },
+   "aceptadas_sin_cota_calculable": {},
+   "coincidencias_de_fecha_descartadas": {
+    "Chaiten": {
+     "2026-08-10": 2.214
+    },
+    "Isluga": {
+     "2026-06-09": 0.648,
+     "2026-06-30": 1.664,
+     "2026-07-22": 1.997
+    },
+    "Lascar": {
+     "2026-06-04": 0.664,
+     "2026-06-06": 0.576,
+     "2026-06-07": 0.571,
+     "2026-06-12": 0.629,
+     "2026-06-17": 0.628,
+     "2026-06-23": 0.57,
+     "2026-06-29": 0.564,
+     "2026-07-08": 0.627,
+     "2026-07-14": 0.578
+    },
+    "Lastarria": {
+     "2026-07-01": 0.698,
+     "2026-07-17": 0.605
+    },
+    "NevadosDeChillan": {
+     "2026-08-26": 1.222
+    },
+    "PuyehueCordonCaulle": {
+     "2026-06-01": 3.023,
+     "2026-06-10": 0.758,
+     "2026-06-15": 3.14,
+     "2026-06-19": 0.679,
+     "2026-06-29": 3.388,
+     "2026-07-25": 0.97
+    },
+    "Tupungatito": {
+     "2026-06-04": 3.288,
+     "2026-08-06": 0.553
+    },
+    "Villarrica": {
+     "2026-06-06": 1.123,
+     "2026-08-23": 0.587
+    }
+   },
+   "noches_publicadas_sin_filtro": {
+    "Chaiten": 14,
+    "Isluga": 74,
+    "Lascar": 61,
+    "Lastarria": 50,
+    "NevadosDeChillan": 5,
+    "PlanchonPeteroa": 28,
+    "PuyehueCordonCaulle": 37,
+    "Tupungatito": 29,
+    "Villarrica": 11
+   }
+  },
+  "final_hotspot_si_test1": {
+   "total": 272,
+   "por_volcan": {
+    "Chaiten": 13,
+    "Isluga": 73,
+    "Lascar": 50,
+    "Lastarria": 42,
+    "NevadosDeChillan": 3,
+    "PlanchonPeteroa": 24,
+    "PuyehueCordonCaulle": 31,
+    "Tupungatito": 27,
+    "Villarrica": 9
+   },
+   "por_estrato": {
+    "nevado": 52,
+    "focal": 220
+   },
+   "fechas": {
+    "Chaiten": [
+     "2026-06-07",
+     "2026-06-08",
+     "2026-06-16",
+     "2026-06-17",
+     "2026-07-03",
+     "2026-07-04",
+     "2026-07-19",
+     "2026-07-20",
+     "2026-08-02",
+     "2026-08-18",
+     "2026-08-22",
+     "2026-08-23",
+     "2026-08-24"
+    ],
+    "Isluga": [
+     "2026-06-01",
+     "2026-06-02",
+     "2026-06-03",
+     "2026-06-04",
+     "2026-06-05",
+     "2026-06-06",
+     "2026-06-07",
+     "2026-06-08",
+     "2026-06-10",
+     "2026-06-11",
+     "2026-06-12",
+     "2026-06-13",
+     "2026-06-15",
+     "2026-06-16",
+     "2026-06-17",
+     "2026-06-18",
+     "2026-06-19",
+     "2026-06-20",
+     "2026-06-21",
+     "2026-06-22",
+     "2026-06-23",
+     "2026-06-24",
+     "2026-06-25",
+     "2026-06-26",
+     "2026-06-27",
+     "2026-06-28",
+     "2026-06-29",
+     "2026-06-30",
+     "2026-07-01",
+     "2026-07-05",
+     "2026-07-07",
+     "2026-07-08",
+     "2026-07-09",
+     "2026-07-10",
+     "2026-07-11",
+     "2026-07-12",
+     "2026-07-13",
+     "2026-07-14",
+     "2026-07-15",
+     "2026-07-16",
+     "2026-07-17",
+     "2026-07-19",
+     "2026-07-20",
+     "2026-07-21",
+     "2026-07-22",
+     "2026-07-23",
+     "2026-07-24",
+     "2026-07-25",
+     "2026-07-26",
+     "2026-07-27",
+     "2026-07-28",
+     "2026-07-29",
+     "2026-07-30",
+     "2026-07-31",
+     "2026-08-01",
+     "2026-08-02",
+     "2026-08-05",
+     "2026-08-06",
+     "2026-08-07",
+     "2026-08-08",
+     "2026-08-09",
+     "2026-08-14",
+     "2026-08-19",
+     "2026-08-20",
+     "2026-08-21",
+     "2026-08-22",
+     "2026-08-25",
+     "2026-08-26",
+     "2026-08-27",
+     "2026-08-28",
+     "2026-08-29",
+     "2026-08-30",
+     "2026-08-31"
+    ],
+    "Lascar": [
+     "2026-06-01",
+     "2026-06-03",
+     "2026-06-05",
+     "2026-06-08",
+     "2026-06-13",
+     "2026-06-14",
+     "2026-06-15",
+     "2026-06-16",
+     "2026-06-20",
+     "2026-06-21",
+     "2026-06-22",
+     "2026-06-24",
+     "2026-06-25",
+     "2026-06-26",
+     "2026-06-27",
+     "2026-06-28",
+     "2026-06-30",
+     "2026-07-07",
+     "2026-07-09",
+     "2026-07-10",
+     "2026-07-11",
+     "2026-07-12",
+     "2026-07-13",
+     "2026-07-15",
+     "2026-07-17",
+     "2026-07-24",
+     "2026-07-25",
+     "2026-07-26",
+     "2026-07-27",
+     "2026-07-29",
+     "2026-07-30",
+     "2026-08-01",
+     "2026-08-02",
+     "2026-08-03",
+     "2026-08-04",
+     "2026-08-05",
+     "2026-08-06",
+     "2026-08-07",
+     "2026-08-08",
+     "2026-08-09",
+     "2026-08-17",
+     "2026-08-20",
+     "2026-08-21",
+     "2026-08-22",
+     "2026-08-23",
+     "2026-08-26",
+     "2026-08-27",
+     "2026-08-28",
+     "2026-08-29",
+     "2026-08-30"
+    ],
+    "Lastarria": [
+     "2026-06-02",
+     "2026-06-03",
+     "2026-06-04",
+     "2026-06-05",
+     "2026-06-06",
+     "2026-06-07",
+     "2026-06-08",
+     "2026-06-12",
+     "2026-06-14",
+     "2026-06-16",
+     "2026-06-17",
+     "2026-06-21",
+     "2026-06-22",
+     "2026-06-23",
+     "2026-06-27",
+     "2026-06-29",
+     "2026-06-30",
+     "2026-07-02",
+     "2026-07-06",
+     "2026-07-07",
+     "2026-07-10",
+     "2026-07-12",
+     "2026-07-13",
+     "2026-07-15",
+     "2026-07-16",
+     "2026-07-24",
+     "2026-07-25",
+     "2026-07-26",
+     "2026-07-27",
+     "2026-07-30",
+     "2026-08-01",
+     "2026-08-02",
+     "2026-08-03",
+     "2026-08-04",
+     "2026-08-05",
+     "2026-08-07",
+     "2026-08-09",
+     "2026-08-21",
+     "2026-08-22",
+     "2026-08-25",
+     "2026-08-27",
+     "2026-08-28"
+    ],
+    "NevadosDeChillan": [
+     "2026-06-16",
+     "2026-08-18",
+     "2026-08-20"
+    ],
+    "PlanchonPeteroa": [
+     "2026-06-01",
+     "2026-06-02",
+     "2026-06-05",
+     "2026-06-06",
+     "2026-06-08",
+     "2026-06-11",
+     "2026-06-16",
+     "2026-06-17",
+     "2026-06-19",
+     "2026-06-21",
+     "2026-06-22",
+     "2026-06-25",
+     "2026-06-26",
+     "2026-06-28",
+     "2026-06-30",
+     "2026-07-02",
+     "2026-07-03",
+     "2026-07-04",
+     "2026-07-06",
+     "2026-07-07",
+     "2026-07-12",
+     "2026-08-09",
+     "2026-08-14",
+     "2026-08-31"
+    ],
+    "PuyehueCordonCaulle": [
+     "2026-06-04",
+     "2026-06-05",
+     "2026-06-06",
+     "2026-06-07",
+     "2026-06-08",
+     "2026-06-12",
+     "2026-06-14",
+     "2026-06-16",
+     "2026-06-17",
+     "2026-06-22",
+     "2026-06-28",
+     "2026-06-30",
+     "2026-07-03",
+     "2026-07-04",
+     "2026-07-05",
+     "2026-07-06",
+     "2026-07-11",
+     "2026-07-12",
+     "2026-07-18",
+     "2026-07-20",
+     "2026-07-21",
+     "2026-07-26",
+     "2026-07-29",
+     "2026-08-10",
+     "2026-08-13",
+     "2026-08-18",
+     "2026-08-19",
+     "2026-08-21",
+     "2026-08-22",
+     "2026-08-24",
+     "2026-08-31"
+    ],
+    "Tupungatito": [
+     "2026-06-01",
+     "2026-06-03",
+     "2026-06-05",
+     "2026-06-07",
+     "2026-06-08",
+     "2026-06-11",
+     "2026-06-19",
+     "2026-06-21",
+     "2026-06-22",
+     "2026-06-25",
+     "2026-06-28",
+     "2026-06-30",
+     "2026-07-02",
+     "2026-07-03",
+     "2026-07-04",
+     "2026-07-06",
+     "2026-07-07",
+     "2026-07-13",
+     "2026-07-21",
+     "2026-08-01",
+     "2026-08-13",
+     "2026-08-16",
+     "2026-08-18",
+     "2026-08-20",
+     "2026-08-21",
+     "2026-08-22",
+     "2026-08-24"
+    ],
+    "Villarrica": [
+     "2026-06-15",
+     "2026-06-16",
+     "2026-07-04",
+     "2026-07-06",
+     "2026-07-20",
+     "2026-08-18",
+     "2026-08-19",
+     "2026-08-21",
+     "2026-08-24"
+    ]
+   },
+   "aceptadas_sin_cota_calculable": {},
+   "coincidencias_de_fecha_descartadas": {
+    "Chaiten": {
+     "2026-08-10": 2.214
+    },
+    "Isluga": {
+     "2026-06-09": 0.648
+    },
+    "Lascar": {
+     "2026-06-02": 0.667,
+     "2026-06-04": 0.664,
+     "2026-06-06": 0.576,
+     "2026-06-07": 0.571,
+     "2026-06-09": 0.557,
+     "2026-06-12": 0.629,
+     "2026-06-17": 0.628,
+     "2026-06-23": 0.57,
+     "2026-06-29": 0.564,
+     "2026-07-08": 0.627,
+     "2026-07-14": 0.578
+    },
+    "Lastarria": {
+     "2026-06-01": 1.325,
+     "2026-06-13": 1.022,
+     "2026-06-25": 0.974,
+     "2026-06-28": 0.635,
+     "2026-07-01": 0.698,
+     "2026-07-11": 1.155,
+     "2026-07-14": 1.313,
+     "2026-07-17": 0.605
+    },
+    "NevadosDeChillan": {
+     "2026-07-15": 0.98,
+     "2026-08-26": 1.222
+    },
+    "PlanchonPeteroa": {
+     "2026-06-15": 0.671,
+     "2026-06-23": 0.708,
+     "2026-07-24": 0.671,
+     "2026-08-24": 0.801
+    },
+    "PuyehueCordonCaulle": {
+     "2026-06-01": 3.023,
+     "2026-06-10": 0.758,
+     "2026-06-15": 3.14,
+     "2026-06-19": 0.679,
+     "2026-06-29": 3.388,
+     "2026-07-25": 0.97
+    },
+    "Tupungatito": {
+     "2026-06-04": 3.288,
+     "2026-08-06": 1.155
+    },
+    "Villarrica": {
+     "2026-06-06": 1.367,
+     "2026-08-23": 0.587
+    }
+   },
+   "noches_publicadas_sin_filtro": {
+    "Chaiten": 14,
+    "Isluga": 74,
+    "Lascar": 61,
+    "Lastarria": 50,
+    "NevadosDeChillan": 5,
+    "PlanchonPeteroa": 28,
+    "PuyehueCordonCaulle": 37,
+    "Tupungatito": 29,
+    "Villarrica": 11
+   }
+  }
+ },
+ "control": {
+  "etiquetas_v375": {
+   "pos": 532,
+   "sin_info": 1544,
+   "far_ref": 140,
+   "neg_limpio": 1184
+  },
+  "neg_limpio_n": 1184,
+  "neg_limpio_tasa_publica": 0.9146959459459459,
+  "neg_limpio_tasa_art": 0.0,
+  "neg_limpio_tasa_predisplay": 0.9146959459459459,
+  "noches_con_alerta_nocturna_v375": {
+   "Isluga": 74,
+   "Lascar": 61,
+   "Lastarria": 50,
+   "PlanchonPeteroa": 28,
+   "PuyehueCordonCaulle": 37,
+   "Tupungatito": 29,
+   "Chaiten": 14,
+   "Villarrica": 11,
+   "NevadosDeChillan": 5
+  }
+ },
+ "brazos": {
+  "_pl_id": {
+   "criterio1": {
+    "perdidas": [],
+    "n_perdidas": 0,
+    "perdidas_sin_filtro_brazo": [],
+    "n_perdidas_sin_filtro_brazo": 0,
+    "ganancias": [],
+    "n_ganancias": 0,
+    "ganancias_sin_filtro": [],
+    "n_ganancias_sin_filtro": 0,
+    "por_volcan": {
+     "Chaiten": {
+      "confirmadas": 13,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Isluga": {
+      "confirmadas": 73,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Lascar": {
+      "confirmadas": 50,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Lastarria": {
+      "confirmadas": 42,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "NevadosDeChillan": {
+      "confirmadas": 3,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "PlanchonPeteroa": {
+      "confirmadas": 24,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "PuyehueCordonCaulle": {
+      "confirmadas": 31,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Tupungatito": {
+      "confirmadas": 27,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Villarrica": {
+      "confirmadas": 9,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     }
+    },
+    "cumple": true,
+    "por_estrato": {
+     "nevado": {
+      "confirmadas": 52,
+      "perdidas": 0,
+      "perdidas_sin_filtro_brazo": 0,
+      "ganancias": 0
+     },
+     "focal": {
+      "confirmadas": 220,
+      "perdidas": 0,
+      "perdidas_sin_filtro_brazo": 0,
+      "ganancias": 0
+     }
+    }
+   },
+   "criterio1_por_campo_de_posicion": {
+    "centroide": {
+     "perdidas": [],
+     "n_perdidas": 0,
+     "perdidas_sin_filtro_brazo": [],
+     "n_perdidas_sin_filtro_brazo": 0,
+     "ganancias": [],
+     "n_ganancias": 0,
+     "ganancias_sin_filtro": [],
+     "n_ganancias_sin_filtro": 0,
+     "por_volcan": {
+      "Chaiten": {
+       "confirmadas": 13,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Isluga": {
+       "confirmadas": 71,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lascar": {
+       "confirmadas": 52,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lastarria": {
+       "confirmadas": 48,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "NevadosDeChillan": {
+       "confirmadas": 4,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PlanchonPeteroa": {
+       "confirmadas": 28,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PuyehueCordonCaulle": {
+       "confirmadas": 31,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Tupungatito": {
+       "confirmadas": 27,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Villarrica": {
+       "confirmadas": 9,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      }
+     },
+     "cumple": true,
+     "por_estrato": {
+      "nevado": {
+       "confirmadas": 53,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      },
+      "focal": {
+       "confirmadas": 230,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      }
+     }
+    },
+    "final_hotspot_si_test1": {
+     "perdidas": [],
+     "n_perdidas": 0,
+     "perdidas_sin_filtro_brazo": [],
+     "n_perdidas_sin_filtro_brazo": 0,
+     "ganancias": [],
+     "n_ganancias": 0,
+     "ganancias_sin_filtro": [],
+     "n_ganancias_sin_filtro": 0,
+     "por_volcan": {
+      "Chaiten": {
+       "confirmadas": 13,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Isluga": {
+       "confirmadas": 73,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lascar": {
+       "confirmadas": 50,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lastarria": {
+       "confirmadas": 42,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "NevadosDeChillan": {
+       "confirmadas": 3,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PlanchonPeteroa": {
+       "confirmadas": 24,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PuyehueCordonCaulle": {
+       "confirmadas": 31,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Tupungatito": {
+       "confirmadas": 27,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Villarrica": {
+       "confirmadas": 9,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      }
+     },
+     "cumple": true,
+     "por_estrato": {
+      "nevado": {
+       "confirmadas": 52,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      },
+      "focal": {
+       "confirmadas": 220,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      }
+     }
+    }
+   },
+   "criterio2": {
+    "total": {
+     "n": 1184,
+     "n_noches": 436,
+     "pub_control": 1083,
+     "pub_brazo": 1083,
+     "tasa_control": 0.9146959459459459,
+     "tasa_brazo": 0.9146959459459459,
+     "dif": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ],
+     "solo_brazo": 0,
+     "solo_control": 0,
+     "margen_signo": 0
+    },
+    "por_estrato": {
+     "focal": {
+      "n": 420,
+      "n_noches": 161,
+      "pub_control": 393,
+      "pub_brazo": 393,
+      "tasa_control": 0.9357142857142857,
+      "tasa_brazo": 0.9357142857142857,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "nevado": {
+      "n": 764,
+      "n_noches": 275,
+      "pub_control": 690,
+      "pub_brazo": 690,
+      "tasa_control": 0.9031413612565445,
+      "tasa_brazo": 0.9031413612565445,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     }
+    },
+    "por_volcan": {
+     "Chaiten": {
+      "n": 226,
+      "n_noches": 77,
+      "pub_control": 208,
+      "pub_brazo": 208,
+      "tasa_control": 0.9203539823008849,
+      "tasa_brazo": 0.9203539823008849,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Isluga": {
+      "n": 21,
+      "n_noches": 8,
+      "pub_control": 19,
+      "pub_brazo": 19,
+      "tasa_control": 0.9047619047619048,
+      "tasa_brazo": 0.9047619047619048,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Lascar": {
+      "n": 51,
+      "n_noches": 23,
+      "pub_control": 42,
+      "pub_brazo": 42,
+      "tasa_control": 0.8235294117647058,
+      "tasa_brazo": 0.8235294117647058,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Lastarria": {
+      "n": 53,
+      "n_noches": 24,
+      "pub_control": 51,
+      "pub_brazo": 51,
+      "tasa_control": 0.9622641509433962,
+      "tasa_brazo": 0.9622641509433962,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "NevadosDeChillan": {
+      "n": 197,
+      "n_noches": 73,
+      "pub_control": 174,
+      "pub_brazo": 174,
+      "tasa_control": 0.883248730964467,
+      "tasa_brazo": 0.883248730964467,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "PlanchonPeteroa": {
+      "n": 144,
+      "n_noches": 53,
+      "pub_control": 137,
+      "pub_brazo": 137,
+      "tasa_control": 0.9513888888888888,
+      "tasa_brazo": 0.9513888888888888,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "PuyehueCordonCaulle": {
+      "n": 151,
+      "n_noches": 53,
+      "pub_control": 144,
+      "pub_brazo": 144,
+      "tasa_control": 0.9536423841059603,
+      "tasa_brazo": 0.9536423841059603,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Tupungatito": {
+      "n": 123,
+      "n_noches": 48,
+      "pub_control": 116,
+      "pub_brazo": 116,
+      "tasa_control": 0.943089430894309,
+      "tasa_brazo": 0.943089430894309,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Villarrica": {
+      "n": 218,
+      "n_noches": 77,
+      "pub_control": 192,
+      "pub_brazo": 192,
+      "tasa_control": 0.8807339449541285,
+      "tasa_brazo": 0.8807339449541285,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     }
+    },
+    "acompanantes_neg_limpio": {
+     "tasa_art_control": 0.0,
+     "tasa_art_brazo": 0.0,
+     "tasa_predisplay_control": 0.9146959459459459,
+     "tasa_predisplay_brazo": 0.9146959459459459,
+     "definicion_predisplay": "summit && valid && disp > 0 (antes de isThermalArtifact)",
+     "art_sube_en_brazo": false
+    },
+    "cumple": false
+   },
+   "criterio3": {
+    "total": {
+     "n_pos_control": 532,
+     "n_pares_decisivo": 532,
+     "mediana_control_decisivo": 0.7701,
+     "mediana_brazo_decisivo": 0.7701,
+     "dist_a_1_control": 0.2299,
+     "dist_a_1_brazo": 0.2299,
+     "n_control_informativo": 532,
+     "mediana_control_informativo": 0.7701,
+     "n_brazo_informativo": 532,
+     "mediana_brazo_informativo": 0.7701
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pos_control": 447,
+      "n_pares_decisivo": 447,
+      "mediana_control_decisivo": 0.7676923076923077,
+      "mediana_brazo_decisivo": 0.7676923076923077,
+      "dist_a_1_control": 0.23230769230769233,
+      "dist_a_1_brazo": 0.23230769230769233,
+      "n_control_informativo": 447,
+      "mediana_control_informativo": 0.7676923076923077,
+      "n_brazo_informativo": 447,
+      "mediana_brazo_informativo": 0.7676923076923077
+     },
+     "nevado": {
+      "n_pos_control": 85,
+      "n_pares_decisivo": 85,
+      "mediana_control_decisivo": 0.8046153846153846,
+      "mediana_brazo_decisivo": 0.8046153846153846,
+      "dist_a_1_control": 0.19538461538461538,
+      "dist_a_1_brazo": 0.19538461538461538,
+      "n_control_informativo": 85,
+      "mediana_control_informativo": 0.8046153846153846,
+      "n_brazo_informativo": 85,
+      "mediana_brazo_informativo": 0.8046153846153846
+     }
+    },
+    "por_volcan": {
+     "Chaiten": {
+      "n_pos_control": 17,
+      "n_pares_decisivo": 17,
+      "mediana_control_decisivo": 1.296,
+      "mediana_brazo_decisivo": 1.296,
+      "dist_a_1_control": 0.29600000000000004,
+      "dist_a_1_brazo": 0.29600000000000004,
+      "n_control_informativo": 17,
+      "mediana_control_informativo": 1.296,
+      "n_brazo_informativo": 17,
+      "mediana_brazo_informativo": 1.296,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     },
+     "Isluga": {
+      "n_pos_control": 131,
+      "n_pares_decisivo": 131,
+      "mediana_control_decisivo": 0.6316,
+      "mediana_brazo_decisivo": 0.6316,
+      "dist_a_1_control": 0.36839999999999995,
+      "dist_a_1_brazo": 0.36839999999999995,
+      "n_control_informativo": 131,
+      "mediana_control_informativo": 0.6316,
+      "n_brazo_informativo": 131,
+      "mediana_brazo_informativo": 0.6316,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "Lascar": {
+      "n_pos_control": 110,
+      "n_pares_decisivo": 110,
+      "mediana_control_decisivo": 0.6286803874092011,
+      "mediana_brazo_decisivo": 0.6286803874092011,
+      "dist_a_1_control": 0.37131961259079893,
+      "dist_a_1_brazo": 0.37131961259079893,
+      "n_control_informativo": 110,
+      "mediana_control_informativo": 0.6286803874092011,
+      "n_brazo_informativo": 110,
+      "mediana_brazo_informativo": 0.6286803874092011,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "Lastarria": {
+      "n_pos_control": 76,
+      "n_pares_decisivo": 76,
+      "mediana_control_decisivo": 0.9597619047619048,
+      "mediana_brazo_decisivo": 0.9597619047619048,
+      "dist_a_1_control": 0.040238095238095184,
+      "dist_a_1_brazo": 0.040238095238095184,
+      "n_control_informativo": 76,
+      "mediana_control_informativo": 0.9597619047619048,
+      "n_brazo_informativo": 76,
+      "mediana_brazo_informativo": 0.9597619047619048,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "NevadosDeChillan": {
+      "n_pos_control": 6,
+      "n_pares_decisivo": 6,
+      "mediana_control_decisivo": 1.2083333333333335,
+      "mediana_brazo_decisivo": 1.2083333333333335,
+      "dist_a_1_control": 0.20833333333333348,
+      "dist_a_1_brazo": 0.20833333333333348,
+      "n_control_informativo": 6,
+      "mediana_control_informativo": 1.2083333333333335,
+      "n_brazo_informativo": 6,
+      "mediana_brazo_informativo": 1.2083333333333335,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     },
+     "PlanchonPeteroa": {
+      "n_pos_control": 44,
+      "n_pares_decisivo": 44,
+      "mediana_control_decisivo": 0.9557777777777778,
+      "mediana_brazo_decisivo": 0.9557777777777778,
+      "dist_a_1_control": 0.04422222222222216,
+      "dist_a_1_brazo": 0.04422222222222216,
+      "n_control_informativo": 44,
+      "mediana_control_informativo": 0.9557777777777778,
+      "n_brazo_informativo": 44,
+      "mediana_brazo_informativo": 0.9557777777777778,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "PuyehueCordonCaulle": {
+      "n_pos_control": 86,
+      "n_pares_decisivo": 86,
+      "mediana_control_decisivo": 1.0209530651340997,
+      "mediana_brazo_decisivo": 1.0209530651340997,
+      "dist_a_1_control": 0.02095306513409967,
+      "dist_a_1_brazo": 0.02095306513409967,
+      "n_control_informativo": 86,
+      "mediana_control_informativo": 1.0209530651340997,
+      "n_brazo_informativo": 86,
+      "mediana_brazo_informativo": 1.0209530651340997,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "Tupungatito": {
+      "n_pos_control": 51,
+      "n_pares_decisivo": 51,
+      "mediana_control_decisivo": 0.562,
+      "mediana_brazo_decisivo": 0.562,
+      "dist_a_1_control": 0.43799999999999994,
+      "dist_a_1_brazo": 0.43799999999999994,
+      "n_control_informativo": 51,
+      "mediana_control_informativo": 0.562,
+      "n_brazo_informativo": 51,
+      "mediana_brazo_informativo": 0.562,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "Villarrica": {
+      "n_pos_control": 11,
+      "n_pares_decisivo": 11,
+      "mediana_control_decisivo": 0.8600452488687783,
+      "mediana_brazo_decisivo": 0.8600452488687783,
+      "dist_a_1_control": 0.1399547511312217,
+      "dist_a_1_brazo": 0.1399547511312217,
+      "n_control_informativo": 11,
+      "mediana_control_informativo": 0.8600452488687783,
+      "n_brazo_informativo": 11,
+      "mediana_brazo_informativo": 0.8600452488687783,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     }
+    },
+    "volcanes_que_empeoran": [],
+    "cumple": true
+   },
+   "cumple_1_2_3": false
+  },
+  "_pl_x1.10": {
+   "criterio1": {
+    "perdidas": [],
+    "n_perdidas": 0,
+    "perdidas_sin_filtro_brazo": [],
+    "n_perdidas_sin_filtro_brazo": 0,
+    "ganancias": [],
+    "n_ganancias": 0,
+    "ganancias_sin_filtro": [],
+    "n_ganancias_sin_filtro": 0,
+    "por_volcan": {
+     "Chaiten": {
+      "confirmadas": 13,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Isluga": {
+      "confirmadas": 73,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Lascar": {
+      "confirmadas": 50,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Lastarria": {
+      "confirmadas": 42,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "NevadosDeChillan": {
+      "confirmadas": 3,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "PlanchonPeteroa": {
+      "confirmadas": 24,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "PuyehueCordonCaulle": {
+      "confirmadas": 31,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Tupungatito": {
+      "confirmadas": 27,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Villarrica": {
+      "confirmadas": 9,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     }
+    },
+    "cumple": true,
+    "por_estrato": {
+     "nevado": {
+      "confirmadas": 52,
+      "perdidas": 0,
+      "perdidas_sin_filtro_brazo": 0,
+      "ganancias": 0
+     },
+     "focal": {
+      "confirmadas": 220,
+      "perdidas": 0,
+      "perdidas_sin_filtro_brazo": 0,
+      "ganancias": 0
+     }
+    }
+   },
+   "criterio1_por_campo_de_posicion": {
+    "centroide": {
+     "perdidas": [],
+     "n_perdidas": 0,
+     "perdidas_sin_filtro_brazo": [],
+     "n_perdidas_sin_filtro_brazo": 0,
+     "ganancias": [],
+     "n_ganancias": 0,
+     "ganancias_sin_filtro": [],
+     "n_ganancias_sin_filtro": 0,
+     "por_volcan": {
+      "Chaiten": {
+       "confirmadas": 13,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Isluga": {
+       "confirmadas": 71,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lascar": {
+       "confirmadas": 52,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lastarria": {
+       "confirmadas": 48,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "NevadosDeChillan": {
+       "confirmadas": 4,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PlanchonPeteroa": {
+       "confirmadas": 28,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PuyehueCordonCaulle": {
+       "confirmadas": 31,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Tupungatito": {
+       "confirmadas": 27,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Villarrica": {
+       "confirmadas": 9,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      }
+     },
+     "cumple": true,
+     "por_estrato": {
+      "nevado": {
+       "confirmadas": 53,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      },
+      "focal": {
+       "confirmadas": 230,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      }
+     }
+    },
+    "final_hotspot_si_test1": {
+     "perdidas": [],
+     "n_perdidas": 0,
+     "perdidas_sin_filtro_brazo": [],
+     "n_perdidas_sin_filtro_brazo": 0,
+     "ganancias": [],
+     "n_ganancias": 0,
+     "ganancias_sin_filtro": [],
+     "n_ganancias_sin_filtro": 0,
+     "por_volcan": {
+      "Chaiten": {
+       "confirmadas": 13,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Isluga": {
+       "confirmadas": 73,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lascar": {
+       "confirmadas": 50,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lastarria": {
+       "confirmadas": 42,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "NevadosDeChillan": {
+       "confirmadas": 3,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PlanchonPeteroa": {
+       "confirmadas": 24,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PuyehueCordonCaulle": {
+       "confirmadas": 31,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Tupungatito": {
+       "confirmadas": 27,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Villarrica": {
+       "confirmadas": 9,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      }
+     },
+     "cumple": true,
+     "por_estrato": {
+      "nevado": {
+       "confirmadas": 52,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      },
+      "focal": {
+       "confirmadas": 220,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      }
+     }
+    }
+   },
+   "criterio2": {
+    "total": {
+     "n": 1184,
+     "n_noches": 436,
+     "pub_control": 1083,
+     "pub_brazo": 1083,
+     "tasa_control": 0.9146959459459459,
+     "tasa_brazo": 0.9146959459459459,
+     "dif": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ],
+     "solo_brazo": 0,
+     "solo_control": 0,
+     "margen_signo": 0
+    },
+    "por_estrato": {
+     "focal": {
+      "n": 420,
+      "n_noches": 161,
+      "pub_control": 393,
+      "pub_brazo": 393,
+      "tasa_control": 0.9357142857142857,
+      "tasa_brazo": 0.9357142857142857,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "nevado": {
+      "n": 764,
+      "n_noches": 275,
+      "pub_control": 690,
+      "pub_brazo": 690,
+      "tasa_control": 0.9031413612565445,
+      "tasa_brazo": 0.9031413612565445,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     }
+    },
+    "por_volcan": {
+     "Chaiten": {
+      "n": 226,
+      "n_noches": 77,
+      "pub_control": 208,
+      "pub_brazo": 208,
+      "tasa_control": 0.9203539823008849,
+      "tasa_brazo": 0.9203539823008849,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Isluga": {
+      "n": 21,
+      "n_noches": 8,
+      "pub_control": 19,
+      "pub_brazo": 19,
+      "tasa_control": 0.9047619047619048,
+      "tasa_brazo": 0.9047619047619048,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Lascar": {
+      "n": 51,
+      "n_noches": 23,
+      "pub_control": 42,
+      "pub_brazo": 42,
+      "tasa_control": 0.8235294117647058,
+      "tasa_brazo": 0.8235294117647058,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Lastarria": {
+      "n": 53,
+      "n_noches": 24,
+      "pub_control": 51,
+      "pub_brazo": 51,
+      "tasa_control": 0.9622641509433962,
+      "tasa_brazo": 0.9622641509433962,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "NevadosDeChillan": {
+      "n": 197,
+      "n_noches": 73,
+      "pub_control": 174,
+      "pub_brazo": 174,
+      "tasa_control": 0.883248730964467,
+      "tasa_brazo": 0.883248730964467,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "PlanchonPeteroa": {
+      "n": 144,
+      "n_noches": 53,
+      "pub_control": 137,
+      "pub_brazo": 137,
+      "tasa_control": 0.9513888888888888,
+      "tasa_brazo": 0.9513888888888888,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "PuyehueCordonCaulle": {
+      "n": 151,
+      "n_noches": 53,
+      "pub_control": 144,
+      "pub_brazo": 144,
+      "tasa_control": 0.9536423841059603,
+      "tasa_brazo": 0.9536423841059603,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Tupungatito": {
+      "n": 123,
+      "n_noches": 48,
+      "pub_control": 116,
+      "pub_brazo": 116,
+      "tasa_control": 0.943089430894309,
+      "tasa_brazo": 0.943089430894309,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Villarrica": {
+      "n": 218,
+      "n_noches": 77,
+      "pub_control": 192,
+      "pub_brazo": 192,
+      "tasa_control": 0.8807339449541285,
+      "tasa_brazo": 0.8807339449541285,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     }
+    },
+    "acompanantes_neg_limpio": {
+     "tasa_art_control": 0.0,
+     "tasa_art_brazo": 0.0,
+     "tasa_predisplay_control": 0.9146959459459459,
+     "tasa_predisplay_brazo": 0.9146959459459459,
+     "definicion_predisplay": "summit && valid && disp > 0 (antes de isThermalArtifact)",
+     "art_sube_en_brazo": false
+    },
+    "cumple": false
+   },
+   "criterio3": {
+    "total": {
+     "n_pos_control": 532,
+     "n_pares_decisivo": 532,
+     "mediana_control_decisivo": 0.7701,
+     "mediana_brazo_decisivo": 0.84711,
+     "dist_a_1_control": 0.2299,
+     "dist_a_1_brazo": 0.15288999999999997,
+     "n_control_informativo": 532,
+     "mediana_control_informativo": 0.7701,
+     "n_brazo_informativo": 532,
+     "mediana_brazo_informativo": 0.84711
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pos_control": 447,
+      "n_pares_decisivo": 447,
+      "mediana_control_decisivo": 0.7676923076923077,
+      "mediana_brazo_decisivo": 0.8444615384615385,
+      "dist_a_1_control": 0.23230769230769233,
+      "dist_a_1_brazo": 0.15553846153846151,
+      "n_control_informativo": 447,
+      "mediana_control_informativo": 0.7676923076923077,
+      "n_brazo_informativo": 447,
+      "mediana_brazo_informativo": 0.8444615384615385
+     },
+     "nevado": {
+      "n_pos_control": 85,
+      "n_pares_decisivo": 85,
+      "mediana_control_decisivo": 0.8046153846153846,
+      "mediana_brazo_decisivo": 0.8850769230769231,
+      "dist_a_1_control": 0.19538461538461538,
+      "dist_a_1_brazo": 0.1149230769230769,
+      "n_control_informativo": 85,
+      "mediana_control_informativo": 0.8046153846153846,
+      "n_brazo_informativo": 85,
+      "mediana_brazo_informativo": 0.8850769230769231
+     }
+    },
+    "por_volcan": {
+     "Chaiten": {
+      "n_pos_control": 17,
+      "n_pares_decisivo": 17,
+      "mediana_control_decisivo": 1.296,
+      "mediana_brazo_decisivo": 1.4256,
+      "dist_a_1_control": 0.29600000000000004,
+      "dist_a_1_brazo": 0.4256,
+      "n_control_informativo": 17,
+      "mediana_control_informativo": 1.296,
+      "n_brazo_informativo": 17,
+      "mediana_brazo_informativo": 1.4256,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     },
+     "Isluga": {
+      "n_pos_control": 131,
+      "n_pares_decisivo": 131,
+      "mediana_control_decisivo": 0.6316,
+      "mediana_brazo_decisivo": 0.6947600000000002,
+      "dist_a_1_control": 0.36839999999999995,
+      "dist_a_1_brazo": 0.30523999999999984,
+      "n_control_informativo": 131,
+      "mediana_control_informativo": 0.6316,
+      "n_brazo_informativo": 131,
+      "mediana_brazo_informativo": 0.6947600000000002,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "Lascar": {
+      "n_pos_control": 110,
+      "n_pares_decisivo": 110,
+      "mediana_control_decisivo": 0.6286803874092011,
+      "mediana_brazo_decisivo": 0.6915484261501211,
+      "dist_a_1_control": 0.37131961259079893,
+      "dist_a_1_brazo": 0.30845157384987887,
+      "n_control_informativo": 110,
+      "mediana_control_informativo": 0.6286803874092011,
+      "n_brazo_informativo": 110,
+      "mediana_brazo_informativo": 0.6915484261501211,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "Lastarria": {
+      "n_pos_control": 76,
+      "n_pares_decisivo": 76,
+      "mediana_control_decisivo": 0.9597619047619048,
+      "mediana_brazo_decisivo": 1.0557380952380953,
+      "dist_a_1_control": 0.040238095238095184,
+      "dist_a_1_brazo": 0.05573809523809525,
+      "n_control_informativo": 76,
+      "mediana_control_informativo": 0.9597619047619048,
+      "n_brazo_informativo": 76,
+      "mediana_brazo_informativo": 1.0557380952380953,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "NevadosDeChillan": {
+      "n_pos_control": 6,
+      "n_pares_decisivo": 6,
+      "mediana_control_decisivo": 1.2083333333333335,
+      "mediana_brazo_decisivo": 1.3291666666666668,
+      "dist_a_1_control": 0.20833333333333348,
+      "dist_a_1_brazo": 0.32916666666666683,
+      "n_control_informativo": 6,
+      "mediana_control_informativo": 1.2083333333333335,
+      "n_brazo_informativo": 6,
+      "mediana_brazo_informativo": 1.3291666666666668,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     },
+     "PlanchonPeteroa": {
+      "n_pos_control": 44,
+      "n_pares_decisivo": 44,
+      "mediana_control_decisivo": 0.9557777777777778,
+      "mediana_brazo_decisivo": 1.0513555555555558,
+      "dist_a_1_control": 0.04422222222222216,
+      "dist_a_1_brazo": 0.05135555555555582,
+      "n_control_informativo": 44,
+      "mediana_control_informativo": 0.9557777777777778,
+      "n_brazo_informativo": 44,
+      "mediana_brazo_informativo": 1.0513555555555558,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "PuyehueCordonCaulle": {
+      "n_pos_control": 86,
+      "n_pares_decisivo": 86,
+      "mediana_control_decisivo": 1.0209530651340997,
+      "mediana_brazo_decisivo": 1.1230483716475097,
+      "dist_a_1_control": 0.02095306513409967,
+      "dist_a_1_brazo": 0.1230483716475097,
+      "n_control_informativo": 86,
+      "mediana_control_informativo": 1.0209530651340997,
+      "n_brazo_informativo": 86,
+      "mediana_brazo_informativo": 1.1230483716475097,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": true
+     },
+     "Tupungatito": {
+      "n_pos_control": 51,
+      "n_pares_decisivo": 51,
+      "mediana_control_decisivo": 0.562,
+      "mediana_brazo_decisivo": 0.6182000000000001,
+      "dist_a_1_control": 0.43799999999999994,
+      "dist_a_1_brazo": 0.3817999999999999,
+      "n_control_informativo": 51,
+      "mediana_control_informativo": 0.562,
+      "n_brazo_informativo": 51,
+      "mediana_brazo_informativo": 0.6182000000000001,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "Villarrica": {
+      "n_pos_control": 11,
+      "n_pares_decisivo": 11,
+      "mediana_control_decisivo": 0.8600452488687783,
+      "mediana_brazo_decisivo": 0.9460497737556561,
+      "dist_a_1_control": 0.1399547511312217,
+      "dist_a_1_brazo": 0.05395022624434387,
+      "n_control_informativo": 11,
+      "mediana_control_informativo": 0.8600452488687783,
+      "n_brazo_informativo": 11,
+      "mediana_brazo_informativo": 0.9460497737556561,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     }
+    },
+    "volcanes_que_empeoran": [
+     "PuyehueCordonCaulle"
+    ],
+    "cumple": false
+   },
+   "cumple_1_2_3": false
+  },
+  "_pl_x1.2": {
+   "criterio1": {
+    "perdidas": [],
+    "n_perdidas": 0,
+    "perdidas_sin_filtro_brazo": [],
+    "n_perdidas_sin_filtro_brazo": 0,
+    "ganancias": [],
+    "n_ganancias": 0,
+    "ganancias_sin_filtro": [],
+    "n_ganancias_sin_filtro": 0,
+    "por_volcan": {
+     "Chaiten": {
+      "confirmadas": 13,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Isluga": {
+      "confirmadas": 73,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Lascar": {
+      "confirmadas": 50,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Lastarria": {
+      "confirmadas": 42,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "NevadosDeChillan": {
+      "confirmadas": 3,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "PlanchonPeteroa": {
+      "confirmadas": 24,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "PuyehueCordonCaulle": {
+      "confirmadas": 31,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Tupungatito": {
+      "confirmadas": 27,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Villarrica": {
+      "confirmadas": 9,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     }
+    },
+    "cumple": true,
+    "por_estrato": {
+     "nevado": {
+      "confirmadas": 52,
+      "perdidas": 0,
+      "perdidas_sin_filtro_brazo": 0,
+      "ganancias": 0
+     },
+     "focal": {
+      "confirmadas": 220,
+      "perdidas": 0,
+      "perdidas_sin_filtro_brazo": 0,
+      "ganancias": 0
+     }
+    }
+   },
+   "criterio1_por_campo_de_posicion": {
+    "centroide": {
+     "perdidas": [],
+     "n_perdidas": 0,
+     "perdidas_sin_filtro_brazo": [],
+     "n_perdidas_sin_filtro_brazo": 0,
+     "ganancias": [],
+     "n_ganancias": 0,
+     "ganancias_sin_filtro": [],
+     "n_ganancias_sin_filtro": 0,
+     "por_volcan": {
+      "Chaiten": {
+       "confirmadas": 13,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Isluga": {
+       "confirmadas": 71,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lascar": {
+       "confirmadas": 52,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lastarria": {
+       "confirmadas": 48,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "NevadosDeChillan": {
+       "confirmadas": 4,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PlanchonPeteroa": {
+       "confirmadas": 28,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PuyehueCordonCaulle": {
+       "confirmadas": 31,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Tupungatito": {
+       "confirmadas": 27,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Villarrica": {
+       "confirmadas": 9,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      }
+     },
+     "cumple": true,
+     "por_estrato": {
+      "nevado": {
+       "confirmadas": 53,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      },
+      "focal": {
+       "confirmadas": 230,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      }
+     }
+    },
+    "final_hotspot_si_test1": {
+     "perdidas": [],
+     "n_perdidas": 0,
+     "perdidas_sin_filtro_brazo": [],
+     "n_perdidas_sin_filtro_brazo": 0,
+     "ganancias": [],
+     "n_ganancias": 0,
+     "ganancias_sin_filtro": [],
+     "n_ganancias_sin_filtro": 0,
+     "por_volcan": {
+      "Chaiten": {
+       "confirmadas": 13,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Isluga": {
+       "confirmadas": 73,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lascar": {
+       "confirmadas": 50,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lastarria": {
+       "confirmadas": 42,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "NevadosDeChillan": {
+       "confirmadas": 3,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PlanchonPeteroa": {
+       "confirmadas": 24,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PuyehueCordonCaulle": {
+       "confirmadas": 31,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Tupungatito": {
+       "confirmadas": 27,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Villarrica": {
+       "confirmadas": 9,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      }
+     },
+     "cumple": true,
+     "por_estrato": {
+      "nevado": {
+       "confirmadas": 52,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      },
+      "focal": {
+       "confirmadas": 220,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      }
+     }
+    }
+   },
+   "criterio2": {
+    "total": {
+     "n": 1184,
+     "n_noches": 436,
+     "pub_control": 1083,
+     "pub_brazo": 1083,
+     "tasa_control": 0.9146959459459459,
+     "tasa_brazo": 0.9146959459459459,
+     "dif": 0.0,
+     "ic95": [
+      0.0,
+      0.0
+     ],
+     "solo_brazo": 0,
+     "solo_control": 0,
+     "margen_signo": 0
+    },
+    "por_estrato": {
+     "focal": {
+      "n": 420,
+      "n_noches": 161,
+      "pub_control": 393,
+      "pub_brazo": 393,
+      "tasa_control": 0.9357142857142857,
+      "tasa_brazo": 0.9357142857142857,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "nevado": {
+      "n": 764,
+      "n_noches": 275,
+      "pub_control": 690,
+      "pub_brazo": 690,
+      "tasa_control": 0.9031413612565445,
+      "tasa_brazo": 0.9031413612565445,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     }
+    },
+    "por_volcan": {
+     "Chaiten": {
+      "n": 226,
+      "n_noches": 77,
+      "pub_control": 208,
+      "pub_brazo": 208,
+      "tasa_control": 0.9203539823008849,
+      "tasa_brazo": 0.9203539823008849,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Isluga": {
+      "n": 21,
+      "n_noches": 8,
+      "pub_control": 19,
+      "pub_brazo": 19,
+      "tasa_control": 0.9047619047619048,
+      "tasa_brazo": 0.9047619047619048,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Lascar": {
+      "n": 51,
+      "n_noches": 23,
+      "pub_control": 42,
+      "pub_brazo": 42,
+      "tasa_control": 0.8235294117647058,
+      "tasa_brazo": 0.8235294117647058,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Lastarria": {
+      "n": 53,
+      "n_noches": 24,
+      "pub_control": 51,
+      "pub_brazo": 51,
+      "tasa_control": 0.9622641509433962,
+      "tasa_brazo": 0.9622641509433962,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "NevadosDeChillan": {
+      "n": 197,
+      "n_noches": 73,
+      "pub_control": 174,
+      "pub_brazo": 174,
+      "tasa_control": 0.883248730964467,
+      "tasa_brazo": 0.883248730964467,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "PlanchonPeteroa": {
+      "n": 144,
+      "n_noches": 53,
+      "pub_control": 137,
+      "pub_brazo": 137,
+      "tasa_control": 0.9513888888888888,
+      "tasa_brazo": 0.9513888888888888,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "PuyehueCordonCaulle": {
+      "n": 151,
+      "n_noches": 53,
+      "pub_control": 144,
+      "pub_brazo": 144,
+      "tasa_control": 0.9536423841059603,
+      "tasa_brazo": 0.9536423841059603,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Tupungatito": {
+      "n": 123,
+      "n_noches": 48,
+      "pub_control": 116,
+      "pub_brazo": 116,
+      "tasa_control": 0.943089430894309,
+      "tasa_brazo": 0.943089430894309,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Villarrica": {
+      "n": 218,
+      "n_noches": 77,
+      "pub_control": 192,
+      "pub_brazo": 192,
+      "tasa_control": 0.8807339449541285,
+      "tasa_brazo": 0.8807339449541285,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     }
+    },
+    "acompanantes_neg_limpio": {
+     "tasa_art_control": 0.0,
+     "tasa_art_brazo": 0.0,
+     "tasa_predisplay_control": 0.9146959459459459,
+     "tasa_predisplay_brazo": 0.9146959459459459,
+     "definicion_predisplay": "summit && valid && disp > 0 (antes de isThermalArtifact)",
+     "art_sube_en_brazo": false
+    },
+    "cumple": false
+   },
+   "criterio3": {
+    "total": {
+     "n_pos_control": 532,
+     "n_pares_decisivo": 532,
+     "mediana_control_decisivo": 0.7701,
+     "mediana_brazo_decisivo": 0.92412,
+     "dist_a_1_control": 0.2299,
+     "dist_a_1_brazo": 0.07587999999999995,
+     "n_control_informativo": 532,
+     "mediana_control_informativo": 0.7701,
+     "n_brazo_informativo": 532,
+     "mediana_brazo_informativo": 0.92412
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pos_control": 447,
+      "n_pares_decisivo": 447,
+      "mediana_control_decisivo": 0.7676923076923077,
+      "mediana_brazo_decisivo": 0.9212307692307692,
+      "dist_a_1_control": 0.23230769230769233,
+      "dist_a_1_brazo": 0.07876923076923081,
+      "n_control_informativo": 447,
+      "mediana_control_informativo": 0.7676923076923077,
+      "n_brazo_informativo": 447,
+      "mediana_brazo_informativo": 0.9212307692307692
+     },
+     "nevado": {
+      "n_pos_control": 85,
+      "n_pares_decisivo": 85,
+      "mediana_control_decisivo": 0.8046153846153846,
+      "mediana_brazo_decisivo": 0.9655384615384615,
+      "dist_a_1_control": 0.19538461538461538,
+      "dist_a_1_brazo": 0.03446153846153854,
+      "n_control_informativo": 85,
+      "mediana_control_informativo": 0.8046153846153846,
+      "n_brazo_informativo": 85,
+      "mediana_brazo_informativo": 0.9655384615384615
+     }
+    },
+    "por_volcan": {
+     "Chaiten": {
+      "n_pos_control": 17,
+      "n_pares_decisivo": 17,
+      "mediana_control_decisivo": 1.296,
+      "mediana_brazo_decisivo": 1.5552,
+      "dist_a_1_control": 0.29600000000000004,
+      "dist_a_1_brazo": 0.5551999999999999,
+      "n_control_informativo": 17,
+      "mediana_control_informativo": 1.296,
+      "n_brazo_informativo": 17,
+      "mediana_brazo_informativo": 1.5552,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     },
+     "Isluga": {
+      "n_pos_control": 131,
+      "n_pares_decisivo": 131,
+      "mediana_control_decisivo": 0.6316,
+      "mediana_brazo_decisivo": 0.75792,
+      "dist_a_1_control": 0.36839999999999995,
+      "dist_a_1_brazo": 0.24207999999999996,
+      "n_control_informativo": 131,
+      "mediana_control_informativo": 0.6316,
+      "n_brazo_informativo": 131,
+      "mediana_brazo_informativo": 0.75792,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "Lascar": {
+      "n_pos_control": 110,
+      "n_pares_decisivo": 110,
+      "mediana_control_decisivo": 0.6286803874092011,
+      "mediana_brazo_decisivo": 0.7544164648910412,
+      "dist_a_1_control": 0.37131961259079893,
+      "dist_a_1_brazo": 0.2455835351089588,
+      "n_control_informativo": 110,
+      "mediana_control_informativo": 0.6286803874092011,
+      "n_brazo_informativo": 110,
+      "mediana_brazo_informativo": 0.7544164648910412,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "Lastarria": {
+      "n_pos_control": 76,
+      "n_pares_decisivo": 76,
+      "mediana_control_decisivo": 0.9597619047619048,
+      "mediana_brazo_decisivo": 1.1517142857142857,
+      "dist_a_1_control": 0.040238095238095184,
+      "dist_a_1_brazo": 0.1517142857142857,
+      "n_control_informativo": 76,
+      "mediana_control_informativo": 0.9597619047619048,
+      "n_brazo_informativo": 76,
+      "mediana_brazo_informativo": 1.1517142857142857,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": true
+     },
+     "NevadosDeChillan": {
+      "n_pos_control": 6,
+      "n_pares_decisivo": 6,
+      "mediana_control_decisivo": 1.2083333333333335,
+      "mediana_brazo_decisivo": 1.45,
+      "dist_a_1_control": 0.20833333333333348,
+      "dist_a_1_brazo": 0.44999999999999996,
+      "n_control_informativo": 6,
+      "mediana_control_informativo": 1.2083333333333335,
+      "n_brazo_informativo": 6,
+      "mediana_brazo_informativo": 1.45,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     },
+     "PlanchonPeteroa": {
+      "n_pos_control": 44,
+      "n_pares_decisivo": 44,
+      "mediana_control_decisivo": 0.9557777777777778,
+      "mediana_brazo_decisivo": 1.1469333333333331,
+      "dist_a_1_control": 0.04422222222222216,
+      "dist_a_1_brazo": 0.14693333333333314,
+      "n_control_informativo": 44,
+      "mediana_control_informativo": 0.9557777777777778,
+      "n_brazo_informativo": 44,
+      "mediana_brazo_informativo": 1.1469333333333331,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": true
+     },
+     "PuyehueCordonCaulle": {
+      "n_pos_control": 86,
+      "n_pares_decisivo": 86,
+      "mediana_control_decisivo": 1.0209530651340997,
+      "mediana_brazo_decisivo": 1.2251436781609195,
+      "dist_a_1_control": 0.02095306513409967,
+      "dist_a_1_brazo": 0.2251436781609195,
+      "n_control_informativo": 86,
+      "mediana_control_informativo": 1.0209530651340997,
+      "n_brazo_informativo": 86,
+      "mediana_brazo_informativo": 1.2251436781609195,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": true
+     },
+     "Tupungatito": {
+      "n_pos_control": 51,
+      "n_pares_decisivo": 51,
+      "mediana_control_decisivo": 0.562,
+      "mediana_brazo_decisivo": 0.6744,
+      "dist_a_1_control": 0.43799999999999994,
+      "dist_a_1_brazo": 0.3256,
+      "n_control_informativo": 51,
+      "mediana_control_informativo": 0.562,
+      "n_brazo_informativo": 51,
+      "mediana_brazo_informativo": 0.6744,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": false
+     },
+     "Villarrica": {
+      "n_pos_control": 11,
+      "n_pares_decisivo": 11,
+      "mediana_control_decisivo": 0.8600452488687783,
+      "mediana_brazo_decisivo": 1.0320542986425338,
+      "dist_a_1_control": 0.1399547511312217,
+      "dist_a_1_brazo": 0.03205429864253384,
+      "n_control_informativo": 11,
+      "mediana_control_informativo": 0.8600452488687783,
+      "n_brazo_informativo": 11,
+      "mediana_brazo_informativo": 1.0320542986425338,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     }
+    },
+    "volcanes_que_empeoran": [
+     "Lastarria",
+     "PlanchonPeteroa",
+     "PuyehueCordonCaulle"
+    ],
+    "cumple": false
+   },
+   "cumple_1_2_3": false
+  },
+  "_pl_desplazada": {
+   "criterio1": {
+    "perdidas": [],
+    "n_perdidas": 0,
+    "perdidas_sin_filtro_brazo": [],
+    "n_perdidas_sin_filtro_brazo": 0,
+    "ganancias": [],
+    "n_ganancias": 0,
+    "ganancias_sin_filtro": [],
+    "n_ganancias_sin_filtro": 0,
+    "por_volcan": {
+     "Chaiten": {
+      "confirmadas": 13,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Isluga": {
+      "confirmadas": 73,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Lascar": {
+      "confirmadas": 50,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Lastarria": {
+      "confirmadas": 42,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "NevadosDeChillan": {
+      "confirmadas": 3,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "PlanchonPeteroa": {
+      "confirmadas": 24,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "PuyehueCordonCaulle": {
+      "confirmadas": 31,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Tupungatito": {
+      "confirmadas": 27,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     },
+     "Villarrica": {
+      "confirmadas": 9,
+      "perdidas": [],
+      "perdidas_sin_filtro_brazo": [],
+      "ganancias": [],
+      "ganancias_sin_filtro": []
+     }
+    },
+    "cumple": true,
+    "por_estrato": {
+     "nevado": {
+      "confirmadas": 52,
+      "perdidas": 0,
+      "perdidas_sin_filtro_brazo": 0,
+      "ganancias": 0
+     },
+     "focal": {
+      "confirmadas": 220,
+      "perdidas": 0,
+      "perdidas_sin_filtro_brazo": 0,
+      "ganancias": 0
+     }
+    }
+   },
+   "criterio1_por_campo_de_posicion": {
+    "centroide": {
+     "perdidas": [],
+     "n_perdidas": 0,
+     "perdidas_sin_filtro_brazo": [],
+     "n_perdidas_sin_filtro_brazo": 0,
+     "ganancias": [],
+     "n_ganancias": 0,
+     "ganancias_sin_filtro": [],
+     "n_ganancias_sin_filtro": 0,
+     "por_volcan": {
+      "Chaiten": {
+       "confirmadas": 13,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Isluga": {
+       "confirmadas": 71,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lascar": {
+       "confirmadas": 52,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lastarria": {
+       "confirmadas": 48,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "NevadosDeChillan": {
+       "confirmadas": 4,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PlanchonPeteroa": {
+       "confirmadas": 28,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PuyehueCordonCaulle": {
+       "confirmadas": 31,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Tupungatito": {
+       "confirmadas": 27,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Villarrica": {
+       "confirmadas": 9,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      }
+     },
+     "cumple": true,
+     "por_estrato": {
+      "nevado": {
+       "confirmadas": 53,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      },
+      "focal": {
+       "confirmadas": 230,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      }
+     }
+    },
+    "final_hotspot_si_test1": {
+     "perdidas": [],
+     "n_perdidas": 0,
+     "perdidas_sin_filtro_brazo": [],
+     "n_perdidas_sin_filtro_brazo": 0,
+     "ganancias": [],
+     "n_ganancias": 0,
+     "ganancias_sin_filtro": [],
+     "n_ganancias_sin_filtro": 0,
+     "por_volcan": {
+      "Chaiten": {
+       "confirmadas": 13,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Isluga": {
+       "confirmadas": 73,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lascar": {
+       "confirmadas": 50,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Lastarria": {
+       "confirmadas": 42,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "NevadosDeChillan": {
+       "confirmadas": 3,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PlanchonPeteroa": {
+       "confirmadas": 24,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "PuyehueCordonCaulle": {
+       "confirmadas": 31,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Tupungatito": {
+       "confirmadas": 27,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      },
+      "Villarrica": {
+       "confirmadas": 9,
+       "perdidas": [],
+       "perdidas_sin_filtro_brazo": [],
+       "ganancias": [],
+       "ganancias_sin_filtro": []
+      }
+     },
+     "cumple": true,
+     "por_estrato": {
+      "nevado": {
+       "confirmadas": 52,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      },
+      "focal": {
+       "confirmadas": 220,
+       "perdidas": 0,
+       "perdidas_sin_filtro_brazo": 0,
+       "ganancias": 0
+      }
+     }
+    }
+   },
+   "criterio2": {
+    "total": {
+     "n": 1184,
+     "n_noches": 436,
+     "pub_control": 1083,
+     "pub_brazo": 1086,
+     "tasa_control": 0.9146959459459459,
+     "tasa_brazo": 0.9172297297297297,
+     "dif": 0.002533783783783784,
+     "ic95": [
+      -0.001693551920103361,
+      0.008271985008700307
+     ],
+     "solo_brazo": 8,
+     "solo_control": 5,
+     "margen_signo": 3
+    },
+    "por_estrato": {
+     "focal": {
+      "n": 420,
+      "n_noches": 161,
+      "pub_control": 393,
+      "pub_brazo": 394,
+      "tasa_control": 0.9357142857142857,
+      "tasa_brazo": 0.9380952380952381,
+      "dif": 0.002380952380952381,
+      "ic95": [
+       0.0,
+       0.007426666174080093
+      ],
+      "solo_brazo": 2,
+      "solo_control": 1,
+      "margen_signo": 1
+     },
+     "nevado": {
+      "n": 764,
+      "n_noches": 275,
+      "pub_control": 690,
+      "pub_brazo": 692,
+      "tasa_control": 0.9031413612565445,
+      "tasa_brazo": 0.9057591623036649,
+      "dif": 0.002617801047120419,
+      "ic95": [
+       -0.004010695187165776,
+       0.010639007092198581
+      ],
+      "solo_brazo": 6,
+      "solo_control": 4,
+      "margen_signo": 2
+     }
+    },
+    "por_volcan": {
+     "Chaiten": {
+      "n": 226,
+      "n_noches": 77,
+      "pub_control": 208,
+      "pub_brazo": 208,
+      "tasa_control": 0.9203539823008849,
+      "tasa_brazo": 0.9203539823008849,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Isluga": {
+      "n": 21,
+      "n_noches": 8,
+      "pub_control": 19,
+      "pub_brazo": 19,
+      "tasa_control": 0.9047619047619048,
+      "tasa_brazo": 0.9047619047619048,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 1,
+      "solo_control": 1,
+      "margen_signo": 0
+     },
+     "Lascar": {
+      "n": 51,
+      "n_noches": 23,
+      "pub_control": 42,
+      "pub_brazo": 42,
+      "tasa_control": 0.8235294117647058,
+      "tasa_brazo": 0.8235294117647058,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "Lastarria": {
+      "n": 53,
+      "n_noches": 24,
+      "pub_control": 51,
+      "pub_brazo": 51,
+      "tasa_control": 0.9622641509433962,
+      "tasa_brazo": 0.9622641509433962,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "NevadosDeChillan": {
+      "n": 197,
+      "n_noches": 73,
+      "pub_control": 174,
+      "pub_brazo": 177,
+      "tasa_control": 0.883248730964467,
+      "tasa_brazo": 0.8984771573604061,
+      "dif": 0.015228426395939087,
+      "ic95": [
+       -0.01020538984824699,
+       0.0425531914893617
+      ],
+      "solo_brazo": 5,
+      "solo_control": 2,
+      "margen_signo": 3
+     },
+     "PlanchonPeteroa": {
+      "n": 144,
+      "n_noches": 53,
+      "pub_control": 137,
+      "pub_brazo": 137,
+      "tasa_control": 0.9513888888888888,
+      "tasa_brazo": 0.9513888888888888,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     },
+     "PuyehueCordonCaulle": {
+      "n": 151,
+      "n_noches": 53,
+      "pub_control": 144,
+      "pub_brazo": 145,
+      "tasa_control": 0.9536423841059603,
+      "tasa_brazo": 0.9602649006622517,
+      "dif": 0.006622516556291391,
+      "ic95": [
+       0.0,
+       0.024249860568878966
+      ],
+      "solo_brazo": 1,
+      "solo_control": 0,
+      "margen_signo": 1
+     },
+     "Tupungatito": {
+      "n": 123,
+      "n_noches": 48,
+      "pub_control": 116,
+      "pub_brazo": 115,
+      "tasa_control": 0.943089430894309,
+      "tasa_brazo": 0.9349593495934959,
+      "dif": -0.008130081300813009,
+      "ic95": [
+       -0.024595244546809374,
+       0.0
+      ],
+      "solo_brazo": 1,
+      "solo_control": 2,
+      "margen_signo": 1
+     },
+     "Villarrica": {
+      "n": 218,
+      "n_noches": 77,
+      "pub_control": 192,
+      "pub_brazo": 192,
+      "tasa_control": 0.8807339449541285,
+      "tasa_brazo": 0.8807339449541285,
+      "dif": 0.0,
+      "ic95": [
+       0.0,
+       0.0
+      ],
+      "solo_brazo": 0,
+      "solo_control": 0,
+      "margen_signo": 0
+     }
+    },
+    "acompanantes_neg_limpio": {
+     "tasa_art_control": 0.0,
+     "tasa_art_brazo": 0.0,
+     "tasa_predisplay_control": 0.9146959459459459,
+     "tasa_predisplay_brazo": 0.9172297297297297,
+     "definicion_predisplay": "summit && valid && disp > 0 (antes de isThermalArtifact)",
+     "art_sube_en_brazo": false
+    },
+    "cumple": false
+   },
+   "criterio3": {
+    "total": {
+     "n_pos_control": 532,
+     "n_pares_decisivo": 531,
+     "mediana_control_decisivo": 0.7718666666666666,
+     "mediana_brazo_decisivo": 0.5199999999999999,
+     "dist_a_1_control": 0.2281333333333334,
+     "dist_a_1_brazo": 0.4800000000000001,
+     "n_control_informativo": 532,
+     "mediana_control_informativo": 0.7701,
+     "n_brazo_informativo": 531,
+     "mediana_brazo_informativo": 0.5199999999999999
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pos_control": 447,
+      "n_pares_decisivo": 446,
+      "mediana_control_decisivo": 0.7680128205128205,
+      "mediana_brazo_decisivo": 0.5279545454545455,
+      "dist_a_1_control": 0.2319871794871795,
+      "dist_a_1_brazo": 0.47204545454545455,
+      "n_control_informativo": 447,
+      "mediana_control_informativo": 0.7676923076923077,
+      "n_brazo_informativo": 446,
+      "mediana_brazo_informativo": 0.5279545454545455
+     },
+     "nevado": {
+      "n_pos_control": 85,
+      "n_pares_decisivo": 85,
+      "mediana_control_decisivo": 0.8046153846153846,
+      "mediana_brazo_decisivo": 0.45999999999999996,
+      "dist_a_1_control": 0.19538461538461538,
+      "dist_a_1_brazo": 0.54,
+      "n_control_informativo": 85,
+      "mediana_control_informativo": 0.8046153846153846,
+      "n_brazo_informativo": 85,
+      "mediana_brazo_informativo": 0.45999999999999996
+     }
+    },
+    "por_volcan": {
+     "Chaiten": {
+      "n_pos_control": 17,
+      "n_pares_decisivo": 17,
+      "mediana_control_decisivo": 1.296,
+      "mediana_brazo_decisivo": 1.0542857142857143,
+      "dist_a_1_control": 0.29600000000000004,
+      "dist_a_1_brazo": 0.05428571428571427,
+      "n_control_informativo": 17,
+      "mediana_control_informativo": 1.296,
+      "n_brazo_informativo": 17,
+      "mediana_brazo_informativo": 1.0542857142857143,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     },
+     "Isluga": {
+      "n_pos_control": 131,
+      "n_pares_decisivo": 130,
+      "mediana_control_decisivo": 0.6339818181818182,
+      "mediana_brazo_decisivo": 0.43479302832244004,
+      "dist_a_1_control": 0.3660181818181818,
+      "dist_a_1_brazo": 0.56520697167756,
+      "n_control_informativo": 131,
+      "mediana_control_informativo": 0.6316,
+      "n_brazo_informativo": 130,
+      "mediana_brazo_informativo": 0.43479302832244004,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": true
+     },
+     "Lascar": {
+      "n_pos_control": 110,
+      "n_pares_decisivo": 110,
+      "mediana_control_decisivo": 0.6286803874092011,
+      "mediana_brazo_decisivo": 0.5156978922716628,
+      "dist_a_1_control": 0.37131961259079893,
+      "dist_a_1_brazo": 0.48430210772833715,
+      "n_control_informativo": 110,
+      "mediana_control_informativo": 0.6286803874092011,
+      "n_brazo_informativo": 110,
+      "mediana_brazo_informativo": 0.5156978922716628,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": true
+     },
+     "Lastarria": {
+      "n_pos_control": 76,
+      "n_pares_decisivo": 76,
+      "mediana_control_decisivo": 0.9597619047619048,
+      "mediana_brazo_decisivo": 0.7383333333333333,
+      "dist_a_1_control": 0.040238095238095184,
+      "dist_a_1_brazo": 0.2616666666666667,
+      "n_control_informativo": 76,
+      "mediana_control_informativo": 0.9597619047619048,
+      "n_brazo_informativo": 76,
+      "mediana_brazo_informativo": 0.7383333333333333,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": true
+     },
+     "NevadosDeChillan": {
+      "n_pos_control": 6,
+      "n_pares_decisivo": 6,
+      "mediana_control_decisivo": 1.2083333333333335,
+      "mediana_brazo_decisivo": 0.6466666666666667,
+      "dist_a_1_control": 0.20833333333333348,
+      "dist_a_1_brazo": 0.3533333333333333,
+      "n_control_informativo": 6,
+      "mediana_control_informativo": 1.2083333333333335,
+      "n_brazo_informativo": 6,
+      "mediana_brazo_informativo": 0.6466666666666667,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     },
+     "PlanchonPeteroa": {
+      "n_pos_control": 44,
+      "n_pares_decisivo": 44,
+      "mediana_control_decisivo": 0.9557777777777778,
+      "mediana_brazo_decisivo": 0.5346666666666666,
+      "dist_a_1_control": 0.04422222222222216,
+      "dist_a_1_brazo": 0.4653333333333334,
+      "n_control_informativo": 44,
+      "mediana_control_informativo": 0.9557777777777778,
+      "n_brazo_informativo": 44,
+      "mediana_brazo_informativo": 0.5346666666666666,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": true
+     },
+     "PuyehueCordonCaulle": {
+      "n_pos_control": 86,
+      "n_pares_decisivo": 86,
+      "mediana_control_decisivo": 1.0209530651340997,
+      "mediana_brazo_decisivo": 0.6342857142857142,
+      "dist_a_1_control": 0.02095306513409967,
+      "dist_a_1_brazo": 0.36571428571428577,
+      "n_control_informativo": 86,
+      "mediana_control_informativo": 1.0209530651340997,
+      "n_brazo_informativo": 86,
+      "mediana_brazo_informativo": 0.6342857142857142,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": true
+     },
+     "Tupungatito": {
+      "n_pos_control": 51,
+      "n_pares_decisivo": 51,
+      "mediana_control_decisivo": 0.562,
+      "mediana_brazo_decisivo": 0.28125,
+      "dist_a_1_control": 0.43799999999999994,
+      "dist_a_1_brazo": 0.71875,
+      "n_control_informativo": 51,
+      "mediana_control_informativo": 0.562,
+      "n_brazo_informativo": 51,
+      "mediana_brazo_informativo": 0.28125,
+      "evaluado": true,
+      "empeora_mas_de_tolerancia": true
+     },
+     "Villarrica": {
+      "n_pos_control": 11,
+      "n_pares_decisivo": 11,
+      "mediana_control_decisivo": 0.8600452488687783,
+      "mediana_brazo_decisivo": 0.14653846153846153,
+      "dist_a_1_control": 0.1399547511312217,
+      "dist_a_1_brazo": 0.8534615384615385,
+      "n_control_informativo": 11,
+      "mediana_control_informativo": 0.8600452488687783,
+      "n_brazo_informativo": 11,
+      "mediana_brazo_informativo": 0.14653846153846153,
+      "evaluado": false,
+      "empeora_mas_de_tolerancia": null
+     }
+    },
+    "volcanes_que_empeoran": [
+     "Isluga",
+     "Lascar",
+     "Lastarria",
+     "PlanchonPeteroa",
+     "PuyehueCordonCaulle",
+     "Tupungatito"
+    ],
+    "cumple": false
+   },
+   "cumple_1_2_3": false
+  }
+ },
+ "controles_instrumento": {
+  "identidad_predicado_node": true,
+  "control_contra_si_mismo": {
+   "perdidas": 0,
+   "ganancias": 0,
+   "dif_neg_limpio": 0.0
+  }
+ }
+}

@@ -1,0 +1,22 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+V1a mediana ponderada: 0 de 300 casos distintos de np.median(np.repeat)
+V1b pesos_bloque: pares del mismo bloque con igual conteo True | suma de conteos de bloques por réplica [3] (n bloques 3)
+    media del conteo por bloque [1.024 0.982 0.994]
+V1c regla_m: MEJORA [-0.3000, -0.0500] | np.percentile 2,5/97,5 de las medianas [-0.3000, -0.0500]
+V1d global_ventana(P2 PIERDE, un estrato de M INDECIDIBLE): ('INDECIDIBLE', False, False)
+    global_ventana(P2 PIERDE, M todo NEUTRO): ('NO CUMPLE (suma de errores)', False, False)
+== VEREDICTO COMBINADO: NO CUMPLE (M empeora) | por ventana [('V1', 'MEJORA'), ('V2', 'NO CUMPLE (M empeora)')]
+V1e combinar(v1_mejora, v2_empeora) -> NO CUMPLE (M empeora)
+== VEREDICTO COMBINADO: DECIDE NICOLAS (M empeora en alguna ventana) | por ventana [('V1', 'DECIDE NICOLAS (M mejora en un estrato y empeora en otro)'), ('V2', 'MEJORA')]
+V1e combinar(v1_mixto, v2_mejora) -> DECIDE NICOLAS (M empeora en alguna ventana)
+== VEREDICTO COMBINADO: DECIDE NICOLAS (M mejora en una sola ventana) | por ventana [('V1', 'MEJORA'), ('V2', 'SIN EFECTO')]
+V1e combinar(v1_mejora, v2_sin) -> DECIDE NICOLAS (M mejora en una sola ventana)
+== VEREDICTO COMBINADO: SIN EFECTO (decide Nicolas) | por ventana [('V1', 'SIN EFECTO | P1b: protegidas que cruzan 1 MW hacia abajo, decide Nicolas'), ('V2', 'SIN EFECTO')]
+V1e combinar(v1_p1b, v2_sin) -> SIN EFECTO (decide Nicolas)
+V1f peor(['MEJORA', 'SIN EFECTO']) = MEJORA | peor(['SIN EFECTO', 'DECIDE NICOLAS (x)']) = DECIDE NICOLAS (x)
+V1g regla con tasa real de falsos 0.050: P(más de 10 de 200) = 0.417
+V1g regla con tasa real de falsos 0.040: P(más de 10 de 200) = 0.180
+V1g regla con tasa real de falsos 0.025: P(más de 10 de 200) = 0.013
+V1h razón K/MIROVA 0.5: nulo sellado (signo de log D/K) MEJORA 0.010 EMPEORA 0.025 | nulo simétrico (signo de d) MEJORA 0.040 EMPEORA 0.020
+V1h razón K/MIROVA 1.0: nulo sellado (signo de log D/K) MEJORA 0.000 EMPEORA 0.185 | nulo simétrico (signo de d) MEJORA 0.025 EMPEORA 0.025
+V1i control positivo, par K=1 M=1,5 D=3: d literal (signo hacia MIROVA, |e| entero) +0.125 | d con tope min(e,a) -0.176

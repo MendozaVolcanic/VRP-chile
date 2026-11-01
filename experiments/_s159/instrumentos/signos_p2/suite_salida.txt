@@ -1,0 +1,94 @@
+Fri Oct 23 18:20:23 UTC 2026
+........................................................................ [  2%]
+........................................................................ [  5%]
+........................................................................ [  8%]
+........................................................................ [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 17%]
+......................s................................................. [ 20%]
+........................................................................ [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 29%]
+........................................................................ [ 31%]
+..........................................s............................. [ 34%]
+........................................................................ [ 37%]
+...........sx.......................................................sss. [ 40%]
+........................................................................ [ 43%]
+........................................................................ [ 46%]
+..........F............................................................. [ 49%]
+........................................................................ [ 52%]
+........................................................................ [ 55%]
+........................................................................ [ 58%]
+........................................................................ [ 61%]
+........................................................................ [ 63%]
+............................ss.......................................... [ 66%]
+................................ssssssss................................ [ 69%]
+........................................................................ [ 72%]
+........................................................................ [ 75%]
+........................................................................ [ 78%]
+........................................................................ [ 81%]
+........................................................................ [ 84%]
+........................................................................ [ 87%]
+........................................................................ [ 90%]
+.......................................ssssss........................... [ 92%]
+...............sssssss.................................................. [ 95%]
+........................................................................ [ 98%]
+..............................                                           [100%]
+================================== FAILURES ===================================
+_________________________ test_csv_max_age_under_48h __________________________
+
+    @pytest.mark.skipif(
+        os.environ.get("SKIP_FRESHNESS_TEST") == "1",
+        reason="Skipped por env var SKIP_FRESHNESS_TEST=1 (e.g. reproc histórico local)",
+    )
+    def test_csv_max_age_under_48h():
+        latest = _latest_date_in_csv(CSV_PATH)
+        assert latest is not None, "CSV sin fechas válidas en columna Fecha_Satelite_UTC."
+    
+        now = datetime.now(timezone.utc)
+        age = now - latest
+>       assert age < timedelta(hours=MAX_AGE_HOURS), (
+            f"latest_consolidado.csv stale: max date = {latest.isoformat()}, "
+            f"age = {age}. Threshold = {MAX_AGE_HOURS}h.\n"
+            f"Probable causa: workflow .github/workflows/sync-mirova-csv.yml "
+            f"caído o Mirova-v1 upstream caído. Ver docs/F49_SCRAPER_MIROVA_DOWN_S77.md "
+            f"para fix manual de emergencia."
+        )
+E       AssertionError: latest_consolidado.csv stale: max date = 2026-10-21T12:45:00+00:00, age = 2 days, 5:39:29.253356. Threshold = 48h.
+E         Probable causa: workflow .github/workflows/sync-mirova-csv.yml caído o Mirova-v1 upstream caído. Ver docs/F49_SCRAPER_MIROVA_DOWN_S77.md para fix manual de emergencia.
+E       assert datetime.timedelta(days=2, seconds=20369, microseconds=253356) < datetime.timedelta(days=2)
+E        +  where datetime.timedelta(days=2) = timedelta(hours=48)
+
+tests\test_mirova_csv_freshness_f49.py:87: AssertionError
+============================== warnings summary ===============================
+tests/test_busqueda_ventana_s157.py: 22 warnings
+  C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\site-packages\earthaccess\results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+    self["size"] = self.size()
+
+tests/test_busqueda_ventana_s157.py: 18 warnings
+tests/test_reproc_brazos_s157.py: 4 warnings
+  C:\vrp-trabajo\s159-evaluador\pipeline\fetch.py:537: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    ahora = ahora or datetime.utcnow()
+
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b22_usa_su_radiancia_medida
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b21_saturado_usa_la_radiancia_de_b21
+tests/test_lambda_por_banda_modis_s157.py::test_sin_flag_queda_el_defecto_de_hoy
+  C:\vrp-trabajo\s159-evaluador\pipeline\detection_context.py:765: RankWarning: Polyfit may be poorly conditioned
+    coeffs = np.polyfit(x, y, 2)  # [a, b, c]
+
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b22_usa_su_radiancia_medida
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b21_saturado_usa_la_radiancia_de_b21
+tests/test_lambda_por_banda_modis_s157.py::test_sin_flag_queda_el_defecto_de_hoy
+  C:\vrp-trabajo\s159-evaluador\pipeline\detection_context.py:786: RankWarning: Polyfit may be poorly conditioned
+    coeffs = np.polyfit(x[inlier_idx], y[inlier_idx], 2)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_mirova_csv_freshness_f49.py::test_csv_max_age_under_48h - A...
+1 failed, 2447 passed, 29 skipped, 1 xfailed, 50 warnings in 333.25s (0:05:33)
+
+real	5m34.906s
+user	0m0.000s
+sys	0m0.015s
+exit suite 1
+Fri Oct 23 18:25:58 UTC 2026

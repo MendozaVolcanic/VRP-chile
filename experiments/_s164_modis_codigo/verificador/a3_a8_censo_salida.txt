@@ -1,0 +1,22 @@
+censo: 5465 records, 5321 ok con port.fisica, ids unicos 5321
+
+== A8 fixtures vs censo ==
+  id 1611 Lascar 2026-04-25 07:35 dtype float32 arreglos_iguales=True campos_ok=True  vrp_regla recalculado=1.1123740911483764 esperado=1.1123740911483764 ok=True
+  id 1638 Lascar 2026-05-10 01:25 dtype float32 arreglos_iguales=True campos_ok=True  vrp_regla recalculado=1.0463826566934584 esperado=1.0463826566934584 ok=True
+  id 1545 Lascar 2026-03-20 07:40 dtype float32 arreglos_iguales=True campos_ok=True  vrp_regla recalculado=3.5205653188750143 esperado=3.5205653188750143 ok=True
+  id 3392 NevadosDeChillan 2026-10-15 07:35 dtype float32 arreglos_iguales=True campos_ok=True  vrp_regla recalculado=18.290625816509124 esperado=18.290625816509124 ok=True
+  id 4943 Villarrica 2026-03-02 02:15 dtype float32 arreglos_iguales=True campos_ok=True  vrp_regla recalculado=None esperado=None ok=True
+
+== A3 extendido: deteccion de la via vs port.fisica en todo el censo ==
+  procesadas 5321; sin grilla npz 0; con alerta (via) 109
+  pixeles distintos via vs port: 0
+  (n_abs, n_p1, n_p2) distintos: 0
+  histograma npix (via): {1: 45, 2: 35, 3: 16, 4: 6, 5: 4, 6: 1, 8: 1, 9: 1}
+
+== A3: VRP via (_fillmissing2_lineal) vs hueco + f273a47a.rellenar, hasta 400 pasadas ==
+  iguales 108, distintos 1, alertas con fondo NaN en la via 1
+  por volcan (iguales, distintos): {'Isluga': [2, 0], 'Lascar': [86, 0], 'Llaima': [4, 0], 'NevadosDeChillan': [13, 0], 'PlanchonPeteroa': [2, 0], 'PuyehueCordonCaulle': [0, 1], 'Villarrica': [1, 0]}
+    id, vol, dt, npix, vrp_via, vrp_f273a47a, n_nan_via, vrp_port: (3933, 'PuyehueCordonCaulle', '2026-03-16 03:10', 1, 2.534755, 0.245619, 1, 0.245619)
+
+tiempo 137 s
+exit 0

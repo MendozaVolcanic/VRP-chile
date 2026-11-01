@@ -1,0 +1,14 @@
+vara (<= 35, decide): MXD03 MAS CERCA | n 65 noches 57
+vara (todas, describe): MXD03 MAS CERCA
+caso A: evaluar_sola -> 'MXD03 MAS CERCA'; evaluador -> 'NO DETIENE'; n=65 noches=57 sat={'AQUA': (34, 2.0), 'TERRA': (31, 2.0)} OK
+vara (<= 35, decide): INTERP MAS CERCA | n 65 noches 57
+vara (todas, describe): INTERP MAS CERCA
+caso B: evaluar_sola -> 'INTERP MAS CERCA'; evaluador -> 'DETIENE'; n=65 noches=57 sat={'AQUA': (34, -2.0), 'TERRA': (31, -2.0)} OK
+vara (<= 35, decide): INDECIDIBLE | n 65 noches 57
+vara (todas, describe): INDECIDIBLE
+caso C: evaluar_sola -> 'INDECIDIBLE'; evaluador -> 'NO DETIENE'; n=65 noches=57 sat={'AQUA': (34, 2.0), 'TERRA': (31, -2.0)} INESPERADO, esperaba ('SESGO POR SATELITE', 'SESGO POR SATELITE')
+vara (<= 35, decide): SIN VARA | n 0 noches 0
+vara (todas, describe): SIN VARA
+caso D: evaluar_sola -> 'SIN VARA'; evaluador -> 'NO DETIENE'; n=0 noches=0 sat={} OK
+RESULTADO: fallas en ['C']
+exit=1

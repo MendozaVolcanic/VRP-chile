@@ -1,0 +1,21 @@
+PROBAR_SOLO='1,3,k' | 5 corridas | arnes y evaluador de D:\vrp-trabajo\worktrees\s155-candado\experiments\_s151_ab_diurno | viejas 42, nuevas 30
+MUTACION ninguna                            NO ATRAPADA          266 s | 89 de 90 OK | fallan ['cobertura_workflow']
+MUTACION h2a_conteo_ultima_raiz             ATRAPADA (prueba)    267 s | 88 de 90 OK | fallan ['cobertura_workflow', 'h2a_matriz']
+        [FALLA] conteo de H2a sobre todas las raíces ({'control': 2, 'diurno': 2})
+MUTACION sha40_desde_13                     ATRAPADA (prueba)    286 s | 88 de 90 OK | fallan ['cobertura_workflow', 'punta_a_punta_k']
+        [FALLA] sha de 39 caracteres: el evaluador se niega con su motivo (no se negó)
+MUTACION sha40_apagado_c0                   ATRAPADA (prueba)    218 s | 69 de 75 OK | fallan ['arnes', 'azar', 'cobertura_workflow', 'punta_a_punta_k', 'solo_protegidas']
+        [FALLA] sha abreviado: el evaluador se niega con su motivo (no se negó)
+        [FALLA] sha de 39 caracteres: el evaluador se niega con su motivo (no se negó)
+        [FALLA] el evaluador se negó a correr: --sha-codigo None no es un commit completo: usar git rev-parse <tag>^{commit} (40 caracteres)
+        [FALLA] el evaluador se negó a correr: --sha-codigo None no es un commit completo: usar git rev-parse <tag>^{commit} (40 caracteres)
+        [FALLA] corrieron los casos de los que dependen 12, 13 y 21 (faltan ['1 solo_protegidas', '3 azar'])
+MUTACION rotulo_siempre_adenda              ATRAPADA (prueba)    260 s | 88 de 90 OK | fallan ['cobertura_workflow', 'solo_protegidas']
+        [FALLA] base c0: la línea final nombra la regla original
+
+RESUMEN
+   control ninguna                            NO ATRAPADA
+   NUEVA   h2a_conteo_ultima_raiz             ATRAPADA (prueba)
+   NUEVA   sha40_desde_13                     ATRAPADA (prueba)
+   NUEVA   sha40_apagado_c0                   ATRAPADA (prueba)
+   NUEVA   rotulo_siempre_adenda              ATRAPADA (prueba)

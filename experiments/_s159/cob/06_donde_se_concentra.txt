@@ -1,0 +1,99 @@
+== por tramo (denominador = filas OSF del tramo) ==
+               osf  faltan   tasa
+tramo                            
+A_antes_0215   357     357  1.000
+B_desde_0215  2577      54  0.021
+
+== tramo A (antes de 2025-02-15) por volcan ==
+                     osf  faltan  dias_distintos
+vol                                             
+Chaiten               23      23              17
+Copahue               31      31              23
+Isluga                40      40              27
+Lascar                50      50              38
+Lastarria             56      56              39
+Llaima                 1       1               1
+NevadosDeChillan       7       7               3
+PlanchonPeteroa       55      55              36
+PuyehueCordonCaulle   84      84              35
+Villarrica            10      10              10
+
+== tramo B (desde 2025-02-15) por volcan ==
+                     osf  faltan  faltan_diurnas   tasa
+vol                                                    
+Chaiten               86       1               0  0.012
+Copahue               86      11              10  0.128
+Isluga               481       1               1  0.002
+Lascar               765       6               5  0.008
+Lastarria            400       3               3  0.008
+Llaima                33       2               2  0.061
+NevadosDeChillan     102      24              24  0.235
+PlanchonPeteroa      240       4               4  0.017
+PuyehueCordonCaulle  352       0               0  0.000
+Villarrica            32       2               0  0.062
+
+== tramo B por Dayflag (denominador = filas OSF del tramo con ese Dayflag) ==
+          osf  faltan
+dayflag              
+0        2528       5
+1          49      49
+
+== tramo B nocturno (Dayflag=0): faltan por sensor ==
+                   osf  faltan
+sensor_esp                    
+MODIS_AQUA         140       1
+MODIS_TERRA        125       4
+VIIRS_NOAA20      1131       0
+VIIRS_NOAA20_750    22       0
+VIIRS_SNPP        1087       0
+VIIRS_SNPP_750      23       0
+
+== tramo A por sensor (denominador OSF del tramo) ==
+                  osf  faltan
+sensor_esp                   
+MODIS_AQUA          3       3
+MODIS_TERRA         1       1
+VIIRS_NOAA20      184     184
+VIIRS_NOAA20_750    2       2
+VIIRS_SNPP        166     166
+VIIRS_SNPP_750      1       1
+
+== tramo A por mes ==
+         osf  faltan
+t                   
+2025-01  251     251
+2025-02  106     106
+
+== Magnitud MIROVA (VRP del OSF, MW) de las faltantes: tramo A nocturnas, tramo B nocturnas, tramo B diurnas, y de las cubiertas ==
+A noche          n=  352 mediana=   0.218 p90=   0.984 max=     5.32 | >=1 MW: 34 | >=0.1 MW: 268
+B noche faltan   n=    5 mediana=   1.274 p90=   9.245 max=    14.39 | >=1 MW: 4 | >=0.1 MW: 5
+B dia faltan     n=   49 mediana= 127.202 p90= 828.633 max=  2178.42 | >=1 MW: 49 | >=0.1 MW: 49
+cubiertas        n= 2523 mediana=   0.416 p90=   2.570 max=   236.14 | >=1 MW: 663 | >=0.1 MW: 2104
+
+== faltantes >= 1 MW por volcan y tramo (alertas protegidas por la regla de 1 MW) ==
+tramo         vol                  dayflag
+A_antes_0215  Chaiten              0           1
+              Copahue              0           1
+              Isluga               0           3
+              Lascar               0           2
+              Lastarria            0           2
+              NevadosDeChillan     0           1
+                                   1           5
+              PuyehueCordonCaulle  0          24
+B_desde_0215  Chaiten              0           1
+              Copahue              0           1
+                                   1          10
+              Isluga               1           1
+              Lascar               0           1
+                                   1           5
+              Lastarria            1           3
+              Llaima               1           2
+              NevadosDeChillan     1          24
+              PlanchonPeteroa      1           4
+              Villarrica           0           1
+
+clase OSF ('class') de faltantes vs cubiertas:
+cls      0     1
+falta           
+False  413  2110
+True    76   335

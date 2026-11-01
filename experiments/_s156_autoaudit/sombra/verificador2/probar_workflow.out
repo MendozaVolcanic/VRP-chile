@@ -1,0 +1,24 @@
+claves raiz: ['name', 'on', 'permissions', 'concurrency', 'jobs']
+on: {'workflow_dispatch': None, 'workflow_run': {'workflows': ['Experimental diario (laboratorio congelado, 11 Tier A)'], 'types': ['completed']}}
+bash -n open_issue: 0
+=== falla_script: rc=0
+   stdout: 
+   gh.log: GH issue list --state open --search in:title "Vigilancia de la sombra de K: el script fallo" --json number --jq length ¶ GH issue create --title Vigilancia de la sombra de K: el script fallo: 2026-10-19 --body scripts/vigilancia_sombra.py no termino (run https://github.com/o/r/actions/runs/123). Mientras no corra, nadie vigila si K pierde alertas que el detector anterior veia. ¶ TITLE<<Vigilancia de la sombra de K: el script fallo: 2026-10-19>> ¶ BODY<<scripts/vigilancia_sombra.py no termino (run https://github.com/o/r/actions/runs/123). Mientras no corra, nadie vigila si K pierde alertas que el detector anterior veia.>>
+=== reversion: rc=0
+   stdout: veredicto: REVERSION_CANDIDATA
+   gh.log: GH issue list --state open --search in:title "Sombra de K: candidata a reversion" --json number --jq length ¶ GH issue create --title Sombra de K: candidata a reversion: 2026-10-19 --body La vigilancia de la sombra encontro una alerta protegida de MIROVA (1 MW o mas) que la sombra (detector C0) publica y produccion (K) calla: ¶  ¶ - REVERSION CANDIDATA: PuyehueCordonCaulle VIIRS750 2026-10-20 05:54 UTC, MIROVA 1.19 MW: la sombra publica y produccion calla ¶ - aviso: aviso con 100% y una barra \ invertida y comillas "x" y $HOME ¶  ¶ La regla (experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9) pre-autoriza revertir K con git revert del PR de adopcion, DESPUES de confirmar la alerta en la cabecera de la imagen de MIROVA (mirova-tif-archive, index_png.csv). Avisar a Nicolas hoy. ¶ Detalle: data/audit_continuous/sombra_latest.json. ¶ TITLE<<Sombra de K: candidata a reversion: 2026-10-1
+=== reversion_ya_abierto: rc=0
+   stdout: veredicto: REVERSION_CANDIDATA | ya hay un issue abierto de esta clase: Sombra de K: candidata a reversion
+   gh.log: GH issue list --state open --search in:title "Sombra de K: candidata a reversion" --json number --jq length
+=== investigar: rc=0
+   stdout: veredicto: INVESTIGAR
+   gh.log: GH issue list --state open --search in:title "Sombra de K: investigar" --json number --jq length ¶ GH issue create --title Sombra de K: investigar: 2026-10-19 --body La vigilancia de la sombra encontro un disparador de investigacion (sin reversion automatica): ¶  ¶ - persistencia: Isluga noches ['2026-10-20', '2026-10-21', '2026-10-22'] ¶  ¶ Regla: experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9. ¶ Detalle: data/audit_continuous/sombra_latest.json. ¶ TITLE<<Sombra de K: investigar: 2026-10-19>> ¶ BODY<<La vigilancia de la sombra encontro un disparador de investigacion (sin reversion automatica): ¶  ¶ - persistencia: Isluga noches ['2026-10-20', '2026-10-21', '2026-10-22'] ¶  ¶ Regla: experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9. ¶ Detalle: data/audit_continuous/sombra_latest.json.>>
+=== ciega_temprana: rc=0
+   stdout: veredicto: VIGILANCIA_CIEGA
+   gh.log: GH issue list --state open --search in:title "Sombra de K: vigilancia ciega" --json number --jq length ¶ GH issue create --title Sombra de K: vigilancia ciega: 2026-10-19 --body La vigilancia de la sombra no puede mirar: ¶  ¶ - aviso: no se leyeron DATOS_K_DESDE_UTC ¶  ¶ Una vigilancia ciega no da error, da VERDE: por eso este issue. Revisar experimental-diario.yml y frontend/cambio_detector.js. ¶ Detalle: data/audit_continuous/sombra_latest.json. ¶ TITLE<<Sombra de K: vigilancia ciega: 2026-10-19>> ¶ BODY<<La vigilancia de la sombra no puede mirar: ¶  ¶ - aviso: no se leyeron DATOS_K_DESDE_UTC ¶  ¶ Una vigilancia ciega no da error, da VERDE: por eso este issue. Revisar experimental-diario.yml y frontend/cambio_detector.js. ¶ Detalle: data/audit_continuous/sombra_latest.json.>>
+=== verde: rc=0
+   stdout: veredicto: VERDE | sin issue
+=== gh_list_falla: rc=1
+   stdout: veredicto: REVERSION_CANDIDATA
+   stderr: error de red
+   gh.log: GH issue list --state open --search in:title "Sombra de K: candidata a reversion" --json number --jq length

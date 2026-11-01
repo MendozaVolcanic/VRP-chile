@@ -1,0 +1,30 @@
+VE-01, punto de MIROVA leído de 03: {'z': 21.3, 'lat': -33.36939, 'lon': -69.7281}
+
+1. mosaicos Sentinel-2 cloudless 2016 (EOX, CC BY 4.0)
+  mosaico sat_Tupungatito_z12.jpg: zoom 12, 7 x 8 teselas, 1.05 MB, bounds S -33.7243 N -33.1376 W -70.1367 E -69.5215
+  mosaico sat_Tupungatito_z14.jpg: zoom 14, 10 x 7 teselas, 0.66 MB, bounds S -33.4498 N -33.3213 W -69.8950 E -69.6753
+  mosaico sat_PuyehueCordonCaulle_z12.jpg: zoom 12, 7 x 8 teselas, 0.58 MB, bounds S -40.8471 N -40.3130 W -72.4219 E -71.8066
+  mosaico sat_PuyehueCordonCaulle_z14.jpg: zoom 14, 9 x 10 teselas, 0.59 MB, bounds S -40.6306 N -40.4637 W -72.2681 E -72.0703
+  mosaico sat_Isluga_z12.jpg: zoom 12, 6 x 6 teselas, 0.56 MB, bounds S -19.3941 N -18.8959 W -69.0820 E -68.5547
+  mosaico sat_Isluga_z14.jpg: zoom 14, 7 x 6 teselas, 0.29 MB, bounds S -19.2074 N -19.0829 W -68.9062 E -68.7524
+
+  datos_mapa.js: 0.87 MB
+
+2. (a) cráter mes a mes: TIF de MIROVA de noche (presente / TIF) contra nuestros records VIIRS 375 (detectado / pasadas)
+  Tupungatito: 2026-05 TIF 33 % (n 42) / nuestro 44 % (n 133); 2026-06 TIF 25 % (n 44) / nuestro 30 % (n 125); 2026-07 TIF 12 % (n 41) / nuestro 15 % (n 123); 2026-08 TIF 15 % (n 34) / nuestro 19 % (n 130); 2026-09 TIF 25 % (n 40) / nuestro 27 % (n 128)
+    Spearman de los 5 meses: 0.97
+  PuyehueCordonCaulle: 2026-05 TIF 52 % (n 44) / nuestro 50 % (n 145); 2026-06 TIF 40 % (n 53) / nuestro 32 % (n 139); 2026-07 TIF 40 % (n 52) / nuestro 32 % (n 139); 2026-08 TIF 11 % (n 38) / nuestro 16 % (n 140); 2026-09 TIF 63 % (n 43) / nuestro 35 % (n 143)
+    Spearman de los 5 meses: 0.87
+  Isluga: 2026-05 TIF 36 % (n 42) / nuestro 60 % (n 114); 2026-06 TIF 43 % (n 46) / nuestro 67 % (n 107); 2026-07 TIF 38 % (n 40) / nuestro 56 % (n 104); 2026-08 TIF 37 % (n 27) / nuestro 46 % (n 107); 2026-09 TIF 39 % (n 36) / nuestro 47 % (n 112)
+    Spearman de los 5 meses: 0.30
+
+2. (b) cúmulos publicados: distancia al cráter y repetición (otro cúmulo publicado de la misma etiqueta a <= 1 km)
+  Tupungatito neg_limpio: n 16; por distancia al cráter {'0-2': 12, '5-10': 4}; a más de 2 km 4, de ésos con otro a <= 1 km 0; por sensor {'VIIRS750': 4, 'VIIRS375': 12}
+    a más de 2 km por sensor: {'VIIRS750': 2, 'VIIRS375': 2}; VRP p50 0.102 MW, máx 0.44 MW
+  Tupungatito pos: n 163; por distancia al cráter {'0-2': 162, '2-5': 1}; a más de 2 km 1, de ésos con otro a <= 1 km 0; por sensor {'VIIRS375': 161, 'VIIRS750': 2}
+  PuyehueCordonCaulle neg_limpio: n 107; por distancia al cráter {'0-2': 38, '10-20': 57, '2-5': 8, '5-10': 4}; a más de 2 km 69, de ésos con otro a <= 1 km 19; por sensor {'MODIS': 39, 'VIIRS750': 30, 'VIIRS375': 38}
+    a más de 2 km por sensor: {'MODIS': 26, 'VIIRS750': 13, 'VIIRS375': 30}; VRP p50 0.370 MW, máx 5.00 MW
+  PuyehueCordonCaulle pos: n 309; por distancia al cráter {'0-2': 303, '10-20': 1, '2-5': 3, '5-10': 2}; a más de 2 km 6, de ésos con otro a <= 1 km 2; por sensor {'VIIRS375': 262, 'VIIRS750': 47}
+  Isluga neg_limpio: n 16; por distancia al cráter {'0-2': 14, '2-5': 2}; a más de 2 km 2, de ésos con otro a <= 1 km 0; por sensor {'VIIRS375': 5, 'VIIRS750': 10, 'MODIS': 1}
+    a más de 2 km por sensor: {'VIIRS375': 1, 'VIIRS750': 1}; VRP p50 0.214 MW, máx 0.42 MW
+  Isluga pos: n 326; por distancia al cráter {'0-2': 322, '2-5': 4}; a más de 2 km 4, de ésos con otro a <= 1 km 0; por sensor {'VIIRS375': 308, 'VIIRS750': 18}

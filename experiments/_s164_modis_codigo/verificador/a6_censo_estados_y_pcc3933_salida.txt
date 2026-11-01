@@ -1,0 +1,21 @@
+estados (estado, port_estado, port_grilla):
+   ('ok', 'ok', None) 5276
+   ('ok', 'volcan_fuera_del_granulo', None) 144
+   ('ok', 'ok', 'grilla_incompleta') 45
+
+port sin record (ok pero port_estado != ok), por (port_estado, pub K):
+   ('volcan_fuera_del_granulo', 0) 144
+ejemplos con K publicando donde el port no dio record:
+
+PCC id 3933 2026-03-16 03:10: alerta en fila 23 col 24 zona BOX 2; celdas NaN en la grilla: 1294 de 2601; port_grilla=None
+vecindario 9 x 9 de MIR (NaN = sin dato):
+    0.114  0.111  0.117   nan    nan    nan    nan    nan    nan 
+    0.115  0.112  0.111  0.124   nan    nan    nan    nan    nan 
+    0.120  0.117  0.113  0.120   nan    nan    nan    nan    nan 
+    0.127  0.133  0.114  0.116  0.102   nan    nan    nan    nan 
+    0.134  0.136  0.121  0.115  0.134   nan    nan    nan    nan 
+    0.137  0.139  0.140  0.116  0.120   nan    nan    nan    nan 
+    0.140  0.141  0.143  0.130  0.117  0.112   nan    nan    nan 
+    0.140  0.142  0.145  0.144  0.119  0.132   nan    nan    nan 
+    0.141  0.143  0.141  0.136  0.134  0.119   nan    nan    nan 
+K en esa pasada: {'dc': None, 'fuente': None, 'final_lat': None, 'final_lon': None, 'final_dist': None, 'pc_lat': None, 'pc_lon': None, 'pc_dist': None, 'pc_vrp': None, 'n_anom': 0, 'vrp_mw': 0, 'sensor': 'MODIS_TERRA', 'cenit': 65.2, 'datetime_utc': '2026-03-16 03:10', 'triggered_test1': False, 'test1_k_observed': 0.0, 'hotspot_dist_km': None, 'discarded_reason': None, 'vrp_vent_mw': 0.0, 'diag_a46_relabel': None, 'final_hotspot_source': None, 'pc_n_pixels': None, 't_bg_k': 262.83, 't_max_k': 267.14, 'diag_n_first_pass_pixels': 0, 'diag_n_first_pass_summit': 0, 'diag_n_second_pass_recapture': 0, 'diag_sigma_bg_k': 2.175, 'diag_n_bg_anillo': 127, 'sensor_zenith_deg': 65.2, 'sensor_azimuth_deg': -109.97, 'geo_class': None} pub K: 0 lab: neg_limpio vrp_mirova: None

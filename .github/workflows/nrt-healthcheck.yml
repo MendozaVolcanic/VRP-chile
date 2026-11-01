@@ -278,6 +278,29 @@ jobs:
           PYEOF
 
       # ────────────────────────────────────────────────────────────────
+      # S159: vigilancia por PLATAFORMA (cese de Suomi NPP el 2026-11-02 13:00 UTC).
+      #
+      # POR QUE VA ACA: el paso de frescura de arriba mira la edad del ultimo record
+      # de cada volcan, con cualquier sensor. Si un satelite deja de entregar, CMR da
+      # cero granulos, el NRT sale verde con "Cobertura: completa" y el volcan sigue
+      # fresco por las otras plataformas: nadie se entera. Este paso cuenta records
+      # por plataforma en 72 h (ventana medida, ver scripts/vigilar_plataformas.py).
+      # Cese anunciado y cumplido (scripts/ceses_esperados.json): un issue informativo,
+      # una sola vez. Cualquier otra plataforma callada: issue de alarma, comentado
+      # mientras dure y cerrado al recuperarse. Si callan todas, es caida general y la
+      # cubre el paso de frescura, asi que no abre nada propio.
+      #
+      # `if: always()`: un paso previo en rojo no debe apagar esta vigilancia.
+      # ────────────────────────────────────────────────────────────────
+      - name: Vigilancia por plataforma (ceses esperados y alarma)
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          python scripts/vigilar_plataformas.py --issues
+
+      # ────────────────────────────────────────────────────────────────
       # S133 — Puntualidad del cron, no solo frescura del dato.
       #
       # POR QUE VA ACA Y NO EN UN WORKFLOW NUEVO: agregar otro cron empeoraria

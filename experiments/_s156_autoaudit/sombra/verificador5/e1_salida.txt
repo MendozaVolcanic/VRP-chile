@@ -1,0 +1,32 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+P1 empate de instante en el borde 29/30 (dos candidatas del mismo granulo, volcanes distintos)
+    ('REVERSION_CANDIDATA', [('Llaima', '2026-10-25 06:00')], [('Villarrica', '2026-10-25 06:00')], 30)
+P2 fila tardia de la referencia con instante ANTERIOR: la candidata 29.a pasa a ser la 30.a
+    dia 1: ('REVERSION_CANDIDATA', [('Villarrica', '2026-10-25 07:20')], [], 29)
+    dia 2 (llega una protegida anterior): ('CANDIDATA_FUERA_DE_PLAZO', [], [('Villarrica', '2026-10-25 07:20')], 30)
+    dia 3 (el consolidado pierde dos filas): ('REVERSION_CANDIDATA', [('Villarrica', '2026-10-25 07:20')], [], 28)
+P3 la sombra llega tarde a una pasada anterior (sombra_pub None -> True)
+    sombra sin record: ('REVERSION_CANDIDATA', [('Villarrica', '2026-10-25 07:20')], [], 29)
+    sombra con record: ('CANDIDATA_FUERA_DE_PLAZO', [], [('Villarrica', '2026-10-25 07:20')], 30)
+P4 borde del vencimiento (adopcion 2026-10-18 09:57:30, +120 d = 2027-02-15 09:57:30)
+    2027-02-14 23:59:59 ('REVERSION_CANDIDATA', [('Villarrica', '2027-02-14 23:59')], [])
+    2027-02-15 00:00:00 ('CANDIDATA_FUERA_DE_PLAZO', [], [('Villarrica', '2027-02-15 00:00')])
+    2027-02-15 05:00:00 ('CANDIDATA_FUERA_DE_PLAZO', [], [('Villarrica', '2027-02-15 05:00')])
+    2027-02-15 09:57:29 ('CANDIDATA_FUERA_DE_PLAZO', [], [('Villarrica', '2027-02-15 09:57')])
+    2027-02-15 09:57:30 ('CANDIDATA_FUERA_DE_PLAZO', [], [('Villarrica', '2027-02-15 09:57')])
+P5 protegida sin record de produccion (prod_pub None) cuenta como vista; sin record de sombra, no
+    ('VERDE', [], [], 1)
+P6 juzgadas en tres noches seguidas: INVESTIGAR por persistencia, para siempre
+    2026-10-25 INVESTIGAR [{'volcano': 'Villarrica', 'noches': ['2026-10-22', '2026-10-23', '2026-10-24']}]
+    2026-12-31 INVESTIGAR [{'volcano': 'Villarrica', 'noches': ['2026-10-22', '2026-10-23', '2026-10-24']}]
+    2027-06-01 INVESTIGAR [{'volcano': 'Villarrica', 'noches': ['2026-10-22', '2026-10-23', '2026-10-24']}]
+    2028-01-01 INVESTIGAR [{'volcano': 'Villarrica', 'noches': ['2026-10-22', '2026-10-23', '2026-10-24']}]
+    y sin juzgar, una sola racha de 3 Muy Bajo (no protegidas) tambien queda para siempre:
+    2026-10-25 INVESTIGAR
+    2028-01-01 INVESTIGAR
+P7 candidata juzgada fuera de plazo: no dispara FUERA (codigo actual)
+    ('VERDE', [], [], 1)
+P8 reversion y fuera de plazo en la misma corrida: gana REVERSION (prioridad sin prueba)
+    ('REVERSION_CANDIDATA', [('Villarrica', '2026-10-25 07:20')], [('Llaima', '2026-10-26 07:20')], 30)
+P9 la juzgada ocupa un lugar en las 29 (cuenta en el orden): la 30.a por eso queda fuera
+    ('CANDIDATA_FUERA_DE_PLAZO', [], [('Villarrica', '2026-10-25 07:20')], 30)

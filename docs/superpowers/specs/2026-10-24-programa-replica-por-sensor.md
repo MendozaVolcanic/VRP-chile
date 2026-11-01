@@ -186,7 +186,9 @@ magnitud); tarea 1.14 «D25 es la palanca que más mueve» y las tareas 1.29 y 1
 el fondo» (Etna, N = 1); AUDIT_S158 §0.3 sobre la compuerta; AUDIT_S158_R2 §2 «el port es vara a pocos por ciento»
 (sólo con 2 o más píxeles); D-13 y la «cobertura PAREJA» de los A/B; D17 «consecuencia NO» y la tarea 1.36; el radio de
 20 km de PCC (condicionado a V750-B); la tarea 1.7 (caja 5 × 5, medida con `_interp_geo`); F5-09 (ahora con
-mecanismo, verificado como D17); «MIROVA usa MOD03» (en disputa hasta MOD-A).
+mecanismo, verificado como D17); «MIROVA usa MOD03» (en disputa hasta MOD-A). ⚠️ **S162, 2026-10-25 (A113)**: MOD-A resuelto en el PR #902 (Coppola
+2026 Sci Data p. 4, con p. 3 y p. 6): MOD03 es insumo también en el NRT; el método del remuestreo sigue SIN LOCALIZAR.
+D35 queda registrada en el PR #906 con el veredicto de MxD03 (CUMPLE SIN DAÑO).
 
 ## 11. Sesiones hijas (cada una con su loop)
 

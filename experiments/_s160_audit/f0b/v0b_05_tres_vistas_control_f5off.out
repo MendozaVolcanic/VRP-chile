@@ -1,0 +1,23 @@
+volcanes en index: 45 | en mosaico: 11 | en tabla de diario: 11
+volcanes donde innerKm efectivo index != diario (index ?? 10 / diario ?? 5): 34 Taapaca:10/5 Parinacota:10/5 Guallatiri:10/5 Irruputuncu:10/5 OlcaParuma:10/5 Ollague:10/5 SanPedro:10/5 Putana:10/5 ...
+records: 74811 (ultimos 90 dias desde 2026-10-21 08:10: 10479)
+MODIS con cumulo en el inner, pixeles anomalos y pc.vrp_mw == 0: 37 | de ellos con alerta MIROVA +-60 min (index _mirova_confirmed): 9
+
+[diario grafica > 0 pero index no lo titularía: isSummitDetection false (vrp_mw==0 && discarded_reason, o distance_class ausente)] total 2 | 90d 0
+   ej: PuyehueCordonCaulle 2025-11-17 06:24 VIIRS_NOAA21 dia=0.037 vrp_mw=0 dr=eruption_hotspot_too_far dc=summit
+   ej: PuyehueCordonCaulle 2026-01-17 04:54 VIIRS_NOAA20 dia=0.165 vrp_mw=0 dr=eruption_hotspot_too_far dc=summit
+
+[diario_chart != mosaico_chart] total 6801 | 90d 710
+   ej: Chaiten 2025-02-15 05:42 VIIRS_NOAA21 dia=0.071 mos=0.0714
+   ej: Chaiten 2025-02-19 04:30 VIIRS_NOAA21 dia=0.08 mos=0.0799
+   ej: Chaiten 2025-02-19 05:18 VIIRS_NOAA20 dia=0.075 mos=0.0755
+
+[index_chart != diario_chart: otra] total 6801 | 90d 710
+   ej: Chaiten 2025-02-15 05:42 VIIRS_NOAA21 idx=0.0714 dia=0.071
+   ej: Chaiten 2025-02-19 04:30 VIIRS_NOAA21 idx=0.0799 dia=0.08
+   ej: Chaiten 2025-02-19 05:18 VIIRS_NOAA20 idx=0.0755 dia=0.075
+
+== control positivo ==
+record sintetico vrp_mw=0+discarded_reason, pc=3.3 @1 km: index chart 3.3 | diario 3.3 | mosaico 3.3 | tarjeta index: false | tarjeta mosaico: false
+record legacy sin pc, far, 60 GW: index 0 | diario 0 | mosaico 0
+record legacy sin pc, sin distance_class, 2 MW: index 2 | diario 2 | mosaico 2

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="1.417" timestamp="2026-10-22T11:40:44.297878-03:00" hostname="Nico"><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_detalle_dice_los_sorteos_y_la_semilla_que_la_calibracion_uso" time="0.060"><failure message="AssertionError: {'calibrada': True, 'falsos_bloquea': 0.3, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...}&#10;assert (1000, 161) == (20, 7)&#10;  &#10;  At index 0 diff: 1000 != 20&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x0000022542205700&gt;
+
+    def test_el_detalle_dice_los_sorteos_y_la_semilla_que_la_calibracion_uso(monkeypatch):
+        """V42-04 (verificador de D-42): n_sorteos y semilla_calibracion tienen que salir de lo que calibrar_p2 usó, no de
+        las constantes; si no, una llamada con otros números seguiría declarando 1.000 y 161 (A116)."""
+        _tiene("calibrar_p2")
+        original = X.calibrar_p2
+    
+        def otra(c, bloques, W, n_rep=None, semilla=None):
+            return original(c, bloques, W, n_rep=20, semilla=7)
+        monkeypatch.setattr(X, "calibrar_p2", otra)
+        v, det = X.decidir_p2_bloques(_contrib(MEZCLA), ok_ctrl=True)
+&gt;       assert (det["n_sorteos"], det["semilla_calibracion"]) == (20, 7), det
+E       AssertionError: {'calibrada': True, 'falsos_bloquea': 0.3, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...}
+E       assert (1000, 161) == (20, 7)
+E         
+E         At index 0 diff: 1000 != 20
+E         Use -v to get more diff
+
+tests\test_evaluar_d25_calib_p2_s160.py:190: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_contar_publica_el_veredicto_calibrado_y_no_el_sin_calibrar" time="0.388" /></testsuite></testsuites>

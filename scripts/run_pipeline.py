@@ -1,3 +1,21 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · run_pipeline.py  ·  SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Punto de entrada del sistema: para cada volcan y dia busca las escenas, corre la
+#                 deteccion por sensor y guarda los registros que publica el tablero. Al final dice que
+#                 parte de la cobertura falto, para que un dato ausente no pase por «no hubo nada».
+# Lógica        : Recorre volcanes y dias (el NRT: hoy y los 7 anteriores), llama a pipeline/fetch.py y a
+#                 los procesadores MODIS / VIIRS 375 m / VIIRS 750 m, y guarda con pipeline/store.py. La
+#                 cobertura informa fallas, plataformas que faltaron (S161: cese o cero granulos) y, por volcan y
+#                 dia, busquedas vacias, L1B sin geolocalizacion y dias parciales (S159, I1).
+# Modelo/método : Reglas deterministicas (orquestacion). Sin aprendizaje automatico.
+# Datos entrada : volcanoes.yaml, perfil de pipeline/profiles/, granulos L1B de NASA. SIN datos personales.
+# Variables     : Perfil, volcanes, ventana de fechas, filtro nocturno, modo estricto de cobertura.
+# Limitaciones  : El NRT no usa el modo estricto: una cobertura incompleta avisa y sale 0, y la corrida
+#                 siguiente vuelve a intentar. Una plataforma que falta se informa como nota, sin cambiar el
+#                 codigo de salida.
+# Refs/datos    : docs/AUDIT_S160.md (hallazgo 241); experiments/_s157_busqueda_ventana/MEDICION.md.
+#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """
 run_pipeline.py — Main entry point for the VRP processing pipeline.
 
@@ -228,7 +246,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
-                        print(f"  No geolocation match for {l1b.name}")
+                        _sin_geolocalizacion(volcano, date, platform, l1b)  # S159 (I1, VB-1)
                         continue
                     try:
                         eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
@@ -242,6 +260,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             active_water_bodies=volcano.get("active_water_bodies"),
                             lbg_global_compatible=volcano.get("lbg_global_compatible", False),
                             local_kernel_bg_compatible=volcano.get("local_kernel_bg", False),
+                            al_sin_dato=_crater_sin_dato(volcano, date, platform),  # S165 (V165-03)
                         )
                         if result:
                             store.append_record(volcano["name"], result,
@@ -271,7 +290,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
-                        print(f"  No geolocation match for {l1b.name}")
+                        _sin_geolocalizacion(volcano, date, platform, l1b)  # S159 (I1, VB-1)
                         continue
                     try:
                         eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
@@ -297,12 +316,14 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                                 max_cluster_pixels=volcano.get("max_cluster_pixels"),
                                                 inner_radius_km=volcano.get("inner_radius_km"),
                                                 volcanic_features=VOLCANIC_FEATURES.get(volcano["name"]))
-                            vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
-                                        f"({result['n_vent_pixels']}px)"
+                            # S165: con .get, porque un record de la vía «código MIROVA» (flag apagado hoy) no trae
+                            # los campos de K y el KeyError salía como ERROR de un record ya guardado.
+                            vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw')} MW "
+                                        f"({result.get('n_vent_pixels')}px)"
                                         if eff_vent_lat is not None else "")
-                            print(f"  {result['sensor']} (375m) | VRP_MIR={result['vrp_mir_mw']} MW | "
-                                  f"VRP_TIR={result['vrp_tir_mw']} MW | "
-                                  f"T_max={result['t_max_i04_k']} K"
+                            print(f"  {result['sensor']} (375m) | VRP_MIR={result.get('vrp_mir_mw')} MW | "
+                                  f"VRP_TIR={result.get('vrp_tir_mw')} MW | "
+                                  f"T_max={result.get('t_max_i04_k')} K"
                                   f"{vent_str}")
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")
@@ -318,7 +339,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
-                        print(f"  No geolocation match for {l1b.name}")
+                        _sin_geolocalizacion(volcano, date, platform, l1b)  # S159 (I1, VB-1)
                         continue
                     try:
                         eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
@@ -351,8 +372,10 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         print(f"  ERROR processing {l1b.name}: {e}")
 
     finally:
-        # Always delete raw granules after processing
-        if volcano_tmp.exists():
+        # Always delete raw granules after processing.
+        # S157: salvo VRP_CONSERVAR_GRANULOS=1, que pone scripts/reproc_brazos.py para que el
+        # brazo siguiente del A/B use los mismos gránulos; el driver borra el día al terminar.
+        if volcano_tmp.exists() and os.environ.get("VRP_CONSERVAR_GRANULOS") != "1":
             import time, stat
             def _remove_readonly(func, path, _):
                 os.chmod(path, stat.S_IWRITE)
@@ -364,6 +387,24 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                 except PermissionError:
                     time.sleep(1)
             print(f"  Cleaned up {volcano_tmp}")
+
+
+def _sin_geolocalizacion(volcano: dict, date: datetime, platform: str, l1b: Path) -> None:
+    """S159 (I1, VB-1): un L1B en disco sin su archivo de geolocalización. Antes sólo se imprimía y la cobertura
+    decía «completa»; ahora queda como incidencia (pipeline/fetch.py, TIPOS_INCIDENCIA). Función aparte, y no tres
+    líneas en cada procesador, para no correr las citas archivo:línea de CLAUDE.md (guard G8)."""
+    print(f"  No geolocation match for {l1b.name}")
+    fetch.registrar_incidencia("sin_geolocalizacion", volcano["name"], date.strftime("%Y-%m-%d"), platform,
+                               f"L1B en disco sin su geolocalización: {l1b.name}")
+
+
+def _crater_sin_dato(volcano: dict, date: datetime, platform: str):
+    """S165 (V165-03): aviso que process_modis.calculate_vrp llama cuando descarta la pasada porque el cráter no tiene
+    posición en el gránulo (ENABLE_MODIS_CRATER_SIN_DATO, apagado). Sin esto la pasada desaparecía y la cobertura
+    decía «completa». No cuenta en modo estricto (pipeline/fetch.py, TIPOS_INCIDENCIA)."""
+    def anotar(motivo: str) -> None:
+        fetch.registrar_incidencia("crater_sin_dato", volcano["name"], date.strftime("%Y-%m-%d"), platform, motivo)
+    return anotar
 
 
 def _time_key(filename: str) -> str:
@@ -397,6 +438,144 @@ def default_date_window(today: datetime, lookback_days: int = 7):
     return [today - timedelta(days=d) for d in range(lookback_days, -1, -1)]
 
 
+def informar_cobertura(fallas: list, ruta_json=None, estricto: bool = False,
+                       plataformas: dict | None = None, incidencias: list | None = None) -> int:
+    """S157: dice qué búsquedas y descargas no se pudieron hacer, y devuelve el código de salida.
+
+    POR QUÉ: con CMR caído cada búsqueda caía en un WARN y el job salía verde sin datos
+    (experiments/_s157_busqueda_ventana/MEDICION.md §3). En un reproceso eso deja un tramo
+    viejo o vacío pasando por hecho (A108); con --estricto-cobertura el job sale con 3. El NRT
+    no usa el modo estricto: avisa y sigue, porque la corrida siguiente vuelve a intentar.
+
+    S161: `plataformas` es `fetch.cobertura_por_plataforma()`. POR QUÉ: un satélite que deja de
+    entregar da cero gránulos, que no es una falla, y la corrida decía «completa» aunque faltara
+    una plataforma entera (hallazgo 241 de docs/AUDIT_S160.md). Ahora «completa» exige además que
+    ninguna plataforma esté retirada por cese anunciado ni haya dado cero en todas sus búsquedas.
+    Eso se informa como nota y no cambia el código de salida: un cese anunciado es permanente y no
+    debe dejar rojo cada reproceso que cruce su fecha, y en un día suelto cero gránulos puede ser
+    legítimo. Que el modo estricto falle por una plataforma muda queda como decisión aparte.
+
+    S159 (I1; AUDIT_S158_R2, R2-9 y VB-1), portado en S163: `incidencias` es
+    `fetch.incidencias_de_cobertura()`, lo que no es falla pero tampoco es cobertura completa, por
+    volcán y día: búsqueda sin gránulos (sin juicio: no cuenta ni en modo estricto), L1B sin
+    geolocalización y día parcial (cuentan en modo estricto). Con cualquiera de ellas el resumen deja
+    de decir «completa». Sin modo estricto el código de salida sigue en 0 (el NRT no cambia de color).
+    S165 (V165-03): `crater_sin_dato`, la pasada MODIS que ENABLE_MODIS_CRATER_SIN_DATO (apagado)
+    descarta porque el cráter no tiene posición en el gránulo; no cuenta en modo estricto.
+    """
+    import json
+    from collections import defaultdict
+    plataformas = plataformas or {}
+    incidencias = list(incidencias or [])
+    cuentan = any(i.get("cuenta_estricto") for i in incidencias)
+    retiradas = sorted(p for p, c in plataformas.items() if c.get("retirada"))
+    sin_granulos = sorted(p for p, c in plataformas.items()
+                          if c.get("sin_granulos") and not c.get("con_granulos") and not c.get("retirada"))
+    if ruta_json:
+        Path(ruta_json).parent.mkdir(parents=True, exist_ok=True)
+        with open(ruta_json, "w", encoding="utf-8") as fh:
+            json.dump({"fallas": fallas, "n": len(fallas), "plataformas": plataformas,
+                       "retiradas": retiradas, "sin_granulos": sin_granulos,
+                       "incidencias": incidencias, "n_incidencias": len(incidencias)},
+                      fh, ensure_ascii=False, indent=1)
+    if not fallas and not retiradas and not sin_granulos and not incidencias:
+        print("Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).")
+        return 0
+    if retiradas or sin_granulos:
+        notas = [f"{p}: no se buscó en {plataformas[p]['retirada']} volcán-día por cese anunciado desde "
+                 f"{plataformas[p]['cese_desde']} UTC (scripts/ceses_esperados.json)" for p in retiradas]
+        notas += [f"{p}: ningún gránulo en sus {plataformas[p]['sin_granulos']} búsquedas de la corrida "
+                  f"(¿la plataforma dejó de entregar?)" for p in sin_granulos]
+        print("Cobertura: faltan plataformas enteras (nota, no es búsqueda fallida).")
+        for n in notas:
+            print(f"  {n}")
+        if sin_granulos and os.environ.get("GITHUB_ACTIONS") == "true":
+            print(f"::warning title=Plataforma sin gránulos::{', '.join(sin_granulos)} no dio ningún "
+                  f"gránulo en toda la corrida", flush=True)
+        resumen = os.environ.get("GITHUB_STEP_SUMMARY")
+        if resumen:
+            try:
+                with open(resumen, "a", encoding="utf-8") as fh:
+                    fh.write("### Plataformas que faltan\n" + "\n".join(f"- {n}" for n in notas) + "\n")
+            except OSError:
+                pass
+    if incidencias:
+        _informar_incidencias(incidencias, hay_fallas=bool(fallas))
+    if not fallas:
+        return 3 if (estricto and cuentan) else 0
+    por_volcan = defaultdict(lambda: defaultdict(list))
+    for f in fallas:
+        por_volcan[f.get("volcan") or "?"][f.get("fecha") or "?"].append(f)
+    print(f"Cobertura INCOMPLETA: {len(fallas)} búsquedas o descargas fallidas.")
+    resumen = os.environ.get("GITHUB_STEP_SUMMARY")
+    lineas = []
+    for volcan, por_fecha in sorted(por_volcan.items()):
+        for fecha, fs in sorted(por_fecha.items()):
+            detalle = ", ".join(f"{x.get('plataforma')}:{x.get('etapa')}" for x in fs)
+            print(f"  {volcan} {fecha}: {detalle} | {fs[0].get('motivo', '')[:100]}")
+            lineas.append(f"- {volcan} {fecha}: {detalle}")
+        if os.environ.get("GITHUB_ACTIONS") == "true":
+            fechas = sorted(por_fecha)
+            print(f"::warning title=Cobertura incompleta {volcan}::{len(fechas)} días con búsquedas o "
+                  f"descargas fallidas: {', '.join(fechas[:12])}{' ...' if len(fechas) > 12 else ''}",
+                  flush=True)
+    if resumen:
+        try:
+            with open(resumen, "a", encoding="utf-8") as fh:
+                fh.write("### Cobertura incompleta\n" + "\n".join(lineas) + "\n")
+        except OSError:
+            pass
+    return 3 if estricto else 0
+
+
+def _informar_incidencias(incidencias: list, hay_fallas: bool) -> None:
+    """S159 (I1): imprime las incidencias por tipo, volcán y día, y las agrega al resumen del job.
+
+    Sin ::warning: el NRT procesa siempre el día en curso (parcial) y vería un aviso por volcán en cada corrida."""
+    from collections import defaultdict
+    titulos = {"sin_granulos": "sin gránulos, sin juicio (la búsqueda respondió vacía; el código no sabe si "
+                               "debía haber pasada)",
+               "sin_geolocalizacion": "L1B sin geolocalización (descartados sin procesar)",
+               "dia_parcial": "día parcial (no había terminado más la latencia mínima de LANCE)",
+               "crater_sin_dato": "cráter sin posición en el gránulo MODIS (sin dato, no se escribió record)"}
+    if hay_fallas:
+        print(f"Además, {len(incidencias)} incidencias de cobertura.")
+    else:
+        print(f"Cobertura NO COMPLETA: {len(incidencias)} incidencias (ninguna búsqueda ni descarga fallida).")
+    lineas = ["### Incidencias de cobertura"]
+    por_tipo = defaultdict(lambda: defaultdict(list))
+    for i in incidencias:
+        por_tipo[i.get("tipo")][(i.get("volcan") or "?", i.get("fecha") or "?")].append(i)
+    for tipo in sorted(por_tipo):
+        cuenta = ("cuenta en modo estricto" if any(x.get("cuenta_estricto") for v in por_tipo[tipo].values()
+                                                   for x in v) else "no cuenta en modo estricto")
+        print(f"  {titulos.get(tipo, tipo)}; {cuenta}:")
+        for (volcan, fecha), xs in sorted(por_tipo[tipo].items()):
+            plat = ", ".join(str(x.get("plataforma") or "todas") for x in xs)
+            print(f"    {volcan} {fecha}: {plat} | {xs[0].get('motivo', '')[:100]}")
+            lineas.append(f"- {tipo}: {volcan} {fecha}: {plat}")
+    resumen = os.environ.get("GITHUB_STEP_SUMMARY")
+    if resumen:
+        try:
+            with open(resumen, "a", encoding="utf-8") as fh:
+                fh.write("\n".join(lineas) + "\n")
+        except OSError:
+            pass
+
+
+def _ventana_del_entorno(dates: list) -> tuple | None:
+    """VRP_VENTANA_BUSQUEDA=INI:FIN: la ventana de búsqueda la fija quien llama (reproc_brazos,
+    que corre un día por proceso dentro de la ventana del A/B). Toda fecha debe caer dentro."""
+    crudo = os.environ.get("VRP_VENTANA_BUSQUEDA", "").strip()
+    if not crudo:
+        return None
+    ini, fin = crudo.split(":")
+    for d in dates:
+        if not (ini <= d.strftime("%Y-%m-%d") <= fin):
+            raise SystemExit(f"VRP_VENTANA_BUSQUEDA={crudo} no contiene la fecha {d:%Y-%m-%d}")
+    return ini, fin
+
+
 def main():
     parser = argparse.ArgumentParser(description="VRP Chile pipeline")
     parser.add_argument("--profile", default=None, choices=_VALID_PROFILES,
@@ -414,6 +593,11 @@ def main():
                         help="Skip NOAA-20 VIIRS (useful when NASA downloads are slow)")
     parser.add_argument("--overwrite", action="store_true",
                         help="Overwrite existing records (use when reprocessing with corrected algorithms)")
+    parser.add_argument("--cobertura-json", default=None,
+                        help="S157: escribe aquí las búsquedas y descargas que no se pudieron hacer")
+    parser.add_argument("--estricto-cobertura", action="store_true",
+                        help="S157: sale con código 3 si hubo búsquedas o descargas fallidas "
+                             "(reprocesos; el NRT no lo usa)")
     args = parser.parse_args()
 
     # S120 (cacería de bugs): --start sin --end (o viceversa) caía en silencio
@@ -466,7 +650,14 @@ def main():
         print(f"Profile mirova_equivalent: filtrado a {len(volcanoes)} volcanes "
               f"MIROVA-monitoreados.")
 
+    # S157: una búsqueda a CMR por producto y por ventana, no una por día (pipeline/fetch.py).
+    ventana_env = _ventana_del_entorno(dates)
+    fetch.limpiar_fallas()
+
     for volcano in volcanoes:
+        fetch.reiniciar_ventana()
+        fetch.configurar_ventana(dates, cache_dir=os.environ.get("VRP_CACHE_BUSQUEDA_DIR") or None,
+                                 ventana=ventana_env)
         for date in dates:
             # S120 (cacería): los breakers de fetch son per-día; sin reset, un
             # timeout transitorio del día 1 silenciaba todos los días restantes
@@ -475,7 +666,12 @@ def main():
             process_date(volcano, date, nighttime_only=nighttime_only,
                         skip_noaa20=args.skip_noaa20, overwrite=args.overwrite)
 
+    codigo = informar_cobertura(fetch.fallas_de_cobertura(), ruta_json=args.cobertura_json,
+                                estricto=args.estricto_cobertura,
+                                plataformas=fetch.cobertura_por_plataforma(),
+                                incidencias=fetch.incidencias_de_cobertura())
     print("\nDone.")
+    sys.exit(codigo)
 
 
 if __name__ == "__main__":

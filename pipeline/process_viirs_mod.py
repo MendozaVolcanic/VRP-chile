@@ -72,6 +72,7 @@ FLAG_DNS = {65532, 65533, 65534, 65535}
 from pipeline.regrid import regrid_to_utm  # F70.2 grilla UTM
 from pipeline.profile import (
     ENABLE_UTM_REGRID,  # F70.2
+    ENABLE_V750_CODIGO_MIROVA,  # S162 V750-A
     ANOMALY_THRESHOLD_K,
     N_SIGMA_MIR,
     BG_INNER_KM,
@@ -490,6 +491,36 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     C2_DETI_SCENE_NIGHT = _TH["c2_deti_scene"]        # noche 10 / día 15
     VIIRS_C2_OVERRIDE_NIGHT = _TH["viirs_c2_override"]  # override nocturno; de día None
     _umbrales_diurnos = bool(_TH.get("dia", False))
+
+    # S162 V750-A: vía «código MIROVA» (pipeline/mirova_v750_codigo.py). POR QUÉ: medido en S159 y
+    # V750-C, para callar donde MIROVA calla y medir lo que mide hay que ver el volcán como lo ve
+    # MIROVA: interpolado a su grilla, con su detector, su fondo y su suma; las piezas sueltas sobre K
+    # no lo logran. Con el flag APAGADO (hoy) este bloque no corre y el procesador es el de siempre.
+    # Con el flag encendido y un volcán sin grilla de MIROVA, sigue K y el record lo dice
+    # (`via_codigo_mirova: "sin_grilla"`), para que nadie lea K creyendo que es la vía (A118).
+    # El volcán se reconoce por sus coordenadas de volcanoes.yaml, que run_pipeline ya pasa (así no se agrega un
+    # argumento a calculate_vrp, cuya firma tiene que ser la de process_viirs, GR1).
+    _via_sin_grilla = False
+    if ENABLE_V750_CODIGO_MIROVA:
+        from . import mirova_v750_codigo as _MV
+        volcan_nombre = _MV.volcan_por_coordenadas(volcano_lat, volcano_lon)
+        if volcan_nombre is not None and _MV.grilla_del_volcan(volcan_nombre) is not None:
+            _rad = _MV.leer_radiancia_l1b(l1b_path)
+            if _rad is None:
+                return None
+            _lat, _lon, _ang = _MV.leer_geo_l1b(geo_path)
+            _rec = _MV.calcular_vrp_granulo(
+                _rad, _lat, _lon, _ang, volcan_nombre,
+                vent_lat if vent_lat is not None else volcano_lat,
+                vent_lon if vent_lon is not None else volcano_lon,
+                inner_radius_km, _sensor_label_from_filename(l1b_path.name))
+            if _rec is None:
+                return None
+            _rec.update({"granule": l1b_path.name,
+                         "product_version": product_version_from_granule(l1b_path.name),
+                         "datetime_utc": _parse_datetime(l1b_path.name)})
+            return _rec
+        _via_sin_grilla = True
 
     bands = read_viirs_mod_l1b(l1b_path)
     if "M13" not in bands:
@@ -1508,6 +1539,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # rama diurna actuó (flag ON y Sol sobre el horizonte); con el flag OFF la salida es la de hoy.
     if _umbrales_diurnos:
         salida["diag_umbrales_diurnos"] = True
+
+    # S162 V750-A: con la vía encendida y un volcán sin grilla de MIROVA, el record es de K y lo dice.
+    if _via_sin_grilla:
+        salida["via_codigo_mirova"] = "sin_grilla"
 
     return salida
 

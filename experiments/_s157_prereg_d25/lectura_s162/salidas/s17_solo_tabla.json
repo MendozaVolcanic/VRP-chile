@@ -1,0 +1,826 @@
+{
+ "ventana": "V1",
+ "desde": "2026-10-17",
+ "hasta": "2026-10-19",
+ "brazos": [
+  "K",
+  "G",
+  "D"
+ ],
+ "dias_excluidos": [],
+ "sha256_index_html": "f711c61dfb96555b8d203ce0e127dc6c5f86e63d692b435c79b7d45fa7d0ba02",
+ "calibracion": "simetrica",
+ "vale_para_decidir": true,
+ "motivo_validez": "calibración simétrica (D-27) con el comparador (D-28)",
+ "placebo": {
+  "ganancias_informadas": [
+   1.2,
+   0.8
+  ],
+  "comparador": true
+ },
+ "referencia_ok": true,
+ "cobertura_ok": true,
+ "version_ok": true,
+ "cableado": {
+  "K": true,
+  "G": true,
+  "D": true
+ },
+ "determinismo_ok": true,
+ "controles_ok": true,
+ "por_regla": {
+  "original": {
+   "veredicto": {
+    "P1|VIIRS375": "CUMPLE",
+    "P1b|VIIRS375": "SIN CRUCES",
+    "P1|VIIRS750": "CUMPLE",
+    "P1b|VIIRS750": "SIN CRUCES",
+    "P2|VIIRS375": "SIN SUSTRATO",
+    "P2|VIIRS750": "SIN SUSTRATO",
+    "M|VIIRS750|z<=40": "SIN SUSTRATO",
+    "M|VIIRS750|z>40": "SIN SUSTRATO",
+    "M|VIIRS375|sin_kernel|z<=40": "NEUTRO",
+    "M|VIIRS375|sin_kernel|z>40": "INDECIDIBLE",
+    "M|VIIRS375|kernel|z<=40": "SIN SUSTRATO",
+    "M|VIIRS375|kernel|z>40": "SIN SUSTRATO"
+   },
+   "info": {
+    "regla": "original",
+    "P1|VIIRS375": {
+     "protegidas_que_K_publica": 6,
+     "netas": [],
+     "ruidosas": [],
+     "pendientes": [],
+     "solo_ocr_snpp": [],
+     "cruces_1MW": [],
+     "descartadas_por_repeticion": []
+    },
+    "P1|VIIRS750": {
+     "protegidas_que_K_publica": 6,
+     "netas": [],
+     "ruidosas": [],
+     "pendientes": [],
+     "solo_ocr_snpp": [],
+     "cruces_1MW": [],
+     "descartadas_por_repeticion": []
+    },
+    "ruido_frac": {
+     "VIIRS375": 0.0,
+     "VIIRS750": 0.0
+    },
+    "P2|VIIRS375": {
+     "neto": 0,
+     "n_discordantes": 0,
+     "noches_discordantes": 0,
+     "B": 0,
+     "bloques_suma_no_nula": 0,
+     "sumas_bloque": [],
+     "metodo": "exacto",
+     "p_gana": 1.0,
+     "p_pierde": 1.0,
+     "p_dos_colas": 1.0,
+     "p_gana_fraccion": [
+      1,
+      1
+     ],
+     "p_pierde_fraccion": [
+      1,
+      1
+     ],
+     "p_dos_colas_fraccion": [
+      1,
+      1
+     ],
+     "p_minimo": 1.0,
+     "p_minimo_fraccion": [
+      1,
+      1
+     ],
+     "semilla_signos": null,
+     "n_sorteos_signos": null,
+     "tope_p2": "5 % por cola",
+     "regla": "D-45 (ADENDA_SIGNOS_P2.md): prueba de signos por bloque noche-volcán, una cola por dirección al 5 %; D-34 y D-42 informan, no deciden",
+     "ic95": null,
+     "resultado_sin_calibrar": "SIN SUSTRATO",
+     "resultado_d42": "SIN SUSTRATO",
+     "calibrada": null,
+     "falsos_gana": null,
+     "falsos_pierde": null,
+     "falsos_bloquea": null,
+     "n_sorteos": null,
+     "semilla_calibracion": null,
+     "tope_por_cola": 0.05,
+     "nota_calibracion": "no se calibra: sin sustrato para D-34 (D-34 §5.6)",
+     "suma_K": 1,
+     "suma_D": 1,
+     "ruido_gemelo": 0,
+     "neto_igual_a_suma_D_menos_suma_K": true,
+     "regla_a_gemelo": "EMPATE",
+     "regla_b_d33": "EMPATE",
+     "discordantes": [],
+     "noches_con_error_K": 1,
+     "noches_con_error_D": 1
+    },
+    "P2|VIIRS750": {
+     "neto": 1,
+     "n_discordantes": 1,
+     "noches_discordantes": 1,
+     "B": 1,
+     "bloques_suma_no_nula": 1,
+     "sumas_bloque": [
+      1
+     ],
+     "metodo": "exacto",
+     "p_gana": 1.0,
+     "p_pierde": 0.5,
+     "p_dos_colas": 1.0,
+     "p_gana_fraccion": [
+      2,
+      2
+     ],
+     "p_pierde_fraccion": [
+      1,
+      2
+     ],
+     "p_dos_colas_fraccion": [
+      2,
+      2
+     ],
+     "p_minimo": 0.5,
+     "p_minimo_fraccion": [
+      1,
+      2
+     ],
+     "semilla_signos": null,
+     "n_sorteos_signos": null,
+     "tope_p2": "5 % por cola",
+     "regla": "D-45 (ADENDA_SIGNOS_P2.md): prueba de signos por bloque noche-volcán, una cola por dirección al 5 %; D-34 y D-42 informan, no deciden",
+     "ic95": null,
+     "resultado_sin_calibrar": "SIN SUSTRATO",
+     "resultado_d42": "SIN SUSTRATO",
+     "calibrada": null,
+     "falsos_gana": null,
+     "falsos_pierde": null,
+     "falsos_bloquea": null,
+     "n_sorteos": null,
+     "semilla_calibracion": null,
+     "tope_por_cola": 0.05,
+     "nota_calibracion": "no se calibra: sin sustrato para D-34 (D-34 §5.6)",
+     "suma_K": 0,
+     "suma_D": 1,
+     "ruido_gemelo": 0,
+     "neto_igual_a_suma_D_menos_suma_K": true,
+     "regla_a_gemelo": "PIERDE",
+     "regla_b_d33": "PENDIENTE DE DIAGNOSTICO POR PASADA (PIERDE por 1)",
+     "discordantes": [
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-10-18 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.271,
+       "error_de": "D",
+       "contribucion": 1
+      }
+     ],
+     "noches_con_error_K": 0,
+     "noches_con_error_D": 1
+    },
+    "estrato_203": {
+     "sensor": "VIIRS750",
+     "n": 2,
+     "recupera_D": 0,
+     "enciende_D": 1,
+     "no_cambia": 0,
+     "otros_cambios": 1,
+     "pasadas": [
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-10-17 05:24",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.274,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-10-18 05:42",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.271,
+       "error_p2_de": "D"
+      }
+     ],
+     "nota": "informa, no decide (NOTA_ESTRATO_203.md)"
+    },
+    "M_salen": {},
+    "M_pares_con_magnitud_distinta": 23,
+    "M_pares": 23,
+    "M_placebo": {
+     "VIIRS375|sin_kernel|z<=40": {
+      "1.2": "NEUTRO",
+      "0.8": "EMPEORA"
+     },
+     "VIIRS375|sin_kernel|z>40": {
+      "1.2": "INDECIDIBLE",
+      "0.8": "INDECIDIBLE"
+     }
+    },
+    "M|VIIRS750|z<=40": {
+     "n": 2,
+     "noches": 1,
+     "modo": "decide"
+    },
+    "M|VIIRS750|z>40": {
+     "n": 4,
+     "noches": 2,
+     "modo": "decide"
+    },
+    "M|VIIRS375|sin_kernel|z<=40": {
+     "n": 6,
+     "noches": 6,
+     "modo": "decide",
+     "regla": "NEUTRO",
+     "d_mediana": -0.0668375271623232,
+     "ic95": [
+      -0.3312232089738777,
+      0.07171005534647726
+     ],
+     "razon_K": 0.5375,
+     "razon_D": 0.965436507936508,
+     "falsos_mejora": 0.05,
+     "falsos_empeora": 0.025,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 0,
+     "volcanes_con_3_pares": 0,
+     "nota": "",
+     "calibrada": true,
+     "poder": null,
+     "g_hat_log": 0.1724914328892424,
+     "g_hat_factor": 1.4876180282907612,
+     "g_hat_ic95": [
+      0.033304065019045315,
+      0.6466135341075585
+     ],
+     "g_hat_por_volcan": {
+      "Isluga": {
+       "n": 2,
+       "log": 0.1724914328892424,
+       "factor": 1.4876180282907612
+      },
+      "NevadosDeChillan": {
+       "n": 2,
+       "log": 0.033304065019045315,
+       "factor": 1.0797023957252352
+      },
+      "Tupungatito": {
+       "n": 2,
+       "log": 0.6466135341075585,
+       "factor": 4.432140652280439
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": 0.022787398466999998,
+     "ic95_dprima": [
+      -0.112978583626,
+      0.212003293201
+     ],
+     "dprima_max_abs": 0.343932650052,
+     "falsos_mejora_dprima": 0.031,
+     "falsos_empeora_dprima": 0.025,
+     "calibrada_dprima": true,
+     "poder_dprima": null,
+     "volcanes_con_dprima_negativa": 0,
+     "volcanes_con_3_pares_dprima": 0,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS375|sin_kernel|z>40": {
+     "n": 7,
+     "noches": 4,
+     "modo": "bloquea",
+     "regla": "MEJORA",
+     "d_mediana": -0.03886337761389724,
+     "ic95": [
+      -0.645466929175539,
+      -0.03731766800269984
+     ],
+     "razon_K": 0.37844444444444447,
+     "razon_D": 0.5033035294117647,
+     "falsos_mejora": 0.06,
+     "falsos_empeora": 0.055,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 1,
+     "volcanes_con_3_pares": 1,
+     "nota": "",
+     "calibrada": false,
+     "poder": null,
+     "g_hat_log": 0.05877800055318605,
+     "g_hat_factor": 1.1449275362318838,
+     "g_hat_ic95": [
+      0.03731766800269984,
+      0.645466929175539
+     ],
+     "g_hat_por_volcan": {
+      "Isluga": {
+       "n": 2,
+       "log": 0.11548795175300151,
+       "factor": 1.304631774894509
+      },
+      "NevadosDeChillan": {
+       "n": 4,
+       "log": 0.03731766800269984,
+       "factor": 1.089726890910578
+      },
+      "Tupungatito": {
+       "n": 1,
+       "log": 0.645466929175539,
+       "factor": 4.420454545454545
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": 0.019914622939,
+     "ic95_dprima": [
+      0.0,
+      0.042784456009
+     ],
+     "dprima_max_abs": 0.586688928622,
+     "falsos_mejora_dprima": 0.064,
+     "falsos_empeora_dprima": 0.061,
+     "calibrada_dprima": false,
+     "poder_dprima": null,
+     "volcanes_con_dprima_negativa": 0,
+     "volcanes_con_3_pares_dprima": 1,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS375|kernel|z<=40": {
+     "n": 2,
+     "noches": 2,
+     "modo": "informa"
+    },
+    "M|VIIRS375|kernel|z>40": {
+     "n": 2,
+     "noches": 2,
+     "modo": "informa"
+    },
+    "M_por_volcan": {
+     "Chaiten|VIIRS375": {
+      "n": 2,
+      "razon_K": 0.9931493506493505,
+      "razon_D": 0.9826298701298701
+     },
+     "Isluga|VIIRS375": {
+      "n": 4,
+      "razon_K": 0.6996428571428571,
+      "razon_D": 1.0314285714285716
+     },
+     "NevadosDeChillan|VIIRS375": {
+      "n": 6,
+      "razon_K": 0.45626199349368035,
+      "razon_D": 0.49287569942936377
+     },
+     "NevadosDeChillan|VIIRS750": {
+      "n": 6,
+      "razon_K": 0.4471608763956347,
+      "razon_D": 0.5082091505058718
+     },
+     "PuyehueCordonCaulle|VIIRS375": {
+      "n": 2,
+      "razon_K": 1.8149650349650348,
+      "razon_D": 1.7483426573426573
+     },
+     "Tupungatito|VIIRS375": {
+      "n": 3,
+      "razon_K": 0.3144444444444444,
+      "razon_D": 0.9194444444444445
+     }
+    }
+   },
+   "estado": "INDECIDIBLE",
+   "mejora": false,
+   "empeora": false
+  },
+  "SN": {
+   "veredicto": {
+    "P1|VIIRS375": "CUMPLE",
+    "P1b|VIIRS375": "SIN CRUCES",
+    "P1|VIIRS750": "CUMPLE",
+    "P1b|VIIRS750": "SIN CRUCES",
+    "P2|VIIRS375": "SIN SUSTRATO",
+    "P2|VIIRS750": "SIN SUSTRATO",
+    "M|VIIRS750|z<=40": "SIN SUSTRATO",
+    "M|VIIRS750|z>40": "SIN SUSTRATO",
+    "M|VIIRS375|sin_kernel|z<=40": "NEUTRO",
+    "M|VIIRS375|sin_kernel|z>40": "INDECIDIBLE",
+    "M|VIIRS375|kernel|z<=40": "SIN SUSTRATO",
+    "M|VIIRS375|kernel|z>40": "SIN SUSTRATO"
+   },
+   "info": {
+    "regla": "SN",
+    "P1|VIIRS375": {
+     "protegidas_que_K_publica": 6,
+     "netas": [],
+     "ruidosas": [],
+     "pendientes": [],
+     "solo_ocr_snpp": [],
+     "cruces_1MW": [],
+     "descartadas_por_repeticion": []
+    },
+    "P1|VIIRS750": {
+     "protegidas_que_K_publica": 6,
+     "netas": [],
+     "ruidosas": [],
+     "pendientes": [],
+     "solo_ocr_snpp": [],
+     "cruces_1MW": [],
+     "descartadas_por_repeticion": []
+    },
+    "ruido_frac": {
+     "VIIRS375": 0.0,
+     "VIIRS750": 0.0
+    },
+    "P2|VIIRS375": {
+     "neto": 0,
+     "n_discordantes": 0,
+     "noches_discordantes": 0,
+     "B": 0,
+     "bloques_suma_no_nula": 0,
+     "sumas_bloque": [],
+     "metodo": "exacto",
+     "p_gana": 1.0,
+     "p_pierde": 1.0,
+     "p_dos_colas": 1.0,
+     "p_gana_fraccion": [
+      1,
+      1
+     ],
+     "p_pierde_fraccion": [
+      1,
+      1
+     ],
+     "p_dos_colas_fraccion": [
+      1,
+      1
+     ],
+     "p_minimo": 1.0,
+     "p_minimo_fraccion": [
+      1,
+      1
+     ],
+     "semilla_signos": null,
+     "n_sorteos_signos": null,
+     "tope_p2": "5 % por cola",
+     "regla": "D-45 (ADENDA_SIGNOS_P2.md): prueba de signos por bloque noche-volcán, una cola por dirección al 5 %; D-34 y D-42 informan, no deciden",
+     "ic95": null,
+     "resultado_sin_calibrar": "SIN SUSTRATO",
+     "resultado_d42": "SIN SUSTRATO",
+     "calibrada": null,
+     "falsos_gana": null,
+     "falsos_pierde": null,
+     "falsos_bloquea": null,
+     "n_sorteos": null,
+     "semilla_calibracion": null,
+     "tope_por_cola": 0.05,
+     "nota_calibracion": "no se calibra: sin sustrato para D-34 (D-34 §5.6)",
+     "suma_K": 2,
+     "suma_D": 2,
+     "ruido_gemelo": 0,
+     "neto_igual_a_suma_D_menos_suma_K": true,
+     "regla_a_gemelo": "EMPATE",
+     "regla_b_d33": "EMPATE",
+     "discordantes": [],
+     "noches_con_error_K": 2,
+     "noches_con_error_D": 2
+    },
+    "P2|VIIRS750": {
+     "neto": 1,
+     "n_discordantes": 1,
+     "noches_discordantes": 1,
+     "B": 1,
+     "bloques_suma_no_nula": 1,
+     "sumas_bloque": [
+      1
+     ],
+     "metodo": "exacto",
+     "p_gana": 1.0,
+     "p_pierde": 0.5,
+     "p_dos_colas": 1.0,
+     "p_gana_fraccion": [
+      2,
+      2
+     ],
+     "p_pierde_fraccion": [
+      1,
+      2
+     ],
+     "p_dos_colas_fraccion": [
+      2,
+      2
+     ],
+     "p_minimo": 0.5,
+     "p_minimo_fraccion": [
+      1,
+      2
+     ],
+     "semilla_signos": null,
+     "n_sorteos_signos": null,
+     "tope_p2": "5 % por cola",
+     "regla": "D-45 (ADENDA_SIGNOS_P2.md): prueba de signos por bloque noche-volcán, una cola por dirección al 5 %; D-34 y D-42 informan, no deciden",
+     "ic95": null,
+     "resultado_sin_calibrar": "SIN SUSTRATO",
+     "resultado_d42": "SIN SUSTRATO",
+     "calibrada": null,
+     "falsos_gana": null,
+     "falsos_pierde": null,
+     "falsos_bloquea": null,
+     "n_sorteos": null,
+     "semilla_calibracion": null,
+     "tope_por_cola": 0.05,
+     "nota_calibracion": "no se calibra: sin sustrato para D-34 (D-34 §5.6)",
+     "suma_K": 0,
+     "suma_D": 1,
+     "ruido_gemelo": 0,
+     "neto_igual_a_suma_D_menos_suma_K": true,
+     "regla_a_gemelo": "PIERDE",
+     "regla_b_d33": "PENDIENTE DE DIAGNOSTICO POR PASADA (PIERDE por 1)",
+     "discordantes": [
+      {
+       "volcan": "Tupungatito",
+       "sensor": "VIIRS750",
+       "hora": "2026-10-18 05:42",
+       "publica_K": false,
+       "publica_D": true,
+       "clase_mirova": "neg_limpio",
+       "vrp_mirova": null,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.271,
+       "error_de": "D",
+       "contribucion": 1
+      }
+     ],
+     "noches_con_error_K": 0,
+     "noches_con_error_D": 1
+    },
+    "estrato_203": {
+     "sensor": "VIIRS750",
+     "n": 2,
+     "recupera_D": 0,
+     "enciende_D": 1,
+     "no_cambia": 0,
+     "otros_cambios": 1,
+     "pasadas": [
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-10-17 05:24",
+       "clase_mirova": "otra",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.274,
+       "error_p2_de": null
+      },
+      {
+       "volcan": "Tupungatito",
+       "hora": "2026-10-18 05:42",
+       "clase_mirova": "negativo limpio",
+       "vrp_mirova": null,
+       "publica_K": false,
+       "publica_D": true,
+       "pc_vrp_mw_K": 0.0,
+       "pc_vrp_mw_D": 0.271,
+       "error_p2_de": "D"
+      }
+     ],
+     "nota": "informa, no decide (NOTA_ESTRATO_203.md)"
+    },
+    "M_salen": {},
+    "M_pares_con_magnitud_distinta": 22,
+    "M_pares": 22,
+    "M_placebo": {
+     "VIIRS375|sin_kernel|z<=40": {
+      "1.2": "NEUTRO",
+      "0.8": "EMPEORA"
+     },
+     "VIIRS375|sin_kernel|z>40": {
+      "1.2": "INDECIDIBLE",
+      "0.8": "INDECIDIBLE"
+     }
+    },
+    "M|VIIRS750|z<=40": {
+     "n": 2,
+     "noches": 1,
+     "modo": "decide"
+    },
+    "M|VIIRS750|z>40": {
+     "n": 4,
+     "noches": 2,
+     "modo": "decide"
+    },
+    "M|VIIRS375|sin_kernel|z<=40": {
+     "n": 5,
+     "noches": 5,
+     "modo": "decide",
+     "regla": "MEJORA",
+     "d_mediana": -0.09508803075668706,
+     "ic95": [
+      -0.46598156692346615,
+      -0.028021106470131285
+     ],
+     "razon_K": 0.6049999999999999,
+     "razon_D": 0.9194444444444445,
+     "falsos_mejora": 0.045,
+     "falsos_empeora": 0.02,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 0,
+     "volcanes_con_3_pares": 0,
+     "nota": "MEJORA sostenida por menos de 2 volcanes (adenda, H4)",
+     "calibrada": true,
+     "poder": null,
+     "g_hat_log": 0.10495846610771156,
+     "g_hat_factor": 1.2733812949640289,
+     "g_hat_ic95": [
+      0.028021106470131285,
+      0.46598156692346615
+     ],
+     "g_hat_por_volcan": {
+      "Isluga": {
+       "n": 2,
+       "log": 0.1724914328892424,
+       "factor": 1.4876180282907612
+      },
+      "NevadosDeChillan": {
+       "n": 2,
+       "log": 0.033304065019045315,
+       "factor": 1.0797023957252352
+      },
+      "Tupungatito": {
+       "n": 1,
+       "log": 0.46598156692346615,
+       "factor": 2.924028268551237
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": 0.0,
+     "ic95_dprima": [
+      -0.135065933563,
+      0.0
+     ],
+     "dprima_max_abs": 0.361023100816,
+     "falsos_mejora_dprima": 0.0,
+     "falsos_empeora_dprima": 0.0,
+     "calibrada_dprima": true,
+     "poder_dprima": null,
+     "volcanes_con_dprima_negativa": 0,
+     "volcanes_con_3_pares_dprima": 0,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS375|sin_kernel|z>40": {
+     "n": 7,
+     "noches": 4,
+     "modo": "bloquea",
+     "regla": "MEJORA",
+     "d_mediana": -0.03886337761389724,
+     "ic95": [
+      -0.645466929175539,
+      -0.03731766800269984
+     ],
+     "razon_K": 0.37844444444444447,
+     "razon_D": 0.5033035294117647,
+     "falsos_mejora": 0.06,
+     "falsos_empeora": 0.055,
+     "modo_calibracion": "simetrica",
+     "volcanes_con_d_negativa": 1,
+     "volcanes_con_3_pares": 1,
+     "nota": "",
+     "calibrada": false,
+     "poder": null,
+     "g_hat_log": 0.05877800055318605,
+     "g_hat_factor": 1.1449275362318838,
+     "g_hat_ic95": [
+      0.03731766800269984,
+      0.645466929175539
+     ],
+     "g_hat_por_volcan": {
+      "Isluga": {
+       "n": 2,
+       "log": 0.11548795175300151,
+       "factor": 1.304631774894509
+      },
+      "NevadosDeChillan": {
+       "n": 4,
+       "log": 0.03731766800269984,
+       "factor": 1.089726890910578
+      },
+      "Tupungatito": {
+       "n": 1,
+       "log": 0.645466929175539,
+       "factor": 4.420454545454545
+      }
+     },
+     "regla_dprima": "NEUTRO",
+     "dprima_mediana": 0.019914622939,
+     "ic95_dprima": [
+      0.0,
+      0.042784456009
+     ],
+     "dprima_max_abs": 0.586688928622,
+     "falsos_mejora_dprima": 0.064,
+     "falsos_empeora_dprima": 0.061,
+     "calibrada_dprima": false,
+     "poder_dprima": null,
+     "volcanes_con_dprima_negativa": 0,
+     "volcanes_con_3_pares_dprima": 1,
+     "dprima_da_mejora": false
+    },
+    "M|VIIRS375|kernel|z<=40": {
+     "n": 2,
+     "noches": 2,
+     "modo": "informa"
+    },
+    "M|VIIRS375|kernel|z>40": {
+     "n": 2,
+     "noches": 2,
+     "modo": "informa"
+    },
+    "M_por_volcan": {
+     "Chaiten|VIIRS375": {
+      "n": 2,
+      "razon_K": 0.9931493506493505,
+      "razon_D": 0.9826298701298701
+     },
+     "Isluga|VIIRS375": {
+      "n": 4,
+      "razon_K": 0.6996428571428571,
+      "razon_D": 1.0314285714285716
+     },
+     "NevadosDeChillan|VIIRS375": {
+      "n": 6,
+      "razon_K": 0.45626199349368035,
+      "razon_D": 0.49287569942936377
+     },
+     "NevadosDeChillan|VIIRS750": {
+      "n": 6,
+      "razon_K": 0.4471608763956347,
+      "razon_D": 0.5082091505058718
+     },
+     "PuyehueCordonCaulle|VIIRS375": {
+      "n": 2,
+      "razon_K": 1.8149650349650348,
+      "razon_D": 1.7483426573426573
+     },
+     "Tupungatito|VIIRS375": {
+      "n": 2,
+      "razon_K": 0.23055555555555554,
+      "razon_D": 0.7838888888888889
+     }
+    }
+   },
+   "estado": "INDECIDIBLE",
+   "mejora": false,
+   "empeora": false
+  }
+ },
+ "ruido_frac": {
+  "original": {
+   "VIIRS375": 0.0,
+   "VIIRS750": 0.0
+  },
+  "SN": {
+   "VIIRS375": 0.0,
+   "VIIRS750": 0.0
+  }
+ },
+ "estado": "INDECIDIBLE",
+ "mejora": false,
+ "empeora": false,
+ "P4": {
+  "movidas": 0,
+  "movidas_protegidas": [],
+  "cambia_distance_class": []
+ },
+ "P5": {
+  "d9_capped_K_D": {
+   "False->False": 271
+  },
+  "modo_un_pixel_K_D": {
+   "True->True": 44,
+   "None->None": 213,
+   "True->False": 2,
+   "False->False": 12
+  },
+  "discarded_reason_cambia": [],
+  "apagadas_por_filtro_del_tablero": {}
+ },
+ "sin_geometria": {}
+}

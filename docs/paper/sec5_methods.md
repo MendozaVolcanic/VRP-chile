@@ -4,9 +4,12 @@
 
 VRP Chile ingests calibrated Level-1B radiances directly; it does not consume any
 pre-computed thermal-anomaly product such as MOD14/MYD14. For MODIS the pipeline reads
-`MOD021KM` (Terra) and `MYD021KM` (Aqua) with their `MOD03`/`MYD03` geolocation files, and
-uses band 21 (3.929 µm) as the primary mid-infrared (MIR) channel, band 22 (3.959 µm) where
-band 21 saturates, and band 31 (11 µm) as the thermal-infrared (TIR) channel. For VIIRS it
+`MOD021KM` (Terra) and `MYD021KM` (Aqua); it downloads the `MOD03`/`MYD03` geolocation files
+but, as of 2026-10-26, locates each pixel by interpolating the 5 km geolocation grid embedded in
+the Level-1B product (adopting `MOD03`/`MYD03` per pixel was tested and is pending, divergence D35).
+Since 2026-10-18 (and in the record reprocessed back to 2026-09-18) it uses band 22 (3.959 µm) as
+the primary mid-infrared (MIR) channel and band 21 (3.929 µm) where band 22 saturates (before, band 21
+was primary), and band 31 (11 µm) as the thermal-infrared (TIR) channel. For VIIRS it
 reads two resolution families: the 375 m I-band products (`VNP02IMG` for Suomi-NPP,
 `VJ102IMG` for NOAA-20, `VJ202IMG` for NOAA-21), using I04 (3.74 µm) as MIR and I05
 (11.45 µm) as TIR; and the 750 m M-band products (`VNP02MOD`, `VJ102MOD`, `VJ202MOD`),

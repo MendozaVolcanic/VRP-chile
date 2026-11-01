@@ -1,5 +1,20 @@
 # Borrador de correo a Diego Coppola (S139, ajustado S142 y S146)
 
+> **Ajuste S158 (no enviado).** MIROVA publicó el 2026-07-24 su código de VIIRS 750 (OSF zm62w;
+> `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`). Para VIIRS 750 el código ya contesta las preguntas 1 (`max`), 3 (no hay
+> compuerta de temperatura), 4 (el fondo no es la media de los vecinos: los alertados más un halo de 1 a 3 celdas se
+> ponen en NaN y se interpola linealmente por debajo, sin recortar a cero), 5 en su primera mitad (NTI sobre K1 es
+> alerta directa), 7 (un solo ajuste), 12 (ETI = NTI − NTIbk) y 13 (no hay test integrado ni de temperatura). Antes
+> de enviar, esas preguntas se reformulan **para MODIS y VIIRS 375**, y se agregan tres: (a) los números de MODIS y
+> VIIRS 375 (K1 y mínimos de dNTI y dETI por región, porque en VIIRS 750 son -0,7 y 0,02 fuera de la cumbre, no los
+> de la Tabla 1); (b) el interpolador del remuestreo (los TIF UTM del 14 y 15 de septiembre tienen la firma de una
+> interpolación lineal) y la regla del origen de la grilla (el centro queda unos 62,5 m al oeste y al sur de nuestras
+> coordenadas de cumbre en 8 volcanes); (c) si la media local de 3 × 3 con el píxel central del código de VIIRS 750
+> es también la de MODIS, donde el paper dice ocho vecinos. Y se agradece explícitamente la publicación del código.
+> Las preguntas de `docs/audit_s146/FRENTE_F_FIDELIDAD_VIIRS.md` §5 que el código contesta para VIIRS 750: la 2
+> (67 × 67), la 3 (suma de todos los alertados), la 5 (no: K1 y el mínimo de dNTI cambian) y la 7 (no hay test
+> integrado).
+
 > **Ajuste S146.** Se agrega una sola pregunta, la 13 (la antigua 13 pasa a ser 14): si el NRT
 > aplica algún test integrado sobre el ROI o algún test de temperatura de brillo, además de los
 > Tests 1 a 3 de SP426.5. Sale de la auditoría S146 (V-06 y V-08), que abrió D30 y D31 en el

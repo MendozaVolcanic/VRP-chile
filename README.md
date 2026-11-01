@@ -49,6 +49,11 @@ operational dashboard selection.
   built around the configured volcano coordinates, **not** around the official MIROVA grid
   center — see divergence D17 in `docs/MIROVA_DIVERGENCES.md` (`get_grid_center()` exists
   but is not wired into production; `ENABLE_UTM_REGRID=False`)
+- ⚠️ **S160 (A113; hallazgo 289, CONFIRMADO en `experiments/_s160_audit/v4/INFORME.md` §3)**: desde el detector K
+  (#850, 2026-10-18; S153) la réplica `mirova_equivalent` corre sin el Test 1 integrado en el ROI
+  (`enable_test1_path: false`, `pipeline/profiles/mirova_equivalent.yaml:268`; D30), con la conectiva `max` en los
+  Tests 2 y 3 y la banda 22 primaria en MODIS, y desde #883 todo el histórico publicado está reprocesado con K. Lo
+  que este README dice del Test 1 integrado describe el detector anterior y se conserva por historia.
 - **Detection paths**: NTI absolute, dNTI contextual (8-neighbor kernel, Coppola 2016a
   Tests 2–3 with dual-ROI summit/scene thresholds), ETI quadratic scene + second-pass,
   and the **integrated-ROI Test 1** for spatially-extended sub-pixel anomalies
@@ -89,7 +94,7 @@ VRP-Chile/
 |   |-- process_modis.py          MODIS Band 21/22 (1 km, 3.93 um)
 |   |-- process_viirs.py          VIIRS I-band I04/I05 (375 m)
 |   |-- process_viirs_mod.py      VIIRS M-band M13 (750 m)
-|   |-- test1_integrated.py       Integrated-ROI Test 1 (sub-pixel detection)
+|   |-- test1_integrated.py       Integrated-ROI Test 1 (sub-pixel detection; ⚠️ S160: apagado en la réplica desde K, #850)
 |   |-- clustering.py             Vent-anchored cluster aggregation
 |   |-- scan_geometry.py          Pixel areas, haversine, ROI masks
 |   |-- geo_utils.py              Grid center vs detection anchor (crater)
@@ -125,6 +130,10 @@ VRP = k_sensor * A_pix_nadir * (L_hot - L_bg)    [W]
 - `k_sensor` empirically validated against MIROVA OSF v2.5 (48k Chilean rows)
 
 ### Detection
+
+⚠️ **S160 (hallazgo 289)**: el Test 1 integrado de este párrafo no corre en la réplica desde K (#850, D30), y el
+ejemplo de record de más abajo (`"final_hotspot_source": "test1"`) es del detector anterior; ver la marca S160 de
+«Detection paths». Texto conservado:
 
 Per-pixel paths (NTI absolute > K1; dNTI contextual vs 8 neighbors with summit/scene
 dual thresholds; ETI quadratic + second-pass adjacent recapture) **plus** the
@@ -216,7 +225,9 @@ reproc workflows pattern.
 
 Tracked formally in `docs/MIROVA_DIVERGENCES.md` (open: D2, D3, D9, D11):
 
-1. **Topographic bias of MIR-absolute paths on snow-capped volcanoes** (D11): the
+1. ⚠️ **S160 (hallazgo 289)**: el Test 1 integrado que nombra este punto está apagado en la réplica desde K (#850,
+   D30); ver la marca S160 de «Detection paths». Texto conservado:
+   **Topographic bias of MIR-absolute paths on snow-capped volcanoes** (D11): the
    integrated Test 1 can drift ~1 km toward warm low-altitude terrain on
    Villarrica/Tupungatito/Llaima. Position-only (alerting and magnitude unaffected).
    A uniform local-background fix is under A/B validation.

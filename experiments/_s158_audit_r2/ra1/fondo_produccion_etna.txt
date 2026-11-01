@@ -1,0 +1,23 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+flags: BG_INNER_KM=5.0 BG_OUTER_KM=25.0 neighbor_mean_v750=False single_pixel=True (<5.0 MW, <=3 px)
+coef y area de produccion: WOOSTER_COEFF=19.7 NADIR_PIXEL_AREA_M2=562500.0 -> k=11081250.0 ; .m: 1.97e7*0.5625=11081250.0
+pixeles alertados por el port del .m (fila,col): [(35, 32), (36, 32), (35, 33), (35, 34), (36, 33)] | Tot_Lmir_hot port=1.965342180 OSF=1.965342180
+ida y vuelta Planck del pipeline, max |L - L'| = 1.832e-15
+anillo 5-25 km: n_bg=3359 (de 3368 en el anillo, NaN=9), t_bg=280.553 K, std_bg=2.309 K, L_bg=0.346144
+mediana directa de la radiancia del anillo = 0.346144 (control de la ida y vuelta)
+
+Por pixel (fila,col): L_hot | fondo .m (fillmissing2 ~ griddata) | fondo produccion (escalar)
+  (35,32) L=0.353470  bk_m=0.220305 dL_m=+0.133165 | bk_prod=0.346144 dL_prod=+0.007326 (recortado=False)
+  (36,32) L=0.347472  bk_m=0.220423 dL_m=+0.127048 | bk_prod=0.346144 dL_prod=+0.001328 (recortado=False)
+  (35,33) L=0.569708  bk_m=0.210616 dL_m=+0.359092 | bk_prod=0.346144 dL_prod=+0.223564 (recortado=False)
+  (35,34) L=0.361932  bk_m=0.218365 dL_m=+0.143567 | bk_prod=0.346144 dL_prod=+0.015787 (recortado=False)
+  (36,33) L=0.332761  bk_m=0.210734 dL_m=+0.122026 | bk_prod=0.346144 dL_prod=-0.013383 (recortado=True)
+
+SUMA fondo sobre alertados: .m port=1.080443826 | OSF Tot_Lmir_bk=1.072886152 | produccion=1.730721119
+deltaL: .m port=0.884898 | OSF=0.892456 | produccion=0.248005
+VRP MW: .m port=9.8058 | OSF=9.8895 | produccion suma=2.7482 | produccion pc tras single_pixel_mode=2.7482 (modo=False)
+razon produccion/OSF = 0.2779 ; port/OSF = 0.9915
+
+CONTROL (flag apagado): fondo por vecinos D25 max_half_px=3: suma bk=1.049228, VRP=10.1517 MW
+media de vecinos 3x3 no alertados por pixel: [0.200178, 0.199181, 0.212697, 0.226691, 0.210482]
+fondo produccion 0.346144 vs mediana del entorno inmediato 0.210482: el anillo regional es MAS CALIDO que el entorno del crater

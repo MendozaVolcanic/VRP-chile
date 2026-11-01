@@ -1,0 +1,8 @@
+# control de simular_revert.sh sobre main 57d18ad78: arbol revertido efd1b8a9cc318cd9ee810489080cddcc90ea602b
+$ git show efd1b8a9cc318cd9ee810489080cddcc90ea602b:pipeline/profiles/mirova_equivalent.yaml | grep -n 'enable_test1_path:\|enable_modis_b22_primary:\|enable_tests_23_prose_branch:'
+263:  enable_test1_path: true
+567:enable_modis_b22_primary: false
+$ git show HEAD:pipeline/profiles/mirova_equivalent.yaml | grep -n (mismo patron)
+268:  enable_test1_path: false
+271:  enable_tests_23_prose_branch: true
+578:enable_modis_b22_primary: true

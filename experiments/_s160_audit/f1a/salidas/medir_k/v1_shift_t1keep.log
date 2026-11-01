@@ -1,0 +1,257 @@
+== VENTANA V1: 2026-08-29 a 2026-10-08 | volcanes 11 | brazos ('C0', 'F', 'K', 'G') | decide tabla y OCR
+   predicado del tablero: frontend/index.html sha256 f711c61dfb96555b8d203ce0e127dc6c5f86e63d692b435c79b7d45fa7d0ba02
+   referencia congelada MendozaVolcanic/Mirova-v1@c5944c6134bff2bdc9380f9005c27055fd74d450: principales y capas (consolidado_filas_perdidas.csv 22 filas, respaldo_20260408.csv 0 filas) OK
+
+== 0. SUSTRATO (pasadas nocturnas de C0, etiqueta del evaluador; en V2, VIIRS desde abril)
+   MODIS    pasadas   944 | alertas    8 | protegidas A   4 (C0 publica   3; solo OCR Suomi NPP 0) | protegidas B   4 | negativos limpios   893
+   VIIRS375 pasadas  1944 | alertas  260 | protegidas A  21 (C0 publica  21; solo OCR Suomi NPP 9) | protegidas B  37 | negativos limpios   832
+   VIIRS750 pasadas  1932 | alertas   42 | protegidas A  12 (C0 publica  12; solo OCR Suomi NPP 2) | protegidas B  14 | negativos limpios  1303
+
+== 1. COBERTURA (A108)
+   protegidas (A o B) sin record en algun brazo: ninguna
+   C0 contra produccion (mirova_equivalent): en ningun volcan y sensor falta mas del 5 % de las pasadas de produccion
+   cobertura pareja: OK
+
+== 2. VERSION DEL PRODUCTO POR PASADA
+   pasadas con version distinta entre brazos: 0 (protegidas: 0) []
+
+== 3. CABLEADO DE CADA BRAZO (linea FLAGS_BRAZO de cada job y huella en los records)
+   C0  OK
+   F   ROTO: declara sin Test 1 y hay records con triggered_test1
+   K   ROTO: declara sin Test 1 y hay records con triggered_test1
+   G   OK
+
+== 4. DETERMINISMO (misma decision de publicar, por sensor)
+   G contra C0 MODIS      944 pasadas, misma decision   944 (100.00 %) | OK
+   G contra C0 VIIRS375  1944 pasadas, misma decision  1944 (100.00 %) | OK
+   G contra C0 VIIRS750  1932 pasadas, misma decision  1932 (100.00 %) | OK
+   K contra F VIIRS375  1944 pasadas, misma decision  1944 (100.00 %) | OK
+   K contra F VIIRS750  1932 pasadas, misma decision  1932 (100.00 %) | OK
+
+== CONTROLES GENERALES: OK
+
+== 5. P1, VETO: alertas protegidas que C0 publica y el candidato no (por pasada)
+   F lectura A VIIRS375 protegidas que C0 publica  21 | perdidas netas 1, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 1 | recuperadas 0 | INDECIDIBLE
+      perdida: NevadosDeChillan|VIIRS375|2026-09-29 06:36 | MIROVA 2.11 MW | VIIRS_SNPP | lab pos
+      solo OCR Suomi NPP (no decide; mirar la cabecera de la imagen, docs/S150_IMAGENES_SNPP.md): Isluga|VIIRS375|2026-09-09 06:06 | MIROVA 1.91 MW | VIIRS_SNPP | lab pos
+   F lectura A VIIRS750 protegidas que C0 publica  12 | perdidas netas 2, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | INDECIDIBLE
+      perdida: NevadosDeChillan|VIIRS750|2026-09-29 06:36 | MIROVA 2.03 MW | VIIRS_SNPP_750 | lab pos
+      perdida: NevadosDeChillan|VIIRS750|2026-10-05 06:48 | MIROVA 2.66 MW | VIIRS_NOAA20_750 | lab pos
+   F lectura A MODIS    protegidas que C0 publica   3 | perdidas netas 3, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | INDECIDIBLE (informativo: F no se adopta sin K)
+      perdida: NevadosDeChillan|MODIS|2026-10-01 01:45 | MIROVA 6.17 MW | MODIS_TERRA | lab pos
+      perdida: NevadosDeChillan|MODIS|2026-10-05 07:50 | MIROVA 3.5 MW | MODIS_AQUA | lab pos
+      perdida: Villarrica|MODIS|2026-09-04 07:50 | MIROVA 4.75 MW | MODIS_AQUA | lab pos
+   F lectura B VIIRS375 protegidas que C0 publica  36 | perdidas netas 4, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 1 | INDECIDIBLE
+      perdida: Isluga|VIIRS375|2026-09-06 06:30 | MIROVA None MW | VIIRS_NOAA21 | lab far_ref
+      perdida: Isluga|VIIRS375|2026-09-09 06:06 | MIROVA 1.91 MW | VIIRS_SNPP | lab pos
+      perdida: Tupungatito|VIIRS375|2026-09-24 06:30 | MIROVA None MW | VIIRS_SNPP | lab far_ref
+      perdida: NevadosDeChillan|VIIRS375|2026-09-29 06:36 | MIROVA 2.11 MW | VIIRS_SNPP | lab pos
+      recuperada (C0 no la publica): Llaima|VIIRS375|2026-09-04 06:24 | MIROVA None MW
+   F lectura B VIIRS750 protegidas que C0 publica  12 | perdidas netas 2, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | INDECIDIBLE
+      perdida: NevadosDeChillan|VIIRS750|2026-09-29 06:36 | MIROVA 2.03 MW | VIIRS_SNPP_750 | lab pos
+      perdida: NevadosDeChillan|VIIRS750|2026-10-05 06:48 | MIROVA 2.66 MW | VIIRS_NOAA20_750 | lab pos
+   F lectura B MODIS    protegidas que C0 publica   3 | perdidas netas 3, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | INDECIDIBLE (informativo: F no se adopta sin K)
+      perdida: NevadosDeChillan|MODIS|2026-10-01 01:45 | MIROVA 6.17 MW | MODIS_TERRA | lab pos
+      perdida: NevadosDeChillan|MODIS|2026-10-05 07:50 | MIROVA 3.5 MW | MODIS_AQUA | lab pos
+      perdida: Villarrica|MODIS|2026-09-04 07:50 | MIROVA 4.75 MW | MODIS_AQUA | lab pos
+   K lectura A MODIS    protegidas que C0 publica   3 | perdidas netas 3, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | INDECIDIBLE
+      perdida: NevadosDeChillan|MODIS|2026-10-01 01:45 | MIROVA 6.17 MW | MODIS_TERRA | lab pos
+      perdida: NevadosDeChillan|MODIS|2026-10-05 07:50 | MIROVA 3.5 MW | MODIS_AQUA | lab pos
+      perdida: Villarrica|MODIS|2026-09-04 07:50 | MIROVA 4.75 MW | MODIS_AQUA | lab pos
+   K lectura A VIIRS375 protegidas que C0 publica  21 | perdidas netas 1, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 1 | recuperadas 0 | INDECIDIBLE
+      perdida: NevadosDeChillan|VIIRS375|2026-09-29 06:36 | MIROVA 2.11 MW | VIIRS_SNPP | lab pos
+      solo OCR Suomi NPP (no decide; mirar la cabecera de la imagen, docs/S150_IMAGENES_SNPP.md): Isluga|VIIRS375|2026-09-09 06:06 | MIROVA 1.91 MW | VIIRS_SNPP | lab pos
+   K lectura A VIIRS750 protegidas que C0 publica  12 | perdidas netas 2, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | INDECIDIBLE
+      perdida: NevadosDeChillan|VIIRS750|2026-09-29 06:36 | MIROVA 2.03 MW | VIIRS_SNPP_750 | lab pos
+      perdida: NevadosDeChillan|VIIRS750|2026-10-05 06:48 | MIROVA 2.66 MW | VIIRS_NOAA20_750 | lab pos
+   K lectura B MODIS    protegidas que C0 publica   3 | perdidas netas 3, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | INDECIDIBLE
+      perdida: NevadosDeChillan|MODIS|2026-10-01 01:45 | MIROVA 6.17 MW | MODIS_TERRA | lab pos
+      perdida: NevadosDeChillan|MODIS|2026-10-05 07:50 | MIROVA 3.5 MW | MODIS_AQUA | lab pos
+      perdida: Villarrica|MODIS|2026-09-04 07:50 | MIROVA 4.75 MW | MODIS_AQUA | lab pos
+   K lectura B VIIRS375 protegidas que C0 publica  36 | perdidas netas 4, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 1 | INDECIDIBLE
+      perdida: Isluga|VIIRS375|2026-09-06 06:30 | MIROVA None MW | VIIRS_NOAA21 | lab far_ref
+      perdida: Isluga|VIIRS375|2026-09-09 06:06 | MIROVA 1.91 MW | VIIRS_SNPP | lab pos
+      perdida: Tupungatito|VIIRS375|2026-09-24 06:30 | MIROVA None MW | VIIRS_SNPP | lab far_ref
+      perdida: NevadosDeChillan|VIIRS375|2026-09-29 06:36 | MIROVA 2.11 MW | VIIRS_SNPP | lab pos
+      recuperada (C0 no la publica): Llaima|VIIRS375|2026-09-04 06:24 | MIROVA None MW
+   K lectura B VIIRS750 protegidas que C0 publica  12 | perdidas netas 2, ruidosas 0, pendientes 0, descartadas por repeticion 0, solo OCR Suomi NPP 0 | recuperadas 0 | INDECIDIBLE
+      perdida: NevadosDeChillan|VIIRS750|2026-09-29 06:36 | MIROVA 2.03 MW | VIIRS_SNPP_750 | lab pos
+      perdida: NevadosDeChillan|VIIRS750|2026-10-05 06:48 | MIROVA 2.66 MW | VIIRS_NOAA20_750 | lab pos
+
+== 6. P2, SUMA DE ERRORES BAJO 1 MW, por pasada (alertas Muy Bajo perdidas + publicaciones en negativos limpios)
+   lectura A MODIS    C0  Muy Bajo perdidas    4 de    4 | negativos publicados  110 de   893 | suma   114 (con Suomi NPP solo OCR:   114) | otras publicadas    2
+   lectura A MODIS    F   Muy Bajo perdidas    4 de    4 | negativos publicados  106 de   893 | suma   110 (con Suomi NPP solo OCR:   110) | otras publicadas    5
+   lectura A MODIS    K   Muy Bajo perdidas    4 de    4 | negativos publicados  106 de   893 | suma   110 (con Suomi NPP solo OCR:   110) | otras publicadas    5
+   lectura A MODIS    G   Muy Bajo perdidas    4 de    4 | negativos publicados  110 de   893 | suma   114 (con Suomi NPP solo OCR:   114) | otras publicadas    2
+      P2 K lectura A MODIS   : 110 contra C0 114, ruido 0.0 (gemelo: 0 pasadas discordantes, diferencia neta 0) -> INDECIDIBLE
+   lectura A VIIRS375 C0  Muy Bajo perdidas    0 de  194 | negativos publicados  734 de   832 | suma   734 (con Suomi NPP solo OCR:   734) | otras publicadas  742
+   lectura A VIIRS375 F   Muy Bajo perdidas   12 de  194 | negativos publicados  745 de   832 | suma   757 (con Suomi NPP solo OCR:   758) | otras publicadas  747
+   lectura A VIIRS375 K   Muy Bajo perdidas   12 de  194 | negativos publicados  745 de   832 | suma   757 (con Suomi NPP solo OCR:   758) | otras publicadas  747
+   lectura A VIIRS375 G   Muy Bajo perdidas    0 de  194 | negativos publicados  734 de   832 | suma   734 (con Suomi NPP solo OCR:   734) | otras publicadas  742
+      P2 F lectura A VIIRS375: 757 contra C0 734, ruido 0.0 (gemelo: 0 pasadas discordantes, diferencia neta 0) -> INDECIDIBLE
+      P2 K lectura A VIIRS375: 757 contra C0 734, ruido 0.0 (gemelo: 0 pasadas discordantes, diferencia neta 0) -> INDECIDIBLE
+   lectura A VIIRS750 C0  Muy Bajo perdidas   10 de   30 | negativos publicados  321 de  1303 | suma   331 (con Suomi NPP solo OCR:   331) | otras publicadas  126
+   lectura A VIIRS750 F   Muy Bajo perdidas   22 de   30 | negativos publicados  298 de  1303 | suma   320 (con Suomi NPP solo OCR:   320) | otras publicadas  149
+   lectura A VIIRS750 K   Muy Bajo perdidas   22 de   30 | negativos publicados  298 de  1303 | suma   320 (con Suomi NPP solo OCR:   320) | otras publicadas  149
+   lectura A VIIRS750 G   Muy Bajo perdidas   10 de   30 | negativos publicados  321 de  1303 | suma   331 (con Suomi NPP solo OCR:   331) | otras publicadas  126
+      P2 F lectura A VIIRS750: 320 contra C0 331, ruido 0.0 (gemelo: 0 pasadas discordantes, diferencia neta 0) -> INDECIDIBLE
+      P2 K lectura A VIIRS750: 320 contra C0 331, ruido 0.0 (gemelo: 0 pasadas discordantes, diferencia neta 0) -> INDECIDIBLE
+   lectura B MODIS    C0  Muy Bajo perdidas    4 de    4 | negativos publicados  110 de   893 | suma   114 (con Suomi NPP solo OCR:   114) | otras publicadas    2
+   lectura B MODIS    F   Muy Bajo perdidas    4 de    4 | negativos publicados  106 de   893 | suma   110 (con Suomi NPP solo OCR:   110) | otras publicadas    5
+   lectura B MODIS    K   Muy Bajo perdidas    4 de    4 | negativos publicados  106 de   893 | suma   110 (con Suomi NPP solo OCR:   110) | otras publicadas    5
+   lectura B MODIS    G   Muy Bajo perdidas    4 de    4 | negativos publicados  110 de   893 | suma   114 (con Suomi NPP solo OCR:   114) | otras publicadas    2
+      P2 K lectura B MODIS   : 110 contra C0 114, ruido 0.0 (gemelo: 0 pasadas discordantes, diferencia neta 0) -> INDECIDIBLE
+   lectura B VIIRS375 C0  Muy Bajo perdidas    0 de  194 | negativos publicados  734 de   832 | suma   734 (con Suomi NPP solo OCR:   734) | otras publicadas  727
+   lectura B VIIRS375 F   Muy Bajo perdidas   12 de  194 | negativos publicados  745 de   832 | suma   757 (con Suomi NPP solo OCR:   758) | otras publicadas  733
+   lectura B VIIRS375 K   Muy Bajo perdidas   12 de  194 | negativos publicados  745 de   832 | suma   757 (con Suomi NPP solo OCR:   758) | otras publicadas  733
+   lectura B VIIRS375 G   Muy Bajo perdidas    0 de  194 | negativos publicados  734 de   832 | suma   734 (con Suomi NPP solo OCR:   734) | otras publicadas  727
+      P2 F lectura B VIIRS375: 757 contra C0 734, ruido 0.0 (gemelo: 0 pasadas discordantes, diferencia neta 0) -> INDECIDIBLE
+      P2 K lectura B VIIRS375: 757 contra C0 734, ruido 0.0 (gemelo: 0 pasadas discordantes, diferencia neta 0) -> INDECIDIBLE
+   lectura B VIIRS750 C0  Muy Bajo perdidas   10 de   30 | negativos publicados  321 de  1303 | suma   331 (con Suomi NPP solo OCR:   331) | otras publicadas  126
+   lectura B VIIRS750 F   Muy Bajo perdidas   22 de   30 | negativos publicados  298 de  1303 | suma   320 (con Suomi NPP solo OCR:   320) | otras publicadas  149
+   lectura B VIIRS750 K   Muy Bajo perdidas   22 de   30 | negativos publicados  298 de  1303 | suma   320 (con Suomi NPP solo OCR:   320) | otras publicadas  149
+   lectura B VIIRS750 G   Muy Bajo perdidas   10 de   30 | negativos publicados  321 de  1303 | suma   331 (con Suomi NPP solo OCR:   331) | otras publicadas  126
+      P2 F lectura B VIIRS750: 320 contra C0 331, ruido 0.0 (gemelo: 0 pasadas discordantes, diferencia neta 0) -> INDECIDIBLE
+      P2 K lectura B VIIRS750: 320 contra C0 331, ruido 0.0 (gemelo: 0 pasadas discordantes, diferencia neta 0) -> INDECIDIBLE
+
+== 7. P3, RAZON DE MAGNITUD contra MIROVA, pareada (d = |log10(brazo/MIROVA)| - |log10(C0/MIROVA)|)
+   F VIIRS375 n 245 | razon mediana C0 0.765, F 0.523 | d mediana +0.117 [+0.071, +0.147] | ruido del gemelo 0.000 -> INDECIDIBLE
+   F VIIRS750 n  16 | razon mediana C0 0.614, F 0.190 | d mediana +0.404 [-0.059, +0.779] | ruido del gemelo 0.000 -> INDECIDIBLE
+   P3b F VIIRS375 Lascar       n  39 | mediana log10(brazo/C0) -0.147 -> baja, como predijo S147
+   P3b F VIIRS375 Isluga       n  62 | mediana log10(brazo/C0) -0.126 -> baja, como predijo S147
+   P3b F VIIRS375 Tupungatito  n  31 | mediana log10(brazo/C0) -0.090 -> baja, como predijo S147
+   K MODIS    n 0: SIN SUSTRATO
+   K VIIRS375 n 245 | razon mediana C0 0.765, K 0.523 | d mediana +0.117 [+0.071, +0.147] | ruido del gemelo 0.000 -> INDECIDIBLE
+   K VIIRS750 n  16 | razon mediana C0 0.614, K 0.190 | d mediana +0.404 [-0.059, +0.779] | ruido del gemelo 0.000 -> INDECIDIBLE
+   P3b K VIIRS375 Lascar       n  39 | mediana log10(brazo/C0) -0.147 -> baja, como predijo S147
+   P3b K VIIRS375 Isluga       n  62 | mediana log10(brazo/C0) -0.126 -> baja, como predijo S147
+   P3b K VIIRS375 Tupungatito  n  31 | mediana log10(brazo/C0) -0.090 -> baja, como predijo S147
+
+== 8. P4, MOVIMIENTO DEL CUMULO PUBLICADO mas de 0.5 km (tope: Wilson superior de S147, 2 de 149 = 0.048)
+   G contra C0: en alertas 0 de 295 (0.000; de las movidas, 0 quedan mas cerca del crater) | en negativos limpios 0 de 1165 | (ruido)
+      MODIS    en alertas 0 de 3
+      VIIRS375 en alertas 0 de 260
+      VIIRS750 en alertas 0 de 32
+   F contra C0: en alertas 125 de 261 (0.479; de las movidas, 31 quedan mas cerca del crater) | en negativos limpios 762 de 836 | INDECIDIBLE
+      MODIS    en alertas 0 de 0
+      VIIRS375 en alertas 115 de 245
+      VIIRS750 en alertas 10 de 16
+   K contra C0: en alertas 125 de 261 (0.479; de las movidas, 31 quedan mas cerca del crater) | en negativos limpios 762 de 836 | INDECIDIBLE
+      MODIS    en alertas 0 de 0
+      VIIRS375 en alertas 115 de 245
+      VIIRS750 en alertas 10 de 16
+
+== 9. LAS TRES METRICAS POR SENSOR (informativo): recall de alertas, publicacion en negativos limpios
+   MODIS    C0  recall    3 de    8 | protegidas A   3 de   4 | negativos limpios publicados  110 de   893 (12.3 %)
+   MODIS    F   recall    0 de    8 | protegidas A   0 de   4 | negativos limpios publicados  106 de   893 (11.9 %)
+   MODIS    K   recall    0 de    8 | protegidas A   0 de   4 | negativos limpios publicados  106 de   893 (11.9 %)
+   MODIS    G   recall    3 de    8 | protegidas A   3 de   4 | negativos limpios publicados  110 de   893 (12.3 %)
+   VIIRS375 C0  recall  260 de  260 | protegidas A  21 de  21 | negativos limpios publicados  734 de   832 (88.2 %)
+   VIIRS375 F   recall  245 de  260 | protegidas A  19 de  21 | negativos limpios publicados  745 de   832 (89.5 %)
+   VIIRS375 K   recall  245 de  260 | protegidas A  19 de  21 | negativos limpios publicados  745 de   832 (89.5 %)
+   VIIRS375 G   recall  260 de  260 | protegidas A  21 de  21 | negativos limpios publicados  734 de   832 (88.2 %)
+   VIIRS750 C0  recall   32 de   42 | protegidas A  12 de  12 | negativos limpios publicados  321 de  1303 (24.6 %)
+   VIIRS750 F   recall   18 de   42 | protegidas A  10 de  12 | negativos limpios publicados  298 de  1303 (22.9 %)
+   VIIRS750 K   recall   18 de   42 | protegidas A  10 de  12 | negativos limpios publicados  298 de  1303 (22.9 %)
+   VIIRS750 G   recall   32 de   42 | protegidas A  12 de  12 | negativos limpios publicados  321 de  1303 (24.6 %)
+
+   P6 (informa): C0 publica en negativos limpios de VIIRS 375 734 de 832 (88.2 %) | banda de A114 80 a 92 % -> DENTRO
+
+   MODIS fuera de Lascar (S150 midio K solo en Lascar), negativos limpios publicados:
+      todos C0 107 de 825 | F 103 de 825 | K 103 de 825 | G 107 de 825
+      Lastarria            C0 5/74 | F 4/74 | K 4/74 | G 5/74
+      Isluga               C0 2/67 | F 2/67 | K 2/67 | G 2/67
+      Tupungatito          C0 6/84 | F 5/84 | K 5/84 | G 6/84
+      PlanchonPeteroa      C0 4/88 | F 4/88 | K 4/88 | G 4/88
+      NevadosDeChillan     C0 1/75 | F 2/75 | K 2/75 | G 1/75
+      Llaima               C0 3/84 | F 3/84 | K 3/84 | G 3/84
+      Villarrica           C0 14/82 | F 10/82 | K 10/82 | G 14/82
+      Copahue              C0 4/83 | F 4/83 | K 4/83 | G 4/83
+      PuyehueCordonCaulle  C0 60/95 | F 62/95 | K 62/95 | G 60/95
+      Chaiten              C0 8/93 | F 7/93 | K 7/93 | G 8/93
+
+== VEREDICTO DE LA VENTANA V1 (reglas de §6):
+   F lectura A: INDECIDIBLE
+   F lectura B: INDECIDIBLE
+   K lectura A: INDECIDIBLE
+   K lectura B: INDECIDIBLE
+
+== 10. P2 Y VEREDICTO CON LAS REGLAS DE D-9 (issue #811; INFORMA. Decide la del pre-registro: original)
+   control: etiqueta original re-calculada igual a la de la tabla en 4820 de 4820 pasadas
+   regla original (original, umbral None) etiquetas que cambian: ninguna
+      lectura A MODIS    suma C0 114 F 110 K 110 G 114 | P2 K INDECIDIBLE
+      lectura A VIIRS375 suma C0 734 F 757 K 757 G 734 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura A VIIRS750 suma C0 331 F 320 K 320 G 331 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura B MODIS    suma C0 114 F 110 K 110 G 114 | P2 K INDECIDIBLE
+      lectura B VIIRS375 suma C0 734 F 757 K 757 G 734 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura B VIIRS750 suma C0 331 F 320 K 320 G 331 | P2 F INDECIDIBLE K INDECIDIBLE
+      veredicto de la ventana F lectura A: INDECIDIBLE
+      veredicto de la ventana F lectura B: INDECIDIBLE
+      veredicto de la ventana K lectura A: INDECIDIBLE
+      veredicto de la ventana K lectura B: INDECIDIBLE
+   regla SN       (SN, umbral 0.05) etiquetas que cambian: {'pos->sin_info': 19, 'sin_info->neg_limpio': 28, 'pos->neg_limpio': 14}
+      lectura A MODIS    suma C0 114 F 110 K 110 G 114 | P2 K INDECIDIBLE
+      lectura A VIIRS375 suma C0 774 F 794 K 794 G 774 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura A VIIRS750 suma C0 331 F 320 K 320 G 331 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura B MODIS    suma C0 114 F 110 K 110 G 114 | P2 K INDECIDIBLE
+      lectura B VIIRS375 suma C0 774 F 794 K 794 G 774 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura B VIIRS750 suma C0 331 F 320 K 320 G 331 | P2 F INDECIDIBLE K INDECIDIBLE
+      veredicto de la ventana F lectura A: INDECIDIBLE
+      veredicto de la ventana F lectura B: INDECIDIBLE
+      veredicto de la ventana K lectura A: INDECIDIBLE
+      veredicto de la ventana K lectura B: INDECIDIBLE
+   regla SE       (SE, umbral 0.05) etiquetas que cambian: {'pos->minima': 33}
+      lectura A MODIS    suma C0 114 F 110 K 110 G 114 | P2 K INDECIDIBLE
+      lectura A VIIRS375 suma C0 734 F 754 K 754 G 734 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura A VIIRS750 suma C0 331 F 320 K 320 G 331 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura B MODIS    suma C0 114 F 110 K 110 G 114 | P2 K INDECIDIBLE
+      lectura B VIIRS375 suma C0 734 F 754 K 754 G 734 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura B VIIRS750 suma C0 331 F 320 K 320 G 331 | P2 F INDECIDIBLE K INDECIDIBLE
+      veredicto de la ventana F lectura A: INDECIDIBLE
+      veredicto de la ventana F lectura B: INDECIDIBLE
+      veredicto de la ventana K lectura A: INDECIDIBLE
+      veredicto de la ventana K lectura B: INDECIDIBLE
+   regla SN_004   (SN, umbral 0.04) etiquetas que cambian: {'pos->sin_info': 9, 'sin_info->neg_limpio': 19, 'pos->neg_limpio': 8}
+      lectura A MODIS    suma C0 114 F 110 K 110 G 114 | P2 K INDECIDIBLE
+      lectura A VIIRS375 suma C0 759 F 779 K 779 G 759 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura A VIIRS750 suma C0 331 F 320 K 320 G 331 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura B MODIS    suma C0 114 F 110 K 110 G 114 | P2 K INDECIDIBLE
+      lectura B VIIRS375 suma C0 759 F 779 K 779 G 759 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura B VIIRS750 suma C0 331 F 320 K 320 G 331 | P2 F INDECIDIBLE K INDECIDIBLE
+      veredicto de la ventana F lectura A: INDECIDIBLE
+      veredicto de la ventana F lectura B: INDECIDIBLE
+      veredicto de la ventana K lectura A: INDECIDIBLE
+      veredicto de la ventana K lectura B: INDECIDIBLE
+   regla SE_004   (SE, umbral 0.04) etiquetas que cambian: {'pos->minima': 17}
+      lectura A MODIS    suma C0 114 F 110 K 110 G 114 | P2 K INDECIDIBLE
+      lectura A VIIRS375 suma C0 734 F 754 K 754 G 734 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura A VIIRS750 suma C0 331 F 320 K 320 G 331 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura B MODIS    suma C0 114 F 110 K 110 G 114 | P2 K INDECIDIBLE
+      lectura B VIIRS375 suma C0 734 F 754 K 754 G 734 | P2 F INDECIDIBLE K INDECIDIBLE
+      lectura B VIIRS750 suma C0 331 F 320 K 320 G 331 | P2 F INDECIDIBLE K INDECIDIBLE
+      veredicto de la ventana F lectura A: INDECIDIBLE
+      veredicto de la ventana F lectura B: INDECIDIBLE
+      veredicto de la ventana K lectura A: INDECIDIBLE
+      veredicto de la ventana K lectura B: INDECIDIBLE
+   autocontrol: la regla original reproduce la seccion 6: OK
+
+--- stderr ---
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-08-29 a 2026-10-08 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-29 a 2026-10-08 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-29 a 2026-10-08 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-29 a 2026-10-08 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-29 a 2026-10-08 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-29 a 2026-10-08 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A

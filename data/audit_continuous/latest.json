@@ -1,184 +1,2591 @@
 {
- "generated_utc": "2026-10-14T11:53:40Z",
+ "generated_utc": "2026-10-26T16:09:56Z",
  "window": [
-  "2026-08-15",
-  "2026-10-14"
+  "2026-08-27",
+  "2026-10-26"
  ],
  "ventana_falsas": [
   "2026-09-01",
-  "2026-10-14"
+  "2026-10-26"
  ],
+ "detector": {
+  "vigente": "K",
+  "frontera_datos": "2025-02-15",
+  "regla_minimas": "SN"
+ },
  "cobertura": {
   "cobertura_propia_pct": 100.0,
   "dias_con_datos": 61,
   "dias_ventana": 61,
-  "ultimo_dia_con_datos": "2026-10-14",
+  "ultimo_dia_con_datos": "2026-10-26",
   "cola_sin_datos_dias": 0,
-  "gt_ultima_fecha_csv": "2026-10-14",
+  "gt_ultima_fecha_csv": "2026-10-26",
   "gt_stale_dias": 0,
-  "alertas_diurnas_excluidas": 25,
+  "alertas_diurnas_excluidas": 34,
   "avisos": []
  },
- "criteria": "eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR, referencia filtrada a pasadas nocturnas con la misma regla del pipeline (_reject_daytime, S124)",
+ "criteria": "eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR, referencia filtrada a pasadas nocturnas con la misma regla del pipeline (_reject_daytime, S124); S156: cada noche con records de su detector, flags sólo del vigente, D-9 SN, magnitud publicada por volcán y sensor, alertas protegidas (lectura A) nominales",
  "recall": {
   "MODIS": {
-   "n_noches": 10,
+   "n_noches": 16,
    "noches_sin_datos": 0,
-   "recall_crater_pct": 100.0,
-   "recall_dash_pct": 30.0
+   "recall_crater_pct": 62.5,
+   "recall_dash_pct": 62.5
   },
   "VIIRS750": {
-   "n_noches": 54,
+   "n_noches": 50,
    "noches_sin_datos": 0,
-   "recall_crater_pct": 87.0,
-   "recall_dash_pct": 87.0
+   "recall_crater_pct": 74.0,
+   "recall_dash_pct": 74.0
   },
   "VIIRS375": {
-   "n_noches": 205,
+   "n_noches": 188,
    "noches_sin_datos": 0,
-   "recall_crater_pct": 99.0,
-   "recall_dash_pct": 99.0
+   "recall_crater_pct": 97.3,
+   "recall_dash_pct": 97.3
+  }
+ },
+ "recall_regla_original": {
+  "MODIS": {
+   "n_noches": 16,
+   "noches_sin_datos": 0,
+   "recall_crater_pct": 62.5,
+   "recall_dash_pct": 62.5
+  },
+  "VIIRS750": {
+   "n_noches": 50,
+   "noches_sin_datos": 0,
+   "recall_crater_pct": 74.0,
+   "recall_dash_pct": 74.0
+  },
+  "VIIRS375": {
+   "n_noches": 208,
+   "noches_sin_datos": 0,
+   "recall_crater_pct": 95.2,
+   "recall_dash_pct": 95.2
   }
  },
  "magnitud_ratio_by_vol": {
   "Chaiten": {
-   "n_noches": 15,
-   "ratio_mediano": 1.044
-  },
-  "Copahue": {
-   "n_noches": 2,
-   "ratio_mediano": 1.3
+   "n_noches": 12,
+   "ratio_mediano": 0.799
   },
   "Isluga": {
-   "n_noches": 50,
-   "ratio_mediano": 0.516
+   "n_noches": 45,
+   "ratio_mediano": 0.378
   },
   "Lascar": {
-   "n_noches": 39,
-   "ratio_mediano": 0.442
+   "n_noches": 35,
+   "ratio_mediano": 0.413
   },
   "Lastarria": {
-   "n_noches": 22,
-   "ratio_mediano": 0.559
-  },
-  "Llaima": {
-   "n_noches": 1,
-   "ratio_mediano": 8.7
+   "n_noches": 15,
+   "ratio_mediano": 0.56
   },
   "NevadosDeChillan": {
-   "n_noches": 30,
-   "ratio_mediano": 0.721
+   "n_noches": 45,
+   "ratio_mediano": 0.635
   },
   "PlanchonPeteroa": {
    "n_noches": 17,
    "ratio_mediano": 0.823
   },
   "PuyehueCordonCaulle": {
-   "n_noches": 36,
-   "ratio_mediano": 0.932
+   "n_noches": 34,
+   "ratio_mediano": 0.677
   },
   "Tupungatito": {
-   "n_noches": 23,
-   "ratio_mediano": 0.647
+   "n_noches": 20,
+   "ratio_mediano": 0.384
   },
   "Villarrica": {
-   "n_noches": 18,
-   "ratio_mediano": 0.82
+   "n_noches": 7,
+   "ratio_mediano": 0.887
+  }
+ },
+ "magnitud_publicada_by_vol_sensor": {
+  "Chaiten|VIIRS375": {
+   "n_noches": 11,
+   "ratio_mediano": 1.184,
+   "pasadas_publicadas_por_noche": 2
+  },
+  "Chaiten|VIIRS750": {
+   "n_noches": 1,
+   "ratio_mediano": 1.15,
+   "pasadas_publicadas_por_noche": 1
+  },
+  "Isluga|VIIRS375": {
+   "n_noches": 45,
+   "ratio_mediano": 0.507,
+   "pasadas_publicadas_por_noche": 3
+  },
+  "Lascar|MODIS": {
+   "n_noches": 1,
+   "ratio_mediano": 0.487,
+   "pasadas_publicadas_por_noche": 1
+  },
+  "Lascar|VIIRS375": {
+   "n_noches": 27,
+   "ratio_mediano": 0.552,
+   "pasadas_publicadas_por_noche": 3
+  },
+  "Lascar|VIIRS750": {
+   "n_noches": 7,
+   "ratio_mediano": 0.275,
+   "pasadas_publicadas_por_noche": 1
+  },
+  "Lastarria|VIIRS375": {
+   "n_noches": 15,
+   "ratio_mediano": 0.664,
+   "pasadas_publicadas_por_noche": 2
+  },
+  "NevadosDeChillan|MODIS": {
+   "n_noches": 8,
+   "ratio_mediano": 0.56,
+   "pasadas_publicadas_por_noche": 1.5
+  },
+  "NevadosDeChillan|VIIRS375": {
+   "n_noches": 21,
+   "ratio_mediano": 0.662,
+   "pasadas_publicadas_por_noche": 3
+  },
+  "NevadosDeChillan|VIIRS750": {
+   "n_noches": 16,
+   "ratio_mediano": 0.683,
+   "pasadas_publicadas_por_noche": 3.0
+  },
+  "PlanchonPeteroa|VIIRS375": {
+   "n_noches": 16,
+   "ratio_mediano": 0.856,
+   "pasadas_publicadas_por_noche": 2.0
+  },
+  "PlanchonPeteroa|VIIRS750": {
+   "n_noches": 1,
+   "ratio_mediano": 1.669,
+   "pasadas_publicadas_por_noche": 1
+  },
+  "PuyehueCordonCaulle|VIIRS375": {
+   "n_noches": 23,
+   "ratio_mediano": 1.057,
+   "pasadas_publicadas_por_noche": 4
+  },
+  "PuyehueCordonCaulle|VIIRS750": {
+   "n_noches": 11,
+   "ratio_mediano": 0.375,
+   "pasadas_publicadas_por_noche": 1
+  },
+  "Tupungatito|VIIRS375": {
+   "n_noches": 20,
+   "ratio_mediano": 0.41,
+   "pasadas_publicadas_por_noche": 2.0
+  },
+  "Villarrica|MODIS": {
+   "n_noches": 1,
+   "ratio_mediano": 0.972,
+   "pasadas_publicadas_por_noche": 1
+  },
+  "Villarrica|VIIRS375": {
+   "n_noches": 5,
+   "ratio_mediano": 1.014,
+   "pasadas_publicadas_por_noche": 1
+  },
+  "Villarrica|VIIRS750": {
+   "n_noches": 1,
+   "ratio_mediano": 0.504,
+   "pasadas_publicadas_por_noche": 1
   }
  },
  "magnitud_ratio_by_npix": {
   "1px": {
-   "n_noches": 83,
-   "ratio_mediano": 0.75
+   "n_noches": 50,
+   "ratio_mediano": 0.706
   },
   "2px": {
-   "n_noches": 64,
-   "ratio_mediano": 0.679
+   "n_noches": 86,
+   "ratio_mediano": 0.562
   },
   "3-5px": {
-   "n_noches": 49,
-   "ratio_mediano": 0.538
+   "n_noches": 81,
+   "ratio_mediano": 0.468
   },
   "6+px": {
-   "n_noches": 57,
-   "ratio_mediano": 0.812
+   "n_noches": 13,
+   "ratio_mediano": 0.614
   }
+ },
+ "por_detector": {
+  "K": {
+   "detector": "K",
+   "recall": {
+    "MODIS": {
+     "n_noches": 16,
+     "noches_sin_datos": 0,
+     "recall_crater_pct": 62.5,
+     "recall_dash_pct": 62.5
+    },
+    "VIIRS750": {
+     "n_noches": 50,
+     "noches_sin_datos": 0,
+     "recall_crater_pct": 74.0,
+     "recall_dash_pct": 74.0
+    },
+    "VIIRS375": {
+     "n_noches": 188,
+     "noches_sin_datos": 0,
+     "recall_crater_pct": 97.3,
+     "recall_dash_pct": 97.3
+    }
+   },
+   "magnitud_ratio_by_vol": {
+    "Chaiten": {
+     "n_noches": 12,
+     "ratio_mediano": 0.799
+    },
+    "Isluga": {
+     "n_noches": 45,
+     "ratio_mediano": 0.378
+    },
+    "Lascar": {
+     "n_noches": 35,
+     "ratio_mediano": 0.413
+    },
+    "Lastarria": {
+     "n_noches": 15,
+     "ratio_mediano": 0.56
+    },
+    "NevadosDeChillan": {
+     "n_noches": 45,
+     "ratio_mediano": 0.635
+    },
+    "PlanchonPeteroa": {
+     "n_noches": 17,
+     "ratio_mediano": 0.823
+    },
+    "PuyehueCordonCaulle": {
+     "n_noches": 34,
+     "ratio_mediano": 0.677
+    },
+    "Tupungatito": {
+     "n_noches": 20,
+     "ratio_mediano": 0.384
+    },
+    "Villarrica": {
+     "n_noches": 7,
+     "ratio_mediano": 0.887
+    }
+   },
+   "magnitud_publicada_by_vol_sensor": {
+    "Chaiten|VIIRS375": {
+     "n_noches": 11,
+     "ratio_mediano": 1.184,
+     "pasadas_publicadas_por_noche": 2
+    },
+    "Chaiten|VIIRS750": {
+     "n_noches": 1,
+     "ratio_mediano": 1.15,
+     "pasadas_publicadas_por_noche": 1
+    },
+    "Isluga|VIIRS375": {
+     "n_noches": 45,
+     "ratio_mediano": 0.507,
+     "pasadas_publicadas_por_noche": 3
+    },
+    "Lascar|MODIS": {
+     "n_noches": 1,
+     "ratio_mediano": 0.487,
+     "pasadas_publicadas_por_noche": 1
+    },
+    "Lascar|VIIRS375": {
+     "n_noches": 27,
+     "ratio_mediano": 0.552,
+     "pasadas_publicadas_por_noche": 3
+    },
+    "Lascar|VIIRS750": {
+     "n_noches": 7,
+     "ratio_mediano": 0.275,
+     "pasadas_publicadas_por_noche": 1
+    },
+    "Lastarria|VIIRS375": {
+     "n_noches": 15,
+     "ratio_mediano": 0.664,
+     "pasadas_publicadas_por_noche": 2
+    },
+    "NevadosDeChillan|MODIS": {
+     "n_noches": 8,
+     "ratio_mediano": 0.56,
+     "pasadas_publicadas_por_noche": 1.5
+    },
+    "NevadosDeChillan|VIIRS375": {
+     "n_noches": 21,
+     "ratio_mediano": 0.662,
+     "pasadas_publicadas_por_noche": 3
+    },
+    "NevadosDeChillan|VIIRS750": {
+     "n_noches": 16,
+     "ratio_mediano": 0.683,
+     "pasadas_publicadas_por_noche": 3.0
+    },
+    "PlanchonPeteroa|VIIRS375": {
+     "n_noches": 16,
+     "ratio_mediano": 0.856,
+     "pasadas_publicadas_por_noche": 2.0
+    },
+    "PlanchonPeteroa|VIIRS750": {
+     "n_noches": 1,
+     "ratio_mediano": 1.669,
+     "pasadas_publicadas_por_noche": 1
+    },
+    "PuyehueCordonCaulle|VIIRS375": {
+     "n_noches": 23,
+     "ratio_mediano": 1.057,
+     "pasadas_publicadas_por_noche": 4
+    },
+    "PuyehueCordonCaulle|VIIRS750": {
+     "n_noches": 11,
+     "ratio_mediano": 0.375,
+     "pasadas_publicadas_por_noche": 1
+    },
+    "Tupungatito|VIIRS375": {
+     "n_noches": 20,
+     "ratio_mediano": 0.41,
+     "pasadas_publicadas_por_noche": 2.0
+    },
+    "Villarrica|MODIS": {
+     "n_noches": 1,
+     "ratio_mediano": 0.972,
+     "pasadas_publicadas_por_noche": 1
+    },
+    "Villarrica|VIIRS375": {
+     "n_noches": 5,
+     "ratio_mediano": 1.014,
+     "pasadas_publicadas_por_noche": 1
+    },
+    "Villarrica|VIIRS750": {
+     "n_noches": 1,
+     "ratio_mediano": 0.504,
+     "pasadas_publicadas_por_noche": 1
+    }
+   },
+   "magnitud_ratio_by_npix": {
+    "1px": {
+     "n_noches": 50,
+     "ratio_mediano": 0.706
+    },
+    "2px": {
+     "n_noches": 86,
+     "ratio_mediano": 0.562
+    },
+    "3-5px": {
+     "n_noches": 81,
+     "ratio_mediano": 0.468
+    },
+    "6+px": {
+     "n_noches": 13,
+     "ratio_mediano": 0.614
+    }
+   }
+  }
+ },
+ "fuera_de_detector": {},
+ "avisos_detector": [],
+ "plataformas": {
+  "ceses": [
+   {
+    "plataforma": "Suomi NPP",
+    "desde_utc": "2026-11-02T13:00:00Z",
+    "sensores": [
+     "VIIRS375",
+     "VIIRS750"
+    ],
+    "primer_dia_sin": "2026-11-03"
+   }
+  ],
+  "juzga_desde": {
+   "MODIS": null,
+   "VIIRS750": null,
+   "VIIRS375": null
+  },
+  "error": null,
+  "sin_juzgar": {},
+  "avisos": [],
+  "aparte": null
+ },
+ "alertas_protegidas": {
+  "lectura": "A",
+  "umbral_mw": 1.0,
+  "lista": [
+   {
+    "volcano": "PlanchonPeteroa",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-08-31 06:00",
+    "vrp_mirova_mw": 1.63,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": false,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "Villarrica",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-09-04 07:50",
+    "vrp_mirova_mw": 4.75,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": false,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "Isluga",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-09-09 06:06",
+    "vrp_mirova_mw": 1.91,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "Tupungatito",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-09-14 06:18",
+    "vrp_mirova_mw": 2.22,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "PuyehueCordonCaulle",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-09-18 05:24",
+    "vrp_mirova_mw": 1.43,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-09-28 04:42",
+    "vrp_mirova_mw": 2.58,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "Isluga",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-09-28 05:12",
+    "vrp_mirova_mw": 1.63,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "Tupungatito",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-09-28 05:18",
+    "vrp_mirova_mw": 2.51,
+    "detector": "K",
+    "estado": "sin_publicar",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "Tupungatito",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-09-29 04:54",
+    "vrp_mirova_mw": 1.86,
+    "detector": "K",
+    "estado": "sin_publicar",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-09-29 05:00",
+    "vrp_mirova_mw": 1.41,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-09-29 05:18",
+    "vrp_mirova_mw": 5.73,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-09-29 05:18",
+    "vrp_mirova_mw": 5.48,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-09-29 06:00",
+    "vrp_mirova_mw": 3.92,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-09-29 06:00",
+    "vrp_mirova_mw": 2.52,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-09-29 06:36",
+    "vrp_mirova_mw": 2.11,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-09-29 06:36",
+    "vrp_mirova_mw": 2.03,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-01 01:45",
+    "vrp_mirova_mw": 6.17,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "Lascar",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-01 05:18",
+    "vrp_mirova_mw": 1.2,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-01 05:24",
+    "vrp_mirova_mw": 6.28,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-01 05:24",
+    "vrp_mirova_mw": 9.0,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-01 06:00",
+    "vrp_mirova_mw": 5.07,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-01 06:00",
+    "vrp_mirova_mw": 10.0,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-01 06:18",
+    "vrp_mirova_mw": 7.28,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-01 06:18",
+    "vrp_mirova_mw": 7.06,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-01 08:35",
+    "vrp_mirova_mw": 5.18,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "Isluga",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-03 05:18",
+    "vrp_mirova_mw": 1.62,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-04 06:06",
+    "vrp_mirova_mw": 2.54,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-04 06:06",
+    "vrp_mirova_mw": 2.3,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-05 05:06",
+    "vrp_mirova_mw": 5.77,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-05 05:06",
+    "vrp_mirova_mw": 3.43,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-05 05:48",
+    "vrp_mirova_mw": 4.35,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-05 05:48",
+    "vrp_mirova_mw": 7.86,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-05 06:24",
+    "vrp_mirova_mw": 8.24,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-05 06:24",
+    "vrp_mirova_mw": 7.0,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": true
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-05 06:48",
+    "vrp_mirova_mw": 4.71,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-05 06:48",
+    "vrp_mirova_mw": 2.66,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-05 07:50",
+    "vrp_mirova_mw": 3.5,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-09 06:12",
+    "vrp_mirova_mw": 1.22,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-10 04:54",
+    "vrp_mirova_mw": 5.72,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-10 04:54",
+    "vrp_mirova_mw": 2.48,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-10 05:12",
+    "vrp_mirova_mw": 8.75,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-10 05:12",
+    "vrp_mirova_mw": 6.42,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-10 05:54",
+    "vrp_mirova_mw": 7.55,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-10 05:54",
+    "vrp_mirova_mw": 13.13,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "PuyehueCordonCaulle",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-10 05:54",
+    "vrp_mirova_mw": 1.19,
+    "detector": "K",
+    "estado": "sin_publicar",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-10 06:54",
+    "vrp_mirova_mw": 13.78,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-10 06:54",
+    "vrp_mirova_mw": 15.26,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-10 07:40",
+    "vrp_mirova_mw": 3.95,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-11 05:36",
+    "vrp_mirova_mw": 1.38,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-11 05:36",
+    "vrp_mirova_mw": 1.03,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-12 05:18",
+    "vrp_mirova_mw": 7.31,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-12 05:18",
+    "vrp_mirova_mw": 8.44,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-12 07:20",
+    "vrp_mirova_mw": 2.18,
+    "detector": "K",
+    "estado": "sin_publicar",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-14 06:18",
+    "vrp_mirova_mw": 2.54,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-14 06:18",
+    "vrp_mirova_mw": 2.0,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-15 01:05",
+    "vrp_mirova_mw": 1.72,
+    "detector": "K",
+    "estado": "sin_publicar",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-15 05:18",
+    "vrp_mirova_mw": 13.74,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-15 05:18",
+    "vrp_mirova_mw": 14.02,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-15 06:00",
+    "vrp_mirova_mw": 14.67,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-15 06:00",
+    "vrp_mirova_mw": 30.1,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-15 06:36",
+    "vrp_mirova_mw": 19.07,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-15 06:36",
+    "vrp_mirova_mw": 15.15,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-15 07:35",
+    "vrp_mirova_mw": 15.27,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-16 01:40",
+    "vrp_mirova_mw": 12.39,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-16 05:00",
+    "vrp_mirova_mw": 8.36,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-16 05:42",
+    "vrp_mirova_mw": 5.33,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-16 05:42",
+    "vrp_mirova_mw": 15.63,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-16 06:42",
+    "vrp_mirova_mw": 14.63,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-16 06:42",
+    "vrp_mirova_mw": 14.02,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-16 08:15",
+    "vrp_mirova_mw": 13.7,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-17 02:20",
+    "vrp_mirova_mw": 12.97,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-17 04:42",
+    "vrp_mirova_mw": 7.39,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-17 04:42",
+    "vrp_mirova_mw": 2.47,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-17 05:24",
+    "vrp_mirova_mw": 11.03,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-17 06:18",
+    "vrp_mirova_mw": 11.36,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-17 06:18",
+    "vrp_mirova_mw": 21.94,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-17 08:50",
+    "vrp_mirova_mw": 7.09,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-18 01:20",
+    "vrp_mirova_mw": 14.39,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-18 05:06",
+    "vrp_mirova_mw": 21.25,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-18 05:06",
+    "vrp_mirova_mw": 19.63,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-18 05:42",
+    "vrp_mirova_mw": 20.87,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-18 06:00",
+    "vrp_mirova_mw": 9.94,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-18 06:00",
+    "vrp_mirova_mw": 18.98,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-18 06:48",
+    "vrp_mirova_mw": 25.79,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-18 06:48",
+    "vrp_mirova_mw": 22.85,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-18 07:50",
+    "vrp_mirova_mw": 18.36,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-24 05:30",
+    "vrp_mirova_mw": 11.65,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-24 05:30",
+    "vrp_mirova_mw": 7.14,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-24 05:48",
+    "vrp_mirova_mw": 2.36,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-24 05:48",
+    "vrp_mirova_mw": 1.74,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-25 04:36",
+    "vrp_mirova_mw": 9.94,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-25 04:36",
+    "vrp_mirova_mw": 4.79,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-25 05:30",
+    "vrp_mirova_mw": 11.3,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-25 05:30",
+    "vrp_mirova_mw": 40.29,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "PuyehueCordonCaulle",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-25 05:30",
+    "vrp_mirova_mw": 1.48,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-25 06:12",
+    "vrp_mirova_mw": 13.71,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-25 06:12",
+    "vrp_mirova_mw": 14.23,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-25 06:54",
+    "vrp_mirova_mw": 5.42,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-25 07:20",
+    "vrp_mirova_mw": 3.79,
+    "detector": "K",
+    "estado": "sin_publicar",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-10-26 01:40",
+    "vrp_mirova_mw": 26.53,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-26 04:54",
+    "vrp_mirova_mw": 10.35,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-26 04:54",
+    "vrp_mirova_mw": 2.81,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS375",
+    "fecha_utc": "2026-10-26 05:12",
+    "vrp_mirova_mw": 5.36,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "VIIRS750",
+    "fecha_utc": "2026-10-26 05:12",
+    "vrp_mirova_mw": 2.64,
+    "detector": "K",
+    "estado": "publicada",
+    "detector_records": [
+     "K"
+    ],
+    "noche_publicada_otra_pasada": true,
+    "referencia_sospechosa": false
+   }
+  ],
+  "error": null
  },
  "falsas_publicaciones": {
   "por_sensor": {
    "MODIS": {
-    "n_neg_limpio": 955,
-    "n_publica": 124,
-    "falsas_pub_pct": 13.0
+    "n_neg_limpio": 1194,
+    "n_publica": 12,
+    "falsas_pub_pct": 1.0
    },
    "VIIRS750": {
-    "n_neg_limpio": 1366,
-    "n_publica": 335,
-    "falsas_pub_pct": 24.5
+    "n_neg_limpio": 1718,
+    "n_publica": 13,
+    "falsas_pub_pct": 0.8
    },
    "VIIRS375": {
-    "n_neg_limpio": 877,
-    "n_publica": 777,
-    "falsas_pub_pct": 88.6
+    "n_neg_limpio": 1136,
+    "n_publica": 46,
+    "falsas_pub_pct": 4.0
    }
   },
   "por_regimen": {
    "focal": {
     "MODIS": {
-     "n_neg_limpio": 420,
-     "n_publica": 83,
-     "falsas_pub_pct": 19.8,
+     "n_neg_limpio": 530,
+     "n_publica": 12,
+     "falsas_pub_pct": 2.3,
      "banda_terminado_pct": 10.0,
-     "sobre_banda_terminado": true
+     "sobre_banda_terminado": false
     },
     "VIIRS750": {
-     "n_neg_limpio": 564,
-     "n_publica": 150,
-     "falsas_pub_pct": 26.6,
+     "n_neg_limpio": 720,
+     "n_publica": 11,
+     "falsas_pub_pct": 1.5,
      "banda_terminado_pct": 10.0,
-     "sobre_banda_terminado": true
+     "sobre_banda_terminado": false
     },
     "VIIRS375": {
-     "n_neg_limpio": 267,
-     "n_publica": 244,
-     "falsas_pub_pct": 91.4,
+     "n_neg_limpio": 354,
+     "n_publica": 37,
+     "falsas_pub_pct": 10.5,
      "banda_terminado_pct": 10.0,
      "sobre_banda_terminado": true
     }
    },
    "nevado": {
     "MODIS": {
-     "n_neg_limpio": 535,
-     "n_publica": 41,
-     "falsas_pub_pct": 7.7,
+     "n_neg_limpio": 664,
+     "n_publica": 0,
+     "falsas_pub_pct": 0.0,
      "banda_terminado_pct": 15.0,
      "sobre_banda_terminado": false
     },
     "VIIRS750": {
-     "n_neg_limpio": 802,
-     "n_publica": 185,
-     "falsas_pub_pct": 23.1,
+     "n_neg_limpio": 998,
+     "n_publica": 2,
+     "falsas_pub_pct": 0.2,
      "banda_terminado_pct": 15.0,
-     "sobre_banda_terminado": true
+     "sobre_banda_terminado": false
     },
     "VIIRS375": {
-     "n_neg_limpio": 610,
-     "n_publica": 533,
-     "falsas_pub_pct": 87.4,
+     "n_neg_limpio": 782,
+     "n_publica": 9,
+     "falsas_pub_pct": 1.2,
      "banda_terminado_pct": 15.0,
-     "sobre_banda_terminado": true
+     "sobre_banda_terminado": false
     }
    }
   },
   "alarma": false,
-  "nota": "medición sin alarma (decisión Nicolás S140); la banda es la de terminado de la spec §2, no un umbral de regresión"
+  "nota": "medición sin alarma (decisión Nicolás S140); la banda es la de terminado de la spec §2, no un umbral de regresión",
+  "detector": "K",
+  "regla_minimas": "SN",
+  "por_sensor_regla_original": {
+   "MODIS": {
+    "n_neg_limpio": 1194,
+    "n_publica": 12,
+    "falsas_pub_pct": 1.0
+   },
+   "VIIRS750": {
+    "n_neg_limpio": 1718,
+    "n_publica": 13,
+    "falsas_pub_pct": 0.8
+   },
+   "VIIRS375": {
+    "n_neg_limpio": 1088,
+    "n_publica": 30,
+    "falsas_pub_pct": 2.8
+   }
+  },
+  "por_detector": {
+   "K": {
+    "MODIS": {
+     "n_neg_limpio": 1194,
+     "n_publica": 12,
+     "falsas_pub_pct": 1.0
+    },
+    "VIIRS750": {
+     "n_neg_limpio": 1718,
+     "n_publica": 13,
+     "falsas_pub_pct": 0.8
+    },
+    "VIIRS375": {
+     "n_neg_limpio": 1136,
+     "n_publica": 46,
+     "falsas_pub_pct": 4.0
+    }
+   }
+  },
+  "cenital_VIIRS375": {
+   "z30-50": {
+    "n_neg_limpio": 274,
+    "n_publica": 15,
+    "falsas_pub_pct": 5.5
+   },
+   "z50-60": {
+    "n_neg_limpio": 204,
+    "n_publica": 6,
+    "falsas_pub_pct": 2.9
+   },
+   "z<30": {
+    "n_neg_limpio": 293,
+    "n_publica": 19,
+    "falsas_pub_pct": 6.5
+   },
+   "z>=60": {
+    "n_neg_limpio": 365,
+    "n_publica": 6,
+    "falsas_pub_pct": 1.6
+   }
+  },
+  "por_cenit": {
+   "MODIS": {
+    "z<30": {
+     "n_neg_limpio": 369,
+     "n_publica": 7,
+     "falsas_pub_pct": 1.9
+    },
+    "z30-50": {
+     "n_neg_limpio": 364,
+     "n_publica": 4,
+     "falsas_pub_pct": 1.1
+    },
+    "z50-60": {
+     "n_neg_limpio": 285,
+     "n_publica": 0,
+     "falsas_pub_pct": 0.0
+    },
+    "z>=60": {
+     "n_neg_limpio": 176,
+     "n_publica": 1,
+     "falsas_pub_pct": 0.6
+    }
+   },
+   "VIIRS750": {
+    "z<30": {
+     "n_neg_limpio": 439,
+     "n_publica": 8,
+     "falsas_pub_pct": 1.8
+    },
+    "z30-50": {
+     "n_neg_limpio": 441,
+     "n_publica": 4,
+     "falsas_pub_pct": 0.9
+    },
+    "z50-60": {
+     "n_neg_limpio": 328,
+     "n_publica": 1,
+     "falsas_pub_pct": 0.3
+    },
+    "z>=60": {
+     "n_neg_limpio": 510,
+     "n_publica": 0,
+     "falsas_pub_pct": 0.0
+    }
+   },
+   "VIIRS375": {
+    "z<30": {
+     "n_neg_limpio": 293,
+     "n_publica": 19,
+     "falsas_pub_pct": 6.5
+    },
+    "z30-50": {
+     "n_neg_limpio": 274,
+     "n_publica": 15,
+     "falsas_pub_pct": 5.5
+    },
+    "z50-60": {
+     "n_neg_limpio": 204,
+     "n_publica": 6,
+     "falsas_pub_pct": 2.9
+    },
+    "z>=60": {
+     "n_neg_limpio": 365,
+     "n_publica": 6,
+     "falsas_pub_pct": 1.6
+    }
+   }
+  }
  },
  "integrity": {
   "parse_errors": [],
   "duplicates_total": 0
  },
  "flags": [
-  "magnitud Tupungatito 0.647x < 0.7 (SUB-estima, n=23) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md"
+  "recall MODIS 62.5% < banda 95.0% (n=16, detector K)",
+  "recall VIIRS750 74.0% < banda 79.5% (n=50, detector K)",
+  "magnitud NevadosDeChillan MODIS 0.56x < 0.7 (SUB-estima, n=8; causa sin medir, antecedente: déficit de régimen débil S124, docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md)",
+  "magnitud NevadosDeChillan VIIRS375 0.662x < 0.7 (SUB-estima, n=21; causa sin medir, antecedente: déficit de régimen débil S124, docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md)",
+  "magnitud NevadosDeChillan VIIRS750 0.683x < 0.7 (SUB-estima, n=16; causa sin medir, antecedente: déficit de régimen débil S124, docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md)",
+  "magnitud PuyehueCordonCaulle VIIRS750 0.375x < 0.7 (SUB-estima, n=11; causa sin medir, antecedente: déficit de régimen débil S124, docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md)",
+  "magnitud Tupungatito VIIRS375 0.41x < 0.7 (SUB-estima, n=20; causa sin medir, antecedente: déficit de régimen débil S124, docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md)",
+  "alerta protegida sin publicar: Tupungatito VIIRS375 2026-09-28 05:18 UTC, MIROVA 2.51 MW (detector K; la noche sí se publicó en otra pasada; referencia sospechosa: sólo OCR de Suomi NPP antes del 2026-10-09, la distancia puede ser de otra pasada (A119))",
+  "alerta protegida sin publicar: Tupungatito VIIRS375 2026-09-29 04:54 UTC, MIROVA 1.86 MW (detector K; la noche sí se publicó en otra pasada; referencia sospechosa: sólo OCR de Suomi NPP antes del 2026-10-09, la distancia puede ser de otra pasada (A119))",
+  "alerta protegida sin publicar: PuyehueCordonCaulle VIIRS750 2026-10-10 05:54 UTC, MIROVA 1.19 MW (detector K; la noche sí se publicó en otra pasada)",
+  "alerta protegida sin publicar: NevadosDeChillan MODIS 2026-10-12 07:20 UTC, MIROVA 2.18 MW (detector K; la noche sí se publicó en otra pasada)",
+  "alerta protegida sin publicar: NevadosDeChillan MODIS 2026-10-15 01:05 UTC, MIROVA 1.72 MW (detector K; la noche sí se publicó en otra pasada)",
+  "alerta protegida sin publicar: NevadosDeChillan MODIS 2026-10-25 07:20 UTC, MIROVA 3.79 MW (detector K; la noche sí se publicó en otra pasada)"
  ],
- "verdict": "FUERA_DE_BANDA"
+ "verdict": "FUERA_DE_BANDA",
+ "magnitud_publicada_by_vol_sensor_cenit": {
+  "Chaiten|VIIRS375": {
+   "z<30": {
+    "n_noches": 10,
+    "ratio_mediano": 1.229,
+    "n_misma_pasada": 8
+   },
+   "z30-50": {
+    "n_noches": 1,
+    "ratio_mediano": 1.069,
+    "n_misma_pasada": 0
+   }
+  },
+  "Chaiten|VIIRS750": {
+   "z<30": {
+    "n_noches": 1,
+    "ratio_mediano": 1.15,
+    "n_misma_pasada": 1
+   }
+  },
+  "Isluga|VIIRS375": {
+   "z<30": {
+    "n_noches": 22,
+    "ratio_mediano": 0.566,
+    "n_misma_pasada": 8
+   },
+   "z30-50": {
+    "n_noches": 12,
+    "ratio_mediano": 0.521,
+    "n_misma_pasada": 5
+   },
+   "z50-60": {
+    "n_noches": 9,
+    "ratio_mediano": 0.349,
+    "n_misma_pasada": 8
+   },
+   "z>=60": {
+    "n_noches": 2,
+    "ratio_mediano": 0.359,
+    "n_misma_pasada": 2
+   }
+  },
+  "Lascar|MODIS": {
+   "z<30": {
+    "n_noches": 1,
+    "ratio_mediano": 0.487,
+    "n_misma_pasada": 1
+   }
+  },
+  "Lascar|VIIRS375": {
+   "z<30": {
+    "n_noches": 20,
+    "ratio_mediano": 0.552,
+    "n_misma_pasada": 8
+   },
+   "z30-50": {
+    "n_noches": 7,
+    "ratio_mediano": 0.548,
+    "n_misma_pasada": 5
+   }
+  },
+  "Lascar|VIIRS750": {
+   "z<30": {
+    "n_noches": 6,
+    "ratio_mediano": 0.261,
+    "n_misma_pasada": 6
+   },
+   "z30-50": {
+    "n_noches": 1,
+    "ratio_mediano": 0.548,
+    "n_misma_pasada": 1
+   }
+  },
+  "Lastarria|VIIRS375": {
+   "z<30": {
+    "n_noches": 5,
+    "ratio_mediano": 0.664,
+    "n_misma_pasada": 4
+   },
+   "z30-50": {
+    "n_noches": 8,
+    "ratio_mediano": 0.773,
+    "n_misma_pasada": 4
+   },
+   "z50-60": {
+    "n_noches": 2,
+    "ratio_mediano": 0.569,
+    "n_misma_pasada": 2
+   }
+  },
+  "NevadosDeChillan|MODIS": {
+   "z<30": {
+    "n_noches": 5,
+    "ratio_mediano": 0.751,
+    "n_misma_pasada": 5
+   },
+   "z30-50": {
+    "n_noches": 2,
+    "ratio_mediano": 0.171,
+    "n_misma_pasada": 2
+   },
+   "z50-60": {
+    "n_noches": 1,
+    "ratio_mediano": 0.203,
+    "n_misma_pasada": 1
+   }
+  },
+  "NevadosDeChillan|VIIRS375": {
+   "z<30": {
+    "n_noches": 6,
+    "ratio_mediano": 1.03,
+    "n_misma_pasada": 3
+   },
+   "z30-50": {
+    "n_noches": 9,
+    "ratio_mediano": 0.556,
+    "n_misma_pasada": 7
+   },
+   "z50-60": {
+    "n_noches": 4,
+    "ratio_mediano": 0.731,
+    "n_misma_pasada": 3
+   },
+   "z>=60": {
+    "n_noches": 2,
+    "ratio_mediano": 0.265,
+    "n_misma_pasada": 2
+   }
+  },
+  "NevadosDeChillan|VIIRS750": {
+   "z<30": {
+    "n_noches": 8,
+    "ratio_mediano": 0.766,
+    "n_misma_pasada": 5
+   },
+   "z30-50": {
+    "n_noches": 7,
+    "ratio_mediano": 0.678,
+    "n_misma_pasada": 6
+   },
+   "z50-60": {
+    "n_noches": 1,
+    "ratio_mediano": 0.587,
+    "n_misma_pasada": 1
+   }
+  },
+  "PlanchonPeteroa|VIIRS375": {
+   "z<30": {
+    "n_noches": 9,
+    "ratio_mediano": 0.822,
+    "n_misma_pasada": 9
+   },
+   "z30-50": {
+    "n_noches": 7,
+    "ratio_mediano": 0.942,
+    "n_misma_pasada": 6
+   }
+  },
+  "PlanchonPeteroa|VIIRS750": {
+   "z30-50": {
+    "n_noches": 1,
+    "ratio_mediano": 1.669,
+    "n_misma_pasada": 1
+   }
+  },
+  "PuyehueCordonCaulle|VIIRS375": {
+   "z<30": {
+    "n_noches": 15,
+    "ratio_mediano": 1.142,
+    "n_misma_pasada": 12
+   },
+   "z30-50": {
+    "n_noches": 5,
+    "ratio_mediano": 0.99,
+    "n_misma_pasada": 3
+   },
+   "z50-60": {
+    "n_noches": 3,
+    "ratio_mediano": 1.057,
+    "n_misma_pasada": 1
+   }
+  },
+  "PuyehueCordonCaulle|VIIRS750": {
+   "z<30": {
+    "n_noches": 7,
+    "ratio_mediano": 0.696,
+    "n_misma_pasada": 7
+   },
+   "z30-50": {
+    "n_noches": 2,
+    "ratio_mediano": 0.229,
+    "n_misma_pasada": 2
+   },
+   "z50-60": {
+    "n_noches": 1,
+    "ratio_mediano": 0.071,
+    "n_misma_pasada": 0
+   },
+   "z>=60": {
+    "n_noches": 1,
+    "ratio_mediano": 0.291,
+    "n_misma_pasada": 0
+   }
+  },
+  "Tupungatito|VIIRS375": {
+   "z<30": {
+    "n_noches": 15,
+    "ratio_mediano": 0.544,
+    "n_misma_pasada": 11
+   },
+   "z30-50": {
+    "n_noches": 5,
+    "ratio_mediano": 0.281,
+    "n_misma_pasada": 2
+   }
+  },
+  "Villarrica|MODIS": {
+   "z<30": {
+    "n_noches": 1,
+    "ratio_mediano": 0.972,
+    "n_misma_pasada": 1
+   }
+  },
+  "Villarrica|VIIRS375": {
+   "z<30": {
+    "n_noches": 5,
+    "ratio_mediano": 1.014,
+    "n_misma_pasada": 5
+   }
+  },
+  "Villarrica|VIIRS750": {
+   "z<30": {
+    "n_noches": 1,
+    "ratio_mediano": 0.504,
+    "n_misma_pasada": 1
+   }
+  }
+ },
+ "magnitud_publicada_by_vol_sensor_regimen": {
+  "Chaiten|VIIRS375": {
+   "K": {
+    "n_noches": 11,
+    "ratio_mediano": 1.184,
+    "n_misma_pasada": 8,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 10,
+      "ratio_mediano": 1.229,
+      "n_misma_pasada": 8
+     },
+     "z30-50": {
+      "n_noches": 1,
+      "ratio_mediano": 1.069,
+      "n_misma_pasada": 0
+     }
+    }
+   }
+  },
+  "Chaiten|VIIRS750": {
+   "K": {
+    "n_noches": 1,
+    "ratio_mediano": 1.15,
+    "n_misma_pasada": 1,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 1,
+      "ratio_mediano": 1.15,
+      "n_misma_pasada": 1
+     }
+    }
+   }
+  },
+  "Isluga|VIIRS375": {
+   "K": {
+    "n_noches": 45,
+    "ratio_mediano": 0.507,
+    "n_misma_pasada": 23,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 22,
+      "ratio_mediano": 0.566,
+      "n_misma_pasada": 8
+     },
+     "z30-50": {
+      "n_noches": 12,
+      "ratio_mediano": 0.521,
+      "n_misma_pasada": 5
+     },
+     "z50-60": {
+      "n_noches": 9,
+      "ratio_mediano": 0.349,
+      "n_misma_pasada": 8
+     },
+     "z>=60": {
+      "n_noches": 2,
+      "ratio_mediano": 0.359,
+      "n_misma_pasada": 2
+     }
+    }
+   }
+  },
+  "Lascar|MODIS": {
+   "K": {
+    "n_noches": 1,
+    "ratio_mediano": 0.487,
+    "n_misma_pasada": 1,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 1,
+      "ratio_mediano": 0.487,
+      "n_misma_pasada": 1
+     }
+    }
+   }
+  },
+  "Lascar|VIIRS375": {
+   "K": {
+    "n_noches": 27,
+    "ratio_mediano": 0.552,
+    "n_misma_pasada": 13,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 20,
+      "ratio_mediano": 0.552,
+      "n_misma_pasada": 8
+     },
+     "z30-50": {
+      "n_noches": 7,
+      "ratio_mediano": 0.548,
+      "n_misma_pasada": 5
+     }
+    }
+   }
+  },
+  "Lascar|VIIRS750": {
+   "K": {
+    "n_noches": 7,
+    "ratio_mediano": 0.275,
+    "n_misma_pasada": 7,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 6,
+      "ratio_mediano": 0.261,
+      "n_misma_pasada": 6
+     },
+     "z30-50": {
+      "n_noches": 1,
+      "ratio_mediano": 0.548,
+      "n_misma_pasada": 1
+     }
+    }
+   }
+  },
+  "Lastarria|VIIRS375": {
+   "K": {
+    "n_noches": 15,
+    "ratio_mediano": 0.664,
+    "n_misma_pasada": 10,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 5,
+      "ratio_mediano": 0.664,
+      "n_misma_pasada": 4
+     },
+     "z30-50": {
+      "n_noches": 8,
+      "ratio_mediano": 0.773,
+      "n_misma_pasada": 4
+     },
+     "z50-60": {
+      "n_noches": 2,
+      "ratio_mediano": 0.569,
+      "n_misma_pasada": 2
+     }
+    }
+   }
+  },
+  "NevadosDeChillan|MODIS": {
+   "K": {
+    "n_noches": 8,
+    "ratio_mediano": 0.56,
+    "n_misma_pasada": 8,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 5,
+      "ratio_mediano": 0.751,
+      "n_misma_pasada": 5
+     },
+     "z30-50": {
+      "n_noches": 2,
+      "ratio_mediano": 0.171,
+      "n_misma_pasada": 2
+     },
+     "z50-60": {
+      "n_noches": 1,
+      "ratio_mediano": 0.203,
+      "n_misma_pasada": 1
+     }
+    }
+   }
+  },
+  "NevadosDeChillan|VIIRS375": {
+   "K": {
+    "n_noches": 21,
+    "ratio_mediano": 0.662,
+    "n_misma_pasada": 15,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 6,
+      "ratio_mediano": 1.03,
+      "n_misma_pasada": 3
+     },
+     "z30-50": {
+      "n_noches": 9,
+      "ratio_mediano": 0.556,
+      "n_misma_pasada": 7
+     },
+     "z50-60": {
+      "n_noches": 4,
+      "ratio_mediano": 0.731,
+      "n_misma_pasada": 3
+     },
+     "z>=60": {
+      "n_noches": 2,
+      "ratio_mediano": 0.265,
+      "n_misma_pasada": 2
+     }
+    }
+   }
+  },
+  "NevadosDeChillan|VIIRS750": {
+   "K": {
+    "n_noches": 16,
+    "ratio_mediano": 0.683,
+    "n_misma_pasada": 12,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 8,
+      "ratio_mediano": 0.766,
+      "n_misma_pasada": 5
+     },
+     "z30-50": {
+      "n_noches": 7,
+      "ratio_mediano": 0.678,
+      "n_misma_pasada": 6
+     },
+     "z50-60": {
+      "n_noches": 1,
+      "ratio_mediano": 0.587,
+      "n_misma_pasada": 1
+     }
+    }
+   }
+  },
+  "PlanchonPeteroa|VIIRS375": {
+   "K": {
+    "n_noches": 16,
+    "ratio_mediano": 0.856,
+    "n_misma_pasada": 15,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 9,
+      "ratio_mediano": 0.822,
+      "n_misma_pasada": 9
+     },
+     "z30-50": {
+      "n_noches": 7,
+      "ratio_mediano": 0.942,
+      "n_misma_pasada": 6
+     }
+    }
+   }
+  },
+  "PlanchonPeteroa|VIIRS750": {
+   "K": {
+    "n_noches": 1,
+    "ratio_mediano": 1.669,
+    "n_misma_pasada": 1,
+    "por_cenit": {
+     "z30-50": {
+      "n_noches": 1,
+      "ratio_mediano": 1.669,
+      "n_misma_pasada": 1
+     }
+    }
+   }
+  },
+  "PuyehueCordonCaulle|VIIRS375": {
+   "K": {
+    "n_noches": 23,
+    "ratio_mediano": 1.057,
+    "n_misma_pasada": 16,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 15,
+      "ratio_mediano": 1.142,
+      "n_misma_pasada": 12
+     },
+     "z30-50": {
+      "n_noches": 5,
+      "ratio_mediano": 0.99,
+      "n_misma_pasada": 3
+     },
+     "z50-60": {
+      "n_noches": 3,
+      "ratio_mediano": 1.057,
+      "n_misma_pasada": 1
+     }
+    }
+   }
+  },
+  "PuyehueCordonCaulle|VIIRS750": {
+   "K": {
+    "n_noches": 11,
+    "ratio_mediano": 0.375,
+    "n_misma_pasada": 9,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 7,
+      "ratio_mediano": 0.696,
+      "n_misma_pasada": 7
+     },
+     "z30-50": {
+      "n_noches": 2,
+      "ratio_mediano": 0.229,
+      "n_misma_pasada": 2
+     },
+     "z50-60": {
+      "n_noches": 1,
+      "ratio_mediano": 0.071,
+      "n_misma_pasada": 0
+     },
+     "z>=60": {
+      "n_noches": 1,
+      "ratio_mediano": 0.291,
+      "n_misma_pasada": 0
+     }
+    }
+   }
+  },
+  "Tupungatito|VIIRS375": {
+   "K": {
+    "n_noches": 20,
+    "ratio_mediano": 0.41,
+    "n_misma_pasada": 13,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 15,
+      "ratio_mediano": 0.544,
+      "n_misma_pasada": 11
+     },
+     "z30-50": {
+      "n_noches": 5,
+      "ratio_mediano": 0.281,
+      "n_misma_pasada": 2
+     }
+    }
+   }
+  },
+  "Villarrica|MODIS": {
+   "K": {
+    "n_noches": 1,
+    "ratio_mediano": 0.972,
+    "n_misma_pasada": 1,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 1,
+      "ratio_mediano": 0.972,
+      "n_misma_pasada": 1
+     }
+    }
+   }
+  },
+  "Villarrica|VIIRS375": {
+   "K": {
+    "n_noches": 5,
+    "ratio_mediano": 1.014,
+    "n_misma_pasada": 5,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 5,
+      "ratio_mediano": 1.014,
+      "n_misma_pasada": 5
+     }
+    }
+   }
+  },
+  "Villarrica|VIIRS750": {
+   "K": {
+    "n_noches": 1,
+    "ratio_mediano": 0.504,
+    "n_misma_pasada": 1,
+    "por_cenit": {
+     "z<30": {
+      "n_noches": 1,
+      "ratio_mediano": 0.504,
+      "n_misma_pasada": 1
+     }
+    }
+   }
+  }
+ }
 }

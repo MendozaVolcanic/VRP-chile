@@ -111,6 +111,10 @@ def test_umbrales_viirs_apagado_devuelve_la_noche_sin_tocarla():
     assert umbrales_viirs(es_dia=False, habilitado=False, noche=noche) is noche
 
 
+# ⚠️ S158 R2 (docs/AUDIT_S158_R2.md, marca A113; experiments/_s158_audit_r2/a113/INFORME.md n 6): K1 = -0,6 es la Tabla 1 de MODIS. El codigo de
+# MIROVA para VIIRS 750 usa de dia K1 = -0,5 (C1 = 0,02 y C2 = 15 coinciden) y rechaza la escena con reflejo
+# solar bajo 12 grados (MIROVA_VIIRS750_hotspot_detection.m l. 83 a 89 y 188 a 199). Esta prueba fija una tabla
+# unica para 375 y 750; para 375 el -0,6 queda TRASLADADO, no refutado. La asercion no cambia.
 def test_umbrales_viirs_dia_es_la_tabla_1_diurna():
     from pipeline.diurno import umbrales_viirs
     dia = umbrales_viirs(es_dia=True, habilitado=True, noche={})

@@ -635,6 +635,16 @@ BT_SAT_MIR_K_MODIS: float = float(_cfg.get("bt_sat_mir_k_modis", _p.get("bt_sat_
 # pre-registrado, nunca por flip a ciegas.
 ENABLE_MODIS_B22_PRIMARY: bool = bool(_cfg.get("enable_modis_b22_primary", _p.get("enable_modis_b22_primary", False)))
 
+# S157 - longitud de onda por banda en la vuelta a radiancia de MODIS (hallazgo lateral de #869).
+# POR QUE: la magnitud (Coppola 2016a p. 8, Ec. 6 y 7) es un exceso en RADIANCIA. El pipeline pasa por
+# temperatura de brillo y vuelve a radiancia; la vuelta devuelve la radiancia medida solo si usa la misma
+# longitud de onda que la ida. Con B22 primaria (K) la ida es con 3,959 um y la vuelta seguia con 3,929 um
+# (la de B21): la magnitud MODIS sale 1,053 a 1,075 veces mas baja (experiments/_s157_lambda_b22/).
+# ON: cada pixel vuelve con la lambda de su banda de origen y el fondo con la de la banda primaria.
+# Arranca OFF: cambia la magnitud publicada; encenderlo es decision de Nicolas (A45).
+ENABLE_MODIS_MIR_LAMBDA_POR_BANDA: bool = bool(_cfg.get("enable_modis_mir_lambda_por_banda",
+                                                        _p.get("enable_modis_mir_lambda_por_banda", False)))
+
 # S132 - origen de `distance_class` en MODIS (decision #4 de AUDIT_S131 §4).
 # POR QUE: la etiqueta se deriva hoy del `final_hotspot`, que en MODIS es el maximo de MIR
 # ABSOLUTA de la escena. A 1 km ese maximo esta dominado por el gradiente de altitud (A69)
@@ -882,6 +892,45 @@ ENABLE_VRP_TIR_OUTPUT: bool = bool(_cfg.get("enable_vrp_tir_output", True))
 # del nivel superior hacía que un perfil con el flag prendido igual arrancara
 # apagado, y el A/B de F70.3 habría salido nulo sin ningún síntoma.
 ENABLE_UTM_REGRID: bool = bool(_t.get("enable_utm_regrid", False))
+
+# S162 V750-A, vía «código MIROVA» para VIIRS 750 (pipeline/mirova_v750_codigo.py). POR QUÉ: medido en S159 y V750-C,
+# las piezas del código operacional de MIROVA no se pueden trasplantar sueltas sobre K: el fondo del código enciende
+# cumbres tibias que MIROVA calla porque MIROVA las interpola a su grilla antes de detectar. La vía corre el paquete
+# entero (grilla de MIROVA, detector del .m, fondo del .m, suma de los alertados). APAGADA: con False no corre ninguna
+# línea del módulo y el procesador V750 es el de hoy bit a bit. Encenderla exige el sello de V750-A, su censo y su
+# sombra, tag defensivo y el sí explícito de Nicolás (A45). Va en `_t`, como todo `enable_*` (S124, A89).
+ENABLE_V750_CODIGO_MIROVA: bool = bool(_t.get("enable_v750_codigo_mirova", False))
+
+# S164 MOD-D fase 3, la misma vía para MODIS (pipeline/mirova_v750_codigo.py con FAMILIAS["MODIS"]). POR QUÉ: el censo
+# MOD-D (5.465 pasadas nocturnas, verificado) midió que el código de MIROVA portado a MODIS, con el fondo según la regla
+# de fillmissing2 de MATLAB, se equivoca menos que K contra MIROVA (8 errores contra 49) y acerca la magnitud. Nicolás lo
+# aprobó como CANDIDATO (2026-10-26) y confirmó que entra APAGADA: con False no corre ninguna línea de la vía y el
+# procesador MODIS es el de hoy bit a bit. Encenderla exige reproceso verificado y el sí de Nicolás (A45). En `_t`.
+ENABLE_MODIS_CODIGO_MIROVA: bool = bool(_t.get("enable_modis_codigo_mirova", False))
+
+# S165, geolocalización MxD03 de MODIS (plan 2026-10-25-flag-mxd03-modis). POR QUÉ: `_interp_geo` estira la grilla de
+# 5 km del MxD021KM como si cada muestra estuviera en el píxel 5i cuando está en el 5i+2, y cada píxel recibe la
+# posición de su vecino: el cráter queda corrido 1 a 3 km hacia el nadir y hasta 11,5 km en el borde del barrido (A61
+# H2). El A/B MOD-B (5.465 pasadas) dio CUMPLE SIN DAÑO con la posición del MxD03. Tres flags, cada uno se mide aparte:
+#   GEO_MXD03: la posición de cada píxel sale del MxD03 (si no se puede leer o no calza, la interpolada, y el record
+#              lo declara en `geo_fuente`);
+#   CRATER_SIN_DATO: sólo con GEO_MXD03; si el cráter cae en relleno o en el borde del gránulo, no hay record (una
+#              pasada que no miró el cráter no es un negativo; A61 H1, VA61-01);
+#   DIST_DESDE_CRATER: la distancia del píxel anómalo, y con ella la etiqueta summit/far, se mide desde el cráter y no
+#              desde el centro del volcán (A61 H5); el anillo de fondo no cambia (D17).
+# APAGADOS: con False el procesador MODIS es bit a bit el del tag pre-s165-mxd03-modis. Encenderlos es decisión de
+# Nicolás (A45). En `_t`, como todo `enable_*` (S124, A89).
+ENABLE_MODIS_GEO_MXD03: bool = bool(_t.get("enable_modis_geo_mxd03", False))
+ENABLE_MODIS_CRATER_SIN_DATO: bool = bool(_t.get("enable_modis_crater_sin_dato", False))
+ENABLE_MODIS_DIST_DESDE_CRATER: bool = bool(_t.get("enable_modis_dist_desde_crater", False))
+
+# S165 V375-E (PD3), la misma vía para VIIRS 375 (pipeline/mirova_v750_codigo.py con FAMILIAS["VIIRS375"]: bandas I4 e
+# I5, grilla de 134 x 134 de 375 m, caja C13 en el cráter de PD1). POR QUÉ: V375-C midió que el código de MIROVA llevado
+# a 375 da la magnitud de MIROVA al milésimo (C13: 0,999) donde K la da a dos tercios; antes de medir el paquete contra K
+# (experiments/_s162_v375/PREREGISTRO_E.md) la vía tiene que vivir en pipeline/. Nicolás autorizó cablearla APAGADA
+# (A45, 2026-10-27, tag pre-s165-via-375): con False no corre ninguna línea de la vía y el procesador de 375 es el de hoy
+# bit a bit. Encenderla exige el sí de Nicolás (A45). En `_t`.
+ENABLE_V375_CODIGO_MIROVA: bool = bool(_t.get("enable_v375_codigo_mirova", False))
 
 # --- Sensor activation ---
 _s = _cfg["sensors"]

@@ -1,0 +1,88 @@
+# S166: el NRT de un día con #920, #921 y #922 en el código (flags APAGADOS) queda bit a bit igual al de antes.
+#
+# POR QUÉ (traspaso S166, A116): los cuatro PR de pipeline/ del 2026-10-27 se mergearon con los flags apagados y un arnés
+# sintético idéntico, pero ningún record real de VIIRS 375 se ha escrito todavía con ese código. Esta corrida de SÓLO
+# LECTURA procesa el mismo día para los mismos volcanes con el árbol del tag pre-s165-via-375 (main con #919) y con el de
+# main, cada uno con su JSON vacío al empezar, en el mismo runner (S152), y compara los records. No commitea nada.
+# Es la plantilla experiments/_s162_v750a/probe-s162-bitabit-nrt.yml con un solo cambio: además del comparador de
+# VIIRS 750 corre el de VIIRS 375 (experiments/_s165_v375_via/comparar_bitabit_nrt_v375.py). Los dos comparan TODOS los
+# records del día; cada uno da SIN DATO (salida 2) si no hay records de su sensor. El job falla si alguno no da VERDE.
+# Autentica sólo con EARTHDATA_TOKEN y sale al instante si viene vacío (A71).
+name: probe-s166-bitabit-nrt
+
+"on":
+  workflow_dispatch:
+    inputs:
+      ref_main:
+        description: "sha o tag de antes (pre-s165-via-375)"
+        required: true
+      ref_rama:
+        description: "sha de main con #920, #921 y #922"
+        required: true
+      fecha:
+        description: "día a procesar, YYYY-MM-DD"
+        required: true
+        default: "2026-10-26"
+
+permissions:
+  contents: read
+
+jobs:
+  bitabit:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        volcano: [Lascar, NevadosDeChillan, PuyehueCordonCaulle, Villarrica]
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.ref_main }}
+          path: a
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.ref_rama }}
+          path: b
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Un día del NRT con el tag y con main
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_FECHA: ${{ github.event.inputs.fecha }}
+          VOLCAN: ${{ matrix.volcano }}
+        run: |
+          set -o pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacío (A71)"; exit 1
+          fi
+          mkdir -p out
+          for arbol in a b; do
+            (
+              cd "$arbol"
+              rm -f "data/mirova_equivalent/${VOLCAN}.json"
+              python scripts/run_pipeline.py --profile mirova_equivalent --volcano "$VOLCAN" --date "$VRP_FECHA" \
+                --overwrite 2>&1 | tee "../out/${arbol}_${VOLCAN}.log"
+              cp "data/mirova_equivalent/${VOLCAN}.json" "../out/${arbol}_${VOLCAN}.json" || echo "[]" > "../out/${arbol}_${VOLCAN}.json"
+            )
+          done
+          rc=0
+          python b/experiments/_s162_v750a/comparar_bitabit_nrt.py out/a_${VOLCAN}.json out/b_${VOLCAN}.json \
+            | tee "out/comparacion_v750_${VOLCAN}.txt" || rc=1
+          python b/experiments/_s165_v375_via/comparar_bitabit_nrt_v375.py out/a_${VOLCAN}.json out/b_${VOLCAN}.json \
+            | tee "out/comparacion_v375_${VOLCAN}.txt" || rc=1
+          exit $rc
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s166-bitabit-${{ matrix.volcano }}
+          path: out/
+          if-no-files-found: error

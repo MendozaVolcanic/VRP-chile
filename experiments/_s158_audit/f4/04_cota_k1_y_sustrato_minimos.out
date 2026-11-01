@@ -1,0 +1,28 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-03-01 a 2026-10-21 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+ventana ('2026-03-01', '2026-10-21') | filas ref nocturnas 19538 | records nocturnos 27190
+etiquetas: {('MODIS', 'pos'): 96, ('VIIRS375', 'neg_limpio'): 3846, ('VIIRS750', 'sin_info'): 4412, ('VIIRS375', 'sin_info'): 5225, ('VIIRS750', 'pos'): 324, ('MODIS', 'sin_info'): 316, ('VIIRS375', 'pos'): 1392, ('MODIS', 'neg_limpio'): 5168, ('VIIRS750', 'neg_limpio'): 5994, ('VIIRS375', 'far_ref'): 356, ('MODIS', 'far_ref'): 10, ('VIIRS750', 'far_ref'): 19, ('VIIRS375', 'sin_geometria'): 25, ('VIIRS750', 'sin_geometria'): 7}
+
+=== M1: cota inferior de K1 desde negativos limpios (nti_max = max NTI en el ROI nativo) ===
+MODIS     neg_limpio n= 5168 (sin nti_max 0) max=-0.864 p99=-0.896 p95=-0.904 mediana=-0.928 | n(>K1): >-0.8:0(0.000) >-0.7:0(0.000) >-0.6:0(0.000) >-0.5:0(0.000)
+MODIS     pos        n=   96 (sin nti_max 0) max=-0.796 p99=-0.809 p95=-0.854 mediana=-0.915 | n(>K1): >-0.8:1(0.010) >-0.7:0(0.000) >-0.6:0(0.000) >-0.5:0(0.000)
+   negativos con nti_max > -0.7 por volcán: 
+VIIRS375  neg_limpio n= 3834 (sin nti_max 12) max=-0.868 p99=-0.931 p95=-0.937 mediana=-0.954 | n(>K1): >-0.8:0(0.000) >-0.7:0(0.000) >-0.6:0(0.000) >-0.5:0(0.000)
+VIIRS375  pos        n= 1392 (sin nti_max 0) max=-0.422 p99=-0.643 p95=-0.845 mediana=-0.945 | n(>K1): >-0.8:44(0.032) >-0.7:25(0.018) >-0.6:11(0.008) >-0.5:1(0.001)
+   negativos con nti_max > -0.7 por volcán: 
+VIIRS750  neg_limpio n= 5994 (sin nti_max 0) max=-0.877 p99=-0.897 p95=-0.905 mediana=-0.927 | n(>K1): >-0.8:0(0.000) >-0.7:0(0.000) >-0.6:0(0.000) >-0.5:0(0.000)
+VIIRS750  pos        n=  324 (sin nti_max 0) max=-0.496 p99=-0.669 p95=-0.854 mediana=-0.911 | n(>K1): >-0.8:11(0.034) >-0.7:5(0.015) >-0.6:2(0.006) >-0.5:1(0.003)
+   negativos con nti_max > -0.7 por volcán: 
+
+=== M2: sustrato de los mínimos fijos (primer pase, dNTI de 8 vecinos, sigma de la caja nativa) ===
+MODIS     n=5259 | fuera: mu+10sd<0.02 en 0.516, <0.01 en 0.074 (mediana mu+10sd=0.0197) | cumbre: mu+5sd<0.003 en 0.008 (mediana 0.0098) | dETI fuera: mu+10sd<0.01 en 0.5307092603156494 (n 5259)
+VIIRS375  n=5226 | fuera: mu+10sd<0.02 en 0.928, <0.01 en 0.113 (mediana mu+10sd=0.0134) | cumbre: mu+5sd<0.003 en 0.000 (mediana 0.0067) | dETI fuera: mu+10sd<0.01 en 0.5442020665901263 (n 5226)
+VIIRS750  n=6318 | fuera: mu+10sd<0.02 en 0.754, <0.01 en 0.059 (mediana mu+10sd=0.0162) | cumbre: mu+5sd<0.003 en 0.002 (mediana 0.0081) | dETI fuera: mu+10sd<0.01 en 0.7584678695789807 (n 6318)

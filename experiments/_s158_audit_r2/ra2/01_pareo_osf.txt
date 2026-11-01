@@ -1,0 +1,60 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+OSF 2025 filas Chile Tier A: 2934 noche (Dayflag=0): 2880
+records nuestros 2025 en los 10 volcanes del OSF: 34440
+sensores nuestros: Counter({'VIIRS_SNPP': 4650, 'VIIRS_NOAA20': 4616, 'VIIRS_SNPP_750': 4607, 'VIIRS_NOAA20_750': 4565, 'VIIRS_NOAA21': 4558, 'VIIRS_NOAA21_750': 4533, 'MODIS_AQUA': 3501, 'MODIS_TERRA': 3410})
+
+Matriz (Satellite, Resolution) -> sensor nuestro, coincidencias con |dt| <= 10.0 min
+  (1, 1000) {'MODIS_TERRA': 121}
+  (2, 1000) {'MODIS_AQUA': 139, 'VIIRS_NOAA20': 6, 'VIIRS_NOAA20_750': 6, 'VIIRS_NOAA21': 6, 'VIIRS_NOAA21_750': 6, 'VIIRS_SNPP': 6, 'VIIRS_SNPP_750': 6}
+  (3, 375) {'VIIRS_SNPP': 1087, 'VIIRS_SNPP_750': 1087, 'MODIS_AQUA': 54}
+  (3, 750) {'VIIRS_SNPP': 23, 'VIIRS_SNPP_750': 23, 'MODIS_AQUA': 1}
+  (4, 375) {'VIIRS_NOAA20': 1131, 'VIIRS_NOAA20_750': 1131, 'MODIS_AQUA': 32}
+  (4, 750) {'VIIRS_NOAA20': 22, 'VIIRS_NOAA20_750': 22, 'MODIS_AQUA': 3}
+mapa elegido (argmax de plataforma + resolucion del OSF): {(1, 1000): 'MODIS_TERRA', (2, 1000): 'MODIS_AQUA', (3, 375): 'VIIRS_SNPP', (3, 750): 'VIIRS_SNPP_750', (4, 375): 'VIIRS_NOAA20', (4, 750): 'VIIRS_NOAA20_750'}
+
+sin par: {'fuera de tolerancia': 411}
+filas OSF sin par por (vol, Resolution) = filas OSF menos pares:
+Resolution           375   750   1000
+vol                                  
+Chaiten                22     0     2
+Copahue                34     6     2
+Isluga                 40     1     0
+Lascar                 50     0     6
+Lastarria              57     0     2
+Llaima                  1     1     1
+NevadosDeChillan        2    22     7
+PlanchonPeteroa        55     3     1
+PuyehueCordonCaulle    84     0     0
+Villarrica             10     0     2
+total OSF por Resolution: {375: 2573, 750: 78, 1000: 283} | pares: {375: 2218, 750: 45, 1000: 260}
+histograma de dt (min, nuestro - OSF), todos los vecinos mas cercanos, n = 2934
+  [-1000000000,      -30) 9
+  [     -30,      -10) 0
+  [     -10,       -6) 0
+  [      -6,       -3) 0
+  [      -3,       -1) 0
+  [      -1,        0) 0
+  [       0,        1) 2523
+  [       1,        3) 0
+  [       3,        6) 0
+  [       6,       10) 0
+  [      10,       30) 0
+  [      30, 1000000000) 402
+
+PARES (|dt| <= 10 min): 2523
+fam                  MODIS  V375  V750
+vol                                   
+Chaiten                  2    83     0
+Copahue                  7    61     7
+Isluga                   0   480     0
+Lascar                 229   513    17
+Lastarria                0   397     0
+Llaima                   0    30     1
+NevadosDeChillan        12    46    20
+PlanchonPeteroa         10   226     0
+PuyehueCordonCaulle      0   352     0
+Villarrica               0    30     0
+
+por familia: {'V375': 2218, 'MODIS': 260, 'V750': 45}
+pares con cluster nuestro (pc_vrp no nulo): 2433 con pc_vrp > 0: 2412
+dt mediana por familia: {'MODIS': 0.0, 'V375': 0.0, 'V750': 0.0}

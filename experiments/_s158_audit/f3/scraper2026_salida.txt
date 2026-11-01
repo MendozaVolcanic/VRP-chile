@@ -1,0 +1,52 @@
+[referencia MIROVA] la ventana 2026-03-01 a 2026-10-20 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+alertas nocturnas de MIROVA (tabla) 1281; pareadas 1279; sin record a ±3 min 2
+                                  n  M_med   clip  n_med      tbg  no_pub  pub/M  esc/M  pub/M_med|pub
+b     vol                 tr                                                                          
+MODIS Lascar              <=40   35  0.780  0.000    1.0  265.600       1  0.593  0.643          0.611
+                          >40     5  0.640  0.000    1.0  266.380       0  0.337  0.455          0.229
+      NevadosDeChillan    <=40    4  8.825  0.167    2.0  272.605       0  0.589  0.589          0.560
+                          >40     5  5.180  0.000    2.0  272.940       2  0.159  0.339          0.205
+      Villarrica          <=40    2  2.825  0.000    0.5  259.320       1  0.817  0.817          0.972
+V375  Chaiten             <=40   31  0.100  0.000    2.0  274.960       1  1.268  1.268          1.310
+                          >40     9  0.110  0.000    1.0  276.740       3  0.629  0.629          0.860
+      Copahue             <=40    1  0.140  0.000    1.0  263.790       0  0.616  0.616          0.616
+                          >40     1  0.210  0.000    1.0  264.690       0  1.862  1.862          1.862
+      Isluga              <=40  116  0.240  0.000    2.0  267.040       1  0.614  0.756          0.591
+                          >40    93  0.250  0.000    2.0  266.820       6  0.425  0.548          0.369
+      Lascar              <=40   95  0.640  0.000    2.0  264.070       0  0.703  0.692          0.676
+                          >40    95  0.310  0.000    2.0  263.810       1  0.550  0.624          0.512
+      Lastarria           <=40   54  0.120  0.000    3.0  261.245       0  0.741  1.320          0.791
+                          >40    57  0.090  0.000    2.0  261.080       2  0.799  1.162          0.782
+      Llaima              >40     1  0.080  0.000    2.0  261.910       0  1.476  5.285          1.476
+      NevadosDeChillan    <=40   20  1.115  0.292    1.5  271.930       6  0.635  0.636          0.684
+                          >40    25  5.720  0.000    3.0  271.510       1  0.463  0.474          0.530
+      PlanchonPeteroa     <=40   65  0.180  0.000    1.0  269.000       2  0.901  1.021          0.916
+                          >40    16  0.085  0.000    1.0  268.785       0  1.076  1.035          1.051
+      PuyehueCordonCaulle <=40   65  0.380  0.000    3.0  272.020       1  0.895  1.137          0.957
+                          >40    82  0.260  0.000    2.0  272.155       3  0.781  0.881          0.810
+      Tupungatito         <=40   65  0.170  0.000    2.0  260.670       0  0.406  0.597          0.390
+                          >40    50  0.145  0.000    1.0  261.195       4  0.267  0.313          0.274
+      Villarrica          <=40   12  0.310  0.000    1.0  275.140       0  0.854  0.831          0.869
+V750  Chaiten             <=40    2  0.180  0.000    1.0  273.615       0  1.150  1.152          1.150
+      Copahue             <=40    1  0.400  0.000    1.0  254.860       0  1.332  1.334          1.332
+      Isluga              <=40   32  0.245  0.500    1.0  265.195      16  0.220  0.220          0.277
+                          >40     8  0.200  1.000    0.0  264.630       7  0.034  0.663          0.300
+      Lascar              <=40   87  1.000  0.000    1.0  263.500       7  0.587  0.608          0.534
+                          >40    43  0.800  0.000    1.0  263.500       5  0.459  0.553          0.452
+      NevadosDeChillan    <=40   12  8.150  0.000    1.5  271.535       1  0.722  0.728          0.788
+                          >40    20  5.950  0.000    2.0  268.580       2  0.314  0.437          0.312
+      PlanchonPeteroa     <=40    7  0.280  1.000    1.0  267.300       7  0.000  0.000            NaN
+                          >40     2  0.125  0.000    0.5  234.335       1  1.068  1.067          1.669
+      PuyehueCordonCaulle <=40   30  0.560  0.000    1.0  271.095       9  0.426  0.469          0.509
+                          >40    10  0.555  0.000    1.0  269.940       5  0.269  0.343          0.473
+      Tupungatito         <=40   12  0.240  1.000    1.0  264.070      10  0.013  0.013          0.072
+                          >40     1  0.190  1.000    1.0  258.630       1  0.000  0.000            NaN
+      Villarrica          <=40    8  0.635  0.000    1.0  271.995       3  0.250  0.249          0.384

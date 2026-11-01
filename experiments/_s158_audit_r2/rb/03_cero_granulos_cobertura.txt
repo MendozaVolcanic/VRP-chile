@@ -1,0 +1,37 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf
+
+--- (a) 0 granulos en todas las versiones, breaker ON: plataformas devueltas=[] archivos=0 fallas_registradas=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida).
+    informar_cobertura(estricto=True) -> codigo de salida 0
+    search_data llamada 18 veces; primeras: [('VNP02IMG', '2', ('2026-10-18', '2026-10-18')), ('VNP02IMG_NRT', '2', ('2026-10-18', '2026-10-18')), ('VJ102IMG', '2.1', ('2026-10-18', '2026-10-18')), ('VJ102IMG', '2', ('2026-10-18', '2026-10-18'))]
+
+--- (b) CONTROL POSITIVO: ReadTimeout de CMR, breaker ON (produccion): plataformas devueltas=[] archivos=0 fallas_registradas=6
+    falla: {'volcan': 'Chaiten', 'fecha': '2026-10-18', 'plataforma': 'VIIRS_SNPP', 'producto': 'VIIRS_SNPP_L1B', 'etapa': 'busqueda', 'motivo': 'SEARCH_CMR_TIMEOUT: ReadTimeout: simulado: CMR no responde'}
+    falla: {'volcan': 'Chaiten', 'fecha': '2026-10-18', 'plataforma': 'VIIRS_NOAA20', 'producto': 'VIIRS_NOAA20_L1B', 'etapa': 'busqueda', 'motivo': 'SEARCH_SKIP: CMR degradada esta corrida'}
+    falla: {'volcan': 'Chaiten', 'fecha': '2026-10-18', 'plataforma': 'VIIRS_NOAA21', 'producto': 'VIIRS_NOAA21_L1B', 'etapa': 'busqueda', 'motivo': 'SEARCH_SKIP: CMR degradada esta corrida'}
+Cobertura INCOMPLETA: 6 búsquedas o descargas fallidas.
+  Chaiten 2026-10-18: VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: simulado: CMR no responde
+    informar_cobertura(estricto=True) -> codigo de salida 3
+  WARN: Failed to fetch VIIRS_SNPP: simulado: CMR no responde
+  WARN: Failed to fetch VIIRS_NOAA20: simulado: CMR no responde
+  WARN: Failed to fetch VIIRS_NOAA21: simulado: CMR no responde
+  WARN: Failed to fetch VIIRS_SNPP_750: simulado: CMR no responde
+  WARN: Failed to fetch VIIRS_NOAA20_750: simulado: CMR no responde
+  WARN: Failed to fetch VIIRS_NOAA21_750: simulado: CMR no responde
+
+--- (c) ReadTimeout de CMR, breaker OFF: plataformas devueltas=['VIIRS_SNPP', 'VIIRS_NOAA20', 'VIIRS_NOAA21', 'VIIRS_SNPP_750', 'VIIRS_NOAA20_750', 'VIIRS_NOAA21_750'] archivos=0 fallas_registradas=6
+    falla: {'volcan': 'Chaiten', 'fecha': '2026-10-18', 'plataforma': 'VIIRS_SNPP', 'producto': 'VIIRS_SNPP_L1B', 'etapa': 'busqueda', 'motivo': 'ReadTimeout: simulado: CMR no responde'}
+    falla: {'volcan': 'Chaiten', 'fecha': '2026-10-18', 'plataforma': 'VIIRS_NOAA20', 'producto': 'VIIRS_NOAA20_L1B', 'etapa': 'busqueda', 'motivo': 'ReadTimeout: simulado: CMR no responde'}
+    falla: {'volcan': 'Chaiten', 'fecha': '2026-10-18', 'plataforma': 'VIIRS_NOAA21', 'producto': 'VIIRS_NOAA21_L1B', 'etapa': 'busqueda', 'motivo': 'ReadTimeout: simulado: CMR no responde'}
+Cobertura INCOMPLETA: 6 búsquedas o descargas fallidas.
+  Chaiten 2026-10-18: VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | ReadTimeout: simulado: CMR no responde
+    informar_cobertura(estricto=True) -> codigo de salida 3
+
+--- (d) busqueda por VENTANA con 0 granulos para el dia: plataformas devueltas=[] archivos=0 fallas_registradas=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida).
+    informar_cobertura(estricto=True) -> codigo de salida 0
+
+Flag efectivo ENABLE_CMR_SEARCH_BREAKER en el perfil: no esta en profile; valor en fetch=True
+
+RESUMEN (fallas_registradas, codigo_salida_estricto): {'a_cero': (0, 0), 'b_timeout_breakerON': (6, 3), 'c_timeout_breakerOFF': (6, 3), 'd_ventana_cero': (0, 0)}

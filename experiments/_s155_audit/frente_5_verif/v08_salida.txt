@@ -1,0 +1,24 @@
+records ventana=229
+
+[F5-05]
+  2026-10-12 07:20 MODIS_AQUA cenit 58.19 solar 120.42 n_anom 0 t_bg 272.94 t_max 281.47 nti_max None pc None diag_t_max_dist 24.17 processed 2026-10-18T11:49:51Z
+   V375 publicados ese dia UTC: [('05:18', 2.8817), ('05:54', 0.4319)]
+  2026-10-15 01:05 MODIS_TERRA cenit 57.58 solar 113.86 n_anom 0 t_bg 273.06 t_max 281.6 nti_max None pc None diag_t_max_dist 29.12 processed 2026-10-18T11:53:45Z
+   V375 publicados ese dia UTC: [('05:00', 10.3611), ('05:18', 5.8544), ('06:00', 9.4457), ('06:36', 11.4023)]
+
+[F5-06] condicion del tope D9 (n_bt_path==0, n_nti_path==0, t_bg<270) en records con deteccion
+  con condicion=42 de 110 con deteccion; por sensor Counter({'VIIRS_NOAA20_750': 10, 'VIIRS_NOAA21': 6, 'VIIRS_SNPP': 6, 'VIIRS_NOAA20': 6, 'VIIRS_NOAA21_750': 5, 'VIIRS_SNPP_750': 4, 'MODIS_TERRA': 3, 'MODIS_AQUA': 2})
+  de ellos con pc.vrp_mw >= 5 (donde el tope podria actuar): 1
+  d9_capped en ventana=1; en todo el archivo=108 de 5895 records
+
+[F5-07] exceso de radiancia con lambda B21 (3,929) sobre BT de B22 (3,959)
+  T=300 Tbg=265  dL21/dL22 = 0.950
+  T=320 Tbg=270  dL21/dL22 = 0.955
+  T=350 Tbg=270  dL21/dL22 = 0.961
+  T=400 Tbg=270  dL21/dL22 = 0.970
+
+[F5-08] processed_utc frente al PR #850 (2026-10-18T09:57:30Z)
+  records ventana con obs>=09-18: 229; procesados antes de #850: 3; sin processed_utc: 0
+    2026-09-28 01:25 MODIS_TERRA 2026-09-28T10:55:05 far 1.071
+    2026-09-28 01:30 MODIS_TERRA 2026-09-28T10:55:08 far 5.0
+    2026-10-10 01:05 MODIS_TERRA 2026-10-10T05:01:59 far 0.238

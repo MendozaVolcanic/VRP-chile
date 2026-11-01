@@ -1,0 +1,74 @@
+pasadas evaluables: 403
+
+(a) cenit del npz en el pixel del crater vs z de la tabla: max |dif| 0.38 grados, mediana 0.04 (n 403)
+    huella nominal en el pixel del crater (mediana por estrato): cenit, a (a lo largo, km), b (a lo ancho, km), paso entre barridos (km) [min; max de a y de b]
+     z<15   n  55  z   7.9  a 1.00 km [0.98; 1.02]  b 1.00 km [0.98; 1.08]  paso 10.10 km
+     15-25  n  43  z  19.7  a 1.05 km [1.01; 1.10]  b 1.11 km [1.01; 1.29]  paso 10.09 km
+     25-40  n  78  z  33.0  a 1.16 km [1.08; 1.27]  b 1.41 km [1.19; 1.84]  paso 10.09 km
+     40-50  n  71  z  45.7  a 1.35 km [1.26; 1.47]  b 1.92 km [1.43; 2.54]  paso 10.07 km
+     z>=50  n 156  z  58.5  a 1.71 km [1.44; 2.12]  b 3.32 km [2.13; 5.29]  paso 9.98 km
+    paso entre barridos (mediana por pasada, km): min 9.82 max 10.19 mediana 10.06 (tiene que ser ~10 km en todo el barrido)
+    10 detectores x a (km) por estrato, mediana: z<15 10.0, 15-25 10.5, 25-40 11.6, 40-50 13.5, z>=50 17.1  (si supera el paso de ~10 km, los barridos vecinos se pisan)
+
+(b) doble conteo en la caja ROI1, media por pasada: [2+ huellas | 2+ barridos distintos | 2+ huellas del mismo barrido unicamente]
+     z<15   todos                    2+: 0.0042 | 2+ barridos: 0.0017 | solo intra: 0.0025
+     z<15   A_centro_cubierto_ant    2+: 0.0042 | 2+ barridos: 0.0017 | solo intra: 0.0025
+     z<15   B_filas_borde            2+: 0.0042 | 2+ barridos: 0.0017 | solo intra: 0.0025
+     z<15   C_sin_det0               2+: 0.0023 | 2+ barridos: 0.0000 | solo intra: 0.0023
+     15-25  todos                    2+: 0.0450 | 2+ barridos: 0.0389 | solo intra: 0.0061
+     15-25  A_centro_cubierto_ant    2+: 0.0450 | 2+ barridos: 0.0389 | solo intra: 0.0061
+     15-25  B_filas_borde            2+: 0.0450 | 2+ barridos: 0.0389 | solo intra: 0.0061
+     15-25  C_sin_det0               2+: 0.0061 | 2+ barridos: 0.0000 | solo intra: 0.0061
+     25-40  todos                    2+: 0.1631 | 2+ barridos: 0.1535 | solo intra: 0.0096
+     25-40  A_centro_cubierto_ant    2+: 0.0684 | 2+ barridos: 0.0577 | solo intra: 0.0107
+     25-40  B_filas_borde            2+: 0.0275 | 2+ barridos: 0.0168 | solo intra: 0.0107
+     25-40  C_sin_det0               2+: 0.0529 | 2+ barridos: 0.0421 | solo intra: 0.0108
+     40-50  todos                    2+: 0.3421 | 2+ barridos: 0.3296 | solo intra: 0.0125
+     40-50  A_centro_cubierto_ant    2+: 0.0859 | 2+ barridos: 0.0684 | solo intra: 0.0175
+     40-50  B_filas_borde            2+: 0.0763 | 2+ barridos: 0.0585 | solo intra: 0.0178
+     40-50  C_sin_det0               2+: 0.2163 | 2+ barridos: 0.2012 | solo intra: 0.0151
+     z>=50  todos                    2+: 0.6665 | 2+ barridos: 0.6590 | solo intra: 0.0075
+     z>=50  A_centro_cubierto_ant    2+: 0.1083 | 2+ barridos: 0.0841 | solo intra: 0.0241
+     z>=50  B_filas_borde            2+: 0.0719 | 2+ barridos: 0.0472 | solo intra: 0.0247
+     z>=50  C_sin_det0               2+: 0.5167 | 2+ barridos: 0.5046 | solo intra: 0.0121
+
+(c) huecos (fraccion de suelo visto 0 veces) por escala de la huella, media por pasada
+     estrato metodo                   x1.00  x1.05  x1.10  x1.20  x1.50
+     z<15   todos                    0.0102  0.0045  0.0023  0.0006  0.0000
+     z<15   A_centro_cubierto_ant    0.0102  0.0045  0.0023  0.0006  0.0000
+     z<15   B_filas_borde            0.0102  0.0045  0.0023  0.0006  0.0000
+     z<15   C_sin_det0               0.1070  0.0998  0.0949  0.0849  0.0554
+     15-25  todos                    0.0067  0.0003  0.0000  0.0000  0.0000
+     15-25  A_centro_cubierto_ant    0.0067  0.0003  0.0000  0.0000  0.0000
+     15-25  B_filas_borde            0.0067  0.0003  0.0000  0.0000  0.0000
+     15-25  C_sin_det0               0.0716  0.0600  0.0544  0.0440  0.0154
+     25-40  todos                    0.0095  0.0011  0.0002  0.0000  0.0000
+     25-40  A_centro_cubierto_ant    0.0107  0.0013  0.0002  0.0000  0.0000
+     25-40  B_filas_borde            0.0606  0.0467  0.0411  0.0322  0.0118
+     25-40  C_sin_det0               0.0137  0.0034  0.0017  0.0006  0.0000
+     40-50  todos                    0.0129  0.0034  0.0011  0.0001  0.0000
+     40-50  A_centro_cubierto_ant    0.0180  0.0046  0.0014  0.0001  0.0000
+     40-50  B_filas_borde            0.0262  0.0122  0.0084  0.0060  0.0034
+     40-50  C_sin_det0               0.0155  0.0040  0.0012  0.0001  0.0000
+     z>=50  todos                    0.0152  0.0091  0.0069  0.0057  0.0048
+     z>=50  A_centro_cubierto_ant    0.0312  0.0150  0.0090  0.0060  0.0049
+     z>=50  B_filas_borde            0.0635  0.0440  0.0348  0.0264  0.0141
+     z>=50  C_sin_det0               0.0207  0.0119  0.0088  0.0071  0.0062
+   huecos NUEVOS de A respecto de 'todos' (A - todos), por escala:
+     z<15   x1.00: +0.0000  x1.05: +0.0000  x1.10: +0.0000  x1.20: +0.0000  x1.50: +0.0000
+     15-25  x1.00: +0.0000  x1.05: +0.0000  x1.10: +0.0000  x1.20: +0.0000  x1.50: +0.0000
+     25-40  x1.00: +0.0012  x1.05: +0.0001  x1.10: +0.0000  x1.20: +0.0000  x1.50: +0.0000
+     40-50  x1.00: +0.0051  x1.05: +0.0013  x1.10: +0.0003  x1.20: +0.0000  x1.50: +0.0000
+     z>=50  x1.00: +0.0161  x1.05: +0.0060  x1.10: +0.0021  x1.20: +0.0003  x1.50: +0.0001
+   huecos NUEVOS de B respecto de 'todos' (B - todos), por escala:
+     z<15   x1.00: +0.0000  x1.05: +0.0000  x1.10: +0.0000  x1.20: +0.0000  x1.50: +0.0000
+     15-25  x1.00: +0.0000  x1.05: +0.0000  x1.10: +0.0000  x1.20: +0.0000  x1.50: +0.0000
+     25-40  x1.00: +0.0511  x1.05: +0.0456  x1.10: +0.0409  x1.20: +0.0322  x1.50: +0.0118
+     40-50  x1.00: +0.0133  x1.05: +0.0088  x1.10: +0.0073  x1.20: +0.0060  x1.50: +0.0034
+     z>=50  x1.00: +0.0484  x1.05: +0.0350  x1.10: +0.0279  x1.20: +0.0207  x1.50: +0.0093
+   huecos NUEVOS de C respecto de 'todos' (C - todos), por escala (control positivo: no se cierran):
+     z<15   x1.00: +0.0968  x1.05: +0.0953  x1.10: +0.0926  x1.20: +0.0844  x1.50: +0.0554
+     15-25  x1.00: +0.0649  x1.05: +0.0597  x1.10: +0.0544  x1.20: +0.0440  x1.50: +0.0154
+     25-40  x1.00: +0.0042  x1.05: +0.0023  x1.10: +0.0015  x1.20: +0.0006  x1.50: +0.0000
+     40-50  x1.00: +0.0026  x1.05: +0.0007  x1.10: +0.0002  x1.20: +0.0000  x1.50: +0.0000
+     z>=50  x1.00: +0.0056  x1.05: +0.0029  x1.10: +0.0019  x1.20: +0.0014  x1.50: +0.0013

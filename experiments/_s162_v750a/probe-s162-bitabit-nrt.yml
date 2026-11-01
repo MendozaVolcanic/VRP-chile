@@ -1,0 +1,82 @@
+# S162 V750-A: el NRT de un día con el cableado de la vía «código MIROVA» (flag APAGADO) queda bit a bit igual a main.
+#
+# POR QUÉ (pedido de la coordinadora S163 antes de mergear el cableado, A45): el cableado toca process_viirs_mod.py,
+# store.py y run_pipeline.py. Con el flag apagado ningún record tiene que cambiar. Localmente no hay gránulos ni token;
+# esta corrida de SÓLO LECTURA procesa el mismo día para los mismos volcanes con el árbol de main y con el de la rama,
+# cada uno con su JSON vacío al empezar, en el mismo runner (las diferencias de máquina entre runners existen, S152), y
+# compara los records. No commitea nada. Plantilla: la coordinadora la copia a .github/workflows/ en una rama de disparo.
+# Autentica sólo con EARTHDATA_TOKEN y sale al instante si viene vacío (A71).
+name: probe-s162-bitabit-nrt
+
+"on":
+  workflow_dispatch:
+    inputs:
+      ref_main:
+        description: "sha de main (antes del cableado)"
+        required: true
+      ref_rama:
+        description: "sha de la rama con el cableado"
+        required: true
+      fecha:
+        description: "día a procesar, YYYY-MM-DD"
+        required: true
+        default: "2026-10-24"
+
+permissions:
+  contents: read
+
+jobs:
+  bitabit:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        volcano: [Lascar, NevadosDeChillan, PuyehueCordonCaulle, Villarrica]
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.ref_main }}
+          path: a
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.ref_rama }}
+          path: b
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Un día del NRT con main y con la rama
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_FECHA: ${{ github.event.inputs.fecha }}
+          VOLCAN: ${{ matrix.volcano }}
+        run: |
+          set -o pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacío (A71)"; exit 1
+          fi
+          mkdir -p out
+          for arbol in a b; do
+            (
+              cd "$arbol"
+              rm -f "data/mirova_equivalent/${VOLCAN}.json"
+              python scripts/run_pipeline.py --profile mirova_equivalent --volcano "$VOLCAN" --date "$VRP_FECHA" \
+                --overwrite 2>&1 | tee "../out/${arbol}_${VOLCAN}.log"
+              cp "data/mirova_equivalent/${VOLCAN}.json" "../out/${arbol}_${VOLCAN}.json" || echo "[]" > "../out/${arbol}_${VOLCAN}.json"
+            )
+          done
+          python b/experiments/_s162_v750a/comparar_bitabit_nrt.py out/a_${VOLCAN}.json out/b_${VOLCAN}.json \
+            | tee "out/comparacion_${VOLCAN}.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s162-bitabit-${{ matrix.volcano }}
+          path: out/
+          if-no-files-found: error

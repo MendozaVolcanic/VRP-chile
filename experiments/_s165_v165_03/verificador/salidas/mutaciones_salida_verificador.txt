@@ -1,0 +1,40 @@
+control_sin_mutacion           esperado=viva        resultado=viva      OK
+control_caida                  esperado=caida       resultado=caida     OK
+     test_apagado_bit_a_bit_con_el_tag: 'failed on setup with "RuntimeError: [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nt'
+     test_geo_solo_no_anota_nada: 'failed on setup with "RuntimeError: [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nt'
+tipo_cuenta_en_estricto        esperado=atrapada    resultado=atrapada  OK
+     test_pasada_sin_dato_queda_anotada[False-crater_borde]: 'assert True is False'
+     test_pasada_sin_dato_queda_anotada[False-crater_relleno]: 'assert True is False'
+tipo_borrado                   esperado=atrapada    resultado=atrapada  OK
+     test_pasada_sin_dato_queda_anotada[False-crater_borde]: "AssertionError: {'fallas': [], 'incidencias': [], 'n': 0, 'n_incidencias': 0, ...}\nassert 0 == 1\n +  where 0 ="
+     test_pasada_sin_dato_queda_anotada[False-crater_relleno]: "AssertionError: {'fallas': [], 'incidencias': [], 'n': 0, 'n_incidencias': 0, ...}\nassert 0 == 1\n +  where 0 ="
+     test_el_tipo_existe_y_no_cuenta_en_estricto: "KeyError: 'crater_sin_dato'"
+aviso_no_se_llama              esperado=atrapada    resultado=atrapada  OK
+     test_pasada_sin_dato_queda_anotada[False-crater_borde]: "AssertionError: {'fallas': [], 'incidencias': [], 'n': 0, 'n_incidencias': 0, ...}\nassert 0 == 1\n +  where 0 ="
+     test_pasada_sin_dato_queda_anotada[False-crater_relleno]: "AssertionError: {'fallas': [], 'incidencias': [], 'n': 0, 'n_incidencias': 0, ...}\nassert 0 == 1\n +  where 0 ="
+aviso_en_toda_pasada           esperado=atrapada    resultado=atrapada  OK
+     test_apagado_bit_a_bit_con_el_tag: 'assert \'{\\n "crater_...}\\n  ]\\n }\\n}\' == \'{\\n "crater_...}\\n  ]\\n }\\n}\'\n  \n  Skipping 79 identical leading cha'
+     test_geo_solo_no_anota_nada: 'assert False\n +  where False = all(<generator object test_geo_solo_no_anota_nada.<locals>.<genexpr> at 0x00000'
+aviso_sin_granulo              esperado=atrapada    resultado=atrapada  OK
+     test_pasada_sin_dato_queda_anotada[False-crater_borde]: "AssertionError: assert 'MOD021KM.A2026200.0300.061.hdf' in 'cráter sin posición en el gránulo (borde o relleno"
+     test_pasada_sin_dato_queda_anotada[False-crater_relleno]: "AssertionError: assert 'MOD021KM.A2026200.0300.061.hdf' in 'cráter sin posición en el gránulo (borde o relleno"
+run_pipeline_no_pasa_aviso     esperado=atrapada    resultado=atrapada  OK
+     test_pasada_sin_dato_queda_anotada[False-crater_borde]: "AssertionError: {'fallas': [], 'incidencias': [], 'n': 0, 'n_incidencias': 0, ...}\nassert 0 == 1\n +  where 0 ="
+     test_pasada_sin_dato_queda_anotada[False-crater_relleno]: "AssertionError: {'fallas': [], 'incidencias': [], 'n': 0, 'n_incidencias': 0, ...}\nassert 0 == 1\n +  where 0 ="
+anota_otro_tipo                esperado=atrapada    resultado=atrapada  OK
+     test_pasada_sin_dato_queda_anotada[False-crater_borde]: "AssertionError: {'fallas': [], 'incidencias': [{'cuenta_estricto': True, 'fecha': '2026-07-19', 'motivo': 'crá"
+     test_pasada_sin_dato_queda_anotada[False-crater_relleno]: "AssertionError: {'fallas': [], 'incidencias': [{'cuenta_estricto': True, 'fecha': '2026-07-19', 'motivo': 'crá"
+anota_sin_plataforma           esperado=atrapada    resultado=atrapada  OK
+     test_pasada_sin_dato_queda_anotada[False-crater_borde]: "AssertionError: assert ('Villarrica' == 'Villarrica'\n  \n    Villarrica and '2026-07-19' == '2026-07-19'\n  \n   "
+     test_pasada_sin_dato_queda_anotada[False-crater_relleno]: "AssertionError: assert ('Villarrica' == 'Villarrica'\n  \n    Villarrica and '2026-07-19' == '2026-07-19'\n  \n   "
+anota_otro_volcan              esperado=atrapada    resultado=atrapada  OK
+     test_pasada_sin_dato_queda_anotada[False-crater_borde]: "AssertionError: assert ('?' == 'Villarrica'\n  \n  - Villarrica\n  + ?)"
+     test_pasada_sin_dato_queda_anotada[False-crater_relleno]: "AssertionError: assert ('?' == 'Villarrica'\n  \n  - Villarrica\n  + ?)"
+titulo_borrado                 esperado=atrapada    resultado=atrapada  OK
+     test_el_resumen_nombra_el_caso[False]: "AssertionError: assert ('cráter sin posición' in 'Cobertura NO COMPLETA: 1 incidencias (ninguna búsqueda ni de"
+     test_el_resumen_nombra_el_caso[True]: "AssertionError: assert ('cráter sin posición' in 'Cobertura NO COMPLETA: 1 incidencias (ninguna búsqueda ni de"
+
+mutaciones reales atrapadas por aserción: 10 de 10
+controles: sin mutación viva, caída caida
+todo como se esperaba
+rc=0

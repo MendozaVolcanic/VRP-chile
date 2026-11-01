@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+import csv
+V = "C:/vrp-trabajo/s159-pruebas/experiments/_s160_audit/v4/"
+filas = [
+ ("281", "Reemplazo del historico con K (#883) no bajo a los documentos rectores de main; en s160-auditoria solo CLAUDE.md:136", "docs/MISSION.md:22; CLAUDE.md:127,190,1335; docs/SINTOMAS.md:9,19,198; docs/MIROVA_DIVERGENCES.md:1444,1507,1640 (main)", "CONFIRMADO EN PARTE", 4, "F4", "python -I v_281_regimen_por_mes.py D:/vrp-trabajo/temporales/s160_audit/main D:/vrp-trabajo/temporales/s160_audit/v4/c0res", V+"v_281_regimen_por_mes_salida.txt"),
+ ("V4-01", "El CLAUDE.md que carga cada sesion desde OneDrive (loop/activo) no tiene marcas S157 ni S158", "dbc377bbe:CLAUDE.md (checkout OneDrive)", "CONFIRMADO", 4, "F4", "grep -c S157 <OneDrive>/CLAUDE.md; git log --oneline dbc377bbe..d516b9d8c -- CLAUDE.md docs/MISSION.md docs/SINTOMAS.md", V+"INFORME.md"),
+ ("282", "Tope D9: marcas S151 exactas en su corpus (1.565/343/7) y no reproducibles hoy por K (9/183/0)", "docs/MIROVA_DIVERGENCES.md:229-235; docs/MISSION.md:187-189; CLAUDE.md A23", "CONFIRMADO EN PARTE", 3, "F4", "python -I v_282_d9_capped.py <c88e97>/data/mirova_equivalent <main>/data/mirova_equivalent; contar_topados_d9.py en ambos", V+"v_282_d9_capped_salida.txt"),
+ ("285", "A118 sigue diciendo D18 nunca se ha medido sin marca S151", "CLAUDE.md:1530 (main), 1501 (loop/activo), 1571 (s160-auditoria)", "CONFIRMADO", 3, "F4", "grep -n 'D18 nunca' CLAUDE.md en las tres ramas", V+"INFORME.md"),
+ ("286", "Contenido S158 ausente de main; no vive en loop/activo sino en el linaje s160-auditoria; U1 U3 U10 U12 U13 sin marca, U8 en parte", "docs/MIROVA_DIVERGENCES.md:3314,1104; CLAUDE.md:152,181 (s160-auditoria)", "CONFIRMADO EN PARTE", 3, "F4", "git cat-file -e <ref>:docs/AUDIT_S158.md para d516b9d8c dbc377bbe HEAD", V+"INFORME.md"),
+ ("288", "Memoria del agente con cinco numeros rebajados sin marca; MEMORY.md:50 se carga en cada sesion", "memory/MEMORY.md:50; reference_calidad_referencia_mirova_por_mes.md:11; reference_s123_reglas_a86_a88.md:23; reference_mirova_daytime_cloud_artifact.md:29-30; milestone_s27_h_s27_1_confirmada.md:3", "CONFIRMADO", 3, "F4", "grep -c de marcas en cada archivo", V+"INFORME.md"),
+ ("289", "README describe el Test 1 integrado como vivo en las tres ramas", "README.md:54,92,131,220", "CONFIRMADO", 3, "F4", "git show <ref>:README.md | grep -n 'Test 1'", V+"INFORME.md"),
+ ("293", "F2-H3..H9 de S158: sin marca en main y loop/activo; en s160-auditoria H3 H4 H5 H6 H7 H9 marcados total o parcialmente; H8 sin marca", "pipeline/detection_context.py:977; CLAUDE.md:150; docs/MISSION.md:302", "CONFIRMADO EN PARTE", 3, "F4", "grep -n 'S158 R2' CLAUDE.md docs/MISSION.md; grep -rl S158 tests/", V+"INFORME.md"),
+ ("V4-02", "La marca V-15 del hueco nov-ene quedo falsa tras el relleno de #883: 74 de 74 dias en los 11", "CLAUDE.md:1603-1607 (main)", "CONFIRMADO", 3, "F4", "python -I v_nuevo_hueco.py D:/vrp-trabajo/temporales/s160_audit/main/data/mirova_equivalent", V+"v_nuevo_hueco_salida.txt"),
+ ("283", "D-4: 439/992 exactos en su fecha; MISSION y CLAUDE.md sin ventana ni hash; hoy 478/1055 por corpus vivo", "docs/MISSION.md:90-92; CLAUDE.md:1695-1696", "CONFIRMADO EN PARTE", 2, "F4", "cd D:/vrp-trabajo/temporales/s160_audit/v4/c03c44 && python -I scripts/clase_mirova.py", V+"v_283_d4_en_su_fecha.txt"),
+ ("290", "D27: 1.642/37/19/233 exactos en la tabla de su fecha; hoy 1.589/37/20/228 porque la tabla cambio en ventana cerrada", "docs/MIROVA_DIVERGENCES.md:2862", "CONFIRMADO", 2, "F4", "python -I v_290_d27_conteo.py <latest_88e97d84e.csv> <main/latest_consolidado.csv>", V+"v_290_d27_conteo_salida.txt"),
+ ("291", "D33: n de la marca validos en su ventana (24, hoy 25); el script mide todo K, que #883 extendio a 582", "docs/MIROVA_DIVERGENCES.md:3208-3210", "CONFIRMADO", 2, "F4", "python -I (v_291 inline) sobre main", V+"v_291_d33_conteo_salida.txt"),
+ ("287", "207 de 214: SIN EVIDENCIA bien propagado en main; memoria sin marca; cambio de poblacion bajo K SIN DATO", "memory/reference_s113_cirrus_d9_scope.md:3,22-23,37; project_s113_estado.md:40", "CONFIRMADO EN PARTE", 2, "F4", "git grep -n '207 de 214' d516b9d8c; grep -n 207 en la memoria", V+"INFORME.md"),
+ ("V4-03", "clase_mirova.py: --cons y --ocr no cambian el conteo de protegidas (usa la union por defecto)", "scripts/clase_mirova.py:227-231 (main)", "CONFIRMADO", 2, "F1a (seguimiento)", "leer scripts/clase_mirova.py:218-231", V+"INFORME.md"),
+ ("284", "D-9: las 14 NONE y el 5 y 5 salen del script persistido (seccion PASADAS DISTINTAS); lectura C automatica", "experiments/_s151_alertas_minimas/frontera_salida.txt (seccion PASADAS DISTINTAS)", "REFUTADO", 1, "F4", "cd experiments/_s151_alertas_minimas && python frontera_banner.py", V+"v_284_frontera_rerun_worktree.txt"),
+]
+with open(V + "hallazgos.csv", "w", newline="", encoding="utf-8") as fh:
+    w = csv.writer(fh)
+    w.writerow(["id","titulo","archivo_linea","confianza","gravedad","eje","comando_reproduccion","salida_cruda"])
+    w.writerows(filas)
+print(len(filas))

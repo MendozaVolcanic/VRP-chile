@@ -1,0 +1,38 @@
+[referencia MIROVA] la ventana 2026-03-01 a 2026-10-20 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+fuentes: ['latest_consolidado.csv', 'data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv']
+alertas VIIRS 375 nocturnas > 0,05 MW con cenit pareado: 1377 de 1391
+cruce con Zenith_Sat_deg del OCR: n 216, |diferencia| mediana 0.53 grados, p95 1.01
+
+volcán | n | (0, 20] | (20, 40] | (40, 50] | (50, 75] | Spearman cenit-rel
+Chaiten              |   51 | 1.00 (24) | 0.93 (17) | -- (1) | 1.05 (9) | -0.164
+Isluga               |  301 | 0.92 (88) | 0.95 (83) | 0.80 (41) | 1.21 (89) | +0.160
+Lascar               |  285 | 1.37 (63) | 1.13 (84) | 0.96 (79) | 0.40 (59) | -0.539
+Lastarria            |  157 | 1.25 (39) | 1.00 (41) | 0.95 (28) | 0.91 (49) | -0.117
+NevadosDeChillan     |   54 | 0.25 (11) | 1.32 (13) | 1.55 (9) | 0.48 (21) | +0.165
+PlanchonPeteroa      |  120 | 1.21 (50) | 1.02 (46) | 0.48 (15) | 0.65 (9) | -0.422
+PuyehueCordonCaulle  |  217 | 1.25 (41) | 1.22 (64) | 1.09 (33) | 0.74 (79) | -0.300
+Tupungatito          |  157 | 1.06 (46) | 0.99 (38) | 0.89 (38) | 1.00 (35) | -0.050
+Villarrica           |   24 | 1.00 (15) | 1.05 (8) | -- (0) | -- (1) | +0.060
+TODOS                | 1366 | 1.08 (377) | 1.06 (394) | 0.90 (244) | 0.82 (351) | -0.157
+
+pasadas con alerta de MIROVA donde publicamos magnitud: 1314 de 1377
+razón nuestra/MIROVA mediana por tramo de cenit (n)
+volcán | (0, 20] | (20, 40] | (40, 50] | (50, 75] | S = R(>40)/R(<=40)
+Chaiten              | 1.32 (23) | 1.08 (16) | -- (0) | 0.92 (7) | 0.74
+Isluga               | 0.71 (87) | 0.52 (82) | 0.46 (40) | 0.31 (83) | 0.58
+Lascar               | 0.77 (63) | 0.59 (84) | 0.51 (78) | 0.48 (56) | 0.76
+Lastarria            | 0.80 (37) | 0.66 (41) | 0.72 (25) | 0.78 (41) | 1.01
+NevadosDeChillan     | 0.83 (8) | 0.61 (12) | 0.55 (8) | 0.49 (22) | 0.77
+PlanchonPeteroa      | 0.94 (49) | 0.77 (44) | 1.14 (14) | 0.79 (9) | 1.13
+PuyehueCordonCaulle  | 0.94 (40) | 0.81 (63) | 0.76 (30) | 0.86 (78) | 0.92
+Tupungatito          | 0.46 (46) | 0.33 (38) | 0.29 (34) | 0.28 (28) | 0.72
+Villarrica           | 1.00 (15) | 0.82 (9) | -- (0) | -- (0) | nan
+TODOS                | 0.79 (368) | 0.63 (390) | 0.52 (230) | 0.55 (326) | 0.75

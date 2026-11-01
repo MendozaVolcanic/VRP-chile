@@ -1,0 +1,32 @@
+# A/B de D25 sobre K (S157, tarea 1.29). BRAZO D25 h1 (sólo si Nicolás elige la opción B del §8 del pre-registro): D25 con los 8 vecinos.
+#
+# POR QUÉ: experiments/_s157_prereg_d25/PREREGISTRO.md. D25 (docs/MIROVA_DIVERGENCES.md) cambia el fondo que se resta
+# en la magnitud de VIIRS 375 y 750: media de la radiancia de los vecinos NO alertados (Coppola 2016a ec. 6) en lugar
+# de la mediana del anillo de 5 a 25 km. Los cuatro perfiles difieren SÓLO en lo declarado, comprobado resolviendo
+# todas las constantes de pipeline.profile (tests/test_perfiles_d25_k_s157.py, A89). Declaran los tres flags de K con
+# su valor (tests/test_guard_perfiles_congelados_s153.py, A117). MODIS va apagado en los cuatro: D25 no existe en
+# process_modis (ningún flag lo lee), así que correrlo sólo gasta runner y mide ruido.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT. NO DESPACHAR sin el sello de Nicolás.
+extends: mirova_equivalent
+profile: _s157_ab_d25_k_on_h1
+description: >
+  Brazo D25 con ventana de 8 vecinos (vrp_bg_neighbor_max_half_px 1).
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+  enable_vrp_bg_neighbor_mean_viirs375: true
+  enable_vrp_bg_neighbor_mean_viirs750: true
+
+sensors:
+  modis: false
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _s157_ab_d25_k_on_h1
+
+enable_modis_b22_primary: true
+
+thresholds:
+  vrp_bg_neighbor_max_half_px: 1

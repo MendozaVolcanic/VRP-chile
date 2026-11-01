@@ -1,0 +1,22 @@
+import csv
+B = r"C:\vrp-trabajo\s159-pruebas\experiments\_s160_audit\v2" + "\\"
+rows = [
+ ("V2-01","F2-203: cumulos summit con todos los pixeles <= t_bg salen en 0,0 MW y no se publican (30 de 97 V750 desde 2026-09-18; 7 con alerta MIROVA, 11 negativos limpios, 0 protegidas)","pipeline/process_viirs_mod.py:1039,1054; frontend/index.html:1603; MIROVA_VIIRS750_VRP.m l. 64-91","CONFIRMADO",5,"F2 magnitudes","python v2/v_203_cero.py",B+"v_203_cero_salida.txt"),
+ ("V2-02","F2-201: C1 de escena bajo los minimos de MIROVA en 8 vecinos (porcentajes exactos) pero casi no toca lo publicado (4/2452 V375, 8/485 V750, 1/129 MODIS)","pipeline/profile.py:105; detection_context.py:483-486; process_viirs_mod.py:808-809,891-893; .m l. 183,186,281-287,389-395","CONFIRMADO EN PARTE",3,"F2 unidades","python v2/v_201_202_umbral.py; python v2/v_201_efecto_v375.py",B+"v_201_202_umbral_salida.txt"),
+ ("V2-03","F2-213: RECALL_MIN calibrado en C0 dispara con K (V750 73,3 % < 79,5; C0 misma ventana 88,0)","scripts/auto_audit_weekly.py:19-21,120,742-747","CONFIRMADO",3,"F2 metricas","git show d516b9d8c:data/audit_continuous/latest.json",B+"autoaudit_latest_d516b9d8c.json"),
+ ("V2-04","F2-202: C1 de cumbre y pisos de descarte en otro espacio; dETI cumbre mas laxo en 8-22 % de pasadas; efecto en pixeles SIN DATO","detection_context.py:60-61,127-129; .m l. 184,187,298,368-374","CONFIRMADO",3,"F2 unidades","python v2/v_201_202_umbral.py",B+"v_201_202_umbral_salida.txt"),
+ ("V2-05","F2-205: pool del segundo pase sin borde ni descartes (MIROVA los aplica en los dos pases); efecto SIN DATO","detection_context.py:923 vs 492-500; .m l. 211-235,288,298,369","CONFIRMADO",3,"F2 unidades","sed -n 900,935p pipeline/detection_context.py",B+"INFORME.md"),
+ ("V2-06","F2-206: anillo 5-25 km centrado en lat/lon del volcan, no en el crater (PCC 7,58 km); efecto SIN DATO","process_viirs_mod.py:517,539; process_viirs.py:780; process_modis.py:560","CONFIRMADO",3,"F2 geometria","python v2/v_206_distancias.py",B+"v_206_distancias_salida.txt"),
+ ("V2-07","F2-209: modo de un pixel expone 8 MODIS, 80 V375, 18 V750 cumulos desde 2026-09-18; en V375 el tablero publica F5 y no lo toca; no cambia la decision de publicar","single_pixel_mode.py:93; process_viirs_mod.py:1122-1130; MIROVA_VIIRS750_VRP.m l. 83-84","CONFIRMADO EN PARTE",3,"F2 magnitudes","python v2/v_209_spm.py",B+"v_209_spm_salida.txt"),
+ ("V2-08","F2-208: predicado D9 activo en 81-88 % desde 2026-09-18 (61-72 % en el corpus); 1 topado en ventana (PCC MODIS 2026-10-03 01:25); causa altitud SOSPECHA","process_viirs_mod.py:1009-1016","CONFIRMADO",3,"F2 magnitudes","python v2/v_208_d9.py",B+"v_208_d9_salida.txt"),
+ ("V2-09","Propio: umbrales de cumbre rigen hasta inner_radius_km y en el codigo de MIROVA solo en la caja BOX==2 de 7x7 px; 8-29 % de lo publicado fuera de esa caja, casi todo PCC","MIROVA_VIIRS750_hotspot_detection.m l. 120-125,180-187,389-399; Example/VIIRS750_example.mat; detection_context.py roi1_summit_mask","SOSPECHA",3,"F2 geometria","python v2/v_nuevo_caja_cumbre.py",B+"v_nuevo_caja_cumbre_salida.txt"),
+ ("V2-10","F2-204: dist_km de anomaly_pixels desde el centro rotulado 'al crater'; respaldo de clase nunca corre (0 de 71.968); cambio de clase 8/73 es contrafactual","process_viirs_mod.py:517,1075; frontend/index.html:3034-3036,3159","CONFIRMADO EN PARTE",2,"F2 geometria","python v2/v_204_respaldo.py",B+"v_204_respaldo_salida.txt"),
+ ("V2-11","F2-211: VRE no integra 62,5 h/dia sino 6,2 (solo detecciones validas); 15 de 147 dias-volcan sobre 24 h","frontend/index.html:2486-2500","REFUTADO",2,"F2 magnitudes","python v2/v_211_204.py",B+"v_211_204_salida.txt"),
+ ("V2-12","F2-207: tope de 50 GW juzga t_max_k antes de normalizar t_max_i04_k; V375 siempre imposible sobre el tope; 0 casos","pipeline/store.py:165-166,556,561-562; process_viirs.py:2210","CONFIRMADO",2,"F2 magnitudes","sed -n 548,562p pipeline/store.py",B+"INFORME.md"),
+ ("V2-13","hallazgos.csv de F2 con 9 campos en filas 203 y 207","experiments/_s160_audit/f2/hallazgos.csv filas 4 y 8","CONFIRMADO",1,"forma","python -c csv.reader len por fila",B+"INFORME.md"),
+]
+with open(B+"hallazgos.csv", "w", newline="", encoding="utf-8") as f:
+    w = csv.writer(f)
+    w.writerow(["id","titulo","archivo_linea","confianza","gravedad","eje","comando_reproduccion","salida_cruda"])
+    w.writerows(rows)
+print(all(len(r) == 8 for r in csv.reader(open(B+"hallazgos.csv", encoding="utf-8"))))

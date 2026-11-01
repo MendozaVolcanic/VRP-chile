@@ -1,0 +1,64 @@
+FF.FF                                                                    [100%]
+================================== FAILURES ===================================
+_____ test_si_d_mejora_y_la_calibracion_de_dprima_falla_queda_indecidible _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000020FA14FD0D0>
+
+    def test_si_d_mejora_y_la_calibracion_de_dprima_falla_queda_indecidible(monkeypatch):
+        """D-30, respuesta 1: si la calibraci\xf3n de d\u2032 falla, no se sabe si hay MEJORA; como en D-27, el estrato no decide."""
+        _calibracion_de_dprima_forzada(monkeypatch, f_mej=0.5, f_emp=0.0)
+        ver, info = X.evaluar_m({E750: _mitad_de_camino()}, ok_ctrl=True, modo_calib="simetrica")
+>       assert ver["M|%s" % E750] == "INDECIDIBLE", "falla la calibraci\xf3n de d\u2032 y el estrato da %s" % ver["M|%s" % E750]
+E       AssertionError: falla la calibraci\xf3n de d\u2032 y el estrato da NEUTRO
+E       assert 'NEUTRO' == 'INDECIDIBLE'
+E         
+E         - INDECIDIBLE
+E         + NEUTRO
+
+tests\test_evaluar_d25_placebo_s159.py:253: AssertionError
+__________ test_la_calibracion_de_dprima_solo_mira_la_cola_de_mejora __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000020FA14FE810>
+
+    def test_la_calibracion_de_dprima_solo_mira_la_cola_de_mejora(monkeypatch):
+        """D-30, respuesta 2: d\u2032 s\xf3lo se usa para MEJORA, as\xed que la cola EMPEORA de su calibraci\xf3n no decide."""
+        _calibracion_de_dprima_forzada(monkeypatch, f_mej=0.0, f_emp=0.5)
+        ver, info = X.evaluar_m({E750: _mitad_de_camino()}, ok_ctrl=True, modo_calib="simetrica")
+>       assert ver["M|%s" % E750] == "MEJORA", "la cola EMPEORA de d\u2032 apag\xf3 la MEJORA: %s" % ver["M|%s" % E750]
+E       AssertionError: la cola EMPEORA de d\u2032 apag\xf3 la MEJORA: NEUTRO
+E       assert 'NEUTRO' == 'MEJORA'
+E         
+E         - MEJORA
+E         + NEUTRO
+
+tests\test_evaluar_d25_placebo_s159.py:262: AssertionError
+____ test_la_calibracion_de_dprima_se_corre_con_las_constantes_sin_sellar _____
+
+    def test_la_calibracion_de_dprima_se_corre_con_las_constantes_sin_sellar():
+        """D-30 deja abierta la semilla y el n\xfamero de repeticiones de la calibraci\xf3n de d\u2032 (H2 del verificador): quedan como
+        constantes con nombre, con los valores de b4258040c, para que el cambio sea de una línea si Nicolás lo sella."""
+>       assert hasattr(X, "N_CALIB_DPRIMA"), "el n\xfamero de repeticiones de la calibraci\xf3n de d\u2032 no es una constante"
+E       AssertionError: el n\xfamero de repeticiones de la calibraci\xf3n de d\u2032 no es una constante
+E       assert False
+E        +  where False = hasattr(X, 'N_CALIB_DPRIMA')
+
+tests\test_evaluar_d25_placebo_s159.py:290: AssertionError
+______ test_un_veredicto_con_la_calibracion_sellada_no_vale_para_decidir ______
+
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1299/test_un_veredicto_con_la_calib0')
+
+    def test_un_veredicto_con_la_calibracion_sellada_no_vale_para_decidir(tmp_path):
+        """D-30, respuesta 4: con --calibracion sellada el comparador no se aplica, así que ese veredicto no vale para
+        decidir y el JSON lo dice; combinar lo arrastra."""
+>       assert hasattr(X, "validez_calibracion"), "falta la marca de validez del veredicto"
+E       AssertionError: falta la marca de validez del veredicto
+E       assert False
+E        +  where False = hasattr(X, 'validez_calibracion')
+
+tests\test_evaluar_d25_placebo_s159.py:297: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_si_d_mejora_y_la_calibracion_de_dprima_falla_queda_indecidible
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_la_calibracion_de_dprima_solo_mira_la_cola_de_mejora
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_la_calibracion_de_dprima_se_corre_con_las_constantes_sin_sellar
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_un_veredicto_con_la_calibracion_sellada_no_vale_para_decidir
+4 failed, 1 passed, 15 deselected in 66.01s (0:01:06)

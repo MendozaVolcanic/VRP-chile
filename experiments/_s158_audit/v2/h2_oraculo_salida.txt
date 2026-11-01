@@ -1,0 +1,24 @@
+(A) Etna
+[Etna] absolutas=0 pase1=[0, 0, 4] pase2=[0, 0, 1] pase2_no_adyacentes=0 de 1
+
+(B) escena isoterma con ruido (sin foco)
+[sin foco] absolutas=0 pase1=[0, 0, 0] pase2=[0, 0, 0] pase2_no_adyacentes=0 de 0
+[control +: foco inyectado en (33,33)] absolutas=0 pase1=[0, 0, 1] pase2=[0, 0, 0] pase2_no_adyacentes=0 de 0
+
+(C) foco fuerte 3x3 en el centro + píxel débil aislado en (33,50), barrido de intensidad
+[debil x1.10] absolutas=9 pase1=[0, 0, 0] pase2=[0, 0, 0] pase2_no_adyacentes=0 de 0
+[debil x1.15] absolutas=9 pase1=[0, 0, 0] pase2=[0, 0, 0] pase2_no_adyacentes=0 de 0
+[debil x1.20] absolutas=9 pase1=[0, 0, 0] pase2=[0, 0, 0] pase2_no_adyacentes=0 de 0
+[debil x1.25] absolutas=9 pase1=[1, 0, 0] pase2=[0, 0, 0] pase2_no_adyacentes=0 de 0
+[debil x1.30] absolutas=9 pase1=[1, 0, 0] pase2=[0, 0, 0] pase2_no_adyacentes=0 de 0
+[debil x1.40] absolutas=9 pase1=[1, 0, 0] pase2=[0, 0, 0] pase2_no_adyacentes=0 de 0
+[debil x1.60] absolutas=9 pase1=[1, 0, 0] pase2=[0, 0, 0] pase2_no_adyacentes=0 de 0
+BOX en (33,50): 0.0  BOX en (33,33): 2.0
+
+(C2) búsqueda en escena ruidosa
+  ruido=0.03 foco=x1.5 debil=x1.925: abs=0 pase1=[1, 0, 2] pase2=[0, 0, 1] no_ady=[(np.int64(34), np.int64(32))] thrN1 p1=0.0299 p2=0.0272
+  ruido=0.03 foco=x1.5 debil=x1.950: abs=0 pase1=[1, 0, 2] pase2=[0, 0, 1] no_ady=[(np.int64(34), np.int64(32))] thrN1 p1=0.0301 p2=0.0272
+  ruido=0.03 foco=x1.5 debil=x1.975: abs=0 pase1=[1, 0, 2] pase2=[0, 0, 1] no_ady=[(np.int64(34), np.int64(32))] thrN1 p1=0.0302 p2=0.0272
+  ruido=0.03 foco=x1.5 debil=x2.000: abs=0 pase1=[1, 0, 2] pase2=[0, 0, 1] no_ady=[(np.int64(34), np.int64(32))] thrN1 p1=0.0303 p2=0.0272
+  ruido=0.03 foco=x2.0 debil=x1.350: abs=0 pase1=[0, 0, 8] pase2=[1, 0, 0] no_ady=[(np.int64(33), np.int64(50))] thrN1 p1=0.0310 p2=0.0270
+(C2) casos con alertas del pase 2 no adyacentes: 37 de 351 escenas probadas

@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+# ⚠️ S158 R2 (docs/AUDIT_S158_R2.md, marca A113; experiments/_s158_audit_r2/a113/INFORME.md n 2): estas pruebas fijan la lectura del paper (p. 7,
+# renderizada), que es la vara para VIIRS 375. En VIIRS 750 el codigo de MIROVA corre el segundo pase siempre y
+# sobre toda la escena con los mismos umbrales (MIROVA_VIIRS750_hotspot_detection.m l. 223 a 235 y 389 a 399): la
+# condicion (a) es nula en efecto y la (b), adyacencia, no existe. Llevar el modo condicionado a VIIRS 750 seria
+# alejarse del codigo. Las aserciones no cambian.
 """S135 — el segundo pase condicionado al conjunto activo y a la vecindad (D2 / D19).
 
 EL FENÓMENO. Coppola diseñó el segundo pase para recuperar los píxeles del BORDE de un cúmulo

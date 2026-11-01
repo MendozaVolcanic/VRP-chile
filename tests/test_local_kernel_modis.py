@@ -1,3 +1,6 @@
+# ⚠️ S158 R2 (docs/AUDIT_S158_R2.md, marca A113; experiments/_s158_audit_r2/a113/INFORME.md n 5, cita fuera de la tabla de F2): «Coppola 2024 L1129
+# literal» es una frase condicional del modelo de dos componentes (libro p. impresa 337, renderizada), no el fondo
+# del VRP. Para MODIS el respaldo posible es Coppola 2016a p. 8. Las aserciones no cambian.
 """Tests TDD para integracion ENABLE_LOCAL_KERNEL_BG en process_modis (S58).
 
 Paridad con la integracion VIIRS (process_viirs.py lineas ~791-802). Cuando el

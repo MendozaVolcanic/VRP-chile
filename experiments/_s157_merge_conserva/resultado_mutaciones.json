@@ -1,0 +1,228 @@
+{
+  "control_sin_mutacion": {
+    "total": 28,
+    "afirma": [],
+    "cae": []
+  },
+  "mutaciones": [
+    {
+      "id": "CTRL_caida",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "error de sintaxis (control de caida)",
+      "estado": "CAIDA",
+      "esperado": "CAIDA",
+      "atrapan": [],
+      "caen": [
+        "tests.test_merge_chunk_stores"
+      ]
+    },
+    {
+      "id": "S1_base_ignorada",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "no carga la base",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_base_conserva_las_ventanas_que_la_corrida_no_toca",
+        "test_base_conserva_aunque_el_trozo_no_traiga_los_otros_meses",
+        "test_base_identica_al_trozo_da_el_mismo_archivo_byte_a_byte",
+        "test_base_bordes_de_ventana_son_inclusivos_por_fecha",
+        "test_base_choque_dentro_de_la_ventana_gana_el_trozo_y_no_es_duplicado",
+        "test_base_duplicados_entre_trozos_se_siguen_contando",
+        "test_base_trozo_caido_no_borra_su_ventana",
+        "test_base_record_sin_fecha_se_conserva",
+        "test_base_de_otro_volcan_se_rechaza",
+        "test_relanzar_un_trozo_no_borra_el_resto_del_historico",
+        "test_la_base_sale_de_main_y_no_del_checkout_del_despacho",
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[post-checkout]",
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[pre-push]",
+        "test_si_el_merge_falla_no_se_sube_nada",
+        "test_perfil_sin_archivo_en_main_se_crea_como_antes"
+      ],
+      "caen": []
+    },
+    {
+      "id": "S2_resucita_dentro",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "conserva tambien lo de dentro de la ventana",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_base_conserva_las_ventanas_que_la_corrida_no_toca",
+        "test_base_bordes_de_ventana_son_inclusivos_por_fecha",
+        "test_base_choque_dentro_de_la_ventana_gana_el_trozo_y_no_es_duplicado"
+      ],
+      "caen": []
+    },
+    {
+      "id": "S3_bordes_exclusivos",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "bordes de ventana abiertos",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_base_bordes_de_ventana_son_inclusivos_por_fecha"
+      ],
+      "caen": []
+    },
+    {
+      "id": "S4_fin_exclusivo",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "dia final de la ventana abierto",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_base_bordes_de_ventana_son_inclusivos_por_fecha"
+      ],
+      "caen": []
+    },
+    {
+      "id": "S5_compara_hora",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "compara fecha y hora contra la ventana",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_base_bordes_de_ventana_son_inclusivos_por_fecha"
+      ],
+      "caen": []
+    },
+    {
+      "id": "S6_updated_base",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "ignora el updated de la base",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_base_choque_dentro_de_la_ventana_gana_el_trozo_y_no_es_duplicado"
+      ],
+      "caen": []
+    },
+    {
+      "id": "S7_claves_base",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "no hereda las claves de la base",
+      "estado": "SOBREVIVE",
+      "esperado": "EQUIVALENTE (la base del store solo tiene volcano, updated, records)",
+      "atrapan": [],
+      "caen": []
+    },
+    {
+      "id": "S8_sin_control_volcan",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "acepta base de otro volcan",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_base_de_otro_volcan_se_rechaza",
+        "test_si_el_merge_falla_no_se_sube_nada"
+      ],
+      "caen": []
+    },
+    {
+      "id": "S9_sin_orden",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "no ordena por fecha",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_une_trozos_disjuntos_sin_perder_records",
+        "test_base_conserva_aunque_el_trozo_no_traiga_los_otros_meses",
+        "test_base_identica_al_trozo_da_el_mismo_archivo_byte_a_byte",
+        "test_base_bordes_de_ventana_son_inclusivos_por_fecha",
+        "test_relanzar_un_trozo_no_borra_el_resto_del_historico",
+        "test_la_base_sale_de_main_y_no_del_checkout_del_despacho",
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[post-checkout]",
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[pre-push]",
+        "test_perfil_sin_archivo_en_main_se_crea_como_antes"
+      ],
+      "caen": []
+    },
+    {
+      "id": "S10_base_sin_ventanas_main",
+      "archivo": "scripts/merge_chunk_stores.py",
+      "rompe": "quita el rechazo de --base sin --ventanas en main()",
+      "estado": "SOBREVIVE",
+      "esperado": "EQUIVALENTE (merge_stores tambien lo rechaza, defensa doble)",
+      "atrapan": [],
+      "caen": []
+    },
+    {
+      "id": "Y1_sin_base",
+      "archivo": ".github/workflows/reproc-chunked.yml",
+      "rompe": "el workflow no pasa --base",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_relanzar_un_trozo_no_borra_el_resto_del_historico",
+        "test_la_base_sale_de_main_y_no_del_checkout_del_despacho",
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[post-checkout]",
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[pre-push]",
+        "test_si_el_merge_falla_no_se_sube_nada",
+        "test_perfil_sin_archivo_en_main_se_crea_como_antes"
+      ],
+      "caen": []
+    },
+    {
+      "id": "Y2_base_del_despacho",
+      "archivo": ".github/workflows/reproc-chunked.yml",
+      "rompe": "une contra el checkout del despacho",
+      "estado": "ATRAPADA",
+      "esperado": "CAIDA o ATRAPADA (git rechaza el push)",
+      "atrapan": [
+        "test_la_base_sale_de_main_y_no_del_checkout_del_despacho",
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[post-checkout]",
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[pre-push]"
+      ],
+      "caen": []
+    },
+    {
+      "id": "Y3_push_forzado",
+      "archivo": ".github/workflows/reproc-chunked.yml",
+      "rompe": "push forzado pisa lo que main gano",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[post-checkout]"
+      ],
+      "caen": []
+    },
+    {
+      "id": "Y4_ventana_invertida",
+      "archivo": ".github/workflows/reproc-chunked.yml",
+      "rompe": "ventana mal leida del nombre del artefacto",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_relanzar_un_trozo_no_borra_el_resto_del_historico",
+        "test_la_base_sale_de_main_y_no_del_checkout_del_despacho",
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[post-checkout]",
+        "test_si_main_se_mueve_antes_del_push_se_relee_la_base[pre-push]",
+        "test_perfil_sin_archivo_en_main_se_crea_como_antes"
+      ],
+      "caen": []
+    },
+    {
+      "id": "Y6_sin_set_e_off",
+      "archivo": ".github/workflows/reproc-chunked.yml",
+      "rompe": "deja el `bash -e` de GitHub activo",
+      "estado": "CAIDA",
+      "esperado": "CAIDA (el paso sale con error, PASO_CAYO)",
+      "atrapan": [],
+      "caen": [
+        "test_perfil_nuevo_sin_ningun_trozo_no_falla"
+      ]
+    },
+    {
+      "id": "Y5_ignora_fallo_merge",
+      "archivo": ".github/workflows/reproc-chunked.yml",
+      "rompe": "sigue aunque el merge falle",
+      "estado": "ATRAPADA",
+      "esperado": "ATRAPADA",
+      "atrapan": [
+        "test_si_el_merge_falla_no_se_sube_nada"
+      ],
+      "caen": []
+    }
+  ]
+}

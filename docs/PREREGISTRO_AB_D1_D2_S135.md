@@ -1,5 +1,17 @@
 # Pre-registro del A/B de D1 y D2 — para la decisión de Nicolás
 
+> ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 2): este
+> pre-registro mide VIIRS 375, sin código de MIROVA; ahí el paper sigue siendo la vara y el «segundo pase condicionado»
+> es fiel **al paper** (p. 7, renderizada: «applied only if one or more pixels have been detected... for the pixels
+> adjacent to those already flagged»). Pero el código operacional de MIROVA para VIIRS 750 **no** hace eso: corre el
+> segundo pase siempre, sobre toda la escena y con los mismos umbrales que el primero (`MIROVA_VIIRS750_hotspot_detection.m`
+> l. 223 a 235 y 389 a 399). Su condición (a) es nula en efecto (con el primer pase vacío, el segundo recibe las mismas
+> entradas y devuelve lo mismo, vacío); la (b), adyacencia, no existe. Si MIROVA hace en VIIRS 375 lo mismo que en 750
+> es SOSPECHA (TRASLADADA). Consecuencia para leer este documento: «brazo fiel» y «fidelidad literal» valen contra el
+> paper; contra el operacional de 750 lo que difiere de nuestro segundo pase suelto no es la condición sino el detalle
+> (8 vecinos contra 3 × 3 con el central, ETI sin recalcular y μ, σ sin el piso de -0,1: D26), y que nuestro primer
+> pase lleva la compuerta de D22 que el de MIROVA no tiene. Texto conservado.
+
 > **DECIDIDO por Nicolás el 2026-09-07.** Sus tres respuestas, textuales en lo esencial:
 > autoriza tocar el pipeline; corre sobre los seis volcanes que deciden; y **«no debemos perder
 > nada que MIROVA esté entregando, debemos ser lo más fiel posible y entender por qué sucede y

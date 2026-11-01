@@ -1,0 +1,94 @@
+== 1. md5 de entradas (rama vs paquete S159 vs md5 declarado)
+entradas_o2.mat True True fb849b6a96a9d348e75cf502e21a326c
+MIROVA_VIIRS750_VRP.m True True b0ceebb2b7864cd27c145dc8d41968cc
+MIROVA_VIIRS750_hotspot_detection.m True True ddffea3672a08e5aa17c702f72d72170
+correr_o2.m False True 743a0f46a84de9209ff0ba557806d174
+resultado_o2.mat rama/paquete: 1f7fdc4bed0f8cb6223204bbce42ba43 1f7fdc4bed0f8cb6223204bbce42ba43
+== 2. orden de escenas
+IDX_O1-1 == json idx_o1: True
+etiquetas rama==paquete: True | unicos: 311
+escena j de entradas_o2 == escena IDX_O1[j] de entradas.mat (M13,M15,BOX,DAY,SG) en 311: True
+version_matlab: ['26.2.0.3386108 (R2026b)']
+len ALERTAS 311 VRP (311, 1) con alerta 166
+== 3. deteccion vs Octave S159 (salida_original) y vs Octave PROPIO (corrida hoy)
+distintas (secuencia exacta) vs S159: 0 | vs Octave propio: 0 | como conjunto: 0
+control: n escenas con alerta MATLAB/Octave propio: 166 166 | total pixeles alertados 374
+== 4. consistencia interna de resultado_o2.mat: VRP == (LHOT-LBK)*1.97e7*0.5625/1e6; LBK == sum(BK[a]); DL
+max |VRP-formula|/|VRP| (166): 0.0 | DL==LHOT-LBK: 0.0
+NPIX==len(alert) en todas: True
+BK guardadas con alerta: 84 max |sum(BK[a])-LBK|: 2.220446049250313e-16
+max |LHOT - sum(M13[a]) recomputado|: 4.440892098500626e-16
+== 5. VRP: conteos del punto 4 (recomputados con script propio)
+n con alerta: 166
+shim S159            >1%:  32  <1e-9: 101  intermedios(1e-9..1%):  33  max 0.8182  med 1.11e-15  nan:0
+shim Octave propio   >1%:  32  <1e-9: 101  intermedios(1e-9..1%):  33  max 0.8182  med 1.11e-15  nan:0
+segundo port R2      >1%:  26  <1e-9: 101  intermedios(1e-9..1%):  39  max 0.7660  med 0.00e+00  nan:0
+primer port O1       >1%:  45  <1e-9:  86  intermedios(1e-9..1%):  35  max 0.8182  med 0.00e+00  nan:0
+min VRP MATLAB: 0.09838139687217828 (division por cero no aplica si >0)
+shim S159 == shim propio (control reproducibilidad): 0.0
+MATLAB vs ensayo Octave de S159 (prueba_o2_en_octave):
+ version: ['11.3.0']
+ ensayo/MATLAB-1 >1%: 32 <1e-9: 101 | ensayo == shim propio: 0.0
+Etna: MATLAB LBK 1.072886152 VRP 9889528.4 | Octave propio LBK 1.062919411 VRP 9999972.3
+== 6. quienes son las diferencias >1% (por npix y familia)
+shim >1% por npix: [(1, 20), (2, 7), (3, 1), (4, 2), (5, 2)]
+todas por npix (n escenas): [(1, 73), (2, 44), (3, 17), (4, 13), (5, 14), (6, 2), (8, 1), (9, 1), (11, 1)]
+ npix==1 (73): shim >1%: 20
+ npix==1 (73): R2 >1%: 16
+ npix==1 (73): O1 >1%: 34
+ npix==1 donde NINGUN modelo calza (>1% los tres): 10 ['Villarrica_2026-09-19_0548|nearest|caja_def', 'Villarrica_2026-09-19_0548|nearest|anillo_sensible', 'Villarrica_2026-09-19_0548|linear|caja_def', 'Villarrica_2026-09-19_0548|nearest|caja_def', 'Villarrica_2026-09-19_0548|nearest|caja_def', 'Villarrica_2026-09-19_0548|cubic|caja_def', 'Chaiten_2026-10-06_0530|linear|caja_def', 'Chaiten_2026-10-06_0530|nearest|caja_def', 'Chaiten_2026-10-06_0530|cubic|caja_def', 'sint_098||']
+max diferencia entre los tres modelos y MATLAB, por modelo y hasta 3 peores:
+shim [('Tupungatito_2026-03-01_0536', 1, 0.8182), ('Villarrica_2026-09-19_0548', 1, 0.766), ('Villarrica_2026-09-19_0548', 1, 0.766)]
+R2 [('Villarrica_2026-09-19_0548', 1, 0.766), ('Villarrica_2026-09-19_0548', 1, 0.766), ('Villarrica_2026-09-19_0548', 1, 0.766)]
+O1 [('Tupungatito_2026-03-01_0536', 1, 0.8182), ('Villarrica_2026-09-19_0548', 1, 0.766), ('Villarrica_2026-09-19_0548', 1, 0.766)]
+== 7. Villarrica 2026-09-19 05:48 nearest
+77 {'familia': 'chile_guardada', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'linear', 'dx': 0, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 77} alertas MATLAB [2177 2178] Octave [2177 2178] VRP MATLAB 0.4745 shim 0.4745 R2 0.4745 O1 0.4745
+78 {'familia': 'chile_guardada', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'linear', 'dx': 0, 'dy': 0, 'caja': 'anillo_sensible', 'idx_o1': 78} alertas MATLAB [2177 2178] Octave [2177 2178] VRP MATLAB 0.4745 shim 0.4745 R2 0.4745 O1 0.4745
+79 {'familia': 'chile_guardada', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'nearest', 'dx': 0, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 79} alertas MATLAB [2178] Octave [2178] VRP MATLAB 0.4212 shim 0.7438 R2 0.7438 O1 0.7438
+80 {'familia': 'chile_guardada', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'nearest', 'dx': 0, 'dy': 0, 'caja': 'anillo_sensible', 'idx_o1': 80} alertas MATLAB [2178] Octave [2178] VRP MATLAB 0.4212 shim 0.7438 R2 0.7438 O1 0.7438
+81 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'linear', 'dx': 0, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 81} alertas MATLAB [2177 2178] Octave [2177 2178] VRP MATLAB 0.4745 shim 0.4745 R2 0.4745 O1 0.4745
+82 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'linear', 'dx': 375, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 82} alertas MATLAB [2110 2178] Octave [2110 2178] VRP MATLAB 0.4467 shim 0.4467 R2 0.4436 O1 0.3587
+83 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'linear', 'dx': -375, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 83} alertas MATLAB [2177 2245] Octave [2177 2245] VRP MATLAB 0.4467 shim 0.3587 R2 0.3618 O1 0.3587
+84 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'linear', 'dx': 0, 'dy': 375, 'caja': 'caja_def', 'idx_o1': 84} alertas MATLAB [2178] Octave [2178] VRP MATLAB 0.5379 shim 0.5111 R2 0.5111 O1 0.5111
+85 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'linear', 'dx': 0, 'dy': -375, 'caja': 'caja_def', 'idx_o1': 85} alertas MATLAB [2177] Octave [2177] VRP MATLAB 0.5379 shim 0.5379 R2 0.5379 O1 0.5379
+86 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'nearest', 'dx': 0, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 86} alertas MATLAB [2178] Octave [2178] VRP MATLAB 0.4212 shim 0.7438 R2 0.7438 O1 0.7438
+87 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'nearest', 'dx': 375, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 87} alertas MATLAB [2110] Octave [2110] VRP MATLAB 0.7080 shim 0.7080 R2 0.6542 O1 0.6542
+88 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'nearest', 'dx': -375, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 88} alertas MATLAB [2177] Octave [2177] VRP MATLAB 0.7080 shim 0.7080 R2 0.7080 O1 0.7080
+89 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'nearest', 'dx': 0, 'dy': 375, 'caja': 'caja_def', 'idx_o1': 89} alertas MATLAB [2178] Octave [2178] VRP MATLAB 0.6632 shim 0.6004 R2 0.6004 O1 0.6004
+90 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'nearest', 'dx': 0, 'dy': -375, 'caja': 'caja_def', 'idx_o1': 90} alertas MATLAB [2177] Octave [2177] VRP MATLAB 0.6632 shim 0.6632 R2 0.6632 O1 0.6632
+91 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'cubic', 'dx': 0, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 91} alertas MATLAB [2177 2178] Octave [2177 2178] VRP MATLAB 0.6354 shim 0.6354 R2 0.6354 O1 0.6354
+92 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'cubic', 'dx': 375, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 92} alertas MATLAB [2110 2178] Octave [2110 2178] VRP MATLAB 0.5350 shim 0.5350 R2 0.5470 O1 0.4404
+93 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'cubic', 'dx': -375, 'dy': 0, 'caja': 'caja_def', 'idx_o1': 93} alertas MATLAB [2177 2245] Octave [2177 2245] VRP MATLAB 0.5350 shim 0.4404 R2 0.4284 O1 0.4404
+94 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'cubic', 'dx': 0, 'dy': 375, 'caja': 'caja_def', 'idx_o1': 94} alertas MATLAB [2178] Octave [2178] VRP MATLAB 0.6147 shim 0.6069 R2 0.6069 O1 0.6069
+95 {'familia': 'chile_variante', 'id': 'Villarrica_2026-09-19_0548', 'metodo': 'cubic', 'dx': 0, 'dy': -375, 'caja': 'caja_def', 'idx_o1': 95} alertas MATLAB [2177] Octave [2177] VRP MATLAB 0.6147 shim 0.6147 R2 0.6147 O1 0.6147
+== 8. Villarrica 05:48 nearest, fondo de MATLAB vs modelos simples (BK guardada de MATLAB)
+escena 79 Villarrica_2026-09-19_0548 nearest caja_def pixel(fila,col) (np.int64(33), np.int64(32)) npix 1
+ M13 vecindad 5x5 (L):
+[[0.1305 0.124  0.124  0.1547 0.1628]
+ [0.1418 0.1418 0.124  0.1499 0.145 ]
+ [0.1855 0.1709 0.2097 0.1596 0.158 ]
+ [0.1774 0.1661 0.158  0.1677 0.1725]
+ [0.1839 0.1693 0.1612 0.1644 0.1822]]
+ L pixel 0.20973560912534595 | fondo MATLAB 0.17172480560839176 | fondo shim Octave propio 0.14261014759540558
+ prueba de modelos simples: media diag(1,5)/(2,4)? 0.15635873610153794 0.17334228660911322 | media 4 esquinas 0.16485051135532558 | media 4 bordes 0.15716747660189867 | media anillo 16 0.15858277247752994
+ hueco NaN en la BK de MATLAB? nan: 0
+escena 80 Villarrica_2026-09-19_0548 nearest anillo_sensible pixel(fila,col) (np.int64(33), np.int64(32)) npix 1
+ M13 vecindad 5x5 (L):
+[[0.1305 0.124  0.124  0.1547 0.1628]
+ [0.1418 0.1418 0.124  0.1499 0.145 ]
+ [0.1855 0.1709 0.2097 0.1596 0.158 ]
+ [0.1774 0.1661 0.158  0.1677 0.1725]
+ [0.1839 0.1693 0.1612 0.1644 0.1822]]
+ L pixel 0.20973560912534595 | fondo MATLAB 0.17172480560839176 | fondo shim Octave propio 0.14261014759540558
+ prueba de modelos simples: media diag(1,5)/(2,4)? 0.15635873610153794 0.17334228660911322 | media 4 esquinas 0.16485051135532558 | media 4 bordes 0.15716747660189867 | media anillo 16 0.15858277247752994
+ hueco NaN en la BK de MATLAB? nan: 0
+escena 86 Villarrica_2026-09-19_0548 nearest caja_def pixel(fila,col) (np.int64(33), np.int64(32)) npix 1
+ M13 vecindad 5x5 (L):
+[[0.1305 0.124  0.124  0.1547 0.1628]
+ [0.1418 0.1418 0.124  0.1499 0.145 ]
+ [0.1855 0.1709 0.2097 0.1596 0.158 ]
+ [0.1774 0.1661 0.158  0.1677 0.1725]
+ [0.1839 0.1693 0.1612 0.1644 0.1822]]
+ L pixel 0.20973560912534595 | fondo MATLAB 0.17172480560839176 | fondo shim Octave propio 0.14261014759540558
+ prueba de modelos simples: media diag(1,5)/(2,4)? 0.15635873610153794 0.17334228660911322 | media 4 esquinas 0.16485051135532558 | media 4 bordes 0.15716747660189867 | media anillo 16 0.15858277247752994
+ hueco NaN en la BK de MATLAB? nan: 0

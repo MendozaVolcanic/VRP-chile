@@ -1,0 +1,30 @@
+F.                                                                       [100%]
+================================== FAILURES ===================================
+____ test_el_detalle_dice_los_sorteos_y_la_semilla_que_la_calibracion_uso _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000022542205700>
+
+    def test_el_detalle_dice_los_sorteos_y_la_semilla_que_la_calibracion_uso(monkeypatch):
+        """V42-04 (verificador de D-42): n_sorteos y semilla_calibracion tienen que salir de lo que calibrar_p2 usó, no de
+        las constantes; si no, una llamada con otros números seguiría declarando 1.000 y 161 (A116)."""
+        _tiene("calibrar_p2")
+        original = X.calibrar_p2
+    
+        def otra(c, bloques, W, n_rep=None, semilla=None):
+            return original(c, bloques, W, n_rep=20, semilla=7)
+        monkeypatch.setattr(X, "calibrar_p2", otra)
+        v, det = X.decidir_p2_bloques(_contrib(MEZCLA), ok_ctrl=True)
+>       assert (det["n_sorteos"], det["semilla_calibracion"]) == (20, 7), det
+E       AssertionError: {'calibrada': True, 'falsos_bloquea': 0.3, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...}
+E       assert (1000, 161) == (20, 7)
+E         
+E         At index 0 diff: 1000 != 20
+E         Use -v to get more diff
+
+tests\test_evaluar_d25_calib_p2_s160.py:190: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_evaluar_d25_calib_p2_s160.py::test_el_detalle_dice_los_sorteos_y_la_semilla_que_la_calibracion_uso
+1 failed, 1 passed, 37 deselected in 1.42s
+
+evaluador de b57ecfe62 | pruebas 2 | fallan por aserción 1 | por otra excepción 0 | errores 0
+   ROJA por aserción: test_el_detalle_dice_los_sorteos_y_la_semilla_que_la_calibracion_uso

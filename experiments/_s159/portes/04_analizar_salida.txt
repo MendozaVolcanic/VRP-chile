@@ -1,0 +1,160 @@
+== 1. cobertura (A108): objetivos 310 con resultado 310
+   ('MODIS', 'neg_pub', 'ok') 20
+   ('MODIS', 'neg_resto', 'ok') 37
+   ('MODIS', 'neg_resto', 'volcan_fuera_del_granulo') 1
+   ('MODIS', 'pos_bajo', 'ok') 42
+   ('MODIS', 'pos_prot', 'ok') 50
+   ('VIIRS375', 'neg_pub', 'ok') 20
+   ('VIIRS375', 'neg_resto', 'ok') 45
+   ('VIIRS375', 'pos_bajo', 'ok') 45
+   ('VIIRS375', 'pos_prot', 'ok') 39
+   ('VIIRS375', 'pos_prot', 'sin_granulo_VJ202IMG') 1
+   ('VIIRS750', 'control_v750', 'ok') 10
+   SIN DATO: [(57, 'MODIS', 'PuyehueCordonCaulle', '2026-08-31 02:50', 'neg_resto', 'volcan_fuera_del_granulo'), (267, 'VIIRS375', 'NevadosDeChillan', '2026-10-12 05:18', 'pos_prot', 'sin_granulo_VJ202IMG')]
+
+== 2. controles (antes de leer)
+  CTL750 (cadena completa en el runner contra el oráculo de N): iguales 10 de 10
+     (300, 'Isluga', '2026-06-07 05:48', 1, 0.20249864089536884, 1, 0.20249864089536884, 'IGUAL')
+     (301, 'Llaima', '2026-09-24 06:54', 0, None, 0, None, 'IGUAL')
+     (302, 'Lascar', '2026-10-08 05:42', 1, 0.3583328421151792, 1, 0.3583328421151792, 'IGUAL')
+     (303, 'Lascar', '2026-04-28 05:48', 3, 2.3803885497661095, 3, 2.3803885497661113, 'IGUAL')
+     (304, 'Lastarria', '2026-05-06 06:36', 0, None, 0, None, 'IGUAL')
+     (305, 'Tupungatito', '2026-08-09 05:18', 0, None, 0, None, 'IGUAL')
+     (306, 'Villarrica', '2026-09-19 05:48', 1, 0.45196917562120104, 1, 0.45196917562120104, 'IGUAL')
+     (307, 'NevadosDeChillan', '2026-10-01 05:24', 7, 9.15701144019906, 7, 9.15701144019906, 'IGUAL')
+     (308, 'NevadosDeChillan', '2026-10-10 05:54', 5, 13.13071837286175, 5, 13.13071837286175, 'IGUAL')
+     (309, 'NevadosDeChillan', '2026-10-15 06:00', 5, 35.16169730390118, 5, 35.16169730390118, 'IGUAL')
+  K re-corrido = publicado, VIIRS375: publica igual 149 de 149; pc.vrp_mw a 0,001 MW 149 de 149; sin record K: 0
+    publica distinto: []
+    pc distinto: []
+  control positivo del port VIIRS375: protegidas de Láscar o Chillán con píxeles 24 de 24
+  motivos de vacío del port VIIRS375 (caja física): {None: 149}
+  K re-corrido = publicado, MODIS: publica igual 149 de 149; pc.vrp_mw a 0,001 MW 149 de 149; sin record K: 0
+    publica distinto: []
+    pc distinto: []
+  control positivo del port MODIS: protegidas de Láscar o Chillán con píxeles 49 de 49
+  motivos de vacío del port MODIS (caja física): {None: 148, 'escena_invalida': 1}
+
+================ VIIRS375 (149 pasadas ok) ================
+
+--- variante fisica ---
+R1 protegidas que K publica y el port no: 6 de 36 (muestra); ganadas 0 de 3
+    perdidas: [('Isluga', '2026-06-17 05:06', 6, 1.571976390210893, 1.64), ('Tupungatito', '2026-08-01 05:00', 3, 1.2797370476249714, 1.25), ('Isluga', '2026-09-09 06:06', 6, 2.179841191212579, 1.91), ('Tupungatito', '2026-09-14 06:18', 2, 2.27804225808163, 2.22), ('Isluga', '2026-09-28 05:12', 7, 1.4469007621123622, 1.63), ('Isluga', '2026-10-03 05:18', 9, 1.5405158680172224, 1.62)]
+R2 recall todas: port 61 de 84 (Wilson 0.623 a 0.810); ponderado 0.638 [0.483, 0.779]; K 76 de 84 (pond 0.887); vara V750 0.801 -> REPRODUCE
+R2 recall prot: port 30 de 39 (Wilson 0.617 a 0.874); ponderado 0.887 [0.788, 0.952]; K 36 de 39 (pond 0.962); vara V750 0.91 -> REPRODUCE
+R2 recall bajo: port 31 de 45 (Wilson 0.543 a 0.805); ponderado 0.618 [0.458, 0.773]; K 40 de 45 (pond 0.881); vara V750  -> (sin vara)
+R3 negativos limpios publicados: port 7 de 65 crudo; ponderado 0.0090 [0.0022, 0.0192] contra K 0.0385 (134 de 3482) -> REPRODUCE; encendidos 0, apagados 13 (crudo)
+R4 razón port/MIROVA: mediana 1.000 [0.966, 1.019] n 61 (IC de la mediana 0.994 a 1.003); en [0,8; 1,25] 48 de 61 -> REPRODUCE
+    1 px: mediana 1.000 [0.980, 1.043] n 8; a menos de 5 %: 5
+    2 a 4 px: mediana 1.002 [0.988, 1.047] n 32; a menos de 5 %: 18
+    5+ px: mediana 0.999 [0.948, 1.001] n 21; a menos de 5 %: 12
+pasadas ambiguas por la triangulación (la banda cruza 0): 0 []
+MISSION port contra K: ΔE +148.3 [-34.1, +333.3] -> PIERDE PROTEGIDA
+
+  estratos VIIRS375, caja física (crudo: port publica / n; K publica / n):
+   por volcán: {'Chaiten|neg': '0/2/6', 'Chaiten|pos': '4/4/4', 'Copahue|neg': '0/0/4', 'Copahue|pos': '2/2/2', 'Isluga|neg': '1/1/5', 'Isluga|pos': '7/10/11', 'Lascar|neg': '2/2/6', 'Lascar|pos': '17/17/19', 'Lastarria|neg': '2/4/8', 'Lastarria|pos': '2/3/4', 'Llaima|neg': '0/1/6', 'Llaima|pos': '1/1/1', 'NevadosDeChillan|neg': '1/2/6', 'NevadosDeChillan|pos': '15/13/15', 'PlanchonPeteroa|neg': '0/1/5', 'PlanchonPeteroa|pos': '6/6/6', 'PuyehueCordonCaulle|neg': '0/3/7', 'PuyehueCordonCaulle|pos': '1/7/7', 'Tupungatito|neg': '0/2/6', 'Tupungatito|pos': '0/7/9', 'Villarrica|neg': '1/2/6', 'Villarrica|pos': '6/6/6'}
+   por cenit: {'z<=40|neg': '4/10/32', 'z<=40|pos': '35/40/42', 'z>40|neg': '3/10/33', 'z>40|pos': '26/36/42'}
+   por tramo A119: {'antes 06-13|neg': '2/5/17', 'antes 06-13|pos': '26/31/32', 'desde 06-13|neg': '5/15/48', 'desde 06-13|pos': '35/45/52'}
+   partidas (aparte): [('Villarrica', '2026-08-09 04:36', 'neg_pub', '-', 'K'), ('PuyehueCordonCaulle', '2026-07-10 06:24', 'neg_resto', '-', '-'), ('Chaiten', '2026-08-12 06:06', 'neg_pub', '-', 'K'), ('PuyehueCordonCaulle', '2026-10-09 06:18', 'neg_resto', '-', '-')]
+
+--- variante pixel ---
+R1 protegidas que K publica y el port no: 7 de 36 (muestra); ganadas 0 de 3
+R2 recall todas: port 52 de 84 (Wilson 0.512 a 0.716); ponderado 0.523 [0.363, 0.666]; K 76 de 84 (pond 0.887); vara V750 0.801 -> NO REPRODUCE
+R2 recall prot: port 29 de 39 (Wilson 0.589 a 0.854); ponderado 0.874 [0.774, 0.946]; K 36 de 39 (pond 0.962); vara V750 0.91 -> REPRODUCE
+R2 recall bajo: port 23 de 45 (Wilson 0.370 a 0.650); ponderado 0.494 [0.337, 0.662]; K 40 de 45 (pond 0.881); vara V750  -> (sin vara)
+R3 negativos limpios publicados: port 6 de 65 crudo; ponderado 0.0085 [0.0014, 0.0177] contra K 0.0385 (134 de 3482) -> REPRODUCE; encendidos 0, apagados 14 (crudo)
+R4 razón port/MIROVA: mediana 0.993 [0.922, 1.002] n 52 (IC de la mediana 0.976 a 1.000); en [0,8; 1,25] 40 de 52 -> REPRODUCE
+    1 px: mediana 0.992 [0.966, 1.011] n 9; a menos de 5 %: 5
+    2 a 4 px: mediana 0.998 [0.934, 1.004] n 24; a menos de 5 %: 15
+    5+ px: mediana 0.983 [0.919, 1.000] n 19; a menos de 5 %: 10
+pasadas ambiguas por la triangulación (la banda cruza 0): 0 []
+MISSION port contra K: ΔE +263.8 [+66.7, +459.2] -> PIERDE PROTEGIDA
+
+--- variante sensible ---
+R1 protegidas que K publica y el port no: 6 de 36 (muestra); ganadas 0 de 3
+R2 recall todas: port 72 de 84 (Wilson 0.767 a 0.916); ponderado 0.904 [0.795, 0.989]; K 76 de 84 (pond 0.887); vara V750 0.801 -> REPRODUCE
+R2 recall prot: port 30 de 39 (Wilson 0.617 a 0.874); ponderado 0.887 [0.797, 0.949]; K 36 de 39 (pond 0.962); vara V750 0.91 -> REPRODUCE
+R2 recall bajo: port 42 de 45 (Wilson 0.821 a 0.977); ponderado 0.905 [0.789, 1.000]; K 40 de 45 (pond 0.881); vara V750  -> (sin vara)
+R3 negativos limpios publicados: port 11 de 65 crudo; ponderado 0.0480 [0.0082, 0.1220] contra K 0.0385 (134 de 3482) -> REPRODUCE; encendidos 1, apagados 10 (crudo)
+R4 razón port/MIROVA: mediana 1.000 [0.964, 1.037] n 72 (IC de la mediana 0.995 a 1.003); en [0,8; 1,25] 57 de 72 -> REPRODUCE
+    1 px: mediana 0.984 [0.944, 1.007] n 9; a menos de 5 %: 4
+    2 a 4 px: mediana 1.003 [0.993, 1.050] n 39; a menos de 5 %: 22
+    5+ px: mediana 1.000 [0.925, 1.003] n 24; a menos de 5 %: 13
+pasadas ambiguas por la triangulación (la banda cruza 0): 0 []
+MISSION port contra K: ΔE +9.8 [-189.0, +305.5] -> PIERDE PROTEGIDA
+
+================ MODIS (149 pasadas ok) ================
+
+--- variante fisica ---
+R1 protegidas que K publica y el port no: 0 de 48 (muestra); ganadas 2 de 2
+R2 recall todas: port 89 de 92 (Wilson 0.908 a 0.989); ponderado 0.967 [0.924, 1.000]; K 80 de 92 (pond 0.870); vara V750 0.801 -> REPRODUCE
+R2 recall prot: port 50 de 50 (Wilson 0.929 a 1.000); ponderado 1.000 [1.000, 1.000]; K 48 de 50 (pond 0.960); vara V750 0.91 -> REPRODUCE
+R2 recall bajo: port 39 de 42 (Wilson 0.810 a 0.975); ponderado 0.929 [0.857, 1.000]; K 32 de 42 (pond 0.762); vara V750  -> (sin vara)
+R3 negativos limpios publicados: port 2 de 57 crudo; ponderado 0.0004 [0.0000, 0.0010] contra K 0.0076 (39 de 5132) -> REPRODUCE; encendidos 0, apagados 18 (crudo)
+R4 razón port/MIROVA: mediana 1.006 [0.889, 1.143] n 89 (IC de la mediana 0.959 a 1.057); en [0,8; 1,25] 66 de 89 -> PARCIAL
+    1 px: mediana 1.030 [0.906, 1.115] n 32; a menos de 5 %: 9
+    2 a 4 px: mediana 0.978 [0.885, 1.150] n 51; a menos de 5 %: 9
+    5+ px: mediana 1.064 [0.943, 1.178] n 6; a menos de 5 %: 1
+pasadas ambiguas por la triangulación (la banda cruza 0): 0 []
+MISSION port contra K: ΔE -44.0 [-58.8, -29.5] -> GANA
+
+  estratos MODIS, caja física (crudo: port publica / n; K publica / n):
+   por volcán: {'Chaiten|neg': '0/1/5', 'Copahue|neg': '0/0/4', 'Isluga|neg': '0/1/4', 'Lascar|neg': '2/5/7', 'Lascar|pos': '78/72/80', 'Lastarria|neg': '0/0/3', 'Llaima|neg': '0/0/4', 'NevadosDeChillan|neg': '0/1/5', 'NevadosDeChillan|pos': '10/7/10', 'PlanchonPeteroa|neg': '0/0/4', 'PuyehueCordonCaulle|neg': '0/12/14', 'Tupungatito|neg': '0/0/3', 'Villarrica|neg': '0/0/4', 'Villarrica|pos': '1/1/2'}
+   por cenit: {'z<=40|neg': '2/12/29', 'z<=40|pos': '76/72/79', 'z>40|neg': '0/8/28', 'z>40|pos': '13/8/13'}
+   partidas (aparte): [('Villarrica', '2026-03-11 01:30', 'neg_resto', '-', '-'), ('Tupungatito', '2026-08-05 08:30', 'neg_resto', '-', '-'), ('Villarrica', '2026-09-25 08:05', 'pos_bajo', '-', '-')]
+
+--- variante pixel ---
+R1 protegidas que K publica y el port no: 0 de 48 (muestra); ganadas 2 de 2
+R2 recall todas: port 89 de 92 (Wilson 0.908 a 0.989); ponderado 0.967 [0.935, 1.000]; K 80 de 92 (pond 0.870); vara V750 0.801 -> REPRODUCE
+R2 recall prot: port 50 de 50 (Wilson 0.929 a 1.000); ponderado 1.000 [1.000, 1.000]; K 48 de 50 (pond 0.960); vara V750 0.91 -> REPRODUCE
+R2 recall bajo: port 39 de 42 (Wilson 0.810 a 0.975); ponderado 0.929 [0.833, 1.000]; K 32 de 42 (pond 0.762); vara V750  -> (sin vara)
+R3 negativos limpios publicados: port 2 de 57 crudo; ponderado 0.0004 [0.0000, 0.0010] contra K 0.0076 (39 de 5132) -> REPRODUCE; encendidos 0, apagados 18 (crudo)
+R4 razón port/MIROVA: mediana 1.006 [0.889, 1.144] n 89 (IC de la mediana 0.959 a 1.055); en [0,8; 1,25] 66 de 89 -> PARCIAL
+    1 px: mediana 1.030 [0.906, 1.115] n 32; a menos de 5 %: 9
+    2 a 4 px: mediana 0.978 [0.885, 1.150] n 51; a menos de 5 %: 9
+    5+ px: mediana 1.090 [0.943, 1.191] n 6; a menos de 5 %: 1
+pasadas ambiguas por la triangulación (la banda cruza 0): 0 []
+MISSION port contra K: ΔE -44.0 [-59.7, -29.2] -> GANA
+
+--- variante sensible ---
+R1 protegidas que K publica y el port no: 0 de 48 (muestra); ganadas 2 de 2
+R2 recall todas: port 89 de 92 (Wilson 0.908 a 0.989); ponderado 0.967 [0.935, 1.000]; K 80 de 92 (pond 0.870); vara V750 0.801 -> REPRODUCE
+R2 recall prot: port 50 de 50 (Wilson 0.929 a 1.000); ponderado 1.000 [1.000, 1.000]; K 48 de 50 (pond 0.960); vara V750 0.91 -> REPRODUCE
+R2 recall bajo: port 39 de 42 (Wilson 0.810 a 0.975); ponderado 0.929 [0.857, 1.000]; K 32 de 42 (pond 0.762); vara V750  -> (sin vara)
+R3 negativos limpios publicados: port 2 de 57 crudo; ponderado 0.0004 [0.0000, 0.0010] contra K 0.0076 (39 de 5132) -> REPRODUCE; encendidos 0, apagados 18 (crudo)
+R4 razón port/MIROVA: mediana 1.006 [0.889, 1.144] n 89 (IC de la mediana 0.959 a 1.057); en [0,8; 1,25] 66 de 89 -> PARCIAL
+    1 px: mediana 1.030 [0.906, 1.115] n 32; a menos de 5 %: 9
+    2 a 4 px: mediana 0.978 [0.885, 1.150] n 51; a menos de 5 %: 9
+    5+ px: mediana 1.090 [0.943, 1.191] n 6; a menos de 5 %: 1
+pasadas ambiguas por la triangulación (la banda cruza 0): 0 []
+MISSION port contra K: ΔE -44.0 [-58.7, -29.7] -> GANA
+
+--- variante fisica_b21 ---
+R1 protegidas que K publica y el port no: 28 de 48 (muestra); ganadas 0 de 2
+R2 recall todas: port 20 de 92 (Wilson 0.145 a 0.312); ponderado 0.217 [0.152, 0.293]; K 80 de 92 (pond 0.870); vara V750 0.801 -> NO REPRODUCE
+R2 recall prot: port 20 de 50 (Wilson 0.276 a 0.538); ponderado 0.400 [0.260, 0.520]; K 48 de 50 (pond 0.960); vara V750 0.91 -> NO REPRODUCE
+R2 recall bajo: port 0 de 42 (Wilson 0.000 a 0.084); ponderado 0.000 [0.000, 0.000]; K 32 de 42 (pond 0.762); vara V750  -> (sin vara)
+R3 negativos limpios publicados: port 0 de 57 crudo; ponderado 0.0000 [0.0000, 0.0000] contra K 0.0076 (39 de 5132) -> REPRODUCE; encendidos 0, apagados 20 (crudo)
+R4 razón port/MIROVA: mediana 0.794 [0.704, 0.993] n 20 (IC de la mediana 0.708 a 0.975); en [0,8; 1,25] 10 de 20 -> NO REPRODUCE
+    1 px: mediana 0.722 [0.696, 0.982] n 13; a menos de 5 %: 3
+    2 a 4 px: mediana 0.844 [0.770, 0.984] n 6; a menos de 5 %: 1
+    5+ px: mediana 0.843 [0.843, 0.843] n 1; a menos de 5 %: 0
+pasadas ambiguas por la triangulación (la banda cruza 0): 0 []
+MISSION port contra K: ΔE -7.0 [-21.8, +6.7] -> PIERDE PROTEGIDA
+
+--- variante fisica_geo5km ---
+R1 protegidas que K publica y el port no: 3 de 48 (muestra); ganadas 1 de 2
+R2 recall todas: port 76 de 92 (Wilson 0.736 a 0.890); ponderado 0.826 [0.750, 0.902]; K 80 de 92 (pond 0.870); vara V750 0.801 -> REPRODUCE
+R2 recall prot: port 46 de 50 (Wilson 0.812 a 0.968); ponderado 0.920 [0.840, 0.980]; K 48 de 50 (pond 0.960); vara V750 0.91 -> REPRODUCE
+R2 recall bajo: port 30 de 42 (Wilson 0.564 a 0.828); ponderado 0.714 [0.595, 0.857]; K 32 de 42 (pond 0.762); vara V750  -> (sin vara)
+R3 negativos limpios publicados: port 3 de 57 crudo; ponderado 0.0006 [0.0000, 0.0013] contra K 0.0076 (39 de 5132) -> REPRODUCE; encendidos 0, apagados 17 (crudo)
+R4 razón port/MIROVA: mediana 0.903 [0.682, 1.180] n 76 (IC de la mediana 0.843 a 0.952); en [0,8; 1,25] 35 de 76 -> PARCIAL
+    1 px: mediana 0.779 [0.497, 0.948] n 28; a menos de 5 %: 1
+    2 a 4 px: mediana 0.957 [0.825, 1.259] n 44; a menos de 5 %: 6
+    5+ px: mediana 0.858 [0.742, 0.970] n 4; a menos de 5 %: 0
+pasadas ambiguas por la triangulación (la banda cruza 0): 0 []
+MISSION port contra K: ΔE -34.0 [-49.9, -19.3] -> PIERDE PROTEGIDA
+
+K (re-corrido, mirovaEqVrpDisplay) / MIROVA en VIIRS375, alertas que K publica: mediana 0.651 [0.436, 0.848] n 76; en [0,8; 1,25]: 14
+
+K (re-corrido, mirovaEqVrpDisplay) / MIROVA en MODIS, alertas que K publica: mediana 0.516 [0.311, 0.729] n 80; en [0,8; 1,25]: 15

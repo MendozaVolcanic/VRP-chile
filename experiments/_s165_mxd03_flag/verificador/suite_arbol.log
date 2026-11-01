@@ -1,0 +1,122 @@
+inicio 17:38:02 HEAD 4164d4547bc0ae0ac17a1c159bab3423fa405911
+        mut_h = mut_dir / "hipotesis.json"
+        mut_h.write_text(json.dumps(copia_h, ensure_ascii=False), encoding="utf-8")
+    
+        mod2 = _cargar_generador()  # instancia propia, para no pisar los paths del fixture
+        mod2.F_HIPOTESIS = str(mut_h)
+>       libro_mutado = mod2.construir()
+                       ^^^^^^^^^^^^^^^^
+
+tests\test_guard_libro_de_pruebas_s146.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\libro_de_pruebas.py:322: in construir
+    "hipotesis": os.path.relpath(F_HIPOTESIS, ROOT).replace(os.sep, "/"),
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:\\Users\\nmend\\AppData\\Local\\Temp\\pytest-of-nmend\\pytest-2731\\test_g1d_mutacion_prueba_que_g0\\insumos_mutados\\hipotesis.json'
+start = 'D:\\vrp-trabajo\\temporales\\s165_mxd03_verificador\\arbol'
+
+>   ???
+E   ValueError: path is on mount 'C:', start on mount 'D:'
+
+<frozen ntpath>:796: ValueError
+_______________ test_g2c_mutacion_prueba_que_g2_de_verdad_falla _______________
+
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-2731/test_g2c_mutacion_prueba_que_g0')
+
+    def test_g2c_mutacion_prueba_que_g2_de_verdad_falla(tmp_path):
+        """Mutación: un documento NUEVO con una cita a una ruta que con toda certeza no existe (nombre
+        con un sufijo aleatorio) y que por lo tanto no puede estar en la lista blanca. Confirma que el
+        mecanismo de G2 la detecta como rota y NO la deja pasar.
+    
+        (1) Si G2 no comparara contra el disco de verdad (por ejemplo si sólo revisara la sintaxis de
+        la ruta) esta mutación no la vería como rota; acá sí, porque `_citas_y_rotas` llama
+        `os.path.exists` sobre el ROOT real. (2) Si el filtro de exclusión (planes/especificaciones)
+        fuera demasiado amplio y se comiera este documento por error, la mutación no aparecería en
+        `rotas` y el assert de abajo fallaría: es la prueba de que el documento mutado SÍ pasa por el
+        filtro.
+        """
+        doc_mutado = tmp_path / "DOC_MUTADO_S146.md"
+        ruta_fantasma = "experiments/_no_existe_de_verdad_s146_9f3c1a/archivo_fantasma.py"
+        doc_mutado.write_text(
+            "# Doc de prueba\n\nEsto cita `%s` a propósito.\n" % ruta_fantasma, encoding="utf-8")
+    
+        assert not os.path.exists(os.path.join(ROOT, ruta_fantasma)), (
+            "la ruta fantasma existe de verdad, elegir otro nombre para la mutación")
+    
+>       total, rotas = _citas_y_rotas(ROOT, [str(doc_mutado)])
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_guard_libro_de_pruebas_s146.py:297: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_guard_libro_de_pruebas_s146.py:182: in _citas_y_rotas
+    rel_doc = os.path.relpath(doc, root).replace(os.sep, "/")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:\\Users\\nmend\\AppData\\Local\\Temp\\pytest-of-nmend\\pytest-2731\\test_g2c_mutacion_prueba_que_g0\\DOC_MUTADO_S146.md'
+start = 'D:\\vrp-trabajo\\temporales\\s165_mxd03_verificador\\arbol'
+
+>   ???
+E   ValueError: path is on mount 'C:', start on mount 'D:'
+
+<frozen ntpath>:796: ValueError
+============================== warnings summary ===============================
+tests/test_busqueda_ventana_s157.py: 22 warnings
+  C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\site-packages\earthaccess\results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+    self["size"] = self.size()
+
+tests/test_busqueda_ventana_s157.py: 18 warnings
+tests/test_cobertura_incidencias_s159.py: 1 warning
+tests/test_reproc_brazos_s157.py: 4 warnings
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\pipeline\fetch.py:574: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    ahora = ahora or datetime.utcnow()
+
+tests/test_busqueda_ventana_s157.py: 4 warnings
+tests/test_cobertura_incidencias_s159.py: 11 warnings
+tests/test_fetch_credential_dead_s123.py: 1 warning
+tests/test_fetch_noaa21.py: 3 warnings
+tests/test_rama_diurna_viirs_s151.py: 2 warnings
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\pipeline\fetch.py:810: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    ahora = ahora or datetime.utcnow()
+
+tests/test_cobertura_incidencias_s159.py::test_dia_en_curso_es_parcial[False-0]
+tests/test_cobertura_incidencias_s159.py::test_dia_en_curso_es_parcial[True-3]
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\tests\test_cobertura_incidencias_s159.py:100: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().strftime("%Y-%m-%d")
+
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b22_usa_su_radiancia_medida
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b21_saturado_usa_la_radiancia_de_b21
+tests/test_lambda_por_banda_modis_s157.py::test_sin_flag_queda_el_defecto_de_hoy
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\pipeline\detection_context.py:765: RankWarning: Polyfit may be poorly conditioned
+    coeffs = np.polyfit(x, y, 2)  # [a, b, c]
+
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b22_usa_su_radiancia_medida
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b21_saturado_usa_la_radiancia_de_b21
+tests/test_lambda_por_banda_modis_s157.py::test_sin_flag_queda_el_defecto_de_hoy
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\pipeline\detection_context.py:786: RankWarning: Polyfit may be poorly conditioned
+    coeffs = np.polyfit(x[inlier_idx], y[inlier_idx], 2)
+
+tests/test_oraculo_mirova_v750_s158.py: 10 warnings
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\experiments\_s158_oraculo_mirova\mirova_v750.py:61: DeprecationWarning: NumPy warning suppression and assertion utilities are deprecated. Use warnings.catch_warnings, warnings.filterwarnings, pytest.warns, or pytest.filterwarnings instead. (Deprecated NumPy 2.4)
+    with np.errstate(invalid="ignore"), np.testing.suppress_warnings() as sup:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_guard_libro_de_pruebas_s146.py::test_g1d_mutacion_prueba_que_g1_de_verdad_falla
+FAILED tests/test_guard_libro_de_pruebas_s146.py::test_g2c_mutacion_prueba_que_g2_de_verdad_falla
+SKIPPED [1] tests\test_descomponer_magnitud_s139.py:24: OSF no descargado
+SKIPPED [1] tests\test_g3_diurno_comparar_s151.py:244: salidas de g3_solo.py sobre W2 sólo en la máquina de Nicolás
+SKIPPED [1] tests\test_guard_keep_peak_s134.py:91: muy pocos records test1_roi para medir (n=0)
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: backfill-tier-a.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: nrt.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: reproc-chunked.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_probe_etapas_s135.py:252: yml archivado (regla S80 de plantillas)
+SKIPPED [1] tests\test_probe_vecinos_s141.py:30: OSF no disponible en este entorno
+SKIPPED [7] tests\test_r2_pixel_level.py:256: mirova-tif-archive no disponible en D:\vrp-trabajo\temporales\s165_mxd03_verificador\mirova-tif-archive
+SKIPPED [1] tests\test_r2_pixel_level.py:333: TIF archive index no existe: D:\vrp-trabajo\temporales\s165_mxd03_verificador\mirova-tif-archive\index.csv
+SKIPPED [6] tests\test_unir_intentos_hotspot_escena_s151.py:386: salidas del A/B no estan en disco
+SKIPPED [7] tests\test_unir_intentos_tolerancia_s151.py:410: salidas de V2a (run 38648773684) no estan en disco
+2 failed, 2676 passed, 29 skipped, 2 xfailed, 84 warnings in 365.75s (0:06:05)
+fin rc=1 17:44:10

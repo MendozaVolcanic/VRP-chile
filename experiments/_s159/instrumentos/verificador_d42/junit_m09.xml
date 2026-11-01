@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="53" time="58.680" timestamp="2026-10-22T10:05:48.907737-03:00" hostname="Nico"><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_los_numeros_de_la_calibracion_son_los_sellados" time="0.001" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados" time="1.070" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_sorteo_es_por_bloque_y_no_por_pasada" time="0.554" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.05-0.05-True]" time="0.008" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.051-0.0-False]" time="0.008"><failure message="AssertionError: {'calibrada': True, 'falsos_bloquea': 0.0, 'falsos_gana': 0.051, 'falsos_pierde': 0.0, ...}&#10;assert True is False">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002114B62A090&gt;
+f_gana = 0.051, f_pierde = 0.0, calibrada = False
+
+    @pytest.mark.parametrize("f_gana,f_pierde,calibrada", [
+        (0.05, 0.05, True),      # en el tope: 50 de 1.000 por cola es calibrada
+        (0.051, 0.0, False),     # una sola cola pasada basta
+        (0.0, 0.051, False),     # la otra cola sola también basta
+        (0.06, 0.0, False),      # tope del 5 %, no del 10 %
+        (0.0, 0.08, False),
+    ])
+    def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, calibrada):
+        _calibracion_forzada(monkeypatch, f_gana, f_pierde)
+        v, det = X.decidir_p2_bloques(_contrib([[-1]] * 12), ok_ctrl=True)
+        assert det.get("resultado_sin_calibrar") == "GANA", det
+&gt;       assert det["calibrada"] is calibrada, det
+E       AssertionError: {'calibrada': True, 'falsos_bloquea': 0.0, 'falsos_gana': 0.051, 'falsos_pierde': 0.0, ...}
+E       assert True is False
+
+tests\test_evaluar_d25_calib_p2_s160.py:139: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.051-False]" time="0.006"><failure message="AssertionError: {'calibrada': True, 'falsos_bloquea': 0.0, 'falsos_gana': 0.0, 'falsos_pierde': 0.051, ...}&#10;assert True is False">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002114A553980&gt;
+f_gana = 0.0, f_pierde = 0.051, calibrada = False
+
+    @pytest.mark.parametrize("f_gana,f_pierde,calibrada", [
+        (0.05, 0.05, True),      # en el tope: 50 de 1.000 por cola es calibrada
+        (0.051, 0.0, False),     # una sola cola pasada basta
+        (0.0, 0.051, False),     # la otra cola sola también basta
+        (0.06, 0.0, False),      # tope del 5 %, no del 10 %
+        (0.0, 0.08, False),
+    ])
+    def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, calibrada):
+        _calibracion_forzada(monkeypatch, f_gana, f_pierde)
+        v, det = X.decidir_p2_bloques(_contrib([[-1]] * 12), ok_ctrl=True)
+        assert det.get("resultado_sin_calibrar") == "GANA", det
+&gt;       assert det["calibrada"] is calibrada, det
+E       AssertionError: {'calibrada': True, 'falsos_bloquea': 0.0, 'falsos_gana': 0.0, 'falsos_pierde': 0.051, ...}
+E       assert True is False
+
+tests\test_evaluar_d25_calib_p2_s160.py:139: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.06-0.0-False]" time="0.010"><failure message="AssertionError: {'calibrada': True, 'falsos_bloquea': 0.0, 'falsos_gana': 0.06, 'falsos_pierde': 0.0, ...}&#10;assert True is False">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002114B629790&gt;
+f_gana = 0.06, f_pierde = 0.0, calibrada = False
+
+    @pytest.mark.parametrize("f_gana,f_pierde,calibrada", [
+        (0.05, 0.05, True),      # en el tope: 50 de 1.000 por cola es calibrada
+        (0.051, 0.0, False),     # una sola cola pasada basta
+        (0.0, 0.051, False),     # la otra cola sola también basta
+        (0.06, 0.0, False),      # tope del 5 %, no del 10 %
+        (0.0, 0.08, False),
+    ])
+    def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, calibrada):
+        _calibracion_forzada(monkeypatch, f_gana, f_pierde)
+        v, det = X.decidir_p2_bloques(_contrib([[-1]] * 12), ok_ctrl=True)
+        assert det.get("resultado_sin_calibrar") == "GANA", det
+&gt;       assert det["calibrada"] is calibrada, det
+E       AssertionError: {'calibrada': True, 'falsos_bloquea': 0.0, 'falsos_gana': 0.06, 'falsos_pierde': 0.0, ...}
+E       assert True is False
+
+tests\test_evaluar_d25_calib_p2_s160.py:139: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.08-False]" time="0.006"><failure message="AssertionError: {'calibrada': True, 'falsos_bloquea': 0.0, 'falsos_gana': 0.0, 'falsos_pierde': 0.08, ...}&#10;assert True is False">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002114B62ADB0&gt;
+f_gana = 0.0, f_pierde = 0.08, calibrada = False
+
+    @pytest.mark.parametrize("f_gana,f_pierde,calibrada", [
+        (0.05, 0.05, True),      # en el tope: 50 de 1.000 por cola es calibrada
+        (0.051, 0.0, False),     # una sola cola pasada basta
+        (0.0, 0.051, False),     # la otra cola sola también basta
+        (0.06, 0.0, False),      # tope del 5 %, no del 10 %
+        (0.0, 0.08, False),
+    ])
+    def test_el_tope_es_5_por_ciento_en_cada_cola(monkeypatch, f_gana, f_pierde, calibrada):
+        _calibracion_forzada(monkeypatch, f_gana, f_pierde)
+        v, det = X.decidir_p2_bloques(_contrib([[-1]] * 12), ok_ctrl=True)
+        assert det.get("resultado_sin_calibrar") == "GANA", det
+&gt;       assert det["calibrada"] is calibrada, det
+E       AssertionError: {'calibrada': True, 'falsos_bloquea': 0.0, 'falsos_gana': 0.0, 'falsos_pierde': 0.08, ...}
+E       assert True is False
+
+tests\test_evaluar_d25_calib_p2_s160.py:139: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche0-GANA]" time="0.006" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche1-PIERDE]" time="0.009" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche2-BLOQUEA]" time="0.008" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche3-EMPATE]" time="0.008" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_bloquea_no_se_calibra_y_su_fraccion_se_informa" time="0.005" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_sin_sustrato_y_controles_caidos_no_se_calibran_pero_informan" time="0.001" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_con_muchas_noches_la_calibracion_pasa_y_decide" time="0.914" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_global_ventana_con_p2_indecidible" time="0.001" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_lectura_pendiente_p2_indecidible_en_un_sensor_y_pierde_calibrado_en_el_otro" time="0.000" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_intervalo_de_p2_usa_la_semilla_y_los_remuestreos_sellados" time="0.511" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_intervalo_de_p2_es_el_95_por_ciento_exacto" time="0.482" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_los_bordes_del_intervalo_son_estrictos[PIERDE]" time="0.003" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_los_bordes_del_intervalo_son_estrictos[GANA]" time="0.003" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.05-MEJORA]" time="8.090" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.051-INDECIDIBLE]" time="7.991" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.06-INDECIDIBLE]" time="8.168" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.09-INDECIDIBLE]" time="8.327" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_dprima_mal_calibrada_no_toca_un_estrato_donde_d_no_da_mejora" time="7.964" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_estrato_203_se_cuenta" time="0.457" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_estrato_203_no_decide" time="0.880" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_estrato_203_es_solo_viirs_750_y_solo_cumbre" time="0.473" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_d_que_gana_en_muchas_noches_da_gana" time="0.476" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_d_que_gana_todo_en_una_sola_noche_da_empate" time="0.433" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_neto_en_contra_chico_bloquea_sin_dar_pierde" time="0.451" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_neto_en_contra_grande_y_repartido_da_pierde" time="0.468" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_sin_sustrato_con_menos_de_5_pasadas_o_3_noches[por_noche0]" time="0.001" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_sin_sustrato_con_menos_de_5_pasadas_o_3_noches[por_noche1]" time="0.001" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_controles_caidos_dejan_indecidible" time="0.001" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_contar_usa_el_signo_de_errores_y_trae_la_lista" time="0.434" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_contar_informa_las_reglas_a_y_b_sin_decidir" time="0.442" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_p2_que_bloquea_no_deja_cumplir" time="0.023" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_p2_sin_sustrato_no_bloquea" time="0.001" /><testcase classname="tests.test_evaluar_d25_dias_d29_s160" name="test_los_dias_de_d29_estan_declarados_para_v1_y_ninguno_para_v2" time="0.001" /><testcase classname="tests.test_evaluar_d25_dias_d29_s160" name="test_filtrar_dias_saca_las_pasadas_de_esos_dias_y_deja_las_demas" time="0.001" /><testcase classname="tests.test_evaluar_d25_dias_d29_s160" name="test_sin_dias_no_saca_nada" time="0.000" /><testcase classname="tests.test_evaluar_d25_dias_d29_s160" name="test_evaluar_aplica_el_filtro_a_tablas_crudos_y_cobertura" time="0.002" /><testcase classname="tests.test_evaluar_d25_dias_d29_s160" name="test_el_veredicto_combinado_lo_dice_en_su_primera_linea" time="0.009" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_poder_las_perturbaciones_existen" time="4.182" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_cabecera_de_d29_es_la_primera_linea" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_exclusion_llega_a_los_crudos" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_exclusion_llega_a_la_referencia_de_cobertura" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_exclusion_llega_a_la_tabla_y_la_fecha_es_utc" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_los_controles_pasan_y_el_veredicto_vale" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_el_json_trae_la_calibracion_de_p2_y_el_estrato_203" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_marca_de_la_calibracion_sellada_llega_al_estado" time="4.133" /></testsuite></testsuites>

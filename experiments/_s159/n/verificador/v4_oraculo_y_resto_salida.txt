@@ -1,0 +1,48 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+A2. alertas que deciden: 181 | detectadas por variante: {'geo_linear': 145, 'geo_nearest': 133, 'geo_cubic': 136, 'r2_linear': 113, 'r2_nearest': 129, 'geo_linear_anillo_sensible': 175} | interseccion de las 5 variantes (sin anillo): 107
+   geo_linear                   propia: 0.999 [0.978, 1.007] n=145, en 0,8-1,25: 127
+                                interseccion: 1.000 [0.985, 1.008] n=107, en 0,8-1,25: 94
+   geo_nearest                  propia: 1.226 [0.951, 1.454] n=133, en 0,8-1,25: 56
+                                interseccion: 1.227 [0.911, 1.454] n=107, en 0,8-1,25: 41
+   geo_cubic                    propia: 1.206 [1.115, 1.286] n=136, en 0,8-1,25: 85
+                                interseccion: 1.210 [1.119, 1.303] n=107, en 0,8-1,25: 67
+   r2_linear                    propia: 1.000 [0.868, 1.108] n=113, en 0,8-1,25: 83
+                                interseccion: 1.000 [0.868, 1.108] n=107, en 0,8-1,25: 80
+   r2_nearest                   propia: 1.238 [0.937, 1.512] n=129, en 0,8-1,25: 48
+                                interseccion: 1.219 [0.892, 1.451] n=107, en 0,8-1,25: 39
+   geo_linear_anillo_sensible   propia: 0.999 [0.973, 1.009] n=175, en 0,8-1,25: 144
+                                interseccion: 1.001 [0.988, 1.011] n=107, en 0,8-1,25: 93
+   fuente de mirova_vrp en las 145 de geo_linear: {'CONS': 141, 'OCR': 4}
+   no detectadas por geo_linear: 36 Counter({'PuyehueCordonCaulle': 28, 'Tupungatito': 8}) | motivo: Counter({None: 36})
+
+A3. oraculo como brazo (ponderado como los brazos; E = bajo 1 MW perdidas + negativos publicados)
+   geo_linear: {'neg_K': 54.0, 'neg_X': 4.0, 'neg_X_crudo': 4, 'neg_X_en_negpub': 4, 'prot_perd': 6, 'prot_n': 78, 'mb_fn_K': 65.0, 'mb_fn_X': 42.4, 'mb_gan': 44.0, 'mb_perd': 21.4, 'dE': -72.6}
+     pierde protegida id 69 PuyehueCordonCaulle 2026-06-07 05:54 MIROVA 1.2 dist MIROVA [7.83, 10.48] | O 0px pico a None km (inner 20.0) motivo None
+     pierde protegida id 141 PuyehueCordonCaulle 2026-09-18 05:24 MIROVA 1.43 dist MIROVA [8.55] | O 0px pico a None km (inner 20.0) motivo None
+     pierde protegida id 220 PuyehueCordonCaulle 2026-05-25 05:42 MIROVA 1.01 dist MIROVA [7.83] | O 0px pico a None km (inner 20.0) motivo None
+     pierde protegida id 231 PuyehueCordonCaulle 2026-06-05 05:36 MIROVA 1.09 dist MIROVA [7.83, 10.48] | O 0px pico a None km (inner 20.0) motivo None
+     pierde protegida id 257 PuyehueCordonCaulle 2026-07-06 05:54 MIROVA 1.02 dist MIROVA [7.83, 7.84] | O 0px pico a None km (inner 20.0) motivo None
+     pierde protegida id 364 PuyehueCordonCaulle 2026-07-03 05:48 MIROVA 1.0 dist MIROVA [4.59] | O 0px pico a None km (inner 20.0) motivo None
+   geo_linear_anillo_sensible: {'neg_K': 54.0, 'neg_X': 8.0, 'neg_X_crudo': 8, 'neg_X_en_negpub': 8, 'prot_perd': 0, 'prot_n': 78, 'mb_fn_K': 65.0, 'mb_fn_X': 6.0, 'mb_gan': 59.0, 'mb_perd': 0.0, 'dE': -105.0}
+
+A4. C contra K
+   publica distinto: 0 de 391
+   K en 0,0 MW: 55 | C en 0,0 MW: 55 | mismos ids: True
+   cumulo cambia id 58 Lascar 2026-05-28 05:36 pos_nopub: K 1px 0.0 -> C 2px 0.0 | pub K False C False
+   cumulo cambia id 117 Lascar 2026-08-05 05:42 neg_pub: K 1px 0.189 -> C 2px 0.189 | pub K True C True
+   cumulo cambia id 137 PuyehueCordonCaulle 2026-09-07 05:30 pos_nopub: K 1px 0.0 -> C 2px 0.0 | pub K False C False
+   cumulo cambia id 257 PuyehueCordonCaulle 2026-07-06 05:54 pos_prot: K 1px 0.113 -> C 2px 0.113 | pub K True C True
+   cumulo cambia id 345 Villarrica 2026-04-11 06:42 neg_pub: K 1px 0.208 -> C 2px 0.226 | pub K True C True
+   cumulo cambia id 381 Lascar 2026-09-21 05:42 pos_nopub: K 1px 0.0 -> C 2px 0.0 | pub K False C False
+   cumulo cambia id 386 NevadosDeChillan 2026-09-29 06:36 pos_prot: K 1px 0.329 -> C 2px 0.329 | pub K True C True
+   cumulo cambia id 392 NevadosDeChillan 2026-10-10 04:54 pos_prot: K 1px 0.243 -> C 2px 0.243 | pub K True C True
+
+A5.
+   id 319 clase pos_prot protegida True MIROVA [{'fecha_utc': '2026-10-01 05:24:02', 'tipo': 'ALERTA_TERMICA_OCR', 'vrp_mw': 9.0, 'dist_km': 1.76, 'source': 'OCR'}] | O geo_linear 7px 9.15701144019906
+     K: pc 2px 2.655 d9 None | F_pc_central None banda None | pub True
+     C: pc 2px 2.655 d9 None | F_pc_central None banda None | pub True
+     F: pc 2px 5.0 d9 True | F_pc_central 6.213729624319477 banda [6.213729554645004, 6.213729698881084] | pub True
+     FC: pc 2px 5.0 d9 True | F_pc_central 6.213729624319477 banda [6.213729554645004, 6.213729698881084] | pub True
+   K: cumulos con d9_capped: 0 []
+   F: cumulos con d9_capped: 1 [(319, 'NevadosDeChillan', '2026-10-01 05:24', 'pos_prot')]
+   FC: cumulos con d9_capped: 1 [(319, 'NevadosDeChillan', '2026-10-01 05:24', 'pos_prot')]

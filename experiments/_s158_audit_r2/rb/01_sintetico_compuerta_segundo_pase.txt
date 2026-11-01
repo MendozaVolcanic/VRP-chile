@@ -1,0 +1,20 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+Flags efectivos: {'SECOND_PASS': True, 'CONDITIONED': False, 'PROSE': True, 'BT_SANITY_K': 3.0, 'NO_BT_GATE_V375': False}
+
+CASO A (bloqueado por la compuerta): bump MIR +2.0 K en (50, 50) | bt_pix=272.15 t_bg=270.01 compuerta(bt>t_bg+3)=False | dNTI_pix=0.0072 umbral summit max(C1, mu+5sd)=0.0031
+   primer pase: n=0 (pixel objetivo NO) | segundo pase (produccion, conditioned=False): n=1 (pixel objetivo SI, nuevos=1) | segundo pase conditioned=True: n=0 (pixel objetivo NO)
+
+CASO A' (misma escena, compuerta apagada en el primer pase, apply_bt_gate=False): bump MIR +2.0 K en (50, 50) | bt_pix=272.44 t_bg=270.00 compuerta(bt>t_bg+3)=False | dNTI_pix=0.0077 umbral summit max(C1, mu+5sd)=0.0031
+   primer pase: n=1 (pixel objetivo SI) | segundo pase (produccion, conditioned=False): n=1 (pixel objetivo SI, nuevos=0) | segundo pase conditioned=True: n=1 (pixel objetivo SI)
+
+CASO B (CONTROL POSITIVO, pasa la compuerta): bump MIR +6.0 K en (50, 50) | bt_pix=276.16 t_bg=270.01 compuerta(bt>t_bg+3)=True | dNTI_pix=0.0222 umbral summit max(C1, mu+5sd)=0.0035
+   primer pase: n=1 (pixel objetivo SI) | segundo pase (produccion, conditioned=False): n=1 (pixel objetivo SI, nuevos=0) | segundo pase conditioned=True: n=1 (pixel objetivo SI)
+
+CASO C (bump 2 K FUERA del inner, a 15 km: umbral scene max(0.01, mu+10sd)): bump MIR +2.0 K en (50, 70) | bt_pix=272.22 t_bg=270.00 compuerta(bt>t_bg+3)=False | dNTI_pix=0.0072 umbral summit max(C1, mu+5sd)=0.0031
+   primer pase: n=0 (pixel objetivo NO) | segundo pase (produccion, conditioned=False): n=0 (pixel objetivo NO, nuevos=0) | segundo pase conditioned=True: n=0 (pixel objetivo NO)
+
+CASO D (bump 2 K fuera del ROI de 50x50 km, a 30 km): bump MIR +2.0 K en (50, 90) | bt_pix=272.09 t_bg=270.00 compuerta(bt>t_bg+3)=False | dNTI_pix=0.0071 umbral summit max(C1, mu+5sd)=0.0030
+   primer pase: n=0 (pixel objetivo NO) | segundo pase (produccion, conditioned=False): n=0 (pixel objetivo NO, nuevos=0) | segundo pase conditioned=True: n=0 (pixel objetivo NO)
+
+CASO E (nulo: sin bump): bump MIR +0.0 K en (50, 50) | bt_pix=269.82 t_bg=270.01 compuerta(bt>t_bg+3)=False | dNTI_pix=-0.0001 umbral summit max(C1, mu+5sd)=0.0030
+   primer pase: n=0 (pixel objetivo NO) | segundo pase (produccion, conditioned=False): n=0 (pixel objetivo NO, nuevos=0) | segundo pase conditioned=True: n=0 (pixel objetivo NO)

@@ -1,0 +1,98 @@
+records V750 cargados: 28581  con predicado: 28581
+ventana del corpus: 2025-02-15 04:30 a 2026-10-21 06:48
+ventana K (>= 2026-09-18): 1553 records, 2026-09-18 04:30 a 2026-10-21 06:48
+publicados en el tablero (pub > 0) en ventana K: 67
+CONTROL join: pub>0 67, pub=0 1486 (si alguno es 0, el join o el predicado están muertos)
+
+== 1. Mínimos fijos de los Tests 2 y 3 (primer pase) contra los del código de MIROVA ==
+Instrumento 1: si el mínimo de MIROVA nunca decidiera, la fracción daría 0; si siempre, 1. Se ve.
+Instrumento 2: records sin diag_sd_dnti (detector muerto) se cuentan aparte como SIN DATO.
+Unidades: nuestro dNTI usa 8 vecinos; el de MIROVA, 9 con el central, = 8/9 del nuestro. Un mínimo F de
+MIROVA equivale a 9F/8 en nuestras unidades: NTI fuera 0,0225, ETI fuera 0,01125, cumbre 0,003375.
+ corpus entero: n=28580 (SIN DATO 1)
+   fuera_NTI_nuestro_min_decide(<0.01)             1385    4.8 %
+   fuera_NTI_MIROVA_min_decide(<0.0225)           23825   83.4 %
+   fuera_NTI_umbral_sube(MIROVA>nuestro)          23825   83.4 %
+   fuera_ETI_MIROVA_min_decide(<0.01125)          23867   83.5 %
+   cumbre_NTI_MIROVA_min_decide(<0.003375)           97    0.3 %
+   cumbre_ETI_MIROVA_min_decide(<0.003375)         8582   30.0 %
+   razon_fuera_NTI_MIROVA/nuestro>=1.5            10561   37.0 %
+   mu+10sd dNTI percentiles 5/50/95: [0.0101 0.0166 0.0287]
+ ventana K: n=1552 (SIN DATO 1)
+   fuera_NTI_nuestro_min_decide(<0.01)               96    6.2 %
+   fuera_NTI_MIROVA_min_decide(<0.0225)            1173   75.6 %
+   fuera_NTI_umbral_sube(MIROVA>nuestro)           1173   75.6 %
+   fuera_ETI_MIROVA_min_decide(<0.01125)           1231   79.3 %
+   cumbre_NTI_MIROVA_min_decide(<0.003375)            6    0.4 %
+   cumbre_ETI_MIROVA_min_decide(<0.003375)          337   21.7 %
+   razon_fuera_NTI_MIROVA/nuestro>=1.5              584   37.6 %
+   mu+10sd dNTI percentiles 5/50/95: [0.0096 0.017  0.0332]
+ publicados K: n=67 (SIN DATO 0)
+   fuera_NTI_nuestro_min_decide(<0.01)                1    1.5 %
+   fuera_NTI_MIROVA_min_decide(<0.0225)              36   53.7 %
+   fuera_NTI_umbral_sube(MIROVA>nuestro)             36   53.7 %
+   fuera_ETI_MIROVA_min_decide(<0.01125)             30   44.8 %
+   cumbre_NTI_MIROVA_min_decide(<0.003375)            0    0.0 %
+   cumbre_ETI_MIROVA_min_decide(<0.003375)           14   20.9 %
+   razon_fuera_NTI_MIROVA/nuestro>=1.5               14   20.9 %
+   mu+10sd dNTI percentiles 5/50/95: [0.0134 0.0217 0.0585]
+
+== 2. Región sensible: nuestro círculo inner_radius_km (centrado en el cráter) contra la caja 7x7 de MIROVA ==
+La caja de MIROVA (BOX==2 en el ejemplo, filas 30-36 y columnas 30-36 de 67) mide ±2,625 km del centro de su
+grilla (mirova_center). Fuera de ella rigen 10 sigma y 0,02/0,01; dentro de nuestro círculo rigen 5 sigma y 0,003.
+Instrumento 1: la distancia vent a mirova_center se imprime; si todo cayera dentro, la fracción sería 0.
+Instrumento 2: records publicados sin anomaly_pixels en el inner se cuentan como SIN DATO.
+ publicados K con píxeles en el inner: 67 (SIN DATO 0)
+   píxeles en el inner: 129, fuera de la caja 7x7 de MIROVA: 28 (21.7 %)
+   records con TODOS sus píxeles del inner fuera de la caja: 15 (22.4 %)
+   records con el píxel de más VRP fuera de la caja: 15 (22.4 %)
+   VRP por píxel (recortado) fuera de la caja: 20.03 de 273.90 MW
+   Isluga               inner  5 km  cráter a 0.37 km del centro de grilla | rec    3  px     3  px fuera     0  rec todo fuera    0  pico fuera    0
+   Lascar               inner  5 km  cráter a 0.83 km del centro de grilla | rec    7  px     7  px fuera     0  rec todo fuera    0  pico fuera    0
+   Lastarria            inner  3 km  cráter a 0.12 km del centro de grilla | rec    0  px     0  px fuera     0  rec todo fuera    0  pico fuera    0
+   Tupungatito          inner  7 km  cráter a 4.86 km del centro de grilla | rec    1  px     1  px fuera     0  rec todo fuera    0  pico fuera    0
+   PlanchonPeteroa      inner  3 km  cráter a 2.02 km del centro de grilla | rec    0  px     0  px fuera     0  rec todo fuera    0  pico fuera    0
+   NevadosDeChillan     inner  5 km  cráter a 0.39 km del centro de grilla | rec   39  px    88  px fuera     0  rec todo fuera    0  pico fuera    0
+   Copahue              inner  4 km  cráter a 0.14 km del centro de grilla | rec    0  px     0  px fuera     0  rec todo fuera    0  pico fuera    0
+   Llaima               inner  5 km  cráter a 0.14 km del centro de grilla | rec    0  px     0  px fuera     0  rec todo fuera    0  pico fuera    0
+   Villarrica           inner  5 km  cráter a 0.54 km del centro de grilla | rec    1  px     1  px fuera     0  rec todo fuera    0  pico fuera    0
+   PuyehueCordonCaulle  inner 20 km  cráter a 7.58 km del centro de grilla | rec   15  px    28  px fuera    28  rec todo fuera   15  pico fuera   15
+   Chaiten              inner  5 km  cráter a 0.24 km del centro de grilla | rec    1  px     1  px fuera     0  rec todo fuera    0  pico fuera    0
+
+== 3. Fondo escalar del anillo y recorte a cero (MIROVA: fondo interpolado local, sin recorte) ==
+Instrumento 1: si el recorte nunca actuara no habría píxeles con vrp 0 y bt < t_bg; se cuentan.
+Instrumento 2: control positivo: el VRP recomputado desde bt_k y t_bg_k debe reproducir el vrp_mw guardado
+en los píxeles con vrp > 0 (si no, la fórmula del instrumento es otra que la del pipeline).
+ control: 128 píxeles con vrp>0,01 MW; error relativo mediano 2.84e-04, p99 1.49e-02
+ ventana K todos: píxeles 174, recortados a 0 46 (26.4 %), magnitud negativa que el recorte deja de restar -9.40 MW
+   records con píxel detectado dentro del inner: 97; de ellos con TODOS esos píxeles en 0: 30; y además NO publicados: 30; con píxel en el inner y no publicados por cualquier razón: 30
+ ventana K publicados: píxeles 129, recortados a 0 16 (12.4 %), magnitud negativa que el recorte deja de restar -4.63 MW
+   records con píxel detectado dentro del inner: 67; de ellos con TODOS esos píxeles en 0: 0; y además NO publicados: 0; con píxel en el inner y no publicados por cualquier razón: 0
+ publicados K: BT del píxel de más VRP menos t_bg, percentiles 5/50/95: [ 0.38 12.04 44.49] K (n=67)
+
+== 4. Lo que se publica: cúmulo vent_anchored + modo de un píxel, contra la suma de todos los alertados ==
+Instrumento 1: si publicáramos la unión, la razón publicado/suma daría 1 siempre; se mide su distribución.
+Instrumento 2: records con vrp_mw (suma de escena) = 0 se excluyen y se cuentan.
+ publicados K: 67; modo de un píxel activo 52 (con >1 px 18); tope D9 0
+   razón publicado / suma de todos los píxeles guardados (unión, top-100 + descartados): n=67 (suma 0: 0)
+   percentiles 5/25/50/75/95: [0.388 0.996 1.    1.    1.005]  fracción con razón < 0,9: 0.209
+   records publicados con 100 píxeles guardados (unión truncada, la razón es cota superior): 0
+
+== 5. Escena incompleta (MIROVA rechaza con >= la mitad de NaN en la grilla 67x67) ==
+Proxy: diag_n_bg_used_first_pass (píxeles válidos del ROI 50x50 km) contra el p95 de su clase de cenit (5 grados).
+Instrumento 1: si no hubiera escenas parciales, ninguna caería bajo 50 % del p95. Instrumento 2: n=0 = SIN DATO.
+ ventana K: n=1553 (SIN DATO 0, sin referencia de cenit 0); bajo 50 % del p95: 64
+ publicados K: n=67 (SIN DATO 0, sin referencia de cenit 0); bajo 50 % del p95: 0
+
+== 6. Test 1 absoluto: K1 -0,7 de MIROVA (alerta directa) contra -0,8 (sólo diagnóstico y predicado D9) ==
+nti_max es el máximo de NTI en el ROI de 50 x 50 km. Instrumento 1: si ningún píxel pasara -0,7 la cuenta sería 0.
+ ventana K: {'n': 1553, 'entre_-0.8_y_-0.7': 8, 'nti_max>-0.7': 8, 'nti_max>-0.7_y_publicado': 8}
+
+== 7. Píxel frío (MIROVA anula BT M15 <= 200 K) ==
+ t_bg_k (mediana M13 del anillo, NO es M15) mínimo 207.6 K; records con t_bg < 220 K: 44 de 28581
+
+== 8. Tope por tamaño de cúmulo (Villarrica, max_cluster_pixels 12) y su efecto en el tablero ==
+ corpus entero: {}
+
+== 9. Píxeles guardados con BT de M13 cerca del techo (634 K, se anulan antes de detectar) ==
+ t_max_k máximo en el corpus V750: 364.9 K; records con t_max >= 400 K: 0

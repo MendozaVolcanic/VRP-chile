@@ -1,0 +1,29 @@
+control sin mutar                                       NO ATRAPADA          fallas por aserción 0, caídas 0 | V1 VIIRS750z<=40 x1.2 -> NEUTRO; V1 VIIRS375z<=40 x1.2 -> NEUTRO; V2 VIIRS750z<=40 x1.2 -> NEUTRO; V2 VIIRS375z<=40 x1.2 -> NEUTRO
+opción A sobre d′ retirada (d′ basta con un volcán)     NO ATRAPADA          fallas por aserción 0, caídas 0 | V1 VIIRS750z<=40 x1.2 -> NEUTRO; V1 VIIRS375z<=40 x1.2 -> NEUTRO; V2 VIIRS750z<=40 x1.2 -> NEUTRO; V2 VIIRS375z<=40 x1.2 -> NEUTRO
+calibración de d′ ignorada (calibrada siempre True)     NO ATRAPADA          fallas por aserción 0, caídas 0 | V1 VIIRS750z<=40 x1.2 -> NEUTRO; V1 VIIRS375z<=40 x1.2 -> NEUTRO; V2 VIIRS750z<=40 x1.2 -> NEUTRO; V2 VIIRS375z<=40 x1.2 -> NEUTRO
+sin redondeo de d′ (DEC_DPRIMA = 30)                    ATRAPADA (aserción)  fallas por aserción 2, caídas 0 | V1 VIIRS750z<=40 x1.2 -> NEUTRO; V1 VIIRS375z<=40 x1.2 -> NEUTRO; V2 VIIRS750z<=40 x1.2 -> NEUTRO; V2 VIIRS375z<=40 x1.2 -> NEUTRO
+      aserción: test_placebo_como_brazo_no_puede_dar_mejora[0.6-1.2]
+      aserción: test_placebo_como_brazo_no_puede_dar_mejora[1.6-0.8]
+ĝ con el signo invertido (K / ĝ)                        ATRAPADA (aserción)  fallas por aserción 4, caídas 0 | V1 VIIRS750z<=40 x1.2 -> MEJORA; V1 VIIRS375z<=40 x1.2 -> MEJORA; V2 VIIRS750z<=40 x1.2 -> MEJORA; V2 VIIRS375z<=40 x1.2 -> MEJORA
+Exception in thread Thread-11 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x9d in position 305: character maps to <undefined>
+      aserción: test_placebo_como_brazo_no_puede_dar_mejora[0.6-1.2]
+      aserción: test_placebo_como_brazo_no_puede_dar_mejora[1.6-0.8]
+      aserción: test_k_por_08_sigue_dando_empeora_por_d
+      aserción: test_d_mejora_y_dprima_no_queda_neutro_con_la_nota
+ĝ = media en vez de mediana (punto)                     ATRAPADA (aserción)  fallas por aserción 1, caídas 0 | V1 VIIRS750z<=40 x1.2 -> NEUTRO; V1 VIIRS375z<=40 x1.2 -> NEUTRO; V2 VIIRS750z<=40 x1.2 -> NEUTRO; V2 VIIRS375z<=40 x1.2 -> NEUTRO
+      aserción: test_g_hat_por_estrato_y_por_volcan
+calibración de d′ sólo con la cola MEJORA               NO ATRAPADA          fallas por aserción 0, caídas 0 | V1 VIIRS750z<=40 x1.2 -> NEUTRO; V1 VIIRS375z<=40 x1.2 -> NEUTRO; V2 VIIRS750z<=40 x1.2 -> NEUTRO; V2 VIIRS375z<=40 x1.2 -> NEUTRO
+opción A de d′ contada con d en vez de d′               NO ATRAPADA          fallas por aserción 0, caídas 0 | V1 VIIRS750z<=40 x1.2 -> NEUTRO; V1 VIIRS375z<=40 x1.2 -> NEUTRO; V2 VIIRS750z<=40 x1.2 -> NEUTRO; V2 VIIRS375z<=40 x1.2 -> NEUTRO
+fin

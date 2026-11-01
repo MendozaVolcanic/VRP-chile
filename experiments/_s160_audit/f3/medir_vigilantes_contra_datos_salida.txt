@@ -1,0 +1,69 @@
+A) records por volcán (cualquier sensor), healthcheck 48 h y nrt.yml 72 h
+volcán | n records | último record | edad al 2026-10-22 03:11 UTC (h) | hueco máx desde 2026-01-29 (h) | hueco máx desde 2025-02 (h) | días 12:00 UTC | alarmas 48 h | alarmas 72 h
+Lascar | 5694 | 2026-10-21T08:05:00+00:00 | 19.1 | 22.1 | 22.7 | 266 | 0 | 0
+PuyehueCordonCaulle | 7174 | 2026-10-21T08:05:00+00:00 | 19.1 | 21.5 | 21.9 | 266 | 0 | 0
+Lastarria | 5780 | 2026-10-21T08:05:00+00:00 | 19.1 | 22.8 | 22.8 | 266 | 0 | 0
+Isluga | 5568 | 2026-10-21T08:00:00+00:00 | 19.2 | 22.8 | 22.9 | 266 | 0 | 0
+Tupungatito | 6424 | 2026-10-21T08:05:00+00:00 | 19.1 | 22.1 | 22.1 | 266 | 0 | 0
+PlanchonPeteroa | 6514 | 2026-10-21T08:05:00+00:00 | 19.1 | 22.2 | 22.2 | 266 | 0 | 0
+Chaiten | 7337 | 2026-10-21T08:10:00+00:00 | 19.0 | 21.5 | 21.9 | 266 | 0 | 0
+Villarrica | 6977 | 2026-10-21T08:05:00+00:00 | 19.1 | 21.5 | 21.9 | 266 | 0 | 0
+NevadosDeChillan | 6750 | 2026-10-21T08:05:00+00:00 | 19.1 | 22.0 | 22.0 | 266 | 0 | 0
+Llaima | 6961 | 2026-10-21T08:05:00+00:00 | 19.1 | 21.5 | 21.9 | 266 | 0 | 0
+Copahue | 6789 | 2026-10-21T08:05:00+00:00 | 19.1 | 21.5 | 21.9 | 266 | 0 | 0
+
+B) por volcán y bucket, sombra MAX_DIAS_SOMBRA_SIN_DATOS = 3 (72 h)
+volcán | bucket | hueco máx desde 2026-01-29 (h) | alarmas 72 h sobre días 12:00 UTC
+Lascar | MODIS | 42.1 | 0 de 266
+Lascar | VIIRS375 | 46.6 | 0 de 266
+Lascar | VIIRS750 | 46.6 | 0 de 266
+PuyehueCordonCaulle | MODIS | 24.7 | 0 de 266
+PuyehueCordonCaulle | VIIRS375 | 23.6 | 0 de 266
+PuyehueCordonCaulle | VIIRS750 | 23.7 | 0 de 266
+Lastarria | MODIS | 42.0 | 0 de 266
+Lastarria | VIIRS375 | 23.7 | 0 de 266
+Lastarria | VIIRS750 | 23.7 | 0 de 266
+Isluga | MODIS | 42.1 | 0 de 266
+Isluga | VIIRS375 | 23.7 | 0 de 266
+Isluga | VIIRS750 | 23.7 | 0 de 266
+Tupungatito | MODIS | 24.7 | 0 de 266
+Tupungatito | VIIRS375 | 23.7 | 0 de 266
+Tupungatito | VIIRS750 | 23.7 | 0 de 266
+PlanchonPeteroa | MODIS | 24.7 | 0 de 266
+PlanchonPeteroa | VIIRS375 | 23.7 | 0 de 266
+PlanchonPeteroa | VIIRS750 | 23.7 | 0 de 266
+Chaiten | MODIS | 24.7 | 0 de 266
+Chaiten | VIIRS375 | 23.6 | 0 de 266
+Chaiten | VIIRS750 | 23.6 | 0 de 266
+Villarrica | MODIS | 24.7 | 0 de 266
+Villarrica | VIIRS375 | 23.7 | 0 de 266
+Villarrica | VIIRS750 | 23.7 | 0 de 266
+NevadosDeChillan | MODIS | 24.6 | 0 de 266
+NevadosDeChillan | VIIRS375 | 23.7 | 0 de 266
+NevadosDeChillan | VIIRS750 | 23.7 | 0 de 266
+Llaima | MODIS | 24.7 | 0 de 266
+Llaima | VIIRS375 | 23.7 | 0 de 266
+Llaima | VIIRS750 | 23.7 | 0 de 266
+Copahue | MODIS | 24.7 | 0 de 266
+Copahue | VIIRS375 | 23.7 | 0 de 266
+Copahue | VIIRS750 | 23.7 | 0 de 266
+
+C) referencia de MIROVA: hueco máx entre filas y entre alertas, contra MAX_GT_STALE_DAYS = 7
+tabla sola: latest_consolidado.csv sha256=bc1522c24c924cb5 filas=42410 columnas=['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro']
+  todas las filas: n=42410 última=2026-10-21T20:05:00+00:00 edad=7.1 h hueco máx desde 2026-01-29=11.9 h (= 0.5 d; umbral 7 d = 168 h)
+  solo ALERTA*: n=1655 última=2026-10-21T05:48:00+00:00 edad=21.4 h hueco máx desde 2026-01-29=71.1 h (= 3.0 d; umbral 7 d = 168 h)
+  (columnas usadas: fecha=Fecha_Satelite_UTC, tipo=Tipo_Registro)
+OCR: registro_vrp_ocr.csv sha256=94679246acbd0db5 filas=1122 columnas=['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro']
+  todas las filas: n=1122 última=2026-10-20T17:30:00+00:00 edad=33.7 h hueco máx desde 2026-01-29=263.5 h (= 11.0 d; umbral 7 d = 168 h)
+  solo ALERTA*: n=1028 última=2026-10-20T17:30:00+00:00 edad=33.7 h hueco máx desde 2026-01-29=288.9 h (= 12.0 d; umbral 7 d = 168 h)
+  (columnas usadas: fecha=Fecha_Satelite_UTC, tipo=Tipo_Registro)
+
+D) control positivo del instrumento
+D1) el hueco del backfill de AUDIT_S146 V-15 (2025-11-16 a 2026-01-28) NO aparece en la columna 'desde 2025-02':
+    medido aparte, Lascar tiene 277/285/291 records en nov/dic-2025/ene-2026 en d516b9d8c: el hueco ya no existe
+    en estos datos (S158 reemplazo el historico con K, #883/#884). La afirmacion de S146 envejecio; no sirve de control.
+D2) control sintetico: a los records de Lascar se les quita todo lo del 2026-05-01 al 2026-05-06 y la regla de
+    48 h a las 12:00 UTC tiene que alarmar los dias 2 a 6 de mayo (5 dias: el ultimo record previo es del 30-abr ~08:00,
+    a las 12:00 del 2-may ya pasaron ~52 h) y la de 72 h los dias 3 a 6 (4 dias). (Primera version de este control
+    esperaba 4 y 3 por contar mal la ventana; el instrumento no cambio.)
+    quitados 57 records; alarmas 48 h = 5 (esperado 5), alarmas 72 h = 4 (esperado 4) -> INSTRUMENTO OK

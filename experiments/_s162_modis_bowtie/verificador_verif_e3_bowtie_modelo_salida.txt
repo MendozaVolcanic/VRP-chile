@@ -1,0 +1,66 @@
+== cobertura a lo largo de la traza (frame central), fracción del eje vista 0 / 1 / 2 veces, por brazo
+angulo  cenit  a_km  dets_conservados | TODOS 0/1/2 | SIN_DUP 0/1/2
+     0    0.0 1.000  10 de 10          | 0.000 / 1.000 / 0.000 | 0.000 / 1.000 / 0.000
+    20   22.3 1.072  10 de 10          | 0.000 / 0.927 / 0.073 | 0.000 / 0.927 / 0.073   <- duplicados que SIN_DUP conserva
+    25   28.0 1.117   8 de 10          | 0.000 / 0.883 / 0.117 | 0.107 / 0.893 / 0.000   <- HUECO en SIN_DUP
+    30   33.7 1.177   8 de 10          | 0.000 / 0.823 / 0.177 | 0.059 / 0.941 / 0.000   <- HUECO en SIN_DUP
+    35   39.6 1.256   8 de 10          | 0.000 / 0.745 / 0.255 | 0.000 / 0.995 / 0.005   <- duplicados que SIN_DUP conserva
+    40   45.6 1.361   8 de 10          | 0.000 / 0.639 / 0.361 | 0.000 / 0.911 / 0.089   <- duplicados que SIN_DUP conserva
+    45   51.8 1.503   6 de 10          | 0.000 / 0.497 / 0.503 | 0.099 / 0.901 / 0.000   <- HUECO en SIN_DUP
+    50   58.3 1.703   6 de 10          | 0.000 / 0.297 / 0.703 | 0.000 / 0.979 / 0.021   <- duplicados que SIN_DUP conserva
+    55   65.5 2.006   4 de 10          | 0.000 / 0.000 / 0.993 | 0.197 / 0.803 / 0.000   <- HUECO en SIN_DUP
+control nadir: TODOS y SIN_DUP cobertura 1 en el 100 %: OK
+
+== realizaciones de ablacion_sintetica_3MW.json: S/T por clase de cobertura del foco (cT = huellas de TODOS que lo contienen, cS = de SIN_DUP)
+angulo cT cS   n  detecta T/S   S/T mediana [n]   min..max
+     0  1  1  40   40/40   1.000 [40]   1.00..1.00
+    20  1  1  39   38/38   1.000 [38]   1.00..1.00
+    20  2  2   1    1/1    1.000 [1]   1.00..1.00   <- foco DUPLICADO en TODOS
+    30  1  1  36   34/34   1.000 [34]   0.70..1.47
+    30  2  0   1    1/0    nan [0]   nan..nan   <- foco en HUECO de SIN_DUP (nadie lo mide)   <- foco DUPLICADO en TODOS
+    30  2  1   3    3/3    1.000 [3]   1.00..1.00   <- foco DUPLICADO en TODOS
+    40  1  1  29   24/24   1.000 [24]   0.79..1.35
+    40  2  1   8    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+    40  2  2   3    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+    45  1  1  18   18/18   1.001 [18]   0.76..1.06
+    45  2  0   5    0/0    nan [0]   nan..nan   <- foco en HUECO de SIN_DUP (nadie lo mide)   <- foco DUPLICADO en TODOS
+    45  2  1  17    2/2    1.309 [2]   1.30..1.31   <- foco DUPLICADO en TODOS
+    50  1  1   7    7/7    0.754 [7]   0.61..1.39
+    50  2  1  32   17/13   0.659 [12]   0.31..0.99   <- foco DUPLICADO en TODOS
+    50  2  2   1    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+    55  2  0   4    0/0    nan [0]   nan..nan   <- foco en HUECO de SIN_DUP (nadie lo mide)   <- foco DUPLICADO en TODOS
+    55  2  1  36    3/4    0.789 [2]   0.57..1.01   <- foco DUPLICADO en TODOS
+fracción de realizaciones (detectadas en los dos brazos) con S/T fuera de [0,95; 1,05], por ángulo:
+      0: 0.00 de 40 (bajo 0,95: 0.00; sobre 1,05: 0.00)
+     20: 0.00 de 39 (bajo 0,95: 0.00; sobre 1,05: 0.00)
+     30: 0.14 de 37 (bajo 0,95: 0.03; sobre 1,05: 0.11)
+     40: 0.54 de 24 (bajo 0,95: 0.33; sobre 1,05: 0.21)
+     45: 0.25 de 20 (bajo 0,95: 0.10; sobre 1,05: 0.15)
+     50: 0.84 de 19 (bajo 0,95: 0.79; sobre 1,05: 0.05)
+     55: 0.50 de 2 (bajo 0,95: 0.50; sobre 1,05: 0.00)
+
+== realizaciones de ablacion_sintetica_1MW.json: S/T por clase de cobertura del foco (cT = huellas de TODOS que lo contienen, cS = de SIN_DUP)
+angulo cT cS   n  detecta T/S   S/T mediana [n]   min..max
+     0  1  1  40   23/23   1.000 [23]   1.00..1.00
+    20  1  1  39   27/27   1.000 [27]   1.00..1.00
+    20  2  2   1    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+    30  1  1  36   23/23   1.000 [23]   0.55..1.64
+    30  2  0   1    0/0    nan [0]   nan..nan   <- foco en HUECO de SIN_DUP (nadie lo mide)   <- foco DUPLICADO en TODOS
+    30  2  1   3    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+    40  1  1  29   22/24   1.000 [22]   0.90..1.78
+    40  2  1   8    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+    40  2  2   3    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+    45  1  1  18    8/6    0.997 [6]   0.95..1.13
+    45  2  0   5    0/0    nan [0]   nan..nan   <- foco en HUECO de SIN_DUP (nadie lo mide)   <- foco DUPLICADO en TODOS
+    45  2  1  17    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+    50  1  1   7    0/0    nan [0]   nan..nan
+    50  2  1  32    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+    50  2  2   1    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+    55  2  0   4    0/0    nan [0]   nan..nan   <- foco en HUECO de SIN_DUP (nadie lo mide)   <- foco DUPLICADO en TODOS
+    55  2  1  36    0/0    nan [0]   nan..nan   <- foco DUPLICADO en TODOS
+fracción de realizaciones (detectadas en los dos brazos) con S/T fuera de [0,95; 1,05], por ángulo:
+      0: 0.00 de 23 (bajo 0,95: 0.00; sobre 1,05: 0.00)
+     20: 0.00 de 27 (bajo 0,95: 0.00; sobre 1,05: 0.00)
+     30: 0.26 de 23 (bajo 0,95: 0.09; sobre 1,05: 0.17)
+     40: 0.23 de 22 (bajo 0,95: 0.09; sobre 1,05: 0.14)
+     45: 0.33 de 6 (bajo 0,95: 0.17; sobre 1,05: 0.17)

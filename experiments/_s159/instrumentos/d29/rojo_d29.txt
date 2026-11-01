@@ -1,0 +1,104 @@
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+_______ test_los_dias_de_d29_estan_declarados_para_v1_y_ninguno_para_v2 _______
+
+    def test_los_dias_de_d29_estan_declarados_para_v1_y_ninguno_para_v2():
+>       _tiene("DIAS_EXCLUIDOS")
+
+tests\test_evaluar_d25_dias_d29_s160.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'DIAS_EXCLUIDOS'
+
+    def _tiene(nombre):
+>       assert hasattr(X, nombre), "falta %s (D-29)" % nombre
+E       AssertionError: falta DIAS_EXCLUIDOS (D-29)
+E       assert False
+E        +  where False = hasattr(X, 'DIAS_EXCLUIDOS')
+
+tests\test_evaluar_d25_dias_d29_s160.py:35: AssertionError
+______ test_filtrar_dias_saca_las_pasadas_de_esos_dias_y_deja_las_demas _______
+
+    def test_filtrar_dias_saca_las_pasadas_de_esos_dias_y_deja_las_demas():
+>       _tiene("filtrar_dias")
+
+tests\test_evaluar_d25_dias_d29_s160.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'filtrar_dias'
+
+    def _tiene(nombre):
+>       assert hasattr(X, nombre), "falta %s (D-29)" % nombre
+E       AssertionError: falta filtrar_dias (D-29)
+E       assert False
+E        +  where False = hasattr(X, 'filtrar_dias')
+
+tests\test_evaluar_d25_dias_d29_s160.py:35: AssertionError
+_________________________ test_sin_dias_no_saca_nada __________________________
+
+    def test_sin_dias_no_saca_nada():
+>       _tiene("filtrar_dias")
+
+tests\test_evaluar_d25_dias_d29_s160.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'filtrar_dias'
+
+    def _tiene(nombre):
+>       assert hasattr(X, nombre), "falta %s (D-29)" % nombre
+E       AssertionError: falta filtrar_dias (D-29)
+E       assert False
+E        +  where False = hasattr(X, 'filtrar_dias')
+
+tests\test_evaluar_d25_dias_d29_s160.py:35: AssertionError
+__________ test_evaluar_aplica_el_filtro_a_tablas_crudos_y_cobertura __________
+
+    def test_evaluar_aplica_el_filtro_a_tablas_crudos_y_cobertura():
+        """A118: un umbral o una exclusión tiene que llegar a todos sus consumidores. Frontera de palabra (A92)."""
+        src = (DIR / "evaluar_d25.py").read_text(encoding="utf-8")
+        cuerpo = src[src.index("def evaluar(a):"):src.index("def combinar(")]
+        llamadas = re.findall(r"(?<![A-Za-z0-9_])filtrar_dias\s*\(\s*([A-Za-z_][A-Za-z0-9_\[\]\"']*)", cuerpo)
+        blancos = {x.split("[")[0] for x in llamadas}
+>       assert {"t", "R", "ks"} <= blancos or {"t", "crudos_n", "ks"} <= blancos or len(llamadas) >= 3, llamadas
+E       AssertionError: []
+E       assert ({'R', 'ks', 't'} <= set()
+E         
+E         Extra items in the left set:
+E         't'
+E         'ks'
+E         'R' or {'crudos_n', 'ks', 't'} <= set()
+E         
+E         Extra items in the left set:
+E         'crudos_n'
+E         'ks'
+E         't' or 0 >= 3)
+E        +  where 0 = len([])
+
+tests\test_evaluar_d25_dias_d29_s160.py:66: AssertionError
+___________ test_el_veredicto_combinado_lo_dice_en_su_primera_linea ___________
+
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-1426/test_el_veredicto_combinado_lo0')
+capsys = <_pytest.capture.CaptureFixture object at 0x000002517FCEB500>
+
+    def test_el_veredicto_combinado_lo_dice_en_su_primera_linea(tmp_path, capsys):
+>       _tiene("DIAS_EXCLUIDOS")
+
+tests\test_evaluar_d25_dias_d29_s160.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+nombre = 'DIAS_EXCLUIDOS'
+
+    def _tiene(nombre):
+>       assert hasattr(X, nombre), "falta %s (D-29)" % nombre
+E       AssertionError: falta DIAS_EXCLUIDOS (D-29)
+E       assert False
+E        +  where False = hasattr(X, 'DIAS_EXCLUIDOS')
+
+tests\test_evaluar_d25_dias_d29_s160.py:35: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_evaluar_d25_dias_d29_s160.py::test_los_dias_de_d29_estan_declarados_para_v1_y_ninguno_para_v2
+FAILED tests/test_evaluar_d25_dias_d29_s160.py::test_filtrar_dias_saca_las_pasadas_de_esos_dias_y_deja_las_demas
+FAILED tests/test_evaluar_d25_dias_d29_s160.py::test_sin_dias_no_saca_nada - ...
+FAILED tests/test_evaluar_d25_dias_d29_s160.py::test_evaluar_aplica_el_filtro_a_tablas_crudos_y_cobertura
+FAILED tests/test_evaluar_d25_dias_d29_s160.py::test_el_veredicto_combinado_lo_dice_en_su_primera_linea
+5 failed in 0.60s

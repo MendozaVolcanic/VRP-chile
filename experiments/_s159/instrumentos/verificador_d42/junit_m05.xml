@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="53" time="65.830" timestamp="2026-10-22T10:01:28.042626-03:00" hostname="Nico"><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_los_numeros_de_la_calibracion_son_los_sellados" time="0.001" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados" time="1.217" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_sorteo_es_por_bloque_y_no_por_pasada" time="0.759" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.05-0.05-True]" time="0.010" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.051-0.0-False]" time="0.011" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.051-False]" time="0.010" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.06-0.0-False]" time="0.012" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.08-False]" time="0.010" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche0-GANA]" time="0.009" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche1-PIERDE]" time="0.009" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche2-BLOQUEA]" time="0.009" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche3-EMPATE]" time="0.009" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_bloquea_no_se_calibra_y_su_fraccion_se_informa" time="0.009"><failure message="AssertionError: ('INDECIDIBLE', {'calibrada': False, 'falsos_bloquea': 0.9, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...})&#10;assert 'INDECIDIBLE' == 'BLOQUEA'&#10;  &#10;  - BLOQUEA&#10;  + INDECIDIBLE">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x0000020642D63200&gt;
+
+    def test_bloquea_no_se_calibra_y_su_fraccion_se_informa(monkeypatch):
+        """Adenda §2.6: con la calibración OK, BLOQUEA sigue como está aunque bajo el nulo bloquee en muchos sorteos."""
+        _calibracion_forzada(monkeypatch, 0.0, 0.0, f_bloquea=0.9)
+        v, det = X.decidir_p2_bloques(_contrib([[+1]] * 6 + [[-1]] * 4), ok_ctrl=True)
+&gt;       assert v == "BLOQUEA", (v, det)
+E       AssertionError: ('INDECIDIBLE', {'calibrada': False, 'falsos_bloquea': 0.9, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...})
+E       assert 'INDECIDIBLE' == 'BLOQUEA'
+E         
+E         - BLOQUEA
+E         + INDECIDIBLE
+
+tests\test_evaluar_d25_calib_p2_s160.py:163: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_sin_sustrato_y_controles_caidos_no_se_calibran_pero_informan" time="0.001" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_con_muchas_noches_la_calibracion_pasa_y_decide" time="0.641"><failure message="AssertionError: {'calibrada': False, 'falsos_bloquea': 0.36, 'falsos_gana': 0.025, 'falsos_pierde': 0.02, ...}&#10;assert False is True&#10; +  where False = &lt;built-in method get of dict object at 0x0000020642E38780&gt;('calibrada')&#10; +    where &lt;built-in method get of dict object at 0x0000020642E38780&gt; = {'calibrada': False, 'falsos_bloquea': 0.36, 'falsos_gana': 0.025, 'falsos_pierde': 0.02, ...}.get">def test_con_muchas_noches_la_calibracion_pasa_y_decide():
+        """Control de poder: un efecto repartido en 12 noches sigue decidiendo (la calibración no lo apaga)."""
+        _tiene("calibrar_p2")
+        for por_noche, esperado in (([[-1]] * 12, "GANA"), ([[+1]] * 12, "PIERDE")):
+            v, det = X.decidir_p2_bloques(_contrib(por_noche), ok_ctrl=True)
+&gt;           assert det.get("calibrada") is True, det
+E           AssertionError: {'calibrada': False, 'falsos_bloquea': 0.36, 'falsos_gana': 0.025, 'falsos_pierde': 0.02, ...}
+E           assert False is True
+E            +  where False = &lt;built-in method get of dict object at 0x0000020642E38780&gt;('calibrada')
+E            +    where &lt;built-in method get of dict object at 0x0000020642E38780&gt; = {'calibrada': False, 'falsos_bloquea': 0.36, 'falsos_gana': 0.025, 'falsos_pierde': 0.02, ...}.get
+
+tests\test_evaluar_d25_calib_p2_s160.py:184: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_global_ventana_con_p2_indecidible" time="0.001" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_lectura_pendiente_p2_indecidible_en_un_sensor_y_pierde_calibrado_en_el_otro" time="0.001" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_intervalo_de_p2_usa_la_semilla_y_los_remuestreos_sellados" time="0.522" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_intervalo_de_p2_es_el_95_por_ciento_exacto" time="0.597" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_los_bordes_del_intervalo_son_estrictos[PIERDE]" time="0.003" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_los_bordes_del_intervalo_son_estrictos[GANA]" time="0.002" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.05-MEJORA]" time="8.913" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.051-INDECIDIBLE]" time="8.806" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.06-INDECIDIBLE]" time="8.717" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_tope_de_la_calibracion_de_dprima_es_el_5_por_ciento[0.09-INDECIDIBLE]" time="9.247" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_dprima_mal_calibrada_no_toca_un_estrato_donde_d_no_da_mejora" time="9.064" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_estrato_203_se_cuenta" time="0.467" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_estrato_203_no_decide" time="1.049" /><testcase classname="tests.test_evaluar_d25_calib_p2_s160" name="test_el_estrato_203_es_solo_viirs_750_y_solo_cumbre" time="0.547" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_d_que_gana_en_muchas_noches_da_gana" time="0.576"><failure message="AssertionError: ('INDECIDIBLE', {'calibrada': False, 'falsos_bloquea': 0.36, 'falsos_gana': 0.025, 'falsos_pierde': 0.02, ...})&#10;assert 'INDECIDIBLE' == 'GANA'&#10;  &#10;  - GANA&#10;  + INDECIDIBLE">def test_d_que_gana_en_muchas_noches_da_gana():
+        _tiene("decidir_p2_bloques")
+        v, det = X.decidir_p2_bloques(_contrib([[-1]] * 12), ok_ctrl=True)
+&gt;       assert v == "GANA", (v, det)
+E       AssertionError: ('INDECIDIBLE', {'calibrada': False, 'falsos_bloquea': 0.36, 'falsos_gana': 0.025, 'falsos_pierde': 0.02, ...})
+E       assert 'INDECIDIBLE' == 'GANA'
+E         
+E         - GANA
+E         + INDECIDIBLE
+
+tests\test_evaluar_d25_p2_s159.py:54: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_d_que_gana_todo_en_una_sola_noche_da_empate" time="0.531"><failure message="AssertionError: ('INDECIDIBLE', {'calibrada': False, 'falsos_bloquea': 0.486, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...})&#10;assert 'INDECIDIBLE' == 'EMPATE'&#10;  &#10;  - EMPATE&#10;  + INDECIDIBLE">def test_d_que_gana_todo_en_una_sola_noche_da_empate():
+        """Doce pasadas de una misma noche: es una noche, no doce pruebas independientes. Con 12 el bootstrap por pasada da
+        GANA ([-18, -4]) y el de bloques EMPATE ([-36, 0]); con 8 los dos caían en 0 por ser sumas discretas y la prueba no
+        distinguía la mutación «bootstrap por pasada» (medido en la primera corrida de mutar_comparador.py de D-34)."""
+        _tiene("decidir_p2_bloques")
+        c = _contrib([[-1] * 12, [+1, -1], [+1, -1], [+1, -1], [+1, -1]])
+        v, det = X.decidir_p2_bloques(c, ok_ctrl=True)
+        assert det["neto"] == -12, det
+&gt;       assert v == "EMPATE", (v, det)
+E       AssertionError: ('INDECIDIBLE', {'calibrada': False, 'falsos_bloquea': 0.486, 'falsos_gana': 0.0, 'falsos_pierde': 0.0, ...})
+E       assert 'INDECIDIBLE' == 'EMPATE'
+E         
+E         - EMPATE
+E         + INDECIDIBLE
+
+tests\test_evaluar_d25_p2_s159.py:66: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_neto_en_contra_chico_bloquea_sin_dar_pierde" time="0.600"><failure message="AssertionError: ('INDECIDIBLE', {'calibrada': False, 'falsos_bloquea': 0.37, 'falsos_gana': 0.01, 'falsos_pierde': 0.009, ...})&#10;assert 'INDECIDIBLE' == 'BLOQUEA'&#10;  &#10;  - BLOQUEA&#10;  + INDECIDIBLE">def test_neto_en_contra_chico_bloquea_sin_dar_pierde():
+        _tiene("decidir_p2_bloques")
+        v, det = X.decidir_p2_bloques(_contrib([[+1]] * 6 + [[-1]] * 4), ok_ctrl=True)
+        assert det["neto"] == 2, det
+&gt;       assert v == "BLOQUEA", (v, det)
+E       AssertionError: ('INDECIDIBLE', {'calibrada': False, 'falsos_bloquea': 0.37, 'falsos_gana': 0.01, 'falsos_pierde': 0.009, ...})
+E       assert 'INDECIDIBLE' == 'BLOQUEA'
+E         
+E         - BLOQUEA
+E         + INDECIDIBLE
+
+tests\test_evaluar_d25_p2_s159.py:73: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_neto_en_contra_grande_y_repartido_da_pierde" time="0.674"><failure message="AssertionError: ('INDECIDIBLE', {'calibrada': False, 'falsos_bloquea': 0.38, 'falsos_gana': 0.02, 'falsos_pierde': 0.025, ...})&#10;assert 'INDECIDIBLE' == 'PIERDE'&#10;  &#10;  - PIERDE&#10;  + INDECIDIBLE">def test_neto_en_contra_grande_y_repartido_da_pierde():
+        _tiene("decidir_p2_bloques")
+        v, det = X.decidir_p2_bloques(_contrib([[+1]] * 12), ok_ctrl=True)
+&gt;       assert v == "PIERDE", (v, det)
+E       AssertionError: ('INDECIDIBLE', {'calibrada': False, 'falsos_bloquea': 0.38, 'falsos_gana': 0.02, 'falsos_pierde': 0.025, ...})
+E       assert 'INDECIDIBLE' == 'PIERDE'
+E         
+E         - PIERDE
+E         + INDECIDIBLE
+
+tests\test_evaluar_d25_p2_s159.py:80: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_sin_sustrato_con_menos_de_5_pasadas_o_3_noches[por_noche0]" time="0.002" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_sin_sustrato_con_menos_de_5_pasadas_o_3_noches[por_noche1]" time="0.001" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_controles_caidos_dejan_indecidible" time="0.001" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_contar_usa_el_signo_de_errores_y_trae_la_lista" time="0.708"><failure message="AssertionError: assert 'INDECIDIBLE' in ('GANA', 'EMPATE', 'BLOQUEA', 'PIERDE')">def test_contar_usa_el_signo_de_errores_y_trae_la_lista():
+        _tiene("decidir_p2_bloques")
+        T, prot, R, cfg, res_ctrl = _armar()
+        ver, info = X.contar(T, prot, R, cfg, "SN", res_ctrl, None, {"Lascar": 5.0})
+        i = info["P2|VIIRS375"]
+        assert "neto" in i, "contar no usa la regla de D-34"
+        assert i["neto"] == -5 + 1, "signo: neto = errores de D menos errores de K: %s" % i["neto"]
+        lista = i["discordantes"]
+        assert len(lista) == 6, "la lista trae %d pasadas, son 6 las discordantes" % len(lista)
+        assert all("06:40" not in x["hora"] for x in lista), "una pasada concordante entró a la lista"
+        x = next(x for x in lista if x["hora"] == "2026-09-06 05:10")
+        assert x == {"volcan": "Lascar", "sensor": "VIIRS375", "hora": "2026-09-06 05:10", "publica_K": False,
+                     "publica_D": True, "clase_mirova": "neg_limpio", "vrp_mirova": None, "pc_vrp_mw_K": 0.0,
+                     "pc_vrp_mw_D": 0.4, "error_de": "D", "contribucion": 1}, x
+&gt;       assert ver["P2|VIIRS375"] in ("GANA", "EMPATE", "BLOQUEA", "PIERDE")
+E       AssertionError: assert 'INDECIDIBLE' in ('GANA', 'EMPATE', 'BLOQUEA', 'PIERDE')
+
+tests\test_evaluar_d25_p2_s159.py:139: AssertionError</failure></testcase><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_contar_informa_las_reglas_a_y_b_sin_decidir" time="0.601" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_p2_que_bloquea_no_deja_cumplir" time="0.018" /><testcase classname="tests.test_evaluar_d25_p2_s159" name="test_p2_sin_sustrato_no_bloquea" time="0.001" /><testcase classname="tests.test_evaluar_d25_dias_d29_s160" name="test_los_dias_de_d29_estan_declarados_para_v1_y_ninguno_para_v2" time="0.000" /><testcase classname="tests.test_evaluar_d25_dias_d29_s160" name="test_filtrar_dias_saca_las_pasadas_de_esos_dias_y_deja_las_demas" time="0.000" /><testcase classname="tests.test_evaluar_d25_dias_d29_s160" name="test_sin_dias_no_saca_nada" time="0.000" /><testcase classname="tests.test_evaluar_d25_dias_d29_s160" name="test_evaluar_aplica_el_filtro_a_tablas_crudos_y_cobertura" time="0.002" /><testcase classname="tests.test_evaluar_d25_dias_d29_s160" name="test_el_veredicto_combinado_lo_dice_en_su_primera_linea" time="0.009" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_poder_las_perturbaciones_existen" time="4.845" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_cabecera_de_d29_es_la_primera_linea" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_exclusion_llega_a_los_crudos" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_exclusion_llega_a_la_referencia_de_cobertura" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_exclusion_llega_a_la_tabla_y_la_fecha_es_utc" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_los_controles_pasan_y_el_veredicto_vale" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_el_json_trae_la_calibracion_de_p2_y_el_estrato_203" time="0.001" /><testcase classname="tests.test_evaluar_d25_punta_a_punta_s160" name="test_la_marca_de_la_calibracion_sellada_llega_al_estado" time="4.628" /></testsuite></testsuites>

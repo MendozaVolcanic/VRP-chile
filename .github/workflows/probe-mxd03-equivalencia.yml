@@ -1,0 +1,61 @@
+name: "Probe S165 MxD03: equivalencia del flag con el brazo X de MOD-B (solo lectura)"
+
+# Tarea 4 del plan docs/superpowers/plans/2026-10-25-flag-mxd03-modis.md. Corre calculate_vrp con
+# enable_modis_geo_mxd03 encendido EN MEMORIA (el perfil no se toca) sobre los 5 granulos del humo y compara cada record
+# con el brazo X de MOD-B; con el flag apagado, con el brazo K (control negativo). Arnes:
+# experiments/_s165_mxd03_flag/equivalencia.py; referencia: experiments/_s165_mxd03_flag/referencia_mod_b.jsonl.
+# Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# Lo despacha la coordinadora (workflow_dispatch solo existe desde main, S73).
+# A43: "on" entre comillas. S141: pipefail con tee. A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene
+# vacio. MODIS solo en Linux (pyhdf).
+"on":
+  workflow_dispatch:
+
+concurrency:
+  group: probe-s165-mxd03-equivalencia
+  cancel-in-progress: false
+
+jobs:
+  equivalencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+          node --version
+      - name: Equivalencia
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          mkdir -p out
+          echo "commit $(git rev-parse HEAD) ref ${GITHUB_REF_NAME}" | tee out/procedencia.txt
+          python experiments/_s165_mxd03_flag/equivalencia.py --out out 2>&1 | tee out/equivalencia.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s165-mxd03-equivalencia
+          path: |
+            out/*.jsonl
+            out/*.log
+            out/*.txt
+          retention-days: 30
+          if-no-files-found: error

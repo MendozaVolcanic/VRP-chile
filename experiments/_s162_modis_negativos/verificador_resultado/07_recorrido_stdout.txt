@@ -1,0 +1,38 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+== 1. cobertura (A108): objetivos 413 | con resultado 413
+    ('control_s159', 'ok') 13
+    ('neg_resto', 'escena_invalida') 2
+    ('neg_resto', 'ok') 390
+    ('neg_resto', 'volcan_fuera_del_granulo') 8
+   no evaluables: [(1001, 'PuyehueCordonCaulle', '2026-03-01 03:10', 'volcan_fuera_del_granulo'), (1066, 'Llaima', '2026-05-25 02:55', 'volcan_fuera_del_granulo'), (1205, 'NevadosDeChillan', '2026-03-16 08:25', 'escena_invalida'), (1212, 'PlanchonPeteroa', '2026-03-23 08:00', 'volcan_fuera_del_granulo'), (1229, 'Lascar', '2026-04-21 08:20', 'volcan_fuera_del_granulo'), (1230, 'Tupungatito', '2026-04-22 07:25', 'volcan_fuera_del_granulo'), (1260, 'Tupungatito', '2026-05-25 07:05', 'escena_invalida'), (1355, 'PlanchonPeteroa', '2026-09-05 08:30', 'volcan_fuera_del_granulo'), (1367, 'Lastarria', '2026-09-19 07:30', 'volcan_fuera_del_granulo'), (1394, 'NevadosDeChillan', '2026-10-13 08:00', 'volcan_fuera_del_granulo')]
+
+== 2. controles (antes de leer)
+  K re-corrido = publicado: publica igual 403 de 403; pc.vrp_mw a 0,001 MW 403 de 403; sin record K 0; distintos: [] []
+  control de instrumento contra S159 (mismo id): iguales 13 de 13; protegidas que publican 11 de 11
+     (19, 'Lascar', '2026-04-05 01:35', 'pos_prot', 2, 2, 'publica', 'IGUAL')
+     (23, 'Lascar', '2026-04-18 01:50', 'pos_prot', 2, 2, 'publica', 'IGUAL')
+     (31, 'Lascar', '2026-05-03 01:45', 'pos_prot', 2, 2, 'publica', 'IGUAL')
+     (55, 'NevadosDeChillan', '2026-08-23 02:35', 'neg_resto', 0, 0, 'calla', 'IGUAL')
+     (65, 'NevadosDeChillan', '2026-10-15 01:05', 'pos_prot', 5, 5, 'publica', 'IGUAL')
+     (75, 'Lascar', '2026-03-10 07:50', 'pos_prot', 4, 4, 'publica', 'IGUAL')
+     (79, 'Lascar', '2026-03-15 07:45', 'pos_prot', 3, 3, 'publica', 'IGUAL')
+     (83, 'Lascar', '2026-03-27 07:10', 'pos_prot', 3, 3, 'publica', 'IGUAL')
+     (89, 'Lascar', '2026-04-07 07:35', 'pos_prot', 2, 2, 'publica', 'IGUAL')
+     (97, 'Lascar', '2026-04-25 07:35', 'pos_prot', 1, 1, 'publica', 'IGUAL')
+     (99, 'PuyehueCordonCaulle', '2026-04-27 07:20', 'neg_resto', 0, 0, 'calla', 'IGUAL')
+     (141, 'NevadosDeChillan', '2026-10-01 08:35', 'pos_prot', 8, 8, 'publica', 'IGUAL')
+     (147, 'NevadosDeChillan', '2026-10-12 07:20', 'pos_prot', 3, 3, 'publica', 'IGUAL')
+  recorte nativo guardado: 403 de 403 evaluables; sin guardar: []
+
+== 3. neg_resto: n evaluables 390, el port publica en x = 2
+   publicaciones: [(1120, 'Llaima', '2026-07-24 01:05', 1, 0.43040338779385484, ''), (1251, 'Lascar', '2026-05-11 07:55', 1, 0.296898301572907, '')]
+   contra K re-corrido en vez del publicado: x = 2
+   tasa ponderada 0.0053 (cruda 0.0051)
+   por volcan: {'Chaiten': '0/45', 'Copahue': '0/39', 'Isluga': '0/31', 'Lascar': '1/20', 'Lastarria': '0/32', 'Llaima': '1/38', 'NevadosDeChillan': '0/35', 'PlanchonPeteroa': '0/36', 'PuyehueCordonCaulle': '0/39', 'Tupungatito': '0/35', 'Villarrica': '0/40'}
+   por cenit: {'z<=40': '1/168', 'z>40': '1/222'}
+   por plataforma: {'MODIS_AQUA': '1/200', 'MODIS_TERRA': '1/190'}
+   por tramo #535: {'antes': '2/308', 'desde': '0/82'}
+   por partida: {False: '2/386', True: '0/4'}
+
+== 4. veredicto (03_regla_decision.py)
+  x = 2 de n = 390: DeltaE punto -18.1, IC 95 % [-43.8; +40.1] -> INDECIDIBLE; R3 IC [0.0014; 0.0166] -> REPRODUCE; cota conservadora +64.0

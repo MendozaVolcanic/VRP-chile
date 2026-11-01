@@ -1,0 +1,1845 @@
+commit 3868c5db7ec5df1c33645beb18d27f58b103fd6d
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -1875,5 +1875,6 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
++6. `docs/SINTOMAS.md` (S157, tarea 1.34): **antes de proponer una palanca, leer ahí el síntoma** (magnitud baja, sobre-publicación, posición corrida, recall, A/B inerte, run verde sin datos) con lo medido, lo abierto y lo que no se reabre.
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -2238,7 +2238,7 @@ cosa: ver D17.
++## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA (premisa probada, consecuencia NO)** S124/S125 ⚠️ **S157 (A113, tarea 1.34): el «mecanismo geométrico SÍ quedó probado» del bloque S130 de abajo NO atribuye la caída con el ángulo a D17. La tarea 1.14 (`experiments/_s151_presupuesto_magnitud/README.md` §3.2) midió que el Npix de MIROVA no crece hacia el borde y que lo que empeora es nuestro fondo (F_bg 0,85 a 0,73): la dependencia angular queda SIN ATRIBUIR, con D25 y D17 compitiendo (ver `docs/SINTOMAS.md` §1). Texto conservado por historia**
+diff --git a/docs/SINTOMAS.md b/docs/SINTOMAS.md
+@@ -0,0 +1,219 @@
++# Índice por síntoma
++
++> Creado S157 (2026-10-20, tarea 1.34 de `tasks/LOOP_OBJETIVOS.md`, rama `loop/activo`). **Por qué existe**: el
++> 2026-10-19 se atribuyó la caída de magnitud de Chillán a D17 citando una lectura de S130 que la tarea 1.14 ya
++> había retirado. El conocimiento estaba, pero repartido entre `docs/MIROVA_DIVERGENCES.md`, las reglas A-n de
++> `CLAUDE.md` y los documentos de sesión, y se busca por número cuando uno llega con un síntoma.
++>
++> **Cómo se usa**: antes de proponer una palanca, leer el síntoma acá, seguir los punteros y estratificar por
++> cenit, sensor, volcán y régimen (C0 antes del 2026-09-18, K después; antes y después de #535). Este archivo
++> **no es fuente de verdad**: resume y apunta. Si un puntero y este resumen discrepan, manda el puntero, salvo que
++> el puntero no tenga todavía la marca ⚠️ de lo que aquí se dice rebajado (entonces la discrepancia es un hallazgo
++> A113: se marca el puntero en el mismo PR). **Se actualiza en el mismo PR en que cambia una divergencia** (A113).
++>
++> **Convención**: `D25` (sin guion) es una divergencia del catálogo; `D-19` (con guion) es una decisión de Nicolás
++> en la tabla de decisiones de `tasks/LOOP_OBJETIVOS.md`. Las tareas `1.n` y las decisiones `D-n` posteriores a
++> S150 viven en la rama `loop/activo` de ese archivo, no en `main`. Lo que no está en `main` lleva su rama o PR.
++
++Régimen vigente: el detector K está en producción desde #850 (2026-10-18): sin Test 1 integrado (D30), conectiva
++`max` en los Tests 2 y 3, banda 22 primaria en MODIS (D21). En los datos rige desde la observación del 2026-09-18
++(`frontend/cambio_detector.js`, `DATOS_K_DESDE_UTC`), salvo 26 records MODIS Terra; la frontera se moverá más
++atrás cuando se aplique el reproceso histórico con K (marca S157 de `docs/MISSION.md`). Cifras de la adopción:
++`experiments/_s153_fk_v2/combinado.log` (veredicto), `r3/controles_salida.txt`, `v1.log` y `v2.log`; regla
++`experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`. Todo lo medido con C0 hay que releerlo con eso.
++
++## 1. Magnitud baja contra MIROVA
++
++**Medido**
++- La razón contra MIROVA cae con el cenit del sensor. S130: VIIRS 375 de 0,740 cerca del nadir a 0,253 sobre 50°,
++  MIROVA plano (`docs/s130/GRADIENTE_CENITAL.md`). En MODIS no es monótono. La curva es real; su explicación por
++  D17 está retirada (siguiente punto y marca S157 de D17).
++- Tarea 1.14 (`experiments/_s151_presupuesto_magnitud/README.md`): el reparto selección/fondo depende de la
++  bisagra; **§3.2: el ángulo NO es la firma del remuestreo** (el Npix de MIROVA no crece hacia el borde; lo que
++  empeora es nuestro fondo, F_bg 0,85 a 0,73). La dependencia angular queda SIN ATRIBUIR. D25 es la palanca que
++  más mueve (§3.4: ×1,28 medido dentro del brazo `literal`, no sobre producción; crece hacia el borde, Tabla C2).
++- En tensión con lo anterior: AUDIT_S155 F5-03 (`docs/AUDIT_S155.md`): en VIIRS 375 de Chillán el fondo no explica
++  la caída con el ángulo (con fondo cero la razón sigue cayendo).
++- Chillán en erupción con K, 87 pasadas (PR #869 ABIERTO, rama `s157-magnitud-chillan`,
++  `experiments/_s157_magnitud_chillan/README.md`, verificador PARCIAL): en VIIRS 375 oblicuo **ni con fondo cero
++  se cierra el déficit**; en VIIRS 750 de borde pesa el recorte del tablero (F_rec 0,57). Recomienda D25 primero
++  con el criterio de Chillán corregido (V375 sólo con cenit de 40° o menos) y D17 después. Tabla por cenit:
++  script `razon_por_cenit` en `experiments/_s154_chillan/`, que sólo existe en la rama `loop/activo` (por eso no
++  va como ruta completa: el guard G2 de S146 rechaza rutas que no están en `main`).
++- AUDIT_S155 F2-02: Chillán se ve un nivel más abajo que MIROVA (24 de 38 Moderado mostradas como Bajo o Muy Bajo);
++  no es propio de K y depende del cenit.
++- AUDIT_S155 F5-01: en VIIRS 750 de Chillán (13 de 37 pasadas) se publica un cúmulo parcial; 36 % del déficit es el
++  modo de un píxel y 64 % la selección. La tarea 1.8 (`experiments/_s151_modo_un_pixel/README.md`, bajo C0) había
++  medido que el modo sólo decide en VIIRS 750 y no cambia publicaciones. Y F5-09: VIIRS 375 cuenta doble en el borde
++  del barrido (6 de 51 pasadas de Chillán, todas sobre 50°), lo que infla en vez de bajar.
++- D33 (#872, mergeado con flag apagado): con K la vuelta a radiancia de MODIS usa la λ de B21 sobre temperaturas
++  de B22; encender el arreglo sube la magnitud MODIS +5 a +7,5 % (`experiments/_s157_lambda_b22/README.md` §9).
++  No es la palanca de Chillán. Encender `enable_modis_mir_lambda_por_banda` es decisión de Nicolás (A45).
++- D32: MIROVA publica la suma de todos los alertados; nosotros un recorte (cúmulo, y en banda I su núcleo). A10
++  quedó rebajada en su premisa (`pc.vrp_mw` no es «lo que MIROVA reporta»). AUDIT_S155 F3-06: el auto-audit usa
++  `pc.vrp_mw` y mezcla sensores, así que su «K/C0 = 1,0» no es la magnitud publicada.
++- Vecinos tibios en VIIRS 375 (`docs/HYPOTHESIS_LOG.md`, H_S141_VECINO_FOCO_V2, bajo C0, 38 pasadas focales): ningún
++  test limitante común y el fondo del cúmulo no cierra la brecha en ningún volcán focal; los nevados quedaron
++  INDETERMINADO. Es sobre la selección de vecinos, **no evalúa D25**. H_S143_D22_D25 (mismo archivo) es el A/B de
++  D22 y D25 en V375.
++- En M-band el efecto dominante de D25 cae del lado de la sobre-publicación (`experiments/_s145_d25_v750/sustrato.py`,
++  sección S145 de D25).
++- Saturación en Chillán: 0 píxeles saturados en 385 gránulos (tarea 1.18; citado en
++  `experiments/_s155_audit/frente_5/INFORME.md`). D24 (MODIS DN 65533 se elimina) sigue abierta.
++
++**Abierto**: D25 (fondo = mediana del anillo, no media de vecinos; pre-registro sobre K en PR #871, borrador,
++espera sello); D17 como hipótesis competidora de la curva angular (tarea 1.36, rama `loop/activo`: sólo si después
++de D25 queda dependencia con el cenit); D32; D33 (encendido); D24.
++
++**No reabrir / no citar como cierre**
++- «El ángulo es D17» o «el grueso del déficit es geométrico»: retirado por 1.14 §3.2. Es el error que motivó este
++  archivo.
++- A99 («0,995 a igual conteo»): rebajada S146; compensa dos factores opuestos y entre volcanes. No apaga la
++  búsqueda en k, área, banda ni Planck.
++- El «NO ADOPTAR» de D22/D25 de H_S143 se midió con el Test 1 encendido, `min` y sólo V375 (AUDIT_S155 F4-05): no
++  vale para K.
++- La suma de píxeles del TIF de MIROVA no es VRP (A24, D6).
++- El tope de 5 MW (D9, A23) recorta por arriba y no está medido que lo recortado sea artefacto. AUDIT_S150 lo listó
++  en MODIS en erupción, pero en las 105 pasadas pareadas de Chillán no recortó ninguna
++  (`experiments/_s155_audit/frente_5/INFORME.md`).
++
++## 2. Sobre-publicación (publicamos donde MIROVA miró y no vio nada)
++
++**Medido**
++- La brecha de paridad es de sobre-publicación, no de recall (A98; `docs/audit_s139/`).
++- K bajó la publicación de VIIRS 375 en negativos limpios de 88,2 y 85,4 % (C0) a 2,5 y 3,7 % (V1 y V2,
++  `experiments/_s153_fk_v2/r3/controles_salida.txt`, sección 9). Fuera de Láscar, MODIS publica 7 de 825 (V1) y
++  18 de 2.173 (V2), contra 107 y 242 con C0 (marca S157 de D11).
++- Con el Test 1 integrado encendido la métrica saturaba en 80 a 92 % en cualquier estrato (A114;
++  `experiments/_s147_residual/estructura_del_residual.py`).
++- El auto-audit mezclaba C0 y K (AUDIT_S155 F3-02); desde #862 informa por detector; el issue #864 sigue abierto.
++- Regla SN (D-9): las alertas V375 de 0,05 MW o menos cuentan como «MIROVA no vio nada»
++  (`scripts/clase_mirova.py::aplicar_regla_minimas`; `docs/MISSION.md`, criterio de victoria).
++
++**Abierto**: D26 bajo `max` (sin medir); D25 en M-band como riesgo de sobre-publicación; D9/A23 en su cara de
++co-validación del path D sobre fondo frío; la sombra de K (tarea 1.28, rama `loop/activo`; vigilancia diaria #863).
++
++**No reabrir**: los «95 % de FP son físicos» de A54 se midieron en S86, bajo otro detector (inferencia; A54 no
++tiene marca, y AUDIT_S155 F4 lista los cierres medidos bajo C0). Sirven como marco de clasificación (artefacto
++contra cat-b real, A72), no como número vigente. Un gate post-hoc sin clasificar lo que filtra repite A55.
++
++## 3. Posición corrida del cúmulo o del hotspot
++
++**Medido**
++- Píxel MODIS del cráter corrido hacia el sensor, creciendo con el ángulo (Láscar, hasta 3,5 km a 45°): marca S151
++  de D18; tareas 1.15, 1.17, 1.21 y 1.23 (rama `loop/activo`; `experiments/_s151_mxd03_etiquetas/`,
++  `experiments/_s151_mxd03_cumulo_121/`, `experiments/_s151_mxd03_sola_123/`). En Láscar bajo 35° MxD03 acerca el
++  píxel a donde VIIRS ve el calor. **Bajo C0** pierde 2 protegidas, las dos por el Test 1, que K apagó; el paso
++  siguiente es el pre-registro de MxD03 sobre K (tarea 1.30 y decisión D-19, rama `loop/activo`; sello de Nicolás).
++- Gradiente topográfico nocturno en paths de MIR absoluto (A69, D11; `docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md`),
++  **medido bajo C0**. Con K el Test 1 integrado no corre (0 de 3.661 records con `triggered_test1`, marca S157 de
++  D11); que el mecanismo siga por otra puerta (compuerta D22, etiqueta MODIS desde `final_hotspot`) es SOSPECHA.
++- `Distancia_km` de MIROVA está cuantizada a su grilla y no trae acimut (D15, A93, A107): un radio no es una
++  posición. La grilla UTM de los TIF V375 duró sólo ocho adquisiciones (A106).
++- Schema asimétrico hotspot contra cúmulo, en las dos direcciones (A46, A81; `docs/S113_A46_COHERENCE_GUARD.md`).
++- Marcador primario de `ctx_cluster` = cúmulo publicado (#853, decisión D-24).
++
++**Abierto**: geolocalización MODIS (`_interp_geo` contra MxD03, D-19); D11 (qué hacer con ella con K es decisión
++de Nicolás, marca S157); caso PCC V750 del 2026-10-10 (issue #865).
++
++**No reabrir**: PCC lejos del cráter es el lacolito real (A20, A68); el offset de Lastarria es Lazufre (A69); el
++A/B vent contra `nti_peak` ya se corrió en S106 y se descartó (A84). Auditar el offset con mediana y rumbo, no con
++distancia media (A61, A70).
++
++## 4. Pérdida de recall o alerta protegida sin publicar
++
++**Criterio vigente**: `docs/MISSION.md`, «Criterio de victoria de la réplica»: ninguna alerta protegida (1 MW o
++más, lectura A, D-4) se puede perder; bajo 1 MW una pérdida y una publicación de más pesan igual. La unidad del
++operador es la **noche** (A94).
++
++**Medido**
++- 874 de 877 noches con alerta detectadas (A98, medido S139, antes de K).
++- K, lectura A: CUMPLE en V1 y V2 (`experiments/_s153_fk_v2/combinado.log`). Por pasada, en VIIRS 375 publica 19
++  de 21 protegidas A en V1 y 38 de 38 en V2; pierde alertas Muy Bajo (V375 16 de 194 y 26 de 388; V750 14 de 30 y
++  26 de 75), que pesan igual que las publicaciones de más (`r3/controles_salida.txt`, secciones P2 y 9).
++- MODIS con K: recall de alertas de 7 a 60 de 65 y 39 de 39 protegidas de Láscar en V2 (marca S157 de D12).
++- Issue #864 (auto-audit del 2026-10-19): recall VIIRS 750 de 73,3 % con K (n = 30) y 5 protegidas sin publicar por
++  pasada (Tupungatito, con referencia sospechosa sólo OCR de Suomi NPP; PCC; Chillán), todas con la noche cubierta.
++- Protegidas MODIS de Chillán sin detección (2026-10-12 07:20 y 10-15 01:05, cenit ~58°): por noche no se pierden,
++  VIIRS 375 publicó esas noches (AUDIT_S155 F3-04 y F5-05).
++- D25 en noches: el cráter en 0,0 MW de VIIRS 750 no pierde noches de volcán (0 de 33, sección D25).
++- Estratos fuera de las etiquetas del evaluador pueden esconder el costo (A118 punto 2).
++
++**Abierto**: issue #865 (PCC V750, K pierde lo que la sombra publica); reversión pre-autorizada de K si se pierde
++una protegida A que MIROVA y la sombra publican y producción calla, confirmada en la cabecera de la imagen (tarea
++1.28, rama `loop/activo`); la reversión ya no es un `git revert` limpio (choca en 3 archivos y no toca los datos
++reescritos, marca S157 de `docs/MISSION.md`); D12 (leer su marca S157); D27 diurno (rama cableada y apagada, A/B
++sobre K en tarea 1.32, rama `loop/activo`); D13 (la cerca `far` del frontend apaga 70,7 % de la magnitud, no 31 %).
++
++**No reabrir / leer antes**: A82 está rebajada (su 90 % no tiene tasa base); A83, A84 y A85 la heredan. Foco
++sub-píxel: SWIR de alta resolución, no VRP (A77); fase explosiva invisible al MIR (A78). Reflejo solar diurno en la
++referencia: perderlo es correcto (A76). Nombres de volcán en el CSV (A14) y calidad de la referencia (§8) antes de
++contar un FN.
++
++## 5. El A/B no cambia nada (o cambia menos de lo esperado)
++
++**Medido**
++- El flag no llegaba a todos sus consumidores: la caja D18 sólo llegaba al primer pase y el segundo recapturaba
++  (A118; `docs/audit_s148/POR_QUE_LA_CAJA_NO_APAGA.md`; arreglado S149, guard
++  `tests/test_guard_caja_llega_al_segundo_pase_s149.py`). Con el cableado arreglado la caja se volvió a medir en
++  S151: KC NO CUMPLE (veto) en D1 por una protegida MODIS de Láscar a 3,2 km, válido con la geolocalización MODIS de
++  hoy; sobre K su neto es cero en 8 volcanes (marcas S151 de D18). El «D18 nunca se ha medido» de A118 quedó viejo.
++- Saturación por otra palanca encendida (A114): el A/B de la caja de S130 corrió con el Test 1 integrado.
++- Sin sustrato: la palanca nunca llega a ejecutarse (`docs/s130/AB_FONDOS_SIN_SUSTRATO.md`).
++- La clave se leía de otra sección del YAML (A89, `enable_utm_regrid`): leer el flag desde `pipeline.profile`.
++
++**Antes de concluir «inerte»**: medir cuántos casos mueve y el nulo del instrumento (A116, A110); trazar por etapa
++(A75); paridad de cobertura entre brazos (A108, `experiments/_s143_evaluador/bajar_tramos.py --estricto`); no
++cruzar fronteras de régimen (A104: #535; frontera de K; A85, marca S153: records MODIS de enero a junio de 2026
++escritos con los gates intra-radio encendidos); despachar cada ventana desde un tag para no mezclar dos pipelines
++(decisión D-15, rama `loop/activo`).
++
++## 6. Run verde sin datos, o el aviso no llega
++
++**Medido (S157)**
++- Cortacircuito de búsqueda en CMR (S116, comentario en `pipeline/fetch.py:475-482`; distinto del de descarga en
++  LANCE de A64): con `SEARCH_CMR_TIMEOUT` (l. 520) marca CMR caído y salta productos con `SEARCH_SKIP` (l. 482) sin
++  fallar el job. En el histórico de Chillán faltaban 326 pasadas de la operacional
++  (`experiments/_s157_chillan_rearmado/cobertura.md`, rama `s157-chillan-rearmado`), casi todas en trozos verdes del
++  run original (bitácora del 2026-10-20 08:15 UTC en `tasks/LOOP_OBJETIVOS.md`, rama `loop/activo`).
++- La segunda pasada de Chillán (run 39391332259) salió 31 de 31 verde con 0 records nuevos: CMR devolvía HTTP 500.
++- El NRT salió `success` de 09:10 a 12:10 UTC sin commits de datos; el healthcheck mira 48 h
++  (`.github/workflows/nrt-healthcheck.yml`). No se pierde nada porque `default_date_window`
++  (`scripts/run_pipeline.py:384`) reprocesa 7 días; cuesta latencia (bitácora del 2026-10-20 12:30 UTC, misma rama).
++- El merge de `reproc-chunked.yml` borraba lo que main tenía fuera de las ventanas; arreglado en #873.
++- Antes: token de Earthdata vencido que apagó el NRT 5 días sin que el aviso llegara a una persona (`docs/AUDIT_S150.md`;
++  nota del token en `CLAUDE.md`, Constraints técnicos); credenciales que bloquean la cuenta (A71); host caído que cuelga el job (A64).
++
++**Abierto**: vigilar cuántos `SEARCH_SKIP` hay por corrida (SOSPECHA de días sin procesar en el NRT); plan de
++relleno sin despachar (`experiments/_s157_relleno/`).
++
++**Regla**: contar las pasadas de cada brazo o trozo contra un control ANTES de leer un veredicto (A108); mirar
++duración y salida del job, no sólo su color (lección S141: un `tee` sin `pipefail` devolvió 0 con el script
++caído); markers con `flush=True` para ver dónde se cuelga (A65); el watchdog juzga cada job desde #867. Un guard
++puede pasar por subcadena (A92), y un laboratorio puede quedar más ciego que producción sin que nadie lo note (A117).
++
++## 7. Un número que no se reproduce o cambió entre sesiones
++
++- Corpus vivo que crece, también hacia atrás por backfill: registrar proporción y ventana (A90).
++- Cambio de régimen: #535 (A104); frontera de K en la fecha de observación 2026-09-18, no en el merge
++  (AUDIT_S155, #860).
++- Citas `archivo:línea` que derivan: remapear por contenido (A101).
++- Suite corrida mientras se editaba (A112); empates desempatados según la CPU (decisión D-16 y tarea 1.22,
++  rama `loop/activo`); reprocesos paralelos sobre el mismo JSON lo corrompen (A47).
++- El ejemplo de A87 no se reproduce hoy: la lección vale, el número no.
++
++## 8. La referencia de MIROVA da algo raro
++
++- No sirve igual todo el año (A119 con su marca S151; `scripts/calidad_referencia_mirova.py`;
++  `docs/audit_s139/MAPA_BASES_MIROVA_V1.md` §2). El OSF no es el NRT (A105).
++- Alertas «sólo OCR» de Suomi NPP antes del 2026-10-09 pueden traer la distancia de otra pasada (issue #864;
++  arreglo en Mirova-v1#20). La línea de MIROVA del tablero no leía el OCR (AUDIT_S150, familia 4).
++- Artefactos solares diurnos publicados por MIROVA (A76). TIF de MIROVA: no sumables (A24), CRS y hora a verificar
++  (A106), y a veces la misma imagen servida bajo una hora nueva (A106).
++
++## 9. Un cierre que no se sostiene
++
++Un cierre que no cita script, run, PR, paper ni `archivo:línea` es una creencia (A111;
++`experiments/_s145_censo_cierres/censo.py`). Hereda las premisas de la lectura con que se derivó (A95) y la rebaja
++se propaga a los hijos en el mismo PR (A113). Leer el PDF renderizado, no la capa de texto (A95). Si un criterio
++necesita un umbral, preguntarle primero a la referencia de MIROVA (A115).
+commit 5fd2ac2ec4797e77c4283d27c72e60f6715e0895
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -381,7 +381,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  absoluto (`pipeline/process_modis.py:1056`, era 1009 hasta S157). Corpus al 2026-10-14 (65.705 records): 1.565 cúmulos
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -3192,3 +3192,29 @@ por MISSION. Estado: **ABIERTA, descrita, sin decisión**, prioridad media, por
++
++## D33: Con K, la magnitud MODIS vuelve a radiancia con la longitud de onda de B21 aunque la temperatura venga de B22. **ABIERTA, arreglo listo detrás de flag apagado (registrada S157)** S157
++
++**Qué dice el paper.** Coppola 2016a (`documentacion/sp426.5.pdf`, p. 3, leída renderizada): las bandas 21 y 22
++están «centred at 3.959 µm» las dos, y MIROVA arma con sus RADIANCIAS una sola banda corregida L21ok a 3,959 µm;
++el exceso de la Ec. 6 (p. 8) es una diferencia de radiancias y RP = 18,9 · A · ΔL (Ec. 7).
++
++**Qué hacemos.** Pasamos por temperatura de brillo y volvemos a radiancia. Con K (B22 primaria, D21) la ida es con
++3,959 µm y la vuelta con 3,929 µm (`BAND21_LAMBDA`) en `pipeline/process_modis.py` (en el tag
++`pre-s157-lambda-b22`: l. 1036, 1040, 1062 en producción; 746, 1155, 1253-1254, 1367, 1377, 1392 en caminos
++apagados; 1528 en el diagnóstico). La radiancia que entra a la Ec. 7 sale ~5 % más baja que la medida. Bajo C0
++ida y vuelta usaban la misma λ y no había error: la divergencia nace con la adopción de K.
++
++**Cuánto.** `experiments/_s157_lambda_b22/medir_efecto_lambda.py`: F (corregida / actual) 1,053 a 1,075, mediana
++1,0575, en los 24 records MODIS con K y cúmulo (2026-09-18 a 2026-10-20). Contra MIROVA, 12 pasadas (11 de
++Chillán): razón mediana 0,362 → 0,382. Es un sesgo de signo fijo, chico; no es la palanca de la brecha de Chillán
++(D25). El 18,9 no se toca: S14 lo reconstruyó con las columnas de radiancia del propio OSF de MIROVA
++(`experiments/21_results.json`), no con nuestra λ.
++
++**Arreglo.** `enable_modis_mir_lambda_por_banda` (OFF; con OFF el procesador es bit a bit el del tag, 96 de 96
++combinaciones). Encenderlo es decisión de Nicolás (A45). Detalle y traza completa:
++`experiments/_s157_lambda_b22/README.md`.
++
++**Caras no tocadas, anotadas:** (1) el `NTI_app` usa la misma λ de B21 (3,929) donde el paper usa la de la banda MIR
++(p. 5, Ec. 2, 3,959): mueve detección, SIN MEDIR; (2) `BAND21_LAMBDA = 3.929` es el borde inferior de la ventana,
++no el centro de 3,959 µm que da el paper para B21.
+commit f101d73046f6639e1c8d60a8bdfb9b57b77e3078
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -15,6 +15,11 @@ Repo: https://github.com/MendozaVolcanic/VRP-chile
++> ⚠️ **S157** (`experiments/_s155_audit/frente_1_verif/INFORME.md` F1-12): en `main` el último bloque de arranque
++> es el de S150, anterior a K; los de S151 en adelante viven en la rama `loop/activo`
++> (`git ls-tree --name-only origin/loop/activo tasks/`). Y el «hoy: AUDIT_S123.md» del bloque quedó viejo: el
++> comando mismo da la última. Bloque conservado por historia.
++
+@@ -117,8 +122,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  laboratorio `experimental` sigue con el detector anterior y es la sombra. Reversión: (⚠️ **S157**:
++  el PR es **#850**, squash `34cea39e`, 2026-10-18 09:57:30 UTC; los datos cambian de detector en la
++  observación del 2026-09-18, no en el merge, porque los 30 días previos se reescribieron con K; y el
++  `git revert` ya no es limpio: sobre `main` del 2026-10-20 choca en tres archivos y no toca esos
++  datos, ver la marca S157 del inicio de `docs/MISSION.md` y `experiments/_s157_propagar_k/revert_hoy.out`)
++  `git revert` del PR (tag `pre-s153-adopcion-k`); ficha `docs/FICHA_SDA_VRP_CHILE.md` v1.9. El texto que sigue,
+@@ -175,6 +184,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++
++> ⚠️ **S157, propagación de K** (A113): las reglas A-número que explican un resultado por el Test 1 integrado en el
++> ROI (entre otras A12, A19, A66, A67, A69, A100 y A114) se escribieron con ese camino encendido. Desde #850
++> (2026-10-18; en los datos desde la observación del 2026-09-18) no corre en la réplica (D30): la lección de
++> método de cada regla se conserva, el mecanismo descrito ya no actúa en producción. A69, A82, A100 y A117 llevan
++> además su marca propia.
+@@ -848,7 +863,13 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A69.** ⚠️ **S157, propagación de K** (`experiments/_s155_audit/frente_1_verif/INFORME.md` F1-08): el camino
++  que esta regla culpa, el Test 1 integrado sobre MIR absoluto, está apagado en la réplica desde #850 (0 de 3.661
++  records procesados después del merge con `triggered_test1`, `experiments/_s155_audit/frente_1/efecto_k_en_datos.out`).
++  El «sigue viva en los 3 sensores» del sub-punto S125 de abajo describe el estado previo a K. Parte del mecanismo
++  puede seguir por otra puerta (la compuerta `bt > t_bg + 3 K` de D22 sigue encendida; la etiqueta MODIS sale del
++  `final_hotspot`): SOSPECHA del verificador de S155, no medida. Texto conservado por historia.
++  **A69. El gradiente topográfico nocturno contamina los paths que usan MIR ABSOLUTO;
+@@ -1017,7 +1038,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A82.** ⚠️ **S157, propagación de K** (`experiments/_s155_audit/frente_1_verif/INFORME.md` F1-04): el «Sólo
++  Láscar; en los otros diez volcanes no está medido» de la marca que sigue ya no vale: K midió MODIS con banda 22 y
++  `max` en los 11, y fuera de Láscar publica en negativos limpios 7 de 825 (V1) y 18 de 2.173 (V2), contra 107 y 242
++  con el detector anterior (`experiments/_s153_fk_v2/v1.log:178`, `v2.log:233`; 158 de los 242 son de PCC). La
++  condición «bajo banda 21» con que S138 dejó vivo el «irreducible» ya no rige en producción. Qué hacer con D11 lo
++  decide Nicolás. ⚠️ **S150, marca agregada en S151 (A113, hija de la marca S151 de D21 en `docs/MIROVA_DIVERGENCES.md`)**: el «a 1 km el foco débil y el gradiente difuso son el mismo objeto» queda en tensión con lo medido con banda 22 en Láscar, marzo a junio de 2026 (`docs/S150_RESULTADO_MESES.md`, verificado): con banda 22 MODIS publica 68 de 73 alertas de MIROVA y 11 de 96 pasadas en que MIROVA miró y no vio nada, y con `max` 67 de 73 y 2 de 96. Sólo Láscar; en los otros diez volcanes no está medido. Marcas anteriores conservadas: **⚠️ REBAJADA S124: «agotado» ya no aplica.** ⚠️ **Rebajada también por la vía espectral en S138 (AUDIT_S138 C3)**: los ejes que la regla da por agotados se barrieron sobre records producidos con banda 21 primaria (D21) y compuerta `bt > t_bg + 3 K` (D22), las dos divergencias que S137 abrió; «irreducible» vale sólo bajo esa configuración. ⚠️ **Y el número que sostiene el cierre no tiene tasa base, verificado S146 (AUDIT_S146 V-02)**: el «el pipeline encuentra el cráter 90 %» mide presencia de cúmulo, no detección. Con negativos limpios (pasadas donde MIROVA miró y todas sus filas son RUTINA) hay cúmulo con magnitud dentro del inner en **89,1 % de 4.800 pasadas MODIS**, contra **93,7 % de 158** cuando MIROVA alertó (ventana 2026-01-29 a 2026-08-28; después de #535, 86,0 % de 500 negativos y sólo 2 positivos): menos de 5 puntos de contraste, y 144 de esas 158 positivas son de Láscar. En VIIRS sí hay contraste (84,5 contra 62,1 en I-band; 47,5 contra 22,8 en M-band), así que el instrumento funciona y el problema es del número, no de la medición. Consecuencia: destapar la etiqueta destaparía por igual las noches con y sin actividad. **Esta rebaja baja también a A83, A84 y A85**, que citan el «irreducible / agotado» de A82 (A113). La auditoría S114 en que se
+@@ -1304,7 +1330,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A100.** ⚠️ **S157**: con K el `keep_peak` de esta regla (el del filtro contextual del Test 1, D10 y D19) no actúa, porque sólo corre sobre records con
++  `final_hotspot_source == "test1"` y el Test 1 integrado está apagado (D10, D30; 0 de 3.687 records con esa fuente
++  desde la observación del 2026-09-18, `experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt`). El «nunca
++  apagarlo solo» vale para el detector anterior. El keep-peak focal de MODIS y VIIRS 750 (`FOCAL_CLUSTER_KEEP_PEAK`,
++  `pipeline/process_modis.py:1172`) es otro mecanismo y sigue corriendo. **A100. `keep_peak` daba paridad por accidente** con un píxel a ~3 km del cráter (S139): nunca apagarlo solo.
+@@ -1480,7 +1510,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++    `pipeline/profiles/`). (⚠️ **S157, FALSO desde K** (`experiments/_s155_audit/frente_1_verif/INFORME.md`
++    F1-07): el laboratorio quedó congelado con el detector anterior y difiere de producción en los tres flags
++    de K; en MODIS ve **menos**: en V2 el brazo C0 del A/B, que es el detector con que quedó el laboratorio,
++    publica 6 de 39 alertas protegidas contra 39 de 39 de K
++    (`experiments/_s153_fk_v2/v2.log:223-224`), aunque en VIIRS 375 y en negativos publica más. El guard de
++    esta regla sólo compara pisos de magnitud y sigue verde. Texto original:) Hoy el laboratorio es **idéntico** al operacional salvo el directorio de
+@@ -1822,7 +1857,9 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
++   y **D12** (⚠️ **S157**: con K, banda 22 y `max` desde #850, MODIS publica las 39 alertas protegidas de Láscar de la
++   ventana V2 contra 6 del detector anterior, `experiments/_s153_fk_v2/v2.log:223-224`; el «pierde ~70/79» de D12 es
++   previo a K y si D12 se cierra lo decide Nicolás. Texto original:) (FN MODIS; C2 peak-of-kernel refutado en S122, cierre formal pendiente
+@@ -1831,7 +1868,9 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
++   D11 cara far→summit (⚠️ **S157**: la condición «bajo banda 21» con que S138 dejó vivo este cierre ya no rige desde K
++   (#850); ver la marca S157 de D11 en `docs/MIROVA_DIVERGENCES.md` y de A82. Qué hacer con D11 lo decide Nicolás.)
++   (**⚠️ S125: leer con la rebaja de A82 — la auditoría S114
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -106,6 +106,11 @@ Cobertura estimada: **~70% para VIIRS** (375m y 750m).
++> ⚠️ **S157, propagación de K** (A113): los recall de abajo se midieron con el Test 1 integrado encendido (S27), que
++> con K no corre (D30, #850). K deja de publicar 16 de 194 alertas Muy Bajo de VIIRS 375 en V1 y 26 de 388 en V2
++> (`experiments/_s153_fk_v2/v1.log:91`, `v2.log:148`). Ver la marca S157 de D4 en `docs/MISSION.md`. Texto
++> conservado por historia.
++
+@@ -698,7 +703,7 @@ Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cr
++| D4 | Recall sub-pixel summit (Lastarria 8%, Planchón 4%) | (⚠️ **S157**: cerrado con el Test 1 integrado, que con K no corre; ver la marca S157 de D4 arriba y en `docs/MISSION.md`. Texto original:) ✅ **Cerrado S27** — H_S27_1 confirmada categóricamente | — |
+@@ -1433,6 +1438,12 @@ Cuando S62+S63 completen:
++> ⚠️ **S157, el «ADOPTADO» del encabezado ya no actúa** (propagación de K, A113; `experiments/_s155_audit/frente_1_verif/INFORME.md`
++> F1-14): el filtro contextual y el keep-peak sólo corren cuando `final_hotspot_source == "test1"`
++> (`pipeline/process_viirs.py:1876`), y con K el Test 1 integrado está apagado (D30, #850): 0 de 3.687 records con esa
++> fuente desde la fecha de observación 2026-09-18 (`experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt`).
++> Los flags siguen en `true` en el perfil, pero no tienen sobre qué actuar. Encabezado y texto conservados por historia.
++
+@@ -1489,7 +1500,20 @@ Guard anti-revert: `tests/test_detection_anchor.py`. Resultados: det→cráter T
++## D11 — ⚠️ **S157: la condición del cierre (banda 21 primaria) ya no rige en producción desde K (#850); ver la marca de abajo** · Sesgo topográfico de los paths MIR-absolutos (A69) — **CERRADA S114, CONDICIONADA S138** (el «irreducible a 1 km» y el «todos los ejes agotados» valen sólo bajo banda 21 primaria y compuerta de 3 K, D21 y D22, abiertas en este mismo catálogo; la «detección fiel a Coppola» es falsa en el código de hoy: la fórmula de los Tests 2 y 3 del paper no tiene condición de temperatura y `detection_context.py:532` la impone. Ver `docs/AUDIT_S138.md` §8 C2. No se reabre el frente far→summit por la vía espectral hasta consolidar D21/D22)
++
++> ⚠️ **S157, propagación de K** (A113; `experiments/_s155_audit/frente_1_verif/INFORME.md` F1-04 y F1-08). (1) La
++> condición con que S138 dejó vivo el cierre era «sólo bajo banda 21 primaria y compuerta de 3 K». Desde #850
++> (2026-10-18, en los datos desde la observación del 2026-09-18) la réplica corre con la banda 22 primaria (D21). La
++> compuerta de 3 K (D22) sigue encendida, así que la condición cayó a medias. K midió MODIS en los 11 volcanes: fuera
++> de Láscar publica en negativos limpios 7 de 825 (V1) y 18 de 2.173 (V2), contra 107 y 242 con el detector anterior
++> (`experiments/_s153_fk_v2/v1.log:178`, `v2.log:233`; de los 242, 158 son de PCC). El «irreducible a 1 km» y el
++> «no se reabre» quedan sin el respaldo con que se escribieron. (2) El «Nuestro Test1 integrado mide "exceso sobre
++> fondo de anillo"» de la Divergencia formal describe un camino que con K no corre (D30): 0 de 3.661 records
++> procesados después del merge con `triggered_test1` (`experiments/_s155_audit/frente_1/efecto_k_en_datos.out`). Parte del mecanismo puede seguir por otra puerta (la compuerta de D22, la etiqueta
++> MODIS que sale del `final_hotspot`): SOSPECHA del verificador de S155, no medida. Qué hacer con D11 (reabrirla,
++> re-cerrarla como resuelta por K o medir sólo la cara de posición) es decisión de Nicolás; esta marca no la toma.
++> Encabezado y texto conservados por historia.
+@@ -1612,6 +1636,10 @@ queda como costo residual conocido, no de recall ni magnitud.
++> ⚠️ **S157, propagación de K** (A113): sin el Test 1 integrado (D30, #850) no hay records `test1_roi` nuevos: 0 de
++> 3.687 desde la observación del 2026-09-18 (`experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt`). El
++> «En producción son 2365 records» de abajo es previo a K y sólo vale para los records anteriores. Texto conservado.
++
+@@ -1639,6 +1667,11 @@ El espejo MODIS sigue OFF (D12, gateado por el fix de magnitud fondo-local §2).
++> ⚠️ **S157, propagación de K** (A113): con K (banda 22 y `max`, #850) MODIS publica las 39 alertas protegidas de
++> Láscar de la ventana V2 (2026-03-01 a 2026-06-12) contra 6 del detector anterior, y el recall MODIS de alertas pasa
++> de 7 a 60 de 65 (`experiments/_s153_fk_v2/v2.log:223-224`). El «pierde ~70/79» del encabezado es previo a K. Si
++> D12 se cierra, y por qué mecanismo, no lo decide esta marca. Encabezado y texto conservados por historia.
++
+@@ -2598,14 +2631,14 @@ para que nadie lo vuelva a encontrar como novedad. **No se propone cambio**: pas
++## D21: ⚠️ **S157: ADOPTADA en producción con K (#850, squash `34cea39e`, 2026-10-18; marca S153 debajo); el «usamos la 21» y el «ABIERTA» que siguen describen el estado previo** · La banda MIR de MODIS: usamos la 21 como primaria; Coppola 2016a usa la 22 y la 21 sólo donde la 22 satura. **ABIERTA (medida S133 en magnitud y S137 en detección; ningún brazo cumple aún la batería)** S137 ⚠️ **El «ningún brazo cumple» cayó S146 (AUDIT_S146 §4, frente E E-08)**: con la vara corregida en el caso A2 el mejor brazo (banda 22, sin compuerta de temperatura, fondo local, conectiva `max`) pasa de 8 a **9 de 9**, y producción baja de 6 a **5 de 9**. Eso **levanta el bloqueo de criterio** que pesaba sobre D21, D22 y D11; no autoriza adoptar nada (9 de 9 en nueve escenas MODIS es fidelidad al Apéndice A, no dice nada de la sobre-publicación). Tres brazos quedan INDECIDIBLES por no guardar posición. Texto original conservado por historia
++> sigue sin medir: la magnitud MODIS con banda 22 fuera de Láscar (sólo 7 pares en V2). Reversión: (⚠️ S157: ya no es un `git revert` limpio, choca en tres archivos y no toca los datos reescritos con K; ver la marca S157 del inicio de `docs/MISSION.md`) `git revert` del PR de adopción; estado anterior en el tag `pre-s153-adopcion-k`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
+@@ -2687,6 +2720,12 @@ los Tier A. Hay que medirlo antes de proponer nada.
++> ⚠️ **S157, el orden de bandas de abajo es el de antes de K** (propagación de K, A113;
++> `experiments/_s155_audit/frente_1_verif/INFORME.md` F1-14). Con la banda 22 primaria (D21, #850) `merge_mir_bands`
++> toma la 22 y cae a la 21 donde la 22 viene NaN (`pipeline/process_modis.py:337-338`), o sea al revés de lo que dice
++> «Lo nuestro». La saturación de la 22 queda cubierta por la 21, y el agujero en el foco aparece sólo donde la 21
++> también se pierde. Cuánto cambia eso la gravedad 3 no está medido. Texto conservado por historia.
++
+@@ -2742,7 +2781,7 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
++## D26: ⚠️ **S157: abierta y sin medir bajo `max`, la conectiva de producción desde K (#850, 2026-10-18; marca S153 debajo)** · El segundo pase calcula mu y sigma sin los filtros de no-aptos del paper (borde, dNTI < -0,1, K1). **ABIERTA, efecto nulo bajo la conectiva `min` (registrada S138)** S138 ⚠️ **el «efecto nulo» cayó en S145; marcado acá en S146**
+@@ -2750,7 +2789,7 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
++> medir bajo `max`.** La conectiva `max` es la que midieron la batería del Apéndice A (S146, mejor brazo 9 de 9) y el A/B F/K. Reversión: (⚠️ S157: ya no es un `git revert` limpio, choca en tres archivos y no toca los datos reescritos con K; ver la marca S157 del inicio de `docs/MISSION.md`) `git revert` del PR de adopción; estado anterior en el tag `pre-s153-adopcion-k`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
+@@ -2846,7 +2885,7 @@ El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el có
++## D30: ⚠️ **S157: RESUELTA en producción con K, el Test 1 integrado está apagado (#850, squash `34cea39e`, 2026-10-18; marca S153 debajo); el «ABIERTA ... sin decisión» que sigue describe el estado previo** · El Test 1 integrado en el ROI es un detector PROPIO; el Test 1 del paper es por píxel y su cita bibliográfica no corresponde a ningún artículo localizable. **ABIERTA (registrada S146, AUDIT_S146 V-06, gravedad 5; descrita, sin decisión)** S146
+@@ -2855,7 +2894,7 @@ El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el có
++> H_S27_1 (más arriba) y el «Test 1 integrado» de `CLAUDE.md` y `docs/MISSION.md`. Reversión: (⚠️ S157: ya no es un `git revert` limpio, choca en tres archivos y no toca los datos reescritos con K; ver la marca S157 del inicio de `docs/MISSION.md`) `git revert` del PR de adopción; estado anterior en el tag `pre-s153-adopcion-k`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
+diff --git a/docs/MISSION.md b/docs/MISSION.md
+@@ -15,6 +15,19 @@
++>
++> ⚠️ **S157, lo que la marca de arriba no dice** (propagación de K, `docs/AUDIT_S155.md` §2 y arreglo 5; frente 1 en
++> `experiments/_s155_audit/frente_1_verif/INFORME.md`, F1-01 y V1-01). (a) El PR de adopción es **#850**, squash
++> `34cea39e`, mergeado el 2026-10-18 09:57:30 UTC. (b) **Los datos no cambian de detector en esa hora sino en la fecha
++> de observación 2026-09-18**: los 30 días previos al merge se reescribieron con K (commits `data(backfill)` del
++> 2026-10-18, por ejemplo `5783192c1`), salvo 26 records MODIS Terra; la marca del tablero va ahí desde #860, y la
++> frontera se moverá más atrás cuando se aplique el reproceso histórico con K. (c) **La reversión ya no es un
++> `git revert` limpio**: simulado sobre `main` del 2026-10-20, choca en `frontend/cambio_detector.js`,
++> `tests/test_cambio_detector_s153.py` y `scripts/auto_audit_weekly.py`, aunque el perfil sí vuelve a C0
++> (`experiments/_s157_propagar_k/simular_revert.sh`; conflictos en `revert_hoy.out`, flags del árbol revertido en
++> `revert_hoy_control.out`); y un revert no toca los records ya
++> reescritos con K. El procedimiento de la reversión pre-autorizada tiene que resolver esos conflictos y esos datos;
++> esta marca no lo decide.
+@@ -153,6 +166,11 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
++   ⚠️ **S157, propagación de K**: la conmutación por volcán de la nota que sigue pasa por
++   `enable_test1_lbg_global`, que fija el fondo con que se recalcula el VRP del **Test 1 integrado**; con K ese camino
++   no corre (#850, D30), así que la conmutación probablemente ya no actúa en producción. SOSPECHA: no se trazó la
++   cadena entera (`experiments/_s155_audit/frente_1/INFORME.md` F1-14). Texto conservado por historia.
++
+@@ -200,13 +218,24 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
++   - ⚠️ **S157, D4 se queda sin su mecanismo** (propagación de K, `experiments/_s155_audit/frente_1_verif/INFORME.md`
++     F1-09): el «D4 recall sub-pixel (S27)» de la línea que sigue se cerró con el Test 1 integrado, que con K no corre
++     (marca del inicio de este documento). Y K deja de publicar justo alertas débiles de VIIRS 375: 16 de 194 alertas
++     Muy Bajo en V1 y 26 de 388 en V2, contra 0 con el detector anterior (`experiments/_s153_fk_v2/v1.log:91` y
++     `v2.log:148`). La regla de adopción pesó ese costo; si D4 se reabre lo decide Nicolás.
++     **D11 sesgo topográfico de paths MIR-absolutos (A69, S104)** — (⚠️ **S157, la condición del cierre ya se
++     cumplió en producción** (propagación de K, `experiments/_s155_audit/frente_1_verif/INFORME.md` F1-04): S138 dejó
++     el «irreducible a 1 km» valiendo sólo bajo banda 21 primaria, y desde K la réplica corre con la banda 22. K midió
++     MODIS en los 11 volcanes: fuera de Láscar publica en negativos limpios 7 de 825 (V1) y 18 de 2.173 (V2), contra 107
++     y 242 con el detector anterior (`experiments/_s153_fk_v2/v1.log:178`, `v2.log:233`; de los 242, 158 son de PCC).
++     El cierre queda sin el respaldo con que se escribió. Qué hacer con D11 (reabrirla, re-cerrarla como resuelta por
++     K o medir sólo la cara de posición) no lo decide esta marca.) (⚠️ **REBAJADA S146**
+@@ -257,7 +286,7 @@ Estas fueron las desviaciones históricas. Nunca repetir.
++| Vent-path entero | (⚠️ **S157**: el «sub-pixel debe ir por Test 1» describe el detector previo a K; desde #850 el Test 1 integrado no corre en la réplica. La razón primera, «no en papers», no cae. `experiments/_s155_audit/frente_1_verif/INFORME.md` F1-09. Texto original:) No en papers; sub-pixel debe ir por Test 1 (Coppola 2016a SP426.5) | Removido S27 |
+commit 34cea39e4b64f0862e4bad949016a57ea181f8c4
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -109,7 +109,18 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **NTI / dNTI contextual**: ⚠️ **S153, el detector de producción cambió (adopción de K, marca A113)**:
++  desde el merge del PR de adopción, `mirova_equivalent` corre **sin el Test 1 integrado en el ROI**
++  (`enable_test1_path: false`, D30), con la **conectiva `max`** en los Tests 2 y 3
++  (`enable_tests_23_prose_branch: true`: hacen falta el piso C1 **y** `μ+C2·σ`, no el `min` de abajo)
++  y con la **banda 22 primaria en MODIS** (`enable_modis_b22_primary: true`, D21). Regla aprobada
++  antes del resultado en `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (#848); evidencia en
++  `experiments/_s153_fk_v2/README.md` (con la lectura A, CUMPLE en V1 y V2: negativos limpios de
++  VIIRS 375 publicados de 88,2 y 85,4 % a 2,5 y 3,7 %, 0 protegidas perdidas que decidan). El
++  laboratorio `experimental` sigue con el detector anterior y es la sombra. Reversión: `git revert`
++  del PR (tag `pre-s153-adopcion-k`); ficha `docs/FICHA_SDA_VRP_CHILE.md` v1.9. El texto que sigue,
++  incluida la «rama OR completa `min(C1, μ+C2·σ)`» y la banda 21 primaria, describe el estado
++  previo a S153 y se conserva por historia. Texto anterior: el gate de detección usa los umbrales **N·σ de Coppola 2016a Tabla 1
+@@ -124,7 +135,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  (b) (⚠️ **S153: apagado en producción**, ver la marca al inicio de este punto) el **Test 1 integrado en el ROI es un detector propio**: en `sp426.5.pdf` p. 6 el Test 1 es
+@@ -240,7 +251,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  l. 1595 (era 1594 hasta la marca de adopción del detector K de S153, 1578 hasta el selector de noche o rango de S153, 1493 hasta las alertas diurnas de MIROVA con sol de S151, 1483 hasta la marca de MIROVA sin distancia de V31.1, 1473 hasta S151, que agregó la marca A113 sobre el tope D9, y 1466 hasta S150, que agregó la marca del OCR en la línea de MIROVA); la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -799,6 +799,9 @@ y sumar (que es lo que hacemos hoy y pierde señal sub-pixel distribuida).
++> ⚠️ **S153: el Test 1 integrado se apagó en producción** (adopción de K, ver la marca S153 de D30). Lo que esta
++> entrada activó en S27 quedó desactivado en la réplica; el laboratorio lo conserva como sombra. Texto conservado.
++
+@@ -1551,7 +1554,7 @@ y **se descartó TODO con datos**:
++  (dual-ROI 5/10 enable_dual_roi_bt, Tests 2∧3 OR `min(C1,μ+C2σ)` [⚠️ S153: desde la adopción de K la conectiva es `max`, #848], σ global, second-run, ETI
+@@ -2437,6 +2440,8 @@ Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
++> ⚠️ **S153, adopción de K (regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, #848):** el disco del Test 1 integrado, donde `keep_peak` publicaba el píxel del borde, queda APAGADO en producción (`enable_test1_path: false`). Lo que esta D describe para el camino del Test 1 deja de ocurrir en la réplica; el second pass sin conjunto activo (D2) no lo toca K y sigue abierto. Evidencia: `experiments/_s153_fk_v2/`. Texto original conservado.
++
+@@ -2595,6 +2600,14 @@ umbrales. Si algún día se hace, medir también el ETI (regresión NTI vs NTI_b
++> ⚠️ **S153, ADOPTADA en producción como parte de K** (A113; regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (aprobada en #848), evidencia `experiments/_s153_fk_v2/README.md`, `combinado.log`, `v1.log` y `v2.log`, sección 9): `enable_modis_b22_primary: true`
++> en `pipeline/profiles/mirova_equivalent.yaml`, junto con la conectiva `max` (D26) y sin el Test 1 integrado (D30).
++> Medido contra MIROVA en los 11 volcanes y dos ventanas: MODIS publica en 0,8 % de 893 y 0,9 % de 2.254 negativos
++> limpios (antes 12,3 y 10,8 %), y en Láscar 39 de 39 alertas protegidas (antes 6). Con esta marca, el «Producción
++> sigue en banda 21» y el «`ENABLE_MODIS_B22_PRIMARY = False`» de abajo describen el estado previo a S153. Lo que
++> sigue sin medir: la magnitud MODIS con banda 22 fuera de Láscar (sólo 7 pares en V2). Reversión: `git revert` del PR de adopción; estado anterior en el tag `pre-s153-adopcion-k`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
++> El encabezado y el texto que siguen se conservan por historia.
++
+@@ -2731,6 +2744,15 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
++> ⚠️ **S153, la conectiva de los Tests 2 y 3 cambió en producción: `max`, no `min`** (A113; regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (aprobada en #848), evidencia `experiments/_s153_fk_v2/README.md`, `combinado.log`, `v1.log` y `v2.log`, sección 9).
++> `enable_tests_23_prose_branch: true` bajo `paths:` en `pipeline/profiles/mirova_equivalent.yaml`: hacen falta
++> las dos condiciones de la prosa de Coppola 2016a (el piso C1 **y** la media más C2 desviaciones), no la más fácil.
++> Consecuencia para esta D: todo lo escrito «bajo `min`» (el «efecto nulo» del encabezado, el «el piso gobierna»
++> de «Lo nuestro» y la «Gravedad 1 hoy») describe el estado previo a S153; bajo `max` el término del sigma puede gobernar
++> el umbral (S136 midió `mu + C2 sigma > C1` en el 100 % de MODIS, pero con banda 21; con banda 22 el sigma del dNTI cae 3,5 a 4,7 veces, D21, y la proporción bajo K no está medida), que es justo el caso que el texto de abajo estima en gravedad 3. **D26 queda abierta y sin
++> medir bajo `max`.** La conectiva `max` es la que midieron la batería del Apéndice A (S146, mejor brazo 9 de 9) y el A/B F/K. Reversión: `git revert` del PR de adopción; estado anterior en el tag `pre-s153-adopcion-k`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
++> El encabezado y el texto que siguen se conservan por historia.
++
+@@ -2826,6 +2848,16 @@ El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el có
++> ⚠️ **S153, RESUELTA en producción: el Test 1 integrado se APAGÓ** (`enable_test1_path: false` bajo `paths:`, A113;
++> regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (aprobada en #848), evidencia `experiments/_s153_fk_v2/README.md`, `combinado.log`, `v1.log` y `v2.log`, sección 9). Era la causa de que la réplica publicara en 88,2 % (V1, 2026-08-29 a 2026-10-08) y 85,4 % (V2,
++> 2026-03-01 a 2026-06-12) de los negativos limpios de VIIRS 375; con K, 2,5 y 3,7 %, sin perder ninguna alerta
++> protegida que decida (las 2 de Tupungatito de Suomi NPP las leyó un segundo lector: lejanas con su distancia
++> propia). Costo: 21 de 260 y 26 de 426 alertas de VIIRS 375, casi todas bajo 1 MW, y la magnitud de VIIRS 375
++> más baja en las pasadas que cambian (sin cruces de 1 MW hacia abajo). El código sigue en el repo y el
++> laboratorio (`experimental`) lo conserva encendido como sombra (REGLA_ADOPCION.md §4.9). Hijos de esta marca:
++> H_S27_1 (más arriba) y el «Test 1 integrado» de `CLAUDE.md` y `docs/MISSION.md`. Reversión: `git revert` del PR de adopción; estado anterior en el tag `pre-s153-adopcion-k`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
++> El encabezado y el texto que siguen se conservan por historia.
++
+diff --git a/docs/MISSION.md b/docs/MISSION.md
+@@ -4,6 +4,18 @@
++> ⚠️ **S153: el detector de la réplica cambió (adopción de K; marca A113).** Desde el merge del PR de adopción,
++> `mirova_equivalent` corre (1) **sin el Test 1 integrado en el ROI** (D30: no está en el paper y hacía publicar en
++> 85 a 88 % de los negativos limpios de VIIRS 375), (2) con la **conectiva `max`** de la prosa de Coppola 2016a en los
++> Tests 2 y 3 (hacen falta las dos condiciones, D26) y (3) con la **banda 22 primaria en MODIS** (D21). La regla de
++> decisión se escribió y aprobó antes del resultado (`experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, #848) y la
++> evidencia está en `experiments/_s153_fk_v2/README.md`: con la lectura A, CUMPLE en las dos ventanas, 0 protegidas
++> perdidas que decidan, negativos limpios publicados de 88,2 y 85,4 % a 2,5 y 3,7 % en VIIRS 375. Toda frase de
++> este documento que describa el detector con el Test 1 integrado, con `min` o con la banda 21 describe el estado
++> previo a S153; se conserva por historia. El laboratorio (`experimental`) sigue con el detector anterior y es la
++> sombra (§4.9 de la regla). Toda comparación con MIROVA que cruce la fecha de adopción se estratifica por régimen
++> (A104). Reversión: `git revert` del PR de adopción (tag `pre-s153-adopcion-k`). Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
++
+@@ -168,7 +180,9 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
++     (`experiments/_s151_seleccion_mirova/README.md`). ⚠️ **S153: el A/B de F y K ya está hecho y K
++     se adoptó** (producción con `max`; marca del inicio de este documento); el brazo que elija la mayor
++     se diseña ahora sobre K.
+@@ -311,6 +325,10 @@ EVIDENCIA y circular (`docs/audit_s147/VERIFICADOR_H_A01.md`; marca de S147 dent
++⚠️ **S153**: el Test 1 integrado ya no corre en la réplica (adopción de K, marca del inicio de este
++documento y marca S153 de D30); esta sección se conserva para el día en que una pérdida de recall
++medida vuelva a plantear la pregunta, y la respuesta sigue siendo la de abajo: investigar, no parchar.
++
+commit 60c45833f505cc970148e3612832303e4b30ea26
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -240,7 +240,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  l. 1594 (era 1578 hasta el selector de noche o rango de S153, 1493 hasta las alertas diurnas de MIROVA con sol de S151, 1483 hasta la marca de MIROVA sin distancia de V31.1, 1473 hasta S151, que agregó la marca A113 sobre el tope D9, y 1466 hasta S150, que agregó la marca del OCR en la línea de MIROVA); la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
+commit bdd2766591b8244b40339bfd32641c6a6e09eea4
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -240,7 +240,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  l. 1578 (era 1493 hasta las alertas diurnas de MIROVA con sol de S151, 1483 hasta la marca de MIROVA sin distancia de V31.1, 1473 hasta S151, que agregó la marca A113 sobre el tope D9, y 1466 hasta S150, que agregó la marca del OCR en la línea de MIROVA); la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
+commit a116d262130e0fac64db4d18134c5703b590e0c9
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -240,7 +240,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  l. 1493 (era 1483 hasta la marca de MIROVA sin distancia de V31.1, 1473 hasta S151, que agregó la marca A113 sobre el tope D9, y 1466 hasta S150, que agregó la marca del OCR en la línea de MIROVA); la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -2472,7 +2472,8 @@ MIROVA corrobora más los `ctx_cluster` que los `test1_roi` dentro de cada volc
++(`frontend/index.html:2880-2885`, el comentario «S106 ancla honesta» sobre `isHonestTest1`; era
++2779-2784 cuando se escribió, remapeada por contenido en V31.1, A101). **La magnitud del píxel único no la cubre ninguna convención.**
+commit d6ff80d56f38eae0c64a828a85b08a6868b76e27
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -2300,6 +2300,15 @@ para un A/B, no para afirmar el origen exacto.
++> ⚠️ **S151, resultado del A/B (D-8 sellado por Nicolás el 2026-10-15; `experiments/_s151_prereg_caja/resultado_d1/`,
++> verificado): KC NO CUMPLE (veto) en D1.** Pierde una alerta protegida MODIS de Láscar (2026-03-27 07:10, MIROVA
++> 1,0 MW) cuyo único píxel nuestro cae a 3,2 km del cráter, en la corona; la repetición lo confirma y el veto es
++> definitivo según el pre-registro. VIIRS 375 y 750 sin pérdidas en D1. **El cierre vale con la geolocalización
++> MODIS de hoy**: el verificador encontró que el píxel del cráter MODIS aparece corrido hacia el lado del sensor,
++> creciendo con el ángulo de visión (hasta 3,5 km a 45° en Láscar, n = 13 pasadas; mecanismo SIN VERIFICAR:
++> interpolación de 5 a 1 km en `process_modis.py:342` o paralaje de la cumbre). No es D17. Si se corrige, la caja
++> se vuelve a medir. D2 y V1 no se despacharon: no pueden cambiar el veredicto.
++
+commit 5170f9539a3b187cb3f1a5879dd833b3f7e3095b
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -1635,7 +1635,11 @@ Métricas derivadas:
++  eventos. ⚠️ **Precisada por D-9 (Nicolás, 2026-10-15, issue #811)**: una alerta del scraper de VIIRS 375
++  con VRP de 0,05 MW o menos, que el banner de MIROVA llama NONE, no entra al recall: cuenta como «MIROVA
++  no vio nada» (regla SN). Cada evaluación informa también SE (estrato aparte) y la regla original
++  (`docs/MISSION.md`, criterio de victoria, punto 5; `scripts/clase_mirova.py::aplicar_regla_minimas`).
++  Marca anterior conservada: ⚠️ **Rebajada S151** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P2; criterio de
+diff --git a/docs/MISSION.md b/docs/MISSION.md
+@@ -67,12 +67,28 @@ energía: arriba de 1 MW perder una alerta no tiene compensación posible.
++2. ⚠️ **Precisada por D-9 (2026-10-15, punto 5)**: «Muy Bajo» empieza arriba de 0,05 MW en VIIRS 375; las
++   alertas del scraper de 0,05 MW o menos son pasadas que el banner llama NONE y cuentan como «MIROVA no vio
++   nada». Texto original:
++   **Dentro de «Muy Bajo»** (alertas bajo 1 MW, VERY LOW en el banner de MIROVA), **una alerta perdida
++5. ⚠️ **Agregado por D-9, decidida por Nicolás el 2026-10-15 (issue #811): las alertas mínimas cuentan
++   como «MIROVA no vio nada» (regla SN).** El scraper llama ALERTA a todo VRP mayor que cero, pero en
++   VIIRS 375 el banner de MIROVA dice NONE en las 14 pasadas observadas de 0,04 MW o menos y VERY LOW en
++   las de 0,06 MW o más; en 0,05 exacto sale de los dos lados (`experiments/_s151_alertas_minimas/README.md`
++   §2). Una pasada de VIIRS 375 cuyas alertas del scraper tienen todas **0,05 MW o menos** (sin ninguna otra
++   alerta por encima de eso a menos de 120 s, así que una protegida nunca se toca) no es «Muy Bajo»:
++   cuenta como pasada en que MIROVA no vio nada, y si la noche no tiene otra alerta es negativo limpio
++   (regla 3). Las protegidas no cambian. Como Nicolás pidió probar todas las opciones, cada evaluación
++   informa además SE (estrato aparte), la regla original y la variante con 0,05 exacto como alerta
++   (umbral 0,04), y dice si algún veredicto cambia. Un pre-registro sellado antes de D-9 decide con la
++   regla que tenía e informa las otras. Función única: `scripts/clase_mirova.py::aplicar_regla_minimas`.
++   Detalle: `docs/S151_CRITERIO_CLASE_MIROVA.md` (nota D-9) y
++   `experiments/_s151_alertas_minimas/veredictos_tres_reglas.md`.
+commit 0b61158fbc23e3d2966007c5f36aafccf0097906
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -2739,6 +2739,37 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
++> ⚠️ **S151, tercera marca (decisión D-10 de Nicolás, 2026-10-15, opción 1; issue #813).** La rama
++> diurna de VIIRS 375 y 750 quedó **cableada y APAGADA** (`ENABLE_DAYTIME_VIIRS = False`, tag
++> defensivo `pre-s151-rama-diurna-viirs`). Con el flag encendido el día se abre en los cinco
++> consumidores que lo cerraban (filtro previo a la descarga en `fetch.py`, salto del gránulo en
++> `scripts/run_pipeline.py`, umbrales de los dos procesadores VIIRS, rechazo en `store.py`, y la
++> auditoría semanal que reusa esa regla), todos leyendo el flag a través de `pipeline/diurno.py`
++> (A118). De día los Tests 2 y 3 usan K1 = -0,6, C1 = 0,02 y **C2 = 15** (Tabla 1, p. 7, página
++> renderizada). El docstring falso de `_reject_daytime` quedó corregido. Producción no cambió (golden
++> S142 bit a bit). **«Deliberada» pasa a «pendiente de A/B»**:
++> `experiments/_s151_ab_diurno/PREREGISTRO.md`. Lo que de día queda como de noche porque el paper no
++> da número (Test 1 integrado sobre MIR absoluto, compuerta de D22, magnitud diurna, tope D9, filtros
++> «unsuitable», consistencia TIR) y lo que hay que corregir antes de un flip (el frontend da por hecho
++> que toda pasada es nocturna): `pipeline/diurno.py`, sección PREGUNTAS.
++>
++> **Defecto LATENTE de la rama diurna de MODIS (A118), confirmado por el verificador con contexto
++> limpio del PR #821, NO corregido en ese PR** (fuera de alcance; el flag `ENABLE_DAYTIME_MODIS` está
++> apagado, así que hoy no actúa). Dos caras, las dos de la clase «el flag no llega a todos sus
++> consumidores»: (1) **el C2 diurno no llega a los Tests 2 y 3.** `_select_thresholds`
++> (`pipeline/process_modis.py:361-383`) devuelve sólo K1, N·σ del camino de BT y C1; no tiene claves de
++> C2. Por eso el primer pase (`process_modis.py:798-804`, y su réplica en l. 815-821) y el bloque del
++> primer pase con overrides (`process_modis.py:862-863` y 888-891) siguen con `C2_DNTI_*_NIGHT` y
++> `C2_DETI_*_NIGHT`, o sea 5 y 10, contra 15 de la Tabla 1 diurna. (2) **El flag no abre las dos
++> compuertas previas.** Ni `pipeline/fetch.py` (filtro previo a la descarga, l. 825, hoy vía
++> `diurno.aplica_filtro_nocturno`, que sólo abre VIIRS) ni `scripts/run_pipeline.py` (`_check_night`,
++> l. 185) miran `ENABLE_DAYTIME_MODIS`: sin `--no-night-filter`, el MODIS diurno nunca se baja ni se
++> procesa, que es exactamente el defecto con que el A/B de S92 midió cero
++> (`experiments/_s92_daytime_diag/FINDINGS.md`). Encender `ENABLE_DAYTIME_MODIS` hoy produciría una
++> rama diurna a medias. Arreglo cuando se abra MODIS de día: claves de C2 en `_select_thresholds` con
++> rebinding de los cuatro nombres de C2, y `diurno.aplica_filtro_nocturno` extendida a MODIS con su
++> propio flag, con tests como los de `tests/test_rama_diurna_viirs_s151.py`.
++
+commit 5980ab213692ca96a7595786762919958f654a15
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -1394,6 +1394,15 @@ Cuando S62+S63 completen:
++> ⚠️ **S151, segunda marca (A113, tarea 1.4 del loop, PR #809 verificado dos veces):** el estudio sobre
++> los GeoTIFF de MIROVA (`experiments/_s151_seleccion_mirova/README.md`) dice que MIROVA no elige el cráter
++> por ser el cráter: informa el foco lejano cuando es fuerte (15 de 15 pasadas con z ≥ 30 en el TIF; 12 de
++> 27 bajo ese corte; prueba continua p = 9e-5) y la fuerza del lejano y el calor del cráter pesan los dos.
++> Eso apoya la decisión del 2026-10-09, pero **«la mayor» contra «la suma» no está demostrado**, y en las
++> 15 alertas del cráter con un foco débil en nuestro píxel lejano el VRP de MIROVA es el del cráter solo.
++> El mecanismo dual ROI quedó refutado como causa; la candidata es la conectiva `min` (SOSPECHA), así que
++> el brazo que elige la mayor espera el A/B de F y K.
++
+diff --git a/docs/MISSION.md b/docs/MISSION.md
+@@ -146,6 +146,13 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
++     ⚠️ **Matiz S151 (tarea 1.4 del loop, PR #809, dos verificadores con contexto limpio):** sobre los
++     GeoTIFF de MIROVA, MIROVA informa el foco lejano cuando es fuerte (15 de 15 con z ≥ 30) y el cráter
++     cuando el lejano es débil; la fuerza del lejano y el calor del cráter pesan los dos, y «la mayor»
++     contra «la suma» **no está demostrado**. Además, cuando informa el cráter, su VRP es el del cráter
++     solo, sin el foco lejano débil que nosotros sí alertamos (causa candidata: la conectiva `min`,
++     SOSPECHA). El diseño del brazo que elija la mayor espera el A/B de F y K
++     (`experiments/_s151_seleccion_mirova/README.md`).
+commit e1ab15e365a7cba4b07d76674e754b086d31c93c
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -2730,6 +2730,20 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
++> ⚠️ **S151, segunda marca (A113, hija de la tarea 1.13 del loop, PR #812 verificado; decisión D-10,
++> issue #813).** Tres cosas de abajo quedan corregidas. (1) **El día no es sobre todo MODIS: es VIIRS 375.**
++> Con el OCR junto a la tabla son 94 pasadas protegidas diurnas (97 filas: 85 VIIRS 375, 6 MODIS, 6 VIIRS
++> 750), sólo 19 de ellas con fila en la tabla; aplicando A119 al denominador quedan **40 usables contra 232
++> nocturnas**. (2) **MIROVA sí procesa VIIRS de día** (Campus et al. 2022, *Sensors* 22:1713, p. 16, §5,
++> segundo párrafo, y p. 17, Tabla 4, páginas renderizadas): la frase «VIIRS solo de noche (sin fuente
++> MIROVA-core diurna)» del docstring de `pipeline/store.py` (`_reject_daytime`) es falsa; el docstring está
++> en un archivo protegido (A45) y se corrige en el PR de código de D-10 si Nicolás elige abrir el día. (3) La
++> Tabla 1 diurna existe sólo en `pipeline/process_modis.py` (`_select_thresholds`); `process_viirs.py` y
++> `process_viirs_mod.py` no tienen rama diurna, así que encender `ENABLE_DAYTIME_MODIS` no tocaría el día de
++> VIIRS (A118). Separar calor real de reflejo solar no se pudo: de las 40, 19 tienen magnitud
++> desproporcionada (reflejo probable) y 21 quedan SIN EVIDENCIA; la clase «real» de la primera versión era
++> circular. Detalle: `experiments/_s151_alertas_diurnas/README.md` §2 a §6.
++
+commit 402447f33ff45d921afe2c4f1db8451d5cc40c91
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -1641,9 +1641,9 @@ Métricas derivadas:
++  sostiene el banner de MIROVA, no el paper. Rige la lectura A (alertas del scraper de 1 MW o más,
++  439 pasadas), decidida por Nicolás el 2026-10-14 (D-4, issue #782 cerrado); la lectura B (toda
++  pasada de 1 MW o más a cualquier distancia, 992) quedó descartada y sólo se informa
+diff --git a/docs/MISSION.md b/docs/MISSION.md
+@@ -59,13 +59,14 @@ energía: arriba de 1 MW perder una alerta no tiene compensación posible.
++   **Rige la lectura A, decidida por Nicolás el 2026-10-14 (D-4, issue #782 cerrado)**: una pasada
++   de la referencia es **alerta protegida** si es alerta (`ALERTA_TERMICA` del consolidado o
++   `ALERTA_TERMICA_OCR`) y su VRP de la pasada es de **1 MW o más**, recalculado desde el VRP y nunca
++   leído de la columna `Clasificacion Mirova`, que la escribe el scraper de Mirova-v1 y no MIROVA (439
++   pasadas en la unión histórica). La lectura B (toda pasada en que MIROVA ve 1 MW o más, a cualquier
++   distancia, 992 pasadas) quedó descartada; los evaluadores que ya la calculan la siguen imprimiendo
++   como dato informativo, pero no decide. Definición, control y denominadores:
++   `docs/S151_CRITERIO_CLASE_MIROVA.md` §2, §3 y §5.
+commit e196a7135a3b2c612ed2d0c13d16c457e407d303
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -2291,6 +2291,17 @@ para un A/B, no para afirmar el origen exacto.
++> ⚠️ **S151 (loop, tarea 1.7, `experiments/_s151_prereg_caja/`, PR #800, verificado): medido sin correr nada,
++> y con un A/B reducido esperando sello (D-8, issue #801).** (1) Desde #738 el flag de la caja llega a las 24
++> llamadas de umbral dual en los dos pases de los tres procesadores. (2) Sobre el candidato K (sin Test 1, `max`,
++> banda 22), en los 8 volcanes donde nuestra caja centrada en el cráter coincide con la de MIROVA, el neto de la
++> caja es cero: `max` ya apaga la misma población. (3) **MIROVA mide `Distancia_km` desde el centro de su grilla,
++> no desde el cráter** (Tupungatito 34 de 40, PCC 38 de 50, Planchón Peteroa 17 de 17 alertas VIIRS 375 a menos
++> de 1 km de la distancia centro-cráter; `distancia_mirova.py`), así que en esos 3 volcanes no se puede saber
++> dónde centra su caja: si en la grilla, publica fuera de ella el 24,8 a 28,8 % de sus alertas VIIRS 375 de la
++> ventana; si en el cráter, el 2,7 %. «MIROVA calla fuera de la caja» sólo se sostiene en los 8 centrados (0,9 a
++> 2,2 %). El texto de abajo se conserva por historia.
++
+commit fecc3eae435ef7261933a18ac995110b95dd6179
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -1502,6 +1502,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  - ⚠️ **Dos cifras de este punto cayeron en S151** (loop 0.4c, `docs/audit_s150/meta/VERIFICADOR_DATOS.md`
++    D5 y D6). (1) El «86 % en enero» es Tupungatito en el denominador (no tiene filas antes del 2026-02-14);
++    sin él, enero da 99,0 % en MODIS, 98,6 a 99,5 % en VIIRS 375 y 95,2 a 95,7 % en VIIRS 750, y febrero 98,2
++    a 99,6 %: enero no está «incompleto» al 86 %. (2) «0 alertas MODIS dependen del OCR» es falso: son 5 hoy,
++    todas de Láscar (4 nocturnas), y el número sube cada vez que el consolidado remoto pierde filas, así que
++    no es una propiedad de MIROVA. Texto original:
+commit 88e97d84e5d8bb73500d68ba38bd8ebcbc31a348
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -240,7 +240,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  l. 1483 (era 1473 hasta S151, que agregó la marca A113 sobre el tope D9, y 1466 hasta S150, que agregó la marca del OCR en la línea de MIROVA); la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
+@@ -351,7 +351,15 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A23.** ⚠️ **S151, sobre el tope de 5 MW** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P5):
++  las dos frases de esta regla que dicen que el tope «funciona» sólo quieren decir que recorta. No está
++  medido que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02: el paper no lo sostiene), y el tope
++  se arma con el fondo de la escena bajo 270 K sin que ningún píxel pase por temperatura ni por NTI
++  absoluto (`pipeline/process_modis.py:1009`). Corpus al 2026-10-14 (65.705 records): 1.565 cúmulos
++  topados en 5,0 exacto (277 `summit`), los 1.565 con `primary_cluster.d9_capped`, y **343 cúmulos
++  sobre 5 MW** (110 `summit`), así que «0 records sobre 5 MW» vale sólo para la población de S113 (A90).
++  Script: `experiments/_s150_meta_audit/verif_docs/contar_topados_d9.py`. Marca de S146 conservada:
++  **⚠️ La declaración de obsolescencia cayó en parte, S146 (AUDIT_S146 V-01): D9 vuelve a
+@@ -998,7 +1006,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A82.** ⚠️ **S150, marca agregada en S151 (A113, hija de la marca S151 de D21 en `docs/MIROVA_DIVERGENCES.md`)**: el «a 1 km el foco débil y el gradiente difuso son el mismo objeto» queda en tensión con lo medido con banda 22 en Láscar, marzo a junio de 2026 (`docs/S150_RESULTADO_MESES.md`, verificado): con banda 22 MODIS publica 68 de 73 alertas de MIROVA y 11 de 96 pasadas en que MIROVA miró y no vio nada, y con `max` 67 de 73 y 2 de 96. Sólo Láscar; en los otros diez volcanes no está medido. Marcas anteriores conservadas: **⚠️ REBAJADA S124: «agotado» ya no aplica.** ⚠️ **Rebajada también por la vía espectral en S138 (AUDIT_S138 C3)**: los ejes que la regla da por agotados se barrieron sobre records producidos con banda 21 primaria (D21) y compuerta `bt > t_bg + 3 K` (D22), las dos divergencias que S137 abrió; «irreducible» vale sólo bajo esa configuración. ⚠️ **Y el número que sostiene el cierre no tiene tasa base, verificado S146 (AUDIT_S146 V-02)**: el «el pipeline encuentra el cráter 90 %» mide presencia de cúmulo, no detección. Con negativos limpios (pasadas donde MIROVA miró y todas sus filas son RUTINA) hay cúmulo con magnitud dentro del inner en **89,1 % de 4.800 pasadas MODIS**, contra **93,7 % de 158** cuando MIROVA alertó (ventana 2026-01-29 a 2026-08-28; después de #535, 86,0 % de 500 negativos y sólo 2 positivos): menos de 5 puntos de contraste, y 144 de esas 158 positivas son de Láscar. En VIIRS sí hay contraste (84,5 contra 62,1 en I-band; 47,5 contra 22,8 en M-band), así que el instrumento funciona y el problema es del número, no de la medición. Consecuencia: destapar la etiqueta destaparía por igual las noches con y sin actividad. **Esta rebaja baja también a A83, A84 y A85**, que citan el «irreducible / agotado» de A82 (A113). La auditoría S114 en que se
+@@ -1074,7 +1082,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A85.** ⚠️ **S151 (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P4)**: esta regla habla de
++  cercas alrededor de la selección, no de la regla de selección, y en eso sigue en pie. Pero bajo la
++  regla de la anomalía MAYOR (decidida por Nicolás el 2026-10-09, A/B `vent_anchored` contra `vrp_max`
++  pendiente, `docs/AUDIT_S150.md` §8) un cúmulo lejano más fuerte que gana no es robo, es fidelidad a
++  MIROVA: «0 robos» deja de ser la vara de ese A/B. Marca de S146 conservada:
++  **⚠️ Hereda la rebaja de A82, aplicada S146 (AUDIT_S146 V-02, E-01)**, y su «0 robos en 214
+@@ -1616,7 +1629,16 @@ Métricas derivadas:
++  eventos. ⚠️ **Rebajada S151** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P2; criterio de
++  victoria decidido por Nicolás el 2026-10-13, en `docs/MISSION.md`, sección «Criterio de victoria de
++  la réplica»): en la réplica el recall se mide **contra MIROVA** y en las dos direcciones, porque
++  callar donde MIROVA calla también es parte de la réplica. Ninguna alerta protegida (alerta de
++  MIROVA de 1 MW o más) se puede perder; bajo 1 MW, una alerta perdida y una publicación de más pesan
++  igual. Nicolás decidió «de Bajo para arriba»; el corte de 1 MW lo puso la tarea 0.2 (PR #780) y lo
++  sostiene el banner de MIROVA, no el paper. Por defecto rige la lectura A (alertas del scraper de
++  1 MW o más, 439 pasadas); la lectura B (toda pasada de 1 MW o más a cualquier distancia, 992) es la
++  decisión pendiente D-4 (issue #782), y el loop evalúa con las dos
++  (`docs/S151_CRITERIO_CLASE_MIROVA.md`). Texto original: **Para `mirova_equivalent` priorizamos recall sobre precision**.
+@@ -1780,7 +1802,10 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
++   de Nicolás). **CERRADAS, no reabrir** (anti-A8): (⚠️ **S151**: el «sólo el tope de 5 MW se
++   confirma» de la marca que sigue quiere decir que el tope recorta, no que lo recortado sea
++   artefacto; hoy hay 343 cúmulos sobre 5 MW, ver la marca S151 de A23.)
++   (⚠️ **D9 salió de esta lista en S146**
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -221,6 +221,20 @@ pixels del TIF como VRP. El patrón replicable de 5 pasos está documentado en
++> ⚠️ **Estado S151 (marca agregada por la regla A113; fuente `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md`
++> P5): ABIERTA desde S146 en la cara de co-validación del path D (ver la rebaja de A23 en `CLAUDE.md`), y
++> el tope de 5 MW no está validado.** Que el tope «funciona» sólo quiere decir que recorta: no está medido
++> que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02). El tope se arma con el fondo de la escena
++> bajo 270 K y sin ningún píxel por temperatura ni por NTI absoluto (`pipeline/process_modis.py:1009`), sin
++> mirar si hay cirrus. Corpus al 2026-10-14 (65.705 records,
++> `experiments/_s150_meta_audit/verif_docs/contar_topados_d9.py`): 1.565 cúmulos topados en 5,0 exacto
++> (277 `summit`), los 1.565 con `primary_cluster.d9_capped`, y 343 cúmulos **sobre** 5 MW. En Nevados de
++> Chillán, en erupción desde el 2026-09-28, el tope actuó en 7 pasadas MODIS entre el 2026-09-28 y el
++> 2026-10-13, todas etiquetadas `far` con el cúmulo a 0,7 a 4,7 km del cráter (consulta directa a
++> `data/mirova_equivalent/NevadosDeChillan.json`); si lo recortado era erupción está SIN VERIFICAR
++> (sospecha de AUDITOR_C C-01 en S150, que no pasó por el verificador). El texto de abajo se conserva por
++> historia.
++
+@@ -785,6 +799,16 @@ y sumar (que es lo que hacemos hoy y pierde señal sub-pixel distribuida).
++> ⚠️ **S147, marca agregada en S151 (A113; `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P3): la
++> última frase de la marca de S146 que sigue («lo que cae es el respaldo bibliográfico, no el resultado
++> empírico de S27») también cayó.** El resultado empírico quedó SIN EVIDENCIA y circular en S147 (ver la
++> marca de S147 dentro de D30, «Lo que esta D NO dice», y `docs/audit_s147/VERIFICADOR_H_A01.md`), y S149
++> mostró que el `_mirova_literal` de S27 (commit `db602040b`, 2026-04-29) no era el literal: no tenía el
++> ETI ni su regresión cuadrática ni el Test 1 (`enable_test1_path: false`); sí tenía un contraste dNTI
++> contextual de 8 vecinos sin ETI y la compuerta de BT de 5/10 sigma. Los Tests 2 y 3 con ETI entraron el
++> 2026-05-15 (`958a7a189`); matiz de `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P3. Las dos marcas
++> de S146 de esta sección se conservan por historia.
++>
+@@ -827,6 +851,10 @@ señal espacialmente distribuida sub-σ pixel-individual.
++   - ⚠️ **S147, marca agregada en S151**: la frase final de la marca de S146 que sigue («Nada de lo
++     medido abajo cambia: lo que cae es el respaldo bibliográfico, no el resultado empírico de S27»)
++     cayó también; el resultado empírico quedó SIN EVIDENCIA y circular (marca de S147 en D30). Se
++     conserva por historia.
+@@ -1366,6 +1394,18 @@ Cuando S62+S63 completen:
++> ⚠️ **Reabierta como pregunta en S150, marca agregada en S151** (A113; decisión de Nicolás del
++> 2026-10-09 en `docs/AUDIT_S150.md` §8; fuente `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P4):
++> **la réplica debe elegir la anomalía MAYOR de la escena, como MIROVA**, y la hipótesis de esta entrada
++> («el criterio de MIROVA no es `vrp_mw desc`») va en contra de esa decisión. Producción sigue en
++> `vent_anchored` (`ENABLE_VENT_ANCHORED_CLUSTERING = True`, leído de `pipeline.profile`) hasta el A/B
++> pre-registrado `vent_anchored` contra `vrp_max` (pendiente, después de D22 y de la prueba de Chillán).
++> Ojo con el tamaño del fenómeno: las 858 detecciones lejanas de MIROVA desde marzo con que se sostuvo
++> la decisión son en su mayoría **diurnas** (498 entre 13 y 21 UTC, 360 de noche, que es lo único que la
++> réplica procesa; `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` H1, confirmado por
++> `docs/audit_s150/meta/VERIFICADOR_DATOS.md` D2 con 499 y 359 según dónde caiga una fila de las 12:25 UTC).
++> Un pre-registro que use 858 infla 2,4 veces lo esperable. Texto original por historia:
++
+@@ -2525,6 +2565,17 @@ umbrales. Si algún día se hace, medir también el ETI (regresión NTI vs NTI_b
++> ⚠️ **S150, marca agregada en S151** (A113; `docs/audit_s150/meta/AUDITOR_F4_PROPAGACION.md` F4-06):
++> **con banda 22, en Láscar, MODIS separa alertas de negativos; con banda 21 y sin el Test 1 no ve nada.**
++> Marzo a junio de 2026 (`docs/S150_RESULTADO_MESES.md`, tabla de MODIS; confirmado por
++> `docs/audit_s150/VERIFICADOR_RESULTADO_MESES.md` A13): banda 21 sin Test 1, 0 de 73 alertas y 0 de 96
++> negativos limpios; banda 22, 68 de 73 y 11 de 96; banda 22 con conectiva `max`, 67 de 73 y 2 de 96.
++> Salvedades: sólo Láscar (el único volcán con alertas MODIS en esos meses), así que la tasa de falsos en
++> los otros diez volcanes no está medida; y la producción de Láscar en la misma población publica 8 de 73
++> alertas y 1 de 96 negativos. Producción sigue en banda 21 (`ENABLE_MODIS_B22_PRIMARY = False`, leído de
++> `pipeline.profile`). La línea de A82 y la ficha SDA que dicen que a 1 km el foco débil y el gradiente
++> son «indistinguibles» quedan en tensión con esta medición en Láscar (F4-07).
++
+@@ -2668,6 +2719,18 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
++> ⚠️ **S151, marca agregada por la regla A113: «deliberada» y «no se propone cambiar» quedan como
++> pregunta, no como cierre.** El criterio de victoria que Nicolás fijó el 2026-10-13 (`docs/MISSION.md`,
++> sección «Criterio de victoria de la réplica») no acepta perder alertas protegidas de MIROVA (1 MW o
++> más), y la réplica pierde por construcción todas las diurnas. Tamaño, medido sobre la tabla sola
++> (`latest_consolidado.csv`, 2026-01-11 a 2026-10-14, sin OCR): de 1.642 filas `ALERTA_TERMICA`, 37
++> caen entre 13 y 21 UTC (pasadas de la tarde en Chile, el mismo corte de
++> `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` H1), y 19 de ellas son de 1 MW o más (15 VIIRS 375,
++> 2 VIIRS 750, 2 MODIS; Láscar 9, Nevados de Chillán 8, Villarrica 2), contra 233 protegidas de noche.
++> Ojo con A76: de día MIROVA publica también reflexión solar sobre nubes, así que esas 19 no son todas
++> calor volcánico. Ningún A/B nocturno mide estas pérdidas; si entran o no al criterio es decisión de
++> Nicolás. El texto de abajo se conserva por historia.
++
+@@ -2813,6 +2876,15 @@ los records VIIRS 375** y en el **22,21 % de los VIIRS 750**
++⚠️ **S151 (A113)**: hasta S150 las dos marcas de S146 de la sección H_S27_1, mil líneas más arriba,
++decían en presente lo contrario de la marca de S147 que sigue («no cae el resultado empírico de S27»);
++desde S151 llevan una marca encima que remite acá. Además S149 mostró que el `_mirova_literal` contra
++el que S27 midió no era el literal (`docs/AUDIT_S149.md` §0): no tenía el ETI ni su regresión
++cuadrática ni el Test 1; sí tenía un contraste dNTI contextual de 8 vecinos sin ETI (commit
++`db602040b` del 2026-04-29; los Tests 2 y 3 con ETI entraron con `958a7a189` el 2026-05-15). Y el
++«NO ADOPTAR» del A/B sin Test 1 de S147 cayó (`docs/AUDIT_S149.md` §3, l. 72). Fuente:
++`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P3.
++
+diff --git a/docs/MISSION.md b/docs/MISSION.md
+@@ -18,6 +18,15 @@ Si encontramos que MIROVA tiene un comportamiento que no queremos (FPs en
++⚠️ **Rebajada S147 a S151, el objetivo (2) y el párrafo «Importante» que lo sigue** (decisiones de
++Nicolás del 2026-09-21 y del 2026-10-13; marca agregada en S151 por la regla A113, fuente
++`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P2): la réplica `mirova_equivalent` publica lo que
++MIROVA publica y calla donde MIROVA calla (`docs/AUDIT_S149.md` §0). Lo que MIROVA no publica ya no
++vive en la réplica clasificado por `pc.classification`: va al perfil `experimental`, congelado en la
++producción del 2026-10-09 (PR #771, `docs/AUDIT_S150.md` §8). Cómo se pesan una alerta perdida y una
++publicación de más ya no está abierto: lo fija la sección «Criterio de victoria de la réplica», más
++abajo. Texto original conservado por historia:
++
+@@ -35,6 +44,35 @@ core). La distinción (1) vs (2) vive en el campo derivado `pc.classification`
++## Criterio de victoria de la réplica (decidido por Nicolás el 2026-10-13)
++
++> Agregado en S151 (tarea 0.3 del loop; la decisión está en `tasks/LOOP_OBJETIVOS.md` §1, regla 2).
++> Manda sobre toda frase anterior que diga cómo pesar una alerta perdida contra una publicación de
++> más, incluido el glosario de `CLAUDE.md` («priorizamos recall sobre precision»).
++
++**Por qué.** El operador de OVDAS lee la réplica como leería a MIROVA. Una alerta con energía que
++MIROVA publicó y nosotros no es un evento que el operador no ve; una publicación donde MIROVA calló es
++una falsa alarma que le enseña a desconfiar. Las dos fallas cuestan, pero no igual en todo el rango de
++energía: arriba de 1 MW perder una alerta no tiene compensación posible.
++
++1. **En la réplica no se acepta ningún cambio que pierda una alerta protegida.** Nicolás lo dijo como
++   «una alerta que MIROVA clasifique de Bajo para arriba»; el corte de 1 MW es la operacionalización
++   hecha en la tarea 0.2 (PR #780), sostenida por el banner de MIROVA de hoy (ningún VERY LOW llega a
++   1 MW, ningún LOW queda bajo 1 MW) y **no por el paper**, cuya figura 11 se contradice con su pie.
++   **Lectura A, la de por defecto**: una pasada de la referencia es **alerta protegida** si es alerta
++   (`ALERTA_TERMICA` del consolidado o `ALERTA_TERMICA_OCR`) y su VRP de la pasada es de **1 MW o
++   más**, recalculado desde el VRP y nunca leído de la columna `Clasificacion Mirova`, que la escribe
++   el scraper de Mirova-v1 y no MIROVA (439 pasadas en la unión histórica). **Lectura B, pendiente**:
++   toda pasada en que MIROVA ve 1 MW o más, a cualquier distancia (992 pasadas). Cuál vale es la
++   decisión D-4 de Nicolás (issue #782); mientras tanto el loop evalúa con las dos. Definición,
++   control y denominadores: `docs/S151_CRITERIO_CLASE_MIROVA.md` §2, §3 y §5.
++2. **Dentro de «Muy Bajo»** (alertas bajo 1 MW, VERY LOW en el banner de MIROVA), **una alerta perdida
++   y una publicación de más pesan igual**: se minimiza la suma de los dos errores.
++3. **Se mide en las dos direcciones, por sensor y por tramo de calidad de la referencia (A119)**, con
++   tres métricas: recall de las alertas de MIROVA, publicación en negativos limpios (pasadas donde
++   MIROVA miró y no vio nada) y razón de magnitud contra MIROVA.
++4. Los umbrales de cada prueba salen de los datos de MIROVA, no se eligen (A115).
++
+@@ -96,6 +134,17 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
++   - ⚠️ **S151, sobre el «se confirma el tope de 5 MW» del ítem que sigue**
++     (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P5): «se confirma» sólo quiere decir que el
++     tope recorta. No está medido que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02: el
++     «no es parche» del tope no lo sostiene el paper). Corpus al 2026-10-14 (65.705 records): 1.565
++     cúmulos topados en 5,0 exacto (277 `summit`), los 1.565 con `primary_cluster.d9_capped`, y 343
++     cúmulos **sobre** 5 MW (110 `summit`); el «0 records sobre 5 MW» de A23 vale sólo para la
++     población de S113. Script: `experiments/_s150_meta_audit/verif_docs/contar_topados_d9.py`.
++   - ⚠️ **S151: D8' ya no está resuelta** (`docs/MIROVA_DIVERGENCES.md`, marca bajo el encabezado de
++     D8'): Nicolás decidió el 2026-10-09 que la réplica elija la anomalía MAYOR de la escena, como
++     MIROVA (`docs/AUDIT_S150.md` §8), y la entrada D8' de la lista de «Resueltas» de más abajo dice
++     lo contrario. Producción sigue con el cúmulo más cercano al cráter hasta el A/B pre-registrado.
+@@ -198,6 +247,12 @@ path" requiere primero**: (a) verificar que el frontend no hace ya esa
++⚠️ **S151, sobre el párrafo que sigue** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P4): habla
++de **cercas** alrededor de la selección, no de la regla de selección, y eso sigue en pie. Pero mide el
++éxito como «0 robos de cluster», y bajo la regla de la anomalía mayor (decidida por Nicolás el
++2026-10-09, A/B pendiente, `docs/AUDIT_S150.md` §8) que un cúmulo lejano más fuerte gane es
++fidelidad a MIROVA, no robo: «0 robos» deja de ser la vara de ese A/B. Texto original:
++
+@@ -224,12 +279,22 @@ justificando contra papers MIROVA core.
++⚠️ **Rebajada S147 y S149, marca agregada en S151** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md`
++P3): el A/B de S27 midió contra un perfil `_mirova_literal` (commit `db602040b`, 2026-04-29) que no
++tenía ni el ETI ni el Test 1; los Tests 2 y 3 con ETI entraron al código el 2026-05-15 (`958a7a189`),
++según `git log -S` (`docs/AUDIT_S149.md` §0). Y el «recall 50 a 80 %» que cerró D4 quedó SIN
++EVIDENCIA y circular (`docs/audit_s147/VERIFICADOR_H_A01.md`; marca de S147 dentro de D30 en
++`docs/MIROVA_DIVERGENCES.md`). O sea: **«el literal pierde recall» no está medido**, y no sirve para
++defender el Test 1 integrado, que es un detector propio (D30). Texto original por historia:
++
++- H_S27_1 (⚠️ **cita falsa, S146 V-06, marca agregada S151**: `sp426.5.pdf` no tiene §2.2, su Ec. 1
++  es el NTI y el Test 1 es por píxel contra K1, p. 6; ver `docs/MIROVA_DIVERGENCES.md` H_S27_1 y D30.
++  Texto original:) Test 1 summit-only más agresivo (Coppola 2016a SP426.5 §2.2 Eq.1).
+@@ -248,7 +313,8 @@ Antes de marcar una sesión como completa, responder explícitamente:
++- ⚠️ **SIN EVIDENCIA desde S147, marca agregada S151** (ver la marca bajo el título de la sección del
++  literal puro, más arriba). Texto original: A/B literal puro NO APROBADO: `~memory/project_s27_mirova_literal_negativo.md`
+commit c0021f62b90696e93996f7213c849a5a7527cb4e
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -240,7 +240,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  l. 1473 (era 1466 hasta S150, que agregó la marca del OCR en la línea de MIROVA) — la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
+commit 5ed619261dabfce1c5b7b6ffb855892033f2f9cf
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -1483,6 +1483,28 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A119. Antes de usar los CSV de la referencia de MIROVA, mirar desde cuándo sirve cada canal: la
++  base no tiene la misma calidad todo el año, y el defecto es NUESTRO, no de MIROVA** (S149, regla de
++  Nicolás). La tabla `latest.php` arrancó incompleta y el OCR de las imágenes estuvo inestable primero y
++  mal calibrado después. Un análisis que cruza uno de esos tramos sin saberlo no da error: da un número
++  plausible y equivocado. Ya estaba medido en S139 (`docs/audit_s139/MAPA_BASES_MIROVA_V1.md` §2) y en
++  S149 igual elegí una ventana de A/B sin mirarlo, porque vivía sólo en un informe.
++  - **Tabla** (canal CONS, de donde salen TODAS las RUTINA y todo MODIS): cobertura nocturna 86 % en
++    enero, 95 % en febrero, **99 a 100 % desde marzo**. Tupungatito no existe antes del 2026-02-14.
++    **MODIS está completo y es plano todo el año** (0 alertas MODIS dependen del OCR, medido S149).
++  - **OCR** (sólo aporta alertas VIIRS que la tabla no trae, 20 a 39 % de las de VIIRS 375 entre marzo y
++    agosto): inestable hasta el 2026-02-24, **geometría mal calibrada hasta el 2026-06-11**, **sin
++    distancia medida hasta el 2026-06-13**, versión 30.0 desde el 2026-08-06. Sin reproceso retroactivo.
++  - **Tasas por pasada de VIIRS**: la tabla expone más gránulos por noche desde abril (1,6 a 1,8 antes;
++    3,0 a 3,4 en agosto y septiembre). Una tasa por pasada anterior a abril no se compara con una posterior.
++  - **How to apply**: (a) en toda ventana que empiece antes del 2026-06-13 la etiqueta positiva que
++    DECIDE es la de la tabla sola, y el OCR se informa aparte; (b) VIIRS por pasada, desde abril; MODIS,
++    desde marzo sin reparos; enero no se usa; (c) no hace falta acordarse: los hitos viven en
++    `scripts/calidad_referencia_mirova.py` y `banco_paridad.indexar_referencia` los imprime por stderr
++    cada vez que se indexa una ventana que los pisa. Si el scraper cambia, se agrega el hito ahí y en el
++    documento de S139; (d) un script nuevo que lea los CSV sin pasar por `banco_paridad` llama a
++    `calidad_referencia_mirova.avisar(desde, hasta)` en su primera línea.
++
+@@ -1684,6 +1706,7 @@ Para minimizar compactaciones automáticas ("session continued..."):
++- **La referencia MIROVA no sirve igual todo el año (A119)**: ver la regla y `scripts/calidad_referencia_mirova.py` antes de elegir una ventana.
+commit 0227dd7ac3264eb4cb5049c525f8374d5a536e88
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -856,7 +856,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++    `process_viirs.py:213/1112`** (era 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:62` (era 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:163`
+@@ -1150,7 +1150,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  repo (el docstring de `process_viirs_mod.py:466` (era 465 hasta S149, 439 tras la 8b de S140, 438 antes, 436 hasta S135, 416 en S131 y 409 antes) nombraba los 5 volcanes opt-in desde
+@@ -1463,7 +1463,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  (`pipeline/process_viirs.py:1313` al momento del hallazgo; **arreglado en S149**: los tres procesadores arman hoy esa máscara con `roi1_summit_mask(..., _roi1_mask)` y lo vigila `tests/test_guard_caja_llega_al_segundo_pase_s149.py`, con el flag todavía apagado), corre sin condicionar sobre toda la escena, y recapturaba con
+commit 180ec3cc72a8ef639b1441b94bd88a483b001ad6
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -1459,6 +1459,30 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A118. Un flag que cambia un umbral o una geometría tiene que llegar a TODOS sus consumidores;
++  y un evaluador sólo ve los estratos que etiqueta** (S148, dos casos la misma noche; regla
++  general). (1) `enable_roi1_box_paper` entregaba la caja de 5 × 5 km sólo al primer pase. El
++  segundo pase (`second_pass_adjacent`) seguía recibiendo el círculo de `inner_radius_km`
++  (`pipeline/process_viirs.py:1313`), corre sin condicionar sobre toda la escena, y recapturaba con
++  el umbral permisivo lo que el primero acababa de rechazar con el estricto: en los 51 negativos de
++  fuera de la caja el primer pase cayó de 86 a 7 píxeles, la recaptura subió de 98 a 175 y el cúmulo
++  publicado quedó idéntico en los 51. El cero estaba **bien medido** (el flag se leía desde
++  `pipeline.profile`, los diagnósticos cambiaban, el instrumento tenía control negativo y positivo)
++  y aun así **no medía la caja**: medía el cableado. D18 nunca se ha medido, y el «NO ADOPTAR» de
++  S130 probablemente salió de este mismo defecto (SOSPECHA). (2) El recall por pasada del A/B de la
++  conectiva daba 137 a 135 de 143; el costo serio estaba en un estrato que el evaluador no
++  etiqueta: 50 publicaciones apagadas en noches en que MIROVA sí alertó por **otra** pasada (84 a
++  34 de 171). Lo encontró el verificador con contexto limpio, no el evaluador.
++  - **How to apply**: (a) al agregar un flag de umbral, máscara o geometría, listar con `grep`
++    **todos** los sitios donde se usa el valor que reemplaza (acá `is_summit`, `inner_radius_km`) y
++    pasarlo a cada uno, o dejar escrito por qué no; (b) ante un A/B que «no cambia nada», A116 no
++    basta: además de comprobar que el flag se lee y que el instrumento puede dar distinto de cero,
++    **trazar por etapa** qué pasa con los píxeles que debían cambiar (A75), porque una etapa
++    posterior puede deshacer el efecto; (c) antes de creerle a un recall, preguntar qué pasadas
++    quedan **fuera** de las etiquetas del evaluador (ni positivas ni negativos limpios) y contarlas
++    aparte. Detalle: `docs/audit_s148/POR_QUE_LA_CAJA_NO_APAGA.md` y
++    `docs/audit_s148/VERIFICADOR_RESULTADO_CONECTIVA.md`.
++
+commit b693096a4509f94b03ec69642b69e083738c4dad
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -2251,6 +2251,21 @@ para un A/B, no para afirmar el origen exacto.
++> ⚠️ **S148: el «NO ADOPTAR, redistribuye y no recorta» de S130 y el «0 de 51» del brazo G de S148
++> NO miden la caja: miden un defecto de cableado.** `enable_roi1_box_paper` entrega la caja sólo
++> al primer pase. El segundo pase (`second_pass_adjacent`) recibe
++> `is_summit_mask = vent_dist_per_pixel <= inner_radius_km`, o sea el círculo de siempre
++> (`pipeline/process_viirs.py:1313`, y el mismo patrón en `process_modis.py:923` y
++> `process_viirs_mod.py:892`), corre sin condicionar sobre toda la escena y vuelve a capturar con
++> el umbral permisivo lo que el primer pase acaba de rechazar con el estricto. Medido en los 51
++> negativos limpios de fuera de la caja: el primer pase cae de 86 a 7 píxeles y la recaptura sube
++> de 98 a 175; el cúmulo publicado queda idéntico en los 51. **D18 nunca se ha medido con la caja
++> en los dos pases**, así que su «prioridad baja» no tiene respaldo. Que S130 corrió con este
++> mismo cableado es SOSPECHA razonable (el código del flag es de S130), no verificada.
++> Evidencia: `docs/audit_s148/POR_QUE_LA_CAJA_NO_APAGA.md`. Arreglarlo toca `pipeline/process_*.py`
++> (A45: tag y confirmación de Nicolás). El texto que sigue se conserva por historia.
++
++
+commit a72eb3a5b71e24d5e105c75eb129b4e213b11fd6
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -1400,6 +1400,65 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A114. Una palanca que satura la métrica esconde todas las demás, y un A/B corrido bajo esa
++  saturación no midió nada** (S147, regla general del workspace). Con el Test 1 integrado encendido,
++  la publicación en negativos limpios de VIIRS 375 es **80 a 92 % en cualquier estrato**: por zona
++  del barrido, por temperatura del fondo, por lo que sea. Al sacarlo aparece estructura que siempre
++  estuvo ahí (18,6 / 25,0 / 38,1 % del nadir al borde; 12,2 / 27,9 / 42,0 % del fondo tibio al
++  frío; 57 % en la celda borde con fondo frío contra 9 % en nadir con fondo tibio). El daño concreto:
++  S130 corrió el A/B de la caja de 5 × 5 km (D18) con el Test 1 encendido, encontró que
++  «redistribuye, no recorta» y la cerró como NO ADOPTAR. No podía encontrar otra cosa: el Test 1
++  publica por su cuenta sin mirar los umbrales contextuales. Es A95 y A111 por otra puerta.
++  - **How to apply**: (a) antes de medir el efecto de una palanca, estratificar la métrica por dos o
++    tres variables físicas y mirar si **varía**; si da casi lo mismo en todos los estratos, algo la
++    está saturando y hay que sacarlo primero; (b) al leer un cierre viejo del tipo «sin beneficio» o
++    «inerte», preguntar qué otra cosa estaba encendida ese día; (c) el brazo de control de un A/B
++    debe ser el régimen donde la palanca **puede** actuar, no necesariamente producción.
++    Instrumento: `experiments/_s147_residual/estructura_del_residual.py`.
++
++- **A115. Si un criterio necesita un umbral, se le pregunta a la referencia antes de inventarlo: el
++  objetivo del proyecto ordena la decisión** (S147, error propio que corrigió Nicolás; regla general).
++  Agregué al evaluador un criterio de posición del cúmulo (C7) con un umbral inventado, cero cúmulos
++  movidos más de 500 m, y se lo llevé a Nicolás como una decisión de gusto: «cuánto movimiento
++  toleras». Tenía la referencia de MIROVA congelada en el mismo directorio. Medido contra ella, el
++  criterio dispara en **94 de 96 casos fuera del universo que MIROVA puede arbitrar**, o sea que no
++  sirve para la réplica; y al mirarlo así apareció algo mejor que el criterio (la estabilidad del
++  cúmulo: 1,3 % donde MIROVA alertó contra 22,8 % donde no vio nada, con el confusor de magnitud
++  controlado).
++  - **How to apply**: para `mirova_equivalent` toda decisión se mide contra la base de datos de
++    MIROVA (CSV del scraper, OSF, TIF), no se elige; para `experimental` MIROVA **no puede** ser la
++    vara, porque se busca lo que ella no publica, y la validación va contra actividad conocida de
++    OVDAS y SWIR de alta resolución. O sea que los dos perfiles no necesitan los mismos criterios
++    con distinto umbral: **necesitan criterios distintos**. Si te descubres preguntándole al dueño
++    «cuánto toleras», primero revisa si el dato ya lo contesta.
++
++- **A116. Medir el efecto antes de llamarlo arreglo, y medir el nulo antes de creerle a un cero**
++  (S147, tres casos el mismo día; refuerza S126 y A110). (1) El plan daba por verificado que
++  `diario.html` graficaba lo que `index.html` oculta: cierto en la forma (0 usos de
++  `isValidDetection` contra 18) y **falso en el efecto**, porque cambia 0 de 4.448 records: las dos
++  condiciones dependen del mismo número. Quedó como guarda de coherencia, dicho en voz alta.
++  (2) El nulo estructural del evaluador del A/B acusaba al brazo C de inventar 392 publicaciones
++  que **el control también publica**; y peor, le daba verde al brazo B no por no inventar sino
++  porque apaga el camino que las hace publicar: el único brazo al que el nulo le funcionaba era
++  aquel para el que la pregunta no aplicaba. (3) Mi propia columna «en riesgo» daba cero en todas
++  las filas porque pedía una condición que el predicado del tablero hace imposible.
++  - **How to apply**: un cambio se declara arreglo cuando se midió **cuántos casos mueve**; un cero
++    se acepta cuando se mostró que el instrumento **puede** dar distinto de cero sobre esos datos; y
++    un nulo se valida corriéndolo sobre el control contra sí mismo y sobre un caso que deba fallar.
++
++- **A117. Un perfil derivado se vigila por DIRECCIÓN, no por valor** (S147). El perfil `experimental`
++  existe para ver más que el operacional, y su única diferencia eran tres pisos de magnitud
++  (0,005 / 0,05 / 0,02 MW). S130 bajó los del operacional a 0,0 y nadie actualizó el laboratorio:
++  durante **17 sesiones** el laboratorio fue estrictamente más ciego que el instrumento que estudia
++  (anulaba 5 de 1.755 records y no agregaba ninguno), con un test de S124 en verde que fijaba el
++  valor viejo y un comentario de `store.py` diciendo lo contrario. `experimental_ndc_focus` tenía el
++  mismo defecto. Nadie recibió un error: un laboratorio que ve menos no se nota mirando una pantalla.
++  - **How to apply**: cuando un perfil se define **en relación** a otro, el guard compara los dos
++    (`tests/test_guard_laboratorio_no_mas_ciego_s147.py`), no fija un número; y al cambiar un
++    parámetro del perfil padre, buscar quién lo sobrescribe (`grep` de la clave en
++    `pipeline/profiles/`). Hoy el laboratorio es **idéntico** al operacional salvo el directorio de
++    salida; su diferenciación real está diseñada en `docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md`.
++
+commit 3dfa8e974bf8a8d56c65287ee6a5424d35b3aec5
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -225,7 +225,19 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A10. ⚠️ REBAJADA S147 en su premisa, por verificador con contexto limpio**
++  (`docs/audit_s147/VERIFICADOR_F_05.md`). La regla dice que `pc.vrp_mw` es «lo que MIROVA
++  reporta», y esa premisa **no la sostiene ni el paper ni el dato**. El paper: Campus et al. 2024
++  (Bull Volcanol 86:25, p. impresa 3, Ec. 1), Campus et al. 2022 (Sensors 22:1713, p. impresa 7,
++  §3.2 y §3.3) y Coppola et al. 2026 (Scientific Data, p. idx 4 y 5) dicen los tres, verificados
++  **renderizando la página a imagen**, que MIROVA suma el VRP de **todos los píxeles alertados** de
++  la pasada, y el §3.2 de Campus 2022 lo pone explícitamente como el paso (iv) de la cadena **de
++  tiempo casi real**, que es la que clonamos. El dato: sobre 1.512 pares publicados, `pc.vrp_mw` es
++  el **peor** de los cuatro candidatos contra MIROVA en VIIRS 375 (mediana 0,600, contra 0,706 del
++  núcleo que el tablero publica y 0,783 de la suma). **Lo que NO cambia**: `record.vrp_mw` sigue sin
++  ser el campo correcto (trae el tope D9 y la suma de escena), y el matiz S132 sobre `f5_core_vrp_mw`
++  sigue en pie. Lo que cae es la justificación de por qué. Ver **D32**. Texto original por historia:
++  **A10. Audit vs MIROVA usar `pc.vrp_mw` (NO `record.vrp_mw`)**: `record.vrp_mw` es sum
+@@ -844,7 +856,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++    `process_viirs.py:212/1111`** (era 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:62` (era 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:162`
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -870,6 +870,34 @@ Copahue               100% (1/1)    100% (1/1)       0
++⚠️ **ESTA TABLA NO TIENE INSTRUMENTO, verificado S147** (`docs/audit_s147/VERIFICADOR_H_A01.md`,
++hallazgos H1 y H1-bis, verificador con contexto limpio). El commit que la escribió
++(`a7b567f00`, 2026-04-30) cambió **un solo archivo, y es este catálogo**: 46 líneas insertadas,
++ningún script, ningún JSON de resultados, ninguna salida. En el árbol completo de ese commit no
++existe ningún script de recall sobre 11 volcanes ni sobre 507 registros. Y no es sólo la búsqueda
++del verificador: el propio **libro de cuentas** del proyecto ya la tenía fichada en su lista
++`sin_instrumento` desde el 2026-08-30 (`docs/LIBRO_DE_CUENTAS.json`, entrada con el contexto
++`"TOTAL ~50% 80% (406/507) +30 pp"`), o sea **21 días antes de que S146 la discutiera**, y nadie
++conectó esa ficha con la adopción que este número justifica.
++
++Tres cosas más que caen con ella:
++- **La medición era circular** (H2): con el Test 1 encendido, su disparo fija por construcción
++  `final_hotspot_source = "test1"`, `distance_class = "summit"` y el recómputo de VRP, que son
++  las dos condiciones del predicado de acierto de la época. El brazo tratado escribía la hoja de
++  respuestas. El commit de S26 ya lo decía en voz alta: el Test 1 **ya disparaba** antes (15 de
++  19 gránulos) y el recall era 0 de 6 **sólo porque la etiqueta salía `far`**.
++- **El único A/B limpio dio 6 contra 6** (H3, S25, `experiments/54_test1_ab/REFS_FORENSE.md`):
++  ganancia cero. Los "+30 puntos" aparecen recién **después** de agregar la regla que fuerza la
++  etiqueta summit.
++- **No había un solo negativo limpio** (H6): el universo era `Tipo_Registro == "ALERTA_TERMICA"`
++  y nada más, habiendo **11.680 filas RUTINA** en el mismo archivo y la misma ventana, en
++  proporción 22,6 a 1. Una tasa sin tasa base no dice nada sobre discriminación.
++
++Y la fila de Nevados de Chillán delata que los dos brazos **no vieron las mismas pasadas** (H9):
++el denominador es el conteo de alertas de MIROVA y pasa de 3 a 4 entre brazos, cuando es la misma
++referencia externa y no puede cambiar. La tabla se conserva por historia; **no se usa como
++evidencia de nada**.
++
+@@ -2649,10 +2677,22 @@ El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el có
++esa suma supera 3 sigmas propagadas. Es el mecanismo que en S27 subió el recall de 50 a 80 % (⚠️
++**ese número quedó SIN EVIDENCIA en S147**, no tiene script; ver la rebaja al final de esta D) y
++⚠️ **Y la vara del disparo está mal armada, medido S147** (`docs/S147_TEST1_ESTADISTICO_CORREGIDO.md`):
++la suma **recorta** los excesos negativos a cero pero se compara contra la desviación de la suma
++**sin** recortar. Con ruido puro la suma recortada vale `0,399·N·sigma`, sigma se cancela y el
++criterio depende del **tamaño del disco**: se cumple con N mayor que 56,6, y el disco tiene ~201
++píxeles en VIIRS 375, 50 en VIIRS 750 y 28 en MODIS. Reproducido en S147 por dos caminos propios:
++un banco sintético sin nada caliente dispara en **38 o más de 40 escenas**
++(`tests/test_test1_estadistico_nulo_s147.py`), y sobre los records persistidos la mediana de
++`test1_k_observed` se sienta en **0,83 a 0,91 veces** el valor de reposo en los tres sensores
++pese a que sus discos difieren por un factor 7
++(`experiments/_s147/reposo_test1_en_records_reales.py`).
++
+@@ -2758,7 +2798,18 @@ los records VIIRS 375** y en el **22,21 % de los VIIRS 750**
++**Lo que esta D NO dice**: no dice que el Test 1 integrado esté mal ni que haya que apagarlo. ⚠️
++**La frase que sigue CAYÓ en S147** (`docs/audit_s147/VERIFICADOR_H_A01.md`, hallazgos H1, H2 y
++H3, verificador con contexto limpio): (a) el "50 a 80 %" **no tiene instrumento**, el commit que
++lo declara (`a7b567f00`) cambia un solo archivo y es este catálogo, y en el árbol de ese commit no
++existe ningún script de recall sobre 11 volcanes ni sobre 507 registros; queda **SIN EVIDENCIA, no
++refutado**; (b) la medición **sí es circular**, aunque no por la disyunción que se le achacaba
++sino por la etiqueta: con el Test 1 encendido, su disparo fija por construcción
++`final_hotspot_source = "test1"`, `distance_class = "summit"` y el recómputo de VRP, que son las
++dos condiciones del predicado de acierto de la época; (c) el único A/B limpio del Test 1 encendido
++contra apagado (S25, `experiments/54_test1_ab/REFS_FORENSE.md:15-18`) dio **6 contra 6**, o sea
++ganancia cero, y los "+30 puntos" aparecen recién **después** de agregar la regla que fuerza la
++etiqueta summit. Texto original conservado por historia: El
+@@ -2834,3 +2885,77 @@ camino entero es de BT y está apagado.
++
++## D32: MIROVA publica la SUMA del VRP de todos los píxeles alertados de la pasada; nosotros publicamos un recorte (el cúmulo, y en banda I su núcleo). **ABIERTA (registrada S147, verificada con contexto limpio, gravedad 4; prioridad MEDIA, no es la palanca del 0,7)** S146/S147
++
++**El fenómeno, primero.** Una anomalía térmica volcánica no ocupa un píxel: ocupa un puñado. El
++lago de lava calienta su propio píxel y entibia a los vecinos, y una colada reciente se extiende
++por el flanco. Cuánta energía se le atribuye al volcán depende entonces de una decisión que parece
++menor y no lo es: cuántos de esos píxeles se suman al informar la pasada.
++
++**Lo que hace MIROVA**, verificado renderizando las páginas a imagen (A95), no por la capa de texto:
++
++> Campus et al. 2024, *Bull. Volcanol.* 86:25, página impresa 3, §Methodology, Ec. 1: *«the
++> algorithm extracts the radiance of each alerted pixel ... and calculates the total MIR radiance
++> ... by summing the contribution of each pixel»*, `L_MIRhot = Σ L_alert`.
++
++> Campus et al. 2022, *Sensors* 22:1713, página impresa 7, §3.2: *«The NRT processing chain is made
++> of 4 successive steps: (i) download; (ii) resampling; (iii) hot-spot detection and (iv)
++> calculation of the VRP.»*
++
++> Coppola et al. 2026, *Scientific Data*, página índice 4: *«All resampled pixels exhibiting
++> anomalous thermal behavior within this area were retained for VRP calculation.»*
++
++La tercera cita viene del conjunto de datos publicado, así que por sí sola no valdría para el canal
++de tiempo casi real (A105). La segunda cierra esa objeción: la suma es el paso (iv) **de la cadena
++de tiempo casi real**, dicho con esas palabras. Lo exclusivo del archivo es el umbral de VRP por
++sensor y la clasificación por DBSCAN, y ninguno de los dos es la regla de suma.
++
++**Lo nuestro**: `ENABLE_SUM_VRP_REPORTING = False`. El tablero publica `f5_core_vrp_mw` (el núcleo
++del cúmulo) en banda I de VIIRS, y `primary_cluster.vrp_mw` en MODIS y VIIRS 750. Son **dos
++recortes encadenados**: primero el cúmulo de 8 conexos, después el núcleo.
++
++**Cuánto vale, medido** (verificador S147, 1.512 pares publicados, ventana 2026-03-01 a 2026-09-20
++partida por #535, magnitud publicada calculada con node ejecutando el propio `index.html`, A97):
++
++| | VIIRS 375 | VIIRS 750 |
++|---|---|---|
++| mediana de la razón, publicado | 0,706 | 0,572 a 0,725 según agregación |
++| mediana de la razón, sumando | 0,783 | 0,642 |
++| razón **agregada** (energía total) | 0,647 a **0,856** | 0,725 a **1,153** |
++
++O sea que cierra el **26 %** de la brecha en VIIRS 375, y en VIIRS 750 **la pasa de largo**: el
++17,4 % de los pares superaría 1,5 veces a MIROVA y el 7,3 % la superaría 10 veces.
++
++**Por qué NO es la palanca del déficit 0,7, y esto es lo que más importa de esta D.** Estratificado
++por volcán, la ganancia **no está donde está el déficit**. Láscar e Isluga, que son 538 de los
++1.285 pares de VIIRS 375, se mueven +0,031 y +0,015 y se quedan en 0,56 y 0,62. En 5 de 11
++volcanes el delta es exactamente 0,000, porque el record es de un solo píxel y la suma ya es el
++núcleo. El que más gana, Puyehue Cordón Caulle, **ya estaba en paridad** (1,037) y pasaría a
++sobreestimar un 72 % (1,719). Es la misma compensación entre volcanes que la rebaja S146 de A99.
++El déficit de Láscar e Isluga hay que buscarlo en el **fondo** (D25) o en la detección.
++
++**Tres cosas que hay que saber antes de intentar el A/B:**
++1. **El camino ya está andado**: `ENABLE_SUM_VRP_REPORTING` existe desde S37 y persiste
++   `vrp_mw_sum_active`. No hay que escribir el cálculo, sólo encender y reprocesar.
++2. **Pero suma una lista truncada**: `anomaly_pixels` es un top 100 por VRP en los dos
++   procesadores. Inmaterial en la población de hoy (mediana de la razón suma sobre escena 1,0000,
++   97,0 % dentro del 2 %), pero en un reproceso eruptivo mordería.
++3. **No toca la sobre-publicación**: la puerta de publicación usa `primary_cluster.vrp_mw` y
++   `distance_class`, no la magnitud mostrada. Cambiar de núcleo a suma no abre ni cierra
++   detecciones. Baja el riesgo de adoptarlo y baja también su premio.
++
++**Dato que acota la divergencia**: el archivo de MIROVA (`VRP_GLOBAL_ARCHIVE_2025.csv`) trae `Npix`
++y `Max_Dist`. En volcanes chilenos y pasadas nocturnas, la mediana de `Npix` es 3 en MODIS, 6 en
++VIIRS 750 y 3 en VIIRS 375, con `Max_Dist` mediana de 1,4 a 1,9 km. O sea que «todos los píxeles
++alertados de la caja de 50 por 50 km» es, en la práctica, **un puñado dentro de unos 2 km**: no es
++una suma de escena. Y nuestro conjunto alertado es comparable al suyo (mediana 2 contra 2): lo que
++difiere es **cuánto de él publicamos**. Eso da un criterio de aceptación que hoy no existe para
++este frente: comparar nuestro `Npix` contra el de MIROVA, no sólo la razón de magnitud.
++
++**Lo que esta D NO dice**: no dice que haya que encender la suma. La decisión no puede ser un
++encendido uniforme (rompería VIIRS 750), y por sensor es legítimo mientras por volcán siga excluido
++por MISSION. Estado: **ABIERTA, descrita, sin decisión**, prioridad media, por debajo de D25 y del
++frente del Test 1.
++
++**Consecuencia sobre las reglas**: rebaja la premisa de **A10** en `CLAUDE.md` (ver la marca ahí).
+commit cf5dd7cf77885f6a3e309956bb6347387b32e600
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -1554,6 +1554,11 @@ Para minimizar compactaciones automáticas ("session continued..."):
++  - ⚠️ **Desactualizado, verificado S146**: el NRT autentica por **`EARTHDATA_TOKEN`** (vence el
++    2026-10-03, se rota cada 50 días). El par usuario y clave de los secretos está VENCIDO: un
++    workflow nuevo que lo usó (run 35507516244) falló con `invalid_credentials` y **bloqueó la
++    cuenta 10 minutos** (A71). Todo workflow nuevo autentica sólo por token, falla al instante si
++    viene vacío, y copia el bloque `env` de `nrt.yml`, no esta línea.
+commit 5167951c24d9fc05e55585d8b74177f3abee7e59
+diff --git a/CLAUDE.md b/CLAUDE.md
+@@ -103,6 +103,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  ⚠️ **Rebajada S146 (AUDIT_S146 C-06)**: la Ec. 5 de Aveni 2024 sí es Stefan-Boltzmann con
++  emisividad 1 y está bien citada, pero la **Ec. 16 del capítulo Springer es la potencia del
++  modelo de dos componentes** (`A_hot σ ε (T_hot⁴ − T_bk⁴)`, exige suponer T_hot), la misma que
++  el catálogo dice que el NRT no usa. Y **ningún paper dice cuál está «adoptado
++  operacionalmente»**: el «no adoptada» de la Ec. 9 es SOSPECHA, no cita. El cierre de D3 se
++  apoya en esa Ec. 16. Texto original conservado por historia.
+@@ -110,7 +116,19 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  Coppola 2016a** (S114). ⚠️ **Rebajada también en S146, dos caminos más** (AUDIT_S146 V-08 y
++  V-06): (a) el **test de temperatura de brillo con N·σ = 5 / 10 no está en la Tabla 1**, donde
++  C2 multiplica la desviación del dNTI y del dETI; el paper no tiene ningún test de temperatura
++  de brillo, así que es un préstamo de esos números a otra variable, y es justo la clase de path
++  que A69 marca como vulnerable al gradiente topográfico (cuánto decide hoy: **nada**, el camino
++  está apagado desde S40, `ENABLE_BT_PATH_HOT = False` leído de `pipeline.profile`, comprobado
++  por la Fase 1 de S146 y por su verificador; la divergencia es de atribución, no de
++  comportamiento, ver D31).
++  (b) el **Test 1 integrado en el ROI es un detector propio**: en `sp426.5.pdf` p. 6 el Test 1 es
++  por píxel contra K1, sin suma sobre el ROI, y la cita «Coppola 2015, Bull. Volcanol. 77:55»
++  corresponde a Heap et al., mecánica de rocas en andesita (DOI 10.1007/s00445-015-0938-7;
++  Crossref y OpenAlex dan 0 artículos de Coppola en esa revista en 2015, con control de
++  consulta). ⚠️ **FALSO desde S137, verificado contra el PDF**: la auditoría S114
+@@ -321,7 +339,23 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A23. ⚠️ La declaración de obsolescencia cayó en parte, S146 (AUDIT_S146 V-01): D9 vuelve a
++  estar abierta SÓLO en la cara de co-validación del path D sobre fondo frío. De las tres
++  alternativas que esta regla manda probar, sigue descartado el gate por `t_bg` (anti-MIROVA) y el
++  tope de magnitud ya está adoptado y funciona; lo único vivo es la co-validación (Fase 3 del
++  plan).** Los denominadores de S113 se reproducen exactos sobre el commit
++  de junio (199 `far`, 214 `summit`), pero el numerador no: con cualquier definición en que
++  «confirmado» signifique que MIROVA publicó una alerta el máximo es **80 de 214 (37,4 %)**, y el
++  rango 201 a 211 sólo aparece contando cualquier fila de la referencia, incluidas las RUTINA («
++  MIROVA miró», no «MIROVA vio»). El «0 fuga» es circular, porque el dashboard oculta todo `far` por
++  construcción; el tope de 5 MW sí funciona (0 records sobre 5 MW). Y la lectura física tampoco se
++  sostiene: el volcán con más records es PCC (59 de 214, 2.236 m) y 3 de cada 4 son VIIRS 750
++  (sensor medido sobre la población de hoy, 162 de 216; el 59 de 214 es la población de junio).
++  O sea
++  que el argumento con que se descartó para siempre la co-validación del path D («mataría 207
++  detecciones reales») no tiene respaldo: entre 63 y 88 % de esa población no tiene alerta de MIROVA.
++  Lo que sigue se conserva por historia:
++  **⚠️ OBSOLETA desde S113 — verificado S125.** D9 quedó **CERRADA en sus dos
+@@ -883,7 +917,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  2023 §2.5 (FP removidos a mano, ~5% tolerados "aleatorios en espacio/tiempo" ⚠️ **cita
++  CORRUPTA, S146 (AUDIT_S146 C-05)**: §2.5 p. 4 sí dice que se supervisó a mano y que quedan
++  errores, pero no trae ni el «5 %» ni «random»; el «c. 5 %» de falsas está en Coppola 2016a
++  p. 9, otro paper, y «aleatorios en espacio/tiempo» no aparece en ninguno de los dos, queda
++  SIN LOCALIZAR. Cita original conservada por historia). **How to
+@@ -937,7 +975,10 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  confirmadas pero impacto NETO recall = 84 noches, 73 de NdC = artefacto A69 (NO destapar
++  ⚠️ **ese «NO destapar» hereda la rebaja de A82, S146 (AUDIT_S146 V-02, frente E)**: la
++  clasificación de esas 73 como artefacto cuelga del «irreducible» de A82, cuyo número no tiene
++  tasa base. No es una decisión cerrada); el resto
+@@ -945,7 +986,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A82. ⚠️ REBAJADA S124: «agotado» ya no aplica.** ⚠️ **Rebajada también por la vía espectral en S138 (AUDIT_S138 C3)**: los ejes que la regla da por agotados se barrieron sobre records producidos con banda 21 primaria (D21) y compuerta `bt > t_bg + 3 K` (D22), las dos divergencias que S137 abrió; «irreducible» vale sólo bajo esa configuración. ⚠️ **Y el número que sostiene el cierre no tiene tasa base, verificado S146 (AUDIT_S146 V-02)**: el «el pipeline encuentra el cráter 90 %» mide presencia de cúmulo, no detección. Con negativos limpios (pasadas donde MIROVA miró y todas sus filas son RUTINA) hay cúmulo con magnitud dentro del inner en **89,1 % de 4.800 pasadas MODIS**, contra **93,7 % de 158** cuando MIROVA alertó (ventana 2026-01-29 a 2026-08-28; después de #535, 86,0 % de 500 negativos y sólo 2 positivos): menos de 5 puntos de contraste, y 144 de esas 158 positivas son de Láscar. En VIIRS sí hay contraste (84,5 contra 62,1 en I-band; 47,5 contra 22,8 en M-band), así que el instrumento funciona y el problema es del número, no de la medición. Consecuencia: destapar la etiqueta destaparía por igual las noches con y sin actividad. **Esta rebaja baja también a A83, A84 y A85**, que citan el «irreducible / agotado» de A82 (A113). La auditoría S114 en que se
+@@ -971,7 +1012,18 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A83. ⚠️ REBAJADA S146 en su número, su etiqueta y su alcance** (AUDIT_S146 V-03): el AUC
++  **0,859 no tiene script** en el repo, vive sólo en `experiments/_s116_followup/c2_discriminator.json`.
++  Su etiqueta positiva es «MIROVA publicó una alerta», y todo lo demás se llamó artefacto, que por
++  A54 es en su mayoría señal real no publicada. Re-medido sobre el corpus de hoy con la misma
++  población y etiqueta (n = 4.547) el AUC global es **0,762**, y es **paradoja de Simpson**: la sola
++  variable «el record es VIIRS 375» da 0,706 contra esa etiqueta, y dentro de un mismo volcán y
++  sensor el AUC ponderado cae a **0,554** (11 estratos, varios bajo 0,50). La conclusión práctica
++  (no hay un escalar por record) sale **reforzada** bajo esa etiqueta; lo que A83 **no puede** hacer
++  es apagar la búsqueda de un discriminante real contra artefacto, porque nunca midió esa pregunta.
++  El «agotado» vale sólo contra la etiqueta de MIROVA. Hereda además la rebaja de A82 (A113). El
++  texto original se conserva por historia:
++  **No existe un discriminante FÍSICO per-record universal que separe el foco débil real
+@@ -986,7 +1038,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A84. ⚠️ Hereda la rebaja de A82, aplicada S146 (AUDIT_S146 V-02, E-01)**: el «irreducible igual
++  que el far→summit» se apoya en A82, y el número que sostenía a A82 no tiene tasa base. Lo que A84
++  midió por su cuenta (los `ctx_cluster` de Llaima y Lastarria indistinguibles) sigue en pie y el
++  frente A lo reprodujo; lo que queda sin respaldo, y condicionado igual que en A82, es el
++  «irreducible» heredado. Texto original:
++  **La POSICIÓN within-inner del `ctx_cluster` es irreducible igual que el far→summit (A82); NO
+@@ -1005,7 +1062,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A85. ⚠️ Hereda la rebaja de A82, aplicada S146 (AUDIT_S146 V-02, E-01)**, y su «0 robos en 214
++  noches focales» quedó observado por el auditor B (hallazgo B-03, sólo leído, sin pasar por el
++  verificador): la población de 214 incluye noches donde el robo es imposible. La lección de método
++  (medir el daño antes de cercar) no cambia. Texto original:
++  **La selección de cluster vent-anchored es robusta a píxeles extra-radio; una cerca
+@@ -1025,7 +1086,23 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A87. ⚠️ El EJEMPLO quedó SIN VERIFICAR, S146** (sospecha S-1 del verificador de la Fase 0,
++  seguida acá). El «482 píxeles del path BT ... en agosto» **no puede ser `diag_n_bt_path`**: ese
++  contador vale 0 en los 6.626 records de `data/mirova_equivalent/Villarrica.json` (barrido mes a
++  mes de abril a septiembre de 2026, y también por sensor en los 8), y el verificador de la Fase 1
++  lo midió en 0 en los 60.112 records de toda la historia del corpus
++  (`docs/audit_s146/FASE1_VERIFICADOR.md` §4); el flag `ENABLE_BT_PATH_HOT` está apagado desde el
++  2026-05-13. Busqué además **todos** los campos numéricos de ese archivo, en agregado, en la
++  ventana del 1 al 9 de agosto y por sensor, y **ninguno** reproduce «≈482 en agosto contra 0 en
++  abril-mayo» (el único que se acerca en agosto, `discarded_max_cluster_pixels` con 492, vale 420
++  en abril-mayo, no 0). Las medianas tampoco: `pc.vrp_mw` da 0,093 y 0,144 en abril y mayo contra
++  0,223 en agosto, no 0,060 contra 2,107. El número viene de `docs/AUDIT_S123.md:174` y de
++  `tasks/BLOQUE_ARRANQUE_S124.md:43`, que no dicen qué campo midieron ni con qué script. **No está
++  refutado, está SIN VERIFICAR**: o el corpus se reprocesó desde S123, o el «path BT» de esa frase
++  nombra otro contador. **No usar A87 como evidencia de que el camino de BT decide** (choca con
++  D31, donde ese camino está apagado). La LECCIÓN DE MÉTODO vale entera; el ejemplo no se
++  reproduce hoy. Texto original conservado por historia:
++  **Un flag que se apaga NO prueba que el problema se fue** (S123). El auto-audit dejó
+@@ -1182,6 +1259,15 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++  ⚠️ **La frase que resume la regla quedó rebajada S146 (AUDIT_S146 V-12)**: ese 0,995 es el producto
++  de **dos factores opuestos** (píxel caliente 1,140 y fondo 0,873 sobre n = 342 pares), y además
++  **compensa entre volcanes**, de **0,66 en Copahue a 1,39 en Villarrica** (n = 8; el extremo con
++  muestra es Planchón Peteroa, 1,33 con 63, y el pareo es contra el OSF de 2025, anterior a #535),
++  con sólo **156 de 342**
++  pares entre 0,8 y 1,25. El subconjunto es el 23 % de los pares y está sesgado a lo simple (233 de
++  343 son de un solo píxel). A igual selección **no coincidimos**: discrepamos 14 % en un sentido y
++  13 % en el otro. Que el problema no esté en la fórmula sigue apoyado por otro script, pero **A99 ya
++  no puede apagar la búsqueda en k, área, banda o Planck**.
+@@ -1280,6 +1366,28 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
++- **A113. Una rebaja se propaga a los hijos en el mismo PR: mientras el texto viejo siga sin marca
++  donde se lee primero, el cierre sigue vivo** (S146, hallazgo central de la auditoría). El proyecto
++  ya sabía que varios cierres habían caído, y aun así `docs/MISSION.md`, que es la puerta que toda
++  sesión lee antes de tocar el pipeline, seguía dando D9 por resuelta, D11 por «irreducible, todos
++  los ejes agotados», el GAP #A por «no reabrir» y NEW-8 por gap abierto cuando corre en producción
++  desde S72. La rebaja de A82 se había anotado en A82 y no había bajado a A83, A84, A85, D13, D18 ni
++  a la frase de D19 que la citan. El defecto dominante de los 89 cierres auditados **no fue falta de
++  evidencia** (de los 50 «sin respaldo» del censo S145, 27 se verifican, 5 en parte, 1 queda sin
++  evidencia, 7 se refutan y
++  10 no eran cierres): fue **falta de propagación**. Y el daño encadena, porque un cierre falso apaga
++  los frentes que cuelgan de él.
++  - **How to apply**: (a) cuando rebajes, refutes o matices una afirmación, en el **mismo PR** busca
++    quién la cita (`grep` del número, de la frase y del ID) y marca cada hijo, aunque el hijo esté en
++    otro archivo; (b) la marca va **al inicio del pasaje**, con el símbolo de advertencia, qué parte
++    cayó, en qué sesión y el puntero a la evidencia, y **conserva el texto viejo como historia**: se
++    degrada, no se borra; (c) el orden de prioridad es por **dónde se lee primero**, o sea
++    `docs/MISSION.md` y `CLAUDE.md` antes que el informe de la sesión, porque son los que cada sesión
++    hereda; (d) un encabezado que contradice a su propio cuerpo más abajo cuenta como texto sin
++    marcar. Es A95 vista desde el otro lado: A95 dice que un cierre hereda las premisas de su
++    lectura, A113 dice que la corrección tiene que heredarse también. Detalle: `docs/AUDIT_S146.md`
++    §2 y §8, `docs/audit_s146/FRENTE_E_GRAFO_DE_CIERRES.md`.
++
+@@ -1310,6 +1418,11 @@ decisiones de umbrales, o cambios metodológicos:
++- (⚠️ **«serie continua» es FALSO, verificado S146 (AUDIT_S146 V-15)**: hay un hueco de
++  **2025-11-16 a 2026-01-28** en 9 de los 11 Tier A, y en PCC es más largo (**111 días**, desde
++  2025-10-10). **Sólo Villarrica es continuo.** Consecuencia: los primeros 19 días de la referencia
++  del scraper (que parte el 2026-01-10) sólo se pueden parear en Villarrica. El texto que sigue se
++  conserva por historia.)
+@@ -1544,7 +1657,11 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
++   de Nicolás). **CERRADAS, no reabrir** (anti-A8): (⚠️ **D9 salió de esta lista en S146**
++   (AUDIT_S146 V-01): el «207 de 214 confirmados» no se reproduce con ninguna definición basada
++   en alertas (máximo 80 de 214, 37,4 %) y el «0 fuga» es circular; sólo el tope de 5 MW se
++   confirma. Ver la rebaja de A23. El texto que sigue se conserva por historia.)
++   D9 (S113, sus dos caras),
+diff --git a/docs/MIROVA_DIVERGENCES.md b/docs/MIROVA_DIVERGENCES.md
+@@ -256,7 +256,7 @@ Subagente Explore revisó 5 papers MIROVA canónicos buscando tratamiento explí
++| Coppola 2016a §SP 426.5 | NO | Define dNTI ctx + umbrales C1/C2 + filtro `dNTI<−0.1`. Sin cloud mask previo, sin gate t_bg. Caso Gaua p.17: "<2% FPs, siempre <5 MW" — interpretativo post-hoc, no gate algorítmico. ⚠️ **S146: «Gaua» NO está en SP426.5; ver la nota bajo esta tabla (AUDIT_S146 V-07 y C-03).** |
+@@ -264,6 +264,19 @@ Subagente Explore revisó 5 papers MIROVA canónicos buscando tratamiento explí
++> ⚠️ **La atribución «Gaua» cae, S146** (`docs/AUDIT_S146.md` §3 V-07 y frente C, C-03). La palabra
++> «Gaua» tiene **cero apariciones** en las 25 páginas de `documentacion/sp426.5.pdf` y en
++> `sp426_5.txt`, y «<2 %» tampoco está: ese dato viene de otro paper del grupo, Coppola et al.
++> 2016, JVGR 322 (Vanuatu), p. 10, §4.6. Lo que **sí** está en SP426.5 p. 17 es la frase *«these
++> false detections typically radiate less than 5 MW and can be easily identified by a visual
++> inspection of the associated NTI map»*, pero referida a falsas alertas **diurnas**, en bordes de
++> cuerpos de agua y nubes dispersas (p. 16), sin volcán nombrado. La tabla de arriba la escribió un
++> subagente que leyó notas del Vault y no el PDF (lo dice el «Trigger» de la sub-sección S71 de
++> más abajo). El texto original se conserva
++> como historia. Nota: la misma cita errada vive en `pipeline/profiles/mirova_equivalent.yaml:482`
++> y otros 23 perfiles (24 de 73 con `grep -l Gaua`); corregirla es de la Fase 2 del plan, porque
++> toca archivos con A45.
++
+@@ -284,7 +297,7 @@ Subagente Explore revisó 5 papers MIROVA canónicos buscando tratamiento explí
++**Cobertura física**: el cap acota magnitudes en cirrus alto (Wooster BT⁸ sobre fondo frío inflaba 20-150×). Ahora la magnitud máxima publicable en escena contextual-only + cirrus es 5 MW, alineado con Coppola 2016a Gaua "<5 MW Tier A sospechosos" y con el máximo MIROVA empírico en records que el cap atrapa (0.21 MW). ⚠️ **S146: la atribución «Gaua» es falsa (V-07, C-03; ver la nota tras la tabla de la Fase 1). El tope sigue siendo una mitigación propia, medida y adoptada acá; lo que cae es el respaldo de paper, no el tope.**
+@@ -324,6 +337,18 @@ Subagente Explore revisó 5 papers MIROVA canónicos buscando tratamiento explí
++> ⚠️ **El «NO es un parche» cae, S146** (`docs/AUDIT_S146.md` §3 y frente C, **C-02**, página 17
++> renderizada a imagen). La frase citada existe, pero leída completa (p. 16 y 17) dice otra cosa:
++> las falsas alertas ocurren **principalmente de día**, en bordes de cuerpos de agua y nubes
++> dispersas, irradian típicamente menos de 5 MW y el remedio que el paper propone es la
++> **inspección visual**. El paper describe cuánto miden las falsas; **no propone recortar nada a
++> 5 MW**. Y el caso que el tope ataca (registros nocturnos inflados 20 a 150 veces sobre cirrus)
++> es el fenómeno opuesto al de la cita. El tope puede ser una buena mitigación, y su adopción
++> tiene A/B propio acá arriba, pero es **propia**: no es la implementación programática de nada
++> que el paper diga. El punto 5 de la lista de abajo («reemplaza programáticamente el QC visual
++> que MIROVA hace manualmente») además choca con A105: el canal NRT de MIROVA no está supervisado
++> a mano. Texto original conservado por historia.
++
+@@ -432,13 +457,42 @@ Ejecución sistemática del catálogo de divergencias (`docs/MIROVA_DIVERGENCES_
++| **F1.2** | NEW-7 + NEW-8 — Test 1 K1 retire + edge/dNTI<-0.1/dETI<-0.1 unsuitable | ⚠️ **PARCIALMENTE RECLASIFICADO S100**: el gap (1) NEW-7 (`enable_test1_k1_retire_from_hot_mask`) era una **LECTURA EQUIVOCADA** — ver nota S100 abajo: "discarded (unsuitable) for further steps" (SP 426.5 §298-300) = sacar los Test 1 del **pool estadístico** (los `suitable pixels` de §326-329 que alimentan m,σ de Tests 2/3), NO del **reporte de detecciones**. Nuestro código (flag OFF, los Test 1 entran al hot_mask reportable) **ya es fiel**. **Mantener OFF permanentemente.** ⚠️ **Esa última frase quedó rebajada S146 (AUDIT_S146 A-08 y C-08, frente E E-07)**: el flag gobierna el **pool de μ y σ**, y ahí el paper sí retira los píxeles del Test 1 mientras nuestro código no. Eso es el **GAP #A**, reabierto en S128, con guard `tests/test_guard_gap_a_pool_musigma_s128.py`. El «mantener OFF permanentemente» no es una decisión cerrada. Los gaps (2)(3)(4) NEW-8 (edge/dNTI<-0.1/dETI<-0.1) **siguen vigentes** — esos sí son sobre el pool estadístico de m,σ (§267-273), naturaleza distinta del malentendido ⚠️ **FALSO desde S72, verificado S146 (AUDIT_S146 V-05): los gaps (2)(3)(4) CORREN EN PRODUCCIÓN. Lo único abierto de este párrafo es el GAP #A. Ver la nota S146 bajo la tabla.** | NEW-7 cerrado; NEW-8 (gaps 2-4) sin cambio |
++##### Nota S146 (2026-09-20): NEW-8 (gaps 2 a 4) NO es un gap abierto, corre en producción desde S72
++
++> ⚠️ **Verificado en S146** (`docs/AUDIT_S146.md` §2 y verificador **V-05**, por dos caminos: el
++> flag leído de `pipeline.profile` y el trazado del consumo en los tres procesadores).
++> `ENABLE_UNSUITABLE_FILTERS_267_273` vale **True** (default de `profile.py:676`, puesto en el
++> commit `d58f7a46f`, S72 F2.3.a; la clave no está escrita en `mirova_equivalent.yaml`, así que
++> manda el default, A89). Los **tres** procesadores lo consumen en las **dos** ramas, y las dos
++> ramas están encendidas (`ENABLE_DNTI_CONTEXTUAL_PATH`, `ENABLE_FIRST_PASS_TESTS_2_AND_3`):
++> `process_modis.py:696/704` y `:866-867`, `process_viirs.py:1071/1079` y `:1272-1273`,
++> `process_viirs_mod.py:705/713` y `:854-855`. El filtro de borde va siempre activo dentro de
++> `build_unsuitable_mask`.
++>
++> Consecuencia: el A/B **F2.1** que este bloque propone más abajo **no se puede correr como está**,
++> porque su control ya tiene el filtro puesto (gravedad 2: el cierre no apaga trabajo, lo inventa).
++> Lo único que sigue abierto del párrafo §267-273 es el **cuarto** elemento, retirar del pool de μ
++> y σ los píxeles del Test 1, que es el **GAP #A**, reabierto en S128 (en este mismo archivo,
++> bloque CIERRE S114 de D11, buscar «REABIERTO S128») y con guard propio (`tests/test_guard_gap_a_pool_musigma_s128.py`). Todo el texto de
++> abajo se conserva como historia.
++
++> ⚠️ **Rebajada en su CONCLUSIÓN, S146** (`docs/AUDIT_S146.md` §2, frente A **A-08** y frente C
++> **C-08**). La lectura del paper que hace esta nota es buena y la página la respalda. Lo que **no**
++> se sostiene es la frase con que termina, «queda OFF permanentemente; el código actual ya es
++> fiel»: el flag gobierna el **pool de μ y σ**, y el paper sí retira de ese pool los píxeles del
++> Test 1 mientras nuestro código no (`test1_mask=None`). Eso es el **GAP #A**, reabierto en S128 y
++> registrado en este mismo archivo (bloque CIERRE S114 de D11, buscar «REABIERTO S128»), con guard
++> `tests/test_guard_gap_a_pool_musigma_s128.py`. Tres frentes de S146 llegaron por separado a esta
++> línea porque es la que se lee primero y no llevaba ninguna marca. Texto original intacto abajo,
++> conservado por historia.
++
+@@ -475,6 +529,17 @@ Los **4 gaps documentales F1.2** explican mejor el drift remanente Villarrica/Ch
++> ⚠️ **Nota S146, dos rebajas sobre el bloque que sigue** (`docs/AUDIT_S146.md`). (1) **V-05**: los
++> gaps 2 a 4 de NEW-8 **no están pendientes**, corren en producción desde S72 en los tres
++> procesadores (ver la nota S146 arriba, tras la tabla de la Fase 1); lo que queda abierto de
++> §267-273 es sólo el GAP #A. (2) **E-01 / A-11**: el «killer A82» con que el veredicto de más
++> abajo declara el A/B no accionable **hereda una premisa rebajada**. A82 quedó rebajada dos
++> veces, por la vía geométrica en S124 (la auditoría S114 nunca miró la geometría del ROI) y por
++> la vía espectral en S138 (los records se produjeron con la banda 21 primaria y la compuerta de
++> 3 K, D21 y D22, abiertas en este mismo catálogo); la rebaja se anotó en A82 y **nunca bajó a las
++> hijas**. El «irreducible» vale sólo bajo esa configuración. Texto original abajo, conservado por
++> historia.
++>
+@@ -511,6 +576,33 @@ Los **4 gaps documentales F1.2** explican mejor el drift remanente Villarrica/Ch
++> ⚠️ **D9 vuelve a estar ABIERTA en su cara de co-validación sobre fondo frío, S146**
++> (`docs/AUDIT_S146.md` §3, verificador **V-01**, gravedad 4, con medición sobre el corpus y la
++> referencia tal como estaban el 2026-06-19, commit `1d6b5b932`). Lo que cae de este bloque:
++>
++> - **Los denominadores SÍ se reproducen, exactos**: 199 `far` y 214 `summit`, con 0 `far` sobre
++>   5 MW. Eso queda verificado limpio.
++> - **El numerador no.** Con cualquier definición en que «confirmado» signifique que MIROVA
++>   publicó una **alerta** (misma fecha, con o sin mismo sensor, con o sin OCR, con tolerancia de
++>   5 a 60 min) el máximo es **80 de 214 (37,4 %)**, y 100 de 214 (46,7 %) si además se cuentan los
++>   `FALSO_POSITIVO` del scraper. El rango 201 a 211 sólo aparece cuando «confirmado» cuenta
++>   **cualquier fila de la referencia, incluidas las RUTINA**, o sea cuando significa «MIROVA miró
++>   esa pasada», no «MIROVA vio algo». La definición exacta que da 207 quedó NO VERIFICABLE.
++> - **El «0 fuga» es circular**: una fuga sería un record `far` visible, y el predicado del
++>   dashboard esconde todo `far` por construcción. La parte no circular (0 records sobre 5 MW, tope
++>   activo) **sí** se confirma.
++> - **La lectura física tampoco se sostiene**: la población no es «fondo frío por altitud del
++>   norte». El volcán con más records es **Puyehue Cordón Caulle (59 de 214, 2.236 m)** y tres de
++>   cada cuatro son **VIIRS 750** (sensor medido sobre la población de hoy, 162 de 216; el 59 de
++>   214 es la población de junio).
++>
++> Consecuencia: el argumento con que se descartó **para siempre** la co-validación del path D en
++> fondo frío («mataría 207 detecciones reales») **no tiene respaldo**; entre 63 y 88 % de esa
++> población no tiene alerta de MIROVA. Esa cara pasa a **REABIERTA** y va a la Fase 3 del plan
++> `docs/PLAN_PARIDAD_POST_AUDITORIA_S146.md`. Lo que **no** se reabre es el gate por `t_bg` (sigue
++> descartado: es anti-MIROVA, Coppola 2016a §247 y 2023 §554) ni el tope de 5 MW, que funciona.
++> Texto original intacto abajo, conservado por historia.
++
+@@ -523,6 +615,11 @@ Caracterización fresca (read-only) sobre data actual, raíz del frente "#2 cirr
++  - ⚠️ **El 207 de 214 NO se reproduce, S146 (AUDIT_S146 V-01)**: con «confirmado» = MIROVA
++    publicó una alerta, el máximo es 80 de 214 (37,4 %); el rango 201 a 211 sale sólo contando
++    filas RUTINA, que son «MIROVA miró», no «MIROVA vio». Y la población está dominada por
++    Puyehue Cordón Caulle (2.236 m) y por VIIRS 750, no por los volcanes de altitud del norte.
++    Ver la nota S146 al inicio de esta sección.
+@@ -531,6 +628,19 @@ Caracterización fresca (read-only) sobre data actual, raíz del frente "#2 cirr
++**Estado D9 (actualizado S146): REABIERTA en la cara de co-validación sobre fondo frío**. El
++«no quedan acciones abiertas» de abajo se apoyaba en el 207 de 214 y en el «0 fuga», y los dos
++caen (AUDIT_S146 V-01: el numerador no se reproduce con ninguna definición basada en alertas, y
++el «0 fuga» es circular porque el dashboard esconde todo `far`). Sigue en pie el tope de 5 MW
++(medido, A/B propio) y sigue descartado el gate por `t_bg`. La acción abierta es la **Opción 2
++(co-validación)**, con su sustrato re-medido en el régimen actual: Fase 3 de
++`docs/PLAN_PARIDAD_POST_AUDITORIA_S146.md`. Adelanto de la Fase 1
++(`docs/audit_s146/FASE1_SUSTRATO_SOBREPUBLICACION.md` §7 a §9, verificado en
++`docs/audit_s146/FASE1_VERIFICADOR.md`): en el régimen actual el `dnti_ctx` legacy es sólo
++diagnóstico y no entra a la máscara, el tope de 5 MW actúa sólo en MODIS, y el sustrato de un
++brazo de co-validación es bajo en VIIRS 375 y MODIS y medio en VIIRS 750. Reabierta no quiere
++decir prioritaria. Estado anterior, conservado por historia:
++
+@@ -667,12 +777,24 @@ pc_dist > inner_radius sigue como FN.
++Coppola 2015 Eq.1 textual: VRP = ΔL_ROI · A_ROI · k (⚠️ **cita FALSA, S146, AUDIT_S146 V-06:
++no existe ese «Coppola 2015»; en `sp426.5.pdf` la Ec. 1 es el NTI. Ver D30 y el encabezado
++H_S27_1 de más abajo**). Posible: reportar
++> ⚠️ **S146 (AUDIT_S146 §3 V-06, gravedad 5): la cita «Coppola 2015 §2.2 Eq.1» es FALSA, y
++> aparece muchas veces en todo este bloque.** El artículo 55 del volumen 77 de *Bulletin of
++> Volcanology* es de Heap et al., mecánica de rocas en andesita; en `sp426.5.pdf` p. 6 el Test 1
++> es por píxel contra K1, sin suma sobre el ROI. El Test 1 integrado en el ROI es un **detector
++> propio**. **Esta marca cubre todas las apariciones de esa cita en la sección**, y no se repite
++> línea por línea (A113 b). Ver el detalle en la pregunta 1 de más abajo y en **D30**, al final
++> de este archivo. Nada de lo medido en el bloque cambia: lo que cae es el respaldo
++> bibliográfico, no el resultado empírico de S27. Texto original intacto, conservado por
++> historia.
++
+@@ -705,6 +827,17 @@ señal espacialmente distribuida sub-σ pixel-individual.
++   - ⚠️ **FALSO, verificado S146 (AUDIT_S146 §3 V-06, gravedad 5; ver D30 al final de este
++     archivo).** El artículo 55 del volumen 77 de *Bulletin of Volcanology* es de **Heap et al.**,
++     mecánica de rocas en andesita (DOI 10.1007/s00445-015-0938-7); Crossref y OpenAlex no
++     registran ningún artículo de Coppola en esa revista en 2015 (con control de consulta: la
++     misma búsqueda sin autor devuelve 12 artículos de ese número). El proyecto ya había
++     establecido (por hash antes de S128, y por contenido en S128) que el «Coppola 2015» del
++     proyecto **es** `sp426.5.pdf`, y ahí la Ec. 1 es el NTI (p. 4)
++     y el Test 1 es `NTI_PIX > K1`, **por píxel** (p. 6): no hay §2.2, ni suma sobre el ROI, ni
++     k = 3, ni piso relativo de 0,02. El Test 1 integrado en el ROI es un **detector propio** y por
++     lo tanto **no pasa** la pregunta 1 de MISSION por esta vía. Nada de lo medido abajo cambia:
++     lo que cae es el respaldo bibliográfico, no el resultado empírico de S27.
+@@ -1025,7 +1158,7 @@ parches S33-S44 para compensar.
++| ~~#1~~ | ~~Test 1 K1 → `hot_mask` reportable~~ — ❌ **NO ES DRIFT (S100)**: lectura equivocada de sp426_5.txt:298-300. "discarded (unsuitable) for further steps" = sacar del **pool estadístico** (m,σ de Tests 2/3, §326-329 "all the suitable pixels"), NO del **reporte**. Los Test 1 SÍ se reportan (son las detecciones fuertes). Código actual (flag OFF) ya fiel. Ver nota S100 arriba ⚠️ **El «ya fiel» cae S146 (AUDIT_S146 A-08, C-08, E-07)**: el flag gobierna el pool de μ y σ, donde el paper sí retira los píxeles del Test 1 y nuestro código no. Es el **GAP #A**, reabierto S128, con guard `tests/test_guard_gap_a_pool_musigma_s128.py`. Texto original conservado por historia | `process_*.py` nti_path_hot | sp426_5.txt:298-300 + 326-329 |
+@@ -1085,7 +1218,17 @@ MIROVA "prefiera" lacolito — es que cráter no pasa filtros estrictos.
++### D8 Background ring contaminado — RESUELTO ⚠️ **matizado S146: leer D25 antes de tomarlo por cerrado**
++
++> ⚠️ **S146 (`docs/AUDIT_S146.md` §2, frente A **A-07**).** «RESUELTO» vale para el parche
++> adoptado (el kernel local de vecinos), **no** para la divergencia de fondo contra el paper.
++> **D25**, en este mismo archivo, dice textual que *«D8 quedó marcada resuelta por el kernel
++> opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en
++> M-band y todo el camino Test 1»*. El kernel rige hoy en **5 de los 11** Tier A
++> (`volcanoes.yaml`), o sea es opt-in por volcán, no un cambio global. Quien lea sólo este
++> encabezado se lleva lo contrario de lo que el catálogo sabe. Además la tabla de regímenes de
++> más abajo usa el ejemplo que A12 declara **FALSO** (Isluga 8,3 K y Láscar 16,9 K medidos en
++> S128, no «más de 20 K»). Texto original intacto abajo, conservado por historia.
+@@ -1126,7 +1269,7 @@ suma VRP inflada.
++### D-PCC: inner_radius_km demasiado permisivo — RESUELTO S62 ⚠️ **NO: la adopción se revirtió a las nueve horas, en la misma S62 (PR #85, 2026-05-19); verificado S146**
+@@ -1135,6 +1278,16 @@ ganaba selección summit con inner=20 km.
++> ⚠️ **El «adoptado» es falso desde la misma S62, verificado S146** (`docs/AUDIT_S146.md` §2 y
++> frente A **A-06**; `volcanoes.yaml` tiene hoy `inner_radius_km: 20` para
++> PuyehueCordonCaulle, con el comentario «MIROVA KML oficial»). El `git log -S"inner_radius_km: 7"`
++> muestra las dos caras: `fab02ec1c` («PCC inner_radius 20->7», PR #79) y, a la mañana siguiente,
++> `5d2bea4b9` («S62 CIERRE: ... revertir PCC inner_radius», **PR #85**), porque el reproceso real
++> empeoró el ratio (es el caso de manual de A18: el preview offline no predice la selección de
++> cúmulo). El catálogo nunca anotó la reversión. Importa hoy: D18 señala que un radio interior de
++> 20 km aplica umbrales de cumbre donde MIROVA usa los de escena, y eso toca la sobre-publicación,
++> así que quien lea «resuelto» acá no va a ir a mirar. Texto original conservado por historia.
++
+@@ -1200,7 +1353,7 @@ Cuando S62+S63 completen:
++**Fenómeno**: el Test 1 integrado-ROI (Coppola 2015 §2.2 Eq.1 ⚠️ **cita FALSA, S146, AUDIT_S146 V-06: el Test 1 integrado en el ROI es un detector propio; ver D30 y la marca del encabezado H_S27_1**) suma TODOS los píxeles del ROI sobre la mediana del fondo. Sobre el glaciar nevado de Tupungatito (5.682 m), en invierno, eso es el mosaico nieve/roca entero (anillo difuso 1-3 km) con un fondo regional sesgado frío → la magnitud se infla **8-19×** vs MIROVA, que reporta el foco compacto (~0.2 MW estable). Empezó abril 2026 (marzo daba 1.04× perfecto): mosaico nieve/roca invernal sobre el glaciar.
+@@ -1258,6 +1411,14 @@ Guard anti-revert: `tests/test_detection_anchor.py`. Resultados: det→cráter T
++> ⚠️ **S146 (AUDIT_S146 V-02 y V-08).** El «90 % pipeline-cráter» del cierre S114 de abajo no
++> tiene tasa base: con negativos limpios hay cúmulo con magnitud dentro del inner en 89,1 % de
++> 4.800 pasadas MODIS, contra 93,7 % de 158 cuando MIROVA alertó (ventana 2026-01-29 a
++> 2026-08-28; después de #535, 86,0 % de 500 negativos y sólo 2 positivos; 144 de las 158
++> positivas son de Láscar). Mide presencia de cúmulo, no detección. Y el «dual-ROI 5/10» que el
++> mismo bloque cita como fidelidad no está en la Tabla 1 (ver D31). Texto original intacto
++> abajo, conservado por historia.
++
+@@ -1398,6 +1559,21 @@ El espejo MODIS sigue OFF (D12, gateado por el fix de magnitud fondo-local §2).
++> ⚠️ **Nota S146, dos rebajas sobre la nota S125 que sigue** (`docs/AUDIT_S146.md`).
++> (1) **V-09**: las «76 noches de FN recuperadas (reales)» de `AUDIT_S121_D12_AB.md` **no son
++> FN**. El script de S121 no carga ninguna referencia: «curada» ahí significa «cúmulo dentro del
++> inner», sin cruzar con nada, así que llamarlas FN usa una palabra que exige una alerta de
++> MIROVA que nadie miró. El CSV del scraper tiene **0 filas** de Láscar en esa ventana
++> (2025-02-15 a 05-15). El fenómeno **sí** queda corroborado por una referencia independiente
++> para cerca de la mitad: el OSF v2.5 (producto filtrado, A105) trae 79 detecciones MODIS
++> nocturnas en **55 noches** de Láscar ahí, y 39 de 73 noches candidatas tienen detección OSF.
++> El **76 exacto es NO VERIFICABLE** (los artefactos del run vivían en un scratchpad que ya no
++> existe). El «NO ADOPTAR» del A/B no cambia: lo que cambia es qué se creía haber recuperado.
++> (2) **A-11 / E-01**: el «reabrir trabajo cerrado» se apoya en el veredicto de S122, que dice
++> «irreducible a 1 km» y hereda la misma premisa que A82, rebajada por la vía geométrica en S124
++> y por la espectral en S138 (banda 21 primaria y compuerta de 3 K, D21 y D22, abiertas en este
++> catálogo). Texto original de la nota S125, conservado por historia:
++>
+@@ -1465,7 +1641,7 @@ Detalle: design doc 2026-06-05 §11.
++## D13 — La cerca `distance_class != summit` del frontend apaga el 31 % de la magnitud — **ABIERTA (documental)** S124 ⚠️ **El título mezcla unidades, S146 (AUDIT_S146, frente A A-12 y frente E): ese 31 % es fracción de RECORDS (10.770 de 34.739); en MAGNITUD la cerca apaga el 70,7 % (medido S145, control reproducido en `docs/audit_s146/FRENTE_D_CIERRES_CON_NUMERO.md`). Título original conservado por historia**
+@@ -1501,9 +1677,15 @@ Dos cosas que corrigen creencias previas de sesiones anteriores:
++que a 1 km es irreducible (A82). ⚠️ **S146 (AUDIT_S146 §2, A-11 / E-01): ese
++«irreducible» hereda una premisa rebajada. A82 quedó rebajada por la vía
++geométrica en S124 (la auditoría S114 nunca miró la geometría del ROI) y por la
++espectral en S138 (los records se produjeron con la banda 21 primaria y la
++compuerta de 3 K, D21 y D22, abiertas en este catálogo); la rebaja se anotó en
++A82 y nunca bajó acá.** Levantar la cerca destaparía ambas cosas
++(⚠️ **S146: ese 31 % son RECORDS; en magnitud son 70,7 %, medido S145**)
+@@ -1512,6 +1694,23 @@ es artefacto, la raíz es no generarlo en la detección, no la cerca.
++> ⚠️ **El «1,5 % corroborado» cae como argumento, S146; la conclusión se sostiene por otra vía**
++> (`docs/AUDIT_S146.md` §3, verificador **V-10**, medición propia con loader independiente).
++> Lo que se reproduce: **41 de 2.704 (1,5 %)** hoy (S126 tenía 41 de 2.694; el corpus creció, el
++> porcentaje es el mismo), y el 95,2 % de lo apagado es MODIS. Lo que
++> el número **no** mide: la calidad de lo que la cerca esconde. En cuatro meses MIROVA tiene **18
++> alertas MODIS nocturnas**, así que casi ningún record MODIS puede corroborarse por mismo sensor;
++> de hecho el MODIS que **sí** se publica se corrobora **0,6 %**, todavía menos que el apagado
++> (1,0 %). La causa es de la referencia, no nuestra, y el 1,5 % mide la rareza de las alertas
++> MODIS de MIROVA. Por eso **«corroboraría casi nada» no vale como evidencia de artefacto**.
++> Lo que sí sostiene el veredicto, y nadie había escrito, está en la unidad del operador (A94):
++> de las 1.266 noches con algo apagado, sólo **92** no tienen ya algo publicado esa misma noche,
++> y de esas 92 **sólo 1** coincide con una alerta de MIROVA. Levantar la cerca agregaría **una
++> noche** con respaldo. (El «33 % contra 43 %» que circuló en los informes de S146 es por record;
++> por noche real la diferencia es **36,1 % contra 38,8 %**.) Límite de la medición: «publicado» ahí
++> es `distance_class == summit`, no el predicado completo del dashboard (A97). Texto original
++> intacto abajo, conservado por historia.
++
+@@ -1854,7 +2053,28 @@ bloquea el A/B de F70.3, pero puede explicar un residual.
++## D16 — La grilla UTM NO explica el sub-reporte — **CERRADA (refutada) S124** ⚠️ **título rebajado S146: lo refutado fue el regrid F70, no la grilla de MIROVA**
++
++> ⚠️ **S146** (`docs/AUDIT_S146.md` §2 y verificador **V-04**, gravedad 4). Todo lo factual del
++> A/B de abajo se sostiene, y lo que sigue vivo está dicho al final de esta misma D («ver D17»).
++> Lo que cae es el **título** y el **NO REABRIR**, que dicen más que lo medido:
++>
++> - El experimento fue **sólo VIIRS 375** (`04_tabla_brazos.py` l. 40 descarta todo lo demás),
++>   **61 días**, y con **n = 1 en Copahue y n = 2 en Nevados de Chillán**. No tocó MODIS ni
++>   VIIRS 750.
++> - El remuestreo probado es el **F70**, que **D17 declara mal centrado** (se centró en
++>   `volcano["lat"]/["lon"]` en vez del centro de la celda, `get_grid_center`) y **sin el paso de
++>   bow tie** (D28). O sea, se refutó **«el regrid F70 arregla la magnitud»**, no **«la grilla de
++>   MIROVA explica el sub-reporte»**.
++> - La nota S130 de D17 dice lo contrario del título: el mecanismo geométrico **sí quedó
++>   probado**, por otro eje, el **ángulo** (la razón contra MIROVA cae de 0,740 cerca del nadir a
++>   0,253 más allá de 50° en VIIRS 375, n = 2.767), y el **brazo fiel (bow tie más remuestreo, en
++>   ese orden y bien centrado) nunca se corrió**. Una mediana de 61 días promedia justo ese eje.
++> - Añadido **A-13**: la ventana 2026-06-25 a 08-24 es **entera anterior a #535**, así que en el
++>   régimen actual esto es **SIN DATO**, no una refutación.
++>
++> El frente vive en la **Fase 4** de `docs/PLAN_PARIDAD_POST_AUDITORIA_S146.md`. Texto original
++> intacto abajo, conservado por historia.
+@@ -1898,6 +2118,11 @@ exactos** en A y B.
++> ⚠️ **S146 (V-04): este «NO REABRIR» cubre el regrid F70 tal como se corrió, no el brazo fiel.**
++> Bow tie más remuestreo, en ese orden y centrado en `get_grid_center`, **nunca se corrió**, y
++> sobre MODIS y VIIRS 750 no hay medición. Ver la nota S146 al inicio de esta D y la Fase 4 del
++> plan.
++
+@@ -2039,6 +2264,10 @@ Es una decisión de misión, no técnica.
++⚠️ **S146 (AUDIT_S146 §2, A-11 / E-01): falta acá la SEGUNDA rebaja de A82, la de S138 por la vía
++espectral (los records se produjeron con la banda 21 primaria y la compuerta de 3 K, D21 y D22,
++abiertas en este catálogo). Y el A/B de esta D (ventana 2026-05-29 a 08-24) es entero anterior a
++#535: en el régimen actual es SIN DATO, no refutación (A-13).**
+@@ -2190,8 +2419,30 @@ el que pone el cúmulo en el cráter de Tupungatito 08-21. **D1 y D2 hay que dis
++⚠️ **«D11/A82 quedan intactas» ya no vale, S146 (AUDIT_S146 §2, E-01).** Se escribió en S134 y
++cuatro sesiones después, en S138, D11 quedó **CONDICIONADA en este mismo archivo** (encabezado de
++D11) y A82 quedó rebajada también **por la vía espectral**: el «irreducible» y el «todos los ejes
++agotados» valen sólo bajo banda 21 primaria y compuerta de 3 K (D21 y D22, abiertas). La frase de
++arriba no se tocó entonces; se conserva y se marca ahora.
++
++## D20 — El NTI de MODIS se calcula con la banda 31 (11,03 µm); Coppola 2016a y Wright 2002 usan la banda 32 (12,02 µm) — **HALLAZGO, despreciable (cuantificado S128), registrado S135** ⚠️ **«despreciable» rebajado S146 a «chico y no medido»**
++
++> ⚠️ **S146** (`docs/AUDIT_S146.md` §3, verificador **V-11**, cálculo de Planck propio e
++> independiente). El cálculo de S128 se reproduce exacto (el corrimiento del NTI entre las dos
++> bandas va de 0,0001 a 250 K a 0,0054 a 290 K), pero **la vara con que se declaró despreciable es
++> la equivocada**: se midió contra el margen de ~0,14 al umbral K1, que es la ruta del NTI
++> absoluto, cuando en MODIS lo que decide es el piso **C1 = 0,003**, unas 47 veces más chico. Y
++> «en el dNTI se cancela» es falso como enunciado: queda un residuo que llega a 0,74 C1. Ahora
++> bien, **la unidad «fracción de C1» también exagera**: el residuo es grande sólo cuando el dNTI
++> ya es grande (ese caso tiene dNTI 0,024, ocho veces el piso, y alerta con cualquiera de las dos
++> bandas). Lo que decide es el cambio **relativo** del dNTI: **6 a 9 % para contraste de terreno y
++> 1 a 3 % para lava**. Sólo cambia de lado un píxel cuyo dNTI esté a menos de ese porcentaje del
++> piso. Cuántos píxeles reales viven en esa franja es **SIN DATO** (hay que abrir gránulos).
++> Hallazgo nuevo del verificador, con su signo: **la banda 32 amplifica más el terreno que la
++> lava**, así que pasarse a la banda del paper empujaría hacia más alertas topográficas en los
++> nevados, no hacia más lava. Es orden de magnitud (cuerpo negro, sin respuesta espectral ni
++> atmósfera). No cambia ninguna decisión hoy; la marca es por método (un cierre calculado contra
++> la vara que no gobierna, A95). Texto original intacto abajo, conservado por historia.
+@@ -2229,7 +2480,7 @@ para que nadie lo vuelva a encontrar como novedad. **No se propone cambio**: pas
++## D21: La banda MIR de MODIS: usamos la 21 como primaria; Coppola 2016a usa la 22 y la 21 sólo donde la 22 satura. **ABIERTA (medida S133 en magnitud y S137 en detección; ningún brazo cumple aún la batería)** S137 ⚠️ **El «ningún brazo cumple» cayó S146 (AUDIT_S146 §4, frente E E-08)**: con la vara corregida en el caso A2 el mejor brazo (banda 22, sin compuerta de temperatura, fondo local, conectiva `max`) pasa de 8 a **9 de 9**, y producción baja de 6 a **5 de 9**. Eso **levanta el bloqueo de criterio** que pesaba sobre D21, D22 y D11; no autoriza adoptar nada (9 de 9 en nueve escenas MODIS es fidelidad al Apéndice A, no dice nada de la sobre-publicación). Tres brazos quedan INDECIDIBLES por no guardar posición. Texto original conservado por historia
+@@ -2328,7 +2579,11 @@ las 48 pasadas de rescate con alerta de MIROVA, **ninguna** cae en una noche-vol
++que la razón de magnitud a igual conteo ya está en 0,995 (A99 ⚠️ **rebajada S146, AUDIT_S146
++V-12**: ese 0,995 compensa dos factores opuestos, 1,140 de píxel caliente contra 0,873 de fondo
++sobre n = 342 pares, y compensa además entre volcanes, de 0,66 en Copahue a 1,39 en Villarrica;
++sólo 156 de 342 pares quedan entre 0,8 y 1,25, así que **A99 ya no apaga la búsqueda en k, área,
++banda ni Planck**) y a que en VIIRS 375 el fondo del
+@@ -2350,7 +2605,15 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
++## D26: El segundo pase calcula mu y sigma sin los filtros de no-aptos del paper (borde, dNTI < -0,1, K1). **ABIERTA, efecto nulo bajo la conectiva `min` (registrada S138)** S138 ⚠️ **el «efecto nulo» cayó en S145; marcado acá en S146**
++
++> ⚠️ **S145, recogido en S146** (`docs/AUDIT_S146.md` §2). El «efecto nulo» de este encabezado se
++> derivó de un script que lee **sólo el dNTI**: midió el Test 2 y atribuyó la conclusión a los
++> dos. Medido después, **el sigma gobierna en el 58,7 % de VIIRS 375 y en el 75,0 % de VIIRS
++> 750**, o sea el piso C1 no manda siempre y el efecto de esta divergencia **no es nulo** fuera de
++> MODIS. Es el caso de manual de A95 (un cierre hereda las premisas de la lectura con que se
++> derivó) y por eso encabeza el porqué de `experiments/_s145_censo_cierres/censo.py`. El texto de
++> abajo, que acota el enunciado a MODIS bajo `min`, se conserva entero.
+@@ -2377,3 +2640,197 @@ El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el có
++
++---
++
++## D30: El Test 1 integrado en el ROI es un detector PROPIO; el Test 1 del paper es por píxel y su cita bibliográfica no corresponde a ningún artículo localizable. **ABIERTA (registrada S146, AUDIT_S146 V-06, gravedad 5; descrita, sin decisión)** S146
++
++**El fenómeno, primero.** Una fuente térmica más chica que el píxel (el lago de lava de Villarrica,
++un campo fumarólico) no levanta ningún píxel lo bastante como para cruzar un umbral por píxel, pero
++sí calienta un poco a varios vecinos a la vez. Nuestro Test 1 integrado aprovecha eso: suma el
++exceso de radiancia MIR de todo un disco de 3 km sobre el fondo de un anillo de 1 km y dispara si
++esa suma supera 3 sigmas propagadas. Es el mecanismo que en S27 subió el recall de 50 a 80 % y
++cerró D4, y es también el que A69 identifica como el que capta el valle tibio en los nevados,
++porque trabaja sobre **MIR absoluto**.
++
++**El paper** (`documentacion/sp426.5.pdf` p. 6, renderizada a imagen y leída así, no por la capa de
++texto, A95), verbatim:
++
++> *«NTI_PIX > K1 (Test 1), where NTI_PIX is the NTI pixel value and K1 is the threshold»*
++
++> *«Pixels that satisfy Test 1 are flagged as "active" and subsequently discarded (unsuitable) for
++> further steps.»*
++
++Es un umbral fijo **por píxel** sobre el NTI. No hay suma sobre el ROI en ninguna parte del
++algoritmo de detección del paper: la única suma es la de la magnitud (`RP = Σ RP_PIX`, Ec. 8).
++
++**La cita que lo respaldaba, y por qué cae.** `MIROVA_DIVERGENCES.md` (bloque H_S27_1) lo hace
++pasar la pregunta 1 de `docs/MISSION.md` con «Test 1 ES Coppola 2015 §2.2 Eq.1», y la cabecera
++FICHA del código (`pipeline/test1_integrated.py:12-18`, `pipeline/process_modis.py:16`) cita
++«Coppola et al. 2015, *MIROVA: a new hotspot detection system based on MODIS Level 1B data*,
++Bulletin of Volcanology 77:55, §2.2». Verificado en S146 por dos bases bibliográficas
++independientes:
++
++- El artículo **55 del volumen 77** de *Bulletin of Volcanology* (2015) es **Heap et al.**,
++  *Fracture and compaction of andesite in a volcanic edifice*, DOI **10.1007/s00445-015-0938-7**
++  (mecánica de rocas, nada que ver).
++- **Crossref y OpenAlex: 0 artículos de Coppola en esa revista en 2015**, con control de consulta
++  (la misma búsqueda sin autor devuelve 12 artículos de ese número, así que el cero no es de la
++  consulta). Buscando el título citado, lo más parecido que devuelve Crossref es el propio
++  **SP426.5**.
++- El proyecto ya había establecido (por hash antes de S128, y por contenido en S128) que su
++  «coppola2015.pdf» **es** `sp426.5.pdf`
++  (`documentacion/BIBLIOGRAPHY_SYNTHESIS.md:36-47`). Ahí la Ec. 1 es el NTI (p. 4), no un test
++  integrado, y no existe ningún §2.2 con esa fórmula.
++- Ningún texto del grupo cita un «Bull. Volcanol. 77:55»: todos citan el algoritmo como «Coppola
++  et al. 2016».
++
++**Lo nuestro, en producción**: `ENABLE_TEST1_PATH = True` en `mirova_equivalent`, con
++`TEST1_K_SIGMA 3.0`, `TEST1_ROI_KM 3.0`, `TEST1_MIR_RELATIVE 0.02`.
++
++**Cómo entra al dato publicado, que no es como suena.** El Test 1 **no entra a la máscara** de
++píxeles calientes: **compite por la fuente del cúmulo publicado**. Si no hay cúmulo contextual, o
++el que hay cae fuera del radio interno, el Test 1 pone el ancla en el cráter
++(`final_hotspot_source = test1_roi` en VIIRS, `test1` en MODIS) y arma él solo el cúmulo que el
++dashboard muestra (Fase 1 §0, leyendo `process_viirs.py` l. 1763 a 1786 y `anchor.py` l. 67 a 89).
++Por eso se puede atribuir desde lo persistido y no sólo contar disparos.
++
++**Cuánto sostiene, medido** (`docs/audit_s146/FASE1_SUSTRATO_SOBREPUBLICACION.md` §4 y §8, ventana
++2026-09-01 a 2026-09-20, entera posterior a #535; unidad de la sobre-publicación = pasada en
++negativo limpio, unidad del recall = noche de volcán. **Verificado en
++`docs/audit_s146/FASE1_VERIFICADOR.md`: sus seis afirmaciones salen CONFIRMADAS, cuatro con
++matiz, gravedad máxima 2. Leer sus §5 y §6 antes de usar la banda 21,4 a 36,5 %, y su §7 antes
++de usar el 74 de 78**):
++
++| sensor | negativos limpios publicados sólo por el Test 1 | tasa hoy | tasa sin Test 1 (cota mínima a máxima) |
++|---|---|---|---|
++| VIIRS 375 | **186 de 322** (57,8 %), de n = 373 | 86,3 % | 21,4 % a 36,5 % |
++| VIIRS 750 | **89 de 133** (66,9 %), de n = 622 | 21,4 % | 5,3 % a 7,1 % |
++| MODIS | 8 de 50 (16,0 %) | 11,4 % | 8,9 % a 9,6 % |
++
++Y del otro lado de la cuenta, que es la mitad que decide si se puede apagar algo: de las **78
++noches positivas** de la ventana, hoy se publican las 78 y sin el Test 1 **74 siguen publicadas
++con certeza, 4 quedan SIN DATO y ninguna se pierde con certeza** (las 4: Isluga 2026-09-19,
++Lastarria 2026-09-01, Nevados de Chillán 2026-09-18, Villarrica 2026-09-16). En VIIRS 375 sólo
++**2 de 143** pasadas positivas publicadas dependen sólo del Test 1, contra el 57,8 % del lado
++negativo, y ese contraste queda **fuera del nulo** de etiquetas barajadas dentro de cada volcán
++(observado 0,5637 contra un intervalo de 0,2506 a 0,3718, que ya descuenta la paradoja de
++Simpson). En **MODIS es al revés**: 38 de las 50 negativas publicadas (76,0 %) las sostiene el
++camino contextual, el que **sí** está en el paper, y se concentran en Puyehue Cordón Caulle.
++
++**Lo que aporta el verificador con contexto limpio** (`docs/audit_s146/FASE1_VERIFICADOR.md`,
++seis afirmaciones CONFIRMADAS, cuatro con matiz):
++
++- La atribución **no depende de la etiqueta** en la mayoría de los casos: **158 de los 186**
++  T1_SOLO de VIIRS 375 y **86 de los 89** de VIIRS 750 tienen la máscara contextual **vacía**, y
++  por `clustering.py` l. 75-76 eso equivale a «sin Test 1 no hay cúmulo». Los 28 y 3 restantes
++  descansan sólo en la lógica de `anchor.py` (§5).
++- El patrón **no es de dos o tres volcanes**: T1_SOLO aparece en **los 11** Tier A en VIIRS 375
++  (Copahue 39, Villarrica 27, NdC 26, Llaima 26, PP 21, Chaitén 17, Lastarria 13, Láscar 8,
++  Tupungatito 6, PCC 2, Isluga 1) y en los 11 en VIIRS 750 (§9).
++- La subclase **«rival débil» está mal atribuida**: `resolve_test1_source_priority` tiene tres
++  ramas y la primera (`eruption_far`) no exige rival débil. El informe rotula 21 negativos como
++  rival débil cuando sólo 16 lo exigen, y 20 de los 23 positivos cuando 15 se explican por
++  `eruption_far`. Donde manda `eruption_far`, sin Test 1 el cúmulo contextual habría publicado,
++  o sea **el contrafactual está más cerca del 36,5 % que del 21,4 %** (§6).
++- **Por sensor, VIIRS 750 pierde con certeza 1 de sus 14 noches** con alerta (PCC 2026-09-07);
++  la noche sobrevive en el agregado porque VIIRS 375 y MODIS publican. Si el criterio del A/B
++  exige conservar la alerta **en el sensor en que MIROVA la publicó**, eso cuenta como pérdida y
++  hay que escribirlo antes de correr (§7).
++- El verificador **recomienda correr el A/B del brazo «sin Test 1 integrado»**, justamente
++  porque la atribución es inferencia sobre campos persistidos y no simulación de la etapa
++  siguiente: el VRP del cúmulo contextual que el Test 1 pisa no se guarda en ningún campo, así
++  que ningún número persistido puede cerrar la banda (§12).
++
++**Lo que ese número NO dice** (A54): «MIROVA calló» no es «artefacto». Los sostenidos sólo por el
++Test 1 en Villarrica y Copahue son en buena parte calor real que MIROVA no publica, que es
++justamente para lo que se adoptó en S27; la mediana publicada de esa clase es de centésimas de MW
++en VIIRS 375. La tabla dice dónde está la palanca de **paridad**, no qué es real. Por eso el
++desenlace natural es la **Fase 2b** (mudar lo propio al perfil `experimental`, no borrarlo), que
++es decisión de Nicolás.
++
++**Por qué importa.** (1) Es el único camino de detección del perfil «clon literal» cuyo respaldo
++bibliográfico nadie ha tenido nunca en la mano, y entró por la puerta 1 de MISSION («está en un
++paper MIROVA»), que es justamente la pregunta que apaga la sospecha de parche propio. (2) Es
++dominante en el sensor que sostiene el recall: S138 midió `triggered_test1` en el **77,89 % de
++los records VIIRS 375** y en el **22,21 % de los VIIRS 750**
++(`docs/audit_s138/EJE_2_matriz_conformidad_pdf.md:112`, citado por el auditor C de S146; no pasó
++por el verificador). En la ventana de la Fase 1 son 800 de 954 (83,9 %) y 200 de 949 (21,1 %). (3) Es un Sistema de Decisiones Automatizadas bajo la Resolución CPLT
++N°372 y la ficha publicable declara una fuente que no se puede mostrar.
++
++**Lo que esta D NO dice**: no dice que el Test 1 integrado esté mal ni que haya que apagarlo. El
++resultado empírico de S27 (recall 50 a 80 %) no se toca. Lo que sigue abierto es **cuánto de las
++4 noches SIN DATO y de las pasadas donde el Test 1 pisó a un cúmulo contextual (`T1_SOBRE_CTX`:
++56 en VIIRS 375, 11 en VIIRS 750, en negativos limpios publicados; más 23 en positivos de VIIRS
++375) sobreviviría sin él**, que no se puede saber desde lo
++persistido porque el VRP del cúmulo contextual no se guarda cuando el Test 1 lo reemplaza. Eso
++pide el probe de sólo lectura especificado en §9 de la Fase 1 (patrón A75, en GitHub Actions). El
++brazo «sin Test 1 integrado» es el que tiene más sustrato de todo el plan y va primero en la
++Fase 2; el brazo «Test 1 por píxel literal en reemplazo» tiene sustrato casi cero
++(`diag_n_nti_path > 0` en 5 pasadas de VIIRS 375 y 0 en el resto), así que no recupera lo que el
++integrado sostiene. Estado: **ABIERTA, descrita, sin decisión**.
++
++**Pendiente fuera de esta fase** (archivos con A45, van con tag): la cabecera FICHA de
++`pipeline/test1_integrated.py`, la de `pipeline/process_modis.py` y
++`docs/FICHA_SDA_VRP_CHILE.md`.
++
++---
++
++## D31: El test de temperatura de brillo con N·σ = 5 / 10 no está en el paper; los números son los de C2, que en la Tabla 1 multiplican otra variable. **ABIERTA como divergencia de ATRIBUCIÓN; el camino está APAGADO y su sustrato es CERO (registrada S146, AUDIT_S146 V-08 más Fase 1)** S146
++
++**El fenómeno, primero.** Hay dos maneras distintas de preguntarle a un píxel si está caliente.
++Una es mirar **cuánto brilla en 4 µm respecto de su entorno** por la vía del NTI, que es una razón
++entre dos bandas y por eso se lleva bien con el terreno. La otra es mirar **su temperatura de
++brillo absoluta** y compararla con la del fondo. La segunda es la que A69 señala como vulnerable:
++en un volcán nevado la cumbre está fría y el valle de baja altitud está tibio, así que el campo de
++temperatura absoluta está dominado por la altitud y no por el volcán.
++
++**El paper** (`documentacion/sp426.5.pdf` p. 7, renderizada a imagen). Los Tests 2 y 3 son, en la
++página:
++
++> Test 2: `dNTI_PIX > C1` **or** `dNTI_PIX > μ_dNTI + C2·σ_dNTI`
++>
++> Test 3: `dETI_PIX > C1` **or** `dETI_PIX > μ_dETI + C2·σ_dETI`
++
++Y en la **Tabla 1** («Parameters used in the MIROVA algorithm»), de noche, ROI1 / ROI2:
++**K1 = −0,8 / −0,8**, **C1 = 0,003 / 0,01**, **C2 = 5 / 10** (de día: −0,6, 0,02 y 15). O sea
++**C2 multiplica la desviación estándar de dNTI y de dETI**, no otra cosa. La única aparición de
++«brightness» en las 25 páginas está en la p. 5, definiendo la NTIapp (Tapp = BT del TIR). **El
++paper no tiene ningún test sobre temperatura de brillo.**
++
++**Lo nuestro**: `pipeline/profiles/mirova_equivalent.yaml:128-134` define
++`n_sigma_mir_summit: 5.0` y `n_sigma_mir_scene: 10.0` rotulados «N·sigma differential
++summit/scene (Coppola 2016a Tabla 1)», y `:279-282` enciende `enable_dual_roi_bt: true` con la
++misma atribución. Ese 5 / 10 se aplica a la **BT del MIR**, no al dNTI ni al dETI. Es un préstamo
++de los números de C2 a otra variable.
++
++**El camino está APAGADO hoy: la divergencia es de atribución, no de comportamiento.** Medido en la
++Fase 1 (`docs/audit_s146/FASE1_SUSTRATO_SOBREPUBLICACION.md` §0 y §9; **verificado en
++`docs/audit_s146/FASE1_VERIFICADOR.md`: seis afirmaciones CONFIRMADAS, cuatro con matiz, y ésta
++es una de las que llevan matiz, ver su §4**) y comprobado de nuevo acá al escribir esta D:
++
++- `ENABLE_BT_PATH_HOT = False` leído de `pipeline.profile` con `VRP_PROFILE=mirova_equivalent`, no
++  del YAML (A89). `ENABLE_DUAL_ROI_BT = True` **sí** construye la máscara, pero
++  `process_viirs.py:997` la pone en cero (lo mismo en `process_modis.py:660` y
++  `process_viirs_mod.py:640`), así que el `true` del YAML no significa que el
++  camino decida.
++- El contador `diag_n_bt_path` vale 0 en las 2.360 pasadas nocturnas de la ventana desde el
++  2026-09-01 (457 MODIS, 954 VIIRS 375, 949 VIIRS 750), pero eso **no es evidencia
++  independiente**: con el flag en False el contador cuenta un arreglo de ceros, y nunca fue
++  mayor que cero en ningún record de toda la historia del corpus (60.112 records con el campo
++  presente, `docs/audit_s146/FASE1_VERIFICADOR.md` §4). **La evidencia es el flag.**
++
++O sea: **un brazo de A/B «sin test de temperatura de brillo» tiene sustrato cero y no hay que
++correrlo**. Lo que queda es corregir los documentos que lo dan por activo y por canónico.
++
++**Por qué importa igual.** (1) La atribución convierte un camino propio en canon: `CLAUDE.md` lo
++presenta dentro de la frase «la detección MODIS es FIEL a Coppola 2016a», y el perfil lo rotula
++«Coppola 2016a Tabla 1». Eso es falso lo encienda quien lo encienda. (2) Si alguien lo enciende
++por creerlo canónico, estaría metiendo un test de **BT absoluta**, que es exactamente la clase de
++camino que A69 identifica como vulnerable al gradiente topográfico de los nevados. (3) Es distinto
++de D22 (la compuerta `bt > t_bg + 3 K` dentro de los Tests 2 y 3), que **sí** está activa: acá el
++camino entero es de BT y está apagado.
++
++**Lo que esta D NO dice**: no propone tocar el código, porque no hay nada que apagar. Estado:
++**ABIERTA, descrita, sin decisión**; la acción es documental (los rótulos del perfil y de
++`CLAUDE.md`, que van con A45).
+diff --git a/docs/MISSION.md b/docs/MISSION.md
+@@ -96,19 +96,54 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
++   - ⚠️ **REBAJADA S146: esta lista de «Resueltas» se lee primero y varias entradas ya
++     cayeron dentro del propio proyecto** (`docs/AUDIT_S146.md` §2, V-13, V-01, V-06). **D9 no
++     está cerrada**: el «207 de 214 confirmados» no se reproduce con ninguna definición en que
++     «confirmado» signifique que MIROVA publicó una alerta (máximo **80 de 214, 37,4 %**; el
++     rango 201 a 211 sólo aparece contando cualquier fila de la referencia, incluidas las
++     RUTINA), y el «0 fuga» es circular porque el dashboard oculta todo `far` por construcción;
++     lo que sí se confirma es el tope de 5 MW y los denominadores 199 `far` / 214 `summit`
++     (V-01). **D4** se apoya en el Test 1 integrado en el ROI, que es un **detector propio**: en
++     `sp426.5.pdf` p. 6 el Test 1 es por píxel contra K1, y la cita «Coppola 2015, Bull.
++     Volcanol. 77:55» corresponde a Heap et al. sobre mecánica de rocas en andesita (DOI
++     10.1007/s00445-015-0938-7; Crossref y OpenAlex dan 0 artículos de Coppola en esa revista en
++     2015, con control de consulta) (V-06). **D8** sigue vigente por la vía del fondo de anillo
++     (D25 en el catálogo). **D5 tampoco está resuelta**: el catálogo la tiene desde S125 como
++     «abierta pendiente de re-medición», con el signo opuesto (sub-reporte cerca de 0,75 y no
++     sobre-reporte de 1,35), y sus dos patas están rebajadas (nadir fijo no es el remuestreo,
++     A66; `keep_peak` daba paridad por accidente, A100) (AUDIT_S146 §2 y E-06). Lo que sigue se
++     conserva por historia.
++     **D11 sesgo topográfico de paths MIR-absolutos (A69, S104)** — (⚠️ **REBAJADA S146**
++     (AUDIT_S146 V-02): «irreducible» y «todos los ejes agotados» quedan rebajados acá igual que
++     en A82 de `CLAUDE.md`, porque el número que sostiene el cierre no tiene tasa base. Con
++     negativos limpios hay cúmulo con magnitud dentro del inner en **89,1 %** de las pasadas
++     MODIS contra **93,7 %** cuando MIROVA alertó, menos de 5 puntos de contraste, y 144 de 158
++     positivas son de Láscar (ventana 2026-01-29 a 2026-08-28; después de #535, 86,0 % de 500
++     negativos y sólo 2 positivos). El texto que sigue se conserva por historia.) cara MODIS far→summit
++     D2 N·σ Tabla 1 ya implementado (dual-ROI 5/10, S114); (⚠️ **ese 5/10 no está en la Tabla 1,
++     verificado S146 (AUDIT_S146 V-08)**: en la Tabla 1 el C2 multiplica la desviación del dNTI y
++     del dETI, y el paper no tiene ningún test de temperatura de brillo. El camino de BT está
++     apagado hoy (`ENABLE_BT_PATH_HOT = False`); lo que cae es la atribución a la Tabla 1, ver
++     D31 en el catálogo.) (⚠️ **FALSO, GAP #A
++     REABIERTO S128 y confirmado S146** (AUDIT_S146 §2): está abierto en
++     `docs/MIROVA_DIVERGENCES.md` con guard `tests/test_guard_gap_a_pool_musigma_s128.py`. La
++     frase que sigue se conserva por historia.) GAP #A (§298-300 retiro Test1 K1) fue
++     (⚠️ **NO es un gap abierto, verificado S146 (AUDIT_S146 V-05)**:
++     `ENABLE_UNSUITABLE_FILTERS_267_273` está en True desde S72 y los tres procesadores lo
++     consumen en las dos ramas (path D contextual y primer paso de los Tests 2 y 3). Lo único que
++     sigue apagado de ese párrafo del paper es el retiro de los píxeles del Test 1, o sea el
++     GAP #A. Un A/B contra un control que ya tiene el filtro no mediría nada.)

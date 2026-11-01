@@ -62,6 +62,9 @@ def argumentos_calculate_vrp(volcan):
         "active_water_bodies": volcan.get("active_water_bodies"),
         "lbg_global_compatible": volcan.get("lbg_global_compatible", False),
         "local_kernel_bg_compatible": volcan.get("local_kernel_bg", False),
+        # S165 (V165-03): aviso de la pasada sin dato. El probe no lleva cobertura, así que no la anota; None no
+        # cambia lo que calculate_vrp devuelve.
+        "al_sin_dato": None,
     }
 
 

@@ -1,0 +1,47 @@
+ventana ('2026-09-18', '2026-10-18') | filas ref nocturnas 2849 | records nocturnos 3573 | etiquetas {'neg_limpio': 2156, 'sin_info': 1083, 'pos': 252, 'far_ref': 54, 'sin_geometria': 28}
+
+(d) inner_radius_km: volcan | auto-audit INNER | tablero html | volcanoes.yaml
+   Lascar                   5   5.0     5
+   Lastarria                3   3.0     3
+   Isluga                   5   5.0     5
+   Tupungatito              7   7.0     7
+   PlanchonPeteroa          3   3.0     3
+   NevadosDeChillan         5   5.0     5
+   Llaima                   5   5.0     5
+   Villarrica               5   5.0     5
+   Copahue                  4   4.0     4
+   PuyehueCordonCaulle     20  20.0    20
+   Chaiten                  5   5.0     5
+
+(b) criterio 'dash' del auto-audit contra el predicado del tablero (node), por record nocturno
+(c) criterio de libro_de_cuentas.r_recall_v750_dash contra el mismo predicado
+  MODIS     n=  706 | (b) dash&pub   21 dash&!pub    0 !dash&pub    0 ninguno   685 | (c) libro&pub   21 libro&!pub    0 !libro&pub    0 ninguno   685 sin_crudo 0
+  VIIRS375  n= 1439 | (b) dash&pub  282 dash&!pub    0 !dash&pub    0 ninguno  1157 | (c) libro&pub  282 libro&!pub    0 !libro&pub    0 ninguno  1157 sin_crudo 0
+  VIIRS750  n= 1428 | (b) dash&pub   66 dash&!pub    0 !dash&pub    0 ninguno  1362 | (c) libro&pub   66 libro&!pub    0 !libro&pub    0 ninguno  1362 sin_crudo 0
+  solo pasadas 'pos' (alerta de MIROVA a +-2 min):
+  MODIS     n=  17  dash&pub   12 dash&!pub    0 !dash&pub    0 ninguno    5
+  VIIRS375  n= 183  dash&pub  164 dash&!pub    0 !dash&pub    0 ninguno   19
+  VIIRS750  n=  52  dash&pub   40 dash&!pub    0 !dash&pub    0 ninguno   12
+
+(a) M del evaluador de D25 (regla_m, bootstrap por bloques noche-volcan, 10.000) con D = c*K
+    estrato | modo | n pares | noches | razon mediana K/MIROVA | c=1 | c=1.10 | c=1.28 | c=1.50 | c=2.0 | c=4.0
+    VIIRS750|z<=40             decide   n= 21 noches= 19  0.678  NEU[0.000,0.000]  MEJ[-0.041,-0.041]  MEJ[-0.107,-0.039]  NEU[-0.176,0.029]  NEU[-0.301,0.154]  NEU[-0.172,0.455]
+    VIIRS750|z>40              decide   n= 19 noches= 10  0.353  NEU[0.000,0.000]  MEJ[-0.041,-0.041]  MEJ[-0.107,-0.107]  MEJ[-0.176,-0.176]  MEJ[-0.301,-0.301]  MEJ[-0.602,-0.155]
+    VIIRS375|sin_kernel|z<=40  decide   n= 58 noches= 49  0.503  NEU[0.000,0.000]  MEJ[-0.041,-0.041]  MEJ[-0.107,-0.107]  MEJ[-0.176,-0.176]  MEJ[-0.301,-0.155]  NEU[-0.070,0.146]
+    VIIRS375|sin_kernel|z>40   bloquea  n= 59 noches= 40  0.418  NEU[0.000,0.000]  MEJ[-0.041,-0.041]  MEJ[-0.107,-0.107]  MEJ[-0.176,-0.176]  MEJ[-0.301,-0.301]  MEJ[-0.378,-0.023]
+    VIIRS375|kernel|z<=40      informa  n= 29 noches= 26  0.959  NEU[0.000,0.000]  NEU[-0.041,0.041]  NEU[-0.105,0.107]  NEU[-0.036,0.176]  EMP[0.089,0.301]  EMP[0.390,0.602]
+    VIIRS375|kernel|z>40       informa  n= 18 noches= 14  0.780  NEU[0.000,0.000]  NEU[-0.041,0.041]  NEU[-0.107,0.107]  NEU[-0.176,0.176]  NEU[-0.064,0.301]  EMP[0.237,0.602]
+
+    lectura: MEJ = el intervalo al 95 % de la mediana de d queda bajo 0; EMP = sobre 0; NEU = cruza 0.
+
+(a2) placebo D = c*K con la calibracion del evaluador (sellada y simetrica de la adenda) y la regla de 2 volcanes
+  c = 1.10
+    VIIRS750|z<=40             decide   regla MEJORA  | sellada: falsos MEJ 0.020 EMP 0.055 -> INDECIDIBLE | simetrica: falsos MEJ 0.020 EMP 0.020, volcanes con d<0 3 -> MEJORA
+    VIIRS750|z>40              decide   regla MEJORA  | sellada: falsos MEJ 0.025 EMP 0.055 -> INDECIDIBLE | simetrica: falsos MEJ 0.020 EMP 0.040, volcanes con d<0 1 -> NEUTRO(<2 volcanes)
+    VIIRS375|sin_kernel|z<=40  decide   regla MEJORA  | sellada: falsos MEJ 0.010 EMP 0.040 -> MEJORA | simetrica: falsos MEJ 0.025 EMP 0.035, volcanes con d<0 4 -> MEJORA
+    VIIRS375|sin_kernel|z>40   bloquea  regla MEJORA  | sellada: falsos MEJ 0.005 EMP 0.030 -> NEUTRO | simetrica: falsos MEJ 0.025 EMP 0.020, volcanes con d<0 4 -> NEUTRO
+  c = 1.28
+    VIIRS750|z<=40             decide   regla MEJORA  | sellada: falsos MEJ 0.000 EMP 0.175 -> INDECIDIBLE | simetrica: falsos MEJ 0.020 EMP 0.020, volcanes con d<0 3 -> MEJORA
+    VIIRS750|z>40              decide   regla MEJORA  | sellada: falsos MEJ 0.030 EMP 0.055 -> INDECIDIBLE | simetrica: falsos MEJ 0.025 EMP 0.025, volcanes con d<0 1 -> NEUTRO(<2 volcanes)
+    VIIRS375|sin_kernel|z<=40  decide   regla MEJORA  | sellada: falsos MEJ 0.005 EMP 0.075 -> INDECIDIBLE | simetrica: falsos MEJ 0.025 EMP 0.035, volcanes con d<0 4 -> MEJORA
+    VIIRS375|sin_kernel|z>40   bloquea  regla MEJORA  | sellada: falsos MEJ 0.000 EMP 0.040 -> NEUTRO | simetrica: falsos MEJ 0.025 EMP 0.020, volcanes con d<0 4 -> NEUTRO

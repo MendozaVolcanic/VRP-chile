@@ -1,0 +1,23 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+== 1. cobertura (A108): objetivos 38 | con resultado 38
+    ('neg_resto', 'escena_invalida') 1
+    ('neg_resto', 'ok') 36
+    ('neg_resto', 'volcan_fuera_del_granulo') 1
+   no evaluables: [(4, 'Villarrica', '2026-03-11 01:30', 'escena_invalida'), (57, 'PuyehueCordonCaulle', '2026-08-31 02:50', 'volcan_fuera_del_granulo')]
+
+== 2. controles (antes de leer)
+  K re-corrido = publicado: publica igual 36 de 36; pc.vrp_mw a 0,001 MW 36 de 36; sin record K 0; distintos: [] []
+  recorte nativo guardado: 0 de 36 evaluables; sin guardar: [(6, None), (9, None), (13, None), (18, None), (25, None), (32, None), (36, None), (38, None), (41, None), (48, None), (49, None), (52, None), (53, None), (55, None), (56, None), (58, None), (60, None), (61, None), (68, None), (72, None)]
+
+== 3. neg_resto: n evaluables 36, el port publica en x = 0
+   publicaciones: []
+   contra K re-corrido en vez del publicado: x = 0
+   tasa ponderada 0.0000 (cruda 0.0000)
+   por volcan: {'Chaiten': '0/4', 'Copahue': '0/4', 'Isluga': '0/3', 'Lascar': '0/2', 'Lastarria': '0/3', 'Llaima': '0/4', 'NevadosDeChillan': '0/4', 'PlanchonPeteroa': '0/4', 'PuyehueCordonCaulle': '0/2', 'Tupungatito': '0/3', 'Villarrica': '0/3'}
+   por cenit: {'z<=40': '0/17', 'z>40': '0/19'}
+   por plataforma: {'MODIS_AQUA': '0/18', 'MODIS_TERRA': '0/18'}
+   por tramo #535: {'antes': '0/26', 'desde': '0/10'}
+   por partida: {False: '0/35', True: '0/1'}
+
+== 4. veredicto (03_regla_decision.py)
+  x = 0 de n = 36: DeltaE punto -44.0, IC 95 % [-52.1; +298.5] -> INDECIDIBLE; R3 IC [0.0002; 0.0669] -> REPRODUCE; cota conservadora +457.9

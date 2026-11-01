@@ -1,0 +1,29 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+1. prueba de signos = función sellada de D-45 (s161-d25-lectura) en 2000 de 2000 juegos
+2a-b. nulo SIN SUSTRATO; 10 noches PIERDE p 1/1024; 3 noches SIN SUSTRATO; 5 contra 1 BLOQUEA; protegidas fuera de P2
+2c. silencio: 0 de 445 -> Wilson 0.0086, SILENCIO ACOTADO BAJO K; 40 de 445 -> ENCIENDE DE MAS
+2d. cota honesta: ΔE -134, IC bootstrap -134, cota +129 -> NO RESUELTO
+2e. elección por volcán: el brazo mejor en O y peor en T no se elige
+2f. ponderada 0.526 (cruda 0,100), n efectivo 3.31
+
+  -- decisión sobre: prueba (13 pasadas) --
+  N representado por clase: {'pos_prot': 3.0, 'pos_bajo': 100.0, 'neg_pub': 0, 'neg_resto': 0}
+  B: neg_resto [0, 0], IC (nan, nan); negativos nan [nan, nan] contra K 0.5000 -> NO RESUELTO; MISSION M14 contra K ENCIENDE DE MAS
+  C13      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -100.0, B 10)
+  C14      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -100.0, B 10)
+  brazo global: C13 | candidatos: ['C13', 'C14']
+  por volcán, elegido en T: {'V': 'C13'} (los demás M14)
+  validación en O: protegidas que M14 publica y el compuesto no 0; P2 contra M14 GANA (neto -50.0, B 5); P2 contra K SIN SUSTRATO -> VALIDA EN O
+  V375-D: NO NECESARIO por B ni por C | protegidas sólo OCR que K publica y el brazo global no: 0 (esperan V375-A)
+
+  -- decisión sobre: prueba (13 pasadas) --
+  N representado por clase: {'pos_prot': 3.0, 'pos_bajo': 100.0, 'neg_pub': 0, 'neg_resto': 0}
+  B: neg_resto [0, 0], IC (nan, nan); negativos nan [nan, nan] contra K 0.5000 -> NO RESUELTO; MISSION M14 contra K ENCIENDE DE MAS
+  C13      protegidas que M14 publica y el brazo no: 1; P2 contra M14 GANA (neto -100.0, B 10)
+  C14      protegidas que M14 publica y el brazo no: 0; P2 contra M14 GANA (neto -100.0, B 10)
+  brazo global: C14 | candidatos: ['C14']
+  por volcán, elegido en T: {'V': 'C13'} (los demás M14)
+  validación en O: protegidas que M14 publica y el compuesto no 1; P2 contra M14 GANA (neto -50.0, B 5); P2 contra K SIN SUSTRATO -> NO VALIDA EN O
+  V375-D: NO NECESARIO por B ni por C | protegidas sólo OCR que K publica y el brazo global no: 0 (esperan V375-A)
+3. decidir: desempate a la caja más chica; una protegida perdida respecto de M14 saca al brazo; repesar ok
+PRUEBAS DEL EVALUADOR OK

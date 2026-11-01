@@ -1,0 +1,44 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+05a: cota fisica del hot medio por pixel en el OSF (Npix como conteo de pixeles exige hot/Npix <= L de saturacion)
+  VIIRS_375 I4: L(Tsat=367.0 K) = 4.562 W m-2 sr-1 um-1
+  VIIRS_750 M13: L(Tsat=634.0 K) = 404.301 W m-2 sr-1 um-1
+  MODIS B21: L(Tsat=500.0 K) = 83.952 W m-2 sr-1 um-1
+               count   mean    std    min    50%     99%   99.9%     max
+sensor                                                                  
+MODIS_1000  262455.0  0.968  2.138  0.001  0.473   8.505  29.013  72.454
+VIIRS_375   252374.0  0.313  0.275  0.007  0.270   1.272   3.395   4.659
+VIIRS_750   100641.0  1.859  3.178  0.063  0.798  15.156  36.907  74.135
+  filas V375 con hot/Npix > L_sat(I4): 81 de 252374
+  filas V750 con hot/Npix > L_sat(M13 634 K): 0
+  filas MODIS con hot/Npix > L(500 K): 0
+  Npix entero en todas las filas: True | Npix min 1 max 3963
+  Npix=1 filas: 82478 | de ellas Max_Dist==0: 8320
+
+05b: excepciones del control positivo de 02 (fondo x1,2 no bajo la magnitud)
+  excepciones: 29 de 2385 | fuente del fondo en las excepciones: {'local': 29} | l_bg_ring*1.2 < l_bg_local en las excepciones: 27
+  control restringido a fondo de anillo: fraccion que baja = 1.0 n = 1352
+
+05c: cobertura: filas OSF 2025 Chile sin record nuestro (dt >= 30 min) por volcan y resolucion
+  ver 01_pareo_osf.txt: 411 de 2934 (14,0 %) sin par; 402 con el record mas cercano a >= 30 min, 9 a <= -30 min
+
+05d: conteo de pixeles por volcan (V375): n_anom/Npix mediana y fraccion n_anom > Npix
+  Chaiten              n=  74 n_anom/Npix med 1.00 | n_anom>Npix 16 | = 41 | < 17 | Npix med 1 n_anom med 1
+  Copahue              n=  55 n_anom/Npix med 1.00 | n_anom>Npix 8 | = 27 | < 20 | Npix med 1 n_anom med 1
+  Isluga               n= 474 n_anom/Npix med 0.60 | n_anom>Npix 51 | = 100 | < 323 | Npix med 3 n_anom med 2
+  Lascar               n= 511 n_anom/Npix med 0.50 | n_anom>Npix 23 | = 47 | < 441 | Npix med 5 n_anom med 3
+  Lastarria            n= 383 n_anom/Npix med 1.00 | n_anom>Npix 149 | = 116 | < 118 | Npix med 2 n_anom med 2
+  Llaima               n=  26 n_anom/Npix med 1.00 | n_anom>Npix 1 | = 15 | < 10 | Npix med 1 n_anom med 1
+  NevadosDeChillan     n=  45 n_anom/Npix med 1.00 | n_anom>Npix 9 | = 17 | < 19 | Npix med 2 n_anom med 2
+  PlanchonPeteroa      n= 217 n_anom/Npix med 0.67 | n_anom>Npix 10 | = 81 | < 126 | Npix med 2 n_anom med 1
+  PuyehueCordonCaulle  n= 330 n_anom/Npix med 0.88 | n_anom>Npix 87 | = 76 | < 167 | Npix med 3 n_anom med 2
+  Villarrica           n=  24 n_anom/Npix med 1.00 | n_anom>Npix 0 | = 15 | < 9 | Npix med 1 n_anom med 1
+
+05e: f_n por tramo de cenit (V375) = n_anom/Npix mediana; si el remuestreo de MIROVA duplica celdas con el cenit, f_n cae a ~0,5
+              n    f_n  Npix  n_anom  hot_m/L_mean
+zb                                                
+[0, 20)   531.0  1.000   3.0     2.0         0.880
+[20, 30)  278.0  0.750   3.0     2.0         0.873
+[30, 40)  321.0  0.667   3.0     2.0         0.885
+[40, 50)  382.0  0.600   4.0     2.0         0.896
+[50, 60)  390.0  0.500   3.0     2.0         0.893
+[60, 70)  237.0  0.500   3.0     1.0         0.928

@@ -1,3 +1,7 @@
+# ⚠️ S158 R2 (docs/AUDIT_S158_R2.md, marca A113; experiments/_s158_audit_r2/a113/INFORME.md n 12 y 9): en VIIRS 750 el codigo de MIROVA descarta solo
+# el contraste de NTI < -0,1 (MIROVA_VIIRS750_hotspot_detection.m l. 298); el contraste de ETI no se filtra
+# (l. 368 a 369). El paper (p. 5, renderizada) si nombra dNTI y dETI: para MODIS y VIIRS 375 el filtro de dETI se
+# sostiene. Y el K1 nocturno de VIIRS 750 en el codigo es -0,7, no -0,8 (l. 178). Las aserciones no cambian.
 """S72 F1.2 — Unsuitable-pixel filters (Coppola 2016a SP 426.5).
 
 Tests sintéticos que cubren los 3 filtros del paper §267-273 + §298-300:

@@ -1,0 +1,16 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-09-18 a 2026-10-18 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+{"fuente": "snapshot", "sha_cons": "756bcf02224976ad028657ca5ff5040e08d89e39", "sha_ocr": "5398eae31c34762b65e7113bb4fc602d49634fed", "sha_respaldo_20260408": "3bb77309a1f5c9ec061f908436cb2bdd2d3ea303", "sha_union_historica": "7fe8004b27545311e741973669a38d433b0d8670"}
+ventana 2026-09-18 a 2026-10-18 | records nocturnos 3577 | etiquetas {'neg_limpio': 1937, 'sin_info': 1351, 'pos': 215, 'far_ref': 46, 'sin_geometria': 28}
+MODIS      pasada: recall 0.6364 (n 11) pub_neg 0.0138 (n 581) estricto 0.013 (n 384) | noche: recall 0.6 (n 10) pub_neg 0.0315 (n 286)
+VIIRS375   pasada: recall 0.8834 (n 163) pub_neg 0.0199 (n 552) estricto 0.0204 (n 540) | noche: recall 0.9149 (n 94) pub_neg 0.0914 (n 175)
+VIIRS750   pasada: recall 0.7073 (n 41) pub_neg 0.0124 (n 804) estricto 0.0073 (n 546) | noche: recall 0.6923 (n 26) pub_neg 0.0581 (n 258)
+CUALQUIERA pasada: recall 0.8372 (n 215) pub_neg 0.015 (n 1937) estricto 0.0136 (n 1470) | noche: recall 0.9072 (n 97) pub_neg 0.1264 (n 182)
+controles: {'identidad_predicado': True, 'identidad_valores': ([0, 1, 1, 1, 0], [1, 0]), 'auc_real_disp_v375_por_volcan': {'Lascar': 1.0, 'Lastarria': 0.894, 'Isluga': 0.959, 'Tupungatito': 0.875, 'PlanchonPeteroa': 1.0, 'NevadosDeChillan': 0.971, 'PuyehueCordonCaulle': 0.913, 'Chaiten': 0.833}, 'auc_barajado_por_volcan': {'Lascar': 0.506, 'Lastarria': 0.498, 'Isluga': 0.488, 'Tupungatito': 0.499, 'PlanchonPeteroa': 0.501, 'NevadosDeChillan': 0.492, 'PuyehueCordonCaulle': 0.518, 'Chaiten': 0.498}, 'auc_oraculo': 1.0}
+listo en 5.3 s -> experiments/_s155_audit/frente_4/banco_K_0918_1018.json
+
+real	0m5.516s
+user	0m0.000s
+sys	0m0.000s

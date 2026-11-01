@@ -1,0 +1,108 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-03-01 a 2026-10-16 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+referencia: {'registro_vrp_consolidado.csv': 'c110787a2650e792a72db9bf571edd6ddd6a3aa6', 'registro_vrp_ocr.csv': '4ddd54810fe343ab28d5242ba25f53e2343850e7'}
+inner (frontend): {'Lascar': 5.0, 'Lastarria': 3.0, 'Isluga': 5.0, 'Tupungatito': 7.0, 'PlanchonPeteroa': 3.0, 'NevadosDeChillan': 5.0, 'Llaima': 5.0, 'Villarrica': 5.0, 'Copahue': 4.0, 'PuyehueCordonCaulle': 20.0, 'Chaiten': 5.0}
+filas de referencia nocturnas indexadas en la ventana (todos los sensores): 19260
+pasadas nuestras en la ventana: 26641 (MODIS 5465); días excluidos: []
+
+=== tolerancia de pareo 120 s; total por etiqueta: {'protegida': 50, 'sin_info': 253, 'neg_limpio': 5110, 'bajo1': 42, 'far_ref': 10} (suma 5465)
+     25-40   f0: {'bajo1': 4, 'bajo1_expuesta': 1, 'bajo1_pubK': 3, 'neg_limpio': 479, 'neg_limpio_expuesta': 0, 'neg_limpio_pubK': 5, 'protegida': 12, 'protegida_expuesta': 4, 'protegida_pubK': 12, 'sin_info': 16, 'sin_info_pubK': 0}
+     25-40 otro: {'bajo1': 4, 'bajo1_expuesta': 0, 'bajo1_pubK': 3, 'far_ref': 1, 'far_ref_expuesta': 0, 'far_ref_pubK': 0, 'neg_limpio': 456, 'neg_limpio_expuesta': 1, 'neg_limpio_pubK': 5, 'protegida': 3, 'protegida_expuesta': 0, 'protegida_pubK': 3, 'sin_info': 17, 'sin_info_expuesta': 0, 'sin_info_pubK': 1}
+     40-50   f0: {'bajo1': 2, 'bajo1_expuesta': 2, 'bajo1_pubK': 2, 'far_ref': 1, 'far_ref_expuesta': 0, 'far_ref_pubK': 0, 'neg_limpio': 444, 'neg_limpio_expuesta': 1, 'neg_limpio_pubK': 0, 'protegida': 1, 'protegida_expuesta': 0, 'protegida_pubK': 1, 'sin_info': 15, 'sin_info_pubK': 0}
+     40-50 otro: {'bajo1': 4, 'bajo1_expuesta': 0, 'bajo1_pubK': 2, 'neg_limpio': 401, 'neg_limpio_expuesta': 1, 'neg_limpio_pubK': 2, 'protegida': 2, 'protegida_expuesta': 0, 'protegida_pubK': 2, 'sin_info': 26, 'sin_info_expuesta': 0, 'sin_info_pubK': 1}
+      <=25   f0: {'bajo1': 11, 'bajo1_expuesta': 0, 'bajo1_pubK': 10, 'far_ref': 4, 'far_ref_expuesta': 0, 'far_ref_pubK': 0, 'neg_limpio': 608, 'neg_limpio_expuesta': 1, 'neg_limpio_pubK': 9, 'protegida': 9, 'protegida_expuesta': 0, 'protegida_pubK': 9, 'sin_info': 33, 'sin_info_expuesta': 1, 'sin_info_pubK': 2}
+      <=25 otro: {'bajo1': 16, 'bajo1_expuesta': 0, 'bajo1_pubK': 12, 'far_ref': 2, 'far_ref_expuesta': 0, 'far_ref_pubK': 0, 'neg_limpio': 632, 'neg_limpio_expuesta': 0, 'neg_limpio_pubK': 12, 'protegida': 20, 'protegida_expuesta': 0, 'protegida_pubK': 20, 'sin_info': 42, 'sin_info_expuesta': 0, 'sin_info_pubK': 2}
+       >50   f0: {'bajo1': 1, 'bajo1_pubK': 0, 'far_ref': 1, 'far_ref_pubK': 0, 'neg_limpio': 1052, 'neg_limpio_expuesta': 2, 'neg_limpio_pubK': 2, 'protegida': 1, 'protegida_pubK': 0, 'sin_info': 52, 'sin_info_pubK': 0}
+       >50 otro: {'far_ref': 1, 'far_ref_expuesta': 0, 'far_ref_pubK': 0, 'neg_limpio': 1038, 'neg_limpio_expuesta': 4, 'neg_limpio_pubK': 4, 'protegida': 2, 'protegida_expuesta': 0, 'protegida_pubK': 1, 'sin_info': 52, 'sin_info_expuesta': 0, 'sin_info_pubK': 0}
+  control Lascar 2026-02-11 07:00 (esperado bajo1 0,48 MW): fuera de la ventana o sin record
+  control Lascar 2026-03-27 07:10 (esperado protegida 1,0 MW (veto de la caja, D18)): [('protegida', 'MODIS_AQUA', '25-40', 'f0')]
+  control NevadosDeChillan 2026-06-01 08:15 (esperado neg (RUTINA)): [('neg_limpio', 'MODIS_AQUA', '40-50', 'otro')]
+  control PuyehueCordonCaulle 2026-06-19 01:15 (esperado neg (RUTINA)): [('neg_limpio', 'MODIS_TERRA', '>50', 'otro')]
+    expuesta: Lascar 2026-03-04 01:55 MODIS_TERRA bajo1 z=32.4 lado=f0 pc_dist=2.544 inner=5.0 pubK=0
+    expuesta: Lascar 2026-03-09 07:10 MODIS_AQUA protegida z=35.69 lado=f0 pc_dist=2.483 inner=5.0 pubK=1
+    expuesta: Lascar 2026-03-14 07:05 MODIS_AQUA bajo1 z=44.59 lado=f0 pc_dist=3.464 inner=5.0 pubK=1
+    expuesta: Lascar 2026-03-27 07:10 MODIS_AQUA protegida z=39.85 lado=f0 pc_dist=3.202 inner=5.0 pubK=1
+    expuesta: Lascar 2026-04-08 01:50 MODIS_TERRA protegida z=28.95 lado=f0 pc_dist=2.244 inner=5.0 pubK=1
+    expuesta: Lascar 2026-04-27 07:15 MODIS_AQUA bajo1 z=41.3 lado=f0 pc_dist=2.537 inner=5.0 pubK=1
+    expuesta: NevadosDeChillan 2026-10-10 07:40 MODIS_AQUA protegida z=35.06 lado=f0 pc_dist=2.424 inner=5.0 pubK=1
+    K no publica: Lascar 2026-03-04 01:55 MODIS_TERRA bajo1 z=32.4 lado=f0 dc=summit pc_dist=2.544 pc_vrp=0.0
+    K no publica: Lascar 2026-03-18 01:15 MODIS_TERRA bajo1 z=45.68 lado=otro dc=None pc_dist=None pc_vrp=None
+    K no publica: Lascar 2026-05-06 08:00 MODIS_AQUA bajo1 z=47.46 lado=otro dc=None pc_dist=None pc_vrp=None
+    K no publica: Lascar 2026-05-18 07:30 MODIS_AQUA bajo1 z=22.38 lado=f0 dc=summit pc_dist=2.169 pc_vrp=0.0
+    K no publica: Lascar 2026-05-20 01:25 MODIS_TERRA bajo1 z=21.36 lado=otro dc=summit pc_dist=0.393 pc_vrp=0.0
+    K no publica: Lascar 2026-06-24 01:15 MODIS_TERRA bajo1 z=29.17 lado=otro dc=summit pc_dist=1.846 pc_vrp=0.0
+    K no publica: Lascar 2026-08-21 01:20 MODIS_TERRA bajo1 z=6.09 lado=otro dc=summit pc_dist=1.457 pc_vrp=0.0
+    K no publica: Lascar 2026-10-08 08:00 MODIS_AQUA bajo1 z=6.12 lado=otro dc=summit pc_dist=0.768 pc_vrp=0.0
+    K no publica: NevadosDeChillan 2026-09-29 07:20 MODIS_AQUA bajo1 z=58.42 lado=f0 dc=None pc_dist=None pc_vrp=None
+    K no publica: NevadosDeChillan 2026-10-12 07:20 MODIS_AQUA protegida z=58.19 lado=f0 dc=None pc_dist=None pc_vrp=None
+    K no publica: NevadosDeChillan 2026-10-15 01:05 MODIS_TERRA protegida z=57.58 lado=otro dc=None pc_dist=None pc_vrp=None
+    K no publica: Villarrica 2026-09-25 08:05 MODIS_AQUA bajo1 z=5.78 lado=otro dc=None pc_dist=None pc_vrp=None
+    por volcán Lascar: {'alerta_pubK': 72, 'bajo1': 40, 'far_ref': 1, 'fondo_actua_bajo1': 10, 'fondo_actua_neg_limpio': 6, 'fondo_actua_sin_info': 5, 'neg_limpio': 283, 'protegida': 40, 'sin_info': 66}
+    por volcán Lastarria: {'neg_limpio': 422, 'sin_info': 15}
+    por volcán Isluga: {'far_ref': 2, 'neg_limpio': 398, 'sin_info': 15}
+    por volcán Tupungatito: {'neg_limpio': 468, 'sin_info': 18}
+    por volcán PlanchonPeteroa: {'far_ref': 1, 'neg_limpio': 487, 'sin_info': 13}
+    por volcán NevadosDeChillan: {'alerta_pubK': 7, 'bajo1': 1, 'far_ref': 2, 'fondo_actua_neg_limpio': 1, 'neg_limpio': 465, 'protegida': 9, 'sin_info': 28}
+    por volcán Llaima: {'far_ref': 3, 'neg_limpio': 496, 'sin_info': 17}
+    por volcán Villarrica: {'alerta_pubK': 1, 'bajo1': 1, 'neg_limpio': 504, 'protegida': 1, 'sin_info': 18}
+    por volcán Copahue: {'neg_limpio': 491, 'sin_info': 17}
+    por volcán PuyehueCordonCaulle: {'neg_limpio': 533, 'sin_info': 26}
+    por volcán Chaiten: {'far_ref': 1, 'neg_limpio': 563, 'sin_info': 20}
+  noches-volcán con protegida MODIS: 44; con publicación VIIRS de K esa noche: 43
+  noches-volcán con bajo1 MODIS: 39; con publicación VIIRS de K esa noche: 38
+
+=== tolerancia de pareo 300 s; total por etiqueta: {'protegida': 50, 'sin_info': 133, 'neg_limpio': 5229, 'bajo1': 43, 'far_ref': 10} (suma 5465)
+     25-40   f0: {'bajo1': 4, 'bajo1_expuesta': 1, 'bajo1_pubK': 3, 'neg_limpio': 488, 'neg_limpio_expuesta': 0, 'neg_limpio_pubK': 5, 'protegida': 12, 'protegida_expuesta': 4, 'protegida_pubK': 12, 'sin_info': 7, 'sin_info_pubK': 0}
+     25-40 otro: {'bajo1': 4, 'bajo1_expuesta': 0, 'bajo1_pubK': 3, 'far_ref': 1, 'far_ref_expuesta': 0, 'far_ref_pubK': 0, 'neg_limpio': 466, 'neg_limpio_expuesta': 1, 'neg_limpio_pubK': 5, 'protegida': 3, 'protegida_expuesta': 0, 'protegida_pubK': 3, 'sin_info': 7, 'sin_info_expuesta': 0, 'sin_info_pubK': 1}
+     40-50   f0: {'bajo1': 2, 'bajo1_expuesta': 2, 'bajo1_pubK': 2, 'far_ref': 1, 'far_ref_expuesta': 0, 'far_ref_pubK': 0, 'neg_limpio': 451, 'neg_limpio_expuesta': 1, 'neg_limpio_pubK': 0, 'protegida': 1, 'protegida_expuesta': 0, 'protegida_pubK': 1, 'sin_info': 8, 'sin_info_pubK': 0}
+     40-50 otro: {'bajo1': 4, 'bajo1_expuesta': 0, 'bajo1_pubK': 2, 'neg_limpio': 411, 'neg_limpio_expuesta': 1, 'neg_limpio_pubK': 2, 'protegida': 2, 'protegida_expuesta': 0, 'protegida_pubK': 2, 'sin_info': 16, 'sin_info_expuesta': 0, 'sin_info_pubK': 1}
+      <=25   f0: {'bajo1': 11, 'bajo1_expuesta': 0, 'bajo1_pubK': 10, 'far_ref': 4, 'far_ref_expuesta': 0, 'far_ref_pubK': 0, 'neg_limpio': 622, 'neg_limpio_expuesta': 2, 'neg_limpio_pubK': 11, 'protegida': 9, 'protegida_expuesta': 0, 'protegida_pubK': 9, 'sin_info': 19, 'sin_info_expuesta': 0, 'sin_info_pubK': 0}
+      <=25 otro: {'bajo1': 17, 'bajo1_expuesta': 0, 'bajo1_pubK': 12, 'far_ref': 2, 'far_ref_expuesta': 0, 'far_ref_pubK': 0, 'neg_limpio': 654, 'neg_limpio_expuesta': 0, 'neg_limpio_pubK': 13, 'protegida': 20, 'protegida_expuesta': 0, 'protegida_pubK': 20, 'sin_info': 19, 'sin_info_expuesta': 0, 'sin_info_pubK': 1}
+       >50   f0: {'bajo1': 1, 'bajo1_pubK': 0, 'far_ref': 1, 'far_ref_pubK': 0, 'neg_limpio': 1078, 'neg_limpio_expuesta': 2, 'neg_limpio_pubK': 2, 'protegida': 1, 'protegida_pubK': 0, 'sin_info': 26, 'sin_info_pubK': 0}
+       >50 otro: {'far_ref': 1, 'far_ref_expuesta': 0, 'far_ref_pubK': 0, 'neg_limpio': 1059, 'neg_limpio_expuesta': 4, 'neg_limpio_pubK': 4, 'protegida': 2, 'protegida_expuesta': 0, 'protegida_pubK': 1, 'sin_info': 31, 'sin_info_expuesta': 0, 'sin_info_pubK': 0}
+  control Lascar 2026-02-11 07:00 (esperado bajo1 0,48 MW): fuera de la ventana o sin record
+  control Lascar 2026-03-27 07:10 (esperado protegida 1,0 MW (veto de la caja, D18)): [('protegida', 'MODIS_AQUA', '25-40', 'f0')]
+  control NevadosDeChillan 2026-06-01 08:15 (esperado neg (RUTINA)): [('neg_limpio', 'MODIS_AQUA', '40-50', 'otro')]
+  control PuyehueCordonCaulle 2026-06-19 01:15 (esperado neg (RUTINA)): [('neg_limpio', 'MODIS_TERRA', '>50', 'otro')]
+    expuesta: Lascar 2026-03-04 01:55 MODIS_TERRA bajo1 z=32.4 lado=f0 pc_dist=2.544 inner=5.0 pubK=0
+    expuesta: Lascar 2026-03-09 07:10 MODIS_AQUA protegida z=35.69 lado=f0 pc_dist=2.483 inner=5.0 pubK=1
+    expuesta: Lascar 2026-03-14 07:05 MODIS_AQUA bajo1 z=44.59 lado=f0 pc_dist=3.464 inner=5.0 pubK=1
+    expuesta: Lascar 2026-03-27 07:10 MODIS_AQUA protegida z=39.85 lado=f0 pc_dist=3.202 inner=5.0 pubK=1
+    expuesta: Lascar 2026-04-08 01:50 MODIS_TERRA protegida z=28.95 lado=f0 pc_dist=2.244 inner=5.0 pubK=1
+    expuesta: Lascar 2026-04-27 07:15 MODIS_AQUA bajo1 z=41.3 lado=f0 pc_dist=2.537 inner=5.0 pubK=1
+    expuesta: NevadosDeChillan 2026-10-10 07:40 MODIS_AQUA protegida z=35.06 lado=f0 pc_dist=2.424 inner=5.0 pubK=1
+    K no publica: Lascar 2026-03-04 01:55 MODIS_TERRA bajo1 z=32.4 lado=f0 dc=summit pc_dist=2.544 pc_vrp=0.0
+    K no publica: Lascar 2026-03-18 01:15 MODIS_TERRA bajo1 z=45.68 lado=otro dc=None pc_dist=None pc_vrp=None
+    K no publica: Lascar 2026-05-06 08:00 MODIS_AQUA bajo1 z=47.46 lado=otro dc=None pc_dist=None pc_vrp=None
+    K no publica: Lascar 2026-05-18 07:30 MODIS_AQUA bajo1 z=22.38 lado=f0 dc=summit pc_dist=2.169 pc_vrp=0.0
+    K no publica: Lascar 2026-05-20 01:25 MODIS_TERRA bajo1 z=21.36 lado=otro dc=summit pc_dist=0.393 pc_vrp=0.0
+    K no publica: Lascar 2026-06-24 01:15 MODIS_TERRA bajo1 z=29.17 lado=otro dc=summit pc_dist=1.846 pc_vrp=0.0
+    K no publica: Lascar 2026-08-21 01:20 MODIS_TERRA bajo1 z=6.09 lado=otro dc=summit pc_dist=1.457 pc_vrp=0.0
+    K no publica: Lascar 2026-10-08 08:00 MODIS_AQUA bajo1 z=6.12 lado=otro dc=summit pc_dist=0.768 pc_vrp=0.0
+    K no publica: NevadosDeChillan 2026-09-29 07:20 MODIS_AQUA bajo1 z=58.42 lado=f0 dc=None pc_dist=None pc_vrp=None
+    K no publica: NevadosDeChillan 2026-10-12 07:20 MODIS_AQUA protegida z=58.19 lado=f0 dc=None pc_dist=None pc_vrp=None
+    K no publica: NevadosDeChillan 2026-10-15 01:05 MODIS_TERRA protegida z=57.58 lado=otro dc=None pc_dist=None pc_vrp=None
+    K no publica: Villarrica 2026-09-25 08:00 MODIS_AQUA bajo1 z=5.71 lado=otro dc=None pc_dist=None pc_vrp=None
+    K no publica: Villarrica 2026-09-25 08:05 MODIS_AQUA bajo1 z=5.78 lado=otro dc=None pc_dist=None pc_vrp=None
+    por volcán Lascar: {'alerta_pubK': 72, 'bajo1': 40, 'far_ref': 1, 'fondo_actua_bajo1': 10, 'fondo_actua_neg_limpio': 7, 'fondo_actua_sin_info': 4, 'neg_limpio': 292, 'protegida': 40, 'sin_info': 57}
+    por volcán Lastarria: {'neg_limpio': 433, 'sin_info': 4}
+    por volcán Isluga: {'far_ref': 2, 'neg_limpio': 408, 'sin_info': 5}
+    por volcán Tupungatito: {'neg_limpio': 480, 'sin_info': 6}
+    por volcán PlanchonPeteroa: {'far_ref': 1, 'neg_limpio': 495, 'sin_info': 5}
+    por volcán NevadosDeChillan: {'alerta_pubK': 7, 'bajo1': 1, 'far_ref': 2, 'fondo_actua_neg_limpio': 1, 'neg_limpio': 479, 'protegida': 9, 'sin_info': 14}
+    por volcán Llaima: {'far_ref': 3, 'neg_limpio': 508, 'sin_info': 5}
+    por volcán Villarrica: {'alerta_pubK': 1, 'bajo1': 2, 'neg_limpio': 510, 'protegida': 1, 'sin_info': 11}
+    por volcán Copahue: {'neg_limpio': 501, 'sin_info': 7}
+    por volcán PuyehueCordonCaulle: {'neg_limpio': 552, 'sin_info': 7}
+    por volcán Chaiten: {'far_ref': 1, 'neg_limpio': 571, 'sin_info': 12}
+  noches-volcán con protegida MODIS: 44; con publicación VIIRS de K esa noche: 43
+  noches-volcán con bajo1 MODIS: 39; con publicación VIIRS de K esa noche: 38
+escrito C:\vrp-trabajo\s159-pruebas\experiments\_s159\mxd03_prereg\verificador\sustrato_mirova_modis.json

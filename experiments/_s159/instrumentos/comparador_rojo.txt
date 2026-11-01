@@ -1,0 +1,150 @@
+...FFFFF.FF.FFF                                                          [100%]
+================================== FAILURES ===================================
+____________ test_placebo_como_brazo_no_puede_dar_mejora[0.6-1.2] _____________
+
+razon = 0.6, g = 1.2
+
+    @pytest.mark.parametrize("razon,g", [(0.6, 1.2), (1.6, 0.8)])
+    def test_placebo_como_brazo_no_puede_dar_mejora(razon, g):
+        """K bajo MIROVA con D = K×1,2 (o K sobre MIROVA con D = K×0,8): sin comparador la regla sellada lo aprueba;
+        con el comparador d\u2032 es id\xe9nticamente 0 y el estrato no puede dar MEJORA."""
+        P = _con_ganancia(_pares(razon, ruido=0.3), g)
+        ver, info = X.evaluar_m({E750: P}, ok_ctrl=True, modo_calib="simetrica")
+>       assert ver["M|%s" % E750] != "MEJORA", "un placebo K x %s dio MEJORA: el comparador no actúa" % g
+E       AssertionError: un placebo K x 1.2 dio MEJORA: el comparador no actúa
+E       assert 'MEJORA' != 'MEJORA'
+
+tests\test_evaluar_d25_placebo_s159.py:98: AssertionError
+____________ test_placebo_como_brazo_no_puede_dar_mejora[1.6-0.8] _____________
+
+razon = 1.6, g = 0.8
+
+    @pytest.mark.parametrize("razon,g", [(0.6, 1.2), (1.6, 0.8)])
+    def test_placebo_como_brazo_no_puede_dar_mejora(razon, g):
+        """K bajo MIROVA con D = K×1,2 (o K sobre MIROVA con D = K×0,8): sin comparador la regla sellada lo aprueba;
+        con el comparador d\u2032 es id\xe9nticamente 0 y el estrato no puede dar MEJORA."""
+        P = _con_ganancia(_pares(razon, ruido=0.3), g)
+        ver, info = X.evaluar_m({E750: P}, ok_ctrl=True, modo_calib="simetrica")
+>       assert ver["M|%s" % E750] != "MEJORA", "un placebo K x %s dio MEJORA: el comparador no actúa" % g
+E       AssertionError: un placebo K x 0.8 dio MEJORA: el comparador no actúa
+E       assert 'MEJORA' != 'MEJORA'
+
+tests\test_evaluar_d25_placebo_s159.py:98: AssertionError
+__________ test_mitad_de_camino_sigue_dando_mejora_con_dos_volcanes ___________
+
+    def test_mitad_de_camino_sigue_dando_mejora_con_dos_volcanes():
+        """El brazo que lleva cada par a mitad de camino hacia MIROVA (en log) corrige más a los pares más lejos: no es una
+        ganancia uniforme, y con dispersión real de K tiene que seguir dando MEJORA con al menos dos volcanes."""
+        P = _pares(0.6, ruido=0.3)
+        for p in P:
+            p["d"] = p["k"] * (p["m"] / p["k"]) ** 0.5
+        ver, info = X.evaluar_m({E750: P}, ok_ctrl=True, modo_calib="simetrica")
+        i = info["M|%s" % E750]
+>       assert "regla_dprima" in i, "el comparador no se calculó"
+E       AssertionError: el comparador no se calculó
+E       assert 'regla_dprima' in {'calibrada': True, 'd_mediana': -0.10997181577934279, 'falsos_empeora': 0.02, 'falsos_mejora': 0.01, ...}
+
+tests\test_evaluar_d25_placebo_s159.py:116: AssertionError
+___________________ test_k_por_08_sigue_dando_empeora_por_d ___________________
+
+    def test_k_por_08_sigue_dando_empeora_por_d():
+        """K bajo MIROVA y D = K\xd70,8: d empeora; d\u2032 es 0. EMPEORA se juzga sobre d (sello \xa72.4)."""
+        P = _con_ganancia(_pares(0.6, ruido=0.3), 0.8)
+        ver, info = X.evaluar_m({E750: P}, ok_ctrl=True, modo_calib="simetrica")
+        i = info["M|%s" % E750]
+>       assert "regla_dprima" in i, "el comparador no se calculó"
+E       AssertionError: el comparador no se calculó
+E       assert 'regla_dprima' in {'calibrada': True, 'd_mediana': 0.09691001300805638, 'falsos_empeora': 0.025, 'falsos_mejora': 0.01, ...}
+
+tests\test_evaluar_d25_placebo_s159.py:131: AssertionError
+_____________ test_d_mejora_y_dprima_no_queda_neutro_con_la_nota ______________
+
+    def test_d_mejora_y_dprima_no_queda_neutro_con_la_nota():
+        P = _con_ganancia(_pares(0.6, ruido=0.3), 1.2)
+        ver, info = X.evaluar_m({E750: P}, ok_ctrl=True, modo_calib="simetrica")
+>       assert ver["M|%s" % E750] == "NEUTRO", ver["M|%s" % E750]
+E       AssertionError: MEJORA
+E       assert 'MEJORA' == 'NEUTRO'
+E         
+E         - NEUTRO
+E         + MEJORA
+
+tests\test_evaluar_d25_placebo_s159.py:141: AssertionError
+______ test_la_compuerta_ya_no_invalida_y_el_placebo_se_sigue_informando ______
+
+    def test_la_compuerta_ya_no_invalida_y_el_placebo_se_sigue_informando():
+        P = _pares(0.6, ruido=0.3)                     # D = K: el nulo
+        ver, info = X.evaluar_m({E750: P}, ok_ctrl=True, modo_calib="simetrica")
+>       assert not any(str(v).startswith("INVALIDO") for v in ver.values()), "la compuerta sigue viva: %s" % ver
+E       AssertionError: la compuerta sigue viva: {'M|VIIRS750|z<=40': 'NEUTRO', 'M|VIIRS750|z>40': 'SIN SUSTRATO', 'M|VIIRS375|sin_kernel|z<=40': 'SIN SUSTRATO', 'M|VIIRS375|sin_kernel|z>40': 'SIN SUSTRATO', 'M|VIIRS375|kernel|z<=40': 'SIN SUSTRATO', 'M|VIIRS375|kernel|z>40': 'SIN SUSTRATO', 'PLACEBO': 'INVALIDO: placebo x1.2 da MEJORA en VIIRS750|z<=40'}
+E       assert not True
+E        +  where True = any(<generator object test_la_compuerta_ya_no_invalida_y_el_placebo_se_sigue_informando.<locals>.<genexpr> at 0x0000016752A9DD80>)
+
+tests\test_evaluar_d25_placebo_s159.py:157: AssertionError
+___________________ test_global_ventana_no_tiene_compuerta ____________________
+
+    def test_global_ventana_no_tiene_compuerta():
+        """Aunque llegue una marca de placebo vieja en el veredicto, la ventana no queda INVALIDO."""
+        ver = _ver_completo({E750: "MEJORA"})
+        ver["PLACEBO"] = "INVALIDO: placebo x1.2 da MEJORA en VIIRS750|z<=40"
+        estado, mejora, _ = X.global_ventana(ver, True)
+>       assert estado == "MEJORA" and mejora, estado
+E       AssertionError: INVALIDO POR INSTRUMENTO (placebo x1.2 da MEJORA en VIIRS750|z<=40) | sin el placebo: MEJORA
+E       assert ('INVALIDO POR...acebo: MEJORA' == 'MEJORA'
+E         
+E         - MEJORA
+E         + INVALIDO POR INSTRUMENTO (placebo x1.2 da MEJORA en VIIRS750|z<=40) | sin el placebo: MEJORA)
+
+tests\test_evaluar_d25_placebo_s159.py:172: AssertionError
+_____________________ test_g_hat_por_estrato_y_por_volcan _____________________
+
+    def test_g_hat_por_estrato_y_por_volcan():
+        """\u011d es uno por estrato (mediana de log10(D/K)) y se informa por volc\xe1n (no decide)."""
+        P = _pares(0.6, ruido=0.3)
+        gan = {"Lascar": 2.0, "Isluga": 1.5, "Tupungatito": 2.5}
+        for p in P:
+            p["d"] = p["k"] * gan[p["clave"].split("|")[0]]
+        _, info = X.evaluar_m({E750: P}, ok_ctrl=True, modo_calib="simetrica")
+        i = info["M|%s" % E750]
+>       assert "g_hat_por_volcan" in i, "no se informa \u011d por volc\xe1n"
+E       AssertionError: no se informa \u011d por volc\xe1n
+E       assert 'g_hat_por_volcan' in {'calibrada': True, 'd_mediana': -0.11312383515864066, 'falsos_empeora': 0.025, 'falsos_mejora': 0.015, ...}
+
+tests\test_evaluar_d25_placebo_s159.py:194: AssertionError
+___________________ test_g_hat_se_recalcula_en_cada_replica ___________________
+
+    def test_g_hat_se_recalcula_en_cada_replica():
+        """\xa73: \u011d se recalcula en cada r\xe9plica del bootstrap con los mismos pesos por bloque; su intervalo no es un punto
+        cuando D/K varía entre bloques."""
+        P = _pares(0.6, ruido=0.3)
+        rng = np.random.default_rng(3)
+        for p in P:
+            p["d"] = p["k"] * float(10 ** rng.normal(0.1, 0.1))
+        _, info = X.evaluar_m({E750: P}, ok_ctrl=True, modo_calib="simetrica")
+        i = info["M|%s" % E750]
+>       assert "g_hat_ic95" in i, "no se informa el intervalo de \u011d"
+E       AssertionError: no se informa el intervalo de \u011d
+E       assert 'g_hat_ic95' in {'calibrada': True, 'd_mediana': -0.03564614735797453, 'falsos_empeora': 0.025, 'falsos_mejora': 0.015, ...}
+
+tests\test_evaluar_d25_placebo_s159.py:209: AssertionError
+__________ test_medianas_por_fila_coinciden_con_medianas_ponderadas ___________
+
+    def test_medianas_por_fila_coinciden_con_medianas_ponderadas():
+>       assert hasattr(X, "medianas_ponderadas_filas"), "falta la mediana ponderada por fila (d\u2032 cambia en cada r\xe9plica)"
+E       AssertionError: falta la mediana ponderada por fila (d\u2032 cambia en cada r\xe9plica)
+E       assert False
+E        +  where False = hasattr(X, 'medianas_ponderadas_filas')
+
+tests\test_evaluar_d25_placebo_s159.py:215: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_placebo_como_brazo_no_puede_dar_mejora[0.6-1.2]
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_placebo_como_brazo_no_puede_dar_mejora[1.6-0.8]
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_mitad_de_camino_sigue_dando_mejora_con_dos_volcanes
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_k_por_08_sigue_dando_empeora_por_d
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_d_mejora_y_dprima_no_queda_neutro_con_la_nota
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_la_compuerta_ya_no_invalida_y_el_placebo_se_sigue_informando
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_global_ventana_no_tiene_compuerta
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_g_hat_por_estrato_y_por_volcan
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_g_hat_se_recalcula_en_cada_replica
+FAILED tests/test_evaluar_d25_placebo_s159.py::test_medianas_por_fila_coinciden_con_medianas_ponderadas
+10 failed, 5 passed in 159.12s (0:02:39)

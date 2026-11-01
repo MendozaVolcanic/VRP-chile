@@ -1,0 +1,29 @@
+sustitucion corona -> _pl_corona_x1.2: 1
+sustitucion ctx_off -> _no_existe: 1
+sustitucion corona+ctx_off -> _no_existe: 1
+sustituciones aplicadas: 4 | salida: experiments/_s160_audit/f1b/s126/x1.2.json
+VEREDICTO DEL A/B DE LA CORONA Eq.6 — 2026-06-25 a 2026-08-24
+brazos con datos: control, corona
+alertas diurnas de MIROVA descartadas (A76): 22
+
+RATIO NUESTRO/MIROVA EN VIIRS375, POR VOLCAN
+volcan                     n         control          corona
+Villarrica                 7         0.860 ✓         1.032 ✓
+PlanchonPeteroa           14         1.068 ✓         1.281 ✓
+Lascar                    34         0.491 ✗         0.589 ✗
+PuyehueCordonCaulle       21         0.734 ✓         0.881 ✓
+NevadosDeChillan           3         1.543 ✗         1.851 ✗
+
+==============================================================================
+CRITERIOS PRE-REGISTRADOS (docs/S126_CORONA_PREREGISTRO.md)
+   1. mas volcanes en banda y ninguno se sale           CUMPLE
+   2. Villarrica BAJA la magnitud                       NO CUMPLE
+   3. Lascar: 0 detecciones perdidas y caida <= 20%     CUMPLE
+   4. el evento NdC 06-16 sigue disparando (A79)        CUMPLE
+   5. cero detecciones perdidas en total                CUMPLE
+   6. MODIS y V750 no se mueven                         NO CUMPLE
+   7. corona degradada (cae al fondo regional)          0.0% (0 de 2185) — diagnostico, no criterio
+
+VEREDICTO: NO ADOPTAR  (fallan: 2_villarrica_baja, 6_control_interno)
+
+persistido en experiments/_s160_audit/f1b/s126/x1.2.json

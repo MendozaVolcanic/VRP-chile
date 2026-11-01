@@ -1,0 +1,54 @@
+ctrl  copia sin mutar, las cuatro baterias BASE                                                       OK, 0 fallas (53 pruebas, 57s)
+m01   semilla de la calibracion compartida con el intervalo (157)                                     ATRAPADA (53 pruebas, 1 por asercion, 0 otra excepcion, 0 errores, 65s)
+        asercion: test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados
+m02   la calibracion corre ANTES del SIN SUSTRATO y un fallo lo vuelve INDECIDIBLE                    ATRAPADA (53 pruebas, 3 por asercion, 0 otra excepcion, 0 errores, 61s)
+        asercion: test_sin_sustrato_y_controles_caidos_no_se_calibran_pero_informan
+        asercion: test_sin_sustrato_con_menos_de_5_pasadas_o_3_noches[por_noche0]
+        asercion: test_sin_sustrato_con_menos_de_5_pasadas_o_3_noches[por_noche1]
+m03   fracciones sobre los sorteos que deciden (sin EMPATE) en vez de sobre los 1.000                 ATRAPADA (53 pruebas, 5 por asercion, 0 otra excepcion, 0 errores, 64s)
+        asercion: test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados
+        asercion: test_con_muchas_noches_la_calibracion_pasa_y_decide
+        asercion: test_d_que_gana_en_muchas_noches_da_gana
+        asercion: test_neto_en_contra_grande_y_repartido_da_pierde
+        asercion: test_contar_usa_el_signo_de_errores_y_trae_la_lista
+m04   CONTROL POSITIVO: todos los sorteos con el mismo signo (un solo sorteo repetido)                ATRAPADA (53 pruebas, 2 por asercion, 0 otra excepcion, 0 errores, 65s)
+        asercion: test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados
+        asercion: test_el_sorteo_es_por_bloque_y_no_por_pasada
+m05   el tope se aplica tambien a BLOQUEA                                                             ATRAPADA (53 pruebas, 7 por asercion, 0 otra excepcion, 0 errores, 68s)
+        asercion: test_bloquea_no_se_calibra_y_su_fraccion_se_informa
+        asercion: test_con_muchas_noches_la_calibracion_pasa_y_decide
+        asercion: test_d_que_gana_en_muchas_noches_da_gana
+        asercion: test_d_que_gana_todo_en_una_sola_noche_da_empate
+        asercion: test_neto_en_contra_chico_bloquea_sin_dar_pierde
+        asercion: test_neto_en_contra_grande_y_repartido_da_pierde
+m06   el neto de cada sorteo se reemplaza por el observado (BLOQUEA/EMPATE del sorteo mal clasificados) ATRAPADA (53 pruebas, 1 por asercion, 0 otra excepcion, 0 errores, 68s)
+        asercion: test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados
+m07   el veredicto CALIBRADO no llega a `ver`: contar publica el resultado sin calibrar               NO ATRAPADA (53 pruebas, 0 por asercion, 0 otra excepcion, 0 errores, 65s)
+m08   global_ventana: INDECIDIBLE de P2 antes que PIERDE (la otra lectura de §2.5)                    ATRAPADA (53 pruebas, 1 por asercion, 0 otra excepcion, 0 errores, 61s)
+        asercion: test_lectura_pendiente_p2_indecidible_en_un_sensor_y_pierde_calibrado_en_el_otro
+m09   or en vez de and: basta una cola bajo el tope                                                   ATRAPADA (53 pruebas, 4 por asercion, 0 otra excepcion, 0 errores, 60s)
+        asercion: test_el_tope_es_5_por_ciento_en_cada_cola[0.051-0.0-False]
+        asercion: test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.051-False]
+        asercion: test_el_tope_es_5_por_ciento_en_cada_cola[0.06-0.0-False]
+        asercion: test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.08-False]
+m10   1001 sorteos (constante)                                                                        ATRAPADA (53 pruebas, 2 por asercion, 0 otra excepcion, 0 errores, 60s)
+        asercion: test_los_numeros_de_la_calibracion_son_los_sellados
+        asercion: test_la_calibracion_reproduce_el_oraculo_con_los_numeros_sellados
+m11   la calibracion usa OTRA matriz de pesos (semilla 166) y no la W del intervalo observado         ATRAPADA (53 pruebas, 1 por asercion, 0 otra excepcion, 0 errores, 56s)
+        asercion: test_el_intervalo_de_p2_usa_la_semilla_y_los_remuestreos_sellados
+m12   bloques en orden de aparicion en vez de ordenados (equivalente en produccion: las claves vienen ordenadas) NO ATRAPADA (53 pruebas, 0 por asercion, 0 otra excepcion, 0 errores, 54s)
+m13   el estrato 203 deja entrar VIIRS 375                                                            ATRAPADA (53 pruebas, 1 por asercion, 0 otra excepcion, 0 errores, 55s)
+        asercion: test_el_estrato_203_es_solo_viirs_750_y_solo_cumbre
+m14   el estrato 203 cuenta tambien los cumulos con pc.vrp_mw > 0 (no exige 0,0 MW)                   ATRAPADA (53 pruebas, 3 por asercion, 0 otra excepcion, 0 errores, 56s)
+        asercion: test_el_estrato_203_se_cuenta
+        asercion: test_el_estrato_203_no_decide
+        asercion: test_el_estrato_203_es_solo_viirs_750_y_solo_cumbre
+m15   calibrada se decide con la cola observada sola (GANA mira solo falsos_gana, PIERDE solo falsos_pierde) ATRAPADA (53 pruebas, 4 por asercion, 0 otra excepcion, 0 errores, 55s)
+        asercion: test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.051-False]
+        asercion: test_el_tope_es_5_por_ciento_en_cada_cola[0.0-0.08-False]
+        asercion: test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche2-BLOQUEA]
+        asercion: test_si_la_calibracion_falla_queda_indecidible_sea_cual_sea_el_resultado[por_noche3-EMPATE]
+
+RESUMEN: 13 de 15 mutaciones propias atrapadas por asercion
+copias que quedan en experiments/_mutv42_*: ninguna
+exit v03 0

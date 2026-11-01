@@ -68,15 +68,19 @@ def bt_to_radiance_um(bt_K: np.ndarray, lambda_um: float) -> np.ndarray:
     """Planck spectral radiance from brightness temperature.
 
     Returns radiance in W·m⁻²·sr⁻¹·μm⁻¹. NaN-preserving.
+
+    `lambda_um` puede ser un arreglo con la forma de `bt_K` (S157: MODIS con B22 primaria y B21 donde B22
+    satura, cada píxel con la λ de su banda). Con un escalar, la cuenta es la de siempre.
     """
     bt = np.asarray(bt_K, dtype=np.float64)
     out = np.full_like(bt, np.nan)
     mask = np.isfinite(bt) & (bt > 0)
-    expo = _C2 / (lambda_um * bt[mask])
+    lam = lambda_um if np.ndim(lambda_um) == 0 else np.asarray(lambda_um, dtype=np.float64)[mask]
+    expo = _C2 / (lam * bt[mask])
     safe = expo < 700  # avoid overflow
     out_idx = np.where(mask)
     expo_safe = np.where(safe, expo, np.nan)
-    rad = np.where(safe, (_C1_LAMBDA / lambda_um**5) / (np.exp(expo_safe) - 1), np.nan)
+    rad = np.where(safe, (_C1_LAMBDA / lam**5) / (np.exp(expo_safe) - 1), np.nan)
     out[out_idx] = rad
     return out
 

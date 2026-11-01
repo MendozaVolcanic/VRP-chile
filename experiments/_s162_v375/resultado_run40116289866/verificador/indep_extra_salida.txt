@@ -1,0 +1,47 @@
+filas 847 Counter({('S162', 'neg_resto'): 389, ('S162', 'pos_bajo'): 155, ('S162', 'neg_pub'): 113, ('S159', 'neg_resto'): 45, ('S159', 'pos_bajo'): 45, ('S162', 'pos_prot'): 41, ('S159', 'pos_prot'): 39, ('S159', 'neg_pub'): 20})
+== 1. geometria C13/M14 sobre las pasadas S162 ok
+   n_roi2 por brazo: {('C13', 'n_roi2', 169): 698, ('C21', 'n_roi2', 441): 698, ('M13', 'n_roi2', 169): 698, ('M21', 'n_roi2', 441): 698}
+   anomalias: [] 0
+   dayflag en ok S162: Counter({0: 698})
+   sunglint min/max: 70.74547826703345 178.92676131141937
+
+== 2. eleccion por volcan en T (union, mis pesos)
+   Chaiten                -> M14      (T: 25 pasadas) top3 [(1.0, 0, 3, 'M14'), (1.0, 1, 0, 'PIX7'), (1.0, 1, 1, 'M13')]
+   Copahue                -> M14      (T: 21 pasadas) top3 [(0, 0, 3, 'M14'), (0, 1, 0, 'PIX7'), (0, 1, 1, 'M13')]
+   Isluga                 -> M14      (T: 21 pasadas) top3 [(1.0, 0, 3, 'M14'), (1.0, 1, 0, 'PIX7'), (1.0, 1, 1, 'M13')]
+   Lascar                 -> M14      (T: 45 pasadas) top3 [(1.0, 0, 3, 'M14'), (1.0, 1, 0, 'PIX7'), (1.0, 1, 1, 'M13')]
+   Lastarria              -> M14      (T: 31 pasadas) top3 [(16.692308, 0, 3, 'M14'), (16.692308, 1, 1, 'M13'), (16.692308, 1, 2, 'C13')]
+   Llaima                 -> M14      (T: 23 pasadas) top3 [(0, 0, 3, 'M14'), (0, 1, 1, 'M13'), (0, 1, 2, 'C13')]
+   NevadosDeChillan       -> M14      (T: 17 pasadas) top3 [(0, 0, 3, 'M14'), (0, 1, 0, 'PIX7'), (0, 1, 1, 'M13')]
+   PlanchonPeteroa        -> M14      (T: 18 pasadas) top3 [(0, 0, 3, 'M14'), (0, 1, 1, 'M13'), (0, 1, 2, 'C13')]
+   PuyehueCordonCaulle    -> C13      (T: 31 pasadas) top3 [(0, 1, 2, 'C13'), (0, 1, 4, 'C14'), (0, 1, 7, 'SENS_PT')]
+   Tupungatito            -> C13      (T: 17 pasadas) top3 [(0, 1, 2, 'C13'), (0, 1, 4, 'C14'), (0, 1, 6, 'C21')]
+   Villarrica             -> M14      (T: 28 pasadas) top3 [(0, 0, 3, 'M14'), (0, 1, 0, 'PIX7'), (0, 1, 1, 'M13')]
+   composite en O vs M14: (-133.04166666666669, 29, 'GANA') vs K: (-32.47445384073291, 64, 'EMPATE')
+   composite en O solo PuyehueCordonCaulle: (-82.06666666666666, 16, 'GANA') (pasadas O: 72 )
+   composite en O solo Tupungatito: (-50.975, 13, 'GANA') (pasadas O: 50 )
+   composite en O fuera de PCC y Tup (deberia ser identico a M14): (0.0, 0, 'SIN SUSTRATO')
+   C13 vs M14 en T: (-124.73333333333332, 24, 'GANA')
+   C13 vs M14 en O1: (-74.01331672203767, 19, 'GANA')
+   C13 vs M14 en O2: (-55.09097744360902, 14, 'GANA')
+   C13 vs M14 fuera de PCC y Tup (todas las ventanas): (3.9373725010199916, 4, 'SIN SUSTRATO')
+
+== 3. alertas bajo 1 MW que C13 publica y M14 no: razon VRP port/MIROVA
+   n 54 mediana 0.9995786796935135 min/max 0.2743386873939576 1.9173803098965436
+   por volcan: Counter({'PuyehueCordonCaulle': 30, 'Tupungatito': 24})
+   publicadas por los dos: n 211 mediana 0.9983321603225626
+   negativos que C13 publica: 43 VRP mediana 0.04298136953730136 max 0.17560571618378162
+   neg_resto que C13 publica: [(0.0149, 'Tupungatito', '2026-07-21 04:30'), (0.0523, 'Lastarria', '2026-09-27 06:36'), (0.0438, 'Villarrica', '2026-09-28 07:00'), (0.0131, 'Lastarria', '2026-10-09 06:48')]
+
+== 4. por volcan: negativos (neg_pub+neg_resto) que publican M14/C13 y alertas bajo 1 MW recuperadas
+   Chaiten                neg M14   2 C13   2 | bajo M14   9 C13   9 de 9
+   Copahue                neg M14   0 C13   0 | bajo M14   2 C13   2 de 2
+   Isluga                 neg M14   2 C13   2 | bajo M14  48 C13  48 de 48
+   Lascar                 neg M14   3 C13   3 | bajo M14  31 C13  30 de 34
+   Lastarria              neg M14  27 C13  26 | bajo M14  22 C13  22 de 25
+   Llaima                 neg M14   1 C13   0 | bajo M14   1 C13   1 de 1
+   NevadosDeChillan       neg M14   2 C13   2 | bajo M14   4 C13   4 de 4
+   PlanchonPeteroa        neg M14   2 C13   2 | bajo M14  16 C13  16 de 17
+   PuyehueCordonCaulle    neg M14   0 C13   1 | bajo M14   2 C13  32 de 33
+   Tupungatito            neg M14   2 C13   3 | bajo M14   0 C13  24 de 24
+   Villarrica             neg M14   1 C13   2 | bajo M14   3 C13   3 de 3

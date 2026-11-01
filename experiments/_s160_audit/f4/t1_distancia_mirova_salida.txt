@@ -1,0 +1,78 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-08-29 a 2026-10-08 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-04-01 a 2026-10-08 pisa 7 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+
+######## V1, referencia congelada (tabla y OCR): 2026-08-29 a 2026-10-08
+
+== VIIRS375 | por volcan: d(centro de grilla, crater) | alertas | mediana de Distancia_km | a menos de 1 km del crater si la distancia fuera desde el centro de grilla / desde el crater | L1 >3,54 y ambiguas | L2 fuera seguro
+   Lascar                0.83 km |   53 |  1.19 km |   51 /    6 |    2 y   0 |    0
+   Lastarria             0.12 km |   27 |  1.62 km |    0 /    0 |    0 y   1 |    0
+   Isluga                0.37 km |   80 |  0.68 km |   79 /   72 |    0 y   0 |    0
+   Tupungatito           4.86 km |   40 |  5.21 km |   34 /    0 |   34 y   5 |    0
+   PlanchonPeteroa       2.02 km |   17 |  2.02 km |   17 /    0 |    0 y   1 |    0
+   NevadosDeChillan      0.39 km |   32 |  0.84 km |   27 /   26 |    0 y   0 |    0
+   Llaima                0.14 km |    1 |  2.93 km |    0 /    0 |    0 y   1 |    0
+   Villarrica            0.54 km |    8 |  0.90 km |    8 /    5 |    0 y   0 |    0
+   Copahue               0.14 km |    2 |  2.56 km |    0 /    0 |    0 y   1 |    0
+   PuyehueCordonCaulle   7.57 km |   50 |  7.83 km |   38 /    0 |   46 y   4 |    9
+   Chaiten               0.24 km |   20 |  0.41 km |   19 /   19 |    0 y   0 |    0
+   TOTAL 11: alertas 330 | L1 fuera 82 (24.8 %), con las ambiguas 95 (28.8 %) | L2 fuera seguro 9 (2.7 %) | de los 3 corridos: 80 de 107 fuera en L1
+
+== VIIRS750 | por volcan: d(centro de grilla, crater) | alertas | mediana de Distancia_km | a menos de 1 km del crater si la distancia fuera desde el centro de grilla / desde el crater | L1 >3,54 y ambiguas | L2 fuera seguro
+   Lascar                0.83 km |   10 |  0.75 km |   10 /    6 |    0 y   0 |    0
+   Isluga                0.37 km |    3 |  0.00 km |    3 /    3 |    0 y   0 |    0
+   PlanchonPeteroa       2.02 km |    1 |  1.06 km |    1 /    0 |    0 y   0 |    0
+   NevadosDeChillan      0.39 km |   18 |  1.08 km |   10 /    5 |    0 y   0 |    0
+   Villarrica            0.54 km |    2 |  1.06 km |    2 /    0 |    0 y   0 |    0
+   PuyehueCordonCaulle   7.57 km |   12 |  7.74 km |   12 /    0 |   12 y   0 |    0
+   Chaiten               0.24 km |    1 |  0.00 km |    1 /    1 |    0 y   0 |    0
+   TOTAL 11: alertas 47 | L1 fuera 12 (25.5 %), con las ambiguas 12 (25.5 %) | L2 fuera seguro 0 (0.0 %) | de los 3 corridos: 12 de 13 fuera en L1
+
+== MODIS | por volcan: d(centro de grilla, crater) | alertas | mediana de Distancia_km | a menos de 1 km del crater si la distancia fuera desde el centro de grilla / desde el crater | L1 >3,54 y ambiguas | L2 fuera seguro
+   Lascar                0.83 km |    2 |  1.00 km |    2 /    2 |    0 y   0 |    0
+   NevadosDeChillan      0.39 km |    4 |  1.21 km |    2 /    2 |    0 y   0 |    0
+   Villarrica            0.54 km |    2 |  0.70 km |    2 /    1 |    0 y   0 |    0
+   TOTAL 11: alertas 8 | L1 fuera 0 (0.0 %), con las ambiguas 0 (0.0 %) | L2 fuera seguro 0 (0.0 %) | de los 3 corridos: 0 de 0 fuera en L1
+
+######## ABRIL A OCTUBRE, solo la tabla (la distancia que calcula MIROVA, sin OCR): 2026-04-01 a 2026-10-08
+
+== VIIRS375 | por volcan: d(centro de grilla, crater) | alertas | mediana de Distancia_km | a menos de 1 km del crater si la distancia fuera desde el centro de grilla / desde el crater | L1 >3,54 y ambiguas | L2 fuera seguro
+   Lascar                0.83 km |  175 |  1.50 km |  165 /    7 |    2 y   3 |    0
+   Lastarria             0.12 km |  141 |  2.19 km |    0 /    0 |    0 y   8 |    0
+   Isluga                0.37 km |  197 |  0.75 km |  188 /  173 |    3 y   3 |    1
+   Tupungatito           4.86 km |  121 |  5.21 km |  118 /    0 |  121 y   0 |    0
+   PlanchonPeteroa       2.02 km |   78 |  2.02 km |   78 /    0 |    0 y   1 |    0
+   NevadosDeChillan      0.39 km |   27 |  0.84 km |   21 /   20 |    0 y   3 |    0
+   Llaima                0.14 km |    2 |  2.41 km |    0 /    0 |    0 y   1 |    0
+   Villarrica            0.54 km |   16 |  0.84 km |   16 /   13 |    0 y   0 |    0
+   Copahue               0.14 km |    5 |  2.70 km |    0 /    0 |    1 y   2 |    1
+   PuyehueCordonCaulle   7.57 km |  142 |  8.02 km |  135 /    0 |  140 y   1 |    2
+   Chaiten               0.24 km |   37 |  0.38 km |   36 /   35 |    1 y   0 |    0
+   TOTAL 11: alertas 941 | L1 fuera 268 (28.5 %), con las ambiguas 290 (30.8 %) | L2 fuera seguro 4 (0.4 %) | de los 3 corridos: 261 de 341 fuera en L1
+
+== VIIRS750 | por volcan: d(centro de grilla, crater) | alertas | mediana de Distancia_km | a menos de 1 km del crater si la distancia fuera desde el centro de grilla / desde el crater | L1 >3,54 y ambiguas | L2 fuera seguro
+   Lascar                0.83 km |  110 |  1.50 km |  109 /   22 |    0 y   0 |    0
+   Isluga                0.37 km |   35 |  0.75 km |   35 /   29 |    0 y   0 |    0
+   Tupungatito           4.86 km |   10 |  4.58 km |   10 /    0 |   10 y   0 |    0
+   PlanchonPeteroa       2.02 km |    9 |  1.68 km |    9 /    0 |    0 y   0 |    0
+   NevadosDeChillan      0.39 km |   10 |  1.37 km |    5 /    2 |    0 y   0 |    0
+   Villarrica            0.54 km |    8 |  1.06 km |    8 /    3 |    0 y   0 |    0
+   Copahue               0.14 km |    1 |  3.75 km |    0 /    0 |    1 y   0 |    1
+   PuyehueCordonCaulle   7.57 km |   41 |  7.83 km |   40 /    0 |   40 y   0 |    1
+   Chaiten               0.24 km |    2 |  0.00 km |    2 /    2 |    0 y   0 |    0
+   TOTAL 11: alertas 226 | L1 fuera 51 (22.6 %), con las ambiguas 51 (22.6 %) | L2 fuera seguro 2 (0.9 %) | de los 3 corridos: 50 de 60 fuera en L1
+
+== MODIS | por volcan: d(centro de grilla, crater) | alertas | mediana de Distancia_km | a menos de 1 km del crater si la distancia fuera desde el centro de grilla / desde el crater | L1 >3,54 y ambiguas | L2 fuera seguro
+   Lascar                0.83 km |   53 |  1.00 km |   48 /   31 |    0 y   0 |    0
+   NevadosDeChillan      0.39 km |    4 |  1.21 km |    2 /    2 |    0 y   0 |    0
+   Villarrica            0.54 km |    2 |  0.70 km |    2 /    1 |    0 y   0 |    0
+   TOTAL 11: alertas 59 | L1 fuera 0 (0.0 %), con las ambiguas 0 (0.0 %) | L2 fuera seguro 0 (0.0 %) | de los 3 corridos: 0 de 0 fuera en L1

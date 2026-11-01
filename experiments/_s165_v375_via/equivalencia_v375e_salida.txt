@@ -1,0 +1,38 @@
+== 0. cobertura: objetivos 2078 {'S162': 709, 'S162b': 1200, 'CTL': 20, 'S159': 149}
+   inner_radius_km de volcanoes.yaml distinto del del tablero en 0 volcanes
+   SIN DATO: {'sin_resultado_ok': 66} | comparadas: 2012 {'S159': 149, 'S162': 698, 'S162b': 1165}
+   con alertas del port: 329 | protegidas: 80
+
+== 1. controles del instrumento
+   el port publica (regla cercano) en 317 de 2012; con el VRP x 0 sigue publicando en 0 (tiene que ser 0)
+
+== 2. grilla y caja
+   misma grilla (<= 0,06 m): 2012 de 2012; máx diferencia 0.0000 m
+   misma caja (vía con su grilla contra brazos.caja C13 con la del lote): 2012 de 2012
+
+== 3. máscara y VRP
+   misma máscara índice por índice: 2012 de 2012
+   VRP a 0.001 MW: 289 de 329 con alertas (0.8784); por vara {('matlab', True): 255, ('port', True): 34, ('port', False): 40}
+   mayores diferencias: [(164, 'Isluga', 6, 'port', 0.288824), (293, 'Isluga', 7, 'port', 0.068361), (1408, 'Isluga', 5, 'port', 0.065025), (228, 'Isluga', 6, 'port', 0.06396), (1023, 'Lascar', 6, 'port', 0.035742), (298, 'Isluga', 9, 'port', 0.033026), (217, 'Tupungatito', 5, 'port', 0.024868), (218, 'Lascar', 7, 'port', 0.018523)]
+   relleno (diagnóstico, adenda §7.3): de las 40 fuera de tolerancia, 40 calzan a 0.001 MW con el port usando el fondo de la regla de MATLAB (código independiente de S163)
+      [(164, 'Isluga', 6, 'port', 0.288824, 0.0), (180, 'Isluga', 6, 'port', 0.010293, 0.0), (190, 'Lastarria', 5, 'port', 0.004243, 0.0), (217, 'Tupungatito', 5, 'port', 0.024868, 0.0), (218, 'Lascar', 7, 'port', 0.018523, 0.0), (228, 'Isluga', 6, 'port', 0.06396, 0.0), (233, 'Lascar', 5, 'port', 0.006317, 0.0), (249, 'Villarrica', 6, 'port', 0.002172, 0.0), (266, 'NevadosDeChillan', 6, 'port', 0.00371, 0.0), (285, 'Lascar', 5, 'port', 0.003933, 0.0), (288, 'Isluga', 6, 'port', 0.016567, 0.0), (293, 'Isluga', 7, 'port', 0.068361, 0.0), (296, 'NevadosDeChillan', 6, 'port', 0.003313, 0.0), (298, 'Isluga', 9, 'port', 0.033026, 0.0), (1023, 'Lascar', 6, 'port', 0.035742, 0.0), (1026, 'Lascar', 5, 'port', 0.011917, 0.0), (1035, 'Lascar', 5, 'port', 0.004056, 0.0), (1039, 'Lascar', 7, 'port', 0.001301, 0.0), (1047, 'Lascar', 5, 'port', 0.006603, 0.0), (1048, 'Lascar', 5, 'port', 0.006034, 0.0), (1064, 'Lascar', 5, 'port', 0.001335, 0.0), (1073, 'Lascar', 5, 'port', 0.001745, 0.0), (1099, 'Lascar', 6, 'port', 0.001661, 0.0), (1102, 'Lascar', 10, 'port', 0.007786, 0.0), (1111, 'PuyehueCordonCaulle', 6, 'port', 0.00214, 0.0), (1281, 'Isluga', 6, 'port', 0.001065, 0.0), (1331, 'Lascar', 5, 'port', 0.00154, 0.0), (1333, 'Isluga', 5, 'port', 0.006406, 0.0), (1346, 'Lascar', 5, 'port', 0.010428, 0.0), (1351, 'Lascar', 5, 'port', 0.002721, 0.0), (1368, 'PuyehueCordonCaulle', 5, 'port', 0.002396, 0.0), (1378, 'PuyehueCordonCaulle', 6, 'port', 0.003212, 0.0), (1393, 'PuyehueCordonCaulle', 5, 'port', 0.00303, 0.0), (1408, 'Isluga', 5, 'port', 0.065025, 0.0), (1410, 'Lascar', 5, 'port', 0.003516, 0.0), (1570, 'Lascar', 5, 'port', 0.002595, 0.0), (1615, 'PuyehueCordonCaulle', 5, 'port', 0.011867, 0.0), (1626, 'Villarrica', 6, 'port', 0.008111, 0.0), (1692, 'NevadosDeChillan', 11, 'port', 0.006571, 0.0), (1699, 'NevadosDeChillan', 8, 'port', 0.002853, 0.0)]
+
+== 4. publicación (predicado del tablero con node)
+   regla cercano (DECIDE en evaluar.py): igual en 2004 de 2012; protegidas distintas 4
+      (228, 'Isluga', '2026-06-17 05:06', False, True, 6, 15.632, 0.884, 5.0, True)
+      (233, 'Lascar', '2026-06-28 05:00', False, True, 5, 22.237, 0.515, 5.0, False)
+      (293, 'Isluga', '2026-09-28 05:12', False, True, 7, 15.882, 0.673, 5.0, True)
+      (298, 'Isluga', '2026-10-03 05:18', False, True, 9, 22.779, 0.673, 5.0, True)
+      (1570, 'Lascar', '2026-10-01 05:18', False, True, 5, 18.99, 0.559, 5.0, True)
+      (1638, 'Lastarria', '2026-06-28 05:36', False, True, 3, 33.861, 2.129, 3.0, False)
+      (1647, 'Lascar', '2026-07-24 05:48', False, True, 4, 7.302, 0.559, 5.0, False)
+      (1662, 'Lascar', '2026-08-21 05:24', False, True, 3, 26.2, 0.884, 5.0, False)
+   regla centroide: igual en 2009 de 2012; protegidas distintas 1
+      (233, 'Lascar', '2026-06-28 05:00', False, True, 5, 22.237, 4.583, 5.0, False)
+      (1035, 'Lascar', '2026-04-20 05:48', True, False, 5, 0.019, 5.378, 5.0, True)
+      (1647, 'Lascar', '2026-07-24 05:48', False, True, 4, 7.302, 1.105, 5.0, False)
+   de las distintas con la regla que decide, con máscara y VRP iguales (sólo la regla de distancia): 3
+
+== 5. veredicto (PREREGISTRO_IMPL_V375E.md §3)
+   detección (grilla, caja, máscara): SI; VRP >= 99 %: NO; publicación 100 % con «cercano»: NO
+   VEREDICTO: NO EQUIVALENTE

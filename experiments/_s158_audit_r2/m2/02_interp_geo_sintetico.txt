@@ -1,0 +1,35 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf
+forma interpolada: (2030, 1354)
+error en LÍNEAS (píxeles), en las líneas 0, 2, 500, 1015, 1500, 2027, 2029:
+  línea    0: +2.000
+  línea    2: +1.996
+  línea  500: +1.014
+  línea 1015: -0.001
+  línea 1500: -0.957
+  línea 2027: -1.996
+  línea 2029: -2.000
+error en MUESTRAS (píxeles), en las columnas 0, 2, 100, 338, 677, 1016, 1252, 1352, 1353:
+  col    0: +2.000
+  col    2: +1.996
+  col  100: +1.778
+  col  338: +1.251
+  col  677: +0.499
+  col 1016: -0.253
+  col 1252: -0.776
+  col 1352: -0.998
+  col 1353: -1.000
+columnas donde el corrimiento apunta hacia el nadir: 1128 de 1354
+
+corrimiento en el suelo (km) = error(px) * ancho(px), en columnas seleccionadas:
+  col    0: cenit  65.5 deg, ancho 5.80 km, corrimiento +11.61 km
+  col  100: cenit  54.2 deg, ancho 2.92 km, corrimiento +5.18 km
+  col  338: cenit  30.9 deg, ancho 1.36 km, corrimiento +1.70 km
+  col  677: cenit   0.0 deg, ancho 1.00 km, corrimiento +0.50 km
+  col 1016: cenit  31.0 deg, ancho 1.36 km, corrimiento -0.34 km
+  col 1252: cenit  54.0 deg, ancho 2.90 km, corrimiento -2.25 km
+  col 1353: cenit  65.5 deg, ancho 5.80 km, corrimiento -5.80 km
+
+== control positivo: grilla gruesa que SÍ parte en el píxel 0 (0::5), 406 x 271 recortando la cola ==
+error muestras col 0 / 677 / 1353: +0.000 / -1.501 / -3.000
+(con 0::5 el último punto gruesa es la muestra 1350, así que zoom lo estira 3 px al final: el instrumento ve también ese defecto)

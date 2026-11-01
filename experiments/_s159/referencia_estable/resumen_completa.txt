@@ -1,0 +1,46 @@
+ventana desde 2026-05-20 ref d516b9d8c
+autotest {"sha": "82b1401db", "n": 42410, "nulo": {"alta": 0, "baja": 0, "cambio": 0, "meta": 0}, "positivo_esperado": {"alta": 0, "baja": 1, "cambio": 2}, "positivo_medido": {"alta": 0, "baja": 1, "cambio": 2, "campos": ["tipo", "vrp"]}}
+
+== CONS: versiones 1238 (base 2026-05-23T17:25:59-04:00 n=15173, ultima 2026-10-21T23:40:05Z n=42410), duplicados max 822, variantes de nombre 3
+   eventos {'alta': 29185, 'baja': 2111, 'reaparece': 163}  solo metadatos 39710
+   bajas por estrato {'rutina': 1963, 'alerta_<1MW': 83, 'falso_positivo': 51, 'alerta_>=1MW': 14}
+   bajas por sensor {'MODIS': 781, 'VIIRS375': 660, 'VIIRS750': 670}
+   bajas por evento [('81dd25ce3', '2026-08-19T17:41', 163, 0), ('190d2f2fa', '2026-08-25T19:55', 202, 0), ('faf444123', '2026-08-26T19:18', 186, 0), ('283d744e2', '2026-10-06T02:57', 207, 44), ('595ba6a00', '2026-10-16T21:25', 529, 14), ('a7a9b2c97', '2026-10-17T22:17', 194, 103), ('0c8848ff9', '2026-10-18T18:04', 630, 0)]
+   edad minima de una fila perdida (h) 19.21
+   bajas en union_historica de hoy 1967 de 2111
+   reaparecen 163
+     PROTEGIDA ('PuyehueCordonCaulle', 'VIIRS375', '2026-01-13 06:12') 1.06 MW perdida 2026-08-25T19:55 | union True | OCR None
+     PROTEGIDA ('Lascar', 'VIIRS750', '2026-01-15 05:24') 1.31 MW perdida 2026-10-16T21:25 | union True | OCR None
+     PROTEGIDA ('PuyehueCordonCaulle', 'VIIRS750', '2026-01-23 06:00') 1.34 MW perdida 2026-10-06T02:57 | union True | OCR None
+     PROTEGIDA ('Lascar', 'MODIS', '2026-02-09 07:20') 1.64 MW perdida 2026-10-18T18:04 | union True | OCR None
+     PROTEGIDA ('Lascar', 'MODIS', '2026-02-14 01:40') 3.43 MW perdida 2026-10-06T02:57 | union True | OCR ('ALERTA_TERMICA_OCR', '3.0')
+     PROTEGIDA ('Lascar', 'MODIS', '2026-03-19 01:55') 2.01 MW perdida 2026-08-25T19:55 | union True | OCR ('ALERTA_TERMICA_OCR', '2.0')
+     PROTEGIDA ('Lascar', 'VIIRS375', '2026-03-21 05:06') 1.69 MW perdida 2026-08-25T19:55 | union True | OCR None
+     PROTEGIDA ('Lascar', 'MODIS', '2026-04-05 01:35') 1.98 MW perdida 2026-08-25T19:55 | union True | OCR None
+     PROTEGIDA ('Lascar', 'MODIS', '2026-04-18 01:50') 2.06 MW perdida 2026-10-06T02:57 | union True | OCR ('ALERTA_TERMICA_OCR', '2.0')
+     PROTEGIDA ('Lascar', 'VIIRS375', '2026-05-02 05:24') 1.4 MW perdida 2026-10-18T18:04 | union True | OCR ('ALERTA_TERMICA_OCR', '1.4')
+     PROTEGIDA ('Lascar', 'VIIRS375', '2026-05-12 05:36') 1.17 MW perdida 2026-10-16T21:25 | union True | OCR ('ALERTA_TERMICA_OCR', '1.17')
+     PROTEGIDA ('Lascar', 'VIIRS375', '2026-06-01 06:00') 1.69 MW perdida 2026-10-17T22:17 | union True | OCR None
+     PROTEGIDA ('PuyehueCordonCaulle', 'VIIRS750', '2026-06-05 05:36') 1.09 MW perdida 2026-10-18T18:04 | union True | OCR ('ALERTA_TERMICA_OCR', '1.0')
+     PROTEGIDA ('Villarrica', 'VIIRS375', '2026-08-21 05:48') 1.82 MW perdida 2026-10-18T18:04 | union True | OCR ('ALERTA_TERMICA_OCR', '1.82')
+   alta estrato=alerta_<1MW          n=  990 p50=    7.1 p90=  207.7 max=  545.1 >24h=171 >48h=159
+   alta estrato=alerta_>=1MW         n=  138 p50=    8.1 p90=  399.7 max=  544.3 >24h=20 >48h=20
+   alta estrato=falso_positivo       n=  697 p50=    7.2 p90=  304.1 max=  555.6 >24h=147 >48h=142
+   alta estrato=rutina               n=27360 p50=    5.8 p90=  116.4 max=  555.6 >24h=3325 >48h=3150
+   alta sensor=MODIS                n= 8010 p50=    4.2 p90=  128.5 max=  553.5 >24h=1018 >48h=974
+   alta sensor=VIIRS375             n=10499 p50=    6.6 p90=   98.9 max=  555.6 >24h=1278 >48h=1198
+   alta sensor=VIIRS750             n=10676 p50=    6.4 p90=  146.6 max=  554.8 >24h=1367 >48h=1299
+
+== OCR: versiones 56 (base 2026-05-29T10:47:21-04:00 n=520, ultima 2026-10-21T15:25:39Z n=1122), duplicados max 0, variantes de nombre 0
+   eventos {'alta': 602, 'cambio': 39}  solo metadatos 0
+   cambios por campo {'tipo': 39, 'dist': 39}
+   cambios por estrato viejo->nuevo [(('alerta_>=1MW', 'falso_positivo'), 30), (('alerta_<1MW', 'falso_positivo'), 9)]
+   edad del cambio (h) p50/p90/max 1634.62 2739.32 2990.62
+   cambios por sensor {'VIIRS375': 37, 'MODIS': 2}
+   alta estrato=alerta_<1MW          n=  427 p50=  101.6 p90=  711.6 max=  879.9 >24h=329 >48h=303
+   alta estrato=alerta_>=1MW         n=   98 p50=   74.9 p90=  663.4 max=  819.6 >24h=61 >48h=57
+   alta estrato=alerta_sin_geometria n=   41 p50=   16.3 p90=  108.2 max=  131.8 >24h=12 >48h=6
+   alta estrato=falso_positivo       n=   36 p50=  195.4 p90=  771.9 max=  843.8 >24h=32 >48h=31
+   alta sensor=MODIS                n=    8 p50=   19.9 p90=  793.4 max=  793.4 >24h=3 >48h=3
+   alta sensor=VIIRS375             n=  556 p50=   88.3 p90=  711.6 max=  879.9 >24h=411 >48h=374
+   alta sensor=VIIRS750             n=   38 p50=   68.4 p90=  663.4 max=  771.1 >24h=20 >48h=20

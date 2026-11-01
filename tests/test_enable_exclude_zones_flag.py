@@ -1,3 +1,7 @@
+# ⚠️ S158 R2 (docs/AUDIT_S158_R2.md, marca A113; experiments/_s158_audit_r2/a113/INFORME.md n 3): «MIROVA no usa mascaras geograficas» cae en forma
+# absoluta para VIIRS 750: el codigo admite pixeles excluidos (NaN en BOX) y dice que las ROI se adaptan por
+# volcan para excluir volcanes vecinos u otras fuentes termicas persistentes (l. 25 a 29 y 120 a 128). Si MIROVA
+# lo aplica en Chile es SIN DATO; «no en papers» no lo revise. Las aserciones no cambian.
 """S27 T3 — TDD: flag ENABLE_EXCLUDE_ZONES desactiva filtro de exclude_zones.
 
 Para clon literal MIROVA (Coppola 2016a + 2020 + Laiolo 2026), exclude_zones

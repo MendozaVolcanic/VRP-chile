@@ -1,0 +1,143 @@
+name: Vigilancia de la sombra de K
+
+# S156 (arreglo 4 de docs/AUDIT_S155.md §5; experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md §4 paso 9).
+# POR QUE: el detector K dejo de usar el Test 1 integrado, que veia la senal termica debil. La sombra
+# (perfil experimental, congelado en C0, data/experimental_v2/) se compara cada dia contra produccion y
+# contra MIROVA. Una alerta protegida que MIROVA publica, la sombra publica y produccion calla es el
+# disparador de la reversion pre-autorizada de K, y la regla pide avisar EL MISMO DIA: por eso corre
+# al terminar experimental-diario (que produce la sombra) y no una vez por semana.
+# El workflow NO revierte: abre el issue. La reversion la confirma una persona en la cabecera de la
+# imagen de MIROVA y la ejecuta una sesion con git revert del PR de adopcion.
+# A43: "on" quoted (Norway Problem YAML 1.1).
+"on":
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Experimental diario (laboratorio congelado, 11 Tier A)"]
+    types: [completed]
+  # Respaldo: si experimental-diario se renombra, se desactiva o no corre, el workflow_run no llega y nadie se
+  # entera. Con este cron la vigilancia corre igual una vez al dia y, sin datos frescos de la sombra, abre el
+  # issue de vigilancia ciega (verificador 2 de S156). El nombre de arriba lo amarra
+  # tests/test_vigilancia_sombra_s156.py::test_el_workflow_escucha_al_workflow_de_la_sombra.
+  schedule:
+    - cron: "40 23 * * *"
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  # Grupo propio (como audit-weekly): el push tiene su bucle de reintento, que es la defensa real
+  # contra la carrera de refs; en `push-main` un run pendiente puede ser desplazado y perder el dia.
+  group: vigilancia-sombra
+  cancel-in-progress: false
+
+jobs:
+  vigilar:
+    runs-on: ubuntu-24.04  # fijado como el NRT: ubuntu-latest migra a 26.04 desde el 2026-10-19
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install pyyaml
+
+      # La referencia fresca va a una carpeta temporal, no al snapshot versionado: el consolidado del
+      # snapshot solo se refresca los lunes (audit-weekly) y una alerta de anoche tiene que poder disparar hoy.
+      - name: Referencia fresca de MIROVA (Mirova-v1)
+        run: |
+          mkdir -p "$RUNNER_TEMP/ref"
+          curl -fsSL -o "$RUNNER_TEMP/ref/registro_vrp_consolidado.csv" \
+            https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_consolidado.csv
+          curl -fsSL -o "$RUNNER_TEMP/ref/registro_vrp_ocr.csv" \
+            https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_ocr.csv
+
+      - name: Vigilancia
+        id: vigilancia
+        continue-on-error: true
+        run: |
+          python scripts/vigilancia_sombra.py \
+            --cons "$RUNNER_TEMP/ref/registro_vrp_consolidado.csv" \
+            --ocr "$RUNNER_TEMP/ref/registro_vrp_ocr.csv"
+
+      - name: Commit results
+        if: steps.vigilancia.outcome == 'success'
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add data/audit_continuous/sombra_latest.json data/audit_continuous/sombra_history.jsonl
+          git diff --staged --quiet && { echo "no changes"; exit 0; }
+          git commit -m "vigilancia(auto): sombra de K contra produccion y MIROVA (S156)"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
+
+      # Un issue por incidente y por clase: si ya hay uno abierto con el mismo titulo, no se abre otro.
+      # always(): si el push falla tras los cinco intentos, el issue de una reversion igual tiene que abrirse
+      # (verificador 2 de S156, hallazgo 2).
+      - name: Open issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OUTCOME: ${{ steps.vigilancia.outcome }}
+        run: |
+          # Deduplicacion por PREFIJO EXACTO del titulo, no por la busqueda de GitHub, que es por bolsa de palabras
+          # y se traga cualquier issue abierto a mano con las mismas palabras (verificador 2, hallazgo 4). Si ya hay
+          # uno abierto de la clase, se comenta con el detalle nuevo: un segundo caso no puede quedar sin rastro.
+          # OJO: un issue abierto A MANO cuyo titulo empiece igual que uno de estos («Sombra de K: candidata a
+          # reversion», etc.) recibe los comentarios en vez de que se abra uno nuevo. Los issues a mano sobre la
+          # sombra van con otro titulo (verificador 3 de S156).
+          abrir() {
+            NUM=$(PREFIJO="$1" gh issue list --state open --limit 200 --json number,title --jq '[.[] | select(.title | startswith(env.PREFIJO))][0].number // empty')
+            if [ -z "$NUM" ]; then
+              gh issue create --title "$1: $(date -u +%F)" --body "$2"
+            else
+              echo "ya hay un issue abierto de esta clase (#$NUM): se comenta"
+              gh issue comment "$NUM" --body "$(printf 'Corrida del %s:\n\n%s' "$(date -u +%F)" "$2")"
+            fi
+          }
+          if [ "$OUTCOME" != "success" ]; then
+            abrir "Vigilancia de la sombra de K: el script fallo" "$(printf 'scripts/vigilancia_sombra.py no termino (run %s). Mientras no corra, nadie vigila si K pierde alertas que el detector anterior veia.' "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")"
+            exit 0
+          fi
+          VEREDICTO=$(python -c "import json; print(json.load(open('data/audit_continuous/sombra_latest.json'))['veredicto'])")
+          echo "veredicto: $VEREDICTO"
+          python - <<'PY' > /tmp/detalle.txt
+          import json
+          d = json.load(open("data/audit_continuous/sombra_latest.json", encoding="utf-8"))
+          for p in d.get("reversion", []):
+              print(f"- REVERSION CANDIDATA: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la sombra publica y produccion calla")
+          for p in d.get("fuera_de_plazo", []):
+              print(f"- FUERA DE PLAZO (sin pre-autorizacion): {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la sombra publica y produccion calla")
+          for k, m in (d.get("muy_bajo") or {}).items():
+              if m["dispara"]:
+                  print(f"- Muy Bajo {k}: {m['k']} de {m['n']}, Wilson {m['wilson']} sobre la cota del A/B {m['cota_ab']}")
+          for p in d.get("persistencia", []):
+              print(f"- persistencia: {p['volcano']} noches {p['noches']}")
+          n = d.get("negativos_VIIRS375") or {}
+          if n.get("dispara"):
+              print(f"- VIIRS 375 en negativos limpios: {n['k']} de {n['n']}, Wilson {n['wilson']} sobre la cota {n['cota_ab']}")
+          for a in d.get("avisos", []):
+              print(f"- aviso: {a}")
+          PY
+          case "$VEREDICTO" in
+            REVERSION_CANDIDATA)
+              abrir "Sombra de K: candidata a reversion" "$(printf 'La vigilancia de la sombra encontro una alerta protegida de MIROVA (1 MW o mas) que la sombra (detector C0) publica y produccion (K) calla:\n\n%s\n\nLa regla (experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9) pre-autoriza revertir K con git revert del PR de adopcion, DESPUES de confirmar la alerta en la cabecera de la imagen de MIROVA (mirova-tif-archive, index_png.csv). Avisar a Nicolas hoy. Una vez decidida, anotar la pasada en experiments/_s151_prereg_fk_11/sombra_pasadas_juzgadas.json para que no vuelva a disparar.\nDetalle: data/audit_continuous/sombra_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+            CANDIDATA_FUERA_DE_PLAZO)
+              abrir "Sombra de K: candidata fuera de plazo" "$(printf 'La vigilancia de la sombra encontro una alerta protegida de MIROVA que la sombra publica y produccion calla, pero el plazo de la regla ya se cumplio (29 protegidas vistas o 120 dias desde la adopcion):\n\n%s\n\nFuera de plazo NO hay reversion pre-autorizada: decide Nicolas (decision del 2026-10-19). Una vez decidida, anotar la pasada en experiments/_s151_prereg_fk_11/sombra_pasadas_juzgadas.json.\nDetalle: data/audit_continuous/sombra_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+            INVESTIGAR)
+              abrir "Sombra de K: investigar" "$(printf 'La vigilancia de la sombra encontro un disparador de investigacion (sin reversion automatica):\n\n%s\n\nRegla: experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9. Una vez investigada una racha de persistencia, anotarla en la seccion rachas de experiments/_s151_prereg_fk_11/sombra_pasadas_juzgadas.json para que deje de disparar.\nDetalle: data/audit_continuous/sombra_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+            VIGILANCIA_CIEGA)
+              abrir "Sombra de K: vigilancia ciega" "$(printf 'La vigilancia de la sombra no puede mirar:\n\n%s\n\nUna vigilancia ciega no da error, da VERDE: por eso este issue. Revisar experimental-diario.yml y frontend/cambio_detector.js.\nDetalle: data/audit_continuous/sombra_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+            *) echo "sin issue" ;;
+          esac

@@ -248,6 +248,9 @@ def _reference_slow_contextual_dnti(nti, bt, roi_mask, t_bg, c1, bt_sanity_k):
             & (dnti > c1) & (bt > t_bg + bt_sanity_k))
 
 
+# ⚠️ S158 R2 (docs/AUDIT_S158_R2.md, marca A113; experiments/_s158_audit_r2/a113/INFORME.md n 7): la media aritmetica se sostiene; el «8 vecinos» no
+# en VIIRS 750, donde MIROVA promedia 3 x 3 con el central incluido (colfilt, l. 281 a 294 y 362 a 368). Para
+# MODIS y VIIRS 375 manda el paper (p. 5, renderizada: «eight neighbouring pixels»). La asercion no cambia.
 def test_kernel_uses_arithmetic_mean_not_median():
     """Test S17 D1: el kernel 8-vecinos debe usar MEAN aritmetico, no median.
 

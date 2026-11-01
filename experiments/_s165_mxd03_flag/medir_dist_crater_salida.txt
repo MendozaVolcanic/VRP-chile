@@ -1,0 +1,50 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-09-18 a 2026-10-27 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf
+ventana 2026-09-18 a 2026-10-27 | records MODIS nocturnos de los 11 Tier A: 920
+fuente final: {None: 886, 'eruption': 34}
+
+etiqueta que cambia: 1   {'far->summit': 1}
+   PuyehueCordonCaulle  2026-10-12 02:20 far->summit d 22.6 -> 15.014 inner 20 | publica 0->1 | ref neg_limpio
+
+publicación que cambia (pasadas): 1   {('0->1', 'neg_limpio'): 1}
+noches de volcán cuya publicación cambia: 1 de 438
+   PuyehueCordonCaulle 2026-10-12 publica 0->1 etiquetas ['neg_limpio']
+
+records con el píxel a menos de 1 km de la geocerca (radius_km), no emulado: 1
+control de identidad: con la distancia guardada el emulador da la etiqueta guardada en 34 de 34 records «eruption»
+=== control positivo: ancla corrida 30 km al norte
+ventana 2026-09-18 a 2026-10-27 | records MODIS nocturnos de los 11 Tier A: 920
+fuente final: {None: 886, 'eruption': 34}
+
+etiqueta que cambia: 30   {'summit->far': 29, 'far->summit': 1}
+
+publicación que cambia (pasadas): 27   {('1->0', 'pos'): 13, ('1->0', 'sin_info'): 4, ('1->0', 'neg_limpio'): 9, ('0->1', 'neg_limpio'): 1}
+noches de volcán cuya publicación cambia: 22 de 438
+
+records con el píxel a menos de 1 km de la geocerca (radius_km), no emulado: 1
+control de identidad: con la distancia guardada el emulador da la etiqueta guardada en 34 de 34 records «eruption»
+
+=== ventana ampliada 2026-03-01 (todo el histórico es K desde #883, marca S160)
+ventana 2026-03-01 a 2026-10-27 | records MODIS nocturnos de los 11 Tier A: 5733
+fuente final: {'eruption': 180, None: 5553}
+
+etiqueta que cambia: 5   {'far->summit': 5}
+   PuyehueCordonCaulle  2026-03-01 07:05 far->summit d 23.21 -> 17.195 inner 20 | publica 0->1 | ref neg_limpio
+   PuyehueCordonCaulle  2026-03-14 01:50 far->summit d 20.18 -> 16.274 inner 20 | publica 0->1 | ref neg_limpio
+   PuyehueCordonCaulle  2026-05-03 07:50 far->summit d 24.21 -> 16.851 inner 20 | publica 0->1 | ref neg_limpio
+   PuyehueCordonCaulle  2026-06-22 08:25 far->summit d 23.17 -> 17.985 inner 20 | publica 0->1 | ref neg_limpio
+   PuyehueCordonCaulle  2026-10-12 02:20 far->summit d 22.6 -> 15.014 inner 20 | publica 0->1 | ref neg_limpio
+
+publicación que cambia (pasadas): 5   {('0->1', 'neg_limpio'): 5}
+noches de volcán cuya publicación cambia: 5 de 2644
+   PuyehueCordonCaulle 2026-03-01 publica 0->1 etiquetas ['neg_limpio']
+   PuyehueCordonCaulle 2026-03-14 publica 0->1 etiquetas ['neg_limpio']
+   PuyehueCordonCaulle 2026-05-03 publica 0->1 etiquetas ['neg_limpio']
+   PuyehueCordonCaulle 2026-06-22 publica 0->1 etiquetas ['neg_limpio', 'sin_info']
+   PuyehueCordonCaulle 2026-10-12 publica 0->1 etiquetas ['neg_limpio']
+
+records con el píxel a menos de 1 km de la geocerca (radius_km), no emulado: 6
+control de identidad: con la distancia guardada el emulador da la etiqueta guardada en 180 de 180 records «eruption»

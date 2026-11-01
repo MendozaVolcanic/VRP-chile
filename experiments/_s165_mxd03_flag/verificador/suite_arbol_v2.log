@@ -1,0 +1,32 @@
+inicio 17:45:06 HEAD 4164d4547bc0ae0ac17a1c159bab3423fa405911 basetemp D:
+tests/test_cobertura_incidencias_s159.py: 11 warnings
+tests/test_fetch_credential_dead_s123.py: 1 warning
+tests/test_fetch_noaa21.py: 3 warnings
+tests/test_rama_diurna_viirs_s151.py: 2 warnings
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\pipeline\fetch.py:810: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    ahora = ahora or datetime.utcnow()
+
+tests/test_cobertura_incidencias_s159.py::test_dia_en_curso_es_parcial[False-0]
+tests/test_cobertura_incidencias_s159.py::test_dia_en_curso_es_parcial[True-3]
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\tests\test_cobertura_incidencias_s159.py:100: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return datetime.utcnow().strftime("%Y-%m-%d")
+
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b22_usa_su_radiancia_medida
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b21_saturado_usa_la_radiancia_de_b21
+tests/test_lambda_por_banda_modis_s157.py::test_sin_flag_queda_el_defecto_de_hoy
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\pipeline\detection_context.py:765: RankWarning: Polyfit may be poorly conditioned
+    coeffs = np.polyfit(x, y, 2)  # [a, b, c]
+
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b22_usa_su_radiancia_medida
+tests/test_lambda_por_banda_modis_s157.py::test_con_flag_el_pixel_de_b21_saturado_usa_la_radiancia_de_b21
+tests/test_lambda_por_banda_modis_s157.py::test_sin_flag_queda_el_defecto_de_hoy
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\pipeline\detection_context.py:786: RankWarning: Polyfit may be poorly conditioned
+    coeffs = np.polyfit(x[inlier_idx], y[inlier_idx], 2)
+
+tests/test_oraculo_mirova_v750_s158.py: 10 warnings
+  D:\vrp-trabajo\temporales\s165_mxd03_verificador\arbol\experiments\_s158_oraculo_mirova\mirova_v750.py:61: DeprecationWarning: NumPy warning suppression and assertion utilities are deprecated. Use warnings.catch_warnings, warnings.filterwarnings, pytest.warns, or pytest.filterwarnings instead. (Deprecated NumPy 2.4)
+    with np.errstate(invalid="ignore"), np.testing.suppress_warnings() as sup:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+2678 passed, 29 skipped, 2 xfailed, 84 warnings in 394.88s (0:06:34)
+fin rc=0 17:51:44

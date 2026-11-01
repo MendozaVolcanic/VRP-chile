@@ -1,3 +1,8 @@
+# ⚠️ S158 R2 (docs/AUDIT_S158_R2.md, marca A113; experiments/_s158_audit_r2/a113/INFORME.md n 1): la premisa del docstring cae. MIROVA no reporta
+# regiones contiguas: en VIIRS 750 cuenta pixeles (npix = numel(alert)) y el VRP suma todos los alertados sin
+# agrupar (MIROVA_VIIRS750_VRP.m l. 61 y 83 a 85); en el OSF v2.5 el fondo por unidad de Npix es plano con el
+# tamano en los tres sensores (m02_osf_npix.txt). cluster_hotspots sirve para nuestro marcador, no es paridad
+# con un n_hotspots de MIROVA. Las aserciones no cambian.
 """S27 — TDD para cluster_hotspots: agrupacion de pixels detectados en clusters
 espacialmente contiguos al estilo MIROVA n_hotspots.
 

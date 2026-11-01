@@ -1,0 +1,33 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+== 1. H2a sobre las raíces reales de C0, sha del tag eb97779f4c0e
+   problemas 391 (con Test 1 220 archivos, con otro sha 171 archivos)
+      _s151_ab_diurno_control/Chaiten: 47 records con el Test 1
+      _s151_ab_diurno_control/Chaiten: 114 records con codigo_sha distinto del tag (o sin marca)
+      _s151_ab_diurno_control/Copahue: 41 records con el Test 1
+      _s151_ab_diurno_control/Copahue: 99 records con codigo_sha distinto del tag (o sin marca)
+   records en los JSON de los dos brazos de las 10 raíces: 27314
+   archivos con otro sha por raíz: {'W2a': 22, 'W2b': 22, 'W3a': 22, 'W3b': 22, 'W4a': 22, 'W4b': 22, 'W5a': 17, 'W5b': 22, 'W6a': 0, 'W6b': 0}
+   sobre W6a y W6b solos, archivos con otro sha: 0 (tienen que ser 0: salieron del tag)
+
+== 2. bordes de H2a (directorio temporal)
+   limpio: []
+   triggered_test1 = 1                -> LIMPIO (no lo ve)
+   triggered_test1 = 'true'           -> LIMPIO (no lo ve)
+   triggered_test1 = numpy-like 1.0   -> LIMPIO (no lo ve)
+   JSON con Test 1 en un subdirectorio del brazo -> LIMPIO (no lo ve; cargar_brazo tampoco lo lee)
+   JSON ajeno sin records en el brazo -> LIMPIO (se ignora)
+   JSON lista en el brazo -> se cae (AttributeError: 'list' object has no attribute 'get')
+   sha abreviado (12) contra records de 40 -> 2 problemas
+
+== 3. bordes de H2b
+   C0 con espacio               -> SE NIEGA (--brazos _s151_ab_diurno_control, _s151_ab_diurno_on sin --b)
+   C0 con tabulador             -> SE NIEGA (--brazos _s151_ab_diurno_control,	_s151_ab_diurno_on sin --b)
+   K sin --base                 -> SE NIEGA (--brazos _s154_ab_diurno_k_control,_s154_ab_diurno_k_on sin )
+   K con tabulador sin --base   -> SE NIEGA (--brazos _s154_ab_diurno_k_control,	_s154_ab_diurno_k_on sin)
+   K con --base c0 explícito    -> c0
+   C0 con --base k explícito    -> k
+   evaluar, K con tabulador -> SE NIEGA (--brazos _s154_ab_diurno_k_control,	_s154_ab_diurno_k_on sin --base: decir explí)
+== A/B DIURNO DE VIIRS (D-10) | raíces ['x']
+   predicado del tablero: frontend/index.html sha256 6af3325ac7f2cad932355f0b399954427ebe878244c0583700952a0ed4806083
+   evaluar(Namespace sin brazos, base k) -> AttributeError: 'Namespace' object has no attribute 'cons' | REGLA en ese momento {'cola_exacta': False, 'w2_decide_nicolas': False} | BRAZOS {'control': '_s151_ab_diurno_control', 'diurno': '_s151_ab_diurno_on'}
+   (antes de llamar: REGLA {'cola_exacta': False, 'w2_decide_nicolas': False})

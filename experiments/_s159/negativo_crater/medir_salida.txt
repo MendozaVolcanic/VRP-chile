@@ -1,0 +1,167 @@
+banco lee: D:\vrp-trabajo\temporales\s159_negcrater\data\mirova_equivalent
+P2: cadenas por largo (toda la historia, 11 Tier A, todos los sensores): {1: 68540, 2: 1714}
+P2: records con diag_n_bg_anillo None: 0 de 71968
+referencia: filas 45337 ultima fecha 2026-10-20 17:30:00
+
+=== §1 corte: tasa de alerta de MIROVA por tramo de f (cadenas de dos con UN solo granulo listado a +-120 s)
+Ventana 2026-01-10 a 2026-10-21, regla original, nocturnas. P1: si f no dijera donde esta el crater, la tasa seria plana en f.
+MODIS [0.0,0.2) 0/24 | [0.2,0.4) 0/21 | [0.4,0.5) 0/10 | [0.5,0.6) 1/18 | [0.6,0.8) 0/27 | [0.8,1.0) 0/30 | indet 0 | f de las alertas, ordenadas: [0.512] ...
+VIIRS375 [0.0,0.2) 0/58 | [0.2,0.4) 0/35 | [0.4,0.5) 0/21 | [0.5,0.6) 2/9 | [0.6,0.8) 8/27 | [0.8,1.0) 12/73 | indet 0 | f de las alertas, ordenadas: [0.537, 0.538, 0.631, 0.663, 0.664, 0.676, 0.701, 0.724] ...
+VIIRS750 [0.0,0.2) 0/48 | [0.2,0.4) 0/35 | [0.4,0.5) 0/20 | [0.5,0.6) 0/8 | [0.6,0.8) 1/23 | [0.8,1.0) 0/51 | indet 0 | f de las alertas, ordenadas: [0.76] ...
+P1 independiente (cumulo con VRP>0 a <3 km en un miembro de partida): f>=0,5 en {'MODIS': '2 de 2', 'VIIRS375': '73 de 76', 'VIIRS750': '11 de 12'}
+
+--- §2 ventana 2026-01-10 a 2026-10-21, regla D-9 original, todos los detectores
+sensor    neg viejo pub viejo      % | neg nuevo pub nuevo      % | salen pub que sale pub del compañero | motivos de los que salen
+MODIS          6156        48   0.78 |      6099        48   0.79 |    57            0                 2 | {'partida_sin_crater': 57}
+          quedan por motivo: {'solo': 6022, 'partida_con_crater': 77}
+            sale con publicacion: Lascar MODIS_TERRA 2026-05-05 01:25 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.32678454485920105
+            sale con publicacion: NevadosDeChillan MODIS_AQUA 2026-10-13 08:00 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.22984356197352587
+VIIRS375       4260       114   2.68 |      4176       113   2.71 |    84            1                 8 | {'partida_sin_crater': 84}
+          quedan por motivo: {'solo': 4113, 'partida_con_crater': 63}
+            sale con publicacion: Lastarria VIIRS_NOAA20 2026-09-22 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.4828165572017718
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-02-04 05:54 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.0
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-04-26 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.07046276899638164
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-05-12 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.07423036347942841
+            sale con publicacion: Villarrica VIIRS_NOAA20 2026-02-20 06:00 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.012870584058228298
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-03-14 05:48 pub_propio=1 pub_compañero=1 motivo=partida_sin_crater f=0.48579369981470044
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-04-26 05:42 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.2237139957848724
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-10-12 06:18 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.0
+VIIRS750       6819        60   0.88 |      6722        60   0.89 |    97            0                 4 | {'partida_sin_crater': 97}
+          quedan por motivo: {'solo': 6650, 'partida_con_crater': 72}
+            sale con publicacion: Lascar VIIRS_NOAA20_750 2026-01-20 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.3306810948440484
+            sale con publicacion: Lascar VIIRS_NOAA20_750 2026-03-10 05:18 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.37349397590361444
+            sale con publicacion: Lascar VIIRS_NOAA21_750 2026-09-03 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.02388535031847134
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20_750 2026-05-12 05:42 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.010331872260488416
+
+--- §2b sensibilidad, corte 0.4
+sensor    neg viejo pub viejo      % | neg nuevo pub nuevo      % | salen pub que sale pub del compañero | motivos de los que salen
+MODIS          6156        48   0.78 |      6109        48   0.79 |    47            0                 2 | {'partida_sin_crater': 47}
+          quedan por motivo: {'solo': 6022, 'partida_con_crater': 87}
+            sale con publicacion: Lascar MODIS_TERRA 2026-05-05 01:25 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.32678454485920105
+            sale con publicacion: NevadosDeChillan MODIS_AQUA 2026-10-13 08:00 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.22984356197352587
+VIIRS375       4260       114   2.68 |      4193       114   2.72 |    67            0                 6 | {'partida_sin_crater': 67}
+          quedan por motivo: {'solo': 4113, 'partida_con_crater': 80}
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-02-04 05:54 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.0
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-04-26 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.07046276899638164
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-05-12 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.07423036347942841
+            sale con publicacion: Villarrica VIIRS_NOAA20 2026-02-20 06:00 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.012870584058228298
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-04-26 05:42 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.2237139957848724
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-10-12 06:18 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.0
+VIIRS750       6819        60   0.88 |      6742        60   0.89 |    77            0                 4 | {'partida_sin_crater': 77}
+          quedan por motivo: {'solo': 6650, 'partida_con_crater': 92}
+            sale con publicacion: Lascar VIIRS_NOAA20_750 2026-01-20 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.3306810948440484
+            sale con publicacion: Lascar VIIRS_NOAA20_750 2026-03-10 05:18 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.37349397590361444
+            sale con publicacion: Lascar VIIRS_NOAA21_750 2026-09-03 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.02388535031847134
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20_750 2026-05-12 05:42 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.010331872260488416
+
+--- §2b sensibilidad, corte 0.6
+sensor    neg viejo pub viejo      % | neg nuevo pub nuevo      % | salen pub que sale pub del compañero | motivos de los que salen
+MODIS          6156        48   0.78 |      6082        48   0.79 |    74            0                 2 | {'partida_sin_crater': 74}
+          quedan por motivo: {'solo': 6022, 'partida_con_crater': 60}
+            sale con publicacion: Lascar MODIS_TERRA 2026-05-05 01:25 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.32678454485920105
+            sale con publicacion: NevadosDeChillan MODIS_AQUA 2026-10-13 08:00 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.22984356197352587
+VIIRS375       4260       114   2.68 |      4171       112   2.69 |    89            2                 8 | {'partida_sin_crater': 89}
+          quedan por motivo: {'solo': 4113, 'partida_con_crater': 58}
+            sale con publicacion: Lastarria VIIRS_NOAA20 2026-09-22 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.4828165572017718
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-02-04 05:54 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.0
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-04-26 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.07046276899638164
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-05-12 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.07423036347942841
+            sale con publicacion: Villarrica VIIRS_NOAA20 2026-02-20 06:00 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.012870584058228298
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-03-14 05:48 pub_propio=1 pub_compañero=1 motivo=partida_sin_crater f=0.48579369981470044
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-04-26 05:42 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.2237139957848724
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-10-12 06:18 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.0
+            sale con publicacion: Chaiten VIIRS_NOAA21 2026-08-12 06:06 pub_propio=1 pub_compañero=0 motivo=partida_sin_crater f=0.565132525169509
+VIIRS750       6819        60   0.88 |      6715        60   0.89 |   104            0                 4 | {'partida_sin_crater': 104}
+          quedan por motivo: {'solo': 6650, 'partida_con_crater': 65}
+            sale con publicacion: Lascar VIIRS_NOAA20_750 2026-01-20 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.3306810948440484
+            sale con publicacion: Lascar VIIRS_NOAA20_750 2026-03-10 05:18 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.37349397590361444
+            sale con publicacion: Lascar VIIRS_NOAA21_750 2026-09-03 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.02388535031847134
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20_750 2026-05-12 05:42 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.010331872260488416
+
+frontera K del tablero: 2025-02-15 | REGLA_MINIMAS del auto-audit: SN | INICIO_REGIMEN_FALSAS: 2026-09-01
+detectores en la ventana: {'K': 5716}
+
+--- §3 ventana del auto-audit 2026-09-01 a 2026-10-19, regla SN, detector K
+sensor    neg viejo pub viejo      % | neg nuevo pub nuevo      % | salen pub que sale pub del compañero | motivos de los que salen
+MODIS          1043        10   0.96 |      1027        10   0.97 |    16            0                 1 | {'partida_sin_crater': 16}
+          quedan por motivo: {'solo': 1011, 'partida_con_crater': 16}
+            sale con publicacion: NevadosDeChillan MODIS_AQUA 2026-10-13 08:00 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.22984356197352587
+VIIRS375        996        37   3.71 |       980        37   3.78 |    16            0                 2 | {'partida_sin_crater': 16}
+          quedan por motivo: {'solo': 965, 'partida_con_crater': 15}
+            sale con publicacion: Lastarria VIIRS_NOAA20 2026-09-22 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.4828165572017718
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-10-12 06:18 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.0
+VIIRS750       1511        13   0.86 |      1491        13   0.87 |    20            0                 1 | {'partida_sin_crater': 20}
+          quedan por motivo: {'solo': 1473, 'partida_con_crater': 18}
+            sale con publicacion: Lascar VIIRS_NOAA21_750 2026-09-03 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.02388535031847134
+detectores en la ventana: {'K': 5918}
+
+--- §3 ventana del auto-audit 2026-09-01 a 2026-10-21, regla SN, detector K
+sensor    neg viejo pub viejo      % | neg nuevo pub nuevo      % | salen pub que sale pub del compañero | motivos de los que salen
+MODIS          1043        10   0.96 |      1027        10   0.97 |    16            0                 1 | {'partida_sin_crater': 16}
+          quedan por motivo: {'solo': 1011, 'partida_con_crater': 16}
+            sale con publicacion: NevadosDeChillan MODIS_AQUA 2026-10-13 08:00 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.22984356197352587
+VIIRS375        996        37   3.71 |       980        37   3.78 |    16            0                 2 | {'partida_sin_crater': 16}
+          quedan por motivo: {'solo': 965, 'partida_con_crater': 15}
+            sale con publicacion: Lastarria VIIRS_NOAA20 2026-09-22 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.4828165572017718
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-10-12 06:18 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.0
+VIIRS750       1511        13   0.86 |      1491        13   0.87 |    20            0                 1 | {'partida_sin_crater': 20}
+          quedan por motivo: {'solo': 1473, 'partida_con_crater': 18}
+            sale con publicacion: Lascar VIIRS_NOAA21_750 2026-09-03 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.02388535031847134
+
+=== §4 frente N: negativos limpios V750 (sin 18 y 19 oct) 5476, K publica 54
+salen: 76 {'partida_sin_crater': 76} | quedan por motivo: {'solo': 5342, 'partida_con_crater': 58}
+K publica en los que salen: 0 | K negativos nuevos: 5400 publica 54
+censo F: cumbre_0mw 60 de ellos en pasadas que salen: [] | far 59 en las que salen: 0
+lote: negativos 197 | con pixeles de algun oraculo u O_pub: 34 | de ellos en pasadas que salen: []
+lote: negativos del lote en pasadas que salen: [('Llaima', '2026-09-25 06:36', 'neg_resto'), ('Chaiten', '2026-06-30 06:12', 'neg_resto')]
+control 3 Chaiten N-8: 2026-06-30 06:12 VIIRS_NOAA21_750 f = 0.22854077253218885 nbg 639 companero ('Chaiten', 'VIIRS_NOAA21_750', '2026-06-30 06:06') -> (False, 'partida_sin_crater')
+control 3 Chaiten N-8: 2026-05-15 04:24 VIIRS_SNPP_750 f = None nbg 10 companero None -> (True, 'solo')
+
+=== §5 controles
+tol 120: NevadosDeChillan MODIS_TERRA 2026-01-19 02:40 lab=sin_info nlc=None motivo=None pub=1 f=None filas MIROVA a ±120s: []
+tol 120: Isluga VIIRS_NOAA20 2026-02-04 05:54 lab=neg_limpio nlc=False motivo=partida_sin_crater pub=0 f=0.0 filas MIROVA a ±120s: ['05:54']
+tol 120: nulo, records solos en neg_limpio 16785, salen 0 (con tol 120 tienen que ser 0; con 390 salen sólo los que parean con el vecino)
+tol 390: NevadosDeChillan MODIS_TERRA 2026-01-19 02:40 lab=neg_limpio nlc=False motivo=vecino_que_no_tenemos pub=1 f=None filas MIROVA a ±390s: ['02:35']
+tol 390: Isluga VIIRS_NOAA20 2026-02-04 05:54 lab=neg_limpio nlc=False motivo=partida_sin_crater pub=0 f=0.0 filas MIROVA a ±390s: ['05:54']
+tol 390: nulo, records solos en neg_limpio 16814, salen 29 (con tol 120 tienen que ser 0; con 390 salen sólo los que parean con el vecino)
+
+--- §5b pareo ±390 s (incluye el granulo vecino), regla original
+sensor    neg viejo pub viejo      % | neg nuevo pub nuevo      % | salen pub que sale pub del compañero | motivos de los que salen
+MODIS          6302        52   0.83 |      6173        48   0.78 |   129            4                 2 | {'vecino_sin_crater': 54, 'partida_sin_crater': 57, 'vecino_que_no_tenemos': 18}
+          quedan por motivo: {'solo': 6022, 'vecino_con_crater': 74, 'partida_con_crater': 77}
+            sale con publicacion: Lascar MODIS_TERRA 2026-05-05 01:25 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.32678454485920105
+            sale con publicacion: Lascar MODIS_TERRA 2026-05-05 01:30 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.673215455140799
+            sale con publicacion: NevadosDeChillan MODIS_TERRA 2026-01-19 02:40 pub_propio=1 pub_compañero=None motivo=vecino_que_no_tenemos f=None
+            sale con publicacion: NevadosDeChillan MODIS_AQUA 2026-10-13 07:55 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.7701564380264742
+            sale con publicacion: NevadosDeChillan MODIS_AQUA 2026-10-13 08:00 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.22984356197352587
+            sale con publicacion: PuyehueCordonCaulle MODIS_AQUA 2026-06-26 07:40 pub_propio=1 pub_compañero=None motivo=vecino_que_no_tenemos f=None
+VIIRS375       4408       122   2.77 |      4239       113   2.67 |   169            9                 9 | {'vecino_sin_crater': 84, 'partida_sin_crater': 84, 'vecino_que_no_tenemos': 1}
+          quedan por motivo: {'solo': 4113, 'vecino_con_crater': 63, 'partida_con_crater': 63}
+            sale con publicacion: Lastarria VIIRS_NOAA20 2026-09-22 05:42 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.5171834427982281
+            sale con publicacion: Lastarria VIIRS_NOAA20 2026-09-22 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.4828165572017718
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-02-04 05:48 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=1.0
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-02-04 05:54 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.0
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-04-26 05:30 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.9295372310036184
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-04-26 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.07046276899638164
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-05-12 05:30 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.9257696365205716
+            sale con publicacion: Isluga VIIRS_NOAA20 2026-05-12 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.07423036347942841
+            sale con publicacion: Villarrica VIIRS_NOAA20 2026-02-20 05:54 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.9871294159417717
+            sale con publicacion: Villarrica VIIRS_NOAA20 2026-02-20 06:00 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.012870584058228298
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-03-14 05:42 pub_propio=1 pub_compañero=1 motivo=vecino_sin_crater f=0.5142063001852996
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-03-14 05:48 pub_propio=1 pub_compañero=1 motivo=partida_sin_crater f=0.48579369981470044
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-04-26 05:36 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.7762860042151276
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-04-26 05:42 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.2237139957848724
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-10-12 06:12 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=1.0
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20 2026-10-12 06:18 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.0
+VIIRS750       6998        64   0.91 |      6794        60   0.88 |   204            4                 4 | {'vecino_sin_crater': 97, 'partida_sin_crater': 97, 'vecino_que_no_tenemos': 10}
+          quedan por motivo: {'solo': 6650, 'vecino_con_crater': 72, 'partida_con_crater': 72}
+            sale con publicacion: Lascar VIIRS_NOAA20_750 2026-01-20 05:30 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.6693189051559516
+            sale con publicacion: Lascar VIIRS_NOAA20_750 2026-01-20 05:36 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.3306810948440484
+            sale con publicacion: Lascar VIIRS_NOAA20_750 2026-03-10 05:12 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.6265060240963856
+            sale con publicacion: Lascar VIIRS_NOAA20_750 2026-03-10 05:18 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.37349397590361444
+            sale con publicacion: Lascar VIIRS_NOAA21_750 2026-09-03 05:42 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.9761146496815286
+            sale con publicacion: Lascar VIIRS_NOAA21_750 2026-09-03 05:48 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.02388535031847134
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20_750 2026-05-12 05:36 pub_propio=1 pub_compañero=0 motivo=vecino_sin_crater f=0.9896681277395116
+            sale con publicacion: PuyehueCordonCaulle VIIRS_NOAA20_750 2026-05-12 05:42 pub_propio=0 pub_compañero=1 motivo=partida_sin_crater f=0.010331872260488416
+
+escrito medir_salida.json

@@ -1,0 +1,11 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+semilla de d′ 160 (SEMILLA + 3), repeticiones del evaluador 1000, tope 5 % por cola
+V2 VIIRS750|z<=40             n  64 | mitad de camino, determinista            | 200 rep: falsos MEJORA 10 (tope 10) OK, EMPEORA 4 | 1000 rep: falsos MEJORA 29 (tope 50) OK, EMPEORA 27
+V2 VIIRS750|z<=40             n  64 | mitad de camino, ruido 0,05 (gen. 205)   | 200 rep: falsos MEJORA 11 (tope 10) FALLA, EMPEORA 2 | 1000 rep: falsos MEJORA 31 (tope 50) OK, EMPEORA 25
+V1 VIIRS750|z<=40             n  29 | mitad de camino, determinista            | 200 rep: falsos MEJORA 4 (tope 10) OK, EMPEORA 3 | 1000 rep: falsos MEJORA 26 (tope 50) OK, EMPEORA 21
+V1 VIIRS750|z<=40             n  29 | mitad de camino, ruido 0,05 (gen. 205)   | 200 rep: falsos MEJORA 5 (tope 10) OK, EMPEORA 3 | 1000 rep: falsos MEJORA 25 (tope 50) OK, EMPEORA 22
+V2 VIIRS375|sin_kernel|z<=40  n 108 | mitad de camino, determinista            | 200 rep: falsos MEJORA 4 (tope 10) OK, EMPEORA 2 | 1000 rep: falsos MEJORA 28 (tope 50) OK, EMPEORA 29
+V2 VIIRS375|sin_kernel|z<=40  n 108 | mitad de camino, ruido 0,05 (gen. 205)   | 200 rep: falsos MEJORA 4 (tope 10) OK, EMPEORA 2 | 1000 rep: falsos MEJORA 25 (tope 50) OK, EMPEORA 31
+V1 VIIRS375|sin_kernel|z<=40  n 103 | mitad de camino, determinista            | 200 rep: falsos MEJORA 6 (tope 10) OK, EMPEORA 0 | 1000 rep: falsos MEJORA 20 (tope 50) OK, EMPEORA 22
+V1 VIIRS375|sin_kernel|z<=40  n 103 | mitad de camino, ruido 0,05 (gen. 205)   | 200 rep: falsos MEJORA 7 (tope 10) OK, EMPEORA 0 | 1000 rep: falsos MEJORA 21 (tope 50) OK, EMPEORA 22
+exit 0

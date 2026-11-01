@@ -1,0 +1,35 @@
+inner_radius_km (HTML del arbol): {'Lascar': 5.0, 'Lastarria': 3.0, 'Isluga': 5.0, 'Tupungatito': 7.0, 'PlanchonPeteroa': 3.0, 'NevadosDeChillan': 5.0, 'Llaima': 5.0, 'Villarrica': 5.0, 'Copahue': 4.0, 'PuyehueCordonCaulle': 20.0, 'Chaiten': 5.0}
+
+== 1. las dos publicaciones ==
+
+-- 1120 Llaima 2026-07-24 01:05 MODIS_TERRA z=62.94 estrato_z=z>40 partida=False peso=12.76
+   volcanoes.yaml: {'lat': -38.692, 'lon': -71.729, 'vent_lat': -38.692, 'vent_lon': -71.729, 'mirova_center': None, 'inner_radius_km': 5, 'radius_km': 25}
+   grilla centro: (-38.69255, -71.72974) epsg 32719 | dist centro grilla -> lat/lon yaml: 0.089 km; -> vent: 0.089 km
+   pixel fila 27 col 25 (centro 25,25) campos=[2, 2.0, 0.13665, 265.26] -> lat -38.7105 lon -71.7297; dist al centro de grilla 2.000 km; al crater (vent) 2.060 km; al lat/lon yaml 2.060 km; inner 5.0
+   dist_centroide (04_analizar): 2.0 | npix 1 vrp 0.43040338779385484 n_p1 1 n_p2 0 n_abs 0
+   noche: solar_zenith 128.29 dayflag 0 | sensor_zenith 63.03
+   otras variantes del port: {'fisica': 1, 'pixel': 1, 'sensible': 1, 'fisica_b21': 0, 'fisica_geo5km': 0}
+   K record (pc, dc, vrp): (None, None, 0)
+   MIROVA en la poblacion: [{'fecha_utc': '2026-07-24 01:05:00', 'tipo': 'RUTINA', 'vrp_mw': 0.0, 'dist_km': 0.0, 'source': 'CONS'}]
+
+-- 1251 Lascar 2026-05-11 07:55 MODIS_AQUA z=38.07 estrato_z=z<=40 partida=False peso=13.57
+   volcanoes.yaml: {'lat': -23.369, 'lon': -67.732, 'vent_lat': -23.36293, 'vent_lon': -67.731416, 'mirova_center': None, 'inner_radius_km': 5, 'radius_km': 25}
+   grilla centro: (-23.37058, -67.73061) epsg 32719 | dist centro grilla -> lat/lon yaml: 0.226 km; -> vent: 0.855 km
+   pixel fila 24 col 25 (centro 25,25) campos=[2, 1.0, 0.12054, 262.86] -> lat -23.3616 lon -67.7306; dist al centro de grilla 1.000 km; al crater (vent) 0.170 km; al lat/lon yaml 0.835 km; inner 5.0
+   dist_centroide (04_analizar): 1.0 | npix 1 vrp 0.296898301572907 n_p1 1 n_p2 0 n_abs 0
+   noche: solar_zenith 130.62 dayflag 0 | sensor_zenith 38.11
+   otras variantes del port: {'fisica': 1, 'pixel': 1, 'sensible': 1, 'fisica_b21': 0, 'fisica_geo5km': 0}
+   K record (pc, dc, vrp): (None, None, 0)
+   MIROVA en la poblacion: [{'fecha_utc': '2026-05-11 07:55:00', 'tipo': 'RUTINA', 'vrp_mw': 0.0, 'dist_km': 0.0, 'source': 'CONS'}]
+
+== 2. neg_resto evaluables con npix > 0 (cualquier variante) ==
+neg_resto evaluables: 390
+con npix>0 por variante: {'sensible': 7, 'fisica_b21': 2, 'fisica': 2, 'pixel': 2, 'fisica_geo5km': 2}
+  fisica npix>0: 1120 Llaima 2026-07-24 01:05 npix 1 vrp 0.430 dcen 2.000 inner 5.0 clase summit
+  fisica npix>0: 1251 Lascar 2026-05-11 07:55 npix 1 vrp 0.297 dcen 1.000 inner 5.0 clase summit
+
+== 3. predicado: HTML del arbol (0e18e1053) vs HTML de origin/main de hoy, sobre 806 casos ==
+casos con publicacion distinta entre los dos HTML: 0 []
+  HTML arbol: x port en neg_resto = 2 de 390; port publica en protegidas 11 de 11; K publica en protegidas 9 de 11 (pub_prod declarado 9); K publica en neg_resto 0
+  HTML main: x port en neg_resto = 2 de 390; port publica en protegidas 11 de 11; K publica en protegidas 9 de 11 (pub_prod declarado 9); K publica en neg_resto 0
+detalle de las dos publicaciones (summit, valid, art, disp, publica): {1120: ([1, 1, 0, 0.4304, 1], [1, 1, 0, 0.4304, 1]), 1251: ([1, 1, 0, 0.2969, 1], [1, 1, 0, 0.2969, 1])}
