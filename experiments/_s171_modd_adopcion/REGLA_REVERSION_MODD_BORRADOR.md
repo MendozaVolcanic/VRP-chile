@@ -29,8 +29,9 @@ el corte de 5 km aplica (`pipeline/mirova_v750_codigo.py:805-808`, main `478d9c0
 
 ## 2. Qué se enciende
 
-`ENABLE_MODIS_CODIGO_MIROVA: true` en `pipeline/profiles/mirova_equivalent.yaml` (clave y sección exactas: **A
-COMPLETAR** leyendo `pipeline.profile`, nunca el YAML a ojo, A89). Los tres flags de MxD03 quedan como están (se
+`enable_modis_codigo_mirova: true` bajo `thresholds:` de `pipeline/profiles/mirova_equivalent.yaml`. Fuente: S172,
+`pipeline/profile.py:909` (`ENABLE_MODIS_CODIGO_MIROVA = bool(_t.get("enable_modis_codigo_mirova", False))`, con
+`_t = _cfg["thresholds"]`, l. 79); falta comprobarlo importando `pipeline.profile` antes de sellar (A89). Los tres flags de MxD03 quedan como están (se
 deciden aparte, programa §12.3 punto 4). VIIRS 375 y VIIRS 750 de producción no cambian.
 
 ## 3. La guardia: K de MODIS corriendo aparte
@@ -40,7 +41,24 @@ correr MODIS con K (vía de MODIS apagada en ese perfil) desde el mismo commit d
 queda como K y producción como la vía, con el mismo workflow, la misma ventana y los mismos gránulos. Por qué no
 contamina VIIRS: los lectores de sombra comparan sólo lo que lee su vía (regla B7 del verificador del lector de
 VIIRS 375, programa §12.6); **comprobar en el lector sellado `s170-v375e-lector` que un cambio en las claves de MODIS
-no marca régimen nuevo en VIIRS 375** antes de elegir esta opción. Alternativa: un perfil de guardia nuevo, aislado
+no marca régimen nuevo en VIIRS 375** antes de elegir esta opción.
+
+**Resultado de S172 (lectura estática del lector en el tag, no corrido): SÍ lo marca, y la opción preferida no es
+gratis.** (1) Control S0: el lector exige el sha256 de `pipeline/profile.py`, `pipeline/store.py`,
+`pipeline/profiles/mirova_equivalent.yaml` y `frontend/index.html` iguales a los del sello (`SHA_SELLO_LECTOR`, l. 63 a
+77); el PR de encendido cambia el YAML de producción y la marca de `index.html` (§5), así que S0 cae y el lector no
+lee. (2) Control S8: cualquier cambio de código bajo `pipeline/` (por AST) o de los dos perfiles
+(`PERFILES_REGIMEN`, `viejo != nuevo`) cuenta como régimen nuevo, y un CUMPLE de (b), (c) o (d) pasa a DECIDE NICOLAS.
+(3) La sombra ya corre las tres vías en un solo perfil (`enable_modis_codigo_mirova: true`, `sombra_codigo_mirova.yaml`),
+así que dejar a MODIS en K ahí también edita ese perfil. Consecuencia: el encendido de MODIS exige re-sellar el lector
+de V375-E (nueva lista de sha256 y base de régimen) con su verificador limpio, o aceptar que la ventana P de VIIRS 375
+quede en DECIDE NICOLAS por régimen. **Decisión de Nicolás, 2026-11-01 (S172): re-sellar el lector de V375-E.** Orden, porque los sha256 dependen del PR
+final: (1) el PR de encendido de MODIS queda con su contenido definitivo (YAML, `profile.py` si cambia, marca de
+`index.html`, perfil de la sombra); (2) con ese commit se calcula la lista nueva de `SHA_SELLO_LECTOR` y la base de
+régimen S8, sin abrir datos de la ventana P; (3) verificador limpio de otro modelo sobre el lector re-sellado
+(batería y nulo como en `s170-v375e-lector`); (4) tag nuevo y frase de sello de Nicolás; (5) recién ahí el merge de
+MODIS (A45). La ventana P de VIIRS 375 empieza el 2026-11-03: si el re-sellado no llega antes, esa noche queda
+informada con el lector actual y el encendido de MODIS espera. Alternativa: un perfil de guardia nuevo, aislado
 (`data_subdir` propio, A47), sumado al workflow de la sombra; cuesta tiempo de runner (pre-mortem 171-03: el paso
 tiene 75 min).
 
@@ -56,10 +74,14 @@ La excepción al congelamiento de `pipeline/` (§12.6) se anota en la bitácora 
   Se ejecuta con `git revert` del PR de encendido (nunca un reset), la hace la sesión que la detecte, abre un issue y
   avisa a Nicolás el mismo día. MODIS no tiene canal de Suomi NPP, así que N-3 no aplica.
 - **Investigación, sin reversión automática:** (i) alertas Muy Bajo (sobre 0,05 MW y bajo 1 MW) que MIROVA publica,
-  la guardia publica y producción calla, con cota de pérdida esperada **A COMPLETAR** desde el A/B de MOD-D
-  (`experiments/_s166_modd_f4/` y `experiments/_s168/modd_f4_candado/lectura_ab2/resultado_f4.json` en la rama
-  `claude/s170-modd-f4-procedencia`); (ii) publicación de MODIS en negativos limpios por sobre lo que midió el A/B
-  (cota **A COMPLETAR** desde el mismo resultado); (iii) pasadas que la guardia registra y producción no (el descarte
+  la guardia publica y producción calla, con cota de pérdida esperada de **2 en toda la ventana del A/B** (marzo a octubre de 2026): en
+  `brazos.V.p2.discordantes` de `resultado_f4.json` (rama `claude/s170-modd-f4-procedencia`, sha256 de la copia leída
+  `312e2050...4129d`) los discordantes de clase `bajo1` son 12, 10 a favor de la vía y 2 a favor de K. El denominador
+  (cuántas pasadas `bajo1` hay en total) NO se extrajo en S172: SIN DATO. Propuesta, la fija Nicolás: investigar si en
+  los primeros 120 días aparecen más de 2; (ii) publicación de MODIS en negativos limpios por sobre lo que midió el A/B: de 42 discordantes `neg_limpio`, la
+  vía publica menos que K en 39 y más en 3 (mismo archivo), así que la cota es **3 sobre-publicaciones en la ventana**
+  y neto -44 con las dos clases juntas (`p2.neto`, `B` 53, p_gana [1, 10001]); propuesta, la fija Nicolás: investigar
+  si en 120 días hay más de 3; (iii) pasadas que la guardia registra y producción no (el descarte
   de 171-01), contadas por semana.
 - **Pasadas juzgadas y rachas:** como (d) y (f) de K, en un `sombra_pasadas_juzgadas_modis.json` junto a esta regla.
 - **Duración:** hasta ver **29 protegidas A nocturnas de MODIS** en la guardia o 120 días, lo que ocurra primero
@@ -71,8 +93,10 @@ La excepción al congelamiento de `pipeline/` (§12.6) se anota en la bitácora 
 ## 5. Lista del PR de encendido (sobre el modelo del paso 8 de K)
 
 - el flag, con un guard que lo fije;
-- los tests que hoy fijan el flag apagado, actualizados diciendo por qué (**A COMPLETAR** con `grep -rn
-  ENABLE_MODIS_CODIGO_MIROVA tests/`);
+- los tests que hoy fijan el flag apagado, actualizados diciendo por qué. `grep` de S172: `tests/test_mirova_modis_codigo_s164.py`
+  l. 54 a 81 fijan `False` (subproceso con `pipeline.profile` y aserción sobre el texto de `profile.py`; l. 321 a 426 lo
+  fuerzan con monkeypatch y no dependen del perfil) y `tests/test_guard_declarado_vs_efectivo_s131.py` l. 158 cita el
+  import sólo en un comentario de líneas; revisar además `tests/test_guard_perfiles_congelados_s153.py`;
 - el cambio de la guardia (§3) y su prueba;
 - el auto-audit: decidir en el PR si las bandas de MODIS se recalibran o se acepta que salten, antes de ver el issue;
 - la ficha `docs/FICHA_SDA_VRP_CHILE.md` (cambia el detector de MODIS de un SDA en producción) y las marcas A113 donde
