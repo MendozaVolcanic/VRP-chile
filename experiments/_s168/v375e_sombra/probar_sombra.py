@@ -500,6 +500,62 @@ def main(argv=None):
         chk("S8 (VL169-03): un .py nuevo en pipeline/ marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb3, mostrar=mo3)
             == ["pipeline/nuevo.py"])
 
+        # S172 (re-sellado por claves, decisión de Nicolás del 2026-11-01): los perfiles se comparan sin las claves de
+        # thresholds que lee sólo el procesador de MODIS o el de VIIRS 750 (CLAVES_PERFIL_OTRO_SENSOR)
+        chk("S8 (S172): la lista de claves de otro sensor es la cerrada",
+            getattr(LS, "CLAVES_PERFIL_OTRO_SENSOR", None) == ("enable_modis_codigo_mirova", "enable_v750_codigo_mirova",
+                                             "enable_modis_geo_mxd03", "enable_modis_crater_sin_dato",
+                                             "enable_modis_dist_desde_crater"), getattr(LS, "CLAVES_PERFIL_OTRO_SENSOR", None))
+        me0 = ("extends: x\nthresholds:\n  anomaly_threshold_k: 4.0\n  enable_v375_codigo_mirova: false\n"
+               "sensors:\n  modis: true\noutput:\n  data_subdir: mirova_equivalent\nenable_modis_b22_primary: true\n")
+        so0 = ("extends: mirova_equivalent\nthresholds:\n  enable_v750_codigo_mirova: true\n"
+               "  enable_v375_codigo_mirova: true\n  enable_modis_codigo_mirova: true\noutput:\n"
+               "  data_subdir: sombra_codigo_mirova\n")
+        ME, SO = "pipeline/profiles/mirova_equivalent.yaml", "pipeline/profiles/sombra_codigo_mirova.yaml"
+        no_marcan = (
+            ("encender la vía de MODIS en producción (clave nueva en thresholds)", ME,
+             me0.replace("  anomaly_threshold_k: 4.0\n", "  anomaly_threshold_k: 4.0\n  enable_modis_codigo_mirova: true\n")),
+            ("apagar la vía de MODIS en la sombra (guardia K)", SO,
+             so0.replace("enable_modis_codigo_mirova: true", "enable_modis_codigo_mirova: false")),
+            ("quitar la clave de MODIS de la sombra", SO, so0.replace("  enable_modis_codigo_mirova: true\n", "")),
+            ("apagar la vía de VIIRS 750 en la sombra", SO,
+             so0.replace("enable_v750_codigo_mirova: true", "enable_v750_codigo_mirova: false")),
+            ("encender los tres flags de MxD03 en producción", ME,
+             me0.replace("  anomaly_threshold_k: 4.0\n", "  anomaly_threshold_k: 4.0\n  enable_modis_geo_mxd03: true\n"
+                         "  enable_modis_crater_sin_dato: true\n  enable_modis_dist_desde_crater: true\n")),
+            ("sólo un comentario nuevo en un perfil", ME, "# comentario\n" + me0),
+        )
+        for nom, ruta, nuevo in no_marcan:
+            viejo = me0 if ruta == ME else so0
+            nb4, mo4 = fake({ruta: (viejo, nuevo)})
+            chk(f"S8 (S172): {nom} no marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb4, mostrar=mo4) == [],
+                LS.diff_git(COMMIT, "f" * 40, nombres=nb4, mostrar=mo4))
+        marcan = (
+            ("apagar la vía de VIIRS 375 en la sombra", SO,
+             so0.replace("enable_v375_codigo_mirova: true", "enable_v375_codigo_mirova: false")),
+            ("encender la vía de VIIRS 375 en producción", ME,
+             me0.replace("enable_v375_codigo_mirova: false", "enable_v375_codigo_mirova: true")),
+            ("otro umbral en thresholds", ME, me0.replace("anomaly_threshold_k: 4.0", "anomaly_threshold_k: 4.5")),
+            ("la clave de MODIS fuera de thresholds (en la raíz)", ME, me0 + "enable_modis_codigo_mirova: true\n"),
+            ("la clave de MODIS en otra sección", SO, so0.replace("output:\n", "output:\n  enable_modis_codigo_mirova: true\n")),
+            ("una clave de MODIS que no está en la lista", ME,
+             me0.replace("enable_modis_b22_primary: true", "enable_modis_b22_primary: false")),
+            ("un sensor apagado", ME, me0.replace("  modis: true", "  modis: false")),
+            ("la carpeta de salida", SO, so0.replace("data_subdir: sombra_codigo_mirova", "data_subdir: otra")),
+            ("un perfil ilegible", ME, "thresholds: [: :\n"),
+            ("un perfil que deja de existir", ME, None),
+        )
+        for nom, ruta, nuevo in marcan:
+            viejo = me0 if ruta == ME else so0
+            nb5, mo5 = fake({ruta: (viejo, nuevo)})
+            chk(f"S8 (S172): {nom} marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb5, mostrar=mo5) == [ruta],
+                LS.diff_git(COMMIT, "f" * 40, nombres=nb5, mostrar=mo5))
+        nb6, mo6 = fake({ME: (None, me0)})
+        chk("S8 (S172): un perfil que aparece marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb6, mostrar=mo6) == [ME])
+        nb7, mo7 = fake({"pipeline/profiles/experimental.yaml": ("a: 1\n", "thresholds: [: :\n")})
+        chk("S8 (S172): un perfil ajeno sigue sin marcar aunque quede ilegible",
+            LS.diff_git(COMMIT, "f" * 40, nombres=nb7, mostrar=mo7) == [])
+
     # ---- analizar: VA168-01, con un control caído no sale nada de la población
     with seccion("analizar: VA168-01, con un control caído no sale nada de la población"):
         res_f, fal_f = LS.analizar(pob, via, kfull, inner, publicar, deps, "2026-11-02", "2026-11-20", commit=COMMIT,

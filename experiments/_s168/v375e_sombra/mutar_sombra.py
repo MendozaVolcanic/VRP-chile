@@ -173,7 +173,7 @@ MUTACIONES = [
     ("R04", 'RUTAS_REGIMEN = ("pipeline/", "volcanoes.yaml", ', 'RUTAS_REGIMEN = ("pipeline/", '),
     ("R05", 'return ast_sin_docstrings(viejo) != ast_sin_docstrings(nuevo)', 'return viejo != nuevo'),
     ("R06", 'nodo.body = nodo.body[1:] or [ast.Pass()]', 'nodo.body = nodo.body'),
-    ("R07", 'return ruta in PERFILES_REGIMEN and viejo != nuevo', 'return viejo != nuevo'),
+    # R07 ('return ruta in PERFILES_REGIMEN and viejo != nuevo'): su línea ya no existe desde S172; la reemplaza S05
     ("R08", '                v.pop(k, None)\n', '                pass\n'),
     ("R09", 'return grillas_sin_roi(viejo) != grillas_sin_roi(nuevo)', 'return False'),
     ("R10", 'ilegible: falla cerrada\n            return True', 'ilegible: falla cerrada\n            return False'),
@@ -197,6 +197,15 @@ MUTACIONES = [
     # ---- S169 ronda 3 (VL2-04): la lectura que decide va sólo a archivo
     ("R28", '        PANTALLA[0] = False\n', '        pass\n'),
     ("R23", '^{{commit}}")[0] != 0:\n        return None\n    return leer_registro', '^{{commit}}")[0] != 0:\n        return []\n    return leer_registro'),
+    # ---- S172 re-sellado por claves (decisión de Nicolás del 2026-11-01; PREREGISTRO_E.md §11.14)
+    ("S01", '            t.pop(k, None)\n', '            pass\n'),
+    ("S02", 'return perfil_sin_otro_sensor(viejo) != perfil_sin_otro_sensor(nuevo)', 'return viejo != nuevo'),
+    ("S03", 'perfil que no se lee: falla cerrada\n            return True', 'perfil que no se lee: falla cerrada\n            return False'),
+    ("S04", 'if None in (viejo, nuevo):\n            return True', 'if None in (viejo, nuevo):\n            return False'),
+    ("S05", 'if ruta not in PERFILES_REGIMEN:\n            return False', 'if False:\n            return False'),
+    ("S06", 't = d.get("thresholds") if isinstance(d, dict) else None', 't = d if isinstance(d, dict) else None'),
+    ("S07", '"enable_modis_dist_desde_crater")', '"enable_modis_dist_desde_crater", "enable_v375_codigo_mirova")'),
+    ("S08", '"enable_modis_geo_mxd03", ', ''),
 ]
 # VL169-10: equivalentes declaradas ANTES de correr (sobrevivir no las hace sospechosas)
 EQUIVALENTES = {
@@ -217,7 +226,7 @@ def preparar(d, mut=None):
         (d / LS).write_text(src.replace(viejo, nuevo), encoding="utf-8")
 
 
-RAMA = "claude/s169-v375e-lector"
+RAMA = "claude/s172-v375e-relector"   # S172: el re-sellado por claves corre desde su propia rama (antes s169-v375e-lector)
 TOPE_S = 5400          # ronda 3 (VL2-01): una corrida de la batería que pase de aquí es CAIDA, no hunde el nulo
 
 

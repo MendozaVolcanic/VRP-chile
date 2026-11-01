@@ -1151,3 +1151,41 @@ mutación que no esté declarada equivalente; 1 si sobrevive alguna; 2 si abort�
 **Cifras de la ronda 3** (las vigentes): batería **230 de 230** sobre el árbol final; nulo **139 mutaciones** (más la
 identidad y los dos controles), **sin correr**; su arranque (`--arranque`) pasó: identidad PASA y los dos controles
 CAIDA. R28 (la lectura por pantalla) se vio en rojo (`ver_en_rojo.py`, grupo L).
+
+### 11.14 Re-sellado del lector por claves (S172, 2026-11-01)
+
+**Decisión de Nicolás** (chat de la coordinadora S172, 2026-11-01, después de las 21:03 UTC), ante «¿Re-sello el lector de V375-E con
+la comparación por claves en vez de archivo entero?»: «Sí, por claves». Origen: Nicolás decidió el 2026-10-31 adelantar
+el encendido de la vía «código MIROVA» en MODIS (borrador de su regla en `loop/activo`,
+`experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md`), y ese encendido agrega
+`enable_modis_codigo_mirova: true` a `thresholds:` de `pipeline/profiles/mirova_equivalent.yaml`. Con el S8 de la ronda
+2 (`viejo != nuevo` sobre el texto del perfil) eso marcaba régimen nuevo en la ventana P de VIIRS 375 aunque ni la vía ni
+la K de VIIRS 375 cambien, y llevaba sus CUMPLE a DECIDE NICOLÁS.
+
+**Qué cambia (sólo el S8, sólo los perfiles).** `cambio_significativo` compara los dos perfiles de `PERFILES_REGIMEN`
+como YAML leído y sin las claves de `thresholds:` de `CLAVES_PERFIL_OTRO_SENSOR`: `enable_modis_codigo_mirova`,
+`enable_v750_codigo_mirova`, `enable_modis_geo_mxd03`, `enable_modis_crater_sin_dato` y
+`enable_modis_dist_desde_crater`. Es lo mismo que la ronda 2 ya hacía con `roi_v750` y `roi_modis` en la grilla
+(`grillas_sin_roi`). Consumidores comprobados con `git grep` de la clave y de su constante en `origin/main` `ffccf6c9f`:
+`ENABLE_MODIS_CODIGO_MIROVA` y los tres de MxD03 sólo en `pipeline/process_modis.py`; `ENABLE_V750_CODIGO_MIROVA` sólo en
+`pipeline/process_viirs_mod.py`; en `profile.py` se leen de `_t = _cfg["thresholds"]`.
+
+**Falla cerrada, como antes:** marca si un perfil aparece, desaparece o no se puede leer; si una de esas claves aparece
+en otra sección (la raíz, `output:`), porque ahí `profile.py` no la lee y un cambio de ese tipo pide ojos (A89); y ante
+cualquier otra clave, incluidas las de MODIS que no están en la lista (`enable_modis_b22_primary`, en la raíz). Lo que
+deja de marcar, además de esas cinco claves: un comentario en los dos perfiles (antes marcaba; VL2-05 lo aceptaba como
+riesgo de marcar de más).
+
+**Tensión con VL2-05, declarada.** La ronda 3 dejó el afinado por clave como riesgo aceptado por el hueco de A89 (una
+clave que se lee con otro nombre o de otra sección). Se cubre con tres cosas: las claves se quitan sólo de la sección
+donde se leen; la lista es cerrada y una prueba la fija; y las mutaciones S06 (quitar de la raíz) y S07 (agregar la de
+VIIRS 375) tienen que salir atrapadas.
+
+**Lo que no cambia.** El S0 (los sha256 se calculan sobre el checkout del lector, no sobre `main`; los 16 archivos del
+sello coinciden en el checkout del tag `s170-v375e-lector`), las rutas de `RUTAS_REGIMEN` (el workflow de la sombra sigue
+comparándose como texto: una guardia que edite su aserción de la l. 110 marca régimen, y por eso la regla de MODIS
+recomienda la guardia en un perfil y un workflow nuevos), la ventana P, la parada y todo lo demás.
+
+**Pruebas.** 25 casos nuevos en `probar_sombra.py` (sección de controles, «S8 (S172)»), en verde y en rojo. Mutaciones
+nuevas S01 a S08 en `mutar_sombra.py`; R07 se retira porque su línea ya no existe (la reemplaza S05). `RAMA` del nulo pasa
+a `claude/s172-v375e-relector`. Cifras, verificador y sello: abajo, cuando existan.

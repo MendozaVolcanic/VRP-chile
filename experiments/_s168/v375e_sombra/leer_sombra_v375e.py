@@ -96,6 +96,13 @@ RUTAS_REGIMEN = ("pipeline/", "volcanoes.yaml", "scripts/run_pipeline.py", ".git
 PERFILES_REGIMEN = ("pipeline/profiles/mirova_equivalent.yaml", "pipeline/profiles/sombra_codigo_mirova.yaml")
 GRILLAS = "pipeline/grillas_mirova.yaml"
 CLAVES_ROI_IGNORADAS = ("roi_v750", "roi_modis")   # la vía de VIIRS 375 arma su caja con roi1_half_m
+# S172 (re-sellado por claves, decisión de Nicolás del 2026-11-01; PREREGISTRO_E.md §11.14): claves de `thresholds:`
+# que lee sólo el procesador de MODIS (process_modis.py) o el de VIIRS 750 (process_viirs_mod.py), según git grep de la
+# clave y de su constante en origin/main ffccf6c9f (2026-11-01). Se quitan sólo de `thresholds:`, que es donde las lee
+# profile.py (`_t = _cfg["thresholds"]`); en otra sección cuentan como cambio (A89, falla cerrada).
+CLAVES_PERFIL_OTRO_SENSOR = ("enable_modis_codigo_mirova", "enable_v750_codigo_mirova",
+                             "enable_modis_geo_mxd03", "enable_modis_crater_sin_dato",
+                             "enable_modis_dist_desde_crater")
 # §11.8 (ronda 2, VL169-01): una sola lectura por ventana
 REGISTRO = AQUI / "lecturas" / "REGISTRO_VENTANA_P.jsonl"
 REF_REGISTRO = "origin/loop/activo"
@@ -398,10 +405,30 @@ def grillas_sin_roi(texto):
     return d
 
 
+def perfil_sin_otro_sensor(texto):
+    """Un perfil leído, sin las claves de `thresholds:` que lee sólo otro sensor (CLAVES_PERFIL_OTRO_SENSOR, S172). Un
+    comentario no cambia esto, igual que un docstring no cambia el AST de un .py."""
+    import yaml
+    d = copy.deepcopy(yaml.safe_load(texto))
+    t = d.get("thresholds") if isinstance(d, dict) else None
+    if isinstance(t, dict):
+        for k in CLAVES_PERFIL_OTRO_SENSOR:
+            t.pop(k, None)
+    return d
+
+
 def cambio_significativo(ruta, viejo, nuevo):
-    """§11.4 S8 (ronda 2): si el cambio de un archivo entre la base y un sha cuenta como cambio de régimen."""
+    """§11.4 S8 (ronda 2; perfiles por claves desde S172, §11.14): si el cambio de un archivo entre la base y un sha
+    cuenta como cambio de régimen."""
     if ruta.startswith("pipeline/profiles/"):
-        return ruta in PERFILES_REGIMEN and viejo != nuevo
+        if ruta not in PERFILES_REGIMEN:
+            return False
+        if None in (viejo, nuevo):
+            return True
+        try:
+            return perfil_sin_otro_sensor(viejo) != perfil_sin_otro_sensor(nuevo)
+        except Exception:      # noqa: BLE001  perfil que no se lee: falla cerrada
+            return True
     if viejo is None or nuevo is None:
         return True
     if ruta.endswith(".py"):
