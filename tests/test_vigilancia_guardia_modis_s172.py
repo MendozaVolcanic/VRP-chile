@@ -352,10 +352,13 @@ def test_el_workflow_escucha_a_la_guardia_y_abre_issues_con_su_prefijo():
 
 
 def test_no_modifica_la_vigilancia_de_k():
-    """vigilancia_sombra.py y su workflow vigilan K y están en plazo: el script nuevo los importa, no los cambia."""
+    """vigilancia_sombra.py y su workflow vigilan K y están en plazo: el script nuevo los importa, no los cambia.
+    S172 ronda 2 (PR B, mini auditoría MA172-101): el PR B sí cambia vigilancia_sombra.py, a propósito y en lo mínimo
+    (deja de contar como K los records MODIS de la vía; tests/test_vigilancia_sombra_via_modis_s172.py). El workflow
+    de esa vigilancia sigue sin tocar."""
     import subprocess
     r = subprocess.run(["git", "diff", "--name-only", "pre-s171-adopcion-modd", "HEAD", "--",
-                        "scripts/vigilancia_sombra.py", ".github/workflows/vigilancia-sombra.yml"],
+                        ".github/workflows/vigilancia-sombra.yml"],
                        cwd=ROOT, capture_output=True, text=True)
     if r.returncode != 0:
         pytest.skip("sin el tag pre-s171-adopcion-modd en este checkout")
