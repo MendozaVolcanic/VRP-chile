@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 ~17:00 UTC (S173): #935 verificado y corregido, CI verde; verificador de regla ronda 3 y B corriendo
+- Verificador Fable de #935: MERGEABLE CON CAMBIOS (V935-01 gravedad 3: el lacolito de PCC en la grilla de Antillanca no
+  se marcaba con 4 km desde el cráter). Aplicado en `b0b7374bb`: radio = max(4 km, `inner_radius_km` del vecino),
+  desde cráter y punto nominal; V935-04 y 05 también. Mutaciones: radio fijo 4 tumba 2 pruebas, round tumba 1. CI
+  `pytest` verde (6m8s), CLEAN. El arreglo no pasó por otro verificador (es el cambio exacto que el verificador propuso).
+- PR B (`claude/s173-modd-flip`, punta `8c89552cf`): implementador declaró esfuerzo BAJO; 3052 pasan. Verificador Fable
+  de regla ronda 3 + B (`verificador_vb3.txt`, sha256 `9ee5fd6c`) en curso; mide además la tasa de `ERROR processing`
+  de MODIS en el NRT de 30 días, que decide cuántas veces el paso nuevo pondría rojo el NRT con K.
+
 ### 2026-11-02 15:59 UTC (S173): PR #935 abierto; su verificador limpio (Fable) corriendo; Suomi NPP sigue entregando
 - PR #935 (decisiones 3 y 4, punta `630424d60`): el implementador declaró esfuerzo BAJO; suite 3041 pasan, 0 fallas;
   13 vecinos de `experiments/_s172_sombra34/vecinos.yaml`; fuera del sitio `data/sombra_34`, `data/sombra_codigo_mirova`,
