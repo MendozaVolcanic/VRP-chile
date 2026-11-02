@@ -569,6 +569,25 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 00:03 UTC (S172): verificador del re-sellado SELLABLE CON CAMBIOS; Chillán en verificación; diurno espera
+- **Re-sellado de V375-E**, verificador limpio (Sonnet, alto; `D:/vrp-trabajo/temporales/ver_s172_relector/informe.md`):
+  SELLABLE CON CAMBIOS. A1 a A4 CONFIRMADO con git real y perfiles de main `d3cd0b2ae` (encender MODIS con guardia en
+  perfil y workflow nuevos no marca; editar la l. 110 del workflow de la sombra sí). A5 en parte: VR172-01 (G3) ninguna
+  prueba fija que cambiar `extends:` marque (su mutante X3 sobrevive); VR172-05 la batería sumó 19 casos, no 25 (y la base
+  era 233, no 230); VR172-02 (G2) un flag MxD03 encendido en producción llega a la sombra por herencia, tumba la aserción
+  de la l. 110 y no marca. Cambios: prueba y mutación S09 de `extends`, cifras de §11.14 y declarar VR172-02 en §11.14.
+  **Se aplican cuando termine el nulo en curso** (A112: el nulo copia el lector en cada mutación). VR172-04 (SOSPECHA,
+  tiempo del job del NRT compartido entre sensores) pasa a la mini auditoría del PR de MODIS.
+- **Chillán** (`D:/vrp-trabajo/temporales/s172_chillan/INFORME.md`): la razón contra MIROVA cae con el cenit en los tres
+  sensores y las tres vías la llevan cerca de 1 en lo retrospectivo; la curva ya estaba en S154 y la tarea 1.14 la dejó
+  SIN ATRIBUIR (D25 o D17). Verificador limpio en curso. Nada se afirma a Nicolás como hecho antes de su veredicto.
+- **A/B diurno sobre K** (#813): seis ventanas, lector y verificador hechos (`experiments/_s167/diurno_w2_w6/`); la regla
+  da DECIDE NICOLÁS. Recomendación de S172: decidir después de la ROI de V750-B y de C13 (4 de las 6 falsas diurnas son
+  de PCC dentro de su radio de 20 km). La tarea 1.32 de §4 está desactualizada.
+- **VIIRS 750** (sesión hija): ningún lector de V750-B, V750-A ni su sombra cambia con el encendido de MODIS; avisó que
+  `experimental.yaml` hereda de producción y heredaría la vía: pasado al implementador del PR B (fijar el flag en los
+  perfiles vivos que heredan, con prueba).
+
 ### 2026-11-01 23:37 UTC (S172): PR de MODIS en preparación, tag puesto; lector re-sellado 252 de 252; trabajos en paralelo
 - **Decisiones de Nicolás** (chat de S172): ante «¿Preparo el PR de encendido de MODIS en una rama, con tag antes del
   primer edit?»: «Sí, prepáralo»; y después: «lo que recomendabas antes también hazlo, la mini auditoría y las otras
