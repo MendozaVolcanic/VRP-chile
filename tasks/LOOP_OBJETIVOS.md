@@ -569,6 +569,25 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 13:40 UTC (S173): V1 y V2 cerrados; ronda 3 de A y B; regla ronda 2; PR #933 (A) y #934 (B, borrador)
+- **V1** (Fable, verificador del censo F1): 10 de 10 se sostienen, ninguno bloquea A ni B; mover a A los tres commits que
+  leen records de la vía es correcto (218 pruebas verdes). Nuevo V1-02: la regla no tenía paso para el día después.
+- **V2** (Fable, verificador de F2): 11 de 11 se sostienen; 205 bloquea B (audit semanal cae con VIA_MODIS) y 201 bloquea
+  al segundo de B y #932. X1 y X3 confirmados.
+- **Ronda 3 de los PR** (Opus): A `f8f37cec9` (avance rápido: 205, 206, cherry-pick de 161/162/V1-04, perfiles derivados
+  apagados); B en rama NUEVA `claude/s173-modd-flip` `d5d52ccfc` (201 en el guard; la vieja `claude/s172-modd-flip`
+  `c9525f994` intacta; el primer intento con force-with-lease lo bloqueó el clasificador). merge-tree: A→B→#932 y
+  A→#932→B limpios por merge commit y squash, mismo árbol; revert de B limpio en los cuatro. Pruebas: A 813, B 821,
+  A+B+#932 922, 0 fallas. Salidas en `experiments/_s173_aud/ronda3_ab/`. Sin arreglar, para Nicolás: 207, 208, 209/V2-02.
+- **Regla de reversión ronda 2** (`5ec26f23c`, sha256 LF `db2c25b3`): decisiones D1 a D7, todas con recomendación sí.
+- **Pre-registro retro ronda 3** (`fcbb50c0e`, sha256 LF `51f67d96`): F26 recontado con la referencia congelada, ningún
+  conteo cambia; R-1 a R-15 para Nicolás.
+- **PR abiertos**: #933 (A, base main), #934 (B, borrador, base la rama de A). CI pendiente al escribir.
+- Esfuerzo de los agentes: varios declararon bajo pese a `effort` explícito; la sesión coordinadora corre en medium.
+  Memoria actualizada (`feedback_s172_esfuerzo_explicito_agentes`). Las decisiones se apoyan en los verificadores Fable.
+- Carpetas vacías `C:/d/vrp-trabajo/worktrees` creadas por error por el agente VR: el guard de seguridad no deja
+  borrarlas, las borra Nicolás. Worktrees `D:/vrp-trabajo/worktrees/s173-moddA` y `s173-moddB` quedan (2,6 GB).
+
 ### 2026-11-02 ~12:58 UTC (S173; corregida, decía 13:30 sin consultar la hora): resultados de VR, VPR, F1 y F2; verificadores V1 y V2 corriendo
 - **VR** (regla de reversión de MODIS, Fable): SELLABLE CON CAMBIOS, 12 cambios de texto (`experiments/_s173_aud/vr/`).
   Peor: cita `CAMBIO_DETECTOR_MODIS_UTC`, que no existe; cotas (i)/(ii) aún «propuesta»; no dice qué hacer con una
