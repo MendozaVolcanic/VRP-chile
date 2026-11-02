@@ -1284,4 +1284,11 @@ positivos reales marcan y que los 56 casos de falla cerrada se comportan como se
 commitear, 2026-11-02 03:16:54 a 03:22:42 UTC): **280 de 280**, sale 0, sin secciones caídas (275 más las 5 nuevas:
 VR2-01 dos, VR2-02 una, VR2-04 dos; `probar_sombra_salida.txt`). Rojo de las nuevas antes del verde: en un ensayo
 barato del bloque de VR2-01 y VR2-04, S13 hace fallar las dos de git real y S14 la de la lista; el de VR2-02 lo da M22
-en el nulo.
+en el nulo. Commit `b4e98fb2b`.
+
+**Nulo de la ronda 3** (`mutar_sombra.py --hilos 1 --solo S13,S14,M22`, `b4e98fb2b`, 2026-11-02 03:23:36 a 03:51:53
+UTC): identidad PASA, CONTROL y CONTROL_SECCION CAIDA, **3 de 3 atrapadas por aserción** (M22 por la prueba de VR2-02,
+S13 por las dos de git real, S14 por la lista y por el caso `roi_v375`), 0 caídas, 0 sobrevivientes. M22 ya tenía una
+línea «SOBREVIVE» en `mutar_sombra_repaso_salida.txt` (corrida de S169) y el corredor salta las mutaciones ya escritas
+en su archivo de salida; por eso la corrida se hizo con ese archivo apartado y después se le agregó al final, sin tocar
+lo anterior (el diff del archivo son sólo líneas agregadas).
