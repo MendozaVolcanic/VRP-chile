@@ -41,6 +41,11 @@ QUÉ HACE.
      estándar), así que el rojo del día en que se escribe dura una corrida y el record queda. Por eso cada revisión
      escribe, también en verde y también si algo no se pudo leer, la línea «K caídos en la ventana: N», en la salida y
      en el resumen del job (GITHUB_STEP_SUMMARY).
+  6. Vecinos (S173, decisión 3 de tasks/BLOQUE_ARRANQUE_S173.md §b): si el JSON está en data/sombra_34/ y el volcán
+     tiene otro volcán en su grilla (experiments/_s172_sombra34/vecinos.yaml), el resumen da aparte las pasadas de la
+     vía con un alertado o el cúmulo dentro del radio de un vecino (4 km, o el inner_radius_km del vecino si es mayor,
+     medido desde su cráter y su punto nominal; scripts/vecinos_sombra_34.py), porque ese calor
+     puede ser del vecino. No cambia los controles 1 a 5. Una lista de vecinos ilegible es FALLA.
   Nunca sale con traceback por un insumo malo: lo dice en la línea FALLA. Salida 0 = verde, 1 = rojo.
 
 Uso: python scripts/revisar_sombra.py --json data/sombra_codigo_mirova/<Volcan>.json --log pipeline.log
@@ -136,11 +141,16 @@ def _sin_pasada(sensor, cobertura, dia, solo_de_dia=frozenset()):
     return vivas or None
 
 
-def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensores=SENSORES, errores_lectura=()):
+def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensores=SENSORES, errores_lectura=(),
+            vecinos=None):
     """(ok, resumen). ini y fin en AAAA-MM-DD, inclusive, sobre la fecha UTC de la pasada. `registros`: los records
     del JSON de la sombra, o None si no se pudo leer. `desde_utc`: inicio de la corrida (ISO UTC). `cobertura`: el dict
     de --cobertura-json de run_pipeline, o None. `sha`: el del disparo (GITHUB_SHA); si viene, un record sólo es de esta
-    corrida si lo trae. `errores_lectura`: insumos que main no pudo leer, que van como FALLA."""
+    corrida si lo trae. `errores_lectura`: insumos que main no pudo leer, que van como FALLA.
+    `vecinos` (S173, decisión 3): {vecino: {"puntos", "radio_km"}} del volcán en la sombra de los 34; si viene no
+    vacío, el resumen da aparte las pasadas de la vía con un alertado o el cúmulo dentro del radio de un vecino
+    (scripts/vecinos_sombra_34.py). No cambia ningún control ni el veredicto: una pasada cerca del vecino también
+    prueba que la vía corrió ese día. Sin vecinos el resumen es el de siempre."""
     fallas, notas = list(errores_lectura), []
     # VR3-02 (S170): con --ini o --fin ilegibles `_dias` da [] y ningún día se juzgaba: la corrida salía verde.
     try:
@@ -236,6 +246,15 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensor
                     + (f" {k_ventana} (quedan en el JSON: pipeline/store.py no los reemplaza)" if k_ventana else ""))
     else:
         resumen += "\n  K caídos en la ventana: sin dato (el JSON de la sombra no se pudo leer)"
+    if json_ok and vecinos:
+        if str(Path(__file__).resolve().parent) not in sys.path:
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+        try:
+            import vecinos_sombra_34 as VS
+            resumen += "\n  " + VS.linea_resumen([r for r in en_ventana if r.get("via_codigo_mirova") is True],
+                                                 vecinos)
+        except Exception as e:   # sin pyproj o con un record raro: la separación no puede quedar callada (S156)
+            fallas.append(f"no se pudo separar las pasadas cerca de un vecino ({type(e).__name__}: {e})")
     for n in notas:
         resumen += "\n  NOTA " + n
     if fallas:
@@ -279,8 +298,24 @@ def main(argv=None):
     ap.add_argument("--fin", required=True)
     ap.add_argument("--desde-utc", required=True, help="inicio de la corrida, AAAA-MM-DDTHH:MM:SSZ")
     ap.add_argument("--sha", default=None, help="GITHUB_SHA del disparo")
+    ap.add_argument("--vecinos", default=None,
+                    help="lista de vecinos (S173); sin ella se usa experiments/_s172_sombra34/vecinos.yaml cuando el "
+                         "JSON está en una carpeta sombra_34")
     a = ap.parse_args(argv)
     errores = []
+    # S173 (decisión 3): en la sombra de los 34 el resumen separa las pasadas cerca de un vecino. Se activa por la
+    # carpeta del JSON (la línea del workflow no cambia) o por --vecinos; la sombra de los 11 no la toca. Una lista
+    # que no se puede leer va como FALLA: no puede terminar en «ningún vecino».
+    vecinos = None
+    if a.vecinos or Path(a.json).parent.name == "sombra_34":
+        try:
+            if str(Path(__file__).resolve().parent) not in sys.path:
+                sys.path.insert(0, str(Path(__file__).resolve().parent))
+            import vecinos_sombra_34 as VS
+            tabla = VS.cargar_vecinos(a.vecinos) if a.vecinos else VS.cargar_vecinos()
+            vecinos = tabla.get(Path(a.json).stem)
+        except Exception as e:
+            errores.append(f"lista de vecinos ilegible ({type(e).__name__}: {e})")
     datos = _leer_json(a.json, "JSON de la sombra", errores)
     if Path(a.json).exists() and datos is not None and not isinstance(datos, dict):
         errores.append("JSON de la sombra ilegible (no es un objeto)")
@@ -309,7 +344,7 @@ def main(argv=None):
         cobertura = None
     try:
         ok, resumen = revisar(registros, log_txt, a.ini, a.fin, a.desde_utc, cobertura, sha=a.sha or None,
-                              errores_lectura=errores)
+                              errores_lectura=errores, vecinos=vecinos)
     except (AttributeError, TypeError, KeyError, ValueError) as e:
         # VR3-03 (S170): un insumo bien formado pero de forma interna inesperada (un `regimen` de texto, fallas o
         # incidencias que no son objetos) no puede terminar en traceback: va como FALLA con la línea de K.
