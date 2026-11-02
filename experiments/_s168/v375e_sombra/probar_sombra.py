@@ -542,6 +542,8 @@ def main(argv=None):
              me0.replace("enable_modis_b22_primary: true", "enable_modis_b22_primary: false")),
             ("un sensor apagado", ME, me0.replace("  modis: true", "  modis: false")),
             ("la carpeta de salida", SO, so0.replace("data_subdir: sombra_codigo_mirova", "data_subdir: otra")),
+            ("cambiar el perfil del que hereda (extends, VR172-01)", SO,
+             so0.replace("extends: mirova_equivalent", "extends: experimental")),
             ("un perfil ilegible", ME, "thresholds: [: :\n"),
             ("un perfil que deja de existir", ME, None),
         )

@@ -1186,6 +1186,24 @@ sello coinciden en el checkout del tag `s170-v375e-lector`), las rutas de `RUTAS
 comparándose como texto: una guardia que edite su aserción de la l. 110 marca régimen, y por eso la regla de MODIS
 recomienda la guardia en un perfil y un workflow nuevos), la ventana P, la parada y todo lo demás.
 
-**Pruebas.** 25 casos nuevos en `probar_sombra.py` (sección de controles, «S8 (S172)»), en verde y en rojo. Mutaciones
+**Pruebas.** 20 casos nuevos en `probar_sombra.py` (19 en la primera ronda y 1 por VR172-01; la base del tag `s170-v375e-lector` era de 233, no de 230 como dice §11.13, porque S170 sumó las tres de VS170-LEC-01 a 03) (sección de controles, «S8 (S172)»), en verde y en rojo. Mutaciones
 nuevas S01 a S08 en `mutar_sombra.py`; R07 se retira porque su línea ya no existe (la reemplaza S05). `RAMA` del nulo pasa
-a `claude/s172-v375e-relector`. Cifras, verificador y sello: abajo, cuando existan.
+a `claude/s172-v375e-relector`. Cifras, verificador y sello: abajo.
+
+**Verificador limpio (S172, Sonnet, alto)** sobre `aa3fdcf1e`: SELLABLE CON CAMBIOS (informe fuera del repo,
+`D:/vrp-trabajo/temporales/ver_s172_relector/informe.md`; copia en `experiments/_s168/v375e_sombra/verificador_s172/`).
+A1 a A4 CONFIRMADO con git real y los perfiles de `origin/main` `d3cd0b2ae`: encender MODIS con la guardia en perfil y
+workflow nuevos no marca; editar la l. 110 del workflow de la sombra sí. Tratamiento de sus hallazgos:
+
+| hallazgo | gravedad | tratamiento |
+|---|---|---|
+| VR172-01 ninguna prueba fija que cambiar `extends:` marque | 3 | prueba nueva «cambiar el perfil del que hereda» y mutación S09 (quitar `extends` de la comparación) |
+| VR172-02 un flag de MxD03 encendido en producción llega a la sombra por herencia, tumba la aserción de la l. 110 del workflow y no marca | 2 | **riesgo aceptado**: las tres claves de MxD03 las lee sólo `process_modis.py`, así que no cambian ni la vía ni la K de VIIRS 375; si producción las encendiera, la sombra se detiene en su aserción (pérdida visible, que el S7 del lector cuenta como sin dato), no un régimen silencioso. El encendido de MODIS de S172 no las toca |
+| VR172-03 el S8 no compara `nrt.yml` ni `frontend/index.html` | 2, SOSPECHA | anterior a este diff; queda como está (el S0 fija `index.html` en el checkout del lector) |
+| VR172-04 el tiempo del job del NRT es compartido entre sensores | 2, SOSPECHA | pasa a la mini auditoría del PR de MODIS |
+| VR172-05 la batería sumó 19 casos, no 25 | 1 | corregido arriba |
+| VR172-06 y 07 renombre de perfil; 1, 1.0 y true iguales | 1 | aceptados (el primero lo ataja la comprobación del perfil de los records) |
+
+**Nulo de las mutaciones nuevas** (`mutar_sombra.py --solo`, un hilo, `aa3fdcf1e`, 2026-11-01 23:22 a 2026-11-02 00:56
+UTC): identidad PASA, CONTROL y CONTROL_SECCION CAIDA, **S01 a S08: 8 de 8 atrapadas por aserción**, 0 caídas, 0
+sobrevivientes (`mutar_sombra_repaso_salida.txt`).

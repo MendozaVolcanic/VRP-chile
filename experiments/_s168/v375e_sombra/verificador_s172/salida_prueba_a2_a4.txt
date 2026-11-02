@@ -1,0 +1,41 @@
+origin/main sha: d3cd0b2aeee70b99fbc5bd90e5fd2b0dff284f54
+lector: D:\vrp-trabajo\worktrees\s172-relector\experiments\_s168\v375e_sombra\leer_sombra_v375e.py | claves: ('enable_modis_codigo_mirova', 'enable_v750_codigo_mirova', 'enable_modis_geo_mxd03', 'enable_modis_crater_sin_dato', 'enable_modis_dist_desde_crater')
+--- A2/A4: no deben marcar
+OK    esperado=False obtenido=False | ME real + enable_modis_codigo_mirova: true (el encendido de MODIS)
+OK    esperado=False obtenido=False | ME real + clave nueva + comentario de cabecera nuevo
+OK    esperado=False obtenido=False | ME real + clave nueva con comentario al margen y sangria distinta de comentario
+OK    esperado=False obtenido=False | ME real + las 5 claves (4 en false) en thresholds
+OK    esperado=False obtenido=False | SO real con enable_modis_codigo_mirova: false (guardia K)
+OK    esperado=False obtenido=False | SO real sin la clave de MODIS
+OK    esperado=False obtenido=False | SO real con enable_v750_codigo_mirova: false
+OK    esperado=False obtenido=False | perfil ajeno (experimental) ilegible no marca
+OK    esperado=False obtenido=False | perfil nuevo (guardia) no listado no marca
+--- A2: deben marcar (cada uno con su par de control: la misma edicion en una clave NO listada)
+OK    esperado=True  obtenido=True  | CONTROL de A1: ME real + enable_modis_b22_primary movida/otra clave nueva en thresholds
+OK    esperado=True  obtenido=True  | ME real + enable_v375_codigo_mirova: true
+OK    esperado=True  obtenido=True  | SO real con enable_v375_codigo_mirova: false
+OK    esperado=True  obtenido=True  | SO real con extends distinto
+OK    esperado=True  obtenido=True  | ME real: un umbral numerico de thresholds
+OK    esperado=True  obtenido=True  | ME real: clave de MODIS en la raiz (fuera de thresholds)
+OK    esperado=True  obtenido=True  | ME real: clave de MODIS en output:
+OK    esperado=True  obtenido=True  | ME real: clave de MODIS en paths:
+OK    esperado=True  obtenido=True  | ME real: clave de V750 en sensors:
+OK    esperado=True  obtenido=True  | perfil que aparece (base None)
+OK    esperado=True  obtenido=True  | perfil que desaparece (nuevo None)
+OK    esperado=True  obtenido=True  | perfil ilegible en el nuevo
+OK    esperado=True  obtenido=True  | perfil ilegible en el viejo
+OK    esperado=True  obtenido=True  | perfil que pasa a vacio ('')
+OK    esperado=True  obtenido=True  | perfil que pasa a lista YAML
+OK    esperado=True  obtenido=True  | thresholds pasa a ser lista (no dict)
+OK    esperado=True  obtenido=True  | thresholds: null en ambos y un cambio de otra seccion
+OK    esperado=False obtenido=False | ambos perfiles vacios -> no marca (iguales)
+--- A2: huecos de YAML (la mutacion de claves de otro sensor debe verse igual que en profile.py)
+OK    esperado=True  obtenido=True  | clave duplicada 'thresholds' (gana la ultima, igual que profile.py): cambia 'a'
+OK    esperado=True  obtenido=True  | ancla/merge: la clave de MODIS entra por <<:
+OK    esperado=False obtenido=False | misma clave con valor entre comillas ('true' str) sigue sin marcar
+--- A4: workflow de la sombra (texto entero)
+l.110 workflow origin/main:           VRP_PROFILE=sombra_codigo_mirova python -c "import pipeline.profile as p; assert p.DATA_SUBDIR == 'sombra_codigo_mirova', p.DATA_S
+OK    esperado=True  obtenido=True  | workflow de la sombra: se edita la asercion de la l.110 (quita MODIS)
+OK    esperado=False obtenido=False | workflow de la sombra: sin cambios
+OK    esperado=True  obtenido=True  | workflow de la sombra: sólo un comentario
+RESUMEN: 33 de 33 como se esperaba

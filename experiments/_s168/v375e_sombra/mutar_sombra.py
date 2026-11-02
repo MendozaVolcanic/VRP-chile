@@ -206,6 +206,9 @@ MUTACIONES = [
     ("S06", 't = d.get("thresholds") if isinstance(d, dict) else None', 't = d if isinstance(d, dict) else None'),
     ("S07", '"enable_modis_dist_desde_crater")', '"enable_modis_dist_desde_crater", "enable_v375_codigo_mirova")'),
     ("S08", '"enable_modis_geo_mxd03", ', ''),
+    # VR172-01 (verificador S172): ignorar `extends` en la comparación de perfiles tiene que salir atrapada
+    ("S09", '            t.pop(k, None)\n    return d\n',
+     '            t.pop(k, None)\n    if isinstance(d, dict):\n        d.pop("extends", None)\n    return d\n'),
 ]
 # VL169-10: equivalentes declaradas ANTES de correr (sobrevivir no las hace sospechosas)
 EQUIVALENTES = {
