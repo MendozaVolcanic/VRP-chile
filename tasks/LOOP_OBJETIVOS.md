@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 01:50 UTC (S172): mini auditoría de MODIS LISTO CON CAMBIOS, con un bloqueante G5; sombra de los 34 lista
+- **Mini auditoría** (3 frentes Opus y 3 verificadores Sonnet; `experiments/_s172_miniaud/SINTESIS.md`): LISTO CON
+  CAMBIOS, 22 verificados, 0 refutados. **Bloqueante G5**: el NRT no instala `pyproj` (`nrt.yml` l. 140 a 143) y la vía
+  lo importa en cada gránulo MODIS; `run_pipeline.py` l. 279-280 atrapa el error, no hay record y el job sale verde: con
+  el PR B tal cual, MODIS callaría en los 11 sin aviso (vigilante ciego). La sombra de los 11, la de los 34 y la guardia
+  sí lo instalan. Otros: `vigilancia_sombra.py:432` contaría la vía como K y pediría revertir K; el tablero no reconoce el
+  ancla `codigo_mirova` (Chillán a 2,2 km en vez de 0,57); `test_guard_adopcion_k_s153` rojo en B; cuatro huecos de la
+  vigilancia de la guardia (MA172-202, 204, 206, 208). El revert del PR B sale limpio (4 simulaciones, sin segundo
+  modelo). Esfuerzo declarado bajo en 5 de 6 agentes (lo fijó el arnés). Arreglos encargados al implementador.
+- **Sombra de los 34** (`claude/s172-sombra-34`, `30d9f9418`): grillas con la regla de los 11 (reproduce 8 de 11 a menos
+  de 1 m), 11 grillas intactas, perfil `sombra_34`, workflow diario 13:07 UTC, vigilancia ciega a 48 h, 52 pruebas.
+  **Hallazgo de geología**: 11 de los 34 tienen otro volcán dentro de su grilla (Quetrupillán con Villarrica, Michinmahuida
+  con Chaitén, Callaqui con Copahue...) y la vía suma toda la grilla: el calor del vecino puede contarse como propio.
+  No bloquea la sombra; bloquea publicar los 34. Verificador limpio en curso. No se mergea antes del lector re-sellado.
+- **Pre-registro retro** (`experiments/_s172_prereg_retro/`, `01be21ff5`): fuera de muestra son febrero y marzo de 2026
+  (VIIRS) y febrero (MODIS); 2025 contra el OSF decide sólo protegidas. Verificador limpio en curso.
+
 ### 2026-11-02 01:24 UTC (S172): sombra de los 34 con las vías adelantada; re-sellado ronda 2; pre-registro retro
 - **Decisiones de Nicolás** (chat de S172): (1) «la idea es lanzar los 34 que faltan cuando ya sepamos que estamos
   funcionando igual que MIROVA» (la compuerta de publicación de los 34 es la paridad en los 11); (2) ante la propuesta de
