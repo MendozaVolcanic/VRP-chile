@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 16:55 UTC (S173): verificador VB3 (Fable): regla SELLABLE CON CAMBIOS, B MERGEABLE CON CAMBIOS
+- Informe `C:/Users/nmend/vrp-wt/ver_s173_regla3_b/INFORME.md` (Fable, esfuerzo declarado MEDIO). Bloquea B sólo
+  VB3-01: la regla no está en B ni en main y 7 de 10 citas de main la dan por «loop/activo» o «borrador». Lo demás es
+  texto (VB3-02 el revert choca por otros hunks; VB3-03 el monitor abre issue con 3 rojas y lo rotula NASA/token; VB3-04
+  D6 a mano; VB3-05 marcas A113 «desde el merge»; VB3-06 citas que no resuelven; VB3-07 ficha; VB3-08 squash/merge).
+- Medido: 0 `ERROR processing` de MODIS (ni de VIIRS) en 2.769 gránulos MODIS, 220 jobs, 20 corridas NRT con K del
+  2026-10-03 al 2026-11-02 (muestra de 390). El paso nuevo no pondría rojo nada hoy; con la vía, SIN DATO.
+- Implementador (Opus, high) en B: regla ronda 4 dentro de B y citas corregidas. Carpeta vacía `C:\c` creada por el
+  verificador: borrar a mano.
+
 ### 2026-11-02 16:27 UTC (S173; corregida, decía ~17:00 sin consultar la hora): #935 verificado y corregido, CI verde; verificador de regla ronda 3 y B corriendo
 - Verificador Fable de #935: MERGEABLE CON CAMBIOS (V935-01 gravedad 3: el lacolito de PCC en la grilla de Antillanca no
   se marcaba con 4 km desde el cráter). Aplicado en `b0b7374bb`: radio = max(4 km, `inner_radius_km` del vecino),
