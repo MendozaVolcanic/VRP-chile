@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 12:21 UTC (S173): arranque; PR #932 abierto; cuatro agentes lanzados (MODIS F1/F2, regla de reversión, retro)
+- La tarea programada arrancó a las 04:51 UTC pero quedó detenida hasta las 12:16 UTC (hora del servidor), con toda
+  probabilidad esperando una aprobación. Estado verificado contra el remoto: tag `s172-v375e-lector-resellado` →
+  `fc3912cb2`; puntas PR A `0a0dae344`, PR B `c9525f994` (A es ancestro de B), sombra 34 `28183712a`; main `a3c5a9b49`.
+  Disco C: 34 GB, D: 7,4 GB. Cuota semanal 10 %. NRT verde (runs horarios por cron externo).
+- Sesión de VIIRS 750 avisada de que reporta a S173.
+- **PR #932** (sombra de los 34) abierto sobre main; `git merge-tree` sin conflicto; CI `pytest` pendiente al escribir.
+- **Segunda pasada MODIS**, lanzada directo (sin orquestador), prompts y sha256 en `D:/vrp-trabajo/temporales/s173_aud/prompts/`
+  (armados con `armar.py`, 0 huecos): F1 censo de consumidores del flag (Opus, high, `9a6d80b0`); F2 integración entre
+  programas, incluidos #932, lector V375-E, guardia, NRT, audit y V750-B (Opus, xhigh, `0b38a4f8`); VR verificador limpio
+  de la regla de reversión (Fable, high, `3fdf1310`). Los verificadores de F1 y F2 van después, con otro modelo.
+- **VPR**: segundo verificador del pre-registro retro (Fable, high, `6eff26a0`; el primero fue Sonnet, sin acceso a él).
+- Suomi NPP: último gránulo NRT en CMR 10:12 UTC; el cese de las 13:00 UTC se comprueba después.
+
 ### 2026-11-02 04:15 UTC (S172): lector V375-E re-sellado SELLADO; S173 se lanza desde esta sesión
 - **Decisión de Nicolás** (chat de S172), ante «¿Sellas el lector re-sellado de V375-E en fc3912cb2?»: «Sí, sellar». Tag
   `s172-v375e-lector-resellado` sobre `fc3912cb2` (rama `claude/s172-v375e-relector`), empujado. Ronda 3: batería 280 de
