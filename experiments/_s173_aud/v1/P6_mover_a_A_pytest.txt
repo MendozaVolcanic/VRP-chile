@@ -1,0 +1,18 @@
+### patrón 6: main+A (93528f597) + los tres commits de B que leen records de la vía, SIN el flip
+cherry-pick de a256a75cc 087b08ced ffe46a68e sobre main+A: LIMPIO
+410cb73ad S172 MOD-D PR B: la prueba de «no modifica la vigilancia de K» admite el cambio minimo de MA172-101
+0a3e136a6 S172 MOD-D PR B: el tablero reconoce codigo_mirova como ancla honesta, en un solo lugar (MA172-102)
+b05691bb3 S172 MOD-D PR B: la vigilancia de la sombra de K no cuenta los records MODIS de la via como K (MA172-101/302)
+93528f597 SIM squash A
+flag en producción (A89):
+False
+........................................................................ [ 33%]
+........................................................................ [ 66%]
+........................................................................ [ 99%]
+..                                                                       [100%]
+218 passed in 40.39s
+### y sin el commit ffe46a68e (sólo los dos de código): ¿queda rojo el test de A que fija vigilancia_sombra.py?
+tests\test_vigilancia_guardia_modis_s172.py:362: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_vigilancia_guardia_modis_s172.py::test_no_modifica_la_vigilancia_de_k
+1 failed, 29 passed in 0.45s

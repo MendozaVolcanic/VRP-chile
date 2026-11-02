@@ -1,0 +1,117 @@
+main=47cdc446f29f712e55961886799b76578eb8deee B=c9525f994 sombra34=28183712aac80dfe987a2d0973acd8718d65c61e
+##### S1: squash B sobre main, luego revert
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+squash B: OK 4620a9c5d
+S1 revert: LIMPIO
+S1 diff tras revert vs main (debe ser vacío):
+(vacío = idéntico)
+##### S1b: merge commit --no-ff de B sobre main, luego revert -m 1
+S1b revert -m 1: LIMPIO
+##### S2: squash sombra-34 primero, luego squash B, luego revert B
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+squash s34: OK
+Auto-merging tests/test_sombra_codigo_mirova_s167.py
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+squash B tras s34: OK
+S2 revert: LIMPIO
+##### S3: squash B primero, luego squash sombra-34, luego revert B
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+Auto-merging tests/test_sombra_codigo_mirova_s167.py
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+squash s34 tras B: OK
+S3 revert B: LIMPIO
+##### estado final
+c2b439757 Revert "SIM squash B"
+6c3685430 SIM squash s34
+4f4863ff6 SIM squash B
+47cdc446f NRT update Lastarria 2026-11-02 12:25 UTC
+### corrección: el PR A se mergea ANTES que el B; se simula squash A, squash B, revert B (y con sombra-34 antes/después)
+##### S1': squash A, squash B, revert B
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+Auto-merging frontend/index.html
+Auto-merging tests/test_vigilancia_guardia_modis_s172.py
+CONFLICT (add/add): Merge conflict in tests/test_vigilancia_guardia_modis_s172.py
+Squash commit -- not updating HEAD
+Automatic merge failed; fix conflicts and then commit the result.
+S1' revert B: CONFLICTO
+tests/test_vigilancia_guardia_modis_s172.py
+error: no cherry-pick or revert in progress
+fatal: revert failed
+diff tras revert vs main+A (debe ser vacío):
+(vacío = idéntico a main+A)
+archivos que el revert toca:
+ 48 files changed, 2797 insertions(+), 81 deletions(-)
+##### S2': squash s34, squash A, squash B, revert B
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+CONFLICT (add/add): Merge conflict in tests/test_vigilancia_guardia_modis_s172.py
+Automatic merge failed; fix conflicts and then commit the result.
+error: Committing is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+U	tests/test_vigilancia_guardia_modis_s172.py
+S2' revert B: CONFLICTO
+tests/test_vigilancia_guardia_modis_s172.py
+error: no cherry-pick or revert in progress
+fatal: revert failed
+##### S3': squash A, squash B, squash s34, revert B
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+Auto-merging frontend/index.html
+Auto-merging tests/test_vigilancia_guardia_modis_s172.py
+CONFLICT (add/add): Merge conflict in tests/test_vigilancia_guardia_modis_s172.py
+Squash commit -- not updating HEAD
+Automatic merge failed; fix conflicts and then commit the result.
+error: Committing is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+U	tests/test_vigilancia_guardia_modis_s172.py
+S3' revert B: CONFLICTO
+tests/test_vigilancia_guardia_modis_s172.py
+error: no cherry-pick or revert in progress
+fatal: revert failed
+55575d085 SIM A
+47cdc446f NRT update Lastarria 2026-11-02 12:25 UTC
+c3540b731 NRT update Copahue 2026-11-02 11:42 UTC
+58129f420 NRT update Llaima 2026-11-02 11:40 UTC
+3b2dc01ac NRT update NevadosDeChillan 2026-11-02 11:37 UTC
+### secuencia real: squash A; B REBASADO sobre main+A (cherry-pick de sus 9 commits) y squash; revert B
+##### S1'': 
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+cherry-pick de B sobre main+A: LIMPIO
+ASQ=93528f597b3981a57b60e8e9283c7347b0dd5ad7 BSQ=d43b688d11c201535d51c33821eabec2180d7e83
+diff BSQ vs B (debe ser vacío salvo data/ de main):
+S1'' revert B: LIMPIO
+diff tras revert vs main+A (debe ser vacío):
+(vacío = idéntico a main+A)
+##### S2'': s34 squash, A squash, B rebasado+squash, revert B
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+cherry-pick B sobre s34+A: LIMPIO
+S2'' revert B: LIMPIO
+##### S3'': A squash, B rebasado+squash, s34 squash, revert B
+S3'' revert B: LIMPIO
+diff tras revert vs (main+A+s34): 
+ 42 files changed, 1153 insertions(+), 939 deletions(-)
+db18bb356 Revert "SIM squash B (rebasado)"
+8b8d6d95f SIM s34
+d43b688d1 SIM squash B (rebasado)
+93528f597 SIM squash A
+### verificación S3'': el árbol revertido == main+A+s34
+Automatic merge went well; stopped before committing as requested
+Squash commit -- not updating HEAD
+diff (main+A+s34) vs S3'' revertido:
+(vacío = idéntico)
