@@ -569,6 +569,28 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 02:38 UTC (S172): arreglos de MODIS hechos; lector ronda 2 lista; verificadores de retro y sombra 34
+- **MODIS**: PR A `claude/s172-modd-encendido` en `0a0dae344` (pyproj en los 22 workflows con perfil de vía; nrt,
+  backfill-tier-a y reproc-chunked fallan si falta; los cuatro huecos de la vigilancia de la guardia cerrados con rojo;
+  627 pruebas). PR B `claude/s172-modd-flip` en `c9525f994`, rebasado sobre A (push con lease sobre `b42823194`):
+  vigilancia_sombra no cuenta la vía como K (salida de hoy idéntica), ancla `codigo_mirova` en el tablero desde una función,
+  guard de K ajustado; 1.444 pruebas, 0 fallas; revert simulado limpio (con squash, B se rebasa sobre main tras A).
+  Pendientes: Nicolás fija la espera antes de leer una pasada sin record como silencio (propuesta 24 h); `run_pipeline.py`
+  sigue atrapando cualquier excepción de la vía sin dejar el job rojo (pipeline/ congelado; la red es la guardia K, que ve
+  las pasadas que producción no tiene). Falta una segunda pasada de auditoría a esfuerzo alto sobre estas puntas.
+- **Lector V375-E ronda 2** (`e7196dda7`): el S8 compara la grilla sólo en los 11 Tier A (`VOLCANES_GRILLA_REGIMEN`);
+  premisa comprobada (`grilla_del_volcan` lee sólo `_referencias().get(nombre)`, mirova_v750_codigo.py:172-187); batería
+  275 de 275; nulo S09 a S12 4 de 4. Verificador limpio en curso, con git real sobre las ramas de MODIS y de los 34.
+- **Pre-registro retro**: verificador SELLABLE CON CAMBIOS (VPR172-01, G4: el fuera de muestra es casi sólo Láscar; 26 de
+  26 protegidas en VIIRS 375); ronda 2 aplicada (`18ab00217`, sha256 `aad33de7`): Láscar dicho primero, veredicto por
+  sensor «NO SE CONTRADICE FUERA DE MUESTRA», inventario de exposiciones. Pide un segundo verificador antes del sello.
+- **Sombra de los 34**: verificador LISTA CON CAMBIOS (`experiments/_s172_sombra34_verificador/`): VS34-01 (G4) con un
+  foco sólo en el vecino el volcán nuevo muestra 7 a 29 MW (12 volcanes: Quetrupillán, Michinmahuida, Antillanca, Callaqui,
+  Osorno y otros); VS34-02 (G3) 10 de 34 mutaciones de la vigilancia pasaban en verde; VS34-03 Pages; VS34-04 nadie vigila
+  la vigilancia. Arreglos encargados al implementador.
+- **Esfuerzo de los agentes**: 5 de 6 de la mini auditoría y también un verificador lanzado con `effort: high` explícito
+  declararon esfuerzo bajo; mecanismo SIN VERIFICAR (memoria `feedback_s172_esfuerzo_explicito_agentes`).
+
 ### 2026-11-02 01:50 UTC (S172): mini auditoría de MODIS LISTO CON CAMBIOS, con un bloqueante G5; sombra de los 34 lista
 - **Mini auditoría** (3 frentes Opus y 3 verificadores Sonnet; `experiments/_s172_miniaud/SINTESIS.md`): LISTO CON
   CAMBIOS, 22 verificados, 0 refutados. **Bloqueante G5**: el NRT no instala `pyproj` (`nrt.yml` l. 140 a 143) y la vía
