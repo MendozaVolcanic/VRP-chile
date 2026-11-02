@@ -35,6 +35,12 @@ VIVOS = {
     "experimental": False,            # laboratorio congelado en C0: sombra de K (S150, S156)
     "experimental_ndc_focus": False,  # laboratorio de Chillán, despachado desde nrt.yml: no sigue a producción
 }
+# S173 (hallazgo 201): perfiles vivos que llegan con otro PR. Entran a VIVOS sólo si su YAML existe, para que el guard
+# no dependa del orden de los merges.
+VIVOS_SI_EXISTEN = {
+    "sombra_34": True,                # sombra de los 34 con las tres vías (#932, sombra-34.yml)
+}
+VIVOS.update({n: v for n, v in VIVOS_SI_EXISTEN.items() if (PERFILES / f"{n}.yaml").exists()})
 
 _LEER = """
 import importlib, json, os, sys
@@ -114,3 +120,14 @@ def test_control_el_instrumento_ve_un_perfil_que_hereda():
     """Si `experimental` no declarara el flag, lo resolvería igual que producción: True."""
     res = _resueltos(["mirova_equivalent", "_s146_ab_sin_test1"])   # un brazo viejo de A/B que no lo declara
     assert res["mirova_equivalent"] is True and res["_s146_ab_sin_test1"] is True
+
+
+def test_la_sombra_de_los_34_entra_a_vivos_solo_si_existe():
+    """S173 (hallazgo 201, experiments/_s173_aud/f2/INFORME.md; confirmado por V2): #932 agrega `sombra_34`, un perfil
+    derivado programado (sombra-34.yml) que declara la vía de MODIS encendida a propósito, igual que la sombra de los
+    11. Sin esta entrada, el segundo de B y #932 en entrar dejaba este guard en rojo en main. Si #932 no entró, el
+    perfil no existe y no se exige: el guard no puede depender del orden de los merges."""
+    existe = (PERFILES / "sombra_34.yaml").exists()
+    assert ("sombra_34" in VIVOS) is existe
+    if existe:
+        assert VIVOS["sombra_34"] is True
