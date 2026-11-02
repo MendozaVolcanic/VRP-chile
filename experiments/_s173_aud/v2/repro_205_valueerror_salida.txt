@@ -1,0 +1,40 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+REGIMENES = ('antes_535', '535_a_571', '571_a_K', 'K')
+[A: via PUBLICA (vrp>0) en noche con alerta] EXCEPCION ValueError: tuple.index(x): x not in tuple
+       for rg, r in sorted(d.items(), key=lambda kv: REGIMENES.index(kv[0]))}
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     File "D:\vrp-trabajo\worktrees\s172-modd-encendido\scripts\auto_audit_weekly.py", line 849, in <lambda>
+       for rg, r in sorted(d.items(), key=lambda kv: REGIMENES.index(kv[0]))}
+                                                     ^^^^^^^^^^^^^^^^^^^^^^
+   ValueError: tuple.index(x): x not in tuple
+Auto-audit semanal — ventana 2026-09-03 → 2026-11-02 · detector vigente K (datos desde 2026-09-18) · D-9 SN
+  [K] MODIS     recall crater 100.0% publicación 100.0% (n=36)
+  [K] VIIRS750  recall crater None% publicación None% (n=0)
+  [K] VIIRS375  recall crater None% publicación None% (n=0)
+  [K] magnitud publicada Villarrica|MODIS               2.0x (n=36)
+      por cenit: sin_cenit 2.0x (n=36)
+  [K] falsas MODIS     None% de 0 pasadas negativas limpias (sin alarma)
+  [K] falsas VIIRS750  None% de 0 pasadas negativas limpias (sin alarma)
+  [K] falsas VIIRS375  None% de 0 pasadas negativas limpias (sin alarma)
+COBERTURA: cobertura propia 59.0% < 80.0% (36/61 días con datos)
+VEREDICTO: DEGRADADO — 1 flags
+  ⚠ magnitud Villarrica MODIS 2.0x > 1.4 (SOBRE-estima, n=36)
+[B control: misma escena sin via (K publica)] OK verdict=DEGRADADO regimenes_en_salida=['K'] vigente_por_sensor=None
+Auto-audit semanal — ventana 2026-09-03 → 2026-11-02 · detector vigente K (datos desde 2026-09-18) · D-9 SN
+  MODIS: decide la vía «código MIROVA» (VIA_MODIS) desde 2026-10-18, primera pasada MODIS de la vía
+  [K] MODIS     recall crater 100.0% publicación 100.0% (n=20)
+  [K] VIIRS750  recall crater None% publicación None% (n=0)
+  [K] VIIRS375  recall crater None% publicación None% (n=0)
+  [VIA_MODIS] MODIS     recall crater 0.0% publicación 0.0% (n=16)
+  [VIA_MODIS] VIIRS750  recall crater None% publicación None% (n=0)
+  [VIA_MODIS] VIIRS375  recall crater None% publicación None% (n=0)
+  [VIA_MODIS] falsas MODIS     None% de 0 pasadas negativas limpias (sin alarma)
+  [VIA_MODIS] falsas VIIRS750  None% de 0 pasadas negativas limpias (sin alarma)
+  [VIA_MODIS] falsas VIIRS375  None% de 0 pasadas negativas limpias (sin alarma)
+  protegida sin_publicar [VIA_MODIS] Villarrica MODIS 2026-10-31 07:20 MIROVA 2.0 MW
+COBERTURA: cobertura propia 59.0% < 80.0% (36/61 días con datos)
+VEREDICTO: DEGRADADO — 2 flags
+  ⚠ recall MODIS 0.0% < banda 95.0% (n=16, detector VIA_MODIS)
+  ⚠ alerta protegida sin publicar: Villarrica MODIS 2026-10-31 07:20 UTC, MIROVA 2.0 MW (detector VIA_MODIS; ninguna otra pasada de esa noche se publicó)
+[C escena del test del PR A: via NO publica] OK verdict=DEGRADADO regimenes_en_salida=['K'] vigente_por_sensor={'MODIS': 'VIA_MODIS', 'VIIRS750': 'K', 'VIIRS375': 'K'}
+RESULTADO: {'via_publica': 'EXCEPCION', 'control_k': 'OK', 'test_pr_a': 'OK'}

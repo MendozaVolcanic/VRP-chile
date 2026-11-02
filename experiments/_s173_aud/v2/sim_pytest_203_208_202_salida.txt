@@ -1,0 +1,61 @@
+##### 1. pytest sobre A+B+#932 (orden ABS, 094b7e9fc)
+        assert nombrados, "control: algún perfil derivado aparece en un workflow programado"
+        sin_decidir = nombrados - set(VIVOS)
+>       assert not sin_decidir, f"perfiles vivos sin valor decidido de la vía de MODIS: {sorted(sin_decidir)}"
+E       AssertionError: perfiles vivos sin valor decidido de la vía de MODIS: ['sombra_34']
+E       assert not {'sombra_34'}
+
+tests\test_guard_modis_codigo_mirova_encendido_s172.py:110: AssertionError
+1 failed, 5 passed in 2.31s
+--- resto de pruebas de S172 + sombra 34 + vía MODIS
+........................................................................ [ 28%]
+........................................................................ [ 57%]
+........................................................................ [ 86%]
+...................................                                      [100%]
+251 passed in 59.52s
+
+##### 2. pytest sobre el revert de B (= main+A+#932, 96614a692)
+(el guard de B no existe en el revert, esperado)
+........................................................................ [ 23%]
+........................................................................ [ 46%]
+........................................................................ [ 69%]
+........................................................................ [ 92%]
+.........................                                                [100%]
+313 passed in 59.54s
+--- flag de producción en el revert (A89)
+ENABLE_MODIS_CODIGO_MIROVA = False
+--- flag de producción en A+B+#932 (A89)
+ENABLE_MODIS_CODIGO_MIROVA = True
+
+##### 3. (203) squash de A y luego squash de B sin rebase
+squash A: ok 23bf28763
+squash B: CONFLICTO en:
+tests/test_vigilancia_guardia_modis_s172.py
+--- control: merge commit de B sobre squash(A)
+merge commit B sobre squash A: CONFLICTO
+tests/test_vigilancia_guardia_modis_s172.py
+
+##### 4. (208) revert de B tras un commit que toca la línea vecina del flag
+140:  enable_modis_dist_desde_crater: false  # dist_km del pixel anomalo y etiqueta summit/far desde el crater (A61 H5)
+148:  enable_modis_codigo_mirova: true
+warning: in the working copy of 'pipeline/profiles/mirova_equivalent.yaml', LF will be replaced by CRLF the next time Git touches it
+commit vecino: b43b4dc5d
+revert de B con línea vecina tocada: CONFLICTO en:
+pipeline/profiles/mirova_equivalent.yaml
+--- control: un commit que toca una línea LEJANA (background.inner_km) y luego el revert
+warning: in the working copy of 'pipeline/profiles/mirova_equivalent.yaml', LF will be replaced by CRLF the next time Git touches it
+commit lejano: 2e121319d
+revert de B con línea lejana tocada: LIMPIO
+
+##### 5. (202) #932 + rama de la ROI de V750-B (cd5aa300c)
+--- control: la prueba en la rama de la ROI sola
+................................                                         [100%]
+32 passed in 0.87s
+merge #932 + roi: LIMPIO 7182b9357
+ # Estos 34 NO tienen TIF de MIROVA: (X0, Y0) es el UTM del lat/lon de volcanoes.yaml (la regla de 8 de los 11),
+escrito C:\Users\nmend\AppData\Local\Temp\pytest-of-nmend\pytest-3280\test_aplicar_dos_veces_deja_so2\grillas_mirova.yaml
+16 failed, 16 passed in 1.72s
+--- cuáles fallan
+--- entradas en grillas_mirova.yaml:
+45
+FIN
