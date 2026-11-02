@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 15:42 a 16:00 UTC (S173): D1 a D7 «sí»; «en el resto haz lo que recomiendes»
+- Nicolás: «de1 a d7 si, en el resto hace lo que recomiendes». Regla de reversión ronda 3 (`e617ad667`, sha256 LF
+  `18887bac`): D1 a D7 contestadas; la regla entra a main con B porque A entró sin ella; 208 y 209 se arreglan en B.
+  Falta su verificador limpio (Fable) y la frase de sello.
+- Implementador (Opus, high) sobre `claude/s173-modd-flip` en `D:/vrp-trabajo/worktrees/s173-moddB`: merge de main,
+  flag apartado de las claves MxD03 con prueba `git merge-file` (208), paso en `nrt.yml` que falla con `ERROR processing`
+  de MODIS (209, V2-02), ficha v1.18 corregida (§4.1). Sin merge ni despacho.
+- Implementador (Opus, high) en `C:/Users/nmend/vrp-wt/s173-sombra34-dec`, rama `claude/s173-sombra34-decisiones`:
+  decisión 3 (marcar en la lectura las pasadas con píxeles a menos de 4 km del vecino) y decisión 4 (sombras fuera de
+  Pages y del disparo del deploy, con censo de consumidores antes). Abre PR, no mergea.
+- 207: sin código; la regla §4.1 ya fija el encendido por la vigilancia (`encendido_modis_utc`) y explica la franja.
+- Pre-registro retro: R-1 a R-15 «sí» (todas las recomendaciones lo eran). Falta la frase de sello.
+- Disco: D: 4,8 GB libres (cerca de la parada de 3 GB); el worktree nuevo va en C: (33 GB).
+
 ### 2026-11-02 15:25 UTC (S173): #933 (PR A, infraestructura inerte de MODIS) mergeado con frase de Nicolás
 - Frase «Sí, mergear #933». CI `pytest` verde (5m7s); `gh pr merge 933 --merge --match-head-commit f8f37cec9`;
   merge commit `eb4ae1c96` (2 padres) en main, 2026-11-02T15:25:53Z, comprobado con `gh api .../commits/main`.

@@ -1,6 +1,6 @@
 # Pre-registro: prueba retrospectiva del paquete de las tres vías «código MIROVA» en los 11 Tier A
 
-Estado: **BORRADOR, RONDA 3, SIN SELLO** (hora del servidor de GitHub al empezar la ronda 3: 2026-11-02 12:52:40 GMT,
+Estado: **BORRADOR, RONDA 3, SIN SELLO; R-1 a R-15 contestadas «sí» (§12)** (hora del servidor de GitHub al empezar la ronda 3: 2026-11-02 12:52:40 GMT,
 `gh api -i repos/MendozaVolcanic/VRP-chile`, cabecera `Date`). Ronda 1: un agente de S172 la escribió a pedido de la
 coordinadora (hora del servidor al empezar: 2026-11-02 01:36:17 UTC) y la coordinadora la commiteó en `loop/activo`
 como `experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md`, commit `01be21ff5` (01:42:57 UTC; sha256 del
@@ -624,6 +624,9 @@ apenas termine V750-B, y VIIRS 750 después. Apagar un sensor salta su proceso p
 ---
 
 ## 12. Qué decide Nicolás (con recomendación)
+
+**Contestadas el 2026-11-02 (servidor 15:42 UTC): R-1 a R-15, «sí» las quince** (Nicolás, ante la lista de
+pendientes: «en el resto haz lo que recomiendes»; las quince recomendaciones son «Sí»). Falta la frase de sello.
 
 Cada fila se contesta con una sola palabra, «sí» o «no», y «sí» acepta la recomendación de esa fila. Un «sí a todo»
 acepta las quince recomendaciones (ronda 3: R-2, R-3, R-6, R-8, R-11 y R-12 reescritas para que «sí» tenga una sola
