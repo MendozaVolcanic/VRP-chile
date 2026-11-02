@@ -1260,4 +1260,9 @@ sin grilla; con 45 de 45 queda vacío).
 
 **Batería** (`probar_sombra.py`, un proceso, árbol quieto, sobre `b7d5e8cba` más este diff sin commitear, 2026-11-02
 01:30:52 a 01:38:47 UTC): **275 de 275**, sale 0, sin secciones caídas (253 de la base más las 22 nuevas;
-`probar_sombra_salida.txt`). El nulo de S09 a S12 va abajo cuando termine.
+`probar_sombra_salida.txt`). Commit `3e8fe64e5`.
+
+**Nulo de S09 a S12** (`mutar_sombra.py --hilos 1 --solo S09,S10,S11,S12`, `3e8fe64e5`, 2026-11-02 01:40:39 a 02:18
+UTC; S09 es la de VR172-01, cuya corrida anterior se había interrumpido): identidad PASA, CONTROL y CONTROL_SECCION
+CAIDA, **4 de 4 atrapadas por aserción**, 0 caídas, 0 sobrevivientes (`mutar_sombra_repaso_salida.txt`, a continuación
+de la corrida de S01 a S08).
