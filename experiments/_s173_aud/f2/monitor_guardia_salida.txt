@@ -1,0 +1,17 @@
+# 204: monitores sobre el árbol A+B+#932 (a4ce2182a4ecc19b155abadac666be0f518e2111)
+## nrt-monitor.yml: líneas con guardia
+(0 líneas)
+## nrt-monitor.yml: líneas con sombra-34 / sombra-codigo-mirova (control)
+140:      # (sombra-codigo-mirova.yml, cron diario 15:00 UTC) no la vigilaba nadie. Mismo mecanismo que el NRT: la
+156:                owner, repo, workflow_id: 'sombra-codigo-mirova.yml', per_page: 30 })).data.workflow_runs || [];
+188:              '1. ¿El workflow esta desactivado o GitHub no entrego el evento `schedule`? (Actions, sombra-codigo-mirova.yml)\n' +
+216:              { wf: 'sombra-34.yml', desde: M.SOMBRA_34_DESDE, titulo: 'Sombra de los 34: sin corrida verde en 26 h' },
+217:              { wf: 'vigilancia-sombra-34.yml', desde: M.VIGILANCIA_34_DESDE,
+## medir_cadencia_cron.py: guardia
+(0 líneas)
+## audit-weekly vigilado por algún workflow (fuera de sí mismo)
+.github/workflows/reproc-s124-ndc-focus.yml:44:  # Grupo PROPIO, no el compartido `push-main`. Leccion S123: audit-weekly quedo
+.github/workflows/sync-mirova-csv.yml:5:#   este cron cada hora; el OCR sólo lo traía `audit-weekly.yml`, una vez por
+.github/workflows/sync-mirova-csv.yml:18:# - `audit-weekly.yml` sigue bajando los dos a la misma ruta: es idempotente,
+.github/workflows/vigilancia-sombra.yml:29:  # Grupo propio (como audit-weekly): el push tiene su bucle de reintento, que es la defensa real
+.github/workflows/vigilancia-sombra.yml:51:      # snapshot solo se refresca los lunes (audit-weekly) y una alerta de anoche tiene que poder disparar hoy.

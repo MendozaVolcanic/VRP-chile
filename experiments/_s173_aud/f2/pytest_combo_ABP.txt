@@ -1,0 +1,44 @@
+# combo A+B+#932 arbol a4ce2182a; Mon Nov  2 12:29:18 UTC 2026
+........................................................................ [  8%]
+...................................................................F.... [ 16%]
+.......ssss............ss............................................... [ 24%]
+........................................................................ [ 32%]
+........................................................................ [ 40%]
+........................................................................ [ 48%]
+........................................................................ [ 56%]
+........................................................................ [ 64%]
+...........................................s............................ [ 72%]
+........................................................................ [ 80%]
+........................................................................ [ 88%]
+........................................................................ [ 96%]
+............................                                             [100%]
+================================== FAILURES ===================================
+_ test_todo_perfil_derivado_que_nombra_un_workflow_programado_tiene_valor_decidido _
+
+    def test_todo_perfil_derivado_que_nombra_un_workflow_programado_tiene_valor_decidido():
+        derivados = set()
+        for f in PERFILES.glob("*.yaml"):
+            cfg = yaml.safe_load(f.read_text(encoding="utf-8"))
+            if isinstance(cfg, dict) and cfg.get("extends") == "mirova_equivalent":
+                derivados.add(f.stem)
+        nombrados = set()
+        for wf in _programados():
+            txt = wf.read_text(encoding="utf-8")
+            nombrados |= {n for n in derivados if re.search(r"(?<![A-Za-z0-9_])" + re.escape(n) + r"(?![A-Za-z0-9_])", txt)}
+        assert nombrados, "control: algún perfil derivado aparece en un workflow programado"
+        sin_decidir = nombrados - set(VIVOS)
+>       assert not sin_decidir, f"perfiles vivos sin valor decidido de la vía de MODIS: {sorted(sin_decidir)}"
+E       AssertionError: perfiles vivos sin valor decidido de la vía de MODIS: ['sombra_34']
+E       assert not {'sombra_34'}
+
+tests\test_guard_modis_codigo_mirova_encendido_s172.py:110: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_guard_modis_codigo_mirova_encendido_s172.py::test_todo_perfil_derivado_que_nombra_un_workflow_programado_tiene_valor_decidido
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: backfill-tier-a.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: guardia-k-modis.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: nrt.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: reproc-chunked.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: sombra-34.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_guard_timeout_vs_ventana_s129.py:102: sombra-codigo-mirova.yml no declara fechas por defecto parseables
+SKIPPED [1] tests\test_probe_etapas_s135.py:252: yml archivado (regla S80 de plantillas)
+1 failed, 884 passed, 7 skipped in 202.26s (0:03:22)

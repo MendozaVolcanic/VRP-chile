@@ -1,0 +1,47 @@
+lector cargado: RUTAS_REGIMEN=('pipeline/', 'volcanoes.yaml', 'scripts/run_pipeline.py', '.github/workflows/sombra-codigo-mirova.yml')
+PERFILES_REGIMEN=('pipeline/profiles/mirova_equivalent.yaml', 'pipeline/profiles/sombra_codigo_mirova.yaml'); VOLCANES_GRILLA_REGIMEN=11
+
+== A: 1 archivos de RUTAS_REGIMEN cambian contra main; significativos para S8: []
+   pipeline/profiles/guardia_k_modis.yaml: no cuenta
+
+== A+B: 6 archivos de RUTAS_REGIMEN cambian contra main; significativos para S8: []
+   pipeline/process_modis.py: no cuenta
+   pipeline/profiles/_s146_ab_control.yaml: no cuenta
+   pipeline/profiles/experimental.yaml: no cuenta
+   pipeline/profiles/experimental_ndc_focus.yaml: no cuenta
+   pipeline/profiles/guardia_k_modis.yaml: no cuenta
+   pipeline/profiles/mirova_equivalent.yaml: no cuenta
+
+== A+#932: 3 archivos de RUTAS_REGIMEN cambian contra main; significativos para S8: []
+   pipeline/grillas_mirova.yaml: no cuenta
+   pipeline/profiles/guardia_k_modis.yaml: no cuenta
+   pipeline/profiles/sombra_34.yaml: no cuenta
+
+== A+B+#932: 8 archivos de RUTAS_REGIMEN cambian contra main; significativos para S8: []
+   pipeline/grillas_mirova.yaml: no cuenta
+   pipeline/process_modis.py: no cuenta
+   pipeline/profiles/_s146_ab_control.yaml: no cuenta
+   pipeline/profiles/experimental.yaml: no cuenta
+   pipeline/profiles/experimental_ndc_focus.yaml: no cuenta
+   pipeline/profiles/guardia_k_modis.yaml: no cuenta
+   pipeline/profiles/mirova_equivalent.yaml: no cuenta
+   pipeline/profiles/sombra_34.yaml: no cuenta
+
+== tag lector fc3912cb2: 1 archivos de RUTAS_REGIMEN cambian contra main; significativos para S8: ['.github/workflows/sombra-codigo-mirova.yml']
+   .github/workflows/sombra-codigo-mirova.yml: SIGNIFICATIVO
+
+== controles (POS debe dar True, NEG debe dar False)
+   POS perfil: anomaly_k cambiado: True
+   NEG perfil: sólo enable_modis_codigo_mirova: False
+   POS grilla: x0 de Lascar +1 m: True
+   NEG grilla: las 34 de #932 agregadas: False
+   POS .py: una línea de código en process_modis.py: True
+   NEG .py: un comentario en process_modis.py: False
+
+== S0: sha256 LF de los 16 archivos del sello, por árbol (OK = igual al sellado)
+   main (a3c5a9b49): 15 de 16 OK; distintos: ['experiments/_s162_v375/e_adenda2/leer_posicion_v375e.py (no existe)']
+   A: 13 de 16 OK; distintos: ['experiments/_s162_v375/e_adenda2/leer_posicion_v375e.py (no existe)', 'scripts/auto_audit_weekly.py', 'frontend/index.html']
+   A+B: 12 de 16 OK; distintos: ['experiments/_s162_v375/e_adenda2/leer_posicion_v375e.py (no existe)', 'scripts/auto_audit_weekly.py', 'frontend/index.html', 'pipeline/profiles/mirova_equivalent.yaml']
+   A+#932: 13 de 16 OK; distintos: ['experiments/_s162_v375/e_adenda2/leer_posicion_v375e.py (no existe)', 'scripts/auto_audit_weekly.py', 'frontend/index.html']
+   A+B+#932: 12 de 16 OK; distintos: ['experiments/_s162_v375/e_adenda2/leer_posicion_v375e.py (no existe)', 'scripts/auto_audit_weekly.py', 'frontend/index.html', 'pipeline/profiles/mirova_equivalent.yaml']
+   tag lector fc3912cb2: 16 de 16 OK; distintos: []

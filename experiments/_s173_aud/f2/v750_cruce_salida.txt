@@ -1,0 +1,65 @@
+# Cruce de archivos de las ramas remotas de VIIRS 750 con A, B y #932, y merge-tree contra la combinación A+B+#932 (a4ce2182a) y contra main
+# Pregunta 1: un archivo en común que choca da rc=1 en merge-tree; uno en común que no choca se lista igual (común sin conflicto).
+# Pregunta 2: control positivo al final de sim_merges_salida.txt (conflicto forzado da rc=1).
+== origin/claude/s162-viirs750-2-918174 aa5583646 2026-11-01T15:18:26-03:00 base=a0ce7c376 archivos=164 (pipeline/: 0)
+   pipeline/ que toca: 
+   en común con A∪B: 
+   en común con #932: 
+   merge-tree contra A+B+#932: rc=0 
+   merge-tree contra main sola: rc=0 
+== origin/s169-roi-v750 cd5aa300c 2026-10-30T01:31:02-03:00 base=443da8649 archivos=4 (pipeline/: 0)
+   pipeline/ que toca: 
+   en común con A∪B: 
+   en común con #932: 
+   merge-tree contra A+B+#932: rc=0 
+   merge-tree contra main sola: rc=0 
+== origin/claude/s162-viirs750-f63ef4 27973d13a 2026-10-24T16:50:20-03:00 base=b05d60527 archivos=60 (pipeline/: 0)
+   pipeline/ que toca: 
+   en común con A∪B: 
+   en común con #932: 
+   merge-tree contra A+B+#932: rc=1 experiments/_s162_v750a/equivalencia_v750a.py  Auto-merging experiments/_s162_v750a/equivalencia_v750a.py CONFLICT (add/add): Merge conflict in experiments/_s162_v750a/equivalencia_v750a.py 
+   merge-tree contra main sola: rc=1    or: git merge-tree [--trivial-merge] <base-tree> <branch1> <branch2>      --write-tree          do a real merge instead of a trivial merge     --trivial-merge       do a trivial merge only     --[no-]messages       also show informational/conflict messages     --quiet               suppress all output; only exit status wanted     -z                    separate paths with the NUL character     --name-only           list filenames without modes/oids/stages     --allow-unrelated-histories                           allow merging unrelated histories     --stdin               perform multiple merges, one per line of input 
+== origin/s162-v750a-evaluador 7d5e723c6 2026-10-25T04:43:24-03:00 base=b05d60527 archivos=80 (pipeline/: 0)
+   pipeline/ que toca: 
+   en común con A∪B: 
+   en común con #932: 
+   merge-tree contra A+B+#932: rc=1 experiments/_s162_v750a/equivalencia_v750a.py  Auto-merging experiments/_s162_v750a/equivalencia_v750a.py CONFLICT (add/add): Merge conflict in experiments/_s162_v750a/equivalencia_v750a.py 
+   merge-tree contra main sola: rc=1    or: git merge-tree [--trivial-merge] <base-tree> <branch1> <branch2>      --write-tree          do a real merge instead of a trivial merge     --trivial-merge       do a trivial merge only     --[no-]messages       also show informational/conflict messages     --quiet               suppress all output; only exit status wanted     -z                    separate paths with the NUL character     --name-only           list filenames without modes/oids/stages     --allow-unrelated-histories                           allow merging unrelated histories     --stdin               perform multiple merges, one per line of input 
+== origin/loop/1.10-max-v750 8c4ccfbf6 2026-10-14T09:52:42-03:00 base=89077f5ae archivos=4 (pipeline/: 0)
+   pipeline/ que toca: 
+   en común con A∪B: 
+   en común con #932: 
+   merge-tree contra A+B+#932: rc=0 
+   merge-tree contra main sola: rc=0 
+== origin/loop/1.5-d25-v750-disco 5357c46b8 2026-10-14T10:17:46-03:00 base=b2187648e archivos=17 (pipeline/: 0)
+   pipeline/ que toca: 
+   en común con A∪B: .github/workflows/probe-s151-d25-v750.yml 
+   en común con #932: 
+   merge-tree contra A+B+#932: rc=1 .github/workflows/probe-s151-d25-v750.yml experiments/_s151_d25_v750_disco/README.md experiments/_s151_d25_v750_disco/analizar_probe.py experiments/_s151_d25_v750_disco/probe_d25_v750.py  Auto-merging .github/workflows/probe-s151-d25-v750.yml CONFLICT (add/add): Merge conflict in .github/workflows/probe-s151-d25-v750.yml Auto-merging experiments/_s151_d25_v750_disco/README.md CONFLICT (add/add): Merge conflict in experiments/_s151_d25_v750_disco/README.md Auto-merging experiments/_s151_d25_v750_disco/analizar_probe.py CONFLICT (add/add): Merge conflict in experiments/_s151_d25_v750_disco/analizar_probe.py Auto-merging experiments/_s151_d25_v750_disco/probe_d25_v750.py CONFLICT (add/add): Merge conflict in experiments/_s151_d25_v750_disco/probe_d25_v750.py 
+   merge-tree contra main sola: rc=1    or: git merge-tree [--trivial-merge] <base-tree> <branch1> <branch2>      --write-tree          do a real merge instead of a trivial merge     --trivial-merge       do a trivial merge only     --[no-]messages       also show informational/conflict messages     --quiet               suppress all output; only exit status wanted     -z                    separate paths with the NUL character     --name-only           list filenames without modes/oids/stages     --allow-unrelated-histories                           allow merging unrelated histories     --stdin               perform multiple merges, one per line of input 
+== origin/s158-v750-recall c18d3b141 2026-10-21T09:46:20-03:00 base=8471add46 archivos=29 (pipeline/: 0)
+   pipeline/ que toca: 
+   en común con A∪B: 
+   en común con #932: 
+   merge-tree contra A+B+#932: rc=0 
+   merge-tree contra main sola: rc=0 
+# Control: las mismas ramas contra main sola (para separar conflictos previos de los que agregan A, B y #932)
+origin/claude/s162-viirs750-f63ef4 contra main: rc=1 CONFLICT (add/add): Merge conflict in experiments/_s162_v750a/equivalencia_v750a.py 
+origin/s162-v750a-evaluador contra main: rc=1 CONFLICT (add/add): Merge conflict in experiments/_s162_v750a/equivalencia_v750a.py 
+origin/loop/1.5-d25-v750-disco contra main: rc=1 CONFLICT (add/add): Merge conflict in experiments/_s151_d25_v750_disco/README.md CONFLICT (add/add): Merge conflict in experiments/_s151_d25_v750_disco/analizar_probe.py CONFLICT (add/add): Merge conflict in experiments/_s151_d25_v750_disco/probe_d25_v750.py 
+origin/claude/s162-viirs750-2-918174 contra main: rc=0 
+origin/s169-roi-v750 contra main: rc=0 
+
+# s169-roi-v750 archivos:
+experiments/_s169_roi_v750/mutar_roi_v750b.py
+experiments/_s169_roi_v750/mutar_roi_v750b_salida.txt
+scripts/roi_v750b_a_grillas.py
+tests/test_roi_v750b_variantes_s169.py
+
+# Complemento: las dos ramas de octubre que faltaban
+== origin/s158-v750-probe 806c50c22 2026-10-21T09:06:44-03:00 archivos=13 pipeline/=0 comunes A∪B:  comunes #932: 
+   contra A+B+#932 rc=1 CONFLICT (add/add): Merge conflict in experiments/_s158_v750/README.md CONFLICT (add/add): Merge conflict in experiments/_s158_v750/anatomia.py CONFLICT (add/add): Merge conflict in experiments/_s158_v750/anatomia_salida.txt CONFLICT (add/add): Merge conflict in experiments/_s158_v750/noches.py CONFLICT (add/add): Merge conflict in experiments/_s158_v750/noches_salida.txt 
+   contra main rc=1 CONFLICT (add/add): Merge conflict in experiments/_s158_v750/README.md CONFLICT (add/add): Merge conflict in experiments/_s158_v750/anatomia.py CONFLICT (add/add): Merge conflict in experiments/_s158_v750/anatomia_salida.txt CONFLICT (add/add): Merge conflict in experiments/_s158_v750/noches.py CONFLICT (add/add): Merge conflict in experiments/_s158_v750/noches_salida.txt 
+== origin/s158-v750-probe2 bc18cd404 2026-10-21T09:34:12-03:00 archivos=28 pipeline/=0 comunes A∪B:  comunes #932: 
+   contra A+B+#932 rc=1 CONFLICT (add/add): Merge conflict in experiments/_s158_v750/README.md CONFLICT (add/add): Merge conflict in experiments/_s158_v750/analizar_probe.py CONFLICT (add/add): Merge conflict in experiments/_s158_v750/analizar_probe_salida.txt CONFLICT (add/add): Merge conflict in experiments/_s158_v750/anatomia.py CONFLICT (add/add): Merge conflict in experiments/_s158_v750/anatomia_salida.txt CONFLICT (add/add): Merge conflict in experiments/_s158_v750/noches.py CONFLICT (add/add): Merge conflict in experiments/_s158_v750/noches_salida.txt 
+   contra main rc=1 CONFLICT (add/add): Merge conflict in experiments/_s158_v750/README.md CONFLICT (add/add): Merge conflict in experiments/_s158_v750/analizar_probe.py CONFLICT (add/add): Merge conflict in experiments/_s158_v750/analizar_probe_salida.txt CONFLICT (add/add): Merge conflict in experiments/_s158_v750/anatomia.py CONFLICT (add/add): Merge conflict in experiments/_s158_v750/anatomia_salida.txt CONFLICT (add/add): Merge conflict in experiments/_s158_v750/noches.py CONFLICT (add/add): Merge conflict in experiments/_s158_v750/noches_salida.txt 

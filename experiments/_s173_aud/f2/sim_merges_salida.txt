@@ -1,0 +1,75 @@
+main=a3c5a9b49 tree 7e0654314feed4a342ac02e203f982b709cd234b | base AB=d3cd0b2ae | A=0a0dae344 | B=c9525f994 | #932=28183712a (base 14fb62030a186fda02ce2ba172866cf01408eeb9)
+== Estrategia merge commit (la base natural de cada merge)
+-- orden A -> B -> #932
+  [main+A (base d3cd)] rc=0 tree=9af3a621b8a130f69cea1bb22c597436d18210b4
+  [+B (base A, A ancestro de B)] rc=0 tree=dc36546d11f7bf623fa97229e431f730af0b64c9
+  [+#932 (base 14fb)] rc=0 tree=a4ce2182a4ecc19b155abadac666be0f518e2111
+  [revert B tras #932: base=estado con B, theirs=estado previo a B] rc=0 tree=255163095061da6407652965c21bef80c0417a05
+-- orden A -> #932 -> B
+  [+#932] rc=0 tree=255163095061da6407652965c21bef80c0417a05
+  [+B (base A)] rc=0 tree=a4ce2182a4ecc19b155abadac666be0f518e2111
+  [revert B inmediato] rc=0 tree=255163095061da6407652965c21bef80c0417a05
+-- orden #932 -> A -> B
+  [main+#932] rc=0 tree=98ff085ee2d1160c09e3ad948dacfb8728d571b7
+  [+A (base d3cd)] rc=0 tree=255163095061da6407652965c21bef80c0417a05
+  [+B (base A)] rc=0 tree=a4ce2182a4ecc19b155abadac666be0f518e2111
+  [revert B inmediato] rc=0 tree=255163095061da6407652965c21bef80c0417a05
+== Estrategia squash (GitHub: base = merge-base(main del día, rama) = rama base original)
+-- orden A -> B -> #932 (B sin rebasar sobre el squash de A)
+  [squash A] rc=0 tree=9af3a621b8a130f69cea1bb22c597436d18210b4
+  [squash B (base d3cd, A ya en main como squash)] rc=1 tree=ad74a232c6e62427c7c0f64f47c08c1a39008e96
+      ad74a232c6e62427c7c0f64f47c08c1a39008e96
+      tests/test_vigilancia_guardia_modis_s172.py
+      
+      Auto-merging frontend/index.html
+      Auto-merging tests/test_vigilancia_guardia_modis_s172.py
+      CONFLICT (add/add): Merge conflict in tests/test_vigilancia_guardia_modis_s172.py
+  [squash #932] rc=0 tree=7ca98f0175f93b21cd7398d8edbd262b3ba42971
+  [revert squash B tras #932] rc=0 tree=255163095061da6407652965c21bef80c0417a05
+-- orden #932 -> A -> B (squash)
+  [squash #932] rc=0 tree=98ff085ee2d1160c09e3ad948dacfb8728d571b7
+  [squash A] rc=0 tree=255163095061da6407652965c21bef80c0417a05
+  [squash B] rc=1 tree=5f58c338e1c730bd305c1d9db2bbc5affe31281c
+      5f58c338e1c730bd305c1d9db2bbc5affe31281c
+      tests/test_vigilancia_guardia_modis_s172.py
+      
+      Auto-merging frontend/index.html
+      Auto-merging tests/test_sombra_codigo_mirova_s167.py
+      Auto-merging tests/test_vigilancia_guardia_modis_s172.py
+      CONFLICT (add/add): Merge conflict in tests/test_vigilancia_guardia_modis_s172.py
+  [revert squash B inmediato] rc=0 tree=255163095061da6407652965c21bef80c0417a05
+-- orden A -> #932 -> B (squash)
+  [squash #932 tras A] rc=0 tree=255163095061da6407652965c21bef80c0417a05
+  [squash B] rc=1 tree=5f58c338e1c730bd305c1d9db2bbc5affe31281c
+      5f58c338e1c730bd305c1d9db2bbc5affe31281c
+      tests/test_vigilancia_guardia_modis_s172.py
+      
+      Auto-merging frontend/index.html
+      Auto-merging tests/test_sombra_codigo_mirova_s167.py
+      Auto-merging tests/test_vigilancia_guardia_modis_s172.py
+      CONFLICT (add/add): Merge conflict in tests/test_vigilancia_guardia_modis_s172.py
+== Igualdad de árboles finales (los tres órdenes y dos estrategias deberían dar el mismo árbol)
+  X3=a4ce2182a4ecc19b155abadac666be0f518e2111
+  Y3=a4ce2182a4ecc19b155abadac666be0f518e2111
+  Z3=a4ce2182a4ecc19b155abadac666be0f518e2111
+  S3=7ca98f0175f93b21cd7398d8edbd262b3ba42971
+  U3=5f58c338e1c730bd305c1d9db2bbc5affe31281c
+  V3=5f58c338e1c730bd305c1d9db2bbc5affe31281c
+== Reversión de B: ¿queda exactamente main+A+#932 (sin B)?
+  esperado (main+A+#932) Y2=255163095061da6407652965c21bef80c0417a05
+  R1 (merge commit, revert tras #932) = 255163095061da6407652965c21bef80c0417a05  IGUAL
+  RS1 (squash, revert tras #932)       = 255163095061da6407652965c21bef80c0417a05  IGUAL
+  R2 = 255163095061da6407652965c21bef80c0417a05 R3 = 255163095061da6407652965c21bef80c0417a05 RU = 255163095061da6407652965c21bef80c0417a05 (deben ser = 255163095061da6407652965c21bef80c0417a05 / 255163095061da6407652965c21bef80c0417a05 / 255163095061da6407652965c21bef80c0417a05)
+== Árbol combinado exportado para pruebas
+COMBO_ABP=a4ce2182a4ecc19b155abadac666be0f518e2111
+COMBO_AP=255163095061da6407652965c21bef80c0417a05
+COMBO_AB=dc36546d11f7bf623fa97229e431f730af0b64c9
+COMBO_A=9af3a621b8a130f69cea1bb22c597436d18210b4
+== Control positivo del instrumento: forzar conflicto (B contra un árbol con mirova_equivalent.yaml distinto)
+warning: in the working copy of 'C:/Users/nmend/AppData/Local/Temp/tmp.d3Z4df1wTS/me.yaml', LF will be replaced by CRLF the next time Git touches it
+  [CONTROL: B sobre main+A con el flag editado distinto (debe dar rc=1)] rc=1 tree=a12d95947135ca81ddec5f98e6f3fda543aec458
+      a12d95947135ca81ddec5f98e6f3fda543aec458
+      pipeline/profiles/mirova_equivalent.yaml
+      
+      Auto-merging pipeline/profiles/mirova_equivalent.yaml
+      CONFLICT (content): Merge conflict in pipeline/profiles/mirova_equivalent.yaml

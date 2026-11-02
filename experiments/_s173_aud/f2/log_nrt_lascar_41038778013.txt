@@ -1,0 +1,1140 @@
+process (Lascar)	UNKNOWN STEP	﻿2026-10-30T10:10:27.3672818Z Current runner version: '2.338.0'
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3698220Z ##[group]Runner Image Provisioner
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3699615Z Hosted Compute Agent
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3700172Z Version: 20261021.618
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3700746Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3701535Z Build Date: 2026-10-21T00:45:21Z
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3702183Z Worker ID: {ca7ad348-06a7-4c26-a2b9-a9c52a7684de}
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3702883Z Region: centralus
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3703435Z Cloud: Azure
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3703944Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3705490Z ##[group]Operating System
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3706103Z Ubuntu
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3706650Z 24.04.5
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3707137Z LTS
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3707655Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3708216Z ##[group]Runner Image
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3708991Z Image: ubuntu-24.04
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3709574Z Version: 20261025.353.1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3710803Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3712282Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3713207Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3714277Z ##[group]GITHUB_TOKEN Permissions
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3716692Z Contents: write
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3717260Z Metadata: read
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3717748Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3720308Z Secret source: Actions
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3721355Z Cache mode: write
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.3722521Z Prepare workflow directory
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.4051630Z Prepare all required actions
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.4103248Z Getting action download info
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.6543518Z Download action repository 'actions/checkout@v5' (SHA:fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.7243752Z Download action repository 'actions/setup-python@v6' (SHA:ece7cb06caefa5fff74198d8649806c4678c61a1)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.8801229Z Complete job name: process (Lascar)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9550949Z ##[group]Run if [ "$DISPATCH_VOLCANO" != "" ] && [ "$DISPATCH_VOLCANO" != "Lascar" ]; then
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9552067Z ^[[36;1mif [ "$DISPATCH_VOLCANO" != "" ] && [ "$DISPATCH_VOLCANO" != "Lascar" ]; then^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9552996Z ^[[36;1m  echo "skip=true" >> $GITHUB_OUTPUT^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9553755Z ^[[36;1m  echo "Skipping Lascar (dispatch filter=$DISPATCH_VOLCANO)"^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9554494Z ^[[36;1melse^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9555080Z ^[[36;1m  echo "skip=false" >> $GITHUB_OUTPUT^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9555703Z ^[[36;1mfi^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9573222Z shell: /usr/bin/bash -e {0}
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9574176Z env:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9574711Z   DISPATCH_VOLCANO: 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:27.9575211Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0052298Z ##[group]Run actions/checkout@v5
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0052857Z with:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0053279Z   repository: MendozaVolcanic/VRP-chile
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0056882Z   token: ***
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0057272Z   ssh-strict: true
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0057668Z   ssh-user: git
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0058108Z   persist-credentials: true
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0058716Z   clean: true
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0059126Z   sparse-checkout-cone-mode: true
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0059602Z   fetch-depth: 1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0060049Z   fetch-tags: false
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0060459Z   show-progress: true
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0060868Z   lfs: false
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0061249Z   submodules: false
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0061663Z   set-safe-directory: true
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0062127Z   allow-unsafe-pr-checkout: false
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.0062606Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2485563Z Syncing repository: MendozaVolcanic/VRP-chile
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2489652Z ##[group]Getting Git version info
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2491472Z Working directory is '/home/runner/work/VRP-chile/VRP-chile'
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2493977Z [command]/usr/bin/git version
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2552320Z git version 2.56.0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2580809Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2591108Z Temporarily overriding HOME='/home/runner/work/_temp/9027bc2e-8237-4e22-b5bf-e29b8a758678' before making global git config changes
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2594724Z Adding repository directory to the temporary git global config as a safe directory
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2597371Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/VRP-chile/VRP-chile
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2641556Z Deleting the contents of '/home/runner/work/VRP-chile/VRP-chile'
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2645974Z ##[group]Initializing the repository
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2650019Z [command]/usr/bin/git init /home/runner/work/VRP-chile/VRP-chile
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2754184Z hint: Using 'master' as the name for the initial branch. This default branch name
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2755831Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2756938Z hint: to use in all of your new repositories, which will suppress this warning,
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2757778Z hint: call:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2758309Z hint:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2759176Z hint: 	git config --global init.defaultBranch <name>
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2760072Z hint:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2761188Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2763277Z hint: 'development'. The just-created branch can be renamed via this command:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2765064Z hint:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2766076Z hint: 	git branch -m <name>
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2767192Z hint:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2768740Z hint: Disable this message with "git config set advice.defaultBranchName false"
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2771236Z Initialized empty Git repository in /home/runner/work/VRP-chile/VRP-chile/.git/
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2775881Z [command]/usr/bin/git remote add origin https://github.com/MendozaVolcanic/VRP-chile
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2827056Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2829135Z ##[group]Disabling automatic garbage collection
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2830916Z [command]/usr/bin/git config --local gc.auto 0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2864379Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2865268Z ##[group]Setting up auth
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2873634Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.2909884Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.3253474Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.3313446Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.3536042Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.3572142Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.3755872Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.3793048Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.3794925Z ##[group]Fetching the repository
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:10:28.3809307Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +b924a87a0a099849b9f9fd8489f438665ab4bc2e:refs/remotes/origin/main
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:28.7476185Z From https://github.com/MendozaVolcanic/VRP-chile
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:28.7482325Z  * [new ref]         b924a87a0a099849b9f9fd8489f438665ab4bc2e -> origin/main
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:28.7485800Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:28.7486469Z ##[group]Determining the checkout info
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:28.7487128Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:28.7489145Z [command]/usr/bin/git sparse-checkout disable
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:28.7538834Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:28.7564992Z ##[group]Checking out the ref
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:28.7578120Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:29.8397136Z Updating files:   2% (254/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:30.6659610Z Updating files:   3% (257/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:30.7839047Z Updating files:   4% (342/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.2625691Z Updating files:   4% (348/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.2739666Z Updating files:   5% (427/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.2836936Z Updating files:   6% (513/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.2941221Z Updating files:   7% (598/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.3040825Z Updating files:   8% (683/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.3132131Z Updating files:   9% (769/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.3329156Z Updating files:  10% (854/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.3395326Z Updating files:  11% (940/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.3797771Z Updating files:  12% (1025/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.3853237Z Updating files:  13% (1110/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.3899142Z Updating files:  14% (1196/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.3961079Z Updating files:  15% (1281/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.4850138Z Updating files:  16% (1366/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.4911954Z Updating files:  17% (1452/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.5063849Z Updating files:  18% (1537/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.5117815Z Updating files:  19% (1623/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.5160332Z Updating files:  20% (1708/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.5239496Z Updating files:  21% (1793/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.5364898Z Updating files:  22% (1879/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.5422384Z Updating files:  23% (1964/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.5458857Z Updating files:  24% (2049/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.5579929Z Updating files:  25% (2135/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.5842501Z Updating files:  26% (2220/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.5883819Z Updating files:  27% (2305/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.6160003Z Updating files:  28% (2391/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.6515090Z Updating files:  29% (2476/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.6563104Z Updating files:  30% (2562/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.6602446Z Updating files:  31% (2647/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.6713241Z Updating files:  32% (2732/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.6746884Z Updating files:  33% (2818/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.6798189Z Updating files:  34% (2903/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7062490Z Updating files:  35% (2988/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7096162Z Updating files:  36% (3074/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7193293Z Updating files:  37% (3159/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7254537Z Updating files:  38% (3245/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7299384Z Updating files:  39% (3330/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7382697Z Updating files:  40% (3415/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7520165Z Updating files:  41% (3501/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7589978Z Updating files:  42% (3586/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7675116Z Updating files:  43% (3671/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7680975Z Updating files:  43% (3743/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7708795Z Updating files:  44% (3757/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.7739850Z Updating files:  45% (3842/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.8147956Z Updating files:  46% (3928/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.8199148Z Updating files:  47% (4013/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.8236730Z Updating files:  48% (4098/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.8503645Z Updating files:  49% (4184/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.8569319Z Updating files:  50% (4269/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.8623262Z Updating files:  51% (4354/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:31.9088033Z Updating files:  52% (4440/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.0251641Z Updating files:  53% (4525/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.0415896Z Updating files:  54% (4610/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.0588819Z Updating files:  55% (4696/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.0689460Z Updating files:  56% (4781/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.0720774Z Updating files:  57% (4867/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.0788253Z Updating files:  58% (4952/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.0857389Z Updating files:  59% (5037/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.0975237Z Updating files:  60% (5123/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1008245Z Updating files:  61% (5208/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1063680Z Updating files:  62% (5293/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1100189Z Updating files:  63% (5379/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1217092Z Updating files:  64% (5464/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1419695Z Updating files:  65% (5550/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1467139Z Updating files:  66% (5635/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1581998Z Updating files:  67% (5720/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1673213Z Updating files:  68% (5806/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1848071Z Updating files:  69% (5891/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1914406Z Updating files:  70% (5976/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.1978715Z Updating files:  71% (6062/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.2010946Z Updating files:  72% (6147/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.2171580Z Updating files:  73% (6233/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.2236071Z Updating files:  74% (6318/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.2325004Z Updating files:  75% (6403/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.2379658Z Updating files:  76% (6489/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.2453280Z Updating files:  77% (6574/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.2574376Z Updating files:  78% (6659/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.2635143Z Updating files:  79% (6745/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.3247571Z Updating files:  80% (6830/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.3289550Z Updating files:  81% (6915/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.3345834Z Updating files:  82% (7001/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.3376374Z Updating files:  83% (7086/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.3675644Z Updating files:  84% (7172/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.3710706Z Updating files:  85% (7257/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.3753917Z Updating files:  86% (7342/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.3811156Z Updating files:  87% (7428/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.3845476Z Updating files:  88% (7513/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.3941970Z Updating files:  89% (7598/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4382227Z Updating files:  90% (7684/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4564379Z Updating files:  91% (7769/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4587381Z Updating files:  92% (7855/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4626775Z Updating files:  93% (7940/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4675001Z Updating files:  94% (8025/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4762682Z Updating files:  95% (8111/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4833390Z Updating files:  96% (8196/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4878581Z Updating files:  97% (8281/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4926237Z Updating files:  98% (8367/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4973426Z Updating files:  99% (8452/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4973991Z Updating files: 100% (8537/8537)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.4974809Z Updating files: 100% (8537/8537), done.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5071671Z Switched to a new branch 'main'
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5076679Z branch 'main' set up to track 'origin/main'.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5164822Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5210096Z [command]/usr/bin/git log -1 --format=%H
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5243815Z b924a87a0a099849b9f9fd8489f438665ab4bc2e
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5430430Z ##[group]Run actions/setup-python@v6
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5430716Z with:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5430923Z   python-version: 3.11
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5431146Z   cache: pip
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5431353Z   check-latest: false
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5433801Z   token: ***
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5434022Z   update-environment: true
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5434271Z   allow-prereleases: false
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5434502Z   freethreaded: false
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.5434724Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.6764981Z ##[group]Installed versions
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.6854952Z Successfully set up CPython (3.11.17)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:32.6855695Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:33.2236955Z [command]/opt/hostedtoolcache/Python/3.11.17/x64/bin/pip cache dir
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:33.4845956Z /home/runner/.cache/pip
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:33.6521615Z Cache hit for: setup-python-Linux-x64-24.04-Ubuntu-python-3.11.17-pip-751f046ea75e643696f19a49373db4a45544f32ffe40eaf60c388095e2e4becf
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:34.8039978Z Received 82585752 of 86780056 (95.2%), 78.8 MBs/sec
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:34.9209148Z Received 86780056 of 86780056 (100.0%), 74.1 MBs/sec
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:34.9209783Z Cache Size: ~83 MB (86780056 B)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:34.9343021Z [command]/usr/bin/tar -xf /home/runner/work/_temp/59eb3ece-695b-4f6a-a8e0-949cc634d2e9/cache.tzst -P -C /home/runner/work/VRP-chile/VRP-chile --use-compress-program unzstd
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0311678Z Cache restored successfully
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0344786Z Cache restored from key: setup-python-Linux-x64-24.04-Ubuntu-python-3.11.17-pip-751f046ea75e643696f19a49373db4a45544f32ffe40eaf60c388095e2e4becf
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0471435Z ##[group]Run pip install --upgrade pip
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0471807Z ^[[36;1mpip install --upgrade pip^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0472109Z ^[[36;1msudo apt-get install -y libhdf4-dev^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0472412Z ^[[36;1mpip install pyhdf^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0472712Z ^[[36;1mpip install earthaccess numpy h5py scipy pyyaml^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0489729Z shell: /usr/bin/bash -e {0}
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0490003Z env:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0490298Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0490756Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0491189Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0491574Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0491956Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0492355Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.0492718Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:35.4859253Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages (26.2.2)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:36.8304714Z Reading package lists...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.0850227Z Building dependency tree...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.0858637Z Reading state information...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.2608328Z The following additional packages will be installed:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.2614160Z   libhdf4-0 libjpeg-dev libjpeg-turbo8-dev libjpeg8-dev
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.2622549Z Suggested packages:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.2622967Z   libhdf4-doc hdf4-tools
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.2830875Z The following NEW packages will be installed:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.2838823Z   libhdf4-0 libhdf4-dev libjpeg-dev libjpeg-turbo8-dev libjpeg8-dev
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.3075139Z 0 upgraded, 5 newly installed, 0 to remove and 1 not upgraded.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.3075724Z Need to get 1060 kB of archives.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.3076268Z After this operation, 4236 kB of additional disk space will be used.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.3076883Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.3663888Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 libhdf4-0 amd64 4.2.16-4build1 [324 kB]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.4051774Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libjpeg-turbo8-dev amd64 2.1.5-2ubuntu2 [295 kB]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.4431211Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libjpeg8-dev amd64 8c-2ubuntu11 [1484 B]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.4789544Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libjpeg-dev amd64 8c-2ubuntu11 [1482 B]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.5149830Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 libhdf4-dev amd64 4.2.16-4build1 [438 kB]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.7875271Z Fetched 1060 kB in 0s (4725 kB/s)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8102673Z Selecting previously unselected package libhdf4-0:amd64.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8270610Z (Reading database ... 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8271111Z (Reading database ... 5%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8271788Z (Reading database ... 10%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8272342Z (Reading database ... 15%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8272610Z (Reading database ... 20%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8272883Z (Reading database ... 25%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8273141Z (Reading database ... 30%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8273391Z (Reading database ... 35%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8273634Z (Reading database ... 40%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8273872Z (Reading database ... 45%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8274171Z (Reading database ... 50%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.8303619Z (Reading database ... 55%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:37.9755025Z (Reading database ... 60%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:38.1829355Z (Reading database ... 65%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:38.3732338Z (Reading database ... 70%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:38.5823584Z (Reading database ... 75%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:38.7392084Z (Reading database ... 80%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:38.8814417Z (Reading database ... 85%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:38.9858793Z (Reading database ... 90%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.1314485Z (Reading database ... 95%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.1315682Z (Reading database ... 100%
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.1316445Z (Reading database ... 215504 files and directories currently installed.)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.1362463Z Preparing to unpack .../libhdf4-0_4.2.16-4build1_amd64.deb ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.1401121Z Unpacking libhdf4-0:amd64 (4.2.16-4build1) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.1608723Z Selecting previously unselected package libjpeg-turbo8-dev:amd64.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.1727737Z Preparing to unpack .../libjpeg-turbo8-dev_2.1.5-2ubuntu2_amd64.deb ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.1742479Z Unpacking libjpeg-turbo8-dev:amd64 (2.1.5-2ubuntu2) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.1958075Z Selecting previously unselected package libjpeg8-dev:amd64.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.2078794Z Preparing to unpack .../libjpeg8-dev_8c-2ubuntu11_amd64.deb ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.2094300Z Unpacking libjpeg8-dev:amd64 (8c-2ubuntu11) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.2250067Z Selecting previously unselected package libjpeg-dev:amd64.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.2370517Z Preparing to unpack .../libjpeg-dev_8c-2ubuntu11_amd64.deb ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.2380265Z Unpacking libjpeg-dev:amd64 (8c-2ubuntu11) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.2529566Z Selecting previously unselected package libhdf4-dev.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.2650165Z Preparing to unpack .../libhdf4-dev_4.2.16-4build1_amd64.deb ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.2661982Z Unpacking libhdf4-dev (4.2.16-4build1) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.3130718Z Setting up libjpeg-turbo8-dev:amd64 (2.1.5-2ubuntu2) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.3153422Z Setting up libhdf4-0:amd64 (4.2.16-4build1) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.3170206Z Setting up libhdf4-dev (4.2.16-4build1) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.3186603Z Setting up libjpeg8-dev:amd64 (8c-2ubuntu11) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.3204673Z Setting up libjpeg-dev:amd64 (8c-2ubuntu11) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.3227143Z Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.3477313Z Processing triggers for man-db (2.12.0-4build2) ...
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.3496031Z Not building database; man-db/auto-update is not 'true'.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.9486110Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.9486869Z Running kernel seems to be up-to-date.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.9487303Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.9487498Z No services need to be restarted.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.9487791Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.9488221Z No containers need to be restarted.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.9488746Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.9488958Z No user sessions are running outdated binaries.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.9489321Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:39.9489641Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:41.4965326Z Collecting pyhdf
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:41.4982196Z   Using cached pyhdf-0.11.7-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (2.8 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:41.7302119Z Collecting numpy (from pyhdf)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:41.7318664Z   Using cached numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:41.7354262Z Using cached pyhdf-0.11.7-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (3.3 MB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:41.7383344Z Using cached numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.9 MB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:41.7968258Z Installing collected packages: numpy, pyhdf
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:43.5972216Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:43.5980331Z Successfully installed numpy-2.4.6 pyhdf-0.11.7
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:43.9902152Z Collecting earthaccess
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:43.9920360Z   Using cached earthaccess-0.17.0-py3-none-any.whl.metadata (6.7 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:43.9950984Z Requirement already satisfied: numpy in /opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages (2.4.6)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.0352337Z Collecting h5py
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.0369964Z   Using cached h5py-3.16.0-cp311-cp311-manylinux_2_28_x86_64.whl.metadata (3.0 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.1553437Z Collecting scipy
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.1570977Z   Using cached scipy-1.17.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.2013494Z Collecting pyyaml
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.2032397Z   Using cached pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.2245535Z Collecting fsspec>=2025.2 (from earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.2260621Z   Using cached fsspec-2026.9.0-py3-none-any.whl.metadata (10 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.2595024Z Collecting importlib-resources>=6.3.2 (from earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.2610731Z   Using cached importlib_resources-7.1.0-py3-none-any.whl.metadata (4.0 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.2798760Z Collecting multimethod>=1.8 (from earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.2813237Z   Using cached multimethod-2.1-py3-none-any.whl.metadata (8.3 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.2968383Z Collecting pqdm>=0.1 (from earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.2983545Z   Using cached pqdm-0.2.0-py2.py3-none-any.whl.metadata (3.2 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.3150847Z Collecting python-cmr>=0.10.0 (from earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.3165484Z   Using cached python_cmr-0.13.0-py3-none-any.whl.metadata (10 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.3395235Z Collecting requests>=2.26 (from earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.3413764Z   Using cached requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.3619389Z Collecting s3fs>=2025.2 (from earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.3634452Z   Using cached s3fs-2026.9.0-py3-none-any.whl.metadata (1.2 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.3817350Z Collecting tenacity>=8.0 (from earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.3831997Z   Using cached tenacity-9.2.1-py3-none-any.whl.metadata (1.4 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.4006017Z Collecting tinynetrc>=1.3.1 (from earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.4021837Z   Using cached tinynetrc-1.3.1-py2.py3-none-any.whl.metadata (2.9 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.4215233Z Collecting typing-extensions>=4.10.0 (from earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.4230338Z   Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.4404705Z Collecting bounded-pool-executor (from pqdm>=0.1->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.4418624Z   Using cached bounded_pool_executor-0.0.3-py3-none-any.whl.metadata (2.7 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.4716143Z Collecting tqdm (from pqdm>=0.1->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.4730543Z   Using cached tqdm-4.70.1-py3-none-any.whl.metadata (57 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.4954387Z Collecting python-dateutil<3.0.0,>=2.8.2 (from python-cmr>=0.10.0->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.4968715Z   Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.5164006Z Collecting six>=1.5 (from python-dateutil<3.0.0,>=2.8.2->python-cmr>=0.10.0->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.5183811Z   Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.6229944Z Collecting charset_normalizer<4,>=2 (from requests>=2.26->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.6246864Z   Using cached charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.6444293Z Collecting idna<4,>=2.5 (from requests>=2.26->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.6458710Z   Using cached idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.6688927Z Collecting urllib3<3,>=1.26 (from requests>=2.26->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.6703102Z   Using cached urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.6941996Z Collecting certifi>=2023.5.7 (from requests>=2.26->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.7811234Z   Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.8121690Z Collecting aiobotocore<4.0.0,>=2.19.0 (from s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:44.8287669Z   Downloading aiobotocore-3.10.0-py3-none-any.whl.metadata (32 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:45.3107458Z Collecting aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0 (from s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:45.3269690Z   Downloading aiohttp-3.14.5-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.3 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:45.3480314Z Collecting aioitertools<1.0.0,>=0.5.1 (from aiobotocore<4.0.0,>=2.19.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:45.3494069Z   Using cached aioitertools-0.13.0-py3-none-any.whl.metadata (3.3 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:45.5323688Z Collecting botocore<1.43.118,>=1.43.115 (from aiobotocore<4.0.0,>=2.19.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:45.5490871Z   Downloading botocore-1.43.117-py3-none-any.whl.metadata (5.6 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:45.5667350Z Collecting jmespath<2.0.0,>=0.7.1 (from aiobotocore<4.0.0,>=2.19.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:45.5680938Z   Using cached jmespath-1.1.0-py3-none-any.whl.metadata (7.6 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:45.8127793Z Collecting multidict<8.0.0,>=6.0.0 (from aiobotocore<4.0.0,>=2.19.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:45.8285930Z   Downloading multidict-7.2.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (6.1 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:46.1770082Z Collecting wrapt<3.0.0,>=1.10.10 (from aiobotocore<4.0.0,>=2.19.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:46.1925913Z   Downloading wrapt-2.5.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (7.6 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:46.8364371Z Collecting aiohappyeyeballs>=2.5.0 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:46.8379682Z   Using cached aiohappyeyeballs-2.7.1-py3-none-any.whl.metadata (5.9 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:46.8796622Z Collecting aiosignal>=1.4.0 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:46.8814040Z   Using cached aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:46.9291820Z Collecting attrs>=17.3.0 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:46.9307387Z   Using cached attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.0152171Z Collecting frozenlist>=1.1.1 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.0167743Z   Using cached frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.0829062Z Collecting propcache>=0.2.0 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.0843909Z   Using cached propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (25 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.3656590Z Collecting yarl<2.0,>=1.25.1 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.3672964Z   Using cached yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (111 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.3939666Z Using cached earthaccess-0.17.0-py3-none-any.whl (76 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.3955055Z Using cached h5py-3.16.0-cp311-cp311-manylinux_2_28_x86_64.whl (5.0 MB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.3992215Z Using cached scipy-1.17.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (35.3 MB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4150329Z Using cached pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (806 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4168250Z Using cached fsspec-2026.9.0-py3-none-any.whl (221 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4183491Z Using cached importlib_resources-7.1.0-py3-none-any.whl (37 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4197604Z Using cached multimethod-2.1-py3-none-any.whl (9.5 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4211632Z Using cached pqdm-0.2.0-py2.py3-none-any.whl (6.8 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4225306Z Using cached python_cmr-0.13.0-py3-none-any.whl (14 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4239576Z Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4254078Z Using cached requests-2.34.2-py3-none-any.whl (73 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4269570Z Using cached charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (269 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4284789Z Using cached idna-3.20-py3-none-any.whl (69 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4300802Z Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4315527Z Using cached urllib3-2.8.0-py3-none-any.whl (135 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4472862Z Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4797777Z Using cached s3fs-2026.9.0-py3-none-any.whl (33 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.4967438Z Downloading aiobotocore-3.10.0-py3-none-any.whl (102 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.5390499Z Downloading aiohttp-3.14.5-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.9 MB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.5902443Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 47.6 MB/s  0:00:00
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.5918373Z Using cached aioitertools-0.13.0-py3-none-any.whl (24 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.6095662Z Downloading botocore-1.43.117-py3-none-any.whl (16.1 MB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.8755560Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.1/16.1 MB 60.1 MB/s  0:00:00
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.8773322Z Using cached jmespath-1.1.0-py3-none-any.whl (20 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.8932340Z Downloading multidict-7.2.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (510 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:47.9510107Z Downloading wrapt-2.5.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (240 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4723095Z Using cached yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (117 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4741798Z Using cached aiohappyeyeballs-2.7.1-py3-none-any.whl (15 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4758331Z Using cached aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4774333Z Using cached attrs-26.1.0-py3-none-any.whl (67 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4789630Z Using cached frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (231 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4805135Z Using cached propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (235 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4820378Z Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4834076Z Using cached tenacity-9.2.1-py3-none-any.whl (32 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4848320Z Using cached tinynetrc-1.3.1-py2.py3-none-any.whl (3.9 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4862359Z Using cached bounded_pool_executor-0.0.3-py3-none-any.whl (3.4 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.4876347Z Using cached tqdm-4.70.1-py3-none-any.whl (80 kB)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:48.7161118Z Installing collected packages: tinynetrc, bounded-pool-executor, wrapt, urllib3, typing-extensions, tqdm, tenacity, six, scipy, pyyaml, propcache, multimethod, multidict, jmespath, importlib-resources, idna, h5py, fsspec, frozenlist, charset_normalizer, certifi, attrs, aioitertools, aiohappyeyeballs, yarl, requests, python-dateutil, pqdm, aiosignal, python-cmr, botocore, aiohttp, aiobotocore, s3fs, earthaccess
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.6388791Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.6407858Z Successfully installed aiobotocore-3.10.0 aiohappyeyeballs-2.7.1 aiohttp-3.14.5 aioitertools-0.13.0 aiosignal-1.4.0 attrs-26.1.0 botocore-1.43.117 bounded-pool-executor-0.0.3 certifi-2026.10.23 charset_normalizer-3.5.2 earthaccess-0.17.0 frozenlist-1.8.0 fsspec-2026.9.0 h5py-3.16.0 idna-3.20 importlib-resources-7.1.0 jmespath-1.1.0 multidict-7.2.1 multimethod-2.1 pqdm-0.2.0 propcache-0.5.4 python-cmr-0.13.0 python-dateutil-2.9.0.post0 pyyaml-6.0.3 requests-2.34.2 s3fs-2026.9.0 scipy-1.17.1 six-1.17.0 tenacity-9.2.1 tinynetrc-1.3.1 tqdm-4.70.1 typing-extensions-4.16.0 urllib3-2.8.0 wrapt-2.5.2 yarl-1.25.1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8270387Z ##[group]Run set -o pipefail
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8270714Z ^[[36;1mset -o pipefail^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8271178Z ^[[36;1m# S160 (hallazgo 247, A71): un secret ausente llega vacío; sin token earthaccess cae al par^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8271780Z ^[[36;1m# usuario y clave vencido, hace hasta 8 logins por job y bloquea la cuenta. Cortar antes.^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8272261Z ^[[36;1m# Test: tests/test_guard_token_vacio_cron_s160.py.^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8272607Z ^[[36;1mif [ -z "$EARTHDATA_TOKEN" ]; then^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8273176Z ^[[36;1m  echo "::error::EARTHDATA_TOKEN vacío. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea la cuenta (A71)."^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8273872Z ^[[36;1m  exit 1^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8274086Z ^[[36;1mfi^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8274433Z ^[[36;1m# S131: los inputs del dispatch entran por env (no interpolados en el shell)^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8274829Z ^[[36;1mARGS=()^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8275172Z ^[[36;1mif [ -n "$VRP_DATE" ]; then ARGS+=(--date "$VRP_DATE"); fi^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8275578Z ^[[36;1mif [ -n "$VRP_START" ]; then ARGS+=(--start "$VRP_START"); fi^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8275958Z ^[[36;1mif [ -n "$VRP_END" ]; then ARGS+=(--end "$VRP_END"); fi^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8276357Z ^[[36;1mif [ "$VRP_OVERWRITE" = "true" ]; then ARGS+=(--overwrite); fi^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8276789Z ^[[36;1mpython scripts/run_pipeline.py --profile mirova_equivalent \^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8277161Z ^[[36;1m  --volcano Lascar \^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8277437Z ^[[36;1m  "${ARGS[@]}" 2>&1 | tee -a pipeline.log^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8291943Z shell: /usr/bin/bash -e {0}
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8292223Z env:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8292501Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8292957Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8293373Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8293780Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8294159Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8294558Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8298984Z   EARTHDATA_TOKEN: ***
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8299268Z   EARTHDATA_USERNAME: ***
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8299541Z   EARTHDATA_PASSWORD: ***
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8299795Z   VRP_DATE: 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8299999Z   VRP_START: 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8300209Z   VRP_END: 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8300413Z   VRP_OVERWRITE: false
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:53.8300640Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:54.6849769Z [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:54.7779728Z === [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent ===
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:54.7781175Z Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:54.7781674Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:54.7782103Z >>> Láscar | 2026-10-23
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:54.7782581Z [diag 10:11:54Z] AUTH_START volcano=Lascar date=2026-10-23
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:54.7825102Z [diag 10:11:54Z] AUTH_OK
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:54.7830219Z [diag 10:11:54Z] SEARCH_START MODIS_TERRA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:56.4152983Z /opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:56.4154519Z   self["size"] = self.size()
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:56.4162787Z [diag 10:11:56Z] SEARCH_VENTANA [MODIS_TERRA_L1B] MOD021KM v6.1 2026-10-23..2026-10-28 n=11 elapsed=1.6s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:56.4164917Z [diag 10:11:56Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:56.9013310Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:56.9014866Z [diag 10:11:56Z] SEARCH_VENTANA [MODIS_TERRA_GEO] MOD03 v6.1 2026-10-23..2026-10-28 n=11 elapsed=0.5s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:56.9015911Z [diag 10:11:56Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:56.9018349Z [diag 10:11:56Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10090461365,LAADS:10089367180]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:56.9028768Z /opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:11:56.9030260Z   total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:00.7112332Z [diag 10:12:00Z] DOWNLOAD_DONE attempt=0 elapsed=3.8s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:00.7129328Z [diag 10:12:00Z] SEARCH_START MODIS_AQUA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:04.7611996Z [diag 10:12:04Z] SEARCH_VENTANA [MODIS_AQUA_L1B] MYD021KM v6.1 2026-10-23..2026-10-28 n=12 elapsed=4.0s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:04.7613282Z [diag 10:12:04Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:08.8322436Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:08.8323292Z [diag 10:12:08Z] SEARCH_VENTANA [MODIS_AQUA_GEO] MYD03 v6.1 2026-10-23..2026-10-28 n=12 elapsed=4.1s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:08.8324233Z [diag 10:12:08Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:08.8326208Z [diag 10:12:08Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10092064472,LAADS:10091241393]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:11.8861497Z [diag 10:12:11Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:11.8869571Z [diag 10:12:11Z] SEARCH_START VIIRS_SNPP
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:13.6448238Z [diag 10:12:13Z] SEARCH_VENTANA [VIIRS_SNPP_L1B] VNP02IMG v2 2026-10-23..2026-10-28 n=15 elapsed=1.8s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:13.6449937Z [diag 10:12:13Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:14.4912516Z   VIIRS_SNPP: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:14.4913728Z [diag 10:12:14Z] SEARCH_VENTANA [VIIRS_SNPP_GEO] VNP03IMG v2 2026-10-23..2026-10-28 n=15 elapsed=0.8s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:14.4914767Z [diag 10:12:14Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:14.4916113Z [diag 10:12:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10090347396,LAADS:10090312159]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:18.9720040Z [diag 10:12:18Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:18.9738079Z [diag 10:12:18Z] SEARCH_START VIIRS_NOAA20
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:20.3642678Z [diag 10:12:20Z] SEARCH_VENTANA [VIIRS_NOAA20_L1B] VJ102IMG v2.1 2026-10-23..2026-10-28 n=16 elapsed=1.4s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:20.3644015Z [diag 10:12:20Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:20.6235563Z   VIIRS_NOAA20: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:20.6236342Z [diag 10:12:20Z] SEARCH_VENTANA [VIIRS_NOAA20_GEO] VJ103IMG v2.1 2026-10-23..2026-10-28 n=16 elapsed=0.3s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:20.6237321Z [diag 10:12:20Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:20.6239974Z [diag 10:12:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10090447342,LAADS:10090439198]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:24.7472086Z [diag 10:12:24Z] DOWNLOAD_DONE attempt=0 elapsed=4.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:24.7487154Z [diag 10:12:24Z] SEARCH_START VIIRS_NOAA21
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:31.8784836Z [diag 10:12:31Z] SEARCH_VENTANA [VIIRS_NOAA21_L1B] VJ202IMG v2.1 2026-10-23..2026-10-28 n=12 elapsed=7.1s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:31.8786642Z [diag 10:12:31Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:32.4245406Z   VIIRS_NOAA21: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:32.4246231Z [diag 10:12:32Z] SEARCH_VENTANA [VIIRS_NOAA21_GEO] VJ203IMG v2.1 2026-10-23..2026-10-28 n=13 elapsed=0.5s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:32.4247125Z [diag 10:12:32Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:32.4249823Z [diag 10:12:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10089959526,LAADS:10089938658]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:36.6921289Z [diag 10:12:36Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:36.6939797Z [diag 10:12:36Z] SEARCH_START VIIRS_SNPP_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:36.9907504Z [diag 10:12:36Z] SEARCH_VENTANA [VIIRS_SNPP_MOD_L1B] VNP02MOD v2 2026-10-23..2026-10-28 n=15 elapsed=0.3s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:36.9908879Z [diag 10:12:36Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:38.7892088Z   VIIRS_SNPP_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:38.7892928Z [diag 10:12:38Z] SEARCH_VENTANA [VIIRS_SNPP_MOD_GEO] VNP03MOD v2 2026-10-23..2026-10-28 n=15 elapsed=1.8s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:38.7893924Z [diag 10:12:38Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:38.7896101Z [diag 10:12:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10090347400,LAADS:10090312161]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:46.7175219Z [diag 10:12:46Z] DOWNLOAD_DONE attempt=0 elapsed=7.9s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:46.7180096Z [diag 10:12:46Z] SEARCH_START VIIRS_NOAA20_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:48.4894951Z [diag 10:12:48Z] SEARCH_VENTANA [VIIRS_NOAA20_MOD_L1B] VJ102MOD v2.1 2026-10-23..2026-10-28 n=16 elapsed=1.8s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:48.4896669Z [diag 10:12:48Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:48.7704195Z   VIIRS_NOAA20_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:48.7704859Z [diag 10:12:48Z] SEARCH_VENTANA [VIIRS_NOAA20_MOD_GEO] VJ103MOD v2.1 2026-10-23..2026-10-28 n=16 elapsed=0.3s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:48.7705952Z [diag 10:12:48Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:48.7708316Z [diag 10:12:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10090447344,LAADS:10090439200]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:52.1523449Z [diag 10:12:52Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:52.1523884Z [diag 10:12:52Z] SEARCH_START VIIRS_NOAA21_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:54.4109257Z [diag 10:12:54Z] SEARCH_VENTANA [VIIRS_NOAA21_MOD_L1B] VJ202MOD v2.1 2026-10-23..2026-10-28 n=12 elapsed=2.3s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:54.4111112Z [diag 10:12:54Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:54.7934046Z   VIIRS_NOAA21_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:54.7935294Z [diag 10:12:54Z] SEARCH_VENTANA [VIIRS_NOAA21_MOD_GEO] VJ203MOD v2.1 2026-10-23..2026-10-28 n=13 elapsed=0.4s
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:54.7936653Z [diag 10:12:54Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:54.7938316Z [diag 10:12:54Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10089959530,LAADS:10089938662]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:12:57.5671478Z [diag 10:12:57Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7117688Z   MODIS_TERRA | VRP=0 MW | T_bg=268.79 K | T_max=286.26 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7118681Z   MODIS_AQUA | VRP=0 MW | T_bg=266.9 K | T_max=280.64 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7119523Z   VIIRS_SNPP (375m) | VRP_MIR=0.356 MW | VRP_TIR=0.0 MW | T_max=279.98 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7120432Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.032 MW | VRP_TIR=0.0 MW | T_max=277.75 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7121351Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.2189 MW | VRP_TIR=0.0 MW | T_max=284.43 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7122253Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=265.14 K | T_max=276.88 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7123163Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=263.5 K | T_max=274.98 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7124068Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=265.97 K | T_max=279.91 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7124997Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Lascar/20261023
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7125518Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7125967Z >>> Láscar | 2026-10-24
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7126509Z [diag 10:14:14Z] AUTH_START volcano=Lascar date=2026-10-24
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7165306Z [diag 10:14:14Z] AUTH_OK
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7165783Z [diag 10:14:14Z] SEARCH_START MODIS_TERRA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7166246Z [diag 10:14:14Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7166839Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7167391Z [diag 10:14:14Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:14.7170169Z [diag 10:14:14Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10095812782,LAADS:10095137298]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:17.3319614Z [diag 10:14:17Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:17.3320202Z [diag 10:14:17Z] SEARCH_START MODIS_AQUA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:17.3320711Z [diag 10:14:17Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:17.3321216Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:17.3321739Z [diag 10:14:17Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:17.3322401Z [diag 10:14:17Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10096324217,LAADS:10096182123]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:20.0110063Z [diag 10:14:20Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:20.0120099Z [diag 10:14:20Z] SEARCH_START VIIRS_SNPP
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:20.0121053Z [diag 10:14:20Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:20.0121551Z   VIIRS_SNPP: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:20.0122183Z [diag 10:14:20Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:20.0123026Z [diag 10:14:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10095618679,LAADS:10095601629]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:24.3000875Z [diag 10:14:24Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:24.3001422Z [diag 10:14:24Z] SEARCH_START VIIRS_NOAA20
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:24.3011134Z [diag 10:14:24Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:24.3011941Z   VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:24.3012683Z [diag 10:14:24Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:24.3013735Z [diag 10:14:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10095528658,LAADS:10095510662]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:28.7721264Z [diag 10:14:28Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:28.7722336Z [diag 10:14:28Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10095679723,LAADS:10095471704]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:32.5003148Z [diag 10:14:32Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:32.5013113Z [diag 10:14:32Z] SEARCH_START VIIRS_NOAA21
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:32.5014816Z [diag 10:14:32Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:32.5015429Z   VIIRS_NOAA21: kept 2 of 4 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:32.5016046Z [diag 10:14:32Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:32.5016880Z [diag 10:14:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10095251529,LAADS:10095243756]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:36.8839891Z [diag 10:14:36Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:36.8841105Z [diag 10:14:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10095676729,LAADS:10095670277]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:40.3948744Z [diag 10:14:40Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:40.3949457Z [diag 10:14:40Z] SEARCH_START VIIRS_SNPP_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:40.3949978Z [diag 10:14:40Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:40.3950529Z   VIIRS_SNPP_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:40.3951081Z [diag 10:14:40Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:14:40.3951847Z [diag 10:14:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10095618689,LAADS:10095601633]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:05.8123789Z [diag 10:15:05Z] DOWNLOAD_DONE attempt=0 elapsed=25.4s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:05.8129816Z [diag 10:15:05Z] SEARCH_START VIIRS_NOAA20_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:05.8130386Z [diag 10:15:05Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:05.8130816Z   VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:05.8131244Z [diag 10:15:05Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:05.8131856Z [diag 10:15:05Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10095528660,LAADS:10095510663]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:08.9669105Z [diag 10:15:08Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:08.9670366Z [diag 10:15:08Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10095679725,LAADS:10095471706]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:12.0239128Z [diag 10:15:12Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:12.0240203Z [diag 10:15:12Z] SEARCH_START VIIRS_NOAA21_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:12.0240762Z [diag 10:15:12Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:12.0248607Z   VIIRS_NOAA21_750: kept 2 of 4 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:12.0249275Z [diag 10:15:12Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:12.0249910Z [diag 10:15:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10095251531,LAADS:10095243757]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:14.9964933Z [diag 10:15:14Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:14.9966157Z [diag 10:15:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10095676739,LAADS:10095670279]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:15:22.0817437Z [diag 10:15:22Z] DOWNLOAD_DONE attempt=0 elapsed=7.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9975641Z   MODIS_TERRA | VRP=0 MW | T_bg=260.92 K | T_max=273.88 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9976251Z   MODIS_AQUA | VRP=0 MW | T_bg=245.02 K | T_max=272.66 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9976867Z   VIIRS_SNPP (375m) | VRP_MIR=0.5028 MW | VRP_TIR=0.0 MW | T_max=287.0 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9977517Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=268.05 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9978138Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.04 MW | VRP_TIR=0.0 MW | T_max=274.18 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9979010Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=269.18 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9979626Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=271.96 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9980236Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=255.54 K | T_max=269.4 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9980817Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=255.44 K | T_max=266.48 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9981414Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=251.7 K | T_max=272.37 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9981972Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=255.38 K | T_max=266.74 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9982542Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=243.24 K | T_max=268.92 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9983091Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Lascar/20261024
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9983423Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9983770Z >>> Láscar | 2026-10-25
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:24.9984120Z [diag 10:17:24Z] AUTH_START volcano=Lascar date=2026-10-25
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:25.0009230Z [diag 10:17:24Z] AUTH_OK
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:25.0009779Z [diag 10:17:25Z] SEARCH_START MODIS_TERRA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:25.0010358Z [diag 10:17:25Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:25.0018596Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:25.0019159Z [diag 10:17:25Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:25.0019932Z [diag 10:17:25Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10097451517,LAADS:10096922476]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:28.1304617Z [diag 10:17:28Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:28.1309829Z [diag 10:17:28Z] SEARCH_START MODIS_AQUA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:28.1310342Z [diag 10:17:28Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:28.1310978Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:28.1311663Z [diag 10:17:28Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:28.1312609Z [diag 10:17:28Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10097792314,LAADS:10097581323]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:31.3837315Z [diag 10:17:31Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:31.3838086Z [diag 10:17:31Z] SEARCH_START VIIRS_SNPP
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:31.3838727Z [diag 10:17:31Z] SEARCH_DONE VIIRS_SNPP n_l1b=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:31.3839249Z   VIIRS_SNPP: kept 2 of 4 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:31.3839759Z [diag 10:17:31Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:31.3840684Z [diag 10:17:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10097552361,LAADS:10097551143]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:36.2792452Z [diag 10:17:36Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:36.2794076Z [diag 10:17:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10097603401,LAADS:10097596117]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:40.1842795Z [diag 10:17:40Z] DOWNLOAD_DONE attempt=0 elapsed=3.9s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:40.1843241Z [diag 10:17:40Z] SEARCH_START VIIRS_NOAA20
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:40.1851304Z [diag 10:17:40Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:40.1852032Z   VIIRS_NOAA20: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:40.1852877Z [diag 10:17:40Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:40.1853888Z [diag 10:17:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10097359450,LAADS:10097357513]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:48.6626984Z [diag 10:17:48Z] DOWNLOAD_DONE attempt=0 elapsed=8.5s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:48.6636689Z [diag 10:17:48Z] SEARCH_START VIIRS_NOAA21
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:48.6637160Z [diag 10:17:48Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:48.6637589Z   VIIRS_NOAA21: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:48.6638042Z [diag 10:17:48Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:48.6638793Z [diag 10:17:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10097394474,LAADS:10097391992]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:52.8680672Z [diag 10:17:52Z] DOWNLOAD_DONE attempt=0 elapsed=4.2s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:52.8689795Z [diag 10:17:52Z] SEARCH_START VIIRS_SNPP_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:52.8690337Z [diag 10:17:52Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:52.8691023Z   VIIRS_SNPP_750: kept 2 of 4 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:52.8691686Z [diag 10:17:52Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:52.8692315Z [diag 10:17:52Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10097552365,LAADS:10097551144]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:56.0639494Z [diag 10:17:56Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:56.0640631Z [diag 10:17:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10097603413,LAADS:10097596118]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:59.1848603Z [diag 10:17:59Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:59.1849320Z [diag 10:17:59Z] SEARCH_START VIIRS_NOAA20_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:59.1849906Z [diag 10:17:59Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:59.1856506Z   VIIRS_NOAA20_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:59.1857118Z [diag 10:17:59Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:17:59.1857690Z [diag 10:17:59Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10097359456,LAADS:10097357514]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:18:02.7272490Z [diag 10:18:02Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:18:02.7280648Z [diag 10:18:02Z] SEARCH_START VIIRS_NOAA21_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:18:02.7281099Z [diag 10:18:02Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:18:02.7281543Z   VIIRS_NOAA21_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:18:02.7282016Z [diag 10:18:02Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:18:02.7282545Z [diag 10:18:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10097394488,LAADS:10097391995]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:18:05.7999336Z [diag 10:18:05Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2714315Z   MODIS_TERRA | VRP=0 MW | T_bg=267.58 K | T_max=284.31 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2715138Z   MODIS_AQUA | VRP=0 MW | T_bg=265.66 K | T_max=277.48 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2715735Z   VIIRS_SNPP (375m) | VRP_MIR=0.006 MW | VRP_TIR=0.0 MW | T_max=281.63 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2716368Z   VIIRS_SNPP (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=280.97 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2717004Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.0511 MW | VRP_TIR=0.0 MW | T_max=287.59 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2717641Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.076 MW | VRP_TIR=0.0 MW | T_max=281.7 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2718282Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=263.6 K | T_max=277.68 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2719110Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=263.2 K | T_max=276.29 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2719928Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=264.09 K | T_max=278.99 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2720499Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=264.96 K | T_max=280.02 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2721064Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Lascar/20261025
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2721392Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2721777Z >>> Láscar | 2026-10-26
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2722135Z [diag 10:19:47Z] AUTH_START volcano=Lascar date=2026-10-26
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2752709Z [diag 10:19:47Z] AUTH_OK
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2753213Z [diag 10:19:47Z] SEARCH_START MODIS_TERRA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2753703Z [diag 10:19:47Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2759962Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2760741Z [diag 10:19:47Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:47.2761654Z [diag 10:19:47Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10098883556,LAADS:10098465910]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:50.3507999Z [diag 10:19:50Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:50.3509028Z [diag 10:19:50Z] SEARCH_START MODIS_AQUA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:50.3509625Z [diag 10:19:50Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:50.3510255Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:50.3510887Z [diag 10:19:50Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:50.3511746Z [diag 10:19:50Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10099373977,LAADS:10099083183]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:53.1395829Z [diag 10:19:53Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:53.1396449Z [diag 10:19:53Z] SEARCH_START VIIRS_SNPP
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:53.1397050Z [diag 10:19:53Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:53.1397659Z   VIIRS_SNPP: kept 2 of 3 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:53.1398152Z [diag 10:19:53Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:19:53.1398942Z [diag 10:19:53Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10098888954,LAADS:10098888775]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:39.2497617Z [diag 10:20:39Z] DOWNLOAD_DONE attempt=0 elapsed=46.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:39.2498982Z [diag 10:20:39Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10098947238,LAADS:10098947119]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:43.1429828Z [diag 10:20:43Z] DOWNLOAD_DONE attempt=0 elapsed=3.9s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:43.1438328Z [diag 10:20:43Z] SEARCH_START VIIRS_NOAA20
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:43.1439032Z [diag 10:20:43Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:43.1439389Z   VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:43.1439741Z [diag 10:20:43Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:43.1440213Z [diag 10:20:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10098839805,LAADS:10098833063]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:47.6709734Z [diag 10:20:47Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:47.6710571Z [diag 10:20:47Z] SEARCH_START VIIRS_NOAA21
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:47.6711677Z [diag 10:20:47Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:47.6712455Z   VIIRS_NOAA21: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:47.6713117Z [diag 10:20:47Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:47.6714100Z [diag 10:20:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10098877324,LAADS:10098877371]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:51.6424787Z [diag 10:20:51Z] DOWNLOAD_DONE attempt=0 elapsed=4.0s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:51.6429303Z [diag 10:20:51Z] SEARCH_START VIIRS_SNPP_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:51.6429734Z [diag 10:20:51Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:51.6430091Z   VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:51.6430500Z [diag 10:20:51Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:51.6430977Z [diag 10:20:51Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10098888968,LAADS:10098888783]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:54.6152568Z [diag 10:20:54Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:54.6154157Z [diag 10:20:54Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10098947254,LAADS:10098947136]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:57.6145977Z [diag 10:20:57Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:57.6149697Z [diag 10:20:57Z] SEARCH_START VIIRS_NOAA20_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:57.6150361Z [diag 10:20:57Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:57.6151018Z   VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:57.6151413Z [diag 10:20:57Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:20:57.6151910Z [diag 10:20:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10098839809,LAADS:10098833069]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:21:00.7653591Z [diag 10:21:00Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:21:00.7654018Z [diag 10:21:00Z] SEARCH_START VIIRS_NOAA21_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:21:00.7662259Z [diag 10:21:00Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:21:00.7662916Z   VIIRS_NOAA21_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:21:00.7663497Z [diag 10:21:00Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:21:00.7664475Z [diag 10:21:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10098877336,LAADS:10098877390]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:21:03.4307339Z [diag 10:21:03Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7250957Z   MODIS_TERRA | VRP=0 MW | T_bg=268.85 K | T_max=282.26 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7251985Z   MODIS_AQUA | VRP=0 MW | T_bg=266.19 K | T_max=281.49 K | anomalous_px=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7253001Z   VIIRS_SNPP (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=282.79 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7253650Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.416 MW | VRP_TIR=0.0 MW | T_max=285.51 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7254285Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.2368 MW | VRP_TIR=0.0 MW | T_max=282.88 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7254925Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=264.76 K | T_max=278.77 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7255508Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=264.85 K | T_max=279.41 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7256080Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=266.16 K | T_max=281.21 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7256634Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Lascar/20261026
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7256964Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7257326Z >>> Láscar | 2026-10-27
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7257678Z [diag 10:22:28Z] AUTH_START volcano=Lascar date=2026-10-27
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7288680Z [diag 10:22:28Z] AUTH_OK
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7289249Z [diag 10:22:28Z] SEARCH_START MODIS_TERRA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7289916Z [diag 10:22:28Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7297096Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7297650Z [diag 10:22:28Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:28.7298780Z [diag 10:22:28Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10099905728,LAADS:10099731506]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:31.6750683Z [diag 10:22:31Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:31.6759903Z [diag 10:22:31Z] SEARCH_START MODIS_AQUA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:31.6760719Z [diag 10:22:31Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:31.6761478Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:31.6762284Z [diag 10:22:31Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:31.6763157Z [diag 10:22:31Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10100336210,LAADS:10100255237]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:34.4743167Z [diag 10:22:34Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:34.4751626Z [diag 10:22:34Z] SEARCH_START VIIRS_SNPP
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:34.4752291Z [diag 10:22:34Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:34.4752906Z   VIIRS_SNPP: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:34.4753540Z [diag 10:22:34Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:34.4754136Z [diag 10:22:34Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10100025700,LAADS:10100010398]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:38.7888005Z [diag 10:22:38Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:38.7889544Z [diag 10:22:38Z] SEARCH_START VIIRS_NOAA20
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:38.7890313Z [diag 10:22:38Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:38.7891087Z   VIIRS_NOAA20: kept 2 of 4 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:38.7891847Z [diag 10:22:38Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:38.7892905Z [diag 10:22:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10099959795,LAADS:10099926748]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:44.1683034Z [diag 10:22:44Z] DOWNLOAD_DONE attempt=0 elapsed=5.4s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:44.1684137Z [diag 10:22:44Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10099979847,LAADS:10099959801]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:47.7287348Z [diag 10:22:47Z] DOWNLOAD_DONE attempt=0 elapsed=3.6s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:47.7289223Z [diag 10:22:47Z] SEARCH_START VIIRS_NOAA21
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:47.7289555Z [diag 10:22:47Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:47.7290036Z   VIIRS_NOAA21: kept 1 of 1 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:47.7290437Z [diag 10:22:47Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:47.7291373Z [diag 10:22:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10099891041,LAADS:10099872531]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:52.8687124Z [diag 10:22:52Z] DOWNLOAD_DONE attempt=0 elapsed=5.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:52.8687883Z [diag 10:22:52Z] SEARCH_START VIIRS_SNPP_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:52.8697691Z [diag 10:22:52Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:52.8698739Z   VIIRS_SNPP_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:52.8699649Z [diag 10:22:52Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:52.8700522Z [diag 10:22:52Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10100025704,LAADS:10100010399]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:55.6916102Z [diag 10:22:55Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:55.6926047Z [diag 10:22:55Z] SEARCH_START VIIRS_NOAA20_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:55.6926681Z [diag 10:22:55Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:55.6927230Z   VIIRS_NOAA20_750: kept 2 of 4 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:55.6927969Z [diag 10:22:55Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=4
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:55.6929005Z [diag 10:22:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10099959797,LAADS:10099926749]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:59.4734294Z [diag 10:22:59Z] DOWNLOAD_DONE attempt=0 elapsed=3.8s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:22:59.4735527Z [diag 10:22:59Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10099979851,LAADS:10099959802]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:23:02.0324254Z [diag 10:23:02Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:23:02.0325264Z [diag 10:23:02Z] SEARCH_START VIIRS_NOAA21_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:23:02.0326165Z [diag 10:23:02Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:23:02.0326993Z   VIIRS_NOAA21_750: kept 1 of 1 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:23:02.0327805Z [diag 10:23:02Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:23:02.0329101Z [diag 10:23:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10099891043,LAADS:10099872532]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:23:04.8599847Z [diag 10:23:04Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3000301Z   MODIS_TERRA | VRP=0.686 MW | T_bg=242.73 K | T_max=254.57 K | anomalous_px=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3001044Z   MODIS_AQUA | VRP=0 MW | T_bg=257.44 K | T_max=273.3 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3001631Z   VIIRS_SNPP (375m) | VRP_MIR=0.111 MW | VRP_TIR=0.0 MW | T_max=277.37 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3002282Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.193 MW | VRP_TIR=0.0 MW | T_max=269.77 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3002909Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=272.25 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3003566Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.499 MW | VRP_TIR=0.0 MW | T_max=279.53 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3004160Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=251.11 K | T_max=269.24 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3004976Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=246.05 K | T_max=261.63 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3005539Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=251.01 K | T_max=267.18 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3006109Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=249.16 K | T_max=273.34 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3006664Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Lascar/20261027
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3006997Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3007364Z >>> Láscar | 2026-10-28
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3010126Z [diag 10:24:46Z] AUTH_START volcano=Lascar date=2026-10-28
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3037934Z [diag 10:24:46Z] AUTH_OK
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3038356Z [diag 10:24:46Z] SEARCH_START MODIS_TERRA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3039167Z [diag 10:24:46Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3040412Z   MODIS_TERRA: kept 1 of 1 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3041401Z [diag 10:24:46Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:46.3042671Z [diag 10:24:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10100643935,LAADS:10100623785]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:49.2200180Z [diag 10:24:49Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:49.2210383Z [diag 10:24:49Z] SEARCH_START MODIS_AQUA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:49.2211099Z [diag 10:24:49Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:49.2211817Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:49.2212535Z [diag 10:24:49Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:49.2213277Z [diag 10:24:49Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10100848004,LAADS:10100635315]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:52.6773688Z [diag 10:24:52Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:52.6774182Z [diag 10:24:52Z] SEARCH_START VIIRS_SNPP
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:52.6774735Z [diag 10:24:52Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:52.6775382Z   VIIRS_SNPP: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:52.6776108Z [diag 10:24:52Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:52.6777155Z [diag 10:24:52Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10101761322,LAADS:10101747610]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:57.1635373Z [diag 10:24:57Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:57.1637739Z [diag 10:24:57Z] SEARCH_START VIIRS_NOAA20
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:57.1638248Z [diag 10:24:57Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:57.1638867Z   VIIRS_NOAA20: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:57.1639378Z [diag 10:24:57Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:24:57.1640046Z [diag 10:24:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10101794749,LAADS:10101789155]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:01.2691080Z [diag 10:25:01Z] DOWNLOAD_DONE attempt=0 elapsed=4.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:01.2699534Z [diag 10:25:01Z] SEARCH_START VIIRS_NOAA21
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:01.2700039Z [diag 10:25:01Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:01.2700653Z   VIIRS_NOAA21: kept 1 of 1 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:01.2701291Z [diag 10:25:01Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:01.2702020Z [diag 10:25:01Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10101953541,LAADS:10101943364]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:06.5300432Z [diag 10:25:06Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:06.5309847Z [diag 10:25:06Z] SEARCH_START VIIRS_SNPP_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:06.5310635Z [diag 10:25:06Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:06.5311396Z   VIIRS_SNPP_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:06.5312152Z [diag 10:25:06Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:06.5312833Z [diag 10:25:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10101761342,LAADS:10101747613]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:09.8632640Z [diag 10:25:09Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:09.8641068Z [diag 10:25:09Z] SEARCH_START VIIRS_NOAA20_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:09.8641515Z [diag 10:25:09Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:09.8641948Z   VIIRS_NOAA20_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:09.8642592Z [diag 10:25:09Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:09.8643201Z [diag 10:25:09Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10101794769,LAADS:10101789160]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:12.5794440Z [diag 10:25:12Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:12.5795252Z [diag 10:25:12Z] SEARCH_START VIIRS_NOAA21_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:12.5795921Z [diag 10:25:12Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:12.5796442Z   VIIRS_NOAA21_750: kept 1 of 1 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:12.5797071Z [diag 10:25:12Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:12.5798101Z [diag 10:25:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10101953565,LAADS:10101943370]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:25:15.2573477Z [diag 10:25:15Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3459373Z   MODIS_TERRA | VRP=0 MW | T_bg=268.33 K | T_max=285.19 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3460428Z   MODIS_AQUA | VRP=0 MW | T_bg=265.18 K | T_max=278.26 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3461485Z   VIIRS_SNPP (375m) | VRP_MIR=0.133 MW | VRP_TIR=0.0 MW | T_max=278.92 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3462265Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.2487 MW | VRP_TIR=0.0 MW | T_max=293.75 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3462910Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.633 MW | VRP_TIR=0.0 MW | T_max=282.43 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3463511Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=260.62 K | T_max=276.18 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3464079Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=257.87 K | T_max=276.31 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3488425Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=263.26 K | T_max=276.46 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3489730Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Lascar/20261028
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3490103Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3490458Z >>> Láscar | 2026-10-29
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3490839Z [diag 10:26:32Z] AUTH_START volcano=Lascar date=2026-10-29
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3495662Z [diag 10:26:32Z] AUTH_OK
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:32.3496184Z [diag 10:26:32Z] SEARCH_START MODIS_TERRA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:35.4709980Z [diag 10:26:35Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:36.8555104Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:36.8555877Z [diag 10:26:36Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:36.8557226Z [diag 10:26:36Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10101894091,LAADS:10101629665]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:39.5760078Z [diag 10:26:39Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:39.5760910Z [diag 10:26:39Z] SEARCH_START MODIS_AQUA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:42.0850260Z [diag 10:26:42Z] SEARCH_DONE MODIS_AQUA n_l1b=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:42.4232991Z   MODIS_AQUA: kept 1 of 1 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:42.4233758Z [diag 10:26:42Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:42.4234345Z [diag 10:26:42Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10102528191,LAADS:10102383336]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:45.3886008Z [diag 10:26:45Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:45.3886454Z [diag 10:26:45Z] SEARCH_START VIIRS_SNPP
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:47.1380046Z [diag 10:26:47Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:49.2322313Z   VIIRS_SNPP: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:49.2323100Z [diag 10:26:49Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:49.2324122Z [diag 10:26:49Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10101980286,LAADS:10101953884]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:54.2040028Z [diag 10:26:54Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:54.2040858Z [diag 10:26:54Z] SEARCH_START VIIRS_NOAA20
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:26:59.4654343Z [diag 10:26:59Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:00.3183512Z   VIIRS_NOAA20: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:00.3184382Z [diag 10:27:00Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:00.3185760Z [diag 10:27:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10102404394,LAADS:10102393621]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:04.1120927Z [diag 10:27:04Z] DOWNLOAD_DONE attempt=0 elapsed=3.8s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:04.1121562Z [diag 10:27:04Z] SEARCH_START VIIRS_NOAA21
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:07.6967374Z [diag 10:27:07Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=5
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:08.3431302Z   VIIRS_NOAA21: kept 2 of 5 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:08.3431907Z [diag 10:27:08Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=5
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:08.3433072Z [diag 10:27:08Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10102510609,LAADS:10102493856]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:12.9769014Z [diag 10:27:12Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:12.9770392Z [diag 10:27:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10101979940,LAADS:10101953341]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:18.6134318Z [diag 10:27:18Z] DOWNLOAD_DONE attempt=0 elapsed=5.6s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:18.6152965Z [diag 10:27:18Z] SEARCH_START VIIRS_SNPP_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:19.7765048Z [diag 10:27:19Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:20.1171455Z   VIIRS_SNPP_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:20.1172195Z [diag 10:27:20Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:20.1172904Z [diag 10:27:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10101980296,LAADS:10101953886]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:23.2710719Z [diag 10:27:23Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:23.2711176Z [diag 10:27:23Z] SEARCH_START VIIRS_NOAA20_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:27.2180660Z [diag 10:27:27Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:30.2621327Z   VIIRS_NOAA20_750: kept 1 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:30.2622195Z [diag 10:27:30Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:30.2623292Z [diag 10:27:30Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10102404396,LAADS:10102393624]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:33.0866113Z [diag 10:27:33Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:33.0879641Z [diag 10:27:33Z] SEARCH_START VIIRS_NOAA21_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:40.2947657Z [diag 10:27:40Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=5
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:45.5213637Z   VIIRS_NOAA21_750: kept 2 of 5 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:45.5214405Z [diag 10:27:45Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=5
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:45.5215429Z [diag 10:27:45Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10102510617,LAADS:10102493879]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:48.3622144Z [diag 10:27:48Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:27:48.3623259Z [diag 10:27:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10101979964,LAADS:10101953355]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:28:08.4416294Z [diag 10:28:08Z] DOWNLOAD_DONE attempt=0 elapsed=20.1s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0674240Z   MODIS_TERRA | VRP=0 MW | T_bg=256.18 K | T_max=269.06 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0674937Z   MODIS_AQUA | VRP=0 MW | T_bg=247.02 K | T_max=276.51 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0675437Z   VIIRS_SNPP (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=268.03 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0675983Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.139 MW | VRP_TIR=0.0 MW | T_max=269.74 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0676502Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=269.13 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0677013Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=265.27 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0677497Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=249.27 K | T_max=265.69 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0677972Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=249.55 K | T_max=266.66 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0678722Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=244.89 K | T_max=264.96 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0679451Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=242.04 K | T_max=261.65 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0680176Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Lascar/20261029
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0680608Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0681388Z >>> Láscar | 2026-10-30
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0681839Z [diag 10:29:46Z] AUTH_START volcano=Lascar date=2026-10-30
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0711465Z [diag 10:29:46Z] AUTH_OK
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:46.0711840Z [diag 10:29:46Z] SEARCH_START MODIS_TERRA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:48.0756528Z [diag 10:29:48Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:48.8508763Z   MODIS_TERRA: kept 1 of 1 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:48.8509403Z [diag 10:29:48Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:48.8510808Z [diag 10:29:48Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LANCEMODIS:3086044065,LAADS:10103195804]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:51.4595237Z [diag 10:29:51Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:51.4595984Z [diag 10:29:51Z] SEARCH_START MODIS_AQUA
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:58.6352170Z [diag 10:29:58Z] SEARCH_DONE MODIS_AQUA n_l1b=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:29:58.6352609Z [diag 10:29:58Z] SEARCH_START VIIRS_SNPP
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:00.5119741Z [diag 10:30:00Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:01.1681923Z   VIIRS_SNPP: kept 2 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:01.1682513Z [diag 10:30:01Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:01.1683694Z [diag 10:30:01Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LANCEMODIS:3086656894,LANCEMODIS:3086655504]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:05.0202585Z [diag 10:30:05Z] DOWNLOAD_DONE attempt=0 elapsed=3.9s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:05.0203764Z [diag 10:30:05Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LANCEMODIS:3086713049,LANCEMODIS:3086711665]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:09.3604301Z [diag 10:30:09Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:09.3604960Z [diag 10:30:09Z] SEARCH_START VIIRS_NOAA20
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:14.2702945Z [diag 10:30:14Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:14.8736892Z   VIIRS_NOAA20: kept 1 of 1 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:14.8737511Z [diag 10:30:14Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:14.8738845Z [diag 10:30:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LANCEMODIS:3086655186,LAADS:10103441325]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:19.1269652Z [diag 10:30:19Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:19.1270174Z [diag 10:30:19Z] SEARCH_START VIIRS_NOAA21
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:28.2465927Z [diag 10:30:28Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:29.0112264Z   VIIRS_NOAA21: kept 2 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:29.0113116Z [diag 10:30:29Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:29.0114201Z [diag 10:30:29Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LANCEMODIS:3086576878,LANCEMODIS:3086574890]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:34.2661455Z [diag 10:30:34Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:34.2662510Z [diag 10:30:34Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LANCEMODIS:3086677947,LANCEMODIS:3086675914]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:39.2239557Z [diag 10:30:39Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:39.2257916Z [diag 10:30:39Z] SEARCH_START VIIRS_SNPP_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:42.1210656Z [diag 10:30:42Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:42.7456128Z   VIIRS_SNPP_750: kept 2 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:42.7456650Z [diag 10:30:42Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:42.7457286Z [diag 10:30:42Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LANCEMODIS:3086656896,LANCEMODIS:3086655505]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:47.1547364Z [diag 10:30:47Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:47.1548735Z [diag 10:30:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LANCEMODIS:3086713051,LANCEMODIS:3086711666]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:50.3109911Z [diag 10:30:50Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:50.3110718Z [diag 10:30:50Z] SEARCH_START VIIRS_NOAA20_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:55.2277314Z [diag 10:30:55Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:55.6434447Z   VIIRS_NOAA20_750: kept 1 of 1 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:55.6435151Z [diag 10:30:55Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=1
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:55.6437508Z [diag 10:30:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LANCEMODIS:3086655188,LAADS:10103441329]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:59.1067518Z [diag 10:30:59Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:30:59.1068126Z [diag 10:30:59Z] SEARCH_START VIIRS_NOAA21_750
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:31:09.7043277Z [diag 10:31:09Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:31:11.4517366Z   VIIRS_NOAA21_750: kept 2 of 2 granules (night filter)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:31:11.4518135Z [diag 10:31:11Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:31:11.4519470Z [diag 10:31:11Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LANCEMODIS:3086576880,LANCEMODIS:3086574891]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:31:13.8029507Z [diag 10:31:13Z] DOWNLOAD_DONE attempt=0 elapsed=2.4s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:31:13.8030487Z [diag 10:31:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LANCEMODIS:3086677949,LANCEMODIS:3086675915]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:31:16.1221723Z [diag 10:31:16Z] DOWNLOAD_DONE attempt=0 elapsed=2.3s n_files=2
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0059011Z   MODIS_TERRA | VRP=0 MW | T_bg=256.83 K | T_max=282.11 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0060035Z   VIIRS_SNPP (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=279.62 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0061009Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=279.54 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0061939Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=None K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0062552Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=277.89 K | VRP_VENT=0.0 MW (0px)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0063148Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=261.51 K | T_max=275.21 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0063741Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=262.68 K | T_max=277.0 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0064307Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=261.89 K | T_max=275.94 K | anomalous_px=0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0064882Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Lascar/20261030
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0065710Z Cobertura NO COMPLETA: 2 incidencias (ninguna búsqueda ni descarga fallida).
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0066492Z   día parcial (no había terminado más la latencia mínima de LANCE); cuenta en modo estricto:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0067235Z     Lascar 2026-10-30: todas | el día UTC no había terminado más 3 h de latencia de LANCE
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0070164Z   sin gránulos, sin juicio (la búsqueda respondió vacía; el código no sabe si debía haber pasada); no cuenta en modo estricto:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0071531Z     Lascar 2026-10-30: MODIS_AQUA | la búsqueda de MODIS_AQUA_L1B respondió sin gránulos
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0072105Z 
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.0072248Z Done.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1190659Z ##[group]Run python - <<'PYEOF'
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1190997Z ^[[36;1mpython - <<'PYEOF'^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1191252Z ^[[36;1mimport json, os, sys^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1191556Z ^[[36;1mfrom datetime import datetime, timezone, timedelta^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1191905Z ^[[36;1mfrom pathlib import Path^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1192164Z ^[[36;1mvol = "Lascar"^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1192453Z ^[[36;1mp = Path(f"data/mirova_equivalent/{vol}.json")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1192763Z ^[[36;1mif not p.exists():^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1193068Z ^[[36;1m    print(f"WARN {p}: no existe (primera corrida)")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1193389Z ^[[36;1m    sys.exit(0)^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1193646Z ^[[36;1md = json.loads(p.read_text())^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1193935Z ^[[36;1mrecords = d.get("records", [])^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1194201Z ^[[36;1mif not records:^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1194456Z ^[[36;1m    print(f"FAIL {p}: 0 records")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1194734Z ^[[36;1m    sys.exit(1)^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1195152Z ^[[36;1mlast = records[-1].get("datetime_utc") or records[-1].get("acq_datetime_utc")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1195554Z ^[[36;1mif not last:^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1195972Z ^[[36;1m    print(f"FAIL {p}: último record sin datetime_utc — schema corrupto")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1196353Z ^[[36;1m    sys.exit(1)^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1196592Z ^[[36;1ms = last.replace("Z", "+00:00")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1196895Z ^[[36;1mlast_dt = datetime.fromisoformat(s)^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1197207Z ^[[36;1mif last_dt.tzinfo is None:^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1197536Z ^[[36;1m    last_dt = last_dt.replace(tzinfo=timezone.utc)^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1197897Z ^[[36;1mage = datetime.now(timezone.utc) - last_dt^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1198234Z ^[[36;1mhours = age.total_seconds() / 3600^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1202277Z ^[[36;1mif age > timedelta(hours=72):^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1202662Z ^[[36;1m    # S123: aviso, NO fallo. Anotación visible en la UI del run y en^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1203124Z ^[[36;1m    # el summary; la alerta accionable la emite el healthcheck A58,^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1203762Z ^[[36;1m    # que agrupa por incidente y no repite una vez por corrida.^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1204182Z ^[[36;1m    msg = (f"{vol} stale: last_dt={last} ({hours:.1f}h > 72h). "^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1204603Z ^[[36;1m           f"Probable NASA outage prolongado o bug silencioso. "^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1205033Z ^[[36;1m           f"La alerta accionable la lleva nrt-healthcheck.yml (A58).")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1205493Z ^[[36;1m    print(f"::warning title=Tier A stale ({vol})::{msg}")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1205963Z ^[[36;1m    summary = os.environ.get("GITHUB_STEP_SUMMARY")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1206279Z ^[[36;1m    if summary:^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1206570Z ^[[36;1m        with open(summary, "a", encoding="utf-8") as f:^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1206986Z ^[[36;1m            f.write(f"\n### ⚠️ {vol}: records stale ({hours:.1f}h)\n\n{msg}\n")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1207355Z ^[[36;1m    sys.exit(0)^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1207636Z ^[[36;1mprint(f"OK {p}: last_dt={last} ({hours:.1f}h)")^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1207946Z ^[[36;1mPYEOF^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1221535Z shell: /usr/bin/bash -e {0}
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1221821Z env:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1222102Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1222545Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1222962Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1223350Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1223725Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1224120Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.1224440Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2534921Z OK data/mirova_equivalent/Lascar.json: last_dt=2026-10-30 06:18 (4.2h)
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2707723Z ##[group]Run set +e  # No abortar en errores intermedios — manejamos exit codes
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2708350Z ^[[36;1mset +e  # No abortar en errores intermedios — manejamos exit codes^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2708949Z ^[[36;1mgit config user.name  "vrp-bot"^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2709292Z ^[[36;1mgit config user.email "vrp-bot@github-actions"^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2709745Z ^[[36;1m# Solo el archivo del volcán de este job (cada matrix tiene volcano único).^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2710264Z ^[[36;1m# S120 (cacería, verificado empírico): git add con N pathspecs fatalea y^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2710746Z ^[[36;1m# NO stagea NADA si UNO falta → data fresca descartada en silencio.^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2711143Z ^[[36;1m# Un add por archivo aísla el que falte.^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2711509Z ^[[36;1mgit add "data/mirova_equivalent/Lascar.json" 2>/dev/null^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2711918Z ^[[36;1mgit add "data/experimental/Lascar.json" 2>/dev/null^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2712337Z ^[[36;1mgit add "data/mirova/Lascar.json" 2>/dev/null^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2712783Z ^[[36;1mgit diff --staged --quiet && { echo "No changes to commit for Lascar"; exit 0; }^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2713295Z ^[[36;1mgit commit -m "NRT update Lascar $(date -u '+%Y-%m-%d %H:%M UTC')"^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2713667Z ^[[36;1mfor attempt in 1 2 3 4 5; do^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2714021Z ^[[36;1m  # -X theirs: en caso de conflict, aceptar el remoto (otros jobs)^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2714428Z ^[[36;1m  # y aplicar nuestro cambio del volcán encima.^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2714823Z ^[[36;1m  git pull --rebase -X theirs origin main && git push && exit 0^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2715262Z ^[[36;1m  echo "push attempt $attempt failed, sleeping $((attempt * 10))s"^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2715701Z ^[[36;1m  # Si rebase falla a mitad, abortarlo antes del próximo intento^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2716059Z ^[[36;1m  git rebase --abort 2>/dev/null^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2716338Z ^[[36;1m  sleep $((attempt * 10))^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2716588Z ^[[36;1mdone^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2716824Z ^[[36;1mecho "all push attempts failed"; exit 1^[[0m
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2730101Z shell: /usr/bin/bash -e {0}
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2730534Z env:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2730814Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2731245Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2731665Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2732047Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2732419Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2732800Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2733129Z ##[endgroup]
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.2935024Z No changes to commit for Lascar
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.3028958Z Post job cleanup.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.4234242Z Cache hit occurred on the primary key setup-python-Linux-x64-24.04-Ubuntu-python-3.11.17-pip-751f046ea75e643696f19a49373db4a45544f32ffe40eaf60c388095e2e4becf, not saving cache.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.4399612Z Post job cleanup.
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5337614Z [command]/usr/bin/git version
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5389862Z git version 2.56.0
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5449979Z Temporarily overriding HOME='/home/runner/work/_temp/af5bd292-05f6-4703-a670-a6a33d0b4d98' before making global git config changes
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5465057Z Adding repository directory to the temporary git global config as a safe directory
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5466576Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/VRP-chile/VRP-chile
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5517669Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5560928Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5869153Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5904783Z http.https://github.com/.extraheader
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5917653Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.5958111Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.6371746Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.6448257Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+process (Lascar)	UNKNOWN STEP	2026-10-30T10:32:49.6916824Z Cleaning up orphan processes
