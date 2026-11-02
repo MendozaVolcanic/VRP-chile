@@ -3,8 +3,10 @@
 > Documento vivo. Actualizar cuando se agregue alineamiento o se descubra nueva
 > divergencia. Estado al cierre 2026-04-29 (post-S27 análisis CSV consolidado).
 
-> ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde el merge del PR B (rama `claude/s172-modd-flip`, decisión de
-> Nicolás del 2026-10-31, tag `pre-s171-adopcion-modd`) MODIS corre la vía «código MIROVA» (`enable_modis_codigo_mirova:
+> ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde la primera corrida del NRT con la vía, después del merge del
+> PR B (#934, rama `claude/s173-modd-flip`, decisión de Nicolás del 2026-10-31, tag `pre-s171-adopcion-modd`), y
+> también en las pasadas observadas hasta unos 8 días antes (cada corrida re-escribe las 8 fechas de su ventana;
+> regla `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` §4.1), MODIS corre la vía «código MIROVA» (`enable_modis_codigo_mirova:
 > true`, `pipeline/mirova_v750_codigo.py`): grilla de 1 km de MIROVA con la geolocalización del MxD03, su detector, su
 > fondo y la suma de todos los alertados. VIIRS 375 y VIIRS 750 siguen con K. Las divergencias de este catálogo que
 > describen el MODIS de producción como K (en particular D11 en su cara MODIS, D12, D21, D33 y D35) describen el
