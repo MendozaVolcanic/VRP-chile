@@ -549,9 +549,9 @@ def partir_por_plataformas(mir, desde):
     return juzgadas, aparte
 
 
-def sensores_sin_juzgar(recall, desde, ceses, mir_aparte):
+def sensores_sin_juzgar(recall, desde, ceses, mir_aparte, via_modis=None):
     """{sensor: estado} de los sensores que perdieron una plataforma y, desde el cese, no juntan MIN_N_RECALL
-    noches con alerta.
+    noches con alerta. S173: también MODIS desde el cambio de detector a la vía «código MIROVA» (`via_modis`).
 
     POR QUÉ (S162, PR162-01 de la revisión de #900, experiments/_s161_audit_cese/REVISION_S162.md): con la
     ventana partida en el cese, VIIRS arranca de cero y tarda de una a tres semanas en juntar el mínimo.
@@ -572,6 +572,21 @@ def sensores_sin_juzgar(recall, desde, ceses, mir_aparte):
                  f"banda. Lo anterior al cese ({n_aparte} noches) está en plataformas.aparte y no decide")
         estado[s] = {"juzga_desde": d, "plataformas": plats, "n_noches": n, "minimo": MIN_N_RECALL,
                      "n_noches_aparte": n_aparte, "aviso": aviso}
+    # S173 (hallazgo 206, experiments/_s173_aud/f2/INFORME.md): con la vía, el recall de MODIS es el de VIA_MODIS
+    # (evaluacion_vigente), que arranca de cero en la primera pasada de la vía. Hasta juntar el mínimo su flag no puede
+    # dispararse y el de K ya no decide: es el mismo «no se midió» del cese, por otra causa. Tampoco degrada.
+    n_via = (recall.get(SENSOR_VIA) or {}).get("n_noches", 0)
+    if via_modis and n_via < MIN_N_RECALL:
+        d = max(via_modis, desde.get(SENSOR_VIA) or "")
+        aviso = (f"{SENSOR_VIA} sin juzgar: {n_via} noches con alerta de MIROVA desde el cambio de detector a la vía "
+                 f"«código MIROVA» (VIA_MODIS, se juzga desde {d}), bajo el mínimo de {MIN_N_RECALL}; su recall no "
+                 f"puede dar flag y eso no es estar en banda. Las noches anteriores son de K, están en "
+                 f"por_detector.K y no deciden")
+        estado[SENSOR_VIA] = {"juzga_desde": d, "plataformas": (estado.get(SENSOR_VIA) or {}).get("plataformas", []),
+                              "detector": "VIA_MODIS", "motivo": "cambio_de_detector", "n_noches": n_via,
+                              "minimo": MIN_N_RECALL,
+                              "n_noches_aparte": (estado.get(SENSOR_VIA) or {}).get("n_noches_aparte", 0),
+                              "aviso": aviso}
     return estado
 
 
@@ -1132,7 +1147,7 @@ def main():
 
     # 4. Flags contra bandas
     flags = flags_de_evaluacion(ev)
-    sin_juzgar = sensores_sin_juzgar(ev["recall"], desde_plat, ceses, mir_aparte)
+    sin_juzgar = sensores_sin_juzgar(ev["recall"], desde_plat, ceses, mir_aparte, via_modis=via_modis)
     if integrity["parse_errors"]:
         flags.append(f"integridad: {len(integrity['parse_errors'])} JSON con parse error")
     if integrity["duplicates_total"]:

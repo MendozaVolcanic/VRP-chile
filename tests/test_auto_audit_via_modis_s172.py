@@ -207,3 +207,38 @@ def test_main_no_cae_cuando_la_via_publica_modis_en_noches_con_alerta(correr):
     reg = out["magnitud_publicada_by_vol_sensor_regimen"]["Villarrica|MODIS"]
     assert list(reg) == ["K", "VIA_MODIS"]
     assert reg["VIA_MODIS"]["n_noches"] == 16 and reg["K"]["n_noches"] == 20
+
+
+# ------------------------------------------------------------------ S173, hallazgo 206
+# POR QUÉ (experiments/_s173_aud/f2/INFORME.md §3, 206; V2 midió 15 noches con alerta MODIS en 4,6 a 7,5 semanas):
+# tras el encendido el recall de MODIS se juzga sólo con noches de la vía. Hasta juntar MIN_N_RECALL noches su flag no
+# puede dispararse y el flag de K desaparece del informe: se leería «MODIS mejoró» cuando es «MODIS no se midió» (A87).
+# `sensores_sin_juzgar` lo decía sólo para el cese de una plataforma; ahora también para el cambio de detector.
+def test_sensores_sin_juzgar_avisa_el_cambio_de_detector_de_modis():
+    recall = {"MODIS": {"n_noches": 5}, "VIIRS750": {"n_noches": 30}, "VIIRS375": {"n_noches": 40}}
+    sj = aa.sensores_sin_juzgar(recall, {}, [], {}, via_modis="2026-11-06")
+    assert set(sj) == {"MODIS"}
+    m = sj["MODIS"]
+    assert (m["juzga_desde"], m["n_noches"], m["minimo"], m["detector"]) == ("2026-11-06", 5, aa.MIN_N_RECALL,
+                                                                             "VIA_MODIS")
+    assert m["aviso"].startswith("MODIS sin juzgar") and "cambio de detector" in m["aviso"]
+    # con n suficiente se juzga; sin la vía, nada nuevo (lo de S162 tal cual)
+    assert aa.sensores_sin_juzgar(dict(recall, MODIS={"n_noches": 15}), {}, [], {}, via_modis="2026-11-06") == {}
+    assert aa.sensores_sin_juzgar(recall, {}, [], {}) == {}
+
+
+def test_main_dice_que_modis_queda_sin_juzgar_tras_el_cambio_de_detector(correr, capsys):
+    out = correr(con_via=True, via_publica=True, n_reciente=5)
+    assert out["recall"]["MODIS"]["n_noches"] == 5 < aa.MIN_N_RECALL
+    sj = out["plataformas"]["sin_juzgar"]
+    assert set(sj) == {"MODIS"} and sj["MODIS"]["juzga_desde"] == _dia(4)
+    avisos = out["plataformas"]["avisos"]
+    assert len(avisos) == 1 and avisos[0] in capsys.readouterr().out
+    # control: con 16 noches de la vía MODIS se juzga; sin la vía, la escena es K con 36 noches
+    assert correr(con_via=True, via_publica=True)["plataformas"]["sin_juzgar"] == {}
+    assert correr(con_via=False, via_publica=True, n_reciente=5)["plataformas"]["sin_juzgar"] == {}
+
+
+def test_el_issue_nombra_el_cambio_de_detector_entre_los_sin_juzgar():
+    wf = (ROOT / ".github" / "workflows" / "audit-weekly.yml").read_text(encoding="utf-8")
+    assert wf.count("Sensores sin juzgar por un cese de plataforma o un cambio de detector") == 2
