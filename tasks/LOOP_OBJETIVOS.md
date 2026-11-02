@@ -569,6 +569,28 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 01:24 UTC (S172): sombra de los 34 con las vías adelantada; re-sellado ronda 2; pre-registro retro
+- **Decisiones de Nicolás** (chat de S172): (1) «la idea es lanzar los 34 que faltan cuando ya sepamos que estamos
+  funcionando igual que MIROVA» (la compuerta de publicación de los 34 es la paridad en los 11); (2) ante la propuesta de
+  tomar datos de los 34 ya, con las vías, en sombra aislada: «si está corriendo un código que funciona bien en 11
+  volcanes esperamos que sea similar para los otros 34, continúa con todo para que avancemos más rápido». Se lee como sí a
+  la sombra de los 34 con las vías desde ya y como excepción al congelamiento de `pipeline/` sólo para AGREGAR entradas a
+  `pipeline/grillas_mirova.yaml` (las 11 intactas). Los merges siguen pidiendo su frase y el tag.
+- **Tag defensivo** `pre-s172-sombra-34` sobre main `14fb62030`; worktree `D:/vrp-trabajo/worktrees/s172-sombra34`, rama
+  `claude/s172-sombra-34`. Un agente prepara grillas de los 34 (regla de los 11, centro del yaml), perfil `sombra_34`,
+  workflow propio y aviso de vigilancia ciega.
+- **Re-sellado de V375-E**: nulo S01 a S08 **8 de 8 atrapadas**; arreglos del verificador en `b7d5e8cba` (prueba y S09 de
+  `extends`, VR172-02 aceptado, cifras); batería **253 de 253** en `b7d5e8cba`. Ronda 2 en curso (agente): la comparación de
+  la grilla ignora entradas de volcanes fuera de los 11 Tier A, para que las grillas de los 34 no marquen régimen; luego
+  nulo S09 en adelante y verificador limpio, y recién ahí el sello.
+- **Proyección de la parada de V375-E** (`experiments/_s172_proyeccion_v375/`): central 2026-12-02, rango 12-02 a 12-09;
+  la mandan las noches, no las alertas (4,4 alertas que deciden por noche sin Suomi NPP); refuta la crítica 2 del
+  devils-advocate. **Capacidad del NRT** (`experiments/_s172_capacidad_nrt/`): los 45 caben con cambios; recomendado un
+  workflow aparte para los 34; trampa: `nrt.yml` tiene la lista de los 11 en tres lugares (agregar sólo a la matriz da
+  jobs verdes sin procesar).
+- Pre-registro de la retrospectiva del paquete en borrador (agente; `D:/vrp-trabajo/temporales/s172_prereg_retro/`).
+- Disco D: bajó a 5,4 GB; se quitó el worktree del implementador de MODIS (limpio y subido): 6,6 GB.
+
 ### 2026-11-02 00:30 UTC (S172): plan de los 34 volcanes encargado; revisión del plan (devils-advocate)
 - **Decisión de Nicolás** (chat de S172), ante «¿Preparo un plan aparte para lanzar los 34 volcanes con K, con sombra
   previa?»: «Sí, prepáralo». Plan encargado a un agente con `writing-plans` (`D:/vrp-trabajo/temporales/s172_plan_34/PLAN.md`);
