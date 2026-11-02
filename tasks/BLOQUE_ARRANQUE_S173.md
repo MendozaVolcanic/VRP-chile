@@ -6,6 +6,9 @@
 > Tags: `pre-s171-adopcion-modd` (main `d3cd0b2ae`), `pre-s172-sombra-34` (main `14fb62030`). Ningún PR abierto, nada
 > mergeado, ningún despacho. Cuota semanal ~5 %; C: 35 GB, D: ~7 GB (temporales viejos en `D:/vrp-trabajo/temporales`,
 > 17 GB, candidatos a papelera con el sí de Nicolás). Sesión viva: VIIRS 750 (`local_94f4be0d`), quieta hasta el 3-nov.
+> **S173 programada** por S172 a pedido de Nicolás («arranca la siguiente tú mismo»): tarea `vrp-s173-retomar`, una vez,
+> 2026-11-02 06:00 UTC (03:00 en Chile), con el prompt de la §e. Corre en el modo de permisos por defecto: puede pausar
+> pidiendo aprobaciones.
 
 ## a. Todo en una pantalla
 
