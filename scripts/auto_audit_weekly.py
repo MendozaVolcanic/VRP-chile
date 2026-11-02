@@ -761,7 +761,11 @@ def evaluar_detector(mir, ours, vistos, detector, frontera, via_modis=None):
 # claves NUEVAS de latest.json, calculadas DESPUÉS del veredicto: no tocan flags, avisos ni claves de
 # siempre (tests/test_auto_audit_cenit_s157.py lo fija contra el código previo).
 CORTE_535 = "2026-08-28 23:00"   # A104: #535 apagó la máscara de nube de 260 K
-REGIMENES = ("antes_535", "535_a_571", "571_a_K", "K")   # #571 = INICIO_REGIMEN_FALSAS (quitó el piso VRP)
+# S173 (hallazgo 205, experiments/_s173_aud/f2/INFORME.md): "VIA_MODIS" va en la tupla porque regimen_de_pasada lo
+# devuelve para una pasada MODIS de la vía; sin él, estratificar_magnitud caía con ValueError la primera noche en que
+# la vía publicara MODIS con alerta de MIROVA, antes de escribir latest.json. Todo régimen nuevo de regimen_de_pasada
+# entra aquí (lo fija tests/test_auto_audit_via_modis_s172.py).
+REGIMENES = ("antes_535", "535_a_571", "571_a_K", "K", "VIA_MODIS")   # #571 = INICIO_REGIMEN_FALSAS (quitó el piso VRP)
 TRAMOS_CENIT = ("z<30", "z30-50", "z50-60", "z>=60", "sin_cenit")   # orden de lectura, de nadir a borde
 
 

@@ -108,15 +108,18 @@ def _brec(fecha, b, pub, lab, sensor="MODIS_AQUA"):
             "sha": SHA, "z": 20.0, "sensor": sensor}
 
 
-def _escenario(con_via):
-    """MODIS Villarrica: 16 noches recientes (la vía si `con_via`) que NO vemos y 20 anteriores de K que vemos."""
+def _escenario(con_via, via_publica=False, n_reciente=16):
+    """MODIS Villarrica: `n_reciente` noches recientes (la vía si `con_via`) y el resto, hasta 36, anteriores de K que
+    vemos. Las recientes NO las vemos salvo `via_publica` (S173, hallazgo 205: la vía que publica en una noche con
+    alerta es el camino que hacía caer el audit)."""
     records, alertas = [], []
     for n in range(0, 36):
         d = _dia(n)
         alertas.append({"volcano": "Villarrica", "sensor_bucket": "MODIS", "fecha_utc": d + " 07:20:00",
                         "vrp_mw": 0.5})
-        reciente = n < 16
-        records.append(_rec(d, vrp=0.0 if reciente else 1.0, via=(True if (reciente and con_via) else None)))
+        reciente = n < n_reciente
+        vrp = (1.0 if via_publica else 0.0) if reciente else 1.0
+        records.append(_rec(d, vrp=vrp, via=(True if (reciente and con_via) else None)))
     banco = ([_brec(_dia(2), "MODIS", False, "pos")],
              [{"volcano": "Villarrica", "sensor_bucket": "MODIS", "fecha_utc": _dia(2) + " 07:20:00", "vrp_mw": 2.0,
                "tipo": "ALERTA_TERMICA", "source": "CONS"}])
@@ -125,8 +128,8 @@ def _escenario(con_via):
 
 @pytest.fixture
 def correr(monkeypatch, tmp_path):
-    def _correr(con_via):
-        records, alertas, banco = _escenario(con_via)
+    def _correr(con_via, **kw):
+        records, alertas, banco = _escenario(con_via, **kw)
         monkeypatch.setattr(aa, "leer_frontera_k", lambda *a: FRONTERA)
         monkeypatch.setattr(aa, "alertas_mirova", lambda *a, **k: alertas)
         monkeypatch.setattr(aa, "cargar_filas_referencia", lambda: None)
@@ -168,3 +171,39 @@ def test_mutacion_sin_la_via_la_misma_escena_es_k_y_no_hay_claves_nuevas(correr)
     assert r["n_noches"] == 36
     p = out["alertas_protegidas"]["lista"][0]
     assert p["detector"] == "K"
+
+
+# ------------------------------------------------------------------ S173, hallazgo 205
+# POR QUÉ (experiments/_s173_aud/f2/INFORME.md §3, 205; confirmado por V2): la magnitud por régimen (S157) ordena los
+# regímenes con la tupla REGIMENES y `regimen_de_pasada` devuelve "VIA_MODIS" para una pasada MODIS de la vía. Sin
+# "VIA_MODIS" en la tupla, la primera noche en que la vía publique MODIS con alerta de MIROVA hacía caer main() con
+# ValueError antes de escribir latest.json: sin informe y sin issue. La prueba de punta a punta de arriba no lo veía
+# porque en su escena la vía no publica (vrp 0): estas dos sí la hacen publicar.
+def test_todo_regimen_que_devuelve_regimen_de_pasada_esta_en_regimenes():
+    casos = [("2026-08-28 22:59", None, None), ("2026-08-28 23:00", None, None), ("2026-09-05 05:00", None, None),
+             ("2026-10-01 05:00", "MODIS", None), ("2026-11-06 07:20", "MODIS", "2026-11-06"),
+             ("2026-11-06 05:00", "VIIRS375", "2026-11-06")]
+    vistos = {aa.regimen_de_pasada(dt, FRONTERA, s, v) for dt, s, v in casos}
+    assert "VIA_MODIS" in vistos
+    assert vistos <= set(aa.REGIMENES), vistos - set(aa.REGIMENES)
+
+
+def test_magnitud_por_regimen_con_la_via_publicando_en_noche_con_alerta():
+    mir = {("Villarrica", "MODIS", "2026-11-06"): 2.0, ("Villarrica", "MODIS", "2026-11-04"): 2.0}
+    recs = {"Villarrica": [_rec("2026-11-06", vrp=1.5, via=True), _rec("2026-11-04", vrp=1.0)]}
+    res = aa.nuestros_por_noche(recs, ("2026-10-01", "2026-11-30"), FRONTERA, via_modis="2026-11-06")
+    est = aa.estratificar_magnitud(mir, res["ours"], FRONTERA, "K", via_modis="2026-11-06")
+    reg = est["por_regimen"]["Villarrica|MODIS"]
+    assert list(reg) == ["K", "VIA_MODIS"]
+    assert reg["VIA_MODIS"]["n_noches"] == 1 and reg["VIA_MODIS"]["ratio_mediano"] == 0.75
+    assert reg["K"]["n_noches"] == 1 and reg["K"]["ratio_mediano"] == 0.5
+
+
+def test_main_no_cae_cuando_la_via_publica_modis_en_noches_con_alerta(correr):
+    out = correr(con_via=True, via_publica=True)
+    assert out["detector"]["vigente_por_sensor"]["MODIS"] == "VIA_MODIS"
+    r = out["recall"]["MODIS"]
+    assert (r["recall_crater_pct"], r["n_noches"]) == (100.0, 16)
+    reg = out["magnitud_publicada_by_vol_sensor_regimen"]["Villarrica|MODIS"]
+    assert list(reg) == ["K", "VIA_MODIS"]
+    assert reg["VIA_MODIS"]["n_noches"] == 16 and reg["K"]["n_noches"] == 20
