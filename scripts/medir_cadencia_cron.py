@@ -41,6 +41,9 @@ ESPERADO_POR_DIA = {
     # S169 (P3-09): la sombra «codigo MIROVA». Su ausencia la alerta nrt-monitor.yml (decidirSombra); aqui solo
     # entra al reporte de puntualidad. Con una corrida al dia, 0 en 24 h es justamente lo que hay que ver.
     "Sombra codigo MIROVA (vias V750, V375 y MODIS, 11 Tier A)": 1,  # cron "0 15 * * *"
+    # S172 (VS34-04): la sombra de los 34 y su vigilancia; su ausencia la alerta nrt-monitor.yml (decidirAusencia).
+    "Sombra de los 34 (vias codigo MIROVA, volcanes fuera del NRT)": 1,  # cron "7 13 * * *"
+    "Vigilancia de la sombra de los 34": 1,                              # cron "27 23 * * *"
 }
 
 # El unico workflow cuya ausencia total es accionable por si sola.
