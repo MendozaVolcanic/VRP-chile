@@ -1,9 +1,14 @@
 # Regla de adopción y reversión de la vía «código MIROVA» en MODIS (MOD-D)
 
-**BORRADOR, RONDA 5, SIN SELLO.** Ronda 5 (S173): los cuatro cambios del verificador VB4 (fast-forward, citas de
+**SELLADA el 2026-11-02 (servidor 17:12:17 UTC)** por Nicolás con la frase «Sí, sellar y encender», sobre la ronda 5
+(sha256 LF del texto sellado antes de esta cabecera: `7f300a14…`, commit `3a3b5e495` de `claude/s173-modd-flip`). La
+misma frase da el sí de A45 para el encendido del PR B (#934) y la pre-autorización de la reversión de §4.3. Desde aquí
+el texto no se cambia: una corrección va como marca A113 con fecha, sin tocar lo sellado.
+
+**Antes: BORRADOR, RONDA 5, SIN SELLO.** Ronda 5 (S173): los cuatro cambios del verificador VB4 (fast-forward, citas de
 `loop/activo`, `pipeline/` fuera del flag, comentario del script), tabla del final. D1 a D7 contestadas por Nicolás el 2026-11-02 (servidor 15:42 UTC): «de1 a d7
 si», las siete con la recomendación. La ronda 3 la leyó un verificador limpio (VB3: regla SELLABLE CON CAMBIOS, PR B
-MERGEABLE CON CAMBIOS); esta ronda 4 aplica esos cambios. Falta la frase de sello de Nicolás.
+MERGEABLE CON CAMBIOS); esta ronda 4 aplica esos cambios. Falta la frase de sello de Nicolás (dada, ver la cabecera).
 
 - **Ronda 4** (S173): aplica los cambios de texto del verificador limpio de la ronda 3 (Fable, informe VB3,
   hallazgos VB3-01 a VB3-08, §9; vive fuera de git, en `C:/Users/nmend/vrp-wt/ver_s173_regla3_b/INFORME.md`; la ronda 3
