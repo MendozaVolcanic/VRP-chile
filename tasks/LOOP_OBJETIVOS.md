@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-11-02 ~17:00 UTC (S173): #935 verificado y corregido, CI verde; verificador de regla ronda 3 y B corriendo
+### 2026-11-02 16:27 UTC (S173; corregida, decía ~17:00 sin consultar la hora): #935 verificado y corregido, CI verde; verificador de regla ronda 3 y B corriendo
 - Verificador Fable de #935: MERGEABLE CON CAMBIOS (V935-01 gravedad 3: el lacolito de PCC en la grilla de Antillanca no
   se marcaba con 4 km desde el cráter). Aplicado en `b0b7374bb`: radio = max(4 km, `inner_radius_km` del vecino),
   desde cráter y punto nominal; V935-04 y 05 también. Mutaciones: radio fijo 4 tumba 2 pruebas, round tumba 1. CI
