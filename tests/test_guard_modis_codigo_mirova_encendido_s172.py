@@ -2,7 +2,7 @@
 """S172, PR B: la vía «código MIROVA» de MODIS queda ENCENDIDA en producción, y ningún perfil vivo la hereda sin querer.
 
 POR QUÉ. Nicolás decidió el 2026-10-31 adelantar MODIS: encender la vía sin esperar la sombra de 28 noches, con K de
-guardia (experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md, rama loop/activo; tag defensivo
+guardia (experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md; en S172 vivía sólo en la rama loop/activo; en main desde el PR B #934; tag defensivo
 pre-s171-adopcion-modd). Este guard fija dos cosas que fallan en silencio:
   1. el flag de producción, leído desde pipeline.profile (A89): si una consolidación lo apagara, MODIS volvería a K
      sin que nada lo dijera (A63); si el PR B se revierte, este archivo se va con él;
