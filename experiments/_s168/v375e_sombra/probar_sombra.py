@@ -307,6 +307,13 @@ def main(argv=None):
         chk("S1 (VS168-01): desde DESPUÉS del 2026-11-03 también cae",
             not LS.control_s1("2026-11-10", "2026-11-20", [o for o in pob if o["noche"] >= "2026-11-10"])[0])
         chk("S1: pasada fuera de la ventana cae", not LS.control_s1("2026-11-03", "2026-11-05", pob)[0])
+        # VR2-02 (verificador de la ronda 2 de S172; M22 sobrevivía desde S169): la cota inferior también es contrato
+        # de S1. En main() banco_paridad ya filtra por la fecha UTC con la misma ventana, así que ahí no se dispara;
+        # la prueba fija la función, que es lo que el S0 no congela (si cambiara quién arma la población)
+        antes = dict(pob[0], id=501, noche="2026-11-02", hora_utc="2026-11-02 06:00")
+        chk("S1 (VR2-02): una pasada de una noche anterior al desde cae",
+            not LS.control_s1("2026-11-03", "2026-11-20", pob + [antes])[0]
+            and "2026-11-02 06:00" in LS.control_s1("2026-11-03", "2026-11-20", pob + [antes])[1]["fuera_de_ventana"])
         chk("S1: clave repetida cae", not LS.control_s1("2026-11-03", "2026-11-20", pob + [dict(pob[0], id=500)])[0])
         chk("S1: hasta antes de desde cae", not LS.control_s1("2026-11-03", "2026-11-02", [])[0])
         ok2, r2 = LS.control_s2(pob, via, inner, publicar, LP)
@@ -535,12 +542,50 @@ def main(argv=None):
              gr0 + "  Lascar: {epsg: 32719, x0: 1.0, y0: 7414948.7, centro_lat: -23.37058, centro_lon: -67.73061}\n"),
             ("una clave nueva fuera de volcanes", gr0, gr0 + "version: 2\n"),
             ("volcanes que deja de ser un diccionario", gr0, "volcanes: [Lascar, Isluga]\n"),
+            ("una clave roi_v375 nueva en uno de los 11 (VR2-04)", gr0,
+             gr0.replace("roi_v750: def", "roi_v750: def, roi_v375: def")),
         ] + [(f"un cambio en x0 de {n}", gr11, gr11.replace(f"x0: {100.0 + i}", f"x0: {100.5 + i}"))
              for i, n in enumerate(ONCE)]
         for nom, viejo, nuevo in marcan_gr:
             nb9, mo9 = fake({GR: (viejo, nuevo)})
             chk(f"S8 (S172 r2): {nom} marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb9, mostrar=mo9) == [GR],
                 LS.diff_git(COMMIT, "f" * 40, nombres=nb9, mostrar=mo9))
+
+        # S172 ronda 3 (verificador de la ronda 2): VR2-04, las claves de ROI que se ignoran son exactamente las dos
+        # que la vía de VIIRS 375 no lee (arma su caja con caja_v375, no con g["roi"])
+        chk("S8 (VR2-04): las claves de ROI ignoradas son exactamente roi_v750 y roi_modis",
+            getattr(LS, "CLAVES_ROI_IGNORADAS", None) == ("roi_v750", "roi_modis"),
+            getattr(LS, "CLAVES_ROI_IGNORADAS", None))
+        # VR2-01: con git real, un archivo de RUTAS_REGIMEN borrado tiene que salir en nombres_git y marcar en
+        # diff_git. El commit se arma con plumbing sobre HEAD y un índice temporal (no toca rama, índice ni árbol, no
+        # se sube); autor y fecha fijos, así que es el mismo objeto en cada corrida. Control: un borrado fuera de
+        # RUTAS_REGIMEN (docs/MISSION.md) no aparece.
+        import os as _os
+        import subprocess as _sp
+
+        def _g(*args, env=None):
+            p = _sp.run(["git", "-C", str(LS.RAIZ)] + list(args), capture_output=True, text=True, encoding="utf-8",
+                        errors="replace", env=env, timeout=120)
+            return p.returncode, p.stdout.strip()
+        borrados = ("pipeline/f5_core.py", "pipeline/profiles/sombra_codigo_mirova.yaml")
+        with tempfile.TemporaryDirectory() as tdg:
+            env = dict(_os.environ, GIT_INDEX_FILE=str(Path(tdg) / "indice"), GIT_AUTHOR_NAME="probar_sombra",
+                       GIT_AUTHOR_EMAIL="probar_sombra@invalid", GIT_COMMITTER_NAME="probar_sombra",
+                       GIT_COMMITTER_EMAIL="probar_sombra@invalid", GIT_AUTHOR_DATE="2026-11-02T00:00:00Z",
+                       GIT_COMMITTER_DATE="2026-11-02T00:00:00Z")
+            rc_h, cabeza = _g("rev-parse", "HEAD")
+            pasos = [rc_h, _g("read-tree", cabeza, env=env)[0],
+                     _g("update-index", "--force-remove", *borrados, "docs/MISSION.md", env=env)[0]]
+            rc_t, arbol = _g("write-tree", env=env)
+            rc_c, armado = _g("commit-tree", arbol, "-p", cabeza, "-m", "probar_sombra VR2-01 (sin rama, sin push)",
+                              env=env)
+        armado_ok = pasos + [rc_t, rc_c] == [0] * 5
+        nb_real = LS.nombres_git(cabeza, armado) if armado_ok else None
+        chk("S8 (VR2-01, git real): los archivos de régimen borrados salen en nombres_git y el borrado ajeno no",
+            armado_ok and sorted(nb_real or []) == sorted(borrados), (pasos, rc_t, rc_c, nb_real))
+        dg_real = LS.diff_git(cabeza, armado) if armado_ok else None
+        chk("S8 (VR2-01, git real): un .py y un perfil de régimen borrados marcan",
+            armado_ok and sorted(dg_real or []) == sorted(borrados), dg_real)
 
         # S172 (re-sellado por claves, decisión de Nicolás del 2026-11-01): los perfiles se comparan sin las claves de
         # thresholds que lee sólo el procesador de MODIS o el de VIIRS 750 (CLAVES_PERFIL_OTRO_SENSOR)

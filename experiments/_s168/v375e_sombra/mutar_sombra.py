@@ -214,6 +214,10 @@ MUTACIONES = [
      '        pass\n'),                                             # quita el filtro
     ("S11", 'if n in VOLCANES_GRILLA_REGIMEN}', 'if False}'),       # lo aplica a todos: no compara ninguna entrada
     ("S12", '"Tupungatito", "Villarrica")', '"Tupungatito")'),     # saca un volcán de la lista
+    # ---- S172 ronda 3 (verificador de la ronda 2): VR2-01 (borrados con git real) y VR2-04 (claves de ROI)
+    ("S13", '_git("diff", "--name-only", a, b,', '_git("diff", "--name-only", "--diff-filter=AM", a, b,'),
+    ("S14", 'CLAVES_ROI_IGNORADAS = ("roi_v750", "roi_modis")',
+     'CLAVES_ROI_IGNORADAS = ("roi_v750", "roi_modis", "roi_v375")'),
 ]
 # VL169-10: equivalentes declaradas ANTES de correr (sobrevivir no las hace sospechosas)
 EQUIVALENTES = {

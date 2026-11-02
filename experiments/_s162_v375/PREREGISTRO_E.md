@@ -1266,3 +1266,22 @@ sin grilla; con 45 de 45 queda vacío).
 UTC; S09 es la de VR172-01, cuya corrida anterior se había interrumpido): identidad PASA, CONTROL y CONTROL_SECCION
 CAIDA, **4 de 4 atrapadas por aserción**, 0 caídas, 0 sobrevivientes (`mutar_sombra_repaso_salida.txt`, a continuación
 de la corrida de S01 a S08).
+
+**Verificador limpio de la ronda 2 (S172, Sonnet)** sobre `e7196dda7`: SELLABLE CON CAMBIOS, todos de pruebas (informe
+fuera del repo, `D:/vrp-trabajo/temporales/ver_s172_relector_r2/informe.md` y `hallazgos.csv`). Confirmó con git real
+que ni el encendido de MODIS ni la sombra de los 34 marcan régimen en VIIRS 375 sobre sus puntas reales, que 11 de 11
+positivos reales marcan y que los 56 casos de falla cerrada se comportan como se declararon. Tratamiento (ronda 3):
+
+| hallazgo | gravedad | tratamiento |
+|---|---|---|
+| VR2-01 ninguna prueba fija con git real que un archivo de régimen borrado marque (`--diff-filter=AM` sobrevivía 275 de 275) | 2 | prueba con git real: commit armado con plumbing sobre `HEAD` y un índice temporal (sin rama, sin tocar índice ni árbol, sin push; autor y fecha fijos, así que es el mismo objeto en cada corrida) que borra `pipeline/f5_core.py`, `pipeline/profiles/sombra_codigo_mirova.yaml` y, de control, `docs/MISSION.md`: los dos primeros salen en `nombres_git` y marcan en `diff_git`, el tercero no; mutación S13 (`--diff-filter=AM`) |
+| VR2-02 M22 (cota inferior de la ventana en S1) sobrevive desde S169 sin declararse | 2, anterior a este diff | prueba nueva «una pasada de una noche anterior al desde cae». No se declara equivalente porque no lo es como función: `control_s1` con una pasada del 2026-11-02 en la población la deja pasar. Sí es verdad que en `main()` no se dispara hoy: `banco_paridad.cargar_nuestros` filtra por la fecha UTC del record con la misma ventana y la noche es esa misma fecha (`scripts/banco_paridad.py` l. 274 y 284). La prueba fija el contrato de S1 por si cambia quién arma la población |
+| VR2-03 renombrar un perfil de régimen no marca (git real) | 2 | **riesgo aceptado**, el mismo hueco que VR172-06: `git diff --name-only` con detección de renombres lista sólo el nombre nuevo, que no está en `PERFILES_REGIMEN`, y `cambio_significativo` lo descarta sin mirar el contenido. Por qué se acepta: un perfil renombrado deja de ser el que cargan K y la vía (`pipeline/profile.py` l. 41 lo busca por nombre, y lo nombran el workflow con `--profile` y `VRP_PROFILE` y el `extends:` de la sombra), así que para que el renombre tenga efecto hay que cambiar también quién lo nombra; el workflow de la sombra, que fija el perfil, se compara como texto y marca, y los records traen `regimen.perfil`, que el S8 compara con `mirova_equivalent` y `sombra_codigo_mirova` (un record con otro perfil marca). Un renombre de un `.py` o de la grilla sí marca |
+| VR2-04 `CLAVES_ROI_IGNORADAS` no está fijada por ninguna prueba (agregarle `roi_v375` sobrevivía) | 1 | prueba que la fija exacta (`roi_v750`, `roi_modis`), caso «una clave `roi_v375` nueva en uno de los 11 marca», y mutación S14 (agrega `roi_v375`) |
+| S1 a S4 de sus seguimientos (`nrt.yml` y `frontend/` fuera del S8; un arreglo real de MODIS marca de más; pruebas de `main` con 45 grillas; `__pycache__`) | 1 a 2 | fuera de este diff; el primero ya estaba como VR172-03 y VR172-04, el tercero está arriba en «Lo que tendrá que ajustar» |
+
+**Batería de la ronda 3** (`probar_sombra.py`, un proceso, árbol quieto, sobre `e7196dda7` más este diff sin
+commitear, 2026-11-02 03:16:54 a 03:22:42 UTC): **280 de 280**, sale 0, sin secciones caídas (275 más las 5 nuevas:
+VR2-01 dos, VR2-02 una, VR2-04 dos; `probar_sombra_salida.txt`). Rojo de las nuevas antes del verde: en un ensayo
+barato del bloque de VR2-01 y VR2-04, S13 hace fallar las dos de git real y S14 la de la lista; el de VR2-02 lo da M22
+en el nulo.
