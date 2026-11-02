@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 15:25 UTC (S173): #933 (PR A, infraestructura inerte de MODIS) mergeado con frase de Nicolás
+- Frase «Sí, mergear #933». CI `pytest` verde (5m7s); `gh pr merge 933 --merge --match-head-commit f8f37cec9`;
+  merge commit `eb4ae1c96` (2 padres) en main, 2026-11-02T15:25:53Z, comprobado con `gh api .../commits/main`.
+- El flag `enable_modis_codigo_mirova` sigue apagado en producción: A no enciende nada.
+- #934 (PR B) reapuntado a `main`; sigue borrador, CLEAN MERGEABLE, head `d5d52ccfc`. Su merge exige A45 (tag + frase).
+
 ### 2026-11-02 15:15 UTC (S173): #932 (sombra de los 34) mergeado con frase de Nicolás
 - Frase «Sí, mergear #932». CI `pytest` verde (5m13s); `gh pr merge 932 --squash --match-head-commit 28183712a`;
   squash `abd27e198` en main, 2026-11-02T15:15:40Z, comprobado con `gh api .../commits/main`.
