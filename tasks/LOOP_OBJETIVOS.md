@@ -569,6 +569,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 17:06 UTC (S173): VB4 limpio; regla ronda 5 en B; B listo para sello y A45
+- Verificador VB4 (Fable; informe `C:/Users/nmend/vrp-wt/ver_s173_regla4/INFORME.md`): regla SELLABLE CON CAMBIOS
+  (VB4-01 gravedad 3: B es fast-forward sobre main; un merge sin `--no-ff` o «Rebase and merge» no deja commit que
+  revertir); B MERGEABLE con cambios menores. S8 del lector V375-E: main a B NO marca (control `pre-s165-mxd03-modis`
+  marca 9). §4.7 punto 6 simulado: funciona.
+- Aplicado por la coordinadora en B: ronda 5 (sólo merge commit; citas de `loop/activo`; VB4-03; comentario de cotas
+  VB4-04) y cuerpo del PR actualizado. Punta B `3a3b5e495`, regla sha256 LF `7f300a14`, 67 pruebas que leen esos
+  archivos pasan, CI `pytest` verde (4m50s), CLEAN, borrador. La regla vigente vive ahora en B; la de loop/activo es
+  la ronda 3, historia.
+- Pendiente de Nicolás: frase de sello de la regla (ronda 5), frase de sello del pre-registro retro, y sí A45 para el
+  encendido (tag nuevo sobre el main previo, `gh pr ready`, `gh pr merge 934 --merge --match-head-commit`).
+
 ### 2026-11-02 16:43 UTC (S173): regla ronda 4 dentro de B; verificador VB4 (Fable) corriendo
 - B = `b18e34eed` (merge de main 438a010ab sin conflictos; regla ronda 4 en `711542e77`, sha256 LF `f6122c8e`; VB3-01
   a 08 tratados; §4.7 punto 6 nuevo: revertir B borra la regla de main y dice cómo reponerla). Suite 3.076 pasan, 0
