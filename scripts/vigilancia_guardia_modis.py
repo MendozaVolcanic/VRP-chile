@@ -73,7 +73,7 @@ OUTDIR = aa.OUTDIR
 PROTEGIDAS_OBJETIVO = vs.PROTEGIDAS_OBJETIVO   # 29: una pérdida de 1 de cada 10 se ve con 95 %, como con K
 DIAS_MAXIMOS = vs.DIAS_MAXIMOS                 # 120
 TOL_S = vs.TOL_S                               # el pareo del etiquetador (±120 s)
-# §4 (i) y (ii) del borrador de la regla, propuestas que fija Nicolás al sellar: más de COTA dispara.
+# §4.4 (i) y (ii) de la regla de reversión: cotas D1 y D2, contestadas «Sí» por Nicolás el 2026-11-02. Más de COTA dispara.
 COTA_MUY_BAJO = 2
 COTA_SOBREPUBLICACION = 3
 UMBRAL_MINIMO_MW = 0.05                        # «sobre 0,05 MW»: lo de 0,05 o menos no cuenta como Muy Bajo
