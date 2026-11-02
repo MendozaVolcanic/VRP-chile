@@ -582,7 +582,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 - **Regla de reversión ronda 2** (`5ec26f23c`, sha256 LF `db2c25b3`): decisiones D1 a D7, todas con recomendación sí.
 - **Pre-registro retro ronda 3** (`fcbb50c0e`, sha256 LF `51f67d96`): F26 recontado con la referencia congelada, ningún
   conteo cambia; R-1 a R-15 para Nicolás.
-- **PR abiertos**: #933 (A, base main), #934 (B, borrador, base la rama de A). CI pendiente al escribir.
+- **PR abiertos**: #933 (A, base main), #934 (B, borrador, base la rama de A). CI `pytest` verde en los dos (5 min 7 s y 5 min 51 s, 13:50 UTC); #932 también verde.
 - Esfuerzo de los agentes: varios declararon bajo pese a `effort` explícito; la sesión coordinadora corre en medium.
   Memoria actualizada (`feedback_s172_esfuerzo_explicito_agentes`). Las decisiones se apoyan en los verificadores Fable.
 - Carpetas vacías `C:/d/vrp-trabajo/worktrees` creadas por error por el agente VR: el guard de seguridad no deja
