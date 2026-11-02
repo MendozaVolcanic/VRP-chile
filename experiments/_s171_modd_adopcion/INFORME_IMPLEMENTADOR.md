@@ -2,7 +2,7 @@
 
 Fecha: 2026-11-01 (hora del servidor, 2026-11-02 UTC al cerrar). Diseño implementado:
 `docs/superpowers/specs/2026-11-01-encendido-modd-design.md` (`d24fda8f3`). Regla:
-`experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` (rama `loop/activo`, sin sellar). Worktree
+`experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` (rama `loop/activo`, sin sellar; ⚠️ **S173 (A113)**: desde el PR B (#934) la regla vive en main, en esta misma ruta (ronda 4)). Worktree
 `D:/vrp-trabajo/worktrees/s172-modd-encendido`. No se abrió PR, no se mergeó nada, no se despachó ningún workflow ni se
 creó ningún tag. Las dos ramas están empujadas a `origin`.
 
