@@ -43,7 +43,8 @@ QUÉ HACE.
      en el resumen del job (GITHUB_STEP_SUMMARY).
   6. Vecinos (S173, decisión 3 de tasks/BLOQUE_ARRANQUE_S173.md §b): si el JSON está en data/sombra_34/ y el volcán
      tiene otro volcán en su grilla (experiments/_s172_sombra34/vecinos.yaml), el resumen da aparte las pasadas de la
-     vía con un alertado o el cúmulo a menos de 4 km de un vecino (scripts/vecinos_sombra_34.py), porque ese calor
+     vía con un alertado o el cúmulo dentro del radio de un vecino (4 km, o el inner_radius_km del vecino si es mayor,
+     medido desde su cráter y su punto nominal; scripts/vecinos_sombra_34.py), porque ese calor
      puede ser del vecino. No cambia los controles 1 a 5. Una lista de vecinos ilegible es FALLA.
   Nunca sale con traceback por un insumo malo: lo dice en la línea FALLA. Salida 0 = verde, 1 = rojo.
 
@@ -146,8 +147,8 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensor
     del JSON de la sombra, o None si no se pudo leer. `desde_utc`: inicio de la corrida (ISO UTC). `cobertura`: el dict
     de --cobertura-json de run_pipeline, o None. `sha`: el del disparo (GITHUB_SHA); si viene, un record sólo es de esta
     corrida si lo trae. `errores_lectura`: insumos que main no pudo leer, que van como FALLA.
-    `vecinos` (S173, decisión 3): {vecino: (lat, lon)} del volcán en la sombra de los 34; si viene no vacío, el resumen
-    da aparte las pasadas de la vía con un alertado o el cúmulo a menos de 4 km de un vecino
+    `vecinos` (S173, decisión 3): {vecino: {"puntos", "radio_km"}} del volcán en la sombra de los 34; si viene no
+    vacío, el resumen da aparte las pasadas de la vía con un alertado o el cúmulo dentro del radio de un vecino
     (scripts/vecinos_sombra_34.py). No cambia ningún control ni el veredicto: una pasada cerca del vecino también
     prueba que la vía corrió ese día. Sin vecinos el resumen es el de siempre."""
     fallas, notas = list(errores_lectura), []
