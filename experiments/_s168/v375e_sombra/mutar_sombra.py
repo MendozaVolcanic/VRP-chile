@@ -209,6 +209,11 @@ MUTACIONES = [
     # VR172-01 (verificador S172): ignorar `extends` en la comparación de perfiles tiene que salir atrapada
     ("S09", '            t.pop(k, None)\n    return d\n',
      '            t.pop(k, None)\n    if isinstance(d, dict):\n        d.pop("extends", None)\n    return d\n'),
+    # ---- S172 ronda 2: la grilla sólo en los 11 Tier A (decisión de Nicolás del 2026-11-02; PREREGISTRO_E.md §11.14)
+    ("S10", '        d["volcanes"] = {n: v for n, v in d["volcanes"].items() if n in VOLCANES_GRILLA_REGIMEN}\n',
+     '        pass\n'),                                             # quita el filtro
+    ("S11", 'if n in VOLCANES_GRILLA_REGIMEN}', 'if False}'),       # lo aplica a todos: no compara ninguna entrada
+    ("S12", '"Tupungatito", "Villarrica")', '"Tupungatito")'),     # saca un volcán de la lista
 ]
 # VL169-10: equivalentes declaradas ANTES de correr (sobrevivir no las hace sospechosas)
 EQUIVALENTES = {

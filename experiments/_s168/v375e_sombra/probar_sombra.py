@@ -500,6 +500,48 @@ def main(argv=None):
         chk("S8 (VL169-03): un .py nuevo en pipeline/ marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb3, mostrar=mo3)
             == ["pipeline/nuevo.py"])
 
+        # S172 ronda 2 (decisión de Nicolás del 2026-11-02, PREREGISTRO_E.md §11.14): la grilla se compara sólo en las
+        # entradas de los 11 Tier A (VOLCANES_GRILLA_REGIMEN); una entrada de otro volcán que aparece, cambia o
+        # desaparece no marca, porque la vía de cada volcán lee sólo su propia entrada (grilla_del_volcan)
+        ONCE = ("Chaiten", "NevadosDeChillan", "Copahue", "Isluga", "Lascar", "Lastarria", "Llaima",
+                "PlanchonPeteroa", "PuyehueCordonCaulle", "Tupungatito", "Villarrica")
+        chk("S8 (S172 r2): la lista de volcanes de la grilla que se comparan es la cerrada de los 11 Tier A",
+            getattr(LS, "VOLCANES_GRILLA_REGIMEN", None) == ONCE, getattr(LS, "VOLCANES_GRILLA_REGIMEN", None))
+        import yaml as _yaml
+        gr_real = (LS.RAIZ / LS.GRILLAS).read_text(encoding="utf-8")
+        claves_real = set((_yaml.safe_load(gr_real) or {}).get("volcanes") or {})
+        chk("S8 (S172 r2): los 11 nombres de la lista están tal cual en grillas_mirova.yaml de este checkout",
+            set(ONCE) <= claves_real, sorted(set(ONCE) - claves_real))
+        GR = "pipeline/grillas_mirova.yaml"
+        ajeno = "  Lonquimay: {epsg: 32719, x0: 1.0, y0: 2.0, centro_lat: -38.38, centro_lon: -71.58}\n"
+        gr11 = "volcanes:\n" + "".join(
+            f"  {n}: {{epsg: 32719, x0: {100.0 + i}, y0: {200.0 + i}, centro_lat: -{20 + i}.0, centro_lon: -70.0, "
+            f"roi_v750: def}}\n" for i, n in enumerate(ONCE))
+        no_marcan_gr = (
+            ("un volcán fuera de los 11 que aparece (sintética)", gr0, gr0 + ajeno),
+            ("un volcán fuera de los 11 que aparece (grilla real de este checkout)", gr_real, gr_real + ajeno),
+            ("un volcán fuera de los 11 que cambia", gr0 + ajeno, gr0 + ajeno.replace("x0: 1.0", "x0: 9.0")),
+            ("un volcán fuera de los 11 que desaparece", gr0 + ajeno, gr0),
+            ("un volcán fuera de los 11 que aparece y otro de los 11 cambia sólo su roi_v750", gr0,
+             gr0.replace("roi_v750: def", "roi_v750: r5x5") + ajeno),
+        )
+        for nom, viejo, nuevo in no_marcan_gr:
+            nb8, mo8 = fake({GR: (viejo, nuevo)})
+            chk(f"S8 (S172 r2): {nom} no marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb8, mostrar=mo8) == [],
+                LS.diff_git(COMMIT, "f" * 40, nombres=nb8, mostrar=mo8))
+        marcan_gr = [
+            ("un volcán de los 11 que desaparece", gr0 + ajeno, "volcanes:\n" + ajeno),
+            ("un volcán de los 11 repetido más abajo con otra x0 (el yaml se queda con el último)", gr0,
+             gr0 + "  Lascar: {epsg: 32719, x0: 1.0, y0: 7414948.7, centro_lat: -23.37058, centro_lon: -67.73061}\n"),
+            ("una clave nueva fuera de volcanes", gr0, gr0 + "version: 2\n"),
+            ("volcanes que deja de ser un diccionario", gr0, "volcanes: [Lascar, Isluga]\n"),
+        ] + [(f"un cambio en x0 de {n}", gr11, gr11.replace(f"x0: {100.0 + i}", f"x0: {100.5 + i}"))
+             for i, n in enumerate(ONCE)]
+        for nom, viejo, nuevo in marcan_gr:
+            nb9, mo9 = fake({GR: (viejo, nuevo)})
+            chk(f"S8 (S172 r2): {nom} marca", LS.diff_git(COMMIT, "f" * 40, nombres=nb9, mostrar=mo9) == [GR],
+                LS.diff_git(COMMIT, "f" * 40, nombres=nb9, mostrar=mo9))
+
         # S172 (re-sellado por claves, decisión de Nicolás del 2026-11-01): los perfiles se comparan sin las claves de
         # thresholds que lee sólo el procesador de MODIS o el de VIIRS 750 (CLAVES_PERFIL_OTRO_SENSOR)
         chk("S8 (S172): la lista de claves de otro sensor es la cerrada",

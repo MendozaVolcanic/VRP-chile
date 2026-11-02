@@ -1207,3 +1207,57 @@ workflow nuevos no marca; editar la l. 110 del workflow de la sombra sí. Tratam
 **Nulo de las mutaciones nuevas** (`mutar_sombra.py --solo`, un hilo, `aa3fdcf1e`, 2026-11-01 23:22 a 2026-11-02 00:56
 UTC): identidad PASA, CONTROL y CONTROL_SECCION CAIDA, **S01 a S08: 8 de 8 atrapadas por aserción**, 0 caídas, 0
 sobrevivientes (`mutar_sombra_repaso_salida.txt`).
+
+#### 11.14.1 Ronda 2 del re-sellado: la grilla se compara sólo en los 11 Tier A (S172, 2026-11-02)
+
+**Decisión de Nicolás** (chat de la coordinadora S172, 2026-11-02): «continúa con todo para que avancemos más rápido».
+Con eso decidió tomar datos ya de los 34 volcanes que no están en el NRT, con las vías «código MIROVA», en una sombra
+aislada. Para correr la vía en un volcán hay que darle su grilla de MIROVA, o sea agregar 34 entradas a
+`pipeline/grillas_mirova.yaml`. Con el S8 de la ronda 2 (§11.4: «un volcán nuevo [...] marca») cualquiera de esas
+entradas marcaba régimen nuevo en la ventana P de VIIRS 375, y llevaba sus CUMPLE a DECIDE NICOLÁS, aunque ni la vía
+ni la K de los 11 Tier A cambiaran.
+
+**Por qué no cambia nada de los 11 (comprobado en el código antes de editar, regla A6).** MIROVA interpola cada pasada a
+una grilla UTM fija **por volcán**; la grilla de un volcán no depende de la de otro, y el cálculo de un volcán no mira a
+sus vecinos. En el código: `pipeline/mirova_v750_codigo.py` en `origin/main` `14fb62030` lee el archivo entero una sola
+vez (`_referencias`, l. 143 a 145) pero sólo lo consulta por nombre, `_referencias().get(nombre)` en `grilla_del_volcan`
+(l. 172 a 187), que devuelve `None` si el volcán no está; `calcular_vrp_granulo` (l. 788 a 827) sólo usa esa entrada.
+Los tres llamadores (`process_viirs.py` l. 769 a 780 para VIIRS 375, `process_viirs_mod.py` l. 506 a 516, `process_modis.py`
+l. 640 a 656) obtienen el nombre con `volcan_por_coordenadas`, que lee `volcanoes.yaml` y no la grilla. `git grep
+grillas_mirova origin/main` no da otro lector en `pipeline/`, `scripts/`, `.github/` ni `frontend/`. No hay entrada por
+defecto ni orden que importe. La lista de volcanes del lector (`banco_paridad.VOLS`) tampoco sale de la grilla.
+
+**Qué cambia (sólo el S8, sólo la grilla).** `grillas_sin_roi` se queda con las entradas de `volcanes:` cuyo nombre está
+en `VOLCANES_GRILLA_REGIMEN`, la lista cerrada de los 11 con los nombres exactos que tiene hoy `grillas_mirova.yaml`
+(Chaiten, NevadosDeChillan, Copahue, Isluga, Lascar, Lastarria, Llaima, PlanchonPeteroa, PuyehueCordonCaulle,
+Tupungatito, Villarrica), y después quita `roi_v750` y `roi_modis` como antes. Una entrada de otro volcán que aparece,
+cambia o desaparece no marca.
+
+**Falla cerrada, como antes.** Marca: una entrada de los 11 que cambia en cualquier clave salvo las dos de ROI, que
+desaparece o que se repite más abajo con otros valores (el yaml se queda con la última); una clave nueva fuera de
+`volcanes:`; `volcanes:` que deja de ser un diccionario; un archivo ilegible. Un volcán de los 11 escrito con otro
+nombre cuenta como que desapareció.
+
+**Lo que no cambia.** El resto del S8 (perfiles por claves de §11.14, `.py` por AST, `volcanoes.yaml` y el workflow de
+la sombra como texto), el S0, la ventana P y la parada. Si la sombra de los 34 edita
+`.github/workflows/sombra-codigo-mirova.yml`, marca; un workflow nuevo y un perfil nuevo, fuera de `RUTAS_REGIMEN` y de
+`PERFILES_REGIMEN`, no.
+
+**Pruebas.** 22 casos nuevos en `probar_sombra.py` (sección de controles, «S8 (S172 r2)»): la lista cerrada; que los 11
+nombres estén tal cual en la grilla del checkout; cinco que no marcan (un volcán fuera de los 11 que aparece, en una
+grilla sintética y en la real; que cambia; que desaparece; que aparece junto a un cambio sólo de `roi_v750` de uno de
+los 11); y quince que marcan (uno de los 11 que desaparece, uno de los 11 repetido, una clave fuera de `volcanes:`,
+`volcanes:` como lista, y un cambio de `x0` en cada uno de los 11). Contra el lector sin el cambio, 6 de las 22 fallan
+(la lista y las cinco que no marcan) y 16 ya pasaban: son guardas de lo que no debe cambiar, y su rojo lo dan las
+mutaciones. La prueba vieja «un volcán nuevo en la grilla» (Isluga) sigue igual y sigue marcando, porque Isluga es de los
+11. Mutaciones nuevas en `mutar_sombra.py`: S10 (quita el filtro), S11 (lo aplica a todos: no compara ninguna entrada) y
+S12 (saca a Villarrica de la lista).
+
+**Lo que tendrá que ajustar quien agregue las 34 grillas (fuera de este lector, SIN VERIFICAR con las grillas reales).**
+Dos pruebas de `main` cuentan las entradas: `tests/test_mirova_v375_codigo_s165.py` l. 121 (`assert len(con_grilla) ==
+11`) y `tests/test_sombra_codigo_mirova_s167.py` l. 102 y 103 (su control exige que algún volcán de `volcanoes.yaml` quede
+sin grilla; con 45 de 45 queda vacío).
+
+**Batería** (`probar_sombra.py`, un proceso, árbol quieto, sobre `b7d5e8cba` más este diff sin commitear, 2026-11-02
+01:30:52 a 01:38:47 UTC): **275 de 275**, sale 0, sin secciones caídas (253 de la base más las 22 nuevas;
+`probar_sombra_salida.txt`). El nulo de S09 a S12 va abajo cuando termine.

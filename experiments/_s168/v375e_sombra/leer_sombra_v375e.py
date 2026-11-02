@@ -96,6 +96,14 @@ RUTAS_REGIMEN = ("pipeline/", "volcanoes.yaml", "scripts/run_pipeline.py", ".git
 PERFILES_REGIMEN = ("pipeline/profiles/mirova_equivalent.yaml", "pipeline/profiles/sombra_codigo_mirova.yaml")
 GRILLAS = "pipeline/grillas_mirova.yaml"
 CLAVES_ROI_IGNORADAS = ("roi_v750", "roi_modis")   # la vía de VIIRS 375 arma su caja con roi1_half_m
+# S172 ronda 2 (decisión de Nicolás del 2026-11-02, «continúa con todo para que avancemos más rápido»; PREREGISTRO_E.md
+# §11.14): de la grilla se comparan sólo las entradas de los 11 Tier A, con los nombres de grillas_mirova.yaml en
+# origin/main 14fb62030. POR QUÉ: la vía de cada volcán lee sólo su propia entrada (mirova_v750_codigo.grilla_del_volcan,
+# `_referencias().get(nombre)`, llamada desde los tres procesadores con el nombre de volcanoes.yaml), así que agregar
+# las grillas de los 34 volcanes fuera del NRT no cambia nada de los 11. Una entrada de los 11 que cambia (salvo las
+# claves de ROI de arriba) o desaparece, o una grilla ilegible, siguen marcando.
+VOLCANES_GRILLA_REGIMEN = ("Chaiten", "NevadosDeChillan", "Copahue", "Isluga", "Lascar", "Lastarria", "Llaima",
+                           "PlanchonPeteroa", "PuyehueCordonCaulle", "Tupungatito", "Villarrica")
 # S172 (re-sellado por claves, decisión de Nicolás del 2026-11-01; PREREGISTRO_E.md §11.14): claves de `thresholds:`
 # que lee sólo el procesador de MODIS (process_modis.py) o el de VIIRS 750 (process_viirs_mod.py), según git grep de la
 # clave y de su constante en origin/main ffccf6c9f (2026-11-01). Se quitan sólo de `thresholds:`, que es donde las lee
@@ -395,9 +403,13 @@ def ast_sin_docstrings(texto):
 
 
 def grillas_sin_roi(texto):
-    """grillas_mirova.yaml leído, sin las claves de ROI que la vía de VIIRS 375 no lee (CLAVES_ROI_IGNORADAS)."""
+    """grillas_mirova.yaml leído, sólo con las entradas de los 11 Tier A (VOLCANES_GRILLA_REGIMEN, S172 ronda 2) y sin
+    las claves de ROI que la vía de VIIRS 375 no lee (CLAVES_ROI_IGNORADAS). Si `volcanes` no es un diccionario no se
+    filtra nada, y el recorrido de abajo lanza: la grilla cuenta como ilegible y marca (falla cerrada)."""
     import yaml
     d = copy.deepcopy(yaml.safe_load(texto))
+    if isinstance(d, dict) and isinstance(d.get("volcanes"), dict):
+        d["volcanes"] = {n: v for n, v in d["volcanes"].items() if n in VOLCANES_GRILLA_REGIMEN}
     for v in ((d or {}).get("volcanes") or {}).values():
         if isinstance(v, dict):
             for k in CLAVES_ROI_IGNORADAS:
