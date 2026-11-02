@@ -6,6 +6,72 @@ Fecha: 2026-11-01 (hora del servidor, 2026-11-02 UTC al cerrar). Diseño impleme
 `D:/vrp-trabajo/worktrees/s172-modd-encendido`. No se abrió PR, no se mergeó nada, no se despachó ningún workflow ni se
 creó ningún tag. Las dos ramas están empujadas a `origin`.
 
+## Ronda 3 (2026-11-02, S173): arreglos pedidos por la segunda pasada de auditoría
+
+Informes: `experiments/_s173_aud/f1/INFORME.md`, `f2/INFORME.md` y sus verificadores `v1/INFORME.md` y `v2/INFORME.md`
+(rama `loop/activo`). Worktrees nuevos: `D:/vrp-trabajo/worktrees/s173-moddA` (rama de A) y
+`D:/vrp-trabajo/worktrees/s173-moddB` (rama nueva de B). La rama vieja `claude/s172-modd-flip` (`c9525f994`) no se
+tocó. Cada arreglo, con su prueba vista primero en rojo y un commit por arreglo. Las rondas 1 y 2 de abajo se
+conservan tal cual; donde la ronda 3 las corrige, lo dice aquí.
+
+**PR A, commits nuevos** (sobre `0a0dae344`; avance rápido, sin reescribir historia):
+
+| sha | arreglo | rojo visto antes | verde después |
+|---|---|---|---|
+| `e6e2a2511` | (1, hallazgo 205, bloqueante) `"VIA_MODIS"` en `REGIMENES` de `scripts/auto_audit_weekly.py`. Barrí con `grep` todo lo que enumera regímenes (A118): `REGIMENES` sólo lo usa `estratificar_magnitud` (el `REGIMENES` de `scripts/evaluador_comun.py` es otro, sin la vía); `DETECTORES` ya tenía `VIA_MODIS`; `TRAMOS_CENIT` no depende del detector. Tres pruebas en `tests/test_auto_audit_via_modis_s172.py`: todo régimen que devuelve `regimen_de_pasada` está en `REGIMENES`; magnitud por régimen con la vía publicando; y la gemela de punta a punta de `main()` con la vía publicando en noches con alerta (la de la ronda 1 tenía la vía en vrp 0 y no pisaba ese camino) | 3 de 11 (`ValueError: tuple.index(x): x not in tuple`, l. 849) | 11 de 11; con el de cenit, 24 |
+| `18c887103` | (2, hallazgo 206) `sensores_sin_juzgar` avisa también cuando MODIS queda bajo `MIN_N_RECALL` desde el cambio de detector a la vía (clave `detector: VIA_MODIS`, `motivo: cambio_de_detector`, `juzga_desde` = frontera de la vía); va a `latest.json`, a la consola y a los dos cuerpos de issue de `.github/workflows/audit-weekly.yml` («por un cese de plataforma o un cambio de detector»). No degrada el veredicto, igual que el cese | 3 de 14 | 14 de 14; los 14 archivos del audit, 123 |
+| `dcf658393`, `fb1a66d39`, `132b7550e` | (3, hallazgos 161, 162 y V1-04) cherry-pick `-x` de `a256a75cc`, `087b08ced` y `ffe46a68e` del PR B (vigilancia de la sombra de K sin los records de la vía, `esAnclaHonesta` del tablero y la enmienda de `test_no_modifica_la_vigilancia_de_k`). Aplicaron limpio | sus pruebas de B copiadas sobre A sin el código: 7 de 7 fallan | ver la tabla de pruebas |
+| `71d355888` | (3) `experimental`, `experimental_ndc_focus` y `_s146_ab_control` declaran `enable_modis_codigo_mirova: false` en `thresholds:`. Inerte en A (los tres ya leían `False`); está aquí para que un revert de B no la arrastre. Los comentarios dicen ahora que el encendido es del PR B. Prueba nueva `tests/test_perfiles_derivados_via_modis_apagada_s173.py` (YAML y `pipeline.profile`) | 3 de 6 (el YAML no declaraba la clave) | 6 de 6 |
+
+El flag de producción sigue apagado en A: `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
+print(p.ENABLE_MODIS_CODIGO_MIROVA)"` da `False` en `71d355888`. En `pipeline/` sólo cambian esos tres perfiles.
+
+**PR B nuevo**: rama `claude/s173-modd-flip`, nacida de la punta nueva de A. Lleva sólo lo que A no tiene: los
+commits `f75285693` (con la versión de A de los tres perfiles derivados; queda sólo el flag de producción y las
+pruebas del encendido), `61a310340`, `efbbf4d80`, `7f60c02ee`, `d9bdaa6a6` y `c9525f994`, más (4, hallazgo 201) el
+guard `tests/test_guard_modis_codigo_mirova_encendido_s172.py` con `sombra_34` en `VIVOS` sólo si su YAML existe
+(rojo visto con los archivos de #932 copiados al árbol: 2 fallas, la del 201 y la prueba nueva; verde 7 de 7 con y
+sin ellos). El arreglo 4 va en B y no en A porque el guard vive en B: fija producción encendida y en A daría rojo. El
+árbol de B nuevo difiere del de B viejo sólo en lo que agregó A en esta ronda (`git diff --stat c9525f994` sobre B
+nuevo: 7 archivos, en `pipeline/` sólo comentarios de los tres perfiles) y en el guard.
+
+**Órdenes de merge y reversión** (`git merge-tree --write-tree`, sin crear refs; base `origin/main` `47cdc446f`;
+script y salida en el scratchpad de la sesión, `merges.sh` y `merges_salida.txt`):
+
+| estrategia | orden | merges | árbol final | revert de B | árbol del revert contra el mismo orden sin B |
+|---|---|---|---|---|---|
+| merge commit | A, B, #932 | limpios | `6753a9a13` | limpio (`376033661`) | idéntico |
+| merge commit | A, #932, B | limpios | `6753a9a13` | limpio (`376033661`) | idéntico |
+| squash | A, B, #932 | limpios | `6753a9a13` | limpio (`376033661`) | idéntico |
+| squash | A, #932, B | limpios | `6753a9a13` | limpio (`376033661`) | idéntico |
+
+Los cuatro órdenes dan el mismo árbol. Corrige el punto 6 de la ronda 2 y el hallazgo 203: con `ffe46a68e` ya en A, B
+no modifica `tests/test_vigilancia_guardia_modis_s172.py` y el squash de B sobre el squash de A deja de chocar.
+Control positivo del instrumento: el A y el B viejos (`0a0dae344`, `c9525f994`) squasheados así siguen chocando en ese
+archivo (rc 1). El revert sobre el `main` del día del revert sigue SIN VERIFICAR (208: choca si otro PR toca una línea
+vecina del flag).
+
+Las puntas y los árboles de esta sección son los de los commits de código; este informe y el cuerpo del PR B
+entran después como commits de documentos (B se rebasa sobre la punta final de A, que no está empujada antes) y
+el cuerpo del PR B repite los órdenes de merge sobre las puntas finales.
+
+**Pruebas** (rutas explícitas, no la suite: la lista de 50 archivos es la de los tocados, los vigilados por las
+auditorías, los que usan los arneses y los de #932; corre los que existen en cada árbol):
+
+| árbol | archivos | resultado |
+|---|---|---|
+| A (`71d355888`) | 48 | 813 pasan, 0 fallan |
+| B nuevo, punta de código (`db1447fce`) | 49 | 821 pasan, 0 fallan |
+| A+B+#932 (árbol `6753a9a13`, con el `main` de hoy) | 50 | 922 pasan, 0 fallan (la falla del 201 ya no aparece; flag de producción `True` leído de `pipeline.profile`) |
+
+**Quedan para Nicolás** (no arreglados en esta ronda, por pedido): 207 (tres maneras de fechar el encendido: tablero
+y audit por primera observación de la vía, hasta ~8 a 9 días antes del merge por el upgrade NRT a estándar; vigilancia
+por primera escritura; la regla cita `CAMBIO_DETECTOR_MODIS_UTC`, que no existe), 208 (el revert de B choca si otro PR
+toca las líneas vecinas del flag en `mirova_equivalent.yaml`, los tres flags de MxD03), 209 y V2-02 (una excepción de
+la vía distinta de la falta de pyproj deja MODIS mudo con el NRT en verde; nrt.yml no tiene un paso «salió MODIS» como
+la guardia; lo ve la vigilancia de la guardia a los 3 días por volcán). Siguen además 202 (#932 deja rojas 16 de 32
+pruebas de la ROI de V750-B), 204 (nadie vigila que la guardia y su vigilancia corran), 210 y 211, fuera de esta ronda.
+
 ## Ronda 2 (2026-11-02): arreglos pedidos desde la mini auditoría
 
 Síntesis de la mini auditoría: `D:/vrp-trabajo/temporales/s172_miniaud/SINTESIS.md` (veredicto «LISTO CON CAMBIOS»).
