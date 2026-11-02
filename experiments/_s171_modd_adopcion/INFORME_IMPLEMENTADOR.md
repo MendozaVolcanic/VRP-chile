@@ -6,6 +6,60 @@ Fecha: 2026-11-01 (hora del servidor, 2026-11-02 UTC al cerrar). Diseño impleme
 `D:/vrp-trabajo/worktrees/s172-modd-encendido`. No se abrió PR, no se mergeó nada, no se despachó ningún workflow ni se
 creó ningún tag. Las dos ramas están empujadas a `origin`.
 
+## Ronda 2 (2026-11-02): arreglos pedidos desde la mini auditoría
+
+Síntesis de la mini auditoría: `D:/vrp-trabajo/temporales/s172_miniaud/SINTESIS.md` (veredicto «LISTO CON CAMBIOS»).
+El worktree se recreó desde `origin/claude/s172-modd-encendido` (estaba limpio y subido cuando se quitó por espacio).
+La ronda 1 de este informe, más abajo, se conserva tal cual; donde la ronda 2 la corrige, lo dice aquí.
+
+**PR A, commits nuevos** (sobre `c83882fcf`):
+
+| sha | qué |
+|---|---|
+| `03f3edec5` | (1, bloqueante G5) pyproj en los 22 workflows que corren un perfil con alguna vía encendida (con el perfil del PR B): `nrt.yml`, `backfill-tier-a.yml`, `reproc-chunked.yml` y los probe/reproc de despacho manual. Paso «Comprobar pyproj» (`python -c "import pyproj"`) en esos tres operacionales, después de instalar y antes de `run_pipeline.py`, con la misma condición que la instalación. Prueba `tests/test_guard_pyproj_vias_s172.py`: lee las vías de cada perfil desde `pipeline.profile` y recorre `.github/workflows/` (sin comentarios). Rojo visto: en el PR A sin arreglo, falla la del paso de comprobación; con los perfiles del PR B y los workflows sin arreglo, 22 workflows sin pyproj (`verificacion/rojo_pyproj_pr_b.txt`). |
+| `94048cc61` | (2) vigilancia de la guardia: MA172-202 (protegida posterior al encendido que la guardia publica y producción no tiene record, pasadas `ESPERA_SIN_RECORD_H` = 24 h, propuesta que fija Nicolás: INVESTIGAR y línea en el issue; no es reversión pre-autorizada, la regla dice «calla»), MA172-204 (frescura de la referencia también en las filas de MODIS), MA172-206 (encendido = menor `processed_utc` de la vía, no `first_processed_utc`, que hereda K), MA172-208 (nulo con 0 pares = aviso, vigilancia ciega). Rojo visto: 17 de 30 en `tests/test_vigilancia_guardia_modis_s172.py` antes del cambio. |
+| (último de la rama) | esta sección y `verificacion/pruebas_pr_a_ronda2.txt` |
+
+**PR B** rebasado sobre `94048cc61`; además de sus tres commits de la ronda 1 (con sha nuevo por el rebase), trae:
+(3) `scripts/vigilancia_sombra.py` deja de contar como K los records MODIS de la vía (por clave con
+`aa.claves_via_modis`, porque el banco de paridad no copia la marca) y, con records de la vía, deja de exigir la
+frescura de K en MODIS (si no, la vigilancia de K quedaría ciega para siempre tres días después del encendido); rojo 4
+de 4 en `tests/test_vigilancia_sombra_via_modis_s172.py`; salida sobre `data/` de hoy idéntica antes y después
+(`verificacion/vigilancia_sombra_antes_despues.txt`). (4) El tablero reconoce `codigo_mirova` como ancla honesta: la
+lista de fuentes vive en `esAnclaHonesta` de `frontend/index.html` (definida en la línea que estaba en blanco, sin
+correr las citas) y las siete copias la llaman; diario y mosaico no tienen esa lista; rojo 3 de 3 en
+`tests/test_tablero_ancla_codigo_mirova_s172.py`; verificado con node y en el navegador (index carga sin errores y el
+marcador de un record de la vía es el cúmulo, 0,567 km). (5) `tests/test_guard_adopcion_k_s153.py` espera la vía en la
+diferencia del laboratorio (rojo visto en la punta de B: 1 fallo). Más: el cuerpo del PR declara el ancla pre-K y los
+arneses (MA172-107) y el recuento de 33 pruebas (MA172-108); y la prueba «no modifica la vigilancia de K» del PR A
+vigila sólo el workflow, porque el PR B cambia `vigilancia_sombra.py` a propósito.
+
+**Pruebas de la ronda 2** (sólo archivos tocados y vecinos, con `--basetemp` en D:): PR A, 627 pasan y 5 omitidas
+(`verificacion/pruebas_pr_a_ronda2.txt`); PR B, 1444 pasan, 20 omitidas, 0 fallan
+(`verificacion/pruebas_pr_b_ronda2.txt`; con el temporal en D: `test_guard_libro_de_pruebas_s146` también pasa). Antes
+de cada corrida pesada esperé el cupo de procesos.
+
+**(6) Revert del PR B, simulado en el worktree y sin push** (ramas desechables borradas):
+- sobre la punta de B rebasado: `git diff A B | git apply -R --check` limpio, y `git revert` de `A..B` deja el árbol
+  idéntico a A;
+- sobre `origin/main` `0f08e889c` con A y B mergeados con merge commit: el revert del merge de B deja exactamente main+A;
+- con squash: A squasheado sobre main, B rebasado sobre ese squash y squasheado, y el revert del squash de B deja
+  exactamente main+A. Squashear B **sin** rebasarlo sobre el squash de A choca (add/add en
+  `tests/test_vigilancia_guardia_modis_s172.py`): con squash merge, B se rebasa sobre main después de mergear A.
+
+**Pendientes que quedan escritos** (fuera de esta ronda):
+- `scripts/run_pipeline.py` l. 279 y 280 atrapa toda excepción por gránulo y sigue: un error de la vía no cae a K ni
+  deja el job rojo. No lo toqué (pipeline/ y el corredor congelados); el paso «Comprobar pyproj» cubre el caso medido,
+  pero no cualquier otra excepción de la vía (VMA172-202).
+- MA172-203 (paso `if: failure()` en la guardia que abra el issue), MA172-205 (la marca del tablero tras una reversión),
+  MA172-206 en el tablero y el audit (la marca y `frontera_via_modis` usan la primera observación de la vía, que con el
+  upgrade NRT a estándar cae días antes del merge), MA172-104 y 110 (`_s154_reproc_k_historico` y `experimental_lowT`
+  heredan la vía), MA172-105 y 106 (README, SINTOMAS, aviso de `index.html`, cabecera de `mirova_v750_codigo.py` y
+  comentario de `profile.py`), MA172-207 y 209 (texto de la regla), MA172-304 (audit tras una reversión) y VMA172-203
+  (el stale-gate del NRT no ve una caída sólo de MODIS).
+- `backfill-tier-a.yml` y `reproc-chunked.yml` siguen pasando `EARTHDATA_USERNAME`/`EARTHDATA_PASSWORD` además del
+  token (A71); no es de esta ronda.
+
 ## Por qué, en una línea
 
 Con K, MODIS pierde más de un tercio de las noches en que MIROVA alerta; la vía ganó el A/B de MOD-D; Nicolás decidió
