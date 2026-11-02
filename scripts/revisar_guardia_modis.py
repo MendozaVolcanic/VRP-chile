@@ -1,7 +1,7 @@
 """S172: revisa que una corrida de la guardia K de MODIS (.github/workflows/guardia-k-modis.yml) haya producido K de MODIS.
 
 POR QUÉ. La guardia es K corriendo aparte mientras producción corre la vía «código MIROVA» en MODIS (regla
-experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §3, rama loop/activo). Su vigilancia
+experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §3; en S172 vivía sólo en la rama loop/activo; en main desde el PR B #934). Su vigilancia
 (scripts/vigilancia_guardia_modis.py) dispara la reversión cuando la guardia publica una alerta protegida que
 producción calla. Una guardia muerta, o una guardia que por error corriera la vía, no da error: da VERDE, porque nunca
 publica algo que producción calle. run_pipeline.py atrapa toda excepción por gránulo y sale 0, así que el job quedaría
