@@ -98,9 +98,9 @@ def test_cada_volcan_de_la_sombra_tiene_grilla_de_miroVA_en_cada_sensor(familia)
         v = vols[nombre]
         assert MV.volcan_por_coordenadas(v["lat"], v["lon"]) == nombre
         assert MV.grilla_del_volcan(nombre, paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"]) is not None, nombre
-    # control: un volcán fuera de la lista de MIROVA no tiene grilla (el instrumento puede dar None)
-    fuera = [n for n in vols if MV.grilla_del_volcan(n, paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"]) is None]
-    assert fuera
+    # control: un nombre sin grilla da None (el instrumento puede dar None). S172: desde la sombra de los 34 los 45
+    # volcanes de volcanoes.yaml tienen grilla, así que el control usa un nombre que no está en la grilla.
+    assert MV.grilla_del_volcan("VolcanSinGrilla", paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"]) is None
 
 
 # ------------------------------------------------------------------------------------- 3. fechas y encendido

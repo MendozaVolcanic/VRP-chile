@@ -1,0 +1,118 @@
+# S172 (VS34-01 y VS34-07): volcanes de la sombra de los 34 con otro volcán de volcanoes.yaml dentro de su grilla de
+# MIROVA. Generado por experiments/_s172_sombra34/vecinos_en_la_grilla.py --escribir; no editar a mano
+# (tests/test_sombra_34_s172.py lo recalcula). caja: clase de la celda del vecino en la caja de la vía, por familia:
+# 2 sensible, 1 anillo, 0 resto de la grilla (umbral estricto), borde (no alerta; su calor puede llegar interpolado),
+# fuera (fuera de la grilla). km: distancia del vecino al punto (X0, Y0) del volcán. tier_a: el vecino es uno de los 11.
+# La vía suma todos los alertados de la grilla: el calor de un vecino activo entra en vrp_mw del volcán de la izquierda.
+volcanes:
+  DescabezadoGrande:
+  - vecino: CerroAzulQuizapu
+    tier_a: false
+    km: 8.2
+    caja:
+      VIIRS750: 1
+      VIIRS375: 0
+      MODIS: 0
+  CerroAzulQuizapu:
+  - vecino: DescabezadoGrande
+    tier_a: false
+    km: 8.2
+    caja:
+      VIIRS750: 0
+      VIIRS375: 0
+      MODIS: 0
+  Callaqui:
+  - vecino: Copahue
+    tier_a: true
+    km: 24.5
+    caja:
+      VIIRS750: 0
+      VIIRS375: 0
+      MODIS: 0
+  Lonquimay:
+  - vecino: Tolhuaca
+    tier_a: false
+    km: 9.6
+    caja:
+      VIIRS750: 1
+      VIIRS375: 1
+      MODIS: 0
+  Tolhuaca:
+  - vecino: Lonquimay
+    tier_a: false
+    km: 9.6
+    caja:
+      VIIRS750: 1
+      VIIRS375: 1
+      MODIS: 0
+  Quetrupillan:
+  - vecino: Villarrica
+    tier_a: true
+    km: 19.8
+    caja:
+      VIIRS750: 0
+      VIIRS375: 0
+      MODIS: 0
+  - vecino: Lanin
+    tier_a: false
+    km: 24.2
+    caja:
+      VIIRS750: 0
+      VIIRS375: 0
+      MODIS: 0
+  Lanin:
+  - vecino: Quetrupillan
+    tier_a: false
+    km: 24.2
+    caja:
+      VIIRS750: 0
+      VIIRS375: 0
+      MODIS: 0
+  AntillancaCasablanca:
+  - vecino: PuyehueCordonCaulle
+    tier_a: true
+    km: 20.2
+    caja:
+      VIIRS750: 0
+      VIIRS375: 0
+      MODIS: 0
+  Osorno:
+  - vecino: Calbuco
+    tier_a: false
+    km: 27.5
+    caja:
+      VIIRS750: borde
+      VIIRS375: fuera
+      MODIS: borde
+  Calbuco:
+  - vecino: Osorno
+    tier_a: false
+    km: 27.5
+    caja:
+      VIIRS750: fuera
+      VIIRS375: fuera
+      MODIS: borde
+  Michinmahuida:
+  - vecino: Chaiten
+    tier_a: true
+    km: 17.5
+    caja:
+      VIIRS750: 0
+      VIIRS375: 0
+      MODIS: 0
+  Irruputuncu:
+  - vecino: OlcaParuma
+    tier_a: false
+    km: 24.0
+    caja:
+      VIIRS750: 0
+      VIIRS375: 0
+      MODIS: 0
+  OlcaParuma:
+  - vecino: Irruputuncu
+    tier_a: false
+    km: 24.0
+    caja:
+      VIIRS750: 0
+      VIIRS375: 0
+      MODIS: 0

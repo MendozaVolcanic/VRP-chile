@@ -198,3 +198,62 @@ jobs:
                 labels: ['nrt-alert', 'priority-high'] });
               console.log(`Issue #${creado.data.number} creado.`);
             }
+
+      # S172 (VS34-04): la misma regla de AUSENCIA para la sombra de los 34 y para su vigilancia de datos frescos, que
+      # dependen del mismo cron de GitHub: si el evento `schedule` deja de llegar, caen juntas y sólo un tercero lo ve.
+      # La decision es decidirAusencia (scripts/nrt_monitor_decision.js, probada en tests/test_sombra_34_s172.py): desde
+      # max(fecha fija, llegada del workflow a main + 30 h), sin corrida programada verde en 26 h se abre el issue; con
+      # una verde se cierra. `if: always()`: un paso previo en rojo no debe apagar esta vigilancia.
+      - name: Vigilar la sombra de los 34 y su vigilancia
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          retries: 3
+          script: |
+            const M = require(`${process.env.GITHUB_WORKSPACE}/scripts/nrt_monitor_decision.js`);
+            const { owner, repo } = context.repo;
+            const VIGILADOS = [
+              { wf: 'sombra-34.yml', desde: M.SOMBRA_34_DESDE, titulo: 'Sombra de los 34: sin corrida verde en 26 h' },
+              { wf: 'vigilancia-sombra-34.yml', desde: M.VIGILANCIA_34_DESDE,
+                titulo: 'Vigilancia de la sombra de los 34: sin corrida verde en 26 h' },
+            ];
+            let sinDato = [];
+            for (const v of VIGILADOS) {
+              let runs, alta;
+              try {
+                alta = (await github.rest.actions.getWorkflow({ owner, repo, workflow_id: v.wf })).data.created_at;
+                runs = (await github.rest.actions.listWorkflowRuns({
+                  owner, repo, workflow_id: v.wf, per_page: 30 })).data.workflow_runs || [];
+              } catch (e) {
+                // Sin dato no es verde: ni se alerta ni se cierra, y el job queda rojo al final.
+                sinDato.push(`${v.wf}: ${e.message}`);
+                continue;
+              }
+              const d = M.decidirAusencia(runs, Date.now(), v.desde, alta);
+              console.log(`${v.wf}: ${d.accion} (${d.motivo})`);
+              if (d.accion === 'inactivo' || d.accion === 'pendiente') continue;
+              const abierto = (await github.rest.issues.listForRepo({
+                owner, repo, state: 'open', labels: 'nrt-alert', per_page: 50 })).data.find(i => i.title === v.titulo);
+              if (d.accion === 'ok') {
+                if (abierto) {
+                  await github.rest.issues.createComment({ owner, repo, issue_number: abierto.number,
+                    body: `## Recuperada\n\n${d.motivo}.\n\nCierro automaticamente.` });
+                  await github.rest.issues.update({ owner, repo, issue_number: abierto.number,
+                    state: 'closed', state_reason: 'completed' });
+                }
+                continue;
+              }
+              const recientes = runs.slice(0, 5).map(r =>
+                `- [${r.created_at}](${r.html_url}) [${r.event}]: ${r.status} ${r.conclusion || ''}`).join('\n');
+              const cuerpo = `**Alerta automatica de nrt-monitor (${v.wf})**.\n\n${d.motivo}.\n\n` +
+                'Ultimas corridas que entrego la API:\n\n' + recientes + '\n\nVerificar si el workflow esta ' +
+                'desactivado, si GitHub no entrego el evento `schedule`, o si el secreto `EARTHDATA_TOKEN` vencio ' +
+                '(A71). (El cuerpo se refresca en cada chequeo sin notificar.) Generado por `.github/workflows/nrt-monitor.yml`.';
+              if (abierto) {
+                await github.rest.issues.update({ owner, repo, issue_number: abierto.number, body: cuerpo });
+              } else {
+                await github.rest.issues.create({ owner, repo, title: v.titulo, body: cuerpo,
+                  labels: ['nrt-alert', 'priority-high'] });
+              }
+            }
+            if (sinDato.length) core.setFailed(`no pude leer: ${sinDato.join('; ')}`);

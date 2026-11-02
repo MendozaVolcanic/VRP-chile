@@ -82,4 +82,26 @@ function decidirSombra(runs, ahoraMs, desde = SOMBRA_DESDE, maxHoras = 26, horas
   };
 }
 
-module.exports = { decidir, decidirSombra, SOMBRA_DESDE };
+// S172 (VS34-04): la misma regla de ausencia para la sombra de los 34 (.github/workflows/sombra-34.yml, cron 13:07 UTC)
+// y para su vigilancia de datos frescos (.github/workflows/vigilancia-sombra-34.yml, cron 23:27 UTC), probada en
+// tests/test_sombra_34_s172.py. POR QUE: la vigilancia de datos frescos depende del mismo cron de GitHub que la sombra;
+// si GitHub deja de entregar el evento `schedule`, las dos caen juntas y nadie lo ve. nrt-monitor (cron cada 6 h) es
+// el tercero que mira. Diferencia con la sombra de los 11: no se sabe cuando se mergean, asi que la regla empieza en
+// max(fecha fija, llegada del workflow a main + margenAltaHoras); sin eso, el primer chequeo despues del merge
+// alertaria antes de la primera corrida programada. Sin dato de la llegada, sólo la fecha fija (peor caso: una alerta
+// de mas el primer dia, nunca una de menos).
+const SOMBRA_34_DESDE = '2026-11-03T13:07:00Z';
+const VIGILANCIA_34_DESDE = '2026-11-03T23:27:00Z';
+
+function desdeConAlta(fijo, altaIso, margenAltaHoras = 30) {
+  const alta = Date.parse(altaIso || '');
+  if (!Number.isFinite(alta)) return fijo;
+  return new Date(Math.max(Date.parse(fijo), alta + margenAltaHoras * 3.6e6)).toISOString();
+}
+
+function decidirAusencia(runs, ahoraMs, fijo, altaIso, maxHoras = 26, margenAltaHoras = 30) {
+  return decidirSombra(runs, ahoraMs, desdeConAlta(fijo, altaIso, margenAltaHoras), maxHoras);
+}
+
+module.exports = { decidir, decidirSombra, SOMBRA_DESDE, decidirAusencia, desdeConAlta, SOMBRA_34_DESDE,
+  VIGILANCIA_34_DESDE };

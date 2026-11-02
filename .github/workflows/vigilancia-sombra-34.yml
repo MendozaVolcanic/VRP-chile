@@ -1,0 +1,82 @@
+name: Vigilancia de la sombra de los 34
+
+# S172. POR QUE: un vigilante ciego no da error, da VERDE (S156). La revision por job de sombra-34.yml solo actua
+# cuando el job corre; si el workflow deja de dispararse (cron que no llega, workflow desactivado, token vencido) o
+# corre sin escribir, nadie se entera. Este workflow, con su propio cron, mira si data/sombra_34/ tiene datos frescos
+# de la via para cada volcan de la matriz (scripts/vigilar_sombra_34.py) y, si no, abre un issue.
+# No escribe en el repo: no hace push (por eso no necesita grupo push-main ni reintento, guard G4).
+# Corre a las 23:27 UTC: la sombra de los 34 tiene cron a las 13:07 y aun con horas de atraso termina antes; la
+# ventana de 48 h tolera un dia de atraso sin falsas alarmas. A43: "on" entre comillas.
+"on":
+  workflow_dispatch:
+  schedule:
+    - cron: "27 23 * * *"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: vigilancia-sombra-34
+  cancel-in-progress: false
+
+jobs:
+  vigilar:
+    runs-on: ubuntu-24.04  # fijado como el NRT: ubuntu-latest migra a 26.04 desde el 2026-10-19
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install pyyaml
+
+      # Fecha en que sombra-34.yml llego a main: antes de eso (mas 48 h) no hay nada que esperar. Si la API falla,
+      # queda vacia y el script usa solo el 2026-11-03 (peor caso: un issue de mas el primer dia, nunca uno de menos).
+      - name: Fecha de alta de la sombra
+        id: alta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ALTA=$(gh api "repos/$GITHUB_REPOSITORY/commits?path=.github/workflows/sombra-34.yml&sha=main&per_page=100" --jq '.[-1].commit.committer.date // empty' 2>/dev/null || true)
+          echo "alta=$ALTA" >> "$GITHUB_OUTPUT"
+          echo "alta de sombra-34.yml en main: ${ALTA:-sin dato}"
+
+      - name: Vigilancia
+        id: vigilancia
+        continue-on-error: true
+        run: |
+          python scripts/vigilar_sombra_34.py --dir data/sombra_34 --workflow .github/workflows/sombra-34.yml --alta "${{ steps.alta.outputs.alta }}" --salida "$RUNNER_TEMP/veredicto.json" | tee "$RUNNER_TEMP/detalle.txt"
+
+      # Un issue por clase: si ya hay uno abierto con el mismo prefijo de titulo, se comenta en vez de abrir otro
+      # (mismo patron que vigilancia-sombra.yml). always(): se evalua aunque la vigilancia haya fallado.
+      - name: Open issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OUTCOME: ${{ steps.vigilancia.outcome }}
+        run: |
+          abrir() {
+            NUM=$(PREFIJO="$1" gh issue list --state open --limit 200 --json number,title --jq '[.[] | select(.title | startswith(env.PREFIJO))][0].number // empty')
+            if [ -z "$NUM" ]; then
+              gh issue create --title "$1: $(date -u +%F)" --body "$2"
+            else
+              echo "ya hay un issue abierto de esta clase (#$NUM): se comenta"
+              gh issue comment "$NUM" --body "$(printf 'Corrida del %s:\n\n%s' "$(date -u +%F)" "$2")"
+            fi
+          }
+          RUN="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          VEREDICTO=$(python -c "import json; print(json.load(open('$RUNNER_TEMP/veredicto.json'))['veredicto'])" 2>/dev/null || echo "SIN_VEREDICTO")
+          echo "veredicto: $VEREDICTO (outcome $OUTCOME)"
+          case "$VEREDICTO" in
+            OK|ESPERA) echo "sin issue" ;;
+            CIEGA)
+              abrir "Sombra de los 34: vigilancia ciega" "$(printf 'La sombra de los 34 (sombra-34.yml, data/sombra_34/) no tiene datos frescos de la via:\n\n```\n%s\n```\n\nUna vigilancia ciega no da error, da VERDE: por eso este issue. Revisar las corridas de sombra-34.yml (cron, token, jobs rojos) y scripts/revisar_sombra.py en el job del volcan. Run: %s' "$(cat "$RUNNER_TEMP/detalle.txt")" "$RUN")" ;;
+            *)
+              abrir "Sombra de los 34: la vigilancia fallo" "$(printf 'scripts/vigilar_sombra_34.py no dejo veredicto (run %s). Mientras no corra, nadie sabe si la sombra de los 34 produce datos.' "$RUN")" ;;
+          esac
