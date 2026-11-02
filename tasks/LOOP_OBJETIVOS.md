@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 15:15 UTC (S173): #932 (sombra de los 34) mergeado con frase de Nicolás
+- Frase «Sí, mergear #932». CI `pytest` verde (5m13s); `gh pr merge 932 --squash --match-head-commit 28183712a`;
+  squash `abd27e198` en main, 2026-11-02T15:15:40Z, comprobado con `gh api .../commits/main`.
+- Después del merge #933 sigue CLEAN MERGEABLE y #934 (base `claude/s172-modd-encendido`) CLEAN.
+- Siguen pendientes de Nicolás: decisiones 3 y 4 de la sombra, frase de #933, sellos de la regla de reversión (D1 a
+  D7) y del pre-registro retro (R-1 a R-15), 207/208/209. La sesión de VIIRS 750 ya puede arreglar
+  `tests/test_roi_v750b_variantes_s169.py` en su rama (hallazgo 202).
+
 ### 2026-11-02 13:40 UTC (S173): V1 y V2 cerrados; ronda 3 de A y B; regla ronda 2; PR #933 (A) y #934 (B, borrador)
 - **V1** (Fable, verificador del censo F1): 10 de 10 se sostienen, ninguno bloquea A ni B; mover a A los tres commits que
   leen records de la vía es correcto (218 pruebas verdes). Nuevo V1-02: la regla no tenía paso para el día después.
