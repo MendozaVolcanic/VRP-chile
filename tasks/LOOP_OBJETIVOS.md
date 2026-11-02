@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-11-02 16:55 UTC (S173): verificador VB3 (Fable): regla SELLABLE CON CAMBIOS, B MERGEABLE CON CAMBIOS
+### 2026-11-02 16:29 UTC (S173): verificador VB3 (Fable): regla SELLABLE CON CAMBIOS, B MERGEABLE CON CAMBIOS
 - Informe `C:/Users/nmend/vrp-wt/ver_s173_regla3_b/INFORME.md` (Fable, esfuerzo declarado MEDIO). Bloquea B sólo
   VB3-01: la regla no está en B ni en main y 7 de 10 citas de main la dan por «loop/activo» o «borrador». Lo demás es
   texto (VB3-02 el revert choca por otros hunks; VB3-03 el monitor abre issue con 3 rojas y lo rotula NASA/token; VB3-04
