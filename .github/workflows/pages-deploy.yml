@@ -22,6 +22,13 @@ name: Deploy GitHub Pages
     paths:
       - "frontend/**"
       - "data/**"
+      # S173 (decisión 4 de tasks/BLOQUE_ARRANQUE_S173.md §b, aprobada por Nicolás el 2026-11-02): un commit de una
+      # sombra o guardia no dispara el deploy. Un patrón negado DESPUÉS del positivo excluye la ruta (docs de GitHub,
+      # workflow-syntax, on.push.paths); paths y paths-ignore no se pueden mezclar en el mismo evento. Lo vigila
+      # tests/test_pages_sin_sombras_s173.py, que deriva la lista de pipeline/profiles/sombra*.yaml y guardia*.yaml.
+      - "!data/sombra_34/**"
+      - "!data/sombra_codigo_mirova/**"
+      - "!data/guardia_k_modis/**"
       - "imagenes/**"
       - "01_05_2026_registro_vrp_consolidado.csv"
       - "latest_consolidado.csv"
@@ -67,6 +74,10 @@ jobs:
           mkdir -p _site
           cp -r frontend/. _site/
           cp -r data _site/data
+          # S173 (decisión 4): las sombras y guardias no van al sitio público. Nadie las lee como operador (el tablero
+          # lee data/mirova_equivalent, data/mirova, data/experimental_v2 y data/alerts) y achican el margen de 1 GB
+          # del sitio. Se leen desde el repo, no desde Pages. Lo vigila tests/test_pages_sin_sombras_s173.py.
+          rm -rf _site/data/sombra_34 _site/data/sombra_codigo_mirova _site/data/guardia_k_modis
           # S120: generar los JSON "recientes" livianos (100 días) que el dashboard
           # carga por defecto. El backfill histórico llevó los completos a 13-17 MB
           # c/u (~171 MB los 11 Tier A) → en red real el navegador timeoutea y el
