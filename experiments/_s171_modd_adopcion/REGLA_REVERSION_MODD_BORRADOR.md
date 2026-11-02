@@ -1,7 +1,15 @@
 # Regla de adopción y reversión de la vía «código MIROVA» en MODIS (MOD-D)
 
-**BORRADOR, RONDA 2, SIN SELLO.** Hora del servidor al escribirla (GitHub, `gh api -i repos/MendozaVolcanic/VRP-chile`,
-cabecera `Date`): 2026-11-02 13:27:30 GMT.
+**BORRADOR, RONDA 3, SIN SELLO.** D1 a D7 contestadas por Nicolás el 2026-11-02 (servidor 15:42 UTC): «de1 a d7
+si», las siete con la recomendación. Falta el verificador limpio de esta ronda y la frase de sello.
+
+- **Ronda 3** (S173): D1 a D7 contestadas (todas «Sí»); el PR A ya está en main (#933, merge commit `eb4ae1c96`,
+  2026-11-02 15:25:53 UTC) **sin** esta regla, así que la regla entra a main con el PR B (#934), no con A (§5); 208 y
+  209 tratados en el PR B a pedido de Nicolás («en el resto haz lo que recomiendes», misma frase): el flag se aparta
+  de las claves de MxD03 (§4.3) y el NRT revisa que MODIS haya salido (§4.4 (a)).
+
+Ronda 2, hora del servidor al escribirla (GitHub, `gh api -i repos/MendozaVolcanic/VRP-chile`, cabecera `Date`):
+2026-11-02 13:27:30 GMT.
 
 - **Ronda 1**: escrita el 2026-10-31 por la coordinadora S171; sha256 LF
   `77f7f37c066ab192b82de5e29f0ec96bc3db712c0799281c227fb6b67a00f6a7`, último commit que la tocó `71c96b410` (rama
@@ -30,6 +38,9 @@ decisiones (a) a (f) de Nicolás del 2026-10-19. Se cambia lo que MODIS pide y n
 dice.
 
 ## Decisiones de Nicolás antes del sello
+
+**Contestadas el 2026-11-02: D1 a D7, «Sí» las siete** (Nicolás: «de1 a d7 si»). El texto de la regla ya estaba
+escrito con esas respuestas; las frases «si D4 se contesta No» y «si D5 se contesta No» quedan sin efecto.
 
 Cada una se contesta con una palabra. La recomendación y el número que la sostiene salen de archivos citados; los
 cálculos de probabilidad son de esta ronda (Poisson con la tasa del A/B, `python -I`), no de un informe previo.
@@ -152,7 +163,9 @@ del veto las protegidas sólo del OCR de Suomi NPP anteriores al 2026-10-09 (`ex
   print(p.ENABLE_MODIS_CODIGO_MIROVA)"` debe dar `False` (A89).
 - **Si el revert choca**: hoy es limpio (simulado el 2026-11-02 sobre `47cdc446f` por dos caminos, 0 conflictos,
   VR-05). Choca si otro PR toca las líneas vecinas del flag en `mirova_equivalent.yaml` (las tres claves de MxD03 están
-  justo antes; V2 sobre 208 lo provocó y vio el conflicto). En ese caso se resuelve a mano dejando
+  justo antes; V2 sobre 208 lo provocó y vio el conflicto). **Ronda 3**: el PR B pone el flag en un bloque propio,
+  separado de las claves de MxD03 por líneas que B no toca, y deja una prueba con `git merge-file` que comprueba que un
+  cambio en esas claves no choca con el revert de B; la frase que sigue queda como respaldo. En ese caso se resuelve a mano dejando
   `enable_modis_codigo_mirova` en `false` (o sin la clave) y conservando el otro cambio; no se espera a nadie.
 - **Después**: issue de la reversión, aviso a Nicolás el mismo día, la pasada en `sombra_pasadas_juzgadas_modis.json`, y
   el paso del día después (§4.7).
@@ -165,6 +178,10 @@ Cada una abre el issue «Guardia K de MODIS: investigar». Investigar es mirar y
   **no tiene record** de esa pasada (el descarte de borde 171-01 o una excepción de la vía). No es «calla»: pasadas
   **24 h (D3)** desde la pasada (`ESPERA_SIN_RECORD_H`), se investiga. Es el peor caso que declara §1; si la
   investigación muestra que la vía descartó un gránulo con el volcán bien cubierto, eso se lleva a Nicolás el mismo día.
+  **Ronda 3 (209, V2-02)**: una excepción de la vía en un gránulo no cae a K y `run_pipeline` sigue con el siguiente,
+  así que el job del NRT sale verde. El PR B agrega a `nrt.yml` un paso como el «Revisar que salio K de MODIS» de la
+  guardia: si el log de la corrida trae `ERROR processing` en un gránulo MODIS, el job falla (rojo), y eso lo ve el
+  monitor del NRT el mismo día, sin esperar los 3 días de frescura de la vigilancia. No revierte nada: se investiga.
 - **(b) Borde del encendido.** Protegida de la franja de §4.1 que la guardia publica y producción, con record de la
   vía, calla (`borde_del_encendido`).
 - **(c) Nulo de la guardia.** Antes del encendido, guardia y producción son el mismo detector K y tienen que publicar
@@ -243,6 +260,10 @@ El revert apaga el flag pero no deshace los datos (V1-02, 207). Tras él:
 
 Según D5: **PR A** primero (guardia, vigilancia, lectores de la vía, regla) y **PR B** después (el flag).
 
+- ⚠️ **Ronda 3**: el PR A entró a main (#933) sin la regla, así que **entra con el PR B**, en la misma ruta y con el
+  encabezado de sellada; el issue de `vigilancia-guardia-modis.yml` la cita y hoy apunta a una ruta que no existe en
+  main (210). Los lectores de la vía y el 205 sí entraron con A (comprobado en `eb4ae1c96`). La ficha v1.18 de B se
+  corrige ahí mismo («No se reprocesan datos anteriores» y «rige desde el merge» no son exactos, §4.1). Texto de ronda 2:
 - **La regla sellada entra a main en el PR A**, en esta misma ruta, con el encabezado de sellada (VR-07, 210): hoy vive
   sólo en `loop/activo` y la citan el perfil de la guardia, los dos workflows, el cuerpo de los issues,
   `scripts/vigilancia_guardia_modis.py`, `scripts/revisar_guardia_modis.py` y `sombra_pasadas_juzgadas_modis.json`.
