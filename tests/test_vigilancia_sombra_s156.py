@@ -362,7 +362,9 @@ def test_mutacion_cargar_insumos_lee_la_sombra_filtra_k_y_etiqueta_original_y_sn
 @pytest.fixture
 def insumos(monkeypatch):
     def poner(filas, prod, sombra, frontera="2026-09-18", adopcion=ADOP):
-        monkeypatch.setattr(vs, "cargar_insumos", lambda win: (filas, prod, sombra))
+        # S172 (MA172-101): cargar_insumos recibe las claves de la vía de MODIS; sin records de la vía, un conjunto vacío
+        monkeypatch.setattr(vs, "cargar_insumos", lambda win, via=None: (filas, prod, sombra))
+        monkeypatch.setattr(vs, "claves_via", lambda: set())
         monkeypatch.setattr(vs.aa, "leer_frontera_k", lambda *a: frontera)
         monkeypatch.setattr(vs, "leer_adopcion", lambda *a: adopcion)
         monkeypatch.setattr(vs, "_diurna_por_defecto", lambda: NOCHE)
