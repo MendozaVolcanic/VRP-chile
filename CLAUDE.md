@@ -35,9 +35,11 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo: qué est�
 
 ## Misión vinculante (LEER ANTES DE TOCAR PIPELINE)
 
-> ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde el merge del PR B (rama `claude/s172-modd-flip`) MODIS corre
-> la vía «código MIROVA» (`enable_modis_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`); VIIRS 375 y VIIRS 750
-> siguen con K. Decisión de Nicolás del 2026-10-31 (adelantar MODIS); K de MODIS queda de guardia
+> ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde la primera corrida del NRT con la vía, después del merge del PR B
+> (#934, rama `claude/s173-modd-flip`), MODIS corre la vía «código MIROVA»; como cada corrida re-escribe las 8 fechas
+> de su ventana, también las pasadas observadas hasta unos 8 días antes quedan con la vía (regla
+> `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` §4.1). Flag `enable_modis_codigo_mirova: true`, código
+> `pipeline/mirova_v750_codigo.py`; VIIRS 375 y VIIRS 750 siguen con K. Decisión de Nicolás del 2026-10-31 (adelantar MODIS); K de MODIS queda de guardia
 > (`pipeline/profiles/guardia_k_modis.yaml`, vigilancia `scripts/vigilancia_guardia_modis.py`) con reversión
 > pre-autorizada por `git revert` del PR B. Todo lo de este archivo que describa el MODIS de producción como K (la marca
 > S153 del punto NTI / dNTI, D21, D12, la cara MODIS de D11) es previo a S172 en MODIS. Detalle: marca S172 al inicio de
