@@ -4,6 +4,37 @@ Borrador escrito por el implementador de S172. No es el PR: lo abre la coordinad
 (el sí de A45 con la pre-autorización de abajo, y la frase de merge). Rama `claude/s172-modd-flip`, nacida de la punta
 de `claude/s172-modd-encendido` (PR A). Tag defensivo `pre-s171-adopcion-modd` (`d3cd0b2ae`, ya empujado).
 
+⚠️ **S173, ronda 3 (segunda pasada de auditoría, `experiments/_s173_aud/` en `loop/activo`)**: el PR B se abre desde la
+rama NUEVA **`claude/s173-modd-flip`**, nacida de la punta nueva de A (`f8f37cec9`). La rama `claude/s172-modd-flip`
+(`c9525f994`) queda como historia y no se abre. Qué cambió respecto de lo que dice el resto de este borrador:
+
+- **Pasaron al PR A** (ya no son de este PR): la vigilancia de la sombra de K sin los records de la vía (MA172-101),
+  `esAnclaHonesta` del tablero (MA172-102), la enmienda de `test_no_modifica_la_vigilancia_de_k` y las declaraciones
+  `enable_modis_codigo_mirova: false` de `experimental`, `experimental_ndc_focus` y `_s146_ab_control` (hallazgos 161,
+  162 y V1-04: así un revert de este PR no deja a esos lectores interpretando mal los records de la vía). Este PR queda
+  con el flag de producción, las pruebas que lo fijan, `test_guard_adopcion_k_s153`, la ficha v1.18, las marcas A113 y
+  este borrador.
+- **En el PR A, además**: el audit semanal ya no cae cuando la vía publica MODIS en una noche con alerta (205,
+  bloqueante: `VIA_MODIS` en `REGIMENES`) y avisa que MODIS queda «sin juzgar» mientras la vía no junta 15 noches con
+  alerta (206; V2 midió 4,6 a 7,5 semanas). El issue semanal lo lista entre los sensores sin juzgar: que MODIS no salga
+  en la línea de recall esas semanas no quiere decir que mejoró. Corrige el punto del §5 que decía que «se acepta que
+  el issue semanal salte»: en recall se calla, y ahora lo dice.
+- **En este PR**: el guard `tests/test_guard_modis_codigo_mirova_encendido_s172.py` acepta `sombra_34` de #932 cuando
+  su YAML existe (201): ya no importa cuál de los dos entra segundo.
+- **Órdenes de merge, medidos con `git merge-tree` sobre `origin/main` `47cdc446f` y las puntas finales** (A
+  `f8f37cec9`, B `96b05bcd8`, #932 `28183712a`): A, B, #932 y A, #932, B, con merge commit y con squash, salen los
+  cuatro limpios y con el mismo árbol (`dba320e87`); el revert de B (`git revert -m 1` del merge, o del squash) sale
+  limpio en los cuatro y deja exactamente el árbol del mismo orden sin B (`c8ca164a7`). El choque del squash que
+  describía la ronda 2 (203) ya no ocurre, porque este PR no toca `tests/test_vigilancia_guardia_modis_s172.py`.
+- **Pruebas** (rutas explícitas, no la suite): A 813 pasan; B 821; A+B+#932, 922; 0 fallas en las tres
+  (`INFORME_IMPLEMENTADOR.md`, ronda 3).
+- **Quedan abiertos, para Nicolás**: 207 (la marca del tablero y la frontera del audit fechan el encendido por la
+  primera observación de la vía, hasta ~8 a 9 días antes del merge; la vigilancia por la primera escritura; la regla
+  cita `CAMBIO_DETECTOR_MODIS_UTC`, que no existe), 208 (el revert de este PR choca si otro PR toca las líneas vecinas
+  del flag en `mirova_equivalent.yaml`: el revert sobre el `main` del día del revert sigue SIN VERIFICAR), 209 y V2-02
+  (una excepción de la vía que no sea la falta de pyproj deja MODIS mudo con el NRT en verde; lo ve la vigilancia de la
+  guardia a los 3 días por volcán).
+
 ---
 
 ## Título propuesto
