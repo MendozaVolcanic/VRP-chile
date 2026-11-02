@@ -4,8 +4,10 @@
 > preguntas antes de proponer o implementar cualquier cosa que toque el
 > pipeline algorítmico.
 
-> ⚠️ **S172: MODIS dejó de ser K en producción (encendido de MOD-D; marca A113).** Desde el merge del PR B (rama
-> `claude/s172-modd-flip`), `mirova_equivalent` corre en MODIS la **vía «código MIROVA»** (`enable_modis_codigo_mirova:
+> ⚠️ **S172: MODIS dejó de ser K en producción (encendido de MOD-D; marca A113).** Desde la primera corrida del NRT con la vía, después
+> del merge del PR B (#934, rama `claude/s173-modd-flip`), y también en las pasadas observadas hasta unos 8 días
+> antes, porque cada corrida re-escribe las 8 fechas de su ventana (regla `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md`
+> §4.1; la hora del merge no decide nada), `mirova_equivalent` corre en MODIS la **vía «código MIROVA»** (`enable_modis_codigo_mirova:
 > true`): el gránulo pasado a la grilla de 1 km de MIROVA con la geolocalización de 1 km del MxD03, el detector, el
 > fondo rellenado con la regla de MATLAB y la suma de todos los alertados del código operacional que MIROVA publicó
 > (`pipeline/mirova_v750_codigo.py`, familia MODIS). Por qué: con K, MODIS perdía más de un tercio de las noches en que
