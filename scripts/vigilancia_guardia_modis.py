@@ -30,10 +30,19 @@ Qué mide (reutiliza por import scripts/vigilancia_sombra.py, que vigila K y NO 
   una guardia que trae records de la vía (dejó de ser K), perfiles cruzados, o el flag de producción encendido sin
   records de la vía (la vía cayendo siempre a K dejaría guardia = producción: VERDE para siempre).
 
-EL ENCENDIDO SALE DE LOS DATOS (diseño, decisión 3): el primer `first_processed_utc` de un record MODIS de producción
-con `via_codigo_mirova: true` (cuándo escribió la vía por primera vez), no una constante que alguien tiene que llenar.
-Como la primera corrida del NRT llega después del merge, las pasadas entre el merge y esa corrida quedan del lado
-retrospectivo: por eso la regla de la protegida con record de la vía anterior al encendido.
+EL ENCENDIDO SALE DE LOS DATOS (diseño, decisión 3): el menor `processed_utc` de un record MODIS de producción con
+`via_codigo_mirova: true`, no una constante que alguien tiene que llenar. ⚠️ S172 ronda 2 (mini auditoría, MA172-206):
+la primera versión usaba `first_processed_utc`, pero pipeline/store.py lo hereda en todo reemplazo y el upgrade de NRT a
+estándar re-escribe con la vía pasadas de hasta ~4,5 días antes: el encendido caía antes del merge. `processed_utc` lo
+escribe la corrida que guardó el record, así que un record de la vía sólo puede traer uno posterior al merge. Las pasadas
+anteriores al encendido re-escritas por la vía quedan del lado retrospectivo: por eso la regla de la protegida con
+record de la vía anterior al encendido (investigar, no revertir).
+
+S172 ronda 2, otros tres huecos que la mini auditoría midió con un arnés (D:/vrp-trabajo/temporales/s172_miniaud/f2):
+- MA172-202: una protegida que la guardia publica y de la que producción NO tiene record (la vía descarta el gránulo
+  de borde, 171-01) daba VERDE. Ahora, pasadas ESPERA_SIN_RECORD_H horas (el NRT procesa con atraso), pide INVESTIGAR.
+- MA172-204: la frescura de la referencia se medía sobre todas las filas; ahora también sobre las de MODIS.
+- MA172-208: un nulo con 0 pares se leía como nulo sano; ahora es aviso (vigilancia ciega).
 
 Salida: data/audit_continuous/guardia_modis_latest.json y una línea en guardia_modis_history.jsonl.
 """
@@ -70,6 +79,9 @@ COTA_SOBREPUBLICACION = 3
 UMBRAL_MINIMO_MW = 0.05                        # «sobre 0,05 MW»: lo de 0,05 o menos no cuenta como Muy Bajo
 DIAS_NULO = 14                                 # cuántos días antes del encendido (o de hoy) mide el nulo
 DIAS_ANTES_DEL_ENCENDIDO = 10                  # la ventana cubre el re-escrito de 8 días del NRT, con margen
+# MA172-202: horas que se espera antes de leer como silencio una pasada sin record de producción (el NRT procesa con
+# atraso: LANCE ~3 h y el cron). Propuesta del implementador; la fija Nicolás al sellar la regla.
+ESPERA_SIN_RECORD_H = 24
 # Decisión de K del 2026-10-19 aplicada a MODIS (§4 de la regla, «como (d) de K»): las pasadas ya juzgadas no vuelven
 # a disparar. Mismo formato estricto que experiments/_s151_prereg_fk_11/sombra_pasadas_juzgadas.json.
 JUZGADAS = os.path.join(ROOT, "experiments", "_s171_modd_adopcion", "sombra_pasadas_juzgadas_modis.json")
@@ -84,9 +96,10 @@ def _t(texto_utc):
 
 
 def encendido_desde_datos(raw_por_volcan):
-    """{encendido_utc, primera_observacion, via}: el primer `first_processed_utc` (o `processed_utc`) de un record
-    MODIS de producción con `via_codigo_mirova` True, la observación más temprana de la vía, y el conjunto de claves
-    (volcán, sensor, 'YYYY-MM-DD HH:MM') de esos records. La caída a K (`"sin_mxd03"` y compañía) no es la vía."""
+    """{encendido_utc, primera_observacion, via}: el menor `processed_utc` de un record MODIS de producción con
+    `via_codigo_mirova` True (MA172-206: no `first_processed_utc`, que hereda la fecha de K), la observación más temprana
+    de la vía, y el conjunto de claves (volcán, sensor, 'YYYY-MM-DD HH:MM') de esos records. La caída a K
+    (`"sin_mxd03"` y compañía) no es la vía."""
     via, proc, obs = set(), [], []
     for vol, recs in raw_por_volcan.items():
         for r in recs:
@@ -95,7 +108,7 @@ def encendido_desde_datos(raw_por_volcan):
             dt = str(r.get("datetime_utc") or "")[:16].replace("T", " ")
             via.add((vol, r.get("sensor"), dt))
             obs.append(dt)
-            t = _t(r.get("first_processed_utc") or r.get("processed_utc"))
+            t = _t(r.get("processed_utc"))
             if t:
                 proc.append(t)
     return {"encendido_utc": min(proc) if proc else None, "primera_observacion": min(obs) if obs else None,
@@ -164,9 +177,11 @@ def _dt(texto):
     return datetime.strptime(texto, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
 
 
-def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None):
-    """Los niveles de §4 sobre lo posterior al encendido; lo anterior, retrospectivo y nulo."""
+def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, ahora=None):
+    """Los niveles de §4 sobre lo posterior al encendido; lo anterior, retrospectivo y nulo. `ahora`: instante UTC
+    'YYYY-MM-DD HH:MM:SS' de la corrida (por defecto, la medianoche de `hoy`), para la espera de MA172-202."""
     juzgadas = juzgadas or {}
+    ahora = ahora or f"{hoy} 00:00:00"
     corte = encendido or "9999-99-99 99:99:99"
     pros = [p for p in pasadas if p["instante_utc"] >= corte]
     retro = [p for p in pasadas if p["instante_utc"] < corte]
@@ -244,8 +259,15 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None):
             clave = (g["vol"], SENSOR, g["dt"].strftime("%Y-%m-%d %H:%M"))
             if clave not in juzgadas:
                 distintas.append({"volcano": g["vol"], "fecha_utc": clave[2], "guardia_pub": bool(g["pub"])})
-    nulo = {"pares": pares, "distintas": len(distintas), "detalle": distintas,
+    # MA172-208: 0 pares no es «coinciden», es «no medí»; evaluar() lo convierte en aviso.
+    nulo = {"pares": pares, "distintas": len(distintas), "detalle": distintas, "sin_medir": pares == 0,
             "nota": "antes del encendido guardia y producción son el mismo detector K: deben publicar lo mismo (A110)"}
+
+    # MA172-202: protegida posterior al encendido que la guardia publica y de la que producción no tiene record, pasada
+    # la espera del NRT. Para el operador es silencio; la regla pre-autoriza revertir sólo «calla», así que investiga.
+    limite_espera = (_dt(ahora) - timedelta(hours=ESPERA_SIN_RECORD_H)).strftime("%Y-%m-%d %H:%M:%S")
+    sin_record = [p for p in pros if p["protegida"] and p["guardia_pub"] is True and p["prod_pub"] is None
+                  and p["instante_utc"] <= limite_espera and vs._clave(p) not in juzgadas]
 
     # Protegida anterior al encendido cuyo record de producción ya es de la vía (re-escrito del NRT): investigar.
     borde_enc = [p for p in retro if p["protegida"] and calla(p) and p.get("prod_via") is True
@@ -264,11 +286,12 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None):
         veredicto = "REVERSION_CANDIDATA"
     elif fuera_de_plazo:
         veredicto = "CANDIDATA_FUERA_DE_PLAZO"
-    elif muy_bajo["dispara"] or sobrepublicacion["dispara"] or distintas or borde_enc:
+    elif muy_bajo["dispara"] or sobrepublicacion["dispara"] or distintas or borde_enc or sin_record:
         veredicto = "INVESTIGAR"
     else:
         veredicto = "VERDE"
     return {"veredicto": veredicto, "reversion": reversion, "fuera_de_plazo": fuera_de_plazo, "muy_bajo": muy_bajo,
+            "protegidas_sin_record_produccion": sin_record, "espera_sin_record_h": ESPERA_SIN_RECORD_H,
             "sobrepublicacion": sobrepublicacion, "borde_171_01": borde, "nulo": nulo,
             "borde_del_encendido": borde_enc, "duracion": duracion, "retrospectivo": retrospectivo,
             "juzgadas": [dict(p, juicio=juzgadas[vs._clave(p)]) for p in pasadas if vs._clave(p) in juzgadas]}
@@ -280,6 +303,29 @@ def avisos_guardia(guardia, hoy):
 
 def avisos_produccion(prod, hoy):
     return vs._avisos_frescura(prod, hoy, "producción", "nrt.yml", sensores=[SENSOR])
+
+
+def avisos_referencia_modis(filas, hoy):
+    """MA172-204: la frescura de la referencia, medida en las filas de MODIS (RUTINA incluidas, como el auto-audit).
+    vigilancia_sombra.avisos_referencia mide todas las filas: con VIIRS fresco y MODIS detenido daría VERDE sin una
+    sola alerta MODIS contra qué comparar."""
+    fechas = [f["fecha_utc"][:10] for f in filas
+              if f.get("sensor_bucket") == SENSOR and (f.get("fecha_utc") or "")[:4].isdigit()]
+    if not fechas:
+        return ["la referencia de MIROVA no trae ninguna fila de MODIS: no hay contra qué vigilar la vía"]
+    dias = (date.fromisoformat(hoy) - date.fromisoformat(max(fechas))).days
+    if dias > aa.MAX_GT_STALE_DAYS:
+        return [f"la referencia de MIROVA no registra MODIS hace {dias} días (última fila MODIS {max(fechas)}): es el "
+                "scraper de Mirova-v1 o la tabla de MIROVA, no los volcanes"]
+    return []
+
+
+def avisos_nulo(nulo):
+    """MA172-208: un nulo sin pares no mide nada y no se puede leer como guardia = producción."""
+    if nulo.get("sin_medir"):
+        return [f"el nulo de la guardia no tiene pasadas pareadas en los {DIAS_NULO} días previos al encendido (o a "
+                "hoy): no se midió que guardia y producción publiquen lo mismo"]
+    return []
 
 
 def avisos_perfiles(prod, guardia, n_guardia_con_via):
@@ -360,11 +406,15 @@ def evaluar(hoy):
            "fase": ("antes_del_encendido" if not encendido else "vigilando")}
     filas, prod, guardia, n_via_g = cargar_insumos(win, enc["via"])
     pasadas = pasadas_modis(filas, prod, guardia, win, diurna=vs._diurna_por_defecto())
-    d = disparadores(pasadas, prod, guardia, hoy, encendido, juzgadas=leer_juzgadas())
+    ahora = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    if ahora[:10] != hoy:
+        ahora = f"{hoy} 23:59:59"           # una corrida con `hoy` fijado (pruebas, re-lectura) mide al cierre de ese día
+    d = disparadores(pasadas, prod, guardia, hoy, encendido, juzgadas=leer_juzgadas(), ahora=ahora)
     if d["duracion"]["cumplida"]:
         out["fase"] = "plazo_cumplido"
-    avisos = (vs.avisos_referencia(filas, hoy) + avisos_guardia(guardia, hoy) + avisos_produccion(prod, hoy)
-              + avisos_perfiles(prod, guardia, n_via_g) + avisos_via(flag, encendido, prod))
+    avisos = (vs.avisos_referencia(filas, hoy) + avisos_referencia_modis(filas, hoy) + avisos_guardia(guardia, hoy)
+              + avisos_produccion(prod, hoy) + avisos_perfiles(prod, guardia, n_via_g)
+              + avisos_via(flag, encendido, prod) + avisos_nulo(d["nulo"]))
     veredicto = d["veredicto"]
     if veredicto == "VERDE" and avisos:
         veredicto = "VIGILANCIA_CIEGA"      # un aviso no tapa una reversión: sólo impide leer la falta de disparos
@@ -393,6 +443,9 @@ def imprimir(out):
     for p in out.get("borde_del_encendido", []):
         print(f"  BORDE DEL ENCENDIDO: {p['volcano']} MODIS {p['fecha_utc']} UTC, anterior al encendido y con record "
               "de la vía: investigar")
+    for p in out.get("protegidas_sin_record_produccion", []):
+        print(f"  SIN RECORD DE PRODUCCIÓN: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: "
+              "la guardia (K) publica y producción no tiene record de la pasada (borde 171-01): investigar")
     for nombre in ("muy_bajo", "sobrepublicacion"):
         m = out.get(nombre) or {}
         if m.get("k"):

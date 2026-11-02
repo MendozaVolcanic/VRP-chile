@@ -108,6 +108,8 @@ jobs:
           d = json.load(open("data/audit_continuous/guardia_modis_latest.json", encoding="utf-8"))
           for p in d.get("reversion", []):
               print(f"- REVERSION CANDIDATA: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia (K) publica y produccion (la via) calla")
+          for p in d.get("protegidas_sin_record_produccion", []):
+              print(f"- SIN RECORD DE PRODUCCION: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia (K) publica y produccion no tiene record (borde 171-01)")
           for p in d.get("fuera_de_plazo", []):
               print(f"- FUERA DE PLAZO (sin pre-autorizacion): {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW")
           for p in d.get("borde_del_encendido", []):

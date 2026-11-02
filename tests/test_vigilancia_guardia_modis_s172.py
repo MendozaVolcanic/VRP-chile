@@ -44,8 +44,9 @@ def _pasada(vol, fecha, protegida, prod, guardia, vrp=None, prod_via=None):
             "prod_via": prod_via}
 
 
-def _disp(pas, prod=(), guardia=(), hoy="2026-11-20", enc=ENC, juzgadas=None):
-    return vg.disparadores(list(pas), list(prod), list(guardia), hoy=hoy, encendido=enc, juzgadas=juzgadas)
+def _disp(pas, prod=(), guardia=(), hoy="2026-11-20", enc=ENC, juzgadas=None, ahora=None):
+    return vg.disparadores(list(pas), list(prod), list(guardia), hoy=hoy, encendido=enc, juzgadas=juzgadas,
+                           ahora=ahora)
 
 
 # ------------------------------------------------------------------ encendido desde los datos
@@ -62,7 +63,10 @@ def test_el_encendido_sale_del_primer_record_modis_de_la_via():
         {"sensor": "VIIRS_NOAA20_750", "datetime_utc": "2026-11-01 06:30", "via_codigo_mirova": True,
          "processed_utc": "2026-11-01T00:00:00Z"}]}
     e = vg.encendido_desde_datos(raw)
-    assert e["encendido_utc"] == "2026-11-05 22:10:00"
+    # MA172-206 (mini auditoría S172): el upgrade de NRT a estándar re-escribe con la vía pasadas viejas y les deja el
+    # `first_processed_utc` de K (pipeline/store.py hereda ese campo en todo reemplazo). El encendido es el menor
+    # `processed_utc` de la vía, que sólo puede ser posterior al merge: aquí 2026-11-06 09:00, no el 11-05 22:10 heredado.
+    assert e["encendido_utc"] == "2026-11-06 09:00:00"
     assert e["primera_observacion"] == "2026-11-04 03:10"
     assert e["via"] == {("NevadosDeChillan", "MODIS_TERRA", "2026-11-04 03:10"),
                         ("NevadosDeChillan", "MODIS_AQUA", "2026-11-06 06:30")}
@@ -100,6 +104,43 @@ def test_una_protegida_que_las_dos_publican_no_dispara():
 def test_mutacion_produccion_sin_record_o_guardia_que_calla_no_es_reversion():
     assert _disp([_pasada("A", "2026-11-10 07:20", True, None, True)])["reversion"] == []
     assert _disp([_pasada("A", "2026-11-10 07:20", True, False, False)])["reversion"] == []
+
+
+def test_protegida_que_la_guardia_publica_sin_record_de_produccion_pide_investigar():
+    """MA172-202 (mini auditoría S172): la vía descarta en silencio los gránulos de borde (171-01), así que el peor caso
+    de la regla es una protegida que la guardia publica y de la que producción no tiene record. Para el operador eso es
+    silencio igual que una pasada que no publica. No está pre-autorizada como reversión (la regla habla de «calla»):
+    pide investigar, pasado el plazo de espera del NRT (ESPERA_SIN_RECORD_H, propuesta; la fija Nicolás)."""
+    p = _pasada("NevadosDeChillan", "2026-11-10 06:40", True, None, True, vrp=2.5)
+    d = _disp([p], ahora="2026-11-12 00:00:00")
+    assert d["reversion"] == [] and d["veredicto"] == "INVESTIGAR"
+    assert [x["fecha_utc"] for x in d["protegidas_sin_record_produccion"]] == ["2026-11-10 06:40"]
+    # recién pasada: el NRT puede no haberla procesado todavía; no dispara
+    d = _disp([p], ahora="2026-11-10 09:00:00")
+    assert d["veredicto"] == "VERDE" and d["protegidas_sin_record_produccion"] == []
+    # control: si la guardia tampoco la publica, o no es protegida, no dispara
+    assert _disp([_pasada("A", "2026-11-10 06:40", True, None, False)], ahora="2026-11-12 00:00:00")["veredicto"] == "VERDE"
+    assert _disp([_pasada("A", "2026-11-10 06:40", False, None, True)], ahora="2026-11-12 00:00:00")["veredicto"] == "VERDE"
+    # una juzgada no vuelve a disparar
+    j = {("NevadosDeChillan", "MODIS", "2026-11-10 06:40"): {"decision": "investigada"}}
+    assert _disp([p], ahora="2026-11-12 00:00:00", juzgadas=j)["veredicto"] == "VERDE"
+
+
+def test_el_nulo_sin_pares_no_se_lee_como_nulo_sano():
+    """MA172-208: 0 pares no es «guardia y producción coinciden», es «no medí»."""
+    d = _disp([], [], [], hoy="2026-11-03", enc=None)
+    assert d["nulo"]["pares"] == 0 and d["nulo"]["sin_medir"] is True
+
+
+def test_la_frescura_de_la_referencia_se_mide_en_las_filas_de_modis():
+    """MA172-204: una referencia con VIIRS fresco y MODIS detenido deja la vigilancia sin alertas MODIS que comparar."""
+    viirs = [_fila("Lascar", "2026-11-19 05:00:00", 0.0, tipo="RUTINA", b="VIIRS375")]
+    modis_viejo = [_fila("Lascar", "2026-11-01 06:00:00", 0.0, tipo="RUTINA")]
+    av = vg.avisos_referencia_modis(viirs + modis_viejo, "2026-11-20")
+    assert av and "MODIS" in av[0]
+    assert vg.avisos_referencia_modis(viirs, "2026-11-20"), "sin ninguna fila MODIS también es aviso"
+    assert vg.avisos_referencia_modis(viirs + [_fila("Lascar", "2026-11-19 06:00:00", 0.0, tipo="RUTINA")],
+                                      "2026-11-20") == []
 
 
 def test_lo_anterior_al_encendido_es_retrospectivo_salvo_que_la_via_haya_escrito_el_record():
@@ -199,6 +240,10 @@ def _caso():
              _fila("Lascar", "2026-11-19 06:00:00", 0.0, tipo="RUTINA")]            # la referencia está viva
     prod = [_rec("NevadosDeChillan", "2026-11-10", "07:20", True, via=True)] + _relleno(via=True)
     guardia = [_rec("NevadosDeChillan", "2026-11-10", "07:20", True)] + _relleno()
+    # S172 ronda 2 (MA172-208): pasadas anteriores al encendido en que guardia y producción (las dos K) coinciden, para
+    # que el nulo tenga pares
+    prod += _relleno("2026-11-01")
+    guardia += _relleno("2026-11-01")
     return filas, prod, guardia
 
 
@@ -245,6 +290,24 @@ def test_una_guardia_con_records_de_la_via_da_vigilancia_ciega(insumos):
     insumos(*_caso(), raw_guardia_con_via=3)
     out = vg.evaluar("2026-11-20")
     assert out["veredicto"] == "VIGILANCIA_CIEGA" and any("dejó de ser K" in a for a in out["avisos"])
+
+
+def test_evaluar_con_nulo_sin_pares_da_vigilancia_ciega(insumos):
+    """MA172-208: si la guardia arranca junto con el encendido, el nulo no se midió y no se puede leer VERDE."""
+    filas, prod, guardia = _caso()
+    insumos(filas, [p for p in prod if p["noche"] != "2026-11-01"], [g for g in guardia if g["noche"] != "2026-11-01"])
+    out = vg.evaluar("2026-11-20")
+    assert out["veredicto"] == "VIGILANCIA_CIEGA" and any("nulo" in a for a in out["avisos"])
+
+
+def test_evaluar_con_referencia_sin_modis_da_vigilancia_ciega(insumos):
+    """MA172-204: con VIIRS fresco y MODIS detenido en la referencia no hay alertas MODIS contra qué comparar."""
+    filas, prod, guardia = _caso()
+    filas = [f for f in filas if f["sensor_bucket"] != "MODIS"] + [
+        _fila("Lascar", "2026-11-19 05:00:00", 0.0, tipo="RUTINA", b="VIIRS375")]
+    insumos(filas, prod, guardia)
+    out = vg.evaluar("2026-11-20")
+    assert out["veredicto"] == "VIGILANCIA_CIEGA" and any("MODIS" in a and "referencia" in a for a in out["avisos"])
 
 
 def test_un_aviso_no_tapa_una_reversion(insumos):
