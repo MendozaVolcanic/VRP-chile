@@ -1,0 +1,18 @@
+import re, pathlib, hashlib, os
+os.chdir(r"D:\vrp-trabajo\temporales\s173_aud")
+exec(open("armar.py", encoding="utf-8").read().split("TAREA = {")[0])
+carpeta = "D:/vrp-trabajo/temporales/s173_aud/vpr/"
+os.makedirs(carpeta, exist_ok=True)
+DEF2 = DEF + """
+- «el pre-registro» = experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md en la rama loop/activo (`git show origin/loop/activo:experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md`), sha256 que empieza en aad33de7 (compruébalo). «el paquete» = las tres vías «código MIROVA» encendidas a la vez, el perfil de la sombra de los 11 (pipeline/profiles/sombra_codigo_mirova.yaml en origin/main). «fuera de muestra» = lo que el pre-registro define como tal; tu tarea es ver si esa definición se sostiene."""
+b = bloque.replace("«CARPETA»", carpeta).replace("«RANGO»", "VPR2-01 en adelante").replace("«DEFINICIONES_DE_LA_VARA»", DEF2)
+a = auton.replace("«CARPETA»", carpeta).replace("«LIMITES_DE_RECURSOS»", LIM)
+v = verif.replace("«CARPETA»", carpeta).replace("«RANGO»", "VPR2-01 en adelante")
+tarea = """Objeto: el pre-registro de la prueba retrospectiva del paquete en los 11 Tier A (630 líneas, ronda 2, sin sello). Nicolás lo va a sellar; después se despacha la prueba y su veredicto por sensor decide si el paquete se acerca a MIROVA fuera de las pasadas que se usaron para elegir parámetros. Un pre-registro sellado con un defecto no se arregla después sin invalidarlo: el defecto hay que encontrarlo ahora.
+Eres el SEGUNDO verificador. El primero (Sonnet, SELLABLE CON CAMBIOS, VPR172-01 a 15) ya pasó y el autor aplicó sus cambios en la ronda 2. No abras su informe ni su carpeta (experiments/_s172_prereg_retro/verificador/ y D:/vrp-trabajo/temporales/ver_s172_prereg_retro/): heredarías sus supuestos. Sí puedes leer la tabla §15 del pre-registro como afirmación a verificar (¿cada cambio declarado está de verdad en el texto?).
+Cada afirmación verificable del pre-registro es una afirmación a verificar con el procedimiento del bloque del verificador (caminos.md primero). Lo que más pesa: (1) que lo llamado «fuera de muestra» no fue usado de verdad para elegir parámetros de ninguna de las tres vías (busca en los pre-registros, A/B y diagnósticos de MOD-D, V375-E, V750-A/B y D25 qué ventanas tocaron, por nombre y por fecha); (2) que cada cifra del poder (§7 y donde haya) se reproduce con un script tuyo sobre la referencia de MIROVA y el OSF, con denominador y ventana, y que la referencia sirve en esas fechas (regla A119: la tabla incompleta antes de marzo de 2026, el OCR mal calibrado hasta el 2026-06-11); (3) que cada regla de decisión es computable sin juicio humano, que dos lectores llegarían al mismo veredicto, y que el nulo y los controles están definidos y pueden fallar (regla A110, A116); (4) que el brazo de control y el del paquete corren el mismo código salvo las tres vías (regla A118: el flag llega a todos sus consumidores), y qué pasa si el PR B de MODIS (rama claude/s172-modd-flip, c9525f994) se mergea antes del despacho; (5) que las 14 decisiones R-1 a R-14 que el pre-registro pide a Nicolás están formuladas de modo que su respuesta no se pueda leer de dos maneras.
+Veredicto final: SELLABLE, SELLABLE CON CAMBIOS (lista exacta de cambios de texto) o NO SELLABLE. En el encabezado declara el modelo y el esfuerzo con que corriste realmente. Informe en D:/vrp-trabajo/temporales/s173_aud/vpr/INFORME.md."""
+txt = f"Eres verificador del proyecto VRP Chile ({REPO}). Lee primero su CLAUDE.md.\n\n{b}\n\n{v}\n\nTarea\n{tarea}\n\n{a}\n"
+assert not re.search(r"«[A-Z_]+»", txt)
+pathlib.Path("prompts/verificador_vpr.txt").write_text(txt, encoding="utf-8")
+print("vpr", hashlib.sha256(txt.encode()).hexdigest()[:8], len(txt))

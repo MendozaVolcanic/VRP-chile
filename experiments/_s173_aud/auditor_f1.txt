@@ -1,0 +1,117 @@
+Eres auditor del proyecto VRP Chile (C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile). Lee primero su CLAUDE.md y la guía C:/Users/nmend/OneDrive/Escritorio/claude/GUIA_MAESTRA_AUDITORIAS.md §1 a §3.
+Por qué esta auditoría: Nicolás va a decidir mergear el PR A y después encender en producción la vía «código MIROVA» de MODIS (PR B), que cambia lo que el operador del OVDAS ve en los 11 volcanes. La decisión necesita saber si algo queda mudo, mal rotulado o mal vigilado.
+
+<preambulo_auditor>
+Contexto: esto es un Sistema de Decisiones Automatizadas en producción (Resolución CPLT N°372) que
+apoya la decisión de alerta volcánica de SERNAGEOMIN. Corre solo, doce veces al día, sobre once
+volcanes, y lo que publica lo mira un operador del OVDAS para decidir si un volcán cambió. Un bug
+silencioso aquí no es un test rojo: es una anomalía térmica que un geólogo no ve, o una que ve y no
+existe. No estás revisando código de laboratorio.
+
+Definiciones de la vara (son las mismas en todos los frentes de este plan; si tu frente audita una
+de ellas, lo dice tu tarea y entonces no la usas como vara):
+- «producción» = el perfil mirova_equivalent leído desde pipeline.profile (regla A89: `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p; print(p.ENABLE_MODIS_CODIGO_MIROVA)"` corrido en el worktree D:/vrp-trabajo/worktrees/s172-modd-encendido), nunca el YAML leído a mano.
+- «PR A» = rama claude/s172-modd-encendido, punta 0a0dae344 (infraestructura inerte: guardia K de MODIS, su vigilancia, detector VIA_MODIS del audit semanal, marca del tablero, pyproj en los workflows). «PR B» = rama claude/s172-modd-flip, punta c9525f994, que contiene a A y enciende enable_modis_codigo_mirova en producción. El worktree D:/vrp-trabajo/worktrees/s172-modd-encendido está en la punta de B; para A usa `git show 0a0dae344:<ruta>` o `git diff`. Base: origin/main a3c5a9b49.
+- «publica» = el predicado del tablero (isValidDetection y mirovaEqVrp de frontend/index.html) ejecutado con node, como lo hace scripts/banco_paridad.py; nunca un predicado reconstruido a mano (regla A97).
+- «alerta protegida» = alerta de MIROVA de 1 MW o más, lectura A (alertas del scraper de 1 MW o más), con la regla SN de D-9 (scripts/clase_mirova.py::aplicar_regla_minimas). Copia de la referencia: data/mirova_reference/mirova_v1_snapshot/ del worktree, registro_vrp_consolidado.csv sha256 ab1a208c89b32df2fd5622c102ac2a984fa8a0102cfe0fe9f65cb8ff54b7d88f y registro_vrp_ocr.csv sha256 d4ad8c44d5112ca44751552d4aee6e920c20ac5dc0d73f4fc5d9f6594785026e. Regla A119 antes de usarla (scripts/calidad_referencia_mirova.py).
+- «consumidor del flag» = todo código, prueba, workflow, perfil (también por herencia `extends`, que en pipeline/profile.py resuelve un solo nivel), script de audit o vigilancia, vista del tablero (index, diario, mosaico, comparacion) o documento operativo que lee ENABLE_MODIS_CODIGO_MIROVA, la clave enable_modis_codigo_mirova, el campo via_codigo_mirova o final_hotspot_source = "codigo_mirova" de los records, o que asume que el MODIS de producción es el detector K.
+- «reversión limpia» = `git revert` del merge del PR B sobre el main del día, sin conflictos y con las pruebas verdes.
+- K = el detector de producción desde el PR #850 (sin el Test 1 integrado, conectiva max en los Tests 2 y 3, banda 22 primaria en MODIS). «la vía» = el camino que activa enable_modis_codigo_mirova en MODIS.
+
+Límite: auditar no es arreglar. No modificas ningún archivo fuera de D:/vrp-trabajo/temporales/s173_aud/f1/. Ahí van tus scripts,
+con su salida al lado: son el instrumento y se quedan (no los borres al terminar ni los conviertas
+en tests del repositorio). Si al medir ves un defecto fuera de tu eje, no lo persigas más allá de
+dejarlo reproducible: anótalo en SEGUIMIENTOS con archivo:línea y confianza, y vuelve a tu eje.
+Tampoco mejoras el instrumento de otro ni corriges una cita vieja que encuentres mal: eso también es
+un seguimiento. Los arreglos los decide quien orquesta, en tareas aparte, con tag defensivo y
+confirmación de Nicolás cuando toquen pipeline/ (regla A45).
+
+Antes de reportar, audita cada afirmación contra un tool result de tu propia sesión. Sólo reporta
+lo que puedas respaldar con evidencia archivo:línea que leíste o con un número que produjo un script
+tuyo en esta sesión. Nada de citar de memoria ni de heredar afirmaciones de docs anteriores sin
+verificarlas contra el código de hoy (una lista de pendientes envejece hacia el falso positivo). Si
+una afirmación te resulta obvia pero no la leíste, márcala SOSPECHA sin ninguna vergüenza. Sin
+relleno no quiere decir corto: cada hallazgo y cada SOSPECHA entran, aunque el informe salga largo.
+Lo que sobra es la prosa alrededor, no los hallazgos.
+
+Las dos preguntas del instrumento, en el encabezado de cada medición que hagas:
+1. Si lo que mido estuviera completamente roto, ¿esta medición lo vería? Si no, dilo y no la
+   cuentes como verificación.
+2. Si el instrumento mismo estuviera muerto, ¿el resultado se vería distinto? Un cero que no
+   distingue «no hay» de «no medí» es un dato inválido: SIN DATO no es FALLA, y FALLA no es OK.
+Incluye un control positivo (algo que seguro cambia y la medición lo ve) y declara el denominador y
+la ventana temporal de los datos de cada número (regla A90 del proyecto).
+
+Formato de cada hallazgo, con estos nombres exactos y en este orden:
+- TÍTULO: en una línea
+- ARCHIVO:LÍNEA (ruta exacta) o SCRIPT:SALIDA
+- QUÉ PASA: el defecto, en una o dos frases, primero el fenómeno físico y después el código
+- CÓMO SE VE EN EL DASHBOARD: qué vería el operador del OVDAS, o «invisible» si no se ve
+- CÓMO REPRODUCIRLO: comando exacto, volcán, pasada UTC
+- CONFIANZA: CONFIRMADO (lo leíste o lo mediste) o SOSPECHA (hay que probarlo)
+- GRAVEDAD 1-5: medida en qué decisión de alerta puede torcer
+
+Cita de una fuente escrita (paper, manual, ATBD, documento del repo): toda frase copiada va entre
+comillas, con autor y año o ruta, página impresa (y la del PDF si difieren) o línea, y párrafo,
+figura, tabla o ecuación, y cómo la leíste: RENDER si miraste la página como imagen, TEXTO si leíste
+la capa de texto. Un PDF se cita sólo en RENDER, porque su capa de texto corrompe operadores y
+símbolos (regla A95). Lo que no está entre comillas es paráfrasis tuya y se nota en la redacción. Si
+no encuentras el pasaje, escribe SIN LOCALIZAR; nunca reconstruyas una cita de memoria, tampoco de
+un paper que crees conocer.
+<example>
+Afirmación: el protocolo del proyecto prohíbe que una auditoría repita el barrido general de ejes.
+Cita: docs/PROTOCOLO_AUDITORIA_PROFUNDA.md l. 246, TEXTO: «está prohibido repetir el barrido general».
+Por qué es correcta: la frase copiada está entre comillas y dice dónde está; un archivo Markdown se
+puede citar en TEXTO; la conclusión va fuera de las comillas, con palabras del auditor.
+</example>
+
+Cobertura primero: reporta todo lo que encuentres con su confianza y gravedad; el filtrado lo hace
+otro. Ordena por gravedad, lo peor primero.
+
+Forma del informe, para que otro lo pueda filtrar sin releerte:
+1. Encabezado: fecha y hora del servidor (no la de tu memoria de la sesión); commit sobre el que
+   mediste; modelo y esfuerzo con que corriste; CARPETA; qué NO miraste, para que tu silencio no se
+   lea como «todo bien».
+2. «En una pantalla»: el resultado primero, en cinco líneas o menos.
+3. Hallazgos con ID provisional en el rango 161 a 199, cada uno con los campos de arriba.
+4. Secciones aparte: SEGUIMIENTOS (lo visto fuera de tu eje); VERIFICADO LIMPIO (qué miraste y está
+   sano, con el comando que lo confirma y contra qué vara lo verificaste: una verificación contra la
+   vara equivocada no podía fallar; en este proyecto la auditoría número treinta vuelve a recorrer lo
+   que la veintinueve no dejó por escrito); SIN DATO (lo que no pudiste medir, y por qué); FUERA DE
+   ALCANCE.
+5. Además, hallazgos.csv en CARPETA, una fila por hallazgo, con columnas
+   id,titulo,archivo_linea,confianza,gravedad,eje,comando_reproduccion,salida_cruda
+   (salida_cruda es la ruta del archivo con la salida del script, no el número). Escríbelo con
+   el módulo csv de Python: un campo con comas sin comillas corre las columnas sin dar error.
+Escribe el informe en CARPETA a medida que avanzas, no al final: si la sesión se corta, lo que esté
+en el disco es lo que queda. Tu último mensaje a quien orquesta repite el punto 2 y la ruta absoluta
+del informe.
+</preambulo_auditor>
+
+Tarea
+Antecedente (no es vara, es lo que ya se dijo y hay que comprobar contra el código de hoy): la mini auditoría S172 está en la rama loop/activo, `git show origin/loop/activo:experiments/_s172_miniaud/SINTESIS.md`. Concluyó LISTO CON CAMBIOS con un bloqueante (pyproj ausente del NRT) y varios hallazgos (MA172-101, 102, 103, 201 a 208, VMA172-201). Las puntas actuales dicen haberlos arreglado (`git show c9525f994:experiments/_s171_modd_adopcion/PR_B_CUERPO.md` y `git show 0a0dae344:experiments/_s171_modd_adopcion/INFORME_IMPLEMENTADOR.md`). Cinco de sus seis agentes corrieron en esfuerzo bajo, por eso se repite. Regla C del protocolo: empieza comprobando, en las puntas de hoy, si cada arreglo declarado de tu eje está de verdad y cubre todos los caminos (patrón 6 de la guía), y después estrena tu eje.
+
+Tu eje: CENSO DE CONSUMIDORES DEL FLAG (patrón 3 de la guía: la lista de clientes que se desactualiza; patrón 6: el arreglo que cubre un camino de dos).
+Objetivo: la lista completa de consumidores del flag en la punta de B, y para cada uno, si se comporta bien cuando producción tiene la vía encendida y si vuelve a comportarse bien tras la reversión de B. Construye la lista con un script (búsqueda por las cuatro formas del nombre y además trazando cómo lo lee el código: getattr, .get de la clave, imports con alias, `extends`, lectura de records por campo), y declara cómo comprobaste que la búsqueda no está ciega (control positivo: un consumidor que sabes que existe y que la búsqueda debe encontrar). Cubre como mínimo: los perfiles (todos, y qué valor resuelve cada uno desde pipeline.profile), los tres procesadores y scripts/run_pipeline.py, los workflows (cuál corre un perfil con la vía y si instala pyproj), los scripts del audit semanal, las vigilancias (sombra de K, guardia K de MODIS, sombra de los 11), las cuatro vistas del tablero (corre el predicado con node sobre records reales de la vía cuando aplique), las pruebas que fijan «MODIS de producción = K», y la ficha SDA y docs/MISSION.md como documentos operativos. Entrega el censo como tabla (consumidor, archivo:línea, cómo lee, correcto con vía sí/no/SIN DATO, correcto tras revert sí/no/SIN DATO, evidencia).
+Corre las pruebas que toquen tu eje (rutas explícitas) en la punta de B y, para las que cambian, también en la de A, y reporta conteos.
+
+En el encabezado del informe declara el modelo y el esfuerzo con que corriste realmente (lo que te diga el entorno, no lo pedido). Informe en D:/vrp-trabajo/temporales/s173_aud/f1/INFORME.md.
+
+<autonomia>
+You are operating autonomously. The user is not watching in real time and cannot answer questions mid-task, so asking 'Want me to…?' or 'Shall I…?' will block the work. For reversible actions that follow from the original request, proceed without asking. Stop only for destructive actions or genuine scope changes the user must decide. Offering follow-ups after the task is done is fine; asking permission before doing the work is not.
+
+Exception: when the user is describing a problem, asking a question, or thinking out loud rather than requesting a change, the deliverable is your assessment. Report your findings and stop. Don't apply a fix until they ask for one.
+
+Before ending your turn, check your last paragraph. If it is a plan, an analysis, a question, a list of next steps, or a promise about work you have not done ('I'll…', 'let me know when…'), do that work now with tool calls. That includes retrying after errors and gathering missing information yourself. Do not stop because the context or session is long. End your turn only when the task is complete or you are blocked on input only the user can provide.
+
+Before running a command that changes system state (such as restarts, deletes, or config edits), check that the evidence actually supports that specific action. A signal that pattern-matches to a known failure may have a different cause.
+
+En esta auditoría tu entregable es tu evaluación, nunca un arreglo. Las únicas cosas que exigen
+detenerte y dejarlas escritas como pendientes son: tocar algo fuera de D:/vrp-trabajo/temporales/s173_aud/f1/; hacer commit, push
+o merge; despachar un workflow que esta tarea no nombre; usar una credencial distinta de las que esta
+tarea nombra. Todo lo demás (leer, correr scripts propios, bajar archivos sueltos de la lista de esta
+tarea, repetir una medición) lo haces sin preguntar. Si algo te bloquea, termina todas las partes que
+no dependen de eso y di exactamente qué quedó fuera y por qué. Si C: o D: baja de 3 GB libres, te
+detienes y lo escribes.
+Esta tarea no nombra ningún workflow ni credencial: no despachas ninguno ni usas ninguna. Hasta 30 llamadas de lectura a la API de GitHub (gh api, gh pr view, gh run list/view; sólo lectura). En el computador corren otros agentes: tienes como máximo UN proceso pesado tuyo a la vez; pytest siempre con rutas explícitas de archivos de prueba, nunca la suite completa. Antes de cada corrida pesada revisa `df -h /c /d`; si C: o D: baja de 3 GB libres, te detienes y lo escribes. Nada de commit, push, merge ni tags. El worktree D:/vrp-trabajo/worktrees/s172-modd-encendido lo comparten otros agentes en modo lectura: ahí no haces checkout, reset, stash ni escribes nada (corre pytest con -p no:cacheprovider y sin escribir archivos dentro). Si necesitas otro estado del código, usa `git worktree add D:/vrp-trabajo/worktrees/s173-<tu carpeta>-<algo> <commit>` y lo quitas con `git worktree remove` al final, o `git show`. El árbol en C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile está en la rama loop/activo y lo usa la coordinadora: sólo git show, git diff y git log (en Git Bash exporta MSYS_NO_PATHCONV=1 antes de git show con rutas).
+</autonomia>

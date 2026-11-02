@@ -1,0 +1,26 @@
+workflows_con_perfil=41 con_via_MODIS=32 via_sin_pyproj=24
+  SIN pyproj: backfill-geometry.yml dispatch mirova_equivalent
+  SIN pyproj: backfill-tier-a.yml dispatch mirova_equivalent
+  SIN pyproj: nrt-healthcheck.yml schedule,dispatch mirova_equivalent
+  SIN pyproj: nrt.yml schedule,dispatch mirova_equivalent
+  SIN pyproj: pages-deploy.yml schedule,dispatch,workflow_run,push mirova_equivalent
+  SIN pyproj: probe-mxd03-equivalencia.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s136-3brazos.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s136-conformidad-a6.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s136-conformidad-apendice.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s137-etapa-apendice.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s137-sigma-dnti.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s141-vecinos-v2.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s141-vecinos.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s146-bateria-apendice.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s151-d25-v750.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s151-mod03.yml dispatch mirova_equivalent
+  SIN pyproj: probe-s157-busqueda-ventana.yml dispatch,push _s146_ab_sin_test1,mirova_equivalent
+  SIN pyproj: reproc-chunked.yml dispatch mirova_equivalent
+  SIN pyproj: reproc-s120-eq16-villarrica.yml dispatch _s99_test1_eq16
+  SIN pyproj: reproc-s124-villarrica-op-ab.yml dispatch _s124_villarrica_op_ab
+  SIN pyproj: reproc-s135-ab-d1d2.yml dispatch _s135_ab_a_control,_s135_ab_b_nokeeppeak,_s135_ab_c_cond,_s135_ab_d_ambos,_s135_ab_e_sp_off
+  SIN pyproj: reproc-s146-ab-sin-test1.yml dispatch _s146_ab_sin_prioridad_debil,_s146_ab_sin_test1
+  SIN pyproj: reproc-s151-ab-caja.yml dispatch _s146_ab_sin_test1,_s147_ab_sin_test1_caja,_s149_ab_sin_test1_b22_max
+  SIN pyproj: reproc-s151-ab-diurno.yml dispatch _s151_ab_diurno_control,_s151_ab_diurno_on
+control nrt.yml: ('nrt.yml', 'schedule,dispatch', 'experimental,experimental_ndc_focus,mirova_equivalent', 'mirova_equivalent', 'NO', 'run_pipeline')

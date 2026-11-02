@@ -1,0 +1,5 @@
+workflows_con_perfil=42 con_via_MODIS=32 via_sin_pyproj=3
+  SIN pyproj: backfill-geometry.yml dispatch mirova_equivalent
+  SIN pyproj: nrt-healthcheck.yml schedule,dispatch mirova_equivalent
+  SIN pyproj: pages-deploy.yml schedule,dispatch,workflow_run,push mirova_equivalent
+control nrt.yml: ('nrt.yml', 'schedule,dispatch', 'experimental,experimental_ndc_focus,mirova_equivalent', 'mirova_equivalent', 'si', 'run_pipeline')
