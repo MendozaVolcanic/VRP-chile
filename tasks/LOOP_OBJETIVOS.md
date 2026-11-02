@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 16:43 UTC (S173): regla ronda 4 dentro de B; verificador VB4 (Fable) corriendo
+- B = `b18e34eed` (merge de main 438a010ab sin conflictos; regla ronda 4 en `711542e77`, sha256 LF `f6122c8e`; VB3-01
+  a 08 tratados; §4.7 punto 6 nuevo: revertir B borra la regla de main y dice cómo reponerla). Suite 3.076 pasan, 0
+  fallas. Implementador declaró esfuerzo BAJO aunque se le pasó `high`. Queda en loop/activo la ronda 3 como historia.
+- Verificador VB4 (`verificador_vb4.txt`, sha256 `0e75d87d`): comprueba cada VB3 contra B, las citas nuevas, el S8 del
+  lector V375-E con control positivo y el CI de B.
+
 ### 2026-11-02 16:32 UTC (S173): #935 mergeado con frase de Nicolás
 - Frase «Sí, mergear #935». CI `pytest` verde (6m8s), CLEAN; `gh pr merge 935 --squash --match-head-commit b0b7374bb`;
   squash `438a010ab` en main a las 16:32:16 UTC, comprobado con `gh api .../commits/main`. Las sombras salen del sitio
