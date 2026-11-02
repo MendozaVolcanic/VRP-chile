@@ -1,0 +1,138 @@
+name: Vigilancia de la guardia K de MODIS
+
+# S172 (regla experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4, rama loop/activo; diseño
+# docs/superpowers/specs/2026-11-01-encendido-modd-design.md, decision 3). Calcado de vigilancia-sombra.yml, que vigila
+# K y no se toca.
+# POR QUE: con la via «codigo MIROVA» encendida en MODIS, K corre aparte como guardia (guardia-k-modis.yml). Una alerta
+# protegida que MIROVA publica, la guardia publica y produccion calla es el disparador de la reversion pre-autorizada,
+# y la regla pide avisar EL MISMO DIA: por eso corre al terminar la guardia y no una vez por semana.
+# El workflow NO revierte: abre el issue. La reversion la confirma una persona en la cabecera de la imagen de MIROVA y
+# la ejecuta una sesion con git revert del PR B (el encendido).
+# A43: "on" quoted (Norway Problem YAML 1.1).
+"on":
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Guardia K de MODIS (11 Tier A)"]
+    types: [completed]
+  # Respaldo: si la guardia se renombra, se desactiva o no corre, el workflow_run no llega. Con este cron la
+  # vigilancia corre igual una vez al dia y, sin datos frescos de la guardia, abre el issue de vigilancia ciega. 22:45
+  # UTC: lejos de la guardia (17:40), de la vigilancia de la sombra (23:40) y de los minutos del NRT y sus vecinos.
+  schedule:
+    - cron: "45 22 * * *"
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  # Grupo propio (como vigilancia-sombra): el push tiene su bucle de reintento.
+  group: vigilancia-guardia-modis
+  cancel-in-progress: false
+
+jobs:
+  vigilar:
+    runs-on: ubuntu-24.04  # fijado como el NRT: ubuntu-latest migra a 26.04 desde el 2026-10-19
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install pyyaml
+
+      # La referencia fresca va a una carpeta temporal: una alerta de anoche tiene que poder disparar hoy.
+      - name: Referencia fresca de MIROVA (Mirova-v1)
+        run: |
+          mkdir -p "$RUNNER_TEMP/ref"
+          curl -fsSL -o "$RUNNER_TEMP/ref/registro_vrp_consolidado.csv" \
+            https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_consolidado.csv
+          curl -fsSL -o "$RUNNER_TEMP/ref/registro_vrp_ocr.csv" \
+            https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_ocr.csv
+
+      - name: Vigilancia
+        id: vigilancia
+        continue-on-error: true
+        run: |
+          python scripts/vigilancia_guardia_modis.py \
+            --cons "$RUNNER_TEMP/ref/registro_vrp_consolidado.csv" \
+            --ocr "$RUNNER_TEMP/ref/registro_vrp_ocr.csv"
+
+      - name: Commit results
+        if: steps.vigilancia.outcome == 'success'
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add data/audit_continuous/guardia_modis_latest.json data/audit_continuous/guardia_modis_history.jsonl
+          git diff --staged --quiet && { echo "no changes"; exit 0; }
+          git commit -m "vigilancia(auto): guardia K de MODIS contra produccion y MIROVA (S172)"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
+
+      # Un issue por incidente y por clase, deduplicado por PREFIJO EXACTO del titulo (como vigilancia-sombra). Todos los
+      # titulos empiezan «Guardia K de MODIS:»; un issue abierto a mano sobre la guardia va con otro titulo.
+      # always(): si el push falla tras los cinco intentos, el issue de una reversion igual tiene que abrirse.
+      - name: Open issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OUTCOME: ${{ steps.vigilancia.outcome }}
+        run: |
+          abrir() {
+            NUM=$(PREFIJO="$1" gh issue list --state open --limit 200 --json number,title --jq '[.[] | select(.title | startswith(env.PREFIJO))][0].number // empty')
+            if [ -z "$NUM" ]; then
+              gh issue create --title "$1: $(date -u +%F)" --body "$2"
+            else
+              echo "ya hay un issue abierto de esta clase (#$NUM): se comenta"
+              gh issue comment "$NUM" --body "$(printf 'Corrida del %s:\n\n%s' "$(date -u +%F)" "$2")"
+            fi
+          }
+          if [ "$OUTCOME" != "success" ]; then
+            abrir "Guardia K de MODIS: el script fallo" "$(printf 'scripts/vigilancia_guardia_modis.py no termino (run %s). Mientras no corra, nadie vigila si la via de MODIS calla alertas que K publicaba.' "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")"
+            exit 0
+          fi
+          VEREDICTO=$(python -c "import json; print(json.load(open('data/audit_continuous/guardia_modis_latest.json'))['veredicto'])")
+          echo "veredicto: $VEREDICTO"
+          python - <<'PY' > /tmp/detalle.txt
+          import json
+          d = json.load(open("data/audit_continuous/guardia_modis_latest.json", encoding="utf-8"))
+          for p in d.get("reversion", []):
+              print(f"- REVERSION CANDIDATA: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia (K) publica y produccion (la via) calla")
+          for p in d.get("fuera_de_plazo", []):
+              print(f"- FUERA DE PLAZO (sin pre-autorizacion): {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW")
+          for p in d.get("borde_del_encendido", []):
+              print(f"- borde del encendido: {p['volcano']} MODIS {p['fecha_utc']} UTC, anterior al encendido con record de la via")
+          for nombre in ("muy_bajo", "sobrepublicacion"):
+              m = d.get(nombre) or {}
+              if m.get("dispara"):
+                  print(f"- {nombre}: {m['k']} sobre la cota {m['cota']} ({m['pasadas']})")
+          n = d.get("nulo") or {}
+          if n.get("distintas"):
+              print(f"- nulo: antes del encendido guardia y produccion publican distinto en {n['distintas']} de {n['pares']} pasadas: {n['detalle']}")
+          b = d.get("borde_171_01") or {}
+          if b.get("total"):
+              print(f"- (informa) pasadas que la guardia registra y produccion no, por semana: {b['por_semana']}")
+          for a in d.get("avisos", []):
+              print(f"- aviso: {a}")
+          PY
+          case "$VEREDICTO" in
+            REVERSION_CANDIDATA)
+              abrir "Guardia K de MODIS: candidata a reversion" "$(printf 'La vigilancia encontro una alerta protegida de MIROVA en MODIS (1 MW o mas) que la guardia (K) publica y produccion (la via codigo MIROVA) calla:\n\n%s\n\nLa regla (experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4) pre-autoriza revertir el encendido con git revert del PR B, DESPUES de confirmar la alerta en la cabecera de la imagen de MIROVA. Avisar a Nicolas hoy. Una vez decidida, anotar la pasada en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+            CANDIDATA_FUERA_DE_PLAZO)
+              abrir "Guardia K de MODIS: candidata fuera de plazo" "$(printf 'La vigilancia encontro una alerta protegida de MIROVA en MODIS que la guardia publica y produccion calla, pero el plazo de la regla ya se cumplio (29 protegidas vistas o 120 dias desde el encendido):\n\n%s\n\nFuera de plazo NO hay reversion pre-autorizada: decide Nicolas. Una vez decidida, anotar la pasada en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+            INVESTIGAR)
+              abrir "Guardia K de MODIS: investigar" "$(printf 'La vigilancia de la guardia encontro un disparador de investigacion (sin reversion automatica):\n\n%s\n\nRegla: experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4. Una pasada ya investigada se anota en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json para que deje de disparar.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+            VIGILANCIA_CIEGA)
+              abrir "Guardia K de MODIS: vigilancia ciega" "$(printf 'La vigilancia de la guardia no puede mirar:\n\n%s\n\nUna vigilancia ciega no da error, da VERDE: por eso este issue. Revisar guardia-k-modis.yml, nrt.yml y el flag enable_modis_codigo_mirova.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+            *) echo "sin issue" ;;
+          esac
