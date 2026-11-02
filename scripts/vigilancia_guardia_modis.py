@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Vigilancia de la guardia K de MODIS (S172; regla experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md
-§4, rama loop/activo; diseño docs/superpowers/specs/2026-11-01-encendido-modd-design.md, decisión 3).
+§4; en S172 vivía sólo en la rama loop/activo; en main desde el PR B #934; diseño docs/superpowers/specs/2026-11-01-encendido-modd-design.md, decisión 3).
 
 POR QUÉ (fenómeno → mecanismo): la vía «código MIROVA» de MODIS ve el volcán como lo ve MIROVA (el gránulo pasado a
 su grilla de 1 km, su detector, su fondo, la suma de todos los alertados) y ganó el A/B pre-registrado de MOD-D. Pero
@@ -73,7 +73,7 @@ OUTDIR = aa.OUTDIR
 PROTEGIDAS_OBJETIVO = vs.PROTEGIDAS_OBJETIVO   # 29: una pérdida de 1 de cada 10 se ve con 95 %, como con K
 DIAS_MAXIMOS = vs.DIAS_MAXIMOS                 # 120
 TOL_S = vs.TOL_S                               # el pareo del etiquetador (±120 s)
-# §4 (i) y (ii) del borrador de la regla, propuestas que fija Nicolás al sellar: más de COTA dispara.
+# §4.4 (i) y (ii) de la regla de reversión: cotas D1 y D2, contestadas «Sí» por Nicolás el 2026-11-02. Más de COTA dispara.
 COTA_MUY_BAJO = 2
 COTA_SOBREPUBLICACION = 3
 UMBRAL_MINIMO_MW = 0.05                        # «sobre 0,05 MW»: lo de 0,05 o menos no cuenta como Muy Bajo
@@ -399,8 +399,8 @@ def evaluar(hoy):
         d0 = min(d0, date.fromisoformat(encendido[:10]) - timedelta(days=max(DIAS_ANTES_DEL_ENCENDIDO, DIAS_NULO)))
     win = (d0.isoformat(), hoy)
     out = {"generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-           "regla": "experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4 (borrador S171, rama "
-                    "loop/activo)",
+           "regla": "experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4 (en main desde el PR B #934; "
+                    "hasta S173, borrador en la rama loop/activo)",
            "encendido_modis_utc": encendido, "primera_observacion_via": enc["primera_observacion"],
            "flag_produccion": flag, "ventana": list(win),
            "fase": ("antes_del_encendido" if not encendido else "vigilando")}

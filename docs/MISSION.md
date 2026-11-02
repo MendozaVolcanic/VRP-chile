@@ -4,6 +4,25 @@
 > preguntas antes de proponer o implementar cualquier cosa que toque el
 > pipeline algorítmico.
 
+> ⚠️ **S172: MODIS dejó de ser K en producción (encendido de MOD-D; marca A113).** Desde la primera corrida del NRT con la vía, después
+> del merge del PR B (#934, rama `claude/s173-modd-flip`), y también en las pasadas observadas hasta unos 8 días
+> antes, porque cada corrida re-escribe las 8 fechas de su ventana (regla `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md`
+> §4.1; la hora del merge no decide nada), `mirova_equivalent` corre en MODIS la **vía «código MIROVA»** (`enable_modis_codigo_mirova:
+> true`): el gránulo pasado a la grilla de 1 km de MIROVA con la geolocalización de 1 km del MxD03, el detector, el
+> fondo rellenado con la regla de MATLAB y la suma de todos los alertados del código operacional que MIROVA publicó
+> (`pipeline/mirova_v750_codigo.py`, familia MODIS). Por qué: con K, MODIS perdía más de un tercio de las noches en que
+> MIROVA alerta (recall 62,5 % en 16 noches, audit del 2026-10-26) y en Chillán marcaba 0,56 de su magnitud; la vía
+> ganó el A/B pre-registrado de MOD-D (tag `s170-modd-f4-lectura`). Decisión de Nicolás del 2026-10-31: adelantar
+> MODIS sin esperar la sombra de 28 noches. **VIIRS 375 y VIIRS 750 siguen con K.** Toda frase de este documento que
+> describa el MODIS de producción con K (banda 22 primaria sobre la imagen nativa, conectiva `max`, `_interp_geo`, la
+> marca S153 de abajo en su punto 3) describe el estado previo a S172 en MODIS y se conserva por historia. K de MODIS
+> sigue corriendo como guardia (`pipeline/profiles/guardia_k_modis.yaml`, `data/guardia_k_modis/`); su vigilancia
+> (`scripts/vigilancia_guardia_modis.py`) dispara la reversión pre-autorizada, `git revert` del PR B, si la vía calla
+> una alerta protegida que K publica (regla `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` §4).
+> El laboratorio (`experimental`) y el ancla de los tests pre-K (`_s146_ab_control`) declaran la vía apagada. Una
+> serie MODIS que cruce la primera pasada de la vía mezcla dos detectores: el tablero la marca y el auto-audit separa el
+> detector `VIA_MODIS` (A104). Tag defensivo `pre-s171-adopcion-modd`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.18.
+
 > ⚠️ **S153: el detector de la réplica cambió (adopción de K; marca A113).** Desde el merge del PR de adopción,
 > `mirova_equivalent` corre (1) **sin el Test 1 integrado en el ROI** (D30: no está en el paper y hacía publicar en
 > 85 a 88 % de los negativos limpios de VIIRS 375), (2) con la **conectiva `max`** de la prosa de Coppola 2016a en los

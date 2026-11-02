@@ -5,7 +5,7 @@ prepáralo» y «lo que recomendabas antes también hazlo»). Nada se mergea sin
 sí de A45 con la pre-autorización de la reversión. Tag defensivo: `pre-s171-adopcion-modd` (`d3cd0b2ae`, empujado).
 
 Regla que este diseño implementa: `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` (rama
-`loop/activo`), sobre todo §3 (guardia), §4 (reversión e investigación) y §5 (lista del PR). Modelo: la adopción de K,
+`loop/activo`; ⚠️ **S173 (A113)**: desde el PR B (#934) la regla vive en main, en esta misma ruta (ronda 4)), sobre todo §3 (guardia), §4 (reversión e investigación) y §5 (lista del PR). Modelo: la adopción de K,
 `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` paso 9, y su vigilancia (`scripts/vigilancia_sombra.py`,
 `.github/workflows/vigilancia-sombra.yml`, `frontend/cambio_detector.js`, `scripts/auto_audit_weekly.py` §S156).
 

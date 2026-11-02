@@ -23,6 +23,19 @@ description: >
 # --- Detection thresholds ---
 # Applied inside process_modis.py / process_viirs.py / process_viirs_mod.py
 thresholds:
+  # S172, MOD-D ENCENDIDO: la via «codigo MIROVA» en MODIS (pipeline/mirova_v750_codigo.py, FAMILIAS["MODIS"]). POR QUE:
+  # con K, MODIS pierde mas de un tercio de las noches en que MIROVA alerta (recall 62,5 % en 16 noches, audit del
+  # 2026-10-26) y en Chillan marca 0,56 de la magnitud de MIROVA; la via gano el A/B pre-registrado de MOD-D (tag
+  # s170-modd-f4-lectura). Decision de Nicolas del 2026-10-31: adelantar MODIS sin esperar la sombra de 28 noches, con
+  # K de guardia (el perfil de la guardia K de MODIS del PR A; reversion de §4 de
+  # experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md). Tag defensivo pre-s171-adopcion-modd. Se
+  # revierte con git revert -m 1 del merge de este PR. VIIRS 375 y VIIRS 750 no cambian; los tres de MxD03 (mas abajo
+  # en esta seccion) siguen apagados.
+  # S173 (hallazgo 208): este bloque va aparte, al inicio de `thresholds:`, y no pegado a otra clave, para que el
+  # revert no choque si otro PR cambia una clave cercana (git trata como conflicto dos cambios en lineas contiguas).
+  # Al agregar una clave nueva, dejar entre ella y este bloque al menos una linea que ya exista. Lo vigila
+  # tests/test_revert_flag_modis_no_choca_s173.py.
+  enable_modis_codigo_mirova: true
   # S112 ADOPTADO — anillo intermedio [1.5,3] km para el recompute de magnitud Test1
   # VIIRS375 (ver enable_test1_intermediate_bg en paths). [1.5,3] recupera los 3 ALERTAS
   # NdC incluido el trigger 06-16 (0.068 vs MIROVA 0.06); [2,4] perdía 06-16 por fallback

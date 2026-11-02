@@ -35,6 +35,11 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 PERFIL = "_s146_ab_control"
 FLAGS_K = ("ENABLE_TEST1_PATH", "ENABLE_TESTS_23_PROSE_BRANCH", "ENABLE_MODIS_B22_PRIMARY")
+# S172 (encendido de MOD-D, decisión de Nicolás del 2026-10-31): cambios de producción POSTERIORES a K que el ancla
+# no hereda porque la producción de antes de K no los tenía. El ancla los declara apagados en su YAML
+# (pipeline/profiles/_s146_ab_control.yaml) y el parche de abajo los lleva también a los procesadores. Si producción
+# los apaga (un revert), dejan de diferir y valores() lo acepta igual.
+FLAGS_POSTERIORES = ("ENABLE_MODIS_CODIGO_MIROVA",)
 PROCESADORES = ("pipeline.process_modis", "pipeline.process_viirs", "pipeline.process_viirs_mod")
 _COD = ("import json, pipeline.profile as p; print('@@' + json.dumps({k: repr(getattr(p, k)) for k in dir(p) "
         "if k.isupper() and k != 'VALID_PROFILES'}))")
@@ -51,20 +56,24 @@ def resolver(nombre):
 def valores():
     ancla, prod = resolver(PERFIL), resolver("mirova_equivalent")
     difieren = {k for k in set(ancla) | set(prod) if ancla.get(k) != prod.get(k)} - {"PROFILE_NAME", "DATA_SUBDIR"}
-    assert difieren == set(FLAGS_K), (
+    assert set(FLAGS_K) <= difieren <= set(FLAGS_K) | set(FLAGS_POSTERIORES), (
         f"el ancla {PERFIL} ya no es «produccion menos K»: difiere de mirova_equivalent en {sorted(difieren)}. "
         "Si la produccion adopto otro cambio, decidir si estos tests lo heredan antes de tocar FLAGS_K")
+    # S172: el ancla tiene que traer apagado todo lo posterior a K (si lo heredara, mediría otra detección)
+    assert all(ancla[k] == "False" for k in FLAGS_POSTERIORES), {k: ancla[k] for k in FLAGS_POSTERIORES}
     return {k: ast.literal_eval(ancla[k]) for k in FLAGS_K}
 
 
 @contextmanager
 def produccion_pre_k():
-    """Corre lo de adentro con los procesadores en la deteccion de antes de K (la del ancla)."""
+    """Corre lo de adentro con los procesadores en la deteccion de antes de K (la del ancla). S172: también con lo
+    posterior a K apagado (FLAGS_POSTERIORES), que la producción de antes de K no tenía."""
     vals = valores()
+    posteriores = {k: False for k in FLAGS_POSTERIORES}
     with ExitStack() as pila:
         for nombre in PROCESADORES + ("pipeline.profile",):
             mod = importlib.import_module(nombre)
-            for k, v in vals.items():
+            for k, v in list(vals.items()) + list(posteriores.items()):
                 if hasattr(mod, k):
                     pila.enter_context(patch.object(mod, k, v))
         yield vals

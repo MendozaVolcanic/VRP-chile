@@ -2,7 +2,7 @@
 """S172: la vigilancia de la guardia K de MODIS dispara lo que pide la regla de reversión de MOD-D.
 
 POR QUÉ. Con la vía «código MIROVA» encendida en MODIS, K corre aparte como guardia
-(experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §3 y §4, rama loop/activo; diseño, decisión 3). El
+(experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §3 y §4; en S172 vivía sólo en la rama loop/activo; en main desde el PR B #934; diseño, decisión 3). El
 peor caso es una señal débil o de borde que K publica y la vía calla. La vigilancia compara cada día, en MODIS,
 producción (la vía) contra la guardia (K) contra MIROVA, y una vigilancia ciega no da error, da VERDE: por eso cada
 caso tiene su prueba, con escenas sintéticas, y cada disparador su control (el caso vecino que no tiene que disparar).

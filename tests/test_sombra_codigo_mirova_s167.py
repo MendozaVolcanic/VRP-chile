@@ -59,10 +59,15 @@ def _resuelto(perfil):
 def test_el_perfil_difiere_de_produccion_solo_en_las_tres_vias_y_la_carpeta():
     prod, sombra = _resuelto("mirova_equivalent"), _resuelto(PERFIL)
     distintas = {k for k in set(prod) | set(sombra) if prod.get(k) != sombra.get(k)}
-    assert distintas == VIAS | {"DATA_SUBDIR", "PROFILE_NAME"}, sorted(distintas)
-    # control: en producción las tres vías están apagadas y en la sombra encendidas (si no, el diff de arriba
-    # podría coincidir por otra razón)
-    assert all(prod[k] == "False" for k in VIAS) and all(sombra[k] == "True" for k in VIAS)
+    # S172 (PR B, encendido de MOD-D, decisión de Nicolás del 2026-10-31): producción enciende la vía de MODIS, así que
+    # sombra y producción ya no difieren en ella; la sombra sigue con las tres encendidas. Texto original: la diferencia
+    # eran las tres vías.
+    PROD_ENCENDIDAS = {"ENABLE_MODIS_CODIGO_MIROVA"}
+    assert distintas == (VIAS - PROD_ENCENDIDAS) | {"DATA_SUBDIR", "PROFILE_NAME"}, sorted(distintas)
+    # control: en producción las vías de VIIRS están apagadas y la de MODIS encendida, y en la sombra las tres
+    # encendidas (si no, el diff de arriba podría coincidir por otra razón)
+    assert all(prod[k] == ("True" if k in PROD_ENCENDIDAS else "False") for k in VIAS)
+    assert all(sombra[k] == "True" for k in VIAS)
     assert sombra["DATA_SUBDIR"] == repr(PERFIL) and prod["DATA_SUBDIR"] == repr("mirova_equivalent")
     # los flags de MxD03 van aparte (programa §12.3 punto 4): apagados en los dos
     assert all(prod[k] == sombra[k] == "False" for k in MXD03)
