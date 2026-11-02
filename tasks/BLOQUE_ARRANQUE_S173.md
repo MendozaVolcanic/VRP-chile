@@ -14,7 +14,7 @@
 
 | frente | estado | evidencia | qué falta |
 |---|---|---|---|
-| Lector V375-E re-sellado por claves | ronda 1 (perfiles sin claves de MODIS y V750) y ronda 2 (grilla sólo en los 11 Tier A): batería 275 de 275, nulo S01 a S12 12 de 12; verificador r2 SELLABLE CON CAMBIOS (sólo pruebas); **ronda 3 cerrada**: batería 280 de 280, nulo S01 a S14 y M22 15 de 15 atrapadas, punta `fc3912cb2` | `experiments/_s162_v375/PREREGISTRO_E.md` §11.14 y §11.14.1 en la rama; verificadores en `D:/vrp-trabajo/temporales/ver_s172_relector*/` | tag nuevo y **frase de sello de Nicolás** antes de que haya datos de la ventana P que alguien lea |
+| Lector V375-E re-sellado por claves | ronda 1 (perfiles sin claves de MODIS y V750) y ronda 2 (grilla sólo en los 11 Tier A): batería 275 de 275, nulo S01 a S12 12 de 12; verificador r2 SELLABLE CON CAMBIOS (sólo pruebas); **ronda 3 cerrada**: batería 280 de 280, nulo S01 a S14 y M22 15 de 15 atrapadas, punta `fc3912cb2` | `experiments/_s162_v375/PREREGISTRO_E.md` §11.14 y §11.14.1 en la rama; verificadores en `D:/vrp-trabajo/temporales/ver_s172_relector*/` | **SELLADO** por Nicolás el 2026-11-02 04:15 UTC («Sí, sellar»): tag `s172-v375e-lector-resellado` (`fc3912cb2`). La lectura de la ventana P se corre desde un checkout de ESE tag, no del `s170-v375e-lector` |
 | Encendido de MODIS (PR A y B) | mini auditoría LISTO CON CAMBIOS con un bloqueante G5 (el NRT no instalaba pyproj: MODIS callaba con el NRT verde); arreglado; 1.444 pruebas en B, 0 fallas; revert limpio | `experiments/_s172_miniaud/SINTESIS.md`; `experiments/_s171_modd_adopcion/INFORME_IMPLEMENTADOR.md` (rama del PR A) | **segunda pasada de auditoría a esfuerzo alto** sobre las puntas nuevas (5 de 6 agentes corrieron en bajo); verificador limpio de la regla de reversión; sello de la regla; merge de A con frase; después B con A45 |
 | Sombra de los 34 con las vías | rama lista; verificador LISTA CON CAMBIOS; arreglos hechos | `experiments/_s172_sombra34/INFORME.md` (rama); `experiments/_s172_sombra34_verificador/` | merge DESPUÉS del lector sellado (las grillas nuevas marcarían régimen con el lector viejo) |
 | Chillán: razón contra MIROVA cae con el cenit en los 3 sensores | CONFIRMADO por verificador, replicado fuera de muestra; mecanismo SIN ATRIBUIR (D25 o D17); las tres vías lo llevan cerca de 1 hacia atrás | `experiments/_s172_chillan/` | ablación por pieza partida por cenit (VIIRS 375 y MODIS) |
@@ -27,7 +27,7 @@
 
 | # | pregunta | recomendación |
 |---|---|---|
-| 1 | Frase de sello del lector V375-E re-sellado | sí, al cerrar la ronda 3 (antes de leer datos de la ventana P) |
+| 1 | ~~Frase de sello del lector V375-E re-sellado~~ | **SELLADO** 2026-11-02 04:15 UTC, tag `s172-v375e-lector-resellado` |
 | 2 | Espera de la guardia antes de leer una pasada sin record como silencio | 24 h |
 | 3 | Volcanes de los 34 con otro volcán en su grilla (13; con vecino Tier A: Quetrupillán, Michinmahuida, Antillanca, Callaqui) | separar en la lectura desde el primer día las pasadas con píxeles a menos de 4 km del vecino; zona excluida en la grilla (A45) antes de publicar esos cuatro |
 | 4 | Sacar las tres sombras del sitio público (Pages) y del disparo del deploy | sí (nadie las lee como operador; achican el margen de 1 GB) |

@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 04:15 UTC (S172): lector V375-E re-sellado SELLADO; S173 se lanza desde esta sesión
+- **Decisión de Nicolás** (chat de S172), ante «¿Sellas el lector re-sellado de V375-E en fc3912cb2?»: «Sí, sellar». Tag
+  `s172-v375e-lector-resellado` sobre `fc3912cb2` (rama `claude/s172-v375e-relector`), empujado. Ronda 3: batería 280 de
+  280; nulo S01 a S14 y M22, 15 de 15 atrapadas por aserción. La lectura de la ventana P se corre desde un checkout de
+  ese tag. Destraba el merge de la sombra de los 34 y el encendido de MODIS sin marcar régimen en VIIRS 375.
+- Nicolás pidió que S172 lance la S173 cuando corresponda (no programada a hora fija): tarea `vrp-s173-retomar`, corrida a
+  mano desde S172 y desactivada después.
+
 ### 2026-11-02 02:38 UTC (S172): arreglos de MODIS hechos; lector ronda 2 lista; verificadores de retro y sombra 34
 - **MODIS**: PR A `claude/s172-modd-encendido` en `0a0dae344` (pyproj en los 22 workflows con perfil de vía; nrt,
   backfill-tier-a y reproc-chunked fallan si falta; los cuatro huecos de la vigilancia de la guardia cerrados con rojo;
