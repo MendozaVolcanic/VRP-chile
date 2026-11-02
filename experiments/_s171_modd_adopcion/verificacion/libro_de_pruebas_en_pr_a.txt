@@ -1,0 +1,91 @@
+...F..F                                                                  [100%]
+================================== FAILURES ===================================
+_______________ test_g1d_mutacion_prueba_que_g1_de_verdad_falla _______________
+
+generador = <module 'libro_de_pruebas' from 'D:\\vrp-trabajo\\worktrees\\s172-modd-base\\scripts\\libro_de_pruebas.py'>
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-3163/test_g1d_mutacion_prueba_que_g0')
+
+    def test_g1d_mutacion_prueba_que_g1_de_verdad_falla(generador, tmp_path):
+        """Mutación: cambia un veredicto en una COPIA de hipotesis.json y confirma que el JSON que
+        produce el generador YA NO coincide con el libro commiteado: es la prueba de que G1
+        realmente puede fallar, no que pasa por construcción.
+    
+        (1) Si G1 no comparara de verdad los datos (por ejemplo si comparara sólo el conteo de filas)
+        esta mutación no lo notaría; acá sí, porque compara el documento completo. (2) Si el generador
+        ignorara silenciosamente el insumo mutado (por ejemplo si `construir()` cacheara el resultado
+        de una corrida anterior), esta mutación tampoco vería diferencia: y por eso es la prueba de
+        que el instrumento reacciona a un cambio real en su entrada.
+        """
+        copia_h = json.load(open(generador.F_HIPOTESIS, encoding="utf-8"))
+        assert copia_h, "hipotesis.json vino vacío, no se puede mutar nada"
+        copia_h[0] = dict(copia_h[0])
+        copia_h[0]["veredicto_H"] = "__MUTADO_S146__"
+        mut_dir = tmp_path / "insumos_mutados"
+        mut_dir.mkdir()
+        mut_h = mut_dir / "hipotesis.json"
+        mut_h.write_text(json.dumps(copia_h, ensure_ascii=False), encoding="utf-8")
+    
+        mod2 = _cargar_generador()  # instancia propia, para no pisar los paths del fixture
+        mod2.F_HIPOTESIS = str(mut_h)
+>       libro_mutado = mod2.construir()
+                       ^^^^^^^^^^^^^^^^
+
+tests\test_guard_libro_de_pruebas_s146.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\libro_de_pruebas.py:322: in construir
+    "hipotesis": os.path.relpath(F_HIPOTESIS, ROOT).replace(os.sep, "/"),
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:\\Users\\nmend\\AppData\\Local\\Temp\\pytest-of-nmend\\pytest-3163\\test_g1d_mutacion_prueba_que_g0\\insumos_mutados\\hipotesis.json'
+start = 'D:\\vrp-trabajo\\worktrees\\s172-modd-base'
+
+>   ???
+E   ValueError: path is on mount 'C:', start on mount 'D:'
+
+<frozen ntpath>:796: ValueError
+_______________ test_g2c_mutacion_prueba_que_g2_de_verdad_falla _______________
+
+tmp_path = WindowsPath('C:/Users/nmend/AppData/Local/Temp/pytest-of-nmend/pytest-3163/test_g2c_mutacion_prueba_que_g0')
+
+    def test_g2c_mutacion_prueba_que_g2_de_verdad_falla(tmp_path):
+        """Mutación: un documento NUEVO con una cita a una ruta que con toda certeza no existe (nombre
+        con un sufijo aleatorio) y que por lo tanto no puede estar en la lista blanca. Confirma que el
+        mecanismo de G2 la detecta como rota y NO la deja pasar.
+    
+        (1) Si G2 no comparara contra el disco de verdad (por ejemplo si sólo revisara la sintaxis de
+        la ruta) esta mutación no la vería como rota; acá sí, porque `_citas_y_rotas` llama
+        `os.path.exists` sobre el ROOT real. (2) Si el filtro de exclusión (planes/especificaciones)
+        fuera demasiado amplio y se comiera este documento por error, la mutación no aparecería en
+        `rotas` y el assert de abajo fallaría: es la prueba de que el documento mutado SÍ pasa por el
+        filtro.
+        """
+        doc_mutado = tmp_path / "DOC_MUTADO_S146.md"
+        ruta_fantasma = "experiments/_no_existe_de_verdad_s146_9f3c1a/archivo_fantasma.py"
+        doc_mutado.write_text(
+            "# Doc de prueba\n\nEsto cita `%s` a propósito.\n" % ruta_fantasma, encoding="utf-8")
+    
+        assert not os.path.exists(os.path.join(ROOT, ruta_fantasma)), (
+            "la ruta fantasma existe de verdad, elegir otro nombre para la mutación")
+    
+>       total, rotas = _citas_y_rotas(ROOT, [str(doc_mutado)])
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_guard_libro_de_pruebas_s146.py:297: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_guard_libro_de_pruebas_s146.py:182: in _citas_y_rotas
+    rel_doc = os.path.relpath(doc, root).replace(os.sep, "/")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:\\Users\\nmend\\AppData\\Local\\Temp\\pytest-of-nmend\\pytest-3163\\test_g2c_mutacion_prueba_que_g0\\DOC_MUTADO_S146.md'
+start = 'D:\\vrp-trabajo\\worktrees\\s172-modd-base'
+
+>   ???
+E   ValueError: path is on mount 'C:', start on mount 'D:'
+
+<frozen ntpath>:796: ValueError
+=========================== short test summary info ===========================
+FAILED tests/test_guard_libro_de_pruebas_s146.py::test_g1d_mutacion_prueba_que_g1_de_verdad_falla
+FAILED tests/test_guard_libro_de_pruebas_s146.py::test_g2c_mutacion_prueba_que_g2_de_verdad_falla
+2 failed, 5 passed in 1.24s
