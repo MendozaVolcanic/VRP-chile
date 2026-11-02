@@ -22,7 +22,8 @@ producción ni los 11.
 | 3 | `7e1a26936` | workflow `.github/workflows/sombra-34.yml` |
 | 4 | `0d4320e2f` | aviso de vigilancia ciega: `scripts/vigilar_sombra_34.py` y `.github/workflows/vigilancia-sombra-34.yml` |
 | 5 | `7de231b17` | pruebas `tests/test_sombra_34_s172.py` |
-| 6 | (este) | informe y lista de vecinos dentro de la grilla |
+| 6 | `30d9f9418` | informe y lista de vecinos dentro de la grilla |
+| 7 a 10 | ronda de arreglos | vecinos.yaml (VS34-01/07); pruebas que ejecutan la vigilancia (VS34-02); monitor de ausencia (VS34-04); informe (VS34-03, 05, 06) |
 
 ### 1. Grillas
 
@@ -141,14 +142,145 @@ ajusta otro agente en `claude/s172-v375e-relector`. **No hay que mergear esta ra
 
 ## Lo que hay que mirar al revisar la sombra
 
-**Vecinos dentro de la grilla** (`vecinos_en_la_grilla.py`, salida al lado): la vía suma en `vrp_mw` todos los
-píxeles alertados de la grilla, también fuera de la caja sensible con umbral más estricto (D32), así que un vecino
-activo puede aparecer en el record de un volcán tranquilo. **11 de los 34** tienen otro volcán del yaml dentro de su
-grilla de 51 × 51 km; los que más importan: Quetrupillán (Villarrica a 19,8 km, lago de lava), Michinmahuida (Chaitén a
-17,5), Antillanca-Casablanca (Puyehue-Cordón Caulle a 20,2) y Callaqui (Copahue a 24,5); además Descabezado Grande y
-Cerro Azul-Quizapú a 8,2 km entre sí, Lonquimay y Tolhuaca a 9,6, Irruputuncu y Olca-Paruma a 24,0. El centroide
-(`primary_cluster.centroid_dist_km`) lo delata; sin inner, la etiqueta no. Si MIROVA excluye vecinos en sus ROI es SIN
-DATO para Chile (CLAUDE.md, marca S158 R2 de A4).
+**Vecinos dentro de la grilla**: ⚠️ el conteo de «11 de los 34» que estaba aquí era una cota inferior (cuadrado de
+±25 km en vez de celdas, VS34-07). Lo vigente, con la tabla de los 13 y la decisión pendiente, está en la sección
+«Ronda de arreglos» de más abajo (VS34-01).
+
+## Ronda de arreglos tras el verificador limpio (VS34-01 a VS34-08)
+
+Verificador: LISTA CON CAMBIOS (`D:\vrp-trabajo\temporales\ver_s172_sombra34\informe.md`, `hallazgos.csv`). Lo que
+se hizo con cada hallazgo:
+
+### VS34-01 y VS34-07: el calor de un vecino entra en el volcán nuevo
+
+**El fenómeno.** La grilla de MIROVA de cada volcán cubre 51 × 51 km. Si otro volcán cae dentro de ese cuadrado, su
+calor entra en el record del volcán nuevo por dos caminos: la vía suma en `vrp_mw` todos los píxeles alertados de la
+grilla (D32), también los de fuera de la caja sensible, que pasan con el umbral estricto; y la posición del record es
+la del cúmulo del píxel más radiante, que puede ser el del vecino. El verificador lo midió con gránulos sintéticos: un
+foco sólo en Villarrica da 13 a 29 MW en el record de Quetrupillán, con el cúmulo a 19,5 km. Con los 34 sin
+`inner_radius_km` no hay etiqueta `far` que lo delate.
+
+**Lo que hay ahora en la rama (sin tocar `pipeline/`, congelado por A45):**
+`experiments/_s172_sombra34/vecinos.yaml`, generado por `vecinos_en_la_grilla.py` (reescrito con la geometría de
+celdas de la vía, como pidió VS34-07) y fijado por `test_vecinos_dentro_de_la_grilla_son_los_de_vecinos_yaml`. Por
+volcán: el vecino, si es Tier A, la distancia a (X0, Y0) y la clase de la celda del vecino en la caja de la vía por
+familia (2 sensible, 1 anillo, 0 resto de la grilla con umbral estricto, `borde`, `fuera`).
+
+**Son 13, no 11 ni 12.** El verificador contó 12 mirando sólo VIIRS 750 (agrega Osorno con Calbuco). Mirando las tres
+familias se suma Calbuco con Osorno, que cae en la fila de borde de la grilla MODIS de Calbuco (no alerta, pero su
+calor puede llegar interpolado a la celda vecina).
+
+| volcán | vecino | km | V750 | V375 | MODIS |
+|---|---|---|---|---|---|
+| Quetrupillán | **Villarrica (Tier A)**; Lanín | 19,8; 24,2 | 0; 0 | 0; 0 | 0; 0 |
+| Michinmahuida | **Chaitén (Tier A)** | 17,5 | 0 | 0 | 0 |
+| Antillanca-Casablanca | **Puyehue-Cordón Caulle (Tier A)** | 20,2 | 0 | 0 | 0 |
+| Callaqui | **Copahue (Tier A)** | 24,5 | 0 | 0 | 0 |
+| Descabezado Grande | Cerro Azul-Quizapú | 8,2 | 1 | 0 | 0 |
+| Cerro Azul-Quizapú | Descabezado Grande | 8,2 | 0 | 0 | 0 |
+| Lonquimay | Tolhuaca | 9,6 | 1 | 1 | 0 |
+| Tolhuaca | Lonquimay | 9,6 | 1 | 1 | 0 |
+| Lanín | Quetrupillán | 24,2 | 0 | 0 | 0 |
+| Irruputuncu | Olca-Paruma | 24,0 | 0 | 0 | 0 |
+| Olca-Paruma | Irruputuncu | 24,0 | 0 | 0 | 0 |
+| Osorno | Calbuco | 27,5 | borde | fuera | borde |
+| Calbuco | Osorno | 27,5 | fuera | fuera | borde |
+
+Ningún vecino cae en la caja sensible (clase 2). Los cuatro vecinos Tier A caen siempre en la clase 0: su calor entra
+sólo si pasa el umbral estricto, que un lago de lava o un domo activo pasa. Al revés también pasa, y ya pasaba antes de
+esta rama: Quetrupillán, Michinmahuida, Antillanca y Callaqui caen dentro de las grillas de Villarrica, Chaitén, PCC y
+Copahue en la sombra de los 11 (y en producción si las vías se adoptan).
+
+**Decisión para Nicolás antes de publicar ninguno de los 13** (no la tomo yo):
+
+| opción | qué es | separa la magnitud | toca |
+|---|---|---|---|
+| A. regla del lector por pasada | para los 13, una pasada se lee como «propia» sólo si ningún píxel alertado (`anomaly_pixels`, que trae lat/lon) cae a menos de 4 km del vecino y el cúmulo (`primary_cluster.centroid_dist_km`) está a menos de 4 km del punto del volcán; si no, va a un estrato «mezclada», se informa aparte y no cuenta para decidir publicar. Para los cuatro con vecino Tier A se cruza además con el record del vecino en la misma pasada | no (el record no guarda VRP por píxel; sí dice cuántos alertados son del vecino) | sólo el lector de la sombra (experiments/) |
+| B. zona excluida en la grilla | como permite el código de MIROVA (celdas NaN en BOX, que no alertan ni entran a la estadística): una clave nueva en `grillas_mirova.yaml` (por ejemplo, círculos de exclusión) que lean `caja_roi` y `caja_v375` | sí | `pipeline/` (A45: tag y tu sí), y el lector sellado de V375-E |
+| C. nada | el geólogo mira cada publicación en la revisión semanal | no | nada |
+
+Los 4 km de A: la caja sensible de VIIRS 750 tiene 2,6 km de semilado y los vecinos más cercanos están a 8,2 km, así
+que un radio de 4 km alrededor del vecino no toca nunca los 4 km alrededor del volcán. Es un número mío, no de
+MIROVA, y se puede cambiar antes de leer datos.
+
+**Recomendación: A desde el primer día de la sombra** (no toca nada congelado y deja medir cuántas pasadas están
+mezcladas), **y B como condición antes de llevar al tablero cualquiera de los cuatro con vecino Tier A**, porque ahí
+la magnitud mezclada sí la vería el operador. Si MIROVA excluye vecinos en sus grillas chilenas es SIN DATO; si algún
+día se sabe, B debería copiar lo que haga MIROVA (A5).
+
+### VS34-02: pruebas que no podían fallar
+
+La prueba de la vigilancia buscaba subcadenas. Ahora `tests/test_sombra_34_s172.py` **ejecuta con bash los dos pasos
+reales** del workflow de vigilancia («Vigilancia» y «Open issue», tal como están en el YAML) sobre un repo de juguete,
+con un `gh` falso que anota lo que se le pide y un reloj fijo (`VIGILAR_SOMBRA_34_AHORA`, la única línea agregada al
+script para esto, más la salida en UTF-8). Cuatro escenarios: todo fresco no abre issue; un volcán viejo abre «Sombra
+de los 34: vigilancia ciega» con su nombre; antes de empezar espera sin issue; con el script roto abre «la vigilancia
+falló». La carpeta de la sombra de los 11 lleva un señuelo con lo contrario, así que un `--dir` equivocado cambia el
+resultado. Además: cada paso de `sombra-34.yml` se compara con el de la sombra de los 11 fuera de su `run` (if con
+`always()`, id, uses, with, env, timeouts, permisos del job), cron diario válido en los dos workflows, checkout de
+`main` en la vigilancia, código de salida del script, y que las 34 entradas de la grilla sean exactamente las del
+generador.
+
+**Comprobado con mutaciones** (`experiments/_s172_sombra34/mutaciones_vs34_02.py`, salida
+`mutaciones_vs34_02_salida.txt`): las 10 que el verificador vio pasar en verde (VW1 a VW4, W8, W9, W11, W12, G4, V5),
+4 que ya caían (VW5 a VW8) y 6 de las piezas nuevas (monitor, Pages, vecinos): **20 de 20 caen por aserción** (ningún
+error de importación o sintaxis), con control sin mutar en verde antes y después (32 pruebas sin las 34 corridas de
+gránulo). Ese es el rojo de las pruebas nuevas. La primera corrida se cortó en VW7 por un patrón mal escrito en el
+script de mutaciones (no en la prueba); corregido y corrido entero.
+
+### VS34-04: quién vigila a la vigilancia
+
+`nrt-monitor.yml` (cron cada 6 h) tiene un paso nuevo, «Vigilar la sombra de los 34 y su vigilancia», con la misma
+regla de ausencia que la sombra de los 11: sin corrida programada verde en 26 h se abre (o refresca) un issue; con una
+verde se cierra; `if: always()`. La decisión es una función pura nueva, `decidirAusencia` en
+`scripts/nrt_monitor_decision.js`, que reutiliza `decidirSombra` y sólo cambia el inicio: como no se sabe cuándo se
+mergea, empieza en max(fecha fija, llegada del workflow a main según la API + 30 h). Sin dato de la llegada, la fecha
+fija (peor caso, una alerta de más el primer día). Los dos workflows entran también al reporte de puntualidad del cron
+(`scripts/medir_cadencia_cron.py`, 1 por día). Probado con node (`test_ausencia_de_la_sombra_34`) y con las
+mutaciones M1 a M4.
+
+### VS34-03: Pages
+
+**La premisa del encargo no se cumple, así que no excluí nada.** El encargo pedía excluir `data/sombra_34` de Pages
+«si las otras sombras tampoco» se publican. Hoy sí se publican: `.github/workflows/pages-deploy.yml`, paso «Prepare
+Pages artifact», hace `cp -r data _site/data`, que sube `data/experimental_v2/` (la lee
+`frontend/experimental/index.html:400`) y `data/sombra_codigo_mirova/` (no la lee nadie). La prueba
+`test_pages_trata_a_la_sombra_34_como_a_las_otras_sombras` obliga a tratar igual las dos sombras: si alguien excluye
+una, tiene que decidir la otra.
+
+Lo que el verificador midió y queda para decidir: cada push de la sombra dispara un deploy (`paths: data/**`, con
+`cancel-in-progress`: 34 al día que se cancelan entre sí) y la sombra de los 34 suma al menos ~0,7 MB por día al sitio
+(si el límite de 1 GB de Pages se mide sin comprimir, alcanzaría para unos 9 meses; SIN DATO). **Recomendación:**
+excluir las dos sombras del artefacto (nadie las lee en el sitio) y sacar `data/sombra_*` del disparador por push.
+Toca el deploy del sitio público: lo decide Nicolás.
+
+### VS34-05: la caja sensible queda en el punto del yaml, no en un cráter medido
+
+Los 11 tienen `vent_lat`/`vent_lon` (cráter verificado) y, en tres, un punto de MIROVA distinto del yaml. Los 34 no
+tienen ninguno de los dos: la caja sensible de VIIRS 750 (7 × 7 celdas, 5,25 km) y la de MODIS (5 × 5, 5 km) quedan
+centradas en el lat/lon del yaml, con tres decimales (~110 m), y `centroid_dist_km` se mide desde ese punto. En
+edificios grandes (la caldera del Hudson, el campo de Laguna del Maule, Descabezado Grande) el foco activo puede caer
+fuera de la caja sensible y pasar sólo con el umbral estricto. La comparación «es como en los 11» vale con esa
+salvedad: dar un cráter medido a cada uno de los 34 es trabajo de geólogo (junto con su inner, decisión D5).
+
+### VS34-06: la prueba vieja que usa `inner_radius_km` como sustituto de Tier A
+
+Queda como estaba, con un comentario en `tests/test_mirova_v375_codigo_s165.py` que dice cuándo se rompe: el día que
+se escriba en `volcanoes.yaml` el inner de alguno de los 34, la cuenta pasa a 12 y cae con «assert 12 == 11», que no es
+una regresión de la caja; ahí hay que filtrar por la matriz de `nrt.yml`.
+
+### VS34-08: orden de merge
+
+Sin cambios: esta rama va **después** del ajuste del lector de V375-E (`claude/s172-v375e-relector`), que tiene que
+comparar las grillas por volcán (las 11 intactas) y no el archivo entero.
+
+### Pruebas de esta ronda
+
+`tests/test_sombra_34_s172.py` pasa a 66 pruebas. Corridas juntas con `test_monitor_sombra_s169.py`,
+`test_cadencia_cron_s133.py`, `test_nrt_monitor_decision_s150.py`, `test_guard_declarado_vs_efectivo_s131.py` (G4),
+`test_guard_expresiones_workflows_s161.py`, `test_guard_token_vacio_cron_s160.py`, `test_sombra_codigo_mirova_s167.py`
+y la prueba de la caja de 375: **140 de 140 en verde**. La prueba de punta a punta de la vigilancia necesita `bash` y
+`node` (los dos están en el runner de `tests.yml` y en este computador); sin `bash` se salta, no pasa en verde.
 
 ## SIN VERIFICAR
 
@@ -174,3 +306,7 @@ DATO para Chile (CLAUDE.md, marca S158 R2 de A4).
   edición.
 - Para ver el rojo restauré temporalmente la grilla de main con `git checkout HEAD -- pipeline/grillas_mirova.yaml`
   (archivo propio, sin cambios ajenos) y la regeneré con el script; el resultado es idéntico byte a byte al primero.
+- Ronda de arreglos: ninguna edición con heredoc (todo con la herramienta de edición). Mi primer bucle de espera del
+  cupo de procesos pesados estaba mal escapado y no terminaba nunca; lo detuve antes de que corriera nada y lo
+  reemplacé por un contador en un `.ps1` aparte. Las mutaciones se aplicaron en el propio worktree (archivo por
+  archivo, restaurado en un `finally`); `git status` después de las corridas sólo muestra mis cambios de esta ronda.
