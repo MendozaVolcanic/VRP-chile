@@ -1,15 +1,20 @@
 # Pre-registro: prueba retrospectiva del paquete de las tres vías «código MIROVA» en los 11 Tier A
 
-Estado: **BORRADOR, RONDA 2, SIN SELLO.** Ronda 1: un agente de S172 la escribió a pedido de la coordinadora (hora del
-servidor de GitHub al empezar: 2026-11-02 01:36:17 UTC) y la coordinadora la commiteó en `loop/activo` como
-`experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md`, commit `01be21ff5` (01:42:57 UTC; sha256 del archivo
-`45f48a93…`). Ronda 2: el mismo agente aplicó los cambios del verificador limpio
+Estado: **BORRADOR, RONDA 3, SIN SELLO** (hora del servidor de GitHub al empezar la ronda 3: 2026-11-02 12:52:40 GMT,
+`gh api -i repos/MendozaVolcanic/VRP-chile`, cabecera `Date`). Ronda 1: un agente de S172 la escribió a pedido de la
+coordinadora (hora del servidor al empezar: 2026-11-02 01:36:17 UTC) y la coordinadora la commiteó en `loop/activo`
+como `experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md`, commit `01be21ff5` (01:42:57 UTC; sha256 del
+archivo `45f48a93…`). Ronda 2: el mismo agente aplicó los cambios del verificador limpio
 (`D:/vrp-trabajo/temporales/ver_s172_prereg_retro/INFORME.md`, Sonnet 5.5, SELLABLE CON CAMBIOS, VPR172-01 a 15;
-hora del servidor al empezar la ronda 2: 2026-11-02 02:05:11 UTC). La tabla «hallazgo, tratamiento» está en el §15.
+hora del servidor al empezar la ronda 2: 2026-11-02 02:05:11 UTC; commit `18ab00217`, sha256 `aad33de7…`). Ronda 3: un
+agente de S173 aplicó los 14 cambios del segundo verificador limpio (`experiments/_s173_aud/vpr/INFORME.md`, Fable 5.1,
+SELLABLE CON CAMBIOS, VPR2-01 a VPR2-14, con su evidencia en esa misma carpeta). Las tablas «hallazgo, tratamiento»
+de las dos verificaciones están en el §15.
 
 Es el paso 1 del plan `docs/superpowers/plans/2026-11-02-nrt-34-volcanes.md` (`loop/activo` `fa22f4b87`), Tarea 0.1.
 No se corrió ningún brazo ni se miró ningún resultado de la vía. Sobre datos sólo se contó la referencia de MIROVA y K
-de disco, para el poder; las cifras del §7 son las que reprodujo el verificador y se recalculan antes del sello.
+de disco, para el poder; las cifras del §7 son las que reprodujo el segundo verificador con sus scripts (con el sha de
+lo que contó, §7) y el autor las recalcula con la referencia congelada antes del sello (§11).
 
 Rutas de repo relativas a `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\`. Commits citados:
 `origin/main` = `14fb62030` (2026-11-01 23:34 UTC), `loop/activo` = `fa22f4b87` salvo que se diga otro.
@@ -61,8 +66,10 @@ interpolando el gránulo a una grilla fija, comparando cada celda con su entorno
 halo y sumando la radiancia de todas las celdas alertadas. Las tres vías hacen eso con el código de MIROVA, y dentro de
 muestra se equivocan menos que K y miden la magnitud cerca de la de MIROVA (MOD-D: razón 0,983,
 `experiments/_s168/modd_f4_candado/lectura_ab2/leer_f4_salida.txt` en `e0bb1b150`; V375-E: 0,9996,
-`experiments/_s172_chillan/auditor/v375e_lectura_salida.txt`; port de V750 0,994 a 0,998 en Chillán,
-`experiments/_s172_chillan/verificador/INFORME.md`). Esas cifras no las re-verificó nadie en esta ronda.
+`experiments/_s172_chillan/auditor/v375e_lectura_salida.txt`; port de V750 0,996 a 0,998 en Chillán, 0,996 sobre 22
+alertas y 0,998 sobre 28, `experiments/_s172_chillan/verificador/INFORME.md` l. 28). El segundo verificador localizó
+las tres citas (`leer_f4_salida.txt` l. 2 y 17, razón 0,9827; `v375e_lectura_salida.txt` l. 39; la de V750 corregida
+de «0,994 a 0,998» a lo que dice la l. 28, VPR2-12); son cifras dentro de muestra y no se re-midieron.
 
 **La sospecha que esta prueba busca refutar.** Los parámetros se eligieron mirando abril a octubre de 2026 (otoño,
 invierno, primavera: cumbres nevadas, fondos fríos, gradiente topográfico fuerte, A69). Febrero y marzo son verano y
@@ -123,18 +130,30 @@ pasadas). Medir ahí reproduce.
 | V750-B (sellado; elige la ROI) | T 2026-04-01 a 06-12; O 06-13 a 11-02 12:59 UTC | `experiments/_s162_v750b/PREREGISTRO_V750B.md` l. 97 a 106, tag `s167-v750b-adenda3-sellada` |
 | V750-A (borrador) | la de V750-B | `experiments/_s162_v750a/PREREGISTRO_V750A.md` l. 130 a 137, `aa5583646` |
 | Regla de posición (S165) | ventana O | `experiments/_s165_regla_posicion/INFORME.md` |
+| D25 (S143, S157; no se adopta, S162) | 2026-06-01 a 08-31 y 09-01 a 09-15 (S143); 2026-04-01 a 06-12 y 08-29 a 10-08 (S157) | `docs/PREREGISTRO_AB_D22_D25_S143.md` l. 89 y 91; `experiments/_s157_prereg_d25/PREREGISTRO.md` (verificado por el segundo verificador, VPR2-10) |
 
-Ninguna toca febrero de 2026 ni 2025. Marzo de 2026 lo toca sólo en MODIS (MOD-D).
+Ninguna toca febrero de 2026 ni 2025 (el segundo verificador lo comprobó línea a línea en cada pre-registro citado,
+`experiments/_s173_aud/vpr/INFORME.md` §5, eje 1). Marzo de 2026 lo tocan MOD-D y la V2 de K (control), sólo en
+MODIS: la V2 de K deja decidir a VIIRS desde el 04-01 (`_s151_prereg_fk_11/PREREGISTRO.md` l. 99 a 102;
+`experiments/_s153_fk_v2/v2.log` l. 15).
 
 **(b) Pasadas miradas por nombre en diagnósticos** (no eligieron parámetros, pero motivaron o probaron las vías):
 - MODIS, Láscar: 2026-02-11 01:20 Terra (bajo 1 MW), 2026-02-11 07:00 Aqua (bajo 1 MW) y **2026-02-16 01:20 Terra
-  (protegida)**. Son exactamente las tres de febrero en que K no publica una alerta
+  (protegida)**. Son las tres de febrero en que K no publica una alerta
   (`experiments/_s159/mxd03_prereg/sustrato_mirova_modis_feb_salida.txt` l. 27 a 29; la de 02-11 07:00 es el control
   positivo del etiquetado de MxD03 y de la sonda M, `experiments/_s159/m/INFORME.md` l. 52 y 58; la de 02-16 es el caso
-  de `experiments/_s158_audit_r2/verificador/va/INFORME.md` l. 37).
+  de `experiments/_s158_audit_r2/verificador/va/INFORME.md` l. 37); la cuarta es un negativo que K publica:
+- MODIS, **Lastarria 2026-02-24 07:05 Aqua** (negativo limpio que K publica con 0,529 MW; mirada por la sonda M,
+  `experiments/_s159/m/INFORME.md` l. 49; es uno de los cinco bloques de F26-M en que K publica un negativo,
+  `experiments/_s173_aud/vpr/contar_f26_F26M_bloques_modis.txt`; VPR2-01).
 - VIIRS 750: los ceros de K de febrero que S158 RA1 listó por nombre (Láscar 02-04, 02-05, 02-12, 02-21, 02-25, 02-26;
   Isluga 02-26; Puyehue-Cordón Caulle 02-01; Tupungatito 02-26) y Láscar 2026-03-11 06:18
   (`experiments/_s158_audit_r2/ra1/contar_ceros_v750.txt`).
+- 2025 (contra el OSF): Llaima 2025-02-15 03:15 (1,243 MW), Láscar 2025-03-17 06:25, 2025-05-23 07:25 y 2025-06-02
+  07:20, Cordón Caulle 2025-08-03 06:35 (MODIS, sonda M, `experiments/_s159/m/INFORME.md` l. 50, 51 y 78); Láscar VIIRS
+  750 2025-07-07 05:24 (CM162, `experiments/_s162_vuelta2/CUMULOS_POR_MATRIZ.md` l. 15); Chillán 2025-11-04 06:00
+  (auditor de S172, `experiments/_s172_chillan/auditor/INFORME.md` l. 153). Fuente del inventario:
+  `experiments/_s173_aud/vpr/pasadas_2025_nombradas.txt` y `febrero_pasadas_nombradas.txt` (VPR2-01).
 
 **(c) Diagnósticos de K contra la referencia sobre todo un tramo** (sin nombre por pasada): S158 RA1 sobre VIIRS 750 del
 2025-02-15 al 2026-10-21; A99, pareo de magnitud de K contra el OSF de 2025 (342 pares); el auditor de Chillán S172
@@ -143,9 +162,9 @@ nada a nuestras detecciones).
 
 **Cómo entra al análisis.** La vía de 750 es un port literal del `.m` de MIROVA y las de MODIS y 375 trasladan su
 estructura: ninguna se ajustó a (b) ni a (c), así que el sesgo de selección es débil (SOSPECHA, no medido). Pero en
-MODIS de febrero el contraste vía contra K descansa justamente en esas tres pasadas. Por eso el lector informa P1, P2 y M
-de F26-M y de F26-V (750) **con y sin** las pasadas de (b), y si el veredicto cambia al sacarlas, el sensor va a DECIDE
-NICOLÁS (§8, fila 4).
+MODIS de febrero el contraste vía contra K descansa justamente en esas cuatro pasadas. Por eso el lector informa P1, P2
+y M de F26-M y de F26-V (750) **con y sin** las pasadas de (b), y P1-OSF y la magnitud de R25 con y sin las de 2025; si
+el veredicto cambia al sacarlas, el sensor va a DECIDE NICOLÁS (§8, fila 4).
 
 ### 3.2 Tramos
 
@@ -175,9 +194,13 @@ abril no es comparable con una posterior, y K decidió VIIRS sólo desde el 2026
 único tramo de VIIRS fuera de la selección de parámetros con negativos limpios. Lo que se compara es vía contra K sobre
 las mismas pasadas, nunca una tasa de F26 contra una de abril en adelante.
 
-**Composición medida** (`f26_sesgo_tabla_salida.txt` del verificador): en 375, 1.708 de 2.660 records (64 %) sin fila;
-NOAA-20 tiene 800 etiquetadas (cenit mediano 47,4°) y 132 sin fila; Suomi NPP sólo 163 etiquetadas, con cenit mediano
-**63,1°** contra 44,9° de sus 732 sin fila; en 750, NOAA-20 855 etiquetadas y Suomi NPP 200 (cenit 62,6° contra 42,6°).
+**Composición medida** con las reglas de este documento (tabla sola, noche por elevación solar, SN, Tupungatito desde el
+02-23; `experiments/_s173_aud/vpr/contar_f26_F26_salida.txt`, línea «por satelite», segundo verificador, VPR2-11): en
+375, 1.708 de 2.660 records (64 %) sin fila; NOAA-20 tiene 790 etiquetadas y 111 sin fila; Suomi NPP sólo 162
+etiquetadas y 702 sin fila; NOAA-21, 895 sin fila; en 750, NOAA-20 844 etiquetadas (49 sin fila) y Suomi NPP 198 (656
+sin fila). Los cenit medianos son los del primer verificador (`f26_sesgo_tabla_salida.txt`, con conteos que diferían
+en 10 a 21 pasadas por satélite): NOAA-20 etiquetadas 47,4°; Suomi NPP etiquetadas **63,1°** contra 44,9° de sus sin
+fila; en 750, Suomi NPP 62,6° contra 42,6°. Se recalculan con el resto del §7 antes del sello.
 O sea: **la evidencia de F26-V es NOAA-20 y las pasadas oblicuas de Suomi NPP**. Todo resultado de F26-V va rotulado así,
 y la curva de cenit de F26-V se lee por satélite.
 
@@ -222,7 +245,9 @@ Hechos (archivo local `data/mirova_reference/VRP_GLOBAL_ARCHIVE_2025.csv`, fuera
   5,003). En 750 el OSF sólo trae pasadas de 5 MW o más.
 - `timeUTC` truncado al minuto; con K todas las pasadas pareadas dan Δt = 0 s.
 - `Dayflag` 0 es noche en 2.524 de 2.528 filas y 1 es día en 49 de 49 según la elevación solar del proyecto (horas UTC
-  de las filas 0 entre 01 y 20; las cuatro diurnas con 0 son MODIS, una de 1 MW o más). Verificación empírica; la
+  de las filas 0 entre 01 y 20; las cuatro diurnas con 0 son MODIS, tres de 1 MW o más: Chaitén 2025-05-14 20:10, 1,27
+  MW; Copahue 2025-08-13 12:40, 1,53 MW; Villarrica 2025-03-26 13:55, 14,39 MW; la cuarta, Villarrica 2025-04-07 13:35,
+  0,99 MW; `experiments/_s173_aud/vpr/contar_osf_vent_salida.txt`, VPR2-05). Verificación empírica; la
   definición del paper sigue SIN VERIFICAR. **Se usa la noche del proyecto (elevación solar), no `Dayflag`.**
 - Columnas (esquema v2.5, `experiments/_s172_chillan/auditor/schema_osf_v25_texto.txt`): `VRP` en watts; `LAT`/`LON`
   del píxel más caliente; `Max_Dist` al píxel alertado más lejano, en metros; `class` 1 volcánica, 0 no, «a screening
@@ -235,11 +260,12 @@ tabla de `Satellite`, que esta prueba ya no necesita para decidir.
 - **Pareo**: misma resolución, ±120 s, mismo volcán.
 - **Protegida OSF**: fila nocturna (elevación solar), `class` 1, `VRP` ≥ 1e6 W, píxel más caliente a no más de
   `inner_radius_km` del cráter de `volcanoes.yaml` (decisión R-1). **317 en 375 m** (273 Láscar, 28 PCC, 14
-  Planchón-Peteroa, 2 Isluga), **17 en 750 m** (todas Láscar, todas de 5 MW o más), **162 en 1 km** (155 Láscar, 6
-  Planchón-Peteroa, 1 Villarrica).
-- **K ya las publica todas**: 317 de 317, 17 de 17 y 160 de 160 con record (dos MODIS sin record de K;
-  `r25_k_salida.txt`). P1-OSF es por eso un control de **«la vía no pierde las evidentes»**, no de recall en volcanes
-  débiles (S-3).
+  Planchón-Peteroa, 2 Isluga), **17 en 750 m** (todas Láscar, todas de 5 MW o más), **161 en 1 km** (155 Láscar, 6
+  Planchón-Peteroa). La fila de Villarrica que la ronda 2 contaba (2025-03-26 13:55, 14,39 MW, `Dayflag` 0) es diurna
+  con la noche del proyecto y no entra (VPR2-05; `experiments/_s173_aud/vpr/contar_osf_vent_salida.txt`, igual con el
+  centro en `contar_osf_centro_salida.txt`).
+- **K ya las publica todas**: 317 de 317, 17 de 17 y 160 de 161 con record (una MODIS sin record de K a ±120 s; misma
+  salida). P1-OSF es por eso un control de **«la vía no pierde las evidentes»**, no de recall en volcanes débiles (S-3).
 - **Bajo 1 MW OSF** (sólo 375 y 1 km): informa, con SN por analogía en 375.
 - **Lejana OSF** (análogo de `far_ref`, corrige la ronda 1): filas `class` 1 de 1 MW o más **fuera** del radio interno.
   Son 49, todas de Chillán entre el 2025-02-15 y el 03-05, a 12,1 a 19,6 km del cráter, mediana 17 MW
@@ -273,7 +299,7 @@ node sobre el record de `store.append_record` (`banco_paridad.correr_node`, A97)
 |---|---|---|---|
 | MODIS | §7 de `PREREGISTRO_MODD_F4.md` (l. 209 a 241, tag `s168-modd-f4-sellado`): P1, P1b, P2, P2', M | F26-M | VIA-radiante (lo eligió MOD-D: «posición: V (ninguno gana contra V)», `leer_f4_salida.txt`) |
 | VIIRS 375 | §5.4 (a) a (d) de `PREREGISTRO_E.md` (l. 134 a 151, tag `s170-v375e-lector`) con N-3 (§8.13, l. 503) y el código del §9.7 | F26-V | **VIA-cercano** («cercano decide», §10, l. 703 a 714). Además, **VIA-radiante con la misma regla, al lado**: el record de la vía publica hoy con radiante (l. 716), así que un veredicto de cercano no describe lo que publicaría el paquete tal como está. Si los dos difieren en el veredicto, el techo de VIIRS 375 es DECIDE NICOLÁS |
-| VIIRS 750 | §6 punto 2 de `PREREGISTRO_V750A.md` con §6 bis y §6 ter, **sólo si V750-A está sellado con su verificador limpio antes del despacho D2** (§10.3). Si no, se aplica el mismo texto como anexo **no verificado** y el techo de VIIRS 750 es DECIDE NICOLÁS. Este documento no sella el texto de V750-A | F26-V | el que elija el §6 bis de V750-A en su censo; si no ha corrido, VIA-radiante, y los otros dos informan |
+| VIIRS 750 | §6 punto 2 de `PREREGISTRO_V750A.md` con §6 bis y §6 ter, **sólo si V750-A está sellado con su verificador limpio antes del despacho D2** (§10.3). Si no, se aplica como anexo **no verificado** el texto de `aa5583646:experiments/_s162_v750a/PREREGISTRO_V750A.md` §6 (l. 217 a 243), §6 bis (l. 174 a 196) y §6 ter (l. 197 a 216), y el techo de VIIRS 750 es DECIDE NICOLÁS. Si V750-A se sella en otro commit, se lista el diff de esas tres secciones contra `aa5583646` antes de D2 (VPR2-07). Este documento no sella el texto de V750-A | F26-V | el que elija el §6 bis de V750-A en su censo; si no ha corrido, VIA-radiante, y los otros dos informan |
 
 Las diferencias con cada regla sellada están todas en la tabla del §5.6 (ninguna cambia un umbral).
 
@@ -291,7 +317,7 @@ Particularidades:
 Para cada protegida OSF: la vía no y K sí, **candidata a veto**: se diagnostica con el record y la imagen si existe;
 **no veta sola**, lleva el sensor a DECIDE NICOLÁS. Ni la vía ni K: se lista. La vía sí y K no: no puede ocurrir (K
 publica todas), y si ocurre es un defecto del lector. Recall de la vía por sensor, **por volcán y sin Láscar** (44
-protegidas no Láscar en 375, 7 en 1 km, 0 en 750).
+protegidas no Láscar en 375, 6 en 1 km, 0 en 750).
 
 ### 5.3 Magnitud partida por cenit (informa; en F26 es además la M de cada regla)
 
@@ -305,9 +331,13 @@ n 12, −0,50 VIIRS 375 n 53, −0,81 VIIRS 750 n 39, fuera del barajado; cerca 
 1. Razón vía/MIROVA y K/MIROVA por pasada pareada (los dos publican, VRP mayor que 0): mediana con IC por bootstrap de
    noches, por tramo de 10° de cenit y por volcán. En R25, sólo cota (§4.3), con el control C-cenit contra `SatZen`.
 2. Spearman de la razón contra el cenit con 200 barajados dentro del sensor (semilla 172; instrumento de `s03_estratos.py`).
-3. Razón doble dentro de la noche con el veredicto de V375-E §5.3 aplicado a los tres sensores (REPRODUCE LA CURVA si el
-   IC contiene 1 y la mediana está en [0,8; 1,25]; CAE MÁS QUE MIROVA si queda entero bajo 1; CAE MENOS si entero sobre
-   1; NO RESUELTO; SIN SUSTRATO con menos de 8 noches).
+3. Razón doble dentro de la noche con el veredicto de V375-E §5.3 aplicado a los tres sensores, con sus seis nombres y
+   en este orden: SIN SUSTRATO con menos de 8 noches en la lectura o en el nulo; NULO SESGADO si el nulo no contiene 1;
+   CAE MÁS QUE MIROVA si el IC de la mediana queda entero bajo 1; CAE MENOS si queda entero sobre 1; REPRODUCE LA CURVA
+   si lo contiene y la mediana está en [0,8; 1,25]; NO RESUELTO en otro caso (`s170-v375e-lector:
+   experiments/_s162_v375/PREREGISTRO_E.md` §5.3; extracto en `experiments/_s173_aud/vpr/cita_v375e_s53.txt`; VPR2-13).
+   En V375-E la curva retrospectiva sólo informa (§9.7, fila (d)); aquí CAE MÁS QUE MIROVA lleva a DECIDE NICOLÁS (§8.1
+   fila 4): desviación conservadora, declarada en el §5.6.
 - **Límite**: Chillán no erupcionaba en F26 ni en R25; la curva fuera de muestra es sobre todo la de Láscar.
 
 ### 5.4 Lectura B: paridad absoluta contra MIROVA (informa)
@@ -343,7 +373,10 @@ protegida que K publica, su tasa en negativos limpios no supera la de K (cotas s
 | V375-E §5.4 | retrospectiva **y** sombra | sólo la parte retrospectiva | la sombra la lee su propio lector; este veredicto no la reemplaza |
 | posición en VIIRS 375 | cercano decide (sombra) | cercano decide y radiante se informa con la misma regla; si difieren, techo DECIDE NICOLÁS | VPR172-08 |
 | V750-A | borrador | se aplica sólo si está sellado con verificador antes de D2; si no, techo DECIDE NICOLÁS | VPR172-06 |
-| pasadas de §3.1 (b) | (no existía) | se informa con y sin ellas; si el veredicto cambia, DECIDE NICOLÁS | VPR172-02 |
+| pasadas de §3.1 (b) | (no existía) | se informa con y sin ellas; si el veredicto cambia, DECIDE NICOLÁS | VPR172-02, VPR2-01 |
+| SIN SUSTRATO de P2 en VIIRS 375 | V375-E §9.7 (b): CUMPLE | SIN PODER FUERA DE MUESTRA (fila 5 del §8.1) | el mismo nombre para los tres sensores; VPR2-02 |
+| SIN SUSTRATO y BLOQUEA de P2 en VIIRS 750 | V750-A §6.2 pide «GANA o EMPATE (no PIERDE ni BLOQUEA)» y no nombra SIN SUSTRATO | se leen como en D-45 (`regla_signos_p2` de `evaluar_d25` blob `1dbabf65`): SIN SUSTRATO va a la fila 5 y BLOQUEA a la fila 4 | la regla de V750-A no dice qué hacer; VPR2-02 |
+| curva de cenit CAE MÁS en la retrospectiva | informa (V375-E §9.7, fila (d)) | DECIDE NICOLÁS (§8.1 fila 4) | conservador: una caída peor que la de MIROVA no queda escondida; VPR2-13 |
 | Tupungatito y NOAA-21 | en la población | Tupungatito desde el 2026-02-23 y fuera de R25; NOAA-21 `sin_info` | la referencia no los cubre |
 
 ---
@@ -352,17 +385,17 @@ protegida que K publica, su tasa en negativos limpios no supera la de K (cotas s
 
 | control | qué tiene que dar | si falla |
 |---|---|---|
-| **C-via** | F26 y DM: 100 % de los records de VIA con `via_codigo_mirova` True, como MOD-D §8.6. R25: un record sin la marca (`sin_grilla`, `sin_mxd03`, `geo_distinta`) sale **de los dos brazos** a SIN DATO y se lista; si es una protegida OSF que K publica, **veta** (lleva a DECIDE NICOLÁS, como toda candidata OSF); más de 10 % SIN DATO en una clase cae (el `UMBRAL_COBERTURA` de `leer_sombra_v375e.py` l. 85) | INDECIDIBLE en ese sensor y tramo; se arregla y se repite el trozo |
-| **C-cobertura** (A108) | pasadas de VIA contra K por volcán, día y sensor, antes de mirar nada. Las que faltan en VIA por la regla de cobertura de la vía (`mirova_v750_codigo.py` l. 798 a 808: menos de 100 píxeles a 45 km o el más cercano a más de 5 km; hallazgo 171-01, descarte sin record) van a SIN DATO en los dos brazos. Una protegida SIN DATO que K publica veta (como `leer_sombra_v375e.py` l. 573). Más de 10 % SIN DATO en una clase que decide, cae. Toda alerta o bajo 1 MW de la tabla sin pasada nuestra a ±120 s se lista | trozo cortado por NASA (A64): se repite una vez con la misma ventana; un trozo que falla dos veces deja sus pasadas en SIN DATO, en la primera línea del resultado, y cuentan para el 10 % |
-| **C-K** | K-gemelo contra K de disco en DM, Láscar y Chillán en F26 y tres días de cada otro volcán en F26: **misma publicación en todas las pasadas** y `pc.vrp_mw` a 0,001 MW, salvo pasadas nombradas con su causa escrita antes de leer F26 (por ejemplo un empate de `argsort` entre CPU, S152, mostrado en el record). Sin tolerancia porcentual: el 1 % es del tamaño del efecto (en F26-V de 375, 27 pasadas contra 48 bloques donde K yerra; V375-E l. 66 a 68) | K de disco no sirve: INDECIDIBLE hasta correr K entero con el código del tag |
-| **C-montaje** | en DM la vía reproduce, pasada por pasada, lo que midieron los A/B donde el código es el mismo: V de MOD-D fase 4 (máscara, VRP a 0,001 MW, clase), la vía de V375-E (lectura lejana) y el brazo de V750-B con la ROI elegida (banda de triangulación de V750-A §4.1). Antes de correr se lista `git diff` del código de la vía entre cada tag y el del despacho y se escriben las diferencias esperadas | cada diferencia se explica antes de leer F26 y R25; una no explicada deja todo INDECIDIBLE |
+| **C-via** | F26 y DM: 100 % de los records de VIA con `via_codigo_mirova` True, como MOD-D §8.6. R25: un record sin la marca (`sin_grilla`, `sin_mxd03`, `geo_distinta`) sale **de los dos brazos** a SIN DATO y se lista; si es una protegida OSF que K publica, **es candidata a veto (fila 4 del §8.1: DECIDE NICOLÁS, como toda candidata OSF)**; más de 10 % SIN DATO en una clase cae (el `UMBRAL_COBERTURA` de `leer_sombra_v375e.py` l. 85) | INDECIDIBLE en ese sensor y tramo; se arregla y se repite el trozo |
+| **C-cobertura** (A108) | pasadas de VIA contra K por volcán, día y sensor, antes de mirar nada. Las que faltan en VIA por la regla de cobertura de la vía (`mirova_v750_codigo.py` l. 798 a 808: menos de 100 píxeles a 45 km o el más cercano a más de 5 km; hallazgo 171-01, descarte sin record) van a SIN DATO en los dos brazos. Una protegida SIN DATO que K publica: en F26 (tabla), fila 2 del §8.1 (NO SE SOSTIENE), como `leer_sombra_v375e.py` l. 573 del tag `s170-v375e-lector` (l. 612 en `s172-v375e-lector-resellado`); en R25 (OSF), candidata a veto, fila 4 (DECIDE NICOLÁS); VPR2-03. Más de 10 % SIN DATO en una clase que decide, cae. Toda alerta o bajo 1 MW de la tabla sin pasada nuestra a ±120 s se lista | trozo cortado por NASA (A64): se repite una vez con la misma ventana; un trozo que falla dos veces deja sus pasadas en SIN DATO, en la primera línea del resultado, y cuentan para el 10 % |
+| **C-K** | K-gemelo contra K de disco en DM, Láscar y Chillán en F26 y tres días de cada otro volcán en F26: **misma publicación en todas las pasadas** y `pc.vrp_mw` a 0,001 MW, salvo pasadas nombradas con su causa escrita antes de leer F26: **a lo más 3 por sensor** (tope de R-15), cada una con el empate de `argsort` entre CPU (S152) mostrado en el record; si hacen falta más, C-K cae (VPR2-06). Sin tolerancia porcentual: el 1 % es del tamaño del efecto (en F26-V de 375, 1 % de 2.660 records son unas 27 pasadas contra los 48 bloques donde K yerra, §7; VPR2-12) | K de disco no sirve: INDECIDIBLE hasta correr K entero con el código del tag |
+| **C-montaje** | en DM la vía reproduce, pasada por pasada, lo que midieron los A/B donde el código es el mismo: V de MOD-D fase 4 (máscara, VRP a 0,001 MW, clase), la vía de V375-E (lectura lejana) y el brazo de V750-B con la ROI elegida (banda de triangulación de V750-A §4.1). Antes de correr se lista `git diff` del código de la vía entre cada tag y el del despacho y se escriben las diferencias esperadas. **Una diferencia está explicada sólo si** (a) un hunk listado de ese `git diff` la reproduce al re-correr esa pasada con el código del tag de origen, o (b) la pasada cambia de gránulo (`otro_granulo`); nada más cuenta como explicación (VPR2-09). En DM, K de disco no publica tres protegidas de la tabla (Nevados de Chillán MODIS 2026-10-12 07:20, 2,18 MW, y 2026-10-15 01:05, 1,72 MW; Puyehue-Cordón Caulle VIIRS 750 NOAA-21 2026-10-10 05:54, 1,19 MW; `experiments/_s173_aud/vpr/contar_f26_DM_salida.txt` l. 12, 13 y 38; seguimiento S-A del segundo verificador): DM no se lee como «K publica todas» | cada diferencia se explica con (a) o (b) antes de leer F26 y R25; una no explicada deja todo INDECIDIBLE |
 | **C-pareo** | Δt de los pares de R25 dentro de ±120 s y ninguna protegida OSF pareada a dos pasadas | se revisa el pareo; la ventana no se ensancha |
 | **C-cenit** | en R25, \|cenit nuestro − `SatZen`\| ≤ 2° | la curva de R25 no se lee |
-| **PLACEBO** | K × 1,2: P1 y P2 sin discordancias salvo las que explican los filtros del tablero que miran la magnitud (nota L7 de V750-A §7); M no da MEJORA | instrumento roto |
-| **Nulo de runner** | K-gemelo contra K de disco: **B = 0** en P2 salvo las pasadas nombradas de C-K. «SIN SUSTRATO» o «EMPATE» no bastan: los da también un instrumento muerto. Control de que el nulo puede fallar: el mismo cálculo sobre K-gemelo contra PLACEBO tiene que dar B mayor que 0 o M distinta | idem |
+| **PLACEBO** | K × 1,2: P1 y P2 sin discordancias salvo las que explican los filtros del tablero que miran la magnitud (nota L7 de V750-A §7); en MODIS y VIIRS 375, M **la de D-28** (MEJORA sólo si d **y** d′ dan MEJORA, con `comparar_con_ganancia`) no da MEJORA; en VIIRS 750, el comparador de V750-A §6.2 separa la vía de K × 1,2. Con d sola el placebo puede dar MEJORA legítima cuando K está bajo MIROVA (con K/MIROVA 0,65, K × 1,2 = 0,78 da d = −0,079), por eso no se usa d sola (`experiments/_s157_prereg_d25/ADENDA_PLACEBO.md` l. 15 y 55; VPR2-04) | instrumento roto |
+| **Nulo de runner** | K-gemelo contra K de disco: **B = 0** en P2 salvo las pasadas nombradas de C-K (con su mismo tope de 3 por sensor, R-15). «SIN SUSTRATO» o «EMPATE» no bastan: los da también un instrumento muerto. Control de que el nulo puede fallar: el mismo cálculo sobre K-gemelo contra PLACEBO tiene que dar B mayor que 0 o M distinta | idem |
 | **Nulo del lector** | K contra K da 0 diferencias; una mutación que pierde una protegida da veto; 50 negativos con un cúmulo de cumbre inyectado suben P2 en 50 (MOD-D §8.5) | el lector no sale |
 | **Controles de cenit** | los de V375-E §4 (pares a menos de 5° con razón doble que contiene 1; ganancia pareja que no la mueve; ganancia creciente con el cenit que la sube) | la curva no se lee |
-| **Candado** | sha256 de cada archivo del lector, de las referencias y de `frontend/index.html` contra el manifiesto del sello, **antes** de correr (lección S171) | no se corre |
+| **Candado** | sha256 **con fin de línea LF** (contenido con `\r` quitado) de cada archivo del lector, de las referencias y de `frontend/index.html` contra el manifiesto del sello, **antes** de correr (lección S171; §11) | no se corre |
 
 Preguntas del instrumento (GUIA §3): (1) si la vía no corriera, C-via da 0 %; si el lector estuviera roto, el nulo del
 lector y el placebo lo ven; si K de disco no fuera K de hoy, C-K lo ve. (2) Si los artefactos estuvieran vacíos,
@@ -373,35 +406,50 @@ la lectura (un vigilante ciego da verde).
 
 ## 7. Poder (antes de leer)
 
-**P1 con «cero perdidas».** Cota superior al 95 % de la tasa de pérdida compatible con 0 de n (regla del tres), con las
-cifras que reprodujo el verificador (`k_en_tramos_salida.txt`, `osf_protegidas_salida.txt`):
+**Con qué se contó.** Las cifras de esta sección las contó el segundo verificador (S173) con sus scripts
+`experiments/_s173_aud/vpr/contar_f26.py` y `contar_osf.py` (salidas `contar_f26_F26_salida.txt`,
+`contar_f26_F26M_salida.txt`, `contar_f26_F26M_bloques_modis.txt`, `contar_osf_vent_salida.txt`) sobre un `git
+archive` de `origin/main` `47cdc446f`, con el predicado de `frontend/index.html` (blob `b618b6cc…`), la tabla consolidada
+del worktree (blob `00feeebc…`; sha256 en disco, con CRLF, `ab1a208c…`) y el OCR (blob `741fea06…`; sha256 en disco
+`d4ad8c44…`); reglas: tabla sola, noche por elevación solar, SN, lectura A, ±120 s, Tupungatito desde el 02-23. Esa
+referencia **no es** la congelada del §4.1 (consolidado `cb91eb50…`): antes del sello el autor las recalcula con la
+congelada, sobre `origin/main` exportado, y escribe aquí el commit y el sha256 LF de lo contado (§11; VPR2-14).
+
+**P1 con «cero perdidas».** Cota superior al 95 % de la tasa de pérdida compatible con 0 de n (regla del tres). La cota
+supone pasadas independientes, y en Láscar no lo son (noches casi consecutivas de un mismo régimen, la misma
+dependencia que D-45 reconoce al sortear por bloque): **es un piso de la cota real**, no la cota (VPR2-14).
 
 | tramo y sensor | protegidas | por volcán | cota con 0 perdidas | lo que K hace |
 |---|---|---|---|---|
 | F26-M | 9 | Láscar 9 | 33 % | pierde 1 (Láscar 02-16 01:20, mirada por nombre, §3.1 b) |
 | F26-V, VIIRS 375 | 26 | Láscar 26 | 11,5 % | pierde 0 |
 | F26-V, VIIRS 750 | 30 | Láscar 29, Isluga 1 | 10 % | pierde 0 |
-| R25, 1 km | 162 | Láscar 155, Planchón-Peteroa 6, Villarrica 1 | 1,9 % (sin Láscar: 7, 43 %) | pierde 0 con record |
+| R25, 1 km | 161 | Láscar 155, Planchón-Peteroa 6 | 1,9 % (sin Láscar: 6, 50 %) | pierde 0 con record (1 sin record a ±120 s) |
 | R25, 375 m | 317 | Láscar 273, PCC 28, Planchón-Peteroa 14, Isluga 2 | 0,9 % (sin Láscar: 44, 6,8 %) | pierde 0 |
 | R25, 750 m (5 MW o más) | 17 | Láscar 17 | 18 % | pierde 0 |
 
 Consecuencias que se escriben ahora: casi toda la evidencia de P1 es Láscar; la única evidencia fuera de muestra sobre
-otros volcanes es VIIRS 375 de 2025 (44 protegidas OSF de tres volcanes) y MODIS de 2025 (7). Como K publica todas las
+otros volcanes es VIIRS 375 de 2025 (44 protegidas OSF de tres volcanes) y MODIS de 2025 (6, de Planchón-Peteroa). Como K publica todas las
 del OSF, P1-OSF sólo puede encontrar que la vía pierde algo que K ve.
 
-**P2 (signos por bloque, D-45).** Bloques noche-volcán donde K yerra en F26 (tabla): **MODIS 6** (5 negativos
-publicados, 2 bajo 1 MW perdidos, 1 protegida perdida), **VIIRS 375 48**, **VIIRS 750 18**. Bajo 1 MW: 158 en 375
+**P2 (signos por bloque, D-45).** Bloques noche-volcán donde K yerra en F26 (tabla): **MODIS (febrero) 6** de P2 (5
+negativos publicados y la noche de Láscar del 02-11 con 2 bajo 1 MW perdidas), más el bloque de la protegida perdida del
+02-16 (7 en total, `contar_f26_F26M_salida.txt` y `contar_f26_F26M_bloques_modis.txt`), **VIIRS 375 48**, **VIIRS 750
+18** (`contar_f26_F26_salida.txt`, febrero y marzo). Bajo 1 MW: 158 en 375
 (tras SN), 25 en 750, 5 en MODIS. Para MODIS: con 6 bloques, GANA exige que la vía arregle 6 de 6 (p = 1/64) o 5 con el
 sexto empatado (2/64); con un bloque en contra ya no llega. En el censo de MOD-D la vía arregló alrededor del 90 % de los
 errores de K (neto −44, B 53): en febrero eso da B de 3 a 7. **Resultado esperado de MODIS: SIN SUSTRATO o EMPATE, o sea
-SIN PODER** (§8). Sin las tres pasadas de §3.1 (b), F26-M queda con 5 bloques donde K publica un negativo limpio y
-ninguno donde K pierde una alerta. VIIRS 375 tiene poder razonable; VIIRS 750, poco.
+SIN PODER** (§8). Sin las cuatro pasadas MODIS de §3.1 (b), F26-M queda con **4 bloques** (Puyehue-Cordón Caulle
+02-01, 02-04, 02-07 y 02-28), todos negativos que K publica, y ninguno donde K pierde una alerta: con B de 4 o menos la
+regla de signos da SIN SUSTRATO por construcción (`MAX_B_SIN_SUSTRATO_P2 = 4`, `evaluar_d25` blob `1dbabf65` l. 149,
+según el segundo verificador, `experiments/_s173_aud/vpr/INFORME.md` §5; VPR2-01). VIIRS 375 tiene poder razonable;
+VIIRS 750, poco.
 
 Antes de leer, el sorteo de etiquetas dentro de cada estrato (volcán × tramo de cenit) sobre K contra K dice qué fracción
 de barajados cumple «GANA o EMPATE» por azar (GUIA §3b fila 7).
 
 **Antes del sello** se recalculan estas cifras con la referencia congelada, sobre `origin/main` exportado, y se escriben
-aquí con su sha.
+aquí con el commit de K y el sha256 LF de la referencia (ver «Con qué se contó», arriba).
 
 ---
 
@@ -412,10 +460,10 @@ aquí con su sha.
 | orden | condición | nombre del veredicto |
 |---|---|---|
 | 1 | algún control del §6 en rojo para ese sensor | **INDECIDIBLE (CONTROLES)** |
-| 2 | en F26 la vía pierde una protegida de la tabla que K publica (incluida una SIN DATO que K publica) | **NO SE SOSTIENE: PIERDE PROTEGIDA [volcán, hora]** |
+| 2 | en F26 la vía pierde una protegida de la tabla que K publica (incluida una SIN DATO de la tabla que K publica; una SIN DATO del OSF en R25 va a la fila 4, VPR2-03) | **NO SE SOSTIENE: PIERDE PROTEGIDA [volcán, hora]** |
 | 3 | la regla del sensor da NO ADOPTAR o «no cumple» por P2 PIERDE (o, en 750 con V750-A sellado, por M fuera de banda) en F26 | **NO SE SOSTIENE: PEOR QUE K** |
 | 4 | cualquiera de: la regla da DECIDE NICOLÁS o BLOQUEA; P1b con alguna; M EMPEORA; candidata a veto en P1-OSF; pérdida sólo OCR que K publica; la curva de la vía CAE MÁS QUE MIROVA; el veredicto cambia sin las pasadas de §3.1 (b); en 375, cercano y radiante dan veredictos distintos; en 750, V750-A no sellado a tiempo | **DECIDE NICOLÁS** (con la lista) |
-| 5 | la regla da SIN SUSTRATO en F26 (y ninguna condición de la fila 4) | **SIN PODER FUERA DE MUESTRA** |
+| 5 | la regla da SIN SUSTRATO en F26 **o, en VIIRS 375 y 750, P2 contra K da SIN SUSTRATO aunque el código del §9.7 de V375-E lo mapee a CUMPLE** (en 750, SIN SUSTRATO y BLOQUEA se leen como en D-45, `regla_signos_p2`; §5.6), y ninguna condición de la fila 4 | **SIN PODER FUERA DE MUESTRA** |
 | 6 | la regla da PROPONER ADOPCIÓN / cumple en F26, y P1-OSF sin candidatas | **NO SE CONTRADICE FUERA DE MUESTRA (alertas: [volcanes con protegidas medidas]; silencio: [volcanes con negativos limpios]; F26-V: NOAA-20 y Suomi NPP oblicuo)** |
 
 La fila 4 va antes que la 5 para que una pérdida, un P1b o una curva que cae más que MIROVA nunca queden bajo «sin poder»
@@ -506,7 +554,8 @@ DATO: si coinciden, bajar a 4).
 
 ### 10.4 Costo
 
-Tasa de K medida: 2,39 min de runner por volcán-día con sobrecarga (run 39125546355: 254,2 h, 176 jobs, 580 días × 11,
+Tasa de K medida: 2,39 min de runner por volcán-día con sobrecarga (run 39125546355: 254,2 h, 176 jobs de reproceso; el run tiene 178 en total, probablemente 2 de armado, seguimiento S-D
+del segundo verificador, `experiments/_s173_aud/vpr/run_39125546355.json`; 580 días × 11,
 pared 32,3 h). Factor de la vía 1,06 a 1,25 (SIN DATO para VIIRS; `experiments/_s172_capacidad_nrt/INFORME.md` §4 acota
 sólo MODIS; lo miden D1 y la sombra). Chillán a su tasa propia, de 4,76 min por volcán-día o más.
 
@@ -535,33 +584,49 @@ apenas termine V750-B, y VIIRS 750 después. Apagar un sensor salta su proceso p
 - Manifiesto con sha256 de: `leer_retro.py` y lo que importa (`evaluar_f4.py` del candado de MOD-D, `evaluar.py` de
   V375-E con sha256 LF `2126b743…`, el analizador de V750-A si se aplica, `evaluar_d25.py` blob `1dbabf65`,
   `scripts/clase_mirova.py`, `scripts/banco_paridad.py`, `scripts/referencia_mirova_unificada.py`), las referencias
-  congeladas, el OSF (`0863c240…`), `frontend/index.html` del tag y los dos perfiles.
+  congeladas, el OSF (`0863c240…`), `frontend/index.html` del tag, los dos perfiles y, si se aplica como anexo, el
+  texto de V750-A en `aa5583646` (§5.1).
+- **Todo sha256 del manifiesto, y el de este documento, se calcula sobre el contenido normalizado a LF** (`tr -d '\r' <
+  archivo | sha256sum`), como ya hace el lector de V375-E (`2126b743…`). Con `core.autocrlf` el mismo contenido da otro
+  sha256 en disco (la tabla consolidada: `ab1a208c…` en el worktree, `c0f18b6a…` por `git show`, mismo blob
+  `00feeebc…`; seguimiento S-B del segundo verificador). El sha256 LF de este archivo en la ronda 3 queda en el commit
+  que la sube; el del sello va en el mensaje del commit y en el tag del sello, no dentro del archivo (no puede
+  contenerse a sí mismo).
 - El lector con TDD (rojo antes de verde, anotado en el commit), batería sintética que cubra cada fila del §8.1 y cada
   regla del §5.6, mutaciones atrapadas por aserción con control de caída, y verificador limpio de otro modelo sobre el
   lector y sobre este documento.
-- `git diff <commit del sello> -- PREREGISTRO_RETRO_PAQUETE.md` vacío al leer; lo agregado después va rotulado *post hoc*.
-- Cifras del §7 recalculadas sobre `origin/main` exportado y escritas.
+- `git diff <commit del sello> -- PREREGISTRO_RETRO_PAQUETE.md` vacío al leer, y su sha256 LF igual al del tag del
+  sello; lo agregado después va rotulado *post hoc*.
+- Cifras del §7 recalculadas sobre `origin/main` exportado con la referencia congelada y escritas con el commit de K y
+  el sha256 LF de la referencia.
+- Excepciones nombradas de C-K escritas antes de leer F26, con su tope (R-15).
 
 ---
 
 ## 12. Qué decide Nicolás (con recomendación)
 
+Cada fila se contesta con una sola palabra, «sí» o «no», y «sí» acepta la recomendación de esa fila. Un «sí a todo»
+acepta las quince recomendaciones (ronda 3: R-2, R-3, R-6, R-8, R-11 y R-12 reescritas para que «sí» tenga una sola
+lectura, VPR2-08; las otras ocho llevadas a la misma forma «¿Aceptas…?», para que ninguna recomendación sea «no»; R-15
+nueva, VPR2-06).
+
 | # | pregunta | recomendación | por qué |
 |---|---|---|---|
-| R-1 | Protegida OSF: ¿distancia del píxel más caliente o `Max_Dist`? | **Píxel más caliente**; `Max_Dist` se informa | `Max_Dist` mide al píxel más lejano: una cola larga sacaría un cúmulo de cráter |
-| R-2 | K: ¿de disco con control ampliado (D3, ~13 a 16 h) o re-corrido entero (~180 h)? | **De disco con control** | dos mediciones previas de K re-corrido = publicado; D3 cubre Chillán, donde cambió el código |
-| R-3 | Posición de VIIRS 750 si V750-A no eligió | **Radiante decide**, cercano y pico informan | es lo que hace hoy la vía |
-| R-4 | ¿Partir la tanda 1 por sensor? | **No**, salvo que quieras MODIS y VIIRS 375 antes del 11-06 | 3 a 4 días a cambio de 30 a 40 h y un despacho más |
-| R-5 | ¿El OSF puede vetar solo? | **No: lleva a DECIDE NICOLÁS** | no es el NRT y está filtrado (A105) |
-| R-6 | ¿Con qué lectura B se dice «a la par de MIROVA»? | la del §5.4, siempre con la lista de volcanes | único modo con números ya existentes (A115) |
-| R-7 | Banda [0,9; 1,1] de V750-A en F26-V | **Decide, si V750-A está sellado** | cambiarla al leer otra ventana sería A95 |
-| R-8 | Febrero y marzo de MODIS | **Febrero decide, con y sin las tres pasadas de §3.1 (b); marzo control** | marzo es tramo C de MOD-D; febrero está expuesto por nombre |
-| R-9 | Tupungatito | **F26 desde el 02-23; fuera de R25** | la referencia no lo cubre |
-| R-10 | ¿La noche (§5.5) decide? | **No, informa** | las reglas y el criterio son por pasada y sensor |
-| R-11 | ¿Un «NO SE CONTRADICE» con alertas sólo de Láscar te basta para contar ese sensor como evidencia en la Compuerta B? | **Sí, con el alcance escrito y junto con la sombra**; no como prueba de los volcanes débiles | no hay más alertas fuera de muestra; inventar un mínimo no agrega información |
-| R-12 | V750-A no sellado antes de D2: ¿esperar su sello o correr con techo DECIDE NICOLÁS en 750? | **Correr igual**, con techo | MODIS y 375 no dependen de V750-A; la lectura de 750 queda para cuando se selle |
-| R-13 | VIIRS 375: si cercano y radiante difieren | **DECIDE NICOLÁS con los dos veredictos** | lo que publica el record hoy es radiante; adoptar cercano pide un cambio de código que esta prueba no prueba |
-| R-14 | Compuertas por sensor (§8.2) en vez de «los tres o ninguno» para esta prueba | **Sí**; «los tres o ninguno» se queda en la Compuerta B | una compuerta inalcanzable posterga sin medir |
+| R-1 | ¿Aceptas que la protegida OSF se defina con la distancia del píxel más caliente, y que `Max_Dist` sólo se informe? | **Sí** | `Max_Dist` mide al píxel más lejano: una cola larga sacaría un cúmulo de cráter |
+| R-2 | ¿Aceptas usar K de disco con el control ampliado D3 (~13 a 16 h) en vez de re-correr K entero (~180 h)? | **Sí** | dos mediciones previas de K re-corrido = publicado; D3 cubre Chillán, donde cambió el código; si C-K cae, se re-corre K entero igual (§6) |
+| R-3 | ¿Aceptas que, si V750-A no eligió posición antes de D2, en VIIRS 750 decida radiante y cercano y pico sólo informen? | **Sí** | es lo que hace hoy la vía |
+| R-4 | ¿Aceptas despachar la tanda 1 entera, sin partirla por sensor? | **Sí** | partirla adelanta MODIS y VIIRS 375 3 a 4 días a cambio de 30 a 40 h y un despacho más; «no» quiere decir partirla (§10.4, alternativa) |
+| R-5 | ¿Aceptas que una pérdida contra el OSF no vete sola y lleve el sensor a DECIDE NICOLÁS? | **Sí** | no es el NRT y está filtrado (A105) |
+| R-6 | ¿Aceptas que «a la par de MIROVA» se diga sólo con la lectura B del §5.4 (ninguna protegida perdida que K publica, tasa en negativos limpios no mayor que la de K, razón en [0,8; 1,25]), siempre con la lista de volcanes? | **Sí** | único modo con números ya existentes (A115) |
+| R-7 | ¿Aceptas que la banda [0,9; 1,1] de V750-A decida en F26-V si V750-A está sellado? | **Sí** | cambiarla al leer otra ventana sería A95 |
+| R-8 | ¿Aceptas que en MODIS decida febrero, leído con y sin las cuatro pasadas MODIS de §3.1 (b), y que marzo sea sólo control? | **Sí** | marzo es tramo C de MOD-D y lo tocó la V2 de K; febrero está expuesto por nombre |
+| R-9 | ¿Aceptas que Tupungatito entre a F26 desde el 02-23 y quede fuera de R25? | **Sí** | la referencia no lo cubre |
+| R-10 | ¿Aceptas que la noche del operador (§5.5) sólo informe y no decida? | **Sí** | las reglas y el criterio son por pasada y sensor |
+| R-11 | ¿Aceptas que un «NO SE CONTRADICE» con alertas sólo de Láscar cuente como evidencia de ese sensor en la Compuerta B, con su alcance escrito y junto con su sombra? | **Sí** | no hay más alertas fuera de muestra; inventar un mínimo no agrega información. Ese veredicto no prueba nada sobre los volcanes de señal débil (§1) |
+| R-12 | ¿Aceptas despachar D2 aunque V750-A no esté sellado, con techo DECIDE NICOLÁS en VIIRS 750? | **Sí** | MODIS y 375 no dependen de V750-A; la lectura de 750 queda para cuando se selle. «No» quiere decir esperar el sello de V750-A |
+| R-13 | ¿Aceptas que en VIIRS 375, si cercano y radiante dan veredictos distintos, el sensor vaya a DECIDE NICOLÁS con los dos veredictos? | **Sí** | lo que publica el record hoy es radiante; adoptar cercano pide un cambio de código que esta prueba no prueba |
+| R-14 | ¿Aceptas compuertas por sensor (§8.2) en vez de «los tres o ninguno» para esta prueba, dejando «los tres o ninguno» en la Compuerta B? | **Sí** | una compuerta inalcanzable posterga sin medir |
+| R-15 | ¿Aceptas un tope de **a lo más 3 pasadas por sensor** como excepciones nombradas de C-K y del nulo de runner, cada una con el empate de `argsort` mostrado en el record, y que C-K caiga si hacen falta más? | **Sí** | un control con excepciones sin tope no puede fallar (A110, A116; VPR2-06). El 3 lo propuso el segundo verificador como ejemplo y no sale de una medición (A115): por eso lo decides tú; «no» deja la pregunta abierta y C-K sin tope no se puede sellar |
 
 ---
 
@@ -592,7 +657,9 @@ el día, ni Chillán en erupción, ni los 34. No adopta nada.
 
 ---
 
-## 15. Hallazgos del verificador y su tratamiento
+## 15. Hallazgos de los verificadores y su tratamiento
+
+**Primer verificador** (ronda 2; Sonnet 5.5, SELLABLE CON CAMBIOS):
 
 | hallazgo | grav. | tratamiento |
 |---|---|---|
@@ -617,6 +684,31 @@ el día, ni Chillán en erupción, ni los 34. No adopta nada.
 | S-4 trozo de Chillán que falla dos veces | 2 | sus pasadas a SIN DATO en la primera línea y cuentan para el 10 % (§6) |
 | S-5 nada sobre las grillas de los 34 | 2 | §0 y §8.1 lo dicen; queda para la Compuerta B |
 | S-6 hito de NOAA-21 en el script | 1 | no se corrige aquí (fuera de alcance); se usa la medida del 04-03 |
+
+**Segundo verificador** (ronda 3; `experiments/_s173_aud/vpr/INFORME.md`, Fable 5.1, SELLABLE CON CAMBIOS; sus §3 bis
+con los 14 cambios de texto):
+
+| hallazgo | grav. | tratamiento |
+|---|---|---|
+| VPR2-01 inventario (b) incompleto (Lastarria MODIS 02-24 07:05 y siete pasadas de 2025) | 3 | §3.1 (b): Lastarria agregada como cuarta pasada MODIS («la cuarta es un negativo que K publica»; «exactamente» quitado) y viñeta de 2025; lectura con y sin (b) extendida a R25; §7: sin (b) quedan 4 bloques (Puyehue 02-01, 02-04, 02-07, 02-28) y la regla da SIN SUSTRATO por construcción; R-8 dice «cuatro» |
+| VPR2-02 SIN SUSTRATO de P2 en 375 cumple en §9.7 y cae en la fila 5 | 2 | §8.1 fila 5 con el texto propuesto; dos filas nuevas en §5.6 (375: CUMPLE pasa a SIN PODER; 750: SIN SUSTRATO y BLOQUEA como en D-45, `regla_signos_p2`) |
+| VPR2-03 «veta» con dos significados | 2 | C-cobertura: F26 fila 2, R25 candidata a veto (fila 4); C-via R25: «candidata a veto (fila 4)»; fila 2 del §8.1 precisa que la SIN DATO es de la tabla; cita de `leer_sombra_v375e.py` con la línea de cada tag (573 y 612) |
+| VPR2-04 placebo con d solo da MEJORA | 2 | §6 PLACEBO: M de D-28 (d y d′, `comparar_con_ganancia`) en MODIS y 375; en 750, el comparador de V750-A §6.2 separa la vía de K × 1,2; ejemplo aritmético escrito |
+| VPR2-05 MODIS OSF 161, no 162 | 2 | §4.2 (161; 160 de 161; las cuatro diurnas con 0, tres de 1 MW o más, con sus horas), §5.2 (6 en 1 km), §7 (fila R25 1 km: 161, sin Láscar 6, 50 %; «MODIS de 2025 (6)»); cifras de `contar_osf_vent_salida.txt` |
+| VPR2-06 excepciones de C-K y del nulo sin tope | 2 | §6 C-K y nulo: tope de a lo más 3 pasadas por sensor con el empate mostrado; si hacen falta más, C-K cae. El número 3 es una decisión: **R-15**, recomendación sí |
+| VPR2-07 texto de V750-A sin commit ni líneas | 2 | §5.1 fila VIIRS 750: `aa5583646`, §6 l. 217 a 243, §6 bis l. 174 a 196, §6 ter l. 197 a 216; diff si se sella en otro commit; §11 lo agrega al manifiesto |
+| VPR2-08 seis R-n no se contestan con «sí» | 2 | R-2, R-3, R-6, R-8, R-11 y R-12 reescritas como «¿Aceptas …?» con recomendación «Sí»; en R-11 la frase de los volcanes débiles pasó a «por qué»; las otras ocho llevadas a la misma forma (ninguna recomendación queda en «no», para que un «sí a todo» no se lea al revés en R-4, R-5 y R-10); nota al inicio del §12 |
+| VPR2-09 C-montaje sin criterio de «explicada» | 2 | §6 C-montaje: explicada sólo por (a) un hunk listado del `git diff` que la reproduce al re-correr con el código del tag de origen, o (b) `otro_granulo` |
+| VPR2-10 marzo omite la V2 de K; falta D25 | 1 | §3.1: fila de D25 y frase «Marzo de 2026 lo tocan MOD-D y la V2 de K (control), sólo en MODIS» |
+| VPR2-11 composición por satélite no se reproduce | 1 | §3.3: cifras del segundo verificador con las reglas escritas (790 / 111; 162 / 702; 895; 844 / 49; 198 / 656), `contar_f26_F26_salida.txt`; cenit del primer verificador rotulado y a recalcular |
+| VPR2-12 dos citas sin localizar | 1 | §6 C-K: quitada «V375-E l. 66 a 68», el 27 derivado del 1 % de 2.660 y los 48 bloques del §7; §1: «0,996 a 0,998» con l. 28 |
+| VPR2-13 curva de cenit incompleta y desviación no declarada | 1 | §5.3 con los seis nombres (NULO SESGADO, 8 noches en la lectura o en el nulo); §5.6: fila «CAE MÁS en retrospectiva: informa en V375-E, aquí DECIDE NICOLÁS, conservador» |
+| VPR2-14 regla del tres con pasadas dependientes; cifras sin sha | 1 | §7: la cota es un piso bajo independencia que en Láscar no se cumple; párrafo «Con qué se contó» con commit `47cdc446f`, blobs y sha256 de lo contado; el recálculo del autor con la referencia congelada sigue pendiente (§11) |
+| S-A K de disco en DM no publica tres protegidas | 2 | declarado en §6 C-montaje con las tres pasadas y `contar_f26_DM_salida.txt` l. 12, 13 y 38 |
+| S-B sha256 con CRLF | 1 | §11 y candado del §6: todo sha256 sobre el contenido normalizado a LF; el de este documento va en el commit y el tag del sello |
+| S-C prompt con CRLF | 1 | mismo patrón que S-B; sin cambio en el texto |
+| S-D 178 jobs en el run | 1 | §10.4: 176 de reproceso, 178 en total (`run_39125546355.json`, `n_jobs`) |
+| S-E disco D: bajo | 1 | sin cambio en el texto (operativo) |
 
 ---
 
