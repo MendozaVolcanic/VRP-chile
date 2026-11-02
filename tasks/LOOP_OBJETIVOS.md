@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 00:30 UTC (S172): plan de los 34 volcanes encargado; revisión del plan (devils-advocate)
+- **Decisión de Nicolás** (chat de S172), ante «¿Preparo un plan aparte para lanzar los 34 volcanes con K, con sombra
+  previa?»: «Sí, prepáralo». Plan encargado a un agente con `writing-plans` (`D:/vrp-trabajo/temporales/s172_plan_34/PLAN.md`);
+  usa la medición de capacidad del NRT (`D:/vrp-trabajo/temporales/s172_capacidad_nrt/`), también en curso, igual que la
+  proyección de la parada de V375-E (`D:/vrp-trabajo/temporales/s172_proyeccion_v375/`).
+- **Revisión del plan** (skill `devils-advocate`, tres rondas). Quedó en pie: (crítico) «cumplir objetivos» y «lanzar los
+  43» son dos decisiones distintas: grillas de MIROVA y referencia del scraper existen sólo para los 11 Tier A
+  (`grillas_mirova.yaml`: 11; consolidado: 11 volcanes), así que en los 34 la réplica no se puede medir y las vías vuelven
+  a K solas; (mayor) la parada de V375-E puede venir después del 2-dic porque exige 40 alertas sin Suomi NPP; V750 sigue
+  siendo el camino crítico (mergear la ROI el día de la lectura de V750-B y correr V750-A en paralelo con la sombra);
+  (menor) la guardia de MODIS terminará por plazo, no por 29 protegidas; el token es punto único de falla.
+- Estimación comunicada a Nicolás (no compromiso): MODIS en producción la primera o segunda semana de noviembre, V750 a
+  mediados de diciembre, V375 a mediados o fines de diciembre; los tres, segunda quincena de diciembre, realista enero de
+  2027. Recomendación: los 34 no esperan las vías (sombra con K desde fines de noviembre).
+- Corrección propia: el costo de la mini auditoría que dije (20 a 25 % semanal) era alto; medido hoy, cinco agentes
+  movieron la cuota de 1 a 3 %.
+
 ### 2026-11-02 00:03 UTC (S172): verificador del re-sellado SELLABLE CON CAMBIOS; Chillán en verificación; diurno espera
 - **Re-sellado de V375-E**, verificador limpio (Sonnet, alto; `D:/vrp-trabajo/temporales/ver_s172_relector/informe.md`):
   SELLABLE CON CAMBIOS. A1 a A4 CONFIRMADO con git real y perfiles de main `d3cd0b2ae` (encender MODIS con guardia en
