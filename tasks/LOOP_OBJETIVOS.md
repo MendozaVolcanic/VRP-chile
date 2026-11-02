@@ -569,6 +569,22 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 13:30 UTC (S173): resultados de VR, VPR, F1 y F2; verificadores V1 y V2 corriendo
+- **VR** (regla de reversión de MODIS, Fable): SELLABLE CON CAMBIOS, 12 cambios de texto (`experiments/_s173_aud/vr/`).
+  Peor: cita `CAMBIO_DETECTOR_MODIS_UTC`, que no existe; cotas (i)/(ii) aún «propuesta»; no dice qué hacer con una
+  protegida sin record de producción.
+- **VPR** (segundo verificador del pre-registro retro, Fable): SELLABLE CON CAMBIOS, 14 cambios; aplicados en la ronda 3
+  (`bf13d7aa2`, sha256 LF `62d8839b`), con R-15 nueva y R-1 a R-15 en forma «¿Aceptas…?». Falta recalcular §7 y §3.3
+  con la referencia congelada (el implementador lo está haciendo).
+- **F1** (censo del flag, Opus, declaró esfuerzo bajo): 42 consumidores; arreglos de S172 presentes; nuevo 161/162
+  (gravedad 3): el revert de B se lleva los arreglos que leen records de la vía. Verificador V1 (Fable) corriendo.
+- **F2** (integración, Opus): 205 (gravedad 4) el audit semanal del PR A cae con ValueError al primer VIA_MODIS con
+  alerta (bloquea A); 201 guard de B rojo con #932; 202 #932 rompe 16 de 32 pruebas de la ROI de V750-B. La sesión de
+  V750 reprodujo 202: V750-B de mañana no lee la grilla ni corre esas pruebas; arregla su rama tras #932 (filtrar a los
+  11 y fijar las 34). Decisión para Nicolás: los 34 quedan con `roi_v750: def` en V750-B (recomendación de V750: sí).
+  Verificador V2 (Fable) corriendo.
+- PR #932: CI `pytest` verde (5 min 13 s).
+
 ### 2026-11-02 12:21 UTC (S173): arranque; PR #932 abierto; cuatro agentes lanzados (MODIS F1/F2, regla de reversión, retro)
 - La tarea programada arrancó a las 04:51 UTC pero quedó detenida hasta las 12:16 UTC (hora del servidor), con toda
   probabilidad esperando una aprobación. Estado verificado contra el remoto: tag `s172-v375e-lector-resellado` →
