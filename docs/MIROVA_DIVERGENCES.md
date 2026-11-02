@@ -3,6 +3,15 @@
 > Documento vivo. Actualizar cuando se agregue alineamiento o se descubra nueva
 > divergencia. Estado al cierre 2026-04-29 (post-S27 análisis CSV consolidado).
 
+> ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde el merge del PR B (rama `claude/s172-modd-flip`, decisión de
+> Nicolás del 2026-10-31, tag `pre-s171-adopcion-modd`) MODIS corre la vía «código MIROVA» (`enable_modis_codigo_mirova:
+> true`, `pipeline/mirova_v750_codigo.py`): grilla de 1 km de MIROVA con la geolocalización del MxD03, su detector, su
+> fondo y la suma de todos los alertados. VIIRS 375 y VIIRS 750 siguen con K. Las divergencias de este catálogo que
+> describen el MODIS de producción como K (en particular D11 en su cara MODIS, D12, D21, D33 y D35) describen el
+> estado previo a S172 en MODIS: su texto se conserva y cada una lleva su marca. Para la vía, la referencia es D34 (el
+> código de MIROVA) y su port a MODIS. K de MODIS sigue corriendo como guardia (`pipeline/profiles/guardia_k_modis.yaml`)
+> con reversión pre-autorizada (marca S172 al inicio de `docs/MISSION.md`).
+
 ## Objetivo
 
 VRP-Chile busca ser un **clon operacional de MIROVA NRT** (objetivo 1) usando
@@ -1546,6 +1555,10 @@ Guard anti-revert: `tests/test_detection_anchor.py`. Resultados: det→cráter T
 
 ## D11 — ⚠️ **S157: la condición del cierre (banda 21 primaria) ya no rige en producción desde K (#850); ver la marca de abajo** · Sesgo topográfico de los paths MIR-absolutos (A69) — **CERRADA S114, CONDICIONADA S138** (el «irreducible a 1 km» y el «todos los ejes agotados» valen sólo bajo banda 21 primaria y compuerta de 3 K, D21 y D22, abiertas en este mismo catálogo; la «detección fiel a Coppola» es falsa en el código de hoy: la fórmula de los Tests 2 y 3 del paper no tiene condición de temperatura y `detection_context.py:532` la impone. Ver `docs/AUDIT_S138.md` §8 C2. No se reabre el frente far→summit por la vía espectral hasta consolidar D21/D22)
 
+> ⚠️ **S172 (A113)**: la cara MODIS de esta divergencia describe K. Desde el PR B MODIS de producción corre la vía
+> «código MIROVA» (marca S172 al inicio del catálogo); el far→summit MODIS se mide de nuevo sobre la vía, y lo que sigue
+> vale para la guardia K de MODIS. Texto conservado.
+>
 > ⚠️ **S160 (hallazgo 281, `experiments/_s160_audit/v4/INFORME.md` §3)**: el «en los datos desde la observación
 > del 2026-09-18» de la marca S157 que sigue ya no rige: #883 (2026-10-21) reprocesó con K el histórico de los 11
 > Tier A desde el 2025-02-15 (marca S160 del inicio de `docs/MISSION.md`).
@@ -1720,6 +1733,10 @@ El espejo MODIS sigue OFF (D12, gateado por el fix de magnitud fondo-local §2).
 
 ### D12 — MODIS Láscar pierde ~70/79 alertas por `distance_class` del píxel Salar (AUDIT_S106 P1.1) — ⚠️ **SECCIÓN CONGELADA EN S106/S108; leer primero la nota S125**
 
+> ⚠️ **S172 (A113)**: D12 es una pérdida de MODIS medida con detectores K o anteriores. Desde el PR B MODIS de
+> producción corre la vía «código MIROVA» (marca S172 al inicio del catálogo); si D12 sigue abierta se mide sobre la
+> vía, y la guardia K de MODIS conserva la vara de antes. Texto conservado.
+>
 > ⚠️ **S157, propagación de K** (A113): con K (banda 22 y `max`, #850) MODIS publica las 39 alertas protegidas de
 > Láscar de la ventana V2 (2026-03-01 a 2026-06-12) contra 6 del detector anterior, y el recall MODIS de alertas pasa
 > de 7 a 60 de 65 (`experiments/_s153_fk_v2/v2.log:223-224`). El «pierde ~70/79» del encabezado es previo a K. Si
@@ -2732,6 +2749,10 @@ umbrales. Si algún día se hace, medir también el ETI (regresión NTI vs NTI_b
 
 ## D21: ⚠️ **S157: ADOPTADA en producción con K (#850, squash `34cea39e`, 2026-10-18; marca S153 debajo); el «usamos la 21» y el «ABIERTA» que siguen describen el estado previo** · La banda MIR de MODIS: usamos la 21 como primaria; Coppola 2016a usa la 22 y la 21 sólo donde la 22 satura. **ABIERTA (medida S133 en magnitud y S137 en detección; ningún brazo cumple aún la batería)** S137 ⚠️ **El «ningún brazo cumple» cayó S146 (AUDIT_S146 §4, frente E E-08)**: con la vara corregida en el caso A2 el mejor brazo (banda 22, sin compuerta de temperatura, fondo local, conectiva `max`) pasa de 8 a **9 de 9**, y producción baja de 6 a **5 de 9**. Eso **levanta el bloqueo de criterio** que pesaba sobre D21, D22 y D11; no autoriza adoptar nada (9 de 9 en nueve escenas MODIS es fidelidad al Apéndice A, no dice nada de la sobre-publicación). Tres brazos quedan INDECIDIBLES por no guardar posición. Texto original conservado por historia
 
+> ⚠️ **S172 (A113)**: la banda 22 primaria de K ya no es el camino de MODIS en producción: desde el PR B MODIS corre
+> la vía «código MIROVA», que también usa la banda 22 como infrarrojo medio principal, pero sobre la grilla de MIROVA
+> (marca S172 al inicio del catálogo). Lo que sigue describe K, que queda en la guardia K de MODIS. Texto conservado.
+>
 > ⚠️ **S153, ADOPTADA en producción como parte de K** (A113; regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (aprobada en #848), evidencia `experiments/_s153_fk_v2/README.md`, `combinado.log`, `v1.log` y `v2.log`, sección 9): `enable_modis_b22_primary: true`
 > en `pipeline/profiles/mirova_equivalent.yaml`, junto con la conectiva `max` (D26) y sin el Test 1 integrado (D30).
 > Medido contra MIROVA en los 11 volcanes y dos ventanas: MODIS publica en 0,8 % de 893 y 0,9 % de 2.254 negativos
@@ -3336,6 +3357,10 @@ frente del Test 1.
 
 ## D33: Con K, la magnitud MODIS vuelve a radiancia con la longitud de onda de B21 aunque la temperatura venga de B22. **ABIERTA, arreglo listo detrás de flag apagado (registrada S157)** S157
 
+> ⚠️ **S172 (A113)**: D33 es una propiedad de la magnitud de K en MODIS. Desde el PR B la magnitud de MODIS de
+> producción la calcula la vía «código MIROVA» (marca S172 al inicio del catálogo); si D33 aplica a la vía no está
+> medido aquí (SIN VERIFICAR). Lo que sigue vale para la guardia K de MODIS. Texto conservado.
+
 **Qué dice el paper.** Coppola 2016a (`documentacion/sp426.5.pdf`, p. 3, leída renderizada): las bandas 21 y 22
 están «centred at 3.959 µm» las dos, y MIROVA arma con sus RADIANCIAS una sola banda corregida L21ok a 3,959 µm;
 el exceso de la Ec. 6 (p. 8) es una diferencia de radiancias y RP = 18,9 · A · ΔL (Ec. 7).
@@ -3398,6 +3423,11 @@ paper cuando difieren lo decide Nicolás (§7 del informe).
 ---
 
 ## D35: La geolocalización MODIS: interpolamos la grilla de 5 km del propio L1B (`_interp_geo`); MIROVA declara MOD03 y MYD03 con corrección de terreno. **ABIERTA (registrada S162; el A/B sobre K dio CUMPLE SIN DAÑO, verificado con contexto limpio; adopción pendiente dentro del paquete MODIS, con el sí de Nicolás, A45)** S162
+
+> ⚠️ **S172 (A113)**: «interpolamos la grilla de 5 km» describe K. Desde el PR B la vía «código MIROVA» de MODIS
+> de producción lee la geolocalización de 1 km del MxD03 (`leer_geo_mxd03` en `pipeline/mirova_v750_codigo.py`); si
+> el MxD03 falta o no calza, el gránulo cae a K y el record lo dice (`via_codigo_mirova`: «sin_mxd03» o
+> «geo_distinta»). Los tres flags de MxD03 de K siguen apagados. Texto conservado.
 
 **Qué hace MIROVA.** Coppola et al. 2026 (Scientific Data,
 `documentacion/Coppola_2026_SciData_Global_VRP_Dataset_s41597-026-08100-7.pdf`, sha256 `2b157f48…`), leído
