@@ -1005,7 +1005,7 @@ async function loadVolcano(v, opts = {}) {
   };
   // S89 #3: etiquetar mirova_confirmed por-record (cruce con CSV MIROVA, capa
   // de presentación). Idempotente; campos transitorios "_" no persistidos.
-  enrichWithMirovaConfirmation(allData[v.name].records, allData[v.name].mirovaRecords);
+  enrichWithMirovaConfirmation(allData[v.name].records, allData[v.name].mirovaRecords); if (window.CambioDetector) CambioDetector.notarRecords(allData[v.name].records); // S172: marca de la vía de MODIS desde los datos, en la misma línea para no correr las citas archivo:línea (G8)
 }
 
 // ── Data helpers ─────────────────────────────────────────────────────────────
