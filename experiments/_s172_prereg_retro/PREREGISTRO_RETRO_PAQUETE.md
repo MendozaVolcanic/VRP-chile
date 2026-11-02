@@ -8,13 +8,16 @@ archivo `45f48a93…`). Ronda 2: el mismo agente aplicó los cambios del verific
 (`D:/vrp-trabajo/temporales/ver_s172_prereg_retro/INFORME.md`, Sonnet 5.5, SELLABLE CON CAMBIOS, VPR172-01 a 15;
 hora del servidor al empezar la ronda 2: 2026-11-02 02:05:11 UTC; commit `18ab00217`, sha256 `aad33de7…`). Ronda 3: un
 agente de S173 aplicó los 14 cambios del segundo verificador limpio (`experiments/_s173_aud/vpr/INFORME.md`, Fable 5.1,
-SELLABLE CON CAMBIOS, VPR2-01 a VPR2-14, con su evidencia en esa misma carpeta). Las tablas «hallazgo, tratamiento»
-de las dos verificaciones están en el §15.
+SELLABLE CON CAMBIOS, VPR2-01 a VPR2-14, con su evidencia en esa misma carpeta); commit `bf13d7aa2`, sha256 LF
+`62d8839b…`. Después, el mismo agente recalculó las cifras de F26 del §3 y del §7 con la referencia congelada (hora del
+servidor: 2026-11-02 13:01:39 GMT; script y salida en esta carpeta): no cambia ningún conteo; cambian los cenit del §3.3
+y el 317 del §5.1 (pasa a 315). Las tablas «hallazgo, tratamiento» de las dos verificaciones están en el §15.
 
 Es el paso 1 del plan `docs/superpowers/plans/2026-11-02-nrt-34-volcanes.md` (`loop/activo` `fa22f4b87`), Tarea 0.1.
 No se corrió ningún brazo ni se miró ningún resultado de la vía. Sobre datos sólo se contó la referencia de MIROVA y K
-de disco, para el poder; las cifras del §7 son las que reprodujo el segundo verificador con sus scripts (con el sha de
-lo que contó, §7) y el autor las recalcula con la referencia congelada antes del sello (§11).
+de disco, para el poder. Las cifras de F26 del §3 y del §7 se recalcularon con la referencia congelada del §4.1
+(`recalcular_s7_ref_congelada.py` y su salida, en esta carpeta) y dan lo mismo que con el snapshot de `origin/main`
+que usó el segundo verificador; las de R25 salen del OSF y no dependen de la tabla (§7, «Con qué se contó»).
 
 Rutas de repo relativas a `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\`. Commits citados:
 `origin/main` = `14fb62030` (2026-11-01 23:34 UTC), `loop/activo` = `fa22f4b87` salvo que se diga otro.
@@ -29,8 +32,8 @@ MIROVA, y febrero a diciembre de 2025 contra el OSF v2.5. Algunas de esas pasada
 diagnósticos (§3.1): se informan aparte, con y sin ellas.
 
 **Lo que hay que saber antes de leer cualquier resultado.** Fuera de muestra, **las alertas protegidas son casi todas
-de Láscar**: en la tabla de febrero y marzo, 26 de 26 en VIIRS 375, 29 de 30 en VIIRS 750 (la otra es de Isluga) y 9 de
-9 en MODIS de febrero. En 2025 el OSF trae algo más: en VIIRS 375, 44 protegidas de Puyehue-Cordón Caulle,
+de Láscar**: en la tabla congelada de febrero y marzo, 26 de 26 en VIIRS 375, 29 de 30 en VIIRS 750 (la otra es de
+Isluga) y 9 de 9 en MODIS de febrero (§7). En 2025 el OSF trae algo más: en VIIRS 375, 44 protegidas de Puyehue-Cordón Caulle,
 Planchón-Peteroa e Isluga, además de las 273 de Láscar. O sea:
 - sobre **no perder alertas** la prueba habla de **Láscar**, y sólo en VIIRS 375 de 2025 de tres volcanes más;
 - sobre **callar donde MIROVA calla** (negativos limpios) habla de **los 11**, porque hay noches limpias en todos.
@@ -180,7 +183,8 @@ el veredicto cambia al sacarlas, el sensor va a DECIDE NICOLÁS (§8, fila 4).
 Restricciones:
 - **Tupungatito**: la tabla no lo tiene antes del 2026-02-14 y hasta el 02-23 el scraper rotulaba con 5 km y no 7
   (hitos de `scripts/calidad_referencia_mirova.py`). En R25, **SIN DATO** y no se despacha.
-- **NOAA-21**: 895 de 895 pasadas de 375 y 889 de 889 de 750 en F26 quedan `sin_info`; la primera etiquetada en la tabla
+- **NOAA-21**: 895 de 895 pasadas de 375 y 889 de 889 de 750 en F26 quedan `sin_info` (tabla congelada y snapshot de
+  `origin/main`, iguales; `experiments/_s172_prereg_retro/recalcular_s7_ref_congelada_salida.txt`); la primera etiquetada en la tabla
   es del **2026-04-03** (medido por el verificador; el hito del script dice 04-09 con una cifra «no reconstruida», S-6).
   El OSF no trae NOAA-21 en ningún año (códigos 3 y 4 = VIIRS, 4 desde 2018; 1 y 2 = MODIS; verificación empírica).
   Sus pasadas no entran a nada que decida; en R25 sólo cuestan (S-2), y no se pueden saltar sin tocar el código.
@@ -195,12 +199,16 @@ abril no es comparable con una posterior, y K decidió VIIRS sólo desde el 2026
 las mismas pasadas, nunca una tasa de F26 contra una de abril en adelante.
 
 **Composición medida** con las reglas de este documento (tabla sola, noche por elevación solar, SN, Tupungatito desde el
-02-23; `experiments/_s173_aud/vpr/contar_f26_F26_salida.txt`, línea «por satelite», segundo verificador, VPR2-11): en
-375, 1.708 de 2.660 records (64 %) sin fila; NOAA-20 tiene 790 etiquetadas y 111 sin fila; Suomi NPP sólo 162
-etiquetadas y 702 sin fila; NOAA-21, 895 sin fila; en 750, NOAA-20 844 etiquetadas (49 sin fila) y Suomi NPP 198 (656
-sin fila). Los cenit medianos son los del primer verificador (`f26_sesgo_tabla_salida.txt`, con conteos que diferían
-en 10 a 21 pasadas por satélite): NOAA-20 etiquetadas 47,4°; Suomi NPP etiquetadas **63,1°** contra 44,9° de sus sin
-fila; en 750, Suomi NPP 62,6° contra 42,6°. Se recalculan con el resto del §7 antes del sello.
+02-23) y la **tabla congelada** del §4.1 (`experiments/_s172_prereg_retro/recalcular_s7_ref_congelada_salida.txt`; con el snapshot de `origin/main` da lo mismo, igual que
+`experiments/_s173_aud/vpr/contar_f26_F26_salida.txt` del segundo verificador, VPR2-11). «Etiquetada» = la pasada
+tiene fila de la tabla (cualquier etiqueta salvo `sin_info`); cenit = mediana de `sensor_zenith_deg` del record de K:
+- VIIRS 375: 1.708 de 2.660 records (64 %) sin fila. NOAA-20, 790 etiquetadas (cenit 47,7°) y 111 sin fila (54,8°);
+  Suomi NPP, sólo 162 etiquetadas, con cenit **63,1°**, y 702 sin fila (44,3°); NOAA-21, 895 sin fila (47,2°).
+- VIIRS 750: NOAA-20, 844 etiquetadas (48,7°) y 49 sin fila (24,9°); Suomi NPP, 198 etiquetadas (62,6°) y 656 sin
+  fila (42,5°); NOAA-21, 889 sin fila (47,3°).
+
+La ronda 3 traía los cenit del primer verificador (NOAA-20 375 etiquetadas 47,4°; Suomi NPP 375 sin fila 44,9°; Suomi
+NPP 750 sin fila 42,6°); los de arriba los reemplazan.
 O sea: **la evidencia de F26-V es NOAA-20 y las pasadas oblicuas de Suomi NPP**. Todo resultado de F26-V va rotulado así,
 y la curva de cenit de F26-V se lee por satélite.
 
@@ -307,7 +315,8 @@ Particularidades:
 - **F26 decide con la tabla sola** en los tres. La rama «tabla más OCR» que pide V750-A §6.2 se calcula e informa; una
   pérdida sólo OCR va a DECIDE NICOLÁS.
 - **V375-E §5.4 (d)** se lee con los controles de su §4. Si F26-V no tiene 8 noches con pares, (d) es SIN SUSTRATO y se
-  informa (hay 317 noches-volcán con dos o más pasadas etiquetadas en 375, pero las publicadas por los dos brazos con
+  informa (hay 315 noches-volcán con dos o más pasadas etiquetadas en 375, con la tabla congelada y la definición
+  de «etiquetada» del §3.3, `experiments/_s172_prereg_retro/recalcular_s7_ref_congelada_salida.txt`; la ronda 3 decía 317, del primer verificador; pero las publicadas por los dos brazos con
   alerta son muchas menos).
 - **V750-A §6.2 M** (banda [0,9; 1,1]) decide en F26-V si V750-A está sellado; son unas 30 pasadas de Láscar y se dice.
 - **R25** aporta P1-OSF (§5.2) y la magnitud como cota (§4.3).
@@ -406,37 +415,46 @@ la lectura (un vigilante ciego da verde).
 
 ## 7. Poder (antes de leer)
 
-**Con qué se contó.** Las cifras de esta sección las contó el segundo verificador (S173) con sus scripts
-`experiments/_s173_aud/vpr/contar_f26.py` y `contar_osf.py` (salidas `contar_f26_F26_salida.txt`,
-`contar_f26_F26M_salida.txt`, `contar_f26_F26M_bloques_modis.txt`, `contar_osf_vent_salida.txt`) sobre un `git
-archive` de `origin/main` `47cdc446f`, con el predicado de `frontend/index.html` (blob `b618b6cc…`), la tabla consolidada
-del worktree (blob `00feeebc…`; sha256 en disco, con CRLF, `ab1a208c…`) y el OCR (blob `741fea06…`; sha256 en disco
-`d4ad8c44…`); reglas: tabla sola, noche por elevación solar, SN, lectura A, ±120 s, Tupungatito desde el 02-23. Esa
-referencia **no es** la congelada del §4.1 (consolidado `cb91eb50…`): antes del sello el autor las recalcula con la
-congelada, sobre `origin/main` exportado, y escribe aquí el commit y el sha256 LF de lo contado (§11; VPR2-14).
+**Con qué se contó.**
+- **F26 (tabla):** `experiments/_s172_prereg_retro/recalcular_s7_ref_congelada.py`, salida al lado
+  (`experiments/_s172_prereg_retro/recalcular_s7_ref_congelada_salida.txt`), sobre un `git archive` de `origin/main` `47cdc446f29f…` (K de disco de ese commit), predicado de
+  `frontend/index.html` (blob `b618b6cc…`, sha256 LF `260b4a19…`). Referencia que decide: la **congelada** del §4.1,
+  consolidado de Mirova-v1 en `cb91eb50…` (sha256 LF `811c4c07e38e55dc768197c9eb9e6e5df3659c41c39aa8f43d8e408a611f7ef4`)
+  y OCR en `cfc57c4d…` (sha256 LF `01c9478d614a59017348fc7f95ae4cffc359b314d5852cf2c6d13b7f831fba6b`), las copias de
+  S165 (`experiments/_s165_regla_posicion/referencia_salida.txt`, mismo sha256), con las capas de historia y respaldo
+  que agrega `cargar_referencia_unificada` de ese commit. El mismo script corre de control el snapshot de `origin/main`
+  (consolidado blob `00feeebc…`, sha256 LF `c0f18b6a…`; OCR blob `741fea06…`, sha256 LF `d38f2d0c…`), que reproduce
+  las cifras del segundo verificador (`experiments/_s173_aud/vpr/contar_f26_F26_salida.txt` y `_F26M_`): **las dos
+  referencias dan las mismas cifras en F26** (3.476 filas nocturnas indexadas en las dos; difieren sólo en la capa de
+  historia, fuera de F26: 37 filas contra 2.503). Reglas: tabla sola, noche por elevación solar, SN, lectura A,
+  ±120 s, Tupungatito desde el 02-23. Control positivo: las tres pasadas MODIS de Láscar de S159 salen «K no publica»
+  con bajo1, bajo1 y protegida.
+- **R25 (OSF):** no depende de la tabla; cifras de `experiments/_s173_aud/vpr/contar_osf.py`
+  (`contar_osf_vent_salida.txt`, segundo verificador) sobre el OSF `0863c240…` y K de `origin/main` `47cdc446f`; no se
+  recalcularon en esta ronda (VPR2-14).
 
 **P1 con «cero perdidas».** Cota superior al 95 % de la tasa de pérdida compatible con 0 de n (regla del tres). La cota
 supone pasadas independientes, y en Láscar no lo son (noches casi consecutivas de un mismo régimen, la misma
 dependencia que D-45 reconoce al sortear por bloque): **es un piso de la cota real**, no la cota (VPR2-14).
 
-| tramo y sensor | protegidas | por volcán | cota con 0 perdidas | lo que K hace |
-|---|---|---|---|---|
-| F26-M | 9 | Láscar 9 | 33 % | pierde 1 (Láscar 02-16 01:20, mirada por nombre, §3.1 b) |
-| F26-V, VIIRS 375 | 26 | Láscar 26 | 11,5 % | pierde 0 |
-| F26-V, VIIRS 750 | 30 | Láscar 29, Isluga 1 | 10 % | pierde 0 |
-| R25, 1 km | 161 | Láscar 155, Planchón-Peteroa 6 | 1,9 % (sin Láscar: 6, 50 %) | pierde 0 con record (1 sin record a ±120 s) |
-| R25, 375 m | 317 | Láscar 273, PCC 28, Planchón-Peteroa 14, Isluga 2 | 0,9 % (sin Láscar: 44, 6,8 %) | pierde 0 |
-| R25, 750 m (5 MW o más) | 17 | Láscar 17 | 18 % | pierde 0 |
+| tramo y sensor | referencia | protegidas | por volcán | cota con 0 perdidas | lo que K hace |
+|---|---|---|---|---|---|
+| F26-M | tabla congelada (= snapshot de `origin/main`) | 9 | Láscar 9 | 33 % | pierde 1 (Láscar 02-16 01:20, mirada por nombre, §3.1 b) |
+| F26-V, VIIRS 375 | tabla congelada (= snapshot) | 26 | Láscar 26 | 11,5 % | pierde 0 |
+| F26-V, VIIRS 750 | tabla congelada (= snapshot) | 30 | Láscar 29, Isluga 1 | 10 % | pierde 0 |
+| R25, 1 km | OSF | 161 | Láscar 155, Planchón-Peteroa 6 | 1,9 % (sin Láscar: 6, 50 %) | pierde 0 con record (1 sin record a ±120 s) |
+| R25, 375 m | OSF | 317 | Láscar 273, PCC 28, Planchón-Peteroa 14, Isluga 2 | 0,9 % (sin Láscar: 44, 6,8 %) | pierde 0 |
+| R25, 750 m (5 MW o más) | OSF | 17 | Láscar 17 | 18 % | pierde 0 |
 
 Consecuencias que se escriben ahora: casi toda la evidencia de P1 es Láscar; la única evidencia fuera de muestra sobre
 otros volcanes es VIIRS 375 de 2025 (44 protegidas OSF de tres volcanes) y MODIS de 2025 (6, de Planchón-Peteroa). Como K publica todas las
 del OSF, P1-OSF sólo puede encontrar que la vía pierde algo que K ve.
 
-**P2 (signos por bloque, D-45).** Bloques noche-volcán donde K yerra en F26 (tabla): **MODIS (febrero) 6** de P2 (5
-negativos publicados y la noche de Láscar del 02-11 con 2 bajo 1 MW perdidas), más el bloque de la protegida perdida del
-02-16 (7 en total, `contar_f26_F26M_salida.txt` y `contar_f26_F26M_bloques_modis.txt`), **VIIRS 375 48**, **VIIRS 750
-18** (`contar_f26_F26_salida.txt`, febrero y marzo). Bajo 1 MW: 158 en 375
-(tras SN), 25 en 750, 5 en MODIS. Para MODIS: con 6 bloques, GANA exige que la vía arregle 6 de 6 (p = 1/64) o 5 con el
+**P2 (signos por bloque, D-45).** Bloques noche-volcán donde K yerra en F26, con la tabla congelada (igual con el
+snapshot; `experiments/_s172_prereg_retro/recalcular_s7_ref_congelada_salida.txt`): **MODIS (febrero) 6** de P2 (5 negativos publicados y la noche de Láscar del 02-11 con 2
+bajo 1 MW perdidas), más el bloque de la protegida perdida del 02-16 (7 en total; los mismos ocho eventos que lista
+`experiments/_s173_aud/vpr/contar_f26_F26M_bloques_modis.txt`), **VIIRS 375 48**, **VIIRS 750 18** (febrero y marzo).
+Bajo 1 MW, misma referencia: 158 en 375 (tras SN), 25 en 750, 5 en MODIS de febrero. Para MODIS: con 6 bloques, GANA exige que la vía arregle 6 de 6 (p = 1/64) o 5 con el
 sexto empatado (2/64); con un bloque en contra ya no llega. En el censo de MOD-D la vía arregló alrededor del 90 % de los
 errores de K (neto −44, B 53): en febrero eso da B de 3 a 7. **Resultado esperado de MODIS: SIN SUSTRATO o EMPATE, o sea
 SIN PODER** (§8). Sin las cuatro pasadas MODIS de §3.1 (b), F26-M queda con **4 bloques** (Puyehue-Cordón Caulle
@@ -448,8 +466,9 @@ VIIRS 750, poco.
 Antes de leer, el sorteo de etiquetas dentro de cada estrato (volcán × tramo de cenit) sobre K contra K dice qué fracción
 de barajados cumple «GANA o EMPATE» por azar (GUIA §3b fila 7).
 
-**Antes del sello** se recalculan estas cifras con la referencia congelada, sobre `origin/main` exportado, y se escriben
-aquí con el commit de K y el sha256 LF de la referencia (ver «Con qué se contó», arriba).
+Las cifras de F26 de esta sección ya están recalculadas con la referencia congelada (ver «Con qué se contó»). Si antes
+del despacho se congela otra referencia o cambia el K de disco (otro commit de `origin/main`), se vuelve a correr el
+mismo script y se listan aquí las cifras que cambien.
 
 ---
 
@@ -598,7 +617,8 @@ apenas termine V750-B, y VIIRS 750 después. Apagar un sensor salta su proceso p
 - `git diff <commit del sello> -- PREREGISTRO_RETRO_PAQUETE.md` vacío al leer, y su sha256 LF igual al del tag del
   sello; lo agregado después va rotulado *post hoc*.
 - Cifras del §7 recalculadas sobre `origin/main` exportado con la referencia congelada y escritas con el commit de K y
-  el sha256 LF de la referencia.
+  el sha256 LF de la referencia: hecho para F26 (commit `47cdc446f`, `811c4c07…`, `01c9478d…`); se repite si cambia
+  la referencia o el commit de K antes del despacho, y el script y su salida entran al manifiesto.
 - Excepciones nombradas de C-K escritas antes de leer F26, con su tope (R-15).
 
 ---
@@ -700,10 +720,10 @@ con los 14 cambios de texto):
 | VPR2-08 seis R-n no se contestan con «sí» | 2 | R-2, R-3, R-6, R-8, R-11 y R-12 reescritas como «¿Aceptas …?» con recomendación «Sí»; en R-11 la frase de los volcanes débiles pasó a «por qué»; las otras ocho llevadas a la misma forma (ninguna recomendación queda en «no», para que un «sí a todo» no se lea al revés en R-4, R-5 y R-10); nota al inicio del §12 |
 | VPR2-09 C-montaje sin criterio de «explicada» | 2 | §6 C-montaje: explicada sólo por (a) un hunk listado del `git diff` que la reproduce al re-correr con el código del tag de origen, o (b) `otro_granulo` |
 | VPR2-10 marzo omite la V2 de K; falta D25 | 1 | §3.1: fila de D25 y frase «Marzo de 2026 lo tocan MOD-D y la V2 de K (control), sólo en MODIS» |
-| VPR2-11 composición por satélite no se reproduce | 1 | §3.3: cifras del segundo verificador con las reglas escritas (790 / 111; 162 / 702; 895; 844 / 49; 198 / 656), `contar_f26_F26_salida.txt`; cenit del primer verificador rotulado y a recalcular |
+| VPR2-11 composición por satélite no se reproduce | 1 | §3.3: cifras del segundo verificador con las reglas escritas (790 / 111; 162 / 702; 895; 844 / 49; 198 / 656), `contar_f26_F26_salida.txt`; después, conteos y cenit recalculados con la tabla congelada (`recalcular_s7_ref_congelada_salida.txt`): conteos iguales, cenit nuevos (47,7 / 44,3 / 42,5 en vez de 47,4 / 44,9 / 42,6) |
 | VPR2-12 dos citas sin localizar | 1 | §6 C-K: quitada «V375-E l. 66 a 68», el 27 derivado del 1 % de 2.660 y los 48 bloques del §7; §1: «0,996 a 0,998» con l. 28 |
 | VPR2-13 curva de cenit incompleta y desviación no declarada | 1 | §5.3 con los seis nombres (NULO SESGADO, 8 noches en la lectura o en el nulo); §5.6: fila «CAE MÁS en retrospectiva: informa en V375-E, aquí DECIDE NICOLÁS, conservador» |
-| VPR2-14 regla del tres con pasadas dependientes; cifras sin sha | 1 | §7: la cota es un piso bajo independencia que en Láscar no se cumple; párrafo «Con qué se contó» con commit `47cdc446f`, blobs y sha256 de lo contado; el recálculo del autor con la referencia congelada sigue pendiente (§11) |
+| VPR2-14 regla del tres con pasadas dependientes; cifras sin sha | 1 | §7: la cota es un piso bajo independencia que en Láscar no se cumple; párrafo «Con qué se contó» con commit `47cdc446f`, blobs y sha256 LF de lo contado; las cifras de F26 recalculadas por el autor con la referencia congelada (`recalcular_s7_ref_congelada.py`, con control que reproduce al segundo verificador): iguales; cada cifra dice su referencia; R25 sigue con el OSF del segundo verificador |
 | S-A K de disco en DM no publica tres protegidas | 2 | declarado en §6 C-montaje con las tres pasadas y `contar_f26_DM_salida.txt` l. 12, 13 y 38 |
 | S-B sha256 con CRLF | 1 | §11 y candado del §6: todo sha256 sobre el contenido normalizado a LF; el de este documento va en el commit y el tag del sello |
 | S-C prompt con CRLF | 1 | mismo patrón que S-B; sin cambio en el texto |
@@ -717,6 +737,7 @@ con los 14 cambios de texto):
 1. ¿V750-A se sella antes de D2? Define si VIIRS 750 puede salir de DECIDE NICOLÁS (R-12).
 2. ¿El lector de la sombra de VIIRS 750 marca régimen con perfiles nuevos? (plan §14, SIN DATO).
 3. ¿El fetch de 2025 encuentra MxD03 todos los días? Si falta en más de 10 % de alguna clase, MODIS de R25 cae.
-4. ¿Qué referencia congelada: la de MOD-D fase 4 o una más nueva? Para F26 no debería cambiar, hay que listarlo.
+4. ¿Qué referencia congelada: la de MOD-D fase 4 o una más nueva? Para F26 no cambia nada: la de MOD-D fase 4 y el
+   snapshot de `origin/main` del 2026-11-02 dan las mismas cifras (§7). Una más nueva se mide con el mismo script.
 5. Plan de la cuenta de GitHub (tope de 20 jobs): SIN DATO.
 6. Definición de `Dayflag` y `Satellite` en el paper: ya no decide nada aquí, pero conviene dejarla leída.
