@@ -35,6 +35,14 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo: qué est�
 
 ## Misión vinculante (LEER ANTES DE TOCAR PIPELINE)
 
+> ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde el merge del PR B (rama `claude/s172-modd-flip`) MODIS corre
+> la vía «código MIROVA» (`enable_modis_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`); VIIRS 375 y VIIRS 750
+> siguen con K. Decisión de Nicolás del 2026-10-31 (adelantar MODIS); K de MODIS queda de guardia
+> (`pipeline/profiles/guardia_k_modis.yaml`, vigilancia `scripts/vigilancia_guardia_modis.py`) con reversión
+> pre-autorizada por `git revert` del PR B. Todo lo de este archivo que describa el MODIS de producción como K (la marca
+> S153 del punto NTI / dNTI, D21, D12, la cara MODIS de D11) es previo a S172 en MODIS. Detalle: marca S172 al inicio de
+> `docs/MISSION.md` y ficha `docs/FICHA_SDA_VRP_CHILE.md` v1.18.
+
 **Objetivo: clon literal MIROVA NRT.** Antes de implementar cualquier feature,
 fix, threshold, exclusion, path o transformación en `pipeline/`, leer
 [docs/MISSION.md](docs/MISSION.md) y aplicar las 3 preguntas. Si las 3 dan NO,
@@ -124,7 +132,9 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   de producción en 10 de 13 puntos, entre ellos K1 (-0,7), el mínimo de dNTI fuera de la cumbre (0,02), la media de 3 × 3
   con el central y el fondo del VRP (interpolación bajo un halo dilatado, sin recorte). Lo de abajo describe nuestro
   detector, no el de MIROVA.
-- **NTI / dNTI contextual**: ⚠️ **S153, el detector de producción cambió (adopción de K, marca A113)**:
+- **NTI / dNTI contextual**: ⚠️ **S172 (A113): en MODIS, lo que sigue ya no corre en producción**: MODIS pasó a la vía
+  «código MIROVA» (marca S172 al inicio de «Misión vinculante»); la banda 22 primaria, la conectiva `max` y los Tests de
+  la marca S153 describen ahora VIIRS 375, VIIRS 750 y la guardia K de MODIS. ⚠️ **S153, el detector de producción cambió (adopción de K, marca A113)**:
   desde el merge del PR de adopción, `mirova_equivalent` corre **sin el Test 1 integrado en el ROI**
   (`enable_test1_path: false`, D30), con la **conectiva `max`** en los Tests 2 y 3
   (`enable_tests_23_prose_branch: true`: hacen falta el piso C1 **y** `μ+C2·σ`, no el `min` de abajo)
