@@ -59,6 +59,11 @@ thresholds:
   min_vrp_mw_viirs375: 0.0
   min_vrp_mw_viirs750: 0.0
   min_vrp_mw_modis: 0.0
+  # S172 (encendido de MOD-D): la replica enciende la via «codigo MIROVA» en MODIS. Este laboratorio esta congelado
+  # en C0 (comentario S150 de abajo) y es la sombra de K que lee scripts/vigilancia_sombra.py: si heredara la via,
+  # en MODIS dejaria de ser C0 y la vigilancia de K compararia otra cosa. Se declara apagada aqui, en `thresholds:`,
+  # que es donde la lee pipeline/profile.py (A89). Lo vigila tests/test_guard_modis_codigo_mirova_encendido_s172.py.
+  enable_modis_codigo_mirova: false
 
 # S150 (AUDIT_S149 Fase 0 tarea 3 y Fase 5; decision de Nicolas 2026-10-09): el laboratorio queda CONGELADO
 # en la deteccion de produccion de hoy. POR QUE: la replica va a cambiar (conectiva max, sin Test 1, banda 22,

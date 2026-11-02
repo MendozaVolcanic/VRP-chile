@@ -69,16 +69,28 @@ def _grilla(pid):
 
 
 # ------------------------------------------------------------------------------------------------ 1. el flag
-@pytest.mark.parametrize("perfil", ["mirova_equivalent", "experimental"])
-def test_flag_apagado_en_produccion_y_laboratorio(perfil):
-    assert _flag(perfil) == "False"
+# S172 (PR B, encendido de MOD-D; decisión de Nicolás del 2026-10-31, adelantar MODIS con K de guardia; tag defensivo
+# pre-s171-adopcion-modd): el flag pasa a ENCENDIDO en producción. El laboratorio sigue apagado porque lo declara
+# (congelado en C0) y la guardia K de MODIS también. Los valores por perfil vivo los fija además
+# tests/test_guard_modis_codigo_mirova_encendido_s172.py. Texto original: «APAGADO en producción y en el laboratorio».
+@pytest.mark.parametrize("perfil,esperado", [("mirova_equivalent", "True"), ("experimental", "False"),
+                                             ("guardia_k_modis", "False")])
+def test_flag_encendido_en_produccion_y_apagado_en_laboratorio_y_guardia(perfil, esperado):
+    assert _flag(perfil) == esperado
 
 
 def test_flag_se_lee_de_thresholds_y_llega_al_procesador():
     src = (REPO / "pipeline/profile.py").read_text(encoding="utf-8")
     assert 'ENABLE_MODIS_CODIGO_MIROVA: bool = bool(_t.get("enable_modis_codigo_mirova", False))' in src
-    from pipeline import process_modis as PM
-    assert PM.ENABLE_MODIS_CODIGO_MIROVA is False
+    # S172: el procesador lo recibe del perfil con que se importa; en un proceso aparte, para no depender del perfil con
+    # que corre la suite. Producción lo trae encendido y la guardia apagado (las dos preguntas del instrumento).
+    codigo = "from pipeline import process_modis as PM; print(PM.ENABLE_MODIS_CODIGO_MIROVA)"
+    for perfil, esperado in (("mirova_equivalent", "True"), ("guardia_k_modis", "False")):
+        env = dict(os.environ, VRP_PROFILE=perfil, PYTHONIOENCODING="utf-8")
+        r = subprocess.run([sys.executable, "-c", codigo], cwd=REPO, env=env, capture_output=True, text=True,
+                           encoding="utf-8")
+        assert r.returncode == 0, r.stderr
+        assert r.stdout.strip().splitlines()[-1] == esperado, perfil
 
 
 # ------------------------------------------------------------------------------------------------ constantes
@@ -391,6 +403,8 @@ def test_flag_encendido_cambia_el_record_y_sin_grilla_sigue_k_y_lo_dice(monkeypa
     from pipeline import process_modis as PM
     assert MV.volcan_por_coordenadas(arnes.LAT0, arnes.LON0) is None
     monkeypatch.setattr(MV, "leer_radiancia_modis", lambda *_a, **_k: (_ for _ in ()).throw(_ViaTocada()))
+    # S172: producción trae la vía encendida desde el PR B; el lado apagado se fija explícitamente.
+    monkeypatch.setattr(PM, "ENABLE_MODIS_CODIGO_MIROVA", False)
     apagado = arnes.correr_modis("nevado")
     monkeypatch.setattr(PM, "ENABLE_MODIS_CODIGO_MIROVA", True)
     encendido = arnes.correr_modis("nevado")

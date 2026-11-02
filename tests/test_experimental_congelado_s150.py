@@ -42,7 +42,10 @@ def _resolver(nombre):
 
 # S153: la replica adopto K (regla #848). Como anunciaba el docstring, el test que exigia laboratorio == produccion
 # cayo a proposito y se reemplaza por la lista DECLARADA de diferencias: exactamente los tres flags de K.
-DIFERENCIAS_DECLARADAS = {"ENABLE_TEST1_PATH", "ENABLE_TESTS_23_PROSE_BRANCH", "ENABLE_MODIS_B22_PRIMARY"}
+# S172 (encendido de MOD-D, decisión de Nicolás del 2026-10-31): producción enciende la vía «código MIROVA» en MODIS
+# y el laboratorio la declara apagada (sigue en C0, es la sombra de K), así que también difieren en ese flag.
+DIFERENCIAS_DECLARADAS = {"ENABLE_TEST1_PATH", "ENABLE_TESTS_23_PROSE_BRANCH", "ENABLE_MODIS_B22_PRIMARY",
+                          "ENABLE_MODIS_CODIGO_MIROVA"}
 
 
 def test_el_laboratorio_difiere_de_produccion_solo_en_lo_declarado():

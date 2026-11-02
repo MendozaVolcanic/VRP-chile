@@ -341,6 +341,12 @@ def main(argv=None):
     for s in a.parche:
         k, v = s.split("=", 1)
         parches[k] = ast.literal_eval(v)
+    # S172 (encendido de MOD-D): las escenas MODIS de este arnés miden K, contra goldens escritos con K. Producción
+    # corre la vía «código MIROVA» en MODIS desde el PR B (y K sigue como guardia), así que en el subproceso la vía va
+    # apagada. La vía tiene sus propias pruebas (tests/test_mirova_modis_codigo_s164.py).
+    import pipeline.process_modis as pm
+    if hasattr(pm, "ENABLE_MODIS_CODIGO_MIROVA"):
+        patch.object(pm, "ENABLE_MODIS_CODIGO_MIROVA", False).start()
     texto = canonico(generar(parches, a.solo))
     Path(a.salida).parent.mkdir(parents=True, exist_ok=True)
     Path(a.salida).write_text(texto, encoding="utf-8")

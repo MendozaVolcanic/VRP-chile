@@ -32,3 +32,11 @@ paths:
 
 # S153 (K): banda 21 primaria congelada; el porque esta en el comentario S153 de `paths:`.
 enable_modis_b22_primary: false
+
+# S172 (encendido de MOD-D): la replica enciende la via «codigo MIROVA» en MODIS. Este perfil es ademas el ancla de
+# los tests escritos sobre la produccion de antes de K (tests/produccion_pre_k.py), que no tenia la via; si la
+# heredara, el golden de S142 y las sondas MxD03 medirian otra cosa. Se declara apagada, en `thresholds:`, que es
+# donde la lee pipeline/profile.py (A89, A117). Es la unica excepcion entre los brazos viejos de A/B: los demas no
+# se tocan (ver experiments/_s171_modd_adopcion/INFORME_IMPLEMENTADOR.md).
+thresholds:
+  enable_modis_codigo_mirova: false

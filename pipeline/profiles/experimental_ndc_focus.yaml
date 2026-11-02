@@ -37,6 +37,11 @@ thresholds:
   # docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md, que es por donde tiene que volver.
   # Guard: tests/test_guard_laboratorio_no_mas_ciego_s147.py
   min_vrp_mw_viirs375: 0.0
+  # S172 (encendido de MOD-D): la replica enciende la via «codigo MIROVA» en MODIS. Este perfil congela la produccion
+  # de antes de K (comentario S153 de abajo) y no corre MODIS (sensors), pero se despacha desde nrt.yml: se declara
+  # apagada para que su significado no dependa de la replica (A117). Guard:
+  # tests/test_guard_modis_codigo_mirova_encendido_s172.py.
+  enable_modis_codigo_mirova: false
 sensors:
   modis: false
   viirs_375: true

@@ -138,6 +138,14 @@ thresholds:
   enable_modis_geo_mxd03: false          # posicion por pixel del MxD03 en vez de _interp_geo (A61 H2, MOD-B)
   enable_modis_crater_sin_dato: false    # crater sin posicion en el granulo -> sin record, no negativo (A61 H1, VA61-01)
   enable_modis_dist_desde_crater: false  # dist_km del pixel anomalo y etiqueta summit/far desde el crater (A61 H5)
+  # S172, MOD-D ENCENDIDO: la via «codigo MIROVA» en MODIS (pipeline/mirova_v750_codigo.py, FAMILIAS["MODIS"]). POR QUE:
+  # con K, MODIS pierde mas de un tercio de las noches en que MIROVA alerta (recall 62,5 % en 16 noches, audit del
+  # 2026-10-26) y en Chillan marca 0,56 de la magnitud de MIROVA; la via gano el A/B pre-registrado de MOD-D (tag
+  # s170-modd-f4-lectura). Decision de Nicolas del 2026-10-31: adelantar MODIS sin esperar la sombra de 28 noches, con
+  # K de guardia (el perfil de la guardia K de MODIS del PR A; reversion de §4 de
+  # experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md). Tag defensivo pre-s171-adopcion-modd. Se
+  # revierte con git revert de este PR. VIIRS 375 y VIIRS 750 no cambian; los tres de MxD03 de arriba siguen apagados.
+  enable_modis_codigo_mirova: true
 
 # --- Background annulus geometry (km) ---
 background:
