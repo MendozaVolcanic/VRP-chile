@@ -420,16 +420,29 @@ def avisos_perfiles(prod, sombra):
     return av
 
 
-def cargar_insumos(win):
+def claves_via():
+    """S172 (mini auditoría MA172-101/302): claves (volcán, sensor, 'YYYY-MM-DD HH:MM') de los records MODIS de
+    producción con `via_codigo_mirova: true`, leídas de data/mirova_equivalent/ con la misma función del auto-audit.
+    El banco de paridad no copia esa marca, así que se cruza por clave."""
+    return aa.claves_via_modis(aa.cargar_records()[0])
+
+
+def cargar_insumos(win, via=None):
     """Referencia unificada, records de producción (sólo K) y de la sombra, con el predicado del tablero.
     Los de producción quedan etiquetados por el banco con la regla original en `lab_original` (para los
-    negativos limpios, como la cota del A/B) y con D-9 SN en `lab`."""
+    negativos limpios, como la cota del A/B) y con D-9 SN en `lab`.
+
+    S172 (MA172-101/302): «sólo K» se decidía por `codigo_sha`, y desde el encendido de MODIS los records de la vía
+    también lo traen; se quitan por clave (`via`, por defecto claves_via()). Sin esto, una protegida que la vía calla y
+    C0 publica abría el issue que pide revertir K. La pérdida de la vía la vigila scripts/vigilancia_guardia_modis.py."""
     import banco_paridad as bp  # noqa: E402  (node; se carga en runtime)
     from referencia_mirova_unificada import cargar_referencia_unificada  # noqa: E402
+    via = claves_via() if via is None else via
     coords = aa._coords_por_volcan()
     inner = bp.inner_desde_html()
     filas = cargar_referencia_unificada(aa.CONS, aa.OCR)
-    prod = [r for r in bp.cargar_nuestros(coords, inner, win) if r.get("sha")]   # sólo records de K
+    prod = [r for r in bp.cargar_nuestros(coords, inner, win) if r.get("sha")   # sólo records de K
+            and (not via or (r["vol"], r.get("sensor"), r["dt"].strftime("%Y-%m-%d %H:%M")) not in via)]
     sombra = bp.cargar_nuestros(coords, inner, win, data=SOMBRA)
     bp.etiquetar(prod, *bp.indexar_referencia(filas, coords, win)[:3])
     for r in prod:
@@ -450,12 +463,16 @@ def evaluar(hoy):
             "desde cuándo vigilar"]})
         return out
     win = (frontera, hoy)
-    filas, prod, sombra = cargar_insumos(win)
+    via = claves_via()
+    filas, prod, sombra = cargar_insumos(win, via=via)
     pasadas = pasadas_de_alerta(filas, prod, sombra, win)
     d = disparadores(pasadas, prod, hoy, adopcion, juzgadas=leer_juzgadas(),
                      rachas_juzgadas=leer_rachas_juzgadas())
-    avisos = (avisos_referencia(filas, hoy) + avisos_sombra(sombra, hoy) + avisos_produccion(prod, hoy)
-              + avisos_perfiles(prod, sombra))
+    # S172: desde el encendido de la vía, MODIS de producción ya no es K y su frescura de K no se exige (si no, esta
+    # vigilancia quedaría ciega para siempre tres días después del encendido). Sin records de la vía, lo de siempre.
+    sensores_k = [s for s in aa.SENSORS if not (via and s == "MODIS")]
+    avisos = (avisos_referencia(filas, hoy) + avisos_sombra(sombra, hoy)
+              + avisos_produccion(prod, hoy, sensores=sensores_k) + avisos_perfiles(prod, sombra))
     # Un aviso no tapa una reversión ni una investigación: sólo impide que la falta de disparos se lea como VERDE.
     veredicto = d["veredicto"]
     if veredicto == "VERDE" and avisos:
@@ -467,6 +484,8 @@ def evaluar(hoy):
                 "n_pasadas_alerta_con_sombra": sum(1 for p in pasadas if p["sombra_pub"] is not None),
                 **{k: v for k, v in d.items() if k != "veredicto"},
                 "protegidas_sin_publicar_k": [p for p in pasadas if p["protegida"] and p["prod_pub"] is False]})
+    if via:
+        out["via_modis_excluida"] = len(via)   # S172: sólo con records de la vía, para no cambiar la salida de antes
     return out
 
 

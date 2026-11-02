@@ -962,7 +962,7 @@ async function init() {
   initPeriodo();
   for (const volc of TIER_A) {
     const [data, mirovaForVolc] = await Promise.all([loadVolcanoData(volc), loadMirovaRef(volc)]);
-    renderCard(volc, data, mirovaForVolc);
+    if (window.CambioDetector) CambioDetector.notarRecords((data && data.records) || []); renderCard(volc, data, mirovaForVolc); // S172: marca de la vía de MODIS desde los datos, antes de dibujar la tarjeta
   }
 }
 init();

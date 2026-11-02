@@ -32,7 +32,7 @@ jobs:
         if: github.event.inputs.vol == '' || github.event.inputs.vol == matrix.vol
         run: |
           pip install --upgrade pip
-          pip install earthaccess numpy h5py scipy pyyaml pandas
+          pip install earthaccess numpy h5py scipy pyyaml pandas pyproj
       - name: Run probe (read-only)
         if: github.event.inputs.vol == '' || github.event.inputs.vol == matrix.vol
         env:

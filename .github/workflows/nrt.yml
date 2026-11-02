@@ -140,7 +140,13 @@ jobs:
           pip install --upgrade pip
           sudo apt-get install -y libhdf4-dev
           pip install pyhdf
-          pip install earthaccess numpy h5py scipy pyyaml
+          pip install earthaccess numpy h5py scipy pyyaml pyproj
+
+      # S172 (mini auditoria MA172-201): la via «codigo MIROVA» importa pyproj en cada granulo; sin el, run_pipeline
+      # atrapa el error por granulo, no escribe record y el job sale verde (MODIS mudo). Aqui el job queda rojo.
+      - name: Comprobar pyproj
+        if: steps.filter.outputs.skip != 'true'
+        run: python -c "import pyproj; print('pyproj', pyproj.__version__)"
 
       # S19 2026-04-25: el step `mirova_equivalent` solo se ejecuta para los 11
       # Tier A monitoreados oficialmente por MIROVA (CSV consolidado, KMLs).
