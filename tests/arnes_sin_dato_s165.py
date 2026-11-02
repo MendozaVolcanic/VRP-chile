@@ -79,6 +79,9 @@ def correr(rp, tipo, flags, estricto, tmp):
            patch.object(pm, "read_modis_l1b", return_value=data),
            patch.object(pm, "leer_mxd03", return_value=mxd),
            patch.object(sys, "argv", argv)]
+    # S172 (encendido de MOD-D): este arnés mide la opción «cráter sin dato» de K. Producción corre la vía «código
+    # MIROVA» en MODIS desde el PR B y K sigue como guardia; aquí la vía va apagada salvo que un brazo la pida.
+    flags = {"ENABLE_MODIS_CODIGO_MIROVA": False, **dict(flags)}
     ctx += [patch.object(pm, k, v) for k, v in flags.items()]
     for p in ctx:
         p.start()
