@@ -3,7 +3,7 @@
 
 POR QUÉ. Nicolás decidió (2026-10-31) encender la vía «código MIROVA» de MODIS sin esperar la sombra de 28 noches, con
 K corriendo aparte como guardia: si la vía calla una alerta protegida que K habría publicado, se revierte el mismo día
-(experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §3 y §4, rama loop/activo; diseño
+(experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §3 y §4; en S172 vivía sólo en la rama loop/activo; en main desde el PR B #934; diseño
 docs/superpowers/specs/2026-11-01-encendido-modd-design.md, decisión 2). La guardia sólo sirve si mide K de verdad:
 estas pruebas fijan lo que puede fallar en silencio:
   1. el perfil resuelve K en MODIS (la vía apagada), sólo MODIS, en su propia carpeta, leído como lo lee el código
