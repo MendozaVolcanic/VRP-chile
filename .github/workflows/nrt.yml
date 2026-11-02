@@ -156,6 +156,7 @@ jobs:
       #   - limpia data/mirova_equivalent/ de no-Tier-A automáticamente.
       #   - alinea el cron con el dashboard que ya filtraba a 11 Tier A en S18.
       - name: Run VRP pipeline — mirova_equivalent profile
+        id: pipeline_mireq  # S173 (209): lo lee el paso «Revisar errores de MODIS»
         # S124: Villarrica INCLUIDA aca (issue #513). Corria con el perfil
         # dedicado mirova_equivalent_villarrica_test1, congelado en abril y con
         # 32 constantes distintas del operacional — entre ellas los 5 parches
@@ -368,5 +369,18 @@ jobs:
             sleep $((attempt * 10))
           done
           echo "all push attempts failed"; exit 1
+
+      # S173 (hallazgo 209, V2-02): con la via «codigo MIROVA» de MODIS encendida, una excepcion de la via en un
+      # granulo no cae a K; run_pipeline la atrapa, imprime `ERROR processing <archivo>` y sigue, y el job saldria verde
+      # con esa pasada sin record. Este paso lee pipeline.log y deja el job rojo si un granulo MODIS (MOD021KM o
+      # MYD021KM) termino en error. Los errores de VIIRS se informan y no hacen fallar (B no cambia VIIRS). Va DESPUES
+      # del commit, como «Revisar que salio K de MODIS» de guardia-k-modis.yml, para no perder los records buenos del
+      # dia por un granulo malo, y despues del paso NASA_DOWN, que asi no lo confunde con una caida de NASA. Corre si el
+      # paso de mirova_equivalent corrio (con exito o con falla); no corre si fue saltado ni si cancelaron la corrida.
+      # Regla: experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4.4 (a). Test:
+      # tests/test_revisar_errores_modis_nrt_s173.py.
+      - name: Revisar errores de MODIS en el log
+        if: ${{ !cancelled() && (steps.pipeline_mireq.outcome == 'success' || steps.pipeline_mireq.outcome == 'failure') }}
+        run: python scripts/revisar_errores_modis_nrt.py --log pipeline.log --volcan "${{ matrix.volcano }}"
 
       # Pages deploy moved to .github/workflows/pages-deploy.yml
