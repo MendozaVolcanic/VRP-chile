@@ -40,8 +40,21 @@ los gránulos que no cubren el volcán (100 celdas a 45 km, centro a más de 5 k
 - Ficha `docs/FICHA_SDA_VRP_CHILE.md` v1.18 y marcas A113 en `docs/MISSION.md`, `CLAUDE.md` y
   `docs/MIROVA_DIVERGENCES.md`; la cabecera FICHA de `pipeline/process_modis.py` (sólo el comentario, el AST no
   cambia) dice ahora que la vía está encendida.
+- El ancla de las pruebas escritas sobre la producción de antes de K (`pipeline/profiles/_s146_ab_control.yaml`,
+  `tests/produccion_pre_k.py`) declara la vía apagada, y los arneses que miden K de MODIS (`tests/arnes_mxd03_s165.py`,
+  `tests/arnes_sin_dato_s165.py`, `tests/arnes_sintetico_s142.py`, fixture en `tests/test_process_modis_core.py`) la
+  fijan apagada: el encendido rompía 33 pruebas que miden K (recuento de la mini auditoría, MA172-108; el informe
+  decía 28), todas verdes en el PR A y arregladas aquí.
+- S172 ronda 2 (mini auditoría): `scripts/vigilancia_sombra.py` deja de contar como K los records MODIS de la vía
+  (MA172-101: si no, una pérdida de la vía abría el issue que pide revertir K); el tablero reconoce
+  `final_hotspot_source = "codigo_mirova"` como ancla del marcador, en una sola función `esAnclaHonesta` (MA172-102);
+  `tests/test_guard_adopcion_k_s153.py` espera la vía en la diferencia del laboratorio (MA172-103).
+- Requisito del PR A, que tiene que estar en `main` antes: pyproj en todo workflow que corre un perfil con vía (sin
+  él, MODIS quedaba mudo con el NRT en verde, MA172-201) y los arreglos de la vigilancia de la guardia.
 - Nada más: VIIRS 375 y VIIRS 750 de producción no cambian, los tres flags de MxD03 siguen apagados, no hay reproceso
-  histórico (la vía corre desde el merge hacia adelante).
+  histórico (la vía corre desde el merge hacia adelante; ojo: el upgrade de NRT a estándar re-escribe con la vía pasadas
+  de hasta ~4,5 días antes del merge, MA172-206, así que el escalón de MODIS empieza unos días antes de la fecha del
+  merge).
 
 ## Pre-autorización de la reversión (§4 de la regla, para el sí de A45)
 
