@@ -1,6 +1,7 @@
 # Regla de adopción y reversión de la vía «código MIROVA» en MODIS (MOD-D)
 
-**BORRADOR, RONDA 4, SIN SELLO.** D1 a D7 contestadas por Nicolás el 2026-11-02 (servidor 15:42 UTC): «de1 a d7
+**BORRADOR, RONDA 5, SIN SELLO.** Ronda 5 (S173): los cuatro cambios del verificador VB4 (fast-forward, citas de
+`loop/activo`, `pipeline/` fuera del flag, comentario del script), tabla del final. D1 a D7 contestadas por Nicolás el 2026-11-02 (servidor 15:42 UTC): «de1 a d7
 si», las siete con la recomendación. La ronda 3 la leyó un verificador limpio (VB3: regla SELLABLE CON CAMBIOS, PR B
 MERGEABLE CON CAMBIOS); esta ronda 4 aplica esos cambios. Falta la frase de sello de Nicolás.
 
@@ -59,8 +60,11 @@ evidencia. Comprobado con `git cat-file -e` el 2026-11-02:
   main. El VB3 dio `resultado_f4.json` por no localizado; está en esa ruta, con el sha256 LF que cita §4.4 (i).
 - `D:/vrp-trabajo/temporales/...` (pre-mortem S171, hallazgos 171-01 y 171-03): fuera de git, en el disco local de
   Nicolás.
-- Lo demás que se cita por ruta (código, perfiles, workflows, `tasks/LOOP_OBJETIVOS.md`, el programa por sensor,
-  `PREREGISTRO_E.md`, `data/audit_continuous/latest.json` en `489113c1f`) resuelve desde main.
+- `tasks/LOOP_OBJETIVOS.md` y el programa por sensor existen en main, pero lo que esta regla cita de ellos (la entrada
+  de la bitácora «2026-10-31 21:55 UTC (S171)», el §12 del programa con 12.3 punto 4, 12.6 y las «28 noches») está sólo
+  en la rama `loop/activo` (ronda 5, VB4-02).
+- Lo demás que se cita por ruta (código, perfiles, workflows, `PREREGISTRO_E.md`, `data/audit_continuous/latest.json`
+  en `489113c1f`) resuelve desde main.
 
 ## Decisiones de Nicolás antes del sello
 
@@ -197,6 +201,13 @@ del veto las protegidas sólo del OCR de Suomi NPP anteriores al 2026-10-09 (`ex
   D5 se contesta «No» y entran juntos, el revert apaga también la guardia y su vigilancia: hay que decirlo en el issue.
   Comprobación después del revert: `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
   print(p.ENABLE_MODIS_CODIGO_MIROVA)"` debe dar `False` (A89).
+- **Sólo con commit de merge (ronda 5, VB4-01).** B se mergea con el botón de merge commit de GitHub
+  (`gh pr merge 934 --merge --match-head-commit <sha>`) o `git merge --no-ff`; **nunca fast-forward ni «Rebase and
+  merge»**: B está hoy adelante de main sin divergencia, así que un merge sin `--no-ff` no deja commit que revertir, y
+  el VB4 midió que entonces `git revert -m 1` de la punta deja el flag en `True` y `git revert main..B` falla en el merge
+  interno. Si aun así entró por fast-forward o rebase, se revierte el rango de commits de B (`git revert -m 1` sobre
+  cada merge interno y `git revert` simple sobre el resto) o se escribe a mano un commit que deje
+  `enable_modis_codigo_mirova: false`, y la comprobación A89 decide.
 - **B entra por merge commit (ronda 4, VB3-08).** El repo mezcla squash (#932) y merge commit (#933); el `-m 1` de
   arriba supone que B entra con merge commit, y así se mergea. Si B hubiera entrado por squash, se revierte el commit
   del squash con `git revert <sha>`, sin `-m` (el git 2.53 de hoy ignora el `-m` en un commit que no es merge; uno
@@ -320,8 +331,9 @@ El revert apaga el flag pero no deshace los datos (V1-02, 207). Tras él:
 6. **Esta regla (ronda 4).** Como entra a main con el PR B, el revert de B la borra de main y devuelve a «rama
    loop/activo» o «borrador» las citas que B corrigió; la guardia, su vigilancia y sus issues la siguen citando por esta
    ruta. En el mismo PR del revert, o el mismo día, se repone con
-   `git checkout <commit de merge de B> -- experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` y se le
-   agrega una marca con la fecha de la reversión.
+   `git checkout <commit de merge de B> -- experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` (si B
+   entró por squash, el sha del squash; si entró por fast-forward o rebase, la punta de B, §4.3) y se le agrega una
+   marca con la fecha de la reversión. Simulado por el VB4: tras el revert la reposición no re-enciende el flag.
 
 ## 5. Lista de los PR de encendido (sobre el modelo del paso 8 de K)
 
@@ -333,7 +345,8 @@ Según D5: **PR A** primero (guardia, vigilancia, lectores de la vía, regla) y 
   `scripts/revisar_guardia_modis.py`, `scripts/vigilancia_guardia_modis.py` con el texto del JSON publicado, las
   pruebas, el diseño y el informe del implementador; el texto viejo, cierto en su fecha, queda con marca A113 donde
   era documento). El perfil `pipeline/profiles/guardia_k_modis.yaml` conserva su comentario «rama loop/activo»: B no
-  toca `pipeline/` fuera del flag. B entra por merge commit (§4.3).
+  toca ese perfil (fuera del flag, B sólo cambia dos comentarios de `pipeline/process_modis.py`, sin efecto en el
+  código ni en el S8 del lector de V375-E; VB4-03). B entra por merge commit (§4.3).
 - ⚠️ **Ronda 3**: el PR A entró a main (#933) sin la regla, así que **entra con el PR B**, en la misma ruta y con el
   encabezado de sellada; el issue de `vigilancia-guardia-modis.yml` la cita y hoy apunta a una ruta que no existe en
   main (210). Los lectores de la vía y el 205 sí entraron con A (comprobado en `eb4ae1c96`). La ficha v1.18 de B se
@@ -464,7 +477,7 @@ vigilancia de la guardia y varias pruebas.
 | V1-02 | §4 sin paso para el día después: records de la vía en `data/`, ficha | Aplicado como §4.7 (datos, lectores, guardia, ficha v1.19, marcas A113); el apartado de los records convertido en pregunta (D7) |
 | 207 | Tres fechas del encendido; la re-escritura del NRT pone la primera observación hasta ~8 días antes del merge | Aplicado: §4.1 (encendido por escritura, franja por observación, retrospectiva salvo `borde_del_encendido`); §5 pide corregir «no se reprocesan datos anteriores» de la ficha v1.18; unificar las tres funciones queda para el código (no es texto de la regla) |
 | 210 | Constante inexistente, tag y línea viejos, issue que remite a una regla que no está en main | Aplicado: constante quitada (§4.1), tag y línea corregidos en el Anexo A, la regla entra a main (§5) |
-| VB3-01 | La regla no estaba en el PR B ni en main, y las citas de main a su ruta decían «rama loop/activo» o «borrador» | Aplicado: la regla entra en B en esta ruta (§5, marca de ronda 4) y B corrige esas citas; el perfil de la guardia queda como está porque B no toca `pipeline/` fuera del flag |
+| VB3-01 | La regla no estaba en el PR B ni en main, y las citas de main a su ruta decían «rama loop/activo» o «borrador» | Aplicado: la regla entra en B en esta ruta (§5, marca de ronda 4) y B corrige esas citas; el perfil de la guardia queda como está porque B no toca ese perfil |
 | VB3-02 | «Reversión limpia» medida sólo contra las claves de MxD03; el revert choca con clave pegada a `thresholds:` o al flag y con el final de `nrt.yml` | Aplicado en texto: §4.3 dice que puede chocar en cualquier hunk de B y cómo se resuelve. La prueba de B no se amplió y el paso de `nrt.yml` sigue último (cambios opcionales del VB3, no pedidos en esta ronda) |
 | VB3-03 | «Lo ve el monitor del NRT el mismo día» es sólo el job rojo; el monitor pide 3 corridas seguidas y rotula NASA o token | Aplicado: §4.4 (a) dice qué hace el monitor, que un gránulo malo puede dejar el NRT rojo hasta 8 días y que la sesión mira el paso «Revisar errores de MODIS en el log»; §6 (f) marcada |
 | VB3-04 | D6 necesita la procedencia tabla u OCR y el instrumento no la publica | Aplicado en texto: §4.3 dice cómo se mira a mano (CSV consolidado contra CSV del OCR de Mirova-v1). Publicar la fuente en la vigilancia queda como seguimiento, fuera de esta regla |
@@ -472,3 +485,7 @@ vigilancia de la guardia y varias pruebas.
 | VB3-06 | Citas que no resuelven desde main; tag y merge-base viejos; `sombra_34` omitido | Aplicado: nota «Dónde vive la evidencia», marcas de rama o de «fuera de git» en cada cita, `resultado_f4.json` localizado (ruta completa, mismo sha256), merge-base de hoy en §5, `sombra_34` en §2 |
 | VB3-07 | La ficha v1.18 no decía que una excepción de la vía deja la pasada sin record y el NRT en rojo | Aplicado en B (en la ficha, no en esta regla) |
 | VB3-08 | La regla mandaba `git revert -m 1` sin decir que B no puede entrar por squash | Aplicado: §4.3, B entra por merge commit; si entró por squash, `git revert <sha>` sin `-m` |
+| VB4-01 | B es fast-forward sobre main; un merge sin `--no-ff` o «Rebase and merge» no deja commit que revertir | Aplicado: §4.3 «Sólo con commit de merge», y el sha alternativo en §4.7 punto 6 |
+| VB4-02 | La nota decía que la bitácora y el programa por sensor resuelven desde main; lo citado está sólo en `loop/activo` | Aplicado: nota «Dónde vive la evidencia» |
+| VB4-03 | «B no toca `pipeline/` fuera del flag» era inexacto (dos comentarios de `process_modis.py`) | Aplicado: §5 y fila VB3-01 |
+| VB4-04 | `vigilancia_guardia_modis.py` decía «borrador, propuestas que fija Nicolás al sellar»; el cuerpo del PR no conocía la ronda 4 ni el tag nuevo | Aplicado: comentario del script y cuerpo del PR B |
