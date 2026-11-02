@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 16:32 UTC (S173): #935 mergeado con frase de Nicolás
+- Frase «Sí, mergear #935». CI `pytest` verde (6m8s), CLEAN; `gh pr merge 935 --squash --match-head-commit b0b7374bb`;
+  squash `438a010ab` en main a las 16:32:16 UTC, comprobado con `gh api .../commits/main`. Las sombras salen del sitio
+  en el próximo deploy. El implementador de B fue avisado de mergear origin/main antes de su suite final.
+
 ### 2026-11-02 16:29 UTC (S173): verificador VB3 (Fable): regla SELLABLE CON CAMBIOS, B MERGEABLE CON CAMBIOS
 - Informe `C:/Users/nmend/vrp-wt/ver_s173_regla3_b/INFORME.md` (Fable, esfuerzo declarado MEDIO). Bloquea B sólo
   VB3-01: la regla no está en B ni en main y 7 de 10 citas de main la dan por «loop/activo» o «borrador». Lo demás es
