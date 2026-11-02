@@ -117,7 +117,11 @@ def test_grilla_de_375_es_la_que_guardo_el_lote():
 def test_caja_de_375_es_la_del_brazo_c13_en_los_volcanes_con_grilla():
     import brazos as BR
     V = _volcanes()
-    con_grilla = [n for n in V if MV.grilla_del_volcan(n, paso_m=375.0) is not None]
+    # S172: desde la sombra de los 34 los 45 volcanes tienen grilla; el brazo C13 de V375-B/C se fijó sobre los 11
+    # Tier A (los que traen inner_radius_km del KML de MIROVA, que brazos.caja necesita), y se compara sobre ellos.
+    assert sum(MV.grilla_del_volcan(n, paso_m=375.0) is not None for n in V) == 45
+    con_grilla = [n for n in V if MV.grilla_del_volcan(n, paso_m=375.0) is not None
+                  and V[n].get("inner_radius_km") is not None]
     assert len(con_grilla) == 11
     for nombre in con_grilla:
         v = V[nombre]
