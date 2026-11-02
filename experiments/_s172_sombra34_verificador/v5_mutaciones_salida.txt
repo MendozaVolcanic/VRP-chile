@@ -1,0 +1,13 @@
+ATRAPADA    | CTRL: sintaxis rota en vigilar_sombra_34.py | 1s | ["E       SyntaxError: unmatched ')'", 'FAILED tests/test_sombra_34_s172.py::test_vigilancia_espera_ok_y_ciega -   Fi...', '1 failed, 49 deselected in 0.53s']
+ATRAPADA    | G1 Hudson x0 +5000 m | 2s | ["E           AssertionError: ('Hudson', 32.66665985191614, 26.666716377066294)", 'FAILED tests/test_sombra_34_s172.py::test_cada_uno_de_los_34_tiene_grilla_centrada_en_su_crater[VIIRS750]', '1 failed, 4 passed in 0.87s']
+ATRAPADA    | G2 Lascar (Tier A) y0 +1 m | 1s | ["E       AssertionError: assert '92643ca82bae...bb9505057bb3b' == 'da755f3e7fc7...1c5e398c42636'", 'FAILED tests/test_sombra_34_s172.py::test_las_11_entradas_de_main_no_cambiaron_ni_un_byte', '1 failed, 1 passed in 0.58s']
+ATRAPADA    | G3 Mocho-Choshuenco epsg 32718->32719 | 2s | ['E           AssertionError: MochoChoshuenco', 'FAILED tests/test_sombra_34_s172.py::test_cada_uno_de_los_34_tiene_grilla_centrada_en_su_crater[VIIRS750]', '1 failed, 4 passed in 1.22s']
+NO ATRAPADA | G4 Antuco roi_v750 def->sens | 33s | ['52 passed in 32.55s']
+ATRAPADA    | G5 Taapaca centro_lat 0.5 grados corrido (V750) | 29s | ["E       AssertionError: ('Taapaca', 'VIIRS375')", 'FAILED tests/test_sombra_34_s172.py::test_la_via_acepta_la_grilla_y_encuentra_el_foco_en_el_crater[25]', '1 failed, 32 passed in 27.73s']
+Traceback (most recent call last):
+  File "D:\vrp-trabajo\temporales\ver_s172_sombra34\v5_mutaciones.py", line 39, in <module>
+    mut("G6 grilla de Hudson borrada (queda sin grilla)", G, "  Hudson:              {epsg: 32718, x0: 657469.5, y0: 4915059.4, centro_lat: -45.90000, centro_lon: -72.97000, roi_v750: def}\n", "")
+  File "D:\vrp-trabajo\temporales\ver_s172_sombra34\v5_mutaciones.py", line 22, in mut
+    assert viejo in s, f"{nombre}: patron no encontrado en {path}"
+           ^^^^^^^^^^
+AssertionError: G6 grilla de Hudson borrada (queda sin grilla): patron no encontrado en pipeline/grillas_mirova.yaml

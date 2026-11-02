@@ -1,0 +1,9 @@
+ATRAPADA    | G6 grilla de Hudson borrada (queda sin grilla) | 1s | ["E       AssertionError: assert {'AntillancaC...Quizapu', ...} == {'AntillancaC...Quizapu', ...}", 'FAILED tests/test_sombra_34_s172.py::test_la_grilla_tiene_los_45_y_nada_mas', '1 failed, 2 passed in 0.71s']
+ATRAPADA    | W1 cron dentro de la ventana del NRT (7 5) | 39s | ["E       AssertionError: assert ['7 5 * * *'] == ['7 13 * * *']", 'FAILED tests/test_sombra_34_s172.py::test_workflow_on_entre_comillas_con_schedule_y_dispatch', '1 failed, 44 passed in 37.98s']
+Traceback (most recent call last):
+  File "D:\vrp-trabajo\temporales\ver_s172_sombra34\v5_mutaciones.py", line 45, in <module>
+    mut("W2 EARTHDATA_USERNAME agregado", WF, "EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}\n          VRP_MEDIR", "EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}\n          EARTHDATA_USERNAME: x\n          VRP_MEDIR")
+  File "D:\vrp-trabajo\temporales\ver_s172_sombra34\v5_mutaciones.py", line 25, in mut
+    assert viejo in s, f"{nombre}: patron no encontrado en {path}"
+           ^^^^^^^^^^
+AssertionError: W2 EARTHDATA_USERNAME agregado: patron no encontrado en .github/workflows/sombra-34.yml
