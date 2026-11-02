@@ -1,0 +1,48 @@
+MIROVA publicó y nosotros no es un evento que el operador no ve; una publicación donde MIROVA calló es
+una falsa alarma que le enseña a desconfiar. Las dos fallas cuestan, pero no igual en todo el rango de
+energía: arriba de 1 MW perder una alerta no tiene compensación posible.
+
+1. **En la réplica no se acepta ningún cambio que pierda una alerta protegida.** Nicolás lo dijo como
+   «una alerta que MIROVA clasifique de Bajo para arriba»; el corte de 1 MW es la operacionalización
+   hecha en la tarea 0.2 (PR #780), sostenida por el banner de MIROVA de hoy (ningún VERY LOW llega a
+   1 MW, ningún LOW queda bajo 1 MW) y **no por el paper**, cuya figura 11 se contradice con su pie.
+   ⚠️ **S160, sobre el 439 y el 992 de este punto** (hallazgo 283 de `experiments/_s160_audit/f4/INFORME.md`,
+   CONFIRMADO EN PARTE en `experiments/_s160_audit/v4/INFORME.md` §3): los dos números se reproducen exactos
+   sobre la unión de la referencia del 2026-10-14 (`03c44eed7`); sobre la de main `d516b9d8c` dan 478 y 1.055, de
+   las cuales 437 y 993 son hasta el 2026-10-13 (corpus vivo, A90; `experiments/_s160_audit/v4/v_283_d4_en_su_fecha.txt`).
+   Lo que decide es la definición, no el número. Ojo: `scripts/clase_mirova.py` cuenta las protegidas siempre
+   sobre la unión, aunque se le pase `--cons` o `--ocr` (V4-03).
+   **Rige la lectura A, decidida por Nicolás el 2026-10-14 (D-4, issue #782 cerrado)**: una pasada
+   de la referencia es **alerta protegida** si es alerta (`ALERTA_TERMICA` del consolidado o
+   `ALERTA_TERMICA_OCR`) y su VRP de la pasada es de **1 MW o más**, recalculado desde el VRP y nunca
+   leído de la columna `Clasificacion Mirova`, que la escribe el scraper de Mirova-v1 y no MIROVA (439
+   pasadas en la unión histórica). La lectura B (toda pasada en que MIROVA ve 1 MW o más, a cualquier
+   distancia, 992 pasadas) quedó descartada; los evaluadores que ya la calculan la siguen imprimiendo
+   como dato informativo, pero no decide. Definición, control y denominadores:
+   `docs/S151_CRITERIO_CLASE_MIROVA.md` §2, §3 y §5.
+2. ⚠️ **Precisada por D-9 (2026-10-15, punto 5)**: «Muy Bajo» empieza arriba de 0,05 MW en VIIRS 375; las
+   alertas del scraper de 0,05 MW o menos son pasadas que el banner llama NONE y cuentan como «MIROVA no vio
+   nada». Texto original:
+   **Dentro de «Muy Bajo»** (alertas bajo 1 MW, VERY LOW en el banner de MIROVA), **una alerta perdida
+   y una publicación de más pesan igual**: se minimiza la suma de los dos errores.
+3. **Se mide en las dos direcciones, por sensor y por tramo de calidad de la referencia (A119)**, con
+   tres métricas: recall de las alertas de MIROVA, publicación en negativos limpios (pasadas donde
+   MIROVA miró y no vio nada) y razón de magnitud contra MIROVA.
+4. Los umbrales de cada prueba salen de los datos de MIROVA, no se eligen (A115).
+5. ⚠️ **Agregado por D-9, decidida por Nicolás el 2026-10-15 (issue #811): las alertas mínimas cuentan
+   como «MIROVA no vio nada» (regla SN).** El scraper llama ALERTA a todo VRP mayor que cero, pero en
+   VIIRS 375 el banner de MIROVA dice NONE en las 14 pasadas observadas de 0,04 MW o menos y VERY LOW en
+   las de 0,06 MW o más; en 0,05 exacto sale de los dos lados (`experiments/_s151_alertas_minimas/README.md`
+   §2). Una pasada de VIIRS 375 cuyas alertas del scraper tienen todas **0,05 MW o menos** (sin ninguna otra
+   alerta por encima de eso a menos de 120 s, así que una protegida nunca se toca) no es «Muy Bajo»:
+   cuenta como pasada en que MIROVA no vio nada, y si la noche no tiene otra alerta es negativo limpio
+   (regla 3). Las protegidas no cambian. Como Nicolás pidió probar todas las opciones, cada evaluación
+   informa además SE (estrato aparte), la regla original y la variante con 0,05 exacto como alerta
+   (umbral 0,04), y dice si algún veredicto cambia. Un pre-registro sellado antes de D-9 decide con la
+   regla que tenía e informa las otras. Función única: `scripts/clase_mirova.py::aplicar_regla_minimas`.
+   Detalle: `docs/S151_CRITERIO_CLASE_MIROVA.md` (nota D-9) y
+   `experiments/_s151_alertas_minimas/veredictos_tres_reglas.md`.
+
+## Las 3 preguntas vinculantes
+
+**Antes de implementar cualquier feature, fix, threshold, exclusion, path,

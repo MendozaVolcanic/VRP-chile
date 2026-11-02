@@ -1,0 +1,71 @@
+## 6 bis. Regla de posición (escrita antes de ver los datos; se aplica antes del §6)
+
+Los tres brazos de posición se comparan contra lo que publica MIROVA. La vara es la de §5 más las pasadas lejanas:
+
+- **E_lejana**: pasadas `far_ref` en que el brazo publica (MIROVA vio el calor y lo ubicó lejos del cráter; publicarlo
+  como cumbre es publicar de más). Entra a la prueba de signos sumada a E, en el mismo bloque noche-volcán: **P2'** es
+  la prueba de signos de D-45 sobre E + E_lejana.
+- **Elegible**: P1 = 0 en T y en O, con la tabla sola y con tabla más OCR (la misma condición de P1 del §6.2).
+- **Gana**: un elegible distinto de P (radiante) que en P2' contra P, sobre T ∪ O con el canal que decide, da GANA, y
+  que con la tabla sola no es peor que P (GANA o EMPATE, o SIN SUSTRATO con el neto en 0 o a favor). Si ganan los dos,
+  el de menor E + E_lejana; a igual valor, P-pico (la distancia de MIROVA calza mejor con el pico, S165).
+- **Si ninguno gana**: P (radiante), si es elegible. Razón: es lo que hace hoy la vía y lo que midió el censo, y a igual
+  desempeño no se cambia sin evidencia.
+- **Si P no es elegible**: el elegible que no es peor que P en P2' ni con el canal que decide ni con la tabla sola; si
+  son los dos, el de menor E + E_lejana y a igual valor P-pico. Si ninguno: NINGUNA POSICIÓN ELEGIBLE, y P no se adopta.
+- El §6 se evalúa después sobre P con la posición elegida (en adelante, «P» es ese brazo).
+- **Multiplicidad**: dos contrastes contra P, cada uno al 5 % de una cola, sin corregir; se declara que la probabilidad
+  de que alguno gane sólo por azar es mayor que 5 %.
+- **Descriptivas, no deciden**: las pasadas que cambian de publicación contra P, por nombre y etiqueta; en las
+  pasadas lejanas, cuántas tienen algún alertado (un cero de E_lejana sin alertados no dice nada); y la distancia de
+  cada brazo desde la celda central de la grilla contra la `Distancia_km` de MIROVA (OCR sólo desde el 2026-06-13,
+  A119; diferencia de radios, A93).
+
+## 6 ter. Regla N-3 (agregada el 2026-10-28, antes de ver los datos; programa §12.0, §12.1 y §12.5)
+
+Nicolás decidió (S166) que las alertas sólo del OCR de Suomi NPP anteriores al 2026-10-09 se informan aparte y no
+deciden: en el auto-audit (#924) y en V375-E (§8.13 de su pre-registro, sellado el 2026-10-28). Aquí se aplica lo mismo:
+
+- **Qué pasadas**: protegida (`protegida`), sin alerta de la tabla (`alerta_tabla` falso, o sea que la protegida
+  existe sólo por el OCR), de Suomi NPP (`sensor == "VIIRS_SNPP_750"`) y con `hora_utc` anterior al 2026-10-09.
+- **Qué cambia**: no vetan. No cuentan en el P1 de la elegibilidad del §6 bis ni en el P1 del §6.2 (ninguna de sus
+  dos ramas: la protegida que K publica y P no, ni la protegida de MIROVA que P no publica). Con la tabla sola nunca
+  contaban, porque no tienen alerta de la tabla; la regla sólo toca el canal de tabla más OCR.
+- **Qué no cambia**: la magnitud M (§6.2) y E. Una protegida no entra a E, y la regla habla sólo del veto, igual que
+  en V375-E. La sombra (§4.3) empieza el 2026-11-03, después del hito y del cese de Suomi NPP (2026-11-02), así que no
+  tiene pasadas de esta clase.
+- **Cómo se informa**: el analizador las lista aparte por nombre (volcán, hora, cuál brazo las publica) y, por cada
+  brazo, imprime el P1 que veta sin ellas al lado del P1 que las cuenta todas. Una pérdida de esta clase se ve, pero no
+  bloquea.
+- **Implementación**: después del medidor completo que corre sobre el analizador sin N-3 (no se edita el analizador
+  mientras corre, A112), con escenarios rojos antes del cambio y mutaciones que deshagan la regla, atrapadas por
+  aserción.
+
+## 6. Regla de adopción (escrita antes de ver los datos)
+
+P (con la posición elegida en el §6 bis) se propone a Nicolás para producción (A45) si y sólo si:
+
+1. **Equivalencia** (§4.1): 0 pasadas distintas fuera de la banda de triangulación, en local y en el runner; **6 de 6**
+   mutaciones atrapadas por aserción (las seis del §4.1) y la de control como caída. ⚠️ **Enmienda E-1 (2026-11-01)**:
+   en local, la vía VERDE contra MATLAB en las 311 escenas de O2 con las 8 mutaciones de la vía atrapadas y el control
+   como caída; VERDE en las 16 sintéticas con las dos mutaciones de esos caminos atrapadas en las escenas de su tipo; y
+   E1 y E3 de `equivalencia_v750a.py` VERDES sobre la vía, con las 6 mutaciones atrapadas por su pieza y la ablación sin
+   mutar pasando (§4.1, enmienda E-1; E1 agregado tras VS172-06). (L2, resuelta por D-48: este punto
+   decía «5 de 5», un resto de cuando la prueba tenía cinco.)
+2. **Censo** (§4.2), en T y en O, con la tabla sola **y** con tabla más OCR:
+   - P1 = 0 (ninguna protegida que K publica y P no; ninguna protegida de MIROVA que P no publique, fuera de las que K
+     tampoco publica, que se listan);
+   - P2 de P contra K: GANA o EMPATE (no PIERDE ni BLOQUEA);
+   - M: mediana de la razón P/MIROVA entre 0,9 y 1,1 (bordes incluidos) en **todas las protegidas que P publica**, con
+     VRP de P y de MIROVA mayores que 0, publique K o no; y el comparador separa a P de K×1,2. (L4, resuelta por D-48:
+     la calibración que se exige es la de P. Si P publica al doble de MIROVA justo en las protegidas que K no ve, eso
+     es un defecto de P, y una razón restringida a las que también publica K lo escondería. La razón sobre las que
+     publican K y P, que es el conjunto del comparador, se imprime al lado y no decide.)
+3. **Sombra** (§4.3): P1 = 0; si hay sustrato, P2 no PIERDE.
+4. Los controles de §7 en verde.
+
+Si 1 falla, se arregla la vía y se repite §4.1 (no se mira el censo). Si 2 falla sólo en P2 por la ventana O y no por
+la T, se informa por canal antes de decidir (el OCR es la parte menos creíble de la referencia). Si P no se adopta,
+V750-D (Kgeo) pasa a tener su propio A/B (programa §3).
+
+## 7. Controles (antes de leer el veredicto)

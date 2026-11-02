@@ -1,0 +1,255 @@
+# -*- coding: utf-8 -*-
+"""Banco de paridad por pasada con negativos (Fase 0, tarea 3 del plan de paridad S139).
+
+POR QUE. La brecha con MIROVA no es de recall: en 874 de 877 noches de volcan con alerta
+publicamos algo. Es de SOBRE-PUBLICACION: en noches que MIROVA miro sin ver nada, VIIRS 375
+publicaba en ~2 de cada 3 pasadas (S139, docs/audit_s139/VERIFICADOR.md). Para medir eso hacen
+falta negativos, y el negativo mas limpio que existe es POR PASADA: si MIROVA listo ESE granule con
+VRP 0, lo proceso y no vio nada; si nosotros publicamos ahi, la divergencia es de ese granule y no
+de pasadas que la referencia se salto.
+
+QUE MIDE, por sensor y por volcan, en dos unidades (la pasada y la noche de volcan, que es como el
+operador vive una alerta, A94):
+  * recall en positivos (pasadas con ALERTA de MIROVA, consolidado u OCR);
+  * tasa de publicacion en negativos limpios (spec §3.1: granule MIROVA con VRP 0, nocturno, sin
+    ALERTA ni FALSO_POSITIVO esa noche y sensor, con record nuestro a +-2 min). Se informa tambien
+    la variante estricta del verificador S139 (sin ALERTA ni FP en la noche del volcan, cualquier
+    sensor), para que el 63,5 % de S139 siga siendo comparable;
+  * `far_ref` (pedido de Nicolas 2026-09-14): FALSO_POSITIVO de MIROVA = calor fuera del limite del
+    volcan, sin informacion para el crater. Sirve de control positivo de nuestras `far`: si MIROVA
+    vio un foco lejano y nosotros no, es una perdida real (incendio o foco excentrico).
+"Publica" = predicado del dashboard EJECUTADO con node desde frontend/index.html (nunca portado),
+con el sha de ese archivo en la salida. _mirova_confirmed = false siempre: la etiqueta no puede
+entrar al predicado.
+
+LAS DOS PREGUNTAS DEL INSTRUMENTO.
+  P1 (si lo medido estuviera roto, lo veria): controles todo_publica / nada_publica sobre el mismo
+     denominador dan 1 y 0; el oraculo (campo = etiqueta) da AUC 1.
+  P2 (instrumento muerto): identidad del predicado contra los casos del guard S139; barajar las
+     etiquetas dentro de cada volcan lleva el AUC a 0,5 (media de 50 barajados; el AUC agrupado NO
+     sirve de control porque mezcla volcanes con distinta tasa de positivos, Simpson); las pasadas sin
+     fila de referencia van a `sin_info` y nunca al denominador.
+
+ORIGEN. Funciones copiadas sin reescribir de experiments/_s139_audit/eje2/banco_noches.py (bucket,
+inner_desde_html, _JS, correr_node, control_identidad_predicado, auc) y del verificador
+v1_negativo_por_pasada.py (zbin; `parear` cambia: devuelve TODAS las filas de la ventana, no la mas
+cercana, porque una misma pasada puede tener fila CONS y fila OCR). Esos scripts no se tocan: son el
+registro historico.
+"""
+from __future__ import annotations
+
+import argparse
+import bisect
+import collections
+import json
+import os
+import random
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+T0 = time.time()
+def indexar_referencia(filas, coords, ventana, regla_minimas="original", umbral_minima_mw=None):
+    """Filas nocturnas en ventana, indexadas por (volcan, sensor) y resumidas por noche.
+
+    `regla_minimas` (decision D-9, issue #811): "SN", "SE" u "original", aplicada por
+    `clase_mirova.aplicar_regla_minimas` antes de indexar (el resumen por noche ya la ve). Aca el valor por
+    defecto es "original" A PROPOSITO: este etiquetador lo comparten mas de 70 scripts de resultados ya
+    publicados, que tienen que reproducirse tal cual. La regla decidida es SN; un evaluador nuevo pasa el modo
+    explicito e informa los tres (`docs/S151_CRITERIO_CLASE_MIROVA.md` §D-9).
+    """
+    # A119 (S149): la referencia no tiene la misma calidad todo el ano. El aviso lo da el cargador,
+    # no la memoria de nadie. Solo imprime a stderr; no cambia ninguna fila ni ninguna etiqueta.
+    try:
+        from calidad_referencia_mirova import avisar as _avisar_calidad
+    except ImportError:
+        from scripts.calidad_referencia_mirova import avisar as _avisar_calidad
+    _avisar_calidad(ventana[0], ventana[1])
+    if regla_minimas != "original":
+        kw = {} if umbral_minima_mw is None else {"umbral_mw": umbral_minima_mw}
+        filas = aplicar_regla_minimas(filas, regla_minimas, **kw).filas
+    por_vb = collections.defaultdict(list)
+    noche_sensor = collections.defaultdict(lambda: {"alerta": False, "fp": False})
+    noche_volcan = collections.defaultdict(lambda: {"alerta": False, "fp": False})
+    n = 0
+    for f in filas:
+        noche = f["fecha_utc"][:10]
+        if not (ventana[0] <= noche <= ventana[1]):
+            continue
+        dt = datetime.strptime(f["fecha_utc"][:19], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        lat, lon = coords[f["volcano"]]
+        if es_pasada_diurna_descartada(f["sensor_bucket"], lat, lon, dt):
+            continue
+        n += 1
+        por_vb[(f["volcano"], f["sensor_bucket"])].append((dt, f))
+        for d in (noche_sensor[(f["volcano"], f["sensor_bucket"], noche)], noche_volcan[(f["volcano"], noche)]):
+            d["alerta"] |= es_alerta(f["tipo"])
+            d["fp"] |= es_fp(f["tipo"])
+    for v in por_vb.values():
+        v.sort(key=lambda x: x[0])
+    return por_vb, noche_sensor, noche_volcan, n
+
+
+def parear(lista, t, tol=TOL_S):
+    """Todas las filas de referencia a +-tol segundos de t (lista ordenada de (dt, fila))."""
+    ts = [x[0] for x in lista]
+    i = bisect.bisect_left(ts, t - timedelta(seconds=tol))
+    out = []
+    while i < len(lista) and lista[i][0] <= t + timedelta(seconds=tol):
+        out.append(lista[i][1])
+        i += 1
+    return out
+
+
+# ---------------------------------------------------------------- nuestros records
+def cargar_nuestros(coords, inner, ventana, data=None):
+    """`data`: carpeta de los JSON (por defecto la de produccion). S156: la vigilancia de la sombra la usa
+    con data/experimental_v2 para aplicar el MISMO predicado del tablero a los records del laboratorio."""
+    recs, casos = [], []
+    for vol in VOLS:
+        with open((DATA if data is None else Path(data)) / f"{vol}.json", encoding="utf-8") as fh:
+            d = json.load(fh)
+        for r in d["records"]:
+            b = bucket(r.get("sensor"))
+            if b is None or not (ventana[0] <= r.get("datetime_utc", "")[:10] <= ventana[1]):
+                continue
+            try:
+                dt = datetime.strptime(r["datetime_utc"], "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+            except (KeyError, ValueError):
+                continue
+            lat, lon = coords[vol]
+            if es_pasada_diurna_descartada(b, lat, lon, dt):
+                continue
+            pc = r.get("primary_cluster") or {}
+            recs.append({"vol": vol, "b": b, "dt": dt, "noche": dt.strftime("%Y-%m-%d"),
+                         "dc": r.get("distance_class"), "pc_vrp": pc.get("vrp_mw"),
+                         "pc_dist": pc.get("centroid_dist_km"), "z": r.get("sensor_zenith_deg"),
+                         # S156: aditivo. El codigo que escribio el record (marca de S151): el auto-audit
+                         # separa con esto los detectores C0 y K (AUDIT_S155 F3-02). Ninguna etiqueta lo usa.
+                         "sha": (r.get("regimen") or {}).get("codigo_sha"), "sensor": r.get("sensor"),
+                         "perfil": (r.get("regimen") or {}).get("perfil")})
+            slim = {k: r.get(k) for k in CAMPOS_JS if k != "anomaly_pixels"}
+            if r.get("f5_core_vrp_mw") is None:
+                slim["anomaly_pixels"] = [{k: p.get(k) for k in ("lat", "lon", "vrp_mw", "bt_k")}
+                                          for p in (r.get("anomaly_pixels") or [])]
+            casos.append([slim, inner[vol]])
+    pred = correr_node(casos) if casos else []
+    for rec, p in zip(recs, pred):
+        rec["disp"], rec["pub"] = p[3], p[4]
+    return recs
+
+
+def etiquetar(recs, por_vb, noche_sensor, noche_volcan):
+    """Etiqueta cada pasada nuestra: pos | far_ref | neg_limpio | sin_info."""
+    for r in recs:
+        filas = parear(por_vb.get((r["vol"], r["b"]), []), r["dt"])
+        ns = noche_sensor.get((r["vol"], r["b"], r["noche"]), {"alerta": False, "fp": False})
+        nv = noche_volcan.get((r["vol"], r["noche"]), {"alerta": False, "fp": False})
+        r["dist_ref"] = None
+        r["neg_estricto"] = False
+        # S149: dos campos ADITIVOS, no cambian ninguna etiqueta. `rutina_pasada`: la tabla de MIROVA
+        # lista ESTA pasada con VRP 0 (fila RUTINA del consolidado), haya o no alerta en otra pasada
+        # de la noche. El negativo limpio exige ademas una noche sin alerta, asi que una RUTINA en
+        # noche con alerta cae en sin_info y el evaluador no la veia (docs/S149_COSTO_OCULTO_MAX.md).
+        r["rutina_pasada"] = any(f["tipo"] == "RUTINA" and f["source"] == "CONS"
+                                 and (f["vrp_mw"] or 0) == 0 for f in filas)
+        r["noche_con_alerta_sensor"] = bool(ns["alerta"])
+        alertas = [f for f in filas if es_alerta(f["tipo"])]
+        if alertas:
+            # D-9, modo SE: si todas las alertas de la pasada son minimas, la pasada va a un estrato aparte
+            # ("minima"): ni alerta ni negativo. La noche no cambia, porque TIPO_MINIMA_SE empieza por ALERTA.
+            r["lab"] = "minima" if all(f["tipo"] == TIPO_MINIMA_SE for f in alertas) else "pos"
+        elif any(es_fp(f["tipo"]) for f in filas):
+            r["lab"] = "far_ref"
+            r["dist_ref"] = next((f["dist_km"] for f in filas if es_fp(f["tipo"]) and f["dist_km"] is not None), None)
+        elif (any(f["tipo"] == "RUTINA" and f["source"] == "CONS" and (f["vrp_mw"] or 0) == 0 for f in filas)
+              and not ns["alerta"] and not ns["fp"]):
+            r["lab"] = "neg_limpio"
+            r["neg_estricto"] = not nv["alerta"] and not nv["fp"]
+        elif any(es_sin_geometria(f["tipo"]) for f in filas) and not any(f["tipo"] == "RUTINA" for f in filas):
+            # V31.1: MIROVA vio calor en ESTA pasada pero no se sabe donde (la imagen de distancia era de
+            # otra). Estrato aparte: ni alerta ni negativo. Nunca le gana a una alerta, a un
+            # FALSO_POSITIVO ni a una RUTINA de la misma pasada (por eso va despues de las tres).
+            r["lab"] = "sin_geometria"
+        else:
+            r["lab"] = "sin_info"
+
+
+def alertas_sin_record(por_vb, recs):
+    """Pasadas con ALERTA nocturna de MIROVA sin record nuestro a +-2 min: cobertura, aparte."""
+    nuestros = collections.defaultdict(list)
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--snapshot", action="store_true", help="referencia desde el snapshot del repo (sin red)")
+    ap.add_argument("--inicio", default=INICIO_DEFECTO)
+    ap.add_argument("--fin", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+    ap.add_argument("--dest", default=str(ROOT / "experiments" / "_s140" / "_dl_referencia"))
+    ap.add_argument("--out", default=str(ROOT / "experiments" / "_s140" / "banco_paridad_out.json"))
+    a = ap.parse_args(argv)
+    ventana = (a.inicio, a.fin)
+
+    if a.snapshot:
+        cons, ocr = SNAP_CONS, SNAP_OCR
+        procedencia = {"fuente": "snapshot", "sha_cons": sha_git(SNAP_CONS), "sha_ocr": sha_git(SNAP_OCR)}
+    else:
+        info = bajar_remoto(Path(a.dest))
+        cons = Path(info["registro_vrp_consolidado.csv"]["path"])
+        ocr = Path(info["registro_vrp_ocr.csv"]["path"])
+        procedencia = {"fuente": "remoto", "commit_cons": info["registro_vrp_consolidado.csv"]["sha"],
+                       "commit_ocr": info["registro_vrp_ocr.csv"]["sha"]}
+    procedencia["sha_respaldo_20260408"] = sha_git(RESPALDO_20260408)
+    procedencia["sha_union_historica"] = sha_git(HISTORICO_RECUPERADAS)  # S150 tarea 0.1
+
+    coords = _coords_por_volcan()
+    inner = inner_desde_html()
+    identidad = control_identidad_predicado()
+    filas = cargar_referencia_unificada(cons, ocr)
+    por_vb, noche_sensor, noche_volcan, n_ref = indexar_referencia(filas, coords, ventana)
+    recs = cargar_nuestros(coords, inner, ventana)
+    etiquetar(recs, por_vb, noche_sensor, noche_volcan)
+    sin_record = alertas_sin_record(por_vb, recs)
+    por_sensor, por_volcan = resumen(recs, sin_record)
+
+    banco = {
+        "meta": {"ventana": list(ventana), "sha_index_html": sha_git(HTML), "referencia": procedencia,
+                 "inner_radius_km": inner, "n_filas_ref_nocturnas": n_ref, "n_records_nocturnos": len(recs),
+                 "etiquetas": dict(collections.Counter(r["lab"] for r in recs)),
+                 "tolerancia_pareo_s": TOL_S, "generado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                 "definiciones": {
+                     "pos": "pasada nuestra con fila ALERTA (CONS u OCR) nocturna a +-2 min",
+                     "far_ref": "pasada con fila FALSO_POSITIVO y sin ALERTA: sin informacion para el crater",
+                     "neg_limpio": "fila CONS RUTINA con VRP 0 a +-2 min, sin ALERTA ni FP esa noche y sensor",
+                     "neg_estricto_noche_volcan": "neg_limpio y sin ALERTA ni FP en la noche del volcan (verificador S139)",
+                     "sin_info": "resto, fuera de todo denominador",
+                     "noche_volcan": "pos si alguna pasada pos; neg si hay neg_limpio y ninguna pos ni far_ref; publica si alguna pasada publica",
+                     "nocturna": "store._reject_daytime por elevacion solar (auto_audit_weekly.es_pasada_diurna_descartada)"}},
+        "por_sensor": por_sensor,
+        "por_volcan": por_volcan,
+        "far_ref": metrica_far_ref(recs, noche_volcan),
+        "cenital_v375": cenital_neg_v375(recs),
+        "alertas_sin_record": {f"{v}|{b}": n for (v, b), n in sorted(sin_record.items())},
+        "controles": controles(recs, sin_record, identidad),
+    }
+    banco["meta"]["segundos"] = round(time.time() - T0, 1)
+    Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+    Path(a.out).write_text(json.dumps(banco, indent=1, ensure_ascii=False), encoding="utf-8")
+
+    print(json.dumps(banco["meta"]["referencia"], ensure_ascii=False))
+    print(f"ventana {ventana[0]} a {ventana[1]} | records nocturnos {len(recs)} | etiquetas {banco['meta']['etiquetas']}")
+    for b in BUCKETS + ["CUALQUIERA"]:
+        p, n = por_sensor[b]["pasada"], por_sensor[b]["noche_volcan"]
+        print(f"{b:10s} pasada: recall {p['recall_pos']} (n {p['n_pos']}) pub_neg {p['tasa_pub_neg']} (n {p['n_neg_limpio']}) "
+              f"estricto {p['tasa_pub_neg_estricto_noche_volcan']} (n {p['n_neg_estricto_noche_volcan']}) | "
+              f"noche: recall {n['recall_pos']} (n {n['n_pos']}) pub_neg {n['tasa_pub_neg']} (n {n['n_neg']})")
+    print("controles:", {k: v for k, v in banco["controles"].items() if k not in ("todo_publica", "nada_publica")})
+    print(f"listo en {banco['meta']['segundos']} s -> {a.out}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,46 @@
+### Tarea 0.2: perfil y workflow de la retrospectiva
+
+**Files:**
+- Create `pipeline/profiles/_s172_retro_paquete.yaml`
+- Create `tests/test_perfil_retro_paquete_s172.py`
+- Create `.github/workflows/reproc-retro-paquete.yml`
+
+**Por qué aparte.** La sombra escribe en `data/sombra_codigo_mirova/` y su lector la lee: mezclar ahí pasadas de 2025
+rompería su control de claves (S1) y abriría la carrera de A47. Y `reproc-chunked.yml` sin `pyproj` haría volver la
+vía a K en silencio (H10).
+
+- [ ] **Paso 1: tag defensivo** antes del primer edit (A45, aunque no toca producción):
+  `git tag pre-s172-retro-paquete origin/main && git push origin pre-s172-retro-paquete`.
+- [ ] **Paso 2: escribir la prueba que falla.**
+
+```python
+# tests/test_perfil_retro_paquete_s172.py
+"""El perfil de la retrospectiva es la sombra con otra carpeta, y nada más (H7: extends resuelve un nivel)."""
+import importlib
+import os
+import sys
+
+
+
+def _puede_diferir(nombre):
+    """Sólo la identidad del perfil y su carpeta."""
+    return nombre.startswith("PROFILE") or nombre == "DATA_SUBDIR"
+
+
+def _constantes(perfil):
+    os.environ["VRP_PROFILE"] = perfil
+    for m in [k for k in sys.modules if k == "pipeline.profile"]:
+        del sys.modules[m]
+    p = importlib.import_module("pipeline.profile")
+    return {k: getattr(p, k) for k in dir(p) if k.isupper()}
+
+
+def test_retro_igual_a_sombra_salvo_carpeta():
+    sombra = _constantes("sombra_codigo_mirova")
+    retro = _constantes("_s172_retro_paquete")
+    distintas = {k for k in sombra.keys() | retro.keys()
+                 if sombra.get(k) != retro.get(k) and not _puede_diferir(k)}
+    assert distintas == set(), distintas
+    assert retro["DATA_SUBDIR"] == "_s172_retro_paquete"
+    assert retro["ENABLE_V750_CODIGO_MIROVA"] and retro["ENABLE_V375_CODIGO_MIROVA"] and retro["ENABLE_MODIS_CODIGO_MIROVA"]
+```

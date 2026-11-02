@@ -1,0 +1,21 @@
+son 10 de Nevados de Chillán (la erupción, ya probada en #796), 1 de Planchón Peteroa y 1 de Láscar. Los otros
+nueve volcanes tienen 3 protegidas o menos en cada sensor y ventana. El 4,3 % detectable vale para lo que pasa en
+Láscar; en los demás volcanes el veto casi no puede fallar, y un CUMPLE ahí no dice que no se pierda nada.
+
+- **V1, 2026-08-29 a 2026-10-08** (41 días; régimen actual). Empieza después del 2026-08-28 23:00 UTC (#535,
+  A104), así que no mezcla regímenes. Es posterior al 2026-06-13: **decide la etiqueta con tabla y OCR** (A119).
+  Pisa el hito del 2026-10-09: hasta esa fecha, en las filas sólo del OCR de **Suomi NPP**, la distancia y la
+  clase ALERTA pueden ser de otra pasada (el VRP sí es el suyo; Mirova-v1#20, `docs/S150_IMAGENES_SNPP.md`).
+  Esas pasadas (9 protegidas en VIIRS 375 y 2 en VIIRS 750) **no deciden con la lectura A**: se listan y se
+  revisa la cabecera de la imagen antes de proponer nada. Con la lectura B sí deciden, porque B no usa ni la
+  clase ni la distancia. Trae a Chillán en erupción desde el 2026-09-28 y es la que aporta el costo: 906
+  negativos limpios MODIS (836 fuera de Láscar), 832 de VIIRS 375 y 1.303 de VIIRS 750. Termina el 2026-10-08
+  para que el producto estándar de NASA (3 a 5 días) esté publicado en todos los brazos al despachar.
+- **V2, 2026-03-01 a 2026-06-12** (104 días; poder del veto). Entera antes de #535 y antes del 2026-06-13, así
+  que **decide la tabla sola**: el evaluador reetiqueta de verdad, sacando las filas del OCR (una alerta sólo
+  del OCR no es positiva ni saca a la pasada de los negativos; S150, hallazgo H7). **VIIRS decide desde el
+  2026-04-01** (A119 b: antes la tabla exponía menos gránulos VIIRS por noche); MODIS, toda la ventana (A119:
+  MODIS completo desde marzo). Enero no se usa. Se despacha en dos mitades, V2a del 03-01 al 04-20 y V2b del
+  04-21 al 06-12, porque un job de 104 días con el Test 1 no cabe en el tope de 300 minutos con el margen de A15.
+  En V2 corren sólo C0 y K: en VIIRS, K es F (§2), y el gemelo se reemplaza por la repetición dirigida de §5.
+  **El VIIRS de F en V2 se deriva de K** (verificador, punto 3): el evaluador escribe el veredicto de F de V2 con

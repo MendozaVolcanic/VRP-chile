@@ -1,0 +1,20 @@
+2:[referencia MIROVA] la ventana 2026-03-01 a 2026-06-12 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+3:   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+4:   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+5:   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+6:   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+7:   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+9:   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+10:   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+11:== VENTANA V2: 2026-03-01 a 2026-06-12 | volcanes 11 | brazos ('C0', 'K') | decide la tabla sola (OCR reetiquetado fuera)
+15:== 0. SUSTRATO (pasadas nocturnas de C0, etiqueta del evaluador; en V2, VIIRS desde abril)
+17:   VIIRS375 pasadas  3396 | alertas  426 | protegidas A  38 (C0 publica  38; solo OCR Suomi NPP 0) | protegidas B  80 | negativos limpios  1010
+18:   VIIRS750 pasadas  3373 | alertas  117 | protegidas A  42 (C0 publica  42; solo OCR Suomi NPP 0) | protegidas B  46 | negativos limpios  1829
+40:      recuperada (C0 no la publica): Lascar|MODIS|2026-03-01 01:40 | MIROVA 1.81 MW
+41:      recuperada (C0 no la publica): Lascar|MODIS|2026-03-02 07:40 | MIROVA 1.64 MW
+42:      recuperada (C0 no la publica): Lascar|MODIS|2026-03-04 07:15 | MIROVA 2.28 MW
+43:      recuperada (C0 no la publica): Lascar|MODIS|2026-03-05 07:55 | MIROVA 1.95 MW
+44:      recuperada (C0 no la publica): Lascar|MODIS|2026-03-06 01:35 | MIROVA 1.42 MW
+45:      recuperada (C0 no la publica): Lascar|MODIS|2026-03-07 07:35 | MIROVA 2.7 MW
+46:      recuperada (C0 no la publica): Lascar|MODIS|2026-03-09 01:55 | MIROVA 2.02 MW
+47:      recuperada (C0 no la publica): Lascar|MODIS|2026-03-09 07:10 | MIROVA 1.38 MW

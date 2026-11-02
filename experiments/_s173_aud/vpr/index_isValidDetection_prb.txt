@@ -1,0 +1,34 @@
+// triggered_test1 S29+, vrp_vent edge cases). Centralizar acá evita que
+// fallbacks tipo `r.vrp_mir_mw ?? 0` re-aparezcan en nuevos paneles y
+// re-inflen records descartados por el pipeline (`vrp_mw=0 + discarded_reason`).
+function isValidDetection(r) {
+  // S139 (decisión S138-H, hallazgo P5 del verificador S138): con cúmulo, detección válida
+  // exige que el cúmulo tenga energía, que es la misma magnitud que publica mirovaEqVrp. Antes
+  // bastaba `triggered_test1`, y un cúmulo en 0,0 MW contaba en el contador del cráter, las
+  // pastillas y la corroboración mientras el gráfico lo mostraba en cero (familia A46). Medido
+  // S139: 2.219 records; en noches de volcán sólo 161 se quedan sin detección y MIROVA publicó
+  // en 1. Guard: tests/test_isvaliddetection_coherencia_s139.py. Records legacy sin cúmulo
+  // (pre-S27) conservan la regla antigua.
+  if (r?.primary_cluster) return (r.primary_cluster.vrp_mw ?? 0) > 0;
+  if ((r?.vrp_mw ?? 0) > 0) return true;        // detección eruption-path / suma indistinta legacy
+  if (r?.triggered_test1 === true) return true;  // detección Test 1 integrated-ROI (Coppola 2015)
+  return false;
+}
+
+function isSummitDetection(r) {
+  // S29 fix bug 8: si el record fue descartado por el pipeline (vrp_mw=0 y
+  // discarded_reason no nulo), NO contar como detección summit aunque el
+  // distance_class lo diga — el cluster que disparó es el descartado.
+  if ((r.vrp_mw ?? 0) === 0 && r.discarded_reason && !r.triggered_test1) return false;
+  if (r.distance_class === "summit") return true;
+  if (r.distance_class === "far") return false;
+  return (r.vrp_vent_mw ?? 0) > 0;
+}
+function esAnclaHonesta(fuente) { return ["ctx_cluster", "test1_roi", "test1_nti_peak", "codigo_mirova"].includes(fuente); } // S172 (MA172-102): fuentes cuyo final_hotspot es el ancla oficial del record (codigo_mirova = centroide del cúmulo más radiante de la vía); un solo lugar para las siete llamadas (A102), en la línea que estaba en blanco para no correr las citas archivo:línea. Guard: tests/test_tablero_ancla_codigo_mirova_s172.py
+// Puntos del mapa de detalle para un record, el primero es el marcador que se dibuja por defecto.
+// S106 ancla honesta: cuando el pipeline ancló el record (final_hotspot_source = test1_roi, test1_nti_peak o
+// ctx_cluster) el marcador PRIMARIO es esa ancla. S154 (D-24, aprobado por Nicolás el 2026-10-18): ctx_cluster
+// se agrega a la lista porque su final_hotspot ES el centroide del cúmulo publicado, mientras que
+// anomaly_pixels[0] es el píxel de más energía de toda la escena y puede caer a 25 km (Láscar 2026-10-10 05:06,
+// dibujado en un salar con «summit» y 0,28 km en la tabla); con K (#850) todos los records son ctx_cluster. [⚠️ S157: no todos; desde la observación del 2026-09-18 hay 52 records `eruption`, todos MODIS, y en los 24 summit la distancia de anomaly_pixels[0] es igual a la de final_hotspot (experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt y v_eruption_marcador.txt).]
+// Los anomaly_pixels siguen detrás, bajo el toggle «Todos los pixels» (evidencia preservada, regla S18).

@@ -1,0 +1,40 @@
+10:paquete de las tres vías, más las sombras prospectivas que ya corren). Si la retrospectiva cumple, la Compuerta A abre
+13:11 confirman y la sombra de los 34 pasa la revisión del experto, la Compuerta B abre la publicación, rotulada «sin
+37:| **~2026-11-13** | **Compuerta A**: ¿se abre la sombra de los 34? | **Nicolás** |
+44:| **~2026-12-29** | **Compuerta B**: ¿se publican los 34? | **Nicolás** |
+47:Rango honesto: la evidencia retrospectiva puede correrse al 2026-11-16 si V750-B se atrasa o NASA corta; la Compuerta B
+108:| H6 | El perfil `sombra_codigo_mirova` enciende las tres vías y escribe en `data/sombra_codigo_mirova/`, que lee el lector sellado de V375-E. Corre una vez al día, `max-parallel: 4` | `pipeline/profiles/sombra_codigo_mirova.yaml`, `.github/workflows/sombra-codigo-mirova.yml` |
+113:| H11 | Capacidad: el NRT de los 11 tarda 16,7 min de mediana por job; con 45 jobs y `max-parallel: 8` la corrida dura 96 a 104 min contra un ciclo efectivo de 60 min; los 34 en un workflow aparte con `max-parallel: 8` dan 74 a 81 min (ventana de 8 días). Agregar volcanes sólo a la matriz de `nrt.yml` deja jobs verdes que no procesan nada (dos listas `contains(fromJson(...))`). Tope de 20 jobs simultáneos del plan Free: plan SIN DATO | `D:\vrp-trabajo\temporales\s172_capacidad_nrt\INFORME.md` |
+143:- Crear `experiments/_s172_retro_paquete/PREREGISTRO_RETRO.md`: reglas, ventanas, controles, sellado antes de correr.
+144:- Crear `experiments/_s172_retro_paquete/leer_retro.py`: lector sellado (reusa `scripts/clase_mirova.py` y `banco_paridad`).
+145:- Crear `experiments/_s172_retro_paquete/osf_referencia.py`: adaptador del OSF v2.5 a pasadas pareables.
+146:- Crear `experiments/_s172_retro_paquete/controles_via.py`: cuenta records de la vía por sensor (vigilante contra la vuelta silenciosa a K).
+147:- Crear `pipeline/profiles/_s172_retro_paquete.yaml` y `tests/test_perfil_retro_paquete_s172.py`.
+148:- Crear `.github/workflows/reproc-retro-paquete.yml` (copia de `reproc-chunked.yml` con `pyproj`, sólo token, sin push).
+168:### Tarea 0.1: pre-registro de la prueba retrospectiva
+170:**Files:** Create `experiments/_s172_retro_paquete/PREREGISTRO_RETRO.md`
+210:  sensor. Y qué abre cada uno (§5, Compuerta A).
+216:### Tarea 0.2: perfil y workflow de la retrospectiva
+219:- Create `pipeline/profiles/_s172_retro_paquete.yaml`
+221:- Create `.github/workflows/reproc-retro-paquete.yml`
+228:  `git tag pre-s172-retro-paquete origin/main && git push origin pre-s172-retro-paquete`.
+255:    retro = _constantes("_s172_retro_paquete")
+259:    assert retro["DATA_SUBDIR"] == "_s172_retro_paquete"
+264:  `VRP_PROFILE='_s172_retro_paquete' is not a known profile`.
+268:# pipeline/profiles/_s172_retro_paquete.yaml
+275:profile: _s172_retro_paquete
+294:  data_subdir: _s172_retro_paquete
+306:  4. `max-parallel: 6` (NRT 8 + sombra 4 + experimental 4 + 6 = 22 sólo si coinciden los cuatro; en la franja del
+307:     NRT, 01 a 12 UTC, son 8 + 6 = 14). Grupo `reproc-retro-paquete`, `"on":` entre comillas (A43), `ubuntu-24.04`.
+312:# experiments/_s172_retro_paquete/controles_via.py
+350:git add pipeline/profiles/_s172_retro_paquete.yaml tests/test_perfil_retro_paquete_s172.py \
+351:        .github/workflows/reproc-retro-paquete.yml experiments/_s172_retro_paquete/controles_via.py
+385:- [ ] **Paso 4:** informe en `experiments/_s172_retro_paquete/INFORME.md` con el veredicto por sensor, sus números con
+397:### Compuerta A: abrir la sombra de los 34
+400:INDECIDIBLE, la Compuerta A **no se abre para ningún sensor** (los 34 se publican con los tres sensores o con ninguno:
+469:  `max-parallel: 4`; grupo propio y bucle de reintento de push (guard G4); `--volcano X` explícito por job (el script
+488:### Tarea 2.1: línea base retrospectiva de los 34 (tras la Compuerta A)
+493:- [ ] Despachar `reproc-retro-paquete.yml` con el perfil `sombra_34` (carpeta propia), los 34, 2026-02-01 a 03-31:
+607:| D6 | Si un sensor no se adopta en los 11 (sombra NO CUMPLE) | los nuevos publican K en ese sensor; esperar | Depende de si aceptas K como «igual a MIROVA» en ese sensor (K CUMPLIÓ su regla, #848). Si lo aceptas, la Compuerta B puede adelantarse a ~2026-12-15 |
+609:| D8 | Rigor de la Compuerta A | abrir la sombra de los 34 con la retrospectiva; esperar las paradas de los 11 | **Con la retrospectiva**: la sombra no publica y se ganan unas cuatro semanas. Esperar las paradas lleva la publicación a fines de enero |
+610:| D9 | Sombra de los 34 antes de tener grillas | etapa K desde la Compuerta A y cambio a vías tras las paradas; esperar las paradas y partir con vías | **Etapa K y después vías**: da volumen y costo temprano; se cuentan para la salida sólo las noches con el detector final |

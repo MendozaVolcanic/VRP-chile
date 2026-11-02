@@ -1,0 +1,41 @@
+  gane sólo por azar es mayor que 5 %, y se declara.
+- **Descriptivas, no deciden**: las pasadas que cambian de publicación contra V, por nombre y etiqueta; en las
+  `far_ref`, cuántas tienen algún alertado (un cero de E_lejana sin alertados no dice nada).
+
+## 7. Veredicto (primera fila que se cumpla), sobre el brazo elegido en el §6 bis
+
+| orden | condición | etiqueta |
+|---|---|---|
+| 1 | algún control del §8 en rojo (después del protocolo del tramo E, abajo) | **INDECIDIBLE** |
+| 2 | ninguna posición elegible, o P1 VETADO (con la regla del §6 bis la segunda no puede darse; queda como defensa) | **NO ADOPTAR** |
+| 3 | P2 o P2' contra K da PIERDE | **NO ADOPTAR** |
+| 4 | P2 o P2' da SIN SUSTRATO | **INDECIDIBLE** |
+| 5 | P2 o P2' da BLOQUEA, o P1 sólo OCR, o P1b con alguna, o M da EMPEORA, o una protegida que K publica salió del denominador por un motivo sellado, o una protegida que otra posición publica y la elegida no | **DECIDE NICOLÁS**, con la lista |
+| 6 | P2 y P2' dan GANA o EMPATE | **PROPONER ADOPCIÓN** (a Nicolás, A45) |
+
+**Protocolo de fallo, escrito antes de ver los datos (VF4-06):**
+- **Rojo de cobertura sólo en el tramo E** (toda pasada faltante, repetida, sobrante, con falla del arnés o de MIROVA
+  sin pasada nuestra es del 2026-10-17 en adelante): E se excluye entero en todos los brazos, se evalúa C solo y el
+  resultado lo declara en su primera línea (`e_excluido`). Por qué: E es una cola de diez días que el censo nunca
+  corrió; un 404 ahí no dice nada de la vía, y perder las 14 h de C por eso sería caro. Un rojo que toca C deja todo
+  INDECIDIBLE. La frontera es la fecha: el 2026-10-16 23:59 es de C y el 2026-10-17 00:00 ya es de E.
+- **Vía que no corrió en E** (N-03 de la segunda vuelta): si entre lo que saca E hay pasadas con `sin_mxd03`,
+  `geo_distinta` o `sin_grilla`, E se excluye igual, pero el veredicto no pasa de **DECIDE NICOLÁS** y la lista va en
+  `e_via_no_corrio`. Eso no es una descarga: es la vía ante datos nuevos, que es lo que verá en producción.
+- El protocolo lo dispara sólo la cobertura. Un rojo de otro control que cae sólo en E deja todo INDECIDIBLE, salvo
+  que la cobertura ya haya sacado E: entonces los controles se recalculan sobre C. Es la lectura conservadora y se
+  declara.
+- **Identidad en rojo**: no se lee el resto. Se busca la causa en la vía con la pasada distinta en la mano. Si hace
+  falta tocar `pipeline/`, eso es un PR propio con tag defensivo y el sí de Nicolás (A45), y después se repite la
+  corrida de V entera desde un tag nuevo (no sólo las pasadas distintas), porque la vía arreglada puede cambiar
+  cualquier pasada.
+- **Cualquier otro control en rojo**: se busca el defecto del instrumento y se repite la lectura; no se repite la
+  corrida a ciegas.
+
+El criterio de victoria de `docs/MISSION.md` (sección «Criterio de victoria de la réplica») queda así: ninguna
+protegida de 1 MW o más se pierde (filas 2 y 5), y bajo 1 MW una alerta perdida y una publicación de más pesan igual
+(cada una vale 1 en E, filas 3 a 6).
+
+## 8. Controles (antes de leer el veredicto)
+
+1. **K = producción**: en cada pasada el K del arnés se compara con el record de `data/mirova_equivalent/`; una

@@ -1,0 +1,39 @@
+diff --git a/frontend/diario.html b/frontend/diario.html
+index 65efc501c..648a212ff 100644
+--- a/frontend/diario.html
++++ b/frontend/diario.html
+@@ -962,7 +962,7 @@ async function init() {
+   initPeriodo();
+   for (const volc of TIER_A) {
+     const [data, mirovaForVolc] = await Promise.all([loadVolcanoData(volc), loadMirovaRef(volc)]);
+-    renderCard(volc, data, mirovaForVolc);
++    if (window.CambioDetector) CambioDetector.notarRecords((data && data.records) || []); renderCard(volc, data, mirovaForVolc); // S172: marca de la vía de MODIS desde los datos, antes de dibujar la tarjeta
+   }
+ }
+ init();
+diff --git a/frontend/index.html b/frontend/index.html
+index b618b6cc2..75b8fdfde 100644
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -1005,7 +1005,7 @@ async function loadVolcano(v, opts = {}) {
+   };
+   // S89 #3: etiquetar mirova_confirmed por-record (cruce con CSV MIROVA, capa
+   // de presentación). Idempotente; campos transitorios "_" no persistidos.
+-  enrichWithMirovaConfirmation(allData[v.name].records, allData[v.name].mirovaRecords);
++  enrichWithMirovaConfirmation(allData[v.name].records, allData[v.name].mirovaRecords); if (window.CambioDetector) CambioDetector.notarRecords(allData[v.name].records); // S172: marca de la vía de MODIS desde los datos, en la misma línea para no correr las citas archivo:línea (G8)
+ }
+ 
+ // ── Data helpers ─────────────────────────────────────────────────────────────
+diff --git a/frontend/mosaico.html b/frontend/mosaico.html
+index 006d8e591..07deb1454 100644
+--- a/frontend/mosaico.html
++++ b/frontend/mosaico.html
+@@ -518,7 +518,7 @@ async function loadVolcano(v) {
+     records:       data?.records   || [],
+     mirovaRecords: mirova?.records || [],
+     updated:       data?.updated   || null,
+-  };
++  }; if (window.CambioDetector) CambioDetector.notarRecords(allData[v.name].records); // S172: marca de la vía de MODIS desde los datos (misma línea: no corre las líneas)
+ }
+ 
+ // ─── Banner stale F49 (sync con index.html L2675) ────────────────────────────

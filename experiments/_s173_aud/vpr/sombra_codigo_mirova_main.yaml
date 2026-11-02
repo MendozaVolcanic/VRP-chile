@@ -1,0 +1,46 @@
+# Sombra prospectiva de las tres vías «código MIROVA» (S167; programa por sensor §12.5 punto 4, aprobado por Nicolás
+# el 2026-10-29: «Sí a todo»; tag defensivo pre-s167-perfil-sombra).
+#
+# POR QUÉ: los tres pre-registros de fase 4 piden medir la vía hacia adelante, en pasadas que nadie había visto al
+# escribir la regla, desde el 2026-11-03 (sin Suomi NPP desde el 2026-11-02 13:00 UTC: otro régimen, ventana P):
+#   - V750-A §4.3 (rama claude/s162-viirs750-2-918174): al menos 4 semanas; P1 veta, P2 sólo con más de 4 bloques.
+#   - V375-E §3.3 y §8.8 (tag s166-v375e-adenda2-sellada): 30 noches o 40 alertas que decidan, lo que llegue último;
+#     los tres brazos de posición se leen del record (radiante = primary_cluster.centroid_dist_km, pico =
+#     hotspot_dist_km, cercano = el menor anomaly_pixels[].dist_km).
+#   - MOD-D fase 4 §12.6 (rama claude/s166-modd-f4): 28 noches, se lee el día 29 con P1 y P2'.
+# Un solo perfil con las tres vías encendidas, porque cada vía sólo cambia el procesador de su sensor y las tres
+# comparten la detección K de producción como vara (los records de K están en data/mirova_equivalent/).
+#
+# QUÉ CAMBIA RESPECTO DE PRODUCCIÓN: sólo los tres flags de abajo y la carpeta de salida. Con las vías encendidas los
+# 11 Tier A tienen grilla de MIROVA en los tres sensores, así que cada record de esta carpeta es de la vía
+# (`via_codigo_mirova: true`); si un volcán no tuviera grilla o un gránulo MODIS no trajera MxD03, sigue K y el record
+# lo dice (`via_codigo_mirova: "sin_grilla"` / "sin_mxd03"). Los tres flags de MxD03 quedan apagados, como en
+# producción: van aparte (programa §12.3 punto 4).
+# Declara los tres flags de K con el valor de producción (tests/test_guard_perfiles_congelados_s153.py, A117).
+#
+# NO OPERACIONAL: data_subdir aislado (A47), nada lo lee el tablero. Lo corre sólo
+# .github/workflows/sombra-codigo-mirova.yml, que no tiene schedule: encenderlo es otro sí de Nicolás (A45).
+extends: mirova_equivalent
+profile: sombra_codigo_mirova
+description: >
+  Sombra prospectiva desde el 2026-11-03: producción (K) con las vías «código MIROVA» de VIIRS 750, VIIRS 375 y
+  MODIS encendidas, en carpeta propia.
+
+thresholds:
+  enable_v750_codigo_mirova: true
+  enable_v375_codigo_mirova: true
+  enable_modis_codigo_mirova: true
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: sombra_codigo_mirova
+
+enable_modis_b22_primary: true

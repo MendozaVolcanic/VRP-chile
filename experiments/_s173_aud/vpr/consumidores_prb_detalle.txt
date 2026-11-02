@@ -1,0 +1,52 @@
+.github/workflows/guardia-k-modis.yml:110:          VRP_PROFILE=guardia_k_modis python -c "import pipeline.profile as p; assert p.DATA_SUBDIR == 'guardia_k_modis', p.DATA_SUBDIR; assert not p.ENABLE_MODIS_CODIGO_MIROVA; assert p.SENSOR_MODIS and not (p.SENSOR_VIIRS_375 or p.SENSOR_VIIRS_750); assert (not p.ENABLE_TEST1_PATH) and p.ENABLE_TESTS_23_PROSE_BRANCH and p.ENABLE_MODIS_B22_PRIMARY; assert not (p.ENABLE_MODIS_GEO_MXD03 or p.ENABLE_MODIS_CRATER_SIN_DATO or p.ENABLE_MODIS_DIST_DESDE_CRATER); print('perfil', p.PROFILE_NAME, '| K de MODIS, via apagada | solo MODIS | MxD03 apagado')"
+.github/workflows/sombra-codigo-mirova.yml:110:          VRP_PROFILE=sombra_codigo_mirova python -c "import pipeline.profile as p; assert p.DATA_SUBDIR == 'sombra_codigo_mirova', p.DATA_SUBDIR; assert p.ENABLE_V750_CODIGO_MIROVA and p.ENABLE_V375_CODIGO_MIROVA and p.ENABLE_MODIS_CODIGO_MIROVA; assert not (p.ENABLE_MODIS_GEO_MXD03 or p.ENABLE_MODIS_CRATER_SIN_DATO or p.ENABLE_MODIS_DIST_DESDE_CRATER); print('perfil', p.PROFILE_NAME, '| vias V750 V375 MODIS encendidas | MxD03 apagado')"
+.github/workflows/vigilancia-guardia-modis.yml:138:              abrir "Guardia K de MODIS: vigilancia ciega" "$(printf 'La vigilancia de la guardia no puede mirar:\n\n%s\n\nUna vigilancia ciega no da error, da VERDE: por eso este issue. Revisar guardia-k-modis.yml, nrt.yml y el flag enable_modis_codigo_mirova.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+frontend/cambio_detector.js:135:  // DESDE LOS DATOS, no desde una constante: la fecha es la de la primera pasada MODIS con `via_codigo_mirova: true`
+frontend/cambio_detector.js:159:      if (r.via_codigo_mirova === true) via.push(t);
+frontend/cambio_detector.js:160:      else if (r.via_codigo_mirova === undefined || r.via_codigo_mirova === null) {
+pipeline/mirova_v750_codigo.py:6:#                 enable_modis_codigo_mirova, S164); con los flags apagados no corre nada de este archivo.
+pipeline/mirova_v750_codigo.py:704:    rec = {"sensor": sensor, "triggered_test1": False, "vrp_vent_mw": 0.0, "via_codigo_mirova": True,
+pipeline/process_modis.py:20:#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md (v1.18). Vía «código MIROVA» ENCENDIDA en producción desde S172 (enable_modis_codigo_mirova; era APAGADA desde S164; K sigue como guardia en guardia_k_modis): pipeline/mirova_v750_codigo.py
+pipeline/process_modis.py:106:    ENABLE_MODIS_CODIGO_MIROVA,  # S164 MOD-D fase 3
+pipeline/process_modis.py:634:    # `via_codigo_mirova`, para que nadie lea K creyendo que es la vía (A118). El volcán se reconoce por sus
+pipeline/process_modis.py:637:    if ENABLE_MODIS_CODIGO_MIROVA:
+pipeline/process_modis.py:1767:        **({"via_codigo_mirova": _via_marca} if _via_marca is not None else {}),
+pipeline/process_viirs.py:763:    # (`via_codigo_mirova: "sin_grilla"`), para que nadie lea K creyendo que es la vía (A118). El volcán se reconoce por
+pipeline/process_viirs.py:2285:        record["via_codigo_mirova"] = "sin_grilla"
+pipeline/process_viirs_mod.py:500:    # (`via_codigo_mirova: "sin_grilla"`), para que nadie lea K creyendo que es la vía (A118).
+pipeline/process_viirs_mod.py:1545:        salida["via_codigo_mirova"] = "sin_grilla"
+pipeline/profile.py:909:ENABLE_MODIS_CODIGO_MIROVA: bool = bool(_t.get("enable_modis_codigo_mirova", False))
+pipeline/profiles/_s146_ab_control.yaml:42:  enable_modis_codigo_mirova: false
+pipeline/profiles/experimental.yaml:66:  enable_modis_codigo_mirova: false
+pipeline/profiles/experimental_ndc_focus.yaml:44:  enable_modis_codigo_mirova: false
+pipeline/profiles/guardia_k_modis.yaml:28:  enable_modis_codigo_mirova: false
+pipeline/profiles/mirova_equivalent.yaml:148:  enable_modis_codigo_mirova: true
+pipeline/profiles/sombra_codigo_mirova.yaml:16:# (`via_codigo_mirova: true`); si un volcán no tuviera grilla o un gránulo MODIS no trajera MxD03, sigue K y el record
+pipeline/profiles/sombra_codigo_mirova.yaml:17:# lo dice (`via_codigo_mirova: "sin_grilla"` / "sin_mxd03"). Los tres flags de MxD03 quedan apagados, como en
+pipeline/profiles/sombra_codigo_mirova.yaml:32:  enable_modis_codigo_mirova: true
+pipeline/store.py:357:    _via_mirova = record.get("via_codigo_mirova") is True
+pipeline/store.py:609:    # S165 V375-E: no para un record de la vía «código MIROVA» (`via_codigo_mirova is True`). La vía informa la suma de
+scripts/auto_audit_weekly.py:398:# decisión 4): VIA_MODIS es el detector de los records MODIS con `via_codigo_mirova: true`. POR QUÉ: también traen
+scripts/auto_audit_weekly.py:446:    (`via_codigo_mirova` "sin_mxd03" y compañía) es K. Si se revierte el encendido, los records MODIS nuevos vuelven
+scripts/auto_audit_weekly.py:456:    return rec.get("via_codigo_mirova") is True and str(rec.get("sensor") or "").startswith("MODIS")
+scripts/auto_audit_weekly.py:466:    de paridad no copia `via_codigo_mirova` y no se toca aquí (lo leen instrumentos sellados): se cruza por clave."""
+scripts/auto_audit_weekly.py:472:    """S172: fecha 'YYYY-MM-DD' de la primera pasada MODIS con `via_codigo_mirova: true`, o None (hoy, antes del
+scripts/revisar_guardia_modis.py:14:  2. ¿Es K? Un record de la ventana con la clave `via_codigo_mirova` (la vía o su caída a K, que sólo existen con el
+scripts/revisar_guardia_modis.py:75:        if "via_codigo_mirova" in r:
+scripts/revisar_guardia_modis.py:76:            k = str(r.get("via_codigo_mirova"))
+scripts/revisar_guardia_modis.py:81:           and "via_codigo_mirova" not in r}
+scripts/revisar_sombra.py:6:(regla 6). Y si la vía no puede correr en un gránulo (`via_codigo_mirova` = "sin_grilla", "sin_mxd03" o
+scripts/revisar_sombra.py:164:    via_nuevos = sum(1 for r in nuevos if r.get("via_codigo_mirova") is True)
+scripts/revisar_sombra.py:167:        if r.get("via_codigo_mirova") is not True:
+scripts/revisar_sombra.py:168:            k = str(r.get("via_codigo_mirova"))
+scripts/revisar_sombra.py:172:        if r.get("via_codigo_mirova") is not True:
+scripts/revisar_sombra.py:173:            k = str(r.get("via_codigo_mirova"))
+scripts/revisar_sombra.py:178:        if r.get("via_codigo_mirova") is True:
+scripts/vigilancia_guardia_modis.py:34:`via_codigo_mirova: true`, no una constante que alguien tiene que llenar. ⚠️ S172 ronda 2 (mini auditoría, MA172-206):
+scripts/vigilancia_guardia_modis.py:100:    `via_codigo_mirova` True (MA172-206: no `first_processed_utc`, que hereda la fecha de K), la observación más temprana
+scripts/vigilancia_guardia_modis.py:106:            if r.get("via_codigo_mirova") is not True or not str(r.get("sensor") or "").startswith("MODIS"):
+scripts/vigilancia_guardia_modis.py:130:    """ENABLE_MODIS_CODIGO_MIROVA de producción leído desde pipeline.profile en un proceso aparte (A89), o None."""
+scripts/vigilancia_guardia_modis.py:133:        r = subprocess.run([sys.executable, "-c", "import pipeline.profile as p; print(p.ENABLE_MODIS_CODIGO_MIROVA)"],
+scripts/vigilancia_guardia_modis.py:349:        return ["no se pudo leer ENABLE_MODIS_CODIGO_MIROVA de pipeline.profile: no se sabe si la vía está encendida"]
+scripts/vigilancia_guardia_modis.py:386:        n_via += sum(1 for r in recs if "via_codigo_mirova" in r
+scripts/vigilancia_sombra.py:425:    producción con `via_codigo_mirova: true`, leídas de data/mirova_equivalent/ con la misma función del auto-audit.

@@ -1,0 +1,41 @@
+de 5 km son los de `FAMILIAS["MODIS"]` en `main`.
+
+## 4. Población y ventanas
+
+- **Tramo C (censo)**: las 5.465 pasadas MODIS nocturnas de `experiments/_s162_mxd03/poblacion.json` (en `main`), en
+  sus 1.232 gránulos, del 2026-03-01 al 2026-10-16. El arnés pide **por nombre** el mismo L1B y el mismo MxD03 que usó
+  el censo (campos `l1b` y `geo` de cada fila); si LAADS ya no los sirve, baja el vigente y la pasada queda marcada
+  `otro_granulo` (cuenta para la identidad, §8.2).
+- **Tramo E (cola)**: las pasadas MODIS nocturnas de los 11 Tier A del 2026-10-17 00:00 al 2026-10-26 23:59 UTC,
+  armadas con la misma regla que C (`experiments/_s162_mxd03/poblacion_mxd03.py` con la ventana como único cambio).
+  Por qué esa cola: incluye la tercera pérdida MODIS de Chillán del #915 (2026-10-25 07:20, 58° de cenit), que quedó
+  fuera del censo. Por qué termina el 26: la referencia congelada es del 2026-10-27 21:21 UTC y las pasadas del 27
+  pueden no estar todavía en la tabla.
+  - Los días 17 a 20 de octubre son los que D-29 sacó porque CMR no servía MOD021KM. Medido hoy, 2026-10-28 04:00
+    UTC (`cmr_cola.py`, `cmr_cola_salida.txt`, por versión, de 00 a 12 UTC en la caja de Chile): CMR lista la versión
+    6.1 estándar, que es la que pide `pipeline/fetch.py` primero, del 17 al 26 de octubre, con tantos MxD03 como L1B en
+    cada día y plataforma (2 a 7 gránulos). El listado no basta: CMR puede listar entradas que dan 404 al bajarlas
+    (commit `798400dec`, el 12-oct de S159) y el verificador vio cambiar una fila del listado en una hora (VF4-07). Por
+    eso **«sirve» quiere decir que, al armar la población, una petición HEAD a la URL de descarga del L1B y a la de su
+    MxD03 responde 200 para cada volcán y pasada nocturna del día**. Un día que no cumpla se excluye entero en todos
+    los brazos y se declara en la primera línea del resultado (como D-29). Esta comprobación se hace y se guarda antes
+    del sello de la lista de días, junto con la población. Las pasadas de MIROVA de un día excluido **no** se sacan de
+    `sin_pasada_nuestra`: quedan sin pareja, la cobertura queda en rojo sólo en E y el protocolo del §7 saca E entero
+    (N-04 de la segunda vuelta). Es la lectura conservadora: una alerta de MIROVA, quizá protegida, no desaparece sin
+    declararse, y el costo es perder la cola de diez días.
+  - CMR sirve además una Collection 7 de LAADS (versión `7`) en paralelo. Ni K ni V la piden (`fetch.py` pide 6.1 y cae
+    a 6.1NRT): los dos brazos leen el mismo archivo y la colección no los separa. Que MIROVA haya pasado a la 7 es SIN
+    DATO.
+- **Cortes informados, que no separan brazos** (A104): los dos brazos se recalculan con un mismo código en todas las
+  fechas, así que ninguna frontera de producción cae entre ellos. Se informan por tramo C y E; #535 (2026-08-28
+  23:00 UTC) y la adopción de K (2026-10-18 09:57 UTC) sólo importan al control K = producción (§8.1), que compara
+  contra lo que producción escribió en cada fecha.
+- **A119**: MODIS desde marzo, sin reparos de cobertura de la tabla. Enero y febrero no entran.
+
+## 5. La vara: lo que publica MIROVA
+
+- **Referencia congelada** posterior al cierre de D-39 (el consolidado ganó 2.648 filas el 2026-10-27, 23 protegidas
+  de todos los sensores; `tasks/LOOP_OBJETIVOS.md` de `loop/activo`, entrada del 2026-10-27 12:46 UTC): consolidado de Mirova-v1 en el commit `cb91eb506c37cff0b83164dd602d8a5340277637`
+  (2026-10-27 21:21:07 UTC) y OCR en `cfc57c4d8bc57c5ccd5219ff3a91749dae167b97` (2026-10-27 13:06:30 UTC), las mismas
+  copias que usó S165 (`experiments/_s165_regla_posicion/referencia_salida.txt`). Su sha256 queda en el manifiesto del
+  candado antes del despacho.

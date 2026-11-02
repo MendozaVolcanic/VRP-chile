@@ -1,0 +1,63 @@
+## 6. Pruebas
+
+Todo por pasada MODIS, «publica» y magnitud mostrada = el predicado de `frontend/index.html` ejecutado con node
+(`banco_paridad.correr_node`, A97) sobre el record que dejó `store.append_record`. Las piezas estadísticas se importan
+sin copiar de `experiments/_s157_prereg_d25/evaluar_d25.py`, blob `1dbabf65` (el mismo que usó el censo MOD-D):
+`prueba_signos_p2` y `regla_signos_p2` (D-45), `pesos_bloque`, `regla_m` y `comparar_con_ganancia` (D-28). Bloque =
+noche-volcán.
+
+| prueba | qué cuenta | regla |
+|---|---|---|
+| **P1 veto** | protegidas que K publica y el brazo no (protegida de la tabla; las de la unión que no lo son de la tabla, aparte) | una de la tabla: el brazo no es elegible (§6 bis), y si ninguna posición queda elegible el veredicto es NO ADOPTAR; sólo OCR: DECIDE NICOLÁS |
+| **P1 lista** | protegidas que ni K ni el brazo publican | se listan, no deciden |
+| **P1b** | protegidas que los dos publican, con K ≥ 1 MW y el brazo < 1 MW | una o más: DECIDE NICOLÁS. La contraria (K < 1, brazo ≥ 1) se lista |
+| **P2** (sellada en MOD-D) | E = alertas bajo 1 MW sin publicar + publicaciones en negativos limpios; +1 si el error es sólo del brazo, −1 si es sólo de K | `regla_signos_p2`: GANA, PIERDE, BLOQUEA, EMPATE, SIN SUSTRATO (4 bloques o menos) |
+| **P2'** (nueva) | E + E_lejana: publicaciones del brazo en pasadas `far_ref` | la misma prueba sobre E + E_lejana |
+| **M** | alertas (protegida o bajo 1 MW) que K y el brazo publican: d = abs(log10(B/MIROVA)) − abs(log10(K/MIROVA)) | `regla_m`: sólo EMPEORA decide (DECIDE NICOLÁS); d′ contra la ganancia pareja informa |
+| **Razón** | mediana de brazo/MIROVA en todas las protegidas que el brazo publica, publique K o no | informa, con la marca de si cae en [0,9; 1,1] (§12, decisión 4) |
+| **Curvas de cenit** | razón brazo/MIROVA y K/MIROVA por tramo de 10°; y en cada noche-volcán con dos alertas separadas por 10° o más, razón más oblicua sobre menos oblicua del brazo y de MIROVA | informan: se busca reproducir la curva de MIROVA, no aplanarla |
+
+P2 y P2' se calculan sobre C ∪ E y se informan también por tramo, y P2 también con las etiquetas de la unión
+(`p2_union`, informa).
+
+**Soporte independiente (informa; adenda 1 del sello, VF4-10)**: al leer el resultado, a cada publicación de V en un
+negativo limpio de C ∪ E se le aplica la función sellada `soporte_independiente` de `evaluar_paquete.py` (tag
+`s162-modd-tag`): si otro sensor la ve la misma noche en otro gránulo, a 6 h o menos, es candidata al perfil
+experimental. No cambia P2, que sigue contando toda publicación en un negativo limpio como costo para la réplica.
+
+**Qué cambia respecto de las reglas selladas de MOD-D** (todo lo demás se conserva tal cual):
+
+| pieza | sellado de MOD-D | aquí | por qué |
+|---|---|---|---|
+| brazo que decide | PM (el port) | V con la posición del §6 bis | la vía del pipeline es lo que se encendería |
+| vara | etiquetas de la referencia del censo | las de la referencia posterior a D-39 (§5) | a la del censo le faltaban filas |
+| canal | el texto decía «tabla sola decide», pero el evaluador usaba la unión con el OCR | decide la tabla sola, como decía el texto; la unión informa | A119 (VF4-05) |
+| P1 | toda pérdida veta | una pérdida sólo OCR va a DECIDE NICOLÁS | el OCR es la parte menos creíble (§12, decisión 5) |
+| P2 | sólo E | P2 y P2', decide la peor de las dos (§7) | decisión de Nicolás del 2026-10-27 (§12, decisión 3) |
+| fila 2 del veredicto | «PM pierde una protegida» | «ninguna posición elegible, o P1 VETADO» | la regla de posición va antes |
+| denominador | lo saca el port (`port_estado`) | lo saca la vía (`motivo` del arnés) | es la vía la que cubre o no al volcán |
+| Chillán | pares con las dos magnitudes | además, ambas mayores que 0 | el sellado haría log10(0) con un record publicado con magnitud 0 (no debería ocurrir; se declara) |
+| veredicto | CANDIDATO a la fase 3 | PROPONER ADOPCIÓN | es la fase 4 |
+| costura, borde del gránulo, S-1 | informan | no se calculan | se informaron en el censo y la vía tiene la misma máscara; en E no se informan (VF4-10, aceptado: no deciden) |
+| soporte de la adenda 1 | informa | informa, al leer (arriba) | el tramo E trae publicaciones nuevas (VF4-10) |
+
+### 6 bis. Regla de posición (se aplica antes del §7)
+
+- **Elegible**: brazo de posición cuyo P1 contra K no está VETADO y, si es V-cercano o V-pico, que tampoco pierde una
+  protegida de la tabla que V publica (P1 contra V). Por qué (VF4-01): sin esto, una posición podía cambiar una alerta
+  de 1 MW o más que V publica por seis publicaciones bajo 1 MW, y el criterio de victoria no admite ese canje. Una
+  pérdida sólo del OCR contra V no quita la elegibilidad: lleva a DECIDE NICOLÁS por la viñeta siguiente.
+- **Gana**: un elegible distinto de V cuyo **P2' contra V** da GANA. Si ganan los dos, el de menor E + E_lejana (sus
+  errores en P2' contra K); a igual valor, V-pico. Esa preferencia es **a priori**, no un resultado: la frase del
+  programa («la distancia de MIROVA calza mejor con el píxel pico») sale de la comparación del píxel pico contra el
+  alertado más cercano, y el propio informe de S165 dice que con todo en el cráter la distancia de MIROVA sigue al
+  cúmulo radiante (VF4-12). En MODIS el caso es improbable (1 de 5.321 pasadas cambia con «cercano»).
+- **Protegidas que otra posición publica**: si alguna protegida, de la tabla o sólo del OCR, la publica otra regla de
+  posición y la elegida no, no se cambia en silencio: el veredicto va a DECIDE NICOLÁS con la lista (§7, fila 5;
+  VF4-01; N-07 de la segunda vuelta: el OCR entra aquí porque es el lado seguro).
+- **Si ninguno gana**: V (radiante), si es elegible. Es lo que hace hoy la vía y lo que midió el censo; a igual
+  desempeño no se cambia sin evidencia.
+- **Si V no es elegible**: el elegible no peor que V en P2' (GANA, EMPATE, o SIN SUSTRATO con neto 0 o a favor); si
+  son dos, el de menor E + E_lejana y a igual valor V-pico. Si ninguno: NINGUNA POSICIÓN ELEGIBLE y el veredicto es
+  NO ADOPTAR.
+- **Multiplicidad**: dos contrastes contra V, cada uno al 5 % de una cola, sin corregir; la probabilidad de que alguno
