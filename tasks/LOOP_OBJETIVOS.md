@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 15:59 UTC (S173): PR #935 abierto; su verificador limpio (Fable) corriendo; Suomi NPP sigue entregando
+- PR #935 (decisiones 3 y 4, punta `630424d60`): el implementador declaró esfuerzo BAJO; suite 3041 pasan, 0 fallas;
+  13 vecinos de `experiments/_s172_sombra34/vecinos.yaml`; fuera del sitio `data/sombra_34`, `data/sombra_codigo_mirova`,
+  `data/guardia_k_modis`. Verificador Fable (prompt `verificador_v935.txt`, sha256 `8e92f06e`) en curso.
+- CMR a las 15:59 UTC: `VNP02IMG_NRT` y `VNP02MOD_NRT` con gránulos continuos de 6 min hasta las 13:36 UTC (ingeridos
+  ~15:08); control NOAA-20 hasta 13:12. **El cese de las 13:00 UTC no se ve todavía en CMR.** El pipeline deja de
+  buscar Suomi NPP desde el cese (ficha v1.11): si sigue entregando de noche en Chile se perderían sus pasadas. Mirar
+  de nuevo con las pasadas nocturnas del 2026-11-03 (05 a 07 UTC); decide Nicolás si se reactiva.
+
 ### 2026-11-02 15:42 a 16:00 UTC (S173): D1 a D7 «sí»; «en el resto haz lo que recomiendes»
 - Nicolás: «de1 a d7 si, en el resto hace lo que recomiendes». Regla de reversión ronda 3 (`e617ad667`, sha256 LF
   `18887bac`): D1 a D7 contestadas; la regla entra a main con B porque A entró sin ella; 208 y 209 se arreglan en B.
