@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -103,7 +104,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", default="data/sombra_34")
     ap.add_argument("--workflow", default=".github/workflows/sombra-34.yml")
-    ap.add_argument("--ahora", default=None)
+    # VIGILAR_SOMBRA_34_AHORA: sólo para que la prueba ejecute el paso real del workflow con un reloj fijo (VS34-02)
+    ap.add_argument("--ahora", default=os.environ.get("VIGILAR_SOMBRA_34_AHORA") or None)
     ap.add_argument("--alta", default=None)
     ap.add_argument("--horas", type=float, default=48)
     ap.add_argument("--salida", default=None)
@@ -127,4 +129,5 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")   # el detalle lleva tildes; en Windows la consola no es UTF-8
     sys.exit(main())

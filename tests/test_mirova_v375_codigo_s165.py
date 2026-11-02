@@ -119,6 +119,9 @@ def test_caja_de_375_es_la_del_brazo_c13_en_los_volcanes_con_grilla():
     V = _volcanes()
     # S172: desde la sombra de los 34 los 45 volcanes tienen grilla; el brazo C13 de V375-B/C se fijó sobre los 11
     # Tier A (los que traen inner_radius_km del KML de MIROVA, que brazos.caja necesita), y se compara sobre ellos.
+    # OJO (VS34-06): «tiene inner_radius_km» hace de sustituto de «es Tier A». El día que Nicolás decida el inner de
+    # alguno de los 34 (decisión D5 del plan de los 34) y se escriba en volcanoes.yaml, la cuenta pasa a 12 y esta
+    # prueba cae con «assert 12 == 11»: no es una regresión de la caja, hay que filtrar por la matriz de nrt.yml.
     assert sum(MV.grilla_del_volcan(n, paso_m=375.0) is not None for n in V) == 45
     con_grilla = [n for n in V if MV.grilla_del_volcan(n, paso_m=375.0) is not None
                   and V[n].get("inner_radius_km") is not None]
