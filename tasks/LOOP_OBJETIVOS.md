@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-02 17:18 UTC (S173): regla y pre-registro SELLADOS; vía «código MIROVA» de MODIS ENCENDIDA en producción
+- Frase de Nicolás: «Sí, sellar y encender» (sello de la regla ronda 5, sello del pre-registro retro y sí A45).
+- Regla sellada en B, commit `33dac1eca` (texto ronda 5 sha256 LF `7f300a14` antes de la cabecera), tag
+  `s173-regla-modd-sellada`. Pre-registro retro sellado en `loop/activo` `aa2a63079` (texto previo `148f1e4b`), tag
+  `s173-prereg-retro-sellado`.
+- Tag defensivo `pre-s173-adopcion-modd` sobre main `438a010ab` (el viejo `pre-s171-adopcion-modd` no se movió).
+- `gh pr ready 934`; CI `pytest` verde sobre `33dac1eca` (run 41488964772, 5m12s), CLEAN; `gh pr merge 934 --merge
+  --match-head-commit 33dac1eca`: merge commit `499935c37` (2 padres) a las 17:18:17 UTC, comprobado contra el remoto.
+- A89 en `499935c37`: `mirova_equivalent` True, `sombra_34` True, `guardia_k_modis` False, `experimental` False; la regla
+  existe en main.
+- Encendido real (regla §4.1) = la primera corrida del NRT que escriba con la vía (`encendido_modis_utc` en
+  `guardia_modis_latest.json`); la guardia corre a las 17:40 UTC. Pendiente §5: aviso a consumidores (OVDAS,
+  Integracion_Plataformas, `MAPA_WORKSPACE.md`).
+
 ### 2026-11-02 17:06 UTC (S173): VB4 limpio; regla ronda 5 en B; B listo para sello y A45
 - Verificador VB4 (Fable; informe `C:/Users/nmend/vrp-wt/ver_s173_regla4/INFORME.md`): regla SELLABLE CON CAMBIOS
   (VB4-01 gravedad 3: B es fast-forward sobre main; un merge sin `--no-ff` o «Rebase and merge» no deja commit que
