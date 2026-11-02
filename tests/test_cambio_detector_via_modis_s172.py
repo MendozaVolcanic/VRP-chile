@@ -76,7 +76,7 @@ def test_notar_records_guarda_la_menor_de_todos_los_volcanes_y_pone_el_aviso_una
     assert "4 nov 2026" in txt and "MODIS" in txt and "vía «código MIROVA»" in txt
     assert "la magnitud de MODIS sube" in txt and "aparecen alertas que K callaba" in txt
     assert "Chillán" in txt and "la erupción crece" in txt
-    assert "—" not in txt and "–" not in txt          # sin guiones largos ni medios (regla del usuario)
+    assert chr(0x2014) not in txt and chr(0x2013) not in txt   # sin guiones largos ni medios (regla del usuario)
 
 
 def test_sin_records_de_la_via_notar_no_pone_aviso_ni_dibuja():
