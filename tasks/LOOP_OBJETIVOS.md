@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-11-02 13:30 UTC (S173): resultados de VR, VPR, F1 y F2; verificadores V1 y V2 corriendo
+### 2026-11-02 ~12:58 UTC (S173; corregida, decía 13:30 sin consultar la hora): resultados de VR, VPR, F1 y F2; verificadores V1 y V2 corriendo
 - **VR** (regla de reversión de MODIS, Fable): SELLABLE CON CAMBIOS, 12 cambios de texto (`experiments/_s173_aud/vr/`).
   Peor: cita `CAMBIO_DETECTOR_MODIS_UTC`, que no existe; cotas (i)/(ii) aún «propuesta»; no dice qué hacer con una
   protegida sin record de producción.
