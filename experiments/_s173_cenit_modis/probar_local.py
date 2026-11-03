@@ -139,12 +139,18 @@ fijadas, valores = set(), []
 for w in (n for n in ast.walk(fmedir) if isinstance(n, ast.With)):
     for it in w.items:
         c = it.context_expr
+        # VER937b: el primer argumento tiene que ser `pm` (process_modis, el único lector del flag); un patch sobre
+        # pipeline.profile u otro módulo deja a K siendo la vía y antes pasaba en verde.
         if (isinstance(c, ast.Call) and isinstance(c.func, ast.Attribute) and c.func.attr == "object" and len(c.args) == 3
+                and isinstance(c.args[0], ast.Name) and c.args[0].id == "pm"
                 and isinstance(c.args[1], ast.Constant) and c.args[1].value == "ENABLE_MODIS_CODIGO_MIROVA"
                 and isinstance(c.args[2], ast.Constant)):
             dentro = {id(n) for s in w.body for n in ast.walk(s) if _es_brazo(n)}
             fijadas |= dentro
             valores += [c.args[2].value] * len(dentro)
+imp_pm = any(isinstance(n, ast.ImportFrom) and n.module == "pipeline" and any(a.name == "process_modis" and a.asname == "pm"
+             for a in n.names) for n in arbol.body)
+ok(imp_pm, "arnés: `pm` es pipeline.process_modis")
 ok(len(todas) == 2 and fijadas == todas and sorted(valores) == [False, True],
    f"arnés: K y V fijan el flag en memoria (llamadas {len(todas)}, fijadas {len(fijadas)}, valores {valores})")
 
