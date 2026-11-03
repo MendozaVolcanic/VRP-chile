@@ -40,8 +40,13 @@ NRT = ROOT / ".github" / "workflows" / "nrt.yml"
 GRILLAS = ROOT / "pipeline" / "grillas_mirova.yaml"
 # pipeline/grillas_mirova.yaml de main 14fb62030 (tag pre-s172-sombra-34), con saltos de línea LF: 3.805 bytes.
 # Las 11 entradas de los Tier A y la cabecera tienen que seguir siendo esos bytes, al comienzo del archivo.
-GRILLAS_MAIN_LEN = 3805
-GRILLAS_MAIN_SHA256 = "da755f3e7fc70bfec052bee7a35bcecc6a685e9f3b3c3b5a2c61c5e398c42636"
+# S173: la lectura de V750-B (ROI B4, confirmada por Nicolás el 2026-11-03) cambia a propósito esos bytes: el
+# comentario de roi_v750 y la ROI de Cordón Caulle y Tupungatito (experiments/_s162_v750b/ADOPCION_ROI_B4.md). Se
+# fija el bloque nuevo, que es el de main 82b55de0d más `scripts/roi_v750b_a_grillas.py --brazo B4` (3.907 bytes);
+# el valor anterior queda abajo por historia. Los valores de roi_v750 los vigila tests/test_roi_v750b_variantes_s169.py.
+GRILLAS_MAIN_LEN = 3907
+GRILLAS_MAIN_SHA256 = "b1ad85fb7b0a4585e1c7ead8c541b79c12cb02192e5ccae814f2e834d333c4fe"
+GRILLAS_MAIN_LEN_S172, GRILLAS_MAIN_SHA256_S172 = 3805, "da755f3e7fc70bfec052bee7a35bcecc6a685e9f3b3c3b5a2c61c5e398c42636"
 
 
 def _volcanes():
