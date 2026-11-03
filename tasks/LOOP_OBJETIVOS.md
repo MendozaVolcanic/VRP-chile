@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 09:57 UTC (S173): V750-B despachado con frase de Nicolás
+- Frase «Sí, despachar». La sesión de VIIRS 750 despachó el run 41615021658 (rama `s162-v750b-disparo`, headSha
+  `94f67fd6c` = tag `s169-v750b-objetivos-20261103`, comprobado contra el remoto); 32 trozos, sólo EARTHDATA_TOKEN.
+- Procedencia según esa sesión: main del día `152071e8e`, carpeta del tag `s167-v750b-adenda3-sellada`, 6.022 objetivos
+  más 20 far_ref (6.042 pasadas), 0 sin gránulo; N-3 deja 4 protegidas que deciden, las 4 en O. Detalle en la rama
+  `claude/s162-viirs750-2-918174`, `experiments/_s162_v750b/r4/despacho_20261103/` (`9877029a8`); sesgos conocidos
+  escritos antes de leer en `d38ea812a`.
+- Al terminar: conteo de pasadas por trozo (A108), lectura y verificador limpio antes de aceptar.
+
 ### 2026-11-03 09:39 UTC (S173): programa por sensor puesto al día por el cenit (§12.8); aviso a VIIRS 750
 - Nicolás: «Sí, los cuatro». Nueva §12.8 en `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`: MODIS
   encendido (la sombra de 28 noches la reemplaza la guardia K con regla de reversión); el cenit como corte informativo en
