@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 23:18 UTC: arreglos del #940 y primera sombra con datos (S173)
+
+- El implementador dejó el #940 en `dbaa4085c`: arregló VPR940-02, 03, 04, 05, 06, 08, 09, 11 y 15; suite 3.161 pasan, 0 fallan; 23 de 23 mutaciones atrapadas por aserción. VPR940-01, 07 y 10 esperan a Nicolás. Lanzado el re-verificador limpio (Fable, high), salida en `C:/Users/nmend/vrp-wt/ver940b/experiments/_s173_aud/ver940b/`.
+- Primera sombra con datos (run 41716179984, 2026-11-03 20:49 UTC): 10 de 11 volcanes escribieron records de las vías; Planchón Peteroa sin records porque todas las descargas dieron `FileExistsError` en los `partial_*` de earthaccess 0.17.0 (la misma falla del trozo 28 de V750-B). El paso «Revisar que salieron records de la vía» la atrapó: el detector de zombi funciona. En el NRT, 0 casos en las 6 últimas corridas. Ese job corrió con Python 3.11.17 y los demás con 3.11.18: SOSPECHA de imagen de runner, no medida. Re-correr el job de PP espera el sí de Nicolás.
+
 ### 2026-11-03 21:26 UTC (S173): verificador limpio de #940: MERGEABLE CON CAMBIOS
 - Fable, esfuerzo alto declarado; informe en `experiments/_s173_aud/ver940/INFORME.md` (60 filas de cobertura, 18
   hallazgos). Copias de reglas selladas iguales byte a byte a sus tags; conteos de trozos 3/47/30/176 reproducidos;
