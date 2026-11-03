@@ -3,6 +3,9 @@
 Pedido por la coordinadora S173 (aviso aprobado por Nicolás, 2026-11-03), antes del despacho y la lectura de V750-B.
 No cambia nada de lo sellado: ni el pre-registro, ni las adendas 1 a 3, ni el analizador, ni los controles. Todo lo
 de abajo es informativo y no decide el veredicto, que sigue siendo el del lector de la adenda 1 (adenda 2 §8).
+(⚠️ Corregido después de la lectura, VV750B-02 del verificador: el veredicto es el del lector de la adenda 3,
+`adenda3/leer_n3_v750b.py`, que la adenda 3 sellada pone en lugar del de la adenda 1; `r4/INFORME.md` §4 ya lo
+decía. Texto original conservado.)
 Escrito sin haber abierto la referencia de la ventana nueva ni ningún artefacto del run.
 
 ## 1. El fondo del oráculo no es el de MATLAB (VPCC750-01, gravedad 3)
