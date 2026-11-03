@@ -1,0 +1,40 @@
+# S172/S173. Prueba retrospectiva del paquete de las tres vías «código MIROVA» en los 11 Tier A (pre-registro SELLADO
+# experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md, tag s173-prereg-retro-sellado, §2 brazo VIA y §10.1;
+# plan docs/superpowers/plans/2026-11-02-nrt-34-volcanes.md Tarea 0.2; tag defensivo pre-s172-retro-paquete).
+#
+# POR QUÉ: medir, fuera de la ventana con que se eligieron los parámetros (febrero y marzo de 2026 contra la tabla de
+# MIROVA, 2025 contra el OSF v2.5), si el paquete publica lo que MIROVA publica y calla donde MIROVA calla.
+#
+# IDÉNTICO a sombra_codigo_mirova salvo nombre y carpeta (lo vigila tests/test_perfil_retro_paquete_s172.py). extends
+# resuelve UN nivel (pipeline/profile.py, _load_profile): por eso extiende mirova_equivalent y escribe los seis flags
+# que definen el brazo (tres vías y tres de MxD03), para no heredar un cambio de producción en silencio (VR172-02).
+# Declara los tres flags de K con el valor de producción (tests/test_guard_perfiles_congelados_s153.py, A117).
+#
+# NO OPERACIONAL: carpeta aislada (A47); no la lee el tablero ni el lector de la sombra. Lo corre sólo
+# .github/workflows/reproc-retro-paquete.yml, que no hace push a main (cada trozo queda como artifact).
+extends: mirova_equivalent
+profile: _s172_retro_paquete
+description: >
+  Retrospectiva del paquete de las tres vías sobre el histórico de los 11 Tier A, en carpeta propia.
+
+thresholds:
+  enable_v750_codigo_mirova: true
+  enable_v375_codigo_mirova: true
+  enable_modis_codigo_mirova: true
+  enable_modis_geo_mxd03: false
+  enable_modis_crater_sin_dato: false
+  enable_modis_dist_desde_crater: false
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _s172_retro_paquete
+
+enable_modis_b22_primary: true
