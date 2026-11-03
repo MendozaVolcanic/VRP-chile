@@ -655,8 +655,8 @@ def test_el_sorteo_de_etiquetas_baraja_dentro_de_cada_estrato(R):
     dice qué fracción de barajados cumple GANA o EMPATE por azar."""
     import numpy as np
     fs = poblacion()
-    for i, f in enumerate(fs):
-        f["z"] = 15.0 if i % 2 else 45.0
+    for f in fs:                         # el cenit por el día: cada estrato mezcla protegidas y alertas bajo 1 MW
+        f["z"] = 15.0 if int(f["dt"][8:10]) % 2 else 45.0
     nuevas = L.barajar_en_estratos(fs, np.random.default_rng(172))
     estrato = lambda f: (f["vol"], int(f["z"] // 10))                                      # noqa: E731
     antes, despues = collections.defaultdict(list), collections.defaultdict(list)
