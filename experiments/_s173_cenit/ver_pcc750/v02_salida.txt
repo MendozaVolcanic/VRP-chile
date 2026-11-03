@@ -1,0 +1,44 @@
+== CONFIG: ventana ('2026-04-01', '2026-11-02') | volcan PuyehueCordonCaulle (-40.59, -72.117) | inner 20.0
+filas de referencia VIIRS750 PCC nocturnas: SN 648 | original 648 | records K VIIRS750 nocturnos: 986 | sin sensor_zenith_deg: 0
+alertas MIROVA (SN, lectura A) por pasada: 53 | descartadas por SN (<= 0,05 MW): 0 | fuente: {'CONS': 51, 'OCR': 2} | noches: 42
+
+== CONTROLES
+alertas sin record K a +-120 s: 0 | con mas de un candidato: 0 | records pareados sin cenit: 0
+P2 pareo: records publicados con alerta a la misma hora 39 | con la referencia corrida +1 dia 3
+control de lectura: disp del tablero != pc.vrp_mw en publicados: 0
+plataformas: {'VIIRS_NOAA20_750': 24, 'VIIRS_NOAA21_750': 25, 'VIIRS_SNPP_750': 4}
+n z<30: 33 | n z>=30: 20 | publica: z<30 27 z>=30 12
+ceros por causa: sin record 0 | record sin cumulo (pc None) 7 | cumulo pero no publica (far u otro) 7 | publica 39
+  no publica con cumulo:  [('2026-04-30 06:06', 'summit', 0.0, 17.644), ('2026-05-26 05:24', 'summit', 0.0, 0.449), ('2026-07-03 05:12', 'summit', 0.0, 0.255), ('2026-07-03 06:06', 'summit', 0.0, 0.143), ('2026-07-06 05:12', 'summit', 0.0, 0.498), ('2026-09-07 05:30', 'summit', 0.0, 0.329), ('2026-09-11 05:36', 'summit', 0.0, 0.255)]
+
+== RAZON K / MIROVA POR PASADA (A1)
+tablero con ceros              z<30 med 0.571 [0.111, 0.849] media 0.672 n=33 | z>=30 med 0.117 [0.000, 0.473] media 0.236 n=20 | Spearman -0.508 barajado [-0.240, +0.252] FUERA
+control x2                     z<30 med 1.141 [0.222, 1.698] media 1.343 n=33 | z>=30 med 0.235 [0.000, 0.945] media 0.473 n=20 | Spearman -0.508 barajado [-0.240, +0.252] FUERA
+tablero publicadas (sin ceros) z<30 med 0.696 [0.485, 0.941] media 0.821 n=27 | z>=30 med 0.336 [0.212, 0.576] media 0.394 n=12 | Spearman -0.414 barajado [-0.284, +0.313] FUERA
+pc.vrp_mw crudo con ceros      z<30 med 0.571 [0.111, 0.849] media 0.672 n=33 | z>=30 med 0.117 [0.000, 0.473] media 0.236 n=20 | Spearman -0.508 barajado [-0.240, +0.252] FUERA
+-- cero = 1 si no publica (A3: ¿la pendiente es de ceros?)
+indicadora no publica          z<30 med 0.000 [0.000, 0.000] media 0.182 n=33 | z>=30 med 0.000 [0.000, 1.000] media 0.400 n=20 | Spearman +0.367 barajado [-0.231, +0.236] FUERA
+-- sin la pasada del 2026-10-10 05:54 (perdida aceptada #865/#881)
+con ceros, sin 10-10           z<30 med 0.573 [0.269, 0.902] media 0.693 n=32 | z>=30 med 0.117 [0.000, 0.473] media 0.236 n=20 | Spearman -0.512 barajado [-0.225, +0.253] FUERA
+-- solo CONS (A119: antes del 2026-06-13 decide la tabla)
+CONS con ceros                 z<30 med 0.576 [0.065, 0.902] media 0.687 n=31 | z>=30 med 0.117 [0.000, 0.473] media 0.236 n=20 | Spearman -0.511 barajado [-0.278, +0.274] FUERA
+CONS publicadas                z<30 med 0.733 [0.511, 0.941] media 0.852 n=25 | z>=30 med 0.336 [0.212, 0.576] media 0.394 n=12 | Spearman -0.444 barajado [-0.312, +0.364] FUERA
+-- por plataforma, con ceros
+VIIRS_NOAA20_750 con ceros     z<30 med 0.576 [0.269, 0.824] media 0.578 n=15 | z>=30 med 0.138 [0.000, 0.375] media 0.251 n=9 | Spearman -0.445 barajado [-0.365, +0.415] FUERA
+VIIRS_NOAA21_750 con ceros     z<30 med 0.659 [0.031, 1.007] media 0.851 n=15 | z>=30 med 0.048 [0.000, 0.473] media 0.221 n=10 | Spearman -0.545 barajado [-0.423, +0.416] FUERA
+VIIRS_SNPP_750 con ceros       z<30 med 0.364 [0.000, 0.368] media 0.244 n=3 | z>=30 med 0.257 [0.257, 0.257] media 0.257 n=1 | Spearman -0.600 barajado [-1.000, +1.000] dentro
+-- por tramo: antes y despues de #535 (2026-08-28) y de la adopcion de K (2026-10-18), con ceros
+hasta 2026-08-28               z<30 med 0.576 [0.368, 0.941] media 0.692 n=19 | z>=30 med 0.069 [0.000, 0.509] media 0.227 n=12 | Spearman -0.621 barajado [-0.325, +0.329] FUERA
+desde 2026-08-29               z<30 med 0.390 [0.000, 0.824] media 0.644 n=14 | z>=30 med 0.154 [0.083, 0.375] media 0.250 n=8 | Spearman -0.236 barajado [-0.422, +0.501] dentro
+-- ventana del auto-audit (2026-09-03 a 2026-11-02)
+auto-audit con ceros           z<30 med 0.390 [0.000, 0.824] media 0.644 n=14 | z>=30 med 0.154 [0.083, 0.375] media 0.250 n=8 | Spearman -0.236 barajado [-0.422, +0.501] dentro
+auto-audit publicadas          z<30 med 0.677 [0.269, 0.902] media 0.901 n=10 | z>=30 med 0.255 [0.097, 0.375] media 0.334 n=6 | Spearman -0.162 barajado [-0.547, +0.438] dentro
+-- corte alternativo 40 grados
+tablero con ceros              z<40 med 0.497 [0.065, 0.755] media 0.565 n=42 | z>=40 med 0.097 [0.000, 0.576] media 0.286 n=11 | Spearman -0.508 barajado [-0.240, +0.252] FUERA
+tablero publicadas             z<40 med 0.571 [0.364, 0.849] media 0.719 n=33 | z>=40 med 0.524 [0.297, 0.770] media 0.525 n=6 | Spearman -0.414 barajado [-0.284, +0.313] FUERA
+-- dejar una noche fuera (con ceros y publicadas): Spearman [min, max], replicas FUERA
+  con ceros    Spearman [-0.556, -0.481] FUERA 42/42
+  publicadas   Spearman [-0.501, -0.373] FUERA 34/34
+-- MIROVA misma: ¿su VRP cae con el cenit? (si cayera, la razon no lo veria)
+vM MIROVA                      z<30 med 0.640 [0.510, 1.000] media 0.777 n=33 | z>=30 med 0.525 [0.460, 0.820] media 0.632 n=20 | Spearman -0.262 barajado [-0.280, +0.251] dentro
+-- alertas descartadas por SN (<= 0,05 MW): estrato SE, informado aparte

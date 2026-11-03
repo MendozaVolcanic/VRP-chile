@@ -1,0 +1,60 @@
+grilla 134x134 paso 375.0 m EPSG 32719; celdas anillo 5-25 km 13103; celdas cumbre <=2 km 89
+pasadas con grilla: 180; con alertados de la vía: 70; ventana 2026-04-04 05:48 a 2026-10-21 06:42
+control P1: |VIA recalculado - vrp_mw del record| max 0.0005 MW (vrp_mw redondeado a 1e-3) sobre 70
+control P1: CERO >= VIA en 70 de 70
+control anillo: T_anillo_grilla - t_bg del record K de producción, misma pasada: n 180 mediana 1.217 p10 0.81 p90 1.83; Spearman entre ambos 0.998
+== temperaturas de brillo I4 por tramo de cenit (todas las pasadas nocturnas con grilla)
+  T_cumbre               {'n': 180, 'mediana': 244.002, 'z<30': [244.477, 55], 'z>=30': [243.951, 125], 'spearman': -0.082, 'barajado_95': [-0.15, 0.121], 'fuera': False}
+  T_anillo_grilla        {'n': 180, 'mediana': 249.276, 'z<30': [250.447, 55], 'z>=30': [248.801, 125], 'spearman': -0.138, 'barajado_95': [-0.134, 0.128], 'fuera': True}
+  anillo_menos_cumbre    {'n': 180, 'mediana': 5.393, 'z<30': [6.275, 55], 'z>=30': [4.247, 125], 'spearman': -0.229, 'barajado_95': [-0.12, 0.117], 'fuera': True}
+  K_t_bg_prod            {'n': 180, 'mediana': 247.855, 'z<30': [249.35, 55], 'z>=30': [247.35, 125], 'spearman': -0.125, 'barajado_95': [-0.135, 0.128], 'fuera': False}
+== pasadas con alertados de la vía (cualquier clase de distancia)
+  T_alert_media          {'n': 70, 'mediana': 264.441, 'z<30': [261.889, 28], 'z>=30': [266.823, 42], 'spearman': 0.22, 'barajado_95': [-0.193, 0.224], 'fuera': False}
+  T_alert_max            {'n': 70, 'mediana': 267.14, 'z<30': [264.806, 28], 'z>=30': [270.555, 42], 'spearman': 0.173, 'barajado_95': [-0.214, 0.196], 'fuera': False}
+  T_fondo_local          {'n': 70, 'mediana': 251.84, 'z<30': [249.005, 28], 'z>=30': [253.1, 42], 'spearman': 0.135, 'barajado_95': [-0.246, 0.234], 'fuera': False}
+  anillo_menos_local     {'n': 70, 'mediana': 4.812, 'z<30': [5.802, 28], 'z>=30': [2.765, 42], 'spearman': -0.22, 'barajado_95': [-0.225, 0.196], 'fuera': False}
+  anillo_menos_cumbre    {'n': 70, 'mediana': 6.833, 'z<30': [7.072, 28], 'z>=30': [6.813, 42], 'spearman': -0.094, 'barajado_95': [-0.258, 0.226], 'fuera': False}
+  npix_via               {'n': 70, 'mediana': 2.0, 'z<30': [2.0, 28], 'z>=30': [2.0, 42], 'spearman': 0.088, 'barajado_95': [-0.24, 0.206], 'fuera': False}
+  alert_sobre_anillo     {'n': 70, 'mediana': 2.0, 'z<30': [2.0, 28], 'z>=30': [2.0, 42], 'spearman': 0.029, 'barajado_95': [-0.252, 0.202], 'fuera': False}
+  P2: T_anillo - T_fondo_local == 0 en 0 de 70
+== brazos de fondo con la máscara de la vía, contra MIROVA (summit, alerta MIROVA > 0): n 24; ventana 2026-04-04 05:48 a 2026-09-18 06:42; far aparte n 4
+  VIA      / MIROVA  {'n': 24, 'mediana': 1.015, 'z<30': [1.01, 12], 'z>=30': [1.015, 12], 'spearman': 0.08, 'barajado_95': [-0.339, 0.389], 'fuera': False}
+  ANI      / MIROVA  {'n': 24, 'mediana': 0.136, 'z<30': [0.269, 12], 'z>=30': [0.06, 12], 'spearman': -0.229, 'barajado_95': [-0.343, 0.404], 'fuera': False}
+  ANI_REC  / MIROVA  {'n': 24, 'mediana': 0.192, 'z<30': [0.272, 12], 'z>=30': [0.167, 12], 'spearman': -0.231, 'barajado_95': [-0.349, 0.413], 'fuera': False}
+  CERO     / MIROVA  {'n': 24, 'mediana': 2.485, 'z<30': [2.163, 12], 'z>=30': [2.588, 12], 'spearman': 0.537, 'barajado_95': [-0.407, 0.409], 'fuera': True}
+  ANIK_REC / MIROVA  {'n': 24, 'mediana': 0.298, 'z<30': [0.415, 12], 'z>=30': [0.246, 12], 'spearman': -0.224, 'barajado_95': [-0.353, 0.436], 'fuera': False}   (fondo = t_bg del record K de producción de la misma pasada, recorte a cero)
+  B Tal_menos_Tfl    {'n': 24, 'mediana': 9.052, 'z<30': [10.614, 12], 'z>=30': [8.493, 12], 'spearman': -0.491, 'barajado_95': [-0.403, 0.363], 'fuera': True}
+  B Kbg_menos_Tfl    {'n': 24, 'mediana': 6.86, 'z<30': [6.86, 12], 'z>=30': [6.985, 12], 'spearman': -0.202, 'barajado_95': [-0.431, 0.449], 'fuera': False}
+  B anillo_menos_local {'n': 24, 'mediana': 8.379, 'z<30': [8.379, 12], 'z>=30': [7.958, 12], 'spearman': -0.193, 'barajado_95': [-0.443, 0.439], 'fuera': False}
+  B ANI_REC/VIA      {'n': 24, 'mediana': 0.199, 'z<30': [0.259, 12], 'z>=30': [0.162, 12], 'spearman': -0.312, 'barajado_95': [-0.345, 0.396], 'fuera': False}
+  K prod / MIROVA (mismas, K publicada) {'n': 23, 'mediana': 0.336, 'z<30': [0.394, 12], 'z>=30': [0.251, 11], 'spearman': -0.503, 'barajado_95': [-0.334, 0.397], 'fuera': True}
+  K prod / ANIK_REC (mismas, ANIK_REC > 0) {'n': 22, 'mediana': 1.024, 'z<30': [1.085, 12], 'z>=30': [0.944, 10], 'spearman': -0.425, 'barajado_95': [-0.448, 0.433], 'fuera': False}
+  2026-09-14 05:42 VIIRS_NOAA21 z   5.3 M 0.130 VIA 0.130 ANI +0.035 ANI_REC 0.035 K 0.0646 npix 2 sobre_anillo 2 Tal 258.2 Tfl 247.7 Tani 255.9 Tcum 247.1 Kt_bg 254.13
+  2026-06-05 05:36 VIIRS_NOAA21 z   7.8 M 0.200 VIA 0.136 ANI +0.031 ANI_REC 0.031 K 0.059 npix 1 sobre_anillo 1 Tal 267.4 Tfl 251.8 Tani 264.7 Tcum 253.1 Kt_bg 262.99
+  2026-04-04 05:48 VIIRS_NOAA20 z  15.8 M 0.260 VIA 0.256 ANI +0.070 ANI_REC 0.072 K 0.1055 npix 2 sobre_anillo 1 Tal 271.2 Tfl 260.4 Tani 268.9 Tcum 260.9 Kt_bg 267.78
+  2026-09-16 05:42 VIIRS_SNPP   z  17.1 M 0.160 VIA 0.103 ANI -0.008 ANI_REC 0.015 K 0.0435 npix 2 sobre_anillo 1 Tal 260.2 Tfl 253.4 Tani 260.7 Tcum 253.6 Kt_bg 259.62
+  2026-06-08 05:30 VIIRS_NOAA20 z  17.3 M 0.260 VIA 0.270 ANI +0.030 ANI_REC 0.060 K 0.093 npix 3 sobre_anillo 2 Tal 261.2 Tfl 248.4 Tani 260.4 Tcum 248.9 Kt_bg 259.31
+  2026-07-02 05:30 VIIRS_NOAA21 z  18.3 M 0.140 VIA 0.163 ANI +0.061 ANI_REC 0.061 K 0.0771 npix 2 sobre_anillo 2 Tal 260.6 Tfl 248.7 Tani 257.1 Tcum 249.7 Kt_bg 255.18
+  2026-04-09 05:54 VIIRS_NOAA20 z  25.7 M 0.240 VIA 0.240 ANI -0.022 ANI_REC 0.037 K 0.0732 npix 3 sobre_anillo 1 Tal 266.8 Tfl 259.1 Tani 267.5 Tcum 260.0 Kt_bg 266.46
+  2026-06-28 06:00 VIIRS_NOAA20 z  25.9 M 0.150 VIA 0.153 ANI +0.065 ANI_REC 0.065 K 0.0843 npix 2 sobre_anillo 2 Tal 260.4 Tfl 249.3 Tani 256.5 Tcum 247.7 Kt_bg 255.31
+  2026-06-19 05:24 VIIRS_NOAA20 z  26.8 M 0.110 VIA 0.116 ANI +0.045 ANI_REC 0.045 K 0.0593 npix 2 sobre_anillo 2 Tal 260.0 Tfl 252.1 Tani 257.3 Tcum 250.8 Kt_bg 256.21
+  2026-05-02 05:24 VIIRS_NOAA20 z  27.4 M 0.250 VIA 0.284 ANI -0.003 ANI_REC 0.046 K 0.089 npix 3 sobre_anillo 2 Tal 265.7 Tfl 255.5 Tani 266.0 Tcum 257.1 Kt_bg 264.77
+  2026-04-24 05:24 VIIRS_NOAA21 z  28.0 M 0.310 VIA 0.267 ANI +0.111 ANI_REC 0.111 K 0.1182 npix 2 sobre_anillo 2 Tal 268.5 Tfl 254.7 Tani 263.8 Tcum 255.0 Kt_bg 261.92
+  2026-06-11 05:24 VIIRS_NOAA21 z  28.1 M 0.100 VIA 0.140 ANI +0.035 ANI_REC 0.035 K 0.0533 npix 3 sobre_anillo 3 Tal 253.9 Tfl 244.8 Tani 252.1 Tcum 244.5 Kt_bg 250.33
+  2026-06-25 06:00 VIIRS_NOAA21 z  33.4 M 0.160 VIA 0.165 ANI +0.032 ANI_REC 0.032 K 0.0537 npix 3 sobre_anillo 3 Tal 258.0 Tfl 249.5 Tani 256.6 Tcum 249.8 Kt_bg 254.91
+  2026-06-30 05:18 VIIRS_NOAA20 z  35.1 M 0.200 VIA 0.204 ANI +0.020 ANI_REC 0.028 K 0.0698 npix 3 sobre_anillo 2 Tal 258.2 Tfl 247.2 Tani 257.4 Tcum 247.3 Kt_bg 256.25
+  2026-06-19 06:12 VIIRS_NOAA21 z  47.9 M 0.060 VIA 0.061 ANI +0.019 ANI_REC 0.019 K 0.0477 npix 1 sobre_anillo 1 Tal 260.3 Tfl 251.8 Tani 258.0 Tcum 251.2 Kt_bg 256.32
+  2026-04-24 06:12 VIIRS_NOAA20 z  48.4 M 0.110 VIA 0.112 ANI -0.042 ANI_REC 0.000 K 0.0088 npix 2 sobre_anillo 0 Tal 261.2 Tfl 254.0 Tani 263.4 Tcum 254.9 Kt_bg 262.24
+  2026-09-16 05:06 VIIRS_NOAA21 z  48.5 M 0.110 VIA 0.108 ANI -0.003 ANI_REC 0.001 K 0.0365 npix 2 sobre_anillo 1 Tal 260.8 Tfl 253.8 Tani 261.0 Tcum 254.1 Kt_bg 259.13
+  2026-05-19 05:06 VIIRS_NOAA20 z  49.3 M 0.180 VIA 0.192 ANI -0.003 ANI_REC 0.031 K 0.0413 npix 3 sobre_anillo 1 Tal 258.8 Tfl 249.2 Tani 259.1 Tcum 249.9 Kt_bg 257.95
+  2026-05-31 06:24 VIIRS_NOAA20 z  54.0 M 0.160 VIA 0.156 ANI -0.022 ANI_REC 0.010 K 0.0209 npix 3 sobre_anillo 1 Tal 261.3 Tfl 254.8 Tani 262.1 Tcum 254.7 Kt_bg 261.18
+  2026-05-30 05:00 VIIRS_NOAA20 z  54.4 M 0.320 VIA 0.322 ANI +0.022 ANI_REC 0.051 K 0.059 npix 4 sobre_anillo 2 Tal 264.5 Tfl 255.5 Tani 264.1 Tcum 254.6 Kt_bg 263.07
+  2026-06-30 05:00 VIIRS_SNPP   z  58.2 M 0.230 VIA 0.233 ANI +0.012 ANI_REC 0.042 K 0.0438 npix 4 sobre_anillo 2 Tal 257.0 Tfl 247.4 Tani 256.8 Tcum 246.8 Kt_bg 256.14
+  2026-04-06 06:30 VIIRS_SNPP   z  59.0 M 0.090 VIA 0.087 ANI -0.009 ANI_REC 0.000 K 0.0 npix 1 sobre_anillo 0 Tal 266.8 Tfl 258.0 Tani 267.5 Tcum 258.8 Kt_bg 266.45
+  2026-04-15 04:54 VIIRS_NOAA21 z  59.1 M 0.400 VIA 0.395 ANI +0.174 ANI_REC 0.178 K 0.1005 npix 5 sobre_anillo 4 Tal 266.6 Tfl 258.9 Tani 263.7 Tcum 259.9 Kt_bg 262.17
+  2026-09-18 06:42 VIIRS_SNPP   z  62.9 M 0.060 VIA 0.063 ANI +0.013 ANI_REC 0.013 K 0.0201 npix 1 sobre_anillo 1 Tal 263.2 Tfl 256.0 Tani 261.9 Tcum 255.3 Kt_bg 261.2
+-- alertas de MIROVA con vía de clase far (aparte):
+  2026-09-28 05:18 VIIRS_SNPP z 48.8 M 2.51 src OCR VIA 2.525 dist_min 25.05 km K 0.0
+  2026-08-01 05:00 VIIRS_SNPP z 58.3 M 1.25 src OCR VIA 1.280 dist_min 13.21 km K 0.016
+  2026-09-29 04:54 VIIRS_SNPP z 62.4 M 1.86 src OCR VIA 1.781 dist_min 9.15 km K 0.0
+  2026-09-14 06:18 VIIRS_SNPP z 42.1 M 2.22 src OCR VIA 2.278 dist_min 14.89 km K 0.0079

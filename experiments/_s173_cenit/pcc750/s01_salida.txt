@@ -1,0 +1,175 @@
+== CONFIG
+volcán: PuyehueCordonCaulle | coords: (-40.59, -72.117) | inner del tablero: 20.0
+SNAP_CONS: C:\Users\nmend\vrp-wt\s173_cenit\pcc750\repo\data\mirova_reference\mirova_v1_snapshot\registro_vrp_consolidado.csv | SNAP_OCR: C:\Users\nmend\vrp-wt\s173_cenit\pcc750\repo\data\mirova_reference\mirova_v1_snapshot\registro_vrp_ocr.csv
+identidad del predicado (node): ([0, 1, 1, 1, 0], [1, 0])
+
+################ VENTANA auditoria: 2026-09-03 a 2026-11-02 (noche UTC)
+filas nocturnas de referencia (todos): 5612 | filas VIIRS750 PCC: 197 | records K VIIRS750 PCC nocturnos: 282
+alertas MIROVA VIIRS750 PCC (SN): 23 | tipos: {'ALERTA_TERMICA': 22, 'ALERTA_TERMICA_OCR': 1} | fuente: {'CONS': 22, 'OCR': 1}
+pasadas con alerta (CONS y OCR fundidos): 22
+
+== CONTROLES
+alertas sin record K a +-120 s: 0 de 22
+alertas con más de un record K a +-120 s: 0
+P2: records publicados pareados con alerta: directo 16 | con la referencia +1 día 2
+control de lectura: disp del tablero distinto de pc.vrp_mw del JSON (publicados): 0
+cenit del record contra Zenith_Sat_deg del OCR: n 1 | |dif| máx 0.27 | mediana |dif| 0.27
+records pareados sin sensor_zenith_deg: 0
+plataformas: {'VIIRS_NOAA20_750': 12, 'VIIRS_NOAA21_750': 9, 'VIIRS_SNPP_750': 1}
+noches: 16 | ventana de alertas: 2026-09-07 05:30 a 2026-10-29 05:54
+cenit de las alertas pareadas: [4.3, 4.5, 5.3, 5.5, 14.1, 14.2, 14.6, 15.0, 15.2, 23.6, 23.8, 23.9, 24.3, 24.7, 31.7, 32.0, 39.0, 39.1, 50.7, 51.0, 55.7, 59.0]
+n z<30: 14 | n z>=30: 8
+publica el tablero: z<30 10 | z>=30 6
+
+== RAZÓN K / MIROVA POR PASADA
+tablero, con ceros     z<30 0.390 [0.000, 0.824] n=14 rango [0.000, 3.939] | z>=30 0.154 [0.083, 0.375] n=8 rango [0.000, 0.939] | med>=30/med<30 0.396 | Spearman -0.236 barajado [-0.386, +0.456] dentro
+tablero, publicadas    z<30 0.677 [0.269, 0.902] n=10 rango [0.031, 3.939] | z>=30 0.255 [0.097, 0.375] n=6 rango [0.083, 0.939] | med>=30/med<30 0.376 | Spearman -0.162 barajado [-0.482, +0.482] dentro
+control x2             z<30 1.355 [0.538, 1.805] n=10 rango [0.062, 7.878] | z>=30 0.510 [0.193, 0.750] n=6 rango [0.165, 1.878] | med>=30/med<30 0.376 | Spearman -0.162 barajado [-0.482, +0.482] dentro
+pc.vrp_mw JSON, c/ceros z<30 0.390 [0.000, 0.824] n=14 rango [0.000, 3.939] | z>=30 0.154 [0.083, 0.375] n=8 rango [0.000, 0.939] | med>=30/med<30 0.396 | Spearman -0.236 barajado [-0.386, +0.456] dentro
+escena (vrp_mw), c/ceros z<30 0.495 [0.000, 1.115] n=14 rango [0.000, 13.889] | z>=30 0.236 [0.083, 0.645] n=8 rango [0.000, 1.576] | med>=30/med<30 0.476 | Spearman -0.208 barajado [-0.421, +0.468] dentro
+suma px>0, c/ceros     z<30 0.495 [0.000, 1.115] n=14 rango [0.000, 27.006] | z>=30 0.235 [0.082, 0.646] n=8 rango [0.000, 1.577] | med>=30/med<30 0.475 | Spearman -0.208 barajado [-0.421, +0.468] dentro
+
+-- sólo alertas con fila CONS (A119): n 22
+CONS tablero c/ceros   z<30 0.390 [0.000, 0.824] n=14 rango [0.000, 3.939] | z>=30 0.154 [0.083, 0.375] n=8 rango [0.000, 0.939] | med>=30/med<30 0.396 | Spearman -0.236 barajado [-0.386, +0.456] dentro
+
+-- desde el 2026-06-13 (OCR con distancia medida, A119)
+desde 06-13 c/ceros    z<30 0.390 [0.000, 0.824] n=14 rango [0.000, 3.939] | z>=30 0.154 [0.083, 0.375] n=8 rango [0.000, 0.939] | med>=30/med<30 0.396 | Spearman -0.236 barajado [-0.386, +0.456] dentro
+
+-- por noche (como el auto-audit: máximo nuestro publicado / máximo de MIROVA de la noche), referencia
+razón por noche (noches con publicación nuestra en pasada con alerta): 0.511 [0.212, 0.824] n=13 rango [0.031, 3.939]
+
+-- DESCOMPOSICIÓN (pares publicados), por cenit
+pc n_pixels            z<30 1.000 [1.000, 2.000] n=10 rango [1.000, 3.000] | z>=30 1.000 [1.000, 1.000] n=6 rango [1.000, 2.000] | med>=30/med<30 1.000 | Spearman -0.371 barajado [-0.497, +0.461] dentro
+n_anomalous escena     z<30 1.500 [1.000, 2.000] n=10 rango [1.000, 11.000] | z>=30 1.500 [1.000, 2.000] n=6 rango [1.000, 2.000] | med>=30/med<30 1.000 | Spearman -0.046 barajado [-0.576, +0.482] dentro
+escena/pc (VRP)        z<30 1.000 [1.000, 1.781] n=10 rango [1.000, 3.526] | z>=30 1.339 [1.000, 2.168] n=6 rango [1.000, 2.270] | med>=30/med<30 1.339 | Spearman +0.175 barajado [-0.548, +0.476] dentro
+t_bg K                 z<30 272.610 [269.140, 275.710] n=10 rango [258.610, 280.030] | z>=30 270.955 [268.500, 273.310] n=6 rango [267.490, 275.470] | med>=30/med<30 0.994 | Spearman -0.210 barajado [-0.430, +0.459] dentro
+t_max K                z<30 279.490 [277.570, 282.360] n=10 rango [274.740, 286.220] | z>=30 277.825 [276.590, 278.880] n=6 rango [274.850, 281.800] | med>=30/med<30 0.994 | Spearman -0.426 barajado [-0.506, +0.562] dentro
+dist pc al volcán km   z<30 7.644 [7.601, 7.926] n=10 rango [7.506, 8.189] | z>=30 7.838 [7.606, 7.887] n=6 rango [7.154, 8.596] | med>=30/med<30 1.025 | Spearman +0.159 barajado [-0.532, +0.447] dentro
+dist MIROVA km         z<30 7.650 [7.650, 7.830] n=10 rango [6.450, 8.550] | z>=30 8.190 [7.830, 8.550] n=6 rango [7.650, 8.550] | med>=30/med<30 1.071 | Spearman +0.509 barajado [-0.489, +0.506] FUERA
+vM MIROVA MW           z<30 0.700 [0.480, 1.480] n=10 rango [0.360, 1.670] | z>=30 0.610 [0.460, 1.220] n=6 rango [0.380, 1.430] | med>=30/med<30 0.871 | Spearman -0.116 barajado [-0.515, +0.508] dentro
+
+== DETALLE (orden de cenit)
+dt_M              sensor             z     vM    src  pub disp   razón  pc_n esc_vrp n_an  t_bg   dpcV  dM
+2026-09-14 05:42 VIIRS_NOAA21_750     4.3  0.63 CONS   1  0.415  0.659    1  0.415    1  272.6  7.51  7.65
+2026-10-16 05:42 VIIRS_NOAA21_750     4.5  0.61 CONS   1  0.019  0.031    2  0.019    2  278.3  7.63  7.65
+2026-09-17 05:42 VIIRS_NOAA20_750     5.3  0.42 CONS   1  0.346  0.824    2  0.657    2  271.5  7.93  7.65
+2026-10-27 05:36 VIIRS_NOAA21_750     5.5  1.67 CONS   1  1.507  0.902    2  1.978    2  272.6  7.51  7.83
+2026-10-21 05:48 VIIRS_NOAA21_750    14.1  0.36 CONS   1  1.418  3.939    3  5.000   11  258.6  8.07  6.45
+2026-10-29 05:54 VIIRS_NOAA20_750    14.2  1.49 CONS   1  0.762  0.511    1  0.762    1  280.0  7.60  7.83
+2026-09-11 05:54 VIIRS_NOAA20_750    14.6  0.80 CONS   1  0.052  0.065    1  0.052    1  267.7  8.19  8.55
+2026-09-28 05:36 VIIRS_NOAA20_750    15.0  0.38 CONS   0  0.000  0.000 None  0.000    0  270.7 -1.00  7.65
+2026-10-14 05:36 VIIRS_NOAA20_750    15.2  0.48 CONS   1  0.535  1.115    1  0.535    1  269.1  7.82  7.65
+2026-10-10 05:54 VIIRS_NOAA21_750    23.6  1.19 CONS   0  0.000  0.000 None  0.000    0  271.9 -1.00  7.83
+2026-09-16 06:00 VIIRS_NOAA20_750    23.8  0.77 CONS   1  0.536  0.696    1  0.536    1  273.1  7.65  7.65
+2026-09-07 05:30 VIIRS_NOAA20_750    23.9  0.38 CONS   0  0.000  0.000    1  0.000    1  269.6  7.54  7.65
+2026-10-25 05:30 VIIRS_NOAA20_750    24.3  1.48 CONS   1  0.398  0.269    1  0.709    2  275.7  7.64  8.55
+2026-09-11 05:36 VIIRS_SNPP_750      24.7  0.49 CONS   0  0.000  0.000    1  0.000    1  267.4  7.35  7.83
+2026-09-13 06:00 VIIRS_NOAA21_750    31.7  0.45 CONS   0  0.000  0.000 None  0.000    0  271.5 -1.00  7.83
+2026-09-18 05:24 VIIRS_NOAA20_750    32.0  1.43 CONS   1  0.536  0.375    1  0.536    1  273.3  7.88  8.55
+2026-09-13 05:18 VIIRS_NOAA20_750    39.0  0.63 CONS   1  0.052  0.083    1  0.052    1  269.9  7.89  7.83
+2026-10-28 06:18 VIIRS_NOAA20_750    39.1  1.22 CONS   1  0.259  0.212    1  0.588    2  275.5  7.61  7.83
+2026-09-11 05:00 VIIRS_NOAA21_750    50.7  0.59 CONS   1  0.057  0.097    1  0.057    1  267.5  7.79  8.55
+2026-10-14 06:24 VIIRS_NOAA21_750    51.0  0.31 CONS   0  0.000  0.000 None  0.000    0  270.1 -1.00  7.65
+2026-09-17 06:30 VIIRS_NOAA21_750    55.7  0.38 CONS   1  0.113  0.297    1  0.245    2  272.0  7.15  7.65
+2026-10-27 04:54 VIIRS_NOAA20_750    59.0  0.46 CONS   1  0.432  0.939    2  0.725    2  268.5  8.60  8.55
+
+################ VENTANA amplia: 2026-04-01 a 2026-11-02 (noche UTC)
+filas nocturnas de referencia (todos): 18772 | filas VIIRS750 PCC: 648 | records K VIIRS750 PCC nocturnos: 986
+alertas MIROVA VIIRS750 PCC (SN): 57 | tipos: {'ALERTA_TERMICA': 51, 'ALERTA_TERMICA_OCR': 6} | fuente: {'CONS': 51, 'OCR': 6}
+pasadas con alerta (CONS y OCR fundidos): 53
+
+== CONTROLES
+alertas sin record K a +-120 s: 0 de 53
+alertas con más de un record K a +-120 s: 0
+P2: records publicados pareados con alerta: directo 39 | con la referencia +1 día 3
+control de lectura: disp del tablero distinto de pc.vrp_mw del JSON (publicados): 0
+cenit del record contra Zenith_Sat_deg del OCR: n 1 | |dif| máx 0.27 | mediana |dif| 0.27
+records pareados sin sensor_zenith_deg: 0
+plataformas: {'VIIRS_NOAA20_750': 24, 'VIIRS_NOAA21_750': 25, 'VIIRS_SNPP_750': 4}
+noches: 42 | ventana de alertas: 2026-04-04 05:54 a 2026-10-29 05:54
+cenit de las alertas pareadas: [2.5, 2.9, 2.9, 4.3, 4.5, 4.7, 5.1, 5.3, 5.5, 6.1, 7.5, 13.4, 13.4, 13.6, 13.8, 14.1, 14.2, 14.6, 15.0, 15.2, 16.1, 16.9, 21.8, 21.9, 23.0, 23.5, 23.6, 23.8, 23.9, 24.3, 24.7, 25.2, 25.9, 30.9, 31.4, 31.6, 31.7, 31.7, 32.0, 38.5, 39.0, 39.1, 40.5, 40.5, 44.3, 45.1, 45.5, 46.5, 50.7, 51.0, 51.5, 55.7, 59.0]
+n z<30: 33 | n z>=30: 20
+publica el tablero: z<30 27 | z>=30 12
+
+== RAZÓN K / MIROVA POR PASADA
+tablero, con ceros     z<30 0.571 [0.111, 0.849] n=33 rango [0.000, 3.939] | z>=30 0.117 [0.000, 0.473] n=20 rango [0.000, 0.939] | med>=30/med<30 0.206 | Spearman -0.508 barajado [-0.215, +0.260] FUERA
+tablero, publicadas    z<30 0.696 [0.485, 0.941] n=27 rango [0.031, 3.939] | z>=30 0.336 [0.212, 0.576] n=12 rango [0.083, 0.939] | med>=30/med<30 0.483 | Spearman -0.414 barajado [-0.286, +0.338] FUERA
+control x2             z<30 1.392 [0.971, 1.883] n=27 rango [0.062, 7.878] | z>=30 0.672 [0.425, 1.151] n=12 rango [0.165, 1.878] | med>=30/med<30 0.483 | Spearman -0.414 barajado [-0.286, +0.338] FUERA
+pc.vrp_mw JSON, c/ceros z<30 0.571 [0.111, 0.849] n=33 rango [0.000, 3.939] | z>=30 0.117 [0.000, 0.473] n=20 rango [0.000, 0.939] | med>=30/med<30 0.206 | Spearman -0.508 barajado [-0.215, +0.260] FUERA
+escena (vrp_mw), c/ceros z<30 0.571 [0.111, 1.033] n=33 rango [0.000, 13.889] | z>=30 0.117 [0.000, 0.645] n=20 rango [0.000, 1.576] | med>=30/med<30 0.206 | Spearman -0.414 barajado [-0.237, +0.268] FUERA
+suma px>0, c/ceros     z<30 0.570 [0.111, 1.032] n=33 rango [0.000, 27.006] | z>=30 0.117 [0.000, 0.646] n=20 rango [0.000, 1.577] | med>=30/med<30 0.206 | Spearman -0.414 barajado [-0.237, +0.268] FUERA
+
+-- sólo alertas con fila CONS (A119): n 51
+CONS tablero c/ceros   z<30 0.576 [0.065, 0.902] n=31 rango [0.000, 3.939] | z>=30 0.117 [0.000, 0.473] n=20 rango [0.000, 0.939] | med>=30/med<30 0.204 | Spearman -0.511 barajado [-0.334, +0.247] FUERA
+
+-- desde el 2026-06-13 (OCR con distancia medida, A119)
+desde 06-13 c/ceros    z<30 0.368 [0.031, 0.824] n=21 rango [0.000, 3.939] | z>=30 0.097 [0.000, 0.297] n=15 rango [0.000, 0.939] | med>=30/med<30 0.262 | Spearman -0.407 barajado [-0.346, +0.348] FUERA
+
+-- por noche (como el auto-audit: máximo nuestro publicado / máximo de MIROVA de la noche), referencia
+razón por noche (noches con publicación nuestra en pasada con alerta): 0.573 [0.368, 0.849] n=34 rango [0.031, 3.939]
+
+-- DESCOMPOSICIÓN (pares publicados), por cenit
+pc n_pixels            z<30 1.000 [1.000, 1.000] n=27 rango [1.000, 3.000] | z>=30 1.000 [1.000, 1.000] n=12 rango [1.000, 2.000] | med>=30/med<30 1.000 | Spearman -0.235 barajado [-0.308, +0.265] dentro
+n_anomalous escena     z<30 1.000 [1.000, 2.000] n=27 rango [1.000, 11.000] | z>=30 1.000 [1.000, 2.000] n=12 rango [1.000, 3.000] | med>=30/med<30 1.000 | Spearman +0.126 barajado [-0.326, +0.335] dentro
+escena/pc (VRP)        z<30 1.000 [1.000, 1.000] n=27 rango [1.000, 3.526] | z>=30 1.000 [1.000, 2.168] n=12 rango [1.000, 2.270] | med>=30/med<30 1.000 | Spearman +0.204 barajado [-0.272, +0.319] dentro
+t_bg K                 z<30 272.610 [269.760, 274.880] n=27 rango [258.610, 280.030] | z>=30 270.130 [269.760, 273.310] n=12 rango [263.910, 275.470] | med>=30/med<30 0.991 | Spearman -0.190 barajado [-0.320, +0.266] dentro
+t_max K                z<30 280.230 [278.770, 282.180] n=27 rango [274.740, 286.220] | z>=30 277.825 [276.540, 281.000] n=12 rango [270.270, 283.470] | med>=30/med<30 0.991 | Spearman -0.353 barajado [-0.348, +0.262] FUERA
+dist pc al volcán km   z<30 7.631 [7.529, 7.716] n=27 rango [7.349, 8.189] | z>=30 7.724 [7.606, 7.887] n=12 rango [7.154, 8.596] | med>=30/med<30 1.012 | Spearman +0.214 barajado [-0.321, +0.359] dentro
+dist MIROVA km         z<30 7.830 [7.650, 7.830] n=27 rango [4.590, 12.410] | z>=30 7.830 [7.830, 8.550] n=12 rango [7.650, 8.550] | med>=30/med<30 1.000 | Spearman +0.461 barajado [-0.297, +0.354] FUERA
+vM MIROVA MW           z<30 0.770 [0.550, 1.010] n=27 rango [0.360, 1.670] | z>=30 0.615 [0.500, 0.950] n=12 rango [0.380, 1.430] | med>=30/med<30 0.799 | Spearman -0.081 barajado [-0.330, +0.327] dentro
+
+== DETALLE (orden de cenit)
+dt_M              sensor             z     vM    src  pub disp   razón  pc_n esc_vrp n_an  t_bg   dpcV  dM
+2026-05-25 05:42 VIIRS_NOAA21_750     2.5  1.01 CONS   1  1.017  1.007    1  1.017    1  273.9  7.53  7.83
+2026-04-07 05:42 VIIRS_NOAA21_750     2.9  0.58 CONS   1  0.546  0.941    2  1.073    2  276.7  7.73  7.65
+2026-05-17 05:48 VIIRS_NOAA20_750     2.9  0.51 CONS   1  0.622  1.220    1  0.622    1  272.2  7.72  7.65
+2026-09-14 05:42 VIIRS_NOAA21_750     4.3  0.63 CONS   1  0.415  0.659    1  0.415    1  272.6  7.51  7.65
+2026-10-16 05:42 VIIRS_NOAA21_750     4.5  0.61 CONS   1  0.019  0.031    2  0.019    2  278.3  7.63  7.65
+2026-08-21 05:48 VIIRS_NOAA20_750     4.7  0.78 CONS   1  0.449  0.576    1  0.449    1  269.8  7.58  7.83
+2026-07-03 05:48 VIIRS_SNPP_750       5.1  1.00 OCR    1  0.364  0.364    1  0.364    1  269.1  7.88  4.59
+2026-09-17 05:42 VIIRS_NOAA20_750     5.3  0.42 CONS   1  0.346  0.824    2  0.657    2  271.5  7.93  7.65
+2026-10-27 05:36 VIIRS_NOAA21_750     5.5  1.67 CONS   1  1.507  0.902    2  1.978    2  272.6  7.51  7.83
+2026-08-24 05:36 VIIRS_NOAA21_750     6.1  0.55 CONS   1  1.283  2.333    1  1.283    1  266.9  7.53  7.65
+2026-06-05 05:36 VIIRS_NOAA21_750     7.5  1.09 CONS   1  0.622  0.571    1  0.622    1  275.3  7.45  7.83
+2026-04-20 05:54 VIIRS_NOAA20_750    13.4  0.89 CONS   1  0.432  0.485    1  0.432    1  270.2  7.35  7.83
+2026-06-07 05:54 VIIRS_NOAA20_750    13.4  1.20 CONS   1  0.882  0.735    1  0.882    1  272.5  7.56  7.83
+2026-08-18 05:48 VIIRS_NOAA21_750    13.6  0.64 CONS   1  0.661  1.033    1  0.661    1  268.2  7.64  7.83
+2026-04-04 05:54 VIIRS_NOAA20_750    13.8  0.55 CONS   1  0.415  0.755    1  0.415    1  274.4  7.70  7.65
+2026-10-21 05:48 VIIRS_NOAA21_750    14.1  0.36 CONS   1  1.418  3.939    3  5.000   11  258.6  8.07  6.45
+2026-10-29 05:54 VIIRS_NOAA20_750    14.2  1.49 CONS   1  0.762  0.511    1  0.762    1  280.0  7.60  7.83
+2026-09-11 05:54 VIIRS_NOAA20_750    14.6  0.80 CONS   1  0.052  0.065    1  0.052    1  267.7  8.19  8.55
+2026-09-28 05:36 VIIRS_NOAA20_750    15.0  0.38 CONS   0  0.000  0.000 None  0.000    0  270.7 -1.00  7.65
+2026-10-14 05:36 VIIRS_NOAA20_750    15.2  0.48 CONS   1  0.535  1.115    1  0.535    1  269.1  7.82  7.65
+2026-06-08 05:36 VIIRS_NOAA20_750    16.1  0.57 CONS   1  0.484  0.849    1  0.484    1  274.9  7.63  7.65
+2026-04-13 05:30 VIIRS_NOAA21_750    16.9  0.72 CONS   1  0.528  0.733    2  0.773    2  274.5  7.71  7.83
+2026-06-04 05:54 VIIRS_NOAA21_750    21.8  1.00 OCR    1  0.509  0.509    1  0.509    1  274.9  7.59 12.41
+2026-07-06 05:54 VIIRS_NOAA21_750    21.9  1.02 CONS   1  0.113  0.111    1  0.113    1  270.1  7.52  7.83
+2026-04-09 06:00 VIIRS_NOAA20_750    23.0  0.95 CONS   1  0.536  0.564    1  0.536    1  275.9  7.50  7.83
+2026-08-19 06:06 VIIRS_SNPP_750      23.5  0.47 CONS   1  0.173  0.368    1  0.173    1  270.0  7.66  7.65
+2026-10-10 05:54 VIIRS_NOAA21_750    23.6  1.19 CONS   0  0.000  0.000 None  0.000    0  271.9 -1.00  7.83
+2026-09-16 06:00 VIIRS_NOAA20_750    23.8  0.77 CONS   1  0.536  0.696    1  0.536    1  273.1  7.65  7.65
+2026-09-07 05:30 VIIRS_NOAA20_750    23.9  0.38 CONS   0  0.000  0.000    1  0.000    1  269.6  7.54  7.65
+2026-10-25 05:30 VIIRS_NOAA20_750    24.3  1.48 CONS   1  0.398  0.269    1  0.709    2  275.7  7.64  8.55
+2026-09-11 05:36 VIIRS_SNPP_750      24.7  0.49 CONS   0  0.000  0.000    1  0.000    1  267.4  7.35  7.83
+2026-07-29 05:24 VIIRS_NOAA21_750    25.2  0.52 CONS   0  0.000  0.000 None  0.000    0  268.4 -1.00  7.83
+2026-05-26 05:24 VIIRS_NOAA21_750    25.9  0.44 CONS   0  0.000  0.000    1  0.000    1  277.1  7.65  7.65
+2026-04-30 06:06 VIIRS_NOAA20_750    30.9  0.41 CONS   0  0.000  0.000    1  0.000    1  268.2 24.47  7.83
+2026-06-17 06:06 VIIRS_NOAA20_750    31.4  0.50 CONS   1  0.069  0.138    1  0.069    1  275.4  7.72  7.65
+2026-07-03 06:06 VIIRS_NOAA20_750    31.6  0.53 CONS   0  0.000  0.000    1  0.000    1  268.8  7.47  7.83
+2026-09-13 06:00 VIIRS_NOAA21_750    31.7  0.45 CONS   0  0.000  0.000 None  0.000    0  271.5 -1.00  7.83
+2026-08-24 06:12 VIIRS_SNPP_750      31.7  0.47 CONS   1  0.121  0.257    1  0.121    1  270.3  7.56  7.83
+2026-09-18 05:24 VIIRS_NOAA20_750    32.0  1.43 CONS   1  0.536  0.375    1  0.536    1  273.3  7.88  8.55
+2026-06-06 06:12 VIIRS_NOAA20_750    38.5  0.95 CONS   1  0.484  0.509    1  1.054    2  269.8  7.57  7.83
+2026-09-13 05:18 VIIRS_NOAA20_750    39.0  0.63 CONS   1  0.052  0.083    1  0.052    1  269.9  7.89  7.83
+2026-10-28 06:18 VIIRS_NOAA20_750    39.1  1.22 CONS   1  0.259  0.212    1  0.588    2  275.5  7.61  7.83
+2026-07-03 05:12 VIIRS_NOAA21_750    40.5  0.52 CONS   0  0.000  0.000    1  0.000    1  269.9  7.47  7.83
+2026-05-16 05:12 VIIRS_NOAA21_750    40.5  0.82 CONS   1  0.472  0.576    1  0.472    1  269.9  7.89  8.55
+2026-05-02 06:18 VIIRS_NOAA21_750    44.3  0.39 CONS   0  0.000  0.000 None  0.000    0  269.9 -1.00  7.65
+2026-08-22 06:18 VIIRS_NOAA21_750    45.1  0.65 CONS   0  0.000  0.000 None  0.000    0  247.8 -1.00  2.25
+2026-07-06 05:12 VIIRS_NOAA20_750    45.5  0.49 CONS   0  0.000  0.000    1  0.000    1  268.2  7.88  7.83
+2026-06-28 05:06 VIIRS_NOAA21_750    46.5  0.84 CONS   1  0.397  0.473    1  0.681    3  263.9  7.65  8.55
+2026-09-11 05:00 VIIRS_NOAA21_750    50.7  0.59 CONS   1  0.057  0.097    1  0.057    1  267.5  7.79  8.55
+2026-10-14 06:24 VIIRS_NOAA21_750    51.0  0.31 CONS   0  0.000  0.000 None  0.000    0  270.1 -1.00  7.65
+2026-06-07 05:00 VIIRS_NOAA21_750    51.5  0.60 CONS   1  0.462  0.770    1  0.462    1  270.5  7.73  7.83
+2026-09-17 06:30 VIIRS_NOAA21_750    55.7  0.38 CONS   1  0.113  0.297    1  0.245    2  272.0  7.15  7.65
+2026-10-27 04:54 VIIRS_NOAA20_750    59.0  0.46 CONS   1  0.432  0.939    2  0.725    2  268.5  8.60  8.55

@@ -16,6 +16,28 @@ catálogo D25 es el fondo de anillo regional con recorte a cero (`docs/MIROVA_DI
 | VIIRS 375 | K (0,745 / 0,481, 66 pares); V375-E no (0,92 / 1,00, 27) | sin aislar: no existe ablación por pieza | D17 SOSPECHA, en tensión con la tarea 1.14 §3.2 (gravedad 3) |
 | MODIS | K; la vía no (producción 2026-11-02: 1,19 y 1,11 a 41° y 52°, n 2) | el recorte a cero cuando ninguna celda supera la mediana del anillo (5 de 10 oblicuas, 0 de 6 bajo 30°); D17 no extraíble del lote S162 (cenit y volcán confundidos) | CONFIRMADO EN PARTE |
 
+## Segunda tanda: Tupungatito (VIIRS 375) y PCC (VIIRS 750), con verificador limpio
+
+Pregunta de Nicolás: el código de MIROVA es uno por sensor, ¿el arreglo de Chillán no debería servir para todos? La
+pregunta que decide es si la vía lleva a cada volcán cerca de 1.
+
+| volcán | K (bajo / sobre 30°) | la vía | pieza | estado |
+|---|---|---|---|---|
+| Tupungatito V375 | 0,43 / 0,24 (168 pares) | V375-E 1,01 / 1,02 (23 pares, representativos de los 168) | nivel del fondo de anillo de K, 3 a 11 K más tibio que la cumbre (mediana 6,86 K); el recorte a cero casi no actúa | CONFIRMADA (pendiente de la vía: sin evidencia, n 23) |
+| PCC V750 | 0,571 / 0,117 con ceros (53 alertas) | con la ROI de hoy (`def`, B0): 0 de 72 pasadas publicadas, pierde las 8 protegidas; con B1, B2, B3 o B5: 0,96 a 1,00 en los dos tramos, 0 protegidas perdidas | fondo de anillo de K (3,6 K más tibio que el fondo local; el lacolito sobresale 4,7 K) | CONFIRMADA EN PARTE |
+
+Para la sesión de V750-B (urgente): en PCC la ROI `def` de `pipeline/grillas_mirova.yaml` deja la vía muda (control
+positivo: una fuente sintética sí alerta con `def`). Y VPCC750-01 (gravedad 3): el oráculo de S162
+(`oraculo_ablacion.py`) interpola el fondo con la Delaunay de scipy sin perturbar; la vía de producción usa la
+triangulación perturbada que iguala a MATLAB. En 11 de 27 pasadas de PCC la vía da 1,3 a 40 % más VRP: toda lectura de
+V750-B o V750-C hecha con el oráculo o el runner N hereda esa diferencia. Además el anillo del oráculo va de inner a 25
+km, no de 5 a 25 (CPCC750-05).
+
+Tupungatito, matices del verificador: dos de las 11 alertas que K no publica son protegidas por la regla oficial
+(2,51 y 1,86 MW), pero son fuentes a 9 y 25 km atribuidas por el OCR con una imagen de 20 a 25 días después (A119); 2
+de 168 pares comparan objetos distintos (A46). Seguimiento: VIIRS 750 en Tupungatito, K deja sin publicar 12 de 14
+alertas (no medido).
+
 ## Seguimientos abiertos
 
 - VMODIS-01 (gravedad 3): el arnés del PR #937 nunca llama a `auth()`; las 27 pasadas saldrían sin bajar. Corregir
