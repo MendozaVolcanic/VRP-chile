@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 09:39 UTC (S173): programa por sensor puesto al día por el cenit (§12.8); aviso a VIIRS 750
+- Nicolás: «Sí, los cuatro». Nueva §12.8 en `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md`: MODIS
+  encendido (la sombra de 28 noches la reemplaza la guardia K con regla de reversión); el cenit como corte informativo en
+  toda lectura nueva; pendientes de la regla de cirrus del tablero (A45) y de Tupungatito en V750; sin ablación por pieza
+  en VIIRS 375.
+- Aviso entregado a la sesión de VIIRS 750 (`local_94f4be0d`) antes de V750-B: PCC con `def` muda, VPCC750-01,
+  CPCC750-05, corte por cenit y Tupungatito. V750-B sin despachar a las 09:00 UTC.
+- Ablación MODIS verificada (run 41588951267): remuestreo y geolocalización de 1 km corrigen la caída oblicua; el fondo
+  de K hace los ceros (`experiments/_s173_cenit/README.md`, tercera tanda).
+
 ### 2026-11-03 02:26 UTC (S173): primera guardia VERDE, pruebas del cenit en Chillán y #938 mergeado
 - Encendido de MODIS medido: `encendido_modis_utc` 2026-11-02 20:11:43 (primer record de la vía, NRT de las 19:58).
   Guardia K despachada a mano (run 41547117408, 11 de 11 verdes; el cron de las 17:40 llegó a las 00:02). Vigilancia

@@ -510,3 +510,41 @@ cuenta noches con datos, y en VIIRS 375 además alertas); se recalculan con el m
    96 % y D: al 94 %. Todo su trabajo commiteado está en el remoto (S171, `git rev-list HEAD --not --remotes` = 0 en los
    20). Archivar las sesiones terminadas y limpiar sus worktrees, con el sí de Nicolás, libera disco antes de V750-B, que
    corre local.
+
+### 12.8 Estado al 2026-11-03 y cambios por el cenit (S173)
+
+Agregado por la coordinadora S173 a pedido de Nicolás («como sigue el plan por sensor? hay que modificar algo?»; aprobó
+los cuatro cambios el 2026-11-03 con «Sí, los cuatro»). Actualiza la §12.7 sin reemplazarla; su calendario queda como
+historia donde esta sección lo contradice.
+
+**Dónde está cada sensor**:
+- **MODIS: encendido, adelantado.** La vía «código MIROVA» corre en producción desde el merge de #934 (2026-11-02 17:18
+  UTC; primer record de la vía a las 20:11:43 UTC). La sombra de 28 noches de la §12.7 (fecha ~2026-11-30) ya no aplica:
+  la reemplazan la guardia K (perfil `guardia_k_modis`) y la regla de reversión sellada (tag `s173-regla-modd-sellada`),
+  vigente hasta el 2027-03-02. Primera vigilancia VERDE (0 distintas de 171 pareadas, 0 de 29 protegidas).
+- **VIIRS 375**: sin cambio. La sombra de V375-E se llena desde el 2026-11-03 y se lee con el lector del tag
+  `s172-v375e-lector-resellado`; parada estimada el 2026-12-02 (rango hasta el 12-09).
+- **VIIRS 750: sigue siendo el camino crítico.** V750-B sin despachar al 2026-11-03 09:00 UTC. El aviso del cambio 1 se
+  entregó a su sesión ese día.
+
+**Lo que midió S173** (`experiments/_s173_cenit/README.md`, cada frente con verificador limpio): la razón de K contra
+MIROVA cae con el ángulo cenital del sensor en los tres sensores, y las tres vías la llevan cerca de 1 en los dos tramos.
+MODIS (Chillán): la corrigen el remuestreo a la grilla de 1 km y la geolocalización de 1 km; el fondo de anillo de K deja
+en cero la magnitud de 6 de 17 pasadas oblicuas. VIIRS 750 (Chillán y PCC): fondo de anillo de K. VIIRS 375:
+en Tupungatito, el nivel del fondo de anillo de K (CONFIRMADA); en Chillán, pieza sin aislar (D17 SOSPECHA).
+
+**Cambios al programa**:
+1. **Aviso a VIIRS 750 antes de leer V750-B** (hecho el 2026-11-03): en PCC la ROI `def` deja muda la vía (0 de 72
+   pasadas, 8 protegidas perdidas; B1, B2, B3 y B5 dan 0,96 a 1,00); el oráculo de S162 triangula distinto que la vía de
+   producción (VPCC750-01: 1,3 a 40 % más VRP en la vía en 11 de 27 pasadas de PCC) y su anillo va de inner a 25 km
+   (CPCC750-05). Se escriben como sesgo conocido antes de leer; no cambian ninguna regla sellada.
+2. **El cenit como corte informativo en toda lectura nueva** (V750-B, sombra de V375-E, retrospectiva del paquete,
+   vigilancia de MODIS): informar aparte las pasadas bajo y sobre 30° de cenit del sensor. No decide. Por qué: K y la
+   vía difieren justo en las oblicuas, y un promedio que mezcla los dos tramos puede esconderlo.
+3. **Pendientes nuevos**: (a) la regla de cirrus del tablero (`frontend/index.html`: `t_max` bajo 273,15 K y más de 10
+   MW oculta el record) puede ocultar alertas reales de la vía de MODIS en pasadas oblicuas: 7 de 27 records de la vía en
+   Chillán tienen `t_max` bajo 273,15 K, todos con cenit de 35° o más (VABLMODIS-05). Tocar `frontend/` pide tag y sí de
+   Nicolás (A45). (b) VIIRS 750 en Tupungatito: K deja sin publicar 12 de 14 alertas; medir con la vía dentro de la
+   lectura de V750-B si se puede, sin que decida.
+4. **No se hace la ablación por pieza en VIIRS 375.** La vía ya corrige el déficit (Tupungatito 1,01 / 1,02) y la
+   adopción la decide la sombra de V375-E. Aislar la pieza no mueve ninguna decisión.
