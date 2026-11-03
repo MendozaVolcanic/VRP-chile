@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.referencia_mirova_unificada import (clave,  # noqa: E402
                                                  cargar_referencia_unificada)
+from tests.perdida_simulada import snapshot_sin  # noqa: E402
 
 LASCAR_CONS = ("Lascar", "MODIS", "2026-03-04 07:15", "CONS")
 
@@ -24,8 +25,11 @@ LASCAR_CONS = ("Lascar", "MODIS", "2026-03-04 07:15", "CONS")
 # S150 (tarea 0.1 del loop): la union historica entra ANTES que el respaldo y hoy lo contiene
 # entero. Estos dos tests prueban la capa del respaldo, asi que la aislan con historico_path=None;
 # sin eso la alerta de Lascar llegaria por la historia y el test dejaria de probar el respaldo.
-def test_recupera_las_alertas_perdidas():
-    ref = cargar_referencia_unificada(historico_path=None)
+# S173: el 2026-11-02 el consolidado remoto repuso la fila de Lascar, que llegaba por el snapshot (origen
+# "principal") y no por el respaldo. La perdida se simula con tests/perdida_simulada.py.
+def test_recupera_las_alertas_perdidas(tmp_path):
+    cons = snapshot_sin([LASCAR_CONS], tmp_path / "cons.csv")
+    ref = cargar_referencia_unificada(cons_path=cons, historico_path=None)
     por_clave = {clave(a): a for a in ref}
     assert LASCAR_CONS in por_clave
     fila = por_clave[LASCAR_CONS]
@@ -33,8 +37,9 @@ def test_recupera_las_alertas_perdidas():
     assert fila["origen"] == "respaldo_20260408"
 
 
-def test_control_sin_respaldo_la_alerta_cons_no_esta():
-    sin = {clave(a) for a in cargar_referencia_unificada(respaldo_path=None, historico_path=None)}
+def test_control_sin_respaldo_la_alerta_cons_no_esta(tmp_path):
+    cons = snapshot_sin([LASCAR_CONS], tmp_path / "cons.csv")
+    sin = {clave(a) for a in cargar_referencia_unificada(cons_path=cons, respaldo_path=None, historico_path=None)}
     assert LASCAR_CONS not in sin
     # la misma pasada si existe por OCR: por eso la clave lleva la fuente
     assert ("Lascar", "MODIS", "2026-03-04 07:15", "OCR") in sin
