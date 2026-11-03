@@ -569,6 +569,23 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 02:26 UTC (S173): primera guardia VERDE, pruebas del cenit en Chillán y #938 mergeado
+- Encendido de MODIS medido: `encendido_modis_utc` 2026-11-02 20:11:43 (primer record de la vía, NRT de las 19:58).
+  Guardia K despachada a mano (run 41547117408, 11 de 11 verdes; el cron de las 17:40 llegó a las 00:02). Vigilancia
+  VERDE: nulo 0 distintas de 171 pareadas, 0 de 29 protegidas, vence 2027-03-02 (`04e797ca1`).
+- Pruebas del cenit en Chillán (pedido de Nicolás), tres sensores con verificador limpio (Fable): en
+  `experiments/_s173_cenit/` (`bd4045563`). La caída es de K; las vías la corrigen. V750: fondo de anillo de K, resto
+  0,587 sin remuestrear (área: SOSPECHA). V375: pieza sin aislar. MODIS: recorte a cero bajo el anillo. Error del
+  coordinador: los encargos llamaron D25 a la geometría del borde; D25 es el fondo.
+- PR #937 (borrador, ablación MODIS en Actions): login con `auth()` (VMODIS-01, `768b4d815`) y brazo K con el flag en
+  False (VER937: desde #934 K era V, `b1ac181d5`). Sin despachar; merge pendiente de frase.
+- `main` rojo desde el 2026-11-02 por datos vivos: el consolidado de Mirova-v1 repuso 3.444 filas (`79f410697`) y el
+  encendido llenó `claves_via()`. PR #938 (sólo `tests/`, pérdida simulada), verificador MERGEABLE, CI verde;
+  mergeado con la frase «Sí, mergear #938»: `f20495d37` (02:25 UTC). #937 actualizado con main (`51558c308`).
+- Seguimiento S1 (gravedad 3): la regla de cirrus del tablero puede ocultar alertas de la vía en pasadas oblicuas;
+  hoy 0 de 22 records de la vía la cumplen. Toca `frontend/` (A45).
+- Próximo: CI del #937 en verde y frase para mergear y despachar; Suomi NPP 05 a 07 UTC; aviso §5 a consumidores.
+
 ### 2026-11-02 17:18 UTC (S173): regla y pre-registro SELLADOS; vía «código MIROVA» de MODIS ENCENDIDA en producción
 - Frase de Nicolás: «Sí, sellar y encender» (sello de la regla ronda 5, sello del pre-registro retro y sí A45).
 - Regla sellada en B, commit `33dac1eca` (texto ronda 5 sha256 LF `7f300a14` antes de la cabecera), tag
