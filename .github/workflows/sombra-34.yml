@@ -1,0 +1,182 @@
+name: Sombra de los 34 (vias codigo MIROVA, volcanes fuera del NRT)
+
+# S172 (decision de Nicolas del 2026-11-02, chat de la coordinadora: «continua con todo»; tag defensivo
+# pre-s172-sombra-34). Calcado de sombra-codigo-mirova.yml (la sombra de los 11), con estos cambios: la matriz son los
+# 34 volcanes de volcanoes.yaml que no estan en nrt.yml, el perfil es sombra_34 (data/sombra_34/), el grupo de
+# concurrencia es propio y la cadencia es otra.
+# POR QUE: MIROVA no vigila estos 34 en su NRT (plan docs/superpowers/plans/2026-11-02-nrt-34-volcanes.md, H2); antes de
+# llevarlos al tablero hay que ver como se comporta en ellos el detector de la sombra de los 11, sin publicar nada.
+# El tablero no lee data/sombra_34/ y el lector sellado de V375-E tampoco.
+#
+# CADENCIA (experiments/_s172_capacidad_nrt/INFORME.md, rama loop/activo, §1 y §5 punto 3): 34 jobs con
+# max-parallel 8 dan una pared de 74 a 81 min de mediana (p95 79 a 87; ESTIMACION, los 34 nunca corrieron con las
+# vias). El NRT de los 11 recibe despachos a las :10 de las 01 a las 12 UTC (pared maxima observada 40 min, termina
+# antes de las 12:50); la sombra de los 11 tiene cron a las 15:00 y la experimental a las 14:00 (las dos llegan con
+# horas de atraso, ~17 a 20 UTC). A las 13:07 UTC esta corrida termina hacia las 14:30 si GitHub la dispara a tiempo y
+# no se cruza con el NRT; si llega con atraso de horas se cruza a lo sumo con la experimental y la sombra de los 11
+# (8 + 4 + 4 = 16 jobs, bajo el tope de 20 simultaneos del plan Free, que es SIN DATO). El minuto 7 evita la punta de
+# carga de GitHub en el minuto 0.
+# Costo: ~34 jobs de ~15 a 17 min, unos 550 a 600 min de runner por dia (repo publico, sin tope propio de minutos).
+#
+# ARRANQUE: igual que la sombra de los 11, scripts/ventana_sombra.py no devuelve ventana antes del 2026-11-03 (Suomi
+# NPP cesa el 2026-11-02 13:00 UTC: otro regimen) y cada job sale en segundos. Encender esto es el merge, que decide
+# Nicolas (A45).
+#
+# CONCURRENCIA: grupo PROPIO, no `push-main` (en `push-main` desplazaria una corrida del NRT en espera); el push se
+# protege con el bucle de reintentos pull --rebase (guard G4).
+# A71: autentica SOLO con EARTHDATA_TOKEN y falla al instante si viene vacio. A43: "on" entre comillas.
+# Vigilancia ciega: .github/workflows/vigilancia-sombra-34.yml abre un issue si data/sombra_34/ deja de recibir datos.
+"on":
+  schedule:
+    - cron: "7 13 * * *"
+  workflow_dispatch:
+    inputs:
+      volcano:
+        description: "Un volcan (vacio = los 34)"
+        required: false
+        default: ""
+      medir:
+        description: "Medir el costo sin commitear (pide start y end; acepta fechas anteriores al 2026-11-03)"
+        required: false
+        type: boolean
+        default: false
+      start:
+        description: "Inicio AAAA-MM-DD (vacio = hoy y 7 dias atras, desde el 2026-11-03)"
+        required: false
+        default: ""
+      end:
+        description: "Fin AAAA-MM-DD"
+        required: false
+        default: ""
+
+concurrency:
+  group: sombra-34
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-24.04  # fijado como el NRT (ubuntu-latest migra a 26.04 desde el 2026-10-19)
+    timeout-minutes: 100
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8   # informe de capacidad S172: con 8 la corrida de 34 cabe en ~80 min; con 4 serian ~2,5 h
+      matrix:
+        volcano: [Antuco, DescabezadoGrande, CerroAzulQuizapu, LagunaDelMaule, NevadoDeLongavi, Callaqui,
+                  Lonquimay, Tolhuaca, Sollipulli, Quetrupillan, Lanin, MochoChoshuenco, CarranLosVenados,
+                  AntillancaCasablanca, Osorno, Calbuco, YateHornopiren, Huequi, Michinmahuida, CorcovadoYanteles,
+                  Melimoyu, Mentolat, MacaCay, Hudson, Tinguiririca, Taapaca, Parinacota, Guallatiri, Irruputuncu,
+                  OlcaParuma, Ollague, SanPedro, Putana, SanJose]
+    steps:
+      - name: Filtro de volcan
+        id: plan
+        env:
+          DISPATCH_VOLCANO: ${{ github.event.inputs.volcano }}
+        run: |
+          if [ -n "$DISPATCH_VOLCANO" ] && [ "$DISPATCH_VOLCANO" != "${{ matrix.volcano }}" ]; then
+            echo "correr=false" >> "$GITHUB_OUTPUT"; echo "Salto ${{ matrix.volcano }} (filtro $DISPATCH_VOLCANO)"; exit 0
+          fi
+          echo "correr=true" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout repository
+        if: steps.plan.outputs.correr == 'true'
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        if: steps.plan.outputs.correr == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        if: steps.plan.outputs.correr == 'true'
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          # pyproj: la via lo usa para pasar el granulo a la grilla UTM de MIROVA (remuestrear_grilla); el NRT no lo instala
+          pip install earthaccess numpy h5py scipy pyyaml pyproj
+
+      - name: Run VRP pipeline, perfil sombra_34
+        id: correr
+        if: steps.plan.outputs.correr == 'true'
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_MEDIR: ${{ github.event.inputs.medir }}
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
+        # Techo del paso como la sombra de los 11: A15 pide >= 1,3 x 56 min (peor job observado del NRT) = 73.
+        timeout-minutes: 75
+        run: |
+          set -o pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea la cuenta (A71)."
+            exit 1
+          fi
+          VRP_PROFILE=sombra_34 python -c "import pipeline.profile as p; assert p.PROFILE_NAME == 'sombra_34', p.PROFILE_NAME; assert p.DATA_SUBDIR == 'sombra_34', p.DATA_SUBDIR; assert p.ENABLE_V750_CODIGO_MIROVA and p.ENABLE_V375_CODIGO_MIROVA and p.ENABLE_MODIS_CODIGO_MIROVA; assert not (p.ENABLE_MODIS_GEO_MXD03 or p.ENABLE_MODIS_CRATER_SIN_DATO or p.ENABLE_MODIS_DIST_DESDE_CRATER); assert p.SENSOR_MODIS and p.SENSOR_VIIRS_375 and p.SENSOR_VIIRS_750; print('perfil', p.PROFILE_NAME, '| vias V750 V375 MODIS encendidas | MxD03 apagado | tres sensores')"
+          ARGS=()
+          if [ "$VRP_MEDIR" = "true" ]; then ARGS+=(--medir); fi
+          if [ -n "$VRP_START" ]; then ARGS+=(--start "$VRP_START"); fi
+          if [ -n "$VRP_END" ]; then ARGS+=(--end "$VRP_END"); fi
+          VENTANA=$(python scripts/ventana_sombra.py "${ARGS[@]}") || { echo "::error::ventana pedida invalida"; exit 2; }
+          if [ -z "$VENTANA" ]; then
+            echo "commit=false" >> "$GITHUB_OUTPUT"; echo "Todavia no toca: la sombra parte el 2026-11-03."; exit 0
+          fi
+          read -r INI FIN <<< "$VENTANA"
+          echo "Ventana $INI a $FIN (medir=$VRP_MEDIR)"
+          # El inicio de la corrida se anota ANTES de correr; la revision cuenta solo los records con processed_utc
+          # desde aqui (pipeline/store.py lo reescribe en cada record que guarda), no los de ayer (S169 P3-02).
+          INICIO=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          { echo "corrio=true"; echo "ini=$INI"; echo "fin=$FIN"; echo "inicio=$INICIO"; } >> "$GITHUB_OUTPUT"
+          # --volcano explicito: run_pipeline lo respeta aunque el volcan no sea mirova_monitored.
+          python scripts/run_pipeline.py --profile sombra_34 --volcano "${{ matrix.volcano }}" \
+            --start "$INI" --end "$FIN" --cobertura-json cobertura.json 2>&1 | tee pipeline.log
+          if [ "$VRP_MEDIR" = "true" ]; then echo "commit=false" >> "$GITHUB_OUTPUT"; else echo "commit=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Commit sombra data
+        if: steps.correr.outputs.commit == 'true'
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          # Solo el archivo de este volcan en data/sombra_34/: nunca data/mirova_equivalent/ ni la sombra de los 11.
+          git add "data/sombra_34/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "Sin cambios para ${{ matrix.volcano }}"; exit 0; }
+          git commit -m "Sombra 34 ${{ matrix.volcano }} $(date -u '+%Y-%m-%d %H:%M UTC')"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
+
+      # run_pipeline atrapa toda excepcion por granulo y sale 0: sin esta revision, una dependencia que falte o una
+      # grilla que la via no acepte dejaria el job verde y vacio. Mismo revisor que la sombra de los 11
+      # (scripts/revisar_sombra.py, generico: recibe la ruta del JSON). Va DESPUES del commit; si falla, el job queda rojo.
+      - name: Revisar que salieron records de la via
+        if: always() && steps.correr.outputs.corrio == 'true'
+        run: |
+          python scripts/revisar_sombra.py --json "data/sombra_34/${{ matrix.volcano }}.json" --log pipeline.log --cobertura-json cobertura.json --ini "${{ steps.correr.outputs.ini }}" --fin "${{ steps.correr.outputs.fin }}" --desde-utc "${{ steps.correr.outputs.inicio }}" --sha "${{ github.sha }}"
+
+      # El repo es publico: el token se tacha del log antes de subirlo, y si el tachado falla no se sube (S169).
+      - name: Tachar el token en el log y la cobertura
+        id: tachar
+        if: always() && steps.correr.outputs.corrio == 'true'
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          python scripts/tachar_secreto_log.py pipeline.log cobertura.json
+
+      - name: Guardar log y cobertura de la corrida
+        if: always() && steps.correr.outputs.corrio == 'true' && steps.tachar.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sombra34-${{ matrix.volcano }}-intento-${{ github.run_attempt }}
+          path: |
+            pipeline.log
+            cobertura.json
+          if-no-files-found: warn
+          retention-days: 90

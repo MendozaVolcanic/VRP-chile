@@ -70,7 +70,11 @@ jobs:
         run: |
           pip install --upgrade pip
           sudo apt-get install -y libhdf4-dev
-          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml pyproj
+      # S172 (mini auditoria MA172-201): la via «codigo MIROVA» importa pyproj en cada granulo; sin el, el job sale
+      # verde sin records. Aqui queda rojo.
+      - name: Comprobar pyproj
+        run: python -c "import pyproj; print('pyproj', pyproj.__version__)"
       - name: Backfill ${{ matrix.volcano }} ${{ github.event.inputs.start }}..${{ github.event.inputs.end }}
         env:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}

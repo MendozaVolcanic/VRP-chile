@@ -93,7 +93,7 @@ jobs:
         run: |
           set -eo pipefail
           pip install --upgrade pip
-          pip install numpy scipy pyyaml h5py earthaccess
+          pip install numpy scipy pyyaml h5py earthaccess pyproj
           VRP_PROFILE=mirova_equivalent python experiments/_s146_bateria/prueba_local.py \
             | tee prueba_local.txt
       - name: Subir la prueba
@@ -125,7 +125,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libhdf4-dev
           pip install pyhdf
-          pip install earthaccess numpy h5py scipy pyyaml
+          pip install earthaccess numpy h5py scipy pyyaml pyproj
       - name: Correr el brazo (read-only)
         env:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}

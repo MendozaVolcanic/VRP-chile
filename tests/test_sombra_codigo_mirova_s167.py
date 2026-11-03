@@ -59,10 +59,15 @@ def _resuelto(perfil):
 def test_el_perfil_difiere_de_produccion_solo_en_las_tres_vias_y_la_carpeta():
     prod, sombra = _resuelto("mirova_equivalent"), _resuelto(PERFIL)
     distintas = {k for k in set(prod) | set(sombra) if prod.get(k) != sombra.get(k)}
-    assert distintas == VIAS | {"DATA_SUBDIR", "PROFILE_NAME"}, sorted(distintas)
-    # control: en producción las tres vías están apagadas y en la sombra encendidas (si no, el diff de arriba
-    # podría coincidir por otra razón)
-    assert all(prod[k] == "False" for k in VIAS) and all(sombra[k] == "True" for k in VIAS)
+    # S172 (PR B, encendido de MOD-D, decisión de Nicolás del 2026-10-31): producción enciende la vía de MODIS, así que
+    # sombra y producción ya no difieren en ella; la sombra sigue con las tres encendidas. Texto original: la diferencia
+    # eran las tres vías.
+    PROD_ENCENDIDAS = {"ENABLE_MODIS_CODIGO_MIROVA"}
+    assert distintas == (VIAS - PROD_ENCENDIDAS) | {"DATA_SUBDIR", "PROFILE_NAME"}, sorted(distintas)
+    # control: en producción las vías de VIIRS están apagadas y la de MODIS encendida, y en la sombra las tres
+    # encendidas (si no, el diff de arriba podría coincidir por otra razón)
+    assert all(prod[k] == ("True" if k in PROD_ENCENDIDAS else "False") for k in VIAS)
+    assert all(sombra[k] == "True" for k in VIAS)
     assert sombra["DATA_SUBDIR"] == repr(PERFIL) and prod["DATA_SUBDIR"] == repr("mirova_equivalent")
     # los flags de MxD03 van aparte (programa §12.3 punto 4): apagados en los dos
     assert all(prod[k] == sombra[k] == "False" for k in MXD03)
@@ -98,9 +103,9 @@ def test_cada_volcan_de_la_sombra_tiene_grilla_de_miroVA_en_cada_sensor(familia)
         v = vols[nombre]
         assert MV.volcan_por_coordenadas(v["lat"], v["lon"]) == nombre
         assert MV.grilla_del_volcan(nombre, paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"]) is not None, nombre
-    # control: un volcán fuera de la lista de MIROVA no tiene grilla (el instrumento puede dar None)
-    fuera = [n for n in vols if MV.grilla_del_volcan(n, paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"]) is None]
-    assert fuera
+    # control: un nombre sin grilla da None (el instrumento puede dar None). S172: desde la sombra de los 34 los 45
+    # volcanes de volcanoes.yaml tienen grilla, así que el control usa un nombre que no está en la grilla.
+    assert MV.grilla_del_volcan("VolcanSinGrilla", paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"]) is None
 
 
 # ------------------------------------------------------------------------------------- 3. fechas y encendido
@@ -186,15 +191,21 @@ def test_el_workflow_commitea_solo_la_carpeta_de_la_sombra_y_con_grupo_propio():
 
 def test_revisar_sombra_falla_si_la_corrida_queda_verde_sin_la_via():
     """run_pipeline sale 0 aunque cada gránulo dé error (sin pyproj, por ejemplo): la revisión tiene que ponerlo rojo."""
+    # S169: la revisión juzga sólo lo escrito en esta corrida y por sensor (tests/test_revisar_sombra_corrida_s169.py
+    # tiene los casos de corrida vacía, sensor faltante y rojo arrastrado).
     from revisar_sombra import revisar
-    via = {"datetime_utc": "2026-11-05T06:30:00Z", "via_codigo_mirova": True}
-    k = {"datetime_utc": "2026-11-05T07:10:00Z", "via_codigo_mirova": "sin_mxd03"}
-    viejo = {"datetime_utc": "2026-11-01T06:30:00Z", "via_codigo_mirova": "sin_grilla"}   # fuera de la ventana
-    assert revisar([via, viejo], "  VIIRS_NOAA20 (375m) | ...", "2026-11-03", "2026-11-05")[0] is True
-    assert revisar([], "", "2026-11-03", "2026-11-05")[0] is False                      # vacía: zombie
-    assert revisar([via], "  ERROR processing VJ102IMG...: No module named 'pyproj'", "2026-11-03",
-                   "2026-11-05")[0] is False
-    ok, resumen = revisar([via, k], "", "2026-11-03", "2026-11-05")
+    desde, cob = "2026-11-05T15:01:00Z", {"fallas": [], "plataformas": {}, "incidencias": []}
+    proc = {"processed_utc": "2026-11-05T15:20:00Z"}
+    via = [dict(proc, datetime_utc="2026-11-05T06:30:00Z", sensor=s, via_codigo_mirova=True)
+           for s in ("MODIS_AQUA", "VIIRS_NOAA20_750", "VIIRS_NOAA20")]
+    k = dict(proc, datetime_utc="2026-11-05T07:10:00Z", sensor="MODIS_TERRA", via_codigo_mirova="sin_mxd03")
+    # S169 ronda 3: la revisión juzga además cada día de la ventana, así que aquí la ventana es de un solo día
+    viejo = dict(proc, datetime_utc="2026-11-01T06:30:00Z", via_codigo_mirova="sin_grilla")   # fuera de la ventana
+    assert revisar(via + [viejo], "  VIIRS_NOAA20 (375m) | ...", "2026-11-05", "2026-11-05", desde, cob)[0] is True
+    assert revisar([], "", "2026-11-05", "2026-11-05", desde, cob)[0] is False                # vacía: zombie
+    assert revisar(via, "  ERROR processing VJ102IMG...: No module named 'pyproj'", "2026-11-05",
+                   "2026-11-05", desde, cob)[0] is False
+    ok, resumen = revisar(via + [k], "", "2026-11-05", "2026-11-05", desde, cob)
     assert ok is False and "sin_mxd03" in resumen                                        # cayó a K: se ve
 
 

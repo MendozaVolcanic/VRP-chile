@@ -1,0 +1,52 @@
+# Sombra de los 34 volcanes de volcanoes.yaml que no están en el NRT, con las tres vías «código MIROVA» (S172;
+# decisión de Nicolás del 2026-11-02 en el chat de la coordinadora: «si está corriendo un código que funciona bien en
+# 11 volcanes esperamos que sea similar para los otros 34, continúa con todo»; tag defensivo pre-s172-sombra-34).
+#
+# POR QUÉ: MIROVA vigila en su NRT sólo los 11 chilenos (plan docs/superpowers/plans/2026-11-02-nrt-34-volcanes.md,
+# H2), así que para los otros 34 no hay referencia contra la cual medir. Antes de llevarlos al tablero hay que ver
+# cómo se comporta en ellos el mismo detector que corre la sombra de los 11, en pasadas reales, sin publicar nada.
+#
+# QUÉ ES: el MISMO detector que pipeline/profiles/sombra_codigo_mirova.yaml (producción K con las vías de VIIRS 750,
+# VIIRS 375 y MODIS encendidas, los tres flags de MxD03 apagados como en producción); cambian sólo el nombre y la
+# carpeta de salida. Lo vigila tests/test_sombra_34_s172.py comparando todas las constantes resueltas de los dos.
+# `extends` resuelve UN solo nivel (pipeline/profile.py, _load_profile: la clave `extends` del padre no se resuelve),
+# por eso extiende mirova_equivalent directo y repite los flags de la sombra de los 11.
+# Declara los tres flags de K con el valor de producción (tests/test_guard_perfiles_congelados_s153.py, A117).
+#
+# GEOMETRÍA: las vías no usan radius_km ni inner_radius_km para detectar: interpolan el gránulo a la grilla de 51 x 51
+# km del volcán (pipeline/grillas_mirova.yaml; los 34 se agregaron en S172 con la regla de 8 de los 11, ver
+# experiments/_s172_sombra34/generar_grillas_34.py) y su región sensible es la caja fija del código. Por eso este
+# perfil NO trae volcano_overrides: sin inner_radius_km en volcanoes.yaml, el record de la vía sale con
+# `distance_class: null` y conserva `primary_cluster.centroid_dist_km`, que permite clasificar después con el inner
+# que Nicolás decida (plan, decisión D5; no hay valor de MIROVA que copiar, A5). Si una pasada no puede correr por la
+# vía (MODIS sin MxD03), sigue K con el radio de 5 km del yaml y el record lo dice en `via_codigo_mirova`.
+#
+# NO OPERACIONAL: data_subdir propio (A47); nada lo lee el tablero ni el lector sellado de V375-E (que lee
+# data/sombra_codigo_mirova/). Lo corre sólo .github/workflows/sombra-34.yml.
+extends: mirova_equivalent
+profile: sombra_34
+description: >
+  Sombra de los 34 volcanes fuera del NRT (S172): producción (K) con las vías «código MIROVA» de VIIRS 750, VIIRS 375
+  y MODIS encendidas, en carpeta propia; no publica.
+
+thresholds:
+  enable_v750_codigo_mirova: true
+  enable_v375_codigo_mirova: true
+  enable_modis_codigo_mirova: true
+  enable_modis_geo_mxd03: false
+  enable_modis_crater_sin_dato: false
+  enable_modis_dist_desde_crater: false
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: sombra_34
+
+enable_modis_b22_primary: true

@@ -17,6 +17,15 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
+@pytest.fixture(autouse=True)
+def _k_de_modis(monkeypatch):
+    """S172 (encendido de MOD-D): estas pruebas miden el núcleo de K en MODIS con escenas sintéticas sobre volcanes
+    con grilla de MIROVA. Producción corre la vía «código MIROVA» desde el PR B (con K de guardia), y la vía intentaría
+    leer un MxD03 que aquí no existe. Se fija K; la vía tiene sus pruebas en tests/test_mirova_modis_codigo_s164.py."""
+    from pipeline import process_modis as pm
+    monkeypatch.setattr(pm, "ENABLE_MODIS_CODIGO_MIROVA", False)
+
+
 def _synthetic_modis_data(hot_pixel_at=None, hot_radiance=20.0,
                           bg_radiance=5.0, bg_std=0.1,
                           center_lat=-33.4, center_lon=-69.8,

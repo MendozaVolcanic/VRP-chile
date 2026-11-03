@@ -81,7 +81,9 @@ def test_la_linea_va_en_la_frontera_de_los_datos_y_el_aviso_dice_las_dos_fechas(
     const registrados = [];
     const ventana = { Chart: { register: p => registrados.push(p) } };
     new Function("window", "module", src)(ventana, undefined);
-    const p = registrados[0];
+    // S172: el módulo registra además el plugin de la vía de MODIS (cambioViaModis); aquí se mide el de K.
+    const deK = registrados.filter(x => x.id === "cambioDetector");
+    const p = deK[0];
     const t = Date.parse(ventana.CambioDetector.DATOS_K_DESDE_UTC);
     const trazos = [];
     const ctx = new Proxy({}, { get: (o, k) => (k in o ? o[k] : (...a) => trazos.push([k, ...a])),
@@ -91,7 +93,7 @@ def test_la_linea_va_en_la_frontera_de_los_datos_y_el_aviso_dice_las_dos_fechas(
                      getPixelForValue: v => (v - (t - 5 * 86400000)) / (10 * 86400000) * 200 } } };
     p.afterDatasetsDraw(chart);
     const mov = trazos.filter(x => x[0] === "moveTo")[0];
-    process.stdout.write(JSON.stringify([registrados.length, mov, ventana.CambioDetector.textoAviso()]));
+    process.stdout.write(JSON.stringify([deK.length, mov, ventana.CambioDetector.textoAviso()]));
     """
     r = subprocess.run(["node", "-e", js, str(MODULO)], capture_output=True, text=True, encoding="utf-8", timeout=60)
     assert r.returncode == 0, r.stderr

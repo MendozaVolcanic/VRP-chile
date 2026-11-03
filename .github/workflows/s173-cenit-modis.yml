@@ -1,0 +1,79 @@
+name: "S173 cenit MODIS Chillan: ablacion por pieza de la via codigo MIROVA (solo lectura)"
+
+# Arnes: experiments/_s173_cenit_modis/ablacion_cenit_modis.py (piezas en piezas.py, lista de pasadas en
+# pasadas_chillan_modis.json, lectura en README.md). Por pasada MODIS de Nevados de Chillan con alerta de MIROVA: K
+# (produccion hasta S172), V (flag de la via encendido EN MEMORIA) y los brazos que cambian UNA pieza de la via
+# (fondo de K, sin halo, cumulo, remuestreo por vecino, geolocalizacion de 5 km, sin remuestreo).
+# Solo lectura: no escribe en data/, no commitea, NO hace push; todo queda como artefacto.
+# Solo workflow_dispatch (existe desde main, S73). A43: "on" entre comillas. S141: pipefail con tee.
+# A71: autentica SOLO por EARTHDATA_TOKEN (sin el par usuario y clave, vencido) y falla al instante si viene vacio.
+# MODIS solo en Linux (pyhdf). A15: el censo MOD-D midio ~9 s por pasada con descarga; aqui son 27 pasadas con K, V y
+# diez brazos (el nativo con fillmissing2 sobre ~60 x 60 pixeles): se estiman menos de 30 min; timeout 90.
+# Dependencias con la misma version fija que probe-s168-modd-f4.yml (A108: dos corridas, un solo pipeline).
+"on":
+  workflow_dispatch:
+    inputs:
+      solo:
+        description: "pasadas a correr, separadas por coma (formato 2026-10-17_0850); vacio = todas"
+        required: false
+        default: ""
+
+concurrency:
+  group: s173-cenit-modis
+  cancel-in-progress: false
+
+jobs:
+  ablacion:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    env:
+      EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+    steps:
+      - name: Token presente
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacío. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea la cuenta (A71)."
+            exit 1
+          fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf==0.11.6
+          pip install earthaccess==0.17.0 numpy==2.4.4 h5py==3.16.0 scipy==1.17.1 pyyaml==6.0.3 pyproj==3.7.2 pandas==3.0.2
+          node --version
+      - name: Prueba local de los controles (sin red)
+        env:
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python -I experiments/_s173_cenit_modis/probar_local.py 2>&1 | tee out/prueba_local.log
+      - name: Ablacion
+        env:
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+          SOLO: ${{ github.event.inputs.solo }}
+        run: |
+          set -o pipefail
+          mkdir -p out "$VRP_TMP_DIR"
+          echo "commit $(git rev-parse HEAD) ref ${GITHUB_REF}" | tee out/procedencia.txt
+          python experiments/_s173_cenit_modis/ablacion_cenit_modis.py --out out --solo "$SOLO" 2>&1 | tee out/ablacion.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s173-cenit-modis
+          path: |
+            out/*.json
+            out/*.log
+            out/*.txt
+            out/nativos/*.npz
+          retention-days: 30
+          if-no-files-found: error

@@ -518,7 +518,7 @@ async function loadVolcano(v) {
     records:       data?.records   || [],
     mirovaRecords: mirova?.records || [],
     updated:       data?.updated   || null,
-  };
+  }; if (window.CambioDetector) CambioDetector.notarRecords(allData[v.name].records); // S172: marca de la vía de MODIS desde los datos (misma línea: no corre las líneas)
 }
 
 // ─── Banner stale F49 (sync con index.html L2675) ────────────────────────────

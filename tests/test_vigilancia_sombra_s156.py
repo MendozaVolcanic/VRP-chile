@@ -338,13 +338,23 @@ def test_mutacion_una_sombra_que_trae_produccion_es_aviso():
 
 # ------------------------------------------------------------------ cargar_insumos (cableado, sin node)
 def test_mutacion_cargar_insumos_lee_la_sombra_filtra_k_y_etiqueta_original_y_sn(monkeypatch):
+    # S173: los records falsos traen dt y sensor, y las claves de la via se pasan explicitas. Antes el test llamaba
+    # cargar_insumos sin `via`, que lee claves_via() de data/mirova_equivalent/ real: mientras produccion no tuvo
+    # records de la via el conjunto venia vacio y el filtro no corria; desde el encendido de MODIS (2026-11-02) corre
+    # y se caia con KeyError 'dt'. Ahora el filtro se ejercita: rec_via es de K por sha pero su clave es de la via.
+    from datetime import datetime, timezone
     llamadas = []
-    rec_k = {"vol": "V", "sha": "f" * 40, "lab": None}
-    rec_c0 = {"vol": "V", "sha": None, "lab": None}
+    dt = datetime(2026, 10, 1, 5, 0, tzinfo=timezone.utc)
+    rec_k = {"vol": "V", "sensor": "MODIS", "dt": dt, "sha": "f" * 40, "lab": None}
+    rec_c0 = {"vol": "V", "sensor": "MODIS", "dt": dt, "sha": None, "lab": None}
+    rec_via = {"vol": "V", "sensor": "MODIS", "dt": datetime(2026, 10, 2, 5, 0, tzinfo=timezone.utc),
+               "sha": "e" * 40, "lab": None}
+    via = {("V", "MODIS", "2026-10-02 05:00")}
     bp = types.SimpleNamespace(
         inner_desde_html=lambda: {},
         cargar_nuestros=lambda coords, inner, win, data=None: (
-            llamadas.append(data) or ([{"vol": "V", "fuente": "sombra"}] if data == vs.SOMBRA else [rec_k, rec_c0])),
+            llamadas.append(data) or ([{"vol": "V", "fuente": "sombra"}] if data == vs.SOMBRA
+                                      else [rec_k, rec_c0, rec_via])),
         indexar_referencia=lambda filas, coords, win, regla_minimas="original": (regla_minimas, None, None, 0),
         etiquetar=lambda recs, modo, *a: [r.__setitem__("lab", "neg_limpio" if modo == "original" else "sn")
                                          for r in recs])
@@ -352,7 +362,8 @@ def test_mutacion_cargar_insumos_lee_la_sombra_filtra_k_y_etiqueta_original_y_sn
     monkeypatch.setitem(sys.modules, "banco_paridad", bp)
     monkeypatch.setitem(sys.modules, "referencia_mirova_unificada", ref)
     monkeypatch.setattr(vs.aa, "_coords_por_volcan", lambda: {})
-    filas, prod, sombra = vs.cargar_insumos(("2026-09-18", "2026-10-19"))
+    monkeypatch.setattr(vs, "claves_via", lambda: (_ for _ in ()).throw(AssertionError("leyo claves_via real")))
+    filas, prod, sombra = vs.cargar_insumos(("2026-09-18", "2026-10-19"), via=via)
     assert llamadas == [None, vs.SOMBRA]
     assert prod == [rec_k] and sombra == [{"vol": "V", "fuente": "sombra"}]
     assert (rec_k.get("lab_original"), rec_k.get("lab")) == ("neg_limpio", "sn")
@@ -362,7 +373,9 @@ def test_mutacion_cargar_insumos_lee_la_sombra_filtra_k_y_etiqueta_original_y_sn
 @pytest.fixture
 def insumos(monkeypatch):
     def poner(filas, prod, sombra, frontera="2026-09-18", adopcion=ADOP):
-        monkeypatch.setattr(vs, "cargar_insumos", lambda win: (filas, prod, sombra))
+        # S172 (MA172-101): cargar_insumos recibe las claves de la vía de MODIS; sin records de la vía, un conjunto vacío
+        monkeypatch.setattr(vs, "cargar_insumos", lambda win, via=None: (filas, prod, sombra))
+        monkeypatch.setattr(vs, "claves_via", lambda: set())
         monkeypatch.setattr(vs.aa, "leer_frontera_k", lambda *a: frontera)
         monkeypatch.setattr(vs, "leer_adopcion", lambda *a: adopcion)
         monkeypatch.setattr(vs, "_diurna_por_defecto", lambda: NOCHE)
