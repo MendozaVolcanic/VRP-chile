@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 18:55 UTC (S173): V750-B leído y verificado: ROI B4 (espera §6.5 y frase de Nicolás)
+- Lectura en la rama `claude/s162-viirs750-2-918174`, `experiments/_s162_v750b/r4/lectura_20261103/` (lectura
+  `70c5b2808`, informes `1c10db660`, verificador Fable `d7d15b450`; los tres en el remoto). Verificador: CONFIRMA, 7
+  hallazgos de gravedad 1.
+- Cobertura SUFICIENTE (1 SIN DATO, Láscar 2026-08-25, negativo limpio). Controles verdes. Elegibles B1 a B4; ninguno
+  GANA contra B1 (B2 EMPATE, B4 SIN SUSTRATO, B3 PIERDE); B4 sale por el orden de cercanía al `.m` del §6, con y sin
+  N-3. Publicaciones de más E: B4 31, B1 32, K 121. P1: 0 en B1 a B4, 1 en K. Magnitud B4 1,00 bajo y sobre 30°
+  (K 0,612 / 0,414). Tupungatito: B1 a B5 publican 7 de 10 alertas, K 2.
+- Pendiente de Nicolás: confirmación §6.5 (B4 es ROI por volcán: fidelidad al `.m`, no gate nuestro) y frase para
+  aplicar B4 en la rama de la ROI y abrir el PR. #932 ya estaba en main (aviso a la sesión de V750).
+
 ### 2026-11-03 18:51 UTC (S173): armado del instrumental de la retrospectiva del paquete
 - Frase de Nicolás: «Sí, ármala». Tag defensivo `pre-s172-retro-paquete` sobre main `82b55de0d` (comprobado en el
   remoto). Worktree `C:/Users/nmend/vrp-wt/s173-retro-paquete`, rama `claude/s173-retro-paquete`.
