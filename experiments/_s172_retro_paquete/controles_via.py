@@ -14,11 +14,15 @@ el runner sólo avisa si el sensor entero baja de 90 % (`--minimo 0.90`): decide
 En el brazo K-gemelo (`--esperado k`) es al revés: ningún record puede traer la marca en True.
 
 LAS DOS PREGUNTAS DEL INSTRUMENTO. (1) Si la vía no corriera, un 0 % en el sensor lo deja rojo. (2) Si el trozo no
-escribiera nada (artefacto vacío, carpeta equivocada), 0 records da rojo con salida 4, no verde: un sensor sin records
-también es rojo salvo que se pida lo contrario de forma explícita.
+escribiera nada (artefacto vacío, carpeta equivocada), 0 records da rojo con salida 4, no verde.
 
-Uso: python controles_via.py <carpeta_de_jsons> [--esperado via|k] [--minimo 1.0] [--permitir-sensor-vacio]
-Salida: 0 bien; 3 C-via falla; 4 sin records (o sensor sin records).
+Un sensor sin records en el trozo NO es rojo (VPR940-08, verificador de #940): en un trozo de 1 a 3 días (D1, D3) la
+vía puede descartar sin record todas las pasadas de un sensor por su regla de cobertura (mirova_v750_codigo.py,
+hallazgo 171-01), con datos válidos. Ese trozo se sube igual, con un aviso y la línea `SENSOR_VACIO <sensor>` en
+controles_via.txt (que viaja con el log), y lo decide C-cobertura en la lectura, contando las pasadas de K.
+
+Uso: python controles_via.py <carpeta_de_jsons> [--esperado via|k] [--minimo 1.0]
+Salida: 0 bien (también con un sensor vacío, marcado); 3 C-via falla; 4 sin ningún record.
 """
 from __future__ import annotations
 
@@ -55,7 +59,7 @@ def contar(carpeta):
     return c
 
 
-def revisar(c, esperado="via", minimo=1.0, permitir_vacio=False):
+def revisar(c, esperado="via", minimo=1.0):
     """Devuelve (código de salida, líneas). Pura: la prueba la ejerce sin archivos."""
     lineas, codigo = [], 0
     total = sum(c.values())
@@ -67,9 +71,8 @@ def revisar(c, esperado="via", minimo=1.0, permitir_vacio=False):
         otros = {e: n for (ss, e), n in sorted(c.items()) if ss == s and e != "True"}
         if tot == 0:
             lineas.append(f"{s}: 0 records")
-            if not permitir_vacio:
-                lineas.append(f"::error::C-via: {s} sin records en el trozo")
-                codigo = max(codigo, 4)
+            lineas.append(f"::warning::C-via: {s} sin records en el trozo (lo decide C-cobertura en la lectura)")
+            lineas.append(f"SENSOR_VACIO {s}")
             continue
         frac = via / tot
         lineas.append(f"{s}: {via}/{tot} de la via ({frac:.1%}); otros: {otros}")
@@ -87,9 +90,8 @@ def main(argv=None):
     ap.add_argument("carpeta")
     ap.add_argument("--esperado", choices=("via", "k"), default="via")
     ap.add_argument("--minimo", type=float, default=1.0)
-    ap.add_argument("--permitir-sensor-vacio", action="store_true")
     a = ap.parse_args(argv)
-    codigo, lineas = revisar(contar(a.carpeta), a.esperado, a.minimo, a.permitir_sensor_vacio)
+    codigo, lineas = revisar(contar(a.carpeta), a.esperado, a.minimo)
     for x in lineas:
         print(x)
     return codigo
