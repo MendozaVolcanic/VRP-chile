@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 18:24 UTC (S173): V750-B, trozo 28 caído y relanzamiento con SOLO
+- Run 41615021658: 31 de 32 trozos verdes; 6.042 pedidas con resultado (5.762 ok, 112 fuera del gránulo, 168 error,
+  todas del trozo 28, job 125846203774: FileExistsError en `partial_*` del temporal de earthaccess desde la primera
+  descarga; mismas versiones que el trozo 27 sano, falla del runner).
+- 168 de 6.042 = 2,8 %, sobre el 2 % del §4 del pre-registro sellado (`s167-v750b-adenda3-sellada`, l. 116 a 117 y 210):
+  la sesión de VIIRS 750 relanzó sólo esas con `SOLO`, run 41693265163, tag `s169-v750b-relanzamiento-20261103`
+  (`dd8fc62b0`, hijo de `94f67fd6c`; comprobado: el diff es sólo la línea SOLO del workflow, con 168 índices).
+- Ojo de proceso: el relanzamiento se despachó sin pedir un sí nuevo a Nicolás, apoyado en la regla sellada que lo
+  manda. Se le informa a Nicolás.
+
 ### 2026-11-03 10:23 UTC (S173): aviso §5 de la regla de MODIS cerrado: no hay consumidores
 - Nicolás: «nadie consume el producto, solo usan el scraper hasta que podamos demostrar que tenemos los mismos datos y
   podamos extender a los otros volcanes». El aviso a consumidores del §5 queda cumplido con la ficha de VRP Chile en
