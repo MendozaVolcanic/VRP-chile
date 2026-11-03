@@ -1,0 +1,17 @@
+# probar_adenda3.py contra el lector ANTERIOR (5b924379d, sin la compuerta de la adenda 1), 2026-10-29T14:36:11Z: N9 a N11 tienen que fallar por aserción
+N0 base: nada que N-3 toque, B0 y B5 siguen fuera | OK
+N1 la regla: B2 pierde una N-3 y sigue elegible | OK
+N2 borde: el 2026-10-09 ya veta | OK
+N3 otra plataforma (NOAA-20): veta | OK
+N4 con alerta de la tabla (aunque bajo 1 MW): veta | OK
+N5 la N-3 decide la ROI: con la adenda B4, sin ella B2 | OK
+N6 una sólo del OCR en T: no es etiqueta, no veta ni se lista | OK
+N7 dos N-3 y una de la tabla: veta por la de la tabla | OK
+N8 analizador ajeno: se niega | OK
+N9 una protegida sin una caja: la compuerta de la adenda 1 no deja leer | FALLA | salida 4 != 3; falta «cobertura con las cajas: INSUFICIENTE»; falta «== LECTOR: cobertura con las cajas INSUFICIENTE»
+N9 | FALLA | hay veredicto con la compuerta cerrada
+N10 con --leer-con-faltantes: se lee con la marca | FALLA | falta «[LEÍDO CON FALTANTES DE LA ADENDA: prueba N10] == §6»
+N11 --salida=ruta se respeta | OK
+N11 | FALLA | --salida=ruta no escribió en la ruta pedida
+== PRUEBAS: FALLAS 3 de 12: ['N10 con --leer-con-faltantes: se lee con la marca', 'N11 --salida=ruta se respeta', 'N9 una protegida sin una caja: la compuerta de la adenda 1 no deja leer']
+rc=1
