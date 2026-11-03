@@ -48,3 +48,21 @@ alertas (no medido).
 - VV750-01 a 07 y VV375-01 a 06: defectos de instrumento de gravedad 1 a 2 (ventana efectiva de 12 noches en V750,
   controles débiles, una pasada topada por D9).
 - La sombra de V375-E está vacía por diseño hasta el 2026-11-03 (`scripts/ventana_sombra.py`, `FECHA_MINIMA`).
+
+## Tercera tanda: ablación por pieza en MODIS (run 41588951267, PR #937), LECTURA PRELIMINAR sin verificador
+
+Corrida del 2026-11-03 06:17 UTC sobre `main` `f4ec1061d`: 27 de 27 pasadas, sin errores. Datos y lectura en
+`ablacion_modis/` (`leer.py` y `leer.out`; los recortes `nativos/*.npz` quedan en D:/vrp-trabajo/temporales/s173_aud/ablacion_modis_run/).
+Controles: K igual campo a campo al record guardado en 27 de 27; V0 igual a V en 27 de 27.
+
+| brazo | bajo 30° (n 10) | sobre 30° (n 17) | Spearman con el cenit |
+|---|---|---|---|
+| K | 0,678 | 0,137 | -0,90 |
+| V (la vía) | 0,947 | 1,054 | +0,25 |
+| FA (fondo de K) | 0,488 | 0,351 | -0,38 |
+| NAT (sin remuestreo) | 0,960 | 0,460 | -0,93 |
+| G5 (geolocalización de 5 km) | 0,985 | 0,415 | -0,75 |
+| NAT_AREA | 1,145 | 1,387 | +0,22 |
+
+Lectura del coordinador, pendiente de verificador limpio: en MODIS la caída oblicua la corrige el remuestreo (D17,
+junto con la geolocalización de 1 km); el fondo de K baja el nivel en todos los cenit. Es al revés que en VIIRS 750.
