@@ -49,7 +49,7 @@ alertas (no medido).
   controles débiles, una pasada topada por D9).
 - La sombra de V375-E está vacía por diseño hasta el 2026-11-03 (`scripts/ventana_sombra.py`, `FECHA_MINIMA`).
 
-## Tercera tanda: ablación por pieza en MODIS (run 41588951267, PR #937), LECTURA PRELIMINAR sin verificador
+## Tercera tanda: ablación por pieza en MODIS (run 41588951267, PR #937)
 
 Corrida del 2026-11-03 06:17 UTC sobre `main` `f4ec1061d`: 27 de 27 pasadas, sin errores. Datos y lectura en
 `ablacion_modis/` (`leer.py` y `leer.out`; los recortes `nativos/*.npz` quedan en D:/vrp-trabajo/temporales/s173_aud/ablacion_modis_run/).
@@ -64,5 +64,20 @@ Controles: K igual campo a campo al record guardado en 27 de 27; V0 igual a V en
 | G5 (geolocalización de 5 km) | 0,985 | 0,415 | -0,75 |
 | NAT_AREA | 1,145 | 1,387 | +0,22 |
 
-Lectura del coordinador, pendiente de verificador limpio: en MODIS la caída oblicua la corrige el remuestreo (D17,
-junto con la geolocalización de 1 km); el fondo de K baja el nivel en todos los cenit. Es al revés que en VIIRS 750.
+Verificador limpio (Fable, `ver_ablmodis/INFORME.md`): reproduce el JSON desde los recortes nativos con `piezas.py`
+de `f4ec1061d` en 27 de 27; los números de la tabla, CONFIRMADOS; se repiten dentro de Terra y de Aqua, sin confusor
+de fecha. Lo que cambia en la lectura:
+
+- VABLMODIS-01 (gravedad 4): «la pieza es el remuestreo», CONFIRMADA EN PARTE. NAT no usa la geolocalización de 5 km
+  (no comparten causa), pero G5 también hunde la razón: la geolocalización de K corre el píxel del cráter 1,5 km bajo
+  30° y 2,8 km sobre 30° (máximo 6,5; Spearman +0,81 con el cenit) y saca el cúmulo de la caja en 9 de 27. En MODIS
+  la caída oblicua la arreglan dos piezas de la vía, el remuestreo y la geolocalización de 1 km. «Al revés que en
+  VIIRS 750»: SIN EVIDENCIA, no se midió.
+- VABLMODIS-02 (gravedad 3): el fondo de K baja la magnitud parejo (sin ceros, 0,488 / 0,471), pero en 6 de 17
+  pasadas oblicuas (0 de 10 bajo 30°) recorta la magnitud a cero con la detección intacta, y ahí están los 5 ceros de
+  K. En PUBLICACIÓN el fondo sí hace la caída.
+- VABLMODIS-04: RN no es neutro (Spearman +0,50 fuera del nulo).
+- VABLMODIS-03 (gravedad 2): `registros_iguales` no puede dar verdadero en el arnés (`regimen.codigo_sha` = GITHUB_SHA);
+  el control vale campo a campo.
+- VABLMODIS-05 (gravedad 3): 7 de 27 records de la vía tienen `t_max_k` bajo 273,15 K, todos con cenit de 35° o más;
+  una alerta real de la vía sobre 10 MW se ocultaría en el tablero como cirrus (la regla S1, ya anotada arriba).

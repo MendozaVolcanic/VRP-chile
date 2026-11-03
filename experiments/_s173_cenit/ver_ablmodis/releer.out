@@ -1,0 +1,117 @@
+commit del JSON: f4ec1061dc2a3becde235e6cc7f7a0d124efba39 | n pasadas: 27
+estados: Counter({'ok': 27})
+
+== cenit: z_record contra sensor_zenith del pixel i0 (MxD03): max |dif| = 0.17
+== tramos: n(<30) = 10  n(>=30) = 17
+== MIROVA (MW): min 0.13 max 37.35 ; alertas <= 0,05 MW (regla SN): 0
+== dayflag: Counter({0: 27})  sunglint min: 42.2
+== fechas por tramo:
+   <30 ['2026-10-01', '2026-10-05', '2026-10-16', '2026-10-16', '2026-10-18', '2026-10-26', '2026-10-29', '2026-10-29', '2026-10-31', '2026-10-31']
+   >=30 ['2026-09-29', '2026-10-01', '2026-10-10', '2026-10-12', '2026-10-15', '2026-10-15', '2026-10-17', '2026-10-17', '2026-10-18', '2026-10-25', '2026-10-27', '2026-10-28', '2026-10-28', '2026-10-30', '2026-10-30', '2026-11-02', '2026-11-02']
+== sensor por tramo: {'<30': {'MODIS_TERRA': 5, 'MODIS_AQUA': 5}, '>=30': {'MODIS_AQUA': 12, 'MODIS_TERRA': 5}}
+
+== CONTROLES
+control_produccion_igual: Counter({False: 27})
+control_produccion_dif: Counter({'[]': 27})
+control_produccion_brazo: Counter({'K': 25, 'V': 2})
+guardado_codigo_sha: Counter({'34cea39e4b64f0862e4bad949016a57ea181f8c4': 11, 'cf272543c24667bf984bf2235bb2aa0c0704af8a': 2, '1a2f9f8991ccc1e8ab084cd316f169a94e463519': 2, '79f41069727af508397229dca26bbd33418b9e85': 2, '8527b2c85f196f6098efa2c7dfa36deee5a465cc': 1, '17e356bbc37f0f1875a4fcf520c524299d56cc7d': 1, '489113c1fe816a4e74658e29a0786b9498bcf980': 1, '55c95c705492b652bd6df6857072fa6dec93cab2': 1, 'bafed90c4fd4dfb1a82469d103fb485e6f0e7e6d': 1, 'dc429f43e1cfbf71377d166b6d1833f6cefba387': 1, 'cc66fa57fda5dc159ffe0d1da661bb74984a63d1': 1, 'c42ee0eb709a9df6c6d4bef92cc6b2f6e610775d': 1, '0c3e9861c968c2d0d918b0f39542ad6d0831c7cf': 1, 'd3a3e65ac81a667baa4f5332dfbd7f9307091c26': 1})
+control_V0_igual_V: Counter({True: 27})
+V0 != V (mi comparacion vrp_mw y npix): []
+V0.pc_vrp != V.pc_vrp: []
+K != guardado (vrp/npix/pc, slim): []
+V != guardado en las de control V: [] | n control V: 2
+X2/V0 por pasada (control positivo del lector): [1.9988, 1.9995, 1.9997, 1.9998, 1.9999, 2.0, 2.0001, 2.0002, 2.0003, 2.0004, 2.0073] n 27
+X2 celdas == V0 celdas: True
+K_publica: Counter({1: 22, 0: 5})
+V_publica: Counter({1: 27})
+publica V0: Counter({1: 27})
+publica X2: Counter({1: 26, 0: 1})
+publica FA: Counter({1: 21, 0: 6})
+publica FSH: Counter({1: 27})
+publica SC: Counter({1: 27})
+publica FA_SC: Counter({1: 21, 0: 6})
+publica RN: Counter({1: 27})
+publica G5: Counter({1: 23, 0: 4})
+publica NAT: Counter({None: 27})
+publica NAT_AREA: Counter({None: 27})
+pasadas con V_publica=1 y X2 publica=0: [('2026-10-01 08:35', 5.721, 11.442, 'summit')]
+pasadas con V_publica=0 y V vrp>0: []
+
+== brazos contra V0 (n pasadas en que vrp_mw difiere de V0 / en que celdas difieren)
+  V0        vrp difiere en  0 | celdas difieren en 0
+  X2        vrp difiere en 27 | celdas difieren en 0
+  FA        vrp difiere en 27 | celdas difieren en 0
+  FSH       vrp difiere en 27 | celdas difieren en 0
+  SC        vrp difiere en  0 | celdas difieren en 0
+  FA_SC     vrp difiere en 27 | celdas difieren en 0
+  RN        vrp difiere en 27 | celdas difieren en 27
+  G5        vrp difiere en 27 | celdas difieren en 27
+  NAT       vrp difiere en 27 | celdas difieren en s/celdas
+  NAT_AREA  vrp difiere en 27 | celdas difieren en s/celdas
+
+== RAZONES brazo/MIROVA por tramo (denominador: 27 pasadas, 2026-09-29 a 2026-11-02)
+brazo     | <30: media_c0 media_s0 mediana r_sumas n0 | >=30: media_c0 media_s0 mediana r_sumas n0 | rho(27) nulo95[173] p | rho sin ceros | jackknife min..max
+K         | 0.668 0.668 0.699 0.671 0 | 0.227 0.322 0.203 0.378 5 | -0.870 [-0.39,+0.38] p=0.000 | -0.810 (n 22) | -0.896..-0.857
+V         | 0.940 0.940 0.947 0.913 0 | 1.056 1.056 1.054 1.085 0 | +0.250 [-0.36,+0.31] p=0.185 | +0.250 (n 27) | +0.177..+0.352
+V0        | 0.940 0.940 0.947 0.913 0 | 1.056 1.056 1.054 1.085 0 | +0.250 [-0.36,+0.31] p=0.185 | +0.250 (n 27) | +0.177..+0.352
+X2        | 1.880 1.880 1.893 1.826 0 | 2.112 2.112 2.115 2.169 0 | +0.263 [-0.36,+0.32] p=0.150 | +0.263 (n 27) | +0.192..+0.367
+FA        | 0.488 0.488 0.488 0.486 0 | 0.293 0.453 0.351 0.481 6 | -0.384 [-0.37,+0.46] p=0.060 | +0.006 (n 21) | -0.441..-0.321
+FSH       | 0.917 0.917 0.926 0.888 0 | 1.014 1.014 1.031 1.075 0 | +0.224 [-0.43,+0.41] p=0.265 | +0.224 (n 27) | +0.136..+0.335
+SC        | 0.940 0.940 0.947 0.913 0 | 1.056 1.056 1.054 1.085 0 | +0.250 [-0.36,+0.31] p=0.185 | +0.250 (n 27) | +0.177..+0.352
+FA_SC     | 0.488 0.488 0.488 0.486 0 | 0.293 0.453 0.351 0.481 6 | -0.384 [-0.37,+0.46] p=0.060 | +0.006 (n 21) | -0.441..-0.321
+RN        | 0.924 0.924 0.962 0.990 0 | 1.213 1.213 1.104 1.240 0 | +0.500 [-0.37,+0.39] p=0.000 | +0.500 (n 27) | +0.440..+0.590
+G5        | 0.980 0.980 0.985 0.977 0 | 0.447 0.584 0.415 0.697 4 | -0.750 [-0.37,+0.38] p=0.000 | -0.643 (n 23) | -0.804..-0.724
+NAT       | 0.970 0.970 0.960 0.956 0 | 0.399 0.522 0.460 0.571 4 | -0.927 [-0.40,+0.39] p=0.000 | -0.913 (n 23) | -0.936..-0.921
+NAT_AREA  | 1.139 1.139 1.145 1.115 0 | 1.513 1.978 1.387 2.033 4 | +0.215 [-0.37,+0.37] p=0.315 | +0.816 (n 23) | +0.137..+0.356
+
+== nulo con otra semilla (7) y 2000 barajados, K / FA / NAT / G5 / V:
+  K         rho -0.870 nulo95 [-0.36,+0.38] p=0.0000
+  V         rho +0.250 nulo95 [-0.38,+0.36] p=0.2090
+  FA        rho -0.384 nulo95 [-0.38,+0.39] p=0.0500
+  NAT       rho -0.927 nulo95 [-0.37,+0.40] p=0.0000
+  G5        rho -0.750 nulo95 [-0.38,+0.39] p=0.0000
+  NAT_AREA  rho +0.215 nulo95 [-0.38,+0.38] p=0.2775
+
+== Spearman de la razon contra la FECHA (confusor temporal) y cenit contra fecha:
+  K         rho(razon, orden de fecha) = +0.083
+  V         rho(razon, orden de fecha) = +0.035
+  NAT       rho(razon, orden de fecha) = +0.100
+  G5        rho(razon, orden de fecha) = +0.094
+  rho(cenit, orden de fecha) = +0.009
+
+== razones por pasada (dt, sensor, z, MIROVA, K, V, FA, NAT, G5, NAT_AREA, NAT npix, V0 npix, K npix, NAT dist_min_cumulo_km):
+  2026-09-29 07:20 AQUA z=58.42 M=  0.13 | K 0.000 V 1.054 FA 0.000 NAT 0.000 G5 0.000 NATA 0.000 | npix NAT  0 V0  1 K  0 G5  0 | NAT dcum None motivo None
+  2026-10-01 01:45 TERRA z= 2.30 M=  6.17 | K 0.779 V 0.768 FA 0.256 NAT 1.129 G5 1.015 NATA 1.131 | npix NAT  2 V0  3 K  2 G5  3 | NAT dcum 0.6366217492129388 motivo None
+  2026-10-01 08:35 AQUA z=50.45 M=  5.18 | K 0.378 V 1.104 FA 0.471 NAT 0.540 G5 0.070 NATA 2.100 | npix NAT  2 V0  8 K  3 G5  1 | NAT dcum 0.6572232474195537 motivo None
+  2026-10-05 07:50 AQUA z=23.58 M=  3.50 | K 0.635 V 1.065 FA 0.600 NAT 0.889 G5 0.891 NATA 1.158 | npix NAT  1 V0  2 K  1 G5  3 | NAT dcum 0.142317755531169 motivo None
+  2026-10-10 07:40 AQUA z=35.06 M=  3.95 | K 0.137 V 0.648 FA 0.000 NAT 0.651 G5 0.726 NATA 1.192 | npix NAT  2 V0  6 K  2 G5  3 | NAT dcum 0.6131195429904407 motivo None
+  2026-10-12 07:20 AQUA z=58.19 M=  2.18 | K 0.000 V 0.837 FA 0.000 NAT 0.000 G5 0.000 NATA 0.000 | npix NAT  0 V0  3 K  0 G5  0 | NAT dcum None motivo None
+  2026-10-15 01:05 TERRA z=57.58 M=  1.72 | K 0.000 V 1.690 FA 0.000 NAT 0.000 G5 0.273 NATA 0.000 | npix NAT  0 V0  5 K  0 G5  1 | NAT dcum None motivo None
+  2026-10-15 07:35 AQUA z=44.34 M= 15.27 | K 0.484 V 1.198 FA 0.593 NAT 0.734 G5 0.829 NATA 2.023 | npix NAT  3 V0  9 K  3 G5  6 | NAT dcum 0.783597386503287 motivo None
+  2026-10-16 01:40 TERRA z= 3.23 M= 12.39 | K 0.747 V 1.058 FA 0.624 NAT 1.053 G5 0.966 NATA 1.058 | npix NAT  2 V0  4 K  2 G5  4 | NAT dcum 0.24595255473376637 motivo None
+  2026-10-16 08:15 AQUA z=19.88 M= 13.70 | K 0.847 V 0.998 FA 0.542 NAT 1.138 G5 1.155 NATA 1.368 | npix NAT  3 V0  5 K  3 G5  5 | NAT dcum 0.5593187919365186 motivo None
+  2026-10-17 02:20 TERRA z=54.01 M= 12.97 | K 0.203 V 1.411 FA 0.465 NAT 0.257 G5 0.812 NATA 1.283 | npix NAT  1 V0 11 K  1 G5  4 | NAT dcum 0.7200806823448446 motivo None
+  2026-10-17 08:50 AQUA z=62.76 M=  7.09 | K 0.108 V 0.802 FA 0.028 NAT 0.142 G5 0.790 NATA 1.496 | npix NAT  1 V0  6 K  2 G5  7 | NAT dcum 0.6265264372236666 motivo None
+  2026-10-18 01:20 TERRA z=37.64 M= 14.39 | K 0.336 V 1.096 FA 0.351 NAT 0.631 G5 0.773 NATA 1.275 | npix NAT  2 V0  8 K  2 G5  4 | NAT dcum 0.6490787387145933 motivo None
+  2026-10-18 07:50 AQUA z=23.12 M= 18.36 | K 0.485 V 0.855 FA 0.399 NAT 0.691 G5 0.757 NATA 0.890 | npix NAT  2 V0  6 K  2 G5  5 | NAT dcum 0.7344002230171145 motivo None
+  2026-10-25 07:20 AQUA z=57.98 M=  3.79 | K 0.000 V 0.674 FA 0.000 NAT 0.309 G5 0.000 NATA 2.099 | npix NAT  2 V0  9 K  1 G5  0 | NAT dcum 1.4623861201223594 motivo None
+  2026-10-26 01:40 TERRA z= 7.02 M= 26.53 | K 0.751 V 0.686 FA 0.346 NAT 0.961 G5 0.989 NATA 0.983 | npix NAT  2 V0  5 K  2 G5  5 | NAT dcum 0.4026004954316893 motivo None
+  2026-10-27 08:35 AQUA z=50.95 M= 30.26 | K 0.431 V 1.016 FA 0.673 NAT 0.541 G5 0.992 NATA 2.172 | npix NAT  3 V0 10 K  4 G5  8 | NAT dcum 0.9156629018966805 motivo None
+  2026-10-28 01:20 TERRA z=40.22 M= 37.35 | K 0.641 V 1.011 FA 0.659 NAT 0.849 G5 0.939 NATA 1.910 | npix NAT  4 V0  8 K  4 G5  7 | NAT dcum 0.7581743405860968 motivo None
+  2026-10-28 07:35 AQUA z=44.24 M=  9.35 | K 0.121 V 0.875 FA 0.144 NAT 0.460 G5 0.162 NATA 1.261 | npix NAT  2 V0  8 K  2 G5  1 | NAT dcum 0.49717360247309206 motivo None
+  2026-10-29 01:55 TERRA z=28.33 M= 16.61 | K 0.682 V 1.317 FA 0.828 NAT 0.960 G5 1.180 NATA 1.411 | npix NAT  2 V0  4 K  2 G5  4 | NAT dcum 0.17235761594916182 motivo None
+  2026-10-29 08:15 AQUA z=19.97 M= 16.85 | K 0.605 V 0.898 FA 0.477 NAT 0.990 G5 0.982 NATA 1.193 | npix NAT  3 V0  6 K  3 G5  5 | NAT dcum 0.20701747905395207 motivo None
+  2026-10-30 07:15 AQUA z=63.08 M=  1.00 | K 0.000 V 0.801 FA 0.000 NAT 0.000 G5 0.000 NATA 0.000 | npix NAT  0 V0  5 K  0 G5  0 | NAT dcum None motivo None
+  2026-10-30 08:55 AQUA z=62.88 M= 14.39 | K 0.291 V 1.428 FA 0.494 NAT 0.445 G5 0.118 NATA 4.745 | npix NAT  2 V0 13 K  2 G5  1 | NAT dcum 1.8890007870158603 motivo None
+  2026-10-31 01:35 TERRA z= 8.90 M= 18.58 | K 0.715 V 0.759 FA 0.500 NAT 0.928 G5 0.857 NATA 0.963 | npix NAT  2 V0  3 K  2 G5  3 | NAT dcum 0.6453025655867363 motivo None
+  2026-10-31 07:55 AQUA z=23.03 M= 10.67 | K 0.435 V 0.995 FA 0.304 NAT 0.960 G5 1.004 NATA 1.233 | npix NAT  3 V0  6 K  3 G5  5 | NAT dcum 0.0628737955260001 motivo None
+  2026-11-02 01:15 TERRA z=41.41 M=  3.64 | K 0.386 V 1.189 FA 0.658 NAT 0.582 G5 0.415 NATA 1.387 | npix NAT  1 V0  4 K  1 G5  2 | NAT dcum 1.4918772108846503 motivo None
+  2026-11-02 07:30 AQUA z=52.01 M= 11.51 | K 0.341 V 1.114 FA 0.447 NAT 0.646 G5 0.696 NATA 2.777 | npix NAT  3 V0  9 K  3 G5  9 | NAT dcum 0.18486464138026057 motivo None
+
+== NAT contra G5 pasada a pasada: Spearman de las razones y pares (NAT=0, G5=0):
+  rho(NAT, G5) = 0.836 | ceros NAT: ['2026-09-29 07:20', '2026-10-12 07:20', '2026-10-15 01:05', '2026-10-30 07:15'] | ceros G5: ['2026-09-29 07:20', '2026-10-12 07:20', '2026-10-25 07:20', '2026-10-30 07:15'] | ceros K: ['2026-09-29 07:20', '2026-10-12 07:20', '2026-10-15 01:05', '2026-10-25 07:20', '2026-10-30 07:15'] | ceros FA: ['2026-09-29 07:20', '2026-10-10 07:40', '2026-10-12 07:20', '2026-10-15 01:05', '2026-10-25 07:20', '2026-10-30 07:15']
+  NAT/V por pasada bajo 30: [('2026-10-01 01:45', np.float64(1.469)), ('2026-10-05 07:50', np.float64(0.835)), ('2026-10-16 01:40', np.float64(0.996)), ('2026-10-16 08:15', np.float64(1.141)), ('2026-10-18 07:50', np.float64(0.809)), ('2026-10-26 01:40', np.float64(1.4)), ('2026-10-29 01:55', np.float64(0.729)), ('2026-10-29 08:15', np.float64(1.103)), ('2026-10-31 01:35', np.float64(1.223)), ('2026-10-31 07:55', np.float64(0.964))]
+  NAT/V por pasada >=30: [('2026-09-29 07:20', np.float64(0.0)), ('2026-10-01 08:35', np.float64(0.489)), ('2026-10-10 07:40', np.float64(1.005)), ('2026-10-12 07:20', np.float64(0.0)), ('2026-10-15 01:05', np.float64(0.0)), ('2026-10-15 07:35', np.float64(0.613)), ('2026-10-17 02:20', np.float64(0.182)), ('2026-10-17 08:50', np.float64(0.177)), ('2026-10-18 01:20', np.float64(0.576)), ('2026-10-25 07:20', np.float64(0.458)), ('2026-10-27 08:35', np.float64(0.532)), ('2026-10-28 01:20', np.float64(0.84)), ('2026-10-28 07:35', np.float64(0.526)), ('2026-10-30 07:15', np.float64(0.0)), ('2026-10-30 08:55', np.float64(0.312)), ('2026-11-02 01:15', np.float64(0.49)), ('2026-11-02 07:30', np.float64(0.58))]
+  NAT_AREA/NAT por pasada (y 1/cos^3 z): [('2026-10-01 01:45', np.float64(1.0), np.float64(1.0)), ('2026-10-01 08:35', np.float64(3.89), np.float64(3.87)), ('2026-10-05 07:50', np.float64(1.3), np.float64(1.3)), ('2026-10-10 07:40', np.float64(1.83), np.float64(1.82)), ('2026-10-15 07:35', np.float64(2.76), np.float64(2.73)), ('2026-10-16 01:40', np.float64(1.0), np.float64(1.0)), ('2026-10-16 08:15', np.float64(1.2), np.float64(1.2)), ('2026-10-17 02:20', np.float64(4.99), np.float64(4.93)), ('2026-10-17 08:50', np.float64(10.53), np.float64(10.43)), ('2026-10-18 01:20', np.float64(2.02), np.float64(2.01)), ('2026-10-18 07:50', np.float64(1.29), np.float64(1.29)), ('2026-10-25 07:20', np.float64(6.8), np.float64(6.71)), ('2026-10-26 01:40', np.float64(1.02), np.float64(1.02)), ('2026-10-27 08:35', np.float64(4.02), np.float64(4.0)), ('2026-10-28 01:20', np.float64(2.25), np.float64(2.25)), ('2026-10-28 07:35', np.float64(2.74), np.float64(2.72)), ('2026-10-29 01:55', np.float64(1.47), np.float64(1.47)), ('2026-10-29 08:15', np.float64(1.2), np.float64(1.2)), ('2026-10-30 08:55', np.float64(10.66), np.float64(10.56)), ('2026-10-31 01:35', np.float64(1.04), np.float64(1.04)), ('2026-10-31 07:55', np.float64(1.29), np.float64(1.28)), ('2026-11-02 01:15', np.float64(2.38), np.float64(2.37)), ('2026-11-02 07:30', np.float64(4.29), np.float64(4.29))]
+  FA/V por pasada: [('2026-09-29 07:20', np.float64(58.4), np.float64(0.0)), ('2026-10-01 01:45', np.float64(2.3), np.float64(0.334)), ('2026-10-01 08:35', np.float64(50.4), np.float64(0.427)), ('2026-10-05 07:50', np.float64(23.6), np.float64(0.564)), ('2026-10-10 07:40', np.float64(35.1), np.float64(0.0)), ('2026-10-12 07:20', np.float64(58.2), np.float64(0.0)), ('2026-10-15 01:05', np.float64(57.6), np.float64(0.0)), ('2026-10-15 07:35', np.float64(44.3), np.float64(0.495)), ('2026-10-16 01:40', np.float64(3.2), np.float64(0.59)), ('2026-10-16 08:15', np.float64(19.9), np.float64(0.543)), ('2026-10-17 02:20', np.float64(54.0), np.float64(0.33)), ('2026-10-17 08:50', np.float64(62.8), np.float64(0.035)), ('2026-10-18 01:20', np.float64(37.6), np.float64(0.32)), ('2026-10-18 07:50', np.float64(23.1), np.float64(0.467)), ('2026-10-25 07:20', np.float64(58.0), np.float64(0.0)), ('2026-10-26 01:40', np.float64(7.0), np.float64(0.505)), ('2026-10-27 08:35', np.float64(51.0), np.float64(0.663)), ('2026-10-28 01:20', np.float64(40.2), np.float64(0.652)), ('2026-10-28 07:35', np.float64(44.2), np.float64(0.164)), ('2026-10-29 01:55', np.float64(28.3), np.float64(0.629)), ('2026-10-29 08:15', np.float64(20.0), np.float64(0.531)), ('2026-10-30 07:15', np.float64(63.1), np.float64(0.0)), ('2026-10-30 08:55', np.float64(62.9), np.float64(0.346)), ('2026-10-31 01:35', np.float64(8.9), np.float64(0.659)), ('2026-10-31 07:55', np.float64(23.0), np.float64(0.306)), ('2026-11-02 01:15', np.float64(41.4), np.float64(0.553)), ('2026-11-02 07:30', np.float64(52.0), np.float64(0.401))]
+  K/V por pasada: [('2026-09-29 07:20', np.float64(58.4), np.float64(0.0)), ('2026-10-01 01:45', np.float64(2.3), np.float64(1.014)), ('2026-10-01 08:35', np.float64(50.4), np.float64(0.342)), ('2026-10-05 07:50', np.float64(23.6), np.float64(0.597)), ('2026-10-10 07:40', np.float64(35.1), np.float64(0.212)), ('2026-10-12 07:20', np.float64(58.2), np.float64(0.0)), ('2026-10-15 01:05', np.float64(57.6), np.float64(0.0)), ('2026-10-15 07:35', np.float64(44.3), np.float64(0.404)), ('2026-10-16 01:40', np.float64(3.2), np.float64(0.706)), ('2026-10-16 08:15', np.float64(19.9), np.float64(0.849)), ('2026-10-17 02:20', np.float64(54.0), np.float64(0.144)), ('2026-10-17 08:50', np.float64(62.8), np.float64(0.135)), ('2026-10-18 01:20', np.float64(37.6), np.float64(0.307)), ('2026-10-18 07:50', np.float64(23.1), np.float64(0.568)), ('2026-10-25 07:20', np.float64(58.0), np.float64(0.0)), ('2026-10-26 01:40', np.float64(7.0), np.float64(1.094)), ('2026-10-27 08:35', np.float64(51.0), np.float64(0.424)), ('2026-10-28 01:20', np.float64(40.2), np.float64(0.635)), ('2026-10-28 07:35', np.float64(44.2), np.float64(0.139)), ('2026-10-29 01:55', np.float64(28.3), np.float64(0.518)), ('2026-10-29 08:15', np.float64(20.0), np.float64(0.674)), ('2026-10-30 07:15', np.float64(63.1), np.float64(0.0)), ('2026-10-30 08:55', np.float64(62.9), np.float64(0.204)), ('2026-10-31 01:35', np.float64(8.9), np.float64(0.942)), ('2026-10-31 07:55', np.float64(23.0), np.float64(0.437)), ('2026-11-02 01:15', np.float64(41.4), np.float64(0.325)), ('2026-11-02 07:30', np.float64(52.0), np.float64(0.306))]
