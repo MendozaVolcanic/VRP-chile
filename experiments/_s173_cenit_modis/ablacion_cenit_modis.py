@@ -186,6 +186,12 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--solo", default="")
     a = ap.parse_args()
+    # VMODIS-01 (verificador S173): sin login, earthaccess.download devuelve [] y las 27 pasadas salían «no bajado».
+    # Mismo patrón que probe_etiquetas.main: sólo EARTHDATA_TOKEN (A71) y auth() de producción antes de bajar nada.
+    if not os.environ.get("EARTHDATA_TOKEN", "").strip():
+        sys.exit("EARTHDATA_TOKEN vacio: la ablacion no usa usuario y clave (A71).")
+    from pipeline.fetch import auth
+    auth()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     pas = json.load(open(PASADAS, encoding="utf-8"))["pasadas"]

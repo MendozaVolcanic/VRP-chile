@@ -110,6 +110,23 @@ ok("EARTHDATA_TOKEN" in txt and "EARTHDATA_USERNAME" not in txt and "EARTHDATA_P
 ok('if [ -z "$EARTHDATA_TOKEN" ]' in txt, "workflow: falla si el token viene vacío")
 ok("git push" not in txt and "contents: write" not in txt, "workflow: sin push y con permiso de sólo lectura")
 
+# ---------------------------------------------------------------------------- 3b. login antes de bajar (VMODIS-01)
+# Por AST y no por subcadena (A92): en main() del arnés tiene que haber una llamada a auth() importada de pipeline.fetch,
+# precedida por el corte si EARTHDATA_TOKEN viene vacío, y antes de la primera llamada a medir() (que es la que baja).
+import ast  # noqa: E402
+arbol = ast.parse((AQUI / "ablacion_cenit_modis.py").read_text(encoding="utf-8"))
+fmain = next(n for n in arbol.body if isinstance(n, ast.FunctionDef) and n.name == "main")
+def _linea_llamada(nombre):
+    ls = [n.lineno for n in ast.walk(fmain) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == nombre]
+    return min(ls) if ls else None
+l_auth, l_medir = _linea_llamada("auth"), _linea_llamada("medir")
+imp_auth = any(isinstance(n, ast.ImportFrom) and n.module == "pipeline.fetch" and any(a.name == "auth" for a in n.names)
+               for n in ast.walk(fmain))
+l_token = min((n.lineno for n in ast.walk(fmain) if isinstance(n, ast.Constant) and n.value == "EARTHDATA_TOKEN"), default=None)
+ok(imp_auth and l_auth is not None and l_medir is not None and l_auth < l_medir,
+   f"arnés: auth() de pipeline.fetch antes de medir() (líneas {l_auth} y {l_medir})")
+ok(l_token is not None and l_auth is not None and l_token < l_auth, "arnés: corta si EARTHDATA_TOKEN viene vacío antes del login")
+
 # ---------------------------------------------------------------------------- 4. lista de pasadas
 pas = json.load(open(AQUI / "pasadas_chillan_modis.json", encoding="utf-8"))["pasadas"]
 claves = ("dt", "sensor", "z", "vrp_mirova_mw", "granule")
