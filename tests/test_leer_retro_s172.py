@@ -12,6 +12,7 @@ placebo que no mueve nada no da MEJORA. (2) Control positivo: una protegida que 
 una vía que publica de más en negativos da la fila 3; un control en rojo da la fila 1. El conteo de mutaciones
 atrapadas por aserción vive en experiments/_s172_retro_paquete/mutar_leer_retro.py.
 """
+import collections
 import copy
 import csv
 import importlib.util
@@ -267,6 +268,7 @@ def test_c_cobertura_ve_la_via_vacia_y_las_repetidas():
 def _ck_filas(n=6):
     fs = [F("Lascar", d, "neg_limpio", 1, 1, mk=0.4) for d in dias(n)]
     fs += [F("Lascar", d, "bajo1", 1, 1, mk=0.4, mir=0.3, hora="06:00") for d in dias(n)]
+    fs += [F("Lascar", f"2026-10-{d:02d}", "neg_limpio", 0, 0, tramo="DM", hora="05:30") for d in (1, 2)]
     for f in fs:
         f["en_kgemelo"] = True
         f["k_rec"] = {"primary_cluster": {"vrp_mw": 0.4}}
@@ -380,7 +382,7 @@ def test_etiquetar_decide_la_tabla_y_la_union_informa(tmp_path):
     assert fs[0]["vrp_mirova"] == 2.5
 
 
-def test_main_de_punta_a_punta_con_predicado_sintetico(tmp_path, monkeypatch, R):
+def test_main_de_punta_a_punta_con_predicado_sintetico(tmp_path, monkeypatch, R, capsys):
     import referencia_mirova_unificada as RMU
     orig = RMU.cargar_referencia_unificada
     monkeypatch.setattr(RMU, "cargar_referencia_unificada",
@@ -408,6 +410,9 @@ def test_main_de_punta_a_punta_con_predicado_sintetico(tmp_path, monkeypatch, R)
     assert m["regla"]["B"] == 8 and m["regla"]["neto"] == -8          # 8 negativos que K publica y la vía calla
     assert m["fila"] == 1 and "c_k" in m["motivos"]                   # sin K-gemelo, C-K en rojo: no se lee
     assert cod == 3 and out["ensayo"] is True
+    # VPR940-15: con --ensayo cada línea de veredicto lo dice
+    lineas = [x for x in capsys.readouterr().out.splitlines() if ": fila " in x]
+    assert len(lineas) == 3 and all(x.startswith("ENSAYO (NO DECIDE) ") for x in lineas), lineas
 
 
 # ------------------------------------------------------------------------------------------- R25 contra el OSF
@@ -506,3 +511,164 @@ def test_v750_sin_sello_la_regla_misma_pone_el_techo(R):
     fs = _con_roi(v750(), "def")
     assert L.regla_v750(R, fs, "V", sellado=False)["_fila_regla"] == 4
     assert L.regla_v750(R, fs, "V", sellado=True)["_fila_regla"] != 4 or L.regla_v750(R, fs, "V", True)["p2"] == "BLOQUEA"
+
+
+
+# ------------------------------------------------------------------------------------------- arreglos de VPR940
+def test_k_de_disco_con_la_marca_de_la_via_es_rojo_en_todas_las_ventanas():
+    """VPR940-02 (grav. 3): un record de K de disco con via_codigo_mirova True no es K. Se marca la pasada y el
+    control c_k_puro queda en rojo, también en R25, que no tiene C-K."""
+    for dts in ("2026-02-10 05:00", "2025-06-10 05:00", "2026-10-05 05:00"):
+        key = ("Lascar", "MODIS_AQUA", dts)
+        k = {key: dict(_rec(dts, "MODIS_AQUA", 1, 0.4), via_codigo_mirova=True)}
+        via = {key: _rec(dts, "MODIS_AQUA", 1, 0.4, via=True)}
+        fs = L.armar_pasadas(via, k)
+        assert fs[0]["estado"] == "k_con_marca:True", (dts, fs[0]["estado"])
+        assert L.c_k_puro(fs)["estado"].startswith("ROJO")
+    for marca in (None, False, "sin_grilla"):
+        key = ("Lascar", "MODIS_AQUA", "2026-02-10 05:00")
+        k = {key: _rec("2026-02-10 05:00", "MODIS_AQUA", 1, 0.4, via=marca)}
+        fs = L.armar_pasadas({key: _rec("2026-02-10 05:00", "MODIS_AQUA", 1, 0.4, via=True)}, k)
+        assert L.c_k_puro(fs)["estado"] == "OK", marca
+
+
+def test_k_puro_en_rojo_lleva_el_sensor_a_la_fila_1(R):
+    fs = poblacion()
+    fs[0]["estado"] = "k_con_marca:True"
+    com = dict(COMUNES, c_k_puro=L.c_k_puro(fs))
+    r = L.leer_sensor(R, fs, "MODIS", com, pred, False, "def")
+    assert r["fila"] == 1 and "c_k_puro" in r["motivos"]
+
+
+def _kg(vol, dia, tramo, con_kg=True, hora="05:00"):
+    f = F(vol, dia, "neg_limpio", 0, 0, tramo=tramo, hora=hora)
+    f["k_rec"] = {"primary_cluster": None}
+    if con_kg:
+        f["en_kgemelo"] = True
+        f["kg_rec"] = {"primary_cluster": None}
+        f["_t"]["KG"] = dict(f["_t"]["K"])
+    return f
+
+
+def _kg_d3():
+    """K de disco de tres volcanes en DM y en F26, con el K-gemelo de D3: DM entero, Láscar y Chillán en F26
+    enteros, tres días de F26 de Isluga."""
+    fs = []
+    for v in ("Lascar", "NevadosDeChillan", "Isluga"):
+        fs += [_kg(v, f"2026-10-{d:02d}", "DM") for d in (1, 2, 3)]
+        for i, d in enumerate(dias(6)):
+            fs.append(_kg(v, d, "F26-M", con_kg=v != "Isluga" or i < 3))
+    return fs
+
+
+def test_c_k_exige_la_cobertura_del_k_gemelo_de_d3():
+    """VPR940-03: con un K-gemelo de una pasada C-K daba OK. Ahora tiene que cubrir lo que manda D3."""
+    fs = _kg_d3()
+    assert L.c_k(fs)["estado"] == "OK", L.c_k(fs)
+    una = [dict(f, en_kgemelo=False, kg_rec=None) if i else f for i, f in enumerate(fs)]
+    assert L.c_k(una)["estado"].startswith("ROJO")
+    for vol, tramo in (("Isluga", "DM"), ("Lascar", "F26-M")):
+        sin = copy.deepcopy(fs)
+        f = next(x for x in sin if x["vol"] == vol and x["tramo"] == tramo and x["en_kgemelo"])
+        f["en_kgemelo"], f["kg_rec"] = False, None
+        assert L.c_k(sin)["estado"].startswith("ROJO"), (vol, tramo)
+    dos = copy.deepcopy(fs)
+    f = next(x for x in dos if x["vol"] == "Isluga" and x["tramo"] == "F26-M" and x["en_kgemelo"])
+    f["en_kgemelo"], f["kg_rec"] = False, None
+    assert L.c_k(dos)["estado"].startswith("ROJO")                   # Isluga con 2 días de F26, no 3
+
+
+def test_nulo_runner_descuenta_las_excepciones_nombradas(R):
+    """VPR940-04: B = 0 salvo las pasadas nombradas de C-K."""
+    fs = _ck_filas(8)
+    f = next(x for x in fs if x["lab"] == "neg_limpio")
+    f["_t"]["KG"] = {"pub": 0, "mag": 0.0}
+    assert L.nulo_runner(R, fs)["estado"].startswith("ROJO")
+    exc = [{"vol": f["vol"], "dt": f["dt"], "sensor": "MODIS_AQUA", "empate_argsort": "pixeles 4 y 5"}]
+    assert L.nulo_runner(R, fs, exc)["estado"] == "OK"
+    exc[0]["empate_argsort"] = ""                                     # sin el empate escrito no cuenta
+    assert L.nulo_runner(R, fs, exc)["estado"].startswith("ROJO")
+
+
+def test_placebo_mira_p1_y_p2_y_acepta_solo_las_dos_causas_de_l7(R):
+    """VPR940-05: K×1,2 sin discordancias de publicación salvo las de L7 (t_max de K bajo 278,15 K, o la magnitud
+    que cruza el tope de 50.000 MW del tablero)."""
+    fs = poblacion()
+    assert L.c_placebo(R, fs, "MODIS")["estado"] == "OK"
+    d = F("Lascar", "2026-02-22", "neg_limpio", 1, 0, mk=0.3, hora="03:00")
+    d["_t"]["placebo"] = {"pub": 0, "mag": 0.0}
+    d["k_rec"] = {"t_max_k": 300.0}
+    r = L.c_placebo(R, fs + [d], "MODIS")
+    assert r["estado"].startswith("ROJO") and r["discordancias_sin_explicar"]
+    d["k_rec"] = {"t_max_k": 275.0}
+    assert L.c_placebo(R, fs + [d], "MODIS")["estado"] == "OK"
+    d["k_rec"] = {"t_max_k": 300.0}
+    d["_t"]["K"]["mag"] = 45000.0                                     # ×1,2 = 54.000 MW: cruza el tope
+    assert L.c_placebo(R, fs + [d], "MODIS")["estado"] == "OK"
+    p = F("Lascar", "2026-02-23", "protegida", 1, 1, hora="03:00")
+    p["_t"]["placebo"] = {"pub": 0, "mag": 0.0}
+    p["k_rec"] = {"t_max_k": 300.0}
+    assert L.c_placebo(R, fs + [p], "MODIS")["estado"].startswith("ROJO")   # P1 también
+
+
+MONTAJE_OK = {"estado": "OK", "tags": ["s170-modd-f4-candado", "s172-v375e-lector-resellado", "s167-v750b-adenda3-sellada"],
+              "diff_listado": "git diff s170-modd-f4-candado s172-retro-d2 -- pipeline/mirova_v750_codigo.py: vacío",
+              "diferencias": [{"pasada": "Lascar|MODIS_AQUA|2026-10-05 05:00", "explicada_por": "hunk",
+                               "hunk": "@@ -10,3 +10,4 @@ ..."},
+                              {"pasada": "Isluga|VIIRS_NOAA20|2026-10-06 05:12", "explicada_por": "otro_granulo"}]}
+
+
+def test_c_montaje_se_valida_y_no_basta_un_estado_ok():
+    """VPR940-06: el JSON de --montaje tiene que traer los tags, el diff listado y cada diferencia explicada por un
+    hunk (con el hunk) o por otro_granulo (§6, VPR2-09)."""
+    assert L.validar_montaje(copy.deepcopy(MONTAJE_OK))["estado"] == "OK"
+    assert L.validar_montaje(None)["estado"].startswith("ROJO")
+    assert L.validar_montaje({"estado": "OK"})["estado"].startswith("ROJO")
+    for mal in ({"explicada_por": "hunk", "hunk": ""}, {"explicada_por": "parecido"}, {}):
+        m = copy.deepcopy(MONTAJE_OK)
+        m["diferencias"].append(dict({"pasada": "Llaima|MODIS_TERRA|2026-10-07 02:30"}, **mal))
+        assert L.validar_montaje(m)["estado"].startswith("ROJO"), mal
+    m = copy.deepcopy(MONTAJE_OK)
+    m["estado"] = "ROJO: algo"
+    assert L.validar_montaje(m)["estado"].startswith("ROJO")
+    m = copy.deepcopy(MONTAJE_OK)
+    m["tags"] = []
+    assert L.validar_montaje(m)["estado"].startswith("ROJO")
+
+
+def test_c_cobertura_en_r25_por_clase_del_osf(R):
+    """VPR940-09: en R25 el 10 % SIN DATO por clase se mide con la clase del OSF."""
+    r25 = [_r25("Lascar", f"2025-06-{d:02d} 05:00", 1, 1) for d in range(1, 11)]
+    osf = [_osf("Lascar", "VIIRS375", f"2025-06-{d:02d} 05:00", 2.0) for d in range(1, 11)]
+    L.p1_osf(r25, osf)
+    assert L.c_cobertura(r25, clave="lab_osf", clases=("protegida_osf",))["estado"] == "OK"
+    for f in r25[:2]:
+        f["estado"], f["_evaluable"] = "sin_dato_cobertura", False
+    assert L.c_cobertura(r25, clave="lab_osf", clases=("protegida_osf",))["estado"].startswith("ROJO")
+    osf_res = L.p1_osf(r25, osf)
+    r = L.leer_sensor(R, v375(), "VIIRS375", COMUNES, pred, False, "def", osf_res=osf_res, filas_r25=r25)
+    assert r["fila"] == 1 and "c_cobertura_r25" in r["motivos"]
+
+
+def test_el_sorteo_de_etiquetas_baraja_dentro_de_cada_estrato(R):
+    """VPR940-11 (§7, GUIA §3b fila 7): el sorteo de etiquetas K contra K baraja dentro de volcán × tramo de cenit y
+    dice qué fracción de barajados cumple GANA o EMPATE por azar."""
+    import numpy as np
+    fs = poblacion()
+    for i, f in enumerate(fs):
+        f["z"] = 15.0 if i % 2 else 45.0
+    nuevas = L.barajar_en_estratos(fs, np.random.default_rng(172))
+    estrato = lambda f: (f["vol"], int(f["z"] // 10))                                      # noqa: E731
+    antes, despues = collections.defaultdict(list), collections.defaultdict(list)
+    for f, n in zip(_ev_(fs), nuevas):
+        antes[estrato(f)].append(f["lab"])
+        despues[estrato(f)].append(n["lab"])
+    assert all(sorted(antes[k]) == sorted(despues[k]) for k in antes)
+    assert any(a["lab"] != n["lab"] for a, n in zip(_ev_(fs), nuevas))
+    s = L.sorteo_etiquetas(R, fs, n=20)
+    assert s["n"] == 20 and abs(s["gana_o_empate"] + s["sin_sustrato"] + s["otros"] - 1.0) < 1e-9
+    assert s["brazos"] == ("K", "K")                                   # sin K-gemelo, K contra K
+
+
+def _ev_(fs):
+    return [f for f in fs if f.get("_evaluable")]
