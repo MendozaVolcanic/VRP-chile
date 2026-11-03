@@ -39,6 +39,12 @@ def snapshot_sin(claves_cons, destino: Path, origen: Path = SNAP_CONS, quitadas:
             esc = csv.DictWriter(fh, fieldnames=campos)
             esc.writeheader()
             esc.writerows(fuera)
-    quedan = quitar & {clave(f) for f in leer_pasadas(destino, "CONS", "simulada")}
+    # Control de dos lados (A110, verificador S173 P2): quito lo pedido y SOLO lo pedido. Las claves que quedan en la
+    # copia son exactamente las del origen menos las quitadas; un helper que borrara todo pasaria el primer lado.
+    antes = {clave(f) for f in leer_pasadas(origen, "CONS", "origen")}
+    despues = {clave(f) for f in leer_pasadas(destino, "CONS", "simulada")}
+    quedan = quitar & despues
     assert not quedan, f"la perdida simulada no quito {len(quedan)} claves, p. ej. {sorted(quedan)[:2]}"
+    assert despues == antes - quitar, f"la perdida simulada toco {len((antes - quitar) ^ despues)} claves ajenas"
+    assert quitar & antes, "ninguna de las claves pedidas estaba en el origen: no se simulo ninguna perdida"
     return destino

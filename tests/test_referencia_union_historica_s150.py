@@ -158,3 +158,26 @@ def test_la_union_repone_una_perdida_simulada(tmp_path):
     tipos = {(p["volcano"], p["sensor_bucket"], p["fecha_utc"], "CONS"): p["tipo"] for p in _perdidas()}
     assert all(k in con and con[k]["origen"] == "historico" and con[k]["tipo"] == tipos[k] for k in perd)
     assert not any(k in sin for k in perd)
+
+
+def test_la_union_no_pisa_a_la_principal(tmp_path):
+    # S173 (verificador P2/R3): la union solo agrega claves ausentes. Se le entrega una fila que el snapshot SI tiene,
+    # con otro tipo: tiene que ganar la del snapshot (origen "principal", su tipo). Hoy union y snapshot no comparten
+    # claves por construccion, asi que sin esta prueba una union que pisara a la principal pasaba en verde.
+    import csv
+    perd = _claves_perdidas()
+    cons = snapshot_sin(perd[:1], tmp_path / "cons.csv", quitadas=tmp_path / "union.csv")
+    with open(tmp_path / "cons.csv", encoding="utf-8", newline="") as fh:
+        filas = list(csv.DictReader(fh))
+    campos = list(filas[0].keys())
+    pisa = dict(filas[0])
+    tipo_real = pisa["Tipo_Registro"]
+    pisa["Tipo_Registro"] = "FALSO_POSITIVO" if tipo_real != "FALSO_POSITIVO" else "RUTINA"
+    with open(tmp_path / "union.csv", "a", encoding="utf-8", newline="") as fh:
+        csv.DictWriter(fh, fieldnames=campos).writerow(pisa)
+    ref = {clave(f): f for f in cargar_referencia_unificada(cons_path=cons, historico_path=tmp_path / "union.csv",
+                                                            respaldo_path=None)}
+    principal = {clave(f): f for f in leer_pasadas(cons, "CONS", "principal")}
+    pisadas = [kk for kk in principal if ref[kk]["origen"] != "principal" or ref[kk]["tipo"] != principal[kk]["tipo"]]
+    assert not pisadas, f"la union piso {len(pisadas)} filas del snapshot, p. ej. {pisadas[:2]}"
+    assert ref[perd[0]]["origen"] == "historico"
