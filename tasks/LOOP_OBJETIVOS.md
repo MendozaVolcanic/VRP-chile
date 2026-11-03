@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 18:39 UTC (S173): relanzamiento de V750-B aprobado; lectura autorizada
+- Run 41693265163 terminó 18:37:21 UTC, 32 de 32 verdes. El trozo 28 tenía 168 pasadas: 162 negativos limpios y 6
+  positivos, 3 protegidas (Láscar 2026-04-16 06:12 y 04-27 06:06, Chillán 2026-10-04 06:06), que solas cerraban la
+  compuerta del §4.
+- Frase de Nicolás: «Sí, que corra y lea» (aprueba el relanzamiento despachado sin preguntar y autoriza contar, juntar,
+  leer y verificar). Pasado a la sesión de VIIRS 750.
+
 ### 2026-11-03 18:24 UTC (S173): V750-B, trozo 28 caído y relanzamiento con SOLO
 - Run 41615021658: 31 de 32 trozos verdes; 6.042 pedidas con resultado (5.762 ok, 112 fuera del gránulo, 168 error,
   todas del trozo 28, job 125846203774: FileExistsError en `partial_*` del temporal de earthaccess desde la primera
