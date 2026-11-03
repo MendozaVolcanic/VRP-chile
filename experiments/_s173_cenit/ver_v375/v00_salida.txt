@@ -1,0 +1,30 @@
+== referencia CONS
+filas 46351
+columnas ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Fecha_Proceso_UTC', 'Ultima_Actualizacion_UTC']
+col volcan = Volcan | col fecha = Fecha_Satelite_UTC
+variantes Chillan: Counter({'Nevados de Chillan': 4348})
+Chillan: fecha min 2026-01-10 19:24:01 max 2026-11-02 12:20:00
+CONS total: fecha max 2026-11-02 12:20:00
+Sensor (Chillan): Counter({'VIIRS': 1573, 'VIIRS375': 1511, 'MODIS': 1264})
+Tipo (Chillan): [(None, 4348)]
+ejemplo fila: {'timestamp': '1768073041', 'Fecha_Satelite_UTC': '2026-01-10 19:24:01', 'Fecha_Captura_Chile': '2026-01-10 16:24:01', 'Volcan': 'Nevados de Chillan', 'Sensor': 'VIIRS375', 'VRP_MW': '0.0', 'Distancia_km': '0.0', 'Tipo_Registro': 'RUTINA', 'Clasificacion Mirova': 'NULO', 'Ruta Foto': 'imagenes_satelitales/Nevados de Chillan/2026-01-10/19-24-01_Nevados de Chillan_VIIRS375_Latest.png', 'Fecha_Proceso_GitHub': '', 'Ultima_Actualizacion': '', 'Editado': 'NO', 'Fecha_Proceso_UTC': '', 'Ultima_Actualizacion_UTC': ''}
+== referencia OCR
+filas 1223
+columnas ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Color_Punto_Dist', 'Confianza_Validacion', 'Requiere_Verificacion', 'Metodo_Validacion', 'Nota_Validacion', 'Version_OCR', 'Zenith_Sat_deg', 'Azimut_Sat_deg', 'Nivel_Anomalia_MIROVA', 'Confianza_Geometria', 'Fecha_Proceso_UTC', 'Ultima_Actualizacion_UTC', 'Distancia_aprox_km', 'Distancia_aprox_min_km', 'Distancia_aprox_max_km', 'Distancia_aprox_metodo', 'Distancia_aprox_pareos', 'Distancia_aprox_imagen', 'Metodo_Clase']
+variantes Chillan OCR: Counter({'Nevados de Chillan': 102})
+OCR Chillan fecha max 2026-11-02 06:18:01 | OCR total max 2026-11-02 06:18:01
+ejemplo fila OCR: {'timestamp': '1770786360', 'Fecha_Satelite_UTC': '2026-02-11 05:06:00', 'Fecha_Captura_Chile': '2026-02-11 02:06:00', 'Volcan': 'Nevados de Chillan', 'Sensor': 'VIIRS375', 'VRP_MW': '0.34', 'Distancia_km': '0.0', 'Tipo_Registro': 'FALSO_POSITIVO_OCR', 'Clasificacion Mirova': 'Bajo', 'Ruta Foto': 'No descargada - Evento descartado', 'Fecha_Proceso_GitHub': '2026-02-12 11:25:51', 'Ultima_Actualizacion': '2026-02-12 11:25:51', 'Editado': 'NO', 'Color_Punto_Dist': 'negro', 'Confianza_Validacion': 'alta', 'Requiere_Verificacion': 'False', 'Metodo_Validacion': 'rgb_analysis', 'Nota_Validacion': 'Píxeles negros dominantes - Evento fuera del límite', 'Version_OCR': '1.0', 'Zenith_Sat_deg': '', 'Azimut_Sat_deg': '', 'Nivel_Anomalia_MIROVA': '', 'Confianza_Geometria': '', 'Fecha_Proceso_UTC': '2026-02-12T14:25:51Z', 'Ultima_Actualizacion_UTC': '2026-02-12T14:25:51Z', 'Distancia_aprox_km': '', 'Distancia_aprox_min_km': '', 'Distancia_aprox_max_km': '', 'Distancia_aprox_metodo': 'pendiente', 'Distancia_aprox_pareos': '', 'Distancia_aprox_imagen': '', 'Metodo_Clase': ''}
+== JSON K de produccion
+records 6879
+sensores: Counter({'VIIRS_SNPP': 935, 'VIIRS_NOAA20': 925, 'VIIRS_SNPP_750': 916, 'VIIRS_NOAA20_750': 907, 'VIIRS_NOAA21': 907, 'VIIRS_NOAA21_750': 901, 'MODIS_AQUA': 697, 'MODIS_TERRA': 691})
+campos presentes (muestra): ['anomaly_pixels', 'datetime_utc', 'diag_codigo_mirova', 'distance_class', 'final_hotspot_dist_km', 'final_hotspot_lat', 'final_hotspot_lon', 'final_hotspot_source', 'first_processed_utc', 'granule', 'hotspot_dist_km', 'hotspot_lat', 'hotspot_lon', 'n_anomalous_pixels', 'primary_cluster', 'processed_utc', 'product_version', 'regimen', 'sensor', 'sensor_azimuth_deg', 'sensor_zenith_deg', 'solar_azimuth_deg', 'solar_zenith_deg', 't_bg_k', 't_max_k', 'triggered_test1', 'via_codigo_mirova', 'vrp_mw', 'vrp_vent_mw']
+duplicados (sensor, datetime_utc): 0 []
+control positivo duplicados (+1 artificial): 1
+VIIRS 375 records: 2767 | con sensor_zenith_deg: 2767
+VIIRS 375 con f5_core_vrp_mw no None: 421
+codigo_sha (VIIRS375): [('3695f67580e8de5fcf3653786ea61def0187ecb4', 1477), ('57d18ad782ffb9572f25ef884ae61d608f6c6e01', 809), ('34cea39e4b64f0862e4bad949016a57ea181f8c4', 128), ('cd372013263bff4d02c1db8f61400159e0a3fb6d', 112), ('c408a909eaa83b2a080b0d1c9e831313fa2179c7', 96)]
+perfil: Counter({'_s154_reproc_k_historico': 2572, 'mirova_equivalent': 195})
+processed_utc min/max (V375): 2026-10-18T11:06:42Z 2026-11-02T20:29:44Z
+V375 records 2026-09-28..11-02: 151 | processed_utc min: 2026-10-18T11:24:57Z
+product_version (ventana): Counter({'standard': 151})
+mismo minuto, dos plataformas (ventana): 0

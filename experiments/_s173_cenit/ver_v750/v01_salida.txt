@@ -1,0 +1,157 @@
+== VARA: filas de Chillan sensor VIIRS (=750) en los CSV: 1605 | CONS 1573 | OCR 32
+tipos: {'RUTINA': 1487, 'FALSO_POSITIVO': 20, 'ALERTA_TERMICA': 66, 'ALERTA_TERMICA_OCR': 16, 'ALERTA_SIN_GEOMETRIA_OCR': 16}
+ultima fila: 2026-11-02 06:18:01
+records VIIRS 750 de Chillan en main: 2724
+de noche (solar_zenith_deg > 90): 2724 | sin solar_zenith: 0
+
+==== VENTANA 2026-04-01 a 2026-10-31
+records nocturnos: 923 | minutos con alerta MIROVA V750 (CONS u OCR): 66 | de ellos entre 00 y 11 UTC: 53
+alertas <= 0,05 MW (regla SN no aplica a V750 pero se informa): 0
+pareo +-120 s: con alerta 53 | sin 870 | +-60 s: 53 | +-300 s: 53 | pasadas con 2+ filas de alerta a +-120 s: 12
+P2 placebos (pares con alerta): +1 dia 18 | +50 min 2 | -50 min 2
+minutos de alerta nocturna de MIROVA SIN record nuestro a +-120 s: 0 []
+positivos (record con alerta pareada): 53 | fuente: {'CONS': 50, 'OCR': 3} | plataformas: {'VIIRS_NOAA21_750': 21, 'VIIRS_NOAA20_750': 22, 'VIIRS_SNPP_750': 10}
+ventana de los positivos: 2026-09-28 04:42 a 2026-10-31 06:00 | noches: 22
+cenit: [0.5, 1.8, 2.0, 8.6, 8.6, 11.1, 12.2, 12.4, 18.9, 20.5, 22.3, 22.4, 27.7, 27.9, 28.0, 31.1, 31.2, 31.3, 35.8, 37.4, 38.8, 39.0, 42.6, 42.7, 42.9, 44.8, 45.7, 45.8, 45.8, 45.8, 48.6, 48.7, 48.7, 51.5, 51.5, 53.6, 53.7, 55.5, 55.8, 58.0, 60.6, 61.9, 64.3, 64.3, 65.1, 65.5, 65.7, 66.8, 67.6, 67.6, 68.0, 68.0, 68.0] | n<30 15 n>=30 38
+cenit del record vs Zenith_Sat_deg del OCR (filas OCR pareadas): 3 [(27.9, 27.0), (11.1, 11.0), (44.8, 44.0)]
+pc.vrp_mw None en positivos: 2 | distance_class: {None: 2, 'summit': 51} | pc.vrp_mw == 0: 1
+
+-- razon pc.vrp_mw / MIROVA, CON ceros (pc None o <= 0 cuenta 0), n = 53
+K pc con ceros                     z<30 0.798 n=15 rango [0.000, 1.131] | z>=30 0.368 n=38 rango [0.000, 1.038] | Spearman -0.743 barajado [-0.282, +0.268] FUERA
+K escena (record.vrp_mw) con ceros z<30 0.798 n=15 rango [0.000, 1.616] | z>=30 0.412 n=38 rango [0.000, 2.005] | Spearman -0.649 barajado [-0.298, +0.287] FUERA
+-- razon SIN ceros (solo pc > 0)
+K pc sin ceros                     z<30 0.800 n=14 rango [0.295, 1.131] | z>=30 0.377 n=36 rango [0.032, 1.038] | Spearman -0.826 barajado [-0.278, +0.293] FUERA
+-- solo summit (proxy del predicado del tablero), con ceros
+K pc summit con ceros              z<30 0.798 n=15 rango [0.000, 1.131] | z>=30 0.368 n=38 rango [0.000, 1.038] | Spearman -0.743 barajado [-0.282, +0.268] FUERA
+-- solo filas CONS (A119)
+K pc con ceros, CONS               z<30 0.798 n=13 rango [0.000, 1.131] | z>=30 0.366 n=37 rango [0.000, 1.038] | Spearman -0.752 barajado [-0.236, +0.288] FUERA
+-- log10 de la razon sin ceros
+log10 K pc                         z<30 -0.097 n=14 rango [-0.530, 0.054] | z>=30 -0.423 n=36 rango [-1.501, 0.016] | Spearman -0.826 barajado [-0.278, +0.293] FUERA
+PLACEBO MIROVA barajado            z<30 1.509 n=15 rango [0.000, 151.144] | z>=30 0.303 n=38 rango [0.000, 7.710] | Spearman -0.430 barajado [-0.298, +0.279] FUERA
+CONTROL+ razon*(1-z/90)            z<30 0.623 n=15 rango [0.000, 0.971] | z>=30 0.177 n=38 rango [0.000, 0.510] | Spearman -0.828 barajado [-0.258, +0.291] FUERA
+CONTROL+ razon*(1+z/90)            z<30 0.889 n=15 rango [0.000, 1.480] | z>=30 0.555 n=38 rango [0.000, 1.565] | Spearman -0.653 barajado [-0.285, +0.262] FUERA
+jackknife por noche (22 replicas), Spearman K pc con ceros: min -0.853 max -0.715
+K pc con ceros, VIIRS_NOAA20_750   z<30 0.719 n=6 rango [0.525, 1.131] | z>=30 0.312 n=16 rango [0.000, 0.724] | Spearman -0.923 barajado [-0.409, +0.412] FUERA
+K pc con ceros, VIIRS_NOAA21_750   z<30 0.824 n=6 rango [0.295, 0.949] | z>=30 0.445 n=15 rango [0.000, 1.038] | Spearman -0.688 barajado [-0.464, +0.404] FUERA
+K pc con ceros, VIIRS_SNPP_750     z<30 0.672 n=3 rango [0.000, 1.108] | z>=30 0.162 n=7 rango [0.098, 0.700] | Spearman -0.394 barajado [-0.636, +0.673] dentro
+
+-- DETALLE positivos (orden de cenit)
+t                 sensor            z     vM    pc     razon  dc      src  nfilas
+2026-10-12 05:54 VIIRS_SNPP_750      0.5   0.40   None  0.000 None    CONS 1
+2026-10-24 05:48 VIIRS_NOAA20_750    1.8   1.74  1.516  0.871 summit  CONS 1
+2026-10-16 05:42 VIIRS_NOAA21_750    2.0  15.63 14.835  0.949 summit  CONS 1
+2026-10-11 05:36 VIIRS_NOAA21_750    8.6   1.03   0.87  0.845 summit  CONS 1
+2026-10-27 05:36 VIIRS_NOAA21_750    8.6  17.73 14.227  0.802 summit  CONS 1
+2026-10-01 06:00 VIIRS_SNPP_750     11.1  10.00 11.084  1.108 summit  OCR  1
+2026-10-29 05:54 VIIRS_NOAA20_750   12.2  20.59  14.85  0.721 summit  CONS 1
+2026-10-05 05:48 VIIRS_NOAA21_750   12.4   7.86  7.152  0.910 summit  CONS 2
+2026-10-30 05:36 VIIRS_NOAA20_750   18.9  23.33 15.552  0.667 summit  CONS 1
+2026-10-18 05:42 VIIRS_SNPP_750     20.5  20.87 14.028  0.672 summit  CONS 1
+2026-10-18 06:00 VIIRS_NOAA20_750   22.3  18.98 13.603  0.717 summit  CONS 1
+2026-10-10 05:54 VIIRS_NOAA21_750   22.4  13.13 10.481  0.798 summit  CONS 1
+2026-10-09 05:30 VIIRS_NOAA20_750   27.7   0.35  0.396  1.131 summit  CONS 1
+2026-10-01 05:24 VIIRS_NOAA21_750   27.9   9.00  2.655  0.295 summit  OCR  1
+2026-10-25 05:30 VIIRS_NOAA20_750   28.0  40.29 21.156  0.525 summit  CONS 2
+2026-09-29 06:00 VIIRS_NOAA21_750   31.1   2.52  0.717  0.285 summit  CONS 1
+2026-10-31 06:00 VIIRS_NOAA21_750   31.2   7.03  3.142  0.447 summit  CONS 2
+2026-10-15 06:00 VIIRS_NOAA21_750   31.3  30.10  20.42  0.678 summit  CONS 1
+2026-10-12 05:18 VIIRS_NOAA21_750   35.8   8.44   3.46  0.410 summit  CONS 2
+2026-10-24 05:30 VIIRS_SNPP_750     37.4   7.14    5.0  0.700 summit  CONS 1
+2026-10-28 06:12 VIIRS_NOAA20_750   38.8  26.40  19.12  0.724 summit  CONS 1
+2026-10-04 06:06 VIIRS_NOAA21_750   39.0   2.30  1.812  0.788 summit  CONS 2
+2026-09-29 05:18 VIIRS_NOAA20_750   42.6   5.48   2.11  0.385 summit  CONS 1
+2026-10-15 05:18 VIIRS_NOAA20_750   42.7  14.02  5.184  0.370 summit  CONS 1
+2026-10-31 05:18 VIIRS_NOAA20_750   42.9   2.88  1.191  0.414 summit  CONS 1
+2026-10-05 06:24 VIIRS_SNPP_750     44.8   7.00  3.983  0.569 summit  OCR  1
+2026-10-17 06:18 VIIRS_NOAA20_750   45.7  21.94 10.566  0.482 summit  CONS 2
+2026-10-09 06:12 VIIRS_NOAA21_750   45.8   0.82  0.851  1.038 summit  CONS 1
+2026-10-25 06:12 VIIRS_NOAA21_750   45.8  14.23  6.967  0.490 summit  CONS 2
+2026-10-01 06:18 VIIRS_NOAA20_750   45.8   7.06  2.491  0.353 summit  CONS 1
+2026-10-10 05:12 VIIRS_NOAA20_750   48.6   6.42  1.747  0.272 summit  CONS 1
+2026-10-18 05:06 VIIRS_NOAA21_750   48.7  19.63  8.102  0.413 summit  CONS 1
+2026-10-26 05:12 VIIRS_NOAA20_750   48.7   2.64  0.966  0.366 summit  CONS 1
+2026-10-14 06:18 VIIRS_NOAA21_750   51.5   2.00  1.173  0.587 summit  CONS 1
+2026-10-30 06:18 VIIRS_NOAA21_750   51.5  26.76 11.908  0.445 summit  CONS 2
+2026-10-05 05:06 VIIRS_NOAA20_750   53.6   3.43  1.435  0.418 summit  CONS 2
+2026-10-29 05:00 VIIRS_NOAA21_750   53.7  23.64 10.559  0.447 summit  CONS 1
+2026-10-15 06:36 VIIRS_SNPP_750     55.5  15.15  8.511  0.562 summit  CONS 1
+2026-09-29 06:36 VIIRS_SNPP_750     55.8   2.03  0.329  0.162 summit  CONS 2
+2026-10-16 05:00 VIIRS_NOAA20_750   58.0   8.36  1.609  0.192 summit  CONS 1
+2026-10-16 06:42 VIIRS_NOAA20_750   60.6  14.02  2.007  0.143 summit  CONS 1
+2026-10-27 04:54 VIIRS_NOAA20_750   61.9   3.04  0.622  0.205 summit  CONS 1
+2026-10-29 06:42 VIIRS_NOAA21_750   64.3  29.35  6.968  0.237 summit  CONS 1
+2026-10-05 06:48 VIIRS_NOAA20_750   64.3   2.66  0.259  0.097 summit  CONS 2
+2026-09-28 04:42 VIIRS_NOAA21_750   65.1   0.23   None  0.000 None    CONS 1
+2026-10-10 04:54 VIIRS_SNPP_750     65.5   2.48  0.243  0.098 summit  CONS 1
+2026-10-26 04:54 VIIRS_SNPP_750     65.7   2.81  0.312  0.111 summit  CONS 1
+2026-10-30 07:00 VIIRS_SNPP_750     66.8  30.85  4.247  0.138 summit  CONS 1
+2026-10-10 06:54 VIIRS_NOAA20_750   67.6  15.26  2.508  0.164 summit  CONS 1
+2026-10-18 06:48 VIIRS_NOAA21_750   67.6  22.85  2.841  0.124 summit  CONS 1
+2026-10-01 04:42 VIIRS_NOAA20_750   68.0   0.09    0.0  0.000 summit  CONS 1
+2026-10-17 04:42 VIIRS_NOAA20_750   68.0   2.47  0.224  0.091 summit  CONS 2
+2026-10-25 04:36 VIIRS_NOAA21_750   68.0   4.79  0.151  0.032 summit  CONS 1
+
+==== VENTANA 2026-09-28 a 2026-10-17
+records nocturnos: 82 | minutos con alerta MIROVA V750 (CONS u OCR): 33 | de ellos entre 00 y 11 UTC: 31
+alertas <= 0,05 MW (regla SN no aplica a V750 pero se informa): 0
+pareo +-120 s: con alerta 31 | sin 51 | +-60 s: 31 | +-300 s: 31 | pasadas con 2+ filas de alerta a +-120 s: 8
+P2 placebos (pares con alerta): +1 dia 9 | +50 min 0 | -50 min 0
+minutos de alerta nocturna de MIROVA SIN record nuestro a +-120 s: 0 []
+positivos (record con alerta pareada): 31 | fuente: {'CONS': 28, 'OCR': 3} | plataformas: {'VIIRS_NOAA21_750': 12, 'VIIRS_NOAA20_750': 13, 'VIIRS_SNPP_750': 6}
+ventana de los positivos: 2026-09-28 04:42 a 2026-10-17 06:18 | noches: 13
+cenit: [0.5, 2.0, 8.6, 11.1, 12.4, 22.4, 27.7, 27.9, 31.1, 31.3, 35.8, 39.0, 42.6, 42.7, 44.8, 45.7, 45.8, 45.8, 48.6, 51.5, 53.6, 55.5, 55.8, 58.0, 60.6, 64.3, 65.1, 65.5, 67.6, 68.0, 68.0] | n<30 8 n>=30 23
+cenit del record vs Zenith_Sat_deg del OCR (filas OCR pareadas): 3 [(27.9, 27.0), (11.1, 11.0), (44.8, 44.0)]
+pc.vrp_mw None en positivos: 2 | distance_class: {None: 2, 'summit': 29} | pc.vrp_mw == 0: 1
+
+-- razon pc.vrp_mw / MIROVA, CON ceros (pc None o <= 0 cuenta 0), n = 31
+K pc con ceros                     z<30 0.877 n=8 rango [0.000, 1.131] | z>=30 0.353 n=23 rango [0.000, 1.038] | Spearman -0.652 barajado [-0.349, +0.347] FUERA
+K escena (record.vrp_mw) con ceros z<30 0.930 n=8 rango [0.000, 1.616] | z>=30 0.370 n=23 rango [0.000, 2.005] | Spearman -0.592 barajado [-0.338, +0.328] FUERA
+-- razon SIN ceros (solo pc > 0)
+K pc sin ceros                     z<30 0.910 n=7 rango [0.295, 1.131] | z>=30 0.370 n=21 rango [0.091, 1.038] | Spearman -0.774 barajado [-0.331, +0.341] FUERA
+-- solo summit (proxy del predicado del tablero), con ceros
+K pc summit con ceros              z<30 0.877 n=8 rango [0.000, 1.131] | z>=30 0.353 n=23 rango [0.000, 1.038] | Spearman -0.652 barajado [-0.349, +0.347] FUERA
+-- solo filas CONS (A119)
+K pc con ceros, CONS               z<30 0.877 n=6 rango [0.000, 1.131] | z>=30 0.319 n=22 rango [0.000, 1.038] | Spearman -0.658 barajado [-0.379, +0.404] FUERA
+-- log10 de la razon sin ceros
+log10 K pc                         z<30 -0.041 n=7 rango [-0.530, 0.054] | z>=30 -0.432 n=21 rango [-1.042, 0.016] | Spearman -0.774 barajado [-0.331, +0.341] FUERA
+PLACEBO MIROVA barajado            z<30 0.537 n=8 rango [0.000, 4.487] | z>=30 0.528 n=23 rango [0.000, 10.904] | Spearman -0.106 barajado [-0.324, +0.320] dentro
+CONTROL+ razon*(1-z/90)            z<30 0.773 n=8 rango [0.000, 0.971] | z>=30 0.173 n=23 rango [0.000, 0.510] | Spearman -0.726 barajado [-0.345, +0.370] FUERA
+CONTROL+ razon*(1+z/90)            z<30 0.983 n=8 rango [0.000, 1.480] | z>=30 0.532 n=23 rango [0.000, 1.565] | Spearman -0.610 barajado [-0.351, +0.359] FUERA
+jackknife por noche (13 replicas), Spearman K pc con ceros: min -0.828 max -0.582
+K pc con ceros, VIIRS_NOAA20_750   z<30 1.131 n=1 rango [1.131, 1.131] | z>=30 0.232 n=12 rango [0.000, 0.482] | Spearman -0.896 barajado [-0.582, +0.632] FUERA
+K pc con ceros, VIIRS_NOAA21_750   z<30 0.845 n=5 rango [0.295, 0.949] | z>=30 0.587 n=7 rango [0.000, 1.038] | Spearman -0.455 barajado [-0.594, +0.573] dentro
+K pc con ceros, VIIRS_SNPP_750     z<30 0.554 n=2 rango [0.000, 1.108] | z>=30 0.362 n=4 rango [0.098, 0.569] | Spearman -0.143 barajado [-0.829, +0.829] dentro
+
+-- DETALLE positivos (orden de cenit)
+t                 sensor            z     vM    pc     razon  dc      src  nfilas
+2026-10-12 05:54 VIIRS_SNPP_750      0.5   0.40   None  0.000 None    CONS 1
+2026-10-16 05:42 VIIRS_NOAA21_750    2.0  15.63 14.835  0.949 summit  CONS 1
+2026-10-11 05:36 VIIRS_NOAA21_750    8.6   1.03   0.87  0.845 summit  CONS 1
+2026-10-01 06:00 VIIRS_SNPP_750     11.1  10.00 11.084  1.108 summit  OCR  1
+2026-10-05 05:48 VIIRS_NOAA21_750   12.4   7.86  7.152  0.910 summit  CONS 2
+2026-10-10 05:54 VIIRS_NOAA21_750   22.4  13.13 10.481  0.798 summit  CONS 1
+2026-10-09 05:30 VIIRS_NOAA20_750   27.7   0.35  0.396  1.131 summit  CONS 1
+2026-10-01 05:24 VIIRS_NOAA21_750   27.9   9.00  2.655  0.295 summit  OCR  1
+2026-09-29 06:00 VIIRS_NOAA21_750   31.1   2.52  0.717  0.285 summit  CONS 1
+2026-10-15 06:00 VIIRS_NOAA21_750   31.3  30.10  20.42  0.678 summit  CONS 1
+2026-10-12 05:18 VIIRS_NOAA21_750   35.8   8.44   3.46  0.410 summit  CONS 2
+2026-10-04 06:06 VIIRS_NOAA21_750   39.0   2.30  1.812  0.788 summit  CONS 2
+2026-09-29 05:18 VIIRS_NOAA20_750   42.6   5.48   2.11  0.385 summit  CONS 1
+2026-10-15 05:18 VIIRS_NOAA20_750   42.7  14.02  5.184  0.370 summit  CONS 1
+2026-10-05 06:24 VIIRS_SNPP_750     44.8   7.00  3.983  0.569 summit  OCR  1
+2026-10-17 06:18 VIIRS_NOAA20_750   45.7  21.94 10.566  0.482 summit  CONS 2
+2026-10-09 06:12 VIIRS_NOAA21_750   45.8   0.82  0.851  1.038 summit  CONS 1
+2026-10-01 06:18 VIIRS_NOAA20_750   45.8   7.06  2.491  0.353 summit  CONS 1
+2026-10-10 05:12 VIIRS_NOAA20_750   48.6   6.42  1.747  0.272 summit  CONS 1
+2026-10-14 06:18 VIIRS_NOAA21_750   51.5   2.00  1.173  0.587 summit  CONS 1
+2026-10-05 05:06 VIIRS_NOAA20_750   53.6   3.43  1.435  0.418 summit  CONS 2
+2026-10-15 06:36 VIIRS_SNPP_750     55.5  15.15  8.511  0.562 summit  CONS 1
+2026-09-29 06:36 VIIRS_SNPP_750     55.8   2.03  0.329  0.162 summit  CONS 2
+2026-10-16 05:00 VIIRS_NOAA20_750   58.0   8.36  1.609  0.192 summit  CONS 1
+2026-10-16 06:42 VIIRS_NOAA20_750   60.6  14.02  2.007  0.143 summit  CONS 1
+2026-10-05 06:48 VIIRS_NOAA20_750   64.3   2.66  0.259  0.097 summit  CONS 2
+2026-09-28 04:42 VIIRS_NOAA21_750   65.1   0.23   None  0.000 None    CONS 1
+2026-10-10 04:54 VIIRS_SNPP_750     65.5   2.48  0.243  0.098 summit  CONS 1
+2026-10-10 06:54 VIIRS_NOAA20_750   67.6  15.26  2.508  0.164 summit  CONS 1
+2026-10-01 04:42 VIIRS_NOAA20_750   68.0   0.09    0.0  0.000 summit  CONS 1
+2026-10-17 04:42 VIIRS_NOAA20_750   68.0   2.47  0.224  0.091 summit  CONS 2

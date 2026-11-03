@@ -1,0 +1,24 @@
+== (1) placebo +1 dia sobre las 47 pasadas del auditor, con mi pareo (+-120 s)
+pares hoy: 28 | pares con +1 dia: 0 de 47 []
+(los 82 records de la ventana corta daban 9 con +1 dia en v01: la diferencia es el subconjunto, no el pareo)
+
+== (2) f requerido = mediana(z<30) / mediana(bin), K y F nativo (28 positivos del auditor)
+bin        n  z_med   K ratio  f_req_K   F ratio  f_req_F   | S131 I-band f_req (mismo bin)
+0-15       4   9.9   0.930    0.98     1.136    0.91     | -
+15-25      1  22.4   0.798    1.14     0.929    1.11     | 1.27
+25-35      4  29.5   0.487    1.87     0.807    1.28     | 1.59
+35-50      7  44.8   0.385    2.36     0.549    1.88     | 1.9
+50+       12  62.5   0.153    5.96     0.469    2.20     | 2.93
+disponible segun ATBD (docs/s131/REMUESTREO_LEY_DE_AREA.md tabla, fila M13): 4,39x al fin del swath
+
+== (2 bis) razones corregidas por dos leyes crudas de area (solo direccion; ninguna es la del ATBD)
+  K x lineal repo (viirs_pixel_areas, tope 2)  med<30 0.921 med>=30 0.342 Spearman -0.828 [-0.419, +0.402] FUERA
+  F x lineal repo (viirs_pixel_areas, tope 2)  med<30 1.045 med>=30 0.714 Spearman -0.485 [-0.363, +0.354] FUERA
+  K x sec(z)                                   med<30 0.932 med>=30 0.431 Spearman -0.712 [-0.423, +0.405] FUERA
+  F x sec(z)                                   med<30 1.057 med>=30 0.858 Spearman -0.258 [-0.357, +0.324] dentro
+  K x sec^2(z)                                 med<30 0.950 med>=30 0.687 Spearman -0.346 [-0.411, +0.377] dentro
+  F x sec^2(z)                                 med<30 1.086 med>=30 1.374 Spearman +0.532 [-0.348, +0.361] FUERA
+
+== (3) multiplicador realizado en la grilla: celdas O alertadas / pixeles nativos alertados (n_hot K)
+multiplicador mediano z<30: 1.3333333333333333 z>=30: 3.0
+F x multiplicador: med<30 1.781 med>=30 1.635 Spearman -0.189 [-0.374, +0.407]

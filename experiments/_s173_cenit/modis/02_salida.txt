@@ -1,0 +1,48 @@
+== controles de configuración: volcanoes.yaml lat -36.863 lon -71.377 (usado {'lat': -36.863, 'lon': -71.377}); anillo de K en profile.py 5.0-25.0 km (usado 5.0-25.0); local_kernel_bg de Chillán: False
+   grillas de Chillán encontradas: 512 (patrón D:/vrp-trabajo/temporales/s170_ab*/*/grillas/grilla_NevadosDeChillan_*.npz)
+
+== pasadas K con alerta (01_salida.json, sin las 2 ya escritas por la vía): 25; con grilla capturada: 16; sin grilla: 2026-10-27 08:35, 2026-10-28 01:20, 2026-10-28 07:35, 2026-10-29 01:55, 2026-10-29 08:15, 2026-10-30 07:15, 2026-10-30 08:55, 2026-10-31 01:35, 2026-10-31 07:55
+
+== controles del instrumento
+  grilla capturada = grilla_del_volcan de main (ul_x, ul_y, epsg, n): 16 de 16
+  V0 directo: máscara igual a la capturada en 16 de 16; |VRP V0 - VRP capturado| máx 4.45e-04 MW
+  V0 por procesar_grilla con el patch: |record - captura redondeada| máx 0.00e+00 MW
+  V0 / MIROVA contra razon_b de la lectura del A/B: 16 de 16 iguales a 1e-6 (las 0 restantes no estaban en la lectura)
+  X2 (control positivo): VRP = 2 x V0 en 16 de 16; celdas iguales en 16 de 16
+  X2: VRP distinto de V0 en 16 de 16
+  FA: VRP distinto de V0 en 16 de 16
+  FSH: VRP distinto de V0 en 16 de 16
+  SC: VRP distinto de V0 en 0 de 16
+  FA_SC: VRP distinto de V0 en 16 de 16
+  t_bg del anillo en la grilla contra t_bg_k del record K (fidelidad de FA al fondo de K):
+    n 16; diferencia (grilla - K) mediana -0.02 K, rango [-2.10; +0.81] K
+
+== por pasada (VRP en MW; razón = VRP / MIROVA; K = disp publicado por K; P = publica en el tablero)
+  dt                   z       M       K            V0            X2            FA           FSH            SC         FA_SC  npixV0
+  2026-10-01 01:45   2.3    6.17    4.80   4.74(0.77)P   9.48(1.54)P   1.58(0.26)P   5.03(0.81)P   4.74(0.77)P   1.58(0.26)P  3
+  2026-10-16 01:40   3.2   12.39    9.25  13.10(1.06)P  26.21(2.12)P   7.74(0.62)P  12.14(0.98)P  13.10(1.06)P   7.74(0.62)P  4
+  2026-10-26 01:40   7.0   26.53   19.93  18.21(0.69)P  36.41(1.37)P   9.19(0.35)P  19.36(0.73)P  18.21(0.69)P   9.19(0.35)P  5
+  2026-10-16 08:15  19.9   13.70   11.61  13.67(1.00)P  27.34(2.00)P   7.42(0.54)P  13.35(0.97)P  13.67(1.00)P   7.42(0.54)P  5
+  2026-10-18 07:50  23.1   18.36    8.91  15.70(0.85)P  31.39(1.71)P   7.32(0.40)P  16.10(0.88)P  15.70(0.85)P   7.32(0.40)P  6
+  2026-10-05 07:50  23.6    3.50    2.22   3.73(1.07)P   7.46(2.13)P   2.10(0.60)P   3.63(1.04)P   3.73(1.07)P   2.10(0.60)P  2
+  2026-10-10 07:40  35.1    3.95    0.54   2.56(0.65)P   5.12(1.30)P   0.00(0.00)-   4.17(1.06)P   2.56(0.65)P   0.00(0.00)-  6
+  2026-10-18 01:20  37.6   14.39    3.45  15.77(1.10)P  31.54(2.19)P   5.05(0.35)P  16.96(1.18)P  15.77(1.10)P   5.05(0.35)P  8
+  2026-10-15 07:35  44.3   15.27    3.12  18.29(1.20)P  36.58(2.40)P   9.05(0.59)P  17.16(1.12)P  18.29(1.20)P   9.05(0.59)P  9
+  2026-10-01 08:35  50.5    5.18    1.08   5.72(1.10)P  11.44(2.21)-   2.44(0.47)P   5.22(1.01)P   5.72(1.10)P   2.44(0.47)P  8
+  2026-10-17 02:20  54.0   12.97    2.64  18.30(1.41)P  36.61(2.82)P   6.03(0.46)P  19.38(1.49)P  18.30(1.41)P   6.03(0.46)P  11
+  2026-10-15 01:05  57.6    1.72    0.00   2.91(1.69)P   5.81(3.38)P   0.00(0.00)-   2.13(1.24)P   2.91(1.69)P   0.00(0.00)-  5
+  2026-10-25 07:20  58.0    3.79    0.00   2.55(0.67)P   5.11(1.35)P   0.00(0.00)-   3.55(0.94)P   2.55(0.67)P   0.00(0.00)-  9
+  2026-10-12 07:20  58.2    2.18    0.00   1.82(0.84)P   3.65(1.67)P   0.00(0.00)-   1.03(0.47)P   1.82(0.84)P   0.00(0.00)-  3
+  2026-09-29 07:20  58.4    0.13    0.00   0.14(1.05)P   0.28(2.12)P   0.00(0.00)-   0.07(0.52)P   0.14(1.05)P   0.00(0.00)-  1
+  2026-10-17 08:50  62.8    7.09    0.54   5.69(0.80)P  11.37(1.60)P   0.20(0.03)P   3.69(0.52)P   5.69(0.80)P   0.20(0.03)P  6
+
+== razón contra MIROVA por brazo: Spearman con el cenit (200 barajados, semilla 173) y tramos
+  K      Spearman -0.907 [-0.521; +0.502]  z<30 n 6 mediana 0.749  z>=30 n 10 mediana 0.107  publica 12 de 16
+  V0     Spearman +0.150 [-0.479; +0.562]  z<30 n 6 mediana 0.926  z>=30 n 10 mediana 1.075  publica 16 de 16
+  X2     Spearman +0.188 [-0.474; +0.538]  z<30 n 6 mediana 1.853  z>=30 n 10 mediana 2.154  publica 15 de 16
+  FA     Spearman -0.546 [-0.478; +0.412]  z<30 n 6 mediana 0.47  z>=30 n 10 mediana 0.014  publica 11 de 16
+  FSH    Spearman -0.121 [-0.535; +0.438]  z<30 n 6 mediana 0.926  z>=30 n 10 mediana 1.032  publica 16 de 16
+  SC     Spearman +0.150 [-0.479; +0.562]  z<30 n 6 mediana 0.926  z>=30 n 10 mediana 1.075  publica 16 de 16
+  FA_SC  Spearman -0.546 [-0.478; +0.412]  z<30 n 6 mediana 0.47  z>=30 n 10 mediana 0.014  publica 11 de 16
+
+== conteo de celdas alertadas por la vía (V0) contra el cenit: Spearman +0.197 [-0.572; +0.455]; z<30 mediana 4.5, z>=30 mediana 7.0

@@ -1,0 +1,179 @@
+== VARA
+referencia: filas nocturnas en ventana (todas las bandas): 18619 | filas VIIRS750 de Chillán: 634
+SNAP_CONS: C:\Users\nmend\vrp-wt\s173_cenit\v750\repo\data\mirova_reference\mirova_v1_snapshot\registro_vrp_consolidado.csv
+records K VIIRS750 de Chillán en main (ventana): 923
+
+== CONTROLES DEL PAREO
+pasadas con grilla: 47 | con alerta MIROVA pareada hoy: 28 | sin: 19
+alerta hoy pero lab del objetivo no 'pos': 0 | lab 'pos' sin alerta hoy: 0
+VRP de MIROVA pareado distinto del guardado en el objetivo de N: 0
+P2: pares con la referencia corrida +1 día: 0 de 47
+record K de main no encontrado por (sensor, datetime): 0
+fuente de la fila MIROVA de los positivos: {'CONS': 25, 'OCR': 3}
+ventana de los positivos: 2026-09-28 04:42 a 2026-10-17 06:18 | noches: 12
+cenit de los positivos: [2.0, 8.6, 11.1, 12.4, 22.4, 27.7, 27.9, 31.1, 31.3, 39.0, 42.6, 42.7, 44.8, 45.7, 45.8, 48.6, 51.5, 53.6, 55.5, 55.8, 58.0, 60.6, 64.3, 65.1, 65.5, 67.6, 68.0, 68.0]
+n z<30: 7 | n z>=30: 21
+plataformas: {'VIIRS_NOAA20_750': 13, 'VIIRS_NOAA21_750': 10, 'VIIRS_SNPP_750': 5}
+
+== CONTROL POSITIVO: K nativo en las mismas pasadas (razón K / MIROVA por pasada)
+K main (tablero) n=26 | z<30 0.910 [0.798, 1.108] n=7 rango [0.295, 1.131] | z>=30 0.353 [0.162, 0.562] n=19 rango [0.091, 0.788] | med(>=30)/med(<30) 0.388 | Spearman -0.839
+                 barajado 2.5-97.5 % [-0.370, +0.307] -> FUERA del barajado
+K runner pc.vrp  n=26 | z<30 0.910 [0.798, 1.108] n=7 rango [0.295, 1.131] | z>=30 0.353 [0.162, 0.562] n=19 rango [0.091, 0.788] | med(>=30)/med(<30) 0.388 | Spearman -0.839
+                 barajado 2.5-97.5 % [-0.370, +0.307] -> FUERA del barajado
+K main publica en 26 de 28 positivos
+
+== P1 control de escala: brazo O x2
+O x2 mediana: 1.996 [1.946, 2.093] n=28 rango [1.513, 2.875] | O: 0.998 [0.973, 1.046] n=28 rango [0.757, 1.438]
+
+== RAZÓN BRAZO / MIROVA POR CENIT, MAGNITUD (brazo con VRP > 0, publique o no)
+O                n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 0.996 [0.975, 1.002] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 0.996 | Spearman +0.053
+                 barajado 2.5-97.5 % [-0.340, +0.378] -> dentro del barajado
+O_8vec           n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 1.000 [0.975, 1.036] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 1.000 | Spearman +0.159
+                 barajado 2.5-97.5 % [-0.344, +0.383] -> dentro del barajado
+O_regp1          n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 0.996 [0.975, 1.002] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 0.996 | Spearman +0.053
+                 barajado 2.5-97.5 % [-0.340, +0.378] -> dentro del barajado
+O_umbK           n=28 | z<30 1.017 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 1.000 [0.975, 1.002] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 0.983 | Spearman +0.026
+                 barajado 2.5-97.5 % [-0.368, +0.364] -> dentro del barajado
+O_comp           n=22 | z<30 0.946 [0.782, 0.979] n=7 rango [0.743, 1.016] | z>=30 0.827 [0.602, 1.001] n=15 rango [0.466, 1.438] | med(>=30)/med(<30) 0.875 | Spearman -0.224
+                 barajado 2.5-97.5 % [-0.406, +0.467] -> dentro del barajado
+O_comp1          n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 0.993 [0.897, 1.032] n=21 rango [0.579, 1.438] | med(>=30)/med(<30) 0.993 | Spearman -0.069
+                 barajado 2.5-97.5 % [-0.384, +0.322] -> dentro del barajado
+O_sens           n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 1.000 [0.990, 1.060] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 1.000 | Spearman +0.229
+                 barajado 2.5-97.5 % [-0.366, +0.373] -> dentro del barajado
+O_circ           n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 1.000 [0.990, 1.060] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 1.000 | Spearman +0.229
+                 barajado 2.5-97.5 % [-0.366, +0.373] -> dentro del barajado
+O_rec            n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 0.996 [0.975, 1.013] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 0.996 | Spearman +0.062
+                 barajado 2.5-97.5 % [-0.333, +0.371] -> dentro del barajado
+O_fanillo        n=22 | z<30 0.743 [0.730, 0.892] n=7 rango [0.376, 1.150] | z>=30 0.590 [0.227, 0.857] n=15 rango [0.048, 2.542] | med(>=30)/med(<30) 0.793 | Spearman -0.352
+                 barajado 2.5-97.5 % [-0.374, +0.457] -> dentro del barajado
+O_sinhalo        n=28 | z<30 1.007 [0.687, 1.088] n=7 rango [0.582, 1.107] | z>=30 0.965 [0.852, 1.046] n=21 rango [0.435, 1.404] | med(>=30)/med(<30) 0.959 | Spearman -0.147
+                 barajado 2.5-97.5 % [-0.359, +0.355] -> dentro del barajado
+O_todoK          n=25 | z<30 0.791 [0.743, 0.892] n=7 rango [0.407, 1.150] | z>=30 0.511 [0.312, 0.802] n=18 rango [0.017, 2.542] | med(>=30)/med(<30) 0.646 | Spearman -0.502
+                 barajado 2.5-97.5 % [-0.398, +0.358] -> FUERA del barajado
+O_todoK_sincomp  n=28 | z<30 1.017 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 1.002 [0.990, 1.095] n=21 rango [0.757, 1.596] | med(>=30)/med(<30) 0.984 | Spearman +0.291
+                 barajado 2.5-97.5 % [-0.326, +0.356] -> dentro del barajado
+geo_nearest      n=27 | z<30 1.307 [0.982, 1.400] n=7 rango [0.887, 2.253] | z>=30 1.226 [0.865, 1.424] n=20 rango [0.612, 1.831] | med(>=30)/med(<30) 0.938 | Spearman +0.069
+                 barajado 2.5-97.5 % [-0.341, +0.365] -> dentro del barajado
+geo_cubic        n=27 | z<30 1.163 [1.139, 1.206] n=7 rango [1.088, 1.230] | z>=30 1.132 [1.110, 1.210] n=20 rango [0.989, 1.610] | med(>=30)/med(<30) 0.974 | Spearman -0.176
+                 barajado 2.5-97.5 % [-0.407, +0.409] -> dentro del barajado
+r2_linear        n=26 | z<30 1.039 [0.983, 1.095] n=6 rango [0.942, 1.668] | z>=30 1.008 [0.979, 1.128] n=20 rango [0.458, 1.349] | med(>=30)/med(<30) 0.971 | Spearman +0.104
+                 barajado 2.5-97.5 % [-0.379, +0.417] -> dentro del barajado
+r2_nearest       n=26 | z<30 0.982 [0.887, 1.175] n=7 rango [0.693, 2.202] | z>=30 1.080 [0.826, 1.381] n=19 rango [0.551, 1.762] | med(>=30)/med(<30) 1.100 | Spearman +0.195
+                 barajado 2.5-97.5 % [-0.417, +0.385] -> dentro del barajado
+
+== RAZÓN BRAZO / MIROVA POR CENIT, PUBLICA (predicado de N: >= 1 px, VRP > 0, píxel más radiante dentro del inner)
+O                n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 0.996 [0.975, 1.002] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 0.996 | Spearman +0.053
+                 barajado 2.5-97.5 % [-0.340, +0.378] -> dentro del barajado
+O_8vec           n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 1.000 [0.975, 1.036] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 1.000 | Spearman +0.159
+                 barajado 2.5-97.5 % [-0.344, +0.383] -> dentro del barajado
+O_regp1          n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 0.996 [0.975, 1.002] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 0.996 | Spearman +0.053
+                 barajado 2.5-97.5 % [-0.340, +0.378] -> dentro del barajado
+O_umbK           n=28 | z<30 1.017 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 1.000 [0.975, 1.002] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 0.983 | Spearman +0.026
+                 barajado 2.5-97.5 % [-0.368, +0.364] -> dentro del barajado
+O_comp           n=22 | z<30 0.946 [0.782, 0.979] n=7 rango [0.743, 1.016] | z>=30 0.827 [0.602, 1.001] n=15 rango [0.466, 1.438] | med(>=30)/med(<30) 0.875 | Spearman -0.224
+                 barajado 2.5-97.5 % [-0.406, +0.467] -> dentro del barajado
+O_comp1          n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 0.993 [0.897, 1.032] n=21 rango [0.579, 1.438] | med(>=30)/med(<30) 0.993 | Spearman -0.069
+                 barajado 2.5-97.5 % [-0.384, +0.322] -> dentro del barajado
+O_sens           n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 1.000 [0.990, 1.060] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 1.000 | Spearman +0.229
+                 barajado 2.5-97.5 % [-0.366, +0.373] -> dentro del barajado
+O_circ           n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 1.000 [0.990, 1.060] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 1.000 | Spearman +0.229
+                 barajado 2.5-97.5 % [-0.366, +0.373] -> dentro del barajado
+O_rec            n=28 | z<30 1.000 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 0.996 [0.975, 1.013] n=21 rango [0.757, 1.438] | med(>=30)/med(<30) 0.996 | Spearman +0.062
+                 barajado 2.5-97.5 % [-0.333, +0.371] -> dentro del barajado
+O_fanillo        n=22 | z<30 0.743 [0.730, 0.892] n=7 rango [0.376, 1.150] | z>=30 0.590 [0.227, 0.857] n=15 rango [0.048, 2.542] | med(>=30)/med(<30) 0.793 | Spearman -0.352
+                 barajado 2.5-97.5 % [-0.374, +0.457] -> dentro del barajado
+O_sinhalo        n=28 | z<30 1.007 [0.687, 1.088] n=7 rango [0.582, 1.107] | z>=30 0.965 [0.852, 1.046] n=21 rango [0.435, 1.404] | med(>=30)/med(<30) 0.959 | Spearman -0.147
+                 barajado 2.5-97.5 % [-0.359, +0.355] -> dentro del barajado
+O_todoK          n=25 | z<30 0.791 [0.743, 0.892] n=7 rango [0.407, 1.150] | z>=30 0.511 [0.312, 0.802] n=18 rango [0.017, 2.542] | med(>=30)/med(<30) 0.646 | Spearman -0.502
+                 barajado 2.5-97.5 % [-0.398, +0.358] -> FUERA del barajado
+O_todoK_sincomp  n=28 | z<30 1.017 [0.946, 1.073] n=7 rango [0.782, 1.085] | z>=30 1.002 [0.990, 1.095] n=21 rango [0.757, 1.596] | med(>=30)/med(<30) 0.984 | Spearman +0.291
+                 barajado 2.5-97.5 % [-0.326, +0.356] -> dentro del barajado
+geo_nearest      n=27 | z<30 1.307 [0.982, 1.400] n=7 rango [0.887, 2.253] | z>=30 1.226 [0.865, 1.424] n=20 rango [0.612, 1.831] | med(>=30)/med(<30) 0.938 | Spearman +0.069
+                 barajado 2.5-97.5 % [-0.341, +0.365] -> dentro del barajado
+geo_cubic        n=27 | z<30 1.163 [1.139, 1.206] n=7 rango [1.088, 1.230] | z>=30 1.132 [1.110, 1.210] n=20 rango [0.989, 1.610] | med(>=30)/med(<30) 0.974 | Spearman -0.176
+                 barajado 2.5-97.5 % [-0.407, +0.409] -> dentro del barajado
+r2_linear        n=26 | z<30 1.039 [0.983, 1.095] n=6 rango [0.942, 1.668] | z>=30 1.008 [0.979, 1.128] n=20 rango [0.458, 1.349] | med(>=30)/med(<30) 0.971 | Spearman +0.104
+                 barajado 2.5-97.5 % [-0.379, +0.417] -> dentro del barajado
+r2_nearest       n=26 | z<30 0.982 [0.887, 1.175] n=7 rango [0.693, 2.202] | z>=30 1.080 [0.826, 1.381] n=19 rango [0.551, 1.762] | med(>=30)/med(<30) 1.100 | Spearman +0.195
+                 barajado 2.5-97.5 % [-0.417, +0.385] -> dentro del barajado
+
+== SUBCONJUNTO COMÚN (todos los brazos y K main con VRP > 0): n = 20, z<30 6, z>=30 14
+K_main           n=20 | z<30 0.877 [0.798, 0.949] n=6 rango [0.295, 1.108] | z>=30 0.402 [0.272, 0.569] n=14 rango [0.143, 0.788] | med(>=30)/med(<30) 0.458 | Spearman -0.789
+                 barajado 2.5-97.5 % [-0.471, +0.418] -> FUERA del barajado
+O                n=20 | z<30 1.009 [0.973, 1.073] n=6 rango [0.946, 1.085] | z>=30 0.991 [0.928, 1.001] n=14 rango [0.757, 1.438] | med(>=30)/med(<30) 0.983 | Spearman -0.114
+                 barajado 2.5-97.5 % [-0.433, +0.430] -> dentro del barajado
+O_8vec           n=20 | z<30 1.009 [0.973, 1.073] n=6 rango [0.946, 1.085] | z>=30 0.991 [0.928, 1.001] n=14 rango [0.757, 1.438] | med(>=30)/med(<30) 0.983 | Spearman -0.114
+                 barajado 2.5-97.5 % [-0.433, +0.430] -> dentro del barajado
+O_regp1          n=20 | z<30 1.009 [0.973, 1.073] n=6 rango [0.946, 1.085] | z>=30 0.991 [0.928, 1.001] n=14 rango [0.757, 1.438] | med(>=30)/med(<30) 0.983 | Spearman -0.114
+                 barajado 2.5-97.5 % [-0.433, +0.430] -> dentro del barajado
+O_umbK           n=20 | z<30 1.020 [0.973, 1.073] n=6 rango [0.946, 1.085] | z>=30 0.995 [0.928, 1.002] n=14 rango [0.757, 1.438] | med(>=30)/med(<30) 0.975 | Spearman -0.132
+                 barajado 2.5-97.5 % [-0.442, +0.435] -> dentro del barajado
+O_comp           n=20 | z<30 0.959 [0.875, 0.979] n=6 rango [0.743, 1.016] | z>=30 0.795 [0.602, 0.993] n=14 rango [0.466, 1.438] | med(>=30)/med(<30) 0.829 | Spearman -0.402
+                 barajado 2.5-97.5 % [-0.433, +0.426] -> dentro del barajado
+O_comp1          n=20 | z<30 1.009 [0.973, 1.073] n=6 rango [0.946, 1.085] | z>=30 0.982 [0.897, 1.000] n=14 rango [0.757, 1.438] | med(>=30)/med(<30) 0.974 | Spearman -0.239
+                 barajado 2.5-97.5 % [-0.430, +0.450] -> dentro del barajado
+O_sens           n=20 | z<30 1.009 [0.973, 1.073] n=6 rango [0.946, 1.085] | z>=30 0.996 [0.928, 1.002] n=14 rango [0.757, 1.438] | med(>=30)/med(<30) 0.988 | Spearman -0.023
+                 barajado 2.5-97.5 % [-0.406, +0.414] -> dentro del barajado
+O_circ           n=20 | z<30 1.009 [0.973, 1.073] n=6 rango [0.946, 1.085] | z>=30 0.996 [0.928, 1.002] n=14 rango [0.757, 1.438] | med(>=30)/med(<30) 0.988 | Spearman -0.023
+                 barajado 2.5-97.5 % [-0.406, +0.414] -> dentro del barajado
+O_rec            n=20 | z<30 1.009 [0.973, 1.073] n=6 rango [0.946, 1.085] | z>=30 0.991 [0.928, 1.001] n=14 rango [0.757, 1.438] | med(>=30)/med(<30) 0.983 | Spearman -0.114
+                 barajado 2.5-97.5 % [-0.433, +0.430] -> dentro del barajado
+O_fanillo        n=20 | z<30 0.741 [0.730, 0.859] n=6 rango [0.376, 1.150] | z>=30 0.548 [0.227, 0.777] n=14 rango [0.048, 2.542] | med(>=30)/med(<30) 0.739 | Spearman -0.514
+                 barajado 2.5-97.5 % [-0.454, +0.415] -> FUERA del barajado
+O_sinhalo        n=20 | z<30 1.014 [0.963, 1.088] n=6 rango [0.687, 1.107] | z>=30 0.966 [0.865, 1.026] n=14 rango [0.803, 1.328] | med(>=30)/med(<30) 0.953 | Spearman -0.123
+                 barajado 2.5-97.5 % [-0.505, +0.438] -> dentro del barajado
+O_todoK          n=20 | z<30 0.785 [0.743, 0.859] n=6 rango [0.407, 1.150] | z>=30 0.576 [0.356, 0.802] n=14 rango [0.180, 2.542] | med(>=30)/med(<30) 0.734 | Spearman -0.474
+                 barajado 2.5-97.5 % [-0.468, +0.414] -> FUERA del barajado
+O_todoK_sincomp  n=20 | z<30 1.020 [0.973, 1.073] n=6 rango [0.946, 1.085] | z>=30 1.000 [0.928, 1.002] n=14 rango [0.757, 1.438] | med(>=30)/med(<30) 0.981 | Spearman -0.041
+                 barajado 2.5-97.5 % [-0.427, +0.426] -> dentro del barajado
+geo_nearest      n=20 | z<30 1.161 [0.982, 1.375] n=6 rango [0.887, 1.400] | z>=30 0.918 [0.755, 1.287] n=14 rango [0.612, 1.612] | med(>=30)/med(<30) 0.791 | Spearman -0.284
+                 barajado 2.5-97.5 % [-0.471, +0.368] -> dentro del barajado
+geo_cubic        n=20 | z<30 1.179 [1.140, 1.206] n=6 rango [1.139, 1.230] | z>=30 1.121 [1.098, 1.168] n=14 rango [0.989, 1.576] | med(>=30)/med(<30) 0.951 | Spearman -0.405
+                 barajado 2.5-97.5 % [-0.420, +0.466] -> dentro del barajado
+r2_linear        n=20 | z<30 1.039 [0.983, 1.095] n=6 rango [0.942, 1.668] | z>=30 1.005 [0.903, 1.037] n=14 rango [0.458, 1.294] | med(>=30)/med(<30) 0.968 | Spearman -0.141
+                 barajado 2.5-97.5 % [-0.439, +0.435] -> dentro del barajado
+r2_nearest       n=20 | z<30 0.959 [0.887, 0.988] n=6 rango [0.693, 1.175] | z>=30 0.910 [0.813, 1.220] n=14 rango [0.551, 1.762] | med(>=30)/med(<30) 0.948 | Spearman +0.132
+                 barajado 2.5-97.5 % [-0.418, +0.398] -> dentro del barajado
+
+== DESCOMPOSICIÓN por cenit (positivos)
+npix O               z<30 3.000 [2.000, 5.000] n=7 rango [1.000, 7.000] | z>=30 5.000 [4.000, 7.000] n=21 rango [1.000, 14.000] | Spearman vs z +0.356 barajado [-0.308, +0.399]
+npix O_todoK         z<30 3.000 [2.000, 6.000] n=7 rango [1.000, 7.000] | z>=30 5.000 [4.000, 7.000] n=21 rango [1.000, 15.000] | Spearman vs z +0.284 barajado [-0.307, +0.335]
+npix K runner pc     z<30 2.000 [1.000, 2.000] n=7 rango [1.000, 3.000] | z>=30 2.000 [1.000, 2.000] n=20 rango [1.000, 4.000] | Spearman vs z -0.057 barajado [-0.357, +0.402]
+O_fanillo/O (VRP)    z<30 0.730 [0.681, 1.141] n=7 rango [0.370, 1.216] | z>=30 0.318 [-0.314, 0.669] n=21 rango [-0.975, 1.768] | Spearman vs z -0.524 barajado [-0.460, +0.364]
+O_sinhalo/O (VRP)    z<30 1.005 [0.744, 1.014] n=7 rango [0.726, 1.021] | z>=30 0.983 [0.924, 1.040] n=21 rango [0.338, 1.368] | Spearman vs z -0.181 barajado [-0.361, +0.333]
+O_todoK/O (VRP)      z<30 0.791 [0.693, 1.141] n=7 rango [0.400, 1.216] | z>=30 0.548 [0.336, 0.802] n=18 rango [0.017, 1.768] | Spearman vs z -0.512 barajado [-0.400, +0.361]
+K main/O_todoK       z<30 1.105 [0.734, 1.268] n=7 rango [0.725, 1.491] | z>=30 0.847 [0.600, 1.236] n=17 rango [0.231, 5.662] | Spearman vs z -0.146 barajado [-0.416, +0.430]
+K main/O             z<30 0.893 [0.798, 1.033] n=7 rango [0.290, 1.447] | z>=30 0.374 [0.163, 0.509] n=19 rango [0.092, 0.787] | Spearman vs z -0.850 barajado [-0.368, +0.319]
+Lbk/Lhot O           z<30 0.396 [0.334, 0.752] n=7 rango [0.196, 0.856] | z>=30 0.651 [0.562, 0.741] n=21 rango [0.203, 0.916] | Spearman vs z +0.532 barajado [-0.391, +0.381]
+Lbk/Lhot O_fanillo   z<30 0.559 [0.546, 0.815] n=7 rango [0.290, 0.835] | z>=30 0.888 [0.696, 1.077] n=21 rango [0.286, 1.186] | Spearman vs z +0.557 barajado [-0.327, +0.411]
+
+== DETALLE por pasada positiva (orden de cenit)
+hora_utc          sensorK          z     vM     Kmain   O      O_fan  O_sinh O_todoK O_comp geo_nn r2_lin  npixO npixK
+2026-10-16 05:42 VIIRS_NOAA21_750   2.0  15.63  0.949  0.973  0.859  0.963  0.859   0.973  1.015  1.067     2    2
+2026-10-11 05:36 VIIRS_NOAA21_750   8.6   1.03  0.845  0.946  1.150  0.687  1.150   0.946  1.375  1.668     2    2
+2026-10-01 06:00 VIIRS_SNPP_750    11.1  10.00  1.108  1.073  0.743  1.088  0.743   0.875  1.400  1.011     4    3
+2026-10-05 05:48 VIIRS_NOAA21_750  12.4   7.86  0.910  1.085  0.739  1.107  0.779   1.016  0.982  1.095     3    1
+2026-10-10 05:54 VIIRS_NOAA21_750  22.4  13.13  0.798  1.000  0.730  1.007  0.791   0.979  0.887  0.942     5    2
+2026-10-09 05:30 VIIRS_NOAA20_750  27.7   0.35  1.131  0.782  0.892  0.582  0.892   0.782  2.253    -       1    1
+2026-10-01 05:24 VIIRS_NOAA21_750  27.9   9.00  0.295  1.017  0.376  1.022  0.407   0.743  1.307  0.983     7    2
+2026-09-29 06:00 VIIRS_NOAA21_750  31.1   2.52  0.285  1.095 -0.857  1.404    -       -    1.287  1.001     6    2
+2026-10-15 06:00 VIIRS_NOAA21_750  31.3  30.10  0.678  1.168  1.047  1.167  1.047   1.168  0.674  1.240     5    1
+2026-10-04 06:06 VIIRS_NOAA21_750  39.0   2.30  0.788  1.001  0.857  1.005  0.857   1.001  0.826  0.987     3    1
+2026-09-29 05:18 VIIRS_NOAA20_750  42.6   5.48  0.385  0.757  0.161  0.824  0.180   0.466  1.612  0.790     4    1
+2026-10-15 05:18 VIIRS_NOAA20_750  42.7  14.02  0.370  0.868  0.506  0.803  0.547   0.722  0.886  0.915     5    1
+2026-10-05 06:24 VIIRS_SNPP_750    44.8   7.00  0.569  0.885  0.592  0.865  0.635   0.829  1.358  1.005     3    2
+2026-10-17 06:18 VIIRS_NOAA20_750  45.7  21.94  0.482  1.000  0.777  1.026  0.802   0.993  0.612  0.903     6    2
+2026-10-01 06:18 VIIRS_NOAA20_750  45.8   7.06  0.353  0.943  0.355  0.952  0.356   0.602  1.235  1.011     6    2
+2026-10-10 05:12 VIIRS_NOAA20_750  48.6   6.42  0.272  0.990  0.190  1.046  0.373   0.716  1.287  0.842     7    2
+2026-10-14 06:18 VIIRS_NOAA21_750  51.5   2.00  0.587  1.438  2.542  1.328  2.542   1.438  0.865  1.294     5    2
+2026-10-05 05:06 VIIRS_NOAA20_750  53.6   3.43  0.418  0.928  0.048  0.965  0.312   0.531  0.755  0.458     4    2
+2026-10-15 06:36 VIIRS_SNPP_750    55.5  15.15  0.562  0.993  0.638  0.947  0.663   0.827  0.661  1.128     9    4
+2026-09-29 06:36 VIIRS_SNPP_750    55.8   2.03  0.162  0.996 -0.312  0.904    -       -    1.424  1.022     3    1
+2026-10-16 05:00 VIIRS_NOAA20_750  58.0   8.36  0.192  1.000  0.227  0.968  0.352   0.554  0.951  1.037     9    2
+2026-10-16 06:42 VIIRS_NOAA20_750  60.6  14.02  0.143  1.002  0.319  0.985  0.475   0.763  1.363  1.005    14    3
+2026-10-05 06:48 VIIRS_NOAA20_750  64.3   2.66  0.097  0.992 -0.663  0.724  0.057     -    1.216  0.979     6    2
+2026-09-28 04:42 VIIRS_NOAA21_750  65.1   0.23    -    1.285  1.971  0.435  1.971   1.285  1.831    -       1     
+2026-10-10 04:54 VIIRS_SNPP_750    65.5   2.48  0.098  1.001 -0.975  1.369  0.017     -    1.581  1.349    10    1
+2026-10-10 06:54 VIIRS_NOAA20_750  67.6  15.26  0.164  0.975  0.590  0.852  0.606   0.850  0.976  1.031    13    2
+2026-10-01 04:42 VIIRS_NOAA20_750  68.0   0.09    -    1.046 -0.956  1.164    -       -      -    1.242     1    1
+2026-10-17 04:42 VIIRS_NOAA20_750  68.0   2.47  0.091  0.984 -0.376  0.634  0.073     -    1.480  1.024     5    1
