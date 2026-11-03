@@ -73,7 +73,9 @@ def correr(nombre, viejo, nuevo):
     if src.count(viejo) != 1:
         return "NO APLICA (el texto a mutar aparece %d veces)" % src.count(viejo), ""
     mut = AQUI / f"_mut_leer_retro_{os.getpid()}.py"
-    xml = Path(tempfile.mkstemp(suffix=".xml")[1])
+    fd, nombre_xml = tempfile.mkstemp(suffix=".xml")
+    os.close(fd)                    # en Windows el descriptor abierto impide borrar el archivo despues
+    xml = Path(nombre_xml)
     try:
         mut.write_text(src.replace(viejo, nuevo), encoding="utf-8")
         env = dict(os.environ, LEER_RETRO_MODULO=str(mut), PYTHONDONTWRITEBYTECODE="1")
