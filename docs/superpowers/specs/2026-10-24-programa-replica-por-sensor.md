@@ -545,6 +545,9 @@ en Tupungatito, el nivel del fondo de anillo de K (CONFIRMADA); en Chillán, pie
    MW oculta el record) puede ocultar alertas reales de la vía de MODIS en pasadas oblicuas: 7 de 27 records de la vía en
    Chillán tienen `t_max` bajo 273,15 K, todos con cenit de 35° o más (VABLMODIS-05). Tocar `frontend/` pide tag y sí de
    Nicolás (A45). (b) VIIRS 750 en Tupungatito: K deja sin publicar 12 de 14 alertas; medir con la vía dentro de la
-   lectura de V750-B si se puede, sin que decida.
+   lectura de V750-B si se puede, sin que decida. (c) VPR939-03 (gravedad 2, verificador del PR #939 de la ROI B4): el
+   lector de la sombra de V750-A todavía no separa las pasadas por ROI; los insumos ya están en cada record
+   (`regimen.codigo_sha` y `diag_codigo_mirova.roi`). Agregar esa separación antes de leer la sombra de VIIRS 750, aunque
+   el merge de #939 caiga antes de la primera corrida con datos.
 4. **No se hace la ablación por pieza en VIIRS 375.** La vía ya corrige el déficit (Tupungatito 1,01 / 1,02) y la
    adopción la decide la sombra de V375-E. Aislar la pieza no mueve ninguna decisión.

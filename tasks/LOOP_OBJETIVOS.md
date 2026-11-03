@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 19:34 UTC (S173): PR #939 (ROI B4 en VIIRS 750) abierto en borrador, verificado
+- #939, rama `s169-roi-v750`, punta `751a5a1d1`; tag defensivo `pre-s173-roi-v750-b4` sobre main `82b55de0d`. Cambia
+  sólo `roi_v750` de Cordón Caulle y Tupungatito a `sens` (8 líneas del YAML); los otros 9 y los 34 siguen en `def`.
+  Producción no cambia (la vía de V750 está apagada en `mirova_equivalent`). Suite local 3.116 pasan, 0 fallas;
+  mutaciones 9 de 9 atrapadas. Verificador Fable: CONFIRMADO EN PARTE, 10 hallazgos de documento corregidos.
+- VPR939-03 (gravedad 2) agregado al programa §12.8 punto 3 (c): el lector de la sombra de V750-A no separa por ROI.
+- La sombra de las vías corre con cron 15:00 UTC y llega tarde (la del 2-nov a las 23:00); la de hoy no ha corrido a
+  las 19:33. Merge antes de esa corrida = la sombra de V750 con datos nace toda con B4. Merge pide frase de Nicolás.
+
 ### 2026-11-03 18:56 UTC (S173): Nicolás confirma B4 (§6.5 de V750-B)
 - Frase: «Sí, confirmo B4». Cubre la confirmación §6.5 (B4 es la ROI por volcán que declara el `.m`, no un gate
   nuestro) y la apertura del PR de `roi_v750` con B4. El merge a main pide frase aparte. Pasado a la sesión de V750.
