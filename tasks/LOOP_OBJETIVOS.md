@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 20:35 UTC (S173): PR #940 (instrumental de la retrospectiva) en borrador; verificador limpio corriendo
+- #940, rama `claude/s173-retro-paquete`, punta `6e93764bf`: perfiles `_s172_retro_paquete` y `_s172_retro_k` (el
+  segundo no estaba en el encargo; el autor dice que lo pide el pre-registro), workflow `reproc-retro-paquete.yml`,
+  plan de trozos, C-via y lector. Suite 3.153 pasan, 0 fallas; mutaciones 12 de 12 atrapadas. Esfuerzo declarado MEDIO.
+- No puede leer todavía: faltan C-montaje, el manifiesto del candado, las excepciones de C-K. Lecturas propias del
+  autor (L1 a L5) por revisar contra el pre-registro sellado. Discrepancias plan contra pre-registro anotadas en el PR.
+- Verificador limpio (Fable, alto) sobre #940 en `C:/Users/nmend/vrp-wt/ver940`. #939 (ROI B4): CI verde sobre la
+  punta `751a5a1d1`; merge espera frase de Nicolás.
+
 ### 2026-11-03 19:34 UTC (S173): PR #939 (ROI B4 en VIIRS 750) abierto en borrador, verificado
 - #939, rama `s169-roi-v750`, punta `751a5a1d1`; tag defensivo `pre-s173-roi-v750-b4` sobre main `82b55de0d`. Cambia
   sólo `roi_v750` de Cordón Caulle y Tupungatito a `sens` (8 líneas del YAML); los otros 9 y los 34 siguen en `def`.
