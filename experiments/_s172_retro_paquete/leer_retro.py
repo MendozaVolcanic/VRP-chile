@@ -43,6 +43,13 @@ LECTURAS DONDE EL TEXTO NO FIJA EL DETALLE (declaradas antes de ver datos; ningu
   L5. El corte por cenit bajo y sobre 30° (pedido del encargo de S173) se informa al lado de los tramos de 10° del
       §5.3 y no decide nada.
 
+ARREGLOS DEL VERIFICADOR LIMPIO DE #940 (Fable 5.1, MERGEABLE CON CAMBIOS, 2026-11-03; informe en
+C:/Users/nmend/vrp-wt/ver940_informe/INFORME.md): VPR940-02 (c_k_puro: K de disco con la marca de la vía es rojo en
+todas las ventanas), 03 (C-K exige la cobertura del K-gemelo que manda D3), 04 (el nulo de runner descuenta las
+excepciones nombradas), 05 (el placebo mira P1 y P2, con las dos causas de L7), 06 (C-montaje validado), 09
+(C-cobertura en R25 por clase del OSF), 11 (sorteo de etiquetas por estrato, §7, informa) y 15 (ENSAYO en cada línea).
+VPR940-01, 07 y 10 esperan decisión de Nicolás y no se tocaron.
+
 LAS DOS PREGUNTAS DEL INSTRUMENTO (§6): (1) si la vía no corriera, C-via da 0 %; si el lector estuviera roto, el nulo
 del lector (K contra K = 0 diferencias; una protegida quitada a la vía = veto; 50 negativos con un cúmulo de cumbre
 inyectado por el predicado = P2 sube en 50) y el placebo lo ven; si K de disco no fuera K de hoy, C-K lo ve. (2) Si los
@@ -111,6 +118,11 @@ CLASES_QUE_DECIDEN = ("protegida", "bajo1", "neg_limpio")
 TOL_VRP_CK = 1e-3                                  # §6 C-K: pc.vrp_mw a 0,001 MW
 TOPE_EXCEPCIONES_CK = 3                            # R-15
 TOL_CENIT_OSF = 2.0                                # §6 C-cenit
+TOPE_TABLERO_MW = 50000.0                          # L7 de V750-A §7: el tope de magnitud de frontend/index.html
+T_MAX_FILTROS_K = 278.15                           # L7: bajo esto miran la magnitud los filtros de artefacto del tablero
+VOLCANES_F26_ENTEROS_D3 = ("Lascar", "NevadosDeChillan")   # §10.3, D3
+DIAS_F26_D3 = 3                                    # §10.3, D3: tres días de F26 de cada otro volcán
+TRAMOS_F26 = ("F26-V", "F26-M", "F26-M3")
 VENTANA_S = 120
 CORTE_CENIT_INFORMA = 30.0                         # L5
 HITO_N3 = "2026-10-09"
@@ -230,6 +242,10 @@ def armar_pasadas(via, k, kgem=None, es_noche=None, inner=None, sin_dato_trozos=
              "via_marca": (rv or {}).get("via_codigo_mirova")}
         if rk is None:
             f["estado"] = "sobra_en_via"
+        elif rk.get("via_codigo_mirova") is True:
+            # VPR940-02: un record de K de disco con la marca de la vía no es K (producción enciende la vía de MODIS
+            # desde 33f889bc5); se marca aquí, en todas las ventanas, y c_k_puro deja el instrumento en rojo
+            f["estado"] = "k_con_marca:True"
         elif rv is None:
             f["estado"] = "sin_dato_cobertura"
         elif any(x["vol"] == vol and x["start"] <= dia <= x["end"] for x in sin_dato_trozos):
@@ -502,13 +518,14 @@ def c_via(filas, tramo):
     return out
 
 
-def c_cobertura(filas, repetidas=()):
-    """A108: pasadas de VIA contra K antes de mirar nada; SIN DATO por clase que decide; repetidas, rojo."""
+def c_cobertura(filas, repetidas=(), clave="lab", clases=CLASES_QUE_DECIDEN):
+    """A108: pasadas de VIA contra K antes de mirar nada; SIN DATO por clase que decide; repetidas, rojo. En R25 la
+    clase es la del OSF (clave="lab_osf", VPR940-09)."""
     con_k = [f for f in filas if f["estado"] != "sobra_en_via"]
     sd = [f for f in con_k if f["estado"] in ("sin_dato_cobertura", "sin_dato_trozo")]
-    por = collections.Counter(f.get("lab", "?") for f in sd)
-    den = collections.Counter(f.get("lab", "?") for f in con_k)
-    malas = {c: (por[c], den[c]) for c in CLASES_QUE_DECIDEN if den[c] and por[c] / den[c] > UMBRAL_SIN_DATO}
+    por = collections.Counter(f.get(clave, "?") for f in sd)
+    den = collections.Counter(f.get(clave, "?") for f in con_k)
+    malas = {c: (por[c], den[c]) for c in clases if den[c] and por[c] / den[c] > UMBRAL_SIN_DATO}
     sobran = [(f["vol"], f["dt"], f["sensor"]) for f in filas if f["estado"] == "sobra_en_via"]
     estado = "OK"
     if not con_k or len(sd) == len(con_k):
@@ -520,6 +537,37 @@ def c_cobertura(filas, repetidas=()):
     return {"estado": estado, "pasadas_k": len(con_k), "sin_dato": len(sd), "por_clase": dict(por),
             "sobran_en_via": sobran[:50], "n_sobran": len(sobran), "repetidas": list(repetidas)[:20],
             "protegidas_sin_dato_que_k_publica": protegidas_sin_dato_que_k_publica(filas)}
+
+
+def c_k_puro(filas):
+    """VPR940-02: ningún record de K de disco puede traer via_codigo_mirova True, en ninguna ventana (R25 incluida,
+    que no tiene C-K). Con uno solo, rojo."""
+    malos = [(f["vol"], f["sensor"], f["dt"]) for f in filas if str(f.get("estado", "")).startswith("k_con_marca")]
+    return {"estado": "OK" if not malos else f"ROJO: {len(malos)} records de K de disco con la marca de la vía",
+            "lista": malos[:50]}
+
+
+def cobertura_kgemelo(filas):
+    """VPR940-03: el K-gemelo tiene que cubrir lo que manda D3 (§10.3): todas las pasadas de K en DM, todas las de F26
+    de Láscar y de Nevados de Chillán, y en cada otro volcán con F26, al menos tres días de F26 con todas sus pasadas."""
+    con_k = [f for f in filas if f.get("k_rec") is not None and f.get("estado") != "sobra_en_via"]
+    faltan = []
+    dm = [f for f in con_k if f["tramo"] == "DM"]
+    if not dm:
+        faltan.append("sin pasadas de K en DM")
+    faltan += [("DM", f["vol"], f["dt"]) for f in dm if not f.get("en_kgemelo")]
+    f26 = [f for f in con_k if f["tramo"] in TRAMOS_F26]
+    for vol in sorted({f["vol"] for f in f26}):
+        fv = [f for f in f26 if f["vol"] == vol]
+        if vol in VOLCANES_F26_ENTEROS_D3:
+            faltan += [("F26", vol, f["dt"]) for f in fv if not f.get("en_kgemelo")]
+            continue
+        dias_ok = {d for d in {f["noche"] for f in fv}
+                   if all(f.get("en_kgemelo") for f in fv if f["noche"] == d)}
+        if len(dias_ok) < DIAS_F26_D3:
+            faltan.append(("F26", vol, f"{len(dias_ok)} días cubiertos, se piden {DIAS_F26_D3}"))
+    return {"estado": "OK" if not faltan else f"ROJO: el K-gemelo no cubre D3 ({len(faltan)} faltas)",
+            "faltan": faltan[:50]}
 
 
 def c_k(filas, excepciones=()):
@@ -539,15 +587,23 @@ def c_k(filas, excepciones=()):
     no_expl = [d for d in difs if (d[0], d[1]) not in nombradas]
     excede = {s: n for s, n in por_sensor.items() if n > TOPE_EXCEPCIONES_CK}
     sin_empate = [e for e in excepciones if not str(e.get("empate_argsort", "")).strip()]
-    estado = ("OK" if not no_expl and not excede and not sin_empate else
-              f"ROJO: {len(no_expl)} diferencias sin nombrar, tope excedido {excede}, sin empate {len(sin_empate)}")
-    return {"estado": estado, "n": len(con), "diferencias": difs[:50], "no_explicadas": no_expl[:50]}
+    cob = cobertura_kgemelo(filas)
+    estado = ("OK" if not no_expl and not excede and not sin_empate and cob["estado"] == "OK" else
+              f"ROJO: {len(no_expl)} diferencias sin nombrar, tope excedido {excede}, sin empate {len(sin_empate)}, "
+              f"cobertura {cob['estado']}")
+    return {"estado": estado, "n": len(con), "diferencias": difs[:50], "no_explicadas": no_expl[:50],
+            "cobertura_kgemelo": cob}
 
 
-def nulo_runner(R, filas):
+def _nombradas(excepciones):
+    return {(e["vol"], e["dt"][:16]) for e in excepciones if str(e.get("empate_argsort", "")).strip()}
+
+
+def nulo_runner(R, filas, excepciones=()):
     """B = 0 de K-gemelo contra K en P2 (salvo las nombradas de C-K, que ya cuentan en C-K); y el control de que el
     nulo puede fallar: K-gemelo contra PLACEBO da B mayor que 0 o M distinta."""
-    con = [f for f in _ev(filas) if "KG" in f["_t"]]
+    nombradas = _nombradas(excepciones)          # VPR940-04: «B = 0 salvo las pasadas nombradas de C-K»
+    con = [f for f in _ev(filas) if "KG" in f["_t"] and (f["vol"], f["dt"]) not in nombradas]
     if not con:
         return {"estado": "ROJO: sin K-gemelo"}
     p = R.F4.p2(con, "KG", "K")
@@ -564,8 +620,24 @@ def c_placebo(R, filas, sensor):
     """K×1,2: M de D-28 no da MEJORA (MODIS y 375); en 750 el comparador de V750-A §6.2 separa la vía de K×1,2."""
     m = R.F4.m(filas, "placebo")
     pl = R.F4.p1(filas, "placebo")
-    out = {"m_regla": m.get("regla"), "mejora_d28": _mejora_d28(m), "p1_placebo": pl["estado"]}
-    out["estado"] = "ROJO: el placebo da MEJORA" if out["mejora_d28"] else "OK"
+    # VPR940-05: P1 y P2 de K×1,2 contra K sin discordancias de publicación, salvo las dos causas de L7 (V750-A §7):
+    # t_max de K bajo 278,15 K (los filtros de artefacto del tablero miran la magnitud) o la magnitud que cruza el
+    # tope de 50.000 MW del tablero. Una discordancia sin esas causas dice que el predicado mira la magnitud donde no
+    # debería: instrumento roto.
+    disc, sin_expl = [], []
+    for f in _ev(filas):
+        if f["lab"] not in ("protegida", "bajo1", "neg_limpio") or _pub(f, "K") == _pub(f, "placebo"):
+            continue
+        tmax = (f.get("k_rec") or {}).get("t_max_k")
+        causa = ("t_max_bajo_278" if tmax is not None and tmax < T_MAX_FILTROS_K else
+                 "cruza_tope_50000" if _mag(f, "K") <= TOPE_TABLERO_MW < _mag(f, "K") * PLACEBO else None)
+        disc.append((f["vol"], f["dt"], f["lab"], causa))
+        if causa is None:
+            sin_expl.append((f["vol"], f["dt"], f["lab"]))
+    out = {"m_regla": m.get("regla"), "mejora_d28": _mejora_d28(m), "p1_placebo": pl["estado"],
+           "discordancias": disc[:50], "discordancias_sin_explicar": sin_expl[:50]}
+    out["estado"] = ("ROJO: el placebo da MEJORA" if out["mejora_d28"] else
+                     f"ROJO: {len(sin_expl)} discordancias de publicación sin causa de L7" if sin_expl else "OK")
     return out
 
 
@@ -620,6 +692,34 @@ def _sintetica(i=0):
             "noche": "2026-02-%02d" % (1 + i % 28), "tramo": "F26-V", "z": 10.0, "inner": 5.0, "estado": "ok",
             "_evaluable": True, "lab": "neg_limpio", "vrp_mirova": None, "k_rec": {}, "via_rec": {},
             "_t": {b: {"pub": 0, "mag": 0.0} for b in ("K", "placebo") + BRAZOS}}
+
+
+def validar_montaje(d):
+    """VPR940-06 (§6 C-montaje, VPR2-09): el resultado externo tiene que traer los tags de origen, el `git diff`
+    listado y cada diferencia explicada sólo por un hunk de ese diff (con el hunk escrito) o por otro_granulo. Un
+    `{"estado": "OK"}` suelto no basta."""
+    if not isinstance(d, dict):
+        return {"estado": "ROJO: sin resultado de C-montaje (L3)"}
+    malas = []
+    if not str(d.get("estado", "")).startswith("OK"):
+        malas.append("estado no OK")
+    if not (isinstance(d.get("tags"), list) and d["tags"] and all(isinstance(t, str) and t for t in d["tags"])):
+        malas.append("sin tags de origen")
+    if not (isinstance(d.get("diff_listado"), str) and d["diff_listado"].strip()):
+        malas.append("sin git diff listado")
+    difs = d.get("diferencias")
+    if not isinstance(difs, list):
+        malas.append("sin lista de diferencias")
+        difs = []
+    for x in difs:
+        por = (x or {}).get("explicada_por")
+        if por == "hunk" and str((x or {}).get("hunk", "")).strip():
+            continue
+        if por == "otro_granulo":
+            continue
+        malas.append(("sin explicar", (x or {}).get("pasada")))
+    return {"estado": "OK" if not malas else f"ROJO: C-montaje inválido ({len(malas)})", "faltas": malas[:50],
+            "n_diferencias": len(difs)}
 
 
 def candado(manifiesto, raiz=RAIZ):
@@ -810,6 +910,42 @@ def controles_cenit(R, filas, brazo):
     return {"estado": "OK" if ok else "ROJO", "veredicto": v, "d": d0, "d_ganancia_pareja": d1, "d_ganancia_cenit": d2}
 
 
+def barajar_en_estratos(filas, rng):
+    """§7 (GUIA §3b fila 7): copia de las filas evaluables, en su orden, con la etiqueta (lab, lab_union y VRP de
+    MIROVA) permutada dentro de cada estrato volcán × tramo de 10° de cenit."""
+    ev = _ev(filas)
+    por = collections.defaultdict(list)
+    for i, f in enumerate(ev):
+        por[(f["vol"], None if f.get("z") is None else int(float(f["z"]) // 10))].append(i)
+    out = [dict(f) for f in ev]
+    for idx in por.values():
+        perm = rng.permutation(len(idx))
+        for dst, src in zip(idx, perm):
+            g = ev[idx[src]]
+            out[dst]["lab"], out[dst]["vrp_mirova"] = g["lab"], g.get("vrp_mirova")
+            out[dst].pop("lab_union", None)
+            if "lab_union" in g:
+                out[dst]["lab_union"] = g["lab_union"]
+    return out
+
+
+def sorteo_etiquetas(R, filas, n=N_BARAJADOS, semilla=SEMILLA):
+    """§7, último párrafo (VPR940-11; informa, se calcula antes de leer): sobre K contra K (K-gemelo contra K de disco
+    si el K-gemelo cubre todas las pasadas evaluables; si no, K contra sí mismo), qué fracción de barajados de las
+    etiquetas por estrato da GANA o EMPATE en P2 por azar. No usa la vía."""
+    ev = _ev(filas)
+    brazos = ("KG", "K") if ev and all("KG" in f["_t"] for f in ev) else ("K", "K")
+    rng = np.random.default_rng(semilla)
+    cuenta = collections.Counter()
+    for _ in range(n):
+        cuenta[R.F4.p2(barajar_en_estratos(filas, rng), brazos[0], brazos[1])["estado"]] += 1
+    tot = float(n) if n else 1.0
+    ge = (cuenta["GANA"] + cuenta["EMPATE"]) / tot
+    ss = cuenta["SIN SUSTRATO"] / tot
+    return {"n": n, "brazos": brazos, "gana_o_empate": ge, "sin_sustrato": ss, "otros": 1.0 - ge - ss,
+            "por_estado": dict(cuenta)}
+
+
 def lectura_b(filas, brazo):
     """§5.4 (informa): por volcán, recall de protegidas y bajo 1 MW, tasa en negativos limpios con Wilson, razón."""
     wilson = sys.modules["evaluar_v375e_retro"].wilson
@@ -920,7 +1056,9 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
     if osf_res is not None:
         ctl["c_pareo_osf"] = {"estado": osf_res["c_pareo"]}
         if filas_r25 is not None:
-            ctl["c_via_r25"] = c_via([f for f in filas_r25 if f["b"] == sensor], "R25")
+            r25s = [f for f in filas_r25 if f["b"] == sensor]
+            ctl["c_via_r25"] = c_via(r25s, "R25")
+            ctl["c_cobertura_r25"] = c_cobertura(r25s, clave="lab_osf", clases=("protegida_osf",))   # VPR940-09
     extra = {"protegidas_sin_dato": [x for x in protegidas_sin_dato_que_k_publica(filas)]}
     extra["solo_ocr_que_k_publica"] = solo_ocr_perdidas(filas, brazo, n3=sensor != "MODIS")
     cur = curva_cenit(R, filas, brazo)
@@ -940,6 +1078,7 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
         extra["cercano_y_radiante_difieren"] = rad["_fila_regla"] != regla["_fila_regla"]
     if sensor == "VIIRS750":
         extra["v750a_no_sellado"] = not v750a_sellado
+    otros["sorteo_etiquetas"] = sorteo_etiquetas(R, filas)
     if sensor == "MODIS":
         m3 = [f for f in filas_todas if f["b"] == "MODIS" and f["tramo"] == "F26-M3"]
         otros["control_f26_m3"] = ({k: v for k, v in regla_modis(R, m3, brazo).items()} if _ev(m3) else "sin pasadas")
@@ -1017,9 +1156,10 @@ def main(argv=None, predicado=None, reglas=None):
     tabla_publica(R, filas, predicado)
     volc = {v["name"]: v for v in yaml.safe_load((RAIZ / "volcanoes.yaml").read_text(encoding="utf-8"))["volcanoes"]}
     osf_res = p1_osf(filas, leer_osf(a.osf, volc, es_noche)) if a.osf else None
-    comunes = {"candado": cand, "_repetidas": rep_v + rep_k,
-               "c_k": c_k(filas, leer(a.excepciones_ck) or []), "nulo_runner": nulo_runner(R, filas),
-               "c_montaje": leer(a.montaje) or {"estado": "ROJO: sin resultado de C-montaje (L3)"}}
+    excepciones = leer(a.excepciones_ck) or []
+    comunes = {"candado": cand, "_repetidas": rep_v + rep_k, "c_k_puro": c_k_puro(filas),
+               "c_k": c_k(filas, excepciones), "nulo_runner": nulo_runner(R, filas, excepciones),
+               "c_montaje": validar_montaje(leer(a.montaje))}
     out = {"preregistro": "experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md @ s173-prereg-retro-sellado",
            "ensayo": bool(a.ensayo), "sin_dato_trozos": sin_dato_trozos,
            "pasadas_por_tramo": dict(collections.Counter((f["tramo"], f["b"], f["estado"].split(":")[0]) for f in filas).items()),
@@ -1030,7 +1170,8 @@ def main(argv=None, predicado=None, reglas=None):
         r = leer_sensor(R, filas, s, comunes, predicado, a.v750a_sellado == "si", a.caja_v750, a.posicion_v750,
                         osf_res, [f for f in filas if f["tramo"] == "R25"])
         out["sensores"][s] = r
-        print(f"{s}: fila {r['fila']} | {r['veredicto']} | motivos {r['motivos']}")
+        pref = "ENSAYO (NO DECIDE) " if a.ensayo else ""          # VPR940-15
+        print(f"{pref}{s}: fila {r['fila']} | {r['veredicto']} | motivos {r['motivos']}")
         codigo = max(codigo, 3 if r["fila"] == 1 else 0)
     out["osf"] = osf_res
     out["alertas_de_la_tabla_sin_pasada_nuestra"] = sin_pasada
