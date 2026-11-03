@@ -12,7 +12,7 @@ La copia vive al lado del original con un nombre que empieza por `_mut_` (el lec
 propia carpeta) y se borra al terminar. No se edita el lector mientras corre la batería (A112): cada mutación es otra
 copia.
 
-Uso: python mutar_leer_retro.py [--solo NOMBRE] > mutar_leer_retro_salida.txt
+Uso: python mutar_leer_retro.py [--solo PREFIJO[,PREFIJO...]] > mutar_leer_retro_salida.txt
 """
 from __future__ import annotations
 
@@ -63,23 +63,57 @@ MUTACIONES = [
     ("M12 la caja de VIIRS 750 no se comprueba (L2)",
      "                                      {\"estado\": \"OK\" if not malas else f\"ROJO: {len(malas)} records con otra caja\",",
      "                                      {\"estado\": \"OK\","),
+    # S173, arreglos del verificador limpio de #940: una mutación que deshace cada arreglo
+    ("N02a c_k_puro nunca cae (VPR940-02)",
+     "    return {\"estado\": \"OK\" if not malos else f\"ROJO: {len(malos)} records de K de disco",
+     "    return {\"estado\": \"OK\" if True else f\"ROJO: {len(malos)} records de K de disco"),
+    ("N02b armar_pasadas no marca K con la marca de la vía (VPR940-02)",
+     "        elif rk.get(\"via_codigo_mirova\") is True:", "        elif False:"),
+    ("N03a C-K no exige los tres días de F26 (VPR940-03)",
+     "        if len(dias_ok) < DIAS_F26_D3:", "        if False:"),
+    ("N03b C-K ignora la cobertura del K-gemelo (VPR940-03)",
+     "and not sin_empate and cob[\"estado\"] == \"OK\" else", "and not sin_empate else"),
+    ("N04 el nulo de runner no descuenta las nombradas (VPR940-04)",
+     "if \"KG\" in f[\"_t\"] and (f[\"vol\"], f[\"dt\"]) not in nombradas]", "if \"KG\" in f[\"_t\"]]"),
+    ("N05 el placebo no mira P1 ni P2 (VPR940-05)",
+     "sin causa de L7\" if sin_expl else \"OK\")", "sin causa de L7\" if False else \"OK\")"),
+    ("N06 C-montaje acepta diferencias sin explicar (VPR940-06)",
+     "        malas.append((\"sin explicar\", (x or {}).get(\"pasada\")))", "        pass"),
+    ("N08 C-via del runner vuelve a dejar rojo el sensor vacío (VPR940-08)",
+     "            lineas.append(f\"SENSOR_VACIO {s}\")\n            continue",
+     "            codigo = max(codigo, 4)\n            continue", "controles_via.py"),
+    ("N09 C-cobertura de R25 no se calcula (VPR940-09)",
+     "            ctl[\"c_cobertura_r25\"] = c_cobertura(r25s, clave=\"lab_osf\", clases=(\"protegida_osf\",))",
+     "            ctl[\"c_cobertura_r25\"] = {\"estado\": \"OK\"}"),
+    ("N11 el sorteo baraja entre estratos (VPR940-11)",
+     "        por[(f[\"vol\"], None if f.get(\"z\") is None else int(float(f[\"z\"]) // 10))].append(i)",
+     "        por[0].append(i)"),
+    ("N15 ENSAYO no se ve en la línea impresa (VPR940-15)",
+     "        pref = \"ENSAYO (NO DECIDE) \" if a.ensayo else \"\"", "        pref = \"\""),
     ("CONTROL de caída: NameError en regla_modis (tiene que salir CAE)",
      "    F4 = R.F4\n    x = {\"p1\": F4.p1(filas, b)", "    F4 = R.F4\n    x = {\"p1\": F4_NO_EXISTE.p1(filas, b)"),
 ]
 
 
-def correr(nombre, viejo, nuevo):
-    src = ORIGINAL.read_text(encoding="utf-8")
+OBJETIVOS = {  # archivo mutado -> (batería, variable de entorno con que la batería carga la copia)
+    "leer_retro.py": (BATERIA, "LEER_RETRO_MODULO"),
+    "controles_via.py": (RAIZ / "tests" / "test_retro_paquete_workflow_s172.py", "CONTROLES_VIA_MODULO"),
+}
+
+
+def correr(nombre, viejo, nuevo, archivo="leer_retro.py"):
+    bateria, var = OBJETIVOS[archivo]
+    src = (AQUI / archivo).read_text(encoding="utf-8")
     if src.count(viejo) != 1:
         return "NO APLICA (el texto a mutar aparece %d veces)" % src.count(viejo), ""
-    mut = AQUI / f"_mut_leer_retro_{os.getpid()}.py"
+    mut = AQUI / f"_mut_{Path(archivo).stem}_{os.getpid()}.py"
     fd, nombre_xml = tempfile.mkstemp(suffix=".xml")
     os.close(fd)                    # en Windows el descriptor abierto impide borrar el archivo despues
     xml = Path(nombre_xml)
     try:
         mut.write_text(src.replace(viejo, nuevo), encoding="utf-8")
-        env = dict(os.environ, LEER_RETRO_MODULO=str(mut), PYTHONDONTWRITEBYTECODE="1")
-        subprocess.run([sys.executable, "-m", "pytest", str(BATERIA), "-q", "-p", "no:cacheprovider",
+        env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", **{var: str(mut)})
+        subprocess.run([sys.executable, "-m", "pytest", str(bateria), "-q", "-p", "no:cacheprovider",
                         f"--junitxml={xml}"], cwd=RAIZ, env=env, capture_output=True, text=True, timeout=3600)
         raiz = ET.parse(xml).getroot()
         fallas = [(c.get("name"), e.tag, e.get("message", "")[:120]) for c in raiz.iter("testcase")
@@ -102,13 +136,13 @@ def main():
         pass
     solo = sys.argv[sys.argv.index("--solo") + 1] if "--solo" in sys.argv else None
     cuenta = {}
-    for nombre, viejo, nuevo in MUTACIONES:
-        if solo and not nombre.startswith(solo):
+    for nombre, viejo, nuevo, *archivo in MUTACIONES:
+        if solo and not nombre.startswith(tuple(solo.split(","))):
             continue
-        estado, detalle = correr(nombre, viejo, nuevo)
+        estado, detalle = correr(nombre, viejo, nuevo, *archivo)
         cuenta[estado] = cuenta.get(estado, 0) + 1
         print(f"{nombre}: {estado} | {detalle}", flush=True)
-    reales = [m for m in MUTACIONES if not m[0].startswith("CONTROL") and (not solo or m[0].startswith(solo))]
+    reales = [m for m in MUTACIONES if not m[0].startswith("CONTROL") and (not solo or m[0].startswith(tuple(solo.split(","))))]
     print("resumen:", cuenta, "| mutaciones reales:", len(reales), "| control de caida: 1")
 
 
