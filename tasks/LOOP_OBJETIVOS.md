@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 18:56 UTC (S173): Nicolás confirma B4 (§6.5 de V750-B)
+- Frase: «Sí, confirmo B4». Cubre la confirmación §6.5 (B4 es la ROI por volcán que declara el `.m`, no un gate
+  nuestro) y la apertura del PR de `roi_v750` con B4. El merge a main pide frase aparte. Pasado a la sesión de V750.
+
 ### 2026-11-03 18:55 UTC (S173): V750-B leído y verificado: ROI B4 (espera §6.5 y frase de Nicolás)
 - Lectura en la rama `claude/s162-viirs750-2-918174`, `experiments/_s162_v750b/r4/lectura_20261103/` (lectura
   `70c5b2808`, informes `1c10db660`, verificador Fable `d7d15b450`; los tres en el remoto). Verificador: CONFIRMA, 7
