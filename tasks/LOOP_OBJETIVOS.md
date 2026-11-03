@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 18:51 UTC (S173): armado del instrumental de la retrospectiva del paquete
+- Frase de Nicolás: «Sí, ármala». Tag defensivo `pre-s172-retro-paquete` sobre main `82b55de0d` (comprobado en el
+  remoto). Worktree `C:/Users/nmend/vrp-wt/s173-retro-paquete`, rama `claude/s173-retro-paquete`.
+- Implementador (Opus, esfuerzo alto pedido) arma perfil aislado, prueba, workflow, lector y controles del pre-registro
+  sellado (`s173-prereg-retro-sellado`); PR borrador, sin merge ni despacho. Después, verificador limpio (Fable).
+
 ### 2026-11-03 18:39 UTC (S173): relanzamiento de V750-B aprobado; lectura autorizada
 - Run 41693265163 terminó 18:37:21 UTC, 32 de 32 verdes. El trozo 28 tenía 168 pasadas: 162 negativos limpios y 6
   positivos, 3 protegidas (Láscar 2026-04-16 06:12 y 04-27 06:06, Chillán 2026-10-04 06:06), que solas cerraban la
