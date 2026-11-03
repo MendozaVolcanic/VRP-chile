@@ -127,6 +127,27 @@ ok(imp_auth and l_auth is not None and l_medir is not None and l_auth < l_medir,
    f"arnés: auth() de pipeline.fetch antes de medir() (líneas {l_auth} y {l_medir})")
 ok(l_token is not None and l_auth is not None and l_token < l_auth, "arnés: corta si EARTHDATA_TOKEN viene vacío antes del login")
 
+# ---------------------------------------------------------------------------- 3c. K y V fijan el flag (VER937)
+# Desde #934 el perfil trae enable_modis_codigo_mirova en True: un brazo que no fija el flag es V aunque se llame K.
+# Cada llamada a procesar_brazo de medir() tiene que estar dentro de un patch.object(pm, "ENABLE_MODIS_CODIGO_MIROVA", v)
+# y entre las dos tienen que estar False (K) y True (V).
+fmedir = next(n for n in arbol.body if isinstance(n, ast.FunctionDef) and n.name == "medir")
+def _es_brazo(n):
+    return isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "procesar_brazo"
+todas = {id(n) for n in ast.walk(fmedir) if _es_brazo(n)}
+fijadas, valores = set(), []
+for w in (n for n in ast.walk(fmedir) if isinstance(n, ast.With)):
+    for it in w.items:
+        c = it.context_expr
+        if (isinstance(c, ast.Call) and isinstance(c.func, ast.Attribute) and c.func.attr == "object" and len(c.args) == 3
+                and isinstance(c.args[1], ast.Constant) and c.args[1].value == "ENABLE_MODIS_CODIGO_MIROVA"
+                and isinstance(c.args[2], ast.Constant)):
+            dentro = {id(n) for s in w.body for n in ast.walk(s) if _es_brazo(n)}
+            fijadas |= dentro
+            valores += [c.args[2].value] * len(dentro)
+ok(len(todas) == 2 and fijadas == todas and sorted(valores) == [False, True],
+   f"arnés: K y V fijan el flag en memoria (llamadas {len(todas)}, fijadas {len(fijadas)}, valores {valores})")
+
 # ---------------------------------------------------------------------------- 4. lista de pasadas
 pas = json.load(open(AQUI / "pasadas_chillan_modis.json", encoding="utf-8"))["pasadas"]
 claves = ("dt", "sensor", "z", "vrp_mirova_mw", "granule")

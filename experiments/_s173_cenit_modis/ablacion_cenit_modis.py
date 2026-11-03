@@ -9,8 +9,9 @@ la caída oblicua: el remuestreo a la grilla fija (D17) o el fondo (D25). Ver pi
 experiments/_s173_cenit_modis/README.md (qué haría falta para correrlo y cómo leerlo).
 
 Por pasada (lista en pasadas_chillan_modis.json, con gránulo, cenit y VRP de MIROVA):
-  K    process_modis.calculate_vrp + store.append_record con el perfil mirova_equivalent intacto (el brazo de
-       producción hasta S172; probe_etiquetas.procesar_brazo). Control: igual al record guardado en
+  K    process_modis.calculate_vrp + store.append_record con el perfil mirova_equivalent y
+       process_modis.ENABLE_MODIS_CODIGO_MIROVA = False EN MEMORIA (desde #934 el perfil lo trae en True; K es el
+       brazo de producción hasta el encendido del 2026-11-02; probe_etiquetas.procesar_brazo). Control: igual al record guardado en
        data/mirova_equivalent/NevadosDeChillan.json salvo las marcas de hora (si el record lo escribió otro commit, se
        informa el codigo_sha y no se oculta).
   V    la misma llamada con process_modis.ENABLE_MODIS_CODIGO_MIROVA = True EN MEMORIA (patch.object). Control: en las
@@ -120,7 +121,10 @@ def medir(p, volcan, feats, outdir):
         return e
     e["otro_granulo"] = l1b.name != p["granule"]
     # --- K y V con el pipeline (los dos por store.append_record, como producción)
-    rk = P.procesar_brazo(l1b, geo, volcan, None, feats)
+    # VER937 (verificador S173): desde #934 el perfil mirova_equivalent trae el flag en True, así que K se fuerza a
+    # False en memoria; sin esto K era V. El único lector del flag es process_modis (l. 106 y 637).
+    with patch.object(pm, "ENABLE_MODIS_CODIGO_MIROVA", False):
+        rk = P.procesar_brazo(l1b, geo, volcan, None, feats)
     with patch.object(pm, "ENABLE_MODIS_CODIGO_MIROVA", True):
         rv = P.procesar_brazo(l1b, geo, volcan, None, feats)
     g = guardado(p["dt"], p["sensor"])
