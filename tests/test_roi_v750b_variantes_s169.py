@@ -6,6 +6,10 @@ POR QUÉ. El día de la lectura de V750-B el cambio de la ROI tiene que ser uno 
 más del YAML (las grillas están fijadas contra los GeoTIFF de MIROVA, A63). Cada prueba mide el efecto, no sólo el
 texto (S126): el valor nuevo tiene que llegar a la caja que arma la vía, y en un volcán donde el cráter no está en el
 centro de la grilla la caja del brazo tiene que ser distinta de la de hoy.
+
+S173: desde #932 el YAML trae además los 34 volcanes de la sombra (todos en "def") y desde el PR de la ROI rige B4
+(confirmado por Nicolás el 2026-11-03). El script sólo toca los 11 Tier A; las pruebas comparan esos 11 y exigen que
+las líneas de los otros 34 queden idénticas con cualquier brazo.
 """
 from __future__ import annotations
 
@@ -37,21 +41,45 @@ def _texto():
     return R.YAML.read_text(encoding="utf-8")
 
 
+def _otros(volcanes):
+    """Los volcanes del YAML que no son de los 11 Tier A (los 34 de la sombra, #932)."""
+    return sorted(set(volcanes) - set(R.VOLCANES))
+
+
 def _volcanes_yaml():
     return {v["name"]: v for v in yaml.safe_load((REPO / "volcanoes.yaml").read_text(encoding="utf-8"))["volcanoes"]}
 
 
-def test_hoy_el_yaml_es_b0():
-    """La rama no cambia el YAML: hoy todos están en def, y la variante B0 es el archivo tal cual."""
-    assert R.variante(_texto(), "B0") == _texto()
-    assert {v: r["roi_v750"] for v, r in yaml.safe_load(_texto())["volcanes"].items()} == ESPERADO["B0"]
+def test_hoy_rige_b4():
+    """S173: rige B4 (lectura de V750-B, confirmada por Nicolás): la variante B4 es el archivo tal cual, los 11 tienen
+    los valores de B4, la nota del comentario dice B4 y los 34 de la sombra siguen en def."""
+    assert R.variante(_texto(), "B4") == _texto()
+    vol = yaml.safe_load(_texto())["volcanes"]
+    assert {v: vol[v]["roi_v750"] for v in R.VOLCANES} == ESPERADO["B4"]
+    assert "Puesto por la lectura de V750-B: brazo B4 (scripts/roi_v750b_a_grillas.py)." in _texto()
+    otros = _otros(vol)
+    assert len(otros) == 34 and all(vol[v]["roi_v750"] == "def" for v in otros)
+
+
+@pytest.mark.parametrize("brazo", BRAZOS)
+def test_los_34_de_la_sombra_no_cambian(brazo):
+    """S173: con cualquier brazo, la línea de cada uno de los 34 volcanes que no son Tier A queda byte a byte igual
+    (el script no los conoce: la ROI de V750-B se midió sólo en los 11)."""
+    viejo, nuevo = _texto().splitlines(), R.variante(_texto(), brazo).splitlines()
+    otros = _otros(yaml.safe_load(_texto())["volcanes"])
+    lineas = lambda t: {v: [x for x in t if x.startswith(f"  {v}:")] for v in otros}
+    a, b = lineas(viejo), lineas(nuevo)
+    assert all(len(a[v]) == 1 for v in otros)
+    assert a == b
 
 
 @pytest.mark.parametrize("brazo", BRAZOS)
 def test_variante_cambia_solo_roi_v750(brazo):
     viejo = yaml.safe_load(_texto())["volcanes"]
     nuevo = yaml.safe_load(R.variante(_texto(), brazo))["volcanes"]
-    assert set(nuevo) == set(viejo) == set(R.VOLCANES)
+    assert set(nuevo) == set(viejo) and set(R.VOLCANES) <= set(viejo)
+    for v in _otros(viejo):
+        assert nuevo[v] == viejo[v], (brazo, v)
     for v in R.VOLCANES:
         assert nuevo[v]["roi_v750"] == ESPERADO[brazo][v], (brazo, v)
         assert nuevo[v]["roi_v750"] in MV.TIPOS_ROI, (brazo, v)
@@ -61,15 +89,17 @@ def test_variante_cambia_solo_roi_v750(brazo):
 
 @pytest.mark.parametrize("brazo", BRAZOS)
 def test_variante_no_toca_otras_lineas(brazo):
-    """Fuera de las 11 líneas de volcán, sólo pueden cambiar los dos comentarios que dicen qué ROI rige."""
+    """Fuera de las 11 líneas de volcán Tier A, sólo pueden cambiar los dos comentarios que dicen qué ROI rige. S173:
+    como hoy rige B4, el resultado se mira en el texto nuevo (comentario y nota del brazo puesto), no en el diff."""
     viejo, nuevo = _texto().splitlines(), R.variante(_texto(), brazo).splitlines()
     assert len(viejo) == len(nuevo)
     distintas = [(a, b) for a, b in zip(viejo, nuevo) if a != b]
     for a, b in distintas:
-        assert a.startswith("  ") and "roi_v750:" in a or a.startswith("# roi_v750:") or a == "# caja_roi().", (a, b)
-    if brazo != "B0":
-        assert any('Hasta la lectura de V750-B, "def" en todos' in b for _a, b in distintas)
-        assert any(f"brazo {brazo}" in b for _a, b in distintas)
+        assert any(a.startswith(f"  {v}:") for v in R.VOLCANES) or a.startswith("# roi_v750:") \
+            or a.startswith("# caja_roi()."), (a, b)
+    texto = "\n".join(nuevo)
+    assert texto.count('Hasta la lectura de V750-B, "def" en todos') == 1
+    assert texto.count(f"brazo {brazo} (scripts/roi_v750b_a_grillas.py).") == 1
 
 
 @pytest.mark.parametrize("brazo", BRAZOS)
@@ -123,7 +153,9 @@ def _copia_del_yaml(tmp_path, monkeypatch):
 
 
 def _roi_del_archivo(ruta):
-    return {v: r["roi_v750"] for v, r in yaml.safe_load(ruta.read_text(encoding="utf-8"))["volcanes"].items()}
+    """roi_v750 de los 11 Tier A (los 34 de la sombra los vigila test_los_34_de_la_sombra_no_cambian)."""
+    vol = yaml.safe_load(ruta.read_text(encoding="utf-8"))["volcanes"]
+    return {v: vol[v]["roi_v750"] for v in R.VOLCANES}
 
 
 @pytest.mark.parametrize("brazo", BRAZOS)
@@ -138,7 +170,8 @@ def test_main_escribe_el_brazo_pedido(brazo, tmp_path, monkeypatch):
 
 def test_main_sin_escribir_no_toca_el_archivo_y_muestra_el_cambio(tmp_path, monkeypatch, capsys):
     ruta = _copia_del_yaml(tmp_path, monkeypatch)
-    assert R.main(["--brazo", "B4"]) == 0
+    # S173: rige B4, así que el diff se mira pidiendo B0 (Cordón Caulle y Tupungatito vuelven de sens a def)
+    assert R.main(["--brazo", "B0"]) == 0
     assert ruta.read_text(encoding="utf-8") == _texto()
     salida = capsys.readouterr().out
     assert salida.count("roi_v750: sens}") == 2 and "+  Tupungatito:" in salida

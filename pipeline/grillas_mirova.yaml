@@ -21,10 +21,10 @@
 # En 8 volcanes (X0, Y0) es el lat/lon del yaml; en Lascar, PlanchonPeteroa y Tupungatito es otro punto, de
 # coordenadas redondas (a 233, 1.885 y 2.787 m del yaml; INFORME GEO, punto 2).
 #
-# roi_v750: la región sensible del código de MIROVA para el volcán. Hoy "def" en todos (la matriz de ejemplo del .m:
+# roi_v750: la región sensible del código de MIROVA para el volcán. Hasta la lectura de V750-B, "def" en todos (la matriz de ejemplo del .m:
 # 7 x 7 sensible al centro dentro de 21 x 21); la decide V750-B (experiments/_s162_v750b/PREREGISTRO_V750B.md, lectura
 # el 2026-11-03) y se cambia aquí con su lectura, nunca antes. Valores posibles en pipeline/mirova_v750_codigo.py,
-# caja_roi().
+# caja_roi(). Puesto por la lectura de V750-B: brazo B4 (scripts/roi_v750b_a_grillas.py).
 
 volcanes:
   Chaiten:             {epsg: 32718, x0: 692393.7, y0: 5255041.2, centro_lat: -42.83359, centro_lon: -72.64674, roi_v750: def}
@@ -35,8 +35,8 @@ volcanes:
   Lastarria:           {epsg: 32719, x0: 549681.0, y0: 7216357.8, centro_lat: -25.16858, centro_lon: -68.50762, roi_v750: def}
   Llaima:              {epsg: 32719, x0: 262650.2, y0: 5713865.6, centro_lat: -38.69255, centro_lon: -71.72974, roi_v750: def}
   PlanchonPeteroa:     {epsg: 32719, x0: 357300.7, y0: 6101099.3, centro_lat: -35.22356, centro_lon: -70.56870, roi_v750: def}
-  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: def}
-  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: def}
+  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: sens}
+  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: sens}
   Villarrica:          {epsg: 32719, x0: 247771.4, y0: 5632515.7, centro_lat: -39.42055, centro_lon: -71.93075, roi_v750: def}
 # S172, sombra de los 34 (experiments/_s172_sombra34/generar_grillas_34.py; decisión de Nicolás del 2026-11-02).
 # Estos 34 NO tienen TIF de MIROVA: (X0, Y0) es el UTM del lat/lon de volcanoes.yaml (la regla de 8 de los 11),
