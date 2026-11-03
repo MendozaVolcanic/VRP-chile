@@ -569,6 +569,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 21:26 UTC (S173): verificador limpio de #940: MERGEABLE CON CAMBIOS
+- Fable, esfuerzo alto declarado; informe en `experiments/_s173_aud/ver940/INFORME.md` (60 filas de cobertura, 18
+  hallazgos). Copias de reglas selladas iguales byte a byte a sus tags; conteos de trozos 3/47/30/176 reproducidos;
+  mutaciones 12 de 12 reproducidas; flags leídos de `pipeline.profile`. `_s172_retro_k.yaml` sí lo manda el
+  pre-registro.
+- Gravedad 3: VPR940-01 («el comparador separa» en V750 va en M y no como control placebo; definición propia de un
+  texto no sellado), VPR940-02 (el lector no comprueba que K de disco no traiga la vía; hoy 0 de 50.467, pero MODIS
+  publica la vía desde el 2-nov). Gravedad 2: 03 a 11 y 15.
+- Decisiones de Nicolás: L1 (VPR940-07), qué es «separar» en V750 y si es control (VPR940-01), y «defecto del lector»
+  en P1-OSF fila 1 o 4 (VPR940-10). Lo demás lo arregla el implementador en la rama.
+
 ### 2026-11-03 20:35 UTC (S173): PR #940 (instrumental de la retrospectiva) en borrador; verificador limpio corriendo
 - #940, rama `claude/s173-retro-paquete`, punta `6e93764bf`: perfiles `_s172_retro_paquete` y `_s172_retro_k` (el
   segundo no estaba en el encargo; el autor dice que lo pide el pre-registro), workflow `reproc-retro-paquete.yml`,
