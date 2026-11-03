@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 10:10 UTC (S173): cese de Suomi NPP confirmado en CMR
+- `VNP02MOD_NRT`: último gránulo 2026-11-02 15:12 UTC; 0 gránulos el 2026-11-03 de 00 a 10 UTC. Control NOAA-20
+  (`VJ102MOD_NRT`): 81 gránulos en la misma ventana, último 07:54. Las pasadas nocturnas del 3-nov no existen, así que
+  dejar de buscar Suomi NPP desde el cese no pierde nada. Cierra el pendiente de la entrada de las 15:59 UTC del 2-nov.
+- Guardia MODIS (`guardia_modis_latest.json`, 03:42 UTC): VERDE, pero todavía 0 pasadas juzgadas después del encendido
+  (muy_bajo y sobrepublicacion con n 0); las 2 protegidas sin publicar son de K antes del encendido (`prod_via` false).
+
 ### 2026-11-03 09:57 UTC (S173): V750-B despachado con frase de Nicolás
 - Frase «Sí, despachar». La sesión de VIIRS 750 despachó el run 41615021658 (rama `s162-v750b-disparo`, headSha
   `94f67fd6c` = tag `s169-v750b-objetivos-20261103`, comprobado contra el remoto); 32 trozos, sólo EARTHDATA_TOKEN.
