@@ -36,6 +36,9 @@ MUT = [
      "        texto = texto if 'Puesto por' in texto else NOTA.sub(", "ATRAPADA"),
     ("M7 B4 sin Tupungatito", 'SENSIBLES_B4 = ("PuyehueCordonCaulle", "Tupungatito")',
      'SENSIBLES_B4 = ("PuyehueCordonCaulle",)', "ATRAPADA"),
+    # S173: desde #932 el YAML trae los 34 de la sombra; el script no los puede tocar (test_los_34_de_la_sombra_no_cambian)
+    ("M8 el script también toca un volcán de la sombra", 'VOLCANES = ("Chaiten",', 'VOLCANES = ("Antuco", "Chaiten",',
+     "ATRAPADA"),
     ("control: import roto", "import difflib\n", "import difflib\nimport modulo_que_no_existe\n", "CAÍDA"),
 ]
 
