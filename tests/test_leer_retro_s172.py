@@ -498,3 +498,11 @@ def test_las_copias_de_las_reglas_son_los_blobs_de_sus_tags(copia, tag, original
         pytest.skip(f"el tag {tag} no está en este clon (checkout superficial)")
     b = (ROOT / copia).read_bytes().replace(b"\r\n", b"\n")
     assert hashlib.sha1(b"blob %d\0" % len(b) + b).hexdigest() == r.stdout.strip()
+
+
+def test_v750_sin_sello_la_regla_misma_pone_el_techo(R):
+    """M9 sobrevivió a la primera ronda de mutaciones: el techo de R-12 estaba puesto dos veces (en la regla y en las
+    condiciones de la fila 4) y la batería sólo miraba el resultado final. Se fija cada una por separado."""
+    fs = _con_roi(v750(), "def")
+    assert L.regla_v750(R, fs, "V", sellado=False)["_fila_regla"] == 4
+    assert L.regla_v750(R, fs, "V", sellado=True)["_fila_regla"] != 4 or L.regla_v750(R, fs, "V", True)["p2"] == "BLOQUEA"
