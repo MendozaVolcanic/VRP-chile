@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-03 10:23 UTC (S173): aviso §5 de la regla de MODIS cerrado: no hay consumidores
+- Nicolás: «nadie consume el producto, solo usan el scraper hasta que podamos demostrar que tenemos los mismos datos y
+  podamos extender a los otros volcanes». El aviso a consumidores del §5 queda cumplido con la ficha de VRP Chile en
+  `MAPA_WORKSPACE.md` (cambio de detector en MODIS, cese de Suomi NPP, sin operadores). Integracion_Plataformas es una
+  carpeta de diseño: no se le escribe. Memoria `project_sin_consumidores_operacionales`.
+
 ### 2026-11-03 10:19 UTC (S173): cese de Suomi NPP confirmado en CMR
 - `VNP02MOD_NRT`: último gránulo 2026-11-02 15:12 UTC; 0 gránulos el 2026-11-03 de 00 a 10 UTC. Control NOAA-20
   (`VJ102MOD_NRT`): 81 gránulos en la misma ventana, último 07:54. Las pasadas nocturnas del 3-nov no existen, así que
