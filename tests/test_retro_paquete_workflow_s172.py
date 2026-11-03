@@ -27,7 +27,12 @@ WF = ROOT / ".github" / "workflows" / "reproc-retro-paquete.yml"
 EXP = ROOT / "experiments" / "_s172_retro_paquete"
 sys.path.insert(0, str(EXP))
 
-import controles_via as CV  # noqa: E402
+# mutar_leer_retro.py corre estas pruebas contra una copia mutada (CONTROLES_VIA_MODULO)
+import importlib.util as _ilu  # noqa: E402
+_spec = _ilu.spec_from_file_location("controles_via_bajo_prueba",
+                                     os.environ.get("CONTROLES_VIA_MODULO") or str(EXP / "controles_via.py"))
+CV = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(CV)
 import plan_trozos as PT  # noqa: E402
 
 
@@ -190,11 +195,16 @@ def test_cvia_rojo_si_la_via_no_corrio(tmp_path):
     assert CV.revisar(c, minimo=0.90)[0] == 3
 
 
-def test_cvia_rojo_con_trozo_vacio_o_sensor_vacio(tmp_path):
+def test_cvia_rojo_con_trozo_vacio_y_aviso_con_sensor_vacio(tmp_path):
+    """VPR940-08: en un trozo de 1 a 3 días un sensor puede no traer records con datos válidos (la vía descarta sin
+    record, regla de cobertura). Ya no deja rojo el trozo: avisa y lo marca en la salida, y el trozo se sube; lo
+    decide C-cobertura en la lectura. Un trozo sin ningún record sigue rojo."""
     assert CV.revisar(CV.contar(_carpeta(tmp_path, [])))[0] == 4
     c = CV.contar(_carpeta(tmp_path, [_r("MODIS_TERRA", True)]))
-    assert CV.revisar(c)[0] == 4
-    assert CV.revisar(c, permitir_vacio=True)[0] == 0
+    codigo, lineas = CV.revisar(c)
+    assert codigo == 0
+    assert any(x.startswith("::warning::") and "V375" in x for x in lineas)
+    assert sum(x.startswith("SENSOR_VACIO ") for x in lineas) == 2
 
 
 def test_cvia_perfil_k_no_admite_la_marca(tmp_path):
