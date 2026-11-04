@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-04 01:20 UTC: re-verificador limpio del #940 (S173)
+
+Fable 5.1, esfuerzo alto, sobre la punta `dbaa4085c` contra el tag `s173-prereg-retro-sellado`. Veredicto MERGEABLE
+CON CAMBIOS, ninguno de gravedad 3 o más. Arreglos: 02, 03, 04, 05, 06, 08, 09 y 15 CONFIRMADOS; 11 EN PARTE
+(VPR940b-01, gravedad 2: el sorteo de etiquetas corre P2 con K contra K y da SIN SUSTRATO siempre, informe ciego
+por A116; cómo leer el §7 lo decide Nicolás). 11 hallazgos de gravedad 1. Suite 3.161 pasan, 0 fallan; batería
+del PR 23 de 23 atrapadas, control de caída CAE; mutaciones propias 6 de 7. Informe y CSV en
+`experiments/_s173_aud/ver940b/`. Pendiente: frase de merge de Nicolás y las tres lecturas 01, 07 y 10.
+
 ### 2026-11-03 23:18 UTC: arreglos del #940 y primera sombra con datos (S173)
 
 - El implementador dejó el #940 en `dbaa4085c`: arregló VPR940-02, 03, 04, 05, 06, 08, 09, 11 y 15; suite 3.161 pasan, 0 fallan; 23 de 23 mutaciones atrapadas por aserción. VPR940-01, 07 y 10 esperan a Nicolás. Lanzado el re-verificador limpio (Fable, high), salida en `C:/Users/nmend/vrp-wt/ver940b/experiments/_s173_aud/ver940b/`.
