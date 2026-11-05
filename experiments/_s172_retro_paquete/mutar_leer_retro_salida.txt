@@ -47,3 +47,51 @@ CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_mo
 resumen: {'ATRAPADA': 23, 'CAE': 1} | mutaciones reales: 23 | control de caida: 1
 salida 0
 # Total ronda 3: 23 de 23 mutaciones reales atrapadas por asercion; el control de caida sale CAE.
+
+# Ronda 4 (S173, seguimiento de #940; lector y generadores en 108104480), todas las mutaciones
+M1 fila 5 antes que la 4 (VPR172-03): ATRAPADA | test_sin_poder_no_tapa_una_condicion_de_la_fila_4 | caídas en la misma corrida: 0
+M2 MODIS: el veto de P1 no cuenta: ATRAPADA | test_modis_via_mejor_que_k_no_se_contradice, test_modis_pierde_protegida_que_k_publica, test_modis_publica_de_mas_es_peor_que_k, test_modis_sin_sustrato_es_sin_poder, test_sin_poder_no_tapa_una_condicion_de_la_fila_4, test_control_negativo_via_identica_a_k_no_gana, test_modis_p1b_lleva_a_nicolas, test_protegida_sin_dato_que_k_publica_es_fila_2, test_veredicto_cambia_sin_las_pasadas_b_va_a_nicolas, test_nulo_del_lector_cae_si_el_predicado_no_publica_lo_inyectado | caídas en la misma corrida: 0
+M3 C-via en F26 acepta records sin la marca: ATRAPADA | test_c_via_f26_cien_por_ciento_y_r25_diez_por_clase | caídas en la misma corrida: 0
+M4 VIIRS 375: SIN SUSTRATO de P2 pasa como CUMPLE (VPR2-02): ATRAPADA | test_v375_sin_sustrato_cumple_en_v375e_pero_aqui_es_sin_poder | caídas en la misma corrida: 0
+M5 C-K sin tope de excepciones (R-15): ATRAPADA | test_c_k_tope_de_tres_excepciones_con_empate | caídas en la misma corrida: 0
+M6 N-3 deshecho: ATRAPADA | test_solo_ocr_no_decide_y_n3_no_lleva_a_nicolas | caídas en la misma corrida: 0
+M7 decide la unión con el OCR y no la tabla sola (§4.1): ATRAPADA | test_etiquetar_decide_la_tabla_y_la_union_informa | caídas en la misma corrida: 0
+M8 Tupungatito antes del 2026-02-23: ATRAPADA | test_armar_pasadas_tupungatito_tramos_y_estados | caídas en la misma corrida: 0
+M9 V750-A sin sello no limita el techo (R-12): ATRAPADA | test_v750_sin_sello_la_regla_misma_pone_el_techo | caídas en la misma corrida: 0
+M10 el nulo del lector no exige el contador: ATRAPADA | test_nulo_del_lector_cae_si_el_predicado_no_publica_lo_inyectado | caídas en la misma corrida: 0
+M11 cercano y radiante distintos no van a Nicolás (R-13): ATRAPADA | test_v375_cercano_y_radiante_distintos_va_a_nicolas | caídas en la misma corrida: 0
+M12 la caja de VIIRS 750 no se comprueba (L2): ATRAPADA | test_v750_records_con_otra_caja_es_indecidible | caídas en la misma corrida: 0
+N02a c_k_puro nunca cae (VPR940-02): ATRAPADA | test_k_de_disco_con_la_marca_de_la_via_es_rojo_en_todas_las_ventanas, test_k_puro_en_rojo_lleva_el_sensor_a_la_fila_1 | caídas en la misma corrida: 0
+N02b armar_pasadas no marca K con la marca de la vía (VPR940-02): ATRAPADA | test_k_de_disco_con_la_marca_de_la_via_es_rojo_en_todas_las_ventanas | caídas en la misma corrida: 0
+N03a C-K no exige los tres días de F26 (VPR940-03): ATRAPADA | test_c_k_exige_la_cobertura_del_k_gemelo_de_d3 | caídas en la misma corrida: 0
+N03b C-K ignora la cobertura del K-gemelo (VPR940-03): ATRAPADA | test_c_k_exige_la_cobertura_del_k_gemelo_de_d3, test_cobertura_kgemelo_ve_volcanes_sin_f26_y_lista_sobras | caídas en la misma corrida: 0
+N04 el nulo de runner no descuenta las nombradas (VPR940-04): ATRAPADA | test_nulo_runner_descuenta_las_excepciones_nombradas | caídas en la misma corrida: 0
+N05 el placebo no mira P1 ni P2 (VPR940-05): ATRAPADA | test_placebo_mira_p1_y_p2_y_acepta_solo_las_dos_causas_de_l7 | caídas en la misma corrida: 0
+N06 C-montaje acepta diferencias sin explicar (VPR940-06): ATRAPADA | test_c_montaje_se_valida_y_no_basta_un_estado_ok | caídas en la misma corrida: 0
+N08 C-via del runner vuelve a dejar rojo el sensor vacío (VPR940-08): ATRAPADA | test_cvia_rojo_con_trozo_vacio_y_aviso_con_sensor_vacio | caídas en la misma corrida: 0
+N09 C-cobertura de R25 no se calcula (VPR940-09): ATRAPADA | test_c_cobertura_en_r25_por_clase_del_osf | caídas en la misma corrida: 0
+N11 el sorteo baraja entre estratos (VPR940-11): ATRAPADA | test_el_sorteo_de_etiquetas_baraja_dentro_de_cada_estrato | caídas en la misma corrida: 0
+N15 ENSAYO no se ve en la línea impresa (VPR940-15): ATRAPADA | test_main_de_punta_a_punta_con_predicado_sintetico, test_main_avisa_r25_sin_osf_y_el_poder_del_sorteo | caídas en la misma corrida: 0
+S01a M de 750 vuelve a exigir que el comparador separe (VPR940-01): ATRAPADA | test_v750_separa_es_control_del_placebo_no_parte_de_m | caídas en la misma corrida: 0
+S01b 750 sellado sin definición de separa no queda rojo (VPR940-01): ATRAPADA | test_v750_separa_es_control_del_placebo_no_parte_de_m | caídas en la misma corrida: 0
+S01c un comparador que no separa no deja rojo el placebo (VPR940-01): ATRAPADA | test_v750_separa_es_control_del_placebo_no_parte_de_m | caídas en la misma corrida: 0
+S07a ENCIENDE DE MAS deja de ir a la fila 3 (VPR940-07): ATRAPADA | test_v375_p2_lejana_pierde_y_enciende_de_mas_son_fila_3 | caídas en la misma corrida: 0
+S07b P2-L PIERDE deja de ir a la fila 3 (VPR940-07): ATRAPADA | test_v375_p2_lejana_pierde_y_enciende_de_mas_son_fila_3 | caídas en la misma corrida: 0
+S10 el defecto del lector OSF deja de ser control (VPR940-10): ATRAPADA | test_defecto_del_lector_osf_es_fila_1 | caídas en la misma corrida: 0
+Sb03 una excepción de C-K mal formada no deja rojo (VPR940b-03): ATRAPADA | test_excepcion_de_c_k_mal_formada_es_rojo_y_no_cae | caídas en la misma corrida: 0
+Sb06a C-montaje acepta tags sin uno por origen (VPR940b-06): ATRAPADA | test_c_montaje_exige_los_tres_origenes_y_pasadas_de_dm | caídas en la misma corrida: 0
+Sb06b C-montaje acepta pasadas fuera de DM (VPR940b-06): ATRAPADA | test_c_montaje_exige_los_tres_origenes_y_pasadas_de_dm | caídas en la misma corrida: 0
+Sb07a un volcán Tier A sin F26 en K no cuenta (VPR940b-07): ATRAPADA | test_cobertura_kgemelo_ve_volcanes_sin_f26_y_lista_sobras | caídas en la misma corrida: 0
+Sb07b las sobras del K-gemelo no se listan (VPR940b-07): ATRAPADA | test_cobertura_kgemelo_ve_volcanes_sin_f26_y_lista_sobras | caídas en la misma corrida: 0
+Sb08 sin aviso de R25 sin OSF (VPR940b-08): ATRAPADA | test_main_avisa_r25_sin_osf_y_el_poder_del_sorteo | caídas en la misma corrida: 0
+Sb01a el sorteo devuelve SIN SUSTRATO sin calcular P2 (P11b del verificador, VPR940b-01): ATRAPADA | test_sorteo_de_etiquetas_dice_que_no_tiene_poder_con_brazos_identicos | caídas en la misma corrida: 0
+Sb01b el informe del sorteo nunca dice SIN PODER (VPR940b-01): ATRAPADA | test_sorteo_de_etiquetas_dice_que_no_tiene_poder_con_brazos_identicos, test_main_avisa_r25_sin_osf_y_el_poder_del_sorteo | caídas en la misma corrida: 0
+Sc1 el candado acepta un manifiesto sin los requeridos (§11): ATRAPADA | test_candado_exige_los_archivos_del_manifiesto | caídas en la misma corrida: 0
+Gm1 el manifiesto lee el disco y no el blob del ref (§11): ATRAPADA | test_el_manifiesto_sale_del_blob_del_ref_y_no_del_disco | caídas en la misma corrida: 1 (test_el_manifiesto_rehusa_una_ruta_que_no_existe_en_el_ref)
+Gm2 el pre-registro cambiado pasa como igual (§11): ATRAPADA | test_un_preregistro_cambiado_desde_el_sello_no_es_igual | caídas en la misma corrida: 0
+Gmo1 C-montaje sale OK con los comparadores pendientes (§6): ATRAPADA | test_montaje_con_comparadores_pendientes_no_puede_salir_ok | caídas en la misma corrida: 0
+Gmo2 C-montaje no compara el VRP (§6): ATRAPADA | test_montaje_compara_pasada_por_pasada_vrp_y_clase | caídas en la misma corrida: 0
+CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_modis_via_mejor_que_k_no_se_contradice:NameError: name 'F4_NO_EXISTE' is not de, test_modis_pierde_protegida_que_k_publica:NameError: name 'F4_NO_EXISTE' is not de, test_modis_publica_de_mas_es_peor_que_k:NameError: name 'F4_NO_EXISTE' is not de
+resumen: {'ATRAPADA': 42, 'CAE': 1} | mutaciones reales: 42 | control de caida: 1
+salida 0
+# Total ronda 4: 42 de 42 mutaciones reales atrapadas por asercion; 41 sin caidas en la misma corrida y 1 (Gm1) con 1 prueba caida por excepcion ademas de la asercion; el control de caida sale CAE.
