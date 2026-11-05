@@ -1,0 +1,49 @@
+# Ronda 1 (bateria del commit b1527ad46, lector a0629347f), python experiments/_s172_retro_paquete/mutar_leer_retro.py
+M1 fila 5 antes que la 4 (VPR172-03): ATRAPADA | test_sin_poder_no_tapa_una_condicion_de_la_fila_4
+M2 MODIS: el veto de P1 no cuenta: ATRAPADA | test_modis_via_mejor_que_k_no_se_contradice, test_modis_pierde_protegida_que_k_publica, test_modis_publica_de_mas_es_peor_que_k, test_modis_sin_sustrato_es_sin_poder, test_sin_poder_no_tapa_una_condicion_de_la_fila_4, test_control_negativo_via_identica_a_k_no_gana, test_modis_p1b_lleva_a_nicolas, test_protegida_sin_dato_que_k_publica_es_fila_2, test_veredicto_cambia_sin_las_pasadas_b_va_a_nicolas, test_nulo_del_lector_cae_si_el_predicado_no_publica_lo_inyectado
+M3 C-via en F26 acepta records sin la marca: ATRAPADA | test_c_via_f26_cien_por_ciento_y_r25_diez_por_clase
+M4 VIIRS 375: SIN SUSTRATO de P2 pasa como CUMPLE (VPR2-02): ATRAPADA | test_v375_sin_sustrato_cumple_en_v375e_pero_aqui_es_sin_poder
+M5 C-K sin tope de excepciones (R-15): ATRAPADA | test_c_k_tope_de_tres_excepciones_con_empate
+M6 N-3 deshecho: ATRAPADA | test_solo_ocr_no_decide_y_n3_no_lleva_a_nicolas
+M7 decide la unión con el OCR y no la tabla sola (§4.1): ATRAPADA | test_etiquetar_decide_la_tabla_y_la_union_informa
+M8 Tupungatito antes del 2026-02-23: ATRAPADA | test_armar_pasadas_tupungatito_tramos_y_estados
+M9 V750-A sin sello no limita el techo (R-12): SOBREVIVE | 
+M10 el nulo del lector no exige el contador: ATRAPADA | test_nulo_del_lector_cae_si_el_predicado_no_publica_lo_inyectado
+M11 cercano y radiante distintos no van a Nicolás (R-13): ATRAPADA | test_v375_cercano_y_radiante_distintos_va_a_nicolas
+M12 la caja de VIIRS 750 no se comprueba (L2): ATRAPADA | test_v750_records_con_otra_caja_es_indecidible
+CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_modis_via_mejor_que_k_no_se_contradice:NameError: name 'F4_NO_EXISTE' is not de, test_modis_pierde_protegida_que_k_publica:NameError: name 'F4_NO_EXISTE' is not de, test_modis_publica_de_mas_es_peor_que_k:NameError: name 'F4_NO_EXISTE' is not de
+resumen: {'ATRAPADA': 11, 'SOBREVIVE': 1, 'CAE': 1} | mutaciones reales: 12 | control de caida: 1
+salida 0
+
+# Ronda 2, solo M9, tras agregar test_v750_sin_sello_la_regla_misma_pone_el_techo
+M9 V750-A sin sello no limita el techo (R-12): ATRAPADA | test_v750_sin_sello_la_regla_misma_pone_el_techo
+# Total: 12 de 12 mutaciones reales atrapadas por asercion; el control de caida sale CAE (no cuenta como atrapada).
+
+# Ronda 3 (tras los arreglos del verificador de #940; lector 5b5011ddd, script 277b7172e), todas las mutaciones
+M1 fila 5 antes que la 4 (VPR172-03): ATRAPADA | test_sin_poder_no_tapa_una_condicion_de_la_fila_4
+M2 MODIS: el veto de P1 no cuenta: ATRAPADA | test_modis_via_mejor_que_k_no_se_contradice, test_modis_pierde_protegida_que_k_publica, test_modis_publica_de_mas_es_peor_que_k, test_modis_sin_sustrato_es_sin_poder, test_sin_poder_no_tapa_una_condicion_de_la_fila_4, test_control_negativo_via_identica_a_k_no_gana, test_modis_p1b_lleva_a_nicolas, test_protegida_sin_dato_que_k_publica_es_fila_2, test_veredicto_cambia_sin_las_pasadas_b_va_a_nicolas, test_nulo_del_lector_cae_si_el_predicado_no_publica_lo_inyectado
+M3 C-via en F26 acepta records sin la marca: ATRAPADA | test_c_via_f26_cien_por_ciento_y_r25_diez_por_clase
+M4 VIIRS 375: SIN SUSTRATO de P2 pasa como CUMPLE (VPR2-02): ATRAPADA | test_v375_sin_sustrato_cumple_en_v375e_pero_aqui_es_sin_poder
+M5 C-K sin tope de excepciones (R-15): ATRAPADA | test_c_k_tope_de_tres_excepciones_con_empate
+M6 N-3 deshecho: ATRAPADA | test_solo_ocr_no_decide_y_n3_no_lleva_a_nicolas
+M7 decide la unión con el OCR y no la tabla sola (§4.1): ATRAPADA | test_etiquetar_decide_la_tabla_y_la_union_informa
+M8 Tupungatito antes del 2026-02-23: ATRAPADA | test_armar_pasadas_tupungatito_tramos_y_estados
+M9 V750-A sin sello no limita el techo (R-12): ATRAPADA | test_v750_sin_sello_la_regla_misma_pone_el_techo
+M10 el nulo del lector no exige el contador: ATRAPADA | test_nulo_del_lector_cae_si_el_predicado_no_publica_lo_inyectado
+M11 cercano y radiante distintos no van a Nicolás (R-13): ATRAPADA | test_v375_cercano_y_radiante_distintos_va_a_nicolas
+M12 la caja de VIIRS 750 no se comprueba (L2): ATRAPADA | test_v750_records_con_otra_caja_es_indecidible
+N02a c_k_puro nunca cae (VPR940-02): ATRAPADA | test_k_de_disco_con_la_marca_de_la_via_es_rojo_en_todas_las_ventanas, test_k_puro_en_rojo_lleva_el_sensor_a_la_fila_1
+N02b armar_pasadas no marca K con la marca de la vía (VPR940-02): ATRAPADA | test_k_de_disco_con_la_marca_de_la_via_es_rojo_en_todas_las_ventanas
+N03a C-K no exige los tres días de F26 (VPR940-03): ATRAPADA | test_c_k_exige_la_cobertura_del_k_gemelo_de_d3
+N03b C-K ignora la cobertura del K-gemelo (VPR940-03): ATRAPADA | test_c_k_exige_la_cobertura_del_k_gemelo_de_d3
+N04 el nulo de runner no descuenta las nombradas (VPR940-04): ATRAPADA | test_nulo_runner_descuenta_las_excepciones_nombradas
+N05 el placebo no mira P1 ni P2 (VPR940-05): ATRAPADA | test_placebo_mira_p1_y_p2_y_acepta_solo_las_dos_causas_de_l7
+N06 C-montaje acepta diferencias sin explicar (VPR940-06): ATRAPADA | test_c_montaje_se_valida_y_no_basta_un_estado_ok
+N08 C-via del runner vuelve a dejar rojo el sensor vacío (VPR940-08): ATRAPADA | test_cvia_rojo_con_trozo_vacio_y_aviso_con_sensor_vacio
+N09 C-cobertura de R25 no se calcula (VPR940-09): ATRAPADA | test_c_cobertura_en_r25_por_clase_del_osf
+N11 el sorteo baraja entre estratos (VPR940-11): ATRAPADA | test_el_sorteo_de_etiquetas_baraja_dentro_de_cada_estrato
+N15 ENSAYO no se ve en la línea impresa (VPR940-15): ATRAPADA | test_main_de_punta_a_punta_con_predicado_sintetico
+CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_modis_via_mejor_que_k_no_se_contradice:NameError: name 'F4_NO_EXISTE' is not de, test_modis_pierde_protegida_que_k_publica:NameError: name 'F4_NO_EXISTE' is not de, test_modis_publica_de_mas_es_peor_que_k:NameError: name 'F4_NO_EXISTE' is not de
+resumen: {'ATRAPADA': 23, 'CAE': 1} | mutaciones reales: 23 | control de caida: 1
+salida 0
+# Total ronda 3: 23 de 23 mutaciones reales atrapadas por asercion; el control de caida sale CAE.

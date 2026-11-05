@@ -1,0 +1,161 @@
+name: Reproc retrospectiva del paquete (vias codigo MIROVA, 11 Tier A, sin push)
+
+# S172/S173. Prueba retrospectiva del paquete de las tres vias «codigo MIROVA» (pre-registro SELLADO
+# experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md, tag s173-prereg-retro-sellado, §10; plan
+# docs/superpowers/plans/2026-11-02-nrt-34-volcanes.md Tarea 0.2; tag defensivo pre-s172-retro-paquete).
+#
+# POR QUE ASI (cada punto viene del pre-registro o de una leccion del proyecto):
+# - Solo perfiles `_s172_retro_*` (§10.2): el plan los rehusa en otro caso (experiments/_s172_retro_paquete/plan_trozos.py).
+# - SIN job merge y SIN push a main: cada trozo sube su JSON, su log y su cobertura como artifact de 30 dias; la union
+#   se hace en local en un solo proceso (A47). Asi la retrospectiva no puede tocar data/ ni competir por push-main.
+# - pyproj instalado y comprobado: sin el la via vuelve a K en silencio y el job sale verde (MA172-201, H10).
+# - Autentica SOLO con EARTHDATA_TOKEN y falla al instante si viene vacio: el par usuario y clave de los secretos esta
+#   vencido y su login bloquea la cuenta (A71). El bloque es el de sombra-codigo-mirova.yml y nrt.yml.
+# - Trozos de 20 dias y de 10 para Nevados de Chillan (§10.2); Tupungatito desde el 2026-02-23 (§3.2).
+# - C-via por trozo en el log (controles_via.py): 100 % en 2026, 90 % en 2025; en el perfil K, ninguna marca de la via.
+# - max-parallel 6 (§10.3; con NRT 8, sombra 4 y experimental 4 serian 22 sobre el tope de 20 si coinciden: bajar a 4).
+# - Timeout: el peor trozo esperado es ~110 min (p95 del reproceso de K, 158 min en ~36 dias = 4,4 min por dia, por
+#   20 dias y por el factor 1,25 de la via). A15 pide >= 1,3 x 110 = 143; el paso tiene 170 y el job 180, el tope del
+#   reproceso de K (run 39125546355).
+# - "on" entre comillas (A43, Norway problem). ubuntu-24.04 fijado como el NRT (pyhdf probado ahi).
+# No cambia nada de lo que publica produccion.
+"on":
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Perfil: _s172_retro_paquete (brazo VIA) o _s172_retro_k (control K-gemelo)"
+        required: true
+      volcanoes:
+        description: "Volcanes de los 11 Tier A, separados por coma"
+        required: true
+      ventanas:
+        description: "Ventanas [Volcan@]AAAA-MM-DD:AAAA-MM-DD separadas por coma (sin volcan = todos)"
+        required: true
+      max_days:
+        description: "Dias por trozo (pre-registro §10.2: 20)"
+        default: "20"
+        required: false
+      max_days_chillan:
+        description: "Dias por trozo de Nevados de Chillan (pre-registro §10.2: 10)"
+        default: "10"
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reproc-retro-paquete-${{ github.event.inputs.profile }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      jobs: ${{ steps.split.outputs.jobs }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install deps del plan
+        run: pip install --quiet pyyaml
+      - name: Guardas y trozos
+        id: split
+        env:
+          PERFIL: ${{ github.event.inputs.profile }}
+          VOLCANES: ${{ github.event.inputs.volcanoes }}
+          VENTANAS: ${{ github.event.inputs.ventanas }}
+          MAX_DIAS: ${{ github.event.inputs.max_days }}
+          MAX_DIAS_CHILLAN: ${{ github.event.inputs.max_days_chillan }}
+        run: python experiments/_s172_retro_paquete/plan_trozos.py >> "$GITHUB_OUTPUT"
+
+  reproc:
+    needs: plan
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        job: ${{ fromJson(needs.plan.outputs.jobs) }}
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          # pyproj: la via lo usa para pasar el granulo a la grilla UTM de MIROVA; sin el vuelve a K en silencio
+          pip install earthaccess numpy h5py scipy pyyaml pyproj
+      - name: Comprobar pyproj
+        run: python -c "import pyproj; print('pyproj', pyproj.__version__)"
+      - name: Reprocesar los tramos del trozo
+        id: correr
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE_IN: ${{ github.event.inputs.profile }}
+          TRAMOS: ${{ matrix.job.tramos }}
+          VOL: ${{ matrix.job.vol }}
+        timeout-minutes: 170
+        run: |
+          set -o pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea la cuenta (A71)."
+            exit 1
+          fi
+          VRP_PROFILE="$VRP_PROFILE_IN" python -c "import sys, pipeline.profile as p; n = p.PROFILE_NAME; assert n.startswith('_s172_retro_'), n; assert p.DATA_SUBDIR == n, p.DATA_SUBDIR; v = (p.ENABLE_V750_CODIGO_MIROVA, p.ENABLE_V375_CODIGO_MIROVA, p.ENABLE_MODIS_CODIGO_MIROVA); assert v == ((False,) * 3 if n == '_s172_retro_k' else (True,) * 3), v; assert not (p.ENABLE_MODIS_GEO_MXD03 or p.ENABLE_MODIS_CRATER_SIN_DATO or p.ENABLE_MODIS_DIST_DESDE_CRATER); print('perfil', n, '| vias', v, '| MxD03 apagado')"
+          mkdir -p cobertura
+          # Desde aqui los errores se manejan a mano: un tramo con busquedas caidas no corta los demas, pero el peor
+          # codigo de salida queda como el del paso (GitHub corre con bash -e).
+          set +e
+          echo "inicio=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          PEOR=0
+          N=0
+          for T in $TRAMOS; do
+            N=$((N + 1))
+            INI="${T%%:*}"; FIN="${T##*:}"
+            echo "=== tramo $N: $VOL $INI a $FIN ==="
+            python scripts/run_pipeline.py --profile "$VRP_PROFILE_IN" --volcano "$VOL" --start "$INI" --end "$FIN" \
+              --overwrite --estricto-cobertura --cobertura-json "cobertura/cobertura_${N}_${INI}_${FIN}.json" 2>&1 | tee -a pipeline.log
+            RC=$?
+            echo "tramo $INI:$FIN salida $RC" | tee -a pipeline.log
+            if [ "$RC" -gt "$PEOR" ]; then PEOR=$RC; fi
+          done
+          echo "salida=$PEOR" >> "$GITHUB_OUTPUT"
+          exit $PEOR
+      - name: C-via del trozo
+        if: always() && steps.correr.outputs.salida != ''
+        run: |
+          set -o pipefail
+          python experiments/_s172_retro_paquete/controles_via.py "data/${{ github.event.inputs.profile }}" \
+            --esperado "${{ matrix.job.esperado }}" --minimo "${{ matrix.job.minimo }}" 2>&1 | tee controles_via.txt
+      - name: Tachar el token en el log y la cobertura
+        id: tachar
+        if: always() && steps.correr.outputs.salida != ''
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          python scripts/tachar_secreto_log.py pipeline.log cobertura/*.json
+      - name: Guardar log, cobertura y C-via (tambien si fallo)
+        if: always() && steps.tachar.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-${{ matrix.job.vol }}-${{ matrix.job.idx }}-${{ matrix.job.start }}_${{ matrix.job.end }}-intento-${{ github.run_attempt }}
+          path: |
+            pipeline.log
+            cobertura/
+            controles_via.txt
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Guardar el trozo
+        # Sin always a proposito: un trozo con busquedas caidas (salida 3) o con C-via en rojo no se sube como hecho;
+        # se relanza una vez con la misma ventana (§6, C-cobertura, A64 y A108).
+        uses: actions/upload-artifact@v4
+        with:
+          name: trozo-${{ matrix.job.vol }}-${{ matrix.job.idx }}-${{ matrix.job.start }}_${{ matrix.job.end }}-intento-${{ github.run_attempt }}
+          path: data/${{ github.event.inputs.profile }}/${{ matrix.job.vol }}.json
+          if-no-files-found: error
+          retention-days: 30
