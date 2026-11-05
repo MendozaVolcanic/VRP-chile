@@ -113,3 +113,14 @@ CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_mo
 resumen: {'ATRAPADA': 12, 'CAE': 1} | mutaciones reales: 12 | control de caida: 1
 salida 0
 # Total ronda 5: 12 de 12 atrapadas por asercion, 0 caidas en la misma corrida; el control de caida sale CAE.
+
+# Ronda 6 (S173, segunda ronda del verificador de #946; lector en 3e10649c6), --solo C1,C3,X2b,R2a,R2b,CONTROL
+C1 C-cenit del OSF no llega al veredicto (VPR946-01): ATRAPADA | test_c_cenit_del_osf_en_rojo_lleva_a_la_fila_1, test_c_cenit_del_osf_se_evalua_por_sensor | caídas en la misma corrida: 0
+C3 C-cenit sin pares da OK (VPR946-01): ATRAPADA | test_c_cenit_del_osf_en_rojo_lleva_a_la_fila_1, test_c_cenit_del_osf_se_evalua_por_sensor | caídas en la misma corrida: 0
+X2b main no pasa --osf a las referencias exigidas (VPR946R2-01): ATRAPADA | test_main_con_manifiesto_exige_tambien_el_osf | caídas en la misma corrida: 0
+R2a un error interno de los controles de cenit vuelve a ser SIN SUSTRATO (VPR946R2-02): ATRAPADA | test_controles_de_cenit_con_error_interno_es_rojo | caídas en la misma corrida: 0
+R2b C-cenit vuelve a ser el reunido de los tres sensores (VPR946R2-03): ATRAPADA | test_c_cenit_del_osf_se_evalua_por_sensor | caídas en la misma corrida: 0
+CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_modis_via_mejor_que_k_no_se_contradice:NameError: name 'F4_NO_EXISTE' is not de, test_modis_pierde_protegida_que_k_publica:NameError: name 'F4_NO_EXISTE' is not de, test_modis_publica_de_mas_es_peor_que_k:NameError: name 'F4_NO_EXISTE' is not de
+resumen: {'ATRAPADA': 5, 'CAE': 1} | mutaciones reales: 5 | control de caida: 1
+salida 0
+# Total ronda 6: 5 de 5 atrapadas por asercion, 0 caidas en la misma corrida; el control de caida sale CAE.
