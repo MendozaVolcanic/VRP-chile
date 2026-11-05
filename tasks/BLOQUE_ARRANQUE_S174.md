@@ -2,7 +2,7 @@
 
 > **Estado fijado con trabajo en curso.** Al escribir esto corría el CI del PR #946 sobre la punta `61910c24d`
 > (run 42072413315). Verifica su conclusión con `gh run view 42072413315 --json conclusion` antes de creerle a la
-> tabla. No quedaron agentes vivos.
+> tabla. No quedaron agentes vivos. **Actualización 17:3x UTC: el run terminó en `success` sobre `61910c24d`.**
 >
 > **Desde S173 el `CLAUDE.md` es la versión corta (#949).** La historia íntegra de cada regla está en
 > `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\docs\CLAUDE_HISTORIA.md`. Léela antes de reabrir un
