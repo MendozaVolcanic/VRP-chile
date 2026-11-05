@@ -886,3 +886,58 @@ def test_c_montaje_rechaza_un_tag_vacio():
     m = copy.deepcopy(MONTAJE_OK)
     m["tags"]["V375-E"] = "   "
     assert L.validar_montaje(m)["estado"].startswith("ROJO")
+
+
+# ------------------------------------------------------------------------------------------- segunda ronda de #946
+# experiments/_s173_aud/ver946/INFORME_R2.md y hallazgos_r2.csv en loop/activo.
+def test_main_con_manifiesto_exige_tambien_el_osf(tmp_path, monkeypatch, R, capsys):
+    """VPR946R2-01 (X2b): con --osf, el OSF también tiene que estar en el manifiesto (tres referencias, no dos)."""
+    test_main_de_punta_a_punta_con_predicado_sintetico(tmp_path, monkeypatch, R, capsys)
+    with open(tmp_path / "osf.csv", "w", encoding="latin-1", newline="") as fh:
+        csv.writer(fh).writerow(["Volc_Name", "Volc_LAT", "Volc_LON", "timeUTC", "Resolution", "VRP", "class", "LAT",
+                                 "LON", "SatZen", "Dayflag", "Satellite", "Max_Dist", "Npix"])
+    man = {r: L.sha256_lf(L.RAIZ / r) for r in L.REQUERIDOS_MANIFIESTO}
+    (tmp_path / "man.json").write_text(json.dumps(man), encoding="utf-8")
+    sal = tmp_path / "out3.json"
+    L.main(["--via", str(tmp_path / "via"), "--k", str(tmp_path / "k"), "--cons", str(tmp_path / "cons.csv"),
+            "--ocr", str(tmp_path / "ocr.csv"), "--osf", str(tmp_path / "osf.csv"), "--v750a-sellado", "no",
+            "--manifiesto", str(tmp_path / "man.json"), "--salida", str(sal)], predicado=pred, reglas=R)
+    c = json.loads(sal.read_text(encoding="utf-8"))["sensores"]["MODIS"]["controles"]["candado"]
+    assert len(c["fuera_del_manifiesto"]) == 3, c
+    assert any(x.endswith("osf.csv") for x in c["fuera_del_manifiesto"])
+
+
+def test_controles_de_cenit_sin_sustrato_real_cuenta_como_ok(R):
+    """VPR946R2-02: SIN SUSTRATO de verdad (la curva no tiene pares) no es un control caído."""
+    r = L.controles_cenit(R, poblacion(), "V")
+    assert r["estado"] == "SIN SUSTRATO" and "error" not in r
+    assert leer(R, poblacion(), "MODIS")["controles"]["controles_cenit"]["estado"].startswith("OK")
+
+
+def test_controles_de_cenit_con_error_interno_es_rojo(R):
+    """VPR946R2-02: un error dentro de los controles de cenit no puede leerse como SIN SUSTRATO ni contar como OK."""
+    def revienta(*a, **k):
+        raise ZeroDivisionError("simulado")
+    malo = _Proxy(R, CC=_Proxy(R.CC, resumen=revienta))
+    r = L.controles_cenit(malo, poblacion(), "V")
+    assert r["estado"].startswith("ROJO") and "ZeroDivisionError" in r["error"], r
+    s = L.leer_sensor(malo, poblacion(), "MODIS", COMUNES, pred, False, "def")
+    assert s["fila"] == 1 and "controles_cenit" in s["motivos"], (s["fila"], s["motivos"])
+
+
+def test_c_cenit_del_osf_se_evalua_por_sensor(R):
+    """VPR946R2-03 (§8.1: «algún control del §6 en rojo para ese sensor»): un sensor sin pares de cenit se acusa
+    aunque otro sí tenga."""
+    r25 = [_r25("Lascar", "2025-06-02 05:00", 1, 1, z=25.0)]                     # pares sólo en VIIRS 375
+    osf_res = L.p1_osf(r25, [_osf("Lascar", "VIIRS375", "2025-06-02 05:00", 2.0, satzen=25.0)])
+    assert osf_res["c_cenit_por_sensor"]["VIIRS375"] == "OK"
+    assert osf_res["c_cenit_por_sensor"]["MODIS"].startswith("ROJO")
+    r = L.leer_sensor(R, poblacion(), "MODIS", COMUNES, pred, False, "def", osf_res=osf_res, filas_r25=r25)
+    assert r["controles"]["c_cenit_osf"]["estado"].startswith("ROJO")
+    r = L.leer_sensor(R, v375(), "VIIRS375", COMUNES, pred, False, "def", osf_res=osf_res, filas_r25=r25)
+    assert r["controles"]["c_cenit_osf"]["estado"] == "OK" and r["fila"] == 6
+    lejos = [_r25("Lascar", "2025-06-02 05:00", 1, 1, z=25.0), _r25("Lascar", "2025-06-03 05:00", 1, 1, z=40.0,
+                                                                   b="VIIRS750", sensor="VIIRS_NOAA20_750")]
+    o2 = L.p1_osf(lejos, [_osf("Lascar", "VIIRS375", "2025-06-02 05:00", 2.0, satzen=25.0),
+                          _osf("Lascar", "VIIRS750", "2025-06-03 05:00", 6.0, satzen=25.0)])
+    assert o2["c_cenit_por_sensor"]["VIIRS375"] == "OK" and o2["c_cenit_por_sensor"]["VIIRS750"].startswith("ROJO")
