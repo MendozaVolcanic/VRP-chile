@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 03:16 UTC: #940 mergeado a main (S173)
+
+Con la frase de Nicolás («Sí, merge #940»): `gh pr ready 940` y `gh pr merge 940 --squash --match-head-commit
+dbaa4085c`; CI `pytest` SUCCESS, estado CLEAN. Squash `761a24e73`, verificado como punta de `origin/main` por la API.
+Quedan abiertos para un PR siguiente: VPR940b-01 (sorteo ciego, cómo leer el §7, decide Nicolás), los 11 de gravedad 1,
+las lecturas 01, 07 y 10, el generador de C-montaje, el manifiesto del candado y las excepciones de C-K.
+
 ### 2026-11-04 01:20 UTC: re-verificador limpio del #940 (S173)
 
 Fable 5.1, esfuerzo alto, sobre la punta `dbaa4085c` contra el tag `s173-prereg-retro-sellado`. Veredicto MERGEABLE
