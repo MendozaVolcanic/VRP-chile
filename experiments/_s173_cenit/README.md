@@ -44,6 +44,10 @@ alertas (no medido).
   antes de pedir el merge.
 - S1 de `ver_modis/` (gravedad 3): la regla de cirrus del tablero (`frontend/index.html`, `t_max` bajo 273,15 K y más
   de 10 MW) puede ocultar alertas reales de la vía en pasadas oblicuas; una ya cayó (2026-10-01 08:35, 11,44 MW).
+  ⚠️ **S173, corregido** (PR #944, `experiments/_s173_cirrus_s1/` de esa rama): «una ya cayó» es FALSO. Los 11,44 MW
+  son el control X2 del verificador (2 × 5,72); la vía dio 5,72 MW esa pasada (MIROVA 5,18) y no se oculta. Lo
+  confirmado es el mecanismo (`ver_ablmodis/INFORME.md` l. 78: ninguna de las 7 pasa de 10 MW). Texto original
+  conservado arriba.
   `frontend/` necesita tag y sí de Nicolás (A45).
 - VV750-01 a 07 y VV375-01 a 06: defectos de instrumento de gravedad 1 a 2 (ventana efectiva de 12 noches en V750,
   controles débiles, una pasada topada por D9).

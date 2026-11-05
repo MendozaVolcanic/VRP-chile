@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 UTC: PR #944, regla de cirrus del tablero (S173)
+
+Agente Opus: PR #944 en borrador (`claude/s173-cirrus-s1`, punta `01318eb95`, CI verde), tag `pre-s173-cirrus-s1` en
+`58edb9788` antes del primer edit (A45, sí de Nicolás «procede con todo»). Los filtros de cirrus (S90) y campo difuso
+(S93) exentan los records de la vía (`esViaCodigoMirova` en `frontend/cambio_detector.js`) en las tres vistas. Medido
+con node sobre 76.398 records: hoy no mueve ninguno (85 records de la vía, 0 ocultos; 6 de K ocultos, iguales antes y
+después); es preventivo. Corrección propagada (A113): la «alerta real de 11,44 MW» era el control X2 del verificador,
+no una alerta; marcado en `experiments/_s173_cenit/README.md`. Pasa a verificador limpio (Fable). Para Nicolás:
+merge, y si la exención vale también para V750 y V375 cuando corran la vía.
+
 ### 2026-11-05 03:2x UTC: #939 mergeado a main (S173)
 
 Con la frase de Nicolás («Sí, merge #939»): CI `pytest` SUCCESS, CLEAN, `gh pr merge 939 --squash --match-head-commit
