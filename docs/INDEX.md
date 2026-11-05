@@ -56,7 +56,7 @@
 | SESSION_CLOSE_CHECKLIST.md | Checklist obligatorio de cierre de sesión | S20 |
 | HYPOTHESIS_LOG.md | Log vivo de hipótesis confirmadas/refutadas | S17 |
 | DATA_SOURCES.md | Inventario vivo de fuentes de datos | S17 |
-| PAPER_VRP_CHILE_DRAFT_S72.md | Draft del paper VRP Chile | S72 |
+| PAPER_PRIVADO.md | El manuscrito del paper (antes `PAPER_VRP_CHILE_DRAFT_S72.md` y `docs/paper/`) vive en un repo privado desde S173 | S173 |
 | R2_GATES_BY_REGIME.md | Gates R2 por régimen térmico (operacional) | S70 |
 | PROCESS_RULES_S33.md | Reglas de proceso R1-R8 (adopciones) | S33 |
 | RESEARCH_WORKFLOW.md | Workflow bibliográfico del proyecto | S36+ |

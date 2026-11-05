@@ -3,7 +3,7 @@
 
 POR QUÉ EXISTE
 ==============
-El borrador del paper (`docs/PAPER_VRP_CHILE_DRAFT_S72.md`) cita números de S119 (julio
+El borrador del paper (repo privado desde S173, `docs/PAPER_PRIVADO.md`) cita números de S119 (julio
 2026). Desde entonces cambiaron nadir-fijo, la máscara de nube (D14), el piso VRP (S130), la
 magnitud del operador en VIIRS 375 (F5', S132) y se abrió D19. Cada sesión de pipeline
 invalida el texto si los números viven en el texto. Acá viven en un script: el texto lleva
@@ -12,10 +12,10 @@ Regla S91: ningún número del paper se transcribe a mano.
 
 QUÉ PRODUCE
 ===========
-  docs/paper/numbers.json   — todas las claves, con la DEFINICIÓN dentro (A90: sin
-                              denominador y ventana, un número no es una afirmación)
-  docs/paper/TABLAS.md      — Tablas 2, 3 y 4 del borrador en markdown, con cabecera de
-                              definiciones, listas para pegar.
+  <out>/numbers.json y <out>/TABLAS.md (Tablas 2, 3 y 4), con la DEFINICIÓN de cada clave dentro
+  (A90). Por defecto <out> = ../paper_vrp_chile/manuscrito/, la copia local del repo privado
+  del manuscrito, hermana de este repo (S173; antes docs/paper/, ver docs/PAPER_PRIVADO.md).
+  Nunca se escribe de vuelta al repo público; `--out` elige otra carpeta.
 
 DEFINICIONES (heredadas de las auditorías, citadas por script de origen)
 ======================================================================
@@ -64,7 +64,7 @@ SNAP = os.path.join(ROOT, "data", "mirova_reference", "mirova_v1_snapshot")
 CONS = os.path.join(SNAP, "registro_vrp_consolidado.csv")
 OCR = os.path.join(SNAP, "registro_vrp_ocr.csv")
 DATA = os.path.join(ROOT, "data", "mirova_equivalent")
-OUT_DIR = os.path.join(ROOT, "docs", "paper")
+OUT_DIR = os.path.normpath(os.path.join(ROOT, "..", "paper_vrp_chile", "manuscrito"))  # S173: privado
 BUCKETS = ("MODIS", "VIIRS750", "VIIRS375")
 # El snapshot que lee el cargador canónico puede quedar atrás del CSV que el workflow
 # `sync-mirova-csv.yml` refresca cada hora en la raíz del repo (canal partido, familia A17).
