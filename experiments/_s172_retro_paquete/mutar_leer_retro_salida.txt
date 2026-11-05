@@ -95,3 +95,21 @@ CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_mo
 resumen: {'ATRAPADA': 42, 'CAE': 1} | mutaciones reales: 42 | control de caida: 1
 salida 0
 # Total ronda 4: 42 de 42 mutaciones reales atrapadas por asercion; 41 sin caidas en la misma corrida y 1 (Gm1) con 1 prueba caida por excepcion ademas de la asercion; el control de caida sale CAE.
+
+# Ronda 5 (S173, verificador de #946; lector y generadores en 9835cadda), --solo C1,C2,C3,X1,X2,X3,X5,X6,G1,G2,G3,G4,CONTROL
+C1 C-cenit del OSF no llega al veredicto (VPR946-01): ATRAPADA | test_c_cenit_del_osf_en_rojo_lleva_a_la_fila_1 | caídas en la misma corrida: 0
+C2 los controles de cenit no llegan al veredicto (VPR946-01): ATRAPADA | test_controles_de_cenit_en_rojo_llevan_a_la_fila_1 | caídas en la misma corrida: 0
+C3 C-cenit sin pares da OK (VPR946-01): ATRAPADA | test_c_cenit_del_osf_en_rojo_lleva_a_la_fila_1 | caídas en la misma corrida: 0
+X1 main no exige --cons/--ocr/--osf en el manifiesto (VPR946-02): ATRAPADA | test_main_con_manifiesto_exige_las_referencias | caídas en la misma corrida: 0
+X2 una referencia fuera del repo no deja el candado en rojo (VPR946-02): ATRAPADA | test_rutas_de_referencia_dentro_y_fuera_del_repo, test_main_con_manifiesto_exige_las_referencias | caídas en la misma corrida: 0
+X3 la excepción de C-K no exige hora que se lea como fecha (VPR946-04): ATRAPADA | test_excepcion_de_c_k_con_tipos_malos_o_sin_hora | caídas en la misma corrida: 0
+X5 cobertura_kgemelo ignora «sin K en DM» (VPR946-11): ATRAPADA | test_c_k_sin_pasadas_de_k_en_dm_es_rojo | caídas en la misma corrida: 0
+X6 validar_montaje acepta un tag vacío (VPR946-05): ATRAPADA | test_c_montaje_rechaza_un_tag_vacio | caídas en la misma corrida: 0
+G1 armar_manifiesto no corta con 3 si el pre-registro cambió (VPR946-03): ATRAPADA | test_main_del_manifiesto_corta_con_3_si_el_preregistro_cambio | caídas en la misma corrida: 0
+G2 armar_montaje hace git diff despacho despacho (VPR946-05): ATRAPADA | test_el_diff_listado_va_de_cada_tag_de_origen_al_despacho | caídas en la misma corrida: 0
+G3 el OSF no entra al manifiesto (VPR946-02): ATRAPADA | test_main_del_manifiesto_incluye_referencias_y_osf | caídas en la misma corrida: 0
+G4 armar_montaje no exige un tag por origen (VPR946-05): ATRAPADA | test_montaje_exige_un_tag_por_origen_en_main | caídas en la misma corrida: 0
+CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_modis_via_mejor_que_k_no_se_contradice:NameError: name 'F4_NO_EXISTE' is not de, test_modis_pierde_protegida_que_k_publica:NameError: name 'F4_NO_EXISTE' is not de, test_modis_publica_de_mas_es_peor_que_k:NameError: name 'F4_NO_EXISTE' is not de
+resumen: {'ATRAPADA': 12, 'CAE': 1} | mutaciones reales: 12 | control de caida: 1
+salida 0
+# Total ronda 5: 12 de 12 atrapadas por asercion, 0 caidas en la misma corrida; el control de caida sale CAE.
