@@ -74,6 +74,10 @@ otros nueve volcanes dan el mismo resultado con B0 y con B4.
 - **Al mergear**, anotar aquí, en el §11 de V750-A y en `tasks/LOOP_OBJETIVOS.md` §6 de `loop/activo` (lo pide el
   §12.6 del programa por sensor): el sha del merge, su hora UTC y la primera corrida de sombra con
   ese sha (su run id y qué noches procesó).
+- ⚠️ **S173, en curso (PR en borrador, rama `claude/s173-vpr939-03`, sin mergear)**: `evaluar_v750a.py --fase sombra`
+  lee la ROI y el sha de cada record de P, exige `--roi-brazo` (sin él cierra la compuerta), saca de la lectura las
+  pasadas de otra ROI y, con `--sha-desde`, las de código anterior; LECTURA LR1 de `LECTURAS_EVALUAR_V750A.md`. Hasta
+  el merge vale el texto que sigue. Texto original:
 - **Pendiente, no hecho**: el lector de la sombra de V750-A todavía no separa por ROI (ningún script de
   `experiments/_s162_v750a/` lee `regimen.codigo_sha` ni `diag_codigo_mirova.roi`; VPR939-03 del verificador del
   PR). Los insumos ya están en cada record (`pipeline/store.py` l. 89 a 93, `pipeline/mirova_v750_codigo.py` l. 708).

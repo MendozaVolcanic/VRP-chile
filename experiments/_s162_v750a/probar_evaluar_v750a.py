@@ -61,6 +61,19 @@ una línea dejaba pasar:
   E47 sombra con una protegida sólo del OCR que P pierde: NO CUMPLE en tabla más OCR, no con la tabla sola.
   E48 P = 1,3 x MIROVA sólo en T: NO CUMPLE por la razón en T y no en O.
   E49 sombra sin protegidas: CUMPLE marcado «SIN PROTEGIDAS».
+Agregados en S173 por VPR939-03 (verificador del PR #939, la ROI B4 de VIIRS 750): la sombra trae pasadas de Cordón
+Caulle con la ROI vieja (def, sha anterior al merge) y con la nueva (sens); el lector no puede mezclarlas (A104). Todas
+las pasadas de la sombra llevan en el record de P `diag_codigo_mirova.roi` y `regimen.codigo_sha`, como los reales
+(ids ER, no E5x, porque la rama de V750-A `claude/s162-viirs750-2-918174` ya usa E50 a E80):
+  ER1 mezcla de dos ROI sin --roi-brazo: compuerta cerrada (salida 3), sin veredicto. El lector de antes daba veredicto (NO CUMPLE por la pasada vieja).
+  ER2 la misma mezcla con --roi-brazo B4: la pasada def de Cordón Caulle queda fuera por otra ROI; CUMPLE; el corte
+      por cenit (30°, el borde de 30 va arriba) informa 2 pasadas sobre 30°.
+  ER3 la misma mezcla con --roi-brazo B0: quedan fuera las dos sens y entra la def, donde P pierde una protegida que K
+      publica: NO CUMPLE por P1 (el brazo elige de verdad qué pasadas se leen).
+  ER4 una protegida cuyo record de P no trae régimen: SIN DATO «sin_regimen», cobertura INSUFICIENTE (salida 3).
+  ER5 shas reales del repo con --sha-desde el merge de #939: 6 protegidas de sha anterior quedan fuera como anteriores
+      al corte (git merge-base --is-ancestor) y la def de Cordón Caulle por otra ROI; CUMPLE.
+  ER6 lo mismo con una pasada cuyo sha no existe en el repo: SIN DATO «sha_desconocido» (salida 3).
 La población base suma para el S-1: celda de Cordón Caulle en el pase 2 y la zona 2 (el pase 1 y la zona 1 con otro
 umbral), una alerta de Tupungatito cuyo NTI cruza entre los umbrales pero el ETI no, y un diagnóstico mal formado.
 Una caída nativa del analizador (código fuera de 0, 3, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
@@ -82,6 +95,11 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 SENSOR = "VIIRS_NOAA20_750"
 C = 33
+# S173 (VPR939-03): régimen del record de P en la sombra. Falsos para los escenarios que no miran git; reales (commits de
+# origin/main) para --sha-desde: 636b3426e es un sha de corrida de la sombra anterior al merge de #939 (58edb9788).
+SHA_B0, SHA_B4 = "b0" * 20, "b4" * 20
+SHA_REAL_B0 = "636b3426e69e9c6dd79ffacde601eed3c111dc48"
+SHA_REAL_B4 = "58edb978825ff08677fc1b3e803a2ca601dd4598"
 CRATER = {"Lascar": [33, 33], "Villarrica": [33, 33], "PuyehueCordonCaulle": [30, 36], "Tupungatito": [33, 33]}
 
 VERDE = """VERDE: E1 1020 casos, E3 10 recortes
@@ -134,7 +152,8 @@ class Pob:
 
     def pasada(self, volcan, hora, lab, K=None, P=None, Pdef="=P", O="=P", gemelo="=K", mirova_vrp=None,
                tabla=True, z=20.0, dP=None, dPdef=None, dO=None, far=False, banda=False, estado="ok",
-               pub_prod="=K", falta=(), decide=True, dayflag=0, k_tmax=300.0):
+               pub_prod="=K", falta=(), decide=True, dayflag=0, k_tmax=300.0, roi="def", sha=SHA_B4,
+               regimen=True):
         i = len(self.objs)
         filas = []
         if lab == "pos":
@@ -156,9 +175,13 @@ class Pob:
                           "protegida": lab == "pos" and (mirova_vrp or 0) >= 1.0, "mirova": filas,
                           "mirova_vrp": mirova_vrp if lab == "pos" else None, "pub_prod": pp,
                           "pc_vrp": K or 0.0, "z": z, "pos_crater": CRATER[volcan]})
+        rp = k_record(P)
+        if regimen:   # como el record real de la vía: ROI en el diagnóstico, sha del código en la marca de régimen
+            rp["diag_codigo_mirova"] = {"roi": roi}
+            rp["regimen"] = {"perfil": "sombra_codigo_mirova", "codigo_sha": sha, "origen": "actions"}
         r = {"id": i, "estado": estado, "dayflag": dayflag, "cobertura": {"nan_7_crater": 0, "nan_crater": False},
              "brazos": {"K": {"record": k_record(K, k_tmax)}, "Kgemelo": {"record": k_record(gemelo, k_tmax)},
-                        "Kgeo": {"record": k_record(K)}, "P": {"record": k_record(P)}},
+                        "Kgeo": {"record": k_record(K)}, "P": {"record": rp}},
              "paquete": {"P": salida_paquete(P, volcan, far, dP), "Pdef": salida_paquete(Pdef, volcan, far, dPdef),
                          "O": salida_paquete(O, volcan, far, dO)},
              "banda_triangulacion": banda}
@@ -252,20 +275,36 @@ def base(p_de=None, negs_T="gana", negs_O="gana", extra=None, pcc_pdef=None, gem
     return pb
 
 
-def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False):
-    """Sombra: sólo K y P (record del perfil sombra), desde el 2026-11-03."""
+def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, mezcla=False, sin_reg=False, sha_real=False,
+               sha_rara=False):
+    """Sombra: sólo K y P (record del perfil sombra), desde el 2026-11-03. S173 (VPR939-03): mezcla agrega tres pasadas
+    de Cordón Caulle, una con la ROI def y sha de antes del cambio (P pierde la protegida que K publica) y dos con sens
+    (z 30 y 35); sin_reg quita el régimen del record de P de la primera protegida de Láscar; sha_real usa shas del repo
+    y pone las tres primeras noches de protegidas con el sha anterior al merge; sha_rara da a un negativo un sha que no
+    existe en el repo."""
     pb = Pob()
+    sha0, sha4 = (SHA_REAL_B0, SHA_REAL_B4) if sha_real else (SHA_B0, SHA_B4)
     for n in range(0 if sin_prot else 6):
         dia = f"2026-11-{4 + n:02d}"
         for vol in ("Lascar", "Villarrica"):
             perder = p1 and n == 0 and vol == "Lascar"
-            pb.pasada(vol, f"{dia} 06:00", "pos", K=1.0, P=None if perder else 2.0, mirova_vrp=2.0)
+            pb.pasada(vol, f"{dia} 06:00", "pos", K=1.0, P=None if perder else 2.0, mirova_vrp=2.0,
+                      sha=sha0 if (sha_real and n < 3) else sha4,
+                      regimen=not (sin_reg and n == 0 and vol == "Lascar"))
+    if mezcla:
+        pb.pasada("PuyehueCordonCaulle", "2026-11-04 06:30", "pos", K=1.5, P=None, mirova_vrp=2.0, roi="def",
+                  sha=sha0, z=25.0)
+        pb.pasada("PuyehueCordonCaulle", "2026-11-06 06:30", "pos", K=1.5, P=2.0, mirova_vrp=2.0, roi="sens",
+                  sha=sha4, z=30.0)
+        pb.pasada("PuyehueCordonCaulle", "2026-11-07 06:30", "pos", K=1.5, P=2.0, mirova_vrp=2.0, roi="sens",
+                  sha=sha4, z=35.0)
     if prot_ocr:   # protegida sólo del OCR que K publica y P no: P1 en tabla más OCR, no con la tabla sola
         pb.pasada("Villarrica", "2026-11-11 06:30", "pos", K=1.0, P=None, mirova_vrp=2.0, tabla=False)
     for n in range(6):
         dia = f"2026-11-{12 + n:02d}"
         if negs == "gana":
-            pb.pasada("Lascar", f"{dia} 05:00", "neg_limpio", K=0.2, P=None)
+            pb.pasada("Lascar", f"{dia} 05:00", "neg_limpio", K=0.2, P=None,
+                      sha="e" * 40 if (sha_rara and n == 0) else sha4)
         elif negs == "pierde" or (negs == "bloquea" and n < 4):
             pb.pasada("Lascar", f"{dia} 05:00", "neg_limpio", K=None, P=0.2)
         elif negs == "bloquea":
@@ -274,7 +313,15 @@ def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False):
             pb.pasada("Lascar", f"{dia} 05:00", "neg_limpio", K=None, P=None)
     for n in range(6):
         pb.pasada("Villarrica", f"2026-11-{20 + n:02d} 05:00", "neg_limpio", K=None, P=None)
+    if sha_real:   # el resto de las pasadas, con el sha real posterior al merge (el falso no existe en git)
+        for r in pb.res:
+            reg = r["brazos"]["P"]["record"].get("regimen")
+            if reg and reg["codigo_sha"] == SHA_B4:
+                reg["codigo_sha"] = SHA_REAL_B4
     return pb
+
+
+B4 = ["--roi-brazo", "B4"]   # S173 (VPR939-03): toda lectura de la sombra declara la ROI que lee
 
 
 def _p1_en_O(pb):
@@ -453,13 +500,13 @@ ESCENARIOS = {
     "E17": dict(pob=lambda: base(extra=_falta_o), rc=3,
                 tiene=[("   SIN DATO por motivo", ["falta_brazo"]), ("== cobertura: INSUFICIENTE", [])],
                 no_tiene=["== §6 censo:"]),
-    "E18": dict(pob=lambda: esc_sombra(), fase="sombra", rc=0, tiene=[("== §6.3 sombra: CUMPLE", [])],
+    "E18": dict(pob=lambda: esc_sombra(), fase="sombra", rc=0, args=B4, tiene=[("== §6.3 sombra: CUMPLE", [])],
                 no_tiene=["== §6.3 sombra: NO CUMPLE"]),
-    "E19": dict(pob=lambda: esc_sombra(p1=True), fase="sombra", rc=0,
+    "E19": dict(pob=lambda: esc_sombra(p1=True), fase="sombra", rc=0, args=B4,
                 tiene=[("== §6.3 sombra: NO CUMPLE", ["P1"])], no_tiene=["== §6.3 sombra: CUMPLE"]),
-    "E20": dict(pob=lambda: esc_sombra(negs="nada"), fase="sombra", rc=0,
+    "E20": dict(pob=lambda: esc_sombra(negs="nada"), fase="sombra", rc=0, args=B4,
                 tiene=[("== §6.3 sombra: CUMPLE", ["SIN SUSTRATO"])]),
-    "E21": dict(pob=lambda: esc_sombra(negs="pierde"), fase="sombra", rc=0,
+    "E21": dict(pob=lambda: esc_sombra(negs="pierde"), fase="sombra", rc=0, args=B4,
                 tiene=[("== §6.3 sombra: NO CUMPLE", ["P2"])], no_tiene=["== §6.3 sombra: CUMPLE"]),
     "E24": dict(pob=lambda: base(negs_T="bloquea"), rc=0,
                 tiene=[("== §6 censo: NO CUMPLE", ["T/tabla: P2 BLOQUEA"])], no_tiene=["== §6 censo: CUMPLE"]),
@@ -515,16 +562,42 @@ ESCENARIOS = {
     "E45": dict(pob=lambda: base(extra=_prot_no_decide), rc=0, tiene=[("== §6 censo: CUMPLE", [])]),
     "E46": dict(pob=lambda: base(gemelo_mirova=True), rc=3,
                 tiene=[("== control nulo K contra K gemelo", ["FALLA"])], no_tiene=["== §6 censo:"]),
-    "E47": dict(pob=lambda: esc_sombra(prot_ocr=True), fase="sombra", rc=0,
+    "E47": dict(pob=lambda: esc_sombra(prot_ocr=True), fase="sombra", rc=0, args=B4,
                 tiene=[("== §6.3 sombra: NO CUMPLE", ["todo: P1 1"])],
                 no_contiene=[("== §6.3 sombra: NO CUMPLE", "tabla: P1")]),
     "E48": dict(pob=lambda: base(p_de_T=lambda m, k: 1.3 * m), rc=0,
                 tiene=[("== §6 censo: NO CUMPLE", ["T/tabla: M razón 1.300"])],
                 no_contiene=[("== §6 censo: NO CUMPLE", "O/tabla: M razón")]),
-    "E49": dict(pob=lambda: esc_sombra(sin_prot=True), fase="sombra", rc=0,
+    "E49": dict(pob=lambda: esc_sombra(sin_prot=True), fase="sombra", rc=0, args=B4,
                 tiene=[("== §6.3 sombra: CUMPLE", ["SIN PROTEGIDAS"])]),
-    "E23": dict(pob=lambda: esc_sombra(negs="bloquea"), fase="sombra", rc=0,
+    "E23": dict(pob=lambda: esc_sombra(negs="bloquea"), fase="sombra", rc=0, args=B4,
                 tiene=[("== §6.3 sombra: CUMPLE", ["BLOQUEA"])]),
+    # S173, VPR939-03: la sombra no mezcla la ROI B0 con la B4 (A104)
+    "ER1": dict(pob=lambda: esc_sombra(mezcla=True), fase="sombra", rc=3,
+                tiene=[("== régimen de la sombra: SIN --roi-brazo", ["compuerta cerrada", "PuyehueCordonCaulle"])],
+                no_tiene=["== §6.3 sombra:"]),
+    "ER2": dict(pob=lambda: esc_sombra(mezcla=True), fase="sombra", rc=0, args=B4,
+                tiene=[("== régimen de la sombra: brazo B4", ["dentro 26", "otra ROI 1", "PuyehueCordonCaulle"]),
+                       ("== §6.3 sombra: CUMPLE", []),
+                       ("   sobre 30°", ["observadas 2", "protegidas 2"]),
+                       ("   bajo 30°", ["observadas 24", "protegidas 12"])],
+                no_tiene=["== §6.3 sombra: NO CUMPLE"]),
+    "ER3": dict(pob=lambda: esc_sombra(mezcla=True), fase="sombra", rc=0, args=["--roi-brazo", "B0"],
+                tiene=[("== régimen de la sombra: brazo B0", ["dentro 25", "otra ROI 2"]),
+                       ("== §6.3 sombra: NO CUMPLE", ["P1"])],
+                no_tiene=["== §6.3 sombra: CUMPLE"]),
+    "ER4": dict(pob=lambda: esc_sombra(sin_reg=True), fase="sombra", rc=3, args=B4,
+                tiene=[("   SIN DATO por motivo:", ["sin_regimen"]), ("== cobertura: INSUFICIENTE", [])],
+                no_tiene=["== §6.3 sombra:"]),
+    "ER5": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True), fase="sombra", rc=0,
+                args=B4 + ["--sha-desde", SHA_REAL_B4],
+                tiene=[("== régimen de la sombra: brazo B4", ["dentro 20", "otra ROI 1", "anteriores al corte 6"]),
+                       ("== §6.3 sombra: CUMPLE", [])],
+                no_tiene=["== §6.3 sombra: NO CUMPLE"]),
+    "ER6": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True, sha_rara=True), fase="sombra", rc=3,
+                args=B4 + ["--sha-desde", SHA_REAL_B4],
+                tiene=[("   SIN DATO por motivo:", ["sha_desconocido"])],
+                no_tiene=["== §6.3 sombra:"]),
     "E22": dict(pob=lambda: base(), sg_otra=True, rc=3,
                 tiene=[("== cobertura: INSUFICIENTE", []), ("== compuerta del veredicto", ["CERRADA"])],
                 no_tiene=["== §6 censo:"]),

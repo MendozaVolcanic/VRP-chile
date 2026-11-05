@@ -11,7 +11,8 @@ tiene que salir CAÍDA).
 La copia mutada vive en esta misma carpeta con otro nombre (`_mut_<id>_evaluar_v750a.py`), así resuelve las mismas
 rutas que el original, y se borra al terminar. Las corridas van en paralelo (cada una con su carpeta de destino).
 M29 a M52 se agregaron tras el verificador limpio (VA-01 a VA-07): cada una rompe una regla que sus
-roturas V01 a V41 mostraron sin vigilar.
+roturas V01 a V41 mostraron sin vigilar. MR1 a MR7 (S173, VPR939-03, LECTURA LR1; ids MR porque la rama `claude/s162-viirs750-2-918174` ya usa M53 a M95) rompen el régimen de la sombra: el
+filtro por ROI, la compuerta sin brazo, la marca SIN DATO, el corte por sha y el corte de cenit en 30°.
 Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4]
 Salida: 0 si los controles salen como deben y todas las mutaciones quedan ATRAPADAS; 1 si no.
 """
@@ -25,6 +26,7 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 ORIGINAL = AQUI / "evaluar_v750a.py"
 PRUEBAS = AQUI / "probar_evaluar_v750a.py"
+ESCENARIOS_SOLO = ""   # S173: --escenarios
 
 MUTACIONES = {
     "M1": ("§6.2: una protegida perdida (P1) ya no entra a los motivos",
@@ -140,6 +142,23 @@ MUTACIONES = {
             '+ ("; SIN PROTEGIDAS: P1 no pudo vetar" if not n_prot else "")', '+ ""'),
     "M52": ("§6.2 (L4): la razón de M no exige que K publique",
             'and (pub(i, "K") and vrp(i, "K") > 0 or not exigir_k)', "and (True or not exigir_k)"),
+    "MR1": ("sombra (LR1): el filtro por ROI no saca ninguna pasada (lo de antes de S173)",
+            'if roi != esperada.get(obj[i]["volcan"]):', "if False:"),
+    "MR2": ("sombra (LR1): sin --roi-brazo no se cierra la compuerta y se lee como B0",
+            "            return salir(3)\n        if a.sha_desde and not commit_conocido(a.sha_desde):",
+            '            a.roi_brazo = "B0"\n        if a.sha_desde and not commit_conocido(a.sha_desde):'),
+    "MR3": ("sombra (LR1): una pasada sin régimen no es SIN DATO y entra a la lectura",
+            "            motivo_sin[i] = sin_regimen[i]", "            pass"),
+    "MR4": ("sombra (LR1): --sha-desde no corta nada",
+            "            elif a.sha_desde:", "            elif False:"),
+    "MR5": ("sombra (LR1): un sha que git no conoce entra a la lectura",
+            '                    sin_regimen[i] = "sha_desconocido"', "                    pass"),
+    "MR6": ("sombra (§12.8 punto 2): el corte de cenit en 40° y no en 30°",
+            '(("bajo 30°", lambda z: z < 30), ("sobre 30°", lambda z: z >= 30))',
+            '(("bajo 30°", lambda z: z < 40), ("sobre 30°", lambda z: z >= 40))'),
+    "MR7": ("sombra (§12.8 punto 2): el borde de 30° va abajo",
+            '(("bajo 30°", lambda z: z < 30), ("sobre 30°", lambda z: z >= 30))',
+            '(("bajo 30°", lambda z: z <= 30), ("sobre 30°", lambda z: z > 30))'),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),
@@ -158,7 +177,8 @@ def correr(dest, evaluador, nombre, viejo=None, nuevo=None):
         shutil.rmtree(sal)
     try:
         o = subprocess.run([sys.executable, str(PRUEBAS), "--dest", str(sal), "--analizador", str(copia),
-                            "--evaluador", str(evaluador)], capture_output=True, text=True, encoding="utf-8",
+                            "--evaluador", str(evaluador)] + (["--solo", ESCENARIOS_SOLO] if ESCENARIOS_SOLO else []),
+                           capture_output=True, text=True, encoding="utf-8",
                            errors="replace", timeout=7200, cwd=str(AQUI))
     finally:
         copia.unlink()
@@ -181,11 +201,16 @@ def main():
     ap.add_argument("--evaluador", required=True, type=Path)
     ap.add_argument("--hilos", type=int, default=4)
     ap.add_argument("--solo", default="", help="ids de mutaciones a correr (IDENTIDAD y CAIDA van siempre)")
+    ap.add_argument("--escenarios", default="",
+                    help="S173: escenarios de las pruebas a correr (--solo de probar_evaluar_v750a.py); sólo para "
+                         "mutaciones de un camino que el resto no recorre (la sombra), y se dice en la salida")
     a = ap.parse_args()
     sel = {x for x in a.solo.split(",") if x}
     a.dest.mkdir(parents=True, exist_ok=True)
     mut = {k: v for k, v in MUTACIONES.items() if not sel or k in sel or k == "CAIDA"}
     trabajos = [("IDENTIDAD", None, None)] + [(k, v[1], v[2]) for k, v in mut.items()]
+    global ESCENARIOS_SOLO
+    ESCENARIOS_SOLO = a.escenarios
     with ThreadPoolExecutor(a.hilos) as ex:
         res = {r[0]: r for r in ex.map(lambda t: correr(a.dest, a.evaluador, *t), trabajos)}
     L = []
@@ -197,6 +222,8 @@ def main():
     ident = res["IDENTIDAD"]
     if sel:
         pr(f"(corrida parcial: --solo {a.solo})")
+    if a.escenarios:
+        pr(f"(escenarios parciales: --escenarios {a.escenarios})")
     pr(f"IDENTIDAD | {ident[1]} (tiene que ser PASA) | rc {ident[2]} | {ident[3][:200]}")
     malos = 0 if ident[1] == "PASA" else 1
     for nom, (que, _v, _n) in mut.items():

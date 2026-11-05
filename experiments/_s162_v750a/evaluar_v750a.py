@@ -33,9 +33,15 @@ Formato de los artefactos (contrato para el probe o el cálculo local que los pr
     u_nti1, u_nti2, u_eti1, u_eti2}, celda_decisiva: {pase, zona, c_nti, c_eti}}}
 Las lecturas tomadas donde el pre-registro deja algo abierto están en LECTURAS_EVALUAR_V750A.md.
 
+Régimen de la sombra (S173, VPR939-03; LECTURA LR1): en la fase sombra cada pasada observada se lee con la ROI y el sha
+del código con que corrió, tomados del record de P (`diag_codigo_mirova.roi`, `regimen.codigo_sha`). La lectura declara
+su brazo de ROI (`--roi-brazo`, el mismo B0 a B5 de V750-B, traducido por volcán con scripts/roi_v750b_a_grillas.py) y,
+si quiere, el primer commit de código que acepta (`--sha-desde`, por ascendencia en git). Sin `--roi-brazo` la compuerta
+se cierra: ninguna lectura de la sombra mezcla la ROI B0 con la B4 (A104).
+
 Uso: python evaluar_v750a.py [--fase censo|sombra] --art <carpetas> --objetivos objetivos_v750a.json
      --evaluador <evaluar_d25.py del tag> [--sin-granulo <archivo>] [--equivalencia-local <salida verde + mutaciones>]
-     [--leer-con-faltantes MOTIVO] [--solo-controles] [--salida <archivo>]
+     [--roi-brazo B0..B5] [--sha-desde SHA] [--leer-con-faltantes MOTIVO] [--solo-controles] [--salida <archivo>]
 Salida: 0 con veredicto; 3 compuerta cerrada (controles caídos o SIN DATO); 5 veredicto leído con faltantes (marcado);
         6 §6.1 no se cumple (la vía no reproduce al oráculo: no se mira el censo).
 """
@@ -45,12 +51,14 @@ import argparse
 import ast
 import collections
 import copy
+import functools
 import hashlib
 import json
 import math
 import random
 import re
 import statistics
+import subprocess
 import sys
 import types
 from pathlib import Path
@@ -65,6 +73,7 @@ sys.path.insert(0, str(RAIZ / "experiments/_s162_v750b"))
 import banco_paridad as B  # noqa: E402
 from clase_mirova import alerta_protegida  # noqa: E402
 import analizar_v750b as AB  # noqa: E402
+import roi_v750b_a_grillas as RV  # noqa: E402
 
 PAQUETE = ("P", "Pdef", "O")
 VENTANAS = ("T", "O")                    # §4.2: T tabla sola hasta el 2026-06-12, O desde el 2026-06-13
@@ -178,6 +187,19 @@ def delta_sd(dA, dB):
     return {f"{x}{p}": dB[f"pasada{p}"][f"sd_{x}"] - dA[f"pasada{p}"][f"sd_{x}"] for x in ("nti", "eti") for p in (1, 2)}
 
 
+@functools.lru_cache(maxsize=None)
+def es_ancestro(desde, sha):
+    """S173 (VPR939-03): True si el commit `desde` es ancestro de `sha` o el mismo, False si no, None si git no conoce
+    alguno de los dos (el sha de la corrida no está en este clon): eso no se adivina, es SIN DATO."""
+    o = subprocess.run(["git", "-C", str(RAIZ), "merge-base", "--is-ancestor", desde, sha], capture_output=True)
+    return {0: True, 1: False}.get(o.returncode)
+
+
+def commit_conocido(sha):
+    o = subprocess.run(["git", "-C", str(RAIZ), "cat-file", "-e", f"{sha}^{{commit}}"], capture_output=True)
+    return o.returncode == 0
+
+
 def leer_equivalencia_local(ruta):
     """§6.1, parte local: la salida de equivalencia_v750a.py contra el módulo real (VERDE) y su corrida --mutaciones."""
     if not ruta or not Path(ruta).exists():
@@ -208,6 +230,10 @@ def main(argv=None):
     ap.add_argument("--leer-con-faltantes", default="",
                     help="MOTIVO de la decisión de leer con cobertura insuficiente; veredicto marcado y salida 5")
     ap.add_argument("--solo-controles", action="store_true")
+    ap.add_argument("--roi-brazo", choices=("B0", "B1", "B2", "B3", "B4", "B5"), default="",
+                    help="fase sombra: brazo de ROI de V750-B que se lee (obligatorio en la sombra; VPR939-03)")
+    ap.add_argument("--sha-desde", default="",
+                    help="fase sombra: sólo pasadas cuyo regimen.codigo_sha desciende de este commit (incluido)")
     ap.add_argument("--salida", default=str(AQUI / "evaluar_v750a_salida.txt"))
     a = ap.parse_args(argv)
     EV = AB.cargar_signos(a.evaluador)
@@ -231,6 +257,65 @@ def main(argv=None):
         return f"{obj[i]['volcan']} {obj[i]['hora_utc']}"
 
     pr(f"== V750-A, fase {a.fase}")
+    # ---------------------------------------------------------------- régimen de la sombra (S173, VPR939-03, LECTURA LR1)
+    # POR QUÉ. El 2026-11-05 03:23 UTC #939 (58edb9788) cambió la ROI de la vía de VIIRS 750 en Cordón Caulle y
+    # Tupungatito de def (B0) a sens (B4): la caja sensible, donde el código de MIROVA usa el umbral bajo, pasa a cubrir
+    # el cráter. La sombra escribe con el sha de main de cada corrida, así que puede traer pasadas de los dos detectores, y
+    # una pasada vieja metida en el denominador nuevo decide la lectura nueva (A104; con la mezcla del escenario ER1 el
+    # lector de antes daba NO CUMPLE por una pasada de la ROI vieja). La ROI se lee del record, no de la fecha (S155: la
+    # marca va en los datos): `diag_codigo_mirova.roi` es la caja con que corrió, `regimen.codigo_sha` el código.
+    sin_regimen, fuera_regimen = {}, {}
+    if not censo:
+        reg = {}
+        for i in obj:
+            r = res.get(i) or {}
+            if AB.partida(r) != "observada":
+                continue
+            rp = ((r.get("brazos") or {}).get("P") or {}).get("record")
+            if not isinstance(rp, dict):
+                continue                       # falta_brazo la marca SIN DATO más abajo
+            roi = (rp.get("diag_codigo_mirova") or {}).get("roi")
+            sha = (rp.get("regimen") or {}).get("codigo_sha")
+            if not roi or not sha:
+                sin_regimen[i] = "sin_regimen"  # sin la marca no se sabe con qué ROI corrió: SIN DATO, no se adivina
+                continue
+            reg[i] = (roi, str(sha))
+        tabla_reg = collections.defaultdict(list)
+        for i, (roi, sha) in reg.items():
+            tabla_reg[(obj[i]["volcan"], roi, sha[:9])].append(obj[i]["hora_utc"])
+        pr("== régimen de la sombra (VPR939-03): pasadas observadas por volcán, ROI del record de P y codigo_sha")
+        for (v, roi, sha), hs in sorted(tabla_reg.items()):
+            pr(f"   {v} {roi} {sha}: {len(hs)} ({min(hs)} a {max(hs)})")
+        dos_roi = sorted(v for v in {k[0] for k in tabla_reg} if len({k[1] for k in tabla_reg if k[0] == v}) > 1)
+        if not a.roi_brazo:
+            pr(f"== régimen de la sombra: SIN --roi-brazo, compuerta cerrada (la lectura declara la ROI que lee; "
+               f"volcanes con dos ROI en los datos: {dos_roi or 'ninguno'})")
+            return salir(3)
+        if a.sha_desde and not commit_conocido(a.sha_desde):
+            pr(f"== régimen de la sombra: --sha-desde {a.sha_desde} no es un commit de este clon, compuerta cerrada")
+            return salir(3)
+        esperada = RV.roi_por_volcan(a.roi_brazo)
+        for i, (roi, sha) in reg.items():
+            if roi != esperada.get(obj[i]["volcan"]):
+                fuera_regimen[i] = "otra ROI"
+            elif a.sha_desde:
+                anc = es_ancestro(a.sha_desde, sha)
+                if anc is None:
+                    sin_regimen[i] = "sha_desconocido"
+                elif not anc:
+                    fuera_regimen[i] = "anterior al corte"
+
+        def por_vol(motivo):
+            return dict(collections.Counter(obj[i]["volcan"] for i, m in fuera_regimen.items() if m == motivo))
+
+        n_fuera = collections.Counter(fuera_regimen.values())
+        dentro = sum(1 for i in reg if i not in fuera_regimen and i not in sin_regimen)
+        pr(f"== régimen de la sombra: brazo {a.roi_brazo}" + (f", desde {a.sha_desde[:9]}" if a.sha_desde else "")
+           + f": dentro {dentro}, fuera por otra ROI {n_fuera['otra ROI']} {por_vol('otra ROI')}, anteriores al "
+           f"corte {n_fuera['anterior al corte']} {por_vol('anterior al corte')}")
+        pr("   protegidas fuera de esta lectura (se leen con su propio brazo, no aquí):",
+           [f"{nombre(i)} ({m})" for i, m in fuera_regimen.items() if obj[i].get("protegida")] or "ninguna")
+        obj = {i: o for i, o in obj.items() if i not in fuera_regimen}
     # ---------------------------------------------------------------- cobertura (copia de analizar_v750b, §4.2)
     req_brazos = ("K", "Kgemelo") if censo else ("K", "P")
 
@@ -250,6 +335,8 @@ def main(argv=None):
             motivo_sin[i] = "diurna"
         elif part[i] == "observada" and falta_brazo(r):
             motivo_sin[i] = "falta_brazo"      # una pasada «ok» incompleta es SIN DATO, no desaparece en silencio
+        elif part[i] == "observada" and i in sin_regimen:
+            motivo_sin[i] = sin_regimen[i]     # S173: sin ROI o sha legibles no se sabe qué detector la produjo
     sin = list(motivo_sin)
     no_obs = collections.Counter(part[i] for i in obj if part[i] in ("fuera", "sin_crater"))
     oks0 = [i for i in obj if part[i] == "observada" and i not in motivo_sin]
@@ -443,6 +530,18 @@ def main(argv=None):
            f"(1 o más): {'OK' if roi else 'FALLA'}")
     else:
         pr("== fase sombra: los controles que necesitan P-def, O, el gemelo o el placebo no aplican (LECTURA L9)")
+        # S173 (programa por sensor §12.8 punto 2): K y la vía difieren justo en las pasadas oblicuas, y un total que
+        # mezcla los dos tramos puede esconderlo. Corte informativo en 30° de cenit del sensor; no decide nada.
+        pr("== sombra por cenit del sensor (informa, no decide; §12.8 punto 2), canal que decide:")
+        for nom_z, f_z in (("bajo 30°", lambda z: z < 30), ("sobre 30°", lambda z: z >= 30)):
+            ids = [i for i in oks0 if obj[i].get("z") is not None and f_z(obj[i]["z"])]
+            prz = [i for i in ids if etiqueta(obj[i], "decide") == "prot"]
+            pr(f"   {nom_z}: observadas {len(ids)} | protegidas {len(prz)} | K publica {sum(pub(i, 'K') for i in ids)}"
+               f" | P publica {sum(pub(i, 'P') for i in ids)} | protegidas que K publica y P no "
+               f"{sum(1 for i in prz if pub(i, 'K') and not pub(i, 'P'))}")
+        sin_z = [i for i in oks0 if obj[i].get("z") is None]
+        if sin_z:
+            pr(f"   sin cenit: {len(sin_z)}")
     aviso, rc_final = "", 0
     if not cob_ok and a.leer_con_faltantes:
         aviso, rc_final = f"[LEÍDO CON FALTANTES: {a.leer_con_faltantes}]", 5
