@@ -16,6 +16,9 @@ y L18 por D-48 (relevo VIIRS 750, 2026-10-25). La antigua M50 («el placebo de p
 atrapar: con el predicado de hoy toda diferencia K contra K×1,2 tiene t_max frío y se explica (A116, LECTURAS).
 M63 a M80 son de los brazos de posición (§3 y §6 bis, decisión de Nicolás del 2026-10-27). M81 a M85, del verificador limpio de
 esos brazos (verificador_posicion/INFORME.md: MV2, MV3, MV9, MV10 y el arreglo de VP-01).
+MR1 a MR8 (S173, VPR939-03, LECTURA LR1; MR1 a MR7 llevadas de #945, MR8 sólo en esta rama) rompen el régimen de la
+sombra: el filtro por ROI, la compuerta sin brazo, la marca SIN DATO, el corte por sha, el corte de cenit en 30° y la
+lista de protegidas que salen. Sólo corren en la fase sombra: se miden con --escenarios sobre los escenarios de sombra.
 --escenarios (S162, brazos de posición) restringe la batería a los escenarios nombrados, en IDENTIDAD, CAIDA y cada
 mutación. Sirve para medir rápido las mutaciones de una pieza nueva contra los escenarios que la fijan (la batería entera
 tarda unos 40 min por corrida con un hilo); una mutación ATRAPADA así cae por aserción EN ESOS escenarios, pero no
@@ -250,6 +253,26 @@ MUTACIONES = {
             "contando las N-3 {m['P1'] + m['P1_n3']}", "contando las N-3 {m['P1']}"),
     "M95": ("§6 ter: la lista aparte de las N-3 sale vacía",
             'n3_l = [i for i in oks if es_n3(obj[i]) and etiqueta(obj[i], "todo") == "prot"]', 'n3_l = []'),
+    "MR1": ("sombra (LR1): el filtro por ROI no saca ninguna pasada (lo de antes de S173)",
+            'if roi != esperada.get(obj[i]["volcan"]):', "if False:"),
+    "MR2": ("sombra (LR1): sin --roi-brazo no se cierra la compuerta y se lee como B0",
+            "            return salir(3)\n        if a.sha_desde and not commit_conocido(a.sha_desde):",
+            '            a.roi_brazo = "B0"\n        if a.sha_desde and not commit_conocido(a.sha_desde):'),
+    "MR3": ("sombra (LR1): una pasada sin régimen no es SIN DATO y entra a la lectura",
+            "            motivo_sin[i] = sin_regimen[i]", "            pass"),
+    "MR4": ("sombra (LR1): --sha-desde no corta nada",
+            "            elif a.sha_desde:", "            elif False:"),
+    "MR5": ("sombra (LR1): un sha que git no conoce entra a la lectura",
+            '                    sin_regimen[i] = "sha_desconocido"', "                    pass"),
+    "MR6": ("sombra (§12.8 punto 2): el corte de cenit en 40° y no en 30°",
+            '(("bajo 30°", lambda z: z < 30), ("sobre 30°", lambda z: z >= 30))',
+            '(("bajo 30°", lambda z: z < 40), ("sobre 30°", lambda z: z >= 40))'),
+    "MR7": ("sombra (§12.8 punto 2): el borde de 30° va abajo",
+            '(("bajo 30°", lambda z: z < 30), ("sobre 30°", lambda z: z >= 30))',
+            '(("bajo 30°", lambda z: z <= 30), ("sobre 30°", lambda z: z > 30))'),
+    "MR8": ("sombra (LR1): la lista de protegidas que salen por otra ROI sale vacía (sólo en esta rama)",
+            '[f"{nombre(i)} ({m})" for i, m in fuera_regimen.items() if obj[i].get("protegida")] or "ninguna"',
+            '"ninguna"'),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),
