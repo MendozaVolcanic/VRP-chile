@@ -113,7 +113,7 @@ def test_la_documentacion_no_puede_volver_a_cerrarlo_con_prosa():
         (r"ya cubierto por el second-run", "«ya cubierto por el second-run»"),
     ]
     ofensas = []
-    for rel in ("CLAUDE.md", "docs/MISSION.md", "docs/MIROVA_DIVERGENCES.md",
+    for rel in ("CLAUDE.md", "docs/CLAUDE_HISTORIA.md", "docs/MISSION.md", "docs/MIROVA_DIVERGENCES.md",
                 "docs/AUDIT_S114_PARITY_BY_SENSOR.md"):
         p = os.path.join(ROOT, rel)
         if not os.path.exists(p):

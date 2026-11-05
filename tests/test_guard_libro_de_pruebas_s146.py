@@ -195,7 +195,9 @@ def _citas_y_rotas(root, documentos):
 # el documento se borra, se quita la línea de acá. Si aparece una rota nueva que no está en esta
 # lista, el guard falla: es la ruta rota número 30 (o la que siga).
 LISTA_BLANCA_RUTAS_ROTAS_S146 = {
-    ("CLAUDE.md", "scratchpad/probe_ctx_cluster_s117.py"),
+    # S173: la cita (A84) se movió con el texto del CLAUDE.md viejo a docs/CLAUDE_HISTORIA.md; es la
+    # misma ruta rota renombrada de documento, no una nueva (la lista no crece).
+    ("docs/CLAUDE_HISTORIA.md", "scratchpad/probe_ctx_cluster_s117.py"),
     ("docs/AUDIT_S110_NDC_PATH_DIAGNOSTIC.md",
      "experiments/_s110_ndc_probe/out/ndc_firstpass_attribution.json"),
     ("docs/AUDIT_S116_FOLLOWUP.md", "scratchpad/probe_ctx_cluster_s117.py"),
