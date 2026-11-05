@@ -569,6 +569,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 05:xx UTC: verificador de #944, PR #945, mirova-tif-archive y temporales (S173)
+
+- #944 (cirrus): verificador limpio Fable, MERGEABLE CON CAMBIOS (`experiments/_s173_aud/ver944/`). VPR944-01
+  (gravedad 3): el cambio en `scripts/banco_paridad.py` es inerte porque `CAMPOS_JS` no copia `via_codigo_mirova`;
+  la vigilancia de MODIS y el auto-audit contarían como no publicado un record de la vía frío y sobre 10 MW. Arreglo
+  (a) agregar la clave y medir, o (b) quitar las líneas: decide Nicolás. VPR944-02 (gravedad 2) cae en silencio a la
+  regla vieja si el módulo no carga.
+- PR #945 (VPR939-03): `evaluar_v750a.py --fase sombra` separa por ROI (`--roi-brazo`) y sha; 67 records de V750 en
+  la sombra, todos `def`, 0 con B4 todavía. La versión viva del lector está en `claude/s162-viirs750-2-918174` y
+  tampoco separa: el parche hay que llevarlo ahí.
+- mirova-tif-archive: el checkout completo (21 GB) llenaba el disco del runner (22 fallas, 93 cancelaciones desde el
+  2026-11-02). Checkout parcial sin `data/` (commit `58d59f68b` vía API, sí de Nicolás); corrida de prueba verde en
+  40 s. Paso de push con archivos nuevos SIN VERIFICAR (no hubo capturas desde 02:58 UTC, tampoco antes del cambio).
+  Informe de tamaño: `C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/mirova-tif-archive_INFORME_TAMANO_2026-11-05.md`
+  (94 % PNG, +3 GB/mes, sobre el límite recomendado de 5 GB).
+- Temporales de D: (sí de Nicolás): 30 carpetas de S171 o antes, 12 GB, a la papelera; rescate de lo único en curso
+  antes de que Nicolás la vacíe. Carpetas sueltas de Volcanologia ordenadas en `_archivo_VRP_Chile/` con LEEME.
+
 ### 2026-11-05 UTC: PR #944, regla de cirrus del tablero (S173)
 
 Agente Opus: PR #944 en borrador (`claude/s173-cirrus-s1`, punta `01318eb95`, CI verde), tag `pre-s173-cirrus-s1` en
