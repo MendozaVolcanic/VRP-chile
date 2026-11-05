@@ -899,6 +899,13 @@ def leer_osf(ruta, volcanes, es_noche):
     return out
 
 
+def _estado_cenit(pares):
+    """§6 C-cenit. VPR946-01: sin pares no hay nada medido (all([]) daba OK)."""
+    if not pares:
+        return "ROJO: sin pares de cenit contra SatZen"
+    return "OK" if all(d <= TOL_CENIT_OSF for d in pares) else "ROJO: cenit nuestro y SatZen difieren más de 2°"
+
+
 def p1_osf(filas, osf, brazo="V"):
     """§5.2: por protegida OSF (noche, class 1, VRP ≥ 1e6 W, píxel más caliente dentro del radio interno), la pasada
     nuestra a ±120 s. La vía no y K sí: candidata a veto (fila 4). SIN DATO de la vía que K publica: candidata (C-via
@@ -910,6 +917,7 @@ def p1_osf(filas, osf, brazo="V"):
     res = {s: {"protegidas": 0, "candidatas": [], "sin_record": [], "ninguno": [], "defecto": [], "pub_via": 0,
                "por_volcan": collections.Counter(), "dobles": []} for s in SENSORES}
     pares_cenit, lejanas, ambiguas = [], [], []
+    pares_por = {s: [] for s in SENSORES}                # VPR946R2-03: C-cenit por sensor (§8.1 «para ese sensor»)
     for o in osf:
         if not o["noche"]:
             continue
@@ -924,6 +932,7 @@ def p1_osf(filas, osf, brazo="V"):
         for f in cand:
             if f.get("z") is not None:
                 pares_cenit.append(abs(float(f["z"]) - o["satzen"]))
+                pares_por[o["b"]].append(pares_cenit[-1])
         if not prot:
             continue
         r = res[o["b"]]
@@ -960,9 +969,10 @@ def p1_osf(filas, osf, brazo="V"):
                                     "n": len(rc)} if rc else None)
     c_pareo = "OK" if not any(r["dobles"] for r in res.values()) else "ROJO: protegida OSF pareada a dos pasadas"
     # VPR946-01: sin pares no hay nada medido (all([]) daba OK)
-    c_cenit = ("ROJO: sin pares de cenit contra SatZen" if not pares_cenit else
-               "OK" if all(d <= TOL_CENIT_OSF for d in pares_cenit) else "ROJO: cenit nuestro y SatZen difieren más de 2°")
+    c_cenit = _estado_cenit(pares_cenit)
     return {"por_sensor": res, "c_pareo": c_pareo, "c_cenit": c_cenit, "n_pares_cenit": len(pares_cenit),
+            "c_cenit_por_sensor": {s: _estado_cenit(p) for s, p in pares_por.items()},
+            "n_pares_cenit_por_sensor": {s: len(p) for s, p in pares_por.items()},
             "lejanas": lejanas, "lejanas_publicadas_como_cumbre": [x for x in lejanas if x[3]], "ambiguas": ambiguas}
 
 
@@ -1030,7 +1040,8 @@ def controles_cenit(R, filas, brazo):
     try:
         base, pareja, crece = res(lambda z: 1.0), res(lambda z: 1.5), res(lambda z: 1.0 + z / 20.0)
     except Exception as e:  # noqa: BLE001
-        return {"estado": "SIN SUSTRATO", "error": f"{type(e).__name__}: {e}"[:200]}
+        # VPR946R2-02: un error no es «sin sustrato»: una caída leída como OK es un vigilante ciego
+        return {"estado": "ROJO: error interno de los controles de cenit", "error": f"{type(e).__name__}: {e}"[:200]}
     v = R.CC.veredicto(base)
     if v == "SIN SUSTRATO":
         return {"estado": "SIN SUSTRATO"}
@@ -1192,7 +1203,10 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
     if osf_res is not None:
         ctl["c_pareo_osf"] = {"estado": osf_res["c_pareo"]}
         # VPR946-01: C-cenit es un control del §6; §8.1 fila 1 manda INDECIDIBLE si cae (se calculaba y no llegaba)
-        ctl["c_cenit_osf"] = {"estado": osf_res["c_cenit"], "n_pares": osf_res["n_pares_cenit"]}
+        # VPR946R2-03: por sensor (§8.1 «algún control del §6 en rojo para ese sensor»); el reunido sólo informa
+        ctl["c_cenit_osf"] = {"estado": osf_res["c_cenit_por_sensor"][sensor],
+                              "n_pares": osf_res["n_pares_cenit_por_sensor"][sensor],
+                              "reunido_informa": osf_res["c_cenit"]}
         # VPR940-10 (aprobado): la vía publica una protegida OSF que K no publica; no puede ocurrir (K publica todas,
         # §5.2), es un defecto del lector y va a la fila 1, no a la 4
         dfc = osf_res["por_sensor"][sensor]["defecto"]
