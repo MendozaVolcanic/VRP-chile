@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 03:2x UTC: #939 mergeado a main (S173)
+
+Con la frase de Nicolás («Sí, merge #939»): CI `pytest` SUCCESS, CLEAN, `gh pr merge 939 --squash --match-head-commit
+751a5a1d1`. Squash `58edb9788`, verificado como punta de `origin/main`. La ROI B4 de V750 (B1 en PCC y Tupungatito,
+B0 en los otros 9) entra en `pipeline/grillas_mirova.yaml`; corre sólo en la sombra. Anotado en V750-A §11. Nicolás
+pidió después «procede con todo lo que falta»: se despachan agentes para el PR de seguimiento de #940, la regla de
+cirrus del tablero (S1, con tag A45) y VPR939-03 en el lector de la sombra de V750.
+
 ### 2026-11-05 03:16 UTC: #940 mergeado a main (S173)
 
 Con la frase de Nicolás («Sí, merge #940»): `gh pr ready 940` y `gh pr merge 940 --squash --match-head-commit

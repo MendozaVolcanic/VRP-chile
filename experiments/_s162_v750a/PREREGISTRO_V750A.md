@@ -176,6 +176,8 @@ pierde contra P** en P2. Kgeo: cambia 7 a 13 de ~290 publicaciones de K, todas h
 ## 11. Pendiente antes del sello
 
 - Resultado de V750-B (la ROI) y del brazo nativo N0/N1 (confirma V750-C).
+  (S173, 2026-11-05: V750-B resuelto con B4, confirmado por Nicolás; #939 mergeado a main, squash `58edb9788`.
+  Sigue pendiente el brazo nativo N0/N1.)
 - Analizador `evaluar_v750a.py` con la regla de §6, probado sin red (nulo, placebo y control positivo sobre las 510
   grillas de N), y su verificador limpio.
 - ~~Prueba de equivalencia local de §4.1 escrita antes de la implementación (TDD), roja sobre el `main` de hoy.~~
