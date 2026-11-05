@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 (S173): verificador limpio del #946
+
+- Sonnet, esfuerzo alto, contexto limpio: **MERGEABLE CON CAMBIOS**, sin gravedad 3; 13 hallazgos en `experiments/_s173_aud/ver946/`. Previos: VPR940-01, 02, 07 y 10 arreglados; b-01, b-03 y b-06 en parte. Nuevos de gravedad 2: VPR946-01 (C-cenit y los controles de cenit se calculan pero no llegan al veredicto; el §8.1 del pre-registro manda fila 1; defecto heredado de #940), VPR946-02 (las exigencias de `--cons/--ocr/--osf` y de referencia dentro del repo no tienen aserción: mutaciones X1, X2 y G3 sobreviven), VPR946-03 (el corte exit 3 de `armar_manifiesto` sin aserción, G1 sobrevive). Suite completa y las 42 mutaciones del PR no se repitieron (SIN VERIFICAR por el verificador). Siguiente: arreglar las tres de gravedad 2 en la rama del PR. Además, `s173-paper-privado` y `s173-vpr939-03-v750-2` a la papelera tras revisarlos.
+
 ### 2026-11-05 (S173): merges de #948 y #947, worktrees a la papelera
 
 - **#948** mergeado a main con frase de Nicolás («si a todo lo que recomiendes»), `--match-head-commit 3604c4330`, squash `e6dc323b2`; CI verde. `docs/paper` en main: 0 archivos. El manuscrito vive en el repo privado `vrp-chile-paper`.
