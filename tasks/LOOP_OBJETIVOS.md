@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 (S173): merges de #948 y #947, worktrees a la papelera
+
+- **#948** mergeado a main con frase de Nicolás («si a todo lo que recomiendes»), `--match-head-commit 3604c4330`, squash `e6dc323b2`; CI verde. `docs/paper` en main: 0 archivos. El manuscrito vive en el repo privado `vrp-chile-paper`.
+- **#947** mergeado a la rama `claude/s162-viirs750-2-918174` (no a main), `--match-head-commit 896195e37`, squash `2f1f36272`. CI con 1 falla: `test_mirova_csv_freshness_f49` (el `latest_consolidado.csv` de esa rama tiene 4 días); el PR no toca ese CSV, 2.822 pasan. Falla de datos de la rama, no del parche.
+- **Worktrees a la papelera** (C:/Users/nmend/vrp-wt): s173-retro-paquete, s173-roi-v750-b4, s173-cirrus-s1, ver940, ver940b, ver944, paper-rev. Antes: 0 commits sin subir; INFORME y hallazgos de ver940b y ver944 iguales a los de loop/activo (sha256 sin CR); REVISION_S173 igual a la del repo privado; el resto de la evidencia de los verificadores (33 archivos) quedó en `_archivo_VRP_Chile/evidencia_verificadores_S173_ver940b_ver944.zip` (testzip OK). `git worktree prune` hecho.
+- Verificador limpio del #946 (Sonnet, esfuerzo alto) corriendo en D:/vrp-trabajo/wt/ver946.
+
 ### 2026-11-05 08:37 UTC (S173): PR #946 (seguimiento de #940) y primera captura de mirova-tif-archive
 
 - **#946** en borrador contra main, punta `7df31d9f1` (rama `claude/s173-retro-seguimiento`). VPR940-01 (el «separa» de V750 pasa a control del placebo, sin valor por defecto), VPR940-07, VPR940-10, gravedad 1 de ver940b (02, 03, 05 a 08, 12; 10 y 11 en docstring; 09 sin cambio por sellado), VPR940b-01 (`sorteo_etiquetas` informa SIN PODER), `candado({})` ya no da OK, generadores `armar_manifiesto.py` y `armar_montaje.py`. Suite en árbol quieto sobre `108104480`: 3.217 pasan, 0 fallan. Mutaciones ronda 4: 42 de 42 atrapadas por aserción, control de caída CAE. CI de GitHub en curso al anotar. Seis decisiones para Nicolás en el cuerpo del PR. SIN VERIFICADOR LIMPIO todavía.
