@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 20:23 UTC (S174): las 8 decisiones del bloque S174, #946 mergeado, #912 cerrado
+
+- Frase de Nicolás: «Sí, a todo» (aprueba las 8 recomendaciones de `tasks/BLOQUE_ARRANQUE_S174.md` §b).
+  1. #946 mergeado a main: `gh pr ready` y `gh pr merge --squash --match-head-commit 61910c24d`, squash `f36a8fb98`, CI verde (run 42072413315).
+  2. Lectura del §7 (VPR940b-01): la vía contra K con las etiquetas barajadas, rotulada post hoc.
+  3. Records `sin_grilla` o `sin_mxd03` (VPR940b-04): se tratan como K y se listan como aviso. NO IMPLEMENTADO todavía.
+  4. Un Tier A sin F26 en K: rojo (ya implementado así, confirmado).
+  5. «Separa» en V750: se decide al sellar V750-A, no antes.
+  6. Tags de origen y campos de los tres comparadores de C-montaje: se fijan antes del despacho de D3.
+  7. PR #912 cerrado (la rama queda); su contenido vive en el repo privado `vrp-chile-paper`.
+  8. Ensayo de los controles de cenit con datos reales de DM antes del despacho: sí. Pendiente de correr.
+- #945: sin verificador previo. Verificador limpio (Sonnet, esfuerzo alto) lanzado en `D:/vrp-trabajo/wt/ver945`, carpeta `D:/vrp-trabajo/temporales/s174-ver945` (prompt sha256 `6b3b3b8e`).
+
 ### 2026-11-05 17:28 UTC (S174): alertas del auto-audit #915 y #936 investigadas, sin tocar nada
 
 - Ninguna de las dos se explica por #934 ni por #939. #915 (2026-10-26) es anterior a ambos. #936 corrió a las 19:29:57 del 2026-11-02, dos horas después del merge de #934 (17:18), pero en ese commit (`79f410697`) los JSON tenían 0 records con `via_codigo_mirova: true` (verificado en NevadosDeChillan y Lascar); el primer NRT posterior entró a las 20:15. Las dos juzgaron MODIS con K, bien rotulado.
