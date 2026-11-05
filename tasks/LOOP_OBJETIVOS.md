@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 21:17 UTC (S174): verificador del #945, PR #950, causa del choque M71/M82
+
+- **#945, verificador limpio** (Sonnet, pedido con esfuerzo alto; el agente informa «esfuerzo del arnés 10», SOSPECHA de que el parámetro no llegó, como en S172): MERGEABLE CON CAMBIOS, 8 hallazgos (`D:/vrp-trabajo/temporales/s174-ver945/INFORME.md`). Gravedad 3: VPR945-01 (la sombra dice CUMPLE con 2 noches; nada mira las 4 semanas del §4.3) y VPR945-02 (un volcán fuera de `roi_por_volcan` sale como «otra ROI»; confirmado por la coordinadora en `evaluar_v750a.py` l. 297 a 301). Reprodujo 56/56, MR1 a MR7 7/7, pytest 3.199 pasan. Vuelta del autor (Opus, esfuerzo alto) lanzada en `D:/vrp-trabajo/wt/ver945`, rama local `s174-autor945`.
+- **PR #950**: las cuatro dudas «estado: ver historia» del CLAUDE.md corto resueltas contra main `f36a8fb98` (D21, GAP #A, A85 obsoleta por #883, A100 keep-peak focal sin acción en producción). 13 pruebas que leen CLAUDE.md: 200 pasan. Sin verificador de otro modelo.
+- **Choque M71/M82 de V750-A**: el commit N-3 `a9500912e` (2026-10-31) reescribió la línea 794 de `evaluar_v750a.py` (`n3=True` y la partió en dos); el blanco de M71 y M82 aparece 0 veces y la aserción de `correr()` tumba el medidor entero. 102 de 104 blancos calzan. Arreglo en `D:/vrp-trabajo/wt/s174-v750a-m71` (rama `claude/s174-v750a-m71-m82`, sin commit); medidor `--solo M71,M82` sobre la batería entera corriendo con `evaluar_d25.py` del tag `s161-d25-lectura` (sha256 CRLF `93c26d62`, LF `2e557697`), salida en `D:/vrp-trabajo/temporales/s174-v750a-m71/mutar_m71_m82_salida.txt`.
+- **Preparación MOD-D 11-09**: `guardia_modis_latest.json` (2026-11-05 02:46) VERDE sin avisos, nulo 167 pares 0 distintas, 1 de 29 protegidas, sobre-publicación 0 de 49, Muy Bajo 0 de 0. Recordatorio: rotación de `EARTHDATA_TOKEN` el 2026-11-27.
+
 ### 2026-11-05 20:23 UTC (S174): las 8 decisiones del bloque S174, #946 mergeado, #912 cerrado
 
 - Frase de Nicolás: «Sí, a todo» (aprueba las 8 recomendaciones de `tasks/BLOQUE_ARRANQUE_S174.md` §b).
