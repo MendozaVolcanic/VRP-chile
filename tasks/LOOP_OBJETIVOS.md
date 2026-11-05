@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 ~16:55 UTC (S173): cierre de la sesión
+
+- #946 tercera vuelta del autor: R2-01/02/03 arreglados (R2-03 por sensor, sostenido por la letra del §8.1 «para ese sensor»), punta `61910c24d`, suite 3.232 pasan 0 fallan, mutaciones ronda 6: 5 de 5 atrapadas por aserción con control de caída CAE. CI run 42072413315 en curso al cerrar.
+- Traspaso en `tasks/BLOQUE_ARRANQUE_S174.md` (8 decisiones con recomendación; primera tarea: alertas #936 y #915). Memoria: `project_s173_estado`, `feedback_s173_costo_por_instrucciones` (regla general).
+
 ### 2026-11-05 (S173): #946 arreglado (5facd4a8b) y segunda ronda del verificador
 
 - Arreglos de VPR946-01/02/03 (gravedad 2) más 04, 11 y 05 en parte; punta `5facd4a8b`. Suite 3.226 pasan; g1d y g2c del guard s146 fallaban sólo por temporales en D: (relpath entre discos) y pasan con temporal en C: (7 de 7, corrido por la coordinadora).
