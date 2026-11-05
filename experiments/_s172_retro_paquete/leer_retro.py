@@ -29,7 +29,8 @@ QUÉ REUSA SIN REESCRIBIR (cada archivo se identifica por sha256 con fin de lín
     evaluar_f4.predicado_node. La curva de cenit: experiments/_s162_v375/curva_cenit.py.
 
 LECTURAS DONDE EL TEXTO NO FIJA EL DETALLE (declaradas antes de ver datos; ninguna cambia un umbral):
-  L1. Fila 3 del §8.1 («la regla da NO ADOPTAR o no cumple por P2 PIERDE»): en VIIRS 375 cuenta también P2-L PIERDE y
+  L1. (Nicolás la aprobó tal cual el 2026-11-04, VPR940-07: se mantiene la fila 3.)
+      Fila 3 del §8.1 («la regla da NO ADOPTAR o no cumple por P2 PIERDE»): en VIIRS 375 cuenta también P2-L PIERDE y
       el silencio ENCIENDE DE MÁS, que son la misma pregunta (la vía se equivoca más que K) con las lejanas y con la
       tasa en negativos. Cualquier otro «no cumple» del §9.7 de V375-E que no esté en las filas 2 o 3 va a la fila 4
       (lo no previsto pasa a Nicolás, como en el propio §9.7).
@@ -44,11 +45,25 @@ LECTURAS DONDE EL TEXTO NO FIJA EL DETALLE (declaradas antes de ver datos; ningu
       §5.3 y no decide nada.
 
 ARREGLOS DEL VERIFICADOR LIMPIO DE #940 (Fable 5.1, MERGEABLE CON CAMBIOS, 2026-11-03; informe en
-C:/Users/nmend/vrp-wt/ver940_informe/INFORME.md): VPR940-02 (c_k_puro: K de disco con la marca de la vía es rojo en
-todas las ventanas), 03 (C-K exige la cobertura del K-gemelo que manda D3), 04 (el nulo de runner descuenta las
-excepciones nombradas), 05 (el placebo mira P1 y P2, con las dos causas de L7), 06 (C-montaje validado), 09
-(C-cobertura en R25 por clase del OSF), 11 (sorteo de etiquetas por estrato, §7, informa) y 15 (ENSAYO en cada línea).
-VPR940-01, 07 y 10 esperan decisión de Nicolás y no se tocaron.
+experiments/_s173_aud/ver940/INFORME.md de la rama loop/activo, commit 6e3af852e): VPR940-02 (c_k_puro: K de disco
+con la marca de la vía es rojo en todas las ventanas), 03 (C-K exige la cobertura del K-gemelo que manda D3), 04 (el
+nulo de runner descuenta las excepciones nombradas), 05 (el placebo mira P1 y P2, con las dos causas de L7), 06
+(C-montaje validado), 09 (C-cobertura en R25 por clase del OSF), 11 (sorteo de etiquetas por estrato, §7, informa) y 15
+(ENSAYO en cada línea).
+
+LECTURAS APROBADAS POR NICOLÁS (S173, con la recomendación del coordinador; marca A113 sobre el texto del lector, el
+pre-registro no cambia):
+  VPR940-01. En VIIRS 750 «el comparador separa la vía de K×1,2» es un CONTROL del placebo (§6 PLACEBO), no parte de
+      M: si falla, INDECIDIBLE (fila 1). Qué es «separar» lo fija V750-A cuando se selle; hasta entonces es un
+      parámetro (`--separa-v750`, DEFINICIONES_SEPARA_V750) y la única candidata está marcada PROVISIONAL.
+  VPR940-07. Se mantiene L1: P2-L PIERDE y ENCIENDE DE MAS van a la fila 3.
+  VPR940-10. Un defecto del lector (la vía publica una protegida OSF que K no publica) va a la fila 1, como control.
+
+SEGUNDO VERIFICADOR DE #940 (experiments/_s173_aud/ver940b/ en loop/activo, commit 1f32ef1d1): VPR940b-01 (el sorteo
+de etiquetas dice que no tiene poder; cómo leer el §7 lo decide Nicolás), 02 (c_k usa _nombradas), 03 (una excepción de
+C-K mal formada es rojo, no traza), 05 (esta cabecera cita el repo), 06 (C-montaje por origen y con pasadas de DM), 07
+(volcanes Tier A sin F26 en K y sobras del K-gemelo), 08 (aviso de R25 sin OSF), 10 y 11 (escritos en los docstrings).
+VPR940b-04 (`is True` en K) espera a Nicolás y no se tocó.
 
 LAS DOS PREGUNTAS DEL INSTRUMENTO (§6): (1) si la vía no corriera, C-via da 0 %; si el lector estuviera roto, el nulo
 del lector (K contra K = 0 diferencias; una protegida quitada a la vía = veto; 50 negativos con un cúmulo de cumbre
@@ -56,7 +71,7 @@ inyectado por el predicado = P2 sube en 50) y el placebo lo ven; si K de disco n
 artefactos estuvieran vacíos, C-cobertura da 0 pasadas contra las de K y C-via sale rojo.
 
 Uso: python leer_retro.py --via DIR --k DIR [--kgemelo DIR] --cons CSV --ocr CSV [--osf CSV] --caja-v750 NOMBRE
-     --v750a-sellado {si,no} [--montaje JSON] [--excepciones-ck JSON] [--sin-dato-trozos JSON] [--manifiesto JSON |
+     --v750a-sellado {si,no} [--separa-v750 NOMBRE] [--montaje JSON] [--excepciones-ck JSON] [--sin-dato-trozos JSON] [--manifiesto JSON |
      --ensayo] [--salida JSON]
 Salida: 0 leído; 3 candado o controles en rojo en algún sensor (el veredicto de ese sensor es INDECIDIBLE).
 """
@@ -121,6 +136,8 @@ TOL_CENIT_OSF = 2.0                                # §6 C-cenit
 TOPE_TABLERO_MW = 50000.0                          # L7 de V750-A §7: el tope de magnitud de frontend/index.html
 T_MAX_FILTROS_K = 278.15                           # L7: bajo esto miran la magnitud los filtros de artefacto del tablero
 VOLCANES_F26_ENTEROS_D3 = ("Lascar", "NevadosDeChillan")   # §10.3, D3
+TIER_A = ("Lascar", "PuyehueCordonCaulle", "Lastarria", "Isluga", "Tupungatito", "PlanchonPeteroa", "Chaiten",
+          "Copahue", "Llaima", "Villarrica", "NevadosDeChillan")   # el de plan_trozos.py (lo vigila una prueba)
 DIAS_F26_D3 = 3                                    # §10.3, D3: tres días de F26 de cada otro volcán
 TRAMOS_F26 = ("F26-V", "F26-M", "F26-M3")
 VENTANA_S = 120
@@ -474,8 +491,8 @@ def regla_v750(R, filas, b="V", sellado=False):
     p1, p2 = F4.p1(filas, b), F4.p2(filas, b)
     razon = F4.razon_protegidas(filas, b)
     m_v, m_pl = F4.m(filas, b), F4.m(filas, "placebo")
-    separa = _mejora_d28(m_v) and not _mejora_d28(m_pl)
-    m_ok = bool(razon["en_banda_0_9_1_1"]) and separa
+    # VPR940-01 (aprobado por Nicolás, S173): «el comparador separa» es un control del placebo (c_placebo), no M.
+    m_ok = bool(razon["en_banda_0_9_1_1"])
     if p1["estado"] == "VETADO":
         fila = 2
     elif p2["estado"] == "PIERDE" or (sellado and not m_ok):
@@ -487,9 +504,21 @@ def regla_v750(R, filas, b="V", sellado=False):
     else:
         fila = 6
     return {"p1": p1["estado"], "perdidas_tabla": [(y["vol"], y["dt"]) for y in p1["perdidas"] if not y["solo_ocr"]],
-            "p2": p2["estado"], "B": p2["B"], "neto": p2["neto"], "razon_protegidas": razon, "m_comparador_separa": separa,
+            "p2": p2["estado"], "B": p2["B"], "neto": p2["neto"], "razon_protegidas": razon,
             "m_regla_via": m_v["regla"], "m_regla_placebo": m_pl["regla"], "v750a_sellado": sellado,
             "_fila_regla": fila}
+
+
+def _separa_provisional_d28(R, filas, b):
+    """PROVISIONAL, no es de V750-A: la vía da MEJORA por D-28 (d y d′) y K×1,2 no. Es la lectura con que #940 armó
+    el comparador; V750-A sellado la reemplaza (VPR940-01)."""
+    return _mejora_d28(R.F4.m(filas, b)) and not _mejora_d28(R.F4.m(filas, "placebo"))
+
+
+# VPR940-01: qué es «el comparador separa la vía de K×1,2» (V750-A §6.2) lo fija V750-A al sellarse. Se elige por
+# nombre con --separa-v750, sin valor por defecto. Toda definición que no venga del texto sellado de V750-A lleva el
+# prefijo PROVISIONAL; cuando V750-A se selle, su definición se agrega aquí con su commit y sha256 LF.
+DEFINICIONES_SEPARA_V750 = {"PROVISIONAL_d28_s172": _separa_provisional_d28}
 
 
 def regla_sensor(R, filas, sensor, brazo, sellado_v750=False):
@@ -547,11 +576,15 @@ def c_k_puro(filas):
             "lista": malos[:50]}
 
 
-def cobertura_kgemelo(filas):
+def cobertura_kgemelo(filas, tier_a=None):
     """VPR940-03: el K-gemelo tiene que cubrir lo que manda D3 (§10.3): todas las pasadas de K en DM, todas las de F26
-    de Láscar y de Nevados de Chillán, y en cada otro volcán con F26, al menos tres días de F26 con todas sus pasadas."""
+    de Láscar y de Nevados de Chillán, y en cada otro volcán con F26, al menos tres días de F26 con todas sus pasadas.
+    VPR940b-07: con `tier_a`, un volcán de la lista sin ninguna pasada de K en F26 tampoco cumple D3 (antes se saltaba
+    en silencio); main pasa los 11 Tier A."""
     con_k = [f for f in filas if f.get("k_rec") is not None and f.get("estado") != "sobra_en_via"]
     faltan = []
+    sin_f26 = sorted(set(tier_a or ()) - {f["vol"] for f in con_k if f["tramo"] in TRAMOS_F26})
+    faltan += [("F26", v, "sin pasadas de K en F26") for v in sin_f26]
     dm = [f for f in con_k if f["tramo"] == "DM"]
     if not dm:
         faltan.append("sin pasadas de K en DM")
@@ -567,16 +600,35 @@ def cobertura_kgemelo(filas):
         if len(dias_ok) < DIAS_F26_D3:
             faltan.append(("F26", vol, f"{len(dias_ok)} días cubiertos, se piden {DIAS_F26_D3}"))
     return {"estado": "OK" if not faltan else f"ROJO: el K-gemelo no cubre D3 ({len(faltan)} faltas)",
-            "faltan": faltan[:50]}
+            "faltan": faltan[:50], "volcanes_sin_f26_en_k": sin_f26}
 
 
-def c_k(filas, excepciones=()):
+def sobras_kgemelo(kgem, k):
+    """VPR940b-07: pasadas (dentro de algún tramo) que trae el K-gemelo y no K de disco. armar_pasadas no las ve (itera
+    vía y K), así que se listan aparte en C-K. Informa: C-K mide K de disco contra K de hoy sobre las pasadas de K."""
+    out = []
+    for key in sorted(set(kgem) - set(k), key=lambda x: (x[0], str(x[1]), str(x[2]))):
+        b = bucket(key[1])
+        if b is not None and key[2] and tramo_de(b, str(key[2])[:10]) is not None:
+            out.append(key)
+    return out
+
+
+def _excepcion_valida(e):
+    """VPR940b-03: una excepción nombrada de C-K trae volcán, hora (al minuto) y un sensor reconocible."""
+    return (isinstance(e, dict) and bool(str(e.get("vol") or "").strip()) and len(str(e.get("dt") or "")) >= 16
+            and (bucket(e.get("sensor")) or e.get("b")) in SENSORES)
+
+
+def c_k(filas, excepciones=(), tier_a=None, sobras_kg=()):
     """C-K: K-gemelo contra K de disco, misma publicación y pc.vrp_mw a 0,001 MW, salvo a lo más 3 pasadas nombradas
-    por sensor con su empate de argsort escrito (R-15)."""
+    por sensor con su empate de argsort escrito (R-15). Una excepción mal formada deja C-K en rojo (VPR940b-03)."""
     con = [f for f in filas if f.get("en_kgemelo") and f.get("k_rec") is not None]
     if not con:
         return {"estado": "ROJO: sin K-gemelo", "n": 0}
-    nombradas = {(e["vol"], e["dt"][:16]) for e in excepciones if str(e.get("empate_argsort", "")).strip()}
+    mal_formadas = [e for e in excepciones if not _excepcion_valida(e)]
+    excepciones = [e for e in excepciones if _excepcion_valida(e)]
+    nombradas = _nombradas(excepciones)                          # VPR940b-02: una sola copia de la regla
     por_sensor = collections.Counter(bucket(e.get("sensor")) or e.get("b") for e in excepciones)
     difs = []
     for f in con:
@@ -587,21 +639,26 @@ def c_k(filas, excepciones=()):
     no_expl = [d for d in difs if (d[0], d[1]) not in nombradas]
     excede = {s: n for s, n in por_sensor.items() if n > TOPE_EXCEPCIONES_CK}
     sin_empate = [e for e in excepciones if not str(e.get("empate_argsort", "")).strip()]
-    cob = cobertura_kgemelo(filas)
-    estado = ("OK" if not no_expl and not excede and not sin_empate and cob["estado"] == "OK" else
+    cob = cobertura_kgemelo(filas, tier_a)
+    estado = ("OK" if not no_expl and not excede and not sin_empate and not mal_formadas and cob["estado"] == "OK" else
               f"ROJO: {len(no_expl)} diferencias sin nombrar, tope excedido {excede}, sin empate {len(sin_empate)}, "
-              f"cobertura {cob['estado']}")
+              f"mal formadas {len(mal_formadas)}, cobertura {cob['estado']}")
     return {"estado": estado, "n": len(con), "diferencias": difs[:50], "no_explicadas": no_expl[:50],
-            "cobertura_kgemelo": cob}
+            "excepciones_mal_formadas": [str(e)[:120] for e in mal_formadas[:20]], "cobertura_kgemelo": cob,
+            "sobras_kgemelo": list(sobras_kg)[:50], "n_sobras_kgemelo": len(sobras_kg)}
 
 
 def _nombradas(excepciones):
-    return {(e["vol"], e["dt"][:16]) for e in excepciones if str(e.get("empate_argsort", "")).strip()}
+    """Las pasadas nombradas de C-K (volcán, hora al minuto) que traen el empate de argsort escrito. La usan c_k y
+    nulo_runner (VPR940b-02); una excepción mal formada no nombra nada (VPR940b-03)."""
+    return {(e["vol"], str(e["dt"])[:16]) for e in excepciones
+            if _excepcion_valida(e) and str(e.get("empate_argsort", "")).strip()}
 
 
 def nulo_runner(R, filas, excepciones=()):
     """B = 0 de K-gemelo contra K en P2 (salvo las nombradas de C-K, que ya cuentan en C-K); y el control de que el
-    nulo puede fallar: K-gemelo contra PLACEBO da B mayor que 0 o M distinta."""
+    nulo puede fallar: K-gemelo contra PLACEBO da B mayor que 0 o M distinta. VPR940b-10, escrito: las nombradas salen
+    también del control «puede fallar» y de M del K-gemelo (con a lo más 3 por sensor el efecto es nulo)."""
     nombradas = _nombradas(excepciones)          # VPR940-04: «B = 0 salvo las pasadas nombradas de C-K»
     con = [f for f in _ev(filas) if "KG" in f["_t"] and (f["vol"], f["dt"]) not in nombradas]
     if not con:
@@ -616,8 +673,12 @@ def nulo_runner(R, filas, excepciones=()):
             "mediana_d_placebo": m_pl.get("mediana_d")}
 
 
-def c_placebo(R, filas, sensor):
-    """K×1,2: M de D-28 no da MEJORA (MODIS y 375); en 750 el comparador de V750-A §6.2 separa la vía de K×1,2."""
+def c_placebo(R, filas, sensor, brazo="V", sellado_v750=False, separa_v750=None):
+    """K×1,2: M de D-28 no da MEJORA (MODIS y 375); en 750 el comparador de V750-A §6.2 separa la vía de K×1,2.
+
+    VPR940-01 (aprobado): en 750 «separa» es este control. Sin V750-A sellado no se calcula (la fila 4 ya pone el
+    techo, §8.1); sellado y sin definición (`separa_v750` None), rojo. VPR940b-11, escrito: las discordancias de P1 y
+    P2 se miran pasada por pasada (más estricto que pasar por F4.p2), no por la prueba de signos."""
     m = R.F4.m(filas, "placebo")
     pl = R.F4.p1(filas, "placebo")
     # VPR940-05: P1 y P2 de K×1,2 contra K sin discordancias de publicación, salvo las dos causas de L7 (V750-A §7):
@@ -636,8 +697,18 @@ def c_placebo(R, filas, sensor):
             sin_expl.append((f["vol"], f["dt"], f["lab"]))
     out = {"m_regla": m.get("regla"), "mejora_d28": _mejora_d28(m), "p1_placebo": pl["estado"],
            "discordancias": disc[:50], "discordancias_sin_explicar": sin_expl[:50]}
-    out["estado"] = ("ROJO: el placebo da MEJORA" if out["mejora_d28"] else
-                     f"ROJO: {len(sin_expl)} discordancias de publicación sin causa de L7" if sin_expl else "OK")
+    rojo_m = None
+    if sensor != "VIIRS750":
+        rojo_m = "ROJO: el placebo da MEJORA" if out["mejora_d28"] else None
+    elif not sellado_v750:
+        out["separa_v750"] = "no se calcula: V750-A sin sellar (la fila 4 pone el techo)"
+    elif separa_v750 is None:
+        rojo_m = "ROJO: V750-A sellado y sin definición de «separa» (VPR940-01: --separa-v750)"
+    else:
+        out["separa_v750"] = bool(separa_v750(R, filas, brazo))
+        rojo_m = None if out["separa_v750"] else "ROJO: el comparador no separa la vía de K×1,2 (VPR940-01)"
+    out["estado"] = (rojo_m or
+                     (f"ROJO: {len(sin_expl)} discordancias de publicación sin causa de L7" if sin_expl else "OK"))
     return out
 
 
@@ -694,6 +765,21 @@ def _sintetica(i=0):
             "_t": {b: {"pub": 0, "mag": 0.0} for b in ("K", "placebo") + BRAZOS}}
 
 
+ORIGENES_MONTAJE = ("MOD-D fase 4", "V375-E", "V750-B")     # §6 C-montaje: los A/B donde el código es el mismo
+# PENDIENTE (no se inventa): qué tag de cada A/B es el «tag de origen» del §6 C-montaje. Cuando se fije, va aquí como
+# {origen: tag} y validar_montaje exige esos tres; mientras sea None, sólo exige uno por origen.
+TAGS_MONTAJE_ESPERADOS = None
+
+
+def _pasada_de_dm(p):
+    """'volcán|sensor|AAAA-MM-DD HH:MM' de una pasada del tramo DM (VIIRS sin el 12 ni el 13)."""
+    partes = str(p or "").split("|")
+    if len(partes) != 3 or len(partes[2]) < 10:
+        return False
+    b = bucket(partes[1])
+    return b is not None and tramo_de(b, partes[2][:10]) == "DM"
+
+
 def validar_montaje(d):
     """VPR940-06 (§6 C-montaje, VPR2-09): el resultado externo tiene que traer los tags de origen, el `git diff`
     listado y cada diferencia explicada sólo por un hunk de ese diff (con el hunk escrito) o por otro_granulo. Un
@@ -703,8 +789,13 @@ def validar_montaje(d):
     malas = []
     if not str(d.get("estado", "")).startswith("OK"):
         malas.append("estado no OK")
-    if not (isinstance(d.get("tags"), list) and d["tags"] and all(isinstance(t, str) and t for t in d["tags"])):
-        malas.append("sin tags de origen")
+    tags = d.get("tags")
+    # VPR940b-06: un tag por origen (los tres A/B del §6 C-montaje), no una lista cualquiera
+    if not (isinstance(tags, dict) and set(tags) == set(ORIGENES_MONTAJE)
+            and all(isinstance(t, str) and t.strip() for t in tags.values())):
+        malas.append("sin un tag por origen " + str(ORIGENES_MONTAJE))
+    elif TAGS_MONTAJE_ESPERADOS is not None and tags != TAGS_MONTAJE_ESPERADOS:
+        malas.append("tags de origen distintos de los declarados")
     if not (isinstance(d.get("diff_listado"), str) and d["diff_listado"].strip()):
         malas.append("sin git diff listado")
     difs = d.get("diferencias")
@@ -712,6 +803,9 @@ def validar_montaje(d):
         malas.append("sin lista de diferencias")
         difs = []
     for x in difs:
+        if not _pasada_de_dm((x or {}).get("pasada")):                  # VPR940b-06: sólo pasadas de DM
+            malas.append(("fuera de DM", (x or {}).get("pasada")))
+            continue
         por = (x or {}).get("explicada_por")
         if por == "hunk" and str((x or {}).get("hunk", "")).strip():
             continue
@@ -722,13 +816,25 @@ def validar_montaje(d):
             "n_diferencias": len(difs)}
 
 
-def candado(manifiesto, raiz=RAIZ):
-    """§11: sha256 LF de cada archivo del manifiesto del sello contra el disco, ANTES de leer."""
+# §11: lo que el manifiesto tiene que traer siempre (el lector, lo que importa, el predicado y los perfiles). Las
+# referencias congeladas y el OSF dependen de la corrida: main las agrega desde --cons, --ocr y --osf.
+REQUERIDOS_MANIFIESTO = tuple(sorted(set(MANIFIESTO_REGLAS) | {
+    "experiments/_s172_retro_paquete/leer_retro.py",
+    "scripts/clase_mirova.py", "scripts/banco_paridad.py", "scripts/referencia_mirova_unificada.py",
+    "frontend/index.html", "pipeline/profiles/_s172_retro_paquete.yaml", "pipeline/profiles/_s172_retro_k.yaml"}))
+
+
+def candado(manifiesto, raiz=RAIZ, requeridos=REQUERIDOS_MANIFIESTO):
+    """§11: sha256 LF de cada archivo del manifiesto del sello contra el disco, ANTES de leer. Un manifiesto al que le
+    falta un archivo requerido no es un candado (un {} daba OK)."""
     if manifiesto is None:
         return {"estado": "ROJO: sin manifiesto del sello"}
+    faltan = sorted(set(requeridos) - set(manifiesto))
     malos = {r: (s, sha256_lf(raiz / r) if (raiz / r).exists() else "falta") for r, s in manifiesto.items()
              if not (raiz / r).exists() or sha256_lf(raiz / r) != s}
-    return {"estado": "OK" if not malos else f"ROJO: {len(malos)} archivos distintos del sello", "distintos": malos}
+    estado = ("OK" if not malos and not faltan else
+              f"ROJO: {len(malos)} archivos distintos del sello, {len(faltan)} requeridos fuera del manifiesto")
+    return {"estado": estado, "distintos": malos, "fuera_del_manifiesto": faltan}
 
 
 # ---------------------------------------------------------------- R25 contra el OSF (§4.2, §5.2)
@@ -942,8 +1048,15 @@ def sorteo_etiquetas(R, filas, n=N_BARAJADOS, semilla=SEMILLA):
     tot = float(n) if n else 1.0
     ge = (cuenta["GANA"] + cuenta["EMPATE"]) / tot
     ss = cuenta["SIN SUSTRATO"] / tot
+    # VPR940b-01: con dos brazos iguales (K contra K, o un K-gemelo idéntico a K, que es lo que C-K exige) B = 0 y P2
+    # da SIN SUSTRATO en todos los barajados por construcción: el control no puede variar y su 0 no mide el azar. El
+    # informe lo dice; cómo leer el §7 (por ejemplo, la vía contra K barajada) lo decide Nicolás.
+    poder = ("SIN PODER (VPR940b-01): SIN SUSTRATO en %d de %d barajados (brazos %s); con brazos iguales P2 tiene "
+             "B = 0 por construcción y este control no puede variar. Cómo leer el §7 lo decide Nicolás"
+             % (cuenta["SIN SUSTRATO"], n, "/".join(brazos))
+             if n and cuenta["SIN SUSTRATO"] == n else "puede variar")
     return {"n": n, "brazos": brazos, "gana_o_empate": ge, "sin_sustrato": ss, "otros": 1.0 - ge - ss,
-            "por_estado": dict(cuenta)}
+            "por_estado": dict(cuenta), "poder": poder}
 
 
 def lectura_b(filas, brazo):
@@ -1032,7 +1145,7 @@ def nombre_fila6(filas, osf_res, sensor):
 
 
 def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sellado, caja_v750=None,
-                posicion_v750="radiante", osf_res=None, filas_r25=None):
+                posicion_v750="radiante", osf_res=None, filas_r25=None, separa_v750=None):
     """El veredicto de un sensor: la regla en su tramo que decide, los controles, las condiciones de la fila 4 y lo que
     informa. `filas_todas` son las filas del sensor ya con `_t`."""
     tramo = TRAMO_DECIDE[sensor]
@@ -1045,7 +1158,7 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
     dm = [f for f in filas_todas if f["b"] == sensor and f["tramo"] == "DM"]
     if dm:
         ctl["c_via_dm"] = c_via(dm, "DM")
-    ctl["c_placebo"] = c_placebo(R, filas, sensor)
+    ctl["c_placebo"] = c_placebo(R, filas, sensor, brazo, v750a_sellado, separa_v750)
     ctl["nulo_lector"] = nulo_lector(R, filas, sensor, brazo, predicado, v750a_sellado)
     if sensor == "VIIRS750":
         malas = [(f["vol"], f["dt"]) for f in filas_todas if f["b"] == "VIIRS750" and f.get("_evaluable")
@@ -1055,6 +1168,12 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
                                        "caja": caja_v750, "distintas": malas[:20]})
     if osf_res is not None:
         ctl["c_pareo_osf"] = {"estado": osf_res["c_pareo"]}
+        # VPR940-10 (aprobado): la vía publica una protegida OSF que K no publica; no puede ocurrir (K publica todas,
+        # §5.2), es un defecto del lector y va a la fila 1, no a la 4
+        dfc = osf_res["por_sensor"][sensor]["defecto"]
+        ctl["c_defecto_lector_osf"] = {"estado": "OK" if not dfc else f"ROJO: {len(dfc)} protegidas OSF que la vía "
+                                                                        "publica y K no (defecto del lector)",
+                                       "lista": dfc[:20]}
         if filas_r25 is not None:
             r25s = [f for f in filas_r25 if f["b"] == sensor]
             ctl["c_via_r25"] = c_via(r25s, "R25")
@@ -1067,7 +1186,6 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
                                          and cur[brazo]["razon_doble"].get("veredicto") == "CAE MAS QUE MIROVA")
     if osf_res is not None:
         extra["candidatas_osf"] = osf_res["por_sensor"][sensor]["candidatas"]
-        extra["defecto_lector_osf"] = osf_res["por_sensor"][sensor]["defecto"]
     sin_b = [f for f in filas if not es_pasada_b(f)]
     regla_sin_b = regla_sensor(R, sin_b, sensor, brazo, v750a_sellado)
     extra["cambia_sin_pasadas_b"] = (regla_sin_b["_fila_regla"] != regla["_fila_regla"])
@@ -1122,6 +1240,9 @@ def main(argv=None, predicado=None, reglas=None):
     ap.add_argument("--v750a-sellado", required=True, choices=("si", "no"))
     ap.add_argument("--posicion-v750", default="radiante", choices=("radiante", "cercano", "pico"),
                     help="la del §6 bis de V750-A si corrió; si no, radiante (R-3)")
+    ap.add_argument("--separa-v750", default=None, choices=sorted(DEFINICIONES_SEPARA_V750),
+                    help="definición de «el comparador separa» (VPR940-01); la fija V750-A al sellarse; sin valor por "
+                         "defecto: con V750-A sellado y sin ella, el placebo de 750 queda en rojo")
     ap.add_argument("--montaje", help="resultado externo de C-montaje en DM (L3)")
     ap.add_argument("--excepciones-ck", help="lista nombrada antes de leer F26 (R-15)")
     ap.add_argument("--sin-dato-trozos", help="trozos que fallaron dos veces: [{vol, start, end}]")
@@ -1138,7 +1259,18 @@ def main(argv=None, predicado=None, reglas=None):
     leer = lambda p: json.loads(Path(p).read_text(encoding="utf-8")) if p else None   # noqa: E731
     sin_dato_trozos = leer(a.sin_dato_trozos) or []
     print("PRIMERA LÍNEA: trozos SIN DATO (fallaron dos veces):", sin_dato_trozos or "ninguno")
-    cand = {"estado": "OK (ENSAYO: sin candado, NO DECIDE)"} if a.ensayo else candado(leer(a.manifiesto))
+    avisos = []
+    if not a.osf:                                                   # VPR940b-08
+        avisos.append("R25 sin OSF: no se lee (sin --osf no hay P1-OSF, C-pareo, C-cenit ni C-cobertura de R25)")
+    refs = []
+    for p in (a.cons, a.ocr, a.osf):                                # §11: las referencias también van al manifiesto
+        if p:
+            try:
+                refs.append(Path(p).resolve().relative_to(RAIZ).as_posix())
+            except ValueError:
+                refs.append("FUERA_DEL_REPO:" + str(p))
+    cand = ({"estado": "OK (ENSAYO: sin candado, NO DECIDE)"} if a.ensayo else
+            candado(leer(a.manifiesto), requeridos=REQUERIDOS_MANIFIESTO + tuple(refs)))
     via, rep_v = cargar_carpeta(a.via)
     k, rep_k = cargar_carpeta(a.k)
     kg, _ = cargar_carpeta(a.kgemelo)
@@ -1158,20 +1290,25 @@ def main(argv=None, predicado=None, reglas=None):
     osf_res = p1_osf(filas, leer_osf(a.osf, volc, es_noche)) if a.osf else None
     excepciones = leer(a.excepciones_ck) or []
     comunes = {"candado": cand, "_repetidas": rep_v + rep_k, "c_k_puro": c_k_puro(filas),
-               "c_k": c_k(filas, excepciones), "nulo_runner": nulo_runner(R, filas, excepciones),
+               "c_k": c_k(filas, excepciones, TIER_A, sobras_kgemelo(kg, k)),
+               "nulo_runner": nulo_runner(R, filas, excepciones),
                "c_montaje": validar_montaje(leer(a.montaje))}
     out = {"preregistro": "experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md @ s173-prereg-retro-sellado",
-           "ensayo": bool(a.ensayo), "sin_dato_trozos": sin_dato_trozos,
+           "ensayo": bool(a.ensayo), "sin_dato_trozos": sin_dato_trozos, "avisos": avisos,
            "pasadas_por_tramo": dict(collections.Counter((f["tramo"], f["b"], f["estado"].split(":")[0]) for f in filas).items()),
            "sensores": {}}
     out["pasadas_por_tramo"] = {"|".join(k): v for k, v in out["pasadas_por_tramo"].items()}
     codigo = 0
+    for x in avisos:
+        print("AVISO:", x)
+    separa = DEFINICIONES_SEPARA_V750[a.separa_v750] if a.separa_v750 else None
     for s in SENSORES:
         r = leer_sensor(R, filas, s, comunes, predicado, a.v750a_sellado == "si", a.caja_v750, a.posicion_v750,
-                        osf_res, [f for f in filas if f["tramo"] == "R25"])
+                        osf_res, [f for f in filas if f["tramo"] == "R25"], separa)
         out["sensores"][s] = r
         pref = "ENSAYO (NO DECIDE) " if a.ensayo else ""          # VPR940-15
         print(f"{pref}{s}: fila {r['fila']} | {r['veredicto']} | motivos {r['motivos']}")
+        print(f"{pref}{s}, sorteo de etiquetas del §7 (informa): {r['otros_brazos']['sorteo_etiquetas']['poder']}")
         codigo = max(codigo, 3 if r["fila"] == 1 else 0)
     out["osf"] = osf_res
     out["alertas_de_la_tabla_sin_pasada_nuestra"] = sin_pasada

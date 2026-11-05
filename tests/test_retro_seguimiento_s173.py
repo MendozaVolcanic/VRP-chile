@@ -9,6 +9,7 @@ sin haber mirado. Cada prueba exige que el instrumento pueda dar rojo.
 """
 import hashlib
 import importlib.util
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -19,16 +20,17 @@ ROOT = Path(__file__).resolve().parents[1]
 EXP = ROOT / "experiments" / "_s172_retro_paquete"
 
 
-def _cargar(nombre, archivo):
-    spec = importlib.util.spec_from_file_location(nombre, EXP / archivo)
+def _cargar(nombre, archivo, var):
+    # mutar_leer_retro.py corre esta batería contra una copia mutada (la variable de entorno da su ruta)
+    spec = importlib.util.spec_from_file_location(nombre, os.environ.get(var) or EXP / archivo)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[nombre] = mod
     spec.loader.exec_module(mod)
     return mod
 
 
-AM = _cargar("armar_manifiesto_t", "armar_manifiesto.py")
-MO = _cargar("armar_montaje_t", "armar_montaje.py")
+AM = _cargar("armar_manifiesto_t", "armar_manifiesto.py", "ARMAR_MANIFIESTO_MODULO")
+MO = _cargar("armar_montaje_t", "armar_montaje.py", "ARMAR_MONTAJE_MODULO")
 
 
 def _tag(t):
@@ -85,3 +87,17 @@ def test_montaje_con_comparadores_pendientes_no_puede_salir_ok():
     assert MO.PENDIENTES and not out["estado"].startswith("OK")
     assert L.validar_montaje(out)["estado"].startswith("ROJO")
     assert set(out["tags"]) == set(MO.ORIGENES) and "sin diferencias" in out["diff_listado"]
+
+
+def test_el_manifiesto_sale_del_blob_del_ref_y_no_del_disco(monkeypatch):
+    """Control de que el instrumento puede fallar: si el blob del ref difiere del disco, manda el blob."""
+    monkeypatch.setattr(AM, "_blob", lambda ref, ruta: b"contenido del ref\r\n")
+    m = AM.manifiesto("cualquier-ref", ["scripts/clase_mirova.py"])
+    assert m["scripts/clase_mirova.py"] == hashlib.sha256(b"contenido del ref\n").hexdigest()
+
+
+def test_un_preregistro_cambiado_desde_el_sello_no_es_igual(monkeypatch):
+    monkeypatch.setattr(AM, "_blob", lambda ref, ruta: b"sello" if ref == AM.TAG_SELLO else b"otro texto")
+    assert AM.verificar_preregistro("rama")["igual"] is False
+    monkeypatch.setattr(AM, "_blob", lambda ref, ruta: b"mismo\r\n" if ref == AM.TAG_SELLO else b"mismo\n")
+    assert AM.verificar_preregistro("rama")["igual"] is True          # el fin de línea no cuenta

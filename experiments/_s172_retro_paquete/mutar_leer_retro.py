@@ -72,7 +72,7 @@ MUTACIONES = [
     ("N03a C-K no exige los tres días de F26 (VPR940-03)",
      "        if len(dias_ok) < DIAS_F26_D3:", "        if False:"),
     ("N03b C-K ignora la cobertura del K-gemelo (VPR940-03)",
-     "and not sin_empate and cob[\"estado\"] == \"OK\" else", "and not sin_empate else"),
+     "and not mal_formadas and cob[\"estado\"] == \"OK\" else", "and not mal_formadas else"),
     ("N04 el nulo de runner no descuenta las nombradas (VPR940-04)",
      "if \"KG\" in f[\"_t\"] and (f[\"vol\"], f[\"dt\"]) not in nombradas]", "if \"KG\" in f[\"_t\"]]"),
     ("N05 el placebo no mira P1 ni P2 (VPR940-05)",
@@ -90,6 +90,53 @@ MUTACIONES = [
      "        por[0].append(i)"),
     ("N15 ENSAYO no se ve en la línea impresa (VPR940-15)",
      "        pref = \"ENSAYO (NO DECIDE) \" if a.ensayo else \"\"", "        pref = \"\""),
+    # S173, seguimiento de #940: lecturas aprobadas por Nicolás y hallazgos del segundo verificador
+    ("S01a M de 750 vuelve a exigir que el comparador separe (VPR940-01)",
+     "    m_ok = bool(razon[\"en_banda_0_9_1_1\"])\n",
+     "    m_ok = bool(razon[\"en_banda_0_9_1_1\"]) and _separa_provisional_d28(R, filas, b)\n"),
+    ("S01b 750 sellado sin definición de separa no queda rojo (VPR940-01)",
+     "        rojo_m = \"ROJO: V750-A sellado y sin definición", "        rojo_m = None and \"ROJO: V750-A sellado y sin definición"),
+    ("S01c un comparador que no separa no deja rojo el placebo (VPR940-01)",
+     "rojo_m = None if out[\"separa_v750\"] else", "rojo_m = None if True else"),
+    ("S07a ENCIENDE DE MAS deja de ir a la fila 3 (VPR940-07)",
+     "    elif p2v == \"PIERDE\" or p2lv == \"PIERDE\" or sil == \"ENCIENDE DE MAS\":",
+     "    elif p2v == \"PIERDE\" or p2lv == \"PIERDE\":"),
+    ("S07b P2-L PIERDE deja de ir a la fila 3 (VPR940-07)",
+     "    elif p2v == \"PIERDE\" or p2lv == \"PIERDE\" or sil == \"ENCIENDE DE MAS\":",
+     "    elif p2v == \"PIERDE\" or sil == \"ENCIENDE DE MAS\":"),
+    ("S10 el defecto del lector OSF deja de ser control (VPR940-10)",
+     "ctl[\"c_defecto_lector_osf\"] = {\"estado\": \"OK\" if not dfc else",
+     "ctl[\"c_defecto_lector_osf\"] = {\"estado\": \"OK\" if True else"),
+    ("Sb03 una excepción de C-K mal formada no deja rojo (VPR940b-03)",
+     "and not sin_empate and not mal_formadas and", "and not sin_empate and"),
+    ("Sb06a C-montaje acepta tags sin uno por origen (VPR940b-06)",
+     "isinstance(tags, dict) and set(tags) == set(ORIGENES_MONTAJE)", "isinstance(tags, dict)"),
+    ("Sb06b C-montaje acepta pasadas fuera de DM (VPR940b-06)",
+     "        if not _pasada_de_dm((x or {}).get(\"pasada\")):", "        if False:"),
+    ("Sb07a un volcán Tier A sin F26 en K no cuenta (VPR940b-07)",
+     "    faltan += [(\"F26\", v, \"sin pasadas de K en F26\") for v in sin_f26]", "    pass"),
+    ("Sb07b las sobras del K-gemelo no se listan (VPR940b-07)",
+     "            out.append(key)", "            pass"),
+    ("Sb08 sin aviso de R25 sin OSF (VPR940b-08)",
+     "    if not a.osf:                                                   # VPR940b-08", "    if False:"),
+    ("Sb01a el sorteo devuelve SIN SUSTRATO sin calcular P2 (P11b del verificador, VPR940b-01)",
+     "        cuenta[R.F4.p2(barajar_en_estratos(filas, rng), brazos[0], brazos[1])[\"estado\"]] += 1",
+     "        cuenta[\"SIN SUSTRATO\"] += 1"),
+    ("Sb01b el informe del sorteo nunca dice SIN PODER (VPR940b-01)",
+     "             if n and cuenta[\"SIN SUSTRATO\"] == n else \"puede variar\")",
+     "             if False else \"puede variar\")"),
+    ("Sc1 el candado acepta un manifiesto sin los requeridos (§11)",
+     "    estado = (\"OK\" if not malos and not faltan else", "    estado = (\"OK\" if not malos else"),
+    ("Gm1 el manifiesto lee el disco y no el blob del ref (§11)",
+     "    return {r: sha256_lf_blob(_blob(ref, r)) for r in rutas}",
+     "    return {r: L.sha256_lf(RAIZ / r) for r in rutas}", "armar_manifiesto.py"),
+    ("Gm2 el pre-registro cambiado pasa como igual (§11)",
+     "\"igual\": sello == actual}", "\"igual\": True}", "armar_manifiesto.py"),
+    ("Gmo1 C-montaje sale OK con los comparadores pendientes (§6)",
+     "    estado = \"PENDIENTE: \" + \"; \".join(PENDIENTES) if PENDIENTES else \"OK\"", "    estado = \"OK\"",
+     "armar_montaje.py"),
+    ("Gmo2 C-montaje no compara el VRP (§6)",
+     "        if abs(_vrp(rv) - _vrp(ra)) > TOL_VRP:", "        if False:", "armar_montaje.py"),
     ("CONTROL de caída: NameError en regla_modis (tiene que salir CAE)",
      "    F4 = R.F4\n    x = {\"p1\": F4.p1(filas, b)", "    F4 = R.F4\n    x = {\"p1\": F4_NO_EXISTE.p1(filas, b)"),
 ]
@@ -98,6 +145,8 @@ MUTACIONES = [
 OBJETIVOS = {  # archivo mutado -> (batería, variable de entorno con que la batería carga la copia)
     "leer_retro.py": (BATERIA, "LEER_RETRO_MODULO"),
     "controles_via.py": (RAIZ / "tests" / "test_retro_paquete_workflow_s172.py", "CONTROLES_VIA_MODULO"),
+    "armar_manifiesto.py": (RAIZ / "tests" / "test_retro_seguimiento_s173.py", "ARMAR_MANIFIESTO_MODULO"),
+    "armar_montaje.py": (RAIZ / "tests" / "test_retro_seguimiento_s173.py", "ARMAR_MONTAJE_MODULO"),
 }
 
 
@@ -120,7 +169,11 @@ def correr(nombre, viejo, nuevo, archivo="leer_retro.py"):
                   for e in c if e.tag in ("failure", "error")]
         por_asercion = [x for x in fallas if x[1] == "failure" and x[2].startswith(("AssertionError", "assert"))]
         if por_asercion:
-            return "ATRAPADA", ", ".join(x[0] for x in por_asercion)
+            # VPR940b-12: se cuentan también las pruebas que cayeron por excepción en la misma corrida
+            caidas = [x for x in fallas if x not in por_asercion]
+            return "ATRAPADA", "%s | caídas en la misma corrida: %d%s" % (
+                ", ".join(x[0] for x in por_asercion), len(caidas),
+                (" (" + ", ".join(x[0] for x in caidas[:3]) + ")") if caidas else "")
         if fallas:
             return "CAE", ", ".join(f"{x[0]}:{x[2][:40]}" for x in fallas[:3])
         return "SOBREVIVE", ""
