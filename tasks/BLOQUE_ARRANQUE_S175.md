@@ -11,7 +11,7 @@
 > noche `sens` da 28,1 de 28 días), R2-03 (g1, sin cota inferior 2026-11-03), R2-04 (g1, 5 de 11 mutaciones nuevas
 > sobreviven). Las tres decisiones del autor: coherentes con la letra (PREREGISTRO_V750A.md l. 89 a 95 y 132); la (1)
 > abre R2-01 y R2-02. Falta que Nicolás fije el mínimo de noches distintas (R2-01). Siguiente: tercera vuelta corta del
-> autor sobre R2-01..04 y R3 del verificador. Informe: `D:rp-trabajo	emporales\s174-ver945\INFORME_R2.md`.
+> autor sobre R2-01..04 y R3 del verificador. Informe: `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R2.md`.
 
 ## a. Todo en una pantalla
 
