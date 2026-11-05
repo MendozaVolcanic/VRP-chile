@@ -137,6 +137,8 @@ def test_g7_campo_con_flag_productor_apagado_queda_en_cero(flags_operacionales):
 
 
 # Contrato explícito, no heurística: cada cita file:line que CLAUDE.md usa como evidencia.
+# S173: desde que CLAUDE.md es la versión corta, estas citas viven en docs/CLAUDE_HISTORIA.md
+# (copia íntegra del CLAUDE.md viejo); el contrato sigue siendo el mismo y G8b lee los dos.
 # Al insertar líneas en pipeline/ hay que correr estos números Y los de CLAUDE.md: el guard
 # atrapa el desfase, pero la lista es el contrato y se actualiza a mano (S135: +1 en los tres
 # procesadores al cablear `conditioned=` en las 9 llamadas a second_pass_adjacent).
@@ -193,7 +195,9 @@ def test_g8b_toda_linea_citada_en_claude_md_existe_en_su_archivo():
     Se declara así, con su límite escrito, en vez de dejar un guard que parece cubrir más de lo
     que cubre.
     """
-    md = _leer("CLAUDE.md")
+    # S173: CLAUDE.md pasó a versión corta y las citas archivo:línea quedaron en la historia;
+    # se leen los dos para que el guard siga midiendo las mismas citas.
+    md = "\n".join(_leer(rel) for rel in ("CLAUDE.md", "docs/CLAUDE_HISTORIA.md"))
     n_lineas = {}
     fallos = []
     for base, num in re.findall(r"([A-Za-z0-9_]+\.(?:py|html|yaml|yml|md)):(\d+)", md):
