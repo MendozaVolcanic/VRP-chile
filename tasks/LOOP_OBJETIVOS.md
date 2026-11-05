@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 (S173): CLAUDE.md corto en main (#949)
+
+- **#949** mergeado con frase de Nicolás («Sí, ajusta y mergea»), `--match-head-commit 2c0c8f291`, squash `83c6de6bb`, CI verde (run 42052763258). CLAUDE.md de 160.357 a 30.998 caracteres; la copia íntegra vive en `docs/CLAUDE_HISTORIA.md` (cuerpo idéntico byte a byte al viejo); 110 de 110 A-números presentes (`experiments/_s173_claude_corto/ids_faltantes.py`). Motivo: el archivo se cargaba entero en cada mensaje y cada subagente (unos 40 mil tokens fijos).
+- Traído a `loop/activo` (CLAUDE.md, la historia y el guard s146 de main) para que las sesiones abiertas en esta carpeta carguen el corto. En `loop/activo` el guard s146 da 5 fallas: 4 ya fallaban con el CLAUDE.md viejo (libro desactualizado y mutaciones) y la quinta (G2) cita `scripts/vigilancia_guardia_modis.py`, que existe en main y no en esta rama (996 commits atrás). En main el CI está verde.
+- Dudas del #949 que quedan para una pasada contra el código: estado de D21 con K, GAP #A con el Test 1 apagado, nota vigente de A85 y si corre el keep-peak focal (A100); hoy dicen «estado: ver historia».
+
 ### 2026-11-05 (S173): verificador limpio del #946
 
 - Sonnet, esfuerzo alto, contexto limpio: **MERGEABLE CON CAMBIOS**, sin gravedad 3; 13 hallazgos en `experiments/_s173_aud/ver946/`. Previos: VPR940-01, 02, 07 y 10 arreglados; b-01, b-03 y b-06 en parte. Nuevos de gravedad 2: VPR946-01 (C-cenit y los controles de cenit se calculan pero no llegan al veredicto; el §8.1 del pre-registro manda fila 1; defecto heredado de #940), VPR946-02 (las exigencias de `--cons/--ocr/--osf` y de referencia dentro del repo no tienen aserción: mutaciones X1, X2 y G3 sobreviven), VPR946-03 (el corte exit 3 de `armar_manifiesto` sin aserción, G1 sobrevive). Suite completa y las 42 mutaciones del PR no se repitieron (SIN VERIFICAR por el verificador). Siguiente: arreglar las tres de gravedad 2 en la rama del PR. Además, `s173-paper-privado` y `s173-vpr939-03-v750-2` a la papelera tras revisarlos.
