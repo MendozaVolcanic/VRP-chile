@@ -462,8 +462,10 @@ def detector_de_record(rec, frontera):
 
 
 def _detector_banco(r, frontera, via=None):
-    """`via`: claves (volcán, sensor, 'YYYY-MM-DD HH:MM') de los records MODIS de la vía (claves_via_modis). El banco
-    de paridad no copia `via_codigo_mirova` y no se toca aquí (lo leen instrumentos sellados): se cruza por clave."""
+    """`via`: claves (volcán, sensor, 'YYYY-MM-DD HH:MM') de los records MODIS de la vía (claves_via_modis). Los dicts
+    que devuelve el banco de paridad no traen `via_codigo_mirova` y no se tocan aquí (los leen instrumentos sellados):
+    se cruza por clave. S173 S1 (VPR944-01): la marca sí viaja a node para el predicado del tablero (CAMPOS_JS), así
+    que `pub` ya ve la exención de la vía en los filtros de artefacto térmico; los dicts siguen sin la clave."""
     es_via = bool(via) and (r["vol"], r.get("sensor"), r["dt"].strftime("%Y-%m-%d %H:%M")) in via
     return _detector(bool(r.get("sha")), r["noche"], frontera, via=es_via)
 

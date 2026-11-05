@@ -123,7 +123,9 @@ let USE_F5_CORE = true;
 // S173 S1: los filtros de artefacto termico leen la marca de la via con el modulo compartido (A102); se carga como
 // en el navegador para que el predicado ejecutado sea el mismo.
 let CambioDetector;
-try { CambioDetector = require(require('path').join(require('path').dirname(process.argv[2]), 'cambio_detector.js')); } catch (e) {}
+try { CambioDetector = require(require('path').join(require('path').dirname(process.argv[2]), 'cambio_detector.js')); }
+catch (e) { console.error('aviso banco_paridad: no cargo cambio_detector.js; los filtros de artefacto termico '
+  + 'aplican la regla anterior a S173 a la via codigo MIROVA (' + e.message + ')'); }
 const codigo = [constante('F5_R_CORE_KM'), constante('F5_BT_EXT_K')].concat(
   ['_havKm','mirovaEqVrp','f5CoreMagnitude','mirovaEqVrpCore','mirovaEqVrpDisplay',
    'isCirrusArtifact','isDiffuseFieldArtifact','isThermalArtifact','isValidDetection',
@@ -141,7 +143,14 @@ console.log(JSON.stringify(out));
 
 CAMPOS_JS = ["primary_cluster", "distance_class", "vrp_mw", "vrp_mir_mw", "discarded_reason",
              "triggered_test1", "vrp_vent_mw", "t_max_k", "sensor", "f5_core_vrp_mw",
-             "anomaly_pixels"]
+             "anomaly_pixels",
+             # S173 S1 (VPR944-01): los filtros de artefacto termico del tablero leen la marca de la via «codigo
+             # MIROVA» (cambio_detector.esViaCodigoMirova). Sin esta clave, cargar_nuestros la recortaba antes de
+             # node y un record de la via frio y sobre 10 MW salia no publicado aca y publicado en el navegador.
+             # Solo viaja a node: los dicts que devuelve cargar_nuestros no cambian. Medido sobre main del
+             # 2026-11-05: 0 records cambian (experiments/_s173_cirrus_s1/banco_marca_via/).
+             # Guard: tests/test_banco_pasa_marca_via_s173.py
+             "via_codigo_mirova"]
 
 
 def correr_node(casos):
@@ -154,6 +163,8 @@ def correr_node(casos):
                            capture_output=True, text=True, timeout=600)
         if o.returncode != 0:
             raise RuntimeError("node fallo: " + o.stderr[-1500:])
+        if o.stderr.strip():
+            sys.stderr.write(o.stderr)   # S173 S1 (VPR944-02 en el banco): el aviso del modulo no cae en silencio
         return json.loads(o.stdout)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

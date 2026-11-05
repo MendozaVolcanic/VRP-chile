@@ -1,0 +1,38 @@
+Auto-audit semanal — ventana 2026-09-06 → 2026-11-05 · detector vigente K (datos desde 2025-02-15) · D-9 SN
+  MODIS: decide la vía «código MIROVA» (VIA_MODIS) desde 2026-11-02, primera pasada MODIS de la vía
+  VIIRS750 se juzga desde 2026-11-03 (cese de plataforma, scripts/ceses_esperados.json); 52 noches de MIROVA anteriores van aparte
+  VIIRS375 se juzga desde 2026-11-03 (cese de plataforma, scripts/ceses_esperados.json); 190 noches de MIROVA anteriores van aparte
+  [K] MODIS     recall crater 70.0% publicación 70.0% (n=20)
+  [K] VIIRS750  recall crater None% publicación None% (n=0)
+  [K] VIIRS375  recall crater 100.0% publicación 100.0% (n=3)
+  [VIA_MODIS] MODIS     recall crater 100.0% publicación 100.0% (n=1)
+  [VIA_MODIS] VIIRS750  recall crater None% publicación None% (n=0)
+  [VIA_MODIS] VIIRS375  recall crater None% publicación None% (n=0)
+  [K] magnitud publicada Isluga|VIIRS375                0.846x (n=1)
+      por cenit: z<30 0.846x (n=1)
+  [VIA_MODIS] magnitud publicada NevadosDeChillan|MODIS         1.114x (n=1)
+      por cenit: z50-60 1.114x (n=1)
+  [K] magnitud publicada NevadosDeChillan|VIIRS375      1.17x (n=1)
+      por cenit: z50-60 1.17x (n=1)
+  [K] magnitud publicada PuyehueCordonCaulle|VIIRS375   1.018x (n=1)
+      por cenit: z<30 1.018x (n=1)
+  [K] falsas MODIS     1.2% de 1204 pasadas negativas limpias (sin alarma)
+  [K] falsas VIIRS750  None% de 0 pasadas negativas limpias (sin alarma)
+  [K] falsas VIIRS375  None% de 0 pasadas negativas limpias (sin alarma)
+  [VIA_MODIS] falsas MODIS     0.0% de 19 pasadas negativas limpias (sin alarma)
+  [VIA_MODIS] falsas VIIRS750  None% de 0 pasadas negativas limpias (sin alarma)
+  [VIA_MODIS] falsas VIIRS375  None% de 0 pasadas negativas limpias (sin alarma)
+  protegida sin_publicar [K] Tupungatito VIIRS375 2026-09-28 05:18 MIROVA 2.51 MW
+  protegida sin_publicar [K] Tupungatito VIIRS375 2026-09-29 04:54 MIROVA 1.86 MW
+  protegida sin_publicar [K] PuyehueCordonCaulle VIIRS750 2026-10-10 05:54 MIROVA 1.19 MW
+  protegida sin_publicar [K] NevadosDeChillan MODIS 2026-10-12 07:20 MIROVA 2.18 MW
+  protegida sin_publicar [K] NevadosDeChillan MODIS 2026-10-15 01:05 MIROVA 1.72 MW
+  protegida sin_publicar [K] NevadosDeChillan MODIS 2026-10-25 07:20 MIROVA 3.79 MW
+  protegida sin_publicar [K] NevadosDeChillan MODIS 2026-10-30 07:15 MIROVA 1.0 MW
+APARTE: protegida sin publicar, sin flag: Tupungatito VIIRS375 2026-09-28 05:18 UTC, MIROVA 2.51 MW (detector K; la noche sí se publicó en otra pasada; referencia sospechosa: sólo OCR de Suomi NPP antes del 2026-10-09, la distancia y la clase pueden ser de otra pasada (A119))
+APARTE: protegida sin publicar, sin flag: Tupungatito VIIRS375 2026-09-29 04:54 UTC, MIROVA 1.86 MW (detector K; la noche sí se publicó en otra pasada; referencia sospechosa: sólo OCR de Suomi NPP antes del 2026-10-09, la distancia y la clase pueden ser de otra pasada (A119))
+APARTE: protegida sin publicar, sin flag: PuyehueCordonCaulle VIIRS750 2026-10-10 05:54 UTC, MIROVA 1.19 MW (detector K; la noche sí se publicó en otra pasada; pérdida aceptada: lacolito de Cordón Caulle, FN de VIIRS 750 publicado en VIIRS 375 en la misma pasada; decidido sin cambiar K en #865 y PR #881)
+SIN JUZGAR: VIIRS750 sin juzgar: 0 noches con alerta de MIROVA desde el cese de Suomi NPP (se juzga desde 2026-11-03), bajo el mínimo de 15; su recall no puede dar flag y eso no es estar en banda. Lo anterior al cese (52 noches) está en plataformas.aparte y no decide
+SIN JUZGAR: VIIRS375 sin juzgar: 3 noches con alerta de MIROVA desde el cese de Suomi NPP (se juzga desde 2026-11-03), bajo el mínimo de 15; su recall no puede dar flag y eso no es estar en banda. Lo anterior al cese (190 noches) está en plataformas.aparte y no decide
+SIN JUZGAR: MODIS sin juzgar: 1 noches con alerta de MIROVA desde el cambio de detector a la vía «código MIROVA» (VIA_MODIS, se juzga desde 2026-11-02), bajo el mínimo de 15; su recall no puede dar flag y eso no es estar en banda. Las noches anteriores son de K, están en por_detector.K y no deciden
+VEREDICTO: VERDE
