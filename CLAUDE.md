@@ -8,7 +8,7 @@ Repo: https://github.com/MendozaVolcanic/VRP-chile
 > [`docs/CLAUDE_HISTORIA.md`](docs/CLAUDE_HISTORIA.md)
 > (`C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\docs\CLAUDE_HISTORIA.md`), copia íntegra
 > del CLAUDE.md al commit `80aafc49e`. **Consúltala antes de reabrir un frente cerrado o de citar un número.**
-> Cada regla de abajo dice lo que hoy es verdad y termina con su puntero «detalle: docs/CLAUDE_HISTORIA.md, Ann». Una rebaja nueva
+> Cada regla de abajo dice lo que hoy es verdad y termina con su puntero «(historia: Ann)», que remite a ese archivo. Una rebaja nueva
 > se escribe acá (estado vigente) y, si conserva texto viejo, en la historia (A113).
 
 > ⚖️ **SDA en producción (Resolución CPLT N°372).** Al crear o editar código de detección o clasificación,
@@ -77,7 +77,7 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
   literal» es FALSO (S137).
 - **Kernel dNTI**: `np.mean` de 8 vecinos (D1, S17); en VIIRS 750 MIROVA usa 3 × 3 con el central (S158 R2).
 - MIR sólo nocturno. Bandas: MODIS 21/22 + 31; VIIRS I04/I05; M13/M15. Constantes exactas del paper y cita en
-  todo cambio metodológico. Si dudas de un método, dilo; nunca adivines. detalle: docs/CLAUDE_HISTORIA.md, Reglas científicas.
+  todo cambio metodológico. Si dudas de un método, dilo; nunca adivines. (historia: Reglas científicas)
 
 ## Reglas geométricas S14 (MIROVA-equivalent)
 
@@ -103,111 +103,111 @@ A114) se escribieron con ese camino encendido; desde #850 no corre (D30) y desde
 La lección de método de cada una se conserva; el mecanismo ya no actúa en producción. detalle:
 docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 
-- **A1.** Calibración empírica > derivación teórica: con data pública del mismo grupo (OSF, Zenodo), calcular el coeficiente antes de creerle al paper. detalle: docs/CLAUDE_HISTORIA.md, A1.
-- **A2.** Agotar diagnósticos sobre data en disco antes de reprocesos caros. detalle: docs/CLAUDE_HISTORIA.md, A2.
-- **A3.** Todo campo de distancia documenta desde qué punto mide; usar `final_hotspot_dist_km`. detalle: docs/CLAUDE_HISTORIA.md, A3.
-- **A4.** Un solo juego de umbrales por sensor; la variación por volcán es geometría. ⚠️ S158 R2: en VIIRS 750 MIROVA sí admite píxeles excluidos y ROI desplazables; si excluye algo en Chile es SIN DATO. detalle: docs/CLAUDE_HISTORIA.md, A4.
-- **A5.** Valores MIROVA oficiales (KML, OSF) son datos: usarlos tal cual; divergir sólo con experimentos en `experimental`. detalle: docs/CLAUDE_HISTORIA.md, A5.
-- **A6.** Trazar callers al concluir comportamiento. El ejemplo drifteó (S127): la función hoy es `get_detection_anchor()` (`get_effective_vent` es alias sin llamador, D17); la lección vale entera. detalle: docs/CLAUDE_HISTORIA.md, A6.
-- **A7.** El ejemplo es OBSOLETO (S125; hoy `diag_sigma_bg_k`, `diag_eff_threshold_k`, `diag_nti_std`). Lección: «no calculado» ≠ «calculado pero no persistido». detalle: docs/CLAUDE_HISTORIA.md, A7.
-- **A8.** Verificar data fresca (reprocesar un día con código actual) antes de asumir el problema de un handoff. detalle: docs/CLAUDE_HISTORIA.md, A8.
-- **A9.** MIROVA = Torino + Firenze + Sapienza (Coppola, Laiolo, Massimetti, Campus, Aveni, Cigolini). NO MIROVA: INGV Catania (Di Bella, Del Negro...) ni CNR-IMAA Potenza (NHI). Lista: `~memory/reference_papers_mirova_canonical.md`. detalle: docs/CLAUDE_HISTORIA.md, A9.
-- **A10.** Rebajada en su premisa (S147, D32): `pc.vrp_mw` NO es «lo que MIROVA reporta» (MIROVA suma todos los píxeles alertados). Sigue en pie: `record.vrp_mw` no es el campo correcto; el dashboard publica `f5_core_vrp_mw` en VIIRS 375 (S132) y `pc.vrp_mw` en MODIS y VIIRS 750 (cita vigilada por el guard G8). detalle: docs/CLAUDE_HISTORIA.md, A10.
-- **A11.** Universo MIROVA = CONS + OCR; OCR es complemento; `FALSO_POSITIVO_OCR` es etiqueta del scraper, no de MIROVA. detalle: docs/CLAUDE_HISTORIA.md, A11.
-- **A12.** El ejemplo es FALSO (S128/S131): ΔT reales Láscar 16,9 K, Isluga 8,3 K. ⚠️ S158 R2: «Coppola 2024 L1129» no respalda el kernel-bg. Lección vigente: el patrón térmico decide, validar por A/B (A19). detalle: docs/CLAUDE_HISTORIA.md, A12.
-- **A13.** FALSA (S124): Villarrica no tiene distancia fija 0,84; el campo está cuantizado a la celda de grilla (D15). detalle: docs/CLAUDE_HISTORIA.md, A13.
-- **A14.** Buscar todas las variantes de nombre del CSV (`PlanchonPeteroa`, `Puyehue-Cordon Caulle`, `Nevados de Chillan`). detalle: docs/CLAUDE_HISTORIA.md, A14.
-- **A15.** `timeout >= duración_esperada × 1.3`. detalle: docs/CLAUDE_HISTORIA.md, A15.
-- **A16.** Pre-escribir scripts de audit mientras corren workflows. detalle: docs/CLAUDE_HISTORIA.md, A16.
-- **A17.** OBSOLETA desde S77: `sync-mirova-csv.yml` automatiza el CSV. Ojo (S125): `data/mirova_reference/registro_vrp_ocr.csv` está congelado; el vivo es `.../mirova_v1_snapshot/registro_vrp_ocr.csv`. detalle: docs/CLAUDE_HISTORIA.md, A17.
-- **A18.** Un preview offline no predice la selección de cúmulo: validar con reproc real. detalle: docs/CLAUDE_HISTORIA.md, A18.
-- **A19.** El patrón térmico no es universal (Tupungatito, anillo glaciar, empeora con kernel-bg): decidir por volcán con A/B. detalle: docs/CLAUDE_HISTORIA.md, A19.
-- **A20.** R2 con centroide no aplica a anomalías difusas (PCC); validar por magnitud agregada + geometría (D7). detalle: docs/CLAUDE_HISTORIA.md, A20.
-- **A21.** Las bandas de los gates R2 dependen del régimen (`docs/R2_GATES_BY_REGIME.md`). detalle: docs/CLAUDE_HISTORIA.md, A21.
-- **A22.** PP es bimodal en selección de cúmulo: multi-caso (3 a 5 ALERTAs) y reportar la moda. detalle: docs/CLAUDE_HISTORIA.md, A22.
-- **A23.** D9 reabierta en parte (S146): sigue viva sólo la co-validación del path D sobre fondo frío; gate por `t_bg` descartado; el tope de 5 MW recorta sin medir que lo recortado sea artefacto, el código MIROVA V750 no lo tiene (S158) y bajo K casi no actúa (S160). detalle: docs/CLAUDE_HISTORIA.md, A23.
-- **A24.** El TIF de MIROVA no es VRP por píxel sumable (D6). detalle: docs/CLAUDE_HISTORIA.md, A24.
-- **A25.** `git fetch origin --prune` al inicio; `git log main` local no refleja `origin/main`. detalle: docs/CLAUDE_HISTORIA.md, A25.
-- **A26.** Calidad sobre tokens (Nicolás S70-2): subagentes, skills y verificación sin recortar; evitar re-lecturas, polling y salidas gigantes. detalle: docs/CLAUDE_HISTORIA.md, A26.
-- **A35.** Valores numéricos de notas Vault `ai_generated` se cotejan contra el PDF (UserGuide > Coppola 2025 > papers históricos > Vault). detalle: docs/CLAUDE_HISTORIA.md, A35.
-- **A36.** OBSOLETA desde S102/S103: el pipeline ya no aplica sec³ (nadir fijo); seguirla mete un factor espurio. detalle: docs/CLAUDE_HISTORIA.md, A36.
-- **A37.** MODIS marca saturación con `SI=65533`, VIIRS con el bit 2 del quality flag: leer el UserGuide de cada sensor. detalle: docs/CLAUDE_HISTORIA.md, A37.
-- **A38.** Antes de borrados masivos (>10 archivos o >50 MB): inventario, tag `pre-<scope>-cleanup` + push, confirmación. detalle: docs/CLAUDE_HISTORIA.md, A38.
-- **A39.** Claude mergea PRs con `mergeStateStatus=CLEAN`, checks verdes y 0 regresiones (alta criticidad: confirmar); fallback `gh api --method PUT .../pulls/<N>/merge`. Enmienda S142: «0 checks» recién abierto es SIN DATO (`gh pr checks <N> --watch`); tras editar un documento, `grep -rl <archivo> tests/` y suite completa. detalle: docs/CLAUDE_HISTORIA.md, A39.
-- **A40.** Búsqueda bibliográfica dirigida: manual `investigacion` (OpenAlex) > orquestadores con WebSearch. detalle: docs/CLAUDE_HISTORIA.md, A40.
-- **A41.** `Claude_in_Chrome` sirve para Perplexity Pro navegando a `perplexity.ai/search/new?q=<...>&sources=scholar`. detalle: docs/CLAUDE_HISTORIA.md, A41.
-- **A42.** OBSOLETA desde S74: la causa del HTTP 422 era el «Norway Problem» (A43): quotear `"on":`. detalle: docs/CLAUDE_HISTORIA.md, A42.
-- **A44.** Un worktree dedicado por subagente paralelo que toque git. detalle: docs/CLAUDE_HISTORIA.md, A44.
-- **A45.** Tag defensivo + push y confirmación explícita de Nicolás antes de tocar `pipeline/process_*.py`, `store.py` o `mirova_equivalent.yaml`. detalle: docs/CLAUDE_HISTORIA.md, A45.
-- **A46.** Dos representaciones del punto caliente (`hotspot_*` vs `primary_cluster.*`) son vector de bugs: auditar los gates downstream (F47 H4). detalle: docs/CLAUDE_HISTORIA.md, A46.
-- **A47.** Reproc local nunca paralelo sobre el mismo `data_subdir`; JSON corrupto: `git checkout origin/main -- <archivo>`. detalle: docs/CLAUDE_HISTORIA.md, A47.
-- **A48.** Validar la convención antes de aceptar heurísticas de un subagente (`VIIRS_SNPP/NOAA20/NOAA21` = 375 m; `VIIRS_*_750` = M-band). detalle: docs/CLAUDE_HISTORIA.md, A48.
-- **A49.** Al insertar código entre dos estructuras, revisar con `git diff` que el `return` anterior sigue intacto. detalle: docs/CLAUDE_HISTORIA.md, A49.
-- **A50.** Antes de llamar «pre-existente» a una falla, comparar con `git show origin/main:<archivo>`. detalle: docs/CLAUDE_HISTORIA.md, A50.
-- **A51.** Auditoría completa cada 20 sesiones (`docs/AUDIT_S<N>.md`); con >3 contradicciones, consolidar antes de features. detalle: docs/CLAUDE_HISTORIA.md, A51.
-- **A52.** Worktrees no-main pueden estar atrasados: `git fetch origin --prune && git log --oneline HEAD..origin/main`. detalle: docs/CLAUDE_HISTORIA.md, A52.
-- **A53.** Cap de 12 PRs por sesión (soft) y 20 (hard); persistencia in-vivo de todo hallazgo. detalle: docs/CLAUDE_HISTORIA.md, A53.
-- **A54.** El gap de precisión vs MIROVA es mayormente metodológico (S86: 95,4 % de los «FP» son anomalías reales): clasificar la categoría (a/b/c/d) antes de un «fix de precisión». Matizada por A69 en nevados. detalle: docs/CLAUDE_HISTORIA.md, A54.
-- **A55.** Un gate «intra-radio por path» exige verificar que el frontend no lo hace ya y qué categoría física filtra. detalle: docs/CLAUDE_HISTORIA.md, A55.
-- **A56-A60.** Reglas preventivas NRT (S82) en `docs/META_RULES_S80.md`. detalle: docs/CLAUDE_HISTORIA.md, A56-A60.
-- **A61.** Auditar detección incluye el eje espacial: lat/lon contra el cráter y el TIF de MIROVA, no sólo distancias. detalle: docs/CLAUDE_HISTORIA.md, A61.
-- **A62.** La insistencia del experto es señal: asumir error y refutarlo con datos (Chrome MCP, `../mirova-tif-archive`). detalle: docs/CLAUDE_HISTORIA.md, A62.
-- **A63.** Consolidar config no debe revertir fixes deliberados: revisar `git log -S` y dejar un test de regresión. detalle: docs/CLAUDE_HISTORIA.md, A63.
-- **A64.** Blindar la red NASA en auth y descarga: circuit-breaker por host (#364); ConnectTimeout no se reintenta, ReadTimeout sí. detalle: docs/CLAUDE_HISTORIA.md, A64.
-- **A65.** Hangs de CI: instrumentar con markers `print(..., flush=True)` por etapa antes de adivinar el fix. detalle: docs/CLAUDE_HISTORIA.md, A65.
-- **A66.** Nadir fijo adoptado en MODIS (#354), pero no es «clon literal» (S138): el paper remuestrea a 1 km (`ENABLE_UTM_REGRID = False`, D17 abierta). Lección vigente: A/B de 3 brazos con criterio pre-registrado. detalle: docs/CLAUDE_HISTORIA.md, A66.
-- **A67.** Nadir fijo VIIRS adoptado (#368, #373), misma salvedad D17. Cambiar área o escala cambia también la detección: verificar FN por record. detalle: docs/CLAUDE_HISTORIA.md, A67.
-- **A68.** Ante «sobre-detección», separar display de over-detección real; el proxy `t_bg<270K` está contaminado por altitud. detalle: docs/CLAUDE_HISTORIA.md, A68.
-- **A69.** Los paths de MIR absoluto son vulnerables al gradiente topográfico de los nevados; el NTI lo atenúa pero no lo cancela (S128), el ETI sí. El Test 1 integrado que culpaba está apagado desde #850; parte del mecanismo puede seguir por D22 (SOSPECHA). `compute_test1_nti` está flag-OFF (S125). Pregunta siempre: ¿MIR absoluto o NTI? detalle: docs/CLAUDE_HISTORIA.md, A69.
-- **A70.** Auditar el offset direccional con mediana (Δlat, Δlon, rumbos), por sensor y por path. detalle: docs/CLAUDE_HISTORIA.md, A70.
-- **A71.** Probes con reintentos pueden bloquear la cuenta Earthdata; nunca manipular credenciales de Nicolás. detalle: docs/CLAUDE_HISTORIA.md, A71.
-- **A72.** Fix de algoritmo sobre fix de display: artefacto → no generarlo; señal real sub-umbral (cat-b) → display legítimo. detalle: docs/CLAUDE_HISTORIA.md, A72.
-- **A73.** Gatear decisiones binarias sobre el first-pass dentro del inner, no sobre agregados contaminados. detalle: docs/CLAUDE_HISTORIA.md, A73.
-- **A74.** Verificar el índice absoluto antes de concluir «normalización rota». detalle: docs/CLAUDE_HISTORIA.md, A74.
-- **A75.** Probe de atribución por etapa con monkeypatch read-only. detalle: docs/CLAUDE_HISTORIA.md, A75.
-- **A76.** MIROVA publica artefactos solares diurnos en su producto por volcán: OCR VIIRS 375 alto en pasada diurna cerca del mediodía es sospechoso. La cita «Coppola 2023 §2.5, ~5 %» está CORRUPTA (S146). ⚠️ S158: VIIRS 750 sí tiene gate automático (sun-glint bajo 12°). detalle: docs/CLAUDE_HISTORIA.md, A76.
-- **A77.** «Erupciona pero VRP no lo ve»: revisar MIROVA OLI/MSI (SWIR alta resolución, NHI); el foco puede ser sub-píxel. detalle: docs/CLAUDE_HISTORIA.md, A77.
-- **A78.** Explosiva ≠ efusiva: escanear `nti_max` multi-sensor antes de concluir FN. detalle: docs/CLAUDE_HISTORIA.md, A78.
-- **A79.** Al adoptar un parámetro, verificar el evento específico que lo motivó, no sólo la métrica agregada. detalle: docs/CLAUDE_HISTORIA.md, A79.
-- **A80.** `nti_max` plano (~-0,9) sirve de sanity check, pero NO discrimina real de artefacto (S116, AUC 0,251). detalle: docs/CLAUDE_HISTORIA.md, A80.
-- **A81.** El bug A46 es bidireccional: medir ambas caras contra MIROVA y preferir el fix unidireccional. El 2.527 es del corpus de junio (A90); el «NO destapar» NdC hereda la rebaja de A82. detalle: docs/CLAUDE_HISTORIA.md, A81.
-- **A82.** El «irreducible / agotado» NO vale: rebajado en S124 (eje geométrico, D17), S138 (sólo bajo banda 21 y D22), S146 (sin tasa base), S151 (banda 22 en Láscar) y S157 (K en MODIS fuera de Láscar); MODIS cambió de vía en S172. Qué hacer con D11 lo decide Nicolás. detalle: docs/CLAUDE_HISTORIA.md, A82.
-- **A83.** Rebajada (S146): el AUC 0,859 no tiene script y su etiqueta es «MIROVA publicó» (re-medido 0,762; 0,554 dentro de volcán y sensor). No apaga la búsqueda de un discriminante real vs artefacto. detalle: docs/CLAUDE_HISTORIA.md, A83.
-- **A84.** Lo medido sigue (ctx_cluster de Llaima y Lastarria indistinguibles; A/B de S106 descartado); el «irreducible» heredado de A82 no. detalle: docs/CLAUDE_HISTORIA.md, A84.
-- **A85.** Lección vigente: medir el daño antes de agregar una cerca geométrica. El «0 robos en 214» está observado (B-03); bajo la regla de la anomalía mayor (Nicolás, 2026-10-09) un cúmulo lejano más fuerte no es robo. Nota S153 sobre MODIS ene-jun 2026 tras #883: estado: ver historia. detalle: docs/CLAUDE_HISTORIA.md, A85.
-- **A86.** Anclar «hoy» a la hora del servidor (`gh api -i <repo>` → header `Date`). detalle: docs/CLAUDE_HISTORIA.md, A86.
-- **A87.** El ejemplo quedó SIN VERIFICAR (S146), no usarlo como evidencia (D31). Lección vigente: un flag que se apaga no prueba que el problema se fue; verificar el mecanismo en los records. detalle: docs/CLAUDE_HISTORIA.md, A87.
-- **A88.** Data que pasa a alimentar el frontend deja de ser descartable en el mismo PR. detalle: docs/CLAUDE_HISTORIA.md, A88.
-- **A89.** «No aparece» casi nunca significa que no esté: trazar cómo lo lee el código; flags desde `pipeline.profile`, nunca del YAML. detalle: docs/CLAUDE_HISTORIA.md, A89.
-- **A90.** Un conteo absoluto sobre un corpus vivo no se compara entre sesiones: registrar proporción y ventana (el corpus crece también hacia atrás). detalle: docs/CLAUDE_HISTORIA.md, A90.
-- **A92.** Un guard por subcadena da falso verde: exigir frontera de palabra y barrer con `experiments/_s133/auditar_guards_por_subcadena.py`. detalle: docs/CLAUDE_HISTORIA.md, A92.
-- **A93.** Un radio no es una posición; «verdes» no es una ventana; un pareo no es el conjunto que dice contar. detalle: docs/CLAUDE_HISTORIA.md, A93.
-- **A94.** Un caso de referencia justifica investigar, no priorizar; medir en la unidad del operador (la noche). detalle: docs/CLAUDE_HISTORIA.md, A94.
-- **A95.** Un cierre hereda las premisas de su lectura: comprobarla en el PDF renderizado a imagen (`get_pixmap(dpi=200)`), no en la capa de texto. detalle: docs/CLAUDE_HISTORIA.md, A95.
-- **A96.** Nunca `git stash pop` sin mirar `git stash list`; `git cherry` da falsos «sin integrar» con squash: verificar por contenido. detalle: docs/CLAUDE_HISTORIA.md, A96.
-- **A97.** Atribuir un mecanismo simulando la etapa siguiente con el predicado literal del dashboard. detalle: docs/CLAUDE_HISTORIA.md, A97.
-- **A98.** La brecha de paridad es sobre-publicación, no recall (874 de 877 noches); toda métrica lleva negativos limpios. detalle: docs/CLAUDE_HISTORIA.md, A98.
-- **A99.** Rebajada (S146): el 0,995 es producto de dos factores opuestos y compensa entre volcanes (0,66 a 1,39); ya no apaga la búsqueda en k, área, banda o Planck. detalle: docs/CLAUDE_HISTORIA.md, A99.
-- **A100.** Con K el `keep_peak` del Test 1 no actúa (0 records con fuente `test1`/`test1_roi` desde #883); el «nunca apagarlo solo» valía para el detector anterior. El keep-peak focal (`FOCAL_CLUSTER_KEEP_PEAK`) es otro mecanismo y seguía corriendo al S165. detalle: docs/CLAUDE_HISTORIA.md, A100.
-- **A101.** Las citas `file:line` se remapean por contenido (`scripts/remapear_citas.py`), salvo las históricas deliberadas (A6, A49). detalle: docs/CLAUDE_HISTORIA.md, A101.
-- **A102.** Al corregir una función, buscar también las copias en línea de su lógica. detalle: docs/CLAUDE_HISTORIA.md, A102.
-- **A103.** La pérdida de vecinos tibios está en la detección, no en el ensamblado (dETI 52 de 52; BT 18 de 18). detalle: docs/CLAUDE_HISTORIA.md, A103.
-- **A104.** Una métrica con ventana que cruza #535 (2026-08-28 23:00 UTC) mezcla dos regímenes: medir por tramo. detalle: docs/CLAUDE_HISTORIA.md, A104.
-- **A105.** El OSF v2.5 NO está supervisado a mano (Coppola et al. 2026, Sci. Data p. 7): sus conteos no valen para el NRT. detalle: docs/CLAUDE_HISTORIA.md, A105.
-- **A106.** Corregida (S144): GeoTIFF VIIRS 375 de MIROVA en UTM nativo sólo del 2026-09-14 06:36 al 2026-09-15 06:24, después EPSG:4326; leer la hora de adquisición y desconfiar de md5 repetidos. detalle: docs/CLAUDE_HISTORIA.md, A106.
-- **A107.** Una cota de distancia escalar sirve para descartar, no para identificar el objeto. detalle: docs/CLAUDE_HISTORIA.md, A107.
-- **A108.** Un run 100 % verde no prueba cobertura pareja: contar pasadas por brazo (`bajar_tramos.py --estricto`). detalle: docs/CLAUDE_HISTORIA.md, A108.
-- **A109.** Medir contra un producto del mismo gránulo infla por selección: usar otra pasada de la misma noche (45 a 120 min). detalle: docs/CLAUDE_HISTORIA.md, A109.
-- **A110.** Un control se valida midiendo su nulo sobre datos sin nada que detectar; preferir controles que se cancelan por construcción. detalle: docs/CLAUDE_HISTORIA.md, A110.
-- **A111.** Un cierre sin respaldo citable es una creencia: correr el script, pedir numerador, denominador y ventana; sin respaldo ≠ refutado. detalle: docs/CLAUDE_HISTORIA.md, A111.
-- **A112.** Una línea base se corre sobre un árbol quieto; si hubo edición durante la corrida, se descarta. detalle: docs/CLAUDE_HISTORIA.md, A112.
-- **A113.** Una rebaja se propaga a los hijos en el mismo PR (`grep` de número, frase e ID), con marca al inicio y el texto viejo conservado. detalle: docs/CLAUDE_HISTORIA.md, A113.
-- **A114.** Una palanca que satura la métrica esconde las demás: estratificar antes de medir. detalle: docs/CLAUDE_HISTORIA.md, A114.
-- **A115.** Un umbral se le pregunta a la referencia: `mirova_equivalent` contra MIROVA; `experimental` contra OVDAS y SWIR. detalle: docs/CLAUDE_HISTORIA.md, A115.
-- **A116.** Medir cuántos casos mueve un cambio antes de llamarlo arreglo, y que el instrumento puede dar ≠ 0 antes de creerle a un cero. detalle: docs/CLAUDE_HISTORIA.md, A116.
-- **A117.** Un perfil derivado se vigila por dirección (`tests/test_guard_laboratorio_no_mas_ciego_s147.py`). ⚠️ S157: el laboratorio NO es idéntico al operacional: quedó con el detector anterior y en MODIS ve menos (6 de 39 protegidas contra 39 de 39); el guard sólo compara pisos. detalle: docs/CLAUDE_HISTORIA.md, A117.
-- **A118.** Un flag de umbral o geometría llega a todos sus consumidores (caja ROI1 al segundo pase, arreglado S149); un evaluador sólo ve los estratos que etiqueta. ⚠️ S160: la caja, medida en S151 sobre K, NO CUMPLE (veto). detalle: docs/CLAUDE_HISTORIA.md, A118.
-- **A119.** Antes de usar los CSV de MIROVA, mirar desde cuándo sirve cada canal (tabla sana desde marzo; OCR mal calibrado hasta 2026-06-11; VIIRS por pasada desde abril; enero no se usa; hitos en `scripts/calidad_referencia_mirova.py`). ⚠️ S151: el «86 % en enero» era Tupungatito en el denominador; «0 alertas MODIS dependen del OCR» es falso, son 5 hoy. detalle: docs/CLAUDE_HISTORIA.md, A119.
+- **A1.** Calibración empírica > derivación teórica: con data pública del mismo grupo (OSF, Zenodo), calcular el coeficiente antes de creerle al paper. (historia: A1)
+- **A2.** Agotar diagnósticos sobre data en disco antes de reprocesos caros. (historia: A2)
+- **A3.** Todo campo de distancia documenta desde qué punto mide; usar `final_hotspot_dist_km`. (historia: A3)
+- **A4.** Un solo juego de umbrales por sensor; la variación por volcán es geometría. ⚠️ S158 R2: en VIIRS 750 MIROVA sí admite píxeles excluidos y ROI desplazables; si excluye algo en Chile es SIN DATO. (historia: A4)
+- **A5.** Valores MIROVA oficiales (KML, OSF) son datos: usarlos tal cual; divergir sólo con experimentos en `experimental`. (historia: A5)
+- **A6.** Trazar callers al concluir comportamiento. El ejemplo drifteó (S127): la función hoy es `get_detection_anchor()` (`get_effective_vent` es alias sin llamador, D17); la lección vale entera. (historia: A6)
+- **A7.** El ejemplo es OBSOLETO (S125; hoy `diag_sigma_bg_k`, `diag_eff_threshold_k`, `diag_nti_std`). Lección: «no calculado» ≠ «calculado pero no persistido». (historia: A7)
+- **A8.** Verificar data fresca (reprocesar un día con código actual) antes de asumir el problema de un handoff. (historia: A8)
+- **A9.** MIROVA = Torino + Firenze + Sapienza (Coppola, Laiolo, Massimetti, Campus, Aveni, Cigolini). NO MIROVA: INGV Catania (Di Bella, Del Negro...) ni CNR-IMAA Potenza (NHI). Lista: `~memory/reference_papers_mirova_canonical.md`. (historia: A9)
+- **A10.** Rebajada en su premisa (S147, D32): `pc.vrp_mw` NO es «lo que MIROVA reporta» (MIROVA suma todos los píxeles alertados). Sigue en pie: `record.vrp_mw` no es el campo correcto; el dashboard publica `f5_core_vrp_mw` en VIIRS 375 (S132) y `pc.vrp_mw` en MODIS y VIIRS 750 (cita vigilada por el guard G8). (historia: A10)
+- **A11.** Universo MIROVA = CONS + OCR; OCR es complemento; `FALSO_POSITIVO_OCR` es etiqueta del scraper, no de MIROVA. (historia: A11)
+- **A12.** El ejemplo es FALSO (S128/S131): ΔT reales Láscar 16,9 K, Isluga 8,3 K. ⚠️ S158 R2: «Coppola 2024 L1129» no respalda el kernel-bg. Lección vigente: el patrón térmico decide, validar por A/B (A19). (historia: A12)
+- **A13.** FALSA (S124): Villarrica no tiene distancia fija 0,84; el campo está cuantizado a la celda de grilla (D15). (historia: A13)
+- **A14.** Buscar todas las variantes de nombre del CSV (`PlanchonPeteroa`, `Puyehue-Cordon Caulle`, `Nevados de Chillan`). (historia: A14)
+- **A15.** `timeout >= duración_esperada × 1.3`. (historia: A15)
+- **A16.** Pre-escribir scripts de audit mientras corren workflows. (historia: A16)
+- **A17.** OBSOLETA desde S77: `sync-mirova-csv.yml` automatiza el CSV. Ojo (S125): `data/mirova_reference/registro_vrp_ocr.csv` está congelado; el vivo es `.../mirova_v1_snapshot/registro_vrp_ocr.csv`. (historia: A17)
+- **A18.** Un preview offline no predice la selección de cúmulo: validar con reproc real. (historia: A18)
+- **A19.** El patrón térmico no es universal (Tupungatito, anillo glaciar, empeora con kernel-bg): decidir por volcán con A/B. (historia: A19)
+- **A20.** R2 con centroide no aplica a anomalías difusas (PCC); validar por magnitud agregada + geometría (D7). (historia: A20)
+- **A21.** Las bandas de los gates R2 dependen del régimen (`docs/R2_GATES_BY_REGIME.md`). (historia: A21)
+- **A22.** PP es bimodal en selección de cúmulo: multi-caso (3 a 5 ALERTAs) y reportar la moda. (historia: A22)
+- **A23.** D9 reabierta en parte (S146): sigue viva sólo la co-validación del path D sobre fondo frío; gate por `t_bg` descartado; el tope de 5 MW recorta sin medir que lo recortado sea artefacto, el código MIROVA V750 no lo tiene (S158) y bajo K casi no actúa (S160). (historia: A23)
+- **A24.** El TIF de MIROVA no es VRP por píxel sumable (D6). (historia: A24)
+- **A25.** `git fetch origin --prune` al inicio; `git log main` local no refleja `origin/main`. (historia: A25)
+- **A26.** Calidad sobre tokens (Nicolás S70-2): subagentes, skills y verificación sin recortar; evitar re-lecturas, polling y salidas gigantes. (historia: A26)
+- **A35.** Valores numéricos de notas Vault `ai_generated` se cotejan contra el PDF (UserGuide > Coppola 2025 > papers históricos > Vault). (historia: A35)
+- **A36.** OBSOLETA desde S102/S103: el pipeline ya no aplica sec³ (nadir fijo); seguirla mete un factor espurio. (historia: A36)
+- **A37.** MODIS marca saturación con `SI=65533`, VIIRS con el bit 2 del quality flag: leer el UserGuide de cada sensor. (historia: A37)
+- **A38.** Antes de borrados masivos (>10 archivos o >50 MB): inventario, tag `pre-<scope>-cleanup` + push, confirmación. (historia: A38)
+- **A39.** Claude mergea PRs con `mergeStateStatus=CLEAN`, checks verdes y 0 regresiones (alta criticidad: confirmar); fallback `gh api --method PUT .../pulls/<N>/merge`. Enmienda S142: «0 checks» recién abierto es SIN DATO (`gh pr checks <N> --watch`); tras editar un documento, `grep -rl <archivo> tests/` y suite completa. (historia: A39)
+- **A40.** Búsqueda bibliográfica dirigida: manual `investigacion` (OpenAlex) > orquestadores con WebSearch. (historia: A40)
+- **A41.** `Claude_in_Chrome` sirve para Perplexity Pro navegando a `perplexity.ai/search/new?q=<...>&sources=scholar`. (historia: A41)
+- **A42.** OBSOLETA desde S74: la causa del HTTP 422 era el «Norway Problem» (A43): quotear `"on":`. (historia: A42)
+- **A44.** Un worktree dedicado por subagente paralelo que toque git. (historia: A44)
+- **A45.** Tag defensivo + push y confirmación explícita de Nicolás antes de tocar `pipeline/process_*.py`, `store.py` o `mirova_equivalent.yaml`. (historia: A45)
+- **A46.** Dos representaciones del punto caliente (`hotspot_*` vs `primary_cluster.*`) son vector de bugs: auditar los gates downstream (F47 H4). (historia: A46)
+- **A47.** Reproc local nunca paralelo sobre el mismo `data_subdir`; JSON corrupto: `git checkout origin/main -- <archivo>`. (historia: A47)
+- **A48.** Validar la convención antes de aceptar heurísticas de un subagente (`VIIRS_SNPP/NOAA20/NOAA21` = 375 m; `VIIRS_*_750` = M-band). (historia: A48)
+- **A49.** Al insertar código entre dos estructuras, revisar con `git diff` que el `return` anterior sigue intacto. (historia: A49)
+- **A50.** Antes de llamar «pre-existente» a una falla, comparar con `git show origin/main:<archivo>`. (historia: A50)
+- **A51.** Auditoría completa cada 20 sesiones (`docs/AUDIT_S<N>.md`); con >3 contradicciones, consolidar antes de features. (historia: A51)
+- **A52.** Worktrees no-main pueden estar atrasados: `git fetch origin --prune && git log --oneline HEAD..origin/main`. (historia: A52)
+- **A53.** Cap de 12 PRs por sesión (soft) y 20 (hard); persistencia in-vivo de todo hallazgo. (historia: A53)
+- **A54.** El gap de precisión vs MIROVA es mayormente metodológico (S86: 95,4 % de los «FP» son anomalías reales): clasificar la categoría (a/b/c/d) antes de un «fix de precisión». Matizada por A69 en nevados. (historia: A54)
+- **A55.** Un gate «intra-radio por path» exige verificar que el frontend no lo hace ya y qué categoría física filtra. (historia: A55)
+- **A56-A60.** Reglas preventivas NRT (S82) en `docs/META_RULES_S80.md`. (historia: A56-A60)
+- **A61.** Auditar detección incluye el eje espacial: lat/lon contra el cráter y el TIF de MIROVA, no sólo distancias. (historia: A61)
+- **A62.** La insistencia del experto es señal: asumir error y refutarlo con datos (Chrome MCP, `../mirova-tif-archive`). (historia: A62)
+- **A63.** Consolidar config no debe revertir fixes deliberados: revisar `git log -S` y dejar un test de regresión. (historia: A63)
+- **A64.** Blindar la red NASA en auth y descarga: circuit-breaker por host (#364); ConnectTimeout no se reintenta, ReadTimeout sí. (historia: A64)
+- **A65.** Hangs de CI: instrumentar con markers `print(..., flush=True)` por etapa antes de adivinar el fix. (historia: A65)
+- **A66.** Nadir fijo adoptado en MODIS (#354), pero no es «clon literal» (S138): el paper remuestrea a 1 km (`ENABLE_UTM_REGRID = False`, D17 abierta). Lección vigente: A/B de 3 brazos con criterio pre-registrado. (historia: A66)
+- **A67.** Nadir fijo VIIRS adoptado (#368, #373), misma salvedad D17. Cambiar área o escala cambia también la detección: verificar FN por record. (historia: A67)
+- **A68.** Ante «sobre-detección», separar display de over-detección real; el proxy `t_bg<270K` está contaminado por altitud. (historia: A68)
+- **A69.** Los paths de MIR absoluto son vulnerables al gradiente topográfico de los nevados; el NTI lo atenúa pero no lo cancela (S128), el ETI sí. El Test 1 integrado que culpaba está apagado desde #850; parte del mecanismo puede seguir por D22 (SOSPECHA). `compute_test1_nti` está flag-OFF (S125). Pregunta siempre: ¿MIR absoluto o NTI? (historia: A69)
+- **A70.** Auditar el offset direccional con mediana (Δlat, Δlon, rumbos), por sensor y por path. (historia: A70)
+- **A71.** Probes con reintentos pueden bloquear la cuenta Earthdata; nunca manipular credenciales de Nicolás. (historia: A71)
+- **A72.** Fix de algoritmo sobre fix de display: artefacto → no generarlo; señal real sub-umbral (cat-b) → display legítimo. (historia: A72)
+- **A73.** Gatear decisiones binarias sobre el first-pass dentro del inner, no sobre agregados contaminados. (historia: A73)
+- **A74.** Verificar el índice absoluto antes de concluir «normalización rota». (historia: A74)
+- **A75.** Probe de atribución por etapa con monkeypatch read-only. (historia: A75)
+- **A76.** MIROVA publica artefactos solares diurnos en su producto por volcán: OCR VIIRS 375 alto en pasada diurna cerca del mediodía es sospechoso. La cita «Coppola 2023 §2.5, ~5 %» está CORRUPTA (S146). ⚠️ S158: VIIRS 750 sí tiene gate automático (sun-glint bajo 12°). (historia: A76)
+- **A77.** «Erupciona pero VRP no lo ve»: revisar MIROVA OLI/MSI (SWIR alta resolución, NHI); el foco puede ser sub-píxel. (historia: A77)
+- **A78.** Explosiva ≠ efusiva: escanear `nti_max` multi-sensor antes de concluir FN. (historia: A78)
+- **A79.** Al adoptar un parámetro, verificar el evento específico que lo motivó, no sólo la métrica agregada. (historia: A79)
+- **A80.** `nti_max` plano (~-0,9) sirve de sanity check, pero NO discrimina real de artefacto (S116, AUC 0,251). (historia: A80)
+- **A81.** El bug A46 es bidireccional: medir ambas caras contra MIROVA y preferir el fix unidireccional. El 2.527 es del corpus de junio (A90); el «NO destapar» NdC hereda la rebaja de A82. (historia: A81)
+- **A82.** El «irreducible / agotado» NO vale: rebajado en S124 (eje geométrico, D17), S138 (sólo bajo banda 21 y D22), S146 (sin tasa base), S151 (banda 22 en Láscar) y S157 (K en MODIS fuera de Láscar); MODIS cambió de vía en S172. Qué hacer con D11 lo decide Nicolás. (historia: A82)
+- **A83.** Rebajada (S146): el AUC 0,859 no tiene script y su etiqueta es «MIROVA publicó» (re-medido 0,762; 0,554 dentro de volcán y sensor). No apaga la búsqueda de un discriminante real vs artefacto. (historia: A83)
+- **A84.** Lo medido sigue (ctx_cluster de Llaima y Lastarria indistinguibles; A/B de S106 descartado); el «irreducible» heredado de A82 no. (historia: A84)
+- **A85.** Lección vigente: medir el daño antes de agregar una cerca geométrica. El «0 robos en 214» está observado (B-03); bajo la regla de la anomalía mayor (Nicolás, 2026-10-09) un cúmulo lejano más fuerte no es robo. Nota S153 sobre MODIS ene-jun 2026 tras #883: estado: ver historia. (historia: A85)
+- **A86.** Anclar «hoy» a la hora del servidor (`gh api -i <repo>` → header `Date`). (historia: A86)
+- **A87.** El ejemplo quedó SIN VERIFICAR (S146), no usarlo como evidencia (D31). Lección vigente: un flag que se apaga no prueba que el problema se fue; verificar el mecanismo en los records. (historia: A87)
+- **A88.** Data que pasa a alimentar el frontend deja de ser descartable en el mismo PR. (historia: A88)
+- **A89.** «No aparece» casi nunca significa que no esté: trazar cómo lo lee el código; flags desde `pipeline.profile`, nunca del YAML. (historia: A89)
+- **A90.** Un conteo absoluto sobre un corpus vivo no se compara entre sesiones: registrar proporción y ventana (el corpus crece también hacia atrás). (historia: A90)
+- **A92.** Un guard por subcadena da falso verde: exigir frontera de palabra y barrer con `experiments/_s133/auditar_guards_por_subcadena.py`. (historia: A92)
+- **A93.** Un radio no es una posición; «verdes» no es una ventana; un pareo no es el conjunto que dice contar. (historia: A93)
+- **A94.** Un caso de referencia justifica investigar, no priorizar; medir en la unidad del operador (la noche). (historia: A94)
+- **A95.** Un cierre hereda las premisas de su lectura: comprobarla en el PDF renderizado a imagen (`get_pixmap(dpi=200)`), no en la capa de texto. (historia: A95)
+- **A96.** Nunca `git stash pop` sin mirar `git stash list`; `git cherry` da falsos «sin integrar» con squash: verificar por contenido. (historia: A96)
+- **A97.** Atribuir un mecanismo simulando la etapa siguiente con el predicado literal del dashboard. (historia: A97)
+- **A98.** La brecha de paridad es sobre-publicación, no recall (874 de 877 noches); toda métrica lleva negativos limpios. (historia: A98)
+- **A99.** Rebajada (S146): el 0,995 es producto de dos factores opuestos y compensa entre volcanes (0,66 a 1,39); ya no apaga la búsqueda en k, área, banda o Planck. (historia: A99)
+- **A100.** Con K el `keep_peak` del Test 1 no actúa (0 records con fuente `test1`/`test1_roi` desde #883); el «nunca apagarlo solo» valía para el detector anterior. El keep-peak focal (`FOCAL_CLUSTER_KEEP_PEAK`) es otro mecanismo y seguía corriendo al S165. (historia: A100)
+- **A101.** Las citas `file:line` se remapean por contenido (`scripts/remapear_citas.py`), salvo las históricas deliberadas (A6, A49). (historia: A101)
+- **A102.** Al corregir una función, buscar también las copias en línea de su lógica. (historia: A102)
+- **A103.** La pérdida de vecinos tibios está en la detección, no en el ensamblado (dETI 52 de 52; BT 18 de 18). (historia: A103)
+- **A104.** Una métrica con ventana que cruza #535 (2026-08-28 23:00 UTC) mezcla dos regímenes: medir por tramo. (historia: A104)
+- **A105.** El OSF v2.5 NO está supervisado a mano (Coppola et al. 2026, Sci. Data p. 7): sus conteos no valen para el NRT. (historia: A105)
+- **A106.** Corregida (S144): GeoTIFF VIIRS 375 de MIROVA en UTM nativo sólo del 2026-09-14 06:36 al 2026-09-15 06:24, después EPSG:4326; leer la hora de adquisición y desconfiar de md5 repetidos. (historia: A106)
+- **A107.** Una cota de distancia escalar sirve para descartar, no para identificar el objeto. (historia: A107)
+- **A108.** Un run 100 % verde no prueba cobertura pareja: contar pasadas por brazo (`bajar_tramos.py --estricto`). (historia: A108)
+- **A109.** Medir contra un producto del mismo gránulo infla por selección: usar otra pasada de la misma noche (45 a 120 min). (historia: A109)
+- **A110.** Un control se valida midiendo su nulo sobre datos sin nada que detectar; preferir controles que se cancelan por construcción. (historia: A110)
+- **A111.** Un cierre sin respaldo citable es una creencia: correr el script, pedir numerador, denominador y ventana; sin respaldo ≠ refutado. (historia: A111)
+- **A112.** Una línea base se corre sobre un árbol quieto; si hubo edición durante la corrida, se descarta. (historia: A112)
+- **A113.** Una rebaja se propaga a los hijos en el mismo PR (`grep` de número, frase e ID), con marca al inicio y el texto viejo conservado. (historia: A113)
+- **A114.** Una palanca que satura la métrica esconde las demás: estratificar antes de medir. (historia: A114)
+- **A115.** Un umbral se le pregunta a la referencia: `mirova_equivalent` contra MIROVA; `experimental` contra OVDAS y SWIR. (historia: A115)
+- **A116.** Medir cuántos casos mueve un cambio antes de llamarlo arreglo, y que el instrumento puede dar ≠ 0 antes de creerle a un cero. (historia: A116)
+- **A117.** Un perfil derivado se vigila por dirección (`tests/test_guard_laboratorio_no_mas_ciego_s147.py`). ⚠️ S157: el laboratorio NO es idéntico al operacional: quedó con el detector anterior y en MODIS ve menos (6 de 39 protegidas contra 39 de 39); el guard sólo compara pisos. (historia: A117)
+- **A118.** Un flag de umbral o geometría llega a todos sus consumidores (caja ROI1 al segundo pase, arreglado S149); un evaluador sólo ve los estratos que etiqueta. ⚠️ S160: la caja, medida en S151 sobre K, NO CUMPLE (veto). (historia: A118)
+- **A119.** Antes de usar los CSV de MIROVA, mirar desde cuándo sirve cada canal (tabla sana desde marzo; OCR mal calibrado hasta 2026-06-11; VIIRS por pasada desde abril; enero no se usa; hitos en `scripts/calidad_referencia_mirova.py`). ⚠️ S151: el «86 % en enero» era Tupungatito en el denominador; «0 alertas MODIS dependen del OCR» es falso, son 5 hoy. (historia: A119)
 
 ## Explicar como geólogo, no como programador
 
@@ -256,7 +256,7 @@ MIROVA es la hoja de respuestas; cada noche-satélite de cada volcán es una pre
 - **TP**: ambos detectan. **FP**: sólo nosotros (lago tibio, nube fina, nieve). **FN**: sólo MIROVA, lo más
   grave. **TN**: ninguno.
 - **Cluster vs pixel**: ⚠️ S158: MIROVA cuenta y suma **píxeles** alertados, no regiones; el «factor 42» de
-  S23 es falso (`docs/AUDIT_S158.md`). detalle: docs/CLAUDE_HISTORIA.md, Glosario.
+  S23 es falso (`docs/AUDIT_S158.md`). (historia: Glosario)
 - **Precision** = TP/(TP+FP). **Recall** = TP/(TP+FN), medido contra MIROVA en las dos direcciones (criterio de
   victoria, Nicolás 2026-10-13, `docs/MISSION.md`): ninguna alerta protegida (≥1 MW) se pierde; rige la lectura
   A (D-4, #782); alertas VIIRS 375 ≤0,05 MW cuentan como «MIROVA no vio nada» (D-9, #811). **F1**: media
@@ -279,7 +279,7 @@ Estado entre sesiones → memoria. No re-leer archivos sin cambios.
 ## Constraints técnicos
 
 - `pyhdf` roto en Windows: MODIS sólo en Actions Linux. LANCE NRT ~3 h. NOAA-20: buscar v2 y v2.1.
-- **Credenciales**: el NRT usa `EARTHDATA_TOKEN` (rotación cada 50 días). El par usuario/clave de los secretos
+- **Credenciales**: el NRT usa `EARTHDATA_TOKEN` (rotación cada 50 días; fecha vigente en `C:\Users\nmend\OneDrive\Escritorio\claude\REGISTRO_CREDENCIALES.md`). El par usuario/clave de los secretos
   está VENCIDO y bloquea la cuenta (A71): workflows nuevos sólo por token, copiando el `env` de `nrt.yml`.
 - `fetch.py` intenta Standard y cae a `_NRT`; `store.py` auto-upgrade NRT→Standard.
 - Encoding Windows: `sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')`.
@@ -301,7 +301,7 @@ Estado entre sesiones → memoria. No re-leer archivos sin cambios.
 2. `MEMORY.md` del proyecto (memoria del agente).
 3. Última auditoría: `ls docs/AUDIT_S*.md | sort -V | tail -1` (no hardcodear el número).
 4. `docs/MIROVA_DIVERGENCES.md`: catálogo vivo; el estado de cada D está en su encabezado. D9 salió de la lista
-   de cerradas en S146 (A23); qué hacer con D11 y si D12 se cierra lo decide Nicolás (S157). detalle: docs/CLAUDE_HISTORIA.md, Estado.
+   de cerradas en S146 (A23); qué hacer con D11 y si D12 se cierra lo decide Nicolás (S157). (historia: Estado)
 5. `docs/SESSION_INDEX_CONSOLIDATED_S80.md`: ancla histórica S1-S80.
 6. `docs/SINTOMAS.md` (S157): antes de proponer una palanca, leer el síntoma.
 
