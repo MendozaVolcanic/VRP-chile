@@ -615,9 +615,16 @@ def sobras_kgemelo(kgem, k):
 
 
 def _excepcion_valida(e):
-    """VPR940b-03: una excepción nombrada de C-K trae volcán, hora (al minuto) y un sensor reconocible."""
-    return (isinstance(e, dict) and bool(str(e.get("vol") or "").strip()) and len(str(e.get("dt") or "")) >= 16
-            and (bucket(e.get("sensor")) or e.get("b")) in SENSORES)
+    """VPR940b-03 y VPR946-04: una excepción nombrada de C-K trae volcán, hora al minuto que se lee como fecha
+    (AAAA-MM-DD HH:MM) y un sensor de texto reconocible."""
+    if not isinstance(e, dict) or not isinstance(e.get("vol"), str) or not e["vol"].strip():
+        return False
+    try:
+        _dt(e["dt"])
+    except (KeyError, TypeError, ValueError):
+        return False
+    s, b = e.get("sensor"), e.get("b")
+    return (isinstance(s, str) and bucket(s) in SENSORES) or (s is None and b in SENSORES)
 
 
 def c_k(filas, excepciones=(), tier_a=None, sobras_kg=()):
@@ -824,6 +831,20 @@ REQUERIDOS_MANIFIESTO = tuple(sorted(set(MANIFIESTO_REGLAS) | {
     "frontend/index.html", "pipeline/profiles/_s172_retro_paquete.yaml", "pipeline/profiles/_s172_retro_k.yaml"}))
 
 
+def rutas_referencias(rutas, raiz=RAIZ):
+    """§11 (VPR946-02): la ruta relativa al repo de cada referencia de la corrida (--cons, --ocr, --osf), para exigirla
+    en el manifiesto. Una fuera del repo no puede estar en el manifiesto: queda marcada y deja el candado en rojo."""
+    out = []
+    for p in rutas:
+        if not p:
+            continue
+        try:
+            out.append(Path(p).resolve().relative_to(Path(raiz).resolve()).as_posix())
+        except ValueError:
+            out.append("FUERA_DEL_REPO:" + str(p))
+    return out
+
+
 def candado(manifiesto, raiz=RAIZ, requeridos=REQUERIDOS_MANIFIESTO):
     """§11: sha256 LF de cada archivo del manifiesto del sello contra el disco, ANTES de leer. Un manifiesto al que le
     falta un archivo requerido no es un candado (un {} daba OK)."""
@@ -938,7 +959,9 @@ def p1_osf(filas, osf, brazo="V"):
         r["razon_cota_mediana"] = ({"via": statistics.median(x for x, _ in rc), "K": statistics.median(y for _, y in rc),
                                     "n": len(rc)} if rc else None)
     c_pareo = "OK" if not any(r["dobles"] for r in res.values()) else "ROJO: protegida OSF pareada a dos pasadas"
-    c_cenit = "OK" if all(d <= TOL_CENIT_OSF for d in pares_cenit) else "ROJO: cenit nuestro y SatZen difieren más de 2°"
+    # VPR946-01: sin pares no hay nada medido (all([]) daba OK)
+    c_cenit = ("ROJO: sin pares de cenit contra SatZen" if not pares_cenit else
+               "OK" if all(d <= TOL_CENIT_OSF for d in pares_cenit) else "ROJO: cenit nuestro y SatZen difieren más de 2°")
     return {"por_sensor": res, "c_pareo": c_pareo, "c_cenit": c_cenit, "n_pares_cenit": len(pares_cenit),
             "lejanas": lejanas, "lejanas_publicadas_como_cumbre": [x for x in lejanas if x[3]], "ambiguas": ambiguas}
 
@@ -1168,6 +1191,8 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
                                        "caja": caja_v750, "distintas": malas[:20]})
     if osf_res is not None:
         ctl["c_pareo_osf"] = {"estado": osf_res["c_pareo"]}
+        # VPR946-01: C-cenit es un control del §6; §8.1 fila 1 manda INDECIDIBLE si cae (se calculaba y no llegaba)
+        ctl["c_cenit_osf"] = {"estado": osf_res["c_cenit"], "n_pares": osf_res["n_pares_cenit"]}
         # VPR940-10 (aprobado): la vía publica una protegida OSF que K no publica; no puede ocurrir (K publica todas,
         # §5.2), es un defecto del lector y va a la fila 1, no a la 4
         dfc = osf_res["por_sensor"][sensor]["defecto"]
@@ -1182,6 +1207,11 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
     extra["solo_ocr_que_k_publica"] = solo_ocr_perdidas(filas, brazo, n3=sensor != "MODIS")
     cur = curva_cenit(R, filas, brazo)
     cur["controles_cenit"] = controles_cenit(R, filas, brazo)
+    # VPR946-01: los controles de cenit del §6 entran al veredicto (§8.1 fila 1). SIN SUSTRATO (la curva no tiene
+    # pares) no es un control caído: no hay curva que leer, y la fila 4 por la curva tampoco se activa.
+    _ec = cur["controles_cenit"]["estado"]
+    ctl["controles_cenit"] = {"estado": "OK (sin sustrato: la curva no se lee)" if _ec == "SIN SUSTRATO" else _ec,
+                              "detalle": cur["controles_cenit"]}
     extra["curva_cae_mas_que_mirova"] = (cur["controles_cenit"]["estado"] == "OK"
                                          and cur[brazo]["razon_doble"].get("veredicto") == "CAE MAS QUE MIROVA")
     if osf_res is not None:
@@ -1262,14 +1292,8 @@ def main(argv=None, predicado=None, reglas=None):
     avisos = []
     if not a.osf:                                                   # VPR940b-08
         avisos.append("R25 sin OSF: no se lee (sin --osf no hay P1-OSF, C-pareo, C-cenit ni C-cobertura de R25)")
-    refs = []
-    for p in (a.cons, a.ocr, a.osf):                                # §11: las referencias también van al manifiesto
-        if p:
-            try:
-                refs.append(Path(p).resolve().relative_to(RAIZ).as_posix())
-            except ValueError:
-                refs.append("FUERA_DEL_REPO:" + str(p))
-    cand = ({"estado": "OK (ENSAYO: sin candado, NO DECIDE)"} if a.ensayo else
+    refs = rutas_referencias((a.cons, a.ocr, a.osf))               # §11: las referencias también van al manifiesto
+    cand =({"estado": "OK (ENSAYO: sin candado, NO DECIDE)"} if a.ensayo else
             candado(leer(a.manifiesto), requeridos=REQUERIDOS_MANIFIESTO + tuple(refs)))
     via, rep_v = cargar_carpeta(a.via)
     k, rep_k = cargar_carpeta(a.k)

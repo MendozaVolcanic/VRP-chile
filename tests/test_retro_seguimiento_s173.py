@@ -123,9 +123,14 @@ def test_main_del_manifiesto_incluye_referencias_y_osf(monkeypatch, tmp_path):
 
 def test_montaje_exige_un_tag_por_origen_en_main(tmp_path):
     """VPR946-05 (G4)."""
-    with pytest.raises(SystemExit):
+    err = None
+    try:                                     # por aserción, no por pytest.raises: otra excepción tiene que fallar aquí
         MO.main(["--despacho", "HEAD", "--origen", "MOD-D fase 4=HEAD", "--origen", "V375-E=HEAD",
                  "--via-dm", str(tmp_path), "--salida", str(tmp_path / "m.json")])
+    except BaseException as e:  # noqa: BLE001
+        err = e
+    assert isinstance(err, SystemExit) and "un tag por origen" in str(err), repr(err)
+    assert not (tmp_path / "m.json").exists()
 
 
 def test_el_diff_listado_va_de_cada_tag_de_origen_al_despacho(monkeypatch):
