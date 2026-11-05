@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 (S173): #946 arreglado (5facd4a8b) y segunda ronda del verificador
+
+- Arreglos de VPR946-01/02/03 (gravedad 2) más 04, 11 y 05 en parte; punta `5facd4a8b`. Suite 3.226 pasan; g1d y g2c del guard s146 fallaban sólo por temporales en D: (relpath entre discos) y pasan con temporal en C: (7 de 7, corrido por la coordinadora).
+- Verificador R2 (mismo Sonnet): MERGEABLE CON CAMBIOS, gravedad máxima 1. Confirmadas las afirmaciones; sus X1, X2, G1 y G3 ahora atrapadas; pre-registro sellado intacto (b58a2254). Nuevos de gravedad 1: R2-01 (X2b sobrevive: la prueba de `main` no usa `--osf`), R2-02 (los controles de cenit dieron SIN SUSTRATO en los datos sintéticos y un error interno también sale como SIN SUSTRATO, o sea OK: caída leída como acierto), R2-03 (C-cenit junta los tres sensores; un sensor sin pares no se acusa). Informe en `experiments/_s173_aud/ver946/INFORME_R2.md`. Siguiente: tercera vuelta corta del autor sobre R2-01..03.
+
 ### 2026-11-05 (S173): CLAUDE.md corto en main (#949)
 
 - **#949** mergeado con frase de Nicolás («Sí, ajusta y mergea»), `--match-head-commit 2c0c8f291`, squash `83c6de6bb`, CI verde (run 42052763258). CLAUDE.md de 160.357 a 30.998 caracteres; la copia íntegra vive en `docs/CLAUDE_HISTORIA.md` (cuerpo idéntico byte a byte al viejo); 110 de 110 A-números presentes (`experiments/_s173_claude_corto/ids_faltantes.py`). Motivo: el archivo se cargaba entero en cada mensaje y cada subagente (unos 40 mil tokens fijos).
