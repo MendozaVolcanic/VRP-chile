@@ -148,6 +148,14 @@
     return isNaN(t) ? null : t;
   }
 
+  // S173 S1: ¿el record lo escribió la vía «código MIROVA»? Un solo lugar para la marca (A102): lo usan
+  // primeraViaModis y los filtros de artefacto térmico de las tres vistas (isCirrusArtifact, isDiffuseFieldArtifact),
+  // que no se aplican a la vía porque se calibraron contra el path D de K, que la vía no tiene. `=== true`: la clave
+  // con texto ("sin_grilla", "sin_mxd03", "geo_distinta") es K que corrió con la vía encendida (A118).
+  function esViaCodigoMirova(r) {
+    return !!r && r.via_codigo_mirova === true;
+  }
+
   // Fecha ISO de la primera pasada MODIS de la vía con una de K antes, o null.
   function primeraViaModis(records) {
     let primeraK = null;
@@ -156,7 +164,7 @@
       if (!r || String(r.sensor || "").indexOf("MODIS") !== 0) continue;
       const t = isoDeRecord(r.datetime_utc);
       if (t == null) continue;
-      if (r.via_codigo_mirova === true) via.push(t);
+      if (esViaCodigoMirova(r)) via.push(t);
       else if (r.via_codigo_mirova === undefined || r.via_codigo_mirova === null) {
         if (primeraK == null || t < primeraK) primeraK = t;
       }
@@ -261,7 +269,7 @@
   }
 
   const CambioDetector = { CAMBIO_DETECTOR_UTC, DATOS_K_DESDE_UTC, textoAviso, insertarAviso, crearPlugin, fechaLegible,
-    primeraViaModis, notarRecords, textoAvisoModis, insertarAvisoModis, crearPluginViaModis,
+    primeraViaModis, esViaCodigoMirova, notarRecords, textoAvisoModis, insertarAvisoModis, crearPluginViaModis,
     viaModisDesde: () => viaModis };
 
   if (typeof module !== "undefined" && module.exports) {

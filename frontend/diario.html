@@ -375,7 +375,7 @@ function mirovaEqVrpCore(r, volcanoName) {
 // vista no cruza per-record), así que opera el criterio físico puro, que ya es
 // limpio por sí solo. Display-only: el record se conserva, solo no se grafica.
 function isCirrusArtifact(r, volcanoName) {
-  if (!r || r._mirova_confirmed) return false;
+  if (!r || r._mirova_confirmed || (typeof CambioDetector !== "undefined" && CambioDetector.esViaCodigoMirova(r))) return false; // S173 S1: la vía «código MIROVA» no tiene path D (su detector es el de MIROVA) y en pasadas oblicuas su celda de 1 km mezcla foco y nieve: t_max bajo 0 °C con calor real (Chillán 2026-10-01 08:35, cenit 50°). La marca la lee el módulo (A102, A118). Medido: experiments/_s173_cirrus_s1/. Guard: tests/test_filtro_cirrus_no_oculta_via_s173.py
   if (r.t_max_k == null || r.t_max_k >= 273.15) return false;
   return mirovaEqVrp(r, volcanoName) > 10;
 }
@@ -386,7 +386,7 @@ function isCirrusArtifact(r, volcanoName) {
 // foco real. Usa t_max + geometría, NUNCA t_bg (escudo §3.2). Validado 45 vols:
 // 0 reales atrapadas. Ver index.html y el design doc S93.
 function isDiffuseFieldArtifact(r, volcanoName) {
-  if (!r || r._mirova_confirmed) return false;
+  if (!r || r._mirova_confirmed || (typeof CambioDetector !== "undefined" && CambioDetector.esViaCodigoMirova(r))) return false; // S173 S1: misma exención que isCirrusArtifact (la vía no tiene path D)
   const pc = r.primary_cluster;
   if (!pc || r.t_max_k == null || r.t_max_k >= 278.15) return false;
   const npx = pc.n_pixels ?? 0;

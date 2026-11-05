@@ -120,6 +120,10 @@ function constante(nombre) {
   return m[0];
 }
 let USE_F5_CORE = true;
+// S173 S1: los filtros de artefacto termico leen la marca de la via con el modulo compartido (A102); se carga como
+// en el navegador para que el predicado ejecutado sea el mismo.
+let CambioDetector;
+try { CambioDetector = require(require('path').join(require('path').dirname(process.argv[2]), 'cambio_detector.js')); } catch (e) {}
 const codigo = [constante('F5_R_CORE_KM'), constante('F5_BT_EXT_K')].concat(
   ['_havKm','mirovaEqVrp','f5CoreMagnitude','mirovaEqVrpCore','mirovaEqVrpDisplay',
    'isCirrusArtifact','isDiffuseFieldArtifact','isThermalArtifact','isValidDetection',
