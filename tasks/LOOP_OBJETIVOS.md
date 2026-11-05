@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 05:05 UTC: #944 mergeado a main (S173)
+
+Con la frase de Nicolás («Sí, merge #944»): punta `ed06921dd` (segunda ronda: VPR944-01, el banco pasa
+`via_codigo_mirova` a node, salida del banco idéntica por sha256 sobre 73.555 records; VPR944-02, aviso en consola si
+el módulo no carga), CI SUCCESS, CLEAN. Squash `91d1bf901`. Toca `frontend/` (tag `pre-s173-cirrus-s1`). También:
+PR #947 (VPR939-03 sobre la rama viva de V750, batería completa SIN VERIFICAR por disco), paper de VRP y propuesta de
+metodología a repos privados (`vrp-chile-paper`, `vrp-chile-metodologia`), `cleanupPeriodDays` 3650 y zip de
+transcripts en OneDrive. C: bajo 3 GB: lo pesado pausado hasta vaciar la papelera de D:.
+
 ### 2026-11-05 05:xx UTC: verificador de #944, PR #945, mirova-tif-archive y temporales (S173)
 
 - #944 (cirrus): verificador limpio Fable, MERGEABLE CON CAMBIOS (`experiments/_s173_aud/ver944/`). VPR944-01
