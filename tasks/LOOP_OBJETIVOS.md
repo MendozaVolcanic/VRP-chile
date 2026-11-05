@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 08:37 UTC (S173): PR #946 (seguimiento de #940) y primera captura de mirova-tif-archive
+
+- **#946** en borrador contra main, punta `7df31d9f1` (rama `claude/s173-retro-seguimiento`). VPR940-01 (el «separa» de V750 pasa a control del placebo, sin valor por defecto), VPR940-07, VPR940-10, gravedad 1 de ver940b (02, 03, 05 a 08, 12; 10 y 11 en docstring; 09 sin cambio por sellado), VPR940b-01 (`sorteo_etiquetas` informa SIN PODER), `candado({})` ya no da OK, generadores `armar_manifiesto.py` y `armar_montaje.py`. Suite en árbol quieto sobre `108104480`: 3.217 pasan, 0 fallan. Mutaciones ronda 4: 42 de 42 atrapadas por aserción, control de caída CAE. CI de GitHub en curso al anotar. Seis decisiones para Nicolás en el cuerpo del PR. SIN VERIFICADOR LIMPIO todavía.
+- **mirova-tif-archive**: primera captura real tras el checkout parcial y el adelgazamiento, commit `591a3a8dc` (06:51 UTC, 40 PNG). El push funciona y el índice trae la columna `omitido` con 15 filas `grafico_ya_guardado_este_dia`. MIROVA volvió a publicar tras el silencio desde el 11-04 09:31.
+
 ### 2026-11-05 05:05 UTC: #944 mergeado a main (S173)
 
 Con la frase de Nicolás («Sí, merge #944»): punta `ed06921dd` (segunda ronda: VPR944-01, el banco pasa
