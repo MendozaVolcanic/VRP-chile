@@ -1,0 +1,41 @@
+Medicion VPR944-01 (S173 S1): CAMPOS_JS sin y con via_codigo_mirova, sobre los datos de origin/main
+origin/main: 84d3a45811a7544b7d0eb16c938879003c7ce6a7 (Thu Nov 5 03:43:44 2026 +0000)
+arbol: git archive de origin/main (sin experiments/ ni data/_*) + frontend/ y scripts/ de la rama (antes: 01318eb95; despues: este commit)
+
+1) por record (por_record.py: cargar_nuestros, ventana 2000-01-01 a 2100-12-31, salida [vol, sensor, dt, disp, pub]):
+mirova_equivalent records en banco: 73555 publicados: 9713 via crudos: 85
+guardia_k_modis records en banco: 242 publicados: 18 via crudos: 0
+experimental_v2 records en banco: 3815 publicados: 1916 via crudos: 0
+sha256 antes   88f215b55d98f4aa668a4024e8b247ff4ea3cfed4997ff3f1b1358ba22640443
+sha256 despues 88f215b55d98f4aa668a4024e8b247ff4ea3cfed4997ff3f1b1358ba22640443
+IDENTICOS: 0 records cambian disp ni pub en las 3 carpetas
+
+2) consumidores (consumidores.sh), exit antes / despues:
+guardia_modis exit 0	guardia_modis exit 0
+sombra exit 0	sombra exit 0
+clasificar exit 0	clasificar exit 0
+banco exit 0	banco exit 0
+auto_audit exit 0	auto_audit exit 0
+
+diferencias entre salidas (diff -r antes despues, sin stderr):
+<  "generated_utc": "2026-11-05T04:36:56Z",
+>  "generated_utc": "2026-11-05T04:39:56Z",
+< listo en 8.3 s -> <scratch>/antes/banco_out.json
+> listo en 8.3 s -> <scratch>/despues/banco_out.json
+<   "sha_index_html": "573e7d4b925a456a0bae5713600d9f6ff2da346a",
+>   "sha_index_html": "8ac54a2a6d3ecaa8e03ac358ee771bb1192dfa72",
+<   "generado_utc": "2026-11-05T04:36:44+00:00",
+>   "generado_utc": "2026-11-05T04:39:43+00:00",
+< escrito en C:\Users\nmend\AppData\Local\Temp\claude\C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile\d7a1e8f0-95ba-454a-a8a3-73d7d75d9816\scratchpad\antes\clasificar_out.json
+< estadisticas en <scratch>/antes/clasificar_stats.json | publicadas {'TOTAL': {'mirova_confirmed': 242, 'mirova_same_night': 137, 'mirova_silent': 21, 'mirova_saw_outside': 8, 'no_reference': 36, 'total': 444}}
+> escrito en C:\Users\nmend\AppData\Local\Temp\claude\C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile\d7a1e8f0-95ba-454a-a8a3-73d7d75d9816\scratchpad\despues\clasificar_out.json
+> estadisticas en <scratch>/despues/clasificar_stats.json | publicadas {'TOTAL': {'mirova_confirmed': 242, 'mirova_same_night': 137, 'mirova_silent': 21, 'mirova_saw_outside': 8, 'no_reference': 36, 'total': 444}}
+<  "sha_index_html": "573e7d4b925a456a0bae5713600d9f6ff2da346a",
+>  "sha_index_html": "8ac54a2a6d3ecaa8e03ac358ee771bb1192dfa72",
+<  "generated_utc": "2026-11-05T04:35:56Z",
+>  "generated_utc": "2026-11-05T04:38:54Z",
+<  "generated_utc": "2026-11-05T04:36:02Z",
+>  "generated_utc": "2026-11-05T04:39:00Z",
+
+Todo lo que difiere son rutas de salida, sellos de hora (generated_utc, generado_utc) y sha_index_html (index.html cambia por el aviso de VPR944-02).
+No corridos: evaluador_comun.cargar (usa bp.CAMPOS_JS sobre carpetas de A/B) y los experimentos sellados que leen bp.CAMPOS_JS (_s150_*, _s151_*). Sobre records de la via (desde 2026-11-02) ven ahora la marca, igual que el navegador; si alguno se corrio sobre records de la via y cambia: SIN VERIFICAR.

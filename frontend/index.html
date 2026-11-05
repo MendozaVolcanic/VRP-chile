@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
-<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) -->
+<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) -->
   <style>
     .rango-ctl { display:inline-flex; gap:4px; align-items:center; }
     .rango-ctl[hidden] { display:none; }
@@ -1334,7 +1334,7 @@ function mirovaEqVrpDisplay(r, innerKm = 10, includeFar = false) {
 // toca un record confirmado por MIROVA (cinturón extra; el criterio físico ya es
 // limpio por sí solo). Una feature volcánica real (categoría b) emite → t_max>0°C.
 function isCirrusArtifact(r, innerKm = 10) {
-  if (!r || r._mirova_confirmed) return false;
+  if (!r || r._mirova_confirmed || (typeof CambioDetector !== "undefined" && CambioDetector.esViaCodigoMirova(r))) return false; // S173 S1: la vía «código MIROVA» no tiene path D (su detector es el de MIROVA) y en pasadas oblicuas su celda de 1 km mezcla foco y nieve: t_max bajo 0 °C con calor real (Chillán 2026-10-01 08:35, cenit 50°). La marca la lee el módulo (A102, A118). Medido: experiments/_s173_cirrus_s1/. Guard: tests/test_filtro_cirrus_no_oculta_via_s173.py
   if (r.t_max_k == null || r.t_max_k >= 273.15) return false;
   return mirovaEqVrp(r, innerKm, false) > 10;
 }
@@ -1353,7 +1353,7 @@ function isCirrusArtifact(r, innerKm = 10) {
 // atrapadas; solo agrega 2 picos PCC a los que el filtro cirrus no llega.
 // Ver docs/superpowers/specs/2026-05-30-display-diffuse-field-artifact-design.md.
 function isDiffuseFieldArtifact(r, innerKm = 10) {
-  if (!r || r._mirova_confirmed) return false;
+  if (!r || r._mirova_confirmed || (typeof CambioDetector !== "undefined" && CambioDetector.esViaCodigoMirova(r))) return false; // S173 S1: misma exención que isCirrusArtifact (la vía no tiene path D)
   const pc = r.primary_cluster;
   if (!pc || r.t_max_k == null || r.t_max_k >= 278.15) return false;
   const npx = pc.n_pixels ?? 0;
