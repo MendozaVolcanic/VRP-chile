@@ -101,3 +101,41 @@ def test_un_preregistro_cambiado_desde_el_sello_no_es_igual(monkeypatch):
     assert AM.verificar_preregistro("rama")["igual"] is False
     monkeypatch.setattr(AM, "_blob", lambda ref, ruta: b"mismo\r\n" if ref == AM.TAG_SELLO else b"mismo\n")
     assert AM.verificar_preregistro("rama")["igual"] is True          # el fin de línea no cuenta
+
+
+# ------------------------------------------------------------------------------------------- verificador de #946
+def test_main_del_manifiesto_corta_con_3_si_el_preregistro_cambio(monkeypatch, tmp_path):
+    """VPR946-03 (G1): el pre-registro distinto del sello corta con 3 y no escribe el manifiesto."""
+    monkeypatch.setattr(AM, "_blob", lambda ref, ruta: b"sello" if ref == AM.TAG_SELLO else b"otro")
+    sal = tmp_path / "m.json"
+    assert AM.main(["--ref", "r", "--salida", str(sal)]) == 3 and not sal.exists()
+
+
+def test_main_del_manifiesto_incluye_referencias_y_osf(monkeypatch, tmp_path):
+    """VPR946-02 (G3): las referencias congeladas y el OSF entran al manifiesto, además de los requeridos."""
+    monkeypatch.setattr(AM, "_blob", lambda ref, ruta: b"igual")
+    sal = tmp_path / "m.json"
+    assert AM.main(["--ref", "r", "--referencia", "ref/cons.csv", "--osf", "ref/osf.csv", "--salida", str(sal)]) == 0
+    m = __import__("json").loads(sal.read_text(encoding="utf-8"))
+    assert {"ref/cons.csv", "ref/osf.csv"} <= set(m)
+    assert set(sys.modules["leer_retro_para_manifiesto"].REQUERIDOS_MANIFIESTO) <= set(m)
+
+
+def test_montaje_exige_un_tag_por_origen_en_main(tmp_path):
+    """VPR946-05 (G4)."""
+    with pytest.raises(SystemExit):
+        MO.main(["--despacho", "HEAD", "--origen", "MOD-D fase 4=HEAD", "--origen", "V375-E=HEAD",
+                 "--via-dm", str(tmp_path), "--salida", str(tmp_path / "m.json")])
+
+
+def test_el_diff_listado_va_de_cada_tag_de_origen_al_despacho(monkeypatch):
+    """VPR946-05 (G2): el git diff se pide entre el tag de cada origen y el del despacho, no del despacho contra sí."""
+    llamadas = []
+
+    class _R:
+        returncode, stdout, stderr = 0, "", ""
+
+    monkeypatch.setattr(MO.subprocess, "run", lambda args, **k: llamadas.append(args) or _R())
+    tags = {o: f"tag-{i}" for i, o in enumerate(MO.ORIGENES)}
+    MO.listar_diff(tags, "despacho")
+    assert [a[2:4] for a in llamadas] == [[tags[o], "despacho"] for o in MO.ORIGENES]

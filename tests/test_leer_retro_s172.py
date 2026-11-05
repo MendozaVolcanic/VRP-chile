@@ -810,3 +810,79 @@ def test_main_avisa_r25_sin_osf_y_el_poder_del_sorteo(tmp_path, monkeypatch, R, 
     out = json.loads((tmp_path / "out.json").read_text(encoding="utf-8"))
     assert any("R25 sin OSF" in a for a in out["avisos"]), out.get("avisos")
     assert out["sensores"]["MODIS"]["otros_brazos"]["sorteo_etiquetas"]["poder"].startswith("SIN PODER")
+
+
+# ------------------------------------------------------------------------------------------- verificador de #946
+# experiments/_s173_aud/ver946/ en loop/activo (MERGEABLE CON CAMBIOS).
+def test_c_cenit_del_osf_en_rojo_lleva_a_la_fila_1(R):
+    """VPR946-01: §8.1 fila 1 (algún control del §6 en rojo). C-cenit de R25 se calculaba y no llegaba al veredicto."""
+    r25 = [_r25("Lascar", "2025-06-02 05:00", 1, 1, z=40.0)]                     # SatZen 25: 15° de diferencia
+    osf_res = L.p1_osf(r25, [_osf("Lascar", "VIIRS375", "2025-06-02 05:00", 2.0, satzen=25.0)])
+    assert osf_res["c_cenit"].startswith("ROJO")
+    r = L.leer_sensor(R, v375(), "VIIRS375", COMUNES, pred, False, "def", osf_res=osf_res, filas_r25=r25)
+    assert r["fila"] == 1 and "c_cenit_osf" in r["motivos"], (r["fila"], r["motivos"])
+    ok = [_r25("Lascar", "2025-06-02 05:00", 1, 1, z=26.0)]                       # control: 1° de diferencia
+    osf_ok = L.p1_osf(ok, [_osf("Lascar", "VIIRS375", "2025-06-02 05:00", 2.0, satzen=25.0)])
+    r = L.leer_sensor(R, v375(), "VIIRS375", COMUNES, pred, False, "def", osf_res=osf_ok, filas_r25=ok)
+    assert r["controles"]["c_cenit_osf"]["estado"] == "OK" and r["fila"] == 6
+    sin_pares = L.p1_osf([], [_osf("Lascar", "VIIRS375", "2025-06-02 05:00", 2.0)])
+    assert sin_pares["c_cenit"].startswith("ROJO")                                # all([]) no es un OK
+
+
+def test_controles_de_cenit_en_rojo_llevan_a_la_fila_1(R, monkeypatch):
+    """VPR946-01: los controles de cenit del §6 (V375-E §4) en rojo dejan el sensor en la fila 1; SIN SUSTRATO no."""
+    monkeypatch.setattr(L, "controles_cenit", lambda *a, **k: {"estado": "ROJO"})
+    r = leer(R, poblacion(), "MODIS")
+    assert r["fila"] == 1 and "controles_cenit" in r["motivos"], (r["fila"], r["motivos"])
+    monkeypatch.setattr(L, "controles_cenit", lambda *a, **k: {"estado": "SIN SUSTRATO"})
+    r = leer(R, poblacion(), "MODIS")
+    assert r["fila"] == 6 and r["controles"]["controles_cenit"]["estado"].startswith("OK")
+
+
+def test_rutas_de_referencia_dentro_y_fuera_del_repo(tmp_path):
+    """VPR946-02: una referencia dentro del repo entra al manifiesto por su ruta relativa; una fuera queda marcada."""
+    (tmp_path / "ref").mkdir()
+    (tmp_path / "ref" / "cons.csv").write_text("x", encoding="utf-8")
+    afuera = tmp_path.parent / "cons_afuera.csv"
+    r = L.rutas_referencias([str(tmp_path / "ref" / "cons.csv"), None, str(afuera)], raiz=tmp_path)
+    assert r == ["ref/cons.csv", "FUERA_DEL_REPO:" + str(afuera)]
+
+
+def test_main_con_manifiesto_exige_las_referencias(tmp_path, monkeypatch, R, capsys):
+    """VPR946-02: con --manifiesto, el candado exige las rutas de --cons y --ocr; fuera del repo no pueden estar en el
+    manifiesto y el candado queda en rojo aunque todo lo demás coincida."""
+    test_main_de_punta_a_punta_con_predicado_sintetico(tmp_path, monkeypatch, R, capsys)
+    man = {r: L.sha256_lf(L.RAIZ / r) for r in L.REQUERIDOS_MANIFIESTO}
+    (tmp_path / "man.json").write_text(json.dumps(man), encoding="utf-8")
+    sal = tmp_path / "out2.json"
+    L.main(["--via", str(tmp_path / "via"), "--k", str(tmp_path / "k"), "--cons", str(tmp_path / "cons.csv"),
+            "--ocr", str(tmp_path / "ocr.csv"), "--v750a-sellado", "no", "--manifiesto", str(tmp_path / "man.json"),
+            "--salida", str(sal)], predicado=pred, reglas=R)
+    c = json.loads(sal.read_text(encoding="utf-8"))["sensores"]["MODIS"]["controles"]["candado"]
+    assert c["estado"].startswith("ROJO") and not c["distintos"], c
+    assert len(c["fuera_del_manifiesto"]) == 2 and all(x.startswith("FUERA_DEL_REPO:") for x in c["fuera_del_manifiesto"])
+
+
+def test_excepcion_de_c_k_con_tipos_malos_o_sin_hora(R):
+    """VPR946-04: sensor que no es texto no cae; la hora se lee como fecha, no sólo por su largo; sin hora, rojo."""
+    fs = _ck_filas()
+    for mala in ({"vol": "Lascar", "dt": fs[0]["dt"], "sensor": 5, "empate_argsort": "x"},
+                 {"vol": "Lascar", "dt": fs[0]["dt"], "sensor": ["MODIS_AQUA"], "empate_argsort": "x"},
+                 {"vol": "Lascar", "dt": "x" * 16, "sensor": "MODIS_AQUA", "empate_argsort": "x"},
+                 {"vol": "Lascar", "sensor": "MODIS_AQUA", "empate_argsort": "x"}):
+        assert L.c_k(fs, [mala])["estado"].startswith("ROJO"), mala
+        L.nulo_runner(R, fs, [mala])
+
+
+def test_c_k_sin_pasadas_de_k_en_dm_es_rojo():
+    """VPR946-11: si K de disco no trae ninguna pasada de DM, D3 no se cumple."""
+    fs = [f for f in _kg_d3() if f["tramo"] != "DM"]
+    r = L.c_k(fs)
+    assert r["estado"].startswith("ROJO") and "sin pasadas de K en DM" in r["cobertura_kgemelo"]["faltan"]
+
+
+def test_c_montaje_rechaza_un_tag_vacio():
+    """VPR946-05 (X6)."""
+    m = copy.deepcopy(MONTAJE_OK)
+    m["tags"]["V375-E"] = "   "
+    assert L.validar_montaje(m)["estado"].startswith("ROJO")
