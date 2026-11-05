@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-05 17:28 UTC (S174): alertas del auto-audit #915 y #936 investigadas, sin tocar nada
+
+- Ninguna de las dos se explica por #934 ni por #939. #915 (2026-10-26) es anterior a ambos. #936 corrió a las 19:29:57 del 2026-11-02, dos horas después del merge de #934 (17:18), pero en ese commit (`79f410697`) los JSON tenían 0 records con `via_codigo_mirova: true` (verificado en NevadosDeChillan y Lascar); el primer NRT posterior entró a las 20:15. Las dos juzgaron MODIS con K, bien rotulado.
+- Son crónicas: hay issue fuera de banda cada semana desde el 2026-07-27 (#499 en adelante). Lo que marcan es lo que ataca el programa de réplica por sensor (comentario S170 en #915): recall MODIS (62,5 a 72,7 %), recall V750 (74,0 a 79,2 %, a 0,3 pp de la banda), magnitud de Chillán en los tres sensores, PCC V750 y Tupungatito V375, y las protegidas de Chillán MODIS (07:20 UTC, la noche sí se publicó en otra pasada).
+- Desde el 2026-11-02 01:15 (adquisición) hay records de la vía: 9 de 11 MODIS en Chillán, 8 de 10 en Láscar, 9 de 11 en Villarrica, 10 de 12 en PCC. El audit del 2026-11-09 será el primero con la vía: el recall MODIS quedará «sin juzgar» hasta 15 noches con alerta (`MIN_N_RECALL`), lo que no es estar en banda (aviso S173 del script).
+
 ### 2026-11-05 ~16:55 UTC (S173): cierre de la sesión
 
 - #946 tercera vuelta del autor: R2-01/02/03 arreglados (R2-03 por sensor, sostenido por la letra del §8.1 «para ese sensor»), punta `61910c24d`, suite 3.232 pasan 0 fallan, mutaciones ronda 6: 5 de 5 atrapadas por aserción con control de caída CAE. CI run 42072413315 en curso al cerrar.
