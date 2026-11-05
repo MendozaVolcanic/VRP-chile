@@ -38,12 +38,17 @@ del código con que corrió, tomados del record de P (`diag_codigo_mirova.roi`, 
 su brazo de ROI (`--roi-brazo`, el mismo B0 a B5 de V750-B, traducido por volcán con scripts/roi_v750b_a_grillas.py) y,
 si quiere, el primer commit de código que acepta (`--sha-desde`, por ascendencia en git). Sin `--roi-brazo` la compuerta
 se cierra: ninguna lectura de la sombra mezcla la ROI B0 con la B4 (A104).
+Segunda vuelta (S174, VPR945; LECTURA LR2): la sombra no dice CUMPLE antes de las 4 semanas del §4.3 (dice PROVISORIO y
+sale 4; el reloj corre sobre las pasadas leídas y, con `--sha-desde`, desde la hora del commit del corte); un volcán que
+no está en el mapa de ROI es SIN DATO, no «otra ROI»; con 0 pasadas observadas la compuerta se cierra con su propio
+mensaje; `--sha-desde` sólo acepta un sha (completo o abreviado) y se imprime resuelto entero.
 
 Uso: python evaluar_v750a.py [--fase censo|sombra] --art <carpetas> --objetivos objetivos_v750a.json
      --evaluador <evaluar_d25.py del tag> [--sin-granulo <archivo>] [--equivalencia-local <salida verde + mutaciones>]
      [--roi-brazo B0..B5] [--sha-desde SHA] [--leer-con-faltantes MOTIVO] [--solo-controles] [--salida <archivo>]
-Salida: 0 con veredicto; 3 compuerta cerrada (controles caídos o SIN DATO); 5 veredicto leído con faltantes (marcado);
-        6 §6.1 no se cumple (la vía no reproduce al oráculo: no se mira el censo).
+Salida: 0 con veredicto; 3 compuerta cerrada (controles caídos o SIN DATO); 4 sombra PROVISORIA (no completó las 4
+        semanas del §4.3: no es CUMPLE ni NO CUMPLE); 5 veredicto leído con faltantes (marcado); 6 §6.1 no se cumple (la
+        vía no reproduce al oráculo: no se mira el censo).
 """
 from __future__ import annotations
 
@@ -51,6 +56,7 @@ import argparse
 import ast
 import collections
 import copy
+import datetime
 import functools
 import hashlib
 import json
@@ -85,6 +91,7 @@ MIN_MUT_LOCAL = 5                        # §6.1: «5 de 5 mutaciones atrapadas 
 MIN_CASOS_LOCAL = (1020, 10)             # §4.1: 510 grillas de N con 2 cajas (E1) y los 10 recortes nativos de R2 (E3)
 PARES_S1 = (("P", "Pdef"), ("P", "O"), ("Pdef", "O"))   # §5, S-1: los brazos que comparten la detección del .m
 VOL_ROI = "PuyehueCordonCaulle"          # §7, control positivo de la ROI
+DIAS_MIN_SOMBRA = 28                     # §4.3: la sombra corre «al menos 4 semanas» (S174, VPR945-01, LECTURA LR2)
 
 NOMBRES_M = ("N_BOOT", "SEMILLA", "N_MIN_PARES", "N_MIN_NOCHES", "N_CALIB", "MAX_FALSOS_CALIB",
              "MIN_VOLCANES_MEJORA", "MIN_PARES_VOLCAN", "MIN_PARES_PODER", "PLACEBO_GANANCIAS", "NOTA_COMPARADOR",
@@ -195,9 +202,22 @@ def es_ancestro(desde, sha):
     return {0: True, 1: False}.get(o.returncode)
 
 
-def commit_conocido(sha):
-    o = subprocess.run(["git", "-C", str(RAIZ), "cat-file", "-e", f"{sha}^{{commit}}"], capture_output=True)
-    return o.returncode == 0
+def resolver_commit(x):
+    """S174 (VPR945-04): el sha completo del commit `x`, o "" si `x` no es un sha (completo o abreviado, 7 caracteres o
+    más) de un commit de este clon. POR QUÉ: una referencia móvil (HEAD, origin/main, una rama, `X^{commit}`) cambia de
+    significado según el clon y el día, y una lectura sellada con ella no se puede reproducir ni auditar después; por eso
+    el texto tecleado tiene que ser el comienzo del sha al que git lo resuelve."""
+    o = subprocess.run(["git", "-C", str(RAIZ), "rev-parse", "--verify", "--quiet", f"{x}^{{commit}}"],
+                       capture_output=True, text=True)
+    sha = o.stdout.strip()
+    return sha if o.returncode == 0 and len(x) >= 7 and sha.startswith(x) else ""
+
+
+def fecha_commit(sha):
+    """Hora del commit (UTC, "AAAA-MM-DD HH:MM"). En main, con merge squash de GitHub, es la hora del merge: desde ahí
+    corre en la sombra el código nuevo."""
+    o = subprocess.run(["git", "-C", str(RAIZ), "show", "-s", "--format=%ct", sha], capture_output=True, text=True)
+    return datetime.datetime.fromtimestamp(int(o.stdout.strip()), datetime.timezone.utc).strftime("%Y-%m-%d %H:%M")
 
 
 def leer_equivalencia_local(ruta):
@@ -264,7 +284,8 @@ def main(argv=None):
     # una pasada vieja metida en el denominador nuevo decide la lectura nueva (A104; con la mezcla del escenario ER1 el
     # lector de antes daba NO CUMPLE por una pasada de la ROI vieja). La ROI se lee del record, no de la fecha (S155: la
     # marca va en los datos): `diag_codigo_mirova.roi` es la caja con que corrió, `regimen.codigo_sha` el código.
-    sin_regimen, fuera_regimen = {}, {}
+    sin_regimen, fuera_regimen, sin_mapa = {}, {}, {}
+    corte, fecha_corte = "", ""
     if not censo:
         reg = {}
         for i in obj:
@@ -284,22 +305,29 @@ def main(argv=None):
         for i, (roi, sha) in reg.items():
             tabla_reg[(obj[i]["volcan"], roi, sha[:9])].append(obj[i]["hora_utc"])
         pr("== régimen de la sombra (VPR939-03): pasadas observadas por volcán, ROI del record de P y codigo_sha")
-        for (v, roi, sha), hs in sorted(tabla_reg.items()):
+        for (v, roi, sha), hs in sorted(tabla_reg.items(), key=lambda kv: tuple(map(str, kv[0]))):
             pr(f"   {v} {roi} {sha}: {len(hs)} ({min(hs)} a {max(hs)})")
         dos_roi = sorted(v for v in {k[0] for k in tabla_reg} if len({k[1] for k in tabla_reg if k[0] == v}) > 1)
         if not a.roi_brazo:
             pr(f"== régimen de la sombra: SIN --roi-brazo, compuerta cerrada (la lectura declara la ROI que lee; "
                f"volcanes con dos ROI en los datos: {dos_roi or 'ninguno'})")
             return salir(3)
-        if a.sha_desde and not commit_conocido(a.sha_desde):
-            pr(f"== régimen de la sombra: --sha-desde {a.sha_desde} no es un commit de este clon, compuerta cerrada")
+        corte = resolver_commit(a.sha_desde) if a.sha_desde else ""
+        if a.sha_desde and not corte:
+            pr(f"== régimen de la sombra: --sha-desde {a.sha_desde} no es el sha (completo o abreviado) de un commit de "
+               "este clon, compuerta cerrada (una referencia como HEAD u origin/main cambia según el clon y el día)")
             return salir(3)
+        fecha_corte = fecha_commit(corte) if corte else ""
         esperada = RV.roi_por_volcan(a.roi_brazo)
         for i, (roi, sha) in reg.items():
-            if roi != esperada.get(obj[i]["volcan"]):
+            if obj[i]["volcan"] not in esperada:
+                # S174 (VPR945-02): un volcán que no está en el mapa de ROI (otro nombre, uno de los 34) no tiene ROI
+                # esperada; descartarlo como «otra ROI» lo sacaba en silencio del denominador con sus protegidas.
+                sin_mapa[i] = "volcan_sin_roi"
+            elif roi != esperada.get(obj[i]["volcan"]):
                 fuera_regimen[i] = "otra ROI"
             elif a.sha_desde:
-                anc = es_ancestro(a.sha_desde, sha)
+                anc = es_ancestro(corte, sha)
                 if anc is None:
                     sin_regimen[i] = "sha_desconocido"
                 elif not anc:
@@ -309,8 +337,9 @@ def main(argv=None):
             return dict(collections.Counter(obj[i]["volcan"] for i, m in fuera_regimen.items() if m == motivo))
 
         n_fuera = collections.Counter(fuera_regimen.values())
-        dentro = sum(1 for i in reg if i not in fuera_regimen and i not in sin_regimen)
-        pr(f"== régimen de la sombra: brazo {a.roi_brazo}" + (f", desde {a.sha_desde[:9]}" if a.sha_desde else "")
+        dentro = sum(1 for i in reg if i not in fuera_regimen and i not in sin_regimen and i not in sin_mapa)
+        pr(f"== régimen de la sombra: brazo {a.roi_brazo}"
+           + (f", desde {corte} (commit del {fecha_corte} UTC)" if corte else "")
            + f": dentro {dentro}, fuera por otra ROI {n_fuera['otra ROI']} {por_vol('otra ROI')}, anteriores al "
            f"corte {n_fuera['anterior al corte']} {por_vol('anterior al corte')}")
         pr("   protegidas fuera de esta lectura (se leen con su propio brazo, no aquí):",
@@ -337,6 +366,8 @@ def main(argv=None):
             motivo_sin[i] = "falta_brazo"      # una pasada «ok» incompleta es SIN DATO, no desaparece en silencio
         elif part[i] == "observada" and i in sin_regimen:
             motivo_sin[i] = sin_regimen[i]     # S173: sin ROI o sha legibles no se sabe qué detector la produjo
+        elif part[i] == "observada" and i in sin_mapa:
+            motivo_sin[i] = sin_mapa[i]        # S174 (VPR945-02): el brazo no dice qué ROI esperar en ese volcán
     sin = list(motivo_sin)
     no_obs = collections.Counter(part[i] for i in obj if part[i] in ("fuera", "sin_crater"))
     oks0 = [i for i in obj if part[i] == "observada" and i not in motivo_sin]
@@ -359,6 +390,14 @@ def main(argv=None):
     pr("   protegidas SIN DATO (falla de cobertura, no de brazo):", prot_sin or "ninguna")
     den_cob = max(1, len(obj) + len(sin_g) - no_obs["fuera"] - no_obs["sin_crater"])
     cob_ok = sg_ok and len(sin) + len(sin_g) <= AB.MAX_SIN_DATO * den_cob and not prot_sin
+    if not oks0:
+        # S174 (VPR945-03): sin ninguna pasada observada no hay nada que medir. Antes decía «cobertura: SUFICIENTE» y
+        # cerraba por «control nulo FALLA», dos mensajes falsos (el nulo no tuvo con qué probarse).
+        pr(f"== cobertura: SIN PASADAS OBSERVADAS en esta lectura (observadas 0, SIN DATO {len(sin)}"
+           + (f"; brazo {a.roi_brazo}" + (f", desde {corte}" if corte else "") if not censo else "")
+           + "): no hay nada que medir, compuerta cerrada")
+        pr("== sin veredicto: ninguna pasada observada que leer")
+        return salir(3)
     pr("== cobertura:", "SUFICIENTE" if cob_ok else
        f"INSUFICIENTE (más de {AB.MAX_SIN_DATO:.0%} sin procesar o una protegida): relanzar con SOLO las faltantes")
 
@@ -542,6 +581,22 @@ def main(argv=None):
         sin_z = [i for i in oks0 if obj[i].get("z") is None]
         if sin_z:
             pr(f"   sin cenit: {len(sin_z)}")
+        # S174 (VPR945-01, LECTURA LR2). POR QUÉ: §4.3 pide que la sombra corra «al menos 4 semanas»: dos noches ven unas
+        # pocas pasadas de un volcán, una estación y unos ángulos, y un CUMPLE con eso no confirma nada. El reloj corre
+        # sobre las pasadas observadas que esta lectura lee (no sobre las de otra ROI, las de antes del corte, las SIN
+        # DATO ni las no observadas) y, con --sha-desde, no parte antes de la hora del commit del corte (una noche vieja
+        # reprocesada con el código nuevo no es sombra prospectiva).
+        horas = sorted(obj[i]["hora_utc"] for i in oks0) or ["(ninguna)"]
+        reloj, desde_que, dias = horas[0], "la primera pasada leída", 0.0
+        if corte and fecha_corte > reloj:
+            reloj, desde_que = fecha_corte, f"el corte --sha-desde (commit del {fecha_corte} UTC)"
+        if oks0:
+            dias = (datetime.datetime.strptime(horas[-1], "%Y-%m-%d %H:%M")
+                    - datetime.datetime.strptime(reloj, "%Y-%m-%d %H:%M")).total_seconds() / 86400
+        dur_ok = dias >= DIAS_MIN_SOMBRA
+        pr(f"== duración de la sombra (§4.3, al menos 4 semanas = {DIAS_MIN_SOMBRA} días): primera {horas[0]}, última "
+           f"{horas[-1]}, noches distintas {len({h[:10] for h in horas})}; reloj desde {desde_que}: {dias:.1f} de "
+           f"{DIAS_MIN_SOMBRA} días, {'COMPLETA' if dur_ok else 'INCOMPLETA'}")
     aviso, rc_final = "", 0
     if not cob_ok and a.leer_con_faltantes:
         aviso, rc_final = f"[LEÍDO CON FALTANTES: {a.leer_con_faltantes}]", 5
@@ -720,12 +775,23 @@ def main(argv=None):
                 motivos.append(f"{canal}: P2 PIERDE (neto {neto}, bloques {nb})")
             pr(f"== §6.3 canal {canal}: P1 {m['P1']} (de {m['n_prot']}) | P2 contra K {reg} (neto {neto}, bloques {nb}) "
                f"| protegidas que ni K ni P publican {nadie or 'ninguna'}")
-        if motivos:
-            pr("== §6.3 sombra: NO CUMPLE (" + "; ".join(motivos) + ")" + (" " + aviso if aviso else ""))
-        else:
+        # S174 (LECTURA LR2): antes de las 4 semanas sólo el veto de P1 es definitivo (una protegida perdida sigue
+        # perdida con más noches); un P2 que hoy PIERDE puede no perder con más bloques, y un CUMPLE no vale aún.
+        dur_txt = f"; duración {dias:.1f} de {DIAS_MIN_SOMBRA} días"
+        p1_veta = any(": P1 " in x for x in motivos)
+        if motivos and (dur_ok or p1_veta):
+            pr("== §6.3 sombra: NO CUMPLE (" + "; ".join(motivos) + dur_txt + ")" + (" " + aviso if aviso else ""))
+        elif dur_ok:
             pr(f"== §6.3 sombra: CUMPLE (P1 = 0; P2 tabla {regs['tabla']}, todo {regs['todo']}"
                + ("; con 4 bloques o menos la sombra sólo veta" if sin_sus else "")
-               + ("; SIN PROTEGIDAS: P1 no pudo vetar" if not n_prot else "") + ")" + (" " + aviso if aviso else ""))
+               + ("; SIN PROTEGIDAS: P1 no pudo vetar" if not n_prot else "") + dur_txt + ")"
+               + (" " + aviso if aviso else ""))
+        else:
+            rc_final = rc_final or 4
+            pr(f"== §6.3 sombra: PROVISORIO ({dias:.1f} de {DIAS_MIN_SOMBRA} días; el §4.3 pide al menos 4 semanas): hoy "
+               + ("; ".join(motivos) if motivos else f"P1 = 0; P2 tabla {regs['tabla']}, todo {regs['todo']}")
+               + ("; SIN PROTEGIDAS" if not n_prot else "")
+               + "; no es CUMPLE ni NO CUMPLE hasta completar la duración" + (" " + aviso if aviso else ""))
 
     # ---------------------------------------------------------------- informativo
     brazos_inf = ("K", "P") + (("Pdef", "Psinfiltro", "Kgeo") if censo else ())

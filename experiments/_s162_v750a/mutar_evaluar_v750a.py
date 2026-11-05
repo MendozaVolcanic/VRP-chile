@@ -12,7 +12,10 @@ La copia mutada vive en esta misma carpeta con otro nombre (`_mut_<id>_evaluar_v
 rutas que el original, y se borra al terminar. Las corridas van en paralelo (cada una con su carpeta de destino).
 M29 a M52 se agregaron tras el verificador limpio (VA-01 a VA-07): cada una rompe una regla que sus
 roturas V01 a V41 mostraron sin vigilar. MR1 a MR7 (S173, VPR939-03, LECTURA LR1; ids MR porque la rama `claude/s162-viirs750-2-918174` ya usa M53 a M95) rompen el régimen de la sombra: el
-filtro por ROI, la compuerta sin brazo, la marca SIN DATO, el corte por sha y el corte de cenit en 30°.
+filtro por ROI, la compuerta sin brazo, la marca SIN DATO, el corte por sha y el corte de cenit en 30°. MR9 a MR24 (S174,
+VPR945, LECTURA LR2; la rama de V750-A ya usa MR8) rompen la segunda vuelta: la duración de 4 semanas y su reloj, el
+volcán fuera del mapa de ROI, las 0 observadas, el sha resuelto de --sha-desde, y las seis roturas que el verificador
+dejó vivas (MY2, MY3, MY4, MY10, MY12, MY15, MY16 de su mutar_propio.py).
 Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4]
 Salida: 0 si los controles salen como deben y todas las mutaciones quedan ATRAPADAS; 1 si no.
 """
@@ -145,8 +148,8 @@ MUTACIONES = {
     "MR1": ("sombra (LR1): el filtro por ROI no saca ninguna pasada (lo de antes de S173)",
             'if roi != esperada.get(obj[i]["volcan"]):', "if False:"),
     "MR2": ("sombra (LR1): sin --roi-brazo no se cierra la compuerta y se lee como B0",
-            "            return salir(3)\n        if a.sha_desde and not commit_conocido(a.sha_desde):",
-            '            a.roi_brazo = "B0"\n        if a.sha_desde and not commit_conocido(a.sha_desde):'),
+            '            return salir(3)\n        corte = resolver_commit(a.sha_desde) if a.sha_desde else ""',
+            '            a.roi_brazo = "B0"\n        corte = resolver_commit(a.sha_desde) if a.sha_desde else ""'),
     "MR3": ("sombra (LR1): una pasada sin régimen no es SIN DATO y entra a la lectura",
             "            motivo_sin[i] = sin_regimen[i]", "            pass"),
     "MR4": ("sombra (LR1): --sha-desde no corta nada",
@@ -159,6 +162,45 @@ MUTACIONES = {
     "MR7": ("sombra (§12.8 punto 2): el borde de 30° va abajo",
             '(("bajo 30°", lambda z: z < 30), ("sobre 30°", lambda z: z >= 30))',
             '(("bajo 30°", lambda z: z <= 30), ("sobre 30°", lambda z: z > 30))'),
+    # S174, VPR945 (segunda vuelta del PR #945)
+    "MR9": ("sombra (§4.3, LR2): la duración de 4 semanas no se exige",
+            "dur_ok = dias >= DIAS_MIN_SOMBRA", "dur_ok = True"),
+    "MR10": ("sombra (LR2): con --sha-desde el reloj no parte del corte",
+             "        if corte and fecha_corte > reloj:", "        if False:"),
+    "MR11": ("sombra (LR2): el reloj cuenta también las pasadas no observadas y las SIN DATO",
+             'horas = sorted(obj[i]["hora_utc"] for i in oks0) or', 'horas = sorted(obj[i]["hora_utc"] for i in obj) or'),
+    "MR12": ("sombra (VPR945-02): un volcán fuera del mapa de ROI vuelve a salir como «otra ROI»",
+             '            if obj[i]["volcan"] not in esperada:', "            if False:"),
+    "MR13": ("VPR945-03: con 0 observadas no hay mensaje propio (dice SUFICIENTE y cae el nulo)",
+             "    if not oks0:\n", "    if False:\n"),
+    "MR14": ("VPR945-04: --sha-desde acepta una referencia móvil (HEAD) mientras git la resuelva",
+             "return sha if o.returncode == 0 and len(x) >= 7 and sha.startswith(x) else \"\"",
+             "return sha if o.returncode == 0 else \"\""),
+    "MR15": ("VPR945-04: la salida lleva lo tecleado en --sha-desde y no el sha resuelto",
+             '(f", desde {corte} (commit del', '(f", desde {a.sha_desde} (commit del'),
+    "MR16": ("VPR945-06 (MY2): sólo se exige la ROI; un record sin sha entra a la lectura",
+             "if not roi or not sha:", "if not roi:"),
+    "MR17": ("VPR945-06 (MY3): sólo se exige el sha; un record sin ROI no es SIN DATO",
+             "if not roi or not sha:", "if not sha:"),
+    "MR18": ("VPR945-05 (MY10): la lista de protegidas que salen de la lectura sale siempre «ninguna»",
+             'for i, m in fuera_regimen.items() if obj[i].get("protegida")] or "ninguna")',
+             'for i, m in fuera_regimen.items() if False] or "ninguna")'),
+    "MR19": ("VPR945-07 (MY4): un --sha-desde que no resuelve no cierra con su mensaje (sigue como sha desconocido)",
+             "        if a.sha_desde and not corte:", "        if False:"),
+    "MR20": ("VPR945-07 (MY12): el conteo «dentro» incluye las SIN DATO del régimen",
+             "dentro = sum(1 for i in reg if i not in fuera_regimen and i not in sin_regimen and i not in sin_mapa)",
+             "dentro = sum(1 for i in reg if i not in fuera_regimen and i not in sin_mapa)"),
+    "MR21": ("VPR945-07 (MY15): el cenit decide: una protegida sobre 30° que P pierde cierra la compuerta",
+             '        sin_z = [i for i in oks0 if obj[i].get("z") is None]\n',
+             '        sin_z = [i for i in oks0 if obj[i].get("z") is None]\n'
+             '        if any(etiqueta(obj[i], "decide") == "prot" and pub(i, "K") and not pub(i, "P") and '
+             'obj[i].get("z", 0) >= 30 for i in oks0):\n            ctrl["cenit"] = False\n'),
+    "MR22": ("sombra (LR2): antes de las 4 semanas un P1 tampoco veta (espera la duración)",
+             "if motivos and (dur_ok or p1_veta):", "if motivos and dur_ok:"),
+    "MR23": ("sombra (LR2): antes de las 4 semanas un P2 PIERDE ya es NO CUMPLE",
+             "if motivos and (dur_ok or p1_veta):", "if motivos:"),
+    "MR24": ("VPR945-07 (MY16): el régimen se lee también en las pasadas no observadas",
+             '            if AB.partida(r) != "observada":\n                continue\n', "            pass\n"),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),

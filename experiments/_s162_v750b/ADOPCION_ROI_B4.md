@@ -77,7 +77,9 @@ otros nueve volcanes dan el mismo resultado con B0 y con B4.
 - ⚠️ **S173, en curso (PR en borrador, rama `claude/s173-vpr939-03`, sin mergear)**: `evaluar_v750a.py --fase sombra`
   lee la ROI y el sha de cada record de P, exige `--roi-brazo` (sin él cierra la compuerta), saca de la lectura las
   pasadas de otra ROI y, con `--sha-desde`, las de código anterior; LECTURA LR1 de `LECTURAS_EVALUAR_V750A.md`. Hasta
-  el merge vale el texto que sigue. Texto original:
+  el merge vale el texto que sigue. S174 (segunda vuelta, VPR945, LECTURA LR2): la sombra no dice CUMPLE antes
+  de las 4 semanas del §4.3 (PROVISORIO, salida 4; el reloj parte del corte con `--sha-desde`), un volcán fuera
+  del mapa de ROI es SIN DATO y `--sha-desde` exige un sha. Texto original:
 - **Pendiente, no hecho**: el lector de la sombra de V750-A todavía no separa por ROI (ningún script de
   `experiments/_s162_v750a/` lee `regimen.codigo_sha` ni `diag_codigo_mirova.roi`; VPR939-03 del verificador del
   PR). Los insumos ya están en cada record (`pipeline/store.py` l. 89 a 93, `pipeline/mirova_v750_codigo.py` l. 708).

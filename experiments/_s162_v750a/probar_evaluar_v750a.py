@@ -73,10 +73,31 @@ las pasadas de la sombra llevan en el record de P `diag_codigo_mirova.roi` y `re
   ER4 una protegida cuyo record de P no trae régimen: SIN DATO «sin_regimen», cobertura INSUFICIENTE (salida 3).
   ER5 shas reales del repo con --sha-desde el merge de #939: 6 protegidas de sha anterior quedan fuera como anteriores
       al corte (git merge-base --is-ancestor) y la def de Cordón Caulle por otra ROI; CUMPLE.
-  ER6 lo mismo con una pasada cuyo sha no existe en el repo: SIN DATO «sha_desconocido» (salida 3).
+  ER6 lo mismo con una pasada cuyo sha no existe en el repo: SIN DATO «sha_desconocido» (salida 3); «dentro» no la
+      cuenta.
+Agregados en S174 por VPR945 (verificador limpio del PR #945; ids ER8 en adelante porque la rama
+`claude/s162-viirs750-2-918174` ya usa ER7). Las pasadas de la sombra base cubren ahora más de 4 semanas (los negativos
+de Villarrica del 10 al 15 de diciembre) para que los escenarios de siempre sigan leyendo un veredicto final; la mezcla
+suma una pasada de Cordón Caulle def fuera del gránulo (no observada: no entra al régimen):
+  ER8 una protegida con sha pero sin ROI en el record de P: SIN DATO «sin_regimen» (salida 3), no «otra ROI».
+  ER9 una protegida con ROI pero sin sha: SIN DATO «sin_regimen» (salida 3).
+  ER10 dos protegidas de un volcán que no está en el mapa de ROI («Nevados de Chillan»): SIN DATO «volcan_sin_roi»,
+      cobertura INSUFICIENTE (salida 3); antes salían como «otra ROI» y la sombra daba CUMPLE (VPR945-02).
+  ER11 todas las pasadas de antes del corte: «cobertura: SIN PASADAS OBSERVADAS», sin «SUFICIENTE» ni «control nulo»
+      (salida 3, VPR945-03).
+  ER12 sombra de 21 días con dos pasadas de octubre que no se leen (una de otra ROI, una fuera del gránulo): PROVISORIO
+      (salida 4), el reloj parte en la primera pasada leída (VPR945-01).
+  ER13 --sha-desde con una noche vieja reprocesada con el código nuevo: 29 días desde la primera pasada leída, 25 desde
+      el commit del corte: PROVISORIO (salida 4), el reloj parte del corte.
+  ER15 --sha-desde HEAD: compuerta cerrada con su mensaje (una referencia móvil no se acepta, VPR945-04).
+  ER16 una protegida sobre 30° que K publica y P no: NO CUMPLE por P1 (el cenit informa, no cierra la compuerta).
+  ER17 --sha-desde con el sha abreviado: la salida lleva el sha completo resuelto.
+  ER18 sombra de 21 días con una protegida perdida: NO CUMPLE por P1 (el veto vale antes de las 4 semanas, LR2).
+  ER19 sombra de 21 días con P2 PIERDE: PROVISORIO (salida 4), no NO CUMPLE.
+  ER2 y ER5 afirman además la línea «protegidas fuera de esta lectura» con las protegidas que salen.
 La población base suma para el S-1: celda de Cordón Caulle en el pase 2 y la zona 2 (el pase 1 y la zona 1 con otro
 umbral), una alerta de Tupungatito cuyo NTI cruza entre los umbrales pero el ETI no, y un diagnóstico mal formado.
-Una caída nativa del analizador (código fuera de 0, 3, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
+Una caída nativa del analizador (código fuera de 0, 3, 4, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
 nunca falla por aserción (VA-08).
 Uso: python probar_evaluar_v750a.py --dest <carpeta temporal> [--analizador <ruta>] [--evaluador <evaluar_d25.py>]
      [--solo E00,E03]
@@ -86,6 +107,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import datetime
 import hashlib
 import json
 import subprocess
@@ -100,7 +122,8 @@ C = 33
 SHA_B0, SHA_B4 = "b0" * 20, "b4" * 20
 SHA_REAL_B0 = "636b3426e69e9c6dd79ffacde601eed3c111dc48"
 SHA_REAL_B4 = "58edb978825ff08677fc1b3e803a2ca601dd4598"
-CRATER = {"Lascar": [33, 33], "Villarrica": [33, 33], "PuyehueCordonCaulle": [30, 36], "Tupungatito": [33, 33]}
+CRATER = {"Lascar": [33, 33], "Villarrica": [33, 33], "PuyehueCordonCaulle": [30, 36], "Tupungatito": [33, 33],
+          "Nevados de Chillan": [33, 33]}   # S174 (ER10): un nombre que no está en el mapa de ROI
 
 VERDE = """VERDE: E1 1020 casos, E3 10 recortes
    mutación k1_y_minimos         atrapada por aserción (sintético)
@@ -177,8 +200,11 @@ class Pob:
                           "pc_vrp": K or 0.0, "z": z, "pos_crater": CRATER[volcan]})
         rp = k_record(P)
         if regimen:   # como el record real de la vía: ROI en el diagnóstico, sha del código en la marca de régimen
-            rp["diag_codigo_mirova"] = {"roi": roi}
-            rp["regimen"] = {"perfil": "sombra_codigo_mirova", "codigo_sha": sha, "origen": "actions"}
+            # S174 (VPR945-06): "sin_roi" deja el diagnóstico sin la ROI, "sin_sha" la marca de régimen sin el sha
+            rp["diag_codigo_mirova"] = {} if regimen == "sin_roi" else {"roi": roi}
+            rp["regimen"] = {"perfil": "sombra_codigo_mirova", "origen": "actions"}
+            if regimen != "sin_sha":
+                rp["regimen"]["codigo_sha"] = sha
         r = {"id": i, "estado": estado, "dayflag": dayflag, "cobertura": {"nan_7_crater": 0, "nan_crater": False},
              "brazos": {"K": {"record": k_record(K, k_tmax)}, "Kgemelo": {"record": k_record(gemelo, k_tmax)},
                         "Kgeo": {"record": k_record(K)}, "P": {"record": rp}},
@@ -276,21 +302,29 @@ def base(p_de=None, negs_T="gana", negs_O="gana", extra=None, pcc_pdef=None, gem
 
 
 def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, mezcla=False, sin_reg=False, sha_real=False,
-               sha_rara=False):
+               sha_rara=False, villa_dia0="2026-12-10", temprana=False, reproc=False, vol_fuera=False, z_perdida=20.0,
+               sha_todas=None):
     """Sombra: sólo K y P (record del perfil sombra), desde el 2026-11-03. S173 (VPR939-03): mezcla agrega tres pasadas
     de Cordón Caulle, una con la ROI def y sha de antes del cambio (P pierde la protegida que K publica) y dos con sens
     (z 30 y 35); sin_reg quita el régimen del record de P de la primera protegida de Láscar; sha_real usa shas del repo
     y pone las tres primeras noches de protegidas con el sha anterior al merge; sha_rara da a un negativo un sha que no
-    existe en el repo."""
+    existe en el repo.
+    S174 (VPR945): villa_dia0 es el primer día de los 6 negativos de Villarrica que cierran la sombra (por omisión del 10
+    al 15 de diciembre, más de 4 semanas desde el 4 de noviembre; "2026-11-20" la deja en 21 días); sin_reg "roi" o "sha"
+    quita sólo una de las dos marcas; temprana agrega dos pasadas de octubre que la lectura con B4 no lee (Cordón Caulle
+    def y una de Láscar fuera del gránulo); reproc, un negativo del 1 de noviembre con el sha posterior al corte (una noche
+    vieja reprocesada); vol_fuera, dos protegidas de un volcán fuera del mapa de ROI; z_perdida, el cenit de la protegida
+    que pierde P con p1; sha_todas, un mismo sha para todas las pasadas."""
     pb = Pob()
     sha0, sha4 = (SHA_REAL_B0, SHA_REAL_B4) if sha_real else (SHA_B0, SHA_B4)
     for n in range(0 if sin_prot else 6):
         dia = f"2026-11-{4 + n:02d}"
         for vol in ("Lascar", "Villarrica"):
             perder = p1 and n == 0 and vol == "Lascar"
+            quitar = sin_reg and n == 0 and vol == "Lascar"
             pb.pasada(vol, f"{dia} 06:00", "pos", K=1.0, P=None if perder else 2.0, mirova_vrp=2.0,
-                      sha=sha0 if (sha_real and n < 3) else sha4,
-                      regimen=not (sin_reg and n == 0 and vol == "Lascar"))
+                      sha=sha0 if (sha_real and n < 3) else sha4, z=z_perdida if perder else 20.0,
+                      regimen={"roi": "sin_roi", "sha": "sin_sha"}.get(sin_reg, False) if quitar else True)
     if mezcla:
         pb.pasada("PuyehueCordonCaulle", "2026-11-04 06:30", "pos", K=1.5, P=None, mirova_vrp=2.0, roi="def",
                   sha=sha0, z=25.0)
@@ -298,6 +332,17 @@ def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, mezcla=Fal
                   sha=sha4, z=30.0)
         pb.pasada("PuyehueCordonCaulle", "2026-11-07 06:30", "pos", K=1.5, P=2.0, mirova_vrp=2.0, roi="sens",
                   sha=sha4, z=35.0)
+        # S174 (VPR945-07, MY16): una pasada def fuera del gránulo no es observada y no entra al régimen ni a «otra ROI»
+        pb.pasada("PuyehueCordonCaulle", "2026-11-05 06:30", "pos", K=None, P=None, mirova_vrp=2.0, roi="def",
+                  sha=sha0, estado="volcan_fuera_del_granulo")
+    if vol_fuera:   # S174 (VPR945-02): el nombre no coincide con ninguna clave de roi_por_volcan
+        for n in range(2):
+            pb.pasada("Nevados de Chillan", f"2026-11-{8 + n:02d} 06:20", "pos", K=1.0, P=2.0, mirova_vrp=2.0)
+    if temprana:    # S174 (VPR945-01): dos pasadas de octubre que esta lectura no lee (otra ROI, no observada)
+        pb.pasada("PuyehueCordonCaulle", "2026-10-01 05:00", "neg_limpio", K=None, P=None, roi="def", sha=sha4)
+        pb.pasada("Lascar", "2026-10-02 05:00", "neg_limpio", K=None, P=None, estado="volcan_fuera_del_granulo")
+    if reproc:      # S174 (VPR945-01): noche vieja reprocesada con el código posterior al corte
+        pb.pasada("Villarrica", "2026-11-01 06:00", "neg_limpio", K=None, P=None, sha=sha4)
     if prot_ocr:   # protegida sólo del OCR que K publica y P no: P1 en tabla más OCR, no con la tabla sola
         pb.pasada("Villarrica", "2026-11-11 06:30", "pos", K=1.0, P=None, mirova_vrp=2.0, tabla=False)
     for n in range(6):
@@ -311,13 +356,19 @@ def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, mezcla=Fal
             pb.pasada("Lascar", f"{dia} 05:00", "neg_limpio", K=0.2, P=None)
         else:
             pb.pasada("Lascar", f"{dia} 05:00", "neg_limpio", K=None, P=None)
+    d0 = datetime.date.fromisoformat(villa_dia0)
     for n in range(6):
-        pb.pasada("Villarrica", f"2026-11-{20 + n:02d} 05:00", "neg_limpio", K=None, P=None)
+        pb.pasada("Villarrica", f"{d0 + datetime.timedelta(days=n)} 05:00", "neg_limpio", K=None, P=None)
     if sha_real:   # el resto de las pasadas, con el sha real posterior al merge (el falso no existe en git)
         for r in pb.res:
             reg = r["brazos"]["P"]["record"].get("regimen")
-            if reg and reg["codigo_sha"] == SHA_B4:
+            if reg and reg.get("codigo_sha") == SHA_B4:
                 reg["codigo_sha"] = SHA_REAL_B4
+    if sha_todas:
+        for r in pb.res:
+            reg = r["brazos"]["P"]["record"].get("regimen")
+            if reg and reg.get("codigo_sha"):
+                reg["codigo_sha"] = sha_todas
     return pb
 
 
@@ -578,6 +629,8 @@ ESCENARIOS = {
                 no_tiene=["== §6.3 sombra:"]),
     "ER2": dict(pob=lambda: esc_sombra(mezcla=True), fase="sombra", rc=0, args=B4,
                 tiene=[("== régimen de la sombra: brazo B4", ["dentro 26", "otra ROI 1", "PuyehueCordonCaulle"]),
+                       ("   protegidas fuera de esta lectura", ["PuyehueCordonCaulle 2026-11-04 06:30 (otra ROI)"]),
+                       ("== duración de la sombra", ["primera 2026-11-04 06:00", "días, COMPLETA"]),
                        ("== §6.3 sombra: CUMPLE", []),
                        ("   sobre 30°", ["observadas 2", "protegidas 2"]),
                        ("   bajo 30°", ["observadas 24", "protegidas 12"])],
@@ -591,13 +644,61 @@ ESCENARIOS = {
                 no_tiene=["== §6.3 sombra:"]),
     "ER5": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True), fase="sombra", rc=0,
                 args=B4 + ["--sha-desde", SHA_REAL_B4],
-                tiene=[("== régimen de la sombra: brazo B4", ["dentro 20", "otra ROI 1", "anteriores al corte 6"]),
+                tiene=[("== régimen de la sombra: brazo B4", ["dentro 20", "otra ROI 1", "anteriores al corte 6",
+                                                               f"desde {SHA_REAL_B4}"]),
+                       ("   protegidas fuera de esta lectura", ["Lascar 2026-11-04 06:00 (anterior al corte)",
+                                                               "PuyehueCordonCaulle 2026-11-04 06:30 (otra ROI)"]),
                        ("== §6.3 sombra: CUMPLE", [])],
                 no_tiene=["== §6.3 sombra: NO CUMPLE"]),
     "ER6": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True, sha_rara=True), fase="sombra", rc=3,
                 args=B4 + ["--sha-desde", SHA_REAL_B4],
-                tiene=[("   SIN DATO por motivo:", ["sha_desconocido"])],
+                tiene=[("   SIN DATO por motivo:", ["sha_desconocido"]),
+                       ("== régimen de la sombra: brazo B4", ["dentro 19"])],
                 no_tiene=["== §6.3 sombra:"]),
+    # S174, VPR945 (verificador limpio del PR #945)
+    "ER8": dict(pob=lambda: esc_sombra(sin_reg="roi"), fase="sombra", rc=3, args=B4,
+                tiene=[("   SIN DATO por motivo:", ["sin_regimen"]), ("== cobertura: INSUFICIENTE", [])],
+                no_tiene=["== §6.3 sombra:"]),
+    "ER9": dict(pob=lambda: esc_sombra(sin_reg="sha"), fase="sombra", rc=3, args=B4,
+                tiene=[("   SIN DATO por motivo:", ["sin_regimen"]), ("== cobertura: INSUFICIENTE", [])],
+                no_tiene=["== §6.3 sombra:"]),
+    "ER10": dict(pob=lambda: esc_sombra(vol_fuera=True), fase="sombra", rc=3, args=B4,
+                 tiene=[("   SIN DATO por motivo:", ["volcan_sin_roi"]), ("== cobertura: INSUFICIENTE", []),
+                        ("== régimen de la sombra: brazo B4", ["otra ROI 0"])],
+                 no_tiene=["== §6.3 sombra:"]),
+    "ER11": dict(pob=lambda: esc_sombra(sha_real=True, sha_todas=SHA_REAL_B0), fase="sombra", rc=3,
+                 args=B4 + ["--sha-desde", SHA_REAL_B4],
+                 tiene=[("== cobertura: SIN PASADAS OBSERVADAS", ["observadas 0", "compuerta cerrada"]),
+                        ("== sin veredicto:", ["ninguna pasada observada"])],
+                 no_tiene=["== cobertura: SUFICIENTE", "== control nulo", "== §6.3 sombra:"]),
+    "ER12": dict(pob=lambda: esc_sombra(villa_dia0="2026-11-20", temprana=True), fase="sombra", rc=4, args=B4,
+                 tiene=[("== duración de la sombra", ["primera 2026-11-04 06:00", "reloj desde la primera pasada leída",
+                                                      "21.0 de 28 días", "días, INCOMPLETA"]),
+                        ("== §6.3 sombra: PROVISORIO", ["21.0 de 28 días", "P1 = 0"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
+    "ER13": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True, reproc=True, villa_dia0="2026-11-25"),
+                 fase="sombra", rc=4, args=B4 + ["--sha-desde", SHA_REAL_B4],
+                 tiene=[("== duración de la sombra", ["primera 2026-11-01 06:00", "reloj desde el corte",
+                                                      "25.1 de 28 días", "días, INCOMPLETA"]),
+                        ("== §6.3 sombra: PROVISORIO", ["25.1 de 28 días"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
+    "ER15": dict(pob=lambda: esc_sombra(), fase="sombra", rc=3, args=B4 + ["--sha-desde", "HEAD"],
+                 tiene=[("== régimen de la sombra: --sha-desde HEAD", ["no es el sha", "compuerta cerrada"])],
+                 no_tiene=["== §6.3 sombra:", "== cobertura:"]),
+    "ER16": dict(pob=lambda: esc_sombra(p1=True, z_perdida=35.0), fase="sombra", rc=0, args=B4,
+                 tiene=[("   sobre 30°", ["protegidas 1", "protegidas que K publica y P no 1"]),
+                        ("== §6.3 sombra: NO CUMPLE", ["P1"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE"]),
+    "ER17": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True), fase="sombra", rc=0,
+                 args=B4 + ["--sha-desde", SHA_REAL_B4[:9]],
+                 tiene=[("== régimen de la sombra: brazo B4", [f"desde {SHA_REAL_B4}", "dentro 20"]),
+                        ("== §6.3 sombra: CUMPLE", [])]),
+    "ER18": dict(pob=lambda: esc_sombra(p1=True, villa_dia0="2026-11-20"), fase="sombra", rc=0, args=B4,
+                 tiene=[("== §6.3 sombra: NO CUMPLE", ["P1", "duración 21.0 de 28 días"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: PROVISORIO"]),
+    "ER19": dict(pob=lambda: esc_sombra(negs="pierde", villa_dia0="2026-11-20"), fase="sombra", rc=4, args=B4,
+                 tiene=[("== §6.3 sombra: PROVISORIO", ["P2 PIERDE", "21.0 de 28 días"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
     "E22": dict(pob=lambda: base(), sg_otra=True, rc=3,
                 tiene=[("== cobertura: INSUFICIENTE", []), ("== compuerta del veredicto", ["CERRADA"])],
                 no_tiene=["== §6 censo:"]),
@@ -616,18 +717,18 @@ def correr(nombre, e, analizador, evaluador, dest):
         cmd += ["--equivalencia-local", str(d / "equivalencia_local.txt")]
     cmd += e.get("args", [])
     # VA-08 del verificador: una caída nativa del proceso (0xC0000005 bajo carga, sin Traceback) no es una falla por
-    # aserción. Los códigos que el analizador puede dar son 0, 3, 5 y 6; cualquier otro es caída. Una caída nativa se
+    # aserción. Los códigos que el analizador puede dar son 0, 3, 4 (S174), 5 y 6; cualquier otro es caída. Una caída nativa se
     # reintenta hasta 2 veces y el reintento queda escrito en la salida.
     reint = 0
     while True:
         o = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800)
         txt = o.stdout + o.stderr
-        nativa = o.returncode not in (0, 3, 5, 6) and "Traceback (most recent call last)" not in txt
+        nativa = o.returncode not in (0, 3, 4, 5, 6) and "Traceback (most recent call last)" not in txt
         if not nativa or reint >= 2:
             break
         reint += 1
     (d / "stdout.txt").write_text(txt, encoding="utf-8")
-    if "Traceback (most recent call last)" in txt or o.returncode not in (0, 3, 5, 6):
+    if "Traceback (most recent call last)" in txt or o.returncode not in (0, 3, 4, 5, 6):
         return "CAÍDA", [f"código {o.returncode}, reintentos {reint}", (txt.strip().splitlines() or [""])[-1][:300]]
     lineas = o.stdout.splitlines()
     fallas = []
