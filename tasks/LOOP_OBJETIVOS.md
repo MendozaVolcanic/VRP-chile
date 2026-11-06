@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 07:36 UTC (S174): cuarta vuelta del autor del #945; R4 del verificador lanzada
+
+- Autor (Opus; el arnés le reporta esfuerzo 15): punta `b13ec336e`, CI pytest pass (run 42180489561), PR en borrador. Según el autor: noches por volcán en los volcanes con ROI distinta de B0 (derivados de `roi_por_volcan`), 0 pasadas en uno da PROVISORIO; reparto 7 y 7 por mitad del lapso en el conjunto y en cada volcán cambiado; rango UTC impreso en vez de cifra fija; prueba del minuto del corte; rojo 8 de 9, batería 84/84, medidor 49/49. Datos de main hoy, B4 desde `58edb9788`: PROVISORIO, 1 noche por volcán. Sin cota superior de fecha (razón en su informe). Para Nicolás: LR3 (a) noches por volcán también en los 9 sin cambio, y LR3 (c) si el reparto 7 y 7 se mantiene. Informe `D:/vrp-trabajo/temporales/s174-autor945-r4/INFORME_AUTOR_R4.md`.
+- R4 del verificador (Sonnet) lanzada sobre `clon3`, sin suite local (C: 2,81 GB, D: 5,93 GB).
+
 ### 2026-11-06 06:10 UTC (S174): cuarta vuelta del autor del #945 lanzada
 
 - Frase de Nicolás: «Cuarta vuelta primero». Autor (Opus, esfuerzo alto pedido) sobre `932a3e9fd`: R3-01 (noches por volcán, PROVISORIO si un volcán con ROI cambiada tiene menos de 14) y R3-02 a R3-05. Por el disco (C: 2,84 GB), sin suite local: sólo batería y medidor con temporales en D:; la suite la corre el CI. Informe `D:/vrp-trabajo/temporales/s174-autor945-r4/INFORME_AUTOR_R4.md`. Después: R4 del verificador y merge con frase.
