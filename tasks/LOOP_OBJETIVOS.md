@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 00:48 UTC (S174): segunda ronda del verificador del #945 y mínimo de noches
+
+- **#945, R2 del verificador** sobre `daf04cfdc`: MERGEABLE CON CAMBIOS (`D:/vrp-trabajo/temporales/s174-ver945/INFORME_R2.md`). 7 de 8 hallazgos de R1 cerrados. Gravedad 2: R2-01 (la duración es el lapso entre extremos, no noches distintas; una pasada suelta a +30 días da CUMPLE) y R2-02 (reloj global; sin `--sha-desde` una noche `sens` llega a 28,1 de 28 días). Gravedad 1: R2-03 (sin cota inferior de fecha) y R2-04 (5 de 11 mutaciones nuevas sobreviven). CI del PR verde en `daf04cfdc`.
+- **Frase de Nicolás**: «14 noches». La sombra exige 14 noches distintas con datos (además de las 4 semanas) para poder decir CUMPLE. Para R2-02 la coordinadora aplica su recomendación (`--sha-desde` obligatorio en la fase sombra), sin frase explícita de Nicolás sobre ese punto; es reversible y se le informa. Tercera vuelta del autor lanzada.
+
 ### 2026-11-05 21:17 UTC (S174): verificador del #945, PR #950, causa del choque M71/M82
 
 - **#945, verificador limpio** (Sonnet, pedido con esfuerzo alto; el agente informa «esfuerzo del arnés 10», SOSPECHA de que el parámetro no llegó, como en S172): MERGEABLE CON CAMBIOS, 8 hallazgos (`D:/vrp-trabajo/temporales/s174-ver945/INFORME.md`). Gravedad 3: VPR945-01 (la sombra dice CUMPLE con 2 noches; nada mira las 4 semanas del §4.3) y VPR945-02 (un volcán fuera de `roi_por_volcan` sale como «otra ROI»; confirmado por la coordinadora en `evaluar_v750a.py` l. 297 a 301). Reprodujo 56/56, MR1 a MR7 7/7, pytest 3.199 pasan. Vuelta del autor (Opus, esfuerzo alto) lanzada en `D:/vrp-trabajo/wt/ver945`, rama local `s174-autor945`.
