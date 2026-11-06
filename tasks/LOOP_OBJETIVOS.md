@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 06:10 UTC (S174): cuarta vuelta del autor del #945 lanzada
+
+- Frase de Nicolás: «Cuarta vuelta primero». Autor (Opus, esfuerzo alto pedido) sobre `932a3e9fd`: R3-01 (noches por volcán, PROVISORIO si un volcán con ROI cambiada tiene menos de 14) y R3-02 a R3-05. Por el disco (C: 2,84 GB), sin suite local: sólo batería y medidor con temporales en D:; la suite la corre el CI. Informe `D:/vrp-trabajo/temporales/s174-autor945-r4/INFORME_AUTOR_R4.md`. Después: R4 del verificador y merge con frase.
+
 ### 2026-11-06 05:10 UTC (S174): R3 del verificador del #945; C: bajo 3 GB
 
 - R3 (Sonnet; el arnés le reporta esfuerzo 10) sobre `932a3e9fd`: MERGEABLE CON CAMBIOS (menor). R2-01, R2-03 y R2-04 CERRADOS; R2-02 cerrado en lo reproducido, con una variante abierta. Reprodujo 78/78, medidor 41/41 por aserción, pytest 3199/0; control positivo sintético (14 noches en 28 días) da CUMPLE, 13 noches o 27 días dan PROVISORIO. CI del PR verde (9 min 49 s). Informe `D:/vrp-trabajo/temporales/s174-ver945/INFORME_R3.md`.
