@@ -42,13 +42,19 @@ Segunda vuelta (S174, VPR945; LECTURA LR2): la sombra no dice CUMPLE antes de la
 sale 4; el reloj corre sobre las pasadas leídas y, con `--sha-desde`, desde la hora del commit del corte); un volcán que
 no está en el mapa de ROI es SIN DATO, no «otra ROI»; con 0 pasadas observadas la compuerta se cierra con su propio
 mensaje; `--sha-desde` sólo acepta un sha (completo o abreviado) y se imprime resuelto entero.
+Tercera vuelta (S174, VPR945-R2; LECTURA LR3): `--sha-desde` es obligatorio en la sombra; la lectura es una ventana que
+empieza en lo más tardío entre el 2026-11-03 (§4.3) y la hora del commit del corte, y sólo entran las pasadas de esa
+ventana cuyo código desciende del corte; una pasada de otra ROI con código posterior al corte (la ROI de ese volcán cambió
+dentro de lo que se lee) cierra la compuerta; CUMPLE exige 28 días y además 14 noches distintas con datos (noche = fecha
+UTC de la pasada, la misma clave del bloque de P2), contados sobre las mismas pasadas que se leen.
 
 Uso: python evaluar_v750a.py [--fase censo|sombra] --art <carpetas> --objetivos objetivos_v750a.json
      --evaluador <evaluar_d25.py del tag> [--sin-granulo <archivo>] [--equivalencia-local <salida verde + mutaciones>]
      [--roi-brazo B0..B5] [--sha-desde SHA] [--leer-con-faltantes MOTIVO] [--solo-controles] [--salida <archivo>]
+     (en la fase sombra, --roi-brazo y --sha-desde son obligatorios)
 Salida: 0 con veredicto; 3 compuerta cerrada (controles caídos o SIN DATO); 4 sombra PROVISORIA (no completó las 4
-        semanas del §4.3: no es CUMPLE ni NO CUMPLE); 5 veredicto leído con faltantes (marcado); 6 §6.1 no se cumple (la
-        vía no reproduce al oráculo: no se mira el censo).
+        semanas del §4.3 o las 14 noches distintas: no es CUMPLE ni NO CUMPLE); 5 veredicto (o PROVISORIO) leído con
+        faltantes (marcado); 6 §6.1 no se cumple (la vía no reproduce al oráculo: no se mira el censo).
 """
 from __future__ import annotations
 
@@ -92,6 +98,8 @@ MIN_CASOS_LOCAL = (1020, 10)             # §4.1: 510 grillas de N con 2 cajas (
 PARES_S1 = (("P", "Pdef"), ("P", "O"), ("Pdef", "O"))   # §5, S-1: los brazos que comparten la detección del .m
 VOL_ROI = "PuyehueCordonCaulle"          # §7, control positivo de la ROI
 DIAS_MIN_SOMBRA = 28                     # §4.3: la sombra corre «al menos 4 semanas» (S174, VPR945-01, LECTURA LR2)
+NOCHES_MIN_SOMBRA = 14                   # S174 (VPR945-R2-01, LECTURA LR3): decisión de Nicolás, «14 noches» distintas
+INICIO_SOMBRA = "2026-11-03 00:00"       # §4.3: «Desde el 2026-11-03 (sin Suomi NPP: otro régimen [...])» (VPR945-R2-03)
 
 NOMBRES_M = ("N_BOOT", "SEMILLA", "N_MIN_PARES", "N_MIN_NOCHES", "N_CALIB", "MAX_FALSOS_CALIB",
              "MIN_VOLCANES_MEJORA", "MIN_PARES_VOLCAN", "MIN_PARES_PODER", "PLACEBO_GANANCIAS", "NOTA_COMPARADOR",
@@ -217,7 +225,10 @@ def fecha_commit(sha):
     """Hora del commit (UTC, "AAAA-MM-DD HH:MM"). En main, con merge squash de GitHub, es la hora del merge: desde ahí
     corre en la sombra el código nuevo."""
     o = subprocess.run(["git", "-C", str(RAIZ), "show", "-s", "--format=%ct", sha], capture_output=True, text=True)
-    return datetime.datetime.fromtimestamp(int(o.stdout.strip()), datetime.timezone.utc).strftime("%Y-%m-%d %H:%M")
+    t = o.stdout.strip()
+    if o.returncode != 0 or not t.isdigit():
+        return ""                          # S174 (R2): sin la hora no hay ventana; el llamador cierra la compuerta
+    return datetime.datetime.fromtimestamp(int(t), datetime.timezone.utc).strftime("%Y-%m-%d %H:%M")
 
 
 def leer_equivalencia_local(ruta):
@@ -285,7 +296,7 @@ def main(argv=None):
     # lector de antes daba NO CUMPLE por una pasada de la ROI vieja). La ROI se lee del record, no de la fecha (S155: la
     # marca va en los datos): `diag_codigo_mirova.roi` es la caja con que corrió, `regimen.codigo_sha` el código.
     sin_regimen, fuera_regimen, sin_mapa = {}, {}, {}
-    corte, fecha_corte = "", ""
+    corte, fecha_corte, ventana_desde = "", "", ""
     if not censo:
         reg = {}
         for i in obj:
@@ -312,12 +323,27 @@ def main(argv=None):
             pr(f"== régimen de la sombra: SIN --roi-brazo, compuerta cerrada (la lectura declara la ROI que lee; "
                f"volcanes con dos ROI en los datos: {dos_roi or 'ninguno'})")
             return salir(3)
-        corte = resolver_commit(a.sha_desde) if a.sha_desde else ""
-        if a.sha_desde and not corte:
+        if not a.sha_desde:
+            # S174 (VPR945-R2-02, decisión de la coordinadora, reversible). POR QUÉ: sin corte, las pasadas del código
+            # viejo en los volcanes que no cambiaron ponen en marcha el reloj de las 4 semanas aunque el detector nuevo
+            # de Cordón Caulle y Tupungatito lleve una sola noche (el verificador lo reprodujo: 28,1 de 28 días, CUMPLE).
+            pr("== régimen de la sombra: SIN --sha-desde, compuerta cerrada (la lectura declara el commit desde el que "
+               "lee: el que puso en la sombra el código y la ROI que se evalúan; sin él, las pasadas de otro código "
+               "ponen en marcha el reloj de las 4 semanas)")
+            return salir(3)
+        corte = resolver_commit(a.sha_desde)
+        if not corte:
             pr(f"== régimen de la sombra: --sha-desde {a.sha_desde} no es el sha (completo o abreviado) de un commit de "
                "este clon, compuerta cerrada (una referencia como HEAD u origin/main cambia según el clon y el día)")
             return salir(3)
-        fecha_corte = fecha_commit(corte) if corte else ""
+        fecha_corte = fecha_commit(corte)
+        if not fecha_corte:
+            pr(f"== régimen de la sombra: no se pudo leer la hora del commit {corte} (git show), compuerta cerrada")
+            return salir(3)
+        # S174 (VPR945-R2-03, LECTURA LR3). POR QUÉ: la sombra empieza el 2026-11-03 (§4.3: antes es otro régimen de
+        # plataformas, con Suomi NPP) y el código del corte no corrió antes de su commit; una noche anterior procesada con
+        # el código nuevo es un reproceso, no sombra. La ventana es una sola para la lectura, el reloj y las noches.
+        ventana_desde = max(INICIO_SOMBRA, fecha_corte)
         esperada = RV.roi_por_volcan(a.roi_brazo)
         for i, (roi, sha) in reg.items():
             if obj[i]["volcan"] not in esperada:
@@ -326,12 +352,17 @@ def main(argv=None):
                 sin_mapa[i] = "volcan_sin_roi"
             elif roi != esperada.get(obj[i]["volcan"]):
                 fuera_regimen[i] = "otra ROI"
-            elif a.sha_desde:
+            elif corte:
                 anc = es_ancestro(corte, sha)
                 if anc is None:
                     sin_regimen[i] = "sha_desconocido"
                 elif not anc:
                     fuera_regimen[i] = "anterior al corte"
+        # la ventana, después de la ROI y del código (que dicen más del régimen) y para todas las pasadas, observadas o no
+        for i in obj:
+            if i not in fuera_regimen and obj[i]["hora_utc"] < ventana_desde:
+                fuera_regimen[i] = ("anterior al inicio de la sombra" if obj[i]["hora_utc"] < INICIO_SOMBRA
+                                    else "anterior a la hora del corte")
 
         def por_vol(motivo):
             return dict(collections.Counter(obj[i]["volcan"] for i, m in fuera_regimen.items() if m == motivo))
@@ -341,9 +372,24 @@ def main(argv=None):
         pr(f"== régimen de la sombra: brazo {a.roi_brazo}"
            + (f", desde {corte} (commit del {fecha_corte} UTC)" if corte else "")
            + f": dentro {dentro}, fuera por otra ROI {n_fuera['otra ROI']} {por_vol('otra ROI')}, anteriores al "
-           f"corte {n_fuera['anterior al corte']} {por_vol('anterior al corte')}")
+           f"corte {n_fuera['anterior al corte']} {por_vol('anterior al corte')}; ventana desde {ventana_desde} UTC: "
+           f"anteriores al inicio de la sombra {n_fuera['anterior al inicio de la sombra']}, anteriores a la hora del "
+           f"corte {n_fuera['anterior a la hora del corte']}")
         pr("   protegidas fuera de esta lectura (se leen con su propio brazo, no aquí):",
            [f"{nombre(i)} ({m})" for i, m in fuera_regimen.items() if obj[i].get("protegida")] or "ninguna")
+        # S174 (VPR945-R2-02, LECTURA LR3). POR QUÉ: el corte tiene que aislar UN régimen en cada volcán. Si una pasada de
+        # otra ROI trae código posterior al corte (o un sha que git no conoce y no se puede descartar), la ROI de ese
+        # volcán cambió dentro de lo que se lee: el reloj y las noches de la lectura serían los de los otros volcanes, no
+        # los suyos (con el corte viejo c3aea8a3e y B4, las pasadas def de los nueve volcanes que no cambiaron hacían
+        # correr el reloj aunque Cordón Caulle y Tupungatito llevaran una noche con sens).
+        roi_cambia = sorted({obj[i]["volcan"] for i, m in fuera_regimen.items() if m == "otra ROI"
+                             and obj[i]["hora_utc"] >= ventana_desde and es_ancestro(corte, reg[i][1]) is not False})
+        if roi_cambia:
+            pr(f"== régimen de la sombra: el corte {corte[:9]} no aísla el brazo {a.roi_brazo}: hay pasadas de otra ROI "
+               f"con código posterior al corte (o sha desconocido) en {roi_cambia}; la ROI de esos volcanes cambió dentro "
+               "de lo que se lee y el reloj no sería el suyo. Usa como --sha-desde el commit que puso esta ROI (B4: el "
+               "merge de #939, 58edb9788); compuerta cerrada")
+            return salir(3)
         obj = {i: o for i, o in obj.items() if i not in fuera_regimen}
     # ---------------------------------------------------------------- cobertura (copia de analizar_v750b, §4.2)
     req_brazos = ("K", "Kgemelo") if censo else ("K", "P")
@@ -382,6 +428,8 @@ def main(argv=None):
         dsg = json.loads(sg.read_text(encoding="utf-8"))
         sg_ok = isinstance(dsg, dict) and dsg.get("objetivos_sha256") == sha_obj
         sin_g = dsg.get("pasadas", []) if sg_ok else []
+    if not censo:   # S174 (VPR945-R2-03): la misma ventana que la lectura; sin hora no se descarta
+        sin_g = [x for x in sin_g if not x.get("hora_utc") or x["hora_utc"] >= ventana_desde]
     pr(f"   pasadas sin gránulo (del generador): {len(sin_g)}"
        + ("" if sg_ok else f" | ARCHIVO {'AUSENTE' if not sg.exists() else 'DE OTRA LISTA DE OBJETIVOS'}: SIN DATO"))
     prot_sin += [f"{x['volcan']} {x['hora_utc']}" for x in sin_g if x.get("protegida")]
@@ -583,20 +631,28 @@ def main(argv=None):
             pr(f"   sin cenit: {len(sin_z)}")
         # S174 (VPR945-01, LECTURA LR2). POR QUÉ: §4.3 pide que la sombra corra «al menos 4 semanas»: dos noches ven unas
         # pocas pasadas de un volcán, una estación y unos ángulos, y un CUMPLE con eso no confirma nada. El reloj corre
-        # sobre las pasadas observadas que esta lectura lee (no sobre las de otra ROI, las de antes del corte, las SIN
-        # DATO ni las no observadas) y, con --sha-desde, no parte antes de la hora del commit del corte (una noche vieja
-        # reprocesada con el código nuevo no es sombra prospectiva).
+        # sobre las pasadas observadas que esta lectura lee (no sobre las de otra ROI, las de antes del corte o de la
+        # ventana, las SIN DATO ni las no observadas).
+        # S174 (VPR945-R2-01 y R2-03, LECTURA LR3). POR QUÉ: el lapso entre la primera y la última pasada no es cobertura
+        # (3 noches con una suelta a 30 días daban COMPLETA); Nicolás pide además «14 noches» distintas con datos. Noche
+        # = fecha UTC de la pasada (hora_utc[:10]), la misma clave del bloque de P2 (noche UTC, volcán): las pasadas
+        # nocturnas de VIIRS 750 sobre Chile caen de madrugada en UTC (en los datos reales, de 04:48 a 06:48), así que una
+        # noche local es una sola fecha UTC. Reloj, noches y lectura usan las mismas pasadas (oks0, ya dentro de la
+        # ventana del corte); los días se muestran truncados al décimo, para que 27,99 no se lea «28,0».
         horas = sorted(obj[i]["hora_utc"] for i in oks0) or ["(ninguna)"]
-        reloj, desde_que, dias = horas[0], "la primera pasada leída", 0.0
-        if corte and fecha_corte > reloj:
-            reloj, desde_que = fecha_corte, f"el corte --sha-desde (commit del {fecha_corte} UTC)"
+        dias = 0.0
         if oks0:
             dias = (datetime.datetime.strptime(horas[-1], "%Y-%m-%d %H:%M")
-                    - datetime.datetime.strptime(reloj, "%Y-%m-%d %H:%M")).total_seconds() / 86400
-        dur_ok = dias >= DIAS_MIN_SOMBRA
-        pr(f"== duración de la sombra (§4.3, al menos 4 semanas = {DIAS_MIN_SOMBRA} días): primera {horas[0]}, última "
-           f"{horas[-1]}, noches distintas {len({h[:10] for h in horas})}; reloj desde {desde_que}: {dias:.1f} de "
-           f"{DIAS_MIN_SOMBRA} días, {'COMPLETA' if dur_ok else 'INCOMPLETA'}")
+                    - datetime.datetime.strptime(horas[0], "%Y-%m-%d %H:%M")).total_seconds() / 86400
+        noches = len({h[:10] for h in horas}) if oks0 else 0
+        dias_ok = dias >= DIAS_MIN_SOMBRA
+        noches_ok = noches >= NOCHES_MIN_SOMBRA
+        dur_ok = dias_ok and noches_ok
+        dias_txt = f"{math.floor(dias * 10) / 10:.1f}"
+        pr(f"== duración de la sombra (§4.3, al menos 4 semanas = {DIAS_MIN_SOMBRA} días y {NOCHES_MIN_SOMBRA} noches "
+           f"distintas): primera {horas[0]}, última {horas[-1]}; reloj desde la primera pasada leída: {dias_txt} de "
+           f"{DIAS_MIN_SOMBRA} días {'(completos)' if dias_ok else '(faltan)'}, noches distintas {noches} de "
+           f"{NOCHES_MIN_SOMBRA} {'(completas)' if noches_ok else '(faltan)'}: {'COMPLETA' if dur_ok else 'INCOMPLETA'}")
     aviso, rc_final = "", 0
     if not cob_ok and a.leer_con_faltantes:
         aviso, rc_final = f"[LEÍDO CON FALTANTES: {a.leer_con_faltantes}]", 5
@@ -777,7 +833,7 @@ def main(argv=None):
                f"| protegidas que ni K ni P publican {nadie or 'ninguna'}")
         # S174 (LECTURA LR2): antes de las 4 semanas sólo el veto de P1 es definitivo (una protegida perdida sigue
         # perdida con más noches); un P2 que hoy PIERDE puede no perder con más bloques, y un CUMPLE no vale aún.
-        dur_txt = f"; duración {dias:.1f} de {DIAS_MIN_SOMBRA} días"
+        dur_txt = f"; duración {dias_txt} de {DIAS_MIN_SOMBRA} días, {noches} de {NOCHES_MIN_SOMBRA} noches"
         p1_veta = any(": P1 " in x for x in motivos)
         if motivos and (dur_ok or p1_veta):
             pr("== §6.3 sombra: NO CUMPLE (" + "; ".join(motivos) + dur_txt + ")" + (" " + aviso if aviso else ""))
@@ -788,10 +844,11 @@ def main(argv=None):
                + (" " + aviso if aviso else ""))
         else:
             rc_final = rc_final or 4
-            pr(f"== §6.3 sombra: PROVISORIO ({dias:.1f} de {DIAS_MIN_SOMBRA} días; el §4.3 pide al menos 4 semanas): hoy "
+            pr(f"== §6.3 sombra: PROVISORIO ({dias_txt} de {DIAS_MIN_SOMBRA} días y {noches} de {NOCHES_MIN_SOMBRA} "
+               "noches distintas; el §4.3 pide al menos 4 semanas y Nicolás 14 noches): hoy "
                + ("; ".join(motivos) if motivos else f"P1 = 0; P2 tabla {regs['tabla']}, todo {regs['todo']}")
                + ("; SIN PROTEGIDAS" if not n_prot else "")
-               + "; no es CUMPLE ni NO CUMPLE hasta completar la duración" + (" " + aviso if aviso else ""))
+               + "; no es CUMPLE ni NO CUMPLE hasta completar la duración y las noches" + (" " + aviso if aviso else ""))
 
     # ---------------------------------------------------------------- informativo
     brazos_inf = ("K", "P") + (("Pdef", "Psinfiltro", "Kgeo") if censo else ())

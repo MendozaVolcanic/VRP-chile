@@ -15,7 +15,12 @@ roturas V01 a V41 mostraron sin vigilar. MR1 a MR7 (S173, VPR939-03, LECTURA LR1
 filtro por ROI, la compuerta sin brazo, la marca SIN DATO, el corte por sha y el corte de cenit en 30°. MR9 a MR24 (S174,
 VPR945, LECTURA LR2; la rama de V750-A ya usa MR8) rompen la segunda vuelta: la duración de 4 semanas y su reloj, el
 volcán fuera del mapa de ROI, las 0 observadas, el sha resuelto de --sha-desde, y las seis roturas que el verificador
-dejó vivas (MY2, MY3, MY4, MY10, MY12, MY15, MY16 de su mutar_propio.py).
+dejó vivas (MY2, MY3, MY4, MY10, MY12, MY15, MY16 de su mutar_propio.py). MR25 a MR42 (S174, VPR945-R2, LECTURA LR3)
+rompen la tercera vuelta: las 14 noches, los bordes de 28,0 días y de 14 noches, --sha-desde obligatorio, la compuerta de
+otra ROI posterior al corte, la ventana desde el 2026-11-03 y desde la hora del commit (la del committer), el piso de 7
+caracteres, la salida 5 del PROVISORIO con faltantes y el corte de las pasadas sin gránulo (MZ1, MZ4, MZ5, MZ6 y MZ7 del
+verificador quedan en MR27, MR36, MR37, MR29 y MR39). MR2, MR4, MR9, MR10 y MR19 cambiaron de blanco porque el código
+que rompían cambió (MR10 rompe ahora la ventana desde la hora del corte, que reemplazó al reloj desde el corte).
 Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4]
 Salida: 0 si los controles salen como deben y todas las mutaciones quedan ATRAPADAS; 1 si no.
 """
@@ -148,12 +153,12 @@ MUTACIONES = {
     "MR1": ("sombra (LR1): el filtro por ROI no saca ninguna pasada (lo de antes de S173)",
             'if roi != esperada.get(obj[i]["volcan"]):', "if False:"),
     "MR2": ("sombra (LR1): sin --roi-brazo no se cierra la compuerta y se lee como B0",
-            '            return salir(3)\n        corte = resolver_commit(a.sha_desde) if a.sha_desde else ""',
-            '            a.roi_brazo = "B0"\n        corte = resolver_commit(a.sha_desde) if a.sha_desde else ""'),
+            '            return salir(3)\n        if not a.sha_desde:\n',
+            '            a.roi_brazo = "B0"\n        if not a.sha_desde:\n'),
     "MR3": ("sombra (LR1): una pasada sin régimen no es SIN DATO y entra a la lectura",
             "            motivo_sin[i] = sin_regimen[i]", "            pass"),
     "MR4": ("sombra (LR1): --sha-desde no corta nada",
-            "            elif a.sha_desde:", "            elif False:"),
+            "            elif corte:", "            elif False:"),
     "MR5": ("sombra (LR1): un sha que git no conoce entra a la lectura",
             '                    sin_regimen[i] = "sha_desconocido"', "                    pass"),
     "MR6": ("sombra (§12.8 punto 2): el corte de cenit en 40° y no en 30°",
@@ -164,9 +169,9 @@ MUTACIONES = {
             '(("bajo 30°", lambda z: z <= 30), ("sobre 30°", lambda z: z > 30))'),
     # S174, VPR945 (segunda vuelta del PR #945)
     "MR9": ("sombra (§4.3, LR2): la duración de 4 semanas no se exige",
-            "dur_ok = dias >= DIAS_MIN_SOMBRA", "dur_ok = True"),
-    "MR10": ("sombra (LR2): con --sha-desde el reloj no parte del corte",
-             "        if corte and fecha_corte > reloj:", "        if False:"),
+            "dias_ok = dias >= DIAS_MIN_SOMBRA", "dias_ok = True"),
+    "MR10": ("sombra (LR2, LR3): con --sha-desde la ventana (y el reloj) no parte de la hora del commit del corte",
+             "ventana_desde = max(INICIO_SOMBRA, fecha_corte)", "ventana_desde = INICIO_SOMBRA"),
     "MR11": ("sombra (LR2): el reloj cuenta también las pasadas no observadas y las SIN DATO",
              'horas = sorted(obj[i]["hora_utc"] for i in oks0) or', 'horas = sorted(obj[i]["hora_utc"] for i in obj) or'),
     "MR12": ("sombra (VPR945-02): un volcán fuera del mapa de ROI vuelve a salir como «otra ROI»",
@@ -185,8 +190,10 @@ MUTACIONES = {
     "MR18": ("VPR945-05 (MY10): la lista de protegidas que salen de la lectura sale siempre «ninguna»",
              'for i, m in fuera_regimen.items() if obj[i].get("protegida")] or "ninguna")',
              'for i, m in fuera_regimen.items() if False] or "ninguna")'),
-    "MR19": ("VPR945-07 (MY4): un --sha-desde que no resuelve no cierra con su mensaje (sigue como sha desconocido)",
-             "        if a.sha_desde and not corte:", "        if False:"),
+    "MR19": ("VPR945-07 (MY4): un --sha-desde que no resuelve no cierra con su mensaje y se usa lo tecleado "
+             "(R2: con el corte obligatorio, saltarse la compuerta sin más hacía caer el programa)",
+             "        if not corte:\n",
+             "        if not corte:\n            corte = a.sha_desde\n        if False:\n"),
     "MR20": ("VPR945-07 (MY12): el conteo «dentro» incluye las SIN DATO del régimen",
              "dentro = sum(1 for i in reg if i not in fuera_regimen and i not in sin_regimen and i not in sin_mapa)",
              "dentro = sum(1 for i in reg if i not in fuera_regimen and i not in sin_mapa)"),
@@ -201,6 +208,40 @@ MUTACIONES = {
              "if motivos and (dur_ok or p1_veta):", "if motivos:"),
     "MR24": ("VPR945-07 (MY16): el régimen se lee también en las pasadas no observadas",
              '            if AB.partida(r) != "observada":\n                continue\n', "            pass\n"),
+    # S174, VPR945-R2 (tercera vuelta del PR #945, LECTURA LR3)
+    "MR25": ("R2-01: las 14 noches distintas no se exigen", "noches_ok = noches >= NOCHES_MIN_SOMBRA",
+             "noches_ok = True"),
+    "MR26": ("R2-04: con 14 noches justas no alcanza (el borde va arriba)", "noches_ok = noches >= NOCHES_MIN_SOMBRA",
+             "noches_ok = noches > NOCHES_MIN_SOMBRA"),
+    "MR27": ("R2-04 (MZ1): con 28,0 días justos no alcanza (el borde va arriba)", "dias_ok = dias >= DIAS_MIN_SOMBRA",
+             "dias_ok = dias > DIAS_MIN_SOMBRA"),
+    "MR28": ("R2-01: se cuentan pasadas y no noches", "noches = len({h[:10] for h in horas}) if oks0 else 0",
+             "noches = len(horas) if oks0 else 0"),
+    "MR29": ("R2-01 (MZ6): la noche es el mes", "noches = len({h[:10] for h in horas}) if oks0 else 0",
+             "noches = len({h[:7] for h in horas}) if oks0 else 0"),
+    "MR30": ("R2-02: sin --sha-desde no se cierra con su mensaje", "        if not a.sha_desde:\n",
+             "        if False:\n"),
+    "MR31": ("R2-02: una pasada de otra ROI con código posterior al corte no cierra la compuerta",
+             "        if roi_cambia:\n", "        if False:\n"),
+    "MR32": ("R2-02: una pasada de otra ROI con sha desconocido no cierra la compuerta",
+             "es_ancestro(corte, reg[i][1]) is not False", "es_ancestro(corte, reg[i][1]) is True"),
+    "MR33": ("R2-02: la compuerta de otra ROI mira también las pasadas de antes de la ventana",
+             'and obj[i]["hora_utc"] >= ventana_desde and es_ancestro', "and es_ancestro"),
+    "MR34": ("R2-03: sin cota inferior del 2026-11-03", "ventana_desde = max(INICIO_SOMBRA, fecha_corte)",
+             "ventana_desde = fecha_corte"),
+    "MR35": ("R2-03: la ventana no saca ninguna pasada",
+             '            if i not in fuera_regimen and obj[i]["hora_utc"] < ventana_desde:', "            if False:"),
+    "MR36": ("R2-04 (MZ4): la hora del corte es la del autor, no la del committer", '"--format=%ct"', '"--format=%at"'),
+    "MR37": ("R2-04 (MZ5): --sha-desde acepta 4 caracteres", "len(x) >= 7", "len(x) >= 4"),
+    "MR38": ("R2-04: --sha-desde exige 8 caracteres", "len(x) >= 7", "len(x) >= 8"),
+    "MR39": ("R2-04 (MZ7): un PROVISORIO leído con faltantes sale 4 y no 5", "rc_final = rc_final or 4", "rc_final = 4"),
+    "MR40": ("R2-03: las pasadas sin gránulo no se cortan con la ventana",
+             '        sin_g = [x for x in sin_g if not x.get("hora_utc") or x["hora_utc"] >= ventana_desde]',
+             "        pass"),
+    "MR41": ("R2-01: CUMPLE con los días o con las noches (basta una)", "dur_ok = dias_ok and noches_ok",
+             "dur_ok = dias_ok or noches_ok"),
+    "MR42": ("R2-04: los días se redondean (27,99 se lee 28,0)", 'dias_txt = f"{math.floor(dias * 10) / 10:.1f}"',
+             'dias_txt = f"{dias:.1f}"'),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),
