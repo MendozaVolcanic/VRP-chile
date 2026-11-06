@@ -12,7 +12,7 @@
 > sobreviven). Las tres decisiones del autor: coherentes con la letra (PREREGISTRO_V750A.md l. 89 a 95 y 132); la (1)
 > abre R2-01 y R2-02. Nicolás fijó el mínimo (2026-11-06 00:48 UTC, frase «14 noches»): 14 noches distintas con datos
 > además de las 4 semanas; `--sha-desde` obligatorio en sombra (recomendación de la coordinadora). Tercera vuelta del
-> autor LANZADA (informe en `D:\vrp-trabajo\temporales\s174-autor945-r3\INFORME_AUTOR_R3.md`); falta R3 del verificador. Informe: `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R2.md`.
+> autor LANZADA (informe en `D:\vrp-trabajo\temporales\s174-autor945-r3\INFORME_AUTOR_R3.md`); R3 del verificador HECHA 2026-11-06 05:08 UTC sobre `932a3e9fd`: MERGEABLE CON CAMBIOS (menor), R3-01 g2 (noches por volcán con ROI cambiada) y R3-02 a R3-05 g1; informe `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R3.md`. C: quedó en 2,85 GB libres. Informe: `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R2.md`.
 
 ## a. Todo en una pantalla
 

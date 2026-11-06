@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 05:10 UTC (S174): R3 del verificador del #945; C: bajo 3 GB
+
+- R3 (Sonnet; el arnés le reporta esfuerzo 10) sobre `932a3e9fd`: MERGEABLE CON CAMBIOS (menor). R2-01, R2-03 y R2-04 CERRADOS; R2-02 cerrado en lo reproducido, con una variante abierta. Reprodujo 78/78, medidor 41/41 por aserción, pytest 3199/0; control positivo sintético (14 noches en 28 días) da CUMPLE, 13 noches o 27 días dan PROVISORIO. CI del PR verde (9 min 49 s). Informe `D:/vrp-trabajo/temporales/s174-ver945/INFORME_R3.md`.
+- Abiertos: R3-01 (g2, sintético): Cordón Caulle y Tupungatito, los volcanes cuya ROI cambió, pueden tener una sola noche dentro y no impiden el CUMPLE si sus otras pasadas salen como «otra ROI» anterior al corte. Pedido: noches por volcán y PROVISORIO si un volcán con ROI cambiada tiene menos de 14. R3-02 a R3-05 (g1): días y noches independientes; la ventana pierde la primera noche si el corte se mergea de día; sin prueba del minuto exacto; cifra «04:48» es 04:30 a 06:48.
+- Disco: C: 2,85 GB libres (bajo el piso de 3 GB), D: 6,61 GB. Clones del verificador en `D:/vrp-trabajo/temporales/s174-ver945/` (clon3 1,3 GB). Nada pesado hasta liberar C:.
+
 ### 2026-11-06 03:41 UTC (S174): tercera vuelta del autor del #945; R3 del verificador lanzada
 
 - Autor (Opus; el arnés le reporta esfuerzo 15, bajo, pese a pedirlo alto): punta `932a3e9fd` en `claude/s173-vpr939-03`, PR en borrador. R2-01: CUMPLE exige 28 días y 14 noches (noche = fecha UTC de la pasada). R2-02: `--sha-desde` obligatorio, más una compuerta propia del autor que cierra si en la ventana hay otra ROI posterior al corte (efecto: no se puede leer B0 sobre datos post #939). R2-03: ventana desde max(2026-11-03, hora del committer del corte). R2-04: ER20 a ER30, MR25 a MR42. Según el autor: batería 78/78, medidor 41/41 por aserción, pytest 3199/0; con `origin/main` y corte `58edb9788`, PROVISORIO con 1 de 14 noches. Informe `D:/vrp-trabajo/temporales/s174-autor945-r3/INFORME_AUTOR_R3.md`. Sin verificar todavía por otro modelo; CI `pending`.
