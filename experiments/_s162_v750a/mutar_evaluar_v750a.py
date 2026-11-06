@@ -33,6 +33,13 @@ Con la ventana fija cambiaron de blanco MR9 y MR27 («ahora» llega al fin), MR1
 MR44, MR45, MR46 y MR50; MR47 (la noche de la mitad del lapso) se retiró con el reparto por mitades. La regla de las 14
 noches no tiene mutación propia: con 5 por semana el total es 20 o más y una rotura de esa sola condición sobrevive por
 construcción (dicho en voz alta, A116).
+MR28 y MR29 cambiaron de blanco en la sexta vuelta (la noche se cuenta en semana_de).
+MR64 a MR71 (S174, VPR945-R5, sexta vuelta; decisión de Nicolás del 2026-11-06, LECTURA LR3) rompen: las 14 noches de
+cada volcán sin cambio de ROI (abajo, arriba y sin la regla), la noche contada una sola vez en la semana de su primera
+pasada (contada en todas, o en la de la última), la conversión de una zona distinta de UTC en --ahora, el reloj UTC
+cuando no se da --ahora (MX11 del verificador) y la pasada en el minuto exacto de «ahora» (MX13). La regla de 14 de los
+volcanes cambiados sigue sin mutación propia (R5-05: redundante con 5 por semana, A116). Con la noche contada una sola
+vez, la mutación MX9 del verificador (total = suma de las semanas) pasa a ser equivalente.
 Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4]
 Salida: 0 si los controles salen como deben y todas las mutaciones quedan ATRAPADAS; 1 si no.
 """
@@ -229,9 +236,10 @@ MUTACIONES = {
              "return min(ns) <= NOCHES_MIN_SEMANA or n < NOCHES_MIN_SOMBRA"),
     "MR27": ("R2-04 (MZ1; R4): con «ahora» justo en el fin de la ventana no alcanza (el borde va arriba)",
              "ahora_ok = t_ahora >= t_fin", "ahora_ok = t_ahora > t_fin"),
-    "MR28": ("R2-01: se cuentan pasadas y no noches", "c[k].add(h[:10])", "c[k].add(h)"),
-    "MR29": ("R2-01 (MZ6): la noche es el mes (cada mes cuenta como una noche, la del día 1)",
-             "c[k].add(h[:10])", 'c[k].add(h[:8] + "01")'),
+    "MR28": ("R2-01: se cuentan pasadas y no noches (R5: blanco nuevo, la noche se cuenta una vez)",
+             "semana_de.setdefault(h[:10], k)", "semana_de.setdefault(h, k)"),
+    "MR29": ("R2-01 (MZ6): la noche es el mes (cada mes cuenta como una noche, la del día 1; R5: blanco nuevo)",
+             "semana_de.setdefault(h[:10], k)", 'semana_de.setdefault(h[:8] + "01", k)'),
     "MR30": ("R2-02: sin --sha-desde no se cierra con su mensaje", "        if not a.sha_desde:\n",
              "        if False:\n"),
     "MR31": ("R2-02: una pasada de otra ROI con código posterior al corte no cierra la compuerta",
@@ -301,6 +309,24 @@ MUTACIONES = {
              "exigidos = [v for v in esperada if v in cambia or SEMANA_EXIGE_SIN_CAMBIO]", "exigidos = []"),
     "MR63": ("R4: el límite de la lectura que se imprime (y los días) es el fin aunque «ahora» sea anterior",
              "t_lim = min(t_fin, t_ahora)", "t_lim = t_fin"),
+    # S174, VPR945-R5 (sexta vuelta del PR #945; decisión de Nicolás del 2026-11-06, LECTURA LR3)
+    "MR64": ("R5-03: los volcanes sin cambio de ROI piden 13 noches en vez de 14",
+             "NOCHES_MIN_SIN_CAMBIO = 14", "NOCHES_MIN_SIN_CAMBIO = 13"),
+    "MR65": ("R5-03: los volcanes sin cambio de ROI piden 15 noches en vez de 14",
+             "NOCHES_MIN_SIN_CAMBIO = 14", "NOCHES_MIN_SIN_CAMBIO = 15"),
+    "MR66": ("R5-03: los volcanes sin cambio de ROI no piden noches (CUMPLE con 2 de 11 volcanes)",
+             "vol_pocas = [v for v in sin_cambio if por_v[v][1] < NOCHES_MIN_SIN_CAMBIO]", "vol_pocas = []"),
+    "MR67": ("R5-02: una noche con pasadas a los dos lados de un borde cuenta en las dos semanas",
+             "semana_de.setdefault(h[:10], k)", "semana_de.setdefault((h[:10], k), k)"),
+    "MR68": ("R5-01: una zona distinta de UTC en --ahora se ignora en vez de convertirse",
+             "t = t.astimezone(datetime.timezone.utc).replace(tzinfo=None)", "t = t.replace(tzinfo=None)"),
+    "MR69": ("R5-04 (MX11): sin --ahora se lee el reloj local en vez del UTC",
+             "datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None, microsecond=0)",
+             "datetime.datetime.now().replace(microsecond=0)"),
+    "MR70": ("R5-04 (MX13): una pasada en el minuto exacto de «ahora» queda fuera",
+             "return t < t_fin and t <= t_ahora", "return t < t_fin and t < t_ahora"),
+    "MR71": ("R5-02: la noche va a la semana de su última pasada en vez de la primera",
+             "for h in sorted(horas, key=hora_dt):", "for h in sorted(horas, key=hora_dt, reverse=True):"),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),

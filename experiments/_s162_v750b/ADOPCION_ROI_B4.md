@@ -93,6 +93,10 @@ otros nueve volcanes dan el mismo resultado con B0 y con B4.
   fijas; CUMPLE exige que la fecha de referencia («ahora», `--ahora` o el reloj de la máquina) haya llegado al fin y
   5 noches en cada semana (y 14 en total) en el conjunto y en Cordón Caulle y Tupungatito; lo posterior al fin o a
   «ahora» no se lee y se cuenta como «fuera de ventana».
+  ⚠️ S174 (sexta vuelta, VPR945-R5, LECTURA LR3; decisión de Nicolás del 2026-11-06, «Sí, sexta vuelta»): además,
+  cada uno de los otros nueve volcanes (ROI igual a B0) pide 14 noches distintas en la ventana, sin mínimo semanal
+  (antes sólo se imprimían); cada noche cuenta una sola vez, en la semana de su primera pasada; `--ahora` acepta ISO
+  con zona y la convierte a UTC.
   Texto original:
 - **Pendiente, no hecho**: el lector de la sombra de V750-A todavía no separa por ROI (ningún script de
   `experiments/_s162_v750a/` lee `regimen.codigo_sha` ni `diag_codigo_mirova.roi`; VPR939-03 del verificador del

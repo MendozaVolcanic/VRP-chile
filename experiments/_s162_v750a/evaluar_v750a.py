@@ -53,6 +53,9 @@ incluir); «ahora» = --ahora o, si no se da, el reloj UTC de la máquina que co
 [inicio, min(fin, ahora)]: las posteriores se cuentan aparte como «fuera de ventana», por volcán. Las 4 semanas son tramos
 fijos de 7 días desde el inicio. CUMPLE exige que ahora haya llegado al fin, 5 noches distintas en cada semana y 14 en
 total, en el conjunto y en cada volcán cuya ROI difiere de B0; los otros volcanes se imprimen por semana y no deciden.
+⚠️ Sexta vuelta (S174, VPR945-R5; decisión de Nicolás del 2026-11-06, A113: el «no deciden» de arriba queda rebajado):
+cada volcán de ROI igual a B0 pide 14 noches distintas dentro de la ventana (sin mínimo semanal); cada noche cuenta una
+sola vez, en la semana de su primera pasada leída; --ahora acepta ISO con o sin zona y se convierte a UTC.
 
 Uso: python evaluar_v750a.py [--fase censo|sombra] --art <carpetas> --objetivos objetivos_v750a.json
      --evaluador <evaluar_d25.py del tag> [--sin-granulo <archivo>] [--equivalencia-local <salida verde + mutaciones>]
@@ -114,6 +117,13 @@ SEMANA = datetime.timedelta(days=7)
 NOCHES_MIN_SEMANA = 5                    # noches distintas con datos que pide cada una de las 4 semanas
 SEMANA_EXIGE_SIN_CAMBIO = False          # False: la exigencia por semana (y las 14) sólo en el conjunto y en los volcanes
                                          # cuya ROI difiere de B0; los que no cambiaron se imprimen y no deciden
+                                         # ⚠️ S174 (R5-03, A113): «no deciden» rebajado; piden NOCHES_MIN_SIN_CAMBIO
+# S174 (VPR945-R5-03, sexta vuelta; decisión de Nicolás del 2026-11-06, «Sí, sexta vuelta»). POR QUÉ: lo que se decide
+# es el detector de VIIRS 750 en los once volcanes, y con la exigencia sólo en el conjunto y en los dos cambiados la
+# sombra daba CUMPLE con datos de 2 de 11 (el verificador lo reprodujo). Cada volcán de ROI igual a B0 pide este número
+# de noches distintas dentro de la ventana; no se le pide el mínimo semanal (los del sur, nublados, dejarían la lectura en
+# PROVISORIO sin remedio dentro de la misma ventana).
+NOCHES_MIN_SIN_CAMBIO = 14
 INICIO_SOMBRA = "2026-11-03 00:00"       # §4.3: «Desde el 2026-11-03 (sin Suomi NPP: otro régimen [...])» (VPR945-R2-03)
 
 NOMBRES_M = ("N_BOOT", "SEMILLA", "N_MIN_PARES", "N_MIN_NOCHES", "N_CALIB", "MAX_FALSOS_CALIB",
@@ -252,11 +262,18 @@ def hora_dt(h):
 
 
 def arg_ahora(x):
-    """--ahora en UTC, «AAAA-MM-DD HH:MM» o «AAAA-MM-DD HH:MM:SS»."""
+    """--ahora: fecha ISO, con o sin zona («AAAA-MM-DD HH:MM[:SS]», con «T» o espacio, y «Z» o «±HH:MM»). Sin zona se lee
+    como UTC. S174 (VPR945-R5-01). POR QUÉ: un workflow que pase `date -u -Iseconds` trae la zona, y comparar una fecha
+    con zona contra las de la ventana (sin zona) tumbaba el lector con TypeError. Una zona distinta de UTC se convierte a
+    UTC, no se ignora (ignorarla corre «ahora» tantas horas como la zona); el resultado queda sin zona, como el resto."""
     try:
-        return hora_dt(x)
+        t = hora_dt(x)
     except ValueError:
-        raise argparse.ArgumentTypeError(f"--ahora {x!r} no es «AAAA-MM-DD HH:MM[:SS]» (UTC)")
+        raise argparse.ArgumentTypeError(f"--ahora {x!r} no es una fecha ISO «AAAA-MM-DD HH:MM[:SS]» (UTC, o con zona "
+                                         "«Z» o «±HH:MM»)")
+    if t.tzinfo is not None:
+        t = t.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+    return t
 
 
 def semanas_noches(horas, t_ini):
@@ -265,19 +282,28 @@ def semanas_noches(horas, t_ini):
     cuatro rondas el reloj y el reparto se anclaron a la primera y la última pasada, y una pasada suelta en una punta (o
     con fecha futura) los movía; con tramos fijos desde el inicio de la ventana ningún dato los mueve. Una fecha con
     pasadas a los dos lados del borde de una semana cuenta en las dos (tiene datos en las dos). Una hora fuera de las 4
-    semanas no cuenta (la ventana ya las sacó de la lectura)."""
-    c = [set() for _ in range(SEMANAS_SOMBRA)]
-    for h in horas:
+    semanas no cuenta (la ventana ya las sacó de la lectura).
+    ⚠️ S174 (VPR945-R5-02, sexta vuelta; decisión de Nicolás del 2026-11-06, A113: rebaja la frase «cuenta en las dos»
+    de arriba, que se conserva): cada noche cuenta una sola vez, en la semana de su primera pasada dentro de las 4
+    semanas. POR QUÉ: contada en las dos, una semana con 4 noches propias llegaba a 5 con la noche de la frontera (el
+    verificador lo reprodujo); así el total es siempre la suma de las semanas. La definición de noche no cambia."""
+    semana_de = {}
+    for h in sorted(horas, key=hora_dt):
         k = (hora_dt(h) - t_ini) // SEMANA
         if 0 <= k < SEMANAS_SOMBRA:
-            c[k].add(h[:10])
-    return [len(x) for x in c], len(set().union(*c))
+            semana_de.setdefault(h[:10], k)
+    c = [0] * SEMANAS_SOMBRA
+    for k in semana_de.values():
+        c[k] += 1
+    return c, len(semana_de)
 
 
 def faltan_noches(ns, n):
     """S174 (VPR945-R4): True si alguna de las 4 semanas tiene menos de NOCHES_MIN_SEMANA noches o el total no llega a
     NOCHES_MIN_SOMBRA (con 5 por semana el total es 20 o más y la de 14 se cumple sola; queda explícita por si el umbral
-    por semana cambia)."""
+    por semana cambia). S174 (VPR945-R5-05): la regla de 14 de los volcanes cambiados y del conjunto es redundante con 5
+    por semana (4 × 5 = 20) y ninguna prueba puede hacerla caer sola mientras el umbral semanal sea 4 o más (A116); se
+    deja, sin quitarla, por si ese umbral baja de 4."""
     return min(ns) < NOCHES_MIN_SEMANA or n < NOCHES_MIN_SOMBRA
 
 
@@ -732,15 +758,20 @@ def main(argv=None):
         # CUMPLE exige que ahora haya llegado al fin, NOCHES_MIN_SEMANA noches en cada semana y NOCHES_MIN_SOMBRA en total,
         # en el conjunto y en cada volcán cuya ROI difiere de B0 (`cambia`), contadas sobre sus pasadas leídas (oks0); un
         # volcán cambiado sin pasadas tiene 0 noches. Los otros volcanes se imprimen y no deciden (SEMANA_EXIGE_SIN_CAMBIO).
+        # ⚠️ S174 (R5-03, A113): ese «no deciden» queda rebajado: piden NOCHES_MIN_SIN_CAMBIO noches en total (abajo).
         horas = sorted(obj[i]["hora_utc"] for i in oks0) or ["(ninguna)"]
         dias = max(0.0, (t_lim - t_ini).total_seconds() / 86400)
         noches_sem, noches = semanas_noches([obj[i]["hora_utc"] for i in oks0], t_ini)
         por_v = {v: semanas_noches([obj[i]["hora_utc"] for i in oks0 if obj[i]["volcan"] == v], t_ini) for v in esperada}
         exigidos = [v for v in esperada if v in cambia or SEMANA_EXIGE_SIN_CAMBIO]
         vol_falta = [v for v in sorted(exigidos) if faltan_noches(*por_v[v])]
+        # S174 (VPR945-R5-03, decisión de Nicolás del 2026-11-06): los volcanes de ROI igual a B0 (con B4, los nueve)
+        # piden NOCHES_MIN_SIN_CAMBIO noches en la ventana, sin mínimo semanal; uno sin pasadas tiene 0 y deja PROVISORIO
+        sin_cambio = [v for v in sorted(esperada) if v not in exigidos]
+        vol_pocas = [v for v in sin_cambio if por_v[v][1] < NOCHES_MIN_SIN_CAMBIO]
         ahora_ok = t_ahora >= t_fin
         noches_ok = not faltan_noches(noches_sem, noches)
-        dur_ok = ahora_ok and noches_ok and not vol_falta
+        dur_ok = ahora_ok and noches_ok and not vol_falta and not vol_pocas
         dias_txt = f"{math.floor(dias * 10) / 10:.1f}"
 
         def sem_txt(ns, n):
@@ -751,16 +782,19 @@ def main(argv=None):
            "cruce las 00:00 UTC)")
         pr(f"== noches por semana y volcán (brazo {a.roi_brazo}; semanas fijas desde {t_ini:%Y-%m-%d %H:%M} UTC; ROI "
            f"distinta de B0 en {cambia or 'ninguno'}, cada uno pide {NOCHES_MIN_SEMANA} por semana y "
-           f"{NOCHES_MIN_SOMBRA} en total; los demás informan): "
+           f"{NOCHES_MIN_SOMBRA} en total; los demás, sin cambio, piden {NOCHES_MIN_SIN_CAMBIO} en total y por semana "
+           f"informan): "
            + ", ".join(f"{v} {sem_txt(ns, n)}" + (" decide, faltan" if v in vol_falta else " decide, completas"
-                                                   if v in exigidos else " informa")
+                                                   if v in exigidos else " sin cambio, faltan" if v in vol_pocas
+                                                   else " sin cambio, completas")
                        for v, (ns, n) in sorted(por_v.items())))
         pr(f"== duración de la sombra (§4.3, ventana fija de {DIAS_MIN_SOMBRA} días en {SEMANAS_SOMBRA} semanas, "
            f"{NOCHES_MIN_SEMANA} noches distintas por semana y {NOCHES_MIN_SOMBRA} en total): primera {horas[0]}, última "
            f"{horas[-1]}; días de calendario desde el inicio {dias_txt} de {DIAS_MIN_SOMBRA} "
            f"{'(completos)' if ahora_ok else '(faltan: ahora es anterior al fin)'}; noches del conjunto por semana "
            f"{sem_txt(noches_sem, noches)} {'(completas)' if noches_ok else '(faltan)'}; volcanes con ROI cambiada sin "
-           f"sus noches {vol_falta or 'ninguno'}: {'COMPLETA' if dur_ok else 'INCOMPLETA'}")
+           f"sus noches {vol_falta or 'ninguno'}; volcanes sin cambio de ROI con menos de {NOCHES_MIN_SIN_CAMBIO} "
+           f"noches {vol_pocas or 'ninguno'}: {'COMPLETA' if dur_ok else 'INCOMPLETA'}")
     aviso, rc_final = "", 0
     if not cob_ok and a.leer_con_faltantes:
         aviso, rc_final = f"[LEÍDO CON FALTANTES: {a.leer_con_faltantes}]", 5
@@ -943,7 +977,9 @@ def main(argv=None):
         # perdida con más noches); un P2 que hoy PIERDE puede no perder con más bloques, y un CUMPLE no vale aún.
         dur_txt = (f"; ventana {t_ini:%Y-%m-%d %H:%M} a {t_fin:%Y-%m-%d %H:%M} UTC, {dias_txt} de {DIAS_MIN_SOMBRA} días, "
                    f"semanas {sem_txt(noches_sem, noches)}"
-                   + "".join(f", {v} {sem_txt(*por_v[v])}" for v in sorted(exigidos)))
+                   + "".join(f", {v} {sem_txt(*por_v[v])}" for v in sorted(exigidos))
+                   + (f"; sin cambio de ROI, {NOCHES_MIN_SIN_CAMBIO} noches o más cada uno: "
+                      + ", ".join(f"{v} {por_v[v][1]}" for v in sin_cambio) if sin_cambio and not vol_pocas else ""))
         p1_veta = any(": P1 " in x for x in motivos)
         if motivos and (dur_ok or p1_veta):
             pr("== §6.3 sombra: NO CUMPLE (" + "; ".join(motivos) + dur_txt + ")" + (" " + aviso if aviso else ""))
@@ -960,10 +996,14 @@ def main(argv=None):
                + f", semanas {sem_txt(noches_sem, noches)}"
                + (f"; volcanes con ROI cambiada sin sus noches: "
                   + ", ".join(f"{v} {sem_txt(*por_v[v])}" for v in vol_falta) if vol_falta else "")
-               + f"; el §4.3 pide 4 semanas, Nicolás 14 noches y la coordinadora {NOCHES_MIN_SEMANA} por semana): hoy "
+               + (f"; volcanes sin cambio de ROI con menos de {NOCHES_MIN_SIN_CAMBIO} noches: "
+                  + ", ".join(f"{v} {por_v[v][1]}" for v in vol_pocas) if vol_pocas else "")
+               + f"; el §4.3 pide 4 semanas, Nicolás 14 noches (también en cada volcán sin cambio de ROI) y la "
+               f"coordinadora {NOCHES_MIN_SEMANA} por semana): hoy "
                + ("; ".join(motivos) if motivos else f"P1 = 0; P2 tabla {regs['tabla']}, todo {regs['todo']}")
                + ("; SIN PROTEGIDAS" if not n_prot else "")
-               + "; no es CUMPLE ni NO CUMPLE hasta que pase el fin y cada semana tenga sus noches" + (" " + aviso if aviso else ""))
+               + "; no es CUMPLE ni NO CUMPLE hasta que pase el fin, cada semana tenga sus noches y cada volcán sin cambio "
+               f"de ROI sus {NOCHES_MIN_SIN_CAMBIO}" + (" " + aviso if aviso else ""))
 
     # ---------------------------------------------------------------- informativo
     brazos_inf = ("K", "P") + (("Pdef", "Psinfiltro", "Kgeo") if censo else ())
