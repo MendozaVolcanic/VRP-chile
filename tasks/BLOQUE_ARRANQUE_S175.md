@@ -12,7 +12,7 @@
 > sobreviven). Las tres decisiones del autor: coherentes con la letra (PREREGISTRO_V750A.md l. 89 a 95 y 132); la (1)
 > abre R2-01 y R2-02. Nicolás fijó el mínimo (2026-11-06 00:48 UTC, frase «14 noches»): 14 noches distintas con datos
 > además de las 4 semanas; `--sha-desde` obligatorio en sombra (recomendación de la coordinadora). Tercera vuelta del
-> autor LANZADA (informe en `D:\vrp-trabajo\temporales\s174-autor945-r3\INFORME_AUTOR_R3.md`); R3 del verificador HECHA 2026-11-06 05:08 UTC sobre `932a3e9fd`: MERGEABLE CON CAMBIOS (menor), R3-01 g2 (noches por volcán con ROI cambiada) y R3-02 a R3-05 g1; informe `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R3.md`. C: quedó en 2,85 GB libres. Informe: `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R2.md`.
+> autor LANZADA (informe en `D:\vrp-trabajo\temporales\s174-autor945-r3\INFORME_AUTOR_R3.md`); R3 del verificador HECHA 2026-11-06 05:08 UTC sobre `932a3e9fd`: MERGEABLE CON CAMBIOS (menor), R3-01 g2 (noches por volcán con ROI cambiada) y R3-02 a R3-05 g1; informe `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R3.md`. C: quedó en 2,85 GB libres. Después: R4 sobre `b13ec336e` (R4-01 g2, el mismo defecto de anclar el reloj a las pasadas); Nicolás eligió ventana fija; quinta vuelta del autor lanzada 2026-11-06 (`D:\vrp-trabajo\temporales\s174-autor945-r5\INFORME_AUTOR_R5.md`), falta R5 del verificador (Sonnet, reutilizar `clon3`, sin suite local). Confirmar con Nicolás los defaults: 5 noches por semana, sólo conjunto y volcanes cambiados. Informe: `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R2.md`.
 
 ## a. Todo en una pantalla
 

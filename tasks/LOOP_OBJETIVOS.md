@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 09:36 UTC (S174): quinta vuelta del autor del #945, ventana fija
+
+- Frase de Nicolás: «Ventana fija, una vuelta». Diseño: inicio = max(2026-11-03, hora del corte), fin = inicio + 28 días, pasadas posteriores a min(fin, ahora) fuera; 4 semanas fijas; CUMPLE exige ahora ≥ fin y 5 noches por semana en el conjunto y en cada volcán con ROI cambiada, más las 14 noches. Defaults de la coordinadora, sin elección de Nicolás: umbral 5 por semana y exigencia sólo en conjunto y cambiados (los 9 sin cambio se informan). Autor (Opus) en `D:/vrp-trabajo/temporales/s174-autor945-r5/INFORME_AUTOR_R5.md`. C: 3,45 GB, D: 5,33 GB. Después: R5 del verificador y merge con frase.
+
 ### 2026-11-06 08:41 UTC (S174): R4 del verificador del #945; el patrón de parches
 
 - R4 (Sonnet; arnés reporta esfuerzo 10) sobre `b13ec336e`: MERGEABLE CON CAMBIOS. R3-01, R3-03, R3-04 y R3-05 CERRADOS; R3-02 PARCIAL. Reprodujo 84/84, medidor 49/49 por aserción, 102 blancos una vez, datos de main PROVISORIO con 1 noche por volcán, control positivo CUMPLE. Informe `D:/vrp-trabajo/temporales/s174-ver945/INFORME_R4.md`.
