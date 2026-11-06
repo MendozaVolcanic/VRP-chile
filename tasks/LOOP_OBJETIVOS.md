@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 03:43 UTC (S174): tercera vuelta del autor del #945; R3 del verificador lanzada
+
+- Autor (Opus; el arnés le reporta esfuerzo 15, bajo, pese a pedirlo alto): punta `932a3e9fd` en `claude/s173-vpr939-03`, PR en borrador. R2-01: CUMPLE exige 28 días y 14 noches (noche = fecha UTC de la pasada). R2-02: `--sha-desde` obligatorio, más una compuerta propia del autor que cierra si en la ventana hay otra ROI posterior al corte (efecto: no se puede leer B0 sobre datos post #939). R2-03: ventana desde max(2026-11-03, hora del committer del corte). R2-04: ER20 a ER30, MR25 a MR42. Según el autor: batería 78/78, medidor 41/41 por aserción, pytest 3199/0; con `origin/main` y corte `58edb9788`, PROVISORIO con 1 de 14 noches. Informe `D:/vrp-trabajo/temporales/s174-autor945-r3/INFORME_AUTOR_R3.md`. Sin verificar todavía por otro modelo; CI `pending`.
+- R3 del verificador limpio (Sonnet, esfuerzo alto pedido) lanzada; informe en `D:/vrp-trabajo/temporales/s174-ver945/INFORME_R3.md`.
+
 ### 2026-11-06 01:16 UTC (S174): #950 y #951 mergeados
 
 - Frase de Nicolás: «Sí, mergea ambos».
