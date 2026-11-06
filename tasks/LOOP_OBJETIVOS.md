@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 11:48 UTC: S174, quinta vuelta del autor del #945 lista; R5 del verificador lanzada
+
+- Autor (Opus): ventana fija implementada, punta `106db8941` (sin force), CI pytest verde (run 42211179548). Afirma batería 91 de 91, medidor 61 de 61 con IDENTIDAD y CAIDA sanos, 114 blancos una vez cada uno, R4-01/R4-02/R4-03 ahora PROVISORIO. Lector real sobre main con B4 desde 58edb9788: PROVISORIO (rc 4), 1,2 de 28 días. Informe: `D:\vrp-trabajo\temporales\s174-autor945-r5\INFORME_AUTOR_R5.md`.
+- Pendiente de Nicolás: NOCHES_MIN_SEMANA = 5 y SEMANA_EXIGE_SIN_CAMBIO = False (decisiones de la coordinadora). Consecuencia anotada por el autor: con ventana fija, una semana vacía deja la lectura PROVISORIO para siempre.
+- R5 del verificador limpio (Sonnet, effort high) corriendo sobre clon3; salida en `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R5.md`. Disco al lanzar: C: 3,4 GB, D: 4,3 GB; sin suite local.
+
 ### 2026-11-06 09:36 UTC (S174): quinta vuelta del autor del #945, ventana fija
 
 - Frase de Nicolás: «Ventana fija, una vuelta». Diseño: inicio = max(2026-11-03, hora del corte), fin = inicio + 28 días, pasadas posteriores a min(fin, ahora) fuera; 4 semanas fijas; CUMPLE exige ahora ≥ fin y 5 noches por semana en el conjunto y en cada volcán con ROI cambiada, más las 14 noches. Defaults de la coordinadora, sin elección de Nicolás: umbral 5 por semana y exigencia sólo en conjunto y cambiados (los 9 sin cambio se informan). Autor (Opus) en `D:/vrp-trabajo/temporales/s174-autor945-r5/INFORME_AUTOR_R5.md`. C: 3,45 GB, D: 5,33 GB. Después: R5 del verificador y merge con frase.
