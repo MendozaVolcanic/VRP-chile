@@ -64,16 +64,18 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
   0,02 fuera de la cumbre, media 3 × 3 con el central, fondo interpolado bajo halo).
 - **Detector de producción**: MODIS = vía «código MIROVA» (S172). VIIRS 375 y 750 = **K** (S153, #850,
   `34cea39e`): sin Test 1 integrado (`enable_test1_path: false`, D30), conectiva `max` en Tests 2 y 3 (piso C1
-  **y** `μ+C2·σ`), banda 22 primaria en MODIS (D21, hoy sólo la guardia). Regla
+  **y** `μ+C2·σ`), banda 22 primaria en MODIS (D21; la guardia K y también la vía). Regla
   `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (#848), evidencia `experiments/_s153_fk_v2/README.md`. El
   histórico de los 11 Tier A desde 2025-02-15 está reprocesado con K (#883). `experimental` sigue con el detector
   anterior (A117). Tag `pre-s153-adopcion-k`; el `git revert` ya no es limpio (S157).
 - **Detector anterior** (N·σ 5/10 noche y 15 día, C1 0,003/0,010 y 0,02 día, rama `min`, banda 21): fiel al
   paper, no al código de MIROVA (S160). El test de BT con N·σ no está en la Tabla 1 y está apagado desde S40
   (D31). El Test 1 integrado era detector propio (su cita «Coppola 2015» es Heap et al.).
-- **Divergencias de S128 a S138**: D21 (banda primaria; K adoptó la banda 22 en MODIS, estado: ver historia),
+- **Divergencias de S128 a S138**: D21 (banda primaria; S174: en MODIS de producción la vía usa siempre la banda 22 primaria y la 21 donde la 22
+  satura, `pipeline/mirova_v750_codigo.py::leer_radiancia_modis`; la guardia K también, `enable_modis_b22_primary: true`),
   D22 (compuerta `bt > t_bg + 3 K`, encendida según S157), GAP #A (reabierto S128, guard
-  `tests/test_guard_gap_a_pool_musigma_s128.py`; estado bajo K: ver historia). «No quedan gaps de fidelidad
+  `tests/test_guard_gap_a_pool_musigma_s128.py`; S174: `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK` sigue en `False` en los
+  tres procesadores; MODIS de producción no pasa por ese código cuando corre la vía; efecto en VIIRS bajo K SIN MEDIR). «No quedan gaps de fidelidad
   literal» es FALSO (S137).
 - **Kernel dNTI**: `np.mean` de 8 vecinos (D1, S17); en VIIRS 750 MIROVA usa 3 × 3 con el central (S158 R2).
 - MIR sólo nocturno. Bandas: MODIS 21/22 + 31; VIIRS I04/I05; M13/M15. Constantes exactas del paper y cita en
@@ -174,7 +176,7 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - **A82.** El «irreducible / agotado» NO vale: rebajado en S124 (eje geométrico, D17), S138 (sólo bajo banda 21 y D22), S146 (sin tasa base), S151 (banda 22 en Láscar) y S157 (K en MODIS fuera de Láscar); MODIS cambió de vía en S172. Qué hacer con D11 lo decide Nicolás. (historia: A82)
 - **A83.** Rebajada (S146): el AUC 0,859 no tiene script y su etiqueta es «MIROVA publicó» (re-medido 0,762; 0,554 dentro de volcán y sensor). No apaga la búsqueda de un discriminante real vs artefacto. (historia: A83)
 - **A84.** Lo medido sigue (ctx_cluster de Llaima y Lastarria indistinguibles; A/B de S106 descartado); el «irreducible» heredado de A82 no. (historia: A84)
-- **A85.** Lección vigente: medir el daño antes de agregar una cerca geométrica. El «0 robos en 214» está observado (B-03); bajo la regla de la anomalía mayor (Nicolás, 2026-10-09) un cúmulo lejano más fuerte no es robo. Nota S153 sobre MODIS ene-jun 2026 tras #883: estado: ver historia. (historia: A85)
+- **A85.** Lección vigente: medir el daño antes de agregar una cerca geométrica. El «0 robos en 214» está observado (B-03); bajo la regla de la anomalía mayor (Nicolás, 2026-10-09) un cúmulo lejano más fuerte no es robo. La nota S153 (MODIS ene-jun 2026 escrito con los gates intra-radio) quedó OBSOLETA con #883: los 4.286 records MODIS de ene-jun 2026 de los 11 Tier A tienen `processed_utc` de 2026-10 (main `f36a8fb98`, S174). (historia: A85)
 - **A86.** Anclar «hoy» a la hora del servidor (`gh api -i <repo>` → header `Date`). (historia: A86)
 - **A87.** El ejemplo quedó SIN VERIFICAR (S146), no usarlo como evidencia (D31). Lección vigente: un flag que se apaga no prueba que el problema se fue; verificar el mecanismo en los records. (historia: A87)
 - **A88.** Data que pasa a alimentar el frontend deja de ser descartable en el mismo PR. (historia: A88)
@@ -188,7 +190,7 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - **A97.** Atribuir un mecanismo simulando la etapa siguiente con el predicado literal del dashboard. (historia: A97)
 - **A98.** La brecha de paridad es sobre-publicación, no recall (874 de 877 noches); toda métrica lleva negativos limpios. (historia: A98)
 - **A99.** Rebajada (S146): el 0,995 es producto de dos factores opuestos y compensa entre volcanes (0,66 a 1,39); ya no apaga la búsqueda en k, área, banda o Planck. (historia: A99)
-- **A100.** Con K el `keep_peak` del Test 1 no actúa (0 records con fuente `test1`/`test1_roi` desde #883); el «nunca apagarlo solo» valía para el detector anterior. El keep-peak focal (`FOCAL_CLUSTER_KEEP_PEAK`) es otro mecanismo y seguía corriendo al S165. (historia: A100)
+- **A100.** Con K el `keep_peak` del Test 1 no actúa (0 records con fuente `test1`/`test1_roi` desde #883); el «nunca apagarlo solo» valía para el detector anterior. El keep-peak focal (`FOCAL_CLUSTER_KEEP_PEAK`) es otro mecanismo y hoy no actúa en producción (S174, main `f36a8fb98`): en VIIRS 750 y en la segunda llamada de MODIS sólo corre con fuente `test1` (0 de 73.620 records de los 11 Tier A); la primera de MODIS (`pipeline/process_modis.py:1356`) es del camino K, que la vía salta (74 de 74 records MODIS desde el 2026-11-02 18 UTC con `via_codigo_mirova: true`). Sigue vivo en la guardia K y en los records que caen a K (`sin_grilla`, `sin_mxd03`). (historia: A100)
 - **A101.** Las citas `file:line` se remapean por contenido (`scripts/remapear_citas.py`), salvo las históricas deliberadas (A6, A49). (historia: A101)
 - **A102.** Al corregir una función, buscar también las copias en línea de su lógica. (historia: A102)
 - **A103.** La pérdida de vecinos tibios está en la detección, no en el ensamblado (dETI 52 de 52; BT 18 de 18). (historia: A103)
