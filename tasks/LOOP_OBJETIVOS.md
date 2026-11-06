@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 13:36 UTC: S174, sexta vuelta del autor del #945 lanzada; arreglo de los falsos verdes de cenit en medición
+
+- Frase de Nicolás: «Sí, sexta vuelta». Cambios: R5-03, cada uno de los nueve volcanes de ROI B0 con 14 noches o más en la ventana (sin mínimo semanal); R5-02, cada noche cuenta en una sola semana (la de su primera pasada); R5-01, `--ahora` con zona. Autor Opus, effort high, carpeta s174-autor945-r6 en D:.
+- Falsos verdes de los controles de cenit (decisión de Nicolás «Sí, arréglalos»): rama `claude/s174-cenit-falsos-verdes` desde main, worktree en `C:/Users/nmend/vrp-wt/s174-cenit` (D: cerca del piso). SIN SUSTRATO rotulado con sus noches y sin OK (no bloquea, sólo en este control); insumo vacío o sin cenit es ROJO; excepción de la curva es ERROR INTERNO. 84 de 84 pruebas del lector pasan; 8 nuevas rojas antes del arreglo; medidor con 5 mutaciones nuevas (Z1 a Z5) y C2 retocado, 63 blancos una vez cada uno, corriendo.
+
 ### 2026-11-06 13:31 UTC: S174, R5 del verificador limpio del #945: MERGEABLE CON CAMBIOS (menores)
 
 - Sonnet (esfuerzo reportado 10, otra vez bajo pese a high). La ventana fija cierra R4-01, R4-02, R4-03 y R3-02 (PROVISORIO, rc 4); control positivo de 20 noches CUMPLE (rc 0). Reproduce al autor: 91 de 91, medidor 61 de 61 por aserción, IDENTIDAD y CAIDA sanos, 114 blancos una vez. Datos reales de main `ba77c1f6` con B4 desde 58edb978: PROVISORIO, 22 pasadas, 1 noche por volcán (recuento propio coincide).
