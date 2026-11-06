@@ -87,6 +87,12 @@ otros nueve volcanes dan el mismo resultado con B0 y con B4.
   LECTURA LR3): las 14 noches van repartidas, 7 en cada mitad del lapso, y Cordón Caulle y Tupungatito (los que B4
   traduce distinto de B0) piden cada uno ese reparto sobre sus pasadas leídas, impresas por volcán (con 0 pasadas,
   PROVISORIO); `--sha-desde` es el commit de merge (`58edb9788`), no el sha de la primera corrida de sombra.
+  ⚠️ S174 (quinta vuelta, VPR945-R4, LECTURA LR3; Nicolás: «Ventana fija, una vuelta»): el reparto de 7 y 7 por
+  mitad del lapso de la cuarta vuelta queda retirado. La ventana es fija: de lo más tardío entre el 2026-11-03 y la
+  hora del commit del corte, 28 días (con `58edb9788`, del 2026-11-05 03:23 al 2026-12-03 03:23 UTC), en 4 semanas
+  fijas; CUMPLE exige que la fecha de referencia («ahora», `--ahora` o el reloj de la máquina) haya llegado al fin y
+  5 noches en cada semana (y 14 en total) en el conjunto y en Cordón Caulle y Tupungatito; lo posterior al fin o a
+  «ahora» no se lee y se cuenta como «fuera de ventana».
   Texto original:
 - **Pendiente, no hecho**: el lector de la sombra de V750-A todavía no separa por ROI (ningún script de
   `experiments/_s162_v750a/` lee `regimen.codigo_sha` ni `diag_codigo_mirova.roi`; VPR939-03 del verificador del

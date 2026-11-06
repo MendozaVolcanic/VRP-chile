@@ -47,13 +47,20 @@ empieza en lo más tardío entre el 2026-11-03 (§4.3) y la hora del commit del 
 ventana cuyo código desciende del corte; una pasada de otra ROI con código posterior al corte (la ROI de ese volcán cambió
 dentro de lo que se lee) cierra la compuerta; CUMPLE exige 28 días y además 14 noches distintas con datos (noche = fecha
 UTC de la pasada, la misma clave del bloque de P2), contados sobre las mismas pasadas que se leen.
+Quinta vuelta (S174, VPR945-R4; LECTURA LR3): la ventana es fija y ningún dato mueve el reloj. Inicio = lo más tardío
+entre el 2026-11-03 00:00 UTC y la hora del committer del commit de --sha-desde (al minuto); fin = inicio + 28 días (sin
+incluir); «ahora» = --ahora o, si no se da, el reloj UTC de la máquina que corre la lectura. Sólo se leen las pasadas de
+[inicio, min(fin, ahora)]: las posteriores se cuentan aparte como «fuera de ventana», por volcán. Las 4 semanas son tramos
+fijos de 7 días desde el inicio. CUMPLE exige que ahora haya llegado al fin, 5 noches distintas en cada semana y 14 en
+total, en el conjunto y en cada volcán cuya ROI difiere de B0; los otros volcanes se imprimen por semana y no deciden.
 
 Uso: python evaluar_v750a.py [--fase censo|sombra] --art <carpetas> --objetivos objetivos_v750a.json
      --evaluador <evaluar_d25.py del tag> [--sin-granulo <archivo>] [--equivalencia-local <salida verde + mutaciones>]
-     [--roi-brazo B0..B5] [--sha-desde SHA] [--leer-con-faltantes MOTIVO] [--solo-controles] [--salida <archivo>]
-     (en la fase sombra, --roi-brazo y --sha-desde son obligatorios)
-Salida: 0 con veredicto; 3 compuerta cerrada (controles caídos o SIN DATO); 4 sombra PROVISORIA (no completó las 4
-        semanas del §4.3 o las 14 noches distintas: no es CUMPLE ni NO CUMPLE); 5 veredicto (o PROVISORIO) leído con
+     [--roi-brazo B0..B5] [--sha-desde SHA] [--ahora "AAAA-MM-DD HH:MM[:SS]"] [--leer-con-faltantes MOTIVO]
+     [--solo-controles] [--salida <archivo>]
+     (en la fase sombra, --roi-brazo y --sha-desde son obligatorios; --ahora es UTC y, si falta, es el reloj de la máquina)
+Salida: 0 con veredicto; 3 compuerta cerrada (controles caídos o SIN DATO); 4 sombra PROVISORIA (ahora no llegó al
+        fin de la ventana, o falta una semana con sus 5 noches o las 14 noches: no es CUMPLE ni NO CUMPLE); 5 veredicto (o PROVISORIO) leído con
         faltantes (marcado); 6 §6.1 no se cumple (la vía no reproduce al oráculo: no se mira el censo).
 """
 from __future__ import annotations
@@ -99,7 +106,14 @@ PARES_S1 = (("P", "Pdef"), ("P", "O"), ("Pdef", "O"))   # §5, S-1: los brazos q
 VOL_ROI = "PuyehueCordonCaulle"          # §7, control positivo de la ROI
 DIAS_MIN_SOMBRA = 28                     # §4.3: la sombra corre «al menos 4 semanas» (S174, VPR945-01, LECTURA LR2)
 NOCHES_MIN_SOMBRA = 14                   # S174 (VPR945-R2-01, LECTURA LR3): decisión de Nicolás, «14 noches» distintas
-NOCHES_MITAD = NOCHES_MIN_SOMBRA // 2    # S174 (VPR945-R3-02, LECTURA LR3): 7 en cada mitad del lapso (7 + 7 = 14)
+# S174 (VPR945-R4, quinta vuelta, LECTURA LR3; decisión de Nicolás, frase literal «Ventana fija, una vuelta»): la
+# ventana de la sombra es fija, [inicio, inicio + 28 días), y se parte en 4 semanas fijas [inicio + 7k, inicio + 7(k+1)).
+SEMANAS_SOMBRA = 4
+SEMANA = datetime.timedelta(days=7)
+# Decisiones de la coordinadora (default reversible, Nicolás no eligió; LR3 las deja pendientes de confirmar):
+NOCHES_MIN_SEMANA = 5                    # noches distintas con datos que pide cada una de las 4 semanas
+SEMANA_EXIGE_SIN_CAMBIO = False          # False: la exigencia por semana (y las 14) sólo en el conjunto y en los volcanes
+                                         # cuya ROI difiere de B0; los que no cambiaron se imprimen y no deciden
 INICIO_SOMBRA = "2026-11-03 00:00"       # §4.3: «Desde el 2026-11-03 (sin Suomi NPP: otro régimen [...])» (VPR945-R2-03)
 
 NOMBRES_M = ("N_BOOT", "SEMILLA", "N_MIN_PARES", "N_MIN_NOCHES", "N_CALIB", "MAX_FALSOS_CALIB",
@@ -232,20 +246,39 @@ def fecha_commit(sha):
     return datetime.datetime.fromtimestamp(int(t), datetime.timezone.utc).strftime("%Y-%m-%d %H:%M")
 
 
-def reparto_noches(horas):
-    """S174 (VPR945-R3-02, LECTURA LR3): (noches distintas, noches en la primera mitad, noches en la segunda) de unas
-    horas UTC «AAAA-MM-DD HH:MM». Noche = fecha UTC. Las mitades parten el lapso entre la primera y la última noche; una
-    noche que cae justo en la mitad va a la segunda. POR QUÉ: 13 noches seguidas y una suelta 28 días después cumplían
-    las 14 noches y los 28 días mirando una sola quincena; pedir la mitad de las noches en cada mitad del lapso obliga a
-    que las 4 semanas tengan datos en los dos tramos. El lapso es el de los datos (no una fecha fija), así que una
-    sombra que empezó con un hueco no queda trabada: al seguir sumando noches, la mitad se corre."""
-    noches = sorted({h[:10] for h in horas})
-    if not noches:
-        return 0, 0, 0
-    d = [datetime.date.fromisoformat(x) for x in noches]
-    mitad = (d[-1] - d[0]).days / 2
-    n1 = sum(1 for x in d if (x - d[0]).days < mitad)
-    return len(d), n1, len(d) - n1
+def hora_dt(h):
+    """S174 (VPR945-R4): «AAAA-MM-DD HH:MM» (o con «:SS») a datetime UTC sin zona, para comparar con la ventana fija."""
+    return datetime.datetime.fromisoformat(h.strip().replace("T", " "))
+
+
+def arg_ahora(x):
+    """--ahora en UTC, «AAAA-MM-DD HH:MM» o «AAAA-MM-DD HH:MM:SS»."""
+    try:
+        return hora_dt(x)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"--ahora {x!r} no es «AAAA-MM-DD HH:MM[:SS]» (UTC)")
+
+
+def semanas_noches(horas, t_ini):
+    """S174 (VPR945-R4, LECTURA LR3): (noches distintas en cada una de las 4 semanas fijas, noches distintas en total) de
+    unas horas UTC. Semana k = [inicio + 7k días, inicio + 7(k+1) días); noche = fecha UTC de la pasada. POR QUÉ: en
+    cuatro rondas el reloj y el reparto se anclaron a la primera y la última pasada, y una pasada suelta en una punta (o
+    con fecha futura) los movía; con tramos fijos desde el inicio de la ventana ningún dato los mueve. Una fecha con
+    pasadas a los dos lados del borde de una semana cuenta en las dos (tiene datos en las dos). Una hora fuera de las 4
+    semanas no cuenta (la ventana ya las sacó de la lectura)."""
+    c = [set() for _ in range(SEMANAS_SOMBRA)]
+    for h in horas:
+        k = (hora_dt(h) - t_ini) // SEMANA
+        if 0 <= k < SEMANAS_SOMBRA:
+            c[k].add(h[:10])
+    return [len(x) for x in c], len(set().union(*c))
+
+
+def faltan_noches(ns, n):
+    """S174 (VPR945-R4): True si alguna de las 4 semanas tiene menos de NOCHES_MIN_SEMANA noches o el total no llega a
+    NOCHES_MIN_SOMBRA (con 5 por semana el total es 20 o más y la de 14 se cumple sola; queda explícita por si el umbral
+    por semana cambia)."""
+    return min(ns) < NOCHES_MIN_SEMANA or n < NOCHES_MIN_SOMBRA
 
 
 def leer_equivalencia_local(ruta):
@@ -282,6 +315,9 @@ def main(argv=None):
                     help="fase sombra: brazo de ROI de V750-B que se lee (obligatorio en la sombra; VPR939-03)")
     ap.add_argument("--sha-desde", default="",
                     help="fase sombra: sólo pasadas cuyo regimen.codigo_sha desciende de este commit (incluido)")
+    ap.add_argument("--ahora", type=arg_ahora, default=None,
+                    help="fase sombra: fecha de referencia en UTC, «AAAA-MM-DD HH:MM[:SS]» (las pruebas la fijan); si "
+                         "falta, el reloj UTC de la máquina que corre la lectura (S174, VPR945-R4)")
     ap.add_argument("--salida", default=str(AQUI / "evaluar_v750a_salida.txt"))
     a = ap.parse_args(argv)
     EV = AB.cargar_signos(a.evaluador)
@@ -314,6 +350,10 @@ def main(argv=None):
     # marca va en los datos): `diag_codigo_mirova.roi` es la caja con que corrió, `regimen.codigo_sha` el código.
     sin_regimen, fuera_regimen, sin_mapa = {}, {}, {}
     corte, fecha_corte, ventana_desde, cambia, esperada = "", "", "", [], {}
+    # S174 (VPR945-R4, LECTURA LR3): «ahora» es la fecha de referencia de la ventana fija. Sin --ahora es el reloj UTC
+    # de la máquina que corre la lectura (en Actions, el del runner); las pruebas lo fijan para ser deterministas.
+    t_ahora = a.ahora or datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None, microsecond=0)
+    origen_ahora = "--ahora" if a.ahora else "reloj de esta máquina, UTC"
     if not censo:
         reg = {}
         for i in obj:
@@ -361,6 +401,18 @@ def main(argv=None):
         # plataformas, con Suomi NPP) y el código del corte no corrió antes de su commit; una noche anterior procesada con
         # el código nuevo es un reproceso, no sombra. La ventana es una sola para la lectura, el reloj y las noches.
         ventana_desde = max(INICIO_SOMBRA, fecha_corte)
+        # S174 (VPR945-R4, LECTURA LR3; Nicolás: «Ventana fija, una vuelta»). POR QUÉ: en cuatro rondas el reloj de 28
+        # días y el reparto de noches se anclaron a la primera y la última pasada leída, y una pasada suelta en una punta
+        # (o con fecha futura) los movía; cada parche cerró una variante y abrió otra. La ventana se fija antes de mirar
+        # los datos: fin = inicio + 28 días (sin incluir), y sólo se lee hasta min(fin, ahora). Lo posterior no entra a
+        # la lectura y se cuenta aparte, por volcán.
+        t_ini = hora_dt(ventana_desde)
+        t_fin = t_ini + datetime.timedelta(days=DIAS_MIN_SOMBRA)
+        t_lim = min(t_fin, t_ahora)
+
+        def en_lectura(h):
+            t = hora_dt(h)
+            return t < t_fin and t <= t_ahora
         esperada = RV.roi_por_volcan(a.roi_brazo)
         # S174 (VPR945-R3-01, LECTURA LR3). POR QUÉ: la sombra existe para ver el detector nuevo justo donde la ROI
         # cambió (con B4, la caja del cráter de Cordón Caulle y Tupungatito). Si sus pasadas faltan, o salen como «otra
@@ -385,6 +437,8 @@ def main(argv=None):
             if i not in fuera_regimen and obj[i]["hora_utc"] < ventana_desde:
                 fuera_regimen[i] = ("anterior al inicio de la sombra" if obj[i]["hora_utc"] < INICIO_SOMBRA
                                     else "anterior a la hora del corte")
+            elif i not in fuera_regimen and not en_lectura(obj[i]["hora_utc"]):
+                fuera_regimen[i] = "fuera de ventana"   # S174 (VPR945-R4): posterior al fin o a ahora (fecha futura)
 
         def por_vol(motivo):
             return dict(collections.Counter(obj[i]["volcan"] for i, m in fuera_regimen.items() if m == motivo))
@@ -396,7 +450,12 @@ def main(argv=None):
            + f": dentro {dentro}, fuera por otra ROI {n_fuera['otra ROI']} {por_vol('otra ROI')}, anteriores al "
            f"corte {n_fuera['anterior al corte']} {por_vol('anterior al corte')}; ventana desde {ventana_desde} UTC: "
            f"anteriores al inicio de la sombra {n_fuera['anterior al inicio de la sombra']}, anteriores a la hora del "
-           f"corte {n_fuera['anterior a la hora del corte']}")
+           f"corte {n_fuera['anterior a la hora del corte']}; fuera de ventana (posteriores a "
+           f"{t_lim:%Y-%m-%d %H:%M:%S}) {n_fuera['fuera de ventana']} {por_vol('fuera de ventana')}")
+        pr(f"== ventana fija de la sombra (§4.3, LECTURA LR3): inicio {t_ini:%Y-%m-%d %H:%M} UTC, fin "
+           f"{t_fin:%Y-%m-%d %H:%M} UTC (inicio + {DIAS_MIN_SOMBRA} días, sin incluir), {SEMANAS_SOMBRA} semanas fijas "
+           f"desde {', '.join(f'{t_ini + k * SEMANA:%m-%d %H:%M}' for k in range(SEMANAS_SOMBRA))}; ahora "
+           f"{t_ahora:%Y-%m-%d %H:%M:%S} UTC ({origen_ahora}); se lee hasta {t_lim:%Y-%m-%d %H:%M:%S} UTC")
         pr("   protegidas fuera de esta lectura (se leen con su propio brazo, no aquí):",
            [f"{nombre(i)} ({m})" for i, m in fuera_regimen.items() if obj[i].get("protegida")] or "ninguna")
         # S174 (VPR945-R2-02, LECTURA LR3). POR QUÉ: el corte tiene que aislar UN régimen en cada volcán. Si una pasada de
@@ -404,8 +463,10 @@ def main(argv=None):
         # volcán cambió dentro de lo que se lee: el reloj y las noches de la lectura serían los de los otros volcanes, no
         # los suyos (con el corte viejo c3aea8a3e y B4, las pasadas def de los nueve volcanes que no cambiaron hacían
         # correr el reloj aunque Cordón Caulle y Tupungatito llevaran una noche con sens).
+        # S174 (VPR945-R4): sólo dentro de lo que se lee; una ROI nueva después del fin de la ventana no la toca
         roi_cambia = sorted({obj[i]["volcan"] for i, m in fuera_regimen.items() if m == "otra ROI"
-                             and obj[i]["hora_utc"] >= ventana_desde and es_ancestro(corte, reg[i][1]) is not False})
+                             and obj[i]["hora_utc"] >= ventana_desde and es_ancestro(corte, reg[i][1]) is not False
+                             and en_lectura(obj[i]["hora_utc"])})
         if roi_cambia:
             pr(f"== régimen de la sombra: el corte {corte[:9]} no aísla el brazo {a.roi_brazo}: hay pasadas de otra ROI "
                f"con código posterior al corte (o sha desconocido) en {roi_cambia}; la ROI de esos volcanes cambió dentro "
@@ -450,8 +511,9 @@ def main(argv=None):
         dsg = json.loads(sg.read_text(encoding="utf-8"))
         sg_ok = isinstance(dsg, dict) and dsg.get("objetivos_sha256") == sha_obj
         sin_g = dsg.get("pasadas", []) if sg_ok else []
-    if not censo:   # S174 (VPR945-R2-03): la misma ventana que la lectura; sin hora no se descarta
-        sin_g = [x for x in sin_g if not x.get("hora_utc") or x["hora_utc"] >= ventana_desde]
+    if not censo:   # S174 (VPR945-R2-03, R4): la misma ventana que la lectura, por las dos puntas; sin hora no se descarta
+        sin_g = [x for x in sin_g if not x.get("hora_utc") or (x["hora_utc"] >= ventana_desde
+                                                               and en_lectura(x["hora_utc"]))]
     pr(f"   pasadas sin gránulo (del generador): {len(sin_g)}"
        + ("" if sg_ok else f" | ARCHIVO {'AUSENTE' if not sg.exists() else 'DE OTRA LISTA DE OBJETIVOS'}: SIN DATO"))
     prot_sin += [f"{x['volcan']} {x['hora_utc']}" for x in sin_g if x.get("protegida")]
@@ -663,35 +725,42 @@ def main(argv=None):
         # envejece; la línea «horas UTC de las pasadas leídas» lo mide en cada lectura. Reloj, noches y lectura usan las
         # mismas pasadas (oks0, ya dentro de la ventana del corte); los días se muestran truncados al décimo, para que
         # 27,99 no se lea «28,0».
-        # S174 (VPR945-R3-02, LECTURA LR3): las noches se reparten, 7 en cada mitad del lapso (reparto_noches); 7 + 7 = 14,
-        # así que la regla contiene la de las 14 noches. S174 (VPR945-R3-01): lo mismo, por separado, en cada volcán cuya
-        # ROI difiere de B0 (`cambia`), contado sobre sus pasadas leídas; un volcán cambiado sin pasadas tiene 0 noches.
+        # S174 (VPR945-R3-02, R3-01): ⚠️ S174 (VPR945-R4, quinta vuelta, A113): el reparto de 7 y 7 por mitad del lapso y
+        # el reloj medido entre la primera y la última pasada leída quedan retirados; el texto de LR3 los conserva.
+        # S174 (VPR945-R4, LECTURA LR3). POR QUÉ: con la ventana fija los días son de calendario, de su inicio a
+        # min(ahora, fin), y no dependen de ninguna pasada; las noches se cuentan en 4 semanas fijas desde el inicio.
+        # CUMPLE exige que ahora haya llegado al fin, NOCHES_MIN_SEMANA noches en cada semana y NOCHES_MIN_SOMBRA en total,
+        # en el conjunto y en cada volcán cuya ROI difiere de B0 (`cambia`), contadas sobre sus pasadas leídas (oks0); un
+        # volcán cambiado sin pasadas tiene 0 noches. Los otros volcanes se imprimen y no deciden (SEMANA_EXIGE_SIN_CAMBIO).
         horas = sorted(obj[i]["hora_utc"] for i in oks0) or ["(ninguna)"]
-        dias = 0.0
-        if oks0:
-            dias = (datetime.datetime.strptime(horas[-1], "%Y-%m-%d %H:%M")
-                    - datetime.datetime.strptime(horas[0], "%Y-%m-%d %H:%M")).total_seconds() / 86400
-        noches, n1, n2 = reparto_noches(horas) if oks0 else (0, 0, 0)
-        por_v = {v: reparto_noches([obj[i]["hora_utc"] for i in oks0 if obj[i]["volcan"] == v]) for v in esperada}
-        vol_falta = [v for v in cambia if min(por_v[v][1:]) < NOCHES_MITAD]
-        dias_ok = dias >= DIAS_MIN_SOMBRA
-        noches_ok = min(n1, n2) >= NOCHES_MITAD
-        dur_ok = dias_ok and noches_ok and not vol_falta
+        dias = max(0.0, (t_lim - t_ini).total_seconds() / 86400)
+        noches_sem, noches = semanas_noches([obj[i]["hora_utc"] for i in oks0], t_ini)
+        por_v = {v: semanas_noches([obj[i]["hora_utc"] for i in oks0 if obj[i]["volcan"] == v], t_ini) for v in esperada}
+        exigidos = [v for v in esperada if v in cambia or SEMANA_EXIGE_SIN_CAMBIO]
+        vol_falta = [v for v in sorted(exigidos) if faltan_noches(*por_v[v])]
+        ahora_ok = t_ahora >= t_fin
+        noches_ok = not faltan_noches(noches_sem, noches)
+        dur_ok = ahora_ok and noches_ok and not vol_falta
         dias_txt = f"{math.floor(dias * 10) / 10:.1f}"
+
+        def sem_txt(ns, n):
+            return ", ".join(str(x) for x in ns) + f" ({n})"
+
         hh = sorted(h[11:16] for h in horas) if oks0 else ["-"]
         pr(f"   horas UTC de las pasadas leídas: de {hh[0]} a {hh[-1]} (una noche es una fecha UTC mientras ninguna "
            "cruce las 00:00 UTC)")
-        pr(f"== noches leídas por volcán (brazo {a.roi_brazo}; ROI distinta de B0 en {cambia or 'ninguno'}, cada uno pide "
-           f"{NOCHES_MITAD} y {NOCHES_MITAD} por mitad de su lapso): "
-           + ", ".join(f"{v} {n} ({x} y {y}" + (", completas)" if v in cambia and v not in vol_falta else
-                                                ", faltan)" if v in cambia else ")")
-                       for v, (n, x, y) in sorted(por_v.items())))
-        pr(f"== duración de la sombra (§4.3, al menos 4 semanas = {DIAS_MIN_SOMBRA} días y {NOCHES_MIN_SOMBRA} noches "
-           f"distintas, {NOCHES_MITAD} en cada mitad del lapso): primera {horas[0]}, última {horas[-1]}; reloj desde la "
-           f"primera pasada leída: {dias_txt} de {DIAS_MIN_SOMBRA} días {'(completos)' if dias_ok else '(faltan)'}, "
-           f"noches distintas {noches} de {NOCHES_MIN_SOMBRA}, por mitad {n1} y {n2} de {NOCHES_MITAD} y {NOCHES_MITAD} "
-           f"{'(completas)' if noches_ok else '(faltan)'}; volcanes con ROI cambiada sin sus noches "
-           f"{vol_falta or 'ninguno'}: {'COMPLETA' if dur_ok else 'INCOMPLETA'}")
+        pr(f"== noches por semana y volcán (brazo {a.roi_brazo}; semanas fijas desde {t_ini:%Y-%m-%d %H:%M} UTC; ROI "
+           f"distinta de B0 en {cambia or 'ninguno'}, cada uno pide {NOCHES_MIN_SEMANA} por semana y "
+           f"{NOCHES_MIN_SOMBRA} en total; los demás informan): "
+           + ", ".join(f"{v} {sem_txt(ns, n)}" + (" decide, faltan" if v in vol_falta else " decide, completas"
+                                                   if v in exigidos else " informa")
+                       for v, (ns, n) in sorted(por_v.items())))
+        pr(f"== duración de la sombra (§4.3, ventana fija de {DIAS_MIN_SOMBRA} días en {SEMANAS_SOMBRA} semanas, "
+           f"{NOCHES_MIN_SEMANA} noches distintas por semana y {NOCHES_MIN_SOMBRA} en total): primera {horas[0]}, última "
+           f"{horas[-1]}; días de calendario desde el inicio {dias_txt} de {DIAS_MIN_SOMBRA} "
+           f"{'(completos)' if ahora_ok else '(faltan: ahora es anterior al fin)'}; noches del conjunto por semana "
+           f"{sem_txt(noches_sem, noches)} {'(completas)' if noches_ok else '(faltan)'}; volcanes con ROI cambiada sin "
+           f"sus noches {vol_falta or 'ninguno'}: {'COMPLETA' if dur_ok else 'INCOMPLETA'}")
     aviso, rc_final = "", 0
     if not cob_ok and a.leer_con_faltantes:
         aviso, rc_final = f"[LEÍDO CON FALTANTES: {a.leer_con_faltantes}]", 5
@@ -872,8 +941,9 @@ def main(argv=None):
                f"| protegidas que ni K ni P publican {nadie or 'ninguna'}")
         # S174 (LECTURA LR2): antes de las 4 semanas sólo el veto de P1 es definitivo (una protegida perdida sigue
         # perdida con más noches); un P2 que hoy PIERDE puede no perder con más bloques, y un CUMPLE no vale aún.
-        dur_txt = (f"; duración {dias_txt} de {DIAS_MIN_SOMBRA} días, {noches} de {NOCHES_MIN_SOMBRA} noches, {n1} y {n2} "
-                   f"por mitad" + "".join(f", {v} {por_v[v][0]} ({por_v[v][1]} y {por_v[v][2]})" for v in cambia))
+        dur_txt = (f"; ventana {t_ini:%Y-%m-%d %H:%M} a {t_fin:%Y-%m-%d %H:%M} UTC, {dias_txt} de {DIAS_MIN_SOMBRA} días, "
+                   f"semanas {sem_txt(noches_sem, noches)}"
+                   + "".join(f", {v} {sem_txt(*por_v[v])}" for v in sorted(exigidos)))
         p1_veta = any(": P1 " in x for x in motivos)
         if motivos and (dur_ok or p1_veta):
             pr("== §6.3 sombra: NO CUMPLE (" + "; ".join(motivos) + dur_txt + ")" + (" " + aviso if aviso else ""))
@@ -884,14 +954,16 @@ def main(argv=None):
                + (" " + aviso if aviso else ""))
         else:
             rc_final = rc_final or 4
-            pr(f"== §6.3 sombra: PROVISORIO ({dias_txt} de {DIAS_MIN_SOMBRA} días y {noches} de {NOCHES_MIN_SOMBRA} "
-               f"noches distintas, {n1} y {n2} por mitad del lapso"
+            pr(f"== §6.3 sombra: PROVISORIO ({dias_txt} de {DIAS_MIN_SOMBRA} días de la ventana "
+               f"{t_ini:%Y-%m-%d %H:%M} a {t_fin:%Y-%m-%d %H:%M} UTC"
+               + ("" if ahora_ok else " (ahora es anterior al fin)")
+               + f", semanas {sem_txt(noches_sem, noches)}"
                + (f"; volcanes con ROI cambiada sin sus noches: "
-                  + ", ".join(f"{v} {por_v[v][0]} ({por_v[v][1]} y {por_v[v][2]})" for v in vol_falta) if vol_falta else "")
-               + f"; el §4.3 pide al menos 4 semanas y Nicolás 14 noches, {NOCHES_MITAD} en cada mitad): hoy "
+                  + ", ".join(f"{v} {sem_txt(*por_v[v])}" for v in vol_falta) if vol_falta else "")
+               + f"; el §4.3 pide 4 semanas, Nicolás 14 noches y la coordinadora {NOCHES_MIN_SEMANA} por semana): hoy "
                + ("; ".join(motivos) if motivos else f"P1 = 0; P2 tabla {regs['tabla']}, todo {regs['todo']}")
                + ("; SIN PROTEGIDAS" if not n_prot else "")
-               + "; no es CUMPLE ni NO CUMPLE hasta completar la duración y las noches" + (" " + aviso if aviso else ""))
+               + "; no es CUMPLE ni NO CUMPLE hasta que pase el fin y cada semana tenga sus noches" + (" " + aviso if aviso else ""))
 
     # ---------------------------------------------------------------- informativo
     brazos_inf = ("K", "P") + (("Pdef", "Psinfiltro", "Kgeo") if censo else ())
