@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 14:23 UTC: S174, PR #952 (falsos verdes de los controles de cenit) en borrador; verificador limpio lanzado; auditoría S175 en su sesión
+
+- #952, rama `claude/s174-cenit-falsos-verdes`, punta `dd17fd97d` sobre main. Medidor `--solo C2,Z,CONTROL`: 6 de 6 atrapadas por aserción, 0 caídas en la misma corrida, control CAE; pruebas del lector 84 de 84 y del workflow 28 de 28. Verificador limpio (Sonnet, effort high) en `C:/Users/nmend/vrp-temporales/s174-ver952`.
+- Auditoría integral post S160 en su propia sesión (a pedido de Nicolás), rama `claude/relaxed-almeida-d17378`, plan sin sellar `f5505b315`: VIIRS 375 en producción entró como F2 a pedido de Nicolás («y porque no audita viirs375 que es el que tiene mayor flujo de datos?»); VIIRS 750 B4 salió y sus pendientes de S160 pasan a F0. Lanzar auditores espera el sí de Nicolás en esa sesión y el reinicio del plan semanal (2026-11-08 12:00 UTC; 71 % usado el 2026-11-06).
+
 ### 2026-11-06 13:36 UTC: S174, sexta vuelta del autor del #945 lanzada; arreglo de los falsos verdes de cenit en medición
 
 - Frase de Nicolás: «Sí, sexta vuelta». Cambios: R5-03, cada uno de los nueve volcanes de ROI B0 con 14 noches o más en la ventana (sin mínimo semanal); R5-02, cada noche cuenta en una sola semana (la de su primera pasada); R5-01, `--ahora` con zona. Autor Opus, effort high, carpeta s174-autor945-r6 en D:.
