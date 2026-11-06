@@ -571,8 +571,8 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ### 2026-11-06 15:53 UTC (S174): sexta vuelta del autor del #945 lista, R6 del verificador lanzada
 
-- Autor (Opus): `ebdc74927` en `claude/s173-vpr939-03`. Los nueve volcanes con ROI igual a B0 piden 14 noches cada uno (`NOCHES_MIN_SIN_CAMBIO`), cada noche cuenta una sola vez (semana de su primera pasada) y `--ahora` acepta zona. Según su informe: batería 100 de 100, medidor 69 de 69 por aserción, 122 blancos una vez cada uno; datos reales de main PROVISORIO (rc 4), una noche por volcán. CI `pytest pass` run 42245107719 sobre `ebdc74927`. Informe: `D:rp-trabajo	emporales\s174-autor945-r6\INFORME_AUTOR_R6.md`.
-- Verificador limpio R6 (Sonnet) lanzado; informe en `D:rp-trabajo	emporales\s174-ver945\INFORME_R6.md`. Sin su veredicto no se pide la frase de merge.
+- Autor (Opus): `ebdc74927` en `claude/s173-vpr939-03`. Los nueve volcanes con ROI igual a B0 piden 14 noches cada uno (`NOCHES_MIN_SIN_CAMBIO`), cada noche cuenta una sola vez (semana de su primera pasada) y `--ahora` acepta zona. Según su informe: batería 100 de 100, medidor 69 de 69 por aserción, 122 blancos una vez cada uno; datos reales de main PROVISORIO (rc 4), una noche por volcán. CI `pytest pass` run 42245107719 sobre `ebdc74927`. Informe: `D:\vrp-trabajo\temporales\s174-autor945-r6\INFORME_AUTOR_R6.md`.
+- Verificador limpio R6 (Sonnet) lanzado; informe en `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R6.md`. Sin su veredicto no se pide la frase de merge.
 - El verificador del #952 sigue corriendo. Disco: C: 15 GB, D: 5,0 GB.
 
 ### 2026-11-06 14:23 UTC: S174, PR #952 (falsos verdes de los controles de cenit) en borrador; verificador limpio lanzado; auditoría S175 en su sesión
