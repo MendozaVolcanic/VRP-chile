@@ -836,7 +836,7 @@ def test_controles_de_cenit_en_rojo_llevan_a_la_fila_1(R, monkeypatch):
     assert r["fila"] == 1 and "controles_cenit" in r["motivos"], (r["fila"], r["motivos"])
     monkeypatch.setattr(L, "controles_cenit", lambda *a, **k: {"estado": "SIN SUSTRATO"})
     r = leer(R, poblacion(), "MODIS")
-    assert r["fila"] == 6 and r["controles"]["controles_cenit"]["estado"].startswith("OK")
+    assert r["fila"] == 6 and r["controles"]["controles_cenit"]["estado"].startswith("SIN SUSTRATO")
 
 
 def test_rutas_de_referencia_dentro_y_fuera_del_repo(tmp_path):
@@ -911,7 +911,7 @@ def test_controles_de_cenit_sin_sustrato_real_cuenta_como_ok(R):
     """VPR946R2-02: SIN SUSTRATO de verdad (la curva no tiene pares) no es un control caído."""
     r = L.controles_cenit(R, poblacion(), "V")
     assert r["estado"] == "SIN SUSTRATO" and "error" not in r
-    assert leer(R, poblacion(), "MODIS")["controles"]["controles_cenit"]["estado"].startswith("OK")
+    assert leer(R, poblacion(), "MODIS")["controles"]["controles_cenit"]["estado"].startswith("SIN SUSTRATO")
 
 
 def test_controles_de_cenit_con_error_interno_es_rojo(R):
@@ -941,3 +941,66 @@ def test_c_cenit_del_osf_se_evalua_por_sensor(R):
     o2 = L.p1_osf(lejos, [_osf("Lascar", "VIIRS375", "2025-06-02 05:00", 2.0, satzen=25.0),
                           _osf("Lascar", "VIIRS750", "2025-06-03 05:00", 6.0, satzen=25.0)])
     assert o2["c_cenit_por_sensor"]["VIIRS375"] == "OK" and o2["c_cenit_por_sensor"]["VIIRS750"].startswith("ROJO")
+
+
+# ------------------------------------------------------------------- ensayo de cenit con datos reales (S174)
+# C:/Users/nmend/vrp-temporales/s174-cenit/INFORME.md §6 (fuera de git): dos falsos verdes de los controles de cenit.
+def test_controles_de_cenit_sin_sustrato_dice_cuantas_noches_y_no_dice_ok(R):
+    """S174 ensayo, defecto 1: SIN SUSTRATO no bloquea el veredicto, pero se rotula como lo que es (sin la palabra OK)
+    y con las noches de lectura y de nulo contra el mínimo, para que un lector vea de cuánto le faltó."""
+    r = L.controles_cenit(R, poblacion(), "V")
+    assert r["estado"] == "SIN SUSTRATO", r
+    assert isinstance(r["noches_lectura"], int) and isinstance(r["noches_nulo"], int) and r["n_min"] == 8, r
+    assert r["pasadas_alerta_con_cenit"] == 12, r                              # 6 protegidas + 6 bajo 1 MW
+    s = leer(R, poblacion(), "MODIS")
+    e = s["controles"]["controles_cenit"]["estado"]
+    assert e.startswith("SIN SUSTRATO") and "OK" not in e, e
+    assert ("lectura %d de 8" % r["noches_lectura"]) in e and ("nulo %d de 8" % r["noches_nulo"]) in e, e
+    assert s["fila"] == 6, (s["fila"], s["motivos"])
+
+
+def test_controles_de_cenit_sin_cenit_en_las_alertas_es_rojo(R):
+    """S174 ensayo, defecto 2: pasadas con alerta pero ninguna con cenit no es falta de noches, es un insumo roto."""
+    fs = poblacion()
+    for f in fs:
+        f["z"] = None
+    r = L.controles_cenit(R, fs, "V")
+    assert r["estado"].startswith("ROJO") and "12" in r["estado"], r
+    s = leer(R, fs, "MODIS")
+    assert s["fila"] == 1 and "controles_cenit" in s["motivos"], (s["fila"], s["motivos"])
+    fs[0]["z"] = 20.0                                                          # control: con una sola z ya no es vacío
+    assert L.controles_cenit(R, fs, "V")["estado"] == "SIN SUSTRATO"
+
+
+def test_controles_de_cenit_sin_pasadas_evaluables_es_rojo(R):
+    """S174 ensayo, defecto 2: 0 pasadas evaluables en el sensor es un insumo vacío, no un OK."""
+    fs = poblacion()
+    for f in fs:
+        f["_evaluable"] = False
+    r = L.controles_cenit(R, fs, "V")
+    assert r["estado"].startswith("ROJO") and "0 pasadas evaluables" in r["estado"], r
+
+
+def test_controles_de_cenit_sin_alertas_pero_con_evaluables_es_sin_sustrato(R):
+    """Control del anterior: evaluables sin protegidas ni bajo 1 MW es falta de sustrato de verdad, no un insumo roto."""
+    fs = [f for f in poblacion() if f["lab"] not in ("protegida", "bajo1")]
+    r = L.controles_cenit(R, fs, "V")
+    assert r["estado"] == "SIN SUSTRATO" and r["pasadas_alerta_con_cenit"] == 0, r
+
+
+def test_sin_sustrato_solo_no_bloquea_en_los_controles_de_cenit():
+    """El permiso de SIN SUSTRATO es del control de cenit y de nadie más: en otro control sigue siendo rojo."""
+    regla = {"_fila_regla": 6}
+    f, _, mot = L.veredicto("MODIS", regla, {"controles_cenit": {"estado": "SIN SUSTRATO (lectura 2 de 8)"}}, {})
+    assert f != 1, (f, mot)
+    f, _, mot = L.veredicto("MODIS", regla, {"c_via": {"estado": "SIN SUSTRATO"}}, {})
+    assert f == 1 and mot == ["c_via"], (f, mot)
+
+
+def test_curva_cenit_con_error_no_se_rotula_sin_sustrato(R):
+    """S174 ensayo, menor (a): una excepción en la razón doble se informa como error, no como falta de datos."""
+    def revienta(*a, **k):
+        raise ZeroDivisionError("simulado")
+    malo = _Proxy(R, CC=_Proxy(R.CC, resumen=revienta))
+    dob = L.curva_cenit(malo, poblacion(), "V")["V"]["razon_doble"]
+    assert dob["veredicto"] == "ERROR INTERNO" and "ZeroDivisionError" in dob["error"], dob
