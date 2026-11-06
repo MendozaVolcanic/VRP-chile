@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 01:10 UTC (S174): #950 y #951 mergeados
+
+- Frase de Nicolás: «Sí, mergea ambos».
+- #950 a main: `gh pr merge --squash --match-head-commit 5dbfe9493`, squash `77e54e8e0`, CI verde. Su CLAUDE.md traído a `loop/activo` en este commit (el de `loop/activo` era idéntico al de #949).
+- #951 a `claude/s162-viirs750-2-918174`: `--match-head-commit c666ab08f`, squash `c8152580b`. CI con 1 falla ajena al cambio: `test_csv_max_age_under_48h`, porque el CSV de MIROVA de esa rama es del 2026-11-01 (`e793545f2`) y la rama no recibe la sincronización; el PR toca sólo 2 archivos de `experiments/_s162_v750a/`.
+- Deuda de `loop/activo` (anterior a este cambio, comprobado con el CLAUDE.md viejo): 3 fallas en `tests/test_guard_libro_de_pruebas_s146.py` (libro JSON y MD desfasados; CLAUDE.md e historia citan `scripts/vigilancia_guardia_modis.py`, que existe en main y no en `loop/activo`, 1.069 commits atrás). Se arregla trayendo main a `loop/activo`; pendiente.
+
 ### 2026-11-06 00:48 UTC (S174): segunda ronda del verificador del #945 y mínimo de noches
 
 - **#945, R2 del verificador** sobre `daf04cfdc`: MERGEABLE CON CAMBIOS (`D:/vrp-trabajo/temporales/s174-ver945/INFORME_R2.md`). 7 de 8 hallazgos de R1 cerrados. Gravedad 2: R2-01 (la duración es el lapso entre extremos, no noches distintas; una pasada suelta a +30 días da CUMPLE) y R2-02 (reloj global; sin `--sha-desde` una noche `sens` llega a 28,1 de 28 días). Gravedad 1: R2-03 (sin cota inferior de fecha) y R2-04 (5 de 11 mutaciones nuevas sobreviven). CI del PR verde en `daf04cfdc`.
