@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-11-06 01:10 UTC (S174): #950 y #951 mergeados
+### 2026-11-06 01:16 UTC (S174): #950 y #951 mergeados
 
 - Frase de Nicolás: «Sí, mergea ambos».
 - #950 a main: `gh pr merge --squash --match-head-commit 5dbfe9493`, squash `77e54e8e0`, CI verde. Su CLAUDE.md traído a `loop/activo` en este commit (el de `loop/activo` era idéntico al de #949).

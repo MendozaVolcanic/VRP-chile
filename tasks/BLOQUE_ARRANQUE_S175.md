@@ -23,8 +23,8 @@
 | #946 | MERGEADO a main | squash `f36a8fb98` |
 | #912 | CERRADO (rama intacta) | decisión 7 |
 | #945 (lector de la sombra V750-A por ROI y sha) | BORRADOR, segunda vuelta del autor en `daf04cfdc`; R2 del verificador en curso | R1: MERGEABLE CON CAMBIOS (VPR945-01 a 08); autor: 67/67 escenarios, 23/23 mutaciones, suite 3.199 pasan |
-| #950 (cuatro dudas del CLAUDE.md corto) | ABIERTO contra main, CI verde, espera frase de Nicolás | D21, GAP #A, A85 (obsoleta por #883), A100; sin verificador de otro modelo |
-| #951 (M71/M82 de V750-A) | ABIERTO contra `claude/s162-viirs750-2-918174`, espera frase | blanco viejo tras N-3 `a9500912e`; 2/2 atrapadas en 88 escenarios |
+| #950 (cuatro dudas del CLAUDE.md corto) | MERGEADO 2026-11-06 (`77e54e8e0`), CLAUDE.md ya en `loop/activo` (`9b70ca5f8`) | D21, GAP #A, A85 (obsoleta por #883), A100; sin verificador de otro modelo |
+| #951 (M71/M82 de V750-A) | MERGEADO 2026-11-06 (`c8152580b`); su única falla de CI es la frescura del CSV de esa rama | blanco viejo tras N-3 `a9500912e`; 2/2 atrapadas en 88 escenarios |
 | Vigilancia de la guardia MODIS | VERDE sin avisos (2026-11-05 02:46) | nulo 167/0, 1 de 29 protegidas |
 | Discos | C: 15 GB, D: ~9 GB libres | `df -h /c /d` a las 20:31 UTC |
 
@@ -51,7 +51,7 @@
 ## d. Pendientes en orden
 
 1. Leer `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R2.md` y el CI del #945; con R2 limpia, presentar decisiones 3 a 5 y mergear #945 con frase.
-2. Con frase, mergear #950 (main) y #951 (rama V750); traer el CLAUDE.md de #950 a `loop/activo`.
+2. HECHO 2026-11-06: #950 y #951 mergeados, CLAUDE.md en `loop/activo`. Nuevo: traer main a `loop/activo` (1.069 commits atrás; 3 fallas de `test_guard_libro_de_pruebas_s146.py` vienen de eso).
 3. Implementar la decisión 3 del S174 (`sin_grilla`/`sin_mxd03` como K con aviso) y correr el ensayo de cenit con DM real (decisión 8).
 4. Corrida completa del medidor de V750-A para el sello (~7 h; un proceso pesado a la vez).
 5. 2026-11-09: primer audit semanal con la vía MODIS (recall «sin juzgar» hasta 15 noches) y revisión de la guardia (`data/audit_continuous/guardia_modis_latest.json`, regla `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` §4).
