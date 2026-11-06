@@ -49,6 +49,8 @@ def test_main_lleva_el_aviso_a_la_cobertura():
     import re
     src = (ROOT / "scripts" / "auto_audit_weekly.py").read_text(encoding="utf-8")
     cuerpo_main = src[src.index("def main():"):]
-    assert re.search(r"(?<![A-Za-z0-9_])avisos_protegidas_sin_record\s*\(\s*protegidas\s*,\s*vigente\s*\)",
+    # S172: la llamada lleva además la frontera de la vía de MODIS (`via_modis`, VIA_MODIS decide en MODIS); el
+    # guard acepta argumentos después de `vigente` y sigue exigiendo frontera de palabra.
+    assert re.search(r"(?<![A-Za-z0-9_])avisos_protegidas_sin_record\s*\(\s*protegidas\s*,\s*vigente\s*[,)]",
                      cuerpo_main)
     assert re.search(r"cobertura_avisos\s*(\+=|\.extend\()", cuerpo_main)

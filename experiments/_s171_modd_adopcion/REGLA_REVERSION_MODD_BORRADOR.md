@@ -1,8 +1,24 @@
 # Regla de adopción y reversión de la vía «código MIROVA» en MODIS (MOD-D)
 
-**BORRADOR, RONDA 3, SIN SELLO.** D1 a D7 contestadas por Nicolás el 2026-11-02 (servidor 15:42 UTC): «de1 a d7
-si», las siete con la recomendación. Falta el verificador limpio de esta ronda y la frase de sello.
+**SELLADA el 2026-11-02 (servidor 17:12:17 UTC)** por Nicolás con la frase «Sí, sellar y encender», sobre la ronda 5
+(sha256 LF del texto sellado antes de esta cabecera: `7f300a14…`, commit `3a3b5e495` de `claude/s173-modd-flip`). La
+misma frase da el sí de A45 para el encendido del PR B (#934) y la pre-autorización de la reversión de §4.3. Desde aquí
+el texto no se cambia: una corrección va como marca A113 con fecha, sin tocar lo sellado.
 
+**Antes: BORRADOR, RONDA 5, SIN SELLO.** Ronda 5 (S173): los cuatro cambios del verificador VB4 (fast-forward, citas de
+`loop/activo`, `pipeline/` fuera del flag, comentario del script), tabla del final. D1 a D7 contestadas por Nicolás el 2026-11-02 (servidor 15:42 UTC): «de1 a d7
+si», las siete con la recomendación. La ronda 3 la leyó un verificador limpio (VB3: regla SELLABLE CON CAMBIOS, PR B
+MERGEABLE CON CAMBIOS); esta ronda 4 aplica esos cambios. Falta la frase de sello de Nicolás (dada, ver la cabecera).
+
+- **Ronda 4** (S173): aplica los cambios de texto del verificador limpio de la ronda 3 (Fable, informe VB3,
+  hallazgos VB3-01 a VB3-08, §9; vive fuera de git, en `C:/Users/nmend/vrp-wt/ver_s173_regla3_b/INFORME.md`; la ronda 3
+  que leyó tiene sha256 LF `18887bac...` y está en la rama `loop/activo`, commit `e617ad667`). Esta ronda ya vive en
+  el PR B (#934, rama `claude/s173-modd-flip`) en esta misma ruta, y B corrige las citas de main que decían que la
+  regla estaba en `loop/activo` o que era borrador (§5). Cambios: el revert de B puede chocar en cualquier hunk de B
+  y B entra por merge commit (§4.3); qué hace de verdad el monitor del NRT con un job rojo (§4.4 (a)); de dónde se lee
+  a mano la procedencia de la protegida para D6 (§4.3); citas que no resuelven desde main, con la rama y el commit donde
+  vive cada evidencia (nota «Dónde vive la evidencia», más abajo); `sombra_34` en §2; el merge-base del tag (§5); el
+  revert también saca de main esta regla (§4.7, punto 6). La tabla del final dice qué se hizo con cada VB3.
 - **Ronda 3** (S173): D1 a D7 contestadas (todas «Sí»); el PR A ya está en main (#933, merge commit `eb4ae1c96`,
   2026-11-02 15:25:53 UTC) **sin** esta regla, así que la regla entra a main con el PR B (#934), no con A (§5); 208 y
   209 tratados en el PR B a pedido de Nicolás («en el resto haz lo que recomiendes», misma frase): el flag se aparta
@@ -25,7 +41,8 @@ Ronda 2, hora del servidor al escribirla (GitHub, `gh api -i repos/MendozaVolcan
 - **Código citado**: PR A = rama `claude/s172-modd-encendido` (guardia, vigilancia, marca del tablero; punta `0a0dae344`
   al escribir), PR B = rama `claude/s172-modd-flip` (el flag; punta `c9525f994`, apilada sobre A:
   `git merge-base --is-ancestor` da A ancestro de B). Hoy no hay PR abierto para ninguna de las dos
-  (`gh pr list --state all`: no aparecen). En paralelo otro agente mueve al PR A los arreglos que leen records de la
+  (`gh pr list --state all`: no aparecen). (⚠️ **Ronda 4** (A113): eso era cierto en la ronda 2. Hoy el PR A es #933,
+  ya en main (merge commit `eb4ae1c96`), y el PR B es #934, rama `claude/s173-modd-flip`.) En paralelo otro agente mueve al PR A los arreglos que leen records de la
   vía y agrega `VIA_MODIS` al audit semanal, así que el código se cita por **función y archivo**, no por línea; las
   líneas que quedan son de tags o de commits fijos.
 
@@ -36,6 +53,23 @@ acercanos a los objetivos» (`tasks/LOOP_OBJETIVOS.md` §6, entrada «2026-10-31
 Modelo: el paso 9 de la regla con que se adoptó K, `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (main), con las
 decisiones (a) a (f) de Nicolás del 2026-10-19. Se cambia lo que MODIS pide y nada más; donde MODIS se aparta de K, se
 dice.
+
+**Dónde vive la evidencia (ronda 4, VB3-06).** Esta regla vive en main desde el merge del PR B, pero no toda su
+evidencia. Comprobado con `git cat-file -e` el 2026-11-02:
+- `experiments/_s173_aud/...` (los informes `vr`, `v1`, `f2`, `v2`, `s8_regimen_pr_b.py`,
+  `desfase_upgrade_modis_salida.txt`, `contar_cotas_f4_salida.txt`): sólo en la rama `loop/activo` (presentes en el
+  commit `e617ad667`); no están en main ni en B.
+- `experiments/_s166_modd_f4/poblacion_f4.json`, `experiments/_s166_modd_f4/PREREGISTRO_MODD_F4.md` y
+  `experiments/_s168/modd_f4_candado/lectura_ab2/resultado_f4.json` (entró en `e0bb1b150`): rama
+  `claude/s170-modd-f4-procedencia` (punta `25e3cc3ba`); el pre-registro también en `claude/s166-modd-f4`. No están en
+  main. El VB3 dio `resultado_f4.json` por no localizado; está en esa ruta, con el sha256 LF que cita §4.4 (i).
+- `D:/vrp-trabajo/temporales/...` (pre-mortem S171, hallazgos 171-01 y 171-03): fuera de git, en el disco local de
+  Nicolás.
+- `tasks/LOOP_OBJETIVOS.md` y el programa por sensor existen en main, pero lo que esta regla cita de ellos (la entrada
+  de la bitácora «2026-10-31 21:55 UTC (S171)», el §12 del programa con 12.3 punto 4, 12.6 y las «28 noches») está sólo
+  en la rama `loop/activo` (ronda 5, VB4-02).
+- Lo demás que se cita por ruta (código, perfiles, workflows, `PREREGISTRO_E.md`, `data/audit_continuous/latest.json`
+  en `489113c1f`) resuelve desde main.
 
 ## Decisiones de Nicolás antes del sello
 
@@ -61,10 +95,11 @@ Hoy MODIS en producción (detector K) pierde más de un tercio de las noches en 
 16 noches, audit del 2026-10-26, ventana 2026-08-27 a 2026-10-26, `data/audit_continuous/latest.json` en `489113c1f`) y
 subestima la magnitud donde más importa: en Chillán, con el domo activo, queda en 0,56 de MIROVA (razón mediana de 8
 noches en ese mismo audit, `magnitud_publicada_by_vol_sensor`) y el A/B le recupera cuatro protegidas que K callaba,
-tres de ellas de octubre (`chillan.recuperadas` de `resultado_f4.json`). La vía que corre el código publicado por
+tres de ellas de octubre (`chillan.recuperadas` de `resultado_f4.json`, rama `claude/s170-modd-f4-procedencia`, ruta en
+«Dónde vive la evidencia»). La vía que corre el código publicado por
 MIROVA ganó el A/B pre-registrado de MOD-D (PROPONER ADOPCIÓN, verificador limpio confirmado; tag
 `s170-modd-f4-lectura`). El programa preveía 28 noches de sombra antes del encendido
-(`docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` §12.3 punto 4 y su calendario, rama `loop/activo`),
+(`docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` §12.3 punto 4 y su calendario; hoy también en main),
 que darían la prueba más limpia, pero cada mes de espera es un mes de alertas de MODIS perdidas. Se adopta antes y la
 sombra pasa a ser guardia: si la vía calla una alerta protegida que K habría publicado, se vuelve atrás sin esperar a
 nadie.
@@ -72,8 +107,8 @@ nadie.
 El peor caso a vigilar es el mismo que con K, visto desde el otro lado: una señal **débil o de borde de barrido** que
 K publica y la vía no. La vía descarta en silencio los gránulos que no cubren el volcán: menos de 100 celdas a 45 km del
 centro de la grilla, o la celda más cercana a más de 5 km (hallazgo 171-01 del pre-mortem S171,
-`D:/vrp-trabajo/temporales/ver_s171_171_01/INFORME.md`). Los dos cortes están en `calcular_vrp_granulo` de
-`pipeline/mirova_v750_codigo.py` (en main `47cdc446f`, l. 804 a 808), y el de 5 km rige para MODIS por
+`D:/vrp-trabajo/temporales/ver_s171_171_01/INFORME.md`, fuera de git). Los dos cortes están en `calcular_vrp_granulo` de
+`pipeline/mirova_v750_codigo.py` (en main `47cdc446f`, l. 804 a 808; la ronda 4 comprobó la línea con `git show`), y el de 5 km rige para MODIS por
 `FAMILIAS["MODIS"]["dist_max_centro_km"] = 5.0`; VIIRS 750 no lo tiene. Para el operador, ese descarte es silencio, igual
 que «calla»: por eso tiene paso propio en §4.4 (a).
 
@@ -83,7 +118,9 @@ que «calla»: por eso tiene paso propio en §4.4 (a).
 `pipeline/profile.py` como `ENABLE_MODIS_CODIGO_MIROVA = bool(_t.get("enable_modis_codigo_mirova", False))` con
 `_t = _cfg["thresholds"]`. Comprobado por A89 importando `pipeline.profile`: en el árbol de esta rama (sin B) da
 `False`; en B, `mirova_equivalent` da `True`, `guardia_k_modis` `False` y `sombra_codigo_mirova` `True`
-(`experiments/_s173_aud/vr/INFORME.md` §4, «VERIFICADO LIMPIO»). Los tres flags de MxD03 quedan como están (se deciden
+(`experiments/_s173_aud/vr/INFORME.md` §4, «VERIFICADO LIMPIO», rama `loop/activo`). **Ronda 4 (VB3-06)**: la sombra
+de los 34 volcanes (`sombra_34`, #932, `extends: mirova_equivalent`) también hereda `True`, y `experimental` da
+`False` (A89 corrido en la punta de B el 2026-11-02, y por el VB3). Los tres flags de MxD03 quedan como están (se deciden
 aparte, programa §12.3 punto 4) y siguen en `False`; VIIRS 375 y VIIRS 750 de producción no cambian (sus vías siguen en
 `False`, mismo informe).
 
@@ -108,7 +145,8 @@ aplican**: editar la sombra rompe la aserción de su workflow, que el S8 del lec
 - **Régimen de V375-E**: ni el perfil de la guardia (fuera de `PERFILES_REGIMEN`) ni su workflow (fuera de
   `RUTAS_REGIMEN`) cuentan para el S8 del lector re-sellado de VIIRS 375 (tag `s172-v375e-lector-resellado`), y el PR
   B tampoco marca régimen nuevo: medido con las funciones del propio lector, con controles positivo y negativo
-  (`experiments/_s173_aud/vr/s8_regimen_pr_b.py` y su salida; X3 de `experiments/_s173_aud/v2/INFORME.md`).
+  (`experiments/_s173_aud/vr/s8_regimen_pr_b.py` y su salida; X3 de `experiments/_s173_aud/v2/INFORME.md`; los dos en la
+rama `loop/activo`).
 
 La excepción al congelamiento de `pipeline/` (programa §12.6) se anota en la bitácora con el commit y el sensor (MODIS).
 
@@ -125,7 +163,7 @@ La excepción al congelamiento de `pipeline/` (programa §12.6) se anota en la b
   (`default_date_window` de `scripts/run_pipeline.py`), y tras el merge esa re-escritura sale de la vía. Así, la
   primera **observación** con record de la vía (`primera_observacion_via` en el mismo JSON) cae hasta unos 8 días antes
   del merge; en los records MODIS de octubre de 2026 re-escritos, el desfase observación a última escritura llegó a
-  9,42 días (`experiments/_s173_aud/f2/desfase_upgrade_modis_salida.txt`; el noveno día queda SIN DATO de origen, V2
+  9,42 días (`experiments/_s173_aud/f2/desfase_upgrade_modis_salida.txt`, rama `loop/activo`; el noveno día queda SIN DATO de origen, V2
   sobre 207). La marca del tablero (`primeraViaModis` de `frontend/cambio_detector.js`) y la frontera del audit
   (`frontera_via_modis` de `scripts/auto_audit_weekly.py`) usan esa fecha de observación, no el encendido (207). Las
   pasadas observadas entre la primera observación de la vía y el encendido son **retrospectivas**: no disparan la
@@ -156,17 +194,46 @@ del veto las protegidas sólo del OCR de Suomi NPP anteriores al 2026-10-09 (`ex
   ese día: **según D6**, revierte igual cuando la protegida viene de la tabla (`latest.php`), y avisa y deja la decisión
   a Nicolás ese mismo día cuando es sólo del OCR. Si la imagen contradice la alerta (la imagen no muestra alerta de 1
   MW o más en esa pasada), no revierte, anota la pasada como juzgada (§4.5) y avisa.
+- **De dónde sale la procedencia para D6 (ronda 4, VB3-04).** La vigilancia no publica si la protegida viene de la
+  tabla o del OCR (`guardia_modis_latest.json` trae volcán, sensor, minuto y VRP, sin la fuente). Mientras no la
+  publique, la sesión la mira a mano: busca la pasada (volcán, MODIS, minuto de `Fecha_Satelite_UTC`) en
+  `monitoreo_satelital/registro_vrp_consolidado.csv` del repo `MendozaVolcanic/Mirova-v1` (la tabla, `latest.php`). Si
+  está ahí con 1 MW o más, viene de la tabla; si sólo está en `registro_vrp_ocr.csv`, es sólo del OCR. Ojo con las
+  variantes de nombre del scraper (A14). La copia de `data/mirova_reference/mirova_v1_snapshot/` puede ir hasta una
+  hora atrasada.
 - **Cómo**: `git revert -m 1` del commit de merge del PR B (el que enciende el flag), nunca un reset. **Según D5**, B
   entra después de A y por separado, así que el revert deja en pie la guardia, su vigilancia y la marca del tablero. Si
   D5 se contesta «No» y entran juntos, el revert apaga también la guardia y su vigilancia: hay que decirlo en el issue.
   Comprobación después del revert: `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
   print(p.ENABLE_MODIS_CODIGO_MIROVA)"` debe dar `False` (A89).
+- **Sólo con commit de merge (ronda 5, VB4-01).** B se mergea con el botón de merge commit de GitHub
+  (`gh pr merge 934 --merge --match-head-commit <sha>`) o `git merge --no-ff`; **nunca fast-forward ni «Rebase and
+  merge»**: B está hoy adelante de main sin divergencia, así que un merge sin `--no-ff` no deja commit que revertir, y
+  el VB4 midió que entonces `git revert -m 1` de la punta deja el flag en `True` y `git revert main..B` falla en el merge
+  interno. Si aun así entró por fast-forward o rebase, se revierte el rango de commits de B (`git revert -m 1` sobre
+  cada merge interno y `git revert` simple sobre el resto) o se escribe a mano un commit que deje
+  `enable_modis_codigo_mirova: false`, y la comprobación A89 decide.
+- **B entra por merge commit (ronda 4, VB3-08).** El repo mezcla squash (#932) y merge commit (#933); el `-m 1` de
+  arriba supone que B entra con merge commit, y así se mergea. Si B hubiera entrado por squash, se revierte el commit
+  del squash con `git revert <sha>`, sin `-m` (el git 2.53 de hoy ignora el `-m` en un commit que no es merge; uno
+  anterior falla con «mainline was specified but commit is not a merge»). En los dos casos la comprobación A89 es la
+  misma.
 - **Si el revert choca**: hoy es limpio (simulado el 2026-11-02 sobre `47cdc446f` por dos caminos, 0 conflictos,
   VR-05). Choca si otro PR toca las líneas vecinas del flag en `mirova_equivalent.yaml` (las tres claves de MxD03 están
   justo antes; V2 sobre 208 lo provocó y vio el conflicto). **Ronda 3**: el PR B pone el flag en un bloque propio,
   separado de las claves de MxD03 por líneas que B no toca, y deja una prueba con `git merge-file` que comprueba que un
   cambio en esas claves no choca con el revert de B; la frase que sigue queda como respaldo. En ese caso se resuelve a mano dejando
   `enable_modis_codigo_mirova` en `false` (o sin la clave) y conservando el otro cambio; no se espera a nadie.
+  **Ronda 4 (VB3-02)**: lo anterior cubre sólo las claves de MxD03, que es lo que mide la prueba de B
+  (`tests/test_revert_flag_modis_no_choca_s173.py`). El revert puede chocar en **cualquier hunk de B**, no sólo en el
+  YAML. Medido por el VB3 sobre el main del 2026-11-02 con `git revert -m 1` real: choca si otro PR agrega una clave
+  pegada a `thresholds:` o pegada al flag en `mirova_equivalent.yaml`, y si otro PR toca el final de
+  `.github/workflows/nrt.yml` (el paso «Revisar errores de MODIS en el log» es el último del job). Por la misma
+  mecánica, no simulado, puede chocar en las marcas A113 que B agrega al inicio de `docs/MISSION.md`,
+  `docs/MIROVA_DIVERGENCES.md` y `CLAUDE.md` (donde cada sesión agrega marcas), en la ficha, en esta regla y en las
+  citas que B corrigió. Cómo se resuelve, en todos: a mano, sin esperar a nadie; el flag queda en `false` (o sin la
+  clave), lo que agregó B sale y lo ajeno se conserva (en los documentos, las marcas de otras sesiones quedan y salen
+  sólo las de B). Después, la comprobación A89 de arriba.
 - **Después**: issue de la reversión, aviso a Nicolás el mismo día, la pasada en `sombra_pasadas_juzgadas_modis.json`, y
   el paso del día después (§4.7).
 
@@ -182,6 +249,15 @@ Cada una abre el issue «Guardia K de MODIS: investigar». Investigar es mirar y
   así que el job del NRT sale verde. El PR B agrega a `nrt.yml` un paso como el «Revisar que salio K de MODIS» de la
   guardia: si el log de la corrida trae `ERROR processing` en un gránulo MODIS, el job falla (rojo), y eso lo ve el
   monitor del NRT el mismo día, sin esperar los 3 días de frescura de la vigilancia. No revierte nada: se investiga.
+  ⚠️ **Ronda 4 (VB3-03)**: «lo ve el monitor del NRT el mismo día» promete de más. Lo seguro es el **job rojo** en la
+  página de la corrida, con el `::error` del paso, que nombra el volcán. El monitor (`.github/workflows/nrt-monitor.yml`,
+  cada 6 h, `scripts/nrt_monitor_decision.js`) abre issue sólo si las **3 corridas seguidas** más recientes fallaron, y
+  ese issue («NRT cron: 3+ corridas consecutivas fallaron») habla de NASA y del token: no distingue esta causa. Un error
+  que aparece en una sola corrida nunca llega al monitor. Además, un gránulo malo se vuelve a procesar en cada corrida
+  mientras su fecha esté en la ventana de 8 días (`default_date_window` de `scripts/run_pipeline.py`), así que un solo
+  gránulo puede dejar el NRT rojo hasta 8 días, en las 12 corridas de cada día. Por eso la sesión que vea el NRT rojo,
+  o ese issue, mira primero el paso **«Revisar errores de MODIS en el log»** del job, antes de buscar una caída de NASA
+  o el token vencido; si el paso nombra un gránulo MODIS, se investiga como este punto (a).
 - **(b) Borde del encendido.** Protegida de la franja de §4.1 que la guardia publica y producción, con record de la
   vía, calla (`borde_del_encendido`).
 - **(c) Nulo de la guardia.** Antes del encendido, guardia y producción son el mismo detector K y tienen que publicar
@@ -190,8 +266,10 @@ Cada una abre el issue «Guardia K de MODIS: investigar». Investigar es mirar y
 - **(i) Muy Bajo.** Alertas de MIROVA sobre 0,05 MW y bajo 1 MW que la guardia publica y producción calla, contadas en
   los 120 días, sólo en pasadas con record en los dos lados. Investiga con **más de 2 (D1)**. Se informa siempre con su
   denominador: cuántas pasadas Muy Bajo tuvieron record en los dos lados (`muy_bajo.n`). Referencia: en el A/B, 2 de 43
-  pasadas `bajo1` en 240 días (`poblacion_f4.json`, sha256 LF `e8315ba4ff93...3be8`, y `brazos.V.p2.discordantes` de
-  `resultado_f4.json`, sha256 `312e2050c680...4129d`, rama `claude/s170-modd-f4-procedencia`).
+  pasadas `bajo1` en 240 días (`experiments/_s166_modd_f4/poblacion_f4.json`, sha256 LF `e8315ba4ff93...3be8`, y
+  `brazos.V.p2.discordantes` de `experiments/_s168/modd_f4_candado/lectura_ab2/resultado_f4.json`, sha256
+  `312e2050c680...4129d`; los dos en la rama `claude/s170-modd-f4-procedencia`, no en main; la ronda 4 recalculó los dos
+  prefijos de sha256 en LF).
 - **(ii) Sobre-publicación diferencial.** Pasadas de negativo limpio en que producción publica y la guardia, **que
   procesó la misma pasada**, no publica; sin record de la guardia la pasada no cuenta. No es la publicación absoluta de
   producción en negativos limpios: K sola publicó en 12 de 1.194 (1,0 %) en el audit del 2026-10-26, y con la vara
@@ -209,8 +287,8 @@ Cada una abre el issue «Guardia K de MODIS: investigar». Investigar es mirar y
   ausencia de pérdidas.
 
 Nota de lectura para quien recuente las cotas: en el A/B, c = +1 es error sólo de la vía y c = -1 error sólo de K
-(`experiments/_s166_modd_f4/PREREGISTRO_MODD_F4.md`, fila P2). La salida de
-`experiments/_s173_aud/vr/contar_cotas_f4_salida.txt` rotula al revés («c=+1 (a favor de la vía)»), pero sus conteos
+(`experiments/_s166_modd_f4/PREREGISTRO_MODD_F4.md`, fila P2; rama `claude/s170-modd-f4-procedencia`, no en main). La
+salida de `experiments/_s173_aud/vr/contar_cotas_f4_salida.txt` (rama `loop/activo`) rotula al revés («c=+1 (a favor de la vía)»), pero sus conteos
 son los de arriba: `bajo1` 2 con c = +1 y 10 con c = -1; `neg_limpio` 3 con c = +1 y 39 con c = -1; neto -44, B 53.
 
 ### 4.5 Pasadas juzgadas
@@ -255,11 +333,25 @@ El revert apaga el flag pero no deshace los datos (V1-02, 207). Tras él:
    pasada Z, y los records de la vía quedan apartados (o todavía mezclados) desde tal fecha.
 5. **Marcas A113** en `docs/MISSION.md`, `CLAUDE.md` y `docs/MIROVA_DIVERGENCES.md`: las del PR B se van con el revert;
    se agrega una marca que diga que MODIS volvió a K y desde cuándo.
+6. **Esta regla (ronda 4).** Como entra a main con el PR B, el revert de B la borra de main y devuelve a «rama
+   loop/activo» o «borrador» las citas que B corrigió; la guardia, su vigilancia y sus issues la siguen citando por esta
+   ruta. En el mismo PR del revert, o el mismo día, se repone con
+   `git checkout <commit de merge de B> -- experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` (si B
+   entró por squash, el sha del squash; si entró por fast-forward o rebase, la punta de B, §4.3) y se le agrega una
+   marca con la fecha de la reversión. Simulado por el VB4: tras el revert la reposición no re-enciende el flag.
 
 ## 5. Lista de los PR de encendido (sobre el modelo del paso 8 de K)
 
 Según D5: **PR A** primero (guardia, vigilancia, lectores de la vía, regla) y **PR B** después (el flag).
 
+- ⚠️ **Ronda 4 (VB3-01)**: la regla **ya está en el PR B** (#934, rama `claude/s173-modd-flip`) en esta misma ruta,
+  con esta ronda; la frase de sello y el encabezado de sellada se le agregan en B antes del merge. En el mismo PR, B
+  corrige las citas de main que decían «rama loop/activo» o «borrador» (workflows de la guardia y de su vigilancia,
+  `scripts/revisar_guardia_modis.py`, `scripts/vigilancia_guardia_modis.py` con el texto del JSON publicado, las
+  pruebas, el diseño y el informe del implementador; el texto viejo, cierto en su fecha, queda con marca A113 donde
+  era documento). El perfil `pipeline/profiles/guardia_k_modis.yaml` conserva su comentario «rama loop/activo»: B no
+  toca ese perfil (fuera del flag, B sólo cambia dos comentarios de `pipeline/process_modis.py`, sin efecto en el
+  código ni en el S8 del lector de V375-E; VB4-03). B entra por merge commit (§4.3).
 - ⚠️ **Ronda 3**: el PR A entró a main (#933) sin la regla, así que **entra con el PR B**, en la misma ruta y con el
   encabezado de sellada; el issue de `vigilancia-guardia-modis.yml` la cita y hoy apunta a una ruta que no existe en
   main (210). Los lectores de la vía y el 205 sí entraron con A (comprobado en `eb4ae1c96`). La ficha v1.18 de B se
@@ -282,7 +374,8 @@ Según D5: **PR A** primero (guardia, vigilancia, lectores de la vía, regla) y 
 - **La ficha** `docs/FICHA_SDA_VRP_CHILE.md` v1.18 (en B) y las marcas A113 donde MODIS aparece como K (`docs/MISSION.md`,
   `CLAUDE.md`, `docs/MIROVA_DIVERGENCES.md`). La v1.18 de B dice «No se reprocesan datos anteriores» y «rige desde el
   merge»; con la re-escritura de 8 días del NRT (§4.1, 207) eso no es exacto: los últimos 8 días antes del merge quedan
-  con la vía. Corregir esa frase antes del merge de B.
+  con la vía. Corregir esa frase antes del merge de B. (⚠️ **Ronda 4**: corregida en B, commit `8c89552cf`; la ronda
+  4 agrega a la v1.18 el caso de la excepción de la vía, VB3-07.)
 - **Una marca visible de la fecha del cambio** en las tres vistas (`index.html`, `diario.html`, `mosaico.html`), ya en B
   (`frontend/cambio_detector.js`): con la vía la magnitud de MODIS sube y aparecen alertas que K callaba; en Chillán ese
   escalón no debe leerse como «la erupción crece». La marca cae en la primera observación de la vía, hasta unos 8 días
@@ -290,7 +383,9 @@ Según D5: **PR A** primero (guardia, vigilancia, lectores de la vía, regla) y 
 - **El aviso a los consumidores** (OVDAS, Integracion_Plataformas, `MAPA_WORKSPACE.md`).
 - **Tag defensivo** `pre-s171-adopcion-modd` (existe y está empujado, `d3cd0b2ae`, merge-base de B con main; si al
   merge de B main ya avanzó, se agrega un tag nuevo sobre el commit de main previo al merge, sin mover el viejo) y el sí de Nicolás antes del merge (A45), que incluye la
-  pre-autorización de la reversión de §4.3.
+  pre-autorización de la reversión de §4.3. ⚠️ **Ronda 4 (VB3-06)**: `d3cd0b2ae` era el merge-base cuando se creó el
+  tag. B ya mergeó main dos veces (`126844bdc`, y el 2026-11-02 tras #935): hoy el merge-base de B con main es
+  `438a010ab`. Main avanzó, así que el tag nuevo sobre el commit de main previo al merge de B **sí hace falta**.
 
 ## 6. Pre-mortem
 
@@ -298,12 +393,13 @@ Si la adopción está mal, se vería como: (a) una protegida que la guardia publ
 una protegida que la guardia publica y de la que producción no tiene record (§4.4 (a)); (c) la sobre-publicación
 diferencial de MODIS subiendo sobre lo medido (§4.4 (ii)); (d) pasadas de borde que producción deja de registrar
 (§4.4 (iii), 171-01); (e) el paso de la guardia pasando su tiempo: la vía cuesta 1,1 a 1,25 veces K en Láscar (13,3
-contra 10,7 y 11,9 min, pre-mortem 171-03, `D:/vrp-trabajo/temporales/audit_s171_dia3/INFORME.md`), pero eso **no está
+contra 10,7 y 11,9 min, pre-mortem 171-03, `D:/vrp-trabajo/temporales/audit_s171_dia3/INFORME.md`, fuera de git), pero eso **no está
 medido con la vía en los volcanes lentos** (Villarrica, Chillán, PCC): que alguno cruce los 75 min del paso es
 SOSPECHA del propio pre-mortem, y si pasa, ese día del volcán no se commitea y la vigilancia lo ve como frescura, no
 como pérdida; (f) una excepción de la vía que no es la falta de pyproj deja a MODIS sin record con el NRT en verde
 (209 de la segunda auditoría), y lo ve la vigilancia de la guardia al cuarto día por volcán, antes si hay una protegida
-(§4.4 (a)).
+(§4.4 (a)). (⚠️ **Ronda 4** (A113): con el paso que agrega B a `nrt.yml`, esa excepción deja el job del NRT en rojo,
+posiblemente hasta 8 días por un solo gránulo; qué ve el monitor y qué mira la sesión, en §4.4 (a).)
 
 ## Anexo A: historia de la ronda 1 (no rige)
 
@@ -369,7 +465,7 @@ vigilancia de la guardia y varias pruebas.
 
 ## Hallazgo, tratamiento
 
-| Hallazgo | Qué decía | Tratamiento en la ronda 2 |
+| Hallazgo | Qué decía | Tratamiento (ronda 2; las filas VB3, ronda 4) |
 |---|---|---|
 | VR-01 | La regla anclaba el conteo en `CAMBIO_DETECTOR_MODIS_UTC`, que no existe; el instrumento usa los datos | Aplicado: §4.1 define el encendido con `encendido_desde_datos` (menor `processed_utc` de un record de la vía) y dice qué pasa en la franja entre el merge y esa corrida |
 | VR-02 | Sólo pre-autorizaba «calla»; nada sobre la protegida sin record de producción ni sobre la vigilancia ciega | Aplicado: §4.4 (a) y «Vigilancia ciega»; las 24 h convertidas en pregunta (D3) |
@@ -386,3 +482,15 @@ vigilancia de la guardia y varias pruebas.
 | V1-02 | §4 sin paso para el día después: records de la vía en `data/`, ficha | Aplicado como §4.7 (datos, lectores, guardia, ficha v1.19, marcas A113); el apartado de los records convertido en pregunta (D7) |
 | 207 | Tres fechas del encendido; la re-escritura del NRT pone la primera observación hasta ~8 días antes del merge | Aplicado: §4.1 (encendido por escritura, franja por observación, retrospectiva salvo `borde_del_encendido`); §5 pide corregir «no se reprocesan datos anteriores» de la ficha v1.18; unificar las tres funciones queda para el código (no es texto de la regla) |
 | 210 | Constante inexistente, tag y línea viejos, issue que remite a una regla que no está en main | Aplicado: constante quitada (§4.1), tag y línea corregidos en el Anexo A, la regla entra a main (§5) |
+| VB3-01 | La regla no estaba en el PR B ni en main, y las citas de main a su ruta decían «rama loop/activo» o «borrador» | Aplicado: la regla entra en B en esta ruta (§5, marca de ronda 4) y B corrige esas citas; el perfil de la guardia queda como está porque B no toca ese perfil |
+| VB3-02 | «Reversión limpia» medida sólo contra las claves de MxD03; el revert choca con clave pegada a `thresholds:` o al flag y con el final de `nrt.yml` | Aplicado en texto: §4.3 dice que puede chocar en cualquier hunk de B y cómo se resuelve. La prueba de B no se amplió y el paso de `nrt.yml` sigue último (cambios opcionales del VB3, no pedidos en esta ronda) |
+| VB3-03 | «Lo ve el monitor del NRT el mismo día» es sólo el job rojo; el monitor pide 3 corridas seguidas y rotula NASA o token | Aplicado: §4.4 (a) dice qué hace el monitor, que un gránulo malo puede dejar el NRT rojo hasta 8 días y que la sesión mira el paso «Revisar errores de MODIS en el log»; §6 (f) marcada |
+| VB3-04 | D6 necesita la procedencia tabla u OCR y el instrumento no la publica | Aplicado en texto: §4.3 dice cómo se mira a mano (CSV consolidado contra CSV del OCR de Mirova-v1). Publicar la fuente en la vigilancia queda como seguimiento, fuera de esta regla |
+| VB3-05 | Las marcas A113 de B decían «desde el merge del PR B (rama claude/s172-modd-flip)» | Aplicado en B (no es texto de esta regla): las tres marcas dicen desde la primera corrida del NRT con la vía, con la franja de unos 8 días, y la rama `claude/s173-modd-flip`, PR #934 |
+| VB3-06 | Citas que no resuelven desde main; tag y merge-base viejos; `sombra_34` omitido | Aplicado: nota «Dónde vive la evidencia», marcas de rama o de «fuera de git» en cada cita, `resultado_f4.json` localizado (ruta completa, mismo sha256), merge-base de hoy en §5, `sombra_34` en §2 |
+| VB3-07 | La ficha v1.18 no decía que una excepción de la vía deja la pasada sin record y el NRT en rojo | Aplicado en B (en la ficha, no en esta regla) |
+| VB3-08 | La regla mandaba `git revert -m 1` sin decir que B no puede entrar por squash | Aplicado: §4.3, B entra por merge commit; si entró por squash, `git revert <sha>` sin `-m` |
+| VB4-01 | B es fast-forward sobre main; un merge sin `--no-ff` o «Rebase and merge» no deja commit que revertir | Aplicado: §4.3 «Sólo con commit de merge», y el sha alternativo en §4.7 punto 6 |
+| VB4-02 | La nota decía que la bitácora y el programa por sensor resuelven desde main; lo citado está sólo en `loop/activo` | Aplicado: nota «Dónde vive la evidencia» |
+| VB4-03 | «B no toca `pipeline/` fuera del flag» era inexacto (dos comentarios de `process_modis.py`) | Aplicado: §5 y fila VB3-01 |
+| VB4-04 | `vigilancia_guardia_modis.py` decía «borrador, propuestas que fija Nicolás al sellar»; el cuerpo del PR no conocía la ronda 4 ni el tag nuevo | Aplicado: comentario del script y cuerpo del PR B |

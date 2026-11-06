@@ -1,0 +1,16 @@
+S173 S1: verificacion en navegador real (panel Browser de Claude Code), 2026-11-05, rama claude/s173-cirrus-s1
+servidor: python -m http.server 8773 en la raiz del worktree; vistas en /frontend/ (BASE_PATH = /)
+
+index.html (http://localhost:8773/frontend/index.html), datos cargados de data/mirova_equivalent/*.json:
+  CambioDetector.esViaCodigoMirova: function
+  caso X2 Chillan 2026-10-01 08:35 (t_max 269,57 K, 11,442 MW, summit):
+    con via_codigo_mirova true -> isCirrusArtifact false, isThermalArtifact false
+    sin la marca (K)           -> isCirrusArtifact true
+    con "sin_grilla" (K, A118) -> isCirrusArtifact true
+  NevadosDeChillan: 6897 records, 8 de la via, 0 ocultos por el filtro; con deteccion:
+    2026-11-02 01:15 t_max 274,66 4,328 MW | 2026-11-02 07:30 284,18 12,823 MW
+    2026-11-04 08:45 281,22 17,101 MW     | 2026-11-05 01:35 298,91 24,622 MW   (los 4: artefacto false)
+  CambioDetector.viaModisDesde(): 2026-11-02T01:15:00.000Z
+  consola: solo 404 de los *_recent.json (se arman en el deploy; el tablero cae al JSON completo) 
+mosaico.html: via -> false, K -> true; 11 canvas
+diario.html:  via -> false, K -> true; 10 canvas; aviso de la via presente; consola sin errores

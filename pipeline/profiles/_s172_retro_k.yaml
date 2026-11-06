@@ -1,0 +1,40 @@
+# S172/S173. Brazo K-gemelo de la prueba retrospectiva del paquete (pre-registro SELLADO
+# experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md, tag s173-prereg-retro-sellado, §2, §6 C-K y nulo de
+# runner, §10.1 y despacho D3 del §10.3).
+#
+# POR QUÉ: la retrospectiva usa como control los records de K que ya están en data/mirova_equivalent/ (K de disco).
+# Este perfil re-corre K con el código del tag del despacho, en el mismo runner, sobre DM y parte de F26: si K
+# re-corrido no publica lo mismo que K de disco (C-K), K de disco no sirve de control.
+#
+# ES _s172_retro_paquete con las tres vías en false (lo vigila tests/test_perfil_retro_paquete_s172.py). extends
+# resuelve UN nivel: escribe los seis flags del brazo para no heredar un cambio de producción en silencio (en
+# producción la vía de MODIS ya está encendida desde S172; aquí K tiene que ser el K que escribió K de disco).
+# Declara los tres flags de K (tests/test_guard_perfiles_congelados_s153.py, A117).
+#
+# NO OPERACIONAL: carpeta aislada (A47). Lo corre sólo .github/workflows/reproc-retro-paquete.yml, sin push a main.
+extends: mirova_equivalent
+profile: _s172_retro_k
+description: >
+  Control K-gemelo de la retrospectiva del paquete (vías apagadas), en carpeta propia.
+
+thresholds:
+  enable_v750_codigo_mirova: false
+  enable_v375_codigo_mirova: false
+  enable_modis_codigo_mirova: false
+  enable_modis_geo_mxd03: false
+  enable_modis_crater_sin_dato: false
+  enable_modis_dist_desde_crater: false
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _s172_retro_k
+
+enable_modis_b22_primary: true

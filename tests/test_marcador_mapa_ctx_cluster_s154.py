@@ -37,6 +37,8 @@ function extraer(nombre) {
   }
   throw new Error('no cerro ' + nombre);
 }
+// S172 (MA172-102): la lista de fuentes del ancla vive en esAnclaHonesta (un solo lugar, A102)
+eval(extraer('esAnclaHonesta'));
 eval(extraer('pixelesDelMarcador'));
 const casos = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'));
 process.stdout.write(JSON.stringify(casos.map(([r, v]) => pixelesDelMarcador(r, v))));

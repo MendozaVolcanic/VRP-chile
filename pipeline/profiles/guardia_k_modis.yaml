@@ -1,0 +1,42 @@
+# Guardia K de MODIS (S172; regla experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §3, rama
+# loop/activo; diseño docs/superpowers/specs/2026-11-01-encendido-modd-design.md, decisión 2; tag defensivo
+# pre-s171-adopcion-modd).
+#
+# POR QUÉ: Nicolás decidió el 2026-10-31 encender la vía «código MIROVA» en MODIS sin esperar la sombra de 28 noches,
+# con K corriendo aparte como guardia. El peor caso a vigilar es una señal débil o de borde de barrido que K publica y
+# la vía calla (la vía descarta en silencio los gránulos que no cubren el volcán, hallazgo 171-01). Si MIROVA publica
+# una alerta protegida, esta guardia la publica y producción calla, se revierte el encendido el mismo día (§4).
+# Mientras producción siga en K (antes del PR B), guardia y producción tienen que publicar lo mismo en MODIS: ese es
+# el nulo medido de la guardia (A110), y la vigilancia lo informa.
+#
+# QUÉ CAMBIA RESPECTO DE PRODUCCIÓN: la vía de MODIS apagada (en el PR A ya lo está en producción; con el PR B la
+# guardia es lo único que sigue en K), sólo MODIS (VIIRS no se vigila aquí y cuesta tiempo de runner) y la carpeta de
+# salida. Nada más: tests/test_guardia_k_modis_s172.py lo fija contra lo que resuelve pipeline.profile (A89).
+# Declara los tres flags de K con el valor de producción (tests/test_guard_perfiles_congelados_s153.py, A117).
+#
+# Por qué un perfil nuevo y no la sombra: la sombra sigue con la vía de MODIS encendida (tras el encendido es igual a
+# producción) y su aserción del workflow (sombra-codigo-mirova.yml l. 110) se compara como texto en el S8 del lector
+# de V375-E. Este perfil no está en PERFILES_REGIMEN del lector ni su workflow en RUTAS_REGIMEN.
+#
+# NO OPERACIONAL: data_subdir aislado (A47), el tablero no lo lee. Lo corre sólo .github/workflows/guardia-k-modis.yml.
+extends: mirova_equivalent
+profile: guardia_k_modis
+description: >
+  Guardia K de MODIS: producción con la vía «código MIROVA» de MODIS apagada, sólo MODIS, en carpeta propia.
+
+thresholds:
+  enable_modis_codigo_mirova: false
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+sensors:
+  modis: true
+  viirs_375: false
+  viirs_750: false
+
+output:
+  data_subdir: guardia_k_modis
+
+enable_modis_b22_primary: true

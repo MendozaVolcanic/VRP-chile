@@ -23,6 +23,7 @@ sys.path.insert(0, str(ROOT))
 from scripts.referencia_mirova_unificada import (clave,  # noqa: E402
                                                  cargar_referencia_unificada,
                                                  leer_pasadas)
+from tests.perdida_simulada import snapshot_sin  # noqa: E402
 
 FIXTURE = ROOT / "tests" / "datos_s150" / "perdidas_06oct.csv"
 TAG = "pre-s150-consolidado-perdida-207"
@@ -41,7 +42,16 @@ def test_fixture_tiene_las_207_y_las_8_alertas():
     assert sum(p["tipo"] == "ALERTA_TERMICA" for p in perd) == 8
 
 
-def test_toda_perdida_del_06oct_esta_en_la_union_con_su_tipo():
+def _claves_perdidas():
+    return [(p["volcano"], p["sensor_bucket"], p["fecha_utc"], "CONS") for p in _perdidas()]
+
+
+# S173: el 2026-11-02 el consolidado remoto repuso esas filas y el auto-audit regenero la union contra el snapshot
+# nuevo (commit 79f410697): la union guarda sólo lo que el snapshot de hoy NO tiene (de 2.503 filas a 37). Las 207
+# llegan ahora por el snapshot, no por la union. La propiedad que importa es la de la referencia entera: las 207
+# estan, con su tipo, por el canal que sea. Que la union agregue lo ausente lo prueba
+# test_las_filas_historicas_solo_agregan; que este test pueda fallar, el control de abajo.
+def test_toda_perdida_del_06oct_esta_en_la_referencia_con_su_tipo():
     ref = {clave(f): f for f in cargar_referencia_unificada()}
     faltan, cambian = [], []
     for p in _perdidas():
@@ -54,13 +64,14 @@ def test_toda_perdida_del_06oct_esta_en_la_union_con_su_tipo():
     assert not cambian, cambian[:3]
 
 
-def test_control_sin_historico_las_perdidas_no_estan():
-    # Control de instrumento: sin la union historica, el snapshot de hoy no tiene esas filas. Si
-    # este control pasara a verde por si solo, el test anterior dejaria de probar la union.
-    ref = {clave(f) for f in cargar_referencia_unificada(historico_path=None)}
-    claves = [(p["volcano"], p["sensor_bucket"], p["fecha_utc"], "CONS") for p in _perdidas()]
-    ausentes = sum(k not in ref for k in claves)
-    assert ausentes > 0, "el snapshot ya tiene todas las perdidas: el test de la union no discrimina"
+def test_control_con_la_perdida_simulada_el_instrumento_las_echa_de_menos(tmp_path):
+    # Control de instrumento (A116): el test anterior tiene que poder fallar. Con el snapshot de hoy sin las 207
+    # claves (perdida simulada, tests/perdida_simulada.py) y sin las capas de recuperacion, ninguna esta. Antes de
+    # S173 este control usaba el snapshot vivo y se puso rojo cuando el remoto repuso las filas.
+    cons = snapshot_sin(_claves_perdidas(), tmp_path / "cons.csv")
+    ref = {clave(f) for f in cargar_referencia_unificada(cons_path=cons, historico_path=None, respaldo_path=None)}
+    presentes = [k for k in _claves_perdidas() if k in ref]
+    assert not presentes, f"{len(presentes)} perdidas llegan sin snapshot ni capas, p. ej. {presentes[:2]}"
 
 
 def _tag_disponible():
@@ -132,3 +143,41 @@ def test_las_filas_historicas_solo_agregan():
     assert set(sin) <= set(con)
     assert all(con[k]["origen"] == "principal" for k in sin)
     assert all(con[k]["origen"] == "historico" for k in set(con) - set(sin))
+
+
+def test_la_union_repone_una_perdida_simulada(tmp_path):
+    # S173: el mecanismo de la union, sin depender de cuantas filas tenga hoy el archivo de la union (37 tras la
+    # reposicion del 2026-11-02; podria quedar en 0 y los tests de arriba pasarian sin que la capa funcione). Se
+    # quitan del snapshot las 207 claves y se entregan como union historica simulada: tienen que volver todas, con
+    # su tipo y con origen "historico"; sin la capa, ninguna.
+    perd = _claves_perdidas()
+    cons = snapshot_sin(perd, tmp_path / "cons.csv", quitadas=tmp_path / "union.csv")
+    con = {clave(f): f for f in cargar_referencia_unificada(cons_path=cons, historico_path=tmp_path / "union.csv",
+                                                            respaldo_path=None)}
+    sin = {clave(f) for f in cargar_referencia_unificada(cons_path=cons, historico_path=None, respaldo_path=None)}
+    tipos = {(p["volcano"], p["sensor_bucket"], p["fecha_utc"], "CONS"): p["tipo"] for p in _perdidas()}
+    assert all(k in con and con[k]["origen"] == "historico" and con[k]["tipo"] == tipos[k] for k in perd)
+    assert not any(k in sin for k in perd)
+
+
+def test_la_union_no_pisa_a_la_principal(tmp_path):
+    # S173 (verificador P2/R3): la union solo agrega claves ausentes. Se le entrega una fila que el snapshot SI tiene,
+    # con otro tipo: tiene que ganar la del snapshot (origen "principal", su tipo). Hoy union y snapshot no comparten
+    # claves por construccion, asi que sin esta prueba una union que pisara a la principal pasaba en verde.
+    import csv
+    perd = _claves_perdidas()
+    cons = snapshot_sin(perd[:1], tmp_path / "cons.csv", quitadas=tmp_path / "union.csv")
+    with open(tmp_path / "cons.csv", encoding="utf-8", newline="") as fh:
+        filas = list(csv.DictReader(fh))
+    campos = list(filas[0].keys())
+    pisa = dict(filas[0])
+    tipo_real = pisa["Tipo_Registro"]
+    pisa["Tipo_Registro"] = "FALSO_POSITIVO" if tipo_real != "FALSO_POSITIVO" else "RUTINA"
+    with open(tmp_path / "union.csv", "a", encoding="utf-8", newline="") as fh:
+        csv.DictWriter(fh, fieldnames=campos).writerow(pisa)
+    ref = {clave(f): f for f in cargar_referencia_unificada(cons_path=cons, historico_path=tmp_path / "union.csv",
+                                                            respaldo_path=None)}
+    principal = {clave(f): f for f in leer_pasadas(cons, "CONS", "principal")}
+    pisadas = [kk for kk in principal if ref[kk]["origen"] != "principal" or ref[kk]["tipo"] != principal[kk]["tipo"]]
+    assert not pisadas, f"la union piso {len(pisadas)} filas del snapshot, p. ej. {pisadas[:2]}"
+    assert ref[perd[0]]["origen"] == "historico"

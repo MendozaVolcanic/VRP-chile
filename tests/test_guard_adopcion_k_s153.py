@@ -43,6 +43,10 @@ def test_el_brazo_k_del_ab_y_produccion_son_la_misma_deteccion():
 
 
 def test_el_laboratorio_difiere_de_produccion_exactamente_en_k():
+    # S172 (encendido de MOD-D, decisión de Nicolás del 2026-10-31; mini auditoría MA172-103): producción enciende la
+    # vía «código MIROVA» en MODIS y el laboratorio la declara apagada (sigue congelado en C0, sombra de K), así que
+    # también difieren en ese flag. La diferencia de K sigue entera.
     lab, prod = _resolver("experimental"), _resolver("mirova_equivalent")
     difieren = {k for k in set(lab) | set(prod) if lab.get(k) != prod.get(k)} - {"PROFILE_NAME", "DATA_SUBDIR"}
-    assert difieren == set(K), difieren
+    assert difieren == set(K) | {"ENABLE_MODIS_CODIGO_MIROVA"}, difieren
+    assert (lab["ENABLE_MODIS_CODIGO_MIROVA"], prod["ENABLE_MODIS_CODIGO_MIROVA"]) == ("False", "True")
