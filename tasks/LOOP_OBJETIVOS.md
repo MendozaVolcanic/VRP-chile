@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 13:11 UTC: S174, ensayo de los controles de cenit con datos reales (decisión 8): LISTA CON CAMBIOS
+
+- Agente Opus (esfuerzo reportado 15, otra vez bajo pese a high). Con sustrato la rama real funciona: K de disco 2026-03-01 a 10-31 puesto como vía da OK en VIIRS 375 (175 noches, nulo 32) y VIIRS 750 (28 noches, nulo 10); el control positivo del nulo da ROJO, cenit roto y caída interna dan ROJO.
+- En DM y F26 no hay sustrato en ningún sensor (DM 2/17/5 noches de lectura, F26 0/2/0, mínimo 8); la vía VIIRS no existe en formato record en DM (SIN DATO), la MODIS sí (MOD-D fase 4, 343 records).
+- Defectos: (a) SIN SUSTRATO se publica como «OK (sin sustrato: la curva no se lee)», sin número de noches (confirmado por la coordinadora en `leer_retro.py` l. 1227 de origin/main); (b) un insumo vacío (cenit todos None o 0 pasadas evaluables) sale el mismo OK, falso verde, debería ser ROJO. Menores: `curva_cenit` rotula una excepción como SIN SUSTRATO (l. 1019); dos de las tres patas del control no pueden fallar por construcción.
+- Para Nicolás: la razón doble de F26 no se podrá leer en ningún sensor, así que la fila 4 por la curva no puede activarse.
+- Informe: `C:\Users\nmend\vrp-temporales\s174-cenit\INFORME.md`.
+
 ### 2026-11-06 12:34 UTC: S174, main traído a loop/activo; ensayo de cenit lanzado
 
 - Merge `dd7467218`: 1.133 commits de main. Único conflicto: `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md`, resuelto con main (regla SELLADA, superconjunto del borrador ronda 3). CLAUDE.md igual a main; `scripts/vigilancia_guardia_modis.py` ya existe aquí.
