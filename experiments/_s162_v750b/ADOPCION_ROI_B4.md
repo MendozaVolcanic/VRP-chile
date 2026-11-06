@@ -83,7 +83,11 @@ otros nueve volcanes dan el mismo resultado con B0 y con B4.
   `--sha-desde` es obligatorio en la sombra; la lectura empieza en lo más tardío entre el 2026-11-03 y la hora del
   commit del corte (ya no hay reloj desde el corte: las pasadas anteriores no se leen); CUMPLE exige además 14 noches
   distintas (decisión de Nicolás); una pasada de otra ROI con código posterior al corte cierra la compuerta, así que
-  la lectura con B4 tiene que cortar en el merge de #939 (`58edb9788`) o después. Texto original:
+  la lectura con B4 tiene que cortar en el merge de #939 (`58edb9788`) o después. S174 (cuarta vuelta, VPR945-R3,
+  LECTURA LR3): las 14 noches van repartidas, 7 en cada mitad del lapso, y Cordón Caulle y Tupungatito (los que B4
+  traduce distinto de B0) piden cada uno ese reparto sobre sus pasadas leídas, impresas por volcán (con 0 pasadas,
+  PROVISORIO); `--sha-desde` es el commit de merge (`58edb9788`), no el sha de la primera corrida de sombra.
+  Texto original:
 - **Pendiente, no hecho**: el lector de la sombra de V750-A todavía no separa por ROI (ningún script de
   `experiments/_s162_v750a/` lee `regimen.codigo_sha` ni `diag_codigo_mirova.roi`; VPR939-03 del verificador del
   PR). Los insumos ya están en cada record (`pipeline/store.py` l. 89 a 93, `pipeline/mirova_v750_codigo.py` l. 708).

@@ -21,6 +21,10 @@ otra ROI posterior al corte, la ventana desde el 2026-11-03 y desde la hora del 
 caracteres, la salida 5 del PROVISORIO con faltantes y el corte de las pasadas sin gránulo (MZ1, MZ4, MZ5, MZ6 y MZ7 del
 verificador quedan en MR27, MR36, MR37, MR29 y MR39). MR2, MR4, MR9, MR10 y MR19 cambiaron de blanco porque el código
 que rompían cambió (MR10 rompe ahora la ventana desde la hora del corte, que reemplazó al reloj desde el corte).
+MR43 a MR50 (S174, VPR945-R3, LECTURA LR3) rompen la cuarta vuelta: las noches por volcán de ROI cambiada (también con 0
+pasadas), el reparto de 7 y 7 por mitad del lapso en el conjunto y por volcán, el borde de la mitad, el minuto exacto del
+corte en la ventana y en la compuerta (MV1 y MV2 del verificador quedan en MR48 y MR49) y la línea por volcán con los 0.
+MR25, MR26, MR28 y MR29 cambiaron de blanco: la regla de las noches pasó a reparto_noches.
 Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4]
 Salida: 0 si los controles salen como deben y todas las mutaciones quedan ATRAPADAS; 1 si no.
 """
@@ -209,16 +213,16 @@ MUTACIONES = {
     "MR24": ("VPR945-07 (MY16): el régimen se lee también en las pasadas no observadas",
              '            if AB.partida(r) != "observada":\n                continue\n', "            pass\n"),
     # S174, VPR945-R2 (tercera vuelta del PR #945, LECTURA LR3)
-    "MR25": ("R2-01: las 14 noches distintas no se exigen", "noches_ok = noches >= NOCHES_MIN_SOMBRA",
+    "MR25": ("R2-01 (R3-02): las noches no se exigen (ni 14 ni su reparto)", "noches_ok = min(n1, n2) >= NOCHES_MITAD",
              "noches_ok = True"),
-    "MR26": ("R2-04: con 14 noches justas no alcanza (el borde va arriba)", "noches_ok = noches >= NOCHES_MIN_SOMBRA",
-             "noches_ok = noches > NOCHES_MIN_SOMBRA"),
+    "MR26": ("R2-04 (R3-02): con 7 y 7 justas por mitad no alcanza (el borde va arriba)",
+             "noches_ok = min(n1, n2) >= NOCHES_MITAD", "noches_ok = min(n1, n2) > NOCHES_MITAD"),
     "MR27": ("R2-04 (MZ1): con 28,0 días justos no alcanza (el borde va arriba)", "dias_ok = dias >= DIAS_MIN_SOMBRA",
              "dias_ok = dias > DIAS_MIN_SOMBRA"),
-    "MR28": ("R2-01: se cuentan pasadas y no noches", "noches = len({h[:10] for h in horas}) if oks0 else 0",
-             "noches = len(horas) if oks0 else 0"),
-    "MR29": ("R2-01 (MZ6): la noche es el mes", "noches = len({h[:10] for h in horas}) if oks0 else 0",
-             "noches = len({h[:7] for h in horas}) if oks0 else 0"),
+    "MR28": ("R2-01: se cuentan pasadas y no noches", "noches = sorted({h[:10] for h in horas})",
+             "noches = sorted(h[:10] for h in horas)"),
+    "MR29": ("R2-01 (MZ6): la noche es el mes (cada mes cuenta como una noche, la del día 1)",
+             "noches = sorted({h[:10] for h in horas})", 'noches = sorted({h[:8] + "01" for h in horas})'),
     "MR30": ("R2-02: sin --sha-desde no se cierra con su mensaje", "        if not a.sha_desde:\n",
              "        if False:\n"),
     "MR31": ("R2-02: una pasada de otra ROI con código posterior al corte no cierra la compuerta",
@@ -242,6 +246,26 @@ MUTACIONES = {
              "dur_ok = dias_ok or noches_ok"),
     "MR42": ("R2-04: los días se redondean (27,99 se lee 28,0)", 'dias_txt = f"{math.floor(dias * 10) / 10:.1f}"',
              'dias_txt = f"{dias:.1f}"'),
+    # S174, VPR945-R3 (cuarta vuelta del PR #945, LECTURA LR3)
+    "MR43": ("R3-01: ningún volcán cuenta como de ROI cambiada (las noches por volcán no se exigen)",
+             'cambia = sorted(v for v, t in esperada.items() if t != RV.roi_por_volcan("B0").get(v))', "cambia = []"),
+    "MR44": ("R3-01: un volcán de ROI cambiada sin pasadas leídas pasa transparente (0 noches no frena)",
+             "vol_falta = [v for v in cambia if min(por_v[v][1:]) < NOCHES_MITAD]",
+             "vol_falta = [v for v in cambia if por_v[v][0] and min(por_v[v][1:]) < NOCHES_MITAD]"),
+    "MR45": ("R3-02: sin reparto, basta con 14 noches en el conjunto (lo de la tercera vuelta)",
+             "noches_ok = min(n1, n2) >= NOCHES_MITAD", "noches_ok = noches >= NOCHES_MIN_SOMBRA"),
+    "MR46": ("R3-02: en un volcán de ROI cambiada basta con 14 noches, sin reparto",
+             "vol_falta = [v for v in cambia if min(por_v[v][1:]) < NOCHES_MITAD]",
+             "vol_falta = [v for v in cambia if por_v[v][0] < NOCHES_MIN_SOMBRA]"),
+    "MR47": ("R3-02: la noche que cae justo en la mitad del lapso va a la primera mitad",
+             "n1 = sum(1 for x in d if (x - d[0]).days < mitad)", "n1 = sum(1 for x in d if (x - d[0]).days <= mitad)"),
+    "MR48": ("R3-04 (MV1 del verificador): una pasada en el minuto exacto del commit del corte queda fuera",
+             'if i not in fuera_regimen and obj[i]["hora_utc"] < ventana_desde:',
+             'if i not in fuera_regimen and obj[i]["hora_utc"] <= ventana_desde:'),
+    "MR49": ("R3-04 (MV2 del verificador): la compuerta de otra ROI ignora la pasada del minuto exacto del corte",
+             'and obj[i]["hora_utc"] >= ventana_desde and es_ancestro', 'and obj[i]["hora_utc"] > ventana_desde and es_ancestro'),
+    "MR50": ("R3-01: la línea de noches por volcán esconde los volcanes con 0 noches",
+             "for v, (n, x, y) in sorted(por_v.items())))", "for v, (n, x, y) in sorted(por_v.items()) if n))"),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),

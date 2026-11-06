@@ -108,7 +108,7 @@ Villarrica para llegar a 14 noches:
   ER21 sin --sha-desde: compuerta cerrada con su mensaje (salida 3), antes de leer nada (R2-02).
   ER22 y ER23 el borde de 28,0 días: del 4 de noviembre 06:00 al 2 de diciembre 06:00 da CUMPLE; a las 05:59 da
       PROVISORIO y se lee «27.9» (los días se truncan al décimo, no se redondean).
-  ER24 y ER25 el borde de 14 noches (con 34 y 35 días): 13 noches en 14 pasadas (dos la noche del 12) dan PROVISORIO;
+  ER24 y ER25 (rehechos en R3, ver abajo) el borde de 14 noches (con 34 y 35 días): 13 noches en 14 pasadas (dos la noche del 12) dan PROVISORIO;
       14 noches dan CUMPLE (R2-01).
   ER26 --sha-desde con 6 caracteres: compuerta cerrada aunque git lo resuelva sin ambigüedad (el piso es 7).
   ER27 un PROVISORIO leído con --leer-con-faltantes sale 5 y lleva la marca (R2-04).
@@ -116,6 +116,23 @@ Villarrica para llegar a 14 noches:
       descartar que su código sea posterior al corte).
   ER29 y ER30 las pasadas sin gránulo del generador se cortan con la misma ventana: una protegida de octubre no frena la
       sombra; una de la ventana deja la cobertura INSUFICIENTE (R2-03).
+Agregados en S174 por VPR945-R3 (tercera ronda del verificador; LECTURA LR3). Con B4 cada volcán cuya ROI difiere de B0
+(Cordón Caulle y Tupungatito) pide sus noches, y las noches se reparten (7 en cada mitad del lapso). La sombra base suma
+negativos sens de esos dos volcanes en cada fecha desde el 7 de noviembre (16 noches cada uno, 9 y 7 por mitad) y un
+séptimo negativo de Villarrica (del 9 al 15 de diciembre, la misma última pasada), así que los conteos «dentro» y de
+noches de E18, ER2, ER5, ER12, ER13, ER17 y ER20 suben; los villa_dia0 de ER12, ER13, ER18, ER19, ER22, ER23 y ER27 bajan
+un día para conservar sus días. ER3 y ER6 van sin el relleno sens (con B0 sería «otra ROI»; en ER6, 1 SIN DATO de 53
+dejaría de pasar el 2 %). E49 pasa a 29 noches seguidas. ER24 y ER25 se rehicieron (ver abajo):
+  ER24 (rehecho) con B0: 13 noches seguidas y una suelta a 28 días (14 noches, 28,0 días, 13 y 1 por mitad): PROVISORIO.
+  ER25 (rehecho) con B0: 7 y 7 por mitad, con una noche justo en la mitad del lapso (va a la segunda): CUMPLE.
+  ER31 Cordón Caulle con sens una sola noche y las otras 15 con la ROI def y el sha anterior al merge (fuera por otra ROI
+      sin cerrar la compuerta): PROVISORIO, «PuyehueCordonCaulle 1 (0 y 1, faltan)» (R3-01; el lector de antes, CUMPLE).
+  ER32 Cordón Caulle y Tupungatito ausentes de los objetivos: 0 noches, PROVISORIO (R3-01, variante).
+  ER33 Cordón Caulle con 14 noches, 13 seguidas y una a 38 días: PROVISORIO por su reparto (13 y 1) (R3-02 por volcán).
+  ER34 una pasada en el minuto exacto del commit del corte entra a la lectura (R3-04, MV1 del verificador).
+  ER35 una pasada de otra ROI con el código del corte en ese minuto cierra la compuerta (R3-04, MV2).
+  ER36 control positivo: los 11 volcanes con 14 noches cada uno repartidas en 28 días, B4 desde el merge de #939: CUMPLE.
+  E18 afirma además la línea de noches por volcán (los 11, también con 0) y la de horas UTC de las pasadas leídas (R3-05).
 La población base suma para el S-1: celda de Cordón Caulle en el pase 2 y la zona 2 (el pase 1 y la zona 1 con otro
 umbral), una alerta de Tupungatito cuyo NTI cruza entre los umbrales pero el ETI no, y un diagnóstico mal formado.
 Una caída nativa del analizador (código fuera de 0, 3, 4, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
@@ -149,6 +166,13 @@ SHA_REAL_B4 = "58edb978825ff08677fc1b3e803a2ca601dd4598"
 SHA_CORTE_PRUEBA = "5b13bfed80240c14a14d491b795b2a1e2965436e"
 CRATER = {"Lascar": [33, 33], "Villarrica": [33, 33], "PuyehueCordonCaulle": [30, 36], "Tupungatito": [33, 33],
           "Nevados de Chillan": [33, 33]}   # S174 (ER10): un nombre que no está en el mapa de ROI
+# S174 (VPR945-R3, control positivo ER36): los 11 volcanes del mapa de ROI (scripts/roi_v750b_a_grillas.py::VOLCANES);
+# si un nombre no coincidiera, el lector lo marcaría SIN DATO «volcan_sin_roi» y ER36 fallaría
+VOLCANES_MAPA = ("Chaiten", "NevadosDeChillan", "Copahue", "Isluga", "Lascar", "Lastarria", "Llaima", "PlanchonPeteroa",
+                 "PuyehueCordonCaulle", "Tupungatito", "Villarrica")
+for _v in VOLCANES_MAPA:
+    CRATER.setdefault(_v, [33, 33])
+CAMBIAN_B4 = ("PuyehueCordonCaulle", "Tupungatito")   # los que B4 traduce distinto de B0 (sólo para armar pasadas)
 
 VERDE = """VERDE: E1 1020 casos, E3 10 recortes
    mutación k1_y_minimos         atrapada por aserción (sintético)
@@ -327,16 +351,16 @@ def base(p_de=None, negs_T="gana", negs_O="gana", extra=None, pcc_pdef=None, gem
 
 
 def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, mezcla=False, sin_reg=False, sha_real=False,
-               sha_rara=False, villa_dia0="2026-12-10", temprana=False, reproc=False, vol_fuera=False, z_perdida=20.0,
-               sha_todas=None, villa_hora="06:00", n_villa=6, doble_noche=False, cc_def_sha=None,
-               cc_def_hora="2026-11-04 06:30"):
+               sha_rara=False, villa_dia0="2026-12-09", temprana=False, reproc=False, vol_fuera=False, z_perdida=20.0,
+               sha_todas=None, villa_hora="06:00", n_villa=7, doble_noche=False, cc_def_sha=None,
+               cc_def_hora="2026-11-04 06:30", sens=True, sens_fechas=None, cc_viejo=False, villa_fechas=None):
     """Sombra: sólo K y P (record del perfil sombra), desde el 2026-11-03. S173 (VPR939-03): mezcla agrega tres pasadas
     de Cordón Caulle, una con la ROI def y sha de antes del cambio (P pierde la protegida que K publica) y dos con sens
     (z 30 y 35); sin_reg quita el régimen del record de P de la primera protegida de Láscar; sha_real usa shas del repo
     y pone las tres primeras noches de protegidas con el sha anterior al merge; sha_rara da a un negativo un sha que no
     existe en el repo.
     S174 (VPR945): villa_dia0 es el primer día de los 6 negativos de Villarrica que cierran la sombra (por omisión del 10
-    al 15 de diciembre, más de 4 semanas desde el 4 de noviembre; "2026-11-20" la deja en 21 días); sin_reg "roi" o "sha"
+    al 15 de diciembre, más de 4 semanas desde el 4 de noviembre; "2026-11-20" la deja en 21 días; desde R3, "2026-11-19"); sin_reg "roi" o "sha"
     quita sólo una de las dos marcas; temprana agrega dos pasadas de octubre que la lectura con B4 no lee (Cordón Caulle
     def y una de Láscar fuera del gránulo); reproc, un negativo del 1 de noviembre con el sha posterior al corte (una noche
     vieja reprocesada); vol_fuera, dos protegidas de un volcán fuera del mapa de ROI; z_perdida, el cenit de la protegida
@@ -346,7 +370,13 @@ def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, mezcla=Fal
     del reloj son enteros y el borde de 28,0 se puede tocar; n_villa es cuántos son (cuántas noches suman); reproc es la
     hora de una pasada de Villarrica con el sha posterior al merge; doble_noche suma un negativo de Villarrica la noche del
     primer negativo de Láscar (una pasada más, ninguna noche más); cc_def_sha, el sha de la pasada def observada de Cordón
-    Caulle en la mezcla, y cc_def_hora su hora."""
+    Caulle en la mezcla, y cc_def_hora su hora.
+    S174 (VPR945-R3): con B4 cada volcán cuya ROI cambió (Cordón Caulle y Tupungatito) pide sus propias noches, así que
+    sens agrega negativos sens de los dos (nadie publica) a las 05:30 y 05:40 en cada fecha de las pasadas anteriores
+    desde el 7 de noviembre (no suma noches, no corre la primera ni la última pasada); sens_fechas {volcán: fechas} las
+    reemplaza; cc_viejo deja a Cordón Caulle con sens sólo la primera fecha y las demás con la ROI def y el sha anterior
+    al merge; villa_fechas reemplaza las fechas de los negativos de Villarrica. Los negativos de Villarrica pasan a 7
+    (del 9 al 15 de diciembre: la misma última pasada) para que la segunda mitad del lapso tenga sus 7 noches."""
     pb = Pob()
     sha0, sha4 = SHA_REAL_B0, SHA_REAL_B4
     for n in range(0 if sin_prot else 6):
@@ -391,8 +421,15 @@ def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, mezcla=Fal
         else:
             pb.pasada("Lascar", f"{dia} 05:00", "neg_limpio", K=None, P=None)
     d0 = datetime.date.fromisoformat(villa_dia0)
-    for n in range(n_villa):
-        pb.pasada("Villarrica", f"{d0 + datetime.timedelta(days=n)} {villa_hora}", "neg_limpio", K=None, P=None)
+    for f in villa_fechas or [str(d0 + datetime.timedelta(days=n)) for n in range(n_villa)]:
+        pb.pasada("Villarrica", f"{f} {villa_hora}", "neg_limpio", K=None, P=None)
+    if sens:   # S174 (VPR945-R3-01): las pasadas de los volcanes que B4 cambia
+        fechas = sorted({o["hora_utc"][:10] for o in pb.objs if o["hora_utc"][:10] >= "2026-11-07"})
+        for k, vol in enumerate(CAMBIAN_B4):
+            for n, f in enumerate((sens_fechas or {}).get(vol, fechas)):
+                viejo = cc_viejo and vol == "PuyehueCordonCaulle" and n > 0
+                pb.pasada(vol, f"{f} 05:{30 + 10 * k}", "neg_limpio", K=None, P=None, roi="def" if viejo else "sens",
+                          sha=sha0 if viejo else sha4)
     if sha_todas:
         for r in pb.res:
             reg = r["brazos"]["P"]["record"].get("regimen")
@@ -401,9 +438,30 @@ def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, mezcla=Fal
     return pb
 
 
+def esc_once():
+    """S174 (VPR945-R3, control positivo): los 11 volcanes del mapa con 14 noches cada uno, repartidas en 28 días (7 en
+    cada mitad: días 0, 2, ..., 12 y 14, 17, 20, 23, 25, 27, 28 desde el 5 de noviembre), con la ROI de B4 y el sha del
+    merge de #939. Láscar y Villarrica traen las 6 protegidas de siempre (las primeras noches) y Láscar los 6 negativos
+    que K publica y P no (P2 GANA); el resto, negativos que nadie publica. Con el lector correcto da CUMPLE."""
+    pb = Pob()
+    d0 = datetime.date(2026, 11, 5)
+    for n, off in enumerate((0, 2, 4, 6, 8, 10, 12, 14, 17, 20, 23, 25, 27, 28)):
+        dia = d0 + datetime.timedelta(days=off)
+        for k, vol in enumerate(VOLCANES_MAPA):
+            hora, roi = f"{dia} 05:{5 * k:02d}", "sens" if vol in CAMBIAN_B4 else "def"
+            if vol in ("Lascar", "Villarrica") and n < 6:
+                pb.pasada(vol, hora, "pos", K=1.0, P=2.0, mirova_vrp=2.0, roi=roi)
+            elif vol == "Lascar" and n < 12:
+                pb.pasada(vol, hora, "neg_limpio", K=0.2, P=None, roi=roi)
+            else:
+                pb.pasada(vol, hora, "neg_limpio", K=None, P=None, roi=roi)
+    return pb
+
+
 # S173 (VPR939-03): toda lectura de la sombra declara la ROI que lee; S174 (VPR945-R2-02) y el commit desde el que lee
 ROI_B4 = ["--roi-brazo", "B4"]
 B4 = ROI_B4 + ["--sha-desde", SHA_CORTE_PRUEBA]
+B0 = ["--roi-brazo", "B0", "--sha-desde", SHA_CORTE_PRUEBA]   # S174 (R3-02): ningún volcán cambia de ROI
 
 
 def _p1_en_O(pb):
@@ -583,13 +641,22 @@ ESCENARIOS = {
                 tiene=[("   SIN DATO por motivo", ["falta_brazo"]), ("== cobertura: INSUFICIENTE", [])],
                 no_tiene=["== §6 censo:"]),
     "E18": dict(pob=lambda: esc_sombra(), fase="sombra", rc=0, args=B4,
-                tiene=[("== §6.3 sombra: CUMPLE", ["duración 41.0 de 28 días, 18 de 14 noches"]),
+                tiene=[("== §6.3 sombra: CUMPLE", ["duración 41.0 de 28 días, 19 de 14 noches, 12 y 7 por mitad, "
+                                                   "PuyehueCordonCaulle 16 (9 y 7), Tupungatito 16 (9 y 7)"]),
                        # S174 (VPR945-R2-04): la hora del corte es la del committer (13:36), no la del autor (02:27)
                        ("== régimen de la sombra: brazo B4", [f"desde {SHA_CORTE_PRUEBA} (commit del 2026-11-02 13:36 UTC)",
-                                                              "ventana desde 2026-11-03 00:00 UTC", "dentro 24"]),
+                                                              "ventana desde 2026-11-03 00:00 UTC", "dentro 57"]),
                        ("== duración de la sombra", ["primera 2026-11-04 06:00", "última 2026-12-15 06:00",
-                                                     "41.0 de 28 días (completos)", "noches distintas 18 de 14 (completas)",
-                                                     ": COMPLETA"])],
+                                                     "41.0 de 28 días (completos)",
+                                                     "noches distintas 19 de 14, por mitad 12 y 7 de 7 y 7 (completas)",
+                                                     "sin sus noches ninguno: COMPLETA"]),
+                       # S174 (VPR945-R3-01): las noches leídas de cada uno de los 11 volcanes, también los que no tienen
+                       ("== noches leídas por volcán", ["brazo B4; ROI distinta de B0 en ['PuyehueCordonCaulle', "
+                                                        "'Tupungatito']", "Chaiten 0 (0 y 0)", "Lascar 12 (", "Villarrica 13 (",
+                                                        "PuyehueCordonCaulle 16 (9 y 7, completas)",
+                                                        "Tupungatito 16 (9 y 7, completas)"]),
+                       # S174 (VPR945-R3-05): el rango horario se mide en cada lectura
+                       ("   horas UTC de las pasadas leídas", ["de 05:00 a 06:00"])],
                 no_tiene=["== §6.3 sombra: NO CUMPLE"]),
     "E19": dict(pob=lambda: esc_sombra(p1=True), fase="sombra", rc=0, args=B4,
                 tiene=[("== §6.3 sombra: NO CUMPLE", ["P1"])], no_tiene=["== §6.3 sombra: CUMPLE"]),
@@ -658,7 +725,9 @@ ESCENARIOS = {
                 tiene=[("== §6 censo: NO CUMPLE", ["T/tabla: M razón 1.300"])],
                 no_contiene=[("== §6 censo: NO CUMPLE", "O/tabla: M razón")]),
     # S174 (VPR945-R2-01): sin protegidas la sombra base tiene 12 noches; con 8 negativos de Villarrica llega a 14
-    "E49": dict(pob=lambda: esc_sombra(sin_prot=True, n_villa=8), fase="sombra", rc=0, args=B4,
+    # S174 (VPR945-R3-02): con 7 noches por mitad del lapso, los negativos de Villarrica siguen a los de Láscar del 18 de
+    # noviembre al 10 de diciembre (29 noches seguidas, 28 días)
+    "E49": dict(pob=lambda: esc_sombra(sin_prot=True, villa_dia0="2026-11-18", n_villa=23), fase="sombra", rc=0, args=B4,
                 tiene=[("== §6.3 sombra: CUMPLE", ["SIN PROTEGIDAS"])]),
     "E23": dict(pob=lambda: esc_sombra(negs="bloquea"), fase="sombra", rc=0, args=B4,
                 tiene=[("== §6.3 sombra: CUMPLE", ["BLOQUEA"])]),
@@ -670,14 +739,15 @@ ESCENARIOS = {
     # S174 (VPR945-R2-02): con el corte viejo, la pasada def de Cordón Caulle (sha 636b3426e) desciende del corte: la
     # ROI de ese volcán cambió dentro de lo que se lee y la compuerta se cierra (antes daba CUMPLE con el reloj global)
     "ER2": dict(pob=lambda: esc_sombra(mezcla=True), fase="sombra", rc=3, args=B4,
-                tiene=[("== régimen de la sombra: brazo B4", ["dentro 26", "otra ROI 1", "PuyehueCordonCaulle"]),
+                tiene=[("== régimen de la sombra: brazo B4", ["dentro 59", "otra ROI 1", "PuyehueCordonCaulle"]),
                        ("   protegidas fuera de esta lectura", ["PuyehueCordonCaulle 2026-11-04 06:30 (otra ROI)"]),
                        ("== régimen de la sombra: el corte 5b13bfed8 no aísla el brazo B4",
                         ["['PuyehueCordonCaulle']", "compuerta cerrada"])],
                 no_tiene=["== §6.3 sombra:", "== cobertura:", "== duración de la sombra"]),
-    "ER3": dict(pob=lambda: esc_sombra(mezcla=True), fase="sombra", rc=3, args=["--roi-brazo", "B0", "--sha-desde",
-                                                                                 SHA_CORTE_PRUEBA],
-                tiene=[("== régimen de la sombra: brazo B0", ["dentro 25", "otra ROI 2"]),
+    # S174 (R3): sin las pasadas sens de relleno, que con B0 serían «otra ROI» (sólo cuenta las dos sens de la mezcla)
+    "ER3": dict(pob=lambda: esc_sombra(mezcla=True, sens=False), fase="sombra", rc=3,
+                args=["--roi-brazo", "B0", "--sha-desde", SHA_CORTE_PRUEBA],
+                tiene=[("== régimen de la sombra: brazo B0", ["dentro 26", "otra ROI 2"]),
                        ("== régimen de la sombra: el corte 5b13bfed8 no aísla el brazo B0",
                         ["['PuyehueCordonCaulle']", "compuerta cerrada"])],
                 no_tiene=["== §6.3 sombra:"]),
@@ -686,22 +756,24 @@ ESCENARIOS = {
                 no_tiene=["== §6.3 sombra:"]),
     "ER5": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True), fase="sombra", rc=0,
                 args=ROI_B4 + ["--sha-desde", SHA_REAL_B4],
-                tiene=[("== régimen de la sombra: brazo B4", ["dentro 20", "otra ROI 1", "anteriores al corte 6",
+                tiene=[("== régimen de la sombra: brazo B4", ["dentro 53", "otra ROI 1", "anteriores al corte 6",
                                                                f"desde {SHA_REAL_B4} (commit del 2026-11-05 03:23 UTC)",
                                                                "ventana desde 2026-11-05 03:23 UTC",
                                                                "anteriores a la hora del corte 0"]),
                        ("   protegidas fuera de esta lectura", ["Lascar 2026-11-04 06:00 (anterior al corte)",
                                                                "PuyehueCordonCaulle 2026-11-04 06:30 (otra ROI)"]),
                        ("== duración de la sombra", ["primera 2026-11-06 06:30", "38.9 de 28 días (completos)",
-                                                     "noches distintas 16 de 14 (completas)", ": COMPLETA"]),
+                                                     "noches distintas 17 de 14, por mitad 10 y 7 de 7 y 7 (completas)",
+                                                     ": COMPLETA"]),
                        ("== §6.3 sombra: CUMPLE", []),
                        ("   sobre 30°", ["observadas 2", "protegidas 2"]),
-                       ("   bajo 30°", ["observadas 18", "protegidas 6"])],
+                       ("   bajo 30°", ["observadas 51", "protegidas 6"])],
                 no_tiene=["== §6.3 sombra: NO CUMPLE", "== régimen de la sombra: el corte"]),
-    "ER6": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True, sha_rara=True), fase="sombra", rc=3,
+    # S174 (R3): sin las pasadas sens de relleno, para que 1 SIN DATO siga pasando el 2 % de la cobertura (con ellas, 1 de 53)
+    "ER6": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True, sha_rara=True, sens=False), fase="sombra", rc=3,
                 args=ROI_B4 + ["--sha-desde", SHA_REAL_B4],
                 tiene=[("   SIN DATO por motivo:", ["sha_desconocido"]),
-                       ("== régimen de la sombra: brazo B4", ["dentro 19"])],
+                       ("== régimen de la sombra: brazo B4", ["dentro 20"])],
                 no_tiene=["== §6.3 sombra:"]),
     # S174, VPR945 (verificador limpio del PR #945)
     "ER8": dict(pob=lambda: esc_sombra(sin_reg="roi"), fase="sombra", rc=3, args=B4,
@@ -721,19 +793,19 @@ ESCENARIOS = {
                  no_tiene=["== cobertura: SUFICIENTE", "== control nulo", "== §6.3 sombra:"]),
     # S174 (VPR945-R2-03): de las dos pasadas de octubre, la def de Cordón Caulle sale por otra ROI (antes del
     # inicio de la sombra no cierra la compuerta) y la no observada por la ventana
-    "ER12": dict(pob=lambda: esc_sombra(villa_dia0="2026-11-20", temprana=True), fase="sombra", rc=4, args=B4,
-                 tiene=[("== régimen de la sombra: brazo B4", ["otra ROI 1", "anteriores al inicio de la sombra 1", "dentro 24"]),
+    "ER12": dict(pob=lambda: esc_sombra(villa_dia0="2026-11-19", temprana=True), fase="sombra", rc=4, args=B4,
+                 tiene=[("== régimen de la sombra: brazo B4", ["otra ROI 1", "anteriores al inicio de la sombra 1", "dentro 57"]),
                         ("== duración de la sombra", ["primera 2026-11-04 06:00", "reloj desde la primera pasada leída",
                                                       "21.0 de 28 días (faltan)", ": INCOMPLETA"]),
                         ("== §6.3 sombra: PROVISORIO", ["21.0 de 28 días", "P1 = 0"])],
                  no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
     # S174 (VPR945-R2-03): una noche del 2 de noviembre reprocesada con el código nuevo no entra (la sombra empieza el 3)
     # aunque su sha descienda del corte; el reloj, las noches y la lectura no la ven
-    "ER13": dict(pob=lambda: esc_sombra(reproc="2026-11-02 20:00", villa_dia0="2026-11-25"), fase="sombra", rc=4,
+    "ER13": dict(pob=lambda: esc_sombra(reproc="2026-11-02 20:00", villa_dia0="2026-11-24"), fase="sombra", rc=4,
                  args=B4,
-                 tiene=[("== régimen de la sombra: brazo B4", ["anteriores al inicio de la sombra 1", "dentro 24"]),
+                 tiene=[("== régimen de la sombra: brazo B4", ["anteriores al inicio de la sombra 1", "dentro 57"]),
                         ("== duración de la sombra", ["primera 2026-11-04 06:00", "26.0 de 28 días (faltan)",
-                                                      "noches distintas 18 de 14"]),
+                                                      "noches distintas 19 de 14"]),
                         ("== §6.3 sombra: PROVISORIO", ["26.0 de 28 días"])],
                  no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
     "ER15": dict(pob=lambda: esc_sombra(), fase="sombra", rc=3, args=ROI_B4 + ["--sha-desde", "HEAD"],
@@ -746,12 +818,12 @@ ESCENARIOS = {
     # S174 (VPR945-R2-04): el piso de 7 caracteres se acepta (y ER26 rechaza 6)
     "ER17": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True), fase="sombra", rc=0,
                  args=ROI_B4 + ["--sha-desde", SHA_REAL_B4[:7]],
-                 tiene=[("== régimen de la sombra: brazo B4", [f"desde {SHA_REAL_B4}", "dentro 20"]),
+                 tiene=[("== régimen de la sombra: brazo B4", [f"desde {SHA_REAL_B4}", "dentro 53"]),
                         ("== §6.3 sombra: CUMPLE", [])]),
-    "ER18": dict(pob=lambda: esc_sombra(p1=True, villa_dia0="2026-11-20"), fase="sombra", rc=0, args=B4,
+    "ER18": dict(pob=lambda: esc_sombra(p1=True, villa_dia0="2026-11-19"), fase="sombra", rc=0, args=B4,
                  tiene=[("== §6.3 sombra: NO CUMPLE", ["P1", "duración 21.0 de 28 días"])],
                  no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: PROVISORIO"]),
-    "ER19": dict(pob=lambda: esc_sombra(negs="pierde", villa_dia0="2026-11-20"), fase="sombra", rc=4, args=B4,
+    "ER19": dict(pob=lambda: esc_sombra(negs="pierde", villa_dia0="2026-11-19"), fase="sombra", rc=4, args=B4,
                  tiene=[("== §6.3 sombra: PROVISORIO", ["P2 PIERDE", "21.0 de 28 días"])],
                  no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
     # S174, VPR945-R2 (segunda ronda del verificador limpio)
@@ -759,7 +831,7 @@ ESCENARIOS = {
     # queda fuera aunque descienda del corte (sin ella, los conteos son los de ER5)
     "ER20": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True, reproc="2026-11-05 02:00"), fase="sombra", rc=0,
                  args=ROI_B4 + ["--sha-desde", SHA_REAL_B4],
-                 tiene=[("== régimen de la sombra: brazo B4", ["dentro 20", "anteriores a la hora del corte 1"]),
+                 tiene=[("== régimen de la sombra: brazo B4", ["dentro 53", "anteriores a la hora del corte 1"]),
                         ("== duración de la sombra", ["primera 2026-11-06 06:30"]),
                         ("== §6.3 sombra: CUMPLE", [])]),
     # R2-02: sin --sha-desde la compuerta se cierra con su mensaje, antes de leer nada
@@ -767,33 +839,43 @@ ESCENARIOS = {
                  tiene=[("== régimen de la sombra: SIN --sha-desde", ["compuerta cerrada"])],
                  no_tiene=["== §6.3 sombra:", "== cobertura:", "== régimen de la sombra: brazo"]),
     # R2-04: el borde exacto de 28,0 días (del 4 de noviembre 06:00 al 2 de diciembre 06:00) cumple; un minuto menos, no
-    "ER22": dict(pob=lambda: esc_sombra(villa_dia0="2026-11-27"), fase="sombra", rc=0, args=B4,
+    "ER22": dict(pob=lambda: esc_sombra(villa_dia0="2026-11-26"), fase="sombra", rc=0, args=B4,
                  tiene=[("== duración de la sombra", ["última 2026-12-02 06:00", "28.0 de 28 días (completos)",
                                                       ": COMPLETA"]),
                         ("== §6.3 sombra: CUMPLE", ["duración 28.0 de 28 días"])],
                  no_tiene=["== §6.3 sombra: PROVISORIO"]),
-    "ER23": dict(pob=lambda: esc_sombra(villa_dia0="2026-11-27", villa_hora="05:59"), fase="sombra", rc=4, args=B4,
+    "ER23": dict(pob=lambda: esc_sombra(villa_dia0="2026-11-26", villa_hora="05:59"), fase="sombra", rc=4, args=B4,
                  tiene=[("== duración de la sombra", ["última 2026-12-02 05:59", "27.9 de 28 días (faltan)",
                                                       ": INCOMPLETA"]),
                         ("== §6.3 sombra: PROVISORIO", ["27.9 de 28 días"])],
                  no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
     # R2-01 y R2-04: 13 noches distintas (14 pasadas: dos en la noche del 12 de noviembre) dan PROVISORIO con 34 días;
     # 14 noches dan CUMPLE
-    "ER24": dict(pob=lambda: esc_sombra(sin_prot=True, n_villa=7, doble_noche=True), fase="sombra", rc=4, args=B4,
-                 tiene=[("== duración de la sombra", ["34.0 de 28 días (completos)", "noches distintas 13 de 14 (faltan)",
+    # S174 (VPR945-R3-02): rehechos. Con 7 noches por mitad del lapso, 13 noches nunca alcanzan, así que el borde ya no es
+    # el de 14 sino el del reparto. Se leen con B0 y sin las pasadas sens de relleno: con B0 ningún volcán cambió de ROI,
+    # y lo que decide es sólo el reparto del conjunto. ER24: el caso del verificador, 13 noches seguidas (Láscar del 12 al
+    # 17 de noviembre y Villarrica del 18 al 24) más una suelta el 10 de diciembre: 14 noches y 28,0 días, pero 13 y 1
+    # por mitad: PROVISORIO. ER25: 7 y 7 justas, con la noche del 26 de noviembre justo en la mitad (va a la segunda): CUMPLE.
+    "ER24": dict(pob=lambda: esc_sombra(sin_prot=True, sens=False, villa_fechas=[
+                     f"2026-11-{d}" for d in range(18, 25)] + ["2026-12-10"]), fase="sombra", rc=4, args=B0,
+                 tiene=[("== duración de la sombra", ["28.0 de 28 días (completos)",
+                                                      "noches distintas 14 de 14, por mitad 13 y 1 de 7 y 7 (faltan)",
                                                       ": INCOMPLETA"]),
-                        ("== §6.3 sombra: PROVISORIO", ["13 de 14 noches distintas"])],
+                        ("== §6.3 sombra: PROVISORIO", ["14 de 14 noches distintas, 13 y 1 por mitad del lapso"])],
                  no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
-    "ER25": dict(pob=lambda: esc_sombra(sin_prot=True, n_villa=8, doble_noche=True), fase="sombra", rc=0, args=B4,
-                 tiene=[("== duración de la sombra", ["noches distintas 14 de 14 (completas)", ": COMPLETA"]),
-                        ("== §6.3 sombra: CUMPLE", ["14 de 14 noches"])],
+    "ER25": dict(pob=lambda: esc_sombra(sin_prot=True, sens=False, villa_fechas=[
+                     "2026-11-18", "2026-11-26"] + [f"2026-12-{d:02d}" for d in range(5, 11)]), fase="sombra", rc=0,
+                 args=B0,
+                 tiene=[("== duración de la sombra", ["noches distintas 14 de 14, por mitad 7 y 7 de 7 y 7 (completas)",
+                                                      ": COMPLETA"]),
+                        ("== §6.3 sombra: CUMPLE", ["14 de 14 noches, 7 y 7 por mitad"])],
                  no_tiene=["== §6.3 sombra: PROVISORIO"]),
     # R2-04: 6 caracteres no bastan aunque git los resuelva sin ambigüedad (el piso es 7)
     "ER26": dict(pob=lambda: esc_sombra(), fase="sombra", rc=3, args=ROI_B4 + ["--sha-desde", SHA_REAL_B4[:6]],
                  tiene=[(f"== régimen de la sombra: --sha-desde {SHA_REAL_B4[:6]}", ["no es el sha", "compuerta cerrada"])],
                  no_tiene=["== §6.3 sombra:", "== cobertura:"]),
     # R2-04: un PROVISORIO leído con faltantes sale 5 (la marca de faltantes manda), no 4
-    "ER27": dict(pob=lambda: esc_sombra(sin_reg=True, villa_dia0="2026-11-20"), fase="sombra", rc=5,
+    "ER27": dict(pob=lambda: esc_sombra(sin_reg=True, villa_dia0="2026-11-19"), fase="sombra", rc=5,
                  args=B4 + ["--leer-con-faltantes", "prueba sintética"],
                  tiene=[("== cobertura: INSUFICIENTE", []),
                         ("== §6.3 sombra: PROVISORIO", ["21.0 de 28 días", "LEÍDO CON FALTANTES"])],
@@ -816,6 +898,61 @@ ESCENARIOS = {
                  sin_granulo=[{"volcan": "Lascar", "hora_utc": "2026-11-20 05:00", "protegida": True}],
                  tiene=[("   pasadas sin gránulo (del generador): 1", []), ("== cobertura: INSUFICIENTE", [])],
                  no_tiene=["== §6.3 sombra:"]),
+    # S174, VPR945-R3 (tercera ronda del verificador limpio; cuarta vuelta del autor)
+    # R3-01: Cordón Caulle con sens una sola noche y sus otras 15 con la ROI def y el sha anterior al merge (fuera por
+    # otra ROI, sin cerrar la compuerta porque su código no desciende del corte): los otros volcanes completan reloj y
+    # noches, pero Cordón Caulle tiene 1 noche leída: PROVISORIO (el lector de antes daba CUMPLE, sint_cc_old)
+    "ER31": dict(pob=lambda: esc_sombra(cc_viejo=True), fase="sombra", rc=4, args=ROI_B4 + ["--sha-desde", SHA_REAL_B4],
+                 tiene=[("== régimen de la sombra: brazo B4", ["otra ROI 15 {'PuyehueCordonCaulle': 15}"]),
+                        ("== noches leídas por volcán", ["PuyehueCordonCaulle 1 (0 y 1, faltan)",
+                                                         "Tupungatito 16 (9 y 7, completas)"]),
+                        ("== duración de la sombra", ["(completos)", "por mitad 11 y 7 de 7 y 7 (completas)",
+                                                      "sin sus noches ['PuyehueCordonCaulle']: INCOMPLETA"]),
+                        ("== §6.3 sombra: PROVISORIO", ["volcanes con ROI cambiada sin sus noches: PuyehueCordonCaulle 1 "
+                                                        "(0 y 1)"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE", "== régimen de la sombra: el corte"]),
+    # R3-01, variante: Cordón Caulle y Tupungatito no están en los objetivos (0 noches): PROVISORIO, no transparente
+    "ER32": dict(pob=lambda: esc_sombra(sens=False), fase="sombra", rc=4, args=B4,
+                 tiene=[("== noches leídas por volcán", ["PuyehueCordonCaulle 0 (0 y 0, faltan)",
+                                                         "Tupungatito 0 (0 y 0, faltan)"]),
+                        ("== §6.3 sombra: PROVISORIO", ["volcanes con ROI cambiada sin sus noches: PuyehueCordonCaulle 0 "
+                                                        "(0 y 0), Tupungatito 0 (0 y 0)"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
+    # R3-02 en un volcán cambiado: Cordón Caulle con 14 noches, 13 seguidas (7 al 19 de noviembre) y una el 15 de
+    # diciembre; el conjunto reparte bien: PROVISORIO por Cordón Caulle (13 y 1)
+    "ER33": dict(pob=lambda: esc_sombra(sens_fechas={"PuyehueCordonCaulle": [
+                     f"2026-11-{d:02d}" for d in range(7, 20)] + ["2026-12-15"]}), fase="sombra", rc=4, args=B4,
+                 tiene=[("== noches leídas por volcán", ["PuyehueCordonCaulle 14 (13 y 1, faltan)",
+                                                         "Tupungatito 16 (9 y 7, completas)"]),
+                        ("== duración de la sombra", ["(completas)", "sin sus noches ['PuyehueCordonCaulle']: INCOMPLETA"]),
+                        ("== §6.3 sombra: PROVISORIO", ["PuyehueCordonCaulle 14 (13 y 1)"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
+    # R3-04: una pasada en el minuto exacto del commit del corte (#939, 2026-11-05 03:23 UTC) entra a la lectura
+    "ER34": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True, reproc="2026-11-05 03:23"), fase="sombra", rc=0,
+                 args=ROI_B4 + ["--sha-desde", SHA_REAL_B4],
+                 tiene=[("== régimen de la sombra: brazo B4", ["dentro 54", "anteriores a la hora del corte 0"]),
+                        ("== duración de la sombra", ["primera 2026-11-05 03:23"]),
+                        ("   horas UTC de las pasadas leídas", ["de 03:23 a 06:30"]),
+                        ("== §6.3 sombra: CUMPLE", [])]),
+    # R3-04: una pasada de otra ROI con el código del corte en ese mismo minuto cierra la compuerta
+    "ER35": dict(pob=lambda: esc_sombra(mezcla=True, sha_real=True, cc_def_sha=SHA_REAL_B4,
+                                        cc_def_hora="2026-11-05 03:23"), fase="sombra", rc=3,
+                 args=ROI_B4 + ["--sha-desde", SHA_REAL_B4],
+                 tiene=[("== régimen de la sombra: el corte 58edb9788 no aísla el brazo B4",
+                         ["['PuyehueCordonCaulle']", "compuerta cerrada"])],
+                 no_tiene=["== §6.3 sombra:"]),
+    # control positivo: los 11 volcanes con 14 noches cada uno repartidas en 28 días (7 y 7), B4 desde el merge de #939
+    "ER36": dict(pob=esc_once, fase="sombra", rc=0, args=ROI_B4 + ["--sha-desde", SHA_REAL_B4],
+                 tiene=[("== noches leídas por volcán", ["Chaiten 14 (7 y 7)", "Villarrica 14 (7 y 7)",
+                                                         "PuyehueCordonCaulle 14 (7 y 7, completas)",
+                                                         "Tupungatito 14 (7 y 7, completas)"]),
+                        ("== duración de la sombra", ["28.0 de 28 días (completos)",
+                                                      "noches distintas 14 de 14, por mitad 7 y 7 de 7 y 7 (completas)",
+                                                      "sin sus noches ninguno: COMPLETA"]),
+                        ("== cobertura: SUFICIENTE", []),
+                        ("== §6.3 sombra: CUMPLE", ["28.0 de 28 días, 14 de 14 noches, 7 y 7 por mitad, "
+                                                   "PuyehueCordonCaulle 14 (7 y 7), Tupungatito 14 (7 y 7)"])],
+                 no_tiene=["== §6.3 sombra: PROVISORIO", "== §6.3 sombra: NO CUMPLE"]),
     "E22": dict(pob=lambda: base(), sg_otra=True, rc=3,
                 tiene=[("== cobertura: INSUFICIENTE", []), ("== compuerta del veredicto", ["CERRADA"])],
                 no_tiene=["== §6 censo:"]),
