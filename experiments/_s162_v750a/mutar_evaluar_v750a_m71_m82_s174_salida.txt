@@ -1,0 +1,13 @@
+# S174, 2026-11-05: medidor --solo M71,M82 sobre la batería entera (88 escenarios), --hilos 2, evaluador evaluar_d25.py del tag s161-d25-lectura (sha256 LF 2e557697, CRLF 93c26d62...fec2). Blancos de M71 y M82 actualizados a la línea que dejó el commit N-3 a9500912e.
+   M71: ATRAPADA | == PRUEBAS: FALLAS 3 de 88
+   IDENTIDAD: PASA | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (88)
+   CAIDA: CAÍDA | == PRUEBAS: CAÍDAS 88 (fallas por aserción 0) de 88
+   M82: ATRAPADA | == PRUEBAS: FALLAS 1 de 88
+(corrida parcial: --solo M71,M82)
+IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (88)
+M71 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: elegible sin mirar la ventana O | == PRUEBAS: FALLAS 3 de 88 | escenarios que fallan ['E64', 'E65', 'E74']
+M82 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis (MV3): elegible mira sólo la tabla, no tabla más OCR | == PRUEBAS: FALLAS 1 de 88 | escenarios que fallan ['E74']
+CAIDA | CAÍDA (tiene que ser CAÍDA) | rc 2 | CONTROL: el analizador sólo se cae (excepción al cargar los objetivos) | == PRUEBAS: CAÍDAS 88 (fallas por aserción 0) de 88 | escenarios que fallan []
+== RESUMEN: 2 de 2 mutaciones atrapadas por aserción; controles como deben; TODO COMO SE ESPERA
+rc 0
+Thu Nov  5 21:47:26 UTC 2026
