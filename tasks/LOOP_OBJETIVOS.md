@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 13:31 UTC: S174, R5 del verificador limpio del #945: MERGEABLE CON CAMBIOS (menores)
+
+- Sonnet (esfuerzo reportado 10, otra vez bajo pese a high). La ventana fija cierra R4-01, R4-02, R4-03 y R3-02 (PROVISORIO, rc 4); control positivo de 20 noches CUMPLE (rc 0). Reproduce al autor: 91 de 91, medidor 61 de 61 por aserción, IDENTIDAD y CAIDA sanos, 114 blancos una vez. Datos reales de main `ba77c1f6` con B4 desde 58edb978: PROVISORIO, 22 pasadas, 1 noche por volcán (recuento propio coincide).
+- Hallazgos: R5-03 (g3, decisión de Nicolás): con SEMANA_EXIGE_SIN_CAMBIO=False puede dar CUMPLE con datos de sólo 2 de 11 volcanes. R5-02 (g2, decisión): una noche que cruza la frontera semanal cuenta en dos semanas, sólo si la hora del corte cae entre 04:30 y 06:06 UTC (la real es 03:23). R5-01 (g1, código): `--ahora` con zona (`...Z`) tumba el lector con TypeError (`evaluar_v750a.py` l. 254 y 355). R5-04 y R5-05 (g1): bordes sin prueba; la regla de 14 noches es código muerto con 5 por semana.
+- Informe: `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R5.md`.
+
 ### 2026-11-06 13:11 UTC: S174, ensayo de los controles de cenit con datos reales (decisión 8): LISTA CON CAMBIOS
 
 - Agente Opus (esfuerzo reportado 15, otra vez bajo pese a high). Con sustrato la rama real funciona: K de disco 2026-03-01 a 10-31 puesto como vía da OK en VIIRS 375 (175 noches, nulo 32) y VIIRS 750 (28 noches, nulo 10); el control positivo del nulo da ROJO, cenit roto y caída interna dan ROJO.
