@@ -10,8 +10,9 @@
 > noches con datos: una pasada suelta a +30 días da CUMPLE), R2-02 (g2, el reloj es global: sin `--sha-desde` una
 > noche `sens` da 28,1 de 28 días), R2-03 (g1, sin cota inferior 2026-11-03), R2-04 (g1, 5 de 11 mutaciones nuevas
 > sobreviven). Las tres decisiones del autor: coherentes con la letra (PREREGISTRO_V750A.md l. 89 a 95 y 132); la (1)
-> abre R2-01 y R2-02. Falta que Nicolás fije el mínimo de noches distintas (R2-01). Siguiente: tercera vuelta corta del
-> autor sobre R2-01..04 y R3 del verificador. Informe: `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R2.md`.
+> abre R2-01 y R2-02. Nicolás fijó el mínimo (2026-11-06 00:48 UTC, frase «14 noches»): 14 noches distintas con datos
+> además de las 4 semanas; `--sha-desde` obligatorio en sombra (recomendación de la coordinadora). Tercera vuelta del
+> autor LANZADA (informe en `D:rp-trabajo	emporales\s174-autor945-r3\INFORME_AUTOR_R3.md`); falta R3 del verificador. Informe: `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R2.md`.
 
 ## a. Todo en una pantalla
 
@@ -33,7 +34,7 @@
 |---|---|---|
 | 1 | Merge de #950 a main | Sí (CI verde, sólo CLAUDE.md, 200 pruebas que lo leen pasan) |
 | 2 | Merge de #951 a la rama de V750 | Sí (sólo `experiments/`, medido) |
-| 3 | #945: mínimo de noches distintas con datos para que la sombra pueda decir CUMPLE (R2-01), y reloj por volcán y ROI o `--sha-desde` obligatorio (R2-02) | Exigir `--sha-desde` y un mínimo de noches; el número lo fijas tú (el spec del programa cuenta noches con datos, origin/loop/activo l. 475) |
+| 3 | #945: mínimo de noches distintas con datos para que la sombra pueda decir CUMPLE (R2-01), y reloj por volcán y ROI o `--sha-desde` obligatorio (R2-02) | RESUELTO 2026-11-06: 14 noches (frase de Nicolás) y `--sha-desde` obligatorio |
 | 4 | #945: un P1 veta antes de cumplir las 4 semanas | Sí (es lo implementado; esperar es la mutación MR22) |
 | 5 | #945: la hora del corte de `--sha-desde` es la del commit | Lo que diga la R2 |
 | 6 | Lectura real de V750-A: `--roi-brazo B4 --sha-desde 58edb9788...` | Hoy da 0 pasadas: decidir al sellar |
