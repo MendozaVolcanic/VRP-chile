@@ -12,9 +12,14 @@
   traspasos; el encargo decía `dd7467218`, que es ancestro: la rama avanzó tres commits de bitácora) y el PR #945 en
   `106db89414b9286848e723153a2feb5cf631ba0f` (borrador, rama `claude/s173-vpr939-03`).
 - **Cinco frentes, cinco verificadores** (tope de la regla S154): F1 MODIS con la vía «código MIROVA» corriendo; F2 VIIRS
-  750 con ROI B4; F3 censo de decisiones y cierres S160 a S174; F4 vencimientos medidos simulando la ausencia; F0 la
-  puerta de entrada (pendientes de S160 que no caen en ningún eje).
-- **Eje nuevo**: F1 y F2 son 100 % nuevos (el sistema de hoy no existía en S160). F3 es nuevo a medias (las decisiones
+  375 en producción (K desde #850) medido sobre el sistema corriendo; F3 censo de decisiones y cierres S160 a S174; F4
+  vencimientos medidos simulando la ausencia; F0 la puerta de entrada (pendientes de S160 que no caen en ningún eje).
+- **Recorte (2026-11-06, pedido de Nicolás vía la coordinadora S174)**: el eje VIIRS 750 con ROI B4 (#939) sale del plan
+  para que entre VIIRS 375, el sensor con más pasadas y alertas, que la primera versión dejaba fuera porque elegía ejes
+  por el código cambiado desde S160. B4 queda mirado por la sombra de V750-A (#945); sus pendientes de S160 pasan a F0
+  (§1). Texto del eje recortado: commit `08d1b9ead`, §2 y §3 «F2. VIIRS 750 con ROI B4».
+- **Eje nuevo**: F1 y F2 son nuevos (F1 es un detector que no existía en S160; F2 nunca se auditó como sistema corriendo
+  contra MIROVA en las dos direcciones, por volcán y por cenit). F3 es nuevo a medias (las decisiones
   del dueño contra el código nunca se auditaron; los cierres sí, en S160 F4). F4 repite el eje de S160 F3, limitado al
   delta y con la novedad de simular la ausencia. Orden de recorte si hay que achicar: F4, después F3.
 - **Cuándo**: nada se lanza antes del reinicio del plan semanal (2026-11-08 12:00 UTC). F2, F3, F4 y F0 desde ese
@@ -33,12 +38,12 @@ Reparto (guía §4: cada pendiente va al frente de su eje; los que no caen en ni
 | pendiente de S160 | va a | por qué |
 |---|---|---|
 | 241, 242, C-06 (cese de Suomi NPP), 243 (decomiso MODIS 6.1), 245 (copia que se encoge), 247 (token), V3-01 a V3-04 | F4 | son vencimientos e insumos que mueren |
-| 203 (cúmulos V750 de cumbre en 0,0 MW), C-08, F1-H6 (D32), V2-09 a V2-13, C-02, C-03 | F2 | son VIIRS 750 |
+| 203 (cúmulos V750 de cumbre en 0,0 MW), C-08, F1-H6 (D32), V2-09 a V2-13, C-02, C-03 | F0 | son VIIRS 750; su eje salió del plan (§0, recorte) |
+| 201 (C1 de escena casi no toca lo publicado: 4 de 2.452 publicaciones V375), C-04 (Tupungatito VIIRS 375) | F2 | son VIIRS 375 |
 | 281 a 297 sin aplicar, 287, 288, U12 (memoria), V4-01 a V4-03, decisión 8 (cola de campo) | F3 | son cierres y su propagación |
 | decisiones 2, 6 y 9 (P2 tolerancia 0, C-10 y D18, K1 y tope D9), V0b-01 a V0b-03, V1a-01 en adelante, V1b-01, V0a-01, C-07, C-09, C-10, y el inventario sin verificar de S160 (F1a 3, F2 9, F3 6, F4 5, F1b 12) que no caiga en otro frente | F0 | no son de ningún eje de esta auditoría |
 
-C-04 (Tupungatito VIIRS 375) y C-05 (geolocalización MODIS a más de 40° de cenit) quedan en la cola de campo sin
-frente; C-05 lo mira F1 sólo si la vía cambió la geolocalización (SOSPECHA, no se sabe).
+C-05 (geolocalización MODIS a más de 40° de cenit) queda en la cola de campo sin frente; lo mira F1 sólo si la vía cambió la geolocalización (SOSPECHA, no se sabe).
 
 ## 2. Los ejes, con su porqué
 
@@ -52,10 +57,14 @@ observación de la vía 19 horas antes del encendido (SOSPECHA: puede ser hora d
 decisión 3 del bloque S174 (records `sin_grilla` o `sin_mxd03` tratados como K con aviso, VPR940b-04) está «NO
 IMPLEMENTADO» (`loop/activo` `tasks/LOOP_OBJETIVOS.md` l. 657).
 
-**F2. VIIRS 750 con ROI B4 en Cordón Caulle y Tupungatito (nuevo).** #939 (`58edb9788`, 2026-11-05 03:23 UTC) cambió
-la geometría de dos volcanes en producción mientras la sombra de V750-A todavía no tiene lector mergeado (#945). Se
-audita lo que está en `main`; #945 se lee en su sha fijo y se rotula, sin repetir lo que su verificador ya hizo en seis
-rondas (R1 a R6 de S174) y sin tocar su rama.
+**F2. VIIRS 375 en producción, sobre el sistema corriendo (nuevo).** Es el sensor con más pasadas y alertas, corre K
+desde #850 y es el que más mira el operador. La primera versión de este plan lo dejaba fuera porque elegía ejes por el
+código cambiado desde S160; esa vara excluye justo lo que más publica. Se mide con records reales del NRT y el
+predicado literal del tablero contra MIROVA en las dos direcciones (criterio de victoria, `docs/MISSION.md`):
+ninguna protegida perdida, y cuánto publicamos en negativos limpios (A98: la brecha es sobre-publicación, no recall).
+Estratificado por volcán y por cenit, porque Chillán cae con el cenit y el mecanismo está SIN ATRIBUIR (memoria S154).
+Incluye el estado de la sombra V375-E y de su lector re-sellado en S172 (tag `s172-v375e-lector-resellado` =
+`12b49057f`; la parada la mandan las noches, cerca del 2026-12-02).
 
 **F3. Censo de decisiones y cierres S160 a S174 (nuevo a medias).** En la bitácora de `loop/activo` hay 308 entradas de
 S160 a S174 (conteo de encabezados por sesión, `grep -c "^### .*S1NN[):,]"`), y entre `d516b9d8c` y la base hay 1.024
@@ -74,8 +83,7 @@ se puede mirar en los records.
 **F0. Pendientes de S160 sin eje.** Ver §1. Su pregunta es una sola: cada pendiente, ¿sigue abierto contra el código de
 hoy, ya se resolvió, o nunca fue lo que decía?
 
-**Qué no se audita**: el código del scraper Mirova-v1 (otro repo; sólo su salida), el perfil `experimental`, VIIRS 375
-salvo como control, la integridad de #945 como PR (lo hace S174).
+**Qué no se audita**: el código del scraper Mirova-v1 (otro repo; sólo su salida), el perfil `experimental`, VIIRS 750 con ROI B4 (recortado, §0), la integridad de #945 como PR (lo hace S174).
 
 ## 3. Los frentes (pre-registro: esto es lo que el sello congela)
 
@@ -102,20 +110,28 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
 - **Campo**: el resultado del audit semanal del 2026-11-09 contra la regla §4; uno o más casos MODIS de la vía para la
   cola, con pasada UTC y lámina de MIROVA que mirar.
 
-### F2. VIIRS 750 con ROI B4
+### F2. VIIRS 375 en producción
 
-- **Pregunta**: en Cordón Caulle y Tupungatito, ¿el ROI B4 llega a todos los consumidores del valor que cambió (primer y
-  segundo pase, dashboard, auditorías, sombra), y lo que publica desde `58edb9788` es lo que B4 promete?
-- **Hallazgo**: un consumidor que sigue con la geometría anterior (patrón 6 de la guía); un record posterior a #939 sin
-  la marca de ROI que el lector de la sombra necesita; una diferencia entre la geometría declarada y la usada; el
-  lector de #945 en `106db8941` dando un veredicto que sus propios datos no sostienen (sólo lectura, rotulado).
-- **Vara**: el predicado del tablero con node; la definición de B4 en el PR #939 y su pre-registro
-  (`PREREGISTRO_V750A.md`, ruta exacta la encuentra el auditor); para fidelidad, el código de MIROVA V750 (D34).
-- **Línea base roja**: (1) sobre los datos de `d516b9d8c`, su instrumento tiene que reencontrar el hallazgo 203 de S160
-  (30 de 97 cúmulos de cumbre V750 en 0,0 MW en la ventana K, `experiments/_s160_audit/v2/v_203_cero_salida.txt`); (2)
-  corrido el lector de la sombra en `daf04cfdc`, tiene que reproducir R2-01 (una pasada suelta a +30 días da CUMPLE).
-- **Campo**: una pasada VIIRS 750 de Cordón Caulle o Tupungatito posterior a #939 con lámina de MIROVA; C-08 si F2 la
-  encuentra.
+- **Pregunta**: en los records reales del NRT, ¿publicamos todo lo que MIROVA alerta en VIIRS 375 y cuánto publicamos
+  donde MIROVA no vio nada, por volcán y por cenit? ¿Y la sombra V375-E y su lector miden lo que dicen medir?
+- **Hallazgo**: una protegida (1 MW o más, lectura A) que no publicamos; un estrato de volcán o de cenit donde la
+  sobre-publicación en negativos limpios o la pérdida se concentra y el agregado la esconde (Simpson, guía §3b fila 13);
+  una regla del tablero o del etiquetado que trata distinto lo que D-9 dice (alertas de 0,05 MW o menos cuentan como
+  «MIROVA no vio nada»); un camino por el que la sombra V375-E o su lector dan CUMPLE o VERDE sin datos (cobertura
+  pareja, guía §3b fila 2), o una fecha de parada que no se sigue de las noches acumuladas.
+- **Vara**: el predicado del tablero con node; `etiquetar` y `clase_mirova.py` en la base para alerta, protegida y
+  negativo limpio; el cenit, del campo que guarda cada record (el auditor declara cuál). Para la sombra, su
+  pre-registro (`experiments/_s165_v375_via/PREREGISTRO_IMPL_V375E.md`) y el lector en el tag
+  `s172-v375e-lector-resellado` (`12b49057f`); el auditor comprueba que el lector de la base es el del tag.
+- **Ventana**: desde la frontera de régimen de K en la fecha de los datos (guía §3b fila 10; el histórico se reprocesó
+  con K en #883), hasta la base; por tramo si la cruza otro cambio, y con la calidad de la referencia por mes (A119).
+- **Línea base roja**: (1) sobre los datos de `d516b9d8c`, su conteo tiene que reproducir el 201 de S160 (4 de 2.452
+  publicaciones VIIRS 375 tocadas por el C1 de escena) o explicar con números por qué no; (2) estratificado por cenit,
+  Nevados de Chillán tiene que mostrar la caída con el cenit de la memoria S154; si su estratificación no la ve, está
+  ciega. Si el lector de la sombra corrido sobre una noche sintética sin datos da algo distinto de SIN DATO, eso también
+  es hallazgo.
+- **Campo**: una protegida perdida o un negativo limpio publicado de alto VRP, con pasada UTC y lámina de MIROVA; la
+  fecha de parada de la sombra (cerca del 2026-12-02) como ítem con fecha; C-04 actualizado.
 
 ### F3. Decisiones y cierres S160 a S174
 
@@ -277,7 +293,7 @@ tokens y 24 a 48 minutos; verificadores Opus: 316.650 a 384.714 tokens y 16 a 37
 | orquestador (ola 0, listas, síntesis) | 1 | 0,3 a 0,5 millones | 1,5 h |
 | **total** | 11 | **3,9 a 4,9 millones** | 6 a 7 h en tres olas |
 
-Riesgo de subestimar: F1 y F2 leen records reales y pueden reprocesar; F3 barre 308 entradas. Si el plan semanal tras
+Riesgo de subestimar: F1 y F2 leen records reales (VIIRS 375 es el sensor con más records) y pueden reprocesar; F3 barre 308 entradas. Si el plan semanal tras
 el reinicio no deja margen para 5 millones, recortar F4 y después F3 (§0).
 
 ## 8. Lo que el plan no hace, y lo que decide Nicolás antes de lanzar
@@ -287,7 +303,7 @@ ningún reproceso en Actions; no audita #945 como PR ni el código de Mirova-v1.
 
 | # | decisión | recomendación |
 |---|---|---|
-| 1 | Los cinco frentes, o recortar | los cinco; si el uso no alcanza, F4 primero (repite eje) y después F3 |
+| 1 | Los cinco frentes, o recortar | los cinco, con VIIRS 375 en lugar de VIIRS 750 B4 (ya recortado por tu pregunta); si el uso no alcanza, F4 primero (repite eje) y después F3 |
 | 2 | F1 espera al audit del 2026-11-09 | sí: sin esa corrida, F1 audita un sistema sin su primer veredicto semanal |
 | 3 | Fable como auditor y Opus como verificador | sí (guía §5); la alternativa barata, Sonnet auditor, no tiene medición propia en este proyecto |
 | 4 | Sellar este plan | con tu sí, commit y hash como «SHA_PLAN» antes de la ola 1 |
