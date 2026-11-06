@@ -51,7 +51,7 @@
 ## d. Pendientes en orden
 
 1. Leer `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R2.md` y el CI del #945; con R2 limpia, presentar decisiones 3 a 5 y mergear #945 con frase.
-2. HECHO 2026-11-06: #950 y #951 mergeados, CLAUDE.md en `loop/activo`. Nuevo: traer main a `loop/activo` (1.069 commits atrás; 3 fallas de `test_guard_libro_de_pruebas_s146.py` vienen de eso).
+2. HECHO 2026-11-06: #950 y #951 mergeados, CLAUDE.md en `loop/activo`. Main traído a `loop/activo` el 2026-11-06 (`dd7467218`); las 2 fallas que quedan del libro son sólo locales (worktrees en `.claude/`).
 3. Implementar la decisión 3 del S174 (`sin_grilla`/`sin_mxd03` como K con aviso) y correr el ensayo de cenit con DM real (decisión 8).
 4. Corrida completa del medidor de V750-A para el sello (~7 h; un proceso pesado a la vez).
 5. 2026-11-09: primer audit semanal con la vía MODIS (recall «sin juzgar» hasta 15 noches) y revisión de la guardia (`data/audit_continuous/guardia_modis_latest.json`, regla `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` §4).

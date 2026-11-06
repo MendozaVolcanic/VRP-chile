@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-06 12:34 UTC: S174, main traído a loop/activo; ensayo de cenit lanzado
+
+- Merge `dd7467218`: 1.133 commits de main. Único conflicto: `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md`, resuelto con main (regla SELLADA, superconjunto del borrador ronda 3). CLAUDE.md igual a main; `scripts/vigilancia_guardia_modis.py` ya existe aquí.
+- `tests/test_guard_libro_de_pruebas_s146.py`: de 3 fallas quedan 2 (G1 y G1b) SÓLO en local: `scripts/libro_de_pruebas.py` resuelve rutas recorriendo el disco y encuentra copias en `.claude/worktrees/`, marcándolas ambiguas. El libro commiteado es igual al de main. Seguimiento: que el generador excluya `.claude/`.
+- Ensayo de los controles de cenit con DM real (decisión 8) lanzado (Opus, effort high), sólo lectura, carpeta en C: porque D: está en 3,7 GB.
+
 ### 2026-11-06 11:48 UTC: S174, quinta vuelta del autor del #945 lista; R5 del verificador lanzada
 
 - Autor (Opus): ventana fija implementada, punta `106db8941` (sin force), CI pytest verde (run 42211179548). Afirma batería 91 de 91, medidor 61 de 61 con IDENTIDAD y CAIDA sanos, 114 blancos una vez cada uno, R4-01/R4-02/R4-03 ahora PROVISORIO. Lector real sobre main con B4 desde 58edb9788: PROVISORIO (rc 4), 1,2 de 28 días. Informe: `D:\vrp-trabajo\temporales\s174-autor945-r5\INFORME_AUTOR_R5.md`.
