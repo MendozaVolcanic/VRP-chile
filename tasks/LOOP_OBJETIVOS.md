@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-07 20:03 UTC (S174): cierre de la sesión
+
+- S174 cerrada. Traspaso en la parte de arriba de `tasks/BLOQUE_ARRANQUE_S175.md` (el bloque del 2026-11-05 quedó abajo como histórico). Mergeados #945, #952, #953 y #954; auditoría S175 parcial en #955 (F1 el 2026-11-09). `loop/activo` no tiene esos merges: traerlos al abrir S175. C: 16 GB libres tras vaciar la papelera; plan semanal 89 % hasta el 2026-11-08 12:00 UTC.
+
 ### 2026-11-07 17:41 UTC (S174): #954 mergeado, el CI corre la batería del lector de V750-A
 
 - Frase de Nicolás («Sí, mergea el 954»). Squash `35b08984d` con `--match-head-commit 8e5bd3673` (verificador R2 MERGEABLE CON CAMBIOS menores). Job nuevo `bateria-v750a` en `tests.yml` (105 escenarios, subconjunto del medidor, huella de batería y medidor). Límite anotado en el PR: la huella ata al diff, no al contenido. Pendientes menores: comentario «158 s» viejo (`tests/test_bateria_lector_v750a_s174.py:49`), VPR954-R2-02. VPR954-03 (main sin protección de rama) es decisión de Nicolás.
