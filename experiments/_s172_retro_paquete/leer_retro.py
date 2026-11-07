@@ -83,6 +83,7 @@ import copy
 import csv
 import hashlib
 import importlib.util
+import inspect
 import json
 import math
 import os
@@ -234,6 +235,18 @@ def tramo_de(b, dia):
     return None
 
 
+def _cenit_finito(x):
+    """El cenit del sensor como número finito, o None. POR QUÉ (VPR952-03): un NaN o un infinito no es un cenit. Leído
+    como presente, armaba pares de la razón doble con NaN (`b - a < 15°` es falso con NaN, así que el par entraba a la
+    lectura), hacía caer la curva (`int(nan)`) y dejaba los controles de cenit SIN SUSTRATO en vez de ROJO de insumo
+    sin cenit. Se trata igual que un cenit ausente."""
+    try:
+        v = float(x)
+    except (TypeError, ValueError):
+        return None
+    return v if math.isfinite(v) else None
+
+
 def armar_pasadas(via, k, kgem=None, es_noche=None, inner=None, sin_dato_trozos=()):
     """Una fila por pasada nocturna (clave de K o de la vía) en algún tramo. `estado`: ok, sin_dato_cobertura (K sin
     pasada de la vía, §6 C-cobertura), sin_dato_trozo (trozo que falló dos veces), sobra_en_via (la vía sin K: se
@@ -254,7 +267,7 @@ def armar_pasadas(via, k, kgem=None, es_noche=None, inner=None, sin_dato_trozos=
             continue
         rk, rv = k.get(key), via.get(key)
         f = {"vol": vol, "sensor": sensor, "b": b, "dt": dts[:16], "noche": dia, "tramo": t,
-             "z": (rv or rk or {}).get("sensor_zenith_deg"), "inner": (inner or {}).get(vol, 5.0),
+             "z": _cenit_finito((rv or rk or {}).get("sensor_zenith_deg")), "inner": (inner or {}).get(vol, 5.0),
              "k_rec": rk, "via_rec": rv, "kg_rec": kgem.get(key), "en_kgemelo": key in kgem,
              "via_marca": (rv or {}).get("via_codigo_mirova")}
         if rk is None:
@@ -1016,7 +1029,8 @@ def curva_cenit(R, filas, brazo):
                              nulo=R.CC.pares_nulo(pas, "vrp", "pub", condicionar=True))
             dob = {"veredicto": R.CC.veredicto(r), "noches": r["todas"]["n_noches"], "d": r["todas"]["d"]}
         except Exception as e:  # noqa: BLE001  (informa: si no corre, se dice)
-            dob = {"veredicto": "SIN SUSTRATO", "error": f"{type(e).__name__}: {e}"[:200]}
+            # S174 (ensayo de cenit): una excepción no es falta de datos; se rotula como error
+            dob = {"veredicto": "ERROR INTERNO", "error": f"{type(e).__name__}: {e}"[:200]}
         out[b] = {"n": len(pares), "por_tramo_10": {k: [round(statistics.median(v), 3), len(v)] for k, v in sorted(por.items())},
                   "corte_30": {k: [round(statistics.median(v), 3) if v else None, len(v)] for k, v in corte.items()},
                   "spearman": rho, "spearman_nulo_p95_abs": float(np.percentile(np.abs(nul), 95)) if nul else None,
@@ -1027,11 +1041,29 @@ def curva_cenit(R, filas, brazo):
 def controles_cenit(R, filas, brazo):
     """§6, controles de cenit (los de V375-E §4): el nulo de cenit parecido (pares a menos de 5°) contiene 1; una
     ganancia pareja (×1,5) no mueve la razón doble; una ganancia que crece con el cenit (×(1 + z/20)) la sube. Si uno
-    cae, la curva no se lee (no es un control del veredicto entero)."""
+    cae, la curva no se lee (no es un control del veredicto entero).
+
+    S174, ensayo con datos reales (C:/Users/nmend/vrp-temporales/s174-cenit/INFORME.md, fuera de git): las dos
+    ganancias no pueden fallar por construcción (la pareja se cancela en la razón doble y la que crece con el cenit
+    sube todo par con más cenit en la oblicua); sólo el nulo prueba los datos. Un insumo vacío (0 pasadas evaluables,
+    o alertas sin ningún cenit) es ROJO, no SIN SUSTRATO: falta de noches y falta de insumo no son lo mismo. SIN
+    SUSTRATO lleva las noches de lectura y de nulo contra el mínimo de la regla. VPR952-03: un cenit NaN o infinito
+    cuenta como ausente, en el chequeo de insumo y en las pasadas de los controles (`_cenit_finito`).
+
+    La rama con sustrato (OK o ROJO por nulo sesgado o por una ganancia) la vigilan las pruebas de VPR952-01 con 14
+    noches de lectura y de nulo, y las de ganancia con una razón doble rota a propósito: con la sana no pueden caer."""
+    ev = _ev(filas)
+    if not ev:
+        return {"estado": "ROJO: insumo vacío de los controles de cenit (0 pasadas evaluables)"}
+    alertas = [f for f in ev if f["lab"] in ("protegida", "bajo1")]
+    con_z = [f for f in alertas if _cenit_finito(f.get("z")) is not None]
+    if alertas and not con_z:
+        return {"estado": "ROJO: insumo sin cenit (%d pasadas con alerta, ninguna con cenit)" % len(alertas)}
+
     def pas(g):
         return [{"vol": f["vol"], "hora": f["dt"], "z": f["z"], "mir": float(f["vrp_mirova"] or 0.0),
                  "plat": f.get("sensor"), "pub": bool(_pub(f, brazo)), "vrp": _mag(f, brazo) * g(float(f["z"]))}
-                for f in _ev(filas) if f["lab"] in ("protegida", "bajo1") and f.get("z") is not None]
+                for f in _ev(filas) if f["lab"] in ("protegida", "bajo1") and _cenit_finito(f.get("z")) is not None]
 
     def res(g):
         p = pas(g)
@@ -1044,7 +1076,10 @@ def controles_cenit(R, filas, brazo):
         return {"estado": "ROJO: error interno de los controles de cenit", "error": f"{type(e).__name__}: {e}"[:200]}
     v = R.CC.veredicto(base)
     if v == "SIN SUSTRATO":
-        return {"estado": "SIN SUSTRATO"}
+        return {"estado": "SIN SUSTRATO", "noches_lectura": int(base["todas"]["n_noches"]),
+                "noches_nulo": int((base.get("nulo") or {}).get("n_noches", 0)),
+                "n_min": int(inspect.signature(R.CC.veredicto).parameters["n_min"].default),
+                "pasadas_alerta_con_cenit": len(con_z)}
     d0, d1, d2 = base["todas"]["d"][0], pareja["todas"]["d"][0], crece["todas"]["d"][0]
     ok = v != "NULO SESGADO" and abs(d1 - d0) <= 1e-9 and d2 > d0
     return {"estado": "OK" if ok else "ROJO", "veredicto": v, "d": d0, "d_ganancia_pareja": d1, "d_ganancia_cenit": d2}
@@ -1152,7 +1187,10 @@ def veredicto(sensor, regla, controles, extra):
     """Primera fila que se cumpla. `regla` trae `_fila_regla` (2, 3, 4, 5 o 6) de la regla del sensor; `extra` las
     condiciones de la fila 4 que no salen de la regla (OSF, sólo OCR, curva, sin (b), cercano contra radiante, V750-A)
     y la de la fila 2 por C-cobertura."""
-    rojos = {k: v for k, v in controles.items() if not str((v or {}).get("estado", v)).startswith("OK")}
+    # S174: SIN SUSTRATO no bloquea sólo en los controles de cenit (la curva no se lee y la fila 4 por la curva tampoco
+    # se activa); en cualquier otro control sigue siendo rojo
+    rojos = {k: v for k, v in controles.items() if not str((v or {}).get("estado", v)).startswith("OK")
+             and not (k == "controles_cenit" and str((v or {}).get("estado", "")).startswith("SIN SUSTRATO"))}
     if rojos:
         return 1, NOMBRES_FILA[1], sorted(rojos)
     if extra.get("protegidas_sin_dato"):
@@ -1223,8 +1261,13 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
     cur["controles_cenit"] = controles_cenit(R, filas, brazo)
     # VPR946-01: los controles de cenit del §6 entran al veredicto (§8.1 fila 1). SIN SUSTRATO (la curva no tiene
     # pares) no es un control caído: no hay curva que leer, y la fila 4 por la curva tampoco se activa.
-    _ec = cur["controles_cenit"]["estado"]
-    ctl["controles_cenit"] = {"estado": "OK (sin sustrato: la curva no se lee)" if _ec == "SIN SUSTRATO" else _ec,
+    # S174 (ensayo de cenit): se rotula SIN SUSTRATO con sus noches, no OK; `veredicto` no lo cuenta como rojo.
+    _cc = cur["controles_cenit"]
+    _ec = _cc["estado"]
+    ctl["controles_cenit"] = {"estado": ("SIN SUSTRATO (lectura %s de %s, nulo %s de %s): la curva no se lee"
+                                         % (_cc.get("noches_lectura", "?"), _cc.get("n_min", "?"),
+                                            _cc.get("noches_nulo", "?"), _cc.get("n_min", "?")))
+                              if _ec == "SIN SUSTRATO" else _ec,
                               "detalle": cur["controles_cenit"]}
     extra["curva_cae_mas_que_mirova"] = (cur["controles_cenit"]["estado"] == "OK"
                                          and cur[brazo]["razon_doble"].get("veredicto") == "CAE MAS QUE MIROVA")
@@ -1264,6 +1307,17 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
 
 
 # ---------------------------------------------------------------- E/S
+def linea_veredicto(pref, sensor, r):
+    """La línea de consola de un sensor. POR QUÉ (VPR952-05): SIN SUSTRATO de los controles de cenit no es motivo ni
+    entra al nombre de la fila (no bloquea), así que sólo quedaba en el JSON y la consola de un tramo sin curva era
+    indistinguible de una lectura con curva. La línea lo dice."""
+    linea = f"{pref}{sensor}: fila {r['fila']} | {r['veredicto']} | motivos {r['motivos']}"
+    e = str(((r.get("controles") or {}).get("controles_cenit") or {}).get("estado", ""))
+    if e.startswith("SIN SUSTRATO"):
+        linea += f" | curva de cenit no leída: {e}"
+    return linea
+
+
 def _predicado_por_defecto(R):
     return R.F4.predicado_node
 
@@ -1345,7 +1399,7 @@ def main(argv=None, predicado=None, reglas=None):
                         osf_res, [f for f in filas if f["tramo"] == "R25"], separa)
         out["sensores"][s] = r
         pref = "ENSAYO (NO DECIDE) " if a.ensayo else ""          # VPR940-15
-        print(f"{pref}{s}: fila {r['fila']} | {r['veredicto']} | motivos {r['motivos']}")
+        print(linea_veredicto(pref, s, r))
         print(f"{pref}{s}, sorteo de etiquetas del §7 (informa): {r['otros_brazos']['sorteo_etiquetas']['poder']}")
         codigo = max(codigo, 3 if r["fila"] == 1 else 0)
     out["osf"] = osf_res
