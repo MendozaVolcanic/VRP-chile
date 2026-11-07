@@ -2,7 +2,9 @@
 
 > 2026-11-06, orquestador Opus 5.5 (sesión hija de la coordinadora S174). Regla A51 y
 > `C:\Users\nmend\OneDrive\Escritorio\claude\GUIA_MAESTRA_AUDITORIAS.md` (leída entera al abrir esta sesión).
-> **Estado: BORRADOR, sin sellar.** Se sella con el commit que Nicolás apruebe; ese hash es «SHA_PLAN» y cada
+> **Estado: SELLADO.** Nicolás aprobó el plan en esta sesión con la frase «Sí, apruebo» (2026-11-07, hora del
+> servidor Sat, 07 Nov 2026 03:55:40 GMT), sobre `2984a9cab`, con las recomendaciones del §8. El commit que lleva esta
+> línea es «SHA_PLAN» (se anota en la ola 0, porque un commit no puede citar su propio hash) y cada
 > verificador comprueba con `git diff «SHA_PLAN» -- docs/PLAN_AUDITORIA_S175.md` que los criterios del §3 no cambiaron.
 
 ## 0. En una pantalla
