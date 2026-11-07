@@ -44,6 +44,12 @@ MR72 a MR75 (S174, VPR945-R6, retoques tras el merge de #945, sin cambio de regl
 volcanes sin cambio cuando se lee con B0 (apagada si ningún volcán cambia, o con la lista vacía; MY7 y MY8 del
 verificador, que sobrevivían a todo), la captura del OverflowError de --ahora (R6-01) y la conversión a la zona local en
 vez de a UTC (MY10; R6-03: ER45 corre con TZ en UTC+12, así que cae también con TZ=UTC en el proceso padre).
+MR76 a MR79 (S174, VPR953, seguimiento del verificador de #953, sin cambio de regla) rompen la regla de 14 noches de los
+volcanes sin cambio en un volcán que no es el primero (X12 a X14 del verificador: sólo el primero, sin el último, sin el
+segundo; ER56) y la lista de la línea CUMPLE recortada a dos volcanes (X15; ER55 exige ahora los once).
+VPR953-01: una mutación atrapada SÓLO porque un escenario con la bandera «no se cae» (no_traceback) vio un Traceback se
+rotula aparte, «sólo por la bandera "no se cae"», en su línea y en el RESUMEN (MR74 es la única hoy): la bandera es la
+aserción natural de ese defecto, pero no es una aserción sobre la salida del lector.
 Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4]
 Salida: 0 si los controles salen como deben y todas las mutaciones quedan ATRAPADAS; 1 si no.
 """
@@ -58,6 +64,8 @@ AQUI = Path(__file__).resolve().parent
 ORIGINAL = AQUI / "evaluar_v750a.py"
 PRUEBAS = AQUI / "probar_evaluar_v750a.py"
 ESCENARIOS_SOLO = ""   # S173: --escenarios
+# VPR953-01: el texto con que probar_evaluar_v750a.py marca la falla de un escenario con no_traceback=True
+BANDERA = "y el escenario afirma que no se cae"
 
 MUTACIONES = {
     "M1": ("§6.2: una protegida perdida (P1) ya no entra a los motivos",
@@ -343,6 +351,19 @@ MUTACIONES = {
              "except (ValueError, OverflowError):", "except ValueError:"),
     "MR75": ("R6-03 (MY10 del verificador): la zona de --ahora se convierte a la zona local de la máquina, no a UTC",
              "t = t.astimezone(datetime.timezone.utc).replace(tzinfo=None)", "t = t.astimezone().replace(tzinfo=None)"),
+    # S174, VPR953 (verificador de #953; X12 a X15 de su mutar_propio.py)
+    "MR76": ("VPR953-02 (X12): sólo el primero de los volcanes sin cambio de ROI pide 14 noches",
+             "vol_pocas = [v for v in sin_cambio if por_v[v][1] < NOCHES_MIN_SIN_CAMBIO]",
+             "vol_pocas = [v for v in sin_cambio[:1] if por_v[v][1] < NOCHES_MIN_SIN_CAMBIO]"),
+    "MR77": ("VPR953-02 (X13): el último de los volcanes sin cambio de ROI no pide 14 noches",
+             "vol_pocas = [v for v in sin_cambio if por_v[v][1] < NOCHES_MIN_SIN_CAMBIO]",
+             "vol_pocas = [v for v in sin_cambio[:-1] if por_v[v][1] < NOCHES_MIN_SIN_CAMBIO]"),
+    "MR78": ("VPR953-02 (X14): el segundo de los volcanes sin cambio de ROI no pide 14 noches",
+             "vol_pocas = [v for v in sin_cambio if por_v[v][1] < NOCHES_MIN_SIN_CAMBIO]",
+             "vol_pocas = [v for j, v in enumerate(sin_cambio) if j != 1 and por_v[v][1] < NOCHES_MIN_SIN_CAMBIO]"),
+    "MR79": ("VPR953-03 (X15): la línea CUMPLE nombra sólo a dos de los volcanes sin cambio de ROI",
+             '", ".join(f"{v} {por_v[v][1]}" for v in sin_cambio)',
+             '", ".join(f"{v} {por_v[v][1]}" for v in sin_cambio[:2])'),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),
@@ -368,14 +389,17 @@ def correr(dest, evaluador, nombre, viejo=None, nuevo=None):
         copia.unlink()
     txt = o.stdout + o.stderr
     linea = next((x for x in txt.splitlines() if x.startswith("== PRUEBAS")), "(sin línea de pruebas)")
-    atrapan = [x.split(" | ")[0] for x in txt.splitlines() if " | FALLA" in x]
+    fallan = [x for x in txt.splitlines() if " | FALLA" in x]
+    atrapan = [x.split(" | ")[0] for x in fallan]
+    # VPR953-01: ¿todas las fallas son la bandera «no se cae» (un Traceback en un escenario con no_traceback)?
+    solo_bandera = bool(fallan) and all(BANDERA in x for x in fallan)
     if o.returncode == 0 and "TODOS LOS ESCENARIOS COMO SE ESPERA" in linea:
         estado = "PASA"
     elif o.returncode == 1 and "FALLAS" in linea:
         estado = "ATRAPADA"
     else:
         estado = "CAÍDA"
-    return nombre, estado, o.returncode, linea, atrapan
+    return nombre, estado, o.returncode, linea, atrapan, solo_bandera
 
 
 def main():
@@ -411,15 +435,18 @@ def main():
     pr(f"IDENTIDAD | {ident[1]} (tiene que ser PASA) | rc {ident[2]} | {ident[3][:200]}")
     malos = 0 if ident[1] == "PASA" else 1
     for nom, (que, _v, _n) in mut.items():
-        _, est, rc, linea, atrapan = res[nom]
+        _, est, rc, linea, atrapan, bandera = res[nom]
         esperado = "CAÍDA" if nom == "CAIDA" else "ATRAPADA"
         malos += est != esperado
-        pr(f"{nom} | {est} (tiene que ser {esperado}) | rc {rc} | {que} | {linea[:120]} | escenarios que fallan "
+        marca = ' sólo por la bandera "no se cae"' if est == "ATRAPADA" and bandera else ""
+        pr(f"{nom} | {est}{marca} (tiene que ser {esperado}) | rc {rc} | {que} | {linea[:120]} | escenarios que fallan "
            f"{atrapan}")
     n_mut = len(mut) - 1
     atr = sum(1 for k in mut if k != "CAIDA" and res[k][1] == "ATRAPADA")
+    atr_b = sum(1 for k in mut if k != "CAIDA" and res[k][1] == "ATRAPADA" and res[k][5])
     ctrl = ident[1] == "PASA" and res["CAIDA"][1] == "CAÍDA"
-    pr(f"== RESUMEN: {atr} de {n_mut} mutaciones atrapadas por aserción; controles "
+    pr(f"== RESUMEN: {atr} de {n_mut} mutaciones atrapadas ({atr - atr_b} por aserción sobre la salida, {atr_b} sólo "
+       f"por la bandera \"no se cae\"); controles "
        f"{'como deben' if ctrl else 'FALLAN'}; {'TODO COMO SE ESPERA' if malos == 0 else f'{malos} FUERA DE LO ESPERADO'}")
     (a.dest / "mutar_evaluar_v750a_salida.txt").write_text("\n".join(L) + "\n", encoding="utf-8")
     return 0 if malos == 0 else 1

@@ -46,4 +46,38 @@ jobs:
           # -W always::RuntimeWarning: los warnings numericos (overflow, divide,
           # invalid) son la firma temprana de los bugs de NaN/cero que perseguimos
           # en las formulas fisicas. Que aparezcan en el log del PR.
-          python -m pytest tests/ -q -W always::RuntimeWarning
+          # La batería del lector de V750-A corre en su propio job (abajo), en paralelo con éste.
+          python -m pytest tests/ -q -W always::RuntimeWarning --ignore=tests/test_bateria_lector_v750a_s174.py
+
+  # S174 (VPR953-04): la batería del lector de la sombra de V750-A (experiments/_s162_v750a/probar_evaluar_v750a.py,
+  # que decide si VIIRS 750 de producción cambia de detector) y un subconjunto barato de su medidor de mutaciones.
+  # Antes sólo se corría a mano y el CI verde no la vigilaba. Job propio para no empujar el de arriba a su timeout:
+  # la batería entera son más de 100 corridas del lector, en grupos paralelos.
+  bateria-v750a:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      # S174 (VPR953-04): la batería del lector de la sombra de V750-A (tests/test_bateria_lector_v750a_s174.py) corta
+      # la lectura en commits reales de main (git merge-base --is-ancestor, git show -s). El checkout es de
+      # profundidad 1; este paso baja la historia de commits de main SIN árboles ni blobs (unos 4 MB, no los cientos
+      # de MB de los datos NRT) y sin tags, así que las pruebas que se saltan sin un tag siguen igual.
+      - name: Historia de commits de main (sin árboles ni blobs)
+        run: |
+          git config remote.origin.promisor true
+          git config remote.origin.partialclonefilter tree:0
+          git fetch --no-tags --filter=tree:0 --unshallow origin +refs/heads/main:refs/remotes/origin/main
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get update -qq && sudo apt-get install -y -qq libhdf4-dev
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Bateria del lector V750-A
+        run: |
+          node --version
+          python -m pytest tests/test_bateria_lector_v750a_s174.py -v -s -W always::RuntimeWarning

@@ -185,6 +185,10 @@ Retoques en S174 por VPR945-R6 (sexta ronda del verificador limpio, tras el merg
   ER53 (R6-01) --ahora con zona en una fecha extrema (9999-12-31T23:59:59-03:00): error de argparse, salida 2 (el lector
       de 235ba7918 se caía con OverflowError, salida 1).
   ER54 (R6-02) con B0 uno de los once con 13 noches: PROVISORIO, lo nombra. ER55 su par con 14 justas: CUMPLE.
+Retoques en S174 por VPR953 (verificador de #953; sin cambio de regla):
+  ER55 (VPR953-03) afirma la lista entera de los once con sus noches en la línea CUMPLE (antes, «Chaiten 14, Copahue 20»).
+  ER56 (VPR953-02) con B0, Copahue (el segundo por orden alfabético) y Villarrica (el último) con 13 noches: PROVISORIO,
+      nombra a los dos. ER57 su par con 14 justas: CUMPLE, con los once en la línea.
 La población base suma para el S-1: celda de Cordón Caulle en el pase 2 y la zona 2 (el pase 1 y la zona 1 con otro
 umbral), una alerta de Tupungatito cuyo NTI cruza entre los umbrales pero el ETI no, y un diagnóstico mal formado.
 Una caída nativa del analizador (código fuera de 0, 3, 4, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
@@ -703,6 +707,12 @@ def ganancia_uniforme():
     import statistics
     g = 1.0 / statistics.median(F_LASCAR + F_VILLA)
     return lambda m, k: k * g
+
+
+def _noches_once(menos):
+    """VPR953-03: la lista «volcán noches» de los once, en el orden en que la imprime el lector (alfabético), con 20
+    noches (esc_once por omisión) salvo los de `menos`."""
+    return ", ".join(f"{v} {menos.get(v, 20)}" for v in sorted(VOLCANES_MAPA))
 
 
 ESCENARIOS = {
@@ -1265,7 +1275,32 @@ ESCENARIOS = {
                  tiene=[("== noches por semana y volcán", ["ROI distinta de B0 en ninguno",
                                                            "Chaiten 5, 5, 4, 0 (14) sin cambio, completas"]),
                         ("== duración de la sombra", ["sin cambio de ROI con menos de 14 noches ninguno: COMPLETA"]),
-                        ("== §6.3 sombra: CUMPLE", ["sin cambio de ROI, 14 noches o más cada uno: Chaiten 14, Copahue 20"])],
+                        # VPR953-03: la lista entera; con sólo «Chaiten 14, Copahue 20», recortarla a dos (MR79) sobrevivía
+                        ("== §6.3 sombra: CUMPLE", ["sin cambio de ROI, 14 noches o más cada uno: "
+                                                    + _noches_once({"Chaiten": 14}) + ")"])],
+                 no_tiene=["== §6.3 sombra: PROVISORIO", "== §6.3 sombra: NO CUMPLE"]),
+    # S174 (VPR953-02, verificador de #953): ER54 y ER55 sólo bajan a Chaiten, el primero de los once por orden
+    # alfabético, así que la regla aplicada sólo al primero (MR76), sin el último (MR77) o sin el segundo (MR78)
+    # sobrevivía a toda la batería. Copahue (el segundo) y Villarrica (el último) con 13 noches: PROVISORIO, nombra a
+    # los dos; su par con 14 justas: CUMPLE, con los once en la línea.
+    "ER56": dict(pob=lambda: esc_once(offs_vol={"Copahue": OFFS_4SEM[:13], "Villarrica": OFFS_4SEM[:13]}, brazo="B0"),
+                 fase="sombra", rc=4, args=["--roi-brazo", "B0", "--sha-desde", SHA_REAL_B4],
+                 tiene=[("== noches por semana y volcán", ["ROI distinta de B0 en ninguno",
+                                                           "Chaiten 5, 5, 5, 5 (20) sin cambio, completas",
+                                                           "Copahue 5, 5, 3, 0 (13) sin cambio, faltan",
+                                                           "Villarrica 5, 5, 3, 0 (13) sin cambio, faltan"]),
+                        ("== duración de la sombra", ["sin cambio de ROI con menos de 14 noches ['Copahue', 'Villarrica']: "
+                                                      "INCOMPLETA"]),
+                        ("== §6.3 sombra: PROVISORIO", ["volcanes sin cambio de ROI con menos de 14 noches: Copahue 13, "
+                                                        "Villarrica 13"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
+    "ER57": dict(pob=lambda: esc_once(offs_vol={"Copahue": OFFS_4SEM[:14], "Villarrica": OFFS_4SEM[:14]}, brazo="B0"),
+                 fase="sombra", rc=0, args=["--roi-brazo", "B0", "--sha-desde", SHA_REAL_B4],
+                 tiene=[("== noches por semana y volcán", ["Copahue 5, 5, 4, 0 (14) sin cambio, completas",
+                                                           "Villarrica 5, 5, 4, 0 (14) sin cambio, completas"]),
+                        ("== duración de la sombra", ["sin cambio de ROI con menos de 14 noches ninguno: COMPLETA"]),
+                        ("== §6.3 sombra: CUMPLE", ["sin cambio de ROI, 14 noches o más cada uno: "
+                                                    + _noches_once({"Copahue": 14, "Villarrica": 14}) + ")"])],
                  no_tiene=["== §6.3 sombra: PROVISORIO", "== §6.3 sombra: NO CUMPLE"]),
     "E22": dict(pob=lambda: base(), sg_otra=True, rc=3,
                 tiene=[("== cobertura: INSUFICIENTE", []), ("== compuerta del veredicto", ["CERRADA"])],
@@ -1311,7 +1346,9 @@ def correr(nombre, e, analizador, evaluador, dest):
     (d / "stdout.txt").write_text(txt, encoding="utf-8")
     # S174 (VPR945-R5-01): en un escenario con no_traceback=True el defecto que se prueba ES el traceback (el lector de
     # 106db8941 se caía con --ahora con zona); ahí «no se cae» es una aserción del escenario y su violación es FALLA, no
-    # CAÍDA. Sólo ER44 y ER45 lo usan; la mutación de la zona (MR68) cae por aserción en ER45 sin caerse (A116).
+    # CAÍDA. Lo usan ER44, ER45 y ER53 (S174, VPR953-05). La mutación de la zona (MR68) cae por aserción sobre la
+    # salida en ER45 y ER53 sin caerse (A116); la del OverflowError (MR74) cae en ER53 SÓLO por esta bandera, y el
+    # medidor la rotula aparte, «sólo por la bandera "no se cae"» (VPR953-01).
     if e.get("no_traceback") and "Traceback (most recent call last)" in txt:
         return "FALLA", [f"se cayó (código {o.returncode}, Traceback) y el escenario afirma que no se cae: "
                          + (txt.strip().splitlines() or [""])[-1][:300]]
