@@ -265,14 +265,17 @@ def arg_ahora(x):
     """--ahora: fecha ISO, con o sin zona («AAAA-MM-DD HH:MM[:SS]», con «T» o espacio, y «Z» o «±HH:MM»). Sin zona se lee
     como UTC. S174 (VPR945-R5-01). POR QUÉ: un workflow que pase `date -u -Iseconds` trae la zona, y comparar una fecha
     con zona contra las de la ventana (sin zona) tumbaba el lector con TypeError. Una zona distinta de UTC se convierte a
-    UTC, no se ignora (ignorarla corre «ahora» tantas horas como la zona); el resultado queda sin zona, como el resto."""
+    UTC, no se ignora (ignorarla corre «ahora» tantas horas como la zona); el resultado queda sin zona, como el resto.
+    S174 (VPR945-R6-01): la conversión va dentro del try y también se captura OverflowError. POR QUÉ: una fecha con zona
+    que al pasarla a UTC sale del rango de datetime (año 9999 con zona negativa, año 1 con zona positiva) tumbaba el
+    lector con traceback (salida 1) en vez de dar el error de argparse (salida 2) de una fecha que no se puede leer."""
     try:
         t = hora_dt(x)
-    except ValueError:
+        if t.tzinfo is not None:
+            t = t.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+    except (ValueError, OverflowError):
         raise argparse.ArgumentTypeError(f"--ahora {x!r} no es una fecha ISO «AAAA-MM-DD HH:MM[:SS]» (UTC, o con zona "
                                          "«Z» o «±HH:MM»)")
-    if t.tzinfo is not None:
-        t = t.astimezone(datetime.timezone.utc).replace(tzinfo=None)
     return t
 
 

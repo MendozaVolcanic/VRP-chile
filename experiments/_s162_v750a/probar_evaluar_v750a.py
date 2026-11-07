@@ -179,6 +179,12 @@ pasan a «sin cambio, completas» o «sin cambio, faltan». Rehechos y nuevos:
   ER51 (R5-03) control positivo en el borde: los nueve con 14 noches justas (5, 5, 4, 0), los dos cambiados con 5 por
       semana: CUMPLE.
   ER52 (R5-01) una fecha ilegible en --ahora: error de argparse con su mensaje, salida 2, sin veredicto.
+Retoques en S174 por VPR945-R6 (sexta ronda del verificador limpio, tras el merge de #945; sin cambio de regla):
+  ER45 (R6-03) corre con TZ en UTC+12, como ER47: convertir --ahora a la zona local en vez de a UTC se ve también en una
+      máquina en UTC.
+  ER53 (R6-01) --ahora con zona en una fecha extrema (9999-12-31T23:59:59-03:00): error de argparse, salida 2 (el lector
+      de 235ba7918 se caía con OverflowError, salida 1).
+  ER54 (R6-02) con B0 uno de los once con 13 noches: PROVISORIO, lo nombra. ER55 su par con 14 justas: CUMPLE.
 La población base suma para el S-1: celda de Cordón Caulle en el pase 2 y la zona 2 (el pase 1 y la zona 1 con otro
 umbral), una alerta de Tupungatito cuyo NTI cruza entre los umbrales pero el ETI no, y un diagnóstico mal formado.
 Una caída nativa del analizador (código fuera de 0, 3, 4, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
@@ -1170,7 +1176,10 @@ ESCENARIOS = {
                         ("== §6.3 sombra: CUMPLE", [])]),
     # R5-01: una zona distinta de UTC se convierte, no se ignora: 00:23 en UTC-3 son las 03:23 UTC, el fin justo (CUMPLE);
     # ignorada, «ahora» quedaría tres horas antes del fin (PROVISORIO, «27.8»)
-    "ER45": dict(pob=esc_once, fase="sombra", rc=0, no_traceback=True,
+    # S174 (VPR945-R6-03): con TZ en UTC+12, como ER47. POR QUÉ: convertir a la zona local de la máquina en vez de a UTC
+    # (MR75) sólo se veía si la máquina no estaba en UTC; en un runner de Actions (UTC) era equivalente. Con TZ fija la
+    # zona local queda 15 horas lejos de la de --ahora y la línea «ahora» cambia en cualquier máquina.
+    "ER45": dict(pob=esc_once, fase="sombra", rc=0, no_traceback=True, env={"TZ": "XXX-12"},
                  args=ROI_B4 + ["--sha-desde", SHA_REAL_B4, "--ahora", "2026-12-03T00:23:00-03:00"],
                  tiene=[("== ventana fija de la sombra", ["ahora 2026-12-03 03:23:00 UTC (--ahora)"]),
                         ("== §6.3 sombra: CUMPLE", ["28.0 de 28 días"])],
@@ -1229,6 +1238,35 @@ ESCENARIOS = {
     "ER52": dict(pob=esc_once, fase="sombra", rc=2, args=ROI_B4 + ["--sha-desde", SHA_REAL_B4, "--ahora", "2026-13-45 00:00"],
                  tiene_err=["--ahora '2026-13-45 00:00' no es una fecha ISO"],
                  no_tiene=["== §6.3 sombra:"]),
+    # S174, VPR945-R6 (sexta ronda del verificador limpio; retoques sin cambio de regla)
+    # R6-01: una fecha con zona que al pasarla a UTC sale del rango de datetime (año 9999 con zona -03:00) sale con el
+    # error de argparse (salida 2), sin veredicto; el lector de 235ba7918 se caía con OverflowError (salida 1, Traceback),
+    # que aquí es la aserción «no se cae» (no_traceback), no una caída
+    "ER53": dict(pob=esc_once, fase="sombra", rc=2, no_traceback=True,
+                 args=ROI_B4 + ["--sha-desde", SHA_REAL_B4, "--ahora", "9999-12-31T23:59:59-03:00"],
+                 tiene_err=["--ahora '9999-12-31T23:59:59-03:00' no es una fecha ISO"],
+                 no_tiene=["== §6.3 sombra:"]),
+    # R6-02: con --roi-brazo B0 ningún volcán cambia de ROI y los once piden NOCHES_MIN_SIN_CAMBIO = 14 noches. Uno con 13
+    # (Chaiten; los demás con 20, el conjunto con 5 por semana) deja PROVISORIO y se nombra; con 14 justas, CUMPLE. Sin
+    # este par, apagar la regla cuando no hay volcanes cambiados (MR72) o vaciar con B0 la lista de los sin cambio (MR73)
+    # sobrevivían a todas las pruebas (MY7 y MY8 del verificador): el único escenario con B0 (ER25) ya es PROVISORIO por
+    # las semanas
+    "ER54": dict(pob=lambda: esc_once(offs_vol={"Chaiten": OFFS_4SEM[:13]}, brazo="B0"), fase="sombra", rc=4,
+                 args=["--roi-brazo", "B0", "--sha-desde", SHA_REAL_B4],
+                 tiene=[("== noches por semana y volcán", ["ROI distinta de B0 en ninguno",
+                                                           "Chaiten 5, 5, 3, 0 (13) sin cambio, faltan",
+                                                           "Lascar 5, 5, 5, 5 (20) sin cambio, completas"]),
+                        ("== duración de la sombra", ["por semana 5, 5, 5, 5 (20) (completas)",
+                                                      "sin cambio de ROI con menos de 14 noches ['Chaiten']: INCOMPLETA"]),
+                        ("== §6.3 sombra: PROVISORIO", ["volcanes sin cambio de ROI con menos de 14 noches: Chaiten 13"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
+    "ER55": dict(pob=lambda: esc_once(offs_vol={"Chaiten": OFFS_4SEM[:14]}, brazo="B0"), fase="sombra", rc=0,
+                 args=["--roi-brazo", "B0", "--sha-desde", SHA_REAL_B4],
+                 tiene=[("== noches por semana y volcán", ["ROI distinta de B0 en ninguno",
+                                                           "Chaiten 5, 5, 4, 0 (14) sin cambio, completas"]),
+                        ("== duración de la sombra", ["sin cambio de ROI con menos de 14 noches ninguno: COMPLETA"]),
+                        ("== §6.3 sombra: CUMPLE", ["sin cambio de ROI, 14 noches o más cada uno: Chaiten 14, Copahue 20"])],
+                 no_tiene=["== §6.3 sombra: PROVISORIO", "== §6.3 sombra: NO CUMPLE"]),
     "E22": dict(pob=lambda: base(), sg_otra=True, rc=3,
                 tiene=[("== cobertura: INSUFICIENTE", []), ("== compuerta del veredicto", ["CERRADA"])],
                 no_tiene=["== §6 censo:"]),

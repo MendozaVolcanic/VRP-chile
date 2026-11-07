@@ -40,6 +40,10 @@ pasada (contada en todas, o en la de la última), la conversión de una zona dis
 cuando no se da --ahora (MX11 del verificador) y la pasada en el minuto exacto de «ahora» (MX13). La regla de 14 de los
 volcanes cambiados sigue sin mutación propia (R5-05: redundante con 5 por semana, A116). Con la noche contada una sola
 vez, la mutación MX9 del verificador (total = suma de las semanas) pasa a ser equivalente.
+MR72 a MR75 (S174, VPR945-R6, retoques tras el merge de #945, sin cambio de regla) rompen: la regla de 14 noches de los
+volcanes sin cambio cuando se lee con B0 (apagada si ningún volcán cambia, o con la lista vacía; MY7 y MY8 del
+verificador, que sobrevivían a todo), la captura del OverflowError de --ahora (R6-01) y la conversión a la zona local en
+vez de a UTC (MY10; R6-03: ER45 corre con TZ en UTC+12, así que cae también con TZ=UTC en el proceso padre).
 Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4]
 Salida: 0 si los controles salen como deben y todas las mutaciones quedan ATRAPADAS; 1 si no.
 """
@@ -327,6 +331,18 @@ MUTACIONES = {
              "return t < t_fin and t <= t_ahora", "return t < t_fin and t < t_ahora"),
     "MR71": ("R5-02: la noche va a la semana de su última pasada en vez de la primera",
              "for h in sorted(horas, key=hora_dt):", "for h in sorted(horas, key=hora_dt, reverse=True):"),
+    # S174, VPR945-R6 (sexta ronda del verificador limpio, retoques tras el merge de #945)
+    "MR72": ("R6-02 (MY7 del verificador): la regla de las 14 noches de los sin cambio se apaga si ningún volcán cambia "
+             "de ROI (lectura con B0)",
+             "dur_ok = ahora_ok and noches_ok and not vol_falta and not vol_pocas",
+             "dur_ok = ahora_ok and noches_ok and not vol_falta and not (vol_pocas and cambia)"),
+    "MR73": ("R6-02 (MY8 del verificador): con B0 la lista de volcanes sin cambio queda vacía",
+             "sin_cambio = [v for v in sorted(esperada) if v not in exigidos]",
+             "sin_cambio = [v for v in sorted(esperada) if v not in exigidos] if cambia else []"),
+    "MR74": ("R6-01: el OverflowError de pasar --ahora a UTC no se captura (salida 1 con traceback)",
+             "except (ValueError, OverflowError):", "except ValueError:"),
+    "MR75": ("R6-03 (MY10 del verificador): la zona de --ahora se convierte a la zona local de la máquina, no a UTC",
+             "t = t.astimezone(datetime.timezone.utc).replace(tzinfo=None)", "t = t.astimezone().replace(tzinfo=None)"),
     "CAIDA": ("CONTROL: el analizador sólo se cae (excepción al cargar los objetivos)",
               'obj = {o["id"]: o for o in json.loads(Path(a.objetivos).read_text(encoding="utf-8"))}',
               'raise RuntimeError("mutación de control: el programa se cae")'),
