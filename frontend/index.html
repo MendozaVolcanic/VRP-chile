@@ -1529,18 +1529,18 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
   return { ...metricsOf(agg), byBucket };
 }
 
-// S89 #3 — mirova_confirmed: etiqueta por-record "MIROVA también vio esto".
-// Cruce con el ground truth EXTERNO (CSV consolidado MIROVA); por eso vive en
-// el frontend y NO en el pipeline (no acoplar el NRT a un CSV de scraping de
-// otro repo — design §4.2). Definición CONSISTENTE con el TP de computeMetrics:
-// existe ALERTA MIROVA (clasificacion != NULO/RUTINA, VRP>0) en el mismo bucket
-// de sensor dentro de ±60 min. NO se gatea por distancia: las distancias del
-// CSV (sobre todo OCR) son poco confiables, y un gate de 2 km haría
-// mirova_confirmed MÁS estricto que el recall que el dashboard ya reporta →
-// incoherente. La distancia MIROVA matcheada se guarda solo para el tooltip
-// (_mirova_dist_km). Campos transitorios prefijo "_" (derivados en cliente, no
-// persistidos). Excluyente con geo_class=extension por construcción (extension
-// = sin alerta MIROVA → no confirmado).
+// S89 #3, mirova_confirmed: "MIROVA también vio esto", cruce con el CSV externo de MIROVA (frontend, no pipeline,
+// design §4.2); sin gate de distancia (las del CSV son poco confiables), la matcheada va al tooltip. Campos "_".
+// S175 decisión 7 (F2-204, V2-04; Nicolás 2026-11-07). POR QUÉ: el operador lee «MIROVA publicó alerta térmica
+// en esta pasada», y hasta S175 bastaba cualquier alerta del mismo sensor a ±60 min (otra pasada, otro satélite)
+// o de 0,04 MW, que el banner de MIROVA llama NONE. Ahora es la vara del banco: la MISMA pasada a ±120 s
+// (scripts/clase_mirova.py::VENTANA_S) con D-9 (#811): en VIIRS 375 una alerta de 0,05 MW o menos cuenta como
+// «MIROVA no vio nada», salvo otra mayor del mismo sensor a ±120 s de ella (aplicar_regla_minimas). Ya NO es el
+// TP de computeMetrics ni corroboracionMirova (siguen a ±60 min sin D-9: el panel de recall es otra decisión).
+// Exime de los filtros de artefacto: 0 cambian (experiments/_s175_confirmo_pasada/). Constantes = clase_mirova (guard s175).
+const MIROVA_PASADA_MS = 120 * 1000;
+const MIROVA_MINIMA_MW = 0.05;
+const MIROVA_MINIMA_BUCKETS = ["VIIRS375"];
 function enrichWithMirovaConfirmation(ourRecords, mirovaRecords) {
   const mByBucket = { MODIS: [], VIIRS375: [], VIIRS750: [] };
   for (const m of mirovaRecords) {
@@ -1553,18 +1553,21 @@ function enrichWithMirovaConfirmation(ourRecords, mirovaRecords) {
     const t = parseUtcMs(m.datetime_utc);
     if (!Number.isFinite(t)) continue;
     const dist = parseFloat(m.distancia_km ?? m.Distancia_km ?? "");
-    mByBucket[b].push({ t, dist: Number.isFinite(dist) ? dist : null });
+    const minima = MIROVA_MINIMA_BUCKETS.includes(b) && vrp <= MIROVA_MINIMA_MW + 1e-9;
+    mByBucket[b].push({ t, dist: Number.isFinite(dist) ? dist : null, minima });
   }
-  for (const k of Object.keys(mByBucket)) mByBucket[k].sort((a, b) => a.t - b.t);
-  const TOL_MS = 60 * 60000;
+  for (const k of Object.keys(mByBucket)) {  // D-9: una mínima sobrevive sólo con una alerta mayor a ±120 s
+    const altas = mByBucket[k].filter(a => !a.minima).map(a => a.t);
+    mByBucket[k] = mByBucket[k].filter(a => !a.minima || altas.some(t => Math.abs(t - a.t) <= MIROVA_PASADA_MS)).sort((a, b) => a.t - b.t);
+  }
   function nearest(list, t) {
     if (!list.length) return -1;
     let lo = 0, hi = list.length - 1;
     while (lo < hi) { const mid = (lo + hi) >> 1; if (list[mid].t < t) lo = mid + 1; else hi = mid; }
-    let best = -1, bestDt = TOL_MS + 1;
+    let best = -1, bestDt = MIROVA_PASADA_MS + 1;
     for (let i = Math.max(0, lo - 1); i <= Math.min(list.length - 1, lo + 1); i++) {
       const dt = Math.abs(list[i].t - t);
-      if (dt <= TOL_MS && dt < bestDt) { best = i; bestDt = dt; }
+      if (dt <= MIROVA_PASADA_MS && dt < bestDt) { best = i; bestDt = dt; }
     }
     return best;
   }
@@ -1576,10 +1579,7 @@ function enrichWithMirovaConfirmation(ourRecords, mirovaRecords) {
     const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t)) continue;
     const idx = nearest(mByBucket[b], t);
-    if (idx >= 0) {
-      r._mirova_confirmed = true;
-      r._mirova_dist_km = mByBucket[b][idx].dist;
-    }
+    if (idx >= 0) { r._mirova_confirmed = true; r._mirova_dist_km = mByBucket[b][idx].dist; }
   }
 }
 
@@ -3111,9 +3111,9 @@ function renderDetail() {
           weight: isPrimary ? 1.5 : 0.8,
           fillColor: color, fillOpacity: pxOpacity, dashArray: null,
         }));
-        // S89 #3: anillo verde si MIROVA confirmó esta detección (mismo bucket
-        // de sensor ±60 min). Convención: anillo verde = MIROVA-backed (TP que
-        // el dashboard ya cuenta en recall); relleno naranja = extensión real
+        // S89 #3: anillo verde si MIROVA confirmó esta detección (misma pasada,
+        // ±120 s con D-9, S175 decisión 7). Convención: anillo verde = MIROVA-
+        // backed (más estricto que el recall, que va a ±60 min); naranja = extensión real
         // no-MIROVA. Excluyentes por construcción. Solo sobrescribe el borde,
         // el relleno (sensor/summit/far/extension) queda intacto.
         if (r._mirova_confirmed) {
