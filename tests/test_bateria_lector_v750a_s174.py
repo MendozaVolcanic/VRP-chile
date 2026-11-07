@@ -18,8 +18,18 @@ Lo que la batería necesita y el checkout de profundidad 1 no trae:
 
 Control de que esta prueba puede fallar: con `V750A_LECTOR_MODULO` apuntando a una copia mutada del lector (en la misma
 carpeta, para que resuelva las mismas rutas), `test_la_bateria_entera_sale_ok` tiene que fallar por aserción.
+
+Segunda vuelta (verificador de #954). El juez de la batería es la batería misma: vaciar las aserciones de un escenario
+(ER54 sin `tiene` ni `no_tiene`) dejaba las cuatro pruebas en verde (VPR954-01). Por eso
+`test_la_bateria_y_su_medidor_tienen_la_huella_fijada` fija el sha256 de `probar_evaluar_v750a.py` y
+`mutar_evaluar_v750a.py` (fines de línea normalizados a LF, así da lo mismo en Windows con autocrlf y en Linux): todo
+cambio a los escenarios, a su juez (`correr`) o al medidor tiene que venir con la huella nueva en este archivo, y eso se
+ve en el diff. Y el medidor reconoce una atrapada «sólo por la bandera "no se cae"» por un texto (`BANDERA`) copiado de
+`probar_evaluar_v750a.py`; si ese texto cambia, el rótulo vuelve a decir «por aserción» en silencio (VPR954-02):
+`test_la_bandera_del_medidor_es_el_texto_que_emite_la_bateria` lo compara con lo que la batería emite de verdad.
 """
 import datetime
+import hashlib
 import importlib.util
 import os
 import subprocess
@@ -35,18 +45,43 @@ LECTOR = Path(os.environ.get("V750A_LECTOR_MODULO") or EXP / "evaluar_v750a.py")
 EVALUADOR_RUTA = "experiments/_s157_prereg_d25/evaluar_d25.py"
 # Conteo fijo a propósito: un escenario que desaparece (o uno nuevo que no se anota aquí) pone la prueba en rojo.
 N_ESCENARIOS = 105
-# Los escenarios son independientes (cada uno en su carpeta); en grupos paralelos la batería cabe en el job de 20 min.
+# Los escenarios son independientes (cada uno en su carpeta); en grupos paralelos la batería cabe holgada en el job
+# `bateria-v750a` de 40 min (158 s en el CI de #954).
 GRUPOS = 4
+# VPR954-01: sha256 de probar_evaluar_v750a.py y mutar_evaluar_v750a.py con fines de línea LF (ver _huella_bateria).
+# Se actualiza A PROPÓSITO, con el valor que imprime la prueba cuando falla, después de correr el medidor sobre los
+# escenarios tocados.
+HUELLA_BATERIA = "b5222101be801e2039ebdd89fab2409bd17b8721e1d3a72a3b24abf8b8c69335"
 
 
-def _cargar_pruebas():
-    spec = importlib.util.spec_from_file_location("probar_evaluar_v750a_t", PRUEBAS)
+def _cargar(nombre, ruta):
+    spec = importlib.util.spec_from_file_location(nombre, ruta)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
 
 
-P = _cargar_pruebas()
+P = _cargar("probar_evaluar_v750a_t", PRUEBAS)
+M = _cargar("mutar_evaluar_v750a_t", MEDIDOR)
+
+
+def _huella_bateria():
+    """sha256 de los dos archivos leídos del disco (así ve también un cambio sin commitear) con CRLF pasado a LF."""
+    h = hashlib.sha256()
+    for ruta in (PRUEBAS, MEDIDOR):
+        h.update(ruta.name.encode("utf-8") + b"\0" + ruta.read_bytes().replace(b"\r\n", b"\n") + b"\0")
+    return h.hexdigest()
+
+
+def test_la_bateria_y_su_medidor_tienen_la_huella_fijada():
+    """VPR954-01: un escenario con las aserciones vaciadas sigue saliendo OK, así que la corrida no lo ve; la huella sí."""
+    h = _huella_bateria()
+    assert h == HUELLA_BATERIA, (
+        f"la huella de {PRUEBAS.name} y {MEDIDOR.name} (sha256, fines de línea LF) es {h} y esta prueba fija "
+        f"{HUELLA_BATERIA}. Cambió la batería del lector de V750-A, su juez o su medidor. Si es a propósito: corre el "
+        f"medidor (python {MEDIDOR.name} --dest <tmp> --evaluador <evaluar_d25.py del blob de git> --solo <MR> "
+        f"--escenarios <los tocados>), confirma que ningún escenario perdió aserciones, anota el resultado en el PR y "
+        f"copia {h} en HUELLA_BATERIA de {Path(__file__).name}.")
 
 
 def _evaluador(tmp):
@@ -85,6 +120,19 @@ def test_tz_de_er45_y_er47_pone_el_proceso_en_utc_mas_12(tmp_path):
                        env=dict(_env(tmp_path), TZ="XXX-12"))
     assert o.returncode == 0, o.stderr
     assert float(o.stdout.strip()) == 12 * 3600, f"con TZ=XXX-12 el desfase local es {o.stdout.strip()} s, no 43200"
+
+
+def test_la_bandera_del_medidor_es_el_texto_que_emite_la_bateria(tmp_path):
+    """VPR954-02: el medidor rotula «sólo por la bandera "no se cae"» buscando BANDERA en la línea de la falla. Aquí la
+    batería corre ER53 (no_traceback=True) contra un lector falso que sólo lanza una excepción, y la falla que emite
+    tiene que contener BANDERA; si alguien cambia uno de los dos textos, el rótulo de MR74 volvería a decir «por
+    aserción» sin que nada se pusiera rojo."""
+    falso = tmp_path / "lector_que_se_cae.py"
+    falso.write_text("raise RuntimeError('lector falso: se cae a propósito')\n", encoding="utf-8")
+    est, det = P.correr("ER53", P.ESCENARIOS["ER53"], falso, _evaluador(tmp_path), tmp_path / "dest")
+    assert est == "FALLA" and len(det) == 1, (est, det)
+    assert M.BANDERA in det[0], (f"BANDERA de {MEDIDOR.name} ({M.BANDERA!r}) no está en la falla que emite "
+                                 f"{PRUEBAS.name} para un escenario que afirma que no se cae: {det[0]!r}")
 
 
 def _correr_grupo(args):
@@ -128,10 +176,13 @@ def test_la_bateria_entera_sale_ok(tmp_path):
 def test_el_medidor_atrapa_un_subconjunto_barato_en_esta_maquina(tmp_path):
     """La batería puede ponerse roja aquí (A110): IDENTIDAD pasa, CAIDA se cae, y tres mutaciones se atrapan por
     aserción. MR75 (la zona de --ahora a la hora local) sólo se ve si TZ=XXX-12 surte efecto en ER45; MR73 y MR76 rompen
-    la regla de 14 noches de los volcanes sin cambio con B0 (ER55 y ER56)."""
+    la regla de 14 noches de los volcanes sin cambio con B0 (ER55 y ER56). VPR954-02: MR74 (el OverflowError de --ahora
+    sin capturar) se atrapa en ER53 SÓLO por la bandera «no se cae» y tiene que salir rotulada así; es el control
+    positivo del rótulo en el CI. ER53 sale por argparse antes de cargar los objetivos (con él solo, CAIDA daría PASA en
+    falso); ER45, ER54, ER55 y ER56 sí los cargan, así que CAIDA significa algo."""
     dest = tmp_path / "medidor"
     o = subprocess.run([sys.executable, str(MEDIDOR), "--dest", str(dest), "--evaluador", str(_evaluador(tmp_path)),
-                        "--hilos", "4", "--solo", "MR73,MR75,MR76", "--escenarios", "ER45,ER55,ER56"],
+                        "--hilos", "4", "--solo", "MR73,MR74,MR75,MR76", "--escenarios", "ER45,ER53,ER54,ER55,ER56"],
                        capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=str(EXP),
                        env=_env(tmp_path), timeout=1800)
     txt = o.stdout + o.stderr
@@ -143,4 +194,8 @@ def test_el_medidor_atrapa_un_subconjunto_barato_en_esta_maquina(tmp_path):
         assert lineas.get(m, "").startswith("ATRAPADA "), (m, txt)
     assert "sólo por la bandera" not in "".join(x for x in o.stdout.splitlines() if x.startswith(("MR73", "MR75",
                                                                                                     "MR76"))), txt
+    assert lineas.get("MR74", "").startswith('ATRAPADA sólo por la bandera "no se cae" '), ("MR74", txt)
+    resumen = next((x for x in o.stdout.splitlines() if x.startswith("== RESUMEN")), "")
+    assert resumen.startswith("== RESUMEN: 4 de 4 mutaciones atrapadas (3 por aserción sobre la salida, 1 sólo por la "
+                              'bandera "no se cae")'), txt
     assert o.returncode == 0, txt

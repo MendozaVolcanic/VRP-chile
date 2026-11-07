@@ -62,6 +62,9 @@ jobs:
       # la lectura en commits reales de main (git merge-base --is-ancestor, git show -s). El checkout es de
       # profundidad 1; este paso baja la historia de commits de main SIN árboles ni blobs (unos 4 MB, no los cientos
       # de MB de los datos NRT) y sin tags, así que las pruebas que se saltan sin un tag siguen igual.
+      # OJO (VPR954-04): --unshallow exige un clon superficial. Si alguien pone `fetch-depth: 0` en el checkout de
+      # arriba, git sale con «fatal: --unshallow on a complete repository does not make sense» y el job queda rojo
+      # antes de probar nada (falso rojo, no falso verde): en ese caso este paso sobra y se quita.
       - name: Historia de commits de main (sin árboles ni blobs)
         run: |
           git config remote.origin.promisor true
