@@ -7,10 +7,14 @@
 
 ## 0. En una pantalla
 
-- **Base fija**: `origin/main` = `ba77c1f6dc072d1f11394e44394f6cde8b2fdba9` (hora del servidor al fijarla: Fri, 06 Nov
-  2026 13:42:31 GMT). Aparte, rotulado: `origin/loop/activo` = `06de6876a878fa672b684ca9793a0f4f1fc0e4ba` (bitácora y
-  traspasos; el encargo decía `dd7467218`, que es ancestro: la rama avanzó tres commits de bitácora) y el PR #945 en
-  `106db89414b9286848e723153a2feb5cf631ba0f` (borrador, rama `claude/s173-vpr939-03`).
+- **Base: se fija en la ola 0** (mejora 1 de S174, 2026-11-07). El plan se redactó sobre `origin/main` =
+  `ba77c1f6dc072d1f11394e44394f6cde8b2fdba9` (Fri, 06 Nov 2026 13:42:31 GMT), pero main siguió: el #945 (lector de la
+  sombra V750-A) entró el 2026-11-07 03:30 UTC (squash `235ba7918`) y `752d348bc` ya va 88 commits más allá. Medir el
+  lector viejo sería auditar algo que ya no corre. Por eso «SHA_BASE» = `origin/main` en el momento de la ola 0, con la
+  hora del servidor, y los sha256 de la referencia («SHA256_CONSOLIDADO», «SHA256_OCR») se calculan ese mismo momento.
+  Las citas `archivo:línea` de este plan son de `ba77c1f6d` o `752d348bc`: cada auditor las remapea por contenido (A101)
+  antes de usarlas. Aparte, rotulado: `origin/loop/activo` (bitácora y traspasos) en su hash de la ola 0, y #952
+  (falsos verdes de cenit, borrador) fuera de main.
 - **Cinco frentes, cinco verificadores** (tope de la regla S154): F1 MODIS con la vía «código MIROVA» corriendo; F2 VIIRS
   375 en producción (K desde #850) medido sobre el sistema corriendo; F3 censo de decisiones y cierres S160 a S174; F5
   identidad del pareo con MIROVA en los tres sensores; F0 la puerta de entrada (pendientes de S160 que no caen en ningún eje).
@@ -26,6 +30,10 @@
   pregunta si lo que el audit cuenta como acierto es la misma anomalía que alertó MIROVA). F3 es nuevo a medias (las decisiones
   del dueño contra el código nunca se auditaron; los cierres sí, en S160 F4). F5 es nuevo (pedido de Nicolás, 2026-11-06).
   Orden de recorte si hay que achicar: F3.
+- **Siete mejoras de S174 (2026-11-07, pedido de Nicolás)**, todas dentro de los cinco frentes: base refijada en la
+  ola 0 (1); sonda de esfuerzo antes de la ola 1 (2, §5); en F5, la referencia como instrumento (I7, 3), el umbral de
+  1 MW con VRP truncado (I8, 4) y lo que ve el operador en las tres vistas y en Pages (I3 ampliada, 6); en F0, las
+  pasadas que nunca bajamos (5); en F1, la sobre-publicación de la vía contra K (7).
 - **Cuándo**: nada se lanza antes del reinicio del plan semanal (2026-11-08 12:00 UTC). F2, F3, F5 y F0 desde ese
   momento; F1 después del audit semanal del lunes 2026-11-09 09:00 UTC, que es su prueba de campo.
 - **Costo estimado** (§7): unos 4 millones de tokens y 6 a 7 horas de reloj, medido sobre el registro real de S160.
@@ -102,6 +110,9 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
   publica; (c) un camino por el que la vigilancia de la guardia o el audit semanal dan VERDE con una regresión real
   (vigilante ciego, guía §3); (d) un criterio de la regla de reversión §4 que no se puede evaluar con lo que el sistema
   produce.
+- **Sobre-publicación de la vía** (mejora 7 de S174): la tasa de falsas publicaciones (negativos limpios publicados)
+  de la vía desde el encendido contra la de K antes, en los mismos volcanes y con el mismo predicado; con pocas noches
+  de la vía, se informa con su denominador y sin veredicto si no alcanza (A111).
 - **Vara**: el predicado del tablero ejecutado con node (`scripts/banco_paridad.py::correr_node`, l. 156 en la base) y
   la regla §4 de `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` tal como está en la base.
 - **Línea base roja**: (1) su censo de records tiene que encontrar records `sin_grilla` o `sin_mxd03` posteriores al
@@ -183,6 +194,22 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
   - **I6 tiempo**: la distribución de |Δt| de los pares; cuántas alertas de MIROVA quedan sin par con un record nuestro
     a 2 a 10 min (SOSPECHA de que una convención distinta, inicio del gránulo contra hora del píxel, mande pares reales a
     `sin_info`, fuera del denominador sin aviso).
+  - **I7 la referencia como instrumento** (mejora 3): el negativo limpio exige que MIROVA liste el gránulo con VRP 0.
+    Pasadas nuestras sin ninguna fila de MIROVA a ±120 s, por satélite, volcán y mes; y el acuerdo entre la tabla
+    (`latest.php`, la más creíble según S159) y el OCR en las mismas pasadas. Si la lista de MIROVA salta gránulos, el
+    denominador de las falsas publicaciones se mueve sin aviso.
+  - **I8 el umbral con VRP truncado** (mejora 4): el OCR anota en MODIS que MIROVA trunca el VRP («real ∈ [9, 10)»,
+    63 filas con esa nota en el snapshot de `752d348bc`). Una alerta escrita 1,0 MW puede ser real entre 1 y 2, y una de
+    0,x puede ser protegida. Cuántas alertas por sensor caen a menos de una unidad de truncado del umbral de 1 MW, y
+    cómo cambia la lista de protegidas al redondear hacia arriba y hacia abajo. Caso de partida: la protegida perdida
+    Chillán MODIS 2026-10-30 07:15, exactamente 1,0 MW en el audit del 2026-11-02 (sin verificar).
+  - **I3 se extiende a lo que ve el operador** (mejora 6): las tres copias de `mirovaEqVrp` son distintas en texto
+    (`index.html` recibe `innerKm` con defecto 10; `diario.html` usa su tabla `INNER_RADIUS_KM`, l. 243, con defecto 5).
+    Qué casos cubre `tests/test_guard_predicado_tres_vistas_s147.py` (record sin `primary_cluster`, `innerKm` no pasado,
+    Cordón Caulle con 20 km), la tabla de `diario.html` contra `volcanoes.yaml`, y que GitHub Pages sirva el mismo
+    `index.html` que «SHA_BASE» (se lee la página publicada; `pages/builds/latest` dio 404).
+- **Orden dentro de F5** (si el frente se alarga, se corta por el final y lo no medido se informa como no medido):
+  I2, I8, I7, I3, I1, I5, I6, I4.
 - **Hallazgo**: un volcán o estrato donde la clase (iii) es una fracción no despreciable de los aciertos, y en especial
   cualquier protegida (1 MW o más) cuyo acierto sea (iii): ahí el recall dice que vimos lo que MIROVA vio y no es así;
   una diferencia port contra node que cambie el recall publicado; un ratio de magnitud que cambie de banda al
@@ -202,7 +229,9 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
   de Cordón Caulle con su punto movido 15 km del cráter, misma noche) tiene que salir (iii), uno de misma pasada y mismo
   píxel (i), y uno sin TIF ni pasada coincidente (iv); (3) un par desfasado 3 min a propósito tiene que aparecer en I6;
   (4) una noche donde port y node difieren a propósito (un record con `distance_class` fuera de summit) tiene que
-  aparecer en I3.
+  aparecer en I3; (5) I8 tiene que encontrar la fila truncada de Chillán MODIS del 2026-11-06 13:15 (9,0 MW, «real ∈
+  [9, 10)»); (6) I7 corrido sobre una copia de la referencia a la que se le borran a propósito las filas de un satélite
+  en una semana tiene que mostrar ese hueco.
 - **Alcance**: el pareo y el conteo, no los detectores (MODIS es F1, VIIRS 375 es F2, VIIRS 750 lo mira la sombra de
   #945). Lee records; no reprocesa.
 - **Campo**: dos o tres aciertos de clase (iii) o (iv), con pasada UTC, para mirar contra la lámina de MIROVA.
@@ -214,6 +243,11 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
 - **Vara**: el código y los datos de la base; para C-07 y V0b-01, el port del código de MIROVA V750 que ya existe.
 - **Línea base roja**: (1) la decisión 1 de S160 (#891) tiene que salir resuelta, con su commit; (2) la decisión 6
   (C-10) tiene que salir abierta. Si el clasificador da lo mismo para las dos, no clasifica.
+- **Pasadas que nunca bajamos** (mejora 5 de S174): el recall excluye las noches sin ningún record nuestro, bien
+  para el recall, pero un satélite que deja de bajarse en silencio (NOAA-21, Suomi NPP tras su cese) sólo se ve en
+  `noches_sin_datos`. F0 cuenta esos conteos por satélite y su tendencia semanal, y el último record de cada satélite
+  por volcán contra el último gránulo que MIROVA lista. Línea base roja propia: Suomi NPP tiene que aparecer sin
+  records después del 2026-11-02 13:00 UTC.
 - **Campo**: C-07, C-09, C-10 actualizados; C-06 (Suomi NPP después del 2026-11-02 13:00 UTC, mirado en los records)
   y la rotación de `EARTHDATA_TOKEN` antes del 2026-11-27 (vence el 2026-12-07 18:03 UTC) como ítems con fecha.
 
@@ -240,10 +274,10 @@ línea base roja que el auditor no pudo reencontrar. Lo demás se publica con su
   carpeta de notas compartidas. Informes y scripts: `experiments/_s175_audit/<agente>/` dentro de este worktree.
 - **Temporales grandes**, una carpeta por agente con su nombre: `C:\Users\nmend\vrp-temporales\s175_audit\<agente>\`
   (C: tenía 19 GB libres a las 13:4x UTC; D: 4,9 GB, no se usa). Nada en las carpetas de S174 (`D:\vrp-trabajo\temporales\s174-*`).
-- **Instantánea**: `git archive ba77c1f6d pipeline scripts frontend .github tests docs experiments/_s160_audit
+- **Instantánea**: `git archive «SHA_BASE» pipeline scripts frontend .github tests docs experiments/_s160_audit
   experiments/_s171_modd_adopcion CLAUDE.md README.md volcanoes.yaml | tar -x -C C:\Users\nmend\vrp-temporales\s175_audit\main\`
   (con rutas, guía §0; trae la configuración de la raíz, lección S160 §7 punto 4). Los datos se leen de este worktree
-  sólo si `git diff --quiet ba77c1f6d -- data latest_consolidado.csv` sale con 0; si no, con `git show`.
+  sólo si `git diff --quiet «SHA_BASE» -- data latest_consolidado.csv` sale con 0; si no, con `git show`.
 - **Insumos de GitHub**, una vez, por el orquestador en la ola 0: `gh api rate_limit`, últimas 50 corridas de `nrt.yml`,
   `audit-weekly.yml`, `guardia-k-modis.yml`, `vigilancia-guardia-modis.yml`, `sync-mirova-csv.yml` y
   `nrt-healthcheck.yml`, últimos commits de `MendozaVolcanic/Mirova-v1` y `gh secret list` (nombres y fechas, sin
@@ -256,6 +290,15 @@ línea base roja que el auditor no pudo reencontrar. Lo demás se publica con su
 | API de GitHub | 10 llamadas por auditor, 5 por verificador, leyendo antes los insumos | ninguna si `rate_limit` baja de 200 |
 | workflows | ninguno | despachar uno es parada |
 | credenciales | ninguna | usar una es parada |
+
+**Sonda de esfuerzo (mejora 2 de S174, ola 0).** En S172 y S174 todos los agentes pedidos a `effort: high`
+declararon 10 a 15. Un auditor a esfuerzo bajo es el defecto más grande que puede tener esta auditoría, y pedirle que
+lo declare no lo arregla. Antes de la ola 1, el orquestador lanza un agente Fable con `effort: high` cuya única tarea
+es declarar el esfuerzo con que corre (costo: unos pocos miles de tokens). Si declara high, se sigue con el Agent
+tool. Si declara bajo o SIN DATO, se para y se le pregunta a Nicolás entre dos salidas: (a) lanzar cada auditor como
+sesión propia con el esfuerzo fijado por la app (`set_session_effort`), que Nicolás tiene que pedir en sus palabras en
+esta sesión porque una sesión no puede iniciar otras por pedido de otra sesión; o (b) seguir y escribir el esfuerzo
+real como limitación en la cabecera de `docs/AUDIT_S175.md`. El esfuerzo declarado de cada agente va al registro.
 
 **Olas**: 1) F2, F3, F5, F0 desde el 2026-11-08 12:00 UTC (4 en paralelo, ninguno pesado salvo F2 si reprocesa; si
 reprocesa, cuenta como pesado); 2) V2, V3, V5, V0 a medida que terminan; F1 desde el 2026-11-09 09:30 UTC, después
@@ -276,16 +319,16 @@ lo dispara un cron externo y no se midió cuántas corridas hace hoy; lo cuenta 
 ```text
 «DEFINICIONES_DE_LA_VARA» =
 - «publica»: lo que da el predicado del tablero ejecutado con node por scripts/banco_paridad.py::correr_node (l. 156)
-  sobre frontend/index.html del commit ba77c1f6d (regla A97). Nunca una reconstrucción a mano.
+  sobre frontend/index.html del commit «SHA_BASE» (regla A97). Nunca una reconstrucción a mano.
 - «alerta de MIROVA», «protegida» y «negativo limpio»: lo que devuelve scripts/banco_paridad.py::etiquetar (l. 317) en
-  ba77c1f6d, con la regla D-9 de scripts/clase_mirova.py. Protegida es alerta de 1 MW o más (lectura A, D-4).
-- pareo de una fila de MIROVA con una pasada nuestra: TOL_S de scripts/banco_paridad.py l. 78 en ba77c1f6d.
-- la referencia: la copia del repo en ba77c1f6d, latest_consolidado.csv (sha256 c54bec14b290b3040df065a1887bb7cc444a725bc5297e16e34ac194e59d618e)
-  y data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv (sha256 cb18f9cd695940d5960b48cf322622c1fc2491f2920cef604da88f046b6b16af),
+  «SHA_BASE», con la regla D-9 de scripts/clase_mirova.py. Protegida es alerta de 1 MW o más (lectura A, D-4).
+- pareo de una fila de MIROVA con una pasada nuestra: TOL_S de scripts/banco_paridad.py l. 78 en «SHA_BASE».
+- la referencia: la copia del repo en «SHA_BASE», latest_consolidado.csv (sha256 «SHA256_CONSOLIDADO»)
+  y data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv (sha256 «SHA256_OCR»),
   no la remota viva.
 - «detector efectivo» de un record MODIS: la vía si via_codigo_mirova es true, K en otro caso (scripts/auto_audit_weekly.py
-  l. 446 a 456 en ba77c1f6d). F1 audita esta definición: para F1 es objeto, no vara.
-- documentos de loop/activo: en 06de6876a. PR #945: en 106db8941, rotulado «fuera de main».
+  l. 446 a 456 en ba77c1f6d, remapear). F1 audita esta definición: para F1 es objeto, no vara.
+- documentos de loop/activo: en «SHA_LOOP». PR #952: fuera de main, rotulado. El lector de V750-A (#945) ya está en «SHA_BASE».
 «LIMITES_DE_RECURSOS» = Esta tarea no nombra ningún workflow ni credencial. Hasta 10 llamadas a la API de GitHub
 (verificador: 5), después de leer C:\Users\nmend\vrp-temporales\s175_audit\insumos\. Disco: tu carpeta temporal, tope
 2 GB (verificador 0,5 GB). Como mucho un proceso pesado tuyo a la vez. En el encabezado declara el esfuerzo con que
@@ -311,7 +354,7 @@ Cada `<tarea>` es el texto de su frente en §3 (pregunta, hallazgo, vara, línea
 ```text
 Empieza por la línea base roja de tu frente: corre tu instrumento sobre el commit indicado y guarda el rojo en tu
 CARPETA antes de medir la base. Si no lo reencuentras, eso es tu primer hallazgo (el instrumento está ciego o el
-defecto nunca fue como se escribió) y lo dices antes de seguir. Mide en la base ba77c1f6d salvo donde tu frente
+defecto nunca fue como se escribió) y lo dices antes de seguir. Mide en la base «SHA_BASE» salvo donde tu frente
 diga otro commit, y nombra el commit en cada número. Lo que viva fuera de main va rotulado «fuera de main».
 No toques las ramas ni las carpetas de la sesión S174 (claude/s173-vpr939-03, claude/s174-*, D:\vrp-trabajo\temporales\s174-*).
 ```
@@ -340,7 +383,8 @@ tokens y 24 a 48 minutos; verificadores Opus: 316.650 a 384.714 tokens y 16 a 37
 
 Riesgo de subestimar: F1 y F2 leen records reales (VIIRS 375 es el sensor con más records) y pueden reprocesar; F3
 barre 308 entradas. F5 lee records de los tres sensores y los TIF ya archivados, sin reprocesar; reemplaza a F4 y no
-cambia el total. Si el plan semanal tras el reinicio no deja margen para 5 millones, recortar F3 (§0).
+cambia el total. Con I7, I8 e I3 ampliada, F5 queda en el extremo alto de su rango (unos 0,5 millones); por eso
+tiene un orden interno de corte. La sonda de esfuerzo cuesta unos pocos miles. Si el plan semanal tras el reinicio no deja margen para 5 millones, recortar F3 (§0).
 
 ## 8. Lo que el plan no hace, y lo que decide Nicolás antes de lanzar
 
@@ -354,3 +398,4 @@ ningún reproceso en Actions; no audita #945 como PR ni el código de Mirova-v1.
 | 3 | Fable como auditor y Opus como verificador | sí (guía §5); la alternativa barata, Sonnet auditor, no tiene medición propia en este proyecto |
 | 4 | Sellar este plan | con tu sí, commit y hash como «SHA_PLAN» antes de la ola 1 |
 | 5 | Tolerancia de «mismo foco» en F5 (I2): 2 píxeles nominales en VIIRS, 3 km en MODIS | sí, como criterio propuesto y no medido; en MODIS se agranda porque su geolocalización ya tiene un desplazamiento conocido de 1 a 3 km hacia el nadir (memoria `project_modis_geo_interp_offset`), que con 2 km fabricaría «otra fuente» falsa; si prefieres otra, se cambia antes de sellar |
+| 6 | Si la sonda de esfuerzo sale baja: auditores como sesiones con esfuerzo fijado, o seguir y declararlo como limitación | sesiones: un auditor a esfuerzo bajo invalida más que lo que cuesta montarlas; la elección se hace con el resultado de la sonda en la mano |
