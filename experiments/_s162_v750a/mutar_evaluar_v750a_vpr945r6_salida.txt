@@ -1,0 +1,10 @@
+(corrida parcial: --solo MR68,MR72,MR73,MR74,MR75)
+(escenarios parciales: --escenarios E18,E19,E20,E21,E47,E49,E23,ER1,ER2,ER3,ER4,ER5,ER6,ER8,ER9,ER10,ER11,ER12,ER13,ER15,ER16,ER17,ER18,ER19,ER20,ER21,ER22,ER23,ER24,ER25,ER26,ER27,ER28,ER29,ER30,ER31,ER32,ER33,ER34,ER35,ER36,ER37,ER38,ER39,ER40,ER41,ER42,ER43,ER44,ER45,ER46,ER47,ER48,ER49,ER50,ER51,ER52,ER53,ER54,ER55)
+IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (60)
+MR68 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | R5-01: una zona distinta de UTC en --ahora se ignora en vez de convertirse | == PRUEBAS: FALLAS 2 de 60 | escenarios que fallan ['ER45', 'ER53']
+MR72 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | R6-02 (MY7 del verificador): la regla de las 14 noches de los sin cambio se apaga si ningún volcán cambia de ROI (lectura con B0) | == PRUEBAS: FALLAS 1 de 60 | escenarios que fallan ['ER54']
+MR73 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | R6-02 (MY8 del verificador): con B0 la lista de volcanes sin cambio queda vacía | == PRUEBAS: FALLAS 2 de 60 | escenarios que fallan ['ER54', 'ER55']
+MR74 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | R6-01: el OverflowError de pasar --ahora a UTC no se captura (salida 1 con traceback) | == PRUEBAS: FALLAS 1 de 60 | escenarios que fallan ['ER53']
+MR75 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | R6-03 (MY10 del verificador): la zona de --ahora se convierte a la zona local de la máquina, no a UTC | == PRUEBAS: FALLAS 1 de 60 | escenarios que fallan ['ER45']
+CAIDA | CAÍDA (tiene que ser CAÍDA) | rc 2 | CONTROL: el analizador sólo se cae (excepción al cargar los objetivos) | == PRUEBAS: CAÍDAS 56 (fallas por aserción 2) de 60 | escenarios que fallan ['ER44', 'ER45']
+== RESUMEN: 5 de 5 mutaciones atrapadas por aserción; controles como deben; TODO COMO SE ESPERA
