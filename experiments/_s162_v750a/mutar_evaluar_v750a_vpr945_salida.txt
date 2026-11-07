@@ -1,0 +1,29 @@
+(S174, VPR945: MR1 a MR7 y MR9 a MR24 sobre los 24 escenarios de sombra, --hilos 2, evaluador del tag s161-d25-lectura con sha256 2e5576973ef1. Una primera corrida dio MR3 y MR17 CAÍDA: con MR3 el volcán fuera del mapa de ER10 entraba a la lectura y caía en inner[volcan] (KeyError), y con MR17 la tabla de régimen no se podía ordenar con una ROI None. Arreglo: el SIN DATO volcan_sin_roi va en su propio dict (no depende de la línea que rompe MR3) y la tabla se ordena por texto. Ésta es la corrida después del arreglo, con el árbol quieto. Las 76 mutaciones del archivo aplican exactamente una vez sobre el lector nuevo; M1 a M52 no se volvieron a correr.)
+(corrida parcial: --solo MR1,MR2,MR3,MR4,MR5,MR6,MR7,MR9,MR10,MR11,MR12,MR13,MR14,MR15,MR16,MR17,MR18,MR19,MR20,MR21,MR22,MR23,MR24)
+(escenarios parciales: --escenarios E18,E19,E20,E21,E23,E47,E49,ER1,ER2,ER3,ER4,ER5,ER6,ER8,ER9,ER10,ER11,ER12,ER13,ER15,ER16,ER17,ER18,ER19)
+IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (24)
+MR1 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (LR1): el filtro por ROI no saca ninguna pasada (lo de antes de S173) | == PRUEBAS: FALLAS 4 de 24 | escenarios que fallan ['ER2', 'ER3', 'ER5', 'ER12']
+MR2 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (LR1): sin --roi-brazo no se cierra la compuerta y se lee como B0 | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER1']
+MR3 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (LR1): una pasada sin régimen no es SIN DATO y entra a la lectura | == PRUEBAS: FALLAS 4 de 24 | escenarios que fallan ['ER4', 'ER6', 'ER8', 'ER9']
+MR4 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (LR1): --sha-desde no corta nada | == PRUEBAS: FALLAS 4 de 24 | escenarios que fallan ['ER5', 'ER6', 'ER11', 'ER17']
+MR5 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (LR1): un sha que git no conoce entra a la lectura | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER6']
+MR6 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (§12.8 punto 2): el corte de cenit en 40° y no en 30° | == PRUEBAS: FALLAS 2 de 24 | escenarios que fallan ['ER2', 'ER16']
+MR7 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (§12.8 punto 2): el borde de 30° va abajo | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER2']
+MR9 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (§4.3, LR2): la duración de 4 semanas no se exige | == PRUEBAS: FALLAS 3 de 24 | escenarios que fallan ['ER12', 'ER13', 'ER19']
+MR10 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (LR2): con --sha-desde el reloj no parte del corte | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER13']
+MR11 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (LR2): el reloj cuenta también las pasadas no observadas y las SIN DATO | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER12']
+MR12 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (VPR945-02): un volcán fuera del mapa de ROI vuelve a salir como «otra ROI» | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER10']
+MR13 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | VPR945-03: con 0 observadas no hay mensaje propio (dice SUFICIENTE y cae el nulo) | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER11']
+MR14 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | VPR945-04: --sha-desde acepta una referencia móvil (HEAD) mientras git la resuelva | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER15']
+MR15 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | VPR945-04: la salida lleva lo tecleado en --sha-desde y no el sha resuelto | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER17']
+MR16 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | VPR945-06 (MY2): sólo se exige la ROI; un record sin sha entra a la lectura | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER9']
+MR17 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | VPR945-06 (MY3): sólo se exige el sha; un record sin ROI no es SIN DATO | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER8']
+MR18 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | VPR945-05 (MY10): la lista de protegidas que salen de la lectura sale siempre «ninguna» | == PRUEBAS: FALLAS 2 de 24 | escenarios que fallan ['ER2', 'ER5']
+MR19 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | VPR945-07 (MY4): un --sha-desde que no resuelve no cierra con su mensaje (sigue como sha desconocido) | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER15']
+MR20 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | VPR945-07 (MY12): el conteo «dentro» incluye las SIN DATO del régimen | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER6']
+MR21 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | VPR945-07 (MY15): el cenit decide: una protegida sobre 30° que P pierde cierra la compuerta | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER16']
+MR22 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (LR2): antes de las 4 semanas un P1 tampoco veta (espera la duración) | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER18']
+MR23 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | sombra (LR2): antes de las 4 semanas un P2 PIERDE ya es NO CUMPLE | == PRUEBAS: FALLAS 1 de 24 | escenarios que fallan ['ER19']
+MR24 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | VPR945-07 (MY16): el régimen se lee también en las pasadas no observadas | == PRUEBAS: FALLAS 3 de 24 | escenarios que fallan ['ER2', 'ER3', 'ER5']
+CAIDA | CAÍDA (tiene que ser CAÍDA) | rc 2 | CONTROL: el analizador sólo se cae (excepción al cargar los objetivos) | == PRUEBAS: CAÍDAS 24 (fallas por aserción 0) de 24 | escenarios que fallan []
+== RESUMEN: 23 de 23 mutaciones atrapadas por aserción; controles como deben; TODO COMO SE ESPERA

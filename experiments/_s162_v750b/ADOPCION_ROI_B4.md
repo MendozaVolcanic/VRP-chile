@@ -74,6 +74,30 @@ otros nueve volcanes dan el mismo resultado con B0 y con B4.
 - **Al mergear**, anotar aquí, en el §11 de V750-A y en `tasks/LOOP_OBJETIVOS.md` §6 de `loop/activo` (lo pide el
   §12.6 del programa por sensor): el sha del merge, su hora UTC y la primera corrida de sombra con
   ese sha (su run id y qué noches procesó).
+- ⚠️ **S173, en curso (PR en borrador, rama `claude/s173-vpr939-03`, sin mergear)**: `evaluar_v750a.py --fase sombra`
+  lee la ROI y el sha de cada record de P, exige `--roi-brazo` (sin él cierra la compuerta), saca de la lectura las
+  pasadas de otra ROI y, con `--sha-desde`, las de código anterior; LECTURA LR1 de `LECTURAS_EVALUAR_V750A.md`. Hasta
+  el merge vale el texto que sigue. S174 (segunda vuelta, VPR945, LECTURA LR2): la sombra no dice CUMPLE antes
+  de las 4 semanas del §4.3 (PROVISORIO, salida 4; el reloj parte del corte con `--sha-desde`), un volcán fuera
+  del mapa de ROI es SIN DATO y `--sha-desde` exige un sha. S174 (tercera vuelta, VPR945-R2, LECTURA LR3):
+  `--sha-desde` es obligatorio en la sombra; la lectura empieza en lo más tardío entre el 2026-11-03 y la hora del
+  commit del corte (ya no hay reloj desde el corte: las pasadas anteriores no se leen); CUMPLE exige además 14 noches
+  distintas (decisión de Nicolás); una pasada de otra ROI con código posterior al corte cierra la compuerta, así que
+  la lectura con B4 tiene que cortar en el merge de #939 (`58edb9788`) o después. S174 (cuarta vuelta, VPR945-R3,
+  LECTURA LR3): las 14 noches van repartidas, 7 en cada mitad del lapso, y Cordón Caulle y Tupungatito (los que B4
+  traduce distinto de B0) piden cada uno ese reparto sobre sus pasadas leídas, impresas por volcán (con 0 pasadas,
+  PROVISORIO); `--sha-desde` es el commit de merge (`58edb9788`), no el sha de la primera corrida de sombra.
+  ⚠️ S174 (quinta vuelta, VPR945-R4, LECTURA LR3; Nicolás: «Ventana fija, una vuelta»): el reparto de 7 y 7 por
+  mitad del lapso de la cuarta vuelta queda retirado. La ventana es fija: de lo más tardío entre el 2026-11-03 y la
+  hora del commit del corte, 28 días (con `58edb9788`, del 2026-11-05 03:23 al 2026-12-03 03:23 UTC), en 4 semanas
+  fijas; CUMPLE exige que la fecha de referencia («ahora», `--ahora` o el reloj de la máquina) haya llegado al fin y
+  5 noches en cada semana (y 14 en total) en el conjunto y en Cordón Caulle y Tupungatito; lo posterior al fin o a
+  «ahora» no se lee y se cuenta como «fuera de ventana».
+  ⚠️ S174 (sexta vuelta, VPR945-R5, LECTURA LR3; decisión de Nicolás del 2026-11-06, «Sí, sexta vuelta»): además,
+  cada uno de los otros nueve volcanes (ROI igual a B0) pide 14 noches distintas en la ventana, sin mínimo semanal
+  (antes sólo se imprimían); cada noche cuenta una sola vez, en la semana de su primera pasada; `--ahora` acepta ISO
+  con zona y la convierte a UTC.
+  Texto original:
 - **Pendiente, no hecho**: el lector de la sombra de V750-A todavía no separa por ROI (ningún script de
   `experiments/_s162_v750a/` lee `regimen.codigo_sha` ni `diag_codigo_mirova.roi`; VPR939-03 del verificador del
   PR). Los insumos ya están en cada record (`pipeline/store.py` l. 89 a 93, `pipeline/mirova_v750_codigo.py` l. 708).
