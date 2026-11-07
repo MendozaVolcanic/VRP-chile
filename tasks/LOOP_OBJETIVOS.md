@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-07 03:31 UTC (S174): #945 mergeado a main
+
+- Frase de Nicolás («Sí, mergea el 945»). Squash `235ba7918` con `--match-head-commit ebdc74927` (CI verde, R6 MERGEABLE). Quedan para un PR aparte R6-01, R6-02 y R6-03 (gravedad 1) y la corrida completa del medidor de V750-A para el sello.
+
 ### 2026-11-07 03:16 UTC (S174): R6 del #945 MERGEABLE; #952 MERGEABLE CON CAMBIOS, segunda vuelta lanzada
 
 - #945: verificador limpio R6 da MERGEABLE en `ebdc74927` (CI verde). Tres hallazgos de gravedad 1 (R6-01 OverflowError en `--ahora`, R6-02 la regla de 14 noches con B0 sin prueba, R6-03 prueba de zona ciega en UTC), para un PR aparte. Espera frase de Nicolás. Informe: `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R6.md`.
