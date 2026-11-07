@@ -11,7 +11,8 @@
 # Datos entrada : records de data/mirova_equivalent/ (solo lectura) y el registro de MIROVA ya
 #                 sincronizado en el repo (consolidado + OCR). Satelital, SIN datos personales.
 # Variables     : tolerancia del pareo (120 s), tipo de fila de MIROVA (ALERTA, RUTINA, fuera de
-#                 limite), ventana movil de fechas.
+#                 limite), ventana movil de fechas, regla D-9 (S175: alertas VIIRS 375 de 0,05 MW o
+#                 menos, que MIROVA marca NONE en su imagen, cuentan como "MIROVA no vio nada").
 # Limitaciones  : (a) la referencia llega tarde (el canal OCR se atrasa dias), asi que un valor
 #                 puede cambiar entre corridas: por eso es ventana movil y no sello unico, y por
 #                 eso cada pasada lleva ademas el booleano `provisorio` (S146, matiz 4 del
@@ -146,7 +147,10 @@ def provisoriedad(valor, dt, frontera):
 def clasificar_pasadas(recs, filas_ref, coords, ventana):
     """Agrega `valor`, `provisorio`/`motivo_provisorio` (y `dist_ref_km` cuando aplica) a cada
     pasada de `recs`, en el lugar."""
-    por_vb, noche_sensor, noche_volcan, _ = bp.indexar_referencia(filas_ref, coords, ventana)
+    # S175 (F2-212 de docs/AUDIT_S175.md): con la regla D-9 decidida (SN, issue #811). Una pasada cuyas alertas son
+    # todas de 0,05 MW o menos es una que MIROVA dice no ver (banner NONE): ya no se rotula "MIROVA confirmo".
+    por_vb, noche_sensor, noche_volcan, _ = bp.indexar_referencia(filas_ref, coords, ventana,
+                                                                  regla_minimas=bp.MODO_MINIMAS)
     bp.etiquetar(recs, por_vb, noche_sensor, noche_volcan)
     frontera = frontera_canales(filas_ref)
     for r in recs:

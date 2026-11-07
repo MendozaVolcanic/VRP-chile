@@ -32,10 +32,11 @@ referencia_mirova_unificada y banco_paridad).
 from __future__ import annotations
 
 import argparse
+import bisect
 import csv
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import NamedTuple, Optional
 
@@ -169,6 +170,56 @@ def aplicar_regla_minimas(filas, modo: str = MODO_MINIMAS, umbral_mw: float = UM
                 f["tipo"] = TIPO_MINIMA_SE
         out.append(f)
     return ReglaMinimas(out, minimas)
+
+
+# ---------------------------------------------------------------------------------------------------------
+# S175, decision 9 de docs/AUDIT_S175.md §8 (Nicolas, 2026-11-07): en MODIS y VIIRS 750 el VRP del OCR es un piso.
+#
+# POR QUE. MIROVA escribe en su imagen el VRP de MODIS y de VIIRS 750 truncado a entero, y su tabla (latest.php) lo
+# trae con decimales. Medido en S175 sobre las copias de la base: en el OCR las 48 alertas MODIS y las 95 de VIIRS
+# 750 son enteras; en la tabla 141 de 142 alertas MODIS traen decimales; misma pasada, Chillan MODIS 2026-10-30
+# 08:55, tabla 14,39 MW y OCR 14,0. VIIRS 375 si trae decimales en el OCR (896 de 897) y no entra.
+# Regla: si la tabla tiene la pasada, su VRP manda y la fila del OCR no se usa (tabla_sobre_ocr); si solo hay OCR,
+# el VRP real esta entre v y v + 1 (techo_vrp). El corte de protegida es entero (1 MW), asi que el piso decide igual
+# que el valor real (v >= 1 es protegida y v = 0 no); lo que no se puede es usar v como magnitud.
+SENSORES_OCR_TRUNCADO = ("MODIS", "VIIRS750")
+
+
+def vrp_es_piso(fila: dict) -> bool:
+    """El VRP de la fila es el truncado de la imagen: viene del OCR en MODIS o VIIRS 750."""
+    return (fila.get("source") == "OCR" and fila.get("sensor_bucket") in SENSORES_OCR_TRUNCADO
+            and fila.get("vrp_mw") is not None)
+
+
+def techo_vrp(fila: dict) -> Optional[float]:
+    """Cota de arriba (exclusiva) del VRP real de la fila: v + 1 si es piso, v si no."""
+    v = fila.get("vrp_mw")
+    if v is None:
+        return None
+    return v + 1.0 if vrp_es_piso(fila) else v
+
+
+def tabla_sobre_ocr(filas, tabla=None, ventana_s: int = VENTANA_S) -> list:
+    """`filas` sin las del OCR de MODIS y VIIRS 750 cuya pasada esta en la tabla: una fila CONS, de cualquier tipo,
+    del mismo volcan y sensor a `ventana_s` segundos o menos. `tabla`: filas donde buscar las CONS (por defecto las
+    mismas `filas`; el auto-audit pasa la referencia unificada, que trae tambien las RUTINA). No modifica nada."""
+    filas = list(filas)
+    idx = defaultdict(list)
+    for f in (filas if tabla is None else tabla):
+        if f.get("source") == "CONS" and f.get("sensor_bucket") in SENSORES_OCR_TRUNCADO and f.get("fecha_utc"):
+            idx[(f["volcano"], f["sensor_bucket"])].append(_instante(f["fecha_utc"]))
+    for ts in idx.values():
+        ts.sort()
+    out = []
+    for f in filas:
+        ts = idx.get((f.get("volcano"), f.get("sensor_bucket")))
+        if ts and f.get("source") == "OCR" and f.get("fecha_utc"):
+            t = _instante(f["fecha_utc"])
+            i = bisect.bisect_left(ts, t - timedelta(seconds=ventana_s))
+            if i < len(ts) and ts[i] <= t + timedelta(seconds=ventana_s):
+                continue
+        out.append(f)
+    return out
 
 
 def pasadas_protegidas(filas, umbral: float = UMBRAL_PROTEGIDA_MW, lectura: str = "A") -> set:
