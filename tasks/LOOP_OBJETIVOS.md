@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-07 03:16 UTC (S174): R6 del #945 MERGEABLE; #952 MERGEABLE CON CAMBIOS, segunda vuelta lanzada
+
+- #945: verificador limpio R6 da MERGEABLE en `ebdc74927` (CI verde). Tres hallazgos de gravedad 1 (R6-01 OverflowError en `--ahora`, R6-02 la regla de 14 noches con B0 sin prueba, R6-03 prueba de zona ciega en UTC), para un PR aparte. Espera frase de Nicolás. Informe: `D:\vrp-trabajo\temporales\s174-ver945\INFORME_R6.md`.
+- #952: verificador limpio da MERGEABLE CON CAMBIOS en `dd17fd97d`. Lo central (VPR952-01, g3): la rama con sustrato de `controles_cenit` no tiene prueba. Nicolás aprobó la segunda vuelta; autor (Opus) lanzado sobre 01, 02, 03, 05, 06 y el nombre de prueba. VPR952-04 y la SOSPECHA del pre-registro l. 409 quedan para Nicolás. Informe: `C:\Users\nmend\vrp-temporales\s174-ver952\INFORME.md`.
+
 ### 2026-11-06 15:53 UTC (S174): sexta vuelta del autor del #945 lista, R6 del verificador lanzada
 
 - Autor (Opus): `ebdc74927` en `claude/s173-vpr939-03`. Los nueve volcanes con ROI igual a B0 piden 14 noches cada uno (`NOCHES_MIN_SIN_CAMBIO`), cada noche cuenta una sola vez (semana de su primera pasada) y `--ahora` acepta zona. Según su informe: batería 100 de 100, medidor 69 de 69 por aserción, 122 blancos una vez cada uno; datos reales de main PROVISORIO (rc 4), una noche por volcán. CI `pytest pass` run 42245107719 sobre `ebdc74927`. Informe: `D:\vrp-trabajo\temporales\s174-autor945-r6\INFORME_AUTOR_R6.md`.
