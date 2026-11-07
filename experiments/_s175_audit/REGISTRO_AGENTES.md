@@ -16,3 +16,7 @@ Plan sellado: `docs/PLAN_AUDITORIA_S175.md`, SHA_PLAN = `a325ac8ff8c480fc88fe91d
 | agente | modelo | effort pedido | esfuerzo declarado | tokens | duración | resultado |
 |---|---|---|---|---|---|---|
 | sonda | Fable | high | `reasoning_effort 25` (etiqueta literal en su contexto) | 89.983 | 12 s | **BAJO**: `effort: high` del Agent tool no llega; se para antes de la ola 1 (§5 del plan) |
+| F5 | Opus 5.5 (sesión `local_9fb8f14e`, se pidió Fable y la app la abrió en Opus: una sesión sólo puede abrir otras de su familia o más baratas) | high (fijado por la app al abrir la sesión) | lo declara en su informe | | lanzada 2026-11-07 04:16 UTC | prompt `C:\Users\nmend\vrp-temporales\s175_audit\prompts\f5.txt` sha256 37373a88... |
+| F2 | Opus 5.5 (sesión `local_ba163e3e`) | high (app) | lo declara en su informe | | lanzada 2026-11-07 04:17 UTC | prompt `...\prompts\f2.txt` sha256 df7b928d... |
+
+Consecuencia para los verificadores: los auditores son Opus, así que los verificadores serán de otro modelo, Sonnet en sesión con esfuerzo high (Fable como subagente corre a 25). Se declara en la síntesis.
