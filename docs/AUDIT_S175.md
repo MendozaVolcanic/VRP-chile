@@ -20,12 +20,18 @@
 
 ### Limitaciones que el lector tiene que saber
 
-1. **El esfuerzo pedido no llegó.** La sonda de la ola 0 (Fable, `effort: high` del Agent tool) declaró
-   `reasoning_effort 25`. Por eso los auditores se lanzaron como sesiones con el esfuerzo fijado en high por la app, y aun
-   así los cuatro declararon `reasoning_effort 15` en su encabezado. De los verificadores, V5 leyó 10 en su prompt de
-   sistema y V0, V2 y V3 declararon SIN DATO. No sabemos si ese número es la misma escala que el «high» de la app.
-   Contrapeso observado: los cuatro auditores reprodujeron todas sus líneas base rojas (§5), comprobaron sha256,
-   usaron controles positivos y declararon lo que no miraron.
+1. **El esfuerzo: pedido high y enviado high; el número que ven los agentes es otra cosa.** La sonda de la ola 0 (Fable,
+   `effort: high` del Agent tool) declaró `reasoning_effort 25`, los cuatro auditores 15 y V5 leyó 10 en su prompt de
+   sistema (V0, V2 y V3: SIN DATO). Corrección del 2026-11-07, medida en los transcriptos de las sesiones
+   (`C:\Users\nmend\.claude\projects\C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile--claude-worktrees-relaxed-almeida-d17378\*.jsonl`
+   y el de la sonda en `...\9f1d2725-...\subagents\agent-a3aa92e33a9a75d12.jsonl`): cada pedido a la API lleva
+   `"output_config":{"effort":"high"}`, `"perTurnEffort":"high"` y pensamiento `adaptive`, en la sonda (2 de 2) y en
+   las sesiones medidas (por ejemplo 110 pedidos con `output_config` high en una de ellas, ninguno distinto). El
+   `reasoning_effort` que el agente lee en su contexto no es el nivel del pedido: varía por modelo (25 en Fable, 15 en
+   Opus, 10 en Sonnet) con el mismo «high». Qué mide ese número es SIN DATO. La limitación de S172 y S174 («el effort no
+   llega») queda rebajada a SOSPECHA sin evidencia: se leyó el número del contexto como si fuera el nivel.
+   Contrapeso que no depende de esto: los cuatro auditores reprodujeron todas sus líneas base rojas (§5), comprobaron
+   sha256, usaron controles positivos y declararon lo que no miraron.
 2. **Modelos.** El plan pedía Fable como auditor y Opus como verificador. Una sesión sólo puede abrir otras de su modelo o
    más baratas, así que los auditores corrieron en Opus 5.5 y los verificadores en Sonnet 5.5. La regla «verifica otro
    modelo» se cumplió; el auditor no fue el previsto.
@@ -171,7 +177,7 @@ tocó desde S160), 256 (la memoria dice que el MxD03 se ignora; la vía lo usa) 
 | 8 | VIIRS 750 en cumbre (101, 102) | darle un camino nuevo dentro del programa de V750 (D25 no se adoptó), medido contra la tabla; ninguna alerta perdida es protegida, así que no es urgente |
 | 9 | La lectura del truncado de MODIS (103, 307) | decidir si una alerta escrita 1,00 MW se lee como 1 o como «entre 1 y 2»; de eso cuelga el veto de D18 |
 | 10 | `.gitignore` y los `hallazgos.csv` (114) | agregar una excepción para `experiments/_s*_audit/**/hallazgos.csv` |
-| 11 | Esfuerzo de los agentes (limitación 1) | aceptar esta auditoría con la limitación escrita y, antes de la próxima, averiguar qué significa el 15 en la escala de la app |
+| 11 | Esfuerzo de los agentes (limitación 1) | medirlo desde ahora en el transcripto (`output_config.effort` de cada pedido), no en lo que el agente declara; volver a Fable como subagente con `effort: high` cuando se quiera ese modelo, porque el pedido sí llega |
 
 ## 9. Registro de agentes
 
