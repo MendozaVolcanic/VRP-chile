@@ -2,9 +2,10 @@
 
 > 2026-11-06, orquestador Opus 5.5 (sesión hija de la coordinadora S174). Regla A51 y
 > `C:\Users\nmend\OneDrive\Escritorio\claude\GUIA_MAESTRA_AUDITORIAS.md` (leída entera al abrir esta sesión).
-> **Estado: SELLADO.** Nicolás aprobó el plan en esta sesión con la frase «Sí, apruebo» (2026-11-07, hora del
-> servidor Sat, 07 Nov 2026 03:55:40 GMT), sobre `2984a9cab`, con las recomendaciones del §8. El commit que lleva esta
-> línea es «SHA_PLAN» (se anota en la ola 0, porque un commit no puede citar su propio hash) y cada
+> **Estado: SELLADO de nuevo.** Primer sello: «Sí, apruebo» de Nicolás sobre `2984a9cab` (Sat, 07 Nov 2026 03:55:40
+> GMT, commit `813584fad`). Segundo sello: Nicolás, en esta sesión, «si has lo que recomiendes» y pidió además las
+> alertas MODIS de Láscar sin TIF, revisar qué trae cada CSV (el OCR puede no estar completo) y lanzar ya de a uno o dos
+> agentes. El commit que lleva esta línea es «SHA_PLAN» (se anota en la ola 0) y cada
 > verificador comprueba con `git diff «SHA_PLAN» -- docs/PLAN_AUDITORIA_S175.md` que los criterios del §3 no cambiaron.
 
 ## 0. En una pantalla
@@ -32,12 +33,15 @@
   pregunta si lo que el audit cuenta como acierto es la misma anomalía que alertó MIROVA). F3 es nuevo a medias (las decisiones
   del dueño contra el código nunca se auditaron; los cierres sí, en S160 F4). F5 es nuevo (pedido de Nicolás, 2026-11-06).
   Orden de recorte si hay que achicar: F3.
+- **Tercera ronda (2026-11-07, Nicolás)**: protegidas diurnas fuera del criterio (F5 I9), poder por volcán (I10),
+  posición después del congelamiento de los TIF con las láminas PNG y las alertas MODIS de Láscar sin TIF (I2), e
+  inventario de qué trae cada CSV, con el OCR incompleto (I7).
 - **Siete mejoras de S174 (2026-11-07, pedido de Nicolás)**, todas dentro de los cinco frentes: base refijada en la
   ola 0 (1); sonda de esfuerzo antes de la ola 1 (2, §5); en F5, la referencia como instrumento (I7, 3), el umbral de
   1 MW con VRP truncado (I8, 4) y lo que ve el operador en las tres vistas y en Pages (I3 ampliada, 6); en F0, las
   pasadas que nunca bajamos (5); en F1, la sobre-publicación de la vía contra K (7).
-- **Cuándo**: nada se lanza antes del reinicio del plan semanal (2026-11-08 12:00 UTC). F2, F3, F5 y F0 desde ese
-  momento; F1 después del audit semanal del lunes 2026-11-09 09:00 UTC, que es su prueba de campo.
+- **Cuándo**: se lanza desde el 2026-11-07 de a uno o dos agentes (§5, decisión de Nicolás). F5, F2, F3 y F0 en ese
+  orden; F1 después del audit semanal del lunes 2026-11-09 09:00 UTC, que es su prueba de campo.
 - **Costo estimado** (§7): unos 4 millones de tokens y 6 a 7 horas de reloj, medido sobre el registro real de S160.
 
 ## 1. Puerta de entrada: los pendientes de S160 (regla C)
@@ -130,7 +134,7 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
 
 - **Pregunta**: en los records reales del NRT, ¿publicamos todo lo que MIROVA alerta en VIIRS 375 y cuánto publicamos
   donde MIROVA no vio nada, por volcán y por cenit? ¿Y la sombra V375-E y su lector miden lo que dicen medir?
-- **Hallazgo**: una protegida (1 MW o más, lectura A) que no publicamos; un estrato de volcán o de cenit donde la
+- **Hallazgo**: una protegida (1 MW o más, lectura A) que no publicamos (cada tasa con su n por volcán, F5 I10); un estrato de volcán o de cenit donde la
   sobre-publicación en negativos limpios o la pérdida se concentra y el agregado la esconde (Simpson, guía §3b fila 13);
   una regla del tablero o del etiquetado que trata distinto lo que D-9 dice (alertas de 0,05 MW o menos cuentan como
   «MIROVA no vio nada»); un camino por el que la sombra V375-E o su lector dan CUMPLE o VERDE sin datos (cobertura
@@ -179,8 +183,8 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
 - **Seis preguntas** (cada una con numerador, denominador y ventana, A111, estratificadas por volcán y sensor):
   - **I1 pasada**: recall por pasada contra recall por noche; en los aciertos sin misma pasada, si la nuestra fue antes o
     después y de qué satélite.
-  - **I2 posición**: en las alertas pareadas por pasada, nuestra `final_hotspot_dist_km` contra la `Distancia_km` del
-    OCR; |Δdist| sirve para descartar, no para identificar (A93, A107), así que la identidad se decide con lat/lon
+  - **I2 posición**: en las alertas pareadas por pasada, nuestra `final_hotspot_dist_km` contra la `Distancia_km` de
+    la tabla (la del OCR sólo donde la tabla no la tiene); |Δdist| sirve para descartar, no para identificar (A93, A107), así que la identidad se decide con lat/lon
     contra el píxel del TIF de MIROVA donde exista. Clases por acierto: (i) misma pasada y mismo foco; (ii) otra
     pasada, mismo foco; (iii) otra fuente dentro del círculo; (iv) SIN DATO de posición. Primero Lastarria (hacia
     Lazufre), Tupungatito (anillo glaciar, A19), Cordón Caulle (inner de 20 km, ROI B4 en VIIRS 750 desde #939) e Isluga,
@@ -196,7 +200,23 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
   - **I6 tiempo**: la distribución de |Δt| de los pares; cuántas alertas de MIROVA quedan sin par con un record nuestro
     a 2 a 10 min (SOSPECHA de que una convención distinta, inicio del gránulo contra hora del píxel, mande pares reales a
     `sin_info`, fuera del denominador sin aviso).
-  - **I7 la referencia como instrumento** (mejora 3): el negativo limpio exige que MIROVA liste el gránulo con VRP 0.
+  - **I7 la referencia como instrumento** (mejora 3, y pedido de Nicolás de revisar qué trae cada CSV). Conteo previo
+    del orquestador sobre `752d348bc`, para que el auditor lo reproduzca y no lo herede:
+    - `latest_consolidado.csv` (raíz, la tabla, se actualiza cada hora): 47.006 filas del 2026-01-10 al 2026-11-06,
+      44.060 RUTINA, 1.939 ALERTA_TERMICA y 1.007 FALSO_POSITIVO.
+    - `data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv` (la que leen el audit y el banco):
+      46.351 filas, la refresca el propio audit semanal (último commit 2026-11-02 19:29 UTC). El audit y el tablero de
+      paridad juzgan con una copia de hasta 7 días: medir si eso deja fuera noches de la ventana.
+    - `.../mirova_v1_snapshot/registro_vrp_ocr.csv` (el OCR vivo): 1.238 filas, 1.040 ALERTA_TERMICA_OCR, 103
+      ALERTA_SIN_GEOMETRIA_OCR y 95 FALSO_POSITIVO_OCR. **No está completo**: de las 970 alertas de la tabla desde el
+      2026-06-11 sólo 255 tienen fila OCR a ±120 s (MODIS 12 de 58, VIIRS 750 20 de 195, VIIRS 375 223 de 717). Y al
+      revés, 200 alertas VIIRS 375 y 9 VIIRS 750 del OCR no tienen fila en la tabla («sólo OCR», A11).
+    - `data/mirova_reference/registro_vrp_ocr.csv`: copia congelada (236 líneas, 2026-05-20, A17). Hallazgo si algún
+      instrumento vivo la lee.
+    Preguntas: qué archivo lee cada instrumento (audit, banco, guardia, tablero de paridad); por qué el OCR cubre un
+    cuarto de las alertas de la tabla y si su falta cambia algún conteo que lo use como fuente; qué son las «sólo OCR»
+    (alertas reales que la tabla no lista, o filas de otra pasada, memoria `reference_ocr_imagen_de_otra_pasada`).
+    Y la parte original de la mejora 3: el negativo limpio exige que MIROVA liste el gránulo con VRP 0.
     Pasadas nuestras sin ninguna fila de MIROVA a ±120 s, por satélite, volcán y mes; y el acuerdo entre la tabla
     (`latest.php`, la más creíble según S159) y el OCR en las mismas pasadas. Si la lista de MIROVA salta gránulos, el
     denominador de las falsas publicaciones se mueve sin aviso.
@@ -210,16 +230,37 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
     Qué casos cubre `tests/test_guard_predicado_tres_vistas_s147.py` (record sin `primary_cluster`, `innerKm` no pasado,
     Cordón Caulle con 20 km), la tabla de `diario.html` contra `volcanoes.yaml`, y que GitHub Pages sirva el mismo
     `index.html` que «SHA_BASE» (se lee la página publicada; `pages/builds/latest` dio 404).
+  - **I9 protegidas diurnas fuera del criterio**: el audit saca del denominador las pasadas diurnas de MIROVA a
+    propósito (`es_pasada_diurna_descartada`, con `_reject_daytime` de `store.py`; A76: de día el Sol reflejado en nube
+    o nieve se confunde con calor). Conteo aproximado del orquestador por hora UTC (13 a 21): 47 de las 201 protegidas
+    de la tabla desde el 2026-09-01 son de día, casi todas Nevados de Chillán (22 VIIRS 375, 17 VIIRS 750, 7 MODIS).
+    Medir con el filtro real del pipeline cuántas protegidas quedan fuera, por volcán y sensor, y cuántas tienen una
+    pasada nocturna vecina (menos de 12 h) también en alerta, que es la señal de que no eran reflexión.
+  - **I10 poder por volcán**: 191 de esas 201 protegidas son de Chillán (Cordón Caulle 8, Láscar 1, Villarrica 1, los
+    otros 7 ninguna). Toda tasa de F2 y F5 va con su n por volcán al lado, y se dice en qué volcanes el criterio
+    «ninguna protegida perdida» no tiene casos para pronunciarse (lección S146, métrica sin poder); ahí la medida que
+    sí tiene casos es la sobre-publicación en negativos limpios.
 - **Orden dentro de F5** (si el frente se alarga, se corta por el final y lo no medido se informa como no medido):
-  I2, I8, I7, I3, I1, I5, I6, I4.
+  I2, I9, I7, I8, I10, I3, I1, I5, I6, I4.
 - **Hallazgo**: un volcán o estrato donde la clase (iii) es una fracción no despreciable de los aciertos, y en especial
   cualquier protegida (1 MW o más) cuyo acierto sea (iii): ahí el recall dice que vimos lo que MIROVA vio y no es así;
   una diferencia port contra node que cambie el recall publicado; un ratio de magnitud que cambie de banda al
   restringirlo a la misma pasada; pares reales perdidos por la ventana de tiempo.
-- **Vara de posición**: el TIF de MIROVA archivado en `MendozaVolcanic/mirova-tif-archive`, leído por la API o por archivo
-  suelto, nunca con `pull` (17 GB, memoria S143). Los TIF están congelados desde el 2026-09-22 (memoria
-  `reference_mirova_tif_congelados_20260922`): después de esa fecha la clase sale (iv) salvo otra posición citable, y
-  la distancia del OCR sola no basta.
+- **Vara de posición** (revisada con los índices del archivo el 2026-11-07, `index.csv` e `index_png.csv` de
+  `MendozaVolcanic/mirova-tif-archive`, leídos por la API, nunca con `pull`: 17 GB, memoria S143):
+  - **TIF**: congelados en los 33 pares volcán y sensor, MODIS incluido; el último `last_modified_utc` es del 2026-09-22
+    entre 07:47 y 10:33 UTC en todos. Sirven hasta esa fecha.
+  - **PNG**: el poller sigue guardando las cuatro láminas (VRP, logVRP, Dist y Latest10NTI); por ejemplo, Láscar
+    MODIS tiene 437 PNG desde el 2026-09-22. La lámina Latest10NTI es un mapa de NTI de la última pasada y puede dar posición
+    después del congelamiento si se georreferencia contra un TIF anterior del mismo volcán y sensor (misma grilla). Si
+    la georreferencia no se puede comprobar con un caso de posición conocida antes del 2026-09-22, la clase es (iv).
+  - **Casos de partida** (pedido de Nicolás): las alertas MODIS de Láscar posteriores al congelamiento, que deberían
+    tener TIF y no lo tienen: 2026-09-25 08:00, 2026-10-08 08:00 y 2026-10-26 07:55 UTC (0,56, 0,29 y 0,29 MW, 1,0 km
+    en la tabla). El auditor dice por qué no hay TIF (MIROVA dejó de servirlo o el poller dejó de guardarlo) con
+    evidencia del índice, y si las láminas PNG de esas pasadas existen.
+  - **Distancia**: la `Distancia_km` de la tabla (`latest_consolidado.csv`, la fuente más creíble según S159) es la
+    primaria; está llena en el 98 % de las alertas desde el 2026-06-11 (951 de 970). La del OCR es secundaria, porque el
+    OCR no está completo (abajo, I7).
 - **Tolerancia** (en unidades del objeto, A91, fijada aquí): mismo foco = nuestro punto a no más de 2 píxeles nominales
   del sensor del píxel de MIROVA (750 m en VIIRS 375, 1,5 km en VIIRS 750) y 3 km en MODIS por su desplazamiento
   conocido de 1 a 3 km hacia el nadir (memoria `project_modis_geo_interp_offset`). Sin TIF, (ii) contra (iii) se decide
@@ -233,7 +274,9 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
   (4) una noche donde port y node difieren a propósito (un record con `distance_class` fuera de summit) tiene que
   aparecer en I3; (5) I8 tiene que encontrar la fila truncada de Chillán MODIS del 2026-11-06 13:15 (9,0 MW, «real ∈
   [9, 10)»); (6) I7 corrido sobre una copia de la referencia a la que se le borran a propósito las filas de un satélite
-  en una semana tiene que mostrar ese hueco.
+  en una semana tiene que mostrar ese hueco; (7) I7 tiene que reencontrar que el OCR cubre 255 de 970 alertas de la
+  tabla desde el 2026-06-11 (conteo del orquestador) o explicar la diferencia; (8) I9 tiene que contar como diurna una
+  protegida de Chillán con hora UTC entre 15 y 19 y como nocturna una a las 07 UTC.
 - **Alcance**: el pareo y el conteo, no los detectores (MODIS es F1, VIIRS 375 es F2, VIIRS 750 lo mira la sombra de
   #945). Lee records; no reprocesa.
 - **Campo**: dos o tres aciertos de clase (iii) o (iv), con pasada UTC, para mirar contra la lámina de MIROVA.
@@ -302,9 +345,12 @@ sesión propia con el esfuerzo fijado por la app (`set_session_effort`), que Nic
 esta sesión porque una sesión no puede iniciar otras por pedido de otra sesión; o (b) seguir y escribir el esfuerzo
 real como limitación en la cabecera de `docs/AUDIT_S175.md`. El esfuerzo declarado de cada agente va al registro.
 
-**Olas**: 1) F2, F3, F5, F0 desde el 2026-11-08 12:00 UTC (4 en paralelo, ninguno pesado salvo F2 si reprocesa; si
-reprocesa, cuenta como pesado); 2) V2, V3, V5, V0 a medida que terminan; F1 desde el 2026-11-09 09:30 UTC, después
-de la corrida del audit semanal; 3) V1 y síntesis. Esperas y verificadores en primer plano.
+**Olas** (cambiadas el 2026-11-07 por Nicolás: se lanza ya, de a uno o dos a la vez; su cálculo es que 5 a 6
+millones de tokens son un 5 a 6 % de la cuota que queda): 0) base, instantánea, insumos y sonda de esfuerzo; 1) F5 y
+F2; 2) F3 y F0, a medida que se libera un cupo; cada verificador entra en cuanto termina su auditor y ocupa uno de los
+dos cupos; 3) F1 desde el 2026-11-09 09:30 UTC, después de la corrida del audit semanal, y V1; 4) síntesis. Nunca más
+de dos agentes a la vez. El orquestador mira el uso antes de cada lanzamiento y para si el semanal de todos los
+modelos pasa de 92 %.
 
 ## 6. Prompts
 
