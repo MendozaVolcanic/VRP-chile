@@ -1,5 +1,7 @@
 # Bloque de arranque S175 (cierre de S174, 2026-11-07 20:05 UTC)
 
+> **Actualización 2026-11-07 20:47 UTC: la auditoría S175 terminó los cinco frentes.** F1 (vía MODIS) corrió antes del lunes y tiene su verificador V1; la síntesis cerrada está en `docs/AUDIT_S175.md` del PR #955 (borrador, `9ab30cfb1`). Sólo falta el anexo del audit semanal del lunes 2026-11-09. Donde abajo dice «F1 el 2026-11-09», léelo así: F1 ya está; el lunes sólo se agrega el anexo y se cierra #955. F1 dejó dos hallazgos de gravedad 4 (leer su veredicto en la síntesis antes de actuar).
+
 > **Sin trabajo en vuelo al fijar este estado.** Ningún agente de S174 sigue corriendo; la sesión de auditoría
 > S175 (`local_f899f426`) está en reposo con su PR #955 en borrador. El NRT y la sombra siguen commiteando a main
 > (último NRT verde 2026-11-07 18:28 UTC; último dato `5d04126f3` 18:58 UTC). El bloque anterior (escrito el
