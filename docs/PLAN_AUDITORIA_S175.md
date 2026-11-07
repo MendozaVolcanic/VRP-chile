@@ -19,7 +19,8 @@
   por el código cambiado desde S160. B4 queda mirado por la sombra de V750-A (#945); sus pendientes de S160 pasan a F0
   (§1). Texto del eje recortado: commit `08d1b9ead`, §2 y §3 «F2. VIIRS 750 con ROI B4».
 - **Eje nuevo**: F1 y F2 son nuevos (F1 es un detector que no existía en S160; F2 nunca se auditó como sistema corriendo
-  contra MIROVA en las dos direcciones, por volcán y por cenit). F3 es nuevo a medias (las decisiones
+  contra MIROVA en las dos direcciones, por volcán y por cenit; su parte B pregunta si cada acierto es la misma
+  anomalía que MIROVA alertó, también en las noches comunes de MODIS y VIIRS 750). F3 es nuevo a medias (las decisiones
   del dueño contra el código nunca se auditaron; los cierres sí, en S160 F4). F4 repite el eje de S160 F3, limitado al
   delta y con la novedad de simular la ausencia. Orden de recorte si hay que achicar: F4, después F3.
 - **Cuándo**: nada se lanza antes del reinicio del plan semanal (2026-11-08 12:00 UTC). F2, F3, F4 y F0 desde ese
@@ -132,6 +133,39 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
   es hallazgo.
 - **Campo**: una protegida perdida o un negativo limpio publicado de alto VRP, con pasada UTC y lámina de MIROVA; la
   fecha de parada de la sombra (cerca del 2026-12-02) como ítem con fecha; C-04 actualizado.
+
+**F2, parte B: ¿el acierto es la misma anomalía? (pregunta de Nicolás, 2026-11-06, vía la coordinadora S174).**
+
+- **Por qué**: el audit semanal cuenta acierto por (volcán, familia de sensor, noche) cuando tenemos un record con
+  `pc.vrp_mw > 0` y centroide dentro de `inner_radius_km` (3 a 20 km), y el tablero agrega `distance_class` summit
+  (`scripts/auto_audit_weekly.py`, l. 14 a 15 y `recall_por_sensor`, l. 363 en `origin/main` `752d348bc`). No exige la
+  misma pasada (VIIRS 375 junta SNPP, NOAA-20 y NOAA-21), ni el mismo píxel, ni magnitud parecida. Un acierto puede ser
+  entonces otra fuente térmica dentro del círculo que MIROVA no alertó esa noche, y el recall lo cuenta igual (A93: un
+  pareo no es el conjunto que dice contar). Indicio de la coordinadora, sin verificar: en `data/audit_continuous/latest.json`
+  del 2026-11-02 la misma pasada a ±120 s se da en 125 de 194 noches comunes VIIRS 375, 32 de 42 VIIRS 750 y 14 de 16 MODIS.
+- **Pregunta**: en cada noche que el audit cuenta como acierto, ¿es la misma pasada?; y si no, ¿nuestra pasada muestra el
+  mismo foco o otra fuente dentro del círculo?
+- **Clases** (una por acierto): (i) misma pasada a ±120 s y mismo foco; (ii) otra pasada, mismo foco; (iii) otra fuente
+  dentro del círculo; (iv) SIN DATO de posición. Candidatos a (iii) que el auditor mira primero, como hipótesis y no como
+  hecho: Lastarria (hacia Lazufre), Tupungatito (anillo glaciar, A19), Puyehue-Cordón Caulle (inner de 20 km, D7).
+- **Vara de posición**: nuestro `final_hotspot_lat/lon` contra el píxel de MIROVA en su TIF donde exista (los TIF están
+  congelados desde el 2026-09-22, memoria `reference_mirova_tif_congelados_20260922`: después de esa fecha la clase sale
+  (iv) salvo que haya otra posición citable); contra el cráter siempre. La distancia y clase del OCR no valen solas
+  como posición de MIROVA, porque pueden venir de otra pasada (memoria `reference_ocr_imagen_de_otra_pasada`).
+- **Tolerancia** (en unidades del objeto, A91; fijada aquí, no por el auditor): mismo foco = nuestro punto a no más de
+  2 píxeles nominales del sensor (750 m en VIIRS 375, 1,5 km en VIIRS 750) del píxel de MIROVA, y 3 km en MODIS por su
+  desplazamiento conocido de 1 a 3 km hacia el nadir (memoria `project_modis_geo_interp_offset`). Sin TIF,
+  la clase (ii) contra (iii) se decide sólo si la distancia al cráter de nuestra pasada difiere en más de 2 píxeles de la
+  de la pasada que sí coincide esa noche o, si no hay, se reporta como (iv).
+- **Hallazgo**: un volcán o estrato de cenit donde la clase (iii) es una fracción no despreciable de los aciertos (se
+  reporta con numerador, denominador y ventana, A111), y en especial cualquier protegida (1 MW o más) cuyo acierto sea
+  (iii): ahí el recall dice que vimos lo que MIROVA vio y no es así.
+- **Alcance**: VIIRS 375 entero; MODIS y VIIRS 750 en las mismas noches comunes (son pocas, 16 y 42 en el indicio), sin
+  auditar sus detectores, que son F1 y la sombra de #945.
+- **Línea base roja**: (1) un acierto sintético por otra fuente: copia de un record real de acierto de Cordón Caulle con su
+  punto desplazado 15 km del cráter dentro del inner de 20 km y la misma noche; el instrumento tiene que darle clase
+  (iii); (2) un acierto de misma pasada y mismo píxel tiene que salir (i); (3) un acierto sin TIF y sin pasada
+  coincidente tiene que salir (iv), no (ii).
 
 ### F3. Decisiones y cierres S160 a S174
 
@@ -293,7 +327,9 @@ tokens y 24 a 48 minutos; verificadores Opus: 316.650 a 384.714 tokens y 16 a 37
 | orquestador (ola 0, listas, síntesis) | 1 | 0,3 a 0,5 millones | 1,5 h |
 | **total** | 11 | **3,9 a 4,9 millones** | 6 a 7 h en tres olas |
 
-Riesgo de subestimar: F1 y F2 leen records reales (VIIRS 375 es el sensor con más records) y pueden reprocesar; F3 barre 308 entradas. Si el plan semanal tras
+Riesgo de subestimar: F1 y F2 leen records reales (VIIRS 375 es el sensor con más records) y pueden reprocesar; F3 barre 308 entradas.
+La parte B de F2 (identidad del acierto) no agrega agentes: lee los mismos records y la posición de los TIF ya
+archivados; empuja a F2 hacia el extremo alto de su rango (unos 0,5 millones) y el total sigue dentro de 3,9 a 4,9. Si el plan semanal tras
 el reinicio no deja margen para 5 millones, recortar F4 y después F3 (§0).
 
 ## 8. Lo que el plan no hace, y lo que decide Nicolás antes de lanzar
@@ -307,3 +343,4 @@ ningún reproceso en Actions; no audita #945 como PR ni el código de Mirova-v1.
 | 2 | F1 espera al audit del 2026-11-09 | sí: sin esa corrida, F1 audita un sistema sin su primer veredicto semanal |
 | 3 | Fable como auditor y Opus como verificador | sí (guía §5); la alternativa barata, Sonnet auditor, no tiene medición propia en este proyecto |
 | 4 | Sellar este plan | con tu sí, commit y hash como «SHA_PLAN» antes de la ola 1 |
+| 5 | Tolerancia de «mismo foco» en la parte B de F2: 2 píxeles nominales en VIIRS, 3 km en MODIS | sí, como criterio propuesto y no medido; en MODIS se agranda porque su geolocalización ya tiene un desplazamiento conocido de 1 a 3 km hacia el nadir (memoria `project_modis_geo_interp_offset`), que con 2 km fabricaría clases (iii) falsas; si prefieres otra, se cambia antes de sellar |
