@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-07 04:32 UTC (S174): PR #953 (retoques R6 del lector de V750-A) en borrador; verificador lanzado; plan S175 con mejoras
+
+- #953 (`1ab822eac`, CI verde run 42337916239): R6-01 (`arg_ahora` captura OverflowError), R6-02 (ER54/ER55, regla de 14 noches con B0), R6-03 (ER45 con TZ). Según el autor: 103/103 pruebas, MR68 y MR72 a MR75 atrapadas por aserción, salida con datos reales idéntica a main. Verificador limpio (Sonnet) lanzado; informe en `C:\Users\nmend\vrp-temporales\s174-ver953\INFORME.md`.
+- Plan de auditoría S175: F5 (identidad del pareo, seis preguntas) reemplaza a F4 (`c15c252a8`); siete mejoras de S174 incorporadas (`2984a9cab`, rama `claude/relaxed-almeida-d17378`): base refijada en la ola 0, sonda de esfuerzo, I7 referencia, I8 umbral truncado, tres vistas del tablero, pasadas no bajadas, sobre-publicación de la vía MODIS. Sin sellar; espera el sí de Nicolás.
+
 ### 2026-11-07 03:31 UTC (S174): #945 mergeado a main
 
 - Frase de Nicolás («Sí, mergea el 945»). Squash `235ba7918` con `--match-head-commit ebdc74927` (CI verde, R6 MERGEABLE). Quedan para un PR aparte R6-01, R6-02 y R6-03 (gravedad 1) y la corrida completa del medidor de V750-A para el sello.
