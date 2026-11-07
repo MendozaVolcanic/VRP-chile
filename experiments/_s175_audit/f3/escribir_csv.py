@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+"""F3 S175: escribe hallazgos.csv con el modulo csv (campos con comas entre comillas)."""
+import csv
+B = r"C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\f3"
+F = [
+ (251, "SINTOMAS.md describe el MODIS de produccion como K y con _interp_geo tras el encendido de la via", "docs/SINTOMAS.md:25; docs/SINTOMAS.md:127 (752d348bc)", "CONFIRMADO", 3, "propagacion A113", "python rebajas_vs_datos.py 752d348bc", "salida_rebajas_vs_datos.txt"),
+ (252, "La nota A85 corregida por #950 en CLAUDE.md sigue vigente sin marca en SINTOMAS.md", "docs/SINTOMAS.md:195-197 (752d348bc)", "CONFIRMADO", 3, "propagacion A113", "python rebajas_vs_datos.py 752d348bc", "salida_rebajas_vs_datos.txt"),
+ (254, "Decision «Si, arreglalos» (falsos verdes de cenit) no esta en main: SIN SUSTRATO se publica como OK", "experiments/_s172_retro_paquete/leer_retro.py:1227 y :1019 (752d348bc); PR #952 fuera de main", "CONFIRMADO", 3, "decision aprobada sin implementar en main", "git merge-base --is-ancestor dd17fd97d 752d348bc; git show 752d348bc:experiments/_s172_retro_paquete/leer_retro.py | sed -n 1225,1228p", "INFORME.md#254"),
+ (253, "Decision 3 de S174 (sin_grilla/sin_mxd03 como K con aviso) aprobada y no implementada: el lector los excluye y pone rojo", "experiments/_s172_retro_paquete/leer_retro.py:270-271, :354, :544 (752d348bc)", "CONFIRMADO", 2, "decision aprobada sin implementar", "git grep -n -E 'sin_grilla|sin_mxd03' 752d348bc -- experiments/_s172_retro_paquete", "salida_via_modis.txt"),
+ (255, "Cola de decisiones §5 de loop/activo con cinco filas desfasadas (D-1, D-19, D-23, D-37, D-39)", "tasks/LOOP_OBJETIVOS.md:526,528,540,543,545 (06de6876a, fuera de main)", "CONFIRMADO", 2, "cierres y decisiones desfasados", "git show 06de6876a:tasks/LOOP_OBJETIVOS.md | sed -n 516,570p", "salida_rebajas_vs_datos.txt"),
+ (256, "La memoria del agente dice que el MxD03 se baja y se ignora; la via de produccion lo usa desde 2026-11-02", "memory/project_modis_geo_interp_offset.md; MEMORY.md (Referencias estables); pipeline/mirova_v750_codigo.py:842", "CONFIRMADO", 2, "propagacion A113 a la memoria", "grep -n 'se ignora' project_modis_geo_interp_offset.md", "INFORME.md#256"),
+ (257, "El censo S145 (piso del frente) no ve las dos lineas base rojas ni los cierres de S160 en adelante", "experiments/_s145_censo_cierres/censo.py:54-66", "CONFIRMADO", 2, "instrumento", "python censo_en_commit.py 77e54e8e0^; python censo_en_commit.py 752d348bc; python cierres_desde_s160.py", "salida_censo_752d348bc.txt"),
+ (258, "Parametros del lector sellado de V750-A fijados por la coordinadora sin frase de Nicolas (declarados)", "experiments/_s162_v750a/evaluar_v750a.py:117-118 (752d348bc); LOOP_OBJETIVOS.md:605,643 (06de6876a)", "CONFIRMADO", 2, "implementada sin frase", "git show 752d348bc:experiments/_s162_v750a/evaluar_v750a.py | sed -n 108,128p", "INFORME.md#258"),
+ (259, "D25 NO SE ADOPTA cerrado bajo una delegacion general (D-48), no con una frase sobre D25", "docs/MIROVA_DIVERGENCES.md:2863-2865 (752d348bc)", "CONFIRMADO", 2, "cierre sin frase especifica", "git show 752d348bc:docs/MIROVA_DIVERGENCES.md | sed -n 2861,2866p", "INFORME.md#259"),
+ (260, "La A45 de #920 («Si, los tres apagados») quedo en el repo solo de segunda mano", "commit 4164d4547; LOOP_OBJETIVOS.md:2468 (06de6876a)", "CONFIRMADO", 1, "frase registrada de segunda mano", "git log -1 --format=%B 4164d4547", "INFORME.md#260"),
+ (261, "#895 (R13 del sync) entro a main sin frase de Nicolas en la bitacora mientras D-39 lo pedia", ".github/workflows/sync-mirova-csv.yml:90-102 (752d348bc); squash 6547f5315", "SOSPECHA", 1, "implementada sin frase registrada", "gh api repos/MendozaVolcanic/VRP-chile/pulls/895 --jq .merged_by.login", "INFORME.md#261"),
+ (262, "Decision 3 de la sombra de los 34 implementada con radio max(4 km, inner) en vez de 4 km", "squash 438a010ab (#935); LOOP_OBJETIVOS.md:959 y 934-937 (06de6876a)", "CONFIRMADO", 1, "implementada distinto", "git show --format=%B 438a010ab | head -30", "INFORME.md#262"),
+ (263, "El texto sellado de la regla MOD-D cambio en una linea al sellarse; el archivo sigue llamandose BORRADOR", "experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md", "CONFIRMADO", 1, "sello", "python sello_regla_modd.py", "salida_sello_regla_modd.txt"),
+ (264, "#951 mergeado con CI rojo en la rama de V750 (fuera de main)", "LOOP_OBJETIVOS.md:637 (06de6876a); squash c8152580b", "CONFIRMADO", 1, "proceso A39", "git log -1 --format='%h %D %s' c8152580b", "INFORME.md#264"),
+ (265, "El indice de memoria tiene desfasado el estado de S174 (#945, #950, #951)", "MEMORY.md (Estado vivo S174); project_s174_estado.md", "CONFIRMADO", 1, "memoria", "git log --oneline 752d348bc --grep='#945'", "INFORME.md#265"),
+]
+F.sort(key=lambda r: (-r[4], r[0]))
+with open(B + r"\hallazgos.csv", "w", encoding="utf-8", newline="") as fh:
+    w = csv.writer(fh)
+    w.writerow(["id", "titulo", "archivo_linea", "confianza", "gravedad", "eje", "comando_reproduccion", "salida_cruda"])
+    for r in F:
+        w.writerow([r[0], r[1], r[2], r[3], r[4], r[5], r[6], B + "\\" + r[7].split("#")[0]])
+print(len(F))
