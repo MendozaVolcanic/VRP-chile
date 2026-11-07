@@ -110,6 +110,8 @@ jobs:
               print(f"- REVERSION CANDIDATA: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia (K) publica y produccion (la via) calla")
           for p in d.get("protegidas_sin_record_produccion", []):
               print(f"- SIN RECORD DE PRODUCCION: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia (K) publica y produccion no tiene record (borde 171-01)")
+          for p in d.get("protegidas_calladas_por_k_de_produccion", []):
+              print(f"- CALLADA POR K DE PRODUCCION (S175): {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia publica y el record de produccion no es de la via ({p.get('prod_caida_k') or 'K sin marca'}); no es candidata a reversion")
           for p in d.get("fuera_de_plazo", []):
               print(f"- FUERA DE PLAZO (sin pre-autorizacion): {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW")
           for p in d.get("borde_del_encendido", []):
@@ -123,7 +125,7 @@ jobs:
               print(f"- nulo: antes del encendido guardia y produccion publican distinto en {n['distintas']} de {n['pares']} pasadas: {n['detalle']}")
           b = d.get("borde_171_01") or {}
           if b.get("total"):
-              print(f"- (informa) pasadas que la guardia registra y produccion no, por semana: {b['por_semana']}")
+              print(f"- (informa) pasadas que la guardia registra y produccion no, por semana: {b['por_semana']}; ultimas: {[(x['volcano'], x['sensor'], x['fecha_utc']) for x in b.get('pasadas', [])[-10:]]}")
           for a in d.get("avisos", []):
               print(f"- aviso: {a}")
           PY

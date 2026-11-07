@@ -260,8 +260,10 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             active_water_bodies=volcano.get("active_water_bodies"),
                             lbg_global_compatible=volcano.get("lbg_global_compatible", False),
                             local_kernel_bg_compatible=volcano.get("local_kernel_bg", False),
-                            al_sin_dato=_crater_sin_dato(volcano, date, platform),  # S165 (V165-03)
+                            al_sin_dato=(_anotar := _crater_sin_dato(volcano, date, platform)),  # S165 (V165-03)
                         )
+                        if not result:
+                            _modis_sin_record(l1b, _anotar)  # S175 (153)
                         if result:
                             store.append_record(volcano["name"], result,
                                                 volcano_lat=volcano["lat"], volcano_lon=volcano["lon"],
@@ -403,8 +405,26 @@ def _crater_sin_dato(volcano: dict, date: datetime, platform: str):
     posición en el gránulo (ENABLE_MODIS_CRATER_SIN_DATO, apagado). Sin esto la pasada desaparecía y la cobertura
     decía «completa». No cuenta en modo estricto (pipeline/fetch.py, TIPOS_INCIDENCIA)."""
     def anotar(motivo: str) -> None:
+        anotar.llamado = True                     # S175: _modis_sin_record no repite lo que el procesador ya avisó
         fetch.registrar_incidencia("crater_sin_dato", volcano["name"], date.strftime("%Y-%m-%d"), platform, motivo)
+    anotar.llamado = False
     return anotar
+
+
+def _modis_sin_record(l1b: Path, anotar) -> None:
+    """S175 (hallazgo 153 de docs/AUDIT_S175.md): un gránulo MODIS que no dejó record y del que el procesador no avisó
+    nada. Con la vía «código MIROVA» encendida es, sobre todo, el descarte de borde de la vía (171-01: menos de 100
+    celdas de la grilla de MIROVA a 45 km, o la más cercana a más de 5 km del centro), que antes desaparecía sin una
+    palabra en el log: Villarrica MODIS_AQUA 2026-11-04 07:10 UTC, cenit 65°, la guardia K la escribió y producción no.
+    Sólo el log: distinguir el descarte de borde del volcán fuera del gránulo, o registrar una incidencia de cobertura,
+    exige tocar pipeline/ (process_modis.py, A45; fetch.py, TIPOS_INCIDENCIA), pendiente."""
+    if getattr(anotar, "llamado", False):
+        return
+    if getattr(vrp_profile, "ENABLE_MODIS_CODIGO_MIROVA", False):
+        print(f"  MODIS {l1b.name}: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera "
+              "del gránulo)")
+    else:
+        print(f"  MODIS {l1b.name}: sin record (volcán fuera del gránulo o pasada descartada por el procesador)")
 
 
 def _time_key(filename: str) -> str:
