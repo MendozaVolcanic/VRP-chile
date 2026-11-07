@@ -12,18 +12,21 @@
   traspasos; el encargo decía `dd7467218`, que es ancestro: la rama avanzó tres commits de bitácora) y el PR #945 en
   `106db89414b9286848e723153a2feb5cf631ba0f` (borrador, rama `claude/s173-vpr939-03`).
 - **Cinco frentes, cinco verificadores** (tope de la regla S154): F1 MODIS con la vía «código MIROVA» corriendo; F2 VIIRS
-  375 en producción (K desde #850) medido sobre el sistema corriendo; F3 censo de decisiones y cierres S160 a S174; F4
-  vencimientos medidos simulando la ausencia; F0 la puerta de entrada (pendientes de S160 que no caen en ningún eje).
+  375 en producción (K desde #850) medido sobre el sistema corriendo; F3 censo de decisiones y cierres S160 a S174; F5
+  identidad del pareo con MIROVA en los tres sensores; F0 la puerta de entrada (pendientes de S160 que no caen en ningún eje).
 - **Recorte (2026-11-06, pedido de Nicolás vía la coordinadora S174)**: el eje VIIRS 750 con ROI B4 (#939) sale del plan
   para que entre VIIRS 375, el sensor con más pasadas y alertas, que la primera versión dejaba fuera porque elegía ejes
   por el código cambiado desde S160. B4 queda mirado por la sombra de V750-A (#945); sus pendientes de S160 pasan a F0
   (§1). Texto del eje recortado: commit `08d1b9ead`, §2 y §3 «F2. VIIRS 750 con ROI B4».
+- **Segundo recorte (2026-11-06, pedido de Nicolás vía S174)**: entra F5, identidad del pareo, y sale F4
+  (vencimientos simulando la ausencia), que era el primero en la fila de recorte porque repetía el eje de S160 F3.
+  Sus pendientes pasan a F0 con fecha; lo que se pierde es la simulación de la ausencia. Texto: commit `a39d3c751`.
 - **Eje nuevo**: F1 y F2 son nuevos (F1 es un detector que no existía en S160; F2 nunca se auditó como sistema corriendo
-  contra MIROVA en las dos direcciones, por volcán y por cenit; su parte B pregunta si cada acierto es la misma
-  anomalía que MIROVA alertó, también en las noches comunes de MODIS y VIIRS 750). F3 es nuevo a medias (las decisiones
-  del dueño contra el código nunca se auditaron; los cierres sí, en S160 F4). F4 repite el eje de S160 F3, limitado al
-  delta y con la novedad de simular la ausencia. Orden de recorte si hay que achicar: F4, después F3.
-- **Cuándo**: nada se lanza antes del reinicio del plan semanal (2026-11-08 12:00 UTC). F2, F3, F4 y F0 desde ese
+  contra MIROVA en las dos direcciones, por volcán y por cenit; F5
+  pregunta si lo que el audit cuenta como acierto es la misma anomalía que alertó MIROVA). F3 es nuevo a medias (las decisiones
+  del dueño contra el código nunca se auditaron; los cierres sí, en S160 F4). F5 es nuevo (pedido de Nicolás, 2026-11-06).
+  Orden de recorte si hay que achicar: F3.
+- **Cuándo**: nada se lanza antes del reinicio del plan semanal (2026-11-08 12:00 UTC). F2, F3, F5 y F0 desde ese
   momento; F1 después del audit semanal del lunes 2026-11-09 09:00 UTC, que es su prueba de campo.
 - **Costo estimado** (§7): unos 4 millones de tokens y 6 a 7 horas de reloj, medido sobre el registro real de S160.
 
@@ -38,7 +41,7 @@ Reparto (guía §4: cada pendiente va al frente de su eje; los que no caen en ni
 
 | pendiente de S160 | va a | por qué |
 |---|---|---|
-| 241, 242, C-06 (cese de Suomi NPP), 243 (decomiso MODIS 6.1), 245 (copia que se encoge), 247 (token), V3-01 a V3-04 | F4 | son vencimientos e insumos que mueren |
+| 241, 242, C-06 (cese de Suomi NPP), 243 (decomiso MODIS 6.1), 245 (copia que se encoge), 247 (token), V3-01 a V3-04 | F0 | vencimientos: su eje salió del plan para que entre F5 (§0); F0 los clasifica con fecha, sin simular la ausencia |
 | 203 (cúmulos V750 de cumbre en 0,0 MW), C-08, F1-H6 (D32), V2-09 a V2-13, C-02, C-03 | F0 | son VIIRS 750; su eje salió del plan (§0, recorte) |
 | 201 (C1 de escena casi no toca lo publicado: 4 de 2.452 publicaciones V375), C-04 (Tupungatito VIIRS 375) | F2 | son VIIRS 375 |
 | 281 a 297 sin aplicar, 287, 288, U12 (memoria), V4-01 a V4-03, decisión 8 (cola de campo) | F3 | son cierres y su propagación |
@@ -73,18 +76,17 @@ commits no automáticos. Las decisiones de Nicolás («Sí, a todo», frases sel
 una decisión aprobada y no implementada, o implementada distinto, es un defecto que ningún test ve. Los cierres sí se
 auditaron en S160; aquí sólo el delta desde `d516b9d8c`.
 
-**F4. Vencimientos, medidos simulando la ausencia (eje usado, delta).** S160 F3 leyó cómo fallaría cada insumo; lo nuevo
-es producir la ausencia a propósito (guía §4 «Por vencimientos»: «Se mide simulando la ausencia, no leyendo el
-código»). Hechos de partida: `EARTHDATA_TOKEN` vence el 2026-12-07 18:03 UTC y hay que rotarlo antes del 2026-11-27
-(`REGISTRO_CREDENCIALES.md` fila 1); `nrt.yml` no tiene `schedule` en la base (lo dispara un cron externo); los
-vigilantes con cron propio son `audit-weekly` (lunes 09:00), `guardia-k-modis` (17:40), `vigilancia-guardia-modis`
-(22:45), `sync-mirova-csv` (cada hora, minuto 12) y `nrt-healthcheck` (12:00). Suomi NPP cesó el 2026-11-02: C-06 ya
-se puede mirar en los records.
+**F5. Identidad del pareo con MIROVA (nuevo, pregunta de Nicolás del 2026-11-06).** Todo lo que el programa dice de
+paridad (recall, protegidas, magnitud) descansa en un pareo que nunca se auditó como instrumento: el recall del audit
+semanal es por noche y por círculo, no por pasada ni por foco, y lo calcula un port en Python del predicado y no el
+tablero. Si un acierto puede ser otra fuente dentro del círculo, el recall alto no prueba que vemos lo que MIROVA ve. F5
+mide eso en los tres sensores, sin auditar sus detectores. Entra en lugar de F4 (vencimientos), que era el primero en
+la fila de recorte porque repetía el eje de S160 F3; sus pendientes quedan en F0 con fecha.
 
 **F0. Pendientes de S160 sin eje.** Ver §1. Su pregunta es una sola: cada pendiente, ¿sigue abierto contra el código de
 hoy, ya se resolvió, o nunca fue lo que decía?
 
-**Qué no se audita**: el código del scraper Mirova-v1 (otro repo; sólo su salida), el perfil `experimental`, VIIRS 750 con ROI B4 (recortado, §0), la integridad de #945 como PR (lo hace S174).
+**Qué no se audita**: el código del scraper Mirova-v1 (otro repo; sólo su salida), el perfil `experimental`, VIIRS 750 con ROI B4 y la simulación de vencimientos (recortados, §0), la integridad de #945 como PR (lo hace S174).
 
 ## 3. Los frentes (pre-registro: esto es lo que el sello congela)
 
@@ -134,39 +136,6 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
 - **Campo**: una protegida perdida o un negativo limpio publicado de alto VRP, con pasada UTC y lámina de MIROVA; la
   fecha de parada de la sombra (cerca del 2026-12-02) como ítem con fecha; C-04 actualizado.
 
-**F2, parte B: ¿el acierto es la misma anomalía? (pregunta de Nicolás, 2026-11-06, vía la coordinadora S174).**
-
-- **Por qué**: el audit semanal cuenta acierto por (volcán, familia de sensor, noche) cuando tenemos un record con
-  `pc.vrp_mw > 0` y centroide dentro de `inner_radius_km` (3 a 20 km), y el tablero agrega `distance_class` summit
-  (`scripts/auto_audit_weekly.py`, l. 14 a 15 y `recall_por_sensor`, l. 363 en `origin/main` `752d348bc`). No exige la
-  misma pasada (VIIRS 375 junta SNPP, NOAA-20 y NOAA-21), ni el mismo píxel, ni magnitud parecida. Un acierto puede ser
-  entonces otra fuente térmica dentro del círculo que MIROVA no alertó esa noche, y el recall lo cuenta igual (A93: un
-  pareo no es el conjunto que dice contar). Indicio de la coordinadora, sin verificar: en `data/audit_continuous/latest.json`
-  del 2026-11-02 la misma pasada a ±120 s se da en 125 de 194 noches comunes VIIRS 375, 32 de 42 VIIRS 750 y 14 de 16 MODIS.
-- **Pregunta**: en cada noche que el audit cuenta como acierto, ¿es la misma pasada?; y si no, ¿nuestra pasada muestra el
-  mismo foco o otra fuente dentro del círculo?
-- **Clases** (una por acierto): (i) misma pasada a ±120 s y mismo foco; (ii) otra pasada, mismo foco; (iii) otra fuente
-  dentro del círculo; (iv) SIN DATO de posición. Candidatos a (iii) que el auditor mira primero, como hipótesis y no como
-  hecho: Lastarria (hacia Lazufre), Tupungatito (anillo glaciar, A19), Puyehue-Cordón Caulle (inner de 20 km, D7).
-- **Vara de posición**: nuestro `final_hotspot_lat/lon` contra el píxel de MIROVA en su TIF donde exista (los TIF están
-  congelados desde el 2026-09-22, memoria `reference_mirova_tif_congelados_20260922`: después de esa fecha la clase sale
-  (iv) salvo que haya otra posición citable); contra el cráter siempre. La distancia y clase del OCR no valen solas
-  como posición de MIROVA, porque pueden venir de otra pasada (memoria `reference_ocr_imagen_de_otra_pasada`).
-- **Tolerancia** (en unidades del objeto, A91; fijada aquí, no por el auditor): mismo foco = nuestro punto a no más de
-  2 píxeles nominales del sensor (750 m en VIIRS 375, 1,5 km en VIIRS 750) del píxel de MIROVA, y 3 km en MODIS por su
-  desplazamiento conocido de 1 a 3 km hacia el nadir (memoria `project_modis_geo_interp_offset`). Sin TIF,
-  la clase (ii) contra (iii) se decide sólo si la distancia al cráter de nuestra pasada difiere en más de 2 píxeles de la
-  de la pasada que sí coincide esa noche o, si no hay, se reporta como (iv).
-- **Hallazgo**: un volcán o estrato de cenit donde la clase (iii) es una fracción no despreciable de los aciertos (se
-  reporta con numerador, denominador y ventana, A111), y en especial cualquier protegida (1 MW o más) cuyo acierto sea
-  (iii): ahí el recall dice que vimos lo que MIROVA vio y no es así.
-- **Alcance**: VIIRS 375 entero; MODIS y VIIRS 750 en las mismas noches comunes (son pocas, 16 y 42 en el indicio), sin
-  auditar sus detectores, que son F1 y la sombra de #945.
-- **Línea base roja**: (1) un acierto sintético por otra fuente: copia de un record real de acierto de Cordón Caulle con su
-  punto desplazado 15 km del cráter dentro del inner de 20 km y la misma noche; el instrumento tiene que darle clase
-  (iii); (2) un acierto de misma pasada y mismo píxel tiene que salir (i); (3) un acierto sin TIF y sin pasada
-  coincidente tiene que salir (iv), no (ii).
-
 ### F3. Decisiones y cierres S160 a S174
 
 - **Pregunta**: cada decisión aprobada por Nicolás y cada cierre escrito desde S160, ¿está en el código de hoy como se
@@ -183,19 +152,60 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
   documentos rectores).
 - **Campo**: decisiones de Nicolás que sólo se cierran mirando el tablero.
 
-### F4. Vencimientos simulando la ausencia
+### F5. Identidad del pareo con MIROVA (los tres sensores)
 
-- **Pregunta**: por cada insumo que puede morir (token, búsqueda de NASA por plataforma, Mirova-v1, CSV de la
-  referencia, cron externo del NRT, cada vigilante), ¿qué hace el sistema el día después: falla, avisa o sigue verde
-  sin producir, y quién se entera?
-- **Hallazgo**: un insumo cuya ausencia, producida a propósito en una copia local, deja un verde; un vigilante sin aviso
-  propio de su propia muerte; un aviso cuyo umbral no se midió contra datos.
-- **Vara**: la salida real del script o workflow simulado localmente (con `act` o llamando al script con el insumo
-  vaciado), nunca la lectura del código sola. Sin credenciales: ninguna simulación usa el token real (A71).
-- **Línea base roja**: (1) el `nrt.yml` de antes de #894 (`79b4e3af6^`) con token vacío tiene que llegar a `auth()`
-  (247 de S160); (2) el NRT de `d516b9d8c` con una plataforma vacía tiene que decir «Cobertura: completa» (241 de S160).
-- **Campo**: C-06 (Suomi NPP después del 2026-11-02 13:00 UTC, mirado en los records y avisos); la rotación del token
-  antes del 2026-11-27 como ítem con fecha.
+- **Pregunta**: lo que el audit semanal y el banco cuentan como «MIROVA vio y nosotros también», ¿es la misma pasada, el
+  mismo foco y una magnitud comparable, o puede ser otra pasada u otra fuente dentro del círculo? Y lo que queda sin par,
+  ¿queda fuera por una convención de tiempo y no por la física?
+- **Por qué** (leído en `origin/main` `752d348bc`, a verificar por el auditor, no a heredar): el recall titular
+  (`scripts/auto_audit_weekly.py`, `recall_por_sensor`, l. 363) es por (volcán, familia de sensor, noche) y cuenta acierto
+  con `pc.vrp_mw > 0` y centroide dentro de `inner_radius_km` (3 a 20 km); VIIRS 375 junta SNPP, NOAA-20 y NOAA-21. Lo
+  calcula con un port en Python del criterio (l. 14 a 15, armado en l. 658 a 690), mientras el banco usa el predicado de
+  `frontend/index.html` con node (l. 214). El banco sí parea por pasada a ±120 s (`clase_mirova.VENTANA_S`, l. 112), pero
+  la distancia de MIROVA (`dist_ref`) sólo la usa en filas FALSO_POSITIVO (`banco_paridad.py`, l. 339 y 450).
+- **Seis preguntas** (cada una con numerador, denominador y ventana, A111, estratificadas por volcán y sensor):
+  - **I1 pasada**: recall por pasada contra recall por noche; en los aciertos sin misma pasada, si la nuestra fue antes o
+    después y de qué satélite.
+  - **I2 posición**: en las alertas pareadas por pasada, nuestra `final_hotspot_dist_km` contra la `Distancia_km` del
+    OCR; |Δdist| sirve para descartar, no para identificar (A93, A107), así que la identidad se decide con lat/lon
+    contra el píxel del TIF de MIROVA donde exista. Clases por acierto: (i) misma pasada y mismo foco; (ii) otra
+    pasada, mismo foco; (iii) otra fuente dentro del círculo; (iv) SIN DATO de posición. Primero Lastarria (hacia
+    Lazufre), Tupungatito (anillo glaciar, A19), Cordón Caulle (inner de 20 km, ROI B4 en VIIRS 750 desde #939) e Isluga,
+    como hipótesis y no como hecho.
+  - **I3 predicado**: en las mismas noches, el port de Python del audit contra el predicado del tablero con node;
+    cuántas noches difieren y en qué sentido (A97; VIIRS 375 publica `f5_core_vrp_mw`).
+  - **I4 magnitud**: el ratio de magnitud del audit compara el máximo de la noche de cada uno, que puede venir de pasadas
+    distintas, y nuestra `pc.vrp_mw` contra la suma de todos los píxeles alertados de MIROVA (D32); el ratio restringido
+    a la misma pasada, y cuánto cambia.
+  - **I5 etiqueta**: Mirova-v1#20 (V31, mergeado 2026-10-09 14:01 UTC) dejó de crear filas con la distancia de otra
+    pasada; antes de esa fecha la distancia del OCR puede ser ajena (A119). I2 se mide desde esa hora y lo anterior va en
+    un estrato aparte.
+  - **I6 tiempo**: la distribución de |Δt| de los pares; cuántas alertas de MIROVA quedan sin par con un record nuestro
+    a 2 a 10 min (SOSPECHA de que una convención distinta, inicio del gránulo contra hora del píxel, mande pares reales a
+    `sin_info`, fuera del denominador sin aviso).
+- **Hallazgo**: un volcán o estrato donde la clase (iii) es una fracción no despreciable de los aciertos, y en especial
+  cualquier protegida (1 MW o más) cuyo acierto sea (iii): ahí el recall dice que vimos lo que MIROVA vio y no es así;
+  una diferencia port contra node que cambie el recall publicado; un ratio de magnitud que cambie de banda al
+  restringirlo a la misma pasada; pares reales perdidos por la ventana de tiempo.
+- **Vara de posición**: el TIF de MIROVA archivado en `MendozaVolcanic/mirova-tif-archive`, leído por la API o por archivo
+  suelto, nunca con `pull` (17 GB, memoria S143). Los TIF están congelados desde el 2026-09-22 (memoria
+  `reference_mirova_tif_congelados_20260922`): después de esa fecha la clase sale (iv) salvo otra posición citable, y
+  la distancia del OCR sola no basta.
+- **Tolerancia** (en unidades del objeto, A91, fijada aquí): mismo foco = nuestro punto a no más de 2 píxeles nominales
+  del sensor del píxel de MIROVA (750 m en VIIRS 375, 1,5 km en VIIRS 750) y 3 km en MODIS por su desplazamiento
+  conocido de 1 a 3 km hacia el nadir (memoria `project_modis_geo_interp_offset`). Sin TIF, (ii) contra (iii) se decide
+  sólo si nuestra distancia al cráter difiere en más de esa tolerancia de la pasada que sí coincide esa noche; si no
+  hay ninguna, (iv).
+- **Línea base roja**: (1) sobre `data/audit_continuous/latest.json` del 2026-11-02, I1 tiene que reproducir las noches
+  comunes con misma pasada a ±120 s (125 de 194 en VIIRS 375, 32 de 42 en VIIRS 750, 14 de 16 en MODIS, conteo de la
+  coordinadora sin verificar) o explicar la diferencia; (2) un acierto sintético por otra fuente (copia de un record real
+  de Cordón Caulle con su punto movido 15 km del cráter, misma noche) tiene que salir (iii), uno de misma pasada y mismo
+  píxel (i), y uno sin TIF ni pasada coincidente (iv); (3) un par desfasado 3 min a propósito tiene que aparecer en I6;
+  (4) una noche donde port y node difieren a propósito (un record con `distance_class` fuera de summit) tiene que
+  aparecer en I3.
+- **Alcance**: el pareo y el conteo, no los detectores (MODIS es F1, VIIRS 375 es F2, VIIRS 750 lo mira la sombra de
+  #945). Lee records; no reprocesa.
+- **Campo**: dos o tres aciertos de clase (iii) o (iv), con pasada UTC, para mirar contra la lámina de MIROVA.
 
 ### F0. Pendientes sin eje
 
@@ -204,7 +214,8 @@ eje que su instrumento tiene que volver a encontrar antes de que su cero valga) 
 - **Vara**: el código y los datos de la base; para C-07 y V0b-01, el port del código de MIROVA V750 que ya existe.
 - **Línea base roja**: (1) la decisión 1 de S160 (#891) tiene que salir resuelta, con su commit; (2) la decisión 6
   (C-10) tiene que salir abierta. Si el clasificador da lo mismo para las dos, no clasifica.
-- **Campo**: C-07, C-09, C-10 actualizados.
+- **Campo**: C-07, C-09, C-10 actualizados; C-06 (Suomi NPP después del 2026-11-02 13:00 UTC, mirado en los records)
+  y la rotación de `EARTHDATA_TOKEN` antes del 2026-11-27 (vence el 2026-12-07 18:03 UTC) como ítems con fecha.
 
 ### Corte del verificador (fijado antes de lanzar)
 
@@ -214,7 +225,7 @@ línea base roja que el auditor no pudo reencontrar. Lo demás se publica con su
 
 ## 4. Verificadores y síntesis
 
-- Un verificador por frente, V0 a V4, del otro modelo: los auditores son Fable a `high`, los verificadores Opus a `high`
+- Un verificador por frente (V0, V1, V2, V3 y V5), del otro modelo: los auditores son Fable a `high`, los verificadores Opus a `high`
   (guía §5). Reciben título, archivo:línea o script:salida y gravedad; no abren el informe del auditor (bloque del
   verificador de `docs/_prompts/PREAMBULO-AUDITOR.md`). `caminos.md` con su sha256 y hora del servidor antes de abrir
   nada; el orquestador guarda el hash.
@@ -243,11 +254,11 @@ línea base roja que el auditor no pudo reencontrar. Lo demás se publica con su
 | disco C: | 2 GB por auditor, 0,5 GB por verificador | cualquiera se detiene si C: baja de 3 GB; el orquestador mide `du` en cada notificación |
 | procesos pesados locales | 2 a la vez en total (contando los de S174) | el orquestador no lanza un tercero |
 | API de GitHub | 10 llamadas por auditor, 5 por verificador, leyendo antes los insumos | ninguna si `rate_limit` baja de 200 |
-| workflows | ninguno (F4 simula en local) | despachar uno es parada |
+| workflows | ninguno | despachar uno es parada |
 | credenciales | ninguna | usar una es parada |
 
-**Olas**: 1) F2, F3, F4, F0 desde el 2026-11-08 12:00 UTC (4 en paralelo, ninguno pesado salvo F2 si reprocesa; si
-reprocesa, cuenta como pesado); 2) V2, V3, V4, V0 a medida que terminan; F1 desde el 2026-11-09 09:30 UTC, después
+**Olas**: 1) F2, F3, F5, F0 desde el 2026-11-08 12:00 UTC (4 en paralelo, ninguno pesado salvo F2 si reprocesa; si
+reprocesa, cuenta como pesado); 2) V2, V3, V5, V0 a medida que terminan; F1 desde el 2026-11-09 09:30 UTC, después
 de la corrida del audit semanal; 3) V1 y síntesis. Esperas y verificadores en primer plano.
 
 ## 6. Prompts
@@ -257,7 +268,7 @@ como está en la base (sha256 del bloque entre `<preambulo_auditor>` y `</preamb
 `sed -n '/^```text$/,/^```$/p' | awk '/<preambulo_auditor>/,/<\/preambulo_auditor>/'`: `36a55c66d016afb3a28b2cdca446f19c32065c8c5b9e6affdfa1e31bb2cb6c1b`),
 con los huecos llenos; la `<tarea>` del frente; y el bloque `<autonomia>` del mismo archivo. Revisado el bloque al
 abrir este plan: no trae carpetas ni reglas viejas; la frase «doce veces al día» del contexto queda como SOSPECHA (el NRT
-lo dispara un cron externo y no se midió cuántas corridas hace hoy; lo mide F4). Antes de lanzar,
+lo dispara un cron externo y no se midió cuántas corridas hace hoy; lo cuenta F0 con los insumos de la ola 0). Antes de lanzar,
 `grep -nE "«[A-Z_]+»"` sobre cada prompt armado da cero líneas.
 
 ### 6.1 Huecos comunes
@@ -287,7 +298,7 @@ realmente corres (en S172 y S174 agentes pedidos a high informaron 10 a 15): si 
 | F1 | `...\_s175_audit\f1\` | `...\s175_audit\f1\` | 151 a 199 |
 | F2 | `...\_s175_audit\f2\` | `...\s175_audit\f2\` | 201 a 249 |
 | F3 | `...\_s175_audit\f3\` | `...\s175_audit\f3\` | 251 a 299 |
-| F4 | `...\_s175_audit\f4\` | `...\s175_audit\f4\` | 301 a 349 |
+| F5 | `...\_s175_audit\f5\` | `...\s175_audit\f5\` | 301 a 349 |
 | Vn | `...\_s175_audit\vn\` | `...\s175_audit\vn\` | Vn-01 en adelante |
 
 (`...` es `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378`;
@@ -327,10 +338,9 @@ tokens y 24 a 48 minutos; verificadores Opus: 316.650 a 384.714 tokens y 16 a 37
 | orquestador (ola 0, listas, síntesis) | 1 | 0,3 a 0,5 millones | 1,5 h |
 | **total** | 11 | **3,9 a 4,9 millones** | 6 a 7 h en tres olas |
 
-Riesgo de subestimar: F1 y F2 leen records reales (VIIRS 375 es el sensor con más records) y pueden reprocesar; F3 barre 308 entradas.
-La parte B de F2 (identidad del acierto) no agrega agentes: lee los mismos records y la posición de los TIF ya
-archivados; empuja a F2 hacia el extremo alto de su rango (unos 0,5 millones) y el total sigue dentro de 3,9 a 4,9. Si el plan semanal tras
-el reinicio no deja margen para 5 millones, recortar F4 y después F3 (§0).
+Riesgo de subestimar: F1 y F2 leen records reales (VIIRS 375 es el sensor con más records) y pueden reprocesar; F3
+barre 308 entradas. F5 lee records de los tres sensores y los TIF ya archivados, sin reprocesar; reemplaza a F4 y no
+cambia el total. Si el plan semanal tras el reinicio no deja margen para 5 millones, recortar F3 (§0).
 
 ## 8. Lo que el plan no hace, y lo que decide Nicolás antes de lanzar
 
@@ -339,8 +349,8 @@ ningún reproceso en Actions; no audita #945 como PR ni el código de Mirova-v1.
 
 | # | decisión | recomendación |
 |---|---|---|
-| 1 | Los cinco frentes, o recortar | los cinco, con VIIRS 375 en lugar de VIIRS 750 B4 (ya recortado por tu pregunta); si el uso no alcanza, F4 primero (repite eje) y después F3 |
+| 1 | Los cinco frentes, o recortar | los cinco: VIIRS 375 en lugar de VIIRS 750 B4 y la identidad del pareo (F5) en lugar de los vencimientos (F4), los dos por tus preguntas; si el uso no alcanza, F3. Alternativa: seis frentes con F4 de vuelta, más de lo que permite la regla S154 (5 + 5) y unos 0,9 millones más |
 | 2 | F1 espera al audit del 2026-11-09 | sí: sin esa corrida, F1 audita un sistema sin su primer veredicto semanal |
 | 3 | Fable como auditor y Opus como verificador | sí (guía §5); la alternativa barata, Sonnet auditor, no tiene medición propia en este proyecto |
 | 4 | Sellar este plan | con tu sí, commit y hash como «SHA_PLAN» antes de la ola 1 |
-| 5 | Tolerancia de «mismo foco» en la parte B de F2: 2 píxeles nominales en VIIRS, 3 km en MODIS | sí, como criterio propuesto y no medido; en MODIS se agranda porque su geolocalización ya tiene un desplazamiento conocido de 1 a 3 km hacia el nadir (memoria `project_modis_geo_interp_offset`), que con 2 km fabricaría clases (iii) falsas; si prefieres otra, se cambia antes de sellar |
+| 5 | Tolerancia de «mismo foco» en F5 (I2): 2 píxeles nominales en VIIRS, 3 km en MODIS | sí, como criterio propuesto y no medido; en MODIS se agranda porque su geolocalización ya tiene un desplazamiento conocido de 1 a 3 km hacia el nadir (memoria `project_modis_geo_interp_offset`), que con 2 km fabricaría «otra fuente» falsa; si prefieres otra, se cambia antes de sellar |
