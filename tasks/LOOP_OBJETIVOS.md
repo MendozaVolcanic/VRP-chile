@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-07 10:32 UTC (S174): #953 mergeado; #952 R2 del verificador en curso
+
+- Frase de Nicolás («Sí, mergea el 953»). Squash `34eb44d9b` con `--match-head-commit 1ab822eac` (verificador limpio MERGEABLE, 5 hallazgos g1). Seguimiento pendiente: ninguna prueba de `tests/` ni workflow corre `evaluar_v750a.py` ni su batería (VPR953-04), así que el CI verde no vigila el lector de V750-A; más VPR953-01 a 03 y 05.
+- #952: segunda vuelta del autor en `adc1c06e4` (CI verde, 120/120, 12/12 mutaciones); R2 del verificador limpio corriendo.
+
 ### 2026-11-07 04:32 UTC (S174): PR #953 (retoques R6 del lector de V750-A) en borrador; verificador lanzado; plan S175 con mejoras
 
 - #953 (`1ab822eac`, CI verde run 42337916239): R6-01 (`arg_ahora` captura OverflowError), R6-02 (ER54/ER55, regla de 14 noches con B0), R6-03 (ER45 con TZ). Según el autor: 103/103 pruebas, MR68 y MR72 a MR75 atrapadas por aserción, salida con datos reales idéntica a main. Verificador limpio (Sonnet) lanzado; informe en `C:\Users\nmend\vrp-temporales\s174-ver953\INFORME.md`.
