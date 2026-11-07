@@ -413,6 +413,9 @@ def test_main_de_punta_a_punta_con_predicado_sintetico(tmp_path, monkeypatch, R,
     # VPR940-15: con --ensayo cada línea de veredicto lo dice
     lineas = [x for x in capsys.readouterr().out.splitlines() if ": fila " in x]
     assert len(lineas) == 3 and all(x.startswith("ENSAYO (NO DECIDE) ") for x in lineas), lineas
+    # VPR952-05: MODIS (evaluables sin alertas) tiene los controles de cenit SIN SUSTRATO y su línea lo dice
+    assert any(x.startswith("ENSAYO (NO DECIDE) MODIS: fila ") and "curva de cenit no leída: SIN SUSTRATO" in x
+               for x in lineas), lineas
 
 
 # ------------------------------------------------------------------------------------------- R25 contra el OSF
@@ -907,8 +910,9 @@ def test_main_con_manifiesto_exige_tambien_el_osf(tmp_path, monkeypatch, R, caps
     assert any(x.endswith("osf.csv") for x in c["fuera_del_manifiesto"])
 
 
-def test_controles_de_cenit_sin_sustrato_real_cuenta_como_ok(R):
-    """VPR946R2-02: SIN SUSTRATO de verdad (la curva no tiene pares) no es un control caído."""
+def test_controles_de_cenit_sin_sustrato_real_no_es_un_control_caido(R):
+    """VPR946R2-02: SIN SUSTRATO de verdad (la curva no tiene pares) no es un control caído (ni un OK: VPR952,
+    nombre corregido; antes se llamaba «..._cuenta_como_ok»)."""
     r = L.controles_cenit(R, poblacion(), "V")
     assert r["estado"] == "SIN SUSTRATO" and "error" not in r
     assert leer(R, poblacion(), "MODIS")["controles"]["controles_cenit"]["estado"].startswith("SIN SUSTRATO")
@@ -995,6 +999,11 @@ def test_sin_sustrato_solo_no_bloquea_en_los_controles_de_cenit():
     assert f != 1, (f, mot)
     f, _, mot = L.veredicto("MODIS", regla, {"c_via": {"estado": "SIN SUSTRATO"}}, {})
     assert f == 1 and mot == ["c_via"], (f, mot)
+    # VPR952-06: sólo la clave exacta; un control que también habla de cenit (C-cenit del OSF) o una clave parecida
+    # no heredan el permiso
+    for k in ("c_cenit_osf", "controles_cenit_x", "xcontroles_cenit"):
+        f, _, mot = L.veredicto("MODIS", regla, {k: {"estado": "SIN SUSTRATO (lectura 2 de 8)"}}, {})
+        assert f == 1 and mot == [k], (k, f, mot)
 
 
 def test_curva_cenit_con_error_no_se_rotula_sin_sustrato(R):
@@ -1004,3 +1013,128 @@ def test_curva_cenit_con_error_no_se_rotula_sin_sustrato(R):
     malo = _Proxy(R, CC=_Proxy(R.CC, resumen=revienta))
     dob = L.curva_cenit(malo, poblacion(), "V")["V"]["razon_doble"]
     assert dob["veredicto"] == "ERROR INTERNO" and "ZeroDivisionError" in dob["error"], dob
+
+
+# ------------------------------------------------------------------- segunda vuelta de #952 (verificador limpio)
+# VPR952-01 a -06 (C:/Users/nmend/vrp-temporales/s174-ver952/INFORME.md, fuera de git): la rama con sustrato de los
+# controles de cenit no tenía prueba, los números del rótulo no se comparaban con la verdad y quedaban bordes.
+def _con_sustrato(n=14):
+    """Población con sustrato para los controles de cenit: por noche, tres protegidas que todos los brazos publican con
+    la misma magnitud que MIROVA, con cenit 10°, 40° y 41°. La lectura es el par 10°/41° (31°, sobre los 15° de V375-E)
+    y el nulo el par 40°/41° (1°, bajo 5°): n noches en cada uno, sobre el mínimo de 8 si n ≥ 8."""
+    fs = []
+    for i in range(n):
+        for h, z in (("01:00", 10.0), ("02:30", 40.0), ("04:00", 41.0)):
+            fs.append(F(("Lascar", "Isluga", "Lastarria")[i % 3], "2026-02-%02d" % (1 + i), "protegida", 1, 1, z=z,
+                        hora=h))
+    return fs
+
+
+def _razon_doble_rota(R, como):
+    """Una razón doble defectuosa para ver que los controles de ganancia la cazan: `como(par)` reescribe la d de cada
+    par de la lectura; el nulo queda sano (si no, el control lo cazaría por NULO SESGADO y no por la ganancia)."""
+    real = R.CC.pares_por_noche
+
+    def pares(*a, **k):
+        out = real(*a, **k)
+        for p in out:
+            p["d"] = como(p)
+        return out
+    return _Proxy(R, CC=_Proxy(R.CC, pares_por_noche=pares))
+
+
+def test_controles_de_cenit_con_sustrato_y_datos_sanos_dan_ok(R):
+    """VPR952-01: la rama con sustrato. Sin sesgo de pasada a pasada el nulo contiene 1, la ganancia pareja no mueve
+    la razón doble y la que crece con el cenit la sube: OK, y este control no manda el sensor a la fila 1."""
+    r = L.controles_cenit(R, _con_sustrato(), "V")
+    assert r["estado"] == "OK" and r["veredicto"] == "REPRODUCE LA CURVA", r
+    assert r["d"] == pytest.approx(1.0) and r["d_ganancia_pareja"] == pytest.approx(r["d"]), r
+    assert r["d_ganancia_cenit"] > r["d"], r
+    s = leer(R, _con_sustrato(), "MODIS")
+    assert s["controles"]["controles_cenit"]["estado"] == "OK" and "controles_cenit" not in s["motivos"], s["motivos"]
+    assert s["fila"] != 1, (s["fila"], s["motivos"])
+
+
+def test_controles_de_cenit_con_nulo_sesgado_son_rojo_y_fila_1(R):
+    """VPR952-01: si nuestra razón contra MIROVA cambia entre dos pasadas de cenit parecido (×0,25 en la de 41°), hay un
+    sesgo de pasada a pasada que no es el cenit: el nulo no contiene 1, la curva no se lee y el sensor va a la fila 1.
+    Las dos ganancias se comportan bien en esta población: sólo el nulo puede poner el rojo."""
+    fs = _con_sustrato()
+    for f in fs:
+        if f["z"] == 41.0:
+            for b in L.BRAZOS:
+                f["_t"][b]["mag"] *= 0.25
+    r = L.controles_cenit(R, fs, "V")
+    assert r["veredicto"] == "NULO SESGADO" and r["estado"] == "ROJO", r
+    assert r["d_ganancia_pareja"] == pytest.approx(r["d"]) and r["d_ganancia_cenit"] > r["d"], r
+    s = leer(R, fs, "MODIS")
+    assert s["fila"] == 1 and "controles_cenit" in s["motivos"], (s["fila"], s["motivos"])
+
+
+def test_controles_de_cenit_cazan_una_razon_doble_que_no_cancela_la_ganancia_pareja(R):
+    """VPR952-01: si la razón doble dependiera de la magnitud absoluta (no cancelara una ganancia pareja ×1,5), el
+    control de la ganancia pareja la caza aunque el nulo y la ganancia que crece estén bien."""
+    malo = _razon_doble_rota(R, lambda p: p["d"] * p["x"][0] / 2.0)     # 2 MW: la magnitud de la menos oblicua
+    r = L.controles_cenit(malo, _con_sustrato(), "V")
+    assert r["veredicto"] == "REPRODUCE LA CURVA" and r["d"] == pytest.approx(1.0), r
+    assert r["d_ganancia_pareja"] == pytest.approx(1.5) and r["d_ganancia_cenit"] > r["d"], r
+    assert r["estado"] == "ROJO", r
+
+
+def test_controles_de_cenit_cazan_una_razon_doble_ciega_al_cenit(R):
+    """VPR952-01: si la razón doble no viera la pasada oblicua (d = 1 siempre), una ganancia que crece con el cenit no
+    la sube y el control lo caza aunque el nulo y la ganancia pareja estén bien."""
+    malo = _razon_doble_rota(R, lambda p: 1.0)
+    r = L.controles_cenit(malo, _con_sustrato(), "V")
+    assert r["veredicto"] == "REPRODUCE LA CURVA" and r["d_ganancia_pareja"] == pytest.approx(r["d"]), r
+    assert r["d_ganancia_cenit"] == pytest.approx(r["d"]) and r["estado"] == "ROJO", r
+
+
+def test_controles_de_cenit_sin_sustrato_cuenta_las_noches_de_verdad(R):
+    """VPR952-02: los números del rótulo SIN SUSTRATO se comparan con la verdad del escenario, no con lo que dice el
+    propio resultado. 5 noches con lectura y nulo, 2 sólo con lectura (10°/40°), 1 sólo con nulo (40°/41°) y 3
+    protegidas sin cenit: lectura 7, nulo 6, 21 pasadas con alerta y cenit de 24 con alerta."""
+    fs = _con_sustrato(5)
+    for d in ("2026-02-20", "2026-02-21"):
+        fs += [F("Lascar", d, "protegida", 1, 1, z=z, hora=h) for h, z in (("01:00", 10.0), ("02:30", 40.0))]
+    fs += [F("Isluga", "2026-02-22", "protegida", 1, 1, z=z, hora=h) for h, z in (("02:30", 40.0), ("04:00", 41.0))]
+    fs += [F("Lastarria", "2026-02-%02d" % d, "protegida", 1, 1, z=None) for d in (23, 24, 25)]
+    r = L.controles_cenit(R, fs, "V")
+    assert r["estado"] == "SIN SUSTRATO", r
+    assert (r["noches_lectura"], r["noches_nulo"], r["n_min"], r["pasadas_alerta_con_cenit"]) == (7, 6, 8, 21), r
+    e = leer(R, fs, "MODIS")["controles"]["controles_cenit"]["estado"]
+    assert "lectura 7 de 8, nulo 6 de 8" in e, e
+
+
+def test_controles_de_cenit_con_cenit_nan_en_todas_las_alertas_es_rojo(R):
+    """VPR952-03: un cenit NaN no es un cenit. Si todas las alertas lo traen así es el mismo insumo roto que sin cenit
+    (ROJO), no falta de noches (antes daba SIN SUSTRATO con 6 noches de lectura armadas con pares NaN). Control: con
+    una sola alerta con cenit numérico ya no es insumo vacío."""
+    fs = poblacion()
+    for f in fs:
+        f["z"] = float("nan")
+    r = L.controles_cenit(R, fs, "V")
+    assert r["estado"].startswith("ROJO: insumo sin cenit") and "12" in r["estado"], r
+    fs[0]["z"] = 20.0
+    r = L.controles_cenit(R, fs, "V")
+    assert r["estado"] == "SIN SUSTRATO" and r["pasadas_alerta_con_cenit"] == 1 and r["noches_lectura"] == 0, r
+
+
+def test_armar_pasadas_deja_sin_cenit_un_cenit_nan():
+    """VPR952-03, en la entrada: un `sensor_zenith_deg` NaN (o infinito) del record llega como cenit ausente, así la
+    curva, los controles de cenit y el sorteo lo tratan igual que un record sin cenit."""
+    k = {("Lascar", "MODIS_AQUA", "2026-02-%02d 05:00" % d): _rec("2026-02-%02d 05:00" % d, "MODIS_AQUA", 0, 0, z=z)
+         for d, z in ((2, float("nan")), (3, float("inf")), (4, 33.0), (5, None))}
+    z = {f["dt"]: f["z"] for f in L.armar_pasadas({}, k)}
+    assert z == {"2026-02-02 05:00": None, "2026-02-03 05:00": None, "2026-02-04 05:00": 33.0,
+                 "2026-02-05 05:00": None}, z
+
+
+def test_la_linea_de_consola_dice_si_la_curva_de_cenit_no_se_leyo(R):
+    """VPR952-05: con los controles de cenit SIN SUSTRATO la línea de consola lo dice (antes sólo estaba en el JSON y
+    la consola era indistinguible de una lectura con curva). Control: con sustrato no lo dice."""
+    assert hasattr(L, "linea_veredicto"), "falta la función que arma la línea de consola"
+    lin = L.linea_veredicto("", "MODIS", leer(R, poblacion(), "MODIS"))
+    assert lin.startswith("MODIS: fila 6 | ") and "curva de cenit no leída: SIN SUSTRATO (lectura" in lin, lin
+    lin = L.linea_veredicto("ENSAYO (NO DECIDE) ", "MODIS", leer(R, _con_sustrato(), "MODIS"))
+    assert lin.startswith("ENSAYO (NO DECIDE) MODIS: fila ") and "curva de cenit no leída" not in lin, lin
