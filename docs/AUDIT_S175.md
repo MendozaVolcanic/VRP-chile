@@ -1,8 +1,9 @@
 # Auditoría S175: el sistema corriendo después de la S160
 
-> **Estado: SÍNTESIS PARCIAL (cuatro de cinco frentes).** F1 (MODIS con la vía «código MIROVA») corre el lunes
-> 2026-11-09 desde las 09:30 UTC, después del audit semanal, y se agrega a este documento con su verificador.
-> Escrita el 2026-11-07 (hora del servidor Sat, 07 Nov 2026 17:44:29 GMT) por el orquestador (Opus 5.5).
+> **Estado: COMPLETA (cinco de cinco frentes, cada uno con su verificador).** F1 se adelantó al 2026-11-07 por decisión
+> de Nicolás; el audit semanal del 2026-11-09 queda como anexo (§10), sin cambiar los veredictos.
+> Primera versión el 2026-11-07 17:44 GMT; cierre con F1 y V1 el 2026-11-07 (hora del servidor al cerrar en §10).
+> Orquestador: Opus 5.5.
 
 ## 0. Encabezado
 
@@ -13,7 +14,7 @@
   `latest_consolidado.csv` `dee76837...` (registro completo en
   `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\REGISTRO_AGENTES.md`).
 - **Frentes**: F0 (pendientes de S160 sin eje), F2 (VIIRS 375 en producción), F3 (decisiones y cierres S160 a S174), F5
-  (identidad del pareo con MIROVA, pedido de Nicolás). F1 pendiente. Recortados del plan: VIIRS 750 con ROI B4 (lo vigila
+  (identidad del pareo con MIROVA, pedido de Nicolás) y F1 (MODIS con la vía «código MIROVA»). Recortados del plan: VIIRS 750 con ROI B4 (lo vigila
   la sombra de #945) y F4, vencimientos simulando la ausencia (sus pendientes pasaron a F0 con fecha).
 - **Sólo veredictos de verificador.** Cada hallazgo de la tabla del §3 lleva el veredicto y la gravedad del verificador,
   no los del auditor. Los que no pasaron el corte del verificador van en el §6 con su conteo.
@@ -37,7 +38,9 @@
    modelo» se cumplió; el auditor no fue el previsto.
 3. **F2 lanzó su propio verificador** (subagente, carpeta `experiments\_s175_audit\f2\verificador\`), fuera del plan. No
    cuenta como verificación; la de F2 es la de V2.
-4. **F1 no está.** Todo lo que este documento dice de MODIS sale de F0, F3 y F5, no del frente que audita la vía.
+4. **F1 y V1 corrieron como subagentes** (Fable y Opus), después de comprobar que el esfuerzo sí llega: sus
+   transcriptos dan `"output_config":{"effort":"high"}` en 27 de 27 y 76 de 76 pedidos. Ese es el modelo que pedía el plan.
+   F1 midió con los datos de `origin/main` = `e75a7d52d` (SHA_CAMPO, 2026-11-07 20:04 GMT) y el código de la base.
 
 ## 1. En una pantalla
 
@@ -57,7 +60,11 @@
    volcanes, y hay 42 protegidas diurnas fuera del criterio por diseño (309; 308 sin verificar).
 6. **Documentos rectores desfasados**: `SINTOMAS.md` describe el MODIS de producción como K y con `_interp_geo`, cuando
    98 de 98 records MODIS desde el 2026-11-02 son de la vía (251, gravedad 3).
-7. **Pendientes de S160 que siguen abiertos con gravedad 3**: VIIRS 750 en cumbre (101, 102), el veto de D18 colgado de
+7. **La vía MODIS publica lo que dice producir** (F1, sin verificar como conteo: 140 de 140 records coherentes, 0 records
+   de K escritos después del encendido, el tablero coincide en todos). Lo que falla es la vigilancia alrededor: es ciega
+   por volcán a una caída a K (151, 152) y la regla de reversión supone que el NRT reescribe 8 días, cosa que el almacén
+   no hace; la FICHA CPLT pública repite esa premisa (154, V1-02).
+8. **Pendientes de S160 que siguen abiertos con gravedad 3**: VIIRS 750 en cumbre (101, 102), el veto de D18 colgado de
    una alerta de 1,00 MW truncada (103) y el token (107: rotar antes del 2026-11-27).
 
 ## 2. Lo que esto dice de si llegamos a los objetivos
@@ -75,7 +82,7 @@ Ninguno muestra una protegida de la tabla perdida. Lo que se ve es que la vara m
 
 ## 3. Hallazgos verificados
 
-Gravedad del verificador (1 a 5). Veredicto: C = CONFIRMADO, P = CONFIRMADO EN PARTE. Ninguno REFUTADO.
+Gravedad del verificador (1 a 5). Veredicto: C = CONFIRMADO, P = CONFIRMADO EN PARTE. Uno solo REFUTADO en parte (155, su consecuencia).
 
 | id | frente | qué | veredicto | gravedad |
 |---|---|---|---|---|
@@ -114,6 +121,14 @@ Gravedad del verificador (1 a 5). Veredicto: C = CONFIRMADO, P = CONFIRMADO EN P
 | 311 | F5 | Las tres copias de `mirovaEqVrp` difieren y el guard de tres vistas sólo compara `isValidDetection` | C | 1 |
 | 312 | F5 | `n_misma_pasada` del audit compara máximo contra máximo, no noches con acierto en la misma pasada | C | 1 |
 | 110 | F0 | `noches_sin_datos` y el recall son ciegos a un satélite callado (el vigilante por plataforma lo cubre a 72 h) | C | 1 |
+| 151 | F1 | La vigilancia de la guardia no comprueba que el record de producción sea de la vía (`prod_via` se calcula y no se usa en el lado prospectivo); una caída a K que calle dispara REVERSION_CANDIDATA contra la vía. Consecuencia práctica de baja probabilidad | C | 2 |
+| 152 | F1 | Vigilante ciego por volcán: si la vía cae a K en un solo volcán, VERDE; si deja de escribir, sí sale VIGILANCIA_CIEGA a los 4 días | P | 2 |
+| 153 | F1 | El descarte de borde de la vía no deja rastro en el log ni en la cobertura; caso Villarrica MODIS Aqua 2026-11-04 07:10 (guardia sí, producción no); la vigilancia lo cuenta por semana | P | 2 |
+| 154 | F1 | §4.1 y §4.7 de la regla de reversión suponen que el NRT reescribe 8 días; no lo hace (primera observación de la vía 19 h antes del encendido) | C | 2 |
+| 155 | F1 | Los TIF de MIROVA dejaron de capturarse el 2026-09-22; la consecuencia para §4.3 no se sostiene porque la regla pide la cabecera del PNG, que se sigue capturando | REFUTADO en la consecuencia | 1 |
+| 156 | F1 | El audit deja de dar flag por las protegidas MODIS que K no publicó cuando la vía tiene records; hay aviso «sin juzgar» y siguen listadas | C | 1 |
+| 157 | F1 | El recall de VIA_MODIS no da flag hasta 15 noches, mitigado: una protegida que la vía calla da flag de inmediato | C | 1 |
+| 158 | F1 | El encendido se cuelga del primer record; sólo un `--overwrite` masivo lo mueve | P | 1 |
 
 **Hallazgos propios de los verificadores**: V2-01 (las 5 protegidas no publicadas son del estrato OCR sin geometría, g2),
 V2-02 («111 de 111 noches» acepta cualquier pasada, g2), V2-03 (dos tercios del exceso de Lastarria es D-9, g2), V2-04 (el
@@ -121,7 +136,11 @@ texto del tablero dice «en esta pasada» y la lógica busca ±60 min, g2), V2-0
 componen mal, SOSPECHA, g2), V3-01 (cita de 258 mezcla dos decisiones, g1), V3-02 (518 records MODIS de enero a junio de los
 34 volcanes fuera del cron sin `processed_utc` ni `regimen`, g1), V5-01 (la regex de I8 deja fuera 20 de 63 notas de
 truncado, g1), V5-02 (el origen de 303 también torna dudosa la clase summit/far de Tupungatito y Puyehue, SOSPECHA, g2),
-V0-01 (la «fracción 19 %» de 101 depende de la ventana, g1), V0-02 (`f0_cadencias.py` emite una advertencia de sintaxis, g1).
+V0-01 (la «fracción 19 %» de 101 depende de la ventana, g1), V0-02 (`f0_cadencias.py` emite una advertencia de sintaxis, g1),
+V1-01 (el plazo de 29 protegidas de la vigilancia cuenta pasadas K contra K, misma raíz que 151, g2), **V1-02 (la FICHA
+CPLT pública v1.18, l. 7 y 25, dice que la vía rige «hasta unos 8 días antes»; los datos dicen 19 h, g2)**, V1-03 (la caída
+`sin_mxd03` es inalcanzable desde el NRT, `run_pipeline.py` l. 247 a 250, g1), V1-04 (falta el JSON de la guardia de un
+volcán y la vigilancia declara ciegos los once; va en la dirección segura, g1).
 
 ## 4. Informes de cada agente
 
@@ -131,7 +150,8 @@ V0-01 (la «fracción 19 %» de 101 depende de la ventana, g1), V0-02 (`f0_caden
 | F2 | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\f2\INFORME.md` |
 | F3 | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\f3\INFORME.md` |
 | F5 | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\f5\INFORME.md` |
-| V0, V2, V3, V5 | `...\experiments\_s175_audit\v0\VERIFICACION.md` (y `v2`, `v3`, `v5`), cada una con su `caminos.md` sellado antes de abrir archivos |
+| F1 | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\f1\INFORME.md` |
+| V0, V1, V2, V3, V5 | `...\experiments\_s175_audit\v0\VERIFICACION.md` (y `v1`, `v2`, `v3`, `v5`), cada una con su `caminos.md` sellado antes de abrir archivos |
 
 ## 5. Líneas base rojas (regla B: el instrumento tiene que ver lo que ya sabemos)
 
@@ -143,12 +163,13 @@ Todas se reencontraron.
 | F5 | acierto sintético por otra fuente, par desfasado 3 min, port contra node forzado, fila truncada de Chillán, hueco de un satélite | las ocho, vistas |
 | F2 | 201 de S160 (C1 de escena: 4 de 2.452) sobre `d516b9d8c`; caída de Chillán con el cenit; lector de la sombra sin datos | las tres, vistas (el lector da NO LEGIBLE) |
 | F3 | nota A85 desfasada en `77e54e8e0^`; hallazgo 281 en `d516b9d8c` | vistas con un instrumento nuevo; el censo S145 no ve ninguna (257) |
+| F1 | records `sin_grilla`/`sin_mxd03` después del encendido (con control sintético que el censo ve); 0 records de la vía en `79f410697` | las dos, vistas (0 de 14.855 MODIS en `79f410697`) |
 | F0 | decisión 1 resuelta (`0d73f2a4e`, #891); decisión 6 abierta; Suomi NPP sin records después del 2026-11-02 13:00 UTC | las tres, vistas |
 
 ## 6. Hallazgos sin verificar (no pasaron el corte del §3 del plan)
 
 Se publican con su conteo y son la puerta de S176: F5 302, 308 y 310 (3); F2 F2-208 a F2-211 y F2-213 (5); F3 255, 256 y 259 a 265 (9);
-F0 108, 111, 112 y 116 a 129 (17). En total 34 de 69 hallazgos de auditor. Los más útiles para la próxima sesión: 302 (los
+F0 108, 111, 112 y 116 a 129 (17); F1 159 a 161 (3). En total 37 de 80 hallazgos de auditor. Los más útiles para la próxima sesión: 302 (los
 aciertos por misma pasada son el mismo foco, la respuesta directa a la pregunta de Nicolás), 108 (la cola de campo no se
 tocó desde S160), 256 (la memoria dice que el MxD03 se ignora; la vía lo usa) y 111 (nadie mide la fracción MODIS NRT).
 
@@ -177,6 +198,8 @@ tocó desde S160), 256 (la memoria dice que el MxD03 se ignora; la vía lo usa) 
 | 8 | VIIRS 750 en cumbre (101, 102) | darle un camino nuevo dentro del programa de V750 (D25 no se adoptó), medido contra la tabla; ninguna alerta perdida es protegida, así que no es urgente |
 | 9 | La lectura del truncado de MODIS (103, 307) | decidir si una alerta escrita 1,00 MW se lee como 1 o como «entre 1 y 2»; de eso cuelga el veto de D18 |
 | 10 | `.gitignore` y los `hallazgos.csv` (114) | agregar una excepción para `experiments/_s*_audit/**/hallazgos.csv` |
+| 12 | Vigilancia de la guardia por volcán y por detector (151, 152, V1-01) | sí: que mire por volcán si el record de producción es de la vía; hoy la probabilidad es baja, pero es la red que sostiene la reversión pre-autorizada |
+| 13 | Corregir la FICHA CPLT y la regla de reversión §4.1 y §4.7 (154, V1-02) | sí: la ficha es pública (Resolución CPLT N°372) y repite una premisa que los datos refutan |
 | 11 | Esfuerzo de los agentes (limitación 1) | medirlo desde ahora en el transcripto (`output_config.effort` de cada pedido), no en lo que el agente declara; volver a Fable como subagente con `effort: high` cuando se quiera ese modelo, porque el pedido sí llega |
 
 ## 9. Registro de agentes
@@ -192,5 +215,13 @@ tocó desde S160), 256 (la memoria dice que el MxD03 se ignora; la vía lo usa) 
 | V2 | Sonnet 5.5 (sesión) | SIN DATO | 8 verificados, 5 propios | |
 | V3 | Sonnet 5.5 (sesión) | SIN DATO | 6 verificados, 2 propios | |
 | V0 | Sonnet 5.5 (sesión) | SIN DATO | 12 verificados, 2 propios | |
+| F1 | Fable 5.1 (subagente) | high en 27 de 27 pedidos (transcripto); él declaró SIN DATO | 11 (151 a 161), 373 mil tokens, 25 min | 2 de 2 |
+| V1 | Opus 5.5 (subagente) | high en 76 de 76 pedidos (transcripto) | 8 verificados, 4 propios, 275 mil tokens, 16 min | |
 
 Uso del plan semanal: 78 % antes de la ola 0 y 79 % después de F5 y F2.
+
+## 10. Anexo pendiente: audit semanal del 2026-11-09
+
+F1 corrió un sustituto del audit sobre la base: VERDE, recall de VIA_MODIS 100 % en 2 noches, 3 protegidas de la vía
+publicadas, sin flags (sin verificar). El audit real del lunes 2026-11-09 09:00 UTC se agrega aquí con su lectura contra
+la regla §4 de reversión; no cambia los veredictos de arriba.
