@@ -198,9 +198,9 @@ tocó desde S160), 256 (la memoria dice que el MxD03 se ignora; la vía lo usa) 
 | 8 | VIIRS 750 en cumbre (101, 102) | darle un camino nuevo dentro del programa de V750 (D25 no se adoptó), medido contra la tabla; ninguna alerta perdida es protegida, así que no es urgente |
 | 9 | La lectura del truncado de MODIS (103, 307) | decidir si una alerta escrita 1,00 MW se lee como 1 o como «entre 1 y 2»; de eso cuelga el veto de D18 |
 | 10 | `.gitignore` y los `hallazgos.csv` (114) | agregar una excepción para `experiments/_s*_audit/**/hallazgos.csv` |
-| 12 | Vigilancia de la guardia por volcán y por detector (151, 152, V1-01) | sí: que mire por volcán si el record de producción es de la vía; hoy la probabilidad es baja, pero es la red que sostiene la reversión pre-autorizada |
-| 13 | Corregir la FICHA CPLT y la regla de reversión §4.1 y §4.7 (154, V1-02) | sí: la ficha es pública (Resolución CPLT N°372) y repite una premisa que los datos refutan |
-| 11 | Esfuerzo de los agentes (limitación 1) | medirlo desde ahora en el transcripto (`output_config.effort` de cada pedido), no en lo que el agente declara; volver a Fable como subagente con `effort: high` cuando se quiera ese modelo, porque el pedido sí llega |
+| 11 | Vigilancia de la guardia por volcán y por detector (151, 152, V1-01) | sí: que mire por volcán si el record de producción es de la vía; hoy la probabilidad es baja, pero es la red que sostiene la reversión pre-autorizada |
+| 12 | Corregir la FICHA CPLT y la regla de reversión §4.1 y §4.7 (154, V1-02) | sí: la ficha es pública (Resolución CPLT N°372) y repite una premisa que los datos refutan |
+| 13 | Esfuerzo de los agentes (limitación 1) | medirlo desde ahora en el transcripto (`output_config.effort` de cada pedido), no en lo que el agente declara; volver a Fable como subagente con `effort: high` cuando se quiera ese modelo, porque el pedido sí llega |
 
 ## 9. Registro de agentes
 
