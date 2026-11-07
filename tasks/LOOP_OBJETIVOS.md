@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-07 15:55 UTC (S174): #952 mergeado; #954 en segunda vuelta
+
+- Frase de Nicolás («Sí, mergea el 952»). Squash `36a191d45` con `--match-head-commit adc1c06e4` (verificador limpio R2 MERGEABLE, 4 hallazgos g1). Los controles de cenit de la retrospectiva D3 ya no dicen OK sin sustrato ni con insumo vacío. Quedan para Nicolás VPR952-04 (etiquetas todas `sin_info`) y el pre-registro l. 409.
+- #954 (CI corre la batería del lector de V750-A): verificador MERGEABLE CON CAMBIOS (VPR954-01 la batería no se vigila a sí misma, -02 bandera sin guardia, -03 main sin protección de rama, decisión de Nicolás). Segunda vuelta del autor en curso.
+
 ### 2026-11-07 10:32 UTC (S174): #953 mergeado; #952 R2 del verificador en curso
 
 - Frase de Nicolás («Sí, mergea el 953»). Squash `34eb44d9b` con `--match-head-commit 1ab822eac` (verificador limpio MERGEABLE, 5 hallazgos g1). Seguimiento pendiente: ninguna prueba de `tests/` ni workflow corre `evaluar_v750a.py` ni su batería (VPR953-04), así que el CI verde no vigila el lector de V750-A; más VPR953-01 a 03 y 05.
