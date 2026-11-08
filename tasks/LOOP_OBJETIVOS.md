@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 15:38 UTC (S175): Nicolás aprueba las recomendaciones; reparto entre esta sesión y S176
+- Frase de Nicolás, 15:3x UTC: «si a todo lo que recomiendes decide si se hace aca o en la siguiente sesion, ademas para la
+  siguiente anota que necesitamos un plan para que gpt codex pueda revisar, entender y auditar nuestro codigo». Cubre
+  la tabla de decisiones: arreglo del token en `pipeline/fetch.py` (A45), mapa «Todos los pixels», merge de #963, merge de
+  #958 con su tooltip, «la tabla decide» más el conteo en #957, S139 histórica, re-correr F5b.
+- **Hecho aquí:** #963 mergeado (`1a49293dd`, cabeza `248b37ddf`). Tags defensivos publicados en `1a49293dd`:
+  `pre-s175-confirmo-misma-pasada`, `pre-s175-token-fetch-401`, `pre-s175-mapa-todos-los-pixels`.
+- **En curso aquí:** tooltip de #958 (se mergea con CI verde), PR del token en `fetch.py` y PR del mapa, ambos en borrador,
+  más el verificador de #964. **`fetch.py` es excepción al congelamiento de `pipeline/` durante la sombra** (§12.6), autorizada
+  por Nicolás: no toca las vías y sólo cambia qué pasa con una credencial rechazada.
+- **Queda para S176:** audit del lunes y anexo de #955; verificador y merge de los PR del token y del mapa; medidor completo de
+  V750-A tras el verificador de #964, vara MATLAB en §4.1 y sello; conteo de filas descartadas en #957; sacar S139 de la
+  suite (histórica); re-correr F5b con la máscara corregida; **plan para que GPT Codex revise, entienda y audite el código**.
+
 ### 2026-11-08 15:24 UTC (S175): #959, #957 y #956 mergeados con frase de Nicolás
 - Frase de Nicolás («Sí, merge de los tres», a la pregunta por #959, #957 y #956). Squash con `--match-head-commit`:
   #959 `71ecc61b0` (15:23:32 UTC, cabeza `cf65d9928`), #957 `6cf57cb2b` (15:23:37, `f4d98dddd`), #956 `1b66b7490` (15:23:44,
