@@ -2352,7 +2352,7 @@ function buildCards() {
                                     : "— sin publicación de MIROVA";
       mrow.title = det.mirova
         ? "MIROVA publicó una alerta térmica para este volcán en la misma pasada (universo CONS ∪ OCR)."
-        : "MIROVA no publicó nada en esta pasada. No significa que la detección sea falsa: "
+        : "Sin alerta de MIROVA a ±2 min de este gránulo, o sólo una de 0,05 MW o menos (su banner la llama NONE). La misma pasada pudo salir en el gránulo vecino: si hay otra fila del mismo satélite a 5 o 6 min, mírala. No significa que la detección sea falsa: "
         + "la mayoría de estos casos son anomalías térmicas reales por debajo del umbral que "
         + "MIROVA publica (regla A54). Sí conviene mirarlos con el ΔT a la vista.";
     }
@@ -3942,7 +3942,7 @@ function buildNRTTable() {
       ? ("MIROVA publicó alerta térmica en esta pasada"
          + (det.record._mirova_dist_km != null
             ? " (a " + det.record._mirova_dist_km.toFixed(1) + " km según ellos)" : "") + ".")
-      : "MIROVA no publicó nada en esta pasada. No la invalida: la mayoría de estos casos son "
+      : "Sin alerta de MIROVA a ±2 min de este gránulo, o sólo una de 0,05 MW o menos (su banner la llama NONE). La misma pasada pudo salir en el gránulo vecino: si hay otra fila del mismo satélite a 5 o 6 min, mírala. No la invalida: la mayoría de estos casos son "
         + "anomalías térmicas reales bajo el umbral que MIROVA publica (A54).";
     row.append(tdDate, tdVolc, tdVrp, tdMir, tdSensor);
     tbody.appendChild(row);
