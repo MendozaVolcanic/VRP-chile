@@ -110,6 +110,8 @@ jobs:
               print(f"- REVERSION CANDIDATA: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia (K) publica y produccion (la via) calla")
           for p in d.get("protegidas_sin_record_produccion", []):
               print(f"- SIN RECORD DE PRODUCCION: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia (K) publica y produccion no tiene record (borde 171-01)")
+          for p in d.get("protegidas_calladas_por_k_de_produccion", []):
+              print(f"- CALLADA POR K DE PRODUCCION (S175): {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia publica y el record de produccion no es de la via ({p.get('prod_caida_k') or 'K sin marca'}); no es candidata a reversion")
           for p in d.get("fuera_de_plazo", []):
               print(f"- FUERA DE PLAZO (sin pre-autorizacion): {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW")
           for p in d.get("borde_del_encendido", []):
@@ -123,7 +125,7 @@ jobs:
               print(f"- nulo: antes del encendido guardia y produccion publican distinto en {n['distintas']} de {n['pares']} pasadas: {n['detalle']}")
           b = d.get("borde_171_01") or {}
           if b.get("total"):
-              print(f"- (informa) pasadas que la guardia registra y produccion no, por semana: {b['por_semana']}")
+              print(f"- (informa) pasadas que la guardia registra y produccion no, por semana: {b['por_semana']}; ultimas: {[(x['volcano'], x['sensor'], x['fecha_utc']) for x in b.get('pasadas', [])[-10:]]}")
           for a in d.get("avisos", []):
               print(f"- aviso: {a}")
           PY
@@ -135,6 +137,12 @@ jobs:
             INVESTIGAR)
               abrir "Guardia K de MODIS: investigar" "$(printf 'La vigilancia de la guardia encontro un disparador de investigacion (sin reversion automatica):\n\n%s\n\nRegla: experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4. Una pasada ya investigada se anota en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json para que deje de disparar.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
             VIGILANCIA_CIEGA)
-              abrir "Guardia K de MODIS: vigilancia ciega" "$(printf 'La vigilancia de la guardia no puede mirar:\n\n%s\n\nUna vigilancia ciega no da error, da VERDE: por eso este issue. Revisar guardia-k-modis.yml, nrt.yml y el flag enable_modis_codigo_mirova.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+              # VPR959-05 (S175): si el unico aviso son caidas a K sueltas, las demas pasadas si se miraron; el texto lo dice
+              SOLO_CAIDAS=$(python -c "import json; print(json.load(open('data/audit_continuous/guardia_modis_latest.json')).get('solo_caidas_a_k', False))")
+              if [ "$SOLO_CAIDAS" = "True" ]; then
+                abrir "Guardia K de MODIS: caidas a K" "$(printf 'En estas pasadas la via no corrio y produccion escribio K:\n\n%s\n\nEsas pasadas comparan K con K: cuentan como K y no dicen nada de la via (decision 3 de S174). Las demas pasadas siguen siendo de la via y en ellas la vigilancia no encontro disparadores. Si se repite en un volcan, revisar la grilla de MIROVA y el MxD03 de esas pasadas.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")"
+              else
+                abrir "Guardia K de MODIS: vigilancia ciega" "$(printf 'La vigilancia de la guardia no puede mirar:\n\n%s\n\nUna vigilancia ciega no da error, da VERDE: por eso este issue. Revisar guardia-k-modis.yml, nrt.yml y el flag enable_modis_codigo_mirova.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")"
+              fi ;;
             *) echo "sin issue" ;;
           esac

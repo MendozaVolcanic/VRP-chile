@@ -37,7 +37,11 @@ def _rec(vol, fecha, hhmm, pub, via=None, perfil=None, b="MODIS", sensor="MODIS_
             "lab": lab, "via": via}
 
 
-def _pasada(vol, fecha, protegida, prod, guardia, vrp=None, prod_via=None):
+def _pasada(vol, fecha, protegida, prod, guardia, vrp=None, prod_via="auto"):
+    # S175: con record de producción, por defecto es de la vía (después del encendido no hay otro, salvo la caída a K,
+    # que se prueba en tests/test_vigilancia_guardia_por_volcan_s175.py); sin record, None, como en pasadas_modis
+    if prod_via == "auto":
+        prod_via = None if prod is None else True
     return {"volcano": vol, "sensor": "MODIS", "fecha_utc": fecha[:16], "instante_utc": fecha[:16] + ":00",
             "vrp_mirova_mw": vrp if vrp is not None else (2.0 if protegida else 0.3), "protegida": protegida,
             "minima": False, "referencia_sospechosa": False, "prod_pub": prod, "guardia_pub": guardia,
@@ -146,7 +150,7 @@ def test_la_frescura_de_la_referencia_se_mide_en_las_filas_de_modis():
 def test_lo_anterior_al_encendido_es_retrospectivo_salvo_que_la_via_haya_escrito_el_record():
     """Cuenta desde el encendido (§4). Pero una pasada anterior cuyo record de producción ya es de la vía (el NRT
     re-escribe 8 días hacia atrás) no puede quedar sin mirar: no dispara la reversión, pide investigar."""
-    d = _disp([_pasada("A", "2026-11-04 07:20", True, False, True)])
+    d = _disp([_pasada("A", "2026-11-04 07:20", True, False, True, prod_via=False)])     # antes del encendido: K
     assert d["veredicto"] == "VERDE" and len(d["retrospectivo"]["protegidas_que_la_guardia_publica_y_prod_calla"]) == 1
     d = _disp([_pasada("A", "2026-11-04 07:20", True, False, True, prod_via=True)])
     assert d["reversion"] == [] and d["veredicto"] == "INVESTIGAR" and d["borde_del_encendido"]
@@ -221,7 +225,8 @@ def test_plazo_29_protegidas_o_120_dias():
 @pytest.fixture
 def insumos(monkeypatch):
     def poner(filas, prod, guardia, enc=ENC, flag=True, raw_guardia_con_via=0):
-        monkeypatch.setattr(vg, "cargar_insumos", lambda win, via: (filas, prod, guardia, raw_guardia_con_via))
+        monkeypatch.setattr(vg, "cargar_insumos", lambda win, via, caidas=None: (filas, prod, guardia,
+                                                                               raw_guardia_con_via))
         monkeypatch.setattr(vg, "leer_encendido", lambda: {"encendido_utc": enc, "primera_observacion": None,
                                                           "via": set()})
         monkeypatch.setattr(vg, "flag_produccion_encendido", lambda: flag)

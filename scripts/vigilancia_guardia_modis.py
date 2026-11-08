@@ -44,6 +44,21 @@ S172 ronda 2, otros tres huecos que la mini auditoría midió con un arnés (D:/
 - MA172-204: la frescura de la referencia se medía sobre todas las filas; ahora también sobre las de MODIS.
 - MA172-208: un nulo con 0 pares se leía como nulo sano; ahora es aviso (vigilancia ciega).
 
+S175 (docs/AUDIT_S175.md §8 decisión 11, hallazgos 151, 152 y V1-01; decisión 3 de S174, hallazgo 253; aprobadas por
+Nicolás el 2026-11-07). Con el flag encendido, cuando la vía no puede correr el procesador escribe K con la marca en
+texto (`via_codigo_mirova`: "sin_grilla", "sin_mxd03", "geo_distinta"). Esa pasada compara K con K y no dice nada de
+la vía. Por eso, del lado prospectivo, cada pasada mira si su record de producción es de la vía (`prod_via`):
+- la reversión pre-autorizada exige el record de la vía; una protegida que la caída a K calla y la guardia publica pide
+  INVESTIGAR (`protegidas_calladas_por_k_de_produccion`), nunca REVERSION_CANDIDATA (151, mutación M6);
+- el plazo de 29 protegidas, Muy Bajo y la sobre-publicación cuentan sólo pasadas de la vía (V1-01);
+- la frescura de la vía se mide POR VOLCÁN, desde el encendido: si la vía cae a K o deja de escribir en un solo volcán,
+  aviso (152, mutaciones M2 y M2c); antes se comparaba la última noche de la vía con la última de MODIS sumando los 11;
+- cada caída a K se lista (`caidas_a_k`) y, si es de los últimos DIAS_AVISO_CAIDA días, es aviso: cuenta como K, no
+  como la vía (decisión 3 de S174). Un VERDE con ese aviso sigue siendo VIGILANCIA_CIEGA (la regla, §4: un VERDE con
+  avisos no es VERDE), pero si es el único aviso la salida lo marca (`solo_caidas_a_k`) y la issue dice lo que pasa: las
+  demás pasadas sí se miraron (VPR959-05).
+Y el descarte de borde (153) se nombra pasada por pasada en `borde_171_01.pasadas`, no sólo por semana.
+
 Salida: data/audit_continuous/guardia_modis_latest.json y una línea en guardia_modis_history.jsonl.
 """
 import json
@@ -78,6 +93,9 @@ COTA_MUY_BAJO = 2
 COTA_SOBREPUBLICACION = 3
 UMBRAL_MINIMO_MW = 0.05                        # «sobre 0,05 MW»: lo de 0,05 o menos no cuenta como Muy Bajo
 DIAS_NULO = 14                                 # cuántos días antes del encendido (o de hoy) mide el nulo
+# Cuántos días una caída a K sigue siendo aviso (decisión 3 de S174). Propuesta del implementador, la fija Nicolás; es
+# otro parámetro que el del nulo, aunque hoy valga lo mismo (VPR959-05).
+DIAS_AVISO_CAIDA = 14
 DIAS_ANTES_DEL_ENCENDIDO = 10                  # la ventana cubre el re-escrito de 8 días del NRT, con margen
 # MA172-202: horas que se espera antes de leer como silencio una pasada sin record de producción (el NRT procesa con
 # atraso: LANCE ~3 h y el cron). Propuesta del implementador; la fija Nicolás al sellar la regla.
@@ -96,23 +114,28 @@ def _t(texto_utc):
 
 
 def encendido_desde_datos(raw_por_volcan):
-    """{encendido_utc, primera_observacion, via}: el menor `processed_utc` de un record MODIS de producción con
+    """{encendido_utc, primera_observacion, via, caidas}: el menor `processed_utc` de un record MODIS de producción con
     `via_codigo_mirova` True (MA172-206: no `first_processed_utc`, que hereda la fecha de K), la observación más temprana
-    de la vía, y el conjunto de claves (volcán, sensor, 'YYYY-MM-DD HH:MM') de esos records. La caída a K
-    (`"sin_mxd03"` y compañía) no es la vía."""
-    via, proc, obs = set(), [], []
+    de la vía, el conjunto de claves (volcán, sensor, 'YYYY-MM-DD HH:MM') de esos records y, S175, las caídas a K
+    {clave: marca} (marca en texto, `"sin_grilla"` y compañía): no son la vía, son K con aviso (decisión 3 de S174)."""
+    via, proc, obs, caidas = set(), [], [], {}
     for vol, recs in raw_por_volcan.items():
         for r in recs:
-            if r.get("via_codigo_mirova") is not True or not str(r.get("sensor") or "").startswith("MODIS"):
+            if not str(r.get("sensor") or "").startswith("MODIS"):
                 continue
             dt = str(r.get("datetime_utc") or "")[:16].replace("T", " ")
+            marca = r.get("via_codigo_mirova")
+            if isinstance(marca, str):
+                caidas[(vol, r.get("sensor"), dt)] = marca
+            if marca is not True:
+                continue
             via.add((vol, r.get("sensor"), dt))
             obs.append(dt)
             t = _t(r.get("processed_utc"))
             if t:
                 proc.append(t)
     return {"encendido_utc": min(proc) if proc else None, "primera_observacion": min(obs) if obs else None,
-            "via": via}
+            "via": via, "caidas": caidas}
 
 
 def leer_encendido():
@@ -157,7 +180,8 @@ def _por_volcan(recs):
 def pasadas_modis(filas, prod, guardia, win, diurna=None):
     """Pasadas nocturnas de MODIS con alerta de MIROVA (vigilancia_sombra.pasadas_de_alerta, la misma lectura A y el
     mismo pareo por volcán y sensor), con `guardia_pub` y `prod_via` (algún record de producción de la pasada es de
-    la vía; None si producción no tiene record)."""
+    la vía; None si producción no tiene record; False si todos son K, por ejemplo una caída a K, cuya marca va en
+    `prod_caida_k`)."""
     pasadas = vs.pasadas_de_alerta(filas, prod, guardia, win, diurna=diurna)
     idx = _por_volcan(prod)
     out = []
@@ -169,6 +193,7 @@ def pasadas_modis(filas, prod, guardia, win, diurna=None):
         dt = datetime.strptime(p["instante_utc"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
         cand = _cerca(idx.get(p["volcano"], []), dt)
         p["prod_via"] = any(r.get("via") is True for r in cand) if cand else None
+        p["prod_caida_k"] = next((r["caida_k"] for r in cand if r.get("caida_k")), None)
         out.append(p)
     return out
 
@@ -187,7 +212,10 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
     retro = [p for p in pasadas if p["instante_utc"] < corte]
     vence_utc = (_dt(encendido) + timedelta(days=DIAS_MAXIMOS)).strftime("%Y-%m-%d %H:%M:%S") if encendido else None
     vence = vence_utc[:10] if vence_utc else None
-    vistas = sorted((p for p in pros if p["protegida"] and p["guardia_pub"] is not None),
+    # V1-01 (S175): una protegida cuyo record de producción es K (prod_via False) compara K con K y no avanza el plazo
+    # de §4.6. Sin record de producción (None) sí cuenta: es la vía que descartó la pasada (y pide investigar, abajo).
+    vistas = sorted((p for p in pros if p["protegida"] and p["guardia_pub"] is not None
+                     and p.get("prod_via") is not False),
                     key=lambda p: (p["instante_utc"], p["volcano"]))
     orden = {vs._clave(p): i + 1 for i, p in enumerate(vistas)}
 
@@ -200,14 +228,19 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
     def calla(p):
         return p["guardia_pub"] is True and p["prod_pub"] is False
 
-    candidatas = [p for p in pros if p["protegida"] and calla(p) and vs._clave(p) not in juzgadas]
+    # 151 (S175): la regla pre-autoriza revertir cuando «producción (la vía) tiene record y no publica». Si el record es
+    # una caída a K, la diferencia es entre dos corridas de K, no de la vía: investigar, nunca revertir (mutación M6).
+    candidatas = [p for p in pros if p["protegida"] and calla(p) and p.get("prod_via") is True
+                  and vs._clave(p) not in juzgadas]
     reversion = [p for p in candidatas if dentro_de_plazo(p)]
     fuera_de_plazo = [p for p in candidatas if not dentro_de_plazo(p)]
+    calladas_por_k = [p for p in pros if p["protegida"] and calla(p) and p.get("prod_via") is not True
+                      and vs._clave(p) not in juzgadas]
 
     # (i) Muy Bajo: sobre 0,05 MW, bajo 1 MW, que la guardia publica y producción calla, en el plazo.
     mb_base = [p for p in pros if not p["protegida"] and not p["minima"] and en_plazo_instante(p)
                and (p["vrp_mirova_mw"] or 0) > UMBRAL_MINIMO_MW
-               and p["prod_pub"] is not None and p["guardia_pub"] is not None]
+               and p["prod_pub"] is not None and p["guardia_pub"] is not None and p.get("prod_via") is True]
     mb = [p for p in mb_base if calla(p) and vs._clave(p) not in juzgadas]
     muy_bajo = {"k": len(mb), "n": len(mb_base), "cota": COTA_MUY_BAJO, "dispara": len(mb) > COTA_MUY_BAJO,
                 "pasadas": mb}
@@ -218,7 +251,8 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
     vence_dt = _dt(vence_utc) if vence_utc else None
     sp, n_neg = [], 0
     for r in prod:
-        if r["b"] != SENSOR or r.get("lab") != "neg_limpio" or enc_dt is None or not (enc_dt <= r["dt"] < vence_dt):
+        if (r["b"] != SENSOR or r.get("lab") != "neg_limpio" or r.get("via") is not True or enc_dt is None
+                or not (enc_dt <= r["dt"] < vence_dt)):
             continue
         g = _cerca(gidx.get(r["vol"], []), r["dt"])
         if not g:
@@ -233,14 +267,17 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
 
     # (iii) pasadas que la guardia registra y producción no, por semana ISO (sin disparo: la regla no da cota).
     pidx = _por_volcan(prod)
-    semanas = defaultdict(int)
+    semanas, sin_prod = defaultdict(int), []
     for g in guardia:
         if g["b"] != SENSOR or enc_dt is None or g["dt"] < enc_dt:
             continue
         if not _cerca(pidx.get(g["vol"], []), g["dt"]):
             iso = g["dt"].isocalendar()
             semanas[f"{iso[0]}-W{iso[1]:02d}"] += 1
-    borde = {"por_semana": dict(sorted(semanas.items())), "total": sum(semanas.values()),
+            sin_prod.append({"volcano": g["vol"], "sensor": g.get("sensor"),
+                             "fecha_utc": g["dt"].strftime("%Y-%m-%d %H:%M")})
+    # 153 (S175): cada pasada con su nombre; el pipeline no deja rastro del descarte y la semana sola no dice cuál fue.
+    borde = {"por_semana": dict(sorted(semanas.items())), "total": sum(semanas.values()), "pasadas": sin_prod,
              "nota": "pasadas que la guardia (K) registra y producción (la vía) no: el descarte de borde 171-01. "
                      "Se informa sin disparar: la regla no da cota (A115)"}
 
@@ -286,12 +323,13 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
         veredicto = "REVERSION_CANDIDATA"
     elif fuera_de_plazo:
         veredicto = "CANDIDATA_FUERA_DE_PLAZO"
-    elif muy_bajo["dispara"] or sobrepublicacion["dispara"] or distintas or borde_enc or sin_record:
+    elif muy_bajo["dispara"] or sobrepublicacion["dispara"] or distintas or borde_enc or sin_record or calladas_por_k:
         veredicto = "INVESTIGAR"
     else:
         veredicto = "VERDE"
     return {"veredicto": veredicto, "reversion": reversion, "fuera_de_plazo": fuera_de_plazo, "muy_bajo": muy_bajo,
             "protegidas_sin_record_produccion": sin_record, "espera_sin_record_h": ESPERA_SIN_RECORD_H,
+            "protegidas_calladas_por_k_de_produccion": calladas_por_k,
             "sobrepublicacion": sobrepublicacion, "borde_171_01": borde, "nulo": nulo,
             "borde_del_encendido": borde_enc, "duracion": duracion, "retrospectivo": retrospectivo,
             "juzgadas": [dict(p, juicio=juzgadas[vs._clave(p)]) for p in pasadas if vs._clave(p) in juzgadas]}
@@ -342,28 +380,69 @@ def avisos_perfiles(prod, guardia, n_guardia_con_via):
     return av
 
 
-def avisos_via(flag, encendido, prod):
+def caidas_a_k(encendido, prod):
+    """Decisión 3 de S174 (S175): records MODIS de producción posteriores al encendido en que la vía cayó a K."""
+    if not encendido:
+        return []
+    enc_dt = _dt(encendido)
+    return [{"volcano": r["vol"], "sensor": r.get("sensor"), "fecha_utc": r["dt"].strftime("%Y-%m-%d %H:%M"),
+             "marca": r["caida_k"]}
+            for r in sorted(prod, key=lambda x: (x["dt"], x["vol"]))
+            if r["b"] == SENSOR and r.get("caida_k") and r["dt"] >= enc_dt]
+
+
+def avisos_via(flag, encendido, prod, vols=None):
     """El flag de producción encendido sin records de la vía, o una vía que dejó de escribir, deja guardia =
-    producción y la vigilancia en VERDE sin vigilar nada."""
+    producción y la vigilancia en VERDE sin vigilar nada.
+
+    152 (S175): POR VOLCÁN. La vía puede morir en un volcán y no en otro (grilla de MIROVA ausente, MxD03 que no calza
+    con su órbita); sumando los 11 volcanes, el que queda en K se tapa con los demás (mutaciones M2 y M2c). En cada
+    volcán con records MODIS posteriores al encendido, la última noche de la vía no puede quedar más de
+    MAX_DIAS_SOMBRA_SIN_DATOS días detrás de la última de producción. Un volcán sin records posteriores lo avisa la
+    frescura de producción (avisos_produccion). Las caídas a K sueltas van aparte, en avisos_caidas."""
     if flag is None:
         return ["no se pudo leer ENABLE_MODIS_CODIGO_MIROVA de pipeline.profile: no se sabe si la vía está encendida"]
     if flag and encendido is None:
         return ["el flag de la vía de MODIS está encendido en producción y no hay ningún record MODIS de la vía: la "
                 "vía no está escribiendo (o cae siempre a K) y guardia y producción son lo mismo"]
-    if flag and encendido:
-        ultima_via = max((r["noche"] for r in prod if r["b"] == SENSOR and r.get("via") is True), default=None)
-        ultima = max((r["noche"] for r in prod if r["b"] == SENSOR), default=None)
-        if ultima and (ultima_via is None or (date.fromisoformat(ultima) - date.fromisoformat(ultima_via)).days
-                       > vs.MAX_DIAS_SOMBRA_SIN_DATOS):
-            return [f"producción escribe MODIS hasta el {ultima} y la vía sólo hasta el {ultima_via}: la vía dejó de "
-                    "correr y lo que se compara con la guardia es K contra K"]
-    return []
+    if not (flag and encendido):
+        return []
+    av = []
+    enc_dt = _dt(encendido)
+    for v in vols or aa.VOLS:
+        post = [r for r in prod if r["vol"] == v and r["b"] == SENSOR and r["dt"] >= enc_dt]
+        if not post:
+            continue
+        ultima = max(r["noche"] for r in post)
+        ultima_via = max((r["noche"] for r in post if r.get("via") is True), default=None)
+        if ultima_via is None or (date.fromisoformat(ultima) - date.fromisoformat(ultima_via)).days \
+                > vs.MAX_DIAS_SOMBRA_SIN_DATOS:
+            hasta = (f"la vía sólo hasta el {ultima_via}" if ultima_via
+                     else "ningún record suyo desde el encendido es de la vía")  # VPR959-04: nunca un None en la issue
+            av.append(f"producción de {v} escribe MODIS hasta el {ultima} y {hasta}: en {v} la vía dejó de correr (o "
+                      "cae a K) y lo que se compara con la guardia es K contra K")
+    return av
 
 
-def cargar_insumos(win, via):
-    """Referencia, records MODIS de producción (marcados con `via`) y de la guardia con el predicado del tablero, y
-    cuántos records crudos de la guardia traen la marca de la vía. Producción queda etiquetada por el banco (regla
-    original; D-9 no toca MODIS)."""
+def avisos_caidas(flag, encendido, prod, hoy):
+    """Decisión 3 de S174: cada caída a K de los últimos DIAS_AVISO_CAIDA días es aviso. Va separado de avisos_via
+    (VPR959-05): una pasada que cayó a K no deja ciega a la vigilancia en las demás, y la issue tiene que poder decirlo."""
+    if not (flag and encendido):
+        return []
+    desde = (date.fromisoformat(hoy) - timedelta(days=DIAS_AVISO_CAIDA)).isoformat()
+    recientes = [c for c in caidas_a_k(encendido, prod) if c["fecha_utc"][:10] >= desde]
+    if not recientes:
+        return []
+    lista = ", ".join(f"{c['volcano']} {c['sensor']} {c['fecha_utc']} ({c['marca']})" for c in recientes[:10])
+    return [f"{len(recientes)} records MODIS de producción de los últimos {DIAS_AVISO_CAIDA} días cayeron a K (la vía no "
+            f"corrió; cuentan como K, no como la vía, decisión 3 de S174): {lista}"
+            f"{' ...' if len(recientes) > 10 else ''}"]
+
+
+def cargar_insumos(win, via, caidas=None):
+    """Referencia, records MODIS de producción (marcados con `via` y, S175, con `caida_k`, la marca de la caída a K o
+    None) y de la guardia con el predicado del tablero, y cuántos records crudos de la guardia traen la marca de la vía.
+    Producción queda etiquetada por el banco (regla original; D-9 no toca MODIS)."""
     import banco_paridad as bp  # noqa: E402  (node; se carga en runtime)
     from referencia_mirova_unificada import cargar_referencia_unificada  # noqa: E402
     coords = aa._coords_por_volcan()
@@ -371,7 +450,9 @@ def cargar_insumos(win, via):
     filas = cargar_referencia_unificada(aa.CONS, aa.OCR)
     prod = [r for r in bp.cargar_nuestros(coords, inner, win) if r["b"] == SENSOR]
     for r in prod:
-        r["via"] = (r["vol"], r.get("sensor"), r["dt"].strftime("%Y-%m-%d %H:%M")) in via
+        clave = (r["vol"], r.get("sensor"), r["dt"].strftime("%Y-%m-%d %H:%M"))
+        r["via"] = clave in via
+        r["caida_k"] = (caidas or {}).get(clave)
     try:
         guardia = [r for r in bp.cargar_nuestros(coords, inner, win, data=GUARDIA) if r["b"] == SENSOR]
     except FileNotFoundError:
@@ -404,7 +485,7 @@ def evaluar(hoy):
            "encendido_modis_utc": encendido, "primera_observacion_via": enc["primera_observacion"],
            "flag_produccion": flag, "ventana": list(win),
            "fase": ("antes_del_encendido" if not encendido else "vigilando")}
-    filas, prod, guardia, n_via_g = cargar_insumos(win, enc["via"])
+    filas, prod, guardia, n_via_g = cargar_insumos(win, enc["via"], enc.get("caidas"))
     pasadas = pasadas_modis(filas, prod, guardia, win, diurna=vs._diurna_por_defecto())
     ahora = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     if ahora[:10] != hoy:
@@ -412,18 +493,22 @@ def evaluar(hoy):
     d = disparadores(pasadas, prod, guardia, hoy, encendido, juzgadas=leer_juzgadas(), ahora=ahora)
     if d["duracion"]["cumplida"]:
         out["fase"] = "plazo_cumplido"
-    avisos = (vs.avisos_referencia(filas, hoy) + avisos_referencia_modis(filas, hoy) + avisos_guardia(guardia, hoy)
+    ciegos = (vs.avisos_referencia(filas, hoy) + avisos_referencia_modis(filas, hoy) + avisos_guardia(guardia, hoy)
               + avisos_produccion(prod, hoy) + avisos_perfiles(prod, guardia, n_via_g)
               + avisos_via(flag, encendido, prod) + avisos_nulo(d["nulo"]))
+    avisos = ciegos + avisos_caidas(flag, encendido, prod, hoy)
     veredicto = d["veredicto"]
     if veredicto == "VERDE" and avisos:
         veredicto = "VIGILANCIA_CIEGA"      # un aviso no tapa una reversión: sólo impide leer la falta de disparos
     out.update({"veredicto": veredicto, "avisos": avisos,
+                # VPR959-05: el veredicto es el de la regla; esto sólo le dice a la issue que no ponga «no puede mirar»
+                "solo_caidas_a_k": veredicto == "VIGILANCIA_CIEGA" and not ciegos,
                 "guardia_desde": min((r["noche"] for r in guardia), default=None),
                 "guardia_hasta": max((r["noche"] for r in guardia), default=None),
                 "n_pasadas_alerta": len(pasadas),
                 "n_pasadas_alerta_con_guardia": sum(1 for p in pasadas if p["guardia_pub"] is not None),
                 **{k: v for k, v in d.items() if k != "veredicto"},
+                "caidas_a_k": caidas_a_k(encendido, prod),
                 "protegidas_sin_publicar_produccion": [p for p in pasadas if p["protegida"] and p["prod_pub"] is False]})
     return out
 
@@ -443,6 +528,10 @@ def imprimir(out):
     for p in out.get("borde_del_encendido", []):
         print(f"  BORDE DEL ENCENDIDO: {p['volcano']} MODIS {p['fecha_utc']} UTC, anterior al encendido y con record "
               "de la vía: investigar")
+    for p in out.get("protegidas_calladas_por_k_de_produccion", []):
+        print(f"  CALLADA POR K DE PRODUCCIÓN: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: "
+              f"la guardia publica y el record de producción no es de la vía ({p.get('prod_caida_k') or 'K sin marca'}): "
+              "investigar; no es candidata a reversión")
     for p in out.get("protegidas_sin_record_produccion", []):
         print(f"  SIN RECORD DE PRODUCCIÓN: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: "
               "la guardia (K) publica y producción no tiene record de la pasada (borde 171-01): investigar")
@@ -455,6 +544,8 @@ def imprimir(out):
     b = out.get("borde_171_01") or {}
     if b.get("total"):
         print(f"  pasadas que la guardia registra y producción no, por semana: {b['por_semana']}")
+        for x in b.get("pasadas", [])[-10:]:
+            print(f"    {x['volcano']} {x['sensor']} {x['fecha_utc']} UTC")
     du = out.get("duracion") or {}
     print(f"  duración: {du.get('protegidas_vistas_en_guardia')} de {du.get('objetivo')} protegidas vistas en la "
           f"guardia desde el encendido; vence {du.get('vence')}")
@@ -478,6 +569,8 @@ def main(argv=None):
     linea = {"date": hoy, "veredicto": out["veredicto"], "fase": out.get("fase"),
              "encendido_modis_utc": out.get("encendido_modis_utc"),
              "n_reversion": len(out.get("reversion", [])), "n_fuera_de_plazo": len(out.get("fuera_de_plazo", [])),
+             "n_calladas_por_k": len(out.get("protegidas_calladas_por_k_de_produccion", [])),
+             "n_caidas_a_k": len(out.get("caidas_a_k", [])),
              "protegidas_vistas_en_guardia": (out.get("duracion") or {}).get("protegidas_vistas_en_guardia"),
              "muy_bajo_k": (out.get("muy_bajo") or {}).get("k"),
              "sobrepublicacion_k": (out.get("sobrepublicacion") or {}).get("k"),

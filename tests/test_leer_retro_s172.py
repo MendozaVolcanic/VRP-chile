@@ -249,10 +249,10 @@ def test_v750_sellado_con_magnitud_fuera_de_banda_es_peor_que_k(R):
 def test_c_via_f26_cien_por_ciento_y_r25_diez_por_clase():
     fs = [F("Lascar", d, "neg_limpio", 0, 0) for d in dias(20)]
     assert L.c_via(fs, "F26-M")["estado"] == "OK"
-    fs[0]["estado"] = "via_sin_marca:sin_grilla"
+    fs[0]["estado"] = "via_sin_marca:None"          # S175: sin_grilla ya no es rojo (decisión 3 de S174)
     assert L.c_via(fs, "F26-M")["estado"].startswith("ROJO")
     assert L.c_via(fs, "R25")["estado"] == "OK"                  # 1 de 20 = 5 %
-    fs[1]["estado"] = fs[2]["estado"] = "via_sin_marca:sin_mxd03"
+    fs[1]["estado"] = fs[2]["estado"] = "via_sin_marca:geo_distinta"
     assert L.c_via(fs, "R25")["estado"].startswith("ROJO")       # 3 de 20 = 15 %
 
 
@@ -434,7 +434,7 @@ def _r25(vol, dts, k, v, estado="ok", z=25.0, b="VIIRS375", sensor="VIIRS_NOAA20
 
 def test_p1_osf_candidata_si_la_via_pierde_lo_que_k_publica():
     fs = [_r25("Lascar", "2025-06-01 05:00", 1, 1), _r25("Lascar", "2025-06-02 05:00", 1, 0),
-          _r25("PlanchonPeteroa", "2025-06-03 05:00", 1, 0, estado="via_sin_marca:sin_grilla"),
+          _r25("PlanchonPeteroa", "2025-06-03 05:00", 1, 0, estado="via_sin_marca:None"),
           _r25("Lascar", "2025-06-04 05:00", 0, 0)]
     osf = [_osf("Lascar", "VIIRS375", "2025-06-01 05:01", 3.0), _osf("Lascar", "VIIRS375", "2025-06-02 05:00", 2.0),
            _osf("PlanchonPeteroa", "VIIRS375", "2025-06-03 05:00", 1.5),
@@ -446,7 +446,7 @@ def test_p1_osf_candidata_si_la_via_pierde_lo_que_k_publica():
     r = L.p1_osf(fs, osf)
     s = r["por_sensor"]["VIIRS375"]
     assert s["protegidas"] == 5 and s["pub_via"] == 1
-    assert [c[2] for c in s["candidatas"]] == ["via_no_publica", "via_sin_marca:sin_grilla"]
+    assert [c[2] for c in s["candidatas"]] == ["via_no_publica", "via_sin_marca:None"]
     assert s["ninguno"] == [("Lascar", "2025-06-04 05:00")] and s["sin_record"] == [("Lascar", "2025-06-05 05:00")]
     assert len(r["lejanas"]) == 1 and len(r["ambiguas"]) == 1
     assert r["c_pareo"] == "OK" and r["c_cenit"] == "OK"
