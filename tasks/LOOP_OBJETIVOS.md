@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 14:14 UTC (S175): #956, #957, #958 y #959 MERGEABLE tras segunda vuelta; 33 hallazgos a verificación
+- Verificadores limpios Fable, segunda vuelta, todos con CI verde y sin hallazgos de gravedad 3: #956 `b155f7963` (reprodujo
+  474 reemplazos y 13,8 h por otro camino; regla sellada intacta; mergear después de #955, que lo cita), #957 `f4d98dddd`
+  (audit y banco idénticos a la primera versión salvo la marca de hora; 18 de 18 roturas; dos decisiones de Nicolás, con
+  una opción (c) sin escribir en la 1: contar y avisar las filas OCR que descarta una tabla sin alerta), #958 `0d922e858`
+  (13 de 14 roturas, M9 equivalente; tooltip propuesto cierto en los 3 casos, decide Nicolás; toca `frontend/`, tag y sí),
+  #959 `cf65d9928` (18 roturas atrapadas; una caída suelta sigue dando VIGILANCIA_CIEGA, coherente con la regla §4;
+  VPR959-R2-01 g2: la historia no distingue esos días). Informes `INFORME_R2.md` en `C:\Users\nmend\vrp-temporales\s175_verpr\<N>\`.
+- V750-A: la vara de equivalencia del §4.1 sigue con el oráculo de Octave y da ROJA desde `e5151e0db` (decisión S163: la vía
+  sigue a MATLAB). Hay vara candidata (`D:\vrp-trabajo\temporales\equiv_v750_s171\vara_matlab_s171.py`: 311 de 311 iguales).
+  Para después de la reconciliación: llevarla al §4.1 antes del sello.
+- Lanzados V33A (F0 y F1, 18 hallazgos) y V33B (F2, F3 y F5, 15 hallazgos), Fable, con la lista del §6 de `docs/AUDIT_S175.md`.
+- Plan semanal 5 % (Fable 7 %) tras 10 agentes. Contexto de esta sesión 49 %: cerrar con `/cierre` cuando vuelvan los agentes.
+
 ### 2026-11-08 14:00 UTC (S175): segundas vueltas de #955, #956 y #957 listas; F5b entregado, V5B corriendo
 - #955 (`14dfb0d2e`, CI verde): frase del 302 reescrita y §11 con VX y V4T; `docs/S175_AUDITORIA_RESULTADOS.md` agregado.
   Precisó la lectura: «2 píxeles nominales (3 km en MODIS), salvo Chillán V375 2026-10-18 06:48», sólo en los 715 pares
