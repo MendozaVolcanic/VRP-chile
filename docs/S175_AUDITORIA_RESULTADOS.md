@@ -2,8 +2,9 @@
 
 > ⚠️ S175 VX (marca A113, 2026-11-08). Copia en el repo del traspaso que quedó fuera de él, sin las rutas privadas. Se
 > escribió antes de que terminaran VX, F4t y V4T, y sus resultados están en `docs/AUDIT_S175.md` §11. Lo que cambió desde
-> entonces: 302, 108, 111 y 256 ya tienen verificador (302 quedó CONFIRMADO EN PARTE, ver la marca más abajo); la parte del
-> token de F4 se hizo como F4t; F5b sigue en curso. El estado de CI de la tabla de PR es el de ese momento.
+> entonces: los 37 sin verificar ya tienen verificador (VX, V33A y V33B; 302 quedó CONFIRMADO EN PARTE, ver la marca más
+> abajo); la parte del token de F4 se hizo como F4t; F5b terminó y su verificador V5B rebajó su conclusión (§11.4). El estado
+> de CI de la tabla de PR es el de ese momento.
 
 Sesión orquestadora: «Auditoría S174 de VRP Chile (post S160)», worktree `.claude/worktrees/relaxed-almeida-d17378`, rama
 `claude/relaxed-almeida-d17378`.
@@ -53,7 +54,8 @@ No hace falta repetir ningún frente. Mejoras, en orden de valor por costo:
    de la tabla (714 de 715, nulo 93 %); «son el mismo foco» no está medido. Los otros tres, CONFIRMADOS.
 2. Rehacer la posición de F5 después del 2026-09-22 con las láminas PNG Latest10NTI georreferenciadas contra un TIF
    anterior (F5 no lo hizo; I2 quedó en clase (iv) desde esa fecha).
-   ⚠️ S175 (marca A113): en curso como F5b.
+   ⚠️ S175 (marca A113): hecho como F5b con V5B. La lámina VIIRS georreferencia, pero el selector de píxel borra la mancha
+   saturada y las clases no miden identidad del foco (`docs/AUDIT_S175.md` §11.4).
 3. F4 (vencimientos simulando la ausencia) quedó recortado: hacerlo en la próxima auditoría A51.
    ⚠️ S175 (marca A113): la parte del token se hizo como F4t con V4T (`docs/AUDIT_S175.md` §11.3); el resto de F4 sigue
    recortado.

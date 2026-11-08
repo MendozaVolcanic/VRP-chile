@@ -1,7 +1,8 @@
 # Auditoría S175: el sistema corriendo después de la S160
 
 > **Estado: COMPLETA (cinco de cinco frentes, cada uno con su verificador), con los agregados del 2026-11-08 en el §11**
-> (VX sobre 302, 108, 111 y 256; F4t, el token, con su verificador V4T; F5b sigue en curso). La conclusión central (302)
+> (VX sobre 302, 108, 111 y 256; F4t, el token, con su verificador V4T; F5b, las láminas, con su verificador V5B; V33A y
+> V33B sobre los 33 restantes). Ya no queda ningún hallazgo de auditor sin verificador. La conclusión central (302)
 > quedó confirmada sólo en parte: ver §1, punto 1. F1 se adelantó al 2026-11-07 por decisión de Nicolás; el audit semanal
 > del 2026-11-09 queda como anexo (§10), todavía sin escribir porque ese audit aún no existe, y no cambia los veredictos.
 > Primera versión el 2026-11-07 17:44 GMT; cierre con F1 y V1 el 2026-11-07 (hora del servidor al cerrar en §10).
@@ -57,7 +58,9 @@
    VIIRS 375 2026-10-18 06:48, que excede por 0,099 km y cambia de lado con el origen (VX-02). Donde MIROVA sólo trae la
    distancia del OCR la pregunta queda abierta: de 29 pares de clase iii, 25 salen «fuera», y esa distancia difiere de la
    de la tabla en el 19 % de las pasadas que traen las dos (301, en parte); además el banco compara radios desde orígenes
-   distintos (303).
+   distintos (303). Las láminas de MIROVA posteriores al 2026-09-22 tampoco lo cierran (F5b con V5B, §11.4): sirven para
+   georreferenciar, pero el selector de píxel de F5b borra la mancha saturada (V5B-01) y su clase de coincidencia sale
+   73 y 77 % con nuestro punto de otra pasada, contra 95 y 94 % observado (V5B-04).
 2. **El recall por noche se infla frente al recall por pasada.** Cuenta como acierto una pasada distinta en otro lugar
    (caso real: Cordón Caulle VIIRS 750, 2026-10-10). Con misma pasada el recall baja unos 2 puntos en VIIRS (304).
 3. **VIIRS 375 no pierde protegidas de la tabla de MIROVA.** Las 5 pasadas protegidas no publicadas son todas filas sólo OCR
@@ -66,7 +69,8 @@
 4. **La sobre-publicación de Lastarria es en dos tercios la regla D-9.** Sin las alertas mínimas reetiquetadas, Lastarria
    publica en negativos limpios el 11,6 % de sus pasadas, igual que Puyehue (V2-03 sobre F2-203).
 5. **El criterio de victoria tiene poco poder fuera de Chillán**: «ninguna protegida perdida» no tiene casos en 5 de 11
-   volcanes, y hay 42 protegidas diurnas fuera del criterio por diseño (309; 308 sin verificar).
+   volcanes (6 de 11 con los 60 días del audit semanal), y hay 42 protegidas diurnas fuera del criterio por diseño (309;
+   308, confirmado por V33B).
 6. **Documentos rectores desfasados**: `SINTOMAS.md` describe el MODIS de producción como K y con `_interp_geo`, cuando
    98 de 98 records MODIS desde el 2026-11-02 son de la vía (251, gravedad 3).
 7. **La vía MODIS publica lo que dice producir** (F1, sin verificar como conteo: 140 de 140 records coherentes, 0 records
@@ -80,6 +84,12 @@
    revocado, de otra cuenta) o el secreto queda con un salto de línea final, el NRT termina verde con 0 archivos, y el
    primer aviso llega por staleness a las 48 a 72 h, a un repositorio con 0 suscriptores. Importa antes de la rotación del
    punto 8.
+10. **Con el botón «Todos los pixels», el mapa de detalle deja de dibujar sin avisar** (V33A-01, gravedad 2, reproducido en
+    navegador). Los píxeles de la vía MODIS no traen energía por píxel (161) y `frontend/index.html:3157` lanza un TypeError
+    al pedirla; se pierden los records posteriores de la ventana. En Nevados de Chillán son 39 records de 5 días, los más
+    recientes del volcán en erupción. Con el modo por defecto, «Solo principal», no ocurre.
+11. **El lector que decidirá la adopción de V375-E no está en main** (F2-209, gravedad 2): vive en un tag y en ramas, y
+    ningún workflow de main lo corre.
 
 ## 2. Lo que esto dice de si llegamos a los objetivos
 
@@ -158,8 +168,8 @@ CPLT pública v1.18, l. 7 y 25, dice que la vía rige «hasta unos 8 días antes
 `sin_mxd03` es inalcanzable desde el NRT, `run_pipeline.py` l. 247 a 250, g1), V1-04 (falta el JSON de la guardia de un
 volcán y la vigilancia declara ciegos los once; va en la dirección segura, g1).
 
-**Verificados después de cerrar esta tabla (§11)**: 302, 108, 111 y 256 (VX) y 381 a 390 (F4t con V4T), con el veredicto y
-la gravedad de sus verificadores.
+**Verificados después de cerrar esta tabla**: 302, 108, 111 y 256 (VX, §11.1), 381 a 390 (F4t con V4T, §11.3), 351 a 355 (F5b
+con V5B, §11.4) y los 33 del §6 (V33A y V33B), con el veredicto y la gravedad de sus verificadores.
 
 ## 4. Informes de cada agente
 
@@ -174,7 +184,10 @@ la gravedad de sus verificadores.
 | VX | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\vx\VERIFICACION.md` |
 | F4t | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\f4t\INFORME.md` |
 | V4T | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\v4t\VERIFICACION.md` |
-| F5b (en curso, fuera de git) | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\f5b\` |
+| F5b | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\f5b\INFORME.md` |
+| V5B | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\v5b\VERIFICACION.md` |
+| V33A | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\v33a\VERIFICACION.md` |
+| V33B | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\v33b\VERIFICACION.md` |
 
 ## 5. Líneas base rojas (regla B: el instrumento tiene que ver lo que ya sabemos)
 
@@ -189,13 +202,32 @@ Todas se reencontraron.
 | F1 | records `sin_grilla`/`sin_mxd03` después del encendido (con control sintético que el censo ve); 0 records de la vía en `79f410697` | las dos, vistas (0 de 14.855 MODIS en `79f410697`) |
 | F0 | decisión 1 resuelta (`0d73f2a4e`, #891); decisión 6 abierta; Suomi NPP sin records después del 2026-11-02 13:00 UTC | las tres, vistas |
 
-## 6. Hallazgos sin verificar (no pasaron el corte del §3 del plan)
+## 6. Hallazgos que no pasaron el corte del §3 del plan
 
-⚠️ S175 VX (marca A113, texto anterior en el §11.2): eran 37 hasta el 2026-11-08; 302, 108, 111 y 256 ya tienen verificador
-(§11.1) y salen de esta lista.
+⚠️ S175 V33A y V33B (marca A113, texto anterior en el §11.2 y el §11.5): eran 37 hasta VX y 33 hasta estos dos verificadores.
+Hoy los 80 hallazgos de auditor de los cinco frentes tienen verificador. De estos 33: **27 CONFIRMADOS, 6 CONFIRMADOS EN PARTE,
+0 refutados, 0 SIN DATO**. Ninguno de los 18 de V33A se arregló entre la base y main de hoy. Lo verificado no cambia hoy
+ninguna alerta publicada: son efectos de etiqueta, gobernanza, documentos y medición, salvo V33A-01 (§1, punto 10).
 
-Se publican con su conteo y son la puerta de S176: F5 308 y 310 (2); F2 F2-208 a F2-211 y F2-213 (5); F3 255 y 259 a 265 (8);
-F0 112 y 116 a 129 (15); F1 159 a 161 (3). En total 33 de los 80 hallazgos de auditor de los cinco frentes.
+| id | qué | veredicto | gravedad | verificador |
+|---|---|---|---|---|
+| F2-209 | El lector de la sombra V375-E no está en la base ni en main (decisión 20) | C | 2 | V33B |
+| 255 | La cola de decisiones de `tasks/LOOP_OBJETIVOS.md` lleva cinco filas desfasadas (D-1, D-19, D-23, D-37, D-39) | C | 2 | V33B |
+| F2-211 | 18 pasadas sin geometría de 1 MW o más fuera del denominador protegido, 14 de Chillán y 2 no publicadas; es decisión documentada, lo nuevo es su tamaño | C | 2 | V33B |
+| F2-213 | C-04 sigue abierto: la distancia del OCR de Tupungatito 2026-09-28 05:18 es la misma, con la misma nota, que la de las 05:36 | C | 2 | V33B |
+| 308 | «Ninguna protegida perdida» es vacuo en 5 de 11 volcanes (2026-09-01 a 2026-11-07); 6 de 11 con los 60 días del audit, 3 de 11 desde marzo | C | 2 | V33B |
+| 116 | El popup dice «Distancia al cráter» y mide desde el centro: hasta 7,58 km en Cordón Caulle | C | 2 | V33A |
+| 117 | La VRE del tablero suma 6 h fijas por record, con 9 a 12 records por noche; MIROVA integra por trapecios (cita TEXTO, sin render) | C | 2 | V33A |
+| 119 | El mínimo de cumbre 0,003 gobierna también el umbral del dETI | C | 2 | V33A |
+| 121 | La regla con que se adoptó K sigue igual y la vigilancia de la sombra usa su paso 9 | C | 2 | V33A |
+| 161 | Los píxeles de la vía no traen `vrp_mw` por píxel; origen de V33A-01 (sube de 1 a 2) | C | 2 | V33A |
+| 112 | Una plataforma muda da código 0 también en modo estricto; decisión escrita en el código | C | 2 | V33A |
+| 122 | Inventario S160 de VIIRS y unidades sin cambio | C | 1 a 2 | V33A |
+| 123 | Inventario S160 de dependencias sin cambio (251: lo externo SIN DATO); el healthcheck con cron de las 12:00 corre con 4,97 h de atraso mediano | C | 1 a 2 | V33A |
+| 124, 125, 127, 128, 129, 159, 160 | 124 y 125 son decisiones documentadas en el código; 127 el placebo del 1 % nunca entró al evaluador; 128 datos de adopción de K no encontrados en `_s153_fk_v2/`; 129 pendientes de F1b sin arreglo en código; 159 y 160 son avisos del vigilante | C | 1 | V33A |
+| 118, 120, 126 | 118 latente (el fenómeno no ha ocurrido); 120 la fila falta, pero la misma noche tiene otra alerta VIIRS en la tabla; 126 la parte «en MIROVA» es indirecta | P | 1 | V33A |
+| F2-208, 259, 260, 262, 263, 264, 310 | 208 la parada de la sombra llega el 2026-12-02 si no falta noche (3 noches y 9 alertas con la tabla de la vara; 4 y 26 con la tabla raíz); 259 y 260 decisiones de segunda mano; 262 radio max(4 km, inner); 263 cambio de una línea al sellar; 264 CI rojo en rama (causa SOSPECHA); 310 cambio de banda de Lastarria por 0,036 | C | 1 | V33B |
+| F2-210, 261, 265 | 210 las dos protegidas de marzo son filas sólo OCR, anteriores al hito del 2026-06-11; 261 #895 lo mergeó la cuenta `MendozaVolcanic` (si es la de Nicolás: SOSPECHA); 265 #945 se corrigió después de la auditoría, #950 y #951 siguen sin nombrar | P | 1 | V33B |
 
 ## 7. Pruebas de campo (lo que sólo se cierra mirando)
 
@@ -205,7 +237,8 @@ F0 112 y 116 a 129 (15); F1 159 a 161 (3). En total 33 de los 80 hallazgos de au
   acierto con distancia de la tabla que excede la tolerancia, por 0,099 km desde `mirova_center`, y desde el vent queda
   compatible (VX-02); ese borde está dentro del error de la vara. Lo que sí pide mirar: el alcance de nuestro cúmulo
   VIIRS 375 es 1,56 km desde `mirova_center` y MIROVA alerta a 1,88 km, con 25,79 MW contra 8,93 MW publicados. Si es el
-  mismo campo de lava o un foco distinto: SIN DATO sin la lámina PNG de esa pasada.
+  mismo campo de lava o un foco distinto sigue SIN DATO: F5b no lo resolvió (su control de distancia falló en esa pasada) y
+  su selector de píxel tiene el defecto V5B-01. Falta mirar la lámina PNG a ojo.
 - Cordón Caulle VIIRS 750 2026-10-10: la noche que el recall da por vista con una pasada de las 04:54 a 18,5 km, mientras la
   protegida de las 05:54 está en `PERDIDAS_ACEPTADAS` (304).
 - C-04 (Tupungatito VIIRS 375 2026-09-28 05:18) y C-06 (Suomi NPP, respondido por el issue #943): actualizar la cola de
@@ -231,8 +264,10 @@ F0 112 y 116 a 129 (15); F1 159 a 161 (3). En total 33 de los 80 hallazgos de au
 | 14 | Arreglar el clasificador de credencial muerta (381, 382, V4T-02) | sí, antes de rotar: toca `pipeline/fetch.py`, así que necesita tag y tu sí (A45), con una prueba que arme el `DownloadFailure` real y un 401 de cuerpo neutro |
 | 15 | Que `nrt.yml` exija que la corrida escribió algo (385, V4T-01) | sí, con un revisor como el de la guardia; hoy es lo que vuelve silencioso cualquier rechazo que no sea vencimiento |
 | 16 | Canal de aviso (383, 384) | que los avisos te lleguen sin depender de un run rojo; hoy el run rojo del defecto 384 es el único aviso empujado cuando el NRT queda verde |
-| 17 | Medir la identidad del foco en dos dimensiones (302, VX-01) | sí, con posición contra el TIF o la lámina PNG; F5b aborda la parte posterior al 2026-09-22, sin resultado todavía |
+| 17 | Medir la identidad del foco en dos dimensiones (302, VX-01, V5B-01, V5B-04) | sí, pero la lámina sola no alcanza: decide si F5b se re-corre con la máscara corregida, conservando la mancha saturada, y con un nulo al lado. Mientras tanto no se publica ninguna posición de MIROVA en Chillán como medición |
 | 18 | Mantener lo que se envejeció (108, 111, 256) | actualizar `docs/COLA_CAMPO.md` (C-05, C-06), medir la fracción MODIS NRT en el audit semanal y corregir la nota de memoria del MxD03 |
+| 19 | Arreglar el mapa con «Todos los pixels» (V33A-01, 161) | sí: `frontend/index.html:3157` y `:3068` tienen que tolerar píxeles sin `vrp_mw`, porque el error corta el dibujo de los días más recientes sin aviso. Toca `frontend/`, así que necesita tu sí (A45); replicar donde haya copia de esa lógica |
+| 20 | Llevar a main el lector de V375-E (F2-209) | sí, antes de la parada de la sombra (2026-12-02 si no falta noche), envuelto en `tests/` para que corra en CI (regla de S174), o declarar que la lectura de la ventana P se hace desde el tag |
 
 ## 9. Registro de agentes
 
@@ -252,6 +287,10 @@ F0 112 y 116 a 129 (15); F1 159 a 161 (3). En total 33 de los 80 hallazgos de au
 | VX | Fable 5.1 (subagente) | SIN DATO (declarado) | 4 verificados, 5 propios (VX-01 a VX-05) | |
 | F4t | Fable 5.1 (subagente) | SIN DATO (declarado) | 10 (381 a 390) | 2 de 2 |
 | V4T | Opus 5.5 | SIN DATO (declarado) | 10 verificados, 2 propios (V4T-01 y V4T-02) | |
+| F5b | Fable 5.1 (subagente) | SIN DATO (declarado; su contexto dice `reasoning_effort 25`) | 5 (351 a 355) | |
+| V5B | Opus 5.5 | SIN DATO (declarado) | 5 verificados, 5 propios (V5B-01 a V5B-05) | |
+| V33A | Fable 5.1 | SIN DATO (declarado) | 18 verificados, 1 propio (V33A-01) | |
+| V33B | Fable 5.1 | SIN DATO (declarado) | 15 verificados | |
 
 Uso del plan semanal: 78 % antes de la ola 0 y 79 % después de F5 y F2.
 
@@ -264,7 +303,7 @@ la regla §4 de reversión; no cambia los veredictos de arriba.
 **Pendiente explícito al 2026-11-08:** ese audit todavía no ha corrido y este anexo no está escrito. Lo de arriba es el
 sustituto de F1, no el audit.
 
-## 11. Agregado del 2026-11-08: VX, F4t con V4T y F5b
+## 11. Agregado del 2026-11-08: VX, F4t con V4T, F5b con V5B, V33A y V33B
 
 Base de todo lo que sigue: `752d348bc` (la misma de la auditoría). Valen los veredictos y las gravedades del verificador;
 las del auditor van sólo donde cambian. Veredicto: C = CONFIRMADO, P = CONFIRMADO EN PARTE. Traspaso de la sesión:
@@ -365,21 +404,63 @@ Hallazgos propios de V4T:
 
 **Para la rotación del 2026-11-27.** Mitigación sin tocar código: tras rotar, despachar el NRT de un volcán y comprobar que
 escribió records. El arreglo de `_is_credential_dead` toca `pipeline/fetch.py` (A45, decisión 14). F4t propuso que F0
-herede esta rebaja en 124 («resuelto salvo un borde», gravedad 1): con 381 el borde «no JWT» ya no es inocuo; 124 sigue
-sin verificador.
+herede esta rebaja en 124 («resuelto salvo un borde», gravedad 1): con 381 el borde «no JWT» ya no es inocuo. V33A confirma
+124 con gravedad 1, como decisión documentada en el código y sin mirar el cruce con 381; ese cruce sigue abierto.
 
 **Lo que quedó sin medir (V4T, parada por disco y sin red a NASA).** El texto real de CMR y LAADS ante un token basura,
 revocado o de otra cuenta; la hora de `exp`; la re-corrida de `f4t_03_pipeline_simulado.py` y de
 `f4t_02_guarda_token_vacio_shell.py`. El verde a nivel de `run_pipeline` completo es medición de F4t; V4T lo midió hasta
 `fetch_for_volcano` más `informar_cobertura`.
 
-### 11.4 F5b
+### 11.4 F5b con V5B: la lámina de MIROVA como vara de posición después del 2026-09-22
 
-En curso. Es la posición de F5 después del 2026-09-22 con las láminas PNG. Otro agente sigue escribiendo en
-`C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378\experiments\_s175_audit\f5b\`:
-no hay resultado que citar y esa carpeta no entra a este PR.
+**Por qué se intentó.** Desde el 2026-09-22 el archivo no tiene TIF de MIROVA, y la lámina Latest10NTI es la única huella de
+dónde marcó el foco. F5b la georreferenció y comparó el píxel más claro con el punto que publicamos.
 
-### 11.5 Pendiente
+**Qué sobrevive.** La lámina VIIRS sirve para georreferenciar. Fuera de muestra, en 41 casos nuevos elegidos sin mirar, valida
+en VIIRS 375 20 de 25 (17 de 17 cuando el máximo del TIF reproduce la tabla) y en VIIRS 750 9 de 16 (2 de 2); correlación
+panel contra TIF, mediana 0,96 y 0,92. La salvedad es V5B-03: la regla se ajustó y se validó sobre los mismos 4 casos, y esos 41
+no ejercitan la máscara.
+
+**Qué no sobrevive.** El selector de píxel falla justo en la erupción: en un foco saturado la mancha se ve blanca, el código
+la toma por «sin dato», la borra y elige un píxel del borde (V5B-01: 35 de 303 láminas; Chillán VIIRS 750 17 de 55, MODIS 12
+de 22). Por eso la conclusión de 351 no se sostiene en ninguna de sus cuatro protegidas de Chillán: las tres VIIRS 750 son ese
+artefacto (conservando la mancha, nuestro punto cae a 0,14, 0,106 y 0,292 km de su celda más cercana), y la VIIRS 375 del
+2026-10-18 05:06 es un empate entre saturados de una misma mancha (V5B-02).
+
+**Las clases de F5b no miden identidad del foco, y sus conteos no se publican aquí como medición.** Con nuestro punto de otra
+pasada la clase de coincidencia sigue saliendo 73 % en VIIRS 375 y 77 % en VIIRS 750, contra 95 % y 94 % observado (V5B-04; n 116 y
+50, 2026-09-22 a 2026-11-06): dice «no está en otro lado del inner», no «mismo foco esta noche». Es la misma lección de VX-01.
+
+Lo único que queda de 351 es radial y sale de la tabla, sin la lámina: la `Distancia_km` VIIRS 750 de MIROVA (2,12 a 2,37 km)
+contra V375 1,06 a 1,19 km en esa misma pasada, según la propia tabla de MIROVA. Su distancia VIIRS 750 no es una posición
+estable. Hipótesis: SOSPECHA, sin medir píxel a píxel. El origen de esa distancia en Chillán: SIN DATO (ningún offset único
+lo explica).
+
+| id | qué | veredicto V5B | gravedad V5B (auditor) |
+|---|---|---|---|
+| 351 | Cuatro protegidas VIIRS de Chillán: publicamos en las cuatro y las filas son de la tabla, pero la conclusión de posición no se sostiene | P | 2 (3) |
+| 352 | El control de distancia falla en 30 protegidas de Chillán (22 V375, 8 V750), «por poco» en 26; la mitad del problema es V5B-01 (conservando la mancha pasa en 18 de 30); la disyuntiva origen o píxel sigue abierta | P | 2 (2) |
+| 353 | Sin láminas MODIS 12 de 46 días (23 a 30-sep y 8 a 11-oct) y VIIRS 2 a 3 días; irrecuperable. Causa (poller o MIROVA): SIN DATO | C | 2 (3) |
+| 354 | La lámina MODIS no sirve de vara con el píxel más claro (5 de 7 a 3,6 a 5,8 km; casos débiles); la vara TIF MODIS es dudosa | C | 2 (2) |
+| 355 | La lámina redondea el VRP a entero también en VIIRS 750; el marco gris V750 sigue un corte de VRP, no marca sin alerta | C | 1 (1) |
+| V5B-01 | El selector borra la mancha caliente saturada como si fuera «sin dato» | C | 3 |
+| V5B-02 | En una mancha saturada el «píxel más claro» es el primero en orden de barrido | C | 2 |
+| V5B-03 | Regla ajustada y validada sobre los mismos 4 casos; fuera de muestra la georreferencia aguanta y el máximo del TIF no siempre | C | 2 |
+| V5B-04 | La clase de coincidencia casi no separa pasadas (nulo 73 y 77 %) | C | 2 |
+| V5B-05 | El control sintético de `p8` no pasó y su docstring dice lo contrario | C | 2 |
+
+Qué no se miró: las láminas fuera de Latest10NTI, el poller de `mirova-tif-archive` y la posición dentro de la mancha, que sólo
+la tabla acota. Ninguna imagen de MIROVA entra a este repositorio (carpetas `f5b` y `v5b` sin imágenes).
+
+### 11.5 V33A y V33B: los 33 que faltaban
+
+El resultado por hallazgo está en el §6. Del hallazgo nuevo V33A-01 se reprodujo el TypeError en el navegador con el tablero
+en local (`frontend/index.html:3157`; 217 marcadores en «Solo principal», 651 en «Todos los pixels», 39 records de Chillán sin
+dibujar, 2026-11-02 a 11-06). Texto anterior del §6 (A113): «F5 308 y 310 (2); F2 F2-208 a F2-211 y F2-213 (5); F3 255 y 259 a 265
+(8); F0 112 y 116 a 129 (15); F1 159 a 161 (3). En total 33 de los 80 hallazgos de auditor de los cinco frentes.»
+
+### 11.6 Pendiente
 
 El anexo del §10 (audit semanal del lunes 2026-11-09 09:00 UTC contra la regla §4 de reversión) no está escrito: ese audit
 todavía no existe.
