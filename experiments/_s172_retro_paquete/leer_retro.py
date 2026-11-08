@@ -63,7 +63,19 @@ SEGUNDO VERIFICADOR DE #940 (experiments/_s173_aud/ver940b/ en loop/activo, comm
 de etiquetas dice que no tiene poder; cómo leer el §7 lo decide Nicolás), 02 (c_k usa _nombradas), 03 (una excepción de
 C-K mal formada es rojo, no traza), 05 (esta cabecera cita el repo), 06 (C-montaje por origen y con pasadas de DM), 07
 (volcanes Tier A sin F26 en K y sobras del K-gemelo), 08 (aviso de R25 sin OSF), 10 y 11 (escritos en los docstrings).
-VPR940b-04 (`is True` en K) espera a Nicolás y no se tocó.
+VPR940b-04 (`is True` en K) espera a Nicolás y no se tocó. ⚠️ S175: Nicolás la decidió el 2026-11-05 (decisión 3 del
+bloque S174, «Sí, a todo»): los records `sin_grilla` y `sin_mxd03` se tratan como K y se listan como aviso. Implementado
+en S175 (hallazgo 253 de docs/AUDIT_S175.md), ver «DECISIÓN 3 DE S174» abajo.
+
+DECISIÓN 3 DE S174 (S175; el pre-registro no cambia, marca A113 sobre el texto del lector). Con la vía encendida,
+cuando la vía no puede correr en un gránulo (volcán sin grilla de MIROVA o sin MxD03) el procesador escribe K con la
+marca en texto. Eso es lo que producción habría publicado esa noche, así que:
+  * del lado de la vía, la pasada es evaluable con los tres brazos de posición iguales al record (K no tiene
+    posiciones de la vía; `via_caida_k` lleva la marca) y C-via la lista como aviso en vez de ponerse en rojo. Si
+    NINGUNA pasada trae la vía de verdad, C-via sigue en rojo: la vía no corrió (primera pregunta del instrumento);
+  * del lado de K de disco, un record con esa marca es K (c_k_puro sigue OK) y se lista como aviso.
+  `geo_distinta` (MxD03 de otra forma) no está nombrada en la decisión: sigue como `via_sin_marca` (C-via en rojo)
+  hasta que Nicolás diga.
 
 LAS DOS PREGUNTAS DEL INSTRUMENTO (§6): (1) si la vía no corriera, C-via da 0 %; si el lector estuviera roto, el nulo
 del lector (K contra K = 0 diferencias; una protegida quitada a la vía = veto; 50 negativos con un cúmulo de cumbre
@@ -130,6 +142,7 @@ REGLA_DE = {"V": "radiante", "V-cercano": "cercano", "V-pico": "pico"}
 BRAZO_DE = {v: k for k, v in REGLA_DE.items()}
 PLACEBO = 1.2
 UMBRAL_SIN_DATO = 0.10                             # §6 C-via y C-cobertura (UMBRAL_COBERTURA de leer_sombra_v375e)
+MARCAS_CAIDA_A_K = ("sin_grilla", "sin_mxd03")     # decisión 3 de S174: K con aviso (geo_distinta no está nombrada)
 CLASES_QUE_DECIDEN = ("protegida", "bajo1", "neg_limpio")
 TOL_VRP_CK = 1e-3                                  # §6 C-K: pc.vrp_mw a 0,001 MW
 TOPE_EXCEPCIONES_CK = 3                            # R-15
@@ -250,7 +263,8 @@ def _cenit_finito(x):
 def armar_pasadas(via, k, kgem=None, es_noche=None, inner=None, sin_dato_trozos=()):
     """Una fila por pasada nocturna (clave de K o de la vía) en algún tramo. `estado`: ok, sin_dato_cobertura (K sin
     pasada de la vía, §6 C-cobertura), sin_dato_trozo (trozo que falló dos veces), sobra_en_via (la vía sin K: se
-    lista), o via_sin_marca:<valor> (C-via)."""
+    lista), o via_sin_marca:<valor> (C-via). S175, decisión 3 de S174: la vía caída a K (MARCAS_CAIDA_A_K) es `ok`
+    con `via_caida_k` = la marca (se evalúa como K y se lista)."""
     kgem = kgem or {}
     filas = []
     for key in sorted(set(via) | set(k), key=lambda x: (x[0], str(x[1]), str(x[2]))):
@@ -269,7 +283,7 @@ def armar_pasadas(via, k, kgem=None, es_noche=None, inner=None, sin_dato_trozos=
         f = {"vol": vol, "sensor": sensor, "b": b, "dt": dts[:16], "noche": dia, "tramo": t,
              "z": _cenit_finito((rv or rk or {}).get("sensor_zenith_deg")), "inner": (inner or {}).get(vol, 5.0),
              "k_rec": rk, "via_rec": rv, "kg_rec": kgem.get(key), "en_kgemelo": key in kgem,
-             "via_marca": (rv or {}).get("via_codigo_mirova")}
+             "via_marca": (rv or {}).get("via_codigo_mirova"), "via_caida_k": None}
         if rk is None:
             f["estado"] = "sobra_en_via"
         elif rk.get("via_codigo_mirova") is True:
@@ -280,6 +294,9 @@ def armar_pasadas(via, k, kgem=None, es_noche=None, inner=None, sin_dato_trozos=
             f["estado"] = "sin_dato_cobertura"
         elif any(x["vol"] == vol and x["start"] <= dia <= x["end"] for x in sin_dato_trozos):
             f["estado"] = "sin_dato_trozo"
+        elif rv.get("via_codigo_mirova") in MARCAS_CAIDA_A_K:
+            # decisión 3 de S174: lo que producción habría publicado esa noche es K; se evalúa como K y se lista
+            f["estado"], f["via_caida_k"] = "ok", rv["via_codigo_mirova"]
         elif rv.get("via_codigo_mirova") is not True:
             f["estado"] = "via_sin_marca:" + str(rv.get("via_codigo_mirova"))
         else:
@@ -369,7 +386,9 @@ def tabla_publica(R, filas, predicado):
         arms = [("K", f["k_rec"]), ("placebo", R.F4.escalar(f["k_rec"], PLACEBO))]
         if f.get("kg_rec") is not None:
             arms.append(("KG", f["kg_rec"]))
-        if f.get("via_rec") is not None:
+        if f.get("via_caida_k"):
+            arms += [(b, f["via_rec"]) for b in BRAZOS]          # decisión 3 de S174: K no tiene posiciones de la vía
+        elif f.get("via_rec") is not None:
             arms += [(b, _variante(R, f["via_rec"], REGLA_DE[b], f["inner"])) for b in BRAZOS]
         for b, rec in arms:
             if rec is not None:
@@ -547,9 +566,16 @@ def c_via(filas, tramo):
     tot = [f for f in filas if f["estado"] != "sobra_en_via" and f["estado"] != "sin_dato_cobertura"
            and f["estado"] != "sin_dato_trozo"]
     sin = [f for f in tot if f["estado"].startswith("via_sin_marca")]
-    out = {"n": len(tot), "sin_marca": len(sin), "lista": [(f["vol"], f["dt"], f["estado"]) for f in sin][:50]}
+    caidas = [f for f in tot if f.get("via_caida_k")]
+    out = {"n": len(tot), "sin_marca": len(sin), "lista": [(f["vol"], f["dt"], f["estado"]) for f in sin][:50],
+           "caidas_a_k": len(caidas), "lista_caidas": [(f["vol"], f["dt"], f["via_caida_k"]) for f in caidas][:50]}
+    if caidas:                                     # decisión 3 de S174: cuentan como K y se listan
+        out["aviso"] = (f"{len(caidas)} pasadas en que la vía cayó a K ("
+                        f"{', '.join(sorted({f['via_caida_k'] for f in caidas}))}): se evalúan como K")
     if not tot:
         out["estado"] = "ROJO: 0 records de la vía"
+    elif len(caidas) == len(tot):
+        out["estado"] = "ROJO: 0 records de la vía (todas las pasadas cayeron a K: la vía no corrió)"
     elif tramo == "R25":
         por = collections.Counter(f.get("lab_osf", "sin_osf") for f in sin)
         den = collections.Counter(f.get("lab_osf", "sin_osf") for f in tot)
@@ -585,8 +611,12 @@ def c_k_puro(filas):
     """VPR940-02: ningún record de K de disco puede traer via_codigo_mirova True, en ninguna ventana (R25 incluida,
     que no tiene C-K). Con uno solo, rojo."""
     malos = [(f["vol"], f["sensor"], f["dt"]) for f in filas if str(f.get("estado", "")).startswith("k_con_marca")]
+    # VPR940b-04, decisión 3 de S174: K escrito por un perfil con la vía encendida que cayó a K es K; se lista
+    caidas = [(f["vol"], f["sensor"], f["dt"], (f.get("k_rec") or {}).get("via_codigo_mirova")) for f in filas
+              if (f.get("k_rec") or {}).get("via_codigo_mirova") in MARCAS_CAIDA_A_K]
+    aviso = {"aviso": f"{len(caidas)} records de K de disco con la marca de caída a K: son K"} if caidas else {}
     return {"estado": "OK" if not malos else f"ROJO: {len(malos)} records de K de disco con la marca de la vía",
-            "lista": malos[:50]}
+            "lista": malos[:50], "caidas_a_k": caidas[:50], **aviso}
 
 
 def cobertura_kgemelo(filas, tier_a=None):
@@ -1370,6 +1400,10 @@ def main(argv=None, predicado=None, reglas=None):
     inner = bp.inner_desde_html()
     es_noche = lambda vol, b, dt: not bp.es_pasada_diurna_descartada(b, coords[vol][0], coords[vol][1], dt)  # noqa: E731
     filas = armar_pasadas(via, k, kg, es_noche, inner, sin_dato_trozos)
+    caidas_via = collections.Counter((f["b"], f["via_caida_k"]) for f in filas if f.get("via_caida_k"))
+    if caidas_via:                                                  # decisión 3 de S174: K con aviso
+        avisos.append("pasadas en que la vía cayó a K, evaluadas como K: "
+                      + ", ".join(f"{b} {m} {n}" for (b, m), n in sorted(caidas_via.items())))
     no_r25 = [f for f in filas if f["tramo"] != "R25"]
     ref = cargar_referencia_unificada(Path(a.cons), Path(a.ocr))
     etiquetar_tabla(no_r25, ref, coords)
@@ -1385,6 +1419,8 @@ def main(argv=None, predicado=None, reglas=None):
                "c_k": c_k(filas, excepciones, TIER_A, sobras_kgemelo(kg, k)),
                "nulo_runner": nulo_runner(R, filas, excepciones),
                "c_montaje": validar_montaje(leer(a.montaje))}
+    if comunes["c_k_puro"].get("aviso"):
+        avisos.append(comunes["c_k_puro"]["aviso"])
     out = {"preregistro": "experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md @ s173-prereg-retro-sellado",
            "ensayo": bool(a.ensayo), "sin_dato_trozos": sin_dato_trozos, "avisos": avisos,
            "pasadas_por_tramo": dict(collections.Counter((f["tramo"], f["b"], f["estado"].split(":")[0]) for f in filas).items()),

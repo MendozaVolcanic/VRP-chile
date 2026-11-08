@@ -3,6 +3,8 @@
 > Documento vivo. Actualizar cuando se agregue alineamiento o se descubra nueva
 > divergencia. Estado al cierre 2026-04-29 (post-S27 análisis CSV consolidado).
 
+> ⚠️ **S175 (A113; hallazgo 154 de `docs/AUDIT_S175.md`, PR #955): la marca S172 que sigue exagera hacia atrás.** Lo de «hasta unos 8 días antes» y «cada corrida re-escribe las 8 fechas de su ventana» no se cumple: cada corrida procesa 8 días, pero el almacén sólo agrega las pasadas que no tenía y reemplaza una ya guardada únicamente con su producto estándar o con `--overwrite` (`pipeline/store.py`). La primera observación con la vía es del 2026-11-02 01:15 UTC, 18,95 horas antes del encendido (20:11:43 UTC): son 22 records guardados como NRT con K ese mismo día y reemplazados por su producto estándar en la primera corrida con la vía. Detalle y plazo medido del estándar: ficha v1.19 (`docs/FICHA_SDA_VRP_CHILE.md`) y `experiments/_s175_latencia_estandar_modis/salida.txt`. Texto S172 conservado.
+>
 > ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde la primera corrida del NRT con la vía, después del merge del
 > PR B (#934, rama `claude/s173-modd-flip`, decisión de Nicolás del 2026-10-31, tag `pre-s171-adopcion-modd`), y
 > también en las pasadas observadas hasta unos 8 días antes (cada corrida re-escribe las 8 fechas de su ventana;
