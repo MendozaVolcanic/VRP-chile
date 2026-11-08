@@ -569,6 +569,27 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 04:27 UTC (S175): main traído a loop/activo, suite corrida, VX entregado, F4t corriendo
+- Nicolás (S175): «traer main y suite», gastar el 7 % que queda de la semana en auditorías y seguir con el loop del
+  programa por sensor con el PC prendido.
+- Merge `6916f73b9` de `origin/main` (`26d1c77cf`) en `loop/activo`, sin conflictos; `git cherry loop/activo origin/main`
+  da 0. Entran #945, #952, #953, #954 y los datos del NRT y de las sombras.
+- Suite completa con el árbol quieto (03:59 a 04:21 UTC): 3.254 pasan, 6 fallan, 22 saltadas, 2 xfail. Las 6 son
+  locales y los archivos que tocan son idénticos a main (`git diff origin/main HEAD` vacío en ellos): G1 y G1b del libro
+  (el generador recorre `.claude/worktrees`, conocido de S174); `test_descomponer_magnitud_s139` (n 1.579 contra 1.499:
+  el reproceso #883 tocó records de 2025; sólo corre con el CSV del OSF, que no está en el repo); tres casos de
+  `test_r2_pixel_level` (records de mayo sin centroide; sólo corre con el archivo de TIF local). El CI las salta: anotarlas
+  como seguimiento, no son del merge. Batería del lector de V750-A: 6 de 6 en 346 s.
+- VX (Fable, esfuerzo `high` comprobado en el transcripto, 61 pedidos): 108, 111 y 256 CONFIRMADOS g2; 302 CONFIRMADO EN
+  PARTE: los números del auditor se reproducen, pero «mismo foco o cúmulo» excede al instrumento (nulo por permutación:
+  93 % de pares barajados también salen «mismo cúmulo»; el «al borde» cambia con el origen y la tolerancia). Reescribir
+  esa frase de `docs/AUDIT_S175.md` antes del merge de #955. Nuevos: VX-04 (record MODIS NRT de Planchón-Peteroa Terra
+  2026-11-02 01:15 sin subir a Standard, quedó en K; causa SOSPECHA) y VX-05 (ningún record MODIS guarda qué
+  geolocalización usó). Informe `experiments\_s175_audit\vx\VERIFICACION.md` en la rama de #955 (sha256 `cae69f6f…`).
+- F4t (Fable, esfuerzo `high`) corriendo. F5b espera el reinicio del plan (12:00 UTC).
+- Disco: C: 4,8 GB y D: 4,9 GB libres; C: bajó a 2,3 GB a las 04:17 durante la suite (medido por VX), transitorio.
+- Próximo: con F4t, su verificador Opus; tras las 12:00 UTC F5b y su verificador; lunes 2026-11-09 audit semanal y #955.
+
 ### 2026-11-07 20:03 UTC (S174): cierre de la sesión
 
 - S174 cerrada. Traspaso en la parte de arriba de `tasks/BLOQUE_ARRANQUE_S175.md` (el bloque del 2026-11-05 quedó abajo como histórico). Mergeados #945, #952, #953 y #954; auditoría S175 parcial en #955 (F1 el 2026-11-09). `loop/activo` no tiene esos merges: traerlos al abrir S175. C: 16 GB libres tras vaciar la papelera; plan semanal 89 % hasta el 2026-11-08 12:00 UTC.
