@@ -11,7 +11,12 @@ tiene que salir CAÍDA).
 La copia mutada vive en esta misma carpeta con otro nombre (`_mut_<id>_evaluar_v750a.py`), así resuelve las mismas
 rutas que el original, y se borra al terminar. Las corridas van en paralelo (cada una con su carpeta de destino).
 M29 a M52 se agregaron tras el verificador limpio (VA-01 a VA-07): cada una rompe una regla que sus
-roturas V01 a V41 mostraron sin vigilar. MR1 a MR7 (S173, VPR939-03, LECTURA LR1; ids MR porque la rama `claude/s162-viirs750-2-918174` ya usa M53 a M95) rompen el régimen de la sombra: el
+roturas V01 a V41 mostraron sin vigilar. M53 a M56 (y M15, M29, M50, M52 reescritas) son de la resolución de L2, L4, L7
+y L18 por D-48 (relevo VIIRS 750, 2026-10-25). La antigua M50 («el placebo de publicación siempre pasa») ya no se puede
+atrapar: con el predicado de hoy toda diferencia K contra K×1,2 tiene t_max frío y se explica (A116, LECTURAS).
+M63 a M80 son de los brazos de posición (§3 y §6 bis, decisión de Nicolás del 2026-10-27). M81 a M85, del verificador limpio de
+esos brazos (verificador_posicion/INFORME.md: MV2, MV3, MV9, MV10 y el arreglo de VP-01).
+MR1 a MR7 (S173, VPR939-03, LECTURA LR1; ids MR porque la rama `claude/s162-viirs750-2-918174` ya usa M53 a M95) rompen el régimen de la sombra: el
 filtro por ROI, la compuerta sin brazo, la marca SIN DATO, el corte por sha y el corte de cenit en 30°. MR9 a MR24 (S174,
 VPR945, LECTURA LR2; la rama de V750-A ya usa MR8) rompen la segunda vuelta: la duración de 4 semanas y su reloj, el
 volcán fuera del mapa de ROI, las 0 observadas, el sha resuelto de --sha-desde, y las seis roturas que el verificador
@@ -50,7 +55,18 @@ segundo; ER56) y la lista de la línea CUMPLE recortada a dos volcanes (X15; ER5
 VPR953-01: una mutación atrapada SÓLO porque un escenario con la bandera «no se cae» (no_traceback) vio un Traceback se
 rotula aparte, «sólo por la bandera "no se cae"», en su línea y en el RESUMEN (MR74 es la única hoy): la bandera es la
 aserción natural de ese defecto, pero no es una aserción sobre la salida del lector.
-Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4]
+MR8 (S173, sólo en la rama de V750-A hasta S175) rompe la lista de protegidas que salen por otra ROI.
+Reconciliación S175: M91 («N-3 llega a la sombra») cambió de blanco. El de antes (metricas con n3=True en §6.3) es
+equivalente desde la ventana fija: la sombra no lee nada anterior al 2026-11-03 y la clase N-3 es anterior al
+2026-10-09, así que es_n3 nunca es cierta ahí (§6 ter lo anticipa; tests/test_bateria_lector_v750a_s174.py fija
+FRONTERA_N3 < INICIO_SOMBRA). El blanco de hoy es el único camino por el que esa clase puede entrar: la ventana.
+M52 queda la de la rama (L4 por D-48 cambió el sentido de exigir_k); la de main rompía la lectura anterior.
+--escenarios (S162, brazos de posición) restringe la batería a los escenarios nombrados, en IDENTIDAD, CAIDA y cada
+mutación. Sirve para medir rápido las mutaciones de una pieza nueva contra los escenarios que la fijan (la batería entera
+tarda unos 40 min por corrida con un hilo); una mutación ATRAPADA así cae por aserción EN ESOS escenarios, pero no
+descarta que se caiga en otro, así que no reemplaza la corrida sin --escenarios, que es la que cuenta para el §6.
+Uso: python mutar_evaluar_v750a.py --dest <tmp> --evaluador <evaluar_d25.py del tag> [--hilos 4] [--solo M1,M2]
+     [--escenarios E61,E62]
 Salida: 0 si los controles salen como deben y todas las mutaciones quedan ATRAPADAS; 1 si no.
 """
 import argparse
@@ -63,7 +79,6 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 ORIGINAL = AQUI / "evaluar_v750a.py"
 PRUEBAS = AQUI / "probar_evaluar_v750a.py"
-ESCENARIOS_SOLO = ""   # S173: --escenarios
 # VPR953-01: el texto con que probar_evaluar_v750a.py marca la falla de un escenario con no_traceback=True
 BANDERA = "y el escenario afirma que no se cae"
 
@@ -91,7 +106,7 @@ MUTACIONES = {
     "M10": ("§4.1: la banda de triangulación se ignora",
             '(banda if res[i].get("banda_triangulacion") else dist).append(i)', "dist.append(i)"),
     "M11": ("§6.1 (L2): la prueba local no exige «mutaciones: TODAS COMO SE ESPERA»",
-            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and caida", "ok = verde and n_atr >= MIN_MUT_LOCAL and caida"),
+            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL) and caida", "ok = verde and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL) and caida"),
     "M12": ("§6.1: sólo el runner decide (la prueba local deja de bloquear)",
             "if dist or not local_ok:", "if dist:"),
     "M13": ("§7 (L6): el control positivo de la ROI siempre pasa",
@@ -100,7 +115,7 @@ MUTACIONES = {
             'ctrl["nulo K contra K gemelo"] = g_reg in ("EMPATE", "SIN SUSTRATO") and',
             'ctrl["nulo K contra K gemelo"] = g_reg in ("EMPATE", "SIN SUSTRATO", "PIERDE") and'),
     "M15": ("§7: K = producción siempre pasa",
-            "k_ok = not k_dist ", "k_ok = True "),
+            "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO", "k_ok = True or len(k_dist) <= AB.MAX_K_DISTINTO"),
     "M16": ("cobertura: el archivo de pasadas sin gránulo se acepta sin comprobar que sea de esta lista",
             "cob_ok = sg_ok and len(sin) + len(sin_g)", "cob_ok = len(sin) + len(sin_g)"),
     "M17": ("compuerta: con controles caídos igual se lee el veredicto",
@@ -130,8 +145,8 @@ MUTACIONES = {
             "s1_prot.add(nombre(i))", "pass"),
     "M28": ("P-sinfiltro (L11, informa): la distancia no se neutraliza",
             'r["distance_class"] = "summit"', "pass"),
-    "M29": ("§7 (L18): K = producción sólo mira las protegidas",
-            "k_ok = not k_dist ", 'k_ok = not [i for i in k_dist if obj[i].get("protegida")] '),
+    "M29": ("§7 (L18): K = producción sólo mira las protegidas (sin el tope del 1 %)",
+            "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO * max(1, len(oks0)) and not k_dist_prot", "k_ok = not k_dist_prot"),
     "M30": ("§7: el VRP de K contra producción con tolerancia de 1000 MW",
             'abs((vrp(i, "K") or 0) - (obj[i].get("pc_vrp") or 0)) > 0.001',
             'abs((vrp(i, "K") or 0) - (obj[i].get("pc_vrp") or 0)) > 1000'),
@@ -144,9 +159,9 @@ MUTACIONES = {
     "M35": ("cobertura: la pasada diurna deja de ser SIN DATO",
             'elif part[i] == "observada" and r.get("dayflag") != 0:', "elif False:"),
     "M36": ("§6.1 (L2): sin mínimo de mutaciones atrapadas en la prueba local",
-            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and caida", "ok = verde and todas and caida"),
+            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL) and caida", "ok = verde and todas and caida"),
     "M37": ("§6.1 (L2): sin exigir el control caído de la prueba local",
-            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and caida", "ok = verde and todas and n_atr >= MIN_MUT_LOCAL"),
+            "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL) and caida", "ok = verde and todas and n_atr >= MIN_MUT_LOCAL and len(nombradas) == len(MUT_LOCAL)"),
     "M38": ("§6.1 (L2): la línea VERDE sin los casos del §4.1",
             "verde = (any(c[0] >= MIN_CASOS_LOCAL[0] and c[1] >= MIN_CASOS_LOCAL[1] for c in casos)",
             "verde = (bool(casos)"),
@@ -175,12 +190,115 @@ MUTACIONES = {
             'PARES_S1 = (("P", "Pdef"), ("P", "O"), ("Pdef", "O"))', 'PARES_S1 = (("P", "Pdef"), ("P", "O"))'),
     "M49": ("§6.1 (L12): la marca «decidida por la escena» nunca sale en la equivalencia",
             "if decidida_por_escena(dP, dO) else \"\")", "if False else \"\")"),
-    "M50": ("§7 (L7): el control de publicación del placebo siempre pasa",
-            'ctrl["placebo (publicación)"] = not pl_dist', 'ctrl["placebo (publicación)"] = True'),
+    "M50": ("§7 (L7): ninguna diferencia del placebo se explica por los filtros (todas cierran)",
+            '.get("t_max_k") or 1e9) < TMAX_FILTROS_ARTEFACTO\n', '.get("t_max_k") or 1e9) < 0\n'),
     "M51": ("§6.3 (L19): la sombra sin protegidas no lo dice",
             '+ ("; SIN PROTEGIDAS: P1 no pudo vetar" if not n_prot else "")', '+ ""'),
-    "M52": ("§6.2 (L4): la razón de M no exige que K publique",
-            'and (pub(i, "K") and vrp(i, "K") > 0 or not exigir_k)', "and (True or not exigir_k)"),
+    "M52": ("§6.2 (L4 por D-48): la razón de M exige que K publique",
+            "def razon_prot(b, v, canal, exigir_k=False):", "def razon_prot(b, v, canal, exigir_k=True):"),
+    "M53": ("§7 (L18): una protegida con K distinto ya no cierra si cabe en el 1 %",
+            "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO * max(1, len(oks0)) and not k_dist_prot", "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO * max(1, len(oks0))"),
+    "M54": ("§7 (L18): las pasadas con K distinto no salen de los brazos",
+            "oks = [i for i in oks0 if i not in set(k_dist)]", "oks = list(oks0)"),
+    "M55": ("§7 (L18): tolerancia de K = producción en 5 % en vez de 1 %",
+            "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO * max", "k_ok = len(k_dist) <= 0.05 * max"),
+    "M56": ("§6.1 (L2 por D-48): mínimo de 5 mutaciones atrapadas en vez de 6",
+            "MIN_MUT_LOCAL = 6 ", "MIN_MUT_LOCAL = 5 "),
+    # tras la segunda vuelta del verificador (verificador_v2/INFORME.md, VB-A01 a VB-A06; sus roturas R1 a R6)
+    "M57": ("§6.2 (VB-A03): los bordes de la banda de M quedan fuera",
+            "BANDA_RAZON[0] <= rz <= BANDA_RAZON[1]", "BANDA_RAZON[0] < rz < BANDA_RAZON[1]"),
+    "M58": ("§7 (VB-A04): K = producción apagado en la sombra",
+            "k_ok = len(k_dist) <= AB.MAX_K_DISTINTO", "k_ok = (not censo) or len(k_dist) <= AB.MAX_K_DISTINTO"),
+    "M59": ("§7 (VB-A05): «ninguna protegida» mira sólo la tabla",
+            'k_dist_prot = [nombre(i) for i in k_dist if obj[i].get("protegida")]',
+            "k_dist_prot = [nombre(i) for i in k_dist if prot_tabla(obj[i])]"),
+    "M60": ("§6.1 (VB-A02): la equivalencia saca las pasadas con K distinto",
+            '        for i in oks0:\n            p, o_ = res[i]["paquete"]["P"], res[i]["paquete"]["O"]',
+            '        for i in oks:\n            p, o_ = res[i]["paquete"]["P"], res[i]["paquete"]["O"]'),
+    "M61": ("§7 (VB-A01): el tope de 50.000 MW del tablero no explica la diferencia del placebo",
+            'or vrp(i, "K") <= TOPE_TABLERO_MW < vrp(i, "K") * GANANCIA_PLACEBO]', "or False]"),
+    "M62": ("§6.1 (VB-A06): las seis mutaciones de la prueba local no se exigen por nombre",
+            "and len(nombradas) == len(MUT_LOCAL) and caida", "and caida"),
+    # brazos de posición (§3 y §6 bis, decisión de Nicolás del 2026-10-27): cada una rompe una pieza de la regla
+    "M63": ("§6 bis: P-cercano toma el alertado más LEJANO del cráter",
+            "p = min(px, key=lambda p: (np.hypot(p[0] - ancla[0], p[1] - ancla[1]), p[0], p[1]))",
+            "p = max(px, key=lambda p: (np.hypot(p[0] - ancla[0], p[1] - ancla[1]), p[0], p[1]))"),
+    "M64": ("§6 bis: P-pico toma el alertado más DÉBIL",
+            "p = max(px, key=lambda p: p[4])", "p = min(px, key=lambda p: p[4])"),
+    "M65": ("§6 bis: el ancla de los brazos de posición es el centro de la grilla, no pos_crater",
+            "ancla = anc(i)\n", "ancla = (AB.C, AB.C)\n"),
+    "M66": ("§6 bis: E_lejana no suma a P2'",
+            "if lejana and etiqueta_lejana(o, canal):", "if False:"),
+    "M67": ("§6 bis: P2' con el canal que decide se mide contra K, no contra P",
+            'p2d = {b: p2(b, "P", "TODO", "decide", lejana=True) for b in POS[1:]}',
+            'p2d = {b: p2(b, "K", "TODO", "decide", lejana=True) for b in POS[1:]}'),
+    "M68": ("§6 bis: gana sin exigir que con la tabla sola no sea peor",
+            'and p2d[b][0] == "GANA" and no_peor(*p2t[b][:2])]', 'and p2d[b][0] == "GANA"]'),
+    "M69": ("§6 bis: desempate invertido (gana el de MAYOR E + E_lejana)",
+            'return min(cands, key=lambda b: (sum(e_tot[b]), b != "Ppico"))',
+            'return max(cands, key=lambda b: (sum(e_tot[b]), b != "Ppico"))'),
+    "M70": ("§6 bis: a igual E + E_lejana gana P-cercano, no P-pico",
+            'b != "Ppico"))', 'b != "Pcercano"))'),
+    "M71": ("§6 bis: elegible sin mirar la ventana O",
+            "for v in VENTANAS for canal in CANALES)\n", 'for v in ("T",) for canal in CANALES)\n'),
+    "M72": ("§6 bis: el §6 se evalúa siempre sobre P (radiante), no sobre el brazo elegido",
+            'PE = eleccion or "P"', 'PE = "P"'),
+    "M73": ("§6 bis: las pasadas far_ref cuentan como negativos en E (y en P1, P2 y M)",
+            'if o["lab"] == "neg_limpio":', 'if o["lab"] in ("neg_limpio", "far_ref"):'),
+    "M74": ("§6 bis: con el canal que decide basta no ser peor (EMPATE o SIN SUSTRATO ganan)",
+            'p2d[b][0] == "GANA"', "no_peor(*p2d[b][:2])"),
+    "M75": ("§6 bis: SIN SUSTRATO cuenta como «no peor» con cualquier neto",
+            '(reg == "SIN SUSTRATO" and neto <= 0)', '(reg == "SIN SUSTRATO")'),
+    "M76": ("§6 bis: si P no es elegible, se toma un elegible sin exigir que no sea peor que P",
+            "np_ = [b for b in POS[1:] if eleg[b] and no_peor(*p2d[b][:2]) and no_peor(*p2t[b][:2])]",
+            "np_ = [b for b in POS[1:] if eleg[b]]"),
+    "M77": ("§6 bis: NINGUNA POSICIÓN ELEGIBLE no entra a los motivos del §6",
+            'fallas.append(("TODO", "decide", "§6 bis: NINGUNA POSICIÓN ELEGIBLE"))', "pass"),
+    "M78": ("§6 bis: sin pasadas far_ref no se dice que la vara lejana quedó SIN DATO",
+            '("" if far else ": SIN DATO', '("" if True else ": SIN DATO'),
+    "M79": ("§6 bis: «con algún alertado» cuenta todas las far_ref",
+            'con_alert = sum(bool((res[i]["paquete"]["P"] or {}).get("npix")) for i in far)', "con_alert = len(far)"),
+    "M80": ("§6 bis (A119): la distancia del OCR se usa también antes del 2026-06-13",
+            'and (f.get("source") == "CONS" or o["hora_utc"] >= AB.FRONTERA_OCR)', "and True"),
+    # tras el verificador limpio de los brazos de posición (verificador_posicion/INFORME.md): sus MV2, MV3, MV9 y MV10,
+    # las dos piezas que el autor había dejado sin cubrir, y la del arreglo de VP-01
+    "M81": ("§6 bis (L20, MV2): E_lejana con la tabla sola cuenta también los FALSO_POSITIVO del OCR",
+            'startswith("FALSO_POSITIVO") and f.get("source") == "CONS"', 'startswith("FALSO_POSITIVO") and True'),
+    "M82": ("§6 bis (MV3): elegible mira sólo la tabla, no tabla más OCR",
+            "for v in VENTANAS for canal in CANALES)\n",
+            'for v in VENTANAS for canal in ("tabla",))\n'),
+    "M83": ("§6 bis (L20, MV9): para las far_ref el canal que decide es siempre la tabla sola",
+            'canal = "tabla" if o["hora_utc"] < AB.FRONTERA_OCR else "todo"\n    if canal == "tabla":',
+            'canal = "tabla"\n    if canal == "tabla":'),
+    "M84": ("§6 bis (MV10): la condición «con la tabla sola» se mide con el canal que decide",
+            'p2t = {b: p2(b, "P", "TODO", "tabla", lejana=True) for b in POS[1:]}',
+            'p2t = {b: p2(b, "P", "TODO", "decide", lejana=True) for b in POS[1:]}'),
+    "M85": ("§6 bis (VP-01): una lista descriptiva cortada a 20 no lo dice",
+            '+ (f" (y {len(lst) - n} más, cortada a {n})" if len(lst) > n else "")', '+ ""'),
+    # §6 ter (N-3, S170): mutaciones que deshacen la regla; las atrapan E26, E77 a E80
+    "M86": ("§6 ter: las N-3 vuelven a contar en el P1 que veta",
+            'm["P1_n3" if n3 and es_n3(o) else "P1"] += 1', 'm["P1"] += 1'),
+    "M87": ("§6 ter: la clase N-3 no mira el sensor (entra NOAA-20)",
+            ' and o.get("sensor") == SENSOR_N3', ''),
+    "M88": ("§6 ter: la clase N-3 no mira la alerta de la tabla",
+            'bool(o.get("protegida")) and not o.get("alerta_tabla") and', 'bool(o.get("protegida")) and'),
+    "M89": ("§6 ter: la frontera del 2026-10-09 incluye el mismo día",
+            'and o["hora_utc"] < FRONTERA_N3)', 'and o["hora_utc"][:10] <= FRONTERA_N3)'),
+    "M90": ("§6 ter: la clase N-3 sin frontera de fecha",
+            '\n            and o["hora_utc"] < FRONTERA_N3)', ')'),
+    # S175: el blanco cambió (el de antes, n3=True en §6.3, es equivalente con la ventana fija; ver el encabezado)
+    "M91": ("§6 ter: la clase N-3 llega a la sombra (§6.3; la ventana no la saca)",
+            'if i not in fuera_regimen and obj[i]["hora_utc"] < ventana_desde:',
+            'if i not in fuera_regimen and obj[i]["hora_utc"] < ventana_desde and not es_n3(obj[i]):'),
+    "M92": ("§6 ter: la elegibilidad del §6 bis cuenta las N-3",
+            'eleg = {b: all(metricas(b, v, canal, n3=True)[0]["P1"] == 0',
+            'eleg = {b: all(metricas(b, v, canal)[0]["P1"] == 0'),
+    "M93": ("§6 ter: el P1 del §6.2 cuenta las N-3",
+            'm, nadie = metricas(PE, v, canal, n3=True)', 'm, nadie = metricas(PE, v, canal)'),
+    "M94": ("§6 ter: el §6.2 no imprime el P1 que cuenta las N-3",
+            "contando las N-3 {m['P1'] + m['P1_n3']}", "contando las N-3 {m['P1']}"),
+    "M95": ("§6 ter: la lista aparte de las N-3 sale vacía",
+            'n3_l = [i for i in oks if es_n3(obj[i]) and etiqueta(obj[i], "todo") == "prot"]', 'n3_l = []'),
     "MR1": ("sombra (LR1): el filtro por ROI no saca ninguna pasada (lo de antes de S173)",
             'if roi != esperada.get(obj[i]["volcan"]):', "if False:"),
     "MR2": ("sombra (LR1): sin --roi-brazo no se cierra la compuerta y se lee como B0",
@@ -199,6 +317,9 @@ MUTACIONES = {
             '(("bajo 30°", lambda z: z < 30), ("sobre 30°", lambda z: z >= 30))',
             '(("bajo 30°", lambda z: z <= 30), ("sobre 30°", lambda z: z > 30))'),
     # S174, VPR945 (segunda vuelta del PR #945)
+    "MR8": ("sombra (LR1): la lista de protegidas que salen por otra ROI sale vacía (sólo en esta rama)",
+            '[f"{nombre(i)} ({m})" for i, m in fuera_regimen.items() if obj[i].get("protegida")] or "ninguna"',
+            '"ninguna"'),
     "MR9": ("sombra (§4.3, LR2; R4): CUMPLE no espera a que «ahora» llegue al fin de la ventana fija",
             "ahora_ok = t_ahora >= t_fin", "ahora_ok = True"),
     "MR10": ("sombra (LR2, LR3): con --sha-desde la ventana (y el reloj) no parte de la hora del commit del corte",
@@ -370,7 +491,7 @@ MUTACIONES = {
 }
 
 
-def correr(dest, evaluador, nombre, viejo=None, nuevo=None):
+def correr(dest, evaluador, nombre, viejo=None, nuevo=None, escenarios=""):
     copia = AQUI / f"_mut_{nombre}_evaluar_v750a.py"
     src = ORIGINAL.read_text(encoding="utf-8")
     if viejo is not None:
@@ -382,12 +503,18 @@ def correr(dest, evaluador, nombre, viejo=None, nuevo=None):
         shutil.rmtree(sal)
     try:
         o = subprocess.run([sys.executable, str(PRUEBAS), "--dest", str(sal), "--analizador", str(copia),
-                            "--evaluador", str(evaluador)] + (["--solo", ESCENARIOS_SOLO] if ESCENARIOS_SOLO else []),
-                           capture_output=True, text=True, encoding="utf-8",
-                           errors="replace", timeout=7200, cwd=str(AQUI))
+                            "--evaluador", str(evaluador)] + (["--solo", escenarios] if escenarios else []), capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", timeout=259200, cwd=str(AQUI))  # 3 días: el plazo es de reloj y corre suspendido
+    except subprocess.TimeoutExpired:
+        # S162 (relevo): con CPU compartida una mutación pasó las 2 h y la excepción tumbó TODO el medidor, sin un
+        # solo resultado. Un tiempo agotado es SIN DATO de esa mutación (no cuenta como atrapada) y se sigue.
+        print(f"   {nombre}: SIN DATO (tiempo agotado)", flush=True)
+        return nombre, "SIN DATO (tiempo)", None, "(tiempo agotado)", [], False
     finally:
         copia.unlink()
     txt = o.stdout + o.stderr
+    # S162 (relevo): M82 cayó sin línea de pruebas y sin traza; la salida entera de cada corrida queda en disco
+    (dest / f"salida_{nombre}.txt").write_text(txt, encoding="utf-8")
     linea = next((x for x in txt.splitlines() if x.startswith("== PRUEBAS")), "(sin línea de pruebas)")
     fallan = [x for x in txt.splitlines() if " | FALLA" in x]
     atrapan = [x.split(" | ")[0] for x in fallan]
@@ -399,6 +526,7 @@ def correr(dest, evaluador, nombre, viejo=None, nuevo=None):
         estado = "ATRAPADA"
     else:
         estado = "CAÍDA"
+    print(f"   {nombre}: {estado} | {linea[:100]}", flush=True)   # en vivo: si algo cae después, esto queda
     return nombre, estado, o.returncode, linea, atrapan, solo_bandera
 
 
@@ -410,17 +538,15 @@ def main():
     ap.add_argument("--hilos", type=int, default=4)
     ap.add_argument("--solo", default="", help="ids de mutaciones a correr (IDENTIDAD y CAIDA van siempre)")
     ap.add_argument("--escenarios", default="",
-                    help="S173: escenarios de las pruebas a correr (--solo de probar_evaluar_v750a.py); sólo para "
-                         "mutaciones de un camino que el resto no recorre (la sombra), y se dice en la salida")
+                    help="escenarios de las pruebas a correr (--solo de probar_evaluar_v750a.py); restringe la batería y "
+                         "no reemplaza la corrida entera, y se dice en la salida")
     a = ap.parse_args()
     sel = {x for x in a.solo.split(",") if x}
     a.dest.mkdir(parents=True, exist_ok=True)
     mut = {k: v for k, v in MUTACIONES.items() if not sel or k in sel or k == "CAIDA"}
     trabajos = [("IDENTIDAD", None, None)] + [(k, v[1], v[2]) for k, v in mut.items()]
-    global ESCENARIOS_SOLO
-    ESCENARIOS_SOLO = a.escenarios
     with ThreadPoolExecutor(a.hilos) as ex:
-        res = {r[0]: r for r in ex.map(lambda t: correr(a.dest, a.evaluador, *t), trabajos)}
+        res = {r[0]: r for r in ex.map(lambda t: correr(a.dest, a.evaluador, *t, escenarios=a.escenarios), trabajos)}
     L = []
 
     def pr(s):
@@ -431,7 +557,8 @@ def main():
     if sel:
         pr(f"(corrida parcial: --solo {a.solo})")
     if a.escenarios:
-        pr(f"(escenarios parciales: --escenarios {a.escenarios})")
+        pr(f"(batería restringida a --escenarios {a.escenarios}: «atrapada» es por aserción en esos escenarios; no "
+           "reemplaza la corrida con la batería entera)")
     pr(f"IDENTIDAD | {ident[1]} (tiene que ser PASA) | rc {ident[2]} | {ident[3][:200]}")
     malos = 0 if ident[1] == "PASA" else 1
     for nom, (que, _v, _n) in mut.items():

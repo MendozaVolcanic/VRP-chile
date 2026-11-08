@@ -1,0 +1,25 @@
+# Medidor sobre las mutaciones de los brazos de posición (M63 a M80), 2026-10-28 00:28:45 a 02:03:43 UTC, --hilos 1,
+# batería restringida a E61..E73 (--escenarios). No reemplaza la corrida completa del medidor (pendiente).
+(corrida parcial: --solo M63,M64,M65,M66,M67,M68,M69,M70,M71,M72,M73,M74,M75,M76,M77,M78,M79,M80)
+(batería restringida a --escenarios E61,E62,E63,E64,E65,E66,E67,E68,E69,E70,E71,E72,E73: «atrapada» es por aserción en esos escenarios; no reemplaza la corrida con la batería entera)
+IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (13)
+M63 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: P-cercano toma el alertado más LEJANO del cráter | == PRUEBAS: FALLAS 9 de 13 | escenarios que fallan ['E61', 'E62', 'E63', 'E64', 'E65', 'E66', 'E67', 'E68', 'E69']
+M64 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: P-pico toma el alertado más DÉBIL | == PRUEBAS: FALLAS 6 de 13 | escenarios que fallan ['E61', 'E62', 'E64', 'E65', 'E66', 'E68']
+M65 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: el ancla de los brazos de posición es el centro de la grilla, no pos_crater | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E70']
+M66 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: E_lejana no suma a P2' | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E68']
+M67 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: P2' con el canal que decide se mide contra K, no contra P | == PRUEBAS: FALLAS 11 de 13 | escenarios que fallan ['E61', 'E62', 'E63', 'E64', 'E65', 'E66', 'E67', 'E68', 'E69', 'E70', 'E72']
+M68 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: gana sin exigir que con la tabla sola no sea peor | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E69']
+M69 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: desempate invertido (gana el de MAYOR E + E_lejana) | == PRUEBAS: FALLAS 2 de 13 | escenarios que fallan ['E66', 'E67']
+M70 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: a igual E + E_lejana gana P-cercano, no P-pico | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E67']
+M71 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: elegible sin mirar la ventana O | == PRUEBAS: FALLAS 2 de 13 | escenarios que fallan ['E64', 'E65']
+M72 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: el §6 se evalúa siempre sobre P (radiante), no sobre el brazo elegido | == PRUEBAS: FALLAS 3 de 13 | escenarios que fallan ['E61', 'E62', 'E64']
+M73 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: las pasadas far_ref cuentan como negativos en E (y en P1, P2 y M) | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E71']
+M74 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: con el canal que decide basta no ser peor (EMPATE o SIN SUSTRATO ganan) | == PRUEBAS: FALLAS 6 de 13 | escenarios que fallan ['E63', 'E64', 'E68', 'E69', 'E70', 'E72']
+M75 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: SIN SUSTRATO cuenta como «no peor» con cualquier neto | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E69']
+M76 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: si P no es elegible, se toma un elegible sin exigir que no sea peor que P | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E65']
+M77 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: NINGUNA POSICIÓN ELEGIBLE no entra a los motivos del §6 | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E65']
+M78 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: sin pasadas far_ref no se dice que la vara lejana quedó SIN DATO | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E72']
+M79 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis: «con algún alertado» cuenta todas las far_ref | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E71']
+M80 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 bis (A119): la distancia del OCR se usa también antes del 2026-06-13 | == PRUEBAS: FALLAS 1 de 13 | escenarios que fallan ['E73']
+CAIDA | CAÍDA (tiene que ser CAÍDA) | rc 2 | CONTROL: el analizador sólo se cae (excepción al cargar los objetivos) | == PRUEBAS: CAÍDAS 13 (fallas por aserción 0) de 13 | escenarios que fallan []
+== RESUMEN: 18 de 18 mutaciones atrapadas por aserción; controles como deben; TODO COMO SE ESPERA

@@ -3065,7 +3065,7 @@ function renderDetail() {
         : pixels.slice(0, PIXEL_CAP_PER_RECORD);
 
       renderPixels.forEach((px, pxIdx) => {
-        const size = Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5));
+        const size = Number.isFinite(px.vrp_mw) ? Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5)) : 4; // S175 V33A-01, POR QUÉ: los píxeles de la vía MODIS «código MIROVA» no traen vrp_mw (MIROVA da la suma, D32); leerlo daba radio NaN y un TypeError que cortaba el dibujo de los records siguientes. Sin energía: radio mínimo y el popup lo dice. En la misma línea para no correr las citas archivo:línea. Guard: tests/test_mapa_todos_los_pixels_s175.py
         const isPrimary = pxIdx === 0;
         const pxOpacity = isPrimary ? recencyOpacity : recencyOpacity * 0.7;
         const ventOnly = isVentOnly || px.vent_only;
@@ -3154,7 +3154,7 @@ function renderDetail() {
           (multiPixel
             ? `<small style="color:#888">Σ escena (diagnóstico, NO es el VRP): ${recordTotalVrp.toFixed(3)} MW (${nPix} pixels)</small><br>`
             : '') +
-          (multiPixel ? `<b>Este pixel:</b> ${px.vrp_mw.toFixed(4)} MW (pixel #${pxIdx+1})<br>` : '') +
+          (multiPixel ? `<b>Este pixel:</b> ${Number.isFinite(px.vrp_mw) ? px.vrp_mw.toFixed(4) + " MW" : "sin dato de VRP por pixel"} (pixel #${pxIdx+1})<br>` : '') +
           `BT max: ${tempC(px.bt_k)}<br>` +
           `Distancia al cráter: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}`
         );

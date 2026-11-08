@@ -44,10 +44,13 @@ porque cambió el cráter con el mismo umbral; un negativo lejano que sólo P-si
   E23 sombra con P2 BLOQUEA (neto +2 en 6 bloques): CUMPLE (LECTURA: §6.3 sólo excluye PIERDE).
 Agregados tras el verificador limpio (verificador/INFORME.md, VA-01 a VA-08), cada uno fija una regla que una rotura de
 una línea dejaba pasar:
-  E28 una sola pasada no protegida con K distinto de producción: compuerta cerrada (L18).
+  E28 una sola pasada no protegida con K distinto de producción entre 109: control OK (hasta 1 %, L18 por D-48), la
+      pasada sale de los brazos (P2 en T pasa de 6 a 5 bloques) y se lista; CUMPLE.
   E29 K publica igual pero su VRP difiere 0,01 MW de producción: compuerta cerrada.
-  E30 K de 9,0 MW con t_max 270 K: K x 1,2 cae en el filtro de cirro del tablero; el control del placebo cae (L7).
-  E31 12 protegidas que K no publica y P publica al doble: no entran a la razón (L4); CUMPLE.
+  E30 K de 9,0 MW con t_max 270 K: K x 1,2 cae en el filtro de cirro del tablero; la diferencia la explica el filtro
+      (t_max bajo 278,15 K), se lista y el control no cae (L7 por D-48); CUMPLE.
+  E31 12 protegidas que K no publica y P publica al doble: entran a la razón (L4 por D-48): NO CUMPLE por M razón 2,0;
+      la razón sobre las que publican K y P (1,0) se imprime al lado.
   E32 y E33 P = 0,85 y 1,15 x MIROVA: NO CUMPLE por la razón (bordes de la banda).
   E34 2 pasadas sin gránulo del generador: cobertura INSUFICIENTE.
   E35 y E36 con 10 negativos de relleno, 1 pasada en error: SUFICIENTE si no es protegida, INSUFICIENTE si lo es.
@@ -61,6 +64,50 @@ una línea dejaba pasar:
   E47 sombra con una protegida sólo del OCR que P pierde: NO CUMPLE en tabla más OCR, no con la tabla sola.
   E48 P = 1,3 x MIROVA sólo en T: NO CUMPLE por la razón en T y no en O.
   E49 sombra sin protegidas: CUMPLE marcado «SIN PROTEGIDAS».
+Agregados al resolver L2, L4, L7 y L18 por D-48 (relevo VIIRS 750, 2026-10-25):
+  E50 dos pasadas no protegidas con K distinto entre 110 (más del 1 %): compuerta cerrada (L18).
+  E51 prueba local con 5 mutaciones atrapadas: §6.1 no se cumple (L2: son 6 de 6).
+  E52 una sola protegida con el VRP de K distinto de producción entre 110 (bajo el 1 %): cierra igual (L18).
+Agregados tras la segunda vuelta del verificador (verificador_v2/INFORME.md, VB-A01 a VB-A07):
+  E53 y E54 P = 0,9 y 1,1 x MIROVA: la razón no entra a los motivos (los bordes de la banda están incluidos; el
+      comparador da NEUTRO a esa ganancia pareja, conducta de evaluar_d25.py anotada por el verificador).
+  E55 la pasada con K distinto (dentro del 1 %) y P distinto de O: §6.1 la sigue mirando y no se cumple (la
+      equivalencia P = O se exige sobre todas las observadas, con K o sin K).
+  E56 sombra, 1 pasada con K distinto de 24 (más del 1 %): compuerta cerrada. E57 la misma con 114: no cierra, se lista.
+  E58 una protegida sólo del OCR con K distinto, entre 111: cierra («ninguna protegida» es tabla más OCR).
+  E59 K de 45.000 MW con t_max tibio: K x 1,2 pasa el tope de 50.000 MW del tablero; explicada, se lista y no cierra.
+  E60 prueba local con seis líneas «atrapada» pero una de otra pieza: §6.1 no se cumple (las seis se exigen por nombre).
+Agregados con los brazos de posición (§3 y §6 bis, decisión de Nicolás del 2026-10-27). Tres escenas de píxeles: «cerca y
+lejos» (un alertado débil en el cráter y otro más radiante a 11,25 km: radiante y pico lejos, cercano en la cumbre),
+«línea» (el más radiante en el cráter y 15 más débiles contiguos hacia el este: el centroide del cúmulo a 5,6 km, fuera
+del radio de 5 km; pico y cercano en el cráter) y la de Llaima con el cráter corrido del centro de la grilla:
+  E61 6 alertas bajo 1 MW «cerca y lejos»: P-cercano gana en P2' y es elegible; el §6 se evalúa sobre P-cercano (P2 contra
+      K en T pasa de neto -6 a -12) y las 6 pasadas que cambian salen por nombre.
+  E62 6 bajas «línea» y 6 negativos «cerca y lejos»: P-pico gana solo (P-cercano empata) y el §6 se evalúa sobre él.
+  E63 3 bajas «cerca y lejos» (SIN SUSTRATO): ninguno gana y queda P (radiante).
+  E64 una protegida «cerca y lejos» que K publica: P y P-pico no son elegibles, P-cercano sí y no es peor: se elige.
+  E65 la protegida de E64 y 6 negativos que sólo P-cercano publica (PIERDE): NINGUNA POSICIÓN ELEGIBLE, NO CUMPLE.
+  E66 ganan los dos, P-cercano con menor E + E_lejana: se elige P-cercano.
+  E67 ganan los dos con el mismo E + E_lejana: se elige P-pico.
+  E68 6 bajas que P-cercano gana y 6 far_ref que publica de más: con E_lejana empata y queda P.
+  E69 P-cercano gana con el canal que decide (bajas del OCR en O) y con la tabla sola es SIN SUSTRATO con neto +1: no gana.
+  E70 Llaima con el cráter a 6,4 km del centro y un alertado en el centro: medido desde el cráter, P-cercano no publica.
+  E71 3 far_ref sin alertados que K publica: E_lejana 0 marcado «no dice nada», y las far_ref no entran a P2 contra K.
+  E72 base sin far_ref: la vara lejana es SIN DATO y la regla se lee igual (queda P).
+  E73 4 alertas sólo del OCR antes del 2026-06-13: no entran a la distancia contra MIROVA (A119).
+Agregados tras el verificador limpio de los brazos de posición (verificador_posicion/INFORME.md, LISTO CON CAMBIOS;
+W3 y W4 son suyos, W5 adaptado):
+  E74 (W3) una protegida sólo del OCR que K y P publican y cercano y pico pierden (escena «anillo»): «elegible» mira
+      también tabla más OCR, así que P-cercano no es elegible aunque gane P2' y queda P (radiante).
+  E75 (W4) bajas y far_ref sólo del OCR en O: con la tabla sola E_lejana no cuenta los FALSO_POSITIVO_OCR (SIN SUSTRATO
+      con neto 0, no peor) y P-cercano gana con el canal que decide (neto -8 en 16 bloques).
+  E76 (W5) 24 pasadas que cambian contra P: la lista impresa dice que se cortó a 20 (VP-01).
+Agregados por la regla N-3 (§6 ter, S170), rojos contra el analizador sin N-3:
+  E77 la protegida sólo del OCR de E26, pero de Suomi NPP y antes del 2026-10-09: no veta (CUMPLE), se lista aparte
+      con el brazo que la publica (K) y el P1 que la cuenta queda al lado.
+  E78 la misma, el 2026-10-09: ya no es de la clase y veta (O/todo: P1 1).
+  E79 la misma antes del 2026-10-09 pero con alerta de la tabla: veta con la tabla sola y con tabla más OCR.
+  E80 en la sombra (§6.3) la regla no se aplica: la protegida sólo del OCR de Suomi NPP anterior al 2026-10-09 veta.
 Agregados en S173 por VPR939-03 (verificador del PR #939, la ROI B4 de VIIRS 750): la sombra trae pasadas de Cordón
 Caulle con la ROI vieja (def, sha anterior al merge) y con la nueva (sens); el lector no puede mezclarlas (A104). Todas
 las pasadas de la sombra llevan en el record de P `diag_codigo_mirova.roi` y `regimen.codigo_sha`, como los reales
@@ -189,6 +236,17 @@ Retoques en S174 por VPR953 (verificador de #953; sin cambio de regla):
   ER55 (VPR953-03) afirma la lista entera de los once con sus noches en la línea CUMPLE (antes, «Chaiten 14, Copahue 20»).
   ER56 (VPR953-02) con B0, Copahue (el segundo por orden alfabético) y Villarrica (el último) con 13 noches: PROVISORIO,
       nombra a los dos. ER57 su par con 14 justas: CUMPLE, con los once en la línea.
+Reconciliación en S175 de las dos líneas (origin/main con el régimen de la sombra y la rama de V750-A con N-3 y los
+brazos de posición; ver LECTURAS y el pre-registro). Los ER1 a ER6 de la rama eran los de #945 y quedan los de main;
+cuatro escenarios de la rama se reescriben porque la sombra de main los dejaba sin sustrato, y conservan lo que vigilan:
+  E56 sombra chica (sin el relleno de los volcanes): 1 pasada con K distinto de 32, más del 1 %, cierra la compuerta.
+  E57 sombra base: 1 pasada con K distinto de 266, no cierra y se lista, CUMPLE (antes se llegaba a 114 con relleno de
+      diciembre, que ahora cae fuera de la ventana).
+  E80 la protegida sólo del OCR de Suomi NPP del 2026-10-08 está antes del inicio de la sombra (§6 ter: «no tiene
+      pasadas de esta clase»): sale de la lectura, se lista y no veta. Antes afirmaba que vetaba, lo que supone una
+      sombra sin ventana. El M91 de antes (exención N-3 en §6.3) quedó equivalente: ver mutar_evaluar_v750a.py.
+  ER7 la protegida def de Cordón Caulle sale por otra ROI, listada por nombre y motivo, ahora con el corte en #939
+      (con el corte de prueba la compuerta se cierra, ER2).
 La población base suma para el S-1: celda de Cordón Caulle en el pase 2 y la zona 2 (el pase 1 y la zona 1 con otro
 umbral), una alerta de Tupungatito cuyo NTI cruza entre los umbrales pero el ETI no, y un diagnóstico mal formado.
 Una caída nativa del analizador (código fuera de 0, 3, 4, 5 y 6, sin Traceback) se reintenta 2 veces y si sigue es CAÍDA,
@@ -221,7 +279,8 @@ SHA_REAL_B0 = "636b3426e69e9c6dd79ffacde601eed3c111dc48"
 SHA_REAL_B4 = "58edb978825ff08677fc1b3e803a2ca601dd4598"
 SHA_CORTE_PRUEBA = "5b13bfed80240c14a14d491b795b2a1e2965436e"
 CRATER = {"Lascar": [33, 33], "Villarrica": [33, 33], "PuyehueCordonCaulle": [30, 36], "Tupungatito": [33, 33],
-          "Nevados de Chillan": [33, 33]}   # S174 (ER10): un nombre que no está en el mapa de ROI
+          "Nevados de Chillan": [33, 33],   # S174 (ER10): un nombre que no está en el mapa de ROI
+          "Llaima": [27, 39]}   # §6 bis (E70): cráter a 6,4 km del centro de la grilla, radio interior de 5 km
 # S174 (VPR945-R3, control positivo ER36): los 11 volcanes del mapa de ROI (scripts/roi_v750b_a_grillas.py::VOLCANES);
 # si un nombre no coincidiera, el lector lo marcaría SIN DATO «volcan_sin_roi» y ER36 fallaría
 VOLCANES_MAPA = ("Chaiten", "NevadosDeChillan", "Copahue", "Isluga", "Lascar", "Lastarria", "Llaima", "PlanchonPeteroa",
@@ -237,6 +296,7 @@ AHORA_PRUEBA = "2026-12-10 00:00"
 VILLA_FECHAS = tuple(str(datetime.date(2026, 11, 17) + datetime.timedelta(days=n)) for n in range(14))
 # esc_once: noches de cada volcán en días desde el 2026-11-05, 5 en cada una de las 4 semanas de la ventana de #939
 OFFS_4SEM = (0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 21, 22, 23, 24, 25)
+PAQ = ("P", "Pdef", "O")
 
 VERDE = """VERDE: E1 1020 casos, E3 10 recortes
    mutación k1_y_minimos         atrapada por aserción (sintético)
@@ -288,8 +348,12 @@ class Pob:
 
     def pasada(self, volcan, hora, lab, K=None, P=None, Pdef="=P", O="=P", gemelo="=K", mirova_vrp=None,
                tabla=True, z=20.0, dP=None, dPdef=None, dO=None, far=False, banda=False, estado="ok",
-               pub_prod="=K", falta=(), decide=True, dayflag=0, k_tmax=300.0, roi="def", sha=SHA_REAL_B4,
-               regimen=True):
+               pub_prod="=K", falta=(), decide=True, dayflag=0, k_tmax=300.0, px=None, dist_ref=11.0,
+               sensor=SENSOR, roi="def", sha=SHA_REAL_B4, regimen=True):
+        """px (§6 bis): píxeles alertados de P, P-def y O cuando no es el de un solo píxel en el cráter (los tres
+        iguales, así la equivalencia P = O se mantiene). lab «far_ref»: MIROVA publicó una fuente lejana (fila
+        FALSO_POSITIVO de la tabla, o del OCR con tabla=False, a dist_ref km, y ninguna ALERTA). roi, sha y regimen
+        (S173, VPR939-03): la ROI y el sha del código que lleva el record de P, como el real; regimen=False los quita."""
         i = len(self.objs)
         filas = []
         if lab == "pos":
@@ -299,6 +363,9 @@ class Pob:
             else:
                 filas.append({"fecha_utc": hora + ":00", "tipo": "ALERTA_TERMICA_OCR", "vrp_mw": mirova_vrp,
                               "dist_km": 0.5, "source": "OCR"})
+        elif lab == "far_ref":
+            filas.append({"fecha_utc": hora + ":00", "tipo": "FALSO_POSITIVO" if tabla else "FALSO_POSITIVO_OCR",
+                          "vrp_mw": 0.5, "dist_km": dist_ref, "source": "CONS" if tabla else "OCR"})
         else:
             filas.append({"fecha_utc": hora + ":00", "tipo": "RUTINA", "vrp_mw": 0.0, "dist_km": None,
                           "source": "CONS"})
@@ -306,11 +373,13 @@ class Pob:
         O = P if O == "=P" else O
         gemelo = K if gemelo == "=K" else gemelo
         pp = (K is not None) if pub_prod == "=K" else pub_prod
-        self.objs.append({"id": i, "volcan": volcan, "hora_utc": hora, "sensor": SENSOR, "lab": lab,
+        self.objs.append({"id": i, "volcan": volcan, "hora_utc": hora, "sensor": sensor, "lab": lab,
                           "decide": lab == "pos" and decide, "alerta_tabla": lab == "pos" and tabla,
                           "protegida": lab == "pos" and (mirova_vrp or 0) >= 1.0, "mirova": filas,
                           "mirova_vrp": mirova_vrp if lab == "pos" else None, "pub_prod": pp,
                           "pc_vrp": K or 0.0, "z": z, "pos_crater": CRATER[volcan]})
+        if lab == "far_ref":
+            self.objs[-1]["dist_ref"] = dist_ref
         rp = k_record(P)
         if regimen:   # como el record real de la vía: ROI en el diagnóstico, sha del código en la marca de régimen
             # S174 (VPR945-06): "sin_roi" deja el diagnóstico sin la ROI, "sin_sha" la marca de régimen sin el sha
@@ -324,6 +393,11 @@ class Pob:
              "paquete": {"P": salida_paquete(P, volcan, far, dP), "Pdef": salida_paquete(Pdef, volcan, far, dPdef),
                          "O": salida_paquete(O, volcan, far, dO)},
              "banda_triangulacion": banda}
+        if px is not None:
+            for b in PAQ:
+                if r["paquete"][b]["vrp_mw"] is not None:
+                    r["paquete"][b]["pixeles"] = copy.deepcopy(px)
+                    r["paquete"][b]["npix"] = len(px)
         for b in falta:
             r["paquete"].pop(b, None)
         self.res.append(r)
@@ -408,7 +482,7 @@ def base(p_de=None, negs_T="gana", negs_O="gana", extra=None, pcc_pdef=None, gem
             pb.pasada(("Lascar", "Villarrica")[n % 2], f"2026-08-{10 + n:02d} 05:00", "neg_limpio", K=None, P=None,
                       gemelo=0.2)
     for n in range(relleno):
-        pb.pasada("Villarrica", f"2026-08-{1 + n:02d} 04:00", "neg_limpio", K=None, P=None)
+        pb.pasada("Villarrica", f"2026-{8 + n // 28:02d}-{1 + n % 28:02d} 04:00", "neg_limpio", K=None, P=None)
     if extra:
         extra(pb)
     return pb
@@ -416,7 +490,7 @@ def base(p_de=None, negs_T="gana", negs_O="gana", extra=None, pcc_pdef=None, gem
 
 def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, mezcla=False, sin_reg=False, sha_real=False,
                sha_rara=False, temprana=False, reproc=False, vol_fuera=False, z_perdida=20.0,
-               sha_todas=None, cc_def_sha=None,
+               sha_todas=None, cc_def_sha=None, sensor_ocr=SENSOR,
                cc_def_hora="2026-11-04 06:30", sens=True, sens_fechas=None, cc_viejo=False, villa_fechas=None,
                nueve=None):
     """Sombra: sólo K y P (record del perfil sombra), desde el 2026-11-03. S173 (VPR939-03): mezcla agrega tres pasadas
@@ -482,7 +556,8 @@ def esc_sombra(p1=False, negs="gana", prot_ocr=False, sin_prot=False, mezcla=Fal
     if reproc:      # S174 (VPR945-01, R2-03): noche vieja reprocesada con el código posterior al corte
         pb.pasada("Villarrica", reproc, "neg_limpio", K=None, P=None, sha=sha4)
     if prot_ocr:   # protegida sólo del OCR que K publica y P no: P1 en tabla más OCR, no con la tabla sola
-        pb.pasada("Villarrica", "2026-11-11 06:30", "pos", K=1.0, P=None, mirova_vrp=2.0, tabla=False)
+        hora = "2026-11-11 06:30" if sensor_ocr == SENSOR else "2026-10-08 06:30"   # E80: Suomi NPP antes del 9-oct
+        pb.pasada("Villarrica", hora, "pos", K=1.0, P=None, mirova_vrp=2.0, tabla=False, sensor=sensor_ocr)
     for n in range(6):
         dia = f"2026-11-{12 + n:02d}"
         if negs == "gana":
@@ -647,6 +722,41 @@ def _k_distinto_uno(pb):
     pb.objs[j]["pub_prod"] = False
 
 
+def _k_distinto_dos(pb):
+    """Dos pasadas no protegidas con K distinto de producción: más del 1 % de 110 (L18)."""
+    js = [i for i, o in enumerate(pb.objs) if o["lab"] == "neg_limpio" and o["pub_prod"]][:2]
+    for j in js:
+        pb.objs[j]["pub_prod"] = False
+
+
+def _k_distinto_y_p_distinto_de_o(pb):
+    """La pasada con K distinto (negativo de Láscar del 2026-04-20) tiene además una celda que O alerta y P no."""
+    _k_distinto_uno(pb)
+    j = next(i for i, o in enumerate(pb.objs) if o["volcan"] == "Lascar" and o["hora_utc"] == "2026-04-20 05:00")
+    pb.res[j]["paquete"]["O"] = salida_paquete(0.1, "Lascar")
+
+
+def _sombra_k_distinto(**kw):
+    """Una pasada con K distinto de producción en la sombra. S175: el tamaño lo da esc_sombra (kw), no un relleno, porque
+    las pasadas posteriores al fin de la ventana fija ya no se leen."""
+    def f():
+        pb = esc_sombra(**kw)
+        j = next(i for i, o in enumerate(pb.objs) if o["lab"] == "neg_limpio" and o["pub_prod"])
+        pb.objs[j]["pub_prod"] = False
+        return pb
+    return f
+
+
+def _protegida_ocr_k_distinto(pb):
+    """Protegida sólo del OCR (O) que K publica pero producción no: K distinto en una protegida."""
+    pb.pasada("Villarrica", "2026-08-05 06:40", "pos", K=0.9, P=0.9, mirova_vrp=2.0, tabla=False, pub_prod=False)
+
+
+def _k_en_el_tope(pb):
+    """K de 45.000 MW con t_max 300 K publica; por 1,2 = 54.000 MW el tablero lo lleva a 0 (tope de 50.000 MW)."""
+    pb.pasada("Lascar", "2026-07-31 05:30", "neg_limpio", K=45000.0, P=None, k_tmax=300.0)
+
+
 def _pc_vrp_distinto(pb):
     """K publica igual que producción pero su VRP difiere en 0,01 MW (más que 0,001)."""
     pb.objs[0]["pc_vrp"] = round(pb.objs[0]["pc_vrp"] + 0.01, 3)
@@ -658,7 +768,7 @@ def _placebo_publica_distinto(pb):
 
 
 def _protegidas_que_k_no(pb):
-    """12 protegidas en O que K no publica y P publica al doble de MIROVA: no entran a la razón de §6.2 (L4)."""
+    """12 protegidas en O que K no publica y P publica al doble de MIROVA: entran a la razón de §6.2 (L4 por D-48)."""
     for n in range(12):
         pb.pasada(("Lascar", "Villarrica")[n % 2], f"2026-08-{10 + n:02d} 06:00", "pos", K=None, P=4.0,
                   mirova_vrp=2.0)
@@ -713,6 +823,79 @@ def _noches_once(menos):
     """VPR953-03: la lista «volcán noches» de los once, en el orden en que la imprime el lector (alfabético), con 20
     noches (esc_once por omisión) salvo los de `menos`."""
     return ", ".join(f"{v} {menos.get(v, 20)}" for v in sorted(VOLCANES_MAPA))
+
+
+# ---------------------------------------------------------------- §6 bis, brazos de posición
+def px_cerca_lejos(volcan):
+    """Un alertado débil (M13 1,0) en el cráter y uno más radiante (M13 2,0) 15 celdas al este (11,25 km): el cúmulo
+    del más radiante y el pico quedan lejos; el más cercano, en la cumbre."""
+    f, c = CRATER[volcan]
+    return [[f, c, 2, 0.0, 1.0], [f, c + 15, 2, 0.0, 2.0]]
+
+
+def px_linea(volcan):
+    """El alertado más radiante en el cráter y 15 más débiles contiguos hacia el este: el centroide del cúmulo queda a
+    7,5 celdas (5,6 km, fuera del radio de 5 km); el pico y el más cercano, en el cráter."""
+    f, c = CRATER[volcan]
+    return [[f, c, 2, 0.0, 2.0]] + [[f, c + k, 2, 0.0, 1.0] for k in range(1, 16)]
+
+
+def px_llaima_centro(volcan):
+    """E70: un alertado débil en el CENTRO de la grilla (a 6,4 km del cráter de Llaima) y uno más radiante 15 celdas al
+    este del cráter. Medido desde el cráter, el más cercano es el del centro y queda lejos; medido desde el centro de la
+    grilla quedaría a 0 km."""
+    f, c = CRATER[volcan]
+    return [[C, C, 2, 0.0, 1.0], [f, c + 15, 2, 0.0, 2.0]]
+
+
+def _escena(volcan, dias, lab, px, mes="2026-05", hora="06:00", K=None, P=0.3, mirova_vrp=0.4, tabla=True):
+    """Una pasada por día (cada una en su propio bloque noche-volcán) con los píxeles de la escena."""
+    def f(pb):
+        for d in dias:
+            pb.pasada(volcan, f"{mes}-{d:02d} {hora}", lab, K=K, P=P, px=None if px is None else px(volcan),
+                      mirova_vrp=mirova_vrp if lab == "pos" else None, tabla=tabla)
+    return f
+
+
+def _y(*fs):
+    def f(pb):
+        for g in fs:
+            g(pb)
+    return f
+
+
+def _prot_cerca_lejos(pb):
+    """E64: protegida de Láscar en O que K publica; sólo el brazo cercano la publica."""
+    pb.pasada("Lascar", "2026-09-01 06:00", "pos", K=1.2, P=3.0, mirova_vrp=3.0, px=px_cerca_lejos("Lascar"))
+
+
+def px_anillo(volcan):
+    """Verificador de posición (W2, W3): borde de un cuadrado de 8 celdas de radio centrado en el cráter. Es 8-conexo y su
+    centroide cae EN el cráter (summit para el radiante), pero todos sus píxeles quedan a 6 km o más (far para cercano y
+    pico). El más radiante es una esquina."""
+    f, c = CRATER[volcan]
+    pts = set()
+    for k in range(-8, 9):
+        pts.update({(f - 8, c + k), (f + 8, c + k), (f + k, c - 8), (f + k, c + 8)})
+    px = [[a, b, 2, 0.0, 1.0] for a, b in sorted(pts)]
+    px[0][4] = 2.0
+    return px
+
+
+def _prot_ocr_anillo(pb):
+    """E74 (W3): protegida de Láscar en O, sólo del OCR, que K y el radiante publican y cercano y pico pierden."""
+    pb.pasada("Lascar", "2026-09-01 06:00", "pos", K=1.2, P=3.0, mirova_vrp=3.0, px=px_anillo("Lascar"), tabla=False)
+
+
+def _n3(hora, tabla=False):
+    """§6 ter (N-3): la protegida de E26 (Villarrica en O, K la publica y P no), de Suomi NPP a la hora dada."""
+    def f(pb):
+        pb.pasada("Villarrica", hora, "pos", K=0.9, P=None, mirova_vrp=2.0, tabla=tabla, sensor="VIIRS_SNPP_750")
+    return f
+
+
+SEIS = range(1, 7)
+NEGS_CERCANO = _escena("Villarrica", range(11, 17), "neg_limpio", px_cerca_lejos, hora="05:00")
 
 
 ESCENARIOS = {
@@ -824,17 +1007,53 @@ ESCENARIOS = {
     "E27": dict(pob=lambda: base(extra=_o_otra_celda), rc=6,
                 tiene=[("== §6.1 equivalencia: NO SE CUMPLE", ["Villarrica 2026-07-11", "decidida por la escena"])],
                 no_tiene=["== §6 censo:"]),
-    "E28": dict(pob=lambda: base(extra=_k_distinto_uno), rc=3,
-                tiene=[("== control K = producción", ["FALLA"]), ("== compuerta del veredicto", ["CERRADA"])],
-                no_tiene=["== §6 censo:"]),
+    "E28": dict(pob=lambda: base(relleno=60, extra=_k_distinto_uno), rc=0,
+                tiene=[("== control K = producción", ["distintas 1 de 109", "OK", "Lascar 2026-04-20"]),
+                       ("== §6.2 ventana T, canal tabla", ["P2 contra K GANA (neto -5, bloques 5"]),
+                       ("== §6 censo: CUMPLE", [])]),
+    "E50": dict(pob=lambda: base(relleno=61, extra=_k_distinto_dos), rc=3,
+                tiene=[("== control K = producción", ["distintas 2 de 110", "FALLA"]),
+                       ("== compuerta del veredicto", ["CERRADA"])], no_tiene=["== §6 censo:"]),
     "E29": dict(pob=lambda: base(extra=_pc_vrp_distinto), rc=3,
                 tiene=[("== control K = producción", ["FALLA"])], no_tiene=["== §6 censo:"]),
-    "E30": dict(pob=lambda: base(extra=_placebo_publica_distinto), rc=3,
-                tiene=[("== control placebo K×1,2 (publicación)", ["FALLA", "Lascar 2026-07-31 05:30"]),
-                       ("== compuerta del veredicto", ["CERRADA"])], no_tiene=["== §6 censo:"]),
+    "E30": dict(pob=lambda: base(extra=_placebo_publica_distinto), rc=0,
+                tiene=[("== control placebo K×1,2 (publicación)", ["explicadas por los filtros de artefacto del tablero "
+                                                                   "(t_max bajo 278.15 K) o su tope de 50000 MW 1", "Lascar 2026-07-31 05:30",
+                                                                   "sin explicar 0", "OK"]),
+                       ("== compuerta del veredicto", ["ABIERTA"]), ("== §6 censo: CUMPLE", [])]),
     "E31": dict(pob=lambda: base(extra=_protegidas_que_k_no), rc=0,
-                tiene=[("== §6 censo: CUMPLE", []),
-                       ("   razón en protegidas que publica P aunque K no", ["2.000"])]),
+                tiene=[("== §6 censo: NO CUMPLE", ["O/tabla: M razón 2.000"]),
+                       ("   razón en protegidas que publican K y P", ["1.000"])],
+                no_tiene=["== §6 censo: CUMPLE"], no_contiene=[("== §6 censo: NO CUMPLE", "T/tabla: M razón")]),
+    "E53": dict(pob=lambda: base(p_de=lambda m, k: round(0.9 * m, 3)), rc=0,
+                tiene=[("== §6 censo:", []), ("== §6.2 ventana T, canal tabla", ["M razón en protegidas 0.900"])],
+                no_contiene=[("== §6 censo:", "M razón")]),
+    "E54": dict(pob=lambda: base(p_de=lambda m, k: round(1.1 * m, 3)), rc=0,
+                tiene=[("== §6 censo:", []), ("== §6.2 ventana T, canal tabla", ["M razón en protegidas 1.100"])],
+                no_contiene=[("== §6 censo:", "M razón")]),
+    "E55": dict(pob=lambda: base(relleno=60, extra=_k_distinto_y_p_distinto_de_o), rc=6,
+                tiene=[("== control K = producción", ["distintas 1 de 109", "OK"]),
+                       ("== §6.1 equivalencia: NO SE CUMPLE", ["Lascar 2026-04-20 05:00"])], no_tiene=["== §6 censo:"]),
+    "E56": dict(pob=_sombra_k_distinto(sens=False), fase="sombra", rc=3, args=B4,
+                tiene=[("== control K = producción", ["distintas 1 de 32", "FALLA"])],
+                no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
+    "E57": dict(pob=_sombra_k_distinto(), fase="sombra", rc=0, args=B4,
+                tiene=[("== control K = producción", ["distintas 1 de 266", "OK", "Lascar 2026-11-12 05:00"]),
+                       ("== §6.3 sombra: CUMPLE", [])]),
+    "E58": dict(pob=lambda: base(relleno=62, extra=_protegida_ocr_k_distinto), rc=3,
+                tiene=[("== control K = producción", ["distintas 1 de 112", "Villarrica 2026-08-05 06:40", "FALLA"])],
+                no_tiene=["== §6 censo:"]),
+    "E59": dict(pob=lambda: base(extra=_k_en_el_tope), rc=0,
+                tiene=[("== control placebo K×1,2 (publicación)", ["tope de 50000 MW 1", "Lascar 2026-07-31 05:30",
+                                                                   "sin explicar 0", "OK"]),
+                       ("== §6 censo: CUMPLE", [])]),
+    "E60": dict(pob=lambda: base(), verde=VERDE.replace("mutación fondo_anillo ", "mutación otra_pieza   "), rc=6,
+                tiene=[("== §6.1 equivalencia: NO SE CUMPLE", ["por nombre: 5 de 6"])], no_tiene=["== §6 censo:"]),
+    "E52": dict(pob=lambda: base(relleno=61, extra=_pc_vrp_distinto), rc=3,
+                tiene=[("== control K = producción", ["distintas 1 de 110", "FALLA"]),
+                       ("== compuerta del veredicto", ["CERRADA"])], no_tiene=["== §6 censo:"]),
+    "E51": dict(pob=lambda: base(), verde=_sin_lineas("recorte "), rc=6,
+                tiene=[("== §6.1 equivalencia: NO SE CUMPLE", ["atrapadas 5", "mínimo 6"])], no_tiene=["== §6 censo:"]),
     "E32": dict(pob=lambda: base(p_de=lambda m, k: 0.85 * m), rc=0,
                 tiene=[("== §6 censo: NO CUMPLE", ["M razón 0.850"])], no_tiene=["== §6 censo: CUMPLE"]),
     "E33": dict(pob=lambda: base(p_de=lambda m, k: 1.15 * m), rc=0,
@@ -1305,6 +1524,134 @@ ESCENARIOS = {
     "E22": dict(pob=lambda: base(), sg_otra=True, rc=3,
                 tiene=[("== cobertura: INSUFICIENTE", []), ("== compuerta del veredicto", ["CERRADA"])],
                 no_tiene=["== §6 censo:"]),
+    # ------------------------------------------------------------ §6 bis, brazos de posición
+    "E61": dict(pob=lambda: base(extra=_escena("Lascar", SEIS, "pos", px_cerca_lejos)), rc=0,
+                tiene=[("== §6 bis elegibles", ["P (radiante) sí", "P-cercano sí", "P-pico sí"]),
+                       ("   §6 bis P2' P-cercano", ["canal que decide GANA (neto -6, bloques 6)",
+                                                  "tabla sola GANA (neto -6, bloques 6)"]),
+                       ("   §6 bis P2' P-pico", ["canal que decide SIN SUSTRATO (neto 0, bloques 0)"]),
+                       ("== §6 bis posición elegida: P-cercano", ["gana contra P"]),
+                       ("   §6 bis cambian de publicación contra P (radiante), P-cercano: 6",
+                        ["Lascar 2026-05-01 06:00", "baja", "publica"]),
+                       ("   §6 bis cambian de publicación contra P (radiante), P-pico: 0", []),
+                       ("== §6.2 ventana T, canal tabla", ["posición P-cercano", "P2 contra K GANA (neto -12, bloques 12"]),
+                       ("== §6 censo: CUMPLE", ["[posición del record: P-cercano]"])]),
+    "E62": dict(pob=lambda: base(extra=_y(_escena("Lascar", SEIS, "pos", px_linea), NEGS_CERCANO)), rc=0,
+                tiene=[("   §6 bis P2' P-cercano", ["canal que decide EMPATE (neto 0, bloques 12)"]),
+                       ("   §6 bis P2' P-pico", ["canal que decide GANA (neto -6, bloques 6)"]),
+                       ("== §6 bis posición elegida: P-pico", []),
+                       ("== §6.2 ventana T, canal tabla", ["posición P-pico", "P2 contra K GANA (neto -12, bloques 12"]),
+                       ("== §6 censo: CUMPLE", ["[posición del record: P-pico]"])]),
+    "E63": dict(pob=lambda: base(extra=_escena("Lascar", (1, 2, 3), "pos", px_cerca_lejos)), rc=0,
+                tiene=[("   §6 bis P2' P-cercano", ["canal que decide SIN SUSTRATO (neto -3, bloques 3)"]),
+                       ("== §6 bis posición elegida: P (radiante)", ["ninguno gana"]),
+                       ("== §6.2 ventana T, canal tabla", ["posición P (radiante)", "P2 contra K GANA (neto -6, bloques 6"]),
+                       ("== §6 censo: CUMPLE", ["[posición del record: P (radiante)]"])]),
+    "E64": dict(pob=lambda: base(extra=_prot_cerca_lejos), rc=0,
+                tiene=[("== §6 bis elegibles", ["P (radiante) no", "P-cercano sí", "P-pico no"]),
+                       ("== §6 bis posición elegida: P-cercano", ["P no es elegible"]),
+                       ("== §6.2 ventana O, canal tabla", ["posición P-cercano", "P1 0"]),
+                       ("== §6 censo: CUMPLE", ["[posición del record: P-cercano]"])],
+                no_tiene=["== §6 censo: NO CUMPLE"]),
+    "E65": dict(pob=lambda: base(extra=_y(_prot_cerca_lejos, NEGS_CERCANO)), rc=0,
+                tiene=[("== §6 bis elegibles", ["P (radiante) no", "P-cercano sí", "P-pico no"]),
+                       ("   §6 bis P2' P-cercano", ["canal que decide PIERDE (neto 6, bloques 6)"]),
+                       ("== §6 bis posición elegida: NINGUNA POSICIÓN ELEGIBLE", ["P no se adopta"]),
+                       ("== §6 censo: NO CUMPLE", ["§6 bis: NINGUNA POSICIÓN ELEGIBLE"])],
+                no_tiene=["== §6 censo: CUMPLE"]),
+    "E66": dict(pob=lambda: base(extra=_y(_escena("Lascar", SEIS, "pos", px_linea),
+                                          _escena("Villarrica", range(11, 17), "pos", px_cerca_lejos))), rc=0,
+                tiene=[("   §6 bis P2' P-cercano", ["canal que decide GANA (neto -12, bloques 12)"]),
+                       ("   §6 bis P2' P-pico", ["canal que decide GANA (neto -6, bloques 6)"]),
+                       ("== §6 bis posición elegida: P-cercano", ["ganan los dos", "menor E + E_lejana"])]),
+    "E67": dict(pob=lambda: base(extra=_escena("Lascar", SEIS, "pos", px_linea)), rc=0,
+                tiene=[("   §6 bis P2' P-cercano", ["canal que decide GANA (neto -6, bloques 6)"]),
+                       ("   §6 bis P2' P-pico", ["canal que decide GANA (neto -6, bloques 6)"]),
+                       ("== §6 bis posición elegida: P-pico", ["ganan los dos", "a igual valor, P-pico"])]),
+    "E68": dict(pob=lambda: base(extra=_y(_escena("Lascar", SEIS, "pos", px_cerca_lejos),
+                                          _escena("Villarrica", SEIS, "far_ref", px_cerca_lejos, mes="2026-09",
+                                                  hora="05:00"))), rc=0,
+                tiene=[("   §6 bis P2' P-cercano", ["canal que decide EMPATE (neto 0, bloques 12)",
+                                                  "tabla sola EMPATE (neto 0, bloques 12)", "E_lejana 6"]),
+                       ("== §6 bis posición elegida: P (radiante)", ["ninguno gana"]),
+                       ("== §6 bis vara lejana: far_ref en los objetivos 6, observadas 6", []),
+                       ("   §6 bis pasadas lejanas", ["con algún alertado 6 de 6", "P (radiante) publica 0",
+                                                     "P-cercano publica 6", "P-pico publica 0"])],
+                no_tiene=["== §6 bis vara lejana: far_ref en los objetivos 6, observadas 6: SIN DATO"]),
+    "E69": dict(pob=lambda: base(extra=_y(_escena("Villarrica", range(1, 9), "pos", px_cerca_lejos, mes="2026-09",
+                                                  tabla=False),
+                                          _escena("Lascar", (1,), "neg_limpio", px_cerca_lejos, hora="05:00"))), rc=0,
+                tiene=[("   §6 bis P2' P-cercano", ["canal que decide GANA (neto -7, bloques 9)",
+                                                  "tabla sola SIN SUSTRATO (neto 1, bloques 1)"]),
+                       ("== §6 bis posición elegida: P (radiante)", ["ninguno gana"])]),
+    "E70": dict(pob=lambda: base(extra=_escena("Llaima", SEIS, "pos", px_llaima_centro)), rc=0,
+                tiene=[("   §6 bis P2' P-cercano", ["canal que decide SIN SUSTRATO (neto 0, bloques 0)"]),
+                       ("== §6 bis posición elegida: P (radiante)", [])]),
+    "E71": dict(pob=lambda: base(extra=_escena("Lascar", (1, 2, 3), "far_ref", None, hora="05:00", K=0.2, P=None)),
+                rc=0,
+                tiene=[("== §6 bis vara lejana: far_ref en los objetivos 3, observadas 3", []),
+                       ("   §6 bis pasadas lejanas", ["con algún alertado 0 de 3", "un cero de E_lejana no dice nada"]),
+                       ("== §6.2 ventana T, canal tabla", ["P2 contra K GANA (neto -6, bloques 6"]),
+                       ("== §6 censo: CUMPLE", [])],
+                no_tiene=["== §6 bis vara lejana: far_ref en los objetivos 3, observadas 3: SIN DATO"]),
+    "E72": dict(pob=lambda: base(), rc=0,
+                tiene=[("== §6 bis vara lejana: far_ref en los objetivos 0, observadas 0: SIN DATO", []),
+                       ("== §6 bis posición elegida: P (radiante)", ["ninguno gana"]),
+                       ("   §6 bis multiplicidad", ["mayor que 5 %"]),
+                       ("   §6 bis distancia desde la celda central contra MIROVA, alertas con distancia",
+                        ["P (radiante) 0.50 km, 0.96, n=24"]),
+                       ("== §6 censo: CUMPLE", ["[posición del record: P (radiante)]"])]),
+    "E73": dict(pob=lambda: base(extra=_escena("Villarrica", (1, 2, 3, 4), "pos", None, tabla=False)), rc=0,
+                tiene=[("   §6 bis distancia desde la celda central contra MIROVA, alertas con distancia",
+                        ["P (radiante) 0.50 km, 0.96, n=24", "P-cercano 0.50 km, 0.96, n=24"])],
+                no_contiene=[("   §6 bis distancia desde la celda central contra MIROVA, alertas con distancia",
+                              "n=28")]),
+    "E74": dict(pob=lambda: base(extra=_y(_prot_ocr_anillo,
+                                          _escena("Lascar", range(10, 16), "pos", px_cerca_lejos, mes="2026-09"))), rc=0,
+                tiene=[("== §6 bis elegibles", ["P (radiante) sí", "P-cercano no", "P-pico no"]),
+                       ("   §6 bis P2' P-cercano", ["canal que decide GANA"]),
+                       ("== §6 bis posición elegida: P (radiante)", [])]),
+    "E75": dict(pob=lambda: base(extra=_y(_escena("Villarrica", range(1, 13), "pos", px_cerca_lejos, mes="2026-09",
+                                                  tabla=False),
+                                          _escena("Lascar", range(15, 19), "far_ref", px_cerca_lejos, mes="2026-09",
+                                                  hora="05:00", tabla=False))), rc=0,
+                tiene=[("   §6 bis P2' P-cercano", ["canal que decide GANA (neto -8, bloques 16)",
+                                                  "tabla sola SIN SUSTRATO (neto 0, bloques 0)"]),
+                       ("== §6 bis posición elegida: P-cercano", ["gana contra P"])]),
+    "E76": dict(pob=lambda: base(extra=_y(_escena("Lascar", range(1, 15), "pos", px_linea),
+                                          _escena("Villarrica", range(1, 5), "pos", px_cerca_lejos),
+                                          _escena("Villarrica", range(11, 17), "far_ref", px_cerca_lejos, mes="2026-09",
+                                                  hora="05:00"))), rc=0,
+                tiene=[("   §6 bis cambian de publicación contra P (radiante), P-cercano: 24", ["(y 4 más, cortada a 20)"]),
+                       ("== §6 bis posición elegida: P-pico", ["ganan los dos", "menor E + E_lejana"])]),
+    "E77": dict(pob=lambda: base(extra=_n3("2026-07-31 06:40")), rc=0,
+                tiene=[("== §6 censo: CUMPLE", []),
+                       ("== §6 ter N-3", ["Villarrica 2026-07-31 06:40 (K)"]),
+                       ("   §6 ter P1 por brazo", ["P (radiante) 0 (contándolas 1)"]),
+                       ("== §6.2 ventana O, canal todo", ["P1 0 (", "contando las N-3 1"]),
+                       ("== §6 bis elegibles", ["P (radiante) sí"])],
+                no_tiene=["== §6 censo: NO CUMPLE"]),
+    "E78": dict(pob=lambda: base(extra=_n3("2026-10-09 06:40")), rc=0,
+                tiene=[("== §6 censo: NO CUMPLE", ["O/todo: P1 1"]),
+                       ("== §6 ter N-3", ["ninguna"])],
+                no_tiene=["== §6 censo: CUMPLE"]),
+    "E79": dict(pob=lambda: base(extra=_n3("2026-07-31 06:40", tabla=True)), rc=0,
+                tiene=[("== §6 censo: NO CUMPLE", ["O/tabla: P1 1", "O/todo: P1 1"]),
+                       ("== §6 ter N-3", ["ninguna"])],
+                no_tiene=["== §6 censo: CUMPLE"]),
+    # S175: la clase N-3 (antes del 2026-10-09) es anterior al inicio de la sombra: sale de la lectura y se lista, sin vetar
+    "E80": dict(pob=lambda: esc_sombra(prot_ocr=True, sensor_ocr="VIIRS_SNPP_750"), fase="sombra", rc=0, args=B4,
+                tiene=[("   protegidas fuera de esta lectura", ["Villarrica 2026-10-08 06:30 (anterior al inicio de la sombra)"]),
+                       ("== régimen de la sombra: brazo B4", ["anteriores al inicio de la sombra 1"]),
+                       ("== §6.3 canal todo", ["P1 0 "]),
+                       ("== §6.3 sombra: CUMPLE", [])],
+                no_tiene=["== §6.3 sombra: NO CUMPLE"]),
+    # S173, de la rama de V750-A: la protegida que sale por otra ROI se lista por nombre y motivo (LR1; MR8). S175: con el
+    # corte en #939, porque con el corte de prueba la compuerta se cierra antes de esa línea (ER2)
+    "ER7": dict(pob=lambda: esc_sombra(mezcla=True), fase="sombra", rc=0, args=ROI_B4 + ["--sha-desde", SHA_REAL_B4],
+                tiene=[("   protegidas fuera de esta lectura", ["PuyehueCordonCaulle 2026-11-04 06:30 (otra ROI)"]),
+                       ("== §6.3 sombra: CUMPLE", [])],
+                no_contiene=[("   protegidas fuera de esta lectura", "2026-11-06")]),
 }
 
 
@@ -1336,7 +1683,8 @@ def correr(nombre, e, analizador, evaluador, dest):
         env = dict(os.environ, **e["env"])
     reint = 0
     while True:
-        o = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800,
+        # S162 relevo: el plazo es de reloj y corre con el equipo suspendido (M5 y M6 cayeron así); 6 h
+        o = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=21600,
                            env=env)
         txt = o.stdout + o.stderr
         nativa = o.returncode not in codigos and "Traceback (most recent call last)" not in txt
