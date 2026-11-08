@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 ~06:30 UTC (S175): verificador limpio de #959
+- #959 (`C:\Users\nmend\vrp-temporales\s175_verpr\959\INFORME.md`, cabeza `57c4e2fc3`): **MERGEABLE CON CAMBIOS**, ninguno
+  bloquea. Confirmadas todas las afirmaciones funcionales; YAML válido con `"on":` quoteado; `run_pipeline.py` sólo agrega
+  un `print`. 29 roturas, 24 atrapadas. VPR959-01 (g3): ninguna prueba recorre la cadena real
+  `encendido_desde_datos → cargar_insumos (caida_k) → pasadas_modis → disparadores`; con V13 o V14 una caída a K volvería
+  a ser REVERSION_CANDIDATA con la suite verde. Cambio pedido: esa prueba de cadena, más el blanco viejo de
+  `experiments/_s165_v165_03/mutaciones.py` y el texto «hasta el None». Datos de hoy: 0 caídas a K, 140 records de la vía.
+  Pendiente: segunda vuelta del autor con esos cambios.
+
 ### 2026-11-08 ~06:05 UTC (S175): V4T confirma el defecto del token en `pipeline/fetch.py`; decisión para Nicolás
 - V4T (Opus, `high` comprobado: 283 pedidos), `experiments\_s175_audit\v4t\VERIFICACION.md` de la rama de #955.
   381 CONFIRMADO g4 (`pipeline/fetch.py:466-467`: `a or b` descarta el `Response` de un 401 porque vale falso; un 401 de
