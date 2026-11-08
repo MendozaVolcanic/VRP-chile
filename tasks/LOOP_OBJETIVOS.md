@@ -569,6 +569,33 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 ~05:20 UTC (S175): F4t entregado, verificadores limpios de #957 y #958, medidor de V750-A corriendo
+- Nicolás (~04:40 UTC): no esperar las 12:00 UTC, gastar el 6 % que queda antes del reinicio. Se lanzaron F5b, V4T y
+  verificadores limpios Fable (esfuerzo `high`) de #956, #957, #958 y #959: ninguno de esos PR tenía uno (sus autores
+  fueron Opus). Brief común `C:\Users\nmend\vrp-temporales\s175_verpr\BRIEF_COMUN.md`.
+- F4t (Fable, `high` comprobado en el transcripto): 10 hallazgos, IDs 381 a 390, las dos líneas base rojas
+  reencontradas. Los graves, SIN VERIFICAR todavía: 381 (g5, `pipeline/fetch.py:467-471` no lee el status HTTP: un 401
+  con texto fuera del regex deja el NRT verde sin records), 382 (g4, la `DownloadFailure` real de earthaccess no calza
+  con el guard de descarga de S124), 383 (g5, los avisos van a un repo con 0 suscriptores), 385 (g4, `nrt.yml` no exige
+  que la corrida escriba algo). Verificador V4T (Opus) lanzado con `prompts\v4t.txt` (sha256 `3e86fa9c6fa74bfd`),
+  carpeta `experiments\_s175_audit\v4t\` de la rama de #955. Si confirma 381/382, el arreglo es A45 y va antes de la
+  rotación del 2026-11-27.
+- #958 (verificador `C:\Users\nmend\vrp-temporales\s175_verpr\958\INFORME.md`, `high` comprobado): **MERGEABLE**. Las
+  856 marcas que se pierden son 748 de otra pasada (hueco limpio entre 6 y 11 min), 107 por D-9 y 1 de gránulo vecino;
+  0 confirmaciones perdidas de una protegida de MIROVA en la misma pasada; salidas idénticas con TZ UTC y Santiago;
+  diario y mosaico no tienen copia que replicar. 14 roturas, 10 atrapadas; no atrapadas M8 (rescate a 60 min, 62 marcas)
+  y M10 (mínima hasta 0,06 MW, 77 marcas): faltan tres casos de prueba (VPR958-02, g2). VPR958-01 (g2): 30 marcas de
+  gránulo vecino (5 o 6 min) se pierden y el tooltip dice «no publicó nada en esta pasada». Toca `frontend/`: tag y sí.
+- #957 (verificador `...\957\INFORME.md`): **MERGEABLE CON CAMBIOS de texto**. Audit semanal con main y con el PR
+  sobre los mismos datos: hoy idénticos; ventana del 2026-11-02 reproduce exactos los números del PR. 48 de 48 pruebas,
+  16 de 16 roturas atrapadas. VPR957-01 (g3, 0 casos hoy): `tabla_sobre_ocr` (`scripts/clase_mirova.py:451-471`) deja
+  que una tabla RUTINA o FALSO_POSITIVO a ±120 s le quite la protección a una alerta sólo OCR de 1 MW o más en MODIS y
+  V750; no está declarado en la descripción. VPR957-02 (g2): el piso del truncado saca noches de la magnitud mientras
+  la tabla se atrasa respecto del OCR. Ambos piden decisión de Nicolás.
+- Disco: C: 3,6 GB libres (bajaba ~1 GB/h esta madrugada; causa en medición), D: 4,9 GB. Medidor de V750-A corriendo
+  desde 04:35 UTC en `D:\vrp-trabajo\wt\s174-v750a-m71` (main `0bb62a8aa`, 2 hilos, log
+  `D:\vrp-trabajo\temporales\s175-medidor\medidor.log`).
+
 ### 2026-11-08 04:27 UTC (S175): main traído a loop/activo, suite corrida, VX entregado, F4t corriendo
 - Nicolás (S175): «traer main y suite», gastar el 7 % que queda de la semana en auditorías y seguir con el loop del
   programa por sensor con el PC prendido.
