@@ -608,6 +608,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 - Nicolás pidió ajustar. Tag `pre-s176-fetch-966`; commit `d3c3839c0` en `claude/s175-token-fetch-401`: la descarga buena que avala al token se cuenta por corrida (`_DESCARGA_BUENA`, reiniciada en `limpiar_fallas()`).
 - Verificador limpio (Sonnet, `C:/Users/nmend/vrp-temporales/s176_verpr/966b/INFORME.md`): MERGEABLE CON RESERVAS. VPR966B-01 g2: token que muere a mitad de corrida con 403 ya no aborta en esa corrida; la siguiente sí (simulado; qué status da LAADS al vencer un token es SIN DATO). VPR966B-02 g1 a 2: la marca no mira lo devuelto (misma semántica del contador anterior). VPR966B-03 y 04 g1. Mutaciones: 10 de 12 atrapadas, las 2 restantes son de VPR966B-02.
 
+### 2026-11-08 21:45 UTC (S176): #966 mergeado con frase de Nicolás; D2 con 6 fallas de CMR
+- #966 mergeado (`d81d01503`, 21:32 UTC, cabeza fijada `d3c3839c0`). Tests de main en verde; main traído a `loop/activo` (`321c3321a`). Tag `pre-s176-fetch-966`. Falta ver la primera corrida del NRT con este `fetch.py`: la última es de las 18:39 UTC, anterior al merge.
+- D2 (run 42507820590) a las 21:29 UTC: 26 de 48 terminados, 20 verdes y 6 con salida 3 por SEARCH_CMR_TIMEOUT (Planchón-Peteroa 4 trozos, Tupungatito 1, Chaitén 1). Corrige la entrada anterior donde el conteo implícito era otro: a las 20:46 UTC eran 20 terminados, 19 verdes. Relanzar con `gh run rerun --failed` al terminar; D3 y D4 esperan.
+
 ### 2026-11-08 17:44 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
 - Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
 
