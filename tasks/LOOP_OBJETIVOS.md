@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 ~05:45 UTC (S175): F5b entregado a medias por la parada de disco
+- F5b (Fable, `high` comprobado: 191 pedidos), informe `experiments\_s175_audit\f5b\INFORME.md` de la rama de #955,
+  hallazgos 351 a 353. La lámina VIIRS sirve de vara de posición: en los 4 casos de F5 con TIF el píxel más claro cae a 0
+  o 1 celda del máximo del TIF (0,0 a 0,37 km), correlación panel contra TIF 0,992 a 0,994, OCR de etiquetas 44 de 44.
+  La lámina MODIS no sirve con ese método (352, g2). Sin lámina MODIS del 23 al 30-sep ni del 8 al 11-oct (351, g3): las
+  alertas MODIS de Láscar del 25-sep y 8-oct quedan irrecuperables; la del 26-oct queda (iv).
+- La clasificación de los 305 aciertos post 22-sep NO se hizo (se detuvo con C: en 2,83 GB): 2 de 305. Reanudable
+  con `python -I p8_clasificar.py` en primer plano (tesseract muere en segundo plano), 60 a 100 MB, se detiene bajo 3,2
+  GB. Pendiente cuando C: se recupere, y después su verificador Opus sin ver el informe.
+
 ### 2026-11-08 05:25 UTC (S175): LOOP DETENIDO por disco (C: 2,7 GB), issue #961
 - 05:10 UTC la vigilancia de disco saltó: C: 2,7 GB libres. Causa medida: `C:\pagefile.sys` en 35 GB (modificado 05:09
   UTC), con la memoria comprometida en 61,8 de 65,9 GB (Chrome ~17 GB en 101 procesos, Claude ~14 GB). Las carpetas de
