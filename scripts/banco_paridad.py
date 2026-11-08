@@ -42,6 +42,7 @@ import argparse
 import bisect
 import collections
 import json
+import math
 import os
 import random
 import re
@@ -60,7 +61,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
 from auto_audit_weekly import _coords_por_volcan, es_pasada_diurna_descartada  # noqa: E402
-from clase_mirova import TIPO_MINIMA_SE, VENTANA_S, aplicar_regla_minimas  # noqa: E402
+from clase_mirova import (MODO_MINIMAS, TIPO_MINIMA_SE, VENTANA_S,  # noqa: E402
+                          aplicar_regla_minimas)
 from referencia_mirova_unificada import (HISTORICO_RECUPERADAS,  # noqa: E402
                                          RESPALDO_20260408, SNAP_CONS,
                                          SNAP_OCR, TIPO_SIN_GEOMETRIA,
@@ -89,6 +91,26 @@ def bucket(sensor):
     if s.startswith("VIIRS"):
         return "VIIRS375"
     return None
+
+
+def centros_mirova():
+    """{volcan: (lat, lon)} del centro de la grilla de MIROVA (`mirova_center_*` de volcanoes.yaml, sacado del KMZ).
+
+    S175 (hallazgo 303 de docs/AUDIT_S175.md): MIROVA mide su `Distancia_km` desde ese centro y nuestro
+    `final_hotspot_dist_km` sale del ancla de deteccion (el vent, `get_detection_anchor`, deliberado desde S98). En
+    Cordon Caulle los dos puntos estan a 7,58 km y en Tupungatito a unos 5: restar los dos radios crudos marcaba
+    432 de 881 aciertos como otro foco cuando con origen comun eran 83. Para comparar posiciones, nuestro punto
+    se mide desde este centro (`d_mc`)."""
+    import yaml
+    with open(ROOT / "volcanoes.yaml", encoding="utf-8") as fh:
+        return {v["name"]: (v["mirova_center_lat"], v["mirova_center_lon"]) for v in yaml.safe_load(fh)["volcanoes"]
+                if v.get("mirova_center_lat") is not None and v.get("mirova_center_lon") is not None}
+
+
+def _hav_km(lat1, lon1, lat2, lon2):
+    p = math.radians
+    a = math.sin(p(lat2 - lat1) / 2) ** 2 + math.cos(p(lat1)) * math.cos(p(lat2)) * math.sin(p(lon2 - lon1) / 2) ** 2
+    return 2 * 6371.0 * math.asin(math.sqrt(a))
 
 
 def inner_desde_html():
@@ -281,6 +303,7 @@ def cargar_nuestros(coords, inner, ventana, data=None):
     """`data`: carpeta de los JSON (por defecto la de produccion). S156: la vigilancia de la sombra la usa
     con data/experimental_v2 para aplicar el MISMO predicado del tablero a los records del laboratorio."""
     recs, casos = [], []
+    mc = centros_mirova()
     for vol in VOLS:
         with open((DATA if data is None else Path(data)) / f"{vol}.json", encoding="utf-8") as fh:
             d = json.load(fh)
@@ -302,7 +325,12 @@ def cargar_nuestros(coords, inner, ventana, data=None):
                          # S156: aditivo. El codigo que escribio el record (marca de S151): el auto-audit
                          # separa con esto los detectores C0 y K (AUDIT_S155 F3-02). Ninguna etiqueta lo usa.
                          "sha": (r.get("regimen") or {}).get("codigo_sha"), "sensor": r.get("sensor"),
-                         "perfil": (r.get("regimen") or {}).get("perfil")})
+                         "perfil": (r.get("regimen") or {}).get("perfil"),
+                         # S175 (303): nuestro punto (A3, final_hotspot_*) medido desde el centro de MIROVA, el
+                         # mismo origen de su Distancia_km. None si falta el punto o el centro.
+                         "d_mc": (round(_hav_km(r["final_hotspot_lat"], r["final_hotspot_lon"], *mc[vol]), 3)
+                                  if vol in mc and r.get("final_hotspot_lat") is not None
+                                  and r.get("final_hotspot_lon") is not None else None)})
             slim = {k: r.get(k) for k in CAMPOS_JS if k != "anomaly_pixels"}
             if r.get("f5_core_vrp_mw") is None:
                 slim["anomaly_pixels"] = [{k: p.get(k) for k in ("lat", "lon", "vrp_mw", "bt_k")}
@@ -314,6 +342,11 @@ def cargar_nuestros(coords, inner, ventana, data=None):
     return recs
 
 
+def _dist_tabla(filas):
+    """Distancia_km de la primera fila del consolidado que la trae (S175, hallazgo 301); None si solo hay OCR."""
+    return next((f["dist_km"] for f in filas if f.get("source") == "CONS" and f.get("dist_km") is not None), None)
+
+
 def etiquetar(recs, por_vb, noche_sensor, noche_volcan):
     """Etiqueta cada pasada nuestra: pos | far_ref | neg_limpio | sin_info."""
     for r in recs:
@@ -321,6 +354,12 @@ def etiquetar(recs, por_vb, noche_sensor, noche_volcan):
         ns = noche_sensor.get((r["vol"], r["b"], r["noche"]), {"alerta": False, "fp": False})
         nv = noche_volcan.get((r["vol"], r["noche"]), {"alerta": False, "fp": False})
         r["dist_ref"] = None
+        # S175 (301): la distancia de MIROVA de la TABLA (Distancia_km del consolidado) de la fila que define la
+        # pasada (alerta en `pos`, fuera de limite en `far_ref`). La del OCR sale de leer la imagen y difiere de
+        # la tabla en la misma pasada por mas de 1 km en 40 de 58 pasadas de Cordon Caulle VIIRS 375: no sirve de
+        # vara de posicion. `dist_ref` (la primera fila con distancia, OCR incluido) queda tal cual porque la leen
+        # evaluadores sellados; lo nuevo mide con esta.
+        r["dist_ref_tabla"] = None
         r["neg_estricto"] = False
         # S149: dos campos ADITIVOS, no cambian ninguna etiqueta. `rutina_pasada`: la tabla de MIROVA
         # lista ESTA pasada con VRP 0 (fila RUTINA del consolidado), haya o no alerta en otra pasada
@@ -334,9 +373,11 @@ def etiquetar(recs, por_vb, noche_sensor, noche_volcan):
             # D-9, modo SE: si todas las alertas de la pasada son minimas, la pasada va a un estrato aparte
             # ("minima"): ni alerta ni negativo. La noche no cambia, porque TIPO_MINIMA_SE empieza por ALERTA.
             r["lab"] = "minima" if all(f["tipo"] == TIPO_MINIMA_SE for f in alertas) else "pos"
+            r["dist_ref_tabla"] = _dist_tabla(alertas)
         elif any(es_fp(f["tipo"]) for f in filas):
             r["lab"] = "far_ref"
             r["dist_ref"] = next((f["dist_km"] for f in filas if es_fp(f["tipo"]) and f["dist_km"] is not None), None)
+            r["dist_ref_tabla"] = _dist_tabla([f for f in filas if es_fp(f["tipo"])])
         elif (any(f["tipo"] == "RUTINA" and f["source"] == "CONS" and (f["vrp_mw"] or 0) == 0 for f in filas)
               and not ns["alerta"] and not ns["fp"]):
             r["lab"] = "neg_limpio"
@@ -441,13 +482,18 @@ def metrica_far_ref(recs, noche_volcan):
     out = {}
     for b in BUCKETS:
         sel = [r for r in recs if r["b"] == b and r["lab"] == "far_ref"]
-        con_dist = [r for r in sel if r["dist_ref"] is not None and r["pc_dist"] is not None]
+        # S175 (301 y 303): la distancia de MIROVA de la tabla, y la nuestra desde el centro de MIROVA (origen
+        # comun). Antes: `pc_dist` (desde el vent) contra `dist_ref` (OCR incluido), dos origenes y una vara dudosa.
+        con_dist = [r for r in sel if r.get("dist_ref_tabla") is not None and r.get("d_mc") is not None]
         out[b] = {"n": len(sel),
                   "frac_far_con_cumulo": _tasa(sum(1 for r in sel if r["dc"] == "far" and (r["pc_vrp"] or 0) > 0), len(sel)),
                   "frac_publica": _tasa(sum(r["pub"] for r in sel), len(sel)),
                   "n_con_distancia": len(con_dist),
-                  # diferencia de RADIOS, no de posiciones (A93): cota inferior de la separacion
-                  "frac_radio_a_2km": _tasa(sum(1 for r in con_dist if abs(r["pc_dist"] - r["dist_ref"]) <= 2), len(con_dist))}
+                  "n_sin_distancia_tabla": sum(1 for r in sel if r.get("dist_ref_tabla") is None),
+                  # diferencia de RADIOS desde el mismo origen, no de posiciones (A93): cota inferior de la separacion
+                  "frac_radio_a_2km": _tasa(sum(1 for r in con_dist if abs(r["d_mc"] - r["dist_ref_tabla"]) <= 2),
+                                            len(con_dist)),
+                  "origen_radios": "centro de MIROVA (volcanoes.yaml mirova_center_*); distancia de MIROVA de la tabla"}
     out["noches_crater_tapado"] = sum(1 for e in noche_volcan.values() if e["alerta"] and e["fp"])
     return out
 
@@ -523,7 +569,9 @@ def main(argv=None):
     inner = inner_desde_html()
     identidad = control_identidad_predicado()
     filas = cargar_referencia_unificada(cons, ocr)
-    por_vb, noche_sensor, noche_volcan, n_ref = indexar_referencia(filas, coords, ventana)
+    # S175 (F2-212 de docs/AUDIT_S175.md): el banco usa la regla D-9 decidida (SN, issue #811), como el auto-audit.
+    # El valor por defecto de indexar_referencia sigue en "original" para los scripts que se reproducen tal cual.
+    por_vb, noche_sensor, noche_volcan, n_ref = indexar_referencia(filas, coords, ventana, regla_minimas=MODO_MINIMAS)
     recs = cargar_nuestros(coords, inner, ventana)
     etiquetar(recs, por_vb, noche_sensor, noche_volcan)
     sin_record = alertas_sin_record(por_vb, recs)
@@ -533,7 +581,7 @@ def main(argv=None):
         "meta": {"ventana": list(ventana), "sha_index_html": sha_git(HTML), "referencia": procedencia,
                  "inner_radius_km": inner, "n_filas_ref_nocturnas": n_ref, "n_records_nocturnos": len(recs),
                  "etiquetas": dict(collections.Counter(r["lab"] for r in recs)),
-                 "tolerancia_pareo_s": TOL_S, "generado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                 "tolerancia_pareo_s": TOL_S, "regla_minimas": MODO_MINIMAS, "generado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                  "definiciones": {
                      "pos": "pasada nuestra con fila ALERTA (CONS u OCR) nocturna a +-2 min",
                      "far_ref": "pasada con fila FALSO_POSITIVO y sin ALERTA: sin informacion para el crater",
