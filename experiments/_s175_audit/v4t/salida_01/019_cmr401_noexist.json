@@ -1,0 +1,53 @@
+{
+ "ea": "019",
+ "escenario": "cmr401_noexist",
+ "netrc_presente": true,
+ "earthaccess_version": "0.19.0",
+ "earthaccess_file": "C:\\Users\\nmend\\vrp-temporales\\s175_audit\\v4t\\ea0190\\earthaccess\\__init__.py",
+ "resultado": "VOLVIO_SIN_EXCEPCION",
+ "archivos_por_plataforma": {
+  "MODIS_TERRA": [],
+  "MODIS_AQUA": []
+ },
+ "n_archivos": 0,
+ "fallas_cobertura": [
+  {
+   "plataforma": "MODIS_TERRA",
+   "etapa": "busqueda",
+   "motivo": "RuntimeError: {\"errors\":[\"Token does not exist\"]}"
+  },
+  {
+   "plataforma": "MODIS_AQUA",
+   "etapa": "busqueda",
+   "motivo": "RuntimeError: {\"errors\":[\"Token does not exist\"]}"
+  }
+ ],
+ "codigo_salida_run_pipeline": 0,
+ "n_peticiones": 4,
+ "por_host": {
+  "169.254.169.254": 2,
+  "cmr.earthdata.nasa.gov": 2
+ },
+ "muestra_peticiones": [
+  {
+   "metodo": "PUT",
+   "url": "http://169.254.169.254/latest/api/token",
+   "auth": true
+  },
+  {
+   "metodo": "GET",
+   "url": "http://169.254.169.254/latest/meta-data/placement/region",
+   "auth": true
+  },
+  {
+   "metodo": "GET",
+   "url": "https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=MOD021KM&version=6.1&bounding_box=-67.95522522522523,-23.595225225225228,-67.50477477477477,-",
+   "auth": true
+  },
+  {
+   "metodo": "GET",
+   "url": "https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=MYD021KM&version=6.1&bounding_box=-67.95522522522523,-23.595225225225228,-67.50477477477477,-",
+   "auth": true
+  }
+ ]
+}

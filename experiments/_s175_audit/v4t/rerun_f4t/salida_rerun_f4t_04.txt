@@ -1,0 +1,46 @@
+token_edad.DIAS_AVISO = 10
+
+## A. scripts/token_edad.py (estado_token) con tokens sintéticos, ahora = 2026-11-07T04:10:45+00:00
+- vacío (secret ausente): {'estado': 'desconocido', 'vence_utc': None, 'dias_restantes': None}
+- no JWT ('hola'): {'estado': 'desconocido', 'vence_utc': None, 'dias_restantes': None}
+- JWT con exp en 2026-12-07 18:03 UTC (el vigente, según el insumo): {'estado': 'ok', 'vence_utc': '2026-12-07T18:03+00:00', 'dias_restantes': 30.6}
+- JWT que vence en 5 días: {'estado': 'renovar', 'vence_utc': '2026-11-12T04:10+00:00', 'dias_restantes': 5.0}
+- JWT vencido ayer: {'estado': 'vencido', 'vence_utc': '2026-11-06T04:10+00:00', 'dias_restantes': -1.0}
+- JWT con payload sin exp: {'estado': 'desconocido', 'vence_utc': None, 'dias_restantes': None}
+
+## B. Calendario del aviso para el token vigente (cron del healthcheck: 12:00 UTC diario)
+- corrida 2026-11-28 12:00 UTC -> renovar (dias_restantes=9.3)
+- corrida 2026-12-07 12:00 UTC -> renovar (dias_restantes=0.3)
+- corrida 2026-12-08 12:00 UTC -> vencido (dias_restantes=-0.7)
+- primera corrida que da `renovar`: 2026-11-28 12:00 UTC; vencimiento 2026-12-07 18:03 UTC; margen 9.25 días
+
+## C. Paso «Issue de renovacion del token (por transicion)» con shim de gh
+- LÍNEA BASE ROJA (2): desconocido (secret ausente o no JWT), sin issue abierto
+    exit=0 | gh: []
+    salida: Estado del token desconocido (secret ausente o no-JWT): sin issue.
+- desconocido con la etiqueta ya existente (da igual: no llama a gh)
+    exit=0 | gh: []
+    salida: Estado del token desconocido (secret ausente o no-JWT): sin issue.
+- CONTROL+: vencido, sin issue abierto, etiqueta NO existe
+    exit=0 | gh: ['gh issue list', 'gh label create', 'gh issue create']
+    salida: 
+- vencido, sin issue abierto, etiqueta YA existe (hoy existe: API labels)
+    exit=1 | gh: ['gh issue list', 'gh label create', 'gh issue create']
+    salida: WARN gh label create earthdata-token: label with name "earthdata-token" already exists; use `--force` to updat
+- renovar, sin issue abierto, etiqueta YA existe (lo que pasará el 2026-11-28 12:00 UTC si nadie rotó)
+    exit=1 | gh: ['gh issue list', 'gh label create', 'gh issue create']
+    salida: WARN gh label create earthdata-token: label with name "earthdata-token" already exists; use `--force` to updat
+- vencido, issue abierto en renovar (transición: comenta)
+    exit=0 | gh: ['gh issue list', 'gh issue edit', 'gh issue comment']
+    salida: 
+- ok, issue abierto (rotado: cierra)
+    exit=0 | gh: ['gh issue list', 'gh issue comment', 'gh issue close']
+    salida: 
+
+## D. Paso «Detect stale Tier A» + «Notificar por escalón» con datos sintéticos de 50 h (lo que deja un token muerto a las 50 h)
+- 50 h sin dato: detect exit=0 stale_count=11 max_age_h=50.0 | notificar exit=1 gh: ['gh issue list', 'gh label create', 'gh issue create']
+    salida: WARN gh label create nrt-stale: label with name "nrt-stale" already exists; use `--force` to update  / Issue creado (escalón 48 h). / FAIL: 1 llamada(s) a gh fallaron; la alerta pudo no haberse emitido.
+- control: 20 h, fresco: detect exit=0 stale_count=0 max_age_h=0.0 | notificar exit=0 gh: ['gh issue list']
+    salida: OK: sin stale y sin issue abierto — nada que hacer.
+
+Salidas intermedias en C:\Users\nmend\vrp-temporales\s175_audit\v4t\rerun_f4t\tmp_04
