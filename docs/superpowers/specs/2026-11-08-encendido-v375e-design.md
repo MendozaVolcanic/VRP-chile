@@ -38,9 +38,9 @@ Salidas en `experiments/_s176_preguntas/`. Pasadas nocturnas con alerta de MIROV
 
 ## Decisión 2: la guardia
 
-Perfil nuevo `pipeline/profiles/guardia_k_v375.yaml`: `extends: mirova_equivalent`, `enable_v375_codigo_mirova: false`, sólo VIIRS 375, carpeta propia (A47). Workflow nuevo
-`guardia-k-v375.yml` calcado de `guardia-k-modis.yml`, sólo `EARTHDATA_TOKEN` (A71). Perfil y workflow nuevos para no tocar lo que el lector de V375-E compara.
-Mientras B no entre, guardia y producción deben publicar lo mismo en VIIRS 375: ese es su nulo (A110), con **al menos tres noches** antes de pedir B.
+Perfil nuevo `pipeline/profiles/guardia_k_viirs.yaml`: `extends: mirova_equivalent`, `enable_v375_codigo_mirova: false` y `enable_v750_codigo_mirova: false`, sólo los dos VIIRS, carpeta propia (A47). Workflow nuevo
+`guardia-k-viirs.yml` calcado de `guardia-k-modis.yml`, sólo `EARTHDATA_TOKEN` (A71). Perfil y workflow nuevos para no tocar lo que el lector de V375-E compara.
+Mientras B no entre, guardia y producción deben publicar lo mismo en los dos VIIRS: ese es su nulo (A110), con **al menos tres noches** antes de pedir B.
 
 ## Decisión 3: vigilancia y regla de reversión
 
@@ -86,4 +86,21 @@ Si todo sale limpio, B cabría hacia el 2026-11-13 a 11-14. Es una estimación, 
 
 ## Lo que no entra
 
-VIIRS 750 (falta #964, sello y ROI). Los 34 volcanes (sección aparte, otra decisión). Reprocesar la historia con la vía: la serie queda K hasta el encendido, con su marca.
+Los 34 volcanes (sección aparte, otra decisión).
+
+## Decisión 7 (2026-11-08): VIIRS 750 entra al mismo plan, con su propio flag
+
+Nicolás: «porque no lanzar todos los sensores con la nueva via?». MODIS ya corre con la vía desde #934; queda VIIRS 750. No hay razón física para dejarlo atrás: en la sombra da 1,00 (n 14, 12 de Chillán) y en la retrospectiva 0,999 [0,978; 1,007] (`experiments/_s162_v750c/INFORME.md`). Lo que le falta es instrumentación, igual que a VIIRS 375, y la guardia con regla la reemplaza del mismo modo.
+
+- PR A cubre los dos VIIRS. PR B se parte en **B1 (VIIRS 375) y B2 (VIIRS 750)**, un flag cada uno, para revertirlos por separado.
+- Condición propia de B2: **vara MATLAB del §4.1 en verde** (`experiments/_s162_v750a/vara_matlab_v750a.py`; la candidata dio 311 de 311 iguales). Es la prueba de que el código portado es el de MIROVA. Hoy la vara con Octave da roja por una decisión ya tomada (S163).
+- Límites de VIIRS 750 que la vigilancia debe mirar: la región sensible `sens` sólo corre en Cordón Caulle y Tupungatito, desde #939, con pocas pasadas (9 y 8); en Cordón Caulle la sombra publicó 1 vez contra 4 de producción, sin saber aún si esas 3 son sobre-publicación de K.
+- #964 y el sello de V750-A dejan de bloquear el encendido; su lectura queda informativa.
+
+## Decisión 8 (2026-11-08): reprocesar la historia
+
+Nicolás: «el reprocesamiento cuando podria hacerse?». Son dos cosas:
+
+- **En carpeta aislada, sin publicar: se puede partir ya.** `reproc-retro-paquete.yml` existe y nunca se ha despachado (0 corridas). Corre en Actions, sin disco local. 6.952 volcán-día (11 Tier A, 2025-02-15 a 2026-11-08). Estimación por la cifra del plan de los 34 (2.006 volcán-día en 10 a 18 h): **unos 2 a 3 días de pared**, ESTIMACIÓN, nunca medida con las vías. Sirve de evidencia retrospectiva y de insumo para el reemplazo.
+- **Reemplazar lo publicado: después de cada encendido.** Precedente: K se adoptó el 2026-10-18 y #883 reemplazó la historia el 10-21. MODIS ya podría (su historia sigue en K hasta el 2026-11-02); los VIIRS, tras B1 y B2, con tag y frase. Si la retrospectiva corre antes, el reemplazo es aplicar lo ya calculado.
+- Sus artefactos duran 30 días en Actions: el reemplazo debe ocurrir antes de que venzan.
