@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 17:55 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
+- Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
+
 ### 2026-11-08 17:40 UTC (S176): «¿por qué no publicamos la sombra con todos los volcanes?»
 - Medido: de las 17 detecciones de los 34, 0 a 5 km o menos del volcán y 3 a 10 km o menos; dos pares son un mismo foco visto desde dos volcanes. Los 34 no tienen
   `inner_radius_km` (D5). Verificador limpio Fable de la medición lanzado. Recomendación a Nicolás: los 11 adelantan por sensor con guardia K; los 34 en sección aparte.
