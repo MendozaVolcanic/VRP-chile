@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 17:30 UTC (S175): cierre de la sesión
+- Traspaso en `tasks/BLOQUE_ARRANQUE_S176.md`. En main: #956, #957, #958, #959 y #963. En borrador con CI verde: #955, #964, #965 y #966.
+  Sigue vivo el verificador de #964, escribe sólo en `C:\Users\nmend\vrp-temporales\s175_verpr\964\`. NRT sin corrida desde las
+  12:47 UTC al cierre (4,5 h, bajo la alarma de 12 h). Nicolás pidió que la sesión S176 la abra esta sesión.
+
 ### 2026-11-08 16:23 UTC (S175): #958 publicado; #965 y #966 en borrador; pedido del visualizador para S176
 - #958 mergeado con la frase de las 15:3x (`a7a6ae360`, 16:06:50 UTC; entre la cabeza verificada y la final sólo cambian las dos
   líneas del tooltip). GitHub Pages publicó (run sobre `a7a6ae360` en verde; el texto nuevo aparece 2 veces en la página en línea).
