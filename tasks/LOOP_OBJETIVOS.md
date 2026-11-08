@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 14:00 UTC (S175): segundas vueltas de #955, #956 y #957 listas; F5b entregado, V5B corriendo
+- #955 (`14dfb0d2e`, CI verde): frase del 302 reescrita y §11 con VX y V4T; `docs/S175_AUDITORIA_RESULTADOS.md` agregado.
+  Precisó la lectura: «2 píxeles nominales (3 km en MODIS), salvo Chillán V375 2026-10-18 06:48», sólo en los 715 pares
+  con distancia de la tabla. Falta el anexo del audit del lunes y F5b con V5B.
+- #956 (`b155f7963`, CI verde): 7 de 7. El «15,6 h» del verificador estaba contaminado: 188 de 662 son del reproceso del
+  2026-10-18. Natural: n 474, mediana 13,8 h, 90,7 % bajo 24 h, 8 entre 3 y 5 días, máximo 4,5 días (MODIS, 11 Tier A,
+  pasadas del 10-17 al 11-07). Respaldo `experiments/_s175_latencia_estandar_modis/`. El 9,42 de §4.1 también era del
+  reproceso. Seguimiento: `pipeline/store.py:693` repite «3-5 days» (A45).
+- #957 (`f4d98dddd`, CI verde): 8 de 8, criterio sin cambio; dos decisiones de Nicolás escritas. Corrige al verificador: la
+  banda del script es 0,7 a 1,4 (`RATIO_BAND_MEDIAN`), y salen 6 noches, no 4.
+- F5b (Fable, `high`): 305 aciertos clasificados, SIN VERIFICAR. 351 (g3): cuatro protegidas VIIRS de Chillán con el foco
+  de MIROVA a 1,0 a 2,5 km del nuestro. V5B (Opus) lanzado (`prompts\v5b.txt`, sha256 `1792c7600b1c7aa2`).
+- En curso: #959 y #958 (autores), reconciliación del lector de V750-A, seguimientos chicos, V5B. Memoria del MxD03
+  marcada (hallazgo 256). Espera a Nicolás: arreglo de 381 y 382 en `pipeline/fetch.py` (A45).
+
 ### 2026-11-08 13:50 UTC (S175): el loop retoma; estado por sensor; el lector de V750-A está en dos versiones
 - Nicolás reinició el PC (10:49 UTC): C: 17 GB libres, `pagefile.sys` 20,6 GB, commit 27 de 52 GB; #961 cerrado. Plan semanal
   en 0 %. Main traído a `loop/activo` (`a9fc031e0`). Pedido: «analiza todo lo que falta [...] continuemos con todo lo que
