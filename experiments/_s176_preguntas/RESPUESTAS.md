@@ -33,3 +33,13 @@ Instrumento: `magnitud_prod_vs_sombra.py`. P1, si lo medido estuviera roto: prod
 vara que siempre dé 1. P2, si el instrumento estuviera muerto: los negativos limpios dan distinto de 0 en producción, 7 de 91 y 4 de 132.
 
 Posición: SIN MEDIR en esta respuesta; S175 retiró «mismo foco» (302) y «foco a 1 a 2,5 km» (351).
+
+## 3. Pregunta de Nicolás: «porque no publicamos simplemente la sombra con todos los volcanes?» (17:40 UTC)
+
+Salida: `detecciones_sombra34_salida.txt`. Verificador limpio en curso: `C:\Users\nmend\vrp-temporales\s176_verpr\medicion\INFORME.md`.
+
+- Las 17 detecciones de los 34 quedan, medidas desde el volcán: 0 a 5 km o menos, 3 a 10 km o menos, y hasta 33,7 km. Son señal real o ruido, pero no están en el cráter.
+- Dos pares son el mismo foco visto desde dos volcanes: Guallatiri y Parinacota (0,11 km, 11-07 05:24) e Irruputuncu y Olca-Paruma (0,16 km, 11-05 05:18).
+- Los 34 no tienen `inner_radius_km` (decisión D5 del plan), así que sus records salen con `distance_class: null`. Qué son esos focos: SIN VERIFICAR.
+- Los 34 no tienen referencia de MIROVA: el 0,99 de los 11 no se puede medir en ellos.
+- La sombra corre una vez al día con atraso de horas. Publicarla como NRT requiere encender las vías en el perfil (A45), no sólo leer otra carpeta.
