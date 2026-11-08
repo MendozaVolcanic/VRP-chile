@@ -1,0 +1,13 @@
+== 1. código que escribe records, byte a byte (git)
+  diff en pipeline/, run_pipeline, volcanoes.yaml y nrt.yml: A	pipeline/profiles/guardia_k_viirs.yaml
+== 2. constantes de todos los perfiles existentes en pipeline.profile
+  perfiles en main: 104; nuevos en la rama: ['guardia_k_viirs']; distintos: []
+== 3. audit, vigilancias y marca, sobre los mismos records reales
+  audit.json: IDENTICO sha256 f6b2d7c58e27faba
+  vig_k.json: IDENTICO sha256 1e0809f4e76ef79f
+  vig_modis.json: IDENTICO sha256 cf90df0a5db9e78e
+  marca del tablero (primera vía de MODIS por volcán, fecha y avisos): IDENTICO
+    {"res":{"AntillancaCasablanca.json":null,"Antuco.json":null,"Calbuco.json":null,"Callaqui.json":null,"CarranLosVenados.json":null,"CerroAzulQuizapu.json":null,"Chaiten.json":"2026-11-02T01:15:00.000Z","Copahue.json":"202
+== control positivo: con records reales de VIIRS marcados como vía, la rama tiene que dar distinto
+  audit.json: DISTINTO (tiene que ser DISTINTO)
+  por_detector: ['K', 'VIA_MODIS', 'VIA_V375', 'VIA_V750'] | vigente_por_sensor: {'MODIS': 'VIA_MODIS', 'VIIRS375': 'VIA_V375', 'VIIRS750': 'VIA_V750'}

@@ -48,8 +48,11 @@ def _dias(ini, fin):
     return [(a + timedelta(days=i)).isoformat() for i in range((b - a).days + 1)]
 
 
-def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, errores_lectura=()):
-    """(ok, resumen). `registros`: los records del JSON de la guardia, o None si no se pudo leer."""
+def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, errores_lectura=(), sensores=("MODIS",),
+            perfil=PERFIL):
+    """(ok, resumen). `registros`: los records del JSON de la guardia, o None si no se pudo leer. S176: `sensores` y
+    `perfil` para que la guardia de los dos VIIRS (scripts/revisar_guardia_viirs.py) use esta misma revisión; con los
+    valores por defecto, lo de siempre."""
     fallas, notas = list(errores_lectura), []
     try:
         date.fromisoformat(ini)
@@ -69,16 +72,16 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, errore
         return sha is None or (r.get("regimen") or {}).get("codigo_sha") == sha
 
     nuevos = [r for r in en_ventana if de_esta_corrida(r)]
-    modis_nuevos = sum(1 for r in nuevos if familia(r.get("sensor")) == "MODIS")
+    n_nuevos = {s: sum(1 for r in nuevos if familia(r.get("sensor")) == s) for s in sensores}
     con_via = {}
     for r in en_ventana:
         if "via_codigo_mirova" in r:
             k = str(r.get("via_codigo_mirova"))
             con_via[k] = con_via.get(k, 0) + 1
-    no_modis = sum(1 for r in nuevos if familia(r.get("sensor")) != "MODIS")
-    otro_perfil = sum(1 for r in nuevos if (r.get("regimen") or {}).get("perfil") not in (None, PERFIL))
-    hay = {str(r.get("datetime_utc") or "")[:10] for r in en_ventana if familia(r.get("sensor")) == "MODIS"
-           and "via_codigo_mirova" not in r}
+    ajenos = sum(1 for r in nuevos if familia(r.get("sensor")) not in sensores)
+    otro_perfil = sum(1 for r in nuevos if (r.get("regimen") or {}).get("perfil") not in (None, perfil))
+    hay = {s: {str(r.get("datetime_utc") or "")[:10] for r in en_ventana if familia(r.get("sensor")) == s
+               and "via_codigo_mirova" not in r} for s in sensores}
     errores = sum(1 for ln in log_txt.splitlines() if "ERROR processing" in ln)
 
     if errores:
@@ -101,27 +104,37 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, errore
         fallas.append("el log dice «Cobertura INCOMPLETA»")
     if con_via:
         fallas.append(f"records con marca de la vía en la guardia ({con_via}): la guardia dejó de ser K")
-    if no_modis:
-        fallas.append(f"{no_modis} records de esta corrida que no son de MODIS: la guardia corre sólo MODIS")
+    nombres = " ni de ".join(sensores)
+    if ajenos:
+        fallas.append(f"{ajenos} records de esta corrida que no son de {nombres}: la guardia corre sólo {nombres}")
     if otro_perfil:
         fallas.append(f"{otro_perfil} records de esta corrida con otro perfil en la marca de régimen")
-    if json_ok and desde is not None and modis_nuevos == 0:
-        fallas.append("ningún record de MODIS escrito en esta corrida: la corrida no escribió nada")
+    if json_ok and desde is not None:
+        for s in sensores:
+            if n_nuevos[s] == 0:
+                fallas.append(f"ningún record de {s} escrito en esta corrida: la corrida no escribió nada de ese sensor")
 
     dias = _dias(ini, fin)
     solo_de_dia = _solo_de_dia(log_txt)
     if json_ok:
         for d in dias:
-            if d in hay:
-                continue
-            vacias = _sin_pasada("MODIS", cobertura or {}, d, solo_de_dia)
-            if vacias:
-                notas.append(f"MODIS {d}: sin records de K; miró y no hubo pasada ({', '.join(vacias)})")
-            else:
-                fallas.append(f"MODIS {d}: ningún record de K y ninguna prueba de que no hubo pasada")
+            sin_pasada = []
+            for s in sensores:
+                if d in hay[s]:
+                    continue
+                vacias = _sin_pasada(s, cobertura or {}, d, solo_de_dia)
+                if vacias:
+                    sin_pasada.append(s)
+                    notas.append(f"{s} {d}: sin records de K; miró y no hubo pasada ({', '.join(vacias)})")
+                else:
+                    fallas.append(f"{s} {d}: ningún record de K y ninguna prueba de que no hubo pasada")
+            # Los dos VIIRS salen de los mismos satélites: si ninguno tuvo pasada el mismo día, es el catálogo y no la
+            # órbita (la misma regla de scripts/revisar_sombra.py, VV169-02). Con un solo sensor no aplica.
+            if len(sensores) > 1 and set(sensores) <= set(sin_pasada):
+                fallas.append(f"{d}: sin pasada a la vez en {', '.join(sin_pasada)}: catálogo de CMR vacío, no la órbita")
 
     resumen = (f"ventana {ini} a {fin}: {len(en_ventana)} records, {len(nuevos)} escritos en esta corrida (desde "
-               f"{desde_utc}; {modis_nuevos} de MODIS), {errores} errores de gránulo")
+               f"{desde_utc}; {', '.join(f'{n} de {s}' for s, n in n_nuevos.items())}), {errores} errores de gránulo")
     for n in notas:
         resumen += "\n  NOTA " + n
     if fallas:
@@ -129,7 +142,7 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, errore
     return not fallas, resumen
 
 
-def main(argv=None):
+def main(argv=None, sensores=("MODIS",), perfil=PERFIL, titulo="MODIS"):
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", required=True)
     ap.add_argument("--log", required=True)
@@ -163,7 +176,7 @@ def main(argv=None):
         cobertura = None
     try:
         ok, resumen = revisar(registros, log_txt, a.ini, a.fin, a.desde_utc, cobertura, sha=a.sha or None,
-                              errores_lectura=errores)
+                              errores_lectura=errores, sensores=sensores, perfil=perfil)
     except (AttributeError, TypeError, KeyError, ValueError) as e:
         ok = False
         resumen = (f"ventana {a.ini} a {a.fin}: no se pudo revisar\n  FALLA: "
@@ -173,8 +186,8 @@ def main(argv=None):
     if ruta:
         try:
             with open(ruta, "a", encoding="utf-8") as fh:
-                fh.write("### Revisión de la guardia K de MODIS (%s)\n\n```\n%s\n```\n" % ("OK" if ok else "FALLA",
-                                                                                         resumen))
+                fh.write("### Revisión de la guardia K de %s (%s)\n\n```\n%s\n```\n" % (titulo, "OK" if ok else "FALLA",
+                                                                                        resumen))
         except OSError:
             pass
     return 0 if ok else 1
