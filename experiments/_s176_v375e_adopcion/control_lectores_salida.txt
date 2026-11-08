@@ -1,0 +1,96 @@
+base a7a6ae3606ebb88fcb4caee360426b9599b889cc
+cabeza 48a59fa507217858b8ace0d0a192dc400781351b
+archivos del PR:
+  .github/workflows/guardia-k-viirs.yml
+  .github/workflows/pages-deploy.yml
+  .github/workflows/vigilancia-guardia-viirs.yml
+  docs/superpowers/plans/2026-11-08-guardia-viirs-pr-a.md
+  experiments/_s162_v750a/LECTURAS_EVALUAR_V750A.md
+  experiments/_s162_v750a/PREREGISTRO_V750A.md
+  experiments/_s162_v750a/equivalencia_v750a.py
+  experiments/_s162_v750a/equivalencia_v750a_salida.txt
+  experiments/_s162_v750a/evaluar_v750a.py
+  experiments/_s162_v750a/mutar_evaluar_v750a.py
+  experiments/_s162_v750a/mutar_evaluar_v750a_n3_salida.txt
+  experiments/_s162_v750a/mutar_evaluar_v750a_posicion_salida.txt
+  experiments/_s162_v750a/mutar_evaluar_v750a_s175_salida.txt
+  experiments/_s162_v750a/probar_evaluar_v750a.py
+  experiments/_s162_v750a/probar_evaluar_v750a_rojo_posicion_salida.txt
+  experiments/_s162_v750a/probar_evaluar_v750a_s175_salida.txt
+  experiments/_s162_v750a/vara_matlab_v750a.py
+  experiments/_s162_v750a/vara_matlab_v750a_salida.txt
+  experiments/_s162_v750a/verificador_posicion/INFORME.md
+  experiments/_s162_v750a/verificador_v2/INFORME.md
+  experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md
+  experiments/_s176_v375e_adopcion/control_lectores.py
+  experiments/_s176_v375e_adopcion/control_produccion.py
+  experiments/_s176_v375e_adopcion/control_produccion_salida.txt
+  experiments/_s176_v375e_adopcion/cotas_retrospectiva_v375.py
+  experiments/_s176_v375e_adopcion/cotas_retrospectiva_v375_salida.txt
+  experiments/_s176_v375e_adopcion/cotas_retrospectiva_v750.py
+  experiments/_s176_v375e_adopcion/cotas_retrospectiva_v750_salida.txt
+  experiments/_s176_v375e_adopcion/medir_cirrus_viirs.py
+  experiments/_s176_v375e_adopcion/medir_cirrus_viirs_salida.txt
+  experiments/_s176_v375e_adopcion/mutaciones_salida.txt
+  experiments/_s176_v375e_adopcion/mutar_pr_a.py
+  experiments/_s176_v375e_adopcion/sombra_pasadas_juzgadas_viirs.json
+  frontend/cambio_detector.js
+  frontend/index.html
+  pipeline/profiles/guardia_k_viirs.yaml
+  scripts/auto_audit_weekly.py
+  scripts/revisar_guardia_modis.py
+  scripts/revisar_guardia_viirs.py
+  scripts/vigilancia_guardia_modis.py
+  scripts/vigilancia_guardia_viirs.py
+  scripts/vigilancia_sombra.py
+  tests/test_auto_audit_via_modis_s172.py
+  tests/test_auto_audit_via_viirs_s176.py
+  tests/test_bateria_lector_v750a_s174.py
+  tests/test_cambio_detector_s153.py
+  tests/test_cambio_detector_via_viirs_s176.py
+  tests/test_guard_modis_codigo_mirova_encendido_s172.py
+  tests/test_guardia_k_viirs_s176.py
+  tests/test_mapa_todos_los_pixels_s175.py
+  tests/test_vigilancia_guardia_viirs_s176.py
+  tests/test_vigilancia_sombra_via_modis_s172.py
+
+== V375-E, S8 del lector del tag s172-v375e-lector-resellado
+RUTAS_REGIMEN: ('pipeline/', 'volcanoes.yaml', 'scripts/run_pipeline.py', '.github/workflows/sombra-codigo-mirova.yml') 
+PERFILES_REGIMEN: ('pipeline/profiles/mirova_equivalent.yaml', 'pipeline/profiles/sombra_codigo_mirova.yaml')
+real: main -> cabeza del PR marca: [] (tiene que ser [])
+  POSITIVO enciende V375 en producción (B1): marca ['pipeline/profiles/mirova_equivalent.yaml'] OK
+  POSITIVO cambia un umbral de producción: marca ['pipeline/profiles/mirova_equivalent.yaml'] OK
+  POSITIVO apaga V375 en la sombra: marca ['pipeline/profiles/sombra_codigo_mirova.yaml'] OK
+  POSITIVO edita la aserción del workflow de la sombra: marca ['.github/workflows/sombra-codigo-mirova.yml'] OK
+  POSITIVO cambia código de pipeline/: marca ['pipeline/mirova_v750_codigo.py'] OK
+  NEGATIVO enciende V750 en producción (B2): no es de este lector: marca [] OK
+  NEGATIVO perfil nuevo en pipeline/profiles/: marca [] OK
+V375-E: el PR no marca régimen; 5 positivos marcan y 2 negativos no.
+
+== V750-A (origin/claude/s175-v750a-reconcilia, lector de #964)
+es_ancestro(58edb9788, cabeza del PR) del lector: True (tiene que ser True: la sombra posterior al PR sigue dentro)
+control positivo: es_ancestro con el commit anterior al corte 761a24e73: False (tiene que ser False)
+control positivo: es_ancestro con un sha que este clon no conoce: None (tiene que ser None, SIN DATO)
+archivos del PR que cambian ROI, código o perfil de la vía de 750 o el lector: [experiments/_s162_v750a/LECTURAS_EVALUAR_V750A.md
+experiments/_s162_v750a/PREREGISTRO_V750A.md
+experiments/_s162_v750a/equivalencia_v750a.py
+experiments/_s162_v750a/equivalencia_v750a_salida.txt
+experiments/_s162_v750a/evaluar_v750a.py
+experiments/_s162_v750a/mutar_evaluar_v750a.py
+experiments/_s162_v750a/mutar_evaluar_v750a_n3_salida.txt
+experiments/_s162_v750a/mutar_evaluar_v750a_posicion_salida.txt
+experiments/_s162_v750a/mutar_evaluar_v750a_s175_salida.txt
+experiments/_s162_v750a/probar_evaluar_v750a.py
+experiments/_s162_v750a/probar_evaluar_v750a_rojo_posicion_salida.txt
+experiments/_s162_v750a/probar_evaluar_v750a_s175_salida.txt
+experiments/_s162_v750a/vara_matlab_v750a.py
+experiments/_s162_v750a/vara_matlab_v750a_salida.txt
+experiments/_s162_v750a/verificador_posicion/INFORME.md
+experiments/_s162_v750a/verificador_v2/INFORME.md] (tiene que ser vacío)
+Traceback (most recent call last):
+  File "C:\Users\nmend\vrp-wt\s176-guardia-viirs\experiments\_s176_v375e_adopcion\control_lectores.py", line 144, in <module>
+    main(sys.argv[1], sys.argv[2])
+  File "C:\Users\nmend\vrp-wt\s176-guardia-viirs\experiments\_s176_v375e_adopcion\control_lectores.py", line 128, in main
+    assert tocados == ""
+           ^^^^^^^^^^^^^
+AssertionError
