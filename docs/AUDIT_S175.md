@@ -67,7 +67,8 @@
    sin geometría confiable o de Suomi NPP antes de Mirova-v1#20; con fila de la tabla se pierde 0 de 115 (V2-01, que
    matiza F2-201 y F2-202).
 4. **La sobre-publicación de Lastarria es en dos tercios la regla D-9.** Sin las alertas mínimas reetiquetadas, Lastarria
-   publica en negativos limpios el 11,6 % de sus pasadas, igual que Puyehue (V2-03 sobre F2-203).
+   publica en negativos limpios el 11,6 % de sus pasadas, en la línea de Puyehue con la misma base, 42 de 355, 11,8 %
+   (V2-03 sobre F2-203).
 5. **El criterio de victoria tiene poco poder fuera de Chillán**: «ninguna protegida perdida» no tiene casos en 5 de 11
    volcanes (6 de 11 con los 60 días del audit semanal), y hay 42 protegidas diurnas fuera del criterio por diseño (309;
    308, confirmado por V33B).
@@ -131,7 +132,7 @@ Gravedad del verificador (1 a 5). Veredicto: C = CONFIRMADO, P = CONFIRMADO EN P
 | F2-207 | F2 | La tabla de MIROVA del snapshot termina el 2026-11-02: sin negativos limpios desde el 03 | C | 2 |
 | F2-212 | F2 | `banco_paridad.main` y `clasificacion_referencia` usan la etiqueta original y no D-9 | C | 2 |
 | 252 | F3 | La nota A85 corregida por #950 en `CLAUDE.md` sigue sin marca en `SINTOMAS.md` | C | 2 |
-| 254 | F3 | «Sí, arréglalos» (falsos verdes de cenit) no está en main; con el código de la base, insumo vacío y alertas sin cenit salen SIN SUSTRATO y se rotulan OK | C | 2 |
+| 254 | F3 | ⚠️ S175 VPR955-01 (marca A113): #952 está mergeado en main desde el 2026-11-07 15:55 GMT (`36a191d45`), después de la base de medición; si ese merge cura este hallazgo es SIN DATO, porque nadie volvió a correr `leer_retro.py` con insumo vacío. Texto de la base: «Sí, arréglalos» (falsos verdes de cenit) no está en main; con el código de la base, insumo vacío y alertas sin cenit salen SIN SUSTRATO y se rotulan OK | C | 2 |
 | 257 | F3 | El censo S145 no ve las dos líneas base rojas ni los cierres desde S160 (65 coincidencias fuera de `censo.DOCS`) | C | 2 |
 | 258 | F3 | Parámetros del lector sellado de V750-A fijados sin frase de Nicolás (declarados); una cita mezcla dos decisiones (V3-01) | P | 2 |
 | 104 | F0 | Decisión 9, V0b-01 y C-07: K1 sigue en -0,8 y el tope D9 acoplado a K1 | P | 2 |
@@ -166,7 +167,8 @@ V0-01 (la «fracción 19 %» de 101 depende de la ventana, g1), V0-02 (`f0_caden
 V1-01 (el plazo de 29 protegidas de la vigilancia cuenta pasadas K contra K, misma raíz que 151, g2), **V1-02 (la FICHA
 CPLT pública v1.18, l. 7 y 25, dice que la vía rige «hasta unos 8 días antes»; los datos dicen 19 h, g2)**, V1-03 (la caída
 `sin_mxd03` es inalcanzable desde el NRT, `run_pipeline.py` l. 247 a 250, g1), V1-04 (falta el JSON de la guardia de un
-volcán y la vigilancia declara ciegos los once; va en la dirección segura, g1).
+volcán y la vigilancia declara ciegos los once; va en la dirección segura, g1). Los propios de los verificadores
+posteriores están en el §11: VX-01 a 05 (§11.1), V4T-01 y 02 (§11.3), V5B-01 a 05 (§11.4), V33A-01 y V33B-01 a 03 (§11.5).
 
 **Verificados después de cerrar esta tabla**: 302, 108, 111 y 256 (VX, §11.1), 381 a 390 (F4t con V4T, §11.3), 351 a 355 (F5b
 con V5B, §11.4) y los 33 del §6 (V33A y V33B), con el veredicto y la gravedad de sus verificadores.
@@ -222,10 +224,10 @@ ninguna alerta publicada: son efectos de etiqueta, gobernanza, documentos y medi
 | 121 | La regla con que se adoptó K sigue igual y la vigilancia de la sombra usa su paso 9 | C | 2 | V33A |
 | 161 | Los píxeles de la vía no traen `vrp_mw` por píxel; origen de V33A-01 (sube de 1 a 2) | C | 2 | V33A |
 | 112 | Una plataforma muda da código 0 también en modo estricto; decisión escrita en el código | C | 2 | V33A |
-| 122 | Inventario S160 de VIIRS y unidades sin cambio | C | 1 a 2 | V33A |
-| 123 | Inventario S160 de dependencias sin cambio (251: lo externo SIN DATO); el healthcheck con cron de las 12:00 corre con 4,97 h de atraso mediano | C | 1 a 2 | V33A |
+| 122 | Inventario S160 de VIIRS y unidades sin cambio (F2-210 y F2-212 en gravedad 2, el resto en 1) | C | 2 | V33A |
+| 123 | Inventario S160 de dependencias sin cambio (251: lo externo SIN DATO); el healthcheck con cron de las 12:00 corre con 4,97 h de atraso mediano (255 y 252 en gravedad 2; 249, 251 y 254 en 1) | C | 2 | V33A |
 | 124, 125, 127, 128, 129, 159, 160 | 124 y 125 son decisiones documentadas en el código; 127 el placebo del 1 % nunca entró al evaluador; 128 datos de adopción de K no encontrados en `_s153_fk_v2/`; 129 pendientes de F1b sin arreglo en código; 159 y 160 son avisos del vigilante | C | 1 | V33A |
-| 118, 120, 126 | 118 latente (el fenómeno no ha ocurrido); 120 la fila falta, pero la misma noche tiene otra alerta VIIRS en la tabla; 126 la parte «en MIROVA» es indirecta | P | 1 | V33A |
+| 118, 120, 126 | 118 latente (el fenómeno no ha ocurrido); 120 la fila falta, pero la misma noche tiene otra alerta VIIRS en la tabla; 126 afirma el silencio de Suomi NPP «en nuestros records y en MIROVA» y V33A sólo sostiene lo segundo de forma indirecta. Se cuenta como P, igual que el resumen de V33A; su encabezado y su CSV dicen CONFIRMADO para el resto de la afirmación | P | 1 | V33A |
 | F2-208, 259, 260, 262, 263, 264, 310 | 208 la parada de la sombra llega el 2026-12-02 si no falta noche (3 noches y 9 alertas con la tabla de la vara; 4 y 26 con la tabla raíz); 259 y 260 decisiones de segunda mano; 262 radio max(4 km, inner); 263 cambio de una línea al sellar; 264 CI rojo en rama (causa SOSPECHA); 310 cambio de banda de Lastarria por 0,036 | C | 1 | V33B |
 | F2-210, 261, 265 | 210 las dos protegidas de marzo son filas sólo OCR, anteriores al hito del 2026-06-11; 261 #895 lo mergeó la cuenta `MendozaVolcanic` (si es la de Nicolás: SOSPECHA); 265 #945 se corrigió después de la auditoría, #950 y #951 siguen sin nombrar | P | 1 | V33B |
 
@@ -250,13 +252,13 @@ ninguna alerta publicada: son efectos de etiqueta, gobernanza, documentos y medi
 |---|---|---|
 | 1 | Rotar `EARTHDATA_TOKEN` (107) | sí, antes del 2026-11-27; sólo tú puedes hacerlo. Al rotar, pega el token sin espacio ni salto de línea final, despacha el NRT de un volcán y comprueba que escribió records (§11.3): hoy un token mal pegado no da error |
 | 2 | Corregir `SINTOMAS.md` (251, 252): marca S172 en l. 25 y 127 y la nota A85 | sí, PR de documentación sin riesgo; es lo que se lee antes de proponer una palanca |
-| 3 | Mergear #952, los falsos verdes de cenit (254) | sí, después de su verificador y con CI verde |
+| 3 | Mergear #952, los falsos verdes de cenit (254) | ⚠️ S175 VPR955-01 (marca A113): CERRADA, #952 se mergeó el 2026-11-07 15:55 GMT (`36a191d45`). Si cura 254 es SIN DATO: nadie corrió `leer_retro.py` con insumo vacío después del merge. Texto anterior: «sí, después de su verificador y con CI verde» |
 | 4 | Implementar la decisión 3 de S174 (253) | sí; ya la aprobaste, falta hacerla |
 | 5 | Publicar el recall por pasada al lado del recall por noche (304, V2-02) | sí, en el audit semanal; no cambia la detección |
 | 6 | Medir la posición de MIROVA con la tabla y con origen común, no con el OCR (301, 303) | sí, en el banco y el audit |
 | 7 | «MIROVA confirmó» del tablero (F2-204, V2-04) | alinear la lógica a la pasada a ±120 s con D-9, o cambiar el texto; recomiendo la lógica, porque el operador lee «en esta pasada» |
 | 8 | VIIRS 750 en cumbre (101, 102) | darle un camino nuevo dentro del programa de V750 (D25 no se adoptó), medido contra la tabla; ninguna alerta perdida es protegida, así que no es urgente |
-| 9 | La lectura del truncado de MODIS (103, 307) | **Respondida por Nicolás y medida por el orquestador (2026-11-07, copias de la base en `C:\Users\nmend\vrp-temporales\s175_audit\insumos\`):** el truncado es del OCR, no de la tabla. En la tabla (`latest_consolidado.csv`) 141 de 142 alertas MODIS traen decimales; en el OCR las 48 alertas MODIS y las 95 de VIIRS 750 son enteras (VIIRS 375 sí trae decimales, 896 de 897). Misma pasada, Chillán MODIS 2026-10-30 08:55: tabla 14,39 MW, OCR 14,0. La protegida perdida de Chillán MODIS 2026-10-30 07:15 (1,0 MW) existe sólo en el OCR. Recomendación: en MODIS y VIIRS 750 usar siempre el VRP de la tabla y tratar el del OCR como piso, entre v y v+1; el veto de D18 se relee con eso |
+| 9 | La lectura del truncado de MODIS (103, 307) | **Respondida por Nicolás y medida por el orquestador (2026-11-07, copias de la base en `C:\Users\nmend\vrp-temporales\s175_audit\insumos\`):** el truncado es del OCR, no de la tabla. Alertas son las filas con `Tipo_Registro` que empieza en `ALERTA_TERMICA`; sin ese filtro los denominadores cambian. Script y salida: `experiments/_s175_audit/dec9_truncado.py` y `dec9_truncado_salida.txt` (`latest_consolidado.csv` no está en el repo: sha256 `dee76837...`, en §0). En la tabla (`latest_consolidado.csv`) 141 de 142 alertas MODIS traen decimales; en el OCR las 48 alertas MODIS y las 95 de VIIRS 750 son enteras (VIIRS 375 sí trae decimales, 896 de 897). Misma pasada, Chillán MODIS 2026-10-30 08:55: tabla 14,39 MW, OCR 14,0. La protegida perdida de Chillán MODIS 2026-10-30 07:15 (1,0 MW) existe sólo en el OCR. Recomendación: en MODIS y VIIRS 750 usar siempre el VRP de la tabla y tratar el del OCR como piso, entre v y v+1; el veto de D18 se relee con eso |
 | 10 | `.gitignore` y los `hallazgos.csv` (114) | agregar una excepción para `experiments/_s*_audit/**/hallazgos.csv` |
 | 11 | Vigilancia de la guardia por volcán y por detector (151, 152, V1-01) | sí: que mire por volcán si el record de producción es de la vía; hoy la probabilidad es baja, pero es la red que sostiene la reversión pre-autorizada |
 | 12 | Corregir la FICHA CPLT y la regla de reversión §4.1 y §4.7 (154, V1-02) | sí: la ficha es pública (Resolución CPLT N°372) y repite una premisa que los datos refutan |
@@ -267,7 +269,7 @@ ninguna alerta publicada: son efectos de etiqueta, gobernanza, documentos y medi
 | 17 | Medir la identidad del foco en dos dimensiones (302, VX-01, V5B-01, V5B-04) | sí, pero la lámina sola no alcanza: decide si F5b se re-corre con la máscara corregida, conservando la mancha saturada, y con un nulo al lado. Mientras tanto no se publica ninguna posición de MIROVA en Chillán como medición |
 | 18 | Mantener lo que se envejeció (108, 111, 256) | actualizar `docs/COLA_CAMPO.md` (C-05, C-06), medir la fracción MODIS NRT en el audit semanal y corregir la nota de memoria del MxD03 |
 | 19 | Arreglar el mapa con «Todos los pixels» (V33A-01, 161) | sí: `frontend/index.html:3157` y `:3068` tienen que tolerar píxeles sin `vrp_mw`, porque el error corta el dibujo de los días más recientes sin aviso. Toca `frontend/`, así que necesita tu sí (A45); replicar donde haya copia de esa lógica |
-| 20 | Llevar a main el lector de V375-E (F2-209) | sí, antes de la parada de la sombra (2026-12-02 si no falta noche), envuelto en `tests/` para que corra en CI (regla de S174), o declarar que la lectura de la ventana P se hace desde el tag |
+| 20 | Llevar a main el lector de V375-E (F2-209, V33B-03) | sí, antes de la parada de la sombra (2026-12-02 si no falta noche), envuelto en `tests/` para que corra en CI (regla de S174), o declarar que la lectura de la ventana P se hace desde el tag |
 
 ## 9. Registro de agentes
 
@@ -290,7 +292,7 @@ ninguna alerta publicada: son efectos de etiqueta, gobernanza, documentos y medi
 | F5b | Fable 5.1 (subagente) | SIN DATO (declarado; su contexto dice `reasoning_effort 25`) | 5 (351 a 355) | |
 | V5B | Opus 5.5 | SIN DATO (declarado) | 5 verificados, 5 propios (V5B-01 a V5B-05) | |
 | V33A | Fable 5.1 | SIN DATO (declarado) | 18 verificados, 1 propio (V33A-01) | |
-| V33B | Fable 5.1 | SIN DATO (declarado) | 15 verificados | |
+| V33B | Fable 5.1 | SIN DATO (declarado) | 15 verificados, 3 propios (V33B-01 a V33B-03) | |
 
 Uso del plan semanal: 78 % antes de la ola 0 y 79 % después de F5 y F2.
 
@@ -459,6 +461,14 @@ El resultado por hallazgo está en el §6. Del hallazgo nuevo V33A-01 se reprodu
 en local (`frontend/index.html:3157`; 217 marcadores en «Solo principal», 651 en «Todos los pixels», 39 records de Chillán sin
 dibujar, 2026-11-02 a 11-06). Texto anterior del §6 (A113): «F5 308 y 310 (2); F2 F2-208 a F2-211 y F2-213 (5); F3 255 y 259 a 265
 (8); F0 112 y 116 a 129 (15); F1 159 a 161 (3). En total 33 de los 80 hallazgos de auditor de los cinco frentes.»
+
+Hallazgos propios de V33B:
+
+| id | qué | confianza | gravedad |
+|---|---|---|---|
+| V33B-01 | Las filas OCR de Tupungatito 2026-09-28 05:18 y 05:36 comparten `Distancia_aprox_imagen` de una imagen del 2026-10-22, método «ambiguo»; alimenta a F2-213 y C-04 | C | 1 |
+| V33B-02 | `alerta_protegida` acepta filas sólo OCR anteriores al hito del 2026-06-11, cuando el OCR estaba mal calibrado (A119); el recall de marzo se mediría contra una referencia dudosa, raíz del «en parte» de F2-210 | SOSPECHA (no se leyó si el banco las excluye) | 2 |
+| V33B-03 | El lector de la sombra V375-E no corre desde un árbol suelto: exige resolver `origin/loop/activo` con git y el árbol entero del tag; toca la decisión 20 | C | 1 |
 
 ### 11.6 Pendiente
 
