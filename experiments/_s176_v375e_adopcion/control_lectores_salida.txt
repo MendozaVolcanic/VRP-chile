@@ -1,28 +1,13 @@
-base a7a6ae3606ebb88fcb4caee360426b9599b889cc
-cabeza 48a59fa507217858b8ace0d0a192dc400781351b
+base 87fb5a43a7470372c21875297f782ab367aa82ba
+cabeza 687832d1a8a36904d5fd81c35cf79832d24c45db
 archivos del PR:
   .github/workflows/guardia-k-viirs.yml
   .github/workflows/pages-deploy.yml
   .github/workflows/vigilancia-guardia-viirs.yml
   docs/superpowers/plans/2026-11-08-guardia-viirs-pr-a.md
-  experiments/_s162_v750a/LECTURAS_EVALUAR_V750A.md
-  experiments/_s162_v750a/PREREGISTRO_V750A.md
-  experiments/_s162_v750a/equivalencia_v750a.py
-  experiments/_s162_v750a/equivalencia_v750a_salida.txt
-  experiments/_s162_v750a/evaluar_v750a.py
-  experiments/_s162_v750a/mutar_evaluar_v750a.py
-  experiments/_s162_v750a/mutar_evaluar_v750a_n3_salida.txt
-  experiments/_s162_v750a/mutar_evaluar_v750a_posicion_salida.txt
-  experiments/_s162_v750a/mutar_evaluar_v750a_s175_salida.txt
-  experiments/_s162_v750a/probar_evaluar_v750a.py
-  experiments/_s162_v750a/probar_evaluar_v750a_rojo_posicion_salida.txt
-  experiments/_s162_v750a/probar_evaluar_v750a_s175_salida.txt
-  experiments/_s162_v750a/vara_matlab_v750a.py
-  experiments/_s162_v750a/vara_matlab_v750a_salida.txt
-  experiments/_s162_v750a/verificador_posicion/INFORME.md
-  experiments/_s162_v750a/verificador_v2/INFORME.md
   experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md
   experiments/_s176_v375e_adopcion/control_lectores.py
+  experiments/_s176_v375e_adopcion/control_lectores_salida.txt
   experiments/_s176_v375e_adopcion/control_produccion.py
   experiments/_s176_v375e_adopcion/control_produccion_salida.txt
   experiments/_s176_v375e_adopcion/cotas_retrospectiva_v375.py
@@ -35,7 +20,6 @@ archivos del PR:
   experiments/_s176_v375e_adopcion/mutar_pr_a.py
   experiments/_s176_v375e_adopcion/sombra_pasadas_juzgadas_viirs.json
   frontend/cambio_detector.js
-  frontend/index.html
   pipeline/profiles/guardia_k_viirs.yaml
   scripts/auto_audit_weekly.py
   scripts/revisar_guardia_modis.py
@@ -45,12 +29,10 @@ archivos del PR:
   scripts/vigilancia_sombra.py
   tests/test_auto_audit_via_modis_s172.py
   tests/test_auto_audit_via_viirs_s176.py
-  tests/test_bateria_lector_v750a_s174.py
   tests/test_cambio_detector_s153.py
   tests/test_cambio_detector_via_viirs_s176.py
   tests/test_guard_modis_codigo_mirova_encendido_s172.py
   tests/test_guardia_k_viirs_s176.py
-  tests/test_mapa_todos_los_pixels_s175.py
   tests/test_vigilancia_guardia_viirs_s176.py
   tests/test_vigilancia_sombra_via_modis_s172.py
 
@@ -71,26 +53,8 @@ V375-E: el PR no marca régimen; 5 positivos marcan y 2 negativos no.
 es_ancestro(58edb9788, cabeza del PR) del lector: True (tiene que ser True: la sombra posterior al PR sigue dentro)
 control positivo: es_ancestro con el commit anterior al corte 761a24e73: False (tiene que ser False)
 control positivo: es_ancestro con un sha que este clon no conoce: None (tiene que ser None, SIN DATO)
-archivos del PR que cambian ROI, código o perfil de la vía de 750 o el lector: [experiments/_s162_v750a/LECTURAS_EVALUAR_V750A.md
-experiments/_s162_v750a/PREREGISTRO_V750A.md
-experiments/_s162_v750a/equivalencia_v750a.py
-experiments/_s162_v750a/equivalencia_v750a_salida.txt
-experiments/_s162_v750a/evaluar_v750a.py
-experiments/_s162_v750a/mutar_evaluar_v750a.py
-experiments/_s162_v750a/mutar_evaluar_v750a_n3_salida.txt
-experiments/_s162_v750a/mutar_evaluar_v750a_posicion_salida.txt
-experiments/_s162_v750a/mutar_evaluar_v750a_s175_salida.txt
-experiments/_s162_v750a/probar_evaluar_v750a.py
-experiments/_s162_v750a/probar_evaluar_v750a_rojo_posicion_salida.txt
-experiments/_s162_v750a/probar_evaluar_v750a_s175_salida.txt
-experiments/_s162_v750a/vara_matlab_v750a.py
-experiments/_s162_v750a/vara_matlab_v750a_salida.txt
-experiments/_s162_v750a/verificador_posicion/INFORME.md
-experiments/_s162_v750a/verificador_v2/INFORME.md] (tiene que ser vacío)
-Traceback (most recent call last):
-  File "C:\Users\nmend\vrp-wt\s176-guardia-viirs\experiments\_s176_v375e_adopcion\control_lectores.py", line 144, in <module>
-    main(sys.argv[1], sys.argv[2])
-  File "C:\Users\nmend\vrp-wt\s176-guardia-viirs\experiments\_s176_v375e_adopcion\control_lectores.py", line 128, in main
-    assert tocados == ""
-           ^^^^^^^^^^^^^
-AssertionError
+archivos del PR que cambian ROI, código o perfil de la vía de 750 o el lector: [] (tiene que ser vacío)
+control positivo del mapa de ROI: sens ['PuyehueCordonCaulle', 'Tupungatito']; def 43 volcanes (el lector separa por este campo)
+el flag de V375 en el procesador de V750 y en el de MODIS: rc 1 [] (rc 1 y vacío: no lo leen)
+control positivo: en el procesador de VIIRS 375 sí aparece: [687832d1a8a36904d5fd81c35cf79832d24c45db:pipeline/process_viirs.py:2]
+V750-A: el PR no cambia la ROI, el código ni el perfil de la vía de 750, y su régimen no cuenta el PR.
