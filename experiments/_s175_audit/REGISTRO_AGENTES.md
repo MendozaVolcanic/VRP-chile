@@ -20,3 +20,14 @@ Plan sellado: `docs/PLAN_AUDITORIA_S175.md`, SHA_PLAN = `a325ac8ff8c480fc88fe91d
 | F2 | Opus 5.5 (sesión `local_ba163e3e`) | high (app) | lo declara en su informe | | lanzada 2026-11-07 04:17 UTC | prompt `...\prompts\f2.txt` sha256 df7b928d... |
 
 Consecuencia para los verificadores: los auditores son Opus, así que los verificadores serán de otro modelo, Sonnet en sesión con esfuerzo high (Fable como subagente corre a 25). Se declara en la síntesis.
+
+## Encargos extra preparados el 2026-11-08 (sin lanzar: uso semanal en 93 %, reinicio 2026-11-08 12:00 UTC)
+
+Pedido de Nicolás: «procede con todo en simultáneo si es posible». Se dejaron listos para lanzar después del reinicio,
+cada uno como subagente Fable con `effort: high` (el pedido sí llega, ver limitación 1 de `docs/AUDIT_S175.md`):
+
+| encargo | prompt (en `C:\Users\nmend\vrp-temporales\s175_audit\prompts\`) | sha256 (16) | carpeta | verificador después |
+|---|---|---|---|---|
+| VX: verificar 302, 108, 111 y 256 | `vx.txt` | be32c28e81cb42a9 | `experiments\_s175_audit\vx\` | ya es verificador (auditores Opus) |
+| F5b: posición después del 2026-09-22 con las láminas PNG Latest10NTI | `f5b.txt` | cdc4ffb869a63cff | `experiments\_s175_audit\f5b\` | Opus, sin ver el informe |
+| F4t: el token muerto simulado (parte de F4, antes de rotarlo el 2026-11-27) | `f4t.txt` | c62aca6c19b66b99 | `experiments\_s175_audit\f4t\` | Opus, sin ver el informe |
