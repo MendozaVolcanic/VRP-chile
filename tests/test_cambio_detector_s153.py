@@ -143,7 +143,7 @@ def test_camino_del_navegador_con_la_constante_completada(tmp_path):
     registrados, const, aviso = node(js, str(archivo))
     # S172: el módulo registra además el plugin de la vía de MODIS, que no dibuja nada sin records de la vía
     # (tests/test_cambio_detector_via_modis_s172.py); el de K sigue registrándose una sola vez.
-    assert registrados == ["cambioDetector", "cambioViaModis"]
+    assert registrados == ["cambioDetector", "cambioViaModis", "cambioViaV375", "cambioViaV750"]  # S176: una línea por sensor
     assert const == FECHA
     assert aviso == "Los datos con fecha de observación desde "
 
