@@ -1,0 +1,26 @@
+(S174, VPR945: corrida ROJA de los escenarios de sombra contra evaluar_v750a.py de la punta del PR 6f99c9ae8, antes de la segunda vuelta, con las pruebas nuevas. Fallan por aserción, sin caídas, los que fijan conducta nueva: ER10 (VPR945-02), ER11 (VPR945-03), ER12, ER13, ER18, ER19 y la línea de duración de ER2 (VPR945-01), ER5, ER15 y ER17 (VPR945-04). ER8, ER9 y ER16, y las líneas nuevas de ER2, ER5 y ER6 sobre «protegidas fuera» y «dentro», vigilan código que ya estaba bien (VPR945-05 a 07): pasan contra la punta y su rojo es el de las mutaciones MR16 a MR21 y MR24, en mutar_evaluar_v750a_vpr945_salida.txt.)
+E18 | OK
+E19 | OK
+E20 | OK
+E21 | OK
+E23 | OK
+E47 | OK
+E49 | OK
+ER1 | OK
+ER2 | FALLA | falta una línea «== duración de la sombra» con ['primera 2026-11-04 06:00', 'días, COMPLETA']
+ER3 | OK
+ER4 | OK
+ER5 | FALLA | falta una línea «== régimen de la sombra: brazo B4» con ['dentro 20', 'otra ROI 1', 'anteriores al corte 6', 'desde 58edb978825ff08677fc1b3e803a2ca601dd4598']
+ER6 | OK
+ER8 | OK
+ER9 | OK
+ER10 | FALLA | código de salida 0, se esperaba 3 ; falta una línea «   SIN DATO por motivo:» con ['volcan_sin_roi'] ; falta una línea «== cobertura: INSUFICIENTE» con [] ; falta una línea «== régimen de la sombra: brazo B4» con ['otra ROI 0'] ; sobra una línea «== §6.3 sombra:»
+ER11 | FALLA | falta una línea «== cobertura: SIN PASADAS OBSERVADAS» con ['observadas 0', 'compuerta cerrada'] ; falta una línea «== sin veredicto:» con ['ninguna pasada observada'] ; sobra una línea «== cobertura: SUFICIENTE» ; sobra una línea «== control nulo»
+ER12 | FALLA | código de salida 0, se esperaba 4 ; falta una línea «== duración de la sombra» con ['primera 2026-11-04 06:00', 'reloj desde la primera pasada leída', '21.0 de 28 días', 'días, INCOMPLETA'] ; falta una línea «== §6.3 sombra: PROVISORIO» con ['21.0 de 28 días', 'P1 = 0'] ; sobra una línea «== §6.3 sombra: CUMPLE»
+ER13 | FALLA | código de salida 0, se esperaba 4 ; falta una línea «== duración de la sombra» con ['primera 2026-11-01 06:00', 'reloj desde el corte', '25.1 de 28 días', 'días, INCOMPLETA'] ; falta una línea «== §6.3 sombra: PROVISORIO» con ['25.1 de 28 días'] ; sobra una línea «== §6.3 sombra: CUMPLE»
+ER15 | FALLA | falta una línea «== régimen de la sombra: --sha-desde HEAD» con ['no es el sha', 'compuerta cerrada'] ; sobra una línea «== cobertura:»
+ER16 | OK
+ER17 | FALLA | falta una línea «== régimen de la sombra: brazo B4» con ['desde 58edb978825ff08677fc1b3e803a2ca601dd4598', 'dentro 20']
+ER18 | FALLA | falta una línea «== §6.3 sombra: NO CUMPLE» con ['P1', 'duración 21.0 de 28 días']
+ER19 | FALLA | código de salida 0, se esperaba 4 ; falta una línea «== §6.3 sombra: PROVISORIO» con ['P2 PIERDE', '21.0 de 28 días'] ; sobra una línea «== §6.3 sombra: NO CUMPLE»
+== PRUEBAS: FALLAS 10 de 24

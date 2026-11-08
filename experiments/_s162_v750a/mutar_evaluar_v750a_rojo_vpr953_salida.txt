@@ -1,0 +1,10 @@
+(corrida parcial: --solo MR74,MR76,MR77,MR78,MR79)
+(escenarios parciales: --escenarios ER53,ER54,ER55)
+IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (3)
+MR74 | ATRAPADA sólo por la bandera "no se cae" (tiene que ser ATRAPADA) | rc 1 | R6-01: el OverflowError de pasar --ahora a UTC no se captura (salida 1 con traceback) | == PRUEBAS: FALLAS 1 de 3 | escenarios que fallan ['ER53']
+MR76 | PASA (tiene que ser ATRAPADA) | rc 0 | VPR953-02 (X12): sólo el primero de los volcanes sin cambio de ROI pide 14 noches | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (3) | escenarios que fallan []
+MR77 | PASA (tiene que ser ATRAPADA) | rc 0 | VPR953-02 (X13): el último de los volcanes sin cambio de ROI no pide 14 noches | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (3) | escenarios que fallan []
+MR78 | PASA (tiene que ser ATRAPADA) | rc 0 | VPR953-02 (X14): el segundo de los volcanes sin cambio de ROI no pide 14 noches | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (3) | escenarios que fallan []
+MR79 | PASA (tiene que ser ATRAPADA) | rc 0 | VPR953-03 (X15): la línea CUMPLE nombra sólo a dos de los volcanes sin cambio de ROI | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (3) | escenarios que fallan []
+CAIDA | CAÍDA (tiene que ser CAÍDA) | rc 2 | CONTROL: el analizador sólo se cae (excepción al cargar los objetivos) | == PRUEBAS: CAÍDAS 2 (fallas por aserción 0) de 3 | escenarios que fallan []
+== RESUMEN: 1 de 5 mutaciones atrapadas (0 por aserción sobre la salida, 1 sólo por la bandera "no se cae"); controles como deben; 4 FUERA DE LO ESPERADO
