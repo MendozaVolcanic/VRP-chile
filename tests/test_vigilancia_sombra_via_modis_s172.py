@@ -56,7 +56,8 @@ def test_las_claves_de_la_via_salen_de_los_records_de_produccion(monkeypatch):
         {"sensor": "MODIS_TERRA", "datetime_utc": "2026-11-10 03:10", "via_codigo_mirova": "sin_mxd03"},
         {"sensor": "VIIRS_NOAA20_750", "datetime_utc": "2026-11-10 05:00", "via_codigo_mirova": True}]}
     monkeypatch.setattr(vs.aa, "cargar_records", lambda: (recs, {}))
-    assert vs.claves_via() == VIA
+    # S176: hasta S175 aquí sólo salía MODIS. Hoy la vía de VIIRS también se saca de K (tests/test_auto_audit_via_viirs_s176.py).
+    assert vs.claves_via() == VIA | {("NevadosDeChillan", "VIIRS_NOAA20_750", "2026-11-10 05:00")}
 
 
 @pytest.fixture

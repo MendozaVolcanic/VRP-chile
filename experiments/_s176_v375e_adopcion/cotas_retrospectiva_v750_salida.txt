@@ -1,0 +1,23 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+== cobertura: objetivos 6022 con resultado 6022 {('neg_limpio', 'error: FileExistsError: [Errno 17] File '): 1, ('neg_limpio', 'ok'): 5618, ('neg_limpio', 'volcan_fuera_del_granulo'): 112, ('pos', 'ok'): 291}
+   observadas: 5866 | no observadas (fuera del denominador): {'fuera': 112, 'sin_crater': 43} | SIN DATO: 1
+   SIN DATO por motivo: {'error: FileExistsError: [Errno 17] File ': 1}
+   pasadas sin gránulo (del generador): 0
+   protegidas no observadas (fuera del denominador, por nombre): ninguna
+   protegidas SIN DATO (falla de cobertura, no de brazo): ninguna
+== cobertura: SUFICIENTE
+== publicación con ancla en el cráter contra ancla en el centro de la grilla (pasadas que cambian): {('B0', 'PlanchonPeteroa'): 1, ('B1', 'PlanchonPeteroa'): 1, ('B1', 'Tupungatito'): 1, ('B3', 'PlanchonPeteroa'): 1, ('B3', 'PuyehueCordonCaulle'): 2, ('B5', 'Tupungatito'): 1}
+== control nulo del contador: 2498 perturbaciones; las que NO cambian la publicación: 0 (tiene que ser 0, con al menos una perturbación)
+== control K = producción: distintas 0 de 5866 (protegidas ninguna); K sin record 0; lista completa []
+== control B0 y B1 = censo S159 en pasadas comunes: {'B0_igual': 5527, 'B1_igual': 5527} OK
+== controles generales (nulo, K = producción, cobertura): EN VERDE
+== ventana O (canal que decide): 2026-06-13 05:42 a 2026-11-02 06:24 pasadas 3961
+== con Suomi NPP: (i) bajas (sobre 0,05 MW) que K publica y B4 calla: 9 de 101; (ii) negativos limpios que B4 publica y K calla: 2 de 3801
+   lista (i), hasta 15: [('Copahue', '2026-08-10 05:54', 0.4), ('Lascar', '2026-08-26 05:48', 0.37), ('PuyehueCordonCaulle', '2026-09-13 05:18', 0.63), ('PuyehueCordonCaulle', '2026-09-17 05:42', 0.42), ('PuyehueCordonCaulle', '2026-10-14 05:36', 0.48), ('PuyehueCordonCaulle', '2026-10-27 04:54', 0.46), ('Tupungatito', '2026-06-21 05:36', 0.21), ('Isluga', '2026-08-07 05:48', 0.31), ('PuyehueCordonCaulle', '2026-10-21 05:48', 0.36)]
+   lista (ii), hasta 15: [('Isluga', '2026-07-15 05:36'), ('PuyehueCordonCaulle', '2026-10-09 06:54')]
+== sin Suomi NPP: (i) bajas (sobre 0,05 MW) que K publica y B4 calla: 9 de 90; (ii) negativos limpios que B4 publica y K calla: 1 de 3218
+   lista (i), hasta 15: [('Copahue', '2026-08-10 05:54', 0.4), ('Lascar', '2026-08-26 05:48', 0.37), ('PuyehueCordonCaulle', '2026-09-13 05:18', 0.63), ('PuyehueCordonCaulle', '2026-09-17 05:42', 0.42), ('PuyehueCordonCaulle', '2026-10-14 05:36', 0.48), ('PuyehueCordonCaulle', '2026-10-27 04:54', 0.46), ('Tupungatito', '2026-06-21 05:36', 0.21), ('Isluga', '2026-08-07 05:48', 0.31), ('PuyehueCordonCaulle', '2026-10-21 05:48', 0.36)]
+   lista (ii), hasta 15: [('Isluga', '2026-07-15 05:36')]
+días de la ventana O entre la primera y la última pasada: 143
+con Suomi NPP: lambda 120 d (i) 7.55 -> cota 12 (falsa alarma 0.045); (ii) 1.68 -> cota 4 (falsa alarma 0.028)
+sin Suomi NPP: lambda 120 d (i) 7.55 -> cota 12 (falsa alarma 0.045); (ii) 0.84 -> cota 2 (falsa alarma 0.053)

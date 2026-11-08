@@ -487,8 +487,12 @@ CAMBIO_DETECTOR_JS = os.path.join(ROOT, "frontend", "cambio_detector.js")
 # que S156 arregló para C0 y K). Su frontera sale de los DATOS (la primera pasada MODIS de la vía, frontera_via_modis),
 # no de una constante. Sin records de la vía todo lo de abajo da lo mismo que antes (latest.json idéntico salvo la
 # hora de generación; tests/test_auto_audit_via_modis_s172.py). Las bandas NO se recalibran antes de ver datos (A115).
-DETECTORES = ("C0", "K", "VIA_MODIS", "sin_marca")
-SENSOR_VIA = "MODIS"
+# S176 (diseño docs/superpowers/specs/2026-11-08-encendido-v375e-design.md, decisiones 4 y 7): un detector de la vía por
+# sensor, porque cada VIIRS se enciende y se revierte por separado. POR QUÉ: mismo defecto que en MODIS (S156), y las
+# bandas tampoco se recalibran (A115). `via_modis`, en todas las firmas de abajo, es un diccionario {sensor: fecha} con
+# las fronteras de la vía; una fecha en texto sigue significando MODIS (llamadores de S172 e instrumentos sellados).
+VIA_POR_SENSOR = {"MODIS": "VIA_MODIS", "VIIRS375": "VIA_V375", "VIIRS750": "VIA_V750"}
+DETECTORES = ("C0", "K", "VIA_MODIS", "VIA_V375", "VIA_V750", "sin_marca")
 # D-9 (Nicolás, 2026-10-15, issue #811): las alertas de VIIRS 375 de 0,05 MW o menos, que el banner de
 # MIROVA llama NONE, cuentan como «MIROVA no vio nada». La original se informa al lado.
 REGLA_MINIMAS = cm.MODO_MINIMAS
@@ -511,16 +515,24 @@ def detector_vigente(frontera):
     return "K" if frontera else "C0"
 
 
+def _fronteras(via_modis):
+    """S176: {sensor: 'YYYY-MM-DD'} de las vías. None o vacío, ninguna; una fecha en texto, la de MODIS (S172)."""
+    if not via_modis:
+        return {}
+    return {"MODIS": via_modis} if isinstance(via_modis, str) else via_modis
+
+
 def detector_vigente_de(sensor, vigente, via_modis=None):
-    """S172: el detector que decide en `sensor`: la vía en MODIS desde que hay records de la vía; si no, el vigente."""
-    return "VIA_MODIS" if via_modis and sensor == SENSOR_VIA else vigente
+    """S172: el detector que decide en `sensor`: su vía desde que hay records de la vía; si no, el vigente."""
+    return VIA_POR_SENSOR[sensor] if sensor in _fronteras(via_modis) else vigente
 
 
 def detector_de_noche(fecha, frontera, sensor=None, via_modis=None):
-    """S172: con `sensor` MODIS y la frontera de la vía (`via_modis`, 'YYYY-MM-DD'), las noches desde esa fecha son de
-    la vía. Sin esos dos argumentos, lo de S156."""
-    if via_modis and sensor == SENSOR_VIA and fecha[:10] >= via_modis:
-        return "VIA_MODIS"
+    """S172: con `sensor` y la frontera de su vía (`via_modis`), las noches desde esa fecha son de la vía. Sin esos dos
+    argumentos, lo de S156."""
+    f = _fronteras(via_modis).get(sensor)
+    if f and fecha[:10] >= f:
+        return VIA_POR_SENSOR[sensor]
     return "K" if frontera and fecha[:10] >= frontera else "C0"
 
 
@@ -529,11 +541,11 @@ def _detector(tiene_marca, fecha, frontera, via=False):
     AUDIT_S155 frente 3 §0); sin marca, C0 antes de la frontera y `sin_marca` después (los MODIS Terra
     que el reproceso no pudo reescribir, F2-08). Si algún día se revierte K, la reversión también trae
     marca: habrá que comparar el sha contra el commit de la reversión, y ese día cambia esta función.
-    S172: `via` (record MODIS de la vía «código MIROVA») gana: VIA_MODIS. La caída a K de la vía
+    S172: `via` (record de la vía «código MIROVA»: el nombre de su detector, o True para MODIS) gana. La caída a K de la vía
     (`via_codigo_mirova` "sin_mxd03" y compañía) es K. Si se revierte el encendido, los records MODIS nuevos vuelven
     a ser K en noches que esta función llama VIA_MODIS y quedan en `fuera_de_detector`: ese día cambia también."""
     if via:
-        return "VIA_MODIS"
+        return via if isinstance(via, str) else "VIA_MODIS"
     if tiene_marca:
         return "K"
     return "C0" if detector_de_noche(fecha, frontera) == "C0" else "sin_marca"
@@ -543,9 +555,15 @@ def es_record_via_modis(rec):
     return rec.get("via_codigo_mirova") is True and str(rec.get("sensor") or "").startswith("MODIS")
 
 
+def sensor_via(rec):
+    """S176: el sensor (MODIS, VIIRS375 o VIIRS750) de un record de la vía, o None si no es de la vía. La caída a K trae
+    texto en la marca y no cuenta."""
+    return our_bucket(str(rec.get("sensor") or "")) if rec.get("via_codigo_mirova") is True else None
+
+
 def detector_de_record(rec, frontera):
     return _detector(bool((rec.get("regimen") or {}).get("codigo_sha")),
-                     rec.get("datetime_utc") or "", frontera, via=es_record_via_modis(rec))
+                     rec.get("datetime_utc") or "", frontera, via=VIA_POR_SENSOR.get(sensor_via(rec)))
 
 
 def _detector_banco(r, frontera, via=None):
@@ -554,7 +572,8 @@ def _detector_banco(r, frontera, via=None):
     se cruza por clave. S173 S1 (VPR944-01): la marca sí viaja a node para el predicado del tablero (CAMPOS_JS), así
     que `pub` ya ve la exención de la vía en los filtros de artefacto térmico; los dicts siguen sin la clave."""
     es_via = bool(via) and (r["vol"], r.get("sensor"), r["dt"].strftime("%Y-%m-%d %H:%M")) in via
-    return _detector(bool(r.get("sha")), r["noche"], frontera, via=es_via)
+    return _detector(bool(r.get("sha")), r["noche"], frontera,
+                     via=VIA_POR_SENSOR.get(our_bucket(str(r.get("sensor") or ""))) if es_via else None)
 
 
 def frontera_via_modis(records_por_volcan):
@@ -568,6 +587,25 @@ def frontera_via_modis(records_por_volcan):
 def claves_via_modis(records_por_volcan):
     return {(vol, r.get("sensor"), str(r.get("datetime_utc") or "")[:16].replace("T", " "))
             for vol, recs in records_por_volcan.items() for r in recs if es_record_via_modis(r)}
+
+
+def fronteras_via(records_por_volcan):
+    """S176: {sensor: 'YYYY-MM-DD'} de la primera pasada de la vía de cada sensor. Vacío si ningún sensor tiene records de
+    la vía. La misma regla que las marcas del tablero (frontend/cambio_detector.js)."""
+    out = {}
+    for recs in records_por_volcan.values():
+        for r in recs:
+            s = sensor_via(r)
+            if s:
+                d = str(r.get("datetime_utc") or "")[:10]
+                out[s] = min(out.get(s, d), d)
+    return out
+
+
+def claves_via(records_por_volcan):
+    """S176: claves (volcán, sensor, 'YYYY-MM-DD HH:MM') de los records de la vía de cualquier sensor."""
+    return {(vol, r.get("sensor"), str(r.get("datetime_utc") or "")[:16].replace("T", " "))
+            for vol, recs in records_por_volcan.items() for r in recs if sensor_via(r)}
 
 
 # --- S161 (recomendación 5 del frente S159 sobre el cese, experiments/_s159/cese_snpp/INFORME.md §3 H3) ---
@@ -661,21 +699,24 @@ def sensores_sin_juzgar(recall, desde, ceses, mir_aparte, via_modis=None):
                  f"banda. Lo anterior al cese ({n_aparte} noches) está en plataformas.aparte y no decide")
         estado[s] = {"juzga_desde": d, "plataformas": plats, "n_noches": n, "minimo": MIN_N_RECALL,
                      "n_noches_aparte": n_aparte, "aviso": aviso}
-    # S173 (hallazgo 206, experiments/_s173_aud/f2/INFORME.md): con la vía, el recall de MODIS es el de VIA_MODIS
+    # S173 (hallazgo 206, experiments/_s173_aud/f2/INFORME.md): con la vía, el recall del sensor es el de su detector
     # (evaluacion_vigente), que arranca de cero en la primera pasada de la vía. Hasta juntar el mínimo su flag no puede
     # dispararse y el de K ya no decide: es el mismo «no se midió» del cese, por otra causa. Tampoco degrada.
-    n_via = (recall.get(SENSOR_VIA) or {}).get("n_noches", 0)
-    if via_modis and n_via < MIN_N_RECALL:
-        d = max(via_modis, desde.get(SENSOR_VIA) or "")
-        aviso = (f"{SENSOR_VIA} sin juzgar: {n_via} noches con alerta de MIROVA desde el cambio de detector a la vía "
-                 f"«código MIROVA» (VIA_MODIS, se juzga desde {d}), bajo el mínimo de {MIN_N_RECALL}; su recall no "
+    for s_via, f in _fronteras(via_modis).items():
+        n_via = (recall.get(s_via) or {}).get("n_noches", 0)
+        if n_via >= MIN_N_RECALL:
+            continue
+        det = VIA_POR_SENSOR[s_via]
+        d = max(f, desde.get(s_via) or "")
+        aviso = (f"{s_via} sin juzgar: {n_via} noches con alerta de MIROVA desde el cambio de detector a la vía "
+                 f"«código MIROVA» ({det}, se juzga desde {d}), bajo el mínimo de {MIN_N_RECALL}; su recall no "
                  f"puede dar flag y eso no es estar en banda. Las noches anteriores son de K, están en "
                  f"por_detector.K y no deciden")
-        estado[SENSOR_VIA] = {"juzga_desde": d, "plataformas": (estado.get(SENSOR_VIA) or {}).get("plataformas", []),
-                              "detector": "VIA_MODIS", "motivo": "cambio_de_detector", "n_noches": n_via,
-                              "minimo": MIN_N_RECALL,
-                              "n_noches_aparte": (estado.get(SENSOR_VIA) or {}).get("n_noches_aparte", 0),
-                              "aviso": aviso}
+        estado[s_via] = {"juzga_desde": d, "plataformas": (estado.get(s_via) or {}).get("plataformas", []),
+                         "detector": det, "motivo": "cambio_de_detector", "n_noches": n_via,
+                         "minimo": MIN_N_RECALL,
+                         "n_noches_aparte": (estado.get(s_via) or {}).get("n_noches_aparte", 0),
+                         "aviso": aviso}
     return estado
 
 
@@ -915,7 +956,7 @@ CORTE_535 = "2026-08-28 23:00"   # A104: #535 apagó la máscara de nube de 260 
 # devuelve para una pasada MODIS de la vía; sin él, estratificar_magnitud caía con ValueError la primera noche en que
 # la vía publicara MODIS con alerta de MIROVA, antes de escribir latest.json. Todo régimen nuevo de regimen_de_pasada
 # entra aquí (lo fija tests/test_auto_audit_via_modis_s172.py).
-REGIMENES = ("antes_535", "535_a_571", "571_a_K", "K", "VIA_MODIS")   # #571 = INICIO_REGIMEN_FALSAS (quitó el piso VRP)
+REGIMENES = ("antes_535", "535_a_571", "571_a_K", "K", "VIA_MODIS", "VIA_V375", "VIA_V750")   # #571 = INICIO_REGIMEN_FALSAS (quitó el piso VRP)
 TRAMOS_CENIT = ("z<30", "z30-50", "z50-60", "z>=60", "sin_cenit")   # orden de lectura, de nadir a borde
 
 
@@ -930,9 +971,10 @@ def tramo_cenit(z):
 def regimen_de_pasada(dt, frontera, sensor=None, via_modis=None):
     """'antes_535', '535_a_571', '571_a_K' o 'K' según la hora UTC 'YYYY-MM-DD HH:MM' de la pasada.
     El corte de #571 es INICIO_REGIMEN_FALSAS, el mismo que recorta la ventana de falsas.
-    S172: 'VIA_MODIS' para una pasada MODIS desde la frontera de la vía."""
-    if detector_de_noche(dt, frontera, sensor, via_modis) == "VIA_MODIS":
-        return "VIA_MODIS"
+    S172: el detector de la vía para una pasada del sensor desde la frontera de su vía."""
+    d = detector_de_noche(dt, frontera, sensor, via_modis)
+    if d in VIA_POR_SENSOR.values():
+        return d
     if detector_de_noche(dt, frontera) == "K":
         return "K"
     if dt[:16] < CORTE_535:
@@ -1029,31 +1071,31 @@ def agregar_estratos(out, mir, ours, frontera, vigente, recs_falsas, instantes_m
 
 
 def evaluacion_vigente(por_detector, vigente, via_modis=None):
-    """S172: la evaluación que decide los flags. Sin la vía, la del vigente tal cual (lo de S156). Con la vía, la de K
-    en VIIRS y la de VIA_MODIS en MODIS (recall y magnitud publicada; `detector_por_sensor` dice de quién es cada uno).
-    Las magnitudes por volcán y por conteo de píxeles quedan del vigente: informan, no deciden."""
+    """S172: la evaluación que decide los flags. Sin la vía, la del vigente tal cual (lo de S156). Con la vía, cada sensor
+    toma la de su detector (recall y magnitud publicada; `detector_por_sensor` dice de quién es cada uno). Las magnitudes
+    por volcán y por conteo de píxeles quedan del vigente: informan, no deciden."""
     ev_k = por_detector[vigente]
-    if not via_modis:
+    fr = _fronteras(via_modis)
+    if not fr:
         return ev_k
-    ev_v = por_detector["VIA_MODIS"]
+
+    def de(s):
+        return por_detector[VIA_POR_SENSOR[s]] if s in fr else ev_k
+
+    def por_clave(campo, ev_de):
+        """Las entradas 'volcán|sensor' de `campo`, cada una tomada de la evaluación de su sensor."""
+        return dict(sorted((k, v) for s in SENSORS for k, v in ev_de(s)[campo].items() if k.endswith("|" + s)))
     ev = dict(ev_k)
     ev["detector_por_sensor"] = {s: detector_vigente_de(s, vigente, via_modis) for s in SENSORS}
-    ev["recall"] = {s: (ev_v if s == SENSOR_VIA else ev_k)["recall"][s] for s in SENSORS}
-    mag = {k: v for k, v in ev_k["magnitud_publicada_by_vol_sensor"].items() if not k.endswith("|" + SENSOR_VIA)}
-    mag.update({k: v for k, v in ev_v["magnitud_publicada_by_vol_sensor"].items() if k.endswith("|" + SENSOR_VIA)})
-    ev["magnitud_publicada_by_vol_sensor"] = dict(sorted(mag.items()))
-    if "magnitud_noches_vrp_piso" in ev_k and "magnitud_noches_vrp_piso" in ev_v:
-        piso = {k: v for k, v in ev_k["magnitud_noches_vrp_piso"].items() if not k.endswith("|" + SENSOR_VIA)}
-        piso.update({k: v for k, v in ev_v["magnitud_noches_vrp_piso"].items() if k.endswith("|" + SENSOR_VIA)})
-        ev["magnitud_noches_vrp_piso"] = dict(sorted(piso.items()))
-    if "recall_por_pasada" in ev_k and "recall_por_pasada" in ev_v:
-        # S175: el recall por pasada sigue al por noche: la vía en MODIS, K en VIIRS.
-        rk, rv = ev_k["recall_por_pasada"], ev_v["recall_por_pasada"]
+    ev["recall"] = {s: de(s)["recall"][s] for s in SENSORS}
+    ev["magnitud_publicada_by_vol_sensor"] = por_clave("magnitud_publicada_by_vol_sensor", de)
+    if all("magnitud_noches_vrp_piso" in de(s) for s in SENSORS):
+        ev["magnitud_noches_vrp_piso"] = por_clave("magnitud_noches_vrp_piso", de)
+    if all("recall_por_pasada" in de(s) for s in SENSORS):
+        # S175: el recall por pasada sigue al por noche: cada sensor con su detector.
         ev["recall_por_pasada"] = {
-            "por_sensor": {s: (rv if s == SENSOR_VIA else rk)["por_sensor"][s] for s in SENSORS},
-            "por_volcan_sensor": dict(sorted(
-                [(k, v) for k, v in rk["por_volcan_sensor"].items() if not k.endswith("|" + SENSOR_VIA)]
-                + [(k, v) for k, v in rv["por_volcan_sensor"].items() if k.endswith("|" + SENSOR_VIA)]))}
+            "por_sensor": {s: de(s)["recall_por_pasada"]["por_sensor"][s] for s in SENSORS},
+            "por_volcan_sensor": por_clave("por_volcan_sensor", lambda s: de(s)["recall_por_pasada"])}
     return ev
 
 
@@ -1302,18 +1344,19 @@ def main():
 
     # 2. Nuestros records + integridad (la integridad mira TODO el archivo, no sólo la ventana)
     records_por_volcan, integrity = cargar_records()
-    # S172: la frontera de la vía de MODIS sale de los datos; sin records de la vía es None y nada cambia.
-    via_modis = frontera_via_modis(records_por_volcan)
-    via = claves_via_modis(records_por_volcan) if via_modis else None
+    # S172: las fronteras de la vía salen de los datos (S176: una por sensor); sin records de la vía, vacío y nada cambia.
+    via_modis = fronteras_via(records_por_volcan)
+    via = claves_via(records_por_volcan) if via_modis else None
     nuestros = nuestros_por_noche(records_por_volcan, win, frontera, via_modis=via_modis)
     ours, vistos = nuestros["ours"], nuestros["vistos"]
     pasadas = (pas_mir, nuestros["pasadas"])
 
     # 3. Recall y magnitud, un detector a la vez. Sólo el vigente decide flags (S172: en MODIS, la vía).
-    dets = ("C0", "K") + (("VIA_MODIS",) if via_modis else ())
+    dets_via = tuple(d for s, d in VIA_POR_SENSOR.items() if s in via_modis)
+    dets = ("C0", "K") + dets_via
     por_detector = {det: evaluar_detector(mir, ours, vistos, det, frontera, via_modis=via_modis, piso=piso,
                                           pasadas=pasadas) for det in dets
-                    if det == vigente or det == "VIA_MODIS"
+                    if det == vigente or det in dets_via
                     or any(detector_de_noche(k[2], frontera, k[1], via_modis) == det for k in mir)}
     ev = evaluacion_vigente(por_detector, vigente, via_modis)
     recall_original = recall_por_sensor(
@@ -1429,7 +1472,10 @@ def main():
     if via_modis:
         # S172: sólo con records de la vía, para que sin ellos latest.json sea el de siempre.
         detector_out["vigente_por_sensor"] = {s: detector_vigente_de(s, vigente, via_modis) for s in SENSORS}
-        detector_out["frontera_via_modis"] = via_modis
+        if "MODIS" in via_modis:
+            detector_out["frontera_via_modis"] = via_modis["MODIS"]
+        if set(via_modis) != {"MODIS"}:
+            detector_out["fronteras_via"] = via_modis   # S176: sin vía de VIIRS, latest.json es el de siempre
     out = {
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "window": list(win),
@@ -1487,8 +1533,8 @@ def main():
 
     print(f"Auto-audit semanal — ventana {win[0]} → {win[1]} · detector vigente {vigente} "
           f"(datos desde {frontera}) · D-9 {REGLA_MINIMAS}")
-    if via_modis:
-        print(f"  MODIS: decide la vía «código MIROVA» (VIA_MODIS) desde {via_modis}, primera pasada MODIS de la vía")
+    for s_via, f in via_modis.items():
+        print(f"  {s_via}: decide la vía «código MIROVA» ({VIA_POR_SENSOR[s_via]}) desde {f}, primera pasada {s_via} de la vía")
     for s, d in desde_plat.items():
         if d:
             print(f"  {s} se juzga desde {d} (cese de plataforma, scripts/ceses_esperados.json); "
