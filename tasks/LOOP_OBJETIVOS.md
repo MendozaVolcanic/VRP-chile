@@ -585,6 +585,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 ### 2026-11-08 18:06 UTC (S176): verificador de #964 entregado
 - MERGEABLE sobre `dd982437c`, sin gravedad 3 (`C:/Users/nmend/vrp-temporales/s175_verpr/964/INFORME.md`). VPR964-01, 02 y 03 (gravedad 2) van antes del sello de V750-A, no del merge. Espera frase de Nicolás.
 
+### 2026-11-08 18:35 UTC (S176): prueba ciega de Codex armada, repo pendiente
+- Nicolás: «si, prueba ciega, debes explicarle sobre el proyecto y que el pueda decidir tambien como mejorar el plan, la cuenta de codex es de pocos tokens». Copia en `C:/Users/nmend/vrp-temporales/s176_codex/ciego_final`, de `d516b9d8c`, 8 archivos de código sin comentarios, unos 53 mil tokens, 3 mutaciones sembradas. Encargo y segundo mensaje en `experiments/_s176_codex/`. Lista sellada sha256 `d8099f8a38877e65fd5f1b85823e9aaee58f52d886d83586e04c40267ea94950`, fuera del repo.
+- El clasificador de permisos rechazó crear el repo privado y subir la copia: los tres comandos quedan para Nicolás.
+
 ### 2026-11-08 17:44 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
 - Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
 
