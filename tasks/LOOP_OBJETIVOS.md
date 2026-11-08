@@ -569,7 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-11-08 17:55 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
+### 2026-11-08 17:50 UTC (S176): Nicolás aprueba empezar; VIIRS 750 entra al plan; reproceso
+- Frases: «si empieza, pero porque no lanzar todos los sensores con la nueva via?» y «el reprocesamiento cuando podria hacerse?». Diseño con decisiones 7 y 8: PR A para los dos VIIRS, B1 y B2 separados, reproceso aislado despachable. `reproc-retro-paquete.yml` con 0 corridas. Tag `pre-s176-adopcion-viirs` publicado en `a7a6ae360`; worktree `C:/Users/nmend/vrp-wt/s176-guardia-viirs`.
+- Verificador limpio Fable de #965: MERGEABLE, sin gravedad 3 (`C:/Users/nmend/vrp-temporales/s176_verpr/965/INFORME.md`), sirviendo la rama de verdad en navegador; Chillán 182 de 182.
+
+### 2026-11-08 17:44 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
 - Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
 
 ### 2026-11-08 17:40 UTC (S176): «¿por qué no publicamos la sombra con todos los volcanes?»
