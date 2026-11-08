@@ -137,6 +137,32 @@ def test_g1d_mutacion_prueba_que_g1_de_verdad_falla(generador, tmp_path):
         "la mutación no cambió el JSON generado: G1 no podría detectar un insumo desactualizado")
 
 
+def test_g1e_el_indice_del_arbol_no_recorre_claude(tmp_path):
+    """El índice de nombres de archivo no entra a `.claude/` (S175).
+
+    POR QUÉ. `.claude/worktrees` guarda copias enteras del repo, ignoradas por git. Si el índice las
+    recorre, cada archivo citado aparece repetido y su fila del libro pasa a `ambiguo: true`: G1 y
+    G1b fallaban en cualquier computador con worktrees, midiendo la máquina y no el repo (S142).
+
+    (1) Si la exclusión se quitara, `solo_en_worktree.py` aparecería en el índice y el assert lo
+    dice por nombre. (2) Si el recorrido muriera (índice vacío), la exclusión pasaría por no mirar
+    nada: por eso el control exige que el archivo normal sí esté.
+    """
+    (tmp_path / ".claude" / "worktrees" / "otra" / "scripts").mkdir(parents=True)
+    (tmp_path / ".claude" / "worktrees" / "otra" / "scripts" / "solo_en_worktree.py").write_text("x\n")
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts" / "archivo_normal.py").write_text("x\n")
+
+    mod = _cargar_generador()  # instancia propia, para no pisar ROOT del fixture
+    mod.ROOT = str(tmp_path)
+    indice = mod._indice_arbol()
+
+    assert indice.get("archivo_normal.py") == ["scripts/archivo_normal.py"], (
+        "control: el recorrido no encontró un archivo normal, el índice no está mirando el árbol")
+    assert "solo_en_worktree.py" not in indice, (
+        "_indice_arbol entró a .claude/: el libro cambia según los worktrees del computador")
+
+
 # ══ G2: ninguna cita a una ruta muerta ═════════════════════════════════════
 _RE_CITA = re.compile(
     r"\b(?:experiments|scripts|scratchpad|data)/[\w\-./]+\.(?:py|json|csv|txt)\b")
