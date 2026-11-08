@@ -9,7 +9,8 @@ la logica al texto el 2026-11-07.
 
 QUE VIGILA, con la funcion real extraida de frontend/index.html y ejecutada en node (A97):
 1. otra pasada de la misma noche (40 min) no confirma; la misma pasada (1 y 2 min) si; 3 min no;
-2. D-9 en VIIRS 375: 0,04 y 0,05 MW solas no confirman; 0,04 con una alerta mayor a ±120 s si;
+2. D-9 en VIIRS 375: 0,04 y 0,05 MW solas no confirman, 0,06 sola si; 0,04 con una alerta mayor a ±120 s de ELLA si,
+   aunque la mayor quede fuera de ±120 s del record; 0,04 con la mayor en otra pasada (30 min) no;
 3. D-9 solo en VIIRS 375: 0,04 MW en MODIS y VIIRS 750 confirma;
 4. RUTINA de la misma pasada no confirma;
 5. las constantes del JS son las de scripts/clase_mirova.py (VENTANA_S, UMBRAL_MINIMA_MW, SENSORES_MINIMA);
@@ -71,6 +72,13 @@ CASOS = {
     "d9_004": ([REC_V375, [_alerta("05:00", 0.04)]], 0),
     "d9_005_exacto": ([REC_V375, [_alerta("05:00", 0.05)]], 0),
     "d9_minima_con_mayor_cerca": ([REC_V375, [_alerta("05:00", 0.04), _alerta("05:01", 0.8)]], 1),
+    # VPR958-02. En el caso de arriba la mayor confirma por si sola y el rescate no decide. En estos tres si decide:
+    # la mayor queda a 4 min del record (no confirma), pero a 2 min de la minima, que sobrevive y confirma.
+    "d9_rescate_decide": ([REC_V375, [_alerta("05:02", 0.04), _alerta("05:04", 0.8)]], 1),
+    # la mayor de otra pasada (30 min) no rescata a la minima: fuera de ±120 s de ella no hay rescate.
+    "d9_mayor_otra_pasada_no_rescata": ([REC_V375, [_alerta("05:00", 0.04), _alerta("05:30", 0.8)]], 0),
+    # por conducta, no por el literal: 0,06 MW esta sobre el umbral de D-9 y confirma sola.
+    "d9_006_sobre_umbral": ([REC_V375, [_alerta("05:00", 0.06)]], 1),
     "d9_no_aplica_modis": ([{"datetime_utc": "2026-10-20 05:00", "sensor": "MODIS_AQUA"},
                             [_alerta("05:00", 0.04, sensor="MODIS")]], 1),
     "d9_no_aplica_v750": ([{"datetime_utc": "2026-10-20 05:00", "sensor": "VIIRS_SNPP_750"},
