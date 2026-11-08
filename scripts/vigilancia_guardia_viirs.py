@@ -113,6 +113,17 @@ def informe_sens(prod, guardia, encendido, vols):
     return out
 
 
+def avisos_cotas(flag, sensor):
+    """Con la vía encendida, una cota PENDIENTE DE NICOLÁS es un disparador apagado: se cuenta y nada lo dispara."""
+    if not flag:
+        return []
+    pendientes = [k for k, v in COTAS[sensor].items() if v is None]
+    if not pendientes:
+        return []
+    return [f"la vía de {vg.ETIQUETAS[sensor]} está encendida y siguen PENDIENTES DE NICOLÁS estas cotas de la regla "
+            f"(§4.4): {', '.join(pendientes)}. Se cuentan, pero ningún disparador las vigila"]
+
+
 def leer_encendido(sensor):
     raw = {}
     for vol in aa.VOLS:
@@ -185,7 +196,8 @@ def evaluar(hoy, clave):
               + vs._avisos_frescura(guardia, hoy, "la guardia (K)", "guardia-k-viirs.yml", sensores=[sensor])
               + vs._avisos_frescura(prod, hoy, "producción", "nrt.yml", sensores=[sensor])
               + vg.avisos_perfiles(prod, guardia, n_via_g, perfil_guardia=PERFIL_GUARDIA)
-              + vg.avisos_via(flag, encendido, prod, sensor=sensor) + vg.avisos_nulo(d["nulo"]))
+              + vg.avisos_via(flag, encendido, prod, sensor=sensor) + vg.avisos_nulo(d["nulo"])
+              + avisos_cotas(flag, sensor))
     avisos = ciegos + vg.avisos_caidas(flag, encendido, prod, hoy, sensor=sensor)
     veredicto = d["veredicto"]
     if veredicto == "VERDE" and avisos:

@@ -49,7 +49,8 @@ def test_la_via_de_un_sensor_no_marca_otro():
 
 def test_si_toda_la_ventana_es_de_la_via_no_hay_escalon():
     assert _primera([V375], "VIIRS375") is None
-    assert _primera([CAIDA, V375], "VIIRS375") is None, "una caída a K no cuenta como K antes"
+    # una caída a K anterior a la vía no cuenta como «K antes»: sin esto, la marca se correría a una ventana sin K
+    assert _primera([{**CAIDA, "datetime_utc": "2026-11-01 05:00"}, V375], "VIIRS375") is None
 
 
 def test_notar_guarda_cada_familia_y_pone_un_aviso_por_familia():

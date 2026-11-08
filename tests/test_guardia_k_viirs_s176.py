@@ -218,6 +218,12 @@ def test_revision_roja_si_falta_uno_de_los_dos_viirs():
     assert ok is False and "VIIRS375" in resumen
 
 
+def test_revision_roja_si_esta_corrida_no_escribio_uno_de_los_dos_viirs():
+    """El record de VIIRS 750 existe pero es de una corrida anterior: esta corrida no escribió ese sensor."""
+    ok, resumen = _rev([AMBOS[0], dict(AMBOS[1], processed_utc="2026-11-04T17:50:00Z")])
+    assert ok is False and "ningún record de VIIRS750 escrito" in resumen
+
+
 def test_revision_roja_si_la_corrida_no_escribio_nada():
     ok, resumen = _rev([_k("2026-11-05 06:30", proc="2026-11-04T17:50:00Z"),
                         _k("2026-11-05 06:30", sensor="VIIRS_NOAA20_750", proc="2026-11-04T17:50:00Z")])

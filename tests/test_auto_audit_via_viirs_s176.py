@@ -196,9 +196,11 @@ def test_control_sin_la_via_la_misma_escena_es_k_y_no_hay_claves_nuevas(correr):
 
 
 def test_las_bandas_no_se_recalibran():
-    """A115: las bandas de recall y de magnitud no dependen del detector."""
-    fuente = (ROOT / "scripts" / "auto_audit_weekly.py").read_text(encoding="utf-8")
-    assert "VIA_V375" not in "".join(ln for ln in fuente.splitlines() if ln.startswith(("BANDS", "BANDAS")))
+    """A115: un umbral elegido después del dato no es pre-registro. Los valores de hoy, copiados: si cambian, es a propósito
+    y con un PR que lo diga, no de pasada con el encendido."""
+    assert aa.RECALL_MIN == {"VIIRS375": 93.4, "VIIRS750": 79.5, "MODIS": 95.0}
+    assert aa.MIN_N_RECALL == 15 and aa.MIN_N_RATIO == 5
+    assert aa.FALSAS_BANDA_TERMINADO == {"focal": 10.0, "nevado": 15.0}
 
 
 # ------------------------------------------------------------------ vigilancia de K (scripts/vigilancia_sombra.py)

@@ -311,6 +311,8 @@ def disco(tmp_path, monkeypatch):
         monkeypatch.setattr(vg, "flag_produccion_encendido", lambda sensor="MODIS": flag)
         monkeypatch.setattr(vv, "leer_juzgadas", lambda *a: {})
         monkeypatch.setattr(vv, "volcanes_sens", lambda: [])
+        for s in vv.COTAS:                      # con la vía encendida la regla exige cotas (test_cadena_cota_pendiente...)
+            monkeypatch.setitem(vv.COTAS, s, {"muy_bajo": 2, "sobrepublicacion": 3})
     return poner
 
 
@@ -440,10 +442,9 @@ def test_el_workflow_escucha_a_la_guardia_y_cubre_los_dos_sensores():
 def test_el_workflow_abre_issues_con_prefijo_propio_de_cada_sensor_y_no_revierte():
     d, txt = _wf()
     assert "git revert" not in "".join(s.get("run", "") for s in d["jobs"]["vigilar"]["steps"] if "git push" in s.get("run", ""))
-    assert "Guardia K de $ETIQUETA:" in txt
     for clase in ("candidata a reversion", "candidata fuera de plazo", "investigar", "vigilancia ciega", "caidas a K",
                   "el script fallo"):
-        assert clase in txt, clase
+        assert f'abrir "Guardia K de $ETIQUETA: {clase}"' in txt, clase
     assert "--sensor \"${{ matrix.sensor }}\"" in txt
     assert "guardia_${{ matrix.sensor }}_latest.json" in txt and "guardia_${{ matrix.sensor }}_history.jsonl" in txt
     assert "REGLA_REVERSION_V375E_BORRADOR.md" in txt
@@ -455,3 +456,36 @@ def test_no_se_toca_la_regla_sellada_de_modis():
     if r.returncode != 0:
         pytest.skip("sin origin/main en este checkout")
     assert r.stdout.strip() == ""
+
+
+def test_cadena_cota_pendiente_con_la_via_encendida_da_vigilancia_ciega(disco, monkeypatch):
+    """Una cota PENDIENTE DE NICOLÁS con la vía encendida es un disparador apagado: el encendido exige fijarla."""
+    plat = "VIIRS_NOAA20"
+    disco(*_disco_base(plat), _ref("VIIRS375"))
+    monkeypatch.setitem(vv.COTAS, "VIIRS375", {"muy_bajo": None, "sobrepublicacion": 3})
+    out = vv.evaluar("2026-11-20", "v375")
+    assert out["veredicto"] == "VIGILANCIA_CIEGA"
+    assert any("PENDIENTE" in a and "muy_bajo" in a and "VIIRS 375" in a for a in out["avisos"]), out["avisos"]
+
+
+def test_una_cota_pendiente_con_la_via_apagada_no_avisa():
+    assert vv.avisos_cotas(False, "VIIRS375") == []
+
+
+def test_cadena_las_cotas_son_las_del_sensor(disco):
+    """Las cotas de la regla por sensor llegan a los disparadores (si faltaran, regirían en silencio las de MODIS)."""
+    disco(*_disco_base("VIIRS_NOAA20"), _ref("VIIRS375"))
+    out = vv.evaluar("2026-11-20", "v375")
+    assert out["muy_bajo"]["cota"] == vv.COTAS["VIIRS375"]["muy_bajo"]
+    assert out["sobrepublicacion"]["cota"] == vv.COTAS["VIIRS375"]["sobrepublicacion"]
+
+
+def test_cadena_una_minima_de_d9_cuenta_como_negativo_limpio(disco):
+    """D-9: una alerta de 0,05 MW o menos en VIIRS 375 es «MIROVA no vio nada»; la vía que publica ahí sobre-publica."""
+    t = "2026-11-10 06:00"
+    prod, guardia = _disco_base("VIIRS_NOAA20")
+    prod["Lascar"].append(_crudo(t, True, marca=True))
+    guardia["Lascar"].append(_crudo(t, False))
+    disco(prod, guardia, _ref("VIIRS375") + [_fila("Lascar", t + ":00", 0.03)])
+    out = vv.evaluar("2026-11-20", "v375")
+    assert out["sobrepublicacion"]["n"] >= 1 and out["sobrepublicacion"]["k"] == 1, out["sobrepublicacion"]
