@@ -604,6 +604,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 - D2 (run 42507820590): 1 falla, Tupungatito 2026-10-01 a 10-16, salida 3 por cobertura incompleta (SEARCH_CMR_TIMEOUT de NOAA-21 750 en 10-01, 10-05, 10-12 y 10-13). Se relanza con `gh run rerun --failed` cuando termine la corrida; hasta entonces D2 no está completo (A108).
 - Issues #960 y #962: la última corrida fallida de cada sombra tiene 1 volcán en rojo (Callaqui, 33 de 34 verdes; Tupungatito, 10 de 11) en el paso que revisa si salieron records, con cobertura incompleta en su log. Coincide con el diagnóstico de S175 (cortes de NASA).
 
+### 2026-11-08 21:28 UTC (S176): #966 ajustado (VPR966-01), verificador con reservas
+- Nicolás pidió ajustar. Tag `pre-s176-fetch-966`; commit `d3c3839c0` en `claude/s175-token-fetch-401`: la descarga buena que avala al token se cuenta por corrida (`_DESCARGA_BUENA`, reiniciada en `limpiar_fallas()`).
+- Verificador limpio (Sonnet, `C:/Users/nmend/vrp-temporales/s176_verpr/966b/INFORME.md`): MERGEABLE CON RESERVAS. VPR966B-01 g2: token que muere a mitad de corrida con 403 ya no aborta en esa corrida; la siguiente sí (simulado; qué status da LAADS al vencer un token es SIN DATO). VPR966B-02 g1 a 2: la marca no mira lo devuelto (misma semántica del contador anterior). VPR966B-03 y 04 g1. Mutaciones: 10 de 12 atrapadas, las 2 restantes son de VPR966B-02.
+
 ### 2026-11-08 17:44 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
 - Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
 
