@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 07:45 UTC (S175): medidor de V750-A detenido a mano para proteger D:
+- El medidor (desde 04:28 UTC) dejaba ~48 MB por mutación en `D:\vrp-trabajo\temporales\s175-medidor\dest\` sin
+  borrarlos (438 MB en 11 mutaciones) y D: bajaba de 4,9 a 4,5 GB. A ~3,4 mutaciones por hora las ~130 no terminaban
+  antes de cruzar los 3 GB de D: (unas 18:00 UTC) y el resumen sólo se escribe al final: se habría perdido todo igual.
+  Detenido (6 procesos) tras IDENTIDAD y M1 a M10; sus salidas quedan en `dest\pruebas_*`. Quedan sin borrar dos copias
+  `_mut_M9` y `_mut_M10` en `D:\vrp-trabajo\wt\s174-v750a-m71\experiments\_s162_v750a\` (sin seguimiento de git).
+- Para la corrida completa hace falta disco: unos 6,5 GB libres en D: además del margen de 3 GB, o correrla por tandas con
+  `--solo` vaciando `dest` entre tandas. Queda para cuando Nicolás libere espacio.
+- C: sigue en 2,7 GB (loop detenido, #961). NRT verde (07:10 UTC).
+
 ### 2026-11-08 ~06:40 UTC (S175): verificador limpio de #956; los cuatro PR en borrador ya tienen el suyo
 - #956 (`C:\Users\nmend\vrp-temporales\s175_verpr\956\INFORME.md`, cabeza `4fab331d4`): **MERGEABLE CON CAMBIOS**. Lo
   central CONFIRMADO (store.py:686-708, `--overwrite` sólo por dispatch manual, 18,95 h entre la primera observación
