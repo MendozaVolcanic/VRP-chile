@@ -595,6 +595,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 ### 2026-11-08 19:19 UTC (S176): PR A #967 en borrador, verificador lanzado
 - Guardia K y vigilancia para los dos VIIRS, audit por sensor, marca del tablero y regla de reversión en borrador. Cabeza `458af255d`, CI verde, sin flags encendidos. Verificador limpio Fable en `C:/Users/nmend/vrp-temporales/s176_verpr/967/`. Pendiente de Nicolás: sello de la regla (D1 a D7), frases de merge. Toca además `pages-deploy.yml` y `vigilancia_sombra.py`: a mirar por el verificador.
 
+### 2026-11-08 19:44 UTC (S176): verificador de #967, MERGEABLE
+- `C:/Users/nmend/vrp-temporales/s176_verpr/967/INFORME.md`: inerte comprobado por tres vías, navegador real. VPR967-01 g3 no bloquea A: las cotas de VIIRS 375 descansan en 2 y 5 casos crudos, IC 95 % [3, 42] y [6, 30]; pesa en el sello. Espera frase de Nicolás.
+
 ### 2026-11-08 17:44 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
 - Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
 
