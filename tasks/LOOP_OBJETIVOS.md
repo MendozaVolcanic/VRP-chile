@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 14:38 UTC (S175): los 33 hallazgos pendientes verificados, ninguno refutado; #963 MERGEABLE
+- #963 (`248b37ddf`, verificador Fable): MERGEABLE, sin gravedad 3. Los tres casos R2 saltan con motivo honesto (MIROVA 0,0
+  MW en esas pasadas; 9 de 9 roturas atrapadas, incluidas dos de datos). Causa #883 de la descomposición S139 confirmada por
+  otra vía (15.176 records iguales entre el merge y HEAD; 9.919 distintos contra el padre).
+- V33A (`experiments\_s175_audit\v33a\VERIFICACION.md`): 18 hallazgos, 15 CONFIRMADOS, 3 EN PARTE, 0 refutados.
+  **V33A-01 (g2, reproducido en navegador)**: con «Todos los pixels», `frontend/index.html:3157` lanza TypeError sobre los
+  píxeles de la vía (sin `vrp_mw`, hallazgo 161) y el `hotspots.forEach` de l. 3017 deja de dibujar los records
+  posteriores: en Chillán desaparecen 5 días (39 records). Con «Solo principal» (defecto) no ocurre. Arreglo: A45.
+- V33B (`...\v33b\VERIFICACION.md`): 15 hallazgos, 12 CONFIRMADOS, 3 EN PARTE, 0 refutados. Pesan: F2-209 (el lector que
+  decide V375-E no está en main; sí en el tag), 255 (la cola §5 tiene cinco filas ya cerradas), F2-211, F2-213 y 308 (el
+  criterio «ninguna protegida perdida» es vacuo en 5 de 11 volcanes en la ventana del audit).
+- #955: el autor incorpora F5b, V5B, V33A y V33B. Queda la reconciliación del lector de V750-A.
+
 ### 2026-11-08 14:19 UTC (S175): V5B baja la conclusión de F5b sobre Chillán; #963 abierto
 - V5B (Opus, `high` comprobado: 125 pedidos), `experiments\_s175_audit\v5b\VERIFICACION.md` de la rama de #955. La
   georreferencia de la lámina VIIRS vale fuera de muestra (17 de 17 en 25 casos nuevos, nulo por azar 1 %). Pero el selector
