@@ -157,9 +157,22 @@ def test_protegida_solo_ocr_truncada_informa_el_intervalo():
     es entero). El flag tiene que decir el intervalo; si se leyera 1,0 como el valor, no lo dice."""
     lista = _protegidas([_alerta("NevadosDeChillan", "MODIS", "2026-10-30 07:15:00", 1.0, source="OCR")],
                         [_brec("NevadosDeChillan", "MODIS", "2026-10-30 07:15", False, "MODIS_TERRA")])
-    assert [(p["vrp_mirova_mw"], p["vrp_mirova_hasta_mw"], p["estado"]) for p in lista] == [(1.0, 2.0, "sin_publicar")]
+    assert [(p["vrp_mirova_mw"], p.get("vrp_mirova_hasta_mw"), p["estado"]) for p in lista] == [(1.0, 2.0, "sin_publicar")]
     fl = aa.flags_protegidas(lista, "K")
     assert len(fl) == 1 and "MIROVA 1.0 a 2.0 MW (sólo OCR, truncado a entero por MIROVA en MODIS" in fl[0]
+
+
+def test_linea_recall_por_pasada_no_imprime_none():
+    """VPR957-05: un sensor sin pasadas tiene los porcentajes en None y la salida del workflow decía «None%».
+    Control: con datos, la línea sigue trayendo los porcentajes y los n."""
+    vacio = {"recall_pasada_pct": None, "n_pasadas": 0, "pasadas_sin_record": 0,
+             "recall_noche_misma_pasada_pct": None, "n_noches": 0}
+    linea = aa.linea_recall_por_pasada("VIA_MODIS", "VIIRS750", vacio)
+    assert "None" not in linea and linea.count("sin dato") == 2
+    con_datos = {"recall_pasada_pct": 95.9, "n_pasadas": 341, "pasadas_sin_record": 0,
+                 "recall_noche_misma_pasada_pct": 95.0, "n_noches": 200}
+    linea = aa.linea_recall_por_pasada("K", "VIIRS375", con_datos)
+    assert "por pasada 95.9% (n=341, 0 sin record)" in linea and "misma pasada 95.0% (n=200)" in linea
 
 
 def test_protegida_con_tabla_usa_el_vrp_de_la_tabla():

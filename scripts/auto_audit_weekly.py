@@ -742,8 +742,27 @@ def noches_mirova_con_instante(alertas, coords, win, techo=None):
 
 def noches_vrp_piso(mir, techo):
     """S175: noches cuyo VRP de MIROVA es sólo un piso (el real puede pasar al máximo que se ve: viene del OCR
-    truncado de MODIS o VIIRS 750 y la tabla no tiene esa pasada). Fuera de toda razón de magnitud."""
+    truncado de MODIS o VIIRS 750 y la tabla no tiene esa pasada). Fuera de toda razón de magnitud.
+
+    DECISIÓN PENDIENTE DE NICOLÁS (VPR957-02, PR #957). La exclusión no mira el tamaño del VRP: también salen noches
+    donde el intervalo [v, v + 1) casi no mueve la razón (con 25 MW, a lo más un 4 %: sólo importa si la razón queda
+    a menos de eso del borde de RATIO_BAND_MEDIAN, 0,7 a 1,4), y mientras la tabla se atrase respecto del OCR el
+    volcán pierde n y tarda más en poder dar flag de magnitud.
+    Medido con el snapshot (tabla hasta el 2026-11-02, OCR hasta el 2026-11-07), ventana 2026-09-09 a 2026-11-08:
+    salen 6 noches, todas de Chillán: 4 de lo que se juzga, posteriores al último día de la tabla (MODIS 25 y 9 MW,
+    n 3 a 1; VIIRS 750 38 y 13 MW, n 2 a ninguna), y 2 de VIIRS 750 del tramo aparte por el cese (n 22 a 20).
+    Cuánto se atrasa la tabla con los CSV vivos del workflow: SIN DATO. Dos opciones: (a) dejarlo así, que es lo que
+    hace este código mientras no se decida (decisión 9: lo que no se puede es usar v como magnitud); (b) excluir sólo
+    si v y v + 1 caen a lados distintos de la banda, o usar v + 0,5 y declararlo."""
     return {k for k, v in mir.items() if (techo or {}).get(k, v) > v + 1e-9}
+
+
+def linea_recall_por_pasada(det, s, rp):
+    """Línea de la salida del workflow con el recall por pasada. Un sensor sin pasadas dice «sin dato», no «None%»."""
+    pct = lambda v: "sin dato" if v is None else f"{v}%"  # noqa: E731
+    return (f"  [{det}] {s:<9} por pasada {pct(rp['recall_pasada_pct'])} (n={rp['n_pasadas']}, "
+            f"{rp['pasadas_sin_record']} sin record) · noches con acierto en la misma pasada "
+            f"{pct(rp['recall_noche_misma_pasada_pct'])} (n={rp['n_noches']})")
 
 
 def nuestros_por_noche(records_por_volcan, win, frontera, via_modis=None):
@@ -1074,7 +1093,9 @@ def alertas_protegidas(filas, recs_banco, win, frontera, diurna=None, via_modis=
 
     S175 (decisión 9 de docs/AUDIT_S175.md): en MODIS y VIIRS 750 la fila del OCR no cuenta si la tabla tiene la
     pasada (`clase_mirova.tabla_sobre_ocr`), y si sólo hay OCR su VRP es un piso: la protegida lleva
-    `vrp_mirova_hasta_mw` (v + 1, exclusivo). Como el corte es 1 MW, el piso no cambia qué es protegida.
+    `vrp_mirova_hasta_mw` (v + 1, exclusivo). Como el corte es 1 MW, el piso no cambia qué es protegida. La regla
+    de la tabla sí puede cambiarlo (una tabla sin alerta le quita la protección al OCR; hoy 0 casos): es la decisión
+    pendiente de Nicolás escrita en `clase_mirova.tabla_sobre_ocr` (VPR957-01).
     """
     filas = cm.tabla_sobre_ocr(filas)
     if diurna is None:
@@ -1270,6 +1291,8 @@ def main():
     mir, inst_mir, n_diurnas_excluidas = noches_mirova_con_instante(alertas_d9, coords, win, techo=techo_mir)
     piso = noches_vrp_piso(mir, techo_mir)
     pas_mir = pasadas_mirova(alertas_d9, coords, win)   # S175: recall por pasada
+    # S175 (VPR957-03): `recall_regla_original` quiere decir «sin D-9», no «como antes de S175»: estas `alertas` ya
+    # pasaron por tabla_sobre_ocr, así que el control lleva la regla de la tabla (hoy no mueve ninguna noche).
     mir_original, _ = noches_mirova(alertas, coords, win)
     # S161: cada sensor se juzga desde el último cese de plataforma ya cumplido; lo anterior va aparte.
     ceses, error_ceses = leer_ceses()
@@ -1475,10 +1498,7 @@ def main():
             r = e["recall"][s]
             print(f"  [{det}] {s:<9} recall crater {r['recall_crater_pct']}% "
                   f"publicación {r['recall_dash_pct']}% (n={r['n_noches']})")
-            rp = e["recall_por_pasada"]["por_sensor"][s]
-            print(f"  [{det}] {s:<9} por pasada {rp['recall_pasada_pct']}% (n={rp['n_pasadas']}, "
-                  f"{rp['pasadas_sin_record']} sin record) · noches con acierto en la misma pasada "
-                  f"{rp['recall_noche_misma_pasada_pct']}% (n={rp['n_noches']})")
+            print(linea_recall_por_pasada(det, s, e["recall_por_pasada"]["por_sensor"][s]))
     for k, m in ev["magnitud_publicada_by_vol_sensor"].items():
         print(f"  [{detector_vigente_de(k.split('|')[-1], vigente, via_modis)}] magnitud publicada {k:<30} "
               f"{m['ratio_mediano']}x (n={m['n_noches']})")

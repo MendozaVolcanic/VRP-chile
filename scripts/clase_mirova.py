@@ -176,9 +176,11 @@ def aplicar_regla_minimas(filas, modo: str = MODO_MINIMAS, umbral_mw: float = UM
 # S175, decision 9 de docs/AUDIT_S175.md §8 (Nicolas, 2026-11-07): en MODIS y VIIRS 750 el VRP del OCR es un piso.
 #
 # POR QUE. MIROVA escribe en su imagen el VRP de MODIS y de VIIRS 750 truncado a entero, y su tabla (latest.php) lo
-# trae con decimales. Medido en S175 sobre las copias de la base: en el OCR las 48 alertas MODIS y las 95 de VIIRS
-# 750 son enteras; en la tabla 141 de 142 alertas MODIS traen decimales; misma pasada, Chillan MODIS 2026-10-30
-# 08:55, tabla 14,39 MW y OCR 14,0. VIIRS 375 si trae decimales en el OCR (896 de 897) y no entra.
+# trae con decimales. Medido sobre la referencia unificada de data/mirova_reference/mirova_v1_snapshot (tabla hasta
+# el 2026-11-02, OCR hasta el 2026-11-07): en el OCR las 50 alertas MODIS y las 95 de VIIRS 750 son enteras (contando
+# tambien FALSO_POSITIVO y ALERTA_SIN_GEOMETRIA, las 52 y 118 filas con VRP); en la tabla 135 de 136 alertas MODIS
+# traen decimales; misma pasada, Chillan MODIS 2026-10-30 08:55, tabla 14,39 MW y OCR 14,0. VIIRS 375 si trae
+# decimales en el OCR (899 de 900 alertas) y no entra.
 # Regla: si la tabla tiene la pasada, su VRP manda y la fila del OCR no se usa (tabla_sobre_ocr); si solo hay OCR,
 # el VRP real esta entre v y v + 1 (techo_vrp). El corte de protegida es entero (1 MW), asi que el piso decide igual
 # que el valor real (v >= 1 es protegida y v = 0 no); lo que no se puede es usar v como magnitud.
@@ -202,7 +204,18 @@ def techo_vrp(fila: dict) -> Optional[float]:
 def tabla_sobre_ocr(filas, tabla=None, ventana_s: int = VENTANA_S) -> list:
     """`filas` sin las del OCR de MODIS y VIIRS 750 cuya pasada esta en la tabla: una fila CONS, de cualquier tipo,
     del mismo volcan y sensor a `ventana_s` segundos o menos. `tabla`: filas donde buscar las CONS (por defecto las
-    mismas `filas`; el auto-audit pasa la referencia unificada, que trae tambien las RUTINA). No modifica nada."""
+    mismas `filas`; el auto-audit pasa la referencia unificada, que trae tambien las RUTINA). No modifica nada.
+
+    DECISION PENDIENTE DE NICOLAS (VPR957-01, PR #957). Como basta una fila CONS de cualquier tipo, una tabla RUTINA o
+    FALSO_POSITIVO a 120 s o menos tambien saca a la fila del OCR: una alerta solo OCR de 1 MW o mas deja de ser
+    protegida y su noche sale del recall. Es un cambio de criterio respecto de `alerta_protegida` fila por fila, y es
+    asimetrico: en VIIRS 375 el OCR sigue compitiendo con la tabla. Medido en la referencia unificada del snapshot
+    (47.631 filas, tabla hasta el 2026-11-02): de las 145 filas OCR de alerta de MODIS y VIIRS 750, 92 tienen tabla con
+    alerta, 53 no tienen tabla y 0 tienen tabla sin alerta; 569 pasadas protegidas (tres sensores) antes y despues, sin
+    que cambie ninguna. Hoy 0 casos; el dano seria futuro y silencioso. Dos opciones: (a) aceptar la regla "la tabla
+    decide" de S162 (`resumir_pasadas`; la tabla es el canal mas creible, feedback S159), que es lo que hace este
+    codigo mientras no se decida; (b) acotar esta funcion a las filas CONS de alerta, de modo que una tabla sin alerta
+    no le quite la proteccion al OCR."""
     filas = list(filas)
     idx = defaultdict(list)
     for f in (filas if tabla is None else tabla):
