@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 17:45 UTC (S176): las dos preguntas de Nicolás, medidas
+- Respuestas y salidas en `experiments/_s176_preguntas/`. Los 34 corren en sombra (`data/sombra_34/`, 5 noches, 1.339 records) y el tablero no los lee,
+  a propósito; son 45 volcanes, no 43; el rótulo «no monitoreado» es inexacto. Audit local con datos de hoy (no el oficial): FUERA_DE_BANDA por
+  VIIRS 375 en Chillán (0,602) y Tupungatito (0,466).
+- Exploratorio, sin verificador: en las mismas pasadas del 11-03 al 11-07, la sombra da razón mediana 0,99 en VIIRS 375 (n 32) y 1,00 en VIIRS 750
+  (n 14), contra 0,50 y 0,48 de producción con K. Negativos limpios publicados: producción 7 de 91 y 4 de 132, sombra 0 y 0.
+- Verificadores limpios Fable de #965 y #966 lanzados (`C:\Users\nmend\vrp-temporales\s176_verpr\`). Sigue el de #964. Claude in Chrome no conectado.
+
 ### 2026-11-08 17:30 UTC (S175): cierre de la sesión
 - Traspaso en `tasks/BLOQUE_ARRANQUE_S176.md`. En main: #956, #957, #958, #959 y #963. En borrador con CI verde: #955, #964, #965 y #966.
   Sigue vivo el verificador de #964, escribe sólo en `C:\Users\nmend\vrp-temporales\s175_verpr\964\`. NRT sin corrida desde las
