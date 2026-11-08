@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 14:19 UTC (S175): V5B baja la conclusión de F5b sobre Chillán; #963 abierto
+- V5B (Opus, `high` comprobado: 125 pedidos), `experiments\_s175_audit\v5b\VERIFICACION.md` de la rama de #955. La
+  georreferencia de la lámina VIIRS vale fuera de muestra (17 de 17 en 25 casos nuevos, nulo por azar 1 %). Pero el selector
+  de píxel de F5b borra la mancha saturada confundiéndola con «sin dato» (`f5b_lib.py` l. 118 a 122): 35 de 303 láminas; en
+  Chillán V750 17 de 55 y MODIS 12 de 22 (V5B-01, g3). **El 351 («cuatro protegidas de Chillán con el foco a 1 a 2,5 km»)
+  no se sostiene**: tres de cuatro son ese artefacto (nuestro punto cae dentro de la mancha, a 0,1 a 0,3 km) y la cuarta es
+  un empate entre saturados. Queda sólo lo radial: la `Distancia_km` V750 de MIROVA (2,12 a 2,37 km) dista 1,8 a 2,3 km de
+  nuestro centroide, y la de V375 en esas pasadas dice 1,06 a 1,19 km. 352 EN PARTE, 353 y 354 CONFIRMADOS g2, 355 g1. El nulo
+  por permutación deja la clase (i) en 73 y 77 %, contra 95 y 94 % observado: casi no separa pasadas. Los conteos de
+  clases de F5b no se citan como medición de identidad de foco.
+- #963 (seguimientos chicos, `248b37ddf`, CI verde): 5 de 6 fallas locales resueltas; verificador Fable lanzado. Hallazgo
+  para Nicolás: la descomposición de S139 cambió con K (n 1.579 contra 1.499, el 0,995 no se reproduce, causa #883).
+- Disco C: 16 GB, D: 4,5 GB. Corren: reconciliación del lector de V750-A, V33A, V33B, verificador de #963.
+
 ### 2026-11-08 14:14 UTC (S175): #956, #957, #958 y #959 MERGEABLE tras segunda vuelta; 33 hallazgos a verificación
 - Verificadores limpios Fable, segunda vuelta, todos con CI verde y sin hallazgos de gravedad 3: #956 `b155f7963` (reprodujo
   474 reemplazos y 13,8 h por otro camino; regla sellada intacta; mergear después de #955, que lo cita), #957 `f4d98dddd`
