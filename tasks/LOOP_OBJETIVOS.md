@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 ~06:05 UTC (S175): V4T confirma el defecto del token en `pipeline/fetch.py`; decisión para Nicolás
+- V4T (Opus, `high` comprobado: 283 pedidos), `experiments\_s175_audit\v4t\VERIFICACION.md` de la rama de #955.
+  381 CONFIRMADO g4 (`pipeline/fetch.py:466-467`: `a or b` descarta el `Response` de un 401 porque vale falso; un 401 de
+  CMR con texto fuera del regex termina en exit 0 y 0 archivos; probado con earthaccess 0.17 y 0.19 y placebo). 382
+  CONFIRMADO g3 (la `DownloadFailure` de un 401/403 en la descarga termina en WARN y exit 0; los tests S123/S124 arman la
+  excepción a mano sin `__cause__`, V4T-02 g3). 383 y 385 CONFIRMADOS EN PARTE g4; 387 g3; 384, 386 y 388 g2; 389 y
+  390 g1. REFUTADO en parte: el CI instala earthaccess 0.17.0 (Python 3.11), no 0.19.0; `experimental-diario.yml`
+  tampoco revisa su salida. Nuevo V4T-01 g3: un token con salto de línea final hace fallar requests antes de enviar, el
+  NRT queda verde, y el error, que lleva el token, se imprime en el log (SOSPECHA de que el enmascarado de secretos de
+  Actions lo tape: SIN DATO).
+- Lectura: el vencimiento natural sí se detecta (2026-10-03 quedó rojo). El riesgo de la rotación del 2026-11-27 es un
+  token mal pegado: NRT verde sin datos, primer aviso a las 48 a 72 h. Decisión para Nicolás (A45, toca `pipeline/`):
+  arreglar 381 y 382 antes de rotar, con tag defensivo. Mitigación sin código: tras rotar, despachar el NRT de un volcán
+  y comprobar que escribió records.
+
 ### 2026-11-08 ~05:45 UTC (S175): F5b entregado a medias por la parada de disco
 - F5b (Fable, `high` comprobado: 191 pedidos), informe `experiments\_s175_audit\f5b\INFORME.md` de la rama de #955,
   hallazgos 351 a 353. La lámina VIIRS sirve de vara de posición: en los 4 casos de F5 con TIF el píxel más claro cae a 0
