@@ -582,6 +582,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 - D1 verde y con la vía en 100 % de MODIS, VIIRS 375 y 750 en los 3 días (31 records). D2 despachado desde el tag `s172-retro-d2` (`a7a6ae360`), run 42507820590, 47 trabajos.
 - Auditoría en navegador de mirovaweb.it y del tablero: `docs/superpowers/plans/2026-11-08-visualizador-como-mirova.md`, plan en tres fases para Nicolás. Agente de plan de GPT Codex lanzado.
 
+### 2026-11-08 18:06 UTC (S176): verificador de #964 entregado
+- MERGEABLE sobre `dd982437c`, sin gravedad 3 (`C:/Users/nmend/vrp-temporales/s175_verpr/964/INFORME.md`). VPR964-01, 02 y 03 (gravedad 2) van antes del sello de V750-A, no del merge. Espera frase de Nicolás.
+
 ### 2026-11-08 17:44 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
 - Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
 
