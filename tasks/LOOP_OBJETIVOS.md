@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 ~06:40 UTC (S175): verificador limpio de #956; los cuatro PR en borrador ya tienen el suyo
+- #956 (`C:\Users\nmend\vrp-temporales\s175_verpr\956\INFORME.md`, cabeza `4fab331d4`): **MERGEABLE CON CAMBIOS**. Lo
+  central CONFIRMADO (store.py:686-708, `--overwrite` sólo por dispatch manual, 18,95 h entre la primera observación
+  con vía y el encendido, 129 de 129 records MODIS con vía, regla sellada sin cambio decisorio, `.gitignore` acotado).
+  VPR956-01 (g3): el «a los 3 a 5 días» del producto estándar sale de un comentario de S12, no de una medición: sobre
+  662 reemplazos NRT a estándar la mediana es 15,6 h (65 % bajo 24 h, 9 % entre 3 y 5 días); y los 22 records del «19 h
+  antes» son reemplazos del mismo día, no «días después». Va en la ficha pública. VPR956-02 (g2): la rebaja no se
+  propagó a `docs/MISSION.md:8` ni a `docs/MIROVA_DIVERGENCES.md:8` (A113). VPR956-03: cita `docs/AUDIT_S175.md`, que
+  sólo existe en #955 (orden de merge). Mi revisión de las 05:15 no vio VPR956-01: confirma la regla del verificador de
+  otro modelo.
+- Estado de los cinco PR: #958 MERGEABLE; #957, #956 y #959 MERGEABLE CON CAMBIOS (de texto los dos primeros, una prueba
+  de cadena el tercero); #955 espera reescribir la frase del 302 y el anexo del audit del lunes. Ninguno se mergea sin la
+  frase de Nicolás; #958 además toca `frontend/` (tag y sí).
+- Loop sigue DETENIDO por disco (C: 2,7 GB, #961).
+
 ### 2026-11-08 ~06:30 UTC (S175): verificador limpio de #959
 - #959 (`C:\Users\nmend\vrp-temporales\s175_verpr\959\INFORME.md`, cabeza `57c4e2fc3`): **MERGEABLE CON CAMBIOS**, ninguno
   bloquea. Confirmadas todas las afirmaciones funcionales; YAML válido con `"on":` quoteado; `run_pipeline.py` sólo agrega
