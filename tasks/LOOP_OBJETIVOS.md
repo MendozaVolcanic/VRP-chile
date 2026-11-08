@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 15:24 UTC (S175): #959, #957 y #956 mergeados con frase de Nicolás
+- Frase de Nicolás («Sí, merge de los tres», a la pregunta por #959, #957 y #956). Squash con `--match-head-commit`:
+  #959 `71ecc61b0` (15:23:32 UTC, cabeza `cf65d9928`), #957 `6cf57cb2b` (15:23:37, `f4d98dddd`), #956 `1b66b7490` (15:23:44,
+  `b155f7963`). Ninguno toca `pipeline/`, `data/` ni `frontend/` (comprobado con `gh pr diff --name-only`). Workflow de la
+  guardia válido en main (claves `name, on, permissions, concurrency, jobs`). CI de main sobre `1b66b7490` en curso (run
+  42494593753); los dos runs anteriores se cancelaron por el grupo de concurrencia. Main traído a `loop/activo`.
+- #957 entra con la decisión 1 en su opción (a), «la tabla decide», que es lo que el código ya hacía; las dos decisiones
+  siguen abiertas para Nicolás. La rebaja de 3-5 días en la ficha queda publicada como v1.19.
+- Siguen sin frase: #958 (tag y sí), #963, #955 (anexo del lunes), #964 (reconciliación, su autor aún no entrega).
+
 ### 2026-11-08 14:38 UTC (S175): los 33 hallazgos pendientes verificados, ninguno refutado; #963 MERGEABLE
 - #963 (`248b37ddf`, verificador Fable): MERGEABLE, sin gravedad 3. Los tres casos R2 saltan con motivo honesto (MIROVA 0,0
   MW en esas pasadas; 9 de 9 roturas atrapadas, incluidas dos de datos). Causa #883 de la descomposición S139 confirmada por
