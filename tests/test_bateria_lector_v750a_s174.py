@@ -27,7 +27,13 @@ cambio a los escenarios, a su juez (`correr`) o al medidor tiene que venir con l
 ve en el diff. Y el medidor reconoce una atrapada «sólo por la bandera "no se cae"» por un texto (`BANDERA`) copiado de
 `probar_evaluar_v750a.py`; si ese texto cambia, el rótulo vuelve a decir «por aserción» en silencio (VPR954-02):
 `test_la_bandera_del_medidor_es_el_texto_que_emite_la_bateria` lo compara con lo que la batería emite de verdad.
+
+S175 (reconciliación de las dos versiones del lector). La regla N-3 (§6 ter) sólo existe antes del 2026-10-09 y la sombra
+sólo lee desde el 2026-11-03: por eso el pre-registro dice que la sombra «no tiene pasadas de esta clase». Con la ventana
+fija, la mutación que aplicaba la exención N-3 en la sombra quedó equivalente (ninguna pasada puede activarla), así que el
+medidor no la puede vigilar: `test_la_clase_n3_no_puede_entrar_a_la_sombra` fija la desigualdad que la hace equivalente.
 """
+import ast
 import datetime
 import hashlib
 import importlib.util
@@ -44,14 +50,14 @@ MEDIDOR = EXP / "mutar_evaluar_v750a.py"
 LECTOR = Path(os.environ.get("V750A_LECTOR_MODULO") or EXP / "evaluar_v750a.py")
 EVALUADOR_RUTA = "experiments/_s157_prereg_d25/evaluar_d25.py"
 # Conteo fijo a propósito: un escenario que desaparece (o uno nuevo que no se anota aquí) pone la prueba en rojo.
-N_ESCENARIOS = 105
+N_ESCENARIOS = 137
 # Los escenarios son independientes (cada uno en su carpeta); en grupos paralelos la batería cabe holgada en el job
 # `bateria-v750a` de 40 min (158 s en el CI de #954).
 GRUPOS = 4
 # VPR954-01: sha256 de probar_evaluar_v750a.py y mutar_evaluar_v750a.py con fines de línea LF (ver _huella_bateria).
 # Se actualiza A PROPÓSITO, con el valor que imprime la prueba cuando falla, después de correr el medidor sobre los
 # escenarios tocados.
-HUELLA_BATERIA = "b5222101be801e2039ebdd89fab2409bd17b8721e1d3a72a3b24abf8b8c69335"
+HUELLA_BATERIA = "c749a1a804e99ac88834126507cfa5d4b56c74bfc0e87c4c67bc83c9417fc185"
 
 
 def _cargar(nombre, ruta):
@@ -120,6 +126,26 @@ def test_tz_de_er45_y_er47_pone_el_proceso_en_utc_mas_12(tmp_path):
                        env=dict(_env(tmp_path), TZ="XXX-12"))
     assert o.returncode == 0, o.stderr
     assert float(o.stdout.strip()) == 12 * 3600, f"con TZ=XXX-12 el desfase local es {o.stdout.strip()} s, no 43200"
+
+
+def test_la_clase_n3_no_puede_entrar_a_la_sombra():
+    """S175: si la frontera de N-3 pasara el inicio de la sombra, la exención del §6 ter podría tocar el §6.3 y ninguna
+    mutación ni escenario lo vería (el M91 antiguo es equivalente sólo mientras esto se cumpla). Se leen las constantes
+    con ast para no importar el lector."""
+    const = {}
+    for n in ast.parse(LECTOR.read_text(encoding="utf-8")).body:
+        if not isinstance(n, ast.Assign):
+            continue
+        destino = n.targets[0]
+        if isinstance(destino, ast.Tuple) and isinstance(n.value, ast.Tuple):
+            pares = zip(destino.elts, n.value.elts)
+        else:
+            pares = [(destino, n.value)]
+        for t, v in pares:
+            if isinstance(t, ast.Name) and t.id in ("FRONTERA_N3", "INICIO_SOMBRA"):
+                const[t.id] = ast.literal_eval(v)
+    assert set(const) == {"FRONTERA_N3", "INICIO_SOMBRA"}, const
+    assert const["FRONTERA_N3"] < const["INICIO_SOMBRA"], const
 
 
 def test_la_bandera_del_medidor_es_el_texto_que_emite_la_bateria(tmp_path):
