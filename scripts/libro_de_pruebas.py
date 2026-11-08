@@ -143,10 +143,13 @@ def _indice_arbol():
     archivo real vive en ".github/workflows/_archive/x.yml"). Este índice permite
     resolver esas rutas parciales por coincidencia de sufijo, sin adivinar por
     parecido de texto: si el sufijo no calza, no hay resolución.
+
+    `.claude/` no se recorre (S175): `.claude/worktrees` guarda copias enteras del repo, ignoradas
+    por git, y cada copia volvía `ambiguo` a un archivo citado: el libro cambiaba según el computador.
     """
     idx = {}
     for dp, dn, fn in os.walk(ROOT):
-        dn[:] = [d for d in dn if d not in (".git", "node_modules", "__pycache__", ".venv")]
+        dn[:] = [d for d in dn if d not in (".git", "node_modules", "__pycache__", ".venv", ".claude")]
         for f in fn:
             rel = os.path.relpath(os.path.join(dp, f), ROOT).replace(os.sep, "/")
             idx.setdefault(f, []).append(rel)
