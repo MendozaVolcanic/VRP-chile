@@ -1,0 +1,14 @@
+(corrida parcial: --solo M86,M87,M88,M89,M90,M91,M92,M93,M94,M95)
+IDENTIDAD | PASA (tiene que ser PASA) | rc 0 | == PRUEBAS: TODOS LOS ESCENARIOS COMO SE ESPERA (81)
+M86 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 ter: las N-3 vuelven a contar en el P1 que veta | == PRUEBAS: FALLAS 1 de 81 | escenarios que fallan ['E77']
+M87 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 ter: la clase N-3 no mira el sensor (entra NOAA-20) | == PRUEBAS: FALLAS 2 de 81 | escenarios que fallan ['E26', 'E74']
+M88 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 ter: la clase N-3 no mira la alerta de la tabla | == PRUEBAS: FALLAS 1 de 81 | escenarios que fallan ['E79']
+M89 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 ter: la frontera del 2026-10-09 incluye el mismo día | == PRUEBAS: FALLAS 1 de 81 | escenarios que fallan ['E78']
+M90 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 ter: la clase N-3 sin frontera de fecha | == PRUEBAS: FALLAS 1 de 81 | escenarios que fallan ['E78']
+M91 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 ter: N-3 llega a la sombra (§6.3) | == PRUEBAS: FALLAS 1 de 81 | escenarios que fallan ['E80']
+M92 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 ter: la elegibilidad del §6 bis cuenta las N-3 | == PRUEBAS: FALLAS 1 de 81 | escenarios que fallan ['E77']
+M93 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 ter: el P1 del §6.2 cuenta las N-3 | == PRUEBAS: FALLAS 1 de 81 | escenarios que fallan ['E77']
+M94 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 ter: el §6.2 no imprime el P1 que cuenta las N-3 | == PRUEBAS: FALLAS 1 de 81 | escenarios que fallan ['E77']
+M95 | ATRAPADA (tiene que ser ATRAPADA) | rc 1 | §6 ter: la lista aparte de las N-3 sale vacía | == PRUEBAS: FALLAS 1 de 81 | escenarios que fallan ['E77']
+CAIDA | CAÍDA (tiene que ser CAÍDA) | rc 2 | CONTROL: el analizador sólo se cae (excepción al cargar los objetivos) | == PRUEBAS: CAÍDAS 81 (fallas por aserción 0) de 81 | escenarios que fallan []
+== RESUMEN: 10 de 10 mutaciones atrapadas por aserción; controles como deben; TODO COMO SE ESPERA
