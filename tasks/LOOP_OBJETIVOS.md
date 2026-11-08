@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 08:45 UTC (S175): issues #960 y #962 son cortes transitorios de NASA
+- #962 (sombra código MIROVA sin corrida verde en 26 h): run 42405421896 del 2026-11-07 19:16 falló sólo el job de
+  Tupungatito por `ConnectTimeout` contra `nrt3.modaps.eosdis.nasa.gov` (descarga MODIS Aqua del 06 y 07-nov). #960
+  (sombra de los 34): run 42398984848, sólo Lanín, `ConnectionResetError` contra `cmr.earthdata.nasa.gov`. Ninguno es
+  el token. Las dos corren una vez al día (~19 a 20 UTC): si la de hoy queda verde, sus issues se cierran solos. Cada
+  una le resta una noche a su sombra en un volcán.
+- C: 2,6 GB, D: 4,5 GB; loop sigue detenido (#961). NRT verde (08:10 UTC).
+
 ### 2026-11-08 07:45 UTC (S175): medidor de V750-A detenido a mano para proteger D:
 - El medidor (desde 04:28 UTC) dejaba ~48 MB por mutación en `D:\vrp-trabajo\temporales\s175-medidor\dest\` sin
   borrarlos (438 MB en 11 mutaciones) y D: bajaba de 4,9 a 4,5 GB. A ~3,4 mutaciones por hora las ~130 no terminaban
