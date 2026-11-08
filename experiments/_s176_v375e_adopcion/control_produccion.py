@@ -65,9 +65,9 @@ else:
     (salida / "vig_modis.json").write_text(json.dumps(sin_hora(vg.evaluar(hoy)), sort_keys=True, default=str), encoding="utf-8")
 '''
 MARCA = r'''
-const M = require(process.argv[2]);
+const M = require(process.argv[1]);
 const fs = require('fs'), path = require('path');
-const d = process.argv[3], res = {};
+const d = process.argv[2], res = {};
 for (const f of fs.readdirSync(d).filter(x => x.endsWith('.json'))) {
   const recs = JSON.parse(fs.readFileSync(path.join(d, f), 'utf8')).records;
   res[f] = M.primeraViaModis(recs);
@@ -101,7 +101,8 @@ def main(base, temp):
     if not arbol_base.exists():
         arbol_base.mkdir(parents=True)
         a = subprocess.run(["git", "-C", str(RAIZ), "archive", base, "scripts", "pipeline", "frontend", "volcanoes.yaml",
-                            "experiments/_s171_modd_adopcion"], capture_output=True)
+                            "experiments/_s171_modd_adopcion",
+                            "experiments/_s151_prereg_fk_11"], capture_output=True)
         assert a.returncode == 0
         subprocess.run(["tar", "-x", "-C", str(arbol_base)], input=a.stdout, check=True)
         subprocess.run(["cmd", "/c", "mklink", "/J", str(arbol_base / "data"), str(RAIZ / "data")], check=True,
@@ -116,7 +117,10 @@ def main(base, temp):
     correr(RAIZ, temp / "s_rama", "perfiles")
     pb, pr = (json.loads((temp / d / "perfiles.json").read_text(encoding="utf-8")) for d in ("s_base", "s_rama"))
     nuevos = sorted(set(pr) - set(pb))
-    distintos = sorted(n for n in pb if pb[n] != pr.get(n))
+    # El catálogo trae el perfil nuevo y la ruta es la de cada árbol: son las dos únicas constantes que deben diferir.
+    fuera = {"VALID_PROFILES", "PROFILES_DIR"}
+    distintos = sorted(n for n in pb if {k: v for k, v in pb[n].items() if k not in fuera}
+                       != {k: v for k, v in pr.get(n, {}).items() if k not in fuera})
     print(f"  perfiles en main: {len(pb)}; nuevos en la rama: {nuevos}; distintos: {distintos}")
     assert nuevos == ["guardia_k_viirs"] and not distintos
     print("== 3. audit, vigilancias y marca, sobre los mismos records reales")
@@ -127,8 +131,10 @@ def main(base, temp):
         a, b = sha(temp / "s_base" / f), sha(temp / "s_rama" / f)
         print(f"  {f}: {'IDENTICO' if a == b else 'DISTINTO'} sha256 {a[:16]}")
         assert a == b, f
-    m = [subprocess.run(["node", "-e", MARCA, "--", str(a / "frontend" / "cambio_detector.js"), str(RAIZ / "data" / "mirova_equivalent")],
-                        capture_output=True, text=True, encoding="utf-8").stdout for a in (arbol_base, RAIZ)]
+    salidas = [subprocess.run(["node", "-e", MARCA, "--", str(a / "frontend" / "cambio_detector.js"), str(RAIZ / "data" / "mirova_equivalent")],
+                              capture_output=True, text=True, encoding="utf-8") for a in (arbol_base, RAIZ)]
+    assert all(x.returncode == 0 for x in salidas), [x.stderr[-400:] for x in salidas]
+    m = [x.stdout for x in salidas]
     print("  marca del tablero (primera vía de MODIS por volcán, fecha y avisos):", "IDENTICO" if m[0] == m[1] else "DISTINTO")
     print("   ", m[1][:220])
     assert m[0] == m[1] and m[1].strip()

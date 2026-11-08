@@ -312,7 +312,7 @@ def disco(tmp_path, monkeypatch):
         monkeypatch.setattr(vv, "leer_juzgadas", lambda *a: {})
         monkeypatch.setattr(vv, "volcanes_sens", lambda: [])
         for s in vv.COTAS:                      # con la vía encendida la regla exige cotas (test_cadena_cota_pendiente...)
-            monkeypatch.setitem(vv.COTAS, s, {"muy_bajo": 2, "sobrepublicacion": 3})
+            monkeypatch.setitem(vv.COTAS, s, {"muy_bajo": 7, "sobrepublicacion": 8})   # distintas de las de MODIS
     return poner
 
 

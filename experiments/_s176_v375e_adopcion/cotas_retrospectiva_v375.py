@@ -47,6 +47,12 @@ def filas_del_evaluador():
     ancla = "    filas = armar(obj, res, arms_por_id, inner, pub_k, vk, k_usa_recorrido, pesos)\n"
     assert src.count(ancla) == 1
     src = src.replace(ancla, ancla + "    globals()['_FILAS'] = (filas, obj); raise SystemExit(77)\n")
+    # El recálculo sin red de los lotes S162 y B2 es sólo el control 2.1 del evaluador (19.277 de 19.277 iguales en la
+    # lectura sellada, b2/resultado_run40131572769/evaluar_salida.txt). Aquí se toman los brazos guardados por el runner,
+    # los mismos que el evaluador usa para sus filas, y sólo se recalcula S159, que el runner no guardó con estos brazos.
+    salto = "        rec = recalcular(o, r, art, V, cache)\n"
+    assert src.count(salto) == 1
+    src = src.replace(salto, '        rec = recalcular(o, r, art, V, cache) if o["lote"] == "S159" else r["port"]\n')
     g = {"__name__": "__main__", "__file__": str(EV)}
     sys.path.insert(0, str(EV.parent))
     sys.argv = ["evaluar.py", "--art162", ART162, "--art159", ART159, "--objetivos-extra",
