@@ -19,13 +19,16 @@ Salidas en `experiments/_s176_preguntas/`. Pasadas nocturnas con alerta de MIROV
 
 | VIIRS 375 | Producción K | Sombra |
 |---|---|---|
-| Razón mediana contra MIROVA (32 pasadas comunes) | 0,50 | 0,99 |
-| Dentro de 0,7 a 1,4 | 8 de 32 | 31 de 32 |
-| Publica en negativos limpios | 7 de 91 | 0 de 91 |
-| Alertas publicadas | 36 de 38 | 34 de 38 |
+| Razón mediana contra MIROVA (31 pasadas comunes, verificador con el predicado real del tablero) | 0,50 | 0,99 |
+| Dentro de 0,7 a 1,4 (cálculo de S176, n 32, con predicado portado) | 8 de 32 | 31 de 32 |
+| Publica en negativos, con la regla D-9 | 10 de 95 | 3 de 95 |
+| Alertas publicadas, etiqueta del scraper | 35 de 38 | 34 de 38 |
+| Alertas publicadas, con D-9 | 32 de 34 | 31 de 34 |
+
+Verificador limpio (`C:\Users\nmend\vrp-temporales\s176_verpr\medicion\INFORME.md`): **SE SOSTIENE EN PARTE**. La magnitud se sostiene, también sin Chillán en VIIRS 375 (0,496 y 0,989, n 26), y no hay ningún camino por el que la sombra herede el VRP de MIROVA. Corrigió el conteo de producción (35, no 36), el «0 de 91» en negativos, que era artefacto de la etiqueta del scraper, y el alcance: «ninguna pierde una alerta de 1 MW» vale sólo de noche (10 alertas diurnas de Chillán de 1 MW o más no las procesa ninguna). MODIS 1,00 es el mismo código en las dos columnas: control de identidad, no evidencia.
 
 - Las cuatro que calla la sombra son débiles: Puyehue-Cordón Caulle 0,36 y 0,09 MW, Planchón-Peteroa 0,06 y Tupungatito 0,03 (esta última, bajo el corte D-9).
-- Límites: 5 noches; 12 de 32 pasadas son de Chillán; el predicado del tablero está portado a Python. Un verificador limpio lo está comprobando (`C:\Users\nmend\vrp-temporales\s176_verpr\medicion\INFORME.md`). **Sin su veredicto no se pide el encendido.**
+- Límites: 5 noches. El veredicto del verificador permite seguir; el encendido además pide la guardia, la regla sellada y la retrospectiva si llega antes.
 - Esta mirada abrió la ventana P del lector sellado después de su sello. No encontré una regla que lo prohíba; queda declarado.
 
 ## Decisión 1: enfoque
@@ -101,6 +104,6 @@ Nicolás: «porque no lanzar todos los sensores con la nueva via?». MODIS ya co
 
 Nicolás: «el reprocesamiento cuando podria hacerse?». Son dos cosas:
 
-- **En carpeta aislada, sin publicar: se puede partir ya.** `reproc-retro-paquete.yml` existe y nunca se ha despachado (0 corridas). Corre en Actions, sin disco local. 6.952 volcán-día (11 Tier A, 2025-02-15 a 2026-11-08). Estimación por la cifra del plan de los 34 (2.006 volcán-día en 10 a 18 h): **unos 2 a 3 días de pared**, ESTIMACIÓN, nunca medida con las vías. Sirve de evidencia retrospectiva y de insumo para el reemplazo.
+- **En carpeta aislada, sin publicar: despachado por tramos (Nicolás, «Sí, despáchalo»).** `reproc-retro-paquete.yml` sigue el pre-registro sellado (`experiments/_s172_prereg_retro/PREREGISTRO_RETRO_PAQUETE.md` §10.3): D1 humo, D2 F26 y DM, D3 control K, D4 2025. Son 4.327 volcán-día y **34 a 41 h de pared** según su tabla §10.4 (ESTIMACIÓN; la vía aún no se mide con D1). Faltan los tramos fuera de esa prueba, unos 2.900 volcán-día con la vía (enero, abril a septiembre y desde el 17 de octubre de 2026, y Tupungatito antes del 23 de febrero de 2026): se despachan aparte si el reemplazo los necesita. El humo D1 es el run 42507360401, desde el tag `s172-retro-d1`.
 - **Reemplazar lo publicado: después de cada encendido.** Precedente: K se adoptó el 2026-10-18 y #883 reemplazó la historia el 10-21. MODIS ya podría (su historia sigue en K hasta el 2026-11-02); los VIIRS, tras B1 y B2, con tag y frase. Si la retrospectiva corre antes, el reemplazo es aplicar lo ya calculado.
 - Sus artefactos duran 30 días en Actions: el reemplazo debe ocurrir antes de que venzan.

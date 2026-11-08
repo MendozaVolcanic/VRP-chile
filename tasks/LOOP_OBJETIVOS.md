@@ -573,6 +573,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 - Frases: «si empieza, pero porque no lanzar todos los sensores con la nueva via?» y «el reprocesamiento cuando podria hacerse?». Diseño con decisiones 7 y 8: PR A para los dos VIIRS, B1 y B2 separados, reproceso aislado despachable. `reproc-retro-paquete.yml` con 0 corridas. Tag `pre-s176-adopcion-viirs` publicado en `a7a6ae360`; worktree `C:/Users/nmend/vrp-wt/s176-guardia-viirs`.
 - Verificador limpio Fable de #965: MERGEABLE, sin gravedad 3 (`C:/Users/nmend/vrp-temporales/s176_verpr/965/INFORME.md`), sirviendo la rama de verdad en navegador; Chillán 182 de 182.
 
+### 2026-11-08 17:56 UTC (S176): reproceso aislado despachado; verificadores de la medición y de #966
+- Frase de Nicolás: «Sí, despáchalo». D1 (humo) despachado desde el tag `s172-retro-d1` (`a7a6ae360`), run 42507360401; siguen D2, D3 y D4 de a uno según §10.3 del pre-registro sellado, tras revisar el candado del §11.
+- Verificador de la medición: SE SOSTIENE EN PARTE (`C:/Users/nmend/vrp-temporales/s176_verpr/medicion/INFORME.md`): magnitud confirmada; correcciones en `experiments/_s176_preguntas/RESPUESTAS.md`.
+- Verificador de #966: MERGEABLE con VPR966-01 g3 (el conteo de descargas buenas es por volcán y fecha, no por proceso), espera decisión de Nicolás.
+
 ### 2026-11-08 17:44 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
 - Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
 

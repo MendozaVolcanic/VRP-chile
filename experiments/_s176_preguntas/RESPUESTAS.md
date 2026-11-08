@@ -34,6 +34,10 @@ vara que siempre dé 1. P2, si el instrumento estuviera muerto: los negativos li
 
 Posición: SIN MEDIR en esta respuesta; S175 retiró «mismo foco» (302) y «foco a 1 a 2,5 km» (351).
 
+### Corrección del verificador limpio (SE SOSTIENE EN PARTE)
+
+`C:\Users\nmend\vrp-temporales\s176_verpr\medicion\INFORME.md`: magnitud confirmada (VIIRS 375 0,504 y 0,993, n 31; VIIRS 750 0,482 y 1,000, n 14). Corrige: producción publica 35 de 38 y no 36; con la regla D-9, en negativos publica producción 10 de 95 y la sombra 3 de 95, no 0; «ninguna pierde alertas de 1 MW» vale sólo de noche; MODIS 1,00 es el mismo código en las dos columnas.
+
 ## 3. Pregunta de Nicolás: «porque no publicamos simplemente la sombra con todos los volcanes?» (17:40 UTC)
 
 Salida: `detecciones_sombra34_salida.txt`. Verificador limpio en curso: `C:\Users\nmend\vrp-temporales\s176_verpr\medicion\INFORME.md`.
