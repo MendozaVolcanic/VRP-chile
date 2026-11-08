@@ -4,6 +4,8 @@
 > preguntas antes de proponer o implementar cualquier cosa que toque el
 > pipeline algorítmico.
 
+> ⚠️ **S175 (A113; hallazgo 154 de `docs/AUDIT_S175.md`, PR #955): la marca S172 que sigue exagera hacia atrás.** Lo de «hasta unos 8 días antes» y «cada corrida re-escribe las 8 fechas de su ventana» no se cumple: cada corrida procesa 8 días, pero el almacén sólo agrega las pasadas que no tenía y reemplaza una ya guardada únicamente con su producto estándar o con `--overwrite` (`pipeline/store.py`). La primera observación con la vía es del 2026-11-02 01:15 UTC, 18,95 horas antes del encendido (20:11:43 UTC): son 22 records guardados como NRT con K ese mismo día y reemplazados por su producto estándar en la primera corrida con la vía. Detalle y plazo medido del estándar: ficha v1.19 (`docs/FICHA_SDA_VRP_CHILE.md`) y `experiments/_s175_latencia_estandar_modis/salida.txt`. Texto S172 conservado.
+>
 > ⚠️ **S172: MODIS dejó de ser K en producción (encendido de MOD-D; marca A113).** Desde la primera corrida del NRT con la vía, después
 > del merge del PR B (#934, rama `claude/s173-modd-flip`), y también en las pasadas observadas hasta unos 8 días
 > antes, porque cada corrida re-escribe las 8 fechas de su ventana (regla `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md`
