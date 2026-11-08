@@ -32,6 +32,7 @@ VIVOS = {
     "mirova_equivalent": True,        # producción: el encendido de este PR
     "sombra_codigo_mirova": True,     # la sombra corre las tres vías a propósito (S167)
     "guardia_k_modis": False,         # la guardia es K de MODIS (PR A)
+    "guardia_k_viirs": False,         # la guardia de los dos VIIRS no corre MODIS (S176, PR A)
     "experimental": False,            # laboratorio congelado en C0: sombra de K (S150, S156)
     "experimental_ndc_focus": False,  # laboratorio de Chillán, despachado desde nrt.yml: no sigue a producción
 }

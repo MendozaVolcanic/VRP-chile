@@ -59,6 +59,10 @@ la vía. Por eso, del lado prospectivo, cada pasada mira si su record de producc
   demás pasadas sí se miraron (VPR959-05).
 Y el descarte de borde (153) se nombra pasada por pasada en `borde_171_01.pasadas`, no sólo por semana.
 
+S176 (diseño docs/superpowers/specs/2026-11-08-encendido-v375e-design.md, decisiones 3 y 7). Las funciones que dependen
+del sensor reciben `sensor` con MODIS por defecto, para que scripts/vigilancia_guardia_viirs.py use estas mismas reglas
+con VIIRS 375 y VIIRS 750 sin copiarlas (A102). Con el valor por defecto todo sigue igual.
+
 Salida: data/audit_continuous/guardia_modis_latest.json y una línea en guardia_modis_history.jsonl.
 """
 import json
@@ -80,6 +84,10 @@ import vigilancia_sombra as vs  # noqa: E402  (vigila K; se importa, no se modif
 
 aa = vs.aa
 SENSOR = "MODIS"
+# S176: cómo se nombra cada sensor en los avisos y qué constante de pipeline.profile enciende su vía.
+ETIQUETAS = {"MODIS": "MODIS", "VIIRS375": "VIIRS 375", "VIIRS750": "VIIRS 750"}
+FLAGS_VIA = {"MODIS": "ENABLE_MODIS_CODIGO_MIROVA", "VIIRS375": "ENABLE_V375_CODIGO_MIROVA",
+             "VIIRS750": "ENABLE_V750_CODIGO_MIROVA"}
 PRODUCCION = os.path.join(ROOT, "data", "mirova_equivalent")
 GUARDIA = os.path.join(ROOT, "data", "guardia_k_modis")
 PERFIL_GUARDIA = "guardia_k_modis"
@@ -113,7 +121,7 @@ def _t(texto_utc):
         return None
 
 
-def encendido_desde_datos(raw_por_volcan):
+def encendido_desde_datos(raw_por_volcan, sensor=SENSOR):
     """{encendido_utc, primera_observacion, via, caidas}: el menor `processed_utc` de un record MODIS de producción con
     `via_codigo_mirova` True (MA172-206: no `first_processed_utc`, que hereda la fecha de K), la observación más temprana
     de la vía, el conjunto de claves (volcán, sensor, 'YYYY-MM-DD HH:MM') de esos records y, S175, las caídas a K
@@ -121,7 +129,7 @@ def encendido_desde_datos(raw_por_volcan):
     via, proc, obs, caidas = set(), [], [], {}
     for vol, recs in raw_por_volcan.items():
         for r in recs:
-            if not str(r.get("sensor") or "").startswith("MODIS"):
+            if aa.our_bucket(str(r.get("sensor") or "")) != sensor:
                 continue
             dt = str(r.get("datetime_utc") or "")[:16].replace("T", " ")
             marca = r.get("via_codigo_mirova")
@@ -149,11 +157,11 @@ def leer_encendido():
     return encendido_desde_datos(raw)
 
 
-def flag_produccion_encendido():
-    """ENABLE_MODIS_CODIGO_MIROVA de producción leído desde pipeline.profile en un proceso aparte (A89), o None."""
+def flag_produccion_encendido(sensor=SENSOR):
+    """El flag de la vía de `sensor` en producción leído desde pipeline.profile en un proceso aparte (A89), o None."""
     env = dict(os.environ, VRP_PROFILE=PERFIL_PRODUCCION, PYTHONIOENCODING="utf-8")
     try:
-        r = subprocess.run([sys.executable, "-c", "import pipeline.profile as p; print(p.ENABLE_MODIS_CODIGO_MIROVA)"],
+        r = subprocess.run([sys.executable, "-c", f"import pipeline.profile as p; print(p.{FLAGS_VIA[sensor]})"],
                            cwd=ROOT, env=env, capture_output=True, text=True, encoding="utf-8", timeout=120)
     except (OSError, subprocess.SubprocessError):
         return None
@@ -169,24 +177,24 @@ def _cerca(recs, dt):
     return [r for r in recs if abs((r["dt"] - dt).total_seconds()) <= TOL_S]
 
 
-def _por_volcan(recs):
+def _por_volcan(recs, sensor=SENSOR):
     out = defaultdict(list)
     for r in recs:
-        if r["b"] == SENSOR:
+        if r["b"] == sensor:
             out[r["vol"]].append(r)
     return out
 
 
-def pasadas_modis(filas, prod, guardia, win, diurna=None):
+def pasadas_modis(filas, prod, guardia, win, diurna=None, sensor=SENSOR):
     """Pasadas nocturnas de MODIS con alerta de MIROVA (vigilancia_sombra.pasadas_de_alerta, la misma lectura A y el
     mismo pareo por volcán y sensor), con `guardia_pub` y `prod_via` (algún record de producción de la pasada es de
     la vía; None si producción no tiene record; False si todos son K, por ejemplo una caída a K, cuya marca va en
     `prod_caida_k`)."""
     pasadas = vs.pasadas_de_alerta(filas, prod, guardia, win, diurna=diurna)
-    idx = _por_volcan(prod)
+    idx = _por_volcan(prod, sensor)
     out = []
     for p in pasadas:
-        if p["sensor"] != SENSOR:
+        if p["sensor"] != sensor:
             continue
         p = dict(p)
         p["guardia_pub"] = p.pop("sombra_pub")
@@ -202,10 +210,13 @@ def _dt(texto):
     return datetime.strptime(texto, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
 
 
-def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, ahora=None):
+def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, ahora=None, sensor=SENSOR, cotas=None):
     """Los niveles de §4 sobre lo posterior al encendido; lo anterior, retrospectivo y nulo. `ahora`: instante UTC
-    'YYYY-MM-DD HH:MM:SS' de la corrida (por defecto, la medianoche de `hoy`), para la espera de MA172-202."""
+    'YYYY-MM-DD HH:MM:SS' de la corrida (por defecto, la medianoche de `hoy`), para la espera de MA172-202.
+    S176: `sensor` y `cotas` ({"muy_bajo": n, "sobrepublicacion": n}; por defecto las de MODIS). Una cota None es una cota
+    que la regla dejó PENDIENTE DE NICOLÁS: se cuenta y se informa, sin disparar (A115)."""
     juzgadas = juzgadas or {}
+    cotas = {"muy_bajo": COTA_MUY_BAJO, "sobrepublicacion": COTA_SOBREPUBLICACION} if cotas is None else cotas
     ahora = ahora or f"{hoy} 00:00:00"
     corte = encendido or "9999-99-99 99:99:99"
     pros = [p for p in pasadas if p["instante_utc"] >= corte]
@@ -242,16 +253,16 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
                and (p["vrp_mirova_mw"] or 0) > UMBRAL_MINIMO_MW
                and p["prod_pub"] is not None and p["guardia_pub"] is not None and p.get("prod_via") is True]
     mb = [p for p in mb_base if calla(p) and vs._clave(p) not in juzgadas]
-    muy_bajo = {"k": len(mb), "n": len(mb_base), "cota": COTA_MUY_BAJO, "dispara": len(mb) > COTA_MUY_BAJO,
-                "pasadas": mb}
+    muy_bajo = {"k": len(mb), "n": len(mb_base), "cota": cotas["muy_bajo"],
+                "dispara": cotas["muy_bajo"] is not None and len(mb) > cotas["muy_bajo"], "pasadas": mb}
 
     # (ii) negativos limpios en que producción publica y la guardia, que miró la misma pasada, no.
-    gidx = _por_volcan(guardia)
+    gidx = _por_volcan(guardia, sensor)
     enc_dt = _dt(encendido) if encendido else None
     vence_dt = _dt(vence_utc) if vence_utc else None
     sp, n_neg = [], 0
     for r in prod:
-        if (r["b"] != SENSOR or r.get("lab") != "neg_limpio" or r.get("via") is not True or enc_dt is None
+        if (r["b"] != sensor or r.get("lab") != "neg_limpio" or r.get("via") is not True or enc_dt is None
                 or not (enc_dt <= r["dt"] < vence_dt)):
             continue
         g = _cerca(gidx.get(r["vol"], []), r["dt"])
@@ -259,17 +270,18 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
             continue
         n_neg += 1
         if r["pub"] and not any(x["pub"] for x in g):
-            clave = (r["vol"], SENSOR, r["dt"].strftime("%Y-%m-%d %H:%M"))
+            clave = (r["vol"], sensor, r["dt"].strftime("%Y-%m-%d %H:%M"))
             if clave not in juzgadas:
                 sp.append({"volcano": r["vol"], "fecha_utc": clave[2]})
-    sobrepublicacion = {"k": len(sp), "n": n_neg, "cota": COTA_SOBREPUBLICACION,
-                        "dispara": len(sp) > COTA_SOBREPUBLICACION, "pasadas": sp}
+    sobrepublicacion = {"k": len(sp), "n": n_neg, "cota": cotas["sobrepublicacion"],
+                        "dispara": cotas["sobrepublicacion"] is not None and len(sp) > cotas["sobrepublicacion"],
+                        "pasadas": sp}
 
     # (iii) pasadas que la guardia registra y producción no, por semana ISO (sin disparo: la regla no da cota).
-    pidx = _por_volcan(prod)
+    pidx = _por_volcan(prod, sensor)
     semanas, sin_prod = defaultdict(int), []
     for g in guardia:
-        if g["b"] != SENSOR or enc_dt is None or g["dt"] < enc_dt:
+        if g["b"] != sensor or enc_dt is None or g["dt"] < enc_dt:
             continue
         if not _cerca(pidx.get(g["vol"], []), g["dt"]):
             iso = g["dt"].isocalendar()
@@ -286,14 +298,14 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
     desde = limite - timedelta(days=DIAS_NULO)
     pares, distintas = 0, []
     for g in guardia:
-        if g["b"] != SENSOR or not (desde <= g["dt"] < limite):
+        if g["b"] != sensor or not (desde <= g["dt"] < limite):
             continue
         p = [x for x in _cerca(pidx.get(g["vol"], []), g["dt"]) if x.get("via") is not True]
         if not p:
             continue
         pares += 1
         if bool(g["pub"]) != any(x["pub"] for x in p):
-            clave = (g["vol"], SENSOR, g["dt"].strftime("%Y-%m-%d %H:%M"))
+            clave = (g["vol"], sensor, g["dt"].strftime("%Y-%m-%d %H:%M"))
             if clave not in juzgadas:
                 distintas.append({"volcano": g["vol"], "fecha_utc": clave[2], "guardia_pub": bool(g["pub"])})
     # MA172-208: 0 pares no es «coinciden», es «no medí»; evaluar() lo convierte en aviso.
@@ -343,17 +355,18 @@ def avisos_produccion(prod, hoy):
     return vs._avisos_frescura(prod, hoy, "producción", "nrt.yml", sensores=[SENSOR])
 
 
-def avisos_referencia_modis(filas, hoy):
+def avisos_referencia_modis(filas, hoy, sensor=SENSOR):
     """MA172-204: la frescura de la referencia, medida en las filas de MODIS (RUTINA incluidas, como el auto-audit).
     vigilancia_sombra.avisos_referencia mide todas las filas: con VIIRS fresco y MODIS detenido daría VERDE sin una
     sola alerta MODIS contra qué comparar."""
+    e = ETIQUETAS[sensor]
     fechas = [f["fecha_utc"][:10] for f in filas
-              if f.get("sensor_bucket") == SENSOR and (f.get("fecha_utc") or "")[:4].isdigit()]
+              if f.get("sensor_bucket") == sensor and (f.get("fecha_utc") or "")[:4].isdigit()]
     if not fechas:
-        return ["la referencia de MIROVA no trae ninguna fila de MODIS: no hay contra qué vigilar la vía"]
+        return [f"la referencia de MIROVA no trae ninguna fila de {e}: no hay contra qué vigilar la vía"]
     dias = (date.fromisoformat(hoy) - date.fromisoformat(max(fechas))).days
     if dias > aa.MAX_GT_STALE_DAYS:
-        return [f"la referencia de MIROVA no registra MODIS hace {dias} días (última fila MODIS {max(fechas)}): es el "
+        return [f"la referencia de MIROVA no registra {e} hace {dias} días (última fila {e} {max(fechas)}): es el "
                 "scraper de Mirova-v1 o la tabla de MIROVA, no los volcanes"]
     return []
 
@@ -366,32 +379,32 @@ def avisos_nulo(nulo):
     return []
 
 
-def avisos_perfiles(prod, guardia, n_guardia_con_via):
+def avisos_perfiles(prod, guardia, n_guardia_con_via, perfil_guardia=PERFIL_GUARDIA):
     av = []
     mal_g = sum(1 for r in guardia if r.get("perfil") == PERFIL_PRODUCCION)
-    mal_p = sum(1 for r in prod if r.get("perfil") == PERFIL_GUARDIA)
+    mal_p = sum(1 for r in prod if r.get("perfil") == perfil_guardia)
     if mal_g:
         av.append(f"{mal_g} records de la guardia traen el perfil {PERFIL_PRODUCCION}: no es la guardia")
     if mal_p:
-        av.append(f"{mal_p} records de producción traen el perfil {PERFIL_GUARDIA}: no es producción")
+        av.append(f"{mal_p} records de producción traen el perfil {perfil_guardia}: no es producción")
     if n_guardia_con_via:
         av.append(f"{n_guardia_con_via} records de la guardia traen la marca de la vía: la guardia dejó de ser K y "
                   "nunca va a publicar algo que producción calle")
     return av
 
 
-def caidas_a_k(encendido, prod):
-    """Decisión 3 de S174 (S175): records MODIS de producción posteriores al encendido en que la vía cayó a K."""
+def caidas_a_k(encendido, prod, sensor=SENSOR):
+    """Decisión 3 de S174 (S175): records de producción del sensor posteriores al encendido en que la vía cayó a K."""
     if not encendido:
         return []
     enc_dt = _dt(encendido)
     return [{"volcano": r["vol"], "sensor": r.get("sensor"), "fecha_utc": r["dt"].strftime("%Y-%m-%d %H:%M"),
              "marca": r["caida_k"]}
             for r in sorted(prod, key=lambda x: (x["dt"], x["vol"]))
-            if r["b"] == SENSOR and r.get("caida_k") and r["dt"] >= enc_dt]
+            if r["b"] == sensor and r.get("caida_k") and r["dt"] >= enc_dt]
 
 
-def avisos_via(flag, encendido, prod, vols=None):
+def avisos_via(flag, encendido, prod, vols=None, sensor=SENSOR):
     """El flag de producción encendido sin records de la vía, o una vía que dejó de escribir, deja guardia =
     producción y la vigilancia en VERDE sin vigilar nada.
 
@@ -400,17 +413,18 @@ def avisos_via(flag, encendido, prod, vols=None):
     volcán con records MODIS posteriores al encendido, la última noche de la vía no puede quedar más de
     MAX_DIAS_SOMBRA_SIN_DATOS días detrás de la última de producción. Un volcán sin records posteriores lo avisa la
     frescura de producción (avisos_produccion). Las caídas a K sueltas van aparte, en avisos_caidas."""
+    e = ETIQUETAS[sensor]
     if flag is None:
-        return ["no se pudo leer ENABLE_MODIS_CODIGO_MIROVA de pipeline.profile: no se sabe si la vía está encendida"]
+        return [f"no se pudo leer {FLAGS_VIA[sensor]} de pipeline.profile: no se sabe si la vía está encendida"]
     if flag and encendido is None:
-        return ["el flag de la vía de MODIS está encendido en producción y no hay ningún record MODIS de la vía: la "
+        return [f"el flag de la vía de {e} está encendido en producción y no hay ningún record {e} de la vía: la "
                 "vía no está escribiendo (o cae siempre a K) y guardia y producción son lo mismo"]
     if not (flag and encendido):
         return []
     av = []
     enc_dt = _dt(encendido)
     for v in vols or aa.VOLS:
-        post = [r for r in prod if r["vol"] == v and r["b"] == SENSOR and r["dt"] >= enc_dt]
+        post = [r for r in prod if r["vol"] == v and r["b"] == sensor and r["dt"] >= enc_dt]
         if not post:
             continue
         ultima = max(r["noche"] for r in post)
@@ -419,22 +433,22 @@ def avisos_via(flag, encendido, prod, vols=None):
                 > vs.MAX_DIAS_SOMBRA_SIN_DATOS:
             hasta = (f"la vía sólo hasta el {ultima_via}" if ultima_via
                      else "ningún record suyo desde el encendido es de la vía")  # VPR959-04: nunca un None en la issue
-            av.append(f"producción de {v} escribe MODIS hasta el {ultima} y {hasta}: en {v} la vía dejó de correr (o "
+            av.append(f"producción de {v} escribe {e} hasta el {ultima} y {hasta}: en {v} la vía dejó de correr (o "
                       "cae a K) y lo que se compara con la guardia es K contra K")
     return av
 
 
-def avisos_caidas(flag, encendido, prod, hoy):
+def avisos_caidas(flag, encendido, prod, hoy, sensor=SENSOR):
     """Decisión 3 de S174: cada caída a K de los últimos DIAS_AVISO_CAIDA días es aviso. Va separado de avisos_via
     (VPR959-05): una pasada que cayó a K no deja ciega a la vigilancia en las demás, y la issue tiene que poder decirlo."""
     if not (flag and encendido):
         return []
     desde = (date.fromisoformat(hoy) - timedelta(days=DIAS_AVISO_CAIDA)).isoformat()
-    recientes = [c for c in caidas_a_k(encendido, prod) if c["fecha_utc"][:10] >= desde]
+    recientes = [c for c in caidas_a_k(encendido, prod, sensor) if c["fecha_utc"][:10] >= desde]
     if not recientes:
         return []
     lista = ", ".join(f"{c['volcano']} {c['sensor']} {c['fecha_utc']} ({c['marca']})" for c in recientes[:10])
-    return [f"{len(recientes)} records MODIS de producción de los últimos {DIAS_AVISO_CAIDA} días cayeron a K (la vía no "
+    return [f"{len(recientes)} records {ETIQUETAS[sensor]} de producción de los últimos {DIAS_AVISO_CAIDA} días cayeron a K (la vía no "
             f"corrió; cuentan como K, no como la vía, decisión 3 de S174): {lista}"
             f"{' ...' if len(recientes) > 10 else ''}"]
 
