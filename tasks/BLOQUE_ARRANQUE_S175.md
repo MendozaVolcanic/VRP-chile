@@ -1,5 +1,18 @@
 # Bloque de arranque S175 (cierre de S174, 2026-11-07 20:05 UTC)
 
+> **Actualización 2026-11-08 03:47 UTC: tres encargos de la auditoría para lanzar tras el reinicio del plan (2026-11-08 12:00 UTC), y la lista para la próxima A51.** Pedido de Nicolás a la sesión de auditoría: «procede con todo en simultáneo si es posible». No se lanzaron (uso semanal 93 %, sobre el corte de 92 %). Los tres en paralelo, cada uno como subagente Fable con `effort: high`, brief «lee entero y ejecuta <archivo>»; comprobar el esfuerzo con `grep '"output_config":{"effort":"[a-z]*"}'` en su transcripto. Prompts en `C:\Users\nmend\vrp-temporales\s175_audit\prompts\`:
+> 1. `vx.txt` (sha256 be32c28e81cb42a9): verificador de los hallazgos 302, 108, 111 y 256 (auditores Opus, por eso Fable). **Antes de mergear #955**: el 302 sostiene la conclusión central. Carpeta `experiments\_s175_audit\vx\`.
+> 2. `f5b.txt` (cdc4ffb869a63cff): posición de los aciertos después del 2026-09-22 con las láminas PNG Latest10NTI, validando la georreferencia contra 4 casos con TIF; incluye Chillán y 3 alertas MODIS de Láscar sin TIF. Después, verificador Opus sin ver el informe.
+> 3. `f4t.txt` (c62aca6c19b66b99): F4 limitado al token (vacío, no JWT, JWT vencido), sin red ni credenciales; **antes de rotar `EARTHDATA_TOKEN` (2026-11-27)**. Después, verificador Opus.
+> Worktree `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\relaxed-almeida-d17378` (rama `claude/relaxed-almeida-d17378`, PR #955); resultados como §11 de `docs/AUDIT_S175.md`; registro `experiments\_s175_audit\REGISTRO_AGENTES.md` (`d1367c6f0`). Respetar el tope de 2 procesos pesados: tres agentes a la vez sólo si ninguno reprocesa.
+> **Para el plan de la próxima auditoría A51** (anotar en su plan al abrirla):
+> - F4 completo, recortado en S175: simular la ausencia de una plataforma (búsqueda de NASA vacía) y del cron externo que dispara el NRT (12,8 de 16 corridas diarias, F0 113), más lo que F4t no cubra.
+> - Auditores Fable como subagentes con `effort: high` (una sesión Opus sólo abre otras Opus o más baratas) y verificadores de otro modelo; medir el esfuerzo en el transcripto, no en lo que declara el agente.
+> - Puerta de entrada (regla C): los 33 hallazgos que sigan sin verificar después de VX (lista en §6 de `docs/AUDIT_S175.md`).
+> - VIIRS 750 en cumbre (101, 102), sin camino desde que D25 no se adoptó.
+> - Rastro del descarte de borde de la vía MODIS (153): requiere A45 en `pipeline/process_modis.py`.
+> - Si F5b no valida la georreferencia de las láminas, la posición de MIROVA después del 2026-09-22 queda SIN DATO hasta que vuelvan los TIF: anotarlo como límite del instrumento.
+
 > **Actualización 2026-11-08 03:15 UTC: resultados de la auditoría S175 y cinco PR en borrador.** Traspaso de la auditoría: `C:\Users\nmend\AppData\Roaming\Claude\side-session-notes\local_bbc7bda4-4358-493f-8b67-23e822d00898\S175_auditoria_resultados.md` (fuera del repo: copiar a `docs/` al retomar). 80 hallazgos, 43 verificados, ninguno refutado entero. Lo central: con la distancia de la tabla los aciertos son la misma anomalía (1 de 881 fuera); el truncado del VRP es del OCR, no de la tabla (la protegida de Chillán MODIS 2026-10-30 sólo existe en el OCR); la vigilancia de la guardia MODIS era ciega por volcán; la ficha CPLT y la regla de reversión suponían que el NRT reescribe 8 días. PR en borrador, todos para frase de Nicolás:
 > - #955 síntesis `docs/AUDIT_S175.md` (`9da257d92`, CI corriendo tras arreglar test_g6).
 > - #956 SINTOMAS (hallazgo 251), ficha CPLT v1.19, marca A113 en la regla de reversión, `.gitignore` (verde).
