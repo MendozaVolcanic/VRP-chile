@@ -1,5 +1,13 @@
 # Bloque de arranque S175 (cierre de S174, 2026-11-07 20:05 UTC)
 
+> **Actualización 2026-11-08 03:15 UTC: resultados de la auditoría S175 y cinco PR en borrador.** Traspaso de la auditoría: `C:\Users\nmend\AppData\Roaming\Claude\side-session-notes\local_bbc7bda4-4358-493f-8b67-23e822d00898\S175_auditoria_resultados.md` (fuera del repo: copiar a `docs/` al retomar). 80 hallazgos, 43 verificados, ninguno refutado entero. Lo central: con la distancia de la tabla los aciertos son la misma anomalía (1 de 881 fuera); el truncado del VRP es del OCR, no de la tabla (la protegida de Chillán MODIS 2026-10-30 sólo existe en el OCR); la vigilancia de la guardia MODIS era ciega por volcán; la ficha CPLT y la regla de reversión suponían que el NRT reescribe 8 días. PR en borrador, todos para frase de Nicolás:
+> - #955 síntesis `docs/AUDIT_S175.md` (`9da257d92`, CI corriendo tras arreglar test_g6).
+> - #956 SINTOMAS (hallazgo 251), ficha CPLT v1.19, marca A113 en la regla de reversión, `.gitignore` (verde).
+> - #957 recall por pasada, distancia de la tabla, D-9 en el banco, VRP del OCR como piso (`scripts/`, verde).
+> - #958 «MIROVA confirmó» por pasada ±120 s con D-9 en las tres vistas: **toca `frontend/`**, exige tag defensivo y sí de Nicolás (A45); 856 de 2.738 marcas se pierden (verde).
+> - #959 vigilancia de la guardia MODIS por volcán y `sin_grilla`/`sin_mxd03` como K con aviso (decisión 3 de S174), toca `.github/` y `scripts/` (verde).
+> Antes de pedir la frase: confirmar que cada uno tuvo verificador limpio de otro modelo (no consta en este bloque). Nuevo: issue #960, la sombra de los 34 sin corrida verde en 26 h (falló el job de Lanín el 2026-11-07 17:59, run 42398984848, causa sin leer). Pendientes de la auditoría: anexo del audit del 2026-11-09; rastro del descarte de borde (153) requiere A45 en `pipeline/process_modis.py`; VIIRS 750 en cumbre (203, D32) al programa V750. Rescates de disco en `C:\Users\nmend\vrp-temporales\rescate_s175\`.
+
 > **Actualización 2026-11-07 20:47 UTC: la auditoría S175 terminó los cinco frentes.** F1 (vía MODIS) corrió antes del lunes y tiene su verificador V1; la síntesis cerrada está en `docs/AUDIT_S175.md` del PR #955 (borrador, `9ab30cfb1`). Sólo falta el anexo del audit semanal del lunes 2026-11-09. Donde abajo dice «F1 el 2026-11-09», léelo así: F1 ya está; el lunes sólo se agrega el anexo y se cierra #955. F1 dejó dos hallazgos de gravedad 4 (leer su veredicto en la síntesis antes de actuar).
 
 > **Sin trabajo en vuelo al fijar este estado.** Ningún agente de S174 sigue corriendo; la sesión de auditoría
