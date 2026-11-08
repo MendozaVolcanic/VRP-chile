@@ -578,6 +578,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 - Verificador de la medición: SE SOSTIENE EN PARTE (`C:/Users/nmend/vrp-temporales/s176_verpr/medicion/INFORME.md`): magnitud confirmada; correcciones en `experiments/_s176_preguntas/RESPUESTAS.md`.
 - Verificador de #966: MERGEABLE con VPR966-01 g3 (el conteo de descargas buenas es por volcán y fecha, no por proceso), espera decisión de Nicolás.
 
+### 2026-11-08 18:05 UTC (S176): D2 en curso; auditoría de visualizadores escrita
+- D1 verde y con la vía en 100 % de MODIS, VIIRS 375 y 750 en los 3 días (31 records). D2 despachado desde el tag `s172-retro-d2` (`a7a6ae360`), run 42507820590, 47 trabajos.
+- Auditoría en navegador de mirovaweb.it y del tablero: `docs/superpowers/plans/2026-11-08-visualizador-como-mirova.md`, plan en tres fases para Nicolás. Agente de plan de GPT Codex lanzado.
+
 ### 2026-11-08 17:44 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
 - Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
 
