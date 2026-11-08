@@ -31,6 +31,7 @@ from pathlib import Path
 
 import pytest
 import requests
+from earthaccess.exceptions import DownloadFailure
 from requests.exceptions import ReadTimeout
 
 import pipeline.fetch as fetch
@@ -45,14 +46,32 @@ def _earthaccess_style_error(status: int, body: bytes):
 
     Devuelve el RuntimeError ya construido, con __cause__ = HTTPError (que es
     donde sobrevive el status_code real).
+
+    S175 (V4T-02): hasta aquí el docstring prometía el __cause__ y el código no lo
+    ponía (faltaba el `from ex`), así que ningún test ejercitaba la rama de status.
     """
     resp = requests.Response()
     resp.status_code = status
     resp._content = body
     try:
-        resp.raise_for_status()
-    except requests.HTTPError as ex:
-        return RuntimeError(ex.response.text)
+        try:
+            resp.raise_for_status()
+        except requests.HTTPError as ex:
+            raise RuntimeError(ex.response.text) from ex
+    except RuntimeError as envuelto:
+        return envuelto
+
+
+def _download_failure_real(status: int) -> DownloadFailure:
+    """Forma real de un rechazo en la descarga (earthaccess 0.17 store.py:919-921).
+
+    S175 (V4T-02): sin response, sin __cause__ y sin el cuerpo del servidor. Sólo
+    queda el número dentro del texto; por eso replicar aquí el RuntimeError de CMR
+    daba verde aunque la descarga real no se detectara.
+    """
+    return DownloadFailure(
+        "Download failed for https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/"
+        f"61/MOD021KM/2026/307/MOD021KM.A2026307.0500.061.NRT.hdf. Status code: {status}")
 
 
 TOKEN_EXPIRED = (401, b'{"errors":["Token [ABC] has expired. Please get a new token"]}')
@@ -67,6 +86,13 @@ def _reset_breakers(monkeypatch):
     yield
     fetch._CMR_SEARCH_DOWN = False
     fetch._DOWN_DOWNLOAD_HOSTS.clear()
+
+
+def test_la_replica_conserva_el_status_en_cause():
+    """S175 (V4T-02): si la réplica pierde el __cause__ vuelve a medir sólo el texto."""
+    err = _earthaccess_style_error(*TOKEN_EXPIRED)
+    respuesta = getattr(err.__cause__, "response", None)
+    assert respuesta is not None and respuesta.status_code == 401
 
 
 def test_expired_token_raises_credential_error(monkeypatch):
@@ -152,14 +178,18 @@ def test_permission_denied_does_not_abort(monkeypatch):
 
 def test_download_aborta_con_credencial_muerta(monkeypatch, tmp_path):
     """Una credencial rechazada en la descarga debe abortar, no reintentar 4×."""
+    llamadas = {"n": 0}
+
     def boom(*a, **k):
-        raise _earthaccess_style_error(*TOKEN_EXPIRED)
+        llamadas["n"] += 1
+        raise _download_failure_real(401)
 
     monkeypatch.setattr(fetch.earthaccess, "download", boom)
     monkeypatch.setattr(fetch, "_granule_hosts", lambda g: set())
     with pytest.raises(fetch.EarthdataCredentialError) as ei:
         fetch.download_granules([{"fake": "granule"}], Path(tmp_path))
     assert "EARTHDATA_CREDENTIAL_INVALID" in str(ei.value)
+    assert llamadas["n"] == 1, "un 401 no se cura reintentando"
 
 
 def test_download_sigue_reintentando_errores_transitorios(monkeypatch, tmp_path):
