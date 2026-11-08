@@ -223,6 +223,58 @@ def test_descarga_403_en_una_sola_plataforma_no_aborta(red, tmp_path):
     assert len(resultado["MODIS_AQUA"]) == 2
 
 
+# --- VPR966-01: la evidencia de que el token sirve vale para todo el proceso ---------------------
+
+def _bajar_dia(tmp_path, nombre):
+    # POR QUÉ la carpeta aparte y el reset: así llama run_pipeline, un volcán y una fecha cada vez,
+    # con los cortacircuitos reiniciados entre fechas. Sin carpeta aparte el archivo ya existiría.
+    fetch.reset_transient_breakers()
+    return fetch.fetch_for_volcano(VOLCAN, FECHA, tmp_path / nombre)
+
+
+def test_403_tras_dias_ya_bajados_no_manda_a_rotar_un_token_sano(red, tmp_path):
+    """El NRT baja 7 días y deja el día en curso al final: a las 06 UTC sólo hay Terra publicado.
+
+    Un 403 en esa última fecha no dice nada del token, que acaba de bajar días enteros. Abortar
+    pone un volcán en rojo y manda a rotar un secreto sano. El hueco sí debe quedar en la cobertura.
+    """
+    _bajar_dia(tmp_path, "ayer")
+    n_antes = red.n_descargas
+    red.descarga = (403, b"Forbidden")
+    resultado = _archivos(_bajar_dia(tmp_path, "hoy"))
+    assert red.n_descargas > n_antes, "el 403 tiene que haber ocurrido; si no, la prueba no mide nada"
+    assert resultado == {"MODIS_TERRA": [], "MODIS_AQUA": []}
+    assert {f["plataforma"] for f in fetch.fallas_de_cobertura()} == {"MODIS_TERRA", "MODIS_AQUA"}
+
+
+def test_una_corrida_nueva_olvida_las_descargas_de_la_anterior(red, tmp_path):
+    """limpiar_fallas() marca el inicio de una corrida; lo de antes no avala al token de ahora."""
+    _bajar_dia(tmp_path, "corrida_anterior")
+    fetch.limpiar_fallas()
+    red.descarga = (403, b"Forbidden")
+    with pytest.raises(fetch.EarthdataCredentialError) as ei:
+        _bajar_dia(tmp_path, "corrida_nueva")
+    assert ETIQUETA in str(ei.value)
+
+
+def test_control_401_tras_dias_ya_bajados_sigue_en_rojo(red, tmp_path):
+    """Control: un 401 es un rechazo explícito y un token puede vencer a mitad de corrida."""
+    _bajar_dia(tmp_path, "ayer")
+    red.descarga = (401, b"Unauthorized")
+    with pytest.raises(fetch.EarthdataCredentialError) as ei:
+        _bajar_dia(tmp_path, "hoy")
+    assert ETIQUETA in str(ei.value)
+
+
+def test_control_un_corte_no_cuenta_como_descarga_buena(red, tmp_path):
+    """Control: un día entero de cortes no prueba que el token sirva; el 403 siguiente aborta."""
+    red.descarga = _timeout_lectura
+    assert _archivos(_bajar_dia(tmp_path, "ayer")) == {"MODIS_TERRA": [], "MODIS_AQUA": []}
+    red.descarga = (403, b"Forbidden")
+    with pytest.raises(fetch.EarthdataCredentialError):
+        _bajar_dia(tmp_path, "hoy")
+
+
 def test_descarga_403_de_eula_en_todo_el_volcan_no_aborta(red, tmp_path):
     """Control: earthaccess la distingue por el cuerpo y es por colección, no por credencial."""
     red.descarga = (403, b"Please accept the EULA")

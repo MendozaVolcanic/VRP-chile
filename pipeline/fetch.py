@@ -572,6 +572,13 @@ _FALLAS: list = []
 # (hallazgo 241 de docs/AUDIT_S160.md).
 _PLATAFORMAS: dict = {}
 
+# S176 (VPR966-01): si algo se bajó bien en esta corrida. POR QUÉ del proceso y no del volcán y la
+# fecha: el NRT baja 8 fechas en orden y deja el día en curso al final; a las 06 UTC ese día suele
+# tener una sola plataforma publicada. Con el contador por fecha, un 403 ahí abortaba mandando a
+# rotar un token que acababa de bajar días enteros. Se reinicia con limpiar_fallas(), no con
+# reset_transient_breakers(), que corre por fecha.
+_DESCARGA_BUENA: bool = False
+
 # S161: ceses anunciados por el operador de cada satélite. POR QUÉ esta lista y no una fecha aquí: es la
 # misma que lee la vigilancia por plataforma de #892 y que el tablero exige por prueba, así que si NASA
 # mueve la fecha se edita un solo archivo. Se lee una vez por proceso.
@@ -803,7 +810,9 @@ def fallas_de_cobertura() -> list[dict]:
 
 
 def limpiar_fallas() -> None:
-    """Olvida las fallas, el conteo por plataforma y las incidencias (inicio de una corrida)."""
+    """Olvida las fallas, el conteo por plataforma, las incidencias y la descarga buena (inicio de una corrida)."""
+    global _DESCARGA_BUENA
+    _DESCARGA_BUENA = False
     _FALLAS.clear()
     _PLATAFORMAS.clear()
     _INCIDENCIAS.clear()
@@ -1242,7 +1251,8 @@ def fetch_for_volcano(volcano: dict, date: datetime,
 
     fecha_str = date.strftime("%Y-%m-%d")
     # S175: ver el cierre de este bucle.
-    pares_bajados, rechazos_403 = 0, 0
+    global _DESCARGA_BUENA
+    rechazos_403 = 0
     # S159 (I1): el día en curso (o recién terminado) es parcial por construcción; una vez por volcán y día.
     if dia_incompleto(date, ahora):
         registrar_incidencia("dia_parcial", volcano.get("name", "?"), fecha_str, None,
@@ -1310,7 +1320,7 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             paths = []
             for l1b_g, geo_g in matched:
                 paths += download_granules([l1b_g, geo_g], platform_dir)
-                pares_bajados += 1
+                _DESCARGA_BUENA = True
             results[platform] = paths
         except EarthdataCredentialError:
             # S123: NO degradar. Este catch-all es justo donde el token expirado
@@ -1338,10 +1348,12 @@ def fetch_for_volcano(volcano: dict, date: datetime,
     # el cuerpo, así que uno solo no los separa. Lo que sí los separa es el conjunto: si alguna
     # descarga funcionó, el token sirve; si ninguna y hubo 403 (agotados ya sus reintentos), no hay
     # nada que perder al abortar y sí un NRT verde sin datos que evitar.
-    if rechazos_403 and not pares_bajados:
+    # S176 (VPR966-01): «alguna» es de toda la corrida, ver _DESCARGA_BUENA. Si el token vence justo
+    # a mitad de corrida con un 403, esta no aborta y la siguiente, sin ninguna descarga buena, sí.
+    if rechazos_403 and not _DESCARGA_BUENA:
         raise EarthdataCredentialError(
             f"EARTHDATA_CREDENTIAL_INVALID [download]: {rechazos_403} plataforma(s) de "
-            f"{volcano.get('name', '?')} con HTTP 403 en la descarga y ninguna descarga buena. "
+            f"{volcano.get('name', '?')} con HTTP 403 en la descarga y ninguna descarga buena en esta corrida. "
             f"Hay que revisar y, si corresponde, **rotar** el secret EARTHDATA "
             f"(ver docs/EARTHDATA_TOKEN_SETUP.md).")
 
