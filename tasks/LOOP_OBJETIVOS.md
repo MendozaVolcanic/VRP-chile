@@ -598,6 +598,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 ### 2026-11-08 19:44 UTC (S176): verificador de #967, MERGEABLE
 - `C:/Users/nmend/vrp-temporales/s176_verpr/967/INFORME.md`: inerte comprobado por tres vías, navegador real. VPR967-01 g3 no bloquea A: las cotas de VIIRS 375 descansan en 2 y 5 casos crudos, IC 95 % [3, 42] y [6, 30]; pesa en el sello. Espera frase de Nicolás.
 
+### 2026-11-08 20:58 UTC (S176): #967 mergeado con frase de Nicolás; una falla NASA en D2
+- #967 mergeado (`ef9b1f9a7`, 20:46 UTC, cabeza fijada `458af255d`). Tests y Deploy GitHub Pages en verde; `cambio_detector.js` publicado idéntico al de main (sha256). En el perfil sólo sigue encendida la vía de MODIS: VIIRS sin cambios. main traído a `loop/activo` (`6ae4f7da2`).
+- La guardia corre por cron a las 19:35 UTC, así que su primera corrida es el 11-09; las 3 noches parten ahí. La vigilancia corre a las 22:55 UTC de hoy y abrirá el issue de «vigilancia ciega» previsto en VPR967-06.
+- D2 (run 42507820590): 1 falla, Tupungatito 2026-10-01 a 10-16, salida 3 por cobertura incompleta (SEARCH_CMR_TIMEOUT de NOAA-21 750 en 10-01, 10-05, 10-12 y 10-13). Se relanza con `gh run rerun --failed` cuando termine la corrida; hasta entonces D2 no está completo (A108).
+- Issues #960 y #962: la última corrida fallida de cada sombra tiene 1 volcán en rojo (Callaqui, 33 de 34 verdes; Tupungatito, 10 de 11) en el paso que revisa si salieron records, con cobertura incompleta en su log. Coincide con el diagnóstico de S175 (cortes de NASA).
+
 ### 2026-11-08 17:44 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
 - Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
 
