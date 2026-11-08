@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 13:50 UTC (S175): el loop retoma; estado por sensor; el lector de V750-A está en dos versiones
+- Nicolás reinició el PC (10:49 UTC): C: 17 GB libres, `pagefile.sys` 20,6 GB, commit 27 de 52 GB; #961 cerrado. Plan semanal
+  en 0 %. Main traído a `loop/activo` (`a9fc031e0`). Pedido: «analiza todo lo que falta [...] continuemos con todo lo que
+  se pueda en paralelo».
+- **Censo de la sombra** (`data/sombra_codigo_mirova/`, script de esta sesión, corrida del 2026-11-07): 5 noches
+  (11-03 a 11-07) con record de la vía en los 3 sensores y los 11 volcanes; 0 caídas a K. V750 con ROI `sens` en PCC y
+  Tupungatito sólo desde #939 (6 y 7 records `def` antes).
+- **HALLAZGO: el lector de V750-A vive en dos versiones que divergen.** `origin/main`: régimen de sombra (#945, #953),
+  105 escenarios, 129 mutaciones, SIN N-3. Rama `claude/s162-viirs750-2-918174` (donde está el pre-registro BORRADOR):
+  N-3 (`n3=True` 4 veces), 88 escenarios, 103 mutaciones (M53 a M95), sin los retoques del régimen; 612 líneas distintas
+  en `evaluar_v750a.py`. Antes de sellar hay que reconciliarlas. El medidor completo sobre la versión de main se
+  relanzó y se DETUVO a los pocos minutos: mediría un analizador que va a cambiar, y su resultado no serviría al sello.
+- En curso: segundas vueltas de autor de #959, #957 y #956, incorporación de VX y V4T a #955, y F5b reanudado. En cola: #958
+  (VPR958-02), reconciliación del lector de V750-A, seguimientos chicos, verificadores de segunda vuelta.
+
 ### 2026-11-08 08:45 UTC (S175): issues #960 y #962 son cortes transitorios de NASA
 - #962 (sombra código MIROVA sin corrida verde en 26 h): run 42405421896 del 2026-11-07 19:16 falló sólo el job de
   Tupungatito por `ConnectTimeout` contra `nrt3.modaps.eosdis.nasa.gov` (descarga MODIS Aqua del 06 y 07-nov). #960
