@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 16:23 UTC (S175): #958 publicado; #965 y #966 en borrador; pedido del visualizador para S176
+- #958 mergeado con la frase de las 15:3x (`a7a6ae360`, 16:06:50 UTC; entre la cabeza verificada y la final sólo cambian las dos
+  líneas del tooltip). GitHub Pages publicó (run sobre `a7a6ae360` en verde; el texto nuevo aparece 2 veces en la página en línea).
+  CI de main verde sobre `1a49293dd` (run 42495697323).
+- #965 (mapa, `b7a8a177a`, CI verde): en Chillán con «Todos los pixels» pasa de 137 a 182 de 182 records, sin error. La prueba en
+  navegador fue con la página parchada en memoria, no sirviendo la rama. #966 (token, `c316e0a24`, CI verde): 55 pruebas, 15 de
+  15 mutaciones, 21 de 21 escenarios con token bueno idénticos; a mirar: una noche con una sola plataforma y 403 deja rojo.
+  Los dos esperan verificador limpio de otro modelo en S176.
+- **Pedido de Nicolás para S176** (con captura de la tarjeta de Isluga): «necesitamos ver como mejorar el frontend del visualizador
+  para parecernos a mirova, el por ejemplo tiene una pagina donde puedes ver todas las ultimas pasadas por volcan y por cada
+  sensor, permite bajar geotif para saber donde estan los pixeles entre otras cosas. las tarjetas tienen un exceso de
+  informacion y ademas mirova no separa por satelite, por ejemplo todos son viirs375 no separa por cada uno. audita ambas paginas y
+  veamos como mejorar. revisa la interaccion entre cada una». Memoria `project_frontend_parecerse_a_mirova.md`.
+
 ### 2026-11-08 15:38 UTC (S175): Nicolás aprueba las recomendaciones; reparto entre esta sesión y S176
 - Frase de Nicolás, 15:3x UTC: «si a todo lo que recomiendes decide si se hace aca o en la siguiente sesion, ademas para la
   siguiente anota que necesitamos un plan para que gpt codex pueda revisar, entender y auditar nuestro codigo». Cubre
