@@ -177,7 +177,7 @@ MUTACIONES = [
      "armar_manifiesto.py"),
     ("G4 armar_montaje no exige un tag por origen (VPR946-05)",
      "    if set(tags) != set(ORIGENES):", "    if False:", "armar_montaje.py"),
-    # S174, ensayo de los controles de cenit con datos reales (C:/Users/nmend/vrp-temporales/s174-cenit/INFORME.md §6)
+    # S174, ensayo de los controles de cenit con datos reales (PR #952, sección «Qué cambia»; su informe no está en git)
     ("Z1 0 pasadas evaluables vuelve a salir SIN SUSTRATO (ensayo S174, defecto 2)",
      "    if not ev:\n        return {\"estado\": \"ROJO: insumo vacío", "    if False:\n        return {\"estado\": \"ROJO: insumo vacío"),
     ("Z2 alertas sin ningún cenit vuelven a salir SIN SUSTRATO (ensayo S174, defecto 2)",
@@ -188,8 +188,9 @@ MUTACIONES = [
      "and not (k == \"controles_cenit\" and", "and not (True and"),
     ("Z5 una excepción de la curva vuelve a rotularse SIN SUSTRATO (ensayo S174, menor a)",
      "dob = {\"veredicto\": \"ERROR INTERNO\",", "dob = {\"veredicto\": \"SIN SUSTRATO\","),
-    # S174, segunda vuelta de #952: mutaciones del verificador limpio (P1 a P7, C:/Users/nmend/vrp-temporales/
-    # s174-ver952/mios/mutar952.py, fuera de git) que sobrevivían la batería completa, y una por cada arreglo nuevo
+    # S174, segunda vuelta de #952: mutaciones del verificador limpio (P1 a P7, PR #952, sección «Segunda vuelta», con
+    # el resultado en mutar_leer_retro_salida.txt; su script no está en git) que sobrevivían la batería completa, y una
+    # por cada arreglo nuevo
     ("V01a los controles de cenit con sustrato siempre dan OK (VPR952-01, P4)",
      "    ok = v != \"NULO SESGADO\" and abs(d1 - d0) <= 1e-9 and d2 > d0", "    ok = True"),
     ("V01b el nulo sesgado no pone ROJO (VPR952-01, P5)",
