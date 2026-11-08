@@ -12,6 +12,7 @@ LO QUE NO CAMBIA. Un record de la vía SIN la marca (clave ausente) o con una ma
 lo ve). Y si TODAS las pasadas son caídas a K, la vía no corrió: C-via en rojo.
 """
 import importlib.util
+import json
 import os
 import sys
 from pathlib import Path
@@ -20,6 +21,8 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 EXP = ROOT / "experiments" / "_s172_retro_paquete"
+CABECERA_CSV = ("Volcan,Fecha_Satelite_UTC,Sensor,Distancia_km,Tipo_Registro,VRP_MW,Clasificacion Mirova,"
+                "Ultima_Actualizacion,Nota_Validacion")
 _RUTA = Path(os.environ.get("LEER_RETRO_MODULO") or EXP / "leer_retro.py")
 _spec = importlib.util.spec_from_file_location("leer_retro_caida_bajo_prueba", _RUTA)
 L = importlib.util.module_from_spec(_spec)
@@ -93,6 +96,51 @@ def test_los_brazos_de_la_via_publican_lo_que_publica_el_record_de_k():
     assert caida["_evaluable"] is True
     for b in L.BRAZOS:
         assert caida["_t"][b] == caida["_t"]["K"] == {"pub": 1, "mag": 0.4}, b
+
+
+def test_la_caida_no_pasa_por_las_posiciones_de_la_via(monkeypatch):
+    """VPR959-06 (L03): K no tiene posiciones de la vía, así que `_variante` no se le aplica al record caído; al de la
+    vía de verdad, sí (el control)."""
+    fs = _armar([True, "sin_grilla"])
+    vistos, orig = [], L._variante
+    monkeypatch.setattr(L, "_variante", lambda R, rec, regla, inner: (vistos.append(rec), orig(R, rec, regla, inner))[1])
+    L.tabla_publica(L.Reglas(), fs, pred)
+    caida = next(f for f in fs if f["via_marca"] == "sin_grilla")
+    de_la_via = next(f for f in fs if f["via_marca"] is True)
+    assert not any(r is caida["via_rec"] for r in vistos)
+    assert any(r is de_la_via["via_rec"] for r in vistos)
+
+
+def test_main_lista_las_caidas_en_los_avisos_de_la_salida(tmp_path, monkeypatch):
+    """VPR959-06 (L07): de punta a punta, las caídas llegan a `avisos`; sin caídas, ese aviso no aparece (el control)."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import referencia_mirova_unificada as RMU
+    orig = RMU.cargar_referencia_unificada
+    monkeypatch.setattr(RMU, "cargar_referencia_unificada",
+                        lambda c, o: orig(c, o, respaldo_path=None, historico_path=None))
+    (tmp_path / "ocr.csv").write_text(CABECERA_CSV + "\n", encoding="utf-8")
+    filas = [f"Lascar,2026-02-{d:02d} 05:00:00,MODIS,0,RUTINA,0,,x," for d in range(1, 28)]
+    (tmp_path / "cons.csv").write_text("\n".join([CABECERA_CSV] + filas) + "\n", encoding="utf-8")
+
+    def correr(nombre, marca_dia_5):
+        via, k = tmp_path / f"via_{nombre}", tmp_path / f"k_{nombre}"
+        via.mkdir()
+        k.mkdir()
+        rv, rk = [], []
+        for d in range(1, 28):
+            dts = f"2026-02-{d:02d} 05:00"
+            rk.append(_rec(dts, 1, 0.4))
+            rv.append(_rec(dts, 1, 0.4, via=marca_dia_5 if d == 5 else True))
+        (via / "Lascar.json").write_text(json.dumps({"volcano": "Lascar", "records": rv}), encoding="utf-8")
+        (k / "Lascar.json").write_text(json.dumps({"volcano": "Lascar", "records": rk}), encoding="utf-8")
+        sal = tmp_path / f"salida_{nombre}.json"
+        L.main(["--via", str(via), "--k", str(k), "--cons", str(tmp_path / "cons.csv"), "--ocr", str(tmp_path / "ocr.csv"),
+                "--v750a-sellado", "no", "--ensayo", "--salida", str(sal)], predicado=pred, reglas=L.Reglas())
+        return json.loads(sal.read_text(encoding="utf-8"))["avisos"]
+
+    con = [a for a in correr("con", "sin_grilla") if "cayó a K" in a]
+    assert len(con) == 1 and "MODIS sin_grilla 1" in con[0], con
+    assert not any("cayó a K" in a for a in correr("sin", True))
 
 
 def test_k_de_disco_con_marca_de_caida_es_k_con_aviso():

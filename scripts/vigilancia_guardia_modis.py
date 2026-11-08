@@ -53,8 +53,10 @@ la vía. Por eso, del lado prospectivo, cada pasada mira si su record de producc
 - el plazo de 29 protegidas, Muy Bajo y la sobre-publicación cuentan sólo pasadas de la vía (V1-01);
 - la frescura de la vía se mide POR VOLCÁN, desde el encendido: si la vía cae a K o deja de escribir en un solo volcán,
   aviso (152, mutaciones M2 y M2c); antes se comparaba la última noche de la vía con la última de MODIS sumando los 11;
-- cada caída a K se lista (`caidas_a_k`) y, si es de los últimos DIAS_NULO días, es aviso: cuenta como K, no como la
-  vía (decisión 3 de S174).
+- cada caída a K se lista (`caidas_a_k`) y, si es de los últimos DIAS_AVISO_CAIDA días, es aviso: cuenta como K, no
+  como la vía (decisión 3 de S174). Un VERDE con ese aviso sigue siendo VIGILANCIA_CIEGA (la regla, §4: un VERDE con
+  avisos no es VERDE), pero si es el único aviso la salida lo marca (`solo_caidas_a_k`) y la issue dice lo que pasa: las
+  demás pasadas sí se miraron (VPR959-05).
 Y el descarte de borde (153) se nombra pasada por pasada en `borde_171_01.pasadas`, no sólo por semana.
 
 Salida: data/audit_continuous/guardia_modis_latest.json y una línea en guardia_modis_history.jsonl.
@@ -91,6 +93,9 @@ COTA_MUY_BAJO = 2
 COTA_SOBREPUBLICACION = 3
 UMBRAL_MINIMO_MW = 0.05                        # «sobre 0,05 MW»: lo de 0,05 o menos no cuenta como Muy Bajo
 DIAS_NULO = 14                                 # cuántos días antes del encendido (o de hoy) mide el nulo
+# Cuántos días una caída a K sigue siendo aviso (decisión 3 de S174). Propuesta del implementador, la fija Nicolás; es
+# otro parámetro que el del nulo, aunque hoy valga lo mismo (VPR959-05).
+DIAS_AVISO_CAIDA = 14
 DIAS_ANTES_DEL_ENCENDIDO = 10                  # la ventana cubre el re-escrito de 8 días del NRT, con margen
 # MA172-202: horas que se espera antes de leer como silencio una pasada sin record de producción (el NRT procesa con
 # atraso: LANCE ~3 h y el cron). Propuesta del implementador; la fija Nicolás al sellar la regla.
@@ -386,7 +391,7 @@ def caidas_a_k(encendido, prod):
             if r["b"] == SENSOR and r.get("caida_k") and r["dt"] >= enc_dt]
 
 
-def avisos_via(flag, encendido, prod, hoy=None, vols=None):
+def avisos_via(flag, encendido, prod, vols=None):
     """El flag de producción encendido sin records de la vía, o una vía que dejó de escribir, deja guardia =
     producción y la vigilancia en VERDE sin vigilar nada.
 
@@ -394,7 +399,7 @@ def avisos_via(flag, encendido, prod, hoy=None, vols=None):
     con su órbita); sumando los 11 volcanes, el que queda en K se tapa con los demás (mutaciones M2 y M2c). En cada
     volcán con records MODIS posteriores al encendido, la última noche de la vía no puede quedar más de
     MAX_DIAS_SOMBRA_SIN_DATOS días detrás de la última de producción. Un volcán sin records posteriores lo avisa la
-    frescura de producción (avisos_produccion). Y cada caída a K de los últimos DIAS_NULO días es aviso (decisión 3)."""
+    frescura de producción (avisos_produccion). Las caídas a K sueltas van aparte, en avisos_caidas."""
     if flag is None:
         return ["no se pudo leer ENABLE_MODIS_CODIGO_MIROVA de pipeline.profile: no se sabe si la vía está encendida"]
     if flag and encendido is None:
@@ -412,17 +417,26 @@ def avisos_via(flag, encendido, prod, hoy=None, vols=None):
         ultima_via = max((r["noche"] for r in post if r.get("via") is True), default=None)
         if ultima_via is None or (date.fromisoformat(ultima) - date.fromisoformat(ultima_via)).days \
                 > vs.MAX_DIAS_SOMBRA_SIN_DATOS:
-            av.append(f"producción de {v} escribe MODIS hasta el {ultima} y la vía sólo hasta el {ultima_via}: en {v} "
-                      "la vía dejó de correr (o cae a K) y lo que se compara con la guardia es K contra K")
-    if hoy:
-        desde = (date.fromisoformat(hoy) - timedelta(days=DIAS_NULO)).isoformat()
-        recientes = [c for c in caidas_a_k(encendido, prod) if c["fecha_utc"][:10] >= desde]
-        if recientes:
-            lista = ", ".join(f"{c['volcano']} {c['sensor']} {c['fecha_utc']} ({c['marca']})" for c in recientes[:10])
-            av.append(f"{len(recientes)} records MODIS de producción de los últimos {DIAS_NULO} días cayeron a K (la "
-                      f"vía no corrió; cuentan como K, no como la vía, decisión 3 de S174): {lista}"
-                      f"{' ...' if len(recientes) > 10 else ''}")
+            hasta = (f"la vía sólo hasta el {ultima_via}" if ultima_via
+                     else "ningún record suyo desde el encendido es de la vía")  # VPR959-04: nunca un None en la issue
+            av.append(f"producción de {v} escribe MODIS hasta el {ultima} y {hasta}: en {v} la vía dejó de correr (o "
+                      "cae a K) y lo que se compara con la guardia es K contra K")
     return av
+
+
+def avisos_caidas(flag, encendido, prod, hoy):
+    """Decisión 3 de S174: cada caída a K de los últimos DIAS_AVISO_CAIDA días es aviso. Va separado de avisos_via
+    (VPR959-05): una pasada que cayó a K no deja ciega a la vigilancia en las demás, y la issue tiene que poder decirlo."""
+    if not (flag and encendido):
+        return []
+    desde = (date.fromisoformat(hoy) - timedelta(days=DIAS_AVISO_CAIDA)).isoformat()
+    recientes = [c for c in caidas_a_k(encendido, prod) if c["fecha_utc"][:10] >= desde]
+    if not recientes:
+        return []
+    lista = ", ".join(f"{c['volcano']} {c['sensor']} {c['fecha_utc']} ({c['marca']})" for c in recientes[:10])
+    return [f"{len(recientes)} records MODIS de producción de los últimos {DIAS_AVISO_CAIDA} días cayeron a K (la vía no "
+            f"corrió; cuentan como K, no como la vía, decisión 3 de S174): {lista}"
+            f"{' ...' if len(recientes) > 10 else ''}"]
 
 
 def cargar_insumos(win, via, caidas=None):
@@ -479,13 +493,16 @@ def evaluar(hoy):
     d = disparadores(pasadas, prod, guardia, hoy, encendido, juzgadas=leer_juzgadas(), ahora=ahora)
     if d["duracion"]["cumplida"]:
         out["fase"] = "plazo_cumplido"
-    avisos = (vs.avisos_referencia(filas, hoy) + avisos_referencia_modis(filas, hoy) + avisos_guardia(guardia, hoy)
+    ciegos = (vs.avisos_referencia(filas, hoy) + avisos_referencia_modis(filas, hoy) + avisos_guardia(guardia, hoy)
               + avisos_produccion(prod, hoy) + avisos_perfiles(prod, guardia, n_via_g)
-              + avisos_via(flag, encendido, prod, hoy) + avisos_nulo(d["nulo"]))
+              + avisos_via(flag, encendido, prod) + avisos_nulo(d["nulo"]))
+    avisos = ciegos + avisos_caidas(flag, encendido, prod, hoy)
     veredicto = d["veredicto"]
     if veredicto == "VERDE" and avisos:
         veredicto = "VIGILANCIA_CIEGA"      # un aviso no tapa una reversión: sólo impide leer la falta de disparos
     out.update({"veredicto": veredicto, "avisos": avisos,
+                # VPR959-05: el veredicto es el de la regla; esto sólo le dice a la issue que no ponga «no puede mirar»
+                "solo_caidas_a_k": veredicto == "VIGILANCIA_CIEGA" and not ciegos,
                 "guardia_desde": min((r["noche"] for r in guardia), default=None),
                 "guardia_hasta": max((r["noche"] for r in guardia), default=None),
                 "n_pasadas_alerta": len(pasadas),

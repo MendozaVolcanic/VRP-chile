@@ -52,8 +52,11 @@ MUTACIONES = [
      '    if al_sin_dato is not None:\n        al_sin_dato("x")\n' + _JUICIO, "atrapada"),
     ("aviso_sin_granulo", PM, ": {hdf_path.name}\")\n", "\")\n", "atrapada"),
     # run_pipeline
-    ("run_pipeline_no_pasa_aviso", RP, "al_sin_dato=_crater_sin_dato(volcano, date, platform),  # S165 (V165-03)",
-     "al_sin_dato=None,", "atrapada"),
+    # S175 (VPR959-03): la línea cambió con #959 (`_anotar :=`, que usa _modis_sin_record). La mutación deja `_anotar` en
+    # None para no agregar un NameError que no es lo que se quiere romper.
+    ("run_pipeline_no_pasa_aviso", RP,
+     "al_sin_dato=(_anotar := _crater_sin_dato(volcano, date, platform)),  # S165 (V165-03)",
+     "al_sin_dato=(_anotar := None),", "atrapada"),
     ("anota_otro_tipo", RP, _ANOTAR, _ANOTAR.replace('"crater_sin_dato"', '"sin_geolocalizacion"'), "atrapada"),
     ("anota_sin_plataforma", RP, _ANOTAR, _ANOTAR.replace(", platform, motivo)", ", None, motivo)"), "atrapada"),
     ("anota_otro_volcan", RP, _ANOTAR, _ANOTAR.replace('volcano["name"]', '"?"'), "atrapada"),

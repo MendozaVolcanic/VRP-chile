@@ -32,6 +32,12 @@ atrapadas con el código nuevo, sobre datos reales, sin mover los controles?
 Las tres mutaciones atrapadas; los controles no se mueven, y sobre los datos de hoy sin mutar la vigilancia sigue en
 VERDE (no hay caídas a K en producción).
 
+Nota posterior (revisión del PR #959): `salida_nuevo.json` es la salida de esa corrida y queda tal cual. Por eso su aviso
+de M2 todavía dice «la vía sólo hasta el None» (VPR959-04, ahora el texto es otro) y su M6 no trae
+`protegidas_calladas_por_k_de_produccion`, porque el instrumento de `aa2b71441` no conoce esa lista: en la tabla, ese
+INVESTIGAR se infiere. La cadena de M6 desde el disco quedó como prueba: `test_cadena_*` en
+`tests/test_vigilancia_guardia_por_volcan_s175.py`.
+
 ## Reproducir
 
 ```bash
