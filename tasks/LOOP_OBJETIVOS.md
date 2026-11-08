@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-08 05:25 UTC (S175): LOOP DETENIDO por disco (C: 2,7 GB), issue #961
+- 05:10 UTC la vigilancia de disco saltó: C: 2,7 GB libres. Causa medida: `C:\pagefile.sys` en 35 GB (modificado 05:09
+  UTC), con la memoria comprometida en 61,8 de 65,9 GB (Chrome ~17 GB en 101 procesos, Claude ~14 GB). Las carpetas de
+  los agentes suman menos de 250 MB: no son la causa. Lección: un fan-out de 5 agentes con Chrome abierto empuja el
+  archivo de paginación, que vive en C:, y eso se lleva el disco aunque nadie escriba nada.
+- Regla §1.5: no se lanza nada nuevo. Siguen hasta terminar F5b, V4T y los verificadores de #956 y #959 (escriben poco)
+  y el medidor de V750-A (escribe en D:; lleva IDENTIDAD y M1 en 50 min: la corrida completa puede pasar de 40 h).
+- Lo destraba Nicolás: cerrar pestañas de Chrome o reiniciar, o liberar espacio en C:.
+
 ### 2026-11-08 ~05:20 UTC (S175): F4t entregado, verificadores limpios de #957 y #958, medidor de V750-A corriendo
 - Nicolás (~04:40 UTC): no esperar las 12:00 UTC, gastar el 6 % que queda antes del reinicio. Se lanzaron F5b, V4T y
   verificadores limpios Fable (esfuerzo `high`) de #956, #957, #958 y #959: ninguno de esos PR tenía uno (sus autores
