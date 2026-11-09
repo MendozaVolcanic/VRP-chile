@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-09 10:31 UTC (S177): D4 despachado con max-parallel 6
+- Nicolás eligió 6 («Sí, con 6»). Run 42601379627, tag `s172-retro-d4` sobre `a7a6ae360`, perfil `_s172_retro_paquete`, R25 (2025-02-15 a 12-31), 10 volcanes sin Tupungatito. El plan local con el `plan_trozos.py` del tag (sha256 igual normalizado a LF) dio 176 trozos y 3.200 volcán-días, como §10.3 y §3; en Actions, 177 trabajos con el `plan` en verde.
+- Salió a las 10:30 UTC, dentro de la franja 01 a 12 UTC que §10.3 prefiere evitar; dura más de un día, así que la cruza igual. Si hay cortes de NOAA-21: esperar el fin y `gh run rerun --failed` (C-via en R25 pide 90 %).
+
 ### 2026-11-09 07:38 UTC (S177): D3 verde; #970 con CI verde
 - D3 (run 42567518008, intento 1): 30 de 30 trozos y el job `plan` en verde a las 07:35 UTC. 48 coberturas finales, 0 fallas, 0 retiradas. Artefactos en `C:/Users/nmend/vrp-temporales/s177_d3/` (9,5 MB; vencen en GitHub a los 30 días). C-via de K da 0 % en 90 de 90 líneas, como debe en el brazo sin vía. No se leyó como evidencia (§11).
 - `bajar_tramos.py --estricto` no sirve aquí: exige el prefijo `s143ab-` y un brazo control de `parametros.json`. El conteo equivalente, sólo de pasadas y sin VRP ni detecciones, está en `experiments/_s177_cmr/control_montaje_d3.py` y `control_montaje_d3_detalle.py`: en los días de D3, K tiene 3.282 pasadas y la vía 3.232; 79 sólo en K y 29 sólo en la vía.
