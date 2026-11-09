@@ -101,4 +101,4 @@ def test_el_tablero_principal_sigue_sin_leer_la_sombra():
 @pytest.mark.parametrize("archivo", [JS, HTML])
 def test_sin_guiones_largos_ni_voseo_visible(archivo):
     texto = archivo.read_text(encoding="utf-8")
-    assert "—" not in texto and "–" not in texto
+    assert chr(0x2014) not in texto and chr(0x2013) not in texto
