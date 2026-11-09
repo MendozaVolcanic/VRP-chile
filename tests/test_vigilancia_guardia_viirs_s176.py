@@ -343,7 +343,7 @@ def test_cadena_produccion_sin_datos_frescos_da_vigilancia_ciega(disco, b, plat,
     disco(prod, guardia, _ref(b))
     out = vv.evaluar("2026-11-20", clave)
     assert out["veredicto"] == "VIGILANCIA_CIEGA", out["avisos"]
-    assert any("producción" in a and "Lascar" in a for a in out["avisos"]), out["avisos"]
+    assert any("producción" in a and "Lascar" in a and b in a for a in out["avisos"]), out["avisos"]
 
 
 @pytest.mark.parametrize("b,plat,clave", CASOS)

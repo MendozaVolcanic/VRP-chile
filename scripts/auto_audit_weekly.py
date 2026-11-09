@@ -1578,6 +1578,11 @@ def main():
         print(f"COBERTURA: {av}")
     for v in sin_juzgar.values():
         print(f"SIN JUZGAR: {v['aviso']}")
+    # S177 (VPR970-02): lo que la regla «la tabla decide» le quitó a una alerta sólo OCR se ve en el log del run.
+    for s_ocr, c_ocr in ocr_descartadas.items():
+        if c_ocr["sin_alerta_en_tabla"]:
+            print(f"OCR DESCARTADO CON TABLA SIN ALERTA: {s_ocr} {c_ocr['sin_alerta_en_tabla']} filas, "
+                  f"{c_ocr['protegidas_sin_alerta_en_tabla']} protegidas")
     print(f"VEREDICTO: {out['verdict']}" + (f" — {len(flags)} flags" if flags else ""))
     for fl in flags:
         print("  ⚠", fl)

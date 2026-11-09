@@ -165,6 +165,16 @@ def test_cuenta_las_filas_ocr_que_descarta_la_tabla():
     quedan = cm.tabla_sobre_ocr(filas, tabla=filas + [tabla_alerta, rutina, fp, v375_tabla])
     assert len(filas) - len(quedan) == sum(v["descartadas"] for v in c.values())
     assert cm.contar_ocr_descartadas([solo, v375]) == {}
+    # VPR970-04: basta una fila de alerta entre las de la pasada; el borde de 120 s cuenta y el de 121 no; el orden no importa.
+    dos = [_alerta("Lascar", "MODIS", t, 0.0, tipo="RUTINA"), _alerta("Lascar", "MODIS", t, 2.0)]
+    ocr_dos = _alerta("Lascar", "MODIS", "2026-10-30 08:56:10", 2.0, source="OCR")      # a 60 s
+    assert cm.contar_ocr_descartadas([ocr_dos], tabla=dos)["MODIS"]["con_alerta_en_tabla"] == 1
+    assert cm.contar_ocr_descartadas([ocr_dos], tabla=dos[::-1])["MODIS"]["con_alerta_en_tabla"] == 1
+    tab = [_alerta("Lascar", "MODIS", "2026-10-30 08:55:00", 2.0)]
+    borde = _alerta("Lascar", "MODIS", "2026-10-30 08:57:00", 2.0, source="OCR")
+    fuera = _alerta("Lascar", "MODIS", "2026-10-30 08:57:01", 2.0, source="OCR")
+    assert cm.contar_ocr_descartadas([borde], tabla=tab)["MODIS"]["descartadas"] == 1
+    assert cm.contar_ocr_descartadas([fuera], tabla=tab) == {}
 
 
 def _protegidas(filas, recs):
