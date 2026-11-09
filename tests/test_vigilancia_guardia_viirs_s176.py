@@ -358,6 +358,33 @@ def test_cadena_la_via_que_calla_una_protegida_es_candidata(disco, b, plat, clav
 
 
 @pytest.mark.parametrize("b,plat,clave", CASOS)
+def test_cadena_un_volcan_sin_archivo_de_guardia_no_tapa_la_candidata_de_otro(disco, b, plat, clave):
+    """VPR967-06: si el job de la guardia de un volcán falla y no deja archivo, la alerta callada en otro volcán se sigue viendo.
+    El volcán sin archivo sale como aviso de frescura, y la lista de volcanes del banco queda como estaba."""
+    import banco_paridad as bp
+    prod, guardia = _disco_base(plat)
+    prod["NevadosDeChillan"].append(_crudo(ALERTA, False, marca=True, sensor=plat))
+    guardia["NevadosDeChillan"].append(_crudo(ALERTA, True, sensor=plat))
+    del guardia["Lascar"]
+    disco(prod, guardia, _ref(b) + [_fila("NevadosDeChillan", ALERTA + ":00", 25.0, b=b)])
+    out = vv.evaluar("2026-11-20", clave)
+    assert out["veredicto"] == "REVERSION_CANDIDATA", out
+    assert [p["volcano"] for p in out["reversion"]] == ["NevadosDeChillan"]
+    assert any("Lascar" in a for a in out["avisos"]), out["avisos"]
+    assert bp.VOLS == VOLS_CASO
+
+
+def test_cadena_la_vigilancia_de_modis_tolera_el_mismo_volcan_sin_archivo(disco, tmp_path, monkeypatch):
+    """VPR967-06, A102: la vigilancia de MODIS tenía la misma línea. Control: el volcán con archivo sí trae sus records."""
+    prod, guardia = _disco_base("MODIS_AQUA")
+    del guardia["Lascar"]
+    disco(prod, guardia, _ref("MODIS"))
+    monkeypatch.setattr(vg, "GUARDIA", str(tmp_path / "guardia"))
+    _filas, _prod, en_guardia, _n = vg.cargar_insumos(VENTANA, set())
+    assert en_guardia and {r["vol"] for r in en_guardia} == {"NevadosDeChillan"}
+
+
+@pytest.mark.parametrize("b,plat,clave", CASOS)
 def test_cadena_la_caida_a_k_que_calla_investiga(disco, b, plat, clave):
     prod, guardia = _disco_base(plat)
     prod["NevadosDeChillan"].append(_crudo(ALERTA, False, marca="sin_grilla", sensor=plat))

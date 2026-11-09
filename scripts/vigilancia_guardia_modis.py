@@ -453,6 +453,21 @@ def avisos_caidas(flag, encendido, prod, hoy, sensor=SENSOR):
             f"{' ...' if len(recientes) > 10 else ''}"]
 
 
+def cargar_guardia_presente(bp, coords, inner, win, carpeta):
+    """Records de la guardia de los volcanes que tienen archivo (S177, VPR967-06).
+
+    POR QUÉ. Si el job de la guardia de un volcán falla y no deja archivo, `cargar_nuestros` se cae y antes se descartaba
+    la guardia de los once: la alerta callada en otro volcán quedaba sin verse ese día. El volcán sin archivo sigue saliendo
+    en el aviso de frescura. Se recorta `bp.VOLS` y se restaura, en vez de agregar un argumento, porque `banco_paridad.py`
+    está en el manifiesto del candado de la retrospectiva (`PREREGISTRO_RETRO_PAQUETE.md` §11)."""
+    vols = bp.VOLS
+    bp.VOLS = [v for v in vols if os.path.exists(os.path.join(carpeta, v + ".json"))]
+    try:
+        return bp.cargar_nuestros(coords, inner, win, data=carpeta)
+    finally:
+        bp.VOLS = vols
+
+
 def cargar_insumos(win, via, caidas=None):
     """Referencia, records MODIS de producción (marcados con `via` y, S175, con `caida_k`, la marca de la caída a K o
     None) y de la guardia con el predicado del tablero, y cuántos records crudos de la guardia traen la marca de la vía.
@@ -467,10 +482,7 @@ def cargar_insumos(win, via, caidas=None):
         clave = (r["vol"], r.get("sensor"), r["dt"].strftime("%Y-%m-%d %H:%M"))
         r["via"] = clave in via
         r["caida_k"] = (caidas or {}).get(clave)
-    try:
-        guardia = [r for r in bp.cargar_nuestros(coords, inner, win, data=GUARDIA) if r["b"] == SENSOR]
-    except FileNotFoundError:
-        guardia = []          # la guardia todavía no escribe algún volcán: la frescura lo dice volcán por volcán
+    guardia = [r for r in cargar_guardia_presente(bp, coords, inner, win, GUARDIA) if r["b"] == SENSOR]
     n_via = 0
     for vol in aa.VOLS:
         try:

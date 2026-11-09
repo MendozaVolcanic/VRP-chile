@@ -857,20 +857,23 @@ def main(argv=None):
         # nocturnas de VIIRS 750 sobre Chile caen de madrugada en UTC, así que una noche local es una sola fecha UTC
         # mientras ninguna pasada leída cruce las 00:00 UTC. S174 (VPR945-R3-05): eso no se escribe con una cifra que
         # envejece; la línea «horas UTC de las pasadas leídas» lo mide en cada lectura. Reloj, noches y lectura usan las
-        # mismas pasadas (oks0, ya dentro de la ventana del corte); los días se muestran truncados al décimo, para que
+        # mismas pasadas (oks0, ya dentro de la ventana del corte; ⚠️ S177, LR4, A113: las noches ya no, van sobre oks;
+        # horas, primera y última pasada y corte por cenit siguen sobre oks0 y sólo informan); los días se muestran truncados al décimo, para que
         # 27,99 no se lea «28,0».
         # S174 (VPR945-R3-02, R3-01): ⚠️ S174 (VPR945-R4, quinta vuelta, A113): el reparto de 7 y 7 por mitad del lapso y
         # el reloj medido entre la primera y la última pasada leída quedan retirados; el texto de LR3 los conserva.
         # S174 (VPR945-R4, LECTURA LR3). POR QUÉ: con la ventana fija los días son de calendario, de su inicio a
         # min(ahora, fin), y no dependen de ninguna pasada; las noches se cuentan en 4 semanas fijas desde el inicio.
         # CUMPLE exige que ahora haya llegado al fin, NOCHES_MIN_SEMANA noches en cada semana y NOCHES_MIN_SOMBRA en total,
-        # en el conjunto y en cada volcán cuya ROI difiere de B0 (`cambia`), contadas sobre sus pasadas leídas (oks0); un
+        # en el conjunto y en cada volcán cuya ROI difiere de B0 (`cambia`), contadas sobre sus pasadas leídas (oks0; ⚠️ S177, LR4, A113: oks); un
         # volcán cambiado sin pasadas tiene 0 noches. Los otros volcanes se imprimen y no deciden (SEMANA_EXIGE_SIN_CAMBIO).
         # ⚠️ S174 (R5-03, A113): ese «no deciden» queda rebajado: piden NOCHES_MIN_SIN_CAMBIO noches en total (abajo).
         horas = sorted(obj[i]["hora_utc"] for i in oks0) or ["(ninguna)"]
         dias = max(0.0, (t_lim - t_ini).total_seconds() / 86400)
-        noches_sem, noches = semanas_noches([obj[i]["hora_utc"] for i in oks0], t_ini)
-        por_v = {v: semanas_noches([obj[i]["hora_utc"] for i in oks0 if obj[i]["volcan"] == v], t_ini) for v in esperada}
+        # S177 (VPR964-03, LECTURA LR4): las noches se cuentan sobre `oks`, no sobre `oks0`: una pasada con K distinto de
+        # producción sale de todos los brazos (L18), así que su noche no la leyó nadie y no puede completar la sombra.
+        noches_sem, noches = semanas_noches([obj[i]["hora_utc"] for i in oks], t_ini)
+        por_v = {v: semanas_noches([obj[i]["hora_utc"] for i in oks if obj[i]["volcan"] == v], t_ini) for v in esperada}
         exigidos = [v for v in esperada if v in cambia or SEMANA_EXIGE_SIN_CAMBIO]
         vol_falta = [v for v in sorted(exigidos) if faltan_noches(*por_v[v])]
         # S174 (VPR945-R5-03, decisión de Nicolás del 2026-11-06): los volcanes de ROI igual a B0 (con B4, los nueve)
