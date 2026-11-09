@@ -569,10 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-11-09 05:48 UTC (S177): F5b re-corrido, verificador SE SOSTIENE EN PARTE; #970 en borrador
+### 2026-11-09 05:52 UTC (S177): #970 ajustado tras verificador
+- Verificador Sonnet MERGEABLE CON RESERVAS: 47.641 filas, 95 descartadas antes y después, 0 diferencias. `f201b3818` atiende VPR970-01 a 05; los controles de S139 se conservan y sólo salen los números históricos. Queda CI y frase de Nicolás. D3 en curso desde las 05:28 UTC.
+
+
+### 2026-11-09 05:46 UTC (S177): F5b re-corrido, verificador SE SOSTIENE EN PARTE; #970 en borrador
 - F5b con la mancha saturada conservada (`experiments/_s177_f5b/RESUMEN.md`, informe del autor y verificador Opus al lado). Vale decir «nuestro punto cae en la mancha saturada», no «el foco de MIROVA coincide»: el nulo de geometría igualada no tiene poder (V177-01) y el hallazgo 351 queda en SOSPECHA (V177-02). No se publica posición de MIROVA en Chillán como medición. Cierra la decisión 17 de la auditoría S175 salvo el par TIF y lámina fuerte, SIN DATO mientras los TIF sigan congelados.
 - #970 en borrador (`843d8c7d1`): conteo de OCR que descarta la tabla, S139 histórica, VPR967-02 a 04 con su mutación atrapada por aserción. Suite completa local 3.477 verdes antes de las tres últimas pruebas. Verificador limpio Sonnet lanzado.
-- VPR967-06 sigue abierto (se ven records vacíos de guardia si falta un volcán); VPR964-01 a 03 van antes del sello de V750-A.
+- VPR967-06 sigue abierto (un volcán sin archivo de guardia deja ciega toda la vigilancia, dirección segura); VPR964-01 a 03 van antes del sello de V750-A.
 
 ### 2026-11-09 05:29 UTC (S177): D2 completo y verde, D3 despachado
 - D2 (run 42507820590, intento 2): verde 05:20 UTC. Son 47 trozos más el job `plan`, así que el 47 de la bitácora era correcto y el «48» del bloque S177 contaba el plan. C-via y paso de reproceso en verde en 47 de 47; 47 de 47 coberturas finales sin fallas (intento 1: 28 limpias y 19 con fallas de CMR, todas repetidas limpias en el intento 2). Artefactos en `C:/Users/nmend/vrp-temporales/s177_d2/` (vencen en GitHub el 2026-12-09). `bajar_tramos.py --estricto` compara brazos y aquí hay uno: se usará entre D2 y D3 si los nombres de artefacto lo permiten, y D2 no se leyó como evidencia (§11).
