@@ -603,7 +603,7 @@ function monitoringFreshness(records) {
   for (const r of records) {
     if (!last || r.datetime_utc > last) last = r.datetime_utc;
   }
-  if (!last) return { cls: "mon-none", txt: "no monitoreado" };
+  if (!last) return { cls: "mon-none", txt: "sin datos en este tablero" };
   const h = (Date.now() - parseUtcMs(last)) / 3600000;
   const ago = h < 1 ? Math.round(h * 60) + " min" : h < 48 ? Math.round(h) + " h" : Math.round(h / 24) + " d";
   if (h <= 30) return { cls: "mon-fresh",   txt: "monitoreado · " + ago };
