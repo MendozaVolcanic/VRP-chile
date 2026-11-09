@@ -612,6 +612,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 - #966 mergeado (`d81d01503`, 21:32 UTC, cabeza fijada `d3c3839c0`). Tests de main en verde; main traído a `loop/activo` (`321c3321a`). Tag `pre-s176-fetch-966`. Falta ver la primera corrida del NRT con este `fetch.py`: la última es de las 18:39 UTC, anterior al merge.
 - D2 (run 42507820590) a las 21:29 UTC: 26 de 48 terminados, 20 verdes y 6 con salida 3 por SEARCH_CMR_TIMEOUT (Planchón-Peteroa 4 trozos, Tupungatito 1, Chaitén 1). Corrige la entrada anterior donde el conteo implícito era otro: a las 20:46 UTC eran 20 terminados, 19 verdes. Relanzar con `gh run rerun --failed` al terminar; D3 y D4 esperan.
 
+### 2026-11-09 03:46 UTC (S176): D2 terminó con 19 fallas de CMR y se relanzó
+- D2 (run 42507820590, intento 1): 29 verdes y 19 con salida 3. Las 19 son SEARCH_CMR_TIMEOUT en la búsqueda, clasificadas una por una en sus logs (VIIRS NOAA-21 750 en todas; SNPP 750 y NOAA-21 375 en la mayoría); ninguna en descarga ni de credencial. Los 5 volcanes con más fallas son del sur, pero causa de ese reparto y si la carga propia aporta: SIN VERIFICAR.
+- Relanzado con `gh run rerun --failed` a las 03:4x UTC (intento 2, misma revisión del workflow). D3 y D4 siguen esperando.
+- El primer NRT que incluye #966 (`8a3ecc287`, 01:10 UTC) y los de 02:10 y 03:10 UTC salieron verdes.
+- Issues #968 y #969 de «vigilancia ciega», abiertos a las 02:19 y 02:21 UTC: previstos (VPR967-06), hasta la primera corrida de la guardia.
+
 ### 2026-11-08 17:44 UTC (S176): diseño del encendido de VIIRS 375, en borrador para Nicolás
 - Nicolás, a adelantar VIIRS 375 con guardia K tras el verificador: «Sí, prepáralo». Diseño en `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, dos PR como MODIS; nada implementado, espera su revisión.
 
