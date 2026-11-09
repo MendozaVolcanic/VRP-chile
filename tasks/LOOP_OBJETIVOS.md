@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-11-09 10:42 UTC (S177): #970 en main; las 29 pasadas ya están resueltas por el lector
+### 2026-11-09 10:37 UTC (S177): #970 en main; las 29 pasadas ya están resueltas por el lector
 - #970 mergeado con la frase de Nicolás («si merge lo que dices»): `b4b8a61a0`, squash, `--match-head-commit f201b3818`, 10:35:53 UTC. #955 no: le falta el anexo del audit.
 - **Corrige la entrada de las 07:38:** no hay nada que decidir sobre las 29. `leer_retro.py::armar_pasadas` ya las marca `sobra_en_via`: fuera de las métricas y de C-cobertura, y listadas (`n_sobran`). El lector compara contra K de disco, no contra el K-gemelo con que las conté. Scripts: `experiments/_s177_cmr/control_montaje_d3_vecinos.py`, `_k_disco.py`, `_sobras_k.py`, `_cenit.py` (sólo claves y geometría, sin VRP).
 - Las 29 tampoco están en K de disco. Su ángulo de vista: 23 de 29 sobre 65° (mediana 69,7°) contra 206 de 1.306 (mediana 48,3°) en las pasadas V750 que están en ambos; o sea, borde de barrido. Por qué K las descarta: SIN DATO, el log no imprime «sin record» en VIIRS 750 (`scripts/run_pipeline.py` sólo lo hace en MODIS). Las 7 con vecino a 6 minutos son la misma pasada en otro gránulo. Recomendación a Nicolás: no tocar la regla sellada; al abrir el candado, informe post hoc de si MIROVA publicó en esas pasadas.
@@ -582,7 +582,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 ### 2026-11-09 07:38 UTC (S177): D3 verde; #970 con CI verde
 - D3 (run 42567518008, intento 1): 30 de 30 trozos y el job `plan` en verde a las 07:35 UTC. 48 coberturas finales, 0 fallas, 0 retiradas. Artefactos en `C:/Users/nmend/vrp-temporales/s177_d3/` (9,5 MB; vencen en GitHub a los 30 días). C-via de K da 0 % en 90 de 90 líneas, como debe en el brazo sin vía. No se leyó como evidencia (§11).
 - `bajar_tramos.py --estricto` no sirve aquí: exige el prefijo `s143ab-` y un brazo control de `parametros.json`. El conteo equivalente, sólo de pasadas y sin VRP ni detecciones, está en `experiments/_s177_cmr/control_montaje_d3.py` y `control_montaje_d3_detalle.py`: en los días de D3, K tiene 3.282 pasadas y la vía 3.232; 79 sólo en K y 29 sólo en la vía.
-- **Para el lector (no resuelto):** las 29 sólo en la vía son todas VIIRS 750, un caso que C-cobertura no nombra (sólo trata las que faltan en la vía). 7 tienen pasada K del mismo sensor en la hora, a 6 minutos: SOSPECHA de borde entre gránulos consecutivos. 22 no tienen K en esa hora, muchas a las 04:30 y 06:54 UTC: SOSPECHA de borde de barrido; sin medir. ⚠️ Corregido a las 10:42: el lector ya las trata (`sobra_en_via`). Hay que decidir su trato antes de abrir el candado.
+- **Para el lector (no resuelto):** las 29 sólo en la vía son todas VIIRS 750, un caso que C-cobertura no nombra (sólo trata las que faltan en la vía). 7 tienen pasada K del mismo sensor en la hora, a 6 minutos: SOSPECHA de borde entre gránulos consecutivos. 22 no tienen K en esa hora, muchas a las 04:30 y 06:54 UTC: SOSPECHA de borde de barrido; sin medir. ⚠️ Corregido a las 10:37: el lector ya las trata (`sobra_en_via`). Hay que decidir su trato antes de abrir el candado.
 - #970: `pytest` y `bateria-v750a` en verde sobre `f201b3818`; falta la frase de Nicolás. D4 no se despacha hasta que Nicolás conteste la decisión 5 (`max-parallel`).
 
 ### 2026-11-09 05:52 UTC (S177): #970 ajustado tras verificador
