@@ -27,7 +27,9 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 OSF = os.path.join(ROOT, "data", "mirova_reference", "VRP_GLOBAL_ARCHIVE_2025.csv")
 
 
-@pytest.mark.skipif(not os.path.exists(OSF), reason="OSF no descargado")
+# S177 (aprobado por Nicolas, 2026-11-08): medicion historica de S139, previa a K. Reprocesado con K (#883) el numero
+# correcto ya no es este y mantenerla en la suite solo deja una falla local conocida; ver el docstring de arriba.
+@pytest.mark.skip(reason="historica S139, previa a K (#883); vigente en experiments/_s175_seguimientos_chicos/README.md")
 def test_reproduce_descomposicion_s139(tmp_path):
     out = tmp_path / "mag.json"
     r = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "descomponer_magnitud_osf.py"),

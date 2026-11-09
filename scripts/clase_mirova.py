@@ -201,38 +201,67 @@ def techo_vrp(fila: dict) -> Optional[float]:
     return v + 1.0 if vrp_es_piso(fila) else v
 
 
+def _indice_tabla(filas, tabla) -> dict:
+    """(volcan, sensor) -> [(instante, es_alerta)] de las filas CONS de los sensores con OCR truncado, ordenado."""
+    idx = defaultdict(list)
+    for f in (filas if tabla is None else tabla):
+        if f.get("source") == "CONS" and f.get("sensor_bucket") in SENSORES_OCR_TRUNCADO and f.get("fecha_utc"):
+            idx[(f["volcano"], f["sensor_bucket"])].append((_instante(f["fecha_utc"]), f.get("tipo") in TIPOS_ALERTA))
+    for ts in idx.values():
+        ts.sort(key=lambda par: par[0])
+    return idx
+
+
+def _tabla_de_la_pasada(idx, f, ventana_s: int) -> list:
+    """`es_alerta` de cada fila CONS a `ventana_s` segundos o menos de la fila OCR `f`; vacia si `f` no es OCR o la
+    tabla no tiene la pasada. Una sola definicion para descartar y para contar (A102)."""
+    ts = idx.get((f.get("volcano"), f.get("sensor_bucket")))
+    if not ts or f.get("source") != "OCR" or not f.get("fecha_utc"):
+        return []
+    t = _instante(f["fecha_utc"])
+    ini, fin = t - timedelta(seconds=ventana_s), t + timedelta(seconds=ventana_s)
+    i = bisect.bisect_left(ts, ini, key=lambda par: par[0])
+    fuera = []
+    while i < len(ts) and ts[i][0] <= fin:
+        fuera.append(ts[i][1])
+        i += 1
+    return fuera
+
+
 def tabla_sobre_ocr(filas, tabla=None, ventana_s: int = VENTANA_S) -> list:
     """`filas` sin las del OCR de MODIS y VIIRS 750 cuya pasada esta en la tabla: una fila CONS, de cualquier tipo,
     del mismo volcan y sensor a `ventana_s` segundos o menos. `tabla`: filas donde buscar las CONS (por defecto las
     mismas `filas`; el auto-audit pasa la referencia unificada, que trae tambien las RUTINA). No modifica nada.
 
-    DECISION PENDIENTE DE NICOLAS (VPR957-01, PR #957). Como basta una fila CONS de cualquier tipo, una tabla RUTINA o
-    FALSO_POSITIVO a 120 s o menos tambien saca a la fila del OCR: una alerta solo OCR de 1 MW o mas deja de ser
-    protegida y su noche sale del recall. Es un cambio de criterio respecto de `alerta_protegida` fila por fila, y es
-    asimetrico: en VIIRS 375 el OCR sigue compitiendo con la tabla. Medido en la referencia unificada del snapshot
-    (47.631 filas, tabla hasta el 2026-11-02): de las 145 filas OCR de alerta de MODIS y VIIRS 750, 92 tienen tabla con
-    alerta, 53 no tienen tabla y 0 tienen tabla sin alerta; 569 pasadas protegidas (tres sensores) antes y despues, sin
-    que cambie ninguna. Hoy 0 casos; el dano seria futuro y silencioso. Dos opciones: (a) aceptar la regla "la tabla
-    decide" de S162 (`resumir_pasadas`; la tabla es el canal mas creible, feedback S159), que es lo que hace este
-    codigo mientras no se decida; (b) acotar esta funcion a las filas CONS de alerta, de modo que una tabla sin alerta
-    no le quite la proteccion al OCR."""
+    DECIDIDO (VPR957-01, PR #957; Nicolas, 2026-11-08, «si a todo lo que recomiendes»): la tabla decide, tambien con
+    una fila RUTINA o FALSO_POSITIVO. Consecuencia aceptada: una alerta solo OCR de 1 MW o mas con tabla sin alerta deja
+    de ser protegida y su noche sale del recall. Como ese dano seria futuro y silencioso (medido en la referencia
+    unificada del snapshot, 47.631 filas: de 145 filas OCR de alerta de MODIS y VIIRS 750, 92 con tabla de alerta, 53
+    sin tabla y 0 con tabla sin alerta), `contar_ocr_descartadas` lo deja a la vista en el audit."""
     filas = list(filas)
-    idx = defaultdict(list)
-    for f in (filas if tabla is None else tabla):
-        if f.get("source") == "CONS" and f.get("sensor_bucket") in SENSORES_OCR_TRUNCADO and f.get("fecha_utc"):
-            idx[(f["volcano"], f["sensor_bucket"])].append(_instante(f["fecha_utc"]))
-    for ts in idx.values():
-        ts.sort()
-    out = []
+    idx = _indice_tabla(filas, tabla)
+    return [f for f in filas if not _tabla_de_la_pasada(idx, f, ventana_s)]
+
+
+def contar_ocr_descartadas(filas, tabla=None, ventana_s: int = VENTANA_S) -> dict:
+    """Por sensor, las filas que `tabla_sobre_ocr` saca de `filas`: con alerta en la tabla (lo esperado) y sin alerta en
+    la tabla (el caso de VPR957-01), y de estas las que eran protegidas. Sensor sin descartes no aparece."""
+    filas = list(filas)
+    idx = _indice_tabla(filas, tabla)
+    out = {}
     for f in filas:
-        ts = idx.get((f.get("volcano"), f.get("sensor_bucket")))
-        if ts and f.get("source") == "OCR" and f.get("fecha_utc"):
-            t = _instante(f["fecha_utc"])
-            i = bisect.bisect_left(ts, t - timedelta(seconds=ventana_s))
-            if i < len(ts) and ts[i] <= t + timedelta(seconds=ventana_s):
-                continue
-        out.append(f)
-    return out
+        cercanas = _tabla_de_la_pasada(idx, f, ventana_s)
+        if not cercanas:
+            continue
+        c = out.setdefault(f["sensor_bucket"], {"descartadas": 0, "con_alerta_en_tabla": 0, "sin_alerta_en_tabla": 0,
+                                                "protegidas_sin_alerta_en_tabla": 0})
+        c["descartadas"] += 1
+        if any(cercanas):
+            c["con_alerta_en_tabla"] += 1
+        else:
+            c["sin_alerta_en_tabla"] += 1
+            c["protegidas_sin_alerta_en_tabla"] += alerta_protegida(f)
+    return dict(sorted(out.items()))
 
 
 def pasadas_protegidas(filas, umbral: float = UMBRAL_PROTEGIDA_MW, lectura: str = "A") -> set:
