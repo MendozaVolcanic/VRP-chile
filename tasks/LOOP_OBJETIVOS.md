@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-09 07:38 UTC (S177): D3 verde; #970 con CI verde
+- D3 (run 42567518008, intento 1): 30 de 30 trozos y el job `plan` en verde a las 07:35 UTC. 48 coberturas finales, 0 fallas, 0 retiradas. Artefactos en `C:/Users/nmend/vrp-temporales/s177_d3/` (9,5 MB; vencen en GitHub a los 30 días). C-via de K da 0 % en 90 de 90 líneas, como debe en el brazo sin vía. No se leyó como evidencia (§11).
+- `bajar_tramos.py --estricto` no sirve aquí: exige el prefijo `s143ab-` y un brazo control de `parametros.json`. El conteo equivalente, sólo de pasadas y sin VRP ni detecciones, está en `experiments/_s177_cmr/control_montaje_d3.py` y `control_montaje_d3_detalle.py`: en los días de D3, K tiene 3.282 pasadas y la vía 3.232; 79 sólo en K y 29 sólo en la vía.
+- **Para el lector (no resuelto):** las 29 sólo en la vía son todas VIIRS 750, un caso que C-cobertura no nombra (sólo trata las que faltan en la vía). 7 tienen pasada K del mismo sensor en la hora, a 6 minutos: SOSPECHA de borde entre gránulos consecutivos. 22 no tienen K en esa hora, muchas a las 04:30 y 06:54 UTC: SOSPECHA de borde de barrido; sin medir. Hay que decidir su trato antes de abrir el candado.
+- #970: `pytest` y `bateria-v750a` en verde sobre `f201b3818`; falta la frase de Nicolás. D4 no se despacha hasta que Nicolás conteste la decisión 5 (`max-parallel`).
+
 ### 2026-11-09 05:52 UTC (S177): #970 ajustado tras verificador
 - Verificador Sonnet MERGEABLE CON RESERVAS: 47.641 filas, 95 descartadas antes y después, 0 diferencias. `f201b3818` atiende VPR970-01 a 05; los controles de S139 se conservan y sólo salen los números históricos. Queda CI y frase de Nicolás. D3 en curso desde las 05:28 UTC.
 
