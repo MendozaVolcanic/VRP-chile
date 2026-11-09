@@ -144,10 +144,11 @@ las pasadas lejanas quedó SIN DATO.
 - **Lo que el lector exige además (S177, VPR964-02; detalle y decisiones en `LECTURAS_EVALUAR_V750A.md`, LR1 a LR4).** Hay
   que declarar `--roi-brazo` (B0 a B5) y `--sha-desde`: sin ellos la compuerta se cierra. La lectura es una ventana fija de
   28 días, desde el 2026-11-03 00:00 UTC o la hora del commit de `--sha-desde`, la que sea posterior. Antes de que termine
-  la ventana, o con noches de menos, la salida es 4 (PROVISORIO). Se piden 5 noches por semana y 14 en total, en el conjunto
+  la ventana, o con noches de menos, la salida es 4 (PROVISORIO), salvo que un P1 mayor que 0 vete antes (NO CUMPLE). Se piden 5 noches por semana y 14 en total, en el conjunto
   y en cada volcán cuya ROI difiere de B0, y 14 noches en cada volcán sin cambio de ROI. Sólo cuentan las noches con una
-  pasada que algún brazo leyó. La exigencia de 14 noches por volcán sin cambio es decisión de Nicolás (2026-11-06); las otras
-  lecturas de LR1 a LR3 son decisiones de la coordinadora, reversibles antes del sello.
+  pasada que algún brazo leyó. La ventana fija, las 14 noches y las 14 noches por volcán sin cambio son decisiones de Nicolás;
+  `--sha-desde` obligatorio y las 5 noches por semana son decisiones de la coordinadora, reversibles antes del sello. El
+  detalle de cada una está en LR1 a LR3.
 
 ### 4.4 Dónde están las fuentes citadas (S177, VPR964-01)
 

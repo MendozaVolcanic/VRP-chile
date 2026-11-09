@@ -53,7 +53,7 @@ El costo que se acepta es que la vía puede callar señales débiles que K publi
 
 ### 4.2 Unidad: la pasada nocturna
 
-La unidad es la pasada nocturna. **Protegida** = alerta de MIROVA del sensor de 1 MW o más (lectura A, D-4). D-9 sí aplica a VIIRS 375: una alerta de 0,05 MW o menos es «MIROVA no vio nada» y no cuenta como alerta. N-3 (las protegidas sólo OCR de Suomi NPP anteriores al 2026-10-09) no aplica: la ventana empieza después del cese de Suomi NPP. Las alertas diurnas de MIROVA no entran a esta regla (S177, VPR967-05 (d)): ni la vía ni K procesan esas pasadas; el verificador de la medición contó 10 alertas diurnas de Chillán de 1 MW o más en VIIRS 375 entre el 2026-11-03 y el 11-07.
+La unidad es la pasada nocturna. **Protegida** = alerta de MIROVA del sensor de 1 MW o más (lectura A, D-4). D-9 sí aplica a VIIRS 375: una alerta de 0,05 MW o menos es «MIROVA no vio nada» y no cuenta como alerta. N-3 (las protegidas sólo OCR de Suomi NPP anteriores al 2026-10-09) no aplica: la ventana empieza después del cese de Suomi NPP. Las alertas diurnas de MIROVA no entran a esta regla (S177, VPR967-05 (d)): ni la vía ni K procesan esas pasadas; el verificador de la medición contó, entre el 2026-11-03 y el 11-07, 10 alertas diurnas de Chillán de 1 MW o más: 4 de VIIRS 375, 4 de VIIRS 750 y 2 de MODIS.
 
 ### 4.3 Reversión inmediata, pre-autorizada
 
