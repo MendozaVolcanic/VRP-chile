@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-09 12:27 UTC (S177): #971 en borrador con verificador; incidente de disco en C:
+- #971 (`9499d7809` y `7855f65e3`): VPR967-05 y 06, VPR964-01 a 03. Vigilancia: un volcán sin archivo de guardia ya no vacía la guardia de los demás (VIIRS y MODIS). Lector de V750-A: noches sobre `oks` (LR4; ER58 a ER60; MR80 y MR81 atrapadas por aserción). Suite local sobre el primer commit: 3.485 pasaron, 33 saltadas, 2 xfail.
+- Verificador limpio Sonnet, `C:/Users/nmend/vrp-temporales/s177_ver971/INFORME.md`: MERGEABLE CON RESERVAS. Comprobé VPR971-01 (las 10 diurnas son 4 de V375, 4 de V750 y 2 de MODIS), 02, 04 y 05 contra informe y lector, y los atendí en `7855f65e3`. En VPR971-02 el verificador dice que sólo las 5 noches son de la coordinadora; LR3 también le atribuye `--sha-desde` obligatorio. VPR971-03 (g1, un aviso de ceguera queda dentro del issue del disparador) se deja: es consecuencia buscada. El segundo commit no tuvo otra vuelta de verificador: sólo texto y comentarios.
+- Incidente: el verificador hizo `git init` y `git add` de una copia del árbol: 9,5 GB, C: en 1,3 GB a las 12:17 UTC. Lo avisó S175. Lo detuve, retiré sus tres copias (hechas por él, reproducibles desde git, sin `.env`) y lo reanudé con tope de 500 MB: terminó con 25 MB. C: en 11 GB. Regla en memoria.
+- D4 a las 12:27 UTC: 19 de 176 trozos en verde, 6 en curso.
+
 ### 2026-11-09 10:37 UTC (S177): #970 en main; las 29 pasadas ya están resueltas por el lector
 - #970 mergeado con la frase de Nicolás («si merge lo que dices»): `b4b8a61a0`, squash, `--match-head-commit f201b3818`, 10:35:53 UTC. #955 no: le falta el anexo del audit.
 - **Corrige la entrada de las 07:38:** no hay nada que decidir sobre las 29. `leer_retro.py::armar_pasadas` ya las marca `sobra_en_via`: fuera de las métricas y de C-cobertura, y listadas (`n_sobran`). El lector compara contra K de disco, no contra el K-gemelo con que las conté. Scripts: `experiments/_s177_cmr/control_montaje_d3_vecinos.py`, `_k_disco.py`, `_sobras_k.py`, `_cenit.py` (sólo claves y geometría, sin VRP).
