@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-09 05:02 UTC (S177): el reproceso no es la causa de los cortes de CMR
+- Censo de Actions del 11-01 al 11-09 04:45 UTC (162 intentos, 238.534 marcas) en `experiments/_s177_cmr/`, veredicto en su `INFORME.md`. **Causa: NO. Si agrava: SIN DATO** (un solo episodio). 305 de las 306 fallas del 11-08 son de colecciones VIIRS NOAA-21, NOAA-20 respondió en 0,4 s en las mismas horas; misma carga sin daño de 18 a 19 UTC y de 03:45 a 04:45 UTC; el 11-06 hubo NOAA-21 lenta con 0 trabajos de reproceso. Verificador limpio Sonnet (`C:/Users/nmend/vrp-temporales/s177_ver_cmr/INFORME.md`), cifras centrales comprobadas por el autor con código propio.
+- Corrige el bloque S177: «el NRT seguía verde» es porque no corrió de 19 a 23 UTC (brecha diaria de unas 5 h del horario); a las 23:25 sus búsquedas tardaron hasta 72,6 s. Las sombras rojas del 11-07 son otro fenómeno (una conexión reseteada; un ConnectTimeout de descarga a `nrt3.modaps`).
+- D2 intento 2 a las 05:02 UTC: 47 de 48 verdes, 1 en curso.
+
 ### 2026-11-08 17:50 UTC (S176): Nicolás aprueba empezar; VIIRS 750 entra al plan; reproceso
 - Frases: «si empieza, pero porque no lanzar todos los sensores con la nueva via?» y «el reprocesamiento cuando podria hacerse?». Diseño con decisiones 7 y 8: PR A para los dos VIIRS, B1 y B2 separados, reproceso aislado despachable. `reproc-retro-paquete.yml` con 0 corridas. Tag `pre-s176-adopcion-viirs` publicado en `a7a6ae360`; worktree `C:/Users/nmend/vrp-wt/s176-guardia-viirs`.
 - Verificador limpio Fable de #965: MERGEABLE, sin gravedad 3 (`C:/Users/nmend/vrp-temporales/s176_verpr/965/INFORME.md`), sirviendo la rama de verdad en navegador; Chillán 182 de 182.
