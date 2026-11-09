@@ -58,8 +58,17 @@
     { name: "Hudson", display: "Hudson", region: "Aysén", lat: -45.9, lon: -72.97 },
   ];
 
-  function clasificar(r) {
+  function clasificar(r, volcan) {
     if (!r || !(r.vrp_mw > 0)) return { estado: "sin_deteccion", dist_km: null };
+    // POR QUÉ mirar cada píxel: la distancia del record es la del cúmulo más radiante y el VRP suma todos. Un píxel alertado en
+    // el cráter con un cúmulo mayor lejos se leería como «foco lejano», y es justo la actividad que hay que ver.
+    if (volcan && Array.isArray(r.anomaly_pixels)) {
+      let min = Infinity;
+      for (const p of r.anomaly_pixels) {
+        if (p.lat != null && p.lon != null) min = Math.min(min, distanciaKm(volcan.lat, volcan.lon, p.lat, p.lon));
+      }
+      if (min <= RADIO_CUMBRE_KM) return { estado: "cumbre", dist_km: min };
+    }
     const d = r.final_hotspot_dist_km;
     // Una detección sin posición no se asigna a la cumbre ni a lo lejano: se muestra como lo que es.
     if (d === null || d === undefined) return { estado: "sin_posicion", dist_km: null };
@@ -91,15 +100,29 @@
     return Date.parse(texto.replace(" ", "T") + ":00Z");
   }
 
-  function resumenVolcan(records, ahoraMs, ventanaDias) {
+  function contarFocos(detecciones) {
+    const c = { cumbre: 0, lejos: 0 };
+    for (const d of detecciones) {
+      if (d.estado === "cumbre") c.cumbre++;
+      else if (d.tambien_desde.every((o) => d.volcan < o)) c.lejos++;   // el mismo foco, una sola vez
+    }
+    return c;
+  }
+
+  function resumenVolcan(records, ahoraMs, ventanaDias, volcan) {
     const desde = ahoraMs - ventanaDias * 86400000;
     let ultima = null;
-    const res = { n_cumbre: 0, n_lejos: 0, n_sin_posicion: 0, vrp_max: 0, ultima_pasada: null, sin_pasadas_recientes: true };
+    const res = { n_cumbre: 0, n_lejos: 0, n_sin_posicion: 0, vrp_max: 0, ultima_pasada: null, primera_pasada: null,
+      ultima_deteccion: null, sin_pasadas_recientes: true };
     for (const r of records) {
+      // POR QUÉ: una escena inválida no miró el volcán; contarla como pasada presentaría una ausencia como calma.
+      if (r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio) continue;
       if (ultima === null || r.datetime_utc > ultima) ultima = r.datetime_utc;
+      if (res.primera_pasada === null || r.datetime_utc < res.primera_pasada) res.primera_pasada = r.datetime_utc;
       if (msUtc(r.datetime_utc) < desde) continue;
-      const { estado } = clasificar(r);
+      const { estado } = clasificar(r, volcan);
       if (estado === "sin_deteccion") continue;
+      if (res.ultima_deteccion === null || r.datetime_utc > res.ultima_deteccion) res.ultima_deteccion = r.datetime_utc;
       if (estado === "cumbre") res.n_cumbre++;
       else if (estado === "lejos") res.n_lejos++;
       else res.n_sin_posicion++;
@@ -110,7 +133,7 @@
     return res;
   }
 
-  const api = { VOLCANES, RADIO_CUMBRE_KM, clasificar, focosCompartidos, resumenVolcan, msUtc };
+  const api = { VOLCANES, RADIO_CUMBRE_KM, clasificar, focosCompartidos, contarFocos, resumenVolcan, msUtc };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else raiz.P34 = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -28,7 +28,7 @@
   .e-cumbre { color:var(--roj); font-weight:600; }
   .e-lejos { color:var(--amar); }
   .e-nada { color:var(--muted); }
-  .e-falta { color:var(--roj); }
+  .e-falta { color:var(--txt); font-style:italic; }
 </style>
 </head>
 <body>
@@ -43,12 +43,12 @@
   <p class="nota">
     <b>Cumbre</b>: detección a 5 km o menos de las coordenadas del volcán (valor por defecto, no medido cráter por cráter).
     <b>Foco lejano</b>: detección más allá de 5 km dentro de la grilla de unos 50 km; puede ser un incendio, otro centro
-    volcánico o un artefacto, y aún no está verificado. Horas en UTC. Ventana: últimos <span id="ventana"></span> días.
+    volcánico o un artefacto, y aún no está verificado. Horas en UTC. Ventana: últimos <span id="ventana"></span> días<span id="desde"></span>.
   </p>
   <div class="cifras" id="cifras"></div>
   <p class="nota" id="estado">Cargando los datos...</p>
   <div class="tabla"><table>
-    <thead><tr><th>Volcán</th><th>Región</th><th>Estado</th><th class="num">Cumbre</th><th class="num">Lejanos</th><th class="num">VRP máx (MW)</th><th>Última pasada</th></tr></thead>
+    <thead><tr><th>Volcán</th><th>Región</th><th>Estado</th><th class="num">Cumbre</th><th class="num">Lejanos</th><th class="num">VRP máx (MW)</th><th>Última detección</th><th>Última pasada</th></tr></thead>
     <tbody id="filas"></tbody>
   </table></div>
   <h2>Detecciones de la ventana</h2>
@@ -109,11 +109,11 @@ async function cargar(v) {
   const ahora = Date.now();
   const desde = ahora - VENTANA_DIAS * 86400000;
   const filas = document.getElementById("filas");
-  let dets = [], nCumbre = 0, nLejos = 0, sinDato = 0, ultima = "";
+  let dets = [], sinDato = 0, ultima = "", primera = "";
 
   P34.VOLCANES.forEach((v, i) => {
-    const records = datos[i] ? datos[i].records : null;
-    const res = records ? P34.resumenVolcan(records, ahora, VENTANA_DIAS) : null;
+    const records = datos[i] && Array.isArray(datos[i].records) ? datos[i].records : null;
+    const res = records ? P34.resumenVolcan(records, ahora, VENTANA_DIAS, v) : null;
     if (records === null) sinDato++;
     const [txt, cls] = estadoFila(res);
     const tr = document.createElement("tr");
@@ -123,32 +123,36 @@ async function cargar(v) {
     celda(tr, res ? res.n_cumbre : "", "num");
     celda(tr, res ? res.n_lejos + res.n_sin_posicion : "", "num");
     celda(tr, res && res.vrp_max > 0 ? res.vrp_max.toFixed(2) : "", "num");
+    celda(tr, res && res.ultima_deteccion ? res.ultima_deteccion : "");
     celda(tr, res && res.ultima_pasada ? res.ultima_pasada : "");
     filas.appendChild(tr);
     if (!records) return;
     if (res.ultima_pasada && res.ultima_pasada > ultima) ultima = res.ultima_pasada;
-    nCumbre += res.n_cumbre;
-    nLejos += res.n_lejos + res.n_sin_posicion;
+    if (res.primera_pasada && (primera === "" || res.primera_pasada < primera)) primera = res.primera_pasada;
     for (const r of records) {
-      if (P34.clasificar(r).estado !== "sin_deteccion" && P34.msUtc(r.datetime_utc) >= desde) dets.push({ ...r, volcan: v.name });
+      const c = P34.clasificar(r, v);
+      if (c.estado !== "sin_deteccion" && P34.msUtc(r.datetime_utc) >= desde) dets.push({ ...r, volcan: v.name, estado: c.estado, dist_km: c.dist_km });
     }
   });
 
-  cifra(P34.VOLCANES.length - sinDato + " de " + P34.VOLCANES.length, "volcanes con datos");
-  cifra(nCumbre, "detecciones en cumbre");
-  cifra(nLejos, "focos lejanos");
-
   dets = P34.focosCompartidos(dets).sort((a, b) => (a.datetime_utc < b.datetime_utc ? 1 : -1));
+  // POR QUÉ: sin datos, un «0 detecciones» se leería como calma.
+  if (sinDato < P34.VOLCANES.length) {
+    const focos = P34.contarFocos(dets);
+    cifra(P34.VOLCANES.length - sinDato + " de " + P34.VOLCANES.length, "volcanes con datos");
+    cifra(focos.cumbre, "detecciones en cumbre");
+    cifra(focos.lejos, "focos lejanos distintos");
+    if (primera) document.getElementById("desde").textContent = " (hay datos desde " + primera.slice(0, 10) + ")";
+  }
   const detalle = document.getElementById("detalle");
   for (const d of dets) {
-    const c = P34.clasificar(d);
     const tr = document.createElement("tr");
     celda(tr, d.datetime_utc);
     celda(tr, nombres[d.volcan]);
     celda(tr, d.sensor.replace("VIIRS_", "VIIRS ").replace("MODIS_", "MODIS ").replace("_750", " 750 m"));
     celda(tr, d.vrp_mw.toFixed(2), "num");
-    celda(tr, c.dist_km === null ? "" : c.dist_km.toFixed(1), "num");
-    celda(tr, etiquetaClase[c.estado], c.estado === "cumbre" ? "e-cumbre" : "e-lejos");
+    celda(tr, d.dist_km === null ? "" : d.dist_km.toFixed(1), "num");
+    celda(tr, etiquetaClase[d.estado], d.estado === "cumbre" ? "e-cumbre" : "e-lejos");
     celda(tr, d.tambien_desde.map((n) => nombres[n]).join(", "));
     const td = celda(tr, "");
     if (d.final_hotspot_lat != null) {

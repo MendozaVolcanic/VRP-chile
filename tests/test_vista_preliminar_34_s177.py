@@ -102,3 +102,49 @@ def test_el_tablero_principal_sigue_sin_leer_la_sombra():
 def test_sin_guiones_largos_ni_voseo_visible(archivo):
     texto = archivo.read_text(encoding="utf-8")
     assert chr(0x2014) not in texto and chr(0x2013) not in texto
+
+
+def test_un_pixel_en_la_cumbre_manda_aunque_el_cumulo_mayor_este_lejos():
+    """Sumar todos los píxeles y ubicar sólo el cúmulo mayor escondería justo lo que importa: actividad en el cráter."""
+    volcan = {"lat": -30.0, "lon": -70.0}
+    regs = _r(final_hotspot_dist_km=20.0, anomaly_pixels=[{"lat": -30.01, "lon": -70.0}, {"lat": -30.2, "lon": -70.0}])
+    res = _node(f"m.clasificar({json.dumps(regs)}, {json.dumps(volcan)})")
+    assert res["estado"] == "cumbre" and res["dist_km"] < 2
+    lejos = _r(final_hotspot_dist_km=20.0, anomaly_pixels=[{"lat": -30.2, "lon": -70.0}])
+    assert _node(f"m.clasificar({json.dumps(lejos)}, {json.dumps(volcan)}).estado") == "lejos"
+
+
+def test_una_escena_invalida_no_cuenta_como_pasada():
+    regs = [_r(datetime_utc="2026-11-08 05:12", vrp_mw=0),
+            _r(datetime_utc="2026-11-08 09:00", vrp_mw=0, diag_codigo_mirova={"motivo_vacio": "escena_invalida"})]
+    assert _node(f"m.resumenVolcan({json.dumps(regs)}, Date.UTC(2026,10,9,12,0), 14).ultima_pasada") == "2026-11-08 05:12"
+
+
+def test_el_resumen_dice_cuando_fue_la_ultima_deteccion_y_desde_cuando_hay_datos():
+    regs = [_r(datetime_utc="2026-11-04 05:42", final_hotspot_dist_km=17.0), _r(datetime_utc="2026-11-08 05:12", vrp_mw=0),
+            _r(datetime_utc="2026-11-03 06:00", vrp_mw=0)]
+    res = _node(f"m.resumenVolcan({json.dumps(regs)}, Date.UTC(2026,10,9,12,0), 14)")
+    assert res["ultima_deteccion"] == "2026-11-04 05:42" and res["primera_pasada"] == "2026-11-03 06:00"
+
+
+def test_el_foco_visto_desde_dos_volcanes_se_cuenta_una_vez():
+    dets = [{"volcan": "Guallatiri", "tambien_desde": ["Parinacota"], "estado": "lejos"},
+            {"volcan": "Parinacota", "tambien_desde": ["Guallatiri"], "estado": "lejos"},
+            {"volcan": "Putana", "tambien_desde": [], "estado": "lejos"},
+            {"volcan": "Osorno", "tambien_desde": [], "estado": "cumbre"}]
+    assert _node(f"m.contarFocos({json.dumps(dets)})") == {"cumbre": 1, "lejos": 2}
+
+
+def test_la_hora_se_lee_en_utc_y_no_en_la_hora_local():
+    assert _node('m.msUtc("2026-11-08 05:12")') == 1794114720000
+
+
+def test_mismo_foco_exige_el_mismo_sensor():
+    dets = [{"volcan": "A", **_r(sensor="VIIRS_NOAA20")}, {"volcan": "B", **_r(sensor="VIIRS_NOAA21")}]
+    assert _node(f"m.focosCompartidos({json.dumps(dets)}).map(d => d.tambien_desde)") == [[], []]
+
+
+def test_el_rotulo_no_afirma_que_se_proceso_cuando_pudo_fallar_la_carga():
+    for pagina in ("index.html", "diario.html", "mosaico.html"):
+        texto = (ROOT / "frontend" / pagina).read_text(encoding="utf-8")
+        assert "procesado, sin publicar" not in texto and "sin datos en este tablero" in texto, pagina

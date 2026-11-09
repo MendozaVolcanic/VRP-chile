@@ -1855,7 +1855,7 @@ function monitoringFreshness(lastTimeStr) {
   // Sin ningún registro = volcán sin pull de datos (no monitoreado), NO una caída
   // del NRT → estado NEUTRO (gris), no rojo de alarma. El rojo se reserva para un
   // Tier A que SÍ se monitorea pero quedó stale (problema real de adquisición).
-  if (!lastTimeStr) return { cls: "mon-none", txt: "procesado, sin publicar", h: null };
+  if (!lastTimeStr) return { cls: "mon-none", txt: "sin datos en este tablero", h: null };
   const h = (Date.now() - parseUtcMs(lastTimeStr)) / 3600000;
   const ago = h < 1 ? Math.round(h * 60) + " min"
             : h < 48 ? Math.round(h) + " h"
