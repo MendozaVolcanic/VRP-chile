@@ -151,10 +151,7 @@ def cargar_insumos(win, via, caidas, sensor):
         clave = (r["vol"], r.get("sensor"), r["dt"].strftime("%Y-%m-%d %H:%M"))
         r["via"] = clave in via
         r["caida_k"] = (caidas or {}).get(clave)
-    try:
-        guardia = [r for r in bp.cargar_nuestros(coords, inner, win, data=GUARDIA) if r["b"] == sensor]
-    except FileNotFoundError:
-        guardia = []          # la guardia todavía no escribe algún volcán: la frescura lo dice volcán por volcán
+    guardia = [r for r in vg.cargar_guardia_presente(bp, coords, inner, win, GUARDIA) if r["b"] == sensor]
     n_via = 0
     for vol in aa.VOLS:
         try:

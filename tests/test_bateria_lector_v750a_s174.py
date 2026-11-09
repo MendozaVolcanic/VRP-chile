@@ -50,14 +50,14 @@ MEDIDOR = EXP / "mutar_evaluar_v750a.py"
 LECTOR = Path(os.environ.get("V750A_LECTOR_MODULO") or EXP / "evaluar_v750a.py")
 EVALUADOR_RUTA = "experiments/_s157_prereg_d25/evaluar_d25.py"
 # Conteo fijo a propósito: un escenario que desaparece (o uno nuevo que no se anota aquí) pone la prueba en rojo.
-N_ESCENARIOS = 137
+N_ESCENARIOS = 140
 # Los escenarios son independientes (cada uno en su carpeta); en grupos paralelos la batería cabe holgada en el job
 # `bateria-v750a` de 40 min (158 s en el CI de #954).
 GRUPOS = 4
 # VPR954-01: sha256 de probar_evaluar_v750a.py y mutar_evaluar_v750a.py con fines de línea LF (ver _huella_bateria).
 # Se actualiza A PROPÓSITO, con el valor que imprime la prueba cuando falla, después de correr el medidor sobre los
 # escenarios tocados.
-HUELLA_BATERIA = "c749a1a804e99ac88834126507cfa5d4b56c74bfc0e87c4c67bc83c9417fc185"
+HUELLA_BATERIA = "34c410d592168b36db01a3165fafce3494e62afa909e01f357f4275c6547c862"
 
 
 def _cargar(nombre, ruta):

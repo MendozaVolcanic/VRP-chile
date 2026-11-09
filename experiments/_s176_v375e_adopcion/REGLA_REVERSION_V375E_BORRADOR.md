@@ -53,13 +53,14 @@ El costo que se acepta es que la vía puede callar señales débiles que K publi
 
 ### 4.2 Unidad: la pasada nocturna
 
-La unidad es la pasada nocturna. **Protegida** = alerta de MIROVA del sensor de 1 MW o más (lectura A, D-4). D-9 sí aplica a VIIRS 375: una alerta de 0,05 MW o menos es «MIROVA no vio nada» y no cuenta como alerta. N-3 (las protegidas sólo OCR de Suomi NPP anteriores al 2026-10-09) no aplica: la ventana empieza después del cese de Suomi NPP.
+La unidad es la pasada nocturna. **Protegida** = alerta de MIROVA del sensor de 1 MW o más (lectura A, D-4). D-9 sí aplica a VIIRS 375: una alerta de 0,05 MW o menos es «MIROVA no vio nada» y no cuenta como alerta. N-3 (las protegidas sólo OCR de Suomi NPP anteriores al 2026-10-09) no aplica: la ventana empieza después del cese de Suomi NPP. Las alertas diurnas de MIROVA no entran a esta regla (S177, VPR967-05 (d)): ni la vía ni K procesan esas pasadas; el verificador de la medición contó 10 alertas diurnas de Chillán de 1 MW o más en VIIRS 375 entre el 2026-11-03 y el 11-07.
 
 ### 4.3 Reversión inmediata, pre-autorizada
 
 - **Disparador**: una pasada nocturna posterior al encendido de ese sensor, dentro del plazo de §4.6, con una protegida que MIROVA publica, la guardia K publica y producción (la vía) **tiene record y no publica**. La vigilancia la informa como `REVERSION_CANDIDATA` y abre el issue «Guardia K de VIIRS 375: candidata a reversion» (o «VIIRS 750»).
 - **Quién y cuándo**: la sesión que lee el issue, el mismo día UTC.
 - **Confirmación**: la cabecera de la imagen de MIROVA de esa pasada. Si la muestra, revierte. Si no está disponible ese día, según D6 revierte igual cuando la protegida viene de la tabla, y deja la decisión a Nicolás cuando es sólo del OCR. Si la imagen la contradice, no revierte, la anota como juzgada y avisa.
+- **De dónde sale la procedencia para D6 (S177, VPR967-05 (b)).** La vigilancia no publica si la protegida viene de la tabla o del OCR. La sesión la mira a mano: busca la pasada (volcán, sensor, minuto de `Fecha_Satelite_UTC`) en `monitoreo_satelital/registro_vrp_consolidado.csv` del repo `MendozaVolcanic/Mirova-v1` (la tabla, `latest.php`). Si está ahí con 1 MW o más, viene de la tabla; si sólo está en `registro_vrp_ocr.csv`, es sólo del OCR. Ojo con las variantes de nombre del scraper (A14).
 - **Cómo**: `git revert -m 1` del commit de merge del PR de **ese sensor**, nunca un reset. Cada B entra por merge commit, después de A y por separado. Comprobación: `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p; print(p.ENABLE_V375_CODIGO_MIROVA, p.ENABLE_V750_CODIGO_MIROVA)"` debe dar `False` en el sensor revertido (A89). Si el revert choca, se resuelve a mano dejando ese flag en `false`, sin esperar a nadie.
 - **Después**: issue de la reversión, aviso a Nicolás el mismo día, la pasada en `experiments/_s176_v375e_adopcion/sombra_pasadas_juzgadas_viirs.json` y el paso del día después (§4.7).
 
@@ -108,6 +109,8 @@ El revert apaga el flag pero no deshace los datos: los records de la vía se que
 - `#965` en main (ya entró). Probar en navegador con records de la vía lo que el diseño dejó en la decisión 5: el tablero con la vía de V375, `diario.html` y `mosaico.html`.
 - La línea del flag, la prueba que fija su valor (`test_las_vias_de_viirs_siguen_apagadas_en_produccion_en_este_pr` se cambia ahí), `tests/test_guard_declarado_vs_efectivo_s131.py`.
 - Ficha SDA, `docs/MISSION.md`, `CLAUDE.md` y `docs/MIROVA_DIVERGENCES.md` (A113).
+- Un paso en `nrt.yml` que deje el job en rojo si el log trae `ERROR processing` en un gránulo de ese sensor (VPR967-05 (a)). `scripts/revisar_errores_modis_nrt.py` hoy sólo mira MODIS y su prueba exige que no falle con VIIRS: hay que generalizarlo con el modelo de `tests/test_revisar_errores_modis_nrt_s173.py`. Lo seguro es el job rojo; `nrt-monitor.yml` abre issue sólo con 3 corridas seguidas fallidas.
+- Prueba de que el revert del flag de ese sensor no choca con un PR que cambie una clave cercana del perfil, con el modelo de `tests/test_revert_flag_modis_no_choca_s173.py` (VPR967-05 (c)). B entra con el botón de merge commit, nunca squash: el `-m 1` lo supone.
 - Tag defensivo, sí de A45 y frase de merge. Medir el tiempo del NRT: el peor job hoy dura 16 min y el techo es 50 por paso.
 - Excepción al congelamiento (§12.6) en la bitácora.
 - Aviso a los consumidores.

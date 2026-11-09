@@ -869,8 +869,10 @@ def main(argv=None):
         # ⚠️ S174 (R5-03, A113): ese «no deciden» queda rebajado: piden NOCHES_MIN_SIN_CAMBIO noches en total (abajo).
         horas = sorted(obj[i]["hora_utc"] for i in oks0) or ["(ninguna)"]
         dias = max(0.0, (t_lim - t_ini).total_seconds() / 86400)
-        noches_sem, noches = semanas_noches([obj[i]["hora_utc"] for i in oks0], t_ini)
-        por_v = {v: semanas_noches([obj[i]["hora_utc"] for i in oks0 if obj[i]["volcan"] == v], t_ini) for v in esperada}
+        # S177 (VPR964-03, LECTURA LR4): las noches se cuentan sobre `oks`, no sobre `oks0`: una pasada con K distinto de
+        # producción sale de todos los brazos (L18), así que su noche no la leyó nadie y no puede completar la sombra.
+        noches_sem, noches = semanas_noches([obj[i]["hora_utc"] for i in oks], t_ini)
+        por_v = {v: semanas_noches([obj[i]["hora_utc"] for i in oks if obj[i]["volcan"] == v], t_ini) for v in esperada}
         exigidos = [v for v in esperada if v in cambia or SEMANA_EXIGE_SIN_CAMBIO]
         vol_falta = [v for v in sorted(exigidos) if faltan_noches(*por_v[v])]
         # S174 (VPR945-R5-03, decisión de Nicolás del 2026-11-06): los volcanes de ROI igual a B0 (con B4, los nueve)

@@ -141,6 +141,20 @@ las pasadas lejanas quedó SIN DATO.
 - Desde el 2026-11-03 (sin Suomi NPP: otro régimen, programa §2 ventana P), P corre en el NRT en un perfil sombra con
   su propio `data_subdir` (nunca en `mirova_equivalent`), al menos 4 semanas. Se mide con las mismas métricas contra
   MIROVA. Si en 4 semanas hay 4 bloques noche-volcán o menos, P2 es SIN SUSTRATO y la sombra sólo puede vetar (P1).
+- **Lo que el lector exige además (S177, VPR964-02; detalle y decisiones en `LECTURAS_EVALUAR_V750A.md`, LR1 a LR4).** Hay
+  que declarar `--roi-brazo` (B0 a B5) y `--sha-desde`: sin ellos la compuerta se cierra. La lectura es una ventana fija de
+  28 días, desde el 2026-11-03 00:00 UTC o la hora del commit de `--sha-desde`, la que sea posterior. Antes de que termine
+  la ventana, o con noches de menos, la salida es 4 (PROVISORIO). Se piden 5 noches por semana y 14 en total, en el conjunto
+  y en cada volcán cuya ROI difiere de B0, y 14 noches en cada volcán sin cambio de ROI. Sólo cuentan las noches con una
+  pasada que algún brazo leyó. La exigencia de 14 noches por volcán sin cambio es decisión de Nicolás (2026-11-06); las otras
+  lecturas de LR1 a LR3 son decisiones de la coordinadora, reversibles antes del sello.
+
+### 4.4 Dónde están las fuentes citadas (S177, VPR964-01)
+
+`experiments/_s165_regla_posicion/INFORME.md` (de `81fb25806`), `experiments/_s162_v750b/adenda2/ADENDA2_V750B.md` y
+`leer_posicion_v750b.py` (de `dd8fc62b0`) se copiaron tal cual a `main`. Los scripts y salidas propios que citan
+`verificador_posicion/INFORME.md` y `verificador_v2/INFORME.md` siguen fuera de `main`: están en los commits `58d62bd8f` y
+`fb95d62ba` (carpetas `experiments/_s162_v750a/verificador_posicion/` y `verificador_v2/`).
 
 ## 5. Métricas (programa §2)
 

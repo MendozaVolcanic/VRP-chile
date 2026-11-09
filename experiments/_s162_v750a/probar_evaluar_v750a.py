@@ -616,6 +616,16 @@ def esc_once(offs=OFFS_4SEM, offs_vol=None, brazo="B4", extra=None):
     return pb
 
 
+def _k_distinto_en(volcan, off):
+    """S177 (VPR964-03): la pasada de `volcan` del día `off` pasa a tener K distinto de producción (tolerada, D-48), así que
+    sale de todos los brazos y ningún brazo la lee; `extra` de esc_once."""
+    def poner(pb, d0):
+        dia = str(d0 + datetime.timedelta(days=off))
+        o = next(x for x in pb.objs if x["volcan"] == volcan and x["hora_utc"].startswith(dia))
+        o["pub_prod"] = not o["pub_prod"]
+    return poner
+
+
 def _r404_cc_semana4_no_leida(pb, d0):
     """R4-04 (MW10 del verificador): Cordón Caulle trae en la semana 4 sólo pasadas que no se leen, en noches distintas
     de las de los otros volcanes: 3 fuera del gránulo (días 23 a 25) y 2 diurnas (SIN DATO, días 26 y 27)."""
@@ -1521,6 +1531,31 @@ ESCENARIOS = {
                         ("== §6.3 sombra: CUMPLE", ["sin cambio de ROI, 14 noches o más cada uno: "
                                                     + _noches_once({"Copahue": 14, "Villarrica": 14}) + ")"])],
                  no_tiene=["== §6.3 sombra: PROVISORIO", "== §6.3 sombra: NO CUMPLE"]),
+    # S177 (VPR964-03): una pasada con K distinto de producción sale de todos los brazos: su noche no se leyó y no cuenta.
+    # ER58: Copahue con 14 noches, la última sin leer, baja a 13 y queda PROVISORIO. ER59, control: con 15 sigue completa.
+    # ER60: la noche que sólo aporta esa pasada no cuenta en el conjunto (la semana 1 baja de 5 a 4).
+    "ER58": dict(pob=lambda: esc_once(offs_vol={"Copahue": OFFS_4SEM[:14]}, brazo="B0",
+                                      extra=_k_distinto_en("Copahue", OFFS_4SEM[13])),
+                 fase="sombra", rc=4, args=["--roi-brazo", "B0", "--sha-desde", SHA_REAL_B4],
+                 tiene=[("== control K = producción", ["distintas 1 de", "OK"]),
+                        ("== noches por semana y volcán", ["Copahue 5, 5, 3, 0 (13) sin cambio, faltan"]),
+                        ("== §6.3 sombra: PROVISORIO", ["volcanes sin cambio de ROI con menos de 14 noches: Copahue 13"])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
+    "ER59": dict(pob=lambda: esc_once(offs_vol={"Copahue": OFFS_4SEM[:15]}, brazo="B0",
+                                      extra=_k_distinto_en("Copahue", OFFS_4SEM[14])),
+                 fase="sombra", rc=0, args=["--roi-brazo", "B0", "--sha-desde", SHA_REAL_B4],
+                 tiene=[("== control K = producción", ["distintas 1 de", "OK"]),
+                        ("== noches por semana y volcán", ["Copahue 5, 5, 4, 0 (14) sin cambio, completas"]),
+                        ("== duración de la sombra", ["sin cambio de ROI con menos de 14 noches ninguno: COMPLETA"])],
+                 no_tiene=["== §6.3 sombra: PROVISORIO", "== §6.3 sombra: NO CUMPLE"]),
+    "ER60": dict(pob=lambda: esc_once(offs=tuple(x for x in OFFS_4SEM if x != OFFS_4SEM[4]),
+                                      offs_vol={"Copahue": OFFS_4SEM}, brazo="B0",
+                                      extra=_k_distinto_en("Copahue", OFFS_4SEM[4])),
+                 fase="sombra", rc=4, args=["--roi-brazo", "B0", "--sha-desde", SHA_REAL_B4],
+                 tiene=[("== control K = producción", ["distintas 1 de", "OK"]),
+                        ("== duración de la sombra", ["por semana 4, 5, 5, 5 (19)"]),
+                        ("== §6.3 sombra: PROVISORIO", [])],
+                 no_tiene=["== §6.3 sombra: CUMPLE", "== §6.3 sombra: NO CUMPLE"]),
     "E22": dict(pob=lambda: base(), sg_otra=True, rc=3,
                 tiene=[("== cobertura: INSUFICIENTE", []), ("== compuerta del veredicto", ["CERRADA"])],
                 no_tiene=["== §6 censo:"]),
