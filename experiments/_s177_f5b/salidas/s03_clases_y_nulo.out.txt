@@ -1,0 +1,163 @@
+== 1. Control: la función de clase con la mancha A reproduce las clases guardadas de F5b ==
+clase recalculada (mancha A, control por centroide) igual a la de p8_clases.json: 303 de 303 con lámina (los 2 sin lámina son iv por construcción)
+
+== 2. Antes y después, mismo universo (305 aciertos; i / iii / iv) ==
+universo                            n |   F5b guardada |     F5b_recalc |             C1 |            C2p |          C2_cc |         C2_min |          C2_nc
+TODOS (305)                       305 |    172/ 15/118 |    172/ 15/118 |    173/ 10/122 |    194/ 21/ 90 |    172/  9/124 |    200/ 15/ 90 |    207/ 96/  2
+Chillán VIIRS 375                  69 |     46/  1/ 22 |     46/  1/ 22 |     46/  1/ 22 |     57/  1/ 11 |     46/  0/ 23 |     58/  0/ 11 |     68/  1/  0
+Chillán VIIRS 750                  55 |     44/  3/  8 |     44/  3/  8 |     43/  0/ 12 |     54/  0/  1 |     43/  0/ 12 |     54/  0/  1 |     55/  0/  0
+Chillán MODIS (sin validar)        23 |     15/  6/  2 |     15/  6/  2 |     18/  4/  1 |     18/  4/  1 |     18/  4/  1 |     21/  1/  1 |     18/  4/  1
+Chillán protegidas VIIRS 375       56 |     33/  1/ 22 |     33/  1/ 22 |     33/  1/ 22 |     44/  1/ 11 |     33/  0/ 23 |     45/  0/ 11 |     55/  1/  0
+Chillán protegidas VIIRS 750       53 |     42/  3/  8 |     42/  3/  8 |     41/  0/ 12 |     52/  0/  1 |     41/  0/ 12 |     52/  0/  1 |     53/  0/  0
+Chillán protegidas MODIS           23 |     15/  6/  2 |     15/  6/  2 |     18/  4/  1 |     18/  4/  1 |     18/  4/  1 |     21/  1/  1 |     18/  4/  1
+Resto VIIRS 375 (sin Chillán)     145 |     64/  5/ 76 |     64/  5/ 76 |     63/  5/ 77 |     62/ 15/ 68 |     62/  5/ 78 |     64/ 13/ 68 |     63/ 82/  0
+Resto VIIRS 750 (sin Chillán)      12 |      3/  0/  9 |      3/  0/  9 |      3/  0/  9 |      3/  1/  8 |      3/  0/  9 |      3/  1/  8 |      3/  9/  0
+Resto MODIS (sin Chillán)           1 |      0/  0/  1 |      0/  0/  1 |      0/  0/  1 |      0/  0/  1 |      0/  0/  1 |      0/  0/  1 |      0/  0/  1
+
+--- Cambios de clase de F5b a C2p (mismo universo) ---
+{('i', 'i'): 170, ('i', 'iii'): 2, ('iii', 'i'): 6, ('iii', 'iii'): 9, ('iv', 'i'): 18, ('iv', 'iii'): 10, ('iv', 'iv'): 88}
+Las 4 protegidas VIIRS de Chillán que F5b llamó (iii) (hallazgo 351):
+  VIIRS_NOAA21   2026-10-18 05:06  21.25 MW prot=True  | F5b iii | C2p i   d_cent 0.19 km (tol 0.75), d_min 0.19, mancha 5 celdas, componentes 1, control-any True
+  VIIRS_NOAA20_750 2026-10-10 06:54  15.26 MW prot=True  | F5b iii | C2p i   d_cent 0.78 km (tol 1.5), d_min 0.14, mancha 11 celdas, componentes 1, control-any True
+  VIIRS_NOAA20_750 2026-10-16 06:42  14.02 MW prot=True  | F5b iii | C2p i   d_cent 0.48 km (tol 1.5), d_min 0.29, mancha 7 celdas, componentes 1, control-any True
+  VIIRS_NOAA21_750 2026-10-29 06:42  29.35 MW prot=True  | F5b iii | C2p i   d_cent 0.65 km (tol 1.5), d_min 0.11, mancha 8 celdas, componentes 1, control-any True
+Los 6 MODIS (iii) de F5b en Chillán:
+  MODIS_AQUA     2026-10-17 08:50   7.09 MW | C2p iii d_cent 3.78 km (tol 3), d_min 2.52, mancha 4 celdas
+  MODIS_AQUA     2026-10-28 07:35   9.35 MW | C2p iii d_cent 3.03 km (tol 3), d_min 1.74, mancha 4 celdas
+  MODIS_TERRA    2026-10-17 02:20  12.97 MW | C2p iii d_cent 4.01 km (tol 3), d_min 2.65, mancha 10 celdas
+  MODIS_TERRA    2026-10-18 01:20  14.39 MW | C2p i   d_cent 2.34 km (tol 3), d_min 1.37, mancha 10 celdas
+  MODIS_AQUA     2026-10-30 08:55  14.39 MW | C2p iii d_cent 6.11 km (tol 3), d_min 4.70, mancha 11 celdas
+  MODIS_TERRA    2026-10-31 01:35  18.58 MW | C2p i   d_cent 2.54 km (tol 3), d_min 1.55, mancha 8 celdas
+
+== 3. Línea base roja: reproducir el nulo de V5B (m4) con la mancha A y las pasadas con control ok ==
+(V5B m4 con 30 sorteos por pasada: V375 todos los volcanes obs 0,948 nulo 0,730; V750 obs 0,940 nulo 0,769; mi nulo es exacto, sin sorteo)
+V375 todos los volcanes (A)    n=116 obs 0.948 | nulo 0.720 | dif +0.228 [+0.180, +0.282] | AUC 0.756 [0.714, 0.798] | d media propia 0.39 km, otras 0.74 km
+V750 todos los volcanes (A)    n= 50 obs 0.940 | nulo 0.759 | dif +0.181 [+0.123, +0.243] | AUC 0.727 [0.651, 0.794] | d media propia 0.73 km, otras 1.13 km
+
+== 4. Observado contra nulo, variante C1 (control: cent; clase por cent) ==
+Chillán VIIRS 375 | N1         n= 47 obs 0.979 | nulo 0.630 | dif +0.349 [+0.277, +0.430] | AUC 0.821 [0.771, 0.867] | d media propia 0.27 km, otras 0.74 km
+Chillán VIIRS 375 | N2         n= 47 obs 0.979 | nulo 0.632 | dif +0.347 [+0.270, +0.429] | AUC 0.827 [0.773, 0.878] | d media propia 0.27 km, otras 0.75 km
+Chillán VIIRS 375 | N2b        n= 46 obs 0.978 | nulo 0.630 | dif +0.348 [+0.263, +0.445] | AUC 0.807 [0.732, 0.879] | d media propia 0.27 km, otras 0.76 km
+                               permutación (distancia media, pasadas con control ok): propia 0.268 km, bajo permutación 0.744 km, p = 0.0000
+Chillán VIIRS 750 | N1         n= 43 obs 1.000 | nulo 0.846 | dif +0.154 [+0.102, +0.217] | AUC 0.755 [0.675, 0.826] | d media propia 0.50 km, otras 0.90 km
+Chillán VIIRS 750 | N2         n= 43 obs 1.000 | nulo 0.856 | dif +0.144 [+0.079, +0.220] | AUC 0.765 [0.686, 0.836] | d media propia 0.50 km, otras 0.92 km
+Chillán VIIRS 750 | N2b        n= 43 obs 1.000 | nulo 0.825 | dif +0.175 [+0.089, +0.271] | AUC 0.740 [0.643, 0.831] | d media propia 0.50 km, otras 0.93 km
+                               permutación (distancia media, pasadas con control ok): propia 0.500 km, bajo permutación 0.898 km, p = 0.0000
+Chillán MODIS (sin validar) | N1 n= 22 obs 0.818 | nulo 0.779 | dif +0.039 [-0.121, +0.182] | AUC 0.519 [0.385, 0.662] | d media propia 2.07 km, otras 2.09 km
+Chillán MODIS (sin validar) | N2 n= 20 obs 0.800 | nulo 0.722 | dif +0.078 [-0.105, +0.239] | AUC 0.510 [0.355, 0.676] | d media propia 2.17 km, otras 2.23 km
+Chillán MODIS (sin validar) | N2b n= 19 obs 0.789 | nulo 0.702 | dif +0.088 [-0.105, +0.263] | AUC 0.491 [0.298, 0.693] | d media propia 2.22 km, otras 2.33 km
+                               permutación (distancia media, pasadas con control ok): propia 2.072 km, bajo permutación 2.083 km, p = 0.4250
+Resto VIIRS 375 (por volcán) | N1 n= 68 obs 0.926 | nulo 0.779 | dif +0.147 [+0.086, +0.217] | AUC 0.712 [0.648, 0.772] | d media propia 0.47 km, otras 0.74 km
+Resto VIIRS 375 (por volcán) | N2 n= 62 obs 0.952 | nulo 0.804 | dif +0.147 [+0.076, +0.223] | AUC 0.713 [0.627, 0.794] | d media propia 0.32 km, otras 0.52 km
+Resto VIIRS 375 (por volcán) | N2b n= 51 obs 0.961 | nulo 0.863 | dif +0.098 [+0.036, +0.173] | AUC 0.719 [0.611, 0.827] | d media propia 0.30 km, otras 0.45 km
+                               permutación (distancia media, pasadas con control ok): propia 0.472 km, bajo permutación 0.727 km, p = 0.0000
+Resto VIIRS 750 (por volcán) | N1 n=  3 obs 1.000 | nulo 0.905 | dif +0.095 [+0.000, +0.143] | AUC 0.810 [0.429, 1.000] | d media propia 0.32 km, otras 1.58 km
+Resto VIIRS 750 (por volcán) | N2 n=  3 obs 1.000 | nulo 1.000 | dif +0.000 [+0.000, +0.000] | AUC 0.833 [0.500, 1.000] | d media propia 0.32 km, otras 0.69 km
+Resto VIIRS 750 (por volcán) | N2b n=  2 obs 1.000 | nulo 1.000 | dif +0.000 [+0.000, +0.000] | AUC 1.000 [1.000, 1.000] | d media propia 0.31 km, otras 0.92 km
+
+== 4. Observado contra nulo, variante C2p (control: any; clase por cent) ==
+Chillán VIIRS 375 | N1         n= 58 obs 0.983 | nulo 0.615 | dif +0.368 [+0.303, +0.439] | AUC 0.818 [0.776, 0.863] | d media propia 0.28 km, otras 0.76 km
+Chillán VIIRS 375 | N2         n= 58 obs 0.983 | nulo 0.608 | dif +0.375 [+0.301, +0.450] | AUC 0.833 [0.780, 0.879] | d media propia 0.28 km, otras 0.77 km
+Chillán VIIRS 375 | N2b        n= 57 obs 0.982 | nulo 0.581 | dif +0.402 [+0.316, +0.492] | AUC 0.827 [0.759, 0.890] | d media propia 0.29 km, otras 0.79 km
+                               permutación (distancia media, pasadas con control ok): propia 0.284 km, bajo permutación 0.768 km, p = 0.0000
+Chillán VIIRS 750 | N1         n= 54 obs 1.000 | nulo 0.861 | dif +0.139 [+0.099, +0.193] | AUC 0.714 [0.644, 0.781] | d media propia 0.51 km, otras 0.86 km
+Chillán VIIRS 750 | N2         n= 54 obs 1.000 | nulo 0.865 | dif +0.135 [+0.081, +0.200] | AUC 0.731 [0.664, 0.802] | d media propia 0.51 km, otras 0.88 km
+Chillán VIIRS 750 | N2b        n= 54 obs 1.000 | nulo 0.844 | dif +0.156 [+0.088, +0.236] | AUC 0.691 [0.596, 0.782] | d media propia 0.51 km, otras 0.87 km
+                               permutación (distancia media, pasadas con control ok): propia 0.508 km, bajo permutación 0.846 km, p = 0.0000
+Chillán MODIS (sin validar) | N1 n= 22 obs 0.818 | nulo 0.779 | dif +0.039 [-0.136, +0.177] | AUC 0.519 [0.385, 0.654] | d media propia 2.07 km, otras 2.09 km
+Chillán MODIS (sin validar) | N2 n= 20 obs 0.800 | nulo 0.722 | dif +0.078 [-0.116, +0.239] | AUC 0.510 [0.335, 0.674] | d media propia 2.17 km, otras 2.23 km
+Chillán MODIS (sin validar) | N2b n= 19 obs 0.789 | nulo 0.702 | dif +0.088 [-0.096, +0.263] | AUC 0.491 [0.298, 0.684] | d media propia 2.22 km, otras 2.33 km
+                               permutación (distancia media, pasadas con control ok): propia 2.072 km, bajo permutación 2.083 km, p = 0.4267
+Resto VIIRS 375 (por volcán) | N1 n= 77 obs 0.805 | nulo 0.676 | dif +0.129 [+0.072, +0.192] | AUC 0.687 [0.619, 0.746] | d media propia 1.75 km, otras 1.98 km
+Resto VIIRS 375 (por volcán) | N2 n= 71 obs 0.817 | nulo 0.691 | dif +0.126 [+0.067, +0.198] | AUC 0.675 [0.593, 0.753] | d media propia 1.72 km, otras 1.89 km
+Resto VIIRS 375 (por volcán) | N2b n= 56 obs 0.857 | nulo 0.768 | dif +0.089 [+0.033, +0.158] | AUC 0.714 [0.613, 0.819] | d media propia 1.40 km, otras 1.54 km
+                               permutación (distancia media, pasadas con control ok): propia 1.766 km, bajo permutación 1.997 km, p = 0.0000
+Resto VIIRS 750 (por volcán) | N1 n=  4 obs 0.750 | nulo 0.679 | dif +0.071 [+0.000, +0.143] | AUC 0.643 [0.286, 1.000] | d media propia 5.13 km, otras 5.93 km
+Resto VIIRS 750 (por volcán) | N2 n=  4 obs 0.750 | nulo 0.750 | dif +0.000 [+0.000, +0.000] | AUC 0.625 [0.250, 1.000] | d media propia 5.13 km, otras 5.36 km
+Resto VIIRS 750 (por volcán) | N2b n=  2 obs 1.000 | nulo 1.000 | dif +0.000 [+0.000, +0.000] | AUC 1.000 [1.000, 1.000] | d media propia 0.31 km, otras 0.92 km
+                               permutación (distancia media, pasadas con control ok): propia 6.727 km, bajo permutación 6.961 km, p = 0.1660
+
+== 4. Observado contra nulo, variante C2_cc (control: cent; clase por cent) ==
+Chillán VIIRS 375 | N1         n= 46 obs 1.000 | nulo 0.639 | dif +0.361 [+0.291, +0.434] | AUC 0.824 [0.775, 0.869] | d media propia 0.25 km, otras 0.73 km
+Chillán VIIRS 375 | N2         n= 46 obs 1.000 | nulo 0.644 | dif +0.356 [+0.283, +0.436] | AUC 0.828 [0.772, 0.877] | d media propia 0.25 km, otras 0.74 km
+Chillán VIIRS 375 | N2b        n= 45 obs 1.000 | nulo 0.644 | dif +0.356 [+0.270, +0.447] | AUC 0.802 [0.724, 0.871] | d media propia 0.25 km, otras 0.74 km
+                               permutación (distancia media, pasadas con control ok): propia 0.251 km, bajo permutación 0.740 km, p = 0.0000
+Chillán VIIRS 750 | N1         n= 43 obs 1.000 | nulo 0.846 | dif +0.154 [+0.103, +0.213] | AUC 0.755 [0.681, 0.826] | d media propia 0.50 km, otras 0.90 km
+Chillán VIIRS 750 | N2         n= 43 obs 1.000 | nulo 0.856 | dif +0.144 [+0.081, +0.224] | AUC 0.765 [0.690, 0.836] | d media propia 0.50 km, otras 0.92 km
+Chillán VIIRS 750 | N2b        n= 43 obs 1.000 | nulo 0.825 | dif +0.175 [+0.091, +0.272] | AUC 0.740 [0.643, 0.831] | d media propia 0.50 km, otras 0.93 km
+                               permutación (distancia media, pasadas con control ok): propia 0.500 km, bajo permutación 0.897 km, p = 0.0000
+Chillán MODIS (sin validar) | N1 n= 22 obs 0.818 | nulo 0.779 | dif +0.039 [-0.136, +0.171] | AUC 0.519 [0.381, 0.660] | d media propia 2.07 km, otras 2.09 km
+Chillán MODIS (sin validar) | N2 n= 20 obs 0.800 | nulo 0.722 | dif +0.078 [-0.104, +0.241] | AUC 0.510 [0.354, 0.678] | d media propia 2.17 km, otras 2.23 km
+Chillán MODIS (sin validar) | N2b n= 19 obs 0.789 | nulo 0.702 | dif +0.088 [-0.096, +0.254] | AUC 0.491 [0.307, 0.675] | d media propia 2.22 km, otras 2.33 km
+                               permutación (distancia media, pasadas con control ok): propia 2.072 km, bajo permutación 2.084 km, p = 0.4233
+Resto VIIRS 375 (por volcán) | N1 n= 67 obs 0.925 | nulo 0.777 | dif +0.148 [+0.086, +0.217] | AUC 0.710 [0.643, 0.770] | d media propia 0.47 km, otras 0.74 km
+Resto VIIRS 375 (por volcán) | N2 n= 61 obs 0.951 | nulo 0.804 | dif +0.147 [+0.078, +0.227] | AUC 0.708 [0.625, 0.796] | d media propia 0.32 km, otras 0.52 km
+Resto VIIRS 375 (por volcán) | N2b n= 50 obs 0.960 | nulo 0.860 | dif +0.100 [+0.037, +0.173] | AUC 0.713 [0.607, 0.823] | d media propia 0.30 km, otras 0.45 km
+                               permutación (distancia media, pasadas con control ok): propia 0.475 km, bajo permutación 0.733 km, p = 0.0000
+Resto VIIRS 750 (por volcán) | N1 n=  3 obs 1.000 | nulo 0.905 | dif +0.095 [+0.000, +0.143] | AUC 0.810 [0.429, 1.000] | d media propia 0.32 km, otras 1.58 km
+Resto VIIRS 750 (por volcán) | N2 n=  3 obs 1.000 | nulo 1.000 | dif +0.000 [+0.000, +0.000] | AUC 0.833 [0.500, 1.000] | d media propia 0.32 km, otras 0.69 km
+Resto VIIRS 750 (por volcán) | N2b n=  2 obs 1.000 | nulo 1.000 | dif +0.000 [+0.000, +0.000] | AUC 1.000 [1.000, 1.000] | d media propia 0.31 km, otras 0.92 km
+
+== 4. Observado contra nulo, variante C2_min (control: any; clase por min) ==
+Chillán VIIRS 375 | N1         n= 58 obs 1.000 | nulo 0.767 | dif +0.233 [+0.179, +0.288] | AUC 0.743 [0.681, 0.799] | d media propia 0.20 km, otras 0.53 km
+Chillán VIIRS 375 | N2         n= 58 obs 1.000 | nulo 0.760 | dif +0.240 [+0.179, +0.304] | AUC 0.736 [0.673, 0.800] | d media propia 0.20 km, otras 0.53 km
+Chillán VIIRS 375 | N2b        n= 57 obs 1.000 | nulo 0.731 | dif +0.269 [+0.189, +0.349] | AUC 0.752 [0.668, 0.825] | d media propia 0.20 km, otras 0.55 km
+                               permutación (distancia media, pasadas con control ok): propia 0.198 km, bajo permutación 0.542 km, p = 0.0000
+Chillán VIIRS 750 | N1         n= 54 obs 1.000 | nulo 0.950 | dif +0.050 [+0.026, +0.087] | AUC 0.657 [0.593, 0.722] | d media propia 0.30 km, otras 0.51 km
+Chillán VIIRS 750 | N2         n= 54 obs 1.000 | nulo 0.951 | dif +0.049 [+0.018, +0.092] | AUC 0.659 [0.585, 0.730] | d media propia 0.30 km, otras 0.51 km
+Chillán VIIRS 750 | N2b        n= 54 obs 1.000 | nulo 0.952 | dif +0.048 [+0.013, +0.094] | AUC 0.666 [0.582, 0.750] | d media propia 0.30 km, otras 0.50 km
+                               permutación (distancia media, pasadas con control ok): propia 0.299 km, bajo permutación 0.503 km, p = 0.0000
+Chillán MODIS (sin validar) | N1 n= 22 obs 0.955 | nulo 0.933 | dif +0.022 [-0.061, +0.076] | AUC 0.535 [0.420, 0.658] | d media propia 1.27 km, otras 1.33 km
+Chillán MODIS (sin validar) | N2 n= 20 obs 0.950 | nulo 0.916 | dif +0.034 [-0.069, +0.113] | AUC 0.566 [0.411, 0.712] | d media propia 1.29 km, otras 1.47 km
+Chillán MODIS (sin validar) | N2b n= 19 obs 0.947 | nulo 0.930 | dif +0.018 [-0.061, +0.096] | AUC 0.614 [0.430, 0.789] | d media propia 1.34 km, otras 1.49 km
+                               permutación (distancia media, pasadas con control ok): propia 1.269 km, bajo permutación 1.331 km, p = 0.2153
+Resto VIIRS 375 (por volcán) | N1 n= 77 obs 0.831 | nulo 0.703 | dif +0.128 [+0.075, +0.188] | AUC 0.675 [0.618, 0.733] | d media propia 1.25 km, otras 1.47 km
+Resto VIIRS 375 (por volcán) | N2 n= 71 obs 0.845 | nulo 0.721 | dif +0.124 [+0.064, +0.195] | AUC 0.668 [0.592, 0.744] | d media propia 1.18 km, otras 1.34 km
+Resto VIIRS 375 (por volcán) | N2b n= 56 obs 0.893 | nulo 0.810 | dif +0.083 [+0.027, +0.152] | AUC 0.699 [0.598, 0.798] | d media propia 0.75 km, otras 0.90 km
+                               permutación (distancia media, pasadas con control ok): propia 1.258 km, bajo permutación 1.482 km, p = 0.0000
+Resto VIIRS 750 (por volcán) | N1 n=  4 obs 0.750 | nulo 0.679 | dif +0.071 [+0.000, +0.143] | AUC 0.643 [0.286, 1.000] | d media propia 3.85 km, otras 4.39 km
+Resto VIIRS 750 (por volcán) | N2 n=  4 obs 0.750 | nulo 0.750 | dif +0.000 [+0.000, +0.000] | AUC 0.625 [0.250, 1.000] | d media propia 3.85 km, otras 4.02 km
+Resto VIIRS 750 (por volcán) | N2b n=  2 obs 1.000 | nulo 1.000 | dif +0.000 [+0.000, +0.000] | AUC 1.000 [1.000, 1.000] | d media propia 0.31 km, otras 0.68 km
+                               permutación (distancia media, pasadas con control ok): propia 5.018 km, bajo permutación 5.149 km, p = 0.1695
+
+== 4. Observado contra nulo, variante C2_nc (control: ninguno; clase por cent) ==
+Chillán VIIRS 375 | N1         n= 69 obs 0.986 | nulo 0.645 | dif +0.341 [+0.282, +0.402] | AUC 0.805 [0.759, 0.847] | d media propia 0.29 km, otras 0.73 km
+Chillán VIIRS 375 | N2         n= 69 obs 0.986 | nulo 0.644 | dif +0.342 [+0.276, +0.415] | AUC 0.804 [0.751, 0.854] | d media propia 0.29 km, otras 0.73 km
+Chillán VIIRS 375 | N2b        n= 68 obs 0.985 | nulo 0.616 | dif +0.369 [+0.296, +0.444] | AUC 0.810 [0.743, 0.866] | d media propia 0.29 km, otras 0.76 km
+                               permutación (distancia media, pasadas con control ok): propia 0.288 km, bajo permutación 0.722 km, p = 0.0000
+Chillán VIIRS 750 | N1         n= 55 obs 1.000 | nulo 0.863 | dif +0.137 [+0.095, +0.186] | AUC 0.718 [0.645, 0.783] | d media propia 0.50 km, otras 0.86 km
+Chillán VIIRS 750 | N2         n= 55 obs 1.000 | nulo 0.867 | dif +0.133 [+0.076, +0.196] | AUC 0.733 [0.666, 0.800] | d media propia 0.50 km, otras 0.88 km
+Chillán VIIRS 750 | N2b        n= 55 obs 1.000 | nulo 0.847 | dif +0.153 [+0.085, +0.236] | AUC 0.693 [0.602, 0.779] | d media propia 0.50 km, otras 0.87 km
+                               permutación (distancia media, pasadas con control ok): propia 0.505 km, bajo permutación 0.850 km, p = 0.0000
+Chillán MODIS (sin validar) | N1 n= 22 obs 0.818 | nulo 0.779 | dif +0.039 [-0.132, +0.177] | AUC 0.519 [0.379, 0.656] | d media propia 2.07 km, otras 2.09 km
+Chillán MODIS (sin validar) | N2 n= 20 obs 0.800 | nulo 0.722 | dif +0.078 [-0.110, +0.231] | AUC 0.510 [0.344, 0.680] | d media propia 2.17 km, otras 2.23 km
+Chillán MODIS (sin validar) | N2b n= 19 obs 0.789 | nulo 0.702 | dif +0.088 [-0.096, +0.254] | AUC 0.491 [0.307, 0.684] | d media propia 2.22 km, otras 2.33 km
+                               permutación (distancia media, pasadas con control ok): propia 2.072 km, bajo permutación 2.085 km, p = 0.4171
+Resto VIIRS 375 (por volcán) | N1 n=145 obs 0.434 | nulo 0.368 | dif +0.066 [+0.036, +0.101] | AUC 0.615 [0.565, 0.666] | d media propia 3.66 km, otras 3.79 km
+Resto VIIRS 375 (por volcán) | N2 n=133 obs 0.444 | nulo 0.374 | dif +0.070 [+0.035, +0.109] | AUC 0.587 [0.524, 0.649] | d media propia 3.59 km, otras 3.69 km
+Resto VIIRS 375 (por volcán) | N2b n=111 obs 0.432 | nulo 0.387 | dif +0.045 [+0.017, +0.081] | AUC 0.588 [0.506, 0.666] | d media propia 3.55 km, otras 3.62 km
+                               permutación (distancia media, pasadas con control ok): propia 3.656 km, bajo permutación 3.782 km, p = 0.0000
+Resto VIIRS 750 (por volcán) | N1 n= 11 obs 0.273 | nulo 0.247 | dif +0.026 [+0.000, +0.065] | AUC 0.500 [0.299, 0.721] | d media propia 9.39 km, otras 10.18 km
+Resto VIIRS 750 (por volcán) | N2 n=  9 obs 0.333 | nulo 0.333 | dif +0.000 [+0.000, +0.000] | AUC 0.426 [0.148, 0.722] | d media propia 9.84 km, otras 9.88 km
+Resto VIIRS 750 (por volcán) | N2b n=  4 obs 0.500 | nulo 0.500 | dif +0.000 [+0.000, +0.000] | AUC 0.500 [0.000, 1.000] | d media propia 6.66 km, otras 6.83 km
+                               permutación (distancia media, pasadas con control ok): propia 9.392 km, bajo permutación 10.078 km, p = 0.1752
+
+== 5. ¿Cuánto filtra el control? Tasa en que la mancha de OTRA pasada también reproduce la Distancia_km de ESTA pasada (C2p: alguna celda) ==
+Chillán VIIRS 375              n= 69 control propio ok 0.841 | la mancha de otra pasada lo pasa con 0.673
+Chillán VIIRS 750              n= 55 control propio ok 0.982 | la mancha de otra pasada lo pasa con 0.907
+Chillán MODIS (sin validar)    n= 22 control propio ok 1.000 | la mancha de otra pasada lo pasa con 1.000
+Resto VIIRS 375 (por volcán)   n=143 control propio ok 0.538 | la mancha de otra pasada lo pasa con 0.522
+Resto VIIRS 750 (por volcán)   n= 11 control propio ok 0.364 | la mancha de otra pasada lo pasa con 0.338
+
+== 6. Barrido de umbral (C2, sin control, centroide): fracción de pasadas con la mancha a <= k celdas de nuestro punto, propia contra otras pasadas (N1) ==
+Chillán VIIRS 375              (celda 0.381 km, tolerancia F5b 0.75 km = 2.0 celdas) propia/otras: 0.5c: 0.29/0.12  1c: 0.75/0.33  1.5c: 0.97/0.54  2c: 0.99/0.65  3c: 1.00/0.79  4c: 1.00/0.88  6c: 1.00/0.99
+Chillán VIIRS 750              (celda 0.757 km, tolerancia F5b 1.5 km = 2.0 celdas) propia/otras: 0.5c: 0.38/0.17  1c: 0.82/0.53  1.5c: 0.98/0.76  2c: 1.00/0.87  3c: 1.00/0.97  4c: 1.00/1.00  6c: 1.00/1.00
+Chillán MODIS (sin validar)    (celda 1.005 km, tolerancia F5b 3.0 km = 3.0 celdas) propia/otras: 0.5c: 0.09/0.06  1c: 0.23/0.23  1.5c: 0.32/0.34  2c: 0.59/0.56  3c: 0.82/0.78  4c: 0.95/0.95  6c: 0.95/1.00
+
+== 7. Cuánto se mueve el foco entre pasadas (Chillán, dispersión de nuestro punto y del centroide de la mancha, km) ==
+Chillán VIIRS 375              n=69  desv. estándar nuestro (E,N) = (0.54, 0.30) km; de la mancha = (0.61, 0.28) km; puntos nuestros distintos: 69; centroides de mancha distintos: 14; celda 0.38 km
+                               correlación entre pasadas nuestro vs mancha: este r=+0.93 (p perm 0.0002), norte r=+0.72 (p perm 0.0002)
+Chillán VIIRS 750              n=55  desv. estándar nuestro (E,N) = (0.56, 0.35) km; de la mancha = (0.64, 0.36) km; puntos nuestros distintos: 55; centroides de mancha distintos: 11; celda 0.76 km
+                               correlación entre pasadas nuestro vs mancha: este r=+0.73 (p perm 0.0002), norte r=+0.74 (p perm 0.0002)
+Chillán MODIS (sin validar)    n=22  desv. estándar nuestro (E,N) = (1.33, 1.44) km; de la mancha = (0.90, 0.47) km; puntos nuestros distintos: 22; centroides de mancha distintos: 8; celda 1.00 km
+                               correlación entre pasadas nuestro vs mancha: este r=+0.08 (p perm 0.3505), norte r=-0.36 (p perm 0.9450)

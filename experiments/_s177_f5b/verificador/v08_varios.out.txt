@@ -1,0 +1,25 @@
+﻿1. Nulo de V5B con mancha A, j solo entre pasadas con control A ok (todos los volcanes), exacto:
+   VIIRS375: j control ok 0.721 (n=115); j todos 0.719 (n=116)
+   VIIRS750: j control ok 0.766 (n=49); j todos 0.759 (n=50)
+
+2. Componentes de C2 por sensor en Chillan:
+   VIIRS375: n=69, con >= 2 componentes: 0; C2 distinto de C1 en px: 1
+   VIIRS750: n=55, con >= 2 componentes: 0; C2 distinto de C1 en px: 0
+   MODIS: n=22, con >= 2 componentes: 1; C2 distinto de C1 en px: 0
+
+3. Cumulo con numero de pixeles igualado:
+   V375 N3 (igual que s05): n=63; cov_N +0.119 [+0.041, +0.194] | cov_M +0.113 [+0.060, +0.163]
+   V375 N3 y |dif n pixeles| <= 1: n=34; cov_N +0.108 [-0.000, +0.202] | cov_M +0.134 [+0.058, +0.211]
+   V375 N3 y mismo n pixeles: n=10; cov_N +0.067 [-0.017, +0.150] | cov_M +0.142 [-0.017, +0.296]
+   V750 N3 (igual que s05): n=45; cov_N +0.048 [-0.024, +0.126] | cov_M +0.141 [+0.075, +0.207]
+   V750 N3 y |dif n pixeles| <= 1: n=32; cov_N +0.069 [-0.031, +0.168] | cov_M +0.190 [+0.103, +0.270]
+   V750 N3 y mismo n pixeles: n=14; cov_N +0.012 [-0.048, +0.107] | cov_M +0.173 [+0.060, +0.291]
+
+4. Componentes que A borraba en Chillan (C1 con px distinto de A): distancia de nuestro punto a la celda mas cercana de la mancha C2
+   VIIRS375: n=2, d min p50 0.14 max 0.16 km (inner 5 km); celda 0.38
+   VIIRS750: n=17, d min p50 0.31 max 0.49 km (inner 5 km); celda 0.76
+   MODIS: n=12, d min p50 1.12 max 4.70 km (inner 5 km); celda 1.00
+
+5. Laminas distintas: 291 de 303 con lamina; 305 aciertos
+   mi A difiere: Lascar VIIRS_NOAA20 2026-09-23 05:24 mio -23.36193 -67.72836 lum 123.0 | F5b (-23.36193, -67.73203) lum 123.0 | clase F5b i
+   mi A difiere: Lascar VIIRS_NOAA21 2026-09-26 05:12 mio -23.36193 -67.72836 lum 133.3 | F5b (-23.36193, -67.73203) lum 133.3 | clase F5b i

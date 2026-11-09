@@ -1,0 +1,40 @@
+﻿A. 35 laminas: componentes blancas 20 a 399 px en el inner
+   componentes: 35; laminas 35
+   Chillan V750   n=17 area p50 24 rango 20 a 57; halo-mediana panel p10 -90.9 p50 -56.1; halo anillo 1 px p50 122; mediana panel p50 121; VRP MIROVA p10 14.8 p50 22.9
+   Chillan V375   n= 2 area p50 24 rango 21 a 26; halo-mediana panel p10 -71.2 p50 -70.7; halo anillo 1 px p50 139; mediana panel p50 106; VRP MIROVA p10 26.3 p50 28.5
+   Chillan MODIS  n=12 area p50 36 rango 27 a 63; halo-mediana panel p10 -79.6 p50 -70.2; halo anillo 1 px p50 68; mediana panel p50 118; VRP MIROVA p10 13.0 p50 16.8
+   Caulle         n= 4 area p50 40 rango 25 a 63; halo-mediana panel p10 46.7 p50 69.0; halo anillo 1 px p50 237; mediana panel p50 146; VRP MIROVA p10 0.5 p50 0.9
+   halo mas bajo: NevadosDeChillan VIIRS_NOAA21_750 2026-10-27 05:36 area 20 halo 36.0 mediana panel 132.0 VRP 17.73
+   halo mas bajo: NevadosDeChillan VIIRS_SNPP_750 2026-10-18 05:42 area 24 halo 28.0 mediana panel 122.0 VRP 20.87
+   halo mas bajo: NevadosDeChillan VIIRS_NOAA21_750 2026-10-29 05:00 area 24 halo 29.2 mediana panel 118.0 VRP 23.64
+   halo mas bajo: NevadosDeChillan VIIRS_NOAA21_750 2026-10-01 05:24 area 20 halo 27.0 mediana panel 112.7 VRP 9.0
+   halo mas bajo: NevadosDeChillan MODIS_TERRA 2026-10-16 01:40 area 27 halo 38.8 mediana panel 120.7 VRP 12.39
+   halo mas bajo: NevadosDeChillan MODIS_TERRA 2026-10-18 01:20 area 36 halo 43.3 mediana panel 123.0 VRP 14.39
+B. Componentes sin dato (toca borde o >= 400 px): n 40 halo-mediana panel p10 22.8 p50 83.0 p90 130.0
+C. Laminas sin componente borrada: pixeles del inner donde A y B difieren >0: {False: 268}
+
+D/E. Las 4 protegidas de 351
+  VIIRS_NOAA21 2026-10-18 05:06: tabla Dist 1.35 km (tolc 0.75); nuestro punto a 0.33 km del centro MIROVA; celdas 5
+     clase (control centroide, any, sin control; d_cent): A ('iii', 'iii', 'iii', 1.02) | C1 ('iii', 'iii', 'iii', 1.02) | C2 ('iv', 'i', 'i', 0.19)
+     d(nuestro, celda): min 0.19 max 1.02; d(centroide, centro MIROVA) 0.38; d(celdas, centro MIROVA) 0.02 a 1.20
+     celdas compatibles con la tabla a +- 1 celda (1): d a nuestro punto 1.02 a 1.02; a +- tolc (1): 1.02 a 1.02
+  VIIRS_NOAA20_750 2026-10-10 06:54: tabla Dist 2.37 km (tolc 1.50); nuestro punto a 0.15 km del centro MIROVA; celdas 11
+     clase (control centroide, any, sin control; d_cent): A ('iii', 'iii', 'iii', 1.83) | C1 ('iv', 'i', 'i', 0.78) | C2 ('iv', 'i', 'i', 0.78)
+     d(nuestro, celda): min 0.14 max 2.45; d(centroide, centro MIROVA) 0.76; d(celdas, centro MIROVA) 0.01 a 2.39
+     celdas compatibles con la tabla a +- 1 celda (3): d a nuestro punto 1.77 a 2.45; a +- tolc (6): 0.99 a 2.45
+  VIIRS_NOAA20_750 2026-10-16 06:42: tabla Dist 2.12 km (tolc 1.50); nuestro punto a 0.29 km del centro MIROVA; celdas 7
+     clase (control centroide, any, sin control; d_cent): A ('iii', 'iii', 'iii', 2.54) | C1 ('i', 'i', 'i', 0.48) | C2 ('i', 'i', 'i', 0.48)
+     d(nuestro, celda): min 0.29 max 1.48; d(centroide, centro MIROVA) 0.76; d(celdas, centro MIROVA) 0.01 a 1.69
+     celdas compatibles con la tabla a +- 1 celda (2): d a nuestro punto 1.23 a 1.48; a +- tolc (6): 0.48 a 1.48
+  VIIRS_NOAA21_750 2026-10-29 06:42: tabla Dist 2.37 km (tolc 1.50); nuestro punto a 0.11 km del centro MIROVA; celdas 8
+     clase (control centroide, any, sin control; d_cent): A ('iii', 'iii', 'iii', 2.16) | C1 ('iv', 'i', 'i', 0.65) | C2 ('iv', 'i', 'i', 0.65)
+     d(nuestro, celda): min 0.11 max 2.16; d(centroide, centro MIROVA) 0.76; d(celdas, centro MIROVA) 0.01 a 2.27
+     celdas compatibles con la tabla a +- 1 celda (1): d a nuestro punto 2.16 a 2.16; a +- tolc (4): 1.00 a 2.16
+
+F. Lo que la mancha no puede excluir (Chillan, C2): por pasada, distancia de nuestro punto a la celda mas lejana de la mancha y a las celdas que reproducen la tabla a +- 1 celda
+  VIIRS375 n=69 tol 0.75: dmax p50 0.41 p90 0.91 max 1.92; con alguna celda a mas de tol: 12 (0.17); a mas de 1 km: 6
+     celda que reproduce la tabla a +-1 celda: pasadas sin ninguna 42; d mediana a nuestro punto p50 0.43 p90 1.16 max 1.77; {'>tol': 9, '<=tol': 18}
+     d(centroide, centro MIROVA) p50 0.40; Dist tabla p50 0.95; tabla - centroide p50 +0.55 p90 +0.95; correlacion +0.82; n=69
+  VIIRS750 n=55 tol 1.5: dmax p50 1.03 p90 1.64 max 2.91; con alguna celda a mas de tol: 6 (0.11); a mas de 1 km: 28
+     celda que reproduce la tabla a +-1 celda: pasadas sin ninguna 2; d mediana a nuestro punto p50 0.83 p90 1.25 max 2.28; {'<=tol': 49, '>tol': 4}
+     d(centroide, centro MIROVA) p50 0.75; Dist tabla p50 1.06; tabla - centroide p50 +1.05 p90 +1.67; correlacion +0.60; n=55

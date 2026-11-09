@@ -1,0 +1,48 @@
+﻿
+======== Chillan VIIRS 375: n pasadas 69, control ok 58, dias distintos 30, satelites {'VIIRS_NOAA21': 26, 'VIIRS_SNPP': 15, 'VIIRS_NOAA20': 28}
+A. Reproduccion (C2p, mismo filtro de vecinos >= 2)
+  N1  n= 58 obs 0.983 nulo 0.615 dif +0.368 AUC 0.818 d propia 0.284 d otras 0.758
+  N3  n= 52 obs 0.981 nulo 0.929 dif +0.052 AUC 0.641 d propia 0.286 d otras 0.380
+  N3b n= 49 obs 0.980 nulo 0.932 dif +0.047 AUC 0.641 d propia 0.293 d otras 0.390
+  N3 sin control (todas las pasadas con >=2 vecinos) n= 63 obs 0.984 nulo 0.941 dif +0.043 AUC 0.638 d propia 0.290 d otras 0.376
+B. IC95 del N3 (C2p): dif de clase | AUC | d otras - d propia (km), segun unidad de remuestreo
+  pasada_i  dif [-0.010, +0.109] | AUC [0.553, 0.728] | km [+0.041, +0.145]
+  dia_i     dif [-0.014, +0.108] | AUC [0.550, 0.739] | km [+0.043, +0.142]
+  dia_ij    dif [-0.002, +0.121] | AUC [0.511, 0.777] | km [+0.036, +0.158]
+C. Techo: mancha = celda que contiene nuestro punto, con ruido (mismo N3, mismo filtro)
+  ruido 0 celdas: obs 1.000 nulo 0.915 AUC 0.785 d propia 0.141 d otras 0.352
+  ruido 0.5 celdas: obs 0.998 nulo 0.883 AUC 0.749 d propia 0.270 d otras 0.445
+  ruido 1 celdas: obs 0.835 nulo 0.706 AUC 0.663 d propia 0.495 d otras 0.617
+  ruido 3 celdas: obs 0.185 nulo 0.176 AUC 0.551 d propia 1.456 d otras 1.499
+D. Permutacion restringida a N3 zenit 5 azimut 30: fraccion de pasadas que se mueven 0.74; d media obs 0.288 km, bajo perm 0.352 (p 0.0002); r E obs +0.93, perm +0.86 (p 0.0005); r N obs +0.72, perm +0.58 (p 0.0192)
+D. Permutacion restringida a N3b zenit 3 azimut 15: fraccion de pasadas que se mueven 0.67; d media obs 0.288 km, bajo perm 0.350 (p 0.0002); r E obs +0.93, perm +0.86 (p 0.0002); r N obs +0.72, perm +0.59 (p 0.0260)
+D. Permutacion restringida a N3 sin vecinos a <36 h: fraccion de pasadas que se mueven 0.74; d media obs 0.288 km, bajo perm 0.355 (p 0.0005); r E obs +0.93, perm +0.86 (p 0.0002); r N obs +0.72, perm +0.58 (p 0.0145)
+   Control de la permutacion D (20 brazos ya barajados; p debe ser ~ uniforme): p min 0.010, mediana 0.628, max 0.988
+F. Vecinos N3: 259 pares; mismo satelite 0.29; |dt| p10 72.0 h, p50 312.3 h; a < 36 h 0.07; vecinos por pasada p50 4
+   Varianza E de nuestro punto: total 0.542 km; residual tras la media de vecinos N3: 0.221 km; mancha: total 0.605, residual 0.295
+   Varianza N: total 0.301; residual 0.233; mancha total 0.279, residual 0.204
+   Correlacion de residuos respecto de los vecinos N3 (nuestro contra mancha): E +0.46, N +0.38, n=63
+
+======== Chillan VIIRS 750: n pasadas 55, control ok 54, dias distintos 24, satelites {'VIIRS_NOAA20_750': 24, 'VIIRS_NOAA21_750': 22, 'VIIRS_SNPP_750': 9}
+A. Reproduccion (C2p, mismo filtro de vecinos >= 2)
+  N1  n= 54 obs 1.000 nulo 0.861 dif +0.139 AUC 0.714 d propia 0.508 d otras 0.857
+  N3  n= 44 obs 1.000 nulo 0.989 dif +0.011 AUC 0.609 d propia 0.528 d otras 0.629
+  N3b n= 37 obs 1.000 nulo 0.980 dif +0.020 AUC 0.660 d propia 0.506 d otras 0.640
+  N3 sin control (todas las pasadas con >=2 vecinos) n= 45 obs 1.000 nulo 0.984 dif +0.016 AUC 0.617 d propia 0.524 d otras 0.637
+B. IC95 del N3 (C2p): dif de clase | AUC | d otras - d propia (km), segun unidad de remuestreo
+  pasada_i  dif [+0.000, +0.030] | AUC [0.495, 0.723] | km [-0.005, +0.212]
+  dia_i     dif [+0.000, +0.030] | AUC [0.455, 0.749] | km [-0.019, +0.229]
+  dia_ij    dif [+0.000, +0.056] | AUC [0.454, 0.760] | km [-0.035, +0.256]
+C. Techo: mancha = celda que contiene nuestro punto, con ruido (mismo N3, mismo filtro)
+  ruido 0 celdas: obs 1.000 nulo 0.994 AUC 0.856 d propia 0.289 d otras 0.630
+  ruido 0.5 celdas: obs 0.997 nulo 0.941 AUC 0.715 d propia 0.542 d otras 0.775
+  ruido 1 celdas: obs 0.828 nulo 0.749 AUC 0.628 d propia 0.990 d otras 1.129
+  ruido 3 celdas: obs 0.206 nulo 0.198 AUC 0.548 d propia 2.824 d otras 2.879
+D. Permutacion restringida a N3 zenit 5 azimut 30: fraccion de pasadas que se mueven 0.70; d media obs 0.505 km, bajo perm 0.583 (p 0.0040); r E obs +0.73, perm +0.68 (p 0.1860); r N obs +0.74, perm +0.43 (p 0.0002)
+D. Permutacion restringida a N3b zenit 3 azimut 15: fraccion de pasadas que se mueven 0.62; d media obs 0.505 km, bajo perm 0.584 (p 0.0025); r E obs +0.73, perm +0.68 (p 0.1820); r N obs +0.74, perm +0.43 (p 0.0002)
+D. Permutacion restringida a N3 sin vecinos a <36 h: fraccion de pasadas que se mueven 0.68; d media obs 0.505 km, bajo perm 0.578 (p 0.0040); r E obs +0.73, perm +0.68 (p 0.2199); r N obs +0.74, perm +0.45 (p 0.0002)
+   Control de la permutacion D (20 brazos ya barajados; p debe ser ~ uniforme): p min 0.004, mediana 0.530, max 0.986
+F. Vecinos N3: 149 pares; mismo satelite 0.34; |dt| p10 96.1 h, p50 384.0 h; a < 36 h 0.05; vecinos por pasada p50 3
+   Varianza E de nuestro punto: total 0.562 km; residual tras la media de vecinos N3: 0.438 km; mancha: total 0.642, residual 0.446
+   Varianza N: total 0.346; residual 0.286; mancha total 0.360, residual 0.384
+   Correlacion de residuos respecto de los vecinos N3 (nuestro contra mancha): E +0.16, N +0.66, n=45

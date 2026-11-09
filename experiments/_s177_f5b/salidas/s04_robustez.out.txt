@@ -1,0 +1,50 @@
+== A. Umbral de «sin dato» (px) con C2: ¿cambia la mancha? ==
+  U =   100 px: records con otra celda o área de mancha que con U = 400: 0 de 303 (Chillán 0)
+  U =   200 px: records con otra celda o área de mancha que con U = 400: 0 de 303 (Chillán 0)
+  U =   400 px: records con otra celda o área de mancha que con U = 400: 0 de 303 (Chillán 0)
+  U =  1000 px: records con otra celda o área de mancha que con U = 400: 0 de 303 (Chillán 0)
+  U =  1500 px: records con otra celda o área de mancha que con U = 400: 0 de 303 (Chillán 0)
+
+== B. Control positivo: desplazar nuestro punto k km (8 direcciones) y ver cuánto sigue siendo «i» (C2p) ==
+estrato (n con control ok)                 0.00   0.25   0.50   1.00   1.50   2.00   3.00   km
+Chillán VIIRS 375 (58)                     0.98   0.97   0.81   0.10   0.00   0.00   0.00   (tolerancia 0.75 km)
+Chillán VIIRS 750 (54)                     1.00   1.00   0.99   0.86   0.43   0.08   0.00   (tolerancia 1.5 km)
+Chillán MODIS (sin validar) (22)           0.82   0.82   0.78   0.75   0.68   0.60   0.37   (tolerancia 3.0 km)
+
+== C. Nulo N3 con geometría de visada igualada (Chillán): otras pasadas con |dif zenit| <= 5 grados y |dif azimut| <= 30 grados ==
+Chillán VIIRS 375: 69 de 69 con zenit y azimut
+   N1 todas                     n= 58 obs 0.983 nulo 0.615 dif +0.368 [+0.301, +0.438] | AUC 0.818 [0.774, 0.860] | d propia 0.28 km, d otras (igual geometría) 0.76 km
+   N3 zenit +-5, azimut +-30    n= 52 obs 0.981 nulo 0.929 dif +0.052 [-0.008, +0.109] | AUC 0.641 [0.553, 0.727] | d propia 0.29 km, d otras (igual geometría) 0.38 km
+   N3b zenit +-3, azimut +-15   n= 49 obs 0.980 nulo 0.932 dif +0.047 [-0.018, +0.110] | AUC 0.641 [0.539, 0.736] | d propia 0.29 km, d otras (igual geometría) 0.39 km
+Chillán VIIRS 750: 55 de 55 con zenit y azimut
+   N1 todas                     n= 54 obs 1.000 nulo 0.861 dif +0.139 [+0.098, +0.191] | AUC 0.714 [0.650, 0.783] | d propia 0.51 km, d otras (igual geometría) 0.86 km
+   N3 zenit +-5, azimut +-30    n= 44 obs 1.000 nulo 0.989 dif +0.011 [+0.000, +0.028] | AUC 0.609 [0.485, 0.722] | d propia 0.53 km, d otras (igual geometría) 0.63 km
+   N3b zenit +-3, azimut +-15   n= 37 obs 1.000 nulo 0.980 dif +0.020 [+0.000, +0.054] | AUC 0.660 [0.521, 0.781] | d propia 0.51 km, d otras (igual geometría) 0.64 km
+Chillán MODIS (sin validar): 22 de 22 con zenit y azimut
+   N1 todas                     n= 22 obs 0.818 nulo 0.779 dif +0.039 [-0.136, +0.177] | AUC 0.519 [0.381, 0.662] | d propia 2.07 km, d otras (igual geometría) 2.09 km
+   N3 zenit +-5, azimut +-30    n= 12 obs 0.833 nulo 0.792 dif +0.042 [-0.292, +0.333] | AUC 0.500 [0.250, 0.750] | d propia 1.80 km, d otras (igual geometría) 2.05 km
+   N3b zenit +-3, azimut +-15   n=  4 obs 1.000 nulo 1.000 dif +0.000 [+0.000, +0.000] | AUC 0.625 [0.250, 1.000] | d propia 1.12 km, d otras (igual geometría) 1.47 km
+
+== D. Transiciones de clase en Chillán (F5b guardada -> variante); 'iv' incluye los sin lámina ==
+  Chillán VIIRS375  F5b -> C1    : i->i: 46, iii->iii: 1, iv->iv: 22
+  Chillán VIIRS375  F5b -> C2p   : i->i: 46, iii->i: 1, iv->i: 10, iv->iii: 1, iv->iv: 11
+  Chillán VIIRS375  F5b -> C2_nc : i->i: 46, iii->i: 1, iv->i: 21, iv->iii: 1
+  Chillán VIIRS750  F5b -> C1    : i->i: 40, i->iv: 4, iii->i: 1, iii->iv: 2, iv->i: 2, iv->iv: 6
+  Chillán VIIRS750  F5b -> C2p   : i->i: 44, iii->i: 3, iv->i: 7, iv->iv: 1
+  Chillán VIIRS750  F5b -> C2_nc : i->i: 44, iii->i: 3, iv->i: 8
+  Chillán MODIS     F5b -> C1    : i->i: 15, iii->i: 2, iii->iii: 4, iv->i: 1
+  Chillán MODIS     F5b -> C2p   : i->i: 15, iii->i: 2, iii->iii: 4, iv->i: 1
+  Chillán MODIS     F5b -> C2_nc : i->i: 15, iii->i: 2, iii->iii: 4, iv->i: 1
+  Los 2 records de C2p que pasan de i a iii:
+     PuyehueCordonCaulle VIIRS_NOAA21 2026-10-14 06:24 0.35 MW d_cent 17.60 km, tol 0.75 celdas 91 comps 8 F5b d_png_nuestro 0.27
+     PuyehueCordonCaulle VIIRS_NOAA20 2026-10-28 06:18 1.16 MW d_cent 15.86 km, tol 0.75 celdas 30 comps 2 F5b d_png_nuestro 0.34
+  (iii) que quedan en C2p en Chillán:
+     MODIS_AQUA 2026-10-17 08:50 7.09 MW prot=True d_cent 3.78 km (tol 3.00) d_min 2.52; mancha 4 celdas
+     MODIS_AQUA 2026-10-28 07:35 9.35 MW prot=True d_cent 3.03 km (tol 3.00) d_min 1.74; mancha 4 celdas
+     MODIS_TERRA 2026-10-17 02:20 12.97 MW prot=True d_cent 4.01 km (tol 3.00) d_min 2.65; mancha 10 celdas
+     MODIS_AQUA 2026-10-30 08:55 14.39 MW prot=True d_cent 6.11 km (tol 3.00) d_min 4.70; mancha 11 celdas
+     VIIRS_NOAA21 2026-10-30 04:42 21.69 MW prot=True d_cent 1.07 km (tol 0.75) d_min 0.63; mancha 11 celdas
+
+== E. MODIS de Chillán por régimen del detector (vía código MIROVA desde 2026-11-02 18:00 UTC; antes, K) ==
+  antes (K): n=21; d(mancha, nuestro) mediana 1.83 km, rango 0.25 a 6.11; clases C2p: {'i': 17, 'iii': 4}
+  desde la vía: n=1; d(mancha, nuestro) mediana 0.51 km, rango 0.51 a 0.51; clases C2p: {'i': 1}

@@ -1,0 +1,33 @@
+== Control de reproducción: A con el código original de F5b contra p8_clases.json ==
+records con panel: 303; lat/lon de A recalculado igual al de p8_clases.json: 303 de 303
+mi reimplementación de A (lib177, regla A, sin empates) igual a p8_clases.json: 303 de 303
+
+== Histograma de componentes blancas que no tocan el borde (area // 50 * 50; 2000 = >= 2000) ==
+[(0, 441), (50, 16), (100, 2), (150, 1), (2000, 4)]
+
+== Records donde A borraba una componente blanca de calor (20 a 399 px, en el inner, sin tocar el borde) ==
+n = 35 de 303 | {('NevadosDeChillan', 'VIIRS750'): 17, ('PuyehueCordonCaulle', 'VIIRS375'): 1, ('PuyehueCordonCaulle', 'VIIRS750'): 3, ('NevadosDeChillan', 'MODIS'): 12, ('NevadosDeChillan', 'VIIRS375'): 2}
+
+== Control positivo: Chillán VIIRS_NOAA20_750 2026-10-10 06:54 ==
+  A: lum 196.7, saturado False, principal 1 px, componentes 1, celdas 1, centro -36.85128,-71.37219
+  C1: lum 255.0, saturado True, principal 48 px, componentes 1, celdas 11, centro -36.86492,-71.37219
+  C2: lum 255.0, saturado True, principal 48 px, componentes 1, celdas 11, centro -36.86492,-71.37219
+  F5b guardó: lum 196.7, mancha 1 px; V5B m1 espera lum 255, 48 px, 11 celdas
+
+== Control de no-cambio: records SIN componente borrada por A ==
+n = 268; C1 igual a A (misma celda y misma lum): 268 de 268
+
+== Pregunta 2: records donde C1 difiere de A (celda o lum) ==
+n = 35 | de ellos con componente borrada por A: 35 | sin ella: 0
+{('NevadosDeChillan', 'VIIRS750'): 17, ('PuyehueCordonCaulle', 'VIIRS375'): 1, ('PuyehueCordonCaulle', 'VIIRS750'): 3, ('NevadosDeChillan', 'MODIS'): 12, ('NevadosDeChillan', 'VIIRS375'): 2}
+
+== C2 contra C1 (empates y unión de saturados) ==
+records donde C2 difiere de C1 (principal, nº de componentes o su área): 14 | {('Isluga', 'VIIRS375'): 1, ('PuyehueCordonCaulle', 'VIIRS375'): 6, ('PuyehueCordonCaulle', 'VIIRS750'): 5, ('NevadosDeChillan', 'MODIS'): 1, ('NevadosDeChillan', 'VIIRS375'): 1}
+   sin saturación y distinto (debería ser 0): 0
+   saturados: 146 de 303 | con >= 2 componentes tras unir: 11
+   sin dato que toca el inner (posible mancha pegada al sin dato; no se puede separar): 2 | {('PuyehueCordonCaulle', 'VIIRS375'): 1, ('PuyehueCordonCaulle', 'VIIRS750'): 1}
+
+== Mancha saturada en Chillán (celdas de todas las componentes: p50, p90, max) ==
+  VIIRS375: n=69 saturadas 50; celdas p50 3 p90 10 max 20; con >=2 componentes 0
+  VIIRS750: n=55 saturadas 48; celdas p50 4 p90 8 max 20; con >=2 componentes 0
+  MODIS: n=22 saturadas 19; celdas p50 8 p90 13 max 16; con >=2 componentes 1
