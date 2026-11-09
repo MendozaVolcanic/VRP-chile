@@ -22,7 +22,7 @@ respondió en 0,4 s. Cuando una búsqueda de NOAA-21 pasó de los 60 s de lectur
 | Fallas 11-08, 19 a 24 UTC, por colección | 305 de 306 son NOAA-21; 1 MODIS Aqua | CONFIRMADO, comprobado por autor y verificador |
 | Inicio | primera lenta 19:11:32 y primera falla 19:15:03, las dos de `experimental-diario`, no del reproceso | CONFIRMADO |
 | Misma carga sin daño, antes del corte | 18:00 a 19:00 UTC: 5,6 trabajos de reproceso en promedio, 1.188 consultas marcadas (máximo del periodo), sin fallas y p95 0,8 s | CONFIRMADO |
-| Misma carga sin daño, después | 11-09 03:45 a 04:45 UTC: 4,5 trabajos de reproceso en promedio, 0 fallas, p95 0,7 s | CONFIRMADO |
+| Misma carga sin daño, después | 11-09 03:45 a 04:45 UTC: 4,5 trabajos de reproceso en promedio, 0 fallas, p95 0,7 s. Con D2 terminado, la hora 04 UTC completa: 5,47 trabajos, 574 consultas, 0 fallas | CONFIRMADO |
 | Episodio sin reproceso | 11-06 19:57 a 20:27 UTC, NOAA-21 lenta (mediana 33 a 40 s, máximo 62,1 s), 0 trabajos de reproceso, sin ReadTimeout | CONFIRMADO |
 | Último evento | última falla 23:25:49, con 6 trabajos aún activos | CONFIRMADO |
 | A favor de «agrava» | las 306 fallas caen dentro de las 6 h con 6 trabajos, y el 11-08 fue peor que el 11-06 (87 consultas NOAA-21 de 40 s o más contra 32; máximo 101,9 s contra 62,1 s) | n = 1 episodio; no decide |

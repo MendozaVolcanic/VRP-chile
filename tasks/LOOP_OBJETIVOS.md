@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-09 05:29 UTC (S177): D2 completo y verde, D3 despachado
+- D2 (run 42507820590, intento 2): verde 05:20 UTC. Son 47 trozos más el job `plan`, así que el 47 de la bitácora era correcto y el «48» del bloque S177 contaba el plan. C-via y paso de reproceso en verde en 47 de 47; 47 de 47 coberturas finales sin fallas (intento 1: 28 limpias y 19 con fallas de CMR, todas repetidas limpias en el intento 2). Artefactos en `C:/Users/nmend/vrp-temporales/s177_d2/` (vencen en GitHub el 2026-12-09). `bajar_tramos.py --estricto` compara brazos y aquí hay uno: se usará entre D2 y D3 si los nombres de artefacto lo permiten, y D2 no se leyó como evidencia (§11).
+- El intento 2 suma control a la medición de CMR: 11-09 04 UTC, 5,47 trabajos de reproceso, 574 consultas, 0 fallas.
+- **D3 despachado 05:28 UTC**, run 42567518008, tag `s172-retro-d3` sobre `a7a6ae360`, perfil `_s172_retro_k`. El plan en local da 30 trozos como manda §10.3. El pre-registro no fija cuáles son los «tres días de F26 de cada otro volcán»: se eligieron antes de mirar datos, repartidos en el tramo y válidos también para Tupungatito (desde el 02-23): 2026-02-25, 03-10 y 03-25. Ventanas exactas en `C:/Users/nmend/vrp-temporales/s177_cmr/ventanas_d3.txt`.
+- D4 (176 trabajos, 24 a 29 h) no se despacha sin decisión de Nicolás sobre `max-parallel` y horario.
+
 ### 2026-11-09 05:02 UTC (S177): el reproceso no es la causa de los cortes de CMR
 - Censo de Actions del 11-01 al 11-09 04:45 UTC (162 intentos, 238.534 marcas) en `experiments/_s177_cmr/`, veredicto en su `INFORME.md`. **Causa: NO. Si agrava: SIN DATO** (un solo episodio). 305 de las 306 fallas del 11-08 son de colecciones VIIRS NOAA-21, NOAA-20 respondió en 0,4 s en las mismas horas; misma carga sin daño de 18 a 19 UTC y de 03:45 a 04:45 UTC; el 11-06 hubo NOAA-21 lenta con 0 trabajos de reproceso. Verificador limpio Sonnet (`C:/Users/nmend/vrp-temporales/s177_ver_cmr/INFORME.md`), cifras centrales comprobadas por el autor con código propio.
 - Corrige el bloque S177: «el NRT seguía verde» es porque no corrió de 19 a 23 UTC (brecha diaria de unas 5 h del horario); a las 23:25 sus búsquedas tardaron hasta 72,6 s. Las sombras rojas del 11-07 son otro fenómeno (una conexión reseteada; un ConnectTimeout de descarga a `nrt3.modaps`).
