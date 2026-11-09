@@ -1136,8 +1136,8 @@ def alertas_protegidas(filas, recs_banco, win, frontera, diurna=None, via_modis=
     S175 (decisión 9 de docs/AUDIT_S175.md): en MODIS y VIIRS 750 la fila del OCR no cuenta si la tabla tiene la
     pasada (`clase_mirova.tabla_sobre_ocr`), y si sólo hay OCR su VRP es un piso: la protegida lleva
     `vrp_mirova_hasta_mw` (v + 1, exclusivo). Como el corte es 1 MW, el piso no cambia qué es protegida. La regla
-    de la tabla sí puede cambiarlo (una tabla sin alerta le quita la protección al OCR; hoy 0 casos): es la decisión
-    pendiente de Nicolás escrita en `clase_mirova.tabla_sobre_ocr` (VPR957-01).
+    de la tabla sí puede cambiarlo (una tabla sin alerta le quita la protección al OCR): decidido en
+    `clase_mirova.tabla_sobre_ocr` (VPR957-01) y contado en `ocr_descartadas_por_tabla` de latest.json.
     """
     filas = cm.tabla_sobre_ocr(filas)
     if diurna is None:
@@ -1327,6 +1327,10 @@ def main():
     coords = _coords_por_volcan()
     filas_ref = cargar_filas_referencia()
     # S175 (decisión 9): en MODIS y VIIRS 750, si la tabla tiene la pasada, la fila del OCR (VRP truncado) no se usa.
+    # S177 (decision 1 de #957): cuantas filas descarta esa regla en la ventana, para que el caso «tabla sin alerta» no
+    # pase en silencio. Se cuenta antes de filtrar y no entra a flags: informa.
+    ocr_descartadas = cm.contar_ocr_descartadas([f for f in alertas if win[0] <= (f.get("fecha_utc") or "")[:10] <= win[1]],
+                                                tabla=(filas_ref or []) + alertas)
     alertas = cm.tabla_sobre_ocr(alertas, tabla=(filas_ref or []) + alertas)
     alertas_d9 = aplicar_d9(alertas, REGLA_MINIMAS, filas_ref)
     techo_mir = {}
@@ -1443,6 +1447,8 @@ def main():
         # Transparencia: un filtro que descarta en silencio es tan malo como no
         # tenerlo. Si este número se dispara, es señal de otra cosa (A76).
         "alertas_diurnas_excluidas": n_diurnas_excluidas,
+        # S177: lo mismo para la regla «la tabla decide» (decisión 1 de #957); `sin_alerta_en_tabla` es el caso a vigilar.
+        "ocr_descartadas_por_tabla": ocr_descartadas,
         "avisos": cobertura_avisos,
     }
 
@@ -1572,6 +1578,11 @@ def main():
         print(f"COBERTURA: {av}")
     for v in sin_juzgar.values():
         print(f"SIN JUZGAR: {v['aviso']}")
+    # S177 (VPR970-02): lo que la regla «la tabla decide» le quitó a una alerta sólo OCR se ve en el log del run.
+    for s_ocr, c_ocr in ocr_descartadas.items():
+        if c_ocr["sin_alerta_en_tabla"]:
+            print(f"OCR DESCARTADO CON TABLA SIN ALERTA: {s_ocr} {c_ocr['sin_alerta_en_tabla']} filas, "
+                  f"{c_ocr['protegidas_sin_alerta_en_tabla']} protegidas")
     print(f"VEREDICTO: {out['verdict']}" + (f" — {len(flags)} flags" if flags else ""))
     for fl in flags:
         print("  ⚠", fl)

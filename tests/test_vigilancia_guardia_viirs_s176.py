@@ -169,6 +169,14 @@ def test_sobrepublicacion_cuenta_solo_el_sensor_vigilado():
     assert d["sobrepublicacion"]["k"] == 0 and d["veredicto"] == "VERDE"
 
 
+def test_la_cota_pendiente_de_sobrepublicacion_no_dispara():
+    """VPR967-02: una cota en None significa PENDIENTE DE NICOLAS, no cero. Una sola sobre-publicacion no abre INVESTIGAR."""
+    prod, guardia = _par_neg("VIIRS750", "2026-11-10", "05:00", True, False)
+    d = _disp("VIIRS750", [], [prod], [guardia], cotas={"muy_bajo": None, "sobrepublicacion": None})
+    assert d["sobrepublicacion"]["k"] == 1 and d["sobrepublicacion"]["cota"] is None
+    assert d["sobrepublicacion"]["dispara"] is False and d["veredicto"] == "VERDE"
+
+
 @pytest.mark.parametrize("s", ["VIIRS375", "VIIRS750"])
 def test_el_nulo_antes_del_encendido_es_por_sensor(s):
     otro = "VIIRS750" if s == "VIIRS375" else "VIIRS375"
@@ -325,6 +333,17 @@ def test_cadena_control_con_la_via_fresca_da_verde(disco, b, plat, clave):
     out = vv.evaluar("2026-11-20", clave)
     assert out["encendido_utc"] == "2026-11-06 09:00:00" and out["sensor"] == b
     assert out["veredicto"] == "VERDE", out["avisos"]
+
+
+@pytest.mark.parametrize("b,plat,clave", CASOS)
+def test_cadena_produccion_sin_datos_frescos_da_vigilancia_ciega(disco, b, plat, clave):
+    """VPR967-03: si el NRT deja de escribir este sensor en un volcan, la vigilancia lo dice. Control: la guardia sigue fresca."""
+    prod, guardia = _disco_base(plat)
+    prod["Lascar"] = [r for r in prod["Lascar"] if r["datetime_utc"] < "2026-11-01 12:00"]
+    disco(prod, guardia, _ref(b))
+    out = vv.evaluar("2026-11-20", clave)
+    assert out["veredicto"] == "VIGILANCIA_CIEGA", out["avisos"]
+    assert any("producción" in a and "Lascar" in a and b in a for a in out["avisos"]), out["avisos"]
 
 
 @pytest.mark.parametrize("b,plat,clave", CASOS)

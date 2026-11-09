@@ -143,6 +143,40 @@ def test_la_tabla_manda_sobre_el_ocr_de_la_misma_pasada():
     assert cm.tabla_sobre_ocr([ocr], tabla=[rutina]) == []
 
 
+def test_cuenta_las_filas_ocr_que_descarta_la_tabla():
+    """Decision 1 de #957 aceptada («la tabla decide»): el dano posible es futuro y silencioso, asi que se cuenta. Una
+    alerta OCR con tabla de alerta es lo esperado; con tabla sin alerta es el caso a vigilar, y aparte si era protegida.
+    Controles: el OCR sin tabla y el OCR de VIIRS 375 no cuentan."""
+    t = "2026-10-30 08:55:10"
+    tabla_alerta = _alerta("NevadosDeChillan", "MODIS", t, 14.39)
+    ocr_ok = _alerta("NevadosDeChillan", "MODIS", "2026-10-30 08:55:05", 14.0, source="OCR")
+    rutina = _alerta("Lascar", "VIIRS750", t, 0.0, tipo="RUTINA")
+    ocr_prot = _alerta("Lascar", "VIIRS750", "2026-10-30 08:55:05", 3.0, source="OCR")
+    ocr_chica = _alerta("Isluga", "VIIRS750", "2026-10-30 08:55:05", 0.0, source="OCR")
+    fp = _alerta("Isluga", "VIIRS750", t, 0.0, tipo="FALSO_POSITIVO")
+    solo = _alerta("Copahue", "MODIS", t, 5.0, source="OCR")
+    v375 = _alerta("Lascar", "VIIRS375", "2026-10-30 08:55:05", 3.0, source="OCR")
+    v375_tabla = _alerta("Lascar", "VIIRS375", t, 3.1)
+    filas = [ocr_ok, ocr_prot, ocr_chica, solo, v375]
+    c = cm.contar_ocr_descartadas(filas, tabla=filas + [tabla_alerta, rutina, fp, v375_tabla])
+    assert c == {"MODIS": {"descartadas": 1, "con_alerta_en_tabla": 1, "sin_alerta_en_tabla": 0, "protegidas_sin_alerta_en_tabla": 0},
+                 "VIIRS750": {"descartadas": 2, "con_alerta_en_tabla": 0, "sin_alerta_en_tabla": 2, "protegidas_sin_alerta_en_tabla": 1}}
+    # debe descartar exactamente las mismas filas que tabla_sobre_ocr
+    quedan = cm.tabla_sobre_ocr(filas, tabla=filas + [tabla_alerta, rutina, fp, v375_tabla])
+    assert len(filas) - len(quedan) == sum(v["descartadas"] for v in c.values())
+    assert cm.contar_ocr_descartadas([solo, v375]) == {}
+    # VPR970-04: basta una fila de alerta entre las de la pasada; el borde de 120 s cuenta y el de 121 no; el orden no importa.
+    dos = [_alerta("Lascar", "MODIS", t, 0.0, tipo="RUTINA"), _alerta("Lascar", "MODIS", t, 2.0)]
+    ocr_dos = _alerta("Lascar", "MODIS", "2026-10-30 08:56:10", 2.0, source="OCR")      # a 60 s
+    assert cm.contar_ocr_descartadas([ocr_dos], tabla=dos)["MODIS"]["con_alerta_en_tabla"] == 1
+    assert cm.contar_ocr_descartadas([ocr_dos], tabla=dos[::-1])["MODIS"]["con_alerta_en_tabla"] == 1
+    tab = [_alerta("Lascar", "MODIS", "2026-10-30 08:55:00", 2.0)]
+    borde = _alerta("Lascar", "MODIS", "2026-10-30 08:57:00", 2.0, source="OCR")
+    fuera = _alerta("Lascar", "MODIS", "2026-10-30 08:57:01", 2.0, source="OCR")
+    assert cm.contar_ocr_descartadas([borde], tabla=tab)["MODIS"]["descartadas"] == 1
+    assert cm.contar_ocr_descartadas([fuera], tabla=tab) == {}
+
+
 def _protegidas(filas, recs):
     return aa.alertas_protegidas(filas, recs, WIN, FRONTERA, diurna=lambda *a: False)
 

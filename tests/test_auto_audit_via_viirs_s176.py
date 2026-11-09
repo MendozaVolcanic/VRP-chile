@@ -195,6 +195,13 @@ def test_control_sin_la_via_la_misma_escena_es_k_y_no_hay_claves_nuevas(correr):
     assert out["alertas_protegidas"]["lista"][0]["detector"] == "K"
 
 
+def test_con_via_solo_en_modis_no_aparece_la_clave_de_viirs(correr):
+    """VPR967-04: la situacion de produccion hoy. Sin via de VIIRS, `fronteras_via` no se escribe y latest.json queda igual."""
+    out = correr(con_via=True, sensor="MODIS_AQUA", bucket="MODIS")
+    assert out["detector"]["frontera_via_modis"] == _dia(15)
+    assert "fronteras_via" not in out["detector"]
+
+
 def test_las_bandas_no_se_recalibran():
     """A115: un umbral elegido después del dato no es pre-registro. Los valores de hoy, copiados: si cambian, es a propósito
     y con un PR que lo diga, no de pasada con el encendido."""

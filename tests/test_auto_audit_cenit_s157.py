@@ -343,6 +343,8 @@ def test_no_regresion_contra_el_codigo_de_main_previo(tmp_path, monkeypatch):
     for h in hist_d:
         assert h.pop("plataformas_juzga_desde") == {s: None for s in aa.SENSORS}
     despues, hist_d = _sin_claves_s175(despues, hist_d)
+    # S177: el conteo informativo de la regla de la tabla; el insumo no descarta ninguna fila.
+    assert despues["cobertura"].pop("ocr_descartadas_por_tabla") == {}
     assert _sin_claves_nuevas(_sin_claves_s166(despues)) == antes
     assert despues["verdict"] == antes["verdict"]
     assert despues["avisos_detector"] == antes["avisos_detector"]
