@@ -34,7 +34,9 @@ def _records(vol):
         d = json.load(fp)
     recs = d["records"] if isinstance(d, dict) and "records" in d else d
     # Sólo lo que los guards miran: baja la memoria ~10× (el disco al 100 % dejó sin pagefile en S134).
-    return tuple({k: r.get(k) for k in ("sensor", "granule", "datetime_utc", "diag_nti_max", "primary_cluster")}
+    # S178: + via_codigo_mirova, para que P5 separe K de la vía de MODIS
+    return tuple({k: r.get(k) for k in ("sensor", "granule", "datetime_utc", "diag_nti_max", "primary_cluster",
+                                        "via_codigo_mirova")}
                  for r in recs if isinstance(r, dict))
 
 
@@ -67,10 +69,19 @@ def test_p4_sin_records_duplicados_por_granule(vol):
 def test_p5_diag_nti_max_persistido_en_modis():
     """P5. El nombre en el punto de uso es `diag_nti_max` (A89), no `nti_max`.
     Pregunta 1: si el pipeline dejara de persistirlo, la fracción cae y falla.
-    Pregunta 2: se exige n ≥ 20 records MODIS para que el cero no sea «no medí»."""
+    Pregunta 2: se exige n ≥ 20 records MODIS para que el cero no sea «no medí».
+
+    S178 (2026-11-10): sólo records del detector K. Desde el 2026-11-02 MODIS de producción corre la vía «código
+    MIROVA» (S172, PR B #934), que no calcula el NTI máximo de K y no escribe `diag_nti_max`; sus records llevan
+    `via_codigo_mirova: true`. El 2026-11-10 eran 19 de 376 en Villarrica y la prueba cayó en todos los PR sin que K
+    hubiera dejado de persistir nada. Lo que vigila esta prueba (A89, el nombre en el punto de uso del camino K) sigue
+    igual sobre los records K. Ojo: cuando el reemplazo de la historia (P6 de S178) quite los records K de MODIS de
+    data/mirova_equivalent/, el piso de 20 la pondrá en rojo a propósito y habrá que apuntarla a la guardia K de MODIS
+    (pipeline/profiles/guardia_k_modis.yaml) o retirarla."""
     recs = [r for r in _records("Villarrica")
             if isinstance(r, dict) and str(r.get("sensor", "")).startswith("MODIS")
-            and str(r.get("datetime_utc", ""))[:10] >= "2026-06-01"]
+            and str(r.get("datetime_utc", ""))[:10] >= "2026-06-01"
+            and r.get("via_codigo_mirova") is not True]
     assert len(recs) >= 20, "muy pocos records MODIS desde 2026-06-01 para medir (n=%d)" % len(recs)
     con = sum(1 for r in recs if r.get("diag_nti_max") is not None)
     assert con / len(recs) >= 0.95, "diag_nti_max falta en %d de %d records MODIS" % (len(recs) - con, len(recs))
