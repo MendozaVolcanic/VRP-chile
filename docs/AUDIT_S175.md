@@ -296,7 +296,11 @@ ninguna alerta publicada: son efectos de etiqueta, gobernanza, documentos y medi
 
 Uso del plan semanal: 78 % antes de la ola 0 y 79 % después de F5 y F2.
 
-## 10. Anexo pendiente: audit semanal del 2026-11-09
+## 10. Anexo: audit semanal del 2026-11-09 (escrito en S178, `docs/AUDIT_S175_ANEXO_AUDIT_20261109.md`)
+
+> S178 (2026-11-10): el anexo está escrito y verificado; ningún veredicto de arriba cambia. El audit corrió a las 19:35
+> UTC (atraso del cron), abrió #973 con tres flags de VIIRS bajo K y ninguno nuevo contra #915 y #936. Lo de abajo se
+> conserva como estaba al 2026-11-08 (A113).
 
 F1 corrió un sustituto del audit sobre la base: VERDE, recall de VIA_MODIS 100 % en 2 noches, 3 protegidas de la vía
 publicadas, sin flags (sin verificar). El audit real del lunes 2026-11-09 09:00 UTC se agrega aquí con su lectura contra
@@ -471,6 +475,9 @@ Hallazgos propios de V33B:
 | V33B-03 | El lector de la sombra V375-E no corre desde un árbol suelto: exige resolver `origin/loop/activo` con git y el árbol entero del tag; toca la decisión 20 | C | 1 |
 
 ### 11.6 Pendiente
+
+> S178 (2026-11-10): resuelto. El anexo está en `docs/AUDIT_S175_ANEXO_AUDIT_20261109.md`, con verificador limpio. Texto
+> original conservado abajo (A113).
 
 El anexo del §10 (audit semanal del lunes 2026-11-09 09:00 UTC contra la regla §4 de reversión) no está escrito: ese audit
 todavía no existe.

@@ -9,7 +9,8 @@
 - **El audit.** Run 42684784167 del workflow «Auto-audit semanal paridad MIROVA» (cron, creado 2026-11-09 19:35:21 UTC,
   `headSha` `e79314dac`, éxito), que escribió `data/audit_continuous/latest.json` en el commit `847b39491` de main
   (2026-11-09 19:50:04 UTC, `generated_utc` 19:50:03Z) y abrió el issue #973. Corrió a las 19:35 UTC, no a las 09:00
-  como decía el §10. Todo número marcado **[latest]** se lee de ese archivo (`git show 847b39491:data/audit_continuous/latest.json`).
+  como decía el §10: el cron es `0 9 * * 1`, pero GitHub lo dispara con 7 a 10 h de atraso (11-02 19:15, 10-26 15:56,
+  11-09 19:35; agregado S178 tras el verificador limpio). Todo número marcado **[latest]** se lee de ese archivo (`git show 847b39491:data/audit_continuous/latest.json`).
 - **Reproducción.** Los diagnósticos importan `scripts/auto_audit_weekly.py` del mismo commit, sobre un árbol parcial de
   `847b39491` (`pipeline/`, `scripts/`, `data/mirova_equivalent/`, `data/mirova_reference/`, `volcanoes.yaml`,
   `frontend/cambio_detector.js`), con «hoy» fijado al 2026-11-09. Reproducen exacto los tres flags (recall VIIRS 750
@@ -31,7 +32,8 @@ Veredicto **FUERA_DE_BANDA** con tres flags, los tres de **VIIRS con el detector
 
 **Qué tramo mide cada flag (ojo con los regímenes).** El audit juzga VIIRS sólo desde el 2026-11-03: el cese de Suomi
 NPP (2026-11-02 13:00 UTC, `scripts/ceses_esperados.json`) parte la ventana y lo anterior va a `plataformas.aparte`
-[latest]. Los tres flags son entonces de **7 noches, 2026-11-03 a 2026-11-09, sólo NOAA-20 y NOAA-21, todo K**: no mezclan
+[latest]. Los tres flags son entonces de **la ventana de 7 días calendario, 2026-11-03 a 2026-11-09, sólo NOAA-20 y
+NOAA-21, todo K** (dentro de ella, n = 15, 7 y 6 noches volcán y sensor, como dice la tabla): no mezclan
 detectores ni plataformas. El recall de VIIRS 750 llega justo al mínimo de 15 noches (`MIN_N_RECALL`), así que el flag
 va a oscilar mientras la ventana post cese crezca (A90).
 
@@ -83,8 +85,9 @@ sí les da potencia: SIN ATRIBUIR.** Candidata no medida: su código V750 estima
 
 ### 2.3 Magnitud de Tupungatito VIIRS 375 (0,373 ×): SIN ATRIBUIR
 
-Régimen muy débil: MIROVA entre 0,06 y 0,35 MW en las 6 noches; nosotros un cúmulo de 1 o 2 píxeles en cumbre, de 0,007 a
-0,104 MW por pasada; el máximo publicado de cada noche va de 0,037 a 0,104 MW [diag b]. Misma pasada, por cenit: menor que 30°, 0,662 (n 2); 30° a 50°, 0,279 (n 3); 50° a 60°, 0,32 (n 2);
+Régimen muy débil: MIROVA entre 0,06 y 0,35 MW en las 6 noches; nosotros un cúmulo de 1 o 2 píxeles en cumbre, de 0,0 a
+0,086 MW en las pasadas pareadas con MIROVA (0,104 MW es una pasada sin alerta de MIROVA; corrección S178 del
+verificador limpio: el texto decía «0,007 a 0,104»); el máximo publicado de cada noche va de 0,037 a 0,104 MW [diag b]. Misma pasada, por cenit: menor que 30°, 0,662 (n 2); 30° a 50°, 0,279 (n 3); 50° a 60°, 0,32 (n 2);
 60° o más, 0,118 (n 1) [diag c]. El n por tramo es demasiado chico para leer una curva. El núcleo F5 tampoco explica:
 0,373 contra 0,372 con `pc.vrp_mw` [diag b]. El antecedente que cita el issue (déficit de régimen débil de S124) es eso,
 un antecedente: no está medido aquí.
@@ -145,3 +148,12 @@ El audit semanal no es el disparador de la regla (§4.3 lo da la vigilancia de l
    de VIIRS 750 está en el mínimo de n y los ratios por volcán quedan con n 3 a 7. Un flag que aparezca o desaparezca en
    las próximas semanas puede ser n, no volcán.
 5. **Hora del audit:** corrió 19:35 UTC (cron), no 09:00 UTC como dice el §10.
+
+## Verificación (S178, 2026-11-10)
+
+Verificador limpio de otro modelo (Sonnet, sin el contexto del autor): ANEXO CORRECTO en lo sustantivo. Reprodujo
+`latest.json` byte a byte con `auto_audit_weekly.py` de `847b39491` y «hoy» = 2026-11-09, los tres flags, las 4 noches
+del hallazgo 101 (BT bajo `t_bg`, cúmulo en 0,0 MW), las razones de Chillán y Tupungatito por pasada y por cenit, y la
+tabla contra #915 y #936. Corregido aquí: «7 noches» (son 7 días; n 15, 7 y 6), el rango de Tupungatito (0,0 a 0,086 MW
+en pasadas pareadas) y el atraso del cron. SIN VERIFICAR por él: el 0,485 contra 0,993 de la sombra (exploratorio) y la
+cita completa de F2-202 (también dice «en Suomi NPP»).
