@@ -25,6 +25,15 @@
 > estado previo a S172 en MODIS: su texto se conserva y cada una lleva su marca. Para la vía, la referencia es D34 (el
 > código de MIROVA) y su port a MODIS. K de MODIS sigue corriendo como guardia (`pipeline/profiles/guardia_k_modis.yaml`)
 > con reversión pre-autorizada (marca S172 al inicio de `docs/MISSION.md`).
+>
+> ⚠️ **S177 B1 (A113; PROPUESTA en borrador: rige sólo desde el merge del PR B1, rama `claude/s177-b1-v375`): VIIRS 375
+> de producción deja de ser K.** Desde la primera corrida del NRT con la vía después del merge, VIIRS 375 corre la vía
+> «código MIROVA» (`enable_v375_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`, familia VIIRS375): la grilla de
+> 375 m de MIROVA, su detector, su fondo y la suma de todos los alertados. Las divergencias de este catálogo que
+> describen VIIRS 375 de producción como K describen el estado previo en VIIRS 375 y su texto se conserva. Las marcas
+> por divergencia (D22, D25, D26, D32 y las demás que midan K en VIIRS 375) no se agregan en este PR: quedan para la
+> sesión que lo mergee. K de VIIRS sigue corriendo como guardia (`pipeline/profiles/guardia_k_viirs.yaml`) con
+> reversión pre-autorizada (marca S177 B1 en `docs/MISSION.md`).
 
 ## Objetivo
 

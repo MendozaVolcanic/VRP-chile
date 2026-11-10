@@ -41,6 +41,21 @@ thresholds:
   # NdC incluido el trigger 06-16 (0.068 vs MIROVA 0.06); [2,4] perdía 06-16 por fallback
   # de la máscara de nubes (min_pixels). A/B run 27705248529 brazo _t1lm_q3_ring15.
   test1_intermediate_bg_ring_km: [1.5, 3.0]
+  # S177 B1: VIIRS 375 ENCENDIDO con la via «codigo MIROVA» (pipeline/mirova_v750_codigo.py, FAMILIAS["VIIRS375"]: el
+  # codigo que MIROVA publico en OSF con lo que ese codigo hace depender del sensor). POR QUE: MIROVA suma la energia de
+  # todos los pixeles que alerta; K publica el nucleo de un cumulo que ya recorto, con un fondo de anillo propio, y en
+  # VIIRS 375 entrega 0,504 de la potencia de MIROVA contra 0,993 de la via (sombra, n 31, pasadas con alerta del
+  # 2026-11-03 al 11-07, verificador de S176); en V375-C la via dio la magnitud de MIROVA al milesimo (comentario S165
+  # de pipeline/process_viirs.py). Decision de Nicolas del 2026-11-08 (diseno del encendido de VIIRS, en la rama
+  # loop/activo): encender VIIRS con la via y K de guardia (la guardia K de VIIRS del PR A, #967). Reversion: §4 de
+  # experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md, con git revert -m 1 del merge de ESTE PR, sin
+  # tocar el de VIIRS 750 (B2). Tag defensivo pre-s178-b1-b2.
+  # Ubicacion (hallazgo 208): este bloque va aqui, lejos del de MODIS (inicio de `thresholds:`) y del de VIIRS 750
+  # (B2, tras n_sigma_vent), con lineas que ya existian entre ellos, para que revertir uno no choque con los otros. La
+  # linea de arriba (test1_intermediate_bg_ring_km, del Test 1 integrado, apagado desde K) es una clave: un PR que la
+  # cambie si chocaria con este revert. Lo vigila tests/test_revert_flag_v375_no_choca_s177.py; el valor,
+  # tests/test_guard_v375_codigo_mirova_encendido_s177.py.
+  enable_v375_codigo_mirova: true
   # S142 D25: semiancho máximo (px) de la ventana del fondo por vecinos cuando los 8 vecinos están
   # alertados. Sólo actúa con enable_vrp_bg_neighbor_mean_viirs375 (en paths:, OFF). El A/B barre
   # 1 contra 3: plan docs/superpowers/plans/2026-09-15-flags-d22-d25.md §5.

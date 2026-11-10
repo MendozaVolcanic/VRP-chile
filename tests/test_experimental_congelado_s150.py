@@ -44,9 +44,10 @@ def _resolver(nombre):
 # cayo a proposito y se reemplaza por la lista DECLARADA de diferencias: exactamente los tres flags de K.
 # S172 (encendido de MOD-D, decisión de Nicolás del 2026-10-31): producción enciende la vía «código MIROVA» en MODIS
 # y el laboratorio la declara apagada (sigue en C0, es la sombra de K), así que también difieren en ese flag.
+# S177 B1 (encendido de la vía de VIIRS 375): lo mismo con esa vía; el laboratorio la declara apagada.
 # S177 B2 (encendido de la vía de VIIRS 750): lo mismo con esa vía; el laboratorio la declara apagada.
 DIFERENCIAS_DECLARADAS = {"ENABLE_TEST1_PATH", "ENABLE_TESTS_23_PROSE_BRANCH", "ENABLE_MODIS_B22_PRIMARY",
-                          "ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V750_CODIGO_MIROVA"}
+                          "ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA", "ENABLE_V750_CODIGO_MIROVA"}
 
 
 def test_el_laboratorio_difiere_de_produccion_solo_en_lo_declarado():

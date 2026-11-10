@@ -30,6 +30,12 @@ description: >
   (docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md).
 
 thresholds:
+  # S177 B1: el PR B1 enciende la via «codigo MIROVA» en VIIRS 375 de la replica. Este laboratorio esta congelado en C0
+  # y es la sombra de K de scripts/vigilancia_sombra.py: si heredara la via, en VIIRS 375 dejaria de ser C0. Se
+  # declara apagada en `thresholds:` (A89). Va aqui, al inicio, separada por lineas existentes de la de VIIRS 750 (B2,
+  # tras la de MODIS), para que los revert de B1 y B2 no choquen (hallazgo 208). Lo vigila
+  # tests/test_guard_v375_codigo_mirova_encendido_s177.py.
+  enable_v375_codigo_mirova: false
   # ⚠️ S147: estos pisos se ponen en 0.0, y el texto de abajo explica por qué el
   # razonamiento de S124 dejó de valer. Se conserva por historia.
   #
