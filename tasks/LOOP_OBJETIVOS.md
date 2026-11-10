@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 17:05 UTC (S178): #984 en main; los tres avisos fuera de la página (comprobado en el sitio publicado)
+- Nicolás: «Mergea #984». Merge `438a60a1e` con CI verde; Pages run 42860414397 success. En el sitio publicado, `index.html`, `diario.html` y `mosaico.html` sin ningún elemento `aviso-*` (Chrome, JS en la página); los módulos cargan y las líneas siguen. Ficha SDA en v1.22: #974 pasa a v1.23 y #983 a v1.24 al mergearlos (S179).
+
 ### 2026-11-10 (S178): #982 en main (regla de reversión de VIIRS sellada)
 - Nicolás: «Mergea #982». Mergeado con CI verde y `--match-head-commit f05e6b140` (merge `a9bd0313b`). Comprobado en `origin/main`: `COTAS` = VIIRS 375 14/17 y VIIRS 750 12/2; cabecera «SELLADA el 2026-11-10». Las cotas empiezan a contar desde cada encendido.
 
