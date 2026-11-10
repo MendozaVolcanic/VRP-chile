@@ -143,6 +143,11 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, errore
             if pendientes:
                 fallas.append(f"ningún record de {s} escrito en esta corrida y nadie había escrito la noche de "
                               f"{', '.join(pendientes)}: la corrida no escribió nada de ese sensor")
+            elif not todos:
+                # VS178-977-01: sin ningún día en la ventana (fechas al revés) no hay noche que excuse escribir 0;
+                # como en origin/main, es corrida muerta
+                fallas.append(f"ningún record de {s} escrito en esta corrida y la ventana no tiene ningún día: la "
+                              f"corrida no escribió nada de ese sensor")
             elif dias:
                 notas.append(f"ningún record de {s} escrito en esta corrida: las noches cerradas de la ventana ya "
                              f"estaban escritas por una corrida anterior o probadas sin pasada")

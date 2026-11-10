@@ -208,3 +208,26 @@ def test_la_latencia_es_la_de_fetch():
 
 def test_las_dos_guardias_usan_la_misma_regla_que_la_sombra():
     assert RGM.noche_cerrada is RS.noche_cerrada
+
+
+# ---- VS178-977-01 (verificador limpio, Sonnet): una ventana sin ningún día (fechas al revés, o la sombra entera antes
+# de FECHA_MINIMA) en una corrida que no escribe nada daba VERDE con el arreglo, y en origin/main daba rojo («la corrida
+# no produjo nada»). Sólo pasa en despachos a mano con start/end, pero un control que deja de dar rojo es ceguera.
+def test_ventana_vacia_sin_nada_escrito_es_rojo_en_la_sombra_fechas_viejas():
+    ok, resumen = RS.revisar([], "", "2026-10-20", "2026-10-21", "2026-11-10T15:00:00Z", COB_S, sha="abc")
+    assert ok is False, resumen
+
+
+def test_ventana_vacia_sin_nada_escrito_es_rojo_en_la_sombra_fechas_al_reves():
+    ok, resumen = RS.revisar([], "", "2026-11-10", "2026-11-03", "2026-11-10T15:00:00Z", COB_S, sha="abc")
+    assert ok is False, resumen
+
+
+def test_ventana_vacia_sin_nada_escrito_es_rojo_en_la_guardia_viirs():
+    ok, resumen = _rev_v([], "2026-11-10T15:00:00Z", ini="2026-11-10", fin="2026-11-03")
+    assert ok is False, resumen
+
+
+def test_ventana_vacia_sin_nada_escrito_es_rojo_en_la_guardia_modis():
+    ok, resumen = RGM.revisar([], "", "2026-11-10", "2026-11-03", "2026-11-10T15:00:00Z", COB_M, sha="abc")
+    assert ok is False, resumen
