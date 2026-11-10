@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-11-10 04:40 UTC (S178): b3 en borrador (#976)
+### 2026-11-10 04:09 UTC (S178): b3 en borrador (#976)
 - Nicolás contestó b3 («Sí, quítalo»). Tag `pre-s178-quitar-aviso-k` en main `6402aaa1e`; worktree `D:/vrp-trabajo/worktrees/s178-aviso`, rama `claude/s178-quitar-aviso-k`, punta `d3f24924e`.
 - No se borra `DATOS_K_DESDE_UTC`: la leen `scripts/vigilancia_sombra.py` (sin ella, VIGILANCIA_CIEGA) y `scripts/auto_audit_weekly.py`. El aviso K y su línea salen ahora de los datos: sólo si `notarRecords` recibe un record anterior a la frontera. Prueba nueva roja antes (3 de 4) y verde después; dos mutaciones atrapadas por aserción; suite local 3.507 verdes y las 2 fallas de main (`test_guard_libro_de_pruebas_s146`); en navegador las tres vistas sin aviso K, con los de la vía MODIS y Suomi NPP. Ficha v1.21 (choca con la ficha de #974 y #975: el segundo en entrar se rebasa). Falta CI y la frase de Nicolás.
 
