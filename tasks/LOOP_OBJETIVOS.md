@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): P10, cotas de VIIRS 375 recalculadas (verificador limpio en curso)
+- Rama `claude/s178-cotas-v375` (`b039263de`), `experiments/_s178_cotas_v375/`. Cotas vigentes (borrador `REGLA_REVERSION_V375E_BORRADOR.md` §4.4, D1): 14 Muy Bajo perdidas y 15 publicaciones de más en 120 días, de `cotas_retrospectiva_v375.py` (Poisson, falsa alarma 8 % o menos), reproducidas.
+- Casos nuevos F26-V (cercano): 1 de 139 Muy Bajo perdidas, 5 de 528 de más; con radiante, 3 Muy Bajo perdidas. Opciones: A vigente 14/15; B por día 11/15; B-rad 13/15; C por pasada 12/17; D con DM 14/14 y E con R25 6/15 (no usar sin decisión expresa). Cómo sumar y con qué brazo: DECIDE NICOLÁS.
+
 ### 2026-11-10 (S178): #977 y #979 en main; #955 listo para la frase de Nicolás
 - Mergeados con CI verde y `--match-head-commit`: #977 (`bc32f5538`, revisores con noche cerrada) y #979 (`46d692175`, caja B4, C-montaje, tags de origen, OSF local en el manifiesto). La guardia K de VIIRS cuenta noches desde su corrida de hoy (cron 19:35 UTC).
 - #955: verificador limpio del anexo (Sonnet): CORRECTO en lo sustantivo (reprodujo `latest.json` byte a byte y cada número). Corregidas sus 2 imprecisiones y la omisión (7 días, no 7 noches; Tupungatito 0,0 a 0,086 MW en pareadas; atraso del cron) y §10 y §11.6 de `docs/AUDIT_S175.md` al día (marca A113), commit `9da50f1b5`; descripción del PR actualizada; rama actualizada con main para que su CI corra con #978.
