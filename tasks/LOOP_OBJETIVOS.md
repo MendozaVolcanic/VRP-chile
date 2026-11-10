@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): #982 (regla de VIIRS sellada) con CI verde y CLEAN, merge bloqueado por el clasificador
+- Punta `f05e6b140` (la actualización con main encima de `5b887f157`, tag `s178-regla-reversion-viirs-sellada`). El clasificador negó el merge («Merge Without Review»): «Sello la regla» no se leyó como orden de merge. Queda para Nicolás (botón en GitHub o frase explícita de merge). Hasta que entre, `COTAS` en main sigue en `None` (sin efecto mientras la vía de VIIRS esté apagada).
+
 ### 2026-11-10 (S178): verificador limpio del plan de reemplazo (#981): CON ERRORES; propuesta de auditoría con Fable 5.2
 - Cifras confirmadas (Lastarria V375 6,3 %, no 6,4 %). Tres huecos, anotados en el plan (`62ccb8830`): (1) falta una tercera regla en el script (no pisar records de la vía ni agregar los de P4 desde el 11-02); (2) desfase con main (#976 y #978 ya entraron; P5 caerá con el reemplazo de MODIS por su piso de 20 y ningún paso la reasigna); (3) **GitHub Pages**: `pages-deploy.yml:77` copia `data/` entera; con la unión en `data/_s178_historia_via/` el sitio llegaría a ~1.010 MB, sobre el límite de 1 GB: la unión va fuera de `data/` o excluida del despliegue.
 - Nicolás propone auditar con Fable 5.2 las decisiones y planes de S172 a S178 en la próxima sesión. Recomendación dada: sí, revisores Fable 5.2 en `high` por frente (MODIS, VIIRS, instrumento y retrospectiva, planes) más verificador cruzado de otro modelo, según `GUIA_MAESTRA_AUDITORIAS.md`; primer paso, escribir la guía de prompting de Fable 5.2 (hoy sólo existe la de 5.1) y ajustar el hook.
