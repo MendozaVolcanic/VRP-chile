@@ -570,8 +570,8 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
 ### 2026-11-10 20:46 UTC (S179): auditoría detenida a pedido de Nicolás (apaga el PC); se relanza entera más tarde
-- A y C detenidos a los ~10 minutos, sin informe útil. Sus restos, apartados (no borrados) en `D:rp-trabajo	emporales\s179-audit\papelera_ola1_cortada\`; las carpetas `experiments/_s179_audit/a` y `c` y los temporales quedan vacíos.
-- Para relanzar: los prompts sellados de `585492d2f` sirven tal cual (`experiments/_s179_audit/prompts/`, sha256 en `SHA256.txt`); la instantánea y los insumos siguen en `D:rp-trabajo	emporales\s179-audit\` (insumos con hora 20:37 UTC: si pasa más de un día, rehacerlos). Orden: A y C, luego B y D, verificadores Opus 5.5 por frente, síntesis en `docs/AUDIT_S179.md`. Mirar `get_usage` antes.
+- A y C detenidos a los ~10 minutos, sin informe útil. Sus restos, apartados (no borrados) en `D:\vrp-trabajo\temporales\s179-audit\papelera_ola1_cortada\`; las carpetas `experiments/_s179_audit/a` y `c` y los temporales quedan vacíos.
+- Para relanzar: los prompts sellados de `585492d2f` sirven tal cual (`experiments/_s179_audit/prompts/`, sha256 en `SHA256.txt`); la instantánea y los insumos siguen en `D:\vrp-trabajo\temporales\s179-audit\` (insumos con hora 20:37 UTC: si pasa más de un día, rehacerlos). Orden: A y C, luego B y D, verificadores Opus 5.5 por frente, síntesis en `docs/AUDIT_S179.md`. Mirar `get_usage` antes.
 - Guardia K de VIIRS: la corrida del cron de las 19:35 UTC del 11-10 no había aparecido a las 20:45 UTC; leerla al retomar.
 
 ### 2026-11-10 20:39 UTC (S179): auditoría Fable 5.2 lanzada, cuatro frentes (Nicolás: «lo que recomiendes»)
