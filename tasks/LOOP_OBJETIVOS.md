@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 20:39 UTC (S179): auditoría Fable 5.2 lanzada, cuatro frentes (Nicolás: «lo que recomiendes»)
+- Recomendé los cuatro frentes (el recorte a B y D se apoyaba en mediciones mías sin verificador; cuota semanal 33 %, Fable 25 %). Adenda en `docs/PLAN_AUDITORIA_S179.md` §9: línea base D nueva (alertas diurnas sin plan), y corrección de los prompts antes de lanzar: mandaban leer el plan, que trae el control ciego; ahora lo prohíben (prompts rearmados, `585492d2f`). Instantánea con `core.autocrlf=false` (con `true`, `git archive` cambiaba bytes).
+- Ola 1 lanzada: auditores A y C (Fable 5.2, `high`). Siguen B y D al liberarse cupo, verificadores Opus 5.5 y síntesis en `docs/AUDIT_S179.md`.
+
 ### 2026-11-10 20:24 UTC (S179): Nicolás corrige, la colada de Chillán va al SO; nuestros píxeles lo confirman
 - Nicolás dio el punto lat −36,867309, lon −71,379167 («tiene razón, es al SO»). Leído como la boca: el píxel más caliente de VIIRS 375 cae a 0,16 km (vía) y 0,20 km (producción) de él en pasadas casi verticales; el píxel más lejano crece a 0,97 km (vía) y 0,79 km (producción) con rumbo ~239° en noviembre. La discrepancia SE de las 18:43 era del dato de terreno, no del instrumento. `experiments/_s179_chillan/contraste_punto_nicolas.py`, INFORME §3 (exploratorio, sin verificador).
 
