@@ -116,3 +116,10 @@ origen da el valor del port), así que **C-montaje queda PENDIENTE y, por el §6
   y se lee D2 a D4. El costo es aceptar un criterio fijado después de ver estas 12 pasadas.
 - **Opción 2:** mantener la declaración: C-montaje rojo y la retrospectiva entera INDECIDIBLE hasta un instrumento
   nuevo (por ejemplo, que la vía guarde su propia banda), lo que obliga a re-correr D2.
+
+## Decisión de Nicolás sobre VIIRS 375 (*post hoc*)
+
+Nicolás, 2026-11-10, en la conversación de S178: «Sí, opción 1». Rotulado *post hoc*: se fija después de ver las 12
+diferencias. En VIIRS 375 el VRP de D2 se compara contra la banda `vrp_banda` del port C13 de V375-E (con la misma
+regla que en VIIRS 750: distancia a la banda, tolerancia 0,001 MW; sin banda, contra `vrp_mw`). Nada más cambia: las
+celdas se siguen comparando una por una y la explicación de una diferencia sigue siendo sólo otro gránulo o un hunk.
