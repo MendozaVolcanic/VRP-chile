@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): #983 = B2 integrado sobre B1 (borrador, CI verde): OJO, enciende los dos
+- Rama `claude/s178-b2-sobre-b1` (`e68819484`): punta de #975 con #974 y main integrados por `git merge`. **Contiene B1 y B2: mergear #983 antes que #974 enciende VIIRS 375 y 750 a la vez.** Uso previsto: #974 primero (renumerado a v1.22 de la ficha, porque #976 tomó la v1.21 y hoy choca), después #983 (v1.23). Las 8 pruebas en conflicto quedan con las dos vías encendidas sin debilitar aserciones. #974 y #975 intactos. Suite local con los mismos 45 fallos de línea base (worktree sin `data/`); CI verde.
+- Ojo con la ficha: el PR de los avisos (agente en curso) también sube una versión; habrá que renumerar en cadena según el orden real de merge.
+
 ### 2026-11-10 (S178): #982 (regla de VIIRS sellada) con CI verde y CLEAN, merge bloqueado por el clasificador
 - Punta `f05e6b140` (la actualización con main encima de `5b887f157`, tag `s178-regla-reversion-viirs-sellada`). El clasificador negó el merge («Merge Without Review»): «Sello la regla» no se leyó como orden de merge. Queda para Nicolás (botón en GitHub o frase explícita de merge). Hasta que entre, `COTAS` en main sigue en `None` (sin efecto mientras la vía de VIIRS esté apagada).
 
