@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 03:21 UTC (S177): B1 y B2 en borrador (#974, #975), CI verde
+- Con el sí A45 de Nicolás («Sí, escríbelos») y tag `pre-s178-b1-b2` (main `557dbd05d`), un agente propio escribió #974 (B1, VIIRS 375, punta `bbbe2068d`) y #975 (B2, VIIRS 750, punta `9d3e63015`). Comprobado por la coordinadora: los dos en borrador, CLEAN, `pytest` y `bateria-v750a` en verde; en perfiles sólo el flag en `mirova_equivalent.yaml` y la vía declarada apagada en 4 derivados (`experimental`, `experimental_ndc_focus`, `_s146_ab_control`, `guardia_k_modis`); nada en `data/` ni `frontend/`; 0 guiones largos.
+- Falta verificador limpio de otro modelo. El segundo en entrar se rebasa (ficha y 8 pruebas chocan). Pendientes fuera de alcance en la sección a del bloque S178.
+- El medidor exploratorio de la semana quedó en `experiments/_s177_cmr/magnitud_prod_vs_sombra_1109.py` con su salida (las cifras 0,485 y 0,428 vivían sólo en un temporal; el agente usó las de S176, ancladas).
+
 ### 2026-11-10 01:25 UTC (S177): cierre; bloque S178 con el plan en paralelo P1 a P10
 - Cierre por contexto. `tasks/BLOQUE_ARRANQUE_S178.md`: ruta crítica P1 (candado y lectura de D2 a D4), en paralelo B1 y B2 en borrador, guardia, tramos de historia restantes, vara MATLAB, plan del reemplazo, primer aviso, falso rojo de la sombra, anexo de #955 y cotas V375. Guardia K de VIIRS (run 42734558894) en curso al cierre.
 

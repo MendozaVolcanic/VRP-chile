@@ -28,6 +28,7 @@
 | #955 síntesis S175 | BORRADOR | falta el anexo con el audit del 11-09 |
 | Producción contra sombra, misma pasada, 11-03 a 11-09 | EXPLORATORIO, sin verificador | V375 K 0,485 / vía 0,993 (n 47); V750 K 0,428 / vía 1,000 (n 20); MODIS 0,998; 0 protegidas perdidas en los dos; negativos limpios V375 K 10 de 117 y vía 0, V750 K 4 de 168 y vía 0. `C:/Users/nmend/vrp-temporales/s177_cmr/magn_1109/m.py` |
 | Prueba ciega de Codex | PUNTUADA: 4 de 8, bajo el umbral 5 | `experiments/_s176_codex/PUNTUACION_PRUEBA_CIEGA.md` (sin commit, de la otra sesión); Codex local armado en `D:\codex-vrp`, sin lanzar |
+| **B1 (VIIRS 375) y B2 (VIIRS 750)** | **BORRADOR, CI verde, sin verificador** (escritos con el sí A45 de Nicolás del 2026-11-10, «Sí, escríbelos»; tag `pre-s178-b1-b2`) | #974 `claude/s177-b1-v375` punta `bbbe2068d`, 22 archivos; #975 `claude/s177-b2-v750` punta `9d3e63015`, 21 archivos; `pytest` y `bateria-v750a` en verde, CLEAN; suite local 2 fallas, las mismas de main (`test_guard_libro_de_pruebas_s146`). El segundo en entrar se rebasa (ficha y 8 pruebas compartidas chocan; los perfiles no). Pendiente fuera de alcance: paso de `nrt.yml` de la regla §5, comentarios «APAGADA» en `process_viirs.py` l. 18 y 761 y `process_viirs_mod.py` l. 498 (A45 propio), prueba en navegador, tiempo del NRT, vara MATLAB. Worktrees `D:/vrp-trabajo/worktrees/s177-b1` y `s177-b2` |
 | `loop/activo` | `01ec1e33e`, igual al remoto | main va 178 commits adelante (casi todo datos del NRT; código: #970, #971, #972) |
 | Disco | C: 11 GB, D: 7,5 GB (01:18 UTC) | 6 worktrees retirados, tag `pre-s177-worktrees-cleanup`; `D:\Windows` viejo (22,6 GB) espera el sí de Nicolás en la otra sesión |
 
@@ -35,7 +36,7 @@
 
 | # | Pregunta | Opciones | Recomendación |
 |---|---|---|---|
-| 1 | A45 para **escribir** B1 y B2 en borrador (tocan `mirova_equivalent.yaml`; la regla pide el sí antes del primer edit, no sólo antes del merge) | sí ahora / esperar la lectura | **Sí ahora**, sin merge: así B1 y B2 están listos el día que la retrospectiva diga que no pierde protegidas |
+| 1 | ~~A45 para escribir B1 y B2~~ **CONTESTADA** 2026-11-10 («Sí, escríbelos»): escritos en #974 y #975 | | |
 | 2 | Despachar los tramos de historia que faltan con la vía (unos 2.900 volcán-día: enero, abril a septiembre y desde el 17-oct de 2026, y Tupungatito antes del 23-feb-2026) | ahora / después del encendido | **Ahora**: el reemplazo de la historia es lo que quita el aviso de MODIS y lo que necesita VIIRS para publicar sin escalón; los artefactos de D2 vencen el 2026-12-09 |
 | 3 | Quitar el primer aviso del tablero (K desde el 15 feb 2025, antes C0) | quitar / dejar | **Quitar**: hay 0 records anteriores al 2025-02-15 en los 45 archivos; describe algo que no está. Tag y sí (A45, `frontend/`) |
 | 4 | Merge de #955 tras el anexo | frase | Sí |
@@ -83,7 +84,7 @@ carpeta temporal propia, tope de 500 MB y sin `git init`, `git add` del árbol n
 | # | Frente | Depende de | Quién | Sale con |
 |---|---|---|---|---|
 | **P1** | **Candado y lectura de la retrospectiva.** (1) C-montaje en DM con `armar_montaje.py`; (2) manifiesto con `armar_manifiesto.py --ref s172-retro-d2` (comprueba que el pre-registro no cambió desde `s173-prereg-retro-sellado`); (3) excepciones de C-K escritas y commiteadas **antes** de leer F26 (R-15); (4) `--caja-v750` = la ROI que eligió V750-B y `--v750a-sellado no` si V750-A no se selló antes de D2 (§10.3; comprobar); (5) `leer_retro.py --manifiesto` sobre D2, D3 y D4; (6) verificador limpio de otro modelo | nada | coordinadora (no delegar el candado) | veredicto por sensor del §8.1 |
-| P2 | **B1 (V375) y B2 (V750) en borrador**: un flag cada uno en `mirova_equivalent.yaml`, excepción §12.6, ficha SDA, marca del tablero ya existe (`frontend/cambio_detector.js`, familias VIIRS375 y VIIRS750 de #967) | decisión b1 (A45 antes del primer edit) | agente con worktree | dos PR en borrador, CI verde |
+| P2 | **B1 y B2: ESCRITOS (#974, #975), falta** verificador limpio de otro modelo sobre los dos; decidir el orden de entrada (el segundo se rebasa); los pendientes fuera de alcance de la fila de la sección a (el paso de `nrt.yml` y los comentarios de `process_viirs*.py` piden su propio A45) | nada | agente verificador (Sonnet o Fable, effort high) | informe MERGEABLE o hallazgos |
 | P3 | **Guardia K de VIIRS**: 3 noches (11-10 a 11-12); confirmar que el cron del 11-10 a las 19:35 UTC dispara; si no, lanzar a mano cada día y averiguar por qué | nada | coordinadora, una mirada por día | 3 corridas verdes y cierre de #968 y #969 |
 | P4 | **Tramos de historia que faltan con la vía** (unos 2.900 volcán-día) en carpeta aislada, mismo workflow `reproc-retro-paquete.yml` | decisión b2 | Actions, `max-parallel` 6 o menos, fuera de 01 a 12 UTC si se puede | artefactos listos para el reemplazo |
 | P5 | **Vara MATLAB de V750**: re-correr `experiments/_s162_v750a/vara_matlab_v750a.py` sobre la punta de main | nada | agente liviano | salida verde fechada (condición de B2) |
