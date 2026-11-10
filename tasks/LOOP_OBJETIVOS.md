@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 17:25 UTC (S178): cierre
+- Traspaso en `tasks/BLOQUE_ARRANQUE_S179.md`. P4 terminó 163 de 165; los 2 trozos de Copahue (salida 3 con `--estricto-cobertura`) relanzados con `gh run rerun --failed` a las 17:22 UTC (en curso al cerrar). Ningún agente vivo. main no integrado en loop/activo (284 commits). Memoria: `project_s178_estado`, `feedback_s178_lecciones`.
+
 ### 2026-11-10 17:05 UTC (S178): #984 en main; los tres avisos fuera de la página (comprobado en el sitio publicado)
 - Nicolás: «Mergea #984». Merge `438a60a1e` con CI verde; Pages run 42860414397 success. En el sitio publicado, `index.html`, `diario.html` y `mosaico.html` sin ningún elemento `aviso-*` (Chrome, JS en la página); los módulos cargan y las líneas siguen. Ficha SDA en v1.22: #974 pasa a v1.23 y #983 a v1.24 al mergearlos (S179).
 
