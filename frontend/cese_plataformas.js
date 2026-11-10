@@ -1,4 +1,5 @@
 // cese_plataformas.js (S159): aviso al operador del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC).
+// S178: el aviso de texto se quitó por pedido de Nicolás; queda la línea vertical (ver el final del archivo).
 //
 // POR QUÉ: VIIRS vuela en tres satélites (Suomi NPP, NOAA-20 y NOAA-21) que pasan sobre Chile de noche en un racimo
 // de una a dos horas. Desde el cese quedan dos: cada noche hay una mirada menos al volcán, y una anomalía débil que a
@@ -133,11 +134,9 @@
   } else {
     raiz.CesePlataformas = CesePlataformas;
     if (raiz.Chart && raiz.Chart.register) raiz.Chart.register(crearPlugin(CESE_UTC));
-    if (raiz.document) {
-      const reloj = (raiz.Date && raiz.Date.now) ? raiz.Date : Date;
-      const poner = () => insertarAviso(raiz.document, reloj.now());
-      if (raiz.document.readyState === "loading") raiz.document.addEventListener("DOMContentLoaded", poner);
-      else poner();
-    }
+    // POR QUÉ (S178, pedido de Nicolás del 2026-11-10, «quita los 3»): ya no se inserta el aviso de texto al cargar; el
+    // cese queda marcado sólo por la línea vertical «sin Suomi NPP» en los gráficos, que da la fecha sin ocupar espacio
+    // arriba del tablero. insertarAviso y textoAviso siguen exportadas, pero nadie las llama.
+    // Prueba: tests/test_cese_plataformas_s159.py::test_camino_del_navegador_registra_el_plugin_y_no_pone_el_aviso.
   }
 })(typeof window !== "undefined" ? window : this);
