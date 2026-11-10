@@ -11,6 +11,10 @@ scripts/revisar_sombra.py da a la sombra, adaptada a lo que la guardia tiene que
 QUÉ HACE (reutiliza por import las piezas de scripts/revisar_sombra.py, sin modificarlo):
   1. ¿Corrió? «De esta corrida» = record de la ventana con `processed_utc` desde el inicio de la corrida y
      `regimen.codigo_sha` igual al sha del disparo. Si esta corrida no escribió ningún record de MODIS, FALLA.
+     S178: salvo que cada día juzgado ya tuviera su record escrito antes del inicio de la corrida, o prueba de que no
+     hubo pasada (una segunda corrida del día no tiene nada nuevo que escribir): eso va como NOTA. Sólo se juzgan los
+     días con la noche cerrada al inicio de la corrida (revisar_sombra.noche_cerrada, 12 UTC); una ventana sin ninguno
+     es FALLA.
   2. ¿Es K? Un record de la ventana con la clave `via_codigo_mirova` (la vía o su caída a K, que sólo existen con el
      flag encendido) es FALLA: la guardia dejó de ser K. Un record de VIIRS o con otro perfil en la marca de régimen
      también.
@@ -35,7 +39,7 @@ AQUI = Path(__file__).resolve().parent
 if str(AQUI) not in sys.path:
     sys.path.insert(0, str(AQUI))
 from revisar_sombra import (_cobertura_bien_formada, _leer_json, _sin_pasada, _solo_de_dia,  # noqa: E402
-                            _utc, familia)
+                            _utc, escrito_antes, familia, noche_cerrada, HORA_NOCHE_CERRADA_UTC)
 
 PERFIL = "guardia_k_modis"
 
@@ -109,13 +113,45 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, errore
         fallas.append(f"{ajenos} records de esta corrida que no son de {nombres}: la guardia corre sólo {nombres}")
     if otro_perfil:
         fallas.append(f"{otro_perfil} records de esta corrida con otro perfil en la marca de régimen")
+    # S178: sólo se juzgan los días con la noche cerrada al inicio de la corrida (revisar_sombra.noche_cerrada, POR
+    # QUÉ allí). El día en curso de una corrida de madrugada lo juzga la corrida siguiente.
+    todos = _dias(ini, fin)
+    dias = [d for d in todos if noche_cerrada(d, desde)]
+    for d in todos:
+        if d not in dias:
+            notas.append(f"{d}: la noche no estaba cerrada al inicio de la corrida (antes de las "
+                         f"{HORA_NOCHE_CERRADA_UTC} UTC del día): no se juzga en esta corrida")
+    if todos and not dias:
+        fallas.append("ningún día de la ventana tenía la noche cerrada al inicio de la corrida: no hay nada que juzgar")
+    solo_de_dia = _solo_de_dia(log_txt)
+
+    def excusado(s, d):
+        """Prueba de que no hubo pasada de `s` el día `d`, salvo catálogo vacío (todos los sensores a la vez, abajo)."""
+        if not _sin_pasada(s, cobertura or {}, d, solo_de_dia):
+            return False
+        return len(sensores) == 1 or not all(_sin_pasada(o, cobertura or {}, d, solo_de_dia) for o in sensores)
+
     if json_ok and desde is not None:
         for s in sensores:
-            if n_nuevos[s] == 0:
-                fallas.append(f"ningún record de {s} escrito en esta corrida: la corrida no escribió nada de ese sensor")
+            if n_nuevos[s]:
+                continue
+            # S178: escribir 0 es corrida muerta sólo si quedaba una noche cerrada que nadie había escrito antes ni
+            # probado sin pasada (revisar_sombra.escrito_antes, POR QUÉ allí); si no, no había nada que escribir.
+            previos = {str(r.get("datetime_utc") or "")[:10] for r in en_ventana if familia(r.get("sensor")) == s
+                       and "via_codigo_mirova" not in r and escrito_antes(r, desde)}
+            pendientes = [d for d in dias if d not in previos and not excusado(s, d)]
+            if pendientes:
+                fallas.append(f"ningún record de {s} escrito en esta corrida y nadie había escrito la noche de "
+                              f"{', '.join(pendientes)}: la corrida no escribió nada de ese sensor")
+            elif not todos:
+                # VS178-977-01: sin ningún día en la ventana (fechas al revés) no hay noche que excuse escribir 0;
+                # como en origin/main, es corrida muerta
+                fallas.append(f"ningún record de {s} escrito en esta corrida y la ventana no tiene ningún día: la "
+                              f"corrida no escribió nada de ese sensor")
+            elif dias:
+                notas.append(f"ningún record de {s} escrito en esta corrida: las noches cerradas de la ventana ya "
+                             f"estaban escritas por una corrida anterior o probadas sin pasada")
 
-    dias = _dias(ini, fin)
-    solo_de_dia = _solo_de_dia(log_txt)
     if json_ok:
         for d in dias:
             sin_pasada = []
