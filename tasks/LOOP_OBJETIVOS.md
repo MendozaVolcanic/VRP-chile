@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 18:14 UTC (S179): antes de lanzar la auditoría, Nicolás pide revisar pérdidas, fumarolas y planes
+- Medido (exploratorio, sin verificador, `experiments/_s179_perdidas/INFORME.md`, main `b68779c65`): abr a nov, 145 de 1.703 pasadas con alerta de MIROVA sin publicar; 10 de 1 MW o más (5 sólo OCR lejanas en VIIRS 375, 4 de MODIS K en Chillán en octubre, 1 de VIIRS 750 en Cordón Caulle), todas con otra publicación esa noche; VIIRS 750 con K es el peor (77,6 % por pasada). Desde la vía en MODIS (11-02), 0 pérdidas de MODIS. En la misma semana la sombra de la vía publica 24 de 25 alertas VIIRS 750 contra 21 de K. MIROVA tiene 162 filas de alerta diurnas (138 de 1 MW o más, 63 de Chillán) que el NRT no mira (D-10).
+- La retrospectiva decidió con F26 (feb y mar), sin la erupción de Chillán: su «ninguna protegida perdida» no cubre octubre.
+- Guallatiri y Callaqui: MIROVA no los vigila (no están en su lista). En la sombra de los 34, Guallatiri tiene una celda de cumbre tibia y persistente a 0,24 a 0,68 del umbral de MIROVA; Callaqui no muestra señal. Es trabajo de `experimental` (bloqueado por 1.11).
+
 ### 2026-11-10 17:44 UTC (S179): b3 contestada; guía de Fable 5.2 escrita; plan de auditoría pre-registrado
 - Nicolás: «Sí, b3 primero». Guía `C:\Users\nmend\OneDrive\Escritorio\claude\GUIA_PROMPTING_prompting-claude-fable-5-2.md` desde la página oficial (copia íntegra `..._ORIGINAL.md`, sha256 `6e2ad08d`); hook `fable_prompting_guide.py` pasa a 5.2 (probado: inyecta con `fable`, calla con otro modelo); nota en `GUIA_MAESTRA_AUDITORIAS.md` §5. Lo que más nos toca de 5.2: sigue al pie de la letra la cautela acumulada (encargos sólo con las prohibiciones de la tarea y una línea con lo que no necesita aprobación) y «Finishing work» reemplaza al bloque de autonomía de 5.1.
 - Plan `docs/PLAN_AUDITORIA_S179.md` con cuatro frentes (A MODIS, B VIIRS, C instrumento y retrospectiva, D planes), Fable 5.2 a `high`, verificador Opus 5.5 por frente, control ciego de 11 líneas base que no va en los prompts, prompts armados por `experiments/_s179_audit/armar_prompts.py` (0 huecos). Costo estimado 2,7 a 3,8 millones de tokens. Espera el sí de Nicolás para lanzar.
