@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 07:29 UTC (S178): tres PR en borrador (#977, #978, #979); C-montaje espera a Nicolás
+- **#979** (caja B4 en el lector): mutaciones CB1 a CB3 atrapadas, control CAE. Cambia el sha256 del lector: el manifiesto de la lectura sale de un ref con este cambio y con `frontend/index.html` del tag `s172-retro-d2`.
+- **#977** (agente, P8): revisores de la guardia y de la sombra con `noche_cerrada`; 20 pruebas nuevas (12 rojas contra main); repite los dos runs reales de Láscar (main salida 1, nuevo salida 0; control a las 19:35 UTC rojo). Su pytest rojo era ajeno: ver #978.
+- **#978**: `test_guard_regla_c_s134::test_p5_diag_nti_max_persistido_en_modis` cae en main desde hoy porque la vía de MODIS (producción desde el 11-02) no escribe `diag_nti_max` (19 de 376 en Villarrica, todos `via_codigo_mirova: true`). P5 pasa a mirar sólo K; control 30 de 357 la tumba. Se rompe a propósito cuando P6 quite los K de MODIS.
+- Verificador limpio (Sonnet) sobre #979 y #977 lanzado. P4: 57 de 165 trozos, 0 fallas.
+
 ### 2026-11-10 06:14 UTC (S178): P1 avanza hasta C-montaje, que no se puede correr como quedó sellado
 - Nicolás dijo «Sí, sigue con eso» (P1 y el revisor de la guardia). #976 con CI verde (pytest y bateria-v750a); espera su frase de merge. P4 (run 42749607584) en 33 de 165 trozos a las 05:57, 0 fallas.
 - **C-K verde, sin excepciones** (commit `2bfc9164b`, antes de leer F26): K-gemelo de D3 contra K de disco `origin/main` `e7cfbaf54`, 3.138 pasadas, 0 diferencias, cobertura OK, c_k_puro OK; control con 6 alteraciones inyectadas, 6 atrapadas. `experiments/_s178_ck/`. La lectura tiene que usar ese mismo K de disco (`e7cfbaf54`).
