@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 01:17 UTC (S177): Nicolás elige «Retro primero» para VIIRS; guardia K de VIIRS lanzada a mano
+- Nicolás preguntó por qué VIIRS sigue en K. Medido en la misma pasada que MIROVA, 2026-11-03 a 11-09 (`C:/Users/nmend/vrp-temporales/s177_cmr/magn_1109/m.py`, el medidor de S176 extendido; EXPLORATORIO, no decide): magnitud V375 K 0,485 y vía 0,993 (n 47), V750 K 0,428 y vía 1,000 (n 20), MODIS 0,998 (vía en los dos); protegidas de 1 MW o más sin publicar: 0 en K y 0 en la vía; publicaciones en negativos limpios, regla de este medidor: V375 K 10 de 117 y vía 0, V750 K 4 de 168 y vía 0. Sin verificador.
+- Eligió «Retro primero»: lanzar la guardia, B1 y B2 en borrador, leer la retrospectiva y encender VIIRS si no pierde protegidas.
+- La guardia K de VIIRS (`guardia-k-viirs.yml`) tenía 0 corridas: el cron de las 19:35 UTC del 11-09 no se disparó. Lanzada a mano por esa elección: run 42734558894, 01:16 UTC. Las 3 noches cuentan desde aquí.
+- Primer aviso del tablero (K desde el 15 feb 2025, antes C0) ya no describe nada: 0 records anteriores al 2025-02-15 en los 45 archivos de `data/mirova_equivalent/` de main `0ac5b898c`. Quitarlo espera tag y sí (A45). El aviso de MODIS se va solo al reemplazar la historia; el de Suomi NPP vence el 2027-01-31.
+- Sombra de los 11 roja el 11-09 23:42 UTC: Chillán, Copahue y Llaima con «2026-11-10: sin pasada a la vez», día recién empezado. SOSPECHA: la corrida atrasada cruzó la medianoche y juzgó un día sin noche todavía.
+- Lo que falta para leer la retrospectiva (S178): C-montaje en DM, manifiesto (`armar_manifiesto.py --ref s172-retro-d2`), excepciones de C-K escritas antes de leer F26 (R-15), `--caja-v750` y `--v750a-sellado`; después `leer_retro.py` con `--manifiesto` y verificador limpio.
+
 ### 2026-11-10 00:34 UTC (S177): D4 verde con C-via 100 %; #971 y #972 en main; 6 worktrees retirados
 - D4 (run 42601379627, intento 1, tag `s172-retro-d4`): 177 de 177 jobs en verde (176 trozos más `plan`), terminó 00:25 UTC, sin `rerun`. Artefactos en `C:/Users/nmend/vrp-temporales/s177_d4/` (93 MB; vencen en GitHub a los 30 días). No se leyó como evidencia (§11): `experiments/_s177_cmr/control_via_d4.py` sólo cuenta marcas y pasadas.
 - C-via en R25: 100 % en los tres sensores (MODIS 6.736 de 6.736, V375 13.361 de 13.361, V750 13.940 de 13.940) y en cada uno de los 30 cruces volcán por sensor; 0 líneas de trozo bajo 90 %. El nulo de este control es D3: 0 % en 90 de 90 líneas.
