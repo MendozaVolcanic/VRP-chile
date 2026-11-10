@@ -20,6 +20,12 @@ QUÉ HACE.
      (lo anota el workflow antes de llamar a run_pipeline) y con `regimen.codigo_sha` igual al sha del disparo.
      pipeline/store.py reescribe los dos campos cada vez que guarda un record (nuevo o reemplazo NRT->estándar) y no
      toca los que ya estaban. Si esta corrida no escribió ningún record de la vía, es FALLA (corrida muerta).
+     S178: salvo que no quedara nada que escribir: si cada día juzgado (control 2) ya tenía su record de la vía por
+     sensor escrito ANTES del inicio de la corrida, o prueba de que no hubo pasada, escribir 0 es lo normal de una
+     segunda corrida del día y va como NOTA (`escrito_antes`).
+  1b. S178: sólo se juzgan los días con la noche cerrada al inicio de la corrida (`noche_cerrada`: las
+     HORA_NOCHE_CERRADA_UTC, 12 UTC, del día); los otros van en una NOTA y los juzga la corrida siguiente. Una ventana
+     sin ningún día juzgable es FALLA (no hay nada que juzgar).
   2. ¿Está la ventana completa? Después del commit, para cada día d de la ventana desde el 2026-11-03
      (scripts/ventana_sombra.py::FECHA_MINIMA; los días anteriores no son de la sombra) y cada sensor (MODIS, VIIRS 750,
      VIIRS 375), tiene que haber al menos un record de la vía con pasada del día d en el JSON, lo haya escrito esta
@@ -81,6 +87,44 @@ def _utc(texto):
     except (TypeError, ValueError):
         return None
     return t if t.tzinfo else t.replace(tzinfo=timezone.utc)
+
+
+# S178 POR QUÉ (noche cerrada). Un día UTC d sólo se puede juzgar cuando su noche chilena ya pasó y LANCE ya la
+# publicó. «Noche», en el código, es el filtro nocturno de pipeline/fetch.py::_filter_nighttime_granules (sol bajo el
+# horizonte en el volcán) sobre la búsqueda del día UTC d. En Chile (70° W, hora solar = UTC - 4 h 40 min) las pasadas
+# nocturnas de los satélites heliosincrónicos caen en la madrugada UTC de d: en los 76.824 records de
+# data/mirova_equivalent/ de main e7cfbaf54, VIIRS entre las 04 y las 07 UTC y MODIS entre las 00 y las 03 (Terra) y
+# entre las 05 y las 09 (Aqua). La última, hacia las 09 UTC, más la latencia mínima de LANCE NRT que usa
+# pipeline/fetch.py::dia_incompleto (LATENCIA_MINIMA_NRT_H, 3 h), da las 12 UTC. Hay además pasadas de MODIS en el
+# crepúsculo de invierno (Terra a las 12 UTC, 9 records; Aqua a las 21 UTC, 43): no hacen falta para el control, que
+# pide al menos un record por sensor y día, y la corrida siguiente las recoge porque la ventana es de 8 días.
+# La hora se compara con el INICIO de la corrida (--desde-utc), no con la de la revisión: lo que importa es si la noche
+# estaba en el catálogo cuando la corrida buscó. Una corrida que arranca antes de las 12 UTC (un despacho de madrugada,
+# o un cron atrasado que cruza la medianoche, como la guardia K de VIIRS y la sombra del 2026-11-10) no juzga el día
+# en curso: lo juzga la corrida siguiente, porque sigue en su ventana. Sin esto daban rojo falso por «catálogo vacío».
+ULTIMA_PASADA_NOCTURNA_UTC_H = 9
+LATENCIA_NRT_H = 3          # = pipeline/fetch.py::LATENCIA_MINIMA_NRT_H (lo vigila tests/test_revisores_noche_cerrada_s178.py)
+HORA_NOCHE_CERRADA_UTC = ULTIMA_PASADA_NOCTURNA_UTC_H + LATENCIA_NRT_H
+
+
+def noche_cerrada(dia, desde):
+    """True si la noche del día UTC `dia` (AAAA-MM-DD) estaba cerrada al inicio de la corrida `desde` (datetime UTC).
+    Con `desde` ilegible (None) se juzgan todos los días, como antes: esa corrida ya es FALLA por el --desde-utc."""
+    inicio = _utc(dia + "T00:00:00Z")
+    if desde is None or inicio is None:
+        return True
+    return desde >= inicio + timedelta(hours=HORA_NOCHE_CERRADA_UTC)
+
+
+def escrito_antes(r, desde):
+    """True si el record ya estaba escrito antes del inicio de la corrida (lo escribió una corrida anterior).
+
+    S178 POR QUÉ (corrida que escribe 0). pipeline/store.py no reescribe un record que ya está, así que una segunda
+    corrida del mismo día, con la noche ya escrita por la primera, escribe 0: eso no es una corrida muerta. Lo es si
+    quedaba una noche cerrada que nadie había escrito ni probado sin pasada. «Antes» es `processed_utc` anterior al
+    inicio; un record escrito después del inicio con otro sha no es de esta corrida ni de una anterior, y no excusa."""
+    t = _utc(r.get("processed_utc"))
+    return desde is not None and t is not None and t < desde
 
 
 def _dias(ini, fin):
@@ -211,11 +255,34 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensor
         fallas.append("el log dice «Cobertura INCOMPLETA»")
     if otros:
         fallas.append(f"records de esta corrida que no son de la vía: {otros}")
-    if json_ok and desde is not None and via_nuevos == 0:
-        fallas.append("ningún record de la vía escrito en esta corrida: la corrida no produjo nada")
-
-    dias = _dias(ini, fin)
+    # S178: sólo se juzgan los días con la noche cerrada al inicio de la corrida (noche_cerrada, POR QUÉ arriba).
+    todos = _dias(ini, fin)
+    dias = [d for d in todos if noche_cerrada(d, desde)]
+    for d in todos:
+        if d not in dias:
+            notas.append(f"{d}: la noche no estaba cerrada al inicio de la corrida (antes de las "
+                         f"{HORA_NOCHE_CERRADA_UTC} UTC del día): no se juzga en esta corrida")
+    if todos and not dias:
+        fallas.append("ningún día de la ventana tenía la noche cerrada al inicio de la corrida: no hay nada que juzgar")
     solo_de_dia = _solo_de_dia(log_txt)
+    if json_ok and desde is not None and via_nuevos == 0:
+        # S178: escribir 0 es corrida muerta sólo si quedaba una noche cerrada que nadie había escrito antes ni
+        # probado sin pasada (escrito_antes, POR QUÉ arriba); si no, no había nada que escribir.
+        previos = {(str(r.get("datetime_utc") or "")[:10], familia(r.get("sensor"))) for r in en_ventana
+                   if r.get("via_codigo_mirova") is True and escrito_antes(r, desde)}
+        def excusado(s, d):
+            """Prueba de que no hubo pasada de `s` el día `d`, salvo catálogo vacío (VV169-02, abajo)."""
+            vacios = {o for o in sensores if _sin_pasada(o, cobertura or {}, d, solo_de_dia)}
+            return s in vacios and not (set(sensores) <= vacios or {"VIIRS750", "VIIRS375"} <= vacios)
+
+        pendientes = [f"{s} {d}" for d in dias for s in sensores if (d, s) not in previos and not excusado(s, d)]
+        if pendientes:
+            fallas.append(f"ningún record de la vía escrito en esta corrida y nadie había escrito {', '.join(pendientes)}"
+                          f": la corrida no produjo nada")
+        elif dias:
+            notas.append("ningún record de la vía escrito en esta corrida: las noches cerradas de la ventana ya estaban "
+                         "escritas por una corrida anterior o probadas sin pasada")
+
     if json_ok:
         for d in dias:
             sin_pasada_d = []
@@ -237,7 +304,12 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensor
                 fallas.append(f"{d}: sin pasada a la vez en {', '.join(sin_pasada_d)}: catálogo de CMR vacío, "
                               f"no la órbita")
 
-    juzgados = f"{dias[0]} a {dias[-1]}" if dias else "ninguno (antes del %s)" % FECHA_MINIMA
+    if dias:
+        juzgados = f"{dias[0]} a {dias[-1]}"
+    elif todos:
+        juzgados = "ninguno (sin noche cerrada al inicio de la corrida)"
+    else:
+        juzgados = "ninguno (antes del %s)" % FECHA_MINIMA
     resumen = (f"ventana {ini} a {fin} (días juzgados: {juzgados}): {len(en_ventana)} records, {len(nuevos)} "
                f"escritos en esta corrida (desde {desde_utc}; {via_nuevos} de la vía), {sum(otros.values())} de "
                f"otra fuente en esta corrida, {errores} errores de gránulo")
