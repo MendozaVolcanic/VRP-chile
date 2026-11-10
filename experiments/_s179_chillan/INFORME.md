@@ -52,7 +52,7 @@ verticales (cenit menor que 35°):
 
 Producción (geolocalización nativa del gránulo, no la grilla) da lo mismo en noviembre: 7 de 7 entre 209° y 242°.
 
-**Lectura.** Nuestros datos muestran una zona caliente que crece desde el foco hasta ~1 km a comienzos de noviembre,
+**Lectura (⚠️ resuelta en §3: la colada va al SO, Nicolás 2026-11-10; se conserva el texto original).** Nuestros datos muestran una zona caliente que crece desde el foco hasta ~1 km a comienzos de noviembre,
 pero hacia el SSO y SO, no hacia el SE. A comienzos de octubre sí hubo píxeles al SE. Esto no coincide con lo que
 Nicolás ve en terreno, y no sé todavía por qué. Caminos posibles, ninguno comprobado:
 1. el foco (nuestro «cráter») no es el punto de salida de la colada, y lo que crece al SO es otra cosa (el domo, la
@@ -63,3 +63,27 @@ Nicolás ve en terreno, y no sé todavía por qué. Caminos posibles, ninguno co
 
 La prueba que lo resuelve es una imagen SWIR de alta resolución (Sentinel-2 o Landsat, 20 a 30 m) de una fecha de
 noviembre, comparada con nuestros píxeles de la misma noche, o la posición del frente de colada que tenga OVDAS.
+
+## 3. Contraste con el punto de Nicolás (2026-11-10, ~20:25 UTC)
+
+Nicolás corrigió: la colada va al **SO**, no al SE, y dio el punto lat −36,867309, lon −71,379167. Se lee como la boca
+de la colada (el cráter activo); si fuera el frente, la lectura de abajo cambia. Instrumento:
+`contraste_punto_nicolas.py`, salida `salida/contraste_punto_nicolas_salida.txt`. Control: el punto del yaml cae a
+0,517 km, rumbo 22°, del punto de Nicolás (comprobado a mano: 0,479 km al N y 0,193 km al E).
+
+- **El foco calza con el punto.** El píxel más caliente de VIIRS 375 queda, en mediana, a 0,16 km (vía) y 0,20 km
+  (producción) del punto en las pasadas casi verticales: dentro de un píxel de 375 m. El 0,16 de la vía es fijo
+  porque la vía trabaja sobre la grilla, que cuantiza la posición (D15).
+- **La zona caliente crece al SO.** Píxel más lejano desde el punto, sólo cenit < 35°:
+
+| quincena | vía: n, alcance mediano, rumbo mediano | producción: n, alcance mediano, rumbo mediano |
+|---|---|---|
+| 1 a 15 de octubre | 11, 0,50 km, 287° (disperso) | 13, 0,36 km, 241° |
+| 16 a 31 de octubre | 17, 0,85 km, 239° | 17, 0,65 km, 242° |
+| 1 a 9 de noviembre | 7, 0,97 km, 239° (208° a 239°) | 7, 0,79 km, 238° (224° a 252°) |
+
+Lectura: con el punto de Nicolás como boca, nuestros dos brazos ven la colada avanzar al SO (rumbo ~240°) y llegar a
+~1 km a comienzos de noviembre (la vía), lo que coincide con lo observado en terreno. El «no sé por qué» de §2 era el
+dato de terreno, no el instrumento. La vía ve más lejos que producción (0,97 contra 0,79 km): alerta más píxeles
+tibios del borde, como MIROVA. Exploratorio, sin verificador; un píxel de 375 m no resuelve el frente con precisión
+mejor que ~0,2 a 0,4 km.

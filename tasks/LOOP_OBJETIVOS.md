@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 20:24 UTC (S179): Nicolás corrige, la colada de Chillán va al SO; nuestros píxeles lo confirman
+- Nicolás dio el punto lat −36,867309, lon −71,379167 («tiene razón, es al SO»). Leído como la boca: el píxel más caliente de VIIRS 375 cae a 0,16 km (vía) y 0,20 km (producción) de él en pasadas casi verticales; el píxel más lejano crece a 0,97 km (vía) y 0,79 km (producción) con rumbo ~239° en noviembre. La discrepancia SE de las 18:43 era del dato de terreno, no del instrumento. `experiments/_s179_chillan/contraste_punto_nicolas.py`, INFORME §3 (exploratorio, sin verificador).
+
 ### 2026-11-10 18:43 UTC (S179): Chillán octubre y noviembre en los tres sensores (pedido de Nicolás; colada al SE de ~1 km)
 - `experiments/_s179_chillan/INFORME.md` (exploratorio, sin verificador; main `b68779c65`; vía de D2 y P4). La vía publica todas las alertas de MIROVA en los tres sensores (MODIS 37 de 37, VIIRS 375 77 de 77, VIIRS 750 69 de 69) con magnitud 0,99 a 1,00 de MIROVA; K subestima a la mitad en VIIRS y perdió 4 de MODIS de 1 MW o más. Primera medición de la vía en la erupción: la retrospectiva no la cubría.
 - Geometría: la zona caliente crece (VIIRS 375 vía, 6 a 13 píxeles por pasada; MIROVA Distancia_km 0,84 a 1,27 km), pero en pasadas casi verticales hacia el SSO a SO (7 de 7 en noviembre, ~1,05 km del foco), no al SE como ve Nicolás en terreno. Mirar en oblicuo corre los píxeles hasta 0,9 km según el lado del satélite. Discrepancia SIN ATRIBUIR; se resuelve con SWIR de alta resolución o la posición del frente según OVDAS.
