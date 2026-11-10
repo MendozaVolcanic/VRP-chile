@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): P10 verificado; C-rad agregada; elección para Nicolás
+- Verificador limpio (Sonnet) de las cotas: COTAS CORRECTAS (reprodujo A a E con su propio código; pérdida F26-V = Planchón 2026-02-10 05:42; de más = 5 pasadas NOAA-20). Matiz: B suma por día con exposiciones distintas (en F26-V sólo NOAA-20 es evaluable: la tabla no trae NOAA-21 antes del 2026-04-09); C, por pasada, lo corrige.
+- C-rad (C con el brazo radiante, el que cuenta la vigilancia, `scripts/vigilancia_guardia_viirs.py:149`): **14 Muy Bajo / 17 de más** (crudos F26-V 3 de 139 y 5 de 528, ya recontados por el verificador; falsa alarma 5,9 % y 5,6 %). Commits `66cf7f866`, `5dd9babd4`. Recomendación: C-rad. DECIDE NICOLÁS.
+
 ### 2026-11-10 (S178): P10, cotas de VIIRS 375 recalculadas (verificador limpio en curso)
 - Rama `claude/s178-cotas-v375` (`b039263de`), `experiments/_s178_cotas_v375/`. Cotas vigentes (borrador `REGLA_REVERSION_V375E_BORRADOR.md` §4.4, D1): 14 Muy Bajo perdidas y 15 publicaciones de más en 120 días, de `cotas_retrospectiva_v375.py` (Poisson, falsa alarma 8 % o menos), reproducidas.
 - Casos nuevos F26-V (cercano): 1 de 139 Muy Bajo perdidas, 5 de 528 de más; con radiante, 3 Muy Bajo perdidas. Opciones: A vigente 14/15; B por día 11/15; B-rad 13/15; C por pasada 12/17; D con DM 14/14 y E con R25 6/15 (no usar sin decisión expresa). Cómo sumar y con qué brazo: DECIDE NICOLÁS.
