@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): D1 contestada por Nicolás: «C-rad (14/17)»; PR #982
+- Borrador de la regla de reversión de VIIRS actualizado (fila D1 contestada, tabla §4.4 de VIIRS 375: más de 14 / más de 17; texto anterior conservado, A113) con el script y salidas de P10, en #982 (borrador). `COTAS` de `vigilancia_guardia_viirs.py` sigue en `None` hasta el sello. Quedan D2 a D7 y el sello (verificador limpio de la versión y frase de Nicolás).
+
 ### 2026-11-10 (S178): P6, plan del reemplazo de la historia en #981 (borrador, sin verificador)
 - `docs/PLAN_REEMPLAZO_HISTORIA_VIA_S178.md`. Reusa `scripts/reemplazar_ventana_reproceso.py` de #883, al que le faltan `--familia` y `--apartar-sin-par` (su tope del 2 % rehusaría casi todo). D2 + D4: 42.389 records, todos de la vía con `codigo_sha a7a6ae360`, 0 repetidos ni caídas a K. Entre 1,4 y 6,4 % de las pasadas K sin par en la vía (MODIS: 217 de 217 son descarte de borde de la regla de cobertura); propone apartarlas a `data/_k_residuales_via/` porque un solo K anterior mantiene el aviso (DECIDE NICOLÁS). La unión tiene que quedar commiteada antes del 2026-12-08 (vencen los artefactos de D2). Tupungatito antes del 2026-02-23: 787 records K de MODIS, cuatro opciones sin regla.
 - Simulación local desechable con la suite: MODIS rompe `vigilar_plataformas` (hueco simulado) y P5 (ya resuelto con #978); VIIRS además p10, `ctx_cluster`, línea base del banco y golden. Datos del checkout principal intactos (0 cambios en `data/`).
