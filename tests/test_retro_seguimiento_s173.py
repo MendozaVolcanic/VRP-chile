@@ -141,3 +141,23 @@ def test_el_diff_listado_va_de_cada_tag_de_origen_al_despacho(monkeypatch):
     tags = {o: f"tag-{i}" for i, o in enumerate(MO.ORIGENES)}
     MO.listar_diff(tags, "despacho")
     assert [a[2:4] for a in llamadas] == [[tags[o], "despacho"] for o in MO.ORIGENES]
+
+
+# S178: el OSF v2.5 (98 MB, fuera de git por .gitignore) no se puede leer con git show. Entra al manifiesto desde el
+# disco SÓLO si su sha256 en bruto es el que fijó el pre-registro (§4.2: 0863c240…); se guarda su sha256 LF, que es lo
+# que compara el candado del lector.
+def test_osf_local_entra_con_su_sha_lf_si_el_crudo_es_el_declarado(tmp_path):
+    import hashlib
+    (tmp_path / "osf.csv").write_bytes(b"a,b\r\n1,2\r\n")
+    crudo = hashlib.sha256(b"a,b\r\n1,2\r\n").hexdigest()
+    assert AM.entrada_local(tmp_path, "osf.csv", crudo) == hashlib.sha256(b"a,b\n1,2\n").hexdigest()
+
+
+def test_osf_local_con_otro_crudo_no_entra(tmp_path):
+    (tmp_path / "osf.csv").write_bytes(b"a,b\r\n1,3\r\n")
+    err = None
+    try:
+        AM.entrada_local(tmp_path, "osf.csv", "0" * 64)
+    except BaseException as e:  # noqa: BLE001
+        err = e
+    assert isinstance(err, SystemExit) and "no es el declarado" in str(err), repr(err)
