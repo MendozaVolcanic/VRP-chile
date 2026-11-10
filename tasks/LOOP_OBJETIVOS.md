@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): P6, plan del reemplazo de la historia en #981 (borrador, sin verificador)
+- `docs/PLAN_REEMPLAZO_HISTORIA_VIA_S178.md`. Reusa `scripts/reemplazar_ventana_reproceso.py` de #883, al que le faltan `--familia` y `--apartar-sin-par` (su tope del 2 % rehusaría casi todo). D2 + D4: 42.389 records, todos de la vía con `codigo_sha a7a6ae360`, 0 repetidos ni caídas a K. Entre 1,4 y 6,4 % de las pasadas K sin par en la vía (MODIS: 217 de 217 son descarte de borde de la regla de cobertura); propone apartarlas a `data/_k_residuales_via/` porque un solo K anterior mantiene el aviso (DECIDE NICOLÁS). La unión tiene que quedar commiteada antes del 2026-12-08 (vencen los artefactos de D2). Tupungatito antes del 2026-02-23: 787 records K de MODIS, cuatro opciones sin regla.
+- Simulación local desechable con la suite: MODIS rompe `vigilar_plataformas` (hueco simulado) y P5 (ya resuelto con #978); VIIRS además p10, `ctx_cluster`, línea base del banco y golden. Datos del checkout principal intactos (0 cambios en `data/`).
+- SIN DATO: P4 completo (09:52 UTC: 93 verdes, 6 corriendo, 66 en cola), si las VIIRS sin par son de borde, el K de Planchón 2026-11-02 01:15.
+
 ### 2026-11-10 (S178): P10 verificado; C-rad agregada; elección para Nicolás
 - Verificador limpio (Sonnet) de las cotas: COTAS CORRECTAS (reprodujo A a E con su propio código; pérdida F26-V = Planchón 2026-02-10 05:42; de más = 5 pasadas NOAA-20). Matiz: B suma por día con exposiciones distintas (en F26-V sólo NOAA-20 es evaluable: la tabla no trae NOAA-21 antes del 2026-04-09); C, por pasada, lo corrige.
 - C-rad (C con el brazo radiante, el que cuenta la vigilancia, `scripts/vigilancia_guardia_viirs.py:149`): **14 Muy Bajo / 17 de más** (crudos F26-V 3 de 139 y 5 de 528, ya recontados por el verificador; falsa alarma 5,9 % y 5,6 %). Commits `66cf7f866`, `5dd9babd4`. Recomendación: C-rad. DECIDE NICOLÁS.
