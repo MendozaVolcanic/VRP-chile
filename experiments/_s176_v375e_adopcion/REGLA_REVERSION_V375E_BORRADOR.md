@@ -1,13 +1,19 @@
 # Regla de adopción y reversión de la vía «código MIROVA» en VIIRS 375 y VIIRS 750
 
-**BORRADOR, SIN SELLO.** Escrito el 2026-11-08 en el PR A del encendido (S176, diseño
+**SELLADA el 2026-11-10 (servidor 10:12:44 UTC, cabecera Date de GitHub)** por Nicolás con la frase «Sello la regla», sobre
+esta versión: D1 a D7 contestadas (D1 «C-rad (14/17)», D2 a D7 «Sí a D2 a D7»), verificador limpio de otro modelo
+(Sonnet, SELLABLE CON CAMBIOS, cambios de texto aplicados en `81e22ee3a`). Cotas en `scripts/vigilancia_guardia_viirs.py`.
+El nombre del archivo no cambia: lo citan el vigilante, los workflows y las pruebas. El encendido de cada sensor (B1, B2)
+pide además su tag defensivo y su sí de A45.
+
+~~**BORRADOR, SIN SELLO.**~~ (texto anterior al sello, A113) Escrito el 2026-11-08 en el PR A del encendido (S176, diseño
 `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, decisiones 3 y 7), para la frase de sello de Nicolás. Modelo: la regla sellada de
 MODIS, `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md`, y la adopción de K, `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` paso 9.
 Se cambia lo que VIIRS pide y nada más; donde VIIRS se aparta de MODIS, se dice.
 
 - **Cómo se sella**: Nicolás contesta las decisiones D1 a D7 de abajo, un verificador limpio de otro modelo lee esta versión y Nicolás da la frase de sello. El encendido de cada sensor (B1, B2) pide además su tag defensivo y su sí de A45 (frases distintas).
 - **Una regla, dos encendidos.** VIIRS 375 (PR B1) y VIIRS 750 (PR B2) se encienden, se vigilan y se revierten por separado. Lo que aquí se dice vale para cada sensor con sus propios números; una alerta callada en un sensor nunca pide revertir el otro.
-- **Mientras no se selle**, las cotas de `COTAS` en `scripts/vigilancia_guardia_viirs.py` valen `None`: se cuentan y se informan sin disparar.
+- **Mientras no se selle**, las cotas de `COTAS` en `scripts/vigilancia_guardia_viirs.py` valen `None`: se cuentan y se informan sin disparar. *Sellada el 2026-11-10: las cotas ya están fijadas y disparan.*
 
 ## Decisiones de Nicolás antes del sello
 
