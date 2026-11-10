@@ -91,3 +91,28 @@ por nombre de archivo sin versión de proceso), o `hunk` con el hunk escrito tra
 tag de origen. Nada más cuenta. En V375-E y V750-B lo medido fue el port y el oráculo, no el pipeline: una diferencia
 ahí significa que la vía del pipeline no reproduce lo que se midió (V750-A §4.1 exige máscara idéntica), y si no la
 explica otro gránulo queda sin explicar y C-montaje sigue rojo. No se ensancha ninguna tolerancia al ver datos.
+
+## Resultado (2026-11-10 08:11 UTC) y la decisión que queda
+
+Corrida con el código del PR #979 (commit 6a07f8ea2), D2 en DM (12 trozos), los tres A/B en disco. Salida:
+`montaje_dm_salida.json`.
+
+- **MODIS contra MOD-D fase 4: 343 pasadas, 0 diferencias** (mismas celdas, VRP a 0,001 MW, misma clase).
+- **VIIRS 750 contra V750-B con B4: 440 pasadas, 0 diferencias.**
+- **VIIRS 375 contra V375-E: 166 pasadas, 12 diferencias**, todas de VRP: mismas celdas, mismas temperaturas de
+  brillo, mismo gránulo (el mismo archivo, versión incluida). Diferencia entre 0,3 % y 3 %, con signo variable.
+
+Como geólogo: la vía y el port ven exactamente los mismos píxeles calientes; lo único que cambia es el fondo que se le
+resta bajo el halo, que se interpola con una triangulación numéricamente inestable. El propio port de V375-E midió esa
+inestabilidad (`vrp_banda`, 20 semillas de jitter), y **las 12 caen dentro de su banda** (`banda_v375.py`,
+`banda_v375_salida.txt`; 9 con holgura, 3 en el borde dentro de los 0,0005 MW del redondeo del record).
+
+Con la declaración tal cual, ninguna de las 12 se explica (no es otro gránulo y re-correr con el código del tag de
+origen da el valor del port), así que **C-montaje queda PENDIENTE y, por el §6, los tres sensores INDECIDIBLES**.
+
+**DECIDE NICOLÁS** (rotulado *post hoc*: se ve después de correr):
+- **Opción 1 (recomendada):** en VIIRS 375 comparar también contra la banda de triangulación del port, como ya se
+  hace en VIIRS 750 (es el criterio de V750-A §4.1 y la banda la calculó el A/B en octubre, no ahora). C-montaje pasa
+  y se lee D2 a D4. El costo es aceptar un criterio fijado después de ver estas 12 pasadas.
+- **Opción 2:** mantener la declaración: C-montaje rojo y la retrospectiva entera INDECIDIBLE hasta un instrumento
+  nuevo (por ejemplo, que la vía guarde su propia banda), lo que obliga a re-correr D2.

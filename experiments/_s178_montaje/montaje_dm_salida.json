@@ -1,0 +1,366 @@
+{
+ "estado": "PENDIENTE: 12 diferencias sin explicar (re-correr con el código del tag de origen)",
+ "tags": {
+  "MOD-D fase 4": "s170-modd-f4-candado",
+  "V375-E": "s166-v375e-adenda2-sellada",
+  "V750-B": "s169-v750b-objetivos-20261103"
+ },
+ "despacho": "s172-retro-d2",
+ "diff_listado": "=== MOD-D fase 4: git diff s170-modd-f4-candado s172-retro-d2 -- pipeline/mirova_v750_codigo.py pipeline/process_modis.py pipeline/process_viirs.py pipeline/process_viirs_mod.py pipeline/profile.py pipeline/store.py pipeline/grillas_mirova.yaml\ndiff --git a/pipeline/grillas_mirova.yaml b/pipeline/grillas_mirova.yaml\nindex 48b9fba94..547e6672e 100644\n--- a/pipeline/grillas_mirova.yaml\n+++ b/pipeline/grillas_mirova.yaml\n@@ -21,10 +21,10 @@\n # En 8 volcanes (X0, Y0) es el lat/lon del yaml; en Lascar, PlanchonPeteroa y Tupungatito es otro punto, de\n # coordenadas redondas (a 233, 1.885 y 2.787 m del yaml; INFORME GEO, punto 2).\n #\n-# roi_v750: la región sensible del código de MIROVA para el volcán. Hoy \"def\" en todos (la matriz de ejemplo del .m:\n+# roi_v750: la región sensible del código de MIROVA para el volcán. Hasta la lectura de V750-B, \"def\" en todos (la matriz de ejemplo del .m:\n # 7 x 7 sensible al centro dentro de 21 x 21); la decide V750-B (experiments/_s162_v750b/PREREGISTRO_V750B.md, lectura\n # el 2026-11-03) y se cambia aquí con su lectura, nunca antes. Valores posibles en pipeline/mirova_v750_codigo.py,\n-# caja_roi().\n+# caja_roi(). Puesto por la lectura de V750-B: brazo B4 (scripts/roi_v750b_a_grillas.py).\n \n volcanes:\n   Chaiten:             {epsg: 32718, x0: 692393.7, y0: 5255041.2, centro_lat: -42.83359, centro_lon: -72.64674, roi_v750: def}\n@@ -35,6 +35,44 @@ volcanes:\n   Lastarria:           {epsg: 32719, x0: 549681.0, y0: 7216357.8, centro_lat: -25.16858, centro_lon: -68.50762, roi_v750: def}\n   Llaima:              {epsg: 32719, x0: 262650.2, y0: 5713865.6, centro_lat: -38.69255, centro_lon: -71.72974, roi_v750: def}\n   PlanchonPeteroa:     {epsg: 32719, x0: 357300.7, y0: 6101099.3, centro_lat: -35.22356, centro_lon: -70.56870, roi_v750: def}\n-  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: def}\n-  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: def}\n+  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: sens}\n+  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: sens}\n   Villarrica:          {epsg: 32719, x0: 247771.4, y0: 5632515.7, centro_lat: -39.42055, centro_lon: -71.93075, roi_v750: def}\n+# S172, sombra de los 34 (experiments/_s172_sombra34/generar_grillas_34.py; decisión de Nicolás del 2026-11-02).\n+# Estos 34 NO tienen TIF de MIROVA: (X0, Y0) es el UTM del lat/lon de volcanoes.yaml (la regla de 8 de los 11),\n+# zona estándar por longitud; centro_lat/lon es el mismo lat/lon del yaml. Si MIROVA llegara a publicar un TIF de\n+# alguno, su punto real reemplaza a éste (A5).\n+  Antuco:              {epsg: 32719, x0: 292096.3, y0: 5857497.5, centro_lat: -37.40600, centro_lon: -71.34900, roi_v750: def}\n+  DescabezadoGrande:   {epsg: 32719, x0: 341436.6, y0: 6061224.9, centro_lat: -35.58000, centro_lon: -70.75000, roi_v750: def}\n+  CerroAzulQuizapu:    {epsg: 32719, x0: 340584.8, y0: 6053109.6, centro_lat: -35.65300, centro_lon: -70.76100, roi_v750: def}\n+  LagunaDelMaule:      {epsg: 32719, x0: 364774.9, y0: 6008704.6, centro_lat: -36.05684, centro_lon: -70.50140, roi_v750: def}\n+  NevadoDeLongavi:     {epsg: 32719, x0: 305695.8, y0: 5992480.3, centro_lat: -36.19300, centro_lon: -71.16100, roi_v750: def}\n+  Callaqui:            {epsg: 32719, x0: 284646.9, y0: 5800230.5, centro_lat: -37.92000, centro_lon: -71.45000, roi_v750: def}\n+  Lonquimay:           {epsg: 32719, x0: 274639.1, y0: 5748870.3, centro_lat: -38.38000, centro_lon: -71.58000, roi_v750: def}\n+  Tolhuaca:            {epsg: 32719, x0: 268737.8, y0: 5756478.5, centro_lat: -38.31000, centro_lon: -71.64500, roi_v750: def}\n+  Sollipulli:          {epsg: 32719, x0: 281681.8, y0: 5683532.0, centro_lat: -38.97000, centro_lon: -71.52000, roi_v750: def}\n+  Quetrupillan:        {epsg: 32719, x0: 265934.7, y0: 5624641.7, centro_lat: -39.49600, centro_lon: -71.72200, roi_v750: def}\n+  Lanin:               {epsg: 32719, x0: 285192.4, y0: 5609981.0, centro_lat: -39.63300, centro_lon: -71.50300, roi_v750: def}\n+  MochoChoshuenco:     {epsg: 32718, x0: 754064.7, y0: 5576112.4, centro_lat: -39.92700, centro_lon: -72.02700, roi_v750: def}\n+  CarranLosVenados:    {epsg: 32718, x0: 748840.1, y0: 5529273.6, centro_lat: -40.35000, centro_lon: -72.07000, roi_v750: def}\n+  AntillancaCasablanca: {epsg: 32718, x0: 740535.4, y0: 5482866.3, centro_lat: -40.77000, centro_lon: -72.15000, roi_v750: def}\n+  Osorno:              {epsg: 32718, x0: 710532.8, y0: 5447113.0, centro_lat: -41.10000, centro_lon: -72.49300, roi_v750: def}\n+  Calbuco:             {epsg: 32718, x0: 699669.6, y0: 5421862.3, centro_lat: -41.33000, centro_lon: -72.61400, roi_v750: def}\n+  YateHornopiren:      {epsg: 32718, x0: 716972.9, y0: 5373577.6, centro_lat: -41.76000, centro_lon: -72.39000, roi_v750: def}\n+  Huequi:              {epsg: 32718, x0: 699401.5, y0: 5305523.0, centro_lat: -42.37700, centro_lon: -72.57800, roi_v750: def}\n+  Michinmahuida:       {epsg: 32718, x0: 709376.1, y0: 5259326.3, centro_lat: -42.79000, centro_lon: -72.44000, roi_v750: def}\n+  CorcovadoYanteles:   {epsg: 32718, x0: 678788.1, y0: 5216513.5, centro_lat: -43.18300, centro_lon: -72.80000, roi_v750: def}\n+  Melimoyu:            {epsg: 32718, x0: 669741.9, y0: 5117056.6, centro_lat: -44.08000, centro_lon: -72.88000, roi_v750: def}\n+  Mentolat:            {epsg: 32718, x0: 652191.9, y0: 5051914.3, centro_lat: -44.67000, centro_lon: -73.08000, roi_v750: def}\n+  MacaCay:             {epsg: 32718, x0: 641620.5, y0: 5004364.8, centro_lat: -45.10000, centro_lon: -73.20000, roi_v750: def}\n+  Hudson:              {epsg: 32718, x0: 657469.5, y0: 4915059.4, centro_lat: -45.90000, centro_lon: -72.97000, roi_v750: def}\n+  Tinguiririca:        {epsg: 32719, x0: 376345.2, y0: 6146750.3, centro_lat: -34.81400, centro_lon: -70.35200, roi_v750: def}\n+  Taapaca:             {epsg: 32719, x0: 447098.1, y0: 7998679.1, centro_lat: -18.10000, centro_lon: -69.50000, roi_v750: def}\n+  Parinacota:          {epsg: 32719, x0: 484981.6, y0: 7991442.9, centro_lat: -18.16600, centro_lon: -69.14200, roi_v750: def}\n+  Guallatiri:          {epsg: 32719, x0: 490495.2, y0: 7963343.9, centro_lat: -18.42000, centro_lon: -69.09000, roi_v750: def}\n+  Irruputuncu:         {epsg: 32719, x0: 546851.9, y0: 7707668.4, centro_lat: -20.73000, centro_lon: -68.55000, roi_v750: def}\n+  OlcaParuma:          {epsg: 32719, x0: 551673.0, y0: 7684191.3, centro_lat: -20.94200, centro_lon: -68.50300, roi_v750: def}\n+  Ollague:             {epsg: 32719, x0: 585052.3, y0: 7644428.9, centro_lat: -21.30000, centro_lon: -68.18000, roi_v750: def}\n+  SanPedro:            {epsg: 32719, x0: 561985.3, y0: 7580334.3, centro_lat: -21.88000, centro_lon: -68.40000, roi_v750: def}\n+  Putana:              {epsg: 32719, x0: 617932.0, y0: 7505066.0, centro_lat: -22.55700, centro_lon: -67.85300, roi_v750: def}\n+  SanJose:             {epsg: 32719, x0: 416958.4, y0: 6260877.4, centro_lat: -33.78900, centro_lon: -69.89700, roi_v750: def}\ndiff --git a/pipeline/process_modis.py b/pipeline/process_modis.py\nindex f4149cbd0..fba9400e9 100644\n--- a/pipeline/process_modis.py\n+++ b/pipeline/process_modis.py\n@@ -17,7 +17,7 @@\n #                 2015 (BV 77:55)\" se RETIRO en S147: no corresponde a ningun articulo\n #                 localizable (ese numero es Heap et al., mecanica de rocas). Ver D30 y la nota\n #                 bibliografica de pipeline/test1_integrated.py.\n-#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md. Vía «código MIROVA» APAGADA (S164, enable_modis_codigo_mirova): pipeline/mirova_v750_codigo.py\n+#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md (v1.18). Vía «código MIROVA» ENCENDIDA en producción desde S172 (enable_modis_codigo_mirova; era APAGADA desde S164; K sigue como guardia en guardia_k_modis): pipeline/mirova_v750_codigo.py\n #                 Posición por píxel del MxD03, pasada sin cráter = sin dato y etiqueta desde el cráter: APAGADAS\n #                 (S165, enable_modis_geo_mxd03 / enable_modis_crater_sin_dato / enable_modis_dist_desde_crater).\n # ════════════════════════════════════════════════════════════════════\n@@ -628,8 +628,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,\n     # el censo MOD-D midió que ver el volcán como lo ve MIROVA (el gránulo interpolado a su grilla de 1 km, su\n     # detector, su fondo rellenado con la regla de fillmissing2 de MATLAB y la suma de todos los alertados) se equivoca\n     # menos que K contra MIROVA (8 errores contra 49) y acerca la magnitud. Es ese paquete entero, con la\n-    # geolocalización de 1 km del MxD03 y la banda 22 primaria, no piezas sueltas sobre K. Con el flag APAGADO (hoy)\n-    # este bloque no corre y el procesador es el de siempre. Con el flag encendido, cuando la vía no puede correr\n+    # geolocalización de 1 km del MxD03 y la banda 22 primaria, no piezas sueltas sobre K. Con el flag APAGADO (guardia K,\n+    # laboratorio; producción hasta S172) este bloque no corre y el procesador es K. Con el flag encendido, cuando la vía no puede correr\n     # (volcán sin grilla de MIROVA, sin MxD03 o con un MxD03 de otra forma) sigue K y el record lo dice en\n     # `via_codigo_mirova`, para que nadie lea K creyendo que es la vía (A118). El volcán se reconoce por sus\n     # coordenadas de volcanoes.yaml, que run_pipeline ya pasa, como en VIIRS 750 (la firma de calculate_vrp no cambia).\n=== V375-E: git diff s166-v375e-adenda2-sellada s172-retro-d2 -- pipeline/mirova_v750_codigo.py pipeline/process_modis.py pipeline/process_viirs.py pipeline/process_viirs_mod.py pipeline/profile.py pipeline/store.py pipeline/grillas_mirova.yaml\ndiff --git a/pipeline/grillas_mirova.yaml b/pipeline/grillas_mirova.yaml\nindex 48b9fba94..547e6672e 100644\n--- a/pipeline/grillas_mirova.yaml\n+++ b/pipeline/grillas_mirova.yaml\n@@ -21,10 +21,10 @@\n # En 8 volcanes (X0, Y0) es el lat/lon del yaml; en Lascar, PlanchonPeteroa y Tupungatito es otro punto, de\n # coordenadas redondas (a 233, 1.885 y 2.787 m del yaml; INFORME GEO, punto 2).\n #\n-# roi_v750: la región sensible del código de MIROVA para el volcán. Hoy \"def\" en todos (la matriz de ejemplo del .m:\n+# roi_v750: la región sensible del código de MIROVA para el volcán. Hasta la lectura de V750-B, \"def\" en todos (la matriz de ejemplo del .m:\n # 7 x 7 sensible al centro dentro de 21 x 21); la decide V750-B (experiments/_s162_v750b/PREREGISTRO_V750B.md, lectura\n # el 2026-11-03) y se cambia aquí con su lectura, nunca antes. Valores posibles en pipeline/mirova_v750_codigo.py,\n-# caja_roi().\n+# caja_roi(). Puesto por la lectura de V750-B: brazo B4 (scripts/roi_v750b_a_grillas.py).\n \n volcanes:\n   Chaiten:             {epsg: 32718, x0: 692393.7, y0: 5255041.2, centro_lat: -42.83359, centro_lon: -72.64674, roi_v750: def}\n@@ -35,6 +35,44 @@ volcanes:\n   Lastarria:           {epsg: 32719, x0: 549681.0, y0: 7216357.8, centro_lat: -25.16858, centro_lon: -68.50762, roi_v750: def}\n   Llaima:              {epsg: 32719, x0: 262650.2, y0: 5713865.6, centro_lat: -38.69255, centro_lon: -71.72974, roi_v750: def}\n   PlanchonPeteroa:     {epsg: 32719, x0: 357300.7, y0: 6101099.3, centro_lat: -35.22356, centro_lon: -70.56870, roi_v750: def}\n-  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: def}\n-  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: def}\n+  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: sens}\n+  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: sens}\n   Villarrica:          {epsg: 32719, x0: 247771.4, y0: 5632515.7, centro_lat: -39.42055, centro_lon: -71.93075, roi_v750: def}\n+# S172, sombra de los 34 (experiments/_s172_sombra34/generar_grillas_34.py; decisión de Nicolás del 2026-11-02).\n+# Estos 34 NO tienen TIF de MIROVA: (X0, Y0) es el UTM del lat/lon de volcanoes.yaml (la regla de 8 de los 11),\n+# zona estándar por longitud; centro_lat/lon es el mismo lat/lon del yaml. Si MIROVA llegara a publicar un TIF de\n+# alguno, su punto real reemplaza a éste (A5).\n+  Antuco:              {epsg: 32719, x0: 292096.3, y0: 5857497.5, centro_lat: -37.40600, centro_lon: -71.34900, roi_v750: def}\n+  DescabezadoGrande:   {epsg: 32719, x0: 341436.6, y0: 6061224.9, centro_lat: -35.58000, centro_lon: -70.75000, roi_v750: def}\n+  CerroAzulQuizapu:    {epsg: 32719, x0: 340584.8, y0: 6053109.6, centro_lat: -35.65300, centro_lon: -70.76100, roi_v750: def}\n+  LagunaDelMaule:      {epsg: 32719, x0: 364774.9, y0: 6008704.6, centro_lat: -36.05684, centro_lon: -70.50140, roi_v750: def}\n+  NevadoDeLongavi:     {epsg: 32719, x0: 305695.8, y0: 5992480.3, centro_lat: -36.19300, centro_lon: -71.16100, roi_v750: def}\n+  Callaqui:            {epsg: 32719, x0: 284646.9, y0: 5800230.5, centro_lat: -37.92000, centro_lon: -71.45000, roi_v750: def}\n+  Lonquimay:           {epsg: 32719, x0: 274639.1, y0: 5748870.3, centro_lat: -38.38000, centro_lon: -71.58000, roi_v750: def}\n+  Tolhuaca:            {epsg: 32719, x0: 268737.8, y0: 5756478.5, centro_lat: -38.31000, centro_lon: -71.64500, roi_v750: def}\n+  Sollipulli:          {epsg: 32719, x0: 281681.8, y0: 5683532.0, centro_lat: -38.97000, centro_lon: -71.52000, roi_v750: def}\n+  Quetrupillan:        {epsg: 32719, x0: 265934.7, y0: 5624641.7, centro_lat: -39.49600, centro_lon: -71.72200, roi_v750: def}\n+  Lanin:               {epsg: 32719, x0: 285192.4, y0: 5609981.0, centro_lat: -39.63300, centro_lon: -71.50300, roi_v750: def}\n+  MochoChoshuenco:     {epsg: 32718, x0: 754064.7, y0: 5576112.4, centro_lat: -39.92700, centro_lon: -72.02700, roi_v750: def}\n+  CarranLosVenados:    {epsg: 32718, x0: 748840.1, y0: 5529273.6, centro_lat: -40.35000, centro_lon: -72.07000, roi_v750: def}\n+  AntillancaCasablanca: {epsg: 32718, x0: 740535.4, y0: 5482866.3, centro_lat: -40.77000, centro_lon: -72.15000, roi_v750: def}\n+  Osorno:              {epsg: 32718, x0: 710532.8, y0: 5447113.0, centro_lat: -41.10000, centro_lon: -72.49300, roi_v750: def}\n+  Calbuco:             {epsg: 32718, x0: 699669.6, y0: 5421862.3, centro_lat: -41.33000, centro_lon: -72.61400, roi_v750: def}\n+  YateHornopiren:      {epsg: 32718, x0: 716972.9, y0: 5373577.6, centro_lat: -41.76000, centro_lon: -72.39000, roi_v750: def}\n+  Huequi:              {epsg: 32718, x0: 699401.5, y0: 5305523.0, centro_lat: -42.37700, centro_lon: -72.57800, roi_v750: def}\n+  Michinmahuida:       {epsg: 32718, x0: 709376.1, y0: 5259326.3, centro_lat: -42.79000, centro_lon: -72.44000, roi_v750: def}\n+  CorcovadoYanteles:   {epsg: 32718, x0: 678788.1, y0: 5216513.5, centro_lat: -43.18300, centro_lon: -72.80000, roi_v750: def}\n+  Melimoyu:            {epsg: 32718, x0: 669741.9, y0: 5117056.6, centro_lat: -44.08000, centro_lon: -72.88000, roi_v750: def}\n+  Mentolat:            {epsg: 32718, x0: 652191.9, y0: 5051914.3, centro_lat: -44.67000, centro_lon: -73.08000, roi_v750: def}\n+  MacaCay:             {epsg: 32718, x0: 641620.5, y0: 5004364.8, centro_lat: -45.10000, centro_lon: -73.20000, roi_v750: def}\n+  Hudson:              {epsg: 32718, x0: 657469.5, y0: 4915059.4, centro_lat: -45.90000, centro_lon: -72.97000, roi_v750: def}\n+  Tinguiririca:        {epsg: 32719, x0: 376345.2, y0: 6146750.3, centro_lat: -34.81400, centro_lon: -70.35200, roi_v750: def}\n+  Taapaca:             {epsg: 32719, x0: 447098.1, y0: 7998679.1, centro_lat: -18.10000, centro_lon: -69.50000, roi_v750: def}\n+  Parinacota:          {epsg: 32719, x0: 484981.6, y0: 7991442.9, centro_lat: -18.16600, centro_lon: -69.14200, roi_v750: def}\n+  Guallatiri:          {epsg: 32719, x0: 490495.2, y0: 7963343.9, centro_lat: -18.42000, centro_lon: -69.09000, roi_v750: def}\n+  Irruputuncu:         {epsg: 32719, x0: 546851.9, y0: 7707668.4, centro_lat: -20.73000, centro_lon: -68.55000, roi_v750: def}\n+  OlcaParuma:          {epsg: 32719, x0: 551673.0, y0: 7684191.3, centro_lat: -20.94200, centro_lon: -68.50300, roi_v750: def}\n+  Ollague:             {epsg: 32719, x0: 585052.3, y0: 7644428.9, centro_lat: -21.30000, centro_lon: -68.18000, roi_v750: def}\n+  SanPedro:            {epsg: 32719, x0: 561985.3, y0: 7580334.3, centro_lat: -21.88000, centro_lon: -68.40000, roi_v750: def}\n+  Putana:              {epsg: 32719, x0: 617932.0, y0: 7505066.0, centro_lat: -22.55700, centro_lon: -67.85300, roi_v750: def}\n+  SanJose:             {epsg: 32719, x0: 416958.4, y0: 6260877.4, centro_lat: -33.78900, centro_lon: -69.89700, roi_v750: def}\ndiff --git a/pipeline/process_modis.py b/pipeline/process_modis.py\nindex f4149cbd0..fba9400e9 100644\n--- a/pipeline/process_modis.py\n+++ b/pipeline/process_modis.py\n@@ -17,7 +17,7 @@\n #                 2015 (BV 77:55)\" se RETIRO en S147: no corresponde a ningun articulo\n #                 localizable (ese numero es Heap et al., mecanica de rocas). Ver D30 y la nota\n #                 bibliografica de pipeline/test1_integrated.py.\n-#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md. Vía «código MIROVA» APAGADA (S164, enable_modis_codigo_mirova): pipeline/mirova_v750_codigo.py\n+#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md (v1.18). Vía «código MIROVA» ENCENDIDA en producción desde S172 (enable_modis_codigo_mirova; era APAGADA desde S164; K sigue como guardia en guardia_k_modis): pipeline/mirova_v750_codigo.py\n #                 Posición por píxel del MxD03, pasada sin cráter = sin dato y etiqueta desde el cráter: APAGADAS\n #                 (S165, enable_modis_geo_mxd03 / enable_modis_crater_sin_dato / enable_modis_dist_desde_crater).\n # ════════════════════════════════════════════════════════════════════\n@@ -628,8 +628,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,\n     # el censo MOD-D midió que ver el volcán como lo ve MIROVA (el gránulo interpolado a su grilla de 1 km, su\n     # detector, su fondo rellenado con la regla de fillmissing2 de MATLAB y la suma de todos los alertados) se equivoca\n     # menos que K contra MIROVA (8 errores contra 49) y acerca la magnitud. Es ese paquete entero, con la\n-    # geolocalización de 1 km del MxD03 y la banda 22 primaria, no piezas sueltas sobre K. Con el flag APAGADO (hoy)\n-    # este bloque no corre y el procesador es el de siempre. Con el flag encendido, cuando la vía no puede correr\n+    # geolocalización de 1 km del MxD03 y la banda 22 primaria, no piezas sueltas sobre K. Con el flag APAGADO (guardia K,\n+    # laboratorio; producción hasta S172) este bloque no corre y el procesador es K. Con el flag encendido, cuando la vía no puede correr\n     # (volcán sin grilla de MIROVA, sin MxD03 o con un MxD03 de otra forma) sigue K y el record lo dice en\n     # `via_codigo_mirova`, para que nadie lea K creyendo que es la vía (A118). El volcán se reconoce por sus\n     # coordenadas de volcanoes.yaml, que run_pipeline ya pasa, como en VIIRS 750 (la firma de calculate_vrp no cambia).\n=== V750-B: git diff s169-v750b-objetivos-20261103 s172-retro-d2 -- pipeline/mirova_v750_codigo.py pipeline/process_modis.py pipeline/process_viirs.py pipeline/process_viirs_mod.py pipeline/profile.py pipeline/store.py pipeline/grillas_mirova.yaml\ndiff --git a/pipeline/grillas_mirova.yaml b/pipeline/grillas_mirova.yaml\nindex f47738137..547e6672e 100644\n--- a/pipeline/grillas_mirova.yaml\n+++ b/pipeline/grillas_mirova.yaml\n@@ -21,10 +21,10 @@\n # En 8 volcanes (X0, Y0) es el lat/lon del yaml; en Lascar, PlanchonPeteroa y Tupungatito es otro punto, de\n # coordenadas redondas (a 233, 1.885 y 2.787 m del yaml; INFORME GEO, punto 2).\n #\n-# roi_v750: la región sensible del código de MIROVA para el volcán. Hoy \"def\" en todos (la matriz de ejemplo del .m:\n+# roi_v750: la región sensible del código de MIROVA para el volcán. Hasta la lectura de V750-B, \"def\" en todos (la matriz de ejemplo del .m:\n # 7 x 7 sensible al centro dentro de 21 x 21); la decide V750-B (experiments/_s162_v750b/PREREGISTRO_V750B.md, lectura\n # el 2026-11-03) y se cambia aquí con su lectura, nunca antes. Valores posibles en pipeline/mirova_v750_codigo.py,\n-# caja_roi().\n+# caja_roi(). Puesto por la lectura de V750-B: brazo B4 (scripts/roi_v750b_a_grillas.py).\n \n volcanes:\n   Chaiten:             {epsg: 32718, x0: 692393.7, y0: 5255041.2, centro_lat: -42.83359, centro_lon: -72.64674, roi_v750: def}\n@@ -35,8 +35,8 @@ volcanes:\n   Lastarria:           {epsg: 32719, x0: 549681.0, y0: 7216357.8, centro_lat: -25.16858, centro_lon: -68.50762, roi_v750: def}\n   Llaima:              {epsg: 32719, x0: 262650.2, y0: 5713865.6, centro_lat: -38.69255, centro_lon: -71.72974, roi_v750: def}\n   PlanchonPeteroa:     {epsg: 32719, x0: 357300.7, y0: 6101099.3, centro_lat: -35.22356, centro_lon: -70.56870, roi_v750: def}\n-  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: def}\n-  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: def}\n+  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: sens}\n+  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: sens}\n   Villarrica:          {epsg: 32719, x0: 247771.4, y0: 5632515.7, centro_lat: -39.42055, centro_lon: -71.93075, roi_v750: def}\n # S172, sombra de los 34 (experiments/_s172_sombra34/generar_grillas_34.py; decisión de Nicolás del 2026-11-02).\n # Estos 34 NO tienen TIF de MIROVA: (X0, Y0) es el UTM del lat/lon de volcanoes.yaml (la regla de 8 de los 11),\n=== V750-B: git diff s169-v750b-relanzamiento-20261103 s172-retro-d2 -- pipeline/mirova_v750_codigo.py pipeline/process_modis.py pipeline/process_viirs.py pipeline/process_viirs_mod.py pipeline/profile.py pipeline/store.py pipeline/grillas_mirova.yaml\ndiff --git a/pipeline/grillas_mirova.yaml b/pipeline/grillas_mirova.yaml\nindex f47738137..547e6672e 100644\n--- a/pipeline/grillas_mirova.yaml\n+++ b/pipeline/grillas_mirova.yaml\n@@ -21,10 +21,10 @@\n # En 8 volcanes (X0, Y0) es el lat/lon del yaml; en Lascar, PlanchonPeteroa y Tupungatito es otro punto, de\n # coordenadas redondas (a 233, 1.885 y 2.787 m del yaml; INFORME GEO, punto 2).\n #\n-# roi_v750: la región sensible del código de MIROVA para el volcán. Hoy \"def\" en todos (la matriz de ejemplo del .m:\n+# roi_v750: la región sensible del código de MIROVA para el volcán. Hasta la lectura de V750-B, \"def\" en todos (la matriz de ejemplo del .m:\n # 7 x 7 sensible al centro dentro de 21 x 21); la decide V750-B (experiments/_s162_v750b/PREREGISTRO_V750B.md, lectura\n # el 2026-11-03) y se cambia aquí con su lectura, nunca antes. Valores posibles en pipeline/mirova_v750_codigo.py,\n-# caja_roi().\n+# caja_roi(). Puesto por la lectura de V750-B: brazo B4 (scripts/roi_v750b_a_grillas.py).\n \n volcanes:\n   Chaiten:             {epsg: 32718, x0: 692393.7, y0: 5255041.2, centro_lat: -42.83359, centro_lon: -72.64674, roi_v750: def}\n@@ -35,8 +35,8 @@ volcanes:\n   Lastarria:           {epsg: 32719, x0: 549681.0, y0: 7216357.8, centro_lat: -25.16858, centro_lon: -68.50762, roi_v750: def}\n   Llaima:              {epsg: 32719, x0: 262650.2, y0: 5713865.6, centro_lat: -38.69255, centro_lon: -71.72974, roi_v750: def}\n   PlanchonPeteroa:     {epsg: 32719, x0: 357300.7, y0: 6101099.3, centro_lat: -35.22356, centro_lon: -70.56870, roi_v750: def}\n-  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: def}\n-  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: def}\n+  PuyehueCordonCaulle: {epsg: 32718, x0: 743976.9, y0: 5502758.6, centro_lat: -40.59059, centro_lon: -72.11771, roi_v750: sens}\n+  Tupungatito:         {epsg: 32719, x0: 425905.6, y0: 6301311.0, centro_lat: -33.42557, centro_lon: -69.79768, roi_v750: sens}\n   Villarrica:          {epsg: 32719, x0: 247771.4, y0: 5632515.7, centro_lat: -39.42055, centro_lon: -71.93075, roi_v750: def}\n # S172, sombra de los 34 (experiments/_s172_sombra34/generar_grillas_34.py; decisión de Nicolás del 2026-11-02).\n # Estos 34 NO tienen TIF de MIROVA: (X0, Y0) es el UTM del lat/lon de volcanoes.yaml (la regla de 8 de los 11),\n",
+ "pasadas_comparadas": {
+  "MOD-D fase 4": 343,
+  "V375-E": 166,
+  "V750-B": 440
+ },
+ "diferencias": [
+  {
+   "origen": "V375-E",
+   "pasada": "Isluga|VIIRS_NOAA20|2026-10-15 05:12",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 0.788,
+    "n_celdas": 6,
+    "dc": "far",
+    "granulo": [
+     "VJ1",
+     "2026288",
+     "0512"
+    ]
+   },
+   "ab": {
+    "vrp": 0.7768311237949612,
+    "banda": null,
+    "n_celdas": 6,
+    "dc": null,
+    "granulo": [
+     "VJ1",
+     "2026288",
+     "0512"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "Lascar|VIIRS_NOAA21|2026-10-01 05:18",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 1.046,
+    "n_celdas": 5,
+    "dc": "far",
+    "granulo": [
+     "VJ2",
+     "2026274",
+     "0518"
+    ]
+   },
+   "ab": {
+    "vrp": 1.0429953162238235,
+    "banda": null,
+    "n_celdas": 5,
+    "dc": null,
+    "granulo": [
+     "VJ2",
+     "2026274",
+     "0518"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "Lascar|VIIRS_NOAA21|2026-10-11 05:30",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 0.557,
+    "n_celdas": 4,
+    "dc": "far",
+    "granulo": [
+     "VJ2",
+     "2026284",
+     "0530"
+    ]
+   },
+   "ab": {
+    "vrp": 0.5620413841679692,
+    "banda": null,
+    "n_celdas": 4,
+    "dc": null,
+    "granulo": [
+     "VJ2",
+     "2026284",
+     "0530"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "Lascar|VIIRS_SNPP|2026-10-01 05:54",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 0.288,
+    "n_celdas": 3,
+    "dc": "summit",
+    "granulo": [
+     "VNP",
+     "2026274",
+     "0554"
+    ]
+   },
+   "ab": {
+    "vrp": 0.2949683099286631,
+    "banda": null,
+    "n_celdas": 3,
+    "dc": null,
+    "granulo": [
+     "VNP",
+     "2026274",
+     "0554"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "Lastarria|VIIRS_NOAA20|2026-10-01 06:18",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 0.56,
+    "n_celdas": 4,
+    "dc": "far",
+    "granulo": [
+     "VJ1",
+     "2026274",
+     "0618"
+    ]
+   },
+   "ab": {
+    "vrp": 0.5621673390269278,
+    "banda": null,
+    "n_celdas": 4,
+    "dc": null,
+    "granulo": [
+     "VJ1",
+     "2026274",
+     "0618"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "Lastarria|VIIRS_NOAA21|2026-10-10 05:54",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 0.068,
+    "n_celdas": 2,
+    "dc": "summit",
+    "granulo": [
+     "VJ2",
+     "2026283",
+     "0554"
+    ]
+   },
+   "ab": {
+    "vrp": 0.06329624773934482,
+    "banda": null,
+    "n_celdas": 2,
+    "dc": null,
+    "granulo": [
+     "VJ2",
+     "2026283",
+     "0554"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "NevadosDeChillan|VIIRS_SNPP|2026-10-05 06:24",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 8.464,
+    "n_celdas": 8,
+    "dc": "summit",
+    "granulo": [
+     "VNP",
+     "2026278",
+     "0624"
+    ]
+   },
+   "ab": {
+    "vrp": 8.46130050442298,
+    "banda": null,
+    "n_celdas": 8,
+    "dc": null,
+    "granulo": [
+     "VNP",
+     "2026278",
+     "0624"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "PlanchonPeteroa|VIIRS_NOAA20|2026-10-09 05:30",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 1.926,
+    "n_celdas": 4,
+    "dc": "far",
+    "granulo": [
+     "VJ1",
+     "2026282",
+     "0530"
+    ]
+   },
+   "ab": {
+    "vrp": 1.9200932749954518,
+    "banda": null,
+    "n_celdas": 4,
+    "dc": null,
+    "granulo": [
+     "VJ1",
+     "2026282",
+     "0530"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "PuyehueCordonCaulle|VIIRS_NOAA21|2026-10-16 05:42",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 0.285,
+    "n_celdas": 2,
+    "dc": "summit",
+    "granulo": [
+     "VJ2",
+     "2026289",
+     "0542"
+    ]
+   },
+   "ab": {
+    "vrp": 0.29492632392793894,
+    "banda": null,
+    "n_celdas": 2,
+    "dc": null,
+    "granulo": [
+     "VJ2",
+     "2026289",
+     "0542"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "Tupungatito|VIIRS_NOAA21|2026-10-15 06:00",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 0.131,
+    "n_celdas": 1,
+    "dc": "far",
+    "granulo": [
+     "VJ2",
+     "2026288",
+     "0600"
+    ]
+   },
+   "ab": {
+    "vrp": 0.13231040560640395,
+    "banda": null,
+    "n_celdas": 1,
+    "dc": null,
+    "granulo": [
+     "VJ2",
+     "2026288",
+     "0600"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "Tupungatito|VIIRS_NOAA21|2026-10-16 05:42",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 0.445,
+    "n_celdas": 3,
+    "dc": "far",
+    "granulo": [
+     "VJ2",
+     "2026289",
+     "0542"
+    ]
+   },
+   "ab": {
+    "vrp": 0.4360145778337028,
+    "banda": null,
+    "n_celdas": 3,
+    "dc": null,
+    "granulo": [
+     "VJ2",
+     "2026289",
+     "0542"
+    ]
+   }
+  },
+  {
+   "origen": "V375-E",
+   "pasada": "Villarrica|VIIRS_SNPP|2026-10-03 05:24",
+   "campos": [
+    "vrp_mw"
+   ],
+   "explicada_por": null,
+   "via": {
+    "vrp": 0.111,
+    "n_celdas": 1,
+    "dc": "far",
+    "granulo": [
+     "VNP",
+     "2026276",
+     "0524"
+    ]
+   },
+   "ab": {
+    "vrp": 0.10837777148117311,
+    "banda": null,
+    "n_celdas": 1,
+    "dc": null,
+    "granulo": [
+     "VNP",
+     "2026276",
+     "0524"
+    ]
+   }
+  }
+ ],
+ "pendientes": []
+}
