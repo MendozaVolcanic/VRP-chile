@@ -35,7 +35,7 @@ El costo que se acepta es que la vía puede callar señales débiles que K publi
 - **B1**: `enable_v375_codigo_mirova: true` en `pipeline/profiles/mirova_equivalent.yaml` (`pipeline/process_viirs.py`).
 - **B2**: `enable_v750_codigo_mirova: true` en el mismo perfil (`pipeline/process_viirs_mod.py`). Condición propia de B2 (decisión 7): vara MATLAB del §4.1 en verde (`experiments/_s162_v750a/vara_matlab_v750a.py`); hoy con Octave da roja por una decisión ya tomada (S163). Es lo que prueba que el código portado es el de MIROVA.
 - Los dos flags tocan `mirova_equivalent.yaml`, dentro del congelamiento del §12.6 del programa: cada uno pide su excepción, como MODIS.
-- La lectura sellada de V375-E y la de V750-A dejan de decidir (D5).
+- La lectura sellada de V375-E y la de V750-A dejan de decidir (D5). *S178, verificador limpio: con D5, la condición M del lector de V750-A (mediana de la razón P/MIROVA entre 0,9 y 1,1, `PREREGISTRO_V750A.md`) deja de ser condición; la magnitud queda vigilada sólo por el audit semanal, con banda 0,7 a 1,4 por volcán (`scripts/auto_audit_weekly.py`, `VIA_V375` y `VIA_V750`). Las pérdidas de protegidas y los errores en lo débil siguen cubiertos por §4.3 y §4.4.*
 
 ## 3. La guardia
 
@@ -69,11 +69,11 @@ La unidad es la pasada nocturna. **Protegida** = alerta de MIROVA del sensor de 
 
 Cada una abre el issue «Guardia K de VIIRS 375: investigar» (o «VIIRS 750»). Investigar es mirar y decidir, no revertir.
 
-- **(a) Protegida sin record de producción**, pasadas 24 h (D4). No es «calla»: es la vía que no escribió.
+- **(a) Protegida que la guardia publica y sin record de producción**, pasadas 24 h (D4) (*S178: «que la guardia publica» agregado, como lo exige el vigilante, `vigilancia_guardia_modis.py:318`*). No es «calla»: es la vía que no escribió.
 - **(b) Borde del encendido**: §4.1.
 - **(c) Nulo de la guardia**: antes del encendido, cualquier pasada que guardia y producción publiquen distinto (A110).
 - **Caída a K**: si el record de producción de una protegida que la guardia publica no es de la vía (la vía cayó a K, `sin_grilla`), se investiga; **nunca es candidata a reversión**, porque compara K con K.
-- **(i) Muy Bajo.** Alertas de MIROVA sobre 0,05 MW y bajo 1 MW que la guardia publica y la vía calla, contadas en el plazo, sólo en pasadas con record de la vía en los dos lados. Investiga con **más de** la cota del sensor (tabla de abajo). Se informa siempre con su denominador (`muy_bajo.n`).
+- **(i) Muy Bajo.** Alertas de MIROVA sobre 0,05 MW y bajo 1 MW que la guardia publica y la vía calla, contadas **en los 120 días** desde el encendido, sólo en pasadas con record en los dos lados (de la vía en producción y de K en la guardia). *S178, verificador limpio: decía «en el plazo» y «record de la vía en los dos lados»; el vigilante corta en el encendido más 120 días sin mirar las 29 protegidas (`scripts/vigilancia_guardia_modis.py:252,265`), las cotas están calibradas a 120 días y la guardia es K (`:254`), como en la regla de MODIS (A113).* Investiga con **más de** la cota del sensor (tabla de abajo). Se informa siempre con su denominador (`muy_bajo.n`).
 - **(ii) Sobre-publicación diferencial.** Pasadas de negativo limpio en que la vía publica y la guardia, que procesó la misma pasada, no. Investiga con **más de** la cota del sensor (tabla de abajo), con su denominador (`sobrepublicacion.n`).
 - **(iii) Pasadas que la guardia registra y la vía no**, por semana ISO. Se informa y no dispara: no hay vara citable para ese número y A115 prohíbe inventarla.
 - **Región sensible de VIIRS 750 (informa).** En Cordón Caulle y Tupungatito la región sensible corre desde #939 con pocas pasadas, y en Cordón Caulle la sombra publicó 1 vez contra 4 de producción sin saberse si esas 3 son sobre-publicación de K. La vigilancia cuenta las pasadas que publica cada lado (`region_sensible`). No dispara: no hay cota citable y la diferencia puede ser un acierto.
@@ -86,6 +86,8 @@ Cada una abre el issue «Guardia K de VIIRS 375: investigar» (o «VIIRS 750»).
 | VIIRS 375 (S178, D1 contestada) | **más de 14** (O ponderado más F26-V radiante 3 de 139, por pasada; se esperan 9,48 en 120 días) | **más de 17** (O ponderado más F26-V 5 de 528, por pasada; se esperan 11,82) | `experiments/_s178_cotas_v375/cotas_v375_con_retro.py`, opción C-rad: reusa `cotas_retrospectiva_v375.py` sin cambiarlo y suma por pasada porque en F26-V la tabla de MIROVA no trae NOAA-21 (antes del 2026-04-09) y sumar por día mezcla exposiciones |
 | VIIRS 375 (anterior a S178, A113) | **más de 14** (crudo 2 de 97; ponderado 9,8; se esperan 9,44 en 120 días) | **más de 15** (crudo 5 de 993; ponderado 10,5; se esperan 10,05) | `cotas_retrospectiva_v375.py` sobre el evaluador sellado `experiments/_s162_v375/evaluar.py`, artefactos de los runs 40116289866 y 40131572769, ventana O (2026-06-13 a 2026-10-21 sin 6 días, 125 días), sólo NOAA-20 y NOAA-21, regla «cercano» |
 | VIIRS 750 | **más de 12** (9 de 90; se esperan 7,55) | **más de 2** (1 de 3.218; se esperan 0,84) | `cotas_retrospectiva_v750.py` sobre `analizar_v750b.py`, runs 41615021658 y 41693265163, brazo B4, ventana O (143 días, hasta el 2026-11-02), sin Suomi NPP |
+
+> *S178 (A113), verificador limpio: el párrafo de abajo quedó en parte viejo con C-rad. Vigente: en VIIRS 375 la ventana O sale del port de V375-B y C con el brazo «cercano» (cerca del 80 % del peso de (i)) y F26-V sale de la vía real de `pipeline/` (prueba retrospectiva, D2) con el brazo radiante, que es el que cuenta el vigilante; las cifras crudas son 5 Muy Bajo perdidas (2 de O y 3 de F26-V) y 10 de más (5 y 5); las cotas «25 y 20 con Suomi NPP» son de la versión anterior (opción A) y no hay cifra de C-rad con Suomi NPP. Lo demás del párrafo sigue en pie.*
 
 **Lo que estas cotas no son.** Salen del port de V375-B y C (`brazos.py`), que PD3 declaró equivalente a la vía (`PREREGISTRO_E.md` §3), y del oráculo de V750-B; no de la vía de `pipeline/` corriendo en producción. Las cifras crudas son chicas (2 y 5 pasadas en VIIRS 375, 9 y 1 en VIIRS 750), y en VIIRS 375 el peso de la muestra multiplica por cerca de 5: la tasa de 120 días es una estimación y su Poisson no incluye la incertidumbre de esa tasa. En MODIS y en estas dos cotas el criterio de falsa alarma de 8 % o menos es propuesta del implementador; las fija Nicolás. Con Suomi NPP incluido las cotas serían 25 y 20 en VIIRS 375, y 12 y 4 en VIIRS 750: no se usan porque esa plataforma terminó el 2026-11-02 (A104).
 
@@ -120,6 +122,8 @@ El revert apaga el flag pero no deshace los datos: los records de la vía se que
 ## 6. Lo que esta regla no cubre
 
 Los 34 volcanes fuera del tablero. El reemplazo de la historia publicada (decisión 8 del diseño): va después de cada encendido, con tag y frase.
+
+*S178, verificador limpio (diferencias menores entre texto y vigilante, ninguna acorta el plazo ni ensancha una cota):* (1) para las 29 protegidas de §4.6 el vigilante no cuenta las pasadas cuyo record de producción cayó a K (`vigilancia_guardia_modis.py:229`), lo que alarga el plazo; la regla de MODIS hace lo mismo. (2) El §3 pide al menos tres noches de nulo antes del encendido; el vigilante sólo avisa con 0 pares (`:312`). Se comprueba a mano antes de cada encendido: al 2026-11-10, 223 y 220 pares, 0 distintos, guardia del 11-03 al 11-09.
 
 ## 7. Pre-mortem
 
