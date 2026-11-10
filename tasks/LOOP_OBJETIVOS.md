@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 10:20 UTC (S178): regla de reversión de VIIRS SELLABLE (cambios de texto aplicados); #976 en main; avisos en curso
+- Nicolás: «actualiza la página» y «quita los 3». #976 mergeado (`d7a655a7f`). Los otros dos avisos (vía de MODIS y cese de Suomi NPP) los quita un agente en `claude/s178-quitar-avisos` (tag `pre-s178-quitar-avisos-via-cese`); se quedan las líneas verticales.
+- Verificador limpio de la regla (Sonnet): SELLABLE CON CAMBIOS; números recalculados y correctos. Aplicado en `81e22ee3a` (#982): (i) «en los 120 días» y record en los dos lados; (a) «que la guardia publica»; párrafo de cotas al día con C-rad (A113); §2 dice que la condición M de V750-A deja de decidir y la magnitud la vigila el audit semanal (0,7 a 1,4); §6 con dos diferencias menores texto contra vigilante. No renombrar el archivo al sellar (vigilante, workflows y prueba lo nombran). Falta la frase de sello de Nicolás; con ella: `COTAS` en `scripts/vigilancia_guardia_viirs.py`, tag del sello y merge.
+- Agentes: B2 sobre B1, avisos, verificador del plan #981. P4 a las 10:09 UTC: 97 de 165, 0 fallas. Contexto de la sesión 52 %: cerrar con /cierre al recibir los informes.
+
 ### 2026-11-10 (S178): D2 a D7 contestadas («Sí a D2 a D7»); verificador limpio de la regla en curso
 - Registradas en el borrador, rama de #982 (`5117c0ab1`); prueba que lo lee 56 de 56. Verificador limpio (Sonnet) leyendo la versión antes del sello; después, la frase de sello de Nicolás.
 
