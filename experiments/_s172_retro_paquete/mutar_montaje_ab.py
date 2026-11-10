@@ -35,6 +35,7 @@ MUTACIONES = [
     ("A9 sin filtro de DM en el A/B", "        if not en_dm(e.get(\"hora_utc\", \"\")):\n            continue\n        o =",
      "        o ="),
     ("A10 V375 lee M13 en vez de C13", "(e.get(\"port\") or {}).get(\"C13\")", "(e.get(\"port\") or {}).get(\"M13\")"),
+    ("A11 V375 sin la banda del port (S178, opción 1)", "\"banda\": c.get(\"vrp_banda\")", "\"banda\": None"),
     ("CONTROL de caída: NameError", "    m = _GRAN.search(str(nombre or \"\"))", "    m = _GRAN_NO_EXISTE.search(str(nombre or \"\"))"),
 ]
 

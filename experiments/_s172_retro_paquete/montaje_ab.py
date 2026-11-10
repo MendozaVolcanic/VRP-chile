@@ -127,8 +127,9 @@ def cargar_v375e(entradas):
         if c is None:
             continue
         k, g = _clave_viirs(e, "VIIRS375")
-        out[k] = {"vrp": _vrp(c.get("vrp_mw")), "banda": None, "celdas": _celdas_pix(c.get("pixeles")), "dc": None,
-                  "granulo": g}
+        # S178, decisión de Nicolás («Sí, opción 1», post hoc): la banda de triangulación del port, como en V750
+        out[k] = {"vrp": _vrp(c.get("vrp_mw")), "banda": c.get("vrp_banda"), "celdas": _celdas_pix(c.get("pixeles")),
+                  "dc": None, "granulo": g}
     return out
 
 

@@ -42,9 +42,10 @@ def e750(vol, vrp, celdas, banda=None, gran=G750, hora="2026-10-05 05:18", brazo
             "oraculo": {brazo: o, ("B0" if brazo == "B1" else "B1"): otro}}
 
 
-def e375(vol, vrp, celdas, gran=G375, hora="2026-10-05 05:18"):
+def e375(vol, vrp, celdas, gran=G375, hora="2026-10-05 05:18", banda=None):
     return {"volcan": vol, "hora_utc": hora, "granule": gran, "archivos": [gran],
-            "port": {"C13": {"vrp_mw": vrp, "pixeles": [[f, c, 0, 1.0, 0.1, 280.0] for f, c in celdas]},
+            "port": {"C13": {"vrp_mw": vrp, "pixeles": [[f, c, 0, 1.0, 0.1, 280.0] for f, c in celdas],
+                             "vrp_banda": banda},
                      "M13": {"vrp_mw": 99.0, "pixeles": []}}}
 
 
@@ -195,3 +196,16 @@ def test_la_pasada_lleva_un_sensor_que_el_lector_reconoce_y_queda_en_dm():
     assert L._pasada_de_dm(d[0]["pasada"])
     assert M.nombre_sensor("MODIS", "TERRA") == "MODIS_TERRA" and L.bucket("MODIS_TERRA") == "MODIS"
     assert L.bucket(M.nombre_sensor("VIIRS375", "SNPP")) == "VIIRS375"
+
+
+# S178, decisión de Nicolás («Sí, opción 1», post hoc): en VIIRS 375 el VRP se compara contra la banda de
+# triangulación del port C13, como en VIIRS 750 (las 12 diferencias de DM caían todas dentro de ella).
+def test_v375_usa_la_banda_de_triangulacion_del_port():
+    v = via("Isluga", rec_viirs("VIIRS_NOAA20", G375, 0.788, [(67, 64)]))
+    dentro = M.cargar_v375e([e375("Isluga", 0.7768, [(67, 64)], banda=[0.7711, 0.8002])])
+    assert M.comparar(v, dentro, "V375-E") == []
+    fuera = M.cargar_v375e([e375("Isluga", 0.7768, [(67, 64)], banda=[0.7711, 0.7760])])
+    d = M.comparar(v, fuera, "V375-E")
+    assert len(d) == 1 and d[0]["campos"] == ["vrp_mw"]
+    sin_banda = M.cargar_v375e([e375("Isluga", 0.7768, [(67, 64)])])
+    assert len(M.comparar(v, sin_banda, "V375-E")) == 1
