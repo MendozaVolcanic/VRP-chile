@@ -315,7 +315,9 @@ def main(argv=None):
     opcion("B3. O + F26-V por día, tres plataformas", vo3["i_w"] + f3["i_w"], vo3["ii_w"] + f3["ii_w"],
            dias_o + dias_t["F26-V"], "como B con Suomi NPP (que terminó el 2026-11-02, A104)")
     # C: tasa por pasada de la clase (O ponderado + F26-V), llevada al número de pasadas de la clase que O espera por día
-    for nom_c, a_i, a_ii in (("C. O + F26-V por pasada de la clase", f2, f2),):
+    # C-rad (S178, pedido de la coordinadora tras el verificador): F26-V con el brazo que la vigilancia cuenta
+    for nom_c, a_i, a_ii in (("C. O + F26-V por pasada de la clase", f2, f2),
+                             ("C-rad. como C, con F26-V en el brazo radiante", fr, fr)):
         ti = (vo["i_w"] + a_i["i_num"]) / (vo["i_den_w"] + a_i["i_den"])
         tii = (vo["ii_w"] + a_ii["ii_num"]) / (vo["ii_den_w"] + a_ii["ii_den"])
         opcion(nom_c, ti * vo["i_den_w"], tii * vo["ii_den_w"], dias_o,
