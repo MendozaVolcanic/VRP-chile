@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 18:43 UTC (S179): Chillán octubre y noviembre en los tres sensores (pedido de Nicolás; colada al SE de ~1 km)
+- `experiments/_s179_chillan/INFORME.md` (exploratorio, sin verificador; main `b68779c65`; vía de D2 y P4). La vía publica todas las alertas de MIROVA en los tres sensores (MODIS 37 de 37, VIIRS 375 77 de 77, VIIRS 750 69 de 69) con magnitud 0,99 a 1,00 de MIROVA; K subestima a la mitad en VIIRS y perdió 4 de MODIS de 1 MW o más. Primera medición de la vía en la erupción: la retrospectiva no la cubría.
+- Geometría: la zona caliente crece (VIIRS 375 vía, 6 a 13 píxeles por pasada; MIROVA Distancia_km 0,84 a 1,27 km), pero en pasadas casi verticales hacia el SSO a SO (7 de 7 en noviembre, ~1,05 km del foco), no al SE como ve Nicolás en terreno. Mirar en oblicuo corre los píxeles hasta 0,9 km según el lado del satélite. Discrepancia SIN ATRIBUIR; se resuelve con SWIR de alta resolución o la posición del frente según OVDAS.
+- Un primer pase del comparador contaba dos veces cada pasada (clave con la hora de MIROVA) y leía la magnitud de la vía por píxel (la vía no la guarda): corregido antes de leer.
+
 ### 2026-11-10 18:14 UTC (S179): antes de lanzar la auditoría, Nicolás pide revisar pérdidas, fumarolas y planes
 - Medido (exploratorio, sin verificador, `experiments/_s179_perdidas/INFORME.md`, main `b68779c65`): abr a nov, 145 de 1.703 pasadas con alerta de MIROVA sin publicar; 10 de 1 MW o más (5 sólo OCR lejanas en VIIRS 375, 4 de MODIS K en Chillán en octubre, 1 de VIIRS 750 en Cordón Caulle), todas con otra publicación esa noche; VIIRS 750 con K es el peor (77,6 % por pasada). Desde la vía en MODIS (11-02), 0 pérdidas de MODIS. En la misma semana la sombra de la vía publica 24 de 25 alertas VIIRS 750 contra 21 de K. MIROVA tiene 162 filas de alerta diurnas (138 de 1 MW o más, 63 de Chillán) que el NRT no mira (D-10).
 - La retrospectiva decidió con F26 (feb y mar), sin la erupción de Chillán: su «ninguna protegida perdida» no cubre octubre.
