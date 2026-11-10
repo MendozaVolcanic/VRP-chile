@@ -87,8 +87,8 @@ def main():
         p = p.replace("«CARPETA»", carpeta).replace("«RANGO»", rango)
         a = autonomia.replace("«CARPETA»", carpeta).replace("«LIMITES_DE_RECURSOS»", limites)
         tarea = (
-            f"<tarea>\nFrente {letra} de la auditoría S179 (plan: docs/PLAN_AUDITORIA_S179.md, commiteado en "
-            f"loop/activo antes de lanzarte). Tu temporal: D:\\vrp-trabajo\\temporales\\s179-audit\\{carp}\\ .\n\n"
+            f"<tarea>\nFrente {letra} de la auditoría S179. Tu temporal: "
+            f"D:\\vrp-trabajo\\temporales\\s179-audit\\{carp}\\ .\n\n"
             f"{frente}\n\n{comunes}\n</tarea>"
         )
         prompt = f"{p}\n\n{tarea}\n\n<informe>\n{comunicar}\n</informe>\n\n{a}\n"

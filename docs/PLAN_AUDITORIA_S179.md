@@ -229,7 +229,10 @@ Por cada decisión da un veredicto (SOSTENIDA, SOSTENIDA CON RESERVAS, DEBILITAD
 la evidencia de tu sesión. Al final, una sección PROPUESTAS PARA LOS PLANES: mejoras concretas a los planes abiertos de
 tu eje, cada una atada a un hallazgo o a una medición tuya. No las implementas.
 
-Mide en la base que dice docs/PLAN_AUDITORIA_S179.md §1 y nombra el commit en cada número. Lee el código desde
+Mide en la base (código: main 438a60a1e; documentos del loop: 0472cd95e) y nombra el commit en cada número. No abras
+docs/PLAN_AUDITORIA_S179.md ni nada bajo experiments/_s179_* salvo tu carpeta: el plan trae el control ciego de esta
+auditoría y esas carpetas, mediciones del orquestador sin verificar; leerlos invalida tu informe. Es un obstáculo
+deliberado. Lee el código desde
 D:\vrp-trabajo\temporales\s179-audit\main\ y los documentos del loop desde D:\vrp-trabajo\temporales\s179-audit\loop\;
 datos y experimentos, con git show <ref>:<ruta> y export MSYS_NO_PATHCONV=1. No toques ramas, worktrees ni carpetas
 de otros (D:\vrp-trabajo\worktrees\*, D:\vrp-trabajo\temporales\s17[0-8]*), salvo leer.
@@ -320,3 +323,13 @@ Línea base roja agregada con esta adenda, antes de lanzar y fuera de los prompt
 
 Se descartó como línea base que la retrospectiva no cubra la erupción de Chillán: el propio pre-registro lo declara
 (`PREREGISTRO_RETRO_PAQUETE.md` l. 47 en 0472cd95e). Main avanzó a `4cf5fe62e`; la base sigue fijada en §1.
+
+**Corrección de los prompts antes de lanzar (20:38 UTC).** Los prompts sellados mandaban leer este plan, que trae la
+línea base roja: el control ciego no era ciego. Se cambió la línea de §6.2 (base nombrada por hash y prohibición
+explícita de abrir este plan y `experiments/_s179_*`, salvo la carpeta propia) y la cabecera de la tarea en
+`armar_prompts.py`; los prompts se rearmaron (sha256 nuevos en `experiments/_s179_audit/prompts/SHA256.txt`). El
+orquestador revisa en el transcripto de cada agente si abrió el plan; si lo abrió, sus reencuentros no cuentan.
+Salvedad que queda: las líneas base de B («14 casos, 12 de Chillán») y de D (Tupungatito) están escritas en el bloque
+S179 §b, que es material de partida; cuentan como reencontradas sólo si el auditor las comprueba con evidencia propia.
+Instantánea: `git archive` con `core.autocrlf=true` cambió los bytes (sha256 de `latest_consolidado.csv` distinto
+del blob); se rehízo con `-c core.autocrlf=false` y se comprobó contra `git show` en tres archivos.
