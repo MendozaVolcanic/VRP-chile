@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): merges y #962 diagnosticada
+- Nicolás: «Sí, mergéalos» (#978, #977, #979). #978 mergeado (`4e7562de7`). #977 y #979 actualizados con main (`5f13127db`, `3e16cf267`), esperando CI. «Avanza con todo»: el merge de #976 lo bloqueó el clasificador de permisos («Production Deploy», publica Pages); queda para Nicolás (botón en GitHub o permiso explícito).
+- Agentes lanzados: B2 rebasado sobre B1 (PR borrador nuevo), P10 (cotas V375), verificador limpio del anexo de #955, diagnóstico de #962.
+- **#962**: de 3 corridas rojas desde el 11-07, sólo 1 es el falso rojo de #977 (11-09 23:42, cruzó la medianoche UTC); 2 son timeouts reales de NASA (11-07 ConnectTimeout nrt3; 11-08 ReadTimeout CMR) que la ventana de 5 a 7 días ya reparó (noches completas en `data/sombra_codigo_mirova/`). #977 no la cierra solo: se cierra con la primera corrida programada verde (15:00 UTC). Fragilidad ante timeouts de NASA (rojo aunque el día siguiente repare): decisión de diseño aparte, sin bug.
+
 ### 2026-11-10 (S178): verificador limpio de la lectura: VÁLIDA CON RESERVAS (ninguna cambia un veredicto)
 - Sonnet, sin contexto: re-corrió el lector con las mismas entradas y dio JSON idéntico; 16 sha256 LF del manifiesto iguales al disco; pre-registro sin cambios; OSF por hash del archivo entero (sin agujero); aplanados sin faltantes ni sobrantes (47 + 176 + 30 trozos); K de disco igual a `e7cfbaf54`; C-montaje regenerado igual; filas del §8.1 bien derivadas.
 - Reservas: C-montaje con poco poder (celdas alertadas en 12 de 343 MODIS, 51 de 166 V375, 32 de 440 V750; el resto coincide en vacío); la banda acepta todo [mín, máx] (V375 mediana 0,0024 MW, máx 0,073; V750 mediana 0,089, máx 0,371); «SIN SUSTRATO no bloquea» de los controles de cenit es de S174, posterior al sello; placebo de 750 sin «separa» (cubierto por el techo de fila 4); sorteo §7 SIN PODER. La de lotes de V375-E duplicados quedó cerrada por la coordinadora: 2 pasadas en dos lotes, 0 discrepan.
