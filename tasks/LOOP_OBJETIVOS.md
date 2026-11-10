@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 07:37 UTC (S178): verificador limpio sobre #979 y #977
+- Sonnet, sin contexto: #979 SIN DEFECTOS (traducción B4 igual a `grillas_mirova.yaml` de main, comprobado a mano; ninguna prueba lo ata al yaml, sólo al script). #977 CON DEFECTOS, uno: VS178-977-01, ventana sin ningún día y corrida que no escribe nada daba verde (main: rojo). Arreglado en `427de6cc4`, 4 pruebas rojas antes; suites de los revisores 229 de 229. Riesgo residual anotado en el PR.
+- #978 con CI verde (pytest y bateria-v750a).
+
 ### 2026-11-10 07:29 UTC (S178): tres PR en borrador (#977, #978, #979); C-montaje espera a Nicolás
 - **#979** (caja B4 en el lector): mutaciones CB1 a CB3 atrapadas, control CAE. Cambia el sha256 del lector: el manifiesto de la lectura sale de un ref con este cambio y con `frontend/index.html` del tag `s172-retro-d2`.
 - **#977** (agente, P8): revisores de la guardia y de la sombra con `noche_cerrada`; 20 pruebas nuevas (12 rojas contra main); repite los dos runs reales de Láscar (main salida 1, nuevo salida 0; control a las 19:35 UTC rojo). Su pytest rojo era ajeno: ver #978.
