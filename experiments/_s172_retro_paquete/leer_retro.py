@@ -815,10 +815,29 @@ def _sintetica(i=0):
             "_t": {b: {"pub": 0, "mag": 0.0} for b in ("K", "placebo") + BRAZOS}}
 
 
+# S178 (2026-11-10, P1; el texto manda y este código se corrige con marca fechada): «la ROI elegida» de V750-B (§6
+# C-montaje) es el brazo B4 (#939), que no es una sola caja sino una por volcán: «sens» en Cordón Caulle y
+# Tupungatito, «def» en los otros nueve (scripts/roi_v750b_a_grillas.py, SENSIBLES_B4, y PREREGISTRO_V750B.md §2).
+# L2 comparaba cada record contra un solo texto, así que con la caja real C-montaje no podía pasar. Un nombre de brazo
+# de esta tabla se traduce por volcán; cualquier otro texto se sigue comparando tal cual.
+CAJAS_V750_POR_BRAZO = {"B4": ({"PuyehueCordonCaulle": "sens", "Tupungatito": "sens"}, "def")}
+
+
+def caja_v750_de(vol, caja):
+    """La `diag_codigo_mirova.roi` que tiene que traer un record de la vía de VIIRS 750 de `vol` con la caja declarada."""
+    if caja in CAJAS_V750_POR_BRAZO:
+        por_volcan, resto = CAJAS_V750_POR_BRAZO[caja]
+        return por_volcan.get(vol, resto)
+    return caja
+
+
 ORIGENES_MONTAJE = ("MOD-D fase 4", "V375-E", "V750-B")     # §6 C-montaje: los A/B donde el código es el mismo
-# PENDIENTE (no se inventa): qué tag de cada A/B es el «tag de origen» del §6 C-montaje. Cuando se fije, va aquí como
-# {origen: tag} y validar_montaje exige esos tres; mientras sea None, sólo exige uno por origen.
-TAGS_MONTAJE_ESPERADOS = None
+# S178 (2026-11-10): tags de origen fijados por la declaración de C-montaje que aprobó Nicolás (opción A;
+# experiments/_s178_montaje/PROPUESTA_C_MONTAJE.md de loop/activo, commit c592ac2d2). Salen del mensaje de cada tag y
+# del head_sha de cada run; las pasadas del relanzamiento de V750-B (s169-v750b-relanzamiento-20261103) llevan su
+# propio tag en la diferencia y su diff también se lista.
+TAGS_MONTAJE_ESPERADOS = {"MOD-D fase 4": "s170-modd-f4-candado", "V375-E": "s166-v375e-adenda2-sellada",
+                          "V750-B": "s169-v750b-objetivos-20261103"}
 
 
 def _pasada_de_dm(p):
@@ -1264,7 +1283,8 @@ def leer_sensor(R, filas_todas, sensor, controles_comunes, predicado, v750a_sell
     ctl["nulo_lector"] = nulo_lector(R, filas, sensor, brazo, predicado, v750a_sellado)
     if sensor == "VIIRS750":
         malas = [(f["vol"], f["dt"]) for f in filas_todas if f["b"] == "VIIRS750" and f.get("_evaluable")
-                 and ((f["via_rec"] or {}).get("diag_codigo_mirova") or {}).get("roi") != caja_v750]
+                 and ((f["via_rec"] or {}).get("diag_codigo_mirova") or {}).get("roi")
+                 != caja_v750_de(f["vol"], caja_v750)]                     # S178: B4 es una caja por volcán
         ctl["c_montaje_caja_v750"] = ({"estado": "ROJO: caja de VIIRS 750 no declarada (L2)"} if caja_v750 is None else
                                       {"estado": "OK" if not malas else f"ROJO: {len(malas)} records con otra caja",
                                        "caja": caja_v750, "distintas": malas[:20]})

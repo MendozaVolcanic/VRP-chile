@@ -220,6 +220,13 @@ MUTACIONES = [
      "        print(f\"{pref}{s}: fila {r['fila']} | {r['veredicto']} | motivos {r['motivos']}\")"),
     ("V06 el permiso de SIN SUSTRATO pasa a toda clave con «cenit» (VPR952-06, P1)",
      "and not (k == \"controles_cenit\" and", "and not (\"cenit\" in k and"),
+    # S178 (P1): la caja B4 de VIIRS 750 es una por volcán
+    ("CB1 la caja se compara como un solo texto otra vez (S178)",
+     "    if caja in CAJAS_V750_POR_BRAZO:", "    if False:"),
+    ("CB2 B4 olvida Tupungatito (S178)",
+     "{\"PuyehueCordonCaulle\": \"sens\", \"Tupungatito\": \"sens\"}", "{\"PuyehueCordonCaulle\": \"sens\"}"),
+    ("CB3 B4 sin valor para los nueve (S178)",
+     "        return por_volcan.get(vol, resto)", "        return por_volcan.get(vol)"),
     ("CONTROL de caída: NameError en regla_modis (tiene que salir CAE)",
      "    F4 = R.F4\n    x = {\"p1\": F4.p1(filas, b)", "    F4 = R.F4\n    x = {\"p1\": F4_NO_EXISTE.p1(filas, b)"),
 ]
