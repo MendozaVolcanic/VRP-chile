@@ -206,7 +206,8 @@ def test_pasada_juzgada_no_dispara_y_la_clave_lleva_el_sensor():
 
 # ------------------------------------------------------------------ flags y avisos
 def test_el_flag_de_cada_sensor_se_lee_de_pipeline_profile():
-    assert vg.flag_produccion_encendido("VIIRS375") is False and vg.flag_produccion_encendido("VIIRS750") is False
+    # S177 B2: la vía de VIIRS 750 pasa a encendida en producción. Texto original: las dos de VIIRS en False.
+    assert vg.flag_produccion_encendido("VIIRS375") is False and vg.flag_produccion_encendido("VIIRS750") is True
     assert vg.flag_produccion_encendido("MODIS") is True, "control: la de MODIS está encendida desde #934"
     assert vg.flag_produccion_encendido() is True
 
