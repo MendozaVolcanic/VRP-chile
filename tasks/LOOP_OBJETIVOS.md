@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 01:25 UTC (S177): cierre; bloque S178 con el plan en paralelo P1 a P10
+- Cierre por contexto. `tasks/BLOQUE_ARRANQUE_S178.md`: ruta crítica P1 (candado y lectura de D2 a D4), en paralelo B1 y B2 en borrador, guardia, tramos de historia restantes, vara MATLAB, plan del reemplazo, primer aviso, falso rojo de la sombra, anexo de #955 y cotas V375. Guardia K de VIIRS (run 42734558894) en curso al cierre.
+
 ### 2026-11-10 01:17 UTC (S177): Nicolás elige «Retro primero» para VIIRS; guardia K de VIIRS lanzada a mano
 - Nicolás preguntó por qué VIIRS sigue en K. Medido en la misma pasada que MIROVA, 2026-11-03 a 11-09 (`C:/Users/nmend/vrp-temporales/s177_cmr/magn_1109/m.py`, el medidor de S176 extendido; EXPLORATORIO, no decide): magnitud V375 K 0,485 y vía 0,993 (n 47), V750 K 0,428 y vía 1,000 (n 20), MODIS 0,998 (vía en los dos); protegidas de 1 MW o más sin publicar: 0 en K y 0 en la vía; publicaciones en negativos limpios, regla de este medidor: V375 K 10 de 117 y vía 0, V750 K 4 de 168 y vía 0. Sin verificador.
 - Eligió «Retro primero»: lanzar la guardia, B1 y B2 en borrador, leer la retrospectiva y encender VIIRS si no pierde protegidas.
