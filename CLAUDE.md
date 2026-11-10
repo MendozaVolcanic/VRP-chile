@@ -38,7 +38,7 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo
 > vía «código MIROVA» (`enable_v750_codigo_mirova: true`); K de VIIRS queda de guardia
 > (`pipeline/profiles/guardia_k_viirs.yaml`), reversión por `git revert -m 1` del merge de B2 (regla
 > `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`). Lo que abajo diga «VIIRS 375 y 750 siguen con
-> K» o «VIIRS 375 y 750 = K» vale para VIIRS 750 sólo hasta ese merge. Ver `docs/MISSION.md`, ficha v1.22.
+> K» o «VIIRS 375 y 750 = K» vale para VIIRS 750 sólo hasta ese merge. Ver `docs/MISSION.md`, ficha v1.23.
 
 > ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde el merge del PR B (#934) MODIS corre la vía «código
 > MIROVA» (`enable_modis_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`); VIIRS 375 y 750 siguen con K.
@@ -51,7 +51,7 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo
 > (`pipeline/profiles/guardia_k_viirs.yaml`), reversión por `git revert -m 1` del merge de B1 (regla
 > `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`). Lo que abajo diga «VIIRS 375 y 750 = K» o que
 > el tablero publica `f5_core_vrp_mw` en VIIRS 375 vale para VIIRS 375 sólo hasta ese merge. Ver `docs/MISSION.md`,
-> ficha v1.21.
+> ficha v1.22.
 
 **Objetivo: clon literal MIROVA NRT.** Antes de tocar `pipeline/`, leer [docs/MISSION.md](docs/MISSION.md) y
 aplicar las 3 preguntas; si las 3 dan NO, no implementar y anotarlo en `tasks/backlog_*.md`. Parches viejos

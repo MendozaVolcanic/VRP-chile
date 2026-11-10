@@ -17,7 +17,7 @@
 > 750) describe el estado previo en VIIRS 750 y se conserva por historia. El laboratorio (`experimental`),
 > `experimental_ndc_focus`, el ancla de los tests pre-K (`_s146_ab_control`) y la guardia K de MODIS declaran la vía de
 > VIIRS 750 apagada. VIIRS 375 va aparte (B1). Tag defensivo `pre-s178-b1-b2`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md`
-> v1.22 (propuesta).
+> v1.23 (propuesta).
 
 > ⚠️ **S175 (A113; hallazgo 154 de `docs/AUDIT_S175.md`, PR #955): la marca S172 que sigue exagera hacia atrás.** Lo de «hasta unos 8 días antes» y «cada corrida re-escribe las 8 fechas de su ventana» no se cumple: cada corrida procesa 8 días, pero el almacén sólo agrega las pasadas que no tenía y reemplaza una ya guardada únicamente con su producto estándar o con `--overwrite` (`pipeline/store.py`). La primera observación con la vía es del 2026-11-02 01:15 UTC, 18,95 horas antes del encendido (20:11:43 UTC): son 22 records guardados como NRT con K ese mismo día y reemplazados por su producto estándar en la primera corrida con la vía. Detalle y plazo medido del estándar: ficha v1.19 (`docs/FICHA_SDA_VRP_CHILE.md`) y `experiments/_s175_latencia_estandar_modis/salida.txt`. Texto S172 conservado.
 >
@@ -53,7 +53,7 @@
 > `f5_core_vrp_mw`, lo que dependa de ellos en VIIRS 375) describe el estado previo en VIIRS 375 y se conserva por
 > historia. El laboratorio (`experimental`), `experimental_ndc_focus`, el ancla de los tests pre-K (`_s146_ab_control`)
 > y la guardia K de MODIS declaran la vía de VIIRS 375 apagada. VIIRS 750 va aparte (B2). Tag defensivo
-> `pre-s178-b1-b2`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.21 (propuesta).
+> `pre-s178-b1-b2`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.22 (propuesta).
 
 > ⚠️ **S153: el detector de la réplica cambió (adopción de K; marca A113).** Desde el merge del PR de adopción,
 > `mirova_equivalent` corre (1) **sin el Test 1 integrado en el ROI** (D30: no está en el paper y hacía publicar en
