@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): P2, verificador limpio (Sonnet) sobre B1 y B2
+- #974 (B1, V375) MERGEABLE; #975 (B2, V750) MERGEABLE CON CAMBIOS: pedía la vara MATLAB verde, que ya está (#980, 311 de 311 sobre main `e7cfbaf54`; #975 no toca `pipeline/`, así que la vara aplica). Ninguno cambia `pipeline/`: el merge ES el encendido. Mutaciones de perfiles muerden en los dos.
+- Orden: B1 primero con merge commit; B2 se rebasa (ficha a v1.22 y las 8 pruebas en conflicto con las dos vías). Combinación SIN VERIFICAR.
+- Pendiente tras el merge (fuera de los PR): paso de `nrt.yml` que ponga rojo `ERROR processing` en VIIRS y los comentarios «Con el flag APAGADO (hoy)» de `process_viirs.py:766` y `process_viirs_mod.py:~498` (A45 propio). Tablero: la vía muestra `pc.vrp_mw` por la caída de `f5CoreMagnitude` a 0 (seguro por casualidad); probar en navegador sigue pendiente.
+
 ### 2026-11-10 08:11 UTC (S178): C-montaje corrido; espera la decisión de la banda de VIIRS 375
 - Nicolás: «Sí, opción A». Declaración commiteada antes de correr (`c592ac2d2`); comparadores en #979 (`6a07f8ea2`; desvío de TDD declarado: pruebas después del módulo, 10 de 10 mutaciones atrapadas, control CAE).
 - Resultado: MODIS 343 pasadas y VIIRS 750 440 pasadas, **0 diferencias**. VIIRS 375: 166 pasadas, **12 diferencias de VRP** con las mismas celdas, temperaturas y gránulo; las 12 dentro de la banda de triangulación del port de V375-E. Con la declaración tal cual, C-montaje PENDIENTE y los tres sensores INDECIDIBLES. DECIDE NICOLÁS (opción 1 recomendada, *post hoc*), en `experiments/_s178_montaje/PROPUESTA_C_MONTAJE.md`.
