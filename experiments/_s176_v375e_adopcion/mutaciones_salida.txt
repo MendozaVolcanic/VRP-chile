@@ -1,0 +1,65 @@
+P01 la vía de 375 encendida en la guardia | ATRAPADA POR ASERCION | test_la_guardia_resuelve_k_en_los_dos_viirs_y_carpeta_propia
+P02 la vía de 750 encendida en la guardia | ATRAPADA POR ASERCION | test_la_guardia_resuelve_k_en_los_dos_viirs_y_carpeta_propia
+P03 la guardia corre MODIS | ATRAPADA POR ASERCION | test_la_guardia_corre_solo_los_dos_viirs
+P04 la guardia sin VIIRS 750 | ATRAPADA POR ASERCION | test_la_guardia_corre_solo_los_dos_viirs
+P05 la guardia escribe en producción | ATRAPADA POR ASERCION | test_la_guardia_resuelve_k_en_los_dos_viirs_y_carpeta_propia
+P06 la guardia con el umbral cambiado | ATRAPADA POR ASERCION | test_la_guardia_resuelve_k_en_los_dos_viirs_y_carpeta_propia
+W01 cron en minuto ocupado | ATRAPADA POR ASERCION | test_la_hora_no_choca_con_el_nrt_ni_con_la_guardia_de_modis
+W02 cron antes del fin de la guardia MODIS | ATRAPADA POR ASERCION | test_la_hora_no_choca_con_el_nrt_ni_con_la_guardia_de_modis
+W03 sin corte por token vacío | ATRAPADA POR ASERCION | test_el_workflow_afirma_el_perfil_desde_pipeline_profile_y_corta_por_token_vacio
+W04 la aserción no exige apagada la vía de 375 | ATRAPADA POR ASERCION | test_el_workflow_afirma_el_perfil_desde_pipeline_profile_y_corta_por_token_vacio
+W05 commitea otra carpeta | ATRAPADA POR ASERCION | test_el_workflow_commitea_solo_la_carpeta_de_la_guardia_con_grupo_propio_y_reintento
+W06 grupo de concurrencia ajeno | ATRAPADA POR ASERCION | test_el_workflow_commitea_solo_la_carpeta_de_la_guardia_con_grupo_propio_y_reintento
+W07 la revisión sólo si no falló nada | ATRAPADA POR ASERCION | test_la_revision_corre_despues_del_commit_aunque_algo_falle
+W08 corre el perfil de producción | ATRAPADA POR ASERCION | test_el_workflow_afirma_el_perfil_desde_pipeline_profile_y_corta_por_token_vacio
+R01 la revisión mira un solo VIIRS | ATRAPADA POR ASERCION | test_revision_verde_con_k_de_los_dos_viirs_escrito_en_esta_corrida
+R02 la revisión con el perfil de MODIS | ATRAPADA POR ASERCION | test_revision_verde_con_k_de_los_dos_viirs_escrito_en_esta_corrida
+R03 sin la regla del catálogo vacío | ATRAPADA POR ASERCION | test_revision_roja_si_ningun_viirs_tuvo_pasada_el_mismo_dia
+R04 una guardia con marca de la vía pasa | ATRAPADA POR ASERCION | test_revision_roja_si_la_guardia_trae_records_de_la_via
+R05 cada sensor no se exige por separado | ATRAPADA POR ASERCION | test_revision_roja_si_esta_corrida_no_escribio_uno_de_los_dos_viirs
+V01 encendido sin filtrar el sensor | ATRAPADA POR ASERCION | test_el_encendido_sale_del_primer_record_de_la_via_de_ese_sensor[VIIRS375-VIIRS_NOAA20-VIIRS_NOAA20_750]
+V02 pasadas sin filtrar el sensor | ATRAPADA POR ASERCION | test_las_pasadas_se_parean_con_el_mismo_sensor
+V03 sobrepublicación de otro sensor | ATRAPADA POR ASERCION | test_sobrepublicacion_cuenta_solo_el_sensor_vigilado
+V04 nulo de otro sensor | ATRAPADA POR ASERCION | test_el_nulo_antes_del_encendido_es_por_sensor[VIIRS375]
+V05 la cota pendiente dispara | ATRAPADA POR ASERCION | test_una_cota_pendiente_informa_sin_disparar
+V06 el flag de VIIRS 375 lee el de MODIS | ATRAPADA POR ASERCION | test_el_flag_de_cada_sensor_se_lee_de_pipeline_profile
+V07 los avisos dicen MODIS | ATRAPADA POR ASERCION | test_los_avisos_nombran_el_sensor_vigilado[VIIRS375-VIIRS
+V08 las cotas de MODIS en VIIRS | ATRAPADA POR ASERCION | test_cadena_las_cotas_son_las_del_sensor
+V09 sin D-9 en la vigilancia | ATRAPADA POR ASERCION | test_cadena_una_minima_de_d9_cuenta_como_negativo_limpio
+V10 frescura de todos los sensores | ATRAPADA POR ASERCION | test_cadena_control_con_la_via_fresca_da_verde[VIIRS375-VIIRS_NOAA20-v375]
+V11 sin frescura de la guardia | ATRAPADA POR ASERCION | test_cadena_guardia_sin_datos_frescos_da_vigilancia_ciega
+V12 región sensible al revés | ATRAPADA POR ASERCION | test_informe_sens_cuenta_lo_que_la_guardia_publica_y_la_via_no_sin_disparar
+V13 lista sensible equivocada | ATRAPADA POR ASERCION | test_la_lista_de_volcanes_sensibles_sale_de_la_grilla
+V14 salida sin la marca del sensor | ATRAPADA POR ASERCION | test_cadena_control_con_la_via_fresca_da_verde[VIIRS750-VIIRS_NOAA20_750-v750]
+W09 la vigilancia cubre un solo sensor | ATRAPADA POR ASERCION | test_el_workflow_escucha_a_la_guardia_y_cubre_los_dos_sensores
+W10 el workflow escucha otra guardia | ATRAPADA POR ASERCION | test_el_workflow_escucha_a_la_guardia_y_cubre_los_dos_sensores
+W11 issues sin el sensor en el título | ATRAPADA POR ASERCION | test_el_workflow_abre_issues_con_prefijo_propio_de_cada_sensor_y_no_revierte
+A01 un solo detector para los dos VIIRS | ATRAPADA POR ASERCION | test_detector_de_record_distingue_la_via_de_cada_sensor[VIIRS_NOAA20_750-VIA_V750]
+A02 falta VIA_V375 en los regímenes | ATRAPADA POR ASERCION | test_regimen_de_pasada_con_la_via_de_viirs
+A03 la vía sin distinguir sensor | ATRAPADA POR ASERCION | test_detector_de_noche_por_sensor
+A04 la caída a K cuenta como vía | ATRAPADA POR ASERCION | test_las_fronteras_de_la_via_salen_de_los_datos_por_sensor
+A05 la fecha en texto deja de ser MODIS | ATRAPADA POR ASERCION | test_una_frontera_en_texto_sigue_siendo_la_de_modis
+A06 sin juzgar al revés | ATRAPADA POR ASERCION | test_sensores_sin_juzgar_por_la_via_de_viirs
+A07 evaluación vigente siempre de K | ATRAPADA POR ASERCION | test_evaluacion_vigente_toma_cada_sensor_de_su_detector
+A08 el banco no reconoce la vía de VIIRS | ATRAPADA POR ASERCION | test_detector_del_banco_por_clave_de_la_via
+A09 detectores de la vía fuera | ATRAPADA POR ASERCION | test_con_la_via_en_un_viirs_decide_la_via_en_ese_sensor[VIIRS_NOAA20-VIIRS375-VIA_V375]
+A10 sin fronteras en la salida | ATRAPADA POR ASERCION | test_con_la_via_en_un_viirs_decide_la_via_en_ese_sensor[VIIRS_NOAA20-VIIRS375-VIA_V375]
+A11 fronteras con la vía de MODIS sólo | ATRAPADA POR ASERCION | test_con_la_via_en_un_viirs_decide_la_via_en_ese_sensor[VIIRS_NOAA20-VIIRS375-VIA_V375]
+A12 banda de recall recalibrada | ATRAPADA POR ASERCION | test_las_bandas_no_se_recalibran
+V15 cota pendiente sin aviso | ATRAPADA POR ASERCION | test_cadena_cota_pendiente_con_la_via_encendida_da_vigilancia_ciega
+K01 la vigilancia de K no saca la vía de VIIRS | ATRAPADA POR ASERCION | test_la_vigilancia_de_k_saca_la_via_de_cualquier_sensor
+K02 sigue exigiendo frescura de K | ATRAPADA POR ASERCION | test_la_frescura_de_k_no_se_exige_en_el_sensor_que_paso_a_la_via
+F01 familia sin distinguir 750 | ATRAPADA POR ASERCION | test_la_fecha_de_cada_viirs_sale_de_sus_records
+F02 primeraVia ignora la familia | ATRAPADA POR ASERCION | test_la_fecha_de_cada_viirs_sale_de_sus_records
+F03 la caída a K cuenta como K previa | ATRAPADA POR ASERCION | test_si_toda_la_ventana_es_de_la_via_no_hay_escalon
+F04 el aviso de 375 sin la advertencia | ATRAPADA POR ASERCION | test_notar_guarda_cada_familia_y_pone_un_aviso_por_familia
+F05 la línea de 375 en otra serie | ATRAPADA POR ASERCION | test_la_linea_de_cada_viirs_va_solo_en_su_serie
+F06 notar sólo MODIS | ATRAPADA POR ASERCION | test_notar_guarda_cada_familia_y_pone_un_aviso_por_familia
+F07 registra sólo el plugin de MODIS | ATRAPADA POR ASERCION | test_camino_del_navegador_registra_los_plugins_de_viirs
+F08 la fecha no se corrige a la más temprana | ATRAPADA POR ASERCION | test_notar_guarda_cada_familia_y_pone_un_aviso_por_familia
+identidad tests/test_guardia_k_viirs_s176.py: 23 passed in 2.64s
+identidad tests/test_vigilancia_guardia_viirs_s176.py: 50 passed in 4.21s
+identidad tests/test_auto_audit_via_viirs_s176.py: 18 passed in 0.35s
+identidad tests/test_cambio_detector_via_viirs_s176.py: 8 passed in 1.60s
+
+Mutaciones: 59; atrapadas por aserción: 59; otras: []

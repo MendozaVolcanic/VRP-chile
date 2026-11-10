@@ -63,30 +63,27 @@ def test_el_preregistro_del_sello_tiene_el_sha256_lf_declarado():
     assert r["igual"] is True
 
 
-def _rec(vrp, clase="summit"):
-    return {"primary_cluster": {"vrp_mw": vrp} if vrp else None, "distance_class": clase}
-
-
-def test_montaje_compara_pasada_por_pasada_vrp_y_clase():
-    k1, k2, k3 = (("Lascar", "MODIS_AQUA", "2026-10-05 05:00"), ("Isluga", "MODIS_AQUA", "2026-10-06 05:00"),
-                  ("Llaima", "MODIS_AQUA", "2026-10-07 05:00"))
-    via = {k1: _rec(1.0), k2: _rec(0.5), k3: _rec(0.2)}
-    ab = {k1: _rec(1.0005), k2: _rec(0.6), ("Copahue", "MODIS_AQUA", "2026-10-08 05:00"): _rec(0.1)}
-    d = MO.comparar(via, ab)
-    campos = sorted((x["pasada"].split("|")[0], x["campo"]) for x in d)
-    assert campos == [("Copahue", "falta_en_via"), ("Isluga", "vrp_mw"), ("Llaima", "falta_en_ab")]
-    assert all(x["explicada_por"] is None for x in d)
-    assert MO.comparar(via, {k1: _rec(1.0, "far"), k2: _rec(0.5), k3: _rec(0.2)})[0]["campo"] == "distance_class"
-
-
-def test_montaje_con_comparadores_pendientes_no_puede_salir_ok():
-    """Mientras falten los comparadores propios de cada A/B, el JSON de C-montaje no pasa validar_montaje."""
+# S178: la comparación pasada por pasada vive en montaje_ab.py (tests/test_montaje_ab_s178.py); aquí, el armado.
+def test_montaje_sin_pasadas_de_un_ab_no_puede_salir_ok():
+    """Un A/B sin ninguna pasada comparada no prueba nada: el JSON de C-montaje no pasa validar_montaje."""
     L = sys.modules["leer_retro_para_montaje"]
-    tags = {o: "HEAD" for o in MO.ORIGENES}
-    out = MO.armar(tags, "HEAD", {}, {o: {} for o in MO.ORIGENES})
-    assert MO.PENDIENTES and not out["estado"].startswith("OK")
-    assert L.validar_montaje(out)["estado"].startswith("ROJO")
+    tags = dict(L.TAGS_MONTAJE_ESPERADOS)
+    out = MO.armar({o: "HEAD" for o in MO.ORIGENES}, "HEAD", {}, {o: {} for o in MO.ORIGENES})
+    assert out["estado"].startswith("ROJO: sin pasadas")
+    assert L.validar_montaje(dict(out, tags=tags))["estado"].startswith("ROJO")
     assert set(out["tags"]) == set(MO.ORIGENES) and "sin diferencias" in out["diff_listado"]
+
+
+def test_montaje_con_una_diferencia_sin_explicar_no_sale_ok():
+    MA = MO.MA
+    clave = ("Lascar", "VIIRS750", "NOAA20", "2026-10-05 05:18")
+    ref = {"vrp": 0.4, "banda": None, "celdas": {(1, 1)}, "dc": None, "granulo": ("VJ1", "2026278", "0518")}
+    refs = {o: {clave: ref} for o in MO.ORIGENES}
+    out = MO.armar({o: "HEAD" for o in MO.ORIGENES}, "HEAD", {}, refs)
+    assert out["estado"].startswith("PENDIENTE") and out["diferencias"][0]["campos"] == ["falta_en_via"]
+    out2 = MO.armar({o: "HEAD" for o in MO.ORIGENES}, "HEAD", {clave: dict(ref)}, refs)
+    assert out2["estado"] == "OK" and out2["diferencias"] == []
+    assert MA is sys.modules["montaje_ab_para_armar"]
 
 
 def test_el_manifiesto_sale_del_blob_del_ref_y_no_del_disco(monkeypatch):
@@ -144,3 +141,23 @@ def test_el_diff_listado_va_de_cada_tag_de_origen_al_despacho(monkeypatch):
     tags = {o: f"tag-{i}" for i, o in enumerate(MO.ORIGENES)}
     MO.listar_diff(tags, "despacho")
     assert [a[2:4] for a in llamadas] == [[tags[o], "despacho"] for o in MO.ORIGENES]
+
+
+# S178: el OSF v2.5 (98 MB, fuera de git por .gitignore) no se puede leer con git show. Entra al manifiesto desde el
+# disco SÓLO si su sha256 en bruto es el que fijó el pre-registro (§4.2: 0863c240…); se guarda su sha256 LF, que es lo
+# que compara el candado del lector.
+def test_osf_local_entra_con_su_sha_lf_si_el_crudo_es_el_declarado(tmp_path):
+    import hashlib
+    (tmp_path / "osf.csv").write_bytes(b"a,b\r\n1,2\r\n")
+    crudo = hashlib.sha256(b"a,b\r\n1,2\r\n").hexdigest()
+    assert AM.entrada_local(tmp_path, "osf.csv", crudo) == hashlib.sha256(b"a,b\n1,2\n").hexdigest()
+
+
+def test_osf_local_con_otro_crudo_no_entra(tmp_path):
+    (tmp_path / "osf.csv").write_bytes(b"a,b\r\n1,3\r\n")
+    err = None
+    try:
+        AM.entrada_local(tmp_path, "osf.csv", "0" * 64)
+    except BaseException as e:  # noqa: BLE001
+        err = e
+    assert isinstance(err, SystemExit) and "no es el declarado" in str(err), repr(err)

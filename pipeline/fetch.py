@@ -329,6 +329,7 @@ def auth():
     # algún caller (test fixture, monkey-patch ajeno) lo deshizo entre
     # imports. Idempotente — no-op si ya está instalado.
     _install_profile_bypass()
+    _exigir_token_enviable()
     netrc_path_unix = os.path.expanduser("~/.netrc")
     netrc_path_win = os.path.expanduser("~/_netrc")
     has_netrc = os.path.exists(netrc_path_unix) or os.path.exists(netrc_path_win)
@@ -458,22 +459,59 @@ _CRED_DEAD_PAT = re.compile(
     r"|unauthorized",
     re.I)
 
+# S175 POR QUÉ: en la descarga earthaccess no conserva la respuesta ni su cuerpo; arma
+# DownloadFailure(f"Download failed for {url}. Status code: {status}") y el número queda
+# sólo en el texto. Se ancla a la frase completa para no leer un «401» suelto en una URL.
+_STATUS_DESCARGA_PAT = re.compile(r"Download failed for \S+ Status code: (\d{3})\b")
+
+# S175 POR QUÉ: lo único que un token puede tener para no salir nunca del runner es lo que
+# `requests` rechaza en una cabecera (CR o LF) o lo que `http.client` no sabe codificar
+# (fuera de latin-1). Esas fallas no son de red ni de credencial, terminaban en un WARN con
+# el token dentro y el NRT en verde. Cualquier otro token raro sí se envía y NASA contesta:
+# su 401 ya deja el rojo, y un validador más estricto podría tumbar un token que hoy sirve.
+_TOKEN_NO_ENVIABLE = re.compile(r"[\r\n]|[^\x00-\xff]")
+
+
+def _exigir_token_enviable() -> None:
+    """Aborta si EARTHDATA_TOKEN no se puede mandar en una cabecera HTTP.
+
+    POR QUÉ no se limpia: un secreto mal pegado debe verse el día de la rotación, y el
+    aviso rojo llega en la corrida siguiente. POR QUÉ el mensaje no lleva el token ni un
+    trozo: el log de este repositorio es público y un secreto multilínea puede escapar
+    al enmascarado de GitHub.
+    """
+    if _TOKEN_NO_ENVIABLE.search(os.environ.get("EARTHDATA_TOKEN") or ""):
+        raise EarthdataCredentialError(
+            "EARTHDATA_CREDENTIAL_INVALID [token]: el secret EARTHDATA_TOKEN tiene un salto de "
+            "línea o un carácter que no se puede enviar en una cabecera HTTP. Hay que volver a "
+            "pegarlo (ver docs/EARTHDATA_TOKEN_SETUP.md); no es un outage y reintentar no lo cura.")
+
 
 def _is_credential_dead(exc: BaseException) -> tuple[bool, int | None]:
     """¿Este error es 'la credencial no sirve' (y no 'la red falló')?
 
     Devuelve (es_credencial_muerta, status_http_si_se_pudo_recuperar).
     """
-    resp = (getattr(getattr(exc, "__cause__", None), "response", None)
-            or getattr(exc, "response", None))
+    # S175 POR QUÉ `is None` y no `or`: un requests.Response con status >= 400 vale falso,
+    # así que el `or` descartaba justo la respuesta del rechazo y el 401 quedaba sin leer.
+    resp = getattr(getattr(exc, "__cause__", None), "response", None)
+    if resp is None:
+        resp = getattr(exc, "response", None)
     code = getattr(resp, "status_code", None)
-    body = (str(exc) or "")[:400]
+    texto = str(exc) or ""
+    if code is None:
+        en_texto = _STATUS_DESCARGA_PAT.search(texto)
+        if en_texto:
+            code = int(en_texto.group(1))
     if code == 401:
         return True, 401
-    if code == 403 and _CRED_DEAD_PAT.search(body):
-        return True, 403
-    if code is None and _CRED_DEAD_PAT.search(body):
-        return True, None
+    # S175 POR QUÉ: un 5xx es del servidor aunque su página de error diga «unauthorized».
+    # Estos cortes pasan seguido y sólo deben saltar el gránulo. Con el status mal leído
+    # (el `or` de arriba) ese texto bastaba para matar la corrida.
+    if code is not None and code >= 500:
+        return False, code
+    if _CRED_DEAD_PAT.search(texto[:400]):
+        return True, code
     return False, code
 
 
@@ -533,6 +571,13 @@ _FALLAS: list = []
 # no es una falla; sin este conteo la cobertura decía «completa» aunque faltara una plataforma entera
 # (hallazgo 241 de docs/AUDIT_S160.md).
 _PLATAFORMAS: dict = {}
+
+# S176 (VPR966-01): si algo se bajó bien en esta corrida. POR QUÉ del proceso y no del volcán y la
+# fecha: el NRT baja 8 fechas en orden y deja el día en curso al final; a las 06 UTC ese día suele
+# tener una sola plataforma publicada. Con el contador por fecha, un 403 ahí abortaba mandando a
+# rotar un token que acababa de bajar días enteros. Se reinicia con limpiar_fallas(), no con
+# reset_transient_breakers(), que corre por fecha.
+_DESCARGA_BUENA: bool = False
 
 # S161: ceses anunciados por el operador de cada satélite. POR QUÉ esta lista y no una fecha aquí: es la
 # misma que lee la vigilancia por plataforma de #892 y que el tablero exige por prueba, así que si NASA
@@ -765,7 +810,9 @@ def fallas_de_cobertura() -> list[dict]:
 
 
 def limpiar_fallas() -> None:
-    """Olvida las fallas, el conteo por plataforma y las incidencias (inicio de una corrida)."""
+    """Olvida las fallas, el conteo por plataforma, las incidencias y la descarga buena (inicio de una corrida)."""
+    global _DESCARGA_BUENA
+    _DESCARGA_BUENA = False
     _FALLAS.clear()
     _PLATAFORMAS.clear()
     _INCIDENCIAS.clear()
@@ -1203,6 +1250,9 @@ def fetch_for_volcano(volcano: dict, date: datetime,
         all_platforms = [(p, l, g) for p, l, g in all_platforms if "NOAA20" not in p]
 
     fecha_str = date.strftime("%Y-%m-%d")
+    # S175: ver el cierre de este bucle.
+    global _DESCARGA_BUENA
+    rechazos_403 = 0
     # S159 (I1): el día en curso (o recién terminado) es parcial por construcción; una vez por volcán y día.
     if dia_incompleto(date, ahora):
         registrar_incidencia("dia_parcial", volcano.get("name", "?"), fecha_str, None,
@@ -1270,6 +1320,7 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             paths = []
             for l1b_g, geo_g in matched:
                 paths += download_granules([l1b_g, geo_g], platform_dir)
+                _DESCARGA_BUENA = True
             results[platform] = paths
         except EarthdataCredentialError:
             # S123: NO degradar. Este catch-all es justo donde el token expirado
@@ -1279,6 +1330,8 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             # muera ruidoso y con la causa en el mensaje.
             raise
         except Exception as e:
+            if etapa == "descarga" and _is_credential_dead(e)[1] == 403:
+                rechazos_403 += 1
             print(f"  WARN: Failed to fetch {platform}: {e}")
             results[platform] = []
             _registrar_falla(producto, fecha_str, f"{type(e).__name__}: {str(e)[:150]}", etapa=etapa)
@@ -1289,6 +1342,20 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             for f in _FALLAS[n_fallas_antes:]:
                 f["volcan"] = volcano.get("name", "?")
                 f["plataforma"] = f["plataforma"] or platform
+
+    # S175 POR QUÉ: un 403 de LAADS puede ser una colección con permiso propio o un throttling
+    # (S123: eso no debe matar el NRT), o un token que CMR acepta y LAADS no. earthaccess descarta
+    # el cuerpo, así que uno solo no los separa. Lo que sí los separa es el conjunto: si alguna
+    # descarga funcionó, el token sirve; si ninguna y hubo 403 (agotados ya sus reintentos), no hay
+    # nada que perder al abortar y sí un NRT verde sin datos que evitar.
+    # S176 (VPR966-01): «alguna» es de toda la corrida, ver _DESCARGA_BUENA. Si el token vence justo
+    # a mitad de corrida con un 403, esta no aborta y la siguiente, sin ninguna descarga buena, sí.
+    if rechazos_403 and not _DESCARGA_BUENA:
+        raise EarthdataCredentialError(
+            f"EARTHDATA_CREDENTIAL_INVALID [download]: {rechazos_403} plataforma(s) de "
+            f"{volcano.get('name', '?')} con HTTP 403 en la descarga y ninguna descarga buena en esta corrida. "
+            f"Hay que revisar y, si corresponde, **rotar** el secret EARTHDATA "
+            f"(ver docs/EARTHDATA_TOKEN_SETUP.md).")
 
     _resumen_hosts_caidos(volcano.get("name", "?"))  # S140 8d
     return results

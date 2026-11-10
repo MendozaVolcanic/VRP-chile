@@ -277,9 +277,14 @@ def test_control_positivo_noches_que_mirova_confirmo(corrida):
     """Recorrido INDEPENDIENTE del modulo: fila ALERTA del consolidado -> record nuestro del mismo
     volcan y sensor a +-2 min -> su valor tiene que ser mirova_confirmed.
     (1) Si el cruce estuviera roto (claves, zona horaria, bucket), estos records saldrian con otro
-    valor y falla. (2) Se exige n > 50: con la referencia muerta n seria 0 y el test falla igual."""
+    valor y falla. (2) Se exige n > 50: con la referencia muerta n seria 0 y el test falla igual.
+    S175 (F2-212): el clasificador aplica la regla D-9 (SN). Una pasada cuyas alertas son todas de 0,05 MW o
+    menos es una que MIROVA dice no ver, y deja de ser mirova_confirmed: se cuenta aparte y se exige que NO
+    salga confirmada (Lastarria VIIRS 375 2026-09-13 06:36, 0,04 MW en la tabla, es una)."""
     import csv
-    n = 0
+    from clase_mirova import aplicar_regla_minimas
+    minimas = aplicar_regla_minimas(cr.cargar_referencia()[0], "SN").minimas
+    n = n_min = 0
     docs = {v: json.loads((corrida["a"] / f"{v}.json").read_text(encoding="utf-8")) for v in cr.bp.VOLS}
     nuestros = {}
     for v in cr.bp.VOLS:
@@ -296,9 +301,14 @@ def test_control_positivo_noches_que_mirova_confirmo(corrida):
             t = datetime.strptime(row["Fecha_Satelite_UTC"][:16], "%Y-%m-%d %H:%M")
             for dt, k in nuestros.get((vol, b), []):
                 if abs(dt - t) <= timedelta(seconds=120):
+                    if (vol, b, row["Fecha_Satelite_UTC"][:16]) in minimas:
+                        n_min += 1
+                        assert docs[vol]["clasificacion"][k]["valor"] != "mirova_confirmed", (vol, k)
+                        continue
                     n += 1
                     assert docs[vol]["clasificacion"][k]["valor"] == "mirova_confirmed", (vol, k)
     assert n > 50, n
+    assert n_min >= 1, n_min
 
 
 def test_instrumento_muerto_sin_referencia_todo_es_sin_dato():

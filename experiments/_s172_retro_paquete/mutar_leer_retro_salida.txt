@@ -124,3 +124,40 @@ CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_mo
 resumen: {'ATRAPADA': 5, 'CAE': 1} | mutaciones reales: 5 | control de caida: 1
 salida 0
 # Total ronda 6: 5 de 5 atrapadas por asercion, 0 caidas en la misma corrida; el control de caida sale CAE.
+
+# S174 (ensayo de cenit con datos reales): --solo C2,Z,CONTROL, 2026-11-06T14:22Z
+C2 los controles de cenit no llegan al veredicto (VPR946-01): ATRAPADA | test_controles_de_cenit_en_rojo_llevan_a_la_fila_1, test_controles_de_cenit_con_error_interno_es_rojo, test_controles_de_cenit_sin_cenit_en_las_alertas_es_rojo | caídas en la misma corrida: 0
+Z1 0 pasadas evaluables vuelve a salir SIN SUSTRATO (ensayo S174, defecto 2): ATRAPADA | test_controles_de_cenit_sin_pasadas_evaluables_es_rojo | caídas en la misma corrida: 0
+Z2 alertas sin ningún cenit vuelven a salir SIN SUSTRATO (ensayo S174, defecto 2): ATRAPADA | test_controles_de_cenit_sin_cenit_en_las_alertas_es_rojo | caídas en la misma corrida: 0
+Z3 SIN SUSTRATO vuelve a rotularse OK (ensayo S174, defecto 1): ATRAPADA | test_controles_de_cenit_en_rojo_llevan_a_la_fila_1, test_controles_de_cenit_sin_sustrato_real_cuenta_como_ok, test_controles_de_cenit_sin_sustrato_dice_cuantas_noches_y_no_dice_ok | caídas en la misma corrida: 0
+Z4 SIN SUSTRATO deja de bloquear en cualquier control (ensayo S174, defecto 1): ATRAPADA | test_sin_sustrato_solo_no_bloquea_en_los_controles_de_cenit | caídas en la misma corrida: 0
+Z5 una excepción de la curva vuelve a rotularse SIN SUSTRATO (ensayo S174, menor a): ATRAPADA | test_curva_cenit_con_error_no_se_rotula_sin_sustrato | caídas en la misma corrida: 0
+CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_modis_via_mejor_que_k_no_se_contradice:NameError: name 'F4_NO_EXISTE' is not de, test_modis_pierde_protegida_que_k_publica:NameError: name 'F4_NO_EXISTE' is not de, test_modis_publica_de_mas_es_peor_que_k:NameError: name 'F4_NO_EXISTE' is not de
+resumen: {'ATRAPADA': 6, 'CAE': 1} | mutaciones reales: 6 | control de caida: 1
+salida 0
+# Total ronda S174: 6 de 6 atrapadas por asercion, 0 caidas en la misma corrida; el control de caida sale CAE.
+
+# S174, segunda vuelta de #952 (verificador limpio VPR952): --solo V0,CONTROL, 2026-11-07T04:51Z a 06:33Z, arbol quieto (sha256 de lector, medidor y bateria iguales antes y despues)
+V01a los controles de cenit con sustrato siempre dan OK (VPR952-01, P4): ATRAPADA | test_controles_de_cenit_con_nulo_sesgado_son_rojo_y_fila_1, test_controles_de_cenit_cazan_una_razon_doble_que_no_cancela_la_ganancia_pareja, test_controles_de_cenit_cazan_una_razon_doble_ciega_al_cenit | caídas en la misma corrida: 0
+V01b el nulo sesgado no pone ROJO (VPR952-01, P5): ATRAPADA | test_controles_de_cenit_con_nulo_sesgado_son_rojo_y_fila_1 | caídas en la misma corrida: 0
+V01c la ganancia pareja ya no se compara (VPR952-01, P6): ATRAPADA | test_controles_de_cenit_cazan_una_razon_doble_que_no_cancela_la_ganancia_pareja | caídas en la misma corrida: 0
+V01d la ganancia que crece con el cenit ya no se compara (VPR952-01, P7): ATRAPADA | test_controles_de_cenit_cazan_una_razon_doble_ciega_al_cenit | caídas en la misma corrida: 0
+V02a las noches del nulo informan las de la lectura (VPR952-02, P2): ATRAPADA | test_controles_de_cenit_sin_sustrato_cuenta_las_noches_de_verdad | caídas en la misma corrida: 0
+V02b las pasadas con cenit cuentan todas las alertas (VPR952-02, P3): ATRAPADA | test_controles_de_cenit_sin_sustrato_cuenta_las_noches_de_verdad, test_controles_de_cenit_con_cenit_nan_en_todas_las_alertas_es_rojo | caídas en la misma corrida: 0
+V03a un cenit NaN vuelve a contar como cenit en el chequeo de insumo (VPR952-03): ATRAPADA | test_controles_de_cenit_con_cenit_nan_en_todas_las_alertas_es_rojo | caídas en la misma corrida: 0
+V03b un cenit NaN vuelve a entrar a las pasadas de los controles (VPR952-03): ATRAPADA | test_controles_de_cenit_con_cenit_nan_en_todas_las_alertas_es_rojo | caídas en la misma corrida: 0
+V03c armar_pasadas deja pasar el cenit NaN (VPR952-03): ATRAPADA | test_armar_pasadas_deja_sin_cenit_un_cenit_nan | caídas en la misma corrida: 0
+V05a la línea de consola no dice que la curva no se leyó (VPR952-05): ATRAPADA | test_main_de_punta_a_punta_con_predicado_sintetico, test_main_avisa_r25_sin_osf_y_el_poder_del_sorteo, test_main_con_manifiesto_exige_las_referencias, test_main_con_manifiesto_exige_tambien_el_osf, test_la_linea_de_consola_dice_si_la_curva_de_cenit_no_se_leyo | caídas en la misma corrida: 0
+V05b main vuelve a imprimir la línea sin el aviso de la curva (VPR952-05): ATRAPADA | test_main_de_punta_a_punta_con_predicado_sintetico, test_main_avisa_r25_sin_osf_y_el_poder_del_sorteo, test_main_con_manifiesto_exige_las_referencias, test_main_con_manifiesto_exige_tambien_el_osf | caídas en la misma corrida: 0
+V06 el permiso de SIN SUSTRATO pasa a toda clave con «cenit» (VPR952-06, P1): ATRAPADA | test_sin_sustrato_solo_no_bloquea_en_los_controles_de_cenit | caídas en la misma corrida: 0
+CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_modis_via_mejor_que_k_no_se_contradice:NameError: name 'F4_NO_EXISTE' is not de, test_modis_pierde_protegida_que_k_publica:NameError: name 'F4_NO_EXISTE' is not de, test_modis_publica_de_mas_es_peor_que_k:NameError: name 'F4_NO_EXISTE' is not de
+resumen: {'ATRAPADA': 12, 'CAE': 1} | mutaciones reales: 12 | control de caida: 1
+salida 0
+# Total ronda VPR952: 12 de 12 atrapadas por asercion, 0 caidas en la misma corrida; el control de caida sale CAE. Antes del cambio, P1 a P7 del verificador (V06, V02a, V02b, V01a a V01d) sobrevivian la bateria completa en dd17fd97d.
+
+# S178 (2026-11-10), caja B4 por volcán: corrida `--solo C1,C2,C3,CONTROL` (las tres nuevas se llamaban C1 a C3; luego se renombraron CB1 a CB3 porque «C3» chocaba con la mutación C3 de C-cenit, que también corrió y salió ATRAPADA)
+C1 la caja se compara como un solo texto otra vez (S178): ATRAPADA | test_caja_b4_acepta_sens_en_cordon_caulle_y_def_en_el_resto, test_caja_b4_rechaza_def_en_cordon_caulle, test_caja_b4_es_la_del_script_que_la_puso_en_grillas | caídas en la misma corrida: 0
+C2 B4 olvida Tupungatito (S178): ATRAPADA | test_caja_b4_es_la_del_script_que_la_puso_en_grillas | caídas en la misma corrida: 0
+C3 B4 sin valor para los nueve (S178): ATRAPADA | test_caja_b4_acepta_sens_en_cordon_caulle_y_def_en_el_resto, test_caja_b4_rechaza_def_en_cordon_caulle, test_caja_b4_es_la_del_script_que_la_puso_en_grillas | caídas en la misma corrida: 0
+CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE
+resumen: {'ATRAPADA': 6, 'CAE': 1} (incluye la C3 vieja de C-cenit) | 3 de 3 nuevas atrapadas por aserción

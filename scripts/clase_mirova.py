@@ -32,10 +32,11 @@ referencia_mirova_unificada y banco_paridad).
 from __future__ import annotations
 
 import argparse
+import bisect
 import csv
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import NamedTuple, Optional
 
@@ -169,6 +170,98 @@ def aplicar_regla_minimas(filas, modo: str = MODO_MINIMAS, umbral_mw: float = UM
                 f["tipo"] = TIPO_MINIMA_SE
         out.append(f)
     return ReglaMinimas(out, minimas)
+
+
+# ---------------------------------------------------------------------------------------------------------
+# S175, decision 9 de docs/AUDIT_S175.md §8 (Nicolas, 2026-11-07): en MODIS y VIIRS 750 el VRP del OCR es un piso.
+#
+# POR QUE. MIROVA escribe en su imagen el VRP de MODIS y de VIIRS 750 truncado a entero, y su tabla (latest.php) lo
+# trae con decimales. Medido sobre la referencia unificada de data/mirova_reference/mirova_v1_snapshot (tabla hasta
+# el 2026-11-02, OCR hasta el 2026-11-07): en el OCR las 50 alertas MODIS y las 95 de VIIRS 750 son enteras (contando
+# tambien FALSO_POSITIVO y ALERTA_SIN_GEOMETRIA, las 52 y 118 filas con VRP); en la tabla 135 de 136 alertas MODIS
+# traen decimales; misma pasada, Chillan MODIS 2026-10-30 08:55, tabla 14,39 MW y OCR 14,0. VIIRS 375 si trae
+# decimales en el OCR (899 de 900 alertas) y no entra.
+# Regla: si la tabla tiene la pasada, su VRP manda y la fila del OCR no se usa (tabla_sobre_ocr); si solo hay OCR,
+# el VRP real esta entre v y v + 1 (techo_vrp). El corte de protegida es entero (1 MW), asi que el piso decide igual
+# que el valor real (v >= 1 es protegida y v = 0 no); lo que no se puede es usar v como magnitud.
+SENSORES_OCR_TRUNCADO = ("MODIS", "VIIRS750")
+
+
+def vrp_es_piso(fila: dict) -> bool:
+    """El VRP de la fila es el truncado de la imagen: viene del OCR en MODIS o VIIRS 750."""
+    return (fila.get("source") == "OCR" and fila.get("sensor_bucket") in SENSORES_OCR_TRUNCADO
+            and fila.get("vrp_mw") is not None)
+
+
+def techo_vrp(fila: dict) -> Optional[float]:
+    """Cota de arriba (exclusiva) del VRP real de la fila: v + 1 si es piso, v si no."""
+    v = fila.get("vrp_mw")
+    if v is None:
+        return None
+    return v + 1.0 if vrp_es_piso(fila) else v
+
+
+def _indice_tabla(filas, tabla) -> dict:
+    """(volcan, sensor) -> [(instante, es_alerta)] de las filas CONS de los sensores con OCR truncado, ordenado."""
+    idx = defaultdict(list)
+    for f in (filas if tabla is None else tabla):
+        if f.get("source") == "CONS" and f.get("sensor_bucket") in SENSORES_OCR_TRUNCADO and f.get("fecha_utc"):
+            idx[(f["volcano"], f["sensor_bucket"])].append((_instante(f["fecha_utc"]), f.get("tipo") in TIPOS_ALERTA))
+    for ts in idx.values():
+        ts.sort(key=lambda par: par[0])
+    return idx
+
+
+def _tabla_de_la_pasada(idx, f, ventana_s: int) -> list:
+    """`es_alerta` de cada fila CONS a `ventana_s` segundos o menos de la fila OCR `f`; vacia si `f` no es OCR o la
+    tabla no tiene la pasada. Una sola definicion para descartar y para contar (A102)."""
+    ts = idx.get((f.get("volcano"), f.get("sensor_bucket")))
+    if not ts or f.get("source") != "OCR" or not f.get("fecha_utc"):
+        return []
+    t = _instante(f["fecha_utc"])
+    ini, fin = t - timedelta(seconds=ventana_s), t + timedelta(seconds=ventana_s)
+    i = bisect.bisect_left(ts, ini, key=lambda par: par[0])
+    fuera = []
+    while i < len(ts) and ts[i][0] <= fin:
+        fuera.append(ts[i][1])
+        i += 1
+    return fuera
+
+
+def tabla_sobre_ocr(filas, tabla=None, ventana_s: int = VENTANA_S) -> list:
+    """`filas` sin las del OCR de MODIS y VIIRS 750 cuya pasada esta en la tabla: una fila CONS, de cualquier tipo,
+    del mismo volcan y sensor a `ventana_s` segundos o menos. `tabla`: filas donde buscar las CONS (por defecto las
+    mismas `filas`; el auto-audit pasa la referencia unificada, que trae tambien las RUTINA). No modifica nada.
+
+    DECIDIDO (VPR957-01, PR #957; Nicolas, 2026-11-08, «si a todo lo que recomiendes»): la tabla decide, tambien con
+    una fila RUTINA o FALSO_POSITIVO. Consecuencia aceptada: una alerta solo OCR de 1 MW o mas con tabla sin alerta deja
+    de ser protegida y su noche sale del recall. Como ese dano seria futuro y silencioso (medido en la referencia
+    unificada del snapshot, 47.631 filas: de 145 filas OCR de alerta de MODIS y VIIRS 750, 92 con tabla de alerta, 53
+    sin tabla y 0 con tabla sin alerta), `contar_ocr_descartadas` lo deja a la vista en el audit."""
+    filas = list(filas)
+    idx = _indice_tabla(filas, tabla)
+    return [f for f in filas if not _tabla_de_la_pasada(idx, f, ventana_s)]
+
+
+def contar_ocr_descartadas(filas, tabla=None, ventana_s: int = VENTANA_S) -> dict:
+    """Por sensor, las filas que `tabla_sobre_ocr` saca de `filas`: con alerta en la tabla (lo esperado) y sin alerta en
+    la tabla (el caso de VPR957-01), y de estas las que eran protegidas. Sensor sin descartes no aparece."""
+    filas = list(filas)
+    idx = _indice_tabla(filas, tabla)
+    out = {}
+    for f in filas:
+        cercanas = _tabla_de_la_pasada(idx, f, ventana_s)
+        if not cercanas:
+            continue
+        c = out.setdefault(f["sensor_bucket"], {"descartadas": 0, "con_alerta_en_tabla": 0, "sin_alerta_en_tabla": 0,
+                                                "protegidas_sin_alerta_en_tabla": 0})
+        c["descartadas"] += 1
+        if any(cercanas):
+            c["con_alerta_en_tabla"] += 1
+        else:
+            c["sin_alerta_en_tabla"] += 1
+            c["protegidas_sin_alerta_en_tabla"] += alerta_protegida(f)
+    return dict(sorted(out.items()))
 
 
 def pasadas_protegidas(filas, umbral: float = UMBRAL_PROTEGIDA_MW, lectura: str = "A") -> set:

@@ -273,6 +273,22 @@ def _sin_claves_s166(latest):
     return d
 
 
+def _sin_claves_s175(latest, hist):
+    """S175 (decisiones 5 y 9 de docs/AUDIT_S175.md, tests/test_paridad_s175.py): `recall_por_pasada` y
+    `magnitud_noches_vrp_piso` son posteriores al commit base. Sólo informan; el insumo no trae filas del OCR de
+    MODIS ni de VIIRS 750, así que ninguna noche sale de la magnitud y todo lo demás queda idéntico."""
+    d = copy.deepcopy(latest)
+    assert d.pop("recall_por_pasada")["por_sensor"]
+    assert d.pop("magnitud_noches_vrp_piso") == {}
+    for ev in list(d["por_detector"].values()) + [(d.get("plataformas") or {}).get("aparte") or {}]:
+        ev.pop("recall_por_pasada", None)
+        assert ev.pop("magnitud_noches_vrp_piso", {}) == {}
+    h = copy.deepcopy(hist)
+    for x in h:
+        x.pop("recall_por_pasada")
+    return d, h
+
+
 def test_no_regresion_las_claves_de_siempre_no_cambian(tmp_path, monkeypatch):
     """Antes = el mismo main() con el paso de estratos apagado. Todo lo que existía queda idéntico.
     Corre en el CI (no necesita historia git), a diferencia de la comparación contra el commit base."""
@@ -326,6 +342,9 @@ def test_no_regresion_contra_el_codigo_de_main_previo(tmp_path, monkeypatch):
     assert despues.pop("plataformas")["juzga_desde"] == {s: None for s in aa.SENSORS}
     for h in hist_d:
         assert h.pop("plataformas_juzga_desde") == {s: None for s in aa.SENSORS}
+    despues, hist_d = _sin_claves_s175(despues, hist_d)
+    # S177: el conteo informativo de la regla de la tabla; el insumo no descarta ninguna fila.
+    assert despues["cobertura"].pop("ocr_descartadas_por_tabla") == {}
     assert _sin_claves_nuevas(_sin_claves_s166(despues)) == antes
     assert despues["verdict"] == antes["verdict"]
     assert despues["avisos_detector"] == antes["avisos_detector"]

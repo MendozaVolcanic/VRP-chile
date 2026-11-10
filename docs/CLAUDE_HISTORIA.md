@@ -44,6 +44,8 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo: qué est�
 
 ## Misión vinculante (LEER ANTES DE TOCAR PIPELINE)
 
+> ⚠️ **S175 (A113; hallazgo 154 de `docs/AUDIT_S175.md`, PR #955): lo de «re-escribe las 8 fechas» y «hasta unos 8 días antes» de la marca S172 que sigue no se cumple**; la primera observación con la vía quedó 18,95 horas antes del encendido (detalle en la ficha v1.19, `docs/FICHA_SDA_VRP_CHILE.md`, y en la marca S175 de `docs/MISSION.md`). Texto conservado.
+>
 > ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde la primera corrida del NRT con la vía, después del merge del PR B
 > (#934, rama `claude/s173-modd-flip`), MODIS corre la vía «código MIROVA»; como cada corrida re-escribe las 8 fechas
 > de su ventana, también las pasadas observadas hasta unos 8 días antes quedan con la vía (regla

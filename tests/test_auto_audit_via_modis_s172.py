@@ -51,7 +51,9 @@ def test_detector_de_record_distingue_la_via_de_modis():
     assert aa.detector_de_record(_rec("2026-11-06"), FRONTERA) == "K"
     # la caída a K no es la vía; la vía de VIIRS no es la de MODIS
     assert aa.detector_de_record(_rec("2026-11-06", via="sin_mxd03"), FRONTERA) == "K"
-    assert aa.detector_de_record(_rec("2026-11-06", sensor="VIIRS_NOAA20_750", via=True), FRONTERA) == "K"
+    # S176: hasta S175 aquí daba K (la vía de VIIRS estaba apagada). Hoy tiene detector propio; lo fija
+    # tests/test_auto_audit_via_viirs_s176.py. Lo que no cambia: no es VIA_MODIS.
+    assert aa.detector_de_record(_rec("2026-11-06", sensor="VIIRS_NOAA20_750", via=True), FRONTERA) == "VIA_V750"
 
 
 def test_detector_de_noche_por_sensor():

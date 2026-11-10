@@ -10,6 +10,8 @@
 > reprocesó con K el histórico de los 11 Tier A desde el 2025-02-15; detalle en la marca S160 del inicio de
 > `docs/MISSION.md`. Texto conservado.
 >
+> ⚠️ **S175 (A113; hallazgos 251 y 252 de `docs/AUDIT_S175.md`, PR #955)**: desde el 2026-11-02 el MODIS de producción ya no corre K: corre la vía «código MIROVA» (#934, ficha v1.18), con la geolocalización de 1 km del MxD03 (98 de 98 records MODIS de los 11 Tier A desde el 2026-11-02 18:00 UTC traen `via_codigo_mirova: true`, verificador V3). K de MODIS sigue corriendo como guardia aparte y en los records que caen a K. Lo que abajo describe el MODIS de producción como K o con `_interp_geo` (el «Régimen vigente» y la marca S162 de §3) vale hoy sólo para VIIRS, la guardia K y los records que caen a K. La nota A85 de §5 («records MODIS de enero a junio de 2026 escritos con los gates intra-radio encendidos») quedó obsoleta con #883: esos records se reprocesaron con K (A85 de `CLAUDE.md`, corregida en #950). Texto conservado.
+>
 > **Cómo se usa**: antes de proponer una palanca, leer el síntoma acá, seguir los punteros y estratificar por
 > cenit, sensor, volcán y régimen (C0 antes del 2026-09-18, K después; antes y después de #535). Este archivo
 > **no es fuente de verdad**: resume y apunta. Si un puntero y este resumen discrepan, manda el puntero, salvo que
@@ -125,6 +127,7 @@ contra cat-b real, A72), no como número vigente. Un gate post-hoc sin clasifica
 > protegidas con cúmulo más cerca del cráter con MxD03 (mediana 1,46 km). Ahora es la divergencia **D35** del catálogo,
 > que trae la cita de MIROVA (Coppola 2026, PR #902), los matices del verificador y lo que falta para adoptar. Sigue
 > **abierta**: producción usa `_interp_geo` hasta que MxD03 entre con el paquete MODIS y con el sí de Nicolás (A45).
+> ⚠️ **S175**: ya entró: desde el 2026-11-02 la vía MODIS de producción usa el MxD03; ver la marca S175 del inicio.
 > Texto de abajo conservado por historia.
 
 **Medido**
@@ -193,7 +196,7 @@ contar un FN.
 **Antes de concluir «inerte»**: medir cuántos casos mueve y el nulo del instrumento (A116, A110); trazar por etapa
 (A75); paridad de cobertura entre brazos (A108, `experiments/_s143_evaluador/bajar_tramos.py --estricto`); no
 cruzar fronteras de régimen (A104: #535; frontera de K; A85, marca S153: records MODIS de enero a junio de 2026
-escritos con los gates intra-radio encendidos); despachar cada ventana desde un tag para no mezclar dos pipelines
+escritos con los gates intra-radio encendidos; ⚠️ S175: obsoleto desde #883, ver la marca del inicio); despachar cada ventana desde un tag para no mezclar dos pipelines
 (decisión D-15, rama `loop/activo`).
 
 ## 6. Run verde sin datos, o el aviso no llega

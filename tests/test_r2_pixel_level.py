@@ -50,6 +50,14 @@ try:
 except ImportError:
     HAVE_TIFFILE = False
 
+# Tabla de MIROVA (scraper Mirova-v1, commiteada): la referencia de si MIROVA vio algo en una pasada.
+TABLA_MIROVA = (REPO_ROOT / "data" / "mirova_reference" / "mirova_v1_snapshot"
+                / "registro_vrp_consolidado.csv")
+# Sensor del caso → columna Sensor de la tabla (en la tabla "VIIRS" es la de 750 m).
+SENSOR_TABLA_MIROVA = {"VIIRS750": "VIIRS", "VIIRS375": "VIIRS375", "MODIS": "MODIS"}
+# Sólo los volcanes de R2_CASES cuyo nombre en la tabla difiere del nuestro (A14).
+NOMBRE_TABLA_MIROVA = {"PuyehueCordonCaulle": "Puyehue-Cordon Caulle"}
+
 # Mapeo sensor del index (MIROVA) → prefijos sensor en records VRP-chile
 SENSOR_VRP_PREFIXES = {
     "MODIS":    ("MODIS_AQUA", "MODIS_TERRA"),
@@ -67,6 +75,16 @@ SENSOR_VRP_PREFIXES = {
 # 2026-05-08→2026-05-11) cruzados con records mirova_equivalent → propone 8
 # casos válidos con dist ≤ 1.6 km (validados en experiments/89_r2_candidates_scan.py).
 # Mantenemos Puyehue lacolito como ancla canónica original S35.
+#
+# S175 (salida en experiments/_s175_seguimientos_chicos/casos_r2_contra_tabla_salida.txt): tres casos
+# dejaron de tener con qué compararse. Tras el reproceso con K (#883), Villarrica y Llaima 2026-05-09
+# 06:36 (VIIRS 375) e Isluga MODIS 2026-05-10 07:15 son records sin detección, y la tabla de MIROVA da
+# 0,0 MW (RUTINA) en esas tres pasadas: los dos negativos coinciden, no es un FN. Se eligieron en S47
+# cruzando el archivo de TIF con NUESTROS records (el detector anterior), y su exp_vrp salió de nuestro
+# pc.vrp_mw o de la suma del TIF (experiments/89_r2_candidates_scan.py), no de lo que MIROVA publicó.
+# El MODIS de esa fecha sigue siendo K; la vía «código MIROVA» no tiene
+# records antes del 2026-11-02, así que este caso no la prueba. Quedan en la lista: si un reproceso
+# vuelve a detectar ahí, la geometría se compara; si MIROVA hubiera alertado, falla como FN.
 R2_CASES = [
     # Ancla histórica S35/S46 — PASS (lacolito Puyehue, inner=20 km)
     ("PuyehueCordonCaulle", "VIIRS375", "2026-05-09 05:42", 7.73, 0.18, "lacolito vs cráter"),
@@ -225,6 +243,35 @@ def _load_vrp_record_near(volcano, sensor_label, target_dt, profile="mirova_equi
     return best
 
 
+def _vrp_tabla_mirova(volcano, sensor_label, target_dt, tol_min=5):
+    """VRP (MW) que la tabla de MIROVA trae para la pasada (±tol_min), o None si no hay fila."""
+    tabla = pd.read_csv(TABLA_MIROVA, usecols=["Fecha_Satelite_UTC", "Volcan", "Sensor", "VRP_MW"])
+    filas = tabla[(tabla["Volcan"] == NOMBRE_TABLA_MIROVA.get(volcano, volcano))
+                  & (tabla["Sensor"] == SENSOR_TABLA_MIROVA[sensor_label])]
+    dif = (pd.to_datetime(filas["Fecha_Satelite_UTC"], errors="coerce") - target_dt).abs()
+    vrp = pd.to_numeric(filas.loc[dif <= pd.Timedelta(minutes=tol_min), "VRP_MW"], errors="coerce").dropna()
+    return None if vrp.empty else float(vrp.max())
+
+
+def _exigir_negativo_de_mirova(volcano, sensor_label, target_dt, hipotesis):
+    """Nuestro record no tiene posición (sin detección): sólo es aceptable si MIROVA tampoco vio nada.
+
+    POR QUÉ (S175): que exista el TIF no dice que MIROVA detectó. El TIF es un campo continuo que se
+    publica en cada pasada (D6), también en las de 0 MW. Quien dice si MIROVA vio algo es su tabla:
+    con 0 MW los dos negativos coinciden y no hay posición que comparar (skip con motivo); con VRP
+    mayor que 0 es un FN nuestro (falla), y sin fila no se puede afirmar que coinciden (falla).
+    """
+    vrp = _vrp_tabla_mirova(volcano, sensor_label, target_dt)
+    assert vrp is not None, (
+        f"R2 sin posición y sin fila en la tabla de MIROVA: {volcano} {sensor_label} {target_dt} "
+        f"({hipotesis}); no se puede afirmar que ambos sean negativos")
+    assert vrp == 0, (
+        f"R2 FN: MIROVA publicó {vrp} MW en {volcano} {sensor_label} {target_dt} ({hipotesis}) "
+        f"y nuestro record no tiene detección")
+    pytest.skip(f"{volcano} {sensor_label} {target_dt}: MIROVA 0 MW y nosotros sin detección; "
+                f"ambos negativos, no hay posición que comparar")
+
+
 @pytest.mark.r2_pixel_level
 @pytest.mark.parametrize(
     "volcano,sensor,granule_ts,exp_dist,exp_vrp,hipotesis",
@@ -249,6 +296,12 @@ def test_r2_pixel_level_match_mirova_tif(
          de factor [0.3, 3.0] del VRP TIF (paridad ±50% del paper MIROVA
          ampliada a 3× por differences en clustering — Coppola declara ±30%
          error VRP individual, casos sub-MW son más volátiles).
+
+    S175, alcance real de esta prueba: el TIF es un campo continuo sobre toda la escena (D6), con miles
+    de píxeles mayores que 0, y su centroide ponderado cae a menos de 2,1 km del centro de la escena
+    en los 7 casos (salida en experiments/_s175_seguimientos_chicos/casos_r2_contra_tabla_salida.txt).
+    Pasar aquí dice que nuestra posición está cerca del centro de la ROI, no que coincida con el píxel
+    que alertó MIROVA. Si el record no tiene detección, ver `_exigir_negativo_de_mirova`.
     """
     if not HAVE_TIFFILE:
         pytest.skip("tifffile no instalado")
@@ -299,10 +352,8 @@ def test_r2_pixel_level_match_mirova_tif(
         candidates.append(("final_hotspot", record["final_hotspot_lat"], record["final_hotspot_lon"]))
     if record.get("hotspot_lat") is not None and record.get("hotspot_lon") is not None:
         candidates.append(("hotspot", record["hotspot_lat"], record["hotspot_lon"]))
-    assert candidates, (
-        f"Record VRP-chile {volcano} {record.get('datetime_utc')} no tiene "
-        f"primary_cluster.centroid ni final_hotspot ni hotspot"
-    )
+    if not candidates:
+        _exigir_negativo_de_mirova(volcano, sensor, granule_time, hipotesis)
 
     dists = [
         (name, _haversine_km(tif_centroid[0], tif_centroid[1], la, lo))
@@ -341,6 +392,43 @@ def test_tif_archive_index_loadable():
         f"Index debe tener al menos una columna timestamp: {ts_cols}"
     )
     assert len(idx) > 0
+
+
+def test_tabla_mirova_distingue_cero_de_alerta():
+    """La lectura de la tabla responde lo que dice la fila, con controles positivos (corre en CI)."""
+    assert _vrp_tabla_mirova("Villarrica", "VIIRS375", pd.Timestamp("2026-05-09 06:36")) == 0
+    assert _vrp_tabla_mirova("Llaima", "VIIRS375", pd.Timestamp("2026-05-09 06:36")) == 0
+    assert _vrp_tabla_mirova("Isluga", "MODIS", pd.Timestamp("2026-05-10 07:15")) == 0
+    # Controles: si la lectura devolviera siempre 0, estos fallan.
+    assert _vrp_tabla_mirova("Lastarria", "VIIRS375", pd.Timestamp("2026-05-10 06:12")) == pytest.approx(0.05)
+    assert _vrp_tabla_mirova("Isluga", "VIIRS750", pd.Timestamp("2026-05-11 05:54")) == pytest.approx(0.27)
+    assert _vrp_tabla_mirova("PuyehueCordonCaulle", "VIIRS375", pd.Timestamp("2026-05-09 05:42")) == pytest.approx(0.18)
+    assert _vrp_tabla_mirova("Villarrica", "VIIRS375", pd.Timestamp("2020-01-01 00:00")) is None
+
+
+def test_sin_deteccion_solo_se_salta_si_mirova_tambien_dio_cero():
+    """Sin posición nuestra: 0 MW en la tabla se salta; una alerta de MIROVA o la falta de fila fallan.
+
+    (1) Si el skip se volviera incondicional, un FN real (MIROVA con VRP y nosotros sin detección)
+    pasaría como skip: el resultado se captura aparte y se compara por aserción, porque un skip
+    escapado dentro de `pytest.raises` dejaría esta prueba saltada y no roja. (2) Si la tabla no se
+    leyera, el caso de 0 MW no llegaría al skip.
+    """
+    def resultado(volcan, fecha):
+        try:
+            _exigir_negativo_de_mirova(volcan, "VIIRS375", pd.Timestamp(fecha), "caso")
+        except pytest.skip.Exception as e:
+            return "skip", str(e)
+        except AssertionError as e:
+            return "falla", str(e)
+        return "sigue", ""
+
+    estado, texto = resultado("Villarrica", "2026-05-09 06:36")
+    assert estado == "skip" and "ambos negativos" in texto, (estado, texto)
+    estado, texto = resultado("Lastarria", "2026-05-10 06:12")
+    assert estado == "falla" and "R2 FN" in texto, (estado, texto)
+    estado, texto = resultado("Villarrica", "2020-01-01 00:00")
+    assert estado == "falla" and "sin fila" in texto, (estado, texto)
 
 
 def test_r2_cases_documented():

@@ -416,7 +416,7 @@
     <span id="last-refresh-ts" style="font-size: 0.72rem; color: var(--muted); margin-left: 8px;" title="Último refresh automático global (15 min interval)"></span>
     <a href="diario.html" id="link-diario" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">📊 Vista Diaria</a> <a href="mosaico.html" id="link-mosaico" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">▦ Mosaico</a>
     <a href="experimental/" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">🧪 Laboratorio</a>
-    <a href="comparacion.html" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;" title="Preview S115: vistas de validación vs MIROVA (histograma distancia, scatter 1:1, extensión PCC)">⚖️ Comparación</a>
+    <a href="comparacion.html" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;" title="Preview S115: vistas de validación vs MIROVA (histograma distancia, scatter 1:1, extensión PCC)">⚖️ Comparación</a> <a href="preliminar_34.html" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;" title="34 volcanes fuera del NRT: sin referencia de MIROVA, paridad no medida">34 volcanes (preliminar)</a>
     <button id="btn-about" style="background:transparent;color:#7a8fa6;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;cursor:pointer;">ℹ️ Acerca de</button>
   </div>
 </header>
@@ -1529,18 +1529,18 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
   return { ...metricsOf(agg), byBucket };
 }
 
-// S89 #3 — mirova_confirmed: etiqueta por-record "MIROVA también vio esto".
-// Cruce con el ground truth EXTERNO (CSV consolidado MIROVA); por eso vive en
-// el frontend y NO en el pipeline (no acoplar el NRT a un CSV de scraping de
-// otro repo — design §4.2). Definición CONSISTENTE con el TP de computeMetrics:
-// existe ALERTA MIROVA (clasificacion != NULO/RUTINA, VRP>0) en el mismo bucket
-// de sensor dentro de ±60 min. NO se gatea por distancia: las distancias del
-// CSV (sobre todo OCR) son poco confiables, y un gate de 2 km haría
-// mirova_confirmed MÁS estricto que el recall que el dashboard ya reporta →
-// incoherente. La distancia MIROVA matcheada se guarda solo para el tooltip
-// (_mirova_dist_km). Campos transitorios prefijo "_" (derivados en cliente, no
-// persistidos). Excluyente con geo_class=extension por construcción (extension
-// = sin alerta MIROVA → no confirmado).
+// S89 #3, mirova_confirmed: "MIROVA también vio esto", cruce con el CSV externo de MIROVA (frontend, no pipeline,
+// design §4.2); sin gate de distancia (las del CSV son poco confiables), la matcheada va al tooltip. Campos "_".
+// S175 decisión 7 (F2-204, V2-04; Nicolás 2026-11-07). POR QUÉ: el operador lee «MIROVA publicó alerta térmica
+// en esta pasada», y hasta S175 bastaba cualquier alerta del mismo sensor a ±60 min (otra pasada, otro satélite)
+// o de 0,04 MW, que el banner de MIROVA llama NONE. Ahora es la vara del banco: la MISMA pasada a ±120 s
+// (scripts/clase_mirova.py::VENTANA_S) con D-9 (#811): en VIIRS 375 una alerta de 0,05 MW o menos cuenta como
+// «MIROVA no vio nada», salvo otra mayor del mismo sensor a ±120 s de ella (aplicar_regla_minimas). Ya NO es el
+// TP de computeMetrics ni corroboracionMirova (siguen a ±60 min sin D-9: el panel de recall es otra decisión).
+// Exime de los filtros de artefacto: 0 cambian (experiments/_s175_confirmo_pasada/). Constantes = clase_mirova (guard s175).
+const MIROVA_PASADA_MS = 120 * 1000;
+const MIROVA_MINIMA_MW = 0.05;
+const MIROVA_MINIMA_BUCKETS = ["VIIRS375"];
 function enrichWithMirovaConfirmation(ourRecords, mirovaRecords) {
   const mByBucket = { MODIS: [], VIIRS375: [], VIIRS750: [] };
   for (const m of mirovaRecords) {
@@ -1553,18 +1553,21 @@ function enrichWithMirovaConfirmation(ourRecords, mirovaRecords) {
     const t = parseUtcMs(m.datetime_utc);
     if (!Number.isFinite(t)) continue;
     const dist = parseFloat(m.distancia_km ?? m.Distancia_km ?? "");
-    mByBucket[b].push({ t, dist: Number.isFinite(dist) ? dist : null });
+    const minima = MIROVA_MINIMA_BUCKETS.includes(b) && vrp <= MIROVA_MINIMA_MW + 1e-9;
+    mByBucket[b].push({ t, dist: Number.isFinite(dist) ? dist : null, minima });
   }
-  for (const k of Object.keys(mByBucket)) mByBucket[k].sort((a, b) => a.t - b.t);
-  const TOL_MS = 60 * 60000;
+  for (const k of Object.keys(mByBucket)) {  // D-9: una mínima sobrevive sólo con una alerta mayor a ±120 s
+    const altas = mByBucket[k].filter(a => !a.minima).map(a => a.t);
+    mByBucket[k] = mByBucket[k].filter(a => !a.minima || altas.some(t => Math.abs(t - a.t) <= MIROVA_PASADA_MS)).sort((a, b) => a.t - b.t);
+  }
   function nearest(list, t) {
     if (!list.length) return -1;
     let lo = 0, hi = list.length - 1;
     while (lo < hi) { const mid = (lo + hi) >> 1; if (list[mid].t < t) lo = mid + 1; else hi = mid; }
-    let best = -1, bestDt = TOL_MS + 1;
+    let best = -1, bestDt = MIROVA_PASADA_MS + 1;
     for (let i = Math.max(0, lo - 1); i <= Math.min(list.length - 1, lo + 1); i++) {
       const dt = Math.abs(list[i].t - t);
-      if (dt <= TOL_MS && dt < bestDt) { best = i; bestDt = dt; }
+      if (dt <= MIROVA_PASADA_MS && dt < bestDt) { best = i; bestDt = dt; }
     }
     return best;
   }
@@ -1576,10 +1579,7 @@ function enrichWithMirovaConfirmation(ourRecords, mirovaRecords) {
     const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t)) continue;
     const idx = nearest(mByBucket[b], t);
-    if (idx >= 0) {
-      r._mirova_confirmed = true;
-      r._mirova_dist_km = mByBucket[b][idx].dist;
-    }
+    if (idx >= 0) { r._mirova_confirmed = true; r._mirova_dist_km = mByBucket[b][idx].dist; }
   }
 }
 
@@ -1855,7 +1855,7 @@ function monitoringFreshness(lastTimeStr) {
   // Sin ningún registro = volcán sin pull de datos (no monitoreado), NO una caída
   // del NRT → estado NEUTRO (gris), no rojo de alarma. El rojo se reserva para un
   // Tier A que SÍ se monitorea pero quedó stale (problema real de adquisición).
-  if (!lastTimeStr) return { cls: "mon-none", txt: "sin datos (no monitoreado)", h: null };
+  if (!lastTimeStr) return { cls: "mon-none", txt: "sin datos en este tablero", h: null };
   const h = (Date.now() - parseUtcMs(lastTimeStr)) / 3600000;
   const ago = h < 1 ? Math.round(h * 60) + " min"
             : h < 48 ? Math.round(h) + " h"
@@ -2352,7 +2352,7 @@ function buildCards() {
                                     : "— sin publicación de MIROVA";
       mrow.title = det.mirova
         ? "MIROVA publicó una alerta térmica para este volcán en la misma pasada (universo CONS ∪ OCR)."
-        : "MIROVA no publicó nada en esta pasada. No significa que la detección sea falsa: "
+        : "Sin alerta de MIROVA a ±2 min de este gránulo, o sólo una de 0,05 MW o menos (su banner la llama NONE). La misma pasada pudo salir en el gránulo vecino: si hay otra fila del mismo satélite a 5 o 6 min, mírala. No significa que la detección sea falsa: "
         + "la mayoría de estos casos son anomalías térmicas reales por debajo del umbral que "
         + "MIROVA publica (regla A54). Sí conviene mirarlos con el ΔT a la vista.";
     }
@@ -3065,7 +3065,7 @@ function renderDetail() {
         : pixels.slice(0, PIXEL_CAP_PER_RECORD);
 
       renderPixels.forEach((px, pxIdx) => {
-        const size = Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5));
+        const size = Number.isFinite(px.vrp_mw) ? Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5)) : 4; // S175 V33A-01, POR QUÉ: los píxeles de la vía MODIS «código MIROVA» no traen vrp_mw (MIROVA da la suma, D32); leerlo daba radio NaN y un TypeError que cortaba el dibujo de los records siguientes. Sin energía: radio mínimo y el popup lo dice. En la misma línea para no correr las citas archivo:línea. Guard: tests/test_mapa_todos_los_pixels_s175.py
         const isPrimary = pxIdx === 0;
         const pxOpacity = isPrimary ? recencyOpacity : recencyOpacity * 0.7;
         const ventOnly = isVentOnly || px.vent_only;
@@ -3111,9 +3111,9 @@ function renderDetail() {
           weight: isPrimary ? 1.5 : 0.8,
           fillColor: color, fillOpacity: pxOpacity, dashArray: null,
         }));
-        // S89 #3: anillo verde si MIROVA confirmó esta detección (mismo bucket
-        // de sensor ±60 min). Convención: anillo verde = MIROVA-backed (TP que
-        // el dashboard ya cuenta en recall); relleno naranja = extensión real
+        // S89 #3: anillo verde si MIROVA confirmó esta detección (misma pasada,
+        // ±120 s con D-9, S175 decisión 7). Convención: anillo verde = MIROVA-
+        // backed (más estricto que el recall, que va a ±60 min); naranja = extensión real
         // no-MIROVA. Excluyentes por construcción. Solo sobrescribe el borde,
         // el relleno (sensor/summit/far/extension) queda intacto.
         if (r._mirova_confirmed) {
@@ -3154,7 +3154,7 @@ function renderDetail() {
           (multiPixel
             ? `<small style="color:#888">Σ escena (diagnóstico, NO es el VRP): ${recordTotalVrp.toFixed(3)} MW (${nPix} pixels)</small><br>`
             : '') +
-          (multiPixel ? `<b>Este pixel:</b> ${px.vrp_mw.toFixed(4)} MW (pixel #${pxIdx+1})<br>` : '') +
+          (multiPixel ? `<b>Este pixel:</b> ${Number.isFinite(px.vrp_mw) ? px.vrp_mw.toFixed(4) + " MW" : "sin dato de VRP por pixel"} (pixel #${pxIdx+1})<br>` : '') +
           `BT max: ${tempC(px.bt_k)}<br>` +
           `Distancia al cráter: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}`
         );
@@ -3942,7 +3942,7 @@ function buildNRTTable() {
       ? ("MIROVA publicó alerta térmica en esta pasada"
          + (det.record._mirova_dist_km != null
             ? " (a " + det.record._mirova_dist_km.toFixed(1) + " km según ellos)" : "") + ".")
-      : "MIROVA no publicó nada en esta pasada. No la invalida: la mayoría de estos casos son "
+      : "Sin alerta de MIROVA a ±2 min de este gránulo, o sólo una de 0,05 MW o menos (su banner la llama NONE). La misma pasada pudo salir en el gránulo vecino: si hay otra fila del mismo satélite a 5 o 6 min, mírala. No la invalida: la mayoría de estos casos son "
         + "anomalías térmicas reales bajo el umbral que MIROVA publica (A54).";
     row.append(tdDate, tdVolc, tdVrp, tdMir, tdSensor);
     tbody.appendChild(row);

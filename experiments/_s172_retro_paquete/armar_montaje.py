@@ -19,8 +19,15 @@ QUÉ HACE Y QUÉ NO (no se inventa lo que falta):
   * Cada diferencia sale con `explicada_por: None`; se llena a mano con «hunk» (y el hunk) u «otro_granulo» después de
     re-correr la pasada, antes de leer F26.
 
+S178 (2026-11-10, opción A aprobada por Nicolás; declaración en experiments/_s178_montaje/PROPUESTA_C_MONTAJE.md de
+loop/activo, commit c592ac2d2, escrita antes de correr): los tres comparadores propios y los tags de origen quedan
+fijados. Los adaptadores y comparadores viven en montaje_ab.py (pruebas tests/test_montaje_ab_s178.py, mutaciones
+mutar_montaje_ab.py). Lo único que sigue a mano es re-correr con el código del tag de origen una diferencia que no
+explique otro gránulo: mientras quede una sin explicar, el estado no empieza por OK.
+
 Uso: python armar_montaje.py --despacho s172-retro-d2 --origen "MOD-D fase 4=TAG" --origen "V375-E=TAG"
-     --origen "V750-B=TAG" --via-dm DIR --ab-dm "MOD-D fase 4=DIR" [--ab-dm ...] --salida montaje.json
+     --origen "V750-B=TAG" --via-dm DIR --modd DIR [--modd DIR ...] --v375e DIR [...] --v750b DIR=TAG [...]
+     --salida montaje.json
 """
 from __future__ import annotations
 
@@ -45,63 +52,51 @@ ORIGENES = L.ORIGENES_MONTAJE
 # texto al diff listado, no explica nada por sí solo.
 ARCHIVOS_VIA = ("pipeline/mirova_v750_codigo.py", "pipeline/process_modis.py", "pipeline/process_viirs.py",
                 "pipeline/process_viirs_mod.py", "pipeline/profile.py", "pipeline/store.py", "pipeline/grillas_mirova.yaml")
-PENDIENTES = (
-    "MOD-D fase 4: comparador de la máscara (campo del record sin fijar)",
-    "V375-E: comparador de la lectura lejana (campo del record sin fijar)",
-    "V750-B: comparador de la banda de triangulación de V750-A §4.1 (campo del record sin fijar)",
-    "re-correr cada pasada distinta con el código del tag de origen (para «explicada_por: hunk»)",
-    "qué tag de cada A/B es el de origen (TAGS_MONTAJE_ESPERADOS en leer_retro.py)",
-)
+PENDIENTES = ()            # S178: los cinco de S173 quedaron fijados por la declaración (ver arriba)
 TOL_VRP = 1e-3
 
+_sm = importlib.util.spec_from_file_location("montaje_ab_para_armar", AQUI / "montaje_ab.py")
+MA = importlib.util.module_from_spec(_sm)
+sys.modules["montaje_ab_para_armar"] = MA
+_sm.loader.exec_module(MA)
 
-def listar_diff(tags, despacho):
+
+def listar_diff(tags, despacho, extra=()):
     partes = []
-    for o in ORIGENES:
-        r = subprocess.run(["git", "diff", tags[o], despacho, "--", *ARCHIVOS_VIA], cwd=RAIZ, capture_output=True,
+    for o, t in [(o, tags[o]) for o in ORIGENES] + list(extra):
+        r = subprocess.run(["git", "diff", t, despacho, "--", *ARCHIVOS_VIA], cwd=RAIZ, capture_output=True,
                            text=True, encoding="utf-8")
         if r.returncode != 0:
-            raise SystemExit(f"MONTAJE: git diff {tags[o]} {despacho} falló: {r.stderr.strip()[:200]}")
-        partes.append(f"=== {o}: git diff {tags[o]} {despacho} -- {' '.join(ARCHIVOS_VIA)}\n"
+            raise SystemExit(f"MONTAJE: git diff {t} {despacho} falló: {r.stderr.strip()[:200]}")
+        partes.append(f"=== {o}: git diff {t} {despacho} -- {' '.join(ARCHIVOS_VIA)}\n"
                       + (r.stdout if r.stdout.strip() else "(sin diferencias)\n"))
     return "".join(partes)
 
 
-def _vrp(r):
-    return float(((r or {}).get("primary_cluster") or {}).get("vrp_mw") or 0.0)
-
-
-def comparar(via, ab):
-    """Pasada por pasada (clave volcán, sensor, hora): presencia, VRP del cúmulo a 0,001 MW y clase de distancia."""
-    out = []
-    for key in sorted(set(via) | set(ab), key=lambda x: (x[0], str(x[1]), str(x[2]))):
-        p = "%s|%s|%s" % (key[0], key[1], str(key[2])[:16])
-        rv, ra = via.get(key), ab.get(key)
-        if rv is None or ra is None:
-            out.append({"pasada": p, "campo": "falta_en_via" if rv is None else "falta_en_ab", "explicada_por": None})
-            continue
-        if abs(_vrp(rv) - _vrp(ra)) > TOL_VRP:
-            out.append({"pasada": p, "campo": "vrp_mw", "via": _vrp(rv), "ab": _vrp(ra), "explicada_por": None})
-        elif (rv.get("distance_class") or None) != (ra.get("distance_class") or None):
-            out.append({"pasada": p, "campo": "distance_class", "via": rv.get("distance_class"),
-                        "ab": ra.get("distance_class"), "explicada_por": None})
-    return out
-
-
-def armar(tags, despacho, via_dm, abs_dm):
-    difs = []
+def armar(tags, despacho, via_idx, refs, extra_tags=()):
+    """`via_idx` de montaje_ab.indexar_via; `refs` = {origen: {clave: ref}}. OK sólo si cada origen trae al menos una
+    pasada comparada (un A/B sin pasadas no prueba nada) y toda diferencia viene explicada."""
+    difs, n = [], {}
     for o in ORIGENES:
-        sens = {"MOD-D fase 4": ("MODIS",), "V375-E": ("VIIRS375",), "V750-B": ("VIIRS750",)}[o]
-        v = {k: r for k, r in via_dm.items() if L.bucket(k[1]) in sens}
-        difs += [dict(x, origen=o) for x in comparar(v, abs_dm.get(o) or {})]
-    estado = "PENDIENTE: " + "; ".join(PENDIENTES) if PENDIENTES else "OK"
-    return {"estado": estado, "tags": dict(tags), "despacho": despacho, "diff_listado": listar_diff(tags, despacho),
+        r = refs.get(o) or {}
+        n[o] = len(r)
+        difs += MA.comparar(via_idx, r, o, comparar_dc=(o == "MOD-D fase 4"))
+    vacios = [o for o in ORIGENES if not n[o]]
+    sin_expl = [d for d in difs if d["explicada_por"] is None]
+    if vacios:
+        estado = f"ROJO: sin pasadas comparadas de {vacios}"
+    elif sin_expl:
+        estado = f"PENDIENTE: {len(sin_expl)} diferencias sin explicar (re-correr con el código del tag de origen)"
+    else:
+        estado = "OK"
+    return {"estado": estado, "tags": dict(tags), "despacho": despacho,
+            "diff_listado": listar_diff(tags, despacho, extra_tags), "pasadas_comparadas": n,
             "diferencias": difs, "pendientes": list(PENDIENTES)}
 
 
-def _par(s):
+def _par(s, validos=ORIGENES):
     o, _, v = s.partition("=")
-    if o not in ORIGENES or not v:
+    if (validos is not None and o not in validos) or not v:
         raise SystemExit(f"MONTAJE: origen desconocido o vacío: {s!r} (orígenes {ORIGENES})")
     return o, v
 
@@ -111,17 +106,28 @@ def main(argv=None):
     ap.add_argument("--despacho", required=True)
     ap.add_argument("--origen", action="append", required=True)
     ap.add_argument("--via-dm", required=True)
-    ap.add_argument("--ab-dm", action="append", default=[])
+    ap.add_argument("--modd", action="append", default=[], help="carpeta con f4_parte*.jsonl de MOD-D fase 4")
+    ap.add_argument("--v375e", action="append", default=[], help="carpeta con resultados_VIIRS375_*.json de V375-E")
+    ap.add_argument("--v750b", action="append", default=[], help="CARPETA=TAG de un run de V750-B")
     ap.add_argument("--salida", required=True)
     a = ap.parse_args(argv)
     tags = dict(_par(x) for x in a.origen)
     if set(tags) != set(ORIGENES):
         raise SystemExit(f"MONTAJE: hace falta un tag por origen {ORIGENES}")
     via, _ = L.cargar_carpeta(a.via_dm)
-    abs_dm = {o: L.cargar_carpeta(d)[0] for o, d in (_par(x) for x in a.ab_dm)}
-    out = armar(tags, a.despacho, via, abs_dm)
-    Path(a.salida).write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"C-MONTAJE: {out['estado'][:80]} | {len(out['diferencias'])} diferencias -> {a.salida}")
+    via_idx = MA.indexar_via(via)
+    modd = MA.cargar_modd(MA.leer_jsonl(sorted(f for c in a.modd for f in Path(c).rglob("f4_parte*.jsonl"))))
+    v375 = MA.cargar_v375e(MA.leer_resultados(a.v375e, "resultados_VIIRS375_*.json"))
+    v750, extra = {}, []
+    for x in a.v750b:
+        d, _, t = x.partition("=")
+        v750.update(MA.cargar_v750b(MA.leer_resultados([d], "resultados_*.json"), tag=t or None))
+        if t and t != tags["V750-B"] and ("V750-B", t) not in extra:
+            extra.append(("V750-B", t))
+    out = armar(tags, a.despacho, via_idx, {"MOD-D fase 4": modd, "V375-E": v375, "V750-B": v750}, extra)
+    Path(a.salida).write_text(json.dumps(out, ensure_ascii=False, indent=1, default=list), encoding="utf-8")
+    print(f"C-MONTAJE: {out['estado'][:100]} | comparadas {out['pasadas_comparadas']} | "
+          f"{len(out['diferencias'])} diferencias -> {a.salida}")
     print("validar_montaje:", L.validar_montaje(out)["estado"])
     return 0
 

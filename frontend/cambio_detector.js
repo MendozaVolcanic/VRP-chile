@@ -138,8 +138,40 @@
   // la vía; y la caída a K de la vía (la clave con un texto, "sin_mxd03") no cuenta ni como vía ni como K. Las vistas
   // sólo le pasan los records con notarRecords (una llamada por vista, A102); sin records de la vía no se dibuja nada.
   // El auto-audit usa la misma fecha (scripts/auto_audit_weekly.py, frontera_via_modis).
-  const COLOR_MODIS = "#ff8c00";       // el naranja de la serie MODIS del tablero
-  let viaModis = null;                 // ISO UTC de la primera pasada de la vía, o null
+  //
+  // S176: lo mismo para cada VIIRS (diseño docs/superpowers/specs/2026-11-08-encendido-v375e-design.md, decisiones 4 y 7).
+  // POR QUÉ: con la vía, K deja de publicar el núcleo recortado y la magnitud sube cerca del doble (VIIRS 375: razón mediana
+  // contra MIROVA 0,50 con K y 0,99 con la vía en la sombra; VIIRS 750: K publica 0,510 de MIROVA y el código 0,999,
+  // experiments/_s162_v750c/INFORME.md punto 3). Sin marca, el operador lee que el volcán crece. Cada sensor se enciende y se
+  // revierte por separado (B1 y B2), así que cada uno tiene su fecha, su aviso y su línea. Sin records de la vía no se
+  // dibuja nada: con los flags apagados el tablero no cambia.
+  const VIAS = {
+    MODIS: {
+      color: "#ff8c00", fondo: "rgba(255,140,0,0.08)", idAviso: "aviso-cambio-via-modis", idPlugin: "cambioViaModis",
+      rotulo: "MODIS: vía MIROVA", dy: 34, serie: /^MODIS/,
+      texto: dia => "Desde el " + dia + " la serie de MODIS viene de la vía «código MIROVA» (el detector que MIROVA publicó " +
+        "en su código), que reemplazó al detector K en MODIS; VIIRS no cambia. Desde esa fecha la magnitud de MODIS " +
+        "sube y aparecen alertas que K callaba: un escalón en la serie de MODIS en esa fecha es un cambio del detector, " +
+        "no del volcán. En Nevados de Chillán ese escalón no quiere decir que la erupción crece.",
+    },
+    VIIRS375: {
+      color: "#e91e63", fondo: "rgba(233,30,99,0.08)", idAviso: "aviso-cambio-via-v375", idPlugin: "cambioViaV375",
+      rotulo: "VIIRS 375: vía MIROVA", dy: 46, serie: /^VIIRS\b.*375/,
+      texto: dia => "Desde el " + dia + " la serie de VIIRS 375 viene de la vía «código MIROVA» (el detector que MIROVA " +
+        "publicó en su código), que reemplazó al detector K en VIIRS 375. Desde esa fecha la magnitud de VIIRS 375 sube " +
+        "cerca del doble, porque K publicaba el núcleo del cúmulo y la vía suma todos los píxeles alertados: un escalón en " +
+        "esa fecha es un cambio del detector y no quiere decir que el volcán crezca.",
+    },
+    VIIRS750: {
+      color: "#00bcd4", fondo: "rgba(0,188,212,0.08)", idAviso: "aviso-cambio-via-v750", idPlugin: "cambioViaV750",
+      rotulo: "VIIRS 750: vía MIROVA", dy: 58, serie: /^VIIRS\b.*750/,
+      texto: dia => "Desde el " + dia + " la serie de VIIRS 750 viene de la vía «código MIROVA» (el detector que MIROVA " +
+        "publicó en su código), que reemplazó al detector K en VIIRS 750. Desde esa fecha la magnitud de VIIRS 750 sube " +
+        "cerca del doble: un escalón en esa fecha es un cambio del detector, no del volcán.",
+    },
+  };
+  const COLOR_MODIS = VIAS.MODIS.color;   // el naranja de la serie MODIS del tablero
+  const desdeVia = { MODIS: null, VIIRS375: null, VIIRS750: null };   // ISO UTC de la primera pasada de cada vía, o null
 
   function isoDeRecord(dt) {
     const s = String(dt || "").trim().replace(" ", "T");
@@ -149,19 +181,27 @@
   }
 
   // S173 S1: ¿el record lo escribió la vía «código MIROVA»? Un solo lugar para la marca (A102): lo usan
-  // primeraViaModis y los filtros de artefacto térmico de las tres vistas (isCirrusArtifact, isDiffuseFieldArtifact),
+  // primeraVia y los filtros de artefacto térmico de las tres vistas (isCirrusArtifact, isDiffuseFieldArtifact),
   // que no se aplican a la vía porque se calibraron contra el path D de K, que la vía no tiene. `=== true`: la clave
   // con texto ("sin_grilla", "sin_mxd03", "geo_distinta") es K que corrió con la vía encendida (A118).
   function esViaCodigoMirova(r) {
     return !!r && r.via_codigo_mirova === true;
   }
 
-  // Fecha ISO de la primera pasada MODIS de la vía con una de K antes, o null.
-  function primeraViaModis(records) {
+  // La convención de sensores del proyecto (A48): VIIRS_*_750 es M-band; los demás VIIRS, I-band.
+  function familiaSensor(sensor) {
+    const s = String(sensor || "");
+    if (s.indexOf("MODIS") === 0) return "MODIS";
+    if (s.indexOf("VIIRS") !== 0) return null;
+    return /_750$/.test(s) ? "VIIRS750" : "VIIRS375";
+  }
+
+  // Fecha ISO de la primera pasada de la vía del sensor con una de K antes, o null.
+  function primeraVia(records, familia) {
     let primeraK = null;
     const via = [];
     for (const r of records || []) {
-      if (!r || String(r.sensor || "").indexOf("MODIS") !== 0) continue;
+      if (!r || familiaSensor(r.sensor) !== familia) continue;
       const t = isoDeRecord(r.datetime_utc);
       if (t == null) continue;
       if (esViaCodigoMirova(r)) via.push(t);
@@ -174,36 +214,37 @@
     return despues.length ? new Date(Math.min.apply(null, despues)).toISOString() : null;
   }
 
-  function textoAvisoModis(desde) {
+  function primeraViaModis(records) { return primeraVia(records, "MODIS"); }
+
+  function textoAvisoVia(familia, desde) {
     const dia = diaLegible(desde);
-    if (dia == null) return null;
-    return "Desde el " + dia + " la serie de MODIS viene de la vía «código MIROVA» (el detector que MIROVA publicó " +
-      "en su código), que reemplazó al detector K en MODIS; VIIRS no cambia. Desde esa fecha la magnitud de MODIS " +
-      "sube y aparecen alertas que K callaba: un escalón en la serie de MODIS en esa fecha es un cambio del detector, " +
-      "no del volcán. En Nevados de Chillán ese escalón no quiere decir que la erupción crece.";
+    return dia == null ? null : VIAS[familia].texto(dia);
   }
 
-  function insertarAvisoModis(doc, desde) {
-    const txt = textoAvisoModis(desde);
+  function textoAvisoModis(desde) { return textoAvisoVia("MODIS", desde); }
+
+  function insertarAvisoVia(familia, doc, desde) {
+    const v = VIAS[familia];
+    const txt = textoAvisoVia(familia, desde);
     if (txt == null || !doc || !doc.body) return null;
-    const ya = doc.getElementById ? doc.getElementById("aviso-cambio-via-modis") : null;
+    const ya = doc.getElementById ? doc.getElementById(v.idAviso) : null;
     if (ya) {
       // otro volcán trajo una fecha anterior: se corrige el texto (nodo de texto guardado al crearlo)
       if (ya._texto) ya._texto.nodeValue = txt + " ";
       return ya;
     }
     const div = doc.createElement("div");
-    div.id = "aviso-cambio-via-modis";
+    div.id = v.idAviso;
     div.setAttribute("role", "note");
-    div.style.cssText = "margin:6px 16px;padding:6px 10px;border:1px solid " + COLOR_MODIS + ";border-radius:4px;" +
-      "color:" + COLOR_MODIS + ";background:rgba(255,140,0,0.08);font-size:0.85rem;line-height:1.4;";
+    div.style.cssText = "margin:6px 16px;padding:6px 10px;border:1px solid " + v.color + ";border-radius:4px;" +
+      "color:" + v.color + ";background:" + v.fondo + ";font-size:0.85rem;line-height:1.4;";
     div._texto = doc.createTextNode(txt + " ");
     div.appendChild(div._texto);
     const a = doc.createElement("a");
     a.href = FICHA_URL;
     a.target = "_blank";
     a.rel = "noopener";
-    a.style.color = COLOR_MODIS;
+    a.style.color = v.color;
     a.appendChild(doc.createTextNode("Ficha SDA"));
     div.appendChild(a);
     const avisoK = doc.getElementById ? doc.getElementById("aviso-cambio-detector") : null;
@@ -213,45 +254,55 @@
     return div;
   }
 
-  // Las vistas llaman esto con los records de cada volcán apenas los cargan. Guarda la fecha más temprana de todos los
-  // volcanes, pone o actualiza el aviso y redibuja los gráficos ya dibujados. Devuelve la fecha vigente (o null).
+  function insertarAvisoModis(doc, desde) { return insertarAvisoVia("MODIS", doc, desde); }
+
+  // Las vistas llaman esto con los records de cada volcán apenas los cargan. Guarda, por sensor, la fecha más temprana de
+  // todos los volcanes, pone o actualiza el aviso y redibuja los gráficos ya dibujados. Devuelve la fecha de MODIS
+  // (lo que siempre devolvió; las de VIIRS se leen con viaDesde).
   function notarRecords(records, doc) {
-    const t = primeraViaModis(records);
-    if (t != null && (viaModis == null || Date.parse(t) < Date.parse(viaModis))) {
-      viaModis = t;
-      const d = doc || (typeof raiz !== "undefined" ? raiz.document : null);
-      insertarAvisoModis(d, viaModis);
+    let cambio = false;
+    Object.keys(VIAS).forEach(familia => {
+      const t = primeraVia(records, familia);
+      if (t != null && (desdeVia[familia] == null || Date.parse(t) < Date.parse(desdeVia[familia]))) {
+        desdeVia[familia] = t;
+        const d = doc || (typeof raiz !== "undefined" ? raiz.document : null);
+        insertarAvisoVia(familia, d, t);
+        cambio = true;
+      }
+    });
+    if (cambio) {
       const C = typeof raiz !== "undefined" ? raiz.Chart : null;
       if (C && C.instances) Object.values(C.instances).forEach(c => { if (c && c.draw) c.draw(); });
     }
-    return viaModis;
+    return desdeVia.MODIS;
   }
 
-  // ¿El gráfico muestra nuestra serie de MODIS? Sí si tiene un dataset visible rotulado «MODIS...» (index, diario), o
-  // si todos sus datasets van sin rótulo (la barra de mosaico, que suma los tres sensores). La referencia de MIROVA
+  // ¿El gráfico muestra nuestra serie de ese sensor? Sí si tiene un dataset visible con su rótulo (index, diario), o si
+  // todos sus datasets van sin rótulo (la barra de mosaico, que suma los tres sensores). La referencia de MIROVA
   // («MIROVA MODIS (ref.)») no es nuestra serie.
-  function muestraModis(chart) {
+  function muestraSensor(chart, familia) {
     const ds = (chart && chart.data && chart.data.datasets) || [];
     if (!ds.length) return false;
     const visible = i => !(chart.isDatasetVisible && !chart.isDatasetVisible(i));
     if (ds.every(d => !d.label)) return ds.some((d, i) => visible(i));
-    return ds.some((d, i) => /^MODIS/.test(String(d.label || "")) && visible(i));
+    return ds.some((d, i) => VIAS[familia].serie.test(String(d.label || "")) && visible(i));
   }
 
-  function crearPluginViaModis() {
+  function crearPluginVia(familia) {
+    const v = VIAS[familia];
     return {
-      id: "cambioViaModis",
+      id: v.idPlugin,
       afterDatasetsDraw(chart) {
-        const t = msDelCambio(viaModis);
+        const t = msDelCambio(desdeVia[familia]);
         const x = chart && chart.scales ? chart.scales.x : null;
-        if (t == null || !x || x.type !== "time" || !muestraModis(chart)) return false;
+        if (t == null || !x || x.type !== "time" || !muestraSensor(chart, familia)) return false;
         if (t < x.min || t > x.max) return false;
         const px = x.getPixelForValue(t);
         const area = chart.chartArea;
         if (!isFinite(px) || !area) return false;
         const ctx = chart.ctx;
         ctx.save();
-        ctx.strokeStyle = COLOR_MODIS;
+        ctx.strokeStyle = v.color;
         ctx.lineWidth = 1.5;
         if (ctx.setLineDash) ctx.setLineDash([6, 3]);
         ctx.beginPath();
@@ -259,18 +310,21 @@
         ctx.lineTo(px, area.bottom);
         ctx.stroke();
         if (ctx.setLineDash) ctx.setLineDash([]);
-        ctx.fillStyle = COLOR_MODIS;
+        ctx.fillStyle = v.color;
         ctx.font = "10px sans-serif";
-        ctx.fillText("MODIS: vía MIROVA", px + 3, area.top + 34);
+        ctx.fillText(v.rotulo, px + 3, area.top + v.dy);
         ctx.restore();
         return true;
       },
     };
   }
 
+  function crearPluginViaModis() { return crearPluginVia("MODIS"); }
+
   const CambioDetector = { CAMBIO_DETECTOR_UTC, DATOS_K_DESDE_UTC, textoAviso, insertarAviso, crearPlugin, fechaLegible,
-    primeraViaModis, esViaCodigoMirova, notarRecords, textoAvisoModis, insertarAvisoModis, crearPluginViaModis,
-    viaModisDesde: () => viaModis };
+    primeraViaModis, primeraVia, esViaCodigoMirova, notarRecords, textoAvisoModis, textoAvisoVia, insertarAvisoModis,
+    insertarAvisoVia, crearPluginViaModis, crearPluginVia, familiaSensor,
+    viaModisDesde: () => desdeVia.MODIS, viaDesde: familia => desdeVia[familia] };
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = CambioDetector;
@@ -281,8 +335,8 @@
     // sin tocar el código de cada gráfico. En los que no son de tiempo, el plugin no hace nada. La línea va en la
     // frontera de los DATOS (S155), no en la hora del merge.
     if (DATOS_K_DESDE_UTC != null && raiz.Chart && raiz.Chart.register) raiz.Chart.register(crearPlugin(DATOS_K_DESDE_UTC));
-    // S172: el plugin de MODIS se registra siempre; no dibuja nada hasta que notarRecords encuentre la vía.
-    if (raiz.Chart && raiz.Chart.register) raiz.Chart.register(crearPluginViaModis());
+    // S172: los plugins de la vía se registran siempre; no dibujan nada hasta que notarRecords encuentre la vía.
+    if (raiz.Chart && raiz.Chart.register) Object.keys(VIAS).forEach(f => raiz.Chart.register(crearPluginVia(f)));
     if (DATOS_K_DESDE_UTC != null && raiz.document) {
       const poner = () => insertarAviso(raiz.document, DATOS_K_DESDE_UTC, CAMBIO_DETECTOR_UTC);
       if (raiz.document.readyState === "loading") raiz.document.addEventListener("DOMContentLoaded", poner);

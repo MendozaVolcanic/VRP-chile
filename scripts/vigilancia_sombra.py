@@ -421,10 +421,17 @@ def avisos_perfiles(prod, sombra):
 
 
 def claves_via():
-    """S172 (mini auditoría MA172-101/302): claves (volcán, sensor, 'YYYY-MM-DD HH:MM') de los records MODIS de
-    producción con `via_codigo_mirova: true`, leídas de data/mirova_equivalent/ con la misma función del auto-audit.
-    El banco de paridad no copia esa marca, así que se cruza por clave."""
-    return aa.claves_via_modis(aa.cargar_records()[0])
+    """S172 (mini auditoría MA172-101/302): claves (volcán, sensor, 'YYYY-MM-DD HH:MM') de los records de producción con
+    `via_codigo_mirova: true`, leídas de data/mirova_equivalent/ con la misma función del auto-audit. El banco de paridad
+    no copia esa marca, así que se cruza por clave. S176: de cualquier sensor, para el encendido de los dos VIIRS."""
+    return aa.claves_via(aa.cargar_records()[0])
+
+
+def sensores_de_k(via):
+    """S176: los sensores de producción que siguen en K: los que no tienen records de la vía. Sin esto, la vigilancia de
+    K quedaría ciega tres días después del encendido de cualquier sensor."""
+    con_via = {aa.our_bucket(str(k[1] or "")) for k in (via or ())}
+    return [s for s in aa.SENSORS if s not in con_via]
 
 
 def cargar_insumos(win, via=None):
@@ -470,7 +477,7 @@ def evaluar(hoy):
                      rachas_juzgadas=leer_rachas_juzgadas())
     # S172: desde el encendido de la vía, MODIS de producción ya no es K y su frescura de K no se exige (si no, esta
     # vigilancia quedaría ciega para siempre tres días después del encendido). Sin records de la vía, lo de siempre.
-    sensores_k = [s for s in aa.SENSORS if not (via and s == "MODIS")]
+    sensores_k = sensores_de_k(via)
     avisos = (avisos_referencia(filas, hoy) + avisos_sombra(sombra, hoy)
               + avisos_produccion(prod, hoy, sensores=sensores_k) + avisos_perfiles(prod, sombra))
     # Un aviso no tapa una reversión ni una investigación: sólo impide que la falta de disparos se lea como VERDE.
