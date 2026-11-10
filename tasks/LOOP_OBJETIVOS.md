@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): verificador limpio de la lectura: VÁLIDA CON RESERVAS (ninguna cambia un veredicto)
+- Sonnet, sin contexto: re-corrió el lector con las mismas entradas y dio JSON idéntico; 16 sha256 LF del manifiesto iguales al disco; pre-registro sin cambios; OSF por hash del archivo entero (sin agujero); aplanados sin faltantes ni sobrantes (47 + 176 + 30 trozos); K de disco igual a `e7cfbaf54`; C-montaje regenerado igual; filas del §8.1 bien derivadas.
+- Reservas: C-montaje con poco poder (celdas alertadas en 12 de 343 MODIS, 51 de 166 V375, 32 de 440 V750; el resto coincide en vacío); la banda acepta todo [mín, máx] (V375 mediana 0,0024 MW, máx 0,073; V750 mediana 0,089, máx 0,371); «SIN SUSTRATO no bloquea» de los controles de cenit es de S174, posterior al sello; placebo de 750 sin «separa» (cubierto por el techo de fila 4); sorteo §7 SIN PODER. La de lotes de V375-E duplicados quedó cerrada por la coordinadora: 2 pasadas en dos lotes, 0 discrepan.
+
 ### 2026-11-10 08:51 UTC (S178): retrospectiva LEÍDA con candado (verificador limpio en curso)
 - Nicolás: «Sí, opción 1» (banda de triangulación en VIIRS 375, *post hoc*, anotada en la declaración). C-montaje OK: 949 pasadas, 0 diferencias (#979 `caf2b24e3`).
 - Ref de lectura: tag `s178-retro-lectura` (rama `claude/s178-retro-lectura`) = `s172-retro-d2` + lector de #979 (`cd48bc133`) + referencias congeladas (CONS `811c4c07`, OCR `01c9478d`). Manifiesto de 16 archivos, pre-registro igual al sello; el OSF (fuera de git) entra por su sha256 en bruto `0863c240`. Excepciones C-K: ninguna. Lectura en `ff8a39972`.
