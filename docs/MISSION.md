@@ -24,6 +24,21 @@
 > El laboratorio (`experimental`) y el ancla de los tests pre-K (`_s146_ab_control`) declaran la vía apagada. Una
 > serie MODIS que cruce la primera pasada de la vía mezcla dos detectores: el tablero la marca y el auto-audit separa el
 > detector `VIA_MODIS` (A104). Tag defensivo `pre-s171-adopcion-modd`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.18.
+>
+> ⚠️ **S177 B1 (A113; PROPUESTA en borrador: rige sólo desde el merge del PR B1, rama `claude/s177-b1-v375`): VIIRS 375
+> de producción deja de ser K.** Desde la primera corrida del NRT con la vía después del merge, `mirova_equivalent` corre
+> en VIIRS 375 la **vía «código MIROVA»** (`enable_v375_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`, familia
+> VIIRS375): el gránulo pasado a la grilla de 375 m de MIROVA, su detector, su fondo y la suma de todos los alertados.
+> Por qué: K publica el núcleo de un cúmulo ya recortado y da 0,504 de la potencia de MIROVA, la vía 0,993 (sombra,
+> n 31, pasadas con alerta del 2026-11-03 al 11-07). Decisión de Nicolás del 2026-11-08 (diseño del encendido de
+> VIIRS). K de VIIRS sigue como guardia (`pipeline/profiles/guardia_k_viirs.yaml`, vigilancia
+> `scripts/vigilancia_guardia_viirs.py`) con reversión pre-autorizada por `git revert -m 1` del merge de B1, sin tocar
+> VIIRS 750 (regla `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md` §4, que se sella antes del
+> merge). Toda frase de este documento que describa VIIRS 375 de producción con K (la marca S153 de abajo, el núcleo
+> `f5_core_vrp_mw`, lo que dependa de ellos en VIIRS 375) describe el estado previo en VIIRS 375 y se conserva por
+> historia. El laboratorio (`experimental`), `experimental_ndc_focus`, el ancla de los tests pre-K (`_s146_ab_control`)
+> y la guardia K de MODIS declaran la vía de VIIRS 375 apagada. VIIRS 750 va aparte (B2). Tag defensivo
+> `pre-s178-b1-b2`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.21 (propuesta).
 
 > ⚠️ **S153: el detector de la réplica cambió (adopción de K; marca A113).** Desde el merge del PR de adopción,
 > `mirova_equivalent` corre (1) **sin el Test 1 integrado en el ROI** (D30: no está en el paper y hacía publicar en
