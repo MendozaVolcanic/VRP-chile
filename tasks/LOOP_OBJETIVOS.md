@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 17:44 UTC (S179): b3 contestada; guía de Fable 5.2 escrita; plan de auditoría pre-registrado
+- Nicolás: «Sí, b3 primero». Guía `C:\Users\nmend\OneDrive\Escritorio\claude\GUIA_PROMPTING_prompting-claude-fable-5-2.md` desde la página oficial (copia íntegra `..._ORIGINAL.md`, sha256 `6e2ad08d`); hook `fable_prompting_guide.py` pasa a 5.2 (probado: inyecta con `fable`, calla con otro modelo); nota en `GUIA_MAESTRA_AUDITORIAS.md` §5. Lo que más nos toca de 5.2: sigue al pie de la letra la cautela acumulada (encargos sólo con las prohibiciones de la tarea y una línea con lo que no necesita aprobación) y «Finishing work» reemplaza al bloque de autonomía de 5.1.
+- Plan `docs/PLAN_AUDITORIA_S179.md` con cuatro frentes (A MODIS, B VIIRS, C instrumento y retrospectiva, D planes), Fable 5.2 a `high`, verificador Opus 5.5 por frente, control ciego de 11 líneas base que no va en los prompts, prompts armados por `experiments/_s179_audit/armar_prompts.py` (0 huecos). Costo estimado 2,7 a 3,8 millones de tokens. Espera el sí de Nicolás para lanzar.
+- Al abrir: P4 (run 42749607584, reintento de Copahue) en cola; guardia K de VIIRS 0 de 3 (primera corrida 19:35 UTC); #968 y #969 envejecidos (las vigilancias desde el 11-10 salen verdes).
+
 ### 2026-11-10 17:25 UTC (S178): cierre
 - Traspaso en `tasks/BLOQUE_ARRANQUE_S179.md`. P4 terminó 163 de 165; los 2 trozos de Copahue (salida 3 con `--estricto-cobertura`) relanzados con `gh run rerun --failed` a las 17:22 UTC (en curso al cerrar). Ningún agente vivo. main no integrado en loop/activo (284 commits). Memoria: `project_s178_estado`, `feedback_s178_lecciones`.
 
