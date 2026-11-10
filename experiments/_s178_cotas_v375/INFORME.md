@@ -49,6 +49,7 @@ El método escrito no dice cómo juntar una ventana nueva con la vieja. Opciones
 | B. O + F26-V por día | 11 | 15 | suma conteos y días; F26-V tiene menos pasadas VIIRS por noche en la tabla (A119 b), lo que baja la tasa por día |
 | B-rad. como B, F26-V con el brazo radiante | 13 | 15 | el record de la vía publica hoy con radiante; O no tiene ese brazo |
 | C. O + F26-V por pasada de la clase | 12 | 17 | tasa por pasada, llevada a las pasadas de cada clase que O ve en 125 días; no depende de la exposición de la tabla |
+| C-rad. como C, F26-V con el brazo radiante | 14 | 17 | C con el brazo que la vigilancia cuenta; F26-V radiante: 3 de 139 Muy Bajo, 5 de 528 de más |
 | D. O + DM | 14 | 14 | cuenta dos veces del 1 al 16 de octubre (DM está dentro de O; Planchón-Peteroa 2026-10-15 05:18 sale en las dos) y el pre-registro dice que DM es control de montaje, no evidencia (§3.2) |
 | E. B + R25 en (i) | 6 | 15 | define «Muy Bajo OSF» sin texto que lo escriba; el OSF está filtrado y reprocesado (A105) |
 
@@ -63,7 +64,13 @@ porque en febrero y marzo la vía calló una sola Muy Bajo de 139 contra 2 de 97
   arriba. En F26-V el radiante calla 3 Muy Bajo y el cercano 1; en (ii) dan lo mismo.
 - Sin recomendación firme: la elección es de Nicolás. Dos preguntas: (1) ¿cómo se suma (A, B, C)? (2) ¿con qué brazo
   se mide F26-V, el que decide (cercano) o el que la vigilancia cuenta (radiante)? Con radiante, las cotas quedan
-  más cerca de las vigentes (B-rad: 13 y 15).
+  más cerca de las vigentes (B-rad: 13 y 15; C-rad: 14 y 17).
+- Matiz del verificador limpio (S178, que confirmó las cotas): B compara tasas por día con exposiciones distintas.
+  En F26-V sólo NOAA-20 es evaluable, porque la tabla no trae NOAA-21 antes del 2026-04-09, y además expone menos
+  pasadas VIIRS por noche; O tiene NOAA-20 y NOAA-21. Sumar días mezcla esas dos exposiciones y baja la tasa. C lo
+  corrige por construcción: suma por pasada de la clase y lleva la tasa a la exposición de O. Como la vigilancia
+  cuenta el radiante (`scripts/vigilancia_guardia_viirs.py:149`, `bp.cargar_nuestros` sobre el record de
+  producción), la variante que junta las dos correcciones es **C-rad: 14 y 17**.
 - D y E no deberían usarse sin decisión expresa (doble conteo; definición inventada).
-- No verificado: verificador limpio de este cálculo; C con el brazo radiante no está calculada; los números crudos
+- No verificado: verificador limpio de C-rad (se agregó después del verificador); los números crudos
   son chicos (1, 2, 3, 5) y el Poisson no incluye la incertidumbre de la tasa.
