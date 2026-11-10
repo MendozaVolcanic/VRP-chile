@@ -85,6 +85,9 @@ def test_la_linea_va_en_la_frontera_de_los_datos_y_el_aviso_dice_las_dos_fechas(
     const deK = registrados.filter(x => x.id === "cambioDetector");
     const p = deK[0];
     const t = Date.parse(ventana.CambioDetector.DATOS_K_DESDE_UTC);
+    // S178: la línea sólo se dibuja si hay datos anteriores a la frontera; se le pasa uno del día anterior.
+    ventana.CambioDetector.notarRecords([{ sensor: "VIIRS_NOAA20",
+      datetime_utc: new Date(t - 86400000).toISOString().slice(0, 16).replace("T", " ") }]);
     const trazos = [];
     const ctx = new Proxy({}, { get: (o, k) => (k in o ? o[k] : (...a) => trazos.push([k, ...a])),
                                 set: (o, k, v) => { o[k] = v; return true; } });
