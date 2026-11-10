@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 06:14 UTC (S178): P1 avanza hasta C-montaje, que no se puede correr como quedó sellado
+- Nicolás dijo «Sí, sigue con eso» (P1 y el revisor de la guardia). #976 con CI verde (pytest y bateria-v750a); espera su frase de merge. P4 (run 42749607584) en 33 de 165 trozos a las 05:57, 0 fallas.
+- **C-K verde, sin excepciones** (commit `2bfc9164b`, antes de leer F26): K-gemelo de D3 contra K de disco `origin/main` `e7cfbaf54`, 3.138 pasadas, 0 diferencias, cobertura OK, c_k_puro OK; control con 6 alteraciones inyectadas, 6 atrapadas. `experiments/_s178_ck/`. La lectura tiene que usar ese mismo K de disco (`e7cfbaf54`).
+- **Defecto del lector, arreglado con TDD** (rama `claude/s178-caja-b4`, worktree `D:/vrp-trabajo/worktrees/s178-caja`): L2 comparaba la caja de VIIRS 750 contra un solo texto, pero B4 es `sens` en Cordón Caulle y Tupungatito y `def` en los nueve (D2 lo confirma: 359 y 219 `sens`, el resto `def`). 4 pruebas nuevas, 3 rojas antes; batería 84 de 84 verde; mutaciones C1 a C3 en curso.
+- **C-montaje bloquea los tres sensores**: el §6 nombra campos que los A/B no guardaron como records (V375-E y V750-B midieron port y oráculo; la máscara de MOD-D está en npz) y ningún documento declara el tag de origen. Datos y tags ubicados (agente Explore). Propuesta con recomendación en `experiments/_s178_montaje/PROPUESTA_C_MONTAJE.md` (commit `254cefb9c`): DECIDE NICOLÁS.
+- V750-A sigue en BORRADOR (#964): la lectura va con `--v750a-sellado no` (techo de VIIRS 750: DECIDE NICOLÁS). Caja: `--caja-v750 B4`.
+- P8 (revisor de la guardia y de la sombra) encargado a un agente con worktree propio; PR en borrador.
+
 ### 2026-11-10 04:09 UTC (S178): b3 en borrador (#976)
 - Nicolás contestó b3 («Sí, quítalo»). Tag `pre-s178-quitar-aviso-k` en main `6402aaa1e`; worktree `D:/vrp-trabajo/worktrees/s178-aviso`, rama `claude/s178-quitar-aviso-k`, punta `d3f24924e`.
 - No se borra `DATOS_K_DESDE_UTC`: la leen `scripts/vigilancia_sombra.py` (sin ella, VIGILANCIA_CIEGA) y `scripts/auto_audit_weekly.py`. El aviso K y su línea salen ahora de los datos: sólo si `notarRecords` recibe un record anterior a la frontera. Prueba nueva roja antes (3 de 4) y verde después; dos mutaciones atrapadas por aserción; suite local 3.507 verdes y las 2 fallas de main (`test_guard_libro_de_pruebas_s146`); en navegador las tres vistas sin aviso K, con los de la vía MODIS y Suomi NPP. Ficha v1.21 (choca con la ficha de #974 y #975: el segundo en entrar se rebasa). Falta CI y la frase de Nicolás.
