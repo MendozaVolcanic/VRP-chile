@@ -302,3 +302,21 @@ reemplazo y cuenta archivos de `data/`.
 | 1 | Los cuatro frentes, o recortar | los cuatro; si hay que recortar, D primero (sus tres huecos más graves ya están anotados en #981) |
 | 2 | Verificador de otro modelo por frente | sí, Opus 5.5 a `high`; recortar verificadores es lo último |
 | 3 | Lanzar ya o esperar la primera corrida de la guardia (19:35 UTC) | ya: ningún frente necesita esa corrida; B la anota si llega |
+
+## 9. Adenda antes del lanzamiento (2026-11-10 20:36 UTC)
+
+Nicolás dejó la elección en el orquestador («lo que recomiendes»). Se lanzan **los cuatro frentes**, como recomendaba
+§8: el semanal de todos los modelos estaba en 33 % y el de Fable en 25 % (`get_usage`, misma hora), y el costo
+estimado es de 3 a 4 % de la cuota. La idea de recortar a B y D salió de las mediciones exploratorias de hoy
+(`experiments/_s179_perdidas/`, `experiments/_s179_chillan/`), pero esas mediciones no tienen verificador: no
+reemplazan a los frentes A y C.
+
+Línea base roja agregada con esta adenda, antes de lanzar y fuera de los prompts (que no cambian; sha256 en
+`experiments/_s179_audit/prompts/SHA256.txt`):
+
+| frente | defecto conocido | dónde quedó escrito |
+|---|---|---|
+| D | ningún plan abierto dice qué pasa con las alertas diurnas de MIROVA (D-10, #813): 162 filas de alerta de abril a noviembre, 138 de 1 MW o más, 63 de Chillán; ni el plan de reemplazo ni el de los 34 las nombran (grep de «diurn», «D-10», «#813» en 0472cd95e: 0) | `experiments/_s179_perdidas/INFORME.md` §2 |
+
+Se descartó como línea base que la retrospectiva no cubra la erupción de Chillán: el propio pre-registro lo declara
+(`PREREGISTRO_RETRO_PAQUETE.md` l. 47 en 0472cd95e). Main avanzó a `4cf5fe62e`; la base sigue fijada en §1.
