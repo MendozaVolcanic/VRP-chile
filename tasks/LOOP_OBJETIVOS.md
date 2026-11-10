@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): #982 en main (regla de reversión de VIIRS sellada)
+- Nicolás: «Mergea #982». Mergeado con CI verde y `--match-head-commit f05e6b140` (merge `a9bd0313b`). Comprobado en `origin/main`: `COTAS` = VIIRS 375 14/17 y VIIRS 750 12/2; cabecera «SELLADA el 2026-11-10». Las cotas empiezan a contar desde cada encendido.
+
 ### 2026-11-10 (S178): #983 = B2 integrado sobre B1 (borrador, CI verde): OJO, enciende los dos
 - Rama `claude/s178-b2-sobre-b1` (`e68819484`): punta de #975 con #974 y main integrados por `git merge`. **Contiene B1 y B2: mergear #983 antes que #974 enciende VIIRS 375 y 750 a la vez.** Uso previsto: #974 primero (renumerado a v1.22 de la ficha, porque #976 tomó la v1.21 y hoy choca), después #983 (v1.23). Las 8 pruebas en conflicto quedan con las dos vías encendidas sin debilitar aserciones. #974 y #975 intactos. Suite local con los mismos 45 fallos de línea base (worktree sin `data/`); CI verde.
 - Ojo con la ficha: el PR de los avisos (agente en curso) también sube una versión; habrá que renumerar en cadena según el orden real de merge.
