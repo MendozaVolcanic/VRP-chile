@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 04:40 UTC (S178): b3 en borrador (#976)
+- Nicolás contestó b3 («Sí, quítalo»). Tag `pre-s178-quitar-aviso-k` en main `6402aaa1e`; worktree `D:/vrp-trabajo/worktrees/s178-aviso`, rama `claude/s178-quitar-aviso-k`, punta `d3f24924e`.
+- No se borra `DATOS_K_DESDE_UTC`: la leen `scripts/vigilancia_sombra.py` (sin ella, VIGILANCIA_CIEGA) y `scripts/auto_audit_weekly.py`. El aviso K y su línea salen ahora de los datos: sólo si `notarRecords` recibe un record anterior a la frontera. Prueba nueva roja antes (3 de 4) y verde después; dos mutaciones atrapadas por aserción; suite local 3.507 verdes y las 2 fallas de main (`test_guard_libro_de_pruebas_s146`); en navegador las tres vistas sin aviso K, con los de la vía MODIS y Suomi NPP. Ficha v1.21 (choca con la ficha de #974 y #975: el segundo en entrar se rebasa). Falta CI y la frase de Nicolás.
+
 ### 2026-11-10 03:28 UTC (S178): P4 despachado; la guardia K de VIIRS escribe pero su revisor da falso rojo
 - Nicolás contestó b2 («Sí, despacha ahora»). Run 42749607584, tag nuevo `s178-retro-historia` sobre `a7a6ae360` (el mismo commit de D2 a D4: desde ahí `pipeline/` sólo cambió en `fetch.py` por #966, manejo de errores del token, nada de detección), perfil `_s172_retro_paquete`, 11 Tier A, ventanas 2026-01-01:01-31, 2026-04-01:09-30 y 2026-10-17:11-09. Plan simulado en local con el `plan_trozos.py` del commit: 164 trozos, 2.587 volcán-días, todos tramo OTRO con C-via mínimo 100 %. `max-parallel` 6 como D4; sale dentro de la franja 01 a 12 UTC que §10.3 prefiere evitar (Nicolás pidió «ahora»).
 - **No entra Tupungatito antes del 2026-02-23** (unos 370 volcán-días de los «unos 2.900» del bloque): el planificador sellado lo rehúsa (§3.2, sin referencia de MIROVA). Para el reemplazo de la historia hace falta otra vía de despacho; decisión pendiente (P6).
