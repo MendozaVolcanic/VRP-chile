@@ -320,14 +320,18 @@ def test_de_punta_a_punta_la_sombra_escribe_solo_en_su_carpeta_y_produccion_qued
     assert r["distance_class"] in ("summit", "far")
 
 
-def test_control_el_mismo_camino_con_produccion_no_toma_la_via(tmp_path):
-    """Control del de arriba: con mirova_equivalent la vía está apagada, K intenta leer el gránulo de mentira y no
-    escribe nada; ni la carpeta de la sombra aparece ni producción cambia. Si este diera lo mismo que la sombra, la
-    prueba de arriba no estaría midiendo el flag."""
+def test_control_el_mismo_camino_con_k_no_toma_la_via(tmp_path):
+    """Control del de arriba: con la vía de VIIRS 375 apagada, K intenta leer el gránulo de mentira y no escribe nada;
+    ni la carpeta de la sombra aparece ni producción cambia. Si este diera lo mismo que la sombra, la prueba de arriba
+    no estaría midiendo el flag.
+
+    S177 B1: producción enciende la vía de VIIRS 375, así que el lado K del control es la guardia K de VIIRS (la
+    producción con las vías de VIIRS apagadas, tests/test_guardia_k_viirs_s176.py). Texto original: el control corría
+    mirova_equivalent, con la vía apagada, y su carpeta era data/mirova_equivalent."""
     raiz = tmp_path / "repo"
     _copia_minima(raiz)
     antes = _huellas(raiz / "data")
-    salida = _correr(raiz, "mirova_equivalent")
+    salida = _correr(raiz, "guardia_k_viirs")
     assert _huellas(raiz / "data") == antes
     assert not (raiz / "data" / PERFIL).exists()
-    assert json.loads(salida.strip().splitlines()[-1])["data_dir"].replace("\\", "/").endswith("data/mirova_equivalent")
+    assert json.loads(salida.strip().splitlines()[-1])["data_dir"].replace("\\", "/").endswith("data/guardia_k_viirs")

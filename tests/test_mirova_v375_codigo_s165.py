@@ -306,6 +306,8 @@ def test_flag_encendido_cambia_el_record_y_sin_grilla_sigue_k_y_lo_dice(monkeypa
     from pipeline import process_viirs as PV
     assert MV.volcan_por_coordenadas(arnes.LAT0, arnes.LON0) is None
     monkeypatch.setattr(MV, "leer_radiancia_l1b", lambda *_a, **_k: (_ for _ in ()).throw(_ViaTocada()))
+    # S177 B1: producción trae la vía encendida desde B1; el lado apagado se fija explícitamente.
+    monkeypatch.setattr(PV, "ENABLE_V375_CODIGO_MIROVA", False)
     apagado = arnes.correr_v375("foco_3x3", False, {})
     monkeypatch.setattr(PV, "ENABLE_V375_CODIGO_MIROVA", True)
     encendido = arnes.correr_v375("foco_3x3", False, {})
