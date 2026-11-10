@@ -121,7 +121,9 @@ def test_la_linea_vertical_se_dibuja_solo_en_ejes_de_tiempo_y_dentro_del_rango()
 
 def test_camino_del_navegador_con_la_constante_completada(tmp_path):
     """Lo que pasará el día del merge: se completa la constante y el módulo, cargado como <script>, registra el
-    plugin en Chart.js y pone el aviso en la página. Si el registro o el aviso dejaran de ocurrir, falla."""
+    plugin en Chart.js y pone el aviso en la página. Si el registro o el aviso dejaran de ocurrir, falla.
+    S178: el aviso ya no se pone al cargar sino cuando una vista pasa un record anterior a la frontera
+    (tests/test_cambio_detector_aviso_k_por_datos_s178.py); aquí se le pasa uno."""
     src = MODULO.read_text(encoding="utf-8")
     # S154: la constante ya está completada con la hora del merge de #850; se reemplaza el valor que tenga (null o fecha).
     completado, n = re.subn(r'const CAMBIO_DETECTOR_UTC = (null|"[^"]*");', f"const CAMBIO_DETECTOR_UTC = {json.dumps(FECHA)};", src)
@@ -137,6 +139,7 @@ def test_camino_del_navegador_con_la_constante_completada(tmp_path):
     const d = docFalso();
     const ventana = { Chart: { register: p => registrados.push(p.id) }, document: d };
     new Function("window", "module", src)(ventana, undefined);
+    ventana.CambioDetector.notarRecords([{ sensor: "VIIRS_NOAA20", datetime_utc: "2026-10-18 05:00" }], d);
     const aviso = d.getElementById("aviso-cambio-detector");
     process.stdout.write(JSON.stringify([registrados, ventana.CAMBIO_DETECTOR_UTC, aviso ? texto(aviso).slice(0, 41) : null]));
     """
