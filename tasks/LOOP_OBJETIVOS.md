@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 08:11 UTC (S178): C-montaje corrido; espera la decisión de la banda de VIIRS 375
+- Nicolás: «Sí, opción A». Declaración commiteada antes de correr (`c592ac2d2`); comparadores en #979 (`6a07f8ea2`; desvío de TDD declarado: pruebas después del módulo, 10 de 10 mutaciones atrapadas, control CAE).
+- Resultado: MODIS 343 pasadas y VIIRS 750 440 pasadas, **0 diferencias**. VIIRS 375: 166 pasadas, **12 diferencias de VRP** con las mismas celdas, temperaturas y gránulo; las 12 dentro de la banda de triangulación del port de V375-E. Con la declaración tal cual, C-montaje PENDIENTE y los tres sensores INDECIDIBLES. DECIDE NICOLÁS (opción 1 recomendada, *post hoc*), en `experiments/_s178_montaje/PROPUESTA_C_MONTAJE.md`.
+- P5: vara MATLAB VERDE sobre main `e7cfbaf54` (311 de 311), PR #980. P2, P6 y P9 en agentes.
+
 ### 2026-11-10 07:37 UTC (S178): verificador limpio sobre #979 y #977
 - Sonnet, sin contexto: #979 SIN DEFECTOS (traducción B4 igual a `grillas_mirova.yaml` de main, comprobado a mano; ninguna prueba lo ata al yaml, sólo al script). #977 CON DEFECTOS, uno: VS178-977-01, ventana sin ningún día y corrida que no escribe nada daba verde (main: rojo). Arreglado en `427de6cc4`, 4 pruebas rojas antes; suites de los revisores 229 de 229. Riesgo residual anotado en el PR.
 - #978 con CI verde (pytest y bateria-v750a).
