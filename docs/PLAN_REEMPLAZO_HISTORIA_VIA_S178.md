@@ -300,3 +300,13 @@ VIIRS (cada familia por separado y SÓLO después de su encendido, #974 para 375
 - Si `test_golden_record_values`, `test_guard_anillo_s134` y `test_clasificacion_referencia_s146` pasan con P4: la
   simulación no lo puede decir.
 - Tupungatito: 787 records K de MODIS, 1.574 de VIIRS 375 y 1.563 de VIIRS 750 antes del 2026-02-23, sin vía.
+
+## Verificación limpia (S178, 2026-11-10): CON ERRORES, pendiente de corregir antes de aplicar
+
+Verificador de otro modelo (Sonnet), contra `origin/main` `d7a655a7f`. Confirmó con scripts propios las cifras (42.389 records de D2 y D4, sin repetidos; tablas por volcán y familia; las 217 pasadas MODIS sin par en los logs; Tupungatito antes del 2026-02-23 con 787 MODIS, 1.574 VIIRS 375 y 1.563 VIIRS 750, todos K) y las citas del script de #883. Única cifra corregida: Lastarria VIIRS 375 es 96 de 1.512 (6,3 %). Hallazgos que el plan tiene que resolver:
+
+1. **Falta una tercera regla en el script.** El §2.5 dice que un record con `via_codigo_mirova` true nunca se pisa y que los de P4 desde el 11-02 no se agregan, pero con `--hasta 2026-11-02` el script actual pisaría los records de producción del 11-02 y agregaría los de P4 que falten. Hay que sumarla a `--familia` y `--apartar-sin-par`.
+2. **El plan quedó desfasado de main.** #976 y #978 ya están mergeados. Con el reemplazo de MODIS no quedan records K y `tests/test_guard_regla_c_s134.py::test_p5_diag_nti_max_persistido_en_modis` cae por su piso de 20 (lo anuncia su docstring); ningún paso del §5 la reasigna antes de MODIS. La frase del §4.2 sobre el aviso «desde el 15 feb 2025» quedó vieja con #976 (hoy el aviso K sólo sale con records anteriores a esa fecha). Los guards con `codigo_sha` (`test_guard_serie_k_pura_s158.py:34`, `test_cambio_detector_frontera_s155.py:41`) siguen como dice el plan.
+3. **GitHub Pages (límite de 1 GB).** `pages-deploy.yml:77` copia `data/` entera al sitio y se dispara con `data/**`. Sumando blobs de main, `data/` pesa unos 784 MB; con imágenes, `_recent` y los ~190 MB de `data/_s178_historia_via/` el sitio llegaría a unos 1.010 MB (aritmética sobre blobs, no medición). La unión tiene que vivir fuera de `data/` o quedar excluida del despliegue (con su prueba).
+
+SIN VERIFICAR por el verificador: la suite completa de las simulaciones del §4.2, que las pasadas VIIRS sin par sean de borde, todo lo de P4 (en curso).
