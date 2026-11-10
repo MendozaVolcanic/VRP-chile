@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 00:34 UTC (S177): D4 verde con C-via 100 %; #971 y #972 en main; 6 worktrees retirados
+- D4 (run 42601379627, intento 1, tag `s172-retro-d4`): 177 de 177 jobs en verde (176 trozos más `plan`), terminó 00:25 UTC, sin `rerun`. Artefactos en `C:/Users/nmend/vrp-temporales/s177_d4/` (93 MB; vencen en GitHub a los 30 días). No se leyó como evidencia (§11): `experiments/_s177_cmr/control_via_d4.py` sólo cuenta marcas y pasadas.
+- C-via en R25: 100 % en los tres sensores (MODIS 6.736 de 6.736, V375 13.361 de 13.361, V750 13.940 de 13.940) y en cada uno de los 30 cruces volcán por sensor; 0 líneas de trozo bajo 90 %. El nulo de este control es D3: 0 % en 90 de 90 líneas.
+- Cobertura: 176 finales, 0 fallas, 0 retiradas, 2 incidencias `sin_granulos` que no cuentan en estricto (Isluga, MODIS_TERRA, 2025-12-26 y 12-31). Los 10 volcanes tienen records en los 320 días de la ventana. C-cobertura contra K por volcán, día y sensor queda para el lector, después del candado.
+- #971 en main (`e79314dac`) y #972 en main (`bfab7c8c0`, con la frase de Nicolás): vista preliminar de los 34 publicada, deploy verde, comprobada en Chrome (34 de 34 con datos, 0 detecciones en cumbre, 22 focos lejanos distintos). Qué son esos focos sigue SIN VERIFICAR.
+- Con el sí de Nicolás se retiraron 6 worktrees de PR mergeados, sin forzar; tag `pre-s177-worktrees-cleanup`; ramas locales intactas. Disco a las 00:33 UTC: C: 11 GB, D: 8,1 GB. Candidatos que siguen: `vm_bundles` y `D:\hiberfil.sys` (los hace Nicolás).
+- Audit semanal del 11-09: issue #973, recall V750 73,3 % bajo banda 79,5 % (n=15, K), magnitud V375 de Chillán 0,579x y Tupungatito 0,373x; MODIS sin juzgar (7 noches con la vía, mínimo 15). Falta el anexo de #955 (S178).
+- Siguiente: anexo de #955, guardia K de VIIRS (3 noches desde su primera corrida), sello D1 a D7 y A45 de B1 y B2 (de Nicolás).
+
 ### 2026-11-09 12:27 UTC (S177): #971 en borrador con verificador; incidente de disco en C:
 - #971 (`9499d7809` y `7855f65e3`): VPR967-05 y 06, VPR964-01 a 03. Vigilancia: un volcán sin archivo de guardia ya no vacía la guardia de los demás (VIIRS y MODIS). Lector de V750-A: noches sobre `oks` (LR4; ER58 a ER60; MR80 y MR81 atrapadas por aserción). Suite local sobre el primer commit: 3.485 pasaron, 33 saltadas, 2 xfail.
 - Verificador limpio Sonnet, `C:/Users/nmend/vrp-temporales/s177_ver971/INFORME.md`: MERGEABLE CON RESERVAS. Comprobé VPR971-01 (las 10 diurnas son 4 de V375, 4 de V750 y 2 de MODIS), 02, 04 y 05 contra informe y lector, y los atendí en `7855f65e3`. En VPR971-02 el verificador dice que sólo las 5 noches son de la coordinadora; LR3 también le atribuye `--sha-desde` obligatorio. VPR971-03 (g1, un aviso de ceguera queda dentro del issue del disparador) se deja: es consecuencia buscada. El segundo commit no tuvo otra vuelta de verificador: sólo texto y comentarios.
