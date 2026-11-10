@@ -658,8 +658,8 @@ def test_placebo_mira_p1_y_p2_y_acepta_solo_las_dos_causas_de_l7(R):
     assert L.c_placebo(R, fs + [p], "MODIS")["estado"].startswith("ROJO")   # P1 también
 
 
-# Los tags de este ejemplo son nombres de prueba, no los de origen reales (pendientes: PENDIENTES_MONTAJE del lector).
-MONTAJE_OK = {"estado": "OK", "tags": {"MOD-D fase 4": "tag-modd", "V375-E": "tag-v375e", "V750-B": "tag-v750b"},
+# S178: los tags de origen quedaron fijados (TAGS_MONTAJE_ESPERADOS); el ejemplo usa los reales.
+MONTAJE_OK = {"estado": "OK", "tags": dict(L.TAGS_MONTAJE_ESPERADOS),
               "diff_listado": "git diff s170-modd-f4-candado s172-retro-d2 -- pipeline/mirova_v750_codigo.py: vacío",
               "diferencias": [{"pasada": "Lascar|MODIS_AQUA|2026-10-05 05:00", "explicada_por": "hunk",
                                "hunk": "@@ -10,3 +10,4 @@ ..."},
@@ -681,6 +681,9 @@ def test_c_montaje_se_valida_y_no_basta_un_estado_ok():
     assert L.validar_montaje(m)["estado"].startswith("ROJO")
     m = copy.deepcopy(MONTAJE_OK)
     m["tags"] = []
+    assert L.validar_montaje(m)["estado"].startswith("ROJO")
+    m = copy.deepcopy(MONTAJE_OK)                       # S178: un tag de origen distinto del declarado
+    m["tags"]["V375-E"] = "otro-tag"
     assert L.validar_montaje(m)["estado"].startswith("ROJO")
 
 

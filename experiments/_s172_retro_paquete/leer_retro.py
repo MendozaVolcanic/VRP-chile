@@ -832,9 +832,12 @@ def caja_v750_de(vol, caja):
 
 
 ORIGENES_MONTAJE = ("MOD-D fase 4", "V375-E", "V750-B")     # §6 C-montaje: los A/B donde el código es el mismo
-# PENDIENTE (no se inventa): qué tag de cada A/B es el «tag de origen» del §6 C-montaje. Cuando se fije, va aquí como
-# {origen: tag} y validar_montaje exige esos tres; mientras sea None, sólo exige uno por origen.
-TAGS_MONTAJE_ESPERADOS = None
+# S178 (2026-11-10): tags de origen fijados por la declaración de C-montaje que aprobó Nicolás (opción A;
+# experiments/_s178_montaje/PROPUESTA_C_MONTAJE.md de loop/activo, commit c592ac2d2). Salen del mensaje de cada tag y
+# del head_sha de cada run; las pasadas del relanzamiento de V750-B (s169-v750b-relanzamiento-20261103) llevan su
+# propio tag en la diferencia y su diff también se lista.
+TAGS_MONTAJE_ESPERADOS = {"MOD-D fase 4": "s170-modd-f4-candado", "V375-E": "s166-v375e-adenda2-sellada",
+                          "V750-B": "s169-v750b-objetivos-20261103"}
 
 
 def _pasada_de_dm(p):
