@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): P9, anexo de #955 escrito (sin verificador todavía)
+- Commit `f2b2eea16` en la rama de #955 (`docs/AUDIT_S175_ANEXO_AUDIT_20261109.md`, comprobado en el remoto). Los tres flags de #973 son de VIIRS con K, 7 noches (11-03 a 11-09), sin mezcla de detectores; reproducidos con `auto_audit_weekly.py` de `847b39491`.
+- Recall V750 73,3 % (n 15): 4 noches débiles (0,11 a 0,27 MW, ninguna protegida) son el hallazgo 101 (píxel de cumbre con BT bajo `t_bg`, cúmulo 0,0 MW); por qué MIROVA les da potencia: SIN ATRIBUIR. Chillán 0,579 y Tupungatito 0,373 en V375: SIN ATRIBUIR. Ningún flag nuevo contra #915 y #936; los de MODIS dejaron de juzgarse (la vía lleva 7 noches, mínimo 15). Ningún veredicto de #955 cambia.
+- Falta para #955: CI verde (depende de #978), actualizar §10 y §11.6 de `docs/AUDIT_S175.md` y la descripción, y verificador del anexo.
+
 ### 2026-11-10 (S178): P2, verificador limpio (Sonnet) sobre B1 y B2
 - #974 (B1, V375) MERGEABLE; #975 (B2, V750) MERGEABLE CON CAMBIOS: pedía la vara MATLAB verde, que ya está (#980, 311 de 311 sobre main `e7cfbaf54`; #975 no toca `pipeline/`, así que la vara aplica). Ninguno cambia `pipeline/`: el merge ES el encendido. Mutaciones de perfiles muerden en los dos.
 - Orden: B1 primero con merge commit; B2 se rebasa (ficha a v1.22 y las 8 pruebas en conflicto con las dos vías). Combinación SIN VERIFICAR.
