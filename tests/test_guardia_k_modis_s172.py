@@ -217,8 +217,13 @@ def test_revision_verde_con_k_de_modis_escrito_en_esta_corrida():
 
 
 def test_revision_roja_si_la_corrida_no_escribio_nada():
-    ok, resumen = _rev([_k("2026-11-05 06:30", proc="2026-11-04T17:50:00Z")])      # el de ayer no cuenta
+    # S178 (tests/test_revisores_noche_cerrada_s178.py): escribir 0 es rojo si quedaba una noche cerrada que nadie
+    # escribió. Hasta S177 bastaba un record de una corrida anterior para el mismo día; eso era el falso rojo de una
+    # segunda corrida del día, y ahora sale verde con NOTA.
+    ok, resumen = _rev([_k("2026-11-04 06:30", proc="2026-11-04T17:50:00Z")], ini="2026-11-04")   # nadie escribió el 05
     assert ok is False and "no escribió" in resumen
+    ok, resumen = _rev([_k("2026-11-05 06:30", proc="2026-11-04T17:50:00Z")])      # el 05 ya estaba escrito
+    assert ok is True and "NOTA ningún record de MODIS escrito" in resumen, resumen
 
 
 def test_revision_roja_si_la_guardia_trae_records_de_la_via():

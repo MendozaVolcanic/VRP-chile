@@ -53,6 +53,18 @@ def rutas_requeridas(referencias=()):
     return sorted(set(L.REQUERIDOS_MANIFIESTO) | set(L.MANIFIESTO_REGLAS) | set(referencias))
 
 
+def entrada_local(raiz, ruta, sha256_crudo):
+    """S178: una referencia fuera de git (el OSF v2.5, 98 MB, ignorado por .gitignore) no se puede leer con git show.
+    Entra desde el disco sólo si su sha256 en bruto es el que fijó el pre-registro (§4.2, 0863c240…): así un archivo
+    editado no entra como sellado. Se guarda su sha256 LF, que es lo que compara el candado del lector."""
+    b = (Path(raiz) / ruta).read_bytes()
+    crudo = hashlib.sha256(b).hexdigest()
+    if crudo != sha256_crudo:
+        raise SystemExit(f"MANIFIESTO: el sha256 en bruto de {ruta} ({crudo[:12]}…) no es el declarado "
+                         f"({str(sha256_crudo)[:12]}…)")
+    return sha256_lf_blob(b)
+
+
 def manifiesto(ref, rutas):
     return {r: sha256_lf_blob(_blob(ref, r)) for r in rutas}
 
@@ -68,6 +80,8 @@ def main(argv=None):
     ap.add_argument("--ref", required=True, help="tag del despacho (s172-retro-dN)")
     ap.add_argument("--referencia", action="append", default=[], help="ruta en el repo de una referencia congelada")
     ap.add_argument("--osf", help="ruta en el repo del OSF v2.5 (0863c240…)")
+    ap.add_argument("--osf-local", help="ruta en el repo del OSF fuera de git (S178); exige --osf-sha256-crudo")
+    ap.add_argument("--osf-sha256-crudo", help="sha256 en bruto del OSF fijado en el pre-registro (§4.2)")
     ap.add_argument("--ref-preregistro", default="origin/loop/activo")
     ap.add_argument("--salida", required=True)
     a = ap.parse_args(argv)
@@ -78,6 +92,10 @@ def main(argv=None):
         return 3
     refs = list(a.referencia) + ([a.osf] if a.osf else [])
     m = manifiesto(a.ref, rutas_requeridas(refs))
+    if a.osf_local:
+        if not a.osf_sha256_crudo:
+            raise SystemExit("MANIFIESTO: --osf-local exige --osf-sha256-crudo")
+        m[a.osf_local] = entrada_local(RAIZ, a.osf_local, a.osf_sha256_crudo)
     Path(a.salida).write_text(json.dumps(m, indent=1, sort_keys=True), encoding="utf-8")
     print(f"MANIFIESTO: {len(m)} archivos desde {a.ref} -> {a.salida}")
     return 0

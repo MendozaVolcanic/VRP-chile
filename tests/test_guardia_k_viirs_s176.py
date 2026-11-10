@@ -223,14 +223,20 @@ def test_revision_roja_si_falta_uno_de_los_dos_viirs():
 
 
 def test_revision_roja_si_esta_corrida_no_escribio_uno_de_los_dos_viirs():
-    """El record de VIIRS 750 existe pero es de una corrida anterior: esta corrida no escribió ese sensor."""
-    ok, resumen = _rev([AMBOS[0], dict(AMBOS[1], processed_utc="2026-11-04T17:50:00Z")])
+    """Esta corrida no escribió VIIRS 750 y la noche del 05 de ese sensor no la escribió nadie: rojo.
+    S178 (tests/test_revisores_noche_cerrada_s178.py): si la noche ya estaba escrita por una corrida anterior, escribir 0
+    no es falla (era el falso rojo de la segunda corrida del 2026-11-10) y sale verde con NOTA."""
+    ok, resumen = _rev([AMBOS[0], _k("2026-11-04 06:30", sensor="VIIRS_NOAA20_750", proc="2026-11-04T17:50:00Z"),
+                        _k("2026-11-04 06:30", proc="2026-11-04T17:50:00Z")], ini="2026-11-04")
     assert ok is False and "ningún record de VIIRS750 escrito" in resumen
+    ok, resumen = _rev([AMBOS[0], dict(AMBOS[1], processed_utc="2026-11-04T17:50:00Z")])
+    assert ok is True and "NOTA ningún record de VIIRS750 escrito" in resumen, resumen
 
 
 def test_revision_roja_si_la_corrida_no_escribio_nada():
-    ok, resumen = _rev([_k("2026-11-05 06:30", proc="2026-11-04T17:50:00Z"),
-                        _k("2026-11-05 06:30", sensor="VIIRS_NOAA20_750", proc="2026-11-04T17:50:00Z")])
+    viejos = [_k("2026-11-04 06:30", proc="2026-11-04T17:50:00Z"),
+              _k("2026-11-04 06:30", sensor="VIIRS_NOAA20_750", proc="2026-11-04T17:50:00Z")]
+    ok, resumen = _rev(viejos, ini="2026-11-04")                                    # nadie escribió el 05
     assert ok is False and "no escribió" in resumen
 
 
