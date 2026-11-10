@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): D2 a D7 contestadas («Sí a D2 a D7»); verificador limpio de la regla en curso
+- Registradas en el borrador, rama de #982 (`5117c0ab1`); prueba que lo lee 56 de 56. Verificador limpio (Sonnet) leyendo la versión antes del sello; después, la frase de sello de Nicolás.
+
 ### 2026-11-10 (S178): D1 contestada por Nicolás: «C-rad (14/17)»; PR #982
 - Borrador de la regla de reversión de VIIRS actualizado (fila D1 contestada, tabla §4.4 de VIIRS 375: más de 14 / más de 17; texto anterior conservado, A113) con el script y salidas de P10, en #982 (borrador). `COTAS` de `vigilancia_guardia_viirs.py` sigue en `None` hasta el sello. Quedan D2 a D7 y el sello (verificador limpio de la versión y frase de Nicolás).
 
