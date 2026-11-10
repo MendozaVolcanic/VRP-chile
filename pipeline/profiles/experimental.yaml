@@ -65,6 +65,12 @@ thresholds:
   # en `thresholds:`, que es donde la lee pipeline/profile.py (A89), y ya en el PR A, para que revertir B no la
   # arrastre. Lo vigila tests/test_perfiles_derivados_via_modis_apagada_s173.py.
   enable_modis_codigo_mirova: false
+  # S177 B2: el PR B2 enciende la via «codigo MIROVA» en VIIRS 750 de la replica. Este laboratorio esta congelado en C0
+  # y es la sombra de K de scripts/vigilancia_sombra.py: si heredara la via, en VIIRS 750 dejaria de ser C0. Se
+  # declara apagada en `thresholds:` (A89). Va aqui, separada por lineas existentes de la de VIIRS 375 (B1, al inicio
+  # de `thresholds:`), para que los revert de B1 y B2 no choquen (hallazgo 208). Lo vigila
+  # tests/test_guard_v750_codigo_mirova_encendido_s177.py.
+  enable_v750_codigo_mirova: false
 
 # S150 (AUDIT_S149 Fase 0 tarea 3 y Fase 5; decision de Nicolas 2026-10-09): el laboratorio queda CONGELADO
 # en la deteccion de produccion de hoy. POR QUE: la replica va a cambiar (conectiva max, sin Test 1, banda 22,

@@ -65,8 +65,10 @@ def test_la_guardia_difiere_de_produccion_solo_en_la_via_los_sensores_y_la_carpe
     prod, g = _resuelto("mirova_equivalent"), _resuelto(PERFIL)
     distintas = {k for k in set(prod) | set(g) if prod.get(k) != g.get(k)}
     # Con el flag de producción apagado (PR A), la vía no difiere; con el PR B encendido, sí. Los dos casos valen.
+    # S177 B2: la guardia declara apagada la vía de VIIRS 750 (no corre VIIRS; si la heredara pediría pyproj) y
+    # producción la enciende: también puede diferir en ella.
     permitidas = {"DATA_SUBDIR", "PROFILE_NAME", "SENSOR_VIIRS_375", "SENSOR_VIIRS_750",
-                  "ENABLE_MODIS_CODIGO_MIROVA"}
+                  "ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V750_CODIGO_MIROVA"}
     assert distintas <= permitidas, sorted(distintas - permitidas)
     assert {"DATA_SUBDIR", "PROFILE_NAME"} <= distintas
 

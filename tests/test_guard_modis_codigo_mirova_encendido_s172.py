@@ -70,13 +70,17 @@ def test_produccion_corre_la_via_de_modis():
 
 
 def test_la_via_de_viirs_y_los_flags_de_mxd03_siguen_apagados_en_produccion():
-    """El PR B enciende MODIS y nada más (regla §2): VIIRS 375, VIIRS 750 y MxD03 van aparte."""
+    """El PR B enciende MODIS y nada más (regla §2): VIIRS 375, VIIRS 750 y MxD03 van aparte.
+
+    S177 B2: la vía de VIIRS 750 pasa a encendida con su propio PR (la fija
+    tests/test_guard_v750_codigo_mirova_encendido_s177.py); VIIRS 375 y MxD03 siguen apagados. Texto original de la
+    aserción: los cinco en False."""
     env = dict(os.environ, VRP_PROFILE="mirova_equivalent", PYTHONIOENCODING="utf-8")
     codigo = ("import pipeline.profile as p; print([p.ENABLE_V750_CODIGO_MIROVA, p.ENABLE_V375_CODIGO_MIROVA, "
               "p.ENABLE_MODIS_GEO_MXD03, p.ENABLE_MODIS_CRATER_SIN_DATO, p.ENABLE_MODIS_DIST_DESDE_CRATER])")
     r = subprocess.run([sys.executable, "-c", codigo], cwd=ROOT, env=env, capture_output=True, text=True,
                        encoding="utf-8")
-    assert r.stdout.strip().splitlines()[-1] == "[False, False, False, False, False]"
+    assert r.stdout.strip().splitlines()[-1] == "[True, False, False, False, False]"
 
 
 def test_cada_perfil_vivo_resuelve_el_valor_que_le_corresponde():
