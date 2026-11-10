@@ -1,0 +1,91 @@
+== 0. candado: 16 de 16 archivos del manifiesto de la lectura con su sha256 LF; distintos: ninguno
+   fuera del manifiesto, iguales a s178-retro-lectura: {'frontend/cambio_detector.js': True, 'frontend/cese_plataformas.js': True, 'frontend/periodo.js': True}
+   script de S176: experiments/_s176_v375e_adopcion/cotas_retrospectiva_v375.py sha256 LF 33e2dad1fd644a97; caché de filas 5d1489252d7d63ce; lectura.json ce8989171137f284
+
+== 1. cotas vigentes (S176): filas 2012; ventana O 125 días
+  [tres plataformas] (i) Muy Bajo que K publica y C13 calla: crudo 4 de 128 (denominador ponderado 614.8); (i): ponderado 19.5 en 125 días; lambda 120 d = 18.72; cota (falsa alarma <= 0.08) = 25 (falsa alarma 0.064)
+  [tres plataformas] (ii) neg_resto que C13 publica: crudo 7 de 1143 (denominador ponderado 2375.1); (ii): ponderado 14.7 en 125 días; lambda 120 d = 14.14; cota (falsa alarma <= 0.08) = 20 (falsa alarma 0.052)
+  [NOAA-20 y NOAA-21] (i) Muy Bajo que K publica y C13 calla: crudo 2 de 97 (denominador ponderado 464.5); (i): ponderado 9.8 en 125 días; lambda 120 d = 9.44; cota (falsa alarma <= 0.08) = 14 (falsa alarma 0.058)
+  [NOAA-20 y NOAA-21] (ii) neg_resto que C13 publica: crudo 5 de 993 (denominador ponderado 2062.7); (ii): ponderado 10.5 en 125 días; lambda 120 d = 10.05; cota (falsa alarma <= 0.08) = 15 (falsa alarma 0.050)
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-02-01 a 2026-10-16 pisa 12 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-02-14 (tabla, Tupungatito): antes Tupungatito no tiene ninguna fila
+   - 2026-02-23 (tabla, Tupungatito): antes su limite de alerta era 5 km y no 7
+   - 2026-03-01 (tabla, todos): antes, sin contar a Tupungatito, la cobertura nocturna de la tabla en enero (desde el 11) era 99,0 % en MODIS, 98,6 a 99,5 % en VIIRS 375 y 95,2 a 95,7 % en VIIRS 750, y en febrero 98,2 a 99,6 %; desde marzo 99 a 100 %
+   - 2026-03-01 (ocr, VIIRS): antes el OCR corrio con siete versiones y doce metodos de validacion distintos; capturo 0,26 a 0,29 alertas por alerta de la tabla contra 0,50 a 0,89 despues, y no hubo reproceso retroactivo
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+[referencia MIROVA] la ventana 2026-02-01 a 2026-10-16 pisa 12 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-02-14 (tabla, Tupungatito): antes Tupungatito no tiene ninguna fila
+   - 2026-02-23 (tabla, Tupungatito): antes su limite de alerta era 5 km y no 7
+   - 2026-03-01 (tabla, todos): antes, sin contar a Tupungatito, la cobertura nocturna de la tabla en enero (desde el 11) era 99,0 % en MODIS, 98,6 a 99,5 % en VIIRS 375 y 95,2 a 95,7 % en VIIRS 750, y en febrero 98,2 a 99,6 %; desde marzo 99 a 100 %
+   - 2026-03-01 (ocr, VIIRS): antes el OCR corrio con siete versiones y doce metodos de validacion distintos; capturo 0,26 a 0,29 alertas por alerta de la tabla contra 0,50 a 0,89 despues, y no hubo reproceso retroactivo
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+
+== 2. retrospectiva, VIIRS 375: 17163 pasadas nocturnas en los tramos; repetidas via 0, K 0; por tramo y estado: {('R25', 'ok'): 13359, ('R25', 'sin_dato_cobertura'): 465, ('F26-V', 'ok'): 2556, ('F26-V', 'sin_dato_cobertura'): 104, ('DM', 'ok'): 647, ('DM', 'sin_dato_cobertura'): 30, ('R25', 'sobra_en_via'): 2}
+   control de identidad contra lectura.json (regla V-cercano en F26-V, etiquetas, pasadas): IGUAL
+     aquí {'p2': 'GANA', 'B': 43, 'neto': -30.0, 'p2_lejana': 'GANA', 'silencio': 'SILENCIO ACOTADO BAJO K', 'm': 'MEJORA', 'm_n': 176, 'N_neg': {'neg_pub': 43, 'neg_resto': 655}, '_fila_regla': 6} etiquetas {'neg_limpio': 698, 'sin_info': 1636, 'bajo1': 158, 'far_ref': 38, 'protegida': 26} pasadas 2660 evaluables 2556
+     lectura {'p2': 'GANA', 'B': 43, 'neto': -30.0, 'p2_lejana': 'GANA', 'silencio': 'SILENCIO ACOTADO BAJO K', 'm': 'MEJORA', 'm_n': 176, 'N_neg': {'neg_pub': 43, 'neg_resto': 655}, '_fila_regla': 6} etiquetas {'neg_limpio': 698, 'sin_info': 1636, 'bajo1': 158, 'far_ref': 38, 'protegida': 26} pasadas 2660 evaluables 2556
+
+== 3. discordancias de la retrospectiva con el predicado de S176 (peso 1: censo)
+  F26-V: 2026-02-01 a 2026-03-31, 59 días; filas con clase 920; por satélite {'VIIRS_NOAA20': 766, 'VIIRS_SNPP': 154}
+    [V-cercano | tres plataformas] (i) 1 de 158; (ii) 6 de 655; sola: (i) lambda 2.03 cota 4; (ii) lambda 12.20 cota 17
+      (i): [('PlanchonPeteroa', '2026-02-10 05:42', 0.07)]
+      (ii): [('Chaiten', '2026-02-07 06:42'), ('Isluga', '2026-02-07 06:36'), ('Isluga', '2026-03-17 06:24'), ('Lastarria', '2026-03-05 06:30'), ('PlanchonPeteroa', '2026-03-02 06:06'), ('Tupungatito', '2026-03-05 05:12')]
+    [V-cercano | NOAA-20 y NOAA-21] (i) 1 de 139; (ii) 5 de 528; sola: (i) lambda 2.03 cota 4; (ii) lambda 10.17 cota 15
+    [V-cercano | sólo NOAA-20] (i) 1 de 139; (ii) 5 de 528; sola: (i) lambda 2.03 cota 4; (ii) lambda 10.17 cota 15
+    [V | tres plataformas] (i) 3 de 158; (ii) 6 de 655; sola: (i) lambda 6.10 cota 10; (ii) lambda 12.20 cota 17
+    [V | NOAA-20 y NOAA-21] (i) 3 de 139; (ii) 5 de 528; sola: (i) lambda 6.10 cota 10; (ii) lambda 10.17 cota 15
+    [V | sólo NOAA-20] (i) 3 de 139; (ii) 5 de 528; sola: (i) lambda 6.10 cota 10; (ii) lambda 10.17 cota 15
+  DM: 2026-10-01 a 2026-10-16, 14 días; filas con clase 356; por satélite {'VIIRS_NOAA20': 168, 'VIIRS_NOAA21': 142, 'VIIRS_SNPP': 46}
+    [V-cercano | tres plataformas] (i) 2 de 55; (ii) 2 de 251; sola: (i) lambda 17.14 cota 23; (ii) lambda 17.14 cota 23
+      (i): [('Chaiten', '2026-10-08 05:30', 0.06), ('PlanchonPeteroa', '2026-10-15 05:18', 0.07)]
+      (ii): [('Lastarria', '2026-10-09 06:48'), ('PuyehueCordonCaulle', '2026-10-01 04:42')]
+    [V-cercano | NOAA-20 y NOAA-21] (i) 1 de 51; (ii) 1 de 216; sola: (i) lambda 8.57 cota 13; (ii) lambda 8.57 cota 13
+    [V-cercano | sólo NOAA-20] (i) 1 de 30; (ii) 1 de 115; sola: (i) lambda 8.57 cota 13; (ii) lambda 8.57 cota 13
+    [V | tres plataformas] (i) 2 de 55; (ii) 2 de 251; sola: (i) lambda 17.14 cota 23; (ii) lambda 17.14 cota 23
+    [V | NOAA-20 y NOAA-21] (i) 1 de 51; (ii) 1 de 216; sola: (i) lambda 8.57 cota 13; (ii) lambda 8.57 cota 13
+    [V | sólo NOAA-20] (i) 1 de 30; (ii) 1 de 115; sola: (i) lambda 8.57 cota 13; (ii) lambda 8.57 cota 13
+  control F26-V: K contra K (i) 0 y (ii) 0 (tienen que ser 0); brazo mudo (i) 151 (tiene que ser mayor que 0)
+
+  R25 (OPCIÓN NO ESCRITA: fila OSF nocturna, class 1, píxel más caliente dentro del radio interno, 0,05 MW < VRP < 1 MW, pareada a ±120 s): 1354 con pasada evaluable (sin pasada 0, no evaluables 0); K publica y la vía (cercano) calla: 12; 320 días; sola: lambda 4.50 cota 8
+    por satélite de la base: {'VIIRS_SNPP': 641, 'VIIRS_NOAA20': 713}; pérdidas: [('Chaiten', '2025-10-27 05:30', 0.084, 'VIIRS_NOAA20'), ('Isluga', '2025-05-26 06:30', 0.058, 'VIIRS_SNPP'), ('Isluga', '2025-10-22 04:54', 0.168, 'VIIRS_SNPP'), ('Lascar', '2025-07-24 06:24', 0.054, 'VIIRS_SNPP'), ('PlanchonPeteroa', '2025-04-01 05:24', 0.116, 'VIIRS_SNPP'), ('PlanchonPeteroa', '2025-05-14 05:18', 0.132, 'VIIRS_SNPP'), ('PuyehueCordonCaulle', '2025-05-11 04:36', 0.162, 'VIIRS_SNPP'), ('PuyehueCordonCaulle', '2025-09-14 05:12', 0.132, 'VIIRS_SNPP'), ('PuyehueCordonCaulle', '2025-10-30 05:54', 0.131, 'VIIRS_SNPP'), ('PuyehueCordonCaulle', '2025-11-24 04:42', 0.166, 'VIIRS_SNPP'), ('PuyehueCordonCaulle', '2025-12-28 04:30', 0.191, 'VIIRS_NOAA20'), ('PuyehueCordonCaulle', '2025-12-29 05:48', 0.061, 'VIIRS_NOAA20')]
+    (ii) en R25: no existe (el OSF no trae negativos limpios, pre-registro §4.2)
+
+== 4. maneras de sumar los casos (ninguna está escrita; decide Nicolás). Plazo 120 días, falsa alarma <= 0.08, régimen NOAA-20 y NOAA-21 salvo que se diga
+  A. vigente (sólo O): (i) (i): ponderado 9.8 en 125 días; lambda 120 d = 9.44; cota (falsa alarma <= 0.08) = 14 (falsa alarma 0.058)
+                       (ii) (ii): ponderado 10.5 en 125 días; lambda 120 d = 10.05; cota (falsa alarma <= 0.08) = 15 (falsa alarma 0.050)
+                       lo sellable hoy en el borrador
+  B. O + F26-V por día: (i) (i): ponderado 10.8 en 184 días; lambda 120 d = 7.07; cota (falsa alarma <= 0.08) = 11 (falsa alarma 0.056)
+                        (ii) (ii): ponderado 15.5 en 184 días; lambda 120 d = 10.09; cota (falsa alarma <= 0.08) = 15 (falsa alarma 0.052)
+                        suma conteos y días; F26-V aporta NOAA-20 (NOAA-21 queda sin_info antes de abril) y la tabla expone menos pasadas VIIRS por noche antes de abril (A119 b): baja la tasa por día
+  B-rad. como B, con F26-V en el brazo radiante: (i) (i): ponderado 12.8 en 184 días; lambda 120 d = 8.37; cota (falsa alarma <= 0.08) = 13 (falsa alarma 0.046)
+                                                 (ii) (ii): ponderado 15.5 en 184 días; lambda 120 d = 10.09; cota (falsa alarma <= 0.08) = 15 (falsa alarma 0.052)
+                                                 el record de la vía publica hoy con radiante (pre-registro §5.1); O sigue en C13 cercano porque el port de V375-B y C no tiene ese brazo
+  B3. O + F26-V por día, tres plataformas: (i) (i): ponderado 20.5 en 184 días; lambda 120 d = 13.37; cota (falsa alarma <= 0.08) = 19 (falsa alarma 0.054)
+                                           (ii) (ii): ponderado 20.7 en 184 días; lambda 120 d = 13.52; cota (falsa alarma <= 0.08) = 19 (falsa alarma 0.058)
+                                           como B con Suomi NPP (que terminó el 2026-11-02, A104)
+  C. O + F26-V por pasada de la clase: (i) (i): ponderado 8.3 en 125 días; lambda 120 d = 8.00; cota (falsa alarma <= 0.08) = 12 (falsa alarma 0.064)
+                                       (ii) (ii): ponderado 12.3 en 125 días; lambda 120 d = 11.82; cota (falsa alarma <= 0.08) = 17 (falsa alarma 0.056)
+                                       tasa por pasada Muy Bajo 0.0179 y por neg_resto 0.0060 (O ponderado + F26-V crudo), por las pasadas de cada clase que O tiene en sus 125 días (464.5 y 2062.7): no depende de cuántas pasadas expone la tabla por noche
+  D. O + DM por día (DM está dentro de O): (i) (i): ponderado 10.8 en 139 días; lambda 120 d = 9.35; cota (falsa alarma <= 0.08) = 14 (falsa alarma 0.054)
+                                           (ii) (ii): ponderado 11.5 en 139 días; lambda 120 d = 9.90; cota (falsa alarma <= 0.08) = 14 (falsa alarma 0.078)
+                                           cuenta dos veces del 1 al 16 de octubre; el pre-registro dice que DM es control de montaje, no evidencia (§3.2)
+  E. B + R25 en (i) por día: (i) (i): ponderado 13.8 en 504 días; lambda 120 d = 3.29; cota (falsa alarma <= 0.08) = 6 (falsa alarma 0.051)
+                             (ii) (ii): ponderado 15.5 en 184 días; lambda 120 d = 10.09; cota (falsa alarma <= 0.08) = 15 (falsa alarma 0.052)
+                             R25 entra sólo a (i), con la lectura NO ESCRITA del OSF (filtrado y reprocesado, A105), sólo NOAA-20 (3 de 12 pérdidas; el resto es Suomi NPP); (ii) queda como en B
+
+salida 0
