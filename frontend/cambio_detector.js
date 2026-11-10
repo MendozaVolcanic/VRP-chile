@@ -268,7 +268,7 @@
   function insertarAvisoModis(doc, desde) { return insertarAvisoVia("MODIS", doc, desde); }
 
   // Las vistas llaman esto con los records de cada volcán apenas los cargan. Guarda, por sensor, la fecha más temprana de
-  // todos los volcanes, pone o actualiza el aviso y redibuja los gráficos ya dibujados. Devuelve la fecha de MODIS
+  // todos los volcanes y redibuja los gráficos ya dibujados (la vía no pone aviso de texto desde S178). Devuelve la fecha de MODIS
   // (lo que siempre devolvió; las de VIIRS se leen con viaDesde).
   function notarRecords(records, doc) {
     let cambio = false;
@@ -285,8 +285,10 @@
       const t = primeraVia(records, familia);
       if (t != null && (desdeVia[familia] == null || Date.parse(t) < Date.parse(desdeVia[familia]))) {
         desdeVia[familia] = t;
-        const d = doc || (typeof raiz !== "undefined" ? raiz.document : null);
-        insertarAvisoVia(familia, d, t);
+        // POR QUÉ (S178, pedido de Nicolás del 2026-11-10, «quita los 3»): la vía ya no pone aviso de texto arriba del
+        // tablero; la marca queda sólo como línea vertical en los gráficos (crearPluginVia), que da la fecha sin ocupar
+        // espacio. insertarAvisoVia y textoAvisoVia siguen exportadas, pero nadie las llama.
+        // Prueba: tests/test_cambio_detector_via_modis_s172.py y tests/test_cambio_detector_via_viirs_s176.py.
         cambio = true;
       }
     });
