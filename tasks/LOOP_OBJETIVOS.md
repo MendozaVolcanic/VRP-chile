@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 (S178): #977 y #979 en main; #955 listo para la frase de Nicolás
+- Mergeados con CI verde y `--match-head-commit`: #977 (`bc32f5538`, revisores con noche cerrada) y #979 (`46d692175`, caja B4, C-montaje, tags de origen, OSF local en el manifiesto). La guardia K de VIIRS cuenta noches desde su corrida de hoy (cron 19:35 UTC).
+- #955: verificador limpio del anexo (Sonnet): CORRECTO en lo sustantivo (reprodujo `latest.json` byte a byte y cada número). Corregidas sus 2 imprecisiones y la omisión (7 días, no 7 noches; Tupungatito 0,0 a 0,086 MW en pareadas; atraso del cron) y §10 y §11.6 de `docs/AUDIT_S175.md` al día (marca A113), commit `9da50f1b5`; descripción del PR actualizada; rama actualizada con main para que su CI corra con #978.
+
 ### 2026-11-10 (S178): merges y #962 diagnosticada
 - Nicolás: «Sí, mergéalos» (#978, #977, #979). #978 mergeado (`4e7562de7`). #977 y #979 actualizados con main (`5f13127db`, `3e16cf267`), esperando CI. «Avanza con todo»: el merge de #976 lo bloqueó el clasificador de permisos («Production Deploy», publica Pages); queda para Nicolás (botón en GitHub o permiso explícito).
 - Agentes lanzados: B2 rebasado sobre B1 (PR borrador nuevo), P10 (cotas V375), verificador limpio del anexo de #955, diagnóstico de #962.
