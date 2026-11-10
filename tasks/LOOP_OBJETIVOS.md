@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-10 08:51 UTC (S178): retrospectiva LEÍDA con candado (verificador limpio en curso)
+- Nicolás: «Sí, opción 1» (banda de triangulación en VIIRS 375, *post hoc*, anotada en la declaración). C-montaje OK: 949 pasadas, 0 diferencias (#979 `caf2b24e3`).
+- Ref de lectura: tag `s178-retro-lectura` (rama `claude/s178-retro-lectura`) = `s172-retro-d2` + lector de #979 (`cd48bc133`) + referencias congeladas (CONS `811c4c07`, OCR `01c9478d`). Manifiesto de 16 archivos, pre-registro igual al sello; el OSF (fuera de git) entra por su sha256 en bruto `0863c240`. Excepciones C-K: ninguna. Lectura en `ff8a39972`.
+- **Veredictos (§8.1)**, todos los controles OK (curva de cenit SIN SUSTRATO, no bloquea); ninguna protegida perdida, ninguna candidata OSF, ninguna pérdida sólo OCR:
+  - MODIS (F26-M, 601 pasadas, 9 protegidas): regla PROPONER ADOPCIÓN (P1 sin pérdida, P2 GANA B 6, M MEJORA), pero sin las 21 pasadas del §3.1 (b) baja a SIN PODER: **fila 4, DECIDE NICOLÁS** (`cambia_sin_pasadas_b`).
+  - VIIRS 375 (F26-V, 2.660 pasadas, 26 protegidas): **fila 6, NO SE CONTRADICE FUERA DE MUESTRA** (alertas: Isluga, Láscar, Planchón-Peteroa, Cordón Caulle).
+  - VIIRS 750 (2.680 pasadas, 30 protegidas): **fila 4, DECIDE NICOLÁS** por V750-A no sellado; la regla misma: P1 sin pérdida, P2 GANA (B 17), M MEJORA, razón en protegidas 0,999.
+
 ### 2026-11-10 (S178): P9, anexo de #955 escrito (sin verificador todavía)
 - Commit `f2b2eea16` en la rama de #955 (`docs/AUDIT_S175_ANEXO_AUDIT_20261109.md`, comprobado en el remoto). Los tres flags de #973 son de VIIRS con K, 7 noches (11-03 a 11-09), sin mezcla de detectores; reproducidos con `auto_audit_weekly.py` de `847b39491`.
 - Recall V750 73,3 % (n 15): 4 noches débiles (0,11 a 0,27 MW, ninguna protegida) son el hallazgo 101 (píxel de cumbre con BT bajo `t_bg`, cúmulo 0,0 MW); por qué MIROVA les da potencia: SIN ATRIBUIR. Chillán 0,579 y Tupungatito 0,373 en V375: SIN ATRIBUIR. Ningún flag nuevo contra #915 y #936; los de MODIS dejaron de juzgarse (la vía lleva 7 noches, mínimo 15). Ningún veredicto de #955 cambia.
