@@ -58,24 +58,24 @@ def test_si_toda_la_ventana_es_de_la_via_no_hay_escalon_que_marcar():
     assert _primera([CAIDA, VIA2]) is None
 
 
-def test_notar_records_guarda_la_menor_de_todos_los_volcanes_y_pone_el_aviso_una_vez():
+def test_notar_records_guarda_la_menor_de_todos_los_volcanes_sin_aviso_de_texto():
+    """S178 (pedido de Nicolás, «quita los 3»): la vía ya no pone aviso de texto arriba del tablero; queda la línea
+    vertical en los gráficos. notarRecords sigue guardando la fecha más temprana de todos los volcanes (la usa la
+    línea) y el texto se puede seguir pidiendo a textoAvisoModis, pero no se inserta en la página."""
     js = REQ + f"""
     const d = docFalso();
-    // como un nodo de texto del navegador: se lee y se corrige por nodeValue
-    d.createTextNode = t => ({{ tag: "#text", nodeValue: t, get text() {{ return this.nodeValue; }} }});
+    const n0 = d.body.children.length;
     const a = M.notarRecords({json.dumps([K1, VIA2])}, d);
     const b = M.notarRecords({json.dumps([K1, VIA1])}, d);
     const c = M.notarRecords({json.dumps([K1, K2])}, d);
     const aviso = d.getElementById("aviso-cambio-via-modis");
-    const n = d.body.children.filter(x => x.id === "aviso-cambio-via-modis").length;
-    process.stdout.write(JSON.stringify([a, b, c, M.viaModisDesde(), n, aviso ? texto(aviso) : null]));
+    process.stdout.write(JSON.stringify([a, b, c, M.viaModisDesde(), d.body.children.length - n0, !!aviso,
+                                         M.textoAvisoModis(M.viaModisDesde())]));
     """
-    a, b, c, desde, n, txt = node(js)
+    a, b, c, desde, nuevos, hay_aviso, txt = node(js)
     assert a == "2026-11-06T07:20:00.000Z" and b == c == desde == "2026-11-04T03:10:00.000Z"
-    assert n == 1
+    assert nuevos == 0 and hay_aviso is False, "la vía ya no inserta aviso de texto (S178)"
     assert "4 nov 2026" in txt and "MODIS" in txt and "vía «código MIROVA»" in txt
-    assert "la magnitud de MODIS sube" in txt and "aparecen alertas que K callaba" in txt
-    assert "Chillán" in txt and "la erupción crece" in txt
     assert chr(0x2014) not in txt and chr(0x2013) not in txt   # sin guiones largos ni medios (regla del usuario)
 
 
@@ -116,7 +116,9 @@ def test_la_linea_va_solo_en_las_series_de_modis():
     assert textos == ["MODIS: vía MIROVA"]
 
 
-def test_camino_del_navegador_registra_el_plugin_de_modis(tmp_path):
+def test_camino_del_navegador_registra_el_plugin_de_modis_y_no_pone_aviso(tmp_path):
+    """En el navegador: el plugin de la línea se registra y la dibuja tras notarRecords; el aviso de texto no aparece
+    (S178, pedido de Nicolás)."""
     src = MODULO.read_text(encoding="utf-8")
     archivo = tmp_path / "cd.js"
     archivo.write_text(src, encoding="utf-8")
@@ -124,14 +126,22 @@ def test_camino_del_navegador_registra_el_plugin_de_modis(tmp_path):
     const src = require('fs').readFileSync(process.argv[process.argv.length - 1], 'utf8');
     const registrados = [];
     const d = docFalso();
-    const ventana = { Chart: { register: p => registrados.push(p.id) }, document: d };
+    const n0 = d.body.children.length;
+    const ventana = { Chart: { register: p => registrados.push(p) }, document: d };
     new Function("window", "module", src)(ventana, undefined);
     ventana.CambioDetector.notarRecords([%s, %s]);
     const aviso = d.getElementById("aviso-cambio-via-modis");
-    process.stdout.write(JSON.stringify([registrados, !!aviso]));
+    const t = Date.parse('2026-11-04T03:10:00Z');
+    const c = chartFalso("time", t - 5*86400000, t + 5*86400000);
+    c.data = { datasets: [{ label: "MODIS (1km)" }] };
+    const p = registrados.filter(x => x.id === "cambioViaModis")[0];
+    process.stdout.write(JSON.stringify([registrados.map(x => x.id), !!aviso, d.body.children.length - n0,
+                                         p ? p.afterDatasetsDraw(c) : null]));
     """ % (json.dumps(K1), json.dumps(VIA1))
-    registrados, hay_aviso = node(js, str(archivo))
-    assert "cambioViaModis" in registrados and hay_aviso is True
+    registrados, hay_aviso, nuevos, linea = node(js, str(archivo))
+    assert "cambioViaModis" in registrados
+    assert hay_aviso is False and nuevos == 0, "sin aviso de texto de la vía (S178)"
+    assert linea is True, "la línea vertical se queda"
 
 
 def test_las_tres_vistas_le_pasan_los_records_al_modulo_sin_copiar_su_logica():

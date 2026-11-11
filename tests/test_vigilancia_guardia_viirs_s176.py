@@ -537,3 +537,17 @@ def test_cadena_una_minima_de_d9_cuenta_como_negativo_limpio(disco):
     disco(prod, guardia, _ref("VIIRS375") + [_fila("Lascar", t + ":00", 0.03)])
     out = vv.evaluar("2026-11-20", "v375")
     assert out["sobrepublicacion"]["n"] >= 1 and out["sobrepublicacion"]["k"] == 1, out["sobrepublicacion"]
+
+
+def test_cotas_selladas_son_las_de_la_regla_s178():
+    """S178: Nicolás selló la regla de reversión de VIIRS («Sello la regla», 2026-11-10). Las cotas del vigilante son las de
+    la tabla §4.4 de experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md (D1 C-rad y D2), y el texto de la
+    regla las dice con «más de»: si una cambia en un lado y no en el otro, esta prueba cae."""
+    assert vv.COTAS == {"VIIRS375": {"muy_bajo": 14, "sobrepublicacion": 17},
+                        "VIIRS750": {"muy_bajo": 12, "sobrepublicacion": 2}}
+    regla = (ROOT / "experiments" / "_s176_v375e_adopcion" / "REGLA_REVERSION_V375E_BORRADOR.md").read_text(encoding="utf-8")
+    assert "**SELLADA el 2026-11-10" in regla
+    fila375 = next(l for l in regla.splitlines() if l.startswith("| VIIRS 375 (S178, D1 contestada) |"))
+    fila750 = next(l for l in regla.splitlines() if l.startswith("| VIIRS 750 |"))
+    assert "**más de 14**" in fila375 and "**más de 17**" in fila375
+    assert "**más de 12**" in fila750 and "**más de 2**" in fila750

@@ -53,26 +53,24 @@ def test_si_toda_la_ventana_es_de_la_via_no_hay_escalon():
     assert _primera([{**CAIDA, "datetime_utc": "2026-11-01 05:00"}, V375], "VIIRS375") is None
 
 
-def test_notar_guarda_cada_familia_y_pone_un_aviso_por_familia():
+def test_notar_guarda_cada_familia_sin_aviso_de_texto():
+    """S178 (pedido de Nicolás): ninguna vía pone aviso de texto; cada familia guarda su fecha para la línea."""
     js = REQ + f"""
     const d = docFalso();
-    d.createTextNode = t => ({{ tag: "#text", nodeValue: t, get text() {{ return this.nodeValue; }} }});
+    const n0 = d.body.children.length;
     M.notarRecords({json.dumps([K375, V375, K750, V750])}, d);
     M.notarRecords({json.dumps([K375, {**V375, "datetime_utc": "2026-11-03 05:00"}])}, d);
-    const a375 = d.getElementById("aviso-cambio-via-v375");
-    const a750 = d.getElementById("aviso-cambio-via-v750");
-    const n375 = d.body.children.filter(x => x.id === "aviso-cambio-via-v375").length;
-    const n750 = d.body.children.filter(x => x.id === "aviso-cambio-via-v750").length;
-    process.stdout.write(JSON.stringify([M.viaDesde("VIIRS375"), M.viaDesde("VIIRS750"), M.viaDesde("MODIS"), n375, n750,
-                                         texto(a375), texto(a750)]));
+    const hay = ["aviso-cambio-via-v375", "aviso-cambio-via-v750", "aviso-cambio-via-modis"].map(i => !!d.getElementById(i));
+    process.stdout.write(JSON.stringify([M.viaDesde("VIIRS375"), M.viaDesde("VIIRS750"), M.viaDesde("MODIS"),
+        d.body.children.length - n0, hay, M.textoAvisoVia("VIIRS375", M.viaDesde("VIIRS375")),
+        M.textoAvisoVia("VIIRS750", M.viaDesde("VIIRS750"))]));
     """
-    d375, d750, dm, n375, n750, t375, t750 = node(js)
+    d375, d750, dm, nuevos, hay, t375, t750 = node(js)
     assert d375 == "2026-11-03T05:00:00.000Z", "se corrige a la fecha más temprana de todos los volcanes"
     assert d750 == "2026-11-06T05:00:00.000Z" and dm is None
-    assert n375 == 1 and n750 == 1
+    assert nuevos == 0 and hay == [False, False, False], "la vía ya no inserta aviso de texto (S178)"
     assert "3 nov 2026" in t375 and "VIIRS 375" in t375 and "vía «código MIROVA»" in t375
-    assert "cerca del doble" in t375 and "no quiere decir que el volcán crezca" in t375
-    assert "6 nov 2026" in t750 and "VIIRS 750" in t750 and "cambio del detector" in t750
+    assert "6 nov 2026" in t750 and "VIIRS 750" in t750
     for t in (t375, t750):
         assert chr(0x2014) not in t and chr(0x2013) not in t     # sin guiones largos ni medios (regla del usuario)
 
@@ -121,14 +119,13 @@ def test_la_linea_de_cada_viirs_va_solo_en_su_serie():
 def test_modis_sigue_igual():
     js = REQ + f"""
     const d = docFalso();
-    d.createTextNode = t => ({{ tag: "#text", nodeValue: t, get text() {{ return this.nodeValue; }} }});
     const r = M.notarRecords({json.dumps([KM, VM, K375, V375])}, d);
     process.stdout.write(JSON.stringify([r, M.viaModisDesde(), M.primeraViaModis({json.dumps([KM, VM])}),
-                                         typeof M.crearPluginViaModis, texto(d.getElementById("aviso-cambio-via-modis"))]));
+                                         typeof M.crearPluginViaModis, !!d.getElementById("aviso-cambio-via-modis")]));
     """
-    r, desde, primera, tipo, txt = node(js)
+    r, desde, primera, tipo, hay_aviso = node(js)
     assert r == desde == primera == "2026-11-02T07:20:00.000Z" and tipo == "function"
-    assert "la magnitud de MODIS sube" in txt
+    assert hay_aviso is False, "sin aviso de texto de la vía (S178)"
 
 
 def test_camino_del_navegador_registra_los_plugins_de_viirs(tmp_path):
