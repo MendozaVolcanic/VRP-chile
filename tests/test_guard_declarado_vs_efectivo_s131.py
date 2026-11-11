@@ -155,7 +155,8 @@ CITAS_CLAUDE_MD = [
     # S151: 1493 -> 1578, +85 por las alertas diurnas de MIROVA con sol (helpers, modo del tooltip, loader).
     # S153: 1578 -> 1594, +16 por el selector de noche o rango (script periodo.js, estilos, controles y estado).
     # S153: 1594 -> 1595, +1 por el script cambio_detector.js (marca de la adopción de K) en la cabecera.
-    ("frontend/index.html", 1595, "isValidDetection"),
+    # S180: 1595 -> 1600, +5 por la exención de la vía en f5CoreMagnitude (tests/test_f5_no_recorta_via_s180.py).
+    ("frontend/index.html", 1600, "isValidDetection"),
     # S151: predicado del tope D9, citado en la marca S151 de A23.
     # S164: 1056 -> 1094, +1 por el import de ENABLE_MODIS_CODIGO_MIROVA y +37 por el bloque de la vía «código MIROVA».
     # S165: 1094 -> 1185 (+91): imports y cabecera FICHA de los flags MxD03, sus funciones nuevas y su cableado.
