@@ -71,6 +71,21 @@ thresholds:
   # Vent-scale path — permissive threshold applied only within vent_radius_km
   vent_threshold_k: 1.0
   n_sigma_vent: 2.0
+  # S177 B2: VIIRS 750 ENCENDIDO con la via «codigo MIROVA» (pipeline/mirova_v750_codigo.py, la familia de VIIRS 750,
+  # que es la del codigo que MIROVA publico en OSF). POR QUE: MIROVA suma la energia de todos los pixeles que alerta, y
+  # K recorta el cumulo y usa su propio fondo: en VIIRS 750, K publica 0,510 de la potencia de MIROVA y la via, sobre la
+  # misma grilla de MIROVA, 0,999 [0,978; 1,007] (retrospectiva, experiments/_s162_v750c/INFORME.md); en la sombra,
+  # 0,482 contra 1,000 (n 14, pasadas con alerta del 2026-11-03 al 11-07, verificador de S176). Decision de Nicolas del
+  # 2026-11-08 (diseno del encendido de VIIRS, decision 7, en la rama loop/activo): encender VIIRS con la via y K de
+  # guardia (la guardia K de VIIRS del PR A, #967). Reversion: §4 de
+  # experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md, con git revert -m 1 del merge de ESTE PR, sin
+  # tocar el de VIIRS 375 (B1). Tag defensivo pre-s178-b1-b2.
+  # Ubicacion (hallazgo 208): este bloque va aqui, lejos del de MODIS (inicio de `thresholds:`) y del de VIIRS 375
+  # (B1, tras test1_intermediate_bg_ring_km), con lineas que ya existian entre ellos, para que revertir uno no choque
+  # con los otros. La linea de arriba (n_sigma_vent, umbral del vent-path, apagado desde S27) es una clave: un PR que
+  # la cambie si chocaria con este revert. Lo vigila tests/test_revert_flag_v750_no_choca_s177.py; el valor,
+  # tests/test_guard_v750_codigo_mirova_encendido_s177.py.
+  enable_v750_codigo_mirova: true
   # Coppola 2015 Test 1 NTI-path (F1, session 9)
   nti_k1_night: -0.8
   nti_bt_sanity_k: 3.0

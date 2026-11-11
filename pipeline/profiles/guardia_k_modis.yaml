@@ -31,6 +31,11 @@ thresholds:
   # por la linea de MODIS (hallazgo 208). Lo vigila tests/test_guard_v375_codigo_mirova_encendido_s177.py.
   enable_v375_codigo_mirova: false
   enable_modis_codigo_mirova: false
+  # S177 B2: el PR B2 enciende la via «codigo MIROVA» en VIIRS 750 de la replica. Esta guardia es K pura y no corre
+  # VIIRS (sensors), pero si la heredara contaria como perfil con via y su workflow pediria pyproj
+  # (tests/test_guard_pyproj_vias_s172.py): se declara apagada. Separada de la de VIIRS 375 (B1, tras `thresholds:`)
+  # por la linea de MODIS (hallazgo 208). Lo vigila tests/test_guard_v750_codigo_mirova_encendido_s177.py.
+  enable_v750_codigo_mirova: false
 
 paths:
   enable_test1_path: false

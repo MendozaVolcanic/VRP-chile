@@ -47,6 +47,11 @@ thresholds:
   # nrt.yml: se declara apagada, ya en el PR A, para que su significado no dependa de la replica (A117). Lo vigila
   # tests/test_perfiles_derivados_via_modis_apagada_s173.py.
   enable_modis_codigo_mirova: false
+  # S177 B2: el PR B2 enciende la via «codigo MIROVA» en VIIRS 750 de la replica. Este perfil congela la produccion de
+  # antes de K y no corre VIIRS 750 (sensors), pero se despacha desde nrt.yml: se declara apagada para que su
+  # significado no dependa de la replica (A117). Separada de la de VIIRS 375 (B1) por lineas existentes (hallazgo
+  # 208). Lo vigila tests/test_guard_v750_codigo_mirova_encendido_s177.py.
+  enable_v750_codigo_mirova: false
 sensors:
   modis: false
   viirs_375: true

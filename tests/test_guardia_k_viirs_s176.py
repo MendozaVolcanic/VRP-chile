@@ -86,14 +86,14 @@ def test_produccion_no_nombra_la_guardia():
     assert PERFIL not in (ROOT / "pipeline" / "profiles" / "mirova_equivalent.yaml").read_text(encoding="utf-8")
 
 
-def test_la_via_de_viirs_375_encendida_y_la_de_750_apagada_en_produccion():
+def test_las_vias_de_viirs_375_y_750_encendidas_en_produccion():
     """PR A es inerte: encender un flag es B1 o B2. Esta prueba se cambia en esos PR, con la frase de Nicolás.
 
-    S177 B1: enciende la vía de VIIRS 375 (A45 para escribirlo, dada a la coordinadora; merge y encendido siguen siendo
-    de Nicolás). VIIRS 750 es B2. Nombre y texto originales: «las vías de VIIRS siguen apagadas en producción», los
-    dos flags en False."""
+    S177 B1 y B2: encienden las vías de VIIRS 375 (B1) y VIIRS 750 (B2) (A45 para escribirlos, dada a la
+    coordinadora; merge y encendido siguen siendo de Nicolás). Nombre y texto originales: «las vías de VIIRS siguen
+    apagadas en producción», los dos flags en False."""
     p = _resuelto("mirova_equivalent")
-    assert p["ENABLE_V375_CODIGO_MIROVA"] == "True" and p["ENABLE_V750_CODIGO_MIROVA"] == "False"
+    assert p["ENABLE_V375_CODIGO_MIROVA"] == "True" and p["ENABLE_V750_CODIGO_MIROVA"] == "True"
 
 
 # ------------------------------------------------------------------------------------- 2. el workflow

@@ -40,7 +40,8 @@ FLAGS_K = ("ENABLE_TEST1_PATH", "ENABLE_TESTS_23_PROSE_BRANCH", "ENABLE_MODIS_B2
 # (pipeline/profiles/_s146_ab_control.yaml) y el parche de abajo los lleva también a los procesadores. Si producción
 # los apaga (un revert), dejan de diferir y valores() lo acepta igual.
 # S177 B1: también la vía de VIIRS 375 (encendida en producción por B1; el ancla la declara apagada).
-FLAGS_POSTERIORES = ("ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA")
+# S177 B2: también la vía de VIIRS 750 (encendida en producción por B2; el ancla la declara apagada).
+FLAGS_POSTERIORES = ("ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA", "ENABLE_V750_CODIGO_MIROVA")
 PROCESADORES = ("pipeline.process_modis", "pipeline.process_viirs", "pipeline.process_viirs_mod")
 _COD = ("import json, pipeline.profile as p; print('@@' + json.dumps({k: repr(getattr(p, k)) for k in dir(p) "
         "if k.isupper() and k != 'VALID_PROFILES'}))")

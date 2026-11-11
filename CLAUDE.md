@@ -34,6 +34,12 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo
 
 ## Misión vinculante (LEER ANTES DE TOCAR PIPELINE)
 
+> ⚠️ **S177 B2 (A113; PROPUESTA: rige sólo desde el merge del PR B2): VIIRS 750 de producción deja de ser K.** Corre la
+> vía «código MIROVA» (`enable_v750_codigo_mirova: true`); K de VIIRS queda de guardia
+> (`pipeline/profiles/guardia_k_viirs.yaml`), reversión por `git revert -m 1` del merge de B2 (regla
+> `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`). Lo que abajo diga «VIIRS 375 y 750 siguen con
+> K» o «VIIRS 375 y 750 = K» vale para VIIRS 750 sólo hasta ese merge. Ver `docs/MISSION.md`, ficha v1.24.
+
 > ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde el merge del PR B (#934) MODIS corre la vía «código
 > MIROVA» (`enable_modis_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`); VIIRS 375 y 750 siguen con K.
 > Decisión de Nicolás del 2026-10-31. K de MODIS queda de guardia (`pipeline/profiles/guardia_k_modis.yaml`,

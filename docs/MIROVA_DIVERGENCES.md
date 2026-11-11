@@ -3,6 +3,16 @@
 > Documento vivo. Actualizar cuando se agregue alineamiento o se descubra nueva
 > divergencia. Estado al cierre 2026-04-29 (post-S27 análisis CSV consolidado).
 
+> ⚠️ **S177 B2 (A113; PROPUESTA en borrador: rige sólo desde el merge del PR B2, rama `claude/s177-b2-v750`): VIIRS 750
+> de producción deja de ser K.** Desde la primera corrida del NRT con la vía después del merge, VIIRS 750 corre la vía
+> «código MIROVA» (`enable_v750_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`): la grilla de 750 m de MIROVA,
+> su detector, su fondo y la suma de todos los alertados. Las divergencias de este catálogo que describen VIIRS 750 de
+> producción como K describen el estado previo en VIIRS 750 y su texto se conserva; para la vía, la referencia es D34
+> (el código de MIROVA para VIIRS 750). Las marcas por divergencia (D22, D25, D26, D32 y las demás que midan K en VIIRS
+> 750) no se agregan en este PR: quedan para la sesión que lo mergee. K de VIIRS sigue corriendo como guardia
+> (`pipeline/profiles/guardia_k_viirs.yaml`) con reversión pre-autorizada (marca S177 B2 al inicio de
+> `docs/MISSION.md`).
+
 > ⚠️ **S175 (A113; hallazgo 154 de `docs/AUDIT_S175.md`, PR #955): la marca S172 que sigue exagera hacia atrás.** Lo de «hasta unos 8 días antes» y «cada corrida re-escribe las 8 fechas de su ventana» no se cumple: cada corrida procesa 8 días, pero el almacén sólo agrega las pasadas que no tenía y reemplaza una ya guardada únicamente con su producto estándar o con `--overwrite` (`pipeline/store.py`). La primera observación con la vía es del 2026-11-02 01:15 UTC, 18,95 horas antes del encendido (20:11:43 UTC): son 22 records guardados como NRT con K ese mismo día y reemplazados por su producto estándar en la primera corrida con la vía. Detalle y plazo medido del estándar: ficha v1.19 (`docs/FICHA_SDA_VRP_CHILE.md`) y `experiments/_s175_latencia_estandar_modis/salida.txt`. Texto S172 conservado.
 >
 > ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde la primera corrida del NRT con la vía, después del merge del
