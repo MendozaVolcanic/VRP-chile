@@ -570,7 +570,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
 ### 2026-11-11 07:00 UTC (S179): #974 preparado para el merge (Nicolás: «Prepara #974»)
-- Rama `claude/s177-b1-v375` en `526ed22d6` (worktree `D:rp-trabajo\worktrees\s179-b1`): merge de main (ficha a v1.23), paso de `nrt.yml` que deja rojo un error de VIIRS con su vía encendida (lee el flag efectivo; mutación atrapada por 2 pruebas), marcas A113 de VIIRS 375 en D22, D25, D26 y D32. Cuerpo del PR con la tabla de condiciones y la posición «radiante».
+- Rama `claude/s177-b1-v375` en `526ed22d6` (worktree `D:\vrp-trabajo\worktrees\s179-b1`): merge de main (ficha a v1.23), paso de `nrt.yml` que deja rojo un error de VIIRS con su vía encendida (lee el flag efectivo; mutación atrapada por 2 pruebas), marcas A113 de VIIRS 375 en D22, D25, D26 y D32. Cuerpo del PR con la tabla de condiciones y la posición «radiante».
 - Navegador: sitio local con VIIRS 375 de la sombra desde el 11-03 (243 records de la vía, `experiments/_s179_b1/armar_sitio_b1.py`): index, diario y mosaico sin errores de JavaScript; capturas en `experiments/_s179_b1/`. Tiempo del NRT: la sombra con las tres vías, mediana 4,0 y máximo 11,9 min por volcán (33 jobs); producción, 9,7 y 16,6 (132 jobs); techo 50.
 - **Excepción al congelamiento §12.6**: B1 cambia `pipeline/profiles/mirova_equivalent.yaml` (el flag de VIIRS 375). No es un cambio a la vía: es la parada de la sombra de VIIRS 375, que termina su congelamiento con el encendido. No toca el código de las vías ni la vía de VIIRS 750 (B2). Rige desde el merge.
 - Aviso a consumidores: al mergear, ficha de VRP Chile en `MAPA_WORKSPACE.md` (sin consumidores operacionales, Nicolás 2026-11-03).
