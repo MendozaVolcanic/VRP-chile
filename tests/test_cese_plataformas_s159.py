@@ -180,15 +180,21 @@ def test_la_linea_vertical_se_dibuja_solo_en_ejes_de_tiempo_y_dentro_del_rango()
     assert rotulo == "sin Suomi NPP" and ident == "cesePlataformas"
 
 
-def test_camino_del_navegador_registra_el_plugin_y_pone_el_aviso():
+@pytest.mark.parametrize("ahora", ["2026-10-25T00:00:00Z", "2026-11-03T00:00:00Z"])
+def test_camino_del_navegador_registra_el_plugin_y_no_pone_el_aviso(ahora):
+    """S178 (pedido de Nicolás, «quita los 3»): al cargar ya no se inserta el aviso de texto, ni antes ni después del
+    cese; la línea vertical se queda. insertarAviso sigue exportada (la prueban las de arriba) pero nadie la llama."""
     js = r"""
     const src = require('fs').readFileSync(process.argv[process.argv.length - 1], 'utf8');
     const registrados = [];
     const d = docFalso(false);
-    const ventana = { Chart: { register: p => registrados.push(p.id) }, document: d,
-                      Date: { now: () => Date.parse("2026-10-25T00:00:00Z") } };
+    const n0 = d.body.children.length;
+    const ventana = { Chart: { register: p => registrados.push(p) }, document: d,
+                      Date: { now: () => Date.parse(%s) } };
     new Function("window", "module", src)(ventana, undefined);
-    const aviso = d.getElementById("aviso-cese-plataformas");
-    process.stdout.write(JSON.stringify([registrados, aviso ? texto(aviso).slice(0, 14) : null]));
-    """
-    assert node(js, str(MODULO)) == [["cesePlataformas"], "Aviso de NASA:"]
+    const t = Date.parse(%s);
+    const c = chartFalso("time", t - 5*86400000, t + 5*86400000);
+    process.stdout.write(JSON.stringify([registrados.map(p => p.id), !!d.getElementById("aviso-cese-plataformas"),
+      d.body.children.length - n0, registrados[0].afterDatasetsDraw(c)]));
+    """ % (json.dumps(ahora), json.dumps(CESE))
+    assert node(js, str(MODULO)) == [["cesePlataformas"], False, 0, True]

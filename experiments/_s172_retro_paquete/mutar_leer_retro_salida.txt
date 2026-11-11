@@ -154,3 +154,10 @@ CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE | test_mo
 resumen: {'ATRAPADA': 12, 'CAE': 1} | mutaciones reales: 12 | control de caida: 1
 salida 0
 # Total ronda VPR952: 12 de 12 atrapadas por asercion, 0 caidas en la misma corrida; el control de caida sale CAE. Antes del cambio, P1 a P7 del verificador (V06, V02a, V02b, V01a a V01d) sobrevivian la bateria completa en dd17fd97d.
+
+# S178 (2026-11-10), caja B4 por volcán: corrida `--solo C1,C2,C3,CONTROL` (las tres nuevas se llamaban C1 a C3; luego se renombraron CB1 a CB3 porque «C3» chocaba con la mutación C3 de C-cenit, que también corrió y salió ATRAPADA)
+C1 la caja se compara como un solo texto otra vez (S178): ATRAPADA | test_caja_b4_acepta_sens_en_cordon_caulle_y_def_en_el_resto, test_caja_b4_rechaza_def_en_cordon_caulle, test_caja_b4_es_la_del_script_que_la_puso_en_grillas | caídas en la misma corrida: 0
+C2 B4 olvida Tupungatito (S178): ATRAPADA | test_caja_b4_es_la_del_script_que_la_puso_en_grillas | caídas en la misma corrida: 0
+C3 B4 sin valor para los nueve (S178): ATRAPADA | test_caja_b4_acepta_sens_en_cordon_caulle_y_def_en_el_resto, test_caja_b4_rechaza_def_en_cordon_caulle, test_caja_b4_es_la_del_script_que_la_puso_en_grillas | caídas en la misma corrida: 0
+CONTROL de caída: NameError en regla_modis (tiene que salir CAE): CAE
+resumen: {'ATRAPADA': 6, 'CAE': 1} (incluye la C3 vieja de C-cenit) | 3 de 3 nuevas atrapadas por aserción

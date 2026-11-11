@@ -235,6 +235,50 @@ def test_v750_records_con_otra_caja_es_indecidible(R):
     assert r["fila"] == 1
 
 
+# S178 (P1): la ROI que eligió V750-B es el brazo B4 (#939), que NO es una sola caja: «sens» en Cordón Caulle y
+# Tupungatito, «def» en los otros nueve (scripts/roi_v750b_a_grillas.py, SENSIBLES_B4). Con la comparación contra un
+# solo texto, --caja-v750 B4 dejaba en rojo todos los records y --caja-v750 def dejaba en rojo los de esos dos volcanes:
+# C-montaje no podía pasar con la caja real.
+def _b4(roi_lascar="def", roi_pcc="sens"):
+    fs = _con_roi(v750(), "def")
+    for f in fs:
+        if f["vol"] == "Lascar":
+            f["via_rec"]["diag_codigo_mirova"] = {"roi": roi_lascar}
+    for i, d in enumerate(dias(3)):
+        g = F("PuyehueCordonCaulle", d, "neg_limpio", 0, 0, sensor="VIIRS_NOAA20_750", b="VIIRS750", tramo="F26-V",
+              hora="04:%02d" % i)
+        g["via_rec"]["diag_codigo_mirova"] = {"roi": roi_pcc}
+        fs.append(g)
+    return fs
+
+
+def test_caja_b4_acepta_sens_en_cordon_caulle_y_def_en_el_resto(R):
+    r = leer(R, _b4(), "VIIRS750", caja="B4")
+    assert r["controles"]["c_montaje_caja_v750"]["estado"] == "OK", r["controles"]["c_montaje_caja_v750"]
+    assert "c_montaje_caja_v750" not in r["motivos"]
+
+
+def test_caja_b4_rechaza_def_en_cordon_caulle(R):
+    r = leer(R, _b4(roi_pcc="def"), "VIIRS750", caja="B4")
+    assert r["fila"] == 1 and "c_montaje_caja_v750" in r["motivos"]
+    assert r["controles"]["c_montaje_caja_v750"]["estado"].startswith("ROJO: 3 records")
+
+
+def test_caja_b4_rechaza_sens_en_lascar(R):
+    r = leer(R, _b4(roi_lascar="sens"), "VIIRS750", caja="B4")
+    assert r["fila"] == 1 and "c_montaje_caja_v750" in r["motivos"]
+
+
+def test_caja_b4_es_la_del_script_que_la_puso_en_grillas():
+    import importlib.util as iu
+    sp = iu.spec_from_file_location("roi_v750b_a_grillas", ROOT / "scripts" / "roi_v750b_a_grillas.py")
+    m = iu.module_from_spec(sp)
+    sp.loader.exec_module(m)
+    esperado = {v: ("sens" if v in m.SENSIBLES_B4 else "def") for v in m.VOLCANES}
+    assert {v: L.caja_v750_de(v, "B4") for v in m.VOLCANES} == esperado
+    assert set(m.VOLCANES) == set(L.TIER_A)
+
+
 def test_v750_sellado_con_magnitud_fuera_de_banda_es_peor_que_k(R):
     fs = _con_roi(v750(), "def")
     for f in fs:
@@ -614,8 +658,8 @@ def test_placebo_mira_p1_y_p2_y_acepta_solo_las_dos_causas_de_l7(R):
     assert L.c_placebo(R, fs + [p], "MODIS")["estado"].startswith("ROJO")   # P1 también
 
 
-# Los tags de este ejemplo son nombres de prueba, no los de origen reales (pendientes: PENDIENTES_MONTAJE del lector).
-MONTAJE_OK = {"estado": "OK", "tags": {"MOD-D fase 4": "tag-modd", "V375-E": "tag-v375e", "V750-B": "tag-v750b"},
+# S178: los tags de origen quedaron fijados (TAGS_MONTAJE_ESPERADOS); el ejemplo usa los reales.
+MONTAJE_OK = {"estado": "OK", "tags": dict(L.TAGS_MONTAJE_ESPERADOS),
               "diff_listado": "git diff s170-modd-f4-candado s172-retro-d2 -- pipeline/mirova_v750_codigo.py: vacío",
               "diferencias": [{"pasada": "Lascar|MODIS_AQUA|2026-10-05 05:00", "explicada_por": "hunk",
                                "hunk": "@@ -10,3 +10,4 @@ ..."},
@@ -637,6 +681,9 @@ def test_c_montaje_se_valida_y_no_basta_un_estado_ok():
     assert L.validar_montaje(m)["estado"].startswith("ROJO")
     m = copy.deepcopy(MONTAJE_OK)
     m["tags"] = []
+    assert L.validar_montaje(m)["estado"].startswith("ROJO")
+    m = copy.deepcopy(MONTAJE_OK)                       # S178: un tag de origen distinto del declarado
+    m["tags"]["V375-E"] = "otro-tag"
     assert L.validar_montaje(m)["estado"].startswith("ROJO")
 
 

@@ -66,8 +66,12 @@ GRILLAS = os.path.join(ROOT, "pipeline", "grillas_mirova.yaml")
 SENSORES = {"v375": "VIIRS375", "v750": "VIIRS750"}
 # Cotas de investigación de la regla de reversión (§4.4). POR QUÉ no se eligen aquí: una cota elegida después de ver los
 # datos no es pre-registro (A115). None = PENDIENTE DE NICOLÁS: se cuenta y se informa, sin disparar. Se llenan al sellar.
-COTAS = {"VIIRS375": {"muy_bajo": None, "sobrepublicacion": None},
-         "VIIRS750": {"muy_bajo": None, "sobrepublicacion": None}}
+# S178 (2026-11-10): SELLADAS por Nicolás («Sello la regla»). VIIRS 375 = D1 contestada «C-rad (14/17)» (ventana O más
+# F26-V de la retrospectiva, por pasada, F26-V con el brazo radiante; experiments/_s178_cotas_v375/); VIIRS 750 = D2
+# (lectura de V750-B, brazo B4). Investiga con MÁS DE la cota en los 120 días. Las ata a la tabla de la regla
+# tests/test_vigilancia_guardia_viirs_s176.py::test_cotas_selladas_son_las_de_la_regla_s178.
+COTAS = {"VIIRS375": {"muy_bajo": 14, "sobrepublicacion": 17},
+         "VIIRS750": {"muy_bajo": 12, "sobrepublicacion": 2}}
 
 
 def _hoy():

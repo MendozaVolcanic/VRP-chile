@@ -300,8 +300,15 @@ def test_a_record_de_ayer_con_el_mismo_sha_no_cuenta(tmp_path):
     Ronda 3: la ventana está completa (el control por día pasa) y sólo el control «esta corrida escribió algo» la ve:
     la corrida que se revisa empezó a las 18:00 y todo lo que hay se escribió antes, con el mismo sha."""
     regs = [dict(r, regimen=dict(r["regimen"], codigo_sha="sha04")) for r in historial(3, 4)]
+    # S178 (tests/test_revisores_noche_cerrada_s178.py): con TODAS las noches ya escritas antes de las 18:00, escribir 0
+    # no es corrida muerta (pipeline/store.py no reescribe lo que ya está; era el falso rojo de la guardia K de VIIRS
+    # del 2026-11-10). Hasta S177 esta prueba exigía rojo con la ventana completa. La hora sigue separando las corridas:
+    # si a la ventana le falta una noche que nadie escribió, lo escrito antes de las 18:00 no es de esta corrida y es rojo.
     rc, out = juzgar(tmp_path, 4, regs, cob=cobertura(4), inicio="2026-11-04T18:00:00Z")
-    assert rc != 0 and "ningún record" in out, out
+    assert rc == 0 and "NOTA ningún record de la vía escrito" in out, out
+    falta = [r for r in regs if not (r["datetime_utc"].startswith("2026-11-04") and r["sensor"].endswith("_750"))]
+    rc, out = juzgar(tmp_path, 4, falta, cob=cobertura(4), inicio="2026-11-04T18:00:00Z")
+    assert rc != 0 and "ningún record" in out and "VIIRS750 2026-11-04" in out, out
     # control: con la hora de verdad, las mismas filas son de esta corrida y sale verde
     rc, out = juzgar(tmp_path, 4, regs, cob=cobertura(4), inicio="2026-11-04T15:01:00Z")
     assert rc == 0, out
