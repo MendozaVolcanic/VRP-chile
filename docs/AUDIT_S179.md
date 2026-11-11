@@ -42,6 +42,12 @@ Carpetas (cada una con informe, `hallazgos.csv`, scripts y salidas):
 | 7 | Vigilancia del caso «la vía calla y K también» | Agregar al vigilante diario la comparación directa de cada protegida de MIROVA contra la vía; hoy sólo la ve el audit semanal, hasta 7 días después | 402, 410 |
 | 8 | Confirmar tres decisiones sin frase registrada | #937 (ablación de MODIS, en main desde el 2026-11-03), #972 (página preliminar de los 34, enlazada desde el tablero) y la fila 4 de VIIRS 750 | DEC-15 (frente A), DEC-7 (frente D), DEC-19 (frente B) |
 
+**Decisión 1, resuelta después de la auditoría (2026-11-11).** Se miraron las imágenes de MIROVA de las 5 pasadas,
+con una lectura ciega de un verificador Fable 5.2: MIROVA dibuja las cinco a más de 5 km (14 a 24 km) y la vía las
+ubica a la misma distancia; el OCR les había pegado la distancia de la pasada siguiente. Con «radiante» la vía no
+pierde ninguna alerta del cráter en estas cinco. Recomendación nueva: encender con «radiante» y escribirlo en #974.
+Informe: `experiments/_s179_ocr5/INFORME.md` (Láscar 2026-03-15 con confianza MEDIA; las otras cuatro, ALTA).
+
 Ninguna de estas decisiones pide tocar `pipeline/`, `data/` ni `frontend/` hoy. La 1, la 3 y la 4 van antes de
 «mergea #974»; la 2 y la 5 antes de que se agote el plazo de MODIS (hacia el 2026-11-20).
 

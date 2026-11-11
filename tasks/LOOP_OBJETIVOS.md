@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 02:34 UTC (S179): las 5 alertas «sólo OCR» de la decisión 1 son la fuente lejana; «radiante» no pierde nada
+- Nicolás: «Sí, revísalas». Imágenes de MIROVA (Mirova-v1 y mirova-tif-archive): MIROVA dibuja las cinco en negro, a 14 a 24 km; la vía las ubica a 13 a 23 km con casi la misma potencia. El OCR les pegó la distancia de la pasada siguiente (defecto del S150). Lectura ciega de un verificador Fable 5.2 coincide (4 ALTA, Láscar 03-15 MEDIA). MIROVA además retira pasadas horas después de publicarlas.
+- Recomendación de la decisión 1 cambia a: encender B1 con «radiante» y escribirlo en #974. `experiments/_s179_ocr5/INFORME.md`; nota en `docs/AUDIT_S179.md` §2.
+
 ### 2026-11-11 02:15 UTC (S179): auditoría S179 cerrada, síntesis en `docs/AUDIT_S179.md`
 - 61 veredictos de verificador: 41 confirmados, 17 en parte, 1 sospecha, 2 refutados (DEC-14 y DEC-17 de D, ambos a favor de lo decidido). 3.577.850 tokens en 8 agentes, todos `high` medido en transcripto; ninguno abrió el plan. Control ciego: A 2 de 2, B 1 de 3, C 3 de 3, D 3 de 4.
 - Para Nicolás antes de «mergea #974»: regla de posición de VIIRS 375 (radiante en el código, cercano en la retrospectiva; 0 de 44 perdidas con la tabla sola, 5 de 72 con el OCR, las 5 dudosas), cinco condiciones de §5 sin hacer, rebasar y re-correr CI. Antes del ~11-20: el plazo de 29 protegidas se gasta en Chillán (MODIS y VIIRS). #981 no ejecutable como está. Guardia K de VIIRS: 1 noche verde (11-11 00:12 UTC).
