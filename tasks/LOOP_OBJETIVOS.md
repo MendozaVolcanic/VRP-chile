@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 14:10 UTC (S180): primera corrida del NRT con las tres vías y tablero publicado
+- NRT run 43030686918 sobre `9a6cf976d`, success; commits `NRT update` de los 11 entre 13:45 y 13:56 UTC. Records escritos desde 13:3x UTC, todos con `via_codigo_mirova: true` en las tres familias (Chillán, Láscar y Villarrica contados con script sobre `origin/main`). Chillán 2026-11-11 06:54 UTC: VIIRS 375 pasa de 8,350 MW (K, 5 px) a 31,889 MW (vía, 26 px) y VIIRS 750 de 5,982 (3 px) a 34,934 MW (20 px).
+- Pages run del 13:56 UTC success. En el sitio (navegador interno, tras vencer la caché de 10 min, `max-age=600`) la tabla de Chillán muestra los valores de la vía; sin errores de consola. Las pasadas que el NRT no reescribió (por ejemplo 05:54 UTC) siguen con K hasta el reemplazo de la historia.
+
 ### 2026-11-11 13:22 UTC (S180): VIIRS 375 y 750 encendidos con la vía «código MIROVA» (#974 y #983)
 - Nicolás (2026-11-11 ~13:05 UTC), ante «¿Enciendo ya VIIRS 375 sin esperar las dos noches de guardia que faltan?»: «si pero publiquemos todo con la via nueva, y cuando este el reproceso tambien se agrega, k puede seguir corriedo pero en el dashboard debe quedar la mas correcta, ademas procede con el resto de los cambios». **Excepción explícita a la regla sellada §5**: se enciende con 1 de 3 noches verdes de la guardia K de VIIRS (run 42929475700); la guardia sigue corriendo y su lectura de esta noche y la del 11-12 se anota igual.
 - #974: tag `pre-s180-b1-encendido` (main `340be5e3b`), `gh pr ready`, merge commit `e23054dcb` (13:09:21 UTC, `--match-head-commit 6ebd35abf`, CI verde, CLEAN).
