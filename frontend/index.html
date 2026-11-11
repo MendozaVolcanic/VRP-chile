@@ -2891,10 +2891,16 @@ function renderDetail() {
     recent.forEach(r => {
       // S180: pasada procesada sin anomalía publicada. Se lista para que se vea que el volcán se miró; no tiene
       // posición ni magnitud que mostrar, así que no lleva marcador ni clic al mapa.
+      // Verificador S180: una pasada con píxeles anómalos que no se publican (lejana con «Solo cráter», descartada por
+      // el pipeline o artefacto térmico) no es «sin anomalía»; se rotula aparte para que no se lea como cielo limpio.
       if (!(eqVrp(r) > 0)) {
         const row = el("tr", "sin-anomalia");
-        [r.datetime_utc, r.sensor, "—", "sin anomalía", "—", "—", "—", "—"].forEach(val => {
+        const huboAlgo = (r.n_anomalous_pixels ?? 0) > 0 || isValidDetection(r);
+        [r.datetime_utc, r.sensor, "—", huboAlgo ? "anomalía no publicada" : "sin anomalía", "—", "—", "—", "—"].forEach((val, i) => {
           const td = el("td"); td.textContent = val; row.appendChild(td);
+          if (i === 3 && huboAlgo) td.title = "La pasada tuvo píxeles anómalos, pero ninguno cuenta como detección " +
+            "publicada: lejana (fuera del radio del cráter, con «Solo cráter»), descartada por el pipeline o marcada " +
+            "como artefacto térmico. Con «Incluir lejanas» las lejanas vuelven a contar.";
         });
         tbody.appendChild(row);
         return;

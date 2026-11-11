@@ -61,33 +61,45 @@ def _cuerpo(src, nombre):
         elif src[j] == "}":
             prof -= 1
             if prof == 0:
-                cuerpo = re.sub(r"//[^\n]*", "", src[i + 1:j])
+                # comentario `//` sólo si no viene de un esquema de URL ni de un string ("https://...")
+                cuerpo = re.sub(r"(?<![:\"'])//[^\n]*", "", src[i + 1:j])
                 return re.sub(r"\s+", " ", cuerpo).strip()
     return None
 
 
-@pytest.mark.parametrize("vista", VISTAS)
-def test_los_predicados_de_publicacion_no_cambiaron(vista):
-    antes, ahora = _fuente_tag(vista), (RAIZ / "frontend" / vista).read_text(encoding="utf-8")
-    vistos = set()
+def _diferencias(antes, ahora):
+    """Predicados que existían en `antes` y en `ahora` desaparecieron o cambiaron de cuerpo; y los que se compararon."""
+    malos, vistos = [], set()
     for nombre in PREDICADOS:
         c0 = _cuerpo(antes, nombre)
         if c0 is None:
             continue
         c1 = _cuerpo(ahora, nombre)
-        assert c1, f"{vista}: {nombre} desapareció"
-        assert c0 == c1, f"{vista}: cambió el cuerpo de {nombre}"
+        if not c1:
+            malos.append(nombre + " desapareció")
+        elif c0 != c1:
+            malos.append(nombre + " cambió")
         vistos.add(nombre)
+    return malos, vistos
+
+
+@pytest.mark.parametrize("vista", VISTAS)
+def test_los_predicados_de_publicacion_no_cambiaron(vista):
+    malos, vistos = _diferencias(_fuente_tag(vista), (RAIZ / "frontend" / vista).read_text(encoding="utf-8"))
+    assert not malos, f"{vista}: {malos}"
     assert "isValidDetection" in vistos and "isThermalArtifact" in vistos, (vista, vistos)
 
 
-def test_control_un_cambio_se_nota():
-    src = (RAIZ / "frontend" / "index.html").read_text(encoding="utf-8")
-    c = _cuerpo(src, "isValidDetection")
-    assert c
-    mutado = src.replace("function isValidDetection(", "function isValidDetection(r0, ", 1)
-    mutado = re.sub(r"(function isValidDetection\([^{]*\{)", r"\1 if (r0) return false;", mutado, count=1)
-    assert _cuerpo(mutado, "isValidDetection") != c
+@pytest.mark.parametrize("vista", VISTAS)
+def test_control_un_cambio_se_nota(vista):
+    """La misma comparación que arriba, contra el tag, sobre una copia con un predicado cambiado: tiene que fallar."""
+    antes = _fuente_tag(vista)
+    ahora = (RAIZ / "frontend" / vista).read_text(encoding="utf-8")
+    mutado = re.sub(r"(function isValidDetection\([^{]*\{)", r"\1 if (Math.random() < 0) return false;", ahora,
+                    count=1)
+    assert mutado != ahora
+    malos, _ = _diferencias(antes, mutado)
+    assert malos == ["isValidDetection cambió"], malos
 
 
 def _guardas(src, nombre):
