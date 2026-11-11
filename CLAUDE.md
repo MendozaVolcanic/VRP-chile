@@ -39,6 +39,13 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo
 > Decisión de Nicolás del 2026-10-31. K de MODIS queda de guardia (`pipeline/profiles/guardia_k_modis.yaml`,
 > `scripts/vigilancia_guardia_modis.py`), reversión pre-autorizada por `git revert` del PR B. Lo que describa el
 > MODIS de producción como K (D21, D12, cara MODIS de D11) es previo a S172. Ver `docs/MISSION.md`, ficha v1.18.
+>
+> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1): VIIRS 375 de producción deja de ser K.** Corre la
+> vía «código MIROVA» (`enable_v375_codigo_mirova: true`); K de VIIRS queda de guardia
+> (`pipeline/profiles/guardia_k_viirs.yaml`), reversión por `git revert -m 1` del merge de B1 (regla
+> `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`). Lo que abajo diga «VIIRS 375 y 750 = K» o que
+> el tablero publica `f5_core_vrp_mw` en VIIRS 375 vale para VIIRS 375 sólo hasta ese merge. Ver `docs/MISSION.md`,
+> ficha v1.23.
 
 **Objetivo: clon literal MIROVA NRT.** Antes de tocar `pipeline/`, leer [docs/MISSION.md](docs/MISSION.md) y
 aplicar las 3 preguntas; si las 3 dan NO, no implementar y anotarlo en `tasks/backlog_*.md`. Parches viejos

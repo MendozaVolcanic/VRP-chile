@@ -15,6 +15,15 @@
 > estado previo a S172 en MODIS: su texto se conserva y cada una lleva su marca. Para la vía, la referencia es D34 (el
 > código de MIROVA) y su port a MODIS. K de MODIS sigue corriendo como guardia (`pipeline/profiles/guardia_k_modis.yaml`)
 > con reversión pre-autorizada (marca S172 al inicio de `docs/MISSION.md`).
+>
+> ⚠️ **S177 B1 (A113; PROPUESTA en borrador: rige sólo desde el merge del PR B1, rama `claude/s177-b1-v375`): VIIRS 375
+> de producción deja de ser K.** Desde la primera corrida del NRT con la vía después del merge, VIIRS 375 corre la vía
+> «código MIROVA» (`enable_v375_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`, familia VIIRS375): la grilla de
+> 375 m de MIROVA, su detector, su fondo y la suma de todos los alertados. Las divergencias de este catálogo que
+> describen VIIRS 375 de producción como K describen el estado previo en VIIRS 375 y su texto se conserva. Las marcas
+> por divergencia van en D18, D19, D22, D25, D26 y D32 (S179); las demás que describan K en VIIRS 375 (D11, D17) se
+> marcan cuando se midan sobre la vía. K de VIIRS sigue corriendo como guardia (`pipeline/profiles/guardia_k_viirs.yaml`) con
+> reversión pre-autorizada (marca S177 B1 en `docs/MISSION.md`).
 
 ## Objetivo
 
@@ -2428,6 +2437,8 @@ para un A/B, no para afirmar el origen exacto.
 
 ## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (A/B corrido S130 → NO ADOPTAR; divergencia de fidelidad literal, prioridad baja)** S129/S130
 
+> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1, #974)**: la cara VIIRS 375 de esta divergencia describe K. Desde el merge de B1, VIIRS 375 de producción corre la vía «código MIROVA» (marca S177 B1 al inicio del catálogo), que usa la caja de la región sensible del código de MIROVA (D34), no el círculo de K; lo que sigue describe K en VIIRS 375, que queda en la guardia K de VIIRS. Texto conservado.
+
 > ⚠️ **S162, sobre el «El cierre vale con la geolocalización MODIS de hoy [...] Si se corrige, la caja se vuelve a
 > medir» de la marca S151 de abajo** (A113; D35): el A/B de MxD03 sobre K dio **CUMPLE SIN DAÑO**, verificado con
 > contexto limpio (`experiments/_s162_mxd03/resultado/INFORME.md` y `resultado/verificador/INFORME_VERIFICADOR.md`,
@@ -2584,6 +2595,8 @@ círculo de igual área tiene radio 2,82, así que hay píxeles que sólo la caj
 Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
 
 ## D19 — `keep_peak` publica como *summit* a 0,0 km un píxel del borde del disco del Test 1, más frío que el fondo; y el second pass corre sin conjunto activo — **ABIERTA (CONFIRMADA gravedad 5 por verificador limpio; probe A75 corrido S135: el cráter no está en el Test 1, y los conteos son del régimen de fondo previo a #537; decisión D1/D2 de Nicolás pendiente)** S134/S135
+
+> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1, #974)**: la cara VIIRS 375 de esta divergencia describe K. Desde el merge de B1, VIIRS 375 de producción corre la vía «código MIROVA» (marca S177 B1 al inicio del catálogo), que no tiene `keep_peak` ni el Test 1 integrado (D34); lo que sigue describe K en VIIRS 375, que queda en la guardia K de VIIRS. Texto conservado.
 
 > ⚠️ **S158, auditoría contra el código de MIROVA (F2-H2, confirmado por V2; F1-H5 y V2-2)**: el código de VIIRS 750
 > corre el segundo pase **siempre y sobre toda la escena**, con la misma función que el primero
@@ -2801,6 +2814,8 @@ exige A45 y un A/B en los Tier A.
 
 ## D22: La compuerta de temperatura `bt > t_bg + 3 K` dentro de los Tests 2 y 3; la fórmula del paper no tiene condición de temperatura. **ABIERTA (divergencia literal confirmada; la atribución de S137 fue CORREGIDA en S138: la compuerta NO es lo que pierde a Villarrica A6)** S137, S138
 
+> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1, #974)**: la cara VIIRS 375 de esta divergencia describe K. Desde el merge de B1, VIIRS 375 de producción corre la vía «código MIROVA» (marca S177 B1 al inicio del catálogo), cuyo detector es el del código de MIROVA (D34), sin la compuerta `bt > t_bg + 3 K`; lo que sigue describe K en VIIRS 375. K queda en la guardia K de VIIRS (`pipeline/profiles/guardia_k_viirs.yaml`). Texto conservado.
+
 > ⚠️ **S158, código de MIROVA** (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3 punto 6): el código operacional de VIIRS 750 publicado en OSF zm62w no tiene compuerta de temperatura en los Tests 2 y 3. La divergencia queda confirmada por el código, no sólo por el texto.
 
 > ⚠️ **Corrección S138** (`docs/AUDIT_S138.md` §8 y verificador §3.b, sobre las salidas commiteadas de la batería, sin reprocesar): la compuerta sólo actúa en el primer pase. El segundo pase (`second_pass_adjacent`, `detection_context.py:803`) recibe NTI, ETI y la máscara de activos, sin temperatura, y corre aunque no haya activos (`ENABLE_SECOND_PASS_CONDITIONED = False`, D19): rescata el píxel que la compuerta rechazó. En A6 con compuerta el cúmulo ya está a 0,8 km del cráter y publica 0,0 MW; quitar la compuerta no mueve ese cero; cambiar el fondo del anillo por vecinos da 0,539 MW (D25). Medido en producción: 14 % de los records VIIRS375 y 17 % de los VIIRS750 se detectan sólo en el segundo pase. **Un brazo de A/B que quite sólo la compuerta no devuelve ninguna alerta.** D22, D19/D2 y D25 no se pueden A/B-ear por separado. La divergencia literal sigue siendo real (la fórmula del paper no la tiene) y sigue abierta como fidelidad.
@@ -2861,6 +2876,8 @@ los Tier A. Hay que medirlo antes de proponer nada.
 ---
 
 ## D25: El fondo del VRP es la mediana de un anillo regional de 5 a 25 km, no la media de los píxeles que rodean al activo; y el exceso se recorta a cero. **ABIERTA (registrada S138, H-S138-01; es la palanca real detrás de A6 y del cráter en 0,0 MW)** S138
+
+> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1, #974)**: la cara VIIRS 375 de esta divergencia describe K. Desde el merge de B1, el fondo de VIIRS 375 de producción es el de la vía «código MIROVA» (el del código de MIROVA, relleno como `fillmissing2`, D34), no el anillo regional de K; lo que sigue describe K en VIIRS 375. K queda en la guardia K de VIIRS (`pipeline/profiles/guardia_k_viirs.yaml`). Texto conservado.
 
 > ⚠️ **S162 (2026-10-24): el A/B de D25 sobre K se leyó y D25 tal como está NO SE ADOPTA (decisión de Nicolás:
 > «sobre las decisiones mías haz lo que tú recomiendes», sobre la recomendación de no adoptar).** La divergencia sigue
@@ -2927,6 +2944,8 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 ---
 
 ## D26: ⚠️ **S157: abierta y sin medir bajo `max`, la conectiva de producción desde K (#850, 2026-10-18; marca S153 debajo)** · El segundo pase calcula mu y sigma sin los filtros de no-aptos del paper (borde, dNTI < -0,1, K1). **ABIERTA, efecto nulo bajo la conectiva `min` (registrada S138)** S138 ⚠️ **el «efecto nulo» cayó en S145; marcado acá en S146**
+
+> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1, #974)**: la cara VIIRS 375 de esta divergencia describe K. Desde el merge de B1, VIIRS 375 de producción corre la vía «código MIROVA», cuyo segundo pase es el del código de MIROVA (D34); si D26 aplica a la vía no está medido. Lo que sigue describe K en VIIRS 375. K queda en la guardia K de VIIRS (`pipeline/profiles/guardia_k_viirs.yaml`). Texto conservado.
 
 > ⚠️ **S158, código de MIROVA** (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3 punto 10): en VIIRS 750 el segundo pase excluye las alertas absolutas y las del primer pase y recalcula estadísticos **y** regresión; nosotros reusamos el ETI del primer pase.
 
@@ -3284,6 +3303,8 @@ camino entero es de BT y está apagado.
 `CLAUDE.md`, que van con A45).
 
 ## D32: MIROVA publica la SUMA del VRP de todos los píxeles alertados de la pasada; nosotros publicamos un recorte (el cúmulo, y en banda I su núcleo). **ABIERTA (registrada S147, verificada con contexto limpio, gravedad 4; prioridad MEDIA, no es la palanca del 0,7)** S146/S147
+
+> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1, #974)**: en VIIRS 375 esta divergencia deja de describir producción desde el merge de B1: la vía «código MIROVA» suma el VRP de todos los píxeles alertados, como MIROVA (`pipeline/mirova_v750_codigo.py`, familia VIIRS375). En la sombra, 31 pasadas nocturnas con alerta de MIROVA del 2026-11-03 al 11-07, la vía da 0,993 de la potencia de MIROVA y K 0,504 (verificador limpio de S176, `experiments/_s176_preguntas/RESPUESTAS.md` en `loop/activo`). Lo que sigue describe K en VIIRS 375. K queda en la guardia K de VIIRS (`pipeline/profiles/guardia_k_viirs.yaml`). Texto conservado.
 
 > ⚠️ **S158, código de MIROVA** (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3 punto 11): en VIIRS 750 el alerta es la unión de todas las regiones y pases, y el VRP suma todos los alertados. Confirma D32.
 

@@ -48,5 +48,7 @@ def test_el_laboratorio_difiere_de_produccion_exactamente_en_k():
     # también difieren en ese flag. La diferencia de K sigue entera.
     lab, prod = _resolver("experimental"), _resolver("mirova_equivalent")
     difieren = {k for k in set(lab) | set(prod) if lab.get(k) != prod.get(k)} - {"PROFILE_NAME", "DATA_SUBDIR"}
-    assert difieren == set(K) | {"ENABLE_MODIS_CODIGO_MIROVA"}, difieren
+    # S177 B1 (encendido de la vía de VIIRS 375): lo mismo con esa vía, que el laboratorio declara apagada.
+    assert difieren == set(K) | {"ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA"}, difieren
     assert (lab["ENABLE_MODIS_CODIGO_MIROVA"], prod["ENABLE_MODIS_CODIGO_MIROVA"]) == ("False", "True")
+    assert (lab["ENABLE_V375_CODIGO_MIROVA"], prod["ENABLE_V375_CODIGO_MIROVA"]) == ("False", "True")
