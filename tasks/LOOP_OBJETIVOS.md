@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 09:15 UTC (S179): cierre por contexto
+- Nicolás: «sí cierra y abre tú misma la siguiente». Traspaso en `tasks/BLOQUE_ARRANQUE_S180.md`. Estado fijado con el CI de #974 (punta `6ebd35abf`) y el de main tras #985 todavía corriendo. #974 sigue en borrador; guardia K de VIIRS 1 de 3; #983 DIRTY.
+
 ### 2026-11-11 09:08 UTC (S179): #985 mergeado; main traído a la rama de B1
 - Nicolás: «mergea #985». Merge commit `0965a98ae` (09:07:56 UTC, `--match-head-commit 99df34589`, CI verde, CLEAN). Main traído a la rama de #974 sin conflictos: punta `6ebd35abf`. En esa rama, con el perfil de producción, `sensores_que_fallan` da MODIS y VIIRS375 (vía 375 encendida, 750 apagada); 96 pruebas del revisor, cabeceras, citas y vía pasan. Falta para «mergea #974»: CI de `6ebd35abf`, dos noches verdes más de la guardia K de VIIRS (1 de 3 al 2026-11-11 00:12 UTC), tag defensivo nuevo sobre main y sí A45 del encendido.
 
