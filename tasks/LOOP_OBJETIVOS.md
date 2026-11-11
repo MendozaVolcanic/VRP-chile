@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 12:16 UTC (S180): issues cerrados; CI de B2 verde
+- Nicolás: «Sí, ciérralos». Cerrados con comentario #968 y #969 (vigilancia de la guardia VERDE sin avisos) y #915 y #936 (superados por #973). Abiertos: #973, #943, #813.
+- #983 punta `f94920698` (ficha corregida): CI verde, CLEAN, sigue en borrador y va después de #974.
+
 ### 2026-11-11 10:11 UTC (S180): #983, verificador limpio MERGE CORRECTO CON CAMBIOS; ficha corregida
 - Verificador Fable 5.2 (informe `D:\vrp-trabajo\tmp\s180-verif-b2\INFORME.md`): el merge `c0fa918f0` no pierde nada de ningún padre (`git merge-tree` reproduce el árbol salvo los 3 archivos en conflicto; 158 archivos revisados); flags V375 y V750 en `true` sólo en producción; el revisor de #985 entero; lo que B2 agrega sobre B1 es sólo VIIRS 750. CI de `c0fa918f0` verde (run 42995394305, confirmado). Defecto mío en la ficha: la línea «Funcionamiento/lógica» quedó dos veces y cuatro menciones decían «v1.22» para B1. Causa: el lado de B2 ya traía la nota vieja de B1 (B2 se armó encima de B1), así que «nuestro + suyo» la duplicó. Corregido en `f94920698` (una sola línea, cabecera tomada de B1, fila v1.24 con la regla sellada); cuerpo de #983 al día; CI de la punta nueva corriendo.
 - Queda para el dueño: el comentario de `pipeline/process_viirs_mod.py` l. 498 («Con el flag APAGADO (hoy)») queda falso con B2; arreglarlo pide A45, como el gemelo de `process_viirs.py` en B1. Revertir B1 con B2 ya adentro choca en la ficha y 8 pruebas (la regla ya lo prevé, §4.3); revertir B2 es limpio.
