@@ -38,6 +38,13 @@ VISTAS = ["index.html", "diario.html", "mosaico.html"]
 PREDICADOS = ["mirovaEqVrp", "mirovaEqVrpCore", "mirovaEqVrpDisplay", "eqVrpDisplay", "f5CoreMagnitude",
               "isValidDetection", "isSummitDetection", "isThermalArtifact", "isCirrusArtifact",
               "isDiffuseFieldArtifact", "toDailyMax", "esAnclaHonesta", "esValorCensurado", "pixelesDelMarcador"]
+# Cambios deliberados posteriores al tag, con su razón: el texto exacto (normalizado) que se agregó al cuerpo. La
+# comparación lo quita antes de comparar y exige que siga ahí; cualquier otro cambio en el predicado sigue fallando.
+# S180 (Nicolás, 2026-11-11, «Sí, exímela»): la vía «código MIROVA» queda fuera del Núcleo F5', que se hizo para el
+# halo frío de K y recortaría la suma de todos los píxeles que hace MIROVA. Guard: tests/test_f5_no_recorta_via_s180.py
+CAMBIOS_AUTORIZADOS = {
+    "f5CoreMagnitude": 'if (r && typeof CambioDetector !== "undefined" && CambioDetector.esViaCodigoMirova(r)) return null;',
+}
 
 
 def _fuente_tag(vista):
@@ -75,6 +82,11 @@ def _diferencias(antes, ahora):
         if c0 is None:
             continue
         c1 = _cuerpo(ahora, nombre)
+        extra = CAMBIOS_AUTORIZADOS.get(nombre)
+        if c1 and extra and extra not in c0:
+            if extra not in c1:
+                malos.append(nombre + " perdió su cambio autorizado")
+            c1 = re.sub(r"\s+", " ", c1.replace(extra, "", 1)).strip()
         if not c1:
             malos.append(nombre + " desapareció")
         elif c0 != c1:
