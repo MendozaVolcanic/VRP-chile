@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 07:30 UTC (S179): #974, verificador limpio LISTO CON CAMBIOS; cambios aplicados
+- Verificador Fable 5.2 de la preparación: merge de main sin pérdidas, revisor funciona, marcas correctas, CI verde en `526ed22d6`. Cambios: (1) el revisor de errores sale a su PR propio, **#985**, que va antes de #974 (el revert de B1 se lo llevaba y B2 no lo trae); B1 lo revierte en `181433652`; (2) ficha: nota v1.23 y regla sellada; marcas en D18 y D19; (3) **corrijo mi medición del tiempo del NRT**: la de las 08:xx mezclaba corridas de la sombra con 1 a 4 días de ventana. Con script (`experiments/_s179_b1/tiempo_nrt.py`): ventana comparable, sombra mediana 6,9 y 9,3 min, máximo 10,3 y 11,9; producción 10,0 y 9,8, máximo 17,5 y 16,6; los días lentos son de NASA (producción topó 50 min el 11-03 a 11-05; la sombra 45,1 el 11-08); (4) cuerpo de #974: método de merge (merge commit), tag nuevo al merge, salvedad de la posición, salto de magnitud por volcán (456).
+- Punta de #974: `4d65e2c99`. Orden para Nicolás: «mergea #985», tercera noche verde de la guardia, sí de A45 para los comentarios de `process_viirs.py`, tag y «mergea #974».
+
 ### 2026-11-11 07:00 UTC (S179): #974 preparado para el merge (Nicolás: «Prepara #974»)
 - Rama `claude/s177-b1-v375` en `526ed22d6` (worktree `D:\vrp-trabajo\worktrees\s179-b1`): merge de main (ficha a v1.23), paso de `nrt.yml` que deja rojo un error de VIIRS con su vía encendida (lee el flag efectivo; mutación atrapada por 2 pruebas), marcas A113 de VIIRS 375 en D22, D25, D26 y D32. Cuerpo del PR con la tabla de condiciones y la posición «radiante».
 - Navegador: sitio local con VIIRS 375 de la sombra desde el 11-03 (243 records de la vía, `experiments/_s179_b1/armar_sitio_b1.py`): index, diario y mosaico sin errores de JavaScript; capturas en `experiments/_s179_b1/`. Tiempo del NRT: la sombra con las tres vías, mediana 4,0 y máximo 11,9 min por volcán (33 jobs); producción, 9,7 y 16,6 (132 jobs); techo 50.
