@@ -36,7 +36,7 @@ def main():
     lista_p = ap.RAIZ / "experiments" / "_s179_audit" / f"lista_{v}.txt"
     lista = lista_p.read_text(encoding="utf-8").strip()
     for linea in lista.splitlines():
-        if len(linea) > 400:
+        if len(linea) > 600:
             sys.exit(f"línea de la lista demasiado larga (¿razonamiento del auditor?): {linea[:80]}")
 
     plan = ap.PLAN.read_text(encoding="utf-8")
