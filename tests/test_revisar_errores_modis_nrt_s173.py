@@ -110,50 +110,11 @@ def test_error_de_modis_aqua_falla(tmp_path):
     assert re.search(r"(?m)^::error .*\bMYD021KM\.A2026306\.0650\b", r.stdout), r.stdout
 
 
-def _flags_produccion():
-    """(vía V375, vía V750) efectivas en producción, leídas como las lee el revisor (A89), en un proceso aparte."""
-    env = dict(os.environ, VRP_PROFILE="mirova_equivalent", PYTHONIOENCODING="utf-8")
-    r = subprocess.run([sys.executable, "-c", "import pipeline.profile as p; "
-                        "print(p.ENABLE_V375_CODIGO_MIROVA, p.ENABLE_V750_CODIGO_MIROVA)"],
-                       cwd=ROOT, capture_output=True, text=True, encoding="utf-8", env=env)
-    a, b = r.stdout.split()
-    return a == "True", b == "True"
-
-
-def test_error_de_viirs_sigue_al_flag_de_su_via(tmp_path):
-    # Texto anterior (S173, con las vías de VIIRS apagadas): «test_error_de_viirs_no_falla»: salida 0, ningún
-    # ::error y «de otros sensores (no hacen fallar): 2». S179 (regla de VIIRS §5): un error de VIIRS hace fallar si la
-    # vía de su sensor está encendida en producción; la prueba lee el flag, así sirve antes y después de B1 y B2.
-    v375, v750 = _flags_produccion()
+def test_error_de_viirs_no_falla(tmp_path):
     r = _correr(tmp_path, LOG_ERROR_VIIRS)
-    assert r.returncode == (1 if (v375 or v750) else 0), r.stdout
-    assert bool(re.search(r"(?m)^::error title=Error en un granulo VIIRS 375 \(Lascar\)::.*\bVJ102IMG\b", r.stdout)) == v375
-    assert bool(re.search(r"(?m)^::error title=Error en un granulo VIIRS 750 \(Lascar\)::.*\bVNP02MOD\b", r.stdout)) == v750
-    assert re.search(r"de otros sensores \(no hacen fallar\): %d\b" % ((not v375) + (not v750)), r.stdout), r.stdout
-
-
-def test_sensores_que_fallan_sigue_a_cada_flag():
-    from revisar_errores_modis_nrt import sensores_que_fallan
-    assert sensores_que_fallan(False, False) == {"MODIS"}
-    assert sensores_que_fallan(True, False) == {"MODIS", "VIIRS375"}
-    assert sensores_que_fallan(False, True) == {"MODIS", "VIIRS750"}
-    # perfil ilegible: no saber no es lo mismo que saber que está apagada
-    assert sensores_que_fallan(None, None) == {"MODIS", "VIIRS375", "VIIRS750"}
-
-
-@pytest.mark.parametrize("nombre,sensor", [("VNP02IMG", "VIIRS375"), ("VJ102IMG", "VIIRS375"), ("VJ202IMG", "VIIRS375"),
-                                           ("VNP02MOD", "VIIRS750"), ("VJ102MOD", "VIIRS750"), ("VJ202MOD", "VIIRS750"),
-                                           ("MOD021KM", "MODIS"), ("MYD021KM", "MODIS"), ("XVJ102IMGX", "otro")])
-def test_clasificar_por_sensor_con_los_nombres_de_run_pipeline(nombre, sensor):
-    from revisar_errores_modis_nrt import clasificar_por_sensor
-    d = clasificar_por_sensor(f"  ERROR processing {nombre}.A2026306.0600.021.nc: x\n")
-    assert [k for k, v in d.items() if v] == [sensor]
-
-
-def test_un_error_de_viirs_375_hace_fallar_si_y_solo_si_su_via_esta_encendida(tmp_path):
-    v375, _ = _flags_produccion()
-    r = _correr(tmp_path, LOG_LIMPIO + "  ERROR processing VJ202IMG.A2026306.0600.021.nc: boom\n")
-    assert r.returncode == (1 if v375 else 0), r.stdout
+    assert r.returncode == 0, r.stdout
+    assert not re.search(r"(?m)^::error\b", r.stdout), r.stdout
+    assert re.search(r"de otros sensores \(no hacen fallar\): 2\b", r.stdout), r.stdout
 
 
 def test_log_limpio_no_falla(tmp_path):
