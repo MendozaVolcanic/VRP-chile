@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 01:06 UTC (S179): auditoría, auditores A y C terminados; corren B y el verificador de A
+- A (604 mil tokens, 41 min): 16 hallazgos (401 a 416), 3 de gravedad 3. C (543 mil tokens, 43 min): 17 (501 a 517), 2 de gravedad 3 (501: la fila 6 de VIIRS 375 depende de la exención N-3 del lector; 502: el «P2 GANA» de VIIRS 750 baja a EMPATE sin las pasadas miradas por nombre). Sin verificar todavía: nada de esto es resultado.
+- Listas y prompts de verificador sellados antes de lanzar: VA (`73b68a2a6`, 9 afirmaciones) y VC (`0467ecf54`, 21). Corren B y VA; en cola D y VC (tope de 2 agentes).
+
 ### 2026-11-11 00:23 UTC (S179): auditoría relanzada desde cero (Nicolás: «ahora sí continúa con todo»)
 - Ola 1: auditores A y C (Fable 5.2, `high`) con los prompts sellados de `585492d2f` (sha256 comprobado); cuota semanal 37 %, Fable 26 %; C: 12 GB, D: 24 GB libres. Insumos de GitHub de las 20:37 UTC del 11-10 (sin rehacer: menos de 4 h).
 - Armador de los verificadores: `experiments/_s179_audit/armar_verificadores.py` (lista escrita por el orquestador, sin el razonamiento del auditor; prohíbe abrir el informe del auditor y el plan; probado con una lista de prueba, 0 huecos).
