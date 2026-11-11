@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 18:56 UTC (S180): tablero por sensor en main (#986); reproceso de la historia en sesión aparte
+- Nicolás pidió abrir dos sesiones aparte. Rediseño: sesión `tablero-por-sensor`, PR #986 (tag `pre-s180-visualizador` sobre `babebdf70`; cambia sólo `frontend/` y dos pruebas; verificador limpio sin cambios en lo publicado; CI pytest y bateria-v750a verdes sobre `b9e284cef`). Nicolás: «mergea #986». Merge commit `2b29405b2` a las 18:53:28 UTC; Pages run 43082026810 success 18:55 UTC.
+- Sitio publicado comprobado en el navegador interno: carga `vista_volcan.css`, 45 tarjetas mínimas, clic en Chillán abre su página con pestañas MODIS (35), VIIRS 375 (79), VIIRS 750 (75) y Combinado (189), la URL pasa a `?volcano=NevadosDeChillan&sensor=...`, la pestaña VIIRS 375 muestra una sola serie del sensor más las referencias de MIROVA y el enlace a su página VIR375; sin errores de consola. Un `?volcano=` con nombre desconocido cae al primer volcán (Taapaca).
+- Reproceso: el primer intento de sesión falló por disco (C: 5,1 GB libres, necesitaba 5,4). Worktree creado en `D:\vrp-trabajo\worktrees\s180-reemplazo` (rama `claude/s180-reemplazo-historia` desde `babebdf70`) y sesión `reproceso-historia-d` corriendo ahí; empieza preguntándole a Nicolás las pasadas sin par y Tupungatito antes del 2026-02-23.
+
 ### 2026-11-11 14:10 UTC (S180): primera corrida del NRT con las tres vías y tablero publicado
 - NRT run 43030686918 sobre `9a6cf976d`, success; commits `NRT update` de los 11 entre 13:45 y 13:56 UTC. Records escritos desde 13:3x UTC, todos con `via_codigo_mirova: true` en las tres familias (Chillán, Láscar y Villarrica contados con script sobre `origin/main`). Chillán 2026-11-11 06:54 UTC: VIIRS 375 pasa de 8,350 MW (K, 5 px) a 31,889 MW (vía, 26 px) y VIIRS 750 de 5,982 (3 px) a 34,934 MW (20 px).
 - Pages run del 13:56 UTC success. En el sitio (navegador interno, tras vencer la caché de 10 min, `max-age=600`) la tabla de Chillán muestra los valores de la vía; sin errores de consola. Las pasadas que el NRT no reescribió (por ejemplo 05:54 UTC) siguen con K hasta el reemplazo de la historia.
