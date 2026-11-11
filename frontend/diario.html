@@ -739,6 +739,13 @@ function renderCard(volc, jsonData, mirovaForVolc) {
   btn.textContent = "⛶ Ampliar";
   btn.addEventListener("click", () => openModal(volc.name));
   ctrl.appendChild(btn);
+  // S180: enlace a la página del volcán en index.html (cada sensor con sus gráficos, mapa y pasadas); antes esta
+  // vista no llevaba a su volcán (plan S176, hallazgo 4).
+  const ver = el("a", "mini-btn");
+  ver.href = "index.html?volcano=" + encodeURIComponent(volc.name);
+  ver.textContent = "Ver volcán ›";
+  ver.style.textDecoration = "none";
+  ctrl.appendChild(ver);
 
   const hdr = el("div", "card-header");
   const h2 = el("h2"); h2.textContent = display;

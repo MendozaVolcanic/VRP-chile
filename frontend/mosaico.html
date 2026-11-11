@@ -446,10 +446,11 @@ function latestVRP(records, innerKm) {
     // Desempate ante igual timestamp (dos sensores en la misma pasada): la
     // lectura más fuerte de ESE instante. No es el máximo del período.
     if (!best || t > best.t || (t === best.t && v > best.max)) {
-      best = { max: v, ts: r.datetime_utc, t };
+      best = { max: v, ts: r.datetime_utc, t, sensor: r.sensor };
     }
   }
-  return best ? { max: best.max, ts: best.ts } : { max: 0, ts: null };
+  // S180: también el sensor de esa detección, para que la tarjeta diga de qué instrumento es el número (como index).
+  return best ? { max: best.max, ts: best.ts, sensor: best.sensor } : { max: 0, ts: null, sensor: null };
 }
 
 // ─── Fetch JSON con cache-bust (sync con index.html L732) ────────────────────
@@ -717,7 +718,10 @@ function renderMosaico() {
   for (const v of TIER_A) {
     const d = allData[v.name];
     const records = d?.records || [];
-    const { max: vrp48, ts: latestTs } = latestVRP(records, v.inner_radius_km);
+    const { max: vrp48, ts: latestTs, sensor: latestSensor } = latestVRP(records, v.inner_radius_km);
+    // S180: etiqueta por sensor, sin satélite (como las pestañas de la página del volcán en index.html).
+    const sensorTxt = !latestSensor ? "" : latestSensor.startsWith("MODIS") ? "MODIS"
+                    : latestSensor.includes("750") ? "VIIRS 750" : "VIIRS 375";
     const level = getLevel(vrp48);
 
     const card = el("div", { className: "mini-card " + level.cardCls });
@@ -741,7 +745,7 @@ function renderMosaico() {
     const metrics = el("div", { className: "mc-metrics" }, [
       el("div", {}, [
         el("span", { className: "mc-vrp lvl-" + level.key, textContent: fmtVRP(vrp48) }),
-        el("span", { className: "mc-vrp-unit", textContent: vrp48 > 0 ? " MW (48h)" : "" }),
+        el("span", { className: "mc-vrp-unit", textContent: vrp48 > 0 ? " MW · " + sensorTxt + " · 48 h" : "" }),
       ]),
       el("span", { className: "mc-level " + level.cls, textContent: level.label }),
     ]);
