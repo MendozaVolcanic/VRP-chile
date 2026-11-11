@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 09:08 UTC (S179): #985 mergeado; main traído a la rama de B1
+- Nicolás: «mergea #985». Merge commit `0965a98ae` (09:07:56 UTC, `--match-head-commit 99df34589`, CI verde, CLEAN). Main traído a la rama de #974 sin conflictos: punta `6ebd35abf`. En esa rama, con el perfil de producción, `sensores_que_fallan` da MODIS y VIIRS375 (vía 375 encendida, 750 apagada); 96 pruebas del revisor, cabeceras, citas y vía pasan. Falta para «mergea #974»: CI de `6ebd35abf`, dos noches verdes más de la guardia K de VIIRS (1 de 3 al 2026-11-11 00:12 UTC), tag defensivo nuevo sobre main y sí A45 del encendido.
+
 ### 2026-11-11 08:00 UTC (S179): sí de A45 para los comentarios de process_viirs.py en #974
 - Nicolás: «Sí, A45 comentarios». Tag defensivo `pre-s179-b1-comentarios` sobre main `8e2f1cab2`, en el remoto. Cabecera FICHA (l. 18) y comentario del bloque de la vía (l. 761 y 762) dicen ahora la vía encendida desde B1; sólo comentarios, mismo número de líneas; 68 pruebas de cabeceras y citas pasan. Punta de #974: `46facedba`. Este sí cubre sólo esos comentarios: el encendido pide su propio tag y «mergea #974».
 
