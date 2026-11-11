@@ -1,0 +1,12 @@
+columnas: veredicto, vistas, cumplida, n_reversion, n_fuera_de_plazo
+T1 real, 13 Chillan, la 12.a callada      : ('REVERSION_CANDIDATA', 13, False, 1, 0)
+T2 tope ingenuo, mismo insumo             : ('CANDIDATA_FUERA_DE_PLAZO', 10, False, 0, 1)
+T3 real (sin tope), 13 + 3                : ('VERDE', 16, False, 0, 0)
+T3 tope ingenuo, 13 + 3                   : ('VERDE', 13, False, 0, 0)
+T3b real (sin tope), 26 + 3               : ('VERDE', 29, True, 0, 0)
+T3b tope ingenuo, 26 + 3                  : ('VERDE', 13, False, 0, 0)
+T4 real, 30 Chillan, la 29.a callada      : ('REVERSION_CANDIDATA', 30, True, 1, 0)
+T4 real, 30 Chillan, la 30.a callada      : ('CANDIDATA_FUERA_DE_PLAZO', 30, True, 0, 1)
+T5 real, 5 con record de guardia sin publicar: ('VERDE', 5, False, 0, 0)
+T6 real, 5 con prod_via False (caida a K) : ('VERDE', 0, False, 0, 0)
+T7 real, 5 sin record de produccion       : ('INVESTIGAR', 5, False, 0, 0)

@@ -48,6 +48,11 @@ ubica a la misma distancia; el OCR les había pegado la distancia de la pasada s
 pierde ninguna alerta del cráter en estas cinco. Recomendación nueva: encender con «radiante» y escribirlo en #974.
 Informe: `experiments/_s179_ocr5/INFORME.md` (Láscar 2026-03-15 con confianza MEDIA; las otras cuatro, ALTA).
 
+**Decisión 2, borrador de enmienda (2026-11-11).** Medido con verificador: las 29 se juntan con un solo volcán activo
+también fuera de la erupción (Láscar en abril y mayo en VIIRS, en marzo en MODIS), y con tope de 10 por volcán la cuenta
+casi nunca cierra. Recomendación nueva: plazo de 120 días sin el cierre por 29 (opción B).
+`experiments/_s179_enmienda_plazo/ENMIENDA_PLAZO.md`.
+
 Ninguna de estas decisiones pide tocar `pipeline/`, `data/` ni `frontend/` hoy. La 1, la 3 y la 4 van antes de
 «mergea #974»; la 2 y la 5 antes de que se agote el plazo de MODIS (hacia el 2026-11-20).
 

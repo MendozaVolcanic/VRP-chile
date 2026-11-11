@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 02:53 UTC (S179): borrador de enmienda del plazo de reversión (decisión 2), ronda 2
+- Nicolás: «Redacta la enmienda». `experiments/_s179_enmienda_plazo/ENMIENDA_PLAZO.md` con `ritmo_protegidas.py` (95 encendidos simulados del 04-09 al 07-12). Verificador limpio Fable 5.2: SELLABLE CON CAMBIOS, seis aplicados; el principal: las 29 se juntan con un solo volcán también fuera de la erupción (Láscar abril y mayo en VIIRS, 16 a 23 días; marzo en MODIS), y con tope de 10 por volcán la cuenta casi nunca cierra (en MODIS nunca: sólo 3 volcanes dan protegidas, 10+10+1).
+- Recomendación cambió de A (tope 10) a B (plazo de 120 días sin cierre por 29). MODIS cerraría con la regla vieja el 11-19 o 11-20; la enmienda lo reabre en la corrida siguiente. Espera «Enmienda B», «Enmienda A» o «Deja el plazo».
+
 ### 2026-11-11 02:34 UTC (S179): las 5 alertas «sólo OCR» de la decisión 1 son la fuente lejana; «radiante» no pierde nada
 - Nicolás: «Sí, revísalas». Imágenes de MIROVA (Mirova-v1 y mirova-tif-archive): MIROVA dibuja las cinco en negro, a 14 a 24 km; la vía las ubica a 13 a 23 km con casi la misma potencia. El OCR les pegó la distancia de la pasada siguiente (defecto del S150). Lectura ciega de un verificador Fable 5.2 coincide (4 ALTA, Láscar 03-15 MEDIA). MIROVA además retira pasadas horas después de publicarlas.
 - Recomendación de la decisión 1 cambia a: encender B1 con «radiante» y escribirlo en #974. `experiments/_s179_ocr5/INFORME.md`; nota en `docs/AUDIT_S179.md` §2.
