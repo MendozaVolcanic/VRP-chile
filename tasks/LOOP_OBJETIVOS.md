@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 02:10 UTC (S179): auditoría, los cuatro auditores y tres verificadores terminados; falta VD
+- B (501 mil tokens): 16 hallazgos (451 a 466). D (581 mil): 14 (551 a 564); D escribió un rato en la instantánea compartida y lo corrigió: comprobé los 1.247 archivos contra los blobs de 438a60a1e, 0 distintos.
+- VA: 9 de 9 confirmadas (6 con gravedad rebajada). VC: 21, 0 refutadas (6 en parte; las cifras del sorteo y del OSF bajo 1 MW eran del brazo radiante). VB: 15, 0 refutadas (7 en parte); VB-01 nuevo: antes del 11-11 la guardia K de VIIRS sólo tiene corridas en falla, la primera programada verde es la de las 00:12 UTC del 11-11.
+- Cruce entre frentes: B1 (#974) publicaría VIIRS 375 con la posición «radiante», y la retrospectiva lo autorizó con «cercano» (C 501, D 551, VC-01). VD lo está verificando.
+
 ### 2026-11-11 01:06 UTC (S179): auditoría, auditores A y C terminados; corren B y el verificador de A
 - A (604 mil tokens, 41 min): 16 hallazgos (401 a 416), 3 de gravedad 3. C (543 mil tokens, 43 min): 17 (501 a 517), 2 de gravedad 3 (501: la fila 6 de VIIRS 375 depende de la exención N-3 del lector; 502: el «P2 GANA» de VIIRS 750 baja a EMPATE sin las pasadas miradas por nombre). Sin verificar todavía: nada de esto es resultado.
 - Listas y prompts de verificador sellados antes de lanzar: VA (`73b68a2a6`, 9 afirmaciones) y VC (`0467ecf54`, 21). Corren B y VA; en cola D y VC (tope de 2 agentes).
