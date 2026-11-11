@@ -6,7 +6,7 @@
   <title>VRP Chile — Monitoreo Volcánico</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> <link rel="stylesheet" href="vista_volcan.css" /><!-- S180: tarjeta mínima y pestañas por sensor; en la misma línea para no correr las citas archivo:línea (guard G8) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
 <script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) -->
@@ -1695,7 +1695,7 @@ function latestDetection(records, includeFar = false, innerKm = 10) {
       const pc = r.primary_cluster || {};
       const _honestSrc = esAnclaHonesta(
         r.final_hotspot_source);
-      best = { vrp: v, datetime_utc: r.datetime_utc, ts,
+      best = { vrp: v, datetime_utc: r.datetime_utc, ts, sensor: r.sensor,  // S180: sensor de la detección, para la tarjeta
                dist: (_honestSrc ? r.final_hotspot_dist_km : null)
                      ?? pc.centroid_dist_km ?? null,
                npx: pc.n_pixels ?? null,
@@ -2194,8 +2194,106 @@ function corroboracionMirova(d, dias) {
   return { alertas, nuestras, dias };
 }
 
+// ── S180: tarjeta mínima y página por volcán con una pestaña por sensor (pedido de Nicolás, 2026-11-11) ──
+// POR QUÉ. Un operador que viene de MIROVA hace dos preguntas: ¿cómo está cada volcán ahora? y, al abrir uno,
+// ¿qué dice cada sensor? La tarjeta traía catorce datos (T máx, fondo, ΔT, percentil, marca y conteos de MIROVA,
+// dos husos) y se leía mal; ahora lleva lo que decide: nivel, VRP de la última detección con su sensor y hora,
+// frescura del monitoreo y la tendencia del período. Lo demás NO se borró: está en «Métricas propias de VRP Chile»,
+// plegado dentro de la página del volcán (filasUltimaLectura). Todo esto es presentación: qué se publica lo siguen
+// decidiendo los mismos predicados (latestDetection, mirovaEqVrpDisplay, isValidDetection, toDailyMax), sin cambios.
+const SENSOR_TABS = [
+  { key: "MODIS",    label: "MODIS",     color: "#ff8c00", mirova: "MOD",    mirovaSensor: "MODIS" },
+  { key: "VIIRS375", label: "VIIRS 375", color: "#e91e63", mirova: "VIR375", mirovaSensor: "VIIRS375" },
+  { key: "VIIRS750", label: "VIIRS 750", color: "#00bcd4", mirova: "VIR",    mirovaSensor: "VIIRS" },
+  { key: "COMB",     label: "Combinado", color: null,      mirova: "MIR",    mirovaSensor: null },
+];
+// volcano_id de MIROVA = número GVP (gvp_id de volcanoes.yaml). Comprobado en mirovaweb.it el 2026-11-11 para los
+// 11: cada volcanoDetails_MIR.php?volcano_id=N abre la página del volcán correcto.
+const MIROVA_VOLCANO_ID = {
+  Isluga: 355030, Lascar: 355100, Lastarria: 355120, Tupungatito: 357010, PlanchonPeteroa: 357040,
+  NevadosDeChillan: 357070, Copahue: 357090, Llaima: 357110, Villarrica: 357120, PuyehueCordonCaulle: 357150,
+  Chaiten: 358041,
+};
+function urlMirovaVolcan(v, tabKey) {
+  const id = MIROVA_VOLCANO_ID[v.name];
+  if (!id) return null;
+  const t = SENSOR_TABS.find(s => s.key === tabKey) || SENSOR_TABS[3];
+  return "https://www.mirovaweb.it/NRT/volcanoDetails_" + t.mirova + ".php?volcano_id=" + id;
+}
+// Bucket de un record de MIROVA (CSV consolidado): "MODIS", "VIIRS375" y "VIIRS" (= M-band 750 m, nombre histórico).
+function sensorGroupMirova(r) {
+  const s = (r && (r.sensor || r.Sensor)) || "";
+  return s === "MODIS" ? "MODIS" : s === "VIIRS375" ? "VIIRS375" : s === "VIIRS" ? "VIIRS750" : null;
+}
+const ETIQUETA_SENSOR = { MODIS: "MODIS", VIIRS375: "VIIRS 375", VIIRS750: "VIIRS 750" };
+
+// Estado de la página del volcán; ?sensor= en la URL (MODIS, VIIRS375, VIIRS750; sin parámetro = Combinado).
+let detailSensor = (() => {
+  const q = new URLSearchParams(location.search).get("sensor");
+  return SENSOR_TABS.some(s => s.key === q) ? q : "COMB";
+})();
+let detailChartTab = null;     // pestaña del gráfico; null = la que diga la escala (lineal o log)
+let tablaTodasPasadas = true;  // «Últimas pasadas»: todas (como MIROVA) o sólo las con anomalía
+let propiasAbiertas = false;   // la sección plegada recuerda si quedó abierta al redibujar
+
+// URL compartible: volcán y sensor abiertos (el período ya lo escribe aplicarPeriodo).
+function escribirVolcanEnURL() {
+  try {
+    const q = new URLSearchParams(location.search);
+    q.set("volcano", currentVolcano.name);
+    if (detailSensor === "COMB") q.delete("sensor"); else q.set("sensor", detailSensor);
+    const s = q.toString();
+    history.replaceState(null, "", location.pathname + (s ? "?" + s : "") + location.hash);
+  } catch (e) { /* file:// o vista previa sin history: la página funciona igual, sólo no queda en la URL */ }
+}
+
+function irAlDetalle() {
+  const det = document.getElementById("detail");
+  if (det && det.scrollIntoView) det.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// Minigráfico de la tarjeta: máximo diario del período con los sensores visibles. Es el mismo número que las barras
+// de la pestaña Combinado (el máximo diario de la unión de sensores es el máximo de sus máximos), con la misma
+// magnitud: la expresión de eqVrp copia la de renderDetail y tests/test_tablero_por_sensor_s180.py vigila que sigan
+// iguales (A102).
+function datosMiniGrafico(records, innerKm) {
+  const eqVrp = (rec) => isThermalArtifact(rec, innerKm) ? 0 : mirovaEqVrpDisplay(rec, innerKm, includeFarDistance);
+  return toDailyMax(Periodo.filtrar(records, currentPeriodo).filter(isSensorVisible), eqVrp).filter(p => p.y > 0);
+}
+
+let _miniGraficos = [];
+function dibujarMiniGrafico(canvas, puntos, level) {
+  const color = level.key === "vhigh" || level.key === "high" ? "rgba(244,67,54,0.85)"
+              : level.key === "mod" ? "rgba(255,152,0,0.85)"
+              : level.key === "low" ? "rgba(255,193,7,0.85)"
+              : level.key === "vlow" ? "rgba(76,175,80,0.85)" : "rgba(122,143,166,0.6)";
+  const ahora = Date.now();
+  let [t0, t1] = Periodo.intervalo(currentPeriodo, ahora);
+  if (!Number.isFinite(t0)) t0 = ahora - 365 * 86400000;
+  if (!Number.isFinite(t1) || t1 > ahora) t1 = ahora;
+  const sinMarcas = { cesePlataformas: false, cambioDetector: false, cambioViaModis: false, cambioViaV375: false,
+                      cambioViaV750: false, legend: { display: false } };
+  return new Chart(canvas.getContext("2d"), {
+    type: "bar",
+    data: { datasets: [{ label: "máximo diario", data: puntos, backgroundColor: color, borderWidth: 0,
+                         barPercentage: 1, categoryPercentage: 1, minBarLength: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: Object.assign(sinMarcas, { tooltip: { displayColors: false, callbacks: {
+        title: items => items[0] ? String(items[0].raw.x) : "",
+        label: ctx => "máx. " + ctx.parsed.y.toFixed(2) + " MW" } } }),
+      scales: {
+        x: { type: "time", min: t0, max: t1, time: { unit: "day" }, display: false, grid: { display: false } },
+        y: { display: false, beginAtZero: true, grid: { display: false } },
+      },
+    },
+  });
+}
+
 function buildCards() {
   _headerWorst = null;
+  for (const c of _miniGraficos) { try { c.destroy(); } catch (e) {} }
+  _miniGraficos = [];
   const grid = document.getElementById("volcano-grid");
   while (grid.firstChild) grid.removeChild(grid.firstChild);
 
@@ -2206,15 +2304,16 @@ function buildCards() {
     const det = latestDetection(d.records, includeFarDistance, innerKm);
     const vrp = det ? det.vrp : 0;
     const level = getLevel(vrp);
-    const sensors = latestSensors(d.records, includeFarDistance);
     const lastTime = lastEventTime(d.records);
 
     const card = el("div", "volcano-card" + (v === currentVolcano ? " active" : "") +
                     (level.cardCls ? " " + level.cardCls : ""));
+    card.title = "Abrir " + v.display + ": cada sensor con sus gráficos, mapa y últimas pasadas";
     card.addEventListener("click", () => {
       currentVolcano = v;
       buildCards();
       renderDetail();
+      irAlDetalle();
     });
 
     // Header
@@ -2225,9 +2324,8 @@ function buildCards() {
     nameDiv.append(nm, rg);
     const badge = el("span", "alert-badge " + level.cls);
     badge.textContent = level.label;
-    // S131 A2/A3: la tarjeta clasifica la ÚLTIMA pasada; el detalle, el máximo de 30 d.
-    // Dos ventanas distintas con el mismo badge se rotulan para que no se confundan.
-    badge.title = "Nivel de la ÚLTIMA pasada (ventana 48 h). El panel de detalle muestra el máximo de 30 días, que puede ser mayor.";
+    // S131 A2/A3: la tarjeta clasifica la ÚLTIMA pasada; el detalle, el máximo del período.
+    badge.title = "Nivel de la ÚLTIMA detección (ventana 48 h). La página del volcán muestra el máximo del período, que puede ser mayor.";
     hdr.append(nameDiv, badge);
 
     // VRP
@@ -2236,7 +2334,7 @@ function buildCards() {
                                    level.key === "low"  ? "var(--yellow)" :
                                    level.key === "mod"  ? "var(--orange)" : "var(--red)") : "var(--muted)";
     vrpEl.textContent = vrp > 0 ? vrp.toFixed(2) : "—";
-    const vrpSub = el("div", "vc-vrp-sub"); vrpSub.textContent = vrp > 0 ? "MW" : "sin detección";
+    const vrpSub = el("div", "vc-vrp-sub"); vrpSub.textContent = vrp > 0 ? "MW" : "sin detección en 48 h";
     // S132 R8: marcar el tope como valor censurado en vez de mostrarlo como medición.
     if (esValorCensurado(vrp)) {
       const ast = el("span", "vrp-censurado"); ast.textContent = " *";
@@ -2246,49 +2344,18 @@ function buildCards() {
       vrpSub.title = TXT_VALOR_CENSURADO;
     }
 
-    // Sensor pills
-    const pills = el("div", "vc-sensors");
-    if (sensors.has("MODIS")) { const p = el("span","sensor-pill pill-modis"); p.textContent = "MODIS"; pills.appendChild(p); }
-    if (sensors.has("VIIRS375")) { const p = el("span","sensor-pill pill-v375"); p.textContent = "VIIRS 375m"; pills.appendChild(p); }
-    if (sensors.has("VIIRS750")) { const p = el("span","sensor-pill pill-v750"); p.textContent = "VIIRS 750m"; pills.appendChild(p); }
-
-    // S97 (pedido Nicolás): como MIROVA, la tarjeta muestra SOLO la última
-    // detección (la más importante), no un resumen acumulado de áreas. Una línea
-    // limpia con la distancia al centroide + extensión (px) de ESA detección,
-    // acoplada al número MW y al timestamp de arriba. Sin "(7d)", sin split.
-    const dcRow = el("div", "vc-distance");
-    if (det && det.dist != null) {
-      // S100: icono más sobrio que 🎯 — ◉ (en el cráter) / ○ (lejana).
-      const ic = el("span", "vc-dist-ic" + (det.summit ? " is-summit" : " is-far"));
-      ic.textContent = det.summit ? "◉" : "○";
-      const s = el("span", "vc-dist-txt");
-      // S131 A4: para records Test 1 (ancla honesta S106) la distancia es 0,0 por
-      // construcción — el ancla ES el cráter, no una medición. Se dice con palabras,
-      // igual que ya hace la columna DIST de la tabla del detalle.
-      const distTxt = det.dist < 0.05 ? "en el cráter (ancla)" : det.dist.toFixed(1) + " km del cráter";
-      s.textContent = " " + distTxt + (det.npx != null ? " · " + det.npx + " px" : "");
-      dcRow.title = "Posición de la última detección respecto del cráter: para detecciones por integral (Test 1) es el ancla del cráter, no un centroide; para clústeres es la distancia del punto reportado al cráter. Extensión en píxeles.";
-      dcRow.append(ic, s);
-    }
-
-    // Last update — S90: si hay detección, el timestamp es el de ESA detección
-    // (acoplado al número mostrado). Si no, se muestra la última pasada satelital
-    // como contexto de frescura de datos, aclarando que no hubo detección.
-    // S94 (pedido Nicolás): mostrar la fecha de la medición prominente como MIROVA.
-    // Etiqueta chica + fecha grande/resaltada en su propia línea.
-    const time = el("div", "vc-time");
+    // S180: de qué sensor y a qué hora es ese número (S90: valor y hora acoplados a la misma detección).
+    const act = el("div", "vc-actual");
     if (det) {
-      const lbl = el("span", "vc-time-lbl"); lbl.textContent = "Última detección";
-      const loc = el("div", "vc-time-local"); loc.textContent = fmtLocalCL(det.datetime_utc);
-      const utc = el("div", "vc-time-utc"); utc.textContent = det.datetime_utc.slice(0, 16) + " UTC";
-      time.append(lbl, loc, utc);
+      const b = el("b"); b.textContent = ETIQUETA_SENSOR[sensorGroup(det.sensor)] || det.sensor || "—";
+      act.append(b, document.createTextNode(" · " + fmtLocalCL(det.datetime_utc)));
+      act.title = "Última detección: " + det.datetime_utc.slice(0, 16) + " UTC, " + (det.sensor || "") +
+                  ". Distancia, contraste térmico y comparación con MIROVA, en la página del volcán.";
     } else if (lastTime) {
-      const lbl = el("span", "vc-time-lbl"); lbl.textContent = "Última pasada (sin detección)";
-      const loc = el("div", "vc-time-local vc-time-nodet"); loc.textContent = fmtLocalCL(lastTime);
-      const utc = el("div", "vc-time-utc"); utc.textContent = lastTime.slice(0, 16) + " UTC";
-      time.append(lbl, loc, utc);
+      act.textContent = "última pasada " + fmtLocalCL(lastTime);
+      act.title = "Última pasada procesada (sin detección): " + lastTime.slice(0, 16) + " UTC";
     } else {
-      time.textContent = "Sin datos";
+      vrpSub.textContent = "";   // sin records en este tablero: lo dice la línea de frescura, una sola vez
     }
 
     // S109 (pedido Nicolás) — frescura de MONITOREO SIEMPRE visible: distingue
@@ -2325,85 +2392,126 @@ function buildCards() {
       mon.append(mdot, mtxt);
     }
 
-    // S132 R5 — contraste térmico de la última detección. Es el único discriminante
-    // físico directo que el operador tiene en la tarjeta: cuánto más caliente está el
-    // píxel que su entorno. Un ΔT de pocos kelvin sobre un volcán nevado es señal
-    // sub-umbral o ruido de nieve; decenas de kelvin es material caliente expuesto.
-    let therm = null;
-    if (det && det.tMax != null && det.tBg != null) {
-      const dT = det.tMax - det.tBg;
-      therm = el("div", "vc-thermal");
-      therm.textContent = "T máx " + det.tMax.toFixed(1) + " K · fondo " + det.tBg.toFixed(1)
-                        + " K · ΔT " + dT.toFixed(1) + " K";
-      therm.title = "Temperatura de brillo del píxel más caliente y del fondo local de esa "
-                  + "misma pasada. La diferencia (ΔT) es el contraste térmico: pocos kelvin "
-                  + "sobre un volcán nevado suele ser señal sub-umbral o ruido de nieve; "
-                  + "decenas de kelvin indican material caliente expuesto.";
-    }
+    card.append(hdr, vrpEl, vrpSub);
+    if (act.firstChild) card.appendChild(act);
+    card.appendChild(mon);
 
-    // S132 R3 — ¿MIROVA publicó algo en esa misma pasada? Es la referencia externa, y
-    // saber que coincide (o no) cambia cuánta confianza merece la lectura. Que NO
-    // coincida no la invalida: el 95 % de nuestras detecciones sin MIROVA son anomalías
-    // físicamente reales que ellos no publican (A54).
-    let mrow = null;
-    if (det) {
-      mrow = el("div", "vc-mirova " + (det.mirova ? "is-conf" : "is-solo"));
-      mrow.textContent = det.mirova ? "▲ MIROVA publicó en esta pasada"
-                                    : "— sin publicación de MIROVA";
-      mrow.title = det.mirova
-        ? "MIROVA publicó una alerta térmica para este volcán en la misma pasada (universo CONS ∪ OCR)."
-        : "Sin alerta de MIROVA a ±2 min de este gránulo, o sólo una de 0,05 MW o menos (su banner la llama NONE). La misma pasada pudo salir en el gránulo vecino: si hay otra fila del mismo satélite a 5 o 6 min, mírala. No significa que la detección sea falsa: "
-        + "la mayoría de estos casos son anomalías térmicas reales por debajo del umbral que "
-        + "MIROVA publica (regla A54). Sí conviene mirarlos con el ΔT a la vista.";
-    }
-
-    // S132 R12 — anomalía relativa a la línea de base del propio volcán.
-    let anom = null;
-    const ar = anomaliaRelativa(d.records, det, innerKm);
-    if (ar) {
-      const fuerte = ar.pct >= 90;
-      anom = el("div", "vc-anom" + (fuerte ? " is-alto" : ""));
-      anom.textContent = "percentil " + ar.pct + " de su propia base 90 d"
-                       + (ar.veces ? " · " + ar.veces.toFixed(1) + "× su mediana" : "");
-      anom.title = "Compara esta lectura contra las " + ar.n + " detecciones del MISMO volcán "
-                 + "en los 90 días previos (mediana " + ar.mediana.toFixed(2) + " MW). El nivel "
-                 + "absoluto de MIROVA compara todos los volcanes con la misma vara y deja en "
-                 + "«Muy Bajo» tanto a uno que lleva un año quieto como a uno que acaba de "
-                 + "multiplicar por diez lo habitual; para vigilancia lo segundo importa más.";
-    }
-
-    // S137 D5 — corroboración acumulada, sólo para los Tier A (los 34 restantes no
-    // tienen referencia de MIROVA con la que cruzarse, así que la fila mentiría).
-    let corr = null;
-    if (v.hasMirova) {
-      const cm = corroboracionMirova(d, 90);
-      if (cm) {
-        const sinNada = cm.alertas === 0;
-        corr = el("div", "vc-corr" + (sinNada ? " is-sola" : ""));
-        //   para que la ventana no se parta de línea entre el número y la unidad.
-        corr.textContent = "MIROVA " + cm.alertas + " · nuestras " + cm.nuestras
-                         + " (" + cm.dias + " d)";
-        corr.title = "Alertas térmicas que MIROVA publicó para este volcán en los últimos "
-                   + cm.dias + " días (universo CONS ∪ OCR), contra nuestras detecciones "
-                   + "válidas en la misma ventana. "
-                   + (sinNada
-                      ? "Sin ninguna corroboración externa en el período: conviene leer las "
-                      + "detecciones de este volcán con más cautela, sobre todo si el ΔT es "
-                      + "de pocos kelvin sobre terreno nevado."
-                      : "Que el número nuestro sea mayor es lo esperado y no es un defecto: "
-                      + "MIROVA publica por encima de un umbral operacional y nosotros "
-                      + "registramos también la señal real que queda por debajo (A54).");
+    // S180: minigráfico del período (como mosaico.html), sólo si el volcán tiene datos en este tablero.
+    if (d.records && d.records.length) {
+      const puntos = datosMiniGrafico(d.records, innerKm);
+      const lbl = el("div", "vc-spark-lbl");
+      if (!puntos.length) {   // sin barras que dibujar: decirlo en vez de dejar un recuadro vacío
+        lbl.textContent = "sin detecciones · " + Periodo.rotuloCorto(currentPeriodo);
+        card.appendChild(lbl);
+        grid.appendChild(card);
+        return;
       }
+      const wrap = el("div", "vc-spark");
+      const canvas = el("canvas");
+      wrap.appendChild(canvas);
+      lbl.textContent = "máx. diario · " + Periodo.rotuloCorto(currentPeriodo);
+      card.append(wrap, lbl);
+      requestAnimationFrame(() => {
+        if (!canvas.isConnected) return;   // otra llamada a buildCards ya reemplazó esta tarjeta
+        _miniGraficos.push(dibujarMiniGrafico(canvas, puntos, level));
+      });
     }
-
-    card.append(hdr, vrpEl, vrpSub, pills, dcRow);
-    if (therm) card.appendChild(therm);
-    if (anom) card.appendChild(anom);
-    if (mrow) card.appendChild(mrow);
-    if (corr) card.appendChild(corr);
-    card.append(time, mon);
     grid.appendChild(card);
   });
+}
+
+// S180: lo que la tarjeta mostraba además (S97 distancia y px, S132 R5 contraste térmico, S132 R3 MIROVA en la misma
+// pasada, S132 R12 percentil propio, S137 D5 corroboración de 90 d). No se borró: vive aquí, plegado en la página
+// del volcán, con sus mismos textos y tooltips. Lee la misma última detección de 48 h que la tarjeta.
+function filasUltimaLectura(v, d) {
+  const innerKm = v.inner_radius_km ?? 10;
+  const det = latestDetection(d.records, includeFarDistance, innerKm);
+  const box = el("div", "ultima-lectura");
+  const tit = el("div", "ul-title");
+  tit.textContent = det ? "Última detección, la de la tarjeta (48 h, cualquier sensor): " + det.datetime_utc.slice(0, 16) + " UTC, " + (det.sensor || "")
+                        : "Sin detección en las últimas 48 h";
+  box.appendChild(tit);
+
+  // S97 (pedido Nicolás): distancia al centroide + extensión (px) de ESA detección.
+  if (det && det.dist != null) {
+    const dcRow = el("div", "vc-distance");
+    // S100: icono más sobrio que 🎯: ◉ (en el cráter) / ○ (lejana).
+    const ic = el("span", "vc-dist-ic" + (det.summit ? " is-summit" : " is-far"));
+    ic.textContent = det.summit ? "◉" : "○";
+    const s = el("span", "vc-dist-txt");
+    // S131 A4: para records Test 1 (ancla honesta S106) la distancia es 0,0 por
+    // construcción: el ancla ES el cráter, no una medición.
+    const distTxt = det.dist < 0.05 ? "en el cráter (ancla)" : det.dist.toFixed(1) + " km del cráter";
+    s.textContent = " " + distTxt + (det.npx != null ? " · " + det.npx + " px" : "");
+    dcRow.title = "Posición de la última detección respecto del cráter: para detecciones por integral (Test 1) es el ancla del cráter, no un centroide; para clústeres es la distancia del punto reportado al cráter. Extensión en píxeles.";
+    dcRow.append(ic, s);
+    box.appendChild(dcRow);
+  }
+
+  // S132 R5: contraste térmico de la última detección: cuánto más caliente está el píxel que su entorno. Un ΔT de
+  // pocos kelvin sobre un volcán nevado es señal sub-umbral o ruido de nieve; decenas de kelvin es material caliente.
+  if (det && det.tMax != null && det.tBg != null) {
+    const dT = det.tMax - det.tBg;
+    const therm = el("div", "vc-thermal");
+    therm.textContent = "T máx " + det.tMax.toFixed(1) + " K · fondo " + det.tBg.toFixed(1)
+                      + " K · ΔT " + dT.toFixed(1) + " K";
+    therm.title = "Temperatura de brillo del píxel más caliente y del fondo local de esa "
+                + "misma pasada. La diferencia (ΔT) es el contraste térmico: pocos kelvin "
+                + "sobre un volcán nevado suele ser señal sub-umbral o ruido de nieve; "
+                + "decenas de kelvin indican material caliente expuesto.";
+    box.appendChild(therm);
+  }
+
+  // S132 R3: ¿MIROVA publicó algo en esa misma pasada? Que NO coincida no la invalida: el 95 % de nuestras
+  // detecciones sin MIROVA son anomalías físicamente reales que ellos no publican (A54).
+  if (det) {
+    const mrow = el("div", "vc-mirova " + (det.mirova ? "is-conf" : "is-solo"));
+    mrow.textContent = det.mirova ? "▲ MIROVA publicó en esta pasada"
+                                  : "sin publicación de MIROVA en esta pasada";
+    mrow.title = det.mirova
+      ? "MIROVA publicó una alerta térmica para este volcán en la misma pasada (universo CONS ∪ OCR)."
+      : "Sin alerta de MIROVA a ±2 min de este gránulo, o sólo una de 0,05 MW o menos (su banner la llama NONE). La misma pasada pudo salir en el gránulo vecino: si hay otra fila del mismo satélite a 5 o 6 min, mírala. No significa que la detección sea falsa: "
+      + "la mayoría de estos casos son anomalías térmicas reales por debajo del umbral que "
+      + "MIROVA publica (regla A54). Sí conviene mirarlos con el ΔT a la vista.";
+    box.appendChild(mrow);
+  }
+
+  // S132 R12: anomalía relativa a la línea de base del propio volcán.
+  const ar = anomaliaRelativa(d.records, det, innerKm);
+  if (ar) {
+    const anom = el("div", "vc-anom" + (ar.pct >= 90 ? " is-alto" : ""));
+    anom.textContent = "percentil " + ar.pct + " de su propia base 90 d"
+                     + (ar.veces ? " · " + ar.veces.toFixed(1) + "× su mediana" : "");
+    anom.title = "Compara esta lectura contra las " + ar.n + " detecciones del MISMO volcán "
+               + "en los 90 días previos (mediana " + ar.mediana.toFixed(2) + " MW). El nivel "
+               + "absoluto de MIROVA compara todos los volcanes con la misma vara y deja en "
+               + "«Muy Bajo» tanto a uno que lleva un año quieto como a uno que acaba de "
+               + "multiplicar por diez lo habitual; para vigilancia lo segundo importa más.";
+    box.appendChild(anom);
+  }
+
+  // S137 D5: corroboración acumulada, sólo para los Tier A (los 34 restantes no tienen referencia de MIROVA).
+  if (v.hasMirova) {
+    const cm = corroboracionMirova(d, 90);
+    if (cm) {
+      const sinNada = cm.alertas === 0;
+      const corr = el("div", "vc-corr" + (sinNada ? " is-sola" : ""));
+      corr.textContent = "Alertas de MIROVA " + cm.alertas + " · detecciones nuestras " + cm.nuestras
+                       + " (últimos " + cm.dias + " d, todos los sensores)";
+      corr.title = "Alertas térmicas que MIROVA publicó para este volcán en los últimos "
+                 + cm.dias + " días (universo CONS ∪ OCR), contra nuestras detecciones "
+                 + "válidas en la misma ventana. "
+                 + (sinNada
+                    ? "Sin ninguna corroboración externa en el período: conviene leer las "
+                    + "detecciones de este volcán con más cautela, sobre todo si el ΔT es "
+                    + "de pocos kelvin sobre terreno nevado."
+                    : "Que el número nuestro sea mayor es lo esperado y no es un defecto: "
+                    + "MIROVA publica por encima de un umbral operacional y nosotros "
+                    + "registramos también la señal real que queda por debajo (A54).");
+      box.appendChild(corr);
+    }
+  }
+  return box;
 }
 
 // ── Detail panel ─────────────────────────────────────────────────────────────
@@ -2415,12 +2523,19 @@ function renderDetail() {
 
   const v = currentVolcano;
   const d = allData[v.name] || { records: [], mirovaRecords: [] };
-  const filtered   = Periodo.filtrar(d.records, currentPeriodo);        // S153: noche o rango
-  const mFiltered  = Periodo.filtrar(d.mirovaRecords, currentPeriodo);
+  escribirVolcanEnURL();   // S180: la URL dice qué volcán y qué sensor están abiertos (enlace compartible)
+  // S180: la pestaña de sensor acota TODO lo de abajo (estadísticas, gráficos, mapa, pasadas, métricas) a ese sensor,
+  // como las pestañas de MIROVA; «Combinado» deja los tres. Sólo elige qué records se miran: qué es una detección y
+  // cuánto vale lo siguen diciendo eqVrp, isValidDetection y compañía, sin cambios.
+  const enSensor       = (r) => detailSensor === "COMB" || sensorGroup(r.sensor) === detailSensor;
+  const enSensorMirova = (r) => detailSensor === "COMB" || sensorGroupMirova(r) === detailSensor;
+  const enPeriodo  = Periodo.filtrar(d.records, currentPeriodo);        // S153: noche o rango
+  const filtered   = enPeriodo.filter(enSensor);
+  const mFiltered  = Periodo.filtrar(d.mirovaRecords, currentPeriodo).filter(enSensorMirova);
   // S151: la linea de MIROVA es solo nocturna (como la replica); lo diurno va aparte, con un sol. Lo diurno
   // junta las filas de la tabla marcadas `dia` y las del OCR de `records_dia_ocr`.
   const mNoche     = mFiltered.filter(r => !mirovaEsDia(r));
-  const mDia       = mFiltered.filter(mirovaEsDia).concat(Periodo.filtrar(d.mirovaDiaOcr || [], currentPeriodo));
+  const mDia       = mFiltered.filter(mirovaEsDia).concat(Periodo.filtrar(d.mirovaDiaOcr || [], currentPeriodo).filter(enSensorMirova));
 
   // S33 bug fix: pasar inner_radius_km del volcán a mirovaEqVrp para validar
   // pc.centroid_dist_km. Sin esto, clusters far en Salar Atacama se reportaban
@@ -2452,10 +2567,56 @@ function renderDetail() {
   // S131 A2: rótulo de la ventana; S153: sale del período elegido (antes decía «30 d» con cualquier período)
   badge.textContent = level.label + " · máx " + Periodo.rotuloCorto(currentPeriodo);
   badge.title = "Nivel del MÁXIMO del período (" + Periodo.rotulo(currentPeriodo) + "). La tarjeta muestra la última pasada (48 h).";
-  const dc = el("div", "detail-coords");
-  // coords will be added from volcanoes config — hardcoded for now
-  dh.append(dt, badge);
+  // S180: región y enlace directo a la página de MIROVA del mismo volcán y sensor (volcano_id = GVP, comprobado).
+  const tWrap = el("div");
+  const sub = el("div", "detail-sub"); sub.textContent = v.region + (v.hasMirova ? "" : " · sin serie publicada en este tablero");
+  tWrap.append(dt, sub);
+  const links = el("div", "detail-links");
+  const urlM = urlMirovaVolcan(v, detailSensor);
+  if (urlM) {
+    const a = el("a"); a.href = urlM; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = "Ver en MIROVA (" + (SENSOR_TABS.find(s => s.key === detailSensor) || {}).label + ") ↗";
+    a.title = "La misma vista en mirovaweb.it, para comparar con lo que publica MIROVA.";
+    links.appendChild(a);
+  }
+  dh.append(tWrap, badge, links);
   dp.appendChild(dh);
+
+  // S180: una pestaña por sensor, como MIROVA (MODIS, VIIRS 375, VIIRS 750, Combinado). Cada sensor es una sola
+  // serie aunque lo lleven varios satélites: el satélite queda en el detalle de cada pasada. El número entre
+  // paréntesis son las pasadas del período con detección publicada de ese sensor.
+  const sTabs = el("div", "sensor-tabs");
+  for (const s of SENSOR_TABS) {
+    // mismo conteo que la caja «Detecciones» de esa pestaña (eqVrp > 0)
+    const n = enPeriodo.filter(r => (s.key === "COMB" || sensorGroup(r.sensor) === s.key) && eqVrp(r) > 0).length;
+    const b = el("button", "sensor-tab" + (s.key === detailSensor ? " active" : ""));
+    if (s.color) { const dot = el("span", "st-dot"); dot.style.background = s.color; b.appendChild(dot); }
+    b.appendChild(document.createTextNode(s.label));
+    const nEl = el("span", "st-n"); nEl.textContent = "(" + n + ")"; b.appendChild(nEl);
+    b.title = s.key === "COMB" ? "Los tres sensores juntos, cada uno con su color"
+                               : "Sólo " + s.label + ": su VRP, distancia, mapa y pasadas";
+    b.addEventListener("click", () => { if (detailSensor !== s.key) { detailSensor = s.key; renderDetail(); } });
+    sTabs.appendChild(b);
+  }
+  dp.appendChild(sTabs);
+  if (detailSensor !== "COMB" && sensorVisible[detailSensor] === false) {
+    const nota = el("div", "sensor-nota");
+    nota.textContent = "Este sensor está apagado en la leyenda de sensores de arriba: el gráfico, el mapa y la VRE " +
+                       "lo omiten hasta que lo enciendas.";
+    dp.appendChild(nota);
+  }
+  // S180: lo propio de VRP Chile (la lectura detallada de la última pasada, la comparación con MIROVA, exportar, las
+  // imágenes) va plegado al final, fuera del camino principal; se llena más abajo.
+  const propias = el("details", "propias");
+  propias.open = propiasAbiertas;
+  propias.addEventListener("toggle", () => { propiasAbiertas = propias.open; });
+  const propSum = el("summary");
+  propSum.textContent = "Métricas propias de VRP Chile ";
+  const propSmall = el("small");
+  propSmall.textContent = "(última detección en detalle, comparación con MIROVA, exportar, imágenes)";
+  propSum.appendChild(propSmall);
+  propias.appendChild(propSum);
+  propias.appendChild(filasUltimaLectura(v, d));
 
   // Energy scale bands legend
   const eb = el("div", "energy-bands");
@@ -2535,7 +2696,7 @@ function renderDetail() {
     banner.innerHTML = "<b>Refs MIROVA escasas:</b> " + mFiltered.length +
                        " records en ventana." + why +
                        "<br><small style='color:#9bb4cc'>Métricas recall/precision abajo tienen baja potencia estadística — interpretar con cuidado. Refs canónicas en docs/F48_LLAIMA_COPAHUE_REFS_GAP.md.</small>";
-    dp.appendChild(banner);
+    propias.appendChild(banner);   // S180: va con las métricas a las que advierte, en la sección plegada
   }
 
   // ── S77 F30 P4 / S93 F1 — Métricas live POR SENSOR vs MIROVA ──
@@ -2553,7 +2714,7 @@ function renderDetail() {
   const hdr = el("div", "metrics-header");
   hdr.textContent = "Métricas vs MIROVA (live) — por sensor";
   hdr.title = tipText;
-  dp.appendChild(hdr);
+  propias.appendChild(hdr);   // S180: métricas propias, plegadas
   const fmt = (x) => (x == null ? "—" : x.toFixed(2));
   // Orden por sensibilidad: VIIRS375 (I-band, más detecciones), VIIRS750 (M-band),
   // MODIS (1km, solo lo grande). Los 3 los publica MIROVA (fix S93).
@@ -2562,11 +2723,12 @@ function renderDetail() {
     { key: "VIIRS750", label: "VIIRS 750m", note: "M-band · menos sensible" },
     { key: "MODIS",    label: "MODIS 1km",  note: "solo anomalías grandes" },
   ];
-  for (const s of SENSOR_ROWS) {
+  // S180: en la pestaña de un sensor, sólo su fila (las otras quedarían vacías: filtered ya es de ese sensor).
+  for (const s of SENSOR_ROWS.filter(x => detailSensor === "COMB" || x.key === detailSensor)) {
     const m = (metrics.byBucket && metrics.byBucket[s.key]) || { recall: null, precision: null, f1: null, ratio_med: null, tp: 0, fn: 0, fp: 0, pairs: 0 };
     const slab = el("div", "metrics-sensor-label");
     slab.innerHTML = `${s.label} <span style="color:var(--muted);font-weight:400">· ${s.note}</span>`;
-    dp.appendChild(slab);
+    propias.appendChild(slab);
     const mr = el("div", "stats-row metrics-row");
     const addMetric = (label, val, unit, color) => {
       const box = el("div", "stat-box metric-box");
@@ -2586,27 +2748,30 @@ function renderDetail() {
     addMetric("Ratio med", m.ratio_med != null ? m.ratio_med.toFixed(2) + "×" : "—",
               `N=${m.pairs} pares`,
               m.ratio_med != null && m.ratio_med >= 0.7 && m.ratio_med <= 1.4 ? "var(--green)" : null);
-    dp.appendChild(mr);
+    propias.appendChild(mr);
   }
 
   // ── Export CSV buttons ──
   const actionRow = el("div", "action-row");
   const csvBtn = el("button", "action-btn");
-  csvBtn.textContent = "\u2B73 Exportar CSV (periodo)";
+  csvBtn.textContent = "\u2B73 Exportar CSV (período" + (detailSensor === "COMB" ? "" : ", " + ETIQUETA_SENSOR[detailSensor]) + ")";
   csvBtn.addEventListener("click", () => exportCSV(v, filtered));
   actionRow.appendChild(csvBtn);
 
   const csvAllBtn = el("button", "action-btn");
-  csvAllBtn.textContent = "\u2B73 Exportar CSV (todos)";
+  csvAllBtn.textContent = "\u2B73 Exportar CSV (toda la serie, todos los sensores)";
   csvAllBtn.addEventListener("click", () => exportCSV(v, d.records));
   actionRow.appendChild(csvAllBtn);
-  dp.appendChild(actionRow);
+  // S180: se agrega más abajo, bajo la tabla de pasadas (es lo que se baja).
 
   // Chart tabs
   const tabs = el("div", "chart-tabs");
-  const tabNames = ["VRP", "Distancia", "VRE Acumulada", "MIROVA Comparar"];
+  // S180: como MIROVA, «VRP» y «Log VRP» son dos pestañas; comparten estado con los botones Lineal/Log del
+  // encabezado (logScale), así que una lleva a la otra. Las demás dibujan el VRP junto a su gráfico.
+  const tabNames = ["VRP lineal", "VRP log", "Distancia", "VRE acumulada", "Comparar con MIROVA"];
+  if (detailChartTab == null || detailChartTab <= 1) detailChartTab = logScale ? 1 : 0;
   const tabBtns = tabNames.map((name, i) => {
-    const btn = el("button", "chart-tab" + (i === 0 ? " active" : ""));
+    const btn = el("button", "chart-tab" + (i === detailChartTab ? " active" : ""));
     btn.textContent = name;
     btn.dataset.idx = i;
     tabs.appendChild(btn);
@@ -2646,9 +2811,23 @@ function renderDetail() {
 
   dp.appendChild(chartsGrid);
 
+  // S180: el mapa de píxeles va antes de la tabla, como en MIROVA (gráfico, mapa, últimas pasadas); se arma más abajo.
+  const mapaHost = el("div");
+  dp.appendChild(mapaHost);
+
   // Events table
-  const tTitle = el("div"); tTitle.style.cssText = "font-size:.8rem;font-weight:600;margin:16px 0 8px";
-  tTitle.textContent = "Últimas detecciones (VRP > 0)";
+  // S180: «Últimas pasadas», como MIROVA: por defecto todas las pasadas del sensor, también las que no vieron nada
+  // (eso dice que el volcán se miró y estaba tranquilo); un botón deja sólo las con anomalía (la tabla de antes).
+  const tTitle = el("div", "pasadas-hdr");
+  const tTxt = el("span", "pt-title");
+  tTxt.textContent = tablaTodasPasadas ? "Últimas pasadas (con y sin anomalía)" : "Últimas detecciones (VRP > 0)";
+  const bTodas = el("button", "scale-btn" + (tablaTodasPasadas ? " active" : ""));
+  bTodas.textContent = "Todas las pasadas";
+  const bAnom = el("button", "scale-btn" + (tablaTodasPasadas ? "" : " active"));
+  bAnom.textContent = "Sólo con anomalía";
+  bTodas.addEventListener("click", () => { if (!tablaTodasPasadas) { tablaTodasPasadas = true; renderDetail(); } });
+  bAnom.addEventListener("click", () => { if (tablaTodasPasadas) { tablaTodasPasadas = false; renderDetail(); } });
+  tTitle.append(tTxt, bTodas, bAnom);
   dp.appendChild(tTitle);
 
   const tbl = el("table","events-table");
@@ -2693,14 +2872,16 @@ function renderDetail() {
   // y chart timeline (eqVrp en toDailyMax). Antes usaba getDisplayVrp que no
   // aplica filter de distance → tabla mostraba más rows que stat/chart.
   // getDisplayVrp sigue usándose para el VALOR mostrado por row (cluster pref).
+  // S180: con «Todas las pasadas» entran también las sin anomalía (se pintan aparte, abajo); el filtro de antes
+  // (eqVrp > 0) sigue siendo el de «Sólo con anomalía».
   const recent = filtered
-    .filter(r => eqVrp(r) > 0)
+    .filter(r => tablaTodasPasadas || eqVrp(r) > 0)
     .sort((a,b) => b.datetime_utc.localeCompare(a.datetime_utc))
     .slice(0, 20);
 
   if (recent.length === 0) {
     const row = el("tr"); const td = el("td"); td.colSpan = 8;
-    td.textContent = "Sin detecciones en el período"; td.style.color = "var(--muted)";
+    td.textContent = tablaTodasPasadas ? "Sin pasadas en el período" : "Sin detecciones en el período"; td.style.color = "var(--muted)";
     td.style.textAlign = "center"; td.style.padding = "20px";
     row.appendChild(td); tbody.appendChild(row);
   } else {
@@ -2708,6 +2889,16 @@ function renderDetail() {
     // al hacer click busca el marker del mapa con la misma key, abre
     // popup, hace zoom, y resalta visualmente la fila.
     recent.forEach(r => {
+      // S180: pasada procesada sin anomalía publicada. Se lista para que se vea que el volcán se miró; no tiene
+      // posición ni magnitud que mostrar, así que no lleva marcador ni clic al mapa.
+      if (!(eqVrp(r) > 0)) {
+        const row = el("tr", "sin-anomalia");
+        [r.datetime_utc, r.sensor, "—", "sin anomalía", "—", "—", "—", "—"].forEach(val => {
+          const td = el("td"); td.textContent = val; row.appendChild(td);
+        });
+        tbody.appendChild(row);
+        return;
+      }
       // S27: VRP de la tabla = primary_cluster.vrp_mw (MIROVA-equiv) cuando
       // exista; fallback a suma indistinta del record para legacy.
       const vrpRaw = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
@@ -2834,7 +3025,10 @@ function renderDetail() {
     });
   }
   tbl.appendChild(tbody);
-  dp.appendChild(tbl);
+  const tblScroll = el("div", "tabla-scroll");   // S180: en celular la tabla se desliza sin ensanchar la página
+  tblScroll.appendChild(tbl);
+  dp.appendChild(tblScroll);
+  dp.appendChild(actionRow);   // S180: exportar, bajo la tabla
 
   // ── Hotspot Map ──────────────────────────────────────────────────────────
   const mapHdr = el("div", "map-header");
@@ -2855,19 +3049,28 @@ function renderDetail() {
     item.append(dot, lbl); mapLeg.appendChild(item);
   });
   mapHdr.append(mapTitle, mapLeg);
-  dp.appendChild(mapHdr);
+  mapaHost.appendChild(mapHdr);   // S180: antes de la tabla
 
   const mapDiv = el("div", "map-container");
   mapDiv.id = "hotspot-map";
-  dp.appendChild(mapDiv);
+  mapaHost.appendChild(mapDiv);
 
   // ── S77 F30 P3 — Galería imágenes MIROVA ─────────────────────────────────
   // Placeholder con id estable; renderGallery() lo puebla async cuando el
   // índice JSON termina de cargar. Esto evita bloquear el resto del detail.
   const galleryHost = el("div");
   galleryHost.id = "mirova-gallery-host";
-  dp.appendChild(galleryHost);
+  // S180: la galería apunta a un archivo que sólo existe en el computador de Nicolás (archiveAvailable); en el sitio
+  // público se rotula y va plegada con lo demás propio, en vez de prometer descargas que no entrega.
+  if (!archiveAvailable()) {
+    const gNota = el("div", "galeria-nota");
+    gNota.textContent = "Imágenes MIROVA: el archivo de TIF y KMZ vive fuera del sitio público, así que aquí sólo se " +
+                        "listan; para ver la imagen de hoy usa «Ver en MIROVA» arriba.";
+    propias.appendChild(gNota);
+  }
+  propias.appendChild(galleryHost);
   renderGallery(v.name, galleryHost);
+  dp.appendChild(propias);
 
   panel.appendChild(dp);
 
@@ -3007,10 +3210,11 @@ function renderDetail() {
       .filter(r => isSensorVisible(r) && eqVrp(r) > 0)
       .sort((a, b) => a.datetime_utc.localeCompare(b.datetime_utc));
 
+    // S180: un color por sensor, no por satélite (el satélite está en el popup de cada píxel).
     const colorMap = {
-      "MODIS_TERRA": "#ff8c00", "MODIS_AQUA": "#ffb347",
-      "VIIRS_SNPP": "#e91e63", "VIIRS_NOAA20": "#f06292", "VIIRS_NOAA21": "#f8bbd0",
-      "VIIRS_SNPP_750": "#00bcd4", "VIIRS_NOAA20_750": "#4dd0e1", "VIIRS_NOAA21_750": "#b2ebf2",
+      "MODIS_TERRA": "#ff8c00", "MODIS_AQUA": "#ff8c00",
+      "VIIRS_SNPP": "#e91e63", "VIIRS_NOAA20": "#e91e63", "VIIRS_NOAA21": "#e91e63",
+      "VIIRS_SNPP_750": "#00bcd4", "VIIRS_NOAA20_750": "#00bcd4", "VIIRS_NOAA21_750": "#00bcd4",
     };
 
     const allPts = [];
@@ -3184,32 +3388,19 @@ function renderDetail() {
     const v375  = filtered.filter(r => r.sensor?.startsWith("VIIRS") && !r.sensor.includes("750"));
     const v750  = filtered.filter(r => r.sensor?.includes("750"));
 
+    // S180 (pedido de Nicolás): una serie por sensor, como MIROVA, sin separar satélites. El máximo diario de la unión
+    // de satélites es el máximo de sus máximos diarios, así que la barra de cada día es la más alta de las que había
+    // antes por satélite: no cambia ningún valor publicado, sólo deja de partirlo en colores. Las etiquetas empiezan
+    // con «MODIS» y «VIIRS … 375/750» porque cambio_detector.js busca las series por ese nombre.
+    // S32 P2: eqVrp (cluster contiguo summit-only), no r.vrp_mw global. C1 (S76): NOAA-21 entra en su sensor.
     if (sensorVisible.MODIS && modis.length) {
-      const terra = modis.filter(r => r.sensor === "MODIS_TERRA");
-      const aqua  = modis.filter(r => r.sensor === "MODIS_AQUA");
-      // S32 P2: usar mirovaEqVrp (cluster contiguo summit-only) en lugar de
-      // r.vrp_mw global. Reduce magnitud reportada de 6.25× MIROVA a 2.29× mediano.
-      if (terra.length) ds.push({ label:"MODIS Terra", data:toDailyMax(terra, eqVrp), backgroundColor:"#ff8c00cc", borderColor:"#ff8c00", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (aqua.length)  ds.push({ label:"MODIS Aqua",  data:toDailyMax(aqua,  eqVrp), backgroundColor:"#ffb347cc", borderColor:"#ffb347", borderWidth:1, borderRadius:2, borderSkipped:false });
+      ds.push({ label:"MODIS", data:toDailyMax(modis, eqVrp), backgroundColor:"#ff8c00cc", borderColor:"#ff8c00", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.VIIRS750 && v750.length) {
-      const snpp750   = v750.filter(r => r.sensor === "VIIRS_SNPP_750");
-      const noaa750   = v750.filter(r => r.sensor === "VIIRS_NOAA20_750");
-      // C1 (S76 audit): NOAA-21 750m faltaba en filtros + colorMaps. 27% del
-      // dataset invisible en chart. Fix recupera la serie completa.
-      const noaa21_750 = v750.filter(r => r.sensor === "VIIRS_NOAA21_750");
-      if (snpp750.length)   ds.push({ label:"VIIRS SNPP 750m",    data:toDailyMax(snpp750,   eqVrp), backgroundColor:"#00bcd4cc", borderColor:"#00bcd4", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa750.length)   ds.push({ label:"VIIRS NOAA-20 750m", data:toDailyMax(noaa750,   eqVrp), backgroundColor:"#4dd0e1cc", borderColor:"#4dd0e1", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa21_750.length) ds.push({ label:"VIIRS NOAA-21 750m",data:toDailyMax(noaa21_750,eqVrp), backgroundColor:"#b2ebf2cc", borderColor:"#b2ebf2", borderWidth:1, borderRadius:2, borderSkipped:false });
+      ds.push({ label:"VIIRS 750m", data:toDailyMax(v750, eqVrp), backgroundColor:"#00bcd4cc", borderColor:"#00bcd4", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.VIIRS375 && v375.length) {
-      const snpp375   = v375.filter(r => r.sensor === "VIIRS_SNPP");
-      const noaa375   = v375.filter(r => r.sensor === "VIIRS_NOAA20");
-      // C1: idem para I-band 375m.
-      const noaa21_375 = v375.filter(r => r.sensor === "VIIRS_NOAA21");
-      if (snpp375.length)   ds.push({ label:"VIIRS SNPP 375m",    data:toDailyMax(snpp375,   eqVrp), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa375.length)   ds.push({ label:"VIIRS NOAA-20 375m", data:toDailyMax(noaa375,   eqVrp), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa21_375.length) ds.push({ label:"VIIRS NOAA-21 375m",data:toDailyMax(noaa21_375,eqVrp), backgroundColor:"#f8bbd0cc", borderColor:"#f8bbd0", borderWidth:1, borderRadius:2, borderSkipped:false });
+      ds.push({ label:"VIIRS 375m", data:toDailyMax(v375, eqVrp), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.MIROVA && (mNoche.length || mDia.length)) {
       // S76 P1 — separar referencia MIROVA por sensor con paleta apareada a la
@@ -3440,10 +3631,11 @@ function renderDetail() {
     if (mode === 1) { // Distance vs Time
       secT.textContent = "Distancia al crater vs Tiempo";
       const distData = buildDistanceData();
+      // S180: un color por sensor, como en el gráfico de VRP.
       const sensorColors = {
-        "MODIS_TERRA":"#ff8c00","MODIS_AQUA":"#ffb347",
-        "VIIRS_SNPP":"#e91e63","VIIRS_NOAA20":"#f06292","VIIRS_NOAA21":"#f8bbd0",
-        "VIIRS_SNPP_750":"#00bcd4","VIIRS_NOAA20_750":"#4dd0e1","VIIRS_NOAA21_750":"#b2ebf2"
+        "MODIS_TERRA":"#ff8c00","MODIS_AQUA":"#ff8c00",
+        "VIIRS_SNPP":"#e91e63","VIIRS_NOAA20":"#e91e63","VIIRS_NOAA21":"#e91e63",
+        "VIIRS_SNPP_750":"#00bcd4","VIIRS_NOAA20_750":"#00bcd4","VIIRS_NOAA21_750":"#00bcd4"
       };
       charts["sec-chart"] = new Chart(secC.getContext("2d"), {
         type: "scatter",
@@ -3541,18 +3733,20 @@ function renderDetail() {
   }
 
   // Tab switching
-  let activeTab = 0;
+  // S180: 0 = VRP lineal, 1 = VRP log (sólo el gráfico de VRP), 2..4 = VRP más Distancia, VRE o Comparar.
+  const mostrarTab = (i) => { drawChart(); drawSecondary(i <= 1 ? 0 : i - 1); };
   tabBtns.forEach((btn, i) => {
     btn.addEventListener("click", () => {
+      // Lineal o log: es la misma escala que los botones del encabezado; su manejador la guarda y redibuja.
+      if (i <= 1 && (i === 1) !== logScale) { detailChartTab = i; document.getElementById(i === 1 ? "btn-log" : "btn-linear").click(); return; }
       tabBtns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      activeTab = i;
-      drawChart();
-      drawSecondary(i);
+      detailChartTab = i;
+      mostrarTab(i);
     });
   });
 
-  setTimeout(() => { drawChart(); drawSecondary(0); }, 50);
+  setTimeout(() => mostrarTab(detailChartTab), 50);
 }
 
 // ── Sensor legend ─────────────────────────────────────────────────────────────

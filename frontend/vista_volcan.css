@@ -1,0 +1,54 @@
+/* S180: tarjeta mínima y página por volcán con una pestaña por sensor, como el visualizador de MIROVA.
+   POR QUÉ va en un archivo aparte: el <link> entra en una línea existente de index.html, así las citas
+   archivo:línea del CLAUDE.md (guard G8) no se corren. Sólo presentación: nada de esto decide qué se publica. */
+
+/* ── Tarjeta mínima ─────────────────────────────────────────────────────────── */
+.vc-actual { font-size: 0.68rem; color: #9fb3c8; margin-top: 2px; line-height: 1.35; }
+.vc-actual b { color: var(--text); font-weight: 600; }
+.vc-spark { position: relative; height: 38px; margin-top: 8px; }
+.vc-spark canvas { width: 100% !important; height: 38px !important; }
+.volcano-card .vc-monitor { display: block; line-height: 1.4; }   /* en tarjetas angostas el flex partía la frase en columnas */
+.vc-spark-lbl { font-size: 0.56rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* ── Página del volcán ─────────────────────────────────────────────────────── */
+.detail-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.detail-links { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-left: auto; }
+.detail-links a { font-size: 0.74rem; color: #4fc3f7; text-decoration: none; border: 1px solid var(--border);
+                  border-radius: 5px; padding: 3px 8px; white-space: nowrap; }
+.detail-links a:hover { border-color: #4fc3f7; }
+
+.sensor-tabs { display: flex; gap: 0; margin: 4px 0 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.sensor-tab { background: transparent; border: 1px solid transparent; border-bottom: none; color: var(--muted);
+              padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px 6px 0 0;
+              margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px; }
+.sensor-tab:hover { color: var(--text); }
+.sensor-tab.active { color: var(--text); background: var(--card); border-color: var(--border);
+                     border-bottom: 1px solid var(--card); }
+.sensor-tab .st-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.sensor-tab .st-n { font-weight: 400; font-size: 0.7rem; color: var(--muted); }
+.sensor-nota { font-size: 0.75rem; color: var(--yellow); margin: 0 0 10px; }
+
+.chart-tabs { flex-wrap: wrap; }
+.charts-grid > .chart-panel { min-width: 0; }   /* sin esto, en celular el gráfico se salía 44 px del panel */
+
+.pasadas-hdr { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 16px 0 8px; }
+.pasadas-hdr .pt-title { font-size: .8rem; font-weight: 600; }
+.pasadas-hdr .scale-btn { font-size: 0.7rem; }
+.events-table tr.sin-anomalia td { color: var(--muted); }
+.tabla-scroll { overflow-x: auto; }
+
+.propias { margin-top: 18px; border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; }
+.propias > summary { cursor: pointer; font-size: 0.82rem; font-weight: 600; padding: 10px 0; color: var(--text); }
+.propias > summary small { font-weight: 400; color: var(--muted); }
+.propias[open] { padding-bottom: 12px; }
+.ultima-lectura { display: grid; gap: 4px; margin: 4px 0 12px; }
+.ultima-lectura .ul-title { font-size: 0.74rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.ultima-lectura .vc-thermal, .ultima-lectura .vc-anom, .ultima-lectura .vc-mirova,
+.ultima-lectura .vc-corr, .ultima-lectura .vc-distance { font-size: 0.76rem; margin-top: 0; }
+.galeria-nota { font-size: 0.72rem; color: var(--muted); margin: 6px 0; }
+
+@media (max-width: 600px) {
+  .sensor-tab { padding: 6px 9px; font-size: 0.74rem; }
+  .detail-links { margin-left: 0; width: 100%; }
+  .detail-header { flex-wrap: wrap; }
+}

@@ -153,13 +153,21 @@ def test_las_tres_vistas_le_pasan_los_records_al_modulo_sin_copiar_su_logica():
 
 
 def test_las_llamadas_no_corren_las_lineas_de_las_vistas():
-    """Las citas archivo:línea del CLAUDE.md (guard G8) apuntan a index.html; la llamada va en una línea existente."""
-    import subprocess
+    """La llamada a notarRecords va en una línea que ya existía, junto a la sentencia que carga los records.
+
+    POR QUÉ (S172): las citas archivo:línea del CLAUDE.md (guard G8) apuntan a index.html, y la marca de la vía no debía
+    correrlas. Hasta S180 esto se comprobaba con el número total de líneas de las tres vistas igual al del tag
+    `pre-s171-adopcion-modd`. S180 (rediseño del tablero por sensor, pedido de Nicolás del 2026-11-11) cambia a
+    propósito el largo de las vistas, así que esa comparación ya no puede quedar verde. Lo que vigilaba sigue vigilado:
+    (1) que la llamada no agregó una línea propia, aquí abajo; (2) que la cita de index.html sigue en su símbolo, por
+    G8 (tests/test_guard_declarado_vs_efectivo_s131.py, contrato index.html:1595); (3) que el predicado de publicación
+    no cambió en ninguna de las tres vistas, por tests/test_tablero_por_sensor_s180.py contra el tag
+    `pre-s180-visualizador`, y que es el mismo en las tres, por tests/test_guard_predicado_tres_vistas_s147.py.
+    """
+    ancla = {"index.html": "enrichWithMirovaConfirmation(", "diario.html": "renderCard(volc, data, mirovaForVolc)",
+             "mosaico.html": "allData[v.name].records"}
     for v in VISTAS:
-        r = subprocess.run(["git", "show", f"pre-s171-adopcion-modd:frontend/{v}"], cwd=RAIZ, capture_output=True,
-                           text=True, encoding="utf-8")
-        if r.returncode != 0:
-            pytest.skip("sin el tag pre-s171-adopcion-modd en este checkout")
-        antes = len(r.stdout.splitlines())
-        ahora = len((RAIZ / "frontend" / v).read_text(encoding="utf-8").splitlines())
-        assert antes == ahora, f"{v}: {antes} -> {ahora} líneas"
+        lineas = (RAIZ / "frontend" / v).read_text(encoding="utf-8").splitlines()
+        con = [ln for ln in lineas if "CambioDetector.notarRecords(" in ln]
+        assert len(con) == 1, f"{v}: {len(con)} líneas con notarRecords"
+        assert ancla[v] in con[0], f"{v}: notarRecords quedó en una línea propia, sin {ancla[v]!r}"
