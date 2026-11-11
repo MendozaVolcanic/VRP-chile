@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 00:23 UTC (S179): auditoría relanzada desde cero (Nicolás: «ahora sí continúa con todo»)
+- Ola 1: auditores A y C (Fable 5.2, `high`) con los prompts sellados de `585492d2f` (sha256 comprobado); cuota semanal 37 %, Fable 26 %; C: 12 GB, D: 24 GB libres. Insumos de GitHub de las 20:37 UTC del 11-10 (sin rehacer: menos de 4 h).
+- Armador de los verificadores: `experiments/_s179_audit/armar_verificadores.py` (lista escrita por el orquestador, sin el razonamiento del auditor; prohíbe abrir el informe del auditor y el plan; probado con una lista de prueba, 0 huecos).
+- Guardia K de VIIRS: el cron de las 19:35 UTC del 11-10 recién entró a la cola a las 00:12 UTC del 11-11 (run 42929475700).
+
 ### 2026-11-10 20:46 UTC (S179): auditoría detenida a pedido de Nicolás (apaga el PC); se relanza entera más tarde
 - A y C detenidos a los ~10 minutos, sin informe útil. Sus restos, apartados (no borrados) en `D:\vrp-trabajo\temporales\s179-audit\papelera_ola1_cortada\`; las carpetas `experiments/_s179_audit/a` y `c` y los temporales quedan vacíos.
 - Para relanzar: los prompts sellados de `585492d2f` sirven tal cual (`experiments/_s179_audit/prompts/`, sha256 en `SHA256.txt`); la instantánea y los insumos siguen en `D:\vrp-trabajo\temporales\s179-audit\` (insumos con hora 20:37 UTC: si pasa más de un día, rehacerlos). Orden: A y C, luego B y D, verificadores Opus 5.5 por frente, síntesis en `docs/AUDIT_S179.md`. Mirar `get_usage` antes.
