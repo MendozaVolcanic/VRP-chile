@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 06:09 UTC (S179): Nicolás decide «Deja el plazo» (decisión 2)
+- Sin enmienda: las reglas de reversión de MODIS y VIIRS siguen con 29 protegidas o 120 días. MODIS cerrará su plazo hacia el 11-19 o 11-20 con 29 de Chillán; desde ahí una candidata se informa como CANDIDATA_FUERA_DE_PLAZO y decide Nicolás. Al leer ese cierre: fin de la pre-autorización, no prueba general de la vía (`experiments/_s179_enmienda_plazo/ENMIENDA_PLAZO.md`).
+
 ### 2026-11-11 02:53 UTC (S179): borrador de enmienda del plazo de reversión (decisión 2), ronda 2
 - Nicolás: «Redacta la enmienda». `experiments/_s179_enmienda_plazo/ENMIENDA_PLAZO.md` con `ritmo_protegidas.py` (95 encendidos simulados del 04-09 al 07-12). Verificador limpio Fable 5.2: SELLABLE CON CAMBIOS, seis aplicados; el principal: las 29 se juntan con un solo volcán también fuera de la erupción (Láscar abril y mayo en VIIRS, 16 a 23 días; marzo en MODIS), y con tope de 10 por volcán la cuenta casi nunca cierra (en MODIS nunca: sólo 3 volcanes dan protegidas, 10+10+1).
 - Recomendación cambió de A (tope 10) a B (plazo de 120 días sin cierre por 29). MODIS cerraría con la regla vieja el 11-19 o 11-20; la enmienda lo reabre en la corrida siguiente. Espera «Enmienda B», «Enmienda A» o «Deja el plazo».

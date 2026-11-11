@@ -1,7 +1,9 @@
 # Enmienda al plazo de la reversión pre-autorizada (MODIS §4.6 y VIIRS D3 §4.6): BORRADOR para Nicolás
 
 Fecha: 2026-11-11. Origen: auditoría S179, decisión 2 (`docs/AUDIT_S179.md` §2), hallazgos 401, DEC-12 (MODIS) y 451
-(VIIRS), confirmados por verificador. Estado: **BORRADOR, SIN SELLO, ronda 2** (la ronda 1 la leyó un verificador limpio
+(VIIRS), confirmados por verificador. **DECIDIDO: «Deja el plazo»** (Nicolás, 2026-11-11 06:09 UTC, hora del servidor). No hay enmienda: las dos reglas siguen como se sellaron (29 protegidas o 120 días). Lo que queda de este documento es la medición y las opciones, por si se reabre. Al cerrarse el plazo de MODIS (hacia el 2026-11-19 o 11-20) el «29 de 29» será de Chillán: se lee como fin de la pre-autorización, no como prueba de que la vía no pierde alertas en otros volcanes (§1, §2).
+
+Estado anterior: **BORRADOR, SIN SELLO, ronda 2** (la ronda 1 la leyó un verificador limpio
 Fable 5.2: SELLABLE CON CAMBIOS; los seis cambios están aplicados, §7). Ninguna regla cambia hasta tu frase.
 
 ## 1. Qué pasa hoy, en lenguaje de volcán

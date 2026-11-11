@@ -50,7 +50,7 @@ Informe: `experiments/_s179_ocr5/INFORME.md` (Láscar 2026-03-15 con confianza M
 
 **Decisión 2, borrador de enmienda (2026-11-11).** Medido con verificador: las 29 se juntan con un solo volcán activo
 también fuera de la erupción (Láscar en abril y mayo en VIIRS, en marzo en MODIS), y con tope de 10 por volcán la cuenta
-casi nunca cierra. Recomendación nueva: plazo de 120 días sin el cierre por 29 (opción B).
+casi nunca cierra. Recomendación nueva: plazo de 120 días sin el cierre por 29 (opción B). **Decidido por Nicolás: «Deja el plazo» (2026-11-11 06:09 UTC)**; las reglas quedan como se sellaron.
 `experiments/_s179_enmienda_plazo/ENMIENDA_PLAZO.md`.
 
 Ninguna de estas decisiones pide tocar `pipeline/`, `data/` ni `frontend/` hoy. La 1, la 3 y la 4 van antes de
