@@ -21,7 +21,8 @@
 > «código MIROVA» (`enable_v375_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`, familia VIIRS375): la grilla de
 > 375 m de MIROVA, su detector, su fondo y la suma de todos los alertados. Las divergencias de este catálogo que
 > describen VIIRS 375 de producción como K describen el estado previo en VIIRS 375 y su texto se conserva. Las marcas
-> por divergencia van en D22, D25, D26 y D32 (S179); las demás que midan K en VIIRS 375 se marcan cuando se midan. K de VIIRS sigue corriendo como guardia (`pipeline/profiles/guardia_k_viirs.yaml`) con
+> por divergencia van en D18, D19, D22, D25, D26 y D32 (S179); las demás que describan K en VIIRS 375 (D11, D17) se
+> marcan cuando se midan sobre la vía. K de VIIRS sigue corriendo como guardia (`pipeline/profiles/guardia_k_viirs.yaml`) con
 > reversión pre-autorizada (marca S177 B1 en `docs/MISSION.md`).
 
 ## Objetivo
@@ -2436,6 +2437,8 @@ para un A/B, no para afirmar el origen exacto.
 
 ## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (A/B corrido S130 → NO ADOPTAR; divergencia de fidelidad literal, prioridad baja)** S129/S130
 
+> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1, #974)**: la cara VIIRS 375 de esta divergencia describe K. Desde el merge de B1, VIIRS 375 de producción corre la vía «código MIROVA» (marca S177 B1 al inicio del catálogo), que usa la caja de la región sensible del código de MIROVA (D34), no el círculo de K; lo que sigue describe K en VIIRS 375, que queda en la guardia K de VIIRS. Texto conservado.
+
 > ⚠️ **S162, sobre el «El cierre vale con la geolocalización MODIS de hoy [...] Si se corrige, la caja se vuelve a
 > medir» de la marca S151 de abajo** (A113; D35): el A/B de MxD03 sobre K dio **CUMPLE SIN DAÑO**, verificado con
 > contexto limpio (`experiments/_s162_mxd03/resultado/INFORME.md` y `resultado/verificador/INFORME_VERIFICADOR.md`,
@@ -2592,6 +2595,8 @@ círculo de igual área tiene radio 2,82, así que hay píxeles que sólo la caj
 Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
 
 ## D19 — `keep_peak` publica como *summit* a 0,0 km un píxel del borde del disco del Test 1, más frío que el fondo; y el second pass corre sin conjunto activo — **ABIERTA (CONFIRMADA gravedad 5 por verificador limpio; probe A75 corrido S135: el cráter no está en el Test 1, y los conteos son del régimen de fondo previo a #537; decisión D1/D2 de Nicolás pendiente)** S134/S135
+
+> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1, #974)**: la cara VIIRS 375 de esta divergencia describe K. Desde el merge de B1, VIIRS 375 de producción corre la vía «código MIROVA» (marca S177 B1 al inicio del catálogo), que no tiene `keep_peak` ni el Test 1 integrado (D34); lo que sigue describe K en VIIRS 375, que queda en la guardia K de VIIRS. Texto conservado.
 
 > ⚠️ **S158, auditoría contra el código de MIROVA (F2-H2, confirmado por V2; F1-H5 y V2-2)**: el código de VIIRS 750
 > corre el segundo pase **siempre y sobre toda la escena**, con la misma función que el primero
