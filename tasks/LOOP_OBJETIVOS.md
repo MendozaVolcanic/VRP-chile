@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 13:22 UTC (S180): VIIRS 375 y 750 encendidos con la vía «código MIROVA» (#974 y #983)
+- Nicolás (2026-11-11 ~13:05 UTC), ante «¿Enciendo ya VIIRS 375 sin esperar las dos noches de guardia que faltan?»: «si pero publiquemos todo con la via nueva, y cuando este el reproceso tambien se agrega, k puede seguir corriedo pero en el dashboard debe quedar la mas correcta, ademas procede con el resto de los cambios». **Excepción explícita a la regla sellada §5**: se enciende con 1 de 3 noches verdes de la guardia K de VIIRS (run 42929475700); la guardia sigue corriendo y su lectura de esta noche y la del 11-12 se anota igual.
+- #974: tag `pre-s180-b1-encendido` (main `340be5e3b`), `gh pr ready`, merge commit `e23054dcb` (13:09:21 UTC, `--match-head-commit 6ebd35abf`, CI verde, CLEAN).
+- #983: main traído a la rama (`13af2f922`); con el sí de A45 («procede con el resto de los cambios») y tag `pre-s180-b2-comentario` (main `e23054dcb`), comentario de `pipeline/process_viirs_mod.py` l. 498 dice encendida desde B2 (`2f4b0df22`, mismo número de líneas, 64 pruebas de citas y guards pasan). CI verde; tag `pre-s180-b2-encendido` (main `e23054dcb`); merge commit `9a6cf976d` (13:22:13 UTC, `--match-head-commit 2f4b0df22`).
+- Reversión por sensor: apagar el flag (`enable_v375_codigo_mirova` o `enable_v750_codigo_mirova`) o `git revert -m 1` del merge (el de B2 es limpio; el de B1 con B2 adentro choca en la ficha y 8 pruebas). Ficha de VRP Chile en `MAPA_WORKSPACE.md` al día. Falta: comprobar la primera corrida del NRT y el tablero publicado.
+
 ### 2026-11-11 12:16 UTC (S180): issues cerrados; CI de B2 verde
 - Nicolás: «Sí, ciérralos». Cerrados con comentario #968 y #969 (vigilancia de la guardia VERDE sin avisos) y #915 y #936 (superados por #973). Abiertos: #973, #943, #813.
 - #983 punta `f94920698` (ficha corregida): CI verde, CLEAN, sigue en borrador y va después de #974.
