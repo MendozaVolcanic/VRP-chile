@@ -1,0 +1,744 @@
+merged
+  result 100644 dc8e1e45f2a8eba3dc60bd7ef5d1c035f97939cb CLAUDE.md
+  our    100644 aa951b842e35c2a4a5f08a2675ee604bc1a2f7db CLAUDE.md
+@@ -39,6 +39,13 @@
+ > Decisión de Nicolás del 2026-10-31. K de MODIS queda de guardia (`pipeline/profiles/guardia_k_modis.yaml`,
+ > `scripts/vigilancia_guardia_modis.py`), reversión pre-autorizada por `git revert` del PR B. Lo que describa el
+ > MODIS de producción como K (D21, D12, cara MODIS de D11) es previo a S172. Ver `docs/MISSION.md`, ficha v1.18.
++>
++> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1): VIIRS 375 de producción deja de ser K.** Corre la
++> vía «código MIROVA» (`enable_v375_codigo_mirova: true`); K de VIIRS queda de guardia
++> (`pipeline/profiles/guardia_k_viirs.yaml`), reversión por `git revert -m 1` del merge de B1 (regla
++> `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`). Lo que abajo diga «VIIRS 375 y 750 = K» o que
++> el tablero publica `f5_core_vrp_mw` en VIIRS 375 vale para VIIRS 375 sólo hasta ese merge. Ver `docs/MISSION.md`,
++> ficha v1.21.
+ 
+ **Objetivo: clon literal MIROVA NRT.** Antes de tocar `pipeline/`, leer [docs/MISSION.md](docs/MISSION.md) y
+ aplicar las 3 preguntas; si las 3 dan NO, no implementar y anotarlo en `tasks/backlog_*.md`. Parches viejos
+changed in both
+  base   100644 b07a27d135e3e661837dfa7102908146f7259591 docs/FICHA_SDA_VRP_CHILE.md
+  our    100644 e01962467768f3b267e568d59842a47ecd4158a5 docs/FICHA_SDA_VRP_CHILE.md
+  their  100644 f2b5966dc3b5046efec2413defbfcf7658aff2ba docs/FICHA_SDA_VRP_CHILE.md
+@@ -4,7 +4,11 @@
+ > generado por el equipo; los campos legales/institucionales marcados `<completar>` los
+ > debe validar SERNAGEOMIN antes de cualquier publicación. Plantilla: `GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md`.
+ 
++<<<<<<< .our
+ **Identificador interno:** VRP-CL  ·  **Versión:** v1.22, 2026-11-10 (sin cambio de lógica de detección: se quitan del tablero los avisos de texto de la vía «código MIROVA» y del cese de Suomi NPP; quedan sus líneas verticales en los gráficos). Versión anterior: v1.21, 2026-11-10 (sin cambio de lógica de detección: el aviso del detector K del tablero sólo aparece si hay datos anteriores a su frontera, y hoy no los hay).
++=======
++**Identificador interno:** VRP-CL  ·  **Versión:** v1.21, 2026-11-09, **PROPUESTA** (PR B1 en borrador, rama `claude/s177-b1-v375`; no rige mientras no se mergee): cambio de la lógica de producción en VIIRS 375: la vía alternativa que corre el código publicado por MIROVA, incorporada apagada en la v1.16, pasaría a ser la de producción en VIIRS 375; MODIS y VIIRS 750 no cambian con esta versión; ver «Funcionamiento/lógica» y el historial. Versión anterior: v1.20, 2026-11-09 (sin cambio de lógica de detección: agrega una vista preliminar de los 34 volcanes fuera del NRT). Versión previa a esa: v1.19, 2026-11-07 (sin cambio de lógica de detección: corrige la descripción de qué pasadas MODIS quedaron con el método nuevo de la v1.18; el NRT procesa en cada corrida la ventana de los últimos 8 días, pero el almacén sólo agrega las pasadas que no tenía; una pasada ya guardada se reemplaza únicamente cuando llega su producto estándar de NASA en lugar del NRT o con un reproceso explícito con `--overwrite` (`pipeline/store.py`). Medido en 474 reemplazos del NRT por el estándar en MODIS (11 volcanes principales, pasadas observadas del 2026-10-17 al 2026-11-07, sin contar 188 registros re-escritos por el reproceso del 2026-10-18), el estándar llegó con una mediana de 13,8 horas desde que la pasada se guardó por primera vez: 90,7 % antes de 24 horas, 8 casos (1,7 %) entre 3 y 5 días y un máximo de 4,5 días (`experiments/_s175_latencia_estandar_modis/salida.txt`). La primera pasada MODIS con el método nuevo se observó el 2026-11-02 a las 01:15 UTC, unas 19 horas antes de la primera corrida del sistema con ese método (20:11 UTC de ese día), no 8 días antes: 22 de las 23 pasadas observadas de 01:15 a 07:30 UTC estaban guardadas como NRT con el método anterior y su producto estándar llegó justo en esa primera corrida, así que el reemplazo las dejó con el método nuevo (la restante sigue como NRT); las pasadas más antiguas ya estaban en producto estándar y siguen con el método anterior; ver el historial). v1.18 era del 2026-11-01 (cambio de la lógica de producción en MODIS: la vía alternativa que corre el código publicado por MIROVA, incorporada apagada en la v1.14, pasa a ser la de producción en MODIS; VIIRS no cambia; ver «Funcionamiento/lógica» y el historial; rige desde la primera corrida del sistema después del cambio, y como cada corrida vuelve a procesar los últimos 8 días, también quedan con el método nuevo las pasadas observadas hasta unos 8 días antes; el tablero marca en la serie de MODIS la fecha de la primera pasada con el método nuevo). v1.17 era del 2026-10-27 (sin cambio de lógica de detección: con la opción de MODIS que descarta las pasadas sin dato del cráter, que sigue apagada, esas pasadas quedan anotadas en el registro de la corrida, ver el historial). v1.16 era del 2026-10-27 (sin cambio de lógica de detección: se agrega, apagada, la misma vía alternativa para VIIRS 375 m, ver el historial). v1.15 era del 2026-10-27 (sin cambio de lógica de detección: se agregan, apagadas, tres opciones de MODIS sobre la posición de cada píxel, ver el historial). v1.14 era del 2026-10-27 (sin cambio de lógica de detección: se agrega, apagada, la misma vía alternativa para MODIS, ver el historial). v1.13 era del 2026-10-26 (sin cambio de lógica de detección: se agrega, apagada, una vía alternativa para VIIRS 750 m que corre el código operacional publicado por MIROVA, ver el historial). v1.12 era del 2026-10-26 (sin cambio de lógica de detección: el registro de cada corrida dice, por volcán y día, lo que no se pudo ver aunque nada haya fallado, ver el historial). v1.11 era del 2026-10-23 (sin cambio de lógica de detección: desde el cese de Suomi NPP el sistema deja de buscar sus datos y el registro de cada corrida dice qué plataforma faltó, ver el historial). v1.10 era del 2026-10-22 (sin cambio de lógica: Suomi NPP deja de ser entrada desde el 2026-11-02 13:00 UTC, ver «Categorías de datos» y el historial). v1.9 era del 2026-10-18 (cambio del detector en producción; ⚠️ precisión del 2026-10-20: en los datos publicados rige desde la fecha de observación 2026-09-18, ver «Funcionamiento/lógica»; texto original: rige desde el merge del PR de adopción, cuya fecha y hora UTC muestran las tres vistas del tablero). v1.8 era del 2026-10-15; hasta v1.7 la cabecera llegó a decir v1.4, 2026-08-30, dos versiones atrás de su propio historial  ·  **Estado:** producción (NRT)
++>>>>>>> .their
+ 
+ ---
+ 
+@@ -22,7 +26,7 @@
+ 
+ ## Subítem 3 — Especificaciones del SDA (CPLT 6.7)
+ - **Objetivo:** Detectar y cuantificar anomalías térmicas en volcanes chilenos a partir de imágenes satelitales (MODIS/VIIRS), replicando de forma independiente la metodología MIROVA, para apoyar la vigilancia volcánica.
+-- **Funcionamiento/lógica:** ⚠️ **Nota v1.18 (2026-11-01): en MODIS la producción cambió de método.** Desde la primera corrida del sistema después del cambio (⚠️ corregido en la v1.19: el NRT procesa en cada corrida la ventana de los últimos 8 días, pero el almacén sólo agrega las pasadas que no tenía; una pasada ya guardada se reemplaza únicamente cuando llega su producto estándar de NASA en lugar del NRT o con un reproceso explícito con `--overwrite` (`pipeline/store.py`). Medido en 474 reemplazos del NRT por el estándar en MODIS (11 volcanes principales, pasadas observadas del 2026-10-17 al 2026-11-07, sin contar 188 registros re-escritos por el reproceso del 2026-10-18), el estándar llegó con una mediana de 13,8 horas desde que la pasada se guardó por primera vez: 90,7 % antes de 24 horas, 8 casos (1,7 %) entre 3 y 5 días y un máximo de 4,5 días (`experiments/_s175_latencia_estandar_modis/salida.txt`). La primera pasada MODIS con el método nuevo se observó el 2026-11-02 a las 01:15 UTC, unas 19 horas antes de la primera corrida del sistema con ese método (20:11 UTC de ese día), no 8 días antes: 22 de las 23 pasadas observadas de 01:15 a 07:30 UTC estaban guardadas como NRT con el método anterior y su producto estándar llegó justo en esa primera corrida, así que el reemplazo las dejó con el método nuevo (la restante sigue como NRT); las pasadas más antiguas ya estaban en producto estándar y siguen con el método anterior; ver la v1.19 del historial), cada pasada MODIS se interpola a la grilla fija de 1 km de MIROVA para cada volcán, con la posición de cada píxel del producto de geolocalización de 1 km de MODIS (`MOD03`/`MYD03`) y la banda 22 como infrarrojo medio principal, y se detecta, se estima el fondo y se suma la potencia de todos los píxeles alertados con el código operacional que el grupo MIROVA publicó (detalle en la v1.14 del historial). Si en una pasada eso no se puede hacer (el volcán sin grilla de MIROVA o el producto de geolocalización ausente o de otra forma), esa pasada se procesa con el método anterior y el registro lo dice. En cambio, si el método nuevo falla en una pasada por un error del propio cálculo, esa pasada **no** se procesa con el método anterior: queda sin registro, y la corrida del sistema queda marcada como fallida (en rojo) para que alguien la revise. Como cada corrida vuelve a procesar los últimos 8 días, una sola pasada con ese problema puede dejar las corridas en rojo hasta unos 8 días. Qué se revisa en ese caso lo dice la regla de reversión, experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md, §4.4 (a). VIIRS 375 m y VIIRS 750 m siguen con el método anterior (detector K, v1.9). Todo lo que sigue en este ítem sobre MODIS describe el método anterior. El método anterior de MODIS sigue corriendo aparte, como guardia, y si el nuevo deja de publicar una alerta de MIROVA de 1 MW o más que el anterior sí publica, el cambio se revierte el mismo día (ver el historial). ⚠️ **Precisión del 2026-10-20 a la v1.9 (sin cambio de lógica; pendiente de llevar al historial de versiones).** (i) **Costo en VIIRS 750 m, que la v1.9 no declaraba:** con el método nuevo dejan de publicarse, en neto, 4 de 42 y 4 de 117 alertas de MIROVA de ese sensor (32 a 28 en la primera ventana y 95 a 91 en la segunda), ninguna de 1 MW o más (12 de 12 y 42 de 42 se siguen publicando) (`experiments/_s153_fk_v2/v1.log` y `v2.log`, sección 9). (ii) **Lo que la auditoría de las pasadas movidas no prueba:** no encontró ninguna alerta de 1 MW o más en que el foco publicado pase a otro objeto que el visto por MIROVA, pero que el objeto publicado por el método nuevo sea el mismo de MIROVA quedó sin verificar en las 14 alertas revisadas, y en una de ellas (Tupungatito, 2026-09-14) ninguno de los dos métodos está sobre el objeto de MIROVA (`experiments/_s153_fk_v2/a61/INFORME.md` §4 y §5). La frase «ninguna protegida queda sobre otro objeto» de más abajo dice más que eso. (iii) **Desde cuándo rige en los datos y cómo se revierte:** el cambio entró a producción con el PR #850 el 2026-10-18 a las 09:57:30 UTC, pero los 30 días anteriores se reprocesaron con el método nuevo, así que en las series publicadas el cambio está en la fecha de observación 2026-09-18 (el tablero marca esa fecha). Y la reversión ya no es un `git revert` limpio: hoy choca en tres archivos y no deshace los datos ya reprocesados (`experiments/_s157_propagar_k/revert_hoy.out`). El texto de la v1.9 que sigue se conserva tal cual. ⚠️ **Cambio v1.9 (2026-10-18, S153): la detección de producción cambió en tres puntos, y desde ese cambio el punto (4) de la corrección v1.7 que sigue ya no describe lo que corre.** (a) **Se apaga el Test 1 integrado** (la suma del exceso de infrarrojo medio sobre un disco alrededor del cráter). No está en el método publicado por el grupo MIROVA y, de noche, con fondo frío y ruidoso al borde del barrido, hacía publicar a la réplica en 85 a 88 % de las pasadas de VIIRS 375 m en que MIROVA miró y no vio nada. (b) **Las dos pruebas de contraste espacial (Tests 2 y 3) exigen las dos condiciones** que pide Coppola et al. 2016a, el exceso del índice térmico sobre un piso fijo y sobre la media más C2 desviaciones del entorno; antes bastaba la más fácil de las dos. (c) **En MODIS se lee la banda 22 como banda principal del infrarrojo medio**, como hace el método publicado; la banda 21 queda sólo para los píxeles donde la 22 satura. **Evidencia** (dos ventanas, 11 volcanes, contra la base de datos de MIROVA, regla de decisión escrita y aprobada por Nicolás antes de ver el resultado: `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`; resultado en `experiments/_s153_fk_v2/README.md`, `combinado.log`, `v1.log` y `v2.log`): la publicación en esas pasadas sin actividad baja en VIIRS 375 m de 88,2 a 2,5 % (2026-08-29 a 2026-10-08) y de 85,4 a 3,7 % (2026-03-01 a 2026-06-12); en MODIS, de 12,3 a 0,8 % y de 10,8 a 0,9 %; en VIIRS 750 m, de 24,6 a 0,9 % y de 21,8 a 1,1 %. Ninguna alerta de 1 MW o más que MIROVA publicó queda sin publicar (las dos de Tupungatito que el método nuevo no muestra resultaron, leídas con la distancia de su propia imagen, focos lejanos que el lector de MIROVA no habría contado como alerta), y en MODIS el método nuevo publica 39 de 39 de esas alertas en Láscar contra 6 del método anterior. **Costo conocido:** dejan de publicarse 21 de 260 y 26 de 426 alertas de VIIRS 375 m (en la primera ventana, 19 de las 21 bajo 1 MW), y en las pasadas que cambian la magnitud de VIIRS 375 m queda casi siempre más baja (98 de 115 y 127 de 144 pares; unos 28 % menos en la mediana de la primera ventana); ninguna alerta de 1 MW o más pasa a leerse bajo 1 MW. Lo revisaron un verificador independiente, un segundo instrumento de conteo escrito aparte (mismos números), cinco pasadas comparadas contra las imágenes de MIROVA (cinco de cinco coinciden) y una auditoría de las pasadas donde el foco publicado se movió (ninguna protegida queda sobre otro objeto). **Vigilancia:** el perfil de laboratorio sigue con el método anterior y hace de sombra; si una alerta de 1 MW o más que MIROVA publica la ve la sombra y no la réplica, se revierte el mismo día (reversión pre-autorizada). **Reversión:** `git revert` del PR de adopción; el estado anterior está guardado en el tag `pre-s153-adopcion-k`. Texto anterior conservado: ⚠️ **Corrección v1.7 (2026-10-14), el texto que sigue no describe del todo lo que corre:** (1) en producción el fondo de la magnitud es un anillo regional de 5 a 25 km alrededor del volcán, salvo en los cinco volcanes que usan un fondo local de píxeles vecinos; (2) en cúmulos de hasta 3 píxeles y bajo 5 MW, la magnitud informada es la del píxel más caliente del cúmulo y no la suma; sobre 5 MW vuelve a ser la suma, así que la regla de la magnitud cambia con el valor. Al 2026-10-14 ese modo está activo en 32.401 de 42.929 registros con cúmulo (75,5 %). (3) Cuando el fondo de la escena está bajo 270 K y ningún píxel pasó por el camino de temperatura ni por el de índice térmico absoluto, la magnitud de la escena y la del cúmulo informado, incluida la recalculada por el Test 1 integrado, se recorta a 5,0 MW. En MODIS, con el camino de temperatura apagado y el de índice térmico que casi nunca dispara a 1 km, esa condición se reduce en la práctica a tener el fondo bajo 270 K. (4) La detección que más publica en VIIRS 375 m, el Test 1 integrado sobre un disco alrededor del cráter, es un detector propio de este sistema: el método publicado por el grupo MIROVA aplica su Test 1 píxel por píxel, sin sumar sobre el área. Texto original: Sobre cada escena satelital se identifican píxeles "calientes", se estima la temperatura de fondo local y se calcula la Potencia Radiada Volcánica (VRP) con ecuaciones físicas (Planck/Wooster). El VRP se compara con umbrales para clasificar el nivel de actividad térmica. La cuantificación de magnitud suma únicamente los píxeles del foco térmico contextualmente anómalo, separándolos del campo difuso de gran escala (gradiente topográfico nocturno sobre terreno nival), de modo que la magnitud refleje la energía del rasgo volcánico y no el calor ambiental residual. En el régimen de muy baja energía se recuperan focos sub-píxel débiles que el sensor de mayor resolución (VIIRS 375 m) cuantifica, mediante un anillo de fondo intermedio condicionado a la compatibilidad del fondo regional. Una verificación de coherencia espacial garantiza que la etiqueta "cumbre" (anomalía al cráter) sea consistente con la ubicación real del cúmulo térmico reportado.
++- **Funcionamiento/lógica:** ⚠️ **Nota v1.21 (PROPUESTA, PR B1 en borrador; vale sólo desde que se mergee): en VIIRS 375 la producción cambia de método.** Cada pasada VIIRS 375 se interpola a la grilla fija de 375 m de MIROVA para cada volcán y en ella se detecta, se estima el fondo y se suman todos los píxeles alertados con el código operacional publicado por MIROVA, cambiando sólo lo que ese código hace depender del sensor (el mismo que la v1.16 incorporó apagado); un volcán sin grilla de MIROVA sigue con el método anterior y el registro lo dice. El método anterior de VIIRS 375 sigue corriendo aparte como guardia. VIIRS 750 no cambia con esta versión. Lo que sigue describe VIIRS 375 con el método anterior. ⚠️ **Nota v1.18 (2026-11-01): en MODIS la producción cambió de método.** Desde la primera corrida del sistema después del cambio (⚠️ corregido en la v1.19: el NRT procesa en cada corrida la ventana de los últimos 8 días, pero el almacén sólo agrega las pasadas que no tenía; una pasada ya guardada se reemplaza únicamente cuando llega su producto estándar de NASA en lugar del NRT o con un reproceso explícito con `--overwrite` (`pipeline/store.py`). Medido en 474 reemplazos del NRT por el estándar en MODIS (11 volcanes principales, pasadas observadas del 2026-10-17 al 2026-11-07, sin contar 188 registros re-escritos por el reproceso del 2026-10-18), el estándar llegó con una mediana de 13,8 horas desde que la pasada se guardó por primera vez: 90,7 % antes de 24 horas, 8 casos (1,7 %) entre 3 y 5 días y un máximo de 4,5 días (`experiments/_s175_latencia_estandar_modis/salida.txt`). La primera pasada MODIS con el método nuevo se observó el 2026-11-02 a las 01:15 UTC, unas 19 horas antes de la primera corrida del sistema con ese método (20:11 UTC de ese día), no 8 días antes: 22 de las 23 pasadas observadas de 01:15 a 07:30 UTC estaban guardadas como NRT con el método anterior y su producto estándar llegó justo en esa primera corrida, así que el reemplazo las dejó con el método nuevo (la restante sigue como NRT); las pasadas más antiguas ya estaban en producto estándar y siguen con el método anterior; ver la v1.19 del historial), cada pasada MODIS se interpola a la grilla fija de 1 km de MIROVA para cada volcán, con la posición de cada píxel del producto de geolocalización de 1 km de MODIS (`MOD03`/`MYD03`) y la banda 22 como infrarrojo medio principal, y se detecta, se estima el fondo y se suma la potencia de todos los píxeles alertados con el código operacional que el grupo MIROVA publicó (detalle en la v1.14 del historial). Si en una pasada eso no se puede hacer (el volcán sin grilla de MIROVA o el producto de geolocalización ausente o de otra forma), esa pasada se procesa con el método anterior y el registro lo dice. En cambio, si el método nuevo falla en una pasada por un error del propio cálculo, esa pasada **no** se procesa con el método anterior: queda sin registro, y la corrida del sistema queda marcada como fallida (en rojo) para que alguien la revise. Como cada corrida vuelve a procesar los últimos 8 días, una sola pasada con ese problema puede dejar las corridas en rojo hasta unos 8 días. Qué se revisa en ese caso lo dice la regla de reversión, experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md, §4.4 (a). VIIRS 375 m y VIIRS 750 m siguen con el método anterior (detector K, v1.9). Todo lo que sigue en este ítem sobre MODIS describe el método anterior. El método anterior de MODIS sigue corriendo aparte, como guardia, y si el nuevo deja de publicar una alerta de MIROVA de 1 MW o más que el anterior sí publica, el cambio se revierte el mismo día (ver el historial). ⚠️ **Precisión del 2026-10-20 a la v1.9 (sin cambio de lógica; pendiente de llevar al historial de versiones).** (i) **Costo en VIIRS 750 m, que la v1.9 no declaraba:** con el método nuevo dejan de publicarse, en neto, 4 de 42 y 4 de 117 alertas de MIROVA de ese sensor (32 a 28 en la primera ventana y 95 a 91 en la segunda), ninguna de 1 MW o más (12 de 12 y 42 de 42 se siguen publicando) (`experiments/_s153_fk_v2/v1.log` y `v2.log`, sección 9). (ii) **Lo que la auditoría de las pasadas movidas no prueba:** no encontró ninguna alerta de 1 MW o más en que el foco publicado pase a otro objeto que el visto por MIROVA, pero que el objeto publicado por el método nuevo sea el mismo de MIROVA quedó sin verificar en las 14 alertas revisadas, y en una de ellas (Tupungatito, 2026-09-14) ninguno de los dos métodos está sobre el objeto de MIROVA (`experiments/_s153_fk_v2/a61/INFORME.md` §4 y §5). La frase «ninguna protegida queda sobre otro objeto» de más abajo dice más que eso. (iii) **Desde cuándo rige en los datos y cómo se revierte:** el cambio entró a producción con el PR #850 el 2026-10-18 a las 09:57:30 UTC, pero los 30 días anteriores se reprocesaron con el método nuevo, así que en las series publicadas el cambio está en la fecha de observación 2026-09-18 (el tablero marca esa fecha). Y la reversión ya no es un `git revert` limpio: hoy choca en tres archivos y no deshace los datos ya reprocesados (`experiments/_s157_propagar_k/revert_hoy.out`). El texto de la v1.9 que sigue se conserva tal cual. ⚠️ **Cambio v1.9 (2026-10-18, S153): la detección de producción cambió en tres puntos, y desde ese cambio el punto (4) de la corrección v1.7 que sigue ya no describe lo que corre.** (a) **Se apaga el Test 1 integrado** (la suma del exceso de infrarrojo medio sobre un disco alrededor del cráter). No está en el método publicado por el grupo MIROVA y, de noche, con fondo frío y ruidoso al borde del barrido, hacía publicar a la réplica en 85 a 88 % de las pasadas de VIIRS 375 m en que MIROVA miró y no vio nada. (b) **Las dos pruebas de contraste espacial (Tests 2 y 3) exigen las dos condiciones** que pide Coppola et al. 2016a, el exceso del índice térmico sobre un piso fijo y sobre la media más C2 desviaciones del entorno; antes bastaba la más fácil de las dos. (c) **En MODIS se lee la banda 22 como banda principal del infrarrojo medio**, como hace el método publicado; la banda 21 queda sólo para los píxeles donde la 22 satura. **Evidencia** (dos ventanas, 11 volcanes, contra la base de datos de MIROVA, regla de decisión escrita y aprobada por Nicolás antes de ver el resultado: `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`; resultado en `experiments/_s153_fk_v2/README.md`, `combinado.log`, `v1.log` y `v2.log`): la publicación en esas pasadas sin actividad baja en VIIRS 375 m de 88,2 a 2,5 % (2026-08-29 a 2026-10-08) y de 85,4 a 3,7 % (2026-03-01 a 2026-06-12); en MODIS, de 12,3 a 0,8 % y de 10,8 a 0,9 %; en VIIRS 750 m, de 24,6 a 0,9 % y de 21,8 a 1,1 %. Ninguna alerta de 1 MW o más que MIROVA publicó queda sin publicar (las dos de Tupungatito que el método nuevo no muestra resultaron, leídas con la distancia de su propia imagen, focos lejanos que el lector de MIROVA no habría contado como alerta), y en MODIS el método nuevo publica 39 de 39 de esas alertas en Láscar contra 6 del método anterior. **Costo conocido:** dejan de publicarse 21 de 260 y 26 de 426 alertas de VIIRS 375 m (en la primera ventana, 19 de las 21 bajo 1 MW), y en las pasadas que cambian la magnitud de VIIRS 375 m queda casi siempre más baja (98 de 115 y 127 de 144 pares; unos 28 % menos en la mediana de la primera ventana); ninguna alerta de 1 MW o más pasa a leerse bajo 1 MW. Lo revisaron un verificador independiente, un segundo instrumento de conteo escrito aparte (mismos números), cinco pasadas comparadas contra las imágenes de MIROVA (cinco de cinco coinciden) y una auditoría de las pasadas donde el foco publicado se movió (ninguna protegida queda sobre otro objeto). **Vigilancia:** el perfil de laboratorio sigue con el método anterior y hace de sombra; si una alerta de 1 MW o más que MIROVA publica la ve la sombra y no la réplica, se revierte el mismo día (reversión pre-autorizada). **Reversión:** `git revert` del PR de adopción; el estado anterior está guardado en el tag `pre-s153-adopcion-k`. Texto anterior conservado: ⚠️ **Corrección v1.7 (2026-10-14), el texto que sigue no describe del todo lo que corre:** (1) en producción el fondo de la magnitud es un anillo regional de 5 a 25 km alrededor del volcán, salvo en los cinco volcanes que usan un fondo local de píxeles vecinos; (2) en cúmulos de hasta 3 píxeles y bajo 5 MW, la magnitud informada es la del píxel más caliente del cúmulo y no la suma; sobre 5 MW vuelve a ser la suma, así que la regla de la magnitud cambia con el valor. Al 2026-10-14 ese modo está activo en 32.401 de 42.929 registros con cúmulo (75,5 %). (3) Cuando el fondo de la escena está bajo 270 K y ningún píxel pasó por el camino de temperatura ni por el de índice térmico absoluto, la magnitud de la escena y la del cúmulo informado, incluida la recalculada por el Test 1 integrado, se recorta a 5,0 MW. En MODIS, con el camino de temperatura apagado y el de índice térmico que casi nunca dispara a 1 km, esa condición se reduce en la práctica a tener el fondo bajo 270 K. (4) La detección que más publica en VIIRS 375 m, el Test 1 integrado sobre un disco alrededor del cráter, es un detector propio de este sistema: el método publicado por el grupo MIROVA aplica su Test 1 píxel por píxel, sin sumar sobre el área. Texto original: Sobre cada escena satelital se identifican píxeles "calientes", se estima la temperatura de fondo local y se calcula la Potencia Radiada Volcánica (VRP) con ecuaciones físicas (Planck/Wooster). El VRP se compara con umbrales para clasificar el nivel de actividad térmica. La cuantificación de magnitud suma únicamente los píxeles del foco térmico contextualmente anómalo, separándolos del campo difuso de gran escala (gradiente topográfico nocturno sobre terreno nival), de modo que la magnitud refleje la energía del rasgo volcánico y no el calor ambiental residual. En el régimen de muy baja energía se recuperan focos sub-píxel débiles que el sensor de mayor resolución (VIIRS 375 m) cuantifica, mediante un anillo de fondo intermedio condicionado a la compatibilidad del fondo regional. Una verificación de coherencia espacial garantiza que la etiqueta "cumbre" (anomalía al cráter) sea consistente con la ubicación real del cúmulo térmico reportado.
+ - **¿Categoriza/perfila individuos?:** **No.** Opera exclusivamente sobre datos físicos satelitales.
+ - **Método/modelo:** **Reglas físicas determinísticas** (Wooster MIR; ecuaciones Coppola 2016a/2024 por régimen térmico). **No utiliza aprendizaje automático ni constituye una caja negra** — la lógica es íntegramente auditable.
+ - **Efecto de las variables principales:** El VRP crece con el exceso de radiancia del píxel sobre el fondo y con el área caliente; la distancia al cráter y la geometría de la escena filtran detecciones espurias.
+@@ -46,8 +50,12 @@
+ 
+ | Versión | Fecha | Cambios sustantivos | Traz. interna |
+ |---|---|---|---|
++<<<<<<< .our
+ | v1.22 | 2026-11-10 | **Sin cambios en la lógica de detección; cambia qué se muestra.** Se quitan del tablero dos avisos de texto: el de la vía «código MIROVA» (hoy el de MODIS; el mismo mecanismo cubría VIIRS 375 y 750 cuando se enciendan) y el del cese de Suomi NPP. Quedan sus líneas verticales en los gráficos, que marcan la fecha de cada cambio sin ocupar espacio arriba de la página. No cambia ninguna detección, ni qué records de la vía se muestran, ni la fecha del cese que usa la vigilancia por plataforma. Pedido de Nicolás del 2026-11-10. | `frontend/cambio_detector.js`, `frontend/cese_plataformas.js`, `tests/test_cambio_detector_via_modis_s172.py`, `tests/test_cambio_detector_via_viirs_s176.py`, `tests/test_cese_plataformas_s159.py` |
+ | v1.21 | 2026-11-10 | **Sin cambios en la lógica de detección; cambia qué se muestra.** El aviso «los datos desde el 15 feb 2025 son del detector K y los anteriores, del detector C0» y su línea vertical salían siempre, pero desde el reemplazo del histórico con K (#883, 2026-10-21) no hay ningún dato anterior a esa fecha: describían algo que no está. Ahora el tablero los muestra sólo si entre los datos cargados hay alguno anterior a esa frontera; hoy no hay ninguno, así que no se ven. La fecha de la frontera no cambia y la siguen usando la vigilancia de la sombra y el auto-audit semanal. Los avisos de la vía «código MIROVA» y del cese de Suomi NPP no cambian. Decisión de Nicolás del 2026-11-10. | `frontend/cambio_detector.js`, `tests/test_cambio_detector_aviso_k_por_datos_s178.py` |
++=======
++| v1.21 | 2026-11-09 | **PROPUESTA (PR B1 en borrador, sin merge; no rige): cambio de la lógica de producción en VIIRS 375.** La vía alternativa de la v1.16 (la pasada interpolada a la grilla fija de 375 m de MIROVA, y la detección, el fondo y la suma de todos los píxeles alertados del código operacional publicado por MIROVA) pasaría a ser la de producción en VIIRS 375. **Por qué:** MIROVA suma la energía de todos los píxeles que alerta; el método anterior publica el núcleo de un grupo de píxeles calientes ya recortado, con un fondo propio, y entrega cerca de la mitad de la potencia que MIROVA asigna al volcán (0,504 en 31 pasadas con alerta del 2026-11-03 al 11-07), mientras el método nuevo da 0,993 en esas pasadas. **Costo aceptado:** el método nuevo puede dejar sin publicar señales débiles que el anterior publica; en esas pasadas calló cuatro alertas débiles de MIROVA, todas bajo 1 MW. **Resguardo:** el método anterior de VIIRS sigue corriendo todos los días en una carpeta aparte (guardia) y se compara automáticamente contra el nuevo y contra MIROVA; si el nuevo deja de publicar una alerta nocturna de MIROVA de 1 MW o más que el anterior sí publica, se revierte el mismo día, con autorización previa, durante las primeras 29 alertas de ese tipo o 120 días, lo que ocurra primero (regla `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`, aún sin sellar; el merge la exige sellada). Se revierte VIIRS 375 sin tocar VIIRS 750. **Desde cuándo regiría:** desde la primera corrida del sistema con el método después del merge; una pasada ya guardada sólo se reemplaza al llegar su producto estándar de NASA o con un reproceso explícito (v1.19). **Qué esperar en el tablero:** desde la primera pasada con el método nuevo, la magnitud de VIIRS 375 sube cerca del doble; el tablero marca esa fecha en la serie de VIIRS 375 para que el escalón no se lea como un cambio del volcán. | S177, PR B1 (rama `claude/s177-b1-v375`), tag `pre-s178-b1-b2` |
++>>>>>>> .their
+ | v1.20 | 2026-11-09 | **Sin cambios en la lógica de detección; cambia qué se muestra.** Se agrega la página `frontend/preliminar_34.html`, separada del tablero, con los 34 volcanes que corren en sombra. Lleva el rótulo «sin referencia de MIROVA, paridad no medida»: MIROVA no los publica y no hay contra qué comparar. Separa cada detección en cumbre (5 km o menos de las coordenadas del volcán, valor por defecto) o foco lejano, y marca el mismo foco visto desde dos volcanes. No alimenta alertas ni el tablero de los 11. El rótulo de los volcanes sin datos en el tablero cambia a «sin datos en este tablero». |
+ | v1.19 | 2026-11-07 | **Sin cambios en la lógica de producción.** Corrige la v1.18, que decía que las pasadas observadas hasta unos 8 días antes del cambio también quedaban con el método nuevo de MODIS: el NRT procesa en cada corrida la ventana de los últimos 8 días, pero el almacén sólo agrega las pasadas que no tenía; una pasada ya guardada se reemplaza únicamente cuando llega su producto estándar de NASA en lugar del NRT o con un reproceso explícito con `--overwrite` (`pipeline/store.py`). Medido en 474 reemplazos del NRT por el estándar en MODIS (11 volcanes principales, pasadas observadas del 2026-10-17 al 2026-11-07, sin contar 188 registros re-escritos por el reproceso del 2026-10-18), el estándar llegó con una mediana de 13,8 horas desde que la pasada se guardó por primera vez: 90,7 % antes de 24 horas, 8 casos (1,7 %) entre 3 y 5 días y un máximo de 4,5 días (`experiments/_s175_latencia_estandar_modis/salida.txt`). La primera pasada MODIS con el método nuevo se observó el 2026-11-02 a las 01:15 UTC, unas 19 horas antes de la primera corrida del sistema con ese método (20:11 UTC de ese día), no 8 días antes: 22 de las 23 pasadas observadas de 01:15 a 07:30 UTC estaban guardadas como NRT con el método anterior y su producto estándar llegó justo en esa primera corrida, así que el reemplazo las dejó con el método nuevo (la restante sigue como NRT); las pasadas más antiguas ya estaban en producto estándar y siguen con el método anterior. La corrección la halló la auditoría S175 (hallazgo 154 y V1-02 de `docs/AUDIT_S175.md`, PR #955); el plazo del producto estándar se midió en la revisión del PR #956. | S175; `experiments/_s175_latencia_estandar_modis/` |
+ | v1.18 | 2026-11-01 | **Cambio de la lógica de producción en MODIS.** La vía alternativa de la v1.14 (la pasada interpolada a la grilla fija de 1 km de MIROVA con la geolocalización de 1 km de MODIS, la banda 22 como infrarrojo medio principal, y la detección, el fondo y la suma de todos los píxeles alertados del código operacional publicado por MIROVA) pasa a ser la de producción en MODIS. **Por qué:** con el método anterior, MODIS dejaba sin publicar más de un tercio de las noches en que MIROVA publicaba una alerta (publicaba 62,5 % de 16 noches, auditoría automática del 2026-10-26) y en Nevados de Chillán, con el domo activo, entregaba 0,56 veces la magnitud de MIROVA. **Evidencia:** un experimento controlado con regla de decisión escrita antes de ver el resultado (MOD-D, marzo a octubre de 2026) dio que el método nuevo se equivoca menos que el anterior contra MIROVA; lo confirmó una revisión independiente. **Decisión:** del responsable del proyecto, el 2026-10-31, de adoptarlo sin esperar el mes de observación paralela previsto. **Resguardo:** el método anterior de MODIS sigue corriendo todos los días en una carpeta aparte (guardia) y se compara automáticamente contra el nuevo y contra MIROVA; si el nuevo deja de publicar una alerta de MIROVA de 1 MW o más que el anterior sí publica, se revierte el cambio el mismo día, con autorización previa, durante las primeras 29 alertas de ese tipo vistas o 120 días, lo que ocurra primero. **Desde cuándo rige:** ⚠️ corregido en la v1.19, ver esa fila: las pasadas anteriores al cambio que quedaron con el método nuevo son 22, observadas hasta unas 19 horas antes de la primera corrida con ese método, no 8 días; la corrección vale también para el «hasta unos 8 días» de «Qué esperar en el tablero». Texto original conservado: desde la primera corrida del sistema después del cambio, no desde la hora en que se aprobó. Cada corrida vuelve a procesar el día y los 7 anteriores, así que las pasadas observadas hasta unos 8 días antes del cambio también quedan con el método nuevo; lo observado antes de esa franja no se vuelve a procesar y queda con el método anterior. **Qué esperar en el tablero:** desde la primera pasada con el método nuevo, la magnitud de MODIS sube y aparecen alertas que antes no salían; el tablero marca esa fecha (la de la pasada, que puede ser hasta unos 8 días anterior al cambio) en la serie de MODIS para que el escalón no se lea como un cambio del volcán. VIIRS 375 m y VIIRS 750 m no cambian. | S172; regla experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md (en main con este cambio; reversión §4.3, pasada sin registro §4.4 (a)); tag pre-s171-adopcion-modd; guardia pipeline/profiles/guardia_k_modis.yaml |
+merged
+  result 100644 4b31b5c6287d6a02e5ccc4d2fed2d08890f36cf6 docs/MIROVA_DIVERGENCES.md
+  our    100644 f93d44e19fbb754c5ab833bf56fdaf14a667ed81 docs/MIROVA_DIVERGENCES.md
+@@ -15,6 +15,15 @@
+ > estado previo a S172 en MODIS: su texto se conserva y cada una lleva su marca. Para la vía, la referencia es D34 (el
+ > código de MIROVA) y su port a MODIS. K de MODIS sigue corriendo como guardia (`pipeline/profiles/guardia_k_modis.yaml`)
+ > con reversión pre-autorizada (marca S172 al inicio de `docs/MISSION.md`).
++>
++> ⚠️ **S177 B1 (A113; PROPUESTA en borrador: rige sólo desde el merge del PR B1, rama `claude/s177-b1-v375`): VIIRS 375
++> de producción deja de ser K.** Desde la primera corrida del NRT con la vía después del merge, VIIRS 375 corre la vía
++> «código MIROVA» (`enable_v375_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`, familia VIIRS375): la grilla de
++> 375 m de MIROVA, su detector, su fondo y la suma de todos los alertados. Las divergencias de este catálogo que
++> describen VIIRS 375 de producción como K describen el estado previo en VIIRS 375 y su texto se conserva. Las marcas
++> por divergencia (D22, D25, D26, D32 y las demás que midan K en VIIRS 375) no se agregan en este PR: quedan para la
++> sesión que lo mergee. K de VIIRS sigue corriendo como guardia (`pipeline/profiles/guardia_k_viirs.yaml`) con
++> reversión pre-autorizada (marca S177 B1 en `docs/MISSION.md`).
+ 
+ ## Objetivo
+ 
+merged
+  result 100644 97473a3e6befca1b91b2ec7dfffe95710543c4c7 docs/MISSION.md
+  our    100644 b2d1ac42c89ec04019fd6d755867d84ce3791c8e docs/MISSION.md
+@@ -24,6 +24,21 @@
+ > El laboratorio (`experimental`) y el ancla de los tests pre-K (`_s146_ab_control`) declaran la vía apagada. Una
+ > serie MODIS que cruce la primera pasada de la vía mezcla dos detectores: el tablero la marca y el auto-audit separa el
+ > detector `VIA_MODIS` (A104). Tag defensivo `pre-s171-adopcion-modd`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.18.
++>
++> ⚠️ **S177 B1 (A113; PROPUESTA en borrador: rige sólo desde el merge del PR B1, rama `claude/s177-b1-v375`): VIIRS 375
++> de producción deja de ser K.** Desde la primera corrida del NRT con la vía después del merge, `mirova_equivalent` corre
++> en VIIRS 375 la **vía «código MIROVA»** (`enable_v375_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`, familia
++> VIIRS375): el gránulo pasado a la grilla de 375 m de MIROVA, su detector, su fondo y la suma de todos los alertados.
++> Por qué: K publica el núcleo de un cúmulo ya recortado y da 0,504 de la potencia de MIROVA, la vía 0,993 (sombra,
++> n 31, pasadas con alerta del 2026-11-03 al 11-07). Decisión de Nicolás del 2026-11-08 (diseño del encendido de
++> VIIRS). K de VIIRS sigue como guardia (`pipeline/profiles/guardia_k_viirs.yaml`, vigilancia
++> `scripts/vigilancia_guardia_viirs.py`) con reversión pre-autorizada por `git revert -m 1` del merge de B1, sin tocar
++> VIIRS 750 (regla `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md` §4, que se sella antes del
++> merge). Toda frase de este documento que describa VIIRS 375 de producción con K (la marca S153 de abajo, el núcleo
++> `f5_core_vrp_mw`, lo que dependa de ellos en VIIRS 375) describe el estado previo en VIIRS 375 y se conserva por
++> historia. El laboratorio (`experimental`), `experimental_ndc_focus`, el ancla de los tests pre-K (`_s146_ab_control`)
++> y la guardia K de MODIS declaran la vía de VIIRS 375 apagada. VIIRS 750 va aparte (B2). Tag defensivo
++> `pre-s178-b1-b2`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.21 (propuesta).
+ 
+ > ⚠️ **S153: el detector de la réplica cambió (adopción de K; marca A113).** Desde el merge del PR de adopción,
+ > `mirova_equivalent` corre (1) **sin el Test 1 integrado en el ROI** (D30: no está en el paper y hacía publicar en
+merged
+  result 100644 ff2e6457d0e9748a636a750048548a5e4b774002 pipeline/profiles/_s146_ab_control.yaml
+  our    100644 377ae97aeab603a88df50ca131cd5a8355e40752 pipeline/profiles/_s146_ab_control.yaml
+@@ -40,4 +40,9 @@
+ # arrastre. Es la unica excepcion entre los brazos viejos de A/B: los demas no se tocan (ver
+ # experiments/_s171_modd_adopcion/INFORME_IMPLEMENTADOR.md). Lo vigila tests/test_perfiles_derivados_via_modis_apagada_s173.py.
+ thresholds:
++  # S177 B1: el PR B1 enciende la via «codigo MIROVA» en VIIRS 375 de la replica. Este perfil es el ancla de
++  # tests/produccion_pre_k.py (la produccion de antes de K, que no tenia la via): se declara apagada, como la de
++  # MODIS. Separada de la de VIIRS 750 (B2, tras la de MODIS) por la linea de MODIS (hallazgo 208). Lo vigila
++  # tests/test_guard_v375_codigo_mirova_encendido_s177.py.
++  enable_v375_codigo_mirova: false
+   enable_modis_codigo_mirova: false
+merged
+  result 100644 6f1e5bdaf946f65390e5636ab357a8a5b73c119d pipeline/profiles/experimental.yaml
+  our    100644 4ce9f3236e8837c588bf8ae7ca23aeee067ec399 pipeline/profiles/experimental.yaml
+@@ -30,6 +30,12 @@
+   (docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md).
+ 
+ thresholds:
++  # S177 B1: el PR B1 enciende la via «codigo MIROVA» en VIIRS 375 de la replica. Este laboratorio esta congelado en C0
++  # y es la sombra de K de scripts/vigilancia_sombra.py: si heredara la via, en VIIRS 375 dejaria de ser C0. Se
++  # declara apagada en `thresholds:` (A89). Va aqui, al inicio, separada por lineas existentes de la de VIIRS 750 (B2,
++  # tras la de MODIS), para que los revert de B1 y B2 no choquen (hallazgo 208). Lo vigila
++  # tests/test_guard_v375_codigo_mirova_encendido_s177.py.
++  enable_v375_codigo_mirova: false
+   # ⚠️ S147: estos pisos se ponen en 0.0, y el texto de abajo explica por qué el
+   # razonamiento de S124 dejó de valer. Se conserva por historia.
+   #
+merged
+  result 100644 48dbecfba94ee7b88a53532c359c5c286056c4b9 pipeline/profiles/experimental_ndc_focus.yaml
+  our    100644 021645d021715c35f4656846bb8950e343825044 pipeline/profiles/experimental_ndc_focus.yaml
+@@ -27,6 +27,11 @@
+   Foco del crater Nicanor (NdC), v2: deteccion IDENTICA a la replica, solo el
+   umbral mas bajo (0.005 MW). El recorte espacial vive en el analisis.
+ thresholds:
++  # S177 B1: el PR B1 enciende la via «codigo MIROVA» en VIIRS 375 de la replica. Este perfil congela la produccion de
++  # antes de K y corre VIIRS 375 de Chillan desde nrt.yml: si heredara la via dejaria de ser lo que dice ser (A117). Se
++  # declara apagada, separada de la de VIIRS 750 (B2, tras la de MODIS) por lineas existentes (hallazgo 208). Lo
++  # vigila tests/test_guard_v375_codigo_mirova_encendido_s177.py.
++  enable_v375_codigo_mirova: false
+   # ⚠️ S147: 0.005 -> 0.0, mismo defecto y mismo origen que en `experimental.yaml`.
+   # La cabecera de este archivo dice "UNA sola diferencia con la replica: el umbral
+   # (0.005 MW vs 0.02)", y eso valia en S124. S130 bajo el piso del operacional a 0.0
+merged
+  result 100644 48082d06f8337cf126a0dd85752eadb8855ef796 pipeline/profiles/guardia_k_modis.yaml
+  our    100644 a4f98dee2154bde2833ec5b269b0a45f5899f019 pipeline/profiles/guardia_k_modis.yaml
+@@ -25,6 +25,11 @@
+   Guardia K de MODIS: producción con la vía «código MIROVA» de MODIS apagada, sólo MODIS, en carpeta propia.
+ 
+ thresholds:
++  # S177 B1: el PR B1 enciende la via «codigo MIROVA» en VIIRS 375 de la replica. Esta guardia es K pura y no corre
++  # VIIRS (sensors), pero si la heredara contaria como perfil con via y su workflow pediria pyproj
++  # (tests/test_guard_pyproj_vias_s172.py): se declara apagada. Separada de la de VIIRS 750 (B2, tras la de MODIS)
++  # por la linea de MODIS (hallazgo 208). Lo vigila tests/test_guard_v375_codigo_mirova_encendido_s177.py.
++  enable_v375_codigo_mirova: false
+   enable_modis_codigo_mirova: false
+ 
+ paths:
+merged
+  result 100644 c63a0c35f7e164a1d4f2c9c3aaf5d55e5cda0a98 pipeline/profiles/mirova_equivalent.yaml
+  our    100644 396b40035128f372324f563502cb7caa5f3cabb1 pipeline/profiles/mirova_equivalent.yaml
+@@ -41,6 +41,21 @@
+   # NdC incluido el trigger 06-16 (0.068 vs MIROVA 0.06); [2,4] perdía 06-16 por fallback
+   # de la máscara de nubes (min_pixels). A/B run 27705248529 brazo _t1lm_q3_ring15.
+   test1_intermediate_bg_ring_km: [1.5, 3.0]
++  # S177 B1: VIIRS 375 ENCENDIDO con la via «codigo MIROVA» (pipeline/mirova_v750_codigo.py, FAMILIAS["VIIRS375"]: el
++  # codigo que MIROVA publico en OSF con lo que ese codigo hace depender del sensor). POR QUE: MIROVA suma la energia de
++  # todos los pixeles que alerta; K publica el nucleo de un cumulo que ya recorto, con un fondo de anillo propio, y en
++  # VIIRS 375 entrega 0,504 de la potencia de MIROVA contra 0,993 de la via (sombra, n 31, pasadas con alerta del
++  # 2026-11-03 al 11-07, verificador de S176); en V375-C la via dio la magnitud de MIROVA al milesimo (comentario S165
++  # de pipeline/process_viirs.py). Decision de Nicolas del 2026-11-08 (diseno del encendido de VIIRS, en la rama
++  # loop/activo): encender VIIRS con la via y K de guardia (la guardia K de VIIRS del PR A, #967). Reversion: §4 de
++  # experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md, con git revert -m 1 del merge de ESTE PR, sin
++  # tocar el de VIIRS 750 (B2). Tag defensivo pre-s178-b1-b2.
++  # Ubicacion (hallazgo 208): este bloque va aqui, lejos del de MODIS (inicio de `thresholds:`) y del de VIIRS 750
++  # (B2, tras n_sigma_vent), con lineas que ya existian entre ellos, para que revertir uno no choque con los otros. La
++  # linea de arriba (test1_intermediate_bg_ring_km, del Test 1 integrado, apagado desde K) es una clave: un PR que la
++  # cambie si chocaria con este revert. Lo vigila tests/test_revert_flag_v375_no_choca_s177.py; el valor,
++  # tests/test_guard_v375_codigo_mirova_encendido_s177.py.
++  enable_v375_codigo_mirova: true
+   # S142 D25: semiancho máximo (px) de la ventana del fondo por vecinos cuando los 8 vecinos están
+   # alertados. Sólo actúa con enable_vrp_bg_neighbor_mean_viirs375 (en paths:, OFF). El A/B barre
+   # 1 contra 3: plan docs/superpowers/plans/2026-09-15-flags-d22-d25.md §5.
+merged
+  result 100644 3191e450f71a7dd6a7ca28f6bc940a2438bf95be tests/arnes_sintetico_s142.py
+  our    100644 d1527001af9a9419b1a3efb77f173431d57bd73d tests/arnes_sintetico_s142.py
+@@ -341,6 +341,13 @@
+     for s in a.parche:
+         k, v = s.split("=", 1)
+         parches[k] = ast.literal_eval(v)
++    # S177 B1 (encendido de la vía de VIIRS 375): las escenas VIIRS 375 de este arnés miden K, contra goldens escritos
++    # con K. Sus coordenadas (LAT0, LON0) no son de ningún volcán con grilla, así que con la vía de producción encendida
++    # corre K igual, pero el record lleva la marca `via_codigo_mirova: "sin_grilla"` que el golden no tiene. Se apaga la
++    # vía aquí; la vía tiene sus pruebas (tests/test_mirova_v375_codigo_s165.py).
++    import pipeline.process_viirs as pv
++    if hasattr(pv, "ENABLE_V375_CODIGO_MIROVA"):
++        patch.object(pv, "ENABLE_V375_CODIGO_MIROVA", False).start()
+     # S172 (encendido de MOD-D): las escenas MODIS de este arnés miden K, contra goldens escritos con K. Producción
+     # corre la vía «código MIROVA» en MODIS desde el PR B (y K sigue como guardia), así que en el subproceso la vía va
+     # apagada. La vía tiene sus propias pruebas (tests/test_mirova_modis_codigo_s164.py).
+merged
+  result 100644 2a23354d851678c72ebde28f07b70fd79eaa5bdd tests/produccion_pre_k.py
+  our    100644 18e68c2c83af85886758ac1628571fc6008499b8 tests/produccion_pre_k.py
+@@ -39,7 +39,8 @@
+ # no hereda porque la producción de antes de K no los tenía. El ancla los declara apagados en su YAML
+ # (pipeline/profiles/_s146_ab_control.yaml) y el parche de abajo los lleva también a los procesadores. Si producción
+ # los apaga (un revert), dejan de diferir y valores() lo acepta igual.
+-FLAGS_POSTERIORES = ("ENABLE_MODIS_CODIGO_MIROVA",)
++# S177 B1: también la vía de VIIRS 375 (encendida en producción por B1; el ancla la declara apagada).
++FLAGS_POSTERIORES = ("ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA")
+ PROCESADORES = ("pipeline.process_modis", "pipeline.process_viirs", "pipeline.process_viirs_mod")
+ _COD = ("import json, pipeline.profile as p; print('@@' + json.dumps({k: repr(getattr(p, k)) for k in dir(p) "
+         "if k.isupper() and k != 'VALID_PROFILES'}))")
+merged
+  result 100644 59d23e10b5a125a7d3ad95aa168d2cf30eaee1ac tests/test_experimental_congelado_s150.py
+  our    100644 2df17f36253a16dbdf6022b8c2b1f0c52f0922f6 tests/test_experimental_congelado_s150.py
+@@ -44,8 +44,9 @@
+ # cayo a proposito y se reemplaza por la lista DECLARADA de diferencias: exactamente los tres flags de K.
+ # S172 (encendido de MOD-D, decisión de Nicolás del 2026-10-31): producción enciende la vía «código MIROVA» en MODIS
+ # y el laboratorio la declara apagada (sigue en C0, es la sombra de K), así que también difieren en ese flag.
++# S177 B1 (encendido de la vía de VIIRS 375): lo mismo con esa vía; el laboratorio la declara apagada.
+ DIFERENCIAS_DECLARADAS = {"ENABLE_TEST1_PATH", "ENABLE_TESTS_23_PROSE_BRANCH", "ENABLE_MODIS_B22_PRIMARY",
+-                          "ENABLE_MODIS_CODIGO_MIROVA"}
++                          "ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA"}
+ 
+ 
+ def test_el_laboratorio_difiere_de_produccion_solo_en_lo_declarado():
+merged
+  result 100644 95d7bec3d165fcc274b76bcbf6272b22501feb88 tests/test_guard_adopcion_k_s153.py
+  our    100644 da254e32f2c399eab4978b3cf7e8b4811f0e47bb tests/test_guard_adopcion_k_s153.py
+@@ -48,5 +48,7 @@
+     # también difieren en ese flag. La diferencia de K sigue entera.
+     lab, prod = _resolver("experimental"), _resolver("mirova_equivalent")
+     difieren = {k for k in set(lab) | set(prod) if lab.get(k) != prod.get(k)} - {"PROFILE_NAME", "DATA_SUBDIR"}
+-    assert difieren == set(K) | {"ENABLE_MODIS_CODIGO_MIROVA"}, difieren
++    # S177 B1 (encendido de la vía de VIIRS 375): lo mismo con esa vía, que el laboratorio declara apagada.
++    assert difieren == set(K) | {"ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA"}, difieren
+     assert (lab["ENABLE_MODIS_CODIGO_MIROVA"], prod["ENABLE_MODIS_CODIGO_MIROVA"]) == ("False", "True")
++    assert (lab["ENABLE_V375_CODIGO_MIROVA"], prod["ENABLE_V375_CODIGO_MIROVA"]) == ("False", "True")
+merged
+  result 100644 2aa0fe12db5e5607556bb443a681ce611817ac5c tests/test_guard_modis_codigo_mirova_encendido_s172.py
+  our    100644 1bb03a3895d5e91e6f64a4fe1e0d32fc283c647b tests/test_guard_modis_codigo_mirova_encendido_s172.py
+@@ -70,13 +70,17 @@
+ 
+ 
+ def test_la_via_de_viirs_y_los_flags_de_mxd03_siguen_apagados_en_produccion():
+-    """El PR B enciende MODIS y nada más (regla §2): VIIRS 375, VIIRS 750 y MxD03 van aparte."""
++    """El PR B enciende MODIS y nada más (regla §2): VIIRS 375, VIIRS 750 y MxD03 van aparte.
++
++    S177 B1: la vía de VIIRS 375 pasa a encendida con su propio PR (la fija
++    tests/test_guard_v375_codigo_mirova_encendido_s177.py); VIIRS 750 y MxD03 siguen apagados. Texto original de la
++    aserción: los cinco en False."""
+     env = dict(os.environ, VRP_PROFILE="mirova_equivalent", PYTHONIOENCODING="utf-8")
+     codigo = ("import pipeline.profile as p; print([p.ENABLE_V750_CODIGO_MIROVA, p.ENABLE_V375_CODIGO_MIROVA, "
+               "p.ENABLE_MODIS_GEO_MXD03, p.ENABLE_MODIS_CRATER_SIN_DATO, p.ENABLE_MODIS_DIST_DESDE_CRATER])")
+     r = subprocess.run([sys.executable, "-c", codigo], cwd=ROOT, env=env, capture_output=True, text=True,
+                        encoding="utf-8")
+-    assert r.stdout.strip().splitlines()[-1] == "[False, False, False, False, False]"
++    assert r.stdout.strip().splitlines()[-1] == "[False, True, False, False, False]"
+ 
+ 
+ def test_cada_perfil_vivo_resuelve_el_valor_que_le_corresponde():
+added in remote
+  their  100644 1cbd81e83534e949ef60d43553e316497e26d6d1 tests/test_guard_v375_codigo_mirova_encendido_s177.py
+@@ -0,0 +1,144 @@
++# -*- coding: utf-8 -*-
++"""S177, PR B1: la vía «código MIROVA» de VIIRS 375 queda ENCENDIDA en producción, y ningún perfil vivo la hereda sin
++querer.
++
++POR QUÉ. En VIIRS 375, K publica el núcleo de un cúmulo que ya recortó, con un fondo de anillo propio: el volcán se ve
++con cerca de la mitad de la potencia que MIROVA le asigna (0,504 en la sombra, n 31, pasadas con alerta del 2026-11-03
++al 11-07), mientras MIROVA suma todos los píxeles que alerta. La vía corre el código publicado por MIROVA sobre su misma
++grilla de 375 m y da 0,993 en esas pasadas (en V375-C, «al milésimo», comentario S165 de pipeline/process_viirs.py).
++Nicolás pidió encender VIIRS con la vía y K de guardia (diseño del encendido de VIIRS del 2026-11-08, en la rama
++loop/activo; regla experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md, SIN SELLO al escribir esto; tag
++defensivo pre-s178-b1-b2). Este guard fija dos cosas que fallan en silencio:
++  1. el flag de producción, leído desde pipeline.profile (A89): si una consolidación lo apagara, VIIRS 375 volvería a
++     K sin que nada lo dijera (A63); si B1 se revierte, este archivo se va con él;
++  2. el valor del flag en cada perfil que corre un workflow vivo. Los perfiles con `extends: mirova_equivalent`
++     heredan lo que no declaran (A117): el laboratorio `experimental` (congelado en C0, sombra de K de
++     scripts/vigilancia_sombra.py), `experimental_ndc_focus` (corre VIIRS 375 de Chillán desde nrt.yml), el ancla de
++     los tests pre-K (`_s146_ab_control`) y la guardia K de MODIS habrían pasado a la vía de VIIRS 375 sin que nadie lo
++     decidiera. Por eso B1 los declara apagados en su YAML.
++Un perfil derivado que aparezca en un workflow programado y no esté en VIVOS hace caer la prueba: hay que decidir su
++valor, no dejarlo heredar. La vía de VIIRS 750 es de B2 y este archivo no la fija, para que B1 y B2 se puedan mergear
++y revertir en cualquier orden.
++"""
++import json
++import os
++import re
++import subprocess
++import sys
++from pathlib import Path
++
++import pytest
++import yaml
++
++ROOT = Path(__file__).resolve().parents[1]
++PERFILES = ROOT / "pipeline" / "profiles"
++WORKFLOWS = ROOT / ".github" / "workflows"
++FLAG = "ENABLE_V375_CODIGO_MIROVA"
++CLAVE = "enable_v375_codigo_mirova"
++
++# perfil vivo -> valor esperado de ENABLE_V375_CODIGO_MIROVA, con el porqué
++VIVOS = {
++    "mirova_equivalent": True,        # producción: el encendido de este PR
++    "sombra_codigo_mirova": True,     # la sombra corre las tres vías a propósito (S167)
++    "sombra_34": True,                # sombra de los 34 con las tres vías (#932)
++    "guardia_k_viirs": False,         # la guardia es K de los dos VIIRS (S176, PR A)
++    "guardia_k_modis": False,         # K pura de MODIS; no corre VIIRS, pero si heredara la vía pediría pyproj
++    "experimental": False,            # laboratorio congelado en C0: sombra de K (S150, S156); lo declara B1
++    "experimental_ndc_focus": False,  # producción de antes de K para Chillán, despachado desde nrt.yml; lo declara B1
++}
++# perfiles que B1 obliga a declarar el flag apagado en su YAML (guardia_k_viirs ya lo declaraba desde el PR A)
++DECLARAN_APAGADA = ("experimental", "experimental_ndc_focus", "_s146_ab_control", "guardia_k_modis", "guardia_k_viirs")
++
++_LEER = """
++import importlib, json, os, sys
++nombres = json.loads(sys.argv[1]); out = {}
++import pipeline.profile as p
++for n in nombres:
++    os.environ["VRP_PROFILE"] = n
++    importlib.reload(p)
++    out[n] = p.ENABLE_V375_CODIGO_MIROVA
++print("@@" + json.dumps(out))
++"""
++
++
++def _resueltos(nombres):
++    r = subprocess.run([sys.executable, "-c", _LEER, json.dumps(sorted(nombres))], capture_output=True, text=True,
++                       cwd=ROOT, env=dict(os.environ, PYTHONIOENCODING="utf-8"), check=True)
++    return json.loads([ln for ln in r.stdout.splitlines() if ln.startswith("@@")][0][2:])
++
++
++def test_produccion_corre_la_via_de_viirs_375():
++    env = dict(os.environ, VRP_PROFILE="mirova_equivalent", PYTHONIOENCODING="utf-8")
++    r = subprocess.run([sys.executable, "-c", f"import pipeline.profile as p; print(p.{FLAG})"],
++                       cwd=ROOT, env=env, capture_output=True, text=True, encoding="utf-8")
++    assert r.returncode == 0, r.stderr
++    assert r.stdout.strip().splitlines()[-1] == "True"
++
++
++def test_el_procesador_de_viirs_375_recibe_el_flag_encendido():
++    """El flag llega al procesador que lo usa (pipeline/process_viirs.py), no sólo a pipeline.profile (A118)."""
++    env = dict(os.environ, VRP_PROFILE="mirova_equivalent", PYTHONIOENCODING="utf-8")
++    r = subprocess.run([sys.executable, "-c", f"from pipeline import process_viirs as P; print(P.{FLAG})"],
++                       cwd=ROOT, env=env, capture_output=True, text=True, encoding="utf-8")
++    assert r.returncode == 0, r.stderr
++    assert r.stdout.strip().splitlines()[-1] == "True"
++
++
++def test_b1_no_toca_los_flags_de_mxd03_ni_la_via_de_modis():
++    """B1 enciende VIIRS 375 y nada más (regla §2): MODIS sigue con su vía (#934) y los de MxD03 apagados."""
++    env = dict(os.environ, VRP_PROFILE="mirova_equivalent", PYTHONIOENCODING="utf-8")
++    codigo = ("import pipeline.profile as p; print([p.ENABLE_MODIS_CODIGO_MIROVA, p.ENABLE_MODIS_GEO_MXD03, "
++              "p.ENABLE_MODIS_CRATER_SIN_DATO, p.ENABLE_MODIS_DIST_DESDE_CRATER])")
++    r = subprocess.run([sys.executable, "-c", codigo], cwd=ROOT, env=env, capture_output=True, text=True,
++                       encoding="utf-8")
++    assert r.stdout.strip().splitlines()[-1] == "[True, False, False, False]"
++
++
++def test_cada_perfil_vivo_resuelve_el_valor_que_le_corresponde():
++    res = _resueltos(VIVOS)
++    malos = {n: (res[n], esperado) for n, esperado in VIVOS.items() if res[n] is not esperado}
++    assert not malos, f"(resuelto, esperado): {malos}"
++
++
++@pytest.mark.parametrize("perfil", DECLARAN_APAGADA)
++def test_los_perfiles_que_no_siguen_a_produccion_lo_declaran_en_thresholds(perfil):
++    """Declarado donde lo lee el código (A89): en otra sección no cuenta y el perfil heredaría la vía."""
++    cfg = yaml.safe_load((PERFILES / f"{perfil}.yaml").read_text(encoding="utf-8"))
++    assert (cfg.get("thresholds") or {}).get(CLAVE) is False, perfil
++
++
++def test_el_ancla_pre_k_resuelve_la_via_apagada():
++    """`_s146_ab_control` es el ancla de tests/produccion_pre_k.py (la producción de antes de K, que no tenía la vía)."""
++    assert _resueltos(["_s146_ab_control"])["_s146_ab_control"] is False
++
++
++def _programados():
++    """Workflows que corren solos (schedule o workflow_run)."""
++    out = []
++    for f in sorted(WORKFLOWS.glob("*.yml")):
++        on = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("on") or {}
++        if isinstance(on, dict) and ({"schedule", "workflow_run"} & set(on)):
++            out.append(f)
++    return out
++
++
++def test_todo_perfil_derivado_que_nombra_un_workflow_programado_tiene_valor_decidido():
++    derivados = set()
++    for f in PERFILES.glob("*.yaml"):
++        cfg = yaml.safe_load(f.read_text(encoding="utf-8"))
++        if isinstance(cfg, dict) and cfg.get("extends") == "mirova_equivalent":
++            derivados.add(f.stem)
++    nombrados = set()
++    for wf in _programados():
++        txt = wf.read_text(encoding="utf-8")
++        nombrados |= {n for n in derivados if re.search(r"(?<![A-Za-z0-9_])" + re.escape(n) + r"(?![A-Za-z0-9_])", txt)}
++    assert nombrados, "control: algún perfil derivado aparece en un workflow programado"
++    sin_decidir = nombrados - set(VIVOS)
++    assert not sin_decidir, f"perfiles vivos sin valor decidido de la vía de VIIRS 375: {sorted(sin_decidir)}"
++
++
++def test_control_el_instrumento_ve_un_perfil_que_hereda():
++    """Si `experimental` no declarara el flag, lo resolvería igual que producción: True. Un brazo viejo de A/B que no
++    lo declara sirve de control de que el lector ve la herencia (si diera False, el guard de arriba no probaría nada)."""
++    res = _resueltos(["mirova_equivalent", "_s146_ab_sin_test1"])
++    assert res["mirova_equivalent"] is True and res["_s146_ab_sin_test1"] is True
+changed in both
+  base   100644 140a22414412c2f352ffa1134505bc274b47ee9d tests/test_guardia_k_modis_s172.py
+  our    100644 ebd1730f97f3e4cfbdf44f7782ad5a64144e242a tests/test_guardia_k_modis_s172.py
+  their  100644 22a995c773fc2178d942934d0b6025f3b37342bd tests/test_guardia_k_modis_s172.py
+@@ -65,8 +65,10 @@
+     prod, g = _resuelto("mirova_equivalent"), _resuelto(PERFIL)
+     distintas = {k for k in set(prod) | set(g) if prod.get(k) != g.get(k)}
+     # Con el flag de producción apagado (PR A), la vía no difiere; con el PR B encendido, sí. Los dos casos valen.
++    # S177 B1: la guardia declara apagada la vía de VIIRS 375 (no corre VIIRS; si la heredara pediría pyproj) y
++    # producción la enciende: también puede diferir en ella.
+     permitidas = {"DATA_SUBDIR", "PROFILE_NAME", "SENSOR_VIIRS_375", "SENSOR_VIIRS_750",
+-                  "ENABLE_MODIS_CODIGO_MIROVA"}
++                  "ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA"}
+     assert distintas <= permitidas, sorted(distintas - permitidas)
+     assert {"DATA_SUBDIR", "PROFILE_NAME"} <= distintas
+ 
+changed in both
+  base   100644 6792f3d3e8dcdf46af11590b6466d617688938ba tests/test_guardia_k_viirs_s176.py
+  our    100644 bb36acaca2971a6780be6ebc79144af9f92aa03b tests/test_guardia_k_viirs_s176.py
+  their  100644 af3a9a5bd04acae8f50b04f2806786443f6e599e tests/test_guardia_k_viirs_s176.py
+@@ -86,10 +86,14 @@
+     assert PERFIL not in (ROOT / "pipeline" / "profiles" / "mirova_equivalent.yaml").read_text(encoding="utf-8")
+ 
+ 
+-def test_las_vias_de_viirs_siguen_apagadas_en_produccion_en_este_pr():
+-    """PR A es inerte: encender un flag es B1 o B2. Esta prueba se cambia en esos PR, con la frase de Nicolás."""
++def test_la_via_de_viirs_375_encendida_y_la_de_750_apagada_en_produccion():
++    """PR A es inerte: encender un flag es B1 o B2. Esta prueba se cambia en esos PR, con la frase de Nicolás.
++
++    S177 B1: enciende la vía de VIIRS 375 (A45 para escribirlo, dada a la coordinadora; merge y encendido siguen siendo
++    de Nicolás). VIIRS 750 es B2. Nombre y texto originales: «las vías de VIIRS siguen apagadas en producción», los
++    dos flags en False."""
+     p = _resuelto("mirova_equivalent")
+-    assert p["ENABLE_V375_CODIGO_MIROVA"] == "False" and p["ENABLE_V750_CODIGO_MIROVA"] == "False"
++    assert p["ENABLE_V375_CODIGO_MIROVA"] == "True" and p["ENABLE_V750_CODIGO_MIROVA"] == "False"
+ 
+ 
+ # ------------------------------------------------------------------------------------- 2. el workflow
+merged
+  result 100644 401a0ab8b6260f6387d17558aeff9b9dbab6c335 tests/test_mirova_v375_codigo_s165.py
+  our    100644 ea47d391a0edf37e7d0ae87f922ca4b577292125 tests/test_mirova_v375_codigo_s165.py
+@@ -72,16 +72,28 @@
+ 
+ 
+ # ------------------------------------------------------------------------------------------------ 1. el flag
+-@pytest.mark.parametrize("perfil", ["mirova_equivalent", "experimental", "experimental_ndc_focus"])
+-def test_flag_apagado_en_produccion_y_laboratorio(perfil):
+-    assert _flag(perfil) == "False"
++# S177 B1 (encendido de la vía de VIIRS 375; A45 para escribirlo dada a la coordinadora; tag pre-s178-b1-b2): el flag
++# pasa a ENCENDIDO en producción. Los laboratorios lo declaran apagado y la guardia K de VIIRS también. Los valores por
++# perfil vivo los fija además tests/test_guard_v375_codigo_mirova_encendido_s177.py. Texto original: «APAGADO en
++# producción y en los laboratorios».
++@pytest.mark.parametrize("perfil,esperado", [("mirova_equivalent", "True"), ("experimental", "False"),
++                                             ("experimental_ndc_focus", "False"), ("guardia_k_viirs", "False")])
++def test_flag_encendido_en_produccion_y_apagado_en_laboratorios_y_guardia(perfil, esperado):
++    assert _flag(perfil) == esperado
+ 
+ 
+ def test_flag_se_lee_de_thresholds_y_llega_al_procesador():
+     src = (REPO / "pipeline" / "profile.py").read_text(encoding="utf-8")
+     assert 'ENABLE_V375_CODIGO_MIROVA: bool = bool(_t.get("enable_v375_codigo_mirova", False))' in src
+-    from pipeline import process_viirs as PV
+-    assert PV.ENABLE_V375_CODIGO_MIROVA is False
++    # S177 B1: el procesador lo recibe del perfil con que se importa; en un proceso aparte, para no depender del perfil
++    # con que corre la suite. Producción lo trae encendido y la guardia apagado (las dos preguntas del instrumento).
++    codigo = "from pipeline import process_viirs as PV; print(PV.ENABLE_V375_CODIGO_MIROVA)"
++    for perfil, esperado in (("mirova_equivalent", "True"), ("guardia_k_viirs", "False")):
++        env = dict(os.environ, VRP_PROFILE=perfil, PYTHONIOENCODING="utf-8")
++        r = subprocess.run([sys.executable, "-c", codigo], cwd=REPO, env=env, capture_output=True, text=True,
++                           encoding="utf-8")
++        assert r.returncode == 0, r.stderr
++        assert r.stdout.strip().splitlines()[-1] == esperado, perfil
+ 
+ 
+ # ------------------------------------------------------------------------------------------------ 2. números y grilla
+@@ -294,6 +306,8 @@
+     from pipeline import process_viirs as PV
+     assert MV.volcan_por_coordenadas(arnes.LAT0, arnes.LON0) is None
+     monkeypatch.setattr(MV, "leer_radiancia_l1b", lambda *_a, **_k: (_ for _ in ()).throw(_ViaTocada()))
++    # S177 B1: producción trae la vía encendida desde B1; el lado apagado se fija explícitamente.
++    monkeypatch.setattr(PV, "ENABLE_V375_CODIGO_MIROVA", False)
+     apagado = arnes.correr_v375("foco_3x3", False, {})
+     monkeypatch.setattr(PV, "ENABLE_V375_CODIGO_MIROVA", True)
+     encendido = arnes.correr_v375("foco_3x3", False, {})
+added in remote
+  their  100644 1b2584d137030d8abd2c0663be8308721aa68e7d tests/test_revert_flag_v375_no_choca_s177.py
+@@ -0,0 +1,173 @@
++# -*- coding: utf-8 -*-
++"""S177, PR B1: revertir el merge de B1 (el que enciende la vía «código MIROVA» de VIIRS 375) no choca con B2 (la de
++VIIRS 750), con el encendido de MODIS (#934) ni con otro PR que cambie una clave cercana de los perfiles.
++
++POR QUÉ. La regla de reversión de VIIRS (experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md §4.3, SIN
++SELLO) manda revertir el mismo día con `git revert -m 1` del merge del PR de ESE sensor si producción calla una alerta
++protegida que la guardia K publica, y nunca revertir el otro. git trata como conflicto dos cambios en líneas contiguas
++(hallazgo 208 de S173): si el bloque de B1 quedara pegado al de B2 o al de MODIS, la reversión de emergencia pasaría a
++necesitar una resolución a mano. Por eso cada bloque de B2 y de B1 va en un lugar propio de cada perfil, con al menos
++una línea existente entre ellos y entre ellos y el bloque de MODIS.
++
++Cómo se prueba. Con `git merge-file` (el merge de tres vías que usan `git merge` y `git revert`) sobre el texto real de
++cada perfil que B1 toca: se arma el estado con los dos PR (si B2 aún no está en este árbol, se pone un bloque de B2
++sintético en el lugar donde B2 lo pone), se mergea en los dos órdenes y se revierte cada uno. Lleva controles
++positivos: un cambio en la misma línea del flag y un bloque puesto en el lugar del de B2 sí tienen que chocar.
++"""
++import re
++import shutil
++import subprocess
++from pathlib import Path
++
++import pytest
++import yaml
++
++ROOT = Path(__file__).resolve().parents[1]
++PERFILES = ROOT / "pipeline" / "profiles"
++
++# Cada PR marca la primera línea de cada bloque suyo con su etiqueta; el bloque termina en la línea de su flag.
++ESTE = {"etiqueta": "S177 B1:", "clave": "enable_v375_codigo_mirova"}
++OTRO = {"etiqueta": "S177 B2:", "clave": "enable_v750_codigo_mirova"}
++# archivo -> (línea tras la cual B1 pone su bloque, línea tras la cual B2 pone el suyo, valor del flag en ese archivo)
++LUGARES = {
++    "mirova_equivalent": ("  test1_intermediate_bg_ring_km: [1.5, 3.0]", "  n_sigma_vent: 2.0", "true"),
++    "experimental": ("thresholds:", "  enable_modis_codigo_mirova: false", "false"),
++    "experimental_ndc_focus": ("thresholds:", "  enable_modis_codigo_mirova: false", "false"),
++    "_s146_ab_control": ("thresholds:", "  enable_modis_codigo_mirova: false", "false"),
++    "guardia_k_modis": ("thresholds:", "  enable_modis_codigo_mirova: false", "false"),
++}
++INICIO_MODIS = "  # S172, MOD-D ENCENDIDO"
++FLAG_MODIS = "  enable_modis_codigo_mirova: true\n"
++
++pytestmark = pytest.mark.skipif(shutil.which("git") is None, reason="sin git en el PATH")
++
++
++def _texto(nombre):
++    return (PERFILES / f"{nombre}.yaml").read_bytes().decode("utf-8").replace("\r\n", "\n")
++
++
++def _spans(texto, pr):
++    """(inicio, fin) de cada bloque del PR: desde la línea con su etiqueta hasta la línea de su flag, inclusive."""
++    out = []
++    for m in re.finditer(r"^.*" + re.escape(pr["etiqueta"]) + r".*\n", texto, re.MULTILINE):
++        f = re.compile(r"^  " + re.escape(pr["clave"]) + r":.*\n", re.MULTILINE).search(texto, m.start())
++        assert f is not None, pr
++        out.append((m.start(), f.end()))
++    return out
++
++
++def _quitar(texto, pr):
++    for ini, fin in reversed(_spans(texto, pr)):
++        texto = texto[:ini] + texto[fin:]
++    return texto
++
++
++def _poner_tras(texto, ancla, bloque):
++    linea = ancla + "\n"
++    assert texto.count(linea) == 1, ancla
++    i = texto.index(linea) + len(linea)
++    return texto[:i] + bloque + texto[i:]
++
++
++def _estados(nombre):
++    """(ambos, solo_b1, solo_b2, ninguno) del perfil. Si B2 no está en el árbol, se sintetiza en su lugar."""
++    t = _texto(nombre)
++    _, ancla_b2, valor = LUGARES[nombre]
++    if not _spans(t, OTRO):
++        sintetico = f"  # {OTRO['etiqueta']} bloque sintético del otro PR, en su lugar\n  {OTRO['clave']}: {valor}\n"
++        t = _poner_tras(t, ancla_b2, sintetico)
++    ambos = t
++    solo_b1, solo_b2 = _quitar(ambos, OTRO), _quitar(ambos, ESTE)
++    return ambos, solo_b1, solo_b2, _quitar(solo_b1, ESTE)
++
++
++def _merge3(tmp_path, ours, base, theirs):
++    """git merge-file -p ours base theirs: (n_conflictos, texto)."""
++    archivos = []
++    for nombre, texto in (("ours", ours), ("base", base), ("theirs", theirs)):
++        f = tmp_path / f"{nombre}.yaml"
++        f.write_bytes(texto.encode("utf-8"))
++        archivos.append(str(f))
++    r = subprocess.run(["git", "merge-file", "-p", *archivos], capture_output=True)
++    assert r.returncode >= 0, r.stderr
++    return r.returncode, r.stdout.decode("utf-8")
++
++
++@pytest.mark.parametrize("nombre", sorted(LUGARES))
++def test_el_bloque_de_b1_esta_y_va_tras_su_ancla(nombre):
++    t = _texto(nombre)
++    spans = _spans(t, ESTE)
++    assert len(spans) == 1, nombre
++    ancla_b1, _, valor = LUGARES[nombre]
++    assert t[:spans[0][0]].endswith(ancla_b1 + "\n"), nombre
++    bloque = t[spans[0][0]:spans[0][1]]
++    assert bloque.endswith(f"  {ESTE['clave']}: {valor}\n"), bloque
++    # y en yaml, dentro de `thresholds:` (donde lo lee pipeline/profile.py, A89)
++    assert yaml.safe_load(t)["thresholds"][ESTE["clave"]] is (valor == "true")
++
++
++@pytest.mark.parametrize("nombre", sorted(LUGARES))
++def test_los_dos_ordenes_de_merge_no_chocan(tmp_path, nombre):
++    ambos, solo_b1, solo_b2, ninguno = _estados(nombre)
++    assert _merge3(tmp_path, solo_b2, ninguno, solo_b1) == (0, ambos)   # B2 primero, entra B1
++    assert _merge3(tmp_path, solo_b1, ninguno, solo_b2) == (0, ambos)   # B1 primero, entra B2
++
++
++@pytest.mark.parametrize("nombre", sorted(LUGARES))
++def test_revertir_b1_con_b2_ya_en_main_no_choca(tmp_path, nombre):
++    ambos, solo_b1, solo_b2, ninguno = _estados(nombre)
++    # B1 entró antes que B2: base del revert = main tras B1, theirs = main antes de B1
++    assert _merge3(tmp_path, ambos, solo_b1, ninguno) == (0, solo_b2)
++    # B1 entró después de B2
++    assert _merge3(tmp_path, ambos, ambos, solo_b2) == (0, solo_b2)
++
++
++@pytest.mark.parametrize("nombre", sorted(LUGARES))
++def test_revertir_b2_con_b1_ya_en_main_no_se_lleva_el_bloque_de_b1(tmp_path, nombre):
++    ambos, solo_b1, solo_b2, ninguno = _estados(nombre)
++    assert _merge3(tmp_path, ambos, solo_b2, ninguno) == (0, solo_b1)
++
++
++def test_revertir_modis_con_b2_y_b1_en_main_no_choca(tmp_path):
++    ambos, _, _, ninguno = _estados("mirova_equivalent")
++    ini = ninguno.index(INICIO_MODIS)
++    fin = ninguno.index(FLAG_MODIS) + len(FLAG_MODIS)
++    ninguno_sin_modis = ninguno[:ini] + ninguno[fin:]
++    a, b = ambos.index(INICIO_MODIS), ambos.index(FLAG_MODIS) + len(FLAG_MODIS)
++    assert _merge3(tmp_path, ambos, ninguno, ninguno_sin_modis) == (0, ambos[:a] + ambos[b:])
++
++
++@pytest.mark.parametrize("clave", ["enable_modis_geo_mxd03", "enable_modis_crater_sin_dato",
++                                   "enable_modis_dist_desde_crater"])
++def test_revertir_b1_no_choca_con_otro_pr_que_cambie_mxd03(tmp_path, clave):
++    ambos, solo_b1, solo_b2, _ = _estados("mirova_equivalent")
++    patron = re.compile(r"^(  " + re.escape(clave) + r":\s*)false\b", re.MULTILINE)
++    otro_pr = patron.subn(r"\1true", ambos)
++    assert otro_pr[1] == 1, clave
++    n, resultado = _merge3(tmp_path, otro_pr[0], ambos, solo_b2)
++    assert n == 0, resultado
++    t = yaml.safe_load(resultado)["thresholds"]
++    assert ESTE["clave"] not in t and t[clave] is True and t[OTRO["clave"]] is True
++
++
++def test_control_un_cambio_en_la_linea_del_flag_si_choca(tmp_path):
++    """Si otro PR toca la misma línea del flag, el revert tiene que chocar: sin esto, un merge-file que nunca reporta
++    conflictos daría verde a todo."""
++    ambos, _, solo_b2, _ = _estados("mirova_equivalent")
++    linea = f"  {ESTE['clave']}: true\n"
++    otro = ambos.replace(linea, f"  {ESTE['clave']}: true   # comentario de otro PR\n")
++    assert otro != ambos
++    n, _ = _merge3(tmp_path, otro, ambos, solo_b2)
++    assert n > 0
++
++
++@pytest.mark.parametrize("nombre", sorted(LUGARES))
++def test_control_un_bloque_en_el_lugar_del_de_b2_si_choca(tmp_path, nombre):
++    """Control del defecto 208: con el bloque de B1 en el lugar del de B2, el segundo merge choca. Es la prueba de que
++    el instrumento ve el problema que la ubicación evita."""
++    ambos, solo_b1, solo_b2, ninguno = _estados(nombre)
++    b2 = _spans(solo_b2, OTRO)[0]
++    b1 = solo_b1[_spans(solo_b1, ESTE)[0][0]:_spans(solo_b1, ESTE)[0][1]]
++    pegado_solo_b1 = ninguno[:b2[0]] + b1 + ninguno[b2[0]:]
++    n, _ = _merge3(tmp_path, solo_b2, ninguno, pegado_solo_b1)
++    assert n > 0
+merged
+  result 100644 fd1252c3c75c7836e37075bee80a124b3119be29 tests/test_saturacion_chillan_s151.py
+  our    100644 3a36e3267e99dfdfdf5eae98af79415b289b0f2d tests/test_saturacion_chillan_s151.py
+@@ -38,6 +38,15 @@
+ 
+ h5py = pytest.importorskip("h5py")
+ 
++
++@pytest.fixture(autouse=True)
++def _k_de_viirs_375(monkeypatch):
++    """S177 B1: esta sonda mide la saturación con K sobre Chillán, que tiene grilla de MIROVA. Producción corre la vía
++    «código MIROVA» en VIIRS 375 desde B1 (con K de guardia), y la vía no escribe `vrp_mir_mw`. Se fija K; la vía tiene
++    sus pruebas en tests/test_mirova_v375_codigo_s165.py."""
++    from pipeline import process_viirs
++    monkeypatch.setattr(process_viirs, "ENABLE_V375_CODIGO_MIROVA", False)
++
+ import saturacion as S  # noqa: E402
+ import probe_saturacion as P  # noqa: E402
+ import evaluar_saturacion as E  # noqa: E402
+merged
+  result 100644 fc0ea91373ae223f7a6cc2aa1b2225bd12dd8022 tests/test_sombra_codigo_mirova_s167.py
+  our    100644 2c80e7a8025b3724c7be52581e24bf9df0cb3c65 tests/test_sombra_codigo_mirova_s167.py
+@@ -62,9 +62,11 @@
+     # S172 (PR B, encendido de MOD-D, decisión de Nicolás del 2026-10-31): producción enciende la vía de MODIS, así que
+     # sombra y producción ya no difieren en ella; la sombra sigue con las tres encendidas. Texto original: la diferencia
+     # eran las tres vías.
+-    PROD_ENCENDIDAS = {"ENABLE_MODIS_CODIGO_MIROVA"}
++    # S177 B1 (encendido de la vía de VIIRS 375): producción también la enciende, así que sombra y producción dejan de
++    # diferir en ella. Texto original: sólo la de MODIS.
++    PROD_ENCENDIDAS = {"ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA"}
+     assert distintas == (VIAS - PROD_ENCENDIDAS) | {"DATA_SUBDIR", "PROFILE_NAME"}, sorted(distintas)
+-    # control: en producción las vías de VIIRS están apagadas y la de MODIS encendida, y en la sombra las tres
++    # control: en producción las vías de PROD_ENCENDIDAS están encendidas y las demás apagadas, y en la sombra las tres
+     # encendidas (si no, el diff de arriba podría coincidir por otra razón)
+     assert all(prod[k] == ("True" if k in PROD_ENCENDIDAS else "False") for k in VIAS)
+     assert all(sombra[k] == "True" for k in VIAS)
+@@ -318,14 +320,18 @@
+     assert r["distance_class"] in ("summit", "far")
+ 
+ 
+-def test_control_el_mismo_camino_con_produccion_no_toma_la_via(tmp_path):
+-    """Control del de arriba: con mirova_equivalent la vía está apagada, K intenta leer el gránulo de mentira y no
+-    escribe nada; ni la carpeta de la sombra aparece ni producción cambia. Si este diera lo mismo que la sombra, la
+-    prueba de arriba no estaría midiendo el flag."""
++def test_control_el_mismo_camino_con_k_no_toma_la_via(tmp_path):
++    """Control del de arriba: con la vía de VIIRS 375 apagada, K intenta leer el gránulo de mentira y no escribe nada;
++    ni la carpeta de la sombra aparece ni producción cambia. Si este diera lo mismo que la sombra, la prueba de arriba
++    no estaría midiendo el flag.
++
++    S177 B1: producción enciende la vía de VIIRS 375, así que el lado K del control es la guardia K de VIIRS (la
++    producción con las vías de VIIRS apagadas, tests/test_guardia_k_viirs_s176.py). Texto original: el control corría
++    mirova_equivalent, con la vía apagada, y su carpeta era data/mirova_equivalent."""
+     raiz = tmp_path / "repo"
+     _copia_minima(raiz)
+     antes = _huellas(raiz / "data")
+-    salida = _correr(raiz, "mirova_equivalent")
++    salida = _correr(raiz, "guardia_k_viirs")
+     assert _huellas(raiz / "data") == antes
+     assert not (raiz / "data" / PERFIL).exists()
+-    assert json.loads(salida.strip().splitlines()[-1])["data_dir"].replace("\\", "/").endswith("data/mirova_equivalent")
++    assert json.loads(salida.strip().splitlines()[-1])["data_dir"].replace("\\", "/").endswith("data/guardia_k_viirs")
+changed in both
+  base   100644 d6a1f883d8f46281a76acad4b86e91c271e7791f tests/test_vigilancia_guardia_viirs_s176.py
+  our    100644 71bf76230b8db3f3a095b1de798d90404dede132 tests/test_vigilancia_guardia_viirs_s176.py
+  their  100644 e55af5c22a3a3699e710b1bee75d1dc13aafce39 tests/test_vigilancia_guardia_viirs_s176.py
+@@ -206,7 +206,8 @@
+ 
+ # ------------------------------------------------------------------ flags y avisos
+ def test_el_flag_de_cada_sensor_se_lee_de_pipeline_profile():
+-    assert vg.flag_produccion_encendido("VIIRS375") is False and vg.flag_produccion_encendido("VIIRS750") is False
++    # S177 B1: la vía de VIIRS 375 pasa a encendida en producción. Texto original: las dos de VIIRS en False.
++    assert vg.flag_produccion_encendido("VIIRS375") is True and vg.flag_produccion_encendido("VIIRS750") is False
+     assert vg.flag_produccion_encendido("MODIS") is True, "control: la de MODIS está encendida desde #934"
+     assert vg.flag_produccion_encendido() is True
+ 

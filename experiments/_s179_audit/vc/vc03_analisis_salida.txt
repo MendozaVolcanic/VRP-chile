@@ -1,0 +1,163 @@
+
+====================================================================================================
+0. CONTROL: veredictos de la tabla re-corrida (deben ser los de lectura_salida.txt)
+  MODIS: fila 4 | DECIDE NICOLÁS | motivos ['cambia_sin_pasadas_b'] | regla p2 GANA B 6 neto -7
+  VIIRS375: fila 6 | NO SE CONTRADICE FUERA DE MUESTRA (alertas: Isluga, Lascar, PlanchonPeteroa, Puy | motivos [] | regla p2 GANA B 43 neto -30.0
+  VIIRS750: fila 4 | DECIDE NICOLÁS | motivos ['v750a_no_sellado', 'regla del sensor'] | regla p2 GANA B 17 neto -11
+
+====================================================================================================
+501. Perdidas solo OCR que K publica en F26-V VIIRS 375, con y sin la exencion N-3 (L4), brazo cercano y radiante.
+   Denominador: pasadas evaluables de VIIRS 375 en F26-V (2026-02-01 a 03-31, noche). Control: la funcion del
+   lector con n3=True tiene que dar lo que trae lectura.json (extra.solo_ocr_que_k_publica).
+  pasadas evaluables: 2556 | con lab_union protegida y lab de la tabla no: 21
+  brazo V-cercano, n3=True: []
+  brazo V-cercano, n3=False: []
+  brazo V, n3=True: []
+  brazo V, n3=False: [('Isluga', '2026-03-20 05:06', 'VIIRS_SNPP'), ('Isluga', '2026-03-24 05:30', 'VIIRS_SNPP'), ('Lascar', '2026-03-15 05:00', 'VIIRS_SNPP')]
+  lectura.json extra.solo_ocr_que_k_publica (VIIRS375): []
+    Isluga VIIRS_SNPP 2026-03-20 05:06 lab tabla sin_info vrp OCR 2.21 | pub K 1 cercano 1 radiante 0 | es_n3 True
+    Isluga VIIRS_SNPP 2026-03-24 05:30 lab tabla sin_info vrp OCR 1.51 | pub K 1 cercano 1 radiante 0 | es_n3 True
+    Lascar VIIRS_SNPP 2026-02-14 05:42 lab tabla sin_info vrp OCR 4.52 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-02-20 05:30 lab tabla sin_info vrp OCR 1.09 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-02-23 06:18 lab tabla sin_info vrp OCR 1.54 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-02 05:42 lab tabla sin_info vrp OCR 2.16 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-03 05:24 lab tabla sin_info vrp OCR 1.71 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-06 06:12 lab tabla sin_info vrp OCR 3.23 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-07 05:48 lab tabla sin_info vrp OCR 3.03 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-08 05:30 lab tabla sin_info vrp OCR 3.42 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-09 05:12 lab tabla sin_info vrp OCR 1.2 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-13 05:36 lab tabla sin_info vrp OCR 3.73 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-14 05:18 lab tabla sin_info vrp OCR 1.87 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-15 05:00 lab tabla sin_info vrp OCR 1.54 | pub K 1 cercano 1 radiante 0 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-18 05:42 lab tabla sin_info vrp OCR 3.32 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-19 05:24 lab tabla sin_info vrp OCR 1.88 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-22 06:12 lab tabla sin_info vrp OCR 2.51 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-24 05:30 lab tabla sin_info vrp OCR 2.6 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-27 06:18 lab tabla sin_info vrp OCR 2.26 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-28 06:00 lab tabla sin_info vrp OCR 2.34 | pub K 1 cercano 1 radiante 1 | es_n3 True
+    Lascar VIIRS_SNPP 2026-03-30 05:18 lab tabla sin_info vrp OCR 1.4 | pub K 1 cercano 1 radiante 1 | es_n3 True
+  VIIRS750 brazo V, n3=True: []
+  VIIRS750 brazo V, n3=False: []
+  con la letra del §4.1 (sin N-3), brazo V-cercano: fila 4 por «perdida solo OCR que K publica» = False
+  con la letra del §4.1 (sin N-3), brazo V: fila 4 por «perdida solo OCR que K publica» = True
+
+====================================================================================================
+502. P2 de VIIRS 750 (brazo radiante) y de MODIS con y sin las pasadas del §3.1 (b). Ventana F26 que decide.
+   Control: con todas las pasadas tiene que dar el B y el estado de lectura.json.
+  VIIRS750: con (b) GANA B 17 neto -11 | sin (b) EMPATE B 9 neto -3 | pasadas (b) quitadas 9 | lectura.json: fila con 4, regla_sin_pasadas_b 4
+  MODIS: con (b) GANA B 6 neto -7 | sin (b) SIN SUSTRATO B 4 neto -4 | pasadas (b) quitadas 4 | lectura.json: fila con 4, regla_sin_pasadas_b 5
+  VIIRS375: con (b) GANA B 43 neto -30 | sin (b) GANA B 43 neto -30 | pasadas (b) quitadas 0 | lectura.json: fila con 6, regla_sin_pasadas_b 6
+  claves de lectura.json que mencionan (b): ['regla_sin_pasadas_b', 'lectura_b'] | extra: {'cambia_sin_pasadas_b': False, 'candidatas_osf_sin_pasadas_b_informa': []}
+
+====================================================================================================
+503. Sorteo del §7 con la via contra K (decision 2 de S174), estratos volcan x tramo de 10° de cenit, barajador
+   del propio lector (barajar_en_estratos), 1000 sorteos, semilla 172. Brazo: el que decide.
+   Control negativo: K contra K barajado da SIN SUSTRATO siempre. Control positivo: sin barajar reproduce el P2 de la lectura.
+  MODIS (V): observado GANA B 6 neto -7 | barajados {'EMPATE': 916, 'GANA': 84} | GANA 8.4 % | GANA o EMPATE 100.0 % | neto <= observado 13 de 1000 | K contra K {'SIN SUSTRATO': 1000}
+  VIIRS375 (V-cercano): observado GANA B 43 neto -30 | barajados {'GANA': 281, 'EMPATE': 650, 'BLOQUEA': 68, 'PIERDE': 1} | GANA 28.1 % | GANA o EMPATE 93.1 % | neto <= observado 0 de 1000 | K contra K {'SIN SUSTRATO': 1000}
+     mismo sorteo con radiante (V): {'GANA': 102, 'EMPATE': 691, 'BLOQUEA': 202, 'PIERDE': 5} | GANA 10.2 %
+  VIIRS750 (V): observado GANA B 17 neto -11 | barajados {'BLOQUEA': 580, 'EMPATE': 373, 'PIERDE': 41, 'GANA': 6} | GANA 0.6 % | GANA o EMPATE 37.9 % | neto <= observado 1 de 1000 | K contra K {'SIN SUSTRATO': 1000}
+
+====================================================================================================
+504. Cobertura del K-gemelo (D3) sobre las pasadas discordantes de P2 (las que deciden). Ventana F26 que decide.
+   Control: el conteo de discordantes es el B y neto del P2 de la lectura (bloques).
+  MODIS: pasadas discordantes 7, cubiertas por el K-gemelo 2 | bloques 6, con alguna pasada cubierta 1 | volcanes de las cubiertas [('Lascar', 2)]
+     pasadas del tramo cubiertas por el K-gemelo: 137 de 601
+  VIIRS375: pasadas discordantes 44, cubiertas por el K-gemelo 4 | bloques 43, con alguna pasada cubierta 4 | volcanes de las cubiertas [('Lascar', 4)]
+     pasadas del tramo cubiertas por el K-gemelo: 572 de 2660
+  VIIRS750: pasadas discordantes 17, cubiertas por el K-gemelo 6 | bloques 17, con alguna pasada cubierta 6 | volcanes de las cubiertas [('Lascar', 6)]
+     pasadas del tramo cubiertas por el K-gemelo: 565 de 2680
+
+====================================================================================================
+505. Efecto de las capas de la referencia (historia y respaldo, fuera del manifiesto) sobre las etiquetas de F26 y DM.
+   Control positivo: la union con capas tiene mas filas que sin capas (se imprime).
+  filas de la referencia: con capas 46710 | sin capas 46673
+  pasadas fuera de R25: 8384 | etiqueta de la tabla distinta sin capas: 0 | de la union: 0
+    []
+
+====================================================================================================
+506. Curva de cenit en R25 contra el OSF (el lector no la calcula). Filas OSF nocturnas, class 1, dentro del radio
+   interno, pareadas a ±120 s con una pasada nuestra evaluable que publica en los dos brazos (via del brazo que decide
+   y K), VRP > 0. Ventana R25 2025-02-15 a 12-31. Spearman razon contra cenit nuestro, nulo de 200 barajados semilla 172.
+   Control positivo: una razon fabricada que crece con el cenit da Spearman positivo.
+  MODIS todas via: n 226 rho +0.055 (p95 del nulo |rho| 0.120) | mediana por tramo de 10°: 0:1.03(n40), 10:0.97(n56), 20:0.99(n56), 30:1.01(n47), 40:1.09(n24), 50:1.01(n3)
+  MODIS todas K: n 226 rho -0.429 (p95 del nulo |rho| 0.131) | mediana por tramo de 10°: 0:0.64(n40), 10:0.62(n56), 20:0.54(n56), 30:0.39(n47), 40:0.33(n24), 50:0.25(n3)
+     volcanes: [('Lascar', 216), ('PlanchonPeteroa', 10)]
+  MODIS >=1 MW via: n 160 rho -0.039 (p95 del nulo |rho| 0.148) | mediana por tramo de 10°: 0:1.04(n33), 10:0.97(n42), 20:0.97(n39), 30:1.01(n33), 40:0.88(n11), 50:1.06(n2)
+  MODIS >=1 MW K: n 160 rho -0.582 (p95 del nulo |rho| 0.138) | mediana por tramo de 10°: 0:0.71(n33), 10:0.63(n42), 20:0.55(n39), 30:0.41(n33), 40:0.24(n11), 50:0.34(n2)
+     volcanes: [('Lascar', 154), ('PlanchonPeteroa', 6)]
+  VIIRS375 todas via: n 1697 rho +0.035 (p95 del nulo |rho| 0.046) | mediana por tramo de 10°: 0:1.00(n226), 10:1.00(n211), 20:1.00(n225), 30:1.00(n269), 40:1.00(n318), 50:1.00(n285), 60:1.00(n163)
+  VIIRS375 todas K: n 1697 rho -0.296 (p95 del nulo |rho| 0.043) | mediana por tramo de 10°: 0:0.86(n226), 10:0.83(n211), 20:0.72(n225), 30:0.65(n269), 40:0.60(n318), 50:0.55(n285), 60:0.57(n163)
+     volcanes: [('Chaiten', 69), ('Copahue', 16), ('Isluga', 378), ('Lascar', 452), ('Lastarria', 290), ('PlanchonPeteroa', 173), ('PuyehueCordonCaulle', 303), ('Villarrica', 16)]
+  VIIRS375 >=1 MW via: n 317 rho +0.081 (p95 del nulo |rho| 0.102) | mediana por tramo de 10°: 0:1.00(n36), 10:1.00(n57), 20:1.00(n56), 30:1.00(n56), 40:1.00(n104), 50:1.01(n5), 60:1.00(n3)
+  VIIRS375 >=1 MW K: n 317 rho -0.547 (p95 del nulo |rho| 0.109) | mediana por tramo de 10°: 0:0.86(n36), 10:0.83(n57), 20:0.69(n56), 30:0.56(n56), 40:0.57(n104), 50:0.50(n5), 60:0.36(n3)
+     volcanes: [('Isluga', 2), ('Lascar', 273), ('PlanchonPeteroa', 14), ('PuyehueCordonCaulle', 28)]
+  VIIRS750 todas via: n 17 rho +0.140 (p95 del nulo |rho| 0.454) | mediana por tramo de 10°: 0:0.97(n2), 10:0.97(n6), 20:0.92(n2), 30:1.00(n4), 40:1.00(n3)
+  VIIRS750 todas K: n 17 rho -0.412 (p95 del nulo |rho| 0.496) | mediana por tramo de 10°: 0:0.75(n2), 10:0.71(n6), 20:0.58(n2), 30:0.50(n4), 40:0.59(n3)
+     volcanes: [('Lascar', 17)]
+  VIIRS750 >=1 MW via: n 17 rho +0.140 (p95 del nulo |rho| 0.454) | mediana por tramo de 10°: 0:0.97(n2), 10:0.97(n6), 20:0.92(n2), 30:1.00(n4), 40:1.00(n3)
+  VIIRS750 >=1 MW K: n 17 rho -0.412 (p95 del nulo |rho| 0.496) | mediana por tramo de 10°: 0:0.75(n2), 10:0.71(n6), 20:0.58(n2), 30:0.50(n4), 40:0.59(n3)
+     volcanes: [('Lascar', 17)]
+  control positivo: Spearman de una razon creciente con el cenit = 1.0
+
+====================================================================================================
+507. Bajo 1 MW del OSF en R25 (el §4.2 manda informarlas; el lector no las calcula). Fila OSF nocturna, class 1,
+   VRP < 1 MW, dentro del radio interno; en 375 con la regla SN por analogia (VRP > 0,05 MW). Publica = el brazo
+   pareado a ±120 s publica. Control: con VRP >= 1 MW el mismo codigo reproduce las protegidas de p1_osf.
+  VIIRS375 piso 0.05 MW brazo K: 1306 de 1354 (96.5 %) | filas sin pasada evaluable 0 | volcanes 8
+  VIIRS375 piso 0.05 MW brazo V: 1324 de 1354 (97.8 %) | filas sin pasada evaluable 0 | volcanes 8
+  VIIRS375 piso 0.05 MW brazo V-cercano: 1332 de 1354 (98.4 %) | filas sin pasada evaluable 0 | volcanes 8
+  VIIRS375 piso 0.00 MW brazo K: 1399 de 1485 (94.2 %) | filas sin pasada evaluable 0 | volcanes 8
+  VIIRS375 piso 0.00 MW brazo V: 1440 de 1485 (97.0 %) | filas sin pasada evaluable 0 | volcanes 8
+  VIIRS375 piso 0.00 MW brazo V-cercano: 1449 de 1485 (97.6 %) | filas sin pasada evaluable 0 | volcanes 8
+  MODIS piso 0.00 MW brazo K: 67 de 79 (84.8 %) | filas sin pasada evaluable 0 | volcanes 2
+  MODIS piso 0.00 MW brazo V: 77 de 79 (97.5 %) | filas sin pasada evaluable 0 | volcanes 2
+  control (>= 1 MW, VIIRS 375, radiante): 317 de 317; p1_osf del lector: protegidas 317 pub_via(radiante) 317
+
+====================================================================================================
+508. Noche del operador en F26-V: noches-volcan, cuantas tienen todas las pasadas evaluables, cuantas tienen una
+   pasada NOAA-21 y cuantas serian limpias sin exigir NOAA-21. Control: la funcion del lector reproduce lectura.json.
+  VIIRS375: noches-volcan 627 | todas evaluables 530 | con alguna pasada NOAA-21 627 | etiquetas de NOAA-21 evaluables {'sin_info': 868} | limpias sin contar NOAA-21 23
+     lector noche_operador: {'V-cercano': {'protegidas_con_publicacion': [26, 26], 'limpias_calladas': [0, 0]}, 'K': {'protegidas_con_publicacion': [26, 26], 'limpias_calladas': [0, 0]}} | lectura.json: {'V-cercano': {'protegidas_con_publicacion': [26, 26], 'limpias_calladas': [0, 0]}, 'K': {'protegidas_con_publicacion': [26, 26], 'limpias_calladas': [0, 0]}}
+  VIIRS750: noches-volcan 627 | todas evaluables 627 | con alguna pasada NOAA-21 627 | etiquetas de NOAA-21 evaluables {'sin_info': 889} | limpias sin contar NOAA-21 46
+     lector noche_operador: {'V': {'protegidas_con_publicacion': [30, 30], 'limpias_calladas': [0, 0]}, 'K': {'protegidas_con_publicacion': [30, 30], 'limpias_calladas': [0, 0]}} | lectura.json: {'V': {'protegidas_con_publicacion': [30, 30], 'limpias_calladas': [0, 0]}, 'K': {'protegidas_con_publicacion': [30, 30], 'limpias_calladas': [0, 0]}}
+
+====================================================================================================
+509. Volcanes del nombre de la fila 6 de VIIRS 375: protegidas de la tabla en F26-V por volcan y protegidas OSF por
+   volcan en R25. Control: nombre_fila6 del lector reproduce el nombre de la lectura.
+  F26-V protegidas (tabla) por volcan: {'Lascar': 26}
+  R25 OSF protegidas por volcan: {'Isluga': 2, 'Lascar': 273, 'PlanchonPeteroa': 14, 'PuyehueCordonCaulle': 28}
+  nombre_fila6: NO SE CONTRADICE FUERA DE MUESTRA (alertas: Isluga, Lascar, PlanchonPeteroa, PuyehueCordonCaulle; silencio: Chaiten, Copahue, Isluga, Lascar, Lastarria, Llaima, NevadosDeChillan, PlanchonPeteroa, PuyehueCordonCaulle, Tupungatito, Villarrica; F26-V: NOAA-20 y Suomi NPP oblicuo)
+
+====================================================================================================
+511. Control «el nulo de runner puede fallar»: se rompe el K-gemelo a proposito y se mira si el control cambia.
+   Mutacion A: KG := la via (radiante). Mutacion B: KG publica todo. Si «puede fallar» sigue True y la mediana d
+   del placebo no cambia, el control no depende del K-gemelo.
+  sin mutar: {'estado': 'OK', 'B': 0, 'B_contra_placebo': 0, 'm_kgemelo': 'NEUTRO', 'mediana_d_placebo': -0.07918124604762478}
+  mutacion «KG = via»: estado ROJO: B=34, el nulo puede fallar=True | B 34 | B contra placebo 34 | mediana d placebo -0.07918124604762478
+  mutacion «KG publica todo con magnitud de K»: estado ROJO: B=294, el nulo puede fallar=True | B 294 | B contra placebo 294 | mediana d placebo -0.07918124604762478
+  -log10(1,2) = -0.0792
+  pares de m del placebo en todas las filas evaluables: 353; con K bajo MIROVA/1,2: 265; mediana d -0.07918124604762478
+
+====================================================================================================
+513. M de MODIS en F26-M (brazo radiante) y del placebo K x 1,2: criterio d y d′ (D-28). Control: la regla de la
+   via es la de lectura.json.
+  V: n 11 regla(d) MEJORA IC d [-0.4833648472808838, -0.20442834922029154] mediana d -0.25986582641837036 | d′: {'g_hat_log': 0.27905309617563284, 'g_hat_factor': 1.901310717039322, 'g_hat_ic95': [0.22892105882831512, 0.5829320051808058], 'g_hat_por_volcan': {'Lascar': {'n': 11, 'log': 0.27905309617563284, 'factor': 1.901310717039322}}, 'regla_dprima': 'NEUTRO', 'dprima_mediana': -0.033979756048, 'ic95_dprima': [-0.174540231995, 0.0], 'dprima_max_abs': 0.376347303748}
+     volcanes de los pares: {'Lascar': 11}
+  placebo: n 11 regla(d) MEJORA IC d [-0.0791812460476248, -0.07918124604762478] mediana d -0.07918124604762478 | d′: {'g_hat_log': 0.07918124604762478, 'g_hat_factor': 1.2, 'g_hat_ic95': [0.07918124604762478, 0.07918124604762482], 'g_hat_por_volcan': {'Lascar': {'n': 11, 'log': 0.07918124604762478, 'factor': 1.2}}, 'regla_dprima': 'NEUTRO', 'dprima_mediana': 0.0, 'ic95_dprima': [-0.0, 0.0], 'dprima_max_abs': 0.0}
+     volcanes de los pares: {'Lascar': 11}
+  lectura.json MODIS m: MEJORA m_n 11
+  control placebo de la lectura (MODIS): {'m_regla': 'MEJORA', 'mejora_d28': False, 'estado': 'OK'}
+
+====================================================================================================
+514. Alertas de la tabla sin pasada nuestra (lista de C-cobertura): ventana del lector y recorte a los tramos.
+   Control: el total con la ventana del lector reproduce la suma de lectura.json.
+  ventana del lector: ('2026-02-01', '2026-10-16') | total sin pasada: 1094 | suma en lectura.json: 1094
+  dentro de F26 o DM: 5 | protegidas 0 | lista: [('Lastarria', 'VIIRS375', '2026-03-10 06:36', False, 0.12), ('PuyehueCordonCaulle', 'VIIRS375', '2026-03-10 06:42', False, 0.27), ('Tupungatito', 'VIIRS375', '2026-02-14 06:06', False, 0.08), ('Tupungatito', 'VIIRS375', '2026-02-17 06:30', False, 0.1), ('Tupungatito', 'VIIRS375', '2026-02-20 05:54', False, 0.17)]
+  dentro de F26 solamente: 5 | protegidas 0 [('Lastarria', 'VIIRS375', '2026-03-10 06:36', False, 0.12), ('PuyehueCordonCaulle', 'VIIRS375', '2026-03-10 06:42', False, 0.27), ('Tupungatito', 'VIIRS375', '2026-02-14 06:06', False, 0.08), ('Tupungatito', 'VIIRS375', '2026-02-17 06:30', False, 0.1), ('Tupungatito', 'VIIRS375', '2026-02-20 05:54', False, 0.17)]
+  fuera de todo tramo (abril a septiembre, etc.): 1089 | meses {'2026-04': 213, '2026-05': 240, '2026-06': 211, '2026-07': 131, '2026-08': 122, '2026-09': 165, '2026-10': 7}
+
+====================================================================================================
+517. Cifras del §7 con el codigo y el K de la lectura (dispatch a7a6ae360, K e7cfbaf54): protegidas, bajo 1 MW y
+   bloques noche-volcan donde K yerra (bajo1 perdida o negativo limpio publicado). El §7 sellado dice: protegidas
+   9 / 26 / 30; bajo 1 MW 5 / 158 / 25; bloques donde K yerra 6 (+1 de la protegida perdida) / 48 / 18.

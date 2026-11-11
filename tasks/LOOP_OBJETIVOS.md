@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 02:15 UTC (S179): auditoría S179 cerrada, síntesis en `docs/AUDIT_S179.md`
+- 61 veredictos de verificador: 41 confirmados, 17 en parte, 1 sospecha, 2 refutados (DEC-14 y DEC-17 de D, ambos a favor de lo decidido). 3.577.850 tokens en 8 agentes, todos `high` medido en transcripto; ninguno abrió el plan. Control ciego: A 2 de 2, B 1 de 3, C 3 de 3, D 3 de 4.
+- Para Nicolás antes de «mergea #974»: regla de posición de VIIRS 375 (radiante en el código, cercano en la retrospectiva; 0 de 44 perdidas con la tabla sola, 5 de 72 con el OCR, las 5 dudosas), cinco condiciones de §5 sin hacer, rebasar y re-correr CI. Antes del ~11-20: el plazo de 29 protegidas se gasta en Chillán (MODIS y VIIRS). #981 no ejecutable como está. Guardia K de VIIRS: 1 noche verde (11-11 00:12 UTC).
+
 ### 2026-11-11 02:10 UTC (S179): auditoría, los cuatro auditores y tres verificadores terminados; falta VD
 - B (501 mil tokens): 16 hallazgos (451 a 466). D (581 mil): 14 (551 a 564); D escribió un rato en la instantánea compartida y lo corrigió: comprobé los 1.247 archivos contra los blobs de 438a60a1e, 0 distintos.
 - VA: 9 de 9 confirmadas (6 con gravedad rebajada). VC: 21, 0 refutadas (6 en parte; las cifras del sorteo y del OSF bajo 1 MW eran del brazo radiante). VB: 15, 0 refutadas (7 en parte); VB-01 nuevo: antes del 11-11 la guardia K de VIIRS sólo tiene corridas en falla, la primera programada verde es la de las 00:12 UTC del 11-11.

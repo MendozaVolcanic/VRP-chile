@@ -1,0 +1,67 @@
+== BASE (datos de 438a60a1e, sin tocar) ==
+{
+ "veredicto": "VERDE",
+ "fase": "vigilando",
+ "encendido": "2026-11-02 20:11:43",
+ "primera_observacion_via": "2026-11-02 01:15",
+ "ventana": [
+  "2026-10-19",
+  "2026-11-10"
+ ],
+ "avisos": [],
+ "nulo_pares": 167,
+ "nulo_distintas": 0,
+ "nulo_sin_medir": false,
+ "guardia_desde": "2026-10-26",
+ "guardia_hasta": "2026-11-09",
+ "duracion": {
+  "protegidas_vistas_en_guardia": 11,
+  "objetivo": 29,
+  "encendido": "2026-11-02 20:11:43",
+  "vence": "2027-03-02",
+  "vence_utc": "2027-03-02 20:11:43",
+  "cumplida": false
+ },
+ "n_pasadas_alerta": 26,
+ "n_borde_del_encendido": 0,
+ "n_retro_guardia_publica_prod_calla": 0
+}
+guardado por el workflow en 438a60a1e: veredicto VERDE, encendido 2026-11-02 20:11:43, nulo 167 pares (corrida 2026-11-10T04:19:09Z)
+CONTROL BASE: OK
+
+== SIMULACION del paso MODIS del plan (regla A): 747 records K de MODIS del 2026-10-01 al 11-02 marcados como via (antes habia 212 de la via desde el 2026-10-01) ==
+{
+ "veredicto": "VIGILANCIA_CIEGA",
+ "fase": "vigilando",
+ "encendido": "2026-11-02 20:11:43",
+ "primera_observacion_via": "2026-10-01 01:45",
+ "ventana": [
+  "2026-10-19",
+  "2026-11-10"
+ ],
+ "avisos": [
+  "el nulo de la guardia no tiene pasadas pareadas en los 14 días previos al encendido (o a hoy): no se midió que guardia y producción publiquen lo mismo"
+ ],
+ "nulo_pares": 0,
+ "nulo_distintas": 0,
+ "nulo_sin_medir": true,
+ "guardia_desde": "2026-10-26",
+ "guardia_hasta": "2026-11-09",
+ "duracion": {
+  "protegidas_vistas_en_guardia": 11,
+  "objetivo": 29,
+  "encendido": "2026-11-02 20:11:43",
+  "vence": "2027-03-02",
+  "vence_utc": "2027-03-02 20:11:43",
+  "cumplida": false
+ },
+ "n_pasadas_alerta": 26,
+ "n_borde_del_encendido": 0,
+ "n_retro_guardia_publica_prod_calla": 0
+}
+
+LECTURA (solo lo que depende de la marca):
+  encendido: base 2026-11-02 20:11:43 -> simulacion 2026-11-02 20:11:43
+  nulo: base 167 pares -> simulacion 0 pares (sin_medir=True)
+  veredicto: base VERDE -> simulacion VIGILANCIA_CIEGA
+  avisos nuevos: ['el nulo de la guardia no tiene pasadas pareadas en los 14 días previos al encendido (o a hoy): no se midió que guardia y producción publiquen lo mismo']

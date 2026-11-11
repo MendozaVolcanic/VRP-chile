@@ -1,0 +1,69 @@
+== tags de despacho y commit
+s172-retro-d1 -> a7a6ae360
+s172-retro-d2 -> a7a6ae360
+s172-retro-d3 -> a7a6ae360
+s172-retro-d4 -> a7a6ae360
+== pre-registro: sha256 del blob en el sello, en loop/activo 0472cd95e y en origin/loop/activo
+s173-prereg-retro-sellado b58a225404c80ae0
+0472cd95e b58a225404c80ae0
+origin/loop/activo b58a225404c80ae0
+== mensaje del tag del sello (el §11 pide que traiga el sha256 LF del documento)
+
+Pre-registro retro del paquete sellado por Nicolas 2026-11-02 17:12 UTC
+== pre-registro en el arbol de la ref de lectura s178-retro-lectura:
+0
+== lector: sha256 LF en la ref de lectura y en main 438a60a1e
+s178-retro-lectura de9ec59ccca8cc87
+438a60a1e de9ec59ccca8cc87
+== codigo: tag de despacho a7a6ae360 contra main 438a60a1e (pipeline/, run_pipeline.py, volcanoes.yaml)
+ pipeline/fetch.py                      | 83 ++++++++++++++++++++++++++++++----
+ pipeline/profiles/guardia_k_viirs.yaml | 45 ++++++++++++++++++
+ 2 files changed, 120 insertions(+), 8 deletions(-)
+== codigo: a7a6ae360 contra la punta de #974 (bbbe2068d) y de #983 (e68819484)
+-- bbbe2068d
+ pipeline/fetch.py                             | 83 ++++++++++++++++++++++++---
+ pipeline/profiles/_s146_ab_control.yaml       |  5 ++
+ pipeline/profiles/experimental.yaml           |  6 ++
+ pipeline/profiles/experimental_ndc_focus.yaml |  5 ++
+ pipeline/profiles/guardia_k_modis.yaml        |  5 ++
+ pipeline/profiles/guardia_k_viirs.yaml        | 45 +++++++++++++++
+ pipeline/profiles/mirova_equivalent.yaml      | 15 +++++
+ 7 files changed, 156 insertions(+), 8 deletions(-)
+-- e68819484
+ pipeline/fetch.py                             | 83 ++++++++++++++++++++++++---
+ pipeline/profiles/_s146_ab_control.yaml       | 10 ++++
+ pipeline/profiles/experimental.yaml           | 12 ++++
+ pipeline/profiles/experimental_ndc_focus.yaml | 10 ++++
+ pipeline/profiles/guardia_k_modis.yaml        | 10 ++++
+ pipeline/profiles/guardia_k_viirs.yaml        | 45 +++++++++++++++
+ pipeline/profiles/mirova_equivalent.yaml      | 30 ++++++++++
+ 7 files changed, 192 insertions(+), 8 deletions(-)
+== flags de MODIS en produccion (438a60a1e) que el perfil de la retrospectiva fija
+38:  enable_modis_codigo_mirova: true
+151:  enable_modis_geo_mxd03: false          # posicion por pixel del MxD03 en vez de _interp_geo (A61 H2, MOD-B)
+152:  enable_modis_crater_sin_dato: false    # crater sin posicion en el granulo -> sin record, no negativo (A61 H1, VA61-01)
+153:  enable_modis_dist_desde_crater: false  # dist_km del pixel anomalo y etiqueta summit/far desde el crater (A61 H5)
+287:  enable_test1_path: false
+290:  enable_tests_23_prose_branch: true
+597:enable_modis_b22_primary: true
+== roi_v750 de los 11 Tier A en grillas_mirova.yaml (tag, main, #983)
+-- a7a6ae360: Chaiten=def NevadosDeChillan=def Copahue=def Isluga=def Lascar=def Lastarria=def Llaima=def PlanchonPeteroa=def PuyehueCordonCaulle=sens Tupungatito=sens Villarrica=def 
+-- 438a60a1e: Chaiten=def NevadosDeChillan=def Copahue=def Isluga=def Lascar=def Lastarria=def Llaima=def PlanchonPeteroa=def PuyehueCordonCaulle=sens Tupungatito=sens Villarrica=def 
+-- e68819484: Chaiten=def NevadosDeChillan=def Copahue=def Isluga=def Lascar=def Lastarria=def Llaima=def PlanchonPeteroa=def PuyehueCordonCaulle=sens Tupungatito=sens Villarrica=def 
+== frontend y etiquetado: tag de despacho contra main 438a60a1e
+ frontend/cambio_detector.js  | 176 ++++++++++++++++++++++++++++++-------------
+ frontend/index.html          |   8 +-
+ scripts/auto_audit_weekly.py | 171 +++++++++++++++++++++++++++--------------
+ scripts/clase_mirova.py      |  79 +++++++++++++------
+ 4 files changed, 297 insertions(+), 137 deletions(-)
+== orden de los commits de S178 (hora local -03)
+2bfc9164b 2026-11-10 03:02:04 | S178 P1: excepciones de C-K escritas antes de leer F26 (ninguna)
+254cefb9c 2026-11-10 03:14:44 | S178 P1: C-montaje no se puede correr tal como quedo sellado; propuesta para Nicolas
+5a3f21faa 2026-11-10 04:29:01 | S178 P1: la caja B4 de VIIRS 750 es una por volcan en el lector de la retrospectiva
+c592ac2d2 2026-11-10 05:04:36 | S178 P1: declaracion de C-montaje (opcion A aprobada por Nicolas), antes de correr
+6a07f8ea2 2026-11-10 05:11:22 | S178 P1: comparadores de C-montaje por A/B y tags de origen (opcion A de Nicolas)
+caf2b24e3 2026-11-10 05:35:51 | S178 P1: VIIRS 375 se compara contra la banda de triangulacion del port (opcion 1 de Nicolas, post hoc)
+cd48bc133 2026-11-10 05:38:47 | S178 P1: el OSF fuera de git entra al manifiesto solo si su sha256 en bruto es el del pre-registro
+ba5ef81c5 2026-11-10 05:39:24 | S178 P1: ref de lectura de la retrospectiva = s172-retro-d2 + lector de #979 (cd48bc133) + referencias congeladas
+f8304c161 2026-11-10 05:39:55 | S178 P1: manifiesto del candado y entradas de la lectura, antes de leer
+ff8a39972 2026-11-10 05:51:55 | S178 P1: lectura de la retrospectiva con candado (D2, D3, D4)

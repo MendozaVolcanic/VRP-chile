@@ -1,0 +1,67 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+Encendido: 2026-11-02 20:11:43 | prod 551 | guardia 359
+
+C0 sin alterar (debe igualar 02_vigilancia_en_la_base.txt: VERDE, vistas 11, sobrepub 1/152)
+C0: veredicto=VERDE | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=11 cumplida=False avisos=0
+
+C1 CONTROL POSITIVO: Chillan 2026-11-08 08:00 (22,46 MW; la guardia K publica). Produccion (la via) calla.
+C1: veredicto=REVERSION_CANDIDATA | reversion=1 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=11 cumplida=False avisos=0
+
+M1: Chillan 2026-11-07 07:25 (9,23 MW; la guardia K NO publica). Produccion (la via) calla tambien.
+M1: veredicto=VERDE | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=11 cumplida=False avisos=0
+
+M2: Chillan 2026-11-08 08:00: la via calla Y la guardia no tiene record de esa pasada (job de la guardia caido esa noche).
+M2: veredicto=VERDE | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=10 cumplida=False avisos=0
+
+M3: la guardia de Chillan sin records desde el 2026-11-08 (3 noches) y la via calla el 2026-11-08 08:00 y el 2026-11-09 08:40.
+M3: veredicto=VERDE | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=6 cumplida=False avisos=0
+
+M4: produccion SIN record de Chillan 2026-11-08 08:00 (descarte de borde) y la guardia publica.
+M4: veredicto=INVESTIGAR | reversion=0 fuera_de_plazo=0 sin_record=1 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=11 cumplida=False avisos=0
+
+M5: plazo. Objetivo bajado a 5 protegidas (simula que ya se vieron 29); la via calla Chillan 2026-11-08 08:00 (la 8.a vista).
+M5: veredicto=CANDIDATA_FUERA_DE_PLAZO | reversion=0 fuera_de_plazo=1 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=11 cumplida=True avisos=0
+
+M6: la via cae a K en Chillan 2026-11-08 08:00 y calla; la guardia publica.
+M6: veredicto=INVESTIGAR | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=1 muy_bajo=0/0 sobrepub=1/152 vistas=10 cumplida=False avisos=0
+
+M7: TODAS las protegidas posteriores al encendido calladas por la via, pero solo donde la guardia K no publica (3 pasadas).
+M7: veredicto=VERDE | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=11 cumplida=False avisos=0
+
+M8: la guardia de TODOS los volcanes sin records desde el 2026-11-08 (corte de NASA de 3 dias) y la via calla Chillan 2026-11-09 08:40.
+M8: veredicto=VERDE | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=0/109 vistas=6 cumplida=False avisos=0
+
+M9: como M8 pero leido 4 dias despues (hoy = 2026-11-12): la frescura de la guardia ya pasa de 3 dias.
+M9: veredicto=VIGILANCIA_CIEGA | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=0/109 vistas=6 cumplida=False avisos=11
+     aviso: la guardia (K) de Lascar en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+     aviso: la guardia (K) de Lastarria en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+     aviso: la guardia (K) de Isluga en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+     aviso: la guardia (K) de Llaima en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+     aviso: la guardia (K) de Villarrica en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+     aviso: la guardia (K) de Chaiten en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+     aviso: la guardia (K) de Tupungatito en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+     aviso: la guardia (K) de Copahue en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+     aviso: la guardia (K) de PlanchonPeteroa en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+     aviso: la guardia (K) de PuyehueCordonCaulle en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+     aviso: la guardia (K) de NevadosDeChillan en MODIS no produce hace 5 días (último dato 2026-11-07): revisar guardia-k-modis.yml; mientras tanto ese volcán y sensor están ciegos
+
+M10: produccion SIN record de Chillan 2026-11-09 02:35 (7,2 MW, cenit 64,52; la guardia K tiene record y NO publica). Es el descarte de borde 0,5 grados mas alla.
+M10: veredicto=VERDE | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=11 cumplida=False avisos=0
+
+M11: produccion de Villarrica deja de escribir MODIS desde el 2026-11-06 (la via devuelve None en todas sus pasadas); hoy = 2026-11-10.
+M11: veredicto=VIGILANCIA_CIEGA | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/143 vistas=11 cumplida=False avisos=1
+     aviso: producción de Villarrica en MODIS no produce hace 5 días (último dato 2026-11-05): revisar nrt.yml; mientras tanto ese volcán y sensor están ciegos
+
+M12: en Villarrica la via cae a K (sin marca) desde el 2026-11-05; hoy = 2026-11-10.
+M12: veredicto=VIGILANCIA_CIEGA | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/141 vistas=11 cumplida=False avisos=1
+     aviso: producción de Villarrica escribe MODIS hasta el 2026-11-10 y la vía sólo hasta el 2026-11-04: en Villarrica la vía dejó de correr (o cae a K) y lo que se compara con la guardia es K contra K
+
+M13: la referencia de MIROVA sin filas MODIS desde el 2026-11-01 (scraper sin MODIS) y la via calla Chillan 2026-11-08 08:00.
+M13: veredicto=VIGILANCIA_CIEGA | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=0 cumplida=False avisos=1
+     aviso: la referencia de MIROVA no registra MODIS hace 10 días (última fila MODIS 2026-10-31): es el scraper de Mirova-v1 o la tabla de MIROVA, no los volcanes
+M13b (misma referencia, leida el 2026-11-12): veredicto=VIGILANCIA_CIEGA | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=0 cumplida=False avisos=1
+     aviso: la referencia de MIROVA no registra MODIS hace 12 días (última fila MODIS 2026-10-31): es el scraper de Mirova-v1 o la tabla de MIROVA, no los volcanes
+
+M14: reemplazo de la historia (plan #981): TODOS los records MODIS de produccion anteriores al encendido pasan a ser de la via (via=True), sin cambiar lo que publican.
+M14: veredicto=VIGILANCIA_CIEGA | reversion=0 fuera_de_plazo=0 sin_record=0 calladas_por_k=0 muy_bajo=0/0 sobrepub=1/152 vistas=11 cumplida=False avisos=1
+     aviso: el nulo de la guardia no tiene pasadas pareadas en los 14 días previos al encendido (o a hoy): no se midió que guardia y producción publiquen lo mismo

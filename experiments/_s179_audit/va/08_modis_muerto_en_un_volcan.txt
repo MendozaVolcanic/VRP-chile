@@ -1,0 +1,16 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+== SIN borrar: records borrados 0
+   healthcheck (48 h, por volcán, cualquier sensor): sin stale
+   vigilar_plataformas (72 h, por plataforma, suma 11): ('ok', [])
+   audit semanal cobertura_de_ventana: sin aviso
+   vigilancia guardia MODIS avisos_produccion (Lascar): sin aviso
+== borra MODIS de Lascar desde 11-05: records borrados 12
+   healthcheck (48 h, por volcán, cualquier sensor): sin stale
+   vigilar_plataformas (72 h, por plataforma, suma 11): ('ok', [])
+   audit semanal cobertura_de_ventana: sin aviso
+   vigilancia guardia MODIS avisos_produccion (Lascar): ['producción de Lascar en MODIS no produce hace 6 días (último dato 2026-11-04): revisar nrt.yml; mientras tanto ese volcán y sensor están ciegos']
+== CONTROL borra TODO (todos los volcanes y sensores) desde 11-05: records borrados 510
+   healthcheck (48 h, por volcán, cualquier sensor): [('Lascar', '2026-11-04 08:40'), ('PuyehueCordonCaulle', '2026-11-04 08:45'), ('Lastarria', '2026-11-04 08:45'), ('Isluga', '2026-11-04 08:40'), ('Tupungatito', '2026-11-04 08:45'), ('PlanchonPeteroa', '2026-11-04 08:45'), ('Chaiten', '2026-11-04 08:50'), ('Villarrica', '2026-11-04 08:45'), ('NevadosDeChillan', '2026-11-04 08:45'), ('Llaima', '2026-11-04 08:45'), ('Copahue', '2026-11-04 08:45')]
+   vigilar_plataformas (72 h, por plataforma, suma 11): ('caida_general', [])
+   audit semanal cobertura_de_ventana: ['6 días sin datos nuestros al final de la ventana (último dato 2026-11-04): probable apagón del NRT en curso, revisar nrt-healthcheck y el token']
+   vigilancia guardia MODIS avisos_produccion (Lascar): ['producción de Lascar en MODIS no produce hace 6 días (último dato 2026-11-04): revisar nrt.yml; mientras tanto ese volcán y sensor están ciegos']

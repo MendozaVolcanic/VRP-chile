@@ -1,0 +1,8 @@
+# Auditoría S179 frente B. Simulación de merge sin tocar el árbol ni escribir objetos (git merge-tree en modo de tres árboles).
+# Pregunta 1 (¿vería algo roto?): un PR que choca con main deja marcas "+<<<<<<<" en la salida. Control: #974 y #983 tienen que chocar al menos en la ficha, porque main cambió su línea de versión (v1.22) después de las dos ramas.
+# Pregunta 2 (¿instrumento muerto?): la salida lista también los archivos "changed in both" que mergean limpio; una salida vacía sería SIN DATO.
+cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"
+export MSYS_NO_PATHCONV=1
+for r in bbbe2068d e68819484; do mb=$(git merge-base 438a60a1e $r); git merge-tree $mb 438a60a1e $r > salida_$r.txt; grep -c "^+<<<<<<<" salida_$r.txt; done
+# Resultado del 2026-11-10: 2 marcas en cada uno, las dos en docs/FICHA_SDA_VRP_CHILE.md.
+# Archivos cambiados en los dos lados que mergean limpio: #974: tests/test_guardia_k_modis_s172.py, tests/test_guardia_k_viirs_s176.py, tests/test_vigilancia_guardia_viirs_s176.py; #983: tests/test_vigilancia_guardia_viirs_s176.py.

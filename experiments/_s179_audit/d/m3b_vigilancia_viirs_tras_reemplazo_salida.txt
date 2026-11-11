@@ -1,0 +1,95 @@
+== S0 base ==
+{
+ "veredicto": "VERDE",
+ "fase": "antes_del_encendido",
+ "encendido_utc": null,
+ "primera_observacion_via": null,
+ "flag_produccion": false,
+ "ventana": [
+  "2026-10-27",
+  "2026-11-10"
+ ],
+ "avisos": [],
+ "nulo_pares": 223,
+ "nulo_distintas": 0,
+ "nulo_sin_medir": false,
+ "guardia_desde": "2026-11-03",
+ "guardia_hasta": "2026-11-09",
+ "duracion": {
+  "protegidas_vistas_en_guardia": 0,
+  "objetivo": 29,
+  "encendido": null,
+  "vence": null,
+  "vence_utc": null,
+  "cumplida": false
+ },
+ "n_pasadas_alerta": 103
+}
+guardado por el workflow en 438a60a1e: VERDE, fase antes_del_encendido, encendido None, nulo 223 pares (corrida 2026-11-10T04:28:23Z)
+CONTROL S0: OK
+
+== S1 solo B1 (encendido ficticio 2026-11-09 12:00 UTC; 31 records VIIRS 375 posteriores marcados como via) ==
+{
+ "veredicto": "VERDE",
+ "fase": "vigilando",
+ "encendido_utc": "2026-11-09 12:00:00",
+ "primera_observacion_via": "2026-11-10 04:30",
+ "flag_produccion": true,
+ "ventana": [
+  "2026-10-26",
+  "2026-11-10"
+ ],
+ "avisos": [],
+ "nulo_pares": 223,
+ "nulo_distintas": 0,
+ "nulo_sin_medir": false,
+ "guardia_desde": "2026-11-03",
+ "guardia_hasta": "2026-11-09",
+ "duracion": {
+  "protegidas_vistas_en_guardia": 0,
+  "objetivo": 29,
+  "encendido": "2026-11-09 12:00:00",
+  "vence": "2027-03-09",
+  "vence_utc": "2027-03-09 12:00:00",
+  "cumplida": false
+ },
+ "n_pasadas_alerta": 107
+}
+CONTROL S1 (encendido ficticio reconocido y nulo con pares): OK
+
+== S2 B1 mas reemplazo de la historia de VIIRS 375 (1718 records anteriores al encendido marcados como via con processed_utc 2026-11-08T18:04:23Z; 31 posteriores) ==
+{
+ "veredicto": "VIGILANCIA_CIEGA",
+ "fase": "vigilando",
+ "encendido_utc": "2026-11-08 18:04:23",
+ "primera_observacion_via": "2026-10-01 04:36",
+ "flag_produccion": true,
+ "ventana": [
+  "2026-10-25",
+  "2026-11-10"
+ ],
+ "avisos": [
+  "el nulo de la guardia no tiene pasadas pareadas en los 14 días previos al encendido (o a hoy): no se midió que guardia y producción publiquen lo mismo"
+ ],
+ "nulo_pares": 0,
+ "nulo_distintas": 0,
+ "nulo_sin_medir": true,
+ "guardia_desde": "2026-11-03",
+ "guardia_hasta": "2026-11-09",
+ "duracion": {
+  "protegidas_vistas_en_guardia": 5,
+  "objetivo": 29,
+  "encendido": "2026-11-08 18:04:23",
+  "vence": "2027-03-08",
+  "vence_utc": "2027-03-08 18:04:23",
+  "cumplida": false
+ },
+ "n_pasadas_alerta": 119
+}
+
+LECTURA (solo marca y processed_utc):
+  encendido que informa la vigilancia: S1 2026-11-09 12:00:00 -> S2 2026-11-08 18:04:23
+  plazo de 120 dias, vence: S1 2027-03-09 12:00:00 -> S2 2027-03-08 18:04:23
+  nulo: S1 223 pares -> S2 0 pares (sin_medir=True)
+  veredicto: S1 VERDE -> S2 VIGILANCIA_CIEGA
+  avisos nuevos en S2: ['el nulo de la guardia no tiene pasadas pareadas en los 14 días previos al encendido (o a hoy): no se midió que guardia y producción publiquen lo mismo']
