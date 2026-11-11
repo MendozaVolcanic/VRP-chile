@@ -495,7 +495,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # S162 V750-A: vía «código MIROVA» (pipeline/mirova_v750_codigo.py). POR QUÉ: medido en S159 y
     # V750-C, para callar donde MIROVA calla y medir lo que mide hay que ver el volcán como lo ve
     # MIROVA: interpolado a su grilla, con su detector, su fondo y su suma; las piezas sueltas sobre K
-    # no lo logran. Con el flag APAGADO (hoy) este bloque no corre y el procesador es el de siempre.
+    # no lo logran. Encendido en producción desde B2 (#983, S180); con el flag apagado (guardia K) no corre.
     # Con el flag encendido y un volcán sin grilla de MIROVA, sigue K y el record lo dice
     # (`via_codigo_mirova: "sin_grilla"`), para que nadie lea K creyendo que es la vía (A118).
     # El volcán se reconoce por sus coordenadas de volcanoes.yaml, que run_pipeline ya pasa (así no se agrega un
