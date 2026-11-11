@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-11 09:28 UTC (S180): apertura; #974 con CI verde, guardia 1 de 3; B2 al día con B1
+- Verificado: `loop/activo` en `4830f7c53` (igual al remoto); main `0965a98ae` con su CI verde (run 42992578237). #974 punta `6ebd35abf`, CI verde (run 42992700877), CLEAN, todavía borrador; cuerpo del PR al día. Guardia K de VIIRS: **1 de 3** (run 42929475700, 11-11 00:12 UTC); las dos que faltan son las del cron de la noche del 11-11 y del 11-12, así que el encendido no toca antes del 11-13. Disco: C: 5,1 GB libres, D: 20 GB.
+- **#983 (B2)**: B1 nuevo integrado en la rama (`c0fa918f0`, worktree `D:\vrp-trabajo\worktrees\s178-b2`). Conflictos sólo de numeración: B1 queda ficha v1.23, B2 pasa a v1.24 «después de la v1.23»; `CLAUDE.md` y `docs/MISSION.md` citan cada una la suya. 170 pruebas de vías, guards, citas y vigilancia pasan en local; CI y verificador limpio Fable 5.2 corriendo.
+- Issues: #968 y #969 envejecidos (vigilancias de la guardia VERDE y sin avisos en main, 11-11 02:28 UTC); cerrarlos lo bloqueó el clasificador, espera el visto bueno de Nicolás. #915 y #936 quedan superados por #973 (ventana móvil de 60 días), cuyo fuera de banda es todo VIIRS bajo K (recall V750 73,3 %, n=15; magnitud de Chillán 0,58× y Tupungatito 0,37× en V375) y MODIS ya no se juzga (7 noches de la vía, mínimo 15).
+
 ### 2026-11-11 09:13 UTC (S179): cierre por contexto
 - Nicolás: «sí cierra y abre tú misma la siguiente». Traspaso en `tasks/BLOQUE_ARRANQUE_S180.md`. Estado fijado con el CI de #974 (punta `6ebd35abf`) y el de main tras #985 todavía corriendo. #974 sigue en borrador; guardia K de VIIRS 1 de 3; #983 DIRTY.
 
