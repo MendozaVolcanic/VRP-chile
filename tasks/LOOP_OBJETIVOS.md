@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-11-11 09:15 UTC (S179): cierre por contexto
+### 2026-11-11 09:13 UTC (S179): cierre por contexto
 - Nicolás: «sí cierra y abre tú misma la siguiente». Traspaso en `tasks/BLOQUE_ARRANQUE_S180.md`. Estado fijado con el CI de #974 (punta `6ebd35abf`) y el de main tras #985 todavía corriendo. #974 sigue en borrador; guardia K de VIIRS 1 de 3; #983 DIRTY.
 
 ### 2026-11-11 09:08 UTC (S179): #985 mergeado; main traído a la rama de B1
