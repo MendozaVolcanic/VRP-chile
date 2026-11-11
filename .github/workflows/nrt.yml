@@ -373,7 +373,10 @@ jobs:
       # S173 (hallazgo 209, V2-02): con la via «codigo MIROVA» de MODIS encendida, una excepcion de la via en un
       # granulo no cae a K; run_pipeline la atrapa, imprime `ERROR processing <archivo>` y sigue, y el job saldria verde
       # con esa pasada sin record. Este paso lee pipeline.log y deja el job rojo si un granulo MODIS (MOD021KM o
-      # MYD021KM) termino en error. Los errores de VIIRS se informan y no hacen fallar (B no cambia VIIRS). Va DESPUES
+      # MYD021KM) termino en error. S179 (regla de VIIRS §5, B1): tambien si un granulo VIIRS 375 o 750 termino en error y
+      # la via de ese sensor esta encendida en produccion (el revisor lee el flag efectivo de pipeline.profile; los
+      # errores de un sensor con la via apagada se informan y no hacen fallar). Texto anterior (S173): «Los errores de
+      # VIIRS se informan y no hacen fallar (B no cambia VIIRS).» Va DESPUES
       # del commit, como «Revisar que salio K de MODIS» de guardia-k-modis.yml, para no perder los records buenos del
       # dia por un granulo malo, y despues del paso NASA_DOWN, que asi no lo confunde con una caida de NASA. Corre si el
       # paso de mirova_equivalent corrio (con exito o con falla); no corre si fue saltado ni si cancelaron la corrida.
