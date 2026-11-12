@@ -569,6 +569,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-12 22:02 UTC (S181): paper, mazos y ficha actualizados por el cambio de método; corrección de la referencia
+- Pedido de Nicolás: «avanza con todo lo que falte, recuerda que hay que actualizar las presentaciones y el paper».
+- **Paper** (repo privado `vrp-chile-paper`; política de Volcanica: la prosa la escribe Nicolás, no se tocó):
+  - `numbers.json` y `TABLAS.md` regenerados con `paper_numbers.py --tests` sobre `21ea8166b`;
+  - `revisiones/REVISION_S181.md`, con 42 pasajes (P1 a P42) que el cambio deja falsos o viejos;
+  - commits `f8bbd68`, `b4f5f4a` (celdas vacías «n/d» y observaciones del verificador) y `3e7580b` (resultado con la tabla sola).
+  - Verificador Sonnet: CORRECTO CON OBSERVACIONES. Reproduce 704 hojas y los 602 números de las tablas; revisó 18 de los 42 pasajes. Observaciones: la ventana de comparación del antes y después (0,917 MODIS) no es la de numbers.json (0,922); el denominador de MIROVA cambia de 82 a 84 noches en MODIS, sin atribuir; en Láscar V375 se mezclan la vía y la salida del Núcleo F5'.
+- **CORRECCIÓN (A113).** `banco_ab.py` usa tabla más OCR (`cargar_referencia_unificada`), no «sólo la tabla» como dice la entrada de las 14:41 (marcada). Lo detectó el agente de los mazos. `experiments/_s181_verif_994/banco_solo_tabla.py` repite el combinado exacto, como control, y agrega la tabla sola (salida `banco_solo_tabla_salida.txt`). Por noche, K contra vía:
+  - recall MODIS 0,874 a 0,966 (igual con o sin OCR), V375 0,986 a 0,991, V750 0,755 a 0,953;
+  - noches limpias publicadas V375 0,175 a 0,122, V750 0,055 a 0,048.
+  - Misma dirección que el combinado. Sin verificador independiente.
+- **Mazos** (agente; `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\congreso geologico 2026\`, fuera de git porque el repo del workspace sólo guarda guías; originales en `2_PRESENTACIONES\_previo_S181\`; inventario en `2_PRESENTACIONES\ACTUALIZACION_S181.md`):
+  - AT8.7: láminas 4 a 11 y 15 a 17; la 6 pasa a «Del detector propio al código de MIROVA», y la idea central nueva la aprueba Nicolás.
+  - AT3.6: láminas 8 y 17.
+  - Jefatura: lámina 2, y se arregló su generador.
+  - Verificador Sonnet en curso.
+- **Ficha SDA:** PR #996 en borrador (`a157769c9`). v1.23 y v1.24 pasan a vigentes; la v1.25 registra el reemplazo de la historia. pytest y bateria-v750a verdes. Verificador Sonnet en curso; el merge es de Nicolás.
+
 ### 2026-11-12 21:47 UTC (S181): el NRT no devolvió K; sitio publicado con la historia nueva
 - El NRT run 43308879564 (partió 21:18) terminó verde y empujó Lastarria, Llaima, Chillán y Copahue después del reemplazo. `chequeo_post_nrt.py` sobre `origin/main` `4217de367`: los 11 volcanes con JSON válido, 0 duplicados y 0 K antes del corte (mismos conteos que `21ea8166b`).
 - Pages: despliegue de `4217de367` verde (iniciado 21:45 UTC). En el sitio, `data/mirova_equivalent/Lascar.json` trae 5.806 records y 0 K entre el 2025-02-15 y el corte. El tablero carga sin errores de consola y la tabla NRT y la ficha de Láscar muestran los valores de la vía.
@@ -592,7 +610,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
   - Ensayo (`--max-sin-par 0.08`): salida 0, ningún rehusado; idéntico al informe del PR salvo 5 a 8 records más por volcán (NRT nuevos, después del corte, que el reemplazo no toca).
   - Aplicado en ese worktree: las tres vigilancias de las guardias siguen VERDE con los mismos encendidos; la única diferencia en su salida es la marca «(sellado antes del reemplazo ...)» del nulo (#993 hace lo que debía).
   - Qué cambia en la historia (`experiments/_s181_verif_994/cambio_por_familia.py`, salida `cambio.txt`; 2025-02-15 al corte): pasadas con 1 MW o más MODIS 187 a 255, V375 494 a 819, V750 531 a 867; la potencia sumada cerca del doble (la vía suma todos los píxeles alertados, como MIROVA). Cordón Caulle MODIS baja de 37 a 1 pasada con 1 MW o más.
-  - Contra MIROVA, sólo la tabla, 2026-03-01 a 2026-11-01 (`experiments/_s181_verif_994/banco_ab.py`, predicado y pareo de `scripts/banco_paridad.py`, salida `banco_ab_salida.txt`): recall por noche MODIS 0,874 a 0,966, V375 0,983 a 0,986, V750 0,763 a 0,954; publicación en noches limpias MODIS 0,018 a 0,003, V375 0,134 a 0,080, V750 0,051 a 0,044. Cordón Caulle MODIS: MIROVA no tiene ninguna alerta; K publicaba 14,6 % de las noches limpias, la vía 0,4 %.
+  - ⚠️ CORREGIDO (S181, 22:02 UTC): la referencia NO es «sólo la tabla», es tabla más OCR (`cargar_referencia_unificada`); con la tabla sola ver la entrada de las 22:02. Texto original: Contra MIROVA, sólo la tabla, 2026-03-01 a 2026-11-01 (`experiments/_s181_verif_994/banco_ab.py`, predicado y pareo de `scripts/banco_paridad.py`, salida `banco_ab_salida.txt`): recall por noche MODIS 0,874 a 0,966, V375 0,983 a 0,986, V750 0,763 a 0,954; publicación en noches limpias MODIS 0,018 a 0,003, V375 0,134 a 0,080, V750 0,051 a 0,044. Cordón Caulle MODIS: MIROVA no tiene ninguna alerta; K publicaba 14,6 % de las noches limpias, la vía 0,4 %.
   - Por pasada, V375 baja de 0,954 a 0,937: 74 pasadas con alerta de MIROVA que K publica y la vía no, 15 de ellas de 1 MW o más (máx. Isluga 2026-04-07 06:12, 4,12 MW); las 15 noches siguen publicadas por la vía en otra pasada V375 de la misma noche. Por noche (lectura A) no se pierde ninguna alerta protegida.
   - Estos números son míos, sin verificador de otro modelo; no deciden nada sellado (la adopción por sensor ya está hecha), describen el reemplazo.
 - Siguiente: «mergea #994»; después el «sí» de A45 para despachar `aplicar-reemplazo.yml` con `script=experiments/_s180_reemplazo_via/aplicar_historia_via.sh`, tag `pre-s180-reemplazo-historia`; comprobar el sitio tras el NRT siguiente (el push con GITHUB_TOKEN no dispara Pages).
