@@ -260,3 +260,76 @@ def test_aplicar_via_escribe_serie_y_residuo(tmp_path, monkeypatch):
     assert serie[("2026-11-09 05:00", "VIIRS_NOAA20")]["vrp_mw"] == 10.0
     r = json.loads((res / "Lascar.json").read_text(encoding="utf-8"))
     assert [(x["datetime_utc"], x["sensor"]) for x in r["records"]] == [("2026-11-09 06:00", "VIIRS_NOAA21")]
+
+
+# ---------------------------------------------------------------- hallazgos del verificador limpio de S180 (PR #994)
+def test_el_borde_exacto_del_corte_ya_es_del_nrt():
+    """Un record con la hora exacta del corte (el minuto del merge) ya es del NRT: el K de ese minuto no se toca y el
+    del reproceso no se agrega. Atrapa `<` cambiado por `<=` en antes_del_corte."""
+    op = _store([_rec("2026-11-11 13:09", "VIIRS_NOAA20", OP, vrp_mw=1.0)])
+    re_ = _store([_rec("2026-11-11 13:09", "VIIRS_NOAA20", via=True, vrp_mw=9.0),
+                  _rec("2026-11-11 13:09", "VIIRS_SNPP", via=True, vrp_mw=8.0)])
+    s, inf, ap = reemplazar_ventana_via(op, re_, "2025-02-15", "2026-11-11", PERFIL, "VIIRS375", CORTE,
+                                        apartar_sin_par=True)
+    assert [r["vrp_mw"] for r in s["records"]] == [1.0] and ap == []
+    assert inf["k_desde_el_corte"] == 1 and inf["reproceso_tras_corte"] == 2
+
+
+def test_la_serie_queda_en_orden_cronologico():
+    """Los agregados se suman al final: sin el orden por fecha la serie quedaría desordenada (el tablero la lee así)."""
+    s, _, _ = _correr()
+    fechas = [r["datetime_utc"] for r in s["records"]]
+    assert fechas == sorted(fechas)
+
+
+def _op_dos_familias():
+    """K sin par en MODIS (antes de su corte, 2026-11-02 17:18) y en VIIRS 375; MODIS lleva además una pasada con par
+    para que la fracción sin par (1 de 2) no pase el tope."""
+    return _op()["records"] + [_rec("2026-10-30 05:00", "MODIS_TERRA", OP, vrp_mw=0.5),
+                               _rec("2026-10-30 06:00", "MODIS_AQUA", OP, vrp_mw=0.6)]
+
+
+def _re_dos_familias():
+    return _re()["records"] + [_rec("2026-10-30 06:00", "MODIS_AQUA", via=True, vrp_mw=6.0)]
+
+
+def test_aplicar_via_residuo_junta_las_sin_par_de_todas_las_familias(tmp_path, monkeypatch):
+    """Hallazgo 2: aplicar_via encadena familias; el residuo debe llevar las sin par de TODAS, no sólo de la última.
+    Atrapa `apartados_todos[v] += apartados` cambiado por `= apartados`."""
+    AV, datos, union, res = _armar(tmp_path, monkeypatch, _op_dos_familias(), _re_dos_familias())
+    inf = AV.correr(["MODIS", "VIIRS375"], datos, res, union, 0.6, aplicar=True, fecha="2026-11-12")
+    assert inf["aplicado"] is True
+    r = json.loads((res / "Lascar.json").read_text(encoding="utf-8"))
+    assert sorted((x["datetime_utc"], x["sensor"]) for x in r["records"]) == [
+        ("2026-10-30 05:00", "MODIS_TERRA"), ("2026-11-09 06:00", "VIIRS_NOAA21")]
+    serie = {(x["datetime_utc"], x["sensor"]) for x in json.loads((datos / "Lascar.json").read_text(encoding="utf-8"))["records"]}
+    assert ("2026-10-30 05:00", "MODIS_TERRA") not in serie
+
+
+def test_aplicar_via_se_rehusa_si_queda_k_antes_del_corte(tmp_path, monkeypatch):
+    """Hallazgo 4: el K que quede antes del corte (fuera de la ventana, o con marca False) es una serie mezclada; se
+    exige 0 y no sólo se informa. Cuenta None y False como K, igual que el reemplazo."""
+    recs = _op()["records"] + [_rec("2025-02-10 05:00", "VIIRS_NOAA20", OP, vrp_mw=0.1),
+                               _rec("2025-02-11 05:00", "VIIRS_NOAA20", OP, via=False, vrp_mw=0.1)]
+    AV, datos, union, res = _armar(tmp_path, monkeypatch, recs, _re()["records"])
+    antes = (datos / "Lascar.json").read_bytes()
+    inf = AV.correr(["VIIRS375"], datos, res, union, 0.6, aplicar=True, fecha="2026-11-12")
+    i = inf["familias"]["VIIRS375"]
+    assert i["volcanes"]["Lascar"]["k_restante_antes_del_corte"] == 2
+    assert i["rehusados"] == ["Lascar"] and inf["aplicado"] is False
+    assert (datos / "Lascar.json").read_bytes() == antes and not res.exists()
+
+
+def test_aplicar_via_tope_justo_en_el_limite_se_acepta(tmp_path, monkeypatch):
+    """El tope es «más que max_sin_par»: con 1 sin par de 2 K en ventana (0,5) y tope 0,5 se aplica. Atrapa `>` por `>=`."""
+    AV, datos, union, res = _armar(tmp_path, monkeypatch, _op()["records"], _re()["records"])
+    inf = AV.correr(["VIIRS375"], datos, res, union, 0.5, aplicar=False, fecha="2026-11-12")
+    i = inf["familias"]["VIIRS375"]
+    assert i["volcanes"]["Lascar"]["fraccion_sin_par"] == 0.5 and i["rehusados"] == []
+
+
+def test_aplicar_via_constantes_del_encargo():
+    """DESDE y los cortes son el pedido de Nicolás y el instante de cada merge (gh pr view N --json mergedAt)."""
+    AV = _aplicar_mod()
+    assert AV.DESDE == "2025-02-15" and AV.PERFIL == "_s172_retro_paquete"
+    assert AV.CORTES == {"MODIS": "2026-11-02 17:18", "VIIRS375": "2026-11-11 13:09", "VIIRS750": "2026-11-11 13:22"}

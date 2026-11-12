@@ -9,7 +9,7 @@ de `scripts/reemplazar_ventana_reproceso.py::reemplazar_ventana_via` (familia, c
 producción nunca se pisa) y aparta las pasadas K sin par a `data/_k_residuales_via/<V>.json` (opción A, decisión de
 Nicolás del 2026-11-11).
 
-TODO O NADA. Calcula las familias pedidas en los 11 volcanes antes de escribir: si un volcán pasa el tope de sin par
+TODO O NADA. Calcula las familias pedidas en los 11 volcanes antes de escribir: si un volcán pasa el tope de sin par, o le queda K antes del corte (serie mezclada),
 en una familia, no escribe nada (un tope pasado es un trozo que falta, no un descarte de borde) y sale con 2.
 
 Por defecto es ENSAYO (no escribe nada) y deja un informe por volcán y familia. `--datos` permite correrlo sobre una
@@ -64,13 +64,15 @@ def correr(familias: list[str], datos: Path, residuos: Path, union: Path, max_si
                                                            corte, apartar_sin_par=True, fecha_apartado=fecha)
             n = inf["operacional_en_ventana"]
             inf["fraccion_sin_par"] = round(inf["sin_par_apartados"] / n, 4) if n else 0.0
-            # K de la familia que queda antes del corte en la serie publicada: tiene que ser 0
+            # K de la familia que queda antes del corte en la serie publicada: tiene que ser 0, o la serie queda
+            # mezclada. None y False son K, como en el reemplazo (verificador del PR #994, hallazgo 4).
             inf["k_restante_antes_del_corte"] = sum(
                 1 for r in store["records"] if familia_sensor(r.get("sensor")) == fam
-                and r.get("via_codigo_mirova") is None and (r.get("datetime_utc") or "").replace("T", " ")[:16] < corte)
+                and r.get("via_codigo_mirova") in (None, False)
+                and (r.get("datetime_utc") or "").replace("T", " ")[:16] < corte)
             inf.pop("solo_operacional_claves", None)
             inf["sin_par_claves"] = [[r["datetime_utc"], r["sensor"]] for r in apartados]
-            if inf["fraccion_sin_par"] > max_sin_par:
+            if inf["fraccion_sin_par"] > max_sin_par or inf["k_restante_antes_del_corte"]:
                 rehusados.append(v)
             stores[v] = store
             apartados_todos[v] += apartados
@@ -78,7 +80,7 @@ def correr(familias: list[str], datos: Path, residuos: Path, union: Path, max_si
         informe["familias"][fam] = {"corte_utc": corte, "rehusados": rehusados, "volcanes": vols}
         if rehusados:
             rehusado = True
-            print(f"REHUSADO {fam}: sin par sobre {max_sin_par:.0%} en {rehusados}", file=sys.stderr)
+            print(f"REHUSADO {fam}: sin par sobre {max_sin_par:.0%} o K restante antes del corte en {rehusados}", file=sys.stderr)
     informe["sha256_antes"] = sha_antes
     if rehusado or not aplicar:
         if rehusado:

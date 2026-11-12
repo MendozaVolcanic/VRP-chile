@@ -76,3 +76,15 @@ def test_exige_confirmacion_y_script_en_experiments(wf, texto):
     assert {"confirmacion", "script", "pruebas"} <= set(entradas)
     assert re.search(r'\[\s*"\$\{\{\s*inputs\.confirmacion\s*\}\}"\s*!=\s*"si"\s*\]', texto)
     assert re.search(r'experiments/\*', texto), "el script tiene que vivir bajo experiments/"
+
+
+def test_una_falla_del_script_aborta_el_paso(wf):
+    """S180, hallazgo 1 del verificador: con `bash "$SCRIPT" && python -m pytest`, set -e no aborta si el script falla
+    (un comando dentro de una lista && no lo dispara): se saltaban las pruebas y se empujaba un estado parcial, y un
+    REHUSADO (salida 2) terminaba en verde con «nada que commitear». El script y las pruebas van en líneas propias."""
+    run = _paso_aplicar(wf)
+    linea_script = next(l for l in run.splitlines() if 'bash "$SCRIPT"' in l)
+    linea_tests = next(l for l in run.splitlines() if "python -m pytest" in l)
+    for l in (linea_script, linea_tests):
+        assert "&&" not in l and "||" not in l, l
+    assert "set -euo pipefail" in run
