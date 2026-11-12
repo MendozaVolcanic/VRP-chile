@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-12 21:47 UTC (S181): el NRT no devolvió K; sitio publicado con la historia nueva
+- El NRT run 43308879564 (partió 21:18) terminó verde y empujó Lastarria, Llaima, Chillán y Copahue después del reemplazo. `chequeo_post_nrt.py` sobre `origin/main` `4217de367`: los 11 volcanes con JSON válido, 0 duplicados y 0 K antes del corte (mismos conteos que `21ea8166b`).
+- Pages: despliegue de `4217de367` verde (iniciado 21:45 UTC). En el sitio, `data/mirova_equivalent/Lascar.json` trae 5.806 records y 0 K entre el 2025-02-15 y el corte. El tablero carga sin errores de consola y la tabla NRT y la ficha de Láscar muestran los valores de la vía.
+
 ### 2026-11-12 21:43 UTC (S181): historia reemplazada con la vía en data/ (A45 de Nicolás); vigilancias verdes
 - Nicolás: «Sí, aplícalo». Despacho de `aplicar-reemplazo.yml` (run 43310112245, 21:25 UTC) con `script=experiments/_s180_reemplazo_via/aplicar_historia_via.sh`, 39 archivos de prueba (los 36 de datos de S180 más `test_reemplazo_via_s180`, `test_union_historia_via_s180`, `test_vigilancias_tras_reemplazo_s181`) y tag `pre-s180-reemplazo-historia` = `23841347d` sobre `origin/main`. Intento 1: 602 pasan, el push perdió la carrera con un NRT; intento 2 regeneró desde `origin/main`: 602 pasan, empujado. Commit `21ea8166b` (21:37:26 UTC).
 - Informe aplicado (`experiments/_s180_reemplazo_via/aplicado/informe.json`): ningún rehusado; sin par máximo MODIS 0,0332, V375 0,0622, V750 0; K restante antes del corte 0 en las tres familias.
