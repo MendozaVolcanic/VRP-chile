@@ -41,7 +41,7 @@ def _fuente(src, nombre):
         if not m2:
             raise AssertionError("no encontré " + nombre)
         return m2.group(0)
-    i = src.index("{", m.end())
+    i = src.index(") {", m.end()) + 2   # tras la lista de parámetros: un default `opts = {}` no es el cuerpo
     prof = 0
     for j in range(i, len(src)):
         prof += {"{": 1, "}": -1}.get(src[j], 0)
@@ -90,6 +90,12 @@ const cumbreBien = cumbre.every(r => (r.primary_cluster && r.primary_cluster.cen
 // control: una clase que ya venía no se toca
 const fijo = [{ distance_class: "far", primary_cluster: { centroid_dist_km: 1, vrp_mw: 3 } }];
 derivarClaseSombra(fijo);
+// caso del verificador: cúmulo sin centroide y foco lejano. mirovaEqVrp no filtra por distancia sin centroide, así que
+// la clase no puede quedar «far» (lo apagaría); debe quedar vacía y el valor, igual.
+const sinCentroide = [{ primary_cluster: { centroid_dist_km: null, vrp_mw: 2 }, final_hotspot_dist_km: 20 }];
+const v0 = mirovaEqVrp(sinCentroide[0], 5, false);
+derivarClaseSombra(sinCentroide);
+if (sinCentroide[0].distance_class || mirovaEqVrp(sinCentroide[0], 5, false) !== v0 || v0 !== 2) throw new Error("sin centroide cambió: " + JSON.stringify(sinCentroide[0]));
 const publicados = antes.filter(a => a[0] > 0).length;
 process.stdout.write(JSON.stringify({ distintos, n: antes.length, conClase: conClase.length, cumbre: cumbre.length, cumbreBien, fijo: fijo[0].distance_class, publicados }));
 """
@@ -160,6 +166,13 @@ def test_botones_que_ya_no_cambiaban_nada_salieron(vista):
     assert not re.search(r"^\s*USE_F5_CORE\s*=[^=]", src, re.M), vista
     # el núcleo no recorta la vía: si eso cayera, fijar el modo dejaría de ser neutro para los datos nuevos
     assert "CambioDetector.esViaCodigoMirova(r)) return null" in src, vista
+
+
+def test_load_volcano_deriva_la_clase_solo_en_la_sombra():
+    cuerpo = _fuente(INDEX.read_text(encoding="utf-8"), "loadVolcano")
+    assert 'const sombra = v.fuente === "sombra_34";' in cuerpo
+    assert "if (sombra) derivarClaseSombra(allData[v.name].records);" in cuerpo
+    assert cuerpo.count("derivarClaseSombra(") == 1
 
 
 def test_el_mapa_dibuja_los_pixeles_medidos():

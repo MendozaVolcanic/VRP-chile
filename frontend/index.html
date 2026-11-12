@@ -1864,13 +1864,14 @@ const RADIO_CUMBRE_SOMBRA_KM = 5;   // D5: el de preliminar_34.js; la cumbre no 
 // POR QUÉ. Los 34 no tienen inner_radius_km en volcanoes.yaml, así que el pipeline deja `distance_class: null` en
 // sus records. mirovaEqVrp ya los decide por el centroide del cúmulo contra innerKm (5 km), pero la tabla y el mapa
 // rotulan «dentro / fuera» con distance_class, y sin él una anomalía a 2 km se rotulaba «fuera». Se completa aquí con
-// el mismo criterio que usa mirovaEqVrp (centroide del cúmulo; si falta, la distancia del foco), sólo donde viene vacío,
-// y queda marcado con `_clase_derivada`. No cambia ningún valor publicado: mirovaEqVrp da lo mismo con o sin la clase.
+// el MISMO dato que mira mirovaEqVrp, el centroide del cúmulo, sólo donde la clase viene vacía; sin cúmulo o sin
+// centroide no se clasifica (mirovaEqVrp tampoco filtra por distancia en ese caso, así que rotular «far» lo apagaría).
+// Queda marcado con `_clase_derivada`. No cambia ningún valor publicado: mirovaEqVrp da lo mismo con o sin la clase.
 function derivarClaseSombra(records) {
   for (const r of records || []) {
     if (!r || r.distance_class) continue;
     const pc = r.primary_cluster;
-    const d = (pc && pc.centroid_dist_km != null) ? pc.centroid_dist_km : r.final_hotspot_dist_km;
+    const d = pc ? pc.centroid_dist_km : null;
     if (d == null) continue;
     r.distance_class = d <= RADIO_CUMBRE_SOMBRA_KM ? "summit" : "far";
     r._clase_derivada = true;
@@ -1930,8 +1931,8 @@ function monitoringFreshness(lastTimeStr, toleranciaH = 30) {
   const ago = h < 1 ? Math.round(h * 60) + " min"
             : h < 48 ? Math.round(h) + " h"
             : Math.round(h / 24) + " d";
-  // S180: la sombra de los 34 corre una vez al día (cerca de las 13 UTC), así que su última pasada nocturna llega con
-  // hasta un día y medio de atraso sin que nada esté caído; se le dan 40 h antes de llamarlo atraso.
+  // S180: la sombra de los 34 corre una vez al día (cron 13:07 UTC; sus datos llegan al repo entre las 18 y las 21 UTC),
+  // así que su última pasada nocturna puede tener unas 37 h sin que nada esté caído; se le dan 40 h antes de llamarlo atraso.
   if (h <= toleranciaH) return { cls: "mon-fresh",   txt: "monitoreado · última pasada hace " + ago, h };
   if (h <= 72) return { cls: "mon-lagging", txt: "datos atrasados · última pasada hace " + ago, h };
   return { cls: "mon-stale", txt: "sin pasadas hace " + ago, h };
@@ -2854,6 +2855,10 @@ function renderDetail() {
   const tabs = el("div", "chart-tabs");
   // S180: como MIROVA, «VRP» y «Log VRP» son dos pestañas; comparten estado con los botones Lineal/Log del
   // encabezado (logScale), así que una lleva a la otra. Las demás dibujan el VRP junto a su gráfico.
+  // S180: las líneas «K desde» y «vía desde» marcan el cambio de detector de los 11; los 34 nunca corrieron otra cosa que
+  // la vía (desde el 2026-11-03), así que en sus gráficos esas líneas caerían fuera de sus datos y confundirían.
+  const sinLineasDeVia = v.fuente === "sombra_34"
+    ? { cambioDetector: false, cambioViaModis: false, cambioViaV375: false, cambioViaV750: false } : {};
   // S180: los 34 no tienen MIROVA con qué comparar, así que no llevan esa pestaña.
   const tabNames = ["VRP lineal", "VRP log", "Distancia", "VRE acumulada", "Comparar con MIROVA"].slice(0, v.hasMirova ? 5 : 4);
   if (detailChartTab == null || detailChartTab <= 1) detailChartTab = logScale ? 1 : 0;
@@ -3163,14 +3168,14 @@ function renderDetail() {
   galleryHost.id = "mirova-gallery-host";
   // S180: la galería apunta a un archivo que sólo existe en el computador de Nicolás (archiveAvailable); en el sitio
   // público se rotula y va plegada con lo demás propio, en vez de prometer descargas que no entrega.
-  if (!archiveAvailable()) {
+  if (!archiveAvailable() && v.hasMirova) {
     const gNota = el("div", "galeria-nota");
     gNota.textContent = "Imágenes MIROVA: el archivo de TIF y KMZ vive fuera del sitio público, así que aquí sólo se " +
                         "listan; para ver la imagen de hoy usa «Ver en MIROVA» arriba.";
     propias.appendChild(gNota);
   }
-  propias.appendChild(galleryHost);
-  renderGallery(v.name, galleryHost);
+  // S180: los 34 no tienen imágenes de MIROVA; la galería decía «(0)» y era ruido.
+  if (v.hasMirova) { propias.appendChild(galleryHost); renderGallery(v.name, galleryHost); }
   dp.appendChild(propias);
 
   panel.appendChild(dp);
@@ -3203,7 +3208,7 @@ function renderDetail() {
     L.circle([v.lat, v.lon], {
       radius: v.radius_km * 1000, color: "#7a8fa6", weight: 1,
       fillColor: "#7a8fa6", fillOpacity: 0.05, dashArray: "5,5",
-    }).bindTooltip(`Scene ${v.radius_km} km (grilla MIROVA UTM 51×51)`, { sticky: true })
+    }).bindTooltip(v.fuente === "sombra_34" ? `Grilla de la vía «código MIROVA», unos 51 × 51 km (radio ${v.radius_km} km)` : `Scene ${v.radius_km} km (grilla MIROVA UTM 51×51)`, { sticky: true })
       .addTo(sceneLayer);
 
     // S14 → S77: inner radius MIROVA oficial — clasificación visual summit/far.
@@ -3214,7 +3219,7 @@ function renderDetail() {
       L.circle([v.vent_lat || v.lat, v.vent_lon || v.lon], {
         radius: v.inner_radius_km * 1000, color: "#ff5252", weight: 1.5,
         fillColor: "#ff5252", fillOpacity: 0.08, dashArray: "3,3",
-      }).bindTooltip(`Summit (cráter MIROVA ${v.inner_radius_km} km)`, { sticky: true })
+      }).bindTooltip(v.fuente === "sombra_34" ? `Cumbre ${v.inner_radius_km} km (supuesto D5: MIROVA no publica este volcán ni su KML)` : `Summit (cráter MIROVA ${v.inner_radius_km} km)`, { sticky: true })
         .addTo(summitLayer);
     }
 
@@ -3258,12 +3263,11 @@ function renderDetail() {
     }
 
     // S77 P5: control de capas — overlays toggleables MIROVA-equivalent.
-    const capasCtl = L.control.layers(null, {
-      "Summit (cráter)": summitLayer,
-      "Vent-path": ventPathLayer,
-      "Scene (25 km)": sceneLayer,
-      "Bbox MIROVA 50×50 km": bboxLayer,
-    }, { collapsed: true, position: "topright" }).addTo(map);
+    // S180: los 34 no tienen KMZ de MIROVA, así que no llevan su recuadro; su cumbre de 5 km es un supuesto (D5).
+    const capasMapa = v.fuente === "sombra_34"
+      ? { "Cumbre 5 km (supuesto)": summitLayer, "Grilla de la vía (51 km)": sceneLayer }
+      : { "Summit (cráter)": summitLayer, "Vent-path": ventPathLayer, "Scene (25 km)": sceneLayer, "Bbox MIROVA 50×50 km": bboxLayer };
+    const capasCtl = L.control.layers(null, capasMapa, { collapsed: true, position: "topright" }).addTo(map);
 
     // Volcano center marker
     L.circleMarker([v.lat, v.lon], {
@@ -3734,7 +3738,7 @@ function renderDetail() {
           if (f) setTimeout(() => aplicarPeriodo(Periodo.noche(f)), 0);
         },
         onHover: (evt, els) => { if (evt.native && evt.native.target) evt.native.target.style.cursor = els && els.length ? "pointer" : ""; },
-        plugins: {
+        plugins: { ...sinLineasDeVia,
           legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12, padding:12 } },
           tooltip: {
             backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
@@ -3791,7 +3795,7 @@ function renderDetail() {
         }] },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: {
+          plugins: { ...sinLineasDeVia,
             legend: { display: false },
             tooltip: {
               backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
@@ -3827,7 +3831,7 @@ function renderDetail() {
         }] },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: {
+          plugins: { ...sinLineasDeVia,
             legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12 } },
             tooltip: {
               backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
@@ -3854,7 +3858,7 @@ function renderDetail() {
         options: {
           responsive: true, maintainAspectRatio: false,
           interaction: { mode:"indexMasSol", intersect:false },  // S151: "index" + el sol bajo el cursor
-          plugins: {
+          plugins: { ...sinLineasDeVia,
             legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12, padding:12 } },
             tooltip: {
               backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
