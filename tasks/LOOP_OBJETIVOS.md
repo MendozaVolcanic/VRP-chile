@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-12 22:36 UTC (S181): cierre; se retoma con tasks/BLOQUE_ARRANQUE_S182.md
+- Mazos: el agente aplicó los 5 retoques de la segunda vuelta (frase «crecía en verano» fuera; «desde la erupción de 2011-2012»; «cerca de 0,6»; etiqueta de AT3.6 L8 separada; nota sobre el atípico). Esa última tanda de texto no se re-verificó.
+- HALLAZGO (para S182): Cordón Caulle V750 2026-10-21 05:48 UTC NOAA-21. Publicamos 10,1 MW (11 píxeles entre 2,9 y 12,1 km del cráter, fondo 249 K); MIROVA da 0,36 MW. Causa sin encontrar.
+- Sombra de los 34: la corrida del 11-12 20:44 UTC salió `success` (#995 debería cerrarse sola).
+- Disco: C: con 2,4 GB libres, bajo el umbral de parada; D: con 13 GB.
+- Nada corriendo. Decisiones pendientes y prompt de S182 en `tasks/BLOQUE_ARRANQUE_S182.md`.
+
 ### 2026-11-12 22:27 UTC (S181): ficha #996 lista para merge; mazos corregidos por su verificador
 - **Ficha, PR #996.** Verificador Sonnet: CORRECTO CON OBSERVACIONES. Correcciones en `a2b1f49d2`:
   - era FALSO que los 34 volcanes de la vista preliminar siguieran con K: `data/sombra_34/` son 2.713 records, todos de la vía, desde el 2026-11-03;
