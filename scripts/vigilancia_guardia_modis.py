@@ -111,6 +111,9 @@ ESPERA_SIN_RECORD_H = 24
 # Decisión de K del 2026-10-19 aplicada a MODIS (§4 de la regla, «como (d) de K»): las pasadas ya juzgadas no vuelven
 # a disparar. Mismo formato estricto que experiments/_s151_prereg_fk_11/sombra_pasadas_juzgadas.json.
 JUZGADAS = os.path.join(ROOT, "experiments", "_s171_modd_adopcion", "sombra_pasadas_juzgadas_modis.json")
+# S181: nulo medido antes de reemplazar la historia con la vía (#987). Tras el reemplazo, los 14 días previos al encendido
+# quedan con la vía y el nulo vivo da 0 pares; el sellado es la misma medida, tomada cuando todavía había K que parear.
+NULO_SELLADO = os.path.join(ROOT, "experiments", "_s181_guardias_reemplazo", "nulo_sellado.json")
 
 
 def _t(texto_utc):
@@ -139,6 +142,10 @@ def encendido_desde_datos(raw_por_volcan, sensor=SENSOR):
                 continue
             via.add((vol, r.get("sensor"), dt))
             obs.append(dt)
+            # S181: un record de la vía reprocesado (reemplazo de la historia, perfil `_s172_retro_paquete`) lleva el
+            # `processed_utc` del reproceso, que puede ser anterior al encendido: el encendido sólo lo fija producción.
+            if (r.get("regimen") or {}).get("perfil") not in (None, PERFIL_PRODUCCION):
+                continue
             t = _t(r.get("processed_utc"))
             if t:
                 proc.append(t)
@@ -371,6 +378,33 @@ def avisos_referencia_modis(filas, hoy, sensor=SENSOR):
     return []
 
 
+def leer_nulo_sellado():
+    try:
+        with open(NULO_SELLADO, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def nulo_vigente(nulo, sensor, encendido, sellado=None):
+    """S181: con 0 pares K en la ventana del nulo (la historia ya es de la vía), el nulo sellado de ESE encendido.
+
+    El nulo mide un tramo pasado y fijo (los 14 días previos al encendido): el sellado es el mismo número, medido antes de
+    que el reemplazo le quitara a producción los records K. Un nulo vivo con pares manda; un sello de otro encendido (la
+    vía se apagó y se volvió a encender) no vale y sigue el aviso de MA172-208."""
+    if not nulo.get("sin_medir"):
+        return nulo
+    s = (leer_nulo_sellado() if sellado is None else sellado).get(sensor)
+    # Sólo se sella un nulo limpio: uno con pasadas distintas pedía INVESTIGAR y un sello no puede taparlo (verificador
+    # S181, O4); en ese caso sigue el aviso de ceguera.
+    if (not s or not encendido or s.get("encendido_utc") != encendido or not s.get("pares")
+            or s.get("distintas") != 0):
+        return nulo
+    return {"pares": s["pares"], "distintas": s["distintas"], "detalle": s.get("detalle", []), "sin_medir": False,
+            "sellado": True, "medido_en_commit": s.get("medido_en_commit"), "medido_utc": s.get("medido_utc"),
+            "nota": "nulo sellado antes del reemplazo de la historia con la vía (S181): guardia y producción eran K"}
+
+
 def avisos_nulo(nulo):
     """MA172-208: un nulo sin pares no mide nada y no se puede leer como guardia = producción."""
     if nulo.get("sin_medir"):
@@ -517,6 +551,7 @@ def evaluar(hoy):
     if ahora[:10] != hoy:
         ahora = f"{hoy} 23:59:59"           # una corrida con `hoy` fijado (pruebas, re-lectura) mide al cierre de ese día
     d = disparadores(pasadas, prod, guardia, hoy, encendido, juzgadas=leer_juzgadas(), ahora=ahora)
+    d["nulo"] = nulo_vigente(d["nulo"], SENSOR, encendido)
     if d["duracion"]["cumplida"]:
         out["fase"] = "plazo_cumplido"
     ciegos = (vs.avisos_referencia(filas, hoy) + avisos_referencia_modis(filas, hoy) + avisos_guardia(guardia, hoy)
@@ -566,7 +601,9 @@ def imprimir(out):
         if m.get("k"):
             print(f"  {nombre}: {m['k']} (cota {m['cota']}, n {m['n']}){' · DISPARA' if m['dispara'] else ''}")
     n = out.get("nulo") or {}
-    print(f"  nulo (antes del encendido): {n.get('distintas')} pasadas distintas de {n.get('pares')} pareadas")
+    print(f"  nulo (antes del encendido): {n.get('distintas')} pasadas distintas de {n.get('pares')} pareadas"
+          + (f" (sellado antes del reemplazo de la historia, "
+             f"{n.get('medido_utc')} UTC)" if n.get('sellado') else ""))
     b = out.get("borde_171_01") or {}
     if b.get("total"):
         print(f"  pasadas que la guardia registra y producción no, por semana: {b['por_semana']}")
