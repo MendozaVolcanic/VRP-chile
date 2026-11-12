@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-12 21:43 UTC (S181): historia reemplazada con la vía en data/ (A45 de Nicolás); vigilancias verdes
+- Nicolás: «Sí, aplícalo». Despacho de `aplicar-reemplazo.yml` (run 43310112245, 21:25 UTC) con `script=experiments/_s180_reemplazo_via/aplicar_historia_via.sh`, 39 archivos de prueba (los 36 de datos de S180 más `test_reemplazo_via_s180`, `test_union_historia_via_s180`, `test_vigilancias_tras_reemplazo_s181`) y tag `pre-s180-reemplazo-historia` = `23841347d` sobre `origin/main`. Intento 1: 602 pasan, el push perdió la carrera con un NRT; intento 2 regeneró desde `origin/main`: 602 pasan, empujado. Commit `21ea8166b` (21:37:26 UTC).
+- Informe aplicado (`experiments/_s180_reemplazo_via/aplicado/informe.json`): ningún rehusado; sin par máximo MODIS 0,0332, V375 0,0622, V750 0; K restante antes del corte 0 en las tres familias.
+- Sobre main: `vigilancia-guardia-modis` (run 43312343316) y `vigilancia-guardia-viirs` (run 43312348741) VERDE en los tres sensores, encendidos sin cambio, nulo sellado (167, 274, 270 pares, 0 distintas). Lo mismo en local sobre `21ea8166b`.
+- RIESGO en curso: el NRT run 43308879564 partió a las 21:18, antes del reemplazo, y empuja con `git pull --rebase -X theirs`; en un rebase «theirs» es el commit del NRT, así que un choque de hunks podría devolver líneas K. Chequeo `D:\vrp-trabajo\temporales\s181_verif994\chequeo_post_nrt.py` (JSON válido, sin duplicados, 0 K antes del corte): OK sobre `21ea8166b`, y su control sobre `21ea8166b~1` marca los 11 volcanes. Se corre al terminar ese NRT.
+- En curso (agentes, effort high): números y `revisiones/REVISION_S181.md` del paper privado (sin tocar la prosa, política de Volcanica); mazos del congreso y de jefatura; PR en borrador de la ficha SDA (v1.23 y v1.24 siguen «PROPUESTA» en main aunque rigen desde el 11-11, y falta la versión del reemplazo).
+- Pages: el último despliegue es de `fb9b4da06` (18:37 UTC); el sitio con la historia nueva sale con el próximo push del NRT.
+
 ### 2026-11-12 21:16 UTC (S181): #994 integrado (sin aplicar a data/)
 - Nicolás: «mergea #994». CI verde sobre `18b9d221f` (pytest y bateria-v750a), CLEAN; merge commit `97979b94a` a las 21:15:51 UTC (`--match-head-commit`). En main: los 18 archivos de `experiments/_s180_reemplazo_via/`, `aplicar-reemplazo.yml` y `aplicar_historia_via.sh`; el merge no toca `data/`.
 - Falta el «sí» de A45 para despachar `aplicar-reemplazo.yml` (tag `pre-s180-reemplazo-historia`). El workflow regenera desde `origin/main` y se rehúsa entero si algún volcán pasa el tope o le queda K.
