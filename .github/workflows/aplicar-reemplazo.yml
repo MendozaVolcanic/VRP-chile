@@ -85,10 +85,11 @@ jobs:
             git push -q origin "$TAG"
             echo "tag $TAG = $(git rev-parse origin/main)"
           fi
+          # El script y las pruebas van en lineas propias: dentro de `a && b`, set -e no aborta si `a` falla
+          # (S180, verificador del PR #994).
           # Cada intento parte de origin/main y regenera: si el NRT empujo entre medio, no hay nada que fusionar.
           for attempt in 1 2 3 4 5; do
             git fetch -q origin main && git reset --hard origin/main
-            # En líneas propias: dentro de `a && b`, set -e no aborta si `a` falla (S180, verificador del PR #994).
             bash "$SCRIPT"
             python -m pytest -q $PRUEBAS
             git add -A data experiments
