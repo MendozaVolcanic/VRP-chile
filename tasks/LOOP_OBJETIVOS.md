@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-12 22:27 UTC (S181): ficha #996 lista para merge; mazos corregidos por su verificador
+- **Ficha, PR #996.** Verificador Sonnet: CORRECTO CON OBSERVACIONES. Correcciones en `a2b1f49d2`:
+  - era FALSO que los 34 volcanes de la vista preliminar siguieran con K: `data/sombra_34/` son 2.713 records, todos de la vía, desde el 2026-11-03;
+  - las 522 pasadas nuevas son de VIIRS 750 (y 25 de VIIRS 375);
+  - marca de rebaja en v1.18, v1.21 y v1.22 (A113);
+  - sin jerga interna.
+
+  CI verde (pytest, bateria-v750a), CLEAN, en borrador. Espera «mergea #996».
+- **Frase falsa en el tablero, fuera de #996.** `frontend/index.html:544` dice que lo anterior a las fechas de cambio es del detector K y que el gráfico marca el cambio con una línea vertical; desde el reemplazo es falso. Requiere tag y el sí de Nicolás (A45). Se le preguntó.
+- **Mazos.** Verificador Sonnet: CORRECTO CON OBSERVACIONES. Reprodujo las cifras y las 4 figuras píxel a píxel, y marcó 11 observaciones: unidad noches contra pasadas, referencia «tabla y OCR», «pasada a pasada» que era la mediana, figura de L7 del detector de agosto, L17 P3 contra L8, «medio megawatt», hora sin zona, «con autorización previa», marcas visuales.
+  - El agente las aplicó todas, salvo «código abierto» sin licencia, que decide Nicolás.
+  - Los pendientes de Nicolás están en `ACTUALIZACION_S181.md` §5.
+  - Segunda vuelta del verificador en curso, sólo sobre lo nuevo (figura `fig_artefactos_pcc_via.png`, cuartiles, L16 con la tabla sola).
+
 ### 2026-11-12 22:02 UTC (S181): paper, mazos y ficha actualizados por el cambio de método; corrección de la referencia
 - Pedido de Nicolás: «avanza con todo lo que falte, recuerda que hay que actualizar las presentaciones y el paper».
 - **Paper** (repo privado `vrp-chile-paper`; política de Volcanica: la prosa la escribe Nicolás, no se tocó):
