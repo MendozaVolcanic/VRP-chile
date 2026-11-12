@@ -173,7 +173,6 @@ footer a:hover { text-decoration: underline; }
         <input type="date" id="periodo-desde" aria-label="Desde (fecha UTC)"> a <input type="date" id="periodo-hasta" aria-label="Hasta (fecha UTC)">
       </span>
       <a href="mosaico.html" class="nav-link active">🗺️ Mosaico</a>
-      <button id="btn-mag" class="nav-link" style="cursor:pointer;border:1px solid currentColor;background:transparent;font:inherit;color:inherit;" title="Magnitud (solo el número, NO la detección): 'Cluster' = pc.vrp_mw actual. 'Núcleo F5'' = D2-safe v2 (S95): suma solo el núcleo de 0.75 km del píxel de máxima energía + lava real (bt≥295K), curando la sobre-estimación del halo glaciar. Ver docs/F5_CALIBRATION_S95.md.">▣ Cluster</button>
     </div>
   </div>
 </header>
@@ -274,7 +273,7 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
 // Calibración: docs/F5_CALIBRATION_S95.md. Toggle USE_F5_CORE.
 // ============================================================================
 // S100: default Núcleo F5' (coherencia con index.html; S92 L5). Usuario puede apagarlo.
-let USE_F5_CORE = sessionStorage.getItem("mosaico_f5_core") !== "false";
+const USE_F5_CORE = true;  // S180 (Nicolás, 2026-11-12): sin botón Magnitud, como en index.html. La vía «código MIROVA» (los tres sensores desde el 2026-11-11) queda fuera del núcleo (f5CoreMagnitude, tests/test_f5_no_recorta_via_s180.py), así que en los datos nuevos Cluster y Núcleo daban lo mismo; queda fijo el modo de siempre, que sólo actúa sobre la historia de K.
 // ⚠️ S151 (A113; docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md, hallazgo V-1): "el pipeline
 // no deja marca en el record" es falso desde S71 (commit 84c7d312e): cada cúmulo topado lleva
 // primary_cluster.d9_capped = true. Reconocerlo por el valor sigue funcionando igual. Detalle en
@@ -796,29 +795,9 @@ function renderMosaico() {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-// S96 F5' — toggle Magnitud: Cluster (pc.vrp_mw) vs Núcleo F5' (D2-safe v2).
-// Solo cambia el número (VRP 48h, nivel, sparkline vía eqVrpDisplay); detección
-// y gating intactos. Re-render en sitio (renderMosaico lee allData global).
-function _syncMagBtn() {
-  const b = document.getElementById("btn-mag");
-  if (!b) return;
-  b.textContent = USE_F5_CORE ? "◎ Núcleo F5'" : "▣ Cluster";
-}
-function setupMagToggle() {
-  USE_F5_CORE = sessionStorage.getItem("mosaico_f5_core") !== "false";  // S100: default Núcleo F5'
-  _syncMagBtn();
-  document.getElementById("btn-mag").addEventListener("click", () => {
-    USE_F5_CORE = !USE_F5_CORE;
-    sessionStorage.setItem("mosaico_f5_core", USE_F5_CORE ? "true" : "false");
-    _syncMagBtn();
-    renderMosaico();
-  });
-}
-
 async function init() {
   document.getElementById("updated-label").textContent = "Cargando…";
   initPeriodo();   // S153
-  setupMagToggle();
   await Promise.all(TIER_A.map(v => loadVolcano(v)));
   renderMirovaFreshness();
   renderMosaico();

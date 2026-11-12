@@ -99,7 +99,6 @@ footer a:hover { text-decoration: underline; }
     <!-- S42: filtro post-S38 removido tras reproc completo 30d. Todos los
          records ya tienen modelo S42. -->
     <button id="btn-scale" class="btn-ui">📈 Escala: Lineal</button>
-    <button id="btn-mag" class="btn-ui" title="Magnitud (solo el número, NO la detección): 'Cluster' = pc.vrp_mw actual. 'Núcleo F5'' = D2-safe v2 (S95): suma solo el núcleo de 0.75 km del píxel de máxima energía + lava real (bt≥295K), curando la sobre-estimación del halo glaciar. APLICA SOLO a VIIRS 375m (I-band): MODIS y VIIRS 750m conservan el Cluster en ambos modos (el ancla energía-máxima en píxeles coarse puede inflar). Ver docs/F5_CALIBRATION_S95.md.">▣ Magnitud: Cluster</button>
     <!-- S153: período. Por defecto 90 días, como antes; el cambio recarga la página con el período en la URL. -->
     <label for="periodo-sel" style="color:var(--muted);font-size:.9em">Período</label>
     <select id="periodo-sel" class="btn-ui">
@@ -284,7 +283,7 @@ function mirovaEqVrp(r, volcanoName) {
 // ============================================================================
 // S100: default Núcleo F5' (coherencia con index.html; S97 lo cambió allí pero no
 // aquí — S92 L5). El usuario puede apagarlo y se recuerda (storage "false").
-let USE_F5_CORE = sessionStorage.getItem("diario_f5_core") !== "false";
+const USE_F5_CORE = true;  // S180 (Nicolás, 2026-11-12): sin botón Magnitud, como en index.html. La vía «código MIROVA» (los tres sensores desde el 2026-11-11) queda fuera del núcleo (f5CoreMagnitude, tests/test_f5_no_recorta_via_s180.py), así que en los datos nuevos Cluster y Núcleo daban lo mismo; queda fijo el modo de siempre, que sólo actúa sobre la historia de K.
 // ⚠️ S151 (A113; docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md, hallazgo V-1): "el pipeline
 // no deja marca en el record" es falso desde S71 (commit 84c7d312e): cada cúmulo topado lleva
 // primary_cluster.d9_capped = true. Reconocerlo por el valor sigue funcionando igual. Detalle en
@@ -907,20 +906,6 @@ document.getElementById("btn-include-far").addEventListener("click", () => {
   location.reload();
 });
 
-// S96 F5' — toggle Magnitud: Cluster (pc.vrp_mw) vs Núcleo F5' (D2-safe v2).
-// Solo cambia el número de magnitud (chart/stats vía eqVrpDisplay); detección y
-// gating intactos. Re-render por reload (patrón diario, igual que includeFar).
-// S100: sincronizar el botón con el estado actual (default Núcleo F5').
-window.addEventListener("DOMContentLoaded", () => {
-  const b = document.getElementById("btn-mag");
-  if (!b) return;
-  b.textContent = USE_F5_CORE ? "◎ Magnitud: Núcleo F5' (solo VIIRS375)" : "▣ Magnitud: Cluster";
-  b.classList.toggle("btn-active", USE_F5_CORE);
-});
-document.getElementById("btn-mag").addEventListener("click", () => {
-  sessionStorage.setItem("diario_f5_core", USE_F5_CORE ? "false" : "true");
-  location.reload();
-});
 
 // S42: toggle post-S38 removido (botón ya no existe en HTML).
 
