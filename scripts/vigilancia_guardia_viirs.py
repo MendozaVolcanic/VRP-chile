@@ -191,6 +191,7 @@ def evaluar(hoy, clave):
         ahora = f"{hoy} 23:59:59"
     d = vg.disparadores(pasadas, prod, guardia, hoy, encendido, juzgadas=leer_juzgadas(), ahora=ahora, sensor=sensor,
                         cotas=COTAS[sensor])
+    d["nulo"] = vg.nulo_vigente(d["nulo"], sensor, encendido)
     if d["duracion"]["cumplida"]:
         out["fase"] = "plazo_cumplido"
     ciegos = (vs.avisos_referencia(filas, hoy) + vg.avisos_referencia_modis(filas, hoy, sensor=sensor)
@@ -243,7 +244,9 @@ def imprimir(out):
             print(f"  {nombre}: {m['k']} (cota {m['cota'] if m['cota'] is not None else 'PENDIENTE'}, n {m['n']})"
                   f"{' · DISPARA' if m['dispara'] else ''}")
     n = out.get("nulo") or {}
-    print(f"  nulo (antes del encendido): {n.get('distintas')} pasadas distintas de {n.get('pares')} pareadas")
+    print(f"  nulo (antes del encendido): {n.get('distintas')} pasadas distintas de {n.get('pares')} pareadas"
+          + (f" (sellado antes del reemplazo de la historia, "
+             f"{n.get('medido_utc')} UTC)" if n.get('sellado') else ""))
     b = out.get("borde_171_01") or {}
     if b.get("total"):
         print(f"  pasadas que la guardia registra y producción no, por semana: {b['por_semana']}")
