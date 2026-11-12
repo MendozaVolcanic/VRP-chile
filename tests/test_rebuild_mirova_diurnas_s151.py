@@ -141,7 +141,10 @@ def test_frontend_el_ocr_diurno_solo_llega_al_dibujo():
     # index: records_dia_ocr se carga en mirovaDiaOcr, y mirovaDiaOcr solo entra a mDia (el dibujo del sol)
     assert len(_usos(idx, "records_dia_ocr")) == 1
     usos_idx = [ln.strip() for ln in idx.splitlines() if _usos(ln, "mirovaDiaOcr")]
-    assert len(usos_idx) == 3, usos_idx          # los dos objetos de allData y el filtro del dibujo
+    # S180: 3 -> 2. Hasta S180 loadVolcano armaba dos objetos de allData (uno vacío para los 34 sin datos); desde que los
+    # 34 se leen de la sombra hay uno solo (con mirova null, mirovaDiaOcr queda []). Lo vigilado no cambia: fuera de
+    # cargarlo, el único uso es el filtro del dibujo (mDia), y ninguna métrica ni confirmación lo lee (abajo).
+    assert len(usos_idx) == 2, usos_idx          # el objeto de allData y el filtro del dibujo
     assert any("const mDia" in ln for ln in usos_idx)
     assert not any("computeMetrics" in ln or "enrichWithMirovaConfirmation" in ln for ln in usos_idx)
     # las metricas siguen recibiendo mFiltered, que sale de mirovaRecords (= records, sin cambio)

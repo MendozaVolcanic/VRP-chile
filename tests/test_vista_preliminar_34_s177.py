@@ -93,9 +93,19 @@ def test_la_pagina_lleva_el_rotulo_y_el_modulo():
     assert 'src="preliminar_34.js"' in texto
 
 
-def test_el_tablero_principal_sigue_sin_leer_la_sombra():
-    for pagina in ("index.html", "diario.html", "mosaico.html"):
+def test_el_tablero_principal_lee_la_sombra_solo_para_los_34():
+    """Hasta S180 esta prueba exigía que ninguna vista leyera la sombra (decisión S18: no mezclar los 34 con los 11).
+    Nicolás la cambió el 2026-11-12 («todos deben tener la misma funcionalidad de los 11 de MIROVA, en la página
+    principal con su mapa»): index.html muestra los 34 con los datos de la sombra, marcados «sin MIROVA · 1 vez al
+    día». Lo que se sigue vigilando: (1) diario y mosaico, que son vistas de los 11 Tier A, no la leen; (2) index la
+    lee en un solo lugar y sólo para los volcanes sin MIROVA, así que un Tier A nunca cae a la sombra. El resto de lo
+    que index hace con los 34 está en tests/test_tablero_34_y_pixeles_s180.py."""
+    for pagina in ("diario.html", "mosaico.html"):
         assert "data/sombra_34" not in (ROOT / "frontend" / pagina).read_text(encoding="utf-8"), pagina
+    src = (ROOT / "frontend" / "index.html").read_text(encoding="utf-8")
+    assert src.count("SOMBRA_34_BASE + v.name") == 1
+    assert 'const sombra = v.fuente === "sombra_34";' in src
+    assert 'v.hasMirova ? v : Object.assign({}, v, { fuente: "sombra_34"' in src
 
 
 @pytest.mark.parametrize("archivo", [JS, HTML])
