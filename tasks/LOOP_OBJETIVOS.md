@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-12 23:58 UTC (S181, después del cierre): #996 integrado
+- Nicolás escribió «mergea #996». CI verde sobre `a2b1f49d2` (pytest y bateria-v750a), CLEAN. `gh pr ready` y merge commit `f53148aa1` a las 23:58:03 UTC, con `--match-head-commit`. La ficha SDA en main ya trae la v1.25 y las v1.23 y v1.24 vigentes. La decisión 1 del bloque S182 queda hecha.
+
 ### 2026-11-12 22:36 UTC (S181): cierre; se retoma con tasks/BLOQUE_ARRANQUE_S182.md
 - Mazos: el agente aplicó los 5 retoques de la segunda vuelta (frase «crecía en verano» fuera; «desde la erupción de 2011-2012»; «cerca de 0,6»; etiqueta de AT3.6 L8 separada; nota sobre el atípico). Esa última tanda de texto no se re-verificó.
 - HALLAZGO (para S182): Cordón Caulle V750 2026-10-21 05:48 UTC NOAA-21. Publicamos 10,1 MW (11 píxeles entre 2,9 y 12,1 km del cráter, fondo 249 K); MIROVA da 0,36 MW. Causa sin encontrar.

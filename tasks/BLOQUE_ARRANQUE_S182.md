@@ -27,7 +27,7 @@ S181 coordinó el loop desde la rama `loop/activo`, como sesión dueña única (
 
 | # | Pregunta | Opciones | Recomendación |
 |---|---|---|---|
-| 1 | Merge de #996 (ficha SDA) | «mergea #996» o esperar | Mergear: la ficha pública dice hoy que VIIRS sigue en propuesta y que la historia es K, y las dos cosas son falsas |
+| 1 | ~~Merge de #996 (ficha SDA)~~ **HECHO** | «mergea #996» de Nicolás, merge `f53148aa1` (2026-11-12 23:58 UTC) | (texto original: Mergear: la ficha pública dice hoy que VIIRS sigue en propuesta y que la historia es K, y las dos cosas son falsas) |
 | 2 | `frontend/index.html:544` dice que lo anterior a las fechas de cambio es K y que el gráfico marca el cambio con una línea vertical. Desde el reemplazo es falso | PR de frontend con tag y sí (A45), o dejarlo | PR chico ahora, junto con la decisión 3 |
 | 3 | Quitar el selector «Cluster / Núcleo F5'» | quitarlo o dejarlo | Quitarlo: la historia ya no tiene records K y el núcleo no aplica a la vía |
 | 4 | Mecanismo de reversión (decisión 5 de `docs/AUDIT_S179.md`) | revert del PR o apagar el flag | Apagar el flag. Ojo: tras el reemplazo, revertir también exige restaurar la historia K desde el tag `pre-s180-reemplazo-historia` |
@@ -85,7 +85,7 @@ C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile, rama loop/acti
 2. Lee CLAUDE.md, tasks/BLOQUE_ARRANQUE_S182.md y las entradas (S181) de tasks/LOOP_OBJETIVOS.md §6.
 3. Dile a Nicolás qué issues siguen abiertos y pide las decisiones de la sección b, con tu recomendación.
 4. Trabajo, en orden:
-   a. Si dice «mergea #996»: gh pr ready 996 y gh pr merge 996 --merge --match-head-commit <head>.
+   a. (#996 ya integrado, f53148aa1.)
    b. PR de frontend (texto de index.html:544 y selector Núcleo F5'), con tag y su sí (A45),
       verificado en el navegador.
    c. Leer la primera comparación real de la guardia K VIIRS después del encendido.
