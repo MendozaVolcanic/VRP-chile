@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-12 21:16 UTC (S181): #994 integrado (sin aplicar a data/)
+- Nicolás: «mergea #994». CI verde sobre `18b9d221f` (pytest y bateria-v750a), CLEAN; merge commit `97979b94a` a las 21:15:51 UTC (`--match-head-commit`). En main: los 18 archivos de `experiments/_s180_reemplazo_via/`, `aplicar-reemplazo.yml` y `aplicar_historia_via.sh`; el merge no toca `data/`.
+- Falta el «sí» de A45 para despachar `aplicar-reemplazo.yml` (tag `pre-s180-reemplazo-historia`). El workflow regenera desde `origin/main` y se rehúsa entero si algún volcán pasa el tope o le queda K.
+- Sombra de los 34 (#995): la corrida programada de esta noche está en cola desde las 20:44 UTC.
+
 ### 2026-11-12 14:41 UTC (S181): #994 verificado sobre el main de hoy; listo para «mergea #994» y el «sí» de A45 (sin aplicar)
 - Nicolás: «Sí, que termine ella». La sesión de S180 ya había terminado: PR #994 (rama `claude/s180-union-via`, head `18b9d221f`), CLEAN, pytest y bateria-v750a verdes, con su verificador Sonnet aplicado (commit `09566680f`: el workflow ya no empuja un estado parcial si el script falla; `k_restante` exigido; 8 de 8 mutaciones atrapadas). No le escribí.
 - Comprobación propia en un worktree desechable de main `fb9b4da06` con los archivos del PR encima (`D:\vrp-trabajo\worktrees\s181-verif-994`; main no tocó ningún archivo del PR desde la base `8250b68f1`):
