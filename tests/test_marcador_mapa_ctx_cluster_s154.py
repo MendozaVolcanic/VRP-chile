@@ -108,10 +108,22 @@ def _hv(a, b, c, d):
     return 2 * 6371 * math.asin(math.sqrt(math.sin(p(c - a) / 2) ** 2 + math.cos(p(a)) * math.cos(p(c)) * math.sin(p(d - b) / 2) ** 2))
 
 
+def _records_k_de_lascar():
+    """S180 (2026-11-11): la historia publicada pasa a la vía (decisión de Nicolás del 2026-11-11) y `ctx_cluster` es
+    una fuente de K. K sigue corriendo como guardia (data/guardia_k_viirs/, data/guardia_k_modis/): la prueba toma los
+    records K de la serie publicada y de la guardia, para que siga midiendo el marcador sobre datos reales después
+    del reemplazo."""
+    out = []
+    for sub in ("mirova_equivalent", "guardia_k_viirs", "guardia_k_modis"):
+        p = ROOT / "data" / sub / "Lascar.json"
+        if p.exists():
+            out += json.loads(p.read_text(encoding="utf-8"))["records"]
+    return sorted(out, key=lambda r: r.get("datetime_utc", ""))
+
+
 def test_datos_reales_de_lascar_el_primer_marcador_es_el_cumulo():
-    d = json.loads((ROOT / "data" / "mirova_equivalent" / "Lascar.json").read_text(encoding="utf-8"))
-    rs = [r for r in d["records"] if r.get("final_hotspot_source") == "ctx_cluster" and r.get("anomaly_pixels")
-          and r.get("final_hotspot_lat") is not None][-200:]
+    rs = [r for r in _records_k_de_lascar() if r.get("final_hotspot_source") == "ctx_cluster"
+          and r.get("anomaly_pixels") and r.get("final_hotspot_lat") is not None][-200:]
     # control positivo del instrumento: entre esos records hay píxeles 0 lejos del cúmulo (si no, la prueba no mide nada)
     lejos_antes = sum(_hv(r["anomaly_pixels"][0]["lat"], r["anomaly_pixels"][0]["lon"], r["final_hotspot_lat"],
                           r["final_hotspot_lon"]) > 2 for r in rs)

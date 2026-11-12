@@ -77,8 +77,18 @@ def test_p5_diag_nti_max_persistido_en_modis():
     hubiera dejado de persistir nada. Lo que vigila esta prueba (A89, el nombre en el punto de uso del camino K) sigue
     igual sobre los records K. Ojo: cuando el reemplazo de la historia (P6 de S178) quite los records K de MODIS de
     data/mirova_equivalent/, el piso de 20 la pondrá en rojo a propósito y habrá que apuntarla a la guardia K de MODIS
-    (pipeline/profiles/guardia_k_modis.yaml) o retirarla."""
-    recs = [r for r in _records("Villarrica")
+    (pipeline/profiles/guardia_k_modis.yaml) o retirarla.
+
+    S180 (2026-11-11): hecho. El reemplazo de la historia con la vía (decisión de Nicolás del 2026-11-11) quita los
+    records K de MODIS de la serie publicada; K sigue corriendo como guardia y escribe en data/guardia_k_modis/. La
+    prueba mira los K de MODIS de las dos carpetas: antes del reemplazo casi todos vienen de la publicada, después
+    todos de la guardia (37 records de Villarrica al 2026-11-11). Si la guardia deja de escribir, el piso de 20 cae."""
+    guardia = os.path.join(ROOT, "data", "guardia_k_modis", "Villarrica.json")
+    extra = []
+    if os.path.exists(guardia):
+        with open(guardia, encoding="utf-8") as fp:
+            extra = json.load(fp).get("records", [])
+    recs = [r for r in list(_records("Villarrica")) + extra
             if isinstance(r, dict) and str(r.get("sensor", "")).startswith("MODIS")
             and str(r.get("datetime_utc", ""))[:10] >= "2026-06-01"
             and r.get("via_codigo_mirova") is not True]
@@ -97,7 +107,9 @@ def test_p10_cap_path_d_activo_en_perfil_operacional():
     importlib.reload(p)
     assert p.PATH_D_ONLY_CAP_MW is not None and p.PATH_D_ONLY_CAP_TBG_MAX_K is not None, (
         "el cap de path D dejó de estar en el perfil operacional")
-    recs = _records("PuyehueCordonCaulle")
-    con = sum(1 for r in recs if isinstance(r, dict)
-              and (r.get("primary_cluster") or {}).get("d9_capped") is not None)
-    assert con > 0, "ningún record de PCC persiste primary_cluster.d9_capped"
+    # S180 (2026-11-11): se retira la mitad de datos («algún record de PCC persiste primary_cluster.d9_capped»). El
+    # tope del path D es un mecanismo de K; con la historia reemplazada por la vía (decisión de Nicolás del 2026-11-11)
+    # la serie publicada no tiene K, y la guardia K (data/guardia_k_modis/, data/guardia_k_viirs/) no lo disparó en su
+    # ventana (0 de 89 records de PCC al 2026-11-11; en la serie publicada eran 2 en toda la historia, uno de 2026-03 y
+    # uno de 2026-10). Exigirlo sobre la guardia pondría la prueba en rojo por falta de un evento raro, no por un
+    # defecto. Queda la mitad del perfil, que es lo que pide el docstring (el cap se lee de `pipeline.profile`).
