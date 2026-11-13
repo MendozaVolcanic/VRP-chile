@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-13 00:29 UTC (S182): #997 abierto (texto del modal); Cordón Caulle explicado por la ROI, en verificación
+- **#997** (A45: «Sí, ábrelo», Nicolás). Tag `pre-s182-frontend-texto` = `f53148aa1`. Sólo `frontend/index.html:544`, mismo número de líneas. 496 pruebas que leen `index.html` pasan; en el navegador `viaDesde` null en las tres familias y sin avisos de cambio. Verificador Sonnet: CORRECTO CON OBSERVACIONES; aplicada «se reemplazó» (el cómputo fue del 8 al 12-nov) en `3cd02eaee`. Espera CI y «mergea #997».
+- **Cordón Caulle V750 2026-10-21 05:48 NOAA-21** (agente, `D:\vrp-trabajo\temporales\s182_pcc\INFORME.md`; SIN VERIFICADOR todavía): el port re-corrido sobre la grilla de V750-B da 10,1 MW con la ROI de producción `sens` (B4, `pipeline/grillas_mirova.yaml:38`) y 0,345 MW a 6,45 km con `crater` (B2); MIROVA 0,36 MW a 6,45 km, de la TABLA (el OCR no tiene filas de PCC el 20 y 21-oct). Los 10 píxeles extra, al S y SW, alertan sólo con el umbral sensible. Otras 4 pasadas de PCC desde marzo con píxeles en la mitad sur. Marca: SOSPECHA hasta el verificador.
+- **522 pasadas de borde V750** (mismo agente): ni K ni el `.m` ni el port tienen corte por ángulo de vista; 499 son escenas casi sin datos que el `.m` anula (el port guarda `vrp_mw 0.0` donde el `.m` da NaN) y 23 completas (22 de NOAA-21 del 13-oct, gránulos tardíos de LAADS). Chillán 13-oct 06:42 (10,94 MW): MIROVA no tiene esa pasada en tabla ni OCR. SOSPECHA hasta el verificador.
+- Verificador Sonnet del informe lanzado (`D:\vrp-trabajo\temporales\s182_verif_pcc\`).
+
 ### 2026-11-13 00:12 UTC (S182): apertura; historia intacta, vigilancias verdes, el botón F5' ya había salido
 - Chequeo post NRT sobre `origin/main`: 11 de 11 OK, 0 K antes del corte, 0 duplicados.
 - Vigilancias verdes: MODIS (run 43326672888, 23:11 UTC, 17 de 29 protegidas vistas, ya no 12), VIIRS 375 y 750 (run 43312348741, 0 de 29: la primera comparación real es la noche del 11-13).
