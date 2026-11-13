@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-13 17:06 UTC (S182): 37 worktrees quitados (Nicolás: «sí, pero revisa bien»); C: 14 a 28 GB, D: 9,7 a 40 GB
+- Revisión antes de borrar: archivos ignorados por git en cada uno (`D:\vrp-trabajo\temporales\s182_ignorados_wt.txt`: sólo `.claude/*.json` de sesiones, logs de un verificador S162, 5 mutantes de V750-A y un CSV de MIROVA idéntico al del checkout principal, md5 igual), referencias en el traspaso y la memoria (ninguna), y sesiones: `reproceso-historia-d` sigue CORRIENDO en `D:\vrp-trabajo\worktrees\s180-reemplazo`, y #955 y #981 siguen abiertos.
+- Quedan 6: `wt_s182_pcc`, `wt_s182_front`, `s180-reemplazo` (sesión viva), `relaxed-almeida-d17378` y `s178-955` (#955), `s178-plan` (#981). Respaldo de lo no subido y de lo ignorado en `D:\vrp-trabajo\papelera_s182\` (60 archivos, 829 KB; la propuesta del paper de S173 que no está en main va ahí). Ninguna rama borrada; los commits sólo locales de `s178-955`, `ver945` y `ver946` están en ramas de origin.
+- `git worktree remove --force` de 38: 37 OK; `s180-tablero-por-sensor-3da0a8` quedó como carpeta vacía de 8 KB bloqueada por Windows (ya no es worktree). Lista y salida en `D:\vrp-trabajo\papelera_s182\quitar_*.txt`.
+- Reproceso PCC (run 43467764489) en cola, 1 de 35 jobs; CI de #999 pendiente.
+
 ### 2026-11-13 16:58 UTC (S182): #999 (caja del cráter en PCC) abierto y reproceso despachado; inventario de worktrees
 - Nicolás: «Yaml y reproceso PCC». Tag `pre-s182-pcc-crater` = `46b2d0b5e` (origin/main) antes del primer edit. Rama `claude/s182-pcc-crater` (`4b306b31e`), worktree `D:\vrp-trabajo\wt_s182_pcc`, PR #999 en borrador: `grillas_mirova.yaml:38` PCC `sens` a `crater` vía `scripts/roi_v750b_a_grillas.py --brazo B4c`; prueba de efecto en `tests/test_roi_v750b_variantes_s169.py` (45 pasan local); ficha SDA v1.26 PROPUESTA; evidencia en `experiments/_s182_pcc_crater/`. La suite local completa se cortó en `test_bateria_lector_v750a_s174.py` por timeout del subproceso con el disco cargado (234 pasaron antes): se mira el CI.
 - Reproceso: `reproc-historia-via.yml` desde la rama de #999, PCC, 2025-02-15 a 2026-11-13 en 6 ventanas alineadas a los tramos del planificador (34 trozos), run 43467764489. Sin push; el reemplazo en `data/` va con el sí aparte de Nicolás y un script propio (sólo VIIRS 750 de PCC).
