@@ -83,10 +83,12 @@ def leer_juzgadas(path=JUZGADAS):
 
 
 def volcanes_sens(path=GRILLAS):
-    """Los volcanes Tier A cuya ROI de VIIRS 750 es la sensible, leídos de la grilla (no se copian aquí: A102)."""
+    """Los volcanes Tier A cuya ROI de VIIRS 750 no es la de ejemplo del .m (def), leídos de la grilla (no se copian
+    aquí: A102). S182: Cordón Caulle pasó de sens a crater (B4c) y sigue con una región sensible propia, distinta de la
+    de la guardia, así que sigue en el informe; con «== sens» se habría caído de él sin aviso."""
     with open(path, encoding="utf-8") as fh:
         volcanes = yaml.safe_load(fh)["volcanes"]
-    return sorted(v for v, d in volcanes.items() if d.get("roi_v750") == "sens")
+    return sorted(v for v, d in volcanes.items() if d.get("roi_v750", "def") != "def")
 
 
 def informe_sens(prod, guardia, encendido, vols):
