@@ -77,6 +77,18 @@ tienen la misma forma que los de `data/sombra_34/` y todos son anteriores al 202
 por clave `(datetime_utc, sensor)` nunca choca. Se carga sólo cuando el período pedido empieza antes del primer record
 de la sombra.
 
+**Respuesta de esa sesión (S183, rama `feat/s183-tablero-absorbe-preliminar34`, 2026-11-13):**
+- Su alcance es `frontend/index.html`, `vista_volcan.css`, sus pruebas y una fila de la ficha.
+- Sigue leyendo los 34 desde `data/sombra_34/` (`SOMBRA_34_BASE`), sin cargar `historia_34`.
+- No toca `pages-deploy.yml` ni `data/`, ni archiva los JSON de abril.
+- No decidió D1 ni D5: usa el radio de cumbre de 5 km que ya existía (`RADIO_CUMBRE_SOMBRA_KM`).
+- Agrega el rótulo «píxel a X km de la cumbre», la marca «también visto desde X» y los filtros «sólo los 34» y «sólo los 11».
+- Retira `preliminar_34.html` y `.js`.
+
+Ojo para la Tarea 8: `focosCompartidosSombra` y `pixelEnCumbreSombra` recorren todos los records cargados de los 34.
+Con la historia unida funcionan igual, si los records tienen la misma forma, pero recorren unas 75 veces más records (unos 6.000 de historia por volcán contra unos 80 de la sombra hoy).
+Hay que medir el tiempo de la página con la historia cargada de un volcán antes de cargarla para varios a la vez.
+
 ---
 
 ## 4. Mapa de archivos
