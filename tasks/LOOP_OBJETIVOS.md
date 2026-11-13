@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-13 17:59 UTC (S182): worktree de tablero-por-sensor restaurado; dos guardias de #999 al día
+- Error mío: el worktree `.claude/worktrees/s180-tablero-por-sensor-3da0a8` se quitó mientras Nicolás retomaba esa sesión (el inventario la vio sin correr; a las 17:19 UTC tenía actividad y había lanzado dos sesiones nuevas en otros worktrees). Restaurado en la misma ruta desde su rama (`b9e284cef`, limpia y mergeada en #986) con su `.claude/*.json` del respaldo. Lección: mirar `list_sessions` justo antes de cada `remove`, no sólo en el inventario.
+- #999: el CI marcó dos guardias por el cambio intencional. `tests/test_sombra_34_s172.py` fija ahora el bloque de los 11 con B4c (3.910 bytes, sha256 `7dac91bf`; el resto del archivo, byte a byte igual al del tag); `scripts/vigilancia_guardia_viirs.py::volcanes_sens` toma toda `roi_v750` distinta de `def`, así Cordón Caulle (crater) sigue en el informe de la región sensible. 309 pruebas relacionadas pasan local. Commit `d6344e06e`.
+- Pendiente de revisar: el lector de la retrospectiva (`caja_v750_de`, `tests/test_leer_retro_s172.py`) conoce B4 y no B4c; sólo importa si se vuelve a leer una retrospectiva con records nuevos de PCC.
+- Reproceso PCC (run 43467764489): 7 de 35 jobs, 0 fallas.
+
 ### 2026-11-13 17:06 UTC (S182): 37 worktrees quitados (Nicolás: «sí, pero revisa bien»); C: 14 a 28 GB, D: 9,7 a 40 GB
 - Revisión antes de borrar: archivos ignorados por git en cada uno (`D:\vrp-trabajo\temporales\s182_ignorados_wt.txt`: sólo `.claude/*.json` de sesiones, logs de un verificador S162, 5 mutantes de V750-A y un CSV de MIROVA idéntico al del checkout principal, md5 igual), referencias en el traspaso y la memoria (ninguna), y sesiones: `reproceso-historia-d` sigue CORRIENDO en `D:\vrp-trabajo\worktrees\s180-reemplazo`, y #955 y #981 siguen abiertos.
 - Quedan 6: `wt_s182_pcc`, `wt_s182_front`, `s180-reemplazo` (sesión viva), `relaxed-almeida-d17378` y `s178-955` (#955), `s178-plan` (#981). Respaldo de lo no subido y de lo ignorado en `D:\vrp-trabajo\papelera_s182\` (60 archivos, 829 KB; la propuesta del paper de S173 que no está en main va ahí). Ninguna rama borrada; los commits sólo locales de `s178-955`, `ver945` y `ver946` están en ramas de origin.
