@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-13 00:12 UTC (S182): apertura; historia intacta, vigilancias verdes, el botón F5' ya había salido
+- Chequeo post NRT sobre `origin/main`: 11 de 11 OK, 0 K antes del corte, 0 duplicados.
+- Vigilancias verdes: MODIS (run 43326672888, 23:11 UTC, 17 de 29 protegidas vistas, ya no 12), VIIRS 375 y 750 (run 43312348741, 0 de 29: la primera comparación real es la noche del 11-13).
+- #995 sigue abierto sólo porque `nrt-monitor` corrió a las 20:17 UTC, antes de la sombra verde de las 20:44 (run 43303258837); se cierra en la próxima pasada del monitor. Abiertos además #973, #943 y #813.
+- Disco: C: 3,4 GB libres (pagefile.sys 20,6 GB), D: 13 GB. Sobre el umbral de 3 GB, justo.
+- Frontend en `origin/main`: el selector «Cluster / Núcleo F5'» YA salió en S180 (`0840a2feb`); `USE_F5_CORE` quedó fijo y la vía está exenta. En los 11 Tier A hay 0 records sin marca de la vía y 0 caídas a K (`D:\vrp-trabajo\temporales\s182\sin_marca.py`), así que el núcleo no actúa sobre nada y no se dibuja línea de cambio (`primeraVia` exige un K anterior). Lo falso es el texto de `frontend/index.html:544`: el «Estado al 2026-11-12» (dice que lo anterior es K y que hay línea vertical) y el «Aviso (2026-10-20)» (dice que las series son de K desde el 18-sep).
+- Agente de solo lectura lanzado: Cordón Caulle V750 2026-10-21 05:48 y las 522 pasadas de borde, contra el .m de OSF. Salida en `D:\vrp-trabajo\temporales\s182_pcc\`.
+
 ### 2026-11-12 23:58 UTC (S181, después del cierre): #996 integrado
 - Nicolás escribió «mergea #996». CI verde sobre `a2b1f49d2` (pytest y bateria-v750a), CLEAN. `gh pr ready` y merge commit `f53148aa1` a las 23:58:03 UTC, con `--match-head-commit`. La ficha SDA en main ya trae la v1.25 y las v1.23 y v1.24 vigentes. La decisión 1 del bloque S182 queda hecha.
 
