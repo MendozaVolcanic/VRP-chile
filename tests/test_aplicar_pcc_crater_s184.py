@@ -22,9 +22,10 @@ import aplicar_pcc_v750 as ap  # noqa: E402
 V = ap.VOLCAN
 
 
-def rec(dt, sensor, vrp=1.0, sha=ap.CODIGO_SHA, perfil=ap.PERFIL, via=True, fp=None):
+def rec(dt, sensor, vrp=1.0, sha=ap.CODIGO_SHA, perfil=ap.PERFIL, via=True, fp=None, roi="crater"):
     r = {"datetime_utc": dt, "sensor": sensor, "vrp_mw": vrp, "via_codigo_mirova": via,
-         "regimen": {"perfil": perfil, "codigo_sha": sha, "origen": "actions"}}
+         "regimen": {"perfil": perfil, "codigo_sha": sha, "origen": "actions"},
+         "diag_codigo_mirova": {"roi": roi}}
     if fp:
         r["first_processed_utc"] = fp
     return r
@@ -87,7 +88,8 @@ def test_no_modifica_las_entradas_y_es_idempotente():
 
 
 @pytest.mark.parametrize("cambio", [
-    {"sha": "otro"}, {"perfil": "mirova_equivalent"}, {"via": False}, {"via": None}])
+    {"sha": "otro"}, {"perfil": "mirova_equivalent"}, {"via": False}, {"via": None}, {"via": 1}, {"roi": "sens"},
+    {"roi": None}])
 def test_union_de_otro_codigo_perfil_o_sin_via_se_rehusa(cambio):
     u = op(rec("2025-02-16 05:00", "VIIRS_NOAA20_750", **cambio))
     with pytest.raises(ap.Rehusado):
@@ -170,3 +172,66 @@ def test_ensayo_sobre_los_datos_reales(tmp_path):
     assert inf["aplicado"] is False
     assert inf["fraccion_sin_par"] <= 0.02
     assert inf["reemplazados"] > 0
+
+
+# Pruebas que pidió el verificador limpio de S184 (hallazgos 1 a 4, 6, 8, 9 y 10).
+
+def test_bordes_de_la_ventana_son_inclusivos_y_la_union_fuera_no_entra():
+    pub = [rec(f"2025-02-{d} 05:00", "VIIRS_NOAA20_750", vrp=9.0, sha="viejo", roi="sens") for d in (14, 15, 20, 21)]
+    union = op(*[rec(f"2025-02-{d} 05:00", "VIIRS_NOAA20_750", vrp=0.1) for d in (14, 15, 20, 21)],
+               rec("2025-02-22 05:00", "VIIRS_NOAA21_750", vrp=0.1))
+    store, inf = ap.reemplazar(op(*pub), union, "2025-02-15", "2025-02-20")
+    por = {r["datetime_utc"][:10]: r["vrp_mw"] for r in store["records"]}
+    assert por == {"2025-02-14": 9.0, "2025-02-15": 0.1, "2025-02-20": 0.1, "2025-02-21": 9.0}
+    assert inf["agregados"] == 0 and inf["reemplazados"] == 2 and inf["tras_ventana_sin_tocar"] == 1
+
+
+def test_la_clave_distingue_sensor_y_tolera_formato_del_instante():
+    pub = [rec("2025-02-16 05:00", "VIIRS_NOAA20_750", vrp=9.0, sha="viejo"),
+           rec("2025-02-16 05:00", "VIIRS_NOAA21_750", vrp=8.0, sha="viejo")]
+    union = op(rec("2025-02-16T05:00:00Z", "VIIRS_NOAA20_750", vrp=0.2),
+               rec("2025-02-16 05:00", "VIIRS_NOAA21_750", vrp=0.3))
+    store, inf = ap.reemplazar(op(*pub), union, "2025-02-15", "2025-02-20")
+    assert {r["sensor"]: r["vrp_mw"] for r in store["records"]} == {"VIIRS_NOAA20_750": 0.2, "VIIRS_NOAA21_750": 0.3}
+    assert inf["reemplazados"] == 2 and inf["agregados"] == 0 and inf["sin_par_conservados"] == 0
+
+
+def test_empates_conservan_el_orden_publicado():
+    pub = [rec("2025-02-16 05:00", "VIIRS_NOAA20_750", sha="viejo"), rec("2025-02-16 05:00", "VIIRS_NOAA20"),
+           rec("2025-02-16 05:00", "MODIS_AQUA")]
+    store, _ = ap.reemplazar(op(*pub), op(rec("2025-02-16 05:00", "VIIRS_NOAA20_750")), "2025-02-15", "2025-02-20")
+    assert [r["sensor"] for r in store["records"]] == ["VIIRS_NOAA20_750", "VIIRS_NOAA20", "MODIS_AQUA"]
+
+
+def test_informa_lo_que_queda_con_otra_caja_tras_la_ventana():
+    pub = [rec("2025-02-21 05:00", "VIIRS_NOAA20_750", roi="sens"), rec("2025-02-22 05:00", "VIIRS_NOAA20_750")]
+    _, inf = ap.reemplazar(op(*pub), op(), "2025-02-15", "2025-02-20")
+    assert inf["tras_ventana_sin_tocar"] == 2 and inf["tras_ventana_con_otra_caja"] == 1
+
+
+def test_dia_con_v750_publicado_sin_v750_en_la_union_se_rehusa_aunque_el_tope_lo_permita(tmp_path):
+    pub = [rec(f"2025-02-1{d} 05:00", "VIIRS_NOAA20_750", sha="viejo") for d in (5, 6)]
+    union = [rec("2025-02-15 05:00", "VIIRS_NOAA20_750"), rec("2025-02-16 05:00", "VIIRS_NOAA20")]
+    datos, u, iu = _arbol(tmp_path, pub, union)
+    antes = (datos / f"{V}.json").read_bytes()
+    informe = tmp_path / "inf.json"
+    codigo = ap.main(["--datos", str(datos), "--union", str(u), "--informe-union", str(iu), "--max-sin-par", "1",
+                      "--informe", str(informe), "--aplicar"])
+    assert codigo == 2 and (datos / f"{V}.json").read_bytes() == antes
+    inf = json.loads(informe.read_text(encoding="utf-8"))
+    assert inf["dias_v750_publicados_sin_union"] == ["2025-02-16"]
+
+
+@pytest.mark.parametrize("cambio", [{"sha": "otro"}, {"roi": "sens"}, {"perfil": "otro"}])
+def test_correr_valida_la_union_antes_de_escribir(tmp_path, cambio):
+    pub = [rec("2025-02-16 05:00", "VIIRS_NOAA20_750", vrp=10.1, sha="viejo")]
+    datos, u, iu = _arbol(tmp_path, pub, [rec("2025-02-16 05:00", "VIIRS_NOAA20_750", vrp=0.35, **cambio)])
+    antes = (datos / f"{V}.json").read_bytes()
+    codigo = ap.main(["--datos", str(datos), "--union", str(u), "--informe-union", str(iu), "--max-sin-par", "1",
+                      "--informe", str(tmp_path / "inf.json"), "--aplicar"])
+    assert codigo == 2 and (datos / f"{V}.json").read_bytes() == antes
+
+
+def test_el_sh_no_tolera_sin_par():
+    sh = (RAIZ / "experiments" / "_s184_pcc_crater_aplicar" / "aplicar_pcc_v750.sh").read_text(encoding="utf-8")
+    assert '"${MAX_SIN_PAR:-0}"' in sh and "--aplicar" in sh and "set -euo pipefail" in sh

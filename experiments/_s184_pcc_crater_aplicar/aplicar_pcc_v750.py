@@ -18,13 +18,16 @@ REGLAS, y por qué:
   merge de #999; los días entre HASTA y el merge siguen con `sens` y se informan como `tras_ventana`).
 - Cada record publicado en la ventana con par en el reproceso (misma pasada: `datetime_utc` y `sensor`) se reemplaza;
   conserva su `first_processed_utc` (cuándo se publicó por primera vez).
+- Una pasada es la misma si coinciden el minuto de `datetime_utc` (con «T» o espacio) y el `sensor`.
 - Sin par: el reproceso no tiene esa pasada. Con el mismo código de la vía esto sólo pasa si una descarga falló en el
   reproceso, no porque la vía la descarte. Se CONSERVA (quitarla borra una observación real; dejarla sólo deja la caja
   vieja en esa pasada) y se lista. Si pasan del tope, se rehúsa: un tope pasado es un trozo con descargas fallidas
-  (FileExistsError de S182), no un borde.
+  (FileExistsError de S182), no un borde. Además se rehúsa todo día con VIIRS 750 publicado sin ningún VIIRS 750 en la
+  unión. El tope del .sh es 0: en el ensayo con 31 trozos no hubo ningún sin par en los días cubiertos.
 - Pasadas sólo del reproceso: se agregan (la vía las ve con la caja nueva y el NRT no las tenía).
 - Todo record del reproceso tiene que venir del perfil `_s172_retro_paquete`, con `via_codigo_mirova` verdadero y con
-  `regimen.codigo_sha` = `CODIGO_SHA` (el commit de la rama de #999 que tiene `crater`; lo vigila la prueba).
+  `regimen.codigo_sha` = `CODIGO_SHA` (el commit de la rama de #999 que tiene `crater`; lo vigila la prueba), y cada
+  VIIRS 750 con `diag_codigo_mirova.roi` = `crater`.
 - La unión no puede tener huecos de calendario en la ventana (un trozo que falta deja pasadas sin reemplazar).
 - TODO O NADA: si algo se rehúsa, no escribe y sale con 2. Por defecto es ENSAYO; `--aplicar` escribe.
 
@@ -63,8 +66,18 @@ def es_v750(sensor) -> bool:
     return s.startswith("VIIRS") and s.endswith("_750")
 
 
+def _minuto(dt) -> str:
+    """'2026-11-11T13:09:21Z' y '2026-11-11 13:09' -> '2026-11-11 13:09' (verificador S184, hallazgo 8: con igualdad
+    exacta de texto, una misma pasada escrita en dos formatos quedaría duplicada en vez de reemplazada)."""
+    return str(dt or "").replace("T", " ").rstrip("Z")[:16]
+
+
 def _clave(r: dict) -> tuple:
-    return (r.get("datetime_utc"), r.get("sensor"))
+    return (_minuto(r.get("datetime_utc")), r.get("sensor"))
+
+
+def _roi(r: dict):
+    return (r.get("diag_codigo_mirova") or {}).get("roi")
 
 
 def _dia(r: dict) -> str:
@@ -86,6 +99,9 @@ def validar_union(union: dict, informe_union: dict, desde: str, hasta: str) -> N
             raise Rehusado(f"REHUSADO: {_clave(r)} viene del código {reg.get('codigo_sha')!r}, no de {CODIGO_SHA}")
         if r.get("via_codigo_mirova") is not True:
             raise Rehusado(f"REHUSADO: {_clave(r)} no es de la vía ({r.get('via_codigo_mirova')!r})")
+        # Evidencia directa de la caja (hallazgo 7): el record anota la región sensible que usó la vía.
+        if es_v750(r.get("sensor")) and _roi(r) != "crater":
+            raise Rehusado(f"REHUSADO: {_clave(r)} usó la región {_roi(r)!r}, no 'crater'")
     iv = (informe_union.get("volcanes") or {}).get(VOLCAN) or {}
     if iv.get("huecos"):
         raise Rehusado(f"REHUSADO: la unión tiene huecos de calendario: {iv['huecos'][:10]}")
@@ -105,7 +121,7 @@ def reemplazar(operacional: dict, union: dict, desde: str, hasta: str) -> tuple[
                 raise Rehusado(f"REHUSADO: pasada repetida en la unión: {k}")
             nuevos[k] = r
     salida, sin_par = [], []
-    reemplazados = tras = 0
+    reemplazados = tras = tras_otra_caja = 0
     vistos = set()
     for r in operacional.get("records", []):
         if not es_v750(r.get("sensor")):
@@ -120,6 +136,7 @@ def reemplazar(operacional: dict, union: dict, desde: str, hasta: str) -> tuple[
             continue
         if _dia(r) > hasta:
             tras += 1
+            tras_otra_caja += _roi(r) != "crater"
             salida.append(copy.deepcopy(r))
             continue
         if k in nuevos:
@@ -135,10 +152,17 @@ def reemplazar(operacional: dict, union: dict, desde: str, hasta: str) -> tuple[
             salida.append(copy.deepcopy(r))
     agregados = [copy.deepcopy(r) for r in nuevos.values()]
     salida.extend(agregados)
-    salida.sort(key=lambda r: (r.get("datetime_utc", ""), r.get("sensor", "")))
+    # Sólo por instante, y sort estable: los empates conservan el orden publicado (hallazgo 9; el diff de git queda
+    # en los records reemplazados).
+    salida.sort(key=lambda r: _minuto(r.get("datetime_utc")))
     store = {k: v for k, v in operacional.items() if k != "records"}
     store["records"] = salida
     en_ventana = reemplazados + len(sin_par)
+    # Hallazgo 6: los huecos del informe de la unión se cuentan por cualquier sensor. Un día con VIIRS 750 publicado y
+    # ningún VIIRS 750 en la unión es un trozo que no bajó esa familia: se rehúsa en correr(), sin importar el tope.
+    dias_pub = {_dia(r) for r in operacional.get("records", [])
+                if es_v750(r.get("sensor")) and desde <= _dia(r) <= hasta}
+    dias_union = {_dia(r) for r in union.get("records", []) if es_v750(r.get("sensor")) and desde <= _dia(r) <= hasta}
     informe = {
         "volcano": VOLCAN, "familia": "VIIRS750", "desde": desde, "hasta": hasta,
         "publicados_en_ventana": en_ventana, "reemplazados": reemplazados, "agregados": len(agregados),
@@ -147,6 +171,8 @@ def reemplazar(operacional: dict, union: dict, desde: str, hasta: str) -> tuple[
         "sin_par_claves": [list(_clave(r)) for r in sin_par],
         "agregados_claves": [list(_clave(r)) for r in agregados],
         "tras_ventana_sin_tocar": tras,
+        "tras_ventana_con_otra_caja": tras_otra_caja,
+        "dias_v750_publicados_sin_union": sorted(dias_pub - dias_union),
         "records_antes": len(operacional.get("records", [])), "records_despues": len(salida),
         "otros_sensores_intactos": sum(1 for r in salida if not es_v750(r.get("sensor"))),
     }
@@ -168,6 +194,9 @@ def correr(datos: Path, union_p: Path, informe_union_p: Path, hasta: str | None,
     store, inf = reemplazar(operacional, union, DESDE, hasta)
     inf.update({"aplicado": False, "max_sin_par": max_sin_par, "sha256_antes": sha_antes,
                 "union_sha256": _sha(union_p), "codigo_sha_reproceso": CODIGO_SHA})
+    if inf["dias_v750_publicados_sin_union"]:
+        raise Rehusado(f"REHUSADO: días con VIIRS 750 publicado y ninguno en la unión: "
+                       f"{inf['dias_v750_publicados_sin_union'][:10]}", inf)
     if inf["fraccion_sin_par"] > max_sin_par:
         raise Rehusado(f"REHUSADO: sin par {inf['fraccion_sin_par']:.2%} sobre el tope {max_sin_par:.2%}", inf)
     if not aplicar:

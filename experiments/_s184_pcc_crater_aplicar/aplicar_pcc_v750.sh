@@ -5,4 +5,4 @@
 # El tope de sin par sale del ensayo local (ensayo/informe.json); si se pasa, no se escribe nada.
 set -euo pipefail
 python experiments/_s184_pcc_crater_aplicar/aplicar_pcc_v750.py \
-  --max-sin-par "${MAX_SIN_PAR:-0.02}" --informe experiments/_s184_pcc_crater_aplicar/aplicado/informe.json --aplicar
+  --max-sin-par "${MAX_SIN_PAR:-0}" --informe experiments/_s184_pcc_crater_aplicar/aplicado/informe.json --aplicar
