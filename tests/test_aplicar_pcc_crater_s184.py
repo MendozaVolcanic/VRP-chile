@@ -235,3 +235,13 @@ def test_correr_valida_la_union_antes_de_escribir(tmp_path, cambio):
 def test_el_sh_no_tolera_sin_par():
     sh = (RAIZ / "experiments" / "_s184_pcc_crater_aplicar" / "aplicar_pcc_v750.sh").read_text(encoding="utf-8")
     assert '"${MAX_SIN_PAR:-0}"' in sh and "--aplicar" in sh and "set -euo pipefail" in sh
+
+
+def test_chequeo_caja_cuenta_lo_que_no_es_crater():
+    sys.path.insert(0, str(RAIZ / "experiments" / "_s184_pcc_crater_aplicar"))
+    import chequeo_caja as cc
+    s = op(rec("2025-02-14 05:00", "VIIRS_NOAA20_750", roi="sens"), rec("2025-02-16 05:00", "VIIRS_NOAA20_750"),
+           rec("2025-02-16 06:00", "VIIRS_NOAA21_750", roi="sens"), rec("2025-02-16 06:00", "VIIRS_NOAA21", roi="sens"))
+    n, caja, otras = cc.contar(s, "2025-02-15")
+    assert n == 2 and caja == {"crater": 1, "sens": 1} and otras == [("2025-02-16 06:00", "VIIRS_NOAA21_750", "sens")]
+    assert cc.contar(op(rec("2025-02-16 05:00", "VIIRS_NOAA20_750")), "2025-02-15")[2] == []

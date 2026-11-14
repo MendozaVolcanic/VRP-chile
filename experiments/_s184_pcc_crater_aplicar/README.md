@@ -17,6 +17,7 @@ publicaron 10,1 MW de 11 píxeles del flanco del Puyehue, cuando MIROVA publicó
 | `aplicar_pcc_v750.py`, `aplicar_pcc_v750.sh` | Reemplazo sólo de VIIRS 750 de PCC; reglas en el docstring; lo corre `.github/workflows/aplicar-reemplazo.yml` con el sí de Nicolás |
 | `ensayo/informe.json` | Ensayo (sin escribir) sobre la serie publicada de `origin/main` `f7e7aa5c6` |
 | `efecto_reemplazo.py`, `efecto_reemplazo_salida.txt` | Qué cambia en la serie |
+| `chequeo_caja.py` | Cuenta las pasadas VIIRS 750 de PCC por caja; sale con 1 si queda alguna sin `crater` |
 
 Pruebas: `tests/test_aplicar_pcc_crater_s184.py`.
 
@@ -27,8 +28,25 @@ Pruebas: `tests/test_aplicar_pcc_crater_s184.py`.
 - 64 pasadas cambian de potencia: 50 suben y 14 bajan; 17 pasan de 0 a tener potencia y 10 de tener potencia a 0.
   Pasadas de 1 MW o más: 129 antes, 135 después.
 - 2026-10-21 05:48 NOAA-21: 10,115 MW a 9,40 km, pasa a 0,345 MW a 2,85 km (`final_hotspot_dist_km`).
-- 3 pasadas posteriores a la ventana (2026-11-14) quedan con `sens` hasta que se decida si se cubren con un reproceso
-  corto entre el 2026-11-14 y el merge.
+- 3 pasadas posteriores a la ventana (2026-11-14) quedan con `sens`; las cubre el paso 3 de la secuencia.
+
+## Secuencia de aplicación (Nicolás, 2026-11-14: «Sí, cúbrelos»)
+
+Todas las pasadas de la cola (2026-11-14 en adelante) son ya versión estándar, así que el NRT no las reescribe solo.
+Después del «mergea #999» y del sí para escribir en `data/`:
+
+1. Merge de #999 y esperar que termine cualquier corrida del NRT de Cordón Caulle que haya empezado antes del merge
+   (una corrida vieja escribiría con `sens`).
+2. `aplicar-reemplazo.yml` con `aplicar_pcc_v750.sh`: reemplaza 2025-02-15 a 2026-11-13.
+3. `nrt.yml` con `profile=mirova_equivalent`, `volcano=PuyehueCordonCaulle`, `start=2026-11-14`, `end=<día UTC del
+   merge>`, `overwrite=true`: reprocesa esos días con el código de main, ya con `crater`. Reescribe también MODIS y
+   VIIRS 375 de PCC en esos días, con el mismo código que ya los escribió.
+4. `python experiments/_s184_pcc_crater_aplicar/chequeo_caja.py data/mirova_equivalent/PuyehueCordonCaulle.json`
+   sobre main: tiene que salir 0 (ninguna pasada VIIRS 750 desde el 2025-02-15 con otra caja). Si una descarga falló
+   (FileExistsError en un runner de AWS), la lista dice cuáles faltan y el paso 3 se repite para esos días.
+
+Ensayado sobre una copia de la serie de `f7e7aa5c6`: tras el paso 2 quedan 2.994 con `crater` y 3 con `sens`, las
+tres del 2026-11-14, que son las del paso 3.
 
 ## Por qué suben 50 pasadas con una región sensible más chica
 
