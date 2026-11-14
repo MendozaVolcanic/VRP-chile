@@ -88,3 +88,31 @@ def test_on_entre_comillas_solo_dispatch_permisos_de_lectura_y_grupo_propio():
     assert "git push" not in texto and "git commit" not in texto
     assert d["concurrency"]["group"].startswith("reproc-historia-via")
     assert d["concurrency"]["group"] != _yml(WF_RETRO)["concurrency"]["group"]
+
+
+# S180 (2026-11-13): los 34 sin MIROVA (plan docs/superpowers/plans/2026-11-13-historia-34-volcanos-via.md, Tarea 1)
+# al final de tests/test_reproc_historia_via_s180.py
+def test_los_34_salen_de_la_grilla_menos_los_11():
+    PH = _ph()
+    assert len(PH.LOS_34) == 34 and not set(PH.LOS_34) & set(PT.TIER_A)
+    assert "Calbuco" in PH.LOS_34 and "Lascar" not in PH.LOS_34
+
+
+def test_planifica_los_34_y_deja_el_sellado_como_estaba():
+    PH = _ph()
+    antes = PT.TIER_A
+    jobs, _ = PH.planificar(PH.PERFIL_VIA, "Calbuco,Osorno", "2025-03-01:2025-03-31")
+    assert jobs and {j["vol"] for j in jobs} == {"Calbuco", "Osorno"}
+    assert PT.TIER_A == antes
+
+
+def test_rehusa_mezclar_los_11_con_los_34():
+    PH = _ph()
+    with pytest.raises(SystemExit):
+        PH.planificar(PH.PERFIL_VIA, "Calbuco,Lascar", "2025-03-01:2025-03-31")
+
+
+def test_rehusa_un_volcan_que_no_es_de_ningun_grupo():
+    PH = _ph()
+    with pytest.raises(SystemExit):
+        PH.planificar(PH.PERFIL_VIA, "Calbuco,Etna", "2025-03-01:2025-03-31")
