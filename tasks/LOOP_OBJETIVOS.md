@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-14 17:51 UTC (S184): #1005 entró con la ficha v1.27; #999 pasa a v1.28; CI verde, espera «mergea #999»
+- #1005 mergeado (17:35 UTC, otra sesión) con la ficha v1.27: #999 quedó DIRTY otra vez. Unido main (commit `466f215aa`); la entrada de la caja del cráter pasa a **v1.28, 2026-11-14**, contenido igual (`D:rp-trabajo	emporales\s184esolver_ficha2.py`). 167 pruebas relacionadas pasan local.
+- CI de `466f215aa` (run 43622233914): pytest y bateria-v750a SUCCESS; #999 CLEAN. Pedido a Nicolás: «mergea #999» y el sí para la secuencia sobre `data/` (aplicar-reemplazo, despacho del NRT con overwrite desde el 2026-11-14, `chequeo_caja.py` en 0).
+
 ### 2026-11-14 17:36 UTC (S184): Nicolás: «Sí, cúbrelos»; secuencia para dejar PCC V750 con una sola caja
 - Las 6 pasadas VIIRS 750 de PCC del 13 y 14-nov son `standard` con `sens`: el NRT no las reescribe solo (sólo reemplaza `nrt` por `standard` o con `overwrite`). Cubrirlas sin un segundo PR: tras el merge de #999, despachar `nrt.yml` con `profile=mirova_equivalent`, `volcano=PuyehueCordonCaulle`, `start=2026-11-14`, `end=<día del merge>`, `overwrite=true` (reescribe también MODIS y VIIRS 375 de PCC esos días, con el mismo código).
 - `experiments/_s184_pcc_crater_aplicar/chequeo_caja.py` (rama de #999, commit `91fa43c29`, 28 pruebas): sale con 1 si queda alguna VIIRS 750 de PCC desde el 2025-02-15 sin `crater`. Sobre una copia de `f7e7aa5c6`: antes 2.997 `sens`; tras la aplicación simulada, 2.994 `crater` y 3 `sens` (las del 14-nov, que cubre el despacho). Secuencia en el README de la carpeta y en el cuerpo de #999. El sí para escribir en `data/` sigue pendiente junto con «mergea #999».
