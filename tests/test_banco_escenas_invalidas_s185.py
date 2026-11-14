@@ -3,8 +3,9 @@
 que la vía no pudo medir.
 
 POR QUÉ. La vía «código MIROVA» deja vacía una escena cuando la mitad o más de la grilla no tiene dato útil, o por
-reflejo solar, la guarda con 0 MW y sin píxeles y lo anota en `diag_codigo_mirova.motivo_vacio`. MIROVA no mide esas
-escenas. El tablero (#1005) y la comparación vía/K (#1006) ya las sacaron; el banco y el auto-audit las seguían
+reflejo solar, la guarda con 0 MW y sin píxeles y lo anota en `diag_codigo_mirova.motivo_vacio`. En el código de
+MIROVA esa escena queda NaN (su tabla a veces lista la pasada con VRP 0; si es medición o NaN escrito como 0 es SIN
+DATO). El tablero (#1005) y la comparación vía/K (#1006) ya las sacaron; el banco y el auto-audit las seguían
 contando: si MIROVA había listado la pasada con VRP 0, como negativo limpio acertado (infla la especificidad); si
 MIROVA alertaba ahí, como pasada vista sin publicar (una pérdida de detección que no fue: no miramos, S150).
 
