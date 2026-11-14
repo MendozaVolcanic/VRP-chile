@@ -130,9 +130,71 @@ def test_serie_k_historia_antes_de_la_adopcion_y_guardia_desde():
 
 
 def test_aviso_si_el_predicado_cambio_desde_el_cache():
-    assert cv.avisos_cache({"sha_index_html": "aaa"}, "aaa") == []
-    (a,) = cv.avisos_cache({"sha_index_html": "aaa"}, "bbb")
+    assert cv.avisos_cache({"sha_predicado": "aaa"}, "aaa") == []
+    (a,) = cv.avisos_cache({"sha_predicado": "aaa"}, "bbb")
     assert "aaa" in a and "bbb" in a
+
+
+def test_sha_del_predicado_ignora_texto_fuera_de_las_funciones():
+    """V183-01: un cambio de texto de la página (un modal, PR #997) no cambia lo que se publica y no debe avisar; un
+    cambio dentro de una función del predicado o en cambio_detector.js sí."""
+    html = open(os.path.join(ROOT, "frontend", "index.html"), encoding="utf-8").read()
+    cd = open(os.path.join(ROOT, "frontend", "cambio_detector.js"), encoding="utf-8").read()
+    base = cv.sha_predicado(html, cd)
+    assert cv.sha_predicado(html.replace("<title>", "<title>Otro texto ", 1), cd) == base
+    dentro = html.replace("function isValidDetection(r) {", "function isValidDetection(r) { /* cambio */", 1)
+    assert dentro != html and cv.sha_predicado(dentro, cd) != base
+    assert cv.sha_predicado(html, cd + " // cambio") != base
+
+
+def test_ventanas_cubren_cada_dia_con_una_sola_fuente_de_k():
+    """V183-03: la historia llega hasta el día antes de la adopción de cada sensor y la adopción parte ese día; ningún
+    día queda fuera de las tarjetas ni con dos K."""
+    assert cv.ventanas("2026-11-14") == {
+        "historia": {"MODIS": ("2026-03-01", "2026-11-01"), "VIIRS375": ("2026-03-01", "2026-11-10"),
+                     "VIIRS750": ("2026-03-01", "2026-11-10")},
+        "adopcion": {"MODIS": ("2026-11-02", "2026-11-14"), "VIIRS375": ("2026-11-11", "2026-11-14"),
+                     "VIIRS750": ("2026-11-11", "2026-11-14")}}
+
+
+def test_cociente_es_mediana_y_no_media():
+    pas = [_p(dt="2026-05-01 03:00", disp=0.5, vrp_mirova=1.0), _p(dt="2026-05-02 03:00", disp=0.5, vrp_mirova=1.0),
+           _p(dt="2026-05-03 03:00", disp=2.0, vrp_mirova=1.0)]
+    assert cv.metricas(cv.agregar_noches(pas), pas)["mediana_cociente"] == 0.5
+
+
+def test_protegida_por_noche_basta_una_pasada():
+    pas = [_p(dt="2026-05-01 03:00", protegida=False, pub=0), _p(dt="2026-05-01 04:40", protegida=True, pub=0)]
+    m = cv.metricas(cv.agregar_noches(pas), pas)
+    assert (m["protegidas"], m["protegidas_perdidas"]) == (1, 1)
+
+
+def test_filas_noches_dicen_de_donde_sale_k():
+    via = [_p(dt="2026-11-01 07:00", pub=1), _p(dt="2026-11-03 07:00", pub=1)]
+    k = [_p(dt="2026-11-01 07:00", pub=0), _p(dt="2026-11-03 07:00", pub=1)]
+    out = cv.filas_noches({"tabla": (via, k), "combinado": (via, k)}, "2026-11-14")
+    filas = [dict(zip(out["campos"], f)) for f in out["filas"]]
+    assert [(f["noche"], f["via_pub"], f["k_pub"], f["k_fuente"]) for f in filas] == [
+        ("2026-11-01", 1, 0, "historia"), ("2026-11-03", 1, 1, "guardia")]
+
+
+def _fila_ref(source, tipo, vrp):
+    return {"volcano": "Lascar", "sensor_bucket": "MODIS", "sensor_raw": "MODIS", "fecha_utc": "2026-05-01 03:00:00",
+            "source": source, "origen": "principal", "tipo": tipo, "vrp_mw": vrp, "dist_km": 1.0, "clasificacion": "",
+            "ultima_actualizacion": "2026-05-01 05:00:00", "sin_geometria": False}
+
+
+def test_etiquetar_prefiere_la_tabla_y_marca_protegida_con_cualquier_fila():
+    coords = cv.bp._coords_por_volcan()
+    filas = [_fila_ref("CONS", "ALERTA_TERMICA", 0.8), _fila_ref("OCR", "ALERTA_TERMICA_OCR", 1.5)]
+    pas = [{k: v for k, v in _p(dt="2026-05-01 03:00").items() if k not in ("lab", "vrp_mirova", "protegida")}]
+    ref = cv.bp.indexar_referencia(filas, coords, ("2026-05-01", "2026-05-01"), regla_minimas="SN")
+    (r,) = cv.etiquetar(pas, ref)
+    assert (r["lab"], r["vrp_mirova"], r["protegida"]) == ("pos", 0.8, True)
+    ref_tabla = cv.bp.indexar_referencia(filas[:1], coords, ("2026-05-01", "2026-05-01"), regla_minimas="SN")
+    (r,) = cv.etiquetar(pas, ref_tabla)
+    assert (r["lab"], r["vrp_mirova"], r["protegida"]) == ("pos", 0.8, False)
+    assert "lab" not in pas[0], "etiquetar no debe tocar las pasadas de entrada (se etiquetan con dos referencias)"
 
 
 # ------------------------------------------------------------------ punta a punta con node y el predicado real
@@ -171,7 +233,7 @@ def test_punta_a_punta_via_acierta_y_k_calla(tmp_path):
     with open(ocr, "w", newline="", encoding="utf-8") as fh:
         csv.DictWriter(fh, fieldnames=CAMPOS_CSV).writeheader()
     cache = tmp_path / "cache.json"
-    cache.write_text(json.dumps({"meta": {"sha_index_html": cv.bp.sha_git(cv.bp.HTML)}, "pasadas": []}),
+    cache.write_text(json.dumps({"meta": {"sha_predicado": cv.sha_predicado_actual()}, "pasadas": []}),
                      encoding="utf-8")
     out = tmp_path / "out.json"
     assert cv.main(["--prod", str(prod), "--guardia-modis", str(guardia), "--guardia-viirs", str(guardia),

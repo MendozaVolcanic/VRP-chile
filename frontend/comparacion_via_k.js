@@ -14,8 +14,9 @@
     ["Chaiten", "Chaitén"]];
   const NOMBRE_VOL = Object.fromEntries(VOLS);
   const REFS = [["tabla", "Tabla de MIROVA (lo más creíble)"], ["combinado", "Tabla más lectura de imagen (OCR)"]];
-  const VENTS = [["historia", "Historia: marzo a octubre de 2026"], ["adopcion", "Desde la adopción"],
-    ["guardia_viirs", "VIIRS desde el 3 de noviembre"]];
+  // Historia: desde marzo de 2026 hasta el día antes de la adopción de cada sensor, K del estado guardado en el tag
+  // pre-s180-reemplazo-historia. Desde la adopción: K de la guardia. Cada día cae en una sola ventana.
+  const VENTS = [["historia", "Historia: desde marzo hasta la adopción"], ["adopcion", "Desde la adopción"]];
   const COLOR = { via: "#66bb6a", k: "#ffb74d", mir: "#ef5350", gris: "#7a8fa6" };
   const st = { ref: "tabla", vent: "historia", vol: "NevadosDeChillan", sens: "MODIS", soloProt: false, d: null };
   const $ = id => document.getElementById(id);

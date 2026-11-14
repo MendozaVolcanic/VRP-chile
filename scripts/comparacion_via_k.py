@@ -37,12 +37,14 @@ from __future__ import annotations
 
 import argparse
 import collections
+import hashlib
 import json
+import re
 import shutil
 import statistics
 import sys
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -60,7 +62,6 @@ SENSORES = ("MODIS", "VIIRS375", "VIIRS750")
 # Encendido de la vía en producción (PR #934 MODIS; #974 y #983 VIIRS). Desde ese día K es la guardia.
 ADOPCION = {"MODIS": "2026-11-02", "VIIRS375": "2026-11-11", "VIIRS750": "2026-11-11"}
 INICIO = "2026-03-01"           # tabla de MIROVA sana desde marzo (A119)
-GUARDIA_VIIRS_DESDE = "2026-11-03"
 PROD = ROOT / "data" / "mirova_equivalent"
 GUARDIA_MODIS = ROOT / "data" / "guardia_k_modis"
 GUARDIA_VIIRS = ROOT / "data" / "guardia_k_viirs"
@@ -76,12 +77,47 @@ CAMPOS_USADOS_POR_LA_PAGINA = ["vol", "sat", "b", "noche", "lab_tabla", "lab_com
                                "k_dmc", "k_fuente"]
 
 
+def _dia_antes(fecha):
+    return (datetime.strptime(fecha, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+
+
 def ventanas(hoy):
-    """Las tres ventanas de la página, por sensor: (inicio, fin) en fecha UTC."""
-    dia_antes = "2026-11-01"
-    return {"historia": {b: (INICIO, dia_antes) for b in SENSORES},
-            "adopcion": {b: (ADOPCION[b], hoy) for b in SENSORES},
-            "guardia_viirs": {"VIIRS375": (GUARDIA_VIIRS_DESDE, hoy), "VIIRS750": (GUARDIA_VIIRS_DESDE, hoy)}}
+    """Las ventanas de la página, por sensor: (inicio, fin) en fecha UTC. V183-03: la historia llega hasta el día antes
+    de la adopción de cada sensor y la adopción parte ese día, así cada día cae en una ventana y con una sola fuente de K
+    (historia del tag antes, guardia desde), la misma que usa la franja."""
+    return {"historia": {b: (INICIO, _dia_antes(ADOPCION[b])) for b in SENSORES},
+            "adopcion": {b: (ADOPCION[b], hoy) for b in SENSORES}}
+
+
+def sha_predicado(html, cambio_detector_js):
+    """sha256 de lo que decide si una pasada se publica: las constantes y funciones que banco_paridad extrae de
+    frontend/index.html para node, más frontend/cambio_detector.js, que ese mismo código carga. V183-01: el sha de todo
+    index.html cambiaba con un texto de la página (un modal) y el aviso de «predicado cambió» quedaba encendido sin
+    motivo. La lista de nombres se lee de banco_paridad._JS para no tener dos listas."""
+    consts = re.findall(r"constante\('(\w+)'\)", bp._JS)
+    funcs = re.findall(r"'(\w+)'", bp._JS[bp._JS.index("concat(") : bp._JS.index("].map(extraer)")])
+    partes = []
+    for c in consts:
+        m = re.search(r"const " + c + r"\s*=\s*([^;]+);", html)
+        partes.append(m.group(0) if m else "SIN " + c)
+    for f in funcs:
+        i = html.find("function " + f + "(")
+        if i < 0:
+            partes.append("SIN " + f)
+            continue
+        j, d = html.index("{", i), 0
+        for k in range(j, len(html)):
+            d += {"{": 1, "}": -1}.get(html[k], 0)
+            if d == 0:
+                partes.append(html[i:k + 1])
+                break
+    partes.append(cambio_detector_js)
+    return hashlib.sha256("\n".join(partes).encode("utf-8")).hexdigest()
+
+
+def sha_predicado_actual():
+    cd = bp.HTML.parent / "cambio_detector.js"
+    return sha_predicado(bp.HTML.read_text(encoding="utf-8"), cd.read_text(encoding="utf-8") if cd.exists() else "")
 
 
 # ------------------------------------------------------------------ cuentas
@@ -197,7 +233,7 @@ def construir_cache_k(carpeta_tag, out, hoy):
     filas = [[p["vol"], p["b"], p["sensor"], p["dt"].strftime("%Y-%m-%d %H:%M"), p["disp"], p["pub"], p["dc"], p["d_mc"]]
              for p in pas]
     meta = {"generado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"), "tag": TAG_K,
-            "sha_index_html": bp.sha_git(bp.HTML), "n": len(filas), "inicio": INICIO, "adopcion": ADOPCION,
+            "sha_index_html": bp.sha_git(bp.HTML), "sha_predicado": sha_predicado_actual(), "n": len(filas), "inicio": INICIO, "adopcion": ADOPCION,
             "nota": "K puro del tag, evaluado con el predicado del tablero de ese sha; sólo pasadas nocturnas"}
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     Path(out).write_text(json.dumps({"meta": meta, "campos": CAMPOS_CACHE, "filas": filas}, separators=(",", ":")),
@@ -219,11 +255,11 @@ def cargar_cache_k(path):
 
 
 def avisos_cache(meta_cache, sha_actual):
-    s = meta_cache.get("sha_index_html")
+    s = meta_cache.get("sha_predicado")
     if s == sha_actual:
         return []
-    return [f"El predicado del tablero cambió desde que se evaluó la historia de K (index.html {s} en el caché, "
-            f"{sha_actual} hoy): la columna K de la historia usa el predicado anterior. Reconstruir el caché con "
+    return [f"El criterio de publicación del tablero cambió desde que se evaluó la historia de K (predicado {s} en el "
+            f"caché, {sha_actual} hoy): la columna K de la historia usa el criterio anterior. Reconstruir el caché con "
             f"--construir-cache-k."]
 
 
@@ -304,6 +340,7 @@ def main(argv=None):
 
     coords, inner = bp._coords_por_volcan(), bp.inner_desde_html()
     sha = bp.sha_git(bp.HTML)
+    sha_pred = sha_predicado_actual()
     cons, ocr, proc = Path(a.cons or SNAP_CONS), Path(a.ocr or SNAP_OCR), {"fuente": "archivo"}
     if a.remoto:
         info = bajar_remoto(Path(a.remoto))
@@ -336,10 +373,10 @@ def main(argv=None):
     ult_tabla = max((f["fecha_utc"] for f in refs["tabla"]), default=None)
     guardia_hasta = max((p["noche"] for p in guardia), default=None)
     salida = {"meta": {"generado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"), "hoy": a.hoy,
-                       "sha_index_html": sha, "referencia": proc, "regla_minimas": MODO_MINIMAS, "adopcion": ADOPCION,
+                       "sha_index_html": sha, "sha_predicado": sha_pred, "referencia": proc, "regla_minimas": MODO_MINIMAS, "adopcion": ADOPCION,
                        "ventanas": vents, "ultima_fila_tabla_mirova": ult_tabla, "guardia_hasta": guardia_hasta,
-                       "cache_k": {k: meta_cache.get(k) for k in ("tag", "sha_index_html", "generado_utc", "n")},
-                       "avisos": avisos_cache(meta_cache, sha)},
+                       "cache_k": {k: meta_cache.get(k) for k in ("tag", "sha_predicado", "generado_utc", "n")},
+                       "avisos": avisos_cache(meta_cache, sha_pred)},
               "resultados": resultados, "noches": filas_noches(series, a.hoy)}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(salida, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
