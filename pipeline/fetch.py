@@ -1122,6 +1122,22 @@ def download_granules(granules: list, dest_dir: Path) -> list[Path]:
         _diag(f"DOWNLOAD_SKIP host caído {sorted(hosts)} [{names}]")
         raise RuntimeError(f"download host(s) down this run: {sorted(hosts)}")
 
+    # S182, POR QUÉ: siempre por HTTPS, también si el runner cae en AWS us-west-2.
+    # Desde nov-2026 parte de los runners ubuntu-24.04 de GitHub corren en AWS us-west-2
+    # (cabecera del log «Region: us-west-2 / Cloud: AWS»). earthaccess consulta el
+    # servicio de metadatos de AWS, se marca `in_region=True` y baja por S3 directo.
+    # Con Python 3.11 el pip queda en earthaccess 0.17.0 (0.18+ exige 3.12), cuya vía
+    # S3 llama `s3_fs.get([archivo], partial_*)` con una lista: fsspec trata el destino
+    # como carpeta y revienta con FileExistsError sobre el temporal. Resultado: el job
+    # que cae ahí pierde TODAS sus descargas (sombras #998/#1004, reproceso de PCC, y
+    # 5 de 121 jobs NRT revisados). HTTPS es la vía de todas las corridas verdes; los
+    # bytes son los mismos. Se fuerza en cada llamada porque cada login crea un Store
+    # nuevo. Prueba: tests/test_fetch_descarga_https_en_aws_s182.py.
+    store = getattr(earthaccess, "__store__", None)
+    if store is not None and getattr(store, "in_region", False):
+        _diag("DOWNLOAD_FORCE_HTTPS runner en AWS us-west-2: in_region=True -> False")
+        store.in_region = False
+
     delays = [0, 10, 30, 60]
     last_err = None
     for attempt, delay in enumerate(delays):
