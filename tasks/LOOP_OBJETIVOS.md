@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-14 17:14 UTC (S184): causa de FileExistsError demostrada (espera A45); 19 de 29 protegidas MODIS, todas de Chillán; #1005 choca en la ficha
+- Diagnóstico (sesión `local_b54b4ce8`, informe en su transcripto y en `causa_fileexists_partial.md` de la carpeta de notas de S182): algunos runners `ubuntu-24.04` corren ahora en AWS us-west-2, donde earthaccess cree estar junto a los datos y baja por S3; en 0.17.0 (la última para Python 3.11) esa vía llama `s3_fs.get([archivo], partial_xxx)` y fsspec trata el destino como carpeta. Comprobado por mí en `job33.log`: «Region: us-west-2», «Cloud: AWS», earthaccess-0.17.0. Afecta también al NRT (5 de 5 jobs en us-west-2 fallan, según el diagnóstico). Arreglo propuesto: forzar `earthaccess.__store__.in_region = False` en `download_granules` (`pipeline/fetch.py`), prueba en rojo escrita. Espera el sí de Nicolás (A45).
+- Plazo MODIS: 19 de 29 protegidas vistas en la guardia desde el encendido (2026-11-02 20:11 UTC), las 19 de Nevados de Chillán, producción publica las 19, 0 candidatas a reversión. Referencia: tabla consolidada y OCR frescos de Mirova-v1 (como `vigilancia-guardia-modis.yml`), unidos por `referencia_mirova_unificada`. A unas 2 por día, el plazo se cumple hacia el 18 o 19 de noviembre. Script `D:\vrp-trabajo\temporales\s184\protegidas_modis2.py`.
+- Error evitado: con el snapshot del repo daban 13. La tabla del snapshot sólo la refresca la auditoría semanal (último 2026-11-09); no es un sincronizador roto. Memoria `feedback_s184_referencia_del_workflow.md`.
+- #973: medido el 11-09 con el detector K, antes del reemplazo de la historia; la auditoría del 11-16 es la primera sobre la vía.
+- #1005 (tablero, escenas inválidas) no toca `scripts/banco_paridad.py`, pero también se numera ficha v1.27, igual que #999: el que entre segundo pasa a v1.28. Filtrar las escenas inválidas en el banco cambia instrumentos sellados: queda como decisión de Nicolás (b.3 del bloque S184), sin PR.
+- Reproceso PCC: 23 y 29 corriendo, 33 en cola; vigilante en segundo plano. Verificador Sonnet del script de aplicación en curso.
+
 ### 2026-11-14 17:07 UTC (S184): apertura; #999 sin conflicto (ficha v1.27); script de aplicación de PCC V750 subido
 - Verificado: C: 29 GB y D: 41 GB libres; `chequeo_post_nrt.py origin/main` OK (11 Tier A, 0 duplicados, 0 K antes del corte). Issues de alerta avisados a Nicolás: #1004, #1003 (es el intento 1 del reproceso PCC, run 43467764489), #998, #973. Las corridas fallidas de #998 (run 43509066218) y #1004 (run 43501659798) mueren por el mismo `FileExistsError` de `partial_*` que estudia la sesión `local_b54b4ce8` (sin nota todavía).
 - Corrección del traspaso: el reproceso PCC tiene 34 trozos (1 a 34), no 35. 31 listos; 23 y 29 corriendo y 33 en cola (intento 2).
