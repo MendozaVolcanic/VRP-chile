@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-14 20:04 UTC (S185): apertura; verificaciones de entrada
+- `git fetch`: `loop/activo` al día con el remoto; main en `81e36eb85` (#1008). Disco: 29 GB libres en C:, 42 GB en D:.
+- Issues de alerta abiertos: #1004 (sombra de los 34), #998 (sombra código MIROVA), #973 (auditoría semanal fuera de banda); además #943 (cese Suomi NPP, informativo) y #813 (D-10, decisión de Nicolás). PR abiertos: #1000, #981, #980, #955, #913 (ninguno del loop).
+- Sombras: todavía sin corrida verde posterior a #1007. Sombra código MIROVA run 43633994315 (creada 19:47 UTC, con el arreglo) en curso; sombra de los 34 run 43628115933 (18:42 UTC, sin el arreglo) en curso. Vigiladas con `gh run watch` en segundo plano.
+- `chequeo_post_nrt.py origin/main`: OK (11 volcanes, 0 duplicados, 0 K antes del corte). `chequeo_caja.py` (tomado de main: no está en `loop/activo`) sobre la PCC de main: 2.997 VIIRS 750, todas `crater`, exit 0.
+- Plazo MODIS: `guardia_modis_latest.json` de main (commit `e4f2e2e9f`, 02:41 UTC) sigue en 19 de 29 protegidas, veredicto VERDE; no hay informe de cierre que preparar todavía.
+- Auditoría semanal: cron lunes 09:00 UTC (las últimas partieron entre 15:56 y 19:35 UTC); la del 2026-11-16 es la primera que juzga MODIS con la vía si junta 15 noches (el 11-09 tenía 7).
+
 ### 2026-11-14 20:02 UTC (S184): cierre; se retoma con tasks/BLOQUE_ARRANQUE_S185.md
 - Nicolás: «Mergea #1008 y cierra». #1008 (ficha v1.29 al día) mergeado tras CI verde en `a7c5f1f07`: merge commit `81e36eb85` (20:00:14 UTC); worktree `D:\vrp-trabajo\wt_s184_ficha` quitado.
 - Fijado con trabajo ajeno en curso: tanda de los 34 (run 43633062404, otra sesión, sin push), sombra de los 34 (run 43628115933, partió antes de #1007) y sombra código MIROVA (19:47 UTC, en cola, con el arreglo); sesión de gráficos en su worktree. Ninguna tarea propia de S184 en segundo plano.
