@@ -223,7 +223,8 @@ def banco_ventana(win):
     coords = _coords_por_volcan()
     inner = bp.inner_desde_html()
     filas = cargar_referencia_unificada(CONS, OCR)
-    recs = bp.cargar_nuestros(coords, inner, win)
+    # S185 (b.1): una escena que la vía no pudo medir no es una pasada «sin anomalía»: no entra a recall ni a negativos.
+    recs = bp.cargar_nuestros(coords, inner, win, excluir_escenas_invalidas=True)
     por_vb, noche_sensor, noche_volcan, _ = bp.indexar_referencia(filas, coords, win)
     bp.etiquetar(recs, por_vb, noche_sensor, noche_volcan)
     for r in recs:
@@ -814,6 +815,7 @@ def nuestros_por_noche(records_por_volcan, win, frontera, via_modis=None):
     `pub` es la magnitud que el tablero publica: el núcleo F5 en VIIRS 375 (`f5_core_vrp_mw`, A10 matiz
     S132) y `pc.vrp_mw` en los otros dos (F3-06: el audit medía un número que no se publica).
     """
+    from banco_paridad import es_escena_invalida  # noqa: E402  (S185: la misma regla que el banco; import en runtime)
     ours = defaultdict(lambda: {"crater": [], "dash": [], "pub": [], "npix": [], "z_pub": [], "dt_pub": []})
     vistos, dias = set(), set()
     fuera, n_det = defaultdict(int), defaultdict(int)
@@ -827,6 +829,12 @@ def nuestros_por_noche(records_por_volcan, win, frontera, via_modis=None):
             if b is None:
                 continue
             dias.add(dt[:10])   # S150: hubo dato, haya o no detección, sea del detector que sea
+            # S185 (b.1): la escena que la vía no pudo medir (banco_paridad.es_escena_invalida) no marca la noche como
+            # vista ni entra al recall por pasada: es «no miramos», no «no vimos» (S150). Sí cuenta el día (el
+            # pipeline corrió). Se informan en `fuera_de_detector["escena_invalida"]`.
+            if es_escena_invalida(rec):
+                fuera["escena_invalida"] += 1
+                continue
             d_rec, d_noche = detector_de_record(rec, frontera), detector_de_noche(dt, frontera, b, via_modis)
             n_det[d_rec] += 1
             if d_rec != d_noche:
