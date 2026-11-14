@@ -115,9 +115,11 @@ def test_cache_solo_k_puro_y_antes_de_la_adopcion():
             {"sensor": "MODIS_AQUA", "datetime_utc": "2026-10-30 07:00", "via_codigo_mirova": True},
             {"sensor": "VIIRS_NOAA20", "datetime_utc": "2026-11-10 06:00"},
             {"sensor": "VIIRS_NOAA20", "datetime_utc": "2026-11-11 06:00"},
-            {"sensor": "VIIRS_NOAA20", "datetime_utc": "2026-02-28 06:00"}]               # antes del inicio
+            {"sensor": "VIIRS_NOAA20", "datetime_utc": "2026-02-28 06:00"},               # antes del inicio
+            {"sensor": "VIIRS_NOAA20", "datetime_utc": "2026-03-01 06:00"}]               # el primer día sí entra
     quedan = [(r["sensor"], r["datetime_utc"]) for r in cv.filtrar_records_k(recs)]
-    assert quedan == [("MODIS_AQUA", "2026-11-01 07:00"), ("VIIRS_NOAA20", "2026-11-10 06:00")]
+    assert quedan == [("MODIS_AQUA", "2026-11-01 07:00"), ("VIIRS_NOAA20", "2026-11-10 06:00"),
+                      ("VIIRS_NOAA20", "2026-03-01 06:00")]
 
 
 def test_serie_k_historia_antes_de_la_adopcion_y_guardia_desde():
@@ -145,6 +147,9 @@ def test_sha_del_predicado_ignora_texto_fuera_de_las_funciones():
     dentro = html.replace("function isValidDetection(r) {", "function isValidDetection(r) { /* cambio */", 1)
     assert dentro != html and cv.sha_predicado(dentro, cd) != base
     assert cv.sha_predicado(html, cd + " // cambio") != base
+    i = html.index("const F5_R_CORE_KM")
+    j = html.index(";", i)
+    assert cv.sha_predicado(html[:i] + "const F5_R_CORE_KM = 99" + html[j:], cd) != base
 
 
 def test_ventanas_cubren_cada_dia_con_una_sola_fuente_de_k():
@@ -178,8 +183,21 @@ def test_filas_noches_dicen_de_donde_sale_k():
         ("2026-11-01", 1, 0, "historia"), ("2026-11-03", 1, 1, "guardia")]
 
 
-def _fila_ref(source, tipo, vrp):
-    return {"volcano": "Lascar", "sensor_bucket": "MODIS", "sensor_raw": "MODIS", "fecha_utc": "2026-05-01 03:00:00",
+def test_filas_noches_incluyen_la_falsa_alarma_de_un_solo_detector():
+    via = [_p(dt="2026-06-01 07:00", lab="neg_limpio", pub=1)]
+    k = [_p(dt="2026-06-01 07:00", lab="neg_limpio", pub=0)]
+    out = cv.filas_noches({"tabla": (via, k), "combinado": (via, k)}, "2026-11-14")
+    (f,) = [dict(zip(out["campos"], x)) for x in out["filas"]]
+    assert (f["lab_tabla"], f["via_pub"], f["k_pub"]) == ("neg", 1, 0)
+    out = cv.filas_noches({"tabla": (k, via), "combinado": (k, via)}, "2026-11-14")
+    (f,) = [dict(zip(out["campos"], x)) for x in out["filas"]]
+    assert (f["via_pub"], f["k_pub"]) == (0, 1)
+    nada = cv.filas_noches({"tabla": (k, k), "combinado": (k, k)}, "2026-11-14")
+    assert nada["filas"] == [], "una noche tranquila en que nadie publica no se dibuja"
+
+
+def _fila_ref(source, tipo, vrp, hora="03:00:00"):
+    return {"volcano": "Lascar", "sensor_bucket": "MODIS", "sensor_raw": "MODIS", "fecha_utc": "2026-05-01 " + hora,
             "source": source, "origen": "principal", "tipo": tipo, "vrp_mw": vrp, "dist_km": 1.0, "clasificacion": "",
             "ultima_actualizacion": "2026-05-01 05:00:00", "sin_geometria": False}
 
@@ -195,6 +213,9 @@ def test_etiquetar_prefiere_la_tabla_y_marca_protegida_con_cualquier_fila():
     (r,) = cv.etiquetar(pas, ref_tabla)
     assert (r["lab"], r["vrp_mirova"], r["protegida"]) == ("pos", 0.8, False)
     assert "lab" not in pas[0], "etiquetar no debe tocar las pasadas de entrada (se etiquetan con dos referencias)"
+    dos = [_fila_ref("CONS", "ALERTA_TERMICA", 0.8), _fila_ref("CONS", "ALERTA_TERMICA", 1.2, hora="03:01:00")]
+    (r,) = cv.etiquetar(pas, cv.bp.indexar_referencia(dos, coords, ("2026-05-01", "2026-05-01"), regla_minimas="SN"))
+    assert r["vrp_mirova"] == 1.2
 
 
 # ------------------------------------------------------------------ punta a punta con node y el predicado real
