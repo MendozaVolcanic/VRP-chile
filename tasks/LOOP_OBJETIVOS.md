@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-14 19:34 UTC (S184): Nicolás: «Mergea #999 y aplica» y «Mergea #1007»; #1007 integrado; #999 otra vez renumerado (v1.29)
+- Al ir a mergear #999 había entrado #1006 (comparación vía, K y MIROVA, otra sesión) con la ficha v1.28. Unido main (commit `b7da74eb3`), entrada de #999 a **v1.29**; 181 pruebas relacionadas pasan local. Resolutor reutilizable: `D:\vrp-trabajo\temporales\s184\resolver_ficha_n.py`. Tag defensivo `pre-s184-merge-999` sobre `6a69bf6ef`. Esperando CI de `b7da74eb3`.
+- #1007 (arreglo de descarga, sesión de diagnóstico): revisado el diff (sólo `pipeline/fetch.py`, fuerza `in_region = False` antes de bajar, y su prueba), tag defensivo `pre-s182-descarga-https` en remoto, CI verde, CLEAN. Merge commit `dc0a1de3f` (19:34:16 UTC). Debe devolver a verde #998 y #1004 y proteger la tanda de los 34 (run 43620748875, 165 trozos) y el despacho del NRT de la cola de PCC.
+- Estado de las sesiones paralelas (pedido de Nicolás): diagnóstico terminado; «Comparar los 11 contra MIROVA» mergeó #1006 y dejó un seguimiento sin investigar (guardia K de VIIRS contra la K del tag, ~7 noches-satélite del 3 al 10-nov); «Los 34 al tablero» sin pendientes, abrió «Gráficos por volcán como MIROVA: primera tanda»; «Reemplazar la historia» corre la tanda 1 de los 34 y creía pasajero el error de descarga (no lo era: es la región del runner).
+
 ### 2026-11-14 17:51 UTC (S184): #1005 entró con la ficha v1.27; #999 pasa a v1.28; CI verde, espera «mergea #999»
 - #1005 mergeado (17:35 UTC, otra sesión) con la ficha v1.27: #999 quedó DIRTY otra vez. Unido main (commit `466f215aa`); la entrada de la caja del cráter pasa a **v1.28, 2026-11-14**, contenido igual (`D:\vrp-trabajo\temporales\s184\resolver_ficha2.py`). 167 pruebas relacionadas pasan local.
 - CI de `466f215aa` (run 43622233914): pytest y bateria-v750a SUCCESS; #999 CLEAN. Pedido a Nicolás: «mergea #999» y el sí para la secuencia sobre `data/` (aplicar-reemplazo, despacho del NRT con overwrite desde el 2026-11-14, `chequeo_caja.py` en 0).
