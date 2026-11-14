@@ -569,6 +569,9 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-14 16:58 UTC (S182): cierre; se retoma con tasks/BLOQUE_ARRANQUE_S184.md
+- Fijado con trabajo en curso: reproceso PCC (run 43467764489, intento 2) con los trozos 23, 29 y 33 corriendo (el 34 pasó); sesión de diagnóstico de descargas `local_b54b4ce8` iniciada (Nicolás autorizó iniciar sesiones). La próxima del loop es S184 (S183 la usaron las sesiones del tablero, #1002 y #1005).
+
 ### 2026-11-14 16:30 UTC (S182): #997 integrado y publicado; reproceso PCC 31/35; la falla de descarga bloquea tres cosas
 - Nicolás: «Mergea #997». Sin conflicto con el main de hoy (`git merge-tree`; main sólo cambió tests de la historia de los 34), CLEAN y checks verdes en `3cd02eaee`: merge commit `11df97a2b` (16:12:36 UTC). Pages run 43614347128 success; el sitio publicado muestra «Estado al 2026-11-13» y el aviso histórico. Worktree `D:\vrp-trabajo\wt_s182_front` quitado.
 - Avisado: #1004 (sombra de los 34 sin verde en 26 h; run 43501659798 del 11-13 falló) además de #998 y #973.
