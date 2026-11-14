@@ -416,7 +416,7 @@
     <span id="last-refresh-ts" style="font-size: 0.72rem; color: var(--muted); margin-left: 8px;" title="Último refresh automático global (15 min interval)"></span>
     <a href="diario.html" id="link-diario" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">📊 Vista Diaria</a> <a href="mosaico.html" id="link-mosaico" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">▦ Mosaico</a>
     <a href="experimental/" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">🧪 Laboratorio</a>
-    <a href="comparacion.html" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;" title="Preview S115: vistas de validación vs MIROVA (histograma distancia, scatter 1:1, extensión PCC)">⚖️ Comparación</a> <a href="preliminar_34.html" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;" title="34 volcanes fuera del NRT: sin referencia de MIROVA, paridad no medida">34 volcanes (preliminar)</a>
+    <a href="comparacion.html" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;" title="Preview S115: vistas de validación vs MIROVA (histograma distancia, scatter 1:1, extensión PCC)">⚖️ Comparación</a>
     <button id="btn-about" style="background:transparent;color:#7a8fa6;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;cursor:pointer;">ℹ️ Acerca de</button>
   </div>
 </header>
@@ -687,7 +687,7 @@
       </table>
     </div>
   </div>
-  <div class="orden-tarjetas"><label for="orden-tarjetas">Ordenar volcanes</label> <select id="orden-tarjetas"><option value="ns">Norte a sur</option><option value="sn">Sur a norte</option><option value="mirova">Comparables con MIROVA primero</option><option value="vrp">Mayor VRP ahora</option></select> <span class="orden-nota">Los 11 con referencia de MIROVA se actualizan cada 2 h; los otros 34, una vez al día y sin MIROVA con qué comparar.</span></div><div class="volcano-grid" id="volcano-grid"></div><!-- S180: selector en la misma línea (guard G8) -->
+  <div class="orden-tarjetas"><label for="orden-tarjetas">Ordenar volcanes</label> <select id="orden-tarjetas"><option value="ns">Norte a sur</option><option value="sn">Sur a norte</option><option value="mirova">Comparables con MIROVA primero</option><option value="vrp">Mayor VRP ahora</option><option value="solo34">Sólo los 34 sin MIROVA</option><option value="solo11">Sólo los 11 con MIROVA</option></select> <span class="orden-nota">Los 11 con referencia de MIROVA se actualizan cada 2 h; los otros 34, una vez al día y sin MIROVA con qué comparar.</span></div><div class="volcano-grid" id="volcano-grid"></div><!-- S180: selector en la misma línea (guard G8) -->
   <div id="detail"></div>
 </main>
 
@@ -743,7 +743,7 @@ const VOLCANOES_ALL = [
   { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -35.241099, vent_lon: -70.573345, mirova_center_lat: -35.2232, mirova_center_lon: -70.5695 },
   { name: "DescabezadoGrande",    display: "Descabezado Grande",     region: "Maule",         lat: -35.580, lon: -70.750, radius_km: 10 },
   { name: "CerroAzulQuizapu",     display: "Cerro Azul-Quizapu",     region: "Maule",         lat: -35.653, lon: -70.761, radius_km: 10 },
-  { name: "LagunaDelMaule",       display: "Laguna del Maule",       region: "Maule",         lat: -36.020, lon: -70.580, radius_km: 15 },
+  { name: "LagunaDelMaule",       display: "Laguna del Maule",       region: "Maule",         lat: -36.056836, lon: -70.501398, radius_km: 15 },   // S183: las de volcanoes.yaml (antes a 8,2 km)
   { name: "NevadoDeLongavi",      display: "Nevado de Longaví",      region: "Maule",         lat: -36.193, lon: -71.161, radius_km: 10 },
   { name: "NevadosDeChillan",     display: "Nevados de Chillán",     region: "Ñuble",         lat: -36.863, lon: -71.377, radius_km: 25, inner_radius_km: 5, vent_radius_km: 2, hasMirova: true,  vent_lat: -36.863, vent_lon: -71.377 },
   { name: "Antuco",               display: "Antuco",                 region: "Biobío",        lat: -37.406, lon: -71.349, radius_km: 10 },
@@ -777,7 +777,7 @@ const VOLCANOES_ALL = [
 
 // S180 (Nicolás, 2026-11-12: «todos deben tener la misma funcionalidad»): las 45 tarjetas con datos. Los 11 Tier A
 // leen data/mirova_equivalent (NRT cada 2 h); los otros 34, data/sombra_34 (vía «código MIROVA», una vez al día,
-// sombra-34.yml), sin referencia de MIROVA. Cumbre de 5 km (D5, la de preliminar_34.js) y grilla de unos 51 km, la
+// sombra-34.yml), sin referencia de MIROVA. Cumbre de 5 km (D5, la de la antigua preliminar_34.js) y grilla de unos 51 km, la
 // de la vía. Hasta S180 (decisión S18) los 34 quedaban «sin datos» para no mezclar; ahora van marcados (v.fuente).
 const VOLCANOES = VOLCANOES_ALL.map(v => v.hasMirova ? v : Object.assign({}, v, { fuente: "sombra_34", inner_radius_km: 5, radius_km: 25 }));
 
@@ -980,7 +980,7 @@ let _fullHistoryLoaded = false;
 
 async function loadVolcano(v, opts = {}) {
   const full = opts.full || false;
-  // S180: los 34 sin MIROVA (v.fuente "sombra_34") se leen de la sombra diaria desde el repo, como preliminar_34.html:
+  // S180: los 34 sin MIROVA (v.fuente "sombra_34") se leen de la sombra diaria desde el repo (S183: la página aparte preliminar_34.html se retiró):
   // pages-deploy.yml saca las sombras del sitio (techo de 1 GB). No tienen refs de MIROVA ni ventana `_recent`.
   const sombra = v.fuente === "sombra_34";
   const suffix = full ? "" : "_recent";
@@ -1858,9 +1858,9 @@ function anomaliaRelativa(records, det, innerKm) {
 
 // S180 (Nicolás, 2026-11-12): los 34 volcanes sin MIROVA en la página principal. Sus datos los escribe sombra-34.yml
 // una vez al día en data/sombra_34 (vía «código MIROVA» en los tres sensores, desde el 2026-11-03). Se leen desde el repo
-// público, como preliminar_34.html, porque pages-deploy.yml saca las sombras del sitio para cuidar el techo de 1 GB.
+// público (S183: la página aparte preliminar_34.html se retiró), porque pages-deploy.yml saca las sombras del sitio para cuidar el techo de 1 GB.
 const SOMBRA_34_BASE = "https://raw.githubusercontent.com/MendozaVolcanic/VRP-chile/main/data/sombra_34/";
-const RADIO_CUMBRE_SOMBRA_KM = 5;   // D5: el de preliminar_34.js; la cumbre no está medida cráter por cráter
+const RADIO_CUMBRE_SOMBRA_KM = 5;   // D5: el de la antigua preliminar_34.js; la cumbre no está medida cráter por cráter
 // POR QUÉ. Los 34 no tienen inner_radius_km en volcanoes.yaml, así que el pipeline deja `distance_class: null` en
 // sus records. mirovaEqVrp ya los decide por el centroide del cúmulo contra innerKm (5 km), pero la tabla y el mapa
 // rotulan «dentro / fuera» con distance_class, y sin él una anomalía a 2 km se rotulaba «fuera». Se completa aquí con
@@ -1878,10 +1878,106 @@ function derivarClaseSombra(records) {
   }
 }
 
+// S183 (Nicolás aprobó, 2026-11-13): lo que hacía la página aparte preliminar_34.html y el tablero no. Las dos
+// funciones son SÓLO rótulos: no cambian mirovaEqVrp, ni el record, ni ningún valor publicado.
+// Guard: tests/test_tablero_absorbe_preliminar34_s183.py
+//
+// POR QUÉ el píxel en la cumbre. La distancia de la pasada es la del centroide del cúmulo más radiante, y el valor
+// publicado la sigue, como MIROVA. Si un píxel alertado cae en el cráter y el cúmulo mayor está a 20 km, la fila dice
+// «fuera» o «anomalía no publicada», y lo que hay en el cráter es justo lo que el operador tiene que ver. Caso real:
+// Carrán-Los Venados, 2026-11-12 05:36 UTC, VIIRS_NOAA21, 0,65 MW, píxel a 1,8 km y centroide a 20,6 km. Que el valor
+// se decida por píxel en vez de por centroide lo decide Nicolás aparte; aquí sólo se avisa.
+const KM_MISMO_FOCO_SOMBRA = 1;   // en los pares medidos el mismo foco difiere 0,11 y 0,16 km; 1 km ~ dos píxeles de 375 m
+function distanciaKmSombra(aLat, aLon, bLat, bLon) {
+  const rad = Math.PI / 180;
+  const x = Math.sin((bLat - aLat) * rad / 2) ** 2 + Math.cos(aLat * rad) * Math.cos(bLat * rad) * Math.sin((bLon - aLon) * rad / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(x));
+}
+// Devuelve { pixel_km, centroide_km } si la pasada de un volcán de los 34 tiene un píxel a RADIO_CUMBRE_SOMBRA_KM o
+// menos de las coordenadas del volcán y el centroide no está ya en la cumbre (si lo está, el rótulo no agrega nada).
+// La distancia se mide desde las coordenadas del volcán (A3), no del `dist_km` que trae cada píxel.
+function pixelEnCumbreSombra(r, v) {
+  if (!r || !v || v.fuente !== "sombra_34" || !(r.vrp_mw > 0)) return null;
+  const pc = r.primary_cluster;
+  const centroide = (pc && pc.centroid_dist_km != null) ? pc.centroid_dist_km : (r.final_hotspot_dist_km ?? null);
+  if (centroide != null && centroide <= RADIO_CUMBRE_SOMBRA_KM) return null;
+  let min = Infinity;
+  for (const p of r.anomaly_pixels || []) {
+    if (p && Number.isFinite(p.lat) && Number.isFinite(p.lon)) min = Math.min(min, distanciaKmSombra(v.lat, v.lon, p.lat, p.lon));
+  }
+  return min <= RADIO_CUMBRE_SOMBRA_KM ? { pixel_km: min, centroide_km: centroide } : null;
+}
+function textoPixelEnCumbre(m) {
+  return "píxel a " + m.pixel_km.toFixed(1).replace(".", ",") + " km de la cumbre";
+}
+// La pasada más reciente desde `desdeMs` con píxel en la cumbre, para la tarjeta (la misma ventana de 48 h que su valor).
+function ultimoPixelEnCumbre(records, v, desdeMs) {
+  let mejor = null;
+  for (const r of records || []) {
+    if (!(parseUtcMs(r.datetime_utc) >= desdeMs)) continue;
+    const m = pixelEnCumbreSombra(r, v);
+    if (m && (!mejor || r.datetime_utc > mejor.r.datetime_utc || (r.datetime_utc === mejor.r.datetime_utc && m.pixel_km < mejor.pixel_km))) mejor = Object.assign({ r }, m);
+  }
+  return mejor;
+}
+// POR QUÉ el foco compartido. La grilla de cada volcán mide unos 50 km y se traslapa con la del vecino: la misma pasada
+// puede detectar el mismo foco desde los dos, y sin la marca el operador lee dos anomalías donde hay una. Se compara
+// sólo entre los 34 (como hacía la página aparte): misma hora y sensor, focos a KM_MISMO_FOCO_SOMBRA o menos.
+// Devuelve un Map «volcán|fecha|sensor» → nombres de los vecinos. El 2026-11-13: 10 de 49 detecciones.
+function focosCompartidosSombra(volcanes, datos) {
+  const porPasada = new Map();
+  for (const v of volcanes) {
+    if (v.fuente !== "sombra_34") continue;
+    for (const r of ((datos || {})[v.name] || {}).records || []) {
+      if (!r || !(r.vrp_mw > 0) || !Number.isFinite(r.final_hotspot_lat) || !Number.isFinite(r.final_hotspot_lon)) continue;
+      const k = r.datetime_utc + "|" + r.sensor;
+      if (!porPasada.has(k)) porPasada.set(k, []);
+      porPasada.get(k).push({ v, r });
+    }
+  }
+  const out = new Map();
+  for (const [k, dets] of porPasada) {
+    for (const a of dets) for (const b of dets) {
+      if (a.v.name === b.v.name) continue;
+      if (distanciaKmSombra(a.r.final_hotspot_lat, a.r.final_hotspot_lon, b.r.final_hotspot_lat, b.r.final_hotspot_lon) > KM_MISMO_FOCO_SOMBRA) continue;
+      const clave = a.v.name + "|" + k;
+      if (!out.has(clave)) out.set(clave, []);
+      const nombre = b.v.display || b.v.name;
+      if (!out.get(clave).includes(nombre)) out.get(clave).push(nombre);
+    }
+  }
+  return out;
+}
+// Las marcas de una fila de «Últimas pasadas» de los 34, dentro de la celda «Zona» (no agrega columnas: en celular la
+// tabla ya se desliza). Devuelve null si la fila no lleva ninguna.
+function marcaSombra34(r, v, compartidos) {
+  if (!v || v.fuente !== "sombra_34") return null;
+  const m = pixelEnCumbreSombra(r, v);
+  const otros = compartidos ? compartidos.get(v.name + "|" + r.datetime_utc + "|" + r.sensor) : null;
+  if (!m && !(otros && otros.length)) return null;
+  const caja = el("div", "marca-34");
+  if (m) {
+    const a = el("div", "marca-34-cumbre"); a.textContent = textoPixelEnCumbre(m);
+    a.title = "Un píxel alertado de esta pasada cae a " + m.pixel_km.toFixed(2) + " km de las coordenadas del volcán, aunque el " +
+      "centroide del cúmulo está a " + (m.centroide_km != null ? m.centroide_km.toFixed(1) + " km" : "una distancia sin dato") +
+      ". El valor publicado sigue el centroide, como MIROVA: este rótulo sólo avisa.";
+    caja.appendChild(a);
+  }
+  if (otros && otros.length) {
+    const b = el("div", "marca-34-compartido"); b.textContent = "también visto desde " + otros.join(", ");
+    b.title = "La misma pasada (hora y sensor) detecta un foco a " + KM_MISMO_FOCO_SOMBRA + " km o menos desde la grilla de " +
+      otros.join(", ") + ": las grillas de unos 50 km se traslapan, así que es probable que sea un solo foco, no dos.";
+    caja.appendChild(b);
+  }
+  return caja;
+}
+
 // Orden de las tarjetas (pedido de Nicolás, 2026-11-12). Se guarda en el navegador; si no se puede, norte a sur.
-const ORDENES_TARJETAS = ["ns", "sn", "mirova", "vrp"];
+// S183: «solo34» y «solo11» filtran (norte a sur); al volver a otro orden vuelven todas, sin duplicar.
+const ORDENES_TARJETAS = ["ns", "sn", "mirova", "vrp", "solo34", "solo11"];
+const ORDEN_ES_FILTRO = o => o === "solo34" || o === "solo11";
 let ordenTarjetas = (() => {
-  try { const o = localStorage.getItem("vrp_orden_tarjetas"); return ORDENES_TARJETAS.includes(o) ? o : "ns"; }
+  try { const o = localStorage.getItem("vrp_orden_tarjetas"); return ORDENES_TARJETAS.includes(o) && !ORDEN_ES_FILTRO(o) ? o : "ns"; }
   catch (e) { return "ns"; }
 })();
 function ordenarVolcanes(lista, orden, vrpDe) {
@@ -1890,6 +1986,8 @@ function ordenarVolcanes(lista, orden, vrpDe) {
   if (orden === "sn") return copia.sort((a, b) => a.lat - b.lat);
   if (orden === "mirova") return copia.sort((a, b) => ((b.hasMirova ? 1 : 0) - (a.hasMirova ? 1 : 0)) || porLat(a, b));
   if (orden === "vrp") return copia.sort((a, b) => (vrpDe(b) - vrpDe(a)) || porLat(a, b));
+  if (orden === "solo34") return copia.filter(v => !v.hasMirova).sort(porLat);
+  if (orden === "solo11") return copia.filter(v => v.hasMirova).sort(porLat);
   return copia.sort(porLat);
 }
 
@@ -2438,6 +2536,18 @@ function buildCards() {
     } else {
       vrpSub.textContent = "";   // sin records en este tablero: lo dice la línea de frescura, una sola vez
     }
+    // S183: en los 34, un píxel en la cumbre con el cúmulo mayor lejos (sólo rótulo; ver pixelEnCumbreSombra). Misma
+    // ventana de 48 h que el valor de la tarjeta y los mismos sensores visibles.
+    const pixCumbre = v.fuente === "sombra_34"
+      ? ultimoPixelEnCumbre(d.records.filter(r => isSensorVisible(r)), v, Date.now() - 48 * 3600000) : null;
+    const pcEl = pixCumbre ? el("div", "vc-pixel-cumbre") : null;
+    if (pixCumbre) {
+      pcEl.textContent = textoPixelEnCumbre(pixCumbre) + " · " + fmtLocalCL(pixCumbre.r.datetime_utc);
+      pcEl.title = "Pasada " + pixCumbre.r.datetime_utc.slice(0, 16) + " UTC, " + pixCumbre.r.sensor + ": un píxel alertado cae a " +
+        pixCumbre.pixel_km.toFixed(2) + " km del volcán, pero el centroide del cúmulo está a " +
+        (pixCumbre.centroide_km != null ? pixCumbre.centroide_km.toFixed(1) + " km" : "una distancia sin dato") +
+        ". El valor publicado sigue el centroide, como MIROVA; este rótulo sólo avisa. Detalle en «Últimas pasadas».";
+    }
 
     // S109 (pedido Nicolás) — frescura de MONITOREO SIEMPRE visible: distingue
     // "monitoreado · tranquilo" de "datos atrasados", independiente de si hubo
@@ -2479,6 +2589,7 @@ function buildCards() {
 
     card.append(hdr, vrpEl, vrpSub);
     if (act.firstChild) card.appendChild(act);
+    if (pcEl) card.appendChild(pcEl);   // S183
     card.appendChild(mon);
 
     // S180: minigráfico del período (como mosaico.html), sólo si el volcán tiene datos en este tablero.
@@ -2980,7 +3091,10 @@ function renderDetail() {
     // S12: tabla clickeable. Cada row guarda su key (datetime|sensor) y
     // al hacer click busca el marker del mapa con la misma key, abre
     // popup, hace zoom, y resalta visualmente la fila.
+    // S183: en los 34, el mismo foco visto desde un vecino, sobre allData ya cargado (necesita los records del vecino).
+    const compartidos34 = v.fuente === "sombra_34" ? focosCompartidosSombra(VOLCANOES, allData) : null;
     recent.forEach(r => {
+      const marca34 = marcaSombra34(r, v, compartidos34);   // S183: rótulos de los 34, dentro de la celda «Zona»
       // S180: pasada procesada sin anomalía publicada. Se lista para que se vea que el volcán se miró; no tiene
       // posición ni magnitud que mostrar, así que no lleva marcador ni clic al mapa.
       // Verificador S180: una pasada con píxeles anómalos que no se publican (lejana con «Solo cráter», descartada por
@@ -2993,6 +3107,7 @@ function renderDetail() {
           if (i === 3 && huboAlgo) td.title = "La pasada tuvo píxeles anómalos, pero ninguno cuenta como detección " +
             "publicada: lejana (fuera del radio del cráter, con «Solo cráter»), descartada por el pipeline o marcada " +
             "como artefacto térmico. Con «Incluir lejanas» las lejanas vuelven a contar.";
+          if (i === 2 && marca34) td.appendChild(marca34);
         });
         tbody.appendChild(row);
         return;
@@ -3116,7 +3231,7 @@ function renderDetail() {
           td.title = vrpTitle;
         }
         if (i === 1) td.style.color = "var(--muted)";
-        if (i === 2) { td.style.color = zoneColor; td.style.fontWeight = "600"; td.style.whiteSpace = "nowrap"; }
+        if (i === 2) { td.style.color = zoneColor; td.style.fontWeight = "600"; td.style.whiteSpace = "nowrap"; if (marca34) td.appendChild(marca34); }
         if (i === 7 && npxCluster != null && npxCluster !== npxTotal) {
           td.title = `${npxCluster} pix en cluster principal · ${npxTotal} pix totales detectados`;
         }
@@ -4469,7 +4584,7 @@ async function init() {
     selOrden.value = ordenTarjetas;
     selOrden.addEventListener("change", () => {
       ordenTarjetas = ORDENES_TARJETAS.includes(selOrden.value) ? selOrden.value : "ns";
-      try { localStorage.setItem("vrp_orden_tarjetas", ordenTarjetas); } catch (e) {}
+      if (!ORDEN_ES_FILTRO(ordenTarjetas)) { try { localStorage.setItem("vrp_orden_tarjetas", ordenTarjetas); } catch (e) {} }   // S183: un filtro no se recuerda: al volver se ven los 45
       buildCards();
     });
   }
