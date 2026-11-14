@@ -1,0 +1,74 @@
+name: Comparacion via, K y MIROVA (diaria)
+
+# S183 (aprobado por Nicolas el 2026-11-14, «Si, con refresco diario»; plan
+# docs/superpowers/plans/2026-11-14-comparacion-via-k-mirova.md).
+# POR QUE: la pestana «Via, K y MIROVA» de frontend/comparacion.html muestra cuanto se parecen a MIROVA el detector de
+# produccion (la via «codigo MIROVA») y K (la guardia). Desde la adopcion, K sale de la guardia, que corre una vez al dia:
+# esta comparacion corre despues de la ultima vigilancia de las guardias (VIIRS, 22:55) para leer la guardia del dia.
+# No abre issues ni decide nada: si falla, el job queda rojo y la pagina muestra la fecha del ultimo calculo.
+# A43: "on" quoted (Norway Problem YAML 1.1).
+"on":
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Vigilancia de la guardia K de VIIRS"]
+    types: [completed]
+  # Respaldo por si el workflow_run no llega (renombre, desactivacion). 23:25 UTC: despues de las vigilancias de las
+  # guardias (22:45 y 22:55), en un minuto que no usa ningun otro cron.
+  schedule:
+    - cron: "25 23 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  # Grupo propio; el push lleva su bucle de reintento (contrato G4: grupo push-main O reintento, no ambos).
+  group: comparacion-via-k
+  cancel-in-progress: false
+
+jobs:
+  comparar:
+    runs-on: ubuntu-24.04  # fijado como el NRT
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install pyyaml
+
+      # Referencia fresca: el snapshot del repo solo lo refresca el auto-audit semanal.
+      - name: Referencia fresca de MIROVA (Mirova-v1)
+        run: |
+          mkdir -p "$RUNNER_TEMP/ref"
+          curl -fsSL -o "$RUNNER_TEMP/ref/registro_vrp_consolidado.csv" \
+            https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_consolidado.csv
+          curl -fsSL -o "$RUNNER_TEMP/ref/registro_vrp_ocr.csv" \
+            https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_ocr.csv
+
+      - name: Comparacion
+        run: |
+          node --version
+          python scripts/comparacion_via_k.py \
+            --cons "$RUNNER_TEMP/ref/registro_vrp_consolidado.csv" \
+            --ocr "$RUNNER_TEMP/ref/registro_vrp_ocr.csv"
+
+      - name: Commit results
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add data/audit_continuous/comparacion_via_k.json
+          git diff --staged --quiet && { echo "no changes"; exit 0; }
+          git commit -m "comparacion(auto): via, K y MIROVA por sensor, volcan y noche (S183)"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
