@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-14 19:49 UTC (S184): #999 integrado; serie VIIRS 750 de Cordón Caulle reemplazada con crater y publicada; #1008 (ficha) abierto
+- #999 mergeado tras CI verde en `b7da74eb3` (merge commit `9ab98b121`, 19:38:12 UTC). Sin corridas del NRT en curso en ese momento.
+- `aplicar-reemplazo.yml` (run 43633201356, tag `pre-s184-pcc-crater-historia` = `9ab98b121`): 2.994 publicadas, 2.994 reemplazadas, 0 sin par, 0 agregadas, 3 tras la ventana; 27 pruebas pasan; empujado al intento 1 (commit `0f92dcc4d`).
+- `nrt.yml` con `profile=mirova_equivalent`, `volcano=PuyehueCordonCaulle`, `start=end=2026-11-14`, `overwrite=true` (run 43633405344, runner AWS us-east-1, 0 errores de descarga): commit `6882f28f1`. Sólo cambió la caja de las 3 VIIRS 750 del 14-nov (potencias iguales); MODIS y VIIRS 375 de ese día con los mismos valores; 7.316 records antes y después.
+- `chequeo_caja.py` sobre main: 2.997 VIIRS 750 de PCC desde el 2025-02-15, todas `crater` (exit 0). Pages (run 43633693529) publica el 2026-10-21 05:48 NOAA-21 con 0,345 MW y `crater`.
+- Worktrees `D:\vrp-trabajo\wt_s182_pcc` y `D:\vrp-trabajo\wt_s184_main` quitados (limpios, sin sesiones usándolos). #1008: la fila v1.29 de la ficha decía «se reemplaza con aprobación aparte»; marca de actualización y texto original conservado (A113). Sólo docs; 0 checks reportados al abrir (SIN DATO, A39). Worktree `D:\vrp-trabajo\wt_s184_ficha`.
+
 ### 2026-11-14 19:34 UTC (S184): Nicolás: «Mergea #999 y aplica» y «Mergea #1007»; #1007 integrado; #999 otra vez renumerado (v1.29)
 - Al ir a mergear #999 había entrado #1006 (comparación vía, K y MIROVA, otra sesión) con la ficha v1.28. Unido main (commit `b7da74eb3`), entrada de #999 a **v1.29**; 181 pruebas relacionadas pasan local. Resolutor reutilizable: `D:\vrp-trabajo\temporales\s184\resolver_ficha_n.py`. Tag defensivo `pre-s184-merge-999` sobre `6a69bf6ef`. Esperando CI de `b7da74eb3`.
 - #1007 (arreglo de descarga, sesión de diagnóstico): revisado el diff (sólo `pipeline/fetch.py`, fuerza `in_region = False` antes de bajar, y su prueba), tag defensivo `pre-s182-descarga-https` en remoto, CI verde, CLEAN. Merge commit `dc0a1de3f` (19:34:16 UTC). Debe devolver a verde #998 y #1004 y proteger la tanda de los 34 (run 43620748875, 165 trozos) y el despacho del NRT de la cola de PCC.
