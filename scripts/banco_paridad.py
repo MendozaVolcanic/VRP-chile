@@ -302,7 +302,10 @@ def parear(lista, t, tol=TOL_S):
 def es_escena_invalida(r):
     """S185: la via «codigo MIROVA» no pudo medir la escena (mitad o mas de la grilla sin dato util, o reflejo solar;
     `pipeline/mirova_v750_codigo.py`) y la guarda con 0 MW y sin pixeles, anotada en `diag_codigo_mirova.motivo_vacio`.
-    MIROVA no mide esas escenas (NaN). Misma regla que el tablero (#1005) y la comparacion via/K (#1006)."""
+    En el codigo de MIROVA esa escena queda NaN; su tabla a veces lista la pasada con VRP 0 (246 de las 768 escenas
+    invalidas nocturnas de los 11 Tier A del 2026-03-01 al 2026-11-14), y no se sabe si esa fila es una medicion o el
+    NaN escrito como 0 (SIN DATO). Por eso no cuentan como negativo acertado ni como perdida. Misma regla que el
+    tablero (#1005) y la comparacion via/K (#1006)."""
     return bool((r.get("diag_codigo_mirova") or {}).get("motivo_vacio"))
 
 
