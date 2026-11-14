@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-14 20:02 UTC (S184): cierre; se retoma con tasks/BLOQUE_ARRANQUE_S185.md
+- Nicolás: «Mergea #1008 y cierra». #1008 (ficha v1.29 al día) mergeado tras CI verde en `a7c5f1f07`: merge commit `81e36eb85` (20:00:14 UTC); worktree `D:\vrp-trabajo\wt_s184_ficha` quitado.
+- Fijado con trabajo ajeno en curso: tanda de los 34 (run 43633062404, otra sesión, sin push), sombra de los 34 (run 43628115933, partió antes de #1007) y sombra código MIROVA (19:47 UTC, en cola, con el arreglo); sesión de gráficos en su worktree. Ninguna tarea propia de S184 en segundo plano.
+- Próxima del loop: S185 (la sesión de gráficos usa el prefijo s184 en su rama; no es del loop). Memoria: `project_s184_estado.md`, `feedback_s184_lecciones.md`, `feedback_s184_referencia_del_workflow.md`.
+
 ### 2026-11-14 19:49 UTC (S184): #999 integrado; serie VIIRS 750 de Cordón Caulle reemplazada con crater y publicada; #1008 (ficha) abierto
 - #999 mergeado tras CI verde en `b7da74eb3` (merge commit `9ab98b121`, 19:38:12 UTC). Sin corridas del NRT en curso en ese momento.
 - `aplicar-reemplazo.yml` (run 43633201356, tag `pre-s184-pcc-crater-historia` = `9ab98b121`): 2.994 publicadas, 2.994 reemplazadas, 0 sin par, 0 agregadas, 3 tras la ventana; 27 pruebas pasan; empujado al intento 1 (commit `0f92dcc4d`).
