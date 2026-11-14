@@ -1,0 +1,19 @@
+con panel analizados: 303
+componentes blancas interiores (no tocan borde) en todo el panel, por area, histograma:
+[(0, 441), (50, 16), (100, 2), (150, 1), (2000, 4)]
+records donde A borro una componente blanca de calor (>=20 px, no toca borde, <400 px, en inner): 35 de 303
+Counter({('NevadosDeChillan', 'VIIRS750'): 17, ('NevadosDeChillan', 'MODIS'): 12, ('PuyehueCordonCaulle', 'VIIRS750'): 3, ('NevadosDeChillan', 'VIIRS375'): 2, ('PuyehueCordonCaulle', 'VIIRS375'): 1})
+A != B en pixel elegido (lum distinta): 34
+VIIRS375: n=214 control A ok 116, control B (cualquier celda de la mancha, misma tolerancia) ok 134, B a 1 celda 88
+VIIRS750: n=67 control A ok 50, control B (cualquier celda de la mancha, misma tolerancia) ok 58, B a 1 celda 56
+MODIS: n=22 control A ok 21, control B (cualquier celda de la mancha, misma tolerancia) ok 22, B a 1 celda 20
+Chillan:
+VIIRS375 n 69 ctrlA 47 ctrlB 58 ctrlB1c 27 n_celdas p50 2.0 max 20 d_B_ours_min<=tol 68 d_B_cent<=tol 67
+VIIRS750 n 55 ctrlA 47 ctrlB 54 ctrlB1c 53 n_celdas p50 4.0 max 20 d_B_ours_min<=tol 55 d_B_cent<=tol 55
+MODIS n 22 ctrlA 21 ctrlB 22 ctrlB1c 20 n_celdas p50 8.0 max 16 d_B_ours_min<=tol 21 d_B_cent<=tol 18
+Los de la afirmacion 351 y vecinos clase A iii VIIRS Chillan:
+{'sensor': 'VIIRS_NOAA20', 'dt': '2026-10-18 06:00', 'vrp': '9.94', 'prot': 'True', 'dist_tabla': 0.84, 'claseA': 'iv', 'lum_A': 255.0, 'lum_B': 255.0, 'd_A_ours': 0.261, 'n_celdas': 2, 'man_px': 3, 'areas_blanco_inner': [3], 'comps_borradas_por_A': 0, 'd_mc_min': 0.018, 'd_mc_max': 0.4, 'ctrl_B': True, 'ctrl_B_1cel': False, 'd_B_ours_min': 0.132, 'd_B_ours_max': 0.261, 'd_B_ours_cent': 0.261, 'd_ours_celda_tabla': 0.132}
+{'sensor': 'VIIRS_NOAA21', 'dt': '2026-10-18 05:06', 'vrp': '21.25', 'prot': 'True', 'dist_tabla': 1.35, 'claseA': 'iii', 'lum_A': 255.0, 'lum_B': 255.0, 'd_A_ours': 1.022, 'n_celdas': 1, 'man_px': 1, 'areas_blanco_inner': [1, 6], 'comps_borradas_por_A': 0, 'd_mc_min': 1.197, 'd_mc_max': 1.197, 'ctrl_B': True, 'ctrl_B_1cel': True, 'd_B_ours_min': 1.022, 'd_B_ours_max': 1.022, 'd_B_ours_cent': 1.022, 'd_ours_celda_tabla': 1.022}
+{'sensor': 'VIIRS_NOAA20_750', 'dt': '2026-10-10 06:54', 'vrp': '15.26', 'prot': 'True', 'dist_tabla': 2.37, 'claseA': 'iii', 'lum_A': 196.7, 'lum_B': 255.0, 'd_A_ours': 1.826, 'n_celdas': 11, 'man_px': 48, 'areas_blanco_inner': [48], 'comps_borradas_por_A': 1, 'd_mc_min': 0.01, 'd_mc_max': 2.386, 'ctrl_B': True, 'ctrl_B_1cel': True, 'd_B_ours_min': 0.14, 'd_B_ours_max': 2.45, 'd_B_ours_cent': 0.782, 'd_ours_celda_tabla': 2.45}
+{'sensor': 'VIIRS_NOAA20_750', 'dt': '2026-10-16 06:42', 'vrp': '14.02', 'prot': 'True', 'dist_tabla': 2.12, 'claseA': 'iii', 'lum_A': 171.7, 'lum_B': 255.0, 'd_A_ours': 2.538, 'n_celdas': 7, 'man_px': 28, 'areas_blanco_inner': [28], 'comps_borradas_por_A': 1, 'd_mc_min': 0.01, 'd_mc_max': 1.686, 'ctrl_B': True, 'ctrl_B_1cel': True, 'd_B_ours_min': 0.292, 'd_B_ours_max': 1.48, 'd_B_ours_cent': 0.477, 'd_ours_celda_tabla': 1.48}
+{'sensor': 'VIIRS_NOAA21_750', 'dt': '2026-10-29 06:42', 'vrp': '29.35', 'prot': 'True', 'dist_tabla': 2.37, 'claseA': 'iii', 'lum_A': 237.0, 'lum_B': 255.0, 'd_A_ours': 2.16, 'n_celdas': 8, 'man_px': 30, 'areas_blanco_inner': [30], 'comps_borradas_por_A': 1, 'd_mc_min': 0.01, 'd_mc_max': 2.266, 'ctrl_B': True, 'ctrl_B_1cel': True, 'd_B_ours_min': 0.106, 'd_B_ours_max': 2.16, 'd_B_ours_cent': 0.65, 'd_ours_celda_tabla': 2.16}

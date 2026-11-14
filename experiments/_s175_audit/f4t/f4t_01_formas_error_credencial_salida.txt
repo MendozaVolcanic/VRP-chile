@@ -1,0 +1,23 @@
+earthaccess instalado: 0.17.0
+_CRED_DEAD_PAT: 'token .{0,40}?(expired|invalid|revoked)|invalid[_ ](credentials|token)|unauthorized'
+bool(requests.Response con status 401) = False  (requests.Response.__bool__ devuelve self.ok)
+__cause__.response.status_code de la forma CMR = 401; _is_credential_dead la clasifica como (False, None)
+
+| forma del error | dead | status recuperado | esperado |
+|---|---|---|---|
+| CONTROL+ CMR 401 token expirado (forma de tests S123) | True | None | True |
+| CMR 401 cuerpo vacío | False | None | True |  <-- NO COINCIDE
+| CMR 401 'Token does not exist' (texto sin expired/invalid/unauthorized) | False | None | True |  <-- NO COINCIDE
+| CMR 401 'Token [x] is invalid' | True | None | True |
+| CMR 403 EULA (no debe abortar) | False | None | False |
+| DESCARGA DownloadFailure 401 (earthaccess real) | False | None | — |
+| DESCARGA DownloadFailure 403 (earthaccess real) | False | None | — |
+| DESCARGA EulaNotAccepted (403 con eula) | False | None | False |
+| DESCARGA DownloadFailure 500 | False | None | False |
+
+download_granules con earthaccess.download que lanza la forma REAL (DownloadFailure 401):
+  RESULTADO: DownloadFailure genérico tras 4 intento(s): Download failed for https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/MOD021KM/2026/307/MOD021KM.A2026307.0500.061.hdf. Status code:
+  => el guard S124 del camino de descarga NO clasifica la forma real; fetch_for_volcano lo tragará como WARN
+
+Control positivo del mismo camino con la forma de CMR (la que usa tests/test_fetch_credential_dead_s123.py):
+  RESULTADO: EarthdataCredentialError tras 1 intento(s) (el test de S124 pasa con ESTA forma)

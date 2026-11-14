@@ -1,0 +1,33 @@
+{
+ "ea": "017",
+ "escenario": "control_cmr401_expired",
+ "netrc_presente": true,
+ "earthaccess_version": "0.17.0",
+ "earthaccess_file": "C:\\Users\\nmend\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\earthaccess\\__init__.py",
+ "resultado": "EarthdataCredentialError",
+ "mensaje": "EARTHDATA_CREDENTIAL_INVALID [search:MODIS_TERRA_L1B]: NASA rechazó la credencial (HTTP ?). Hay que **rotar** el secret EARTHDATA (ver docs/EARTHDATA_TOKEN_SETUP.md) — no es un outage y reintentar no lo cura. Detalle: {\"errors\":[\"Token [ABC] has expired. Please get a new token\"]}",
+ "fallas_cobertura": [],
+ "codigo_salida_run_pipeline": "excepcion no atrapada en process_date => exit 1",
+ "n_peticiones": 3,
+ "por_host": {
+  "169.254.169.254": 2,
+  "cmr.earthdata.nasa.gov": 1
+ },
+ "muestra_peticiones": [
+  {
+   "metodo": "PUT",
+   "url": "http://169.254.169.254/latest/api/token",
+   "auth": true
+  },
+  {
+   "metodo": "GET",
+   "url": "http://169.254.169.254/latest/meta-data/placement/region",
+   "auth": true
+  },
+  {
+   "metodo": "GET",
+   "url": "https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=MOD021KM&version=6.1&bounding_box=-67.95522522522523,-23.595225225225228,-67.50477477477477,-",
+   "auth": true
+  }
+ ]
+}

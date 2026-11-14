@@ -1,0 +1,32 @@
+Bloque `run:` de cada paso, ejecutado con bash y un shim de python en el PATH (nunca corre el pipeline).
+
+[nrt.yml BASE 752d348bc] guarda `-z "$EARTHDATA_TOKEN"` en el texto: SÍ
+- nrt.yml BASE 752d348bc | token=VACÍO | exit=1 | python invocado=NO | ::error::EARTHDATA_TOKEN vacÃ­o. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea 
+- nrt.yml BASE 752d348bc (control positivo) | token='x' | exit=0 | python invocado=SÍ | SHIM python ejecutado (sin red, sin pipeline): scripts/run_pipeline.py --profile mirova_equivalent --volcano L
+      SHIM python: scripts/run_pipeline.py --profile mirova_equivalent --volcano Lascar
+
+[nrt.yml PRE-#894 (79b4e3af6^)  <- línea base roja (1)] guarda `-z "$EARTHDATA_TOKEN"` en el texto: NO
+- nrt.yml PRE-#894 (79b4e3af6^)  <- línea base roja (1) | token=VACÍO | exit=0 | python invocado=SÍ | SHIM python ejecutado (sin red, sin pipeline): scripts/run_pipeline.py --profile mirova_equivalent --volcano L
+      SHIM python: scripts/run_pipeline.py --profile mirova_equivalent --volcano Lascar
+- nrt.yml PRE-#894 (79b4e3af6^)  <- línea base roja (1) (control positivo) | token='x' | exit=0 | python invocado=SÍ | SHIM python ejecutado (sin red, sin pipeline): scripts/run_pipeline.py --profile mirova_equivalent --volcano L
+      SHIM python: scripts/run_pipeline.py --profile mirova_equivalent --volcano Lascar
+
+[guardia-k-modis.yml BASE] guarda `-z "$EARTHDATA_TOKEN"` en el texto: SÍ
+- guardia-k-modis.yml BASE | token=VACÍO | exit=1 | python invocado=NO | ::error::EARTHDATA_TOKEN vacio. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea l
+- guardia-k-modis.yml BASE (control positivo) | token='x' | exit=0 | python invocado=SÍ | SHIM python ejecutado (sin red, sin pipeline): -c import pipeline.profile as p; assert p.DATA_SUBDIR == 'guard
+      SHIM python: -c import pipeline.profile as p; assert p.DATA_SUBDIR == 'guardia_k_modis', p.DATA_SUBDIR; assert not p.ENABLE_MODIS_CODIGO_MIROVA; asser
+      SHIM python: scripts/run_pipeline.py --profile guardia_k_modis --volcano Lascar --start 2026-11-01 --end 2026-11-08 --cobertura-json cobertura.json
+
+[sombra-34.yml BASE] guarda `-z "$EARTHDATA_TOKEN"` en el texto: SÍ
+- sombra-34.yml BASE | token=VACÍO | exit=1 | python invocado=NO | ::error::EARTHDATA_TOKEN vacio. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea l
+- sombra-34.yml BASE (control positivo) | token='x' | exit=0 | python invocado=SÍ | SHIM python ejecutado (sin red, sin pipeline): -c import pipeline.profile as p; assert p.PROFILE_NAME == 'somb
+      SHIM python: -c import pipeline.profile as p; assert p.PROFILE_NAME == 'sombra_34', p.PROFILE_NAME; assert p.DATA_SUBDIR == 'sombra_34', p.DATA_SUBDIR
+      SHIM python: scripts/ventana_sombra.py
+      SHIM python: scripts/run_pipeline.py --profile sombra_34 --volcano Lascar --start SHIM --end python ejecutado (sin red, sin pipeline): scripts/ventana
+
+[experimental-diario.yml BASE] guarda `-z "$EARTHDATA_TOKEN"` en el texto: SÍ
+- experimental-diario.yml BASE | token=VACÍO | exit=1 | python invocado=NO | ::error::EARTHDATA_TOKEN vacio. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea l
+- experimental-diario.yml BASE (control positivo) | token='x' | exit=0 | python invocado=SÍ | SHIM python ejecutado (sin red, sin pipeline): -c import pipeline.profile as p; assert p.DATA_SUBDIR == 'exper
+      SHIM python: -c import pipeline.profile as p; assert p.DATA_SUBDIR == 'experimental_v2', p.DATA_SUBDIR; print('perfil', p.PROFILE_NAME, '| test1', p.E
+      SHIM python: scripts/run_pipeline.py --profile experimental --volcano Lascar
+

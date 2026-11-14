@@ -1,0 +1,49 @@
+Escenarios (run_pipeline.py --profile mirova_equivalent --volcano Lascar --date 2026-11-03, base 752d348bc, red interceptada)
+
+== cmr401_expired: CONTROL+ ROJO: CMR responde 401 'Token has expired' (lo visto el 2026-10-03, AUDITOR_A S150)
+   exit=1 en 29.8s | logins=1 búsquedas=1 descargas=0 | red bloqueada=1 probe sim=0
+   CREDENTIAL_INVALID=True traceback=True WARN fetch=0 cobertura incompleta=False completa=False ERROR processing=0 records=0
+   nrt.yml quedaría: ROJO (el paso del pipeline falló) | revisar_errores_modis exit=0 | revisar_guardia_modis exit=None: sin cobertura.json (el proceso murió antes de escribirla)
+
+== cmr401_noexist: CMR responde 401 'Token does not exist' (texto fuera del regex)
+   exit=0 en 33.5s | logins=1 búsquedas=8 descargas=0 | red bloqueada=1 probe sim=0
+   CREDENTIAL_INVALID=False traceback=False WARN fetch=6 cobertura incompleta=True completa=False ERROR processing=0 records=0
+   nrt.yml quedaría: VERDE | revisar_errores_modis exit=0 | revisar_guardia_modis exit=1:   FALLA: cobertura incompleta: 6 b�squedas o descargas fallidas del 2026-11-03 o sin fecha; ning�n record de MODIS escrito en esta corrida: la corrida no escrib
+
+== descarga401: CMR acepta la búsqueda; la descarga responde 401 (forma real DownloadFailure)
+   exit=0 en 32.1s | logins=1 búsquedas=12 descargas=24 | red bloqueada=1 probe sim=0
+   CREDENTIAL_INVALID=False traceback=False WARN fetch=6 cobertura incompleta=True completa=False ERROR processing=0 records=0
+   nrt.yml quedaría: VERDE | revisar_errores_modis exit=0 | revisar_guardia_modis exit=1:   FALLA: cobertura incompleta: 6 b�squedas o descargas fallidas del 2026-11-03 o sin fecha; ning�n record de MODIS escrito en esta corrida: la corrida no escrib
+
+== descarga401_jwt_vencido: igual, con un JWT sintético vencido el 2026-10-03: ¿el pipeline mira exp?
+   exit=0 en 25.3s | logins=1 búsquedas=12 descargas=24 | red bloqueada=1 probe sim=0
+   CREDENTIAL_INVALID=False traceback=False WARN fetch=6 cobertura incompleta=True completa=False ERROR processing=0 records=0
+   nrt.yml quedaría: ROJO (revisar_errores_modis_nrt: gránulo MODIS con ERROR processing) | revisar_errores_modis exit=3221225794 | revisar_guardia_modis exit=3221225794: 
+
+== descarga403: la descarga responde 403 sin texto de credencial
+   exit=3221225794 en 0.0s | logins=0 búsquedas=0 descargas=0 | red bloqueada=0 probe sim=0
+   CREDENTIAL_INVALID=False traceback=False WARN fetch=0 cobertura incompleta=False completa=False ERROR processing=0 records=0
+   nrt.yml quedaría: ROJO (el paso del pipeline falló) | revisar_errores_modis exit=3221225794 | revisar_guardia_modis exit=None: sin cobertura.json (el proceso murió antes de escribirla)
+
+== descarga_ok_archivo_falso: CONTROL+ PROCESADOR: la descarga 'funciona' y deja un archivo que no es HDF
+   exit=3221225794 en 0.0s | logins=0 búsquedas=0 descargas=0 | red bloqueada=0 probe sim=0
+   CREDENTIAL_INVALID=False traceback=False WARN fetch=0 cobertura incompleta=False completa=False ERROR processing=0 records=0
+   nrt.yml quedaría: ROJO (el paso del pipeline falló) | revisar_errores_modis exit=3221225794 | revisar_guardia_modis exit=None: sin cobertura.json (el proceso murió antes de escribirla)
+
+== token_vacio_pre894: LÍNEA BASE ROJA (1) a nivel Python: token vacío llega a auth(); usuario y clave falsos; probe TCP simulado OK
+   exit=3221225794 en 0.1s | logins=0 búsquedas=0 descargas=0 | red bloqueada=0 probe sim=0
+   CREDENTIAL_INVALID=False traceback=False WARN fetch=0 cobertura incompleta=False completa=False ERROR processing=0 records=0
+   nrt.yml quedaría: ROJO (el paso del pipeline falló) | revisar_errores_modis exit=3221225794 | revisar_guardia_modis exit=None: sin cobertura.json (el proceso murió antes de escribirla)
+
+Tabla:
+| escenario | exit | logins | WARN fetch | cobertura incompleta | records | nrt.yml | guardia/sombra (revisor) |
+|---|---|---|---|---|---|---|---|
+| cmr401_expired | 1 | 1 | 0 | False | 0 | ROJO (el paso del pipeline falló) | ROJO (sin cobertura) |
+| cmr401_noexist | 0 | 1 | 6 | True | 0 | VERDE | ROJO |
+| descarga401 | 0 | 1 | 6 | True | 0 | VERDE | ROJO |
+| descarga401_jwt_vencido | 0 | 1 | 6 | True | 0 | ROJO (revisar_errores_modis_nrt: gránulo MODIS con ERROR processing) | ROJO |
+| descarga403 | 3221225794 | 0 | 0 | False | 0 | ROJO (el paso del pipeline falló) | ROJO (sin cobertura) |
+| descarga_ok_archivo_falso | 3221225794 | 0 | 0 | False | 0 | ROJO (el paso del pipeline falló) | ROJO (sin cobertura) |
+| token_vacio_pre894 | 3221225794 | 0 | 0 | False | 0 | ROJO (el paso del pipeline falló) | ROJO (sin cobertura) |
+
+Logs y marcas por escenario en C:\Users\nmend\vrp-temporales\s175_audit\v4t\rerun_f4t\tmp_03

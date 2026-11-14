@@ -1,0 +1,39 @@
+== (a) 2026-10-18 05:06 V375: componentes blancas en el inner ==
+  comp 1 px 1 celdas [(66, 63)] lum max 255.0 d_mc km [1.2] d_nuestro km [1.02]
+  comp 2 px 6 celdas [(67, 65), (67, 66), (68, 65), (68, 66)] lum max 255.0 d_mc km [0.38, 0.02, 0.55, 0.4] d_nuestro km [0.19, 0.32, 0.25, 0.35]
+  celda de mirova_center (67,66); nuestro punto en (np.int64(67), np.int64(65))
+  Luminancia alrededor del centro (filas 62..71, cols 60..71, media por celda):
+     col   60   61   62   63   64   65   66   67   68   69   70   71
+  r 62    19   18   19   19   18   18   21   27   33   37   44   48
+  r 63    28   24   21   26   25   23   25   26   29   36   40   45
+  r 64    33   26   25   29   30   30   33   27   25   30   33   46
+  r 65    36   33   32  199  166   72   30   23   22   26   38   45
+  r 66    40   40   42  255  239  200  174   88   25   30   38   40
+  r 67    42   42   46  163  220  255  245  172   27   28   34   32
+  r 68    46   43   46   58  207  255  229  133   25   23   30   26
+  r 69    46   41   39   42  148  201  180   62   22   18   27   19
+  r 70    46   42   37   41   41   41   34   25   21   19   21   24
+  r 71    45   43   42   38   36   35   30   27   22   24   21   13
+
+== (b) Predicado del tablero con node sobre frontend/index.html de la base ==
+  campos JS: ['primary_cluster', 'distance_class', 'vrp_mw', 'vrp_mir_mw', 'discarded_reason', 'triggered_test1', 'vrp_vent_mw', 't_max_k', 'sensor', 'f5_core_vrp_mw', 'anomaly_pixels', 'via_codigo_mirova']
+  rc 0 stderr 
+   VIIRS_NOAA21 2026-10-18 05:06 [summit, valid, art, disp, publica] = [1, 1, 0, 9.7797, 1] final_hotspot -36.86643 -71.38376 fuente ctx_cluster
+   VIIRS_NOAA21_750 2026-10-29 06:42 [summit, valid, art, disp, publica] = [1, 1, 0, 6.968, 1] final_hotspot -36.86489 -71.37949 fuente ctx_cluster
+   VIIRS_NOAA20_750 2026-10-10 06:54 [summit, valid, art, disp, publica] = [1, 1, 0, 2.508, 1] final_hotspot -36.86617 -71.38084 fuente ctx_cluster
+   VIIRS_NOAA20_750 2026-10-16 06:42 [summit, valid, art, disp, publica] = [1, 1, 0, 2.007, 1] final_hotspot -36.86554 -71.37749 fuente ctx_cluster
+   control_far  [summit, valid, art, disp, publica] = [0, 1, 0, 0, 0] final_hotspot None None fuente None
+  El control far debe dar publica=0: True
+
+== (c) Filas de la tabla de MIROVA (snapshot_consolidado_base.csv) para las 4 pasadas ==
+  VIIRS375 2026-10-18 05:06 [('2026-10-18 05:06:02', '21.25', '1.35', 'ALERTA_TERMICA', 'Moderado')]
+  VIIRS750 2026-10-29 06:42 []
+  VIIRS750 2026-10-10 06:54 []
+  VIIRS750 2026-10-16 06:42 []
+
+== (d) m2: tasas condicionadas a que el maximo del TIF reproduzca la tabla ==
+  nuevo VIIRS375 TIF reproduce tabla=True: n=17; A<=tol 17; A<=1 celda 15; p50 0.00 km; corr p50 0.973
+  nuevo VIIRS375 TIF reproduce tabla=False: n=8; A<=tol 3; A<=1 celda 2; p50 15.30 km; corr p50 0.959
+  nuevo VIIRS750 TIF reproduce tabla=True: n=2; A<=tol 2; A<=1 celda 2; p50 0.00 km; corr p50 0.982
+  nuevo VIIRS750 TIF reproduce tabla=False: n=14; A<=tol 7; A<=1 celda 5; p50 2.40 km; corr p50 0.919
+  Por volcan en nuevos con TIF que reproduce: [('Lascar', 'VIIRS375'), ('Lascar', 'VIIRS750'), ('PuyehueCordonCaulle', 'VIIRS375'), ('Villarrica', 'VIIRS375')]
