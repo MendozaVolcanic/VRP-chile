@@ -30,3 +30,13 @@ Copia local: `D:/vrp-trabajo/temporales/historia_34/piloto/` (fuera del repo).
 - `FileExistsError` en `partial_*`: en el run 43467764489 (S182) tumbó 3 de 34 jobs enteros (todas las descargas del job,
   0 `DOWNLOAD_DONE`), y a Mentolat en la sombra el 2026-11-03. Causa SIN VERIFICAR; S182 propuso una sesión aparte para
   diagnosticarlo. Con 165 trozos por tanda, una tasa así dejaría ~15 trozos para relanzar en cada una.
+
+## Tanda 1 (Taapaca, Parinacota, Guallatiri, Irruputuncu, OlcaParuma; 2025-02-15 a 2026-11-02)
+
+- Run 43620748875 (main `f7e7aa5c6`, despachado 2026-11-14 17:22 UTC tras esperar el rerun de S182 en el mismo grupo):
+  165 trozos. CANCELADO a las ~19:36 UTC con 27 en verde (sus artifacts quedan) y 138 sin correr, porque S184 halló que
+  `FileExistsError` NO es pasajero: falla todo job que cae en AWS us-west-2, y el arreglo #1007 (`dc0a1de3f`) entró a
+  main a las 19:34 UTC. Un rerun habría usado el commit viejo.
+- Run 43633062404 (main `dc0a1de3f`): los 138 trozos restantes, con ventanas `Volcan@a:b` exactas
+  (`D:/vrp-trabajo/temporales/historia_34/tanda1/ventanas_relanzar.txt`); el planificador los reproduce idénticos y
+  sin solaparse con los 27 (comprobado antes de despachar). La unión se arma con los dos runs.
