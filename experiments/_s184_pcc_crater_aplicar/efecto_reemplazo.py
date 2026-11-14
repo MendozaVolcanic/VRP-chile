@@ -48,7 +48,26 @@ for d in sorted(dif, key=lambda d: -abs(d[2] - d[1]))[:8]:
 sys.path.insert(0, str(AQUI.parents[1]))
 from pipeline.mirova_v750_codigo import caja_roi  # noqa: E402
 
+from pipeline.mirova_v750_codigo import celda_de, grilla_del_volcan  # noqa: E402
+import yaml  # noqa: E402
+
 box_sens = caja_roi("sens")
+# Geometría de las dos cajas en Cordón Caulle, con la celda del cráter que usa el pipeline (vent_lat/vent_lon de
+# volcanoes.yaml, como pipeline/process_viirs_mod.py al llamar al port).
+_v = [x for x in yaml.safe_load(open(AQUI.parents[1] / "volcanoes.yaml", encoding="utf-8"))["volcanoes"]
+      if x.get("name") == ap.VOLCAN][0]
+_g = grilla_del_volcan(ap.VOLCAN)
+_celda = celda_de(_g, _v["vent_lat"], _v["vent_lon"])
+box_crater = caja_roi("crater", n=_g["n"], celda_crater=_celda)
+box_sens_g = caja_roi("sens", n=_g["n"])
+_r, _c = (box_sens_g == 2).nonzero()
+_rc, _cc = (box_crater == 2).nonzero()
+print("grilla", _g["n"], "x", _g["n"], "| celda del crater", tuple(int(x) for x in _celda),
+      "| sens filas", int(_r.min()), "a", int(_r.max()), "columnas", int(_c.min()), "a", int(_c.max()),
+      "| crater filas", int(_rc.min()), "a", int(_rc.max()), "columnas", int(_cc.min()), "a", int(_cc.max()))
+print("celdas sensibles con crater que sens dejaba fuera:", int(((box_crater == 2) & (box_sens_g == 0)).sum()),
+      "| sensibles de sens que pasan a conservadoras:", int(((box_sens_g == 2) & (box_crater == 1)).sum()))
+assert (box_sens_g == box_sens).all()
 
 
 def nuevos_fuera_de_sens(kk):

@@ -36,7 +36,8 @@ En la grilla de 67 × 67 celdas, el cráter cae en la fila 23, el borde norte de
 43). El cuadro `crater` (filas 20 a 26, columnas 27 a 33) hace sensibles 21 celdas al norte que `sens` dejaba fuera
 (BOX 0), y vuelve conservadoras las otras 413 del cuadrado. Comprobado en `efecto_reemplazo_salida.txt`: las 50 pasadas
 que suben tienen un píxel alertado nuevo fuera del cuadrado `sens`, y ninguna de las 14 que bajan lo tiene. En la del
-2025-08-29 05:36 los umbrales son iguales y entra un píxel más en la fila 22.
+2025-08-29 05:36 los umbrales son iguales y entra un píxel más en la fila 22. Celda del cráter, cajas y conteos: primeras
+líneas de `efecto_reemplazo_salida.txt`, con la celda que usa el pipeline (`vent_lat`/`vent_lon` de `volcanoes.yaml`).
 
 ## Verificación
 
