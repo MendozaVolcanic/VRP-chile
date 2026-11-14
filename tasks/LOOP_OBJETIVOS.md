@@ -570,7 +570,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
 ### 2026-11-14 17:51 UTC (S184): #1005 entró con la ficha v1.27; #999 pasa a v1.28; CI verde, espera «mergea #999»
-- #1005 mergeado (17:35 UTC, otra sesión) con la ficha v1.27: #999 quedó DIRTY otra vez. Unido main (commit `466f215aa`); la entrada de la caja del cráter pasa a **v1.28, 2026-11-14**, contenido igual (`D:rp-trabajo	emporales\s184esolver_ficha2.py`). 167 pruebas relacionadas pasan local.
+- #1005 mergeado (17:35 UTC, otra sesión) con la ficha v1.27: #999 quedó DIRTY otra vez. Unido main (commit `466f215aa`); la entrada de la caja del cráter pasa a **v1.28, 2026-11-14**, contenido igual (`D:\vrp-trabajo\temporales\s184\resolver_ficha2.py`). 167 pruebas relacionadas pasan local.
 - CI de `466f215aa` (run 43622233914): pytest y bateria-v750a SUCCESS; #999 CLEAN. Pedido a Nicolás: «mergea #999» y el sí para la secuencia sobre `data/` (aplicar-reemplazo, despacho del NRT con overwrite desde el 2026-11-14, `chequeo_caja.py` en 0).
 
 ### 2026-11-14 17:36 UTC (S184): Nicolás: «Sí, cúbrelos»; secuencia para dejar PCC V750 con una sola caja
