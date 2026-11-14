@@ -1,0 +1,65 @@
+sha256 port 62d6538bbdbbc357
+objetivos PCC 543  con resultado ok 535  con grilla 535  ambos 535
+filas 535 -> D:\vrp-trabajo\temporales\s182_pcc\11_cajas_pcc_filas.json
+
+MIROVA alertó en 53 pasadas (12 protegidas >= 1 MW); fuentes de esas alertas: solo tabla 47, solo OCR 2, ambas 4
+MIROVA no alertó (neg_limpio) en 482
+
+[crater]
+  alertas de MIROVA vistas 45/53; protegidas perdidas 0 []
+  razón VRP/MIROVA (tabla+OCR, máx): mediana 0.995  p10 0.890  p90 1.297  máx 2.41  dentro de [0,5; 2] 42/45
+  razón VRP/tabla sola: mediana 0.995  máx 2.41  n 43
+  |dist del píxel más caliente - Distancia_km de MIROVA|: mediana 0.64 km  >2 km en 2/45
+  pasadas sin alerta de MIROVA con algún píxel 2/482  (suma 0.94 MW; detección cruda)
+     2026-04-11 06:12 VIIRS_NOAA21_750  1 px 0.4226 MW dist 7.01 sur 0 nan 0.0
+     2026-05-09 05:42 VIIRS_NOAA21_750  1 px 0.5127 MW dist 7.2 sur 0 nan 0.0
+
+[sens]
+  alertas de MIROVA vistas 45/53; protegidas perdidas 0 []
+  razón VRP/MIROVA (tabla+OCR, máx): mediana 0.995  p10 0.675  p90 1.508  máx 28.10  dentro de [0,5; 2] 41/45
+  razón VRP/tabla sola: mediana 0.995  máx 28.10  n 43
+  |dist del píxel más caliente - Distancia_km de MIROVA|: mediana 0.64 km  >2 km en 3/45
+  pasadas sin alerta de MIROVA con algún píxel 3/482  (suma 1.35 MW; detección cruda)
+     2026-04-11 06:12 VIIRS_NOAA21_750  1 px 0.4226 MW dist 7.01 sur 0 nan 0.0
+     2026-05-09 05:42 VIIRS_NOAA21_750  1 px 0.5127 MW dist 7.2 sur 0 nan 0.0
+     2026-10-09 06:54 VIIRS_SNPP_750    1 px 0.4162 MW dist 5.55 sur 1 nan 0.0
+
+[sens_sur_cons]
+  alertas de MIROVA vistas 45/53; protegidas perdidas 0 []
+  razón VRP/MIROVA (tabla+OCR, máx): mediana 0.993  p10 0.675  p90 1.092  máx 2.41  dentro de [0,5; 2] 42/45
+  razón VRP/tabla sola: mediana 0.993  máx 2.41  n 43
+  |dist del píxel más caliente - Distancia_km de MIROVA|: mediana 0.64 km  >2 km en 2/45
+  pasadas sin alerta de MIROVA con algún píxel 2/482  (suma 0.94 MW; detección cruda)
+     2026-04-11 06:12 VIIRS_NOAA21_750  1 px 0.4226 MW dist 7.01 sur 0 nan 0.0
+     2026-05-09 05:42 VIIRS_NOAA21_750  1 px 0.5127 MW dist 7.2 sur 0 nan 0.0
+
+[sens_sur_fuera]
+  alertas de MIROVA vistas 45/53; protegidas perdidas 0 []
+  razón VRP/MIROVA (tabla+OCR, máx): mediana 0.993  p10 0.675  p90 1.092  máx 2.41  dentro de [0,5; 2] 42/45
+  razón VRP/tabla sola: mediana 0.993  máx 2.41  n 43
+  |dist del píxel más caliente - Distancia_km de MIROVA|: mediana 0.64 km  >2 km en 2/45
+  pasadas sin alerta de MIROVA con algún píxel 2/482  (suma 0.94 MW; detección cruda)
+     2026-04-11 06:12 VIIRS_NOAA21_750  1 px 0.4226 MW dist 7.01 sur 0 nan 0.0
+     2026-05-09 05:42 VIIRS_NOAA21_750  1 px 0.5127 MW dist 7.2 sur 0 nan 0.0
+
+Pasadas con alerta de MIROVA donde alguna caja cambia npix o la razón sale de [0,5; 2]:
+  hora  sensor  prot  MIROVA(fuentes, dist) | crater | sens | sur_cons | sur_fuera   (npix/VRP MW)
+  2026-04-30 06:06 S_NOAA20_750 F 0.41(CONS,[7.83]) | 0/None | 0/None | 0/None | 0/None
+  2026-06-08 05:36 S_NOAA20_750 F 0.57(CONS,[7.65]) | 2/1.225 | 2/1.225 | 2/1.225 | 2/1.225
+  2026-09-07 05:30 S_NOAA20_750 F 0.38(CONS,[7.65]) | 2/0.8717 | 2/0.8717 | 2/0.8717 | 2/0.8717
+  2026-09-13 05:18 S_NOAA20_750 F 0.63(CONS,[7.83]) | 0/None | 0/None | 0/None | 0/None
+  2026-09-17 05:42 S_NOAA20_750 F 0.42(CONS,[7.65]) | 0/None | 0/None | 0/None | 0/None
+  2026-09-18 05:24 S_NOAA20_750 T 1.43(CONS,[8.55]) | 3/1.8108 | 1/0.7562 | 1/0.7562 | 1/0.7562
+  2026-09-28 05:36 S_NOAA20_750 F 0.38(CONS,[7.65]) | 0/None | 0/None | 0/None | 0/None
+  2026-10-14 05:36 S_NOAA20_750 F 0.48(CONS,[7.65]) | 0/None | 0/None | 0/None | 0/None
+  2026-10-25 05:30 S_NOAA20_750 T 1.48(CONS+OCR,[8.55, 8.51]) | 3/1.5062 | 2/1.2002 | 2/1.2002 | 2/1.2002
+  2026-10-27 04:54 S_NOAA20_750 F 0.46(CONS,[8.55]) | 0/None | 0/None | 0/None | 0/None
+  2026-10-28 06:18 S_NOAA20_750 T 1.22(CONS,[7.83]) | 3/2.0451 | 2/1.2423 | 2/1.2423 | 2/1.2423
+  2026-04-07 05:42 S_NOAA21_750 F 0.58(CONS,[7.65]) | 1/0.5436 | 2/1.0015 | 1/0.5436 | 1/0.5436
+  2026-06-28 05:06 S_NOAA21_750 F 0.84(CONS,[8.55]) | 2/0.7903 | 1/0.4823 | 1/0.4823 | 1/0.4823
+  2026-08-22 06:18 S_NOAA21_750 F 0.65(CONS,[2.25]) | 0/None | 0/None | 0/None | 0/None
+  2026-08-24 05:36 S_NOAA21_750 F 0.55(CONS,[7.65]) | 2/1.3233 | 2/1.3233 | 2/1.3233 | 2/1.3233
+  2026-10-21 05:48 S_NOAA21_750 F 0.36(CONS,[6.45]) | 1/0.3452 | 11/10.1152 | 1/0.3452 | 1/0.3452
+  2026-10-27 05:36 S_NOAA21_750 T 1.67(CONS,[7.83]) | 3/2.2008 | 2/1.8269 | 2/1.8269 | 2/1.8269
+  2026-07-03 05:48 IRS_SNPP_750 T 1.0(OCR,[4.59]) | 2/1.1945 | 1/0.6663 | 1/0.6663 | 1/0.6663
+  2026-09-11 05:36 IRS_SNPP_750 F 0.49(CONS,[7.83]) | 0/None | 0/None | 0/None | 0/None

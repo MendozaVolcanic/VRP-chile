@@ -15,7 +15,14 @@ Brazos de V750-B -> `roi_v750` (caja_roi, pipeline/mirova_v750_codigo.py):
   B3 inner  en los 11 (el círculo de inner_radius_km del tablero)
   B4 sens   en PuyehueCordonCaulle y Tupungatito, def en los otros nueve
   B5 corona en los 11 (la corona 21 x 21 menos el 7 x 7 central)
-Uso: python scripts/roi_v750b_a_grillas.py --brazo B4 [--escribir]   (sin --escribir sólo muestra el diff)
+  B4c (S182) B4 con crater en PuyehueCordonCaulle: sens en Tupungatito, def en los otros nueve. No es un brazo
+      sellado. POR QUÉ: el cráter de Cordón Caulle cae en el borde norte del anillo 21 x 21, así que sens deja fuera
+      la fila al norte de la fisura y pone el umbral sensible en el flanco sur del Puyehue (10,1 MW publicados el
+      2026-10-21 05:48 NOAA-21 contra 0,36 de MIROVA). B2 había quedado elegible en V750-B; el analizador sellado,
+      corrido con crater sólo en Cordón Caulle, da 101 de 101 protegidas y E 29 contra 31 de B4 (experiments/
+      _s182_pcc_crater/). Mover la región sensible al volcán es lo que el .m declara (l. 105-125, D-48). Decisión de
+      Nicolás del 2026-11-13 («Yaml y reproceso PCC»).
+Uso: python scripts/roi_v750b_a_grillas.py --brazo B4c [--escribir]   (sin --escribir sólo muestra el diff)
 """
 from __future__ import annotations
 
@@ -29,12 +36,13 @@ YAML = Path(__file__).resolve().parents[1] / "pipeline" / "grillas_mirova.yaml"
 VOLCANES = ("Chaiten", "NevadosDeChillan", "Copahue", "Isluga", "Lascar", "Lastarria", "Llaima", "PlanchonPeteroa",
             "PuyehueCordonCaulle", "Tupungatito", "Villarrica")
 SENSIBLES_B4 = ("PuyehueCordonCaulle", "Tupungatito")     # PREREGISTRO_V750B.md §2, tabla de brazos
+CRATER_B4C = ("PuyehueCordonCaulle",)                     # S182: B4 con crater en estos
 TIPO = {"B0": "def", "B1": "sens", "B2": "crater", "B3": "inner", "B5": "corona"}
 COMENTARIO_VIEJO = '# roi_v750: la región sensible del código de MIROVA para el volcán. Hoy "def" en todos'
 COMENTARIO_NUEVO = '# roi_v750: la región sensible del código de MIROVA para el volcán. Hasta la lectura de V750-B, "def" en todos'
 # la línea que cierra el comentario: sin nota (hoy) o con la nota del brazo puesto. VF1-02 del verificador S169: una
 # segunda aplicación la reemplaza, no la deja con el brazo anterior
-NOTA = re.compile(r"^# caja_roi\(\)\.(?: Puesto por la lectura de V750-B: brazo B\d \(scripts/roi_v750b_a_grillas\.py\)\.)?$",
+NOTA = re.compile(r"^# caja_roi\(\)\.(?: Puesto por la lectura de V750-B: brazo B\dc? \(scripts/roi_v750b_a_grillas\.py\)\.)?$",
                   re.M)
 
 
@@ -42,8 +50,10 @@ def roi_por_volcan(brazo):
     """{volcán: tipo de caja_roi} para el brazo de V750-B."""
     if brazo == "B4":
         return {v: ("sens" if v in SENSIBLES_B4 else "def") for v in VOLCANES}
+    if brazo == "B4c":
+        return {v: ("crater" if v in CRATER_B4C else "sens" if v in SENSIBLES_B4 else "def") for v in VOLCANES}
     if brazo not in TIPO:
-        raise ValueError(f"brazo desconocido: {brazo!r} (válidos B0 a B5)")
+        raise ValueError(f"brazo desconocido: {brazo!r} (válidos B0 a B5 y B4c)")
     return {v: TIPO[brazo] for v in VOLCANES}
 
 
@@ -71,7 +81,7 @@ def variante(texto, brazo):
 def main(argv=None):
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
-    ap.add_argument("--brazo", required=True, choices=("B0", "B1", "B2", "B3", "B4", "B5"))
+    ap.add_argument("--brazo", required=True, choices=("B0", "B1", "B2", "B3", "B4", "B4c", "B5"))
     ap.add_argument("--escribir", action="store_true", help="escribe el YAML; sin esto sólo muestra el diff")
     a = ap.parse_args(argv)
     viejo = YAML.read_text(encoding="utf-8")
