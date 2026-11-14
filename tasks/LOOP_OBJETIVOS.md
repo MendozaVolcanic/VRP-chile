@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-14 22:22 UTC (S185): Nicolás: «Mergea #1009 y #1010»; los dos integrados; ficha v1.30
+- #1009 (regla: la versión de la ficha se toma al mergear) mergeado con CI verde en `9b2842c06`: merge commit `0a1102d5d` (22:09:30 UTC). Worktree `D:\vrp-trabajo\wt_s185_doc` y rama quitados (list_sessions antes: ninguna sesión lo usaba).
+- #1010 (escenas inválidas fuera del banco de paridad y del auto-audit): primera aplicación de la regla de #1009. Se unió main en la rama, se agregó la ficha **v1.30** (cabecera y fila del historial) en `9615463ea`, CI verde en ese commit (`pytest` 10 min 54 s, `bateria-v750a` 9 min 53 s) y merge con `--match-head-commit`: merge commit `86a07971f` (22:22:20 UTC). Pruebas de la ficha locales: 26 de 26. Worktree `D:\vrp-trabajo\wt_s185_banco` y rama quitados (sólo `__pycache__` ignorado).
+- Desajuste menor de la regla: el texto de #1009 dice «la cabecera, si cambia la lógica», pero la ficha actualiza la cabecera en toda versión (así la v1.28 de #1006); en #1010 se siguió la práctica. Ajustar el texto si Nicolás quiere.
+- #1011 (sesión de gráficos) trae la ficha v1.30 escrita: con #1010 adentro, al mergearlo pasa a v1.31 según la regla nueva.
+- La auditoría semanal del 2026-11-16 es la primera con #1010: sus `n_neg_limpio` bajan respecto del 11-09 por este cambio, no por el detector (A104).
+
 ### 2026-11-14 20:54 UTC (S185): #1010 (b.1) abierto y verificado; #1009 y #1010 con CI verde, esperan «mergea #N»
 - **#1010** (rama `claude/s185-banco-escenas-invalidas`, head `c65bf6e4d`): `banco_paridad.es_escena_invalida`; `cargar_nuestros(..., excluir_escenas_invalidas=False)`; con `True` en `banco_paridad.main` y en el auto-audit (carga del banco y `nuestros_por_noche`, que cuenta el día y las informa en `fuera_de_detector.escena_invalida`). Las tres vigilancias de reversión no cambian (prueba AST). Nada en `pipeline/`, `data/` ni `frontend/`.
 - Nulo antes y después (snapshot, mismo árbol): banco, recall igual en los tres sensores y negativos limpios 16.117 a 15.871; auto-audit, veredicto, flags, recall y magnitud iguales, sólo bajan los `n_neg_limpio` de falsas publicaciones. 675 pruebas relacionadas pasan (7 saltadas) sobre `6a09eb314`; 152 tras el refactor. Salidas en `D:\vrp-trabajo\temporales\s185\nulo\`.
