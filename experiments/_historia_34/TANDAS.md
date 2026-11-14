@@ -18,9 +18,15 @@ informe de `unir_trozos.py` y de la API de Actions (suma de `completed_at - star
 
 Copia local: `D:/vrp-trabajo/temporales/historia_34/piloto/` (fuera del repo).
 
+## Decisiones (Nicolás, 2026-11-14, «Sí, parte la tanda 1» sobre las recomendaciones del §2)
+
+- H1: los 34 de `data/sombra_34/` (lo que ya muestra el tablero).
+- H2: tandas de norte a sur, las del §5 Tarea 5.
+- H3: una sola aprobación para aplicar las 7 tandas, cada una con su tag defensivo y sólo si su ensayo da 0 huecos y
+  0 caídas a K. El merge de cada PR de unión sigue pidiendo «mergea #N».
+
 ## Antes de la tanda 1
 
-- Decisiones H1 a H3 de Nicolás (§2 del plan).
 - `FileExistsError` en `partial_*`: en el run 43467764489 (S182) tumbó 3 de 34 jobs enteros (todas las descargas del job,
   0 `DOWNLOAD_DONE`), y a Mentolat en la sombra el 2026-11-03. Causa SIN VERIFICAR; S182 propuso una sesión aparte para
   diagnosticarlo. Con 165 trozos por tanda, una tasa así dejaría ~15 trozos para relanzar en cada una.
