@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-14 17:32 UTC (S184): segunda vuelta del verificador CORRECTO; por qué suben 50 pasadas, comprobado; #999 listo salvo CI
+- Segunda vuelta (Sonnet, esfuerzo alto): CORRECTO. Rearmó la unión desde los 34 artefactos (7.307 records idénticos), repitió el ensayo (idéntico campo por campo, sha256 de la serie igual) y el efecto (sin diferencias). Quedan sin prueba reglas menores (volcán de la unión, claves de nivel superior, `deepcopy`), sin efecto en datos.
+- Comprobado con el código del pipeline (`efecto_reemplazo.py`, commit `5f9fb5cf9`): grilla 67 × 67, celda del cráter (23, 30) en el borde norte del cuadrado `sens` (filas y columnas 23 a 43); `crater` (filas 20 a 26, columnas 27 a 33) hace sensibles 21 celdas que `sens` dejaba fuera y vuelve conservadoras 413. Las 50 pasadas que suben tienen un píxel nuevo fuera de `sens` (50 de 50); las 14 que bajan, ninguno.
+- Cuerpo de #999 con la secuencia de aplicación (`aplicar-reemplazo.yml`, script `aplicar_pcc_v750.sh`, tag `pre-s184-pcc-crater-historia`). CI de `5f9fb5cf9` en curso.
+
 ### 2026-11-14 17:27 UTC (S184): reproceso PCC completo; unión de 34 trozos sin huecos; ensayo 2.994 de 2.994 con par
 - Run 43467764489 terminado en success a las 17:21 UTC: los trozos 23, 29 y 33 (intento 2) corrieron en runners de Azure (southcentralus, eastus2, westus3) con 0 `DOWNLOAD_ERR`. La API muestra el job del 33 como «queued», pero su log y su artefacto (17:10 UTC) están completos.
 - Unión con `unir_trozos.py` en `experiments/_s184_pcc_crater_aplicar/historia_crater/` (rama de #999, commit `cba48b3b5`): 34 trozos, 637 días, 0 huecos, 7.307 records, 2.994 VIIRS 750, todos de la vía.
