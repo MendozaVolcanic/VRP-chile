@@ -722,7 +722,7 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
 function monitoringFreshness(records) {
   let last = null;
   for (const r of (records || [])) {
-    if (!last || r.datetime_utc > last) last = r.datetime_utc;
+    if ((!last || r.datetime_utc > last) && !(r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio)) last = r.datetime_utc;   // S183: una escena sin datos no es pasada (espejo de escenaSinDato de index)
   }
   if (!last) return { cls: "mon-none", txt: "sin datos en este tablero" };
   const h = (Date.now() - parseUtcMs(last)) / 3600000;
