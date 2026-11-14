@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>VRP Chile — Comparación vs MIROVA (preview S115)</title>
+<title>VRP Chile: comparación con MIROVA</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -34,24 +34,81 @@
   .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:0.74rem; color:var(--muted); margin:8px 0; }
   .legend span { display:inline-flex; align-items:center; gap:5px; }
   .dot { width:11px; height:11px; border-radius:50%; display:inline-block; border:1px solid #0008; }
+  /* S183: pestaña «Vía, K y MIROVA» (frontend/comparacion_via_k.js) */
+  .vk-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:12px; }
+  .vk-card h3 { margin:0 0 8px; font-size:.95rem; color:#fff; }
+  .vk-card table { width:100%; border-collapse:collapse; font-size:.8rem; }
+  .vk-card td, .vk-card th { padding:4px 6px; border-bottom:1px solid var(--line); text-align:right; }
+  .vk-card td:first-child, .vk-card th:first-child { text-align:left; color:var(--muted); }
+  .vk-mejor { font-weight:700; color:#fff; background:#1b3b2a; }
+  .vk-n { color:var(--muted); font-size:.72rem; font-weight:normal; margin-top:6px; }
+  .vk-h2 { font-size:.95rem; color:#fff; margin:22px 0 6px; }
+  .vk-grid { border-collapse:collapse; font-size:.78rem; }
+  .vk-grid td, .vk-grid th { border:1px solid var(--line); padding:4px 7px; text-align:center; }
+  .vk-grid th { color:var(--muted); font-weight:normal; } .vk-grid th.vk-izq { text-align:left; color:#cfe3f5; }
+  .vk-disc { border-collapse:collapse; font-size:.78rem; width:100%; }
+  .vk-disc td, .vk-disc th { border-bottom:1px solid var(--line); padding:4px 6px; text-align:left; }
+  .vk-disc th { color:var(--muted); font-weight:normal; }
+  .vk-si { color:#66bb6a; } .vk-no { color:#ef5350; }
+  .vk-aviso { background:#5b3a00; border:1px solid #ffc107; color:#ffe082; border-radius:6px; padding:8px 10px; margin:8px 0; font-size:.8rem; }
+  .vk-scroll { overflow-x:auto; }
+  #vk-franja { width:100%; height:auto; background:var(--panel); border:1px solid var(--line); border-radius:8px; }
+  #vk-franja .vk-et { fill:var(--muted); font-size:10px; } #vk-franja .vk-eje { stroke:var(--line); }
+  #vk-franja .vk-mes { stroke:#1a3a5c; stroke-dasharray:2 3; }
   a.back { color:var(--muted); text-decoration:none; border:1px solid var(--line); padding:4px 10px; border-radius:4px; font-size:0.78rem; }
 </style>
 </head>
 <body>
 <header>
-  <h1>VRP Chile — Comparación vs MIROVA <span class="preview-badge">PREVIEW S115 · no es el dashboard live</span></h1>
+  <h1>VRP Chile: comparación con MIROVA <span class="preview-badge">pestañas 1 a 3: PREVIEW S115</span></h1>
   <div style="margin-top:6px;"><small>Vistas de validación contra el CSV consolidado MIROVA NRT (latest.php). Distancias re-ancladas al GVP (apples-to-apples). Decide cuáles promover al dashboard.</small>
   &nbsp; <a class="back" href="index.html">← Dashboard</a></div>
 </header>
 
 <nav class="tabs">
-  <button class="tab-btn active" data-tab="dist">1 · Histograma de distancia</button>
+  <button class="tab-btn active" data-tab="viak">Vía, K y MIROVA</button>
+  <button class="tab-btn" data-tab="dist">1 · Histograma de distancia</button>
   <button class="tab-btn" data-tab="scatter">2 · Scatter de acuerdo 1:1</button>
   <button class="tab-btn" data-tab="pcc">3 · Preview extensión PCC</button>
 </nav>
 
+<!-- S183: pestaña «Vía, K y MIROVA» (lógica en comparacion_via_k.js; datos de scripts/comparacion_via_k.py) -->
+<section class="pane active" id="pane-viak">
+  <div class="explain">Cada noche, cada satélite que pasa sobre un volcán es una pregunta: ¿hay calor anómalo en el
+  cráter? MIROVA da su respuesta y nosotros la nuestra con dos detectores: la <b style="color:#66bb6a">vía «código
+  MIROVA»</b> (en producción desde el 2 de noviembre de 2026 en MODIS y el 11 en VIIRS) y <b style="color:#ffb74d">K</b>
+  (el detector anterior, que sigue corriendo aparte como guardia). Sólo cuentan las pasadas que <b>los dos</b> procesaron,
+  juzgadas con el mismo criterio del tablero. <b>Acierto</b>: MIROVA alertó y publicamos. <b>Silencio</b>: MIROVA alertó y
+  no publicamos, lo más grave. <b>Falsa alarma</b>: MIROVA miró y no vio nada, y publicamos. Las alertas de 1 MW o más son
+  las <b>protegidas</b>: no se puede perder ninguna. Las noches en que MIROVA no miró o vio calor fuera del volcán no se
+  juzgan. La tabla de MIROVA es lo más creíble; la lectura de su imagen (OCR) a veces toma la distancia de otra pasada.</div>
+  <div id="vk-avisos"></div>
+  <div class="stat" id="vk-estado"></div>
+  <div class="controls" id="vk-ctl-ref"></div>
+  <div class="controls" id="vk-ctl-vent"></div>
+  <div class="vk-cards" id="vk-cards"></div>
+  <h2 class="vk-h2">Volcán por volcán</h2>
+  <div class="explain">Verde: vía. Naranjo: K. En cada celda, alertas de MIROVA publicadas (de cuántas) y, después del
+  punto, falsas alarmas.</div>
+  <div class="vk-scroll"><table class="vk-grid" id="vk-grid"></table></div>
+  <h2 class="vk-h2">Noche a noche</h2>
+  <div class="explain">Una fila por fuente. Arriba, MIROVA: punto rojo = alerta (grande si es protegida), círculo gris =
+  miró y no vio nada. Abajo, cada detector: punto = publicó; cruz roja = calló una alerta de MIROVA. Sólo se dibujan las
+  noches con alerta de MIROVA o con alguna publicación nuestra.</div>
+  <div class="controls"><label>Volcán:</label><select id="vk-vol"></select><label>Sensor:</label><select id="vk-sens"></select></div>
+  <svg id="vk-franja" role="img" aria-label="Franja por noche: MIROVA, vía y K"></svg>
+  <div class="stat" id="vk-franja-nota"></div>
+  <h2 class="vk-h2">Noches en que la vía y K no coinciden</h2>
+  <div class="explain">La lista para revisar una por una. «Lejos» es la distancia de nuestro foco más fuerte al centro de la
+  grilla de MIROVA. Si la vía calla una alerta con su foco lejos y su VRP parecido al de MIROVA, MIROVA probablemente midió
+  ese foco lejano.</div>
+  <div class="controls"><label><input type="checkbox" id="vk-solo-prot"> Sólo alertas protegidas</label></div>
+  <div class="stat" id="vk-disc-nota"></div>
+  <div class="vk-scroll"><table class="vk-disc" id="vk-disc"></table></div>
+</section>
+
 <!-- TAB 1 — distance histogram -->
-<section class="pane active" id="pane-dist">
+<section class="pane" id="pane-dist">
   <div class="explain"><b>¿Detectamos en el mismo lugar que MIROVA?</b> Distribución de distancia al cráter
   (GVP) de nuestras detecciones (cluster summit, VRP&gt;0, <b>re-ancladas al GVP</b>) vs la
   <code>Distancia_km</code> que reporta MIROVA (ALERTA_TÉRMICA). Si las dos distribuciones se solapan,
@@ -377,6 +434,9 @@ function setupTabs() {
       const t = btn.dataset.tab;
       el("pane-"+t).classList.add("active");
       if (t === "pcc") { renderPcc(); setTimeout(()=>pccMap && pccMap.invalidateSize(), 80); }
+      // S183: la pestaña activa al cargar ya no es la del histograma; se dibuja al mostrarla (un canvas oculto mide 0).
+      if (t === "dist") renderDist(el("dist-volc").value);
+      if (t === "scatter") renderScatter(el("scatter-volc").value);
     });
   });
 }
@@ -401,5 +461,6 @@ populateSelectors();
 renderDist("PuyehueCordonCaulle");
 renderScatter("Villarrica");
 </script>
+<script src="comparacion_via_k.js"></script>
 </body>
 </html>
