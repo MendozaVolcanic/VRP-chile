@@ -1762,10 +1762,43 @@ function isSensorVisible(r) {
   return sensorVisible[g] !== false;
 }
 
+// S183 (2026-11-14): una escena que no se pudo medir no es una pasada «sin anomalía». POR QUÉ. La vía «código MIROVA»
+// deja la escena vacía cuando la mitad o más de la grilla no tiene NTI útil (borde de la franja o del gránulo, o nubes a 200 K
+// o menos: l. 163-167 del .m de MIROVA) o por reflejo solar, y lo anota en `diag_codigo_mirova.motivo_vacio`. MIROVA no
+// la mide (NaN); nosotros la guardamos con 0 MW. Contada como pasada, una ausencia de observación se leía como volcán
+// tranquilo, en la tabla y en la frescura del monitoreo. Sólo cambia qué se muestra: esas escenas tienen 0 MW y ningún
+// píxel. Devuelve el rótulo de la escena, o null si es una pasada normal. Guard: tests/test_tablero_escenas_invalidas_s183.py
+function escenaSinDato(r) {
+  const m = r && r.diag_codigo_mirova ? r.diag_codigo_mirova.motivo_vacio : null;
+  if (!m) return null;
+  return m === "escena_invalida" ? "escena sin datos" : m === "sunglint" ? "reflejo solar" : "escena sin medir";
+}
+// Rótulo de una fila de «Últimas pasadas» sin valor publicado (antes en línea dentro de renderDetail).
+function rotuloPasadaSinPublicar(r) {
+  const sinDato = escenaSinDato(r);
+  if (sinDato) return { texto: sinDato, sinDato: true, title: sinDato === "reflejo solar"
+    ? "La pasada no se pudo medir: el reflejo del sol sobre la escena la anula (corte de 12° del código de MIROVA). " +
+      "No dice nada de la actividad del volcán y no cuenta como «última pasada»."
+    : sinDato === "escena sin datos"
+    ? "La vía «código MIROVA» no midió esta escena: la mitad o más de la grilla quedó sin dato útil (borde de la franja o " +
+      "del gránulo, o nubes muy frías; el registro no dice si el cráter tenía dato). MIROVA tampoco la mide. No dice nada " +
+      "de la actividad y no cuenta como «última pasada»."
+    : "La vía «código MIROVA» dejó esta escena sin medir (" + (r.diag_codigo_mirova.motivo_vacio || "motivo sin dato") + "). " +
+      "No dice nada de la actividad y no cuenta como «última pasada»." };
+  // Verificador S180: una pasada con píxeles anómalos que no se publican (lejana con «Solo cráter», descartada por el
+  // pipeline o artefacto térmico) no es «sin anomalía»; se rotula aparte para que no se lea como cielo limpio.
+  if ((r.n_anomalous_pixels ?? 0) > 0 || isValidDetection(r)) return { texto: "anomalía no publicada", sinDato: false,
+    title: "La pasada tuvo píxeles anómalos, pero ninguno cuenta como detección publicada: lejana (fuera del radio del " +
+      "cráter, con «Solo cráter»), descartada por el pipeline o marcada como artefacto térmico. Con «Incluir lejanas» " +
+      "las lejanas vuelven a contar." };
+  return { texto: "sin anomalía", sinDato: false, title: null };
+}
+
 function lastEventTime(records) {
   // S38: aplicar filtro post-S38 al inicio.
   let latest = null;
   for (const r of records) {
+    if (escenaSinDato(r)) continue;   // S183: escena sin datos, no es pasada
     if (!latest || r.datetime_utc > latest) latest = r.datetime_utc;
   }
   return latest;
@@ -1795,7 +1828,7 @@ function lastEventTime(records) {
 // ruido que R13 venía a eliminar. Ambos se calculan sobre el PROPIO volcán: la latitud y
 // la cantidad de plataformas cambian el ritmo de uno a otro.
 function proximaPasadaEsperada(records) {
-  const crudos = records.map(r => parseUtcMs(r.datetime_utc))
+  const crudos = records.filter(r => !escenaSinDato(r)).map(r => parseUtcMs(r.datetime_utc))   // S183: sólo pasadas que miraron
                         .filter(Number.isFinite).sort((a, b) => a - b);
   if (crudos.length < 8) return null;
   // Una "pasada" no es un record: en una misma órbita el volcán puede quedar cubierto por
@@ -3095,18 +3128,15 @@ function renderDetail() {
     const compartidos34 = v.fuente === "sombra_34" ? focosCompartidosSombra(VOLCANOES, allData) : null;
     recent.forEach(r => {
       const marca34 = marcaSombra34(r, v, compartidos34);   // S183: rótulos de los 34, dentro de la celda «Zona»
-      // S180: pasada procesada sin anomalía publicada. Se lista para que se vea que el volcán se miró; no tiene
+      // S180: pasada procesada sin anomalía publicada (S183: o escena sin datos). Se lista para que se vea qué pasó; no tiene
       // posición ni magnitud que mostrar, así que no lleva marcador ni clic al mapa.
-      // Verificador S180: una pasada con píxeles anómalos que no se publican (lejana con «Solo cráter», descartada por
-      // el pipeline o artefacto térmico) no es «sin anomalía»; se rotula aparte para que no se lea como cielo limpio.
+      // El rótulo («anomalía no publicada», «escena sin datos» o «sin anomalía») lo decide rotuloPasadaSinPublicar (S183).
       if (!(eqVrp(r) > 0)) {
-        const row = el("tr", "sin-anomalia");
-        const huboAlgo = (r.n_anomalous_pixels ?? 0) > 0 || isValidDetection(r);
-        [r.datetime_utc, r.sensor, "—", huboAlgo ? "anomalía no publicada" : "sin anomalía", "—", "—", "—", "—"].forEach((val, i) => {
+        const rot = rotuloPasadaSinPublicar(r);
+        const row = el("tr", "sin-anomalia" + (rot.sinDato ? " escena-sin-dato" : ""));
+        [r.datetime_utc, r.sensor, "—", rot.texto, "—", "—", "—", "—"].forEach((val, i) => {
           const td = el("td"); td.textContent = val; row.appendChild(td);
-          if (i === 3 && huboAlgo) td.title = "La pasada tuvo píxeles anómalos, pero ninguno cuenta como detección " +
-            "publicada: lejana (fuera del radio del cráter, con «Solo cráter»), descartada por el pipeline o marcada " +
-            "como artefacto térmico. Con «Incluir lejanas» las lejanas vuelven a contar.";
+          if (i === 3 && rot.title) td.title = rot.title;
           if (i === 2 && marca34) td.appendChild(marca34);
         });
         tbody.appendChild(row);
@@ -4530,7 +4560,7 @@ async function init() {
     if (e.target.value === "rango") {
       // Por defecto, la última noche con datos del volcán elegido (o la de hoy UTC).
       const recs = (allData[currentVolcano.name] || {}).records || [];
-      const ult = recs.reduce((m, r) => (r.datetime_utc > m ? r.datetime_utc : m), "").slice(0, 10) || new Date().toISOString().slice(0, 10);
+      const ult = recs.reduce((m, r) => (r.datetime_utc > m && !escenaSinDato(r) ? r.datetime_utc : m), "").slice(0, 10) || new Date().toISOString().slice(0, 10);
       aplicarPeriodo(Periodo.esRango(currentPeriodo) ? currentPeriodo : Periodo.noche(ult));
     } else {
       aplicarPeriodo({ dias: parseInt(e.target.value, 10) });
