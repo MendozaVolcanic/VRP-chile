@@ -42,6 +42,25 @@ print("cambio de clase:", collections.Counter((pub[k].get("distance_class"), nue
                                               for k in com if pub[k].get("distance_class") != nue[k].get("distance_class")))
 for d in sorted(dif, key=lambda d: -abs(d[2] - d[1]))[:8]:
     print(d)
+# Por qué suben (README, «Lo que se comprobó»): `crater` hace sensibles celdas que `sens` dejaba fuera de su anillo
+# (BOX 0). Se cuenta, en las que suben y en las que bajan, cuántas tienen un píxel alertado que no estaba en la serie
+# publicada y que cae fuera del anillo `sens`.
+sys.path.insert(0, str(AQUI.parents[1]))
+from pipeline.mirova_v750_codigo import caja_roi  # noqa: E402
+
+box_sens = caja_roi("sens")
+
+
+def nuevos_fuera_de_sens(kk):
+    antes = {(p.get("fila"), p.get("col")) for p in pub[kk].get("anomaly_pixels") or []}
+    return [(p.get("fila"), p.get("col")) for p in nue[kk].get("anomaly_pixels") or []
+            if (p.get("fila"), p.get("col")) not in antes and box_sens[p["fila"], p["col"]] == 0]
+
+
+sube = [d[0] for d in dif if d[2] > d[1]]
+baja = [d[0] for d in dif if d[2] < d[1]]
+print("suben con pixel nuevo fuera del anillo sens:", sum(1 for kk in sube if nuevos_fuera_de_sens(kk)), "de", len(sube))
+print("bajan con pixel nuevo fuera del anillo sens:", sum(1 for kk in baja if nuevos_fuera_de_sens(kk)), "de", len(baja))
 print("----")
 for k in [("2025-08-29 05:36", "VIIRS_NOAA20_750"), ("2026-02-04 05:36", "VIIRS_SNPP_750")]:
     for nom, r in (("pub", pub[k]), ("nue", nue[k])):

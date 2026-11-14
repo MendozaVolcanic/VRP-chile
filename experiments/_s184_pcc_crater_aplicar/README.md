@@ -30,13 +30,18 @@ Pruebas: `tests/test_aplicar_pcc_crater_s184.py`.
 - 3 pasadas posteriores a la ventana (2026-11-14) quedan con `sens` hasta que se decida si se cubren con un reproceso
   corto entre el 2026-11-14 y el merge.
 
-## Lo que no está comprobado
+## Por qué suben 50 pasadas con una región sensible más chica
 
-- Por qué suben 50 pasadas con una región sensible más chica. En la del 2025-08-29 05:36 los umbrales son iguales y con
-  `crater` pasa un píxel más en la primera pasada (3 contra 2). Encaja con que el cuadro del cráter cubra celdas de la
-  fisura que quedaban fuera del cuadrado `sens`. SOSPECHA: no se comprobó celda por celda.
+En la grilla de 67 × 67 celdas, el cráter cae en la fila 23, el borde norte del cuadrado `sens` (filas y columnas 23 a
+43). El cuadro `crater` (filas 20 a 26, columnas 27 a 33) hace sensibles 21 celdas al norte que `sens` dejaba fuera
+(BOX 0), y vuelve conservadoras las otras 413 del cuadrado. Comprobado en `efecto_reemplazo_salida.txt`: las 50 pasadas
+que suben tienen un píxel alertado nuevo fuera del cuadrado `sens`, y ninguna de las 14 que bajan lo tiene. En la del
+2025-08-29 05:36 los umbrales son iguales y entra un píxel más en la fila 22.
 
 ## Verificación
 
 Verificador limpio (Sonnet, esfuerzo alto) del script: CORRECTO CON OBSERVACIONES; las observaciones se corrigieron en
-el commit `e44502a9e` (bitácora S184 en `tasks/LOOP_OBJETIVOS.md`, rama `loop/activo`).
+el commit `e44502a9e` (bitácora S184 en `tasks/LOOP_OBJETIVOS.md`, rama `loop/activo`). Segunda vuelta del mismo verificador sobre la unión, el ensayo y
+el efecto: CORRECTO. Rearmó la unión desde los 34 artefactos (idéntica), repitió el ensayo (idéntico) y encontró la
+geometría de las cajas; quedan sin prueba algunas reglas menores (volcán de la unión, claves de nivel superior), sin
+efecto en los datos.
