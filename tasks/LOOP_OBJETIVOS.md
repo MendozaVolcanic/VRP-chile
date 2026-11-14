@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-14 17:36 UTC (S184): Nicolás: «Sí, cúbrelos»; secuencia para dejar PCC V750 con una sola caja
+- Las 6 pasadas VIIRS 750 de PCC del 13 y 14-nov son `standard` con `sens`: el NRT no las reescribe solo (sólo reemplaza `nrt` por `standard` o con `overwrite`). Cubrirlas sin un segundo PR: tras el merge de #999, despachar `nrt.yml` con `profile=mirova_equivalent`, `volcano=PuyehueCordonCaulle`, `start=2026-11-14`, `end=<día del merge>`, `overwrite=true` (reescribe también MODIS y VIIRS 375 de PCC esos días, con el mismo código).
+- `experiments/_s184_pcc_crater_aplicar/chequeo_caja.py` (rama de #999, commit `91fa43c29`, 28 pruebas): sale con 1 si queda alguna VIIRS 750 de PCC desde el 2025-02-15 sin `crater`. Sobre una copia de `f7e7aa5c6`: antes 2.997 `sens`; tras la aplicación simulada, 2.994 `crater` y 3 `sens` (las del 14-nov, que cubre el despacho). Secuencia en el README de la carpeta y en el cuerpo de #999. El sí para escribir en `data/` sigue pendiente junto con «mergea #999».
+
 ### 2026-11-14 17:32 UTC (S184): segunda vuelta del verificador CORRECTO; por qué suben 50 pasadas, comprobado; #999 listo salvo CI
 - Segunda vuelta (Sonnet, esfuerzo alto): CORRECTO. Rearmó la unión desde los 34 artefactos (7.307 records idénticos), repitió el ensayo (idéntico campo por campo, sha256 de la serie igual) y el efecto (sin diferencias). Quedan sin prueba reglas menores (volcán de la unión, claves de nivel superior, `deepcopy`), sin efecto en datos.
 - Comprobado con el código del pipeline (`efecto_reemplazo.py`, commit `5f9fb5cf9`): grilla 67 × 67, celda del cráter (23, 30) en el borde norte del cuadrado `sens` (filas y columnas 23 a 43); `crater` (filas 20 a 26, columnas 27 a 33) hace sensibles 21 celdas que `sens` dejaba fuera y vuelve conservadoras 413. Las 50 pasadas que suben tienen un píxel nuevo fuera de `sens` (50 de 50); las 14 que bajan, ninguno.
