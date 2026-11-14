@@ -219,6 +219,23 @@ def evaluar(data_dir, coords, inner, ventana):
     return bp.cargar_nuestros(coords, inner, ventana, data=data_dir)
 
 
+def escenas_sin_medir(data_dir):
+    """{(volcán, satélite, "AAAA-MM-DD HH:MM")} de las escenas que la vía dejó sin medir
+    (`diag_codigo_mirova.motivo_vacio`, PR #1005). El tablero ya no las cuenta como pasadas sin anomalía; aquí salen del
+    pareo y quedan como pasada sin par: no es un silencio ni una noche tranquila bien callada, es una escena sin dato."""
+    out = set()
+    for vol in bp.VOLS:
+        d = json.loads((Path(data_dir) / f"{vol}.json").read_text(encoding="utf-8"))
+        for r in d.get("records", []):
+            if (r.get("diag_codigo_mirova") or {}).get("motivo_vacio"):
+                out.add((vol, r.get("sensor"), r.get("datetime_utc")))
+    return out
+
+
+def quitar_escenas_sin_medir(pasadas, sin_medir):
+    return [p for p in pasadas if (p["vol"], p["sensor"], p["dt"].strftime("%Y-%m-%d %H:%M")) not in sin_medir]
+
+
 def construir_cache_k(carpeta_tag, out, hoy):
     coords, inner = bp._coords_por_volcan(), bp.inner_desde_html()
     tmp = Path(tempfile.mkdtemp(prefix="s183_cache_"))
@@ -354,7 +371,9 @@ def main(argv=None):
     refs = {"tabla": [f for f in filas_ref if f["source"] == "CONS"], "combinado": filas_ref}
     total = (INICIO, a.hoy)
 
-    via = evaluar(a.prod, coords, inner, total)
+    sin_medir = escenas_sin_medir(a.prod)
+    via_todas = evaluar(a.prod, coords, inner, total)
+    via = quitar_escenas_sin_medir(via_todas, sin_medir)
     guardia = ([p for p in evaluar(a.guardia_modis, coords, inner, total) if p["b"] == "MODIS"]
                + [p for p in evaluar(a.guardia_viirs, coords, inner, total) if p["b"] != "MODIS"])
     hist, meta_cache = cargar_cache_k(a.cache_k)
@@ -375,6 +394,7 @@ def main(argv=None):
     salida = {"meta": {"generado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"), "hoy": a.hoy,
                        "sha_index_html": sha, "sha_predicado": sha_pred, "referencia": proc, "regla_minimas": MODO_MINIMAS, "adopcion": ADOPCION,
                        "ventanas": vents, "ultima_fila_tabla_mirova": ult_tabla, "guardia_hasta": guardia_hasta,
+                       "via_escenas_sin_medir_fuera": len(via_todas) - len(via),
                        "cache_k": {k: meta_cache.get(k) for k in ("tag", "sha_predicado", "generado_utc", "n")},
                        "avisos": avisos_cache(meta_cache, sha_pred)},
               "resultados": resultados, "noches": filas_noches(series, a.hoy)}

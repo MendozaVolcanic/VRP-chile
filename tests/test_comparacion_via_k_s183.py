@@ -218,6 +218,23 @@ def test_etiquetar_prefiere_la_tabla_y_marca_protegida_con_cualquier_fila():
     assert r["vrp_mirova"] == 1.2
 
 
+def test_escena_que_la_via_no_pudo_medir_sale_del_pareo(tmp_path):
+    """PR #1005: una escena que la vía dejó sin medir (`diag_codigo_mirova.motivo_vacio`) no es una pasada sin anomalía.
+    Aquí tampoco: no cuenta como noche tranquila bien callada ni como silencio; queda como pasada sin par."""
+    d = tmp_path / "prod"
+    d.mkdir()
+    for vol in cv.bp.VOLS:
+        recs = [{"sensor": "VIIRS_NOAA20", "datetime_utc": "2026-05-01 06:00",
+                 "diag_codigo_mirova": {"motivo_vacio": "escena_invalida"}},
+                {"sensor": "VIIRS_NOAA20", "datetime_utc": "2026-05-02 06:00", "diag_codigo_mirova": {}}]             if vol == "Lascar" else []
+        (d / f"{vol}.json").write_text(json.dumps({"records": recs}), encoding="utf-8")
+    sin = cv.escenas_sin_medir(d)
+    assert sin == {("Lascar", "VIIRS_NOAA20", "2026-05-01 06:00")}
+    pas = [_p(b="VIIRS375", sensor="VIIRS_NOAA20", dt="2026-05-01 06:00", lab="neg_limpio", pub=0),
+           _p(b="VIIRS375", sensor="VIIRS_NOAA20", dt="2026-05-02 06:00", lab="neg_limpio", pub=0)]
+    assert [p["noche"] for p in cv.quitar_escenas_sin_medir(pas, sin)] == ["2026-05-02"]
+
+
 # ------------------------------------------------------------------ punta a punta con node y el predicado real
 REC_PUB = {"sensor": "MODIS_AQUA", "datetime_utc": "2027-01-05 03:00", "distance_class": "summit", "t_max_k": 320.0,
            "vrp_mw": 2.0, "triggered_test1": False, "vrp_vent_mw": 0.0, "f5_core_vrp_mw": None, "anomaly_pixels": [],
