@@ -371,3 +371,10 @@ Y cuatro decisiones de producto, con mi recomendación:
   el suelo, la vía con y sin interruptor en los tres sensores, rotación, conservación sin gránulo, reemplazo NRT a
   estándar, K sin imagen, índice copiado del record, dos corridas iguales sin cambios, y que sólo `nrt.yml` use
   `--miniaturas`).
+- **Corrida real** (probe temporal en la rama, runs 43718917391 y 43719887705, Chillán y Villarrica, 12 al 15 de
+  noviembre de 2026, ya borrado): 30 imágenes por volcán (10 por sensor), 35 miniaturas generadas por corrida. Tamaño
+  real por volcán: unos 134 KB de PNG (VIIRS 375 10,2 a 10,9 KB de mediana, VIIRS 750 2,6 a 2,8 KB, MODIS 1,5 a
+  1,6 KB) más 22 a 31 KB de índice: **unos 0,16 MB por volcán, 1,8 MB los 11**, en línea con §5. Con la escala
+  240 a 300 K el blanco puro queda en el 0,01 % de las celdas de la escena mediana de VIIRS 375 (con 290 K era 2,7 %):
+  queda casi sólo para el foco. La pasada de 06:42 UTC del 14 de noviembre sale a medias con el tramado de sin dato,
+  igual que la miniatura en blanco de MIROVA, y la de 06:36 trae la otra mitad con el foco.
