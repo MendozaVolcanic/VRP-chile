@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 12:50 UTC (S185): cierre; se retoma con tasks/BLOQUE_ARRANQUE_S186.md
+- Cierre por contexto (61 %). Estado fijado con trabajo en curso: sesiones «L1B» (`local_797fa5af`, PR de workflow de descarga en preparación) y «Paper y mazos» (`local_fe610939`); CI de #1016 y #1017 pendiente; sombra de los 34 por cron a las 13:07 UTC.
+- Esperan «mergea #N»: #1013 (CI verde), #1016, #1017, #1014 y luego #1012 (otra sesión). Decisiones con recomendación en el bloque S186 §b.
+- Memoria: `project_s185_estado.md`, `feedback_s185_lecciones.md` (cinco reglas generales). Próxima del loop: S186.
+
 ### 2026-11-15 12:47 UTC (S185): #1016 y #1017 abiertos; fidelidad de la vía auditada y verificada; contexto en 61 %, se cierra
 - **#1016** (rama `claude/s185-vigilancia-plazo-nulo`, worktree `D:\vrp-trabajo\wt_s185_vigil_pr`): vigilancias de las guardias, plazo por instante y `nulo.ventana_efectiva`. Sin cambio de veredicto. 19 pruebas (17 fallan por aserción contra el original), 13 de 13 mutaciones, 145 pruebas locales. Verificador Opus en dos vueltas: CONFIRMADO. Espera CI y «mergea #1016».
 - **#1017** (rama `claude/s185-auditoria-etiquetas`, worktree `D:\vrp-trabajo\wt_s185_audit_a`): el auto-audit nombra a la vía como detector vigente y llena `magnitud_ratio_by_vol/npix`. Sin cambio de veredicto. 133 pruebas `test_auto_audit_*`. Verificador Opus: CONFIRMADO. Espera CI y «mergea #1017».
