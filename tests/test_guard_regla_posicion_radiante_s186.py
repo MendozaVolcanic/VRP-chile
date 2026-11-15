@@ -35,7 +35,9 @@ from pipeline import mirova_v750_codigo as MV  # noqa: E402
 
 CRATER = (33, 33)
 LEJOS = (33, 46)          # 13 celdas de 750 m: 9,75 km al este, fuera del radio interior de 5 km
+LEJOS_2 = (33, 47)        # vecino del anterior, menos caliente: el foco lejano es un cúmulo de 2 píxeles
 INNER_KM = 5.0
+CAJA_LASCAR = "def"       # la caja que declara grillas_mirova.yaml para Láscar
 
 
 def _escena_debil_en_crater_fuerte_lejos():
@@ -44,10 +46,12 @@ def _escena_debil_en_crater_fuerte_lejos():
     T13 = T15 - 3 + rng.normal(0, 0.3, (67, 67))
     T13[CRATER] += 15     # foco débil en el cráter
     T13[LEJOS] += 30      # foco más radiante, lejos
+    T13[LEJOS_2] += 20    # su vecino: con «pico» el record quedaría en 1 píxel a 9,75 km; con radiante, 2 a 10,125
     return MV.temperatura_a_radiancia(T13, MV.LAMBDA_M13), MV.temperatura_a_radiancia(T15, MV.LAMBDA_M15)
 
 
-def _record(box):
+def _record(box=None):
+    box = MV.caja_roi(CAJA_LASCAR) if box is None else box
     m13, m15 = _escena_debil_en_crater_fuerte_lejos()
     g = MV.grilla_del_volcan("Lascar")
     rec = MV.procesar_grilla(m13, m15, g, box, 0, 40.0, (33.0, 33.0), INNER_KM, "VIIRS_NOAA20_750")
@@ -57,22 +61,33 @@ def _record(box):
 
 def test_control_los_dos_focos_alertan():
     """Sin esto la prueba de abajo no distingue nada: si el foco del cráter no alertara, cualquier regla daría lejos."""
-    _, mask, m13 = _record(MV.caja_roi("sens"))
-    assert mask[CRATER] and mask[LEJOS]
-    assert m13[LEJOS] > m13[CRATER]
+    _, mask, m13 = _record()
+    assert mask[CRATER] and mask[LEJOS] and mask[LEJOS_2]
+    assert m13[LEJOS] > m13[LEJOS_2] > m13[CRATER]
 
 
 def test_posicion_es_la_del_cumulo_mas_radiante_aunque_haya_alerta_en_el_crater():
-    rec, mask, _ = _record(MV.caja_roi("sens"))
+    rec, mask, _ = _record()
     pc = rec["primary_cluster"]
     # radiante: el record va al foco lejano (con cercano iría al cráter, a 0 km, y sería summit)
     assert rec["distance_class"] == "far"
     assert pc["centroid_dist_km"] > INNER_KM
-    assert abs(pc["centroid_dist_km"] - 13 * 0.75) < 0.5
-    assert pc["n_pixels"] == 1
+    # el cúmulo entero, no sólo el pico: centroide de las columnas 46 y 47 = 13,5 celdas = 10,125 km
+    # (con «pico» quedaría n 1 a 9,75 km)
+    assert pc["n_pixels"] == 2
+    assert abs(pc["centroid_dist_km"] - 13.5 * 0.75) < 0.01
+    # el pico sigue informado aparte, en hotspot_*
+    assert abs(rec["hotspot_dist_km"] - 13 * 0.75) < 0.01
     # el VRP no depende de la regla de posición: es la unión de todos los alertados (D32)
     assert rec["vrp_mw"] == pc["vrp_mw"]
-    assert rec["n_anomalous_pixels"] == int(mask.sum()) >= 2
+    assert rec["n_anomalous_pixels"] == int(mask.sum())
+
+
+def test_tambien_con_la_caja_sensible():
+    """La regla no depende de la caja: con `sens` el resultado es el mismo."""
+    rec, mask, _ = _record(MV.caja_roi("sens"))
+    assert mask[CRATER] and mask[LEJOS] and mask[LEJOS_2]
+    assert rec["distance_class"] == "far" and rec["primary_cluster"]["n_pixels"] == 2
 
 
 def test_cumulo_del_mas_radiante_elige_el_de_mayor_radiancia_no_el_mas_cercano():
