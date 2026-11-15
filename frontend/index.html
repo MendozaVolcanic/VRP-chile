@@ -551,7 +551,8 @@
       «código MIROVA», el código operacional que el grupo MIROVA publicó en OSF: MODIS desde el 2 de noviembre de
       2026 y VIIRS 375 y 750 desde el 11 de noviembre. El 12 de noviembre de 2026 se reemplazó la serie de los 11
       volcanes con MIROVA, desde el 15 de febrero de 2025, por su reproceso con esa misma vía: la serie completa
-      viene de un solo detector, sin escalón por cambio de método. Los 34 volcanes sin MIROVA se procesan una vez al
+      viene de un solo detector, sin escalón por cambio de método, y por eso el gráfico ya no marca una fecha de
+      cambio de detector. Los 34 volcanes sin MIROVA se procesan una vez al
       día con la misma vía desde el 3 de noviembre y aparecen en el tablero marcados «sin MIROVA · 1 vez al día».</p>
       <div id="about-desempeno">Cargando la última auditoría semanal…</div>
     </div>
@@ -641,9 +642,19 @@
         'target="_blank" rel="noopener" style="color:#4fc3f7;">data/audit_continuous/latest.json</a>.';
       return;
     }
+    // Un JSON con forma inesperada no debe dejar el cuadro en «Cargando…» ni romper el resto de la página.
+    try {
+      renderDesempenoAcerca(box, a);
+      box.dataset.cargado = "1";
+    } catch (e) {
+      box.textContent = "La última auditoría semanal tiene una forma que este cuadro no sabe leer; " +
+        "su archivo es data/audit_continuous/latest.json.";
+    }
+  }
+  function renderDesempenoAcerca(box, a) {
     const gen = new Date(a.generated_utc);
-    const dias = Math.floor((Date.now() - gen.getTime()) / 86400000);
-    const fecha = isNaN(gen) ? escAcerca(a.generated_utc) : gen.toISOString().slice(0, 16).replace("T", " ") + " UTC";
+    const dias = isNaN(gen) ? null : Math.floor((Date.now() - gen.getTime()) / 86400000);
+    const fecha = isNaN(gen) ? "fecha sin dato" : gen.toISOString().slice(0, 16).replace("T", " ") + " UTC";
     const w = Array.isArray(a.window) ? a.window : ["?", "?"];
     const porSensor = (a.detector && a.detector.vigente_por_sensor) || {};
     const rpp = (a.recall_por_pasada && a.recall_por_pasada.por_sensor) || {};
@@ -654,14 +665,25 @@
       const det = ETIQUETA_DETECTOR_ACERCA[porSensor[s]] || escAcerca(porSensor[s] || "sin dato");
       filas += `<tr><td style="padding:3px 8px;">${nombre}</td><td style="padding:3px 8px;">${det}</td>` +
         `<td style="padding:3px 8px;text-align:right;">${pctAcerca(r.recall_crater_pct)} de ${r.n_noches ?? "?"} noches</td>` +
-        `<td style="padding:3px 8px;text-align:right;">${pctAcerca(p.recall_pasada_pct)} de ${p.n_pasadas ?? "?"} pasadas</td></tr>`;
+        `<td style="padding:3px 8px;text-align:right;">${p.n_pasadas === undefined ? "sin dato" : pctAcerca(p.recall_pasada_pct) + " de " + p.n_pasadas + " pasadas"}</td></tr>`;
     }
+    // POR QUÉ: la auditoría juzga cada noche con el detector que regía ese día. Una ventana que cierra antes del
+    // 2026-11-11 todavía juzga VIIRS con K aunque hoy corra la vía; sin esta frase la tabla parece contradecir
+    // el párrafo «Detector vigente».
+    const hayK = Object.values(porSensor).includes("K");
+    const antesViaViirs = typeof w[1] === "string" && w[1] < "2026-11-11";
+    const notaK = !hayK ? "" : antesViaViirs
+      ? `<p style="margin:6px 0 0 0;font-size:0.85rem;color:#ffcc80;">Esta auditoría juzga cada noche con el detector ` +
+        `que regía ese día; su ventana cierra antes de que la vía entrara en VIIRS (2026-11-11), por eso VIIRS aparece ` +
+        `con el detector anterior. Las auditorías siguientes juzgan VIIRS con la vía.</p>`
+      : `<p style="margin:6px 0 0 0;font-size:0.85rem;color:#ffcc80;">Esta auditoría juzgó algún sensor con el ` +
+        `detector anterior (K) aunque su ventana es posterior a la entrada de la vía: revisar la auditoría.</p>`;
     const flags = Array.isArray(a.flags) ? a.flags : [];
     const avisos = flags.length
       ? "<ul style=\"margin:4px 0 0 18px;padding:0;font-size:0.85rem;\">" + flags.map(f => `<li>${escAcerca(f)}</li>`).join("") + "</ul>"
       : "";
-    const vieja = dias > 8
-      ? `<p style="margin:6px 0 0 0;color:#ffcc80;">⚠ Esta auditoría tiene ${dias} días; la siguiente corre el lunes.</p>`
+    const vieja = (dias !== null && dias > 8)
+      ?`<p style="margin:6px 0 0 0;color:#ffcc80;">⚠ Esta auditoría tiene ${dias} días; la siguiente corre el lunes.</p>`
       : "";
     box.innerHTML =
       `<p style="margin:0 0 6px 0;"><b>Última auditoría:</b> ${fecha}, ventana del ${escAcerca(w[0])} al ${escAcerca(w[1])}, ` +
@@ -669,17 +691,19 @@
       `<table style="border-collapse:collapse;margin:8px 0;font-size:0.88rem;">` +
       `<tr style="color:#9bb4cc;"><th style="padding:3px 8px;text-align:left;">Sensor</th><th style="padding:3px 8px;text-align:left;">Detector juzgado</th>` +
       `<th style="padding:3px 8px;text-align:right;">Recall por noche</th><th style="padding:3px 8px;text-align:right;">Recall por pasada</th></tr>` +
-      filas + `</table>` +
-      `<p style="margin:6px 0 0 0;font-size:0.85rem;color:#c5d3e2;"><b>Cómo leerlo:</b> de las noches (o de las pasadas ` +
-      `nocturnas) en que MIROVA publicó una alerta y tenemos datos del mismo sensor, en qué porcentaje la réplica ` +
-      `también publicó una. La referencia de MIROVA es su tabla publicada más la lectura automática (OCR) de sus ` +
-      `imágenes. El veredicto queda FUERA_DE_BANDA cuando falla algún control de la auditoría (por ejemplo, un ` +
-      `recall bajo su mínimo, una magnitud fuera de banda o una alerta de 1 MW o más sin publicar); los avisos de esta corrida se listan abajo.</p>` +
+      filas + `</table>` + notaK +
+      `<p style="margin:6px 0 0 0;font-size:0.85rem;color:#c5d3e2;"><b>Cómo leerlo:</b> de las noches en que ` +
+      `MIROVA publicó una alerta nocturna y tenemos datos del mismo sensor, en qué porcentaje la réplica tuvo también una ` +
+      `detección dentro del radio interior del cráter; por pasada, lo mismo con cada pasada de MIROVA, exigiendo además ` +
+      `que nuestra detección esté clasificada en la cumbre. La referencia de MIROVA es su tabla publicada más la ` +
+      `lectura automática (OCR) de sus imágenes. El veredicto es <b>VERDE</b> si todos los controles de la auditoría ` +
+      `pasan; <b>FUERA_DE_BANDA</b> si alguno falla (por ejemplo, un recall bajo su mínimo, una magnitud fuera de ` +
+      `banda o una alerta de 1 MW o más sin publicar), y los avisos de esa corrida se listan abajo; <b>DEGRADADO</b> ` +
+      `si la cobertura de datos de la ventana no alcanza para interpretarla.</p>` +
       (avisos ? `<p style="margin:6px 0 0 0;font-size:0.85rem;"><b>Avisos:</b></p>` + avisos : "") +
       `<p style="margin:6px 0 0 0;font-size:0.82rem;color:#9bb4cc;">Fuente: ` +
       `<a href="https://github.com/MendozaVolcanic/VRP-chile/blob/main/data/audit_continuous/latest.json" target="_blank" rel="noopener" style="color:#4fc3f7;">data/audit_continuous/latest.json</a>, ` +
       `que escribe <code>scripts/auto_audit_weekly.py</code> cada lunes.</p>`;
-    box.dataset.cargado = "1";
   }
   document.getElementById("btn-about").addEventListener("click", () => {
     document.getElementById("about-modal").style.display = "block";
