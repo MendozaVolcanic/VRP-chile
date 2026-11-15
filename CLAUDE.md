@@ -122,8 +122,8 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
   aunque haya otra alertada más débil en el cráter; `distance_class` y la publicación en el tablero salen de ahí. El
   VRP no depende de la regla (suma de todos los alertados, D32). Clase igual a la de MIROVA en 98,7 % de 2.037
   pasadas, tabla sola (cercano 93,6 %); `Distancia_km` de MIROVA no sirve para elegir (sesgo al alertado más
-  lejano). Prueba en el PR aparte de la coordinadora S186 (`tests/test_guard_regla_posicion_radiante_s186.py`, aún
-  no en main). Detalle en D8'. (S186)
+  lejano). Prueba: `tests/test_guard_regla_posicion_radiante_s186.py` (#1022, en main desde el 2026-11-15).
+  Detalle en D8'. (S186)
 - Campo unificado `final_hotspot_lat/lon/dist_km`. En la vía es el centroide del cúmulo 8-conexo de la alertada más
   radiante, con la distancia desde el cráter; `hotspot_*` es el píxel pico; `distance_class` sale de ese centroide; y
   `vrp_mw` es la suma de todos los alertados, no la del cúmulo (`procesar_grilla`; D8', D32, D36). En K es el fallback

@@ -1507,9 +1507,9 @@ Cuando S62+S63 completen:
 > radiancia MIR, aunque haya otra alertada más débil en el cráter; `distance_class` sale de ese centroide y de
 > `inner_radius_km`, y de ahí si el tablero publica. La magnitud no depende de la regla: es la suma de todos los
 > alertados (D32). Vale para los tres sensores (`_cumulo_del_mas_radiante`, llamada por `procesar_grilla`). La prueba
-> que la fija, con un caso débil en el cráter y fuerte lejos, va en un PR aparte de la coordinadora S186
-> (`tests/test_guard_regla_posicion_radiante_s186.py`, rama `claude/s186-guard-radiante`; no existe en main hasta
-> que ese PR se integre). Evidencia (auditoría S185 con verificador limpio,
+> que la fija, con un caso débil en el cráter y fuerte lejos, es
+> `tests/test_guard_regla_posicion_radiante_s186.py` (#1022, en main desde el 2026-11-15, merge `5b16e9da5`).
+> Evidencia (auditoría S185 con verificador limpio,
 > `D:\vrp-trabajo\temporales\s185_posicion_medida\` y `_verif\`, fuera del repo; 2026-03-01 a 2026-11-15, 11 Tier A,
 > sólo la tabla de MIROVA): CONFIRMADO que la clase coincide con la de MIROVA en 98,7 % de 2.037 pasadas con
 > píxeles (con el píxel pico, 98,7 %, la misma clase en 3.656 de 3.656 records; con el cúmulo más cercano al cráter,
