@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 20:01 UTC (S186): Nicolás: «continúa con todo lo que puedas»; sombra de los 34 verde con #1007
+- **Sombra de los 34**: la corrida programada de hoy (run 43751792916, creada 19:19 UTC) salió verde, 34 de 34 trabajos, y commiteó la sombra de cada volcán (19:45 a 19:59 UTC). Es la primera con #1007 (HTTPS en us-west-2): la causa de #1004 queda arreglada. #1004 lo cierra solo `nrt-monitor.yml` en su próxima pasada (cada 6 h, minuto 30).
+- **Plazo MODIS**: `data/audit_continuous/guardia_modis_latest.json` de 02:07 UTC dice 22 de 29 protegidas, VERDE, sin reversión. Aún no toca el informe de cierre.
+- **b.5 y b.6** (documentos con K como producción y divergencias de la vía): el inicio directo de la sesión lo bloqueó el clasificador; quedó como tarjeta «Documentos al día con la vía (b.5 y b.6)» (task_2fa11265) para que Nicolás la inicie. Sólo documentos, worktree `D:\vrp-trabajo\wt_s186_docs`, PR sin merge.
+- **Paper y mazos**: pedido a la sesión `local_fe610939` una vuelta de verificador limpio sobre su segunda ronda de correcciones (no había pasado por verificador). Pendiente su reporte.
+- b.3 (regla de posición «radiante») y b.8 (color de #1011) siguen esperando a Nicolás: son decisiones de método.
+
 ### 2026-11-15 18:36 UTC (S186): Nicolás: «Mergea #1021»; modal publicado; NRT programado verde con el token nuevo
 - **#1021** integrado con merge commit `e2126d441` (head `8031bacf0` verificado con `--match-head-commit`). Tests y Deploy GitHub Pages de main verdes (runs 43746502577 y 43746502644). En Pages, el modal «Acerca de» carga la auditoría del 2026-11-09 (MODIS con la vía, VIIRS con K y la nota de ventana). Worktree `D:\vrp-trabajo\wt_s186_modal` quitado tras revisar list_sessions (ninguna sesión lo usaba); el tag `pre-s186-modal` queda.
 - **Token nuevo en producción**: el NRT programado de 16:48 UTC (run 43737544218) salió verde y subió datos de los 11 Tier A (commits 16:57 a 17:07 UTC).
