@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 10:35 UTC (S185): Nicolás: «Sí, agrégala»; §12.9 del programa por sensor
+- `docs/superpowers/specs/2026-10-24-programa-replica-por-sensor.md` §12.9 (commit `c61af222a`, sólo en `loop/activo`; main tiene la versión del 24-oct): PD4 cumplida en los tres sensores; guardias al 2026-11-15 02:07 a 02:22 UTC: MODIS 22 de 29, VIIRS 750 11 de 29, VIIRS 375 8 de 29, todas VERDE, 0 reversión.
+- Pendientes de la §12.8: (a) cirrus hecho (#944), (c) VPR939-03 hecho (#945, #947), (b) Tupungatito V750 con la vía SIN VERIFICAR. Regla de posición (radiante, cercano, pico): sin decisión final registrada (SIN DATO). Fase 5: V750-E (D-10), V375-F y MOD-E sin empezar; V750-D subsumido.
+- #998 cerrado (sombra código MIROVA verde). #1004 sigue abierto hasta la corrida de las 13:07 UTC.
+
 ### 2026-11-14 22:22 UTC (S185): Nicolás: «Mergea #1009 y #1010»; los dos integrados; ficha v1.30
 - #1009 (regla: la versión de la ficha se toma al mergear) mergeado con CI verde en `9b2842c06`: merge commit `0a1102d5d` (22:09:30 UTC). Worktree `D:\vrp-trabajo\wt_s185_doc` y rama quitados (list_sessions antes: ninguna sesión lo usaba).
 - #1010 (escenas inválidas fuera del banco de paridad y del auto-audit): primera aplicación de la regla de #1009. Se unió main en la rama, se agregó la ficha **v1.30** (cabecera y fila del historial) en `9615463ea`, CI verde en ese commit (`pytest` 10 min 54 s, `bateria-v750a` 9 min 53 s) y merge con `--match-head-commit`: merge commit `86a07971f` (22:22:20 UTC). Pruebas de la ficha locales: 26 de 26. Worktree `D:\vrp-trabajo\wt_s185_banco` y rama quitados (sólo `__pycache__` ignorado).
