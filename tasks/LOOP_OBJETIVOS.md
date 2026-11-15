@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 14:56 UTC (S186): #1021 (modal) abierto; resultado del probe L1B
+- **#1021** (rama `claude/s186-modal-acerca`, tag `pre-s186-modal`): el modal lee el desempeño en vivo de `data/audit_continuous/latest.json`. Verificador Sonnet limpio en dos vueltas: fechas, ruta, Pages, HTML e histórico CONFIRMADOS; corregidos «publicó» (el recall cuenta una detección dentro del radio interior del cráter; por pasada además clase cumbre), VERDE y DEGRADADO (DEGRADADO prima), nota de K por ventana y render protegido. G8 remapeado 1600 a 1714 (`isValidDetection`). 46 pruebas de guard y tablero verdes; casos forzados en el navegador sin romper. Espera CI y «mergea #1021».
+- **Probe L1B** (sesión `local_797fa5af`, run 43724596931, 18 de 18 pasadas; la variante lineal reproduce lo publicado 18 de 18; verificador Opus limpio; `D:\vrp-trabajo\temporales\s185_l1b\INFORME.md`):
+  - Tupungatito V750, NRT contra estándar: SIN DATO (LANCE conserva ~7 días).
+  - Tupungatito V750, remuestreo o fase de la grilla: SOSPECHA. La celda decisiva va de 0,48 a 1,73 de margen según la fase; con media celda N/S las 6 calladas alertan y los 4 controles siguen. Sin rutinas no hay mejora que declarar (5 de 621 rutinas sobre el umbral en la historia); A/B real pide ~20 rutinas de margen alto.
+  - Chillán V375, cola baja del este: saturación y huecos (borrado de bow-tie) REFUTADOS como causa; paralaje descriptivo; remuestreo SOSPECHA débil (n = 3; una baja empeora con vecino). Causa sin atribuir.
+  - Worktree `wt_s185_l1b` quitado por su sesión; rama `claude/s185-l1b-probe` intacta; ningún L1B en disco.
+
 ### 2026-11-15 14:50 UTC (S186): Nicolás: «Sí, el modal» (b.4); token rotado; probe L1B verde
 - **`EARTHDATA_TOKEN` rotado** (guiado por S185 con Nicolás): secreto actualizado 2026-11-15 14:27:52 UTC (`gh api .../secrets/EARTHDATA_TOKEN`); `nrt-healthcheck` run 43724522521: `estado=ok vence=2027-01-14T14:24+00:00 dias_restantes=60.0`. Próxima rotación antes del 2027-01-04. Primera descarga real con el token nuevo: el probe L1B (run 43724596931), `tup` y `chi` verdes (14:29 a 14:33 y 14:39 UTC); el script sale 2 si falta una pasada. El primer NRT programado con el token nuevo queda por verificar.
 - Tests de main sobre `40616bc56` (#1020 y #1018): VERDE (run 43724561770).
