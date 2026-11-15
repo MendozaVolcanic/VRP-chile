@@ -1,7 +1,9 @@
 # Diseño: una miniatura por pasada para las «Últimas 10 imágenes» del tablero
 
-Sesión S184 (lado), 2026-11-15. Estado: **DISEÑO, sin implementar**. Nada de `pipeline/`, `data/` ni
-`frontend/` cambia con este documento. Lo que necesita la confirmación A45 de Nicolás está al final (§9).
+Sesión S184 (lado), 2026-11-15. Estado: **IMPLEMENTADO en la rama `claude/s184-diseno-miniaturas-eb819f`** tras el
+«avanza con todo» de Nicolás (2026-11-15), con las cuatro recomendaciones de §9 (NTI, escala fija, 256 tonos, los 11
+Tier A) y el interruptor por línea de comandos (no toca `mirova_equivalent.yaml`). Tag defensivo `pre-miniaturas`.
+Lo que cambió respecto del diseño original está en §10.
 
 ## 1. Por qué
 
@@ -343,3 +345,29 @@ Y cuatro decisiones de producto, con mi recomendación:
 - **Escala**: fija por sensor de noche (recomendada) o estirada por escena como MIROVA.
 - **Tonos**: 256 (recomendado, 0,19 MB por volcán) o 64 (35 % menos).
 - **Alcance**: los 11 Tier A ahora; los 34 cuando se decida publicarlos.
+
+## 10. Lo implementado (y en qué se apartó del diseño)
+
+- **Vía** (`pipeline/mirova_v750_codigo.py`): `GENERAR_MINIATURA = False`, `ESCALA_MINIATURA_T_K = (240.0, 290.0)`,
+  `escala_nti(familia)` y `miniatura_nti(m13g, m15g, alertadas, familia)`; `calcular_vrp_granulo` agrega
+  `rec["_miniatura"]` sólo con el interruptor encendido. La escala fija es el NTI de un cuerpo negro a 240 K y 290 K
+  con las longitudes de onda de cada sensor y la Planck del .m: V750 de -0,975 a -0,882; V375 de -0,989 a -0,933; MODIS
+  de -0,980 a -0,898. Contiene el fondo nocturno medido en V750 (§3); en V375 y MODIS cada miniatura guarda los
+  percentiles 2 y 98 de su NTI para recalibrar con datos de producción.
+- **Recolector y rotación** (`pipeline/miniaturas.py`, módulo nuevo): `Recolector.recoger` saca la clave antes del
+  store; `escribir_volcan` hace lo de §4.3 punto 3. **Cambio:** el PNG se escribe con la biblioteca estándar
+  (zlib, se prueban los cinco filtros PNG y queda el más chico), porque el NRT no instala Pillow. El índice no lleva
+  hora de la corrida: sin pasadas nuevas no cambia ningún byte y no hay commit.
+- **`scripts/run_pipeline.py`**: `--miniaturas`, `_MINIATURAS.recoger(...)` antes de cada `store.append_record` y
+  `escribir_volcan` al terminar cada volcán (una falla ahí se imprime y no tumba el job). **Cambio:** el import va en la
+  misma línea que el de `profile` y el recolector se define después de `process_date`, para no correr las líneas 252 y
+  262 que cita CLAUDE.md (guard G8).
+- **`nrt.yml`**: `--miniaturas` en el paso del perfil `mirova_equivalent` y `git add -A -- "data/miniaturas/<volcan>"`.
+- **Tablero** (`frontend/miniaturas.js` nuevo y dos líneas de `frontend/index.html`): el panel de §7 antes de lo
+  plegado de la página del volcán, con pestañas por sensor; el VRP de cada casilla es el que el tablero ya calcula para
+  ese record (`eqVrp`), así que imagen y gráfico dicen lo mismo. Si el volcán no tiene `indice.json`, el panel no se
+  muestra.
+- **Pruebas**: `tests/test_miniaturas_por_pasada.py` (imagen sin pérdida y determinista, escala, nube más oscura que
+  el suelo, la vía con y sin interruptor en los tres sensores, rotación, conservación sin gránulo, reemplazo NRT a
+  estándar, K sin imagen, índice copiado del record, dos corridas iguales sin cambios, y que sólo `nrt.yml` use
+  `--miniaturas`).

@@ -125,14 +125,16 @@ FAMILIAS = {
 # porque 49 archivos (pruebas, experimentos, probes) llaman a la vía o a los procesadores y ninguno debe ver la clave;
 # la enciende sólo `run_pipeline.py --miniaturas`, que sólo usa el NRT de producción (nrt.yml).
 GENERAR_MINIATURA = False
-# Escala fija del gris: el NTI de un cuerpo negro a 240 K (negro) y a 290 K (blanco) con las longitudes de onda de cada
-# sensor. POR QUÉ fija y no estirada por escena: así una noche nublada (fría) se ve más oscura que una despejada. POR
-# QUÉ esas temperaturas: contienen el fondo nocturno medido en 298 escenas reales de V750 (experiments/_s163_o2,
-# percentil 2 por escena entre -0,965 y -0,917, percentil 98 con mediana -0,914; cuerpo negro a 240 K = -0,974 y a
-# 290 K = -0,882 en M13/M15). En VIIRS 375 y MODIS falta medirlo con grillas reales: por eso cada miniatura guarda los
-# percentiles 2 y 98 de su NTI, para recalibrar con datos de producción. Más frío que 240 K (nube alta) satura en
-# negro; más caliente que 290 K (el foco) satura en blanco.
-ESCALA_MINIATURA_T_K = (240.0, 290.0)
+# Escala fija del gris: el NTI de un cuerpo negro a 240 K (negro) y a 300 K (blanco) con las longitudes de onda de cada
+# sensor y la Planck del .m. POR QUÉ fija y no estirada por escena: así una noche nublada (fría) se ve más oscura que
+# una despejada. POR QUÉ esas temperaturas (medido, no supuesto): en la corrida real de la rama S184 (Chillán y
+# Villarrica, 12 al 15 de noviembre de 2026, 59 escenas con dato) el percentil 98 del NTI por escena llegó a -0,921 en
+# VIIRS 375, -0,890 en MODIS y -0,882 en VIIRS 750, y el percentil 2 bajó (percentil 10 entre escenas) a -0,980, -0,957
+# y -0,968. Con 290 K de blanco VIIRS 375 dejaba en blanco puro el 2,7 % de las celdas en la escena mediana (36 % en
+# el percentil 90), y un foco no se distinguía del fondo tibio; con 300 K (V375 -0,910, MODIS -0,869, V750 -0,850) y
+# 240 K de negro (-0,989, -0,980, -0,975) caben todos. Más frío que 240 K (nube alta) satura en negro; el foco, en
+# blanco. Cada miniatura guarda los percentiles 2 y 98 de su NTI para volver a medirlo con más volcanes.
+ESCALA_MINIATURA_T_K = (240.0, 300.0)
 
 
 # ---------------------------------------------------------------------------------------------------- Planck

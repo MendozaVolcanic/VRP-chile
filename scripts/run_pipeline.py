@@ -80,8 +80,7 @@ if _early_args.profile:
     os.environ["VRP_PROFILE"] = _early_args.profile
 
 from pipeline import fetch, process_modis, process_viirs, process_viirs_mod, store, diurno  # S151 D-10
-from pipeline import profile as vrp_profile
-from pipeline import mirova_v750_codigo, miniaturas  # S184: miniaturas por pasada (docs/DISENO_MINIATURAS_POR_PASADA.md)
+from pipeline import profile as vrp_profile; from pipeline import mirova_v750_codigo, miniaturas  # S184: miniaturas por pasada, en la misma línea para no correr las citas archivo:línea (guard G8)
 from pipeline.geo_utils import get_detection_anchor
 
 
@@ -89,10 +88,6 @@ from pipeline.geo_utils import get_detection_anchor
 # VRP_TMP_DIR para sacarlo de carpetas sincronizadas (OneDrive): la sync a la nube
 # desperdicia banda y los file-locks bloquean el rmtree del cleanup (S94). Default
 # = repo/tmp (sin cambio en GitHub Actions, que no setea la var).
-# S184: miniaturas de la corrida (las junta process_date, las escribe main al terminar cada volcán). Sin
-# --miniaturas la vía no las genera y el recolector queda vacío.
-_MINIATURAS = miniaturas.Recolector()
-
 TMP_DIR = Path(os.environ.get("VRP_TMP_DIR", str(Path(__file__).parent.parent / "tmp")))
 VOLCANOES_FILE = Path(__file__).parent.parent / "volcanoes.yaml"
 VOLCANIC_FEATURES_FILE = Path(__file__).parent.parent / "pipeline" / "volcanic_features.yaml"
@@ -602,6 +597,11 @@ def _ventana_del_entorno(dates: list) -> tuple | None:
         if not (ini <= d.strftime("%Y-%m-%d") <= fin):
             raise SystemExit(f"VRP_VENTANA_BUSQUEDA={crudo} no contiene la fecha {d:%Y-%m-%d}")
     return ini, fin
+
+
+# S184 (definido aquí, después de process_date, para no correr las citas archivo:línea del guard G8): miniaturas de la corrida (las junta process_date, las escribe main al terminar cada volcán). Sin
+# --miniaturas la vía no las genera y el recolector queda vacío.
+_MINIATURAS = miniaturas.Recolector()
 
 
 def main():
