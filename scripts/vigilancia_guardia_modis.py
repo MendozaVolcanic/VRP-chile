@@ -217,6 +217,32 @@ def _dt(texto):
     return datetime.strptime(texto, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
 
 
+def ventana_efectiva_nulo(guardia, sensor, desde, limite):
+    """S185: qué tramo mide de verdad el nulo. `DIAS_NULO` es la ventana que la regla declara; la guardia sólo existe desde
+    su primer record, así que si empezó después de `desde` el nulo cubre menos días de los declarados (VIIRS 750: la guardia
+    arranca el 2026-11-03 y el encendido es el 2026-11-11, unos 8,5 días, no 14). Es información, no cambia el nulo ni el
+    veredicto: la regla de MODIS (§4.4 c) y la de VIIRS (§3, al menos tres noches) no dicen que menos días sea una
+    falla, y un aviso en `avisos` convertiría un VERDE en VIGILANCIA_CIEGA, que es un cambio de la regla.
+    `guardia` llega recortada a la ventana de carga, que arranca antes de `desde`: el recorte no mueve este mínimo."""
+    inicio = min((g["dt"] for g in guardia if g["b"] == sensor), default=None)
+    efectivo = max(desde, inicio) if inicio else None
+    dias = max((limite - efectivo).total_seconds(), 0.0) / 86400 if efectivo else 0.0
+    f = "%Y-%m-%d %H:%M:%S"
+    return {"desde": efectivo.strftime(f) if efectivo else None, "hasta": limite.strftime(f),
+            "desde_nominal": desde.strftime(f), "dias_declarados": DIAS_NULO, "dias_cubiertos": round(dias, 1),
+            "inicio_guardia": inicio.strftime(f) if inicio else None}
+
+
+def avisos_ventana_nulo(nulo):
+    """S185: aviso informativo (no entra en `avisos`, no cambia el veredicto) si el nulo cubre menos días que los declarados."""
+    v = (nulo or {}).get("ventana_efectiva")
+    if not v or v["dias_cubiertos"] >= v["dias_declarados"] - 0.05:
+        return []
+    return [f"el nulo de la guardia cubre {v['dias_cubiertos']} de los {v['dias_declarados']} días declarados "
+            f"({v['desde']} a {v['hasta']} UTC): la guardia empieza el {(v['inicio_guardia'] or 'sin records')[:10]}. "
+            "El veredicto no cambia"]
+
+
 def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, ahora=None, sensor=SENSOR, cotas=None):
     """Los niveles de §4 sobre lo posterior al encendido; lo anterior, retrospectivo y nulo. `ahora`: instante UTC
     'YYYY-MM-DD HH:MM:SS' de la corrida (por defecto, la medianoche de `hoy`), para la espera de MA172-202.
@@ -317,6 +343,7 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
                 distintas.append({"volcano": g["vol"], "fecha_utc": clave[2], "guardia_pub": bool(g["pub"])})
     # MA172-208: 0 pares no es «coinciden», es «no medí»; evaluar() lo convierte en aviso.
     nulo = {"pares": pares, "distintas": len(distintas), "detalle": distintas, "sin_medir": pares == 0,
+            "ventana_efectiva": ventana_efectiva_nulo(guardia, sensor, desde, limite),
             "nota": "antes del encendido guardia y producción son el mismo detector K: deben publicar lo mismo (A110)"}
 
     # MA172-202: protegida posterior al encendido que la guardia publica y de la que producción no tiene record, pasada
@@ -331,7 +358,10 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
 
     duracion = {"protegidas_vistas_en_guardia": len(vistas), "objetivo": PROTEGIDAS_OBJETIVO,
                 "encendido": encendido, "vence": vence, "vence_utc": vence_utc,
-                "cumplida": bool(encendido) and (len(vistas) >= PROTEGIDAS_OBJETIVO or bool(vence and hoy >= vence))}
+                # S185: el plazo vence al INSTANTE del encendido más DIAS_MAXIMOS, no a la medianoche de ese día: comparar
+                # la fecha lo daba por cumplido hasta 24 h antes (`en_plazo_instante` ya compara el instante)
+                "cumplida": bool(encendido) and (len(vistas) >= PROTEGIDAS_OBJETIVO
+                                                 or bool(vence_utc and ahora >= vence_utc))}
     retrospectivo = {
         "nota": "anterior al encendido: se informa y no dispara la reversión (§4, decisión (b) de K)",
         "n_pasadas": len(retro),
@@ -402,7 +432,16 @@ def nulo_vigente(nulo, sensor, encendido, sellado=None):
         return nulo
     return {"pares": s["pares"], "distintas": s["distintas"], "detalle": s.get("detalle", []), "sin_medir": False,
             "sellado": True, "medido_en_commit": s.get("medido_en_commit"), "medido_utc": s.get("medido_utc"),
+            # S185: la ventana es del tramo previo al encendido y de la guardia, que sigue en disco: se mide viva
+            "ventana_efectiva": nulo.get("ventana_efectiva"), "ventana_sellada": s.get("ventana_utc"),
             "nota": "nulo sellado antes del reemplazo de la historia con la vía (S181): guardia y producción eran K"}
+
+
+def texto_ventana_nulo(nulo):
+    v = (nulo or {}).get("ventana_efectiva")
+    if not v:
+        return ""
+    return f" en {v['dias_cubiertos']} de {v['dias_declarados']} días ({v['desde']} a {v['hasta']} UTC)"
 
 
 def avisos_nulo(nulo):
@@ -562,6 +601,8 @@ def evaluar(hoy):
     if veredicto == "VERDE" and avisos:
         veredicto = "VIGILANCIA_CIEGA"      # un aviso no tapa una reversión: sólo impide leer la falta de disparos
     out.update({"veredicto": veredicto, "avisos": avisos,
+                # S185: informativo, aparte de `avisos` a propósito: no cambia el veredicto ni abre issue
+                "avisos_informativos": avisos_ventana_nulo(d["nulo"]),
                 # VPR959-05: el veredicto es el de la regla; esto sólo le dice a la issue que no ponga «no puede mirar»
                 "solo_caidas_a_k": veredicto == "VIGILANCIA_CIEGA" and not ciegos,
                 "guardia_desde": min((r["noche"] for r in guardia), default=None),
@@ -579,6 +620,8 @@ def imprimir(out):
           f"{out.get('encendido_modis_utc')} · guardia {out.get('guardia_desde')} a {out.get('guardia_hasta')}")
     for a in out.get("avisos", []):
         print("AVISO:", a)
+    for a in out.get("avisos_informativos", []):
+        print("AVISO (informativo):", a)
     for p in out.get("reversion", []):
         print(f"  REVERSIÓN CANDIDATA: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la "
               "guardia (K) publica y producción (la vía) calla. Confirmar en la cabecera de la imagen de MIROVA antes de "
@@ -602,6 +645,7 @@ def imprimir(out):
             print(f"  {nombre}: {m['k']} (cota {m['cota']}, n {m['n']}){' · DISPARA' if m['dispara'] else ''}")
     n = out.get("nulo") or {}
     print(f"  nulo (antes del encendido): {n.get('distintas')} pasadas distintas de {n.get('pares')} pareadas"
+          + texto_ventana_nulo(n)
           + (f" (sellado antes del reemplazo de la historia, "
              f"{n.get('medido_utc')} UTC)" if n.get('sellado') else ""))
     b = out.get("borde_171_01") or {}
