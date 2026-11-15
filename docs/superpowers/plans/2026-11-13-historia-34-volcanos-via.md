@@ -44,8 +44,12 @@ Eso pide la misma vía en toda la serie, igual que en los 11.
    170 KB a unos 14 MB, y el tablero bajaría los 34 completos en cada visita (~475 MB). (b) Si el reemplazo entra a
    main mientras corre la sombra, el rebase con `-X theirs` hace ganar el archivo de la sombra, que no tiene la
    historia, y la borra sin error. Con un archivo aparte que la sombra nunca toca, ninguna de las dos cosas pasa.
-2. **El techo de 1 GB de Pages no aplica**: los 34 se sirven desde el repo. Sacar de Pages las carpetas que nadie lee
-   (~590 MB) es una limpieza útil para los 11, pero independiente de este plan (§7).
+2. **El techo de 1 GB de Pages sí aplica si no se excluye la carpeta.** Los 34 se leen desde el repo, pero
+   `pages-deploy.yml` copia `data/` entera y sólo saca las sombras y guardias que nombra: `data/historia_34/` iría al
+   sitio (340 a 475 MB) y pasaría el techo. CORREGIDO el 2026-11-15: la primera versión de este plan decía «no aplica»;
+   lo encontró el revisor de S185 sobre el PR #1012, y el arreglo es el PR #1014 (patrón negado y `rm -rf` de
+   `historia_34`, vigilados por `tests/test_pages_sin_sombras_s173.py`). **Ninguna tanda se aplica antes del merge de
+   #1014.** Sacar de Pages las carpetas que nadie lee (~500 MB) sigue siendo una limpieza aparte (§7).
 3. **Por etapas.** El planificador sellado admite 256 trozos por despacho y el grupo de concurrencia guarda UN solo
    despacho pendiente (S152: un tercero desplaza al segundo). Por eso, tandas de 5 volcanes, despachadas de a una.
 
@@ -540,8 +544,8 @@ def test_historia_publicada_es_toda_de_la_via_y_anterior_a_la_sombra():
 ### Tarea 8: contrato para el frontend (lo implementa la sesión del tablero de los 34, no este plan)
 
 Escribir en el PR de la Tarea 2, para esa sesión:
-- **Dónde:** `https://raw.githubusercontent.com/MendozaVolcanic/VRP-chile/main/data/historia_34/<V>.json`. No está en
-  Pages, igual que la sombra.
+- **Dónde:** `https://raw.githubusercontent.com/MendozaVolcanic/VRP-chile/main/data/historia_34/<V>.json`. Fuera de
+  Pages, igual que la sombra, desde el PR #1014 (antes el yml la habría copiado).
 - **Cuándo cargarlo:** sólo si el período pedido empieza antes del primer record de la sombra. Pesa unos 14 MB por
   volcán; cargar los 34 al abrir la página serían ~475 MB.
 - **Cómo unirlo:** por clave `(datetime_utc, sensor)`; nunca chocan, porque la historia termina antes del 2026-11-03
@@ -579,5 +583,9 @@ Escribir en el PR de la Tarea 2, para esa sesión:
   con una prueba que la saque del código del frontend, devuelve margen al techo de 1 GB para los 11.
 - **Peso del repo (12,8 GB):** crece sobre todo porque el NRT reescribe JSON de ~15 MB cada 2 horas. Un repo de datos
   aparte, o un formato que no reescriba toda la serie, se evalúa por separado.
+- **Dos defectos bajos del aplicador** (revisor de S185, PR #1012): (a) si la unión trajera dos records con la misma
+  clave, el aplicador se queda con uno sin avisar (hoy no pasa: `unir_trozos.py` rehúsa claves repetidas); (b) «gana
+  lo que ya estaba» impide corregir una tanda ya aplicada: para rehacerla hay que borrar antes su
+  `data/historia_34/<V>.json` (con tag, A38) y aplicar de nuevo.
 - **`_recent` para la sombra de los 34:** su archivo crece ~0,1 MB por semana; en un año el tablero bajaría ~200 MB al
   abrir. Hace falta el mismo `_recent` que tienen los 11 antes de mediados de 2027.
