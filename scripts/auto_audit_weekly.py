@@ -1218,17 +1218,22 @@ def alertas_protegidas(filas, recs_banco, win, frontera, diurna=None, via_modis=
                       "detector_records": sorted({_detector_banco(r, frontera, via) for r in cand}),
                       "noche_publicada_otra_pasada": any(r["pub"] for r in otras),
                       "referencia_sospechosa": (fuentes[k] == {"OCR"} and minuto[:10] < HITO_OCR_SUOMI_NPP
-                                                and any("SNPP" in (r.get("sensor") or "") for r in cand)),
+                                                and any("VIIRS" in (r.get("sensor") or "") for r in cand)),
                       "perdida_aceptada": k in PERDIDAS_ACEPTADAS,
                       **({"vrp_mirova_hasta_mw": round(techo[k], 3)} if techo[k] > prot[k] + 1e-9 else {})})
     return lista
 
 
-# A119: antes de este hito, en las filas SÓLO OCR de Suomi NPP la distancia y la clase pueden ser de OTRA
+# A119: antes de este hito, en las filas SÓLO OCR de VIIRS la distancia y la clase pueden ser de OTRA
 # pasada (el VRP sí es de la suya). Una protegida que descansa sólo en una de esas filas sigue siendo
 # protegida por su VRP, pero el flag lo dice: dos de las cinco del 2026-10-19 (Tupungatito 28 y 29 de
 # septiembre) eran así, con nuestros cúmulos a 21,6 y 9,4 km (verificador de S156). El hito vive en
 # scripts/calidad_referencia_mirova.py, no copiado acá.
+# S185: el defecto es del OCR de Mirova-v1 (la imagen de otra pasada, la «Last Update» no coincide), no de una
+# plataforma: el guard mira que nuestro record de la pasada sea de cualquier VIIRS (el OCR no trae satélite), no sólo
+# Suomi NPP. Láscar VIIRS 375 2026-10-01 05:18 era NOAA-21 (cenit del OCR 32,0 contra 32,36 del record nuestro) y mostraba
+# el mismo patrón (fila sólo OCR, procesada 8 h 43 min después, misma Y que la fila de otra pasada). La fecha de corte es
+# la de la pasada y sigue siendo la del hito de Suomi NPP (único canal OCR medido); el nombre HITO_OCR_SUOMI_NPP se conserva.
 def _hito_ocr_suomi_npp():
     try:
         from calidad_referencia_mirova import HITOS  # noqa: E402
@@ -1307,7 +1312,7 @@ def flags_protegidas(lista, vigente, via_modis=None):
 def protegidas_aparte(lista, vigente, via_modis=None):
     """S166 (issue #915): protegidas sin publicar del detector vigente que se informan SIN flag.
 
-    POR QUÉ: (1) con `referencia_sospechosa` la fila es sólo OCR de Suomi NPP anterior al hito A119 y su
+    POR QUÉ: (1) con `referencia_sospechosa` la fila es sólo OCR de VIIRS anterior al hito A119 y su
     distancia y clase pueden ser de otra pasada: en #915 las dos de Tupungatito (28 y 29 de septiembre) eran
     objetos lejanos que nosotros vemos y clasificamos `far`, no el cráter. La protegida sigue protegida por su
     VRP, pero no hay cómo saber si es una alerta de cráter. (2) La pérdida aceptada ya está decidida
@@ -1319,7 +1324,7 @@ def protegidas_aparte(lista, vigente, via_modis=None):
             continue
         k = (p["volcano"], p["sensor"], p["fecha_utc"])
         motivo = (f"pérdida aceptada: {PERDIDAS_ACEPTADAS[k]}" if p.get("perdida_aceptada") else
-                  f"referencia sospechosa: sólo OCR de Suomi NPP antes del {HITO_OCR_SUOMI_NPP}, la distancia "
+                  f"referencia sospechosa: sólo OCR de VIIRS antes del {HITO_OCR_SUOMI_NPP}, la distancia "
                   "y la clase pueden ser de otra pasada (A119)")
         out.append(f"protegida sin publicar, sin flag: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, "
                    f"MIROVA {_vrp_txt(p)} (detector {p['detector']}; {_noche_txt(p)}; {motivo})")
