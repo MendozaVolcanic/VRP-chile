@@ -4286,7 +4286,7 @@ function textoUltimaPasadaEvol(u, ahoraMs, includeFar, conCalor) {
   const cen = textoCenitEvol(p.zen, null);
   let texto = "Última pasada: " + p.dt + " UTC (" + haceEvol(p.t, ahoraMs) + ") · " + (ETIQUETA_SENSOR[p.grupo] || p.sensor) +
               " · " + estado + (cen ? " · " + cen + (esOblicuaEvol(p.zen) ? " (oblicua)" : "") : "");
-  if (!(u.vrp > 0) && conCalor && conCalor.p !== p) {
+  if (!(u.vrp > 0) && conCalor) {   // si la última no publicó, la última con calor es otra pasada
     const c = conCalor.p;
     texto += ". Última con calor publicado: " + c.dt + " UTC (" + haceEvol(c.t, ahoraMs) + ") · " +
              (ETIQUETA_SENSOR[c.grupo] || c.sensor) + " · " + clase(conCalor.vrp, getLevel(conCalor.vrp));

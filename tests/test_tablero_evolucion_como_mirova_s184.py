@@ -774,11 +774,13 @@ const granulos = [P(10 * H, "crater", 3, "VIIRS375"), P(10 * H + 6 * M, "nada", 
 // a 50 min ya es otra pasada: manda la última aunque no vea nada
 const otra = [P(10 * H, "crater", 3, "VIIRS375"), P(10 * H + 50 * M, "nada", undefined, "MODIS")];
 const fuera = [P(10 * H, "fuera", 9, "VIIRS750"), P(10 * H, "crater", 0.5, "VIIRS375")];
+// a igual valor publicado (0) manda la de más anomalía: la no publicada antes que la que no vio nada
+const igual = [P(10 * H, "no_publicada", undefined, "VIIRS375"), P(10 * H, "nada", undefined, "VIIRS750")];
 const u = (l, f) => { const x = ultimaPasadaEvol(l, f); return [x.p.grupo, x.p.estado, x.vrp]; };
 const conCalor = ultimaConCalorEvol(otra, false);
 console.log(JSON.stringify({ empate: u(empate, false), empateInv: u(empate.slice().reverse(), false), granulos: u(granulos, false),
   otra: u(otra, false), fueraSolo: u(fuera, false), fueraLejanas: u(fuera, true),
-  conCalor: [conCalor.p.grupo, conCalor.vrp], sinCalor: ultimaConCalorEvol([P(1, "nada")], false),
+  igual: u(igual, false), conCalor: [conCalor.p.grupo, conCalor.vrp], sinCalor: ultimaConCalorEvol([P(1, "nada")], false),
   texto: textoUltimaPasadaEvol(ultimaPasadaEvol(otra, false), A, false, conCalor).texto,
   textoConCalorIgual: textoUltimaPasadaEvol(ultimaPasadaEvol(granulos, false), A, false, ultimaConCalorEvol(granulos, false)).texto,
   extremo: textoUltimaPasadaEvol({ p: P(1, "crater", 12000, "MODIS"), vrp: 12000 }, A, false).texto }));
@@ -788,6 +790,7 @@ console.log(JSON.stringify({ empate: u(empate, false), empateInv: u(empate.slice
     assert o["granulos"] == ["VIIRS375", "crater", 3] and o["otra"] == ["MODIS", "nada", 0], o
     # con «Solo cráter» manda el cráter (0,5 publicado); con «Incluir lejanas», el de fuera (9 MW)
     assert o["fueraSolo"] == ["VIIRS375", "crater", 0.5] and o["fueraLejanas"] == ["VIIRS750", "fuera", 9], o
+    assert o["igual"] == ["VIIRS375", "no_publicada", 0], o["igual"]
     assert o["conCalor"] == ["VIIRS375", 3] and o["sinCalor"] is None
     assert "sin anomalía" in o["texto"] and ". Última con calor publicado: D36000000 UTC" in o["texto"] and "Bajo, 3,00 MW" in o["texto"], o["texto"]
     assert "Última con calor" not in o["textoConCalorIgual"], o["textoConCalorIgual"]
