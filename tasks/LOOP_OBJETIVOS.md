@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 14:50 UTC (S186): Nicolás: «Sí, el modal» (b.4); token rotado; probe L1B verde
+- **`EARTHDATA_TOKEN` rotado** (guiado por S185 con Nicolás): secreto actualizado 2026-11-15 14:27:52 UTC (`gh api .../secrets/EARTHDATA_TOKEN`); `nrt-healthcheck` run 43724522521: `estado=ok vence=2027-01-14T14:24+00:00 dias_restantes=60.0`. Próxima rotación antes del 2027-01-04. Primera descarga real con el token nuevo: el probe L1B (run 43724596931), `tup` y `chi` verdes (14:29 a 14:33 y 14:39 UTC); el script sale 2 si falta una pasada. El primer NRT programado con el token nuevo queda por verificar.
+- Tests de main sobre `40616bc56` (#1020 y #1018): VERDE (run 43724561770).
+- **Modal «Acerca de» (b.4):** tag `pre-s186-modal` (= `40616bc56`, empujado). Rama `claude/s186-modal-acerca`, worktree `D:\vrp-trabajo\wt_s186_modal`, commits `cb0eb6a7b` y `3fa3b7594`. El desempeño se lee en vivo de `data/audit_continuous/latest.json` (fecha, ventana, veredicto, detector juzgado por sensor, recall por noche y por pasada, avisos); las métricas de julio quedan en un `<details>` histórico con su texto (A113); guiones largos fuera del texto visible. Probado en el navegador (localhost:8186, escritorio y 375 px sin desborde; la auditoría del 11-09 se ve juzgando VIIRS con K, como fue). Verificador Sonnet en curso; sin PR todavía.
+
 ### 2026-11-15 14:29 UTC (S186): Nicolás: «Mergea #1020 y #1018»; probe L1B despachado
 - #1020 (parche B, guard A119 para todo VIIRS) integrado: merge `aa3f48a5a`. La auditoría del lunes 2026-11-16 corre con él; se espera VERDE si la ventana trae lo mismo.
 - #1018 (probe L1B) integrado tras el arreglo de su sesión (`7f54166b3`, módulos con prefijo `s185_l1b_`; CI verde): merge `40616bc56`. Despachado desde main: run 43724596931 (14:29 UTC). El análisis y su verificador los hace la sesión L1B (`local_797fa5af`).
