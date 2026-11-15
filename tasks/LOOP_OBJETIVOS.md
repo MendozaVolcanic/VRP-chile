@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 13:21 UTC (S186): Nicolás: «Sí, los cinco» (b.1); #1013, #1016, #1017, #1014 y #1012 integrados
+- Respuesta a la pregunta «¿Mergeo #1013, #1016, #1017, #1014 y luego #1012, en ese orden?». Merge commit con `--match-head-commit`, cada uno con CLEAN y 2 de 2 checks verdes justo antes: #1013 `be1dba138`, #1016 `6dcbbf5d3`, #1017 `f40de3c9a`, #1014 `f0459ad9a` (Pages sin `data/historia_34`), #1012 `d41cb1930` (tanda 1 de los 34, sin aplicar a `data/`). Ninguno toca ficha SDA, `pipeline/`, `frontend/` ni `data/`: no hay versión de ficha que numerar.
+- CI de main: Tests sobre `d41cb1930` (contiene los cinco) VERDE, run 43718319448; las corridas de los merges intermedios quedaron canceladas por concurrencia. Deploy de Pages de `f0459ad9a` VERDE (run 43718302873); `.../data/historia_34/` da 404 y el índice 200.
+- Worktrees de S185 quitados tras revisar que estaban limpios (sin cambios ni ignorados) y que ninguna sesión viva los usaba: `wt_s185_doc2`, `wt_s185_vigil_pr`, `wt_s185_audit_a`. D: pasa de 31 a 36 GB libres.
+- Pendientes de Nicolás del bloque: b.2 a b.8. Aplicar la tanda 1 a `data/` sigue siendo decisión suya.
+
 ### 2026-11-15 13:09 UTC (S186): arranque verificado; #1018 rojo por colisión de módulo; decisiones b.1 a b.8 llevadas a Nicolás
 - Disco C: 27 GB, D: 31 GB. `chequeo_post_nrt.py origin/main`: OK. Plazo MODIS 22 de 29 (`guardia_modis_latest.json`, VERDE, `cumplida: false`).
 - Issues de alerta abiertos: #1004 (sombra de los 34) y #973 (auto-audit del 11-09). La sombra del 11-15 todavía no corre: el cron `7 13` lo lanza GitHub entre las 18 y las 20 UTC. Las fallas del 11-13 (`Region: us-west-2`, Lonquimay y Olca-Paruma) y del 11-14 (Calbuco y Callaqui) son el `FileExistsError` que arregló #1007 (merge 2026-11-14 19:34 UTC, después de la corrida de las 18:42). La del 11-15 es la primera con el arreglo. La auditoría semanal del 11-16 corre el lunes; aún no hay con qué comparar.
