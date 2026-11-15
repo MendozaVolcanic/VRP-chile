@@ -299,9 +299,27 @@ def parear(lista, t, tol=TOL_S):
 
 
 # ---------------------------------------------------------------- nuestros records
-def cargar_nuestros(coords, inner, ventana, data=None):
+def es_escena_invalida(r):
+    """S185: la via «codigo MIROVA» no pudo medir la escena (mitad o mas de la grilla sin dato util, o reflejo solar;
+    `pipeline/mirova_v750_codigo.py`) y la guarda con 0 MW y sin pixeles, anotada en `diag_codigo_mirova.motivo_vacio`.
+    En el codigo de MIROVA esa escena queda NaN; su tabla a veces lista la pasada con VRP 0 (246 de las 768 escenas
+    invalidas nocturnas de los 11 Tier A del 2026-03-01 al 2026-11-14), y no se sabe si esa fila es una medicion o el
+    NaN escrito como 0 (SIN DATO). Por eso no cuentan como negativo acertado ni como perdida. Misma regla que el
+    tablero (#1005) y la comparacion via/K (#1006)."""
+    return bool((r.get("diag_codigo_mirova") or {}).get("motivo_vacio"))
+
+
+def cargar_nuestros(coords, inner, ventana, data=None, excluir_escenas_invalidas=False):
     """`data`: carpeta de los JSON (por defecto la de produccion). S156: la vigilancia de la sombra la usa
-    con data/experimental_v2 para aplicar el MISMO predicado del tablero a los records del laboratorio."""
+    con data/experimental_v2 para aplicar el MISMO predicado del tablero a los records del laboratorio.
+
+    `excluir_escenas_invalidas` (S185, decision b.1 de Nicolas): una escena que la via no pudo medir no es una
+    pasada «sin anomalia». Con True no entra: si MIROVA alerto ahi, la pasada cae en `alertas_sin_record` (no
+    miramos, S150) y no en el recall; si MIROVA la listo con VRP 0, deja de inflar los negativos limpios. Lo pasan el
+    banco (`main`) y el auto-audit. El valor por defecto (False) deja igual a los demas llamadores, en particular a las
+    vigilancias de la guardia y de la sombra: su regla sellada pre-autoriza revertir cuando produccion «calla» en una
+    protegida, y para el operador una escena vacia es silencio; sacarla la pasaria de «calla» a «sin record» (de
+    reversion a investigar). Ese cambio no se hace aqui."""
     recs, casos = [], []
     mc = centros_mirova()
     for vol in VOLS:
@@ -317,6 +335,8 @@ def cargar_nuestros(coords, inner, ventana, data=None):
                 continue
             lat, lon = coords[vol]
             if es_pasada_diurna_descartada(b, lat, lon, dt):
+                continue
+            if excluir_escenas_invalidas and es_escena_invalida(r):
                 continue
             pc = r.get("primary_cluster") or {}
             recs.append({"vol": vol, "b": b, "dt": dt, "noche": dt.strftime("%Y-%m-%d"),
@@ -572,7 +592,7 @@ def main(argv=None):
     # S175 (F2-212 de docs/AUDIT_S175.md): el banco usa la regla D-9 decidida (SN, issue #811), como el auto-audit.
     # El valor por defecto de indexar_referencia sigue en "original" para los scripts que se reproducen tal cual.
     por_vb, noche_sensor, noche_volcan, n_ref = indexar_referencia(filas, coords, ventana, regla_minimas=MODO_MINIMAS)
-    recs = cargar_nuestros(coords, inner, ventana)
+    recs = cargar_nuestros(coords, inner, ventana, excluir_escenas_invalidas=True)
     etiquetar(recs, por_vb, noche_sensor, noche_volcan)
     sin_record = alertas_sin_record(por_vb, recs)
     por_sensor, por_volcan = resumen(recs, sin_record)

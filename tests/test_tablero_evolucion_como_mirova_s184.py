@@ -45,7 +45,7 @@ FUNCIONES = ["parseUtcMs", "_havKm", "f5CoreMagnitude", "mirovaEqVrp", "mirovaEq
              "ultimaPasadaEvol", "haceEvol", "textoUltimaPasadaEvol", "marcasEvol", "tMinRecords",
              "unirHistoriaEvol", "enVentanaEvol", "puntosMirovaEvol", "clasesEscalaEvol", "ejeLogEvol",
              "ejeDistEvol", "ejeXEvol", "rotuloFueraEvol", "inicioDatosEvol", "datosEvol", "datasetsEvol",
-             "fechaUtcEvol", "historiaEvol", "armarEvolucion", "mirovaEsDia", "mirovaPointStyle", "mirovaPointFill",
+             "fechaUtcEvol", "inicioMirovaEvol", "historiaEvol", "armarEvolucion", "mirovaEsDia", "mirovaPointStyle", "mirovaPointFill",
              "mirovaPointRadius", "mirovaSufijoSinGeo", "mirovaLineasDia", "mirovaIconoSol", "mirovaDiaDataset"]
 CONSTANTES = ["USE_F5_CORE", "F5_R_CORE_KM", "F5_BT_EXT_K", "LEVELS", "EVOL_DIAS", "EVOL_GRIS", "EVOL_LOG_MIN_MW",
               "EVOL_LOG_MAX_MW", "EVOL_SERIES", "MIROVA_SIN_GEO_TXT", "MIROVA_DIA_TXT", "MIROVA_DIA_RAYOS", "_iconosSol",
@@ -485,11 +485,11 @@ out.ejeX = [charts["evol-0"].options.scales.x.min, charts["evol-1"].options.scal
 out.leyenda = [charts["evol-0"].options.plugins.legend.display !== false, charts["evol-1"].options.plugins.legend.display !== false];
 armarEvolucion(host, V11, d, 5, {}); out.pedidos2 = PEDIDOS.length; out.vivos2 = VIVOS.size;
 // leyenda: apagar una serie la apaga en los dos paneles y sigue apagada al rearmar
-charts["evol-0"].options.plugins.legend.onClick({}, { text: "MODIS" });
+charts["evol-0"].options.plugins.legend.onClick({}, { text: "MODIS", datasetIndex: charts["evol-0"].data.datasets.findIndex(x => x.label === "MODIS") }, { chart: charts["evol-0"] });
 out.apagadaEnAmbos = ["evol-0", "evol-1"].map(k => charts[k].data.datasets.find(x => x.label === "MODIS").hidden);
 armarEvolucion(host, V11, d, 5, {});
 out.apagadaTrasRearmar = charts["evol-1"].data.datasets.find(x => x.label === "MODIS").hidden;
-charts["evol-0"].options.plugins.legend.onClick({}, { text: "MODIS" });
+charts["evol-0"].options.plugins.legend.onClick({}, { text: "MODIS", datasetIndex: charts["evol-0"].data.datasets.findIndex(x => x.label === "MODIS") }, { chart: charts["evol-0"] });
 // sensores y MIROVA apagados en la leyenda de arriba
 sensorVisible.VIIRS750 = false; sensorVisible.MIROVA = false; armarEvolucion(host, V11, d, 5, {});
 out.sinV750 = etiquetas("evol-1"); sensorVisible.VIIRS750 = true; sensorVisible.MIROVA = true;
@@ -704,5 +704,58 @@ def test_nota_del_cenit_dice_lo_medido():
     nota = _const(src, "NOTA_CENIT_EVOL")
     for frase in ["68 %", "17 %", "0,81 a 0,14 MW", "0,73 a 0,14 MW", "no separan", "Chillán"]:
         assert frase in nota, frase
-    assert "—" not in nota and "–" not in nota
+    assert "\u2014" not in nota and "\u2013" not in nota
     assert (RAIZ / "experiments" / "_s184_cenit" / "INFORME.md").exists()
+
+
+# ── Revisión S185 de #1011 (2026-11-15) ──────────────────────────────────────────────────────────────────────────────
+
+def test_s185_historia_cargando_reintento_y_mirova_desde(tmp_path):
+    cuerpo = """
+const d = DATOS; const out = {};
+allData = { X: { mirovaRecords: [{ datetime_utc: "2026-11-01 00:00" }] }, Z: { mirovaRecords: [{ datetime_utc: "2026-11-05 00:00" }] } };
+let resolver; FETCH = () => new Promise(r => { resolver = r; });
+const h = mk("div"); armarEvolucion(h, V11, d, 5, {});
+out.cargando = titulos(h);                       // mientras baja: sin «datos desde» (no se sabe dónde empiezan)
+resolver(null); await espera(); await espera();
+out.fallo = [_historiaEvol.X.estado, titulos(h)[1]];
+const n0 = PEDIDOS.length; armarEvolucion(h, V11, d, 5, {}); out.sinReintento = PEDIDOS.length - n0;   // antes del minuto
+_historiaEvol.X.reintentarMs = 0; FETCH = () => Promise.resolve({ records: d.records });
+armarEvolucion(h, V11, d, 5, {}); out.reintento = PEDIDOS.length - n0;
+await espera(); await espera(); out.lista = [_historiaEvol.X.estado, titulos(h)];
+console.log(JSON.stringify(out));
+"""
+    o = _arnes(tmp_path, cuerpo, _datos_d())
+    assert not any("datos desde" in t for t in o["cargando"]), o["cargando"]
+    assert "MIROVA desde el 2026-11-01" in o["cargando"][1], o["cargando"]
+    assert o["fallo"][0] == "fallo" and "datos desde" not in o["fallo"][1] and "no se pudo" in o["fallo"][1], o["fallo"]
+    assert o["sinReintento"] == 0 and o["reintento"] == 1, o
+    assert o["lista"][0] == "lista" and "datos desde el 2026-11-10" in o["lista"][1][1], o["lista"]
+
+
+def test_s185_serie_gris_con_clave_estable(tmp_path):
+    cuerpo = """
+const d = DATOS; const out = {}; currentVolcano = V34;
+const h = mk("div"); armarEvolucion(h, V34, d, 5, {});
+const gris = k => charts[k].data.datasets.find(x => x.fueraCrater);
+const i = charts["evol-1"].data.datasets.indexOf(gris("evol-1"));
+charts["evol-1"].options.plugins.legend.onClick({}, { text: gris("evol-1").label, datasetIndex: i }, { chart: charts["evol-1"] });
+out.antes = ["evol-0", "evol-1"].map(k => gris(k).hidden);
+includeFarDistance = true; armarEvolucion(h, V34, d, 5, {});
+out.despues = [gris("evol-1").label, gris("evol-1").hidden];
+includeFarDistance = false;
+console.log(JSON.stringify(out));
+"""
+    o = _arnes(tmp_path, cuerpo, _datos_d())
+    assert o["antes"] == [True, True], o
+    assert o["despues"] == ["Fuera del cráter (contada con «Incluir lejanas»)", True], o
+
+
+def test_s185_una_sola_cadena_de_distancia():
+    src = INDEX.read_text(encoding="utf-8")
+    assert "const dist = distanciaDePasada(r) ?? r.vent_hotspot_dist_km;" in _fuente(src, "renderDetail")
+    assert "const honestDist = (r) => distanciaDePasada(r);" in src
+    # fuera de distanciaDePasada no queda ninguna copia de la cadena
+    sin_funcion = src.replace(_fuente(src, "distanciaDePasada"), "")
+    assert "?? r.hotspot_dist_km ?? r.final_hotspot_dist_km" not in sin_funcion
+    assert not re.search(r"\?\?\s*r\.hotspot_dist_km\s*\n\s*\?\?\s*r\.final_hotspot_dist_km", sin_funcion)
