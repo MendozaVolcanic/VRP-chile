@@ -569,6 +569,19 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 12:47 UTC (S185): #1016 y #1017 abiertos; fidelidad de la vía auditada y verificada; contexto en 61 %, se cierra
+- **#1016** (rama `claude/s185-vigilancia-plazo-nulo`, worktree `D:\vrp-trabajo\wt_s185_vigil_pr`): vigilancias de las guardias, plazo por instante y `nulo.ventana_efectiva`. Sin cambio de veredicto. 19 pruebas (17 fallan por aserción contra el original), 13 de 13 mutaciones, 145 pruebas locales. Verificador Opus en dos vueltas: CONFIRMADO. Espera CI y «mergea #1016».
+- **#1017** (rama `claude/s185-auditoria-etiquetas`, worktree `D:\vrp-trabajo\wt_s185_audit_a`): el auto-audit nombra a la vía como detector vigente y llena `magnitud_ratio_by_vol/npix`. Sin cambio de veredicto. 133 pruebas `test_auto_audit_*`. Verificador Opus: CONFIRMADO. Espera CI y «mergea #1017».
+- **Parche B (guard A119 para todo VIIRS), sin PR, decisión de Nicolás:** `D:\vrp-trabajo\temporales\s185_auditfix\B.patch`. Láscar V375 10-01 pasa de flag a «informado aparte» y el veredicto de la semana, de FUERA_DE_BANDA a VERDE. El verificador no encontró pérdida escondida (el mecanismo es A119); marca además 2 entradas de Chillán ya publicadas.
+- **Fidelidad de la vía, verificada (trabajador Opus y verificador Sonnet):**
+  - VIIRS: el detector y el VRP son iguales al `.m` línea por línea. Divergencias sin documentar (ni catálogo ni ficha): el corte de 5 km al centro (VIIRS 375 y MODIS; de `probe_v375.py` y `probe_n.py`); el mínimo de 100 píxeles y el recorte de 45 km; la fila 0 al norte (−0,38 % de VRP en el ejemplo de OSF); la caja `sens` de Tupungatito; el escalón de cenit sobre 50° de MIROVA, que la vía no reproduce. `D:\vrp-trabajo\temporales\s185_fid_viirs\` y `_fid_viirs_verif\`.
+  - MODIS: usa K1 −0,7 y piso dNTI 0,02 del `.m` de VIIRS 750, fijos en `detectar_mirova` l. 439, en vez de −0,8 y 0,01 de la Tabla 1. No está documentado. Además, los descartes de cobertura (caso: Villarrica MODIS_AQUA 2026-11-04 07:10 en la guardia y no en producción), la posición y distancia que difieren de MIROVA en más de 1 km en 51 de 472, y 5 pasadas de crepúsculo con umbrales diurnos. `D:\vrp-trabajo\temporales\s185_fid_modis\` y `_fid_modis_verif\`.
+- **MOD-E** ya estaba hecho desde S162; reproducido idéntico; no conviene tocar producción. Corregido en el programa §12.9 (`abb5f787b`).
+- **Documentos contra producción, verificado:** `CLAUDE.md` (VIIRS = K; historia con K; D34), `README.md` (no menciona la vía), `MISSION.md` l. 280, la ficha SDA («Funcionamiento» describe K; la nota v1.18 contradice) y las marcas «PROPUESTA» ya mergeadas. Queda como tarjeta propuesta «Documentos al día con la vía (CLAUDE, README, ficha)» (task_875e6dfd); la app no dejó iniciarla desde un turno de agente.
+- **#1011 (gráficos):** revisión independiente enviada a su sesión. Está en conflicto por la ficha (pasa a v1.31); el color no se corta a 5 km como MIROVA (decide Nicolás).
+- **#1014** (de la sesión de la historia): Pages excluye `data/historia_34`; va antes de aplicar #1012.
+- Sesiones vivas: L1B (prepara el PR de un workflow de descarga) y paper y mazos.
+
 ### 2026-11-15 12:08 UTC (S185): resultados verificados de la segunda tanda; dos sesiones lanzadas; pedidos de Nicolás
 Nicolás: «si necesitas iniciar sesiones paralelas puedes hacerlo», «descárgalo desde un workflow por mientras» (L1B) y «recuerda mantener el ppt y el paper al día; si es necesario puedes hacerlo en otra sesión».
 - **Verificados (trabajador más verificador Opus limpio):**
