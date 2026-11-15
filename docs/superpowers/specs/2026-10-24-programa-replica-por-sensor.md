@@ -603,8 +603,13 @@ porque Suomi NPP dejó de producir records (cese informado en el issue #943).
 3. **Plazos de VIIRS 750 y 375:** siguen solos con las guardias diarias.
 4. **Fase 5:**
    - V750-E, rama diurna: depende de D-10 (#813, decisión de Nicolás); 3 protegidas diurnas de Chillán sin record.
-   - V375-F, Chillán sobre 3 MW (port 0,939, n 6): sin empezar.
-   - MOD-E, bow tie de MODIS (D28): ablación local, sin empezar; no cambia producción.
+   - V375-F, Chillán sobre 3 MW (port 0,939, n 6): ⚠️ **S185, 2026-11-15 (A113): medido y verificado**, sin
+     déficit de la vía (razón 0,984, n 69 con la tabla sola; K 0,502). Queda una cola baja (3 de 69 bajo 0,7) ligada
+     al lado este del barrido (SOSPECHA; se cierra con L1B). Texto original: «sin empezar».
+   - MOD-E, bow tie de MODIS (D28): ⚠️ **S185 (A113): era falso que estuviera sin empezar**; está hecho desde S162
+     (`experiments/_s162_modis_bowtie/`, con verificador) y S185 lo reprodujo idéntico (403 de 403 pasadas). Las 11
+     protegidas siguen publicando; el efecto cae sólo sobre 50° de cenit; no conviene tocar producción. Texto
+     original: «ablación local, sin empezar; no cambia producción».
    - V750-D: subsumido, porque V750-A (la vía de VIIRS 750) se adoptó.
 5. **Regla de posición del record** (decisión de Nicolás del 2026-10-27: medir radiante, cercano y pico como brazos):
    la bitácora no registra una decisión final después de las lecturas de fase 4 (SIN DATO). Antes de llevarla a
