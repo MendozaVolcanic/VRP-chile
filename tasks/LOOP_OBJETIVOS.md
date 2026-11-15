@@ -569,6 +569,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 12:08 UTC (S185): resultados verificados de la segunda tanda; dos sesiones lanzadas; pedidos de Nicolás
+Nicolás: «si necesitas iniciar sesiones paralelas puedes hacerlo», «descárgalo desde un workflow por mientras» (L1B) y «recuerda mantener el ppt y el paper al día; si es necesario puedes hacerlo en otra sesión».
+- **Verificados (trabajador más verificador Opus limpio):**
+  - Cobertura vía contra K, 2026-03-01 a 11-10: 28.468 pares, 596 pasadas sólo en K (descarte de borde de la vía), 0 con alerta de MIROVA. El corte «píxel más cercano a más de 5 km» (`pipeline/mirova_v750_codigo.py` l. 804 a 808, VIIRS 375 y MODIS, no VIIRS 750) **no viene del `.m` de MIROVA** (sale de `probe_n.py` y `probe_v375.py`): divergencia sin costo medido hoy.
+  - Costura de gránulo: no unimos gránulos; las 2 alertas perdidas en 8,3 meses (Villarrica MODIS 09-25, 0,9 MW; PCC V750 08-22, 0,65 MW) son del detector sobre la escena válida, no de la costura.
+  - Las 6 de Tupungatito V750: margen NTI 0,725 a 0,930; MIROVA publicó con un archivo anterior al L1B estándar; celda vecina en 5 de 6; ROI, K1, dNTI y fondo descartados. Cerrar exige L1B.
+  - Cola baja de V375-F: no es cúmulo, fondo, saturación ni pasada distinta; el lado este del barrido es real con cortes redondos (p 0,013; 3 bajas por azar p 0,021) y aparece débil en Láscar fuera de muestra.
+  - Falsas: Chaitén V375 11-10 y Láscar MODIS 11-08 son (b); la subestimación de Láscar MODIS es de 3 casos (mediana desde marzo 0,996, n 79); Tupungatito V750 07-31 es (c) plausible.
+  - Auditoría anticipada: 1 flag (Láscar V375 10-01) y 4 aparte, mismo mecanismo A119; el guard sólo cubre records de Suomi NPP y el defecto también afecta NOAA-20 y NOAA-21 (CONFIRMADO, n chico).
+  - Etiquetas «K» del auto-audit: texto viejo con números de la vía; `magnitud_ratio_by_vol/npix` de la raíz vacíos. No deciden flags.
+  - Unión histórica del lunes: riesgo bajo (801 s contra 1.500 s; el issue se abre por `steps.union.outcome`).
+  - TIF de MIROVA: siguen congelados desde el 2026-09-22; el poller vive y guarda PNG.
+  - Tablero: el modal «Acerca de» de `index.html` (l. 542 a 553) muestra métricas de julio (C0) y el algoritmo anterior; publicado hoy. Cifras vigentes de la vía (`comparacion_via_k.json`, tabla sola, por pasada): MODIS 0,972, V375 0,981, V750 0,939. Arreglo toca `frontend/`: espera tag y sí de Nicolás.
+  - Revisión de #1012 (tanda 1 de los 34): integridad, cobertura y aplicador CONFIRMADOS; defecto ALTO: Pages copiaba `data/historia_34`. La sesión de la historia lo arregló en **#1014**; #1012 no se aplica antes.
+- **Borradores sin PR:** `D:\vrp-trabajo\temporales\s185_vigil\borrador.patch` (plazo por instante y ventana del nulo; en verificación) y `D:\vrp-trabajo\temporales\s185_auditfix\` (etiquetas y guard A119; en curso).
+- **Sesiones:** «L1B: Tupungatito V750 y cola baja de Chillán V375» (`local_797fa5af`): sin `EARTHDATA_TOKEN` local; el NRT de LANCE ya no existe para las 6 pasadas (comparación NRT contra estándar SIN DATO por retención); prepara un PR con `probe-s185-l1b.yml` (espera «mergea #N»). «Paper y mazos al día (S182 a S185)» (`local_fe610939`): números, `REVISION_S185.md` del paper sin tocar la prosa, y láminas.
+- En curso: MOD-E, fidelidad de la vía VIIRS y MODIS, documentos contra producción, revisión de #1011.
+
 ### 2026-11-15 11:24 UTC (S185): Nicolás: «si puedes lanzar más en esta ocasión, hazlo»; segunda tanda (hasta 11 agentes a la vez)
 El tope de 5 agentes era regla del encargo (lecciones S169 y S175); Nicolás lo levantó para esta ventana. Todo de solo lectura en `D:\vrp-trabajo\temporales\s185_*`.
 - **Regla de posición: VERIFICADO.** Producción usa «radiante» en los tres sensores (`pipeline/mirova_v750_codigo.py` l. 670 a 742, sin parámetro por sensor). «Cercano decide» (Nicolás, 2026-10-30) tenía alcance sólo en la sombra de V375-E; no hay decisión explícita posterior: el cruce lo resolvió la coordinadora y el merge de #974. Medido en producción (2026-03-01 a 11-15, tabla sola): clase igual a la etiqueta de MIROVA en radiante 98,7 %, pico 98,7 % (misma clase en 3.656 de 3.656) y cercano 93,6 % (rescata 9 de 10 `pos` y publica 114 `far_ref` más). Publicamos 16 de 425 `far_ref`. La comparación de distancias con `Distancia_km` NO sirve para elegir: MIROVA mide al píxel alertado más lejano desde el centro de su grilla (verificador, `docs/audit_s139/DISTANCIA_MIROVA_VS_TIF.md`). `D:\vrp-trabajo\temporales\s185_posicion\`, `_posicion_verif\`, `_posicion_medida\`, `_posicion_medida_verif\`.
