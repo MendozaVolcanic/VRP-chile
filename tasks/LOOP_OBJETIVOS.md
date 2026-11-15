@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 13:09 UTC (S186): arranque verificado; #1018 rojo por colisión de módulo; decisiones b.1 a b.8 llevadas a Nicolás
+- Disco C: 27 GB, D: 31 GB. `chequeo_post_nrt.py origin/main`: OK. Plazo MODIS 22 de 29 (`guardia_modis_latest.json`, VERDE, `cumplida: false`).
+- Issues de alerta abiertos: #1004 (sombra de los 34) y #973 (auto-audit del 11-09). La sombra del 11-15 todavía no corre: el cron `7 13` lo lanza GitHub entre las 18 y las 20 UTC. Las fallas del 11-13 (`Region: us-west-2`, Lonquimay y Olca-Paruma) y del 11-14 (Calbuco y Callaqui) son el `FileExistsError` que arregló #1007 (merge 2026-11-14 19:34 UTC, después de la corrida de las 18:42). La del 11-15 es la primera con el arreglo. La auditoría semanal del 11-16 corre el lunes; aún no hay con qué comparar.
+- PR abiertos: #1011, #1012, #1013, #1014, #1015, #1016 y #1017, todos CLEAN con CI verde; ninguno mergeado.
+- **#1018 (probe L1B) con CI ROJO** (run 43716403720: 15 failed, 3818 passed). Causa CONFIRMADA: `tests/test_probe_etapas_s135.py` y dos pruebas de S141 importan `analisis` de `experiments/_s135_probe_etapas/` antes; el `import analisis` de #1018 recibe ese módulo desde `sys.modules`. Aislado pasa; en la suite no. Diagnóstico enviado a su sesión (`local_797fa5af`), que es la dueña del PR.
+- Paper y mazos (`local_fe610939`): terminó. Paper en `2841828` (origin): 7 de 700 números cambian, todos de PCC V750 (caja del cráter); revisión `paper_vrp_chile\revisiones\REVISION_S185.md` (Q1 a Q13). Mazos AT8.7 y AT3.6 actualizados con respaldo en `_previo_S185\`; inventario en `ACTUALIZACION_S185.md`. Verificador Sonnet sin errores; su segunda ronda de correcciones no volvió a pasar por el verificador.
+
 ### 2026-11-15 12:50 UTC (S185): cierre; se retoma con tasks/BLOQUE_ARRANQUE_S186.md
 - Cierre por contexto (61 %). Estado fijado con trabajo en curso: sesiones «L1B» (`local_797fa5af`, PR de workflow de descarga en preparación) y «Paper y mazos» (`local_fe610939`); CI de #1016 y #1017 pendiente; sombra de los 34 por cron a las 13:07 UTC.
 - Esperan «mergea #N»: #1013 (CI verde), #1016, #1017, #1014 y luego #1012 (otra sesión). Decisiones con recomendación en el bloque S186 §b.
