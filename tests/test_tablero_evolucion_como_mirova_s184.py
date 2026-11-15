@@ -42,7 +42,7 @@ FUNCIONES = ["parseUtcMs", "_havKm", "f5CoreMagnitude", "mirovaEqVrp", "mirovaEq
              "isCirrusArtifact", "isDiffuseFieldArtifact", "isThermalArtifact", "esAnclaHonesta", "sensorGroup",
              "getLevel", "rotuloVentanaEvol", "ventanasEvol", "distanciaDePasada", "pasadasEvol", "todasPasadasEvol",
              "escenaSinDato", "isValidDetection", "esOblicuaEvol", "textoCenitEvol", "clasesGraficoEvol",
-             "ultimaPasadaEvol", "haceEvol", "textoUltimaPasadaEvol", "marcasEvol", "tMinRecords",
+             "ultimaPasadaEvol", "vrpPublicadoEvol", "ultimaConCalorEvol", "mwEvol", "haceEvol", "textoUltimaPasadaEvol", "marcasEvol", "tMinRecords",
              "unirHistoriaEvol", "enVentanaEvol", "puntosMirovaEvol", "clasesEscalaEvol", "ejeLogEvol",
              "ejeDistEvol", "ejeXEvol", "rotuloFueraEvol", "inicioDatosEvol", "datosEvol", "datasetsEvol",
              "fechaUtcEvol", "inicioMirovaEvol", "historiaEvol", "armarEvolucion", "mirovaEsDia", "mirovaPointStyle", "mirovaPointFill",
@@ -51,7 +51,7 @@ CONSTANTES = ["USE_F5_CORE", "F5_R_CORE_KM", "F5_BT_EXT_K", "LEVELS", "EVOL_DIAS
               "EVOL_LOG_MAX_MW", "EVOL_SERIES", "MIROVA_SIN_GEO_TXT", "MIROVA_DIA_TXT", "MIROVA_DIA_RAYOS", "_iconosSol",
               "_historiaEvol", "_evolOcultas", "EVOL_MODOS", "palitosEvolPlugin", "lineasEvolPlugin", "EVOL_CENIT_OBLICUO",
               "NOTA_CENIT_EVOL", "EVOL_EXTREMO_MW", "EVOL_COLOR_LINEA", "EVOL_LIMITE_DETECCION_MW", "EVOL_COLOR_MARCA",
-              "ETIQUETA_SENSOR"]
+              "ETIQUETA_SENSOR", "EVOL_MISMA_PASADA_MS", "EVOL_PRIORIDAD_ESTADO", "EVOL_FILA_MARCA"]
 T_20261001_0500Z = int(datetime(2026, 10, 1, 5, tzinfo=timezone.utc).timestamp() * 1000)
 # La expresión de eqVrp de renderDetail, tal como está en la página (test_tablero_por_sensor_s180 vigila que sea una).
 EQVRP = "isThermalArtifact(rec, innerKm) ? 0 : mirovaEqVrpDisplay(rec, innerKm, includeFarDistance)"
@@ -440,7 +440,7 @@ console.log(JSON.stringify({
 ARNES = """
 const AHORA = Date.parse("2026-11-14T12:00:00Z");
 Date.now = () => AHORA;
-let charts = {}, allData = {}, includeFarDistance = false, detailSensor = "COMB", evolModo = "log";
+let charts = {}, allData = {}, includeFarDistance = false, detailSensor = "COMB", evolModo = "log", evolCenitAbierto = false;
 let _fullHistoryLoaded = false; const BASE_PATH = "";
 const sensorVisible = { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: true };
 const sessionStorage = { setItem() {} };
@@ -605,7 +605,7 @@ console.log(JSON.stringify({
     assert o["u3"] == ["nada", 0]
     assert o["t1"]["clave"] == "nd" and "anomalía fuera del cráter, no publicada" in o["t1"]["texto"], o["t1"]
     assert "cenit 50°" in o["t1"]["texto"] and "(oblicua)" in o["t1"]["texto"] and "hace 4 días" in o["t1"]["texto"]
-    assert o["t2"]["clave"] == "low" and "Bajo, 2.00 MW" in o["t2"]["texto"], o["t2"]
+    assert o["t2"]["clave"] == "low" and "Bajo, 2,00 MW" in o["t2"]["texto"], o["t2"]
     assert o["t3"]["clave"] == "nd" and "sin anomalía" in o["t3"]["texto"] and "cenit 61° (oblicua)" in o["t3"]["texto"]
     assert o["t4"]["clave"] == "nd" and "sin pasadas medidas" in o["t4"]["texto"]
     assert o["t5"]["clave"] == "mod" and "VIIRS 375" in o["t5"]["texto"] and "(oblicua)" not in o["t5"]["texto"]
@@ -688,7 +688,7 @@ console.log(JSON.stringify(out));
     # combinado: sin línea de límite (cada sensor tiene la suya); clases con Extremo; marcas de las dos pasadas sin palito
     assert o["comb"] == [None, 6, 2], o["comb"]
     assert o["v375"] == 0.01 and o["dist"] == [None, None]
-    assert o["tooltip"][-1] == "  cenit 47°, azimut 101° · mirada oblicua: el VRP puede salir más bajo", o["tooltip"]
+    assert o["tooltip"][-1] == "  cenit 47°, azimut 101° · mirada oblicua: una fuente chica puede no verse o verse menor", o["tooltip"]
 
 
 def test_tabla_de_pasadas_con_cenit():
@@ -759,3 +759,77 @@ def test_s185_una_sola_cadena_de_distancia():
     sin_funcion = src.replace(_fuente(src, "distanciaDePasada"), "")
     assert "?? r.hotspot_dist_km ?? r.final_hotspot_dist_km" not in sin_funcion
     assert not re.search(r"\?\?\s*r\.hotspot_dist_km\s*\n\s*\?\?\s*r\.final_hotspot_dist_km", sin_funcion)
+
+
+# ── Verificador de la tanda 2 (2026-11-15): empates de hora, última con calor, límites, dibujo de rayas y límite ──────
+
+def test_ultima_pasada_empates_y_ultima_con_calor(tmp_path):
+    cuerpo = """
+const P = (t, estado, y, grupo, dt) => ({ t, dt: dt || ("D" + t), estado, y, grupo, sensor: grupo, zen: 30 });
+const M = 60000, H = 60 * M, A = 100 * H;
+// misma hora: la de 375 vio 1,857 MW en el cráter y la de 750 nada; el archivo trae primero la 375
+const empate = [P(10 * H, "crater", 1.857, "VIIRS375"), P(10 * H, "nada", undefined, "VIIRS750")];
+// dos gránulos de la misma pasada a 6 min: el primero con calor, el segundo sin
+const granulos = [P(10 * H, "crater", 3, "VIIRS375"), P(10 * H + 6 * M, "nada", undefined, "VIIRS375")];
+// a 50 min ya es otra pasada: manda la última aunque no vea nada
+const otra = [P(10 * H, "crater", 3, "VIIRS375"), P(10 * H + 50 * M, "nada", undefined, "MODIS")];
+const fuera = [P(10 * H, "fuera", 9, "VIIRS750"), P(10 * H, "crater", 0.5, "VIIRS375")];
+const u = (l, f) => { const x = ultimaPasadaEvol(l, f); return [x.p.grupo, x.p.estado, x.vrp]; };
+const conCalor = ultimaConCalorEvol(otra, false);
+console.log(JSON.stringify({ empate: u(empate, false), empateInv: u(empate.slice().reverse(), false), granulos: u(granulos, false),
+  otra: u(otra, false), fueraSolo: u(fuera, false), fueraLejanas: u(fuera, true),
+  conCalor: [conCalor.p.grupo, conCalor.vrp], sinCalor: ultimaConCalorEvol([P(1, "nada")], false),
+  texto: textoUltimaPasadaEvol(ultimaPasadaEvol(otra, false), A, false, conCalor).texto,
+  textoConCalorIgual: textoUltimaPasadaEvol(ultimaPasadaEvol(granulos, false), A, false, ultimaConCalorEvol(granulos, false)).texto,
+  extremo: textoUltimaPasadaEvol({ p: P(1, "crater", 12000, "MODIS"), vrp: 12000 }, A, false).texto }));
+"""
+    o = _node(tmp_path, cuerpo)
+    assert o["empate"] == ["VIIRS375", "crater", 1.857] and o["empateInv"] == ["VIIRS375", "crater", 1.857], o
+    assert o["granulos"] == ["VIIRS375", "crater", 3] and o["otra"] == ["MODIS", "nada", 0], o
+    # con «Solo cráter» manda el cráter (0,5 publicado); con «Incluir lejanas», el de fuera (9 MW)
+    assert o["fueraSolo"] == ["VIIRS375", "crater", 0.5] and o["fueraLejanas"] == ["VIIRS750", "fuera", 9], o
+    assert o["conCalor"] == ["VIIRS375", 3] and o["sinCalor"] is None
+    assert "sin anomalía" in o["texto"] and ". Última con calor publicado: D36000000 UTC" in o["texto"] and "Bajo, 3,00 MW" in o["texto"], o["texto"]
+    assert "Última con calor" not in o["textoConCalorIgual"], o["textoConCalorIgual"]
+    assert "Muy Alto (Extremo en la escala de MIROVA), 12000,00 MW" in o["extremo"], o["extremo"]
+
+
+def test_limites_por_sensor_en_la_pagina(tmp_path):
+    cuerpo = """
+const d = DATOS; const out = {}; currentVolcano = V34; const h = mk("div");
+for (const s of ["MODIS", "VIIRS750", "VIIRS375", "COMB"]) { detailSensor = s; armarEvolucion(h, V34, d, 5, {});
+  out[s] = charts["evol-0"].options.plugins.lineasEvol.limiteMw ?? null; }
+detailSensor = "COMB"; console.log(JSON.stringify(out));
+"""
+    o = _arnes(tmp_path, cuerpo, _datos_d())
+    assert o == {"MODIS": 1, "VIIRS750": 0.1, "VIIRS375": 0.01, "COMB": None}, o
+
+
+def test_dibujo_de_rayas_y_limite(tmp_path):
+    cuerpo = """
+const llamadas = [];
+const ctx = { save() {}, restore() {}, setLineDash() {}, beginPath() {}, moveTo() {}, lineTo() {}, stroke() {},
+  fillRect(x, y, w, h) { llamadas.push(["rect", this.fillStyle, Math.round(x), y, h]); },
+  fillText(t, x, y) { llamadas.push(["text", t]); } };
+const esc = (min, max, px0, px1) => ({ min, max, type: "linear", getPixelForValue: v => px0 + (v - min) / (max - min) * (px1 - px0) });
+const chart = { ctx, chartArea: { left: 0, right: 100, top: 10, bottom: 110 }, scales: { x: esc(0, 100, 0, 100), y: esc(0, 10, 110, 10) } };
+lineasEvolPlugin.beforeDatasetsDraw(chart, {}, { marcas: [{ t: 10, estado: "sin_datos" }, { t: 20, estado: "reflejo" },
+  { t: 30, estado: "nada" }, { t: 40, estado: "no_publicada" }, { t: 500, estado: "nada" }], limiteMw: 0.5 });
+console.log(JSON.stringify(llamadas));
+"""
+    o = _node(tmp_path, cuerpo)
+    rects = [c for c in o if c[0] == "rect"]
+    # fila de arriba (y = top) lo que no se pudo medir; fila de abajo (y = top + 6) lo medido sin palito; la de t=500 cae fuera
+    assert rects == [["rect", "#ffffff", 9, 10, 5], ["rect", "#ffc400", 19, 10, 5],
+                     ["rect", "rgba(150,160,175,0.6)", 29, 16, 5], ["rect", "#5dade2", 39, 16, 5]], rects
+    assert ["text", "límite de detección ~0,5 MW (MIROVA)"] in o, o
+
+
+def test_nota_del_cenit_sin_generalizar():
+    src = INDEX.read_text(encoding="utf-8")
+    nota = "".join(re.findall(r'"([^"]*)"', _const(src, "NOTA_CENIT_EVOL")))   # el texto unido, sin los cortes de línea
+    for frase in ["gradual", "56 %", "en Isluga se mantiene", "no baja ni la fracción ni el VRP", "área del píxel en el nadir",
+                  "no está medido aparte"]:
+        assert frase in nota, frase
+    assert "Isluga, Lastarria y Planchón-Peteroa caen igual" not in nota
+    assert "VRP puede salir más bajo" not in src and "VRP tiende a salir más bajo" not in src
