@@ -551,3 +551,63 @@ en Tupungatito, el nivel del fondo de anillo de K (CONFIRMADA); en Chillán, pie
    el merge de #939 caiga antes de la primera corrida con datos.
 4. **No se hace la ablación por pieza en VIIRS 375.** La vía ya corrige el déficit (Tupungatito 1,01 / 1,02) y la
    adopción la decide la sombra de V375-E. Aislar la pieza no mueve ninguna decisión.
+
+### 12.9 Estado al 2026-11-15: fase 4 cumplida en los tres sensores; quedan los plazos de guardia y la fase 5 (S185)
+
+Agregado por la coordinadora S185 a pedido de Nicolás («Sí, agrégala», 2026-11-15). Actualiza la §12.8 sin
+reemplazarla; donde la contradice, manda esta. Cada número sale del archivo que se cita, leído en `origin/main` el
+2026-11-15.
+
+**PD4 (adopción) está cumplida en los tres sensores.** La vía «código MIROVA» es la detección de producción:
+
+| sensor | encendido (primer record de la vía) | guardia K y vigilancia | protegidas vistas | veredicto | vence |
+|---|---|---|---|---|---|
+| MODIS | 2026-11-02 20:11:43 UTC | `guardia_k_modis`, `scripts/vigilancia_guardia_modis.py` | 22 de 29 | VERDE | 2027-03-02 |
+| VIIRS 750 | 2026-11-11 13:39:30 UTC | `guardia_k_viirs`, `scripts/vigilancia_guardia_viirs.py` | 11 de 29 | VERDE | 2027-03-11 |
+| VIIRS 375 | 2026-11-11 13:45:35 UTC | `guardia_k_viirs`, `scripts/vigilancia_guardia_viirs.py` | 8 de 29 | VERDE | 2027-03-11 |
+
+Fuente: `data/audit_continuous/guardia_{modis,v750,v375}_latest.json` (generados entre 02:07 y 02:22 UTC del
+2026-11-15), campo `duracion`. En los tres: 0 candidatas a reversión, 0 fuera de plazo y sin disparo de sobrepublicación
+ni de «muy bajo». El plazo de cada sensor se cumple con 29 protegidas vistas o en la fecha de vencimiento, lo que llegue
+antes; al cumplirse, la coordinadora prepara el informe de cierre para Nicolás. VIIRS 375 junta protegidas más lento
+porque Suomi NPP dejó de producir records (cese informado en el issue #943).
+
+**Hecho desde la §12.8** (detalle en la bitácora de `tasks/LOOP_OBJETIVOS.md` §6):
+- Encendido de la vía en VIIRS 375 y VIIRS 750 (S180), con la regla de reversión pre-autorizada sellada antes del merge.
+- La historia publicada de los 11 Tier A se reemplazó con la vía (S181, con A45 de Nicolás); el tablero publica una
+  sola serie por sensor.
+- Cordón Caulle VIIRS 750 con la caja del cráter en vez de `def` (#999, S184): 2.997 de 2.997 pasadas desde el
+  2025-02-15 con `crater` (`experiments/_s184_pcc_crater_aplicar/chequeo_caja.py`). Cierra el aviso del cambio 1 de la
+  §12.8 (en PCC la ROI `def` dejaba muda la vía).
+- Descargas: la falla `FileExistsError` en runners de AWS us-west-2 (earthaccess 0.17.0 baja por S3) se arregló
+  forzando HTTPS (#1007, S184); la sombra código MIROVA volvió a verde el 2026-11-14 (issue #998 cerrado).
+- La guardia K de VIIRS reproduce a K de producción antes del encendido: 505 de 505 pasadas del 2026-11-03 al 11-10,
+  0 distintas en lo que publica el tablero (S185, investigador y verificador limpios; `D:\vrp-trabajo\temporales\
+  s185_b3\INFORME.md`). Defecto de alcance sin efecto en el resultado: el nulo de la vigilancia declara 14 días y mide
+  unos 8,4 (la guardia empieza el 2026-11-03).
+- El banco de paridad y la auditoría semanal dejan de contar como pasada «sin anomalía» una escena que la vía no pudo
+  medir (#1010, S185; ficha v1.30). Las vigilancias de reversión no cambian.
+
+**Pendientes de la §12.8, punto 3:**
+- (a) Filtro cirrus del tablero sobre la vía de MODIS: **hecho** (#944, 2026-11-05).
+- (b) VIIRS 750 en Tupungatito (K dejaba sin publicar 12 de 14 alertas): **SIN VERIFICAR** con la vía; la bitácora no
+  registra una medición después de la adopción. Medirlo con la auditoría o la comparación vía/K por volcán.
+- (c) VPR939-03, el lector de la sombra de V750-A separa por ROI y por `codigo_sha`: **hecho** (#945 y #947).
+
+**Lo que queda, en orden:**
+1. **Cierre del plazo de MODIS.** Faltan 7 protegidas; al ritmo de la última semana se cumpliría hacia el 17 o 18 de
+   noviembre (SOSPECHA: depende de la actividad de Chillán, que aporta casi todas). Al cumplirse: informe de cierre con
+   la referencia fresca de Mirova-v1 (tabla consolidada + OCR, como el workflow) y decisión de Nicolás.
+2. **Auditoría semanal del 2026-11-16 (#973):** la primera que juzga la vía en los tres sensores. Sus `n_neg_limpio`
+   bajan respecto del 11-09 por #1010, no por el detector (A104). Cada flag se clasifica (A54) antes de proponer nada.
+3. **Plazos de VIIRS 750 y 375:** siguen solos con las guardias diarias.
+4. **Fase 5:**
+   - V750-E, rama diurna: depende de D-10 (#813, decisión de Nicolás); 3 protegidas diurnas de Chillán sin record.
+   - V375-F, Chillán sobre 3 MW (port 0,939, n 6): sin empezar.
+   - MOD-E, bow tie de MODIS (D28): ablación local, sin empezar; no cambia producción.
+   - V750-D: subsumido, porque V750-A (la vía de VIIRS 750) se adoptó.
+5. **Regla de posición del record** (decisión de Nicolás del 2026-10-27: medir radiante, cercano y pico como brazos):
+   la bitácora no registra una decisión final después de las lecturas de fase 4 (SIN DATO). Antes de llevarla a
+   Nicolás, reunir lo que dijeron los tres brazos en V750-B, V375-E y MOD-D.
+6. **Los 34 volcanes fuera del NRT:** la tanda de la historia con la vía (run 43633062404, otra sesión) iba en 136 de
+   139 trozos sin fallas el 2026-11-15; publicar sigue el plan de #1000.
