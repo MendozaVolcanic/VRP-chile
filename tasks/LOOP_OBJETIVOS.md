@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 18:36 UTC (S186): Nicolás: «Mergea #1021»; modal publicado; NRT programado verde con el token nuevo
+- **#1021** integrado con merge commit `e2126d441` (head `8031bacf0` verificado con `--match-head-commit`). Tests y Deploy GitHub Pages de main verdes (runs 43746502577 y 43746502644). En Pages, el modal «Acerca de» carga la auditoría del 2026-11-09 (MODIS con la vía, VIIRS con K y la nota de ventana). Worktree `D:\vrp-trabajo\wt_s186_modal` quitado tras revisar list_sessions (ninguna sesión lo usaba); el tag `pre-s186-modal` queda.
+- **Token nuevo en producción**: el NRT programado de 16:48 UTC (run 43737544218) salió verde y subió datos de los 11 Tier A (commits 16:57 a 17:07 UTC).
+- **Sombra de los 34 (#1004)**: la corrida de hoy (cron 13:07) aún no la entrega GitHub a las 18:36 UTC; las anteriores llegaron entre 18:42 y 20:44 UTC. Es la primera con #1007; #1004 sigue abierto hasta verla verde.
+- Pendientes: sombra de hoy, auditoría del lunes 2026-11-16 (debería salir VERDE con #1020; comparar con `s185_audit_pre`), plazo MODIS 22/29, decisiones b.3, b.5, b.6 y b.8.
+
 ### 2026-11-15 14:56 UTC (S186): #1021 (modal) abierto; resultado del probe L1B
 - **#1021** (rama `claude/s186-modal-acerca`, tag `pre-s186-modal`): el modal lee el desempeño en vivo de `data/audit_continuous/latest.json`. Verificador Sonnet limpio en dos vueltas: fechas, ruta, Pages, HTML e histórico CONFIRMADOS; corregidos «publicó» (el recall cuenta una detección dentro del radio interior del cráter; por pasada además clase cumbre), VERDE y DEGRADADO (DEGRADADO prima), nota de K por ventana y render protegido. G8 remapeado 1600 a 1714 (`isValidDetection`). 46 pruebas de guard y tablero verdes; casos forzados en el navegador sin romper. Espera CI y «mergea #1021».
 - **Probe L1B** (sesión `local_797fa5af`, run 43724596931, 18 de 18 pasadas; la variante lineal reproduce lo publicado 18 de 18; verificador Opus limpio; `D:\vrp-trabajo\temporales\s185_l1b\INFORME.md`):
