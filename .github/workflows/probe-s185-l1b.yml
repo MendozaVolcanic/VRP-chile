@@ -1,6 +1,6 @@
 name: "Probe S185, L1B crudos: Tupungatito V750 (remuestreo y celda) y Nevados de Chillan V375 (energia de I4) (solo lectura)"
 
-# Cierra con datos crudos dos sospechas de la coordinadora S185 (experiments/_s185_l1b/analisis.py trae el porque y las reglas del
+# Cierra con datos crudos dos sospechas de la coordinadora S185 (experiments/_s185_l1b/s185_l1b_analisis.py trae el porque y las reglas del
 # veredicto, escritas antes de ver datos): (1) Tupungatito VIIRS 750, 6 pasadas que MIROVA alerta y la via calla (+4 detectadas de
 # control); (2) Nevados de Chillan VIIRS 375, 3 pasadas bajas del lado este del barrido (+5 controles).
 # Solo lectura: no escribe en data/, no commitea, no hace push, no usa el grupo push-main. Baja cada L1B a un temporal, lo mide y
@@ -55,7 +55,7 @@ jobs:
           VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
         run: |
           set -o pipefail
-          python experiments/_s185_l1b/bajar_y_medir.py --caso ${{ matrix.caso }} --out out \
+          python experiments/_s185_l1b/s185_l1b_bajar_y_medir.py --caso ${{ matrix.caso }} --out out \
             2>&1 | tee out/bajar_y_medir_${{ matrix.caso }}.log
       - name: Subir resultados
         if: always()

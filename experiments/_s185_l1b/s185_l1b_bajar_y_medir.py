@@ -1,7 +1,7 @@
-# FICHA (SDA, CPLT 372): driver de solo lectura. Baja gránulos L1B a un temporal, los mide con analisis.py y los borra.
+# FICHA (SDA, CPLT 372): driver de solo lectura. Baja gránulos L1B a un temporal, los mide con s185_l1b_analisis.py y los borra.
 # No es detección de producción; no escribe en data/, no commitea, no hace push.
 """Uso (desde la raíz del repo, con EARTHDATA_TOKEN en el entorno; lo corre .github/workflows/probe-s185-l1b.yml):
-    python experiments/_s185_l1b/bajar_y_medir.py --caso tup|chi --out out [--tmp DIR] [--solo N]
+    python experiments/_s185_l1b/s185_l1b_bajar_y_medir.py --caso tup|chi --out out [--tmp DIR] [--solo N]
 
 Por cada pasada del manifiesto: busca el gránulo L1B y su GEO en CMR (pipeline.fetch.search_granules, misma ruta que el NRT),
 los baja con download_granules, corre analisis.analizar_tup o analizar_chi, guarda un recorte chico (npz, +-12 km del cráter)
@@ -75,7 +75,7 @@ def main():
         print("EARTHDATA_TOKEN vacio: no se corre (A71)")
         return 2
     from pipeline.fetch import auth
-    import analisis as AN
+    import s185_l1b_analisis as AN
     auth()
     man = [m for m in json.load(open(AQUI / "manifiesto_s185.json", encoding="utf-8")) if m["proyecto"] == a.caso]
     if a.solo:

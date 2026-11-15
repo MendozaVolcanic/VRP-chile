@@ -21,9 +21,9 @@ for p in (ROOT, AQUI):
     sys.path.insert(0, str(p))
 
 from pipeline import mirova_v750_codigo as MV  # noqa: E402
-import analisis as AN  # noqa: E402
-import interpoladores as IP  # noqa: E402
-import bajar_y_medir as BM  # noqa: E402
+import s185_l1b_analisis as AN  # noqa: E402
+import s185_l1b_interpoladores as IP  # noqa: E402
+import s185_l1b_bajar_y_medir as BM  # noqa: E402
 
 MANIFIESTO = json.load(open(AQUI / "manifiesto_s185.json", encoding="utf-8"))
 WORKFLOW = ROOT / ".github" / "workflows" / "probe-s185-l1b.yml"
@@ -314,7 +314,7 @@ def test_sello_del_nombre():
 
 def test_driver_sin_token_no_corre(monkeypatch):
     monkeypatch.delenv("EARTHDATA_TOKEN", raising=False)
-    monkeypatch.setattr(sys, "argv", ["bajar_y_medir.py", "--caso", "tup"])
+    monkeypatch.setattr(sys, "argv", ["s185_l1b_bajar_y_medir.py", "--caso", "tup"])
     assert BM.main() == 2
 
 
@@ -329,7 +329,7 @@ def test_driver_borra_el_temporal_y_sale_2_si_falta_una_pasada(monkeypatch, tmp_
         return None, "sin gránulo de prueba"
     monkeypatch.setattr(BM, "bajar_uno", bajar_falso)
     tmp = tmp_path / "tmp"
-    monkeypatch.setattr(sys, "argv", ["bajar_y_medir.py", "--caso", "chi", "--out", str(tmp_path / "out"), "--tmp", str(tmp), "--solo", "2"])
+    monkeypatch.setattr(sys, "argv", ["s185_l1b_bajar_y_medir.py", "--caso", "chi", "--out", str(tmp_path / "out"), "--tmp", str(tmp), "--solo", "2"])
     assert BM.main() == 2
     assert not (tmp / "chi").exists()                              # el temporal se borra aunque falle
     res = json.load(open(tmp_path / "out" / "chi_resultados.json", encoding="utf-8"))

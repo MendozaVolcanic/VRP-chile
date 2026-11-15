@@ -33,7 +33,7 @@ if str(REPO) not in sys.path:
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pipeline import mirova_v750_codigo as MV  # noqa: E402
-import interpoladores as IP  # noqa: E402
+import s185_l1b_interpoladores as IP  # noqa: E402
 
 VENT_TUP = (-33.389044, -69.826374)   # vent_lat, vent_lon de volcanoes.yaml
 INNER_TUP = 7
