@@ -17,7 +17,8 @@ Repo: https://github.com/MendozaVolcanic/VRP-chile
 > [`../../GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md`](../../GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md).
 > **Número de versión de la ficha: se toma al mergear (Nicolás, S185).** Un PR no escribe la ficha mientras está
 > abierto: su descripción trae el texto de la fila. Al recibir «mergea #N», quien mergea une `origin/main` en la
-> rama, agrega la fila (y la cabecera, si cambia la lógica) con la versión siguiente a la de main y la fecha del
+> rama, agrega la fila del historial y pone la cabecera en esa versión (la anterior pasa a «Versión anterior»; se hace
+> en toda versión, cambie o no la lógica, como v1.28 y v1.30), con la versión siguiente a la de main y la fecha del
 > merge, espera el CI de ese commit y mergea con `--match-head-commit`. Por qué: con la versión al abrir, #999 tuvo
 > que renumerarse dos veces (v1.27 a v1.29) porque #1002, #1005 y #1006 entraron antes.
 
