@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 20:31 UTC (S186): Nicolás: «Formalizar radiante» (b.3); #1022 abierto con CI verde
+- **Decisión b.3**: la regla de posición del record de la vía es «radiante» (centroide del cúmulo 8-conexo de la alertada de mayor M13; `pipeline/mirova_v750_codigo.py::_cumulo_del_mas_radiante`, única para los tres sensores vía `calcular_vrp_granulo`). Evidencia S185: `D:\vrp-trabajo\temporales\s185_posicion_medida\INFORME.md` (acuerdo de clase con MIROVA 98,7 % contra 93,6 % de cercano; cercano +9 pos y +114 far_ref).
+- **#1022** (rama `claude/s186-guard-radiante`, worktree `D:\vrp-trabajo\wt_s186_radiante`, head `9f609ad51`): sólo agrega `tests/test_guard_regla_posicion_radiante_s186.py`. Foco débil en el cráter y cúmulo de 2 px más radiante a 9,75 y 10,5 km: exige `far`, n 2 y centroide 10,125 km. Mutación «cercano»: 3 de 4 fallan por aserción; «pico»: 2 de 4 (el verificador Sonnet encontró en la primera vuelta que «pico» no fallaba; corregido y confirmado en la segunda). CI verde, CLEAN. Espera «mergea #1022».
+- **Texto de la regla**: lo escribe la sesión de documentos (b.5 y b.6, `local_cb1107fe`) en su PR: catálogo D8', ficha, MISSION y CLAUDE.md (commit `febdd0d79` en su rama); falta su verificador.
+
 ### 2026-11-15 20:01 UTC (S186): Nicolás: «continúa con todo lo que puedas»; sombra de los 34 verde con #1007
 - **Sombra de los 34**: la corrida programada de hoy (run 43751792916, creada 19:19 UTC) salió verde, 34 de 34 trabajos, y commiteó la sombra de cada volcán (19:45 a 19:59 UTC). Es la primera con #1007 (HTTPS en us-west-2): la causa de #1004 queda arreglada. #1004 lo cierra solo `nrt-monitor.yml` en su próxima pasada (cada 6 h, minuto 30).
 - **Plazo MODIS**: `data/audit_continuous/guardia_modis_latest.json` de 02:07 UTC dice 22 de 29 protegidas, VERDE, sin reversión. Aún no toca el informe de cierre.
