@@ -4259,7 +4259,7 @@ function textoUltimaPasadaEvol(u, ahoraMs, includeFar) {
   const cen = textoCenitEvol(p.zen, null);
   return { texto: "Última pasada: " + p.dt + " UTC (" + haceEvol(p.t, ahoraMs) + ") · " + (ETIQUETA_SENSOR[p.grupo] || p.sensor) +
                   " · " + estado + (cen ? " · " + cen + (esOblicuaEvol(p.zen) ? " (oblicua)" : "") : ""),
-           clave: u.vrp > 0 ? lv.key : "nd" };
+           clave: lv.key };   // getLevel(0) ya es «nd» (gris)
 }
 // Marcas arriba del gráfico para las pasadas sin palito: se miró y no había nada, anomalía no publicada, escena sin datos,
 // reflejo solar. Así se distingue «tranquilo» de «no se pudo medir».

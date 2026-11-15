@@ -597,7 +597,7 @@ console.log(JSON.stringify({
   t1: textoUltimaPasadaEvol(u1, A, false), t2: textoUltimaPasadaEvol(u2, A, true),
   t3: textoUltimaPasadaEvol(u3, A, false), t4: textoUltimaPasadaEvol(null, A, false),
   t5: textoUltimaPasadaEvol(ultimaPasadaEvol([P(99 * H, "crater", 25, 10)], false), A, false),
-  hace: [haceEvol(A - 5 * 60000, A), haceEvol(A - 6 * H, A), haceEvol(A - 72 * H, A), haceEvol(A + 1000, A)] }));
+  hace: [haceEvol(A - 5 * 60000, A), haceEvol(A - 6 * H, A), haceEvol(A - 72 * H, A), haceEvol(A + 1000, A), haceEvol(A - 30 * H, A)] }));
 """
     o = _node(tmp_path, cuerpo)
     # las escenas sin datos y de reflejo no son «última pasada» (como la tarjeta, S183)
@@ -609,7 +609,7 @@ console.log(JSON.stringify({
     assert o["t3"]["clave"] == "nd" and "sin anomalía" in o["t3"]["texto"] and "cenit 61° (oblicua)" in o["t3"]["texto"]
     assert o["t4"]["clave"] == "nd" and "sin pasadas medidas" in o["t4"]["texto"]
     assert o["t5"]["clave"] == "mod" and "VIIRS 375" in o["t5"]["texto"] and "(oblicua)" not in o["t5"]["texto"]
-    assert o["hace"] == ["hace 5 min", "hace 6 h", "hace 3 días", "hace 0 min"], o["hace"]
+    assert o["hace"] == ["hace 5 min", "hace 6 h", "hace 3 días", "hace 0 min", "hace 30 h"], o["hace"]
 
 
 def test_clases_del_grafico_con_extremo(tmp_path):
@@ -640,6 +640,8 @@ const f = ds => ds.map(d => ({ label: d.label, n: d.data.length,
 console.log(JSON.stringify({
   con: f(datasetsEvol(DATOS, [], "log", false, null, DATOS[1])),
   sinAnomalia: f(datasetsEvol(DATOS, [], "log", false, null, { t: 9, y: undefined })),
+  // la última pasada no vio nada pero cae a la misma hora que una pasada con anomalía de otro satélite: sin estrella
+  mismaHora: f(datasetsEvol(DATOS, [], "log", false, null, { t: 1, y: undefined })),
   fueraVentana: f(datasetsEvol(DATOS, [], "log", false, null, { t: 99, y: 5, dist: 1 })),
   dist: f(datasetsEvol(DATOS, [], "dist", false, 25, DATOS[2])) }));
 """
@@ -649,7 +651,7 @@ console.log(JSON.stringify({
     assert con["VIIRS 375m"]["relleno"] == ["#e91e63", "rgba(0,0,0,0)"]          # la de 55° va hueca
     assert con["Fuera del cráter: no publicada"]["forma"] == ["rect"]
     assert con["★ Última pasada"]["n"] == 1 and con["★ Última pasada"]["forma"] == ["star"]
-    assert not any(d["label"].startswith("★") for d in o["sinAnomalia"] + o["fueraVentana"])
+    assert not any(d["label"].startswith("★") for d in o["sinAnomalia"] + o["fueraVentana"] + o["mismaHora"])
     assert any(d["label"].startswith("★") for d in o["dist"])
 
 
