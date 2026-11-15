@@ -116,12 +116,14 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
   En VIIRS 750, `roi_v750` de `pipeline/grillas_mirova.yaml`: `def` en casi todos, `crater` en Cordón Caulle (#999,
   ficha v1.29) y `sens` en Tupungatito (D36); en VIIRS 375 la caja C13 en el cráter; en MODIS `def`, 5 × 5 al centro.
   `inner_radius_km` sólo clasifica. (S186)
-- **Regla de posición «radiante» (decisión de Nicolás del 2026-11-15, «Formalizar radiante», bloque S186 §b.3):** la
+- **Regla de posición «radiante» (decisión de Nicolás del 2026-11-15 en S186, «Formalizar radiante», respuesta a
+  §b.3 del bloque S186; transmitida por la coordinadora S186):** la
   posición del record de la vía es el centroide del cúmulo 8-conexo que contiene a la alertada de mayor radiancia MIR,
   aunque haya otra alertada más débil en el cráter; `distance_class` y la publicación en el tablero salen de ahí. El
   VRP no depende de la regla (suma de todos los alertados, D32). Clase igual a la de MIROVA en 98,7 % de 2.037
-  pasadas (cercano 93,6 %); `Distancia_km` de MIROVA no sirve para elegir (sesgo al alertado más lejano). Prueba:
-  `tests/test_guard_regla_posicion_radiante_s186.py`. Detalle en D8'. (S186)
+  pasadas, tabla sola (cercano 93,6 %); `Distancia_km` de MIROVA no sirve para elegir (sesgo al alertado más
+  lejano). Prueba en el PR aparte de la coordinadora S186 (`tests/test_guard_regla_posicion_radiante_s186.py`, aún
+  no en main). Detalle en D8'. (S186)
 - Campo unificado `final_hotspot_lat/lon/dist_km`. En la vía es el centroide del cúmulo 8-conexo de la alertada más
   radiante, con la distancia desde el cráter; `hotspot_*` es el píxel pico; `distance_class` sale de ese centroide; y
   `vrp_mw` es la suma de todos los alertados, no la del cúmulo (`procesar_grilla`; D8', D32, D36). En K es el fallback

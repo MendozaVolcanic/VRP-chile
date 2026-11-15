@@ -1496,22 +1496,24 @@ Cuando S62+S63 completen:
 > `vent_anchored` contra `vrp_max` que piden las marcas de abajo y sin una decisión explícita de Nicolás hasta el 2026-11-15:
 > entró con la vía (auditoría de posición de S185, verificada) y se formalizó ese día (marca siguiente). Medido en producción, 2026-03-01 a 2026-11-15, tabla
 > sola: la clase coincide con la etiqueta de MIROVA en 98,7 % (con el píxel pico también 98,7 %; con el cúmulo más
-> cercano al cráter, 93,6 %). La magnitud no sale de ese cúmulo: es la suma de todos los alertados (D32). Que se
-> formalice esta regla lo decide Nicolás (bloque de arranque S186, §b.3). `vent_anchored` sigue en la guardia K.
+> cercano al cráter, 93,6 %). La magnitud no sale de ese cúmulo: es la suma de todos los alertados (D32). Formalizarla
+> le tocaba a Nicolás (bloque de arranque S186, §b.3): lo hizo el 2026-11-15 (marca siguiente). `vent_anchored` sigue en la guardia K.
 > Texto conservado.
 
 > ⚠️ **S186, regla de posición vigente: «radiante», formalizada el 2026-11-15.** Nicolás respondió «Formalizar
-> radiante» a la recomendación b.3 del bloque de arranque S186 (decisión transmitida por la sesión coordinadora S186).
+> radiante» a la recomendación b.3 del bloque de arranque S186, en la sesión S186 (la coordinadora la transmitió a
+> esta sesión de documentos y la registra en su bitácora, `tasks/LOOP_OBJETIVOS.md` de `loop/activo`).
 > La regla: la posición del record de la vía es el centroide del cúmulo 8-conexo que contiene a la alertada de mayor
 > radiancia MIR, aunque haya otra alertada más débil en el cráter; `distance_class` sale de ese centroide y de
 > `inner_radius_km`, y de ahí si el tablero publica. La magnitud no depende de la regla: es la suma de todos los
 > alertados (D32). Vale para los tres sensores (`_cumulo_del_mas_radiante`, llamada por `procesar_grilla`). La prueba
-> que la fija, con un caso débil en el cráter y fuerte lejos, va en un PR aparte
-> (`tests/test_guard_regla_posicion_radiante_s186.py`). Evidencia (auditoría S185 con verificador limpio,
+> que la fija, con un caso débil en el cráter y fuerte lejos, va en un PR aparte de la coordinadora S186
+> (`tests/test_guard_regla_posicion_radiante_s186.py`, rama `claude/s186-guard-radiante`; no existe en main hasta
+> que ese PR se integre). Evidencia (auditoría S185 con verificador limpio,
 > `D:\vrp-trabajo\temporales\s185_posicion_medida\` y `_verif\`, fuera del repo; 2026-03-01 a 2026-11-15, 11 Tier A,
 > sólo la tabla de MIROVA): CONFIRMADO que la clase coincide con la de MIROVA en 98,7 % de 2.037 pasadas con
 > píxeles (con el píxel pico, 98,7 %, la misma clase en 3.656 de 3.656 records; con el cúmulo más cercano al cráter,
-> 93,6 %). «Cercano» rescataría 9 de 1.664 pasadas `pos`, pero publicaría 114 `far_ref` más. Las 5 alertas protegidas
+> 93,6 %); con el OCR sumado a la tabla, 96,5 % contra 93,5 %. «Cercano» rescataría 9 de 1.664 pasadas `pos`, pero publicaría 114 `far_ref` más. Las 5 alertas protegidas
 > que «radiante» calla son todas sólo OCR (Isluga 2026-03-20, 03-24 y 10-03; Láscar 2026-03-15 y 10-01). Que la
 > `Distancia_km` de MIROVA calce mejor con el píxel alertado más lejano es un sesgo de construcción (se comporta como
 > la distancia al alertado más lejano desde el centro de su grilla, `docs/audit_s139/DISTANCIA_MIROVA_VS_TIF.md`,
@@ -3650,8 +3652,10 @@ el efecto no se ha medido.
   procesaron con los umbrales diurnos, ninguna con alerta. CONFIRMADO; efecto observado nulo.
 - **MODIS, píxel sin dato en las bandas 21 y 22.** La interpolación lo rellena con los vecinos; no queda el agujero que
   describe D24 para K. SIN MEDIR.
-- **Almacén.** Un VRP negativo quedaría en 0 en `vrp_mw`, y el tope de cordura de 50.000 MW del almacén también actúa
-  sobre la vía. Medido en los 11 Tier A: 0 casos de cada uno.
+- **Almacén.** Un VRP negativo queda en 0 en `vrp_mw` (en `primary_cluster.vrp_mw` sigue negativo), y el tope de
+  cordura de 50.000 MW del almacén también actúa sobre la vía. Medido en los 11 Tier A por el verificador de S186: 1
+  VRP negativo (Nevados de Chillán MODIS_TERRA 2025-11-18 03:00, `primary_cluster.vrp_mw` -0,032 y `vrp_mw` 0; el
+  informe de S185 decía 0) y 0 casos del tope (máximo 248,32 MW).
 - **Pasada válida sin alerta.** Se guarda con `vrp_mw` 0,0; el código de MIROVA devuelve NaN y su README pide no leerlo
   como emisión cero. Las escenas que la vía no pudo medir ya se separan (`motivo_vacio`, ficha SDA v1.27 y v1.30).
 
