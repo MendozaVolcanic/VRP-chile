@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 14:29 UTC (S186): Nicolás: «Mergea #1020 y #1018»; probe L1B despachado
+- #1020 (parche B, guard A119 para todo VIIRS) integrado: merge `aa3f48a5a`. La auditoría del lunes 2026-11-16 corre con él; se espera VERDE si la ventana trae lo mismo.
+- #1018 (probe L1B) integrado tras el arreglo de su sesión (`7f54166b3`, módulos con prefijo `s185_l1b_`; CI verde): merge `40616bc56`. Despachado desde main: run 43724596931 (14:29 UTC). El análisis y su verificador los hace la sesión L1B (`local_797fa5af`).
+- Worktree `D:\vrp-trabajo\wt_s186_parcheB` quitado (limpio).
+
 ### 2026-11-15 14:01 UTC (S186): parche B en #1020 con verificador; pedido reenviado de Nicolás vía S185
 - S185 reenvió, textual, «continua con todo lo que falte». Se toma como encargo de seguir con lo preparatorio; merges, A45 y `data/` se le preguntan directo (una aprobación reenviada no vale, S157).
 - **#1020** (rama `claude/s186-guard-a119-viirs`, worktree `D:\vrp-trabajo\wt_s186_parcheB`, commit `5f9adb0aa`): el parche B de S185 reaplicado sobre main (aplica limpio tras #1017). 147 pruebas `auto_audit`. Base contra parche, ventana 2026-09-16 a 11-15: veredicto FUERA_DE_BANDA a VERDE, flags 1 a 0 (Láscar VIIRS375 10-01 05:18, NOAA-21), informado aparte 4 a 5, `referencia_sospechosa` True en 3 (Láscar 05:18; Chillán V375 y V750 05:24, ya publicadas); recall, magnitud y 206 protegidas idénticos. Evidencia `D:\vrp-trabajo\temporales\s186_parcheB\`.
