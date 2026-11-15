@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-15 14:01 UTC (S186): parche B en #1020 con verificador; pedido reenviado de Nicolás vía S185
+- S185 reenvió, textual, «continua con todo lo que falte». Se toma como encargo de seguir con lo preparatorio; merges, A45 y `data/` se le preguntan directo (una aprobación reenviada no vale, S157).
+- **#1020** (rama `claude/s186-guard-a119-viirs`, worktree `D:\vrp-trabajo\wt_s186_parcheB`, commit `5f9adb0aa`): el parche B de S185 reaplicado sobre main (aplica limpio tras #1017). 147 pruebas `auto_audit`. Base contra parche, ventana 2026-09-16 a 11-15: veredicto FUERA_DE_BANDA a VERDE, flags 1 a 0 (Láscar VIIRS375 10-01 05:18, NOAA-21), informado aparte 4 a 5, `referencia_sospechosa` True en 3 (Láscar 05:18; Chillán V375 y V750 05:24, ya publicadas); recall, magnitud y 206 protegidas idénticos. Evidencia `D:\vrp-trabajo\temporales\s186_parcheB\`.
+- Verificador Sonnet limpio, effort high (`D:\vrp-trabajo\temporales\s186_verif_parcheB\INFORME.md`): CONFIRMADO en las 4 preguntas. Láscar 05:18 muestra el patrón A119 (fila sólo OCR, procesada 8 h 43 min después, misma imagen, Y y 1,22 km que la de 05:54); nuestro NOAA-21 da 1,046 MW con cúmulo `far` a 18,99 km; el cráter de esa noche se publicó en 05:54 y 06:18. No esconde pérdida de cráter. Mutaciones: con `"SNPP"` fallan 4 pruebas; con cualquier sensor, 3 controles MODIS. SIN DATO: fracción de cráter en el 1,2 MW de MIROVA (a lo más ~0,15 MW, estimación).
+- #1018 sigue rojo en `e5e1a2004`; su sesión corre la suite con el módulo renombrado.
+
 ### 2026-11-15 13:21 UTC (S186): Nicolás: «Sí, los cinco» (b.1); #1013, #1016, #1017, #1014 y #1012 integrados
 - Respuesta a la pregunta «¿Mergeo #1013, #1016, #1017, #1014 y luego #1012, en ese orden?». Merge commit con `--match-head-commit`, cada uno con CLEAN y 2 de 2 checks verdes justo antes: #1013 `be1dba138`, #1016 `6dcbbf5d3`, #1017 `f40de3c9a`, #1014 `f0459ad9a` (Pages sin `data/historia_34`), #1012 `d41cb1930` (tanda 1 de los 34, sin aplicar a `data/`). Ninguno toca ficha SDA, `pipeline/`, `frontend/` ni `data/`: no hay versión de ficha que numerar.
 - CI de main: Tests sobre `d41cb1930` (contiene los cinco) VERDE, run 43718319448; las corridas de los merges intermedios quedaron canceladas por concurrencia. Deploy de Pages de `f0459ad9a` VERDE (run 43718302873); `.../data/historia_34/` da 404 y el índice 200.
