@@ -300,8 +300,9 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
      lo contrario. Producción sigue con el cúmulo más cercano al cráter hasta el A/B pre-registrado. ⚠️ **S186:
      superado.** Desde la vía, la posición publicada en los tres sensores es el centroide del cúmulo de la alertada
      más radiante, medido desde el cráter (`pipeline/mirova_v750_codigo.py::procesar_grilla`); entró con la vía, sin
-     el A/B ni una decisión explícita posterior. Clase igual a la de MIROVA en 98,7 % (2026-03-01 a 2026-11-15, tabla
-     sola); formalizarla lo decide Nicolás (marca S186 de D8' y bloque de arranque S186, §b.3).
+     el A/B pre-registrado. Clase igual a la de MIROVA en 98,7 % (2026-03-01 a 2026-11-15, tabla
+     sola). Nicolás la formalizó el 2026-11-15 («Formalizar radiante», respuesta a la recomendación b.3 del bloque
+     S186): es la regla de posición vigente (marca S186 de D8' en `docs/MIROVA_DIVERGENCES.md`).
      ⚠️ **Matiz S151 (tarea 1.4 del loop, PR #809, dos verificadores con contexto limpio):** sobre los
      GeoTIFF de MIROVA, MIROVA informa el foco lejano cuando es fuerte (15 de 15 con z ≥ 30) y el cráter
      cuando el lejano es débil; la fuerza del lejano y el calor del cráter pesan los dos, y «la mayor»

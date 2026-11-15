@@ -1493,13 +1493,31 @@ Cuando S62+S63 completen:
 > a la alertada de mayor radiancia MIR, con la distancia medida desde el cráter; `distance_class` es `summit` si ese
 > centroide está a `inner_radius_km` o menos (`pipeline/mirova_v750_codigo.py`, `_cumulo_del_mas_radiante` y
 > `procesar_grilla`). Es la regla «anomalía mayor» del 2026-10-09 aplicada por objeto más radiante, sin el A/B
-> `vent_anchored` contra `vrp_max` que piden las marcas de abajo y sin una decisión explícita posterior de Nicolás:
-> entró con la vía (auditoría de posición de S185, verificada). Medido en producción, 2026-03-01 a 2026-11-15, tabla
+> `vent_anchored` contra `vrp_max` que piden las marcas de abajo y sin una decisión explícita de Nicolás hasta el 2026-11-15:
+> entró con la vía (auditoría de posición de S185, verificada) y se formalizó ese día (marca siguiente). Medido en producción, 2026-03-01 a 2026-11-15, tabla
 > sola: la clase coincide con la etiqueta de MIROVA en 98,7 % (con el píxel pico también 98,7 %; con el cúmulo más
 > cercano al cráter, 93,6 %). La magnitud no sale de ese cúmulo: es la suma de todos los alertados (D32). Que se
 > formalice esta regla lo decide Nicolás (bloque de arranque S186, §b.3). `vent_anchored` sigue en la guardia K.
 > Texto conservado.
 
+> ⚠️ **S186, regla de posición vigente: «radiante», formalizada el 2026-11-15.** Nicolás respondió «Formalizar
+> radiante» a la recomendación b.3 del bloque de arranque S186 (decisión transmitida por la sesión coordinadora S186).
+> La regla: la posición del record de la vía es el centroide del cúmulo 8-conexo que contiene a la alertada de mayor
+> radiancia MIR, aunque haya otra alertada más débil en el cráter; `distance_class` sale de ese centroide y de
+> `inner_radius_km`, y de ahí si el tablero publica. La magnitud no depende de la regla: es la suma de todos los
+> alertados (D32). Vale para los tres sensores (`_cumulo_del_mas_radiante`, llamada por `procesar_grilla`). La prueba
+> que la fija, con un caso débil en el cráter y fuerte lejos, va en un PR aparte
+> (`tests/test_guard_regla_posicion_radiante_s186.py`). Evidencia (auditoría S185 con verificador limpio,
+> `D:\vrp-trabajo\temporales\s185_posicion_medida\` y `_verif\`, fuera del repo; 2026-03-01 a 2026-11-15, 11 Tier A,
+> sólo la tabla de MIROVA): CONFIRMADO que la clase coincide con la de MIROVA en 98,7 % de 2.037 pasadas con
+> píxeles (con el píxel pico, 98,7 %, la misma clase en 3.656 de 3.656 records; con el cúmulo más cercano al cráter,
+> 93,6 %). «Cercano» rescataría 9 de 1.664 pasadas `pos`, pero publicaría 114 `far_ref` más. Las 5 alertas protegidas
+> que «radiante» calla son todas sólo OCR (Isluga 2026-03-20, 03-24 y 10-03; Láscar 2026-03-15 y 10-01). Que la
+> `Distancia_km` de MIROVA calce mejor con el píxel alertado más lejano es un sesgo de construcción (se comporta como
+> la distancia al alertado más lejano desde el centro de su grilla, `docs/audit_s139/DISTANCIA_MIROVA_VS_TIF.md`,
+> SOSPECHA fuerte) y no sirve para elegir la regla. Cómo elige MIROVA su posición sigue siendo SIN DATO; la diferencia
+> en posición y distancia queda registrada en D36.
+>
 > ⚠️ **S151, segunda marca (A113, tarea 1.4 del loop, PR #809 verificado dos veces):** el estudio sobre
 > los GeoTIFF de MIROVA (`experiments/_s151_seleccion_mirova/README.md`) dice que MIROVA no elige el cráter
 > por ser el cráter: informa el foco lejano cuando es fuerte (15 de 15 pasadas con z ≥ 30 en el TIF; 12 de
@@ -3620,7 +3638,7 @@ el efecto no se ha medido.
 **Otras diferencias de la vía con MIROVA que tampoco estaban registradas** (misma auditoría):
 
 - **Posición y distancia.** La vía publica el centroide del cúmulo 8-conexo de la alertada más radiante, con la
-  distancia medida desde el cráter (D8'). MIROVA publica el píxel alertado más caliente, y su `Distancia_km` se comporta
+  distancia medida desde el cráter (D8'; regla «radiante», formalizada por Nicolás el 2026-11-15). MIROVA publica el píxel alertado más caliente, y su `Distancia_km` se comporta
   como la del alertado más lejano medida desde el centro de su grilla (`docs/audit_s139/DISTANCIA_MIROVA_VS_TIF.md`).
   CONFIRMADO. En MODIS el centroide y el alertado más lejano difieren más de 1 km en 51 de 472 records con alerta. La
   clase coincide con la de MIROVA en 98,7 % (D8').
