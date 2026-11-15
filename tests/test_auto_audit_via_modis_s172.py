@@ -150,7 +150,7 @@ def correr(monkeypatch, tmp_path):
 
 def test_con_la_via_en_modis_decide_la_via_y_k_se_informa_aparte(correr):
     out = correr(con_via=True)
-    assert out["detector"]["vigente"] == "K"
+    assert out["detector"]["vigente"] == "VIA_MODIS+K"        # S185: la etiqueta nombra la vía de MODIS y K en VIIRS
     assert out["detector"]["vigente_por_sensor"] == {"VIIRS375": "K", "VIIRS750": "K", "MODIS": "VIA_MODIS"}
     assert out["detector"]["frontera_via_modis"] == _dia(15)
     r = out["recall"]["MODIS"]

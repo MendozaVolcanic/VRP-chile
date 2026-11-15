@@ -36,6 +36,17 @@ def carpetas_de_sombras():
     return sorted(out)
 
 
+# Carpetas que no salen de un perfil y que el tablero lee desde el repo (raw.githubusercontent.com), no desde Pages.
+# historia_34 (plan docs/superpowers/plans/2026-11-13-historia-34-volcanos-via.md): la historia de los 34 con la vía,
+# unos 10 MB por volcán y entre 340 y 475 MB los 34, que pasarían el techo de 1 GB del sitio. La encontró el revisor
+# de S185 sobre el PR #1012: el plan decía «no está en Pages» y el yml la copiaba.
+CARPETAS_DEL_REPO = ("historia_34",)
+
+
+def carpetas_fuera_de_pages():
+    return sorted(set(carpetas_de_sombras()) | set(CARPETAS_DEL_REPO))
+
+
 def _wf():
     return yaml.safe_load(WF.read_text(encoding="utf-8"))
 
@@ -69,7 +80,7 @@ def test_la_lista_derivada_trae_las_tres_de_hoy():
     assert {"sombra_34", "sombra_codigo_mirova", "guardia_k_modis"} <= set(carpetas_de_sombras())
 
 
-@pytest.mark.parametrize("sub", carpetas_de_sombras())
+@pytest.mark.parametrize("sub", carpetas_fuera_de_pages())
 def test_cada_sombra_no_dispara_el_deploy(sub):
     pats = _paths()
     assert "data/**" in pats
@@ -78,7 +89,7 @@ def test_cada_sombra_no_dispara_el_deploy(sub):
     assert not dispara(f"data/{sub}/Antuco.json", pats)
 
 
-@pytest.mark.parametrize("sub", carpetas_de_sombras())
+@pytest.mark.parametrize("sub", carpetas_fuera_de_pages())
 def test_cada_sombra_se_borra_del_sitio_en_el_texto(sub):
     run = _paso_del_sitio()
     lineas = run.splitlines()
@@ -101,7 +112,7 @@ def test_control_mirova_equivalent_sigue_disparando_y_copiandose():
 @pytest.mark.skipif(shutil.which("bash") is None, reason="sin bash")
 def test_el_efecto_del_paso_real_sobre_una_carpeta_temporal(tmp_path):
     """Ejecuta las líneas `cp -r data _site/data` y los `rm -rf _site/data/...` del paso, tal cual, y mira qué quedó."""
-    subs = carpetas_de_sombras()
+    subs = carpetas_fuera_de_pages()
     for d in ["mirova_equivalent", "mirova", "experimental_v2", *subs]:
         (tmp_path / "data" / d).mkdir(parents=True)
         (tmp_path / "data" / d / "x.json").write_text("{}", encoding="utf-8")
