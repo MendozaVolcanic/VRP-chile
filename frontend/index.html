@@ -3172,11 +3172,8 @@ function renderDetail() {
       // — el píxel suelto (hotspot_dist_km) ya no representa al record.
       const honestAnchor = esAnclaHonesta(
         r.final_hotspot_source);
-      const dist = (honestAnchor ? r.final_hotspot_dist_km : null)
-        ?? r.hotspot_dist_km
-        ?? r.final_hotspot_dist_km
-        ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null)
-        ?? r.vent_hotspot_dist_km;
+      // S184 (revisión S185): la cadena vive en distanciaDePasada (A102); la tabla agrega el vent de los records legacy.
+      const dist = distanciaDePasada(r) ?? r.vent_hotspot_dist_km;
       const isVent = (r.n_vent_pixels ?? 0) > 0 && (r.n_anomalous_pixels ?? 0) === 0;
       const isVentLegacy = isVent && r.vent_hotspot_dist_km == null;  // legacy sin coord real
       const k2c = (k) => k != null ? (k - 273.15).toFixed(1) : "—";
@@ -4233,15 +4230,16 @@ const _historiaEvol = {};
 function historiaEvol(v, innerKm) {
   if (v.fuente === "sombra_34" || _fullHistoryLoaded) return { pts: null, estado: "no_hace_falta" };   // ya está toda en allData
   let h = _historiaEvol[v.name];
+  if (h && h.estado === "fallo" && Date.now() >= (h.reintentarMs || 0)) { delete _historiaEvol[v.name]; h = null; }
   if (!h) {
     h = _historiaEvol[v.name] = { estado: "cargando" };
     h.promesa = fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json").then(data => {
       const recs = data && data.records;
-      if (!recs) { h.estado = "fallo"; return; }
+      if (!recs) { h.estado = "fallo"; h.reintentarMs = Date.now() + 60000; return; }
       // mismo enriquecimiento que loadVolcano: _mirova_confirmed exime de los filtros de artefacto
       enrichWithMirovaConfirmation(recs, (allData[v.name] || {}).mirovaRecords || []);
       h.pts = pasadasEvol(recs, innerKm); h.t0 = tMinRecords(recs); h.estado = "lista";
-    }).catch(() => { h.estado = "fallo"; });   // fetchJSON no atrapa un JSON cortado (devuelve r.json() sin await)
+    }).catch(() => { h.estado = "fallo"; h.reintentarMs = Date.now() + 60000; });   // fetchJSON no atrapa un JSON cortado (devuelve r.json() sin await)
   }
   return h;
 }
@@ -4282,15 +4280,20 @@ function datasetsEvol(pts, mirovaPts, modo, includeFar, distMax) {
                               pointStyle: forma, pointRadius: 2.6, pointHoverRadius: 5, pointHitRadius: 6, palitos: !dist, order: 2 });
   }
   const fuera = pts.filter(p => !p.enCrater && (!dist || p.dist != null));
-  if (fuera.length) ds.push({ label: rotuloFueraEvol(includeFar), type: "scatter", data: fuera.map(aDato), fueraCrater: true,
+  if (fuera.length) ds.push({ label: rotuloFueraEvol(includeFar), claveLeyenda: "fuera", type: "scatter", data: fuera.map(aDato), fueraCrater: true,
                               borderColor: EVOL_GRIS, backgroundColor: EVOL_GRIS + "99", pointStyle: forma, pointRadius: 2.4,
                               pointHoverRadius: 5, pointHitRadius: 6, palitos: !dist, order: 3 });
   if (!dist) for (const m of mirovaPts) ds.push(m);
-  for (const x of ds) x.hidden = _evolOcultas.has(x.label);
+  for (const x of ds) x.hidden = _evolOcultas.has(x.claveLeyenda || x.label);
   return ds;
 }
 
 function fechaUtcEvol(ms) { return new Date(ms).toISOString().slice(0, 10); }
+function inicioMirovaEvol(listas) {
+  let t0 = Infinity;
+  for (const l of listas) for (const r of l || []) { const t = parseUtcMs(r && r.datetime_utc); if (t < t0) t0 = t; }
+  return t0;
+}
 
 function armarEvolucion(host, v, d, innerKm, plugExtra) {
   for (const k of ["evol-0", "evol-1"]) if (charts[k]) { charts[k].destroy(); delete charts[k]; }
@@ -4320,7 +4323,14 @@ function armarEvolucion(host, v, d, innerKm, plugExtra) {
 
   const hist = historiaEvol(v, innerKm);
   const datos = datosEvol({ d, histPts: hist.pts, innerKm, sensorKey: detailSensor, visible: sensorVisible, hasMirova: v.hasMirova });
-  const inicio = hist.estado === "lista" ? Math.min(hist.t0, tMinRecords(d.records)) : tMinRecords(d.records);
+  // Sólo se sabe dónde empiezan los datos con la historia completa (o cuando allData ya la tiene). Mientras baja, o si
+  // falló, la ventana de 100 días no dice nada del comienzo: no se sombrea (revisión S185, punto 3).
+  const inicio = hist.estado === "lista" ? Math.min(hist.t0, tMinRecords(d.records))
+               : hist.estado === "no_hace_falta" ? tMinRecords(d.records) : null;
+  // Desde cuándo hay referencia de MIROVA: el primer registro guardado entre todos los volcanes (el scraper no guarda
+  // antes), para que el 2025 sin triángulos no se lea como «MIROVA no vio nada» (revisión S185, punto 4).
+  const inicioMirova = v.hasMirova && sensorVisible.MIROVA !== false
+    ? inicioMirovaEvol(Object.values(allData).map(x => (x && x.mirovaRecords) || [])) : NaN;
   const ahora = Date.now();
   const dist = evolModo === "dist";
   const ventanas = ventanasEvol(detailSensor);
@@ -4333,8 +4343,10 @@ function armarEvolucion(host, v, d, innerKm, plugExtra) {
     const panel = el("div", "chart-panel evol-panel");
     const t = el("h5");
     const sinDatosHasta = inicioDatosEvol(inicio, ahora, w.dias);
+    const sinMirovaHasta = dist ? null : inicioDatosEvol(inicioMirova, ahora, w.dias);
     t.textContent = w.rotulo + (dist ? " · distancia al volcán" : " · VRP por pasada") +
-      (sinDatosHasta != null ? " · datos desde el " + fechaUtcEvol(sinDatosHasta) : "");
+      (sinDatosHasta != null ? " · datos desde el " + fechaUtcEvol(sinDatosHasta) : "") +
+      (sinMirovaHasta != null ? " · MIROVA desde el " + fechaUtcEvol(sinMirovaHasta) : "");
     if (i === 1 && hist.estado === "cargando") t.textContent += " (bajando la historia del volcán…)";
     if (i === 1 && hist.estado === "fallo") t.textContent += " (no se pudo bajar la historia: sólo los últimos 100 días)";
     const cw = el("div", "chart-wrapper"); const cv = el("canvas"); cw.appendChild(cv);
@@ -4366,12 +4378,14 @@ function armarEvolucion(host, v, d, innerKm, plugExtra) {
                         sinDatosHastaMs: sinDatosHasta },
           // Leyenda en los dos paneles (el largo puede tener series que el corto no) y apagar una serie la apaga en ambos.
           legend: { labels: { color: "#7a8fa6", font: { size: 10 }, boxWidth: 9, padding: 7, sort: (a, b) => a.datasetIndex - b.datasetIndex },
-                    onClick: (e, item) => {
-                      if (_evolOcultas.has(item.text)) _evolOcultas.delete(item.text); else _evolOcultas.add(item.text);
+                    onClick: (e, item, legend) => {
+                      const dsx = legend && legend.chart ? legend.chart.data.datasets[item.datasetIndex] : null;
+                      const clave = (dsx && dsx.claveLeyenda) || item.text;
+                      if (_evolOcultas.has(clave)) _evolOcultas.delete(clave); else _evolOcultas.add(clave);
                       for (const k of ["evol-0", "evol-1"]) {
                         const c = charts[k]; if (!c) continue;
-                        const j = c.data.datasets.findIndex(x => x.label === item.text);
-                        if (j >= 0) c.setDatasetVisibility(j, !_evolOcultas.has(item.text));
+                        const j = c.data.datasets.findIndex(x => (x.claveLeyenda || x.label) === clave);
+                        if (j >= 0) c.setDatasetVisibility(j, !_evolOcultas.has(clave));
                         c.update();
                       }
                     } },
@@ -4533,10 +4547,7 @@ function updateHotspotLayer() {
       const lon = (honest ? r.final_hotspot_lon : null) ?? r.hotspot_lon ?? r.final_hotspot_lon ?? r.vent_hotspot_lon;
       return (lat != null && lon != null) ? [lat, lon] : null;
     };
-    const honestDist = (r) => {
-      const honest = esAnclaHonesta(r.final_hotspot_source);
-      return (honest ? r.final_hotspot_dist_km : null) ?? r.hotspot_dist_km ?? r.final_hotspot_dist_km;
-    };
+    const honestDist = (r) => distanciaDePasada(r);   // S184 (revisión S185): misma cadena que la tabla y la evolución (A102)
     // Show any record with a resolvable position (honest anchor or legacy fallback).
     const withCoords = recs.filter(r => honestPos(r) != null);
 
