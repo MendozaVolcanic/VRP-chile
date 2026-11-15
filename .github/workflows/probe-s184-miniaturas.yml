@@ -1,0 +1,58 @@
+name: Probe S184 miniaturas (temporal, no se mergea)
+
+# S184: corre la vía con --miniaturas sobre gránulos reales de Chillán (12 al 15 de noviembre, para comparar con el
+# Latest10NTI de MIROVA del 15-nov 06:18) y Villarrica, SIN commitear nada: sube data/miniaturas como artefacto.
+# Sólo lectura de NASA, sólo por token (A71). Se borra antes del merge (tests/test_miniaturas_por_pasada.py lo exige).
+
+"on":
+  push:
+    branches: [claude/s184-diseno-miniaturas-eb819f]
+    paths:
+      - ".github/workflows/probe-s184-miniaturas.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        volcano: [NevadosDeChillan, Villarrica]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj
+      - name: Correr la via con miniaturas (sin commit)
+        timeout-minutes: 45
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          set -o pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "::error::EARTHDATA_TOKEN vacio (A71)"; exit 1; fi
+          python scripts/run_pipeline.py --profile mirova_equivalent --volcano ${{ matrix.volcano }} \
+            --start 2026-11-12 --end 2026-11-15 --miniaturas 2>&1 | tee pipeline.log
+      - name: Resumen
+        if: always()
+        run: |
+          grep -E "Miniaturas|ERROR" pipeline.log || true
+          find data/miniaturas -type f -printf "%s %p\n" | sort -k2 || true
+          du -sb data/miniaturas || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: miniaturas-${{ matrix.volcano }}
+          path: |
+            data/miniaturas
+            pipeline.log
+          retention-days: 7

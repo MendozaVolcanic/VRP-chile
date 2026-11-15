@@ -117,6 +117,23 @@ FAMILIAS = {
                  "dist_max_centro_km": 5.0, "roi1_half_m": HALF_ROI1_V375_M},
 }
 
+# ---------------------------------------------------------------------------------------------------- miniatura
+# S184 (docs/DISENO_MINIATURAS_POR_PASADA.md): una imagen chica de cada pasada para las «Últimas 10 imágenes» del
+# tablero, como el panel Latest10NTI de MIROVA. POR QUÉ: una pasada con VRP 0 no dice si el volcán estaba tranquilo,
+# nublado o con la escena cortada en el borde de la franja; la imagen sí. NO decide nada: no toca la máscara, el VRP ni
+# el record (sólo agrega una clave interna que scripts/run_pipeline.py saca antes de guardar). APAGADA por defecto,
+# porque 49 archivos (pruebas, experimentos, probes) llaman a la vía o a los procesadores y ninguno debe ver la clave;
+# la enciende sólo `run_pipeline.py --miniaturas`, que sólo usa el NRT de producción (nrt.yml).
+GENERAR_MINIATURA = False
+# Escala fija del gris: el NTI de un cuerpo negro a 240 K (negro) y a 290 K (blanco) con las longitudes de onda de cada
+# sensor. POR QUÉ fija y no estirada por escena: así una noche nublada (fría) se ve más oscura que una despejada. POR
+# QUÉ esas temperaturas: contienen el fondo nocturno medido en 298 escenas reales de V750 (experiments/_s163_o2,
+# percentil 2 por escena entre -0,965 y -0,917, percentil 98 con mediana -0,914; cuerpo negro a 240 K = -0,974 y a
+# 290 K = -0,882 en M13/M15). En VIIRS 375 y MODIS falta medirlo con grillas reales: por eso cada miniatura guarda los
+# percentiles 2 y 98 de su NTI, para recalibrar con datos de producción. Más frío que 240 K (nube alta) satura en
+# negro; más caliente que 290 K (el foco) satura en blanco.
+ESCALA_MINIATURA_T_K = (240.0, 290.0)
+
 
 # ---------------------------------------------------------------------------------------------------- Planck
 def radiancia_a_temperatura(L, lam_um):
@@ -824,7 +841,48 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
     rec["diag_codigo_mirova"].update({"dayflag": dayflag, "sunglint": round(sg, 2),
                                       "celdas_sin_dato": int(np.isnan(m13g).sum())})
     rec.update({f"{k}_deg": round(v, 2) for k, v in geom.items()})
+    if GENERAR_MINIATURA:
+        # S184: también en las pasadas sin anomalía, con sun glint o escena inválida (la grilla existe igual): son las
+        # que el operador necesita ver. Los alertados son los del record, para que imagen y número digan lo mismo.
+        rec["_miniatura"] = miniatura_nti(m13g, m15g, [[p["fila"], p["col"]] for p in rec["anomaly_pixels"]],
+                                          familia)
     return rec
+
+
+def escala_nti(familia):
+    """(NTI negro, NTI blanco) de la miniatura: el NTI de un cuerpo negro a ESCALA_MINIATURA_T_K con las longitudes de
+    onda de la familia, con la misma Planck del .m que usa la vía."""
+    cfg = FAMILIAS[familia]
+    out = []
+    for T in ESCALA_MINIATURA_T_K:
+        a = float(temperatura_a_radiancia(T, cfg["lam_mir"]))
+        b = float(temperatura_a_radiancia(T, cfg["lam_tir"]))
+        out.append((a - b) / (a + b))
+    return tuple(out)
+
+
+def miniatura_nti(m13g, m15g, alertadas, familia):
+    """NTI de la grilla ENTERA cuantizado a uint8: 0 a 254 gris en la escala fija, 255 sin dato.
+
+    POR QUÉ el NTI y no la temperatura del térmico: de noche el NTI correlaciona 0,97 (mediana, 298 escenas de V750)
+    con la temperatura de M15, así que la nube fría sale oscura igual, y además el foco salta en blanco; es lo que
+    muestra MIROVA. POR QUÉ recalcularlo y no usar el del detector: el del detector pone en NaN lo que queda fuera de
+    la caja y el M15 frío (BT <= 200 K), y la miniatura tiene que mostrar la escena entera; aquí sólo es sin dato lo que
+    no tiene radiancia (fuera de la franja). Devuelve también los percentiles 2 y 98 del NTI para recalibrar la escala."""
+    m13g = np.asarray(m13g, float)
+    m15g = np.asarray(m15g, float)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        nti = (m13g - m15g) / (m13g + m15g)
+    ok = np.isfinite(nti)
+    lo, hi = escala_nti(familia)
+    with np.errstate(invalid="ignore"):
+        q = np.round(np.clip((nti - lo) / (hi - lo), 0.0, 1.0) * 254.0)
+    u8 = np.where(ok, q, 255).astype(np.uint8)
+    p2 = p98 = None
+    if ok.any():
+        p2, p98 = (round(float(x), 5) for x in np.percentile(nti[ok], (2, 98)))
+    return {"u8": u8, "n": int(u8.shape[0]), "escala_nti": [round(lo, 6), round(hi, 6)],
+            "alertadas": [[int(f), int(c)] for f, c in alertadas], "nti_p2": p2, "nti_p98": p98}
 
 
 # ---------------------------------------------------------------------------------------------------- MODIS (S164)
