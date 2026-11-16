@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 19:55 UTC (S188): arranque; auditoría del 11-16 VERDE y #973 cerrado; tanda 3 en curso
+
+- S188 abre como sesión propia, dueña del loop. Vigilante de la tanda 3 (`vigilar_run.sh 43906817147`) y cadena `D:\vrp-trabajo\temporales\s187_tanda2\cadena_4a7.sh` relanzados a las 19:05 UTC. Tanda 3 a esa hora: 35 de 165 trozos verdes, 0 rojos.
+- **Auditoría semanal del 2026-11-16** (run 43938585128, `generated_utc` 19:36:52Z, ventana 09-17 a 11-16): VERDE, ninguna métrica sobre banda. Los tres motivos de #973: recall V750 73,3 % a 96,3 % (27 noches); magnitud Chillán V375 0,579x a 0,999x; Tupungatito V375 0,373x a 1,02x. Contra la corrida local del parche B (`D:\vrp-trabajo\temporales\s186_parcheB\latest_B.json`, VERDE): recall MODIS 96,7 a 97,0, V750 94,7 a 96,3, V375 97,9 a 98,6; protegidas 206 a 237 con las mismas 5 sin publicar (todas `referencia_sospechosa`). Copia en `D:\vrp-trabajo\temporales\s188\latest_1116.json`.
+- **#973 cerrado** con esa tabla como comentario.
+- Avisadas a Nicolás las decisiones abiertas de `tasks/DECISIONES_34_S187.md` (D1 primero; N1, D5, N2, D13, D15).
+
 ### 2026-11-16 19:01 UTC (S187): Nicolás: «Mergea #1026 y aplica»; tanda 2 integrada y aplicada
 
 - **#1026** (unión de la tanda 2): CI verde sobre `12321f578` (pytest y bateria-v750a), CLEAN; merge commit `1fabb0ea0` a las 18:57:40 UTC (`--match-head-commit`). Nicolás eligió aplicar con Putana (D1 sigue abierta; si sale, se retira con su tag).
