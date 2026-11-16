@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 17:40 UTC (S187): Nicolás: «Mergea #1025 y #1019»; ambos integrados; tanda 2 unida en #1026; tanda 3 corriendo
+- #1025 (ficha v1.32 por #1011 y fecha de la v1.31 a 2026-11-16) mergeado 17:26:30 UTC, `0be01792a`.
+- #1019: en su rama, desde un worktree mío, merge de main (`7a980a11f`) y fila v1.33 ANTES de mergear (`9515ec247`, 51 pruebas de ficha, G8 y evolución en verde); CI verde; mergeado 17:40:00 UTC, `850d03245`. Sesión de los gráficos avisada para quitar sus worktrees.
+- Tanda 2 (run 43806164818): 165 de 165 verdes, intento 1, 67,5 h de runner, pared 04:48 a 16:20 UTC. La descarga de artifacts falló dos veces por la red local (api.github.com y el blob de Azure); se bajó uno por uno con `D:\vrp-trabajo\temporales\s187_tanda2\bajar_trozos.sh`. Unión: 5 volcanes, 626 días, 0 huecos, 0 fuera de ventana, todo `:true`; ensayo 29.866 nuevos, 0 tras el corte. PR #1026 (unión + `informe_tanda2.json` + TANDAS.md con el cierre de la tanda 1). Verificador limpio (Sonnet) corriendo con un segundo camino propio.
+- La cadena despachó sola la tanda 3 a las 16:22:46 UTC (run 43906817147).
+
 ### 2026-11-16 15:58 UTC (S187): Nicolás: «Regla de publicación» (b.2) y «Mergea #1011»; #1011 integrado, ficha en #1025
 - b.2 enviada con sus palabras a la sesión de #1011 (local_cf79e659); unió main (`19753e1c4`), arregló la prueba que fijaba la línea 1600 (ahora lee la línea del guard G8) y dejó la fila de la ficha en la descripción, sin escribir la ficha (regla S185).
 - #1011 mergeado 15:55:53 UTC, `--merge --match-head-commit 9ce86ce12…`, merge commit `0bcd26143`.
