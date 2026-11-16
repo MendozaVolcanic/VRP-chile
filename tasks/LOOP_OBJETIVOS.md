@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 15:36 UTC (S187): Nicolás: «Sí, parte con 1, 2 y 3»; hoja de los 34, guardia MODIS y unión de la tanda 2 preparada
+- Hoja D1 a D15 al día en `tasks/DECISIONES_34_S187.md` (redactor Opus, verificador limpio Sonnet: 0 estados mal puestos, 2 imprecisiones de D1 corregidas). 5 resueltas por los hechos, 3 obsoletas, 3 con otra pregunta, 4 abiertas (D1, D5, D13, D15) y 2 NUEVAS: N1 (los 34 ya están en el tablero principal con el rótulo «sin MIROVA · 1 vez al día»; ¿cuenta como publicado?) y N2 (calor de Villarrica, Chaitén, PCC y Copahue en la grilla de Quetrupillán, Michinmahuida, Antillanca y Callaqui; la zona excluida aprobada el 11-02 no está hecha). D1 decide si Putana (tanda 2) se aplica.
+- Guardia MODIS: VERDE, 22 de 29, sin candidatas; informe `D:\vrp-trabajo\temporales\s185_cierre_modis\informe_cierre_modis_2026-11-16.md`.
+- Unión: `D:\vrp-trabajo\temporales\s187_tanda2\unir_tanda2.sh <run> [<run relanzado>...]` (worktree D:, descarga, `unir_trozos.py`, ensayo). Probado re-uniendo la tanda 1 (runs 43620748875 y 43633062404): `git status` vacío, o sea los 5 `.json.gz` de main reproducidos byte a byte; ensayo 0 nuevos y todos «ya estaban». Worktree y datos de la prueba borrados.
+- Vigilante de la tanda 2 caído a las 14:41 UTC por corte de red con api.github.com; relanzado con `vigilar_run.sh` (reintenta cada 5 min).
+- Otras sesiones: #1011 DIRTY contra main (fila de la ficha; pasa a v1.32) y espera b.2; #1019 apilado (v1.33); #1015 CLEAN y espera A45 (recomendado tras la cadena de tandas); #913 sin decidir.
+
 ### 2026-11-16 13:21 UTC (S187): tanda 2 aún corriendo; cadena 3 a 7 pasada a un script autónomo
 - Run 43806164818 (tanda 2): 127 de 165 trozos verdes, 0 rojos, 6 en curso y 32 en cola; unos 26 min por trozo con 6 en paralelo, fin estimado hacia las 16 UTC. El NRT de los 11 siguió verde toda la noche (09 a 12 UTC, 20 min cada uno).
 - Auditoría semanal del 11-16 aún sin publicar: el cron del lunes se dispara tarde (11-09 a las 19:35 UTC); el vigilante sigue esperando hasta 24 h.
