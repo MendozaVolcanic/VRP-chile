@@ -40,3 +40,29 @@ Copia local: `D:/vrp-trabajo/temporales/historia_34/piloto/` (fuera del repo).
 - Run 43633062404 (main `dc0a1de3f`): los 138 trozos restantes, con ventanas `Volcan@a:b` exactas
   (`D:/vrp-trabajo/temporales/historia_34/tanda1/ventanas_relanzar.txt`); el planificador los reproduce idénticos y
   sin solaparse con los 27 (comprobado antes de despachar). La unión se arma con los dos runs.
+- Unión (#1012): 5 volcanes, 626 días cada uno, 0 huecos, todas las marcas `:true`; ensayo del aplicador con 5.389
+  (Guallatiri), 5.573 (Irruputuncu), 5.603 (OlcaParuma), 5.384 (Parinacota) y 5.494 (Taapaca) records nuevos, 0 tras
+  el corte.
+- **Aplicada** el 2026-11-16 tras el merge de #1000 (`8c94743d1`, 04:11 UTC): run 43802322235 de
+  `aplicar-reemplazo.yml`, tag `pre-historia-34-tanda1`, commit `bec44eb16` en main (5 archivos en `data/historia_34/`).
+
+## Tanda 2 (Ollague, SanPedro, Putana, SanJose, Tinguiririca; 2025-02-15 a 2026-11-02)
+
+| campo | valor |
+|---|---|
+| run | 43806164818 (main `9a7f37bcc`), despachado 2026-11-16 04:47 UTC (Nicolás: «Despacha ahora») |
+| trozos | 165 de 165 en verde, todos con intento 1; ningún relanzamiento |
+| runner | 67,5 h (suma de `completed_at - started_at` de los 165 jobs), 24,6 min por trozo en promedio (máximo 43,5); pared 04:48 a 16:20 UTC, 11 h 32 min |
+| unión | 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. Ollague 5.673 records, Putana 5.602, SanJose 6.398, SanPedro 5.708, Tinguiririca 6.485 |
+| ensayo del aplicador | 29.866 nuevos (los cinco de arriba), 0 tras el corte; los 5 de la tanda 1 dan 0 nuevos y todos «ya estaban» |
+| se aplica | tras el merge del PR de esta unión. Ojo D1 (`tasks/DECISIONES_34_S187.md` en `loop/activo`): Putana es candidata a salir si la lista final es la de la RNVV |
+
+Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda2/` (fuera del repo). El script de unión
+(`D:/vrp-trabajo/temporales/s187_tanda2/unir_tanda2.sh`) se probó re-uniendo la tanda 1: reprodujo byte a byte sus
+cinco `.json.gz` de main. La descarga de artifacts se cortó dos veces por la red de la máquina local; se bajaron
+uno por uno con reintentos (`bajar_trozos.sh`).
+
+## Tandas 3 a 7
+
+Nicolás autorizó despacharlas en cadena («Sí, despacha 3 a 7», 2026-11-16). Tanda 3 despachada 2026-11-16 16:22 UTC
+(run 43906817147).
