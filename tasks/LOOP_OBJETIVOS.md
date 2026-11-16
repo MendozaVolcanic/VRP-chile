@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 04:45 UTC (S187): Nicolás: «mergea #1024, #955 y #981»; los tres integrados
+- **#981** merge `b10fcd183` (mergedAt 2026-11-16 04:42:55 UTC; head `62ccb8830`; sólo `docs/PLAN_REEMPLAZO_HISTORIA_VIA_S178.md`, CI verde). Arregla las citas del workflow y de `data/_k_residuales_via/`.
+- **#955** merge `b9d36ac8b` (04:43:54 UTC; head `e0f971620` tras `update-branch`, pytest y bateria verdes sobre main). `docs/AUDIT_S175.md` ya existe en main.
+- **#1024** merge `9a7f37bcc` (04:45:13 UTC; head `3e4182ffd`, CI verde). Sin fila de ficha: sólo comentarios, no cambia lo publicado. Worktree `D:\vrp-trabajo\worktrees\s187-b4` y rama local quitados.
+- Ninguno de los tres toca la ficha SDA. Archivadas además las 8 sesiones auditoras de S175 y la de S174 (`bbc7bda4`) con su hija de #955: 43 en total.
+- **Datos para la respuesta a Nicolás**: (1) VRP por pasada: un record por volcán, sensor y pasada; `vrp_mw = primary_cluster.vrp_mw` = VRP de la unión de TODOS los píxeles alertados (como MIROVA, D32; `pipeline/mirova_v750_codigo.py` líneas 691 y 716 a 737); la posición es la del cúmulo de la alertada más radiante; el tablero lo muestra si la clase es cumbre (`mirovaEqVrp`), el núcleo F5' no toca la vía. (2) Experimental: sin cron desde S101, último record 2026-08-25, sin la vía (`experimental.yaml` con las tres vías en `false` y Test 1 en `true`); su diferenciación diseñada (sensibilidad por zona, S147) sin implementar; lista MEJ-1 a MEJ-7 en `docs/BEYOND_MIROVA_EXTENSIONS.md` §12. (3) Durante la tanda 1 (hasta 04:24 UTC del 11-15) el NRT corrió verde y en tiempos normales (16 a 18 min), así que despachar la tanda 2 antes de las 13 UTC no lo daña.
+
 ### 2026-11-16 04:35 UTC (S187): Nicolás: «continúa con todo lo que recomiendes»; PR viejos, b.4 y sesiones
 - **#980 cerrado** (superado: main tiene `vara_matlab_v750a_salida.txt` con el mismo veredicto y el mismo sha256 de la vía, comprobado por contenido); rama conservada.
 - **#955 actualizado sobre main** con `gh pr update-branch` (sin worktree local); CI corriendo. El JWT del cuerpo es sintético (`exp` inventado, firma «sinte»): no bloquea. Merge espera «mergea #955»; arregla las citas rotas a `docs/AUDIT_S175.md` en 10 archivos de main.
