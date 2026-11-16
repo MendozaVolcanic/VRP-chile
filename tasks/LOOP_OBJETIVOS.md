@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 04:47 UTC (S187): Nicolás: «Despacha ahora»; tanda 2 de la historia de los 34 corriendo
+- Despacho programado local (13:10 UTC) detenido; Nicolás quiere apagar el computador. Despachada a las 04:47 UTC, antes de las 13 UTC del plan, con evidencia: durante la tanda 1 el NRT corrió verde y en tiempo normal.
+- **Run 43806164818** sobre main `9a7f37bcc`, 0 corridas del grupo vivas antes de despachar; job `plan` success; 165 trozos (Ollague, SanPedro, Putana, SanJose, Tinguiririca; 2025-02-15 a 2026-11-02), 6 a la vez. Fin estimado unas 13 h después (tanda 1: 8 h 47 min para 138 trozos).
+- **Para la próxima sesión** (Tarea 5 del plan, Steps 3 a 6): `gh run view 43806164818`; relanzar sólo trozos rojos con su ventana `Volcan@a:b`; bajar los artifacts a `D:\vrp-trabajo\temporales\historia_34\tanda2\` (parada bajo 3 GB); `python -I experiments/_s180_reemplazo_via/unir_trozos.py --salida experiments/_historia_34/union --informe experiments/_historia_34/union/informe_tanda2.json D:/vrp-trabajo/temporales/historia_34/tanda2`; exigir `huecos: []` y marcas sólo `:true`; ensayo del aplicador; PR con los `.json.gz`, el informe y `TANDAS.md` al día (tanda 1: ensayo, run 43802322235, commit `bec44eb16`; tanda 2: este run); «mergea #N» de Nicolás; aplicar con `aplicar-reemplazo.yml` y tag `pre-historia-34-tanda2` (H3).
+- **También pendiente**: auditoría semanal del 11-16 (09:00 UTC) contra `D:\vrp-trabajo\temporales\s186_parcheB\` y cerrar #973 si da VERDE; confirmar que #1004 se cerró.
+
 ### 2026-11-16 04:45 UTC (S187): Nicolás: «mergea #1024, #955 y #981»; los tres integrados
 - **#981** merge `b10fcd183` (mergedAt 2026-11-16 04:42:55 UTC; head `62ccb8830`; sólo `docs/PLAN_REEMPLAZO_HISTORIA_VIA_S178.md`, CI verde). Arregla las citas del workflow y de `data/_k_residuales_via/`.
 - **#955** merge `b9d36ac8b` (04:43:54 UTC; head `e0f971620` tras `update-branch`, pytest y bateria verdes sobre main). `docs/AUDIT_S175.md` ya existe en main.
