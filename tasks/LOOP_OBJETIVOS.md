@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 04:15 UTC (S187): Nicolás: «Sí, despacha la tanda 2»; despacho programado para las 13:10 UTC
+- Planificador ensayado en local (copia de main en `D:\vrp-trabajo\temporales\s187_tanda1\repo\`) con Ollague, SanPedro, Putana, SanJose y Tinguiririca y las seis ventanas del plan: 165 trozos, 0 saltados (tope 256).
+- Despacho en segundo plano desde esta máquina: `D:\vrp-trabajo\temporales\s187_tanda2\despachar.sh` (log `despacho.log` al lado). Espera a las 13:10 UTC, comprueba que no haya corridas del grupo `reproc-historia-via` vivas (Step 1), despacha con `--ref main` y anota el run y el resultado del job `plan`. Si el computador se suspende, despacha más tarde, lo que también cumple «después de las 13 UTC».
+- Después del run: relanzar sólo trozos rojos (Step 3), bajar y unir en `D:\vrp-trabajo\temporales\historia_34\tanda2\` (Step 4), ensayo (Step 5) y PR de la unión con `TANDAS.md` al día, incluida la tanda 1 (Step 6; su merge pide «mergea #N»).
+
 ### 2026-11-16 04:12 UTC (S187): Nicolás: «Mergea #1000 y aplica»; tanda 1 de la historia de los 34 en data/historia_34
 - **#1000** integrado con merge commit `8c94743d1` (mergedAt 2026-11-16 04:07:12 UTC; head `7962a7666` con `--match-head-commit`). Sólo el plan y `experiments/_historia_34/TANDAS.md`; no toca la ficha.
 - **Ensayo** (sin `--aplicar`, copia mínima de main en `D:\vrp-trabajo\temporales\s187_tanda1\`): 5 de 5 volcanes, 0 rehusados, 0 tras el corte; Guallatiri 5389, Irruputuncu 5573, OlcaParuma 5603, Parinacota 5384, Taapaca 5494. Unión con `huecos: []` y marcas sólo `:true` en los cinco.
