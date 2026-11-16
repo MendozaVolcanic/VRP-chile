@@ -144,8 +144,12 @@ def test_frontend_el_ocr_diurno_solo_llega_al_dibujo():
     # S180: 3 -> 2. Hasta S180 loadVolcano armaba dos objetos de allData (uno vacío para los 34 sin datos); desde que los
     # 34 se leen de la sombra hay uno solo (con mirova null, mirovaDiaOcr queda []). Lo vigilado no cambia: fuera de
     # cargarlo, el único uso es el filtro del dibujo (mDia), y ninguna métrica ni confirmación lo lee (abajo).
-    assert len(usos_idx) == 2, usos_idx          # el objeto de allData y el filtro del dibujo
-    assert any("const mDia" in ln for ln in usos_idx)
+    # S184: 2 -> 3. La evolución «como MIROVA» (datosEvol, que alimenta armarEvolucion) dibuja el mismo sol por pasada en
+    # sus dos paneles: es otro filtro de dibujo (`const mDia = conMirova ? ...`), que sólo va a puntosMirovaEvol.
+    assert len(usos_idx) == 3, usos_idx          # el objeto de allData y los dos filtros del dibujo
+    assert sum("const mDia" in ln for ln in usos_idx) == 2, usos_idx
+    cuerpo_evol = idx.split("function datosEvol(", 1)[1].split("\nfunction ", 1)[0]
+    assert len(_usos(cuerpo_evol, "mirovaDiaOcr")) == 1 and "puntosMirovaEvol(mDia," in cuerpo_evol
     assert not any("computeMetrics" in ln or "enrichWithMirovaConfirmation" in ln for ln in usos_idx)
     # las metricas siguen recibiendo mFiltered, que sale de mirovaRecords (= records, sin cambio)
     assert "computeMetrics(filtered, mFiltered," in idx

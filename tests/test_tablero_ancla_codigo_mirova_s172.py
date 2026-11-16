@@ -80,4 +80,7 @@ def test_un_solo_lugar_las_siete_copias_llaman_a_la_funcion():
     cuerpo = src.replace(re.search(r"function esAnclaHonesta\([^\n]*", src).group(0), "")
     assert not re.search(r'\[\s*"(ctx_cluster|test1_roi|test1_nti_peak)"\s*,', cuerpo)
     llamadas = re.findall(r"(?<!function )(?<![A-Za-z0-9_])esAnclaHonesta\(", src)
-    assert len(llamadas) == 7, len(llamadas)
+    # S184 (revisión S185 de #1011): 7 -> 6. La capa del mapa (honestDist) llama ahora a distanciaDePasada, que lleva la
+    # suya: una copia menos de la cadena de distancia (A102), no una llamada perdida.
+    assert len(llamadas) == 6, len(llamadas)
+    assert "const honestDist = (r) => distanciaDePasada(r);" in src

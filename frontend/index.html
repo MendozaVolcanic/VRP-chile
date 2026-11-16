@@ -3117,6 +3117,11 @@ function renderDetail() {
   // la vía (desde el 2026-11-03), así que en sus gráficos esas líneas caerían fuera de sus datos y confundirían.
   const sinLineasDeVia = v.fuente === "sombra_34"
     ? { cambioDetector: false, cambioViaModis: false, cambioViaV375: false, cambioViaV750: false } : {};
+  // S184: último mes y último año fijos, un palito por pasada y color por distancia, como los PNG de MIROVA (va antes del
+  // gráfico del período, que sigue igual). Sólo display: ver armarEvolucion.
+  const evolHost = el("div", "evol");
+  dp.appendChild(evolHost);
+  armarEvolucion(evolHost, v, d, innerKm, sinLineasDeVia);
   // S180: los 34 no tienen MIROVA con qué comparar, así que no llevan esa pestaña.
   const tabNames = ["VRP lineal", "VRP log", "Distancia", "VRE acumulada", "Comparar con MIROVA"].slice(0, v.hasMirova ? 5 : 4);
   if (detailChartTab == null || detailChartTab <= 1) detailChartTab = logScale ? 1 : 0;
@@ -3281,11 +3286,8 @@ function renderDetail() {
       // — el píxel suelto (hotspot_dist_km) ya no representa al record.
       const honestAnchor = esAnclaHonesta(
         r.final_hotspot_source);
-      const dist = (honestAnchor ? r.final_hotspot_dist_km : null)
-        ?? r.hotspot_dist_km
-        ?? r.final_hotspot_dist_km
-        ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null)
-        ?? r.vent_hotspot_dist_km;
+      // S184 (revisión S185): la cadena vive en distanciaDePasada (A102); la tabla agrega el vent de los records legacy.
+      const dist = distanciaDePasada(r) ?? r.vent_hotspot_dist_km;
       const isVent = (r.n_vent_pixels ?? 0) > 0 && (r.n_anomalous_pixels ?? 0) === 0;
       const isVentLegacy = isVent && r.vent_hotspot_dist_km == null;  // legacy sin coord real
       const k2c = (k) => k != null ? (k - 273.15).toFixed(1) : "—";
@@ -3874,12 +3876,9 @@ function renderDetail() {
       if (!isSensorVisible(r)) continue;
       if (!isValidDetection(r)) continue;  // H3 (S77): helper global
       const vrp = r.vrp_mw ?? 0;
-      // S106 ancla honesta: preferir el ancla oficial cuando existe (ver tabla).
-      const _honest = esAnclaHonesta(
-        r.final_hotspot_source);
-      const dist = (_honest ? r.final_hotspot_dist_km : null)
-        ?? r.hotspot_dist_km ?? r.final_hotspot_dist_km
-        ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
+      // S106 ancla honesta: preferir el ancla oficial cuando existe (ver tabla). S184: la cadena vive en distanciaDePasada
+      // (la usa también la evolución de arriba; un solo lugar, A102).
+      const dist = distanciaDePasada(r);
       if (dist == null) continue;
       // F30 Bug 11a fix (S74): respetar toggle "Solo cráter" / "Incluir lejanas".
       // Antes el scatter mostraba todos los puntos incluso con toggle activo —
@@ -4154,6 +4153,390 @@ function renderDetail() {
   setTimeout(() => mostrarTab(detailChartTab), 50);
 }
 
+// ── S184: evolución como MIROVA (último mes y último año, un palito por pasada) ──────────────────────────────────────
+// POR QUÉ. Los gráficos por volcán de MIROVA (PNG de mirovaweb.it, vistos el 2026-11-14 en Nevados de Chillán) muestran a
+// la vez el último mes y el último año (2 meses y 2 años en el combinado), un palito por pasada sobre tiempo real y el
+// color por distancia: rojo a 5 km o menos, negro más lejos. Así se ve de un vistazo cuándo la actividad pasó al cráter
+// (Chillán, desde septiembre de 2026). El gráfico del período dibuja el máximo diario en barras y, con «Solo cráter»,
+// borra lo lejano: con 30 días una barra llena el ancho y el año no muestra el traslado.
+// Este bloque es SÓLO de display. El alto de cada palito es mirovaEqVrpDisplay, el mismo valor que publica eqVrp de
+// renderDetail, y el color sigue la regla de publicación de mirovaEqVrp (centroide del cúmulo contra inner_radius_km):
+// en el cráter va en el color del sensor (lo que se publica) y fuera en gris, rotulado «no publicada» (o «contada con
+// Incluir lejanas» si ese botón está prendido). No cambia mirovaEqVrp ni lo que cuentan las estadísticas. Los
+// artefactos térmicos (cirrus, campo difuso) no se dibujan, igual que en el gráfico del período.
+// Guard: tests/test_tablero_evolucion_como_mirova_s184.py
+const EVOL_DIAS = { sensor: [30, 365], COMB: [60, 730] };   // como MIROVA: mes y año por sensor; 2 meses y 2 años combinado
+const EVOL_GRIS = "#8a94a3";
+const EVOL_LOG_MIN_MW = 0.01;   // 10^4 W: un decenio bajo el piso de MIROVA (10^5 W) para no esconder lo débil de VIIRS 375
+const EVOL_LOG_MAX_MW = 1e5;    // 10^11 W, el techo de MIROVA
+const EVOL_SERIES = [   // rótulos que busca cambio_detector.js (/^MODIS/, /^VIIRS\b.*375/, /^VIIRS\b.*750/), como buildDatasets
+  { grupo: "MODIS",    label: "MODIS",      color: "#ff8c00", bucketMirova: "MODIS" },
+  { grupo: "VIIRS750", label: "VIIRS 750m", color: "#00bcd4", bucketMirova: "VIIRS" },
+  { grupo: "VIIRS375", label: "VIIRS 375m", color: "#e91e63", bucketMirova: "VIIRS375" },
+];
+
+function rotuloVentanaEvol(dias) {
+  return ({ 30: "Último mes", 60: "Últimos 2 meses", 365: "Último año", 730: "Últimos 2 años" })[dias] || ("Últimos " + dias + " días");
+}
+function ventanasEvol(sensorKey) {
+  return (sensorKey === "COMB" ? EVOL_DIAS.COMB : EVOL_DIAS.sensor).map(dias => ({ dias, rotulo: rotuloVentanaEvol(dias) }));
+}
+
+// Distancia de la pasada al volcán: el ancla oficial cuando existe (S106), luego el resto de la cadena. Es la misma que
+// usa el gráfico «Distancia» del período (buildDistanceData la llama: un solo lugar, A102).
+function distanciaDePasada(r) {
+  const honesta = esAnclaHonesta(r.final_hotspot_source);
+  const d = (honesta ? r.final_hotspot_dist_km : null)
+    ?? r.hotspot_dist_km ?? r.final_hotspot_dist_km
+    ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
+  return typeof d === "number" && Number.isFinite(d) ? d : null;
+}
+
+// Una entrada por pasada con anomalía dibujable. `y` es el valor que se publicaría con «Incluir lejanas» y `enCrater` dice
+// si se publica con «Solo cráter»: así el valor publicado de cada record es (enCrater || includeFar) ? y : 0, idéntico a
+// eqVrp de renderDetail (la prueba lo comprueba record por record). No depende del botón, así que la historia se guarda
+// ya resumida.
+function pasadasEvol(records, innerKm) {
+  const out = [];
+  for (const r of records || []) {
+    if (!r || isThermalArtifact(r, innerKm)) continue;
+    const y = mirovaEqVrpDisplay(r, innerKm, true);
+    if (!(y > 0)) continue;
+    const t = parseUtcMs(r.datetime_utc);
+    if (!Number.isFinite(t)) continue;
+    out.push({ t, dt: r.datetime_utc, sensor: r.sensor, grupo: sensorGroup(r.sensor), y,
+               enCrater: mirovaEqVrpDisplay(r, innerKm, false) > 0, dist: distanciaDePasada(r) });
+  }
+  return out.sort((a, b) => a.t - b.t);
+}
+
+function tMinRecords(records) {
+  let t0 = Infinity;
+  for (const r of records || []) { const t = parseUtcMs(r && r.datetime_utc); if (t < t0) t0 = t; }
+  return t0;
+}
+// La historia completa se baja una vez y la ventana reciente se refresca cada 2 h: de la historia sólo se toma lo anterior
+// al primer record reciente, y desde ahí manda lo reciente (lo nuevo y lo reprocesado).
+function unirHistoriaEvol(histPts, recPts, t0Recientes) {
+  if (!histPts || !histPts.length) return recPts;
+  if (!Number.isFinite(t0Recientes)) return histPts;
+  return histPts.filter(p => p.t < t0Recientes).concat(recPts);
+}
+function enVentanaEvol(pts, ahoraMs, dias) {
+  const desde = ahoraMs - dias * 86400000;
+  return pts.filter(p => (p.t ?? p.x) >= desde);
+}
+
+// Referencia de MIROVA, una marca por pasada (no el máximo diario): las convenciones de siempre (▲ tabla, ◇ OCR, ✕ sin
+// distancia, ☀ diurna), puestas en la hora de la pasada.
+function puntosMirovaEvol(records, sensorInfo, dia) {
+  const out = [];
+  for (const r of records || []) {
+    const info = sensorInfo(r.sensor || r.Sensor || ""); if (!info) continue;
+    const y = parseFloat(r.VRP_MW ?? r.vrp_mw ?? 0);
+    if (!(y > 0)) continue;
+    const t = parseUtcMs(r.datetime_utc);
+    if (!Number.isFinite(t)) continue;
+    out.push({ x: t, y, dt: r.datetime_utc, sensor: info.label, color: info.color,
+               ocr: r.source === "ocr", sinGeo: r.sin_geometria === true, dia: !!dia });
+  }
+  return out.sort((a, b) => a.x - b.x);
+}
+
+// Bandas de clase de la escala log, sacadas de LEVELS (las de getLevel y la «Escala MIROVA» del detalle): nada de
+// umbrales nuevos. MIROVA dibuja además «Extreme», cuyo umbral no está en nuestro código, así que no se dibuja.
+function clasesEscalaEvol(levels) {
+  const out = []; let desde = 0;
+  for (const l of levels.slice(1)) { out.push({ desde, hasta: l.max, rotulo: l.label }); desde = l.max; }
+  return out;
+}
+function ejeLogEvol(valores) {
+  let min = EVOL_LOG_MIN_MW;
+  for (const v of valores) if (v > 0 && v < min) min = Math.pow(10, Math.floor(Math.log10(v)));
+  return { min, max: EVOL_LOG_MAX_MW };
+}
+// Eje fijo de distancia: de 0 al radio de la grilla (25 km), como MIROVA. Lo que cae más lejos (las esquinas de la grilla
+// de 51 km llegan a unos 36 km) se dibuja en el borde de arriba con un triángulo, y el tooltip da su distancia real.
+function ejeDistEvol(radioKm) {
+  return { min: 0, max: radioKm || 25 };
+}
+// Eje de tiempo: la ventana termina en «ahora» con un 2 % de margen para que la línea se vea.
+function ejeXEvol(ahoraMs, dias) {
+  return { min: ahoraMs - dias * 86400000, max: ahoraMs + dias * 86400000 * 0.02 };
+}
+function rotuloFueraEvol(includeFar) {
+  return includeFar ? "Fuera del cráter (contada con «Incluir lejanas»)" : "Fuera del cráter: no publicada";
+}
+// «Datos desde»: la historia publicada empieza el 2025-02-15 en los 11 y el 2026-11-03 en los 34 de la sombra. Si la
+// ventana empieza antes, ese tramo se sombrea y el título lo dice: sin aviso, la falta de observación se lee como un
+// volcán tranquilo. Devuelve null cuando la ventana está cubierta (con un día de tolerancia).
+function inicioDatosEvol(inicioMs, ahoraMs, dias) {
+  if (!Number.isFinite(inicioMs)) return null;
+  return inicioMs > ahoraMs - dias * 86400000 + 86400000 ? inicioMs : null;
+}
+
+// Palito: una línea del pie del gráfico a cada punto de los datasets marcados `palitos`.
+const palitosEvolPlugin = {
+  id: "palitosEvol",
+  beforeDatasetsDraw(chart) {
+    const a = chart.chartArea; if (!a) return;
+    const ctx = chart.ctx; ctx.save(); ctx.lineWidth = 1;
+    chart.data.datasets.forEach((ds, i) => {
+      if (!ds.palitos || !chart.isDatasetVisible(i)) return;
+      ctx.strokeStyle = ds.borderColor; ctx.beginPath();
+      for (const e of chart.getDatasetMeta(i).data) {
+        if (!e || !Number.isFinite(e.x) || !Number.isFinite(e.y) || e.x < a.left || e.x > a.right) continue;
+        ctx.moveTo(e.x, a.bottom); ctx.lineTo(e.x, Math.max(e.y, a.top));
+      }
+      ctx.stroke();
+    });
+    ctx.restore();
+  },
+};
+// Líneas de referencia: clases de la escala (con rótulo al centro de cada banda), radio del cráter, «ahora» y el tramo
+// sin datos al comienzo de la ventana.
+const lineasEvolPlugin = {
+  id: "lineasEvol",
+  beforeDatasetsDraw(chart, args, o) {
+    const a = chart.chartArea, x = chart.scales.x, y = chart.scales.y;
+    if (!a || !x || !y || !o) return;
+    const ctx = chart.ctx; ctx.save(); ctx.font = "10px system-ui, sans-serif"; ctx.lineWidth = 1;
+    if (o.sinDatosHastaMs != null && o.sinDatosHastaMs > x.min) {
+      const px = Math.min(x.getPixelForValue(o.sinDatosHastaMs), a.right);
+      ctx.fillStyle = "rgba(122,143,166,0.12)"; ctx.fillRect(a.left, a.top, px - a.left, a.bottom - a.top);
+      if (px - a.left > 46) {
+        ctx.fillStyle = "rgba(200,212,228,0.6)"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText("sin datos", (a.left + px) / 2, (a.top + a.bottom) / 2);
+      }
+    }
+    const hLinea = (py, color) => { ctx.strokeStyle = color; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke(); };
+    for (const c of o.clases || []) {
+      if (c.desde > y.min && c.desde < y.max) hLinea(y.getPixelForValue(c.desde), "rgba(150,165,185,0.45)");
+      const lo = Math.max(c.desde, y.min), hi = Math.min(c.hasta, y.max);
+      if (!(hi > lo)) continue;
+      const pLo = y.getPixelForValue(lo), pHi = y.getPixelForValue(hi);
+      if (Math.abs(pLo - pHi) < 11) continue;
+      // a la izquierda: a la derecha están los datos recientes y la línea de «ahora»
+      ctx.fillStyle = "rgba(200,212,228,0.7)"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      ctx.fillText(c.rotulo, a.left + 4, (pLo + pHi) / 2);
+    }
+    if (o.radioKm != null && o.radioKm > y.min && o.radioKm < y.max) {
+      const py = y.getPixelForValue(o.radioKm);
+      hLinea(py, "#ff5252");
+      ctx.fillStyle = "#ff8a80"; ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+      ctx.fillText("cráter " + o.radioKm + " km", a.left + 4, py - 2);
+    }
+    if (o.ahoraMs != null && o.ahoraMs >= x.min && o.ahoraMs <= x.max) {
+      const px = x.getPixelForValue(o.ahoraMs);
+      ctx.strokeStyle = "rgba(224,230,240,0.75)"; ctx.setLineDash([2, 3]);
+      ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+      ctx.fillStyle = "rgba(224,230,240,0.85)"; ctx.textAlign = "right"; ctx.textBaseline = "top";
+      ctx.fillText("ahora", px - 3, a.top + 2);
+    }
+    ctx.restore();
+  },
+};
+
+// Historia completa del volcán abierto, sólo la suya (los 45 siguen con la ventana de 100 días). Se guarda resumida
+// (pasadasEvol), no el JSON: 13 a 17 MB por volcán de los 11 (alrededor de 1 MB comprimido, medido el 2026-11-14).
+// Si la descarga falla o el JSON llega cortado, queda «fallo» y el panel anual muestra los 100 días y lo dice.
+const _historiaEvol = {};
+function historiaEvol(v, innerKm) {
+  if (v.fuente === "sombra_34" || _fullHistoryLoaded) return { pts: null, estado: "no_hace_falta" };   // ya está toda en allData
+  let h = _historiaEvol[v.name];
+  if (h && h.estado === "fallo" && Date.now() >= (h.reintentarMs || 0)) { delete _historiaEvol[v.name]; h = null; }
+  if (!h) {
+    h = _historiaEvol[v.name] = { estado: "cargando" };
+    h.promesa = fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json").then(data => {
+      const recs = data && data.records;
+      if (!recs) { h.estado = "fallo"; h.reintentarMs = Date.now() + 60000; return; }
+      // mismo enriquecimiento que loadVolcano: _mirova_confirmed exime de los filtros de artefacto
+      enrichWithMirovaConfirmation(recs, (allData[v.name] || {}).mirovaRecords || []);
+      h.pts = pasadasEvol(recs, innerKm); h.t0 = tMinRecords(recs); h.estado = "lista";
+    }).catch(() => { h.estado = "fallo"; h.reintentarMs = Date.now() + 60000; });   // fetchJSON no atrapa un JSON cortado (devuelve r.json() sin await)
+  }
+  return h;
+}
+
+let evolModo = (() => { try { return sessionStorage.getItem("vrp_evol_modo") || "log"; } catch (e) { return "log"; } })();
+const EVOL_MODOS = [["log", "Log VRP"], ["lin", "VRP"], ["dist", "Distancia"]];
+const _evolOcultas = new Set();   // series apagadas en la leyenda: sobreviven a la llegada de la historia y al cambio de modo
+
+// Lo que dibujan los paneles, ya acotado a la pestaña de sensor, a los sensores prendidos y al botón de MIROVA.
+// o = { d, histPts, innerKm, sensorKey, visible, hasMirova }; d = allData del volcán.
+function datosEvol(o) {
+  const d = o.d || {};
+  const enPestana = p => (o.sensorKey === "COMB" || p.grupo === o.sensorKey) && (!p.grupo || o.visible[p.grupo] !== false);
+  const todos = unirHistoriaEvol(o.histPts, pasadasEvol(d.records, o.innerKm), tMinRecords(d.records)).filter(enPestana);
+  // MIROVA: una marca por pasada, del mismo sensor que la pestaña y con el mismo botón que el gráfico del período.
+  const infoMirova = s => {
+    const serie = EVOL_SERIES.find(x => x.bucketMirova === s);
+    if (!serie || !(o.sensorKey === "COMB" || serie.grupo === o.sensorKey) || o.visible[serie.grupo] === false) return null;
+    return { color: serie.color, label: serie.label };
+  };
+  const conMirova = !!o.hasMirova && o.visible.MIROVA !== false;
+  const mNoche = conMirova ? (d.mirovaRecords || []).filter(r => !mirovaEsDia(r)) : [];
+  const mDia = conMirova ? (d.mirovaRecords || []).filter(mirovaEsDia).concat(d.mirovaDiaOcr || []) : [];
+  return { todos, mirovaNoche: puntosMirovaEvol(mNoche, infoMirova, false), mirovaDia: puntosMirovaEvol(mDia, infoMirova, true) };
+}
+
+// Datasets de un panel. `pts` ya viene acotado al sensor de la pestaña, a los sensores prendidos y a la ventana. En
+// distancia, lo que pasa del techo del eje (`distMax`) queda en el borde con un triángulo.
+function datasetsEvol(pts, mirovaPts, modo, includeFar, distMax) {
+  const ds = [];
+  const dist = modo === "dist";
+  const tope = distMax || 25;
+  const aDato = p => dist ? { x: p.t, y: Math.min(p.dist, tope), recortada: p.dist > tope, p } : { x: p.t, y: p.y, p };
+  const forma = dist ? (c => (c.raw && c.raw.recortada ? "triangle" : "circle")) : "circle";
+  for (const s of EVOL_SERIES) {
+    const enC = pts.filter(p => p.grupo === s.grupo && p.enCrater && (!dist || p.dist != null));
+    if (enC.length) ds.push({ label: s.label, type: "scatter", data: enC.map(aDato), borderColor: s.color, backgroundColor: s.color,
+                              pointStyle: forma, pointRadius: 2.6, pointHoverRadius: 5, pointHitRadius: 6, palitos: !dist, order: 2 });
+  }
+  const fuera = pts.filter(p => !p.enCrater && (!dist || p.dist != null));
+  if (fuera.length) ds.push({ label: rotuloFueraEvol(includeFar), claveLeyenda: "fuera", type: "scatter", data: fuera.map(aDato), fueraCrater: true,
+                              borderColor: EVOL_GRIS, backgroundColor: EVOL_GRIS + "99", pointStyle: forma, pointRadius: 2.4,
+                              pointHoverRadius: 5, pointHitRadius: 6, palitos: !dist, order: 3 });
+  if (!dist) for (const m of mirovaPts) ds.push(m);
+  for (const x of ds) x.hidden = _evolOcultas.has(x.claveLeyenda || x.label);
+  return ds;
+}
+
+function fechaUtcEvol(ms) { return new Date(ms).toISOString().slice(0, 10); }
+function inicioMirovaEvol(listas) {
+  let t0 = Infinity;
+  for (const l of listas) for (const r of l || []) { const t = parseUtcMs(r && r.datetime_utc); if (t < t0) t0 = t; }
+  return t0;
+}
+
+function armarEvolucion(host, v, d, innerKm, plugExtra) {
+  for (const k of ["evol-0", "evol-1"]) if (charts[k]) { charts[k].destroy(); delete charts[k]; }
+  while (host.firstChild) host.removeChild(host.firstChild);
+  host.className = "evol";
+  const hdr = el("div", "evol-hdr");
+  const h = el("h4"); h.textContent = "Evolución, como MIROVA";
+  const modos = el("div", "evol-modos");
+  for (const [k, txt] of EVOL_MODOS) {
+    const b = el("button", "chart-tab" + (k === evolModo ? " active" : "")); b.textContent = txt;
+    b.addEventListener("click", () => {
+      if (evolModo === k) return;
+      evolModo = k; try { sessionStorage.setItem("vrp_evol_modo", k); } catch (e) {}
+      armarEvolucion(host, v, d, innerKm, plugExtra);
+    });
+    modos.appendChild(b);
+  }
+  hdr.append(h, modos);
+  const nota = el("div", "evol-nota");
+  nota.textContent = "Un palito por pasada con anomalía, en su hora real. En color: el cúmulo está en el cráter (centroide a " +
+    innerKm + " km o menos), lo que se publica. En gris: fuera del cráter, " +
+    (includeFarDistance ? "contada porque está prendido «Incluir lejanas»." : "no publicada (con «Solo cráter»).") +
+    " Fijos: no cambian con el período elegido; el gráfico del período sigue más abajo. Las fechas del eje van en la hora" +
+    " de tu computador; el detalle de cada pasada, en UTC.";
+  const grid = el("div", "evol-grid");
+  host.append(hdr, nota, grid);
+
+  const hist = historiaEvol(v, innerKm);
+  const datos = datosEvol({ d, histPts: hist.pts, innerKm, sensorKey: detailSensor, visible: sensorVisible, hasMirova: v.hasMirova });
+  // Sólo se sabe dónde empiezan los datos con la historia completa (o cuando allData ya la tiene). Mientras baja, o si
+  // falló, la ventana de 100 días no dice nada del comienzo: no se sombrea (revisión S185, punto 3).
+  const inicio = hist.estado === "lista" ? Math.min(hist.t0, tMinRecords(d.records))
+               : hist.estado === "no_hace_falta" ? tMinRecords(d.records) : null;
+  // Desde cuándo hay referencia de MIROVA: el primer registro guardado entre todos los volcanes (el scraper no guarda
+  // antes), para que el 2025 sin triángulos no se lea como «MIROVA no vio nada» (revisión S185, punto 4).
+  const inicioMirova = v.hasMirova && sensorVisible.MIROVA !== false
+    ? inicioMirovaEvol(Object.values(allData).map(x => (x && x.mirovaRecords) || [])) : NaN;
+  const ahora = Date.now();
+  const dist = evolModo === "dist";
+  const ventanas = ventanasEvol(detailSensor);
+  // El mismo eje Y en los dos paneles (el largo contiene al corto): se comparan de un vistazo, como en MIROVA.
+  const largo = enVentanaEvol(datos.todos, ahora, ventanas[1].dias);
+  const ejeY = dist ? ejeDistEvol(v.radius_km || 25)
+             : evolModo === "log" ? ejeLogEvol(largo.map(p => p.y).concat(enVentanaEvol(datos.mirovaNoche.concat(datos.mirovaDia), ahora, ventanas[1].dias).map(p => p.y)))
+             : null;
+  ventanas.forEach((w, i) => {
+    const panel = el("div", "chart-panel evol-panel");
+    const t = el("h5");
+    const sinDatosHasta = inicioDatosEvol(inicio, ahora, w.dias);
+    const sinMirovaHasta = dist ? null : inicioDatosEvol(inicioMirova, ahora, w.dias);
+    t.textContent = w.rotulo + (dist ? " · distancia al volcán" : " · VRP por pasada") +
+      (sinDatosHasta != null ? " · datos desde el " + fechaUtcEvol(sinDatosHasta) : "") +
+      (sinMirovaHasta != null ? " · MIROVA desde el " + fechaUtcEvol(sinMirovaHasta) : "");
+    if (i === 1 && hist.estado === "cargando") t.textContent += " (bajando la historia del volcán…)";
+    if (i === 1 && hist.estado === "fallo") t.textContent += " (no se pudo bajar la historia: sólo los últimos 100 días)";
+    const cw = el("div", "chart-wrapper"); const cv = el("canvas"); cw.appendChild(cv);
+    panel.append(t, cw); grid.appendChild(panel);
+    const pts = enVentanaEvol(datos.todos, ahora, w.dias);
+    const mPts = [];
+    const noche = enVentanaEvol(datos.mirovaNoche, ahora, w.dias);
+    for (const s of EVOL_SERIES) {
+      const sp = noche.filter(p => p.sensor === s.label);
+      if (sp.length) mPts.push({ label: "MIROVA " + s.label + " (ref.)", type: "scatter", data: sp, order: 1, borderColor: s.color,
+        pointRadius: mirovaPointRadius(3.5), pointHoverRadius: 6, pointStyle: mirovaPointStyle, pointBorderColor: s.color,
+        pointBackgroundColor: mirovaPointFill(s.color), pointBorderWidth: 1.4 });
+    }
+    const dia = enVentanaEvol(datos.mirovaDia, ahora, w.dias);
+    if (dia.length) mPts.push(mirovaDiaDataset(dia));
+    const yScale = dist ? { type: "linear", min: ejeY.min, max: ejeY.max, title: "Distancia (km)" }
+                 : evolModo === "log" ? { type: "logarithmic", min: ejeY.min, max: ejeY.max, title: "VRP (MW)" }
+                 : { type: "linear", min: 0, title: "VRP (MW)" };
+    const ejeX = ejeXEvol(ahora, w.dias);
+    charts["evol-" + i] = new Chart(cv.getContext("2d"), {
+      type: "scatter",
+      data: { datasets: datasetsEvol(pts, mPts, evolModo, includeFarDistance, dist ? ejeY.max : null) },
+      plugins: [palitosEvolPlugin, lineasEvolPlugin],
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        interaction: { mode: "nearest", intersect: true },
+        plugins: { ...plugExtra,
+          lineasEvol: { clases: dist ? null : clasesEscalaEvol(LEVELS), radioKm: dist ? innerKm : null, ahoraMs: ahora,
+                        sinDatosHastaMs: sinDatosHasta },
+          // Leyenda en los dos paneles (el largo puede tener series que el corto no) y apagar una serie la apaga en ambos.
+          legend: { labels: { color: "#7a8fa6", font: { size: 10 }, boxWidth: 9, padding: 7, sort: (a, b) => a.datasetIndex - b.datasetIndex },
+                    onClick: (e, item, legend) => {
+                      const dsx = legend && legend.chart ? legend.chart.data.datasets[item.datasetIndex] : null;
+                      const clave = (dsx && dsx.claveLeyenda) || item.text;
+                      if (_evolOcultas.has(clave)) _evolOcultas.delete(clave); else _evolOcultas.add(clave);
+                      for (const k of ["evol-0", "evol-1"]) {
+                        const c = charts[k]; if (!c) continue;
+                        const j = c.data.datasets.findIndex(x => (x.claveLeyenda || x.label) === clave);
+                        if (j >= 0) c.setDatasetVisibility(j, !_evolOcultas.has(clave));
+                        c.update();
+                      }
+                    } },
+          tooltip: {
+            backgroundColor: "#0f3460", borderColor: "#1a3a5c", borderWidth: 1, titleColor: "#e0e6f0", bodyColor: "#c0cad8",
+            callbacks: {
+              title: items => { const r = items[0] && items[0].raw; const dt = r && (r.p ? r.p.dt : r.dt); return dt ? dt + " UTC" : ""; },
+              label: ctx => {
+                const p = ctx.raw && ctx.raw.p;
+                if (!p) return [" " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) + " MW" : "sin dato") + mirovaSufijoSinGeo(ctx)].concat(mirovaLineasDia(ctx));
+                const fuera = rotuloFueraEvol(includeFarDistance);
+                return [" " + p.sensor + ": " + p.y.toFixed(3) + " MW",
+                        "  distancia " + (p.dist != null ? p.dist.toFixed(1) + " km" + (ctx.raw.recortada ? " (fuera del eje)" : "") : "sin dato") + " · " +
+                        (p.enCrater ? "en el cráter" : fuera.charAt(0).toLowerCase() + fuera.slice(1))];
+              },
+            },
+          },
+        },
+        scales: {
+          x: { type: "time", min: ejeX.min, max: ejeX.max,
+               time: { minUnit: "day", tooltipFormat: "yyyy-MM-dd HH:mm" },
+               grid: { color: "rgba(26,58,92,0.6)" }, ticks: { color: "#7a8fa6", font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 } },
+          y: { type: yScale.type, min: yScale.min, max: yScale.max,
+               grid: { color: "rgba(26,58,92,0.45)" },
+               ticks: { color: "#7a8fa6", font: { size: 10 },
+                        callback: yScale.type === "logarithmic" ? (val => { const e = Math.log10(val); return Math.abs(e - Math.round(e)) < 1e-9 ? String(val) : null; }) : undefined },
+               title: { display: true, text: yScale.title, color: "#7a8fa6", font: { size: 10 } } },
+        },
+      },
+    });
+  });
+  // La historia llega después: se redibuja sólo este bloque (no toda la página), si sigue a la vista el mismo volcán.
+  if (hist.estado === "cargando" && hist.promesa) {
+    hist.promesa.then(() => { if (host.isConnected && currentVolcano === v) armarEvolucion(host, v, allData[v.name] || d, innerKm, plugExtra); });
+  }
+}
+
 // ── Sensor legend ─────────────────────────────────────────────────────────────
 function buildLegend() {
   const legend = document.getElementById("sensor-legend");
@@ -4278,10 +4661,7 @@ function updateHotspotLayer() {
       const lon = (honest ? r.final_hotspot_lon : null) ?? r.hotspot_lon ?? r.final_hotspot_lon ?? r.vent_hotspot_lon;
       return (lat != null && lon != null) ? [lat, lon] : null;
     };
-    const honestDist = (r) => {
-      const honest = esAnclaHonesta(r.final_hotspot_source);
-      return (honest ? r.final_hotspot_dist_km : null) ?? r.hotspot_dist_km ?? r.final_hotspot_dist_km;
-    };
+    const honestDist = (r) => distanciaDePasada(r);   // S184 (revisión S185): misma cadena que la tabla y la evolución (A102)
     // Show any record with a resolvable position (honest anchor or legacy fallback).
     const withCoords = recs.filter(r => honestPos(r) != null);
 
@@ -4959,5 +5339,18 @@ function exportCSV(volcano, records) {
 
 document.addEventListener("DOMContentLoaded", init);
 </script>
+<style>
+  /* S184: evolución como MIROVA. Va aquí y no en el <head> para no correr las líneas 1 a 1599 (guard G8). */
+  .evol { margin: 12px 0 16px; }
+  .evol-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 4px; }
+  .evol-hdr h4 { font-size: 0.85rem; font-weight: 600; margin: 0; color: var(--text); }
+  .evol-modos { display: flex; flex-wrap: wrap; gap: 6px; }
+  .evol-nota { font-size: 0.75rem; color: #9aa; margin: 4px 0 8px; line-height: 1.35; }
+  .evol-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 12px; }
+  .evol-panel { min-width: 0; padding: 10px 12px; }
+  .evol-panel h5 { font-size: 0.75rem; font-weight: 600; margin: 0 0 6px; color: var(--text); }
+  .evol-panel .chart-wrapper { height: 250px; }
+  @media (max-width: 600px) { .evol-panel .chart-wrapper { height: 220px; } .evol-panel { padding: 8px; } }
+</style>
 </body>
 </html>
