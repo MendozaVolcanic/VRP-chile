@@ -569,6 +569,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 04:35 UTC (S187): Nicolás: «continúa con todo lo que recomiendes»; PR viejos, b.4 y sesiones
+- **#980 cerrado** (superado: main tiene `vara_matlab_v750a_salida.txt` con el mismo veredicto y el mismo sha256 de la vía, comprobado por contenido); rama conservada.
+- **#955 actualizado sobre main** con `gh pr update-branch` (sin worktree local); CI corriendo. El JWT del cuerpo es sintético (`exp` inventado, firma «sinte»): no bloquea. Merge espera «mergea #955»; arregla las citas rotas a `docs/AUDIT_S175.md` en 10 archivos de main.
+- **#981** sigue CLEAN; mergearlo como registro arregla las citas rotas a `docs/PLAN_REEMPLAZO_HISTORIA_VIA_S178.md` (16 archivos de main). Espera «mergea #981».
+- **b.4: PR #1024** (tag `pre-s187-b4-comentario-f5` sobre `bec44eb16`; worktree disperso sólo con `frontend/` en `D:\vrp-trabajo\worktrees\s187-b4`): tres comentarios de `USE_F5_CORE` dejan de hablar de una «historia de K»; el núcleo sólo actúa sobre records que no son de la vía (caídas a K). Una línea por archivo, sin mover líneas (guard G8). CI corriendo; espera «mergea #1024».
+- **Sesiones archivadas: 33** (con su etiqueta, que pide el hook): documentos #1023, paper y mazos, L1B, reemplazo #987 (dos), FileExists #1007, comparación #1006, limpieza de D:, orden de sesiones, S171, S172, S173, S161, tres de S175 con PR mergeado, paper #912, y las coordinadoras S160, S161, S162 con sus 13 hijas. Worktree `D:\vrp-trabajo\wt_s186_docs` quitado (0 sin commitear, HEAD ya en main).
+- **No archivadas a propósito**: las coordinadoras S179 a S186 (archivar una arrastra a sus hijas terminadas, y «Los 34 al tablero», `local_b5b88dc8`, debe quedar viva para la Tarea 8 del plan de la historia); los ocho auditores y verificadores de S175 y su coordinadora `bbc7bda4` (su carpeta es el worktree de #955); Codex (`experiments/_s176_codex/` sin commitear, regla: no tocar); las de #1011/#1019, #1015 y #913.
+- **Revisados sin acción**: `experiments/_s161_estado_864/INFORME.md` ya está en main; `tasks/LOOP_MODIS.md` y `tasks/LOOP_VIIRS750.md` de S162 sólo viven en sus ramas del remoto, que se conservan.
+- **#913**: cerrar y llevarlo al repo privado del paper queda para Nicolás (escribe en otro repo).
+
 ### 2026-11-16 04:15 UTC (S187): Nicolás: «Sí, despacha la tanda 2»; despacho programado para las 13:10 UTC
 - Planificador ensayado en local (copia de main en `D:\vrp-trabajo\temporales\s187_tanda1\repo\`) con Ollague, SanPedro, Putana, SanJose y Tinguiririca y las seis ventanas del plan: 165 trozos, 0 saltados (tope 256).
 - Despacho en segundo plano desde esta máquina: `D:\vrp-trabajo\temporales\s187_tanda2\despachar.sh` (log `despacho.log` al lado). Espera a las 13:10 UTC, comprueba que no haya corridas del grupo `reproc-historia-via` vivas (Step 1), despacha con `--ref main` y anota el run y el resultado del job `plan`. Si el computador se suspende, despacha más tarde, lo que también cumple «después de las 13 UTC».
