@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 19:01 UTC (S187): Nicolás: «Mergea #1026 y aplica»; tanda 2 integrada y aplicada
+
+- **#1026** (unión de la tanda 2): CI verde sobre `12321f578` (pytest y bateria-v750a), CLEAN; merge commit `1fabb0ea0` a las 18:57:40 UTC (`--match-head-commit`). Nicolás eligió aplicar con Putana (D1 sigue abierta; si sale, se retira con su tag).
+- **Aplicación** (H3): run 43934376861 de `aplicar-reemplazo.yml` verde; tag `pre-historia-34-tanda2` = `33c6796f9`; 73 pruebas pasadas; commit `43ac1c5e6` (19:00:16 UTC) con los 5 `data/historia_34/<V>.json` y `experiments/_historia_34/aplicado/informe.json`: Ollague 5.673, Putana 5.602, SanJose 6.398, SanPedro 5.708, Tinguiririca 6.485 nuevos (29.866, igual al ensayo), 0 tras el corte; los 5 de la tanda 1 dan 0 nuevos.
+- Worktree `D:/vrp-trabajo/worktrees/s187-tanda2` y rama local quitados.
+- **Compactación** (pregunta de Nicolás): la sesión se compactó sola dos veces (13:20 UTC con 321.594 tokens; 18:57 UTC con 263.498). Entre ambas: 76 Bash (77 mil caracteres de salida), 88 mil de entradas de herramientas, 46 mil en sólo 9 `list_sessions`/`list_events`, 107 mil de recordatorios del sistema. Nicolás: «no es compactar lo que queremos sino abrir nuevas sesiones». Se agrega un hook que avisa cerrar con /cierre antes de llegar al umbral, y S187 cierra para abrir S188.
+- **Tanda 3**: run 43906817147 corriendo; la cadena `cadena_3a7.sh` despacha la 4 cuando termine.
+
 ### 2026-11-16 17:40 UTC (S187): Nicolás: «Mergea #1025 y #1019»; ambos integrados; tanda 2 unida en #1026; tanda 3 corriendo
 - #1025 (ficha v1.32 por #1011 y fecha de la v1.31 a 2026-11-16) mergeado 17:26:30 UTC, `0be01792a`.
 - #1019: en su rama, desde un worktree mío, merge de main (`7a980a11f`) y fila v1.33 ANTES de mergear (`9515ec247`, 51 pruebas de ficha, G8 y evolución en verde); CI verde; mergeado 17:40:00 UTC, `850d03245`. Sesión de los gráficos avisada para quitar sus worktrees.
