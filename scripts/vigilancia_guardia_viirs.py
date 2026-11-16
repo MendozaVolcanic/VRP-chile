@@ -209,6 +209,8 @@ def evaluar(hoy, clave):
     if sensor == "VIIRS750":
         out["region_sensible"] = informe_sens(prod, guardia, encendido, volcanes_sens())
     out.update({"veredicto": veredicto, "avisos": avisos,
+                # S185: informativo, aparte de `avisos` a propósito: no cambia el veredicto ni abre issue
+                "avisos_informativos": vg.avisos_ventana_nulo(d["nulo"]),
                 "solo_caidas_a_k": veredicto == "VIGILANCIA_CIEGA" and not ciegos,
                 "guardia_desde": min((r["noche"] for r in guardia), default=None),
                 "guardia_hasta": max((r["noche"] for r in guardia), default=None),
@@ -225,6 +227,8 @@ def imprimir(out):
           f"encendido {out.get('encendido_utc')} · guardia {out.get('guardia_desde')} a {out.get('guardia_hasta')}")
     for a in out.get("avisos", []):
         print("AVISO:", a)
+    for a in out.get("avisos_informativos", []):
+        print("AVISO (informativo):", a)
     e = vg.ETIQUETAS[out["sensor"]]
     for p in out.get("reversion", []):
         print(f"  REVERSIÓN CANDIDATA: {p['volcano']} {e} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia (K) "
@@ -247,6 +251,7 @@ def imprimir(out):
                   f"{' · DISPARA' if m['dispara'] else ''}")
     n = out.get("nulo") or {}
     print(f"  nulo (antes del encendido): {n.get('distintas')} pasadas distintas de {n.get('pares')} pareadas"
+          + vg.texto_ventana_nulo(n)
           + (f" (sellado antes del reemplazo de la historia, "
              f"{n.get('medido_utc')} UTC)" if n.get('sellado') else ""))
     b = out.get("borde_171_01") or {}

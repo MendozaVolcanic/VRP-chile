@@ -1,0 +1,15 @@
+CLASES_DECIDEN ('pos_prot', 'pos_bajo', 'neg_pub', 'neg_resto', 'far_tabla') UMBRAL_COBERTURA 0.1
+criterios_sombra(p2k='SIN SUSTRATO', silencio='SIN SUSTRATO (faltan negativos de alguna clase)', p2l='SIN SUSTRATO') -> b=CUMPLE estado=CUMPLE
+criterios_sombra(p2k='SIN SUSTRATO', silencio='ENCIENDE DE MAS', p2l='SIN SUSTRATO') -> b=NO CUMPLE estado=NO CUMPLE
+criterios_sombra(p2k='SIN SUSTRATO', silencio='SIN SUSTRATO', p2l='PIERDE') -> b=NO CUMPLE estado=NO CUMPLE
+criterios_sombra(p2k='PIERDE', silencio='APAGA', p2l='GANA') -> b=NO CUMPLE estado=NO CUMPLE
+criterios_sombra(p2k='GANA', silencio='SIN SUSTRATO', p2l='SIN SUSTRATO') -> b=CUMPLE estado=CUMPLE
+  con regimen_ok=False -> b=DECIDE NICOLAS estado=DECIDE NICOLAS
+estado_c_sombra('SIN SUSTRATO') = DECIDE NICOLAS
+control_s7(1 pos_prot con dato, 0 negativos): ok=True
+control_s7(10 de pos_prot todos SIN DATO): ok=False   [control positivo: tiene que ser False]
+control_s7(10 de pos_bajo todos SIN DATO): ok=False   [control positivo: tiene que ser False]
+control_s7(10 de neg_pub todos SIN DATO): ok=False   [control positivo: tiene que ser False]
+control_s7(10 de neg_resto todos SIN DATO): ok=False   [control positivo: tiene que ser False]
+control_s7(10 de far_tabla todos SIN DATO): ok=False   [control positivo: tiene que ser False]
+control_s7(poblacion vacia): ok=False

@@ -1,0 +1,11 @@
+CLASES_DECIDEN ('pos_prot', 'pos_bajo', 'neg_pub', 'neg_resto', 'far_tabla') | UMBRAL_COBERTURA 0.1
+criterios_sombra [p2k y silencio SIN SUSTRATO, p2l SIN SUSTRATO] -> b=CUMPLE estado=CUMPLE
+criterios_sombra [p2k y silencio SIN SUSTRATO, p2l EMPATE] -> b=CUMPLE estado=CUMPLE
+criterios_sombra [p2k y silencio SIN SUSTRATO, p2l PIERDE (control)] -> b=NO CUMPLE estado=NO CUMPLE
+criterios_sombra [p2k PIERDE (control)] -> b=NO CUMPLE estado=NO CUMPLE
+criterios_sombra [silencio ENCIENDE DE MAS (control)] -> b=NO CUMPLE estado=NO CUMPLE
+criterios_sombra [todo SIN SUSTRATO, regimen_ok=False] -> b= DECIDE NICOLAS estado= DECIDE NICOLAS
+control_s7 negativos n=0, resto con dato completo -> pasa = True | n por clase {'far_tabla': 3, 'neg_pub': 0, 'neg_resto': 0, 'pos_bajo': 5, 'pos_prot': 10}
+control_s7 control: neg_pub 50 % sin dato -> pasa = False | sin_dato {'far_tabla': 0, 'neg_pub': 5, 'neg_resto': 0, 'pos_bajo': 0, 'pos_prot': 0}
+control_s7 poblacion vacia -> pasa = False
+control_s7 solo 1 far_tabla, sin protegidas ni negativos -> pasa = True

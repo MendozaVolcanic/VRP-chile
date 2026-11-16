@@ -1,0 +1,12 @@
+65:healthcheck	UNKNOWN STEP	2026-10-04T16:06:30.4363881Z hint: to use in all of your new repositories, which will suppress this warning,
+350:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2848145Z ^[[36;1mLABEL = "nrt-stale"^[[0m
+363:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2852560Z ^[[36;1m    # un WARN, el workflow termina success y la alerta se pierde sin que^[[0m
+370:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2855537Z ^[[36;1m        print(f"WARN {msg}")^[[0m
+387:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2860812Z ^[[36;1m        print(f"FAIL: {len(fallos_gh)} llamada(s) a gh fallaron; "^[[0m
+391:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2862094Z ^[[36;1m        sys.exit(1)^[[0m
+392:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2862333Z ^[[36;1m    sys.exit(0)^[[0m
+394:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2862826Z ^[[36;1mraw = gh("issue", "list", "--repo", REPO, "--label", LABEL,^[[0m
+402:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2865877Z ^[[36;1m        sys.exit(0)^[[0m
+425:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2873981Z ^[[36;1m    gh("label", "create", LABEL, "--repo", REPO, "--color", "FF6B6B",^[[0m
+428:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2875248Z ^[[36;1m       "--label", LABEL, "--body-file", "-", stdin=cuerpo)^[[0m
+429:healthcheck	UNKNOWN STEP	2026-10-04T16:07:28.2875618Z ^[[36;1m    print(f"Issue creado (escalón {actual}).")^[[0m
