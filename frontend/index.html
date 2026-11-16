@@ -3199,7 +3199,19 @@ function renderDetail() {
     {label: "T max (°C)"},
     {label: "T fondo (°C)"},
     {label: "Píxeles", title: "Cluster principal / total detectados. Cluster = región contigua ~1km."},
+    // S184 tanda 2: cenit del satélite en cada pasada, como el «Zen» de MIROVA; en naranja si es oblicua (esOblicuaEvol)
+    {label: "Cenit", title: "Ángulo del satélite desde la vertical del volcán. Sobre " + EVOL_CENIT_OBLICUO + "° la mirada es " +
+      "oblicua: el píxel crece y el infrarrojo cruza más atmósfera; en un volcán de señal chica la pasada puede no ver el calor " +
+      "o verlo menor. Ver la nota del cenit arriba."},
   ];
+  // Celda del cenit (también en las filas sin anomalía: una pasada oblicua que no vio nada pesa menos que una de nadir).
+  const celdaCenit = (td, r) => {
+    const z = r.sensor_zenith_deg;
+    if (typeof z !== "number") { td.textContent = "sin dato"; return; }
+    td.textContent = Math.round(z) + "°";
+    td.title = textoCenitEvol(z, r.sensor_azimuth_deg) + (esOblicuaEvol(z) ? " · mirada oblicua" : "");
+    if (esOblicuaEvol(z)) td.className = "cenit-oblicuo";
+  };
   headers.forEach(h => {
     const th = el("th"); th.textContent = h.label;
     if (h.title) th.title = h.title;
@@ -3235,7 +3247,7 @@ function renderDetail() {
     .slice(0, 20);
 
   if (recent.length === 0) {
-    const row = el("tr"); const td = el("td"); td.colSpan = 8;
+    const row = el("tr"); const td = el("td"); td.colSpan = 9;
     td.textContent = tablaTodasPasadas ? "Sin pasadas en el período" : "Sin detecciones en el período"; td.style.color = "var(--muted)";
     td.style.textAlign = "center"; td.style.padding = "20px";
     row.appendChild(td); tbody.appendChild(row);
@@ -3258,6 +3270,7 @@ function renderDetail() {
           if (i === 3 && rot.title) td.title = rot.title;
           if (i === 2 && marca34) td.appendChild(marca34);
         });
+        const tdZ = el("td"); celdaCenit(tdZ, r); row.appendChild(tdZ);
         tbody.appendChild(row);
         return;
       }
@@ -3383,6 +3396,7 @@ function renderDetail() {
         }
         row.appendChild(td);
       });
+      const tdZ = el("td"); celdaCenit(tdZ, r); row.appendChild(tdZ);
       tbody.appendChild(row);
     });
   }
@@ -4197,15 +4211,33 @@ function distanciaDePasada(r) {
 // eqVrp de renderDetail (la prueba lo comprueba record por record). No depende del botón, así que la historia se guarda
 // ya resumida.
 function pasadasEvol(records, innerKm) {
+  return todasPasadasEvol(records, innerKm).filter(p => p.y > 0);
+}
+// S184 tanda 2: TODAS las pasadas, también las que no vieron nada y las que no se pudieron medir, una entrada chica por
+// pasada (la historia se guarda así, resumida). `estado`: «crater» o «fuera» (anomalía dibujable, con `y`, `enCrater` y
+// `dist`; son las de pasadasEvol), «no_publicada» (píxeles anómalos que no cuentan: artefacto o descartada, la misma regla
+// que rotuloPasadaSinPublicar), «sin_datos» y «reflejo» (escenaSinDato, S183) y «nada». POR QUÉ: «se miró y no había
+// nada» y «no se pudo medir» son cosas distintas para el operador; MIROVA las separa en sus últimas imágenes (NaN y
+// escena en blanco). `zen` y `azi` son el cenit y el azimut del satélite (sensor_zenith_deg, sensor_azimuth_deg).
+function todasPasadasEvol(records, innerKm) {
+  const num = x => (typeof x === "number" && Number.isFinite(x) ? x : null);
   const out = [];
   for (const r of records || []) {
-    if (!r || isThermalArtifact(r, innerKm)) continue;
-    const y = mirovaEqVrpDisplay(r, innerKm, true);
-    if (!(y > 0)) continue;
+    if (!r) continue;
     const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t)) continue;
-    out.push({ t, dt: r.datetime_utc, sensor: r.sensor, grupo: sensorGroup(r.sensor), y,
-               enCrater: mirovaEqVrpDisplay(r, innerKm, false) > 0, dist: distanciaDePasada(r) });
+    const p = { t, dt: r.datetime_utc, sensor: r.sensor, grupo: sensorGroup(r.sensor),
+                zen: num(r.sensor_zenith_deg), azi: num(r.sensor_azimuth_deg) };
+    const y = isThermalArtifact(r, innerKm) ? 0 : mirovaEqVrpDisplay(r, innerKm, true);
+    if (y > 0) {
+      const enCrater = mirovaEqVrpDisplay(r, innerKm, false) > 0;
+      out.push(Object.assign(p, { estado: enCrater ? "crater" : "fuera", y, enCrater, dist: distanciaDePasada(r) }));
+      continue;
+    }
+    const sinDato = escenaSinDato(r);
+    p.estado = sinDato ? (sinDato === "reflejo solar" ? "reflejo" : "sin_datos")
+             : ((r.n_anomalous_pixels ?? 0) > 0 || isValidDetection(r)) ? "no_publicada" : "nada";
+    out.push(p);
   }
   return out.sort((a, b) => a.t - b.t);
 }
@@ -4244,7 +4276,7 @@ function puntosMirovaEvol(records, sensorInfo, dia) {
 }
 
 // Bandas de clase de la escala log, sacadas de LEVELS (las de getLevel y la «Escala MIROVA» del detalle): nada de
-// umbrales nuevos. MIROVA dibuja además «Extreme», cuyo umbral no está en nuestro código, así que no se dibuja.
+// umbrales nuevos. «Extreme» de MIROVA se agrega aparte, sólo en el gráfico (clasesGraficoEvol, S184 tanda 2).
 function clasesEscalaEvol(levels) {
   const out = []; let desde = 0;
   for (const l of levels.slice(1)) { out.push({ desde, hasta: l.max, rotulo: l.label }); desde = l.max; }
@@ -4266,6 +4298,121 @@ function ejeXEvol(ahoraMs, dias) {
 }
 function rotuloFueraEvol(includeFar) {
   return includeFar ? "Fuera del cráter (contada con «Incluir lejanas»)" : "Fuera del cráter: no publicada";
+}
+
+// ── S184 tanda 2: lo que MIROVA agrega en sus PNG por volcán (revisados el 2026-11-15) ──────────────────────────────────
+// Cenit del satélite. POR QUÉ: mientras más oblicua la mirada, más grande es el píxel en el suelo y más largo el camino por
+// la atmósfera; el mismo foco queda diluido y atenuado, y el borde del cráter puede taparlo, así que el VRP sale más bajo o
+// la pasada no detecta. MIROVA muestra «Zen» y «Azi» en cada imagen. Medido con la vía el 2026-11-15
+// (experiments/_s184_cenit/INFORME.md, pasadas nocturnas del 2026-03-01 al 2026-11-14): en los volcanes de señal chica la
+// fracción de pasadas con calor publicado cae de forma GRADUAL con el cenit, ya entre 20 y 40° (Láscar MODIS 0,47, 0,30,
+// 0,07 y 0; VIIRS 375 0,68, 0,67, 0,56 y 0,17 en los tramos 0-20, 20-40, 40-55 y 55-70°), y MIROVA cae igual (razón
+// nuestra/MIROVA 1,00 en VIIRS 375 y 750, de 0,97 a 1,11 en MODIS). 40° NO es un quiebre: es el corte de lectura con que se
+// marca la pasada como oblicua (más de la mitad de las nocturnas lo pasan). No es un umbral de detección. Sólo display.
+const EVOL_CENIT_OBLICUO = 40;
+function esOblicuaEvol(zen) { return typeof zen === "number" && zen > EVOL_CENIT_OBLICUO; }
+const NOTA_CENIT_EVOL = "El cenit es el ángulo entre la vertical del volcán y la línea hacia el satélite: 0° es mirar " +
+  "derecho hacia abajo y 60° o más es mirar de lado, hacia el borde de la franja. El azimut es desde qué dirección mira. " +
+  "En una mirada oblicua el píxel que cae sobre el cráter cubre más terreno y el infrarrojo atraviesa más atmósfera: una " +
+  "fuente chica queda diluida en un píxel más grande y su señal se acerca al umbral. Además el VRP se calcula con el área " +
+  "del píxel en el nadir, como en MIROVA, así que esa dilución no se compensa (es lo esperable por el método; no está " +
+  "medido aparte). Medido en las pasadas nocturnas del 2026-03-01 al 2026-11-14, la caída es gradual, no un corte: en " +
+  "Láscar, con VIIRS 375, la fracción de pasadas con calor publicado baja de 68 % cerca del nadir a 56 % entre 40 y 55° y " +
+  "a 17 % sobre 55°, y el VRP típico de 0,81 a 0,14 MW; MIROVA, en esas mismas pasadas, baja de 0,73 a 0,14 MW. Con MODIS, " +
+  "en Láscar, ninguna pasada sobre 55° muestra calor. En Isluga, Lastarria y Planchón-Peteroa también baja la fracción de " +
+  "pasadas con calor, aunque el VRP de lo que sí se ve no siempre baja (en Isluga se mantiene). En Chillán, con focos de " +
+  "varios MW, no baja ni la fracción ni el VRP. Los números no separan cuánto es tamaño del píxel, atmósfera o nubes. " +
+  "Para el turno: en un volcán de señal chica, una pasada oblicua sin calor no es evidencia de que la actividad bajó; mira " +
+  "la pasada más cercana al nadir. Más de la mitad de las pasadas nocturnas tienen cenit sobre 40°, el corte con que " +
+  "aquí se marcan como oblicuas.";
+function textoCenitEvol(zen, azi) {
+  if (typeof zen !== "number") return null;
+  return "cenit " + Math.round(zen) + "°" + (typeof azi === "number" ? ", azimut " + Math.round(azi) + "°" : "");
+}
+// Clase «Extremo»: la línea magenta de MIROVA en 10^10 W, con el rótulo «Extreme» encima (PNG logVRP de Chillán, leído en
+// RENDER el 2026-11-15). Sólo se dibuja en estos gráficos: getLevel, las tarjetas y los niveles no cambian.
+const EVOL_EXTREMO_MW = 10000;
+// Colores de las líneas de clase como en MIROVA (verde, amarillo, naranja, rojo, magenta, por su borde inferior).
+const EVOL_COLOR_LINEA = { 1: "#2ecc40", 10: "#ffdc00", 100: "#ff851b", 1000: "#ff4136", 10000: "#e040fb" };
+function clasesGraficoEvol(levels) {
+  const out = clasesEscalaEvol(levels).map(c => Object.assign({}, c));
+  const u = out[out.length - 1];
+  if (u && u.hasta === Infinity && u.desde < EVOL_EXTREMO_MW) {
+    u.hasta = EVOL_EXTREMO_MW;
+    out.push({ desde: EVOL_EXTREMO_MW, hasta: Infinity, rotulo: "Extremo (MIROVA)" });
+  }
+  for (const c of out) c.color = EVOL_COLOR_LINEA[c.desde] || null;
+  return out;
+}
+// Límite de detección que declara MIROVA para cada sensor («About this dataset» de sus páginas, leído el 2026-11-15):
+// bajo esa línea una alerta está en el borde de lo que el sensor puede ver.
+const EVOL_LIMITE_DETECCION_MW = { MODIS: 1, VIIRS750: 0.1, VIIRS375: 0.01 };
+
+// La última pasada medida del volcán en la pestaña (las escenas sin datos y de reflejo solar no cuentan, como en la
+// tarjeta, S183). `vrp` es el valor publicado: el del cráter, o el de fuera sólo con «Incluir lejanas».
+// Verificador S184 (tanda 2): VIIRS 375 y 750 del mismo satélite comparten la hora, y una pasada puede venir en dos
+// gránulos seguidos (6 min); elegir por el orden del archivo dejaba casi siempre la de 750. Entre las pasadas medidas a
+// 10 minutos o menos de la última, manda la de mayor valor publicado y, a igual valor, la de más anomalía.
+const EVOL_MISMA_PASADA_MS = 10 * 60000;
+const EVOL_PRIORIDAD_ESTADO = { crater: 3, fuera: 2, no_publicada: 1, nada: 0 };
+function vrpPublicadoEvol(p, includeFar) { return (p.estado === "crater" || (p.estado === "fuera" && includeFar)) ? p.y : 0; }
+function ultimaPasadaEvol(pasadas, includeFar) {
+  const medida = p => p.estado !== "sin_datos" && p.estado !== "reflejo";
+  let i = pasadas.length - 1;
+  while (i >= 0 && !medida(pasadas[i])) i--;
+  if (i < 0) return null;
+  const tUlt = pasadas[i].t;
+  let mejor = null;
+  for (let j = i; j >= 0 && tUlt - pasadas[j].t <= EVOL_MISMA_PASADA_MS; j--) {
+    const p = pasadas[j];
+    if (!medida(p)) continue;
+    const c = { p, vrp: vrpPublicadoEvol(p, includeFar) };
+    if (!mejor || c.vrp > mejor.vrp ||
+        (c.vrp === mejor.vrp && (EVOL_PRIORIDAD_ESTADO[p.estado] || 0) > (EVOL_PRIORIDAD_ESTADO[mejor.p.estado] || 0))) mejor = c;
+  }
+  return mejor;
+}
+// La última pasada con calor publicado (en el combinado la última suele ser una MODIS oblicua que no ve nada; sin esto el
+// recuadro gris escondía que esa noche otra pasada sí publicó).
+function ultimaConCalorEvol(pasadas, includeFar) {
+  for (let i = pasadas.length - 1; i >= 0; i--) {
+    const v = vrpPublicadoEvol(pasadas[i], includeFar);
+    if (v > 0) return { p: pasadas[i], vrp: v };
+  }
+  return null;
+}
+function mwEvol(x) { return x.toFixed(2).replace(".", ","); }
+function haceEvol(ms, ahoraMs) {
+  const min = Math.max(0, Math.round((ahoraMs - ms) / 60000));
+  if (min < 60) return "hace " + min + " min";
+  const h = Math.round(min / 60);
+  return h < 48 ? "hace " + h + " h" : "hace " + Math.round(h / 24) + " días";
+}
+// Recuadro de la última pasada, como el «Thermal anomaly: LOW» de MIROVA (color de la clase de la ÚLTIMA pasada; gris si
+// no vio nada). Devuelve { texto, clave } con la clave de getLevel ("nd" si no hay valor publicado).
+function textoUltimaPasadaEvol(u, ahoraMs, includeFar, conCalor) {
+  if (!u) return { texto: "Última pasada: sin pasadas medidas en los datos cargados", clave: "nd" };
+  const p = u.p, lv = getLevel(u.vrp);
+  const clase = (vrp, l) => l.label + (vrp >= EVOL_EXTREMO_MW ? " (Extremo en la escala de MIROVA)" : "") + ", " + mwEvol(vrp) + " MW";
+  const estado = u.vrp > 0 ? clase(u.vrp, lv)
+    : p.estado === "fuera" ? "anomalía fuera del cráter, no publicada"
+    : p.estado === "no_publicada" ? "anomalía no publicada" : "sin anomalía";
+  const cen = textoCenitEvol(p.zen, null);
+  let texto = "Última pasada: " + p.dt + " UTC (" + haceEvol(p.t, ahoraMs) + ") · " + (ETIQUETA_SENSOR[p.grupo] || p.sensor) +
+              " · " + estado + (cen ? " · " + cen + (esOblicuaEvol(p.zen) ? " (oblicua)" : "") : "");
+  if (!(u.vrp > 0) && conCalor) {   // si la última no publicó, la última con calor es otra pasada
+    const c = conCalor.p;
+    texto += ". Última con calor publicado: " + c.dt + " UTC (" + haceEvol(c.t, ahoraMs) + ") · " +
+             (ETIQUETA_SENSOR[c.grupo] || c.sensor) + " · " + clase(conCalor.vrp, getLevel(conCalor.vrp));
+  }
+  return { texto, clave: lv.key };   // getLevel(0) ya es «nd» (gris): el color es el de la última pasada, como en MIROVA
+}
+// Marcas arriba del gráfico para las pasadas sin palito: se miró y no había nada, anomalía no publicada, escena sin datos,
+// reflejo solar. Así se distingue «tranquilo» de «no se pudo medir».
+const EVOL_COLOR_MARCA = { nada: "rgba(150,160,175,0.6)", no_publicada: "#5dade2", sin_datos: "#ffffff", reflejo: "#ffc400" };
+const EVOL_FILA_MARCA = { sin_datos: 0, reflejo: 0, nada: 1, no_publicada: 1 };   // 0: no se pudo medir; 1: se midió
+function marcasEvol(pasadas) {
+  return pasadas.filter(p => EVOL_COLOR_MARCA[p.estado]).map(p => ({ t: p.t, estado: p.estado }));
 }
 // «Datos desde»: la historia publicada empieza el 2025-02-15 en los 11 y el 2026-11-03 en los 34 de la sombra. Si la
 // ventana empieza antes, ese tramo se sombrea y el título lo dice: sin aviso, la falta de observación se lee como un
@@ -4310,8 +4457,16 @@ const lineasEvolPlugin = {
       }
     }
     const hLinea = (py, color) => { ctx.strokeStyle = color; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke(); };
+    // S184 tanda 2: marcas arriba de las pasadas sin palito (ver marcasEvol), una raya de 5 px por pasada, en dos filas para
+    // que no se pisen (verificador): arriba lo que no se pudo medir, abajo lo que se midió y no tiene palito.
+    for (const m of o.marcas || []) {
+      if (m.t < x.min || m.t > x.max) continue;
+      ctx.fillStyle = EVOL_COLOR_MARCA[m.estado] || "#888";
+      ctx.fillRect(x.getPixelForValue(m.t) - 0.75, a.top + EVOL_FILA_MARCA[m.estado] * 6, 1.5, 5);
+    }
     for (const c of o.clases || []) {
-      if (c.desde > y.min && c.desde < y.max) hLinea(y.getPixelForValue(c.desde), "rgba(150,165,185,0.45)");
+      // S184 tanda 2: cada línea con el color de MIROVA (clasesGraficoEvol); sin color, el gris de antes
+      if (c.desde > y.min && c.desde < y.max) hLinea(y.getPixelForValue(c.desde), c.color ? c.color + "b0" : "rgba(150,165,185,0.45)");
       const lo = Math.max(c.desde, y.min), hi = Math.min(c.hasta, y.max);
       if (!(hi > lo)) continue;
       const pLo = y.getPixelForValue(lo), pHi = y.getPixelForValue(hi);
@@ -4319,6 +4474,15 @@ const lineasEvolPlugin = {
       // a la izquierda: a la derecha están los datos recientes y la línea de «ahora»
       ctx.fillStyle = "rgba(200,212,228,0.7)"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
       ctx.fillText(c.rotulo, a.left + 4, (pLo + pHi) / 2);
+    }
+    // Límite de detección del sensor, después de las clases para que la línea verde de 1 MW no lo tape (MODIS). >= y.min:
+    // en VIIRS 375 el límite (0,01 MW) suele ser el piso del eje; se dibuja igual, con el rótulo encima.
+    if (o.limiteMw != null && o.limiteMw >= y.min && o.limiteMw < y.max) {
+      const py = Math.min(y.getPixelForValue(o.limiteMw), a.bottom - 1);
+      ctx.save(); ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.setLineDash([1, 3]); ctx.beginPath();
+      ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke(); ctx.restore();
+      ctx.fillStyle = "rgba(230,236,245,0.85)"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillText("límite de detección ~" + String(o.limiteMw).replace(".", ",") + " MW (MIROVA)", a.right - 4, py - 2);
     }
     if (o.radioKm != null && o.radioKm > y.min && o.radioKm < y.max) {
       const py = y.getPixelForValue(o.radioKm);
@@ -4342,7 +4506,7 @@ const lineasEvolPlugin = {
 // Si la descarga falla o el JSON llega cortado, queda «fallo» y el panel anual muestra los 100 días y lo dice.
 const _historiaEvol = {};
 function historiaEvol(v, innerKm) {
-  if (v.fuente === "sombra_34" || _fullHistoryLoaded) return { pts: null, estado: "no_hace_falta" };   // ya está toda en allData
+  if (v.fuente === "sombra_34" || _fullHistoryLoaded) return { todas: null, estado: "no_hace_falta" };   // ya está toda en allData
   let h = _historiaEvol[v.name];
   if (h && h.estado === "fallo" && Date.now() >= (h.reintentarMs || 0)) { delete _historiaEvol[v.name]; h = null; }
   if (!h) {
@@ -4352,22 +4516,25 @@ function historiaEvol(v, innerKm) {
       if (!recs) { h.estado = "fallo"; h.reintentarMs = Date.now() + 60000; return; }
       // mismo enriquecimiento que loadVolcano: _mirova_confirmed exime de los filtros de artefacto
       enrichWithMirovaConfirmation(recs, (allData[v.name] || {}).mirovaRecords || []);
-      h.pts = pasadasEvol(recs, innerKm); h.t0 = tMinRecords(recs); h.estado = "lista";
+      h.todas = todasPasadasEvol(recs, innerKm); h.t0 = tMinRecords(recs); h.estado = "lista";
     }).catch(() => { h.estado = "fallo"; h.reintentarMs = Date.now() + 60000; });   // fetchJSON no atrapa un JSON cortado (devuelve r.json() sin await)
   }
   return h;
 }
 
+let evolCenitAbierto = false;
 let evolModo = (() => { try { return sessionStorage.getItem("vrp_evol_modo") || "log"; } catch (e) { return "log"; } })();
 const EVOL_MODOS = [["log", "Log VRP"], ["lin", "VRP"], ["dist", "Distancia"]];
 const _evolOcultas = new Set();   // series apagadas en la leyenda: sobreviven a la llegada de la historia y al cambio de modo
 
 // Lo que dibujan los paneles, ya acotado a la pestaña de sensor, a los sensores prendidos y al botón de MIROVA.
-// o = { d, histPts, innerKm, sensorKey, visible, hasMirova }; d = allData del volcán.
+// o = { d, histTodas, innerKm, sensorKey, visible, hasMirova }; d = allData del volcán. `pasadas` son todas las pasadas
+// (todasPasadasEvol) y `todos` sólo las con anomalía dibujable.
 function datosEvol(o) {
   const d = o.d || {};
   const enPestana = p => (o.sensorKey === "COMB" || p.grupo === o.sensorKey) && (!p.grupo || o.visible[p.grupo] !== false);
-  const todos = unirHistoriaEvol(o.histPts, pasadasEvol(d.records, o.innerKm), tMinRecords(d.records)).filter(enPestana);
+  const pasadas = unirHistoriaEvol(o.histTodas, todasPasadasEvol(d.records, o.innerKm), tMinRecords(d.records)).filter(enPestana);
+  const todos = pasadas.filter(p => p.y > 0);
   // MIROVA: una marca por pasada, del mismo sensor que la pestaña y con el mismo botón que el gráfico del período.
   const infoMirova = s => {
     const serie = EVOL_SERIES.find(x => x.bucketMirova === s);
@@ -4377,27 +4544,39 @@ function datosEvol(o) {
   const conMirova = !!o.hasMirova && o.visible.MIROVA !== false;
   const mNoche = conMirova ? (d.mirovaRecords || []).filter(r => !mirovaEsDia(r)) : [];
   const mDia = conMirova ? (d.mirovaRecords || []).filter(mirovaEsDia).concat(d.mirovaDiaOcr || []) : [];
-  return { todos, mirovaNoche: puntosMirovaEvol(mNoche, infoMirova, false), mirovaDia: puntosMirovaEvol(mDia, infoMirova, true) };
+  return { pasadas, todos, mirovaNoche: puntosMirovaEvol(mNoche, infoMirova, false), mirovaDia: puntosMirovaEvol(mDia, infoMirova, true) };
 }
 
 // Datasets de un panel. `pts` ya viene acotado al sensor de la pestaña, a los sensores prendidos y a la ventana. En
 // distancia, lo que pasa del techo del eje (`distMax`) queda en el borde con un triángulo.
-function datasetsEvol(pts, mirovaPts, modo, includeFar, distMax) {
+function datasetsEvol(pts, mirovaPts, modo, includeFar, distMax, ultima) {
   const ds = [];
   const dist = modo === "dist";
   const tope = distMax || 25;
   const aDato = p => dist ? { x: p.t, y: Math.min(p.dist, tope), recortada: p.dist > tope, p } : { x: p.t, y: p.y, p };
-  const forma = dist ? (c => (c.raw && c.raw.recortada ? "triangle" : "circle")) : "circle";
+  // S184 tanda 2: la forma también dice dónde está (círculo en el cráter, cuadrado fuera, como el gráfico de distancia de
+  // MIROVA), así se lee aunque el color no se distinga; el triángulo sigue siendo «más lejos que el eje».
+  const forma = base => (c => (dist && c.raw && c.raw.recortada ? "triangle" : base));
+  // Pasada oblicua (cenit sobre EVOL_CENIT_OBLICUO): marcador hueco. En un volcán de señal chica puede no ver el calor o verlo menor (ver NOTA_CENIT_EVOL).
+  const relleno = color => (c => (c.raw && c.raw.p && esOblicuaEvol(c.raw.p.zen) ? "rgba(0,0,0,0)" : color));
   for (const s of EVOL_SERIES) {
     const enC = pts.filter(p => p.grupo === s.grupo && p.enCrater && (!dist || p.dist != null));
     if (enC.length) ds.push({ label: s.label, type: "scatter", data: enC.map(aDato), borderColor: s.color, backgroundColor: s.color,
-                              pointStyle: forma, pointRadius: 2.6, pointHoverRadius: 5, pointHitRadius: 6, palitos: !dist, order: 2 });
+                              pointBackgroundColor: relleno(s.color), pointBorderColor: s.color, pointBorderWidth: 1.4,
+                              pointStyle: forma("circle"), pointRadius: 2.8, pointHoverRadius: 5, pointHitRadius: 6, palitos: !dist, order: 2 });
   }
   const fuera = pts.filter(p => !p.enCrater && (!dist || p.dist != null));
   if (fuera.length) ds.push({ label: rotuloFueraEvol(includeFar), claveLeyenda: "fuera", type: "scatter", data: fuera.map(aDato), fueraCrater: true,
-                              borderColor: EVOL_GRIS, backgroundColor: EVOL_GRIS + "99", pointStyle: forma, pointRadius: 2.4,
+                              borderColor: EVOL_GRIS, backgroundColor: EVOL_GRIS + "99", pointBackgroundColor: relleno(EVOL_GRIS + "99"),
+                              pointBorderColor: EVOL_GRIS, pointBorderWidth: 1.4, pointStyle: forma("rect"), pointRadius: 2.6,
                               pointHoverRadius: 5, pointHitRadius: 6, palitos: !dist, order: 3 });
   if (!dist) for (const m of mirovaPts) ds.push(m);
+  // Estrella en la última pasada, como MIROVA, sólo si tuvo anomalía dibujable y cae en la ventana.
+  if (ultima && ultima.y > 0 && (!dist || ultima.dist != null) && pts.some(p => p.t === ultima.t)) {
+    ds.push({ label: "★ Última pasada", type: "scatter", data: [aDato(ultima)], ultimaPasada: true, order: 0,
+              pointStyle: "star", pointRadius: 9, pointHoverRadius: 11, borderColor: "#39d353", backgroundColor: "#39d353",
+              pointBorderWidth: 2 });
+  }
   for (const x of ds) x.hidden = _evolOcultas.has(x.claveLeyenda || x.label);
   return ds;
 }
@@ -4432,11 +4611,21 @@ function armarEvolucion(host, v, d, innerKm, plugExtra) {
     (includeFarDistance ? "contada porque está prendido «Incluir lejanas»." : "no publicada (con «Solo cráter»).") +
     " Fijos: no cambian con el período elegido; el gráfico del período sigue más abajo. Las fechas del eje van en la hora" +
     " de tu computador; el detalle de cada pasada, en UTC.";
+  // S184 tanda 2: qué dicen las formas, el relleno y las marcas de arriba, y por qué importa el cenit.
+  const claves = el("div", "evol-nota");
+  claves.textContent = "● cráter · ■ fuera · marcador hueco = pasada oblicua (cenit sobre " + EVOL_CENIT_OBLICUO + "°) · ★ última " +
+    "pasada. Rayas arriba, fila de arriba = no se pudo medir: blanca, escena sin datos (borde de la franja o nubes muy " +
+    "frías); amarilla, reflejo solar. Fila de abajo = se midió y no hay palito: gris, sin anomalía; celeste, anomalía no " +
+    "publicada (artefacto o descartada).";
+  const cenitInfo = el("details", "evol-cenit");
+  cenitInfo.open = evolCenitAbierto;   // se redibuja al llegar la historia o al cambiar de pestaña: que no se cierre solo
+  cenitInfo.addEventListener("toggle", () => { evolCenitAbierto = cenitInfo.open; });
+  const cenitSum = el("summary"); cenitSum.textContent = "¿Qué es el cenit y por qué una pasada oblicua mide menos?";
+  const cenitTxt = el("div", "evol-nota"); cenitTxt.textContent = NOTA_CENIT_EVOL;
+  cenitInfo.append(cenitSum, cenitTxt);
   const grid = el("div", "evol-grid");
-  host.append(hdr, nota, grid);
-
   const hist = historiaEvol(v, innerKm);
-  const datos = datosEvol({ d, histPts: hist.pts, innerKm, sensorKey: detailSensor, visible: sensorVisible, hasMirova: v.hasMirova });
+  const datos = datosEvol({ d, histTodas: hist.todas, innerKm, sensorKey: detailSensor, visible: sensorVisible, hasMirova: v.hasMirova });
   // Sólo se sabe dónde empiezan los datos con la historia completa (o cuando allData ya la tiene). Mientras baja, o si
   // falló, la ventana de 100 días no dice nada del comienzo: no se sombrea (revisión S185, punto 3).
   const inicio = hist.estado === "lista" ? Math.min(hist.t0, tMinRecords(d.records))
@@ -4446,6 +4635,10 @@ function armarEvolucion(host, v, d, innerKm, plugExtra) {
   const inicioMirova = v.hasMirova && sensorVisible.MIROVA !== false
     ? inicioMirovaEvol(Object.values(allData).map(x => (x && x.mirovaRecords) || [])) : NaN;
   const ahora = Date.now();
+  const ultima = ultimaPasadaEvol(datos.pasadas, includeFarDistance);
+  const ult = textoUltimaPasadaEvol(ultima, ahora, includeFarDistance, ultimaConCalorEvol(datos.pasadas, includeFarDistance));
+  const caja = el("div", "evol-ultima evol-ultima-" + ult.clave); caja.textContent = ult.texto;
+  host.append(hdr, caja, nota, claves, cenitInfo, grid);
   const dist = evolModo === "dist";
   const ventanas = ventanasEvol(detailSensor);
   // El mismo eje Y en los dos paneles (el largo contiene al corto): se comparan de un vistazo, como en MIROVA.
@@ -4482,16 +4675,22 @@ function armarEvolucion(host, v, d, innerKm, plugExtra) {
     const ejeX = ejeXEvol(ahora, w.dias);
     charts["evol-" + i] = new Chart(cv.getContext("2d"), {
       type: "scatter",
-      data: { datasets: datasetsEvol(pts, mPts, evolModo, includeFarDistance, dist ? ejeY.max : null) },
+      data: { datasets: datasetsEvol(pts, mPts, evolModo, includeFarDistance, dist ? ejeY.max : null, ultima && ultima.p) },
       plugins: [palitosEvolPlugin, lineasEvolPlugin],
       options: {
         responsive: true, maintainAspectRatio: false, animation: false,
         interaction: { mode: "nearest", intersect: true },
         plugins: { ...plugExtra,
-          lineasEvol: { clases: dist ? null : clasesEscalaEvol(LEVELS), radioKm: dist ? innerKm : null, ahoraMs: ahora,
-                        sinDatosHastaMs: sinDatosHasta },
+          lineasEvol: { clases: dist ? null : clasesGraficoEvol(LEVELS), radioKm: dist ? innerKm : null, ahoraMs: ahora,
+                        sinDatosHastaMs: sinDatosHasta, marcas: marcasEvol(enVentanaEvol(datos.pasadas, ahora, w.dias)),
+                        limiteMw: !dist && detailSensor !== "COMB" ? EVOL_LIMITE_DETECCION_MW[detailSensor] : null },
           // Leyenda en los dos paneles (el largo puede tener series que el corto no) y apagar una serie la apaga en ambos.
-          legend: { labels: { color: "#7a8fa6", font: { size: 10 }, boxWidth: 9, padding: 7, sort: (a, b) => a.datasetIndex - b.datasetIndex },
+          // S184 tanda 2: el cuadrito de la leyenda va lleno aunque el primer punto sea hueco (oblicuo).
+          legend: { labels: { color: "#7a8fa6", font: { size: 10 }, boxWidth: 9, padding: 7, sort: (a, b) => a.datasetIndex - b.datasetIndex,
+                              generateLabels: chart => Chart.defaults.plugins.legend.labels.generateLabels(chart).map(it => {
+                                const dsx = chart.data.datasets[it.datasetIndex];
+                                if (dsx && !dsx.mirovaDia && typeof dsx.backgroundColor === "string" && !String(dsx.label).startsWith("MIROVA")) it.fillStyle = dsx.backgroundColor;
+                                return it; }) },
                     onClick: (e, item, legend) => {
                       const dsx = legend && legend.chart ? legend.chart.data.datasets[item.datasetIndex] : null;
                       const clave = (dsx && dsx.claveLeyenda) || item.text;
@@ -4513,7 +4712,9 @@ function armarEvolucion(host, v, d, innerKm, plugExtra) {
                 const fuera = rotuloFueraEvol(includeFarDistance);
                 return [" " + p.sensor + ": " + p.y.toFixed(3) + " MW",
                         "  distancia " + (p.dist != null ? p.dist.toFixed(1) + " km" + (ctx.raw.recortada ? " (fuera del eje)" : "") : "sin dato") + " · " +
-                        (p.enCrater ? "en el cráter" : fuera.charAt(0).toLowerCase() + fuera.slice(1))];
+                        (p.enCrater ? "en el cráter" : fuera.charAt(0).toLowerCase() + fuera.slice(1))]
+                  .concat(textoCenitEvol(p.zen, p.azi) ? ["  " + textoCenitEvol(p.zen, p.azi) +
+                          (esOblicuaEvol(p.zen) ? " · mirada oblicua: una fuente chica puede no verse o verse menor" : "")] : []);
               },
             },
           },
@@ -5350,6 +5551,16 @@ document.addEventListener("DOMContentLoaded", init);
   .evol-panel { min-width: 0; padding: 10px 12px; }
   .evol-panel h5 { font-size: 0.75rem; font-weight: 600; margin: 0 0 6px; color: var(--text); }
   .evol-panel .chart-wrapper { height: 250px; }
+  /* S184 tanda 2: recuadro de la última pasada, con el color de su clase como el «Thermal anomaly» de MIROVA */
+  .evol-ultima { margin: 6px 0 4px; padding: 6px 10px; border-left: 4px solid var(--muted); border-radius: 4px;
+    background: rgba(122,143,166,0.10); font-size: 0.8rem; color: var(--text); line-height: 1.35; }
+  .evol-ultima-vlow { border-left-color: var(--green); background: rgba(46,204,64,0.10); }
+  .evol-ultima-low { border-left-color: var(--yellow); background: rgba(255,220,0,0.10); }
+  .evol-ultima-mod { border-left-color: var(--orange); background: rgba(255,133,27,0.12); }
+  .evol-ultima-high, .evol-ultima-vhigh { border-left-color: var(--red); background: rgba(255,65,54,0.12); }
+  .evol-cenit { margin: 0 0 8px; font-size: 0.75rem; color: #9aa; }
+  .evol-cenit summary { cursor: pointer; color: var(--text); }
+  .cenit-oblicuo { color: var(--orange); }
   @media (max-width: 600px) { .evol-panel .chart-wrapper { height: 220px; } .evol-panel { padding: 8px; } }
 </style>
 </body>
