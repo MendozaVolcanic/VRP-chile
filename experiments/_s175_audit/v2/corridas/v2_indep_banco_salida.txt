@@ -1,0 +1,61 @@
+records nocturnos 28932 | V375 11525 | filas ref nocturnas SN 20776 | ventana 2026-03-01..2026-11-07
+duplicados (vol,sensor,dt) entre records V375: 0
+pasadas (vol,dt) con 2 records de plataformas distintas: 0
+protegidas (record con fila protegida A pareada): 171  (auditor: 171)  | con lab=='pos': 171
+  publicadas 166  recall 166/171
+  fuentes de la fila protegida: {('OCR',): 56, ('CONS',): 85, ('CONS', 'OCR'): 30}
+    fuente ('OCR',): n 56 publicadas 51 perdidas 5
+    fuente ('CONS',): n 85 publicadas 85 perdidas 0
+    fuente ('CONS', 'OCR'): n 30 publicadas 30 perdidas 0
+  SOLO TABLA (alguna fila CONS protegida): n 115 publicadas 115 -> perdidas 0
+  SOLO OCR: n 56 perdidas 5 tasa perdida 5/56  Wilson (0.0387, 0.1926)
+  perdidas (vol, pasada, plataforma, cenit, fuente, tramo):
+    Lascar       2026-08-22 05:06 VIIRS_SNPP    z 59.32 src ['OCR'] tramo _s154_reproc_k_historico n_filas_par 1
+    Lastarria    2026-04-18 04:42 VIIRS_NOAA20  z 67.02 src ['OCR'] tramo _s154_reproc_k_historico n_filas_par 1
+    Lastarria    2026-05-02 05:06 VIIRS_SNPP    z 59.49 src ['OCR'] tramo _s154_reproc_k_historico n_filas_par 1
+    Tupungatito  2026-09-28 05:18 VIIRS_SNPP    z 48.77 src ['OCR'] tramo mirova_equivalent n_filas_par 1
+    Tupungatito  2026-09-29 04:54 VIIRS_SNPP    z 62.41 src ['OCR'] tramo mirova_equivalent n_filas_par 1
+CONTROL positivo: forzando pub=1 en las perdidas, recall = 171/171
+NOCHES con protegida: 111 | publicada si CUALQUIER pasada de la noche publica: 111 | estricto (una pasada protegida publica): 106
+   noche con protegida SIN pasada protegida publicada: ('Lascar', '2026-08-22') pub_any 1
+   noche con protegida SIN pasada protegida publicada: ('Lastarria', '2026-04-18') pub_any 1
+   noche con protegida SIN pasada protegida publicada: ('Lastarria', '2026-05-02') pub_any 1
+   noche con protegida SIN pasada protegida publicada: ('Tupungatito', '2026-09-28') pub_any 1
+   noche con protegida SIN pasada protegida publicada: ('Tupungatito', '2026-09-29') pub_any 1
+F2-202 z>=50: perdidas/n dentro 4/36  fuera 1/135 | Fisher dos colas p 0.0073 una cola p 0.0073 | Wilson dentro (0.0441, 0.2532) fuera (0.0013, 0.0408)
+F2-202 z>=60: perdidas/n dentro 2/21  fuera 3/150 | Fisher dos colas p 0.1145 una cola p 0.1145 | Wilson dentro (0.0265, 0.2891) fuera (0.0068, 0.0571)
+F2-202 SNPP: perdidas/n dentro 4/51  fuera 1/120 | Fisher dos colas p 0.0282 una cola p 0.0282 | Wilson dentro (0.0309, 0.185) fuera (0.0015, 0.0457)
+  tabla cenit x plataforma (perdidas/n) entre protegidas:
+    z<50   VIIRS_NOAA20: 0/61 | VIIRS_NOAA21: 0/38 | VIIRS_SNPP: 1/36
+    z>=50  VIIRS_NOAA20: 1/10 | VIIRS_NOAA21: 0/11 | VIIRS_SNPP: 3/15
+    cenit protegidas VIIRS_NOAA20: n 71 mediana 33.4 fraccion >=50: 0.14
+    cenit protegidas VIIRS_NOAA21: n 49 mediana 34.2 fraccion >=50: 0.22
+    cenit protegidas VIIRS_SNPP: n 51 mediana 42.0 fraccion >=50: 0.29
+  permutacion de cenit DENTRO de cada volcan (5000): P(perdidas con z>=50 >= 4) = 0.0710
+NEGATIVOS LIMPIOS pasadas: 4087 publicadas 161 = 0.0394  Wilson (0.0338, 0.0458)
+  Lascar               n  135 pub   8 tasa 0.059259 Wilson (0.0303, 0.1126) noches con neg_limpio 56
+  Lastarria            n  191 pub  49 tasa 0.256544 Wilson (0.1998, 0.3229) noches con neg_limpio 82
+  Isluga               n   68 pub   3 tasa 0.044117 Wilson (0.0151, 0.1219) noches con neg_limpio 34
+  Tupungatito          n  258 pub  13 tasa 0.050387 Wilson (0.0297, 0.0843) noches con neg_limpio 103
+  PlanchonPeteroa      n  320 pub  11 tasa 0.034375 Wilson (0.0193, 0.0605) noches con neg_limpio 123
+  NevadosDeChillan     n  457 pub   6 tasa 0.013129 Wilson (0.006, 0.0283) noches con neg_limpio 184
+  Llaima               n  602 pub   1 tasa 0.001661 Wilson (0.0003, 0.0093) noches con neg_limpio 228
+  Villarrica           n  560 pub   3 tasa 0.005357 Wilson (0.0018, 0.0156) noches con neg_limpio 208
+  Copahue              n  581 pub   0 tasa 0.0 Wilson (-0.0, 0.0066) noches con neg_limpio 226
+  PuyehueCordonCaulle  n  371 pub  43 tasa 0.115902 Wilson (0.0872, 0.1525) noches con neg_limpio 136
+  Chaiten              n  544 pub  24 tasa 0.044117 Wilson (0.0298, 0.0648) noches con neg_limpio 199
+NOCHES negativas (def. auditor): 1579 | pub si cualquier pasada publica: 213 = 0.1349 | pub si la pasada neg_limpio publica: 133 = 0.0842
+  Lastarria: noches 82 cualquier 45 (0.5488) | pasada neg_limpio 38 (0.4634)
+  PuyehueCordonCaulle: noches 136 cualquier 57 (0.4191) | pasada neg_limpio 36 (0.2647)
+  Lastarria por mes (pasadas neg_limpio pub/n):
+    2026-03: 3/10
+    2026-04: 5/11
+    2026-05: 10/16
+    2026-06: 9/28
+    2026-07: 2/15
+    2026-08: 3/24
+    2026-09: 13/48
+    2026-10: 4/39
+  Lastarria publicados en neg_limpio: display MW y dc
+    {('summit', 'disp<0.1'): 47, ('summit', 'disp>=0.1'): 2}
+CONTROL nulo: pub permutado entre neg_limpio, tasa Lastarria media 0.0390 max 0.0890 (observada 0.2565): P(>=observada) = 0.0000

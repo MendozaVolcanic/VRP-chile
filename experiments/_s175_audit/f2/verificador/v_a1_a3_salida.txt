@@ -1,0 +1,46 @@
+banco_paridad desde C:\Users\nmend\vrp-temporales\s175_audit\f2\arbol_752d348bc\scripts\banco_paridad.py | HTML C:\Users\nmend\vrp-temporales\s175_audit\f2\arbol_752d348bc\frontend\index.html | DATA C:\Users\nmend\vrp-temporales\s175_audit\f2\arbol_752d348bc\data\mirova_equivalent
+flag_viirs_diurno = False
+inner {'Lascar': 5.0, 'Lastarria': 3.0, 'Isluga': 5.0, 'Tupungatito': 7.0, 'PlanchonPeteroa': 3.0, 'NevadosDeChillan': 5.0, 'Llaima': 5.0, 'Villarrica': 5.0, 'Copahue': 4.0, 'PuyehueCordonCaulle': 20.0, 'Chaiten': 5.0}
+control identidad predicado (valid 5 casos, publica 2 casos): ([0, 1, 1, 1, 0], [1, 0])
+filas referencia unificada 47626 | ultima fecha V375: 2026-11-06 06:42:01
+records nocturnos totales 28932 | VIIRS375 11525 | sensores Counter({'VIIRS_NOAA20': 3990, 'VIIRS_NOAA21': 3899, 'VIIRS_SNPP': 3636})
+
+A1 protegidas con record: 171 | claves unicas (vol,sensor,dt): 171 | duplicadas: 0
+   etiquetas de las protegidas: Counter({'pos': 171})
+   publicadas 166 no publicadas 5
+   NO PUB Lascar VIIRS_SNPP 2026-08-22 05:06 z 59.32 dc far pc_dist 8.23 disp 0 | filas MIROVA: [('OCR', 'ALERTA_TERMICA_OCR', 1.65, 1.22, '2026-08-22 05:06:00')]
+   NO PUB Lastarria VIIRS_NOAA20 2026-04-18 04:42 z 67.02 dc far pc_dist 19.632 disp 0 | filas MIROVA: [('OCR', 'ALERTA_TERMICA_OCR', 1.29, 2.48, '2026-04-18 04:42:01')]
+   NO PUB Lastarria VIIRS_SNPP 2026-05-02 05:06 z 59.49 dc far pc_dist 19.546 disp 0 | filas MIROVA: [('OCR', 'ALERTA_TERMICA_OCR', 2.36, 2.48, '2026-05-02 05:06:00')]
+   NO PUB Tupungatito VIIRS_SNPP 2026-09-28 05:18 z 48.77 dc far pc_dist 21.574 disp 0 | filas MIROVA: [('OCR', 'ALERTA_TERMICA_OCR', 2.51, 5.27, '2026-09-28 05:18:00')]
+   NO PUB Tupungatito VIIRS_SNPP 2026-09-29 04:54 z 62.41 dc far pc_dist 9.403 disp 0 | filas MIROVA: [('OCR', 'ALERTA_TERMICA_OCR', 1.86, 5.68, '2026-09-29 04:54:00')]
+   control umbral 0 -> 1469 | umbral 1e9 -> 0
+   noches con protegida: 111 | sin publicacion V375 esa noche: [] | sin publicacion de ningun sensor: []
+   noche ('Lascar', '2026-08-22') publicadas esa noche: [('VIIRS_NOAA20', '05:24', 1, 'pos'), ('VIIRS_NOAA21', '06:12', 1, 'pos')]
+   noche ('Lastarria', '2026-04-18') publicadas esa noche: [('VIIRS_NOAA21', '05:36', 1, 'pos'), ('VIIRS_SNPP', '06:06', 1, 'pos'), ('VIIRS_NOAA20', '06:24', 1, 'pos')]
+   noche ('Lastarria', '2026-05-02') publicadas esa noche: [('VIIRS_NOAA20', '05:24', 1, 'sin_info'), ('VIIRS_NOAA21', '06:12', 1, 'pos'), ('VIIRS_SNPP', '06:42', 1, 'pos')]
+   noche ('Tupungatito', '2026-09-28') publicadas esa noche: [('VIIRS_NOAA20', '05:36', 1, 'pos')]
+   noche ('Tupungatito', '2026-09-29') publicadas esa noche: [('VIIRS_NOAA20', '05:18', 1, 'sin_info'), ('VIIRS_NOAA21', '06:00', 1, 'sin_info')]
+
+A2 (z>=50?, publica) -> {(False, True): 134, (True, True): 32, (True, False): 4, (False, False): 1}
+   z None en protegidas: 0
+   z de las no publicadas: [59.32, 67.02, 59.49, 48.77, 62.41]
+   protegidas con z en [49.5, 50.5]: [('Lascar', 49.78), ('Lascar', 49.69), ('Lascar', 49.51)]
+
+A3 negativos limpios V375: 4087 publicados 161
+    Chaiten [24, 544]
+    Copahue [0, 581]
+    Isluga [3, 68]
+    Lascar [8, 135]
+    Lastarria [49, 191]
+    Llaima [1, 602]
+    NevadosDeChillan [6, 457]
+    PlanchonPeteroa [11, 320]
+    PuyehueCordonCaulle [43, 371]
+    Tupungatito [13, 258]
+    Villarrica [3, 560]
+   display maximo en neg publicados: 0.3782 | con disp>=1: 0
+   top 5 disp neg publicados: [(0.378, 'PuyehueCordonCaulle', '2026-10-08 05:30'), (0.336, 'PuyehueCordonCaulle', '2026-10-21 05:48'), (0.32, 'PuyehueCordonCaulle', '2026-03-14 05:48'), (0.244, 'PuyehueCordonCaulle', '2026-04-24 05:24'), (0.227, 'PuyehueCordonCaulle', '2026-10-08 05:48')]
+   control: protegidas publicadas con disp>=1: 110 de 166
+   etiquetas V375: Counter({'sin_info': 5531, 'neg_limpio': 4087, 'pos': 1469, 'far_ref': 374, 'sin_geometria': 64})
+   neg limpios por fecha max: 2026-11-02
+listo -> C:\Users\nmend\vrp-temporales\s175_audit\f2\verificador\v_a1_a3.json

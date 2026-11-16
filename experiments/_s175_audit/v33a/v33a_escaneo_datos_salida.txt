@@ -1,0 +1,57 @@
+# datos: C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile/.claude/worktrees/relaxed-almeida-d17378/data/mirova_equivalent (14dfb0d2e); yaml: C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile/.claude/worktrees/relaxed-almeida-d17378/volcanoes.yaml
+
+## 116. Distancia centro (lat/lon) a vent (vent_lat/vent_lon) por volcan Tier A, volcanoes.yaml
+  Lascar                 centro-vent =  0.68 km  inner=5.0
+  Lastarria              centro-vent =  0.00 km  inner=3.0
+  Isluga                 centro-vent =  0.00 km  inner=5.0
+  Tupungatito            centro-vent =  2.73 km  inner=7.0
+  PlanchonPeteroa        centro-vent =  0.50 km  inner=3.0
+  NevadosDeChillan       centro-vent =  0.00 km  inner=5.0
+  Llaima                 centro-vent =  0.00 km  inner=5.0
+  Villarrica             centro-vent =  0.85 km  inner=5.0
+  Copahue                centro-vent =  0.00 km  inner=4.0
+  PuyehueCordonCaulle    centro-vent =  7.58 km  inner=20.0
+  Chaiten                centro-vent =  0.59 km  inner=5.0
+
+# records leidos (11 Tier A): 73708  (0 = instrumento muerto)
+# ultimo datetime_utc: 2026-11-06 08:25
+
+## 117. Records nocturnos (solar_zenith_deg > 90) por volcan y noche, ultimos 60 dias de datos; n sensores distintos por noche
+  Lascar                 noches= 61 records/noche mediana=9 max=12  sensores/noche mediana=8
+  Lastarria              noches= 61 records/noche mediana=10 max=13  sensores/noche mediana=8
+  Isluga                 noches= 61 records/noche mediana=9 max=12  sensores/noche mediana=8
+  Tupungatito            noches= 61 records/noche mediana=10 max=14  sensores/noche mediana=8
+  PlanchonPeteroa        noches= 61 records/noche mediana=10 max=15  sensores/noche mediana=8
+  NevadosDeChillan       noches= 61 records/noche mediana=10 max=15  sensores/noche mediana=8
+  Llaima                 noches= 61 records/noche mediana=11 max=15  sensores/noche mediana=8
+  Villarrica             noches= 61 records/noche mediana=11 max=15  sensores/noche mediana=8
+  Copahue                noches= 61 records/noche mediana=10 max=14  sensores/noche mediana=8
+  PuyehueCordonCaulle    noches= 61 records/noche mediana=12 max=16  sensores/noche mediana=8
+  Chaiten                noches= 61 records/noche mediana=12 max=17  sensores/noche mediana=8
+
+## 118. Records con diag_rejected_sanity_cap_mw o vrp_exceeds_sanity_cap, por sensor; vrp_mw maximo por sensor
+  MODIS_AQUA         n=  7567 rechazados_cap=0 exceeds=0 t_max_k None con t_max_i04_k=0 vrp_max=(62.978, 'NevadosDeChillan', '2025-02-28 06:50')
+  MODIS_TERRA        n=  7384 rechazados_cap=0 exceeds=0 t_max_k None con t_max_i04_k=0 vrp_max=(119.036, 'NevadosDeChillan', '2025-02-28 02:05')
+  VIIRS_NOAA20       n=  9989 rechazados_cap=0 exceeds=0 t_max_k None con t_max_i04_k=91 vrp_max=(94.249, 'NevadosDeChillan', '2025-02-28 05:48')
+  VIIRS_NOAA20_750   n=  9890 rechazados_cap=0 exceeds=0 t_max_k None con t_max_i04_k=0 vrp_max=(117.746, 'NevadosDeChillan', '2025-02-28 05:48')
+  VIIRS_NOAA21       n=  9825 rechazados_cap=0 exceeds=0 t_max_k None con t_max_i04_k=47 vrp_max=(75.356, 'NevadosDeChillan', '2025-02-27 05:18')
+  VIIRS_NOAA21_750   n=  9772 rechazados_cap=0 exceeds=0 t_max_k None con t_max_i04_k=0 vrp_max=(211.346, 'NevadosDeChillan', '2025-02-27 05:18')
+  VIIRS_SNPP         n=  9689 rechazados_cap=0 exceeds=0 t_max_k None con t_max_i04_k=87 vrp_max=(80.397, 'NevadosDeChillan', '2025-02-27 05:42')
+  VIIRS_SNPP_750     n=  9592 rechazados_cap=0 exceeds=0 t_max_k None con t_max_i04_k=0 vrp_max=(184.792, 'NevadosDeChillan', '2025-02-27 05:42')
+  (control positivo del instrumento: n por sensor > 0; el cap solo actua sobre vrp > 50000 MW)
+
+## 126. Ultimo datetime_utc por satelite (control: NOAA-20 y NOAA-21 siguen)
+  MODIS_AQUA         ultimo 2026-11-06 08:25 (Tupungatito)
+  MODIS_TERRA        ultimo 2026-11-06 02:15 (Tupungatito)
+  VIIRS_NOAA20       ultimo 2026-11-06 06:48 (PlanchonPeteroa)
+  VIIRS_NOAA20_750   ultimo 2026-11-06 06:48 (PlanchonPeteroa)
+  VIIRS_NOAA21       ultimo 2026-11-06 05:48 (Lastarria)
+  VIIRS_NOAA21_750   ultimo 2026-11-06 05:48 (Lastarria)
+  VIIRS_SNPP         ultimo 2026-11-01 06:24 (Chaiten)
+  VIIRS_SNPP_750     ultimo 2026-11-01 06:24 (Chaiten)
+
+## 161. Records MODIS con via_codigo_mirova True: claves de anomaly_pixels; cuantos con >1 pixel
+  records via=118; con >1 pixel=6; de esos sin vrp_mw en ningun pixel=6
+  claves de pixel (via): {('bt_k', 'col', 'dist_km', 'fila', 'lat', 'lon'): 46}
+  control (MODIS no-via con >1 pixel): {'K_multi': 225}  (si K tambien careciera de vrp_mw, el hallazgo no seria de la via)
+  ejemplos via multi-pixel sin vrp_mw (volcan, pasada UTC, n_pix, vrp_mw): [('NevadosDeChillan', '2026-11-02 01:15', 4, 4.328), ('NevadosDeChillan', '2026-11-02 07:30', 9, 12.823), ('NevadosDeChillan', '2026-11-04 08:45', 12, 17.101), ('NevadosDeChillan', '2026-11-05 01:35', 5, 24.622), ('NevadosDeChillan', '2026-11-05 07:45', 8, 24.809)]
