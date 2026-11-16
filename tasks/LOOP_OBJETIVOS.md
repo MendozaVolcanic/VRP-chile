@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 15:58 UTC (S187): Nicolás: «Regla de publicación» (b.2) y «Mergea #1011»; #1011 integrado, ficha en #1025
+- b.2 enviada con sus palabras a la sesión de #1011 (local_cf79e659); unió main (`19753e1c4`), arregló la prueba que fijaba la línea 1600 (ahora lee la línea del guard G8) y dejó la fila de la ficha en la descripción, sin escribir la ficha (regla S185).
+- #1011 mergeado 15:55:53 UTC, `--merge --match-head-commit 9ce86ce12…`, merge commit `0bcd26143`.
+- Error mío de procedimiento: la descripción de #1011 pedía agregar la fila de la ficha ANTES de mergear; la agregué después, en #1025 (v1.32, 2026-11-16) junto con la fecha de la v1.31 corregida a 2026-11-16 (#1023 se mergeó a las 00:02:12 UTC; b.1). 19 pruebas de la ficha y del G8 en verde; espera «mergea #1025». Para #1019: agregar la fila v1.33 en su rama antes de mergear.
+- #1019 pasado a base main; CI corriendo.
+
 ### 2026-11-16 15:36 UTC (S187): Nicolás: «Sí, parte con 1, 2 y 3»; hoja de los 34, guardia MODIS y unión de la tanda 2 preparada
 - Hoja D1 a D15 al día en `tasks/DECISIONES_34_S187.md` (redactor Opus, verificador limpio Sonnet: 0 estados mal puestos, 2 imprecisiones de D1 corregidas). 5 resueltas por los hechos, 3 obsoletas, 3 con otra pregunta, 4 abiertas (D1, D5, D13, D15) y 2 NUEVAS: N1 (los 34 ya están en el tablero principal con el rótulo «sin MIROVA · 1 vez al día»; ¿cuenta como publicado?) y N2 (calor de Villarrica, Chaitén, PCC y Copahue en la grilla de Quetrupillán, Michinmahuida, Antillanca y Callaqui; la zona excluida aprobada el 11-02 no está hecha). D1 decide si Putana (tanda 2) se aplica.
 - Guardia MODIS: VERDE, 22 de 29, sin candidatas; informe `D:\vrp-trabajo\temporales\s185_cierre_modis\informe_cierre_modis_2026-11-16.md`.
