@@ -6,7 +6,7 @@ POR QUÉ: el audit semanal abrió #915 «FUERA DE BANDA» con tres alertas prote
 clasificación de S165 mostró que ninguna era una pérdida de cráter que el operador no viera. Un audit que
 se dispara cada semana por eso confunde más de lo que ayuda (decisión de Nicolás, 2026-10-28). Dos cambios:
 
-1. protegida con `referencia_sospechosa` (sólo OCR de Suomi NPP antes del hito A119): no levanta flag, se
+1. protegida con `referencia_sospechosa` (sólo OCR de VIIRS antes del hito A119): no levanta flag, se
    informa aparte;
 2. pérdida aceptada: PCC VIIRS 750 2026-10-10 05:54 (#865, #881), y ninguna otra pasada.
 
@@ -65,17 +65,17 @@ def test_protegida_con_referencia_sospechosa_no_es_flag_y_se_informa_aparte():
 @pytest.mark.parametrize("fila,sensor", [
     # control: de la tabla (CONS), aunque sea Suomi NPP y antes del hito
     (_fila("Tupungatito", "VIIRS375", "2026-09-28 05:18:00", 2.51, source="CONS"), "VIIRS_SNPP"),
-    # control: sólo OCR antes del hito, pero de NOAA-20
-    (_fila("Tupungatito", "VIIRS375", "2026-09-28 05:18:00", 2.51, source="OCR"), "VIIRS_NOAA20"),
+    # control: sólo OCR antes del hito, pero de MODIS (el defecto del OCR es de VIIRS; S185 abrió el guard a todo VIIRS)
+    (_fila("Tupungatito", "MODIS", "2026-09-28 05:18:00", 2.51, source="OCR"), "MODIS_AQUA"),
     # control: sólo OCR de Suomi NPP, pero posterior al hito
     (_fila("Tupungatito", "VIIRS375", "2026-10-12 05:18:00", 2.51, source="OCR"), "VIIRS_SNPP"),
 ])
 def test_protegida_normal_sigue_siendo_flag(fila, sensor):
-    recs = [_brec("Tupungatito", "VIIRS375", fila["fecha_utc"][:16], False, sensor)]
+    recs = [_brec("Tupungatito", fila["sensor_bucket"], fila["fecha_utc"][:16], False, sensor)]
     lista = _protegidas([fila], recs)
     assert lista[0]["referencia_sospechosa"] is False
     flags = aa.flags_protegidas(lista, "K")
-    assert len(flags) == 1 and flags[0].startswith("alerta protegida sin publicar: Tupungatito VIIRS375")
+    assert len(flags) == 1 and flags[0].startswith(f"alerta protegida sin publicar: Tupungatito {fila['sensor_bucket']}")
     assert aa.protegidas_aparte(lista, "K") == []
 
 

@@ -1,0 +1,63 @@
+C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\site-packages\numpy\_core\fromnumeric.py:3824: RuntimeWarning: Mean of empty slice
+  return _methods._mean(a, axis=axis, dtype=dtype,
+C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\site-packages\numpy\_core\_methods.py:142: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+== (1) NULO de la clase i (control A ok): fraccion d <= tol; observado vs nuestro punto de otra pasada vs uniforme en inner ==
+  VIIRS375 todos los volcanes: n=116 observado A 0.948 | observado B(centroide) 0.940 | nulo permutacion 0.730 (A) | nulo uniforme 0.021
+  VIIRS375 Chillan: n=47 observado A 0.979 | observado B(centroide) 0.979 | nulo permutacion 0.635 (A) | nulo uniforme 0.013
+  VIIRS375 sin Chillan: n=69 observado A 0.928 | observado B(centroide) 0.913 | nulo permutacion 0.782 (A) | nulo uniforme 0.021
+  VIIRS750 todos los volcanes: n=50 observado A 0.940 | observado B(centroide) 1.000 | nulo permutacion 0.769 (A) | nulo uniforme 0.072
+  VIIRS750 Chillan: n=47 observado A 0.936 | observado B(centroide) 1.000 | nulo permutacion 0.754 (A) | nulo uniforme 0.063
+  VIIRS750 sin Chillan: n=3 observado A 1.000 | observado B(centroide) 1.000 | nulo permutacion 1.000 (A) | nulo uniforme 0.044
+  MODIS todos los volcanes: n=21 observado A 0.714 | observado B(centroide) 0.810 | nulo permutacion 0.667 (A) | nulo uniforme 0.311
+  MODIS Chillan: n=21 observado A 0.714 | observado B(centroide) 0.810 | nulo permutacion 0.662 (A) | nulo uniforme 0.322
+  MODIS sin Chillan: n=0 observado A nan | observado B(centroide) nan | nulo permutacion nan (A) | nulo uniforme nan
+
+== (2) ORIGEN de la Distancia_km ==
+NevadosDeChillan VIIRS375: n=60 (mitades 30/30); celda de mirova_center (67, 66)
+   origen centro: ajuste 0.13, prueba 0.07
+   mejor del barrido en ajuste: offset fila,col (3,-1) tasa ajuste 0.57, tasa prueba 0.37
+   top 5 ajuste: [(0.57, 3, -1), (0.5, 2, -1), (0.5, 1, 2), (0.5, -1, 2), (0.5, -2, 1)]
+   mediana de tasa de todo el barrido (si no hubiera origen): 0.03
+NevadosDeChillan VIIRS750: n=50 (mitades 25/25); celda de mirova_center (33, 33)
+   origen centro: ajuste 0.36, prueba 0.48
+   mejor del barrido en ajuste: offset fila,col (1,0) tasa ajuste 0.72, tasa prueba 0.68
+   top 5 ajuste: [(0.72, 1, 0), (0.72, 1, -1), (0.72, -1, 0), (0.68, 1, 1), (0.64, 0, 1)]
+   mediana de tasa de todo el barrido (si no hubiera origen): 0.0
+Lascar VIIRS375: n=17 (mitades 9/8); celda de mirova_center (67, 66)
+   origen centro: ajuste 0.56, prueba 0.38
+   mejor del barrido en ajuste: offset fila,col (0,0) tasa ajuste 0.56, tasa prueba 0.38
+   top 5 ajuste: [(0.56, 0, 0), (0.44, -2, 2), (0.44, -6, 0), (0.33, 0, -1), (0.33, 0, -2)]
+   mediana de tasa de todo el barrido (si no hubiera origen): 0.0
+Isluga VIIRS375: n=35 (mitades 18/17); celda de mirova_center (67, 66)
+   origen centro: ajuste 0.06, prueba 0.00
+   mejor del barrido en ajuste: offset fila,col (2,1) tasa ajuste 0.17, tasa prueba 0.06
+   top 5 ajuste: [(0.17, 2, 1), (0.17, 0, 1), (0.11, 3, 0), (0.11, 3, -2), (0.11, 2, -3)]
+   mediana de tasa de todo el barrido (si no hubiera origen): 0.0
+PuyehueCordonCaulle VIIRS750: n=8 (mitades 4/4); celda de mirova_center (33, 33)
+   origen centro: ajuste 0.25, prueba 0.25
+   mejor del barrido en ajuste: offset fila,col (8,-4) tasa ajuste 0.25, tasa prueba 0.00
+   top 5 ajuste: [(0.25, 8, -4), (0.25, 7, 8), (0.25, 7, 6), (0.25, 7, 5), (0.25, 7, 4)]
+   mediana de tasa de todo el barrido (si no hubiera origen): 0.0
+
+== (3) Afirmacion 352: Chillan, control A fallido, protegidas ==
+n: Counter({'VIIRS375': 22, 'VIIRS750': 8, 'MODIS': 1})
+  VIIRS375: d(mancha A, mirova_center) en celda central (<=0,05 km): 10 de 22; max 1.52; valores tabla [(0.84, 6), (0.95, 1), (1.06, 3), (1.19, 3), (1.35, 3), (1.88, 1), (2.02, 1), (2.12, 2), (2.28, 1), (2.52, 1)]; lum_A min 146.0
+     control B pasa (cualquier celda de la mancha) 11 de 22; nuestro punto a la celda mas cercana p50 0.16; d_A_ours p50 0.36
+     mirando origen: comps blancas borradas por A en 2; n_celdas mancha p50 4.0
+  VIIRS750: d(mancha A, mirova_center) en celda central (<=0,05 km): 4 de 8; max 4.86; valores tabla [(1.06, 1), (1.68, 2), (1.76, 2), (2.37, 1), (2.7, 1), (3.18, 1)]; lum_A min 107.0
+     control B pasa (cualquier celda de la mancha) 7 de 8; nuestro punto a la celda mas cercana p50 0.34; d_A_ours p50 0.62
+     mirando origen: comps blancas borradas por A en 3; n_celdas mancha p50 4.5
+  MODIS: d(mancha A, mirova_center) en celda central (<=0,05 km): 0 de 1; max 4.68; valores tabla [(1.41, 1)]; lum_A min 113.0
+     control B pasa (cualquier celda de la mancha) 1 de 1; nuestro punto a la celda mas cercana p50 0.87; d_A_ours p50 3.41
+     mirando origen: comps blancas borradas por A en 1; n_celdas mancha p50 8.0
+  ¿Dist tabla == 0 en Chillan VIIRS375 alguna vez en p8? [(0.38, 1), (0.53, 8), (0.54, 1), (0.68, 1), (0.75, 1), (0.84, 18), (0.95, 5), (1.06, 8), (1.08, 1), (1.13, 3), (1.19, 5), (1.35, 5)]
+
+== (4) Empates: pasadas con mas de una componente blanca en inner (Chillan) y zenit ==
+  con >=2 componentes blancas no-borde en inner: Counter({('VIIRS375', False): 66, ('VIIRS750', False): 55, ('MODIS', False): 20, ('VIIRS375', True): 3, ('MODIS', True): 2})
+  n con zenit: 124
+  zenit 0-30: n=33 d_A_ours/celda p50 0.58; d_B_cent/celda p50 0.50; n_celdas p50 3.0
+  zenit 30-50: n=41 d_A_ours/celda p50 0.87; d_B_cent/celda p50 0.80; n_celdas p50 3.0
+  zenit 50-60: n=19 d_A_ours/celda p50 0.80; d_B_cent/celda p50 0.79; n_celdas p50 3.0
+  zenit 60-90: n=31 d_A_ours/celda p50 1.05; d_B_cent/celda p50 0.86; n_celdas p50 6.0
+  Spearman zenit vs n_celdas: 0.314

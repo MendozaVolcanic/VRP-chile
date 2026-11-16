@@ -370,8 +370,14 @@ def test_la_pagina_baja_solo_la_historia_del_volcan_abierto():
     assert "distanciaDePasada(r)" in _fuente(src, "buildDistanceData")
 
 
-def test_la_linea_1600_sigue_en_su_lugar():
-    assert INDEX.read_text(encoding="utf-8").splitlines()[1599].startswith("function isValidDetection")
+def test_isvaliddetection_sigue_en_la_linea_de_la_guarda_g8():
+    """La línea la fija la guarda G8 (tests/test_guard_declarado_vs_efectivo_s131.py); main la movió de 1600 a 1714 en
+    S186. Se lee de ahí para no fijar un número que cambia."""
+    g8 = (RAIZ / "tests" / "test_guard_declarado_vs_efectivo_s131.py").read_text(encoding="utf-8")
+    m = re.search(r'\("frontend/index\.html", (\d+), "isValidDetection"\)', g8)
+    assert m, "la guarda G8 ya no declara isValidDetection"
+    linea = int(m.group(1))
+    assert INDEX.read_text(encoding="utf-8").splitlines()[linea - 1].startswith("function isValidDetection"), linea
 
 
 def test_textos_sin_guiones_largos():

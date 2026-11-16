@@ -273,7 +273,7 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
 // Calibración: docs/F5_CALIBRATION_S95.md. Toggle USE_F5_CORE.
 // ============================================================================
 // S100: default Núcleo F5' (coherencia con index.html; S92 L5). Usuario puede apagarlo.
-const USE_F5_CORE = true;  // S180 (Nicolás, 2026-11-12): sin botón Magnitud, como en index.html. La vía «código MIROVA» (los tres sensores desde el 2026-11-11) queda fuera del núcleo (f5CoreMagnitude, tests/test_f5_no_recorta_via_s180.py), así que en los datos nuevos Cluster y Núcleo daban lo mismo; queda fijo el modo de siempre, que sólo actúa sobre la historia de K.
+const USE_F5_CORE = true;  // S180 (Nicolás, 2026-11-12): sin botón Magnitud, como en index.html. La vía «código MIROVA» (los tres sensores desde el 2026-11-11) queda fuera del núcleo (f5CoreMagnitude, tests/test_f5_no_recorta_via_s180.py), así que en los datos nuevos Cluster y Núcleo daban lo mismo; queda fijo el modo de siempre, que sólo actúa sobre los records que no son de la vía (caídas a K: sin_grilla, sin_mxd03); S187: la historia publicada ya se reprocesó con la vía (ficha v1.25).
 // ⚠️ S151 (A113; docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md, hallazgo V-1): "el pipeline
 // no deja marca en el record" es falso desde S71 (commit 84c7d312e): cada cúmulo topado lleva
 // primary_cluster.d9_capped = true. Reconocerlo por el valor sigue funcionando igual. Detalle en
