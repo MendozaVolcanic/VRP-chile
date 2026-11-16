@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 00:17 UTC (S186): Nicolás: «Mergea #1023»; documentos al día con la vía en main, ficha v1.31
+- **#1023** integrado con merge commit `19b21cd0d` (2026-11-16 00:02:12 UTC; head `2dafdbda8` con `--match-head-commit`). Antes del merge, en un worktree propio separado de la rama (`D:\vrp-trabajo\wt_s186_merge1023`, ya quitado), se unió `origin/main` sin conflictos y se aplicó la regla de #1009: ficha v1.31 (cabecera y fila, «#1023, S186»); además, CLAUDE.md y D8' dejan de decir que la prueba radiante no está en main (#1022). CI del PR y Tests de main verdes (run 43778001626).
+- **Fecha de la v1.31**: la ficha dice 2026-11-15 (fecha de Chile, 21:02), pero el merge quedó a las 00:02 UTC del 2026-11-16. Las versiones anteriores usan la fecha UTC del merge. Corregir en el próximo PR que toque la ficha (o uno de una línea), si Nicolás lo pide.
+- **Falsa alarma local**: `tests/test_guard_libro_de_pruebas_s146.py::test_g1d` y `::test_g2c` fallan en un worktree en D: porque `os.path.relpath` no cruza de D: al temporal de pytest en C: (ValueError en Windows). En CI (Linux) pasan. No es regresión.
+- Worktree `D:\vrp-trabajo\wt_s186_docs` es de la sesión `local_cb1107fe` (terminada): no se tocó; puede quitarse al archivarla.
+- b.1 a b.7 resueltos en S186; b.8 (color de #1011) sigue con Nicolás.
+
 ### 2026-11-15 22:12 UTC (S186): Nicolás: «Mergea #1022»; #1023 (documentos) CLEAN con CI verde
 - **#1022** integrado con merge commit `5b16e9da5` (head `9f609ad51` con `--match-head-commit`); Tests de main verde (run 43766788405). Worktree `D:\vrp-trabajo\wt_s186_radiante` quitado tras revisar list_sessions. La regla «radiante» queda protegida por `tests/test_guard_regla_posicion_radiante_s186.py` en main.
 - **#1023** (sesión `local_cb1107fe`, rama `claude/s186-docs-via`, head `fea0e961a`): siete documentos al día con la vía en los tres sensores (CLAUDE.md, README, CLAUDE_HISTORIA, ficha SDA, INDEX, MIROVA_DIVERGENCES con D36 nueva y D8' con la regla radiante, MISSION). Cierra 34 de 35 contradicciones del barrido S185; la 35 está en comentarios de `frontend/diario.html` y `mosaico.html` (baja, pide tag y sí). Ficha sin numerar: quien mergea une main y pone la versión siguiente (#1009). Suite local 3.903 passed; CI verde; CLEAN. Revisado aquí: sólo documentos, decisión b.3 escrita con sus palabras. Espera «mergea #1023».
