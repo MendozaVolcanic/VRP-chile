@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 13:21 UTC (S187): tanda 2 aún corriendo; cadena 3 a 7 pasada a un script autónomo
+- Run 43806164818 (tanda 2): 127 de 165 trozos verdes, 0 rojos, 6 en curso y 32 en cola; unos 26 min por trozo con 6 en paralelo, fin estimado hacia las 16 UTC. El NRT de los 11 siguió verde toda la noche (09 a 12 UTC, 20 min cada uno).
+- Auditoría semanal del 11-16 aún sin publicar: el cron del lunes se dispara tarde (11-09 a las 19:35 UTC); el vigilante sigue esperando hasta 24 h.
+- Para que la cadena no dependa del turno de la sesión: `D:\vrp-trabajo\temporales\s187_tanda2\cadena_3a7.sh` corre en segundo plano en el computador de Nicolás. Espera a que no quede nada del grupo vivo, exige 0 trozos rojos en la última corrida y despacha la tanda siguiente; si hay rojos se detiene (exit 2) y la sesión los relanza. La unión, el ensayo y el PR de cada tanda siguen a cargo de la sesión.
+
 ### 2026-11-16 05:06 UTC (S187): Nicolás: «Sí, despacha 3 a 7»; despacho encadenado de las tandas autorizado
 - Autorización: despachar las tandas 3 a 7 una tras otra, cada una al terminar la anterior (incluidos los relanzamientos de sus trozos rojos), sin esperar el merge de la unión anterior. Orden del plan (§5 Tarea 5): 3 DescabezadoGrande, CerroAzulQuizapu, LagunaDelMaule, NevadoDeLongavi, Antuco; 4 Callaqui, Lonquimay, Tolhuaca, Sollipulli, Quetrupillan; 5 Lanin, MochoChoshuenco, CarranLosVenados, AntillancaCasablanca, Osorno; 6 Calbuco, YateHornopiren, Huequi, Michinmahuida, CorcovadoYanteles; 7 Melimoyu, MacaCay, Mentolat, Hudson.
 - Sigue igual: cada unión va en su PR con «mergea #N» de Nicolás; cada aplicación con su tag y sólo con ensayo de 0 huecos y 0 caídas a K (H3). Un solo despacho del grupo a la vez (Step 1). Antes de cada despacho, ensayar el planificador con los 5 nombres.
