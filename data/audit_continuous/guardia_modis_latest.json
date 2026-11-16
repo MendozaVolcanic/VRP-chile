@@ -1,26 +1,29 @@
 {
- "generated_utc": "2026-11-10T04:19:09Z",
+ "generated_utc": "2026-11-16T02:23:58Z",
  "regla": "experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4 (en main desde el PR B #934; hasta S173, borrador en la rama loop/activo)",
  "encendido_modis_utc": "2026-11-02 20:11:43",
- "primera_observacion_via": "2026-11-02 01:15",
+ "primera_observacion_via": "2025-02-15 01:40",
  "flag_produccion": true,
  "ventana": [
   "2026-10-19",
-  "2026-11-10"
+  "2026-11-16"
  ],
  "fase": "vigilando",
  "veredicto": "VERDE",
  "avisos": [],
+ "avisos_informativos": [
+  "el nulo de la guardia cubre 7.8 de los 14 días declarados (2026-10-26 01:35:00 a 2026-11-02 20:11:43 UTC): la guardia empieza el 2026-10-26. El veredicto no cambia"
+ ],
  "solo_caidas_a_k": false,
  "guardia_desde": "2026-10-26",
- "guardia_hasta": "2026-11-09",
- "n_pasadas_alerta": 26,
- "n_pasadas_alerta_con_guardia": 24,
+ "guardia_hasta": "2026-11-15",
+ "n_pasadas_alerta": 37,
+ "n_pasadas_alerta_con_guardia": 36,
  "reversion": [],
  "fuera_de_plazo": [],
  "muy_bajo": {
   "k": 0,
-  "n": 0,
+  "n": 1,
   "cota": 2,
   "dispara": false,
   "pasadas": []
@@ -30,7 +33,7 @@
  "protegidas_calladas_por_k_de_produccion": [],
  "sobrepublicacion": {
   "k": 1,
-  "n": 152,
+  "n": 277,
   "cota": 3,
   "dispara": false,
   "pasadas": [
@@ -43,14 +46,39 @@
  "borde_171_01": {
   "por_semana": {
    "2026-W45": 1,
-   "2026-W46": 1
+   "2026-W46": 6
   },
-  "total": 2,
+  "total": 7,
   "pasadas": [
+   {
+    "volcano": "Lascar",
+    "sensor": "MODIS_TERRA",
+    "fecha_utc": "2026-11-12 01:15"
+   },
+   {
+    "volcano": "Tupungatito",
+    "sensor": "MODIS_AQUA",
+    "fecha_utc": "2026-11-12 08:55"
+   },
+   {
+    "volcano": "Llaima",
+    "sensor": "MODIS_TERRA",
+    "fecha_utc": "2026-11-11 02:15"
+   },
+   {
+    "volcano": "Llaima",
+    "sensor": "MODIS_AQUA",
+    "fecha_utc": "2026-11-12 07:20"
+   },
    {
     "volcano": "Villarrica",
     "sensor": "MODIS_AQUA",
     "fecha_utc": "2026-11-04 07:10"
+   },
+   {
+    "volcano": "Copahue",
+    "sensor": "MODIS_TERRA",
+    "fecha_utc": "2026-11-13 01:50"
    },
    {
     "volcano": "Chaiten",
@@ -65,11 +93,26 @@
   "distintas": 0,
   "detalle": [],
   "sin_medir": false,
-  "nota": "antes del encendido guardia y producción son el mismo detector K: deben publicar lo mismo (A110)"
+  "sellado": true,
+  "medido_en_commit": "f345d0274b06cdf3702995432f42d85198167b19",
+  "medido_utc": "2026-11-12 04:52:32",
+  "ventana_efectiva": {
+   "desde": "2026-10-26 01:35:00",
+   "hasta": "2026-11-02 20:11:43",
+   "desde_nominal": "2026-10-19 20:11:43",
+   "dias_declarados": 14,
+   "dias_cubiertos": 7.8,
+   "inicio_guardia": "2026-10-26 01:35:00"
+  },
+  "ventana_sellada": [
+   "2026-10-19 20:11:43",
+   "2026-11-02 20:11:43"
+  ],
+  "nota": "nulo sellado antes del reemplazo de la historia con la vía (S181): guardia y producción eran K"
  },
  "borde_del_encendido": [],
  "duracion": {
-  "protegidas_vistas_en_guardia": 11,
+  "protegidas_vistas_en_guardia": 22,
   "objetivo": 29,
   "encendido": "2026-11-02 20:11:43",
   "vence": "2027-03-02",
@@ -83,34 +126,5 @@
  },
  "juzgadas": [],
  "caidas_a_k": [],
- "protegidas_sin_publicar_produccion": [
-  {
-   "volcano": "NevadosDeChillan",
-   "sensor": "MODIS",
-   "fecha_utc": "2026-10-25 07:20",
-   "instante_utc": "2026-10-25 07:20:00",
-   "vrp_mirova_mw": 3.79,
-   "protegida": true,
-   "minima": false,
-   "referencia_sospechosa": false,
-   "prod_pub": false,
-   "guardia_pub": null,
-   "prod_via": false,
-   "prod_caida_k": null
-  },
-  {
-   "volcano": "NevadosDeChillan",
-   "sensor": "MODIS",
-   "fecha_utc": "2026-10-30 07:15",
-   "instante_utc": "2026-10-30 07:15:00",
-   "vrp_mirova_mw": 1.0,
-   "protegida": true,
-   "minima": false,
-   "referencia_sospechosa": false,
-   "prod_pub": false,
-   "guardia_pub": false,
-   "prod_via": false,
-   "prod_caida_k": null
-  }
- ]
+ "protegidas_sin_publicar_produccion": []
 }

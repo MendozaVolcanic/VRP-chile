@@ -38,6 +38,15 @@ os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
 h5py = pytest.importorskip("h5py")
 
+
+@pytest.fixture(autouse=True)
+def _k_de_viirs_375(monkeypatch):
+    """S177 B1: esta sonda mide la saturación con K sobre Chillán, que tiene grilla de MIROVA. Producción corre la vía
+    «código MIROVA» en VIIRS 375 desde B1 (con K de guardia), y la vía no escribe `vrp_mir_mw`. Se fija K; la vía tiene
+    sus pruebas en tests/test_mirova_v375_codigo_s165.py."""
+    from pipeline import process_viirs
+    monkeypatch.setattr(process_viirs, "ENABLE_V375_CODIGO_MIROVA", False)
+
 import saturacion as S  # noqa: E402
 import probe_saturacion as P  # noqa: E402
 import evaluar_saturacion as E  # noqa: E402

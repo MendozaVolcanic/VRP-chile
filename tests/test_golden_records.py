@@ -71,6 +71,15 @@ GOLDEN = [
             "distance_class":        "summit",
             "sensor":                "VIIRS_NOAA21",
         },
+        # S180: valor de la vía (reproceso P4, run 42749607584, código a7a6ae360): 1,41 MW, t_max_k 294,0 K, 0,149 km.
+        "expected_via": {
+            "vrp_mw":                (1.27, 1.55),
+            "t_max_k":               (292.5, 295.5),
+            "final_hotspot_dist_km": (0.0, 0.45),
+            "distance_class":        "summit",
+            "final_hotspot_source":  "codigo_mirova",
+            "sensor":                "VIIRS_NOAA21",
+        },
     },
     {
         "id": "lascar_summit_noaa21_2026_04_08",
@@ -84,6 +93,15 @@ GOLDEN = [
             "t_max_i04_k":           (296.0, 299.0),
             "final_hotspot_dist_km": (0.0, 0.45),
             "distance_class":        "summit",
+            "sensor":                "VIIRS_NOAA21",
+        },
+        # S180: valor de la vía (P4): 1,541 MW, t_max_k 296,57 K, 0,112 km.
+        "expected_via": {
+            "vrp_mw":                (1.39, 1.70),
+            "t_max_k":               (295.0, 298.0),
+            "final_hotspot_dist_km": (0.0, 0.45),
+            "distance_class":        "summit",
+            "final_hotspot_source":  "codigo_mirova",
             "sensor":                "VIIRS_NOAA21",
         },
     },
@@ -100,6 +118,13 @@ GOLDEN = [
             "distance_class":       "summit",
             "final_hotspot_source": "ctx_cluster",
             "diag_n_dnti_ctx_path": (1, 8),
+            "sensor":               "VIIRS_NOAA21",
+        },
+        # S180: la vía no tiene ancla ctx_cluster ni path D; publica 0,111 MW a 2,254 km, summit (dentro de los 3 km
+        # del inner de Lastarria). Se vigila la clase y la fuente, no la magnitud (sub-MW volátil, como antes).
+        "expected_via": {
+            "distance_class":       "summit",
+            "final_hotspot_source": "codigo_mirova",
             "sensor":               "VIIRS_NOAA21",
         },
     },
@@ -147,6 +172,16 @@ def _check_field(record, field, expected, golden_id):
         )
 
 
+def _expected_de(g, rec):
+    """S180: la historia publicada pasa de K a la vía «código MIROVA» (reemplazo de la historia, decisión de Nicolás
+    del 2026-11-11). Cada golden fija el valor del detector que escribió el record: `expected` el de K y
+    `expected_via` el de la vía (capturado del reproceso P4). Sin `expected_via`, el mismo `expected` vale para los dos
+    (Villarrica, negativo limpio: la vía también calla). Cuando no quede K publicado, `expected` de K se puede retirar."""
+    if rec.get("via_codigo_mirova") is True and "expected_via" in g:
+        return g["expected_via"]
+    return g["expected"]
+
+
 @pytest.mark.parametrize("g", GOLDEN, ids=[g["id"] for g in GOLDEN])
 def test_golden_record_present(g):
     """Cada golden record debe estar presente en el JSON correspondiente."""
@@ -157,11 +192,19 @@ def test_golden_record_present(g):
     )
 
 
+def test_expected_por_detector_elige_segun_la_marca():
+    g = {"expected": {"x": 1}, "expected_via": {"x": 2}}
+    assert _expected_de(g, {"via_codigo_mirova": True}) == {"x": 2}
+    assert _expected_de(g, {}) == {"x": 1}
+    assert _expected_de(g, {"via_codigo_mirova": "sin_grilla"}) == {"x": 1}   # caída a K: valores de K
+    assert _expected_de({"expected": {"x": 1}}, {"via_codigo_mirova": True}) == {"x": 1}
+
+
 @pytest.mark.parametrize("g", GOLDEN, ids=[g["id"] for g in GOLDEN])
 def test_golden_record_values(g):
     """Cada field del expected debe estar dentro de tolerancia."""
     rec = _find_record(g["volcano"], g["datetime_utc"], g["sensor"])
     if rec is None:
         pytest.skip(f"record no presente — ver test_golden_record_present")
-    for field, expected in g["expected"].items():
+    for field, expected in _expected_de(g, rec).items():
         _check_field(rec, field, expected, g["id"])

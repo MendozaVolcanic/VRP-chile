@@ -27,6 +27,11 @@ description: >
   Foco del crater Nicanor (NdC), v2: deteccion IDENTICA a la replica, solo el
   umbral mas bajo (0.005 MW). El recorte espacial vive en el analisis.
 thresholds:
+  # S177 B1: el PR B1 enciende la via «codigo MIROVA» en VIIRS 375 de la replica. Este perfil congela la produccion de
+  # antes de K y corre VIIRS 375 de Chillan desde nrt.yml: si heredara la via dejaria de ser lo que dice ser (A117). Se
+  # declara apagada, separada de la de VIIRS 750 (B2, tras la de MODIS) por lineas existentes (hallazgo 208). Lo
+  # vigila tests/test_guard_v375_codigo_mirova_encendido_s177.py.
+  enable_v375_codigo_mirova: false
   # ⚠️ S147: 0.005 -> 0.0, mismo defecto y mismo origen que en `experimental.yaml`.
   # La cabecera de este archivo dice "UNA sola diferencia con la replica: el umbral
   # (0.005 MW vs 0.02)", y eso valia en S124. S130 bajo el piso del operacional a 0.0
@@ -42,6 +47,11 @@ thresholds:
   # nrt.yml: se declara apagada, ya en el PR A, para que su significado no dependa de la replica (A117). Lo vigila
   # tests/test_perfiles_derivados_via_modis_apagada_s173.py.
   enable_modis_codigo_mirova: false
+  # S177 B2: el PR B2 enciende la via «codigo MIROVA» en VIIRS 750 de la replica. Este perfil congela la produccion de
+  # antes de K y no corre VIIRS 750 (sensors), pero se despacha desde nrt.yml: se declara apagada para que su
+  # significado no dependa de la replica (A117). Separada de la de VIIRS 375 (B1) por lineas existentes (hallazgo
+  # 208). Lo vigila tests/test_guard_v750_codigo_mirova_encendido_s177.py.
+  enable_v750_codigo_mirova: false
 sensors:
   modis: false
   viirs_375: true

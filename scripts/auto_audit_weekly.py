@@ -223,7 +223,8 @@ def banco_ventana(win):
     coords = _coords_por_volcan()
     inner = bp.inner_desde_html()
     filas = cargar_referencia_unificada(CONS, OCR)
-    recs = bp.cargar_nuestros(coords, inner, win)
+    # S185 (b.1): una escena que la vía no pudo medir no es una pasada «sin anomalía»: no entra a recall ni a negativos.
+    recs = bp.cargar_nuestros(coords, inner, win, excluir_escenas_invalidas=True)
     por_vb, noche_sensor, noche_volcan, _ = bp.indexar_referencia(filas, coords, win)
     bp.etiquetar(recs, por_vb, noche_sensor, noche_volcan)
     for r in recs:
@@ -253,7 +254,7 @@ def resumir_falsas_por_detector(recs, frontera, vigente, via_modis=None, via=Non
         r["det"] = _detector_banco(r, frontera, via)
     vig = [r for r in recs if r["det"] == detector_vigente_de(r["b"], vigente, via_modis)]
     out = resumir_falsas(vig, None)
-    out["detector"] = vigente
+    out["detector"] = etiqueta_vigente(vigente, via_modis)
     out["regla_minimas"] = REGLA_MINIMAS
     out["por_sensor_regla_original"] = {s: _pct_falsas([r for r in vig if r["b"] == s], "lab_original")
                                         for s in SENSORS}
@@ -515,6 +516,19 @@ def detector_vigente(frontera):
     return "K" if frontera else "C0"
 
 
+def etiqueta_detector(por_sensor):
+    """S185: el nombre del detector que decide, para mostrarlo. `por_sensor` = {sensor: detector}. Un solo detector
+    para todos, su nombre; varios, los nombres en el orden de SENSORS unidos con «+» (p. ej. VIA_MODIS+VIA_V375+VIA_V750).
+    POR QUÉ: con la vía en los tres sensores el «vigente» global ya no es «K» (K quedó de guardia), y el texto «K» en
+    latest.json, la consola y el issue se leía como que K juzga. Sólo es etiqueta: no decide ningún flag."""
+    return "+".join(dict.fromkeys(por_sensor[s] for s in SENSORS if s in por_sensor))
+
+
+def etiqueta_vigente(vigente, via_modis=None):
+    """S185: `etiqueta_detector` del detector vigente de cada sensor (detector_vigente_de). Sin vía, el vigente tal cual."""
+    return etiqueta_detector({s: detector_vigente_de(s, vigente, via_modis) for s in SENSORS})
+
+
 def _fronteras(via_modis):
     """S176: {sensor: 'YYYY-MM-DD'} de las vías. None o vacío, ninguna; una fecha en texto, la de MODIS (S172)."""
     if not via_modis:
@@ -710,8 +724,8 @@ def sensores_sin_juzgar(recall, desde, ceses, mir_aparte, via_modis=None):
         d = max(f, desde.get(s_via) or "")
         aviso = (f"{s_via} sin juzgar: {n_via} noches con alerta de MIROVA desde el cambio de detector a la vía "
                  f"«código MIROVA» ({det}, se juzga desde {d}), bajo el mínimo de {MIN_N_RECALL}; su recall no "
-                 f"puede dar flag y eso no es estar en banda. Las noches anteriores son de K, están en "
-                 f"por_detector.K y no deciden")
+                 f"puede dar flag y eso no es estar en banda. Las noches anteriores son de otro detector, están en "
+                 f"por_detector y no deciden")
         estado[s_via] = {"juzga_desde": d, "plataformas": (estado.get(s_via) or {}).get("plataformas", []),
                          "detector": det, "motivo": "cambio_de_detector", "n_noches": n_via,
                          "minimo": MIN_N_RECALL,
@@ -814,6 +828,7 @@ def nuestros_por_noche(records_por_volcan, win, frontera, via_modis=None):
     `pub` es la magnitud que el tablero publica: el núcleo F5 en VIIRS 375 (`f5_core_vrp_mw`, A10 matiz
     S132) y `pc.vrp_mw` en los otros dos (F3-06: el audit medía un número que no se publica).
     """
+    from banco_paridad import es_escena_invalida  # noqa: E402  (S185: la misma regla que el banco; import en runtime)
     ours = defaultdict(lambda: {"crater": [], "dash": [], "pub": [], "npix": [], "z_pub": [], "dt_pub": []})
     vistos, dias = set(), set()
     fuera, n_det = defaultdict(int), defaultdict(int)
@@ -827,6 +842,12 @@ def nuestros_por_noche(records_por_volcan, win, frontera, via_modis=None):
             if b is None:
                 continue
             dias.add(dt[:10])   # S150: hubo dato, haya o no detección, sea del detector que sea
+            # S185 (b.1): la escena que la vía no pudo medir (banco_paridad.es_escena_invalida) no marca la noche como
+            # vista ni entra al recall por pasada: es «no miramos», no «no vimos» (S150). Sí cuenta el día (el
+            # pipeline corrió). Se informan en `fuera_de_detector["escena_invalida"]`.
+            if es_escena_invalida(rec):
+                fuera["escena_invalida"] += 1
+                continue
             d_rec, d_noche = detector_de_record(rec, frontera), detector_de_noche(dt, frontera, b, via_modis)
             n_det[d_rec] += 1
             if d_rec != d_noche:
@@ -892,14 +913,19 @@ def _mediana(xs):
     return round(statistics.median(xs), 3)
 
 
-def evaluar_detector(mir, ours, vistos, detector, frontera, via_modis=None, piso=None, pasadas=None):
+def evaluar_detector(mir, ours, vistos, detector, frontera, via_modis=None, piso=None, pasadas=None, por_sensor=None):
     """Recall y magnitud sobre las noches de MIROVA de UN detector (S172: por sensor, con la frontera de la vía).
+
+    S185: `por_sensor` = {sensor: detector} (el `detector_por_sensor` de evaluacion_vigente) evalúa de una vez las noches
+    de cada sensor con SU detector, en vez de las de un solo detector; `detector` queda sólo como etiqueta de salida
+    (etiqueta_detector). Sirve para el bloque `plataformas.aparte` y para las magnitudes de la raíz de latest.json.
 
     S175: `piso` (noches_vrp_piso) saca de la magnitud las noches cuyo VRP de MIROVA es sólo un piso (decisión 9) y
     las cuenta en `magnitud_noches_vrp_piso`; `pasadas` = (pasadas_mirova, pasadas nuestras de nuestros_por_noche)
     agrega `recall_por_pasada`. Sin ellos, lo de siempre."""
     mir_d = {k: v for k, v in mir.items()
-             if k[0] in VOLS and detector_de_noche(k[2], frontera, k[1], via_modis) == detector}
+             if k[0] in VOLS and detector_de_noche(k[2], frontera, k[1], via_modis)
+             == (por_sensor.get(k[1], detector) if por_sensor else detector)}
     recall = recall_por_sensor(mir_d, vistos, ours, SENSORS, set(VOLS))
     por_vol, por_vs, pasadas_vs, por_npix = (defaultdict(list) for _ in range(4))
     n_piso = defaultdict(int)
@@ -924,7 +950,7 @@ def evaluar_detector(mir, ours, vistos, detector, frontera, via_modis=None, piso
         n = max(o["npix"]) if o["npix"] else 0
         por_npix["1px" if n == 1 else "2px" if n == 2 else "3-5px" if n <= 5 else "6+px"].append(r_pc)
     return {
-        "detector": detector,
+        "detector": etiqueta_detector(por_sensor) if por_sensor else detector,
         "recall": recall,
         "magnitud_ratio_by_vol": {v: {"n_noches": len(r), "ratio_mediano": _mediana(r)}
                                   for v, r in sorted(por_vol.items())},
@@ -1073,11 +1099,14 @@ def agregar_estratos(out, mir, ours, frontera, vigente, recs_falsas, instantes_m
 def evaluacion_vigente(por_detector, vigente, via_modis=None):
     """S172: la evaluación que decide los flags. Sin la vía, la del vigente tal cual (lo de S156). Con la vía, cada sensor
     toma la de su detector (recall y magnitud publicada; `detector_por_sensor` dice de quién es cada uno). Las magnitudes
-    por volcán y por conteo de píxeles quedan del vigente: informan, no deciden."""
-    ev_k = por_detector[vigente]
+    por volcán y por conteo de píxeles quedan del vigente: informan, no deciden (S185: main() las rehace con
+    `magnitud_ratio_vigente`, cada sensor con su detector; acá siguen siendo las del bloque del vigente).
+    S185: si la vía cubre los tres sensores no hay bloque `por_detector[vigente]` (K sin noches, lo omite main()): la base
+    de la copia es la de cualquier detector de la vía y `detector` lleva la etiqueta de todos."""
     fr = _fronteras(via_modis)
     if not fr:
-        return ev_k
+        return por_detector[vigente]
+    ev_k = por_detector[vigente] if vigente in por_detector else por_detector[VIA_POR_SENSOR[next(iter(fr))]]
 
     def de(s):
         return por_detector[VIA_POR_SENSOR[s]] if s in fr else ev_k
@@ -1087,6 +1116,7 @@ def evaluacion_vigente(por_detector, vigente, via_modis=None):
         return dict(sorted((k, v) for s in SENSORS for k, v in ev_de(s)[campo].items() if k.endswith("|" + s)))
     ev = dict(ev_k)
     ev["detector_por_sensor"] = {s: detector_vigente_de(s, vigente, via_modis) for s in SENSORS}
+    ev["detector"] = etiqueta_detector(ev["detector_por_sensor"])
     ev["recall"] = {s: de(s)["recall"][s] for s in SENSORS}
     ev["magnitud_publicada_by_vol_sensor"] = por_clave("magnitud_publicada_by_vol_sensor", de)
     if all("magnitud_noches_vrp_piso" in de(s) for s in SENSORS):
@@ -1097,6 +1127,17 @@ def evaluacion_vigente(por_detector, vigente, via_modis=None):
             "por_sensor": {s: de(s)["recall_por_pasada"]["por_sensor"][s] for s in SENSORS},
             "por_volcan_sensor": por_clave("por_volcan_sensor", lambda s: de(s)["recall_por_pasada"])}
     return ev
+
+
+def magnitud_ratio_vigente(mir, ours, vistos, vigente, frontera, via_modis, piso, ev):
+    """S185: `magnitud_ratio_by_vol` y `magnitud_ratio_by_npix` del detector vigente de cada sensor.
+
+    POR QUÉ: evaluacion_vigente las copiaba del bloque del vigente global (K). Con la vía en los tres sensores ese
+    bloque no tiene noches y la raíz de latest.json las publicaba vacías ({}), que se lee como «sin dato» aunque
+    por_detector.VIA_* las tengan. Informan, no deciden flags (flags_de_evaluacion no las lee)."""
+    e = evaluar_detector(mir, ours, vistos, vigente, frontera, via_modis=via_modis, piso=piso,
+                         por_sensor=ev["detector_por_sensor"])
+    return e["magnitud_ratio_by_vol"], e["magnitud_ratio_by_npix"]
 
 
 def flags_de_evaluacion(ev):
@@ -1177,17 +1218,22 @@ def alertas_protegidas(filas, recs_banco, win, frontera, diurna=None, via_modis=
                       "detector_records": sorted({_detector_banco(r, frontera, via) for r in cand}),
                       "noche_publicada_otra_pasada": any(r["pub"] for r in otras),
                       "referencia_sospechosa": (fuentes[k] == {"OCR"} and minuto[:10] < HITO_OCR_SUOMI_NPP
-                                                and any("SNPP" in (r.get("sensor") or "") for r in cand)),
+                                                and any("VIIRS" in (r.get("sensor") or "") for r in cand)),
                       "perdida_aceptada": k in PERDIDAS_ACEPTADAS,
                       **({"vrp_mirova_hasta_mw": round(techo[k], 3)} if techo[k] > prot[k] + 1e-9 else {})})
     return lista
 
 
-# A119: antes de este hito, en las filas SÓLO OCR de Suomi NPP la distancia y la clase pueden ser de OTRA
+# A119: antes de este hito, en las filas SÓLO OCR de VIIRS la distancia y la clase pueden ser de OTRA
 # pasada (el VRP sí es de la suya). Una protegida que descansa sólo en una de esas filas sigue siendo
 # protegida por su VRP, pero el flag lo dice: dos de las cinco del 2026-10-19 (Tupungatito 28 y 29 de
 # septiembre) eran así, con nuestros cúmulos a 21,6 y 9,4 km (verificador de S156). El hito vive en
 # scripts/calidad_referencia_mirova.py, no copiado acá.
+# S185: el defecto es del OCR de Mirova-v1 (la imagen de otra pasada, la «Last Update» no coincide), no de una
+# plataforma: el guard mira que nuestro record de la pasada sea de cualquier VIIRS (el OCR no trae satélite), no sólo
+# Suomi NPP. Láscar VIIRS 375 2026-10-01 05:18 era NOAA-21 (cenit del OCR 32,0 contra 32,36 del record nuestro) y mostraba
+# el mismo patrón (fila sólo OCR, procesada 8 h 43 min después, misma Y que la fila de otra pasada). La fecha de corte es
+# la de la pasada y sigue siendo la del hito de Suomi NPP (único canal OCR medido); el nombre HITO_OCR_SUOMI_NPP se conserva.
 def _hito_ocr_suomi_npp():
     try:
         from calidad_referencia_mirova import HITOS  # noqa: E402
@@ -1266,7 +1312,7 @@ def flags_protegidas(lista, vigente, via_modis=None):
 def protegidas_aparte(lista, vigente, via_modis=None):
     """S166 (issue #915): protegidas sin publicar del detector vigente que se informan SIN flag.
 
-    POR QUÉ: (1) con `referencia_sospechosa` la fila es sólo OCR de Suomi NPP anterior al hito A119 y su
+    POR QUÉ: (1) con `referencia_sospechosa` la fila es sólo OCR de VIIRS anterior al hito A119 y su
     distancia y clase pueden ser de otra pasada: en #915 las dos de Tupungatito (28 y 29 de septiembre) eran
     objetos lejanos que nosotros vemos y clasificamos `far`, no el cráter. La protegida sigue protegida por su
     VRP, pero no hay cómo saber si es una alerta de cráter. (2) La pérdida aceptada ya está decidida
@@ -1278,7 +1324,7 @@ def protegidas_aparte(lista, vigente, via_modis=None):
             continue
         k = (p["volcano"], p["sensor"], p["fecha_utc"])
         motivo = (f"pérdida aceptada: {PERDIDAS_ACEPTADAS[k]}" if p.get("perdida_aceptada") else
-                  f"referencia sospechosa: sólo OCR de Suomi NPP antes del {HITO_OCR_SUOMI_NPP}, la distancia "
+                  f"referencia sospechosa: sólo OCR de VIIRS antes del {HITO_OCR_SUOMI_NPP}, la distancia "
                   "y la clase pueden ser de otra pasada (A119)")
         out.append(f"protegida sin publicar, sin flag: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, "
                    f"MIROVA {_vrp_txt(p)} (detector {p['detector']}; {_noche_txt(p)}; {motivo})")
@@ -1360,9 +1406,12 @@ def main():
     dets = ("C0", "K") + dets_via
     por_detector = {det: evaluar_detector(mir, ours, vistos, det, frontera, via_modis=via_modis, piso=piso,
                                           pasadas=pasadas) for det in dets
-                    if det == vigente or det in dets_via
+                    if (det == vigente and any(s not in via_modis for s in SENSORS)) or det in dets_via
                     or any(detector_de_noche(k[2], frontera, k[1], via_modis) == det for k in mir)}
     ev = evaluacion_vigente(por_detector, vigente, via_modis)
+    if via_modis:
+        ev["magnitud_ratio_by_vol"], ev["magnitud_ratio_by_npix"] = magnitud_ratio_vigente(
+            mir, ours, vistos, vigente, frontera, via_modis, piso, ev)
     recall_original = recall_por_sensor(
         {k: v for k, v in mir_original.items()
          if detector_de_noche(k[2], frontera, k[1], via_modis) == detector_vigente_de(k[1], vigente, via_modis)},
@@ -1474,7 +1523,7 @@ def main():
                        if not es_aparte(r["b"], r["noche"], desde_plat)]
         falsas = resumir_falsas_por_detector(recs_falsas, frontera, vigente, via_modis=via_modis, via=via)
 
-    detector_out = {"vigente": vigente, "frontera_datos": frontera, "regla_minimas": REGLA_MINIMAS}
+    detector_out = {"vigente": etiqueta_vigente(vigente, via_modis), "frontera_datos": frontera, "regla_minimas": REGLA_MINIMAS}
     if via_modis:
         # S172: sólo con records de la vía, para que sin ellos latest.json sea el de siempre.
         detector_out["vigente_por_sensor"] = {s: detector_vigente_de(s, vigente, via_modis) for s in SENSORS}
@@ -1508,8 +1557,8 @@ def main():
         "plataformas": {"ceses": ceses, "juzga_desde": desde_plat, "error": error_ceses,
                         # S162: sensores sin juzgar por n bajo el mínimo desde el cese (no están en banda).
                         "sin_juzgar": sin_juzgar, "avisos": [v["aviso"] for v in sin_juzgar.values()],
-                        "aparte": (evaluar_detector(mir_aparte, ours, vistos, vigente, frontera, piso=piso,
-                                                    pasadas=pasadas)
+                        "aparte": (evaluar_detector(mir_aparte, ours, vistos, vigente, frontera, via_modis=via_modis,
+                                                    piso=piso, pasadas=pasadas, por_sensor=ev.get("detector_por_sensor"))
                                    if mir_aparte else None)},
         "alertas_protegidas": {"lectura": "A", "umbral_mw": cm.UMBRAL_PROTEGIDA_MW, "lista": protegidas,
                                "error": error_banco},
@@ -1537,7 +1586,7 @@ def main():
     with open(os.path.join(OUTDIR, "history.jsonl"), "a", encoding="utf-8") as f:
         f.write(json.dumps(hist_line, ensure_ascii=False) + "\n")
 
-    print(f"Auto-audit semanal — ventana {win[0]} → {win[1]} · detector vigente {vigente} "
+    print(f"Auto-audit semanal: ventana {win[0]} → {win[1]} · detector vigente {etiqueta_vigente(vigente, via_modis)} "
           f"(datos desde {frontera}) · D-9 {REGLA_MINIMAS}")
     for s_via, f in via_modis.items():
         print(f"  {s_via}: decide la vía «código MIROVA» ({VIA_POR_SENSOR[s_via]}) desde {f}, primera pasada {s_via} de la vía")

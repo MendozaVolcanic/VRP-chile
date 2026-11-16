@@ -66,8 +66,12 @@ GRILLAS = os.path.join(ROOT, "pipeline", "grillas_mirova.yaml")
 SENSORES = {"v375": "VIIRS375", "v750": "VIIRS750"}
 # Cotas de investigación de la regla de reversión (§4.4). POR QUÉ no se eligen aquí: una cota elegida después de ver los
 # datos no es pre-registro (A115). None = PENDIENTE DE NICOLÁS: se cuenta y se informa, sin disparar. Se llenan al sellar.
-COTAS = {"VIIRS375": {"muy_bajo": None, "sobrepublicacion": None},
-         "VIIRS750": {"muy_bajo": None, "sobrepublicacion": None}}
+# S178 (2026-11-10): SELLADAS por Nicolás («Sello la regla»). VIIRS 375 = D1 contestada «C-rad (14/17)» (ventana O más
+# F26-V de la retrospectiva, por pasada, F26-V con el brazo radiante; experiments/_s178_cotas_v375/); VIIRS 750 = D2
+# (lectura de V750-B, brazo B4). Investiga con MÁS DE la cota en los 120 días. Las ata a la tabla de la regla
+# tests/test_vigilancia_guardia_viirs_s176.py::test_cotas_selladas_son_las_de_la_regla_s178.
+COTAS = {"VIIRS375": {"muy_bajo": 14, "sobrepublicacion": 17},
+         "VIIRS750": {"muy_bajo": 12, "sobrepublicacion": 2}}
 
 
 def _hoy():
@@ -79,10 +83,12 @@ def leer_juzgadas(path=JUZGADAS):
 
 
 def volcanes_sens(path=GRILLAS):
-    """Los volcanes Tier A cuya ROI de VIIRS 750 es la sensible, leídos de la grilla (no se copian aquí: A102)."""
+    """Los volcanes Tier A cuya ROI de VIIRS 750 no es la de ejemplo del .m (def), leídos de la grilla (no se copian
+    aquí: A102). S182: Cordón Caulle pasó de sens a crater (B4c) y sigue con una región sensible propia, distinta de la
+    de la guardia, así que sigue en el informe; con «== sens» se habría caído de él sin aviso."""
     with open(path, encoding="utf-8") as fh:
         volcanes = yaml.safe_load(fh)["volcanes"]
-    return sorted(v for v, d in volcanes.items() if d.get("roi_v750") == "sens")
+    return sorted(v for v, d in volcanes.items() if d.get("roi_v750", "def") != "def")
 
 
 def informe_sens(prod, guardia, encendido, vols):
@@ -187,6 +193,7 @@ def evaluar(hoy, clave):
         ahora = f"{hoy} 23:59:59"
     d = vg.disparadores(pasadas, prod, guardia, hoy, encendido, juzgadas=leer_juzgadas(), ahora=ahora, sensor=sensor,
                         cotas=COTAS[sensor])
+    d["nulo"] = vg.nulo_vigente(d["nulo"], sensor, encendido)
     if d["duracion"]["cumplida"]:
         out["fase"] = "plazo_cumplido"
     ciegos = (vs.avisos_referencia(filas, hoy) + vg.avisos_referencia_modis(filas, hoy, sensor=sensor)
@@ -202,6 +209,8 @@ def evaluar(hoy, clave):
     if sensor == "VIIRS750":
         out["region_sensible"] = informe_sens(prod, guardia, encendido, volcanes_sens())
     out.update({"veredicto": veredicto, "avisos": avisos,
+                # S185: informativo, aparte de `avisos` a propósito: no cambia el veredicto ni abre issue
+                "avisos_informativos": vg.avisos_ventana_nulo(d["nulo"]),
                 "solo_caidas_a_k": veredicto == "VIGILANCIA_CIEGA" and not ciegos,
                 "guardia_desde": min((r["noche"] for r in guardia), default=None),
                 "guardia_hasta": max((r["noche"] for r in guardia), default=None),
@@ -218,6 +227,8 @@ def imprimir(out):
           f"encendido {out.get('encendido_utc')} · guardia {out.get('guardia_desde')} a {out.get('guardia_hasta')}")
     for a in out.get("avisos", []):
         print("AVISO:", a)
+    for a in out.get("avisos_informativos", []):
+        print("AVISO (informativo):", a)
     e = vg.ETIQUETAS[out["sensor"]]
     for p in out.get("reversion", []):
         print(f"  REVERSIÓN CANDIDATA: {p['volcano']} {e} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia (K) "
@@ -239,7 +250,10 @@ def imprimir(out):
             print(f"  {nombre}: {m['k']} (cota {m['cota'] if m['cota'] is not None else 'PENDIENTE'}, n {m['n']})"
                   f"{' · DISPARA' if m['dispara'] else ''}")
     n = out.get("nulo") or {}
-    print(f"  nulo (antes del encendido): {n.get('distintas')} pasadas distintas de {n.get('pares')} pareadas")
+    print(f"  nulo (antes del encendido): {n.get('distintas')} pasadas distintas de {n.get('pares')} pareadas"
+          + vg.texto_ventana_nulo(n)
+          + (f" (sellado antes del reemplazo de la historia, "
+             f"{n.get('medido_utc')} UTC)" if n.get('sellado') else ""))
     b = out.get("borde_171_01") or {}
     if b.get("total"):
         print(f"  pasadas que la guardia registra y producción no, por semana: {b['por_semana']}")

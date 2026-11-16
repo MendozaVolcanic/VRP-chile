@@ -1,0 +1,152 @@
+name: Reproc de la historia con la via (despacho aparte del reemplazo S180, sin push)
+
+# S180. Reemplazo de la historia publicada de los 11 Tier A con la via «codigo MIROVA» (plan
+# docs/PLAN_REEMPLAZO_HISTORIA_VIA_S178.md). POR QUE EXISTE: Nicolas decidio el 2026-11-11 reprocesar con la via
+# Tupungatito del 2025-02-15 al 2026-02-22 (opcion 1 del §3 del plan), para que su serie sea de un solo metodo. El
+# workflow de la retrospectiva (reproc-retro-paquete.yml) usa un planificador SELLADO que recorta Tupungatito al
+# 2026-02-23 por una razon de la referencia de esa prueba, no de la via; aqui el plan lo arma
+# experiments/_s180_reemplazo_via/plan_trozos_historia.py, que llama al sellado con ese inicio corrido y solo para el
+# brazo de la via. El job de reproceso es copia fiel del de la retrospectiva (mismo perfil aislado, solo
+# EARTHDATA_TOKEN, pyproj comprobado, C-via por trozo, artifacts de 30 dias, sin push): lo vigila
+# tests/test_reproc_historia_via_s180.py, que exige que los dos jobs sean iguales.
+# No cambia nada de lo que publica produccion.
+"on":
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Perfil: solo _s172_retro_paquete (brazo VIA)"
+        required: true
+      volcanoes:
+        description: "Volcanes de los 11 Tier A, separados por coma"
+        required: true
+      ventanas:
+        description: "Ventanas [Volcan@]AAAA-MM-DD:AAAA-MM-DD separadas por coma (sin volcan = todos)"
+        required: true
+      max_days:
+        description: "Dias por trozo (pre-registro §10.2: 20)"
+        default: "20"
+        required: false
+      max_days_chillan:
+        description: "Dias por trozo de Nevados de Chillan (pre-registro §10.2: 10)"
+        default: "10"
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reproc-historia-via-${{ github.event.inputs.profile }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      jobs: ${{ steps.split.outputs.jobs }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install deps del plan
+        run: pip install --quiet pyyaml
+      - name: Guardas y trozos
+        id: split
+        env:
+          PERFIL: ${{ github.event.inputs.profile }}
+          VOLCANES: ${{ github.event.inputs.volcanoes }}
+          VENTANAS: ${{ github.event.inputs.ventanas }}
+          MAX_DIAS: ${{ github.event.inputs.max_days }}
+          MAX_DIAS_CHILLAN: ${{ github.event.inputs.max_days_chillan }}
+        run: python experiments/_s180_reemplazo_via/plan_trozos_historia.py >> "$GITHUB_OUTPUT"
+
+  reproc:
+    needs: plan
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        job: ${{ fromJson(needs.plan.outputs.jobs) }}
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          # pyproj: la via lo usa para pasar el granulo a la grilla UTM de MIROVA; sin el vuelve a K en silencio
+          pip install earthaccess numpy h5py scipy pyyaml pyproj
+      - name: Comprobar pyproj
+        run: python -c "import pyproj; print('pyproj', pyproj.__version__)"
+      - name: Reprocesar los tramos del trozo
+        id: correr
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE_IN: ${{ github.event.inputs.profile }}
+          TRAMOS: ${{ matrix.job.tramos }}
+          VOL: ${{ matrix.job.vol }}
+        timeout-minutes: 170
+        run: |
+          set -o pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea la cuenta (A71)."
+            exit 1
+          fi
+          VRP_PROFILE="$VRP_PROFILE_IN" python -c "import sys, pipeline.profile as p; n = p.PROFILE_NAME; assert n.startswith('_s172_retro_'), n; assert p.DATA_SUBDIR == n, p.DATA_SUBDIR; v = (p.ENABLE_V750_CODIGO_MIROVA, p.ENABLE_V375_CODIGO_MIROVA, p.ENABLE_MODIS_CODIGO_MIROVA); assert v == ((False,) * 3 if n == '_s172_retro_k' else (True,) * 3), v; assert not (p.ENABLE_MODIS_GEO_MXD03 or p.ENABLE_MODIS_CRATER_SIN_DATO or p.ENABLE_MODIS_DIST_DESDE_CRATER); print('perfil', n, '| vias', v, '| MxD03 apagado')"
+          mkdir -p cobertura
+          # Desde aqui los errores se manejan a mano: un tramo con busquedas caidas no corta los demas, pero el peor
+          # codigo de salida queda como el del paso (GitHub corre con bash -e).
+          set +e
+          echo "inicio=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          PEOR=0
+          N=0
+          for T in $TRAMOS; do
+            N=$((N + 1))
+            INI="${T%%:*}"; FIN="${T##*:}"
+            echo "=== tramo $N: $VOL $INI a $FIN ==="
+            python scripts/run_pipeline.py --profile "$VRP_PROFILE_IN" --volcano "$VOL" --start "$INI" --end "$FIN" \
+              --overwrite --estricto-cobertura --cobertura-json "cobertura/cobertura_${N}_${INI}_${FIN}.json" 2>&1 | tee -a pipeline.log
+            RC=$?
+            echo "tramo $INI:$FIN salida $RC" | tee -a pipeline.log
+            if [ "$RC" -gt "$PEOR" ]; then PEOR=$RC; fi
+          done
+          echo "salida=$PEOR" >> "$GITHUB_OUTPUT"
+          exit $PEOR
+      - name: C-via del trozo
+        if: always() && steps.correr.outputs.salida != ''
+        run: |
+          set -o pipefail
+          python experiments/_s172_retro_paquete/controles_via.py "data/${{ github.event.inputs.profile }}" \
+            --esperado "${{ matrix.job.esperado }}" --minimo "${{ matrix.job.minimo }}" 2>&1 | tee controles_via.txt
+      - name: Tachar el token en el log y la cobertura
+        id: tachar
+        if: always() && steps.correr.outputs.salida != ''
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          python scripts/tachar_secreto_log.py pipeline.log cobertura/*.json
+      - name: Guardar log, cobertura y C-via (tambien si fallo)
+        if: always() && steps.tachar.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-${{ matrix.job.vol }}-${{ matrix.job.idx }}-${{ matrix.job.start }}_${{ matrix.job.end }}-intento-${{ github.run_attempt }}
+          path: |
+            pipeline.log
+            cobertura/
+            controles_via.txt
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Guardar el trozo
+        # Sin always a proposito: un trozo con busquedas caidas (salida 3) o con C-via en rojo no se sube como hecho;
+        # se relanza una vez con la misma ventana (§6, C-cobertura, A64 y A108).
+        uses: actions/upload-artifact@v4
+        with:
+          name: trozo-${{ matrix.job.vol }}-${{ matrix.job.idx }}-${{ matrix.job.start }}_${{ matrix.job.end }}-intento-${{ github.run_attempt }}
+          path: data/${{ github.event.inputs.profile }}/${{ matrix.job.vol }}.json
+          if-no-files-found: error
+          retention-days: 30

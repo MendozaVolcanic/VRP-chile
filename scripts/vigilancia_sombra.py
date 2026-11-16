@@ -363,8 +363,11 @@ def _avisos_frescura(recs, hoy, nombre, revisar, vols=None, sensores=None):
     """Frescura POR VOLCÁN Y SENSOR. Si un lado muere en un solo volcán o en un solo sensor, sumar todo lo deja
     verde: el verificador 2 lo mostró con la sombra de Chillán (protegida de 5 MW, VERDE) y el 3 con la sombra
     sin MODIS (13 protegidas MODIS sin mirar, VERDE)."""
-    vols = vols or aa.VOLS
-    sensores = sensores or aa.SENSORS
+    # S180 (#989): None es «sin indicación» y vale los tres sensores; una lista vacía es «ningún sensor sigue en K» (los
+    # tres con la vía desde 2026-11-11) y no exige nada. Con `or`, la lista vacía volvía a los tres y daba MODIS ciego.
+    # Guard: tests/test_vigilancia_sombra_sin_k_s180.py
+    vols = aa.VOLS if vols is None else vols
+    sensores = aa.SENSORS if sensores is None else sensores
     ultima = defaultdict(str)
     for r in recs:
         ultima[(r["vol"], r["b"])] = max(ultima[(r["vol"], r["b"])], r["noche"])
@@ -493,6 +496,7 @@ def evaluar(hoy):
                 "protegidas_sin_publicar_k": [p for p in pasadas if p["protegida"] and p["prod_pub"] is False]})
     if via:
         out["via_modis_excluida"] = len(via)   # S172: sólo con records de la vía, para no cambiar la salida de antes
+        out["sensores_k"] = sensores_k         # S180: lista vacía = ningún sensor de producción sigue en K
     return out
 
 

@@ -176,7 +176,8 @@ def correr(monkeypatch, tmp_path):
 @pytest.mark.parametrize("sensor,bucket,det", [(V375, "VIIRS375", "VIA_V375"), (V750, "VIIRS750", "VIA_V750")])
 def test_con_la_via_en_un_viirs_decide_la_via_en_ese_sensor(correr, sensor, bucket, det):
     out = correr(con_via=True, sensor=sensor, bucket=bucket)
-    assert out["detector"]["vigente"] == "K"
+    # S185: la etiqueta nombra la vía de ese VIIRS y K en los otros sensores
+    assert sorted(out["detector"]["vigente"].split("+")) == sorted({"K", det})
     assert out["detector"]["vigente_por_sensor"][bucket] == det
     assert out["detector"]["fronteras_via"] == {bucket: _dia(15)}
     assert "frontera_via_modis" not in out["detector"], "esa clave es la de MODIS"

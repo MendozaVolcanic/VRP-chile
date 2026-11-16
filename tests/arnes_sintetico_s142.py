@@ -341,12 +341,26 @@ def main(argv=None):
     for s in a.parche:
         k, v = s.split("=", 1)
         parches[k] = ast.literal_eval(v)
+    # S177 B1 (encendido de la vía de VIIRS 375): las escenas VIIRS 375 de este arnés miden K, contra goldens escritos
+    # con K. Sus coordenadas (LAT0, LON0) no son de ningún volcán con grilla, así que con la vía de producción encendida
+    # corre K igual, pero el record lleva la marca `via_codigo_mirova: "sin_grilla"` que el golden no tiene. Se apaga la
+    # vía aquí; la vía tiene sus pruebas (tests/test_mirova_v375_codigo_s165.py).
+    import pipeline.process_viirs as pv
+    if hasattr(pv, "ENABLE_V375_CODIGO_MIROVA"):
+        patch.object(pv, "ENABLE_V375_CODIGO_MIROVA", False).start()
     # S172 (encendido de MOD-D): las escenas MODIS de este arnés miden K, contra goldens escritos con K. Producción
     # corre la vía «código MIROVA» en MODIS desde el PR B (y K sigue como guardia), así que en el subproceso la vía va
     # apagada. La vía tiene sus propias pruebas (tests/test_mirova_modis_codigo_s164.py).
     import pipeline.process_modis as pm
     if hasattr(pm, "ENABLE_MODIS_CODIGO_MIROVA"):
         patch.object(pm, "ENABLE_MODIS_CODIGO_MIROVA", False).start()
+    # S177 B2 (encendido de la vía de VIIRS 750): las escenas VIIRS 750 de este arnés miden K, contra goldens escritos
+    # con K. Sus coordenadas (LAT0, LON0) no son de ningún volcán con grilla, así que con la vía de producción encendida
+    # corre K igual, pero el record lleva la marca `via_codigo_mirova: "sin_grilla"` que el golden no tiene. Se apaga la
+    # vía aquí; la vía tiene sus pruebas (tests/test_mirova_v750_cableado_s162.py).
+    import pipeline.process_viirs_mod as pvm
+    if hasattr(pvm, "ENABLE_V750_CODIGO_MIROVA"):
+        patch.object(pvm, "ENABLE_V750_CODIGO_MIROVA", False).start()
     texto = canonico(generar(parches, a.solo))
     Path(a.salida).parent.mkdir(parents=True, exist_ok=True)
     Path(a.salida).write_text(texto, encoding="utf-8")

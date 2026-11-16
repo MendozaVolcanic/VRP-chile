@@ -111,6 +111,9 @@ ESPERA_SIN_RECORD_H = 24
 # Decisión de K del 2026-10-19 aplicada a MODIS (§4 de la regla, «como (d) de K»): las pasadas ya juzgadas no vuelven
 # a disparar. Mismo formato estricto que experiments/_s151_prereg_fk_11/sombra_pasadas_juzgadas.json.
 JUZGADAS = os.path.join(ROOT, "experiments", "_s171_modd_adopcion", "sombra_pasadas_juzgadas_modis.json")
+# S181: nulo medido antes de reemplazar la historia con la vía (#987). Tras el reemplazo, los 14 días previos al encendido
+# quedan con la vía y el nulo vivo da 0 pares; el sellado es la misma medida, tomada cuando todavía había K que parear.
+NULO_SELLADO = os.path.join(ROOT, "experiments", "_s181_guardias_reemplazo", "nulo_sellado.json")
 
 
 def _t(texto_utc):
@@ -139,6 +142,10 @@ def encendido_desde_datos(raw_por_volcan, sensor=SENSOR):
                 continue
             via.add((vol, r.get("sensor"), dt))
             obs.append(dt)
+            # S181: un record de la vía reprocesado (reemplazo de la historia, perfil `_s172_retro_paquete`) lleva el
+            # `processed_utc` del reproceso, que puede ser anterior al encendido: el encendido sólo lo fija producción.
+            if (r.get("regimen") or {}).get("perfil") not in (None, PERFIL_PRODUCCION):
+                continue
             t = _t(r.get("processed_utc"))
             if t:
                 proc.append(t)
@@ -208,6 +215,32 @@ def pasadas_modis(filas, prod, guardia, win, diurna=None, sensor=SENSOR):
 
 def _dt(texto):
     return datetime.strptime(texto, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+
+
+def ventana_efectiva_nulo(guardia, sensor, desde, limite):
+    """S185: qué tramo mide de verdad el nulo. `DIAS_NULO` es la ventana que la regla declara; la guardia sólo existe desde
+    su primer record, así que si empezó después de `desde` el nulo cubre menos días de los declarados (VIIRS 750: la guardia
+    arranca el 2026-11-03 y el encendido es el 2026-11-11, unos 8,5 días, no 14). Es información, no cambia el nulo ni el
+    veredicto: la regla de MODIS (§4.4 c) y la de VIIRS (§3, al menos tres noches) no dicen que menos días sea una
+    falla, y un aviso en `avisos` convertiría un VERDE en VIGILANCIA_CIEGA, que es un cambio de la regla.
+    `guardia` llega recortada a la ventana de carga, que arranca antes de `desde`: el recorte no mueve este mínimo."""
+    inicio = min((g["dt"] for g in guardia if g["b"] == sensor), default=None)
+    efectivo = max(desde, inicio) if inicio else None
+    dias = max((limite - efectivo).total_seconds(), 0.0) / 86400 if efectivo else 0.0
+    f = "%Y-%m-%d %H:%M:%S"
+    return {"desde": efectivo.strftime(f) if efectivo else None, "hasta": limite.strftime(f),
+            "desde_nominal": desde.strftime(f), "dias_declarados": DIAS_NULO, "dias_cubiertos": round(dias, 1),
+            "inicio_guardia": inicio.strftime(f) if inicio else None}
+
+
+def avisos_ventana_nulo(nulo):
+    """S185: aviso informativo (no entra en `avisos`, no cambia el veredicto) si el nulo cubre menos días que los declarados."""
+    v = (nulo or {}).get("ventana_efectiva")
+    if not v or v["dias_cubiertos"] >= v["dias_declarados"] - 0.05:
+        return []
+    return [f"el nulo de la guardia cubre {v['dias_cubiertos']} de los {v['dias_declarados']} días declarados "
+            f"({v['desde']} a {v['hasta']} UTC): la guardia empieza el {(v['inicio_guardia'] or 'sin records')[:10]}. "
+            "El veredicto no cambia"]
 
 
 def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, ahora=None, sensor=SENSOR, cotas=None):
@@ -310,6 +343,7 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
                 distintas.append({"volcano": g["vol"], "fecha_utc": clave[2], "guardia_pub": bool(g["pub"])})
     # MA172-208: 0 pares no es «coinciden», es «no medí»; evaluar() lo convierte en aviso.
     nulo = {"pares": pares, "distintas": len(distintas), "detalle": distintas, "sin_medir": pares == 0,
+            "ventana_efectiva": ventana_efectiva_nulo(guardia, sensor, desde, limite),
             "nota": "antes del encendido guardia y producción son el mismo detector K: deben publicar lo mismo (A110)"}
 
     # MA172-202: protegida posterior al encendido que la guardia publica y de la que producción no tiene record, pasada
@@ -324,7 +358,10 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
 
     duracion = {"protegidas_vistas_en_guardia": len(vistas), "objetivo": PROTEGIDAS_OBJETIVO,
                 "encendido": encendido, "vence": vence, "vence_utc": vence_utc,
-                "cumplida": bool(encendido) and (len(vistas) >= PROTEGIDAS_OBJETIVO or bool(vence and hoy >= vence))}
+                # S185: el plazo vence al INSTANTE del encendido más DIAS_MAXIMOS, no a la medianoche de ese día: comparar
+                # la fecha lo daba por cumplido hasta 24 h antes (`en_plazo_instante` ya compara el instante)
+                "cumplida": bool(encendido) and (len(vistas) >= PROTEGIDAS_OBJETIVO
+                                                 or bool(vence_utc and ahora >= vence_utc))}
     retrospectivo = {
         "nota": "anterior al encendido: se informa y no dispara la reversión (§4, decisión (b) de K)",
         "n_pasadas": len(retro),
@@ -369,6 +406,42 @@ def avisos_referencia_modis(filas, hoy, sensor=SENSOR):
         return [f"la referencia de MIROVA no registra {e} hace {dias} días (última fila {e} {max(fechas)}): es el "
                 "scraper de Mirova-v1 o la tabla de MIROVA, no los volcanes"]
     return []
+
+
+def leer_nulo_sellado():
+    try:
+        with open(NULO_SELLADO, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def nulo_vigente(nulo, sensor, encendido, sellado=None):
+    """S181: con 0 pares K en la ventana del nulo (la historia ya es de la vía), el nulo sellado de ESE encendido.
+
+    El nulo mide un tramo pasado y fijo (los 14 días previos al encendido): el sellado es el mismo número, medido antes de
+    que el reemplazo le quitara a producción los records K. Un nulo vivo con pares manda; un sello de otro encendido (la
+    vía se apagó y se volvió a encender) no vale y sigue el aviso de MA172-208."""
+    if not nulo.get("sin_medir"):
+        return nulo
+    s = (leer_nulo_sellado() if sellado is None else sellado).get(sensor)
+    # Sólo se sella un nulo limpio: uno con pasadas distintas pedía INVESTIGAR y un sello no puede taparlo (verificador
+    # S181, O4); en ese caso sigue el aviso de ceguera.
+    if (not s or not encendido or s.get("encendido_utc") != encendido or not s.get("pares")
+            or s.get("distintas") != 0):
+        return nulo
+    return {"pares": s["pares"], "distintas": s["distintas"], "detalle": s.get("detalle", []), "sin_medir": False,
+            "sellado": True, "medido_en_commit": s.get("medido_en_commit"), "medido_utc": s.get("medido_utc"),
+            # S185: la ventana es del tramo previo al encendido y de la guardia, que sigue en disco: se mide viva
+            "ventana_efectiva": nulo.get("ventana_efectiva"), "ventana_sellada": s.get("ventana_utc"),
+            "nota": "nulo sellado antes del reemplazo de la historia con la vía (S181): guardia y producción eran K"}
+
+
+def texto_ventana_nulo(nulo):
+    v = (nulo or {}).get("ventana_efectiva")
+    if not v:
+        return ""
+    return f" en {v['dias_cubiertos']} de {v['dias_declarados']} días ({v['desde']} a {v['hasta']} UTC)"
 
 
 def avisos_nulo(nulo):
@@ -517,6 +590,7 @@ def evaluar(hoy):
     if ahora[:10] != hoy:
         ahora = f"{hoy} 23:59:59"           # una corrida con `hoy` fijado (pruebas, re-lectura) mide al cierre de ese día
     d = disparadores(pasadas, prod, guardia, hoy, encendido, juzgadas=leer_juzgadas(), ahora=ahora)
+    d["nulo"] = nulo_vigente(d["nulo"], SENSOR, encendido)
     if d["duracion"]["cumplida"]:
         out["fase"] = "plazo_cumplido"
     ciegos = (vs.avisos_referencia(filas, hoy) + avisos_referencia_modis(filas, hoy) + avisos_guardia(guardia, hoy)
@@ -527,6 +601,8 @@ def evaluar(hoy):
     if veredicto == "VERDE" and avisos:
         veredicto = "VIGILANCIA_CIEGA"      # un aviso no tapa una reversión: sólo impide leer la falta de disparos
     out.update({"veredicto": veredicto, "avisos": avisos,
+                # S185: informativo, aparte de `avisos` a propósito: no cambia el veredicto ni abre issue
+                "avisos_informativos": avisos_ventana_nulo(d["nulo"]),
                 # VPR959-05: el veredicto es el de la regla; esto sólo le dice a la issue que no ponga «no puede mirar»
                 "solo_caidas_a_k": veredicto == "VIGILANCIA_CIEGA" and not ciegos,
                 "guardia_desde": min((r["noche"] for r in guardia), default=None),
@@ -544,6 +620,8 @@ def imprimir(out):
           f"{out.get('encendido_modis_utc')} · guardia {out.get('guardia_desde')} a {out.get('guardia_hasta')}")
     for a in out.get("avisos", []):
         print("AVISO:", a)
+    for a in out.get("avisos_informativos", []):
+        print("AVISO (informativo):", a)
     for p in out.get("reversion", []):
         print(f"  REVERSIÓN CANDIDATA: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la "
               "guardia (K) publica y producción (la vía) calla. Confirmar en la cabecera de la imagen de MIROVA antes de "
@@ -566,7 +644,10 @@ def imprimir(out):
         if m.get("k"):
             print(f"  {nombre}: {m['k']} (cota {m['cota']}, n {m['n']}){' · DISPARA' if m['dispara'] else ''}")
     n = out.get("nulo") or {}
-    print(f"  nulo (antes del encendido): {n.get('distintas')} pasadas distintas de {n.get('pares')} pareadas")
+    print(f"  nulo (antes del encendido): {n.get('distintas')} pasadas distintas de {n.get('pares')} pareadas"
+          + texto_ventana_nulo(n)
+          + (f" (sellado antes del reemplazo de la historia, "
+             f"{n.get('medido_utc')} UTC)" if n.get('sellado') else ""))
     b = out.get("borde_171_01") or {}
     if b.get("total"):
         print(f"  pasadas que la guardia registra y producción no, por semana: {b['por_semana']}")

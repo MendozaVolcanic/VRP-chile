@@ -44,8 +44,13 @@ GRILLAS = ROOT / "pipeline" / "grillas_mirova.yaml"
 # comentario de roi_v750 y la ROI de Cordón Caulle y Tupungatito (experiments/_s162_v750b/ADOPCION_ROI_B4.md). Se
 # fija el bloque nuevo, que es el de main 82b55de0d más `scripts/roi_v750b_a_grillas.py --brazo B4` (3.907 bytes);
 # el valor anterior queda abajo por historia. Los valores de roi_v750 los vigila tests/test_roi_v750b_variantes_s169.py.
-GRILLAS_MAIN_LEN = 3907
-GRILLAS_MAIN_SHA256 = "b1ad85fb7b0a4585e1c7ead8c541b79c12cb02192e5ccae814f2e834d333c4fe"
+# S182: la caja del cráter en Cordón Caulle (B4c, decisión de Nicolás del 2026-11-13, experiments/_s182_pcc_crater/)
+# vuelve a cambiar a propósito dos de esos bytes: la nota del brazo (B4 a B4c) y la ROI de Cordón Caulle (sens a
+# crater). El bloque nuevo es el de B4 más `scripts/roi_v750b_a_grillas.py --brazo B4c` (3.910 bytes; el resto del
+# archivo, los 34, byte a byte igual). Los valores de B4 quedan abajo por historia.
+GRILLAS_MAIN_LEN = 3910
+GRILLAS_MAIN_SHA256 = "7dac91bf79cc2404690385428ee4f48722aba36f666951e943c0fadb057baf26"
+GRILLAS_MAIN_LEN_B4, GRILLAS_MAIN_SHA256_B4 = 3907, "b1ad85fb7b0a4585e1c7ead8c541b79c12cb02192e5ccae814f2e834d333c4fe"
 GRILLAS_MAIN_LEN_S172, GRILLAS_MAIN_SHA256_S172 = 3805, "da755f3e7fc70bfec052bee7a35bcecc6a685e9f3b3c3b5a2c61c5e398c42636"
 
 

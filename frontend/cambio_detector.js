@@ -22,14 +22,23 @@
 // se apartaron a data/_c0_residuales/ por decisión de Nicolás del 2026-10-21. Desde el 2025-02-15, primer día de la
 // serie, todo lo publicado es K; lo vigila además tests/test_guard_serie_k_pura_s158.py (100 %, no 95 %). La
 // vigilancia de la sombra sigue cortando sus disparos en CAMBIO_DETECTOR_UTC, que no cambia.
+//
+// S178 (decisión b3 de Nicolás, 2026-11-10): el aviso y la línea de K salen de los DATOS. Desde #883 no hay ningún
+// record anterior al 2025-02-15, así que el aviso «los anteriores, del detector C0» describía algo que no está; siguió
+// tres semanas en pantalla porque su prueba vigilaba la fecha, no que existiera algo al otro lado. Ahora sólo aparecen
+// si notarRecords (la llamada de las marcas de la vía, una por vista) recibe un record con fecha de observación
+// anterior a DATOS_K_DESDE_UTC; si un dato así vuelve, el aviso vuelve solo. La constante se queda: la leen
+// scripts/vigilancia_sombra.py y scripts/auto_audit_weekly.py como frontera (sin ella la vigilancia se declara ciega).
+// Prueba: tests/test_cambio_detector_aviso_k_por_datos_s178.py.
 (function (raiz) {
   "use strict";
 
   // Fecha y hora UTC del merge del PR de adopción de K, en ISO con Z (p. ej. "2026-10-19T14:05:00Z"). null = sin marca.
   const CAMBIO_DETECTOR_UTC = "2026-10-18T09:57:30Z";
   // Fecha de OBSERVACIÓN desde la que los records de data/mirova_equivalent/ son de K (medianoche UTC). Es donde va la
-  // línea vertical. null = sin línea ni aviso.
+  // línea vertical. null = sin línea ni aviso. S178: aun con fecha, línea y aviso sólo si hay datos anteriores.
   const DATOS_K_DESDE_UTC = "2025-02-15T00:00:00Z";
+  let hayDatosAntesDeK = false;   // S178: ¿alguna vista pasó un record anterior a DATOS_K_DESDE_UTC?
 
   const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   const FICHA_URL = "https://github.com/MendozaVolcanic/VRP-chile/blob/main/docs/FICHA_SDA_VRP_CHILE.md";
@@ -94,11 +103,13 @@
   }
 
   // Plugin de Chart.js: línea vertical punteada en la fecha del cambio, sólo en gráficos con eje x de tiempo y sólo
-  // si la fecha cae dentro del rango visible. No toca datos ni escalas.
-  function crearPlugin(utc) {
+  // si la fecha cae dentro del rango visible. No toca datos ni escalas. `activo` (S178, opcional): función que dice si
+  // hay algo que marcar; el plugin registrado en las vistas usa hayDatosAntesDeK.
+  function crearPlugin(utc, activo) {
     return {
       id: "cambioDetector",
       afterDatasetsDraw(chart) {
+        if (activo && !activo()) return false;
         const t = msDelCambio(utc);
         const x = chart && chart.scales ? chart.scales.x : null;
         if (t == null || !x || x.type !== "time") return false;
@@ -257,16 +268,27 @@
   function insertarAvisoModis(doc, desde) { return insertarAvisoVia("MODIS", doc, desde); }
 
   // Las vistas llaman esto con los records de cada volcán apenas los cargan. Guarda, por sensor, la fecha más temprana de
-  // todos los volcanes, pone o actualiza el aviso y redibuja los gráficos ya dibujados. Devuelve la fecha de MODIS
+  // todos los volcanes y redibuja los gráficos ya dibujados (la vía no pone aviso de texto desde S178). Devuelve la fecha de MODIS
   // (lo que siempre devolvió; las de VIIRS se leen con viaDesde).
   function notarRecords(records, doc) {
     let cambio = false;
+    const tK = msDelCambio(DATOS_K_DESDE_UTC);
+    if (!hayDatosAntesDeK && tK != null && (records || []).some(r => {
+      const t = r ? isoDeRecord(r.datetime_utc) : null;
+      return t != null && t < tK;
+    })) {
+      hayDatosAntesDeK = true;
+      insertarAviso(doc || (typeof raiz !== "undefined" ? raiz.document : null), DATOS_K_DESDE_UTC, CAMBIO_DETECTOR_UTC);
+      cambio = true;
+    }
     Object.keys(VIAS).forEach(familia => {
       const t = primeraVia(records, familia);
       if (t != null && (desdeVia[familia] == null || Date.parse(t) < Date.parse(desdeVia[familia]))) {
         desdeVia[familia] = t;
-        const d = doc || (typeof raiz !== "undefined" ? raiz.document : null);
-        insertarAvisoVia(familia, d, t);
+        // POR QUÉ (S178, pedido de Nicolás del 2026-11-10, «quita los 3»): la vía ya no pone aviso de texto arriba del
+        // tablero; la marca queda sólo como línea vertical en los gráficos (crearPluginVia), que da la fecha sin ocupar
+        // espacio. insertarAvisoVia y textoAvisoVia siguen exportadas, pero nadie las llama.
+        // Prueba: tests/test_cambio_detector_via_modis_s172.py y tests/test_cambio_detector_via_viirs_s176.py.
         cambio = true;
       }
     });
@@ -324,7 +346,7 @@
   const CambioDetector = { CAMBIO_DETECTOR_UTC, DATOS_K_DESDE_UTC, textoAviso, insertarAviso, crearPlugin, fechaLegible,
     primeraViaModis, primeraVia, esViaCodigoMirova, notarRecords, textoAvisoModis, textoAvisoVia, insertarAvisoModis,
     insertarAvisoVia, crearPluginViaModis, crearPluginVia, familiaSensor,
-    viaModisDesde: () => desdeVia.MODIS, viaDesde: familia => desdeVia[familia] };
+    viaModisDesde: () => desdeVia.MODIS, viaDesde: familia => desdeVia[familia], hayDatosAntesDeK: () => hayDatosAntesDeK };
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = CambioDetector;
@@ -333,14 +355,12 @@
     raiz.CAMBIO_DETECTOR_UTC = CAMBIO_DETECTOR_UTC;
     // Registro global: cubre el gráfico principal de index, los de diario (tarjetas y ampliado) y los de mosaico,
     // sin tocar el código de cada gráfico. En los que no son de tiempo, el plugin no hace nada. La línea va en la
-    // frontera de los DATOS (S155), no en la hora del merge.
-    if (DATOS_K_DESDE_UTC != null && raiz.Chart && raiz.Chart.register) raiz.Chart.register(crearPlugin(DATOS_K_DESDE_UTC));
+    // frontera de los DATOS (S155), no en la hora del merge, y sólo si hay datos anteriores a ella (S178).
+    if (DATOS_K_DESDE_UTC != null && raiz.Chart && raiz.Chart.register) {
+      raiz.Chart.register(crearPlugin(DATOS_K_DESDE_UTC, () => hayDatosAntesDeK));
+    }
     // S172: los plugins de la vía se registran siempre; no dibujan nada hasta que notarRecords encuentre la vía.
     if (raiz.Chart && raiz.Chart.register) Object.keys(VIAS).forEach(f => raiz.Chart.register(crearPluginVia(f)));
-    if (DATOS_K_DESDE_UTC != null && raiz.document) {
-      const poner = () => insertarAviso(raiz.document, DATOS_K_DESDE_UTC, CAMBIO_DETECTOR_UTC);
-      if (raiz.document.readyState === "loading") raiz.document.addEventListener("DOMContentLoaded", poner);
-      else poner();
-    }
+    // S178: el aviso de K ya no se pone al cargar; lo pone notarRecords cuando ve un record anterior a la frontera.
   }
 })(typeof window !== "undefined" ? window : this);

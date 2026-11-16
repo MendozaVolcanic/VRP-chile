@@ -4,6 +4,31 @@
 > preguntas antes de proponer o implementar cualquier cosa que toque el
 > pipeline algorítmico.
 
+> ⚠️ **S186 (A113, 2026-11-15): los tres sensores de producción corren la vía «código MIROVA»; K queda sólo como
+> guardia.** MODIS desde la primera corrida del NRT del 2026-11-02 (marca S172), VIIRS 375 desde el merge de #974
+> (2026-11-11 13:09:21 UTC) y VIIRS 750 desde el merge de #983 (2026-11-11 13:22:13 UTC); las dos marcas S177 que siguen
+> decían «PROPUESTA en borrador» y rigen. El 2026-11-12 la serie de los 11 Tier A desde el 2025-02-15 se reemplazó por un
+> reproceso con la vía (ficha SDA v1.25): no queda historia publicada con K. Toda frase de este documento que describa
+> la producción con K (marcas S153, S157 y S160, y lo que dependa de ellas) describe hoy las guardias
+> (`pipeline/profiles/guardia_k_modis.yaml`, `pipeline/profiles/guardia_k_viirs.yaml`) y se conserva por historia. Lo
+> que la vía decide fuera del código de MIROVA está en `docs/MIROVA_DIVERGENCES.md` D36.
+
+> ⚠️ **S177 B2 (A113; ⚠️ S186: rige, #983 mergeado el 2026-11-11 a las 13:22:13 UTC; decía «PROPUESTA en borrador:
+> rige sólo desde el merge del PR B2, rama `claude/s177-b2-v750`»): VIIRS 750
+> de producción deja de ser K.** Desde la primera corrida del NRT con la vía después del merge, `mirova_equivalent` corre
+> en VIIRS 750 la **vía «código MIROVA»** (`enable_v750_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`): el
+> gránulo pasado a la grilla de 750 m de MIROVA, su detector, su fondo y la suma de todos los alertados. Por qué: K
+> publica 0,510 de la potencia de MIROVA y la vía 0,999 (retrospectiva, `experiments/_s162_v750c/INFORME.md`). Decisión
+> de Nicolás del 2026-11-08 (decisión 7 del diseño del encendido de VIIRS). K de VIIRS sigue como guardia
+> (`pipeline/profiles/guardia_k_viirs.yaml`, vigilancia `scripts/vigilancia_guardia_viirs.py`) con reversión
+> pre-autorizada por `git revert -m 1` del merge de B2, sin tocar VIIRS 375 (regla
+> `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md` §4, que se sella antes del merge). Toda frase de
+> este documento que describa VIIRS 750 de producción con K (la marca S153 de abajo y lo que dependa de ella en VIIRS
+> 750) describe el estado previo en VIIRS 750 y se conserva por historia. El laboratorio (`experimental`),
+> `experimental_ndc_focus`, el ancla de los tests pre-K (`_s146_ab_control`) y la guardia K de MODIS declaran la vía de
+> VIIRS 750 apagada. VIIRS 375 va aparte (B1). Tag defensivo `pre-s178-b1-b2`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md`
+> v1.24 (propuesta).
+
 > ⚠️ **S175 (A113; hallazgo 154 de `docs/AUDIT_S175.md`, PR #955): la marca S172 que sigue exagera hacia atrás.** Lo de «hasta unos 8 días antes» y «cada corrida re-escribe las 8 fechas de su ventana» no se cumple: cada corrida procesa 8 días, pero el almacén sólo agrega las pasadas que no tenía y reemplaza una ya guardada únicamente con su producto estándar o con `--overwrite` (`pipeline/store.py`). La primera observación con la vía es del 2026-11-02 01:15 UTC, 18,95 horas antes del encendido (20:11:43 UTC): son 22 records guardados como NRT con K ese mismo día y reemplazados por su producto estándar en la primera corrida con la vía. Detalle y plazo medido del estándar: ficha v1.19 (`docs/FICHA_SDA_VRP_CHILE.md`) y `experiments/_s175_latencia_estandar_modis/salida.txt`. Texto S172 conservado.
 >
 > ⚠️ **S172: MODIS dejó de ser K en producción (encendido de MOD-D; marca A113).** Desde la primera corrida del NRT con la vía, después
@@ -15,7 +40,8 @@
 > (`pipeline/mirova_v750_codigo.py`, familia MODIS). Por qué: con K, MODIS perdía más de un tercio de las noches en que
 > MIROVA alerta (recall 62,5 % en 16 noches, audit del 2026-10-26) y en Chillán marcaba 0,56 de su magnitud; la vía
 > ganó el A/B pre-registrado de MOD-D (tag `s170-modd-f4-lectura`). Decisión de Nicolás del 2026-10-31: adelantar
-> MODIS sin esperar la sombra de 28 noches. **VIIRS 375 y VIIRS 750 siguen con K.** Toda frase de este documento que
+> MODIS sin esperar la sombra de 28 noches. **VIIRS 375 y VIIRS 750 siguen con K.** (⚠️ S186: superado por B1 y B2,
+> que rigen desde el 2026-11-11.) Toda frase de este documento que
 > describa el MODIS de producción con K (banda 22 primaria sobre la imagen nativa, conectiva `max`, `_interp_geo`, la
 > marca S153 de abajo en su punto 3) describe el estado previo a S172 en MODIS y se conserva por historia. K de MODIS
 > sigue corriendo como guardia (`pipeline/profiles/guardia_k_modis.yaml`, `data/guardia_k_modis/`); su vigilancia
@@ -24,8 +50,25 @@
 > El laboratorio (`experimental`) y el ancla de los tests pre-K (`_s146_ab_control`) declaran la vía apagada. Una
 > serie MODIS que cruce la primera pasada de la vía mezcla dos detectores: el tablero la marca y el auto-audit separa el
 > detector `VIA_MODIS` (A104). Tag defensivo `pre-s171-adopcion-modd`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.18.
+>
+> ⚠️ **S177 B1 (A113; ⚠️ S186: rige, #974 mergeado el 2026-11-11 a las 13:09:21 UTC; decía «PROPUESTA en borrador:
+> rige sólo desde el merge del PR B1, rama `claude/s177-b1-v375`»): VIIRS 375
+> de producción deja de ser K.** Desde la primera corrida del NRT con la vía después del merge, `mirova_equivalent` corre
+> en VIIRS 375 la **vía «código MIROVA»** (`enable_v375_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`, familia
+> VIIRS375): el gránulo pasado a la grilla de 375 m de MIROVA, su detector, su fondo y la suma de todos los alertados.
+> Por qué: K publica el núcleo de un cúmulo ya recortado y da 0,504 de la potencia de MIROVA, la vía 0,993 (sombra,
+> n 31, pasadas con alerta del 2026-11-03 al 11-07). Decisión de Nicolás del 2026-11-08 (diseño del encendido de
+> VIIRS). K de VIIRS sigue como guardia (`pipeline/profiles/guardia_k_viirs.yaml`, vigilancia
+> `scripts/vigilancia_guardia_viirs.py`) con reversión pre-autorizada por `git revert -m 1` del merge de B1, sin tocar
+> VIIRS 750 (regla `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md` §4, que se sella antes del
+> merge). Toda frase de este documento que describa VIIRS 375 de producción con K (la marca S153 de abajo, el núcleo
+> `f5_core_vrp_mw`, lo que dependa de ellos en VIIRS 375) describe el estado previo en VIIRS 375 y se conserva por
+> historia. El laboratorio (`experimental`), `experimental_ndc_focus`, el ancla de los tests pre-K (`_s146_ab_control`)
+> y la guardia K de MODIS declaran la vía de VIIRS 375 apagada. VIIRS 750 va aparte (B2). Tag defensivo
+> `pre-s178-b1-b2`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.23 (propuesta).
 
-> ⚠️ **S153: el detector de la réplica cambió (adopción de K; marca A113).** Desde el merge del PR de adopción,
+> ⚠️ **S153: el detector de la réplica cambió (adopción de K; marca A113).** (⚠️ S186: K dejó de ser producción en
+> MODIS el 2026-11-02 y en VIIRS el 2026-11-11; lo que sigue describe hoy las guardias. Marca S186 al inicio.) Desde el merge del PR de adopción,
 > `mirova_equivalent` corre (1) **sin el Test 1 integrado en el ROI** (D30: no está en el paper y hacía publicar en
 > 85 a 88 % de los negativos limpios de VIIRS 375), (2) con la **conectiva `max`** de la prosa de Coppola 2016a en los
 > Tests 2 y 3 (hacen falta las dos condiciones, D26) y (3) con la **banda 22 primaria en MODIS** (D21). La regla de
@@ -40,7 +83,8 @@
 > ⚠️ **S160, la frontera de la marca S157 que sigue ya no separa detectores** (A113; hallazgo 281 de
 > `experiments/_s160_audit/f4/INFORME.md` §3, CONFIRMADO EN PARTE en `experiments/_s160_audit/v4/INFORME.md` §3).
 > El punto (b) de abajo avisaba que «la frontera se moverá más atrás cuando se aplique el reproceso histórico con K».
-> Eso ya pasó: #883 (`8471add46`, 2026-10-21) reprocesó con K el histórico de los 11 Tier A, puso
+> Eso ya pasó: #883 (`8471add46`, 2026-10-21) reprocesó con K el histórico de los 11 Tier A (⚠️ S186: el 2026-11-12
+> ese histórico se reemplazó otra vez, con la vía; hoy no queda historia K publicada), puso
 > `DATOS_K_DESDE_UTC` en 2025-02-15 (`frontend/cambio_detector.js:32`) y apartó los records C0 que quedaban en
 > `data/_c0_residuales/`. En main `d516b9d8c`, del 2025-02-15 al 2026-09-17 hay 68.072 records K y 0 sin marca de
 > régimen (`experiments/_s160_audit/v4/v_281_regimen_por_mes_salida.txt`; control: los 90 residuos salen C0). Una
@@ -163,7 +207,12 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    tanto, toda respuesta a esta pregunta para VIIRS 750 cita también el código. **Decisión de Nicolás, 2026-10-21**: a
    la recomendación del §7 del informe («el código es la autoridad sobre el paper para VIIRS 750») respondió
    «continua con todo lo que recomiendes». Para VIIRS 750, cuando el paper y el código difieren, manda el código; para
-   MODIS y VIIRS 375 manda el paper hasta tener su código o una medición.
+   MODIS y VIIRS 375 manda el paper hasta tener su código o una medición. ⚠️ **S186:** hoy producción corre el código
+   de VIIRS 750 trasladado a los tres sensores (MODIS por el A/B de MOD-D, decisión de Nicolás del 2026-10-31; VIIRS
+   375 por la sombra de V375-E, decisión del 2026-11-08), con mediciones y no por esta regla. Donde el traslado usa en
+   MODIS números de VIIRS 750 que contradicen la Tabla 1 del paper (K1 -0,7 contra -0,8 y piso de dNTI 0,02 contra
+   0,01), eso no es una decisión de que mande el código: es una divergencia registrada sin medir
+   (`docs/MIROVA_DIVERGENCES.md` D36, punto 6).
    - Coppola 2016a SP 426.5 (Test 1 + NTI; Tabla 1 N·σ summit/scene, dual-ROI, dNTI 8-vec).
      ✅ **S128: «Coppola 2015» y «Coppola 2016a» eran la MISMA entrada, no dos papers.**
      El `Test 1` está dentro de `documentacion/sp426_5.txt` (`NTIPIX > K1 (Test 1)`, línea
@@ -233,7 +282,8 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    - ⚠️ **S160, sobre los números de la marca S151 que sigue** (hallazgo 282 de
      `experiments/_s160_audit/f4/INFORME.md`, CONFIRMADO EN PARTE en `experiments/_s160_audit/v4/INFORME.md` §3):
      el 65.705, el 1.565 y el 343 se reproducen exactos en el corpus de su fecha (`88e97d84e`, 2026-10-14) y no en
-     el de hoy, porque #883 reemplazó el histórico con K (A90). En main `d516b9d8c` (74.811 records) hay 9 cúmulos
+     el de hoy, porque #883 reemplazó el histórico con K (A90; ⚠️ S186: y el 2026-11-12 se reemplazó otra vez, con la
+     vía). En main `d516b9d8c` (74.811 records) hay 9 cúmulos
      con `pc.vrp_mw` = 5,0, los 9 con `primary_cluster.d9_capped`, y 183 sobre 5 MW
      (`experiments/_s160_audit/v4/v_282_d9_capped_salida.txt`): bajo K el tope casi no actúa, y la cara de
      co-validación del path D se midió con el detector anterior.
@@ -247,7 +297,12 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    - ⚠️ **S151: D8' ya no está resuelta** (`docs/MIROVA_DIVERGENCES.md`, marca bajo el encabezado de
      D8'): Nicolás decidió el 2026-10-09 que la réplica elija la anomalía MAYOR de la escena, como
      MIROVA (`docs/AUDIT_S150.md` §8), y la entrada D8' de la lista de «Resueltas» de más abajo dice
-     lo contrario. Producción sigue con el cúmulo más cercano al cráter hasta el A/B pre-registrado.
+     lo contrario. Producción sigue con el cúmulo más cercano al cráter hasta el A/B pre-registrado. ⚠️ **S186:
+     superado.** Desde la vía, la posición publicada en los tres sensores es el centroide del cúmulo de la alertada
+     más radiante, medido desde el cráter (`pipeline/mirova_v750_codigo.py::procesar_grilla`); entró con la vía, sin
+     el A/B pre-registrado. Clase igual a la de MIROVA en 98,7 % (2026-03-01 a 2026-11-15, tabla
+     sola). Nicolás la formalizó el 2026-11-15 («Formalizar radiante», respuesta a la recomendación b.3 del bloque
+     S186): es la regla de posición vigente (marca S186 de D8' en `docs/MIROVA_DIVERGENCES.md`).
      ⚠️ **Matiz S151 (tarea 1.4 del loop, PR #809, dos verificadores con contexto limpio):** sobre los
      GeoTIFF de MIROVA, MIROVA informa el foco lejano cuando es fuerte (15 de 15 con z ≥ 30) y el cráter
      cuando el lejano es débil; la fuerza del lejano y el calor del cráter pesan los dos, y «la mayor»

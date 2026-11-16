@@ -50,9 +50,14 @@ def _flag(perfil):
 
 
 # ------------------------------------------------------------------------------------------------ 1. el flag
-@pytest.mark.parametrize("perfil", ["mirova_equivalent", "experimental"])
-def test_flag_apagado_en_produccion_y_laboratorio(perfil):
-    assert _flag(perfil) == "False"
+# S177 B2 (encendido de la vía de VIIRS 750; A45 para escribirlo dada a la coordinadora; tag pre-s178-b1-b2): el flag
+# pasa a ENCENDIDO en producción. El laboratorio lo declara apagado (congelado en C0) y la guardia K de VIIRS también.
+# Los valores por perfil vivo los fija además tests/test_guard_v750_codigo_mirova_encendido_s177.py. Texto original:
+# «APAGADO en producción y en el laboratorio».
+@pytest.mark.parametrize("perfil,esperado", [("mirova_equivalent", "True"), ("experimental", "False"),
+                                             ("guardia_k_viirs", "False")])
+def test_flag_encendido_en_produccion_y_apagado_en_laboratorio_y_guardia(perfil, esperado):
+    assert _flag(perfil) == esperado
 
 
 def test_flag_se_lee_de_thresholds():

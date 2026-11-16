@@ -221,7 +221,7 @@ def planear_issues(v: dict, abiertos_alarma: list[dict], existentes_cese: list[d
             acciones.append(("create", t, LABEL_CESE,
                              f"El cese anunciado de **{c['plataforma']}** se confirmó en los datos: sin records "
                              f"desde hace más de {v['ventana_h']} h. Es esperado, no hay nada que arreglar. "
-                             "El tablero ya lo avisa al operador (frontend/cese_plataformas.js) y la ficha SDA "
+                             "El tablero marca la fecha con una línea vertical (frontend/cese_plataformas.js) y la ficha SDA "
                              "lo declara (v1.10). Este issue se abre una sola vez.\n\n" + cuerpo))
 
     alarma = next((i for i in abiertos_alarma if i.get("title") == TITULO_ALARMA), None)
