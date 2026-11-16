@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 05:06 UTC (S187): Nicolás: «Sí, despacha 3 a 7»; despacho encadenado de las tandas autorizado
+- Autorización: despachar las tandas 3 a 7 una tras otra, cada una al terminar la anterior (incluidos los relanzamientos de sus trozos rojos), sin esperar el merge de la unión anterior. Orden del plan (§5 Tarea 5): 3 DescabezadoGrande, CerroAzulQuizapu, LagunaDelMaule, NevadoDeLongavi, Antuco; 4 Callaqui, Lonquimay, Tolhuaca, Sollipulli, Quetrupillan; 5 Lanin, MochoChoshuenco, CarranLosVenados, AntillancaCasablanca, Osorno; 6 Calbuco, YateHornopiren, Huequi, Michinmahuida, CorcovadoYanteles; 7 Melimoyu, MacaCay, Mentolat, Hudson.
+- Sigue igual: cada unión va en su PR con «mergea #N» de Nicolás; cada aplicación con su tag y sólo con ensayo de 0 huecos y 0 caídas a K (H3). Un solo despacho del grupo a la vez (Step 1). Antes de cada despacho, ensayar el planificador con los 5 nombres.
+- Vigilantes en segundo plano de esta máquina: fin del run 43806164818 y auditoría semanal del 11-16.
+
 ### 2026-11-16 04:47 UTC (S187): Nicolás: «Despacha ahora»; tanda 2 de la historia de los 34 corriendo
 - Despacho programado local (13:10 UTC) detenido; Nicolás quiere apagar el computador. Despachada a las 04:47 UTC, antes de las 13 UTC del plan, con evidencia: durante la tanda 1 el NRT corrió verde y en tiempo normal.
 - **Run 43806164818** sobre main `9a7f37bcc`, 0 corridas del grupo vivas antes de despachar; job `plan` success; 165 trozos (Ollague, SanPedro, Putana, SanJose, Tinguiririca; 2025-02-15 a 2026-11-02), 6 a la vez. Fin estimado unas 13 h después (tanda 1: 8 h 47 min para 138 trozos).
