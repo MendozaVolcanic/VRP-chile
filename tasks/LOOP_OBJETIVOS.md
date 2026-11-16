@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-16 04:12 UTC (S187): Nicolás: «Mergea #1000 y aplica»; tanda 1 de la historia de los 34 en data/historia_34
+- **#1000** integrado con merge commit `8c94743d1` (mergedAt 2026-11-16 04:07:12 UTC; head `7962a7666` con `--match-head-commit`). Sólo el plan y `experiments/_historia_34/TANDAS.md`; no toca la ficha.
+- **Ensayo** (sin `--aplicar`, copia mínima de main en `D:\vrp-trabajo\temporales\s187_tanda1\`): 5 de 5 volcanes, 0 rehusados, 0 tras el corte; Guallatiri 5389, Irruputuncu 5573, OlcaParuma 5603, Parinacota 5384, Taapaca 5494. Unión con `huecos: []` y marcas sólo `:true` en los cinco.
+- **Verificador limpio** (Sonnet, effort high, código propio sin el aplicador): APLICABLE. 626 de 626 días por volcán, 100 % vía y perfil `_s172_retro_paquete`, 0 claves repetidas, 8 sensores esperados, sin VRP negativos ni NaN; el workflow sólo escribe `data/historia_34/` y el informe. Nota sin bloqueo: el archivo no trae `updated` (la sombra sí); el tablero aún no lee la historia (Tarea 8).
+- **Aplicación** (A45 por H3 de Nicolás del 2026-11-14): run 43802322235 verde; tag `pre-historia-34-tanda1` = `8c94743d1`; 73 pruebas pasadas, ninguna saltada (el guard de datos de la Tarea 7 corrió); commit `bec44eb16` con los 5 `data/historia_34/<V>.json` (10,2 a 10,6 MB cada uno, unos 52 MB) y `experiments/_historia_34/aplicado/informe.json`, conteos idénticos al ensayo; `data/sombra_34/` y `data/mirova_equivalent/` sin cambios. Pages excluye la carpeta (`pages-deploy.yml` líneas 35 y 86).
+- **Pendiente**: anotar en `TANDAS.md` (en main) el ensayo y el commit de la tanda 1, en el PR de la unión de la tanda 2. Despachar la tanda 2 (Ollague, SanPedro, Putana, SanJose, Tinguiririca) después de las 13 UTC espera el sí de Nicolás: unas 77 h de runner (ESTIMACIÓN del plan). Ficha: una línea al cierre de las 7 tandas (Tarea 9).
+
 ### 2026-11-16 00:54 UTC (S187): arranque verificado; la historia de los 34 ya NO está «sin ejecutar»; revisión de PR y sesiones
 - **Verificado**: `loop/activo` al día con el remoto; C: 23 GB, D: 37 GB; `chequeo_post_nrt.py origin/main` da OK (11 de 11, 0 duplicados, 0 K antes del corte). Guardias VERDE: MODIS 22, V750 13, V375 11 de 29 (no toca el informe de cierre MODIS).
 - **Issues**: #1004 sigue abierto aunque la sombra corrió verde (run 43751792916, 2026-11-15 19:19 UTC); el último `nrt-monitor.yml` fue a las 19:01 UTC, antes de ese verde, así que lo cierra la próxima corrida. #973 sigue abierto: la auditoría del 11-16 corre a las 09:00 UTC del lunes y aún no sale (`latest.json` en main es la del 11-09, FUERA_DE_BANDA).
