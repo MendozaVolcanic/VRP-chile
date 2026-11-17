@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 06:05 UTC (S190): cadena 4 a 7 DETENIDA a la espera de los centros RNVV; #1030 abierto
+- **Coordenadas** (sesión `s190-coordenadas`, rama `s190-coordenadas-centros`, `19ff4c3c9`, sin push a esta hora): centro de la ficha RNVV en 7 de los 34 (Callaqui, AntillancaCasablanca, Michinmahuida, CorcovadoYanteles, Mentolat 3,3 km, MacaCay 2,5 km, SanPedro) y `gvp_id` corregido en 3 (Tolhuaca entre ellos); cambia también `pipeline/grillas_mirova.yaml`.
+- **Decisión S190**: detener `cadena_4a7.sh` (PID 77439 y 77437, `sleep` 86913; comprobado con `ps`; log vacío, no despachó nada), porque la tanda 4 trae Callaqui y saldría con el centro viejo apenas termine la tanda 3. Se relanza cuando el PR de centros esté en main. El vigilante de la tanda 3 sigue vivo. SanPedro ya tiene su historia aplicada con el centro viejo: reprocesarlo queda pendiente.
+- **#1030** (A/B de fase de grilla V750 en Tupungatito, sesión `s190-l1b-ab`): pre-registro sellado, 203 de 203 pasadas, verificador limpio; veredicto NO CUMPLE; Chillán V375 sigue sin atribuir. No cambia producción; se mergea con checks verdes.
+
 ### 2026-11-17 05:55 UTC (S190): auditoría de Codex verificada; S190 encarga los arreglos sin A45
 - **Codex local** (sesión `s190-codex`; copia `D:\codex-vrp` de main, sandbox con señuelos negados, sin red; 42 % de la ventana de 5 h): 12 hallazgos; verificadores limpios: 9 CONFIRMADO, 3 EN PARTE, 0 REFUTADO; 5 nuevos (H01, H03, H04, H06, H08). Informe: `D:rp-trabajo	emporales\s190_codex\INFORME_VERIFICADO.md`; entrega de Codex en `D:\codex-vrp\_salida\`.
   - Latentes de gravedad 5 (0 records hoy, máximo 451 MW): H01, el tablero y `audit_metrics` muestran 0 una magnitud sobre 50.000 MW que `store.py` conserva con `vrp_exceeds_sanity_cap`; H04, el techo de 500 K de `store.py` anula escenas VIIRS 750 calientes (M13 llega a 634 K).
