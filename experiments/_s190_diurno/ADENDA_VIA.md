@@ -1,6 +1,9 @@
 # Adenda V al pre-registro diurno: el día con la vía «código MIROVA» (S190, issue #813)
 
-Estado: **BORRADOR, sin sellar.** Lo sella Nicolás. Hasta el sello no se despacha nada.
+Estado: **SELLADA por Nicolás el 2026-11-17 (respuesta «Sello» en la sesión s190-diurno, hora del servidor
+04:43 UTC), sobre el texto del commit 7a5f5ec01 sin cambios de regla.** Tag `s190-diurno-via-sellado`. Lo que se
+escriba después (instrumento, perfiles, workflow) implementa este texto; si algo de la regla tuviera que cambiar,
+va como desviación declarada y vuelve al sello.
 
 Base: `experiments/_s163_diurno_k/PREREGISTRO.md` (sellado el 2026-10-26, tag `s163-diurno-k-sellado`), que a su vez
 reemplazó la regla G1 y G2 de `experiments/_s151_ab_diurno/PREREGISTRO.md` y `ADENDA_K.md`. Todo lo que esta adenda no
