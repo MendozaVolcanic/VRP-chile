@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 06:23 UTC (S190): #1032 y #1035 mergeados; #1034 (retiro D1) en CI combinado; #1033 espera verificador
+- **#1032** (escenarios de falso positivo, 10 escenarios con firma y costo, verificado dos veces; sin tocar producción ni tablero): checks SUCCESS, CLEAN, head `fc872f228`; merge commit `5afb5a749` a las 06:22:28 UTC.
+- **#1035** (instrumento del A/B diurno sobre la vía, adenda V sellada por Nicolás): checks SUCCESS, CLEAN, head `b802c8087`; merge commit `51aafdf14` a las 06:22:35 UTC. Toca `pipeline/diurno.py` (MODIS obedece `ENABLE_DAYTIME_MODIS`); comprobado que el flag vale `False` por defecto (`pipeline/profile.py:208`) y que `mirova_equivalent.yaml` no lo enciende: producción sin cambio. Pregunta para Nicolás: `experiments/_s190_diurno/PREGUNTA_R_W7.md`; el veredicto del A/B no se calcula hasta su respuesta.
+- **#1034** (retiro de Putana y OlcaParuma, D1 1a): checks verdes sobre `55d9d6e31` (pytest 3.915 passed). Como #1031 regeneró `vecinos.yaml` y `volcanoes.yaml` en main, S190 actualizó la rama con main (`gh pr update-branch`, head `d50edeb40`) para probar la mezcla en CI antes de mergear. El aplicador de tandas ahora salta volcanes `active: false` (la unión de Putana y OlcaParuma sigue en `experiments/_historia_34/union/`).
+- **#1033** (guarda de geometría, sólo prueba): checks verdes y CLEAN; espera el veredicto de su verificador.
+
 ### 2026-11-17 06:06 UTC (S190): #1031 (centros RNVV) y #1030 mergeados por S190; cadena 4 a 7 relanzada
 - **#1031** (centros RNVV en 7 de los 34 y `gvp_id` de 3): checks `pytest` y `bateria-v750a` SUCCESS, CLEAN, head `19ff4c3c9`, verificador limpio; merge commit `c962d6aab` a las 06:04:41 UTC. Toca `volcanoes.yaml`, `pipeline/grillas_mirova.yaml`, `vecinos.yaml`, los espejos de `frontend/index.html` y `frontend/experimental/index.html`, y `tests/test_centros_rnvv_s190.py`. Cambian de clase 4 de 289 records (3 de SanPedro en `historia_34`, 1 de AntillancaCasablanca en `sombra_34`). Comprobado en main: Mentolat `centro_lat: -44.70000`.
 - **#1030** (A/B de fase de grilla V750, NO CUMPLE; Chillán V375 sin atribuir; sólo lectura): checks SUCCESS, CLEAN, head `45d8611d1`; merge commit `9d6e31241` a las 06:04:47 UTC.
