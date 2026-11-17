@@ -1837,7 +1837,7 @@ El espejo MODIS sigue OFF (D12, gateado por el fix de magnitud fondo-local §2).
 Distinta de D11 (que es posición de nevados) y de A54 (real-no-publicada): acá **MIROVA SÍ
 publica** y nosotros lo perdemos. El `primary_cluster` MODIS está en el cráter (mediana
 1.46 km ≈ MIROVA 1.41 km) pero el píxel suelto más caliente cae en el **Salar de Atacama**
-(16-32 km) → `distance_class='far'` → el gate `mirovaEqVrp`/`audit_metrics.py:79` lo anula.
+(16-32 km) → `distance_class='far'` → el gate `mirovaEqVrp`/`audit_metrics.py:85` lo anula.
 El rescate F47 no dispara (`hotspot_dist<25 km`). Es el **espejo MODIS** del bug que el
 ancla honesta resolvió en VIIRS375 — el espejo MODIS del ancla está flag-OFF, gateado por
 el fix de magnitud fondo-local (design 2026-06-13). FN sobre señal confirmada = lo más
@@ -2704,7 +2704,7 @@ MIROVA corrobora más los `ctx_cluster` que los `test1_roi` dentro de cada volc�
 
 **Lo que MIROVA hace**: Coppola 2016a integra el ROI y publica el cúmulo; la posición «en el
 cráter» de una integral de ROI es una convención que el frontend declara
-(`frontend/index.html:2880-2885`, el comentario «S106 ancla honesta» sobre `isHonestTest1`; era
+(`frontend/index.html:2889-2894`, el comentario «S106 ancla honesta» sobre `isHonestTest1`; era
 2779-2784 cuando se escribió, remapeada por contenido en V31.1, A101). **La magnitud del píxel único no la cubre ninguna convención.**
 
 **Segunda cara** (`detection_context.py:877-879` vs `:518-523`): `second_pass_adjacent` corre con
