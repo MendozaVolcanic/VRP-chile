@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 00:26 UTC (S189): dos cadenas huérfanas detenidas; Nicolás acepta D1 1a, 2a y 3b; S189 cierra por contexto
+
+- Al abrir (00:09 UTC) seguían VIVOS `cadena_3a7.sh` (de S187, 13:21 UTC del 16, la que despachó la tanda 3), `cadena_4a7.sh` y `vigilar_run.sh` (19:03 UTC), pese al «detenidos» de S188: habrían despachado la tanda 4 dos veces. Se mataron por PID (también los `sleep`) y se relanzaron vigilante y `cadena_4a7.sh` como procesos de S189.
+- `D:\vrp-trabajo\temporales\s187_tanda2\cadena_4a7.sh`: el conteo de rojos reintenta hasta 30 veces cada 2 min (cierra la SOSPECHA del falso «DETENIDO» por corte de red de S189 §d). `bash -n` OK; no ejercitado contra un corte real.
+- Alertas: #1028, la sombra de los 34 corrió el 16 a las 22:50 UTC y falló sólo en Putana y SanJose por descargas fallidas del 16 (cobertura incompleta, 0 K caídos, 32 verdes). #1027, la sombra código MIROVA no falló: en cola desde las 23:39 UTC, igual que el NRT, detrás de los trozos de la tanda 3.
+- Nicolás (≈00:20 UTC del 17): «Sí, las tres» = D1 pregunta 1 (a) retirar sólo Putana y OlcaParuma con respaldo; 2 (a) seguir con los dos de cada par fusionado; 3 (b) no agregar Tatara-San Pedro, Cay ni Hornopirén por ahora.
+- Respaldo de los 4 JSON (historia_34 y sombra_34 de los dos) desde main `7f864b885` en `D:\vrp-trabajo\temporales\s189\respaldo_d1_rnvv\` (sha256 en el bloque S190). El PR de retiro NO se abrió.
+- Tanda 3 a las 00:25 UTC: 109 de 165 verdes, 0 rojos, 57 vivos. Aviso de contexto a los 150 mil tokens: vigilante y cadena DETENIDOS a las 00:25 UTC (`ps` vacío, log de la cadena vacío: no despachó nada). Sigue en `tasks/BLOQUE_ARRANQUE_S190.md`.
+
 ### 2026-11-17 00:10 UTC (S188): Nicolás decide D1, «vamos con los 43 de la RNVV por mientras»; S188 cierra por contexto
 
 - Cruce por distancia de los 45 con los 43 de la RNVV (`D:\vrp-trabajo\temporales\s188\cruce_rnvv.py`): sin entrada RNVV Putana (aplicada, tanda 2), Olca-Paruma (aplicada, tanda 1) y Lastarria (Tier A); fusionados en la RNVV Descabezado Grande con Cerro Azul-Quizapu («Grupo Descabezados», 7,1 km; tanda 3) y Lonquimay con Tolhuaca (9,2 km; tanda 4); la RNVV trae Tatara-San Pedro, Cay y Hornopirén, que no tenemos. Cómo ejecutarlo queda como preguntas 1 a 4 en `tasks/BLOQUE_ARRANQUE_S189.md` §b.
