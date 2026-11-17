@@ -834,8 +834,14 @@ def limpiar_fallas() -> None:
 # S165 (V165-03): (4) una pasada MODIS que ENABLE_MODIS_CRATER_SIN_DATO (apagado) descarta porque el cráter no tiene
 # posición en el gránulo: noche sin dato, no noche observada. No cuenta en modo estricto (Nicolás, S165): sale de la
 # órbita y repetir el job no la recupera (A108); contra un control sin el flag la explica evaluador_comun, no el estricto.
+# S190 (H07 de la auditoría de Codex, verificado en V4): un gránulo bajado y con su geolocalización que no dejó record.
+# (5) `error_procesamiento`: el procesador lanzó una excepción (archivo truncado, banda ausente, error de la vía). Es
+# pérdida segura de una pasada que existió y cuenta en modo estricto: antes los reprocesos que reemplazan la historia
+# la dejaban como hueco con el rótulo «completa». (6) `sin_record`: el procesador devolvió None sin anotar nada. Suele ser
+# legítimo (descarte de borde de la vía, 171-01; volcán fuera del gránulo), así que va SIN JUICIO y no cuenta en modo
+# estricto, como `sin_granulos`; sólo impide que el resumen diga «completa». Los registra scripts/run_pipeline.py.
 TIPOS_INCIDENCIA = {"sin_granulos": False, "sin_geolocalizacion": True, "dia_parcial": True,
-                    "crater_sin_dato": False}
+                    "crater_sin_dato": False, "error_procesamiento": True, "sin_record": False}
 # Latencia de LANCE NRT: «~3h» (CLAUDE.md del proyecto, Constraints técnicos: «NASA LANCE NRT ~3h latencia»).
 # Se usa como la MÍNIMA: un día más joven que su fin más esto seguro está incompleto; uno más viejo todavía puede
 # estarlo (Standard publicado a medias, gránulos que llegan tarde) y eso el código no lo puede saber.

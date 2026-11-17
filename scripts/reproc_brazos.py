@@ -114,7 +114,7 @@ def correr(volcan: str, ini: str, fin: str, perfiles: list[str], trabajo, overwr
     cuentan = [i for i in incidencias if i.get("cuenta_estricto")]
     if fallas or cuentan:
         print(f"::warning::reproc_brazos {volcan}: {len(fallas)} búsquedas o descargas fallidas y {len(cuentan)} "
-              f"incidencias que cuentan (L1B sin geolocalización o día parcial) "
+              f"incidencias que cuentan (L1B sin geolocalización, día parcial o error al procesar un gránulo) "
               f"(días: {sorted({f.get('fecha') for f in fallas + cuentan})[:12]})", flush=True)
         return 3 if estricto else 0
     return 0
