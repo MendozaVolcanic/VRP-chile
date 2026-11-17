@@ -180,3 +180,11 @@ jobs:
             cobertura.json
           if-no-files-found: warn
           retention-days: 90
+
+      # S190 (H07 de la auditoria de Codex): el revisor de errores del NRT, como en nrt.yml. revisar_sombra.py ya deja
+      # rojo el job con cualquier «ERROR processing»; este paso agrega la anotacion por sensor y la misma regla que el
+      # NRT, porque desde la ficha v1.26 el tablero publica data/sombra_34/. ULTIMO paso: no salta el commit ni la
+      # subida del log. Test: tests/test_cobertura_honesta_s190.py.
+      - name: Revisar errores de granulo en el log
+        if: ${{ !cancelled() && steps.correr.outputs.corrio == 'true' }}
+        run: python scripts/revisar_errores_modis_nrt.py --log pipeline.log --volcan "${{ matrix.volcano }}"

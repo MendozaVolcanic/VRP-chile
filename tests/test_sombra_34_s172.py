@@ -295,8 +295,14 @@ def test_workflow_es_el_molde_paso_a_paso_salvo_lo_declarado():
     """VS34-02 (mutaciones W8, W9, W11 y W12 pasaban en verde): cada paso de sombra-34.yml tiene, fuera de su `run`,
     lo mismo que el paso correspondiente de la sombra de los 11 (if con always(), id, uses, with, env y timeouts), y
     el job el mismo runs-on, timeout, permisos y fail-fast. Sólo se permiten distintos el nombre de perfil y carpeta,
-    el nombre del artefacto, la matriz, el paralelismo, el cron y el grupo (probados aparte)."""
-    a = _wf()["jobs"]["process"]
+    el nombre del artefacto, la matriz, el paralelismo, el cron y el grupo (probados aparte).
+    S190 (H07): sombra-34.yml tiene además, como ÚLTIMO paso, el revisor de errores del NRT, porque desde la ficha v1.26
+    el tablero publica data/sombra_34/ y la sombra de los 11 no publica. Se quita sólo ese paso (exactamente uno, al
+    final) antes de comparar; que esté y sea el último lo prueba tests/test_cobertura_honesta_s190.py."""
+    a = dict(_wf()["jobs"]["process"])
+    revisor = [i for i, p in enumerate(a["steps"]) if "scripts/revisar_errores_modis_nrt.py" in (p.get("run") or "")]
+    assert revisor == [len(a["steps"]) - 1], revisor
+    a["steps"] = a["steps"][:-1]
     b = yaml.safe_load(MOLDE.read_text(encoding="utf-8"))["jobs"]["process"]
     for clave in ("runs-on", "timeout-minutes", "permissions"):
         assert a[clave] == b[clave], clave
