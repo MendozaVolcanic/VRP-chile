@@ -1294,7 +1294,7 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
   if (!includeFar && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
   // M1: sanity cap también sobre el cluster path (coherente con diario.html).
   const vmw = pc.vrp_mw ?? 0;
-  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (<= 500 K) y la marca
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (bajo store.techo_bt_k) y la marca
   // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
   // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
   // tests/test_tope_publicacion_s190.py
@@ -1435,7 +1435,7 @@ function mirovaEqVrpCore(r, innerKm = 10, includeFar = false) {
   // dan ~0) → mostrar el Cluster. F5' solo REDUCE el halo glaciar; jamás erradica
   // señal real (validado: 73/1653 records confirmados por MIROVA caían a 0 sin esto).
   if (core == null || core <= 0) return base;
-  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (<= 500 K) y la marca
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (bajo store.techo_bt_k) y la marca
   // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
   // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
   // tests/test_tope_publicacion_s190.py

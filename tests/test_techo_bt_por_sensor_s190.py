@@ -47,6 +47,13 @@ def test_v750_bajo_634_k_se_conserva_y_se_marca(sensor):
     assert "discarded_reason" not in r, r
 
 
+def test_v750_justo_en_634_k_se_conserva():
+    """Borde: el TMAX del detector es medible (`>` y no `>=`); 634,0 K no es imposible."""
+    r = _rec("VIIRS_NOAA20_750", 634.0)
+    store._apply_sanity_cap(r)
+    assert r["vrp_mw"] == GW60 and r.get("vrp_exceeds_sanity_cap") is True, r
+
+
 @pytest.mark.parametrize("t", [634.01, 650.0])
 def test_v750_sobre_634_k_se_anula(t):
     r = _rec("VIIRS_NOAA20_750", t)

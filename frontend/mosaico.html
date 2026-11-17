@@ -262,7 +262,7 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
   const pc = r.primary_cluster;
   if (!includeFar && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
   const vmw = pc.vrp_mw ?? 0;
-  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (<= 500 K) y la marca
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (bajo store.techo_bt_k) y la marca
   // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
   // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
   // tests/test_tope_publicacion_s190.py
@@ -360,7 +360,7 @@ function mirovaEqVrpCore(r, innerKm) {
   // Guard S96: el Núcleo nunca borra una detección del Cluster (core ≤ 0 con
   // base > 0 = anomaly_pixels no cargan la energía, A46/A07 → mostrar cluster).
   if (core == null || core <= 0) return base;
-  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (<= 500 K) y la marca
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (bajo store.techo_bt_k) y la marca
   // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
   // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
   // tests/test_tope_publicacion_s190.py
