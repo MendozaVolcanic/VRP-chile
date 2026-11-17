@@ -63,9 +63,15 @@ DEFAULT_INNER_KM = 10  # Conservative fallback for non-Tier-A or unknown volcano
 SANITY_CAP_VRP_MW = 50000.0
 
 
-def _cap(v):
-    """0 por encima del cap, igual que el frontend (`> cap`, no `>=`)."""
-    return 0 if v > SANITY_CAP_VRP_MW else v
+def _cap(v, exceeds_sanity_cap=False):
+    """0 por encima del cap, igual que el frontend (`> cap`, no `>=`), salvo record marcado.
+
+    POR QUÉ (S190, H01): `store._apply_sanity_cap` conserva sobre el cap una VRP con BT creíble
+    (<= 500 K) y la marca `vrp_exceeds_sanity_cap: True` para no borrar una erupción grande; las
+    3 copias del frontend la muestran. Sólo el booleano True exime (paridad con `!== true` del JS).
+    Guard: tests/test_tope_publicacion_s190.py
+    """
+    return 0 if v > SANITY_CAP_VRP_MW and not exceeds_sanity_cap else v
 
 
 def mirova_eq_vrp(record, volcano_name=None, inner_km=None):
@@ -100,10 +106,10 @@ def mirova_eq_vrp(record, volcano_name=None, inner_km=None):
     # Regla 3: legacy fallback si no hay primary_cluster
     pc = record.get('primary_cluster')
     if not pc:
-        return _cap(record.get('vrp_mw') or 0)
+        return _cap(record.get('vrp_mw') or 0, record.get('vrp_exceeds_sanity_cap') is True)
     # Regla 4 (bug S33 fix): validar pc.centroid_dist_km contra inner_radius
     pc_dist = pc.get('centroid_dist_km')
     if pc_dist is not None and pc_dist > inner_km:
         return 0
     # Regla 6 (S126): sanity cap, paridad con las 3 copias del frontend
-    return _cap(pc.get('vrp_mw', 0) or 0)
+    return _cap(pc.get('vrp_mw', 0) or 0, record.get('vrp_exceeds_sanity_cap') is True)

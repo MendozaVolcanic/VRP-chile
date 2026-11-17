@@ -255,13 +255,18 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
   if (!r) return 0;
   if (!r.primary_cluster) {
     const vfb = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
-    return vfb > 50000 ? 0 : vfb;
+    // POR QUÉ (S190, H01): misma excepción que el camino del cúmulo; ver el comentario de abajo.
+    return vfb > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : vfb;
   }
   if (r.distance_class && r.distance_class !== "summit" && !includeFar) return 0;
   const pc = r.primary_cluster;
   if (!includeFar && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
   const vmw = pc.vrp_mw ?? 0;
-  return vmw > 50000 ? 0 : vmw;
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (<= 500 K) y la marca
+  // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
+  // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
+  // tests/test_tope_publicacion_s190.py
+  return vmw > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : vmw;
 }
 
 // ============================================================================
@@ -355,7 +360,11 @@ function mirovaEqVrpCore(r, innerKm) {
   // Guard S96: el Núcleo nunca borra una detección del Cluster (core ≤ 0 con
   // base > 0 = anomaly_pixels no cargan la energía, A46/A07 → mostrar cluster).
   if (core == null || core <= 0) return base;
-  return core > 50000 ? 0 : core;
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (<= 500 K) y la marca
+  // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
+  // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
+  // tests/test_tope_publicacion_s190.py
+  return core > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : core;
 }
 
 // S92 — artefacto cirrus: píxel más caliente bajo 0 °C con VRP alto = nube fría
