@@ -69,7 +69,9 @@ def vecinos():
               ["jobs"]["process"]["strategy"]["matrix"]["volcano"])
     out = {}
     for v in vols:
-        if v["name"] in nrt:
+        # S190, D1 1a: un volcán inactivo (Putana, OlcaParuma) ya no es de la sombra y no tiene entrada propia, pero
+        # sigue contando como vecino de los demás: su calor entra igual en la grilla del de al lado.
+        if v["name"] in nrt or not v.get("active", True):
             continue
         g = MV.grilla_del_volcan(v["name"])
         t = Transformer.from_crs("EPSG:4326", f"EPSG:{g['epsg']}", always_xy=True)

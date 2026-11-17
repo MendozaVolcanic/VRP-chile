@@ -801,7 +801,7 @@
       </table>
     </div>
   </div>
-  <div class="orden-tarjetas"><label for="orden-tarjetas">Ordenar volcanes</label> <select id="orden-tarjetas"><option value="ns">Norte a sur</option><option value="sn">Sur a norte</option><option value="mirova">Comparables con MIROVA primero</option><option value="vrp">Mayor VRP ahora</option><option value="solo34">Sólo los 34 sin MIROVA</option><option value="solo11">Sólo los 11 con MIROVA</option></select> <span class="orden-nota">Los 11 con referencia de MIROVA se actualizan cada 2 h; los otros 34, una vez al día y sin MIROVA con qué comparar.</span></div><div class="volcano-grid" id="volcano-grid"></div><!-- S180: selector en la misma línea (guard G8) -->
+  <div class="orden-tarjetas"><label for="orden-tarjetas">Ordenar volcanes</label> <select id="orden-tarjetas"><option value="ns">Norte a sur</option><option value="sn">Sur a norte</option><option value="mirova">Comparables con MIROVA primero</option><option value="vrp">Mayor VRP ahora</option><option value="solo34">Sólo los 32 sin MIROVA</option><option value="solo11">Sólo los 11 con MIROVA</option></select> <span class="orden-nota">Los 11 con referencia de MIROVA se actualizan cada 2 h; los otros 34, una vez al día y sin MIROVA con qué comparar.</span></div><div class="volcano-grid" id="volcano-grid"></div><!-- S180: selector en la misma línea (guard G8) -->
   <div id="detail"></div>
 </main>
 
@@ -889,11 +889,11 @@ const VOLCANOES_ALL = [
   { name: "Hudson",               display: "Hudson",                 region: "Aysén",         lat: -45.900, lon: -72.970, radius_km: 15 },
 ];
 
-// S180 (Nicolás, 2026-11-12: «todos deben tener la misma funcionalidad»): las 45 tarjetas con datos. Los 11 Tier A
-// leen data/mirova_equivalent (NRT cada 2 h); los otros 34, data/sombra_34 (vía «código MIROVA», una vez al día,
-// sombra-34.yml), sin referencia de MIROVA. Cumbre de 5 km (D5, la de la antigua preliminar_34.js) y grilla de unos 51 km, la
-// de la vía. Hasta S180 (decisión S18) los 34 quedaban «sin datos» para no mezclar; ahora van marcados (v.fuente).
-const VOLCANOES = VOLCANOES_ALL.map(v => v.hasMirova ? v : Object.assign({}, v, { fuente: "sombra_34", inner_radius_km: 5, radius_km: 25 }));
+// S180 (Nicolás, 2026-11-12: «todos deben tener la misma funcionalidad»): las tarjetas con datos. Los 11 Tier A leen
+// data/mirova_equivalent (NRT cada 2 h); los demás, data/sombra_34 (vía «código MIROVA», diaria), sin referencia de MIROVA,
+// cumbre de 5 km (D5) y grilla de unos 51 km. S190, D1 opción 1a (Nicolás, 2026-11-17): la lista son los 43 de la RNVV;
+// Olca-Paruma y Putana (active: false en volcanoes.yaml) no se muestran y quedan en VOLCANOES_ALL por si D1 cambia.
+const VOLCANOES = VOLCANOES_ALL.filter(v => !["OlcaParuma", "Putana"].includes(v.name)).map(v => v.hasMirova ? v : Object.assign({}, v, { fuente: "sombra_34", inner_radius_km: 5, radius_km: 25 }));
 
 const SENSORS = [
   { key: "MODIS",    label: "MODIS (1km)",     color: "#ff8c00" },
