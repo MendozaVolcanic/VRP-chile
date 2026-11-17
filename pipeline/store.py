@@ -69,9 +69,28 @@ SANITY_CAP_VRP_MW = 50000.0
 
 # S124 — límite físico de temperatura de brillo. Por encima de esto el dato no
 # es "una anomalía muy grande": es imposible. MODIS B21 satura cerca de 500 K
-# (Coppola 2025 Cap.11) y VIIRS clampea antes; una BT de 566 K como la del
-# granule de Lastarria del 2026-04-23 solo sale de un flag DN no enmascarado.
+# (Coppola 2025 Cap.11); una BT de 566 K como la del granule de Lastarria del
+# 2026-04-23 solo sale de un flag DN no enmascarado.
 BT_PHYSICAL_MAX_K = 500.0
+
+# S190 (H04 de la auditoría de Codex): el techo depende de la banda que midió la BT.
+# POR QUÉ: el comentario anterior decía «VIIRS clampea antes», y es falso para M13, que mide hasta 634 K: con el
+# techo de MODIS, una erupción vista por VIIRS 750 a 550 K y más de 50 GW se guardaba como 0 MW.
+# FUENTE del 634: Campus et al. 2022, Sensors 22:1713, Tabla 1, TMAX sobre órbita de M13; es el mismo número que
+# `pipeline/process_viirs_mod.py::BT_LUT_MAX_MBAND["M13"]` (tests/test_techo_bt_por_sensor_s190.py lo compara).
+# VIIRS 375 queda en 500 K, SIN CAMBIO: la LUT de I04 llega a 361,77 K (UserGuide, process_viirs.py::BT_LUT_MAX),
+# pero la vía calcula t_max invirtiendo Planck sobre la radiancia en la longitud de onda central, no con la LUT, y
+# cuánto puede pasar de 361,77 K un píxel I04 saturado es SIN DATO; bajar el techo sin medirlo podría anular una
+# erupción real. Sensor desconocido: 500 K, como antes.
+BT_PHYSICAL_MAX_K_VIIRS750 = 634.0
+
+
+def techo_bt_k(sensor) -> float:
+    """Techo físico de la temperatura de brillo para la etiqueta de sensor del record (S190, H04)."""
+    s = str(sensor or "")
+    if s.startswith("VIIRS") and s.endswith("_750"):
+        return BT_PHYSICAL_MAX_K_VIIRS750
+    return BT_PHYSICAL_MAX_K
 
 
 @functools.lru_cache(maxsize=1)
@@ -163,7 +182,7 @@ def _apply_sanity_cap(record: dict) -> None:
         return
 
     t_max = record.get("t_max_k")
-    bt_imposible = t_max is None or t_max > BT_PHYSICAL_MAX_K
+    bt_imposible = t_max is None or t_max > techo_bt_k(record.get("sensor"))  # S190 (H04): techo por sensor
 
     if not bt_imposible:
         # Magnitud enorme pero físicamente admisible: NO anular.

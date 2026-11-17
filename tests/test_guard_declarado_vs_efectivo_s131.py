@@ -76,7 +76,7 @@ def test_g2_mitigaciones_declaradas_en_ficha_estan_encendidas(flags_operacionale
 
 
 def test_g3_sello_del_piso_implica_vrp_cero():
-    """Invariante de store.py:99-103: `diag_vrp_floor_mw` se escribe junto con `vrp_mw = 0.0`.
+    """Invariante de store.py:118-122: `diag_vrp_floor_mw` se escribe junto con `vrp_mw = 0.0`.
     Un reproceso parcial (S130) restauró la magnitud y dejó el sello pegado en 1.635 records;
     S132 los limpió (tag `pre-s131-data-hygiene`) y desde entonces el guard corre en verde."""
     viol = tot = 0

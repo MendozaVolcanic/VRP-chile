@@ -69,7 +69,7 @@ def base(**kw):
 
 
 def rescatado(r):
-    """El rescate por cúmulo de store.py:390-422 sobre el mismo record (lo que otro runner deja si su hotspot de
+    """El rescate por cúmulo de store.py:409-441 sobre el mismo record (lo que otro runner deja si su hotspot de
     escena cae lejos): hotspot y ancla final al centroide, fuente, etiqueta y vrp_mw del cúmulo."""
     pc = r["primary_cluster"]
     return dict(r, vrp_mw=pc["vrp_mw"], final_hotspot_source="cluster_rescue", discarded_reason=RESCATE,
@@ -189,7 +189,7 @@ def test_el_predicado_recibe_cada_volcan_con_sus_pares():
 
 def test_rescate_incoherente_no_es_escena_y_falla():
     a = base()
-    b = dict(rescatado(a), vrp_mw=3.0)        # rescate con vrp_mw distinto del cúmulo: no es store.py:396
+    b = dict(rescatado(a), vrp_mw=3.0)        # rescate con vrp_mw distinto del cúmulo: no es store.py:415
     v, ni = g3([(a, b)])
     assert v.startswith("FALLA")
 

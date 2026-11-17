@@ -371,7 +371,7 @@ def test_cenit_en_viirs375_sigue_decidiendo():
 
 def test_intento_con_pasada_duplicada_no_se_usa_entero():
     """Mata la mutacion «quitar el chequeo de duplicados del modo entero»: un intento con la misma pasada dos
-    veces no es una corrida limpia (store.py:650-653 deduplica por esa clave), así que no se entrega entero."""
+    veces no es una corrida limpia (store.py:669-672 deduplica por esa clave), así que no se entrega entero."""
     a = rec_modis(processed_utc="INTENTO1")
     salida, inf = unir(doc(a, copy.deepcopy(a)), doc(rec_modis(processed_utc="INTENTO2")))
     assert inf["ok"] and inf["intento_entero"] == 2 and len(salida["records"]) == 1

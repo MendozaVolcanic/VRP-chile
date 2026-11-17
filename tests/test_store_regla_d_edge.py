@@ -1,7 +1,7 @@
 """Edge cases para Regla D vent-priority (S20). Garantizar que NO rompe
 KeyError si los campos vent_hotspot_* faltan inesperadamente.
 
-S23 Task 1 audit followup: detectado en audit S22 que store.py:150-156
+S23 Task 1 audit followup: detectado en audit S22 que store.py:169-175
 asumía que `record["vent_hotspot_dist_km"]` existía cuando vrp_vent>0.
 Si el campo está ausente del dict (no None, sino key missing), el código
 lanza KeyError silencioso en producción.
