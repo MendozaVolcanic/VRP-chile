@@ -56,6 +56,7 @@ Copia local: `D:/vrp-trabajo/temporales/historia_34/piloto/` (fuera del repo).
 | unión | 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. Ollague 5.673 records, Putana 5.602, SanJose 6.398, SanPedro 5.708, Tinguiririca 6.485 |
 | ensayo del aplicador | 29.866 nuevos (los cinco de arriba), 0 tras el corte; los 5 de la tanda 1 dan 0 nuevos y todos «ya estaban» |
 | se aplica | tras el merge del PR de esta unión. Ojo D1 (`tasks/DECISIONES_34_S187.md` en `loop/activo`): Putana es candidata a salir si la lista final es la de la RNVV |
+| aplicada | 2026-11-16 tras el merge de #1026: run 43934376861 de `aplicar-reemplazo.yml`, commit `43ac1c5e6` en main. Putana salió después con D1 (sección de abajo) |
 
 Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda2/` (fuera del repo). El script de unión
 (`D:/vrp-trabajo/temporales/s187_tanda2/unir_tanda2.sh`) se probó re-uniendo la tanda 1: reprodujo byte a byte sus
@@ -66,6 +67,25 @@ uno por uno con reintentos (`bajar_trozos.sh`).
 
 Nicolás autorizó despacharlas en cadena («Sí, despacha 3 a 7», 2026-11-16). Tanda 3 despachada 2026-11-16 16:22 UTC
 (run 43906817147).
+
+⚠️ S190 (2026-11-17): el run 43906817147 NO era la tanda 3. Procesó otra vez los cinco de la tanda 2: lo despachó
+`despachar.sh`, programado antes de que Nicolás pidiera «Despacha ahora» para la tanda 2, y nadie lo canceló. Unido y
+ensayado contra main dio 0 records nuevos en los cinco (la vía es reproducible corrida a corrida). La tanda 3 real es el
+run 44037264576 (sección siguiente). Carpeta del duplicado: `D:/vrp-trabajo/temporales/historia_34/tanda2_duplicado_run43906817147`.
+
+## Tanda 3 (DescabezadoGrande, CerroAzulQuizapu, LagunaDelMaule, NevadoDeLongavi, Antuco; 2025-02-15 a 2026-11-02)
+
+| campo | valor |
+|---|---|
+| run | 44037264576 (main `3239a4db8`), despachado 2026-11-17 07:15 UTC por `cadena_3a7_s190b.sh` |
+| trozos | 165 de 165 en verde. 6 cayeron en el intento 1 por fallas de búsqueda en CMR de NASA (DescabezadoGrande 5, NevadoDeLongavi 1) y pasaron con `gh run rerun --failed` (intento 2, mismo commit) |
+| runner | 76,2 h (suma de `completed_at - started_at` de los 165 jobs vigentes), 27,7 min por trozo en promedio (máximo 53,6); pared 07:16 a 21:14 UTC, con la ronda de relanzamiento |
+| unión | 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. Antuco 6.718 records, CerroAzulQuizapu 6.497, DescabezadoGrande 6.499, LagunaDelMaule 6.643, NevadoDeLongavi 6.538 |
+| ensayo del aplicador | 32.895 nuevos (los cinco de arriba), 0 tras el corte; los 8 activos de las tandas 1 y 2 dan 0 nuevos y todos «ya estaban»; Putana y OlcaParuma, saltados (`active: false`) |
+| se aplica | tras el merge del PR de esta unión, con tag `pre-historia-34-tanda3` |
+
+Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda3/` (fuera del repo). Tanda 4 (Callaqui, Lonquimay, Tolhuaca,
+Sollipulli, Quetrupillan) despachada por la cadena el 2026-11-17 23:25 UTC.
 
 ## Retiro de Putana y OlcaParuma (D1, opción 1a, 2026-11-17)
 
