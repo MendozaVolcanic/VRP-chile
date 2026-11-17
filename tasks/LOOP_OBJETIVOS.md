@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 05:40 UTC (S190): #1029 mergeado por S190; C: en 6,2 GB y carga reducida
+- **#1029** (plan del laboratorio, sólo documentos y scripts de medición): checks `pytest` y `bateria-v750a` en SUCCESS, CLEAN, head `576f280aa`; merge commit `736f3734e` a las 05:39:47 UTC, decidido por S190 con la autorización de Nicolás (política 05:10). El único guion largo agregado es el nombre de un workflow copiado tal cual en un JSON de salida.
+- **Disco**: C: bajó a 6,2 GB libres (05:33 UTC); `pagefile.sys` creció de 26,7 a 32,2 GB en una hora con unos 10 procesos Python pesados a la vez (sesiones D36, día, sombras, coordenadas, Codex y el subagente del retiro). Detenido el pytest del retiro que corría fuera de la cola (PID 13132); pedido a las sesiones D36, día, sombras y Codex un proceso pesado a la vez. No se tocó `hiberfil.sys` (13,6 GB): apagar la hibernación es configuración del sistema y la decide Nicolás.
+
 ### 2026-11-17 06:00 UTC (S190): MacaCay V750 del 11-15 es una escena partida entre gránulos; disco C: bajo
 - **Auditoría de falsos positivos de píxel aislado** (subagente con verificador limpio; `D:\vrp-trabajo\temporales\s190_fp\INFORME.md`, scripts al lado; leído de main `0d5f5ac6f`):
   - MacaCay 2026-11-15 05:36 NOAA-20 V750: SOSPECHA fuerte de falso positivo. Pasó la prueba contextual (NTI 0,0142 contra 0,0072; ETI 0,0052 contra 0,0031) en la esquina de la caja sensible; el VRP es artefacto: `L_bk = 0` (fondo interpolado vacío) y 4,122 MW es la radiancia M13 entera de una celda a 282 K. El gránulo de 05:36 tiene 2.096 de 4.489 celdas sin dato; el tablero la publica (clase nula derivada a cumbre).
