@@ -68,7 +68,7 @@ def test_modis_imports_helper():
 def test_modis_populates_anomaly_pixels_in_test1_block():
     assert _calls_in_test1_block(_module_source("process_modis.py")), \
         ("process_modis.py debe poblar anomaly_pixels en el bloque Test1 "
-         "(tras t1_vrp_2d[...]=t1_vrp_arr), espejo de process_viirs.py:1486")
+         "(tras t1_vrp_2d[...]=t1_vrp_arr), espejo de process_viirs.py:1489")
 
 
 # --- VIIRS 750m (M-band) -------------------------------------------------
@@ -81,7 +81,7 @@ def test_viirs750_imports_helper():
 def test_viirs750_populates_anomaly_pixels_in_test1_block():
     assert _calls_in_test1_block(_module_source("process_viirs_mod.py")), \
         ("process_viirs_mod.py debe poblar anomaly_pixels en el bloque Test1 "
-         "(tras t1_vrp_2d[...]=t1_vrp_arr), espejo de process_viirs.py:1486")
+         "(tras t1_vrp_2d[...]=t1_vrp_arr), espejo de process_viirs.py:1489")
 
 
 # --- guardia de no-regresión: VIIRS375 ya lo tiene (PR #294) -------------

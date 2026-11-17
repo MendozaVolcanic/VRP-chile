@@ -765,6 +765,18 @@ def leer_radiancia_l1b(ruta, bandas=("M13", "M15")):
     return out
 
 
+def bandas_ausentes_l1b(ruta, bandas=("M13", "M15")):
+    """Las bandas pedidas que el L1B no trae, en el orden pedido ([] si están todas).
+
+    POR QUÉ (S190, H03 de la auditoría de Codex): `leer_radiancia_l1b` devuelve None si falta una banda y no dice cuál.
+    Los procesadores usan esto para que el error de una pasada sin medir nombre la banda que faltó, en vez de que la
+    pasada desaparezca en silencio. Sólo mira los nombres de `observation_data`; no lee datos."""
+    import h5py
+    with h5py.File(ruta, "r") as f:
+        presentes = set(f["observation_data"].keys()) if "observation_data" in f else set()
+    return [b for b in bandas if b not in presentes]
+
+
 def leer_geo_l1b(ruta):
     """lat, lon (float64, como el probe del oráculo) y ángulos de observación en grados del L1B GEO de VIIRS."""
     import h5py
