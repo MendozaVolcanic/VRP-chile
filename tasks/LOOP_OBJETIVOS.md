@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 07:10 UTC (S190): la «tanda 3» (run 43906817147) era un DUPLICADO de la tanda 2; tanda 3 real despachada recién ahora
+- **Hallazgo**: el run 43906817147 (16-nov 16:22 UTC), que S187, S188, S189 y S190 trataron como tanda 3, procesó Ollague, SanPedro, Putana, SanJose y Tinguiririca (165 trozos `trozo-<volcán>`, 33 por volcán). Lo despachó `D:\vrp-trabajo\temporales\s187_tanda2\despachar.sh` (programado para las 13:10 UTC del 16 con `-f volcanoes=Ollague,SanPedro,Putana,SanJose,Tinguiririca`; `despacho.log`), que nadie canceló cuando Nicolás pidió «Despacha ahora» (run 43806164818, 04:47 UTC): esperó a que terminara la tanda 2 real y la relanzó. La tanda 3 (DescabezadoGrande, CerroAzulQuizapu, LagunaDelMaule, NevadoDeLongavi, Antuco) nunca corrió. Costo: ~11 h de runners y la creencia falsa en cuatro sesiones.
+- Lo rescatable: unido y ensayado contra main, el duplicado da 0 records nuevos en los cinco (todos «ya estaban»): el reproceso de la vía es reproducible corrida a corrida. Carpeta movida a `D:\vrp-trabajo\temporales\historia_34\tanda2_duplicado_run43906817147`; worktree y rama `s190-historia34-tanda3` quitados.
+- **Corrección**: `cadena_4a7.sh` detenido antes de despachar (habría saltado la tanda 3; `ps` vacío de cadenas del loop). Nueva `D:\vrp-trabajo\temporales\s187_tanda2\cadena_3a7_s190.sh` (copia con la tanda 3 agregada al inicio), lanzada desde S190; log `cadena_3a7_s190.log`.
+- **Lección** (a memoria): un despacho programado que espera turno sobrevive a la orden que lo reemplaza; al despachar a mano lo que un script iba a despachar, matar el script en el mismo paso. Y los artefactos de un run se cotejan contra lo que se cree que procesó (nombres de los trozos) antes de llamarlo «tanda N».
+
 ### 2026-11-17 06:32 UTC (S190): retiro D1 en main (#1034); D1 ejecutada
 - **#1034** (retiro de Putana y OlcaParuma, opción 1a aceptada por Nicolás): CI combinado con main (#1031 incluido) SUCCESS sobre `d50edeb40`, CLEAN; merge commit `3239a4db8` a las 06:31:32 UTC, por S190. Comprobado en main: 32 JSON en `data/sombra_34/`, ninguno de Putana ni OlcaParuma en `data/sombra_34/` ni `data/historia_34/`, Putana con `active: false` y comentario D1. El aplicador de tandas salta los inactivos.
 - `tasks/DECISIONES_34_S187.md`: D1 marcada DECIDIDA Y EJECUTADA (texto previo conservado). Worktree `D:\vrp-trabajo\worktrees\s190-retiro-d1` quitado.
