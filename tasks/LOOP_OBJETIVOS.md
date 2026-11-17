@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 04:55 UTC (S190): Nicolás se va a dormir; loop autónomo; S190 pasa a sesión principal; sesiones de día y coordenadas
+- **Nicolás (≈04:50 UTC)**: «quiero que sigas trabajando en loop y vigilando las otras sesiones, no es necesario que me pidas permiso para todo, porque las pruebas irán descartando errores». Lectura de S190: avanzar sin preguntar en todo lo reversible (sesiones, PR, verificadores, relanzar rojos, aplicar tandas ya mergeadas por H3); merges a main, A45 y sellos de pre-registro siguen esperando su frase, porque son reglas suyas explícitas y no las nombró.
+- S190 movida a sesión principal (antes anidada en `local_4c1a9a18`); sus hijas siguen anidadas.
+- **Plan experimental (#1029)**: Nicolás «Sí, las siete» (D1 a D7 del §8; anotado en el PR, `576f280aa`). Merge de #1029 espera «mergea #1029».
+- **Día (#813)**: sesión `s190-diurno` con inventario y adenda V en la rama `s190-diurno` (`7a5f5ec01`); espera el sello de Nicolás. Hallazgo: hoy MODIS no puede abrir el día con ningún flag.
+- **Dudas de Nicolás**: (1) MacaCay V750 2026-11-15 05:36 UTC NOAA-20: 1 píxel, 4,12 MW, noche, 3,2 km del centro; el V375 del mismo satélite y hora 0 y el gránulo de 05:42 0 (de `data/sombra_34/MacaCay.json` en main). SOSPECHA de falso positivo; pregunta enviada a la sesión Codex junto con la de geometría. (2) Mentolat: centro nuestro -44,67 / -73,08 contra RNVV -44,70 / -73,08 (≈3,3 km al norte); `pipeline/grillas_mirova.yaml` centra la grilla en el nuestro. Sesión `s190-coordenadas` audita los 45 contra RNVV y GVP; si cambian volcanes de la tanda 7, decidir antes de su despacho si salen de la cadena (no editar `cadena_4a7.sh` mientras corre: bash lee el script por partes).
+
 ### 2026-11-17 04:07 UTC (S190): arranque verificado; vigilante y cadena 4 a 7 relanzados; retiro D1 en curso; cuatro sesiones para los pendientes
 - **Verificado 03:42 UTC**: `loop/activo` = remoto (`9f80dde80`); `ps` sin cadenas, vigilantes ni `sleep` huérfanos; main en `9a5bc536b` (sólo NRT y guardia K desde el respaldo `7f864b885`; los 4 JSON de Putana y OlcaParuma sin cambios). Run 43906817147 (tanda 3) sin terminar.
 - **Relanzados desde S190**: `vigilar_run.sh 43906817147` (log `D:\vrp-trabajo\temporales\s187_tanda2\vigilar_t3.log`) y `cadena_4a7.sh` (log `cadena_4a7.log`). `cadena_3a7.sh` NO.
