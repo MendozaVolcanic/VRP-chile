@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 06:06 UTC (S190): #1031 (centros RNVV) y #1030 mergeados por S190; cadena 4 a 7 relanzada
+- **#1031** (centros RNVV en 7 de los 34 y `gvp_id` de 3): checks `pytest` y `bateria-v750a` SUCCESS, CLEAN, head `19ff4c3c9`, verificador limpio; merge commit `c962d6aab` a las 06:04:41 UTC. Toca `volcanoes.yaml`, `pipeline/grillas_mirova.yaml`, `vecinos.yaml`, los espejos de `frontend/index.html` y `frontend/experimental/index.html`, y `tests/test_centros_rnvv_s190.py`. Cambian de clase 4 de 289 records (3 de SanPedro en `historia_34`, 1 de AntillancaCasablanca en `sombra_34`). Comprobado en main: Mentolat `centro_lat: -44.70000`.
+- **#1030** (A/B de fase de grilla V750, NO CUMPLE; Chillán V375 sin atribuir; sólo lectura): checks SUCCESS, CLEAN, head `45d8611d1`; merge commit `9d6e31241` a las 06:04:47 UTC.
+- **Cadena 4 a 7 relanzada** desde S190 (06:06 UTC; antes `ps` sin cadenas vivas): despacha desde main, ya con los centros nuevos; espera a que termine el intento 2 de la tanda 3.
+- Pendiente: reprocesar SanPedro (tanda 2 aplicada con el centro viejo).
+
 ### 2026-11-17 05:56 UTC (S190): tanda 3 con 9 rojos de Tinguiririca, relanzados; suite completa pasa al CI
 - **Tanda 3** (run 43906817147): terminó 05:49 UTC con `failure`, 165 trozos y 9 rojos, todos de Tinguiririca (ventanas 2, 3, 5, 8 a 13), por `SEARCH_VENTANA_ERR` contra CMR de NASA cerca de las 02:00 UTC (mismo síntoma que las sombras, #1027). Relanzados con `gh run rerun --failed` (intento 2); vigilante en `D:\vrp-trabajo\temporales\s187_tanda2\vigilar_t3b.log`. Tinguiririca no cambia de centro.
 - **Decisión S190, regla de pruebas**: la cola local de la suite (`suite_con_turno.sh`) se atascó (turno de 45 min, 4 sesiones esperando, entre ellas la de coordenadas que destraba la cadena). La suite completa la da el check `pytest` del CI de cada PR; localmente sólo las pruebas pertinentes, con `--basetemp` en D:. Enviado a coordenadas, escenarios, día, Codex y al subagente del retiro.
