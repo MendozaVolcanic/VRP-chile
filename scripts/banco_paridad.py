@@ -172,7 +172,12 @@ CAMPOS_JS = ["primary_cluster", "distance_class", "vrp_mw", "vrp_mir_mw", "disca
              # Solo viaja a node: los dicts que devuelve cargar_nuestros no cambian. Medido sobre main del
              # 2026-11-05: 0 records cambian (experiments/_s173_cirrus_s1/banco_marca_via/).
              # Guard: tests/test_banco_pasa_marca_via_s173.py
-             "via_codigo_mirova"]
+             "via_codigo_mirova",
+             # S190 (H01): el tope de 50.000 MW del tablero exime al record que store.py conservo y marco (BT
+             # creible), para no mostrar en cero una erupcion grande. Sin esta clave el banco recortaba la marca y
+             # contaba como no publicada la erupcion que el navegador publica. Hoy ningun record tiene la marca: no
+             # cambia ningun numero. Guard: tests/test_banco_pasa_marca_tope_s190.py
+             "vrp_exceeds_sanity_cap"]
 
 
 def correr_node(casos):
