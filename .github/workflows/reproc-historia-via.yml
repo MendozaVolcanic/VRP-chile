@@ -150,3 +150,12 @@ jobs:
           path: data/${{ github.event.inputs.profile }}/${{ matrix.job.vol }}.json
           if-no-files-found: error
           retention-days: 30
+      # S190 (H07 de la auditoria de Codex): el revisor de errores del NRT (scripts/revisar_errores_modis_nrt.py). Una
+      # excepcion de un granulo deja «ERROR processing» en el log; desde S190 run_pipeline tambien la cuenta en modo
+      # estricto (incidencia error_procesamiento, salida 3), y este paso deja el error con nombre y sensor en la
+      # anotacion del job. ULTIMO paso a proposito: no salta ningun paso anterior (la subida del trozo sigue
+      # dependiendo solo de los pasos de antes), solo cambia el color del job. Mismo paso en los dos reprocesos
+      # (tests/test_reproc_historia_via_s180.py exige jobs iguales). Test: tests/test_cobertura_honesta_s190.py.
+      - name: Revisar errores de granulo en el log
+        if: ${{ !cancelled() && steps.correr.outputs.salida != '' }}
+        run: python scripts/revisar_errores_modis_nrt.py --log pipeline.log --volcan "${{ matrix.job.vol }}"
