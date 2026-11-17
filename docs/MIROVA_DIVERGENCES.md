@@ -555,8 +555,8 @@ Ejecución sistemática del catálogo de divergencias (`docs/MIROVA_DIVERGENCES_
 > commit `d58f7a46f`, S72 F2.3.a; la clave no está escrita en `mirova_equivalent.yaml`, así que
 > manda el default, A89). Los **tres** procesadores lo consumen en las **dos** ramas, y las dos
 > ramas están encendidas (`ENABLE_DNTI_CONTEXTUAL_PATH`, `ENABLE_FIRST_PASS_TESTS_2_AND_3`):
-> `process_modis.py:696/704` y `:866-867`, `process_viirs.py:1071/1079` y `:1272-1273`,
-> `process_viirs_mod.py:736/744` y `:854-855`. El filtro de borde va siempre activo dentro de
+> `process_modis.py:696/704` y `:866-867`, `process_viirs.py:1074/1082` y `:1275-1276`,
+> `process_viirs_mod.py:739/747` y `:857-858`. El filtro de borde va siempre activo dentro de
 > `build_unsuitable_mask`.
 >
 > Consecuencia: el A/B **F2.1** que este bloque propone más abajo **no se puede correr como está**,
@@ -1563,7 +1563,7 @@ Cuando S62+S63 completen:
 
 > ⚠️ **S157, el «ADOPTADO» del encabezado ya no actúa** (propagación de K, A113; `experiments/_s155_audit/frente_1_verif/INFORME.md`
 > F1-14): el filtro contextual y el keep-peak sólo corren cuando `final_hotspot_source == "test1"`
-> (`pipeline/process_viirs.py:1876`), y con K el Test 1 integrado está apagado (D30, #850): 0 de 3.687 records con esa
+> (`pipeline/process_viirs.py:1879`), y con K el Test 1 integrado está apagado (D30, #850): 0 de 3.687 records con esa
 > fuente desde la fecha de observación 2026-09-18 (`experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt`).
 > Los flags siguen en `true` en el perfil, pero no tienen sobre qué actuar. Encabezado y texto conservados por historia.
 
@@ -2162,7 +2162,7 @@ Estado del código, verificado leyendo `pipeline.profile` y no el YAML:
 `bt > CLOUD_MASK_BT_K` es tautológico y la máscara está inerte en los tres
 sensores. El literal `260.0` que VIIRS 375 tenía hardcodeado —la anomalía que la
 corrección S125 de arriba señalaba— **ya está reemplazado por la perilla**
-(`process_viirs.py:800`), con dos guards: `tests/test_cloud_mask_from_profile_s125.py`
+(`process_viirs.py:803`), con dos guards: `tests/test_cloud_mask_from_profile_s125.py`
 y `tests/test_cloud_mask_operacional_s126.py`.
 
 **Por qué se sostiene el apagado**, en este orden:
@@ -2542,8 +2542,8 @@ para un A/B, no para afirmar el origen exacto.
 > NO miden la caja: miden un defecto de cableado.** `enable_roi1_box_paper` entrega la caja sólo
 > al primer pase. El segundo pase (`second_pass_adjacent`) recibe
 > `is_summit_mask = vent_dist_per_pixel <= inner_radius_km`, o sea el círculo de siempre
-> (`pipeline/process_viirs.py:1313`, y el mismo patrón en `process_modis.py:923` y
-> `process_viirs_mod.py:923`), corre sin condicionar sobre toda la escena y vuelve a capturar con
+> (`pipeline/process_viirs.py:1316`, y el mismo patrón en `process_modis.py:923` y
+> `process_viirs_mod.py:926`), corre sin condicionar sobre toda la escena y vuelve a capturar con
 > el umbral permisivo lo que el primer pase acaba de rechazar con el estricto. Medido en los 51
 > negativos limpios de fuera de la caja: el primer pase cae de 86 a 7 píxeles y la recaptura sube
 > de 98 a 175; el cúmulo publicado queda idéntico en los 51. **D18 nunca se ha medido con la caja
@@ -2684,7 +2684,7 @@ ahí el cúmulo está a 0,15 km del cráter).
 disco de 3 km alrededor de la cumbre, el píxel más caliente es el borde del disco (cota más
 baja), no el cráter (A69).
 
-**Lo nuestro** (`pipeline/process_viirs.py:1832-1841`, flags efectivos
+**Lo nuestro** (`pipeline/process_viirs.py:1835-1844`, flags efectivos
 `ENABLE_TEST1_CONTEXTUAL_FILTER=True` y `ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK=True`, adopción
 S100 #340 «ctxpeak»): el Test 1 marca ~la mitad del disco (exceso sobre la mediana del anillo
 1-3 km, `test1_integrated.py:376,412,420`), el filtro contextual lo intersecta con `dNTI_ctx`
@@ -2968,7 +2968,7 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 **S141, siete textos más del grupo, páginas renderizadas** (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-07 y P-02): fondo = media de los píxeles que rodean al alertado o al cúmulo, nunca mediana ni anillo regional. Coppola et al. 2013 (JVGR 249, p. 46, Apéndice 2, bajo la ec. A.1); Coppola et al. 2020 (Front. Earth Sci. 7:362, p. 3, bajo la ecuación del VRP); Campus et al. 2022 (Sensors 22, 1713, p. 7, §3.2, bajo la ec. 2); Aveni et al. 2023 (Remote Sens. 15, 2528, p. 8, §3.3, bajo la ec. 3: vecinos «non-alerted»); Coppola et al. 2023 (Front. Earth Sci. 11:1240107, p. 3, §2.2, ec. 1, y p. 6, Tabla 1, fila Tot_Lmir_bk); Campus et al. 2024 (Bull. Volcanol. 86:25, p. 3, columna derecha, bajo la ec. 1, y ec. 2). **Segunda divergencia dentro de D25**: Campus 2024 precisa que cada píxel alertado tiene **su propio** fondo (media de sus vecinos) y que el fondo total es la **suma** de esos fondos; la columna Tot_Lmir_bk del archivo v1 es esa suma («Sum of MIR background radiance from all alerted pixels», Coppola 2023 Tabla 1). Lo nuestro usa un único `t_bg` para todos los píxeles del cúmulo. Para comparar `diag_L_bg_w_m2_sr_um` (T7, S140) con Tot_Lmir_bk hay que dividir este último por Npix. Ningún texto visto menciona recortar a cero el exceso negativo: esa mitad de la pregunta 4 del correo sigue abierta.
 
-**Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:571-579`, 1023; `process_viirs_mod.py:1043`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1044-1052`); `delta_L` recortado a 0 (`process_modis.py:1060`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
+**Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:571-579`, 1023; `process_viirs_mod.py:1046`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1044-1052`); `delta_L` recortado a 0 (`process_modis.py:1060`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
 
 **S142, flag (OFF en producción).** `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375` calcula, en VIIRS 375, el fondo de cada píxel alertado como la media de la **radiancia** de sus vecinos no alertados (`pipeline/vrp_regimes.py:neighbor_mean_radiance_background`). Cuando los 8 vecinos están alertados, la ventana crece hasta `vrp_bg_neighbor_max_half_px` (3 = 7x7, decisión abierta), y si aun así no hay vecinos, se usa el fondo de hoy como respaldo, contado en `diag_bg_vecinos_n_sin_vecinos`. Entra en el bloque contextual (`anomaly_pixels`, cúmulo, F5) y en los dos recomputes del Test 1. Pisa al kernel 3x3 opt-in. El recorte a cero **no** cambia. MODIS y VIIRS 750 siguen con la mediana. En la escena sintética del plan, el cráter pasa de 0,0 a ~0,097 MW. Brazos: `pipeline/profiles/_s142_ab_*.yaml` (S143). Plan: `docs/superpowers/plans/2026-09-15-flags-d22-d25.md`.
 
@@ -3347,8 +3347,8 @@ es una de las que llevan matiz, ver su §4**) y comprobado de nuevo acá al escr
 
 - `ENABLE_BT_PATH_HOT = False` leído de `pipeline.profile` con `VRP_PROFILE=mirova_equivalent`, no
   del YAML (A89). `ENABLE_DUAL_ROI_BT = True` **sí** construye la máscara, pero
-  `process_viirs.py:997` la pone en cero (lo mismo en `process_modis.py:660` y
-  `process_viirs_mod.py:671`), así que el `true` del YAML no significa que el
+  `process_viirs.py:1000` la pone en cero (lo mismo en `process_modis.py:660` y
+  `process_viirs_mod.py:674`), así que el `true` del YAML no significa que el
   camino decida.
 - El contador `diag_n_bt_path` vale 0 en las 2.360 pasadas nocturnas de la ventana desde el
   2026-09-01 (457 MODIS, 954 VIIRS 375, 949 VIIRS 750), pero eso **no es evidencia
@@ -3631,12 +3631,12 @@ el efecto no se ha medido.
 
 | # | Qué hace la vía | Dónde | De dónde salió | Sensores | Marca | Efecto |
 |---|---|---|---|---|---|---|
-| 1 | Si el píxel del gránulo más cercano al **centro de la grilla** (no al cráter) está a más de 5 km, la pasada no deja record y tampoco cae a K | `FAMILIAS` (`dist_max_centro_km`), `calcular_vrp_granulo` | Sondas propias del censo (`experiments/_s159/n/probe_n.py`, `experiments/_s162_v375/probe_v375.py`); no está en el `.m` ni en el paper | VIIRS 375 y MODIS; VIIRS 750 no lo tiene | CONFIRMADO | Costo SIN MEDIR. Del 2026-03-01 al 2026-11-10, las 596 pasadas que sólo procesó K (descartes de borde de la vía, sin separar este corte del punto 2) no tienen alerta de MIROVA. Asimetría: VIIRS 750 guarda la escena de borde como `escena_invalida` (1.566 de 30.064 records de los 11 Tier A) y VIIRS 375 la borra sin rastro (238 inválidas de 28.751); si el volcán cae en un hueco con la mayor parte de la grilla con dato, VIIRS 375 pierde una escena que el `.m` sí mediría (cuántas, SIN MEDIR). Caso: Villarrica MODIS_AQUA 2026-11-04 07:10 UTC, la guardia K escribió record y producción no |
-| 2 | Si quedan menos de 100 píxeles del gránulo a menos de 45 km del centro, la pasada no deja record | `calcular_vrp_granulo` | Sonda propia (`probe_n.py`, `grillar`) | Los tres | CONFIRMADO | SIN MEDIR por separado del punto 1 |
-| 3 | Sólo se interpolan los píxeles a menos de 45 km del centro de la grilla (`RADIO_RECORTE_KM`) | `remuestrear_grilla` | `probe_n.py`, `grillar`; MIROVA no publicó su remuestreo (Coppola et al. 2026, p. 21) | Los tres | CONFIRMADO el hecho; lo de MIROVA, SIN DATO | SIN MEDIR; probable nulo dentro de la grilla (sus esquinas están a 35,4 km del centro), pero ninguna prueba atrapa la mutación de 45 a 30 km (`experiments/_s164_modis_codigo/verificador/INFORME.md`) |
+| 1 | Si el píxel del gránulo más cercano al **centro de la grilla** (no al cráter) está a más de 5 km, la pasada no deja record y tampoco cae a K | `FAMILIAS` (`dist_max_centro_km`), `calcular_vrp_granulo` | Sondas propias del censo (`experiments/_s159/n/probe_n.py`, `experiments/_s162_v375/probe_v375.py`); no está en el `.m` ni en el paper | VIIRS 375 y MODIS; VIIRS 750 no lo tiene | CONFIRMADO | ⚠️ **S190, costo medido (`experiments/_s190_d36/INFORME.md` §3):** de 2.197 alertas nocturnas de MIROVA del 2026-03-01 al 2026-11-16 (525 protegidas), 0 quedan sin pasada nuestra de la vía del mismo sensor a ±60 min; las 15 sin la misma pasada a 10 min (3 protegidas) son del 2026-03-10 al 03-12, a horas de Suomi NPP, un hueco de gránulos SNPP común a todos los perfiles y no este corte. En MODIS, 12 pasadas que la vía descartó (píxel más cercano a 6,9 a 19,9 km del centro) no dan alerta corriendo la vía sin el corte. Pruebas: quitar el corte, subirlo a 10 km o ignorarlo se atrapa; en VIIRS 375 sólo lo vigila la prueba de constantes; bajarlo a 2 km: bajarlo a 2 km no lo atrapa ninguna de las 16 pruebas que importan la vía (457 casos). Texto anterior: Costo SIN MEDIR. Del 2026-03-01 al 2026-11-10, las 596 pasadas que sólo procesó K (descartes de borde de la vía, sin separar este corte del punto 2) no tienen alerta de MIROVA. Asimetría: VIIRS 750 guarda la escena de borde como `escena_invalida` (1.566 de 30.064 records de los 11 Tier A) y VIIRS 375 la borra sin rastro (238 inválidas de 28.751); si el volcán cae en un hueco con la mayor parte de la grilla con dato, VIIRS 375 pierde una escena que el `.m` sí mediría (cuántas, SIN MEDIR). Caso: Villarrica MODIS_AQUA 2026-11-04 07:10 UTC, la guardia K escribió record y producción no |
+| 2 | Si quedan menos de 100 píxeles del gránulo a menos de 45 km del centro, la pasada no deja record | `calcular_vrp_granulo` | Sonda propia (`probe_n.py`, `grillar`) | Los tres | CONFIRMADO | ⚠️ **S190 (`experiments/_s190_d36/INFORME.md` §3):** en 330 pasadas MODIS del A/B el mínimo de píxeles a 45 km fue 396: el corte no actuó en la muestra. Pruebas: cambiar el mínimo a 1 o a 2000 no lo atrapa ninguna de las 16 pruebas que importan la vía (457 casos). Texto anterior: SIN MEDIR por separado del punto 1 |
+| 3 | Sólo se interpolan los píxeles a menos de 45 km del centro de la grilla (`RADIO_RECORTE_KM`) | `remuestrear_grilla` | `probe_n.py`, `grillar`; MIROVA no publicó su remuestreo (Coppola et al. 2026, p. 21) | Los tres | CONFIRMADO el hecho; lo de MIROVA, SIN DATO | ⚠️ **S190 (`experiments/_s190_d36/INFORME.md` §3):** la mutación de 45 a 30 km y la de 45 a 60 km ya se atrapan (`tests/test_mirova_modis_codigo_s164.py::test_remuestreo_es_el_del_probe_del_censo`). Bajar sólo el radio con que se cuenta la cobertura (45 a 20 km): no lo atrapa ninguna de las 16 pruebas que importan la vía (457 casos). Texto anterior: SIN MEDIR; probable nulo dentro de la grilla (sus esquinas están a 35,4 km del centro), pero ninguna prueba atrapa la mutación de 45 a 30 km (`experiments/_s164_modis_codigo/verificador/INFORME.md`) |
 | 4 | La matriz se arma con la fila 0 al norte | `remuestrear_grilla`, `celda_de`, `posicion_de` | Propia. `pipeline/grillas_mirova.yaml` dice que la grilla de MIROVA arma las filas de sur a norte, así que su matriz podría ir con la fila 1 al sur | Los tres | CONFIRMADO lo nuestro; que MIROVA vaya al revés, SOSPECHA | La detección no cambia (la máscara del ejemplo de OSF es idéntica volteada). El fondo sí, por el desempate de `fillmissing2`: ejemplo del Etna 9,890 contra 9,851 MW (-0,38 %); en 200 focos sintéticos cambia el 10 %, con un máximo de 0,44 %. La validación contra MATLAB (S163, 166 de 166) usó nuestras grillas y no prueba la orientación de MIROVA |
 | 5 | Tupungatito en VIIRS 750 usa la caja `sens`: todo el cuadro de 21 × 21 celdas con los umbrales sensibles | `pipeline/grillas_mirova.yaml` (`roi_v750: sens`), `caja_roi` | Lectura de V750-B, brazo B4c (`scripts/roi_v750b_a_grillas.py`, `experiments/_s162_v750b/`). El `.m` declara que la ROI se ajusta por volcán; la de MIROVA para Tupungatito es SIN DATO | VIIRS 750 | CONFIRMADO | Medido en V750-B; la caja `crater` de Cordón Caulle (#999) sí estaba declarada (ficha SDA v1.29) |
-| 6 | MODIS usa los números de VIIRS 750 del `.m`: Test 1 con NTI > -0,7 de noche y piso de dNTI fuera de la cumbre de 0,02, en vez de -0,8 y 0,01 de la Tabla 1 de Coppola et al. 2016a | `detectar_mirova` (umbrales fijos, los mismos para las tres familias) | El `.m` de VIIRS 750 (l. 177-199); no hay código de MIROVA para MODIS. D34 («Alcance») y `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §5 ponen -0,8 y 0,01 para MODIS | MODIS (en VIIRS 375 también, declarado en la ficha v1.16) | CONFIRMADO | Efecto contra la Tabla 1 SIN MEDIR. En el sustrato de la era K (píxel nativo, 8 vecinos, `experiments/_s158_audit/f4/04_cota_k1_y_sustrato_minimos.out`), en MODIS μ + 10σ < 0,02 en 51,6 % de las escenas y < 0,01 en 7,4 %: en la mitad de las escenas manda el piso de 0,02. De 96 positivos MODIS de ese sustrato, 1 tenía NTI > -0,8 y ninguno > -0,7. Sobre la grilla de la vía no está medido |
+| 6 | MODIS usa los números de VIIRS 750 del `.m`: Test 1 con NTI > -0,7 de noche y piso de dNTI fuera de la cumbre de 0,02, en vez de -0,8 y 0,01 de la Tabla 1 de Coppola et al. 2016a | `detectar_mirova` (umbrales fijos, los mismos para las tres familias) | El `.m` de VIIRS 750 (l. 177-199); no hay código de MIROVA para MODIS. D34 («Alcance») y `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §5 ponen -0,8 y 0,01 para MODIS | MODIS (en VIIRS 375 también, declarado en la ficha v1.16) | CONFIRMADO | ⚠️ **S190, medido (`experiments/_s190_d36/INFORME.md` §1, A/B pre-registrado, run 44016042341, 330 pasadas nocturnas de los 11 Tier A desde el 2026-03-01):** sobre la grilla de la vía el piso de 0,02 decide el umbral fuera de la cumbre en 5.872 de 6.006 escenas, y K1 no actúa (0 de 6.006 con alertas absolutas). Con los números de la Tabla 1 (-0,8 y 0,01): 62 de 62 noches con alerta protegida de MIROVA igual que hoy; 0 de 162 negativas publicadas en los dos brazos; el valor publicado cambia en 9 de 330 pasadas, todas de Nevados de Chillán, siempre hacia arriba (23,5 MW sobre 936,2), casi todo por el piso (B2: 8 pasadas, 21,7 MW); la razón contra MIROVA en la misma pasada pasa de 1,013 a 1,027 (\|log\| 0,130 a 0,134; Chillán 0,108 a 0,145). Regla pre-registrada: «medir más» (cambia 5,8 % de las pasadas con alerta, el corte era 2 %). Recomendación posterior: no adoptar la Tabla 1; acercarse al paper no nos acerca a lo que MIROVA publica. Texto anterior: Efecto contra la Tabla 1 SIN MEDIR. En el sustrato de la era K (píxel nativo, 8 vecinos, `experiments/_s158_audit/f4/04_cota_k1_y_sustrato_minimos.out`), en MODIS μ + 10σ < 0,02 en 51,6 % de las escenas y < 0,01 en 7,4 %: en la mitad de las escenas manda el piso de 0,02. De 96 positivos MODIS de ese sustrato, 1 tenía NTI > -0,8 y ninguno > -0,7. Sobre la grilla de la vía no está medido |
 
 **Otras diferencias de la vía con MIROVA que tampoco estaban registradas** (misma auditoría):
 
@@ -3645,7 +3645,7 @@ el efecto no se ha medido.
   como la del alertado más lejano medida desde el centro de su grilla (`docs/audit_s139/DISTANCIA_MIROVA_VS_TIF.md`).
   CONFIRMADO. En MODIS el centroide y el alertado más lejano difieren más de 1 km en 51 de 472 records con alerta. La
   clase coincide con la de MIROVA en 98,7 % (D8').
-- **Escalón de cenit.** Sobre 50° de cenit, MIROVA publica en VIIRS 750 la mitad del VRP de su propio código (0,51) en
+- **Escalón de cenit.** ⚠️ **S190 (`experiments/_s190_d36/INFORME.md` §2):** desde que corre la vía, sobre 50° nuestra razón contra MIROVA en VIIRS 750 es 0,996 hasta 20 MW (39 pares) y 0,999 de 20 a 100 MW (12 pares), pero eso no prueba que MIROVA haya dejado el escalón: en el OSF v2.5 actúa en 0,9 % de las filas de 20 a 100 MW y en 55 % y 98,5 % sobre 100 y 500 MW, y no hemos tenido ningún par oblicuo de 100 MW o más (tampoco desde 2025-02-15). Sigue SOSPECHA; las 3 preguntas de `docs/MISSION.md` dan NO, así que no se implementa; lo decide el primer evento oblicuo grande con valor de MIROVA en la misma pasada. Texto anterior: Sobre 50° de cenit, MIROVA publica en VIIRS 750 la mitad del VRP de su propio código (0,51) en
   el 24 % de las filas del OSF v2.5 (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §2, F6); la vía no lo reproduce porque
   está fuera del `.m`. CONFIRMADO en esa data; que siga en el NRT de MIROVA, SOSPECHA.
 - **Día o noche.** La vía decide `dayflag` con el cenit solar del píxel más cercano al centro de la grilla y el almacén
@@ -3660,5 +3660,5 @@ el efecto no se ha medido.
 - **Pasada válida sin alerta.** Se guarda con `vrp_mw` 0,0; el código de MIROVA devuelve NaN y su README pide no leerlo
   como emisión cero. Las escenas que la vía no pudo medir ya se separan (`motivo_vacio`, ficha SDA v1.27 y v1.30).
 
-**Estado.** ABIERTA, documental. Lo siguiente es medir el costo de los puntos 1, 2 y 6 antes de proponer un cambio
+**Estado.** ⚠️ **S190:** costo de los puntos 1, 2, 3 y 6 y del escalón medido en `experiments/_s190_d36/INFORME.md` (veredictos: punto 6, no adoptar la Tabla 1, pre-registro «medir más»; escalón, no implementar y medir en el primer evento oblicuo grande; puntos 1 a 3, sin alertas perdidas atribuibles). Ningún cambio de producción. Texto anterior: ABIERTA, documental. Lo siguiente es medir el costo de los puntos 1, 2 y 6 antes de proponer un cambio
 (A116; bloque de arranque S186, §b.6).

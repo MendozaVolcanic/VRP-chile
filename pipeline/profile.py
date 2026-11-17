@@ -487,7 +487,7 @@ LOCAL_CLUSTER_MAG_MIN_CORONA: int = int(_p.get("local_cluster_mag_min_corona", 4
 # un anillo fijo [1,5-3] km al cráter (TEST1_INTERMEDIATE_BG_RING_KM) mientras su ROI
 # es el disco de 3 km (TEST1_ROI_KM): el anillo es el 75 % del área que mide, así que
 # cada píxel se compara contra la media de sus propios tres cuartos exteriores y el
-# clip a cero de process_viirs.py:1729 suma la mitad de arriba del ruido de esa misma
+# clip a cero de process_viirs.py:1732 suma la mitad de arriba del ruido de esa misma
 # corona. Coppola 2016a Eq.6 dice que L4bk sale de la media de los píxeles que RODEAN
 # al clúster activo, que por construcción no contiene a los medidos.
 # Flag propio del sensor (alcance acotado a VIIRS375 por decisión de Nicolás, S126),

@@ -466,7 +466,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             (a diferencia de process_viirs.py I-band 375m). Para vols opt-in
             (Villarrica/PP/Lastarria/Chaiten/PCC), M-band sigue usando t_bg
             global del ring 5-25km mientras se implementa T1.5+ S73. TODO:
-            replicar `compute_local_background` block de process_viirs.py:856.
+            replicar `compute_local_background` block de process_viirs.py:859.
 
     Returns dict with VRP or None if granule does not cover volcano.
     """
@@ -507,7 +507,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         if volcan_nombre is not None and _MV.grilla_del_volcan(volcan_nombre) is not None:
             _rad = _MV.leer_radiancia_l1b(l1b_path)
             if _rad is None:
-                return None
+                # S190 (H03): sin M13 o M15 la pasada no se pudo medir; no es una noche sin calor. El error llega a
+                # run_pipeline como `error_procesamiento` y al revisor de errores del NRT, que lo pone rojo.
+                raise ValueError(f"{l1b_path.name}: L1B sin la banda requerida por la vía código MIROVA: "
+                                 f"{', '.join(_MV.bandas_ausentes_l1b(l1b_path, ('M13', 'M15')))}")
             _lat, _lon, _ang = _MV.leer_geo_l1b(geo_path)
             _rec = _MV.calcular_vrp_granulo(
                 _rad, _lat, _lon, _ang, volcan_nombre,
@@ -1347,7 +1350,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             # S95 (A45): gap A07: el path Test1 calculaba la magnitud pero dejaba
             # anomaly_pixels=[] vacío → bloqueaba F5' display y rompía el mapa de
             # píxeles del dashboard para records VIIRS750 pure-Test1. Espejo del fix
-            # S94 (PR #294) en process_viirs.py:1486. Poblar desde t1_vrp_2d (los
+            # S94 (PR #294) en process_viirs.py:1489. Poblar desde t1_vrp_2d (los
             # mismos píxeles que ya alimentan pc.vrp_mw). NO cambia detección ni
             # magnitud: solo serializa píxeles ya calculados.
             anomaly_pixels = build_anomaly_pixels(t1_vrp_2d, lat, lon, dist, bt)
