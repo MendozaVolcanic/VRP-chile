@@ -66,3 +66,11 @@ uno por uno con reintentos (`bajar_trozos.sh`).
 
 Nicolás autorizó despacharlas en cadena («Sí, despacha 3 a 7», 2026-11-16). Tanda 3 despachada 2026-11-16 16:22 UTC
 (run 43906817147).
+
+## Retiro de Putana y OlcaParuma (D1, opción 1a, 2026-11-17)
+
+La lista del sistema son los 43 de la RNVV (decisión de Nicolás, 2026-11-17 ~00:20 UTC); Putana (tanda 2) y OlcaParuma
+(tanda 1) no están en ella. S190 los dejó con `active: false` en `volcanoes.yaml`, borró sus `data/historia_34/` y
+`data/sombra_34/`, los sacó de la matriz de `sombra-34.yml` y del tablero. Sus `.json.gz` siguen en `union/`, pero
+`aplicar_historia_34.py` ya no los escribe (`INACTIVOS`). Respaldo de los cuatro JSON borrados:
+`D:/vrp-trabajo/temporales/s189/respaldo_d1_rnvv/` (fuera del repo). Desde aquí las tandas cubren 32 volcanes.
