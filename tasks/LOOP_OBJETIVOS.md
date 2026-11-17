@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 18:10 UTC (S190): PR 2 y 3 de Codex (H03, H04) en main con «mergea»; #1040 cerrado; W2 diurno reparada
+- **Mergeados con orden explícita de Nicolás** («Mergea ambos», respuesta a «¿Mergeo #1041 y #1042?»; tag defensivo `pre-s190-codex-pr2-pr3` en el remoto): #1041 (17:50, `d9c72ffbe`, ficha v1.37, H03 banda ausente en el L1B VIIRS deja el NRT en rojo) y #1042 (18:05, `61e3e3d54`, ficha v1.38, H04 techo de BT por sensor, 634 K en VIIRS 750). Cada uno con main unido, ficha numerada al mergear, CI verde y `--match-head-commit`. En la fila v1.35 se marcó «≤ 500 K» como corregido en v1.38, con el texto viejo conservado (A113). Pendiente declarado de #1042: el Planck inverso de la radiancia M13 máxima es SIN DATO; un píxel saturado que invierta apenas sobre 634 K se sigue anulando. El margen se fija desde la especificación de NASA, no a ojo.
+- **#1040 cerrado**: era el rojo de COBERTURA de W2 del A/B diurno (run 44032909508; timeouts de CMR 07:14 a 07:24 UTC). La sesión diurna reparó Láscar y Villarrica (run 44099659256): 2.132 noches por brazo, 0 faltan, 0 sobran. W3 corre (44099736902). Veredicto espera R-W7 de Nicolás.
+- **Tanda 3** (run 44037264576): 124 de 166 verdes a las 17:25, 5 rojos de CMR en DescabezadoGrande, resto en cola. Se relanzan los rojos al terminar; la cadena no despacha la tanda 4 hasta entonces.
+- **Codex ronda 2** (local_cc05c1b3): consolidador probado; F7-B y el resto de E2 parten a las 19:17 UTC, luego verificador e informe.
+
 ### 2026-11-17 14:05 UTC (S190): cinco PR de las sesiones hijas en main; A45 de Nicolás para los PR 2 y 3 de Codex
 - **Mergeados** (merge commit, `--match-head-commit`, CI verde sobre main actualizado): #1033 (10:49, guarda de geometría), #1038 (10:53, ficha v1.34, reintento de ReadTimeout en CMR), #1036 (11:10, cobertura honesta), #1037 (11:28, ficha v1.35, tope de publicación) y #1039 (14:01, ficha v1.36, D36). La fila de #1039 venía sin la columna de trazabilidad y numerada v1.34: se completó y renumeró al mergear (el informe lo dice).
 - **Instrumento**: `D:\vrp-trabajo\temporales\s190\mergear_verdes.sh` v1 se saltó #1033 porque `gh pr checks --watch` volvió al instante con checks en pending; v2 sondea cada 2 min, y v3 espera si GitHub deja el estado en UNKNOWN tras otro merge (le pasó a #1036 y a #1037; cada uno se unió con main y repitió el CI).
