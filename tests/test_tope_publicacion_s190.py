@@ -2,7 +2,7 @@
 """S190 (hallazgo H01 de la auditoría de Codex): el tablero no borra una erupción grande que el almacén conservó.
 
 POR QUÉ. `pipeline/store.py::_apply_sanity_cap` discrimina por CAUSA y no por magnitud: sobre el tope de cordura
-de 50.000 MW, si la temperatura de brillo es creíble (t_max_k bajo store.techo_bt_k: 634 K en VIIRS 750, 500 K en el resto) conserva la VRP y marca
+de 50.000 MW, si la temperatura de brillo es creíble (t_max_k bajo store.techo_bt_k: 683 K en VIIRS 750 desde S190 techo M13, antes 634 K; 500 K en el resto) conserva la VRP y marca
 `vrp_exceeds_sanity_cap: true`, porque 50 GW está dentro de lo físicamente posible (el récord documentado por MIROVA
 ronda los 70 GW). Si la temperatura es imposible (saturación) anula la VRP. Pero las funciones del tablero
 (`mirovaEqVrp` y `mirovaEqVrpCore` en index, diario y mosaico) y `pipeline/audit_metrics.py::mirova_eq_vrp`

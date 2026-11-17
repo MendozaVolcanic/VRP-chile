@@ -67,7 +67,7 @@ def _cap(v, exceeds_sanity_cap=False):
     """0 por encima del cap, igual que el frontend (`> cap`, no `>=`), salvo record marcado.
 
     POR QUÉ (S190, H01): `store._apply_sanity_cap` conserva sobre el cap una VRP con BT creíble
-    (bajo `store.techo_bt_k`: 634 K en VIIRS 750, 500 K en el resto) y la marca `vrp_exceeds_sanity_cap: True` para no borrar una erupción grande; las
+    (bajo `store.techo_bt_k`: 683 K en VIIRS 750 desde S190 techo M13, antes 634 K; 500 K en el resto) y la marca `vrp_exceeds_sanity_cap: True` para no borrar una erupción grande; las
     3 copias del frontend la muestran. Sólo el booleano True exime (paridad con `!== true` del JS).
     Guard: tests/test_tope_publicacion_s190.py
     """

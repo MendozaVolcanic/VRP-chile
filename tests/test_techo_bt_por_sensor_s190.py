@@ -15,6 +15,13 @@ magnitud y la marca. (2) Sobre 634 K en VIIRS 750 se sigue anulando. (3) MODIS n
 cambia (500 K): su techo propio queda SIN DATO para la temperatura que da la vía (ver la constante en store.py).
 (5) El 634 de store.py es el mismo número que el del lector de bandas M; si uno cambia, la prueba lo dice.
 
+⚠️ S190 (techo M13, `experiments/_s190_techo_m13/HALLAZGO.md`): el 634 K es el Tmax de ESPECIFICACIÓN de M13, no lo
+más alto que mide. El L1B codifica hasta DN 65527 (escala 0,008088269, offset 0,00108056: 530,0 W m-2 sr-1 um-1,
+VIIRS L1B UserGuide Aug 2021 p. 23), que la vía convierte en 666,3 K; la LUT oficial de M13 llega a 665,9161 K (misma
+página) y el ATBD radiométrico Rev C (Tabla 17, p. 80; definición en p. 81) da 683 K como la más alta detectable. El techo del almacén
+pasa a 683 K: (2) ahora es «sobre 683 K se anula» y (5) ya no exige igualdad con el lector de la guardia K, que
+sigue en 634 K. El texto de arriba se conserva (A113).
+
 LAS DOS PREGUNTAS DEL INSTRUMENTO. ¿Puede dar rojo? Sí: sin el arreglo (1) y la escena sintética de 550 K fallan por
 aserción (el almacén las anula). Controles que no pueden pasar por casualidad: (2) y (3) anulan, (4) marca sin anular.
 """
@@ -47,15 +54,17 @@ def test_v750_bajo_634_k_se_conserva_y_se_marca(sensor):
     assert "discarded_reason" not in r, r
 
 
-def test_v750_justo_en_634_k_se_conserva():
-    """Borde: el TMAX del detector es medible (`>` y no `>=`); 634,0 K no es imposible."""
-    r = _rec("VIIRS_NOAA20_750", 634.0)
+@pytest.mark.parametrize("t", [634.0, 640.0, 655.0, 666.3, 683.0])
+def test_v750_hasta_683_k_se_conserva(t):
+    """Borde: 683 K es la más alta detectable del ATBD (`>` y no `>=`); entre 634 y 666,3 K hay píxeles M13 que el
+    L1B sí puede entregar (S190, techo M13)."""
+    r = _rec("VIIRS_NOAA20_750", t)
     store._apply_sanity_cap(r)
     assert r["vrp_mw"] == GW60 and r.get("vrp_exceeds_sanity_cap") is True, r
 
 
-@pytest.mark.parametrize("t", [634.01, 650.0])
-def test_v750_sobre_634_k_se_anula(t):
+@pytest.mark.parametrize("t", [683.01, 700.0])
+def test_v750_sobre_683_k_se_anula(t):
     r = _rec("VIIRS_NOAA20_750", t)
     store._apply_sanity_cap(r)
     assert r["vrp_mw"] == 0.0 and r["primary_cluster"]["vrp_mw"] == 0.0, r
@@ -89,8 +98,21 @@ def test_sin_temperatura_se_sigue_anulando():
     assert r["vrp_mw"] == 0.0
 
 
-def test_techo_m13_es_el_del_lector_de_bandas_m():
-    assert store.techo_bt_k("VIIRS_NOAA20_750") == process_viirs_mod.BT_LUT_MAX_MBAND["M13"] == 634.0
+def test_techo_m13_es_el_del_atbd_y_no_el_de_la_guardia():
+    """S190: el almacén usa 683 K (ATBD Rev C, Tabla 17); la guardia K sigue descartando desde su 634 K de
+    especificación. Si alguien los vuelve a igualar, la prueba lo dice."""
+    assert store.techo_bt_k("VIIRS_NOAA20_750") == 683.0
+    assert process_viirs_mod.BT_LUT_MAX_MBAND["M13"] == 634.0
+
+
+def test_techo_m13_no_anula_el_dn_maximo_valido_del_l1b():
+    """El píxel M13 más brillante que el L1B puede codificar (DN 65527, escala y offset de la guía L1B de agosto de
+    2021, p. 23) pasa por la misma inversión de Planck de la vía y queda bajo el techo. ¿Puede dar rojo? Sí: con el
+    techo de 634 K falla (666,3 > 634)."""
+    l_max = 65527 * 0.008088269 + 0.00108056
+    t_max = float(MV.radiancia_a_temperatura(np.array([l_max]), MV.LAMBDA_M13)[0])
+    assert 666.0 < t_max < 667.0, t_max
+    assert t_max <= store.techo_bt_k("VIIRS_NOAA20_750"), t_max
     assert store.techo_bt_k("MODIS_AQUA") == store.techo_bt_k("VIIRS_NOAA20") == 500.0
     assert store.techo_bt_k("") == 500.0  # sensor desconocido: el techo de siempre
 

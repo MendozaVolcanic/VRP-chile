@@ -82,7 +82,15 @@ BT_PHYSICAL_MAX_K = 500.0
 # pero la vía calcula t_max invirtiendo Planck sobre la radiancia en la longitud de onda central, no con la LUT, y
 # cuánto puede pasar de 361,77 K un píxel I04 saturado es SIN DATO; bajar el techo sin medirlo podría anular una
 # erupción real. Sensor desconocido: 500 K, como antes.
-BT_PHYSICAL_MAX_K_VIIRS750 = 634.0
+# ⚠️ S190 (techo M13, experiments/_s190_techo_m13/HALLAZGO.md; A45, Nicolás 2026-11-17 «Sí, prepáralo»): el 634 K de
+# arriba es el Tmax de ESPECIFICACIÓN de M13 (ATBD radiométrico JPSS Rev C, Tabla 2), no lo más alto que el L1B
+# entrega. POR QUÉ 683: el L1B codifica M13 hasta DN 65527 (escala 0,008088269, offset 0,00108056 → 530,0
+# W m-2 sr-1 um-1; VIIRS L1B UserGuide Aug 2021, p. 23), que la vía invierte por Planck a 666,3 K; la LUT oficial de
+# M13 llega a 665,9161 K (misma página). Con 634 K, un píxel válido entre 634 y 666 K se anulaba. FUENTE del 683: el
+# mismo ATBD, Tabla 17, p. 80, «Highest Detectable EBBT» de M13 (1,5 veces la señal de Tmax, p. 81): sobre eso no hay
+# píxel del L1B posible. Prueba: tests/test_techo_bt_por_sensor_s190.py. La guardia K
+# (process_viirs_mod.py::BT_LUT_MAX_MBAND) sigue en 634 K. El texto de arriba se conserva (A113).
+BT_PHYSICAL_MAX_K_VIIRS750 = 683.0
 
 
 def techo_bt_k(sensor) -> float:
