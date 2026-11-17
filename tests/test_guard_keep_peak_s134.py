@@ -11,7 +11,7 @@ este archivo. Así el arreglo no puede entrar en silencio ni el defecto volver s
 
 Fenómeno (F3 H1, verificado gravedad 5): en un cono nevado el píxel más caliente en MIR de un
 disco de 3 km alrededor de la cumbre es el borde del disco, no el cráter (A69). El filtro
-contextual del Test 1 con `keep_peak` (pipeline/process_viirs.py:1777-1786) conserva sólo ese
+contextual del Test 1 con `keep_peak` (pipeline/process_viirs.py:1780-1789) conserva sólo ese
 píxel cuando la máscara dNTI está vacía, y el ancla honesta (pipeline/anchor.py:89) lo publica
 como summit a 0,0 km con la magnitud de un píxel que está bajo el fondo global.
 

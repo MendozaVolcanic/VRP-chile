@@ -1584,7 +1584,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             # S95 (A45): gap A07: el path Test1 calculaba la magnitud pero dejaba
             # anomaly_pixels=[] vacío → bloqueaba F5' display y rompía el mapa de
             # píxeles del dashboard para records MODIS pure-Test1. Espejo del fix
-            # S94 (PR #294) en process_viirs.py:1486. Poblar desde t1_vrp_2d (los
+            # S94 (PR #294) en process_viirs.py:1489. Poblar desde t1_vrp_2d (los
             # mismos píxeles que ya alimentan pc.vrp_mw). NO cambia detección ni
             # magnitud: solo serializa píxeles ya calculados.
             anomaly_pixels = build_anomaly_pixels(t1_vrp_2d, lat, lon, dist_etiqueta, bt_mir)

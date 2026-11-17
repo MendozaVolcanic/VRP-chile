@@ -130,7 +130,7 @@ def test_local_kernel_with_all_nan_neighbors_falls_back_to_global_bg():
     """Si compute_local_background retorna NaN (todos los vecinos NaN), el
     pipeline MODIS debe fallback al t_bg global — no propagar NaN al VRP.
 
-    Replica logica process_viirs.py:797-799:
+    Replica logica process_viirs.py:800-802:
         t_bk_arr = np.where(np.isnan(t_bk_arr), t_bg_i04, t_bk_arr)
     """
     bt_grid = np.full((3, 3), np.nan)
