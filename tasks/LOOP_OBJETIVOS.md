@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 05:10 UTC (S190): autorización amplia de Nicolás para la noche y política de decisiones de S190
+- **Nicolás (≈05:05 UTC)**: «tú también puedes auditar esas cosas, me iré a dormir dejaré omitir permisos, recuerda que puedes ir tomando decisiones para alcanzar nuestros objetivos, todo debe quedar anotado, tenemos tokens y tiempo de sobra».
+- **Política que adopta S190 con esa autorización** (cada decisión se anota aquí con su evidencia):
+  - SÍ decide y mergea (merge commit con `--match-head-commit`, nunca squash) cuando el PR tiene checks verdes, `mergeStateStatus=CLEAN` y verificador de contexto limpio sin bloqueos: documentos, instrumentos y pruebas; el retiro D1 de Putana y OlcaParuma (decisión ya suya); las uniones de tandas de los 34 con 0 huecos y 0 caídas a K, y su aplicación (H3); la corrección de coordenadas de los 34 si la fuente es clara.
+  - NO mergea de noche lo que cambia detecciones del NRT de los 11 (encender el día, cambios A45 en `pipeline/process_*.py`, `store.py` o `mirova_equivalent.yaml` de producción): queda listo con recomendación para la mañana, porque un cambio de producción sin nadie mirando no se puede vigilar en el tablero.
+- **Adenda V diurna**: sellada por Nicolás en la sesión `s190-diurno` (tag `s190-diurno-via-sellado`, commit `4ad9746af`, 04:43 UTC). La sesión arregló en `pipeline/diurno.py` el filtro que tiraba los gránulos diurnos MODIS aunque su flag estuviera encendido (rama `s190-diurno`, `3962b8187`).
+- **Auditoría de falsos positivos de píxel aislado** (MacaCay V750 2026-11-15 05:36 y conteo en los 45): subagente de S190, informe en `D:\vrp-trabajo\temporales\s190_fp\INFORME.md`.
+- **Codex**: las preguntas de MacaCay, geometría y «cómo auditar todas las decisiones» quedaron en `D:\codex-vrp\ENCARGO_ADICIONAL.txt`; Codex sigue en su primer turno.
+
 ### 2026-11-17 04:55 UTC (S190): Nicolás se va a dormir; loop autónomo; S190 pasa a sesión principal; sesiones de día y coordenadas
 - **Nicolás (≈04:50 UTC)**: «quiero que sigas trabajando en loop y vigilando las otras sesiones, no es necesario que me pidas permiso para todo, porque las pruebas irán descartando errores». Lectura de S190: avanzar sin preguntar en todo lo reversible (sesiones, PR, verificadores, relanzar rojos, aplicar tandas ya mergeadas por H3); merges a main, A45 y sellos de pre-registro siguen esperando su frase, porque son reglas suyas explícitas y no las nombró.
 - S190 movida a sesión principal (antes anidada en `local_4c1a9a18`); sus hijas siguen anidadas.
