@@ -1,0 +1,285 @@
+name: "A/B S190: el dia con la via codigo MIROVA (adenda V, issue #813)"
+
+# POR QUE EXISTE ESTE ARCHIVO (S190, adenda V sellada: experiments/_s190_diurno/ADENDA_VIA.md). Es copia de
+# reproc-s151-ab-diurno.yml con lo minimo cambiado: nombre, grupo de concurrencia, prefijo de artefactos, rama y
+# directorio de salida, textos y defaults de las entradas (perfiles _s190_*, prueba de humo de la adenda §5), la linea
+# FLAGS_BRAZO (agrega los tres flags de la via y deja los dos del dia), el assert del brazo (la via en los tres sensores
+# y los dos flags del dia segun el brazo) y el conteo de cobertura (contar_pasadas_via.py, que exige dia con dayflag 1
+# en MODIS, VIIRS 375 y VIIRS 750). Grupo propio porque GitHub guarda UN solo run pendiente por grupo de concurrencia, y
+# los otros A/B tienen el suyo.
+#
+# EL FENOMENO. De dia el canal de 4 um suma a la emision termica la luz del Sol reflejada. MIROVA mira de dia con
+# umbrales mas altos y descarta la escena con reflejo bajo 12 grados. Produccion corre la via en los tres sensores, y el
+# detector de la via ES el .m de MIROVA, con su rama diurna; lo que la apaga son tres compuertas previas (descarga,
+# salto del granulo y store). Este A/B mide si abrirlas con los flags del perfil comete menos errores que hoy.
+#
+# BRAZOS (perfiles aislados, cada uno con su data_subdir; A47):
+#   _s190_ab_diurno_via_control  produccion tal cual (la via en los tres sensores, dia apagado)
+#   _s190_ab_diurno_via_on       el control mas enable_daytime_viirs y enable_daytime_modis, y nada mas
+# run_pipeline.py corre SIN --no-night-filter en los dos: lo que se prueba es que los flags abren por si solos las
+# compuertas de fetch.py, run_pipeline.py y store.py (A118; trampa de S92).
+#
+# NO DESPACHAR sin la adenda sellada y desde un tag del commit del instrumento (adenda §6): una ventana por despacho,
+# brazos y control EXPLICITOS. Los defaults son los de la prueba de humo (adenda §5: un volcan, tres dias de W7).
+#
+# NO COMMITEA A main. Cada brazo escribe en su data_subdir aislado; las salidas salen por dos caminos, porque los
+# artefactos caducan a los 90 dias: (a) artefacto por job, (b) rama propia de la corrida, s190-ab-diurno-via/<run_id>,
+# con los archivos bajo experiments/_s190_diurno/salidas/<run_id>/ (<brazo>/<volcan>.json y
+# logs/<brazo>_<volcan>.log, el arbol que lee evaluar_diurno_via.py con --raiz).
+#
+# A43: la clave "on" va entre comillas (Norway Problem de YAML 1.1).
+# A71: se autentica SOLO con EARTHDATA_TOKEN. Sin token, el job falla al instante.
+# A15: timeout >= 1,3 veces la duracion esperada y por debajo del tope duro de 6 h de GitHub; una ventana larga se
+#      parte en mitades (como hizo S163).
+"on":
+  workflow_dispatch:
+    inputs:
+      preregistro_aprobado:
+        description: "Escribe si SOLO con experiments/_s190_diurno/ADENDA_VIA.md sellada por Nicolas (issue #813)"
+        required: true
+        default: "no"
+      start:
+        description: "Inicio YYYY-MM-DD (ventanas W2 a W7 de la adenda V, §2; default: prueba de humo, §5)"
+        required: true
+        default: "2026-11-10"
+      end:
+        description: "Fin YYYY-MM-DD inclusive (ventanas W2 a W7 de la adenda V, §2)"
+        required: true
+        default: "2026-11-12"
+      vols:
+        description: 'Lista JSON de volcanes (los 11 Tier A en la evaluacion; uno en la prueba de humo). La lista corta sirve para REPETIR un job que quedo con pasadas de menos por un corte de NASA'
+        required: true
+        default: '["NevadosDeChillan"]'
+      brazos:
+        description: 'Lista JSON de brazos (control y diurno)'
+        required: true
+        default: '["_s190_ab_diurno_via_control","_s190_ab_diurno_via_on"]'
+      control:
+        description: 'Brazo que hace de control al contar cobertura nocturna en recolectar'
+        required: true
+        default: "_s190_ab_diurno_via_control"
+
+# No entra al grupo push-main: este workflow no pushea a main. Se serializa consigo mismo, en un
+# grupo PROPIO y distinto de los otros A/B: GitHub guarda un solo run pendiente por grupo.
+concurrency:
+  group: s190-ab-diurno-via
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reproc:
+    if: github.event.inputs.preregistro_aprobado == 'si'
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      # Un volcan y un brazo por job, cada uno escribiendo en su propio data_subdir: dos procesos
+      # sobre el mismo directorio corrompen los JSON (A47). max-parallel 3 (adenda V §6): el tope
+      # es de 20 jobs concurrentes y los runners se comparten con el NRT y las tandas.
+      max-parallel: 3
+      matrix:
+        volcano: ${{ fromJSON(github.event.inputs.vols) }}
+        profile: ${{ fromJSON(github.event.inputs.brazos) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Credenciales presentes (un secreto ausente se resuelve a string vacio, no a error)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio. Sin token no se mide nada, y el login por usuario y clave con la credencial vencida bloquea la cuenta (A71). No se reintenta."
+            exit 1
+          fi
+          echo "credenciales presentes"
+
+      - name: Dependencias
+        run: |
+          set -euo pipefail
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj
+
+      - name: El brazo LEE lo que declara (y escribe donde declara)
+        env:
+          VRP_PROFILE: ${{ matrix.profile }}
+          # S154: el brazo diurno es el que NO es control (antes el nombre del brazo diurno estaba fijo en el
+          # assert, y el A/B sobre K usa otros perfiles: _s154_ab_diurno_k_*)
+          ARM_CONTROL: ${{ github.event.inputs.control }}
+        run: |
+          set -euo pipefail
+          python -c "import os, pipeline.profile as p; from pipeline import diurno; \
+            print('brazo', p.PROFILE_NAME, \
+            '| diurno_viirs', p.ENABLE_DAYTIME_VIIRS, \
+            '| diurno_viirs_vivo', diurno.flag_viirs_diurno(), \
+            '| filtro_nocturno_viirs', diurno.aplica_filtro_nocturno(True, 'VIIRS_SNPP'), \
+            '| filtro_nocturno_modis', diurno.aplica_filtro_nocturno(True, 'MODIS_AQUA'), \
+            '| diurno_modis', p.ENABLE_DAYTIME_MODIS, \
+            '| via', p.ENABLE_MODIS_CODIGO_MIROVA, p.ENABLE_V375_CODIGO_MIROVA, p.ENABLE_V750_CODIGO_MIROVA, \
+            '| test1_path', p.ENABLE_TEST1_PATH, \
+            '| sensores', p.SENSOR_MODIS, p.SENSOR_VIIRS_375, p.SENSOR_VIIRS_750, \
+            '| subdir', p.DATA_SUBDIR); \
+            assert p.DATA_SUBDIR == p.PROFILE_NAME, 'el brazo escribiria fuera de su subdir'; \
+            assert p.ENABLE_DAYTIME_VIIRS == (p.PROFILE_NAME != os.environ['ARM_CONTROL']), 'el flag diurno no es el que declara el brazo'; \
+            assert p.ENABLE_DAYTIME_MODIS == (p.PROFILE_NAME != os.environ['ARM_CONTROL']), 'el flag diurno de MODIS no es el que declara el brazo'; \
+            assert diurno.aplica_filtro_nocturno(True, 'MODIS_AQUA') == (p.PROFILE_NAME == os.environ['ARM_CONTROL']), 'el filtro nocturno de MODIS no sigue al flag'; \
+            assert p.ENABLE_MODIS_CODIGO_MIROVA and p.ENABLE_V375_CODIGO_MIROVA and p.ENABLE_V750_CODIGO_MIROVA, 'el brazo no corre la via en los tres sensores'"
+
+      - name: Reproceso del brazo
+        env:
+          # Solo el token (A71). Ni EARTHDATA_USERNAME ni EARTHDATA_PASSWORD entran al entorno.
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          # Las entradas viajan por env y NO se interpolan dentro del run (S128).
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_PROFILE: ${{ matrix.profile }}
+          ARM_VOLCANO: ${{ matrix.volcano }}
+        timeout-minutes: 300
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          mkdir -p logs
+          # La primera linea del log deja escrito que flags LEYO este job, para que el evaluador
+          # compruebe el cableado de cada brazo desde el artefacto (A89; I1 de la adenda V §3.2).
+          # ENABLE_DAYTIME_VIIRS y ENABLE_DAYTIME_MODIS son la palanca; los tres de la via, verdaderos en los dos.
+          VRP_PROFILE="$ARM_PROFILE" python -c "import json, pipeline.profile as p; print('FLAGS_BRAZO ' + json.dumps({k: getattr(p, k) for k in ('PROFILE_NAME', 'DATA_SUBDIR', 'ENABLE_MODIS_CODIGO_MIROVA', 'ENABLE_V375_CODIGO_MIROVA', 'ENABLE_V750_CODIGO_MIROVA', 'ENABLE_DAYTIME_VIIRS', 'ENABLE_DAYTIME_MODIS', 'ENABLE_TEST1_PATH', 'ENABLE_TESTS_23_PROSE_BRANCH', 'ENABLE_MODIS_B22_PRIMARY', 'ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER', 'PATH_D_ONLY_CAP_MW', 'ENABLE_TESTS_23_NO_BT_GATE_VIIRS375', 'ENABLE_VENT_ANCHORED_CLUSTERING', 'ENABLE_ROI1_BOX_PAPER')}))" | grep '^FLAGS_BRAZO ' > "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
+          # SIN --no-night-filter (adenda V §1): el modo nocturno queda ON y son los flags del perfil
+          # los que abren el dia para VIIRS y MODIS. El log entero (busqueda, filtro nocturno, SKIP daytime,
+          # errores y lineas de proceso) va al artefacto: lo usa la cobertura diurna (nulo 4).
+          python scripts/run_pipeline.py \
+            --profile "$ARM_PROFILE" \
+            --volcano "$ARM_VOLCANO" \
+            --start "$ARM_START" \
+            --end "$ARM_END" \
+            --overwrite 2>&1 | tee -a "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
+
+      - name: Subir el JSON del brazo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s190diurno-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: |
+            data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+            logs/${{ matrix.profile }}_${{ matrix.volcano }}.log
+          retention-days: 90
+          if-no-files-found: error
+
+  recolectar:
+    needs: reproc
+    if: always() && github.event.inputs.preregistro_aprobado == 'si'
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Dependencias minimas
+        run: pip install pyyaml numpy
+
+      - name: Bajar los artefactos de todos los brazos
+        uses: actions/download-artifact@v4
+        with:
+          pattern: s190diurno-*
+          path: recolectado
+          merge-multiple: true
+
+      - name: Ordenar por brazo
+        run: |
+          set -euo pipefail
+          mkdir -p salidas
+          # download-artifact con merge-multiple deja los JSON bajo data/<brazo>/<volcan>.json
+          if [ -d recolectado/data ]; then cp -r recolectado/data/. salidas/; fi
+          if [ -d recolectado/logs ]; then mkdir -p salidas/logs && cp -r recolectado/logs/. salidas/logs/; fi
+          find salidas -name '*.json' | sort | sed -n '1,200p'
+
+      - name: COBERTURA antes de mirar nada (A108; noche pareja, dia como se espera)
+        env:
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_CONTROL: ${{ github.event.inputs.control }}
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          # Compara las noches en las dos direcciones y exige dia con dayflag 1 en los tres sensores
+          # del brazo diurno y cero dia en el control (adenda V §5, prueba de humo).
+          CONTROL="salidas/${ARM_CONTROL}"
+          if [ ! -d "$CONTROL" ]; then
+            echo "::warning::el control ${ARM_CONTROL} no esta en esta corrida (relanzamiento parcial): la cobertura NO se conto aca, contarla en local antes de evaluar"
+            echo "COBERTURA NO CONTADA: el control ${ARM_CONTROL} no esta en esta corrida" | tee salidas/cobertura.txt
+            exit 0
+          fi
+          ARGS=""
+          for d in salidas/_*; do
+            if [ -d "$d" ] && [ "$d" != "$CONTROL" ]; then ARGS="$ARGS --brazo $d"; fi
+          done
+          python experiments/_s190_diurno/contar_pasadas_via.py \
+            --control "$CONTROL" \
+            --inicio "$ARM_START" --fin "$ARM_END" \
+            --out salidas/cobertura.json \
+            $ARGS 2>&1 | tee salidas/cobertura.txt
+
+      - name: Publicar las salidas en una rama propia de esta corrida
+        if: always()
+        env:
+          RAMA: s190-ab-diurno-via/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(ls -A salidas 2>/dev/null)" ]; then
+            echo "::error::no llego ninguna salida: no hay nada que publicar"
+            exit 1
+          fi
+          git checkout -b "$RAMA"
+          mkdir -p "experiments/_s190_diurno/salidas/${GITHUB_RUN_ID}"
+          cp -r salidas/. "experiments/_s190_diurno/salidas/${GITHUB_RUN_ID}/"
+          git add -f "experiments/_s190_diurno/salidas/${GITHUB_RUN_ID}"
+          git commit -m "S190 A/B diurno sobre la via (adenda V): salidas crudas de la corrida ${GITHUB_RUN_ID} (no toca main)"
+          # Reintento propio. Este workflow NO pushea a main y por eso no entra al grupo push-main.
+          # El guard G4 de tests/test_guard_declarado_vs_efectivo_s131.py detecta "git push" por
+          # texto: el reintento lo satisface, pero esta aca por su propia razon, que es que si el
+          # push se cae por red se pierde la unica copia durable (el artefacto caduca).
+          for attempt in 1 2 3 4 5; do
+            if git push origin "$RAMA"; then
+              echo "salidas en la rama $RAMA"
+              exit 0
+            fi
+            echo "push fallido, intento $attempt"
+            sleep $((attempt * 10))
+          done
+          echo "::error::no se pudo publicar la rama $RAMA en 5 intentos; queda el artefacto"
+          exit 1
+
+      - name: Subir tambien todo junto como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s190diurno-todo
+          path: salidas
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Guard declarado contra efectivo (al final, sobre el arbol con los perfiles nuevos)
+        if: always()
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          pip install pytest
+          python -m pytest tests/test_guard_declarado_vs_efectivo_s131.py -q 2>&1 | tee salidas/guard.txt
