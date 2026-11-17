@@ -425,10 +425,11 @@ def reset_transient_breakers():
 try:
     # requests.Timeout = base de ReadTimeout y ConnectTimeout; ConnectionError aparte.
     from requests.exceptions import Timeout as _Timeout, \
-        ConnectionError as _ReqConnErr
+        ConnectionError as _ReqConnErr, ReadTimeout as _ReadTimeout
     _CMR_SEARCH_ERRORS = (_Timeout, _ReqConnErr)
 except Exception:  # pragma: no cover — requests siempre presente
     _CMR_SEARCH_ERRORS = _CONNECT_ERRORS or (Exception,)
+    _ReadTimeout = ()
 
 
 # ---------------------------------------------------------------------------
@@ -905,6 +906,39 @@ def cese_cumplido(platform: str, date: datetime) -> datetime | None:
     return None
 
 
+# S190 POR QUÉ (issues #1027 y #1028, experiments/_s190_sombras/DIAGNOSTICO.md). La búsqueda por día encendía el
+# breaker al PRIMER ReadTimeout (S116) y la fecha entera quedaba sin buscar. El 2026-11-16, entre las 23:50 y las 00:30
+# UTC, CMR dio ReadTimeout sueltos a las dos sombras y al NRT: la búsqueda por ventana (S157), que reintenta una vez a
+# los 20 s, se recuperó en 3 de 3; la búsqueda por día, sin reintento, perdió el último día de Tupungatito y los VIIRS
+# de Putana y SanJose. A64: ReadTimeout (CMR acepta la conexión y responde lento) se reintenta; ConnectTimeout y
+# ConnectionError no. Un solo reintento, del mismo producto y versión: si también falla, el breaker se enciende como
+# antes, así que el costo extra está acotado a una espera y un intento por fecha y sigue en pie la garantía de S116
+# contra el cuelgue de Copahue (8 sensores por 60 s). Con el breaker apagado (VRP_CMR_BREAKER=0) no se reintenta:
+# comportamiento previo. Prueba: tests/test_sombra_cmr_s190.py.
+_CMR_DIA_ESPERAS_S = list(_VENTANA_ESPERAS_S)   # [0, 20]: la misma espera que la búsqueda por ventana
+
+
+def _buscar_dia_con_reintento(product_key, short_name, ver, bbox, date_str):
+    import time
+    for k, espera in enumerate(_CMR_DIA_ESPERAS_S):
+        if espera:
+            time.sleep(espera)
+        try:
+            return earthaccess.search_data(
+                short_name=short_name,
+                version=ver,
+                bounding_box=bbox,
+                temporal=(date_str, date_str),
+                count=_COUNT_POR_DIA,
+            )
+        except _CMR_SEARCH_ERRORS as e:
+            reintentable = (ENABLE_CMR_SEARCH_BREAKER and _ReadTimeout and isinstance(e, _ReadTimeout)
+                            and k < len(_CMR_DIA_ESPERAS_S) - 1)
+            if not reintentable:
+                raise
+            _diag(f"SEARCH_DIA_REINTENTO intento={k} [{product_key}] err={type(e).__name__}: {str(e)[:90]}")
+
+
 def search_granules(product_key: str, lat: float, lon: float,
                     radius_km: float, date: datetime) -> list:
     """
@@ -943,13 +977,7 @@ def search_granules(product_key: str, lat: float, lon: float,
     # S157: el orden vive en _intentos(), que comparte la búsqueda por ventana.
     for short_name, ver in _intentos(product_key):
         try:
-            results = earthaccess.search_data(
-                short_name=short_name,
-                version=ver,
-                bounding_box=bbox,
-                temporal=(date_str, date_str),
-                count=_COUNT_POR_DIA,
-            )
+            results = _buscar_dia_con_reintento(product_key, short_name, ver, bbox, date_str)
         except _CMR_SEARCH_ERRORS as e:
             # S116: CMR caído/lento → tripear el breaker para la corrida y
             # degradar a [] (no reintentar versiones ni quemar 60s × sensores).
