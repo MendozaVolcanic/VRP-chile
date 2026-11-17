@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 06:00 UTC (S190): MacaCay V750 del 11-15 es una escena partida entre gránulos; disco C: bajo
+- **Auditoría de falsos positivos de píxel aislado** (subagente con verificador limpio; `D:\vrp-trabajo\temporales\s190_fp\INFORME.md`, scripts al lado; leído de main `0d5f5ac6f`):
+  - MacaCay 2026-11-15 05:36 NOAA-20 V750: SOSPECHA fuerte de falso positivo. Pasó la prueba contextual (NTI 0,0142 contra 0,0072; ETI 0,0052 contra 0,0031) en la esquina de la caja sensible; el VRP es artefacto: `L_bk = 0` (fondo interpolado vacío) y 4,122 MW es la radiancia M13 entera de una celda a 282 K. El gránulo de 05:36 tiene 2.096 de 4.489 celdas sin dato; el tablero la publica (clase nula derivada a cumbre).
+  - La vía replica el .m, pero procesa un gránulo por vez (`process_viirs_mod.py:512`). En los 11 desde marzo: escena entera 343 de 378 alertas con fila de MIROVA tienen alerta; escena partida 0 de 11. MIROVA pone su fila a la hora del segundo gránulo en 183 de 282 pares partidos: SOSPECHA de que une gránulos.
+  - V750 de 1 píxel sin alerta en 375 del mismo satélite: 39 en los 11 (18 publicadas) y 46 en los 34 (12 publicadas). En los 11, MIROVA alertó 4 de las 21 comparables, todas bajo 1 MW y con magnitud parecida: la confirmación cruzada 375/750 va al laboratorio, no a la réplica.
+  - No hay records VIIRS de día en ningún conjunto (el día está cerrado, #813).
+- **Decisión S190**: propuesta la sesión «Escenas partidas entre gránulos: unir o callar» (tarjeta `task_4ea6874e`; el sistema no deja iniciarla desde un evento automático, queda para que Nicolás la inicie). Encender el arreglo en producción espera a Nicolás (política 05:10).
+- **Disco**: C: con 11 GB libres y `pagefile.sys` en 26,7 GB por varias suites a la vez. Turno global para la suite completa: `D:\vrp-trabajo\temporales\s190\suite_con_turno.sh` (cola de a una, temporales en D:); regla enviada a las seis sesiones que corren pruebas.
+
 ### 2026-11-17 05:10 UTC (S190): autorización amplia de Nicolás para la noche y política de decisiones de S190
 - **Nicolás (≈05:05 UTC)**: «tú también puedes auditar esas cosas, me iré a dormir dejaré omitir permisos, recuerda que puedes ir tomando decisiones para alcanzar nuestros objetivos, todo debe quedar anotado, tenemos tokens y tiempo de sobra».
 - **Política que adopta S190 con esa autorización** (cada decisión se anota aquí con su evidencia):
