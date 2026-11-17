@@ -186,7 +186,8 @@ persistencia?
 de cada volcán (zona A, el cráter), igual que producción fuera (zona B). Sólo la zona A cambia, así que lo que
 aparezca de más está, por construcción, donde el prior volcánico es alto.
 
-**Cambio respecto de S147.** Su parámetro natural era el multiplicador de sigma del criterio contextual de K. La vía
+**Cambio respecto de S147.** Su parámetro natural era el multiplicador de sigma del criterio contextual del detector de entonces (S147 es
+anterior a K). La vía
 «código MIROVA» tiene sus propios umbrales (K1, dNTI mínimo); cuál se modula en la zona A se decide al escribir el
 `writing-plans` del PR del perfil, leyendo `pipeline/mirova_v750_codigo.py`, y no lo afirmo aquí sin haberlo leído.
 Puyehue Cordón Caulle (inner de 20 km, casi dos tercios de la escena, S147 §9) queda fuera de la primera tanda.
