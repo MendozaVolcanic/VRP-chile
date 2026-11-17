@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-18 00:10 UTC (S190): PR #1044 con la unión de la tanda 3 (verificador limpio 6 de 6); #1028 cerrado
+- **#1044** (rama `s190-historia34-tanda3`, commit `4b036e282`): Antuco 6.718, CerroAzulQuizapu 6.497, DescabezadoGrande 6.499, LagunaDelMaule 6.643, NevadoDeLongavi 6.538 records; 626 días, 0 huecos; ensayo 32.895 nuevos, 0 tras el corte; 74 pruebas en verde. Verificador limpio (scripts propios sobre los 165 trozos crudos, `D:\vrp-trabajo\temporales\s190\verif_tanda3\verif.py`): 6 de 6 confirmadas, ningún defecto. Espera «mergea #1044»; después se aplica con tag `pre-historia-34-tanda3`.
+- **#1028 cerrado**: sombra-34.yml run 44182162221 en verde en el intento 2 (los 4 rojos del intento 1 eran HTML de CMR).
+- **Para pensar (no hecho):** las sombras quedan en rojo a nivel de run por una falla pasajera de CMR en un solo volcán, y eso abre el issue de alerta. Un reintento automático de los jobs caídos dentro del mismo workflow evitaría falsas alarmas; requiere decidir si vale el cambio.
+
 ### 2026-11-17 23:30 UTC (S190): tanda 3 limpia y tanda 4 despachada; siete hijas archivadas; #1027 cerrado; sombra de los 34 con rojos de CMR relanzados
 - **Tanda 3** (run 44037264576): el vigilante relanzó los 6 rojos de CMR a las 20:39 y la ronda 1 terminó con 0 rojos a las 23:25. La cadena `cadena_3a7_s190b.sh` vio el run limpio y despachó la **tanda 4** (Callaqui, Lonquimay, Tolhuaca, Sollipulli, Quetrupillan) a las 23:25:57. Bajada y unión de la tanda 3 en curso hacia `D:\vrp-trabajo\worktrees\s190-tanda3` (rama `s190-historia34-tanda3`).
 - **Sesiones hijas archivadas** (Nicolás: «archívalas si ya no les queda nada por hacer o algo que aportar»): las siete con PR mergeado y sin pendiente propio (s190-codex #1033, s190-d36 #1039, s190-sombras #1038, s190-coordenadas #1031, s190-escenarios-fp #1032, s190-l1b-ab #1030, s190-experimental #1029). **Quedan vivas** dos: s190-diurno (su cadena W3 sigue y el veredicto espera R-W7) y auditor-a-codex-ronda-2 (F7-B se puede reanudar en el mismo hilo de Codex si Nicolás decide seguir).
