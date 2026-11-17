@@ -71,6 +71,21 @@ def test_orden_cronologico_y_sin_claves_repetidas(tmp_path):
     assert fechas == sorted(fechas) and len(s["records"]) == 3
 
 
+def test_un_volcan_inactivo_no_se_escribe_aunque_este_en_la_union(tmp_path, monkeypatch):
+    """S190, D1 1a: Putana y OlcaParuma salieron (`active: false`) pero sus .json.gz siguen en la unión de las tandas
+    1 y 2. Una tanda siguiente no debe reponer su historia: el aplicador los salta y escribe a los demás."""
+    monkeypatch.setattr(A, "INACTIVOS", frozenset({"Putana"}))
+    u = _union(tmp_path, "Putana", [_r("2025-03-01 05:00")])
+    _union(tmp_path, "Calbuco", [_r("2025-03-01 05:00")])
+    inf = A.aplicar(u, tmp_path / "hist", aplicar=True)
+    assert set(inf) == {"Calbuco"}
+    assert not (tmp_path / "hist" / "Putana.json").exists() and (tmp_path / "hist" / "Calbuco.json").exists()
+
+
+def test_los_inactivos_son_los_de_volcanoes_yaml():
+    assert A.INACTIVOS == frozenset({"Putana", "OlcaParuma"})   # D1 1a, 2026-11-17
+
+
 DATOS = ROOT / "data" / "historia_34"
 
 
@@ -79,6 +94,7 @@ def test_historia_publicada_es_toda_de_la_via_y_anterior_a_la_sombra():
     for f in sorted(DATOS.glob("*.json")):
         s = json.loads(f.read_text(encoding="utf-8"))
         assert f.stem in A.LOS_34 and s["volcano"] == f.stem
+        assert f.stem not in A.INACTIVOS, f.stem   # S190, D1 1a
         recs = s["records"]
         assert all(r.get("via_codigo_mirova") is True for r in recs), f.stem
         assert all(A._minuto(r["datetime_utc"]) < A.CORTE for r in recs), f.stem

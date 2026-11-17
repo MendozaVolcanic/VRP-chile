@@ -136,24 +136,41 @@ process.stdout.write(JSON.stringify(DATOS.map(r => { const p = pixelesMedidos(r)
                    [0, 0, 0.375, False, None]], out
 
 
+# S190, D1 opción 1a (Nicolás, 2026-11-17): Putana y OlcaParuma no están en la RNVV y salen del tablero. Siguen en
+# VOLCANOES_ALL (las coordenadas quedan para reponerlos si D1 cambia) y la línea que arma VOLCANOES los filtra.
+LINEA_VOLCANOES = ('const VOLCANOES = VOLCANOES_ALL.filter(v => !["OlcaParuma", "Putana"].includes(v.name)).map(v => '
+                   'v.hasMirova ? v : Object.assign({}, v, { fuente: "sombra_34", inner_radius_km: 5, radius_km: 25 }));')
+
+
 def test_los_34_marcados_y_los_11_intactos(tmp_path):
-    cuerpo = """
-const VOLCANOES = VOLCANOES_ALL.map(v => v.hasMirova ? v : Object.assign({}, v, { fuente: "sombra_34", inner_radius_km: 5, radius_km: 25 }));
+    cuerpo = LINEA_VOLCANOES + """
 const once = VOLCANOES.filter(v => v.hasMirova), resto = VOLCANOES.filter(v => !v.hasMirova);
 process.stdout.write(JSON.stringify({
   n: VOLCANOES.length, once: once.length, mismos: once.every(v => VOLCANOES_ALL.includes(v) && !v.fuente),
   resto: resto.length, marcados: resto.every(v => v.fuente === "sombra_34" && v.inner_radius_km === 5),
+  fuera: VOLCANOES_ALL.filter(v => !VOLCANOES.some(w => w.name === v.name)).map(v => v.name).sort(),
 }));
 """
     src = INDEX.read_text(encoding="utf-8")
     m = re.search(r"const VOLCANOES_ALL = \[.*?\n\];", src, re.S)
     assert m, "no encontré VOLCANOES_ALL"
-    assert "const VOLCANOES = VOLCANOES_ALL.map(v => v.hasMirova ? v : Object.assign({}, v, { fuente: \"sombra_34\", inner_radius_km: 5, radius_km: 25 }));" in src
+    assert LINEA_VOLCANOES in src
     f = tmp_path / "v.js"
     f.write_text(m.group(0) + "\n" + cuerpo, encoding="utf-8")
     r = subprocess.run(["node", str(f)], capture_output=True, text=True, encoding="utf-8", timeout=60)
     assert r.returncode == 0, r.stderr
-    assert json.loads(r.stdout) == {"n": 45, "once": 11, "mismos": True, "resto": 34, "marcados": True}
+    assert json.loads(r.stdout) == {"n": 43, "once": 11, "mismos": True, "resto": 32, "marcados": True,
+                                    "fuera": ["OlcaParuma", "Putana"]}
+
+
+def test_los_que_el_tablero_filtra_son_los_inactivos_del_yaml():
+    """El filtro del tablero se escribe a mano (la página es estática); tiene que nombrar exactamente a los volcanes
+    con `active: false` en volcanoes.yaml, la fuente de verdad (S190, D1 1a)."""
+    import yaml
+    vols = yaml.safe_load((RAIZ / "volcanoes.yaml").read_text(encoding="utf-8"))["volcanoes"]
+    inactivos = sorted(v["name"] for v in vols if not v.get("active", True))
+    filtrados = sorted(re.findall(r'"([A-Za-z]+)"', re.search(r"\.filter\(v => !\[([^\]]*)\]", LINEA_VOLCANOES).group(1)))
+    assert filtrados == inactivos == ["OlcaParuma", "Putana"]
 
 
 @pytest.mark.parametrize("vista", VISTAS)

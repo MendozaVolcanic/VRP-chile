@@ -52,7 +52,10 @@ def tabla():
 
 
 def test_la_lista_es_la_de_s172_trece_y_cuatro_con_tier_a(tabla):
-    assert len(tabla) == 13
+    # S190, D1 1a: OlcaParuma (active: false) pierde su entrada propia, 12 en vez de 13; sigue como vecino de
+    # Irruputuncu, así que las pasadas de Irruputuncu con calor junto a Olca-Paruma se siguen dando aparte.
+    assert len(tabla) == 12
+    assert "OlcaParuma" not in tabla and "OlcaParuma" in tabla["Irruputuncu"]
     assert {"Quetrupillan", "Michinmahuida", "AntillancaCasablanca", "Callaqui"} <= set(tabla)
     assert "Villarrica" in tabla["Quetrupillan"] and "Lanin" in tabla["Quetrupillan"]
     assert "Antuco" not in tabla
