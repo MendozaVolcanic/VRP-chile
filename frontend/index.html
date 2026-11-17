@@ -1282,7 +1282,8 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
     // fósil F2.8 pre-S41 que pueda reaparecer (race condition reproc / restore
     // de tag). Pipeline ya tiene SANITY_CAP_VRP_MW=50000 en store.py; esto
     // es defensa-en-profundidad si un JSON viejo se cuela al frontend.
-    return vfb > 50000 ? 0 : vfb;
+    // POR QUÉ (S190, H01): misma excepción que el camino del cúmulo; ver el comentario de abajo.
+    return vfb > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : vfb;
   }
   // Records modernos: si dist_class no es summit, MIROVA no reportaría → 0
   // (a menos que el toggle "incluir lejanas" esté activo).
@@ -1293,7 +1294,11 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
   if (!includeFar && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
   // M1: sanity cap también sobre el cluster path (coherente con diario.html).
   const vmw = pc.vrp_mw ?? 0;
-  return vmw > 50000 ? 0 : vmw;
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (<= 500 K) y la marca
+  // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
+  // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
+  // tests/test_tope_publicacion_s190.py
+  return vmw > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : vmw;
 }
 
 // ============================================================================
@@ -1430,7 +1435,11 @@ function mirovaEqVrpCore(r, innerKm = 10, includeFar = false) {
   // dan ~0) → mostrar el Cluster. F5' solo REDUCE el halo glaciar; jamás erradica
   // señal real (validado: 73/1653 records confirmados por MIROVA caían a 0 sin esto).
   if (core == null || core <= 0) return base;
-  return core > 50000 ? 0 : core;
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (<= 500 K) y la marca
+  // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
+  // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
+  // tests/test_tope_publicacion_s190.py
+  return core > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : core;
 }
 
 // Punto ÚNICO de magnitud para DISPLAY: respeta el toggle USE_F5_CORE. Los
