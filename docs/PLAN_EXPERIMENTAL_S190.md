@@ -235,6 +235,14 @@ Puyehue Cordón Caulle (inner de 20 km, casi dos tercios de la escena, S147 §9)
 | D6 | ¿Puyehue Cordón Caulle en la primera tanda? | fuera; dentro con zona A reducida a un radio propio | **fuera** (inner de 20 km rompe el argumento del área, S147 §9) |
 | D7 | ¿Cuánto Actions se le da al reproceso del paso 4? | la ventana entera de una vez; por tandas fuera de horario del NRT y de las tandas de los 34 | **por tandas**, después de que terminen las tandas de los 34 |
 
+### Decisión de Nicolás (2026-11-17, ≈04:41 UTC)
+
+«Sí, las siete», dicho en la sesión S190 y reenviado a esta sesión por S190 (no lo leí de primera mano). Quedan
+aceptadas las siete recomendaciones de la tabla: D1 (a), D2 (a), D3 `laboratorio` en `data/laboratorio_v1/`, D4 (a),
+D5 30 % y 4 de 9 con p < 0,05 (se sellan con commit antes de correr), D6 Cordón Caulle fuera, D7 por tandas después
+de las tandas de los 34. Esto **no** es el sí para A45 del paso 1 ni el «mergea» de este PR: los dos se piden aparte.
+La plantilla de la tabla de episodios de D4 está en `docs/PLANTILLA_EPISODIOS_OVDAS_S190.md`.
+
 ## 9. Lo que este plan no resuelve
 
 - No leí `pipeline/mirova_v750_codigo.py`: qué umbral de la vía se modula en la zona A queda para el plan del PR del
