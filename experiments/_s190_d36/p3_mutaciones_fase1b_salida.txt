@@ -1,0 +1,16 @@
+pruebas (6): tests/test_mirova_modis_codigo_s164.py, tests/test_mirova_v375_codigo_s165.py, tests/test_mirova_v750_codigo_s162.py, tests/test_mirova_v750_cableado_s162.py, tests/test_modis_geo_mxd03_s165.py, tests/test_probe_s185_l1b.py
+
+control_sin_mutacion       resultado=viva      casos=202 OK
+control_caida              resultado=caida     casos=202 OK
+     tests.test_mirova_modis_codigo_s164::test_extremo_a_extremo_con_granulo_sintetico_en_lascar: 'RuntimeError: control de caida'
+     tests.test_mirova_modis_codigo_s164::test_extremo_a_extremo_alerta_lejos_del_crater_es_far: 'RuntimeError: control de caida'
+corte_5km_ignorado         resultado=atrapada  casos=202
+     tests.test_mirova_modis_codigo_s164::test_via_sin_cobertura_no_cae_a_k: "AssertionError: assert {'anomaly_pixels': [], 'datetime_utc': '2026-04-25 07:35', 'diag_codigo_mirov"
+     tests.test_mirova_modis_codigo_s164::test_volcan_lejos_del_granulo_no_da_record: "AssertionError: assert {'anomaly_pixels': [], 'diag_codigo_mirova': {'L_bk': None, 'L_hot': None, 'c"
+min_100_a_1                resultado=viva      casos=202
+min_100_a_2000             resultado=viva      casos=202
+recorte_45_a_30            resultado=atrapada  casos=202
+     tests.test_mirova_modis_codigo_s164::test_remuestreo_es_el_del_probe_del_censo: 'assert (False)\n +  where False = <function array_equal at 0x0000027B879727F0>(array([[nan, nan, nan,'
+recorte_45_a_60            resultado=atrapada  casos=202
+     tests.test_mirova_modis_codigo_s164::test_remuestreo_es_el_del_probe_del_censo: 'assert (False)\n +  where False = <function array_equal at 0x0000010F07B7E470>(array([[0.06373115, 0.'
+recorte_seleccion_45_a_20  resultado=viva      casos=202

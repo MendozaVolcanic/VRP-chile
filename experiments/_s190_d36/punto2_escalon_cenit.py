@@ -12,6 +12,10 @@ Pares: criterio de experiments/_s184_cenit/cenit_via.py (alerta MIROVA nocturna,
 prefiriendo «consolidado»; valor nuestro = mirovaEqVrp de frontend/index.html), pero sólo la pasada MISMA (la nuestra
 más cercana del mismo sensor a 10 min o menos, A109) y sólo fuente «consolidado» (el OCR no sirve para magnitud).
 Ventana: desde DESDE (por defecto 2026-03-01, tabla de MIROVA comparable) hasta el último record.
+PODER (verificador S190): en el OSF el escalón casi no actúa bajo 20 MW de VRP del código (2 de 12.048 filas con cenit
+> 50°) y actúa casi siempre sobre 500 MW (4.050 de 4.111). Por eso los pares sobre 50° se parten por nuestra magnitud
+(que es la del código): bajo 20 MW la prueba no tiene poder, y sólo los pares grandes pueden mostrar el escalón. El
+«|log| con escalón» se calcula sólo sobre 50° (bajo 50° el escalón nunca actúa en el OSF).
 Uso: python experiments/_s190_d36/punto2_escalon_cenit.py <raiz_repo> <salida.json> [DESDE]
 """
 import collections
@@ -130,10 +134,10 @@ for v in TIER_A:
         pares.append(dict(volcan=v, fam=fam, t=str(ta), z=c["z"], mvrp=a["VRP_MW"], ours=c["pub"]))
 
 
-def resumen(P):
+def resumen(P, escalon=True):
     pos = [p for p in P if p["ours"] > 0]
     r = [p["ours"] / p["mvrp"] for p in pos]
-    r_esc = [FACTOR * x for x in r]
+    r_esc = [FACTOR * x for x in r] if escalon else list(r)
     err = [abs(math.log(x)) for x in r]
     err_esc = [abs(math.log(x)) for x in r_esc]
     return {"n_pares": len(P), "n_nuestro_positivo": len(pos),
@@ -149,13 +153,18 @@ def resumen(P):
 res = {"desde": DESDE, "factor_escalon": FACTOR, "contadores": dict(cont), "por_familia": {}, "por_volcan_v750": {}}
 for fam in ("V750", "V375", "MODIS"):
     P = [p for p in pares if p["fam"] == fam]
-    res["por_familia"][fam] = {"z_le_50": resumen([p for p in P if p["z"] <= 50]),
+    res["por_familia"][fam] = {"z_le_50": resumen([p for p in P if p["z"] <= 50], escalon=False),
                                "z_gt_50": resumen([p for p in P if p["z"] > 50]),
                                "ultima_hora_par": max((p["t"] for p in P), default=None)}
 for v in TIER_A:
     P = [p for p in pares if p["fam"] == "V750" and p["volcan"] == v and p["z"] > 50]
     if P:
         res["por_volcan_v750"][v] = resumen(P)
+TRAMOS = [(0, 20), (20, 100), (100, 500), (500, 1e9)]
+res["v750_z_gt_50_por_magnitud_nuestra"] = {}
+for a, b in TRAMOS:
+    P = [p for p in pares if p["fam"] == "V750" and p["z"] > 50 and a < p["ours"] <= b]
+    res["v750_z_gt_50_por_magnitud_nuestra"]["%g-%g MW" % (a, b)] = resumen(P)
 res["pares_v750_z_gt_50"] = sorted([p for p in pares if p["fam"] == "V750" and p["z"] > 50], key=lambda p: p["t"])
 json.dump(res, open(OUT, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
 for fam, d in res["por_familia"].items():
@@ -163,5 +172,8 @@ for fam, d in res["por_familia"].items():
         x = d[k]
         print(fam, k, {kk: (round(vv, 3) if isinstance(vv, float) else vv) for kk, vv in x.items()})
 print("contadores", dict(cont))
+for k, d in res["v750_z_gt_50_por_magnitud_nuestra"].items():
+    print("V750 z>50 tramo", k, {kk: (round(vv, 3) if isinstance(vv, float) else vv) for kk, vv in d.items()
+                                 if kk in ("n_nuestro_positivo", "razon_mediana", "razon_p25", "razon_p75", "n_razon_1_7_a_2_3")})
 print("por volcan V750 z>50:", {v: (d["n_nuestro_positivo"], round(d["razon_mediana"], 3) if d["razon_mediana"] else None)
                                for v, d in res["por_volcan_v750"].items()})

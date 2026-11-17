@@ -1,0 +1,16 @@
+pruebas (6): tests/test_mirova_modis_codigo_s164.py, tests/test_mirova_v375_codigo_s165.py, tests/test_mirova_v750_codigo_s162.py, tests/test_mirova_v750_cableado_s162.py, tests/test_modis_geo_mxd03_s165.py, tests/test_probe_s185_l1b.py
+
+control_sin_mutacion       resultado=viva      casos=202 OK
+control_caida              resultado=caida     casos=202 OK
+     tests.test_mirova_modis_codigo_s164::test_extremo_a_extremo_con_granulo_sintetico_en_lascar: 'RuntimeError: control de caida'
+     tests.test_mirova_modis_codigo_s164::test_extremo_a_extremo_alerta_lejos_del_crater_es_far: 'RuntimeError: control de caida'
+modis_sin_corte_5km        resultado=atrapada  casos=202
+     tests.test_mirova_modis_codigo_s164::test_via_sin_cobertura_no_cae_a_k: "AssertionError: assert {'anomaly_pixels': [], 'datetime_utc': '2026-04-25 07:35', 'diag_codigo_mirov"
+     tests.test_mirova_modis_codigo_s164::test_volcan_lejos_del_granulo_no_da_record: "AssertionError: assert {'anomaly_pixels': [], 'diag_codigo_mirova': {'L_bk': None, 'L_hot': None, 'c"
+modis_corte_10km           resultado=atrapada  casos=202
+     tests.test_mirova_modis_codigo_s164::test_via_sin_cobertura_no_cae_a_k: "AssertionError: assert {'anomaly_pixels': [], 'datetime_utc': '2026-04-25 07:35', 'diag_codigo_mirov"
+modis_corte_2km            resultado=viva      casos=202
+v375_sin_corte_5km         resultado=atrapada  casos=202
+     tests.test_mirova_v375_codigo_s165::test_constantes_de_375_son_las_del_port: "AssertionError: assert (7875.0 == 7875.0 and None == 5.0)\n +  where 7875.0 = <module 'mirova_port' f"
+v375_corte_10km            resultado=atrapada  casos=202
+     tests.test_mirova_v375_codigo_s165::test_constantes_de_375_son_las_del_port: "AssertionError: assert (7875.0 == 7875.0 and 10.0 == 5.0)\n +  where 7875.0 = <module 'mirova_port' f"
