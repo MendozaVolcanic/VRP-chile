@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 00:10 UTC (S188): Nicolás decide D1, «vamos con los 43 de la RNVV por mientras»; S188 cierra por contexto
+
+- Cruce por distancia de los 45 con los 43 de la RNVV (`D:\vrp-trabajo\temporales\s188\cruce_rnvv.py`): sin entrada RNVV Putana (aplicada, tanda 2), Olca-Paruma (aplicada, tanda 1) y Lastarria (Tier A); fusionados en la RNVV Descabezado Grande con Cerro Azul-Quizapu («Grupo Descabezados», 7,1 km; tanda 3) y Lonquimay con Tolhuaca (9,2 km; tanda 4); la RNVV trae Tatara-San Pedro, Cay y Hornopirén, que no tenemos. Cómo ejecutarlo queda como preguntas 1 a 4 en `tasks/BLOQUE_ARRANQUE_S189.md` §b.
+- Tanda 3 (run 43906817147): 104 de 165 verdes, 0 rojos a las 00:05 UTC.
+- Aviso de contexto a los 152 mil tokens: S188 detuvo su vigilante y su `cadena_4a7.sh` a las 00:07 UTC (log vacío, no despachó nada) para que S189 sea la única dueña, y cierra.
+
 ### 2026-11-16 19:55 UTC (S188): arranque; auditoría del 11-16 VERDE y #973 cerrado; tanda 3 en curso
 
 - S188 abre como sesión propia, dueña del loop. Vigilante de la tanda 3 (`vigilar_run.sh 43906817147`) y cadena `D:\vrp-trabajo\temporales\s187_tanda2\cadena_4a7.sh` relanzados a las 19:05 UTC. Tanda 3 a esa hora: 35 de 165 trozos verdes, 0 rojos.
