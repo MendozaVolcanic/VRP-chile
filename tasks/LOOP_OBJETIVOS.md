@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 14:05 UTC (S190): cinco PR de las sesiones hijas en main; A45 de Nicolás para los PR 2 y 3 de Codex
+- **Mergeados** (merge commit, `--match-head-commit`, CI verde sobre main actualizado): #1033 (10:49, guarda de geometría), #1038 (10:53, ficha v1.34, reintento de ReadTimeout en CMR), #1036 (11:10, cobertura honesta), #1037 (11:28, ficha v1.35, tope de publicación) y #1039 (14:01, ficha v1.36, D36). La fila de #1039 venía sin la columna de trazabilidad y numerada v1.34: se completó y renumeró al mergear (el informe lo dice).
+- **Instrumento**: `D:\vrp-trabajo\temporales\s190\mergear_verdes.sh` v1 se saltó #1033 porque `gh pr checks --watch` volvió al instante con checks en pending; v2 sondea cada 2 min, y v3 espera si GitHub deja el estado en UNKNOWN tras otro merge (le pasó a #1036 y a #1037; cada uno se unió con main y repitió el CI).
+- **A45**: Nicolás, 10:5x UTC, respuesta a «¿Autorizas tocar store.py y process_viirs*.py para los PR 2 y 3 de Codex?»: «Sí, PR 2 y 3». Reenviado con cita a la sesión Codex (local_528782ec), que pone el tag defensivo y abre los PR sin mergear; el merge espera «mergea #N». PR 5, 7 y 8 no autorizados.
+- **Tanda 3** (run 44037264576): 79 de 166 verdes, 5 rojos (DescabezadoGrande, CMR), 6 corriendo, 76 en cola. Worktrees de sombras y D36 quitados (contenidos en main).
+
 ### 2026-11-17 10:45 UTC (S190): Nicolás de vuelta; merges de las sesiones hijas y tanda 3 en curso
 - **Tanda 3 real** (run 44037264576): 33 de 166 trozos verdes, 6 corriendo, 122 en cola y 5 rojos, los cinco de DescabezadoGrande (trozos 1, 2, 4, 5, 6), todos por la búsqueda en CMR (`SEARCH_VENTANA_ERR` ReadTimeout y luego `RuntimeError: <html>`; «Cobertura INCOMPLETA», salida 3). Es la misma degradación de CMR que arregla #1038. Se relanzan con `gh run rerun --failed` cuando el run termine; la cadena se detendrá antes de la tanda 4 por esos rojos, y se relanza a mano tras el rerun.
 - **Merges que decide S190** (política 05:10 y «continúa con lo que recomiendes» de Nicolás, 10:30 UTC): #1033 (sólo prueba), #1038 (reintento de ReadTimeout en CMR y revisor de sombra; ficha v1.34 puesta al mergear) y #1036 (cobertura honesta en reprocesos; no toca A45) quedan esperando su CI sobre main actual y se mergean con `D:rp-trabajo	emporales\s190\mergear_verdes.sh`. Después, #1037 (ficha v1.35) y #1039 (D36, ficha v1.36; trae v1.34 escrita al abrir, se renumera al mergear).
