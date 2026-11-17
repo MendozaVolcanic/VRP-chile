@@ -235,29 +235,39 @@ def revisar(registros, log_txt, ini, fin, desde_utc, cobertura, sha=None, sensor
 
     if errores:
         fallas.append(f"{errores} gránulos con ERROR processing")
+    # S178: sólo se juzgan los días con la noche cerrada al inicio de la corrida (noche_cerrada, POR QUÉ arriba).
+    todos = _dias(ini, fin)
+    dias = [d for d in todos if noche_cerrada(d, desde)]
     if cobertura is None:
         fallas.append("no hay JSON de cobertura legible: no se sabe qué se buscó")
     else:
-        # VV169-03: sólo las del último día (o sin fecha) dejan rojo; las de días anteriores van como NOTA
-        de_hoy, viejas = 0, {}
+        # VV169-03: sólo las del último día (o sin fecha) dejan rojo; las de días anteriores van como NOTA.
+        # S190 (#1027, tests/test_sombra_cmr_s190.py): «el último día» es el último JUZGADO. Con el cron atrasado la
+        # corrida cruza la medianoche UTC y `fin` es un día sin noche cerrada que esta revisión no juzga: sus búsquedas
+        # caídas van como NOTA y las juzga la corrida siguiente, que lo vuelve a buscar (ventana de 8 días). Hasta S189
+        # dejaban rojo (PlanchonPeteroa y NevadosDeChillan, 2026-11-16, sólo por búsquedas del 2026-11-17).
+        ultimo = dias[-1] if dias else fin
+        de_hoy, viejas, abiertas = 0, {}, {}
         for fl in cobertura.get("fallas") or []:
             fecha = str(fl.get("fecha") or "")
-            if fecha and fecha < fin:
+            if fecha and fecha < ultimo:
                 viejas[fecha] = viejas.get(fecha, 0) + 1
+            elif fecha and fecha > ultimo and fecha in todos and fecha not in dias:
+                abiertas[fecha] = abiertas.get(fecha, 0) + 1
             else:
                 de_hoy += 1
         if de_hoy:
-            fallas.append(f"cobertura incompleta: {de_hoy} búsquedas o descargas fallidas del {fin} o sin fecha")
+            fallas.append(f"cobertura incompleta: {de_hoy} búsquedas o descargas fallidas del {ultimo} o sin fecha")
         for fecha in sorted(viejas):
             notas.append(f"{viejas[fecha]} búsquedas o descargas fallidas del {fecha}, día anterior al último "
                          f"(el control por día dice si ese día quedó sin records)")
+        for fecha in sorted(abiertas):
+            notas.append(f"{abiertas[fecha]} búsquedas o descargas fallidas del {fecha}, día sin la noche cerrada al "
+                         f"inicio de la corrida (lo juzga la corrida siguiente)")
     if "Cobertura INCOMPLETA" in log_txt and not (cobertura and cobertura.get("fallas")):
         fallas.append("el log dice «Cobertura INCOMPLETA»")
     if otros:
         fallas.append(f"records de esta corrida que no son de la vía: {otros}")
-    # S178: sólo se juzgan los días con la noche cerrada al inicio de la corrida (noche_cerrada, POR QUÉ arriba).
-    todos = _dias(ini, fin)
-    dias = [d for d in todos if noche_cerrada(d, desde)]
     for d in todos:
         if d not in dias:
             notas.append(f"{d}: la noche no estaba cerrada al inicio de la corrida (antes de las "
