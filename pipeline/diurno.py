@@ -93,13 +93,21 @@ def viirs_diurno_habilitado(nombre: str) -> bool:
     return es_viirs(nombre) and flag_viirs_diurno()
 
 
+def modis_diurno_habilitado(nombre: str) -> bool:
+    """True si el perfil abre el día para esta plataforma MODIS (ENABLE_DAYTIME_MODIS, valor vivo)."""
+    from pipeline import profile as _perfil
+    return str(nombre).upper().startswith("MODIS") and bool(_perfil.ENABLE_DAYTIME_MODIS)
+
+
 def aplica_filtro_nocturno(nighttime_only: bool, plataforma: str) -> bool:
     """¿Se descarta el gránulo diurno de esta plataforma antes de descargarlo o procesarlo?
 
-    POR QUÉ: con el flag apagado es exactamente `nighttime_only` (comportamiento de siempre). Con el
-    flag encendido, VIIRS no se filtra y MODIS sigue con su regla (su rama diurna tiene flag propio).
+    POR QUÉ: con los dos flags apagados es exactamente `nighttime_only` (comportamiento de siempre). Cada
+    sensor abre con su flag: VIIRS con ENABLE_DAYTIME_VIIRS, MODIS con ENABLE_DAYTIME_MODIS. S190 (adenda V,
+    `experiments/_s190_diurno/ADENDA_VIA.md`, sellada): hasta acá MODIS abría el día sólo en store.py y este
+    filtro lo seguía tirando antes de bajarlo, la trampa de S92 (un flag que abre una sola compuerta mide cero).
     """
-    return bool(nighttime_only) and not viirs_diurno_habilitado(plataforma)
+    return bool(nighttime_only) and not (viirs_diurno_habilitado(plataforma) or modis_diurno_habilitado(plataforma))
 
 
 def pasada_es_diurna(fecha_utc: str, lat: float, lon: float) -> bool:

@@ -62,12 +62,14 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 8   # informe de capacidad S172: con 8 la corrida de 34 cabe en ~80 min; con 4 serian ~2,5 h
+      # S190, D1 opcion 1a (Nicolas, 2026-11-17): OlcaParuma y Putana no estan en la RNVV y salen de la matriz
+      # (active: false en volcanoes.yaml); quedan 32. Respaldo de sus datos en D:/vrp-trabajo/temporales/s189/respaldo_d1_rnvv/
       matrix:
         volcano: [Antuco, DescabezadoGrande, CerroAzulQuizapu, LagunaDelMaule, NevadoDeLongavi, Callaqui,
                   Lonquimay, Tolhuaca, Sollipulli, Quetrupillan, Lanin, MochoChoshuenco, CarranLosVenados,
                   AntillancaCasablanca, Osorno, Calbuco, YateHornopiren, Huequi, Michinmahuida, CorcovadoYanteles,
                   Melimoyu, Mentolat, MacaCay, Hudson, Tinguiririca, Taapaca, Parinacota, Guallatiri, Irruputuncu,
-                  OlcaParuma, Ollague, SanPedro, Putana, SanJose]
+                  Ollague, SanPedro, SanJose]
     steps:
       - name: Filtro de volcan
         id: plan
