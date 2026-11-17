@@ -555,8 +555,8 @@ Ejecución sistemática del catálogo de divergencias (`docs/MIROVA_DIVERGENCES_
 > commit `d58f7a46f`, S72 F2.3.a; la clave no está escrita en `mirova_equivalent.yaml`, así que
 > manda el default, A89). Los **tres** procesadores lo consumen en las **dos** ramas, y las dos
 > ramas están encendidas (`ENABLE_DNTI_CONTEXTUAL_PATH`, `ENABLE_FIRST_PASS_TESTS_2_AND_3`):
-> `process_modis.py:696/704` y `:866-867`, `process_viirs.py:1074/1082` y `:1272-1273`,
-> `process_viirs_mod.py:739/747` y `:854-855`. El filtro de borde va siempre activo dentro de
+> `process_modis.py:696/704` y `:866-867`, `process_viirs.py:1074/1082` y `:1275-1276`,
+> `process_viirs_mod.py:739/747` y `:857-858`. El filtro de borde va siempre activo dentro de
 > `build_unsuitable_mask`.
 >
 > Consecuencia: el A/B **F2.1** que este bloque propone más abajo **no se puede correr como está**,
