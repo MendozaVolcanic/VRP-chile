@@ -569,7 +569,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-11-18 00:10 UTC (S190): PR #1044 con la unión de la tanda 3 (verificador limpio 6 de 6); #1028 cerrado
+### 2026-11-17 23:52 UTC (S190): PR #1044 con la unión de la tanda 3 (verificador limpio 6 de 6); #1028 cerrado
 - **#1044** (rama `s190-historia34-tanda3`, commit `4b036e282`): Antuco 6.718, CerroAzulQuizapu 6.497, DescabezadoGrande 6.499, LagunaDelMaule 6.643, NevadoDeLongavi 6.538 records; 626 días, 0 huecos; ensayo 32.895 nuevos, 0 tras el corte; 74 pruebas en verde. Verificador limpio (scripts propios sobre los 165 trozos crudos, `D:\vrp-trabajo\temporales\s190\verif_tanda3\verif.py`): 6 de 6 confirmadas, ningún defecto. Espera «mergea #1044»; después se aplica con tag `pre-historia-34-tanda3`.
 - **#1028 cerrado**: sombra-34.yml run 44182162221 en verde en el intento 2 (los 4 rojos del intento 1 eran HTML de CMR).
 - **Para pensar (no hecho):** las sombras quedan en rojo a nivel de run por una falla pasajera de CMR en un solo volcán, y eso abre el issue de alerta. Un reintento automático de los jobs caídos dentro del mismo workflow evitaría falsas alarmas; requiere decidir si vale el cambio.
