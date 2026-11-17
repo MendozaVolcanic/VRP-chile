@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 05:55 UTC (S190): auditoría de Codex verificada; S190 encarga los arreglos sin A45
+- **Codex local** (sesión `s190-codex`; copia `D:\codex-vrp` de main, sandbox con señuelos negados, sin red; 42 % de la ventana de 5 h): 12 hallazgos; verificadores limpios: 9 CONFIRMADO, 3 EN PARTE, 0 REFUTADO; 5 nuevos (H01, H03, H04, H06, H08). Informe: `D:rp-trabajo	emporales\s190_codex\INFORME_VERIFICADO.md`; entrega de Codex en `D:\codex-vrp\_salida\`.
+  - Latentes de gravedad 5 (0 records hoy, máximo 451 MW): H01, el tablero y `audit_metrics` muestran 0 una magnitud sobre 50.000 MW que `store.py` conserva con `vrp_exceeds_sanity_cap`; H04, el techo de 500 K de `store.py` anula escenas VIIRS 750 calientes (M13 llega a 634 K).
+  - H03: un L1B sin M15 o I05 hace desaparecer la pasada sin record ni incidencia. H07 y H08: «cobertura completa» no significa procesada, y el revisor de errores sólo corre en `nrt.yml` (falta en `sombra-34.yml`, que sí se publica, y en los reprocesos).
+  - MacaCay coincide con la auditoría propia: fondo 0 en el borde entre gránulos; 21 records con `L_bk = 0`, 11 visibles. Ningún filtro del .m falta en el port (16 condiciones recorridas).
+  - Geometría coherente; X0/Y0 de `grillas_mirova.yaml` está congelado y no se compara con `volcanoes.yaml`. AD04: el ejemplo OSF tiene la fila 1 al sur (bajo 0,4 % de magnitud).
+- **Decisión S190**: la sesión `s190-codex` implementa ahora los PR sin A45: 1 (H01), 4 (H07, H08) y 6 (guarda de geometría, coordinada con `s190-coordenadas`); los de A45 o detector (2, 3, 5, 7, 8) quedan en ramas con tag y flags apagados para Nicolás.
+- Propuesta de Codex para seguir: auditar por «afirmación que decide algo» con registro central y piloto de 28 tareas (`D:\codex-vrp\_salida\PROPUESTA_COMO_SEGUIR.md`); para Nicolás.
+
 ### 2026-11-17 05:40 UTC (S190): #1029 mergeado por S190; C: en 6,2 GB y carga reducida
 - **#1029** (plan del laboratorio, sólo documentos y scripts de medición): checks `pytest` y `bateria-v750a` en SUCCESS, CLEAN, head `576f280aa`; merge commit `736f3734e` a las 05:39:47 UTC, decidido por S190 con la autorización de Nicolás (política 05:10). El único guion largo agregado es el nombre de un workflow copiado tal cual en un JSON de salida.
 - **Disco**: C: bajó a 6,2 GB libres (05:33 UTC); `pagefile.sys` creció de 26,7 a 32,2 GB en una hora con unos 10 procesos Python pesados a la vez (sesiones D36, día, sombras, coordenadas, Codex y el subagente del retiro). Detenido el pytest del retiro que corría fuera de la cola (PID 13132); pedido a las sesiones D36, día, sombras y Codex un proceso pesado a la vez. No se tocó `hiberfil.sys` (13,6 GB): apagar la hibernación es configuración del sistema y la decide Nicolás.
