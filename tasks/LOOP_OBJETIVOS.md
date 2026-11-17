@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 06:32 UTC (S190): retiro D1 en main (#1034); D1 ejecutada
+- **#1034** (retiro de Putana y OlcaParuma, opción 1a aceptada por Nicolás): CI combinado con main (#1031 incluido) SUCCESS sobre `d50edeb40`, CLEAN; merge commit `3239a4db8` a las 06:31:32 UTC, por S190. Comprobado en main: 32 JSON en `data/sombra_34/`, ninguno de Putana ni OlcaParuma en `data/sombra_34/` ni `data/historia_34/`, Putana con `active: false` y comentario D1. El aplicador de tandas salta los inactivos.
+- `tasks/DECISIONES_34_S187.md`: D1 marcada DECIDIDA Y EJECUTADA (texto previo conservado). Worktree `D:\vrp-trabajo\worktrees\s190-retiro-d1` quitado.
+- Pendientes que deja el retiro (del informe del subagente, sin tocar): `frontend/experimental/index.html:306` y `:309` todavía los listan; `experiments/_historia_34/union/{Putana,OlcaParuma}.json.gz` siguen en el repo; el comentario de capacidad de `sombra-34.yml:64` dice «34».
+
 ### 2026-11-17 06:23 UTC (S190): #1032 y #1035 mergeados; #1034 (retiro D1) en CI combinado; #1033 espera verificador
 - **#1032** (escenarios de falso positivo, 10 escenarios con firma y costo, verificado dos veces; sin tocar producción ni tablero): checks SUCCESS, CLEAN, head `fc872f228`; merge commit `5afb5a749` a las 06:22:28 UTC.
 - **#1035** (instrumento del A/B diurno sobre la vía, adenda V sellada por Nicolás): checks SUCCESS, CLEAN, head `b802c8087`; merge commit `51aafdf14` a las 06:22:35 UTC. Toca `pipeline/diurno.py` (MODIS obedece `ENABLE_DAYTIME_MODIS`); comprobado que el flag vale `False` por defecto (`pipeline/profile.py:208`) y que `mirova_equivalent.yaml` no lo enciende: producción sin cambio. Pregunta para Nicolás: `experiments/_s190_diurno/PREGUNTA_R_W7.md`; el veredicto del A/B no se calcula hasta su respuesta.
