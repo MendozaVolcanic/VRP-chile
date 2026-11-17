@@ -29,8 +29,8 @@ Tolerancias (medidas el 2026-11-17 sobre main 736f3734e y sobre los yaml del com
 coordenadas, que corrige 7 de los 34):
   - Los 34: |dx| y |dy| hasta 0,06 m por eje. El generador redondea X0, Y0 a 0,1 m, así que el error de redondeo es a
     lo más 0,05 m por eje; lo medido es 0,048 m (main) y 0,050 m (19ff4c3c9). El centímetro de margen cubre
-    diferencias de versión de PROJ en la proyección. centro_lat/lon: hasta 5e-6 grados (redondeo a 5 decimales; MacaCay
-    en 19ff4c3c9 trae -73.169326 y la grilla -73.16933).
+    diferencias de versión de PROJ en la proyección. centro_lat/lon: hasta 6e-6 grados (redondeo a 5 decimales, 5e-6, más
+    margen de coma flotante; MacaCay en 19ff4c3c9 trae -73.169326 y la grilla -73.16933).
   - Los 3 Tier A con punto propio: la distancia declarada, en metros enteros, más o menos 1 m (0,5 m de redondeo del
     número declarado y 0,5 m de margen). Medido: 232,95; 1.884,81; 2.786,89 m.
   - Los 8 Tier A con el punto del yaml: hasta 1,5 m. Medido: 0,93 a 1,02 m.
@@ -62,7 +62,10 @@ GRILLAS = Path(os.environ.get("GUARDA_GEOMETRIA_GRILLAS_YAML") or ROOT / "pipeli
 VOLCANES = Path(os.environ.get("GUARDA_GEOMETRIA_VOLCANES_YAML") or ROOT / "volcanoes.yaml")
 
 TOL_34_EJE_M = 0.06
-TOL_34_GRADOS = 5e-6
+# 6e-6 y no 5e-6: el redondeo a 5 decimales deja a lo más 5e-6 grados, pero una coordenada de 6 decimales terminada
+# en 5 da 5,0000000016e-6 en coma flotante y caería en rojo sin error real (reparo del verificador, PR #1033).
+# 1e-6 grados son unos 0,1 m: muy por debajo de cualquier corrección de coordenada.
+TOL_34_GRADOS = 6e-6
 # Cabecera de pipeline/grillas_mirova.yaml: «a 233, 1.885 y 2.787 m del yaml»
 DECLARADA_TIER_A_M = {"Lascar": 233.0, "PlanchonPeteroa": 1885.0, "Tupungatito": 2787.0}
 TOL_DECLARADA_M = 1.0
@@ -132,7 +135,7 @@ def test_los_34_tienen_x0_y0_igual_al_utm_de_volcanoes_yaml(datos):
 
 # --------------------------------------------------------------------------------- (b) los 11: distancia declarada
 def test_la_cabecera_declara_las_tres_distancias():
-    texto = (ROOT / "pipeline" / "grillas_mirova.yaml").read_text(encoding="utf-8")
+    texto = GRILLAS.read_text(encoding="utf-8")
     assert "Lascar, PlanchonPeteroa y Tupungatito es otro punto" in texto
     assert "a 233, 1.885 y 2.787 m del yaml" in texto
 
