@@ -569,6 +569,10 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 05:56 UTC (S190): tanda 3 con 9 rojos de Tinguiririca, relanzados; suite completa pasa al CI
+- **Tanda 3** (run 43906817147): terminó 05:49 UTC con `failure`, 165 trozos y 9 rojos, todos de Tinguiririca (ventanas 2, 3, 5, 8 a 13), por `SEARCH_VENTANA_ERR` contra CMR de NASA cerca de las 02:00 UTC (mismo síntoma que las sombras, #1027). Relanzados con `gh run rerun --failed` (intento 2); vigilante en `D:\vrp-trabajo\temporales\s187_tanda2\vigilar_t3b.log`. Tinguiririca no cambia de centro.
+- **Decisión S190, regla de pruebas**: la cola local de la suite (`suite_con_turno.sh`) se atascó (turno de 45 min, 4 sesiones esperando, entre ellas la de coordenadas que destraba la cadena). La suite completa la da el check `pytest` del CI de cada PR; localmente sólo las pruebas pertinentes, con `--basetemp` en D:. Enviado a coordenadas, escenarios, día, Codex y al subagente del retiro.
+
 ### 2026-11-17 06:05 UTC (S190): cadena 4 a 7 DETENIDA a la espera de los centros RNVV; #1030 abierto
 - **Coordenadas** (sesión `s190-coordenadas`, rama `s190-coordenadas-centros`, `19ff4c3c9`, sin push a esta hora): centro de la ficha RNVV en 7 de los 34 (Callaqui, AntillancaCasablanca, Michinmahuida, CorcovadoYanteles, Mentolat 3,3 km, MacaCay 2,5 km, SanPedro) y `gvp_id` corregido en 3 (Tolhuaca entre ellos); cambia también `pipeline/grillas_mirova.yaml`.
 - **Decisión S190**: detener `cadena_4a7.sh` (PID 77439 y 77437, `sleep` 86913; comprobado con `ps`; log vacío, no despachó nada), porque la tanda 4 trae Callaqui y saldría con el centro viejo apenas termine la tanda 3. Se relanza cuando el PR de centros esté en main. El vigilante de la tanda 3 sigue vivo. SanPedro ya tiene su historia aplicada con el centro viejo: reprocesarlo queda pendiente.
