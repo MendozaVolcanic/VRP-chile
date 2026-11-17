@@ -1,0 +1,199 @@
+FLAGS_BRAZO {"PROFILE_NAME": "_s190_ab_diurno_via_control", "DATA_SUBDIR": "_s190_ab_diurno_via_control", "ENABLE_MODIS_CODIGO_MIROVA": true, "ENABLE_V375_CODIGO_MIROVA": true, "ENABLE_V750_CODIGO_MIROVA": true, "ENABLE_DAYTIME_VIIRS": false, "ENABLE_DAYTIME_MODIS": false, "ENABLE_TEST1_PATH": false, "ENABLE_TESTS_23_PROSE_BRANCH": true, "ENABLE_MODIS_B22_PRIMARY": true, "ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER": false, "PATH_D_ONLY_CAP_MW": 5.0, "ENABLE_TESTS_23_NO_BT_GATE_VIIRS375": false, "ENABLE_VENT_ANCHORED_CLUSTERING": true, "ENABLE_ROI1_BOX_PAPER": false}
+[VRP profile=_s190_ab_diurno_via_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s190_ab_diurno_via_control
+=== [VRP profile=_s190_ab_diurno_via_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s190_ab_diurno_via_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Nevados de Chillán | 2026-11-10
+[diag 06:26:28Z] AUTH_START volcano=NevadosDeChillan date=2026-11-10
+[diag 06:26:28Z] AUTH_OK
+[diag 06:26:28Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 06:26:33Z] SEARCH_VENTANA [MODIS_TERRA_L1B] MOD021KM v6.1 2026-11-10..2026-11-12 n=6 elapsed=5.2s
+[diag 06:26:33Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 06:26:46Z] SEARCH_VENTANA [MODIS_TERRA_GEO] MOD03 v6.1 2026-11-10..2026-11-12 n=6 elapsed=13.1s
+[diag 06:26:46Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 06:26:46Z] DOWNLOAD_FORCE_HTTPS runner en AWS us-west-2: in_region=True -> False
+[diag 06:26:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10122555612,LAADS:10122303360]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 06:26:48Z] DOWNLOAD_DONE attempt=0 elapsed=1.8s n_files=2
+[diag 06:26:48Z] SEARCH_START MODIS_AQUA
+[diag 06:27:15Z] SEARCH_VENTANA [MODIS_AQUA_L1B] MYD021KM v6.1 2026-11-10..2026-11-12 n=7 elapsed=27.2s
+[diag 06:27:15Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 06:27:29Z] SEARCH_VENTANA [MODIS_AQUA_GEO] MYD03 v6.1 2026-11-10..2026-11-12 n=7 elapsed=13.9s
+[diag 06:27:29Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 06:27:29Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10123147807,LAADS:10122861236]
+[diag 06:27:31Z] DOWNLOAD_DONE attempt=0 elapsed=2.3s n_files=2
+[diag 06:27:31Z] SEARCH_RETIRADA VIIRS_SNPP cese anunciado desde 2026-11-02 13:00 UTC (scripts/ceses_esperados.json), no se busca
+[diag 06:27:31Z] SEARCH_START VIIRS_NOAA20
+[diag 06:27:32Z] SEARCH_VENTANA [VIIRS_NOAA20_L1B] VJ102IMG v2.1 2026-11-10..2026-11-12 n=10 elapsed=0.5s
+[diag 06:27:32Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 06:28:36Z] SEARCH_VENTANA [VIIRS_NOAA20_GEO] VJ103IMG v2.1 2026-11-10..2026-11-12 n=10 elapsed=64.5s
+[diag 06:28:36Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 06:28:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10122493980,LAADS:10122493284]
+[diag 06:28:39Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+[diag 06:28:39Z] SEARCH_START VIIRS_NOAA21
+[diag 06:28:50Z] SEARCH_VENTANA [VIIRS_NOAA21_L1B] VJ202IMG v2.1 2026-11-10..2026-11-12 n=8 elapsed=11.3s
+[diag 06:28:50Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 06:28:58Z] SEARCH_VENTANA [VIIRS_NOAA21_GEO] VJ203IMG v2.1 2026-11-10..2026-11-12 n=8 elapsed=7.7s
+[diag 06:28:58Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 06:28:58Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10122464717,LAADS:10122463442]
+[diag 06:29:01Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 06:29:01Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10122522203,LAADS:10122515221]
+[diag 06:29:04Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 06:29:04Z] SEARCH_RETIRADA VIIRS_SNPP_750 cese anunciado desde 2026-11-02 13:00 UTC (scripts/ceses_esperados.json), no se busca
+[diag 06:29:04Z] SEARCH_START VIIRS_NOAA20_750
+[diag 06:29:09Z] SEARCH_VENTANA [VIIRS_NOAA20_MOD_L1B] VJ102MOD v2.1 2026-11-10..2026-11-12 n=10 elapsed=5.6s
+[diag 06:29:09Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 06:29:39Z] SEARCH_VENTANA [VIIRS_NOAA20_MOD_GEO] VJ103MOD v2.1 2026-11-10..2026-11-12 n=10 elapsed=29.7s
+[diag 06:29:39Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 06:29:39Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10122493990,LAADS:10122493286]
+[diag 06:29:40Z] DOWNLOAD_DONE attempt=0 elapsed=1.4s n_files=2
+[diag 06:29:40Z] SEARCH_START VIIRS_NOAA21_750
+[diag 06:29:47Z] SEARCH_VENTANA [VIIRS_NOAA21_MOD_L1B] VJ202MOD v2.1 2026-11-10..2026-11-12 n=8 elapsed=6.3s
+[diag 06:29:47Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 06:29:54Z] SEARCH_VENTANA [VIIRS_NOAA21_MOD_GEO] VJ203MOD v2.1 2026-11-10..2026-11-12 n=8 elapsed=7.1s
+[diag 06:29:54Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 06:29:54Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10122464721,LAADS:10122463446]
+[diag 06:29:55Z] DOWNLOAD_DONE attempt=0 elapsed=1.6s n_files=2
+[diag 06:29:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10122522213,LAADS:10122515223]
+[diag 06:29:57Z] DOWNLOAD_DONE attempt=0 elapsed=1.4s n_files=2
+  MODIS_TERRA | VRP=30.804 MW | T_bg=273.75 K | T_max=304.24 K | anomalous_px=7
+  MODIS_AQUA | VRP=24.183 MW | T_bg=273.06 K | T_max=293.05 K | anomalous_px=10
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20_750 (750m) | VRP=27.696 MW | T_bg=272.02 K | T_max=313.8 K | anomalous_px=5
+  VIIRS_NOAA21_750 (750m) | VRP=1.785 MW | T_bg=270.0 K | T_max=273.32 K | anomalous_px=7
+  VIIRS_NOAA21_750 (750m) | VRP=30.818 MW | T_bg=270.05 K | T_max=300.88 K | anomalous_px=7
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20261110
+
+>>> Nevados de Chillán | 2026-11-11
+[diag 06:30:26Z] AUTH_START volcano=NevadosDeChillan date=2026-11-11
+[diag 06:30:26Z] AUTH_OK
+[diag 06:30:26Z] SEARCH_START MODIS_TERRA
+[diag 06:30:26Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 06:30:26Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 06:30:26Z] DOWNLOAD_FORCE_HTTPS runner en AWS us-west-2: in_region=True -> False
+[diag 06:30:26Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10124774080,LAADS:10124542394]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 06:30:27Z] DOWNLOAD_DONE attempt=0 elapsed=1.8s n_files=2
+[diag 06:30:27Z] SEARCH_START MODIS_AQUA
+[diag 06:30:27Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 06:30:27Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 06:30:27Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10125364588,LAADS:10125214783]
+[diag 06:30:29Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+[diag 06:30:29Z] SEARCH_RETIRADA VIIRS_SNPP cese anunciado desde 2026-11-02 13:00 UTC (scripts/ceses_esperados.json), no se busca
+[diag 06:30:29Z] SEARCH_START VIIRS_NOAA20
+[diag 06:30:29Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+  VIIRS_NOAA20: kept 2 of 4 granules (night filter)
+[diag 06:30:29Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=4
+[diag 06:30:29Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10124634589,LAADS:10124629584]
+[diag 06:30:32Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 06:30:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10124723441,LAADS:10124721132]
+[diag 06:30:35Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 06:30:35Z] SEARCH_START VIIRS_NOAA21
+[diag 06:30:35Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+  VIIRS_NOAA21: kept 1 of 2 granules (night filter)
+[diag 06:30:35Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=2
+[diag 06:30:35Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10124716119,LAADS:10124704634]
+[diag 06:30:37Z] DOWNLOAD_DONE attempt=0 elapsed=2.4s n_files=2
+[diag 06:30:37Z] SEARCH_RETIRADA VIIRS_SNPP_750 cese anunciado desde 2026-11-02 13:00 UTC (scripts/ceses_esperados.json), no se busca
+[diag 06:30:37Z] SEARCH_START VIIRS_NOAA20_750
+[diag 06:30:37Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=4
+  VIIRS_NOAA20_750: kept 2 of 4 granules (night filter)
+[diag 06:30:37Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=4
+[diag 06:30:37Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10124634597,LAADS:10124629586]
+[diag 06:30:40Z] DOWNLOAD_DONE attempt=0 elapsed=2.3s n_files=2
+[diag 06:30:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10124723447,LAADS:10124721134]
+[diag 06:30:41Z] DOWNLOAD_DONE attempt=0 elapsed=1.9s n_files=2
+[diag 06:30:41Z] SEARCH_START VIIRS_NOAA21_750
+[diag 06:30:41Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+  VIIRS_NOAA21_750: kept 1 of 2 granules (night filter)
+[diag 06:30:41Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=2
+[diag 06:30:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10124716123,LAADS:10124704639]
+[diag 06:30:43Z] DOWNLOAD_DONE attempt=0 elapsed=1.5s n_files=2
+  MODIS_TERRA | VRP=5.013 MW | T_bg=266.01 K | T_max=276.22 K | anomalous_px=5
+  MODIS_AQUA | VRP=42.457 MW | T_bg=272.39 K | T_max=312.56 K | anomalous_px=5
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20_750 (750m) | VRP=18.683 MW | T_bg=271.03 K | T_max=291.64 K | anomalous_px=9
+  VIIRS_NOAA20_750 (750m) | VRP=34.934 MW | T_bg=270.16 K | T_max=292.12 K | anomalous_px=20
+  VIIRS_NOAA21_750 (750m) | VRP=27.977 MW | T_bg=269.16 K | T_max=323.53 K | anomalous_px=6
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20261111
+
+>>> Nevados de Chillán | 2026-11-12
+[diag 06:31:12Z] AUTH_START volcano=NevadosDeChillan date=2026-11-12
+[diag 06:31:12Z] AUTH_OK
+[diag 06:31:12Z] SEARCH_START MODIS_TERRA
+[diag 06:31:12Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 06:31:12Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 06:31:12Z] DOWNLOAD_FORCE_HTTPS runner en AWS us-west-2: in_region=True -> False
+[diag 06:31:12Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10126653207,LAADS:10126194131]
+[diag 06:31:14Z] DOWNLOAD_DONE attempt=0 elapsed=2.1s n_files=2
+[diag 06:31:14Z] SEARCH_START MODIS_AQUA
+[diag 06:31:14Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 2 of 3 granules (night filter)
+[diag 06:31:14Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 06:31:14Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10127128957,LAADS:10126847484]
+[diag 06:31:16Z] DOWNLOAD_DONE attempt=0 elapsed=1.9s n_files=2
+[diag 06:31:16Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10127128966,LAADS:10126927335]
+[diag 06:31:17Z] DOWNLOAD_DONE attempt=0 elapsed=2.0s n_files=2
+[diag 06:31:17Z] SEARCH_RETIRADA VIIRS_SNPP cese anunciado desde 2026-11-02 13:00 UTC (scripts/ceses_esperados.json), no se busca
+[diag 06:31:17Z] SEARCH_START VIIRS_NOAA20
+[diag 06:31:17Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 06:31:17Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 06:31:17Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10126513036,LAADS:10126502739]
+[diag 06:31:20Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 06:31:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10126674128,LAADS:10126658106]
+[diag 06:31:23Z] DOWNLOAD_DONE attempt=0 elapsed=2.3s n_files=2
+[diag 06:31:23Z] SEARCH_START VIIRS_NOAA21
+[diag 06:31:23Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 06:31:23Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 06:31:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10126462106,LAADS:10126454102]
+[diag 06:31:25Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+[diag 06:31:25Z] SEARCH_RETIRADA VIIRS_SNPP_750 cese anunciado desde 2026-11-02 13:00 UTC (scripts/ceses_esperados.json), no se busca
+[diag 06:31:25Z] SEARCH_START VIIRS_NOAA20_750
+[diag 06:31:25Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 06:31:25Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 06:31:25Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10126513038,LAADS:10126502740]
+[diag 06:31:27Z] DOWNLOAD_DONE attempt=0 elapsed=1.6s n_files=2
+[diag 06:31:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10126674136,LAADS:10126658108]
+[diag 06:31:29Z] DOWNLOAD_DONE attempt=0 elapsed=1.9s n_files=2
+[diag 06:31:29Z] SEARCH_START VIIRS_NOAA21_750
+[diag 06:31:29Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 06:31:29Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 06:31:29Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10126462110,LAADS:10126454106]
+[diag 06:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=1.8s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=3.038 MW | T_bg=272.65 K | T_max=276.31 K | anomalous_px=9
+  MODIS_AQUA | VRP=23.378 MW | T_bg=267.74 K | T_max=283.34 K | anomalous_px=11
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20_750 (750m) | VRP=21.353 MW | T_bg=270.15 K | T_max=290.13 K | anomalous_px=13
+  VIIRS_NOAA20_750 (750m) | VRP=40.679 MW | T_bg=270.25 K | T_max=307.28 K | anomalous_px=8
+  VIIRS_NOAA21_750 (750m) | VRP=34.105 MW | T_bg=268.63 K | T_max=319.82 K | anomalous_px=5
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20261112
+Cobertura: faltan plataformas enteras (nota, no es búsqueda fallida).
+  VIIRS_SNPP: no se buscó en 3 volcán-día por cese anunciado desde 2026-11-02T13:00:00Z UTC (scripts/ceses_esperados.json)
+  VIIRS_SNPP_750: no se buscó en 3 volcán-día por cese anunciado desde 2026-11-02T13:00:00Z UTC (scripts/ceses_esperados.json)
+
+Done.
