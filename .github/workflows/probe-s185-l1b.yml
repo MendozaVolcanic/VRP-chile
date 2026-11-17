@@ -11,8 +11,23 @@ name: "Probe S185, L1B crudos: Tupungatito V750 (remuestreo y celda) y Nevados d
 # A15: 10 pares V750 de ~115 MB y 8 pares V375 de ~245 MB (manifiesto); cada pasada corre la via 7 veces (variantes de remuestreo,
 # ~1 a 2 min con la grilla de 750 m y ~2 a 3 min con la de 375 m en la prueba sintetica) y baja ~40 s: ~20 y ~30 min estimados.
 # timeout 60 (2 veces lo esperado). Cuota: 2 jobs, grupo de concurrencia propio.
+# S190 (experiments/_s190_l1b_ab/PREREGISTRO.md): con probe=s190 corre en su lugar el A/B de fase de grilla en VIIRS 750
+# (178 gránulos V750 de ~115 MB, 4 brazos por pasada, 6 partes de ~30 gránulos: ~15 a 25 min cada una, timeout 60). Mismas
+# reglas: solo lectura, solo EARTHDATA_TOKEN, sin push; sube solo JSON y logs. Por defecto (probe=s185) hace lo de siempre.
 "on":
   workflow_dispatch:
+    inputs:
+      probe:
+        description: "s185 (Tupungatito y Chillan, 18 pasadas) o s190 (A/B de fase de grilla V750)"
+        required: false
+        default: "s185"
+        type: choice
+        options: ["s185", "s190", "s190r"]
+      granulos:
+        description: "solo con s190r: gránulos L1B del manifiesto S190 a reintentar, separados por coma"
+        required: false
+        default: ""
+        type: string
 
 concurrency:
   group: probe-s185-l1b
@@ -20,6 +35,7 @@ concurrency:
 
 jobs:
   probe:
+    if: ${{ inputs.probe != 's190' && inputs.probe != 's190r' }}
     runs-on: ubuntu-24.04  # igual que nrt.yml
     timeout-minutes: 60
     permissions:
@@ -67,5 +83,96 @@ jobs:
             out/*.txt
             out/*.log
             out/recortes_${{ matrix.caso }}/*.npz
+          retention-days: 30
+          if-no-files-found: error
+
+  ab_s190:
+    if: ${{ inputs.probe == 's190' }}
+    runs-on: ubuntu-24.04  # igual que nrt.yml
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        parte: [0, 1, 2, 3, 4, 5]
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pytest
+      - name: Prueba del instrumento (sintetica, sin red)
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python -m pytest tests/test_ab_fase_s190.py -q 2>&1 | tee out/prueba_instrumento_s190_${{ matrix.parte }}.txt
+      - name: Bajar, medir y borrar
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          python experiments/_s190_l1b_ab/ab_fase.py --parte ${{ matrix.parte }} --partes 6 --out out             2>&1 | tee out/ab_fase_s190_${{ matrix.parte }}.log
+      - name: Subir resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s190-ab-fase-${{ matrix.parte }}
+          path: |
+            out/*.json
+            out/*.txt
+            out/*.log
+          retention-days: 30
+          if-no-files-found: error
+
+  # S190, desvío operativo: reintento de los gránulos que el cortacircuito de búsqueda de CMR (S116) saltó tras un solo
+  # ReadTimeout (run 44016316141). Misma medición (ab_fase.py), manifiesto sellado; ~10 gránulos, ~10 min, timeout 40.
+  ab_s190_reintento:
+    if: ${{ inputs.probe == 's190r' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pytest
+      - name: Bajar, medir y borrar
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+          GRANULOS: ${{ inputs.granulos }}
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s190_l1b_ab/reintento.py --granulos "$GRANULOS" --out out 2>&1 | tee out/reintento_s190.log
+      - name: Subir resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s190-ab-fase-reintento
+          path: |
+            out/*.json
+            out/*.log
           retention-days: 30
           if-no-files-found: error

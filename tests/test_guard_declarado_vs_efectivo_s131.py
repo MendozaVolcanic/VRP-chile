@@ -147,8 +147,9 @@ def test_g7_campo_con_flag_productor_apagado_queda_en_cero(flags_operacionales):
 # deriva del documento (S136 lo aprendio agregando un flag que corrio tres citas en 1).
 CITAS_CLAUDE_MD = [
     # S161: 234 -> 252 y 244 -> 262, +18 por la cabecera FICHA de run_pipeline.py.
+    # S190: 262 -> 263, +1 por la foto de incidencias antes de process_modis.calculate_vrp (H07).
     ("scripts/run_pipeline.py", 252, "get_detection_anchor"),
-    ("scripts/run_pipeline.py", 262, "local_kernel_bg"),
+    ("scripts/run_pipeline.py", 263, "local_kernel_bg"),
     ("pipeline/geo_utils.py", 29, "get_grid_center"),
     # S151: 1473 -> 1483, +10 por la marca A113 sobre el tope D9 (tarea 0.3 del loop, sólo comentario).
     # V31.1: 1483 -> 1493, +10 por la marca de MIROVA sin distancia (helpers de estilo y tooltip).
@@ -157,7 +158,7 @@ CITAS_CLAUDE_MD = [
     # S153: 1594 -> 1595, +1 por el script cambio_detector.js (marca de la adopción de K) en la cabecera.
     # S180: 1595 -> 1600, +5 por la exención de la vía en f5CoreMagnitude (tests/test_f5_no_recorta_via_s180.py).
     # S186: 1600 -> 1714, +114 por el desempeño en vivo del modal «Acerca de» (b.4, lee data/audit_continuous/latest.json).
-    ("frontend/index.html", 1714, "isValidDetection"),
+    ("frontend/index.html", 1723, "isValidDetection"),
     # S151: predicado del tope D9, citado en la marca S151 de A23.
     # S164: 1056 -> 1094, +1 por el import de ENABLE_MODIS_CODIGO_MIROVA y +37 por el bloque de la vía «código MIROVA».
     # S165: 1094 -> 1185 (+91): imports y cabecera FICHA de los flags MxD03, sus funciones nuevas y su cableado.

@@ -188,7 +188,7 @@ procese un gránulo.
 - `docs/MIROVA_DIVERGENCES.md` D36: los puntos 1, 2, 3 y 6 de la tabla y el escalón de cenit llevan su cifra y su
   veredicto.
 - `docs/FICHA_SDA_VRP_CHILE.md`: los literales (a), (b) y (e) de las diferencias con MIROVA dicen el costo medido;
-  fila v1.34 del historial. Sin cambio de lógica de detección.
+  fila v1.36 del historial (numerada al mergear; el PR la abrió como v1.34). Sin cambio de lógica de detección.
 - Nada en `pipeline/`, `data/` ni `frontend/`.
 
 ## Límites

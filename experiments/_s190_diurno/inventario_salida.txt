@@ -1,0 +1,68 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+Perfil: mirova_equivalent | ENABLE_DAYTIME_VIIRS = False | ENABLE_DAYTIME_MODIS = False
+Tabla: registro_vrp_consolidado.csv ultimo commit 2026-11-16T19:36:52Z 585aaa6f2
+OCR  : registro_vrp_ocr.csv ultimo commit 2026-11-16T19:36:52Z 585aaa6f2
+C1 regla sintetica de dia/noche: PASA
+C2 el contador de records puede dar distinto de cero: PASA
+
+Referencia desde 2026-03-01: 43494 filas, 2026-03-01 01:35 a 2026-11-16 13:15
+campos de una fila: ['clasificacion', 'dist_km', 'fecha_utc', 'origen', 'sensor_bucket', 'sensor_raw', 'sin_geometria', 'source', 'tipo', 'ultima_actualizacion', 'volcano', 'vrp_mw']
+fuentes: {'CONS': 42268, 'OCR': 1226}
+
+Pasadas de MIROVA (volcan, sensor, minuto) desde 2026-03-01, y cuantas son alerta
+  tab = solo tabla latest.php; comb = tabla + OCR desde 2026-06-13 (A119); prot = >= 1 MW lectura A
+  sensor     luz     pasadas alerta_tab   prot_tab alerta_comb  prot_comb
+  MODIS      dia        5951         21         18         21         18
+  MODIS      noche      6088        133         89        134         90
+  VIIRS375   dia        7671         52         40         75         60
+  VIIRS375   noche      7772       1303        148       1480        164
+  VIIRS750   dia        7889         27         26         31         30
+  VIIRS750   noche      7581        361        158        367        164
+
+Alertas diurnas (comb) por volcan y sensor; entre parentesis protegidas >= 1 MW; [tabla sola]:
+  NevadosDeChillan         VIIRS375     36 (33) [35]
+  NevadosDeChillan         VIIRS750     27 (26) [27]
+  Lascar                   VIIRS375     17 (13) [10]
+  NevadosDeChillan         MODIS        17 (17) [17]
+  Lastarria                VIIRS375      7 (6) [0]
+  Villarrica               VIIRS375      5 (3) [3]
+  Chaiten                  MODIS         3 (0) [3]
+  Isluga                   VIIRS375      3 (3) [0]
+  PuyehueCordonCaulle      VIIRS375      3 (1) [2]
+  Chaiten                  VIIRS375      2 (1) [1]
+  Isluga                   VIIRS750      2 (2) [0]
+  Tupungatito              VIIRS375      2 (0) [1]
+  PlanchonPeteroa          VIIRS750      1 (1) [0]
+  Tupungatito              VIIRS750      1 (1) [0]
+  Villarrica               MODIS         1 (1) [1]
+
+Alertas diurnas (comb) por mes y sensor:
+  2026-03 MODIS      1
+  2026-03 VIIRS375   8
+  2026-04 VIIRS750   1
+  2026-05 MODIS      2
+  2026-06 MODIS      1
+  2026-06 VIIRS375   13
+  2026-06 VIIRS750   1
+  2026-07 VIIRS375   3
+  2026-08 MODIS      1
+  2026-08 VIIRS375   9
+  2026-08 VIIRS750   2
+  2026-09 VIIRS375   6
+  2026-09 VIIRS750   1
+  2026-10 MODIS      6
+  2026-10 VIIRS375   19
+  2026-10 VIIRS750   12
+  2026-11 MODIS      10
+  2026-11 VIIRS375   17
+  2026-11 VIIRS750   14
+
+Nuestros records en data/mirova_equivalent/, pasadas diurnas por sensor (debe ser 0 hoy):
+  MODIS_AQUA             records    7754  diurnos     0  dayflag=1     4
+  MODIS_TERRA            records    7594  diurnos     0  dayflag=1     1
+  VIIRS_NOAA20           records   10190  diurnos     0  dayflag=1     0
+  VIIRS_NOAA20_750       records   10652  diurnos     0  dayflag=1     0
+  VIIRS_NOAA21           records   10062  diurnos     0  dayflag=1     0
+  VIIRS_NOAA21_750       records   10443  diurnos     0  dayflag=1     0
+  VIIRS_SNPP             records    9688  diurnos     0  dayflag=1     0
+  VIIRS_SNPP_750         records   10160  diurnos     0  dayflag=1     0

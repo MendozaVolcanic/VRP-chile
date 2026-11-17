@@ -143,6 +143,21 @@ def test_filtro_nocturno_sigue_al_flag_solo_en_viirs():
         assert aplica_filtro_nocturno(True, "MODIS_AQUA") is True
 
 
+def test_filtro_nocturno_de_modis_sigue_a_su_flag_s190():
+    """S190 (adenda V, sellada): MODIS abría el día sólo en store (ENABLE_DAYTIME_MODIS) y el filtro previo a la
+    descarga lo seguía tirando, la trampa de S92. Con su flag, MODIS no se filtra; VIIRS sigue a su propio flag."""
+    import pipeline.profile as prof
+    from pipeline.diurno import aplica_filtro_nocturno
+    with patch.object(prof, "ENABLE_DAYTIME_MODIS", True), _flag(False):
+        assert aplica_filtro_nocturno(True, "MODIS_TERRA") is False
+        assert aplica_filtro_nocturno(True, "MODIS_AQUA") is False
+        assert aplica_filtro_nocturno(True, "VIIRS_SNPP") is True
+        assert aplica_filtro_nocturno(True, "VIIRS_NOAA20_750") is True
+    with patch.object(prof, "ENABLE_DAYTIME_MODIS", False), _flag(False):
+        assert aplica_filtro_nocturno(True, "MODIS_TERRA") is True
+        assert aplica_filtro_nocturno(True, "MODIS_AQUA") is True
+
+
 def test_pasada_es_diurna_usa_la_regla_de_store():
     from pipeline.diurno import pasada_es_diurna
     assert pasada_es_diurna("2026-07-19 18:00", arnes.LAT0, arnes.LON0) is True

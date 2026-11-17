@@ -801,7 +801,7 @@
       </table>
     </div>
   </div>
-  <div class="orden-tarjetas"><label for="orden-tarjetas">Ordenar volcanes</label> <select id="orden-tarjetas"><option value="ns">Norte a sur</option><option value="sn">Sur a norte</option><option value="mirova">Comparables con MIROVA primero</option><option value="vrp">Mayor VRP ahora</option><option value="solo34">Sólo los 34 sin MIROVA</option><option value="solo11">Sólo los 11 con MIROVA</option></select> <span class="orden-nota">Los 11 con referencia de MIROVA se actualizan cada 2 h; los otros 34, una vez al día y sin MIROVA con qué comparar.</span></div><div class="volcano-grid" id="volcano-grid"></div><!-- S180: selector en la misma línea (guard G8) -->
+  <div class="orden-tarjetas"><label for="orden-tarjetas">Ordenar volcanes</label> <select id="orden-tarjetas"><option value="ns">Norte a sur</option><option value="sn">Sur a norte</option><option value="mirova">Comparables con MIROVA primero</option><option value="vrp">Mayor VRP ahora</option><option value="solo34">Sólo los 32 sin MIROVA</option><option value="solo11">Sólo los 11 con MIROVA</option></select> <span class="orden-nota">Los 11 con referencia de MIROVA se actualizan cada 2 h; los otros 34, una vez al día y sin MIROVA con qué comparar.</span></div><div class="volcano-grid" id="volcano-grid"></div><!-- S180: selector en la misma línea (guard G8) -->
   <div id="detail"></div>
 </main>
 
@@ -843,7 +843,7 @@ const VOLCANOES_ALL = [
   { name: "Irruputuncu",          display: "Irruputuncu",            region: "Tarapacá",      lat: -20.730, lon: -68.550, radius_km: 10 },
   { name: "OlcaParuma",           display: "Olca-Paruma",            region: "Tarapacá",      lat: -20.942, lon: -68.503, radius_km: 10 },
   { name: "Ollague",              display: "Ollagüe",                region: "Antofagasta",   lat: -21.300, lon: -68.180, radius_km: 10 },
-  { name: "SanPedro",             display: "San Pedro",              region: "Antofagasta",   lat: -21.880, lon: -68.400, radius_km: 10 },
+  { name: "SanPedro",             display: "San Pedro",              region: "Antofagasta",   lat: -21.890, lon: -68.390, radius_km: 10 },
   { name: "Putana",               display: "Putana",                 region: "Antofagasta",   lat: -22.557, lon: -67.853, radius_km: 10 },
   { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",   lat: -23.369, lon: -67.732, radius_km: 25, inner_radius_km: 5, vent_radius_km: 3, hasMirova: true,  vent_lat: -23.362930, vent_lon: -67.731416 },
   { name: "Lastarria",            display: "Lastarria",              region: "Antofagasta",      lat: -25.168, lon: -68.507, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
@@ -862,7 +862,7 @@ const VOLCANOES_ALL = [
   { name: "NevadosDeChillan",     display: "Nevados de Chillán",     region: "Ñuble",         lat: -36.863, lon: -71.377, radius_km: 25, inner_radius_km: 5, vent_radius_km: 2, hasMirova: true,  vent_lat: -36.863, vent_lon: -71.377 },
   { name: "Antuco",               display: "Antuco",                 region: "Biobío",        lat: -37.406, lon: -71.349, radius_km: 10 },
   { name: "Copahue",              display: "Copahue",                region: "Biobío",        lat: -37.856, lon: -71.183, radius_km: 25, inner_radius_km: 4, vent_radius_km: 2, hasMirova: true,  vent_lat: -37.856, vent_lon: -71.183 },
-  { name: "Callaqui",             display: "Callaqui",               region: "Biobío",        lat: -37.920, lon: -71.450, radius_km: 10 },
+  { name: "Callaqui",             display: "Callaqui",               region: "Biobío",        lat: -37.930, lon: -71.450, radius_km: 10 },
   // === Zona Sur SVZ ===
   { name: "Lonquimay",            display: "Lonquimay",              region: "Araucanía",     lat: -38.380, lon: -71.580, radius_km: 10 },
   { name: "Tolhuaca",             display: "Tolhuaca",               region: "Araucanía",     lat: -38.310, lon: -71.645, radius_km: 10 },
@@ -874,26 +874,26 @@ const VOLCANOES_ALL = [
   { name: "MochoChoshuenco",      display: "Mocho-Choshuenco",       region: "Los Ríos",      lat: -39.927, lon: -72.027, radius_km: 10 },
   { name: "CarranLosVenados",     display: "Carrán-Los Venados",     region: "Los Ríos",      lat: -40.350, lon: -72.070, radius_km: 10 },
   { name: "PuyehueCordonCaulle",  display: "Puyehue–Cordón Caulle",  region: "Los Ríos",      lat: -40.590, lon: -72.117, radius_km: 25, inner_radius_km: 20, vent_radius_km: 3, hasMirova: true,  vent_lat: -40.525499, vent_lon: -72.146137, mirova_center_lat: -40.5903, mirova_center_lon: -72.1187 },  // S89: sync mirova_center al KMZ oficial MIROVA (= volcanoes.yaml S81). Antes -40.582/-72.131 = centroide térmico empírico S48 (stale, 1.39 km off); ese punto es la *feature* lacolito, no el centro de grilla.
-  { name: "AntillancaCasablanca", display: "Antillanca-Casablanca",  region: "Los Lagos",     lat: -40.770, lon: -72.150, radius_km: 10 },
+  { name: "AntillancaCasablanca", display: "Antillanca-Casablanca",  region: "Los Lagos",     lat: -40.780, lon: -72.160, radius_km: 10 },
   { name: "Osorno",               display: "Osorno",                 region: "Los Lagos",     lat: -41.100, lon: -72.493, radius_km: 10 },
   { name: "Calbuco",              display: "Calbuco",                region: "Los Lagos",     lat: -41.330, lon: -72.614, radius_km: 10 },
   { name: "YateHornopiren",       display: "Yate-Hornopirén",        region: "Los Lagos",     lat: -41.760, lon: -72.390, radius_km: 10 },
   { name: "Huequi",               display: "Huequi",                 region: "Los Lagos",     lat: -42.377, lon: -72.578, radius_km: 10 },
-  { name: "Michinmahuida",        display: "Michinmahuida",          region: "Los Lagos",     lat: -42.790, lon: -72.440, radius_km: 10 },
+  { name: "Michinmahuida",        display: "Michinmahuida",          region: "Los Lagos",     lat: -42.800, lon: -72.450, radius_km: 10 },
   { name: "Chaiten",              display: "Chaitén",                region: "Los Lagos",     lat: -42.833, lon: -72.646, radius_km: 25, inner_radius_km: 5, vent_radius_km: 3, hasMirova: true,  vent_lat: -42.8344815, vent_lon: -72.6528875 },
   // === Zona Austral ===
-  { name: "CorcovadoYanteles",    display: "Corcovado-Yanteles",     region: "Los Lagos",     lat: -43.183, lon: -72.800, radius_km: 10 },
+  { name: "CorcovadoYanteles",    display: "Corcovado-Yanteles",     region: "Los Lagos",     lat: -43.190, lon: -72.790, radius_km: 10 },
   { name: "Melimoyu",             display: "Melimoyu",               region: "Aysén",         lat: -44.080, lon: -72.880, radius_km: 10 },
-  { name: "Mentolat",             display: "Mentolat",               region: "Aysén",         lat: -44.670, lon: -73.080, radius_km: 10 },
-  { name: "MacaCay",              display: "Macá-Cay",               region: "Aysén",         lat: -45.100, lon: -73.200, radius_km: 10 },
+  { name: "Mentolat",             display: "Mentolat",               region: "Aysén",         lat: -44.700, lon: -73.080, radius_km: 10 },
+  { name: "MacaCay",              display: "Macá-Cay",               region: "Aysén",         lat: -45.10501, lon: -73.169326, radius_km: 10 },
   { name: "Hudson",               display: "Hudson",                 region: "Aysén",         lat: -45.900, lon: -72.970, radius_km: 15 },
 ];
 
-// S180 (Nicolás, 2026-11-12: «todos deben tener la misma funcionalidad»): las 45 tarjetas con datos. Los 11 Tier A
-// leen data/mirova_equivalent (NRT cada 2 h); los otros 34, data/sombra_34 (vía «código MIROVA», una vez al día,
-// sombra-34.yml), sin referencia de MIROVA. Cumbre de 5 km (D5, la de la antigua preliminar_34.js) y grilla de unos 51 km, la
-// de la vía. Hasta S180 (decisión S18) los 34 quedaban «sin datos» para no mezclar; ahora van marcados (v.fuente).
-const VOLCANOES = VOLCANOES_ALL.map(v => v.hasMirova ? v : Object.assign({}, v, { fuente: "sombra_34", inner_radius_km: 5, radius_km: 25 }));
+// S180 (Nicolás, 2026-11-12: «todos deben tener la misma funcionalidad»): las tarjetas con datos. Los 11 Tier A leen
+// data/mirova_equivalent (NRT cada 2 h); los demás, data/sombra_34 (vía «código MIROVA», diaria), sin referencia de MIROVA,
+// cumbre de 5 km (D5) y grilla de unos 51 km. S190, D1 opción 1a (Nicolás, 2026-11-17): la lista son los 43 de la RNVV;
+// Olca-Paruma y Putana (active: false en volcanoes.yaml) no se muestran y quedan en VOLCANOES_ALL por si D1 cambia.
+const VOLCANOES = VOLCANOES_ALL.filter(v => !["OlcaParuma", "Putana"].includes(v.name)).map(v => v.hasMirova ? v : Object.assign({}, v, { fuente: "sombra_34", inner_radius_km: 5, radius_km: 25 }));
 
 const SENSORS = [
   { key: "MODIS",    label: "MODIS (1km)",     color: "#ff8c00" },
@@ -1282,7 +1282,8 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
     // fósil F2.8 pre-S41 que pueda reaparecer (race condition reproc / restore
     // de tag). Pipeline ya tiene SANITY_CAP_VRP_MW=50000 en store.py; esto
     // es defensa-en-profundidad si un JSON viejo se cuela al frontend.
-    return vfb > 50000 ? 0 : vfb;
+    // POR QUÉ (S190, H01): misma excepción que el camino del cúmulo; ver el comentario de abajo.
+    return vfb > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : vfb;
   }
   // Records modernos: si dist_class no es summit, MIROVA no reportaría → 0
   // (a menos que el toggle "incluir lejanas" esté activo).
@@ -1293,7 +1294,11 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
   if (!includeFar && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
   // M1: sanity cap también sobre el cluster path (coherente con diario.html).
   const vmw = pc.vrp_mw ?? 0;
-  return vmw > 50000 ? 0 : vmw;
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (<= 500 K) y la marca
+  // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
+  // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
+  // tests/test_tope_publicacion_s190.py
+  return vmw > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : vmw;
 }
 
 // ============================================================================
@@ -1430,7 +1435,11 @@ function mirovaEqVrpCore(r, innerKm = 10, includeFar = false) {
   // dan ~0) → mostrar el Cluster. F5' solo REDUCE el halo glaciar; jamás erradica
   // señal real (validado: 73/1653 records confirmados por MIROVA caían a 0 sin esto).
   if (core == null || core <= 0) return base;
-  return core > 50000 ? 0 : core;
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (<= 500 K) y la marca
+  // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
+  // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
+  // tests/test_tope_publicacion_s190.py
+  return core > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : core;
 }
 
 // Punto ÚNICO de magnitud para DISPLAY: respeta el toggle USE_F5_CORE. Los

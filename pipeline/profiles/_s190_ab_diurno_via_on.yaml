@@ -1,0 +1,28 @@
+# A/B diurno sobre la vía (S190, adenda V sellada: experiments/_s190_diurno/ADENDA_VIA.md). BRAZO DIURNO: el control más enable_daytime_viirs y enable_daytime_modis en true, y nada más.
+#
+# POR QUÉ. Producción corre la vía en MODIS, VIIRS 375 y VIIRS 750, y el detector de la vía trae la rama diurna del
+# .m de MIROVA. Lo que se mide es abrir las tres compuertas previas (descarga, salto del gránulo y store) con los
+# flags del perfil, sin --no-night-filter. tests/test_perfiles_diurno_via_s190.py vigila que el control sea
+# producción y que el diurno difiera sólo en los dos flags, resolviendo todas las constantes de pipeline.profile.
+# Declara los flags de K y de la vía con su valor (A117): si la réplica cambia, este brazo no la sigue en silencio.
+# NO OPERACIONAL: fuera del cron NRT.
+extends: mirova_equivalent
+profile: _s190_ab_diurno_via_on
+description: >
+  A/B diurno sobre la vía, brazo on (S190, adenda V).
+
+thresholds:
+  enable_modis_codigo_mirova: true
+  enable_v375_codigo_mirova: true
+  enable_v750_codigo_mirova: true
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+  enable_daytime_viirs: true
+  enable_daytime_modis: true
+
+output:
+  data_subdir: _s190_ab_diurno_via_on
+
+enable_modis_b22_primary: true

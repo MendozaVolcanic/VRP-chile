@@ -183,10 +183,11 @@ def _sombra_real():
 
 
 def _volcanes_de_la_pagina(tmp_path):
-    """Los 45 tal como los arma index.html (VOLCANOES_ALL y VOLCANOES), evaluados en node."""
+    """Los 45 tal como los arma index.html (VOLCANOES_ALL y VOLCANOES), evaluados en node. S190 (D1 1a): son 43, la
+    línea de VOLCANOES filtra a Putana y OlcaParuma antes del map."""
     m = re.search(r"const VOLCANOES_ALL = \[.*?\n\];", _SRC, re.S)
     assert m, "no encontré VOLCANOES_ALL"
-    linea = re.search(r"^const VOLCANOES = VOLCANOES_ALL\.map[^\n]*", _SRC, re.M).group(0)
+    linea = re.search(r"^const VOLCANOES = VOLCANOES_ALL\.[^\n]*", _SRC, re.M).group(0)
     return _node(tmp_path, "process.stdout.write(JSON.stringify(VOLCANOES));", None, nombres=[],
                  previo=m.group(0) + "\n" + linea + "\n")
 
@@ -199,7 +200,9 @@ def test_los_34_de_la_pagina_estan_donde_los_pone_el_pipeline(tmp_path):
     todos = {v["name"]: v for v in yaml.safe_load((RAIZ / "volcanoes.yaml").read_text(encoding="utf-8"))["volcanoes"]}
     pagina = _volcanes_de_la_pagina(tmp_path)
     sombra = [v for v in pagina if v.get("fuente") == "sombra_34"]
-    assert {v["name"] for v in sombra} == {n for n, v in todos.items() if v["radius_km"] != 25}
+    # S190, D1 1a: sólo los activos de volcanoes.yaml (Putana y OlcaParuma quedan fuera del tablero)
+    assert {v["name"] for v in sombra} == {n for n, v in todos.items()
+                                          if v["radius_km"] != 25 and v.get("active", True)}
     lejos = [(v["name"], v["lat"], v["lon"]) for v in sombra
              if abs(v["lat"] - todos[v["name"]]["lat"]) > 1e-6 or abs(v["lon"] - todos[v["name"]]["lon"]) > 1e-6]
     assert not lejos, lejos
@@ -208,7 +211,7 @@ def test_los_34_de_la_pagina_estan_donde_los_pone_el_pipeline(tmp_path):
 def test_datos_reales_carran_y_focos_compartidos(tmp_path):
     datos = _sombra_real()
     vs = [v for v in _volcanes_de_la_pagina(tmp_path) if v.get("fuente") == "sombra_34"]
-    assert len(vs) == 34
+    assert len(vs) == 32   # S190, D1 1a: 34 menos Putana y OlcaParuma
     cuerpo = """
 const { vs, datos } = DATOS;
 const carran = vs.find(v => v.name === "CarranLosVenados");
@@ -222,8 +225,10 @@ process.stdout.write(JSON.stringify({ rotulos, compartidas: m.size, n }));
     rot = {s: (t, c) for s, t, c in out["rotulos"]}
     assert rot["VIIRS_NOAA21"] == ("píxel a 1,8 km de la cumbre", 20.601), out["rotulos"]
     assert rot["VIIRS_NOAA21_750"] == (None, None), "su centroide ya está a 1,8 km: el rótulo no agrega nada"
-    # 10 de 49 el 2026-11-13; el corpus crece (A90): se exige que haya y que sea una parte, no el número exacto
-    assert 10 <= out["compartidas"] < out["n"] and out["n"] >= 49, out
+    # 10 de 49 el 2026-11-13; el corpus crece (A90): se exige que haya y que sea una parte, no el número exacto.
+    # S190 (D1 1a): sin OlcaParuma en la página, 4 de 51 sobre origin/main 9a5bc536b (con los 34 eran 12 de 64; las 8
+    # que salen son los 4 focos que Irruputuncu y OlcaParuma compartían, contados desde cada uno).
+    assert 4 <= out["compartidas"] < out["n"] and out["n"] >= 51, out
 
 
 def test_filtros_solo_34_y_solo_11(tmp_path):
