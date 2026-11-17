@@ -569,6 +569,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-17 04:07 UTC (S190): arranque verificado; vigilante y cadena 4 a 7 relanzados; retiro D1 en curso; cuatro sesiones para los pendientes
+- **Verificado 03:42 UTC**: `loop/activo` = remoto (`9f80dde80`); `ps` sin cadenas, vigilantes ni `sleep` huérfanos; main en `9a5bc536b` (sólo NRT y guardia K desde el respaldo `7f864b885`; los 4 JSON de Putana y OlcaParuma sin cambios). Run 43906817147 (tanda 3) sin terminar.
+- **Relanzados desde S190**: `vigilar_run.sh 43906817147` (log `D:\vrp-trabajo\temporales\s187_tanda2\vigilar_t3.log`) y `cadena_4a7.sh` (log `cadena_4a7.log`). `cadena_3a7.sh` NO.
+- **Retiro D1 (1a)**: subagente armando el PR en `D:\vrp-trabajo\worktrees\s190-retiro-d1` (rama `s190-retiro-d1`); espera «mergea #N».
+- **Alertas #1027 y #1028**: NO son sólo «corrida en cola». Rojas el 16 (`sombra-codigo-mirova` run 43981233006: 5 de 11 con `SEARCH_CMR_TIMEOUT` y push fallido; `sombra-34` run 43973811657: Putana y SanJose en «Revisar que salieron records»). Rojas el 14 y el 16, verde el 15. NRT sano.
+- **Aviso de contexto**: Nicolás, «espera no cierres, aun vamos en 15%» y «estamos trabajando con ventanas de 1 millón»: el aviso de 150 mil tokens no obliga a cerrar (memoria `feedback_s187_sesion_nueva_no_compactar.md` rebajada).
+- **Nicolás: «avancemos con todo lo que decías que estaba pendiente, en paralelo si es necesario o en sesiones nuevas si son tareas largas».** Lanzadas: `s190-d36` (costo de D36: umbrales MODIS -0,7/0,02, escalón de cenit V750, cortes 5 km/100 px/45 km), `s190-l1b-ab` (A/B de fase de grilla Tupungatito V750 y Chillán V375), `s190-sombras` (#1027 y #1028), `s190-experimental` (plan para reactivar el perfil, sin encender). Subagente: PR que corrige el `CLAUDE.md` (VIIRS corre la vía desde S177, no K). Todas trabajan en worktrees de `D:\vrp-trabajo\worktrees\`, sin tocar `loop/activo`.
+- La revisión acotada de los 34 queda para después de la tanda 7.
+
 ### 2026-11-17 00:26 UTC (S189): dos cadenas huérfanas detenidas; Nicolás acepta D1 1a, 2a y 3b; S189 cierra por contexto
 
 - Al abrir (00:09 UTC) seguían VIVOS `cadena_3a7.sh` (de S187, 13:21 UTC del 16, la que despachó la tanda 3), `cadena_4a7.sh` y `vigilar_run.sh` (19:03 UTC), pese al «detenidos» de S188: habrían despachado la tanda 4 dos veces. Se mataron por PID (también los `sleep`) y se relanzaron vigilante y `cadena_4a7.sh` como procesos de S189.
