@@ -3117,7 +3117,7 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 > calor volcánico. Ningún A/B nocturno mide estas pérdidas; si entran o no al criterio es decisión de
 > Nicolás. El texto de abajo se conserva por historia.
 
-`_select_thresholds` (`process_modis.py:357-380`), `ENABLE_DAYTIME_MODIS = False`, `run_pipeline.py:185-195`, `store.py:171-182`. El paper procesa pasadas diurnas y advierte que ahí están la mayoría de sus falsas alertas (p. 16-17; A76). MIROVA publica detecciones diurnas de MODIS que el operador no verá acá. Gravedad 2 (recall de día; riesgo de falsos positivos si se activara). No se propone cambiar.
+`_select_thresholds` (`process_modis.py:357-380`), `ENABLE_DAYTIME_MODIS = False`, `run_pipeline.py:185-195`, `store.py:190-201`. El paper procesa pasadas diurnas y advierte que ahí están la mayoría de sus falsas alertas (p. 16-17; A76). MIROVA publica detecciones diurnas de MODIS que el operador no verá acá. Gravedad 2 (recall de día; riesgo de falsos positivos si se activara). No se propone cambiar.
 
 ---
 
