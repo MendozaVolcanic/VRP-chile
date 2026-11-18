@@ -1,0 +1,1078 @@
+FLAGS_BRAZO {"PROFILE_NAME": "_s190_ab_diurno_via_on", "DATA_SUBDIR": "_s190_ab_diurno_via_on", "ENABLE_MODIS_CODIGO_MIROVA": true, "ENABLE_V375_CODIGO_MIROVA": true, "ENABLE_V750_CODIGO_MIROVA": true, "ENABLE_DAYTIME_VIIRS": true, "ENABLE_DAYTIME_MODIS": true, "ENABLE_TEST1_PATH": false, "ENABLE_TESTS_23_PROSE_BRANCH": true, "ENABLE_MODIS_B22_PRIMARY": true, "ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER": false, "PATH_D_ONLY_CAP_MW": 5.0, "ENABLE_TESTS_23_NO_BT_GATE_VIIRS375": false, "ENABLE_VENT_ANCHORED_CLUSTERING": true, "ENABLE_ROI1_BOX_PAPER": false}
+[VRP profile=_s190_ab_diurno_via_on] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s190_ab_diurno_via_on
+=== [VRP profile=_s190_ab_diurno_via_on] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s190_ab_diurno_via_on ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Rama diurna VIIRS ABIERTA por perfil (ENABLE_DAYTIME_VIIRS): VIIRS se procesa de día con la Tabla 1 diurna de Coppola 2016a; MODIS sigue con su propia regla.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Planchón-Peteroa | 2026-09-01
+[diag 16:50:57Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-01
+[diag 16:50:57Z] AUTH_OK
+[diag 16:50:57Z] SEARCH_START MODIS_TERRA
+[diag 16:51:57Z] SEARCH_VENTANA_ERR intento=0 [MODIS_TERRA_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 16:53:17Z] SEARCH_VENTANA_ERR intento=1 [MODIS_TERRA_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 16:53:17Z] SEARCH_VENTANA_OFF [MODIS_TERRA_L1B] -> búsqueda por día el resto del proceso err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+  WARN: Failed to fetch MODIS_TERRA: <html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+</body>
+</html>
+
+[diag 16:53:27Z] SEARCH_START MODIS_AQUA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 16:53:46Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 16:54:02Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 16:54:02Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10022134508,LAADS:10021810027]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 16:54:06Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 16:54:06Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10023058288,LAADS:10023053427]
+[diag 16:54:10Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 16:54:10Z] SEARCH_START VIIRS_SNPP
+[diag 16:55:20Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 16:55:34Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 16:55:34Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10021682677,LAADS:10021680805]
+[diag 16:55:39Z] DOWNLOAD_DONE attempt=0 elapsed=5.1s n_files=2
+[diag 16:55:39Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10022324507,LAADS:10022319646]
+[diag 16:55:45Z] DOWNLOAD_DONE attempt=0 elapsed=6.7s n_files=2
+[diag 16:55:45Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10022381098,LAADS:10022379308]
+[diag 16:55:52Z] DOWNLOAD_DONE attempt=0 elapsed=6.6s n_files=2
+[diag 16:55:52Z] SEARCH_START VIIRS_NOAA20
+[diag 16:56:19Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+[diag 16:57:19Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_NOAA20_GEO] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 16:57:19Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=0
+[diag 16:57:19Z] SEARCH_START VIIRS_NOAA21
+[diag 16:57:19Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 16:57:19Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 16:57:19Z] SEARCH_START VIIRS_SNPP_750
+[diag 16:57:19Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 16:57:19Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 16:57:19Z] SEARCH_START VIIRS_NOAA20_750
+[diag 16:57:19Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 16:57:19Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 16:57:19Z] SEARCH_START VIIRS_NOAA21_750
+[diag 16:57:19Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 16:57:19Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260901
+
+>>> Planchón-Peteroa | 2026-09-02
+[diag 16:57:45Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-02
+[diag 16:57:45Z] AUTH_OK
+[diag 16:57:45Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 16:57:45Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+[diag 16:57:55Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=3
+[diag 16:57:55Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10022997637,LAADS:10022482365]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 16:57:58Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+[diag 16:57:58Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10022997646,LAADS:10022597906]
+[diag 16:58:01Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 16:58:01Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10023263654,LAADS:10023167977]
+[diag 16:58:06Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+[diag 16:58:06Z] SEARCH_START MODIS_AQUA
+[diag 16:58:21Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 16:58:47Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 16:58:47Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10023174804,LAADS:10023104011]
+[diag 16:58:50Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 16:58:50Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10024027794,LAADS:10023981993]
+[diag 16:58:55Z] DOWNLOAD_DONE attempt=0 elapsed=5.2s n_files=2
+[diag 16:58:55Z] SEARCH_START VIIRS_SNPP
+[diag 16:59:24Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 16:59:27Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 16:59:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10022991856,LAADS:10022990361]
+[diag 16:59:31Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+[diag 16:59:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10023042969,LAADS:10023042235]
+[diag 16:59:36Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+[diag 16:59:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10023284731,LAADS:10023280474]
+[diag 16:59:44Z] DOWNLOAD_DONE attempt=0 elapsed=8.4s n_files=2
+[diag 16:59:44Z] SEARCH_START VIIRS_NOAA20
+[diag 17:00:44Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_NOAA20_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:00:44Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 17:00:44Z] SEARCH_START VIIRS_NOAA21
+[diag 17:00:44Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 17:00:44Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 17:00:44Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:00:44Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 17:00:44Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 17:00:44Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:00:44Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:00:44Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:00:44Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:00:44Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:00:44Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260902
+
+>>> Planchón-Peteroa | 2026-09-03
+[diag 17:01:14Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-03
+[diag 17:01:14Z] AUTH_OK
+[diag 17:01:14Z] SEARCH_START MODIS_TERRA
+[diag 17:02:14Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [MODIS_TERRA_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:02:14Z] SEARCH_DONE MODIS_TERRA n_l1b=0
+[diag 17:02:14Z] SEARCH_START MODIS_AQUA
+[diag 17:02:14Z] SEARCH_SKIP CMR degradada esta corrida [MODIS_AQUA_L1B]
+[diag 17:02:14Z] SEARCH_DONE MODIS_AQUA n_l1b=0
+[diag 17:02:14Z] SEARCH_START VIIRS_SNPP
+[diag 17:02:14Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_L1B]
+[diag 17:02:14Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 17:02:14Z] SEARCH_START VIIRS_NOAA20
+[diag 17:02:14Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_L1B]
+[diag 17:02:14Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 17:02:14Z] SEARCH_START VIIRS_NOAA21
+[diag 17:02:14Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 17:02:14Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 17:02:14Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:02:14Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 17:02:14Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 17:02:14Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:02:14Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:02:14Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:02:14Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:02:14Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:02:14Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+
+>>> Planchón-Peteroa | 2026-09-04
+[diag 17:02:14Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-04
+[diag 17:02:14Z] AUTH_OK
+[diag 17:02:14Z] SEARCH_START MODIS_TERRA
+[diag 17:02:15Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+[diag 17:03:00Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 17:03:00Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10024740807,LAADS:10024671667]
+[diag 17:03:04Z] DOWNLOAD_DONE attempt=0 elapsed=3.6s n_files=2
+[diag 17:03:04Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10025895808,LAADS:10025405342]
+[diag 17:03:12Z] DOWNLOAD_DONE attempt=0 elapsed=8.4s n_files=2
+[diag 17:03:12Z] SEARCH_START MODIS_AQUA
+[diag 17:03:25Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+[diag 17:04:06Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 17:04:06Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10025458824,LAADS:10024928087]
+[diag 17:04:09Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 17:04:09Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10028028732,LAADS:10027804680]
+[diag 17:04:15Z] DOWNLOAD_DONE attempt=0 elapsed=5.9s n_files=2
+[diag 17:04:15Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10028029675,LAADS:10027798098]
+[diag 17:04:21Z] DOWNLOAD_DONE attempt=0 elapsed=5.6s n_files=2
+[diag 17:04:21Z] SEARCH_START VIIRS_SNPP
+[diag 17:05:21Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_SNPP_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:05:21Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 17:05:21Z] SEARCH_START VIIRS_NOAA20
+[diag 17:05:21Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_L1B]
+[diag 17:05:21Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 17:05:21Z] SEARCH_START VIIRS_NOAA21
+[diag 17:05:21Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 17:05:21Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 17:05:21Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:05:21Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 17:05:21Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 17:05:21Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:05:21Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:05:21Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:05:21Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:05:21Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:05:21Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS MYD021KM.A2026247.1950.061.2026251154238.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260904
+
+>>> Planchón-Peteroa | 2026-09-05
+[diag 17:05:28Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-05
+[diag 17:05:28Z] AUTH_OK
+[diag 17:05:28Z] SEARCH_START MODIS_TERRA
+  WARN: Failed to fetch MODIS_TERRA: <html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+</body>
+</html>
+
+[diag 17:05:28Z] SEARCH_START MODIS_AQUA
+[diag 17:05:28Z] SEARCH_DONE MODIS_AQUA n_l1b=4
+[diag 17:05:43Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=4
+[diag 17:05:43Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10028029497,LAADS:10027819555]
+[diag 17:05:46Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 17:05:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10028029498,LAADS:10027816195]
+[diag 17:05:49Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 17:05:49Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10028071415,LAADS:10027842662]
+[diag 17:05:55Z] DOWNLOAD_DONE attempt=0 elapsed=5.6s n_files=2
+[diag 17:05:55Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10028069184,LAADS:10027831315]
+[diag 17:06:00Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+[diag 17:06:00Z] SEARCH_START VIIRS_SNPP
+[diag 17:07:00Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_SNPP_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:07:00Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 17:07:00Z] SEARCH_START VIIRS_NOAA20
+[diag 17:07:00Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_L1B]
+[diag 17:07:00Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 17:07:00Z] SEARCH_START VIIRS_NOAA21
+[diag 17:07:00Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 17:07:00Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 17:07:00Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:07:00Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 17:07:00Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 17:07:00Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:07:00Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:07:00Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:07:00Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:07:00Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:07:00Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS MYD021KM.A2026248.0830.061.2026251154403.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  MODIS MYD021KM.A2026248.2025.061.2026251160252.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260905
+
+>>> Planchón-Peteroa | 2026-09-06
+[diag 17:07:06Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-06
+[diag 17:07:06Z] AUTH_OK
+[diag 17:07:06Z] SEARCH_START MODIS_TERRA
+[diag 17:08:22Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+[diag 17:08:43Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 17:08:43Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10028059838,LAADS:10027834729]
+[diag 17:08:46Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+[diag 17:08:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10028071965,LAADS:10027838961]
+[diag 17:08:51Z] DOWNLOAD_DONE attempt=0 elapsed=4.7s n_files=2
+[diag 17:08:51Z] SEARCH_START MODIS_AQUA
+[diag 17:08:51Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 17:09:33Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 17:09:33Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10028098227,LAADS:10027878422]
+[diag 17:09:36Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 17:09:36Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10028133819,LAADS:10027913539]
+[diag 17:09:41Z] DOWNLOAD_DONE attempt=0 elapsed=5.5s n_files=2
+[diag 17:09:41Z] SEARCH_START VIIRS_SNPP
+[diag 17:09:42Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 17:09:51Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 17:09:51Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10026882958,LAADS:10026882024]
+[diag 17:09:56Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+[diag 17:09:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10027043160,LAADS:10027013615]
+[diag 17:10:03Z] DOWNLOAD_DONE attempt=0 elapsed=7.6s n_files=2
+[diag 17:10:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10027047605,LAADS:10027045729]
+[diag 17:10:12Z] DOWNLOAD_DONE attempt=0 elapsed=9.1s n_files=2
+[diag 17:10:12Z] SEARCH_START VIIRS_NOAA20
+[diag 17:11:12Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_NOAA20_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:11:12Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 17:11:12Z] SEARCH_START VIIRS_NOAA21
+[diag 17:11:12Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 17:11:12Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 17:11:12Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:11:12Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 17:11:12Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 17:11:12Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:11:12Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:11:12Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:11:12Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:11:12Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:11:12Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260906
+
+>>> Planchón-Peteroa | 2026-09-07
+[diag 17:11:41Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-07
+[diag 17:11:41Z] AUTH_OK
+[diag 17:11:41Z] SEARCH_START MODIS_TERRA
+[diag 17:12:12Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+[diag 17:12:50Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=3
+[diag 17:12:50Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10028125510,LAADS:10027913521]
+[diag 17:12:53Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 17:12:53Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10027385677,LAADS:10027174719]
+[diag 17:12:57Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+[diag 17:12:57Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10028106860,LAADS:10027854717]
+[diag 17:15:46Z] DOWNLOAD_DONE attempt=0 elapsed=168.7s n_files=2
+[diag 17:15:46Z] SEARCH_START MODIS_AQUA
+[diag 17:16:04Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 17:16:07Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 17:16:07Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10028071416,LAADS:10027843334]
+[diag 17:16:11Z] DOWNLOAD_DONE attempt=0 elapsed=3.8s n_files=2
+[diag 17:16:11Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10029829299,LAADS:10029582559]
+[diag 17:16:17Z] DOWNLOAD_DONE attempt=0 elapsed=6.1s n_files=2
+[diag 17:16:17Z] SEARCH_START VIIRS_SNPP
+[diag 17:16:22Z] SEARCH_DONE VIIRS_SNPP n_l1b=4
+[diag 17:16:31Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=4
+[diag 17:16:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10027288042,LAADS:10027286720]
+[diag 17:16:37Z] DOWNLOAD_DONE attempt=0 elapsed=6.3s n_files=2
+[diag 17:16:37Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10027307661,LAADS:10027306150]
+[diag 17:16:51Z] DOWNLOAD_DONE attempt=0 elapsed=13.7s n_files=2
+[diag 17:16:51Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10027364701,LAADS:10027363492]
+[diag 17:17:15Z] DOWNLOAD_DONE attempt=0 elapsed=24.1s n_files=2
+[diag 17:17:15Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10027373001,LAADS:10027372162]
+[diag 17:17:22Z] DOWNLOAD_DONE attempt=0 elapsed=7.1s n_files=2
+[diag 17:17:22Z] SEARCH_START VIIRS_NOAA20
+[diag 17:17:45Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+[diag 17:17:57Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 17:17:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10033457206,LAADS:10033282775]
+[diag 17:18:02Z] DOWNLOAD_DONE attempt=0 elapsed=5.2s n_files=2
+[diag 17:18:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10033662718,LAADS:10033540634]
+[diag 17:18:09Z] DOWNLOAD_DONE attempt=0 elapsed=7.3s n_files=2
+[diag 17:18:09Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10033668828,LAADS:10033540880]
+[diag 17:18:17Z] DOWNLOAD_DONE attempt=0 elapsed=7.2s n_files=2
+[diag 17:18:17Z] SEARCH_START VIIRS_NOAA21
+[diag 17:18:18Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+[diag 17:18:24Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 17:18:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10038041918,LAADS:10038025108]
+[diag 17:19:37Z] DOWNLOAD_DONE attempt=0 elapsed=72.6s n_files=2
+[diag 17:19:37Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10038041922,LAADS:10038013208]
+[diag 17:19:41Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 17:19:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10038049346,LAADS:10038022326]
+[diag 17:19:49Z] DOWNLOAD_DONE attempt=0 elapsed=7.4s n_files=2
+[diag 17:19:49Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:20:30Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=4
+[diag 17:20:30Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=4
+[diag 17:20:30Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10027288048,LAADS:10027286722]
+[diag 17:20:33Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 17:20:33Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10027307667,LAADS:10027306153]
+[diag 17:20:36Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 17:20:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10027364713,LAADS:10027363494]
+[diag 17:20:42Z] DOWNLOAD_DONE attempt=0 elapsed=6.2s n_files=2
+[diag 17:20:42Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10027373011,LAADS:10027372164]
+[diag 17:20:49Z] DOWNLOAD_DONE attempt=0 elapsed=6.6s n_files=2
+[diag 17:20:49Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:20:52Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+[diag 17:21:10Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 17:21:10Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10033457220,LAADS:10033282778]
+[diag 17:21:13Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 17:21:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10033662730,LAADS:10033540637]
+[diag 17:21:20Z] DOWNLOAD_DONE attempt=0 elapsed=6.7s n_files=2
+[diag 17:21:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10033668832,LAADS:10033540882]
+[diag 17:21:26Z] DOWNLOAD_DONE attempt=0 elapsed=6.2s n_files=2
+[diag 17:21:26Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:22:21Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+[diag 17:22:25Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 17:22:25Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10038041958,LAADS:10038025127]
+[diag 17:22:28Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 17:22:28Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10038041962,LAADS:10038013245]
+[diag 17:22:31Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+[diag 17:22:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10038049388,LAADS:10038022335]
+[diag 17:23:14Z] DOWNLOAD_DONE attempt=0 elapsed=42.7s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260907
+
+>>> Planchón-Peteroa | 2026-09-08
+[diag 17:24:54Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-08
+[diag 17:24:54Z] AUTH_OK
+[diag 17:24:54Z] SEARCH_START MODIS_TERRA
+[diag 17:24:54Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+[diag 17:25:12Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 17:25:12Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10027644458,LAADS:10027402674]
+[diag 17:25:15Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 17:25:15Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10029969208,LAADS:10029540670]
+[diag 17:25:20Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+[diag 17:25:20Z] SEARCH_START MODIS_AQUA
+[diag 17:25:20Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+[diag 17:25:34Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 17:25:34Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10029850450,LAADS:10029623094]
+[diag 17:25:38Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+[diag 17:25:38Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10029847295,LAADS:10029600038]
+[diag 17:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 17:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10030653055,LAADS:10030603454]
+[diag 17:25:45Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+[diag 17:25:45Z] SEARCH_START VIIRS_SNPP
+[diag 17:25:45Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 17:25:54Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 17:25:54Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10027589757,LAADS:10027571382]
+[diag 17:26:00Z] DOWNLOAD_DONE attempt=0 elapsed=5.5s n_files=2
+[diag 17:26:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10027909462,LAADS:10027890738]
+[diag 17:26:04Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 17:26:04Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10029552926,LAADS:10029533151]
+[diag 17:26:12Z] DOWNLOAD_DONE attempt=0 elapsed=7.2s n_files=2
+[diag 17:26:12Z] SEARCH_START VIIRS_NOAA20
+[diag 17:26:23Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+[diag 17:26:25Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=4
+[diag 17:26:25Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10043993326,LAADS:10043992011]
+[diag 17:26:29Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 17:26:29Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10043993327,LAADS:10043992215]
+[diag 17:26:34Z] DOWNLOAD_DONE attempt=0 elapsed=4.2s n_files=2
+[diag 17:26:34Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10043999445,LAADS:10043996935]
+[diag 17:26:40Z] DOWNLOAD_DONE attempt=0 elapsed=6.6s n_files=2
+[diag 17:26:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10044004024,LAADS:10044001259]
+[diag 17:26:47Z] DOWNLOAD_DONE attempt=0 elapsed=6.8s n_files=2
+[diag 17:26:47Z] SEARCH_START VIIRS_NOAA21
+[diag 17:27:13Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+[diag 17:27:26Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=2
+[diag 17:27:26Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10035322821,LAADS:10035310084]
+[diag 17:27:30Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+[diag 17:27:30Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10035359196,LAADS:10035320517]
+[diag 17:27:39Z] DOWNLOAD_DONE attempt=0 elapsed=8.6s n_files=2
+[diag 17:27:39Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:27:39Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+[diag 17:27:48Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 17:27:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10027589769,LAADS:10027571384]
+[diag 17:27:52Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+[diag 17:27:52Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10027909476,LAADS:10027890744]
+[diag 17:27:55Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 17:27:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10029552940,LAADS:10029533158]
+[diag 17:28:00Z] DOWNLOAD_DONE attempt=0 elapsed=5.6s n_files=2
+[diag 17:28:00Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:28:09Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=4
+[diag 17:28:09Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=4
+[diag 17:28:09Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10043993353,LAADS:10043992019]
+[diag 17:28:12Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+[diag 17:28:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10043993354,LAADS:10043992223]
+[diag 17:28:15Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 17:28:15Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10043999471,LAADS:10043996954]
+[diag 17:28:20Z] DOWNLOAD_DONE attempt=0 elapsed=5.1s n_files=2
+[diag 17:28:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10044004028,LAADS:10044001267]
+[diag 17:28:25Z] DOWNLOAD_DONE attempt=0 elapsed=5.7s n_files=2
+[diag 17:28:25Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:29:02Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+[diag 17:29:48Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=2
+[diag 17:29:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10035322855,LAADS:10035310113]
+[diag 17:29:51Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 17:29:51Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10035359212,LAADS:10035320535]
+[diag 17:29:57Z] DOWNLOAD_DONE attempt=0 elapsed=5.8s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260908
+
+>>> Planchón-Peteroa | 2026-09-09
+[diag 17:31:30Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-09
+[diag 17:31:30Z] AUTH_OK
+[diag 17:31:30Z] SEARCH_START MODIS_TERRA
+[diag 17:32:23Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+[diag 17:32:36Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 17:32:36Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10030368749,LAADS:10030367716]
+[diag 17:32:39Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+[diag 17:32:39Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10032149214,LAADS:10031406994]
+[diag 17:32:44Z] DOWNLOAD_DONE attempt=0 elapsed=5.2s n_files=2
+[diag 17:32:44Z] SEARCH_START MODIS_AQUA
+[diag 17:32:49Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 17:33:14Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 17:33:14Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10032284871,LAADS:10032280796]
+[diag 17:33:17Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 17:33:17Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10032631779,LAADS:10032589485]
+[diag 17:33:22Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+[diag 17:33:22Z] SEARCH_START VIIRS_SNPP
+[diag 17:33:27Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+[diag 17:33:27Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=2
+[diag 17:33:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10030282825,LAADS:10030282582]
+[diag 17:33:32Z] DOWNLOAD_DONE attempt=0 elapsed=4.7s n_files=2
+[diag 17:33:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10032177105,LAADS:10032173426]
+[diag 17:33:40Z] DOWNLOAD_DONE attempt=0 elapsed=7.7s n_files=2
+[diag 17:33:40Z] SEARCH_START VIIRS_NOAA20
+[diag 17:34:40Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_NOAA20_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:34:40Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 17:34:40Z] SEARCH_START VIIRS_NOAA21
+[diag 17:34:40Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 17:34:40Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 17:34:40Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:34:40Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 17:34:40Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 17:34:40Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:34:40Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:34:40Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:34:40Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:34:40Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:34:40Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260909
+
+>>> Planchón-Peteroa | 2026-09-10
+[diag 17:35:01Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-10
+[diag 17:35:01Z] AUTH_OK
+[diag 17:35:01Z] SEARCH_START MODIS_TERRA
+[diag 17:35:28Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+[diag 17:35:29Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 17:35:29Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10032371804,LAADS:10032220470]
+[diag 17:35:32Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 17:35:32Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10034553264,LAADS:10033726726]
+[diag 17:35:36Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+[diag 17:35:36Z] SEARCH_START MODIS_AQUA
+[diag 17:35:44Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 17:36:17Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 17:36:17Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10033791343,LAADS:10032779548]
+[diag 17:36:21Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 17:36:21Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10035466492,LAADS:10035450202]
+[diag 17:36:26Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+[diag 17:36:26Z] SEARCH_START VIIRS_SNPP
+[diag 17:37:06Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 17:37:12Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 17:37:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10032506253,LAADS:10032491692]
+[diag 17:37:16Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+[diag 17:37:16Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10034600362,LAADS:10034597489]
+[diag 17:37:23Z] DOWNLOAD_DONE attempt=0 elapsed=7.0s n_files=2
+[diag 17:37:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10034768180,LAADS:10034759486]
+[diag 17:37:31Z] DOWNLOAD_DONE attempt=0 elapsed=7.7s n_files=2
+[diag 17:37:31Z] SEARCH_START VIIRS_NOAA20
+[diag 17:37:32Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+[diag 17:37:44Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=2
+[diag 17:37:44Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10032425283,LAADS:10032381272]
+[diag 17:37:49Z] DOWNLOAD_DONE attempt=0 elapsed=4.7s n_files=2
+[diag 17:37:49Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10034502983,LAADS:10034497669]
+[diag 17:37:56Z] DOWNLOAD_DONE attempt=0 elapsed=7.1s n_files=2
+[diag 17:37:56Z] SEARCH_START VIIRS_NOAA21
+[diag 17:37:59Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+[diag 17:37:59Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 17:37:59Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10032271477,LAADS:10032270321]
+[diag 17:38:04Z] DOWNLOAD_DONE attempt=0 elapsed=4.7s n_files=2
+[diag 17:38:04Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10034333021,LAADS:10034301672]
+[diag 17:38:11Z] DOWNLOAD_DONE attempt=0 elapsed=7.2s n_files=2
+[diag 17:38:11Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10034448753,LAADS:10034444471]
+[diag 17:38:18Z] DOWNLOAD_DONE attempt=0 elapsed=6.8s n_files=2
+[diag 17:38:18Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:38:24Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+[diag 17:38:36Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 17:38:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10032506257,LAADS:10032491696]
+[diag 17:38:40Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 17:38:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10034600374,LAADS:10034597490]
+[diag 17:38:46Z] DOWNLOAD_DONE attempt=0 elapsed=6.0s n_files=2
+[diag 17:38:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10034768190,LAADS:10034759490]
+[diag 17:38:52Z] DOWNLOAD_DONE attempt=0 elapsed=6.0s n_files=2
+[diag 17:38:52Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:38:52Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+[diag 17:39:17Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=2
+[diag 17:39:17Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10032425289,LAADS:10032381273]
+[diag 17:39:20Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 17:39:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10034502985,LAADS:10034497670]
+[diag 17:39:26Z] DOWNLOAD_DONE attempt=0 elapsed=6.2s n_files=2
+[diag 17:39:26Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:39:34Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+[diag 17:39:34Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 17:39:34Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10032271489,LAADS:10032270326]
+[diag 17:39:37Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+[diag 17:39:37Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10034333023,LAADS:10034301674]
+[diag 17:39:44Z] DOWNLOAD_DONE attempt=0 elapsed=6.1s n_files=2
+[diag 17:39:44Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10034448755,LAADS:10034444474]
+[diag 17:39:50Z] DOWNLOAD_DONE attempt=0 elapsed=6.3s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260910
+
+>>> Planchón-Peteroa | 2026-09-11
+[diag 17:41:11Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-11
+[diag 17:41:11Z] AUTH_OK
+[diag 17:41:11Z] SEARCH_START MODIS_TERRA
+[diag 17:41:54Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+[diag 17:42:06Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 17:42:06Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10035101439,LAADS:10034898467]
+[diag 17:42:09Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 17:42:09Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10037322020,LAADS:10036005810]
+[diag 17:42:14Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+[diag 17:42:14Z] SEARCH_START MODIS_AQUA
+[diag 17:42:17Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 17:42:17Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 17:42:17Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10036201060,LAADS:10035469893]
+[diag 17:42:21Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 17:42:21Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10038645030,LAADS:10038631557]
+[diag 17:42:26Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+[diag 17:42:26Z] SEARCH_START VIIRS_SNPP
+[diag 17:42:29Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 17:42:49Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 17:42:49Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10035031187,LAADS:10035031256]
+[diag 17:42:54Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+[diag 17:42:54Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10037485309,LAADS:10037477211]
+[diag 17:43:01Z] DOWNLOAD_DONE attempt=0 elapsed=6.9s n_files=2
+[diag 17:43:01Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10037485317,LAADS:10037477214]
+[diag 17:43:08Z] DOWNLOAD_DONE attempt=0 elapsed=7.7s n_files=2
+[diag 17:43:08Z] SEARCH_START VIIRS_NOAA20
+[diag 17:43:08Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+[diag 17:43:13Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=2
+[diag 17:43:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10035160641,LAADS:10035110009]
+[diag 17:43:17Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 17:43:17Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10037308841,LAADS:10037291675]
+[diag 17:43:25Z] DOWNLOAD_DONE attempt=0 elapsed=7.4s n_files=2
+[diag 17:43:25Z] SEARCH_START VIIRS_NOAA21
+[diag 17:43:26Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+[diag 17:44:03Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 17:44:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10035028230,LAADS:10035028019]
+[diag 17:44:07Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+[diag 17:44:07Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10035056263,LAADS:10035055352]
+[diag 17:44:12Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 17:44:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10037190629,LAADS:10037169980]
+[diag 17:44:18Z] DOWNLOAD_DONE attempt=0 elapsed=6.6s n_files=2
+[diag 17:44:18Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:44:35Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+[diag 17:45:35Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_SNPP_MOD_GEO] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:45:35Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=0
+[diag 17:45:35Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:45:35Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:45:35Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:45:35Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:45:35Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:45:35Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260911
+
+>>> Planchón-Peteroa | 2026-09-12
+[diag 17:46:43Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-12
+[diag 17:46:43Z] AUTH_OK
+[diag 17:46:43Z] SEARCH_START MODIS_TERRA
+[diag 17:47:17Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+[diag 17:47:18Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=3
+[diag 17:47:18Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10038435216,LAADS:10037690980]
+[diag 17:47:21Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+[diag 17:47:21Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10038437007,LAADS:10037774557]
+[diag 17:47:24Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 17:47:24Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10039332969,LAADS:10038943327]
+[diag 17:47:29Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+[diag 17:47:29Z] SEARCH_START MODIS_AQUA
+[diag 17:47:35Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+[diag 17:47:51Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 17:47:51Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10039007543,LAADS:10038772830]
+[diag 17:47:55Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+[diag 17:47:55Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10039870370,LAADS:10039866301]
+[diag 17:48:00Z] DOWNLOAD_DONE attempt=0 elapsed=4.7s n_files=2
+[diag 17:48:00Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10039870179,LAADS:10039869195]
+[diag 17:48:04Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+[diag 17:48:04Z] SEARCH_START VIIRS_SNPP
+[diag 17:48:08Z] SEARCH_DONE VIIRS_SNPP n_l1b=4
+[diag 17:48:47Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=4
+[diag 17:48:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10038498910,LAADS:10038479160]
+[diag 17:48:52Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+[diag 17:48:52Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10038645556,LAADS:10038629633]
+[diag 17:48:56Z] DOWNLOAD_DONE attempt=0 elapsed=4.1s n_files=2
+[diag 17:48:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10039315606,LAADS:10039311998]
+[diag 17:49:03Z] DOWNLOAD_DONE attempt=0 elapsed=6.8s n_files=2
+[diag 17:49:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10039397252,LAADS:10039393027]
+[diag 17:49:09Z] DOWNLOAD_DONE attempt=0 elapsed=6.1s n_files=2
+[diag 17:49:09Z] SEARCH_START VIIRS_NOAA20
+[diag 17:50:09Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_NOAA20_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:50:09Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 17:50:09Z] SEARCH_START VIIRS_NOAA21
+[diag 17:50:09Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 17:50:09Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 17:50:09Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:50:09Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 17:50:09Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 17:50:09Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:50:09Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:50:09Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:50:09Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:50:09Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:50:09Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS MYD021KM.A2026255.2135.061.2026256150646.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260912
+
+>>> Planchón-Peteroa | 2026-09-13
+[diag 17:50:47Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-13
+[diag 17:50:47Z] AUTH_OK
+[diag 17:50:47Z] SEARCH_START MODIS_TERRA
+[diag 17:51:48Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [MODIS_TERRA_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:51:48Z] SEARCH_DONE MODIS_TERRA n_l1b=0
+[diag 17:51:48Z] SEARCH_START MODIS_AQUA
+[diag 17:51:48Z] SEARCH_SKIP CMR degradada esta corrida [MODIS_AQUA_L1B]
+[diag 17:51:48Z] SEARCH_DONE MODIS_AQUA n_l1b=0
+[diag 17:51:48Z] SEARCH_START VIIRS_SNPP
+[diag 17:51:48Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_L1B]
+[diag 17:51:48Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 17:51:48Z] SEARCH_START VIIRS_NOAA20
+[diag 17:51:48Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_L1B]
+[diag 17:51:48Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 17:51:48Z] SEARCH_START VIIRS_NOAA21
+[diag 17:51:48Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 17:51:48Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 17:51:48Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:51:48Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 17:51:48Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 17:51:48Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:51:48Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:51:48Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:51:48Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:51:48Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:51:48Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+
+>>> Planchón-Peteroa | 2026-09-14
+[diag 17:51:48Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-14
+[diag 17:51:48Z] AUTH_OK
+[diag 17:51:48Z] SEARCH_START MODIS_TERRA
+[diag 17:52:18Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+[diag 17:53:33Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 17:53:33Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10040476394,LAADS:10040335439]
+[diag 17:53:37Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+[diag 17:53:37Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10041952755,LAADS:10041391087]
+[diag 17:53:42Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+[diag 17:53:42Z] SEARCH_START MODIS_AQUA
+[diag 17:54:02Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 17:54:11Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 17:54:11Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10041437912,LAADS:10040745582]
+[diag 17:54:14Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 17:54:14Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10042751882,LAADS:10042745036]
+[diag 17:54:19Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+[diag 17:54:19Z] SEARCH_START VIIRS_SNPP
+[diag 17:55:19Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_SNPP_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:55:19Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 17:55:19Z] SEARCH_START VIIRS_NOAA20
+[diag 17:55:19Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_L1B]
+[diag 17:55:19Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 17:55:19Z] SEARCH_START VIIRS_NOAA21
+[diag 17:55:19Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 17:55:19Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 17:55:19Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:55:19Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 17:55:19Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 17:55:19Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:55:19Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:55:19Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:55:19Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:55:19Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:55:19Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260914
+
+>>> Planchón-Peteroa | 2026-09-15
+[diag 17:55:25Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-15
+[diag 17:55:25Z] AUTH_OK
+[diag 17:55:25Z] SEARCH_START MODIS_TERRA
+[diag 17:56:08Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+[diag 17:56:23Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=3
+[diag 17:56:23Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10042642185,LAADS:10042331582]
+[diag 17:56:27Z] DOWNLOAD_DONE attempt=0 elapsed=3.8s n_files=2
+[diag 17:56:27Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10043239831,LAADS:10042951754]
+[diag 17:56:37Z] DOWNLOAD_DONE attempt=0 elapsed=9.5s n_files=2
+[diag 17:56:37Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10043239592,LAADS:10042951757]
+[diag 17:56:42Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+[diag 17:56:42Z] SEARCH_START MODIS_AQUA
+[diag 17:57:42Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [MODIS_AQUA_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 17:57:42Z] SEARCH_DONE MODIS_AQUA n_l1b=0
+[diag 17:57:42Z] SEARCH_START VIIRS_SNPP
+[diag 17:57:42Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_L1B]
+[diag 17:57:42Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 17:57:42Z] SEARCH_START VIIRS_NOAA20
+[diag 17:57:42Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_L1B]
+[diag 17:57:42Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 17:57:42Z] SEARCH_START VIIRS_NOAA21
+[diag 17:57:42Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 17:57:42Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 17:57:42Z] SEARCH_START VIIRS_SNPP_750
+[diag 17:57:42Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 17:57:42Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 17:57:42Z] SEARCH_START VIIRS_NOAA20_750
+[diag 17:57:42Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 17:57:42Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 17:57:42Z] SEARCH_START VIIRS_NOAA21_750
+[diag 17:57:42Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 17:57:42Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS MOD021KM.A2026258.1350.061.2026259012605.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260915
+
+>>> Planchón-Peteroa | 2026-09-16
+[diag 17:57:46Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-16
+[diag 17:57:46Z] AUTH_OK
+[diag 17:57:46Z] SEARCH_START MODIS_TERRA
+[diag 17:58:13Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+[diag 17:58:14Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 17:58:14Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10043807286,LAADS:10043481449]
+[diag 17:58:17Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 17:58:17Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10044144629,LAADS:10044009732]
+[diag 17:58:22Z] DOWNLOAD_DONE attempt=0 elapsed=5.2s n_files=2
+[diag 17:58:22Z] SEARCH_START MODIS_AQUA
+[diag 17:58:22Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 17:59:02Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 17:59:02Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10044025328,LAADS:10043876614]
+[diag 17:59:05Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 17:59:05Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10044566491,LAADS:10044560791]
+[diag 17:59:10Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+[diag 17:59:10Z] SEARCH_START VIIRS_SNPP
+[diag 18:00:10Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_SNPP_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 18:00:10Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 18:00:10Z] SEARCH_START VIIRS_NOAA20
+[diag 18:00:10Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_L1B]
+[diag 18:00:10Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 18:00:10Z] SEARCH_START VIIRS_NOAA21
+[diag 18:00:10Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 18:00:10Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 18:00:10Z] SEARCH_START VIIRS_SNPP_750
+[diag 18:00:10Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 18:00:10Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 18:00:10Z] SEARCH_START VIIRS_NOAA20_750
+[diag 18:00:10Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 18:00:10Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 18:00:10Z] SEARCH_START VIIRS_NOAA21_750
+[diag 18:00:10Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 18:00:10Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260916
+
+>>> Planchón-Peteroa | 2026-09-17
+[diag 18:00:16Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-17
+[diag 18:00:16Z] AUTH_OK
+[diag 18:00:16Z] SEARCH_START MODIS_TERRA
+[diag 18:01:09Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+[diag 18:02:23Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=3
+[diag 18:02:23Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10044521656,LAADS:10044250804]
+[diag 18:02:26Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 18:02:26Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10044521665,LAADS:10044496303]
+[diag 18:02:30Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+[diag 18:02:30Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10044795691,LAADS:10044707267]
+[diag 18:02:35Z] DOWNLOAD_DONE attempt=0 elapsed=5.1s n_files=2
+[diag 18:02:35Z] SEARCH_START MODIS_AQUA
+[diag 18:02:35Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 18:02:36Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 18:02:36Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10044716481,LAADS:10044572799]
+[diag 18:02:39Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 18:02:39Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10045114432,LAADS:10045100269]
+[diag 18:02:44Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+[diag 18:02:44Z] SEARCH_START VIIRS_SNPP
+[diag 18:02:46Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 18:03:09Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 18:03:09Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10044509779,LAADS:10044504175]
+[diag 18:03:13Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 18:03:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10044792547,LAADS:10044792046]
+[diag 18:03:22Z] DOWNLOAD_DONE attempt=0 elapsed=8.8s n_files=2
+[diag 18:03:22Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10044828572,LAADS:10044823982]
+[diag 18:03:29Z] DOWNLOAD_DONE attempt=0 elapsed=7.2s n_files=2
+[diag 18:03:29Z] SEARCH_START VIIRS_NOAA20
+[diag 18:04:30Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+[diag 18:04:31Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=4
+[diag 18:04:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10044516901,LAADS:10044516623]
+[diag 18:04:35Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+[diag 18:04:35Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10044790231,LAADS:10044787422]
+[diag 18:04:44Z] DOWNLOAD_DONE attempt=0 elapsed=8.6s n_files=2
+[diag 18:04:44Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10044790279,LAADS:10044787833]
+[diag 18:04:52Z] DOWNLOAD_DONE attempt=0 elapsed=7.9s n_files=2
+[diag 18:04:52Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10044790327,LAADS:10044787433]
+[diag 18:05:00Z] DOWNLOAD_DONE attempt=0 elapsed=8.1s n_files=2
+[diag 18:05:00Z] SEARCH_START VIIRS_NOAA21
+[diag 18:06:00Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [VIIRS_NOAA21_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 18:06:00Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 18:06:00Z] SEARCH_START VIIRS_SNPP_750
+[diag 18:06:00Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 18:06:00Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 18:06:00Z] SEARCH_START VIIRS_NOAA20_750
+[diag 18:06:00Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 18:06:00Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 18:06:00Z] SEARCH_START VIIRS_NOAA21_750
+[diag 18:06:00Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 18:06:00Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260917
+
+>>> Planchón-Peteroa | 2026-09-18
+[diag 18:06:58Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-18
+[diag 18:06:58Z] AUTH_OK
+[diag 18:06:58Z] SEARCH_START MODIS_TERRA
+[diag 18:07:58Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [MODIS_TERRA_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 18:07:58Z] SEARCH_DONE MODIS_TERRA n_l1b=0
+[diag 18:07:58Z] SEARCH_START MODIS_AQUA
+[diag 18:07:58Z] SEARCH_SKIP CMR degradada esta corrida [MODIS_AQUA_L1B]
+[diag 18:07:58Z] SEARCH_DONE MODIS_AQUA n_l1b=0
+[diag 18:07:58Z] SEARCH_START VIIRS_SNPP
+[diag 18:07:58Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_L1B]
+[diag 18:07:58Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 18:07:58Z] SEARCH_START VIIRS_NOAA20
+[diag 18:07:58Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_L1B]
+[diag 18:07:58Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 18:07:58Z] SEARCH_START VIIRS_NOAA21
+[diag 18:07:58Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 18:07:58Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 18:07:58Z] SEARCH_START VIIRS_SNPP_750
+[diag 18:07:58Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 18:07:58Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 18:07:58Z] SEARCH_START VIIRS_NOAA20_750
+[diag 18:07:58Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 18:07:58Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 18:07:58Z] SEARCH_START VIIRS_NOAA21_750
+[diag 18:07:58Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 18:07:58Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+
+>>> Planchón-Peteroa | 2026-09-19
+[diag 18:07:58Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-19
+[diag 18:07:58Z] AUTH_OK
+[diag 18:07:58Z] SEARCH_START MODIS_TERRA
+[diag 18:08:34Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+[diag 18:08:39Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 18:08:39Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10045754584,LAADS:10045635796]
+[diag 18:08:42Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 18:08:42Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10045917803,LAADS:10045868861]
+[diag 18:08:47Z] DOWNLOAD_DONE attempt=0 elapsed=4.7s n_files=2
+[diag 18:08:47Z] SEARCH_START MODIS_AQUA
+[diag 18:09:30Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+[diag 18:10:30Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [MODIS_AQUA_GEO] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 18:10:30Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=0
+[diag 18:10:30Z] SEARCH_START VIIRS_SNPP
+[diag 18:10:30Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_L1B]
+[diag 18:10:30Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 18:10:30Z] SEARCH_START VIIRS_NOAA20
+[diag 18:10:30Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_L1B]
+[diag 18:10:30Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 18:10:30Z] SEARCH_START VIIRS_NOAA21
+[diag 18:10:30Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 18:10:30Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 18:10:30Z] SEARCH_START VIIRS_SNPP_750
+[diag 18:10:30Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 18:10:30Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 18:10:30Z] SEARCH_START VIIRS_NOAA20_750
+[diag 18:10:30Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 18:10:30Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 18:10:30Z] SEARCH_START VIIRS_NOAA21_750
+[diag 18:10:30Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 18:10:30Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20260919
+
+>>> Planchón-Peteroa | 2026-09-20
+[diag 18:10:33Z] AUTH_START volcano=PlanchonPeteroa date=2026-09-20
+[diag 18:10:33Z] AUTH_OK
+[diag 18:10:33Z] SEARCH_START MODIS_TERRA
+[diag 18:11:33Z] SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida [MODIS_TERRA_L1B] err=ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read timed out. (read timeou
+[diag 18:11:33Z] SEARCH_DONE MODIS_TERRA n_l1b=0
+[diag 18:11:33Z] SEARCH_START MODIS_AQUA
+[diag 18:11:33Z] SEARCH_SKIP CMR degradada esta corrida [MODIS_AQUA_L1B]
+[diag 18:11:33Z] SEARCH_DONE MODIS_AQUA n_l1b=0
+[diag 18:11:33Z] SEARCH_START VIIRS_SNPP
+[diag 18:11:33Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_L1B]
+[diag 18:11:33Z] SEARCH_DONE VIIRS_SNPP n_l1b=0
+[diag 18:11:33Z] SEARCH_START VIIRS_NOAA20
+[diag 18:11:33Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_L1B]
+[diag 18:11:33Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=0
+[diag 18:11:33Z] SEARCH_START VIIRS_NOAA21
+[diag 18:11:33Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_L1B]
+[diag 18:11:33Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=0
+[diag 18:11:33Z] SEARCH_START VIIRS_SNPP_750
+[diag 18:11:33Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_SNPP_MOD_L1B]
+[diag 18:11:33Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=0
+[diag 18:11:33Z] SEARCH_START VIIRS_NOAA20_750
+[diag 18:11:33Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA20_MOD_L1B]
+[diag 18:11:33Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=0
+[diag 18:11:33Z] SEARCH_START VIIRS_NOAA21_750
+[diag 18:11:33Z] SEARCH_SKIP CMR degradada esta corrida [VIIRS_NOAA21_MOD_L1B]
+[diag 18:11:33Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=0
+Cobertura INCOMPLETA: 104 búsquedas o descargas fallidas.
+  PlanchonPeteroa 2026-09-01: MODIS_TERRA:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | RuntimeError: <html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gate
+  PlanchonPeteroa 2026-09-02: VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-03: MODIS_TERRA:busqueda, MODIS_AQUA:busqueda, VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-04: VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-05: MODIS_TERRA:busqueda, VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | RuntimeError: <html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gatew
+  PlanchonPeteroa 2026-09-06: VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-09: VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-11: VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-12: VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-13: MODIS_TERRA:busqueda, MODIS_AQUA:busqueda, VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-14: VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-15: MODIS_AQUA:busqueda, VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-16: VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-17: VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-18: MODIS_TERRA:busqueda, MODIS_AQUA:busqueda, VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-19: MODIS_AQUA:busqueda, VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+  PlanchonPeteroa 2026-09-20: MODIS_TERRA:busqueda, MODIS_AQUA:busqueda, VIIRS_SNPP:busqueda, VIIRS_NOAA20:busqueda, VIIRS_NOAA21:busqueda, VIIRS_SNPP_750:busqueda, VIIRS_NOAA20_750:busqueda, VIIRS_NOAA21_750:busqueda | SEARCH_CMR_TIMEOUT: ReadTimeout: HTTPSConnectionPool(host='cmr.earthdata.nasa.gov', port=443): Read 
+::warning title=Cobertura incompleta PlanchonPeteroa::17 días con búsquedas o descargas fallidas: 2026-09-01, 2026-09-02, 2026-09-03, 2026-09-04, 2026-09-05, 2026-09-06, 2026-09-09, 2026-09-11, 2026-09-12, 2026-09-13, 2026-09-14, 2026-09-15 ...
+
+Done.
