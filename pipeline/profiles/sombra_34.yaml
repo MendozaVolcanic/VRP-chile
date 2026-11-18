@@ -20,6 +20,10 @@
 # `distance_class: null` y conserva `primary_cluster.centroid_dist_km`, que permite clasificar después con el inner
 # que Nicolás decida (plan, decisión D5; no hay valor de MIROVA que copiar, A5). Si una pasada no puede correr por la
 # vía (MODIS sin MxD03), sigue K con el radio de 5 km del yaml y el record lo dice en `via_codigo_mirova`.
+# ⚠️ S190 (A113, F8-110 de la auditoría de Codex, verificado): la frase anterior es FALSA para MODIS sin MxD03:
+# scripts/run_pipeline.py salta ese gránulo antes del procesador y anota la incidencia `sin_geolocalizacion`
+# (pipeline/fetch.py), sin record. Lo que sí cae a K y lo dice es un volcán sin grilla («sin_grilla»; hoy los 45 la
+# tienen) o un MxD03 que no calza («geo_distinta»). Ver D35 en docs/MIROVA_DIVERGENCES.md. Texto conservado.
 #
 # PUBLICACIÓN (S190, H08 de la auditoría de Codex; texto anterior: «NO OPERACIONAL: ... nada lo lee el tablero»): desde
 # la ficha v1.26 el tablero SÍ lee data/sombra_34/ y muestra estos 34 volcanes (frontend/index.html, SOMBRA_34_BASE y
