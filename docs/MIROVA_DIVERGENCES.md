@@ -2704,7 +2704,7 @@ MIROVA corrobora más los `ctx_cluster` que los `test1_roi` dentro de cada volc�
 
 **Lo que MIROVA hace**: Coppola 2016a integra el ROI y publica el cúmulo; la posición «en el
 cráter» de una integral de ROI es una convención que el frontend declara
-(`frontend/index.html:1748-1755`, el comentario «S106 ancla honesta» sobre `pixelesDelMarcador`, cuya
+(`frontend/index.html:1782-1789`, el comentario «S106 ancla honesta» sobre `pixelesDelMarcador`, cuya
 lista de anclas vive hoy en `esAnclaHonesta`; `isHonestTest1` ya no existe. Era 2779-2784 cuando se escribió,
 remapeada por contenido en V31.1, A101; S190 la halló apuntando a otro código y la llevó al comentario). **La magnitud del píxel único no la cubre ninguna convención.**
 
