@@ -659,7 +659,7 @@ piden decisión de Nicolás (y A45 si tocan `pipeline/process_*.py` o `store.py`
     rastro en el record. Recomendación: primero contar cuántos records de producción tienen fondo no estimable (es
     lectura, sin cambiar nada); según el número, una marca en el record, no un cambio de método.
     **Medido el 2026-11-19 (S190):** de 73.952 records de la vía de los 11 Tier A en `origin/main`, 19 tienen `L_bk`
-    igual a 0 en `diag_codigo_mirova` y los 19 tienen VRP > 0 (MODIS 6, VIIRS 375 9, VIIRS 750 4); 10 pesan 1 MW o más,
+    igual a 0 en `diag_codigo_mirova` y los 19 tienen VRP > 0 (MODIS 6, VIIRS 375 9, VIIRS 750 4); 12 pesan 1 MW o más,
     el mayor Llaima 2025-07-02 07:10 MODIS Aqua con 9,3 MW y un píxel. En la ventana de la comparación vía, K y MIROVA
     (desde el 2026-03-01) cae uno: Cordón Caulle 2026-03-16 MODIS Terra, 2,5 MW, que la tabla de MIROVA lista sin
     alerta (un FP nuestro). Script: `D:\vrp-trabajo\temporales\s190\f4_101_contar.py`. Recomendación nueva:
