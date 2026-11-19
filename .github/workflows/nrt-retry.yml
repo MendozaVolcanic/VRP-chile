@@ -1,5 +1,10 @@
 name: NRT Retry (NASA recovery)
 
+# ⚠️ S190 (F6-111, auditoría Codex ronda 2, confirmado por el verificador): el «~30 min después» de abajo es falso
+# respecto de la corrida que este retry revisa. El retry corre a las :30 de las horas impares y mira el último run del
+# principal, que es el de la hora par ANTERIOR: lo reintenta 90 min después de su cron base, no 30 (y 30 min antes del
+# siguiente cron base). Efecto: sólo latencia; el texto original queda abajo (A113).
+#
 # S70-0 T2: cron secundario que dispara ~30 min después del cron principal
 # `nrt.yml` (cada 2h en horas pares). Si el último run del principal falló
 # por NASA_AUTH_UNREACHABLE (badge etiquetado [NASA_DOWN] o warning en logs),
