@@ -308,9 +308,12 @@ jobs:
           from pathlib import Path
           vol = "${{ matrix.volcano }}"
           p = Path(f"data/mirova_equivalent/{vol}.json")
+          # S190 (auditoría de Codex, ronda 2, F6-108): los 11 Tier A tienen historia desde 2025-02-15; un JSON ausente
+          # es un archivo borrado o un commit roto, falla nuestra e inmediata como «0 records», no una primera corrida.
+          # Prueba: tests/test_nrt_compuerta_json_ausente_s190.py. Antes: WARN «no existe (primera corrida)» y exit 0.
           if not p.exists():
-              print(f"WARN {p}: no existe (primera corrida)")
-              sys.exit(0)
+              print(f"FAIL {p}: no existe (un Tier A siempre tiene historia)")
+              sys.exit(1)
           d = json.loads(p.read_text())
           records = d.get("records", [])
           if not records:
