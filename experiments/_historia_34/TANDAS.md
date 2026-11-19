@@ -83,9 +83,24 @@ run 44037264576 (sección siguiente). Carpeta del duplicado: `D:/vrp-trabajo/tem
 | unión | 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. Antuco 6.718 records, CerroAzulQuizapu 6.497, DescabezadoGrande 6.499, LagunaDelMaule 6.643, NevadoDeLongavi 6.538 |
 | ensayo del aplicador | 32.895 nuevos (los cinco de arriba), 0 tras el corte; los 8 activos de las tandas 1 y 2 dan 0 nuevos y todos «ya estaban»; Putana y OlcaParuma, saltados (`active: false`) |
 | se aplica | tras el merge del PR de esta unión, con tag `pre-historia-34-tanda3` |
+| aplicada | 2026-11-18 tras el merge de #1044: run 44206439159 de `aplicar-reemplazo.yml` (tag `pre-historia-34-tanda3` sobre `251f80487`), commit `73a33807f` en main |
 
 Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda3/` (fuera del repo). Tanda 4 (Callaqui, Lonquimay, Tolhuaca,
 Sollipulli, Quetrupillan) despachada por la cadena el 2026-11-17 23:25 UTC.
+
+## Tanda 4 (Callaqui, Lonquimay, Tolhuaca, Sollipulli, Quetrupillan; 2025-02-15 a 2026-11-02)
+
+| campo | valor |
+|---|---|
+| run | 44199313624 (main `aa0d81b80`), despachado 2026-11-17 23:26 UTC por `cadena_3a7_s190b.sh` |
+| trozos | 165 de 165 en verde. 11 se tomaron de un intento posterior tras fallas pasajeras (relanzados con `gh run rerun --failed`, mismo commit, por `cadena_4a7_s190c.sh`): Callaqui 22 a 27 y Sollipulli 8 del intento 2; Lonquimay 4 y Quetrupillan 16, 17 y 20 del intento 3 |
+| runner | 86,4 h (suma de `completed_at - started_at` de los 165 jobs vigentes), 31,4 min por trozo en promedio (máximo 67,2); pared 2026-11-17 23:27 a 2026-11-18 19:45 UTC |
+| unión | 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. Callaqui 6.816 records, Lonquimay 6.879, Quetrupillan 6.951, Sollipulli 6.858, Tolhuaca 6.883 |
+| ensayo del aplicador | 34.387 nuevos (los cinco de arriba), 0 tras el corte; los 13 activos de las tandas 1 a 3 dan 0 nuevos y todos «ya estaban» |
+| se aplica | tras el merge del PR de esta unión, con tag `pre-historia-34-tanda4` |
+
+Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda4/` (fuera del repo). Tanda 5 (Lanin, MochoChoshuenco,
+CarranLosVenados, AntillancaCasablanca, Osorno) despachada por la cadena el 2026-11-19 11:10 UTC (run 44512397201).
 
 ## Retiro de Putana y OlcaParuma (D1, opción 1a, 2026-11-17)
 

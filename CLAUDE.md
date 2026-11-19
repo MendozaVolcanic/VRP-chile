@@ -146,7 +146,7 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - **A7.** El ejemplo es OBSOLETO (S125; hoy `diag_sigma_bg_k`, `diag_eff_threshold_k`, `diag_nti_std`). Lección: «no calculado» ≠ «calculado pero no persistido». (historia: A7)
 - **A8.** Verificar data fresca (reprocesar un día con código actual) antes de asumir el problema de un handoff. (historia: A8)
 - **A9.** MIROVA = Torino + Firenze + Sapienza (Coppola, Laiolo, Massimetti, Campus, Aveni, Cigolini). NO MIROVA: INGV Catania (Di Bella, Del Negro...) ni CNR-IMAA Potenza (NHI). Lista: `~memory/reference_papers_mirova_canonical.md`. (historia: A9)
-- **A10.** Rebajada en su premisa (S147, D32): `pc.vrp_mw` NO es «lo que MIROVA reporta» en K (MIROVA suma todos los píxeles alertados). En la vía, los tres sensores, `vrp_mw` = `pc.vrp_mw` = la suma de todos los alertados, y el tablero publica `pc.vrp_mw` (la vía está eximida del núcleo `f5_core_vrp_mw`, S180); el núcleo de VIIRS 375 (S132) sólo actúa sobre records K residuales (cita vigilada por el guard G8). (S186; historia: A10)
+- **A10.** ⚠️ S190 (A113; auditoría Codex ronda 2, F4-114, verificada): «`vrp_mw` = `pc.vrp_mw`» no vale si la suma es negativa: `pipeline/store.py` lleva `vrp_mw` a 0 y deja negativo `primary_cluster.vrp_mw` (1 de 10.625 records de la vía con cúmulo: Nevados de Chillán MODIS_TERRA 2025-11-18 03:00, 0 contra -0,032 MW; D36 «Almacén»). Rebajada en su premisa (S147, D32): `pc.vrp_mw` NO es «lo que MIROVA reporta» en K (MIROVA suma todos los píxeles alertados). En la vía, los tres sensores, `vrp_mw` = `pc.vrp_mw` = la suma de todos los alertados, y el tablero publica `pc.vrp_mw` (la vía está eximida del núcleo `f5_core_vrp_mw`, S180); el núcleo de VIIRS 375 (S132) sólo actúa sobre records K residuales (cita vigilada por el guard G8). (S186; historia: A10)
 - **A11.** Universo MIROVA = CONS + OCR; OCR es complemento; `FALSO_POSITIVO_OCR` es etiqueta del scraper, no de MIROVA. (historia: A11)
 - **A12.** El ejemplo es FALSO (S128/S131): ΔT reales Láscar 16,9 K, Isluga 8,3 K. ⚠️ S158 R2: «Coppola 2024 L1129» no respalda el kernel-bg. Lección vigente: el patrón térmico decide, validar por A/B (A19). (historia: A12)
 - **A13.** FALSA (S124): Villarrica no tiene distancia fija 0,84; el campo está cuantizado a la celda de grilla (D15). (historia: A13)
@@ -325,7 +325,7 @@ Estado entre sesiones → memoria. No re-leer archivos sin cambios.
   `pull --rebase` + `push`, no ambos; en `nrt.yml` el grupo va a nivel workflow. Contrato:
   `tests/test_guard_declarado_vs_efectivo_s131.py::test_g4_pusher_push_main_o_retry`.
 - Geofencing por volcán (`max_hotspot_dist_km`). Refs del scraper son NRT: https://github.com/MendozaVolcanic/Mirova-v1
-- Frontend: VIIRS 375 grafica `vrp_mw`, no `vrp_mir_mw` (S12).
+- Frontend: ⚠️ S190 (A113; auditoría Codex ronda 2, R1, verificada EN PARTE): el gráfico no lee `vrp_mw` del record sino `primary_cluster.vrp_mw` (`vrpTablero` → `mirovaEqVrpDisplay` → `mirovaEqVrp`), o el núcleo F5 en records K; `r.vrp_mw` sólo sin `primary_cluster`. Lo de «no `vrp_mir_mw`» sigue cierto. Texto anterior: VIIRS 375 grafica `vrp_mw`, no `vrp_mir_mw` (S12).
 - Matrix de fechas sobre el mismo JSON: `max-parallel: 1` o chunks + merge (S25).
 - earthaccess: `g["umm"]["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"]`.
 - `workflow_dispatch` sólo con el yml en `main`. **Norway Problem (A43)**: quotear `"on":`; verificar con

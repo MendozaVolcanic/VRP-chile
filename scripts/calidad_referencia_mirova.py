@@ -58,8 +58,17 @@ def avisos_de_ventana(desde: str, hasta: str) -> list[str]:
 
 
 def etiqueta_que_decide(desde: str) -> str:
-    """Que canal puede DECIDIR una etiqueta positiva en una ventana que empieza en `desde`."""
-    return "tabla y OCR" if desde >= "2026-06-13" else "SOLO la tabla; el OCR se informa aparte"
+    """Que canal puede DECIDIR una etiqueta positiva en una ventana que empieza en `desde`.
+
+    Auditoria Codex ronda 2, F7-308. POR QUE se cambio el texto: antes decia «SOLO la tabla; el OCR se informa
+    aparte» para ventanas anteriores al 2026-06-13, pero scripts/banco_paridad.py::etiquetar toma como alerta
+    cualquier fila ALERTA de la pasada, de la tabla o del OCR, sin mirar la fecha: con la ventana por defecto
+    (desde el 2026-03-01) entran 293 alertas nocturnas solo OCR anteriores al 2026-06-13 (74 protegidas). El aviso
+    describe lo que el codigo hace; si el OCR de ese tramo debe o no decidir lo decide Nicolas (no se toco)."""
+    if desde >= "2026-06-13":
+        return "tabla y OCR"
+    return ("tabla y OCR, tambien antes del 2026-06-13, cuando el OCR no media la distancia: una alerta solo OCR "
+            "de ese tramo decide sin saber si el calor estaba dentro del radio")
 
 
 def avisar(desde: str, hasta: str, archivo=None) -> list[str]:

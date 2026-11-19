@@ -17,7 +17,8 @@ SÍ hay divergencias sistémicas, con causas físicas distintas por sensor.
 - Dispara por **Path D (dNTI contextual)** casi exclusivo. Usa NTI (no MIR absoluto) →
   **NO es el sesgo topográfico del Test1 VIIRS** (A69); es otro mecanismo: el kernel
   8-vecinos sobre escena tibia uniforme dispara espurio, y la suma scene-wide infla la
-  magnitud (Wooster BT⁸).
+  magnitud (Wooster BT⁸). ⚠️ S190 (A113, F4-118): «BT⁸» es falso, la Ec. 6b es lineal en la radiancia en
+  exceso (S159 H5, `experiments/_s159/p3/INFORME.md`); el texto se conserva.
 - **73% t_max<290K** (no volcánico), **77% t_bg≥270K** (escena tibia, NO cirrus), ~0% real.
 - **El cap D9** (`path_d_only_cap_mw=5.0` + `path_d_only_cap_tbg_max_k=270`) **solo atrapa
   el 23% cirrus** — el 77% restante es escena tibia (t_bg≥270) y ESCAPA el cap. 640/901
