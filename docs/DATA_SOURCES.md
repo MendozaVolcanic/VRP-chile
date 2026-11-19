@@ -35,7 +35,7 @@
 - MODIS **NRT eliminado ~7-14 días**. El lag del Standard es variable y **no simétrico
   entre satélites**: medido el 2026-09-04, Terra 11,6 h y **Aqua 35,6 h** (VIIRS 9,8-11,8 h).
   La nota anterior decía «3-5 días» de forma uniforme.
-- **pyhdf roto en Windows** — MODIS solo corre en GitHub Actions Linux.
+- ⚠️ S190 (F1M-112): con el entorno conda `vrp` y su `Library\bin` en el PATH, pyhdf importa y lee HDF4 en Windows; bajar gránulos sigue pidiendo Actions (token sólo en secretos). Texto anterior: **pyhdf roto en Windows** — MODIS solo corre en GitHub Actions Linux.
 
 ### VIIRS I-band (375m) — Suomi-NPP (2011) y NOAA-20 (2017), NOAA-21 (2022, pendiente)
 
