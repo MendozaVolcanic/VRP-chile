@@ -18,6 +18,9 @@
 # Variables     : NTI, contraste NTI y ETI contra la media 3 x 3, umbrales por región (BOX), fondo M13
 #                 interpolado, VRP = suma de (L - L_fondo) x 1,97e7 x 0,5625 / 1e6 (V750) o x 1,89e7 x 1,0 / 1e6
 #                 (MODIS, Coppola 2016a Ec. 7).
+#                 Diagnóstico sin efecto en la detección (S190): dato faltante sobre el cráter medido en los
+#                 píxeles del gránulo ANTES de interpolar (crater_sin_posicion, px_mir_invalido_crater,
+#                 px_saturados_crater).
 # Limitaciones  : fillmissing2 de MATLAB no documenta su triangulación; se reproduce con un Delaunay de desempate
 #                 simbólico que iguala a MATLAB R2026b en 166 de 166 escenas (S163 O2), sin que el mecanismo interno
 #                 de MATLAB esté verificado. La ROI por volcán la decide V750-B. El umbral contextual depende de la
@@ -95,6 +98,15 @@ HALF_ROI1_V375_M = 10.5 * 750.0
 MEDIA_GRILLA_M = 25000.0   # regla GEO: centros en X0 - 25000 : paso : X0 + 25000
 RADIO_RECORTE_KM = 45.0    # como probe_n.grillar: sólo se interpolan los píxeles a menos de 45 km
 FLAG_MIN_DN = 65528        # DN >= 65528 son banderas en el L1B de VIIRS (UserGuide Aug 2021, Tabla C.1)
+# Bit de saturación de <banda>_quality_flags del L1B de VIIRS: «bit value» 4 de la Tabla C.1 del UserGuide (transcrita
+# en docs/F28_SATURATION_INVESTIGATION.md), el mismo SAT_BIT_MASK = 0b100 que lee la guardia K
+# (process_viirs.py, process_viirs_mod.py). Sólo diagnóstico: la vía no enmascara el píxel saturado.
+BIT_SATURACION_VIIRS = 0b100
+# Radio, en celdas de la grilla del sensor, dentro del cual un píxel perdido cuenta como dato faltante del cráter
+# (plan F1M-G3 del 2026-11-19): 2 km en MODIS, 1,5 km en VIIRS 750, 0,75 km en VIIRS 375. Es una decisión de
+# diagnóstico, no un valor de MIROVA: cubre el píxel del cráter y sus vecinos inmediatos con cualquier desorden
+# de barrido cerca del nadir.
+CELDAS_DATO_CRATER = 2
 TIPOS_ROI = ("def", "sens", "crater", "inner", "corona")
 
 _GRILLAS_YAML = Path(__file__).resolve().parent / "grillas_mirova.yaml"
@@ -764,6 +776,17 @@ def leer_radiancia_l1b(ruta, bandas=("M13", "M15")):
             rad = dn * sf + ao
             rad[dn >= FLAG_MIN_DN] = np.nan
             out[b] = rad
+        # S190 (F1V-101), sólo diagnóstico: un I04 o M13 saturado llega con radiancia finita (el L1B la deja en el
+        # techo y enciende el bit de saturación, no un DN de bandera), así que la VRP sale baja sin aviso. Se guarda
+        # la máscara del bit para la banda MIR (la primera pedida); la radiancia no cambia. Sin el dataset, no hay
+        # clave y la marca queda sin dato. Un dataset que no es entero (no ocurre en el L1B de NASA) tampoco da clave:
+        # un diagnóstico no puede tumbar una pasada que la detección sí procesa (verificador S191).
+        qf = obs.get(f"{bandas[0]}_quality_flags")
+        if qf is not None:
+            try:
+                out["saturado_mir"] = (qf[:] & BIT_SATURACION_VIIRS) != 0
+            except TypeError:
+                pass
     return out
 
 
@@ -797,6 +820,45 @@ def leer_geo_l1b(ruta):
                 a[np.isnan(lat)] = np.nan
                 ang[k] = a
     return lat, lon, ang
+
+
+def dato_faltante_crater(rad, lat, lon, b_mir, b_tir, vent_lat, vent_lon, paso_m, ventana=None):
+    """Marcas de dato faltante sobre el cráter, medidas en los píxeles del gránulo ANTES de interpolar. Sólo diagnóstico.
+
+    POR QUÉ (S190, F1M-101, F1M-108, F1V-104, F1V-101). En el volcán, la noche más caliente es justo la que puede dejar
+    el píxel del cráter sin valor: un flujo o una fuente de lava satura la MIR de MODIS en las bandas 22 y 21, o el L1B
+    de VIIRS marca el píxel con una bandera (Missing_EV, Cal_Fail); otras veces el escaneo que cruza el cráter llega
+    sin posición. Ese píxel se pierde antes de interpolar, y la interpolación lineal rellena el hueco con los vecinos,
+    más fríos: el detector ve una noche tranquila y publica 0 MW, o una fracción de la potencia, sin ninguna marca
+    (celdas_sin_dato se cuenta después de interpolar y no lo ve). Estas marcas no cambian ninguna detección, potencia ni
+    posición; dejan escrito en el record que esa pasada no midió el cráter entero, para que el operador no la lea como
+    noche sin anomalía. Qué hace el tablero con ellas (paso B) se decide después de contarlas.
+
+    - crater_sin_posicion: la regla «cráter sin dato» de la guardia K (process_modis.crater_cubierto, importada para
+      que haya una sola copia, A102): el píxel con posición más cercano al cráter está en el borde del gránulo o a
+      alguno de sus 8 vecinos le falta lat o lon.
+    - px_mir_invalido_crater: píxeles con posición a menos de CELDAS_DATO_CRATER celdas de la grilla del cráter cuya
+      MIR o TIR no es finita (sin TIR el píxel tampoco tiene NTI).
+    - px_saturados_crater: lo mismo con el bit de saturación de quality_flags de la banda MIR (VIIRS). None si el
+      lector no lo trae: siempre en MODIS, donde la saturación es un DN que el lector ya deja en NaN (B22 cae a B21, y si
+      las dos saturan cuenta en px_mir_invalido_crater), y en un L1B sin quality_flags. None es «no medido», no cero.
+
+    ventana: (slice de filas, slice de columnas) donde mirar; calcular_vrp_granulo pasa la caja de los píxeles del
+    recorte de 45 km. POR QUÉ: en un gránulo VIIRS 375 entero (6464 × 6400) medir sobre todo multiplica el tiempo y la
+    memoria de cada pasada (costo sin medir con script), y fuera de esa caja no hay nada del cráter. Da lo mismo que sin ventana mientras el píxel más cercano al
+    cráter esté dentro de la caja: un borde de la caja junto a ese píxel es borde del gránulo o vecino sin posición, y
+    la regla de K responde igual en los dos casos (prueba de equivalencia en test_via_dato_faltante_crater_s190.py)."""
+    from .process_modis import crater_cubierto
+    v = (slice(None), slice(None)) if ventana is None else ventana
+    lat = np.asarray(lat, float)[v]
+    lon = np.asarray(lon, float)[v]
+    cerca = _haversine(lat, lon, vent_lat, vent_lon) < CELDAS_DATO_CRATER * float(paso_m) / 1000.0
+    cerca &= np.isfinite(lat) & np.isfinite(lon)
+    invalido = ~(np.isfinite(np.asarray(rad[b_mir], float)[v]) & np.isfinite(np.asarray(rad[b_tir], float)[v]))
+    sat = rad.get("saturado_mir")
+    return {"crater_sin_posicion": not crater_cubierto(lat, lon, vent_lat, vent_lon),
+            "px_mir_invalido_crater": int((cerca & invalido).sum()),
+            "px_saturados_crater": None if sat is None else int((cerca & np.asarray(sat, bool)[v]).sum())}
 
 
 def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_lon, inner_km, sensor,
@@ -835,8 +897,15 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
         box = caja_roi(tipo_roi or g.get("roi", "def"), n=g["n"], celda_crater=celda, inner_km=inner_km,
                        lado_sensible=cfg["lado_sensible"], lado_anillo=cfg["lado_anillo"], paso_m=g["paso"])
     rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia)
+    # celdas_sin_dato cuenta celdas de la grilla sin dato DESPUÉS de interpolar: griddata llena todo lo que cae dentro
+    # de la envolvente de los píxeles válidos, así que sólo ve celdas fuera de ella (bordes del gránulo). Un píxel
+    # perdido dentro del gránulo no aparece aquí; para eso están las marcas de dato_faltante_crater (S190, F1M-V201).
     rec["diag_codigo_mirova"].update({"dayflag": dayflag, "sunglint": round(sg, 2),
                                       "celdas_sin_dato": int(np.isnan(m13g).sum())})
+    filas, cols = np.flatnonzero(sel.any(axis=1)), np.flatnonzero(sel.any(axis=0))
+    ventana = (slice(filas[0], filas[-1] + 1), slice(cols[0], cols[-1] + 1))
+    rec["diag_codigo_mirova"].update(dato_faltante_crater(rad, lat, lon, b_mir, b_tir, vent_lat, vent_lon,
+                                                          g["paso"], ventana=ventana))
     rec.update({f"{k}_deg": round(v, 2) for k, v in geom.items()})
     return rec
 
