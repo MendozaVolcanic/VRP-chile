@@ -1105,7 +1105,7 @@ async function loadVolcano(v, opts = {}) {
     fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
   ]);
   // Fallback robusto: deploy viejo sin `_recent` → usar el completo (nunca romper). La sombra no cae ahí: en
-  // data/mirova_equivalent quedó de los 34 una semana de abril de 2026 sin detecciones, que no es su estado.
+  // data/mirova_equivalent quedó de los 34 una semana de abril de 2026 (2.843 records del detector de entonces, sin marca de régimen, 476 con VRP > 0; F8-V201), que no es su estado.
   const data = (!dataPrimary && !full && !sombra)
     ? await fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json")
     : dataPrimary;
