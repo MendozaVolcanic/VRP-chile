@@ -3546,6 +3546,17 @@ paper cuando difieren lo decide Nicolás (§7 del informe).
 
 ## D35: La geolocalización MODIS: interpolamos la grilla de 5 km del propio L1B (`_interp_geo`); MIROVA declara MOD03 y MYD03 con corrección de terreno. **ABIERTA (registrada S162; el A/B sobre K dio CUMPLE SIN DAÑO, verificado con contexto limpio; adopción pendiente dentro del paquete MODIS, con el sí de Nicolás, A45)** S162
 
+> ⚠️ **S190 (A113; F8-110 de la auditoría de Codex, ronda 2, CONFIRMADO por verificador de contexto limpio en
+> `D:\codex-vrp\_salida\ronda2\f8b_verificacion\VEREDICTO.md`)**: lo que la marca S172 de abajo dice del MxD03 que
+> falta es FALSO para los records que existen. `scripts/run_pipeline.py`, el único ejecutor que escribe records MODIS,
+> salta el gránulo sin MxD03 antes de llamar al procesador y anota la incidencia `sin_geolocalizacion`
+> (`pipeline/fetch.py`, `TIPOS_INCIDENCIA`, que cuenta en modo estricto): esa pasada queda sin medir y sin record, no
+> cae a K. La rama «sin_mxd03» de `pipeline/process_modis.py` sólo se alcanza llamando al procesador directo (las
+> pruebas lo hacen); en la copia auditada (main `8d6d41588`) `data/` tiene 0 records «sin_mxd03» contra 78.541 de la
+> vía. «geo_distinta» (MxD03 presente que no calza) sí es alcanzable desde el NRT. Cuántas pasadas se saltan así es SIN
+> DATO: la incidencia vive en los logs de Actions, no en `data/`. El párrafo «Qué hacemos» de abajo ya lo decía
+> (`run_pipeline.py:247-250` salta el gránulo). Texto de S172 conservado.
+
 > ⚠️ **S172 (A113)**: «interpolamos la grilla de 5 km» describe K. Desde el PR B la vía «código MIROVA» de MODIS
 > de producción lee la geolocalización de 1 km del MxD03 (`leer_geo_mxd03` en `pipeline/mirova_v750_codigo.py`); si
 > el MxD03 falta o no calza, el gránulo cae a K y el record lo dice (`via_codigo_mirova`: «sin_mxd03» o
