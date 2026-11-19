@@ -844,8 +844,8 @@ def dato_faltante_crater(rad, lat, lon, b_mir, b_tir, vent_lat, vent_lon, paso_m
       las dos saturan cuenta en px_mir_invalido_crater), y en un L1B sin quality_flags. None es «no medido», no cero.
 
     ventana: (slice de filas, slice de columnas) donde mirar; calcular_vrp_granulo pasa la caja de los píxeles del
-    recorte de 45 km. POR QUÉ: en un gránulo VIIRS 375 entero (6464 × 6400) medir sobre todo cuesta unos 6 s y 2 GB
-    por pasada, y fuera de esa caja no hay nada del cráter. Da lo mismo que sin ventana mientras el píxel más cercano al
+    recorte de 45 km. POR QUÉ: en un gránulo VIIRS 375 entero (6464 × 6400) medir sobre todo multiplica el tiempo y la
+    memoria de cada pasada (costo sin medir con script), y fuera de esa caja no hay nada del cráter. Da lo mismo que sin ventana mientras el píxel más cercano al
     cráter esté dentro de la caja: un borde de la caja junto a ese píxel es borde del gránulo o vecino sin posición, y
     la regla de K responde igual en los dos casos (prueba de equivalencia en test_via_dato_faltante_crater_s190.py)."""
     from .process_modis import crater_cubierto
