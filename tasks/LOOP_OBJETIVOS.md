@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-19 11:50 UTC (S190): reinicio del PC; cadena relanzada para las tandas 5 a 7; ramas de #1048, #1049 y #1050 al día con main
+- Nicolás reinició el PC hacia las 11:45 UTC. Murió `cadena_4a7_s190c.sh` (ya había despachado la tanda 5, run 44512397201, en cola en GitHub). Comprobado con ps: ninguna cadena viva. Relanzada como `D:\vrp-trabajo\temporales\s187_tanda2\cadena_5a7_s190d.sh` (log al lado): espera la tanda 5, relanza sus rojos hasta 3 veces y despacha 6 y 7 con el mismo ciclo. Una sola viva.
+- #1048, #1049 y #1050 tenían `pytest` rojo sólo por la P4 de Copahue (el duplicado que arregló #1051): ramas actualizadas con `gh pr update-branch` (merge de main), CI nueva en curso. #1054: CI en curso.
+- Avisadas las sesiones del frente 1 MODIS (local_579d2664) y del día (local_1a9c0903): sus procesos de fondo murieron con el reinicio; que revisen y relancen sólo lo que falte.
+- Pendiente: la primera corrida del NRT con el checkout nuevo de #1051 (despacho de las 12:10 UTC).
+
 ### 2026-11-19 11:37 UTC (S190): PR #1054 con la unión de la tanda 4 (verificador limpio 7 de 7)
 - **#1054** (rama `s190-historia34-tanda4`, commit `5be8ebe1c`): Callaqui 6.816, Lonquimay 6.879, Quetrupillan 6.951, Sollipulli 6.858, Tolhuaca 6.883 records; 626 días, 0 huecos, marcas todas true; ensayo 34.387 nuevos, 0 tras el corte, los 13 activos ya aplicados dan 0; 74 pruebas en verde. Verificador Sonnet limpio (`D:\vrp-trabajo\temporales\s190\verif_tanda4\verif.py`): 7 de 7 confirmadas. Rareza a revisar antes de publicar: Callaqui con 16 records sobre 50 MW el 2025-03-24 y 25 (máximo 149,2 MW), plausible incendio forestal. Espera «mergea #1054»; después se aplica con tag `pre-historia-34-tanda4`.
 - Runner de la tanda 4: 86,4 h, 31,4 min por trozo (máximo 67,2). La API de jobs dio «Server Error» con `per_page=100`; con 30 por página respondió. `run_attempt` vale 3 en todos los jobs (es el número del run), así que los relanzados se cuentan por el nombre del artifact: 11.
