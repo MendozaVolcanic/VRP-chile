@@ -616,3 +616,78 @@ porque Suomi NPP dejó de producir records (cese informado en el issue #943).
    Nicolás, reunir lo que dijeron los tres brazos en V750-B, V375-E y MOD-D.
 6. **Los 34 volcanes fuera del NRT:** la tanda de la historia con la vía (run 43633062404, otra sesión) iba en 136 de
    139 trozos sin fallas el 2026-11-15; publicar sigue el plan de #1000.
+
+### 12.10 Estado al 2026-11-19 y mejoras por sensor que salen de la auditoría Codex (S190)
+
+Agregado por la sesión dueña del loop S190 a pedido de Nicolás («continuemos con las mejoras a los planes por sensor»,
+2026-11-19). Actualiza la §12.9 sin reemplazarla; donde la contradice, manda esta. Los números de las guardias salen de
+`data/audit_continuous/guardia_{modis,v750,v375}_latest.json` de `origin/main` (generados entre 03:51 y 03:58 UTC del
+2026-11-19); los de Tupungatito, de `data/audit_continuous/comparacion_via_k.json` (generado 04:21 UTC del mismo día).
+
+**Plazos de guardia (todos VERDE, 0 candidatas a reversión):**
+
+| sensor | protegidas vistas | objetivo | vence |
+|---|---|---|---|
+| MODIS | 23 (22 el 11-15) | 29 | 2027-03-02 |
+| VIIRS 750 | 14 (11 el 11-15) | 29 | 2027-03-11 |
+| VIIRS 375 | 12 (8 el 11-15) | 29 | 2027-03-11 |
+
+MODIS sumó una sola protegida en cuatro días: la estimación «hacia el 17 o 18 de noviembre» de la §12.9 no se cumplió
+(Chillán, que aporta casi todas, bajó). El plazo sigue abierto; se cierra en 29 o en la fecha de vencimiento.
+
+**Auditoría semanal del 2026-11-16** (`data/audit_continuous/latest.json`, generada 19:36 UTC): VERDE, 0 flags. Es la
+primera que juzga la vía en los tres sensores.
+
+**Cerrado desde la §12.9:**
+- (b) de la §12.8, **Tupungatito VIIRS 750 con la vía: medido.** Del 2026-03-01 al 2026-11-19, la tabla de MIROVA tiene
+  14 noches con alerta; la vía publica 8 y K publicaba 2. Ninguna es protegida (todas entre 0,11 y 0,32 MW). En las 8
+  pareadas la magnitud de la vía calza con la de MIROVA (por ejemplo 0,253 contra 0,25 y 0,301 contra 0,30). Las 6 que
+  la vía no publica son débiles (0,11 a 0,25 MW). La vía publica además 8 noches que MIROVA no lista con alerta (0,05
+  a 1,36 MW, en la cumbre). Lectura: la vía arregla casi todo el déficit de K; queda una cola débil sin explicar
+  (SOSPECHA: la caja `sens` de D36 o el umbral cerca del fondo), sin pérdida protegida. Script: `D:\vrp-trabajo\temporales\s190\tupungatito_v750.py`.
+- Punto 5 de la §12.9, **regla de posición: decidida.** Nicolás eligió «radiante» el 2026-11-15 (#1022, guard
+  `tests/test_guard_regla_posicion_radiante_s186.py`).
+
+**Mejoras por sensor que salen de la auditoría Codex, ronda 2** (frentes 4, 6, 7 y 8; 98 filas en
+`D:\codex-vrp\_salida\ronda2\hallazgos_verificados.csv`, cada una con verificador Claude limpio; la gravedad es la
+del verificador, de 1 a 5). Ninguna cambia hoy una detección publicada; las que tocarían la vía cambian detecciones y
+piden decisión de Nicolás (y A45 si tocan `pipeline/process_*.py` o `store.py`).
+
+- **Los tres sensores (la vía):**
+  - F4-101 (3): cuando el fondo no se puede estimar, la vía lo resta como 0 K y puede dar VRP positivo. Es el método de
+    MIROVA copiado fielmente (`pipeline/mirova_v750_codigo.py`). F4-V201 (2): la pérdida parcial del fondo no deja
+    rastro en el record. Recomendación: primero contar cuántos records de producción tienen fondo no estimable (es
+    lectura, sin cambiar nada); según el número, una marca en el record, no un cambio de método.
+  - F4-103 y F4-105 (1): mecanismos ciertos sin alcance práctico. Sin acción.
+- **VIIRS 750 y 375:**
+  - F8-107 (3): sin ángulo solar en la escena, la vía la toma como día con brillo solar y la deja en 0. Hoy 0 de 58.936
+    records VIIRS de la vía están en ese caso. Recomendación: marcar «sin ángulo» como escena no medida en vez de
+    negativo.
+  - F4-104 (2): la vía VIIRS usa muestras con el bit de saturación y el record pierde esa marca. Incidencia observada
+    nula; qué hace MIROVA es SIN DATO. Va con la lectura de saturación M13 ya pendiente (`M13_quality_flags`).
+  - F4-106 (2): el tope de cordura del almacén. Corregido para VIIRS 750 con el techo de 683 K (#1043, ficha v1.39).
+- **MODIS:**
+  - F8-110 (2): la promesa de que una pasada sin MxD03 cae a K es falsa (se salta y queda como incidencia). Documentos
+    corregidos en #1049.
+  - F8-V202 (1): en el crepúsculo la vía aplica umbrales diurnos a 5 pasadas que el pipeline admitió como nocturnas
+    (todas con VRP 0). Recomendación: una sola definición del día; va con D-10.
+  - Frente 1 MODIS: el pase ciego de Codex dejó 9 hallazgos, 3 de gravedad 5 todavía sin verificar (doble saturación
+    del MIR publicada como pasada negativa, relleno del ángulo solar que vuelve día la noche, hueco de geolocalización
+    sobre el cráter guardado como cero). Los verifica la sesión «Auditoría Codex, ronda 2: frente 1 MODIS y siguientes».
+- **Disponibilidad (frente 6, todos los sensores):** el NRT puede quedar verde sin medir (F6-104, 3), una descarga vacía
+  cuenta como buena y apaga el aborto por token rechazado (F6-101 y F6-V201), una pasada fallida no deja fila (F6-112,
+  3) y a los 8 días la ventana deja de buscarla (F6-114, 3). Recomendación: una fila «no medida» por pasada fallida y
+  rojo cuando un volcán no mide nada; PR de la sesión de la ronda 3. Hallazgo relacionado de hoy: dos corridas del NRT
+  encoladas escribieron dos veces las mismas pasadas de Copahue; arreglo en #1051 (checkout de la rama al arrancar).
+- **Tablero y referencia (frente 7):** el panel contaba como FP pasadas sin referencia de MIROVA y mostraba 0,00 km para
+  distancias no medidas; arreglo en #1046 (con él, los FP de los 11 Tier A del 2026-03-01 al 11-16 bajan de 284 a 40).
+
+**Lo que queda, en orden:**
+1. Mergear las correcciones abiertas (#1045, #1046, #1048, #1049, #1050, #1051): espera la orden de Nicolás.
+2. Frente 1 MODIS: confrontación y verificadores (sesión aparte en curso); con sus veredictos, revisar si alguno toca
+   una protegida.
+3. Contar en producción los records con fondo no estimable (F4-101) y los VIIRS con saturación (F4-104), sólo lectura.
+4. Fase 5: V750-E (rama diurna) espera D-10; el A/B del día de la vía corre en la sesión del día (#1035), ventanas W1 a
+   W4 pareadas, W5 en curso.
+5. Los 34 fuera del NRT: tandas 1 a 3 aplicadas; tanda 4 limpia (unión en curso); tanda 5 despachada el 2026-11-19 a
+   las 11:10 UTC. Publicar sigue esperando D1 a D15.
