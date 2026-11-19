@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-19 15:40 UTC (S190): «Mergea los cinco»: #1055 a #1059 en main, ficha v1.44 a v1.46
+- **Orden explícita de Nicolás** («Mergea los cinco», respuesta a «¿Mergeo los cinco PR nuevos (#1055 a #1059)?»). Tag defensivo `pre-s190-lote-5pr` sobre `30a96ffef`, empujado.
+- Sin ficha, con las ramas actualizadas con main antes (#1059 toca `nrt.yml`, que ya cambiaron #1051 y #1053) y CI verde: #1057 (14:46:52, `bab2c33d2`, el monitor del NRT no cierra la alerta por corridas canceladas, F6-106) y #1059 (14:47:35, `e13c463b1`, la compuerta del NRT deja rojo un JSON ausente de un Tier A, F6-108).
+- Con ficha, en serie (main unido, ficha numerada con fecha 2026-11-19, 201 pruebas de la ficha y `CLAUDE.md` en verde, CI verde, `--match-head-commit`): #1055 v1.44 (15:02:44, `d73f7ea10`, una descarga vacía o parcial deja de darse por buena, F6-101, F6-102, F6-V201), #1056 v1.45 (15:17:50, `f287b66a4`, textos del frente 1 MODIS; reapuntado antes de la base mergeada de #1049 a main), #1058 v1.46 (15:32:51, `618d0c93e`, el encabezado dice «Volcán principal sin datos» en vez de «Sistema Operativo», F6-113). Pages publicó `618d0c93e` y el `index.html` del sitio trae el texto nuevo.
+- Sesión del frente 1 VIIRS archivada (terminada, traspaso escrito en `ESTADO_COORDINACION.md` §«TRASPASO 2026-11-19 ~14:40 UTC»). Frente 2: pase ciego congelado (8 hallazgos sin verificar, el mayor F2-101 de gravedad 4 según Codex), tarjeta propuesta para seguirlo. Codex en 59 % de la semana.
+- Tanda 5 (run 44512397201): 26 trozos rojos, todos en «Install deps» durante la caída del espejo de Ubuntu de las 12:08 UTC; la cadena los relanza al terminar el run. #1052 lo cerró el watchdog a las 13:14.
+- Para Nicolás: F4-101 (fondo nulo), el marcador de diagnóstico de F1M-108/F1M-101/F1M-V201/F1V-104/F1V-101 (`D:\codex-vrp\_salidaonda2\PLAN_F1M_G3_PARA_NICOLAS.md`), las decisiones de F6 (`PENDIENTES_F6_PARA_NICOLAS.md`) y F1M-114 (docstring de `process_modis.py`, zona A45).
+
 ### 2026-11-19 14:05 UTC (S190): «Mergea todos»: siete PR en main, ficha v1.40 a v1.43; tanda 4 aplicada
 - **Orden explícita de Nicolás** («Mergea todos», respuesta a «¿Mergeo los siete PR verdes?»). Tag defensivo `pre-s190-lote-7pr` sobre `1505c016d`, empujado.
 - Sin ficha, mergeados con CI verde y `--match-head-commit`: #1054 (12:54:33, `22e966a11`), #1048 (12:55:17, `620d50373`), #1050 (12:55:59, `e72ba3c3a`).
