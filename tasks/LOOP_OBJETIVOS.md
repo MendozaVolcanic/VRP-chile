@@ -569,6 +569,11 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-19 12:45 UTC (S190): primera corrida del NRT con el checkout de #1051, verde tras dos relanzamientos por el espejo de Ubuntu
+- Run 44521415639 (12:10 UTC, sha `1505c016d`): el log muestra `git checkout --progress --force -B main refs/remotes/origin/main`, la punta de la rama. 7 de 11 trabajos cayeron en `Install dependencies` (apt contra `azure.archive.ubuntu.com`, exit 100), sin relación con #1051; relanzados con `gh run rerun --failed` dos veces (Chillán y Lastarria cayeron de nuevo la primera), quedó `success` en los 11. 0 duplicados en los 11 Tier A de main después.
+- #1048, #1049, #1050 y #1054: CI verde y CLEAN tras actualizar las ramas. Esperan la orden de Nicolás junto con #1045, #1046 y #1053.
+- #1052 es la W5 del A/B del día; la sesión del día lo cierra cuando cuadre (reparación 44518569977). Frente 1 MODIS de Codex cerrado (20 filas; F1M-108, F1M-101 y F1M-V201 en gravedad 3 piden cambiar `pipeline/mirova_v750_codigo.py`, decide Nicolás). Tarjeta propuesta para el frente 1 VIIRS.
+
 ### 2026-11-19 11:50 UTC (S190): reinicio del PC; cadena relanzada para las tandas 5 a 7; ramas de #1048, #1049 y #1050 al día con main
 - Nicolás reinició el PC hacia las 11:45 UTC. Murió `cadena_4a7_s190c.sh` (ya había despachado la tanda 5, run 44512397201, en cola en GitHub). Comprobado con ps: ninguna cadena viva. Relanzada como `D:\vrp-trabajo\temporales\s187_tanda2\cadena_5a7_s190d.sh` (log al lado): espera la tanda 5, relanza sus rojos hasta 3 veces y despacha 6 y 7 con el mismo ciclo. Una sola viva.
 - #1048, #1049 y #1050 tenían `pytest` rojo sólo por la P4 de Copahue (el duplicado que arregló #1051): ramas actualizadas con `gh pr update-branch` (merge de main), CI nueva en curso. #1054: CI en curso.
