@@ -62,6 +62,51 @@ CLASE_SIN_GEOMETRIA = "SIN_GEOMETRIA"
 METODO_SIN_GEOMETRIA = "vrp_sin_geometria_propia"
 
 
+# Auditoria Codex ronda 2, F7-304. POR QUE: antes del 2026-06-13 el OCR no media la distancia y escribia 0 fijo
+# (hito de scripts/calidad_referencia_mirova.py), y este script lo guardaba como 0,00 km: el tablero decia
+# «MIROVA @ 0.00 km», que se lee como «en el crater», en 316 alertas OCR (78 de 1 MW o mas). Una distancia no
+# medida o vacia queda `null` (desconocida, como en las SIN_GEOMETRIA). Un 0 del OCR desde esa fecha si es
+# medicion (estrella en el crater, «geometria medida» en la nota) y queda en 0, igual que un 0 de la tabla.
+OCR_DISTANCIA_MEDIDA_DESDE = "2026-06-13"
+
+
+def _distancia(r, dt):
+    try:
+        dist = float((r.get("Distancia_km") or "").strip())
+    except ValueError:
+        return None
+    if r.get("_fuente") == "ocr" and dist == 0 and dt.strftime("%Y-%m-%d") < OCR_DISTANCIA_MEDIDA_DESDE:
+        return None
+    return round(dist, 2)
+
+
+# Auditoria Codex ronda 2, F7-301 y F7-V401. POR QUE: el JSON solo traia alertas, y el panel de metricas del
+# tablero llamaba falso positivo a toda deteccion nuestra sin alerta cercana, aunque MIROVA no tuviera ninguna fila
+# de esa pasada (sin dato) o la tuviera como FALSO_POSITIVO (calor fuera de su radio, que el banco separa como
+# far_ref). Para distinguirlas, el tablero necesita saber que pasadas listo la tabla sin alerta. Mismas reglas que
+# scripts/banco_paridad.py::etiquetar: RUTINA con VRP 0 es «miro y no vio nada»; FALSO_POSITIVO (y la clase
+# "FALSO POSITIVO" de los tipos viejos) es «fuera del radio». Solo la tabla: el OCR guarda solo alertas.
+def _pasadas_tabla(filas):
+    out = {"rutina": {}, "fuera_radio": {}}
+    for r in filas:
+        tipo = (r.get("Tipo_Registro") or "").strip()
+        clase = (r.get("Clasificacion Mirova") or "").strip()
+        try:
+            vrp = float(r.get("VRP_MW") or 0)
+            dt = datetime.strptime((r.get("Fecha_Satelite_UTC") or "").strip()[:16], "%Y-%m-%d %H:%M")
+        except ValueError:
+            continue
+        if tipo == "FALSO_POSITIVO" or clase == "FALSO POSITIVO":
+            grupo = "fuera_radio"
+        elif tipo == "RUTINA" and vrp == 0:
+            grupo = "rutina"
+        else:
+            continue
+        sensor = (r.get("Sensor") or "").strip()
+        out[grupo].setdefault(sensor, set()).add(dt.strftime("%Y-%m-%d %H:%M"))
+    return {g: {s: sorted(v) for s, v in sorted(d.items())} for g, d in out.items()}
+
+
 def _es_sin_geometria(r):
     if r.get("_fuente") != "ocr":
         return False
@@ -139,6 +184,7 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
     print(f"Total CSV rows: {len(rows)}")
     print(f"Matching {names}: {len(matched)}")
     latlon = _coords(json_stem)
+    pasadas_tabla = _pasadas_tabla(matched)
     if ocr:
         filas_ocr = _filas_ocr(Path(ocr), names)
         for r in filas_ocr:
@@ -188,15 +234,11 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
                 continue
         dt_str = dt.strftime("%Y-%m-%d %H:%M")
         sensor = (r.get("Sensor") or "").strip()
-        try:
-            dist = float(r.get("Distancia_km") or 0)
-        except ValueError:
-            dist = 0.0
         rec = {
             "datetime_utc": dt_str,
             "sensor": sensor,
             "VRP_MW": round(vrp, 3),
-            "distancia_km": round(dist, 2),
+            "distancia_km": _distancia(r, dt),   # F7-304: None si no se midio, nunca 0 inventado
             "clasificacion": (r.get("Clasificacion Mirova") or "").strip(),
             "source": r.get("_fuente", "consolidado"),
         }
@@ -273,7 +315,21 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
             "nocturno); 'records_dia_ocr' trae las alertas diurnas del OCR, solo para dibujar en el tablero como "
             "referencia. No usarlas en metricas de paridad.")
         output["records_dia_ocr"] = dia_ocr
-    dest.write_text(json.dumps(output, indent=2), encoding="utf-8")
+    output["nota_pasadas_tabla"] = (
+        "F7-301: pasadas que la tabla de MIROVA lista SIN alerta, por sensor del CSV y al minuto (UTC). 'rutina': "
+        "RUTINA con VRP 0 (miro y no vio nada); 'fuera_radio': FALSO_POSITIVO (calor fuera de su radio). Una "
+        "deteccion nuestra sin alerta cercana es FP del panel solo si su pasada esta en 'rutina'; si no hay fila "
+        "es sin dato. Mismas reglas que scripts/banco_paridad.py::etiquetar.")
+    output["pasadas_tabla"] = pasadas_tabla
+    texto = json.dumps(output, indent=2)
+    # Las listas de pasadas son miles de horas por volcan: una por linea triplicaria el archivo. Se escriben
+    # compactas (una linea por sensor) sin cambiar el JSON que lee el tablero.
+    for grupo, por_sensor in pasadas_tabla.items():
+        for sensor, horas in por_sensor.items():
+            lista = json.dumps(horas, indent=2)
+            texto = texto.replace(lista.replace("\n", "\n      "), json.dumps(horas), 1)
+    assert json.loads(texto) == output, "FATAL: la compactacion de pasadas_tabla cambio el contenido del JSON"
+    dest.write_text(texto, encoding="utf-8")
     print(f"  wrote: {dest}")
 
 
