@@ -126,6 +126,12 @@ jobs:
       - name: Checkout repository
         if: steps.filter.outputs.skip != 'true'
         uses: actions/checkout@v5
+        # S190 (2026-11-18): la punta de la rama al arrancar el trabajo, no el SHA del despacho. Las corridas del NRT
+        # se encolan en `push-main`; sin esto una corrida encolada parte de un commit anterior al push de la que la
+        # precedió, reprocesa pasadas ya subidas y el rebase deja dos copias (Copahue 2026-11-18, VIIRS 750 06:18 y
+        # 06:24; runs 44278853697 y 44282845368). Guard: tests/test_nrt_checkout_rama_s190.py.
+        with:
+          ref: ${{ github.ref }}
 
       - name: Set up Python
         if: steps.filter.outputs.skip != 'true'
