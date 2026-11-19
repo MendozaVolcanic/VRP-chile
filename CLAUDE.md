@@ -258,7 +258,8 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - `frontend/`: `index.html`, `diario.html`, `mosaico.html` live, cada una con su copia de helpers
   (`mirovaEqVrp`): un cambio de display se replica en las 3 (S92). `comparacion.html` es pública desde la ficha v1.28 (pestaña «Vía, K y MIROVA»), sin
   `mirovaEqVrp` a propósito. Verificar en navegador real. GitHub Pages despliega en push a `frontend/**`.
-- `volcanoes.yaml`: 45 volcanes; 11 Tier A con serie continua (sin hueco nov-ene tras #883); 34 fuera del cron del NRT, que corren
+- `volcanoes.yaml`: 45 volcanes; 11 Tier A con serie continua (sin hueco nov-ene tras #883); 34 fuera del cron del NRT (⚠️ S190, F6-120: 32 activos;
+  OlcaParuma y Putana salieron de la matriz el 2026-11-17, `active: false`, por no estar en la RNVV), que corren
   a diario con la vía (`sombra-34.yml`, `data/sombra_34/`) y se muestran en el tablero (ficha v1.26). (S186)
 - `nrt.yml`: cron 2 h, matrix por volcán, timeout 50 min. Reprocesos de historia en la máquina de Nicolás
   (`scripts/run_pipeline.py --profile X --volcano Y --start ... --end ...`), nunca full-history en Actions.
