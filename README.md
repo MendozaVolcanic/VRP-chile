@@ -233,7 +233,9 @@ reproc workflows pattern.
 
 `primary_cluster.vrp_mw` is the MIROVA-comparable magnitude (summit cluster);
 `vrp_mw` at record level is the scene-wide sum (diagnostic). ⚠️ S186: el ejemplo y esta frase son de K. En un
-record de la vía (`"via_codigo_mirova": true`) los dos campos valen lo mismo, la suma de todos los alertados;
+record de la vía (`"via_codigo_mirova": true`) los dos campos valen lo mismo, la suma de todos los alertados
+(⚠️ S190, F4-114: salvo si la suma es negativa; el almacén deja `vrp_mw` en 0 y `primary_cluster.vrp_mw` negativo,
+1 de 10.625 records de la vía con cúmulo);
 `final_hotspot_source` es `"codigo_mirova"` y el centroide es el del cúmulo de la alertada más radiante. Sensor naming:
 `VIIRS_<SAT>` = I-band 375 m, `VIIRS_<SAT>_750` = M-band.
 

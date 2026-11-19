@@ -27,10 +27,12 @@ def test_despues_del_arreglo_de_suomi_npp_no_pisa_nada():
     assert cal.avisos_de_ventana("2026-10-10", "2026-10-14") == []
 
 
-def test_mayo_avisa_del_ocr_y_decide_solo_la_tabla():
+def test_mayo_avisa_del_ocr_y_dice_que_el_ocr_tambien_decide():
+    # F7-308 (auditoria Codex ronda 2): el banco deja decidir al OCR tambien antes del 2026-06-13; el aviso que
+    # decia «SOLO la tabla» prometia otra cosa. Guard del texto nuevo en tests/test_tablero_hoja_respuestas_f7.py.
     av = " ".join(cal.avisos_de_ventana("2026-05-01", "2026-05-31"))
     assert "2026-06-11" in av and "2026-06-13" in av and "2026-03-01" not in av
-    assert cal.etiqueta_que_decide("2026-05-01").startswith("SOLO la tabla")
+    assert cal.etiqueta_que_decide("2026-05-01").startswith("tabla y OCR")
 
 
 def test_marzo_avisa_de_la_tasa_por_pasada_de_viirs():

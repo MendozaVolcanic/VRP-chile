@@ -9,7 +9,7 @@ cambió.
 
 | Punto | Qué se midió | Veredicto |
 |---|---|---|
-| 1. Umbrales de MODIS (K1 -0,7 y piso 0,02 del `.m` de VIIRS 750 en vez de -0,8 y 0,01 de la Tabla 1) | A/B sobre 330 pasadas reales con la grilla de la vía | **Pre-registrado: «medir más»** (la Tabla 1 cambia el valor publicado en 5,8 % de las pasadas con alerta; el corte para «dejar documentado» era 2 %). **Recomendación posterior: no adoptar la Tabla 1 y dejarlo documentado**: no recupera ninguna alerta, no cambia ninguna protegida, y en las 9 pasadas que cambian (todas Chillán) sube un valor que ya estaba sobre el de MIROVA |
+| 1. Umbrales de MODIS (K1 -0,7 y piso 0,02 del `.m` de VIIRS 750 en vez de -0,8 y 0,01 de la Tabla 1) | A/B sobre 330 pasadas reales con la grilla de la vía | **Pre-registrado: «medir más»** (la Tabla 1 cambia el valor publicado en 5,8 % de las pasadas con alerta; el corte para «dejar documentado» era 2 %). **Recomendación posterior: no adoptar la Tabla 1 y dejarlo documentado**: no recupera ninguna alerta, no cambia ninguna protegida, y en las 9 pasadas que cambian (todas Chillán) sube un valor que ya estaba sobre el de MIROVA (⚠️ S190, F4-119: en 8 de las 9; en Chillán 2026-11-09 00:55 A estaba bajo MIROVA, ver el desglose de §1) |
 | 2. Escalón de cenit de VIIRS 750 sobre 50° | Razón nuestra/MIROVA en la misma pasada sobre 50°, por magnitud | **No implementar (3 preguntas: NO) y medir más.** La razón es 0,998, pero la prueba no tiene poder: en el OSF el escalón casi sólo actúa sobre 100 MW, y no tenemos ningún par sobre 50° con 100 MW o más desde que corre la vía. Se mide en el primer evento oblicuo grande |
 | 3. Corte de 5 km al centro, mínimo de 100 píxeles, recorte de 45 km | Mutaciones contra las pruebas de hoy; costo contra MIROVA | **Dejar documentado.** Costo contra MIROVA: 0 alertas perdidas atribuibles. Pruebas: quitar o subir el corte de 5 km y mover el recorte de 45 km se atrapan; bajar el corte, el mínimo de 100 píxeles y el radio de cobertura no los atrapa ninguna prueba (ver §3) |
 
@@ -38,7 +38,7 @@ Esto acota la exposición pero no dice cuántas celdas nuevas aparecerían: eso 
 estratos (135 a ±60 min de una alerta MODIS de MIROVA, 156 con alerta nuestra, 165 negativas al azar, 15 por
 volcán, y 12 que la vía descartó y la guardia K procesó). Brazos (`brazos.py`): A = la vía; B = los números de la
 Tabla 1 con la lógica del `.m` (umbral = max(μ + C2σ, C1); la p. 7 del paper lo escribe «dNTI > C1 or dNTI >
-μ + C2σ», que es lo mismo [⚠️ S190, auditoría de Codex, ronda 2, F1M-117: no es lo mismo; «or» equivale a min(C1, μ + C2σ), como escribe el propio catálogo (D26), y el brazo B usó max, así que midió los números de la Tabla 1 con la conectiva del `.m`, no la fórmula del texto del paper]); B1 = sólo K1; B2 = sólo el piso. Corrió en Actions (run 44016042341, rama desechable ya borrada, sólo lectura; arnés
+μ + C2σ», que es lo mismo ⚠️ S190, F4-117: **no es lo mismo**; «or» equivale al mínimo de los dos umbrales y el `.m` usa el máximo; medido sobre los umbrales que guardó la vía, el umbral «or» de la región conservadora es 0,35 a 0,41 veces el actual en mediana, en el 100 % de las escenas. Este A/B cambió sólo los números, como pre-registró, y la conectiva literal del paper no se midió); B1 = sólo K1; B2 = sólo el piso. Corrió en Actions (run 44016042341, rama desechable ya borrada, sólo lectura; arnés
 `p1_runner.py`) porque el token de Earthdata existe sólo como secreto. Lectura: `p1_analisis.py`, salida
 `p1_analisis_salida.txt` y `.json`.
 
@@ -86,7 +86,8 @@ Chillán 2026-10-30 08:55, cenit 63°, MIROVA 14,39 MW, A 20,55, B 28,60. Lo que
 recupera ninguna alerta, no cambia ninguna protegida y no mejora la magnitud en ninguno de los dos volcanes con pares (Láscar igual, Chillán
 peor). El veredicto que
 recomiendo es **no adoptar la Tabla 1 y dejarlo documentado**: la divergencia con el paper existe, pero acercarse al
-paper no nos acerca a lo que MIROVA publica, que es la referencia del perfil `mirova_equivalent` (A115).
+paper no nos acerca a lo que MIROVA publica, que es la referencia del perfil `mirova_equivalent` (A115). ⚠️ S190
+(F4-117): «acercarse al paper» vale sólo para sus números; su conectiva «or» no se midió.
 
 **Qué faltaría para cerrar del todo** (si Nicolás quiere el «medir más» literal): las 8 pasadas que fallaron por
 la NASA (4 noches de Chillán, Láscar y Villarrica con alerta) y, para la sobre-publicación, una muestra de negativas
