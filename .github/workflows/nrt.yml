@@ -260,7 +260,7 @@ jobs:
             echo "Pipeline abortó con \`NASA_AUTH_UNREACHABLE\` (budget corto, ~2 min)." >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "Volcán afectado: \`${{ matrix.volcano }}\`" >> "$GITHUB_STEP_SUMMARY"
-            echo "Workflow \`nrt-retry.yml\` reintentará automáticamente en ~30 min." >> "$GITHUB_STEP_SUMMARY"
+            echo "Workflow \`nrt-retry.yml\` reintentará automáticamente a las :30 de la próxima hora impar (unos 90 min después del cron de esta corrida; S190 F6-111)." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       # S85 A57: assertion de contenido post-pipeline para Tier A. Detecta
