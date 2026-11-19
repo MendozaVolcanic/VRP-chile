@@ -690,7 +690,7 @@ piden decisión de Nicolás (y A45 si tocan `pipeline/process_*.py` o `store.py`
   distancias no medidas; arreglo en #1046 (con él, los FP de los 11 Tier A del 2026-03-01 al 11-16 bajan de 284 a 40).
 
 **Lo que queda, en orden:**
-1. Mergear las correcciones abiertas (#1045, #1046, #1048, #1049, #1050, #1051): espera la orden de Nicolás.
+1. ⚠️ Hecho el 2026-11-19: #1045, #1046, #1048, #1049, #1050, #1051 y #1053 en main (ficha v1.40 a v1.43). Texto anterior: «Mergear las correcciones abiertas (#1045, #1046, #1048, #1049, #1050, #1051): espera la orden de Nicolás.»
 2. Frente 1 MODIS: confrontación y verificadores (sesión aparte en curso); con sus veredictos, revisar si alguno toca
    una protegida.
 3. Fondo no estimable (F4-101): contado (19 records, arriba); falta la decisión. Saturación VIIRS (F4-104): contar, sólo

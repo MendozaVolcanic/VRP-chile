@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-19 14:05 UTC (S190): «Mergea todos»: siete PR en main, ficha v1.40 a v1.43; tanda 4 aplicada
+- **Orden explícita de Nicolás** («Mergea todos», respuesta a «¿Mergeo los siete PR verdes?»). Tag defensivo `pre-s190-lote-7pr` sobre `1505c016d`, empujado.
+- Sin ficha, mergeados con CI verde y `--match-head-commit`: #1054 (12:54:33, `22e966a11`), #1048 (12:55:17, `620d50373`), #1050 (12:55:59, `e72ba3c3a`).
+- **Tanda 4 aplicada**: run 44528546156 de `aplicar-reemplazo.yml` (tag `pre-historia-34-tanda4`), commit `4e6e873fa`. Comprobado en main: Callaqui 6.816, Lonquimay 6.879, Tolhuaca 6.883, Sollipulli 6.858, Quetrupillan 6.951 records, 626 días cada uno, todos de la vía. `data/historia_34/` tiene 18 volcanes. La fila «aplicada» de la tanda 4 va en el PR de la tanda 5.
+- Con ficha, en serie (main unido, ficha numerada con fecha UTC 2026-11-19, 201 pruebas que leen la ficha y `CLAUDE.md` en verde, CI verde, `--match-head-commit`): #1045 v1.40 (13:11:53, `2a9a0243a`; además el marcador de la fila v1.35 pasó a «corregido en la v1.40»), #1046 v1.41 (13:28:15, `543e2d121`), #1049 v1.42 (13:46:28, `d4c94ab28`), #1053 v1.43 (14:03:04, `30a96ffef`). #1053 chocó en la ficha con #1045 (filas vecinas v1.35 y v1.36): resuelto por contenido, de cada fila el lado que se apartó de la base común. La serie se cortó una vez por un `git fetch` fallido (red) y se retomó.
+- Pages publicó tras #1046 (run 44533763192): el `index.html` del sitio trae `textoDistanciaMirova`. El panel nuevo («sin dato», «fuera de radio») aparece cuando el sync de MIROVA regenere los JSON con `pasadas_tabla`; a las 14:00 todavía no (último sync 13:00, antes del merge). Revisar.
+- Archivadas por memoria comprometida alta (83 %; autorización general de Nicolás): ronda 2 piloto, frente 6, frente 1 MODIS y las sesiones de #1045 y #1046. Abiertos por la sesión del frente 1 VIIRS (local_b09fa019): #1055, #1056 (sobre la base de #1049, ya mergeada), #1057, #1058 y #1059; esperan orden.
+
 ### 2026-11-19 12:45 UTC (S190): primera corrida del NRT con el checkout de #1051, verde tras dos relanzamientos por el espejo de Ubuntu
 - Run 44521415639 (12:10 UTC, sha `1505c016d`): el log muestra `git checkout --progress --force -B main refs/remotes/origin/main`, la punta de la rama. 7 de 11 trabajos cayeron en `Install dependencies` (apt contra `azure.archive.ubuntu.com`, exit 100), sin relación con #1051; relanzados con `gh run rerun --failed` dos veces (Chillán y Lastarria cayeron de nuevo la primera), quedó `success` en los 11. 0 duplicados en los 11 Tier A de main después.
 - #1048, #1049, #1050 y #1054: CI verde y CLEAN tras actualizar las ramas. Esperan la orden de Nicolás junto con #1045, #1046 y #1053.
