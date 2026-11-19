@@ -1128,6 +1128,10 @@ def _probe_download_host(host: str, timeout: float = 5.0) -> bool:
         return False
 
 
+class DescargaIncompleta(RuntimeError):
+    """La biblioteca respondió sin excepción pero faltan archivos en disco (S190, F6-101)."""
+
+
 def download_granules(granules: list, dest_dir: Path) -> list[Path]:
     """Download a list of granules to dest_dir. Returns list of local file paths.
 
@@ -1182,7 +1186,18 @@ def download_granules(granules: list, dest_dir: Path) -> list[Path]:
         try:
             paths = earthaccess.download(granules, local_path=str(dest_dir))
             _diag(f"DOWNLOAD_DONE attempt={attempt} elapsed={time.time()-t0:.1f}s n_files={len(paths)}")
-            return [Path(p) for p in paths if Path(p).exists()]
+            existentes = [Path(p) for p in paths if Path(p).exists()]
+            # S190 (auditoría de Codex, ronda 2, F6-101 y F6-V201) POR QUÉ: earthaccess 0.17.0, la del runner,
+            # devuelve una lista vacía SIN excepción cuando el gránulo no trae enlace GET DATA o el almacén no
+            # tiene sesión. Antes eso salía de aquí como éxito: la pasada se perdía sin falla ni incidencia (en el
+            # tablero, una noche sin anomalía) y además contaba como «descarga buena», lo que apagaba el aborto por
+            # token rechazado con 403 (S175). Un archivo por gránulo es lo mínimo (L1B y su geolocalización): si
+            # falta alguno es una descarga incompleta, que se reintenta como cualquier error de lectura y, si
+            # persiste, queda como falla de descarga en la cobertura. Prueba: tests/test_fetch_descarga_vacia_s190.py.
+            if len(existentes) < len(granules):
+                raise DescargaIncompleta(f"descarga incompleta: {len(existentes)} de {len(granules)} archivos "
+                                         f"en disco [{names}]")
+            return existentes
         except _CONNECT_ERRORS as e:
             last_err = e
             # S109 — resiliencia a blip transitorio: antes de marcar el host caído PARA
@@ -1368,9 +1383,26 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             etapa, producto = "descarga", l1b_key
             platform_dir = tmp_dir / platform
             paths = []
+            # S190 (auditoría de Codex, ronda 2, F6-102 y F6-V202) POR QUÉ: el try de afuera envolvía este bucle
+            # entero, así que la primera pasada que fallaba al bajar botaba las ya bajadas de la plataforma y ni se
+            # intentaban las siguientes. Cada par (L1B y su geolocalización) es una pasada independiente: su falla
+            # se registra sola y el resto sigue. Un 403 cuenta una vez por plataforma, como antes; la credencial
+            # muerta (401) sigue abortando la corrida entera.
+            rechazo_403_plataforma = False
             for l1b_g, geo_g in matched:
-                paths += download_granules([l1b_g, geo_g], platform_dir)
-                _DESCARGA_BUENA = True
+                try:
+                    paths += download_granules([l1b_g, geo_g], platform_dir)
+                    _DESCARGA_BUENA = True
+                except EarthdataCredentialError:
+                    raise
+                except Exception as e_par:
+                    if _is_credential_dead(e_par)[1] == 403:
+                        rechazo_403_plataforma = True
+                    print(f"  WARN: Failed to fetch {platform} (una pasada): {e_par}")
+                    _registrar_falla(producto, fecha_str, f"{type(e_par).__name__}: {str(e_par)[:150]}",
+                                     etapa=etapa)
+            if rechazo_403_plataforma:
+                rechazos_403 += 1
             results[platform] = paths
         except EarthdataCredentialError:
             # S123: NO degradar. Este catch-all es justo donde el token expirado
