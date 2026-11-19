@@ -658,6 +658,13 @@ piden decisión de Nicolás (y A45 si tocan `pipeline/process_*.py` o `store.py`
     MIROVA copiado fielmente (`pipeline/mirova_v750_codigo.py`). F4-V201 (2): la pérdida parcial del fondo no deja
     rastro en el record. Recomendación: primero contar cuántos records de producción tienen fondo no estimable (es
     lectura, sin cambiar nada); según el número, una marca en el record, no un cambio de método.
+    **Medido el 2026-11-19 (S190):** de 73.952 records de la vía de los 11 Tier A en `origin/main`, 19 tienen `L_bk`
+    igual a 0 en `diag_codigo_mirova` y los 19 tienen VRP > 0 (MODIS 6, VIIRS 375 9, VIIRS 750 4); 10 pesan 1 MW o más,
+    el mayor Llaima 2025-07-02 07:10 MODIS Aqua con 9,3 MW y un píxel. En la ventana de la comparación vía, K y MIROVA
+    (desde el 2026-03-01) cae uno: Cordón Caulle 2026-03-16 MODIS Terra, 2,5 MW, que la tabla de MIROVA lista sin
+    alerta (un FP nuestro). Script: `D:\vrp-trabajo\temporales\s190\f4_101_contar.py`. Recomendación nueva:
+    tratar `L_bk` 0 como escena no medida (no publicar VRP sin fondo restado). Cambia detecciones: decide Nicolás.
+    Pendiente antes: mirar si MIROVA publicó los 9 de 2025 (su tabla de esas fechas no está en el consolidado).
   - F4-103 y F4-105 (1): mecanismos ciertos sin alcance práctico. Sin acción.
 - **VIIRS 750 y 375:**
   - F8-107 (3): sin ángulo solar en la escena, la vía la toma como día con brillo solar y la deja en 0. Hoy 0 de 58.936
@@ -686,7 +693,8 @@ piden decisión de Nicolás (y A45 si tocan `pipeline/process_*.py` o `store.py`
 1. Mergear las correcciones abiertas (#1045, #1046, #1048, #1049, #1050, #1051): espera la orden de Nicolás.
 2. Frente 1 MODIS: confrontación y verificadores (sesión aparte en curso); con sus veredictos, revisar si alguno toca
    una protegida.
-3. Contar en producción los records con fondo no estimable (F4-101) y los VIIRS con saturación (F4-104), sólo lectura.
+3. Fondo no estimable (F4-101): contado (19 records, arriba); falta la decisión. Saturación VIIRS (F4-104): contar, sólo
+   lectura.
 4. Fase 5: V750-E (rama diurna) espera D-10; el A/B del día de la vía corre en la sesión del día (#1035), ventanas W1 a
    W4 pareadas, W5 en curso.
 5. Los 34 fuera del NRT: tandas 1 a 3 aplicadas; tanda 4 limpia (unión en curso); tanda 5 despachada el 2026-11-19 a
