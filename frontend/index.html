@@ -39,7 +39,7 @@
     .header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }  /* S131 A11: en celular los enlaces se salían de pantalla */
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
     .status-dot.mon-lagging { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }  /* S131 A1 */
-    .status-dot.mon-stale   { background: var(--red);    box-shadow: 0 0 8px var(--red); animation: none; }
+    .status-dot.mon-stale, .status-dot.mon-none { background: var(--red); box-shadow: 0 0 8px var(--red); animation: none; }  /* S190 F6-113: mon-none en la misma línea para no correr las citas archivo:línea (G8) */
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
     .status-label { font-size: 0.75rem; color: var(--green); display: flex; align-items: center; gap: 6px; }
     #updated-label { font-size: 0.72rem; color: var(--muted); }
@@ -2510,7 +2510,11 @@ function fmtLocalCL(s) {
 
 // S131 A1: semáforo del encabezado alimentado por datos. Guarda la peor frescura de los
 // Tier A vista durante buildCards() y la refleja en el punto + texto del header.
-const _FRESH_RANK = { "mon-fresh": 0, "mon-lagging": 1, "mon-stale": 2 };
+// S190 (auditoría de Codex, ronda 2, F6-113): «mon-none» (el JSON del volcán no cargó o viene vacío) es el peor estado
+// para un Tier A. Antes se descartaba y el encabezado decía «Sistema Operativo» con un volcán principal sin ningún dato
+// (y con los 11 sin datos quedaba el texto fijo del HTML). En la tarjeta sigue gris: ahí lo dice el texto de la tarjeta.
+// Prueba: tests/test_semaforo_tier_a_sin_datos_s190.py.
+const _FRESH_RANK = { "mon-fresh": 0, "mon-lagging": 1, "mon-stale": 2, "mon-none": 3 };
 let _headerWorst = null;
 function trackHeaderFreshness(fresh) {
   if (!(fresh.cls in _FRESH_RANK)) return;
@@ -2521,6 +2525,7 @@ function trackHeaderFreshness(fresh) {
   dot.className = "status-dot " + _headerWorst.cls;
   const label = _headerWorst.cls === "mon-fresh" ? "Sistema Operativo"
               : _headerWorst.cls === "mon-lagging" ? "Datos atrasados"
+              : _headerWorst.cls === "mon-none" ? "Volcán principal sin datos"
               : "Sin pasadas recientes";
   if (txt) { txt.textContent = label; txt.title = "Peor frescura entre los volcanes Tier A: " + _headerWorst.txt; }
 }
