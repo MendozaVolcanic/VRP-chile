@@ -38,7 +38,7 @@ Esto acota la exposición pero no dice cuántas celdas nuevas aparecerían: eso 
 estratos (135 a ±60 min de una alerta MODIS de MIROVA, 156 con alerta nuestra, 165 negativas al azar, 15 por
 volcán, y 12 que la vía descartó y la guardia K procesó). Brazos (`brazos.py`): A = la vía; B = los números de la
 Tabla 1 con la lógica del `.m` (umbral = max(μ + C2σ, C1); la p. 7 del paper lo escribe «dNTI > C1 or dNTI >
-μ + C2σ», que es lo mismo); B1 = sólo K1; B2 = sólo el piso. Corrió en Actions (run 44016042341, rama desechable ya borrada, sólo lectura; arnés
+μ + C2σ», que es lo mismo [⚠️ S190, auditoría de Codex, ronda 2, F1M-117: no es lo mismo; «or» equivale a min(C1, μ + C2σ), como escribe el propio catálogo (D26), y el brazo B usó max, así que midió los números de la Tabla 1 con la conectiva del `.m`, no la fórmula del texto del paper]); B1 = sólo K1; B2 = sólo el piso. Corrió en Actions (run 44016042341, rama desechable ya borrada, sólo lectura; arnés
 `p1_runner.py`) porque el token de Earthdata existe sólo como secreto. Lectura: `p1_analisis.py`, salida
 `p1_analisis_salida.txt` y `.json`.
 
