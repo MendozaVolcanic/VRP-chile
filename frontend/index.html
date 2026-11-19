@@ -1115,6 +1115,7 @@ async function loadVolcano(v, opts = {}) {
     // S151: alertas diurnas del OCR de MIROVA, SOLO para dibujar (con un sol). Van aparte de mirovaRecords
     // para que ninguna metrica, confirmacion ni tarjeta cambie (ver toMirovaDiaPoints).
     mirovaDiaOcr:  mirova?.records_dia_ocr || [],
+    mirovaPasadas: mirova?.pasadas_tabla || null,   // F7-301: pasadas sin alerta de la tabla (null = JSON viejo)
     updated:       data?.updated   || null,
   }; if (sombra) derivarClaseSombra(allData[v.name].records);  // S180: la sombra de los 34 no trae distance_class (ver la función)
   // S89 #3: etiquetar mirova_confirmed por-record (cruce con CSV MIROVA, capa
@@ -1547,7 +1548,14 @@ function mirovaSensorBucket(sensor) {
   if (s === "VIIRS") return "VIIRS750";
   return null;
 }
-function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
+function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar, pasadasTabla) {
+  // Auditoría Codex ronda 2, F7-301 y F7-V401. POR QUÉ: una detección nuestra sin alerta de MIROVA cerca era FP
+  // siempre, aunque MIROVA no tuviera ninguna fila de esa pasada (no la procesó o el scraper no la trajo) o la
+  // listara como FALSO_POSITIVO (vio calor, pero fuera de su radio). Ninguna de las dos es «MIROVA miró y no vio
+  // nada». Ahora, con `pasadas_tabla` del JSON de MIROVA (scripts/rebuild_mirova_from_consolidado.py), FP es sólo
+  // la que tiene fila RUTINA de la misma pasada a ±2 min (MIROVA_PASADA_MS, la vara del banco); con FALSO_POSITIVO
+  // va a `fuera_radio` y sin fila a `sin_ref` (sin dato). Ninguna de las dos entra a la precisión. Un JSON viejo
+  // sin `pasadas_tabla` (hasta que el sync lo regenere) cuenta como antes.
   // S90: los artefactos cirrus incoherentes no cuentan como detección nuestra
   // (mejora la precisión reportada hacia el valor real; no son FP genuinos).
   const eqVrp = (r) => isThermalArtifact(r, innerKm) ? 0 : mirovaEqVrpDisplay(r, innerKm, includeFar);
@@ -1599,10 +1607,22 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
   // estos volcanes (0 alertas en 5 meses), así que incluirlo en la precisión la
   // hundía con FP de un sensor que el clon no debe reportar. Ver AUDIT_S93.
   const per = {
-    MODIS:    { tp: 0, fn: 0, fp: 0, ratios: [] },
-    VIIRS375: { tp: 0, fn: 0, fp: 0, ratios: [] },
-    VIIRS750: { tp: 0, fn: 0, fp: 0, ratios: [] },
+    MODIS:    { tp: 0, fn: 0, fp: 0, sin_ref: 0, fuera_radio: 0, ratios: [] },
+    VIIRS375: { tp: 0, fn: 0, fp: 0, sin_ref: 0, fuera_radio: 0, ratios: [] },
+    VIIRS750: { tp: 0, fn: 0, fp: 0, sin_ref: 0, fuera_radio: 0, ratios: [] },
   };
+  // F7-301: horas (ms) de las pasadas que la tabla lista sin alerta, por bucket; null = JSON viejo.
+  const pasadasMs = (grupo) => {
+    const out = { MODIS: [], VIIRS375: [], VIIRS750: [] };
+    for (const [sensor, horas] of Object.entries((pasadasTabla && pasadasTabla[grupo]) || {})) {
+      const b = mirovaSensorBucket(sensor);
+      if (b) for (const h of horas) out[b].push(parseUtcMs(h));
+    }
+    return out;
+  };
+  const rutinaMs = pasadasTabla ? pasadasMs("rutina") : null;
+  const lejosMs = pasadasTabla ? pasadasMs("fuera_radio") : null;
+  const enPasada = (lista, t) => lista.some(x => Math.abs(x - t) <= MIROVA_PASADA_MS);
   const matchedOurIdx = { MODIS: new Set(), VIIRS375: new Set(), VIIRS750: new Set() };
 
   // Loop MIROVA → buscar nuestro con eqVrp > 0
@@ -1627,7 +1647,11 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
       if (matchedOurIdx[bucket].has(i)) continue;
       if (!(eqVrp(ours[i].r) > 0)) continue;
       const idx = findNearest(mirovas, ours[i].t);
-      if (idx < 0) per[bucket].fp++;
+      if (idx >= 0) continue;
+      if (!rutinaMs) per[bucket].fp++;                                         // JSON viejo: como antes
+      else if (enPasada(lejosMs[bucket], ours[i].t)) per[bucket].fuera_radio++; // F7-V401: calor fuera del radio
+      else if (enPasada(rutinaMs[bucket], ours[i].t)) per[bucket].fp++;         // MIROVA miró y no vio nada
+      else per[bucket].sin_ref++;                                              // F7-301: sin fila de MIROVA
     }
   }
 
@@ -1642,16 +1666,18 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
       const mid = s.length >> 1;
       ratio_med = (s.length % 2) ? s[mid] : 0.5 * (s[mid - 1] + s[mid]);
     }
-    return { tp: o.tp, fn: o.fn, fp: o.fp, pairs: o.ratios.length, recall, precision, f1, ratio_med };
+    return { tp: o.tp, fn: o.fn, fp: o.fp, sin_ref: o.sin_ref, fuera_radio: o.fuera_radio,
+             pairs: o.ratios.length, recall, precision, f1, ratio_med };
   }
   const byBucket = {};
   for (const b of Object.keys(per)) byBucket[b] = metricsOf(per[b]);
   // Global = los 3 sensores. MIROVA publica MODIS, VIIRS375 (I-band) y VIIRS750
   // (M-band); este último detecta MENOS pero NO es nulo (fix S93: el loader
   // buggeado lo daba en 0 → falso "MIROVA no usa VIIRS750").
-  const agg = { tp: 0, fn: 0, fp: 0, ratios: [] };
+  const agg = { tp: 0, fn: 0, fp: 0, sin_ref: 0, fuera_radio: 0, ratios: [] };
   for (const b of ["MODIS", "VIIRS375", "VIIRS750"]) {
     agg.tp += per[b].tp; agg.fn += per[b].fn; agg.fp += per[b].fp;
+    agg.sin_ref += per[b].sin_ref; agg.fuera_radio += per[b].fuera_radio;
     agg.ratios.push(...per[b].ratios);
   }
   return { ...metricsOf(agg), byBucket };
@@ -1709,6 +1735,14 @@ function enrichWithMirovaConfirmation(ourRecords, mirovaRecords) {
     const idx = nearest(mByBucket[b], t);
     if (idx >= 0) { r._mirova_confirmed = true; r._mirova_dist_km = mByBucket[b][idx].dist; }
   }
+}
+
+// Auditoría Codex ronda 2, F7-304. POR QUÉ: una alerta de MIROVA sin distancia (OCR anterior al 2026-06-13, que no
+// la medía, o SIN_GEOMETRIA) llega con `distancia_km: null`; antes el generador la escribía como 0 y el tooltip
+// decía «MIROVA @ 0.00 km», que se lee «en el cráter». Un solo texto para el tooltip del gráfico y la tabla.
+function textoDistanciaMirova(r, decimales) {
+  if (!r || !r._mirova_confirmed) return null;
+  return r._mirova_dist_km != null ? r._mirova_dist_km.toFixed(decimales) + " km" : "sin distancia";
 }
 
 // H3 (S77 audit, PR #170 follow-up): helper global único para "este record
@@ -3058,10 +3092,15 @@ function renderDetail() {
   // agregado mezclaba MODIS (precisión ~3%, ciego a lo débil → casi todo
   // artefacto) con VIIRS375 (fuente real, precisión ~38%) y resultaba engañoso.
   // VIIRS750 (M-band) NO lo usa MIROVA para estos volcanes → no se reporta acá.
-  const metrics = computeMetrics(filtered, mFiltered, innerKm, includeFarDistance);
+  const metrics = computeMetrics(filtered, mFiltered, innerKm, includeFarDistance, d.mirovaPasadas);
   const tipText = "Calculado contra CONS+OCR del CSV consolidado MIROVA en la ventana actual del chart (" +
                   Periodo.rotulo(currentPeriodo) + "). " +
                   "Records MIROVA con clasificación RUTINA o NULO no cuentan como FN. " +
+                  (d.mirovaPasadas
+                    ? "FP = detección nuestra en una pasada que la tabla de MIROVA lista sin calor (RUTINA a ±2 min). " +
+                      "«Sin dato» = MIROVA no tiene fila de esa pasada; «fuera de radio» = MIROVA vio calor fuera de su " +
+                      "radio (FALSO_POSITIVO). Ninguna de las dos entra a la precisión. "
+                    : "FP = detección nuestra sin alerta de MIROVA cerca (este JSON de MIROVA aún no trae las pasadas sin alerta). ") +
                   "Match por sensor bucket con tolerancia temporal ±60 min. " +
                   "MIROVA publica los 3 sensores (VIIRS375 I-band detecta más; " +
                   "VIIRS750 M-band menos; MODIS solo anomalías grandes).";
@@ -3096,7 +3135,8 @@ function renderDetail() {
     };
     addMetric("Recall",    fmt(m.recall),    `TP=${m.tp} FN=${m.fn}`,
               m.recall    != null && m.recall    >= 0.6 ? "var(--green)" : null);
-    addMetric("Precision", fmt(m.precision), `TP=${m.tp} FP=${m.fp}`,
+    addMetric("Precision", fmt(m.precision), `TP=${m.tp} FP=${m.fp}` +
+              (d.mirovaPasadas ? ` · sin dato ${m.sin_ref || 0} · fuera de radio ${m.fuera_radio || 0}` : ""),
               m.precision != null && m.precision >= 0.5 ? "var(--green)" : null);
     addMetric("F1",        fmt(m.f1),        "armónica");
     addMetric("Ratio med", m.ratio_med != null ? m.ratio_med.toFixed(2) + "×" : "—",
@@ -3734,7 +3774,7 @@ function renderDetail() {
           `${r.datetime_utc} UTC<br>` +
           (r._mirova_confirmed
             ? `<span style="color:#00e676">✓ Confirmado por MIROVA</span>` +
-              (r._mirova_dist_km != null ? ` <small style="color:#888">(MIROVA @ ${r._mirova_dist_km.toFixed(2)} km)</small>` : '') + `<br>`
+              ` <small style="color:#888">(MIROVA ${r._mirova_dist_km != null ? "@ " : ""}${textoDistanciaMirova(r, 2)})</small>` + `<br>`
             : (isExtension ? `<span style="color:#ff9800">Extensión volcánica (no publicada por MIROVA)</span><br>` : '')) +
           (hasPC
             ? `<b style="color:#ffc107">VRP MIROVA-equiv:</b> ${pc.vrp_mw.toFixed(3)} MW <small style="color:#888">(cluster ${pc.n_pixels} pix)</small><br>`
@@ -5130,7 +5170,7 @@ function buildNRTTable() {
     tdMir.title = conf
       ? ("MIROVA publicó alerta térmica en esta pasada"
          + (det.record._mirova_dist_km != null
-            ? " (a " + det.record._mirova_dist_km.toFixed(1) + " km según ellos)" : "") + ".")
+            ? " (a " + textoDistanciaMirova(det.record, 1) + " según ellos)" : " (" + textoDistanciaMirova(det.record, 1) + ": MIROVA no la informó)") + ".")
       : "Sin alerta de MIROVA a ±2 min de este gránulo, o sólo una de 0,05 MW o menos (su banner la llama NONE). La misma pasada pudo salir en el gránulo vecino: si hay otra fila del mismo satélite a 5 o 6 min, mírala. No la invalida: la mayoría de estos casos son "
         + "anomalías térmicas reales bajo el umbral que MIROVA publica (A54).";
     row.append(tdDate, tdVolc, tdVrp, tdMir, tdSensor);
