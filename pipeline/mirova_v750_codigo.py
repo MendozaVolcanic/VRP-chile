@@ -4,6 +4,8 @@
 #                 B31; S164, MOD-D fase 3): ver el volcán como lo ve MIROVA, interpolado a su grilla fija, con su
 #                 detector, su fondo y su suma. APAGADA por flag en cada sensor (enable_v750_codigo_mirova, S162;
 #                 enable_modis_codigo_mirova, S164); con los flags apagados no corre nada de este archivo.
+#                 ⚠️ S190 (F1M-113): APAGADA es el valor por defecto de profile.py; producción (mirova_equivalent)
+#                 la ENCIENDE en los tres sensores: MODIS desde S172, VIIRS 375 y 750 desde S186 (ficha v1.18 y v1.23 a v1.25).
 # Lógica        : (1) remuestreo lineal del gránulo a la grilla UTM de MIROVA del volcán (regla GEO, S159);
 #                 (2) MIROVA_VIIRS750_hotspot_detection.m: NTI absoluto (K1 -0,7) + dos pasadas contextuales
 #                 de NTI y ETI con umbral max(mu + s*sd, piso) por región; (3) MIROVA_VIIRS750_VRP.m: fondo por

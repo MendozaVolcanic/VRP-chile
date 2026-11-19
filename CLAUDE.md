@@ -75,7 +75,7 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
   `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`): producción corre su port en los tres sensores (K1 -0,7, dNTI mínimo
   0,02 fuera de la cumbre, media 3 × 3 con el central, fondo interpolado bajo halo, suma de todos los alertados),
   validado contra Octave y MATLAB en VIIRS 750. MODIS y VIIRS 375 cambian sólo bandas, λ, coeficiente, paso y caja;
-  que MODIS use el K1 y el piso de 750 en vez de -0,8 y 0,01 de la Tabla 1 es divergencia sin medir (D36). El «difiere
+  que MODIS use el K1 y el piso de 750 en vez de -0,8 y 0,01 de la Tabla 1 es divergencia sin medir (D36) (⚠️ S190, F1M-110: ya medida, A/B de 330 pasadas en `experiments/_s190_d36/INFORME.md`; con los números de la Tabla 1 y la conectiva `max` del `.m` no se gana ni se pierde ninguna alerta de MIROVA y la potencia cambia en 9 pasadas de NdC; la fórmula «or» del texto del paper no se midió, F1M-117). El «difiere
   de producción en 10 de 13 puntos» de S158 comparaba con K. (S186; historia: Reglas científicas)
 - **Detector de producción**: la vía «código MIROVA» en los tres sensores (S186): grilla fija de MIROVA
   (`pipeline/grillas_mirova.yaml`), detector y fondo del `.m`, `vrp_mw` = suma de todos los alertados; banda 22
@@ -189,7 +189,7 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - **A63.** Consolidar config no debe revertir fixes deliberados: revisar `git log -S` y dejar un test de regresión. (historia: A63)
 - **A64.** Blindar la red NASA en auth y descarga: circuit-breaker por host (#364); ConnectTimeout no se reintenta, ReadTimeout sí. (historia: A64)
 - **A65.** Hangs de CI: instrumentar con markers `print(..., flush=True)` por etapa antes de adivinar el fix. (historia: A65)
-- **A66.** Nadir fijo adoptado en MODIS (#354), pero no es «clon literal» (S138): el paper remuestrea a 1 km (`ENABLE_UTM_REGRID = False`, D17 abierta). Lección vigente: A/B de 3 brazos con criterio pre-registrado. (historia: A66)
+- **A66.** Nadir fijo adoptado en MODIS (#354), pero no es «clon literal» (S138): el paper remuestrea a 1 km (`ENABLE_UTM_REGRID = False`, D17 abierta). ⚠️ S190 (F1M-111): ese flag sólo rige en la guardia K; MODIS de producción corre la vía, que sí remuestrea a la grilla de 1 km de MIROVA (`mirova_v750_codigo.py::remuestrear_grilla`) y vuelve antes de llegar al flag. Lección vigente: A/B de 3 brazos con criterio pre-registrado. (historia: A66)
 - **A67.** Nadir fijo VIIRS adoptado (#368, #373), misma salvedad D17. Cambiar área o escala cambia también la detección: verificar FN por record. (historia: A67)
 - **A68.** Ante «sobre-detección», separar display de over-detección real; el proxy `t_bg<270K` está contaminado por altitud. (historia: A68)
 - **A69.** Los paths de MIR absoluto son vulnerables al gradiente topográfico de los nevados; el NTI lo atenúa pero no lo cancela (S128), el ETI sí. El Test 1 integrado que culpaba está apagado desde #850; parte del mecanismo puede seguir por D22 (SOSPECHA). `compute_test1_nti` está flag-OFF (S125). Pregunta siempre: ¿MIR absoluto o NTI? (historia: A69)
@@ -258,7 +258,8 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - `frontend/`: `index.html`, `diario.html`, `mosaico.html` live, cada una con su copia de helpers
   (`mirovaEqVrp`): un cambio de display se replica en las 3 (S92). `comparacion.html` es pública desde la ficha v1.28 (pestaña «Vía, K y MIROVA»), sin
   `mirovaEqVrp` a propósito. Verificar en navegador real. GitHub Pages despliega en push a `frontend/**`.
-- `volcanoes.yaml`: 45 volcanes; 11 Tier A con serie continua (sin hueco nov-ene tras #883); 34 fuera del cron del NRT, que corren
+- `volcanoes.yaml`: 45 volcanes; 11 Tier A con serie continua (sin hueco nov-ene tras #883); 34 fuera del cron del NRT (⚠️ S190, F6-120: 32 activos;
+  OlcaParuma y Putana salieron de la matriz el 2026-11-17, `active: false`, por no estar en la RNVV), que corren
   a diario con la vía (`sombra-34.yml`, `data/sombra_34/`) y se muestran en el tablero (ficha v1.26). (S186)
 - `nrt.yml`: cron 2 h, matrix por volcán, timeout 50 min. Reprocesos de historia en la máquina de Nicolás
   (`scripts/run_pipeline.py --profile X --volcano Y --start ... --end ...`), nunca full-history en Actions.
@@ -313,7 +314,7 @@ Estado entre sesiones → memoria. No re-leer archivos sin cambios.
 
 ## Constraints técnicos
 
-- `pyhdf` roto en Windows: MODIS sólo en Actions Linux. LANCE NRT ~3 h. NOAA-20: buscar v2 y v2.1.
+- ⚠️ S190 (F1M-112): `pyhdf` importa y lee HDF4 en Windows con el entorno conda `vrp` y su `Library\bin` en el PATH (sin ese PATH sale con código 127 y sin mensaje); bajar gránulos sigue pidiendo Actions, porque el token de Earthdata existe sólo como secreto. Texto anterior: `pyhdf` roto en Windows: MODIS sólo en Actions Linux. LANCE NRT ~3 h. NOAA-20: buscar v2 y v2.1.
 - **Credenciales**: el NRT usa `EARTHDATA_TOKEN` (rotación cada 50 días; fecha vigente en `C:\Users\nmend\OneDrive\Escritorio\claude\REGISTRO_CREDENCIALES.md`). El par usuario/clave de los secretos
   está VENCIDO y bloquea la cuenta (A71): workflows nuevos sólo por token, copiando el `env` de `nrt.yml`.
 - `fetch.py` intenta Standard y cae a `_NRT`; `store.py` auto-upgrade NRT→Standard.
