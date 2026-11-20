@@ -21,6 +21,9 @@
 #                 Diagnóstico sin efecto en la detección (S190): dato faltante sobre el cráter medido en los
 #                 píxeles del gránulo ANTES de interpolar (crater_sin_posicion, px_mir_invalido_crater,
 #                 px_saturados_crater).
+#                 Fondo no estimable (S192, F4-101; decisión de Nicolás del 2026-11-20): si ningún alertado tiene fondo,
+#                 en MODIS la escena es no medida (motivo_vacio «fondo_no_estimado», 0 MW); en VIIRS se publica como el
+#                 .m y el record cuenta alertados_sin_fondo. t_bg_k promedia sólo los alertados con fondo.
 # Limitaciones  : fillmissing2 de MATLAB no documenta su triangulación; se reproduce con un Delaunay de desempate
 #                 simbólico que iguala a MATLAB R2026b en 166 de 166 escenas (S163 O2), sin que el mecanismo interno
 #                 de MATLAB esté verificado. La ROI por volcán la decide V750-B. El umbral contextual depende de la
@@ -607,7 +610,7 @@ def vrp_mirova(m13, mascara, coef=COEF_VRP_V750):
     mascara = np.asarray(mascara, bool)
     npix = int(mascara.sum())                                        # l. 61
     if npix == 0:                                                    # l. 50-52
-        return {"VRP_MW": np.nan, "npix": 0, "L_hot": np.nan, "L_bk": np.nan, "deltaL": np.nan}
+        return {"VRP_MW": np.nan, "npix": 0, "L_hot": np.nan, "L_bk": np.nan, "deltaL": np.nan, "n_sin_fondo": 0}
     enm = m13.copy()
     enm[mascara] = np.nan                                            # l. 64-65
     k = 3 if npix <= 4 else (5 if npix <= 30 else 7)                 # l. 68-74
@@ -617,7 +620,21 @@ def vrp_mirova(m13, mascara, coef=COEF_VRP_V750):
     L_hot = float(np.nansum(m13[mascara]))                           # l. 83
     L_bk = float(np.nansum(fondo[mascara]))                          # l. 84
     dL = L_hot - L_bk                                                # l. 85
-    return {"VRP_MW": dL * coef, "npix": npix, "L_hot": L_hot, "L_bk": L_bk, "deltaL": dL}
+    # S192 (F4-101, F2-V201): cuántos alertados quedaron sin fondo (fillmissing2 no extrapola fuera de la envolvente de
+    # las celdas con dato y el .m los suma como cero). No cambia ningún valor del .m; lo usa procesar_grilla.
+    n_sin = int(np.isnan(fondo[mascara]).sum())
+    return {"VRP_MW": dL * coef, "npix": npix, "L_hot": L_hot, "L_bk": L_bk, "deltaL": dL, "n_sin_fondo": n_sin}
+
+
+def t_bg_de(v, lam):
+    """Temperatura de brillo del fondo medio de los alertados QUE TIENEN fondo (S192), o None si ninguno lo tiene.
+
+    POR QUÉ: L_bk suma sólo los fondos que existen; dividirlo por todos los alertados mete ceros y da un suelo varios
+    kelvin más frío (o 0 K si ninguno tiene fondo). Sólo se muestra; no decide nada."""
+    con = v["npix"] - v.get("n_sin_fondo", 0)
+    if v["npix"] <= 0 or con <= 0:
+        return None
+    return round(float(radiancia_a_temperatura(np.array([v["L_bk"] / con]), lam)[0]), 2)
 
 
 def sunglint_deg(sat_zen, sun_zen, sat_azi, sun_azi):
@@ -713,15 +730,21 @@ def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inne
     mascara, d = detectar_mirova(m13g, m15g, box, dayflag, sunglint, devolver_diag=True, lam_mir=lam,
                                  lam_tir=cfg["lam_tir"])
     v = vrp_mirova(m13g, mascara, coef=coef)
+    # POR QUÉ (S192, F4-101 y F2-108; decisión de Nicolás del 2026-11-20, opción a): si NINGÚN alertado tiene fondo, el
+    # .m publica la radiancia entera de los píxeles como si fuera exceso. En MODIS MIROVA no tiene ninguna detección
+    # con fondo 0 en 262.455 del OSF v2.5 (ese fondo 0 nace de correr aquí el código de VIIRS 750, D36) y el único caso
+    # cotejable fue un falso positivo nuestro: la escena es no medida (0 MW, sin píxeles, motivo propio). En VIIRS el
+    # OSF sí publica con fondo 0 (501 en 375 y 464 en 750): se conserva la cifra y queda la marca alertados_sin_fondo.
+    sin_fondo_modis = familia == "MODIS" and v["npix"] > 0 and v["n_sin_fondo"] == v["npix"]
     celda_c = (int(round(pos_crater[0])), int(round(pos_crater[1])))
     paso_km = float(grilla.get("paso", PASO_V750_M)) / 1000.0
     rec = {"sensor": sensor, "triggered_test1": False, "vrp_vent_mw": 0.0, "via_codigo_mirova": True,
-           "n_anomalous_pixels": int(v["npix"]), "diag_codigo_mirova": {
-               "motivo_vacio": d.get("motivo"), "n_abs": d.get("n_abs"), "n_p1": d.get("n_p1"),
-               "n_p2": d.get("n_p2"), "L_hot": v["L_hot"] if v["npix"] else None,
-               "L_bk": v["L_bk"] if v["npix"] else None, "roi": grilla.get("roi"),
-               "s1": diag_s1(d, celda_c)}}
-    if not v["npix"]:
+           "n_anomalous_pixels": 0 if sin_fondo_modis else int(v["npix"]), "diag_codigo_mirova": {
+               "motivo_vacio": "fondo_no_estimado" if sin_fondo_modis else d.get("motivo"), "n_abs": d.get("n_abs"),
+               "n_p1": d.get("n_p1"), "n_p2": d.get("n_p2"), "L_hot": v["L_hot"] if v["npix"] else None,
+               "L_bk": v["L_bk"] if v["npix"] else None, "alertados_sin_fondo": v["n_sin_fondo"] if v["npix"] else None,
+               "roi": grilla.get("roi"), "s1": diag_s1(d, celda_c)}}
+    if not v["npix"] or sin_fondo_modis:
         rec.update({"vrp_mw": 0.0, "primary_cluster": None, "t_bg_k": None, "distance_class": None, "anomaly_pixels": [],
                     "t_max_k": None, "hotspot_lat": None, "hotspot_lon": None, "hotspot_dist_km": None,
                     "final_hotspot_lat": None, "final_hotspot_lon": None, "final_hotspot_dist_km": None,
@@ -746,8 +769,9 @@ def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inne
                     "fila": int(f), "col": int(k)})
     rec.update({
         "vrp_mw": vrp_mw, "t_max_k": round(t_max, 2), "distance_class": dc, "anomaly_pixels": pix,
-        # fondo medio del .m bajo los alertados, en temperatura de brillo (para el log y el tablero; no decide nada)
-        "t_bg_k": round(float(radiancia_a_temperatura(np.array([v["L_bk"] / v["npix"]]), lam)[0]), 2),
+        # fondo medio del .m bajo los alertados que lo tienen, en temperatura de brillo (para el log y el tablero; no
+        # decide nada). S192: antes L_bk / npix, que con alertados sin fondo daba un suelo más frío o 0 K.
+        "t_bg_k": t_bg_de(v, lam),
         "primary_cluster": {"vrp_mw": vrp_mw, "n_pixels": len(cu), "centroid_lat": round(clat, 5),
                             "centroid_lon": round(clon, 5), "centroid_dist_km": round(dcen, 3),
                             "single_pixel_mode": False},
