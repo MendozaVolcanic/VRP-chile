@@ -21,6 +21,7 @@
 | Codex ronda 2 | frentes 2, 3 y 5 cerrados (205 filas en total, ninguna de gravedad 4 o más); frentes 9 a 12 para la próxima sesión de Codex; Codex en 73 % de la semana | `D:\codex-vrp\_salida\ronda2\ESTADO_COORDINACION.md`, `RESUMEN_F5_PARA_NICOLAS.md` |
 | A/B diurno (#813, sesión local_1a9c0903) | W2 a W7 bajadas (W7 verde 09:43 UTC); S192 le pidió la cobertura A108 de W6 y W7; el veredicto espera R-W7 | `D:\vrp-trabajo\temporales\s190_diurno\cadena_log.txt` |
 | Sesión «Limpieza de worktrees» (local_325cc12c) | espera decisión de Nicolás (mover carpetas, hibernación) | `D:\vrp-trabajo\temporales\s191\limpieza\INVENTARIO.md` |
+| **Sesiones lanzadas por S192 después del cierre** (Nicolás: «continua con todo, si es necesario abre sesiones paralelas») | «Reemplazo de los MODIS sin fondo ya guardados» (local_0dbb6738): script y prueba para `aplicar-reemplazo.yml`, PR sin aplicar. «Marcador del cráter: ¿el MIR inválido en VIIRS es bow-tie?» (local_b41707b7): sólo lectura, informe en `D:\vrp-trabajo\temporales\s192\bowtie\INFORME.md`. «Auditoría Codex, ronda 2: frentes 9 a 12» (local_b9a0c0a7). La sesión del tablero (local_b2a2dcac) sigue con F5-114 y F5-V201 tras #1067 | `mcp__ccd_session_mgmt__list_sessions` |
 | Sin commitear en `loop/activo` (no son de S192, no se commitean) | `experiments/_s140/`, `experiments/_s160_espacial/_censo_s159/`, `experiments/_s160_espacial/data/`, `experiments/_s176_codex/*` (nunca se commitea) | `git status --porcelain` |
 | PR abiertos ajenos | #1015 (miniaturas, S184) y #913 (plan, S163) | `gh pr list` |
 
