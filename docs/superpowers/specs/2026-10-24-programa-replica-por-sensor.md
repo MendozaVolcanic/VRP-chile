@@ -699,3 +699,104 @@ piden decisión de Nicolás (y A45 si tocan `pipeline/process_*.py` o `store.py`
    W4 pareadas, W5 en curso.
 5. Los 34 fuera del NRT: tandas 1 a 3 aplicadas; tanda 4 limpia (unión en curso); tanda 5 despachada el 2026-11-19 a
    las 11:10 UTC. Publicar sigue esperando D1 a D15.
+
+### 12.11 Estado al 2026-11-20 y mejoras propuestas (S192)
+
+Agregado por la sesión dueña del loop S192 a pedido de Nicolás («revisa el estado del plan para los 3 sensores [...]
+propone mejoras a los planes si es necesario», 2026-11-20). Actualiza la §12.10 sin reemplazarla; donde la contradice,
+manda esta. Cada número sale de `D:\vrp-trabajo\temporales\s192\plan\numeros_12_11.py` (salida `numeros_12_11.txt`) o de
+`marcas_detalle.py` (misma carpeta), leídos de `origin/main` `434c21a37` (2026-11-20 ~15:00 UTC), salvo donde se cita otro
+script o informe.
+
+**Main desde la §12.10:** #1060 (marcador del cráter, ficha v1.47), #1062 (unión de la tanda 5 de los 34) y #1061 (los 34
+como preliminares, v1.48); los dos últimos los mergeó la sesión «s192» (local_841efdd9) a las 02:00 y 02:08 UTC y aplicó la
+tanda 5 (`aplicar-reemplazo.yml` run 44658784431, tag `pre-historia-34-tanda5`). #1063 (documentos del frente 2 de Codex,
+v1.49) lo mergeó S192 a las 14:59 UTC con la orden de Nicolás dada en la sesión Codex («mergea #1063 y después #1064»);
+#1064 (frente 3, v1.50) estaba en CI a la hora de escribir esto.
+
+**Plazos de guardia (todos VERDE, 0 candidatas a reversión; JSON generados de 03:44 a 03:52 UTC del 2026-11-20):**
+
+| sensor | protegidas vistas | el 2026-11-19 (§12.10) | objetivo | vence |
+|---|---|---|---|---|
+| MODIS | 25 | 23 | 29 | 2027-03-02 |
+| VIIRS 750 | 14 | 14 | 29 | 2027-03-11 |
+| VIIRS 375 | 13 | 12 | 29 | 2027-03-11 |
+
+**Auditoría semanal:** la última sigue siendo la del 2026-11-16 (generada 19:36 UTC, ventana 2026-09-17 a 2026-11-16,
+VERDE). La próxima es la del lunes 2026-11-23 (cron `0 9 * * 1` de `audit-weekly.yml`; las tres últimas partieron entre
+las 19:15 y las 19:35 UTC, con unas 10 h de atraso del cron de GitHub). No juzga a los 34.
+
+**Marcador del cráter (#1060, paso A):** en su primer día, 88 records de los 11 principales traen las claves (MODIS 21,
+VIIRS 375 33, VIIRS 750 34). MODIS no tiene ninguna marca. En VIIRS, 27 traen `px_mir_invalido_crater > 0` (12 en 375 y
+15 en 750) y 3 `crater_sin_posicion` (1 y 2); ninguno `px_saturados_crater`. Sólo 1 de los 27 tiene VRP > 0.
+**Lo nuevo:** las 27 pasadas VIIRS con MIR inválido sobre el cráter tienen cenit del sensor de 54,7° a 67,0° (mediana
+59,3°); las 40 sin esa marca, de 4,6° a 67,2° (mediana 28,0°). **SOSPECHA** física: es la supresión «bow-tie» de VIIRS.
+A ángulos de barrido grandes, los detectores del borde de cada barrido ven el mismo suelo que el barrido vecino y el
+satélite descarta esos píxeles a bordo; el L1B los entrega con un valor de relleno. No es dato perdido: el suelo lo mide el
+barrido contiguo y la interpolación a la grilla lo recoge. Si la sospecha se confirma, el paso B del marcador («sin dato» o
+aviso) leería geometría de barrido como hueco en casi todas las pasadas de borde. Falta abrir un gránulo y ver qué valor
+traen esos píxeles (A37: leer el UserGuide de VIIRS, no adivinar el código de relleno).
+
+**Fondo nulo (F4-101, F2-108, F2-V201, F3-104):** sin cambio en los 11 principales: 19 records de la vía con `L_bk = 0` y
+VRP > 0 sobre 74.038 (MODIS 6, los 6 de 1 MW o más; VIIRS 375 9, 2 de 1 MW o más; VIIRS 750 4, los 4 de 1 MW o más). Lo
+nuevo es la historia de los 34: 16 records más, 8 de 1 MW o más (sin desglose por sensor todavía). La propuesta unificada
+(`D:\codex-vrp\_salida\ronda2\PROPUESTA_F2_PARA_NICOLAS.md` §1) y el informe de F4-101
+(`D:\vrp-trabajo\temporales\s191\f4_101\INFORME.md`) siguen esperando la decisión; ver la mejora 1.
+
+**TIR perdida en el cráter** (`D:\vrp-trabajo\temporales\s191\tir_perdida\INFORME.md`): con la TIR del cráter perdida y la
+MIR sana, VIIRS 750 sube la potencia en el caso sintético (el remuestreo rellena la TIR con vecinos fríos y una celda más
+cruza el umbral), pero se acerca a la verdad del foco en vez de inflarla, y el `.m` de MIROVA da la misma máscara. No es
+defecto de fidelidad. La marca de #1060 no separa MIR de TIR (mejora 2).
+
+**Auditoría Codex, frentes 2 y 3:** cerrados, 42 hallazgos verificados, ninguno de gravedad 4 o más (6 de gravedad 3, 16
+de 2, 20 de 1; `D:\codex-vrp\_salida\ronda2\RESUMEN_F2_F3_PARA_NICOLAS.md`). Sus documentos entran con #1063 y #1064.
+Quedan para Nicolás dos arreglos chicos de código en zona A45 sin efecto en detección (F2-V303: `diag_codigo_mirova.roi`
+dice `def` en VIIRS 375 aunque la caja es C13; F3-107: VRP indeterminado guardado como 0,0) y medir la lectura «or» de la
+Tabla 1 en MODIS (F3-110). El frente 5 (publicación) tiene el encargo listo y no se lanzó por la memoria del computador;
+Codex se reinicia el 2026-11-24 a las 04:20 UTC.
+
+**Los 34:** historia aplicada en 23 volcanes (tandas 1 a 5 menos Putana y OlcaParuma, que salieron con D1): 148.671
+records en `data/historia_34/`, del 2025-02-15 al 2026-11-02. Sin historia todavía 9 de los 32 activos: la tanda 6
+(Calbuco, CorcovadoYanteles, Huequi, Michinmahuida, YateHornopiren; run 44653724540, terminó con 2 rojos que la cadena
+relanzó a las 14:54 UTC) y la 7 (Hudson, MacaCay, Melimoyu, Mentolat), que la cadena despacha sólo con la 6 limpia. Con
+#1061 el tablero los muestra como «Preliminar · paridad no medida». Lanin feb-2025 (detecciones de más de 5 MW a 14 a
+29 km) sigue como SOSPECHA de incendio forestal, sin cotejar.
+
+**Pasadas diurnas (#813, A/B de la vía de día):** las siete ventanas están bajadas (W7, run 44635196200, verde a las
+09:43 UTC del 2026-11-20). Falta el recuento de cobertura de W6 y W7 (A108, pedido a su sesión) y la respuesta de
+Nicolás sobre la lectura de R-W7 (`experiments/_s190_diurno/PREGUNTA_R_W7.md` en la rama `s190-diurno`); sin ella no se
+calcula el veredicto.
+
+**Mejoras propuestas a los planes (S192):**
+
+1. **Fondo nulo: aprobar la opción (a) y extenderla a los 34.** Por qué: el VRP es el exceso de radiancia sobre el suelo;
+   sin fondo restado se publica la radiancia total del píxel, y en una alerta chica el suelo explica de 0,68 a 0,80 de la
+   radiancia (mediana por sensor, verificador del frente 2). En MODIS el fondo 0 nace de correr el código de VIIRS 750 con
+   bandas MODIS (decisión nuestra, D36): MIROVA no tiene ninguna detección MODIS con fondo 0 en 262.455 del OSF v2.5, y el
+   único caso cotejable es un falso positivo nuestro. En VIIRS MIROVA sí publica con fondo 0, así que allí sólo se marca.
+   Costo: A45 sobre `pipeline/mirova_v750_codigo.py`, plan, prueba roja y un reemplazo de los records afectados (6 MODIS
+   en los 11 y los MODIS que haya en la historia de los 34); ningún VIIRS cambia de valor. Juntar en el mismo PR F2-V303 y
+   F3-107.
+2. **Marcador del cráter: separar MIR de TIR y no contar el relleno bow-tie, antes del paso B.** Por qué: la TIR perdida
+   sola cambia la máscara en VIIRS 750 y la MIR perdida da 0 MW; son dos fenómenos distintos con la misma marca. Y si el
+   relleno bow-tie cuenta como MIR inválido, el marcador dice «cráter sin dato» en pasadas de borde donde el suelo sí se
+   midió. Costo: abrir un gránulo NOAA-21 de las 04:42 o 06:24 UTC del 2026-11-20 (Láscar o Isluga) para leer el valor de
+   relleno (sólo lectura) y después un cambio de diagnóstico en la misma función de #1060 (A45, sin efecto en detección).
+   El paso B espera a que la marca esté limpia; si no, contaría ruido de geometría.
+3. **Guardias: sin cambio.** VIIRS 750 y 375 suman 1 protegida o ninguna por día; MODIS sumó 2 el último día. La regla ya
+   cierra al vencer si no llega a 29 (2027-03-02 y 2027-03-11). No se propone bajar el objetivo: lo fijó la regla sellada.
+4. **Historia de los 34: cotejar las detecciones lejanas grandes antes de publicar.** Por qué: en verano, las anomalías a
+   14 a 30 km del cráter en la zona sur (Lanin feb-2025, Callaqui mar-2025) tienen la firma de incendios forestales, no de
+   volcanes; la vía las clasifica lejanas pero el tablero las muestra. Costo: un cruce sólo de lectura con el producto de
+   incendios activos de NASA (FIRMS) para los records lejanos de 5 MW o más de los 34; una sesión corta. No cambia
+   detecciones; da a Nicolás la base para D1 a D15.
+5. **F3-110 («or» de la Tabla 1 en MODIS): medir con el A/B de 330 pasadas de S190 antes de decidir.** Por qué: la cota de
+   Codex (63 de 5.866 escenas nocturnas que hoy salen vacías alertarían con «or», contra 1 con el máximo) mira la celda más
+   cercana a alertar, no gránulos reales. Costo: un A/B en Actions de unas horas de runner, después de la tanda 7 para no
+   competir por runners.
+
+**Lo que queda, en orden:**
+1. #1064 en main (CI corriendo; se mergea solo si queda verde).
+2. Tanda 6: limpiar los 2 rojos, bajar, unir, verificar y PR; la tanda 7 sale sola de la cadena.
+3. Decisiones de Nicolás: fondo nulo (mejora 1), R-W7 del A/B diurno, marcador (mejora 2).
+4. Frente 5 de Codex cuando haya memoria y cuota (desde el 2026-11-24).
