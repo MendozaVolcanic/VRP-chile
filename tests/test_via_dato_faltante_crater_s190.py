@@ -44,7 +44,9 @@ SENSOR = {"MODIS": "MODIS_AQUA", "VIIRS750": "VIIRS_NOAA20_750", "VIIRS375": "VI
 PASO_NATIVO_KM = {"MODIS": 1.0, "VIIRS750": 0.75, "VIIRS375": 0.375}   # el de la grilla de cada familia
 T_FOCO_K = {"MODIS": 420.0, "VIIRS750": 340.0, "VIIRS375": 340.0}       # ilustrativas
 GOLDEN = Path(__file__).resolve().parent / "datos_s190_dato_crater" / "sano_antes.json"
-CLAVES_NUEVAS = ("crater_sin_posicion", "px_mir_invalido_crater", "px_saturados_crater")
+# S192: alertados_sin_fondo es la marca del fondo nulo (F4-101); el resto del record sano sigue idéntico al dorado
+# (lo vigila tests/test_via_fondo_nulo_s192.py).
+CLAVES_NUEVAS = ("crater_sin_posicion", "px_mir_invalido_crater", "px_saturados_crater", "alertados_sin_fondo")
 
 
 def _granulo(familia, semilla=190):
