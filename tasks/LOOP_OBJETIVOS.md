@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-20 01:20 UTC (S191): N1 y D14 decididas (los 34 como preliminares), PR #1061; cuatro sesiones paralelas; S191 sacada de bajo S190
+- **Decisión de Nicolás** («Preliminares, rotulados», respuesta a «¿Cómo se muestran los 34 en el tablero?»): opción (b) de N1 y D14. Anotada en `tasks/DECISIONES_34_S187.md` (texto anterior conservado).
+- **PR #1061** (rama `s191-preliminares-34`, `9a88d7990`): la barra «Estado actual» cuenta a los 11 en sus niveles y a los 34 aparte; la tarjeta, el detalle y la fila de la tabla dicen «Preliminar · paridad no medida». Sólo presentación. Prueba nueva 4 rojas antes y 4 verdes después; las que leen el frontend dan 693 pasan y 2 fallas de la guardia G8 (línea de `isValidDetection`, 1757 a 1764, actualizada; 55 de 55 después). Verificador limpio Sonnet 5 de 5 (20.000 casos al azar sin diferencia en los 11). Navegador local: la barra da 0, 0, 1, 4 y 6 para los 11 y «1 preliminares con anomalía de 32». Espera «mergea #1061».
+- **Pedido de Nicolás** («sigamos con todo lo que se pueda en paralelo; revisa worktrees y espacio; lanza las sesiones que sean necesarias; saca la S191 de bajo de la S190»): S191 pasó a sesión de primer nivel. Sesiones nuevas: «Limpieza de worktrees y espacio en disco» (local_325cc12c), «F4-101: ¿MIROVA publicó los casos con fondo nulo?» (local_2b6790b0), «Sospecha: TIR perdida en el cráter sube la VRP» (local_ba18aef9) y «Auditoría Codex, ronda 2: frente 2 y siguientes» (local_4d3dbc4c); a S190 se le pidió descartar su tarjeta task_c8159ee6.
+- Tanda 5 a las 01:20 UTC: 165 verdes y 1 corriendo; la cadena v5 sigue viva.
+
 ### 2026-11-20 00:40 UTC (S191): reinicio del PC; cadena de las tandas 5 a 7 relanzada; huecos vespertinos del NRT medidos
 - **El PC se reinició a las 23:17 UTC del 11-19** (`LastBootUpTime` 20:17 hora de Chile). Murieron `cadena_5a7_s190d.sh` y `cadena_ventanas.sh` de la sesión del día; `ps` sin ninguna cadena viva. La v4 alcanzó a relanzar los 27 rojos de la tanda 5 a las 23:05 UTC. Relanzada como `D:\vrp-trabajo\temporales\s187_tanda2\cadena_5a7_s191.sh` (misma lógica, log al lado); pedido de mantener el PC despierto mientras la sesión trabaja. Avisada la sesión del día (local_1a9c0903) para que relance lo suyo; su run 44635196200 sigue en cola.
 - Tanda 5 a las 00:15 UTC: 151 verdes, 6 corriendo, 9 en cola (último intento de cada trabajo).
