@@ -98,9 +98,26 @@ Sollipulli, Quetrupillan) despachada por la cadena el 2026-11-17 23:25 UTC.
 | unión | 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. Callaqui 6.816 records, Lonquimay 6.879, Quetrupillan 6.951, Sollipulli 6.858, Tolhuaca 6.883 |
 | ensayo del aplicador | 34.387 nuevos (los cinco de arriba), 0 tras el corte; los 13 activos de las tandas 1 a 3 dan 0 nuevos y todos «ya estaban» |
 | se aplica | tras el merge del PR de esta unión, con tag `pre-historia-34-tanda4` |
+| aplicada | 2026-11-19 tras el merge de #1054: run 44528546156 de `aplicar-reemplazo.yml` (tag `pre-historia-34-tanda4` sobre `e72ba3c3a`), commit `4e6e873fa` en main |
 
 Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda4/` (fuera del repo). Tanda 5 (Lanin, MochoChoshuenco,
 CarranLosVenados, AntillancaCasablanca, Osorno) despachada por la cadena el 2026-11-19 11:10 UTC (run 44512397201).
+
+## Tanda 5 (Lanin, MochoChoshuenco, CarranLosVenados, AntillancaCasablanca, Osorno; 2025-02-15 a 2026-11-02)
+
+Números de `D:\vrp-trabajo\temporales\s191\tanda5_numeros.py` (salida en `tanda5_numeros.txt`, al lado).
+
+| campo | valor |
+|---|---|
+| run | 44512397201 (main `fa3ac287f`), despachado 2026-11-19 11:10 UTC por `cadena_4a7_s190c.sh` |
+| trozos | 165 de 165 en verde. 27 se tomaron del intento 2 tras fallas pasajeras (contados por el nombre del artifact). Causas, de `D:\vrp-trabajo\temporales\s190\t5_fallas.txt` (26 fallas a las 15:20 UTC): 19 en «Install deps» por la caída del espejo de Ubuntu del 2026-11-19 12:08 UTC, y 7 de MochoChoshuenco en el reproceso, que el modo estricto corta con salida 3 ante una descarga fallida de LAADS (ejemplo, job 135520546869: VNP03MOD del 2026-05-06). La 27.ª (Osorno 32) cayó después y su causa no se revisó. Relanzados con `gh run rerun --failed`, mismo commit, por `cadena_5a7_s190d.sh`: Lanin 13, 16 a 22, 24, 25, 27 a 30 y 33; MochoChoshuenco 1 a 4, 23, 24 y 26 a 30; Osorno 32 |
+| runner | 76,7 h (suma de `completed_at - started_at` de los 165 jobs `reproc` vigentes), 27,9 min por trozo en promedio (máximo 40,1); pared 2026-11-19 11:12 a 2026-11-20 01:21 UTC, con un reinicio del PC a las 23:17 UTC que no afectó al run |
+| unión | 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. AntillancaCasablanca 7.144 records, CarranLosVenados 7.078, Lanin 6.890, MochoChoshuenco 7.025, Osorno 7.148 |
+| ensayo del aplicador | 35.285 nuevos (los cinco de arriba), 0 tras el corte; los 18 activos de las tandas 1 a 4 dan 0 nuevos y todos «ya estaban» |
+| se aplica | tras el merge del PR de esta unión, con tag `pre-historia-34-tanda5` |
+
+Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda5/` (fuera del repo). Tanda 6 (Calbuco, YateHornopiren,
+Huequi, Michinmahuida, CorcovadoYanteles) despachada por la cadena el 2026-11-20 01:27 UTC (run 44653724540).
 
 ## Retiro de Putana y OlcaParuma (D1, opción 1a, 2026-11-17)
 
