@@ -29,7 +29,8 @@ def dn_invalido(ds, dn):
     publicarse con un corte inventado."""
     vmax = ds.attrs.get("valid_max")
     if vmax is None:
-        if np.dtype(ds.dtype) != np.uint16:
+        tipo = np.dtype(ds.dtype)
+        if not (tipo.kind == "u" and tipo.itemsize == 2):     # uint16 en cualquier orden de bytes
             raise ValueError(f"{ds.name}: {ds.dtype} sin valid_max; no hay base para separar medición de bandera")
         vmax = VALID_MAX_UINT16_USERGUIDE
     return np.asarray(dn) > np.asarray(vmax).ravel()[0]

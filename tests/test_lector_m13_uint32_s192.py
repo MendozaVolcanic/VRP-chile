@@ -120,3 +120,58 @@ def test_uint32_sin_valid_max_no_se_mide_con_un_corte_inventado(tmp_path):
     ruta = _l1b(tmp_path, {}, con_attrs=False)
     with pytest.raises(ValueError, match="valid_max"):
         MV.leer_radiancia_l1b(ruta)
+
+
+# ------------------------------------------------------------------------------------------ guardia K: M15 y sin LUT
+def test_guardia_k_m15_bandera_sobre_valid_max_nan(tmp_path):
+    """M15 uint16 en la guardia K: 65530 (sobre valid_max 65527, fuera de la lista vieja) y 65533 quedan NaN; con la
+    lista fija {65532..65535} el 65530 tomaba lo que la LUT tuviera ahí."""
+    import h5py
+    ruta = _l1b(tmp_path, {}, con_lut=True)
+    with h5py.File(ruta, "a") as f:
+        d = f["observation_data"]["M15"]
+        x = d[:]
+        x[1, 1], x[1, 2] = 65530, 65533
+        d[...] = x
+    bt15 = PVM.read_viirs_mod_l1b(ruta)["M15"]
+    assert np.isnan(bt15[1, 1]) and np.isnan(bt15[1, 2])
+    assert np.isfinite(bt15[0, 0])
+
+
+def test_guardia_k_sin_lut_m13_uint32(tmp_path):
+    """Camino sin LUT de la guardia (radiancia e inversión de Planck): el foco a 600 K es medición, la bandera bow-tie
+    real de M13 (327678) es NaN, y en M15 el 65530 es NaN."""
+    import h5py
+    L = MV.temperatura_a_radiancia(T_FOCO_K, MV.LAMBDA_M13)
+    ruta = _l1b(tmp_path, {(3, 3): _dn(L, M13_REAL), (4, 4): 327678})
+    with h5py.File(ruta, "a") as f:
+        # este camino hace float(attrs["scale_factor"]), que el numpy de hoy rechaza para un arreglo de 1 elemento
+        # (defecto previo, fuera de este cambio; los L1B de NASA traen LUT y no pasan por aquí): escalares
+        for b, a in (("M13", M13_REAL), ("M15", M15_REAL)):
+            f["observation_data"][b].attrs["scale_factor"] = a["scale_factor"]
+            f["observation_data"][b].attrs["add_offset"] = a["add_offset"]
+        d = f["observation_data"]["M15"]
+        x = d[:]
+        x[1, 1] = 65530
+        d[...] = x
+    r = PVM.read_viirs_mod_l1b(ruta)
+    assert r["M13"][3, 3] == pytest.approx(T_FOCO_K, abs=1.0)   # Planck de la guardia (C2 14388), no el de la vía
+    assert np.isnan(r["M13"][4, 4])
+    assert np.isnan(r["M15"][1, 1]) and np.isfinite(r["M15"][0, 0])
+
+
+def test_uint16_big_endian_sin_valid_max_usa_el_respaldo(tmp_path):
+    """Un uint16 en orden de bytes big-endian sin valid_max es uint16: usa el 65527 del UserGuide, no da error."""
+    import h5py
+    ruta = tmp_path / "be.nc"
+    with h5py.File(ruta, "w") as f:
+        obs = f.create_group("observation_data")
+        for b in ("M13", "M15"):
+            ds = obs.create_dataset(b, data=np.array([[100, 65527, 65528]], dtype=">u2"))
+            ds.attrs["scale_factor"] = np.array([0.01], np.float32)
+            ds.attrs["add_offset"] = np.array([0.0], np.float32)
+    try:
+        m13 = MV.leer_radiancia_l1b(ruta)["M13"][0]
+    except ValueError as e:
+        pytest.fail(f"un uint16 big-endian sin valid_max no debe dar error: {e}")
+    assert np.isfinite(m13[:2]).all() and np.isnan(m13[2])
