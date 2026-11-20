@@ -38,6 +38,9 @@
 | 7 | Resto del frente 5 (F5-114, F5-V201, F5-V301, F5-106, firma de comparacion) | PR por tema / dejar | PR: F5-114 y F5-V201 primero (rótulos que inducen a error) |
 | 8 | Mover `Goes`, `Automatizacion web` y `Diversion` a D:; apagar la hibernación (13,6 GB) | sí / no | Sí; la hibernación la apaga Nicolás |
 | 9 | Rotar el PAT de `C:\Users\nmend\.claude\settings.json` | | Sí (Nicolás) |
+| 0a | **Lector M13 de la vía corta a 512 K** (hallazgo de la sesión bow-tie, `D:\vrp-trabajo\temporales\s192\bowtie\INFORME.md` §5): en `VJ202MOD_NRT` v2.1 la M13 viene en uint32 (válidos hasta 327670) y el lector pone NaN todo DN >= 65528, o sea M13 sobre 512,1 K; un foco efusivo fuerte se borraría antes de interpolar. No ha actuado (máximo publicado 358,7 K). A45 | arreglar el corte por `valid_max` del archivo / dejar | Arreglar pronto, con prueba roja y tag; revisar si el camino K tiene el mismo corte |
+| 0b | Marcador del cráter: el informe bow-tie confirma que los 105 píxeles contados el 2026-11-20 son relleno bow-tie, no dato perdido (veredicto MIXTO por la regla preregistrada: 6 de 105 fallan cobertura a cenit alto). Diff propuesto en el informe (A45) | aplicar el diff / esperar | Aplicar junto con 0a en un PR A45 |
+| 0c | PR #1069 (reemplazo de 15 MODIS sin fondo: 6 en los 11, 9 en historia_34) | mergear y aplicar tras la tanda 7 / esperar | Sí, después de la tanda 7 y de repetir el ensayo |
 | 10 | Pendientes heredados de S192 §b: frente 6 (rojo si un volcán no mide nada), F1M-114, D15, reintento en las sombras, D-10, D5/D13/D11 de los 34 | ver `tasks/BLOQUE_ARRANQUE_S192.md` §b | Las de ese bloque |
 
 Preguntas de Nicolás de S192 sin respuesta explícita: ninguna. «¿cómo vamos?» (relevada por S191) se respondió en texto.
