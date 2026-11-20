@@ -47,12 +47,13 @@ jobs:
           VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
         run: |
           set -o pipefail
-          python experiments/_s192_bowtie/medir_bowtie.py --out out 2>&1 | tee out/medir_bowtie.log
+          # segunda corrida (S192): atributos y rango de DN de M13 y M15 (un gránulo); la primera midió el bow-tie
+          python experiments/_s192_bowtie/medir_m13.py --out out 2>&1 | tee out/medir_m13.log
       - name: Subir resultados
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: s192-bowtie
+          name: s192-bowtie-m13
           path: |
             out/*.json
             out/*.txt
