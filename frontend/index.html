@@ -238,6 +238,11 @@
     .alert-box.ab-vlow  { border-color: var(--green); }
     .alert-box.ab-vlow .ab-count { color: var(--green); }
     .alert-box.ab-nd .ab-count { color: var(--muted); }
+    /* S191: los 34 sin MIROVA van aparte, con borde punteado: preliminares, paridad no medida */
+    .alert-box.ab-prelim { border-style: dashed; margin-left: 8px; }
+    .alert-box.ab-prelim .ab-count { color: var(--muted); }
+    .prelim-badge { font-size: 0.62rem; font-weight: 500; color: var(--muted); border: 1px dashed var(--border);
+                    border-radius: 4px; padding: 0 4px; margin-left: 6px; white-space: nowrap; }
 
     /* ── Overview map ── */
     .overview-section {
@@ -553,7 +558,9 @@
       volcanes con MIROVA, desde el 15 de febrero de 2025, por su reproceso con esa misma vía: la serie completa
       viene de un solo detector, sin escalón por cambio de método, y por eso el gráfico ya no marca una fecha de
       cambio de detector. Los 34 volcanes sin MIROVA se procesan una vez al
-      día con la misma vía desde el 3 de noviembre y aparecen en el tablero marcados «sin MIROVA · 1 vez al día».</p>
+      día con la misma vía desde el 3 de noviembre y aparecen en el tablero como preliminares, marcados «Preliminar ·
+      paridad no medida»: MIROVA no los publica, así que no hay con qué medir su paridad, y la barra
+      «Estado actual» los cuenta aparte de los 11.</p>
       <div id="about-desempeno">Cargando la última auditoría semanal…</div>
     </div>
 
@@ -2051,6 +2058,38 @@ function anomaliaRelativa(records, det, innerKm) {
 // público (S183: la página aparte preliminar_34.html se retiró), porque pages-deploy.yml saca las sombras del sitio para cuidar el techo de 1 GB.
 const SOMBRA_34_BASE = "https://raw.githubusercontent.com/MendozaVolcanic/VRP-chile/main/data/sombra_34/";
 const RADIO_CUMBRE_SOMBRA_KM = 5;   // D5: el de la antigua preliminar_34.js; la cumbre no está medida cráter por cráter
+// S191 (decisión de Nicolás del 2026-11-20, «Preliminares, rotulados»: N1 y D14 de tasks/DECISIONES_34_S187.md, opción b).
+// POR QUÉ. MIROVA no publica los 34, así que no hay con qué medir su paridad, y nadie revisó todavía si su calor es
+// volcánico (fumarola, lago tibio, campo geotermal, incendio). Quedan a la vista, pero rotulados como preliminares y
+// contados aparte de los 11 en la barra «Estado actual», para que un punto en un volcán nuevo no se lea con el mismo
+// peso que en Láscar. Sólo presentación: ningún record, valor ni detección cambia.
+// Guard: tests/test_tablero_preliminares_s191.py
+const ROTULO_PRELIMINAR = "Preliminar · paridad no medida";
+const TXT_PRELIMINAR = "Volcán fuera del NRT de 2 h: lo procesa una vez al día la sombra de los 34 con la misma vía " +
+  "«código MIROVA» que los 11. MIROVA no publica este volcán, así que su paridad no está medida, y su calor todavía " +
+  "no tiene revisión experta (puede ser fumarola, lago tibio o campo geotermal). Cumbre: 5 km desde las coordenadas " +
+  "del volcán. Por eso se cuenta aparte de los 11 en la barra «Estado actual».";
+function esPreliminar(v) { return !!v && v.fuente === "sombra_34"; }
+// Cuenta los niveles de la barra «Estado actual»: los 11 en sus casillas y los 34 aparte (cuántos con anomalía, de
+// cuántos). nivelDe(v) devuelve la clave de getLevel ("nd", "vlow", "low", "mod", "high", "vhigh").
+function contarEstadoTablero(volcanes, nivelDe) {
+  const principales = { high: 0, mod: 0, low: 0, vlow: 0, nd: 0 };
+  const preliminares = { con_anomalia: 0, total: 0 };
+  for (const v of volcanes) {
+    const k = nivelDe(v);
+    if (esPreliminar(v)) {
+      preliminares.total++;
+      if (k !== "nd") preliminares.con_anomalia++;
+      continue;
+    }
+    if (k === "high" || k === "vhigh") principales.high++;
+    else if (k === "mod") principales.mod++;
+    else if (k === "low") principales.low++;
+    else if (k === "vlow") principales.vlow++;
+    else principales.nd++;
+  }
+  return { principales, preliminares };
+}
 // POR QUÉ. Los 34 no tienen inner_radius_km en volcanoes.yaml, así que el pipeline deja `distance_class: null` en
 // sus records. mirovaEqVrp ya los decide por el centroide del cúmulo contra innerKm (5 km), pero la tabla y el mapa
 // rotulan «dentro / fuera» con distance_class, y sin él una anomalía a 2 km se rotulaba «fuera». Se completa aquí con
@@ -2690,8 +2729,8 @@ function buildCards() {
     const rg = el("div", "vc-region"); rg.textContent = v.region;
     nameDiv.append(nm, rg);
     if (v.fuente === "sombra_34") {   // S180: que se vea que no es lo mismo que los 11
-      const tag = el("div", "vc-sombra"); tag.textContent = "sin MIROVA · 1 vez al día";
-      tag.title = "Volcán fuera del NRT de 2 h: lo procesa una vez al día la sombra de los 34 (vía «código MIROVA»). MIROVA no lo publica, así que no hay con qué comparar. Cumbre: 5 km desde las coordenadas del volcán.";
+      const tag = el("div", "vc-sombra"); tag.textContent = ROTULO_PRELIMINAR;   // S191 («1 vez al día» va en el title y en el detalle)
+      tag.title = TXT_PRELIMINAR;
       nameDiv.appendChild(tag);
     }
     const badge = el("span", "alert-badge " + level.cls);
@@ -2961,7 +3000,7 @@ function renderDetail() {
   // S180: región y enlace directo a la página de MIROVA del mismo volcán y sensor (volcano_id = GVP, comprobado).
   const tWrap = el("div");
   const sub = el("div", "detail-sub"); sub.textContent = v.region + (v.hasMirova ? "" : v.fuente === "sombra_34"
-    ? " · sin referencia de MIROVA · se procesa una vez al día (vía «código MIROVA»), cumbre de 5 km"
+    ? " · preliminar: paridad con MIROVA no medida (MIROVA no publica este volcán) · se procesa una vez al día (vía «código MIROVA»), cumbre de 5 km"
     : " · sin serie publicada en este tablero");
   tWrap.append(dt, sub);
   const links = el("div", "detail-links");
@@ -4833,20 +4872,14 @@ function buildAlertSummary() {
   const bar = document.getElementById("alert-summary");
   while (bar.firstChild) bar.removeChild(bar.firstChild);
 
-  const counts = { high: 0, mod: 0, low: 0, vlow: 0, nd: 0 };
-  for (const v of VOLCANOES) {
+  // S191: los 11 en las casillas de nivel; los 34 sin MIROVA en una casilla aparte (contarEstadoTablero).
+  const { principales: counts, preliminares } = contarEstadoTablero(VOLCANOES, v => {
     const d = allData[v.name] || { records: [] };
     // Bug 14 fix: respetar el toggle includeFarDistance.
     // S33: pasar inner_radius_km del volcán para validar pc_dist.
     const innerKm = v.inner_radius_km ?? 10;
-    const vrp = latestVRP(d.records, includeFarDistance, innerKm);
-    const lv = getLevel(vrp);
-    if (lv.key === "high" || lv.key === "vhigh") counts.high++;
-    else if (lv.key === "mod") counts.mod++;
-    else if (lv.key === "low") counts.low++;
-    else if (lv.key === "vlow") counts.vlow++;
-    else counts.nd++;
-  }
+    return getLevel(latestVRP(d.records, includeFarDistance, innerKm)).key;
+  });
 
   const lbl = el("span", "summary-label"); lbl.textContent = "Estado actual:";
   bar.appendChild(lbl);
@@ -4869,6 +4902,17 @@ function buildAlertSummary() {
     box.append(c, l);
     bar.appendChild(box);
   });
+  if (preliminares.total > 0) {   // S191: casilla aparte para los 34, que no suman en los niveles de los 11
+    const box = el("div", "alert-box ab-prelim");
+    box.title = TXT_PRELIMINAR;
+    const c = el("span", "ab-count"); c.textContent = preliminares.con_anomalia;
+    const l = el("span", "ab-label");
+    l.textContent = "Preliminares con anomalía";
+    l.appendChild(document.createElement("br"));
+    l.appendChild(document.createTextNode("de " + preliminares.total + " · " + ROTULO_PRELIMINAR.replace("Preliminar · ", "")));
+    box.append(c, l);
+    bar.appendChild(box);
+  }
 }
 
 // ── Overview map ─────────────────────────────────────────────────────────────
@@ -5141,6 +5185,10 @@ function buildNRTTable() {
 
     const tdDate = el("td"); tdDate.textContent = det.record.datetime_utc;
     const tdVolc = el("td"); tdVolc.textContent = det.volcano.display; tdVolc.style.fontWeight = "600";
+    if (esPreliminar(det.volcano)) {   // S191: la fila de un volcán de los 34 dice que es preliminar
+      const pb = el("span", "prelim-badge"); pb.textContent = "preliminar"; pb.title = TXT_PRELIMINAR;
+      tdVolc.appendChild(pb);
+    }
     const tdVrp = el("td"); tdVrp.textContent = det.vrp.toFixed(3);
     tdVrp.style.fontWeight = "700";
     // S132 R8: el tope del path D no es una medición.
