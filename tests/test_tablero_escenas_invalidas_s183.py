@@ -66,9 +66,10 @@ def _r(t, motivo=None, **k):
 
 def test_escena_sin_dato_reconoce_el_motivo(tmp_path):
     casos = [_r("2026-11-08 04:30", "escena_invalida"), _r("2026-11-08 04:30", "sunglint"),
-             _r("2026-11-08 04:30", "otro_motivo"), _r("2026-11-08 04:30", None), _r("2026-11-08 04:30", False), None]
+             _r("2026-11-08 04:30", "otro_motivo"), _r("2026-11-08 04:30", None), _r("2026-11-08 04:30", False), None,
+             _r("2026-11-08 04:30", "fondo_no_estimado")]   # S192: escena MODIS sin fondo estimable (F4-101)
     out = _node(tmp_path, ["escenaSinDato"], "process.stdout.write(JSON.stringify(DATOS.map(escenaSinDato)));", casos)
-    assert out == ["escena sin datos", "reflejo solar", "escena sin medir", None, None, None], out
+    assert out == ["escena sin datos", "reflejo solar", "escena sin medir", None, None, None, "fondo no estimado"], out
 
 
 def test_la_ultima_pasada_no_es_una_escena_que_no_miro(tmp_path):
