@@ -3724,7 +3724,9 @@ el efecto no se ha medido.
   `pre-s192-fondo-nulo`).** Si el alertado queda junto a un hueco de datos, el halo del `.m` se come los vecinos útiles,
   `fillmissing2` no extrapola y el fondo queda vacío; el `.m` lo suma como cero y el VRP es la radiancia entera del píxel.
   En `origin/main` `434c21a37`: 19 records de la vía de los 11 Tier A con `L_bk = 0` y VRP > 0 (MODIS 6, VIIRS 375 9,
-  VIIRS 750 4) y 16 en la historia de los 34 (`D:\vrp-trabajo\temporales\s192\plan\numeros_12_11.py`). **Decidido fuera
+  VIIRS 750 4), 16 en la historia de los 34 (`D:\vrp-trabajo\temporales\s192\plan\numeros_12_11.py`) y 1 en la sombra
+  de los 34 (MacaCay VIIRS 750 2026-11-15; `D:\vrp-trabajo\temporales\s192\plan\fondo_nulo_lista.py`, 36 en total, 14
+  MODIS). **Decidido fuera
   del código de MIROVA, sólo en MODIS:** si ningún alertado tiene fondo, la escena es no medida (`motivo_vacio`
   «fondo_no_estimado», 0 MW). Por qué: MIROVA no tiene ninguna detección MODIS con fondo 0 en 262.455 del OSF v2.5 (el
   fondo 0 nace de correr aquí el código de VIIRS 750, punto 6) y el único caso cotejable, Cordón Caulle 2026-03-16 03:10,

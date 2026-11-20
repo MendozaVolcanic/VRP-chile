@@ -135,4 +135,9 @@ def test_fondo_parcial_no_es_escena_no_medida(familia, monkeypatch):
     dg = rec["diag_codigo_mirova"]
     assert dg["motivo_vacio"] is None
     assert rec["n_anomalous_pixels"] == 2 and dg["alertados_sin_fondo"] == 1
-    assert rec["vrp_mw"] > 0
+    # la cifra es la del .m literal (suma con el alertado sin fondo) y t_bg_k sale sólo del que tiene fondo (0,30)
+    cfg = MV.FAMILIAS[familia]
+    v = MV.vrp_mirova(m13, mascara, coef=cfg["coef"])
+    assert rec["vrp_mw"] == round(float(v["VRP_MW"]), 3) > 0
+    esperado = float(MV.radiancia_a_temperatura(np.array([0.30]), cfg["lam_mir"])[0])
+    assert rec["t_bg_k"] == pytest.approx(round(esperado, 2), abs=1e-9)
