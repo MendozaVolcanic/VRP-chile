@@ -569,6 +569,12 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-20 00:40 UTC (S191): reinicio del PC; cadena de las tandas 5 a 7 relanzada; huecos vespertinos del NRT medidos
+- **El PC se reinició a las 23:17 UTC del 11-19** (`LastBootUpTime` 20:17 hora de Chile). Murieron `cadena_5a7_s190d.sh` y `cadena_ventanas.sh` de la sesión del día; `ps` sin ninguna cadena viva. La v4 alcanzó a relanzar los 27 rojos de la tanda 5 a las 23:05 UTC. Relanzada como `D:\vrp-trabajo\temporales\s187_tanda2\cadena_5a7_s191.sh` (misma lógica, log al lado); pedido de mantener el PC despierto mientras la sesión trabaja. Avisada la sesión del día (local_1a9c0903) para que relance lo suyo; su run 44635196200 sigue en cola.
+- Tanda 5 a las 00:15 UTC: 151 verdes, 6 corriendo, 9 en cola (último intento de cada trabajo).
+- **NRT, huecos de tarde (medido, `gh run list -w nrt.yml --limit 100`, 2026-11-13 07:10 a 11-19 18:52 UTC):** 79 despachos externos y 21 del cron de GitHub; entre las 12 y las 01 UTC hay 1 o 2 corridas por día, con huecos de 5 a 9 h (máximo 9,1 h el 11-16). Es el diseño de S142 (cron-job.org `10 1-12` UTC cubre las pasadas nocturnas, que llegan antes de las 12 UTC) y no pierde datos (cada corrida reprocesa 7 días). Afecta sólo a las pasadas diurnas, que hoy no se publican; si D-10 abre el día, la ventana del despacho externo tendría que cubrir de 15 a 22 UTC.
+- Guardias al 2026-11-20 00:10 UTC (MODIS) y 11-19 03:58 (VIIRS): las tres VERDE, 0 candidatas a reversión.
+
 ### 2026-11-19 23:10 UTC (S191): «Mergea #1060»: marcador del cráter en main, ficha v1.47
 - **Orden explícita de Nicolás** («Mergea #1060»). Tag defensivo `pre-s191-merge-1060` sobre `6e6620be9`, empujado.
 - Con `D:\vrp-trabajo\temporales\s190\lote7\uno.sh`: main unido, ficha v1.47 con fecha 2026-11-19 (cabecera y fila de la descripción del PR), 201 pruebas de la ficha y `CLAUDE.md` en verde, head `a166780ea` empujado a las 19:09:39 UTC; la CI tardó hasta las 23:05 por runners ocupados con la tanda 5 y el A/B del día; mergeado con `--match-head-commit`: `1d96f6417` (23:05:00 UTC). En main: `**Versión:** v1.47, 2026-11-19` y `px_saturados_crater` en `pipeline/mirova_v750_codigo.py`. Log: `D:\vrp-trabajo\temporales\s191\merge_1060.log`.
