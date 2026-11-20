@@ -212,7 +212,11 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    375 por la sombra de V375-E, decisión del 2026-11-08), con mediciones y no por esta regla. Donde el traslado usa en
    MODIS números de VIIRS 750 que contradicen la Tabla 1 del paper (K1 -0,7 contra -0,8 y piso de dNTI 0,02 contra
    0,01), eso no es una decisión de que mande el código: es una divergencia registrada sin medir
-   (`docs/MIROVA_DIVERGENCES.md` D36, punto 6).
+   (`docs/MIROVA_DIVERGENCES.md` D36, punto 6). ⚠️ **S191 (A113; auditoría Codex ronda 2, F3-108, verificada):** el
+   «sin medir» quedó desfasado: ya medida, A/B de 330 pasadas en `experiments/_s190_d36/INFORME.md`; con los números
+   de la Tabla 1 y la conectiva `max` del `.m` no se gana ni se pierde ninguna alerta de MIROVA y la potencia cambia
+   en 9 pasadas de NdC; la fórmula «or» del texto del paper no se midió (misma redacción que la marca S190 de
+   `CLAUDE.md`, F1M-110 y F1M-117). Texto anterior conservado.
    - Coppola 2016a SP 426.5 (Test 1 + NTI; Tabla 1 N·σ summit/scene, dual-ROI, dNTI 8-vec).
      ✅ **S128: «Coppola 2015» y «Coppola 2016a» eran la MISMA entrada, no dos papers.**
      El `Test 1` está dentro de `documentacion/sp426_5.txt` (`NTIPIX > K1 (Test 1)`, línea

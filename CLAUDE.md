@@ -74,7 +74,13 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
 - **Código operacional de MIROVA VIIRS 750** (OSF zm62w, 2026-07-24, D34,
   `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`): producción corre su port en los tres sensores (K1 -0,7, dNTI mínimo
   0,02 fuera de la cumbre, media 3 × 3 con el central, fondo interpolado bajo halo, suma de todos los alertados),
-  validado contra Octave y MATLAB en VIIRS 750. MODIS y VIIRS 375 cambian sólo bandas, λ, coeficiente, paso y caja;
+  validado contra Octave y MATLAB en VIIRS 750 (⚠️ S191 (A113; auditoría Codex ronda 2, F3-V301, verificada): los 311 de
+  311 contra MATLAB fijaron el módulo con sha256 `62d6538b`; el de main del 2026-11-20 es `a1615f92`, y los `.mat` de
+  esa vara no están en el repo; lo que se re-comprueba hoy son las 4 pruebas de oro MATLAB y Etna de
+  `tests/test_mirova_v750_codigo_s162.py`, que pasan). MODIS y VIIRS 375 cambian sólo bandas, λ, coeficiente, paso y caja
+  (⚠️ S191, frente 3, R4: además quedan fijos en el valor de 750, sin medir por separado, los cortes de reflejo solar y
+  de frío, la regla de media escena, el halo y los multiplicadores; MODIS y VIIRS 375 agregan el corte de 5 km, D36
+  punto 1);
   que MODIS use el K1 y el piso de 750 en vez de -0,8 y 0,01 de la Tabla 1 es divergencia sin medir (D36) (⚠️ S190, F1M-110: ya medida, A/B de 330 pasadas en `experiments/_s190_d36/INFORME.md`; con los números de la Tabla 1 y la conectiva `max` del `.m` no se gana ni se pierde ninguna alerta de MIROVA y la potencia cambia en 9 pasadas de NdC; la fórmula «or» del texto del paper no se midió, F1M-117). El «difiere
   de producción en 10 de 13 puntos» de S158 comparaba con K. (S186; historia: Reglas científicas)
 - **Detector de producción**: la vía «código MIROVA» en los tres sensores (S186): grilla fija de MIROVA
