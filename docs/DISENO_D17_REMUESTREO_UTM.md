@@ -22,6 +22,9 @@ que cambian el diseño respecto de lo que D17 daba por hecho:
    (derivado en S80 de los KMZ, que son reproyecciones geográficas) cae a 46 a 310 m. La premisa de D17 («F70 se
    centró en el punto equivocado, `get_grid_center` es el bueno») **cae en esos 8**: F70 usó el punto más cercano.
    Cablear `get_grid_center` tal como está no es el arreglo.
+   ⚠️ S191 (A113; auditoría Codex ronda 2, R5, verificada en parte): medido sobre los TIF de 375 m, vale para esa
+   grilla. En la de 750 m el centro geométrico queda a 250 m al oeste y al sur del origen X0, Y0, y en MODIS coincide
+   con él (ver la marca S191 de D17 en `docs/MIROVA_DIVERGENCES.md`).
 2. **La grilla es UTM verdadera** (EPSG:32719, y 32718 en Chaitén y Cordón Caulle), con 1,3 a 1,9° de giro respecto
    del norte geográfico en el sur. Nuestro F70 usa ejes alineados con latitud y longitud: a 25 km del centro la
    partición se corre unos 0,8 km, dos celdas de 375 m.

@@ -125,7 +125,10 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
   lejano). Prueba: `tests/test_guard_regla_posicion_radiante_s186.py` (#1022, en main desde el 2026-11-15).
   Detalle en D8'. (S186)
 - Campo unificado `final_hotspot_lat/lon/dist_km`. En la vía es el centroide del cúmulo 8-conexo de la alertada más
-  radiante, con la distancia desde el cráter; `hotspot_*` es el píxel pico; `distance_class` sale de ese centroide; y
+  radiante, con la distancia desde el cráter (⚠️ S191 (A113; auditoría Codex ronda 2, R1, verificada en parte): exacto en
+  los 11 Tier A (copia auditada `785b4c45`: 10.333 records de la vía con cúmulo, 0 discrepancias); en los 34 de la sombra no hay `vent_lat` y
+  `get_detection_anchor` cae al `lat`/`lon` del catálogo, y 10 records de 5 volcanes guardan la grilla y el centro
+  anteriores a la corrección de coordenadas de S190, `experiments/_s190_coordenadas/INFORME.md`); `hotspot_*` es el píxel pico; `distance_class` sale de ese centroide; y
   `vrp_mw` es la suma de todos los alertados, no la del cúmulo (`procesar_grilla`; D8', D32, D36). En K es el fallback
   eruption→vent. Dashboard y auditorías usan sólo este campo. (S186; historia: Reglas geométricas)
 

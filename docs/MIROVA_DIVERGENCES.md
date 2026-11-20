@@ -1526,6 +1526,13 @@ Cuando S62+S63 completen:
 > SOSPECHA fuerte) y no sirve para elegir la regla. Cómo elige MIROVA su posición sigue siendo SIN DATO; la diferencia
 > en posición y distancia queda registrada en D36.
 >
+> ⚠️ **S191 (A113; auditoría Codex ronda 2, F2-110 y R1, verificadas en parte):** el «SIN DATO» de arriba vale para el
+> NRT. La definición del archivo de MIROVA sí está escrita: latitud y longitud del píxel alertado más caliente y
+> distancia máxima entre la cumbre y el alertado más lejano (esquema del OSF v2.5,
+> `experiments/_s139_audit/eje6/schema_v25.md`; la base v.1 en `docs/audit_s141/lectura/LECTOR_B.md` B-09). D36 quedó
+> alineada con esto. Y la «distancia medida desde el cráter» de la marca S186 vale en los 11 Tier A; en los 34 de la
+> sombra no hay cráter registrado y se mide desde el `lat`/`lon` del catálogo.
+>
 > ⚠️ **S151, segunda marca (A113, tarea 1.4 del loop, PR #809 verificado dos veces):** el estudio sobre
 > los GeoTIFF de MIROVA (`experiments/_s151_seleccion_mirova/README.md`) dice que MIROVA no elige el cráter
 > por ser el cráter: informa el foco lejano cuando es fuerte (15 de 15 pasadas con z ≥ 30 en el TIF; 12 de
@@ -2403,6 +2410,11 @@ cosa: ver D17.
 > mayor de F70 es otro: `regrid_to_utm` asigna cada muestra a su celda y deja vacía entre el 43 y el 77 % de la grilla en oblicuo
 > (sintético, `firma_interpolador.py`), mientras los TIF de MIROVA, a 60 a 65° de cenit, no repiten ningún valor entre vecinas y casi
 > no tienen celdas vacías: interpola. Texto de abajo conservado por historia.
+>
+> ⚠️ **S191 (A113; auditoría Codex ronda 2, R5, verificada en parte):** los «46 a 310 m» y los «62,5 m» de la marca
+> S158 se midieron sobre los TIF de VIIRS 375 y valen sólo para la grilla de 375 m (se reproducen: 46,2 a 310,5 m del
+> `mirova_center` al centro geométrico de esa grilla). El centro geométrico depende del sensor: en la grilla de 750 m
+> queda a 250 m al oeste y al sur del origen X0, Y0, y en la de MODIS coincide con X0, Y0. Marca S158 conservada.
 
 > **S141, lectura de papers verificada renderizando las páginas** (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-08 y V-13).
 > **Grilla por sensor.** MODIS 51 × 51 celdas de 1 km (Coppola et al. 2023, Front. Earth Sci. 11:1240107, p. 3, §2.1);
@@ -3658,10 +3670,19 @@ el efecto no se ha medido.
 | 4 | La matriz se arma con la fila 0 al norte | `remuestrear_grilla`, `celda_de`, `posicion_de` | Propia. `pipeline/grillas_mirova.yaml` dice que la grilla de MIROVA arma las filas de sur a norte, así que su matriz podría ir con la fila 1 al sur | Los tres | CONFIRMADO lo nuestro; que MIROVA vaya al revés, SOSPECHA | La detección no cambia (la máscara del ejemplo de OSF es idéntica volteada). El fondo sí, por el desempate de `fillmissing2`: ejemplo del Etna 9,890 contra 9,851 MW (-0,38 %); en 200 focos sintéticos cambia el 10 %, con un máximo de 0,44 %. La validación contra MATLAB (S163, 166 de 166) usó nuestras grillas y no prueba la orientación de MIROVA |
 | 5 | Tupungatito en VIIRS 750 usa la caja `sens`: todo el cuadro de 21 × 21 celdas con los umbrales sensibles | `pipeline/grillas_mirova.yaml` (`roi_v750: sens`), `caja_roi` | Lectura de V750-B, brazo B4c (`scripts/roi_v750b_a_grillas.py`, `experiments/_s162_v750b/`). El `.m` declara que la ROI se ajusta por volcán; la de MIROVA para Tupungatito es SIN DATO | VIIRS 750 | CONFIRMADO | Medido en V750-B; la caja `crater` de Cordón Caulle (#999) sí estaba declarada (ficha SDA v1.29) |
 | 6 | MODIS usa los números de VIIRS 750 del `.m`: Test 1 con NTI > -0,7 de noche y piso de dNTI fuera de la cumbre de 0,02, en vez de -0,8 y 0,01 de la Tabla 1 de Coppola et al. 2016a | `detectar_mirova` (umbrales fijos, los mismos para las tres familias) | El `.m` de VIIRS 750 (l. 177-199); no hay código de MIROVA para MODIS. D34 («Alcance») y `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §5 ponen -0,8 y 0,01 para MODIS | MODIS (en VIIRS 375 también, declarado en la ficha v1.16) | CONFIRMADO | ⚠️ **S190, medido (`experiments/_s190_d36/INFORME.md` §1, A/B pre-registrado, run 44016042341, 330 pasadas nocturnas de los 11 Tier A desde el 2026-03-01):** sobre la grilla de la vía el piso de 0,02 decide el umbral fuera de la cumbre en 5.872 de 6.006 escenas, y K1 no actúa (0 de 6.006 con alertas absolutas). Con los números de la Tabla 1 (-0,8 y 0,01): 62 de 62 noches con alerta protegida de MIROVA igual que hoy; 0 de 162 negativas publicadas en los dos brazos; el valor publicado cambia en 9 de 330 pasadas, todas de Nevados de Chillán, siempre hacia arriba (23,5 MW sobre 936,2), casi todo por el piso (B2: 8 pasadas, 21,7 MW); la razón contra MIROVA en la misma pasada pasa de 1,013 a 1,027 (\|log\| 0,130 a 0,134; Chillán 0,108 a 0,145). Regla pre-registrada: «medir más» (cambia 5,8 % de las pasadas con alerta, el corte era 2 %). Recomendación posterior: no adoptar la Tabla 1; acercarse al paper no nos acerca a lo que MIROVA publica. ⚠️ S190 (A113, F4-117 y F4-119, verificadas): el A/B cambió sólo los números; la conectiva literal del paper («or», umbral = mín.) no se midió y no equivale al «max» del `.m`, así que «acercarse al paper» dice más de lo medido; A ya estaba sobre MIROVA en 8 de las 9 pasadas, no en 9. Texto anterior: Efecto contra la Tabla 1 SIN MEDIR. En el sustrato de la era K (píxel nativo, 8 vecinos, `experiments/_s158_audit/f4/04_cota_k1_y_sustrato_minimos.out`), en MODIS μ + 10σ < 0,02 en 51,6 % de las escenas y < 0,01 en 7,4 %: en la mitad de las escenas manda el piso de 0,02. De 96 positivos MODIS de ese sustrato, 1 tenía NTI > -0,8 y ninguno > -0,7. Sobre la grilla de la vía no está medido |
+| 7 | ⚠️ **S191 (registrada por la auditoría Codex ronda 2, F2-101 y F2-V301, verificadas).** En MODIS, Cordón Caulle y Tupungatito usan la caja `def` (5 × 5 celdas al centro de la grilla), no la `crater` ni la `sens` que tienen en VIIRS 750: el cráter queda fuera de la región sensible, a 5,25 km en Cordón Caulle y a 2,11 km en Tupungatito, y se prueba con el umbral conservador | `FAMILIAS` (`"clave_roi": "roi_modis"`), `grilla_del_volcan` (`r.get(clave_roi, "def")`): la clave `roi_modis` no existe en `pipeline/grillas_mirova.yaml` | Decisión del paquete MOD-D, escrita sólo en experimentos: `experiments/_s162_v750b/ADOPCION_ROI_B4.md` §4 («`roi_modis` y la ROI de VIIRS 375 no se tocan») y `experiments/_s162_v750b/verificador_pr939/INFORME.md` VPR939-05. La caja de MIROVA en MODIS es SIN DATO (no publicó código para MODIS) | MODIS | CONFIRMADO | En los records MODIS de la vía, la celda decisiva del 7 × 7 del cráter (`diag_codigo_mirova.s1`) quedó en la región conservadora, no alertó y superaba los dos umbrales sensibles de su pase en 67 pasadas de Cordón Caulle y 1 de Tupungatito (control: 0 en Chaitén, Copahue, Isluga, Lastarria, Llaima, NdC, Planchón y Villarrica; 1 en Láscar). De esas 67, 19 caen en la ventana de la tabla de MIROVA y en las 19 MIROVA publicó RUTINA con 0 MW. De enero a noviembre de 2026 MIROVA no publicó ninguna ALERTA_TERMICA MODIS en esos dos volcanes (control: 97 en Láscar y 67 en Chillán): ninguna alerta perdida medible. Criterio sobre la celda guardada y los umbrales de su pase, sin reproceso. Evidencia: `D:\codex-vrp\_salida\ronda2\f2_verificacion\VEREDICTO.md` y `D:\codex-vrp\_salida\ronda2\f2b_verificacion\VEREDICTO.md` (copia `785b4c45`), fuera del repo |
 
 **Otras diferencias de la vía con MIROVA que tampoco estaban registradas** (misma auditoría):
 
-- **Posición y distancia.** La vía publica el centroide del cúmulo 8-conexo de la alertada más radiante, con la
+- **Posición y distancia.** ⚠️ **S191 (A113; auditoría Codex ronda 2, F2-110 y R1, verificadas en parte):** el
+  CONFIRMADO vale para lo nuestro, no para MIROVA. De MIROVA está escrita la definición de su archivo (esquema del OSF
+  v2.5, `experiments/_s139_audit/eje6/schema_v25.md`: latitud y longitud del píxel alertado más caliente; `Max_Dist`,
+  distancia máxima entre la cumbre y el alertado más lejano). Que la `Distancia_km` de su NRT sea esa es SOSPECHA
+  fuerte (`docs/audit_s139/DISTANCIA_MIROVA_VS_TIF.md` §0), y su origen no está demostrado: el esquema dice la cumbre,
+  no el centro de la grilla (en Cordón Caulle los dos son el mismo punto X0, Y0, y el caso de la ficha v1.29, 6,410 km
+  desde ese punto contra 6,45 km de MIROVA, es compatible). Cómo elige su posición el NRT sigue SIN DATO (D8'). De lo
+  nuestro: la distancia se mide desde el cráter en los 11 Tier A; en los 34 de la sombra no hay `vent_lat` y
+  `get_detection_anchor` cae al `lat`/`lon` del catálogo. Texto anterior, conservado: La vía publica el centroide del cúmulo 8-conexo de la alertada más radiante, con la
   distancia medida desde el cráter (D8'; regla «radiante», formalizada por Nicolás el 2026-11-15). MIROVA publica el píxel alertado más caliente, y su `Distancia_km` se comporta
   como la del alertado más lejano medida desde el centro de su grilla (`docs/audit_s139/DISTANCIA_MIROVA_VS_TIF.md`).
   CONFIRMADO. En MODIS el centroide y el alertado más lejano difieren más de 1 km en 51 de 472 records con alerta. La
