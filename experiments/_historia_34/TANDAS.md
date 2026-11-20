@@ -115,9 +115,27 @@ Números de `D:\vrp-trabajo\temporales\s191\tanda5_numeros.py` (salida en `tanda
 | unión | 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. AntillancaCasablanca 7.144 records, CarranLosVenados 7.078, Lanin 6.890, MochoChoshuenco 7.025, Osorno 7.148 |
 | ensayo del aplicador | 35.285 nuevos (los cinco de arriba), 0 tras el corte; los 18 activos de las tandas 1 a 4 dan 0 nuevos y todos «ya estaban» |
 | se aplica | tras el merge del PR de esta unión, con tag `pre-historia-34-tanda5` |
+| aplicada | 2026-11-20 tras el merge de #1062 (02:00 UTC): run 44658784431 de `aplicar-reemplazo.yml` (tag `pre-historia-34-tanda5` sobre `0e6126871`), commit `da372acd1` en main, por la sesión «s192» (local_841efdd9) |
 
 Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda5/` (fuera del repo). Tanda 6 (Calbuco, YateHornopiren,
 Huequi, Michinmahuida, CorcovadoYanteles) despachada por la cadena el 2026-11-20 01:27 UTC (run 44653724540).
+
+## Tanda 6 (Calbuco, YateHornopiren, Huequi, Michinmahuida, CorcovadoYanteles; 2025-02-15 a 2026-11-02)
+
+Números de `D:\vrp-trabajo\temporales\s192\tanda6\tanda6_numeros.py` (salida en `numeros.log`, al lado).
+
+| campo | valor |
+|---|---|
+| run | 44653724540 (main), despachado 2026-11-20 01:27 UTC por `cadena_5a7_s191.sh` |
+| trozos | 165 de 165 con artifact. 2 se tomaron del intento 2 (CorcovadoYanteles 1 y 2), relanzados por la cadena a las 14:54 UTC. Al relanzar, con la API de GitHub dando 502, GitHub creó 12 trabajos para esos dos trozos: 2 corrieron en verde y subieron su artifact y 10 quedaron «queued» para siempre con el run ya «completed success». La cadena leyó uno de esos fantasmas como rojo, no pudo relanzar («cannot be retried») y se detuvo a las 15:50 UTC sin despachar la tanda 7; por eso la lista de jobs vigentes da 165 success y 1 sin conclusión, y el runner suma 164 jobs. Lo despachó aparte S192 con `D:\vrp-trabajo\temporales\s192\tanda7\cadena_7_s192.sh`, que cuenta rojos por trozo (alguna copia en success) |
+| runner | 78,5 h (suma de `completed_at - started_at` de los 164 jobs `reproc` vigentes con fin), 28,7 min por trozo en promedio (máximo 39,0); pared 2026-11-20 01:28 a 15:28 UTC |
+| unión | 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. Calbuco 7.163 records, CorcovadoYanteles 7.393, Huequi 7.351, Michinmahuida 7.360, YateHornopiren 7.336 |
+| ensayo del aplicador | 36.603 nuevos (los cinco de arriba), 0 tras el corte; los 23 activos de las tandas 1 a 5 dan 0 nuevos y todos «ya estaban» |
+| se aplica | tras el merge del PR de esta unión, con tag `pre-historia-34-tanda6` |
+| fondo nulo | esta tanda se procesó con el código anterior a #1065 (fondo nulo, opción a): sus pasadas MODIS sin fondo entran publicadas y se cuentan junto con las demás antes del reemplazo que sigue a ese merge |
+
+Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda6/` (fuera del repo). Tanda 7 (Melimoyu, MacaCay, Mentolat,
+Hudson) despachada por S192 el 2026-11-20 15:55 UTC (run 44768057665).
 
 ## Retiro de Putana y OlcaParuma (D1, opción 1a, 2026-11-17)
 
