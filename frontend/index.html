@@ -3018,7 +3018,7 @@ function renderDetail() {
   const badge = el("span", "alert-badge " + level.cls);
   // S131 A2: rótulo de la ventana; S153: sale del período elegido (antes decía «30 d» con cualquier período)
   badge.textContent = level.label + " · máx " + Periodo.rotuloCorto(currentPeriodo);
-  badge.title = "Nivel del MÁXIMO del período (" + Periodo.rotulo(currentPeriodo) + "). La tarjeta muestra la última pasada (48 h).";
+  badge.title = "Nivel del MÁXIMO del período (" + Periodo.rotulo(currentPeriodo) + "). La tarjeta muestra la última detección publicada (48 h), que puede ser de una pasada anterior a la última.";   // S192 (F5-114): antes decía «la última pasada»
   // S180: región y enlace directo a la página de MIROVA del mismo volcán y sensor (volcano_id = GVP, comprobado).
   const tWrap = el("div");
   const sub = el("div", "detail-sub"); sub.textContent = v.region + (v.hasMirova ? "" : v.fuente === "sombra_34"
