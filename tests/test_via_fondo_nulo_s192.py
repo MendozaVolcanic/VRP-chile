@@ -109,3 +109,30 @@ def test_t_bg_k_promedia_solo_los_alertados_con_fondo():
 def test_t_bg_de_sin_alertados_con_fondo_es_nulo():
     assert MV.t_bg_de({"npix": 3, "n_sin_fondo": 3, "L_bk": 0.0}, MV.FAMILIAS["MODIS"]["lam_mir"]) is None
     assert MV.t_bg_de({"npix": 0, "n_sin_fondo": 0, "L_bk": float("nan")}, MV.FAMILIAS["MODIS"]["lam_mir"]) is None
+
+
+def _grilla_parcial():
+    """Grilla sintética con dos alertados: (10, 4) junto a un hueco de datos (sin fondo) y (10, 15) con fondo."""
+    n = 21
+    m13 = np.full((n, n), 0.30)
+    m13[:, :4] = np.nan
+    mascara = np.zeros((n, n), bool)
+    mascara[10, 4] = True
+    mascara[10, 15] = True
+    m13[mascara] = 3.0
+    g = {"n": n, "paso": 1000.0, "ul_x": 0.0, "ul_y": 0.0, "zona": 19, "hemisferio": "S", "roi": "def"}
+    return m13, mascara, g
+
+
+@pytest.mark.parametrize("familia", ["MODIS", "VIIRS750"])
+def test_fondo_parcial_no_es_escena_no_medida(familia, monkeypatch):
+    """Si al menos un alertado tiene fondo, la escena SÍ se midió en los dos sensores: se publica (con el .m) y la marca
+    dice cuántos quedaron sin fondo. Sólo «ninguno con fondo» es no medida en MODIS."""
+    m13, mascara, g = _grilla_parcial()
+    monkeypatch.setattr(MV, "detectar_mirova", lambda *a, **k: (mascara.copy(), {"motivo": None}))
+    monkeypatch.setattr(MV, "latlon_de", lambda grilla, f, c: (-40.0 - f * 0.01, -72.0 + c * 0.01))
+    rec = MV.procesar_grilla(m13, m13, g, None, 0, 90.0, (10.0, 10.0), 5.0, "SENSOR", familia=familia)
+    dg = rec["diag_codigo_mirova"]
+    assert dg["motivo_vacio"] is None
+    assert rec["n_anomalous_pixels"] == 2 and dg["alertados_sin_fondo"] == 1
+    assert rec["vrp_mw"] > 0
