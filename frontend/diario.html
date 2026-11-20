@@ -723,6 +723,7 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
     n_det_us: jsonData ? detRecs.length : null, n_det_mirova: mirovaForVolc ? mirovaWindowed.length : null,
     max_us: ourMaxVrp, median_us: medianVrp,
     mirova_dist_med: mirovaDistMed,
+    mirova_ventana: mirovaForVolc ? mirovaWindowed : null,   // S192 (F5-V201): para desgloseMirova; el total no cambia
   };
 }
 
@@ -733,6 +734,24 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
 function textoConteo(n) {
   if (n == null) return { texto: "no cargó", falla: true };
   return { texto: String(n), falla: false };
+}
+// S192 (auditoría Codex ronda 2, F5-V201). POR QUÉ: nuestra réplica mide sólo de noche (MIR nocturno), así que una
+// alerta diurna de MIROVA nunca puede tener par nuestro. La tarjeta ponía «301 det. nuestras · MIROVA: 353 alertas»
+// en Nevados de Chillán, que sugiere 52 silencios nuestros, cuando las nocturnas de MIROVA eran 277. El total se
+// deja como estaba (S151: computeStats no lee la marca diurna) y se agrega cuántas son de noche, lo comparable.
+// Guard: tests/test_tablero_f5_rotulos_s192.py
+function desgloseMirova(lista) {
+  if (!lista) return null;
+  let diurnas = 0;
+  for (const r of lista) if (r.dia === true) diurnas++;
+  return { nocturnas: lista.length - diurnas, diurnas };
+}
+function textoNocturnas(d) {
+  if (!d || d.diurnas === 0) return null;
+  return { texto: " (" + d.nocturnas + " de noche)",
+    title: "Nuestra réplica mide sólo de noche (MIR nocturno). De las " + (d.nocturnas + d.diurnas) + " alertas de " +
+      "MIROVA en la ventana, " + d.diurnas + " son de pasadas diurnas, que no pueden tener par nuestro; lo comparable " +
+      "con «det. nuestras» son las " + d.nocturnas + " nocturnas." };
 }
 // Aviso del recuadro sin gráfico: no decir «sin detecciones» cuando lo que pasó es que un archivo no cargó.
 function mensajeSinGrafico(jsonData, mirovaForVolc, rotuloPeriodo) {
@@ -814,6 +833,8 @@ function renderCard(volc, jsonData, mirovaForVolc) {
   if (c2.falla) { b2.className = "falla-carga"; s2.title = "No cargó la referencia de MIROVA de este volcán (data/mirova/): el conteo no es cero, es desconocido. Recarga la página."; }
   s2.appendChild(b2);
   if (!c2.falla) s2.appendChild(document.createTextNode(" alertas"));
+  const noche = textoNocturnas(desgloseMirova(stats.mirova_ventana));   // S192 (F5-V201)
+  if (noche) { s2.appendChild(document.createTextNode(noche.texto)); s2.title = noche.title; }
   stRow.appendChild(s2);
   stRow.appendChild(document.createTextNode(" · "));
 
