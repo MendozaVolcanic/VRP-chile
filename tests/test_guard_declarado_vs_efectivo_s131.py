@@ -158,7 +158,7 @@ CITAS_CLAUDE_MD = [
     # S153: 1594 -> 1595, +1 por el script cambio_detector.js (marca de la adopción de K) en la cabecera.
     # S180: 1595 -> 1600, +5 por la exención de la vía en f5CoreMagnitude (tests/test_f5_no_recorta_via_s180.py).
     # S186: 1600 -> 1714, +114 por el desempeño en vivo del modal «Acerca de» (b.4, lee data/audit_continuous/latest.json).
-    ("frontend/index.html", 1764, "isValidDetection"),
+    ("frontend/index.html", 1779, "isValidDetection"),
     # S151: predicado del tope D9, citado en la marca S151 de A23.
     # S164: 1056 -> 1094, +1 por el import de ENABLE_MODIS_CODIGO_MIROVA y +37 por el bloque de la vía «código MIROVA».
     # S165: 1094 -> 1185 (+91): imports y cabecera FICHA de los flags MxD03, sus funciones nuevas y su cableado.

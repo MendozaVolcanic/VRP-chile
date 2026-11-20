@@ -248,6 +248,25 @@ function getLevel(vrp) {
   for (const l of LEVELS.slice(1)) if (vrp < l.max) return l;
   return LEVELS[LEVELS.length - 1];
 }
+// S192 (auditoría Codex ronda 2, F5-101; regla S92). POR QUÉ: «Sin datos» es el rótulo del nivel cero, pero cero
+// detecciones no es lo mismo que cero pasadas. Un volcán vigilado y tranquilo tiene pasadas medidas y ninguna anomalía
+// publicada; llamarlo «Sin datos» hace creer que el sistema no lo mira (2.728 de 6.270 tarjetas-instante de mosaico,
+// 43,5 %, del 2026-10-01 al 11-17, medido por el verificador de la auditoría). La tarjeta de index ya decía «Sin
+// anomalía» desde S180; esta función es ese mismo criterio, compartido por la tarjeta y la barra de index y por mosaico.
+// «Sin datos» queda para cuando no hay ninguna pasada medida (una escena con motivo_vacio no lo es, S183). Mismo nivel y
+// color: sólo cambia el rótulo. Guard: tests/test_tablero_f5_codex_s192.py
+function rotuloNivel(level, ultimaPasada) {
+  return level.key === "nd" && ultimaPasada ? "Sin anomalía" : level.label;
+}
+// Última pasada medida: espejo de lastEventTime de index.html (S183: una escena sin datos no es pasada).
+function lastEventTime(records) {
+  let latest = null;
+  for (const r of records || []) {
+    if (r && r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio) continue;
+    if (!latest || r.datetime_utc > latest) latest = r.datetime_utc;
+  }
+  return latest;
+}
 
 // ─── VRP MIROVA-equivalente (sync con index.html L822) ───────────────────────
 // Cluster summit-only, con sanity cap F2.8 (50 MW × 1000 = 50,000 MW).
@@ -760,7 +779,7 @@ function renderMosaico() {
         el("span", { className: "mc-vrp lvl-" + level.key, textContent: fmtVRP(vrp48) }),
         el("span", { className: "mc-vrp-unit", textContent: vrp48 > 0 ? " MW · " + sensorTxt + " · 48 h" : "" }),
       ]),
-      el("span", { className: "mc-level " + level.cls, textContent: level.label }),
+      el("span", { className: "mc-level " + level.cls, textContent: rotuloNivel(level, lastEventTime(records)) }),   // S192 (F5-101)
     ]);
     card.appendChild(metrics);
 
