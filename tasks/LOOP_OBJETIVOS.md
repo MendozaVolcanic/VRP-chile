@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-20 15:30 UTC (S192): apertura; #1063 en main (v1.49), #1064 en CI (v1.50); §12.11 del plan; tanda 6 relanzando
+- Verificado al abrir: #1062 y #1061 los mergeó la sesión «s192» (local_841efdd9, abierta 01:46 UTC, inactiva desde 02:14) y aplicó la tanda 5 (run 44658784431, tag `pre-historia-34-tanda5`); ficha v1.48. CLAUDE.md de `loop/activo` igual al de main.
+- #1063 mergeado por S192 a las 14:59 UTC (head `1b9f18ece`, ya numerado v1.49 por la sesión Codex) con la orden de Nicolás en local_4d3dbc4c: «mergea #1063 y después #1064». #1064 rebasado a main, ficha v1.50 (`54e957c23`), merge automático si el CI queda verde (`D:\vrp-trabajo\temporales\s192\merge\merge_1064.log`).
+- Tanda 6 terminó a las 14:54 UTC con 2 rojos; la cadena los relanzó. `D:\vrp-trabajo\temporales\s192\tanda6\esperar_y_unir.sh` une y ensaya cuando quede limpia.
+- A/B diurno (#813): la cadena no murió, terminó a las 09:43 UTC con W2 a W7 bajadas; falta cobertura W6 y W7 (pedida a su sesión) y R-W7 (Nicolás).
+- §12.11 del plan por sensor (`70418272a`). Hallazgo: las 27 pasadas VIIRS con MIR inválido sobre el cráter (marca de #1060) tienen cenit de 54,7° a 67,0°; SOSPECHA de relleno bow-tie, falta abrir un gránulo.
+- Regla nueva de Nicolás: la coordinadora no va anidada (memoria `feedback_s192_coordinadora_no_anidada.md`); S192 se desanidó.
+
 ### 2026-11-20 01:45 UTC (S191): cierre; PR #1062 (unión tanda 5); tanda 6 corriendo; traspaso en BLOQUE_ARRANQUE_S192
 - **Tanda 5 limpia** a las 01:23 UTC (0 rojos tras relanzar 27); 165 trozos bajados; unión en `D:\vrp-trabajo\worktrees\s191-tanda5`: 5 volcanes, 626 días, 0 huecos, todo de la vía; ensayo 35.285 nuevos, 0 tras el corte, los 18 aplicados con 0 nuevos. Números de `D:\vrp-trabajo\temporales\s191\tanda5_numeros.py`. **PR #1062** (`b4f64423f`), con la fila «aplicada» de la tanda 4. Verificador limpio Sonnet 5 de 5. Rareza: Lanin feb-2025, 64 de 66 detecciones >5 MW a 14 a 29,5 km (SOSPECHA de incendio).
 - Corregido un dato heredado: de los 26 rojos de la tanda 5 a las 15:20 UTC, 19 fueron «Install deps» y 7 de MochoChoshuenco descargas fallidas de LAADS en modo estricto (job 135520546869), no «todos Install deps».
