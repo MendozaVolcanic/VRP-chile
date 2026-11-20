@@ -3720,6 +3720,18 @@ el efecto no se ha medido.
   0 casos en 73.779 records de la vía (el instrumento sí la detecta en un caso sintético). También quedan sin motivo
   el frío local y el borde de la grilla; cuántas veces, SIN DATO (el record no los distingue). Texto anterior
   conservado arriba.
+- **Fondo no estimable (S192, decisión de Nicolás del 2026-11-20, opción a de F4-101; PR del fondo nulo, tag
+  `pre-s192-fondo-nulo`).** Si el alertado queda junto a un hueco de datos, el halo del `.m` se come los vecinos útiles,
+  `fillmissing2` no extrapola y el fondo queda vacío; el `.m` lo suma como cero y el VRP es la radiancia entera del píxel.
+  En `origin/main` `434c21a37`: 19 records de la vía de los 11 Tier A con `L_bk = 0` y VRP > 0 (MODIS 6, VIIRS 375 9,
+  VIIRS 750 4) y 16 en la historia de los 34 (`D:\vrp-trabajo\temporales\s192\plan\numeros_12_11.py`). **Decidido fuera
+  del código de MIROVA, sólo en MODIS:** si ningún alertado tiene fondo, la escena es no medida (`motivo_vacio`
+  «fondo_no_estimado», 0 MW). Por qué: MIROVA no tiene ninguna detección MODIS con fondo 0 en 262.455 del OSF v2.5 (el
+  fondo 0 nace de correr aquí el código de VIIRS 750, punto 6) y el único caso cotejable, Cordón Caulle 2026-03-16 03:10,
+  MIROVA lo listó sin alerta (`D:\vrp-trabajo\temporales\s191\f4_101\INFORME.md`). En VIIRS 375 y 750 la vía sigue al
+  `.m` (el OSF sí publica fondo 0: 501 y 464 detecciones) y el record cuenta `alertados_sin_fondo`, también cuando sólo
+  parte de los alertados quedó sin fondo. `t_bg_k` promedia sólo los alertados con fondo (antes dividía por todos y daba
+  0 K sin fondo). Prueba: `tests/test_via_fondo_nulo_s192.py`.
 
 **Estado.** ⚠️ **S190:** costo de los puntos 1, 2, 3 y 6 y del escalón medido en `experiments/_s190_d36/INFORME.md` (veredictos: punto 6, no adoptar la Tabla 1, pre-registro «medir más»; escalón, no implementar y medir en el primer evento oblicuo grande; puntos 1 a 3, sin alertas perdidas atribuibles). Ningún cambio de producción. Texto anterior: ABIERTA, documental. Lo siguiente es medir el costo de los puntos 1, 2 y 6 antes de proponer un cambio
 (A116; bloque de arranque S186, §b.6).
