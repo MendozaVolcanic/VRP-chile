@@ -74,7 +74,7 @@ def test_contar_separa_los_34_y_cuadra(tmp_path):
     cuerpo = ("const N = " + json.dumps(niveles) + ";\n"
               "console.log(JSON.stringify(contarEstadoTablero(DATOS, v => N[v.name])));")
     out = _node(tmp_path, cuerpo, ONCE + SOMBRA)
-    assert out["principales"] == {"high": 0, "mod": 1, "low": 0, "vlow": 0, "nd": 1}
+    assert out["principales"] == {"high": 0, "mod": 1, "low": 0, "vlow": 0, "na": 0, "nd": 1}   # S192: na = sin anomalía (F5-101)
     assert out["preliminares"] == {"con_anomalia": 2, "total": 3}
     assert sum(out["principales"].values()) + out["preliminares"]["total"] == len(ONCE + SOMBRA)
 

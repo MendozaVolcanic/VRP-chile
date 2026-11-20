@@ -924,6 +924,21 @@ function getLevel(vrp) {
   for (const l of LEVELS.slice(1)) if (vrp < l.max) return l;
   return LEVELS[LEVELS.length - 1];
 }
+// S192 (auditoría Codex ronda 2, F5-101; regla S92). POR QUÉ: «Sin datos» es el rótulo del nivel cero, pero cero
+// detecciones no es lo mismo que cero pasadas. Un volcán vigilado y tranquilo tiene pasadas medidas y ninguna anomalía
+// publicada; llamarlo «Sin datos» hace creer que el sistema no lo mira (2.728 de 6.270 tarjetas-instante de mosaico,
+// 43,5 %, del 2026-10-01 al 11-17, medido por el verificador de la auditoría). La tarjeta de index ya decía «Sin
+// anomalía» desde S180; esta función es ese mismo criterio, compartido por la tarjeta y la barra de index y por mosaico.
+// «Sin datos» queda para cuando no hay ninguna pasada medida (una escena con motivo_vacio no lo es, S183). Mismo nivel y
+// color: sólo cambia el rótulo. Guard: tests/test_tablero_f5_codex_s192.py
+function rotuloNivel(level, ultimaPasada) {
+  return level.key === "nd" && ultimaPasada ? "Sin anomalía" : level.label;
+}
+// Clave de la barra «Estado actual»: el nivel, o "na" (sin anomalía) cuando el nivel es cero pero hay pasada medida.
+function nivelEstado(records, includeFar, innerKm) {
+  const k = getLevel(latestVRP(records, includeFar, innerKm)).key;
+  return k === "nd" && lastEventTime(records) ? "na" : k;
+}
 
 // F2/S78 — Mirova-v1 parity plugin: sombreado horizontal por bandas
 // MIROVA (Muy Bajo / Bajo / Moderado / Alto / Muy Alto). Solo dibuja
@@ -2073,19 +2088,20 @@ function esPreliminar(v) { return !!v && v.fuente === "sombra_34"; }
 // Cuenta los niveles de la barra «Estado actual»: los 11 en sus casillas y los 34 aparte (cuántos con anomalía, de
 // cuántos). nivelDe(v) devuelve la clave de getLevel ("nd", "vlow", "low", "mod", "high", "vhigh").
 function contarEstadoTablero(volcanes, nivelDe) {
-  const principales = { high: 0, mod: 0, low: 0, vlow: 0, nd: 0 };
+  const principales = { high: 0, mod: 0, low: 0, vlow: 0, na: 0, nd: 0 };   // S192: na = sin anomalía (F5-101)
   const preliminares = { con_anomalia: 0, total: 0 };
   for (const v of volcanes) {
     const k = nivelDe(v);
     if (esPreliminar(v)) {
       preliminares.total++;
-      if (k !== "nd") preliminares.con_anomalia++;
+      if (k !== "nd" && k !== "na") preliminares.con_anomalia++;
       continue;
     }
     if (k === "high" || k === "vhigh") principales.high++;
     else if (k === "mod") principales.mod++;
     else if (k === "low") principales.low++;
     else if (k === "vlow") principales.vlow++;
+    else if (k === "na") principales.na++;
     else principales.nd++;
   }
   return { principales, preliminares };
@@ -2736,7 +2752,7 @@ function buildCards() {
     const badge = el("span", "alert-badge " + level.cls);
     // S180: «Sin datos» sólo si no hay pasadas; con pasadas y sin anomalía publicada en 48 h, decirlo así (con los 34 ya
     // en la página, casi todos estaban procesados y la tarjeta decía «sin datos»). Mismo nivel y color: sólo cambia el rótulo.
-    badge.textContent = (level.key === "nd" && lastTime) ? "Sin anomalía" : level.label;
+    badge.textContent = rotuloNivel(level, lastTime);   // S192: el criterio de S180, compartido con la barra y mosaico
     // S131 A2/A3: la tarjeta clasifica la ÚLTIMA pasada; el detalle, el máximo del período.
     badge.title = "Nivel de la ÚLTIMA detección (ventana 48 h). La página del volcán muestra el máximo del período, que puede ser mayor.";
     hdr.append(nameDiv, badge);
@@ -4878,7 +4894,7 @@ function buildAlertSummary() {
     // Bug 14 fix: respetar el toggle includeFarDistance.
     // S33: pasar inner_radius_km del volcán para validar pc_dist.
     const innerKm = v.inner_radius_km ?? 10;
-    return getLevel(latestVRP(d.records, includeFarDistance, innerKm)).key;
+    return nivelEstado(d.records, includeFarDistance, innerKm);   // S192 (F5-101): «Sin anomalía» aparte de «Sin datos»
   });
 
   const lbl = el("span", "summary-label"); lbl.textContent = "Estado actual:";
@@ -4889,6 +4905,7 @@ function buildAlertSummary() {
     ["ab-mod",  counts.mod,  "10\u2013100 MW", "Moderado"],
     ["ab-low",  counts.low,  "1\u201310 MW", "Bajo"],
     ["ab-vlow", counts.vlow, "<1 MW", "Muy Bajo"],
+    ["ab-nd",   counts.na,   "", "Sin anomalía"],   // S192 (F5-101): con pasadas medidas, nada publicado en 48 h
     ["ab-nd",   counts.nd,   "", "Sin datos"],
   ].forEach(([cls, count, range, label]) => {
     const box = el("div", "alert-box " + cls);
