@@ -1259,12 +1259,12 @@ function mirovaLineasDia(ctx) {
   return ["    " + p.sensor + " · " + p.dt + " UTC" + (p.ocr ? " (OCR)" : ""), "    " + MIROVA_DIA_TXT];
 }
 
-// S32 P2 — VRP "MIROVA-equivalent": cluster contiguo del cráter, no integrated
+// ⚠️ S191 (A113; auditoría Codex ronda 2, F2-111, verificada): texto S32 superado, ver la nota S191 al final de este párrafo. S32 P2 — VRP "MIROVA-equivalent": cluster contiguo del cráter, no integrated
 // global. Coppola 2016a SP 426.5 §2.2 "neighbor pixels connectivity": MIROVA
 // reporta el VRP del cluster contiguo principal cerca del vent. Si nuestro
 // primary_cluster cae fuera del inner_radius (dist_class='far'), MIROVA tampoco
 // reportaría → magnitud=0. Reduce ratio mediano nuestro/MIROVA de 6.25× a 2.29×.
-// Fallback a vrp_mw global solo en records legacy pre-S27 sin primary_cluster.
+// Fallback a vrp_mw global solo en records legacy pre-S27 sin primary_cluster. Nota S191 (F2-111): en la vía pc.vrp_mw es la suma de TODOS los alertados (D32, D36), no un cúmulo, y MIROVA sí publica alertas lejanas (ver S36 abajo); el 0 de las lejanas es la vista por defecto del tablero («Solo cráter»), no algo que haga MIROVA.
 //
 // S33 bug fix — validar también pc.centroid_dist_km contra inner_radius del
 // volcán. Caso patológico: distance_class='summit' (final_hotspot Test1
@@ -1286,7 +1286,7 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
     // POR QUÉ (S190, H01): misma excepción que el camino del cúmulo; ver el comentario de abajo.
     return vfb > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : vfb;
   }
-  // Records modernos: si dist_class no es summit, MIROVA no reportaría → 0
+  // Records modernos: si dist_class no es summit, MIROVA no reportaría → 0 (⚠️ S191, F2-111: no es MIROVA, es la vista por defecto del tablero; MIROVA publica también las lejanas)
   // (a menos que el toggle "incluir lejanas" esté activo).
   if (r.distance_class && r.distance_class !== "summit" && !includeFar) return 0;
   // Validar pc realmente esté dentro del inner_radius del volcán
