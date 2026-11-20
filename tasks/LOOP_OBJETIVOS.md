@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-20 01:45 UTC (S191): cierre; PR #1062 (unión tanda 5); tanda 6 corriendo; traspaso en BLOQUE_ARRANQUE_S192
+- **Tanda 5 limpia** a las 01:23 UTC (0 rojos tras relanzar 27); 165 trozos bajados; unión en `D:\vrp-trabajo\worktrees\s191-tanda5`: 5 volcanes, 626 días, 0 huecos, todo de la vía; ensayo 35.285 nuevos, 0 tras el corte, los 18 aplicados con 0 nuevos. Números de `D:\vrp-trabajo\temporales\s191\tanda5_numeros.py`. **PR #1062** (`b4f64423f`), con la fila «aplicada» de la tanda 4. Verificador limpio Sonnet 5 de 5. Rareza: Lanin feb-2025, 64 de 66 detecciones >5 MW a 14 a 29,5 km (SOSPECHA de incendio).
+- Corregido un dato heredado: de los 26 rojos de la tanda 5 a las 15:20 UTC, 19 fueron «Install deps» y 7 de MochoChoshuenco descargas fallidas de LAADS en modo estricto (job 135520546869), no «todos Install deps».
+- **Tanda 6** despachada por la cadena a las 01:27 UTC (run 44653724540).
+- Sesiones paralelas: F4-101 y TIR perdida terminadas (informes en `D:\vrp-trabajo\temporales\s191\`); Codex frente 2 unificó F2-108 con F4-101 (`PROPUESTA_F2_PARA_NICOLAS.md` §1) y sigue; limpieza de disco con el inventario a medias.
+- Cierre por umbral de contexto. Traspaso: `tasks/BLOQUE_ARRANQUE_S192.md`.
+
 ### 2026-11-20 01:20 UTC (S191): N1 y D14 decididas (los 34 como preliminares), PR #1061; cuatro sesiones paralelas; S191 sacada de bajo S190
 - **Decisión de Nicolás** («Preliminares, rotulados», respuesta a «¿Cómo se muestran los 34 en el tablero?»): opción (b) de N1 y D14. Anotada en `tasks/DECISIONES_34_S187.md` (texto anterior conservado).
 - **PR #1061** (rama `s191-preliminares-34`, `9a88d7990`): la barra «Estado actual» cuenta a los 11 en sus niveles y a los 34 aparte; la tarjeta, el detalle y la fila de la tabla dicen «Preliminar · paridad no medida». Sólo presentación. Prueba nueva 4 rojas antes y 4 verdes después; las que leen el frontend dan 693 pasan y 2 fallas de la guardia G8 (línea de `isValidDetection`, 1757 a 1764, actualizada; 55 de 55 después). Verificador limpio Sonnet 5 de 5 (20.000 casos al azar sin diferencia en los 11). Navegador local: la barra da 0, 0, 1, 4 y 6 para los 11 y «1 preliminares con anomalía de 32». Espera «mergea #1061».
