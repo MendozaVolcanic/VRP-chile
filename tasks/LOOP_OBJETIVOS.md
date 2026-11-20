@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-20 18:00 UTC (S192): fondo nulo en main (#1065, v1.51); tanda 6 aplicada (#1066); tanda 7 corriendo; frente 5 de Codex cerrado
+- **#1065** (fondo nulo, opción a; Nicolás «Sí, opción (a)» y «mergea #1065 y #1066»): mergeado 17:50 UTC, ficha v1.51, tag A45 `pre-s192-fondo-nulo`. MODIS sin fondo bajo ningún alertado = escena no medida (`motivo_vacio` «fondo_no_estimado»); VIIRS con marca `alertados_sin_fondo`; `t_bg_k` sólo con alertados con fondo; rótulo en el tablero. Suite 4.224 pasan; mutaciones 6 de 6; verificador limpio sin defectos que rompan.
+- **Pendiente del fondo nulo:** reemplazar las pasadas MODIS ya guardadas (14 al 2026-11-20 en `origin/main` `434c21a37`: 6 de los 11 y 8 de la historia de los 34, más 1 de la tanda 6), recontando con la tanda 7 aplicada. Lista: `D:\vrp-trabajo\temporales\s192\plan\fondo_nulo_lista.py`.
+- **#1066** (unión tanda 6) mergeado 17:35 UTC y aplicado (run 44784790668, tag `pre-historia-34-tanda6`, commit `41cbd0b88`): 28 volcanes con historia.
+- **Trabajos fantasma de GitHub:** la cadena S191 se detuvo por 10 trabajos «queued» eternos de CorcovadoYanteles (la tanda estaba completa). Tanda 7 despachada por S192 15:55 UTC (run 44768057665) con `D:\vrp-trabajo\temporales\s192\tanda7\cadena_7_s192.sh`, rojos por trozo. Memoria `feedback_s192_trabajos_fantasma.md`.
+- **Frente 5 de Codex** cerrado por la sesión Codex (25 filas, nada de gravedad 4 o más; F5-105 de gravedad 3 y F5-101 de 2 en el tablero). Lanzado sobre 70 % de commit con autorización de S192 (máximo 77 %). Tarjeta propuesta para arreglar F5-105 y F5-101.
+
 ### 2026-11-20 15:30 UTC (S192): apertura; #1063 en main (v1.49), #1064 en CI (v1.50); §12.11 del plan; tanda 6 relanzando
 - Verificado al abrir: #1062 y #1061 los mergeó la sesión «s192» (local_841efdd9, abierta 01:46 UTC, inactiva desde 02:14) y aplicó la tanda 5 (run 44658784431, tag `pre-historia-34-tanda5`); ficha v1.48. CLAUDE.md de `loop/activo` igual al de main.
 - #1063 mergeado por S192 a las 14:59 UTC (head `1b9f18ece`, ya numerado v1.49 por la sesión Codex) con la orden de Nicolás en local_4d3dbc4c: «mergea #1063 y después #1064». #1064 rebasado a main, ficha v1.50 (`54e957c23`), merge automático si el CI queda verde (`D:\vrp-trabajo\temporales\s192\merge\merge_1064.log`).
