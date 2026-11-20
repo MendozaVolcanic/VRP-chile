@@ -100,7 +100,10 @@ PASO_V375_M = 375.0
 HALF_ROI1_V375_M = 10.5 * 750.0
 MEDIA_GRILLA_M = 25000.0   # regla GEO: centros en X0 - 25000 : paso : X0 + 25000
 RADIO_RECORTE_KM = 45.0    # como probe_n.grillar: sólo se interpolan los píxeles a menos de 45 km
-FLAG_MIN_DN = 65528        # DN >= 65528 son banderas en el L1B de VIIRS (UserGuide Aug 2021, Tabla C.1)
+# S192: ya no es el corte. Era «DN >= 65528 son banderas» (UserGuide Aug 2021, uint16); el lector usa el valid_max de
+# cada variable (pipeline/banderas_viirs_l1b.py), porque M13 de VJ202MOD v2.1 viene en uint32 y el corte fijo borraba
+# M13 sobre unos 512 K. Se conserva el nombre para los verificadores que lo leen (experiments/_s164_modis_codigo).
+FLAG_MIN_DN = 65528
 # Bit de saturación de <banda>_quality_flags del L1B de VIIRS: «bit value» 4 de la Tabla C.1 del UserGuide (transcrita
 # en docs/F28_SATURATION_INVESTIGATION.md), el mismo SAT_BIT_MASK = 0b100 que lee la guardia K
 # (process_viirs.py, process_viirs_mod.py). Sólo diagnóstico: la vía no enmascara el píxel saturado.
@@ -784,9 +787,12 @@ def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inne
 # ---------------------------------------------------------------------------------------------------- gránulo
 def leer_radiancia_l1b(ruta, bandas=("M13", "M15")):
     """M13 y M15 (o las bandas pedidas: I04 e I05 en VIIRS 375) en radiancia (W m-2 sr-1 um-1) del L1B, con las
-    banderas (DN >= 65528) en NaN; el código de MIROVA trabaja en radiancia, no en temperatura de brillo. En 375 es la
-    lectura del probe de V375-B/C (experiments/_s159/portes/probe_portes.py::leer_viirs)."""
+    banderas en NaN; el código de MIROVA trabaja en radiancia, no en temperatura de brillo. En 375 es la lectura del
+    probe de V375-B/C (experiments/_s159/portes/probe_portes.py::leer_viirs). S192: bandera es todo DN sobre el valid_max
+    de la variable (banderas_viirs_l1b.dn_invalido), no DN >= 65528: M13 de VJ202MOD v2.1 viene en uint32 y ese corte
+    borraba M13 sobre unos 512 K."""
     import h5py
+    from .banderas_viirs_l1b import dn_invalido
     out = {}
     with h5py.File(ruta, "r") as f:
         obs = f["observation_data"]
@@ -794,11 +800,12 @@ def leer_radiancia_l1b(ruta, bandas=("M13", "M15")):
             if b not in obs:
                 return None
             ds = obs[b]
-            dn = ds[:].astype(np.float64)
+            crudo = ds[:]
+            dn = crudo.astype(np.float64)
             sf = float(np.asarray(ds.attrs.get("scale_factor", 1.0)).ravel()[0])
             ao = float(np.asarray(ds.attrs.get("add_offset", 0.0)).ravel()[0])
             rad = dn * sf + ao
-            rad[dn >= FLAG_MIN_DN] = np.nan
+            rad[dn_invalido(ds, crudo)] = np.nan
             out[b] = rad
         # S190 (F1V-101), sólo diagnóstico: un I04 o M13 saturado llega con radiancia finita (el L1B la deja en el
         # techo y enciende el bit de saturación, no un DN de bandera), así que la VRP sale baja sin aviso. Se guarda
