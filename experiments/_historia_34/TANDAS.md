@@ -132,10 +132,28 @@ Números de `D:\vrp-trabajo\temporales\s192\tanda6\tanda6_numeros.py` (salida en
 | unión | 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. Calbuco 7.163 records, CorcovadoYanteles 7.393, Huequi 7.351, Michinmahuida 7.360, YateHornopiren 7.336 |
 | ensayo del aplicador | 36.603 nuevos (los cinco de arriba), 0 tras el corte; los 23 activos de las tandas 1 a 5 dan 0 nuevos y todos «ya estaban» |
 | se aplica | tras el merge del PR de esta unión, con tag `pre-historia-34-tanda6` |
+| aplicada | 2026-11-20 tras el merge de #1066 (17:35 UTC): run 44784790668 de `aplicar-reemplazo.yml` (tag `pre-historia-34-tanda6`), commit `41cbd0b88` en main |
 | fondo nulo | esta tanda se procesó con el código anterior a #1065 (fondo nulo, opción a): sus pasadas MODIS sin fondo entran publicadas y se cuentan junto con las demás antes del reemplazo que sigue a ese merge |
 
 Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda6/` (fuera del repo). Tanda 7 (Melimoyu, MacaCay, Mentolat,
 Hudson) despachada por S192 el 2026-11-20 15:55 UTC (run 44768057665).
+
+## Tanda 7 (Hudson, MacaCay, Melimoyu, Mentolat; 2025-02-15 a 2026-11-02)
+
+Números de `D:\vrp-trabajo\temporales\s193\tanda7\tanda7_numeros.py` (salida en `tanda7_numeros.txt`, al lado).
+
+| campo | valor |
+|---|---|
+| runs | 44768057665 (main en `ab28719d3`, despachado 2026-11-20 15:55 UTC por S192) y 44914342023 (main en `27ded66ee`, despachado 2026-11-21 14:31 UTC tras el merge de #1073) |
+| trozos | 132 de 132 con artifact: 129 del primer run y 3 del segundo. En el primero, el trozo 28 (2026-07-30 a 2026-08-18) de Hudson, MacaCay y Mentolat quedó rojo tras tres relanzamientos: el gránulo MODIS Terra del 2026-08-01 03:00 trae posición pero 81 escaneos sin radiancia, y la vía cortaba con «No points given» (por eso sus jobs vigentes dan 130 success, 2 failure y 1 sin conclusión). #1073 hizo que esa escena se guarde vacía con motivo «sin radiancia válida», y el segundo run repuso los tres trozos en verde. Ningún trozo usó un intento mayor que 1 |
+| runner | 67,0 h en el primer run (131 jobs `reproc` con fin, 30,7 min por trozo en promedio, máximo 44,8; pared 2026-11-20 15:56 a 2026-11-21 05:18 UTC) y 1,5 h en el segundo (3 jobs, 29,7 min en promedio; pared 2026-11-21 14:32 a 15:05 UTC) |
+| unión | 33 trozos y 626 días por volcán, 0 huecos, 0 records fuera de ventana, todas las marcas `:true`. Hudson 7.833 records, MacaCay 7.751, Melimoyu 7.567, Mentolat 7.709 |
+| ensayo del aplicador | 30.860 nuevos (los cuatro de arriba), 0 tras el corte; los 28 activos de las tandas 1 a 6 dan 0 nuevos y todos «ya estaban» |
+| se aplica | tras el merge del PR de esta unión, con tag `pre-historia-34-tanda7` |
+| código | el primer run corrió con el código anterior a #1065 (fondo nulo) y a #1070 (lector M13): sus pasadas MODIS sin fondo entran publicadas y las cubre el reemplazo de #1069. Los tres trozos del segundo run corrieron con #1065, #1070 y #1073 ya en main. El checkout de `reproc-historia-via.yml` usa el commit del despacho, así que cada run es homogéneo |
+
+Copia local: `D:/vrp-trabajo/temporales/historia_34/tanda7/` (fuera del repo). Con la tanda 7 los 32 volcanes activos
+de la RNVV fuera de los 11 tienen historia desde el 2025-02-15.
 
 ## Retiro de Putana y OlcaParuma (D1, opción 1a, 2026-11-17)
 
