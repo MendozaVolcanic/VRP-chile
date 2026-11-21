@@ -295,8 +295,13 @@ def latlon_de(grilla, fila, col):
 # ---------------------------------------------------------------------------------------------------- ROI
 def caja_roi(tipo="def", n=None, celda_crater=None, inner_km=None, lado_sensible=7, lado_anillo=21,
              paso_m=PASO_V750_M):
-    """BOX del .m: 0 fuera, 1 región conservadora, 2 región sensible (los nombres ROI1/ROI2 de los comentarios del
-    .m están al revés de la matriz: BOX == 2 es la cumbre sensible; memoria del código OSF, S158).
+    """BOX del .m: 0 resto de la grilla, 1 región conservadora, 2 región sensible (los nombres ROI1/ROI2 de los
+    comentarios del .m están al revés de la matriz: BOX == 2 es la cumbre sensible; memoria del código OSF, S158).
+
+    ⚠️ S193 (auditoría Codex ronda 2, F9-106, verificada): la zona 0 NO queda fuera de la búsqueda. El .m la busca con
+    los mismos umbrales conservadores que la zona 1 (`_pasada_contextual`, a0, l. 389-391 del .m); sólo el borde de la
+    grilla (NaN, l. 102-103) queda fuera. Un brazo que deje una zona en 0 la vuelve conservadora, no ciega. Texto
+    anterior: «BOX del .m: 0 fuera, 1 región conservadora, 2 región sensible».
 
     POR QUÉ es por volcán: el .m declara que la ROI se ajusta por volcán (l. 105-125), y en Cordón Caulle y
     Tupungatito el calor no está en el centro de la grilla (V750-C, V750-B). Tipos (los brazos de V750-B):
