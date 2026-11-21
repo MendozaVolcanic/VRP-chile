@@ -344,6 +344,20 @@ El revert apaga el flag pero no deshace los datos (V1-02, 207). Tras él:
 > encendido (F11-V201), que la guardia no puede reponer porque empieza el 2026-10-26. Por eso la reversión está
 > suspendida (marca S192 de la cabecera). Texto sellado conservado.
 
+> ⚠️ **S193 (A113, 2026-11-21; auditoría Codex ronda 2, F11-104, R7 AF-2910 y F11-V201, verificadas):** la frase del
+> punto 1 «El NRT re-escribe con K las 8 fechas de su ventana», y la misma premisa en la fila D7 («el NRT re-escribe
+> con K sólo 8 fechas hacia atrás»), son falsas en la práctica, como ya anticipaba la marca S175 de la cabecera. El
+> almacén sólo reemplaza un record guardado con su producto estándar o con `--overwrite` (`pipeline/store.py`), y en la
+> ventana de 8 días que terminaba el 2026-11-17, 642 de 689 records de la vía ya eran producto estándar (MODIS: 166 de
+> 191) y seguirían siendo de la vía tras un revert; sólo los 47 NRT pasarían a K al llegar su estándar
+> (`D:\codex-vrp\_salida\ronda2\f11_verificacion\instrumentos\i104_store_salida.txt`, fuera del repo). Lo que queda
+> de la vía tras un revert no es la ventana: son también los 14.484 records MODIS de la vía anteriores al encendido
+> (historia reemplazada el 2026-11-12; `D:\codex-vrp\_salida\ronda2\f11_verificacion\instrumentos\iv201_historia_salida.txt`,
+> fuera del repo). La regla de VIIRS (§4.7 de `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`)
+> lo dice bien: «los records de la vía se quedan como están hasta que llegue su producto estándar o se reprocesen». Y desde #1072 (2026-11-21) el tablero marca también el paso de la vía a K
+> (`frontend/cambio_detector.js`), así que el «no hay marca de fin» de la marca S192 de arriba describe el tablero
+> anterior a ese PR. Texto sellado conservado.
+
 1. **Datos (según D7).** El NRT re-escribe con K las 8 fechas de su ventana; lo observado antes queda con
    `via_codigo_mirova: true` en `data/mirova_equivalent/`. Dentro de los 7 días siguientes, en un PR aparte y con tag
    defensivo antes (A38): esos records se apartan a `data/_via_modis_residuales/` y se reponen con K para las mismas
