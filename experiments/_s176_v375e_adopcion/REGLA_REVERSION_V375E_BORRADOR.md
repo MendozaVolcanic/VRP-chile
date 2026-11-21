@@ -132,6 +132,13 @@ Por sensor, hasta que la guardia **tenga record** de 29 protegidas nocturnas de 
 > la guardia no puede reponer porque empieza el 2026-11-03, ni que el tablero no marca el paso de la vía a K
 > (F11-102). Por eso la reversión está suspendida (marca S192 de la cabecera). Texto sellado conservado.
 
+> ⚠️ **S193 (A113, 2026-11-21; auditoría Codex ronda 2, F11-102 y F11-V201, verificadas):** desde #1072 (2026-11-21) el
+> tablero marca también el paso de la vía a K (`frontend/cambio_detector.js`); lo de F11-102 en la marca S192 de arriba
+> describe el tablero anterior a ese PR. La historia sigue sin regla: un revert dejaría de la vía 28.627 records VIIRS
+> 375 y 29.936 VIIRS 750 anteriores al encendido (historia reemplazada el 2026-11-12;
+> `D:\codex-vrp\_salida\ronda2\f11_verificacion\instrumentos\iv201_historia_salida.txt`, fuera del repo). Lo que este
+> paso dice del NRT es correcto (F11-104): sólo el producto estándar o un reproceso reemplazan un record guardado.
+
 El revert apaga el flag pero no deshace los datos: los records de la vía se quedan como están hasta que llegue su producto estándar o se reprocesen. Dentro de los 7 días siguientes, en un PR aparte y con tag defensivo (A38), esos records se apartan a `data/_via_viirs_residuales/` y se reponen con K, o con los records de la guardia si el nulo de §4.4 (c) dio 0 diferencias (D7). Hasta entonces la serie del sensor mezcla dos detectores y así se dice en el issue. La guardia y su vigilancia siguen corriendo hasta que Nicolás decida apagarlas. La ficha SDA y las marcas A113 del PR revertido se reponen con una marca que diga que ese sensor volvió a K y desde cuándo.
 
 ## 5. Lista de los PR

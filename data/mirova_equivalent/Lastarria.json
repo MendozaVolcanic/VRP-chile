@@ -1,6 +1,6 @@
 {
   "volcano": "Lastarria",
-  "updated": "2026-11-21T10:19:13Z",
+  "updated": "2026-11-21T17:12:39Z",
   "records": [
     {
       "sensor": "MODIS_TERRA",
@@ -197433,14 +197433,15 @@
       "triggered_test1": false,
       "vrp_vent_mw": 0.0,
       "via_codigo_mirova": true,
-      "n_anomalous_pixels": 1,
+      "n_anomalous_pixels": 0,
       "diag_codigo_mirova": {
-        "motivo_vacio": null,
+        "motivo_vacio": "fondo_no_estimado",
         "n_abs": 0,
         "n_p1": 1,
         "n_p2": 0,
         "L_hot": 0.1650969013459009,
         "L_bk": 0.0,
+        "alertados_sin_fondo": 1,
         "roi": "def",
         "s1": {
           "pasada1": {
@@ -197479,36 +197480,19 @@
         "sunglint": 139.9,
         "celdas_sin_dato": 1244
       },
-      "vrp_mw": 3.12,
-      "t_max_k": 268.97,
-      "distance_class": "summit",
-      "anomaly_pixels": [
-        {
-          "lat": -25.16798,
-          "lon": -68.49708,
-          "dist_km": 1.0,
-          "bt_k": 268.97,
-          "fila": 25,
-          "col": 26
-        }
-      ],
-      "t_bg_k": 0.0,
-      "primary_cluster": {
-        "vrp_mw": 3.12,
-        "n_pixels": 1,
-        "centroid_lat": -25.16798,
-        "centroid_lon": -68.49708,
-        "centroid_dist_km": 1.0,
-        "single_pixel_mode": false,
-        "geo_class": "summit"
-      },
-      "hotspot_lat": -25.16798,
-      "hotspot_lon": -68.49708,
-      "hotspot_dist_km": 1.0,
-      "final_hotspot_lat": -25.16798,
-      "final_hotspot_lon": -68.49708,
-      "final_hotspot_dist_km": 1.0,
-      "final_hotspot_source": "codigo_mirova",
+      "vrp_mw": 0,
+      "t_max_k": null,
+      "distance_class": null,
+      "anomaly_pixels": [],
+      "t_bg_k": null,
+      "primary_cluster": null,
+      "hotspot_lat": null,
+      "hotspot_lon": null,
+      "hotspot_dist_km": null,
+      "final_hotspot_lat": null,
+      "final_hotspot_lon": null,
+      "final_hotspot_dist_km": null,
+      "final_hotspot_source": null,
       "sensor_zenith_deg": 65.25,
       "sensor_azimuth_deg": -104.15,
       "solar_zenith_deg": 136.24,
@@ -487158,6 +487142,7 @@
         "n_p2": 0,
         "L_hot": null,
         "L_bk": null,
+        "alertados_sin_fondo": null,
         "roi": "def",
         "s1": {
           "pasada1": {
@@ -487189,12 +487174,15 @@
             "c_eti": 0.000539,
             "u_nti": 0.003457,
             "u_eti": 0.003,
-            "margen": 0.179544
+            "margen": 0.179638
           }
         },
         "dayflag": 0,
         "sunglint": 150.29,
-        "celdas_sin_dato": 0
+        "celdas_sin_dato": 0,
+        "crater_sin_posicion": false,
+        "px_mir_invalido_crater": 0,
+        "px_saturados_crater": null
       },
       "vrp_mw": 0,
       "primary_cluster": null,
@@ -487213,13 +487201,13 @@
       "sensor_azimuth_deg": -102.76,
       "solar_zenith_deg": 123.71,
       "solar_azimuth_deg": -138.62,
-      "granule": "MOD021KM.A2026322.0155.061.2026322023326.NRT.hdf",
-      "product_version": "nrt",
+      "granule": "MOD021KM.A2026322.0155.061.2026323015839.hdf",
+      "product_version": "standard",
       "datetime_utc": "2026-11-18 01:55",
-      "processed_utc": "2026-11-18T04:27:56Z",
+      "processed_utc": "2026-11-21T17:11:39Z",
       "regimen": {
         "perfil": "mirova_equivalent",
-        "codigo_sha": "740c2fa87947a19ac074a252f7f1f9cf920e718c",
+        "codigo_sha": "bbb56954fef66d306b1616b8f5a27d4bae6a4d99",
         "origen": "actions"
       },
       "first_processed_utc": "2026-11-18T04:27:56Z"
@@ -487561,11 +487549,12 @@
         "n_p2": 0,
         "L_hot": null,
         "L_bk": null,
+        "alertados_sin_fondo": null,
         "roi": "def",
         "s1": {
           "pasada1": {
-            "sd_nti": 0.000557,
-            "sd_eti": 0.000318,
+            "sd_nti": 0.000558,
+            "sd_eti": 0.000316,
             "mu_nti": 5e-06,
             "mu_eti": 0.0,
             "u_nti1": 0.02,
@@ -487574,8 +487563,8 @@
             "u_eti2": 0.003
           },
           "pasada2": {
-            "sd_nti": 0.000557,
-            "sd_eti": 0.000318,
+            "sd_nti": 0.000558,
+            "sd_eti": 0.000316,
             "mu_nti": 5e-06,
             "mu_eti": 0.0,
             "u_nti1": 0.02,
@@ -487588,16 +487577,19 @@
             "zona": 2,
             "fila": 27,
             "col": 27,
-            "c_nti": 0.001149,
-            "c_eti": 0.001023,
+            "c_nti": 0.00114,
+            "c_eti": 0.00103,
             "u_nti": 0.003,
             "u_eti": 0.003,
-            "margen": 0.341059
+            "margen": 0.343441
           }
         },
         "dayflag": 0,
         "sunglint": 147.23,
-        "celdas_sin_dato": 0
+        "celdas_sin_dato": 0,
+        "crater_sin_posicion": false,
+        "px_mir_invalido_crater": 0,
+        "px_saturados_crater": null
       },
       "vrp_mw": 0,
       "primary_cluster": null,
@@ -487616,13 +487608,13 @@
       "sensor_azimuth_deg": 101.1,
       "solar_zenith_deg": 112.76,
       "solar_azimuth_deg": 126.31,
-      "granule": "MYD021KM.A2026322.0745.061.2026322093453.NRT.hdf",
-      "product_version": "nrt",
+      "granule": "MYD021KM.A2026322.0745.061.2026323015832.hdf",
+      "product_version": "standard",
       "datetime_utc": "2026-11-18 07:45",
-      "processed_utc": "2026-11-18T10:41:58Z",
+      "processed_utc": "2026-11-21T17:11:41Z",
       "regimen": {
         "perfil": "mirova_equivalent",
-        "codigo_sha": "abd7b0205b775483b1cff48a51c498f5abe1ff95",
+        "codigo_sha": "bbb56954fef66d306b1616b8f5a27d4bae6a4d99",
         "origen": "actions"
       },
       "first_processed_utc": "2026-11-18T10:41:58Z"
@@ -487640,6 +487632,7 @@
         "n_p2": 0,
         "L_hot": null,
         "L_bk": null,
+        "alertados_sin_fondo": null,
         "roi": "def",
         "s1": {
           "pasada1": {
@@ -487671,12 +487664,15 @@
             "c_eti": 0.00117,
             "u_nti": 0.003494,
             "u_eti": 0.003,
-            "margen": 0.362013
+            "margen": 0.361972
           }
         },
         "dayflag": 0,
         "sunglint": 74.48,
-        "celdas_sin_dato": 0
+        "celdas_sin_dato": 0,
+        "crater_sin_posicion": false,
+        "px_mir_invalido_crater": 0,
+        "px_saturados_crater": null
       },
       "vrp_mw": 0,
       "primary_cluster": null,
@@ -487695,13 +487691,13 @@
       "sensor_azimuth_deg": 84.03,
       "solar_zenith_deg": 113.76,
       "solar_azimuth_deg": -127.46,
-      "granule": "MOD021KM.A2026323.0055.061.2026323013605.NRT.hdf",
-      "product_version": "nrt",
+      "granule": "MOD021KM.A2026323.0055.061.2026323131901.hdf",
+      "product_version": "standard",
       "datetime_utc": "2026-11-19 00:55",
-      "processed_utc": "2026-11-19T01:50:51Z",
+      "processed_utc": "2026-11-21T17:12:14Z",
       "regimen": {
         "perfil": "mirova_equivalent",
-        "codigo_sha": "eebb9dfd36645db710b2235dc4934aa9e6934e33",
+        "codigo_sha": "bbb56954fef66d306b1616b8f5a27d4bae6a4d99",
         "origen": "actions"
       },
       "first_processed_utc": "2026-11-19T01:50:51Z"
@@ -487719,6 +487715,7 @@
         "n_p2": 0,
         "L_hot": 0.5133257040662694,
         "L_bk": 0.1646224959258492,
+        "alertados_sin_fondo": 0,
         "roi": "def",
         "s1": {
           "pasada1": {
@@ -487755,7 +487752,10 @@
         },
         "dayflag": 0,
         "sunglint": 133.31,
-        "celdas_sin_dato": 0
+        "celdas_sin_dato": 0,
+        "crater_sin_posicion": false,
+        "px_mir_invalido_crater": 3,
+        "px_saturados_crater": 0
       },
       "vrp_mw": 0.883,
       "t_max_k": 292.87,
@@ -487799,13 +487799,13 @@
       "sensor_azimuth_deg": 104.11,
       "solar_zenith_deg": 134.05,
       "solar_azimuth_deg": 165.18,
-      "granule": "VJ202IMG_NRT.A2026323.0500.021.2026323065917.nc",
-      "product_version": "nrt",
+      "granule": "VJ202IMG.A2026323.0500.021.2026323102927.nc",
+      "product_version": "standard",
       "datetime_utc": "2026-11-19 05:00",
-      "processed_utc": "2026-11-19T07:21:03Z",
+      "processed_utc": "2026-11-21T17:12:30Z",
       "regimen": {
         "perfil": "mirova_equivalent",
-        "codigo_sha": "08c70c13cc4f9e54af8ffc054e5e99385a89410b",
+        "codigo_sha": "bbb56954fef66d306b1616b8f5a27d4bae6a4d99",
         "origen": "actions"
       },
       "first_processed_utc": "2026-11-19T07:21:03Z"
@@ -487823,6 +487823,7 @@
         "n_p2": 0,
         "L_hot": null,
         "L_bk": null,
+        "alertados_sin_fondo": null,
         "roi": "def",
         "s1": {
           "pasada1": {
@@ -487859,7 +487860,10 @@
         },
         "dayflag": 0,
         "sunglint": 133.3,
-        "celdas_sin_dato": 0
+        "celdas_sin_dato": 0,
+        "crater_sin_posicion": false,
+        "px_mir_invalido_crater": 4,
+        "px_saturados_crater": 0
       },
       "vrp_mw": 0,
       "primary_cluster": null,
@@ -487878,13 +487882,13 @@
       "sensor_azimuth_deg": 104.1,
       "solar_zenith_deg": 134.05,
       "solar_azimuth_deg": 165.18,
-      "granule": "VJ202MOD_NRT.A2026323.0500.021.2026323065917.nc",
-      "product_version": "nrt",
+      "granule": "VJ202MOD.A2026323.0500.021.2026323102927.nc",
+      "product_version": "standard",
       "datetime_utc": "2026-11-19 05:00",
-      "processed_utc": "2026-11-19T07:21:05Z",
+      "processed_utc": "2026-11-21T17:12:39Z",
       "regimen": {
         "perfil": "mirova_equivalent",
-        "codigo_sha": "08c70c13cc4f9e54af8ffc054e5e99385a89410b",
+        "codigo_sha": "bbb56954fef66d306b1616b8f5a27d4bae6a4d99",
         "origen": "actions"
       },
       "first_processed_utc": "2026-11-19T07:21:05Z"
@@ -487902,6 +487906,7 @@
         "n_p2": 0,
         "L_hot": 0.20297538799872528,
         "L_bk": 0.15408608364745277,
+        "alertados_sin_fondo": 0,
         "roi": "def",
         "s1": {
           "pasada1": {
@@ -487938,7 +487943,10 @@
         },
         "dayflag": 0,
         "sunglint": 113.94,
-        "celdas_sin_dato": 0
+        "celdas_sin_dato": 0,
+        "crater_sin_posicion": false,
+        "px_mir_invalido_crater": 0,
+        "px_saturados_crater": 0
       },
       "vrp_mw": 0.124,
       "t_max_k": 269.96,
@@ -487982,13 +487990,13 @@
       "sensor_azimuth_deg": -81.3,
       "solar_zenith_deg": 128.92,
       "solar_azimuth_deg": 148.51,
-      "granule": "VJ102IMG_NRT.A2026323.0600.021.2026323082429.nc",
-      "product_version": "nrt",
+      "granule": "VJ102IMG.A2026323.0600.021.2026323124817.nc",
+      "product_version": "standard",
       "datetime_utc": "2026-11-19 06:00",
-      "processed_utc": "2026-11-19T09:19:57Z",
+      "processed_utc": "2026-11-21T17:12:23Z",
       "regimen": {
         "perfil": "mirova_equivalent",
-        "codigo_sha": "c5a9c858d9a17aed89590940e2daa22669cb1ae4",
+        "codigo_sha": "bbb56954fef66d306b1616b8f5a27d4bae6a4d99",
         "origen": "actions"
       },
       "first_processed_utc": "2026-11-19T09:19:57Z"
@@ -488006,6 +488014,7 @@
         "n_p2": 0,
         "L_hot": null,
         "L_bk": null,
+        "alertados_sin_fondo": null,
         "roi": "def",
         "s1": {
           "pasada1": {
@@ -488042,7 +488051,10 @@
         },
         "dayflag": 0,
         "sunglint": 113.94,
-        "celdas_sin_dato": 0
+        "celdas_sin_dato": 0,
+        "crater_sin_posicion": false,
+        "px_mir_invalido_crater": 0,
+        "px_saturados_crater": 0
       },
       "vrp_mw": 0,
       "primary_cluster": null,
@@ -488061,13 +488073,13 @@
       "sensor_azimuth_deg": -81.34,
       "solar_zenith_deg": 128.92,
       "solar_azimuth_deg": 148.51,
-      "granule": "VJ102MOD_NRT.A2026323.0600.021.2026323082429.nc",
-      "product_version": "nrt",
+      "granule": "VJ102MOD.A2026323.0600.021.2026323124817.nc",
+      "product_version": "standard",
       "datetime_utc": "2026-11-19 06:00",
-      "processed_utc": "2026-11-19T09:20:13Z",
+      "processed_utc": "2026-11-21T17:12:37Z",
       "regimen": {
         "perfil": "mirova_equivalent",
-        "codigo_sha": "c5a9c858d9a17aed89590940e2daa22669cb1ae4",
+        "codigo_sha": "bbb56954fef66d306b1616b8f5a27d4bae6a4d99",
         "origen": "actions"
       },
       "first_processed_utc": "2026-11-19T09:20:13Z"
