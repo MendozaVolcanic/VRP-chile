@@ -104,8 +104,8 @@
   {
    "id": "A14",
    "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
-   "viejo": "def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES):",
-   "nuevo": "def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES_VIIRS):",
+   "viejo": "def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES, descartes_borde=frozenset()):",
+   "nuevo": "def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES_VIIRS, descartes_borde=frozenset()):",
    "que": "I4 sin MODIS"
   },
   {
@@ -218,7 +218,7 @@
    "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
    "viejo": "if sin_v and all(_descartada(v[0], s,",
    "nuevo": "if all(_descartada(v[0], s,",
-   "que": "desviacion 1: dia sin pasadas sin record (lista vacia) se dispensa"
+   "que": "desviacion 1: dia sin pasadas sin record (lista vacia) se dispensa (casi equivalente: solo vive si una pasada diurna se parea con un record de otra fecha)"
   },
   {
    "id": "C-CAIDA",

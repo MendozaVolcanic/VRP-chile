@@ -5,6 +5,21 @@ R-W7 en la lectura 2 que eligió Nicolás (`PREGUNTA_R_W7.md`). Corridas desde e
 (`51aafdf14`). Revisado por un verificador de contexto limpio con esfuerzo alto, que lo reprodujo byte a byte
 (`verificador/INFORME.md`). **No cambia nada en producción**: encender el día es un PR aparte que espera a Nicolás.
 
+## Decisión de Nicolás (2026-11-21) y veredicto con la desviación declarada
+
+Nicolás aceptó D1, D2 y D3. Lo dijo así, textual, el 2026-11-21 en la sesión S193, después de ver este informe con la
+recomendación «D1: dejar pasar el caso de Isluga; D2: encender el día sólo en MODIS»: «continua con todo lo que
+recomiendes».
+
+- **D1.** La desviación quedó declarada en `ADENDA_VIA.md` §8, mecánica y leída del registro de cada job. Con ella, el
+  evaluador dispensa exactamente un caso: `Isluga|MODIS|2026-07-22`. El veredicto sale **DECIDE NICOLÁS CON M4 en las
+  dos opciones** (`resultado/veredicto_desviacion1_salida.txt`). Fuera de las líneas de la desviación, esa salida es
+  idéntica a `resultado/informativo_sin_i4b_salida.txt`.
+- **D2, con M4 a la vista.** Se enciende el día **sólo en MODIS** (`enable_daytime_modis`). VIIRS queda apagado.
+  Queda pendiente mirar en imagen las 5 publicaciones de 1 MW o más fuera de Chillán y las 19 protegidas de VIIRS 375
+  que no se recuperan. Antes de encender: el PR del frontend con pasadas diurnas y el PR de perfil con A45.
+- **D3.** Nota sobre ceses de plataforma en `ADENDA_VIA.md` §9.
+
 ## En una pantalla
 
 1. **Con la regla sellada: INVÁLIDO POR INSTRUMENTO en las dos opciones** (`enable_daytime_modis` y
