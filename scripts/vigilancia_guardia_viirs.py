@@ -232,7 +232,9 @@ def imprimir(out):
     e = vg.ETIQUETAS[out["sensor"]]
     for p in out.get("reversion", []):
         print(f"  REVERSIÓN CANDIDATA: {p['volcano']} {e} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la guardia (K) "
-              "publica y producción (la vía) calla. Confirmar en la cabecera de la imagen de MIROVA antes de revertir")
+              "publica y producción (la vía) calla. Confirmar en la cabecera de la imagen de MIROVA y llevarla a "
+              "Nicolás hoy: la reversión pre-autorizada (REGLA_REVERSION_V375E §4.3) está SUSPENDIDA desde el "
+              "2026-11-21 (marca S192 de la regla)")
     for p in out.get("fuera_de_plazo", []):
         print(f"  CANDIDATA FUERA DE PLAZO: {p['volcano']} {e} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: sin "
               "pre-autorización, decide Nicolás")

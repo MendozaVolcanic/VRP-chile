@@ -15,6 +15,8 @@ Qué mide (reutiliza por import scripts/vigilancia_sombra.py, que vigila K y NO 
 - REVERSIÓN (pre-autorizada): una alerta protegida A de MODIS (alerta del scraper de 1 MW o más, regla SN de D-9)
   nocturna, posterior al encendido, que la guardia publica y producción calla. El script NO revierte: lo dice. La regla
   pide confirmarla en la cabecera de la imagen de MIROVA y que la sesión que la detecte haga `git revert` del PR B.
+  ⚠️ S192 (A113): esa reversión está SUSPENDIDA desde el 2026-11-21 por decisión de Nicolás (marca S192 de la
+  regla): la candidata se lleva a Nicolás y no se revierte sola. El veredicto REVERSION_CANDIDATA no cambia.
 - INVESTIGAR (sin reversión): (i) alertas Muy Bajo (sobre 0,05 MW y bajo 1 MW) que MIROVA publica, la guardia publica
   y producción calla, más de 2 en el plazo; (ii) publicación de producción en negativos limpios donde la guardia no
   publica, más de 3 en el plazo; las dos cotas salen de los discordantes del A/B de MOD-D (`brazos.V.p2.discordantes`
@@ -624,8 +626,9 @@ def imprimir(out):
         print("AVISO (informativo):", a)
     for p in out.get("reversion", []):
         print(f"  REVERSIÓN CANDIDATA: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la "
-              "guardia (K) publica y producción (la vía) calla. Confirmar en la cabecera de la imagen de MIROVA antes de "
-              "revertir (git revert del PR B, REGLA_REVERSION_MODD §4)")
+              "guardia (K) publica y producción (la vía) calla. Confirmar en la cabecera de la imagen de MIROVA y "
+              "llevarla a Nicolás hoy: la reversión pre-autorizada (git revert del PR B, REGLA_REVERSION_MODD §4.3) "
+              "está SUSPENDIDA desde el 2026-11-21 (marca S192 de la regla)")
     for p in out.get("fuera_de_plazo", []):
         print(f"  CANDIDATA FUERA DE PLAZO: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: "
               "sin pre-autorización, decide Nicolás")

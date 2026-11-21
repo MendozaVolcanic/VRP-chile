@@ -4,6 +4,23 @@
 > preguntas antes de proponer o implementar cualquier cosa que toque el
 > pipeline algorítmico.
 
+> ⚠️ **S192 (A113, 2026-11-21): la reversión pre-autorizada de los tres sensores está SUSPENDIDA.** Decisión de
+> Nicolás del 2026-11-21 en la sesión coordinadora S192, en respuesta a «¿Suspendo la reversión pre-autorizada
+> hasta que el tablero marque el paso de la vía a K?»: «Sí, suspéndela». Viene del hallazgo F11-102 de la auditoría
+> Codex ronda 2, frente 11 (gravedad 4 condicional, verificador limpio,
+> `D:\codex-vrp\_salida\ronda2\f11_verificacion\VEREDICTO.md`, fuera del repo). Por qué, como geólogo: desde el
+> reemplazo del 2026-11-12 toda la historia publicada de los 11 Tier A es de la vía, y el tablero sólo marca el paso
+> de K a la vía (`primeraVia` de `frontend/cambio_detector.js`); con 0 records K en producción hoy no dibuja ninguna
+> marca. Si se revirtiera un sensor, su serie pasaría de la vía a K sin marca y la potencia caería a cerca de la
+> mitad sin aviso: el operador leería un cambio de método como una baja de actividad del volcán. Además, el revert no
+> toca la historia de la vía anterior al encendido (F11-V201) y el NRT ordinario no repone con K los records que ya
+> están en producto estándar (F11-104). La suspensión rige hasta que (1) el tablero marque el paso de la vía a K y
+> (2) una regla aprobada por Nicolás diga qué pasa con la historia ya publicada. Mientras tanto, una
+> `REVERSION_CANDIDATA` de las guardias se confirma en la cabecera de la imagen de MIROVA y se lleva a Nicolás el
+> mismo día; nadie revierte sin su decisión. Las guardias, sus vigilancias, sus issues y el plazo de 29 protegidas o
+> 120 días siguen corriendo igual. Lo que este documento diga de revertir «el mismo día», «sin esperar a nadie» o
+> «pre-autorizada» queda en suspenso y se conserva por historia.
+
 > ⚠️ **S186 (A113, 2026-11-15): los tres sensores de producción corren la vía «código MIROVA»; K queda sólo como
 > guardia.** MODIS desde la primera corrida del NRT del 2026-11-02 (marca S172), VIIRS 375 desde el merge de #974
 > (2026-11-11 13:09:21 UTC) y VIIRS 750 desde el merge de #983 (2026-11-11 13:22:13 UTC); las dos marcas S177 que siguen
