@@ -50,7 +50,8 @@ GOLDEN = Path(__file__).resolve().parent / "datos_s190_dato_crater" / "sano_ante
 # es la C13 del cráter, no la «def» de la grilla que decía el record dorado. Único cambio declarado de un campo existente:
 # la prueba exige el valor viejo en el dorado y el nuevo en el record, y todo lo demás idéntico.
 CAMBIOS_A_PROPOSITO = {"VIIRS375": {"roi": ("def", "c13_crater")}}
-CLAVES_NUEVAS = ("crater_sin_posicion", "px_mir_invalido_crater", "px_saturados_crater", "alertados_sin_fondo")
+CLAVES_NUEVAS = ("crater_sin_posicion", "px_mir_invalido_crater", "px_saturados_crater", "alertados_sin_fondo",
+                 "px_bowtie_crater", "px_mir_hueco_crater", "px_tir_hueco_crater")   # S193: separación bow-tie
 
 
 def _granulo(familia, semilla=190):

@@ -20,7 +20,9 @@
 #                 (MODIS, Coppola 2016a Ec. 7).
 #                 Diagnóstico sin efecto en la detección (S190): dato faltante sobre el cráter medido en los
 #                 píxeles del gránulo ANTES de interpolar (crater_sin_posicion, px_mir_invalido_crater,
-#                 px_saturados_crater).
+#                 px_saturados_crater). S193 (bow-tie de VIIRS): px_bowtie_crater separa el relleno que VIIRS
+#                 descarta a bordo en el borde del barrido (bit 256 de quality_flags; ese suelo lo midió el barrido
+#                 contiguo) del dato perdido, y px_mir_hueco_crater y px_tir_hueco_crater cuentan el hueco por banda.
 #                 Fondo no estimable (S192, F4-101; decisión de Nicolás del 2026-11-20): si ningún alertado tiene fondo,
 #                 en MODIS la escena es no medida (motivo_vacio «fondo_no_estimado», 0 MW); en VIIRS se publica como el
 #                 .m y el record cuenta alertados_sin_fondo. t_bg_k promedia sólo los alertados con fondo.
@@ -118,6 +120,11 @@ FLAG_MIN_DN = 65528
 # en docs/F28_SATURATION_INVESTIGATION.md), el mismo SAT_BIT_MASK = 0b100 que lee la guardia K
 # (process_viirs.py, process_viirs_mod.py). Sólo diagnóstico: la vía no enmascara el píxel saturado.
 BIT_SATURACION_VIIRS = 0b100
+# Bit «Bowtie_Deleted» de <banda>_quality_flags (Tabla C.1 del UserGuide VIIRS L1B Aug 2021: bit value 256). Se lee el
+# bit y no el DN de bandera porque M13 no lo codifica como 65533: en VJ202MOD_NRT v2.1 los píxeles bow-tie de M13 traen
+# DN 327678 (probe S192, run 44818788733), mientras I04, I05 y M15 traen 65533 como dice el UserGuide (págs. 21 y 23).
+# Sólo diagnóstico (S193): la radiancia del píxel bow-tie sigue en NaN, como toda bandera.
+BIT_BOWTIE_VIIRS = 0b100000000
 # Radio, en celdas de la grilla del sensor, dentro del cual un píxel perdido cuenta como dato faltante del cráter
 # (plan F1M-G3 del 2026-11-19): 2 km en MODIS, 1,5 km en VIIRS 750, 0,75 km en VIIRS 375. Es una decisión de
 # diagnóstico, no un valor de MIROVA: cubre el píxel del cráter y sus vecinos inmediatos con cualquier desorden
@@ -845,7 +852,20 @@ def leer_radiancia_l1b(ruta, bandas=("M13", "M15")):
         qf = obs.get(f"{bandas[0]}_quality_flags")
         if qf is not None:
             try:
-                out["saturado_mir"] = (qf[:] & BIT_SATURACION_VIIRS) != 0
+                q = qf[:]
+                out["saturado_mir"] = (q & BIT_SATURACION_VIIRS) != 0
+                out["bowtie_mir"] = (q & BIT_BOWTIE_VIIRS) != 0
+            except TypeError:
+                pass
+        # POR QUÉ (S192, adoptado en S193; sólo diagnóstico): el relleno bow-tie no es dato perdido. Lejos del nadir los
+        # barridos vecinos de VIIRS se solapan y el satélite descarta a bordo los detectores del borde de cada barrido,
+        # cuyo suelo ya midió el barrido contiguo. La radiancia no cambia (sigue en NaN, como toda bandera); la máscara
+        # sólo deja que dato_faltante_crater no los cuente como hueco. Sin quality_flags no hay clave y la separación
+        # queda sin dato.
+        qt = obs.get(f"{bandas[1]}_quality_flags")
+        if qt is not None:
+            try:
+                out["bowtie_tir"] = (qt[:] & BIT_BOWTIE_VIIRS) != 0
             except TypeError:
                 pass
     return out
@@ -899,7 +919,15 @@ def dato_faltante_crater(rad, lat, lon, b_mir, b_tir, vent_lat, vent_lon, paso_m
       que haya una sola copia, A102): el píxel con posición más cercano al cráter está en el borde del gránulo o a
       alguno de sus 8 vecinos le falta lat o lon.
     - px_mir_invalido_crater: píxeles con posición a menos de CELDAS_DATO_CRATER celdas de la grilla del cráter cuya
-      MIR o TIR no es finita (sin TIR el píxel tampoco tiene NTI).
+      MIR o TIR no es finita (sin TIR el píxel tampoco tiene NTI). Cuenta también el relleno bow-tie; se deja igual para
+      que la serie desde #1060 siga comparable.
+    - px_bowtie_crater (S192, adoptado en S193): de los píxeles cercanos, los que traen el bit Bowtie_Deleted (256) en
+      quality_flags de la MIR o de la TIR. No es dato perdido: el suelo lo midió el barrido contiguo, y la interpolación
+      usa ese píxel. None si el lector no trae quality_flags (siempre en MODIS, que no descarta a bordo).
+    - px_mir_hueco_crater y px_tir_hueco_crater (S192, adoptado en S193): píxeles cercanos con la MIR (o la TIR) no
+      finita por una causa que NO es bow-tie (Missing_EV, Cal_Fail; en MODIS la doble saturación o el relleno).
+      Separados porque perder la MIR esconde el foco y perder sólo la TIR puede destapar parte de él (S191,
+      tir_perdida). Son lo que debe leer el paso B, no el total.
     - px_saturados_crater: lo mismo con el bit de saturación de quality_flags de la banda MIR (VIIRS). None si el
       lector no lo trae: siempre en MODIS, donde la saturación es un DN que el lector ya deja en NaN (B22 cae a B21, y si
       las dos saturan cuenta en px_mir_invalido_crater), y en un L1B sin quality_flags. None es «no medido», no cero.
@@ -915,11 +943,23 @@ def dato_faltante_crater(rad, lat, lon, b_mir, b_tir, vent_lat, vent_lon, paso_m
     lon = np.asarray(lon, float)[v]
     cerca = _haversine(lat, lon, vent_lat, vent_lon) < CELDAS_DATO_CRATER * float(paso_m) / 1000.0
     cerca &= np.isfinite(lat) & np.isfinite(lon)
-    invalido = ~(np.isfinite(np.asarray(rad[b_mir], float)[v]) & np.isfinite(np.asarray(rad[b_tir], float)[v]))
+    mir_ok = np.isfinite(np.asarray(rad[b_mir], float)[v])
+    tir_ok = np.isfinite(np.asarray(rad[b_tir], float)[v])
+    invalido = ~(mir_ok & tir_ok)
     sat = rad.get("saturado_mir")
+    # POR QUÉ (S192, adoptado en S193): el 2026-11-20 los 105 píxeles que este marcador contó en 27 pasadas NOAA-21 de
+    # cenit alto (54,7° a 67,0°) eran todos relleno bow-tie (bit 256 en MIR y TIR, probe S192, run 44818788733), no
+    # dato perdido. Se separan del hueco, y el hueco de la MIR del de la TIR. Sin máscara (MODIS, que no descarta a
+    # bordo, o un L1B sin quality_flags) nada se descuenta y px_bowtie_crater queda None (no medido, no cero).
+    bt_m, bt_t = rad.get("bowtie_mir"), rad.get("bowtie_tir")
+    btm = np.zeros(mir_ok.shape, bool) if bt_m is None else np.asarray(bt_m, bool)[v]
+    btt = np.zeros(tir_ok.shape, bool) if bt_t is None else np.asarray(bt_t, bool)[v]
     return {"crater_sin_posicion": not crater_cubierto(lat, lon, vent_lat, vent_lon),
             "px_mir_invalido_crater": int((cerca & invalido).sum()),
-            "px_saturados_crater": None if sat is None else int((cerca & np.asarray(sat, bool)[v]).sum())}
+            "px_saturados_crater": None if sat is None else int((cerca & np.asarray(sat, bool)[v]).sum()),
+            "px_bowtie_crater": None if bt_m is None and bt_t is None else int((cerca & (btm | btt)).sum()),
+            "px_mir_hueco_crater": int((cerca & ~mir_ok & ~btm).sum()),
+            "px_tir_hueco_crater": int((cerca & ~tir_ok & ~btt).sum())}
 
 
 def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_lon, inner_km, sensor,

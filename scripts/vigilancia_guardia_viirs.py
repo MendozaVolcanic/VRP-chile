@@ -243,6 +243,10 @@ def imprimir(out):
     for p in out.get("protegidas_calladas_por_k_de_produccion", []):
         print(f"  CALLADA POR K DE PRODUCCIÓN: {p['volcano']} {e} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW "
               f"({p.get('prod_caida_k') or 'K sin marca'}): investigar; no es candidata a reversión")
+    for p in out.get("protegidas_sin_publicar_sin_aviso", []):   # S193, F11-101 y F9-101: aviso, sin reversión
+        print(f"  PROTEGIDA SIN PUBLICAR (aviso S193, sin reversión): {p['volcano']} {e} {p['fecha_utc']} UTC, MIROVA "
+              f"{p['vrp_mirova_mw']} MW: producción no la publica y la guardia {vg.estado_guardia(p)}. Confirmar en la "
+              "imagen de MIROVA y llevarla a Nicolás")
     for p in out.get("protegidas_sin_record_produccion", []):
         print(f"  SIN RECORD DE PRODUCCIÓN: {p['volcano']} {e} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: "
               "la guardia (K) publica y producción no tiene record de la pasada: investigar")
@@ -286,6 +290,7 @@ def main(argv=None):
              "encendido_utc": out.get("encendido_utc"),
              "n_reversion": len(out.get("reversion", [])), "n_fuera_de_plazo": len(out.get("fuera_de_plazo", [])),
              "n_calladas_por_k": len(out.get("protegidas_calladas_por_k_de_produccion", [])),
+             "n_protegidas_sin_publicar_sin_aviso": len(out.get("protegidas_sin_publicar_sin_aviso", [])),
              "n_caidas_a_k": len(out.get("caidas_a_k", [])),
              "protegidas_vistas_en_guardia": (out.get("duracion") or {}).get("protegidas_vistas_en_guardia"),
              "muy_bajo_k": (out.get("muy_bajo") or {}).get("k"),
