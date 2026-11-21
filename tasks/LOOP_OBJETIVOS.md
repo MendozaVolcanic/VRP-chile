@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-21 22:30 UTC (S193): 12 PR en main (v1.57 a v1.66); historia de los 34 completa; fondo nulo cerrado; Codex 9 a 12 resueltos
+- **Tanda 7** unida con dos runs (44768057665 y 44914342023, trozo 28 repuesto tras #1073), #1080, aplicada (run 44938602533): los 32 activos con historia desde 2025-02-15.
+- **#1069** aplicado (run 44946628014): 15 MODIS sin fondo a escena no medida; recuento en main 0. Sitio republicado y comprobado.
+- **Codex 9 a 12:** #1076 (documentos), #1081 (vigilancias F11-101, F9-101, F11-V301, F11-106), #1082 (F9-106 docstring A45, criterio nocturno F10-V301), #1083 (variante de «radiante» medida) y #1085 («radiante» se mantiene; Chaitén 2026-11-19 juzgada). #1077 (bow-tie) y #1078 (F2-V303, F3-107), A45. #1075 (lagos, MEJ-8) y #1079 (mapas con agua).
+- **Nicolás:** «acepto los 4» (S192), «continua con todo», «no necesitas pedirme permiso para mergear, si es lo que recomiendas puedes hacerlo tu mismo» (nueva regla del loop), «Sí, las dos» (radiante y Chaitén).
+- **En curso al cerrar:** A/B diurno (PR #1084 y los dos PR para encender el día en MODIS), laboratorio paso 1, tablero F5 (espera a Nicolás), Codex Cierre I (espera memoria). Traspaso: `tasks/BLOQUE_ARRANQUE_S194.md`.
+
 ### 2026-11-20 18:00 UTC (S192): fondo nulo en main (#1065, v1.51); tanda 6 aplicada (#1066); tanda 7 corriendo; frente 5 de Codex cerrado
 - **#1065** (fondo nulo, opción a; Nicolás «Sí, opción (a)» y «mergea #1065 y #1066»): mergeado 17:50 UTC, ficha v1.51, tag A45 `pre-s192-fondo-nulo`. MODIS sin fondo bajo ningún alertado = escena no medida (`motivo_vacio` «fondo_no_estimado»); VIIRS con marca `alertados_sin_fondo`; `t_bg_k` sólo con alertados con fondo; rótulo en el tablero. Suite 4.224 pasan; mutaciones 6 de 6; verificador limpio sin defectos que rompan.
 - **Pendiente del fondo nulo:** reemplazar las pasadas MODIS ya guardadas (14 al 2026-11-20 en `origin/main` `434c21a37`: 6 de los 11 y 8 de la historia de los 34, más 1 de la tanda 6), recontando con la tanda 7 aplicada. Lista: `D:\vrp-trabajo\temporales\s192\plan\fondo_nulo_lista.py`.
