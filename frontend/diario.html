@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
-<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) -->
+<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: marca «pico sobre agua» (sólo display); misma línea por G8 -->
 <style>
 :root {
   --bg: #0a1628; --panel: #0f1a2a; --border: #1a3a5c;
@@ -60,6 +60,7 @@ header .ts-note { color: #6e7681; margin-top: 8px; font-size: 0.75em; font-style
 .card-stats { font-size: 0.72em; color: var(--muted); margin-top: 4px; }
 .card-stats .stat { display: inline-block; margin: 0 6px; }
 .card-stats .stat b { color: var(--text); }
+.card-stats .sobre-agua { color: #40c4ff; } .card-stats .sobre-agua:empty { display: none; }   /* S193 */
 .card-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 10; }
 .mini-btn { background: rgba(15, 26, 42, 0.95); color: var(--muted);
             border: 1px solid var(--border); border-radius: 3px; padding: 2px 6px;
@@ -722,6 +723,7 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
     // S192 (F5-105): null = no cargó (el JSON nuestro o el de MIROVA); 0 = cargó y no hay. La tarjeta los distingue.
     n_det_us: jsonData ? detRecs.length : null, n_det_mirova: mirovaForVolc ? mirovaWindowed.length : null,
     max_us: ourMaxVrp, median_us: medianVrp,
+    det_recs: jsonData ? detRecs : null,   // S193: para contar las detecciones con el pico sobre agua (marcaAguaPeriodo)
     mirova_dist_med: mirovaDistMed,
     mirova_ventana: mirovaForVolc ? mirovaWindowed : null,   // S192 (F5-V201): para desgloseMirova; el total no cambia
   };
@@ -778,6 +780,28 @@ function monitoringFreshness(records) {
   return { cls: "mon-stale", txt: "sin pasadas hace " + ago };
 }
 
+// S193 (Nicolás, 2026-11-21: «tenemos gente revisando las anomalías, sería bueno mejorar los mapas»). POR QUÉ. De noche
+// un lago queda más tibio que la roca y el detector, como el de MIROVA (sin máscara de agua), puede alertarlo
+// (experiments/_s193_lagos/INFORME.md). Esta vista no tiene mapa ni lista de pasadas, así que dice cuántas detecciones
+// del período tienen el píxel más caliente sobre agua, para que el revisor abra el volcán y lo mire en el mapa. Sólo
+// avisa: el conteo de detecciones no cambia. Criterio y fuente en frontend/agua.js. Vacío (capa sin cargar o sin
+// agua) no se ve. Guard: tests/test_tablero_agua_s193.py
+function marcaAguaPeriodo(volc, recs) {
+  if (!recs || !recs.length || typeof AguaTablero === "undefined") return null;
+  const sp = el("span", "sobre-agua");
+  AguaTablero.cargarCapa(volc.name).then(capa => {
+    if (!capa) return;
+    let k = 0;
+    for (const r of recs) { const m = AguaTablero.aguaDePasada(r, capa); if (m && m.sobreAgua) k++; }
+    if (!k) return;
+    sp.textContent = " (💧 " + k + " con el pico sobre agua)";
+    sp.title = k + " de las " + recs.length + " detecciones del período tienen su píxel más caliente en una celda de la que la " +
+      "mitad o más es agua (" + AguaTablero.FUENTE + "). De noche un lago queda más tibio que la roca y el detector puede " +
+      "alertarlo; no es un descarte. Míralas en el mapa de la página del volcán.";
+  });
+  return sp;
+}
+
 function renderCard(volc, jsonData, mirovaForVolc) {
   const grid = document.getElementById("grid");
   const card = el("div", "card");
@@ -822,6 +846,8 @@ function renderCard(volc, jsonData, mirovaForVolc) {
   if (c1.falla) s1.appendChild(document.createTextNode("det. nuestras: "));
   s1.appendChild(b1);
   if (!c1.falla) s1.appendChild(document.createTextNode(" det. nuestras"));
+  const sAgua = marcaAguaPeriodo(volc, stats.det_recs);   // S193
+  if (sAgua) s1.appendChild(sAgua);
   stRow.appendChild(s1);
   stRow.appendChild(document.createTextNode(" · "));
 
