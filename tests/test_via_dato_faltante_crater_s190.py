@@ -46,7 +46,8 @@ T_FOCO_K = {"MODIS": 420.0, "VIIRS750": 340.0, "VIIRS375": 340.0}       # ilustr
 GOLDEN = Path(__file__).resolve().parent / "datos_s190_dato_crater" / "sano_antes.json"
 # S192: alertados_sin_fondo es la marca del fondo nulo (F4-101); el resto del record sano sigue idéntico al dorado
 # (lo vigila tests/test_via_fondo_nulo_s192.py).
-CLAVES_NUEVAS = ("crater_sin_posicion", "px_mir_invalido_crater", "px_saturados_crater", "alertados_sin_fondo")
+CLAVES_NUEVAS = ("crater_sin_posicion", "px_mir_invalido_crater", "px_saturados_crater", "alertados_sin_fondo",
+                 "px_bowtie_crater", "px_mir_hueco_crater", "px_tir_hueco_crater")   # S193: separación bow-tie
 
 
 def _granulo(familia, semilla=190):
