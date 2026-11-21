@@ -499,11 +499,16 @@ def test_el_workflow_abre_issues_con_prefijo_propio_de_cada_sensor_y_no_revierte
 
 
 def test_no_se_toca_la_regla_sellada_de_modis():
-    r = subprocess.run(["git", "diff", "--name-only", "origin/main", "--", "experiments/_s171_modd_adopcion/"], cwd=ROOT,
+    # S192 (A113): la regla sellada dice en su cabecera «una corrección va como marca A113 con fecha, sin tocar lo
+    # sellado». Antes esta prueba exigía 0 archivos cambiados en la carpeta, lo que también vetaba esas marcas (la de la
+    # reversión suspendida del 2026-11-21). Ahora vigila lo que la cabecera promete: ninguna línea de la carpeta se quita
+    # ni se reescribe; sólo se agregan.
+    r = subprocess.run(["git", "diff", "--unified=0", "origin/main", "--", "experiments/_s171_modd_adopcion/"], cwd=ROOT,
                        capture_output=True, text=True, encoding="utf-8")
     if r.returncode != 0:
         pytest.skip("sin origin/main en este checkout")
-    assert r.stdout.strip() == ""
+    quitadas = [l for l in r.stdout.splitlines() if l.startswith("-") and not l.startswith("---")]
+    assert quitadas == [], quitadas[:5]
 
 
 def test_cadena_cota_pendiente_con_la_via_encendida_da_vigilancia_ciega(disco, monkeypatch):

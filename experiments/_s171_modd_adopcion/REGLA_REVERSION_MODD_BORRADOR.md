@@ -5,6 +5,23 @@
 misma frase da el sí de A45 para el encendido del PR B (#934) y la pre-autorización de la reversión de §4.3. Desde aquí
 el texto no se cambia: una corrección va como marca A113 con fecha, sin tocar lo sellado.
 
+> ⚠️ **S192 (A113, 2026-11-21): la reversión pre-autorizada de los tres sensores está SUSPENDIDA.** Decisión de
+> Nicolás del 2026-11-21 en la sesión coordinadora S192, en respuesta a «¿Suspendo la reversión pre-autorizada
+> hasta que el tablero marque el paso de la vía a K?»: «Sí, suspéndela». Viene del hallazgo F11-102 de la auditoría
+> Codex ronda 2, frente 11 (gravedad 4 condicional, verificador limpio,
+> `D:\codex-vrp\_salida\ronda2\f11_verificacion\VEREDICTO.md`, fuera del repo). Por qué, como geólogo: desde el
+> reemplazo del 2026-11-12 toda la historia publicada de los 11 Tier A es de la vía, y el tablero sólo marca el paso
+> de K a la vía (`primeraVia` de `frontend/cambio_detector.js`); con 0 records K en producción hoy no dibuja ninguna
+> marca. Si se revirtiera un sensor, su serie pasaría de la vía a K sin marca y la potencia caería a cerca de la
+> mitad sin aviso: el operador leería un cambio de método como una baja de actividad del volcán. Además, el revert no
+> toca la historia de la vía anterior al encendido (F11-V201) y el NRT ordinario no repone con K los records que ya
+> están en producto estándar (F11-104). La suspensión rige hasta que (1) el tablero marque el paso de la vía a K y
+> (2) una regla aprobada por Nicolás diga qué pasa con la historia ya publicada. Mientras tanto, una
+> `REVERSION_CANDIDATA` de las guardias se confirma en la cabecera de la imagen de MIROVA y se lleva a Nicolás el
+> mismo día; nadie revierte sin su decisión. Las guardias, sus vigilancias, sus issues y el plazo de 29 protegidas o
+> 120 días siguen corriendo igual. Lo que este documento diga de revertir «el mismo día», «sin esperar a nadie» o
+> «pre-autorizada» queda en suspenso y se conserva por historia.
+
 > ⚠️ **Marca A113, 2026-11-07 (auditoría S175, hallazgo 154 confirmado por V1, `docs/AUDIT_S175.md`, PR #955)**: la premisa de §4.1 («Franja del encendido»), §4.7 punto 1 y la fila D7 de que el NRT re-escribe en cada corrida las 8 fechas de su ventana no se cumple: el NRT procesa en cada corrida la ventana de los últimos 8 días, pero el almacén sólo agrega las pasadas que no tenía; una pasada ya guardada se reemplaza únicamente cuando llega su producto estándar de NASA en lugar del NRT o con un reproceso explícito con `--overwrite` (`pipeline/store.py`). Medido en 474 reemplazos del NRT por el estándar en MODIS (11 Tier A, pasadas observadas del 2026-10-17 al 2026-11-07, sin contar 188 records re-escritos por el reproceso de 30 días del 2026-10-18), el estándar llegó con mediana de 13,8 horas desde la primera escritura: 90,7 % antes de 24 horas, 8 casos (1,7 %) entre 3 y 5 días y máximo de 4,5 días (`experiments/_s175_latencia_estandar_modis/salida.txt`). La primera pasada MODIS con la vía se observó el 2026-11-02 a las 01:15 UTC, 18,95 horas antes del encendido (20:11:43 UTC, definición de §4.1), no 8 días antes: 22 de las 23 pasadas observadas de 01:15 a 07:30 UTC estaban guardadas como NRT con K y su producto estándar llegó justo en la primera corrida con la vía, así que el reemplazo las dejó con la vía (la restante sigue como NRT); las pasadas más antiguas ya estaban en producto estándar y siguen con K. Consecuencias para leer esta regla: la franja del encendido no llega a 8 días (los datos dan 19 horas), y el «día después» de una reversión no queda re-escrito con K por el NRT: los records de la vía se quedan como están salvo que llegue su producto estándar o se reprocese con `--overwrite`. El desfase de 9,42 días de §4.1 no es del producto estándar ni de una ventana completa: es el del reproceso de 30 días del 2026-10-18 (PuyehueCordonCaulle, pasada del 2026-10-09 02:00 UTC, re-escrita el 18 a las 12:02 UTC); entre los reemplazos naturales el mayor desfase de la observación a la escritura es 4,76 días (misma salida). Texto sellado conservado.
 
 **Antes: BORRADOR, RONDA 5, SIN SELLO.** Ronda 5 (S173): los cuatro cambios del verificador VB4 (fast-forward, citas de
@@ -187,6 +204,10 @@ del veto las protegidas sólo del OCR de Suomi NPP anteriores al 2026-10-09 (`ex
 
 ### 4.3 Reversión inmediata, pre-autorizada
 
+> ⚠️ **S192 (A113, 2026-11-21): esta reversión inmediata está SUSPENDIDA** (marca S192 de la cabecera). El
+> disparador y la confirmación en la imagen siguen; en vez de revertir, la sesión lleva la candidata a Nicolás el
+> mismo día. Texto sellado conservado.
+
 - **Disparador**: una pasada nocturna posterior al encendido, dentro del plazo de §4.6, con una protegida que MIROVA
   publica, la guardia K publica y producción (la vía) **tiene record y no publica** («calla»). La vigilancia la informa
   como `REVERSION_CANDIDATA` y abre el issue «Guardia K de MODIS: candidata a reversion».
@@ -316,6 +337,26 @@ límites. Se informa cuántas hubo.
 ### 4.7 El día después de una reversión
 
 El revert apaga el flag pero no deshace los datos (V1-02, 207). Tras él:
+
+> ⚠️ **S192 (A113, 2026-11-21): la premisa del punto 2 es falsa desde el reemplazo del 2026-11-12** (F11-102):
+> la marca naranja sale de que haya K antes de la vía, y con la historia toda de la vía `primeraVia` da `null`
+> hoy y también tras un revert; no hay marca de fin. Y el punto 1 no prevé la historia de la vía anterior al
+> encendido (F11-V201), que la guardia no puede reponer porque empieza el 2026-10-26. Por eso la reversión está
+> suspendida (marca S192 de la cabecera). Texto sellado conservado.
+
+> ⚠️ **S193 (A113, 2026-11-21; auditoría Codex ronda 2, F11-104, R7 AF-2910 y F11-V201, verificadas):** la frase del
+> punto 1 «El NRT re-escribe con K las 8 fechas de su ventana», y la misma premisa en la fila D7 («el NRT re-escribe
+> con K sólo 8 fechas hacia atrás»), son falsas en la práctica, como ya anticipaba la marca S175 de la cabecera. El
+> almacén sólo reemplaza un record guardado con su producto estándar o con `--overwrite` (`pipeline/store.py`), y en la
+> ventana de 8 días que terminaba el 2026-11-17, 642 de 689 records de la vía ya eran producto estándar (MODIS: 166 de
+> 191) y seguirían siendo de la vía tras un revert; sólo los 47 NRT pasarían a K al llegar su estándar
+> (`D:\codex-vrp\_salida\ronda2\f11_verificacion\instrumentos\i104_store_salida.txt`, fuera del repo). Lo que queda
+> de la vía tras un revert no es la ventana: son también los 14.484 records MODIS de la vía anteriores al encendido
+> (historia reemplazada el 2026-11-12; `D:\codex-vrp\_salida\ronda2\f11_verificacion\instrumentos\iv201_historia_salida.txt`,
+> fuera del repo). La regla de VIIRS (§4.7 de `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`)
+> lo dice bien: «los records de la vía se quedan como están hasta que llegue su producto estándar o se reprocesen». Y desde #1072 (2026-11-21) el tablero marca también el paso de la vía a K
+> (`frontend/cambio_detector.js`), así que el «no hay marca de fin» de la marca S192 de arriba describe el tablero
+> anterior a ese PR. Texto sellado conservado.
 
 1. **Datos (según D7).** El NRT re-escribe con K las 8 fechas de su ventana; lo observado antes queda con
    `via_codigo_mirova: true` en `data/mirova_equivalent/`. Dentro de los 7 días siguientes, en un PR aparte y con tag

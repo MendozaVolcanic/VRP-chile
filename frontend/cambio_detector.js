@@ -30,6 +30,9 @@
 // anterior a DATOS_K_DESDE_UTC; si un dato así vuelve, el aviso vuelve solo. La constante se queda: la leen
 // scripts/vigilancia_sombra.py y scripts/auto_audit_weekly.py como frontera (sin ella la vigilancia se declara ciega).
 // Prueba: tests/test_cambio_detector_aviso_k_por_datos_s178.py.
+//
+// S192 (F11-102): las marcas de la vía ya no son sólo «K seguido de la vía»; cada cambio de detector de la serie, en
+// las dos direcciones, lleva su línea (cambiosVia, más abajo). Prueba: tests/test_cambio_detector_retorno_k_s192.py.
 (function (raiz) {
   "use strict";
 
@@ -159,7 +162,7 @@
   const VIAS = {
     MODIS: {
       color: "#ff8c00", fondo: "rgba(255,140,0,0.08)", idAviso: "aviso-cambio-via-modis", idPlugin: "cambioViaModis",
-      rotulo: "MODIS: vía MIROVA", dy: 34, serie: /^MODIS/,
+      rotulo: "MODIS: vía MIROVA", rotuloK: "MODIS: vuelve a K", dy: 34, serie: /^MODIS/,
       texto: dia => "Desde el " + dia + " la serie de MODIS viene de la vía «código MIROVA» (el detector que MIROVA publicó " +
         "en su código), que reemplazó al detector K en MODIS; VIIRS no cambia. Desde esa fecha la magnitud de MODIS " +
         "sube y aparecen alertas que K callaba: un escalón en la serie de MODIS en esa fecha es un cambio del detector, " +
@@ -167,7 +170,7 @@
     },
     VIIRS375: {
       color: "#e91e63", fondo: "rgba(233,30,99,0.08)", idAviso: "aviso-cambio-via-v375", idPlugin: "cambioViaV375",
-      rotulo: "VIIRS 375: vía MIROVA", dy: 46, serie: /^VIIRS\b.*375/,
+      rotulo: "VIIRS 375: vía MIROVA", rotuloK: "VIIRS 375: vuelve a K", dy: 46, serie: /^VIIRS\b.*375/,
       texto: dia => "Desde el " + dia + " la serie de VIIRS 375 viene de la vía «código MIROVA» (el detector que MIROVA " +
         "publicó en su código), que reemplazó al detector K en VIIRS 375. Desde esa fecha la magnitud de VIIRS 375 sube " +
         "cerca del doble, porque K publicaba el núcleo del cúmulo y la vía suma todos los píxeles alertados: un escalón en " +
@@ -175,7 +178,7 @@
     },
     VIIRS750: {
       color: "#00bcd4", fondo: "rgba(0,188,212,0.08)", idAviso: "aviso-cambio-via-v750", idPlugin: "cambioViaV750",
-      rotulo: "VIIRS 750: vía MIROVA", dy: 58, serie: /^VIIRS\b.*750/,
+      rotulo: "VIIRS 750: vía MIROVA", rotuloK: "VIIRS 750: vuelve a K", dy: 58, serie: /^VIIRS\b.*750/,
       texto: dia => "Desde el " + dia + " la serie de VIIRS 750 viene de la vía «código MIROVA» (el detector que MIROVA " +
         "publicó en su código), que reemplazó al detector K en VIIRS 750. Desde esa fecha la magnitud de VIIRS 750 sube " +
         "cerca del doble: un escalón en esa fecha es un cambio del detector, no del volcán.",
@@ -183,6 +186,21 @@
   };
   const COLOR_MODIS = VIAS.MODIS.color;   // el naranja de la serie MODIS del tablero
   const desdeVia = { MODIS: null, VIIRS375: null, VIIRS750: null };   // ISO UTC de la primera pasada de cada vía, o null
+
+  // ── S192 (F11-102, auditoría Codex ronda 2, frente 11): todo cambio de detector de la serie, en las dos direcciones.
+  //
+  // POR QUÉ: desde el reemplazo del 2026-11-12 la historia publicada es toda de la vía, y primeraVia sólo ve K seguido
+  // de la vía. Si un sensor se revirtiera, su serie pasaría de la vía a K y la potencia caería a cerca de la mitad sin
+  // ninguna línea: el operador leería un cambio de método como una baja de actividad del volcán. Nicolás suspendió la
+  // reversión pre-autorizada el 2026-11-21 hasta que esta marca exista. Cada cambio lleva su línea: «vía MIROVA» cuando
+  // la serie entra a la vía y «vuelve a K» cuando sale.
+  //
+  // FUSIÓN: tras un revert cada volcán pasa a K en su primera pasada nueva, en días distintos para un mismo cambio. Dos
+  // cambios de la misma dirección y el mismo sensor a 10 días o menos se funden en el más temprano: 10 días cubre la
+  // ventana de 8 días que re-escribe el NRT (default_date_window de scripts/run_pipeline.py). Es una elección de dibujo,
+  // no un número medido. desdeVia (la frontera de las vistas y del auto-audit) no cambia.
+  const FUSION_MS = 10 * 86400000;
+  const cambiosVia = { MODIS: [], VIIRS375: [], VIIRS750: [] };   // [{utc, hacia: "via" | "K"}], en orden de fecha
 
   function isoDeRecord(dt) {
     const s = String(dt || "").trim().replace(" ", "T");
@@ -226,6 +244,46 @@
   }
 
   function primeraViaModis(records) { return primeraVia(records, "MODIS"); }
+
+  // "via", "K" o null. La clave con texto ("sin_grilla", "sin_mxd03") es una pasada suelta de K con la vía encendida
+  // (A118): no es un cambio de método de la serie, como en primeraVia.
+  function detectorDe(r) {
+    if (esViaCodigoMirova(r)) return "via";
+    if (r.via_codigo_mirova === undefined || r.via_codigo_mirova === null) return "K";
+    return null;
+  }
+
+  // S192: los cambios de detector de un sensor en los records de un volcán, en orden de fecha de observación.
+  function cambiosEnRecords(records, familia) {
+    const serie = [];
+    for (const r of records || []) {
+      if (!r || familiaSensor(r.sensor) !== familia) continue;
+      const t = isoDeRecord(r.datetime_utc);
+      const det = t == null ? null : detectorDe(r);
+      if (det != null) serie.push([t, det]);
+    }
+    serie.sort((a, b) => (a[0] - b[0]) || (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
+    const out = [];
+    for (let i = 1; i < serie.length; i++) {
+      if (serie[i][1] !== serie[i - 1][1]) out.push({ utc: new Date(serie[i][0]).toISOString(), hacia: serie[i][1] });
+    }
+    return out;
+  }
+
+  // Agrega un cambio a los de todos los volcanes (fusión de arriba). Devuelve true si cambió algo que redibujar.
+  function sumarCambio(familia, c) {
+    const lista = cambiosVia[familia];
+    const t = Date.parse(c.utc);
+    const cerca = lista.find(x => x.hacia === c.hacia && Math.abs(Date.parse(x.utc) - t) <= FUSION_MS);
+    if (cerca) {
+      if (t >= Date.parse(cerca.utc)) return false;
+      cerca.utc = c.utc;
+    } else {
+      lista.push({ utc: c.utc, hacia: c.hacia });
+    }
+    lista.sort((a, b) => Date.parse(a.utc) - Date.parse(b.utc));
+    return true;
+  }
 
   function textoAvisoVia(familia, desde) {
     const dia = diaLegible(desde);
@@ -291,6 +349,8 @@
         // Prueba: tests/test_cambio_detector_via_modis_s172.py y tests/test_cambio_detector_via_viirs_s176.py.
         cambio = true;
       }
+      // S192: los cambios en las dos direcciones; son los que dibuja crearPluginVia.
+      cambiosEnRecords(records, familia).forEach(c => { if (sumarCambio(familia, c)) cambio = true; });
     });
     if (cambio) {
       const C = typeof raiz !== "undefined" ? raiz.Chart : null;
@@ -314,29 +374,37 @@
     const v = VIAS[familia];
     return {
       id: v.idPlugin,
+      // S192: una línea por cambio de detector (cambiosVia), no sólo la entrada a la vía. La entrada conserva su raya y
+      // su rótulo; la vuelta a K va con raya corta, para que se distingan aun en el mismo color.
       afterDatasetsDraw(chart) {
-        const t = msDelCambio(desdeVia[familia]);
         const x = chart && chart.scales ? chart.scales.x : null;
-        if (t == null || !x || x.type !== "time" || !muestraSensor(chart, familia)) return false;
-        if (t < x.min || t > x.max) return false;
-        const px = x.getPixelForValue(t);
+        if (!x || x.type !== "time" || !muestraSensor(chart, familia)) return false;
         const area = chart.chartArea;
-        if (!isFinite(px) || !area) return false;
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.strokeStyle = v.color;
-        ctx.lineWidth = 1.5;
-        if (ctx.setLineDash) ctx.setLineDash([6, 3]);
-        ctx.beginPath();
-        ctx.moveTo(px, area.top);
-        ctx.lineTo(px, area.bottom);
-        ctx.stroke();
-        if (ctx.setLineDash) ctx.setLineDash([]);
-        ctx.fillStyle = v.color;
-        ctx.font = "10px sans-serif";
-        ctx.fillText(v.rotulo, px + 3, area.top + v.dy);
-        ctx.restore();
-        return true;
+        if (!area) return false;
+        let dibujo = false;
+        for (const c of cambiosVia[familia]) {
+          const t = msDelCambio(c.utc);
+          if (t == null || t < x.min || t > x.max) continue;
+          const px = x.getPixelForValue(t);
+          if (!isFinite(px)) continue;
+          const aK = c.hacia === "K";
+          const ctx = chart.ctx;
+          ctx.save();
+          ctx.strokeStyle = v.color;
+          ctx.lineWidth = 1.5;
+          if (ctx.setLineDash) ctx.setLineDash(aK ? [2, 3] : [6, 3]);
+          ctx.beginPath();
+          ctx.moveTo(px, area.top);
+          ctx.lineTo(px, area.bottom);
+          ctx.stroke();
+          if (ctx.setLineDash) ctx.setLineDash([]);
+          ctx.fillStyle = v.color;
+          ctx.font = "10px sans-serif";
+          ctx.fillText(aK ? v.rotuloK : v.rotulo, px + 3, area.top + v.dy);
+          ctx.restore();
+          dibujo = true;
+        }
+        return dibujo;
       },
     };
   }
@@ -346,7 +414,8 @@
   const CambioDetector = { CAMBIO_DETECTOR_UTC, DATOS_K_DESDE_UTC, textoAviso, insertarAviso, crearPlugin, fechaLegible,
     primeraViaModis, primeraVia, esViaCodigoMirova, notarRecords, textoAvisoModis, textoAvisoVia, insertarAvisoModis,
     insertarAvisoVia, crearPluginViaModis, crearPluginVia, familiaSensor,
-    viaModisDesde: () => desdeVia.MODIS, viaDesde: familia => desdeVia[familia], hayDatosAntesDeK: () => hayDatosAntesDeK };
+    viaModisDesde: () => desdeVia.MODIS, viaDesde: familia => desdeVia[familia], hayDatosAntesDeK: () => hayDatosAntesDeK,
+    cambiosEnRecords, cambiosDetector: familia => (cambiosVia[familia] || []).map(c => ({ utc: c.utc, hacia: c.hacia })) };
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = CambioDetector;

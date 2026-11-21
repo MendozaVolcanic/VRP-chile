@@ -168,13 +168,13 @@ CITAS_CLAUDE_MD = [
     ("pipeline/process_viirs.py", 83, "FLAG_DNS"),
     # S149: +1 en los tres procesadores por el import de roi1_summit_mask (A118, la caja al segundo pase).
     # S162: +1 en process_viirs_mod.py por el import de ENABLE_V750_CODIGO_MIROVA (la vía «código MIROVA»).
-    ("pipeline/process_viirs_mod.py", 467, "Villarrica/PP/Lastarria/Chaiten/PCC"),
+    ("pipeline/process_viirs_mod.py", 470, "Villarrica/PP/Lastarria/Chaiten/PCC"),
     # S165: 213 -> 214, +1 en process_viirs.py por el import de ENABLE_V375_CODIGO_MIROVA (la vía de VIIRS 375).
     ("pipeline/process_viirs.py", 214, "compute_test1_nti"),
     # S147: 59 -> 62, la cabecera FICHA crecio al retirar la cita bibliografica de D30.
     # S165: 62 -> 64, la cabecera FICHA nombra los tres flags MxD03 apagados.
     ("pipeline/process_modis.py", 64, "compute_test1_mir"),
-    ("pipeline/process_viirs_mod.py", 164, "compute_test1_mir"),
+    ("pipeline/process_viirs_mod.py", 167, "compute_test1_mir"),
     ("scripts/build_c2ab_windows.py", 64, "registro_vrp_ocr.csv"),
 ]
 

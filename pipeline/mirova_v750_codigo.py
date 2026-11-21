@@ -20,10 +20,18 @@
 #                 (MODIS, Coppola 2016a Ec. 7).
 #                 Diagnóstico sin efecto en la detección (S190): dato faltante sobre el cráter medido en los
 #                 píxeles del gránulo ANTES de interpolar (crater_sin_posicion, px_mir_invalido_crater,
-#                 px_saturados_crater).
+#                 px_saturados_crater). S193 (bow-tie de VIIRS): px_bowtie_crater separa el relleno que VIIRS
+#                 descarta a bordo en el borde del barrido (bit 256 de quality_flags; ese suelo lo midió el barrido
+#                 contiguo) del dato perdido, y px_mir_hueco_crater y px_tir_hueco_crater cuentan el hueco por banda.
 #                 Fondo no estimable (S192, F4-101; decisión de Nicolás del 2026-11-20): si ningún alertado tiene fondo,
 #                 en MODIS la escena es no medida (motivo_vacio «fondo_no_estimado», 0 MW); en VIIRS se publica como el
 #                 .m y el record cuenta alertados_sin_fondo. t_bg_k promedia sólo los alertados con fondo.
+#                 Sin radiancia (S192, run 44768057665): si en el recorte una banda tiene menos de tres píxeles
+#                 con radiancia válida (escaneos enteros con DN de relleno aunque el GEO traiga posición), la
+#                 escena es no medida (motivo_vacio «sin_radiancia_valida», 0 MW) en vez de una excepción.
+#                 Cráter no evaluado (S193, F3-107): escena válida sin alertados en la que ninguna celda del 7 x 7 del
+#                 cráter tuvo contraste que evaluar (hueco o nube fría): motivo_vacio «crater_no_evaluado», 0 MW.
+#                 diag_codigo_mirova.roi nombra la caja usada («c13_crater» en VIIRS 375; S193, F2-V303).
 # Limitaciones  : fillmissing2 de MATLAB no documenta su triangulación; se reproduce con un Delaunay de desempate
 #                 simbólico que iguala a MATLAB R2026b en 166 de 166 escenas (S163 O2), sin que el mecanismo interno
 #                 de MATLAB esté verificado. La ROI por volcán la decide V750-B. El umbral contextual depende de la
@@ -100,17 +108,35 @@ PASO_V375_M = 375.0
 HALF_ROI1_V375_M = 10.5 * 750.0
 MEDIA_GRILLA_M = 25000.0   # regla GEO: centros en X0 - 25000 : paso : X0 + 25000
 RADIO_RECORTE_KM = 45.0    # como probe_n.grillar: sólo se interpolan los píxeles a menos de 45 km
-FLAG_MIN_DN = 65528        # DN >= 65528 son banderas en el L1B de VIIRS (UserGuide Aug 2021, Tabla C.1)
+# S192: mínimo de píxeles con radiancia finita (por banda, en el recorte) para que la interpolación lineal exista: 
+# una triangulación de Delaunay en el plano pide tres puntos no colineales. Con menos, la escena es no medida
+# (motivo_vacio «sin_radiancia_valida», calcular_vrp_granulo). Es geometría, no un umbral físico.
+MIN_PX_TRIANGULAR = 3
+# S192: ya no es el corte. Era «DN >= 65528 son banderas» (UserGuide Aug 2021, uint16); el lector usa el valid_max de
+# cada variable (pipeline/banderas_viirs_l1b.py), porque M13 de VJ202MOD v2.1 viene en uint32 y el corte fijo borraba
+# M13 sobre unos 512 K. Se conserva el nombre para los verificadores que lo leen (experiments/_s164_modis_codigo).
+FLAG_MIN_DN = 65528
 # Bit de saturación de <banda>_quality_flags del L1B de VIIRS: «bit value» 4 de la Tabla C.1 del UserGuide (transcrita
 # en docs/F28_SATURATION_INVESTIGATION.md), el mismo SAT_BIT_MASK = 0b100 que lee la guardia K
 # (process_viirs.py, process_viirs_mod.py). Sólo diagnóstico: la vía no enmascara el píxel saturado.
 BIT_SATURACION_VIIRS = 0b100
+# Bit «Bowtie_Deleted» de <banda>_quality_flags (Tabla C.1 del UserGuide VIIRS L1B Aug 2021: bit value 256). Se lee el
+# bit y no el DN de bandera porque M13 no lo codifica como 65533: en VJ202MOD_NRT v2.1 los píxeles bow-tie de M13 traen
+# DN 327678 (probe S192, run 44818788733), mientras I04, I05 y M15 traen 65533 como dice el UserGuide (págs. 21 y 23).
+# Sólo diagnóstico (S193): la radiancia del píxel bow-tie sigue en NaN, como toda bandera.
+BIT_BOWTIE_VIIRS = 0b100000000
 # Radio, en celdas de la grilla del sensor, dentro del cual un píxel perdido cuenta como dato faltante del cráter
 # (plan F1M-G3 del 2026-11-19): 2 km en MODIS, 1,5 km en VIIRS 750, 0,75 km en VIIRS 375. Es una decisión de
 # diagnóstico, no un valor de MIROVA: cubre el píxel del cráter y sus vecinos inmediatos con cualquier desorden
 # de barrido cerca del nadir.
 CELDAS_DATO_CRATER = 2
 TIPOS_ROI = ("def", "sens", "crater", "inner", "corona")
+# S193 (F2-V303): nombre que el diagnóstico da a la caja de VIIRS 375, que no es ninguna de TIPOS_ROI: caja_v375, la C13
+# (13 x 13 celdas de 375 m) sobre el cráter dentro de la ROI1 física. Sólo etiqueta; no elige nada.
+ROI_DIAG_V375 = "c13_crater"
+# S193 (F3-107, F3-V201): motivo_vacio de la escena válida en la que el detector corrió pero no pudo evaluar ninguna
+# celda del 7 x 7 del cráter (celda_decisiva nula) y no alertó en ninguna parte. Ver procesar_grilla.
+MOTIVO_CRATER_NO_EVALUADO = "crater_no_evaluado"
 
 _GRILLAS_YAML = Path(__file__).resolve().parent / "grillas_mirova.yaml"
 
@@ -716,14 +742,16 @@ def _cumulo_del_mas_radiante(mascara, m13):
 
 
 def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inner_km, sensor,
-                    coef=None, familia="VIIRS750"):
+                    coef=None, familia="VIIRS750", roi=None):
     """Detección + VRP + record (esquema de hoy) sobre una grilla ya remuestreada.
 
     Record: vrp_mw = primary_cluster.vrp_mw = VRP de la UNIÓN de los alertados (lo que publica MIROVA, D32);
     posición, centroide y distance_class = el cúmulo 8-conexo de la alertada más radiante, con la distancia medida
     desde el cráter (pos_crater, posición fraccionaria en la grilla, como producción mide desde
     get_detection_anchor). Sin modo de un píxel y sin tope D9 (N-5: el tope recorta una erupción real). familia elige
-    las longitudes de onda y el coeficiente (FAMILIAS); coef, si se da, reemplaza al de la familia."""
+    las longitudes de onda y el coeficiente (FAMILIAS); coef, si se da, reemplaza al de la familia. roi es el nombre de
+    la caja `box` para el diagnóstico (S193, F2-V303: calcular_vrp_granulo pasa la que de verdad usó); sin él, el de la
+    grilla."""
     cfg = FAMILIAS[familia]
     coef = cfg["coef"] if coef is None else coef
     lam = cfg["lam_mir"]
@@ -743,7 +771,19 @@ def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inne
                "motivo_vacio": "fondo_no_estimado" if sin_fondo_modis else d.get("motivo"), "n_abs": d.get("n_abs"),
                "n_p1": d.get("n_p1"), "n_p2": d.get("n_p2"), "L_hot": v["L_hot"] if v["npix"] else None,
                "L_bk": v["L_bk"] if v["npix"] else None, "alertados_sin_fondo": v["n_sin_fondo"] if v["npix"] else None,
-               "roi": grilla.get("roi"), "s1": diag_s1(d, celda_c)}}
+               "roi": grilla.get("roi") if roi is None else roi, "s1": diag_s1(d, celda_c)}}
+    # POR QUÉ (S193, F3-107 y F3-V201 de la auditoría Codex ronda 2): una escena puede pasar el corte de media grilla
+    # (l. 163-167 del .m) con el hueco justo sobre el cráter: escaneos sin dato, nube fría bajo 200 K en la banda
+    # térmica (l. 151-154) o un ajuste imposible. Si en el 7 x 7 del cráter no queda ni una celda con contraste NTI y
+    # ETI que comparar (celda_decisiva nula) y el detector no alertó en ninguna parte, el cráter no se miró: no es una
+    # noche sin anomalía. El .m deja ese VRP indefinido y pide no leerlo como cero (MIROVA_VIIRS750_VRP.m l. 20-22).
+    # La cifra sigue en 0 MW, como las demás escenas no medidas (ficha v1.27; el 0,0 en vez de NaN es D36, «Pasada
+    # válida sin alerta»); lo que cambia es que el record lo dice, y el tablero la trata como escena sin dato. En main
+    # del 2026-11-21 son 23 records de los 11 principales (censo S193). Con un alertado en cualquier parte la escena es
+    # una medición con VRP y no se toca; si el detector no corrió (reflejo solar, media escena: sin pasada1) su motivo queda.
+    s1 = rec["diag_codigo_mirova"]["s1"]
+    if not v["npix"] and "pasada1" in s1 and s1.get("celda_decisiva") is None:
+        rec["diag_codigo_mirova"]["motivo_vacio"] = MOTIVO_CRATER_NO_EVALUADO
     if not v["npix"] or sin_fondo_modis:
         rec.update({"vrp_mw": 0.0, "primary_cluster": None, "t_bg_k": None, "distance_class": None, "anomaly_pixels": [],
                     "t_max_k": None, "hotspot_lat": None, "hotspot_lon": None, "hotspot_dist_km": None,
@@ -784,9 +824,12 @@ def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inne
 # ---------------------------------------------------------------------------------------------------- gránulo
 def leer_radiancia_l1b(ruta, bandas=("M13", "M15")):
     """M13 y M15 (o las bandas pedidas: I04 e I05 en VIIRS 375) en radiancia (W m-2 sr-1 um-1) del L1B, con las
-    banderas (DN >= 65528) en NaN; el código de MIROVA trabaja en radiancia, no en temperatura de brillo. En 375 es la
-    lectura del probe de V375-B/C (experiments/_s159/portes/probe_portes.py::leer_viirs)."""
+    banderas en NaN; el código de MIROVA trabaja en radiancia, no en temperatura de brillo. En 375 es la lectura del
+    probe de V375-B/C (experiments/_s159/portes/probe_portes.py::leer_viirs). S192: bandera es todo DN sobre el valid_max
+    de la variable (banderas_viirs_l1b.dn_invalido), no DN >= 65528: M13 de VJ202MOD v2.1 viene en uint32 y ese corte
+    borraba M13 sobre unos 512 K."""
     import h5py
+    from .banderas_viirs_l1b import dn_invalido
     out = {}
     with h5py.File(ruta, "r") as f:
         obs = f["observation_data"]
@@ -794,11 +837,12 @@ def leer_radiancia_l1b(ruta, bandas=("M13", "M15")):
             if b not in obs:
                 return None
             ds = obs[b]
-            dn = ds[:].astype(np.float64)
+            crudo = ds[:]
+            dn = crudo.astype(np.float64)
             sf = float(np.asarray(ds.attrs.get("scale_factor", 1.0)).ravel()[0])
             ao = float(np.asarray(ds.attrs.get("add_offset", 0.0)).ravel()[0])
             rad = dn * sf + ao
-            rad[dn >= FLAG_MIN_DN] = np.nan
+            rad[dn_invalido(ds, crudo)] = np.nan
             out[b] = rad
         # S190 (F1V-101), sólo diagnóstico: un I04 o M13 saturado llega con radiancia finita (el L1B la deja en el
         # techo y enciende el bit de saturación, no un DN de bandera), así que la VRP sale baja sin aviso. Se guarda
@@ -808,7 +852,20 @@ def leer_radiancia_l1b(ruta, bandas=("M13", "M15")):
         qf = obs.get(f"{bandas[0]}_quality_flags")
         if qf is not None:
             try:
-                out["saturado_mir"] = (qf[:] & BIT_SATURACION_VIIRS) != 0
+                q = qf[:]
+                out["saturado_mir"] = (q & BIT_SATURACION_VIIRS) != 0
+                out["bowtie_mir"] = (q & BIT_BOWTIE_VIIRS) != 0
+            except TypeError:
+                pass
+        # POR QUÉ (S192, adoptado en S193; sólo diagnóstico): el relleno bow-tie no es dato perdido. Lejos del nadir los
+        # barridos vecinos de VIIRS se solapan y el satélite descarta a bordo los detectores del borde de cada barrido,
+        # cuyo suelo ya midió el barrido contiguo. La radiancia no cambia (sigue en NaN, como toda bandera); la máscara
+        # sólo deja que dato_faltante_crater no los cuente como hueco. Sin quality_flags no hay clave y la separación
+        # queda sin dato.
+        qt = obs.get(f"{bandas[1]}_quality_flags")
+        if qt is not None:
+            try:
+                out["bowtie_tir"] = (qt[:] & BIT_BOWTIE_VIIRS) != 0
             except TypeError:
                 pass
     return out
@@ -862,7 +919,15 @@ def dato_faltante_crater(rad, lat, lon, b_mir, b_tir, vent_lat, vent_lon, paso_m
       que haya una sola copia, A102): el píxel con posición más cercano al cráter está en el borde del gránulo o a
       alguno de sus 8 vecinos le falta lat o lon.
     - px_mir_invalido_crater: píxeles con posición a menos de CELDAS_DATO_CRATER celdas de la grilla del cráter cuya
-      MIR o TIR no es finita (sin TIR el píxel tampoco tiene NTI).
+      MIR o TIR no es finita (sin TIR el píxel tampoco tiene NTI). Cuenta también el relleno bow-tie; se deja igual para
+      que la serie desde #1060 siga comparable.
+    - px_bowtie_crater (S192, adoptado en S193): de los píxeles cercanos, los que traen el bit Bowtie_Deleted (256) en
+      quality_flags de la MIR o de la TIR. No es dato perdido: el suelo lo midió el barrido contiguo, y la interpolación
+      usa ese píxel. None si el lector no trae quality_flags (siempre en MODIS, que no descarta a bordo).
+    - px_mir_hueco_crater y px_tir_hueco_crater (S192, adoptado en S193): píxeles cercanos con la MIR (o la TIR) no
+      finita por una causa que NO es bow-tie (Missing_EV, Cal_Fail; en MODIS la doble saturación o el relleno).
+      Separados porque perder la MIR esconde el foco y perder sólo la TIR puede destapar parte de él (S191,
+      tir_perdida). Son lo que debe leer el paso B, no el total.
     - px_saturados_crater: lo mismo con el bit de saturación de quality_flags de la banda MIR (VIIRS). None si el
       lector no lo trae: siempre en MODIS, donde la saturación es un DN que el lector ya deja en NaN (B22 cae a B21, y si
       las dos saturan cuenta en px_mir_invalido_crater), y en un L1B sin quality_flags. None es «no medido», no cero.
@@ -878,11 +943,23 @@ def dato_faltante_crater(rad, lat, lon, b_mir, b_tir, vent_lat, vent_lon, paso_m
     lon = np.asarray(lon, float)[v]
     cerca = _haversine(lat, lon, vent_lat, vent_lon) < CELDAS_DATO_CRATER * float(paso_m) / 1000.0
     cerca &= np.isfinite(lat) & np.isfinite(lon)
-    invalido = ~(np.isfinite(np.asarray(rad[b_mir], float)[v]) & np.isfinite(np.asarray(rad[b_tir], float)[v]))
+    mir_ok = np.isfinite(np.asarray(rad[b_mir], float)[v])
+    tir_ok = np.isfinite(np.asarray(rad[b_tir], float)[v])
+    invalido = ~(mir_ok & tir_ok)
     sat = rad.get("saturado_mir")
+    # POR QUÉ (S192, adoptado en S193): el 2026-11-20 los 105 píxeles que este marcador contó en 27 pasadas NOAA-21 de
+    # cenit alto (54,7° a 67,0°) eran todos relleno bow-tie (bit 256 en MIR y TIR, probe S192, run 44818788733), no
+    # dato perdido. Se separan del hueco, y el hueco de la MIR del de la TIR. Sin máscara (MODIS, que no descarta a
+    # bordo, o un L1B sin quality_flags) nada se descuenta y px_bowtie_crater queda None (no medido, no cero).
+    bt_m, bt_t = rad.get("bowtie_mir"), rad.get("bowtie_tir")
+    btm = np.zeros(mir_ok.shape, bool) if bt_m is None else np.asarray(bt_m, bool)[v]
+    btt = np.zeros(tir_ok.shape, bool) if bt_t is None else np.asarray(bt_t, bool)[v]
     return {"crater_sin_posicion": not crater_cubierto(lat, lon, vent_lat, vent_lon),
             "px_mir_invalido_crater": int((cerca & invalido).sum()),
-            "px_saturados_crater": None if sat is None else int((cerca & np.asarray(sat, bool)[v]).sum())}
+            "px_saturados_crater": None if sat is None else int((cerca & np.asarray(sat, bool)[v]).sum()),
+            "px_bowtie_crater": None if bt_m is None and bt_t is None else int((cerca & (btm | btt)).sum()),
+            "px_mir_hueco_crater": int((cerca & ~mir_ok & ~btm).sum()),
+            "px_tir_hueco_crater": int((cerca & ~tir_ok & ~btt).sum())}
 
 
 def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_lon, inner_km, sensor,
@@ -891,7 +968,9 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
 
     Devuelve None si el volcán no tiene grilla en grillas_mirova.yaml (el llamador decide qué hacer: la vía no
     inventa una grilla) o si el gránulo no cubre el volcán (menos de 100 píxeles en el recorte de 45 km o, en MODIS y
-    VIIRS 375, el píxel más cercano al centro a más de 5 km). familia: "VIIRS750" (rad con M13 y M15), "MODIS" (rad
+    VIIRS 375, el píxel más cercano al centro a más de 5 km). Si el gránulo cubre el volcán pero en el recorte una
+    banda tiene menos de MIN_PX_TRIANGULAR píxeles con radiancia válida, devuelve la escena vacía con motivo_vacio
+    «sin_radiancia_valida» (S192). familia: "VIIRS750" (rad con M13 y M15), "MODIS" (rad
     con MIR y TIR, ver leer_radiancia_modis) o "VIIRS375" (rad con I04 e I05; la caja es siempre caja_v375)."""
     cfg = FAMILIAS[familia]
     g = grilla or grilla_del_volcan(nombre_volcan, paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"])
@@ -911,16 +990,41 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
     sg = sunglint_deg(geom.get("sensor_zenith", 0.0), geom.get("solar_zenith", 0.0),
                       geom.get("sensor_azimuth", 0.0), geom.get("solar_azimuth", 0.0))
     b_mir, b_tir = cfg["bandas"]
-    m13g, m15g = remuestrear_grilla(lat, lon, rad[b_mir], rad[b_tir], g)
+    # POR QUÉ (S192, run 44768057665): el filtro de arriba cuenta píxeles con POSICIÓN, pero remuestrear_grilla
+    # interpola sólo los que además tienen RADIANCIA. La geolocalización sale de la órbita y la actitud y existe
+    # siempre; la radiancia puede faltar en escaneos enteros. En MOD021KM.A2026213.0300 los 81 primeros escaneos
+    # (filas 0 a 809) traen en las bandas 21, 22 y 31 el DN 65527, «Rotation of Earth view Sector from nominal science
+    # collection position» (MODIS L1B C7 UserGuide, Tabla 5.6.1): Mentolat, MacaCay y Hudson tenían 1.714 a 1.838
+    # píxeles con posición y 0 con radiancia (experiments/_s192_no_points/diag_s192_no_points.json), y griddata
+    # lanzó «No points given». Con menos de tres puntos no hay
+    # triangulación (cero: ValueError; uno o dos: QhullError). La escena no está medida: se guarda vacía (0 MW, sin
+    # píxeles) con motivo propio, como las escenas con media grilla sin dato (escena_invalida, ficha v1.27), en vez de
+    # una excepción que deja la pasada sin record y el job en rojo. Desde tres puntos el camino es el de siempre.
+    n_rad = {k: int((sel & np.isfinite(np.asarray(rad[b], float))).sum()) for k, b in (("mir", b_mir), ("tir", b_tir))}
+    sin_radiancia = min(n_rad.values()) < MIN_PX_TRIANGULAR
+    if sin_radiancia:
+        m13g = np.full((g["n"], g["n"]), np.nan)
+        m15g = m13g.copy()
+    else:
+        m13g, m15g = remuestrear_grilla(lat, lon, rad[b_mir], rad[b_tir], g)
     pos = posicion_de(g, vent_lat, vent_lon)
+    # POR QUÉ (S193, F2-V303): diag_codigo_mirova.roi debe nombrar la caja que el detector usó. Antes decía la de la
+    # grilla: «def» en todos los records V375 de la vía (28.930 en data/mirova_equivalent y 1.621 en sombra_34 en main
+    # del 2026-11-21) aunque VIIRS 375 busca siempre en la C13 del cráter; y la de la grilla aunque se pasara tipo_roi.
     if cfg.get("roi1_half_m") is not None:
         # VIIRS 375: la caja de PD1 (C13 en el cráter dentro de la ROI1 física), igual en todos los volcanes
         box = caja_v375(g, vent_lat, vent_lon, lado_sensible=cfg["lado_sensible"], half_roi1_m=cfg["roi1_half_m"])
+        roi_usada = ROI_DIAG_V375
     else:
         celda = celda_de(g, vent_lat, vent_lon)
-        box = caja_roi(tipo_roi or g.get("roi", "def"), n=g["n"], celda_crater=celda, inner_km=inner_km,
+        roi_usada = tipo_roi or g.get("roi", "def")
+        box = caja_roi(roi_usada, n=g["n"], celda_crater=celda, inner_km=inner_km,
                        lado_sensible=cfg["lado_sensible"], lado_anillo=cfg["lado_anillo"], paso_m=g["paso"])
-    rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia)
+    rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia, roi=roi_usada)
+    if sin_radiancia:
+        # con la grilla toda sin dato el detector ya devolvió la escena vacía (reflejo solar o media escena); el motivo
+        # se reemplaza porque la causa es otra: no hubo radiancia que interpolar.
+        rec["diag_codigo_mirova"].update({"motivo_vacio": "sin_radiancia_valida", "px_radiancia_valida": n_rad})
     # celdas_sin_dato cuenta celdas de la grilla sin dato DESPUÉS de interpolar: griddata llena todo lo que cae dentro
     # de la envolvente de los píxeles válidos, así que sólo ve celdas fuera de ella (bordes del gránulo). Un píxel
     # perdido dentro del gránulo no aparece aquí; para eso están las marcas de dato_faltante_crater (S190, F1M-V201).
