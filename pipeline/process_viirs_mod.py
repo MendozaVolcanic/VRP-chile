@@ -48,6 +48,7 @@ from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
 from .product_version import product_version_from_granule  # S140 8b
 from .diag_fondo import radiancia_planck, redondear_diag  # S140 T7
+from .banderas_viirs_l1b import dn_invalido  # S192: banderas por el valid_max de cada variable
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
 from pipeline.constants import SIGMA  # kept for reference, not used in MIR VRP
@@ -65,7 +66,9 @@ from pipeline.constants import C1_PLANCK, C2_PLANCK  # 2hc², hc/k Planck
 # Not 18.9 (which is MODIS 1km). Difference is band center (4.05 vs 3.96 µm).
 WOOSTER_COEFF = 19.7   # VIIRS M13 750m, empirically validated S14 2026-04-21
 
-FLAG_DNS = {65532, 65533, 65534, 65535}
+# S192: las banderas se separan con el valid_max de cada variable (pipeline/banderas_viirs_l1b.py), no con la lista
+# fija {65532, 65533, 65534, 65535} del UserGuide (uint16): M13 de VJ202MOD v2.1 viene en uint32, donde esos cuatro
+# DN son mediciones (unos 512 K) y sus banderas reales (327677 a 327679) pasaban hasta la LUT.
 
 # --- All detection thresholds come from the active profile ---
 # See pipeline/profiles/*.yaml. Profile selected via $VRP_PROFILE.
@@ -246,7 +249,7 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
         if lut_key in obs:
             lut = obs[lut_key][:]
             bt = lut[dn].astype(np.float32)
-            flag_mask = np.isin(dn, list(FLAG_DNS))
+            flag_mask = dn_invalido(obs[band_key], dn)
             bt[flag_mask] = np.nan
             bt[bt < 0] = np.nan
             if qf is not None:
@@ -257,7 +260,7 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
             scale  = float(ds.attrs.get("scale_factor", 1.0))
             offset = float(ds.attrs.get("add_offset", 0.0))
             rad = dn.astype(np.float32) * scale + offset
-            flag_mask = np.isin(dn, list(FLAG_DNS))
+            flag_mask = dn_invalido(ds, dn)
             rad[flag_mask] = np.nan
             if qf is not None:
                 rad[(qf & SAT_BIT_MASK) != 0] = np.nan
@@ -279,7 +282,7 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
             if lut_key_15 in obs:
                 lut15 = obs[lut_key_15][:]
                 bt15 = lut15[dn15].astype(np.float32)
-                flag_mask_15 = np.isin(dn15, list(FLAG_DNS))
+                flag_mask_15 = dn_invalido(obs[band_key_15], dn15)
                 bt15[flag_mask_15] = np.nan
                 bt15[bt15 < 0] = np.nan
                 if qf15 is not None:
@@ -290,7 +293,7 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
                 scale15  = float(ds15.attrs.get("scale_factor", 1.0))
                 offset15 = float(ds15.attrs.get("add_offset", 0.0))
                 rad15 = dn15.astype(np.float32) * scale15 + offset15
-                flag_mask_15 = np.isin(dn15, list(FLAG_DNS))
+                flag_mask_15 = dn_invalido(ds15, dn15)
                 rad15[flag_mask_15] = np.nan
                 if qf15 is not None:
                     rad15[(qf15 & SAT_BIT_MASK) != 0] = np.nan
