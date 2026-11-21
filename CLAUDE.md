@@ -45,12 +45,21 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo
 > 2026-11-02 (#934, decisión de Nicolás del 2026-10-31), VIIRS 375 y 750 desde el 2026-11-11 (#974 a las 13:09:21 y
 > #983 a las 13:22:13 UTC, decisión del 2026-11-08). K queda sólo de guardia (`pipeline/profiles/guardia_k_modis.yaml`
 > y `guardia_k_viirs.yaml`; vigilancias `scripts/vigilancia_guardia_modis.py` y `scripts/vigilancia_guardia_viirs.py`),
-> con reversión pre-autorizada por `git revert` del PR de cada sensor (`-m 1` en VIIRS). Desde el 2026-11-12 la
+> con reversión pre-autorizada por `git revert` del PR de cada sensor (`-m 1` en VIIRS; ⚠️ S192: SUSPENDIDA, marca
+> que sigue). Desde el 2026-11-12 la
 > historia de los 11 Tier A desde 2025-02-15 es de la vía (ficha v1.25): no queda serie K publicada. Lo que un
 > documento diga de la producción con K (D11, D12, D21, D22, D25, D26, D32, `f5_core_vrp_mw`) describe hoy la guardia.
 > Lo que la vía decide fuera del código de MIROVA: `docs/MIROVA_DIVERGENCES.md` D36. Las marcas S172, S177 B1 y S177 B2
 > que decían esto por partes (B1 y B2 como «PROPUESTA») están en la historia. Ver `docs/MISSION.md`, ficha v1.18 y
 > v1.23 a v1.25. (historia: Misión vinculante)
+
+> ⚠️ **S192 (A113, decisión de Nicolás del 2026-11-21, «Sí, suspéndela»): la reversión pre-autorizada de los tres
+> sensores está SUSPENDIDA** hasta que (1) el tablero marque el paso de la vía a K y (2) una regla aprobada por Nicolás
+> diga qué pasa con la historia ya publicada. Por qué (F11-102, auditoría Codex ronda 2, frente 11): la historia es
+> toda de la vía y `frontend/cambio_detector.js` sólo marca K seguido de la vía, así que un revert dejaría caer la
+> potencia a cerca de la mitad sin marca en el tablero. Mientras tanto, una `REVERSION_CANDIDATA` de las guardias se
+> confirma en la imagen de MIROVA y se lleva a Nicolás el mismo día; no se revierte sola. Detalle en la marca S192 de
+> las dos reglas de reversión.
 
 **Objetivo: clon literal MIROVA NRT.** Antes de tocar `pipeline/`, leer [docs/MISSION.md](docs/MISSION.md) y
 aplicar las 3 preguntas; si las 3 dan NO, no implementar y anotarlo en `tasks/backlog_*.md`. Parches viejos

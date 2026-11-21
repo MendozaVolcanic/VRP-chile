@@ -6,6 +6,8 @@ name: Vigilancia de la guardia K de MODIS
 # POR QUE: con la via «codigo MIROVA» encendida en MODIS, K corre aparte como guardia (guardia-k-modis.yml). Una alerta
 # protegida que MIROVA publica, la guardia publica y produccion calla es el disparador de la reversion pre-autorizada,
 # y la regla pide avisar EL MISMO DIA: por eso corre al terminar la guardia y no una vez por semana.
+# S192: la reversion pre-autorizada esta SUSPENDIDA desde el 2026-11-21 (decision de Nicolas, marca S192 de la regla):
+# la candidata se lleva a Nicolas y no se revierte sola. Texto anterior:
 # El workflow NO revierte: abre el issue. La reversion la confirma una persona en la cabecera de la imagen de MIROVA y
 # la ejecuta una sesion con git revert del PR B (el encendido).
 # A43: "on" quoted (Norway Problem YAML 1.1).
@@ -131,7 +133,7 @@ jobs:
           PY
           case "$VEREDICTO" in
             REVERSION_CANDIDATA)
-              abrir "Guardia K de MODIS: candidata a reversion" "$(printf 'La vigilancia encontro una alerta protegida de MIROVA en MODIS (1 MW o mas) que la guardia (K) publica y produccion (la via codigo MIROVA) calla:\n\n%s\n\nLa regla (experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4) pre-autoriza revertir el encendido con git revert del PR B, DESPUES de confirmar la alerta en la cabecera de la imagen de MIROVA. Avisar a Nicolas hoy. Una vez decidida, anotar la pasada en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+              abrir "Guardia K de MODIS: candidata a reversion" "$(printf 'La vigilancia encontro una alerta protegida de MIROVA en MODIS (1 MW o mas) que la guardia (K) publica y produccion (la via codigo MIROVA) calla:\n\n%s\n\nLa reversion pre-autorizada de la regla (experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4.3) esta SUSPENDIDA por decision de Nicolas del 2026-11-21 (marca S192 de la regla): NO revertir. Confirmar la alerta en la cabecera de la imagen de MIROVA y llevarla a Nicolas hoy; decide el. Una vez decidida, anotar la pasada en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
             CANDIDATA_FUERA_DE_PLAZO)
               abrir "Guardia K de MODIS: candidata fuera de plazo" "$(printf 'La vigilancia encontro una alerta protegida de MIROVA en MODIS que la guardia publica y produccion calla, pero el plazo de la regla ya se cumplio (29 protegidas vistas o 120 dias desde el encendido):\n\n%s\n\nFuera de plazo NO hay reversion pre-autorizada: decide Nicolas. Una vez decidida, anotar la pasada en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
             INVESTIGAR)
