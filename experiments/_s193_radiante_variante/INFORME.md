@@ -151,7 +151,22 @@ Empates de temperatura en la semilla (el orden por `bt_k` redondeado a 0,01 K re
 
 ## 7. Verificación independiente
 
-PENDIENTE: se completa con el resultado del verificador de contexto limpio.
+Un subagente sin este razonamiento escribió su propio instrumento antes de abrir `medir_variante.py`
+(`D:\vrp-trabajo\temporales\s193_radiante_variante_verif\verificar.py`, salidas `salida.txt` y `salida_verificador.json`,
+fuera del repo). **Reproduce todos los números** de G1, L1, L2, L3 y L4 por lectura y sensor, las informativas (G2 9 y 40;
+218 cambios, todos de no publicar a publicar; `sin_info` 95 y 61; `sin_geometria` 3) y los controles C1, C2, C3 y C5
+(C4 con otro sintético: `far` y no publica, `summit` y publica). Su veredicto según §6: DECIDE NICOLÁS.
+
+Diferencias de método que encontró, ninguna mueve un número:
+
+- Desempate de la semilla: aquí por (temperatura, menor distancia), él por orden de lista y probando el segundo empatado:
+  en los 6 empates de la variante el cúmulo y la clase salen iguales con cualquier desempate.
+- Ancla del cráter: aquí `vent` o `lat`/`lon`, como el procesador; `get_detection_anchor` pasa además por `mirova_center`.
+  No cambia nada porque los 11 tienen `vent` (y C2 reproduce las distancias).
+- `t_max_k`: aquí se reescribe con el pico del cúmulo elegido, como haría producción (`procesar_grilla`); §3 no lo lista. No
+  pesa: los filtros de artefacto térmico eximen a la vía, y para la vía el predicado lee sólo `distance_class`,
+  `primary_cluster.centroid_dist_km` y `primary_cluster.vrp_mw`.
+- `veredicto()` omite la cláusula «G1 tabla ≥ 0 sin L1 tabla» del corte 3; es redundante con el veto (L1 = 0).
 
 ## 8. Límites
 
