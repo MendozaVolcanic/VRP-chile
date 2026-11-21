@@ -74,8 +74,8 @@ def aplicar_modificadores(base, sin_chillan, sin_w7, m5, m8_1mw):
     """Adenda V §4 sobre el veredicto base (casos a a e) de un sensor. Devuelve (veredicto, motivos).
 
     R-CH: base ADOPTAR y sin Chillán NO ADOPTAR -> DECIDE NICOLÁS CON M4 (beneficio de un solo volcán en erupción).
-    R-W7: sin W7 sale NO ADOPTAR -> DECIDE NICOLÁS CON M4. Se aplica como está escrito: también cuando el base ya es
-      NO ADOPTAR (ver el informe de S190: un brazo malo en todas las ventanas sale así DECIDE NICOLÁS CON M4).
+    R-W7: base ADOPTAR y sin W7 NO ADOPTAR -> DECIDE NICOLÁS CON M4. Lectura 2, simétrica con R-CH, elegida por
+      Nicolás el 2026-11-21 (PREGUNTA_R_W7.md): si con W7 ya sale NO ADOPTAR, queda NO ADOPTAR.
     M5: con 5 pares o más, una mediana nuestro/MIROVA fuera de 0,5 a 2 impide ADOPTAR -> DECIDE NICOLÁS.
     M8: 5 o más publicaciones diurnas de 1 MW o más en pasadas sin fila de MIROVA impiden ADOPTAR -> DECIDE NICOLÁS
       CON M4.
@@ -84,7 +84,7 @@ def aplicar_modificadores(base, sin_chillan, sin_w7, m5, m8_1mw):
     if base == ADOPTAR and sin_chillan == NO_ADOPTAR:
         motivos.append("R-CH: sin Chillán sale NO ADOPTAR")
         m4 = True
-    if sin_w7 == NO_ADOPTAR:
+    if base == ADOPTAR and sin_w7 == NO_ADOPTAR:
         motivos.append("R-W7: sin W7 sale NO ADOPTAR")
         m4 = True
     pares, med = m5

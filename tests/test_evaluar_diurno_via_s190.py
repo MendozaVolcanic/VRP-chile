@@ -127,7 +127,8 @@ def limpio(r):
     (AD, AD, AD, (0, None), 0, AD),
     (AD, NO, AD, (0, None), 0, DM4),          # R-CH
     (AD, SC, AD, (0, None), 0, AD),           # R-CH sólo con NO ADOPTAR sin Chillán
-    (NO, NO, NO, (0, None), 0, DM4),          # R-W7 tal como está escrito: también con el base en NO ADOPTAR
+    (NO, NO, NO, (0, None), 0, NO),           # R-W7, lectura 2: con el base en NO ADOPTAR queda NO ADOPTAR
+    (SC, SC, NO, (0, None), 0, SC),           # R-W7, lectura 2: sólo actúa sobre un ADOPTAR
     (AD, AD, NO, (0, None), 0, DM4),          # R-W7
     (AD, AD, SC, (0, None), 0, AD),
     (AD, AD, AD, (5, 2.5), 0, DE),            # M5 con 5 pares fuera de 0,5 a 2
@@ -247,15 +248,16 @@ def test_r_w7_beneficio_solo_de_w7_pasa_a_decide_con_m4():
     assert m["veredicto"] == DM4 and r["flags"][FV] == DM4
 
 
-def test_r_w7_tal_como_esta_escrito_con_un_brazo_malo_en_todas_las_ventanas():
-    """Lectura literal del §4: «no cambia el veredicto salvo que sin W7 salga NO ADOPTAR». Un brazo que publica sin
-    discriminar en W2 sale NO ADOPTAR con y sin W7, y por R-W7 queda DECIDE NICOLÁS CON M4, no NO ADOPTAR. Se deja
-    fijado y se informa a Nicolás (no es un ADOPTAR, así que no viola el control del brazo ruidoso)."""
+def test_r_w7_lectura_2_un_brazo_malo_en_todas_las_ventanas_sale_no_adoptar():
+    """R-W7, lectura 2 (simétrica con R-CH), elegida por Nicolás el 2026-11-21 sobre PREGUNTA_R_W7.md: «acepto los 4
+    mientras nos acerquen a nuestros objetivos». Un brazo que publica sin discriminar en W2 sale NO ADOPTAR con y sin
+    W7 y queda NO ADOPTAR; con la lectura literal habría salido DECIDE NICOLÁS CON M4."""
     e = Escena().base()
     publicar_negativos(e, V750, 30)
     r = e.evaluar()
     m = sensor(r, V750)
-    assert (m["base"], m["sin_W7"], m["veredicto"]) == (NO, NO, DM4)
+    assert (m["base"], m["sin_W7"], m["veredicto"]) == (NO, NO, NO)
+    assert r["flags"][FV] != DM4
 
 
 def test_m8_cinco_publicaciones_de_1_mw_sin_fila_de_mirova_impiden_adoptar():
