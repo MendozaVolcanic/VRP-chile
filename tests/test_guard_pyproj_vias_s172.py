@@ -52,8 +52,15 @@ def perfiles_con_via(root=ROOT):
     return {n for n, v in res.items() if isinstance(v, list) and any(v)}
 
 
+# S193: tampoco cuentan los nombres visibles (`name:` del workflow, del job o del paso) ni la lista `workflows:` de un
+# disparador workflow_run, que cita nombres de otros workflows. POR QUÉ: el perfil `laboratorio` se llama como la palabra
+# del nombre «Experimental diario (laboratorio congelado, 11 Tier A)», y un nombre no corre nada. La invocación
+# (`--profile`, `VRP_PROFILE`, una matriz o un input) nunca va en esas líneas.
+_NO_CORRE = re.compile(r"^\s*(?:#|-?\s*name:|workflows:)")
+
+
 def _sin_comentarios(texto):
-    return "\n".join(ln for ln in texto.splitlines() if not ln.lstrip().startswith("#"))
+    return "\n".join(ln for ln in texto.splitlines() if not _NO_CORRE.match(ln))
 
 
 def _nombra(texto, nombre):
@@ -103,6 +110,22 @@ def test_control_el_instrumento_ve_un_workflow_sin_pyproj(tmp_path):
                       "      - run: python scripts/run_pipeline.py --profile experimental\n"
     (tmp_path / ".github" / "workflows" / "x.yml").write_text(solo_comentario, encoding="utf-8")
     assert workflows_sin_pyproj(tmp_path, {"sombra_codigo_mirova"}) == {}
+
+
+def test_control_un_nombre_visible_no_corre_un_perfil(tmp_path):
+    """S193: el perfil `laboratorio` se llama como una palabra que aparece en nombres visibles («Experimental diario
+    (laboratorio congelado, 11 Tier A)», que vigilancia-sombra.yml cita en `workflows:`). Un nombre no corre nada; una
+    invocación sí, aunque el mismo archivo tenga el nombre."""
+    (tmp_path / ".github" / "workflows").mkdir(parents=True)
+    solo_nombre = ('name: Diario (laboratorio congelado)\n"on":\n  workflow_run:\n'
+                   '    workflows: ["Diario (laboratorio congelado)"]\njobs:\n  a:\n    name: laboratorio\n    steps:\n'
+                   '      - name: corre laboratorio\n        run: |\n          pip install numpy\n'
+                   '          python scripts/run_pipeline.py --profile experimental\n')
+    (tmp_path / ".github" / "workflows" / "x.yml").write_text(solo_nombre, encoding="utf-8")
+    assert workflows_sin_pyproj(tmp_path, {"laboratorio"}) == {}
+    (tmp_path / ".github" / "workflows" / "x.yml").write_text(
+        solo_nombre.replace("--profile experimental", "--profile laboratorio"), encoding="utf-8")
+    assert workflows_sin_pyproj(tmp_path, {"laboratorio"}) == {"x.yml": ["laboratorio"]}
 
 
 def _pasos_del_job_que_corre(wf):
