@@ -29,6 +29,9 @@
 #                 Sin radiancia (S192, run 44768057665): si en el recorte una banda tiene menos de tres píxeles
 #                 con radiancia válida (escaneos enteros con DN de relleno aunque el GEO traiga posición), la
 #                 escena es no medida (motivo_vacio «sin_radiancia_valida», 0 MW) en vez de una excepción.
+#                 Cráter no evaluado (S193, F3-107): escena válida sin alertados en la que ninguna celda del 7 x 7 del
+#                 cráter tuvo contraste que evaluar (hueco o nube fría): motivo_vacio «crater_no_evaluado», 0 MW.
+#                 diag_codigo_mirova.roi nombra la caja usada («c13_crater» en VIIRS 375; S193, F2-V303).
 # Limitaciones  : fillmissing2 de MATLAB no documenta su triangulación; se reproduce con un Delaunay de desempate
 #                 simbólico que iguala a MATLAB R2026b en 166 de 166 escenas (S163 O2), sin que el mecanismo interno
 #                 de MATLAB esté verificado. La ROI por volcán la decide V750-B. El umbral contextual depende de la
@@ -128,6 +131,12 @@ BIT_BOWTIE_VIIRS = 0b100000000
 # de barrido cerca del nadir.
 CELDAS_DATO_CRATER = 2
 TIPOS_ROI = ("def", "sens", "crater", "inner", "corona")
+# S193 (F2-V303): nombre que el diagnóstico da a la caja de VIIRS 375, que no es ninguna de TIPOS_ROI: caja_v375, la C13
+# (13 x 13 celdas de 375 m) sobre el cráter dentro de la ROI1 física. Sólo etiqueta; no elige nada.
+ROI_DIAG_V375 = "c13_crater"
+# S193 (F3-107, F3-V201): motivo_vacio de la escena válida en la que el detector corrió pero no pudo evaluar ninguna
+# celda del 7 x 7 del cráter (celda_decisiva nula) y no alertó en ninguna parte. Ver procesar_grilla.
+MOTIVO_CRATER_NO_EVALUADO = "crater_no_evaluado"
 
 _GRILLAS_YAML = Path(__file__).resolve().parent / "grillas_mirova.yaml"
 
@@ -733,14 +742,16 @@ def _cumulo_del_mas_radiante(mascara, m13):
 
 
 def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inner_km, sensor,
-                    coef=None, familia="VIIRS750"):
+                    coef=None, familia="VIIRS750", roi=None):
     """Detección + VRP + record (esquema de hoy) sobre una grilla ya remuestreada.
 
     Record: vrp_mw = primary_cluster.vrp_mw = VRP de la UNIÓN de los alertados (lo que publica MIROVA, D32);
     posición, centroide y distance_class = el cúmulo 8-conexo de la alertada más radiante, con la distancia medida
     desde el cráter (pos_crater, posición fraccionaria en la grilla, como producción mide desde
     get_detection_anchor). Sin modo de un píxel y sin tope D9 (N-5: el tope recorta una erupción real). familia elige
-    las longitudes de onda y el coeficiente (FAMILIAS); coef, si se da, reemplaza al de la familia."""
+    las longitudes de onda y el coeficiente (FAMILIAS); coef, si se da, reemplaza al de la familia. roi es el nombre de
+    la caja `box` para el diagnóstico (S193, F2-V303: calcular_vrp_granulo pasa la que de verdad usó); sin él, el de la
+    grilla."""
     cfg = FAMILIAS[familia]
     coef = cfg["coef"] if coef is None else coef
     lam = cfg["lam_mir"]
@@ -760,7 +771,19 @@ def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inne
                "motivo_vacio": "fondo_no_estimado" if sin_fondo_modis else d.get("motivo"), "n_abs": d.get("n_abs"),
                "n_p1": d.get("n_p1"), "n_p2": d.get("n_p2"), "L_hot": v["L_hot"] if v["npix"] else None,
                "L_bk": v["L_bk"] if v["npix"] else None, "alertados_sin_fondo": v["n_sin_fondo"] if v["npix"] else None,
-               "roi": grilla.get("roi"), "s1": diag_s1(d, celda_c)}}
+               "roi": grilla.get("roi") if roi is None else roi, "s1": diag_s1(d, celda_c)}}
+    # POR QUÉ (S193, F3-107 y F3-V201 de la auditoría Codex ronda 2): una escena puede pasar el corte de media grilla
+    # (l. 163-167 del .m) con el hueco justo sobre el cráter: escaneos sin dato, nube fría bajo 200 K en la banda
+    # térmica (l. 151-154) o un ajuste imposible. Si en el 7 x 7 del cráter no queda ni una celda con contraste NTI y
+    # ETI que comparar (celda_decisiva nula) y el detector no alertó en ninguna parte, el cráter no se miró: no es una
+    # noche sin anomalía. El .m deja ese VRP indefinido y pide no leerlo como cero (MIROVA_VIIRS750_VRP.m l. 20-22).
+    # La cifra sigue en 0 MW, como las demás escenas no medidas (ficha v1.27; el 0,0 en vez de NaN es D36, «Pasada
+    # válida sin alerta»); lo que cambia es que el record lo dice, y el tablero la trata como escena sin dato. En main
+    # del 2026-11-21 son 23 records de los 11 principales (censo S193). Con un alertado en cualquier parte la escena es
+    # una medición con VRP y no se toca; si el detector no corrió (reflejo solar, media escena: sin pasada1) su motivo queda.
+    s1 = rec["diag_codigo_mirova"]["s1"]
+    if not v["npix"] and "pasada1" in s1 and s1.get("celda_decisiva") is None:
+        rec["diag_codigo_mirova"]["motivo_vacio"] = MOTIVO_CRATER_NO_EVALUADO
     if not v["npix"] or sin_fondo_modis:
         rec.update({"vrp_mw": 0.0, "primary_cluster": None, "t_bg_k": None, "distance_class": None, "anomaly_pixels": [],
                     "t_max_k": None, "hotspot_lat": None, "hotspot_lon": None, "hotspot_dist_km": None,
@@ -985,14 +1008,19 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
     else:
         m13g, m15g = remuestrear_grilla(lat, lon, rad[b_mir], rad[b_tir], g)
     pos = posicion_de(g, vent_lat, vent_lon)
+    # POR QUÉ (S193, F2-V303): diag_codigo_mirova.roi debe nombrar la caja que el detector usó. Antes decía la de la
+    # grilla: «def» en todos los records V375 de la vía (28.930 en data/mirova_equivalent y 1.621 en sombra_34 en main
+    # del 2026-11-21) aunque VIIRS 375 busca siempre en la C13 del cráter; y la de la grilla aunque se pasara tipo_roi.
     if cfg.get("roi1_half_m") is not None:
         # VIIRS 375: la caja de PD1 (C13 en el cráter dentro de la ROI1 física), igual en todos los volcanes
         box = caja_v375(g, vent_lat, vent_lon, lado_sensible=cfg["lado_sensible"], half_roi1_m=cfg["roi1_half_m"])
+        roi_usada = ROI_DIAG_V375
     else:
         celda = celda_de(g, vent_lat, vent_lon)
-        box = caja_roi(tipo_roi or g.get("roi", "def"), n=g["n"], celda_crater=celda, inner_km=inner_km,
+        roi_usada = tipo_roi or g.get("roi", "def")
+        box = caja_roi(roi_usada, n=g["n"], celda_crater=celda, inner_km=inner_km,
                        lado_sensible=cfg["lado_sensible"], lado_anillo=cfg["lado_anillo"], paso_m=g["paso"])
-    rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia)
+    rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia, roi=roi_usada)
     if sin_radiancia:
         # con la grilla toda sin dato el detector ya devolvió la escena vacía (reflejo solar o media escena); el motivo
         # se reemplaza porque la causa es otra: no hubo radiancia que interpolar.

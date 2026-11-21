@@ -46,6 +46,10 @@ T_FOCO_K = {"MODIS": 420.0, "VIIRS750": 340.0, "VIIRS375": 340.0}       # ilustr
 GOLDEN = Path(__file__).resolve().parent / "datos_s190_dato_crater" / "sano_antes.json"
 # S192: alertados_sin_fondo es la marca del fondo nulo (F4-101); el resto del record sano sigue idéntico al dorado
 # (lo vigila tests/test_via_fondo_nulo_s192.py).
+# S193 (F2-V303, auditoría Codex ronda 2): diag_codigo_mirova.roi nombra ahora la caja que el detector usó; en VIIRS 375
+# es la C13 del cráter, no la «def» de la grilla que decía el record dorado. Único cambio declarado de un campo existente:
+# la prueba exige el valor viejo en el dorado y el nuevo en el record, y todo lo demás idéntico.
+CAMBIOS_A_PROPOSITO = {"VIIRS375": {"roi": ("def", "c13_crater")}}
 CLAVES_NUEVAS = ("crater_sin_posicion", "px_mir_invalido_crater", "px_saturados_crater", "alertados_sin_fondo",
                  "px_bowtie_crater", "px_mir_hueco_crater", "px_tir_hueco_crater")   # S193: separación bow-tie
 
@@ -172,7 +176,13 @@ def test_granulo_sano_da_marcas_en_cero(familia):
 def test_granulo_sano_record_identico_al_de_antes(familia):
     """Regla dura del paso A: ninguna detección, potencia, posición ni campo existente cambia; sólo se agregan claves."""
     esperado = json.loads(GOLDEN.read_text(encoding="utf-8"))[familia]
-    _igual(esperado, _sin_claves_nuevas(_correr(_granulo(familia), familia)))
+    rec = _sin_claves_nuevas(_correr(_granulo(familia), familia))
+    for clave, (antes, ahora) in CAMBIOS_A_PROPOSITO.get(familia, {}).items():
+        # el dorado queda como se grabó; el cambio declarado se comprueba en sus dos lados y sólo entonces se iguala
+        assert esperado["diag_codigo_mirova"][clave] == antes, f"{familia}.{clave}: el dorado ya no dice {antes!r}"
+        assert rec["diag_codigo_mirova"][clave] == ahora, f"{familia}.{clave}: {rec['diag_codigo_mirova'][clave]!r}"
+        esperado["diag_codigo_mirova"][clave] = ahora
+    _igual(esperado, rec)
 
 
 # ------------------------------------------------------------------------------------------ (e) lejos no marca
