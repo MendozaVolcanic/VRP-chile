@@ -24,6 +24,9 @@
 #                 Fondo no estimable (S192, F4-101; decisión de Nicolás del 2026-11-20): si ningún alertado tiene fondo,
 #                 en MODIS la escena es no medida (motivo_vacio «fondo_no_estimado», 0 MW); en VIIRS se publica como el
 #                 .m y el record cuenta alertados_sin_fondo. t_bg_k promedia sólo los alertados con fondo.
+#                 Sin radiancia (S192, run 44768057665): si en el recorte una banda tiene menos de tres píxeles
+#                 con radiancia válida (escaneos enteros con DN de relleno aunque el GEO traiga posición), la
+#                 escena es no medida (motivo_vacio «sin_radiancia_valida», 0 MW) en vez de una excepción.
 # Limitaciones  : fillmissing2 de MATLAB no documenta su triangulación; se reproduce con un Delaunay de desempate
 #                 simbólico que iguala a MATLAB R2026b en 166 de 166 escenas (S163 O2), sin que el mecanismo interno
 #                 de MATLAB esté verificado. La ROI por volcán la decide V750-B. El umbral contextual depende de la
@@ -100,6 +103,10 @@ PASO_V375_M = 375.0
 HALF_ROI1_V375_M = 10.5 * 750.0
 MEDIA_GRILLA_M = 25000.0   # regla GEO: centros en X0 - 25000 : paso : X0 + 25000
 RADIO_RECORTE_KM = 45.0    # como probe_n.grillar: sólo se interpolan los píxeles a menos de 45 km
+# S192: mínimo de píxeles con radiancia finita (por banda, en el recorte) para que la interpolación lineal exista: 
+# una triangulación de Delaunay en el plano pide tres puntos no colineales. Con menos, la escena es no medida
+# (motivo_vacio «sin_radiancia_valida», calcular_vrp_granulo). Es geometría, no un umbral físico.
+MIN_PX_TRIANGULAR = 3
 # S192: ya no es el corte. Era «DN >= 65528 son banderas» (UserGuide Aug 2021, uint16); el lector usa el valid_max de
 # cada variable (pipeline/banderas_viirs_l1b.py), porque M13 de VJ202MOD v2.1 viene en uint32 y el corte fijo borraba
 # M13 sobre unos 512 K. Se conserva el nombre para los verificadores que lo leen (experiments/_s164_modis_codigo).
@@ -898,7 +905,9 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
 
     Devuelve None si el volcán no tiene grilla en grillas_mirova.yaml (el llamador decide qué hacer: la vía no
     inventa una grilla) o si el gránulo no cubre el volcán (menos de 100 píxeles en el recorte de 45 km o, en MODIS y
-    VIIRS 375, el píxel más cercano al centro a más de 5 km). familia: "VIIRS750" (rad con M13 y M15), "MODIS" (rad
+    VIIRS 375, el píxel más cercano al centro a más de 5 km). Si el gránulo cubre el volcán pero en el recorte una
+    banda tiene menos de MIN_PX_TRIANGULAR píxeles con radiancia válida, devuelve la escena vacía con motivo_vacio
+    «sin_radiancia_valida» (S192). familia: "VIIRS750" (rad con M13 y M15), "MODIS" (rad
     con MIR y TIR, ver leer_radiancia_modis) o "VIIRS375" (rad con I04 e I05; la caja es siempre caja_v375)."""
     cfg = FAMILIAS[familia]
     g = grilla or grilla_del_volcan(nombre_volcan, paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"])
@@ -918,7 +927,23 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
     sg = sunglint_deg(geom.get("sensor_zenith", 0.0), geom.get("solar_zenith", 0.0),
                       geom.get("sensor_azimuth", 0.0), geom.get("solar_azimuth", 0.0))
     b_mir, b_tir = cfg["bandas"]
-    m13g, m15g = remuestrear_grilla(lat, lon, rad[b_mir], rad[b_tir], g)
+    # POR QUÉ (S192, run 44768057665): el filtro de arriba cuenta píxeles con POSICIÓN, pero remuestrear_grilla
+    # interpola sólo los que además tienen RADIANCIA. La geolocalización sale de la órbita y la actitud y existe
+    # siempre; la radiancia puede faltar en escaneos enteros. En MOD021KM.A2026213.0300 los 81 primeros escaneos
+    # (filas 0 a 809) traen en las bandas 21, 22 y 31 el DN 65527, «Rotation of Earth view Sector from nominal science
+    # collection position» (MODIS L1B C7 UserGuide, Tabla 5.6.1): Mentolat, MacaCay y Hudson tenían 1.714 a 1.838
+    # píxeles con posición y 0 con radiancia (experiments/_s192_no_points/diag_s192_no_points.json), y griddata
+    # lanzó «No points given». Con menos de tres puntos no hay
+    # triangulación (cero: ValueError; uno o dos: QhullError). La escena no está medida: se guarda vacía (0 MW, sin
+    # píxeles) con motivo propio, como las escenas con media grilla sin dato (escena_invalida, ficha v1.27), en vez de
+    # una excepción que deja la pasada sin record y el job en rojo. Desde tres puntos el camino es el de siempre.
+    n_rad = {k: int((sel & np.isfinite(np.asarray(rad[b], float))).sum()) for k, b in (("mir", b_mir), ("tir", b_tir))}
+    sin_radiancia = min(n_rad.values()) < MIN_PX_TRIANGULAR
+    if sin_radiancia:
+        m13g = np.full((g["n"], g["n"]), np.nan)
+        m15g = m13g.copy()
+    else:
+        m13g, m15g = remuestrear_grilla(lat, lon, rad[b_mir], rad[b_tir], g)
     pos = posicion_de(g, vent_lat, vent_lon)
     if cfg.get("roi1_half_m") is not None:
         # VIIRS 375: la caja de PD1 (C13 en el cráter dentro de la ROI1 física), igual en todos los volcanes
@@ -928,6 +953,10 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
         box = caja_roi(tipo_roi or g.get("roi", "def"), n=g["n"], celda_crater=celda, inner_km=inner_km,
                        lado_sensible=cfg["lado_sensible"], lado_anillo=cfg["lado_anillo"], paso_m=g["paso"])
     rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia)
+    if sin_radiancia:
+        # con la grilla toda sin dato el detector ya devolvió la escena vacía (reflejo solar o media escena); el motivo
+        # se reemplaza porque la causa es otra: no hubo radiancia que interpolar.
+        rec["diag_codigo_mirova"].update({"motivo_vacio": "sin_radiancia_valida", "px_radiancia_valida": n_rad})
     # celdas_sin_dato cuenta celdas de la grilla sin dato DESPUÉS de interpolar: griddata llena todo lo que cae dentro
     # de la envolvente de los píxeles válidos, así que sólo ve celdas fuera de ella (bordes del gránulo). Un píxel
     # perdido dentro del gránulo no aparece aquí; para eso están las marcas de dato_faltante_crater (S190, F1M-V201).
