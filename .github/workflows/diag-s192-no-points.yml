@@ -1,0 +1,54 @@
+name: "Diag S192, No points given en la via MODIS (solo lectura, rama de diagnostico)"
+
+# Vive SOLO en la rama diag/s192-no-points y corre al hacer push a ella (workflow_dispatch exige el yml en main, S73).
+# Solo lectura: no escribe en data/, no commitea, no hace push. A71: autentica SOLO por EARTHDATA_TOKEN.
+# A43: "on" entre comillas. Baja 2 archivos MODIS (~100 MB), ~3 min; timeout 20.
+"on":
+  push:
+    branches: ["diag/s192-no-points"]
+
+concurrency:
+  group: diag-s192-no-points
+  cancel-in-progress: false
+
+jobs:
+  diag:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj
+      - name: Bajar y medir
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s192_no_points/diag_granulo.py --out out --tmp "${{ runner.temp }}/gran" 2>&1 | tee out/diag.log
+      - name: Subir resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diag-s192-no-points
+          path: |
+            out/*.json
+            out/*.log
+            out/*.npz
+          retention-days: 30
+          if-no-files-found: error
