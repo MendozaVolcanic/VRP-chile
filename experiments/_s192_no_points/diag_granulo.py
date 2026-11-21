@@ -61,6 +61,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     tmp = Path(a.tmp or (out / "_tmp"))
     tmp.mkdir(parents=True, exist_ok=True)
+    from pipeline.fetch import auth
+    auth()
     lat0, lon0 = VOLCANES["Mentolat"]
     l1b = bajar("MODIS_TERRA_L1B", lat0, lon0, tmp)
     geo = bajar("MODIS_TERRA_GEO", lat0, lon0, tmp)
