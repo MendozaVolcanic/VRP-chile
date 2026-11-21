@@ -15,8 +15,8 @@ Archivos de esta medición (todos en `D:\vrp-trabajo\temporales\s193\lagos\`):
   `D:\vrp-trabajo\temporales\s193\lagos\verificaciones.txt`: los números que no salen de `resumir.py` (BT del lago,
   lagos cratéricos, agua alrededor de cada punto, detector anterior de abril).
 
-Todo número de este informe sale de `resumen.txt` o de `verificaciones.txt`. Copia en el repo, sin `pixeles.csv` (se
-regenera con `medir_agua.py`): `experiments/_s193_lagos/`.
+Todo número de este informe sale de `resumen.txt` o de `verificaciones.txt`. Copia en el repo, sin los CSV (el `.gitignore` los excluye;
+se regeneran con `medir_agua.py` en unos 4 minutos): `experiments/_s193_lagos/`.
 
 ## Respuesta corta
 
