@@ -156,3 +156,39 @@ compartidos con las tandas y el NRT).
 
 Verificador de contexto limpio (effort high) sobre el resultado, informe con veredicto por sensor, PR a main con esta
 adenda, el instrumento y el resultado, y comentario en #813.
+
+## 8. Desviación declarada 1: la compuerta I4 (b) y el descarte de borde de la vía (2026-11-21)
+
+Decisión de Nicolás, textual, el 2026-11-21 en la sesión S193 (dueña del loop), después de ver el veredicto con la
+recomendación «D1: dejar pasar el caso de Isluga; D2: encender el día sólo en MODIS»: «continua con todo lo que
+recomiendes». Escrita después de calcular el veredicto con la regla sellada (INVÁLIDO POR INSTRUMENTO, sólo por este
+caso; `INFORME_VEREDICTO.md`), y por eso se declara como desviación y no como regla original.
+
+**El caso.** Isluga, MODIS, 2026-07-22. MIROVA lista una sola pasada diurna de MODIS ese día (Terra 12:25, RUTINA,
+0 MW). El brazo bajó ese gránulo (MOD021KM.A2026203.1225) y la vía no guardó record: su registro dice «sin record (vía
+encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)». Aqua no tiene gránulo diurno ese día en
+CMR. I4 (b) pide que ningún volcán, sensor y día con pasadas diurnas de MIROVA quede sin records diurnos del brazo.
+
+**Por qué no es lo que la compuerta quería cazar.** I4 (b) se escribió en S163, bajo K, para detectar un brazo que no
+bajó un día. Bajo K, producción no perdía records nocturnos. La vía sí los pierde, de noche también, por el mismo descarte
+(98 de 2.674 pasadas MODIS nocturnas de MIROVA sin record en la noche de producción). La adenda V ya llevó la compuerta
+I4 (c) a esa tasa, y pasa en los tres sensores, pero dejó la I4 (b) con tolerancia cero. La pasada es negativa: dejarla
+pasar no puede inflar el beneficio del día.
+
+**La desviación, mecánica.** Un caso de I4 (b) (volcán, sensor, día) se dispensa sólo si cada pasada diurna de MIROVA de
+ese volcán, sensor y día sin record del brazo tiene, a ±120 s (`clase_mirova.VENTANA_S`), un gránulo que el brazo bajó y
+la vía descartó según el registro de su job (`evaluar_diurno_via.descartes_de_borde`, que lee la línea de
+`scripts/run_pipeline.py`; hoy sólo MODIS la escribe). I4 (a), las alertas diurnas sin record, no se dispensa nunca. Los
+casos dispensados se informan por nombre (`I4b_dispensadas`). Pruebas: `tests/test_evaluar_diurno_via_s190.py`, sección
+«desviación declarada 1».
+
+## 9. Nota sobre ceses definitivos de plataforma en la regla de días excluidos (D3, 2026-11-21)
+
+Decisión de Nicolás del 2026-11-21 (la misma respuesta del §8). La regla (a) más (b') de la adenda 1 de S163 se
+escribió para huecos pasajeros de NASA («si alguien pudo tener ese dato»). Con el cese de Suomi NPP desde el 2026-11-02
+a las 13:00 UTC (`scripts/ceses_esperados.json`), la regla excluye del 2026-11-03 al 2026-11-15 en los tres sensores,
+también de NOAA-20, NOAA-21 y MODIS, que sí tienen datos, y saca de la cuenta 9 protegidas MODIS, 13 de VIIRS 375 y
+12 de VIIRS 750 (verificador, H2). En este A/B no cambia el veredicto (calculado con y sin esos días). **Para los A/B
+futuros:** una plataforma que figura en `scripts/ceses_esperados.json` con su fecha de cese no dispara la regla después
+de esa fecha. Sus días vacíos se explican por el cese, no por un hueco, y las pasadas de las demás plataformas se
+evalúan. Este A/B se informa con la regla tal como estaba sellada.

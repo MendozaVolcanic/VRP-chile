@@ -170,9 +170,15 @@ def tabla_dayflag(recs_por_lado):
     return dict(sorted(c.items()))
 
 
-def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES):
-    """evaluar_diurno_k.compuerta_i4 con la lista de sensores como parámetro (en S163 recorría sólo VIIRS)."""
-    prob, det = [], {}
+def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES, descartes_borde=frozenset()):
+    """evaluar_diurno_k.compuerta_i4 con la lista de sensores como parámetro (en S163 recorría sólo VIIRS).
+
+    Desviación declarada 1 (ADENDA_VIA.md §8, decisión de Nicolás del 2026-11-21): un caso de I4 (b) (volcán, sensor,
+    día) se dispensa sólo si CADA pasada diurna de MIROVA de ese volcán, sensor y día sin record del brazo tiene, a
+    ±VENTANA_S, un gránulo que el brazo bajó y la vía descartó según su registro (`descartes_de_borde`). POR QUÉ: la
+    compuerta se escribió para cazar un día que el brazo no bajó; la vía descarta por borde gránulos bajados (171-01),
+    también de noche, y eso no es un brazo roto. I4 (a), las alertas, no se dispensa nunca."""
+    prob, det = [], {"I4b_dispensadas": []}
     dia_b = collections.Counter((r["vol"], r["b"], r["dt"].strftime("%Y-%m-%d")) for r in recs_b if r["es_dia"])
     for s in sensores:
         filas = [f for f in T if ek._sensor_dia(f, s)]
@@ -183,12 +189,44 @@ def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES):
         vacios = sorted({(f["pasada"].volcano, s, f["dia"]) for f in filas
                          if dia_b[(f["pasada"].volcano, s, f["dia"])] == 0})
         for v in vacios:
+            sin_v = [f for f in sin if (f["pasada"].volcano, s, f["dia"]) == v]
+            if sin_v and all(_descartada(v[0], s, f["pasada"].instante, descartes_borde) for f in sin_v):
+                det["I4b_dispensadas"].append("%s|%s|%s" % v)
+                continue
             prob.append("I4b %s|%s|%s: pasadas diurnas de MIROVA y ningún record diurno del brazo" % v)
         if ek.cobertura_diurna_excede(len(sin), len(filas), p_sup[s]):
             prob.append("I4c %s: %d de %d pasadas diurnas de MIROVA sin record del brazo (p_sup %.4f)"
                         % (s, len(sin), len(filas), p_sup[s]))
         det[s] = {"pasadas_diurnas": len(filas), "sin_record": len(sin), "p_sup": p_sup[s]}
     return prob, det
+
+
+def _descartada(vol, s, instante, descartes):
+    t = instante.replace(tzinfo=None)
+    return any(v == vol and b == s and abs((x - t).total_seconds()) <= cm.VENTANA_S for v, b, x in descartes)
+
+
+_RE_BORDE = re.compile(r"^\s*MODIS (M[OY]D021KM)\.A(\d{4})(\d{3})\.(\d{2})(\d{2})\.\S*: sin record \(vía encendida")
+
+
+def descartes_de_borde(raices, brazo):
+    """Desviación declarada 1: (volcán, sensor, instante) de cada gránulo que el BRAZO bajó y la vía no convirtió en
+    record, leído del registro del job (`scripts/run_pipeline.py`, línea «sin record (vía encendida: descarte de borde
+    de la vía, 171-01, o volcán fuera del gránulo)»; hoy sólo MODIS la escribe). El volcán sale del nombre del log."""
+    out = set()
+    for raiz in raices:
+        logs = Path(raiz) / "logs"
+        if not logs.is_dir():
+            continue
+        for p in logs.glob("%s_*.log" % brazo):
+            vol = p.stem[len(brazo) + 1:]
+            for linea in p.read_text(encoding="utf-8", errors="replace").splitlines():
+                m = _RE_BORDE.match(linea)
+                if m:
+                    d = datetime(int(m.group(2)), 1, 1) + timedelta(days=int(m.group(3)) - 1,
+                                                                    hours=int(m.group(4)), minutes=int(m.group(5)))
+                    out.add((vol, "MODIS", d))
+    return out
 
 
 def completar_control_diurno(T, control, brazo, sensores=SENSORES):
@@ -265,7 +303,8 @@ def _dias_de(ventanas, nombre):
 
 
 def evaluar(pasadas, recs_por_lado, control, brazo, p_sup, sha, ventanas, excluir_claves=(), excluir_dias=(),
-            problemas_log=(), otra_como_negativo=False, sin_volcanes=(), con_i6=True, con_robustez=True):
+            problemas_log=(), otra_como_negativo=False, sin_volcanes=(), con_i6=True, con_robustez=True,
+            descartes_borde=frozenset()):
     """Una evaluación completa (adenda V §3 y §4) sobre pasadas de MIROVA y records ya cargados (con `pub`, `disp`,
     `es_dia`, `t1`, `fuente_hotspot`, `sha`, `via`, `dayflag`, `motivo`, `soz`). Con `con_robustez`, cada sensor se
     vuelve a evaluar sin Chillán (R-CH) y sin W7 (R-W7) para aplicar el §4."""
@@ -300,7 +339,7 @@ def evaluar(pasadas, recs_por_lado, control, brazo, p_sup, sha, ventanas, exclui
         comp["invalido"].append("I3: cobertura nocturna %s (protegidas %d, días vacíos %d, control sin protegida %d)" % (
             cob_n["veredicto"], len(cob_n["protegidas_sin_record_en_brazos"]),
             len(cob_n["dias_con_pasadas_de_mirova_y_sin_records"]), len(cob_n["control_sin_protegida_que_un_brazo_tiene"])))
-    p4, det4 = compuerta_i4(T, rb, brazo, p_sup)
+    p4, det4 = compuerta_i4(T, rb, brazo, p_sup, descartes_borde=descartes_borde)
     comp["invalido"] += p4
     i5, solo = ek.compuerta_i5(rc, rb)
     comp["indecidible"] += i5
@@ -311,7 +350,8 @@ def evaluar(pasadas, recs_por_lado, control, brazo, p_sup, sha, ventanas, exclui
     sub_ch = sub_w7 = None
     if con_robustez:
         kw = dict(p_sup=p_sup, sha=sha, ventanas=ventanas, excluir_claves=excluir_claves, problemas_log=problemas_log,
-                  otra_como_negativo=otra_como_negativo, con_i6=False, con_robustez=False)
+                  otra_como_negativo=otra_como_negativo, con_i6=False, con_robustez=False,
+                  descartes_borde=descartes_borde)
         sub_ch = evaluar(pasadas, recs_por_lado, control, brazo, excluir_dias=excl_d, sin_volcanes=sin_v | {CHILLAN},
                          **kw)
         sub_w7 = evaluar(pasadas, recs_por_lado, control, brazo, excluir_dias=excl_d | _dias_de(ventanas, "W7"),
@@ -343,7 +383,8 @@ def evaluar(pasadas, recs_por_lado, control, brazo, p_sup, sha, ventanas, exclui
             # §3.5: sin ningún descarte VIIRS diurno en el brazo se informa sospecha de cableado antes del veredicto.
             "M7_sospecha": sum(m7[brazo][s]["dia"] for s in SENSORES_VIIRS) == 0,
             "dayflag_contra_elevacion": tabla_dayflag(recs),
-            "pasadas": len(T), "pasadas_diurnas": sum(1 for f in T if f["es_dia"])}
+            "pasadas": len(T), "pasadas_diurnas": sum(1 for f in T if f["es_dia"]),
+            "I4b_dispensadas": det4.pop("I4b_dispensadas")}
 
 
 def pasadas_de(filas, canal, ventanas, vols=None, regla=ek.REGLA_MINIMAS, umbral=cm.UMBRAL_MINIMA_MW):
@@ -362,11 +403,12 @@ def pasadas_de(filas, canal, ventanas, vols=None, regla=ek.REGLA_MINIMAS, umbral
     return out
 
 
-def evaluar_completo(filas, recs, control, brazo, p_sup, sha, ventanas, problemas_log=(), filas_1_13=()):
+def evaluar_completo(filas, recs, control, brazo, p_sup, sha, ventanas, problemas_log=(), filas_1_13=(),
+                     descartes_borde=frozenset()):
     """El veredicto por flag con la robustez de S163 §6.4 (tabla sola, sin W2, sin reflejo probable, «otra» como
     negativo) y lo informativo (mínimas, filtro de 12° que la vía ya aplica, desproporción). Separado de main() para
     que la batería lo pruebe."""
-    kw = dict(p_sup=p_sup, sha=sha, ventanas=ventanas, problemas_log=problemas_log)
+    kw = dict(p_sup=p_sup, sha=sha, ventanas=ventanas, problemas_log=problemas_log, descartes_borde=descartes_borde)
     pas_u = pasadas_de(filas, "union", ventanas)
     principal = evaluar(pas_u, recs, control, brazo, **kw)
     reflejo, sin_pareo = ek.claves_reflejo(pas_u, filas_1_13)
@@ -549,7 +591,11 @@ def main(argv=None):
     if dias:
         print("DÍAS EXCLUIDOS POR HUECO DE NASA: %s" % dias)
         filas, recs = ece.quitar_dias(filas, recs, dias)
-    r = evaluar_completo(filas, recs, control, brazo, p_sup, a.sha_codigo, ventanas, logs, ek._filas_1_13())
+    descartes = descartes_de_borde(a.raiz, brazo)
+    print("desviación 1 (§8): %d gránulos del brazo que la vía bajó y descartó según su registro" % len(descartes))
+    r = evaluar_completo(filas, recs, control, brazo, p_sup, a.sha_codigo, ventanas, logs, ek._filas_1_13(),
+                         descartes_borde=frozenset(descartes))
+    print("I4b dispensadas por la desviación 1: %s" % r["principal"]["I4b_dispensadas"])
     imprimir(r)
     print("INFORMATIVO (no decide): %s" % r["info"])
     print("filtro de reflejo de 12° sobre lo publicado (la vía ya lo aplica): apaga %d; %d diurnas sin ángulos"
