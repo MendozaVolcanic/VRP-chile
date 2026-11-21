@@ -205,6 +205,13 @@ energía: arriba de 1 MW perder una alerta no tiene compensación posible.
    distancia, 992 pasadas) quedó descartada; los evaluadores que ya la calculan la siguen imprimiendo
    como dato informativo, pero no decide. Definición, control y denominadores:
    `docs/S151_CRITERIO_CLASE_MIROVA.md` §2, §3 y §5.
+   ⚠️ **S193 (auditoría Codex ronda 2, F10-V301, verificada; recomendación aceptada por Nicolás el 2026-11-21 en
+   S193, «continua con todo lo que recomiendes»): mientras un sensor procese sólo pasadas nocturnas (D27), sus
+   alertas protegidas diurnas de MIROVA no entran en este punto.** La réplica no mira de día a propósito, así que
+   perderlas no es una pérdida del detector sino del alcance. Codex contó 88 protegidas diurnas sin record nuestro, 76
+   de ellas de Nevados de Chillán en erupción, hasta 12,34 MW (`D:\codex-vrp\_salida\ronda2\RESUMEN_F10_F12_PARA_NICOLAS.md`).
+   Quedan a la vista, no fuera del registro: el A/B diurno (#813) decide si se enciende el día por sensor, y desde el
+   encendido de un sensor sus protegidas diurnas cuentan aquí como cualquier otra.
 2. ⚠️ **Precisada por D-9 (2026-10-15, punto 5)**: «Muy Bajo» empieza arriba de 0,05 MW en VIIRS 375; las
    alertas del scraper de 0,05 MW o menos son pasadas que el banner llama NONE y cuentan como «MIROVA no vio
    nada». Texto original:
