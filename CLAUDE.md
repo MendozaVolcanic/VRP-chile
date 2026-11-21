@@ -56,7 +56,7 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo
 > ⚠️ **S192 (A113, decisión de Nicolás del 2026-11-21, «Sí, suspéndela»): la reversión pre-autorizada de los tres
 > sensores está SUSPENDIDA** hasta que (1) el tablero marque el paso de la vía a K y (2) una regla aprobada por Nicolás
 > diga qué pasa con la historia ya publicada. Por qué (F11-102, auditoría Codex ronda 2, frente 11): la historia es
-> toda de la vía y `frontend/cambio_detector.js` sólo marca K seguido de la vía, así que un revert dejaría caer la
+> toda de la vía y `frontend/cambio_detector.js` sólo marca K seguido de la vía (⚠️ S193: describe el tablero anterior a #1072, que desde el 2026-11-21 marca también el paso de la vía a K con la línea «vuelve a K»; lo que falta para levantar la suspensión es la condición (2) y la decisión de Nicolás), así que un revert dejaría caer la
 > potencia a cerca de la mitad sin marca en el tablero. Mientras tanto, una `REVERSION_CANDIDATA` de las guardias se
 > confirma en la imagen de MIROVA y se lleva a Nicolás el mismo día; no se revierte sola. Detalle en la marca S192 de
 > las dos reglas de reversión.
@@ -90,7 +90,7 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
   (⚠️ S191, frente 3, R4: además quedan fijos en el valor de 750, sin medir por separado, los cortes de reflejo solar y
   de frío, la regla de media escena, el halo y los multiplicadores; MODIS y VIIRS 375 agregan el corte de 5 km, D36
   punto 1);
-  que MODIS use el K1 y el piso de 750 en vez de -0,8 y 0,01 de la Tabla 1 es divergencia sin medir (D36) (⚠️ S190, F1M-110: ya medida, A/B de 330 pasadas en `experiments/_s190_d36/INFORME.md`; con los números de la Tabla 1 y la conectiva `max` del `.m` no se gana ni se pierde ninguna alerta de MIROVA y la potencia cambia en 9 pasadas de NdC; la fórmula «or» del texto del paper no se midió, F1M-117). El «difiere
+  que MODIS use el K1 y el piso de 750 en vez de -0,8 y 0,01 de la Tabla 1 es divergencia sin medir (D36) (⚠️ S190, F1M-110: ya medida, A/B de 330 pasadas en `experiments/_s190_d36/INFORME.md`; con los números de la Tabla 1 y la conectiva `max` del `.m` no se gana ni se pierde ninguna alerta de MIROVA y la potencia cambia en 9 pasadas de NdC; la fórmula «or» del texto del paper no se midió, F1M-117; ⚠️ S193, F9-V303 y F9-V304: las 9 pasadas son todas protegidas, así que «ni se pierde» vale para la detección y no para el valor; de «or» ya se midió la exposición, no el efecto: umbral bajo el de la vía en 6.024 de 6.024 escenas nocturnas MODIS, marca S193 de D36 punto 6). El «difiere
   de producción en 10 de 13 puntos» de S158 comparaba con K. (S186; historia: Reglas científicas)
 - **Detector de producción**: la vía «código MIROVA» en los tres sensores (S186): grilla fija de MIROVA
   (`pipeline/grillas_mirova.yaml`), detector y fondo del `.m`, `vrp_mw` = suma de todos los alertados; banda 22
@@ -137,7 +137,9 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
   aunque haya otra alertada más débil en el cráter; `distance_class` y la publicación en el tablero salen de ahí. El
   VRP no depende de la regla (suma de todos los alertados, D32). Clase igual a la de MIROVA en 98,7 % de 2.037
   pasadas, tabla sola (cercano 93,6 %); `Distancia_km` de MIROVA no sirve para elegir (sesgo al alertado más
-  lejano). Prueba: `tests/test_guard_regla_posicion_radiante_s186.py` (#1022, en main desde el 2026-11-15).
+  lejano). ⚠️ S193 (A113; auditoría Codex ronda 2, F12-104 y F12-V301, verificadas): su costo son 12 protegidas
+  nocturnas sólo OCR con el mecanismo de «radiante» del 2026-03-01 al 2026-11-18, no las 5 declaradas; con la tabla
+  sola, 0 (marca S193 de D8'). Prueba: `tests/test_guard_regla_posicion_radiante_s186.py` (#1022, en main desde el 2026-11-15).
   Detalle en D8'. (S186)
 - Campo unificado `final_hotspot_lat/lon/dist_km`. En la vía es el centroide del cúmulo 8-conexo de la alertada más
   radiante, con la distancia desde el cráter (⚠️ S191 (A113; auditoría Codex ronda 2, R1, verificada en parte): exacto en
@@ -177,7 +179,7 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - **A20.** R2 con centroide no aplica a anomalías difusas (PCC); validar por magnitud agregada + geometría (D7). (historia: A20)
 - **A21.** Las bandas de los gates R2 dependen del régimen (`docs/R2_GATES_BY_REGIME.md`). (historia: A21)
 - **A22.** PP es bimodal en selección de cúmulo: multi-caso (3 a 5 ALERTAs) y reportar la moda. (historia: A22)
-- **A23.** D9 reabierta en parte (S146): sigue viva sólo la co-validación del path D sobre fondo frío; gate por `t_bg` descartado; el tope de 5 MW recorta sin medir que lo recortado sea artefacto, el código MIROVA V750 no lo tiene (S158) y bajo K casi no actúa (S160). (historia: A23)
+- **A23.** D9 reabierta en parte (S146): sigue viva sólo la co-validación del path D sobre fondo frío; gate por `t_bg` descartado; el tope de 5 MW recorta sin medir que lo recortado sea artefacto, el código MIROVA V750 no lo tiene (S158) y bajo K casi no actúa (S160). ⚠️ S193 (F10-107): la vía, producción en los tres sensores, no tiene tope (70 records MODIS de la vía sobre 5 MW; marca S193 de D9). (historia: A23)
 - **A24.** El TIF de MIROVA no es VRP por píxel sumable (D6). (historia: A24)
 - **A25.** `git fetch origin --prune` al inicio; `git log main` local no refleja `origin/main`. (historia: A25)
 - **A26.** Calidad sobre tokens (Nicolás S70-2): subagentes, skills y verificación sin recortar; evitar re-lecturas, polling y salidas gigantes. (historia: A26)
