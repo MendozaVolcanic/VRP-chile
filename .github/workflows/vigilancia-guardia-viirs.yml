@@ -160,3 +160,18 @@ jobs:
               fi ;;
             *) echo "sin issue" ;;
           esac
+          # S193 (auditoria Codex ronda 2, F11-101 y F9-101): una protegida que produccion no publica y que ningun
+          # disparador de arriba cubre (la guardia no tiene la pasada, o K tambien calla) abre su propio issue, por
+          # sensor y con cualquier veredicto. Es un AVISO: no es candidata a reversion (si K tampoco publica, la perdida
+          # no dice nada de K contra la via). Antes quedaba listada en el JSON con VERDE hasta el auto-audit del lunes.
+          python - <<'PY' > /tmp/sin_aviso.txt
+          import json, os
+          d = json.load(open(os.environ["LATEST"], encoding="utf-8"))
+          e = {"VIIRS375": "VIIRS 375", "VIIRS750": "VIIRS 750"}[d["sensor"]]
+          g = {True: "la publica", False: "tampoco la publica", None: "no tiene la pasada"}
+          for p in d.get("protegidas_sin_publicar_sin_aviso", []):
+              print(f"- {p['volcano']} {e} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: produccion no la publica y la guardia (K) {g[p.get('guardia_pub')]}")
+          PY
+          if [ -s /tmp/sin_aviso.txt ]; then
+            abrir "Guardia K de $ETIQUETA: protegida sin publicar" "$(printf 'Produccion (la via codigo MIROVA) no publica estas alertas protegidas de MIROVA en %s (1 MW o mas), y ningun disparador de la regla las cubre porque la guardia (K) no tiene la pasada o tampoco la publica:\n\n%s\n\nEs un AVISO, no una candidata a reversion: si K tampoco la publica, la perdida no dice nada de K contra la via (auditoria Codex ronda 2, F11-101 y F9-101). Confirmar la alerta en la cabecera de la imagen de MIROVA y llevarla a Nicolas. Una vez decidida, anotar la pasada en %s para que deje de avisar.\nDetalle: %s (protegidas_sin_publicar_sin_aviso).' "$ETIQUETA" "$(cat /tmp/sin_aviso.txt)" "$JUZGADAS" "$LATEST")"
+          fi
