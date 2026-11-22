@@ -51,7 +51,11 @@ def test_control_es_produccion_y_diurno_difiere_solo_en_la_palanca():
     res = _resolver("mirova_equivalent", CONTROL, DIURNO)
     prod, c, d = res["mirova_equivalent"], res[CONTROL], res[DIURNO]
     assert len(prod) > 100   # el instrumento ve las constantes de verdad
-    assert _distintos(prod, c) == {"PROFILE_NAME", "DATA_SUBDIR"}, sorted(_distintos(prod, c))
+    # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y este control
+    # (medido con producción sólo de noche) lo declara apagado, así que difieren justo en ese flag. Base nueva: control
+    # = producción menos el día de MODIS. Texto original: `_distintos(prod, c) == {"PROFILE_NAME", "DATA_SUBDIR"}`.
+    assert _distintos(prod, c) == {"PROFILE_NAME", "DATA_SUBDIR", "ENABLE_DAYTIME_MODIS"}, sorted(_distintos(prod, c))
+    assert (prod["ENABLE_DAYTIME_MODIS"], c["ENABLE_DAYTIME_MODIS"]) == ("True", "False")
     assert _distintos(c, d) == {"PROFILE_NAME", "DATA_SUBDIR", "ENABLE_DAYTIME_VIIRS"}, sorted(_distintos(c, d))
     assert (c["ENABLE_DAYTIME_VIIRS"], d["ENABLE_DAYTIME_VIIRS"]) == ("False", "True")
     # la base es K (S153, #850): sin Test 1 integrado, conectiva max, banda 22 MODIS

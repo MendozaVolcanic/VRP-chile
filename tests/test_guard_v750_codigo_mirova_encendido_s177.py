@@ -39,6 +39,7 @@ CLAVE = "enable_v750_codigo_mirova"
 VIVOS = {
     "mirova_equivalent": True,        # producción: el encendido de este PR
     "sombra_codigo_mirova": True,     # la sombra corre las tres vías a propósito (S167)
+    "laboratorio": True,              # S193: hereda la vía de producción (D2 (a) del plan S190)
     "sombra_34": True,                # sombra de los 34 con las tres vías (#932)
     "guardia_k_viirs": False,         # la guardia es K de los dos VIIRS (S176, PR A)
     "guardia_k_modis": False,         # K pura de MODIS; no corre VIIRS, pero si heredara la vía pediría pyproj

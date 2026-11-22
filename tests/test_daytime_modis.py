@@ -9,9 +9,15 @@ os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 def test_profile_exposes_daytime_constants():
     """profile.py expone las constantes día MODIS + flag (default OFF).
     mirova_equivalent NO define el flag → defaults seguros (Coppola 2016a Tabla 1)."""
+    import inspect
     import pipeline.profile as P
     assert hasattr(P, "ENABLE_DAYTIME_MODIS")
-    assert P.ENABLE_DAYTIME_MODIS is False           # default OFF, no toca operacional
+    # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción declara el flag ENCENDIDO
+    # (pipeline/profiles/mirova_equivalent.yaml, `paths`). Lo que sigue valiendo de la razón original es el default:
+    # un perfil que no lo declara queda sólo de noche. Texto original:
+    # `assert P.ENABLE_DAYTIME_MODIS is False  # default OFF, no toca operacional`.
+    assert P.ENABLE_DAYTIME_MODIS is True
+    assert 'bool(_p.get("enable_daytime_modis", False))' in inspect.getsource(P)
     assert hasattr(P, "NTI_K1_DAY") and abs(P.NTI_K1_DAY - (-0.6)) < 1e-9
     assert hasattr(P, "N_SIGMA_MIR_DAY") and abs(P.N_SIGMA_MIR_DAY - 15.0) < 1e-9
     assert hasattr(P, "DNTI_CONTEXTUAL_C1_DAY") and abs(P.DNTI_CONTEXTUAL_C1_DAY - 0.02) < 1e-9

@@ -21,6 +21,7 @@ QUÉ FIJAN ESTOS TESTS.
 import json
 import os
 import sys
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
@@ -49,6 +50,18 @@ CAMPOS_DEL_NOMBRE = {"granule", "datetime_utc", "product_version"}
 def _flag(valor):
     import pipeline.profile as prof
     return patch.object(prof, "ENABLE_DAYTIME_VIIRS", valor)
+
+
+@contextmanager
+def _flag_con_modis_de_noche(valor):
+    """⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción abre el día de MODIS. Las pruebas que
+    fijan que el flag de VIIRS no toca a MODIS lo comprueban ahora con el flag de MODIS apagado a mano, que era lo que
+    daba producción cuando se escribieron; el caso con MODIS encendido vive en
+    test_filtro_nocturno_de_modis_sigue_a_su_flag_s190 y en tests/test_perfil_dia_modis_s193.py. Texto original: usaban
+    `_flag(valor)` solo."""
+    import pipeline.profile as prof
+    with patch.object(prof, "ENABLE_DAYTIME_MODIS", False), _flag(valor):
+        yield
 
 
 def _sin_nombre(rec):
@@ -132,11 +145,11 @@ def test_filtro_nocturno_sigue_al_flag_solo_en_viirs():
     from pipeline.diurno import aplica_filtro_nocturno
     plataformas = ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21", "VIIRS_SNPP_750",
                    "VIIRS_NOAA20_750", "VIIRS_NOAA21_750")
-    with _flag(False):
+    with _flag_con_modis_de_noche(False):
         for p in plataformas + ("MODIS_TERRA", "MODIS_AQUA"):
             assert aplica_filtro_nocturno(True, p) is True
             assert aplica_filtro_nocturno(False, p) is False
-    with _flag(True):
+    with _flag_con_modis_de_noche(True):
         for p in plataformas:
             assert aplica_filtro_nocturno(True, p) is False, p
         assert aplica_filtro_nocturno(True, "MODIS_TERRA") is True
@@ -341,9 +354,9 @@ def test_fetch_no_filtra_viirs_de_noche_con_el_flag(tmp_path):
             f.fetch_for_volcano({"name": "Prueba", "lat": arnes.LAT0, "lon": arnes.LON0},
                                 datetime(2026, 7, 19), tmp_path, nighttime_only=True)
         return list(filtradas)
-    with _flag(False):
+    with _flag_con_modis_de_noche(False):
         off = correr()
-    with _flag(True):
+    with _flag_con_modis_de_noche(True):
         on = correr()
     assert any("VIIRS" in k for k in off) and any("MODIS" in k for k in off)
     assert on and all("MODIS" in k for k in on), on
@@ -384,10 +397,10 @@ def test_run_pipeline_deja_pasar_el_granulo_viirs_diurno_solo_con_el_flag(tmp_pa
 def test_la_auditoria_sigue_al_flag():
     from scripts.auto_audit_weekly import es_pasada_diurna_descartada
     dt = datetime(2026, 7, 19, 18, 0)
-    with _flag(False):
+    with _flag_con_modis_de_noche(False):
         assert es_pasada_diurna_descartada("VIIRS375", arnes.LAT0, arnes.LON0, dt) is True
         assert es_pasada_diurna_descartada("VIIRS750", arnes.LAT0, arnes.LON0, dt) is True
-    with _flag(True):
+    with _flag_con_modis_de_noche(True):
         assert es_pasada_diurna_descartada("VIIRS375", arnes.LAT0, arnes.LON0, dt) is False
         assert es_pasada_diurna_descartada("VIIRS750", arnes.LAT0, arnes.LON0, dt) is False
         assert es_pasada_diurna_descartada("MODIS", arnes.LAT0, arnes.LON0, dt) is True
