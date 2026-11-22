@@ -127,7 +127,8 @@ def limpio(r):
     (AD, AD, AD, (0, None), 0, AD),
     (AD, NO, AD, (0, None), 0, DM4),          # R-CH
     (AD, SC, AD, (0, None), 0, AD),           # R-CH sólo con NO ADOPTAR sin Chillán
-    (NO, NO, NO, (0, None), 0, DM4),          # R-W7 tal como está escrito: también con el base en NO ADOPTAR
+    (NO, NO, NO, (0, None), 0, NO),           # R-W7, lectura 2: con el base en NO ADOPTAR queda NO ADOPTAR
+    (SC, SC, NO, (0, None), 0, SC),           # R-W7, lectura 2: sólo actúa sobre un ADOPTAR
     (AD, AD, NO, (0, None), 0, DM4),          # R-W7
     (AD, AD, SC, (0, None), 0, AD),
     (AD, AD, AD, (5, 2.5), 0, DE),            # M5 con 5 pares fuera de 0,5 a 2
@@ -247,15 +248,16 @@ def test_r_w7_beneficio_solo_de_w7_pasa_a_decide_con_m4():
     assert m["veredicto"] == DM4 and r["flags"][FV] == DM4
 
 
-def test_r_w7_tal_como_esta_escrito_con_un_brazo_malo_en_todas_las_ventanas():
-    """Lectura literal del §4: «no cambia el veredicto salvo que sin W7 salga NO ADOPTAR». Un brazo que publica sin
-    discriminar en W2 sale NO ADOPTAR con y sin W7, y por R-W7 queda DECIDE NICOLÁS CON M4, no NO ADOPTAR. Se deja
-    fijado y se informa a Nicolás (no es un ADOPTAR, así que no viola el control del brazo ruidoso)."""
+def test_r_w7_lectura_2_un_brazo_malo_en_todas_las_ventanas_sale_no_adoptar():
+    """R-W7, lectura 2 (simétrica con R-CH), elegida por Nicolás el 2026-11-21 sobre PREGUNTA_R_W7.md: «acepto los 4
+    mientras nos acerquen a nuestros objetivos». Un brazo que publica sin discriminar en W2 sale NO ADOPTAR con y sin
+    W7 y queda NO ADOPTAR; con la lectura literal habría salido DECIDE NICOLÁS CON M4."""
     e = Escena().base()
     publicar_negativos(e, V750, 30)
     r = e.evaluar()
     m = sensor(r, V750)
-    assert (m["base"], m["sin_W7"], m["veredicto"]) == (NO, NO, DM4)
+    assert (m["base"], m["sin_W7"], m["veredicto"]) == (NO, NO, NO)
+    assert r["flags"][FV] != DM4
 
 
 def test_m8_cinco_publicaciones_de_1_mw_sin_fila_de_mirova_impiden_adoptar():
@@ -499,3 +501,55 @@ def test_vara_de_los_tres_sensores_en_el_sustrato_sellado():
     for s in SENS:
         assert ps[s] == pytest.approx(sus["vara_cobertura_nocturna_produccion"][s]["p_sup"])
         assert 0 < ps[s] < 0.1
+
+
+# ------------------------------------------- desviación declarada 1 (adenda V §8): I4 (b) y el descarte de borde
+LINEA_BORDE = ("  MODIS MOD021KM.A2026217.1225.061.2026218013443.hdf: sin record (vía encendida: descarte de borde de la "
+               "vía, 171-01, o volcán fuera del gránulo)\n")
+
+
+def test_descartes_de_borde_se_leen_del_registro_del_brazo(tmp_path):
+    logs = tmp_path / "W2" / "logs"
+    logs.mkdir(parents=True)
+    (logs / ("%s_Isluga.log" % B)).write_text(">>> Isluga | 2026-08-05\n" + LINEA_BORDE, encoding="utf-8")
+    (logs / ("%s_Lascar.log" % C)).write_text(LINEA_BORDE, encoding="utf-8")   # del control: no cuenta
+    d = ev.descartes_de_borde([tmp_path / "W2"], B)
+    assert d == {("Isluga", MOD, datetime(2026, 8, 5, 12, 25))}
+
+
+def _isluga_sola_y_descartada():
+    """Isluga, MODIS, 5 de agosto: MIROVA lista una sola pasada diurna (RUTINA) y el brazo no tiene record."""
+    e = Escena().base()
+    e.dia("Isluga", MOD, 5, "rutina", hora=12, minuto=25, con_record=False)
+    return e
+
+
+def test_i4b_sin_registro_de_descarte_sigue_invalidando():
+    r = _isluga_sola_y_descartada().evaluar()
+    assert any(x.startswith("I4b Isluga|MODIS|2026-08-05") for x in r["compuertas"]["invalido"])
+
+
+def test_i4b_se_dispensa_si_la_via_descarto_ese_granulo_por_borde():
+    r = _isluga_sola_y_descartada().evaluar(descartes_borde={("Isluga", MOD, t(5, 12, 25))})
+    assert not any(x.startswith("I4b") for x in r["compuertas"]["invalido"]), r["compuertas"]["invalido"]
+    assert r["I4b_dispensadas"] == ["Isluga|MODIS|2026-08-05"]
+
+
+def test_i4b_no_se_dispensa_con_un_descarte_de_otra_hora_u_otro_volcan():
+    for d in ({("Isluga", MOD, t(5, 14, 0))}, {("Lascar", MOD, t(5, 12, 25))}, {("Isluga", V375, t(5, 12, 25))}):
+        r = _isluga_sola_y_descartada().evaluar(descartes_borde=d)
+        assert any(x.startswith("I4b Isluga|MODIS|2026-08-05") for x in r["compuertas"]["invalido"]), d
+
+
+def test_i4b_no_se_dispensa_si_queda_una_pasada_del_dia_sin_descarte():
+    e = _isluga_sola_y_descartada()
+    e.dia("Isluga", MOD, 5, "rutina", hora=14, minuto=0, con_record=False)
+    r = e.evaluar(descartes_borde={("Isluga", MOD, t(5, 12, 25))})
+    assert any(x.startswith("I4b Isluga|MODIS|2026-08-05") for x in r["compuertas"]["invalido"])
+
+
+def test_la_desviacion_no_toca_i4a():
+    e = Escena().base()
+    e.dia("Isluga", MOD, 5, "alerta", 3.0, hora=12, minuto=25, con_record=False)
+    r = e.evaluar(descartes_borde={("Isluga", MOD, t(5, 12, 25))})
+    assert any(x.startswith("I4a Isluga|MODIS") for x in r["compuertas"]["invalido"])
