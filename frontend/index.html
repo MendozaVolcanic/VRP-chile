@@ -4489,10 +4489,20 @@ function ultimaPasadaEvol(pasadas, includeFar) {
 }
 // La última pasada con calor publicado (en el combinado la última suele ser una MODIS oblicua que no ve nada; sin esto el
 // recuadro gris escondía que esa noche otra pasada sí publicó).
+// F5-V301 (auditoría Codex ronda 2, S193): tomaba el último record con valor en el orden del archivo. Cuando VIIRS 375 y
+// 750 del mismo satélite publican a la misma hora (es la misma pasada), podía nombrar el menor mientras la tarjeta
+// mostraba el mayor: Chillán 2026-11-17 06:42, recuadro VIIRS 750 19,36 MW y tarjeta 22,81 MW. Ahora agrupa la pasada
+// como ultimaPasadaEvol (todo lo que cae a 10 minutos o menos de la última con calor) y manda el mayor valor publicado.
 function ultimaConCalorEvol(pasadas, includeFar) {
   for (let i = pasadas.length - 1; i >= 0; i--) {
-    const v = vrpPublicadoEvol(pasadas[i], includeFar);
-    if (v > 0) return { p: pasadas[i], vrp: v };
+    if (!(vrpPublicadoEvol(pasadas[i], includeFar) > 0)) continue;
+    const tUlt = pasadas[i].t;
+    let mejor = null;
+    for (let j = i; j >= 0 && tUlt - pasadas[j].t <= EVOL_MISMA_PASADA_MS; j--) {
+      const v = vrpPublicadoEvol(pasadas[j], includeFar);
+      if (v > 0 && (!mejor || v > mejor.vrp)) mejor = { p: pasadas[j], vrp: v };
+    }
+    return mejor;
   }
   return null;
 }
