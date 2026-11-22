@@ -1,0 +1,72 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · laboratorio.yaml · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Perfil de LABORATORIO, no operacional: medir lo que VRP Chile puede ver «mejor que MIROVA» (señal
+#                 térmica real que queda bajo el umbral de MIROVA en el cráter) contra referencias que no son MIROVA
+#                 (NHI en SWIR, actividad del OVDAS, persistencia), nunca contra MIROVA (A115). No alimenta el tablero
+#                 operacional ni la alerta.
+# Lógica        : La vía «código MIROVA» de producción en los tres sensores (hereda mirova_equivalent), más UNA
+#                 extensión declarada, MEJ-5: un umbral contextual más permisivo sólo dentro de la zona A (el círculo
+#                 de inner_radius_km alrededor del cráter), igual a producción fuera. En este paso la zona A está
+#                 APAGADA: el record de cada pasada es el de producción, en otra carpeta.
+# Modelo/método : Reglas físicas deterministas (port del .m de MIROVA), sin ML (punto 5.5 Res.372).
+# Datos entrada : Los de producción: radiancias MIR y TIR de MODIS y VIIRS (L1B) y su geolocalización. SIN datos
+#                 personales.
+# Variables     : Las de producción. La extensión agrega un parámetro, el multiplicador de sigma de la zona A en el
+#                 criterio contextual nocturno (laboratorio_zona_a.valor), hoy null; lo elige el paso 3 del plan.
+# Limitaciones  : Mientras la zona A esté apagada no mide nada nuevo (es un gemelo de producción). Cuando se encienda,
+#                 cada píxel extra que mire puede ser un valle tibio, un salar o un incendio: por eso sólo cuenta lo
+#                 que confirme NHI o la persistencia, con el nulo medido (S131: 20 a 49 % de tasa basal NHI).
+#                 Cordón Caulle queda fuera de la primera tanda (inner de 20 km, casi dos tercios de la escena; D6).
+# Refs/datos    : docs/PLAN_EXPERIMENTAL_S190.md (§2, §4, §6, §7 y decisiones D1 a D7 de Nicolás, 2026-11-17);
+#                 docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md; docs/BEYOND_MIROVA_EXTENSIONS.md §12 (MEJ-5);
+#                 plan de este paso: docs/superpowers/plans/2026-11-21-laboratorio-paso1.md. Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
+#
+# POR QUÉ un perfil nuevo y no reconvertir `experimental` (D1 (a)): `experimental` es la sombra C0 congelada que escribe
+# en data/experimental_v2/; cambiarle la configuración mezclaría dos detectores en una misma serie
+# (tests/test_profile_data_isolation_s124.py). Se retira aparte.
+# POR QUÉ sobre la vía y no sobre C0 (D2 (a)): lo que C0 ve de más es mayormente el Test 1 integrado, que el 90,9 % de los
+# records VIIRS 375 cruza por ruido (S147 §1); construir encima mediría ese defecto y no el fenómeno.
+# POR QUÉ hereda y no copia: si producción cambia, el laboratorio la sigue, y toda diferencia con el tablero operacional
+# es atribuible a la extensión declarada (diseño S147 §5). Lo vigila tests/test_laboratorio_paso1_s193.py (G1): el
+# perfil resuelto difiere de producción sólo en nombre, carpeta y la zona A.
+# Los tres flags de K se declaran con el valor de producción porque tests/test_guard_perfiles_congelados_s153.py lo
+# exige a todo perfil derivado (A117). Consecuencia buscada: si producción los cambiara, G1 cae en rojo y alguien decide
+# a conciencia si el laboratorio sigue o no.
+#
+# NO OPERACIONAL: carpeta propia data/laboratorio_v1/ (D3), ningún workflow lo corre (el cron llega en el paso 4, por
+# tandas, D7) y el tablero operacional no lo lee (G5 y G6 de la misma prueba). Correrlo sin --volcano procesa los 45
+# volcanes (scripts/run_pipeline.py sólo filtra a los Tier A el perfil mirova_equivalent): despachar por volcán.
+extends: mirova_equivalent
+profile: laboratorio
+description: >
+  Laboratorio sobre la vía de producción (S193, paso 1 del plan S190): producción tal cual en carpeta propia, con la
+  extensión MEJ-5 (zona A más sensible) declarada y apagada.
+
+thresholds:
+  # POR QUÉ apagada y no ausente: la zona A existe para que el paso 3 elija su umbral sobre negativos limpios. Encenderla
+  # antes de que la vía la implemente es un error al cargar el perfil (pipeline/profile.py, _zona_a_de), para que nadie
+  # corra un laboratorio idéntico a producción creyendo que mide la extensión.
+  enable_lab_zona_a: false
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+enable_modis_b22_primary: true
+
+# Extensión MEJ-5 (plan S190 §6). Zona A: celdas a no más de inner_radius_km del cráter (volcanoes.yaml). Parámetro: el
+# multiplicador de sigma del criterio contextual nocturno de la vía (detectar_mirova: alerta si el contraste NTI y el
+# ETI superan max(mu + s·sd, piso); hoy la región sensible del cráter usa s = 5 y la conservadora s = 10). En la zona A
+# se usaría s = valor, con los pisos de la región sensible; menor valor, más alertas (lo vigila
+# tests/test_guard_laboratorio_no_mas_ciego_s147.py: valor <= s2 nocturno). valor: null hasta el paso 3.
+laboratorio_zona_a:
+  extension: MEJ-5
+  radio: inner_radius_km
+  parametro: sigma_contextual_nocturno
+  valor: null
+  volcanes_fuera:
+    - PuyehueCordonCaulle   # D6: inner de 20 km
+
+output:
+  data_subdir: laboratorio_v1
