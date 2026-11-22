@@ -113,9 +113,10 @@ def _hav_km(lat1, lon1, lat2, lon2):
     return 2 * 6371.0 * math.asin(math.sqrt(a))
 
 
-def inner_desde_html():
-    """inner_radius_km por volcan leido de la lista VOLCANOES de frontend/index.html."""
-    src = HTML.read_text(encoding="utf-8")
+def inner_desde_html(src=None):
+    """inner_radius_km por volcan leido de la lista VOLCANOES de frontend/index.html (o del texto `src`, para que
+    scripts/comparacion_via_k.sha_predicado firme los radios del mismo texto que firma, F5-V302)."""
+    src = HTML.read_text(encoding="utf-8") if src is None else src
     out = {}
     for m in re.finditer(r'name:\s*"(\w+)".*?inner_radius_km:\s*([\d.]+)', src):
         out.setdefault(m.group(1), float(m.group(2)))
@@ -141,14 +142,15 @@ function constante(nombre) {
   if (!m) throw new Error('no encontre const ' + nombre);
   return m[0];
 }
-let USE_F5_CORE = true;
+// F5-112 (auditoria Codex ronda 2, S193): USE_F5_CORE se lee de la pagina con las demas constantes; antes el runner lo
+// fijaba en true por su cuenta y un cambio del interruptor en index.html no llegaba ni a lo medido ni a la firma.
 // S173 S1: los filtros de artefacto termico leen la marca de la via con el modulo compartido (A102); se carga como
 // en el navegador para que el predicado ejecutado sea el mismo.
 let CambioDetector;
 try { CambioDetector = require(require('path').join(require('path').dirname(process.argv[2]), 'cambio_detector.js')); }
 catch (e) { console.error('aviso banco_paridad: no cargo cambio_detector.js; los filtros de artefacto termico '
   + 'aplican la regla anterior a S173 a la via codigo MIROVA (' + e.message + ')'); }
-const codigo = [constante('F5_R_CORE_KM'), constante('F5_BT_EXT_K')].concat(
+const codigo = [constante('USE_F5_CORE'), constante('F5_R_CORE_KM'), constante('F5_BT_EXT_K')].concat(
   ['_havKm','mirovaEqVrp','f5CoreMagnitude','mirovaEqVrpCore','mirovaEqVrpDisplay',
    'isCirrusArtifact','isDiffuseFieldArtifact','isThermalArtifact','isValidDetection',
    'isSummitDetection'].map(extraer)).join('\n');

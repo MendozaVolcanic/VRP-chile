@@ -89,13 +89,58 @@ def ventanas(hoy):
             "adopcion": {b: (ADOPCION[b], hoy) for b in SENSORES}}
 
 
-def sha_predicado(html, cambio_detector_js):
-    """sha256 de lo que decide si una pasada se publica: las constantes y funciones que banco_paridad extrae de
-    frontend/index.html para node, más frontend/cambio_detector.js, que ese mismo código carga. V183-01: el sha de todo
-    index.html cambiaba con un texto de la página (un modal) y el aviso de «predicado cambió» quedaba encendido sin
-    motivo. La lista de nombres se lee de banco_paridad._JS para no tener dos listas."""
-    consts = re.findall(r"constante\('(\w+)'\)", bp._JS)
-    funcs = re.findall(r"'(\w+)'", bp._JS[bp._JS.index("concat(") : bp._JS.index("].map(extraer)")])
+def _sin_comentarios_js(src):
+    """Texto JS sin comentarios (// y /* */) ni líneas en blanco ni espacios al final de línea; respeta los textos entre
+    comillas simples, dobles e invertidas. F5-V302: la firma hasheaba los comentarios, así que un comentario nuevo dentro
+    de mirovaEqVrp encendía el aviso de «criterio cambió» sin que cambiara nada de lo que se publica. No reconoce
+    expresiones regulares literales: ninguna de las funciones firmadas tiene una con // o /* adentro (lo vigila
+    tests/test_comparacion_via_k_s183.py, que compila con node lo que queda)."""
+    out, i, n, cita = [], 0, len(src), None
+    while i < n:
+        c = src[i]
+        if cita:
+            out.append(c)
+            if c == "\\" and i + 1 < n:
+                out.append(src[i + 1])
+                i += 2
+                continue
+            if c == cita:
+                cita = None
+            i += 1
+            continue
+        if c in "'\"`":
+            cita = c
+            out.append(c)
+            i += 1
+        elif src.startswith("//", i):
+            while i < n and src[i] != "\n":
+                i += 1
+        elif src.startswith("/*", i):
+            k = src.find("*/", i + 2)
+            i = n if k < 0 else k + 2
+            out.append(" ")
+        else:
+            out.append(c)
+            i += 1
+    lineas = (l.rstrip() for l in "".join(out).replace("\r\n", "\n").split("\n"))
+    return "\n".join(l for l in lineas if l.strip())
+
+
+def sha_predicado(html, cambio_detector_js, runner=None):
+    """sha256 de lo que decide si una pasada se publica en la comparación, que es lo que banco_paridad ejecuta en node:
+    las constantes y funciones que extrae de frontend/index.html (USE_F5_CORE incluida, F5-112), frontend/cambio_detector.js
+    que ese código carga, el propio runner de node (la regla `summit && valid && !art && disp > 0`) y el radio del cráter
+    de cada volcán que lee de la lista VOLCANOES (F5-V302). Todo sin comentarios: un comentario no cambia lo que se
+    publica y no debe avisar (F5-V302). V183-01: el sha de todo index.html cambiaba con un texto de la página (un modal)
+    y el aviso de «predicado cambió» quedaba encendido sin motivo. La lista de nombres se lee de banco_paridad._JS para
+    no tener dos listas.
+
+    Lo que NO entra, a propósito: las funciones de la tarjeta (latestDetection y su ventana de 48 h). La comparación no
+    ejecuta la tarjeta; que la tarjeta publique con la misma regla que el runner lo vigila
+    tests/test_comparacion_via_k_s183.py::test_tarjeta_publica_con_la_regla_del_banco, con datos reales."""
+    runner = bp._JS if runner is None else runner
+    consts = re.findall(r"constante\('(\w+)'\)", runner)
+    funcs = re.findall(r"'(\w+)'", runner[runner.index("concat(") : runner.index("].map(extraer)")])
     partes = []
     for c in consts:
         m = re.search(r"const " + c + r"\s*=\s*([^;]+);", html)
@@ -112,7 +157,10 @@ def sha_predicado(html, cambio_detector_js):
                 partes.append(html[i:k + 1])
                 break
     partes.append(cambio_detector_js)
-    return hashlib.sha256("\n".join(partes).encode("utf-8")).hexdigest()
+    partes.append(runner)
+    texto = "\n".join(_sin_comentarios_js(x) for x in partes)
+    radios = json.dumps(sorted(bp.inner_desde_html(html).items()))
+    return hashlib.sha256((texto + "\n" + radios).encode("utf-8")).hexdigest()
 
 
 def sha_predicado_actual():
