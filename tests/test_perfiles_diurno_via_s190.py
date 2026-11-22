@@ -51,7 +51,14 @@ def test_control_es_produccion_y_diurno_difiere_solo_en_los_dos_flags_del_dia():
     res = _resolver("mirova_equivalent", CONTROL, DIURNO)
     prod, c, d = res["mirova_equivalent"], res[CONTROL], res[DIURNO]
     assert len(prod) > 100
-    assert _distintos(prod, c) == {"PROFILE_NAME", "DATA_SUBDIR"}, sorted(_distintos(prod, c))
+    # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS con el
+    # resultado de este A/B, así que el control (producción de cuando se midió, sólo de noche) deja de ser producción
+    # justo en ese flag. Base nueva: control = producción menos el día de MODIS, y nada más; el brazo diurno sigue
+    # difiriendo del control sólo en los dos flags del día. Texto original: `_distintos(prod, c) == {"PROFILE_NAME",
+    # "DATA_SUBDIR"}` (el control ERA producción).
+    assert _distintos(prod, c) == {"PROFILE_NAME", "DATA_SUBDIR", "ENABLE_DAYTIME_MODIS"}, sorted(_distintos(prod, c))
+    assert (prod["ENABLE_DAYTIME_MODIS"], c["ENABLE_DAYTIME_MODIS"]) == ("True", "False")
+    assert prod["ENABLE_DAYTIME_VIIRS"] == c["ENABLE_DAYTIME_VIIRS"] == "False"
     assert _distintos(c, d) == {"PROFILE_NAME", "DATA_SUBDIR", "ENABLE_DAYTIME_VIIRS", "ENABLE_DAYTIME_MODIS"}, \
         sorted(_distintos(c, d))
     for k in ("ENABLE_DAYTIME_VIIRS", "ENABLE_DAYTIME_MODIS"):

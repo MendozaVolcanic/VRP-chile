@@ -66,8 +66,10 @@ def test_la_guardia_difiere_de_produccion_solo_en_las_vias_los_sensores_y_la_car
     distintas = {k for k in set(prod) | set(g) if prod.get(k) != g.get(k)}
     # Con los flags de producción apagados (PR A) las vías de VIIRS no difieren; con B1 y B2 encendidos, sí. La de
     # MODIS está encendida en producción y apagada aquí porque la guardia no corre MODIS.
+    # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y este perfil lo
+    # declara apagado (no se midió de día), así que también difieren en ese flag. Texto original: sin ENABLE_DAYTIME_MODIS.
     permitidas = {"DATA_SUBDIR", "PROFILE_NAME", "SENSOR_MODIS", "ENABLE_V375_CODIGO_MIROVA",
-                  "ENABLE_V750_CODIGO_MIROVA", "ENABLE_MODIS_CODIGO_MIROVA"}
+                  "ENABLE_V750_CODIGO_MIROVA", "ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_DAYTIME_MODIS"}
     assert distintas <= permitidas, sorted(distintas - permitidas)
     assert {"DATA_SUBDIR", "PROFILE_NAME", "SENSOR_MODIS"} <= distintas
 

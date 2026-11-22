@@ -90,6 +90,10 @@ enable_modis_b22_primary: false
 enable_modis_distance_class_from_cluster: false
 
 paths:
+  # S193: producción abre el día de MODIS (A/B #813, decisión de Nicolás del 2026-11-21); este perfil
+  # queda sólo de noche, declarado aquí para no heredarlo en silencio (A117). El laboratorio congelado C0 (detector anterior) no se midió de día.
+  # Lo vigila tests/test_perfil_dia_modis_s193.py.
+  enable_daytime_modis: false
   enable_test1_path: true
   enable_tests_23_prose_branch: false
   enable_tests_23_no_bt_gate_viirs375: false

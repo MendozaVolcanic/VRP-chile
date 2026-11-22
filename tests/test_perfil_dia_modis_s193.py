@@ -73,3 +73,43 @@ print("@@" + json.dumps({
     d = json.loads([l for l in r.stdout.splitlines() if l.startswith("@@")][0][2:])
     assert d == {"filtro_modis": [False, False], "filtro_viirs": [True, True], "rechazo_modis": False,
                  "rechazo_viirs": True}, d
+
+
+# Brazos que declaran el día de MODIS encendido a propósito (el brazo diurno del A/B #813).
+CON_DIA = {"_s190_ab_diurno_via_on"}
+
+
+def _derivados():
+    import yaml
+    out = {}
+    for f in sorted((ROOT / "pipeline" / "profiles").glob("*.yaml")):
+        cfg = yaml.safe_load(f.read_text(encoding="utf-8"))
+        if isinstance(cfg, dict) and cfg.get("extends") == PRODUCCION:
+            out[f.stem] = cfg
+    return out
+
+
+def _sin_flag(cfg):
+    """True si el YAML propio del perfil no declara el flag en `paths`, la sección donde lo lee pipeline/profile.py."""
+    return "enable_daytime_modis" not in (cfg.get("paths") or {})
+
+
+def test_todo_perfil_derivado_declara_el_dia_de_modis():
+    """A117 y S153: un perfil que hereda de producción declara el flag en `paths` (donde lo lee pipeline/profile.py),
+    así el próximo cambio de producción no se le filtra en silencio. Los brazos históricos se midieron con producción
+    sólo de noche y lo declaran apagado; sólo el brazo diurno del A/B lo declara encendido. Se comprueba también lo que
+    resuelve el código (A89)."""
+    der = _derivados()
+    assert len(der) >= 60
+    sin = sorted(n for n, c in der.items() if _sin_flag(c))
+    assert sin == [], f"perfiles derivados que heredarían el día de MODIS de producción: {sin}"
+    encendidos = {n for n, c in der.items() if c["paths"]["enable_daytime_modis"] is True}
+    assert encendidos == CON_DIA, encendidos
+    res = _resolver(*sorted(der))
+    assert {n for n, v in res.items() if v["modis"]} == CON_DIA
+
+
+def test_control_negativo_el_guard_ve_un_derivado_sin_el_flag():
+    assert _sin_flag({"extends": PRODUCCION, "paths": {"enable_test1_path": False}})
+    assert _sin_flag({"extends": PRODUCCION, "thresholds": {"enable_daytime_modis": False}})  # sección equivocada
+    assert not _sin_flag({"extends": PRODUCCION, "paths": {"enable_daytime_modis": False}})

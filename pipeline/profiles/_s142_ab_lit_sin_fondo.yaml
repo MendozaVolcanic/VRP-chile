@@ -6,6 +6,9 @@ description: >
   Literal menos D25: D22 on, D25 off, segundo pase condicionado on, keep_peak off; sólo VIIRS 375.
 
 paths:
+  # S193: perfil histórico, medido con producción sólo de noche. Producción abre el día de MODIS desde el
+  # 2026-11-21 (A/B #813); este perfil no lo hereda (A117; tests/test_perfil_dia_modis_s193.py).
+  enable_daytime_modis: false
   # S153, ADOPCION DE K (regla experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848): la replica apago el
   # Test 1 integrado y encendio la conectiva max y la banda 22. Este perfil hereda de mirova_equivalent y su
   # significado era la produccion de ANTES de K mas su propio cambio, asi que congela aca esos flags con el valor
