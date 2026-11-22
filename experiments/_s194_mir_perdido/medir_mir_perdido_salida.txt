@@ -1,0 +1,33 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+Records: {'records': 77172, 'no_tier_a': 2843, 'via': 74329, 'tier_a': 74329, 'con_claves_separadas': 214, 'con_claves_sin_separar': 329}
+  claves separadas: processed_utc 2026-11-22T02:18:57Z a 2026-11-22T09:33:56Z; datetime_utc 2026-11-15 12:30 a 2026-11-22 06:48
+  claves sin_separar: processed_utc 2026-11-20T02:18:25Z a 2026-11-21T17:22:35Z; datetime_utc 2026-11-17 01:10 a 2026-11-21 08:05
+Por sensor y generación de claves (tipo: records):
+  MODIS|separadas          {'ninguna': 146, 'sin_posicion': 1}
+  MODIS|sin_separar        {'ninguna': 106}
+  VIIRS375|separadas       {'bowtie': 13, 'ninguna': 19, 'saturado': 1}
+  VIIRS375|sin_separar     {'ambiguo': 33, 'ninguna': 77, 'sin_posicion': 1}
+  VIIRS750|separadas       {'bowtie': 14, 'ninguna': 19, 'sin_posicion': 1}
+  VIIRS750|sin_separar     {'ambiguo': 37, 'ninguna': 72, 'sin_posicion': 3}
+  total|separadas          {'ninguna': 184, 'bowtie': 27, 'saturado': 1, 'sin_posicion': 2}
+  total|sin_separar        {'ninguna': 255, 'ambiguo': 70, 'sin_posicion': 4}
+Claves separadas: 27 records con px_mir_invalido_crater > 0; en 27 el inválido es todo bow-tie (px_mir_invalido_crater == px_bowtie_crater)
+Qué muestra hoy el tablero («Solo cráter»), por tipo:
+  MARCA_TABLERO  {'escena sin datos': 6, 'publicada': 1}
+  ambiguo        {'sin anomalía': 63, 'publicada': 4, 'anomalía no publicada': 3}
+  bowtie         {'sin anomalía': 25, 'anomalía no publicada': 1, 'publicada': 1}
+  ninguna        {'sin anomalía': 376, 'reflejo solar': 20, 'publicada': 39, 'anomalía no publicada': 4}
+  saturado       {'publicada': 1}
+  sin_posicion   {'escena sin datos': 6}
+Records que el tablero marcaría (criterio de frontend/crater_no_medido.js):
+   {'vol': 'Chaiten', 'sensor': 'VIIRS_NOAA21_750', 'dt': '2026-11-21 06:06', 'gen': 'sin_separar', 'tipos': ['sin_posicion'], 'marca': [0, 0, True], 'tablero': 'escena sin datos', 'eq_mw': 0, 'eq_far_mw': 0, 'motivo_vacio': 'escena_invalida'}
+   {'vol': 'NevadosDeChillan', 'sensor': 'VIIRS_NOAA20', 'dt': '2026-11-22 06:48', 'gen': 'separadas', 'tipos': ['saturado'], 'marca': [0, 1, False], 'tablero': 'publicada', 'eq_mw': 25.806, 'eq_far_mw': 25.806, 'motivo_vacio': None}
+   {'vol': 'Tupungatito', 'sensor': 'VIIRS_NOAA21_750', 'dt': '2026-11-20 04:48', 'gen': 'sin_separar', 'tipos': ['sin_posicion'], 'marca': [0, 0, True], 'tablero': 'escena sin datos', 'eq_mw': 0, 'eq_far_mw': 0, 'motivo_vacio': 'escena_invalida'}
+   {'vol': 'Tupungatito', 'sensor': 'MODIS_AQUA', 'dt': '2026-11-21 21:40', 'gen': 'separadas', 'tipos': ['sin_posicion'], 'marca': [0, 0, True], 'tablero': 'escena sin datos', 'eq_mw': 0, 'eq_far_mw': 0, 'motivo_vacio': 'escena_invalida'}
+   {'vol': 'Tupungatito', 'sensor': 'VIIRS_NOAA20_750', 'dt': '2026-11-22 06:48', 'gen': 'separadas', 'tipos': ['sin_posicion'], 'marca': [0, 0, True], 'tablero': 'escena sin datos', 'eq_mw': 0, 'eq_far_mw': 0, 'motivo_vacio': 'escena_invalida'}
+   {'vol': 'Villarrica', 'sensor': 'VIIRS_NOAA21', 'dt': '2026-11-20 06:24', 'gen': 'sin_separar', 'tipos': ['sin_posicion'], 'marca': [0, 0, True], 'tablero': 'escena sin datos', 'eq_mw': 0, 'eq_far_mw': 0, 'motivo_vacio': 'escena_invalida'}
+   {'vol': 'Villarrica', 'sensor': 'VIIRS_NOAA21_750', 'dt': '2026-11-20 06:24', 'gen': 'sin_separar', 'tipos': ['sin_posicion'], 'marca': [0, 0, True], 'tablero': 'escena sin datos', 'eq_mw': 0, 'eq_far_mw': 0, 'motivo_vacio': 'escena_invalida'}
+Ambiguos (sin separar, no se marcan): 70
+Control sintético (hueco, saturado y sin posición marcan; control, bow-tie, ambiguo y TIR no): {'py': {'control': None, 'hueco': [2, 0, False], 'bowtie': None, 'ambiguo': None, 'tir': None, 'sat': [0, 1, False], 'sinpos': [0, 0, True]}, 'ok': True}
+Paridad con frontend/crater_no_medido.js: {'records': 77172, 'distintos': 0, 'con_marca_js': 7, 'sintetico_ok': True}
+-> D:\vrp-trabajo\worktrees\s194-mir-perdido\experiments\_s194_mir_perdido\resultado.json
