@@ -134,10 +134,19 @@ def _guardas(src, nombre):
     return [g.strip() for g in re.findall(r"if \([^;]*?\) continue;|const v = [^;]*;", c)]
 
 
+# S193 (pasadas MODIS de día, issue #813): la última detección de la tarjeta elige el turno, nocturno por defecto, para
+# que una lectura diurna (puede ser reflejo solar) no titule sin marca; la diurna se pide aparte (`diurnas = true`). Es
+# una guarda agregada a propósito: se quita antes de comparar con el tag y se exige que siga ahí.
+# Guard: tests/test_tablero_diurno_s193.py
+GUARDA_TURNO_S193 = "if ((r._diurna === true) !== diurnas) continue;"
+
+
 @pytest.mark.parametrize("vista,nombre", [("index.html", "latestDetection"), ("mosaico.html", "latestVRP")])
 def test_la_ultima_deteccion_se_elige_igual(vista, nombre):
     g0 = _guardas(_fuente_tag(vista), nombre)
     g1 = _guardas((RAIZ / "frontend" / vista).read_text(encoding="utf-8"), nombre)
+    assert g1.count(GUARDA_TURNO_S193) == 1, g1
+    g1 = [g for g in g1 if g != GUARDA_TURNO_S193]
     assert len(g0) >= 4 and g0 == g1, (g0, g1)
 
 
