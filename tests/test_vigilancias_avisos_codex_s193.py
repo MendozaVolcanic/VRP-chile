@@ -35,7 +35,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 
 import auto_audit_weekly as aa  # noqa: E402
 import scripts.vigilancia_guardia_modis as vg  # noqa: E402  (el mismo módulo que parchea el fixture `disco`)
-import vigilancia_sombra as vs  # noqa: E402
+import scripts.vigilancia_sombra as vs  # noqa: E402  (C1-106: la instancia que parchea el fixture `insumos`)
 from test_vigilancia_guardia_por_volcan_s175 import (  # noqa: E402,F401  (fixture `disco` y la escena de S175)
     ALERTA, REF_FRESCA, _crudo, _disco_base, _fila, disco)
 from test_vigilancia_sombra_s156 import _caso_pcc, insumos  # noqa: E402,F401  (fixture `insumos` de S156)
@@ -191,6 +191,20 @@ TRES_VIAS = {("PuyehueCordonCaulle", "MODIS_AQUA", "2026-11-02 18:10"),
              ("PuyehueCordonCaulle", "VIIRS_NOAA20_750", "2026-11-11 06:54")}
 
 
+def test_c1_106_las_pruebas_f11_106_usan_la_instancia_que_aisla_el_fixture():
+    """S194 (auditoría Codex, Cierre I, C1-106). POR QUÉ: `insumos` parchea `cargar_insumos`, `leer_juzgadas` y compañía
+    en el módulo que importa test_vigilancia_sombra_s156 (`scripts.vigilancia_sombra`). Importado aquí como
+    `vigilancia_sombra` (sin prefijo, por `sys.path`), Python crea OTRO objeto módulo desde el mismo archivo y el parche
+    no llega: las tres pruebas F11-106 corrían contra los datos reales del repo (y caían por FileNotFoundError en un
+    árbol sin datos). Comparar el objeto, no el archivo."""
+    import test_vigilancia_sombra_s156 as s156
+    assert vs is s156.vs, "las pruebas F11-106 tienen que usar el módulo que parchea el fixture `insumos`"
+
+
+# Las dos pasadas de alerta de la escena PCC de S156 (la fila RUTINA de Láscar sólo mantiene viva la referencia).
+ESCENA_PCC = [("NevadosDeChillan", "MODIS", "2026-10-22 07:20"), ("PuyehueCordonCaulle", "VIIRS750", "2026-10-10 05:54")]
+
+
 def test_f11_106_sin_k_en_ningun_sensor_dice_sin_objeto(insumos, monkeypatch):
     filas, _, sombra = _caso_pcc()
     insumos(filas, [], sombra)
@@ -198,6 +212,9 @@ def test_f11_106_sin_k_en_ningun_sensor_dice_sin_objeto(insumos, monkeypatch):
     out = vs.evaluar("2026-10-25")
     assert out["veredicto"] == "SIN_OBJETO", out["veredicto"]
     assert out["sensores_k"] == [] and "sin K" in out["sin_objeto"]
+    # C1-106: lo que sigue sólo vale para la escena PCC (dos pasadas de alerta, ningún record K), no para los datos reales
+    assert out["n_pasadas_alerta"] == len(ESCENA_PCC) and "(0 records de K en la ventana)" in out["sin_objeto"]
+    assert out["avisos"] == [], out["avisos"]
 
 
 def test_f11_106_control_con_un_sensor_en_k_sigue_vigilando(insumos, monkeypatch):
@@ -206,6 +223,9 @@ def test_f11_106_control_con_un_sensor_en_k_sigue_vigilando(insumos, monkeypatch
     monkeypatch.setattr(vs, "claves_via", lambda: {("PuyehueCordonCaulle", "MODIS_AQUA", "2026-11-02 18:10")})
     out = vs.evaluar("2026-10-25")
     assert out["veredicto"] != "SIN_OBJETO" and "sin_objeto" not in out
+    # C1-106: en la escena la sombra y K están frescos y la pérdida de PCC es retrospectiva (anterior a la adopción)
+    assert out["veredicto"] == "VERDE" and out["avisos"] == [], (out["veredicto"], out["avisos"])
+    assert out["n_pasadas_alerta"] == len(ESCENA_PCC) and out["sensores_k"] == ["VIIRS750", "VIIRS375"]
 
 
 def test_f11_106_un_disparador_no_se_tapa_con_sin_objeto(insumos, monkeypatch):
@@ -213,8 +233,11 @@ def test_f11_106_un_disparador_no_se_tapa_con_sin_objeto(insumos, monkeypatch):
     filas, prod, sombra = _caso_pcc()
     insumos(filas, prod, sombra)
     monkeypatch.setattr(vs, "claves_via", lambda: TRES_VIAS)
-    monkeypatch.setattr(vs, "disparadores", lambda *a, **k: {"veredicto": "INVESTIGAR"})
+    vistas = []
+    monkeypatch.setattr(vs, "disparadores", lambda pas, *a, **k: vistas.append(pas) or {"veredicto": "INVESTIGAR"})
     assert vs.evaluar("2026-10-25")["veredicto"] == "INVESTIGAR"
+    # C1-106: el disparador recibió las pasadas de la escena, no las de los datos reales
+    assert [sorted((p["volcano"], p["sensor"], p["fecha_utc"]) for p in pas) for pas in vistas] == [ESCENA_PCC]
 
 
 def test_f11_106_el_workflow_no_abre_issue_con_sin_objeto():
