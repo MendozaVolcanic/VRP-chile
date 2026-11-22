@@ -182,5 +182,9 @@ def test_perfil_aislado_resuelve_identico_a_la_replica():
     res = json.loads([l for l in r.stdout.splitlines() if l.startswith("@@")][0][2:])
     a, b = res["mirova_equivalent"], res[PERFIL]
     distintos = {k for k in set(a) | set(b) if a.get(k) != b.get(k)}
-    assert distintos == {"PROFILE_NAME", "DATA_SUBDIR"}, sorted(distintos)
+    # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y el reproceso
+    # histórico de K se hizo sólo de noche; el perfil lo declara apagado. Base nueva: idéntico salvo ese flag. Texto
+    # original: `distintos == {"PROFILE_NAME", "DATA_SUBDIR"}`.
+    assert distintos == {"PROFILE_NAME", "DATA_SUBDIR", "ENABLE_DAYTIME_MODIS"}, sorted(distintos)
+    assert (a["ENABLE_DAYTIME_MODIS"], b["ENABLE_DAYTIME_MODIS"]) == ("True", "False")
     assert len(a) > 100   # el instrumento ve las constantes de verdad, no un modulo vacio
