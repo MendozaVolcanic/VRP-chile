@@ -6,7 +6,7 @@
 <title>VRP Chile — Vista Diaria · 11 Tier A</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-<script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
+<script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas --> <script src="diurno.js"></script><!-- S193: qué pasada nuestra es diurna (MODIS de día) y su sol; misma línea por G8 -->
 <script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: marca «pico sobre agua» (sólo display); misma línea por G8 -->
 <style>
 :root {
@@ -61,6 +61,7 @@ header .ts-note { color: #6e7681; margin-top: 8px; font-size: 0.75em; font-style
 .card-stats .stat { display: inline-block; margin: 0 6px; }
 .card-stats .stat b { color: var(--text); }
 .card-stats .sobre-agua { color: #40c4ff; } .card-stats .sobre-agua:empty { display: none; }   /* S193 */
+.card-stats .det-diurnas { color: #ffc400; cursor: help; }   /* S193: detecciones de pasadas de día, aparte */
 .card-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 10; }
 .mini-btn { background: rgba(15, 26, 42, 0.95); color: var(--muted);
             border: 1px solid var(--border); border-radius: 3px; padding: 2px 6px;
@@ -151,18 +152,19 @@ footer a:hover { text-decoration: underline; }
 </footer>
 
 <script>
+// S193: lat y lon de volcanoes.yaml, sólo para saber qué pasada es diurna (frontend/diurno.js, la regla de store.py).
 const TIER_A = [
-  { name: "Lascar",              region: "Antofagasta",  csv: "Lascar" },
-  { name: "Lastarria",           region: "Antofagasta",  csv: "Lastarria" },
-  { name: "Tupungatito",         region: "Metropolitana",csv: "Tupungatito" },
-  { name: "PlanchonPeteroa",     region: "Maule",        csv: "PlanchonPeteroa", display: "Planchón-Peteroa" },
-  { name: "NevadosDeChillan",    region: "Ñuble",        csv: "Nevados de Chillan", display: "Nevados de Chillán" },
-  { name: "Copahue",             region: "Biobío",       csv: "Copahue" },
-  { name: "Llaima",              region: "Araucanía",    csv: "Llaima" },
-  { name: "Villarrica",          region: "Araucanía",    csv: "Villarrica" },
-  { name: "PuyehueCordonCaulle", region: "Los Ríos",     csv: "Puyehue-Cordon Caulle", display: "Puyehue-Cordón Caulle" },
-  { name: "Chaiten",             region: "Los Lagos",    csv: "Chaiten", display: "Chaitén" },
-  { name: "Isluga",              region: "Tarapacá",     csv: "Isluga" }
+  { name: "Lascar",              region: "Antofagasta",  csv: "Lascar", lat: -23.369, lon: -67.732 },
+  { name: "Lastarria",           region: "Antofagasta",  csv: "Lastarria", lat: -25.168, lon: -68.507 },
+  { name: "Tupungatito",         region: "Metropolitana",csv: "Tupungatito", lat: -33.4, lon: -69.8 },
+  { name: "PlanchonPeteroa",     region: "Maule",        csv: "PlanchonPeteroa", display: "Planchón-Peteroa", lat: -35.24, lon: -70.568 },
+  { name: "NevadosDeChillan",    region: "Ñuble",        csv: "Nevados de Chillan", display: "Nevados de Chillán", lat: -36.863, lon: -71.377 },
+  { name: "Copahue",             region: "Biobío",       csv: "Copahue", lat: -37.856, lon: -71.183 },
+  { name: "Llaima",              region: "Araucanía",    csv: "Llaima", lat: -38.692, lon: -71.729 },
+  { name: "Villarrica",          region: "Araucanía",    csv: "Villarrica", lat: -39.42, lon: -71.93 },
+  { name: "PuyehueCordonCaulle", region: "Los Ríos",     csv: "Puyehue-Cordon Caulle", display: "Puyehue-Cordón Caulle", lat: -40.59, lon: -72.117 },
+  { name: "Chaiten",             region: "Los Lagos",    csv: "Chaiten", display: "Chaitén", lat: -42.833, lon: -72.646 },
+  { name: "Isluga",              region: "Tarapacá",     csv: "Isluga", lat: -19.15, lon: -68.83 }
 ];
 
 // S153: el período sale de la URL (?dias= / ?desde=&hasta=, frontend/periodo.js); por defecto 90 días como antes.
@@ -197,7 +199,10 @@ async function loadVolcanoData(volc) {
     let r = Periodo.necesitaHistoria(PERIODO) ? { ok: false } : await fetch(`${BASE_PATH}data/mirova_equivalent/${name}_recent.json`);
     if (!r.ok) r = await fetch(`${BASE_PATH}data/mirova_equivalent/${name}.json`);
     if (!r.ok) return null;
-    return await r.json();
+    const j = await r.json();
+    // S193: `_diurna` en cada record (frontend/diurno.js), como en index.html y mosaico.html.
+    if (j && window.DiurnoTablero) DiurnoTablero.marcar(j.records, volc.lat, volc.lon);
+    return j;
   } catch (e) { return null; }
 }
 
@@ -594,10 +599,13 @@ function mirovaSufijoSinGeo(item) { return item && item.raw && item.raw.sinGeo ?
 
 function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
   const ds = [];
-  const recs = (jsonData?.records || []).filter(r => {
+  const recsTodos = (jsonData?.records || []).filter(r => {
     const t = parseUtcMs(r.datetime_utc);
     return enPeriodo(t) && eqVrpDisplay(r, volcanoName) > 0;  // S92: excluir artefacto cirrus; S153: período
   });
+  // S193: las barras son de la noche; las pasadas MODIS de día van con el sol de VRP Chile (al final), aparte, porque
+  // pueden incluir reflejo solar. Sin pasadas de día, recs es lo de siempre.
+  const recs = recsTodos.filter(r => r._diurna !== true);
 
   const buckets = { MODIS: [], VIIRS750: [], VIIRS375: [] };
   for (const r of recs) {
@@ -645,7 +653,12 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
       pointRadius: 8, pointHoverRadius: 9, pointStyle: mirovaSolStyle, mirovaDia: true,
     });
   }
-  return { datasets: ds, n_records: recs.length };
+  const diaPropios = DiurnoTablero.puntosDiarios(recsTodos, r => eqVrpDisplay(r, volcanoName), r => {
+    const b = sensorBucket(r.sensor);
+    return SENSOR_COLOR[b] ? { clave: b, color: SENSOR_COLOR[b], label: SENSOR_LABEL[b] } : null;
+  });
+  if (diaPropios.length) ds.push(DiurnoTablero.dataset(diaPropios));   // S193
+  return { datasets: ds, n_records: recsTodos.length };
 }
 
 function chartConfig(datasets) {
@@ -689,7 +702,9 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
   // S38: aplicar filtro post-S38 antes del filtro de ventana temporal.
   const baseRecs = applyS38Filter(jsonData?.records || []);
   const recs = baseRecs.filter(r => enPeriodo(parseUtcMs(r.datetime_utc)));   // S153: período
-  const detRecs = recs.filter(r => eqVrpDisplay(r, volcanoName) > 0);  // S92: excluir cirrus
+  // S193: «det. nuestras», el máximo y la mediana son de la noche; las detecciones de día se cuentan aparte (n_det_dia).
+  const detRecs = recs.filter(r => eqVrpDisplay(r, volcanoName) > 0 && r._diurna !== true);  // S92: excluir cirrus
+  const nDetDia = recs.filter(r => eqVrpDisplay(r, volcanoName) > 0 && r._diurna === true).length;
   const mirovaWindowed = (mirovaForVolc || []).filter(r => {
     const t = parseUtcMs(r.dt);  // S115 #6: Fecha_Satelite_UTC sin 'Z' → parseUtcMs (no new Date crudo = hora local)
     return enPeriodo(t) && r.vrp > 0;
@@ -722,6 +737,7 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
   return {
     // S192 (F5-105): null = no cargó (el JSON nuestro o el de MIROVA); 0 = cargó y no hay. La tarjeta los distingue.
     n_det_us: jsonData ? detRecs.length : null, n_det_mirova: mirovaForVolc ? mirovaWindowed.length : null,
+    n_det_dia: jsonData ? nDetDia : null,   // S193: detecciones nuestras de pasadas diurnas, fuera de n_det_us
     max_us: ourMaxVrp, median_us: medianVrp,
     det_recs: jsonData ? detRecs : null,   // S193: para contar las detecciones con el pico sobre agua (marcaAguaPeriodo)
     mirova_dist_med: mirovaDistMed,
@@ -737,6 +753,8 @@ function textoConteo(n) {
   if (n == null) return { texto: "no cargó", falla: true };
   return { texto: String(n), falla: false };
 }
+// ⚠️ S193: con la rama diurna de MODIS la réplica mide también de día en MODIS; «det. nuestras» sigue siendo de la noche
+// (las de día van aparte, con ☀) y el título dejó de decir que lo diurno de MIROVA no puede tener par. Texto S192:
 // S192 (auditoría Codex ronda 2, F5-V201). POR QUÉ: nuestra réplica mide sólo de noche (MIR nocturno), así que una
 // alerta diurna de MIROVA nunca puede tener par nuestro. La tarjeta ponía «301 det. nuestras · MIROVA: 353 alertas»
 // en Nevados de Chillán, que sugiere 52 silencios nuestros, cuando las nocturnas de MIROVA eran 277. El total se
@@ -751,9 +769,9 @@ function desgloseMirova(lista) {
 function textoNocturnas(d) {
   if (!d || d.diurnas === 0) return null;
   return { texto: " (" + d.nocturnas + " de noche)",
-    title: "Nuestra réplica mide sólo de noche (MIR nocturno). De las " + (d.nocturnas + d.diurnas) + " alertas de " +
-      "MIROVA en la ventana, " + d.diurnas + " son de pasadas diurnas, que no pueden tener par nuestro; lo comparable " +
-      "con «det. nuestras» son las " + d.nocturnas + " nocturnas." };
+    title: "«det. nuestras» cuenta pasadas nocturnas (VIIRS se procesa sólo de noche; las pasadas MODIS de día, si las " +
+      "hay, se cuentan aparte con ☀). De las " + (d.nocturnas + d.diurnas) + " alertas de MIROVA en la ventana, " +
+      d.diurnas + " son de pasadas diurnas; lo comparable con «det. nuestras» son las " + d.nocturnas + " nocturnas." };
 }
 // Aviso del recuadro sin gráfico: no decir «sin detecciones» cuando lo que pasó es que un archivo no cargó.
 function mensajeSinGrafico(jsonData, mirovaForVolc, rotuloPeriodo) {
@@ -770,6 +788,7 @@ function mensajeSinGrafico(jsonData, mirovaForVolc, rotuloPeriodo) {
 function monitoringFreshness(records) {
   let last = null;
   for (const r of (records || [])) {
+    if (r._diurna === true) continue;   // S193: la frescura se mide con las pasadas nocturnas (ver lastEventTime de index.html)
     if ((!last || r.datetime_utc > last) && !(r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio)) last = r.datetime_utc;   // S183: una escena sin datos no es pasada (espejo de escenaSinDato de index)
   }
   if (!last) return { cls: "mon-none", txt: "sin datos en este tablero" };
@@ -848,6 +867,13 @@ function renderCard(volc, jsonData, mirovaForVolc) {
   if (!c1.falla) s1.appendChild(document.createTextNode(" det. nuestras"));
   const sAgua = marcaAguaPeriodo(volc, stats.det_recs);   // S193
   if (sAgua) s1.appendChild(sAgua);
+  if (stats.n_det_dia > 0) {   // S193: las de día, aparte y con su sol
+    const sDia = el("span", "det-diurnas");
+    sDia.textContent = " (+" + stats.n_det_dia + " " + DiurnoTablero.SIMBOLO + " de día)";
+    sDia.title = stats.n_det_dia + " detecciones del período son de pasadas diurnas (MODIS), que pueden incluir reflejo solar." +
+      " No entran en «det. nuestras», el máximo ni la mediana, que son de la noche; en el gráfico van con su sol.";
+    s1.appendChild(sDia);
+  }
   stRow.appendChild(s1);
   stRow.appendChild(document.createTextNode(" · "));
 

@@ -960,6 +960,40 @@ DATA_SUBDIR: str = str(_cfg["output"]["data_subdir"])
 VOLCANO_OVERRIDES: dict = dict(_cfg.get("volcano_overrides") or {})
 
 
+# --- S193: zona A del perfil `laboratorio` (extensión MEJ-5, plan docs/PLAN_EXPERIMENTAL_S190.md §6) ---
+# POR QUÉ existe: un foco chico en el cráter (lago de lava, campo fumarólico) queda al borde del umbral de MIROVA y la
+# réplica lo copia a propósito. El laboratorio bajaría el umbral sólo dentro de inner_radius_km del cráter, donde el
+# prior volcánico es alto, y mediría lo que aparece contra NHI y persistencia (nunca contra MIROVA, A115).
+# POR QUÉ apagada y con error al encenderla: el umbral de la zona lo elige el paso 3 del plan (barrido sobre negativos
+# limpios) y ningún procesador la lee todavía (tests/test_laboratorio_paso1_s193.py, G4). Si alguien la encendiera
+# antes, el laboratorio correría idéntico a producción creyendo medir la extensión: un nulo silencioso (A87). Por eso
+# encenderla es un error al cargar el perfil hasta que la vía la implemente. Los perfiles que no la declaran (todos
+# salvo `laboratorio`) resuelven (False, {}), así que producción no cambia.
+_ZONA_A_RADIOS = ("inner_radius_km",)
+_ZONA_A_PARAMETROS = ("sigma_contextual_nocturno",)
+
+
+def _zona_a_de(t: dict, cfg: dict) -> tuple:
+    """(ENABLE_LAB_ZONA_A, LAB_ZONA_A) validados desde la sección thresholds (t) y el perfil resuelto (cfg)."""
+    encendida = bool(t.get("enable_lab_zona_a", False))
+    zona = dict(cfg.get("laboratorio_zona_a") or {})
+    if zona:
+        if zona.get("radio") not in _ZONA_A_RADIOS:
+            raise ValueError(f"laboratorio_zona_a.radio={zona.get('radio')!r}; válidos {_ZONA_A_RADIOS}")
+        if zona.get("parametro") not in _ZONA_A_PARAMETROS:
+            raise ValueError(f"laboratorio_zona_a.parametro={zona.get('parametro')!r}; válidos {_ZONA_A_PARAMETROS}")
+        v = zona.get("valor")
+        if v is not None and (isinstance(v, bool) or not isinstance(v, (int, float)) or not v > 0):
+            raise ValueError(f"laboratorio_zona_a.valor={v!r}: null o un número positivo")
+    if encendida:
+        raise ValueError("enable_lab_zona_a: true, pero la zona A del laboratorio aún no tiene efecto en la vía "
+                         "(su umbral se elige en el paso 3 del plan docs/PLAN_EXPERIMENTAL_S190.md); apagarla")
+    return encendida, zona
+
+
+ENABLE_LAB_ZONA_A, LAB_ZONA_A = _zona_a_de(_t, _cfg)
+
+
 def describe() -> str:
     return (
         f"[VRP profile={PROFILE_NAME}] "

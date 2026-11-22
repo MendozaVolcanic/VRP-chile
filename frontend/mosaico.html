@@ -20,7 +20,7 @@
 -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-<script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
+<script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas --> <script src="diurno.js"></script><!-- S193: qué pasada nuestra es diurna (MODIS de día) y su sol; misma línea por G8 -->
 <script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: marca «pico sobre agua» (sólo display); misma línea por G8 -->
 <style>
 :root {
@@ -126,6 +126,7 @@ main { padding: 12px 24px 32px; max-width: 1600px; margin: 0 auto; }
 .mc-footer .last { color: var(--text); }
 /* S109 — frescura de monitoreo (última pasada procesada, estilo MIROVA) */
 .mc-sobre-agua { font-size: 0.66rem; color: #40c4ff; margin-top: 3px; } .mc-sobre-agua:empty { display: none; }   /* S193 */
+.mc-diurna { font-size: 0.66rem; color: #ffc400; margin-top: 3px; } .mc-mon-dia { color: #c9a227; }   /* S193: pasada de día */
 .mc-monitor { font-size: 0.68rem; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 .mc-mon-dot { font-size: 0.7rem; line-height: 1; }
 .mon-none .mc-mon-dot, .mon-none .mc-mon-txt { color: var(--muted); opacity: 0.6; }
@@ -266,6 +267,16 @@ function lastEventTime(records) {
   let latest = null;
   for (const r of records || []) {
     if (r && r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio) continue;
+    if (r && r._diurna === true) continue;   // S193: la última pasada de la frescura es nocturna (espejo de index.html)
+    if (!latest || r.datetime_utc > latest) latest = r.datetime_utc;
+  }
+  return latest;
+}
+// S193: la última pasada DIURNA medida (MODIS de día), para decirla aparte de la frescura (espejo de index.html).
+function ultimaPasadaDiurna(records) {
+  let latest = null;
+  for (const r of records || []) {
+    if (!r || r._diurna !== true || (r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio)) continue;
     if (!latest || r.datetime_utc > latest) latest = r.datetime_utc;
   }
   return latest;
@@ -468,12 +479,15 @@ function isSummitDetection(r) {
 // No se porta isSensorVisible: mosaico no tiene toggle de sensores, así que en
 // index ese filtro es identidad para esta vista (A89 — trazar el efecto, no el
 // nombre).
-function latestVRP(records, innerKm) {
+// S193: `diurnas` elige el turno, como latestDetection de index.html: por defecto la última NOCTURNA (valor y nivel de la
+// tarjeta, igual que antes de la rama diurna de MODIS); con true, la última diurna, que la tarjeta dice aparte con ☀.
+function latestVRP(records, innerKm, diurnas = false) {
   const cutoff = Date.now() - 48 * 3600000;
   let best = null;
   for (const r of records) {
     const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t) || t < cutoff) continue;
+    if ((r._diurna === true) !== diurnas) continue;
     if (!isSummitDetection(r)) continue;
     if (!isValidDetection(r)) continue;
     const v = eqVrpDisplay(r, innerKm);  // S92: excluir artefacto cirrus
@@ -555,6 +569,8 @@ async function loadVolcano(v) {
     mirovaRecords: mirova?.records || [],
     updated:       data?.updated   || null,
   }; if (window.CambioDetector) CambioDetector.notarRecords(allData[v.name].records); // S172: marca de la vía de MODIS desde los datos (misma línea: no corre las líneas)
+  // S193: `_diurna` en cada record (frontend/diurno.js, la regla de store.py), como en index.html.
+  if (window.DiurnoTablero) DiurnoTablero.marcar(allData[v.name].records, v.lat, v.lon);
 }
 
 // ─── Banner stale F49 (sync con index.html L2675) ────────────────────────────
@@ -637,6 +653,7 @@ function fmtRelativeTime(iso) {
 function monitoringFreshness(records) {
   let last = null;
   for (const r of records) {
+    if (r._diurna === true) continue;   // S193: la frescura se mide con las pasadas nocturnas (ver lastEventTime de index.html)
     if ((!last || r.datetime_utc > last) && !(r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio)) last = r.datetime_utc;   // S183: una escena sin datos no es pasada (espejo de escenaSinDato de index)
   }
   if (!last) return { cls: "mon-none", txt: "sin datos en este tablero" };
@@ -650,6 +667,14 @@ function monitoringFreshness(records) {
 // ─── Construir sparkline 30d ──────────────────────────────────────────────────
 // Series: máximo diario de mirovaEqVrp (summit) sobre los últimos 30 días.
 // Bins simples por día UTC; render con Chart.js bar para visual MIROVA-like.
+// F5-102 (auditoría Codex ronda 2, S193): un día sin ninguna pasada medida y un día medido sin detección salían iguales
+// (barra en cero, «sin detecciones»). Para el operador no son lo mismo: el primero no dice nada del volcán, el segundo
+// dice que se miró y no había calor (la misma distinción que hace la evolución de index, «sin_datos» contra «nada»).
+// Ahora `values` lleva null en los días sin pasada medida y `observado` dice qué días tuvieron alguna. Una escena sin
+// datos (diag_codigo_mirova.motivo_vacio) no es pasada medida, como en monitoringFreshness (S183).
+// F5-V202: el primer día empezaba a medianoche UTC pero los records se cortaban en «ahora menos 30 días»; como las
+// pasadas nocturnas caen entre 00 y 09 UTC, pasada esa hora el día más viejo perdía todas sus pasadas y salía en cero
+// aunque hubiera tenido detección. Ahora el corte también es a medianoche: el primer día va entero.
 function buildSparklineData(records, innerKm) {
   const ms = 86400000;
   // S153: el intervalo sale del período (por defecto los últimos 30 días, como antes). «Todo» se acota a un año
@@ -664,25 +689,42 @@ function buildSparklineData(records, innerKm) {
   const dayStart = Math.floor(t0 / ms) * ms;
   const nBins = Math.floor((now - dayStart) / ms) + 1;
   const bins = new Array(nBins).fill(0);
+  const observado = new Array(nBins).fill(false);
+  // S193: las barras son de la noche; el máximo de las pasadas de día va aparte (`dia`, null sin pasada) y se dibuja
+  // con el sol de VRP Chile. Sin pasadas de día, `dia` queda todo en null y el minigráfico es el de siempre.
+  const dia = new Array(nBins).fill(null);
   for (const r of records) {
     const t = parseUtcMs(r.datetime_utc);
-    if (!Number.isFinite(t) || t < t0 || t > now) continue;
-    const v = eqVrpDisplay(r, innerKm);  // S92: excluir artefacto cirrus del sparkline
-    if (v <= 0) continue;
+    if (!Number.isFinite(t) || t < dayStart || t > now) continue;   // F5-V202: desde la medianoche del primer día
     const idx = Math.floor((t - dayStart) / ms);
     if (idx < 0 || idx >= nBins) continue;
+    const v = eqVrpDisplay(r, innerKm);  // S92: excluir artefacto cirrus del sparkline
+    // S194 (unión de #1086 y #1089): la pasada de día no cuenta como «observado», que es de las barras nocturnas.
+    if (r._diurna === true) { if (v > 0 && (dia[idx] == null || v > dia[idx])) dia[idx] = v; continue; }
+    if (!(r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio)) observado[idx] = true;
+    if (v <= 0) continue;
     if (v > bins[idx]) bins[idx] = v;
   }
   const labels = [];
   for (let i = 0; i < nBins; i++) {
     labels.push(new Date(dayStart + i * ms));
   }
-  return { labels, values: bins };
+  return { labels, values: bins.map((v, i) => (observado[i] || v > 0 ? v : null)), observado, dia };
+}
+
+// F5-102: texto del tooltip de un día del minigráfico. Separa «se miró y no había calor» de «no hubo pasada medida».
+function etiquetaDiaSparkline(v, observado) {
+  if (v > 0) return "VRP: " + fmtVRP(v) + " MW";
+  return observado ? "pasadas medidas, sin detecciones" : "sin pasadas medidas";
 }
 
 function renderSparkline(canvas, sparkData, level) {
   // Color barras según nivel actual (último valor>0 o max). Bajo = mute.
-  const maxV = Math.max(...sparkData.values);
+  const maxV = Math.max(0, ...sparkData.values.filter(v => v != null));
+  // F5-102: los días sin pasada medida se marcan con una raya gris baja, distinta del vacío de un día medido sin
+  // detección, para que «no se miró» no se lea como «tranquilo».
+  const rayaSinPasada = (maxV > 0 ? maxV : 1) * 0.06;
+  const sinPasada = sparkData.values.map(v => (v == null ? rayaSinPasada : null));
   const color = level.key === "vhigh" || level.key === "high"
     ? "rgba(244,67,54,0.85)"
     : level.key === "mod"
@@ -703,7 +745,22 @@ function renderSparkline(canvas, sparkData, level) {
         borderWidth: 0,
         barPercentage: 0.95,
         categoryPercentage: 1.0,
-      }],
+        grouped: false,
+      }, {
+        // F5-102: días sin ninguna pasada medida.
+        data: sinPasada,
+        backgroundColor: "rgba(122,143,166,0.35)",
+        borderColor: "rgba(122,143,166,0.35)",
+        borderWidth: 0,
+        barPercentage: 0.95,
+        categoryPercentage: 1.0,
+        grouped: false,
+      }].concat(sparkData.dia && sparkData.dia.some(v => v != null) ? [{
+        // S193: máximo diario de las pasadas de día, con el sol de VRP Chile (cuadrado al centro, color MODIS)
+        type: "line", data: sparkData.dia, showLine: false, diurna: true,
+        pointStyle: DiurnoTablero.iconoSol("#ff8c00"), pointRadius: 6, pointHoverRadius: 7,
+        borderColor: DiurnoTablero.RAYOS, backgroundColor: DiurnoTablero.RAYOS,
+      }] : []),
     },
     options: {
       responsive: true,
@@ -722,10 +779,13 @@ function renderSparkline(canvas, sparkData, level) {
               return d.toISOString().slice(0, 10);
             },
             label: (ctx) => {
-              const v = ctx.parsed.y;
-              return v > 0 ? "VRP: " + fmtVRP(v) + " MW" : "sin detecciones";
+              if (ctx.dataset.diurna) return DiurnoTablero.SIMBOLO + " de día: " + fmtVRP(ctx.parsed.y) + " MW (" + DiurnoTablero.TEXTO + ")";   // S193
+              return etiquetaDiaSparkline(sparkData.values[ctx.dataIndex], sparkData.observado[ctx.dataIndex]);
             },
           },
+          // Una sola línea nocturna por día aunque las barras de noche y de «sin pasada» compartan el día (el texto sale
+          // del índice del día, F5-102), más la del sol si ese día hubo pasada de día (S193). Unión S194 de #1086 y #1089.
+          filter: (item) => item.datasetIndex === 0 || (item.dataset.diurna === true && item.parsed.y != null),
         },
       },
       scales: {
@@ -798,6 +858,17 @@ function renderMosaico() {
       card.appendChild(ag);
     }
 
+    // S193: detección DIURNA de las últimas 48 h, aparte y con ☀ (espejo de la tarjeta de index.html): el valor y el
+    // nivel de arriba siguen siendo de la noche, porque de día la lectura puede ser reflejo solar.
+    const dia48 = latestVRP(records, v.inner_radius_km, true);
+    if (dia48.ts) {
+      const dd = el("div", { className: "mc-diurna", textContent: DiurnoTablero.SIMBOLO + " de día: " + fmtVRP(dia48.max) +
+        " MW · hace " + fmtRelativeTime(dia48.ts) });
+      dd.title = "Última detección DIURNA (48 h): " + dia48.ts.slice(0, 16) + " UTC, " + (dia48.sensor || "") + ". " +
+        "De día la lectura puede incluir reflejo solar, así que no fija el valor ni el nivel.";
+      card.appendChild(dd);
+    }
+
     if (records.length === 0) {
       card.appendChild(el("div", { className: "mc-no-data", textContent: "Sin datos cargados" }));
     } else {
@@ -831,6 +902,14 @@ function renderMosaico() {
       el("span", { className: "mc-mon-txt", textContent: " " + fresh.txt }),
     ]);
     monRow.title = "Frescura del MONITOREO: última pasada satelital procesada (haya o no detección). Verde = reciente; ámbar = datos atrasados (host NRT LANCE intermitente); rojo = sin pasadas.";
+    // S193: una pasada de día posterior a la última nocturna se dice aparte; no cambia verde, ámbar ni rojo.
+    const ultDia = ultimaPasadaDiurna(records), ultNoche = lastEventTime(records);
+    if (ultDia) monRow.title += " Se mide con las pasadas nocturnas: las pasadas MODIS de día (☀) no cuentan.";
+    if (ultDia && (!ultNoche || ultDia > ultNoche)) {
+      const pd = el("span", { className: "mc-mon-dia", textContent: " · " + DiurnoTablero.SIMBOLO + " pasada de día hace " + fmtRelativeTime(ultDia) });
+      pd.title = "Pasada diurna (MODIS) " + ultDia.slice(0, 16) + " UTC: puede incluir reflejo solar y no cuenta para la frescura, que se mide con las pasadas nocturnas.";
+      monRow.appendChild(pd);
+    }
     card.appendChild(monRow);
 
     grid.appendChild(card);
