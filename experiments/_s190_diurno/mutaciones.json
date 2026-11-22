@@ -41,9 +41,16 @@
   {
    "id": "A6",
    "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
-   "viejo": "if sin_w7 == NO_ADOPTAR:",
+   "viejo": "if base == ADOPTAR and sin_w7 == NO_ADOPTAR:",
    "nuevo": "if False:",
    "que": "R-W7 apagado"
+  },
+  {
+   "id": "A6L1",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if base == ADOPTAR and sin_w7 == NO_ADOPTAR:",
+   "nuevo": "if sin_w7 == NO_ADOPTAR:",
+   "que": "R-W7 con la lectura 1 (literal), la que Nicolás no eligió"
   },
   {
    "id": "A7",
@@ -97,8 +104,8 @@
   {
    "id": "A14",
    "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
-   "viejo": "def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES):",
-   "nuevo": "def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES_VIIRS):",
+   "viejo": "def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES, descartes_borde=frozenset()):",
+   "nuevo": "def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES_VIIRS, descartes_borde=frozenset()):",
    "que": "I4 sin MODIS"
   },
   {
@@ -170,6 +177,48 @@
    "viejo": "out[r[\"b\"]][\"n_1mw\"] += d >= cm.UMBRAL_PROTEGIDA_MW",
    "nuevo": "out[r[\"b\"]][\"n_1mw\"] += 1",
    "que": "M8 cuenta tambien lo bajo 1 MW"
+  },
+  {
+   "id": "D1a",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "abs((x - t).total_seconds()) <= cm.VENTANA_S for v, b, x in descartes)",
+   "nuevo": "x.date() == t.date() for v, b, x in descartes)",
+   "que": "desviacion 1: dispensa con cualquier descarte del mismo dia, sin mirar la hora"
+  },
+  {
+   "id": "D1b",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if sin_v and all(_descartada(",
+   "nuevo": "if sin_v and any(_descartada(",
+   "que": "desviacion 1: dispensa si UNA pasada del dia tiene descarte"
+  },
+  {
+   "id": "D1c",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "return any(v == vol and b == s and abs(",
+   "nuevo": "return any(b == s and abs(",
+   "que": "desviacion 1: no mira el volcan"
+  },
+  {
+   "id": "D1d",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "for p in logs.glob(\"%s_*.log\" % brazo):",
+   "nuevo": "for p in logs.glob(\"*.log\"):",
+   "que": "desviacion 1: lee tambien el registro del control"
+  },
+  {
+   "id": "D1e",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "                det[\"I4b_dispensadas\"].append(\"%s|%s|%s\" % v)\n                continue\n",
+   "nuevo": "                continue\n",
+   "que": "desviacion 1: no informa los casos dispensados"
+  },
+  {
+   "id": "D1f",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if sin_v and all(_descartada(v[0], s,",
+   "nuevo": "if all(_descartada(v[0], s,",
+   "que": "desviacion 1: dia sin pasadas sin record (lista vacia) se dispensa (casi equivalente: solo vive si una pasada diurna se parea con un record de otra fecha)"
   },
   {
    "id": "C-CAIDA",

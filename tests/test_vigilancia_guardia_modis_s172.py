@@ -334,9 +334,17 @@ def test_main_escribe_latest_e_historial(insumos, monkeypatch, tmp_path):
 
 # ------------------------------------------------------------------ archivo de juzgadas y workflow
 def test_el_archivo_de_juzgadas_nace_vacio_con_su_esquema_y_se_lee():
+    # S193 (A113): nació vacío (S172) y su primera entrada es Chaitén MODIS 2026-11-19 02:30, juzgada por Nicolás el
+    # 2026-11-21. Texto anterior: assert d["pasadas"] == [] y vg.leer_juzgadas() == {}. Ahora se exige que cada
+    # entrada traiga todas las claves del esquema y que el lector las devuelva todas, una por pasada.
     d = json.loads(Path(vg.JUZGADAS).read_text(encoding="utf-8"))
-    assert d["pasadas"] == [] and "esquema" in d and "por_que" in d
-    assert vg.leer_juzgadas() == {}
+    assert "esquema" in d and "por_que" in d and isinstance(d["pasadas"], list)
+    for p in d["pasadas"]:
+        assert set(d["esquema"]) <= set(p), p
+        assert p["sensor"] == "MODIS"
+    j = vg.leer_juzgadas()
+    assert len(j) == len(d["pasadas"])
+    assert ("Chaiten", "MODIS", "2026-11-19 02:30") in j
 
 
 def test_el_workflow_escucha_a_la_guardia_y_abre_issues_con_su_prefijo():
@@ -362,9 +370,11 @@ def test_no_modifica_la_vigilancia_de_k():
     (deja de contar como K los records MODIS de la vía; tests/test_vigilancia_sombra_via_modis_s172.py). El workflow
     de esa vigilancia sigue sin tocar."""
     import subprocess
-    r = subprocess.run(["git", "diff", "--name-only", "pre-s171-adopcion-modd", "HEAD", "--",
+    # S193 (A113): #1081 (F11-106, merge f5973394d) cambió a propósito ese workflow: la sombra C0 da SIN_OBJETO sin
+    # issue cuando ningún sensor sigue en K. La base pasa de `pre-s171-adopcion-modd` a ese merge.
+    r = subprocess.run(["git", "diff", "--name-only", "f5973394d78702acbf13087119735f749b229a27", "HEAD", "--",
                         ".github/workflows/vigilancia-sombra.yml"],
                        cwd=ROOT, capture_output=True, text=True)
     if r.returncode != 0:
-        pytest.skip("sin el tag pre-s171-adopcion-modd en este checkout")
+        pytest.skip("sin el merge de #1081 en este checkout")
     assert r.stdout.strip() == ""

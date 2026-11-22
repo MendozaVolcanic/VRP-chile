@@ -1550,6 +1550,14 @@ Cuando S62+S63 completen:
 > alineada con esto. Y la «distancia medida desde el cráter» de la marca S186 vale en los 11 Tier A; en los 34 de la
 > sombra no hay cráter registrado y se mide desde el `lat`/`lon` del catálogo.
 >
+> ⚠️ **S193, «radiante» se mantiene (decisión de Nicolás, 2026-11-21, «Sí, las dos», en S193).** Se midió la variante
+> «cumbre primero» (si hay un alertado dentro de `inner_radius_km`, la posición es el cúmulo de la alertada más
+> radiante dentro del inner), preregistrada (`experiments/_s193_radiante_variante/`, #1083): recupera las 12
+> protegidas sólo OCR de F12-V301 sin perder ninguna ni sumar falsas alarmas en negativos limpios, pero publica como
+> cumbre 114 pasadas que la tabla de MIROVA ubica lejos (31 de 1 MW o más) y la concordancia de clase con la tabla
+> baja de 98,73 % a 93,59 %. Es el mismo canje que «cercano» (rechazado el 2026-11-15). La tabla de MIROVA no lista
+> ninguna de las 12 y 10 traen sólo la clase del OCR. Costo aceptado: 12 protegidas sólo OCR, 0 con la tabla sola.
+>
 > ⚠️ **S151, segunda marca (A113, tarea 1.4 del loop, PR #809 verificado dos veces):** el estudio sobre
 > los GeoTIFF de MIROVA (`experiments/_s151_seleccion_mirova/README.md`) dice que MIROVA no elige el cráter
 > por ser el cráter: informa el foco lejano cuando es fuerte (15 de 15 pasadas con z ≥ 30 en el TIF; 12 de
