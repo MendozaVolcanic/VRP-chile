@@ -16,7 +16,8 @@ Repo: https://github.com/MendozaVolcanic/VRP-chile
 > [`docs/FICHA_SDA_VRP_CHILE.md`](docs/FICHA_SDA_VRP_CHILE.md) al día. Estándar:
 > [`../../GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md`](../../GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md).
 > **Número de versión de la ficha: se toma al mergear (Nicolás, S185).** Un PR no escribe la ficha mientras está
-> abierto: su descripción trae el texto de la fila. Al recibir «mergea #N», quien mergea une `origin/main` en la
+> abierto: su descripción trae el texto de la fila. Al mergear (Claude mergea sola lo que recomienda, sin esperar
+> «mergea #N»: regla S193 en A39), quien mergea une `origin/main` en la
 > rama, agrega la fila del historial y pone la cabecera en esa versión (la anterior pasa a «Versión anterior»; se hace
 > en toda versión, cambie o no la lógica, como v1.28 y v1.30), con la versión siguiente a la de main y la fecha del
 > merge, espera el CI de ese commit y mergea con `--match-head-commit`. Por qué: con la versión al abrir, #999 tuvo
@@ -187,7 +188,7 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - **A36.** OBSOLETA desde S102/S103: el pipeline ya no aplica sec³ (nadir fijo); seguirla mete un factor espurio. (historia: A36)
 - **A37.** MODIS marca saturación con `SI=65533`, VIIRS con el bit 2 del quality flag: leer el UserGuide de cada sensor. (historia: A37)
 - **A38.** Antes de borrados masivos (>10 archivos o >50 MB): inventario, tag `pre-<scope>-cleanup` + push, confirmación. (historia: A38)
-- **A39.** Claude mergea PRs con `mergeStateStatus=CLEAN`, checks verdes y 0 regresiones (alta criticidad: confirmar); fallback `gh api --method PUT .../pulls/<N>/merge`. Enmienda S142: «0 checks» recién abierto es SIN DATO (`gh pr checks <N> --watch`); tras editar un documento, `grep -rl <archivo> tests/` y suite completa. (historia: A39)
+- **A39.** Claude mergea PRs con `mergeStateStatus=CLEAN`, checks verdes y 0 regresiones (alta criticidad: confirmar); fallback `gh api --method PUT .../pulls/<N>/merge`. Enmienda S142: «0 checks» recién abierto es SIN DATO (`gh pr checks <N> --watch`); tras editar un documento, `grep -rl <archivo> tests/` y suite completa. Enmienda S193 (Nicolás, 2026-11-21, textual: «no necesitas pedirme permiso para mergear, si es lo que recomiendas puedes hacerlo tu mismo, siempre podemos volver atras»): la dueña del loop mergea sin pedir «mergea #N» los PR que recomienda (CLEAN, CI verde, ficha al mergear, `--match-head-commit`) e informa después; lo dudoso se pregunta igual, y A45 para EMPEZAR un cambio y las decisiones científicas siguen siendo de Nicolás. (historia: A39)
 - **A40.** Búsqueda bibliográfica dirigida: manual `investigacion` (OpenAlex) > orquestadores con WebSearch. (historia: A40)
 - **A41.** `Claude_in_Chrome` sirve para Perplexity Pro navegando a `perplexity.ai/search/new?q=<...>&sources=scholar`. (historia: A41)
 - **A42.** OBSOLETA desde S74: la causa del HTTP 422 era el «Norway Problem» (A43): quotear `"on":`. (historia: A42)

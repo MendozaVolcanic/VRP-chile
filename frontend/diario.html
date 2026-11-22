@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas --> <script src="diurno.js"></script><!-- S193: qué pasada nuestra es diurna (MODIS de día) y su sol; misma línea por G8 -->
-<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: marca «pico sobre agua» (sólo display); misma línea por G8 -->
+<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: marca «pico sobre agua» (sólo display); misma línea por G8 --> <script src="cumbre.js"></script><!-- S194: marca «también hay calor en la cumbre» (sólo display); misma línea por G8 -->
 <style>
 :root {
   --bg: #0a1628; --panel: #0f1a2a; --border: #1a3a5c;
@@ -60,7 +60,7 @@ header .ts-note { color: #6e7681; margin-top: 8px; font-size: 0.75em; font-style
 .card-stats { font-size: 0.72em; color: var(--muted); margin-top: 4px; }
 .card-stats .stat { display: inline-block; margin: 0 6px; }
 .card-stats .stat b { color: var(--text); }
-.card-stats .sobre-agua { color: #40c4ff; } .card-stats .sobre-agua:empty { display: none; }   /* S193 */
+.card-stats .sobre-agua { color: #40c4ff; } .card-stats .sobre-agua:empty { display: none; }   /* S193 */ .card-stats .calor-cumbre { color: #ff8a65; }   /* S194 */
 .card-stats .det-diurnas { color: #ffc400; cursor: help; }   /* S193: detecciones de pasadas de día, aparte */
 .card-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 10; }
 .mini-btn { background: rgba(15, 26, 42, 0.95); color: var(--muted);
@@ -740,6 +740,9 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
     n_det_dia: jsonData ? nDetDia : null,   // S193: detecciones nuestras de pasadas diurnas, fuera de n_det_us
     max_us: ourMaxVrp, median_us: medianVrp,
     det_recs: jsonData ? detRecs : null,   // S193: para contar las detecciones con el pico sobre agua (marcaAguaPeriodo)
+    // S194: pasadas lejanas del período con alertados también en la cumbre (frontend/cumbre.js); sólo para avisar.
+    lejanas_cumbre: jsonData && typeof CumbreTablero !== "undefined"
+      ? recs.filter(r => r._diurna !== true && isValidDetection(r) && CumbreTablero.calorEnCumbre(r, INNER_RADIUS_KM[volcanoName])).length : null,
     mirova_dist_med: mirovaDistMed,
     mirova_ventana: mirovaForVolc ? mirovaWindowed : null,   // S192 (F5-V201): para desgloseMirova; el total no cambia
   };
@@ -873,6 +876,14 @@ function renderCard(volc, jsonData, mirovaForVolc) {
     sDia.title = stats.n_det_dia + " detecciones del período son de pasadas diurnas (MODIS), que pueden incluir reflejo solar." +
       " No entran en «det. nuestras», el máximo ni la mediana, que son de la noche; en el gráfico van con su sol.";
     s1.appendChild(sDia);
+  }
+  if (stats.lejanas_cumbre) {   // S194: la regla «radiante» (D8') las ubica lejos; esta vista no tiene mapa ni lista
+    const sC = el("span", "calor-cumbre");
+    sC.textContent = " (◉ " + stats.lejanas_cumbre + (stats.lejanas_cumbre === 1 ? " lejana" : " lejanas") + " con calor también en la cumbre)";
+    sC.title = "Pasadas del período cuyo cúmulo más radiante está lejos del cráter, pero con píxeles alertados también dentro " +
+      "del radio de la cumbre. Puede ser calor del cráter más débil que la fuente lejana. Con «Solo cráter» no cuentan como " +
+      "detección; míralas en la tabla de pasadas de la página del volcán. Sólo avisa: no cambia el conteo ni el nivel.";
+    s1.appendChild(sC);
   }
   stRow.appendChild(s1);
   stRow.appendChild(document.createTextNode(" · "));

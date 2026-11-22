@@ -38,7 +38,10 @@ COD = ("import json, pipeline.profile as p; print('@@' + json.dumps({k: repr(get
        "if k.isupper() and k != 'VALID_PROFILES'}))")
 # G1: lo único que el laboratorio declara distinto. PROFILE_NAME y DATA_SUBDIR son su identidad; LAB_ZONA_A es la
 # extensión MEJ-5 (zona A) declarada y apagada. Una segunda diferencia sin declarar pone esto en rojo.
-DIFERENCIAS_DECLARADAS = {"PROFILE_NAME", "DATA_SUBDIR", "LAB_ZONA_A"}
+# ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y el laboratorio,
+# que no se midió de día, lo declara apagado (pipeline/profiles/laboratorio.yaml, `paths`). Texto original: sin
+# ENABLE_DAYTIME_MODIS.
+DIFERENCIAS_DECLARADAS = {"PROFILE_NAME", "DATA_SUBDIR", "LAB_ZONA_A", "ENABLE_DAYTIME_MODIS"}
 CLAVES_ZONA = re.compile(r"\b(?:enable_lab_zona_a|laboratorio_zona_a)\b")
 LECTURA_ZONA = re.compile(r"\b(?:ENABLE_LAB_ZONA_A|LAB_ZONA_A)\b")
 
@@ -69,6 +72,7 @@ def test_g1_el_laboratorio_difiere_de_produccion_solo_en_lo_declarado(resueltos)
     lab, prod = resueltos["laboratorio"], resueltos["mirova_equivalent"]
     difieren = {k for k in set(lab) | set(prod) if lab.get(k) != prod.get(k)}
     assert difieren == DIFERENCIAS_DECLARADAS, difieren
+    assert (lab["ENABLE_DAYTIME_MODIS"], prod["ENABLE_DAYTIME_MODIS"]) == ("False", "True")
 
 
 def test_g1_la_via_esta_encendida_en_los_tres_sensores_y_la_zona_apagada(resueltos):

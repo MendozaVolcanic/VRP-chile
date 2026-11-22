@@ -46,8 +46,11 @@ def _resolver(nombre):
 # y el laboratorio la declara apagada (sigue en C0, es la sombra de K), así que también difieren en ese flag.
 # S177 B1 (encendido de la vía de VIIRS 375): lo mismo con esa vía; el laboratorio la declara apagada.
 # S177 B2 (encendido de la vía de VIIRS 750): lo mismo con esa vía; el laboratorio la declara apagada.
+# ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y este perfil lo
+# declara apagado (no se midió de día), así que también difieren en ese flag. Texto original: sin ENABLE_DAYTIME_MODIS.
 DIFERENCIAS_DECLARADAS = {"ENABLE_TEST1_PATH", "ENABLE_TESTS_23_PROSE_BRANCH", "ENABLE_MODIS_B22_PRIMARY",
-                          "ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA", "ENABLE_V750_CODIGO_MIROVA"}
+                          "ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA", "ENABLE_V750_CODIGO_MIROVA",
+                          "ENABLE_DAYTIME_MODIS"}
 
 
 def test_el_laboratorio_difiere_de_produccion_solo_en_lo_declarado():

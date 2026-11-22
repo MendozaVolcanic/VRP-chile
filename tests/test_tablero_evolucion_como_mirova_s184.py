@@ -803,6 +803,34 @@ console.log(JSON.stringify({ empate: u(empate, false), empateInv: u(empate.slice
     assert "Muy Alto (Extremo en la escala de MIROVA), 12000,00 MW" in o["extremo"], o["extremo"]
 
 
+def test_f5_v301_ultima_con_calor_agrupa_la_pasada_como_la_tarjeta(tmp_path):
+    """F5-V301 (auditoría Codex ronda 2, S193): VIIRS 375 y 750 del mismo satélite publican a la misma hora y la última
+    pasada no publica. El recuadro tomaba el último record con valor en el orden del archivo (750, 19,36 MW) y la tarjeta
+    el mayor de esa hora (375, 22,81 MW): Chillán 2026-11-17 06:42. Ahora manda el mayor de la pasada, en los dos
+    órdenes del archivo, y a más de 10 minutos ya es otra pasada."""
+    cuerpo = """
+const P = (t, estado, y, grupo) => ({ t, dt: "D" + t, estado, y, grupo, sensor: grupo, zen: 30 });
+const M = 60000, H = 60 * M;
+const tras = P(10 * H + 50 * M, "nada", undefined, "MODIS");
+const chillan = [P(10 * H, "crater", 22.81, "VIIRS375"), P(10 * H, "crater", 19.36, "VIIRS750"), tras];
+const inv = [chillan[1], chillan[0], tras];
+// dos gránulos de la misma pasada a 6 min, el mayor primero
+const granulos = [P(10 * H, "crater", 4, "VIIRS375"), P(10 * H + 6 * M, "crater", 1, "VIIRS375"), tras];
+// a 30 min es otra pasada: manda la última con calor aunque la anterior sea mayor
+const otra = [P(9 * H + 30 * M, "crater", 50, "MODIS"), P(10 * H, "crater", 2, "VIIRS375"), tras];
+// con «Solo cráter» la de fuera no cuenta aunque sea mayor; con «Incluir lejanas», sí
+const fuera = [P(10 * H, "crater", 3, "VIIRS375"), P(10 * H, "fuera", 9, "VIIRS750"), tras];
+const r = (l, f) => { const x = ultimaConCalorEvol(l, f); return [x.p.grupo, x.vrp]; };
+console.log(JSON.stringify({ chillan: r(chillan, false), inv: r(inv, false), granulos: r(granulos, false),
+  otra: r(otra, false), fueraSolo: r(fuera, false), fueraLejanas: r(fuera, true) }));
+"""
+    o = _node(tmp_path, cuerpo)
+    assert o["chillan"] == ["VIIRS375", 22.81] and o["inv"] == ["VIIRS375", 22.81], o
+    assert o["granulos"] == ["VIIRS375", 4], o
+    assert o["otra"] == ["VIIRS375", 2], o
+    assert o["fueraSolo"] == ["VIIRS375", 3] and o["fueraLejanas"] == ["VIIRS750", 9], o
+
+
 def test_limites_por_sensor_en_la_pagina(tmp_path):
     cuerpo = """
 const d = DATOS; const out = {}; currentVolcano = V34; const h = mk("div");
