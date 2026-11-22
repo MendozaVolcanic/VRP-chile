@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> <link rel="stylesheet" href="vista_volcan.css" /><!-- S180: tarjeta mínima y pestañas por sensor; en la misma línea para no correr las citas archivo:línea (guard G8) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
-<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) -->
+<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: capa de cuerpos de agua y marca «pico sobre agua» (sólo display); misma línea por G8 -->
   <style>
     .rango-ctl { display:inline-flex; gap:4px; align-items:center; }
     .rango-ctl[hidden] { display:none; }
@@ -1879,7 +1879,7 @@ function latestDetection(records, includeFar = false, innerKm = 10) {
       const pc = r.primary_cluster || {};
       const _honestSrc = esAnclaHonesta(
         r.final_hotspot_source);
-      best = { vrp: v, datetime_utc: r.datetime_utc, ts, sensor: r.sensor,  // S180: sensor de la detección, para la tarjeta
+      best = { vrp: v, datetime_utc: r.datetime_utc, ts, sensor: r.sensor, rec: r,  // S180: sensor de la detección, para la tarjeta; S193: el record, para la marca «pico sobre agua»
                dist: (_honestSrc ? r.final_hotspot_dist_km : null)
                      ?? pc.centroid_dist_km ?? null,
                npx: pc.n_pixels ?? null,
@@ -2269,6 +2269,27 @@ function colorPorBT(bt) {
   if (bt < 330) return "#ffb74d";
   if (bt < 360) return "#ff7043";
   return "#d50000";
+}
+
+// S193 (Nicolás, 2026-11-21: «tenemos gente revisando las anomalías, sería bueno mejorar los mapas»). POR QUÉ. De noche
+// un lago queda más tibio que la roca y la nieve que lo rodean, y el detector, como el de MIROVA (sin máscara de agua),
+// puede alertarlo: el píxel más caliente cayó sobre agua en 124 de 14.391 pasadas de la vía, 35 en Laguna del Maule y 21
+// en Carrán-Los Venados (experiments/_s193_lagos/INFORME.md). Esta marca le dice al revisor que mire el mapa; no
+// descarta nada ni cambia ningún valor publicado (una erupción también puede empezar en un lago). Criterio y fuente en
+// frontend/agua.js. La capa del volcán se pide una vez; si llega después de dibujar, se completa el mismo elemento (sin
+// redibujar la página), y un elemento vacío no se ve. Guard: tests/test_tablero_agua_s193.py
+function marcaAgua(clase, v, rec) {
+  if (!v || !rec || typeof AguaTablero === "undefined") return null;
+  const host = el("div", clase);
+  const pintar = (capa) => {
+    const m = capa ? AguaTablero.aguaDePasada(rec, capa) : null;
+    if (!m || !m.sobreAgua) return;
+    host.textContent = "💧 " + AguaTablero.textoAgua(m);
+    host.title = AguaTablero.tituloAgua(m);
+  };
+  const c = AguaTablero.capaEnCache(v.name);
+  if (c === undefined) AguaTablero.cargarCapa(v.name).then(pintar); else pintar(c);
+  return host;
 }
 
 function monitoringFreshness(lastTimeStr, toleranciaH = 30) {
@@ -2846,6 +2867,8 @@ function buildCards() {
     card.append(hdr, vrpEl, vrpSub);
     if (act.firstChild) card.appendChild(act);
     if (pcEl) card.appendChild(pcEl);   // S183
+    const aguaEl = det ? marcaAgua("vc-sobre-agua", v, det.rec) : null;   // S193: pico de la última detección sobre agua
+    if (aguaEl) card.appendChild(aguaEl);
     card.appendChild(mon);
 
     // S180: minigráfico del período (como mosaico.html), sólo si el volcán tiene datos en este tablero.
@@ -3384,6 +3407,7 @@ function renderDetail() {
           const td = el("td"); td.textContent = val; row.appendChild(td);
           if (i === 3 && rot.title) td.title = rot.title;
           if (i === 2 && marca34) td.appendChild(marca34);
+          if (i === 2 && r.anomaly_pixels && r.anomaly_pixels.length) { const ma = marcaAgua("marca-agua", v, r); if (ma) td.appendChild(ma); }   // S193
         });
         const tdZ = el("td"); celdaCenit(tdZ, r); row.appendChild(tdZ);
         tbody.appendChild(row);
@@ -3506,6 +3530,7 @@ function renderDetail() {
         }
         if (i === 1) td.style.color = "var(--muted)";
         if (i === 2) { td.style.color = zoneColor; td.style.fontWeight = "600"; td.style.whiteSpace = "nowrap"; if (marca34) td.appendChild(marca34); }
+        if (i === 2) { const ma = marcaAgua("marca-agua", v, r); if (ma) td.appendChild(ma); }   // S193: pico sobre agua
         if (i === 7 && npxCluster != null && npxCluster !== npxTotal) {
           td.title = `${npxCluster} pix en cluster principal · ${npxTotal} pix totales detectados`;
         }
@@ -3531,7 +3556,8 @@ function renderDetail() {
     ["#ff9800", "Extensión volcánica no-MIROVA"],
     ["#00e676", "✓ Confirmado por MIROVA (anillo)"],
     ["#7c4dff", "Vent-path / POI investigación"], ["#ffc107", "Radio vent-path"], ["#7a8fa6", "Radio búsqueda 25 km"],
-    ["#ffb74d", "Píxeles medidos (cuadros, color = temperatura)"]
+    ["#ffb74d", "Píxeles medidos (cuadros, color = temperatura)"],
+    ["#40c4ff", "💧 Agua (JRC); borde celeste discontinuo = pico sobre agua"]   // S193 (frontend/agua.js)
   ].forEach(([color, label]) => {
     const item = el("div", "map-legend-item");
     const dot = el("div", "map-legend-dot");
@@ -3571,9 +3597,14 @@ function renderDetail() {
   panel.appendChild(dp);
 
   // Initialize Leaflet map after DOM is ready
-  setTimeout(() => {
-    if (!document.getElementById("hotspot-map")) return;
-    const map = L.map("hotspot-map", { zoomControl: true }).setView([v.lat, v.lon], 12);
+  setTimeout(async () => {
+    const mapaEl = document.getElementById("hotspot-map");
+    if (!mapaEl) return;
+    // S193: la capa de agua del volcán (frontend/agua.js) se pide antes de dibujar, para que marcadores y píxeles lleven
+    // su marca. Si no carga, el mapa queda como antes. Si mientras tanto se redibujó el detalle, este mapa ya no se usa.
+    const capaAgua = typeof AguaTablero === "undefined" ? null : await AguaTablero.cargarCapa(v.name);
+    if (!mapaEl.isConnected || mapaEl._leaflet_id) return;
+    const map = L.map(mapaEl, { zoomControl: true }).setView([v.lat, v.lon], 12);
     // S12: registro de markers para el click-row-to-highlight feature.
     // Key = "{datetime_utc}|{sensor}" del record.
     const markersByKey = new Map();
@@ -3582,6 +3613,14 @@ function renderDetail() {
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
       attribution: "Esri World Imagery", maxZoom: 18,
     }).addTo(map);
+
+    // S193: cuerpos de agua (JRC, ocurrencia de 50 % o más), bajo los píxeles medidos y los marcadores, encendidos por
+    // defecto: de noche un lago no se distingue en la imagen y es donde el detector puede alertar sin volcán (marcaAgua).
+    let aguaLayer = null;
+    if (capaAgua) {
+      map.createPane("agua").style.zIndex = 320;
+      aguaLayer = L.geoJSON(capaAgua, { pane: "agua", style: () => AguaTablero.ESTILO_CAPA, interactive: false }).addTo(map);
+    }
 
     // S77 P5: capas de referencia espacial agrupadas + toggle.
     // Cada una refleja una construcción geométrica del workflow MIROVA:
@@ -3658,6 +3697,7 @@ function renderDetail() {
       ? { "Cumbre 5 km (supuesto)": summitLayer, "Grilla de la vía (51 km)": sceneLayer }
       : { "Summit (cráter)": summitLayer, "Vent-path": ventPathLayer, "Scene (25 km)": sceneLayer, "Bbox MIROVA 50×50 km": bboxLayer };
     const capasCtl = L.control.layers(null, capasMapa, { collapsed: true, position: "topright" }).addTo(map);
+    if (aguaLayer) capasCtl.addOverlay(aguaLayer, "Cuerpos de agua (JRC, 50 % o más)");   // S193
 
     // Volcano center marker
     L.circleMarker([v.lat, v.lon], {
@@ -3745,6 +3785,17 @@ function renderDetail() {
       // Solo poblado por records post-S88 (NRT cron); records viejos sin
       // geo_class caen al comportamiento previo (gris si far).
       const isExtension = (r.primary_cluster && r.primary_cluster.geo_class === "extension");
+      // S193: ¿el píxel más caliente de la pasada cae sobre agua? (frontend/agua.js). Borde celeste discontinuo y una
+      // línea en el popup, con el contraste del pico contra el fondo. Sólo display.
+      // (typeof: tests/test_mapa_todos_los_pixels_s175.py corre este bloque aislado, sin la capa)
+      const ma = (typeof capaAgua !== "undefined" && capaAgua) ? AguaTablero.aguaDePasada(r, capaAgua) : null;
+      const popupAgua = !ma ? "" :
+        "<br>" + (ma.sobreAgua
+          ? `<span style="color:${AguaTablero.COLOR_AGUA}" title="${AguaTablero.tituloAgua(ma)}">💧 ${AguaTablero.textoAgua(ma)}</span>` +
+            `<br><small style="color:#888">De noche un lago queda más tibio que la roca: revisa si es el lago o un foco.</small>`
+          : `Agua en la celda del pico: ${Math.round(ma.fraccion * 100)} %`) +
+        (ma.dT != null ? `<br>Contraste del pico contra el fondo: ${ma.dT.toFixed(1)} K` +
+          (ma.n > 1 ? ` · ${ma.nAgua} de ${ma.n} píxeles sobre agua` : "") : "");
 
       // S26 B: cuando toggle "Solo cráter" activo (default), NO renderizar markers
       // far en el mapa para reducir ruido visual. La tabla los mantiene atenuados
@@ -3815,6 +3866,11 @@ function renderDetail() {
         // backed (más estricto que el recall, que va a ±60 min); naranja = extensión real
         // no-MIROVA. Excluyentes por construcción. Solo sobrescribe el borde,
         // el relleno (sensor/summit/far/extension) queda intacto.
+        if (isPrimary && ma && ma.sobreAgua) {   // S193: pico sobre agua (si MIROVA la confirmó, abajo gana el verde)
+          markerStyle.color = AguaTablero.COLOR_AGUA;
+          markerStyle.weight = Math.max(markerStyle.weight || 1, 2.2);
+          markerStyle.dashArray = "3,2";
+        }
         if (r._mirova_confirmed) {
           markerStyle.color = "#00e676";
           markerStyle.weight = Math.max(markerStyle.weight || 1, 2.2);
@@ -3855,7 +3911,8 @@ function renderDetail() {
             : '') +
           (multiPixel ? `<b>Este pixel:</b> ${Number.isFinite(px.vrp_mw) ? px.vrp_mw.toFixed(4) + " MW" : "sin dato de VRP por pixel"} (pixel #${pxIdx+1})<br>` : '') +
           `BT max: ${tempC(px.bt_k)}<br>` +
-          `Distancia al cráter: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}`
+          `Distancia al cráter: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}` +
+          popupAgua
         );
         // S12: registrar SOLO el marker primario (pxIdx===0) para el
         // click-row-to-highlight. Si el record tiene múltiples pixels,
@@ -3874,6 +3931,15 @@ function renderDetail() {
     const medidosLayer = L.layerGroup().addTo(map);
     capasCtl.addOverlay(medidosLayer, "Píxeles medidos (una pasada)");
     const k2cMed = (k) => Number.isFinite(k) ? (k - 273.15).toFixed(1) + " °C" : "sin dato";
+    // S193: qué significa el celeste, y si el píxel más caliente de esta pasada cae sobre agua.
+    const notaAgua = (r) => {
+      if (!capaAgua) return "";
+      const m = AguaTablero.aguaDePasada(r, capaAgua);
+      return " En celeste, los cuerpos de agua (" + AguaTablero.FUENTE + "); un cuadro con borde celeste es un píxel cuya " +
+        "celda es mitad o más agua." + (m && m.sobreAgua ? " El píxel más caliente de esta pasada cae sobre agua (" +
+        Math.round(m.fraccion * 100) + " % de su celda): de noche un lago queda más tibio que la roca, así que revisa si es el " +
+        "lago o un foco; no es un descarte, una erupción también puede empezar en el agua." : "");
+    };
     const medir = (r) => {
       medidosLayer.clearLayers();
       const nota = document.getElementById("pixeles-medidos-nota");
@@ -3885,11 +3951,17 @@ function renderDetail() {
         const dLat = half / 111.32, dLon = half / (111.32 * Math.cos(px.lat * Math.PI / 180));
         const b = [[px.lat - dLat, px.lon - dLon], [px.lat + dLat, px.lon + dLon]];
         caja.push(b[0], b[1]);
-        L.rectangle(b, { pane: "pixelesMedidos", color: "#ffffff", weight: 0.8, fillColor: colorPorBT(px.bt_k), fillOpacity: 0.55 })
+        // S193: fracción de agua de la celda de este píxel y su contraste contra el fondo; borde celeste si es mitad o más agua
+        const fa = capaAgua ? AguaTablero.fraccionAgua(capaAgua, px.lat, px.lon, pm.ladoKm) : null;
+        const enAgua = fa != null && fa >= AguaTablero.UMBRAL_CELDA;
+        L.rectangle(b, { pane: "pixelesMedidos", color: enAgua ? AguaTablero.COLOR_AGUA : "#ffffff", weight: enAgua ? 1.8 : 0.8,
+                         fillColor: colorPorBT(px.bt_k), fillOpacity: 0.55 })
           .bindPopup("<b>Píxel medido</b><br>" + r.datetime_utc + " UTC · " + r.sensor + "<br>" +
                      "Temperatura de brillo: " + k2cMed(px.bt_k) + "<br>" +
+                     (Number.isFinite(px.bt_k) && Number.isFinite(r.t_bg_k) ? "Contraste contra el fondo: " + (px.bt_k - r.t_bg_k).toFixed(1) + " K<br>" : "") +
                      "Distancia al volcán: " + (Number.isFinite(px.dist_km) ? px.dist_km.toFixed(2) + " km" : "sin dato") +
-                     (Number.isFinite(px.vrp_mw) ? "<br>VRP del píxel: " + px.vrp_mw.toFixed(3) + " MW" : ""))
+                     (Number.isFinite(px.vrp_mw) ? "<br>VRP del píxel: " + px.vrp_mw.toFixed(3) + " MW" : "") +
+                     (fa != null ? "<br>" + (enAgua ? "💧 " : "") + "Agua en la celda: " + Math.round(fa * 100) + " %" : ""))
           .addTo(medidosLayer);
       }
       if (nota) {
@@ -3900,7 +3972,8 @@ function renderDetail() {
                   (pm.nCumulo != null ? "; el cúmulo publicado cuenta " + pm.nCumulo : "") +
                   ". Cada cuadro es un píxel de " + lado + " (tamaño en el nadir; hacia el borde de la pasada es mayor)." +
                   " Color: temperatura de brillo (amarillo bajo 27 °C, naranjo bajo 57 °C, rojo bajo 87 °C, rojo oscuro sobre eso)." +
-                  (pm.via ? "" : " Pasada del detector anterior (K): son los píxeles anómalos que guardó, no sólo los del cúmulo.")
+                  (pm.via ? "" : " Pasada del detector anterior (K): son los píxeles anómalos que guardó, no sólo los del cúmulo.") +
+                  notaAgua(r)
                 : "esta pasada no guardó píxeles.") +
           " Toca una fila de «Últimas pasadas» para ver otra pasada.";
       }

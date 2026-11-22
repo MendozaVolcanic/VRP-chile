@@ -10,7 +10,7 @@
 > Codex ronda 2, frente 11 (gravedad 4 condicional, verificador limpio,
 > `D:\codex-vrp\_salida\ronda2\f11_verificacion\VEREDICTO.md`, fuera del repo). Por qué, como geólogo: desde el
 > reemplazo del 2026-11-12 toda la historia publicada de los 11 Tier A es de la vía, y el tablero sólo marca el paso
-> de K a la vía (`primeraVia` de `frontend/cambio_detector.js`); con 0 records K en producción hoy no dibuja ninguna
+> de K a la vía (`primeraVia` de `frontend/cambio_detector.js`) (⚠️ S193: describe el tablero anterior a #1072, que desde el 2026-11-21 marca también el paso de la vía a K con la línea «vuelve a K»; lo que falta para levantar la suspensión es la condición (2) y la decisión de Nicolás); con 0 records K en producción hoy no dibuja ninguna
 > marca. Si se revirtiera un sensor, su serie pasaría de la vía a K sin marca y la potencia caería a cerca de la
 > mitad sin aviso: el operador leería un cambio de método como una baja de actividad del volcán. Además, el revert no
 > toca la historia de la vía anterior al encendido (F11-V201) y el NRT ordinario no repone con K los records que ya
@@ -66,7 +66,12 @@
 > una alerta protegida que K publica (regla `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md` §4).
 > El laboratorio (`experimental`) y el ancla de los tests pre-K (`_s146_ab_control`) declaran la vía apagada. Una
 > serie MODIS que cruce la primera pasada de la vía mezcla dos detectores: el tablero la marca y el auto-audit separa el
-> detector `VIA_MODIS` (A104). Tag defensivo `pre-s171-adopcion-modd`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.18.
+> detector `VIA_MODIS` (A104). (⚠️ S193 (A113; auditoría Codex ronda 2, F11-102, R8 y F11-V301, verificadas): desde el
+> reemplazo del 2026-11-12 ninguna serie cruza de K a la vía, así que hoy el tablero no dibuja ninguna marca (0 records
+> K en los 33 pares volcán y sensor); desde #1072 (2026-11-21) `frontend/cambio_detector.js` marca también el paso de
+> la vía a K, que tampoco ocurre hoy. El auto-audit separa por record, pero toma la frontera de la vía de los datos
+> (hoy el 2025-02-15): tras revertir un sensor descartaría sus records K nuevos y ese sensor quedaría sin medir contra
+> MIROVA. Fuente: `D:\codex-vrp\_salida\ronda2\f11b_verificacion\VEREDICTO.md`, R8, fuera del repo.) Tag defensivo `pre-s171-adopcion-modd`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.18.
 >
 > ⚠️ **S177 B1 (A113; ⚠️ S186: rige, #974 mergeado el 2026-11-11 a las 13:09:21 UTC; decía «PROPUESTA en borrador:
 > rige sólo desde el merge del PR B1, rama `claude/s177-b1-v375`»): VIIRS 375
@@ -77,7 +82,11 @@
 > n 31, pasadas con alerta del 2026-11-03 al 11-07). Decisión de Nicolás del 2026-11-08 (diseño del encendido de
 > VIIRS). K de VIIRS sigue como guardia (`pipeline/profiles/guardia_k_viirs.yaml`, vigilancia
 > `scripts/vigilancia_guardia_viirs.py`) con reversión pre-autorizada por `git revert -m 1` del merge de B1, sin tocar
-> VIIRS 750 (regla `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md` §4, que se sella antes del
+> VIIRS 750 (⚠️ S193 (A113; auditoría Codex ronda 2, R3 AF-0356 y F11-V201, verificadas en parte): «sin tocar VIIRS 750»
+> se sostiene en los perfiles, pero la reversión está SUSPENDIDA (marca S192 al inicio) y un revert de B1 no toca los
+> 28.810 records VIIRS 375 de la vía en producción, 28.627 de ellos anteriores al encendido, que la guardia, con datos
+> desde el 2026-11-03, no puede reponer; `D:\codex-vrp\_salida\ronda2\f11b_verificacion\instrumentos\censo_records_salida.txt`,
+> fuera del repo) (regla `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md` §4, que se sella antes del
 > merge). Toda frase de este documento que describa VIIRS 375 de producción con K (la marca S153 de abajo, el núcleo
 > `f5_core_vrp_mw`, lo que dependa de ellos en VIIRS 375) describe el estado previo en VIIRS 375 y se conserva por
 > historia. El laboratorio (`experimental`), `experimental_ndc_focus`, el ancla de los tests pre-K (`_s146_ab_control`)
@@ -85,7 +94,14 @@
 > `pre-s178-b1-b2`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.23 (propuesta).
 
 > ⚠️ **S153: el detector de la réplica cambió (adopción de K; marca A113).** (⚠️ S186: K dejó de ser producción en
-> MODIS el 2026-11-02 y en VIIRS el 2026-11-11; lo que sigue describe hoy las guardias. Marca S186 al inicio.) Desde el merge del PR de adopción,
+> MODIS el 2026-11-02 y en VIIRS el 2026-11-11; lo que sigue describe hoy las guardias. Marca S186 al inicio.) (⚠️ S193
+> (A113; auditoría Codex ronda 2, F11-106 y R6, verificadas): lo de que «lo que sigue describe hoy las guardias» vale
+> para los tres puntos del detector, no para la sombra ni para la reversión de este párrafo. La vigilancia de la sombra
+> C0 contra K (`scripts/vigilancia_sombra.py`) no lee las guardias: toma como K los records de producción que no son de
+> la vía, y desde el reemplazo del 2026-11-12 no hay ninguno (0 en los tres sensores de los 11 Tier A, sobre 14.843,
+> 28.810 y 30.126 records; `D:\codex-vrp\_salida\ronda2\f11b_verificacion\instrumentos\censo_records_salida.txt`, fuera
+> del repo), así que sale VERDE sin comparar nada. Nota del verificador, sin re-verificar: como excluye los records de la vía, hoy
+> nadie compara C0 contra la vía.) Desde el merge del PR de adopción,
 > `mirova_equivalent` corre (1) **sin el Test 1 integrado en el ROI** (D30: no está en el paper y hacía publicar en
 > 85 a 88 % de los negativos limpios de VIIRS 375), (2) con la **conectiva `max`** de la prosa de Coppola 2016a en los
 > Tests 2 y 3 (hacen falta las dos condiciones, D26) y (3) con la **banda 22 primaria en MODIS** (D21). La regla de
@@ -189,6 +205,13 @@ energía: arriba de 1 MW perder una alerta no tiene compensación posible.
    distancia, 992 pasadas) quedó descartada; los evaluadores que ya la calculan la siguen imprimiendo
    como dato informativo, pero no decide. Definición, control y denominadores:
    `docs/S151_CRITERIO_CLASE_MIROVA.md` §2, §3 y §5.
+   ⚠️ **S193 (auditoría Codex ronda 2, F10-V301, verificada; recomendación aceptada por Nicolás el 2026-11-21 en
+   S193, «continua con todo lo que recomiendes»): mientras un sensor procese sólo pasadas nocturnas (D27), sus
+   alertas protegidas diurnas de MIROVA no entran en este punto.** La réplica no mira de día a propósito, así que
+   perderlas no es una pérdida del detector sino del alcance. Codex contó 88 protegidas diurnas sin record nuestro, 76
+   de ellas de Nevados de Chillán en erupción, hasta 12,34 MW (`D:\codex-vrp\_salida\ronda2\RESUMEN_F10_F12_PARA_NICOLAS.md`).
+   Quedan a la vista, no fuera del registro: el A/B diurno (#813) decide si se enciende el día por sensor, y desde el
+   encendido de un sensor sus protegidas diurnas cuentan aquí como cualquier otra.
 2. ⚠️ **Precisada por D-9 (2026-10-15, punto 5)**: «Muy Bajo» empieza arriba de 0,05 MW en VIIRS 375; las
    alertas del scraper de 0,05 MW o menos son pasadas que el banner llama NONE y cuentan como «MIROVA no vio
    nada». Texto original:
@@ -233,7 +256,12 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    «sin medir» quedó desfasado: ya medida, A/B de 330 pasadas en `experiments/_s190_d36/INFORME.md`; con los números
    de la Tabla 1 y la conectiva `max` del `.m` no se gana ni se pierde ninguna alerta de MIROVA y la potencia cambia
    en 9 pasadas de NdC; la fórmula «or» del texto del paper no se midió (misma redacción que la marca S190 de
-   `CLAUDE.md`, F1M-110 y F1M-117). Texto anterior conservado.
+   `CLAUDE.md`, F1M-110 y F1M-117). Texto anterior conservado. ⚠️ **S193 (A113; auditoría Codex ronda 2, F9-V303 y
+   F9-V304, verificadas):** las 9 pasadas de NdC cuyo valor cambia son todas protegidas (MIROVA de 6,37 a 86,39 MW en
+   la misma pasada): «no se gana ni se pierde ninguna alerta» vale para la detección, no para el valor publicado. De la
+   fórmula «or» ya se midió la exposición, no el efecto: fuera de la cumbre su umbral queda bajo el de la vía en 6.024
+   de 6.024 escenas nocturnas MODIS (mediana 0,00796 contra 0,02 o más;
+   `D:\codex-vrp\_salida\ronda2\f9b_verificacion\instrumentos\inst1_d36_p1_salida.txt`, partes C y D, fuera del repo).
    - Coppola 2016a SP 426.5 (Test 1 + NTI; Tabla 1 N·σ summit/scene, dual-ROI, dNTI 8-vec).
      ✅ **S128: «Coppola 2015» y «Coppola 2016a» eran la MISMA entrada, no dos papers.**
      El `Test 1` está dentro de `documentacion/sp426_5.txt` (`NTIPIX > K1 (Test 1)`, línea
@@ -307,7 +335,9 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
      vía). En main `d516b9d8c` (74.811 records) hay 9 cúmulos
      con `pc.vrp_mw` = 5,0, los 9 con `primary_cluster.d9_capped`, y 183 sobre 5 MW
      (`experiments/_s160_audit/v4/v_282_d9_capped_salida.txt`): bajo K el tope casi no actúa, y la cara de
-     co-validación del path D se midió con el detector anterior.
+     co-validación del path D se midió con el detector anterior. ⚠️ **S193 (A113; auditoría Codex ronda 2, F10-107,
+     verificada en parte):** la vía, producción en los tres sensores, no tiene tope: lo de esta marca y de la S151 que
+     sigue vale para K (hoy la guardia) y el detector anterior (marca S193 de D9 en `docs/MIROVA_DIVERGENCES.md`).
    - ⚠️ **S151, sobre el «se confirma el tope de 5 MW» del ítem que sigue**
      (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P5): «se confirma» sólo quiere decir que el
      tope recorta. No está medido que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02: el
@@ -323,7 +353,10 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
      más radiante, medido desde el cráter (`pipeline/mirova_v750_codigo.py::procesar_grilla`); entró con la vía, sin
      el A/B pre-registrado. Clase igual a la de MIROVA en 98,7 % (2026-03-01 a 2026-11-15, tabla
      sola). Nicolás la formalizó el 2026-11-15 («Formalizar radiante», respuesta a la recomendación b.3 del bloque
-     S186): es la regla de posición vigente (marca S186 de D8' en `docs/MIROVA_DIVERGENCES.md`).
+     S186): es la regla de posición vigente (marca S186 de D8' en `docs/MIROVA_DIVERGENCES.md`). ⚠️ **S193 (A113;
+     auditoría Codex ronda 2, F12-104 y F12-V301, verificadas):** su costo es mayor que el declarado al formalizarla:
+     12 protegidas nocturnas sólo OCR con el mecanismo de «radiante», no 5, del 2026-03-01 al 2026-11-18; con la tabla
+     sola, 0 (marca S193 de D8').
      ⚠️ **Matiz S151 (tarea 1.4 del loop, PR #809, dos verificadores con contexto limpio):** sobre los
      GeoTIFF de MIROVA, MIROVA informa el foco lejano cuando es fuerte (15 de 15 con z ≥ 30) y el cráter
      cuando el lejano es débil; la fuerza del lejano y el calor del cráter pesan los dos, y «la mayor»

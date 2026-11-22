@@ -9,7 +9,7 @@ cambió.
 
 | Punto | Qué se midió | Veredicto |
 |---|---|---|
-| 1. Umbrales de MODIS (K1 -0,7 y piso 0,02 del `.m` de VIIRS 750 en vez de -0,8 y 0,01 de la Tabla 1) | A/B sobre 330 pasadas reales con la grilla de la vía | **Pre-registrado: «medir más»** (la Tabla 1 cambia el valor publicado en 5,8 % de las pasadas con alerta; el corte para «dejar documentado» era 2 %). **Recomendación posterior: no adoptar la Tabla 1 y dejarlo documentado**: no recupera ninguna alerta, no cambia ninguna protegida, y en las 9 pasadas que cambian (todas Chillán) sube un valor que ya estaba sobre el de MIROVA (⚠️ S190, F4-119: en 8 de las 9; en Chillán 2026-11-09 00:55 A estaba bajo MIROVA, ver el desglose de §1) |
+| 1. Umbrales de MODIS (K1 -0,7 y piso 0,02 del `.m` de VIIRS 750 en vez de -0,8 y 0,01 de la Tabla 1) | A/B sobre 330 pasadas reales con la grilla de la vía | **Pre-registrado: «medir más»** (la Tabla 1 cambia el valor publicado en 5,8 % de las pasadas con alerta; el corte para «dejar documentado» era 2 %). **Recomendación posterior: no adoptar la Tabla 1 y dejarlo documentado**: no recupera ninguna alerta, no cambia ninguna protegida (⚠️ S193, F9-V303: en la detección; las 9 pasadas cuyo valor cambia son todas protegidas, MIROVA de 6,37 a 86,39 MW; ver la marca S193 del desglose de §1), y en las 9 pasadas que cambian (todas Chillán) sube un valor que ya estaba sobre el de MIROVA (⚠️ S190, F4-119: en 8 de las 9; en Chillán 2026-11-09 00:55 A estaba bajo MIROVA, ver el desglose de §1) |
 | 2. Escalón de cenit de VIIRS 750 sobre 50° | Razón nuestra/MIROVA en la misma pasada sobre 50°, por magnitud | **No implementar (3 preguntas: NO) y medir más.** La razón es 0,998, pero la prueba no tiene poder: en el OSF el escalón casi sólo actúa sobre 100 MW, y no tenemos ningún par sobre 50° con 100 MW o más desde que corre la vía. Se mide en el primer evento oblicuo grande |
 | 3. Corte de 5 km al centro, mínimo de 100 píxeles, recorte de 45 km | Mutaciones contra las pruebas de hoy; costo contra MIROVA | **Dejar documentado.** Costo contra MIROVA: 0 alertas perdidas atribuibles. Pruebas: quitar o subir el corte de 5 km y mover el recorte de 45 km se atrapan; bajar el corte, el mínimo de 100 píxeles y el radio de cobertura no los atrapa ninguna prueba (ver §3) |
 
@@ -83,11 +83,17 @@ queda más lejos de MIROVA que A. Ese 9 de 9 es casi mecánico y no es evidencia
 ya estaba sobre MIROVA en 8 de las 9, así que cualquier suma aleja. La única pasada que informa es Chillán 2026-11-09
 00:55 (MIROVA 6,37 MW, A 6,25, B 9,41), donde A estaba bajo MIROVA y B se pasa de largo. Ejemplo del caso típico:
 Chillán 2026-10-30 08:55, cenit 63°, MIROVA 14,39 MW, A 20,55, B 28,60. Lo que sí se sostiene: la Tabla 1 no
-recupera ninguna alerta, no cambia ninguna protegida y no mejora la magnitud en ninguno de los dos volcanes con pares (Láscar igual, Chillán
+recupera ninguna alerta, no cambia ninguna protegida (⚠️ S193 (A113; auditoría Codex ronda 2, F9-V303 y AF-3315, verificada): vale para la detección, no para el valor publicado; las 9 pasadas que cambian tienen todas MIROVA de 1 MW o más en la misma pasada, de 6,37 a 86,39 MW, o sea son protegidas, y en las 9 B cambia lo que se publica; además, para las protegidas el conjunto evaluable estaba saturado, 62 de 62 noches en los cuatro brazos, así que «no recupera» no podía dar otro resultado ahí; `D:\codex-vrp\_salida\ronda2\f9b_verificacion\instrumentos\inst1_d36_p1_salida.txt`, parte C, fuera del repo) y no mejora la magnitud en ninguno de los dos volcanes con pares (Láscar igual, Chillán
 peor). El veredicto que
 recomiendo es **no adoptar la Tabla 1 y dejarlo documentado**: la divergencia con el paper existe, pero acercarse al
 paper no nos acerca a lo que MIROVA publica, que es la referencia del perfil `mirova_equivalent` (A115). ⚠️ S190
-(F4-117): «acercarse al paper» vale sólo para sus números; su conectiva «or» no se midió.
+(F4-117): «acercarse al paper» vale sólo para sus números; su conectiva «or» no se midió. ⚠️ S193 (A113; auditoría
+Codex ronda 2, F9-V304, verificada): su exposición ya se midió, su efecto en alertas no. Fuera de la cumbre, el
+umbral de dNTI con «or» y los números de la Tabla 1 queda bajo el de la vía en 6.024 de 6.024 escenas nocturnas MODIS
+(mediana 0,00796 contra 0,02 o más de la vía; con `max` y la Tabla 1, 0,01000):
+`D:\codex-vrp\_salida\ronda2\f9b_verificacion\instrumentos\inst1_d36_p1_salida.txt`, parte D, fuera del repo. Como
+geólogo: con «or» MODIS alertaría con anomalías más tenues que las que hoy publica; cuántas alertas de MIROVA ganaría
+o cuántas publicaciones de más agregaría sigue SIN MEDIR (F1M-117).
 
 **Qué faltaría para cerrar del todo** (si Nicolás quiere el «medir más» literal): las 8 pasadas que fallaron por
 la NASA (4 noches de Chillán, Láscar y Villarrica con alerta) y, para la sobre-publicación, una muestra de negativas

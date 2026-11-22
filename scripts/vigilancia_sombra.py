@@ -30,6 +30,8 @@ Qué mide, con el predicado del tablero ejecutado con node (banco de paridad) pa
 - Duración: hasta ver 29 protegidas A nocturnas en la sombra después de la adopción, o 120 días.
 - Vigilancia ciega: la sombra dejó de producir, no hay frontera o adopción declaradas, o la «sombra» trae
   records de producción. Una vigilancia ciega no da error: da VERDE. Por eso cada caso tiene su veredicto.
+- SIN_OBJETO (S193, auditoría Codex ronda 2, F11-106): ningún sensor de producción sigue en K (los tres con la vía
+  desde el 2026-11-11 y la historia reemplazada el 2026-11-12): no hay K que comparar con la sombra C0. No abre issue.
 
 Salida: data/audit_continuous/sombra_latest.json y una línea en sombra_history.jsonl.
 """
@@ -487,6 +489,18 @@ def evaluar(hoy):
     veredicto = d["veredicto"]
     if veredicto == "VERDE" and avisos:
         veredicto = "VIGILANCIA_CIEGA"
+    # S193 (auditoría Codex ronda 2, F11-106). POR QUÉ: esta vigilancia compara C0 contra K DE PRODUCCIÓN. Desde el
+    # reemplazo de la historia del 2026-11-12 los tres sensores son de la vía y no queda K que comparar (0 de 73.779
+    # records cumplían el filtro); salía VERDE todos los días sin mirar nada, contra su propio principio (una vigilancia
+    # ciega no da error, da VERDE). Ahora dice SIN_OBJETO y no abre issue: la pérdida de la vía la vigilan las guardias
+    # (vigilancia_guardia_*.py) y retirar la sombra C0 lo decide Nicolás (D1 de docs/PLAN_EXPERIMENTAL_S190.md). Un
+    # disparador de K residual (caída a K) manda sobre SIN_OBJETO; los avisos quedan en `avisos`.
+    sin_objeto = None
+    if via and not sensores_k and veredicto in ("VERDE", "VIGILANCIA_CIEGA"):
+        veredicto = "SIN_OBJETO"
+        sin_objeto = ("sin K en producción: los tres sensores son de la vía «código MIROVA» y esta vigilancia no tiene "
+                      f"K que comparar con la sombra C0 ({len(prod)} records de K en la ventana). La pérdida de la vía la "
+                      "vigilan las guardias; retirar la sombra C0 lo decide Nicolás (D1, docs/PLAN_EXPERIMENTAL_S190.md)")
     out.update({"ventana": list(win), "veredicto": veredicto, "avisos": avisos,
                 "sombra_desde": min((r["noche"] for r in sombra), default=None),
                 "sombra_hasta": max((r["noche"] for r in sombra), default=None),
@@ -497,6 +511,8 @@ def evaluar(hoy):
     if via:
         out["via_modis_excluida"] = len(via)   # S172: sólo con records de la vía, para no cambiar la salida de antes
         out["sensores_k"] = sensores_k         # S180: lista vacía = ningún sensor de producción sigue en K
+    if sin_objeto:
+        out["sin_objeto"] = sin_objeto         # S193, F11-106
     return out
 
 
@@ -529,6 +545,8 @@ def main(argv=None):
 def imprimir(out):
     print(f"Vigilancia de la sombra: {out['veredicto']} · ventana {out.get('ventana')} · adopción "
           f"{out.get('adopcion_k_utc')} · sombra {out.get('sombra_desde')} a {out.get('sombra_hasta')}")
+    if out.get("sin_objeto"):
+        print("SIN OBJETO:", out["sin_objeto"])
     for a in out.get("avisos", []):
         print("AVISO:", a)
     for p in out.get("reversion", []):

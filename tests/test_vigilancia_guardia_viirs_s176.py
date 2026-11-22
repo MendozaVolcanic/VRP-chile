@@ -507,7 +507,17 @@ def test_no_se_toca_la_regla_sellada_de_modis():
                        capture_output=True, text=True, encoding="utf-8")
     if r.returncode != 0:
         pytest.skip("sin origin/main en este checkout")
-    quitadas = [l for l in r.stdout.splitlines() if l.startswith("-") and not l.startswith("---")]
+    # S193 (A113): el registro de pasadas juzgadas (`sombra_pasadas_juzgadas_modis.json`) no es texto sellado: su
+    # esquema dice «agregar una entrada es un commit». Al agregar la primera, la línea `"pasadas": []` se abre en una
+    # lista; es la única línea que ese archivo puede perder. El resto de la carpeta sigue sin poder perder ninguna.
+    quitadas, archivo = [], None
+    for l in r.stdout.splitlines():
+        if l.startswith("+++ "):
+            archivo = l[6:] if l.startswith("+++ b/") else l[4:]
+        elif l.startswith("-") and not l.startswith("---"):
+            if archivo and archivo.endswith("sombra_pasadas_juzgadas_modis.json") and l.strip() == '- "pasadas": []':
+                continue
+            quitadas.append(l)
     assert quitadas == [], quitadas[:5]
 
 
