@@ -43,14 +43,19 @@ def _pas(vol, d, pub, sensor="VIIRS_NOAA20", hh=5, inval=False, lat=None, lon=No
             "pub": pub, "invalida": inval, "lat": lat, "lon": lon}
 
 
-def _pos(modo, rng):
+def _pos(modo, rng, i=0):
+    """fija: un píxel tibio de siempre. deriva: una fuente que se corre despacio (4 km del ancla, una vuelta en 150
+    noches, ~0,17 km por noche): cerca de sus noches previas y a más de 1 km de las de hace más de 6 días. azar: ruido."""
     if modo == "fija":
         return ANCLA[0] + 0.001, ANCLA[1]
+    if modo == "deriva":
+        th = 2 * np.pi * i / 150
+        return ANCLA[0] + 4 * np.cos(th) / 111.32, ANCLA[1] + 4 * np.sin(th) / (111.32 * np.cos(np.radians(ANCLA[0])))
     r, th = ANCLA[2] * np.sqrt(rng.random()), 2 * np.pi * rng.random()
     return ANCLA[0] + r * np.cos(th) / 111.32, ANCLA[1] + r * np.sin(th) / (111.32 * np.cos(np.radians(ANCLA[0])))
 
 
-def construir(clases, alertas, nubes=None, modo_pos="fija", semilla=0):
+def construir(clases, alertas, nubes=None, modo_pos="deriva", semilla=0):
     """clases[vol] y alertas[vol]: listas por noche i (día BASE + i). Una pasada por perfil y noche; la escena NHI
     del día D es de la noche D. Devuelve (noches, nhi)."""
     rng = np.random.default_rng(semilla)
@@ -59,7 +64,7 @@ def construir(clases, alertas, nubes=None, modo_pos="fija", semilla=0):
         nhi[vol] = []
         for i, c in enumerate(cl):
             d = BASE + timedelta(days=i)
-            la, lo = _pos(modo_pos, rng)
+            la, lo = _pos(modo_pos, rng, i)
             pl, pp = c in ("S", "A"), c in ("A", "P")
             lab.append(_pas(vol, d, pl, lat=la if pl else None, lon=lo if pl else None))
             prod.append(_pas(vol, d, pp, lat=la if pp else None, lon=lo if pp else None))
@@ -102,7 +107,7 @@ def test_sello_valores_de_nicolas():
     assert (E.N_PERMUTACIONES, E.N_SORTEOS_PERSIST, E.SEMILLA) == (10000, 2000, 194)
     assert E.GRILLA_S == (5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0) and E.N_MIN_NEG_SENSOR == 30
     assert (E.TOL_PAREO_S, E.MAX_FRAC_COBERTURA_DESIGUAL) == (120, 0.05)
-    assert E.UNIDAD_TASA == "pasada"
+    assert E.UNIDAD_TASA == "noche"
 
 
 def test_sello_hash_del_evaluador_en_el_preregistro():
@@ -290,19 +295,41 @@ def test_cobertura_desigual_invalida():
     assert r["veredicto"] == E.INVALIDO and r["cobertura"][v]["desiguales"] == 10
 
 
-def test_persistencia_fija_supera_y_azar_no():
+def test_persistencia_temporal_deriva_supera_fija_y_azar_no():
+    """El sorteo temporal (el que vota, re-sello del 2026-11-22) separa una fuente que recurre en el tiempo de un punto
+    fijo de siempre; el uniforme (informativo) da por persistente también al punto fijo."""
     clases, alertas = mezcla(9, 11)
-    fija = E.persistencia(construir(clases, alertas)[0], ANCLAS)
-    azar = E.persistencia(construir(clases, alertas, modo_pos="azar")[0], ANCLAS)
-    assert fija["supera"] and fija["frac_obs"] > 0.5
+    deriva = E.persistencia_temporal(construir(clases, alertas)[0])
+    fija = construir(clases, alertas, modo_pos="fija")[0]
+    azar = E.persistencia_temporal(construir(clases, alertas, modo_pos="azar")[0])
+    assert deriva["supera"] and deriva["frac_obs"] > 0.5
+    assert not E.persistencia_temporal(fija)["supera"] and E.persistencia(fija, ANCLAS)["supera"]
     assert not azar["supera"] and azar["p"] > 0.05
 
 
-def test_persistencia_temporal_informativa_no_vota(cumple):
-    """Con la posición fija, la recurrencia temporal no se distingue de la espacial: p alto, y aun así CUMPLE."""
-    t = cumple["persistencia_temporal_informativa"]
-    assert t["n_extras"] == cumple["persistencia"]["n_extras"] and t["p"] > 0.05
-    assert cumple["veredicto"] == E.CUMPLE
+def test_sorteo_temporal_solo_toma_noches_lejanas():
+    """Noches 0 y 1 en el punto X, noche 20 en Y a 3 km. La extra de la noche 1 es persistente (X la noche previa). Su
+    sorteo sólo puede tomar la noche 20 (más de 6 días): nunca persistente, media del sorteo exactamente 0. Si el
+    sorteo tomara también noches cercanas (la noche 0, en X), la media subiría a 1/6."""
+    v = "Villarrica"
+    x, y = (ANCLA[0], ANCLA[1]), (ANCLA[0] + 3 / 111.32, ANCLA[1])
+    lab, prod = [], []
+    for i in range(21):
+        d = BASE + timedelta(days=i)
+        pt = x if i in (0, 1) else y if i == 20 else (None, None)
+        lab.append(_pas(v, d, i in (0, 1, 20), lat=pt[0], lon=pt[1]))
+        prod.append(_pas(v, d, False))
+    r = E.persistencia_temporal(E.clasificar_noches(lab, prod), n_sorteos=500)
+    assert r["n_extras"] == 3 and r["frac_obs"] == round(1 / 3, 6)
+    assert r["frac_sorteo_media"] == 0.0
+
+
+def test_pixel_fijo_con_exceso_nhi_no_cumple_y_el_uniforme_no_vota():
+    noches, nhi = construir(*mezcla(9, 11), modo_pos="fija")
+    r = E.veredicto(noches, nhi, ANCLAS)
+    assert len(r["volcanes_con_exceso"]) >= 4 and r["control"]["nulo"]
+    assert r["persistencia_uniforme_informativa"]["supera"] and not r["persistencia"]["supera"]
+    assert r["veredicto"] == E.NO_CUMPLE
 
 
 # ----------------------------------------------------------------------------------------------- calibración
@@ -323,6 +350,10 @@ def test_un_sensor_sobre_la_tasa_basta_para_rechazar():
     t[3.0]["VIIRS750"] = (310, 1000)
     for s in (2.5, 2.0, 1.5, 1.0):
         t[s]["VIIRS750"] = (400, 1000)
+    assert E.elegir_valor(t, unidad="pasada")["valor"] == 3.5   # en la unidad pasada rige cada sensor
+    t[3.0]["NOCHE"] = (301, 1000)                                  # en la noche, una sola tasa
+    for s in (2.5, 2.0, 1.5, 1.0):
+        t[s]["NOCHE"] = (400, 1000)
     assert E.elegir_valor(t)["valor"] == 3.5
 
 
@@ -346,12 +377,13 @@ def test_identidad_barrido_plano_no_da_extension():
     assert r["valor"] == 1.0 and "piso" in r["detalle"]
 
 
-def test_unidad_sellada_es_la_pasada_y_la_noche_queda_disponible():
-    """D5 aprobó la tasa por pasada. La unidad noche (pregunta 1 del PR) elige otro valor con los mismos brazos."""
+def test_unidad_sellada_es_la_noche_y_la_pasada_queda_disponible():
+    """Rige la noche (Nicolás, 2026-11-22, pregunta 1 del PR #1093); la pasada (D5) elige otro valor con los mismos
+    brazos y queda disponible sin regir."""
     pasada = {5.0: .01, 4.5: .02, 4.0: .05, 3.5: .10, 3.0: .20, 2.5: .30, 2.0: .40, 1.5: .5, 1.0: .6}
     noche = {5.0: .03, 4.5: .08, 4.0: .20, 3.5: .30, 3.0: .45, 2.5: .60, 2.0: .80, 1.5: .9, 1.0: .95}
     t = _tasas(pasada, por_s_noche=noche)
-    assert E.elegir_valor(t)["valor"] == 2.5
+    assert E.elegir_valor(t)["valor"] == 3.5
     assert E.elegir_valor(t, unidad="noche")["valor"] == 3.5
     assert E.elegir_valor(t, unidad="pasada")["valor"] == 2.5
 

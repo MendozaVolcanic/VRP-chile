@@ -2,7 +2,8 @@
 """Evaluador pre-registrado de la zona A del laboratorio (MEJ-5), S194, paso 2 del plan S190.
 
 ESCRITO ANTES DE TENER DATOS DEL LABORATORIO. El criterio que aplica está sellado en
-`experiments/_s194_lab_zona_a/PREREGISTRO.md` (valores de Nicolás, D5 del 2026-11-17). Este archivo no se edita
+`experiments/_s194_lab_zona_a/PREREGISTRO.md` (valores de Nicolás, D5 del 2026-11-17; re-sello del 2026-11-22 con sus
+respuestas a las tres preguntas del PR #1093: tasa por noche, calibración desde marzo, sorteo temporal). No se edita
 después del sello sin un pre-registro nuevo: la prueba `tests/test_lab_zona_a_preregistro_s194.py` compara su
 sha256 (con fin de línea normalizado) con el que declara el pre-registro.
 
@@ -18,8 +19,9 @@ QUÉ HACE, en cuatro piezas que son funciones puras (las prueba el archivo de pr
   2. `parear_nhi` y `prueba_permutacion`: cada escena NHI a una noche (D, después D+1, después D-1), y la diferencia
      de tasa de alerta NHI entre S y N con permutación dentro del volcán, estratificada por nubosidad de la escena.
   3. `control_desplazado`: lo mismo con las fechas NHI corridas +15 y -15 días; tiene que dar nulo.
-  4. `persistencia`: fracción de detecciones extra a <= 1 km de una detección del laboratorio de las 3 noches previas,
-     contra posiciones sorteadas al azar dentro de la zona A.
+  4. `persistencia_temporal` (vota): fracción de detecciones extra a <= 1 km de una detección del laboratorio de las 3
+     noches previas, contra la misma fracción con posiciones que el propio laboratorio publicó en noches lejanas.
+     `persistencia` (sorteo uniforme en la zona A) se informa sin voto.
 Y `elegir_valor`, la regla del paso 3 para elegir el multiplicador de sigma de la zona A sobre negativos limpios.
 
 Uso (cuando existan los datos del paso 4; hoy sale con error a propósito si falta la carpeta del laboratorio):
@@ -67,14 +69,15 @@ RADIO_PERSIST_KM = 1.0
 NOCHES_PREVIAS = 3
 N_SORTEOS_PERSIST = 2000
 N_MIN_EXTRAS = 10
-TASA_OBJETIVO = 0.30           # tasa de publicación por pasada en negativos limpios, zona A, cada sensor
+TASA_OBJETIVO = 0.30           # tasa de publicación en negativos limpios, zona A (unidad: UNIDAD_TASA)
 GRILLA_S = (5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0)  # 5.0 = s2 nocturno de producción (control del barrido)
 N_MIN_NEG_SENSOR = 30
 SENSORES = ("MODIS", "VIIRS375", "VIIRS750")
-# Unidad de la tasa objetivo. D5 aprobó «por pasada» y es la que rige. «noche» (noche de volcán, tres sensores juntos)
-# queda implementada y probada pero APAGADA: es la alternativa de la pregunta 1 del PR para Nicolás (debilidad 1 del
-# PREREGISTRO). Cambiar esta constante es un re-sello (nuevo sha256), antes de correr el barrido.
-UNIDAD_TASA = "pasada"
+# Unidad de la tasa objetivo: la noche de volcán, tres sensores juntos. Decisión de Nicolás del 2026-11-22 en la
+# coordinadora S194 («Por noche (Recomendado)», pregunta 1 del PR #1093): con 30 % por pasada y una mediana de 6
+# pasadas negativas por noche, la noche se saturaba y la prueba NHI quedaba sin noches N (debilidad 1 del
+# PREREGISTRO). «pasada» (lo aprobado en D5) queda implementada y probada, sin regir.
+UNIDAD_TASA = "noche"
 CLAVES_UNIDAD = {"pasada": SENSORES, "noche": ("NOCHE",)}
 
 CUMPLE, NO_CUMPLE, SIN_PODER, INVALIDO = "CUMPLE", "NO CUMPLE", "SIN PODER", "INVALIDO POR INSTRUMENTO"
@@ -258,7 +261,9 @@ def _sorteo_disco(rng, lat0, lon0, r_km, n):
 
 
 def persistencia(noches, anclas, volcanes=VOLCANES_ZONA_A, n_sorteos=N_SORTEOS_PERSIST, semilla=SEMILLA):
-    """`anclas`: {vol: (lat, lon, inner_km)}. Fracción de extras a <= RADIO_PERSIST_KM de una detección publicada del
+    """INFORMATIVA, no vota desde el re-sello del 2026-11-22 (pregunta 3 del PR #1093; debilidad 5: el disco de la zona
+    A es más grande que la ROI de detección de la vía e infla el contraste). `anclas`: {vol: (lat, lon, inner_km)}.
+    Fracción de extras a <= RADIO_PERSIST_KM de una detección publicada del
     laboratorio en las NOCHES_PREVIAS noches anteriores, contra la misma fracción con la posición de cada extra
     sorteada uniforme (por área) en el disco de la zona A de su volcán; las detecciones previas quedan reales.
     p = (1 + #{f* >= f}) / (1 + n_sorteos); supera si p < ALFA y hay al menos N_MIN_EXTRAS extras."""
@@ -286,12 +291,18 @@ def persistencia(noches, anclas, volcanes=VOLCANES_ZONA_A, n_sorteos=N_SORTEOS_P
 
 
 def persistencia_temporal(noches, volcanes=VOLCANES_ZONA_A, n_sorteos=N_SORTEOS_PERSIST, semilla=SEMILLA):
-    """INFORMATIVA, no vota (PREREGISTRO, debilidad 5): cada extra toma la posición de una detección publicada del
-    laboratorio del mismo volcán en otra noche lejana (|Δ| > NOCHES_PREVIAS + 3 días). Separa la recurrencia en el
-    tiempo de la mera concentración espacial en un punto fijo (un píxel tibio de siempre también «persiste»)."""
+    """LA QUE VOTA (decisión de Nicolás del 2026-11-22 en la coordinadora S194, «Temporal (Recomendado)», pregunta 3 del
+    PR #1093). Fracción de extras a <= RADIO_PERSIST_KM de una detección publicada del laboratorio en las
+    NOCHES_PREVIAS noches anteriores, contra la misma fracción cuando cada extra toma, al azar, la posición de una
+    detección publicada del laboratorio del mismo volcán en otra noche lejana (|Δ| > NOCHES_PREVIAS + 3 días). Respeta
+    por construcción la ROI real y la grilla, y separa la recurrencia en el tiempo de la concentración en un punto fijo:
+    un píxel tibio de siempre está igual de cerca de las noches lejanas que de las previas, y no supera. Una extra sin
+    noches lejanas o sin previas cuenta como no persistente en lo observado y en el sorteo.
+    p = (1 + #{f* >= f}) / (1 + n_sorteos); supera si p < ALFA y hay al menos N_MIN_EXTRAS extras."""
     extras, pub = _detecciones(noches, volcanes)
     if not extras:
-        return {"n_extras": 0, "frac_obs": None, "frac_sorteo_media": None, "p": None}
+        return {"n_extras": 0, "frac_obs": None, "frac_sorteo_media": None, "p": None, "supera": False,
+                "sin_poder": True}
     pool = collections.defaultdict(list)
     for (vol, n), pts in pub.items():
         for pt in pts:
@@ -309,8 +320,10 @@ def persistencia_temporal(noches, volcanes=VOLCANES_ZONA_A, n_sorteos=N_SORTEOS_
         hit_c = _hav_km(cand[:, None, 0], cand[:, None, 1], pv[None, :, 0], pv[None, :, 1]).min(axis=1) <= RADIO_PERSIST_KM
         hits += hit_c[rng.integers(len(cand), size=n_sorteos)]
     obs, sorteo = hits_obs / len(extras), hits / len(extras)
+    p = float((1 + np.sum(sorteo >= obs - 1e-12)) / (1 + n_sorteos))
+    sin_poder = len(extras) < N_MIN_EXTRAS
     return {"n_extras": len(extras), "frac_obs": round(obs, 6), "frac_sorteo_media": round(float(sorteo.mean()), 6),
-            "p": float((1 + np.sum(sorteo >= obs - 1e-12)) / (1 + n_sorteos))}
+            "p": p, "supera": bool(p < ALFA and not sin_poder), "sin_poder": sin_poder}
 
 
 # ------------------------------------------------------------------------------------------------ veredicto
@@ -325,8 +338,8 @@ def veredicto(noches, nhi, anclas, fin=None, n_perm=N_PERMUTACIONES, n_sorteos=N
               for vol in VOLCANES_ZONA_A}
     nhi_res = medir_nhi(noches, nhi, fin=fin, n_perm=n_perm)
     ctrl = control_desplazado(noches, nhi, fin=fin, n_perm=n_perm)
-    pers = persistencia(noches, anclas, n_sorteos=n_sorteos)
-    pers_t = persistencia_temporal(noches, n_sorteos=n_sorteos)
+    pers = persistencia_temporal(noches, n_sorteos=n_sorteos)           # vota
+    pers_u = persistencia(noches, anclas, n_sorteos=n_sorteos)          # informativa
     con_poder = [v for v, r in nhi_res.items() if r["voto"] != SIN_PODER]
     con_exceso = [v for v, r in nhi_res.items() if r["voto"] == "exceso"]
     motivos = []
@@ -352,9 +365,9 @@ def veredicto(noches, nhi, anclas, fin=None, n_perm=N_PERMUTACIONES, n_sorteos=N
             motivos.append("exceso NHI con p < %.2f en %d volcanes (hacen falta %d)" % (ALFA, len(con_exceso),
                                                                                     MIN_VOLCANES_CUMPLE))
         if not pers["supera"]:
-            motivos.append("la persistencia no supera al sorteo dentro de la zona A")
+            motivos.append("la persistencia no supera al sorteo temporal (posiciones del laboratorio en noches lejanas)")
     return {"veredicto": v, "motivos": motivos, "volcanes_con_poder": con_poder, "volcanes_con_exceso": con_exceso,
-            "nhi": nhi_res, "control": ctrl, "persistencia": pers, "persistencia_temporal_informativa": pers_t,
+            "nhi": nhi_res, "control": ctrl, "persistencia": pers, "persistencia_uniforme_informativa": pers_u,
             "cobertura": cob, "clases_por_volcan": clases}
 
 

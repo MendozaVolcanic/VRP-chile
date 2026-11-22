@@ -49,7 +49,10 @@ MUTACIONES = [
     ("sin_poder_global", "elif len(con_poder) < MIN_VOLCANES_CUMPLE:", "elif False:"),
     ("monotonia", "if any(r[i + 1] < r[i] for i in range(len(r) - 1)):", "if False:"),
     ("control_barrido", "return tasas.get(GRILLA_S[0]) == tasas_prod", "return True"),
-    ("unidad_noche", "UNIDAD_TASA = \"pasada\"", "UNIDAD_TASA = \"noche\""),
+    ("unidad_pasada", "UNIDAD_TASA = \"noche\"", "UNIDAD_TASA = \"pasada\""),
+    ("vota_uniforme", "pers = persistencia_temporal(noches, n_sorteos=n_sorteos)",
+     "pers = persistencia(noches, anclas, n_sorteos=n_sorteos)"),
+    ("temporal_sin_lejania", "if abs((d - d0).days) > NOCHES_PREVIAS + 3]", "if abs((d - d0).days) > 0]"),
 ]
 
 

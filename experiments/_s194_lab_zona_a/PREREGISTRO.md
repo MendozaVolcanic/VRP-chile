@@ -5,11 +5,20 @@
 > Nicolás el 2026-11-17 (D5 de `docs/PLAN_EXPERIMENTAL_S190.md` §8): tasa objetivo de 30 % por pasada en negativos
 > limpios, CUMPLE con exceso NHI de p < 0,05 en al menos 4 de los 9 volcanes con serie NHI (sin Cordón Caulle),
 > control con las fechas NHI corridas 15 días, persistencia sobre el sorteo, SIN PODER bajo 10 noches pareadas.
-> No cambia ningún valor que él aprobó; lo que el crítico encontró que podría obligar a cambiarlos va como pregunta
-> (§8).
+> El primer sello no cambió ningún valor aprobado; lo que el crítico encontró se llevó como pregunta (§8).
+>
+> **Re-sello del 2026-11-22, con las respuestas de Nicolás** a las tres preguntas del §8, dadas de primera mano en la
+> sesión coordinadora S194 por la herramienta de preguntas y reenviadas a esta sesión por la coordinadora (no las leí
+> de primera mano). Textual de las opciones que eligió: (1) tasa del 30 %, «Por noche (Recomendado)»; (2) calibración,
+> «Sí, desde marzo (Recomendado)»; (3) persistencia, «Temporal (Recomendado)». Desde este re-sello la tasa objetivo
+> de 30 % se mide **por noche de volcán** con los tres sensores juntos (§5), la calibración corre desde el 2026-03-01
+> y la persistencia que vota es la del **sorteo temporal** (3.8); el sorteo uniforme queda informativo. Lo demás de
+> D5 (30 %, 4 de 9, p < 0,05, control de 15 días, SIN PODER bajo 10, ventana NHI desde 2026-02-15) no cambia. El
+> re-sello se commitea antes de cualquier medición: no existe aún ningún record del laboratorio.
 >
 > **Sello.** El evaluador es `experiments/_s194_lab_zona_a/evaluar.py`,
-> sha256 del evaluador (fin de línea LF): `e0d19ae34188735a1bc468aae3bc887ff9f495eab985a95a68f4911f38cfd74b`.
+> sha256 del evaluador (fin de línea LF): `072400b76afd536ba161a0e488182873eb83045cdc68c9faf21f8c7e5293f903`
+> (el del primer sello, commit `f93c343e5`, era `e0d19ae34188735a1bc468aae3bc887ff9f495eab985a95a68f4911f38cfd74b`).
 > La prueba `tests/test_lab_zona_a_preregistro_s194.py::test_sello_hash_del_evaluador_en_el_preregistro` compara ese
 > hash con el archivo: editar el evaluador sin re-sellar este documento deja el CI en rojo. Base: `origin/main` en
 > `1c6ac41e1` (2026-11-22). Sin cambio de la lógica de detección ni de ningún valor publicado: no toca `pipeline/`,
@@ -34,7 +43,7 @@ publica» del mismo volcán.
 | records del laboratorio | `data/laboratorio_v1/<Volcan>.json` (paso 4; hoy no existe) | 2026-02-15 al último día disponible |
 | records de producción | `data/mirova_equivalent/<Volcan>.json` | la misma |
 | NHI | `https://raw.githubusercontent.com/MendozaVolcanic/NHI-v1/main/docs/nhi_data/<Carpeta>/nhi_timeseries.json` (campos `fecha`, `alerta`, `cloud_cover`, `sensor`); carpetas `Planchon-Peteroa` y `Nevados de Chillan` | la misma |
-| referencia MIROVA (sólo calibración) | `registro_vrp_consolidado.csv` y `registro_vrp_ocr.csv` de Mirova-v1, bajados frescos (`referencia_mirova_unificada.bajar_remoto`) | **2026-03-01** al último día (A119; pregunta 2) |
+| referencia MIROVA (sólo calibración) | `registro_vrp_consolidado.csv` y `registro_vrp_ocr.csv` de Mirova-v1, bajados frescos (`referencia_mirova_unificada.bajar_remoto`) | **2026-03-01** al último día (A119; confirmado por Nicolás, pregunta 2) |
 
 Volcanes: los 9 con serie NHI (Láscar, Isluga, Tupungatito, Planchón-Peteroa, Nevados de Chillán, Llaima,
 Villarrica, Copahue, Chaitén). Cordón Caulle fuera (D6). Lastarria no tiene serie NHI (404 en NHI-v1): no vota en NHI,
@@ -84,12 +93,18 @@ desplazamiento (`salida_poder.txt`).
 
 **3.8 Persistencia.** Una **detección extra** es una pasada válida que el laboratorio publica y producción no, en una
 noche con cobertura igual, en los 10 volcanes de la zona A. Es **persistente** si está a ≤1 km (haversine, posición
-`final_hotspot_lat/lon`) de alguna pasada publicada del laboratorio de las **3 noches previas** del mismo volcán. Se
-compara la fracción persistente observada con la de 2.000 sorteos en que la posición de cada extra se reemplaza por
-un punto uniforme (por área) en el disco de la zona A de su volcán (ancla `pipeline.geo_utils.get_detection_anchor`,
-radio `inner_radius_km`), dejando reales las detecciones previas. **Supera** si p = (1 + #{f* ≥ f}) / 2.001 < 0,05 y
-hay al menos 10 extras. Se informa además, **sin voto**, un sorteo temporal (la posición de cada extra se reemplaza
-por la de una detección publicada del laboratorio del mismo volcán en una noche a más de 6 días; debilidad 5).
+`final_hotspot_lat/lon`) de alguna pasada publicada del laboratorio de las **3 noches previas** del mismo volcán.
+
+- **Vota el sorteo temporal** (`evaluar.persistencia_temporal`; respuesta 3 de Nicolás): se compara la fracción
+  persistente observada con la de 2.000 sorteos en que cada extra toma, al azar, la posición de una pasada publicada
+  del laboratorio del mismo volcán en una noche a **más de 6 días** de la suya (3 noches previas más 3 de margen),
+  dejando reales las detecciones previas. Usa posiciones que el propio laboratorio publicó, así que respeta la ROI
+  real de la vía y la grilla; y un píxel tibio de siempre está igual de cerca de las noches lejanas que de las
+  previas, así que no supera. Una extra sin noches previas o sin noches lejanas cuenta como no persistente en lo
+  observado y en el sorteo. **Supera** si p = (1 + #{f* ≥ f}) / 2.001 < 0,05 y hay al menos 10 extras.
+- **Se informa sin voto el sorteo uniforme** (`evaluar.persistencia`, lo aprobado en D5): la posición de cada extra
+  se reemplaza por un punto uniforme (por área) en el disco de la zona A de su volcán (ancla
+  `pipeline.geo_utils.get_detection_anchor`, radio `inner_radius_km`).
 
 **3.9 Instrumento.** Si en algún volcán más del 5 % de las noches tiene cobertura desigual entre perfiles, el
 veredicto es INVALIDO: un hueco de un lado fabrica noches S o N (lección de `scripts/evaluador_comun.py`, T1).
@@ -105,7 +120,7 @@ Se evalúa en este orden (`evaluar.veredicto`):
 2. **SIN PODER** si menos de 4 volcanes tienen poder (con menos de 4 votantes no se puede llegar a 4). Qué se hace:
    se espera más datos y se re-evalúa **con este mismo criterio** a lo más dos veces más, la primera no antes del
    2027-02-21 (tres meses más de NHI); cada corrida se informa, ninguna se descarta.
-3. **CUMPLE** si al menos 4 volcanes dan exceso y la persistencia supera al sorteo. Qué se hace: paso 6 del plan
+3. **CUMPLE** si al menos 4 volcanes dan exceso y la persistencia supera al sorteo temporal. Qué se hace: paso 6 del plan
    (cron por tandas, vista de tres estados en la pestaña Laboratorio, fila de la ficha SDA), con el merge de Nicolás.
 4. **SIN PODER** si al menos 4 dan exceso pero hay menos de 10 extras para la persistencia (no puede ocurrir con 4
    volcanes de 10 noches S cada uno, pero la regla queda escrita).
@@ -124,16 +139,18 @@ nota del paso 1). Menor valor, más alertas; el guard S147 vigila que no pase de
 
 - **Brazos:** s = 5,0 (producción: control), 4,5, 4,0, 3,5, 3,0, 2,5, 2,0, 1,5 y 1,0. Cada brazo es el perfil
   `laboratorio` con la zona encendida y ese valor, en su propia carpeta, sobre la ventana de calibración.
-- **Medida:** con `evaluar.py calibrar`, por brazo y por sensor, la tasa de publicación por pasada sobre negativos
-  limpios (3.3) de los 10 volcanes de la zona A; también la tasa por noche de volcán (tres sensores juntos), que se
-  informa y no decide mientras `UNIDAD_TASA = "pasada"` (pregunta 1).
-- **Controles:** el brazo 5,0 tiene que dar exactamente las cuentas de producción (si no, la implementación cambia
-  algo más que el multiplicador: geometría, fondo o ancla, S147 §5; INVALIDO). La tasa no puede bajar al bajar s
-  (INVALIDO). Cada sensor necesita al menos 30 negativos limpios por brazo (si no, SIN PODER).
-- **Regla:** el valor es el **menor s** de la grilla cuya tasa por pasada no supera 30 % en **ninguno** de los tres
-  sensores (la comparación es entera, 10·publicadas ≤ 3·negativos, así que 30 % exacto cumple). Si producción ya
-  supera 30 % en algún sensor: SIN VALOR, a Nicolás. Si cumple hasta el piso (1,0), se elige 1,0 y el estado lo dice
-  («el piso de la grilla»), para que nadie lea el piso como una calibración. Si ya 4,5 supera: SIN EXTENSION.
+- **Medida** (`evaluar.py calibrar`, unidad `UNIDAD_TASA = "noche"`, respuesta 1 de Nicolás): por brazo, la tasa
+  de publicación **por noche de volcán** sobre los 10 volcanes de la zona A. Una **noche negativa limpia de volcán**
+  es una noche con al menos una pasada `neg_limpio` (3.3) y ninguna pasada `pos` ni `far_ref` (la noche negativa del
+  banco de paridad), con los tres sensores juntos; **publica** si alguna pasada de esa noche publica. La tasa por
+  pasada y por sensor (lo aprobado en D5) se calcula y se informa, sin decidir.
+- **Controles:** el brazo 5,0 tiene que dar exactamente las cuentas de producción, en las dos unidades (si no, la
+  implementación cambia algo más que el multiplicador: geometría, fondo o ancla, S147 §5; INVALIDO). La tasa no puede
+  bajar al bajar s (INVALIDO). Hacen falta al menos 30 noches negativas limpias por brazo (si no, SIN PODER).
+- **Regla:** el valor es el **menor s** de la grilla cuya tasa por noche no supera 30 % (la comparación es entera,
+  10·publicadas ≤ 3·negativas, así que 30 % exacto cumple). Si producción ya supera 30 %: SIN VALOR, a Nicolás. Si
+  cumple hasta el piso (1,0), se elige 1,0 y el estado lo dice («el piso de la grilla»), para que nadie lea el piso
+  como una calibración. Si ya 4,5 supera: SIN EXTENSION.
 
 ## 6. Lo que se puede medir hoy, sin el laboratorio
 
@@ -160,10 +177,9 @@ y en producción la tasa por noche (3,15 %) ya es 5,5 veces la tasa por pasada (
 fueran independientes, 30 % por pasada daría 88 % de las noches (SOSPECHA: no son independientes, una fuente real se
 repite en las pasadas de la misma noche, así que la cifra real queda entre 30 y 88 %). La prueba NHI necesita al
 menos 10 noches N, y las noches S y N salen sólo de las noches en que producción no publica (Isluga 16, Láscar 23):
-con la noche saturada, N se queda sin noches. **Qué hice:** no cambié el 30 % ni su unidad. Dejé implementada y
-probada, pero apagada, la unidad «noche» (`UNIDAD_TASA`; la tasa por noche de volcán con los tres sensores juntos),
-el barrido informa las dos, y lo llevo como **pregunta 1**. Elegir la unidad después del barrido y antes de medir NHI
-no mira el resultado: el barrido no toca NHI.
+con la noche saturada, N se queda sin noches. **Qué hice:** en el primer sello no cambié el 30 % ni su unidad; dejé
+implementada y apagada la unidad «noche» y lo llevé como pregunta 1. **Re-sello:** Nicolás eligió «por noche»; rige
+`UNIDAD_TASA = "noche"` y la tasa por pasada se informa.
 
 **Debilidad 2. Las nubes pueden fabricar el exceso.** Mecanismo (SOSPECHA, sin medir): una noche nublada apaga
 nuestra detección (la noche cae en N) y, si la nubosidad persiste a la tarde, apaga también la alerta NHI; las
@@ -198,16 +214,18 @@ para un pre-registro nuevo si llega a pasar.
 
 **Debilidad 5. El sorteo uniforme en la zona A es un nulo débil para la persistencia.** Evidencia: (a) un píxel tibio
 fijo (un lago, un campo fumarólico, el borde de un glaciar, el gradiente topográfico de A69) «persiste» igual que una
-fuente volcánica: en la prueba `test_persistencia_fija_supera_y_azar_no`, una posición fija hace persistentes más de la
-mitad de las extras y supera al sorteo; (b) la ROI de detección de la vía no es el círculo de la zona A: en MODIS
+fuente volcánica: en la prueba `test_persistencia_temporal_deriva_supera_fija_y_azar_no`, una posición fija supera al
+sorteo uniforme; (b) la ROI de detección de la vía no es el círculo de la zona A: en MODIS
 es la caja de 5 × 5 celdas al centro (CLAUDE.md, «Reglas geométricas»), unos 2,5 km a cada lado, y el sorteo reparte
 puntos hasta 5 km o más, donde la vía nunca podría detectar; eso infla el contraste a favor de lo observado.
-**Qué hice:** mantuve la persistencia aprobada (sorteo uniforme) porque es la de D5, y agregué, **sin voto**, el
-sorteo temporal (3.8), que respeta por construcción la ROI real y la cuantización de la grilla porque usa posiciones
-que el propio laboratorio publicó. Ni uno ni otro separan un artefacto fijo de una fuente fija: eso lo hace NHI, que
-es donde descansa el veredicto. Va como **pregunta 3**.
+**Qué hice:** en el primer sello mantuve el sorteo uniforme (D5), agregué sin voto el sorteo temporal y lo llevé
+como pregunta 3. **Re-sello:** Nicolás eligió «Temporal»; vota el sorteo temporal (3.8) y el uniforme se informa. Con
+eso un píxel fijo ya no pasa por persistente (`test_pixel_fijo_con_exceso_nhi_no_cumple_y_el_uniforme_no_vota`: con
+exceso NHI en los 9 volcanes y posición fija, el uniforme supera, el temporal no y el veredicto es NO CUMPLE). Lo que
+queda sin resolver: una fuente real que no se mueve en meses tampoco supera el sorteo temporal; para ella la
+persistencia no ayuda y el veredicto descansa en NHI.
 
-## 8. Preguntas para Nicolás (no cambian nada hasta que responda)
+## 8. Preguntas para Nicolás (respondidas el 2026-11-22; aplicadas en el re-sello de la cabecera)
 
 1. **¿La tasa objetivo de 30 % se mide por pasada (lo aprobado) o por noche de volcán?** Por la debilidad 1, con 30 %
    por pasada lo más probable es SIN PODER. Recomiendo **por noche** (la unidad del operador, A94). Si dice que sí, se
@@ -216,17 +234,20 @@ es donde descansa el veredicto. Va como **pregunta 3**.
    La medición contra NHI queda en 2026-02-15, como se aprobó; sólo la calibración, que depende de la tabla, se
    corre desde marzo. Recomiendo **sí** (es lo sellado); si prefiere 2026-02-15, se re-sella.
 3. **¿El sorteo temporal de la persistencia debe votar en vez del uniforme?** Por la debilidad 5. Recomiendo **sí**.
-   Hoy vota el uniforme (lo aprobado) y el temporal sólo se informa.
+   En el primer sello votaba el uniforme (lo aprobado) y el temporal sólo se informaba.
+
+Respuestas (2026-11-22, coordinadora S194): 1 «Por noche (Recomendado)», 2 «Sí, desde marzo (Recomendado)», 3
+«Temporal (Recomendado)».
 
 ## 9. Cómo se probó el instrumento antes de tener datos
 
 - `tests/test_lab_zona_a_preregistro_s194.py` (en CI): con datos sintéticos de verdad conocida el evaluador da CUMPLE,
-  NO CUMPLE (sin señal; señal sin persistencia; 3 de 9), SIN PODER (8 noches S) e INVALIDO (cobertura desigual;
+  NO CUMPLE (sin señal; señal sin persistencia; píxel fijo; 3 de 9), SIN PODER (8 noches S) e INVALIDO (cobertura desigual;
   señal estacional que el control atrapa); el control cae a nulo cuando la señal es de la noche misma; la
   estratificación neutraliza el confusor de nubes; la regla del barrido se prueba en sus bordes (30 % exacto, un
   sensor sobre la tasa, no monótona, piso, producción sobre la tasa, brazo faltante, control del brazo 5,0); la
   tabla de poder; y tres pruebas de sello (valores, hash del evaluador, la grilla parte del s2 leído del código).
-- `experiments/_s194_lab_zona_a/mutar.py` (salida `resultado_mutaciones.json`): 22 mutaciones del criterio sobre
+- `experiments/_s194_lab_zona_a/mutar.py` (salida `resultado_mutaciones.json`): 24 mutaciones del criterio sobre
   copias del evaluador, corridas sin las pruebas de sello. Cuenta como atrapada sólo si alguna prueba falla por
   aserción y ninguna da error (una mutación que hace caer la prueba no está atrapada, lección S152). El control sin
   mutar pasa entero.
