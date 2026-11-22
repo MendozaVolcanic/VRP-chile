@@ -29,6 +29,8 @@ Qué mide (reutiliza por import scripts/vigilancia_sombra.py, que vigila K y NO 
 - AVISO de protegida sin publicar (S193, auditoría Codex ronda 2, F11-101 y F9-101): una protegida que producción no
   publica y que ningún nivel de arriba cubre (la guardia no tiene la pasada, o K también calla) va a
   `protegidas_sin_publicar_sin_aviso` y el workflow abre su propio issue. No cambia el veredicto ni pide revertir.
+  S194 (auditoría Codex, Cierre I, C1-101): también la protegida de la que producción no tiene record y que ningún nivel
+  cubre (`prod_pub` None), pasadas ESPERA_SIN_RECORD_H horas; la diurna que producción no procesa no llega a la lista.
 - Duración: hasta ver 29 protegidas A nocturnas de MODIS en la guardia o 120 días desde el encendido. Fuera de plazo,
   una candidata se informa sin pre-autorización.
 - Vigilancia ciega: guardia o producción sin datos frescos de MODIS en algún volcán, referencia de MIROVA detenida,
@@ -380,8 +382,16 @@ def disparadores(pasadas, prod, guardia, hoy, encendido=None, juzgadas=None, aho
     # aparte: no cambia el veredicto de la regla ni pide revertir (si K también calla, no dice nada de K contra la vía).
     # Lo que ya abre su issue (reversión, fuera de plazo, caída a K, borde del encendido) no se repite, y una pasada
     # juzgada deja de avisar como las demás.
-    con_issue = {vs._clave(p) for p in candidatas + calladas_por_k + borde_enc}
-    sin_aviso = [p for p in pasadas if p["protegida"] and p["prod_pub"] is False
+    # S194 (auditoría Codex, Cierre I, C1-101). POR QUÉ: la pasada de la que producción NO tiene record también es un
+    # cráter que el operador no ve (la vía descartó el gránulo de borde, 171-01, o se perdió), y sólo avisaba si la
+    # guardia la publicaba después del encendido (`sin_record`, arriba); si la guardia tampoco la tenía o K también
+    # callaba, el aviso llegaba con el auto-audit del lunes (`avisos_protegidas_sin_record`), hasta 7 días después.
+    # Va al mismo aviso, con `prod_pub` None, pasada la misma espera del NRT que `sin_record`. Lo que producción no
+    # procesa a propósito ya no llega aquí: `pasadas_de_alerta` quita la pasada diurna con la regla del auto-audit
+    # (`es_pasada_diurna_descartada`: VIIRS de día apagado, MODIS de día sólo desde la frontera de los datos, #1090).
+    con_issue = {vs._clave(p) for p in candidatas + calladas_por_k + borde_enc + sin_record}
+    sin_aviso = [p for p in pasadas if p["protegida"]
+                 and (p["prod_pub"] is False or (p["prod_pub"] is None and p["instante_utc"] <= limite_espera))
                  and vs._clave(p) not in con_issue and vs._clave(p) not in juzgadas]
 
     if reversion:
@@ -637,6 +647,11 @@ def estado_guardia(p):
     return {True: "la publica", False: "tampoco la publica", None: "no tiene la pasada"}[p.get("guardia_pub")]
 
 
+def estado_produccion(p):
+    """S194 (C1-101): qué hizo producción con la pasada del aviso: la miró y calló, o no tiene record."""
+    return "no tiene record de la pasada" if p.get("prod_pub") is None else "no la publica"
+
+
 def imprimir(out):
     print(f"Vigilancia de la guardia K de MODIS: {out['veredicto']} · fase {out.get('fase')} · encendido "
           f"{out.get('encendido_modis_utc')} · guardia {out.get('guardia_desde')} a {out.get('guardia_hasta')}")
@@ -661,7 +676,7 @@ def imprimir(out):
               "investigar; no es candidata a reversión")
     for p in out.get("protegidas_sin_publicar_sin_aviso", []):
         print(f"  PROTEGIDA SIN PUBLICAR (aviso S193, sin reversión): {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA "
-              f"{p['vrp_mirova_mw']} MW: producción no la publica y la guardia {estado_guardia(p)}. Confirmar en la "
+              f"{p['vrp_mirova_mw']} MW: producción {estado_produccion(p)} y la guardia {estado_guardia(p)}. Confirmar en la "
               "imagen de MIROVA y llevarla a Nicolás")
     for p in out.get("protegidas_sin_record_produccion", []):
         print(f"  SIN RECORD DE PRODUCCIÓN: {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: "
