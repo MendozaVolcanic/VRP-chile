@@ -11,10 +11,12 @@ QUÉ VIGILA (G1 a G7 del plan docs/superpowers/plans/2026-11-21-laboratorio-paso
   G1 difiere de producción sólo en lo declarado (resuelto como lo resuelve el código, VRP_PROFILE, nunca el YAML: A89);
   G2 con la zona apagada, el record de una misma pasada es el de producción en los tres sensores;
   G3 no escribe en data/mirova_equivalent;
-  G4 producción no cambia: resuelve la zona apagada y vacía, ningún otro perfil la declara y nadie en pipeline/ la lee;
+  G4 producción no cambia: resuelve la zona apagada y vacía, ningún otro perfil la declara y nadie en pipeline/ la lee
+     (S195: salvo la vía, en s_zona_a, y los perfiles del barrido);
   G5 el tablero operacional no lee la carpeta del laboratorio;
   G6 el commit del NRT no la agrega y ningún workflow corre el perfil (el cron es el paso 4, por tandas, D7);
-  G7 encender la zona antes de que la vía la implemente es un error, no un nulo silencioso.
+  G7 encender la zona antes de que la vía la implemente es un error, no un nulo silencioso (S195: la vía ya la
+     implementa; el error queda para encenderla sin valor).
 
 LAS DOS PREGUNTAS DEL INSTRUMENTO. Cada búsqueda de texto tiene un control que la misma expresión encuentra lo que
 debe encontrar (A92, A116), y la comparación de records exige que los tres sean de la vía y con VRP > 0 (dos escenas
@@ -84,7 +86,10 @@ def test_g1_la_via_esta_encendida_en_los_tres_sensores_y_la_zona_apagada(resuelt
     assert lab.get("ENABLE_LAB_ZONA_A") == "False", lab.get("ENABLE_LAB_ZONA_A")
     zona = ast.literal_eval(lab["LAB_ZONA_A"])
     assert zona.get("extension") == "MEJ-5" and zona.get("radio") == "inner_radius_km", zona
-    assert zona.get("valor") is None, f"el umbral de la zona A se elige en el paso 3 del plan S190, no antes: {zona}"
+    # S195 (paso 3): la zona ya tiene efecto en la vía, pero el laboratorio sigue apagado y sin valor: el valor sale del
+    # barrido de 9 brazos (perfiles _s195_lab_*, evaluar.py calibrar) y lo fija el paso 4. Texto anterior del mensaje:
+    # «el umbral de la zona A se elige en el paso 3 del plan S190, no antes».
+    assert zona.get("valor") is None, f"el valor de la zona A del laboratorio lo fija el paso 4, tras el barrido: {zona}"
     assert "PuyehueCordonCaulle" in zona.get("volcanes_fuera", []), f"D6: Cordón Caulle fuera de la primera tanda: {zona}"
 
 
@@ -128,18 +133,27 @@ def test_g4_produccion_resuelve_la_zona_apagada_y_vacia(resueltos):
     assert prod.get("LAB_ZONA_A") == "{}", prod.get("LAB_ZONA_A")
 
 
+# S195 (paso 3): los 10 perfiles del barrido (control y 9 brazos, tests/test_laboratorio_paso3_s195.py P7) también la
+# declaran. Texto anterior: sólo laboratorio.yaml.
+PERFILES_CON_ZONA = sorted(["laboratorio.yaml", "_s195_lab_control.yaml"]
+                           + ["_s195_lab_s%02d.yaml" % t for t in (50, 45, 40, 35, 30, 25, 20, 15, 10)])
+
+
 def test_g4_ningun_otro_perfil_declara_la_zona():
     declaran = sorted(p.relative_to(PERFILES).as_posix() for p in PERFILES.rglob("*.yaml")
                       if CLAVES_ZONA.search(p.read_text(encoding="utf-8")))
-    assert declaran == ["laboratorio.yaml"], declaran     # control incluido: el laboratorio sí la declara
+    assert declaran == PERFILES_CON_ZONA, declaran     # control incluido: el laboratorio sí la declara
 
 
-def test_g4_nadie_en_pipeline_lee_la_zona_fuera_de_profile_py():
-    """Mientras la zona no tenga efecto (paso 3), ningún procesador la lee: una lectura nueva es un cambio de detección
-    y tiene que actualizar esta prueba a conciencia (A45)."""
+def test_g4_nadie_en_pipeline_lee_la_zona_fuera_de_profile_py_y_la_via():
+    """S195 (paso 3, A45 de Nicolás del 2026-11-22): la vía la lee, en un solo lugar (s_zona_a), y ningún procesador ni
+    el almacén. Una lectura nueva es un cambio de detección y tiene que actualizar esta prueba a conciencia (A45).
+    Texto anterior: «Mientras la zona no tenga efecto (paso 3), ningún procesador la lee», con sólo profile.py."""
     fuentes = list((RAIZ / "pipeline").glob("*.py")) + [RAIZ / "scripts" / "run_pipeline.py"]
     leen = sorted(p.name for p in fuentes if LECTURA_ZONA.search(p.read_text(encoding="utf-8")))
-    assert leen == ["profile.py"], leen                    # control incluido: profile.py sí la lee
+    assert leen == ["mirova_v750_codigo.py", "profile.py"], leen    # control incluido: profile.py sí la lee
+    via = (RAIZ / "pipeline" / "mirova_v750_codigo.py").read_text(encoding="utf-8")
+    assert len(LECTURA_ZONA.findall(via)) == 2, "la vía lee el flag y el bloque una sola vez, en s_zona_a"
 
 
 # ------------------------------------------------------------------------------------------------ G5
@@ -173,18 +187,25 @@ def test_g6_ningun_workflow_corre_el_laboratorio():
 
 
 # ------------------------------------------------------------------------------------------------ G7
-def test_g7_encender_la_zona_antes_de_implementarla_es_un_error():
+def test_g7_encender_la_zona_sin_valor_es_un_error():
+    """S195 (paso 3): la vía ya implementa la zona, así que encenderla deja de ser error; encenderla SIN valor (o sin
+    el bloque) sigue siéndolo, porque correría idéntico a producción creyendo medir la extensión (A87). Texto anterior:
+    test_g7_encender_la_zona_antes_de_implementarla_es_un_error (encender era siempre error)."""
     from pipeline import profile as P
     zona = {"extension": "MEJ-5", "radio": "inner_radius_km", "parametro": "sigma_contextual_nocturno",
             "valor": None, "volcanes_fuera": ["PuyehueCordonCaulle"]}
     assert P._zona_a_de({"enable_lab_zona_a": False}, {"laboratorio_zona_a": zona}) == (False, zona)  # control
     assert P._zona_a_de({}, {}) == (False, {})
+    con_valor = {**zona, "valor": 2.5}
+    assert P._zona_a_de({"enable_lab_zona_a": True}, {"laboratorio_zona_a": con_valor}) == (True, con_valor)
     with pytest.raises(ValueError, match="zona A"):
         P._zona_a_de({"enable_lab_zona_a": True}, {"laboratorio_zona_a": zona})
+    with pytest.raises(ValueError, match="zona A"):
+        P._zona_a_de({"enable_lab_zona_a": True}, {})
 
 
 @pytest.mark.parametrize("malo", ({"radio": "radius_km"}, {"parametro": "piso_nti"}, {"valor": -1.0},
-                                  {"valor": "5"}))
+                                  {"valor": "5"}, {"volcanes_fuera": "PuyehueCordonCaulle"}))
 def test_g7_una_zona_mal_escrita_no_carga(malo):
     from pipeline import profile as P
     zona = {"extension": "MEJ-5", "radio": "inner_radius_km", "parametro": "sigma_contextual_nocturno",

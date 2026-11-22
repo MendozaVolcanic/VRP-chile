@@ -964,11 +964,14 @@ VOLCANO_OVERRIDES: dict = dict(_cfg.get("volcano_overrides") or {})
 # POR QUÉ existe: un foco chico en el cráter (lago de lava, campo fumarólico) queda al borde del umbral de MIROVA y la
 # réplica lo copia a propósito. El laboratorio bajaría el umbral sólo dentro de inner_radius_km del cráter, donde el
 # prior volcánico es alto, y mediría lo que aparece contra NHI y persistencia (nunca contra MIROVA, A115).
-# POR QUÉ apagada y con error al encenderla: el umbral de la zona lo elige el paso 3 del plan (barrido sobre negativos
-# limpios) y ningún procesador la lee todavía (tests/test_laboratorio_paso1_s193.py, G4). Si alguien la encendiera
-# antes, el laboratorio correría idéntico a producción creyendo medir la extensión: un nulo silencioso (A87). Por eso
-# encenderla es un error al cargar el perfil hasta que la vía la implemente. Los perfiles que no la declaran (todos
-# salvo `laboratorio`) resuelven (False, {}), así que producción no cambia.
+# S195 (paso 3, A45 de Nicolás del 2026-11-22): la vía ya le da efecto (pipeline/mirova_v750_codigo.py, s_zona_a y
+# mascara_zona_a: el círculo de inner_radius_km cortado por la región sensible, decisión (a) del mismo día). Encenderla
+# ya no es error; encenderla SIN valor sí, porque el laboratorio correría idéntico a producción creyendo medir la
+# extensión: un nulo silencioso (A87). Que el valor no pase del s2 nocturno lo exige la vía (_pasada_contextual), que es
+# donde vive s2. Los perfiles que no la declaran resuelven (False, {}), así que producción no cambia.
+# ⚠️ S195 (A113): texto anterior, del paso 1: «POR QUÉ apagada y con error al encenderla: el umbral de la zona lo elige
+# el paso 3 del plan (barrido sobre negativos limpios) y ningún procesador la lee todavía (tests/test_laboratorio_paso1_s193.py,
+# G4). [...] Por eso encenderla es un error al cargar el perfil hasta que la vía la implemente.»
 _ZONA_A_RADIOS = ("inner_radius_km",)
 _ZONA_A_PARAMETROS = ("sigma_contextual_nocturno",)
 
@@ -985,9 +988,12 @@ def _zona_a_de(t: dict, cfg: dict) -> tuple:
         v = zona.get("valor")
         if v is not None and (isinstance(v, bool) or not isinstance(v, (int, float)) or not v > 0):
             raise ValueError(f"laboratorio_zona_a.valor={v!r}: null o un número positivo")
-    if encendida:
-        raise ValueError("enable_lab_zona_a: true, pero la zona A del laboratorio aún no tiene efecto en la vía "
-                         "(su umbral se elige en el paso 3 del plan docs/PLAN_EXPERIMENTAL_S190.md); apagarla")
+        fuera = zona.get("volcanes_fuera", [])
+        if not isinstance(fuera, list) or not all(isinstance(x, str) for x in fuera):
+            raise ValueError(f"laboratorio_zona_a.volcanes_fuera={fuera!r}: una lista de nombres de volcanes.yaml")
+    if encendida and zona.get("valor") is None:
+        raise ValueError("enable_lab_zona_a: true sin laboratorio_zona_a.valor: la zona A encendida sin multiplicador "
+                         "correría idéntica a producción (A87); declarar el valor o apagarla")
     return encendida, zona
 
 

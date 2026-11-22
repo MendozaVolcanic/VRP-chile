@@ -126,9 +126,9 @@ def _s2_nocturno_del_detector() -> float:
     return float(ast.literal_eval("(" + m.group(1).strip() + ")")[2])
 
 
-def _zona_a_del_laboratorio() -> dict:
+def _zona_a_del_laboratorio(perfil: str = "laboratorio") -> dict:
     codigo = "import pipeline.profile as p; print('@@' + repr(p.LAB_ZONA_A))"
-    env = dict(os.environ, VRP_PROFILE="laboratorio", PYTHONIOENCODING="utf-8")
+    env = dict(os.environ, VRP_PROFILE=perfil, PYTHONIOENCODING="utf-8")
     salida = subprocess.run([sys.executable, "-c", codigo], cwd=ROOT, env=env, capture_output=True, text=True,
                             timeout=120)
     assert salida.returncode == 0, f"no resolvio el laboratorio: {salida.stderr[-400:]}"
@@ -149,6 +149,17 @@ def test_s193_la_zona_a_no_es_mas_estricta_que_la_region_sensible():
     assert _no_mas_ciego_en_zona_a(zona.get("valor"), s2), (
         f"la zona A del laboratorio tiene multiplicador {zona.get('valor')}, mayor que el s2 nocturno de la vía ({s2}): "
         "el laboratorio vería MENOS que producción justo en el cráter")
+
+
+# S195 (paso 3): los 9 brazos del barrido (perfiles _s195_lab_s50 a _s195_lab_s10) encienden la zona con valor; ninguno
+# puede pasar del s2 nocturno, y el brazo s = 5,0 lo iguala (control del barrido sellado).
+@pytest.mark.parametrize("perfil", ["_s195_lab_s%02d" % t for t in (50, 45, 40, 35, 30, 25, 20, 15, 10)])
+def test_s195_ningun_brazo_del_barrido_es_mas_estricto_que_la_region_sensible(perfil):
+    s2 = _s2_nocturno_del_detector()
+    zona = _zona_a_del_laboratorio(perfil)
+    assert zona.get("parametro") == "sigma_contextual_nocturno", zona
+    assert zona.get("valor") is not None, f"control: el brazo {perfil} declara su valor"
+    assert _no_mas_ciego_en_zona_a(zona.get("valor"), s2), (perfil, zona.get("valor"), s2)
 
 
 def test_s193_control_un_multiplicador_mayor_rompe_la_comparacion():
