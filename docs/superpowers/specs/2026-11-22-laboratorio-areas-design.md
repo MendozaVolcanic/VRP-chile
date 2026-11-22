@@ -87,3 +87,19 @@ VRP). Es la «vista de tres estados» de S147 §8, extendida a áreas.
 - Si `anomaly_pixels` trae todos los alertados (lo mide el marcador de S194).
 - Cómo guarda la vía la grilla durante el proceso, para B: no leí `pipeline/mirova_v750_codigo.py` con ese fin.
 - El radio del edificio volcánico por volcán: no está en el repo.
+
+## 9. Crítica del propio borrador (pasada de «crítico despiadado», S194)
+
+1. **Fuera del cráter casi no hay vara.** NHI cubre sólo unos 8 × 8 km alrededor del volcán, y la clave de FIRMS
+   figura como «no configurado» en `C:\Users\nmend\OneDrive\Escritorio\claude\REGISTRO_CREDENCIALES.md`. Para flanco,
+   incendio y resto, hoy sólo queda la persistencia. Antes de prometer validar esas áreas hay que conseguir FIRMS o
+   aceptar que serán descriptivas, no validadas.
+2. **Un píxel no cabe en un área.** La celda de la grilla es de 1 km (750 m y 375 m en VIIRS) y el radio interno de
+   varios volcanes es de 3 a 5 km: una celda en el borde cae en dos áreas. Hay que fijar la regla (centro de la celda)
+   y contar cuántas celdas quedan en el borde.
+3. **Muchas comparaciones.** Cinco áreas por diez volcanes por tres sensores dan 150 celdas de resultado: alguna
+   saldrá «significativa» por azar. El criterio tiene que sellarse antes de mirar, como en el plan S190 §6.
+4. **El agua no es un control limpio en todas partes.** Hay lagunas con aporte geotermal y orillas mezcladas en el
+   píxel; la capa JRC (ocurrencia ≥ 50 %) no las distingue. El control negativo vale por lago, no en bloque.
+5. **La partición A depende de un campo que nadie diseñó para esto.** Si `anomaly_pixels` está truncado o cambió de
+   forma en la historia, A da conteos sesgados sin avisar; hay que medirlo antes (§2).
