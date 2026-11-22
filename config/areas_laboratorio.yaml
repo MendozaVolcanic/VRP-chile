@@ -1,0 +1,57 @@
+# Áreas del laboratorio (S194, opción A del diseño docs/superpowers/specs/2026-11-22-laboratorio-areas-design.md,
+# rama loop/activo; respuestas de Nicolás del 2026-11-22: AR1 = A, AR2 = cinco áreas, AR4 = sin área de incendio).
+#
+# POR QUÉ vive fuera de pipeline/profiles/: la partición A no toca la detección ni ningún valor publicado; sólo reparte
+# entre áreas los alertados que cada record ya guarda (anomaly_pixels). Lo lee experiments/_s194_areas/particion.py.
+#
+# Áreas EXCLUYENTES, asignadas por la posición del píxel alertado y en este orden de precedencia (la primera que lo
+# contiene se lo queda):
+#   1. crater: dist_km del píxel <= inner_radius_km de volcanoes.yaml (KML de MIROVA). dist_km es la distancia que
+#      guarda la vía, medida en la grilla desde la celda del cráter; es la misma que decide distance_class, así que el
+#      cráter de esta partición coincide con la «cumbre» del tablero. Un lago cratérico (Copahue) queda aquí.
+#   2. agua: el centro del píxel cae dentro de un polígono de frontend/agua/<Volcan>.geojson (JRC Global Surface Water
+#      v1.4, ocurrencia >= 50 %, la capa que dibuja el mapa desde #1079).
+#   3. flanco: inner_radius_km < dist_km <= radio_flanco_km.
+#   4. resto: lo demás de la grilla de 51 x 51 km.
+# Sin área de incendio (Nicolás, AR4): lo que sería incendio cae en flanco o resto.
+#
+# radio_flanco_km: PROVISIONAL, 10 km en todos mientras no se defina el edificio volcánico por volcán (AR3 sin
+# respuesta; el radio del edificio no está en el repo). Editable por volcán.
+#
+# Puyehue Cordón Caulle queda fuera de esta primera tanda (radio interno de 20 km, como en D6 del plan S190).
+
+version: 1
+precedencia: [crater, agua, flanco, resto]
+radio_flanco_km_defecto: 10.0
+
+volcanes:
+  Lascar:
+    radio_flanco_km: 10.0
+    agua: frontend/agua/Lascar.geojson
+  Isluga:
+    radio_flanco_km: 10.0
+    agua: frontend/agua/Isluga.geojson
+  Lastarria:
+    radio_flanco_km: 10.0
+    agua: frontend/agua/Lastarria.geojson
+  Tupungatito:
+    radio_flanco_km: 10.0
+    agua: frontend/agua/Tupungatito.geojson
+  PlanchonPeteroa:
+    radio_flanco_km: 10.0
+    agua: frontend/agua/PlanchonPeteroa.geojson
+  NevadosDeChillan:
+    radio_flanco_km: 10.0
+    agua: frontend/agua/NevadosDeChillan.geojson
+  Copahue:
+    radio_flanco_km: 10.0
+    agua: frontend/agua/Copahue.geojson
+  Llaima:
+    radio_flanco_km: 10.0
+    agua: frontend/agua/Llaima.geojson
+  Villarrica:
+    radio_flanco_km: 10.0
+    agua: frontend/agua/Villarrica.geojson
+  Chaiten:
+    radio_flanco_km: 10.0
+    agua: frontend/agua/Chaiten.geojson
