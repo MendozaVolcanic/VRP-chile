@@ -39,7 +39,10 @@ def test_el_brazo_k_del_ab_y_produccion_son_la_misma_deteccion():
     """El perfil adoptado es el mismo que se midio (brazo _s149_ab_sin_test1_b22_max), salvo nombre y directorio."""
     brazo, prod = _resolver("_s149_ab_sin_test1_b22_max"), _resolver("mirova_equivalent")
     difieren = {k for k in set(brazo) | set(prod) if brazo.get(k) != prod.get(k)} - {"PROFILE_NAME", "DATA_SUBDIR"}
-    assert not difieren, difieren
+    # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y el brazo, medido
+    # sólo de noche, lo declara apagado. La detección de noche sigue siendo la misma. Texto original: `assert not difieren`.
+    assert difieren == {"ENABLE_DAYTIME_MODIS"}, difieren
+    assert (brazo["ENABLE_DAYTIME_MODIS"], prod["ENABLE_DAYTIME_MODIS"]) == ("False", "True")
 
 
 def test_el_laboratorio_difiere_de_produccion_exactamente_en_k():
@@ -50,8 +53,11 @@ def test_el_laboratorio_difiere_de_produccion_exactamente_en_k():
     difieren = {k for k in set(lab) | set(prod) if lab.get(k) != prod.get(k)} - {"PROFILE_NAME", "DATA_SUBDIR"}
     # S177 B1 (encendido de la vía de VIIRS 375): lo mismo con esa vía, que el laboratorio declara apagada.
     # S177 B2 (encendido de la vía de VIIRS 750): lo mismo con esa vía, que el laboratorio declara apagada.
+    # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y este perfil lo
+    # declara apagado (no se midió de día), así que también difieren en ese flag. Texto original: sin ENABLE_DAYTIME_MODIS.
     assert difieren == set(K) | {"ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA",
-                                 "ENABLE_V750_CODIGO_MIROVA"}, difieren
+                                 "ENABLE_V750_CODIGO_MIROVA", "ENABLE_DAYTIME_MODIS"}, difieren
+    assert (lab["ENABLE_DAYTIME_MODIS"], prod["ENABLE_DAYTIME_MODIS"]) == ("False", "True")
     assert (lab["ENABLE_MODIS_CODIGO_MIROVA"], prod["ENABLE_MODIS_CODIGO_MIROVA"]) == ("False", "True")
     assert (lab["ENABLE_V375_CODIGO_MIROVA"], prod["ENABLE_V375_CODIGO_MIROVA"]) == ("False", "True")
     assert (lab["ENABLE_V750_CODIGO_MIROVA"], prod["ENABLE_V750_CODIGO_MIROVA"]) == ("False", "True")

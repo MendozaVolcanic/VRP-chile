@@ -527,6 +527,17 @@ paths:
   # A/B diurno: experiments/_s151_ab_diurno/PREREGISTRO.md (A45).
   enable_daytime_viirs: false
 
+  # S193 (issue #813): día de MODIS ENCENDIDO en producción. El A/B diurno sobre la vía (PR #1084,
+  # experiments/_s190_diurno/INFORME_VEREDICTO.md, con la desviación declarada 1) salió DECIDE NICOLÁS CON M4, y
+  # Nicolás decidió el 2026-11-21 encender el día sólo en MODIS: de día recupera 7 de 7 alertas protegidas de MIROVA y
+  # publica de más 1 vez en 2.223 pasadas negativas (Chillán en erupción, 2026-10-27). R2 píxel a píxel: 5 pasadas
+  # diurnas MODIS cotejadas con las imágenes de MIROVA, misma posición en las 5. El detector de la vía ya trae la rama
+  # diurna del .m (dayflag por cenit solar); este flag abre, sólo para MODIS, el filtro previo a la descarga, el salto
+  # del gránulo y el rechazo de store (pipeline/diurno.py). VIIRS sigue sólo de noche (flag de arriba). La historia NO
+  # se reprocesa de día: rige el NRT hacia adelante. Los perfiles derivados lo declaran apagado (A117), y lo vigila
+  # tests/test_perfil_dia_modis_s193.py. Reversión: este flag en false (tag pre-s193-dia-modis).
+  enable_daytime_modis: true
+
   # S71 ADOPCIÓN — Opción C cap magnitud path D D9 (defensa intermedia).
   # Cuando el firing es contextual-only (BT/NTI duros = 0) Y t_bg <270K (cirrus
   # alto), capear pc.vrp_mw a 5 MW. Resuelve el bug D9 (path D contextual infla

@@ -31,6 +31,10 @@ thresholds:
   enable_modis_codigo_mirova: false
 
 paths:
+  # S193: producción abre el día de MODIS (A/B #813, decisión de Nicolás del 2026-11-21); este perfil
+  # queda sólo de noche, declarado aquí para no heredarlo en silencio (A117). La guardia K de VIIRS no corre MODIS, y K no se midió de día.
+  # Lo vigila tests/test_perfil_dia_modis_s193.py.
+  enable_daytime_modis: false
   enable_test1_path: false
   enable_tests_23_prose_branch: true
 

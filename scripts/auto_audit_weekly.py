@@ -44,7 +44,6 @@ if HERE not in sys.path:
 import clase_mirova as cm  # noqa: E402  S156: D-9 y alerta protegida, una sola implementación
 from pipeline.mirova_csv_loader import load_mirova_alertas  # noqa: E402
 from pipeline.store import _reject_daytime, _solar_elevation  # noqa: E402
-from pipeline.profile import ENABLE_DAYTIME_MODIS  # noqa: E402
 from pipeline.diurno import flag_viirs_diurno  # noqa: E402  S151 D-10
 import yaml  # noqa: E402
 
@@ -295,12 +294,68 @@ def bucket_representative_sensor(bucket: str) -> str:
     return _BUCKET_SENSOR.get(bucket, bucket)
 
 
+# S193 (issue #813; decisión de Nicolás del 2026-11-21): producción procesa MODIS de día desde que se encendió
+# `enable_daytime_modis`, pero la historia anterior NO se reprocesó de día (sólo el NRT rellena sus 7 días hacia
+# atrás). Con el flag encendido y sin frontera, cada pasada diurna de MIROVA anterior al encendido contaba como una
+# pasada que miramos y no vimos: corrida el 2026-11-21 con el flag encendido sobre los datos de ese día, la ventana de
+# 60 días bajaba el recall MODIS de 94,3 a 91,7 %, sumaba 16 pasadas sin record (Chillán) y un aviso de protegida sin
+# record de día (2026-10-14 13:05), y el veredicto cambiaba; nada de eso es del detector. La frontera sale de los DATOS
+# y no del merge (S155: la marca de régimen va en la fecha de los datos): el primer record MODIS diurno de la serie del
+# perfil activo (data/<DATA_SUBDIR>/, los volcanes de VOLS), con la misma regla de día que store. Antes de ella la
+# pasada MODIS diurna se descarta como siempre; sin ningún record diurno, todas. El flag de MODIS se lee vivo, como el de
+# VIIRS (A89). Prueba: tests/test_auditoria_frontera_dia_modis_s193.py.
+_INICIO_DIA_MODIS = {}
+
+
+def inicio_dia_modis(directorio=None):
+    """Instante UTC (con zona) del primer record MODIS diurno de la serie de `directorio`, o None si no tiene.
+
+    Por defecto, la serie del perfil activo (`data/<DATA_SUBDIR>/`). Se calcula una vez por directorio y proceso;
+    `fijar_inicio_dia_modis` lo fija a mano (pruebas, o un evaluador que mide otra carpeta)."""
+    from pipeline import profile as _perfil
+    d = os.path.normpath(directorio or os.path.join(ROOT, "data", _perfil.DATA_SUBDIR))
+    if d not in _INICIO_DIA_MODIS:
+        coords = _coords_por_volcan()
+        primero = None
+        for vol in VOLS:
+            ruta = os.path.join(d, vol + ".json")
+            if vol not in coords or not os.path.exists(ruta):
+                continue
+            with open(ruta, encoding="utf-8") as fh:
+                recs = json.load(fh).get("records") or []
+            lat, lon = coords[vol]
+            for r in recs:
+                if not str(r.get("sensor") or "").startswith("MODIS"):
+                    continue
+                try:
+                    dt = datetime.strptime(r.get("datetime_utc") or "", "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+                except ValueError:
+                    continue
+                if (primero is None or dt < primero) and _solar_elevation(lat, lon, dt) > 0:
+                    primero = dt
+        _INICIO_DIA_MODIS[d] = primero
+    return _INICIO_DIA_MODIS[d]
+
+
+def fijar_inicio_dia_modis(valor, directorio=None):
+    """Fija la frontera del día de MODIS para `directorio` (None: la serie del perfil activo)."""
+    from pipeline import profile as _perfil
+    d = os.path.normpath(directorio or os.path.join(ROOT, "data", _perfil.DATA_SUBDIR))
+    _INICIO_DIA_MODIS[d] = valor
+
+
 def es_pasada_diurna_descartada(bucket, lat, lon, dt_utc) -> bool:
-    """¿El pipeline habría descartado esta pasada por diurna?"""
+    """¿El pipeline habría descartado esta pasada por diurna? S193: con la regla que regía en el instante de la pasada
+    (el día de MODIS cuenta desde `inicio_dia_modis`)."""
+    from pipeline import profile as _perfil
     elev = _solar_elevation(lat, lon, dt_utc)
-    return _reject_daytime(bucket_representative_sensor(bucket), elev,
-                           ENABLE_DAYTIME_MODIS,
-                           enable_daytime_viirs=flag_viirs_diurno())
+    sensor = bucket_representative_sensor(bucket)
+    dia_modis = bool(_perfil.ENABLE_DAYTIME_MODIS)
+    if dia_modis and elev > 0 and str(sensor).startswith("MODIS"):
+        inicio = inicio_dia_modis()
+        instante = dt_utc if dt_utc.tzinfo else dt_utc.replace(tzinfo=timezone.utc)
+        dia_modis = inicio is not None and instante >= inicio
+    return _reject_daytime(sensor, elev, dia_modis, enable_daytime_viirs=flag_viirs_diurno())
 
 
 def _coords_por_volcan():

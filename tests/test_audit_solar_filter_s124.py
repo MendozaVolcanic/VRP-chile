@@ -53,16 +53,26 @@ def test_la_misma_deteccion_de_noche_SI_cuenta():
                                            _dt("2026-08-18T05:48:00"))
 
 
-def test_el_filtro_es_el_MISMO_del_pipeline_no_uno_paralelo():
-    """Si alguien cambia la regla del pipeline, la auditoría debe seguirla sola."""
+def test_el_filtro_es_el_MISMO_del_pipeline_no_uno_paralelo(monkeypatch):
+    """Si alguien cambia la regla del pipeline, la auditoría debe seguirla sola.
+
+    ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS sin reprocesar la
+    historia de día, así que la regla que la auditoría sigue es la que regía en el instante de la pasada: el flag de
+    MODIS cuenta desde el primer record MODIS diurno de la serie (`inicio_dia_modis`). Se fija esa frontera a mano para
+    que la prueba no dependa de los datos del repo: las pasadas de enero y junio quedan antes de ella y las de agosto
+    (una de noche y una de día) después. Texto original: `esperado = _reject_daytime(sensor, elev, ENABLE_DAYTIME_MODIS)`."""
+    import scripts.auto_audit_weekly as aa
     from pipeline.profile import ENABLE_DAYTIME_MODIS
+    frontera = _dt("2026-07-01T00:00:00")
+    monkeypatch.setattr(aa, "_INICIO_DIA_MODIS", {})
+    aa.fijar_inicio_dia_modis(frontera)
     for bucket in ("MODIS", "VIIRS375", "VIIRS750"):
-        for ts in ("2026-06-12T18:18:00", "2026-08-18T05:48:00",
+        for ts in ("2026-06-12T18:18:00", "2026-08-18T05:48:00", "2026-08-18T17:00:00",
                    "2026-01-15T16:00:00", "2026-01-15T08:00:00"):
             dt = _dt(ts)
             elev = _solar_elevation(NDC[0], NDC[1], dt)
             esperado = _reject_daytime(bucket_representative_sensor(bucket),
-                                       elev, ENABLE_DAYTIME_MODIS)
+                                       elev, ENABLE_DAYTIME_MODIS and dt >= frontera)
             assert es_pasada_diurna_descartada(bucket, NDC[0], NDC[1], dt) == esperado
 
 

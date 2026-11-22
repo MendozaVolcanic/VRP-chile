@@ -67,8 +67,11 @@ def test_la_guardia_difiere_de_produccion_solo_en_la_via_los_sensores_y_la_carpe
     # Con el flag de producción apagado (PR A), la vía no difiere; con el PR B encendido, sí. Los dos casos valen.
     # S177 B1 y B2: la guardia declara apagadas las vías de VIIRS 375 y 750 (no corre VIIRS; si las heredara
     # pediría pyproj) y producción las enciende: también puede diferir en ellas.
+    # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y este perfil lo
+    # declara apagado (no se midió de día), así que también difieren en ese flag. Texto original: sin ENABLE_DAYTIME_MODIS.
     permitidas = {"DATA_SUBDIR", "PROFILE_NAME", "SENSOR_VIIRS_375", "SENSOR_VIIRS_750",
-                  "ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA", "ENABLE_V750_CODIGO_MIROVA"}
+                  "ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA", "ENABLE_V750_CODIGO_MIROVA",
+                  "ENABLE_DAYTIME_MODIS"}
     assert distintas <= permitidas, sorted(distintas - permitidas)
     assert {"DATA_SUBDIR", "PROFILE_NAME"} <= distintas
 

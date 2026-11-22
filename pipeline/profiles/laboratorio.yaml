@@ -50,6 +50,10 @@ thresholds:
   enable_lab_zona_a: false
 
 paths:
+  # S193: producción abre el día de MODIS (A/B #813, decisión de Nicolás del 2026-11-21); este perfil
+  # queda sólo de noche, declarado aquí para no heredarlo en silencio (A117). El laboratorio no se midió de día; su prueba G1 lo declara como diferencia con producción.
+  # Lo vigila tests/test_perfil_dia_modis_s193.py.
+  enable_daytime_modis: false
   enable_test1_path: false
   enable_tests_23_prose_branch: true
 
