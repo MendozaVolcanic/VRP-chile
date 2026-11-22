@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> <link rel="stylesheet" href="vista_volcan.css" /><!-- S180: tarjeta mínima y pestañas por sensor; en la misma línea para no correr las citas archivo:línea (guard G8) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas --> <script src="diurno.js"></script><!-- S193: qué pasada nuestra es diurna (MODIS de día) y su sol; misma línea por G8 -->
-<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: capa de cuerpos de agua y marca «pico sobre agua» (sólo display); misma línea por G8 -->
+<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: capa de cuerpos de agua y marca «pico sobre agua» (sólo display); misma línea por G8 --> <script src="cumbre.js"></script><!-- S194: marca «también hay calor en la cumbre» (sólo display); misma línea por G8 -->
   <style>
     .rango-ctl { display:inline-flex; gap:4px; align-items:center; }
     .rango-ctl[hidden] { display:none; }
@@ -2336,6 +2336,35 @@ function marcaAgua(clase, v, rec) {
   return host;
 }
 
+// S194 (salida intermedia de experiments/_s193_radiante_variante/INFORME.md, aprobada por Nicolás el 2026-11-21). POR
+// QUÉ. Una pasada puede tener un píxel tibio sobre el cráter y, a varios km, un cúmulo más radiante; la regla «radiante»
+// (D8') la ubica lejos y el operador no ve que también hubo calor en la cumbre (12 alertas protegidas de MIROVA vistas
+// sólo por su OCR, Codex F12-V301). Esta marca sólo avisa: no cambia posición, clase, potencia, nivel ni frescura.
+// Criterio en frontend/cumbre.js; medición en experiments/_s194_marcador_cumbre/INFORME.md. Guard:
+// tests/test_tablero_cumbre_s194.py
+function marcaCumbre(clase, v, r) {
+  if (!v || !r || typeof CumbreTablero === "undefined") return null;
+  const m = CumbreTablero.calorEnCumbre(r, v.inner_radius_km);
+  if (!m) return null;
+  const host = el("div", clase);
+  host.textContent = "◉ " + CumbreTablero.textoCumbre(m);
+  host.title = CumbreTablero.tituloCumbre(m, r, v.inner_radius_km);
+  return host;
+}
+
+// Tarjeta: la pasada lejana nocturna con calor en la cumbre de las últimas 48 h (las mismas guardas de latestDetection
+// salvo la clase, que decide cumbre.js), si es más nueva que la detección que muestra la tarjeta. Con «Solo cráter» la tarjeta no la mostraría.
+function avisoCumbreTarjeta(clase, v, records, det, innerKm) {
+  if (typeof CumbreTablero === "undefined") return null;
+  const lc = CumbreTablero.ultimaLejanaConCumbre(records, v.inner_radius_km, Date.now() - 48 * 3600000,
+    r => r._diurna !== true && isValidDetection(r) && isSensorVisible(r) && !isThermalArtifact(r, innerKm), parseUtcMs);
+  if (!lc || (det && det.rec !== lc.rec && det.ts >= lc.t)) return null;
+  const host = el("div", clase);
+  host.textContent = "◉ Pasada lejana del " + lc.rec.datetime_utc.slice(0, 16) + " UTC: " + CumbreTablero.textoCumbre(lc.m);
+  host.title = CumbreTablero.tituloCumbre(lc.m, lc.rec, v.inner_radius_km);
+  return host;
+}
+
 function monitoringFreshness(lastTimeStr, toleranciaH = 30) {
   // Sin ningún registro = volcán sin pull de datos (no monitoreado), NO una caída
   // del NRT → estado NEUTRO (gris), no rojo de alarma. El rojo se reserva para un
@@ -2945,6 +2974,8 @@ function buildCards() {
     if (diaEl) card.appendChild(diaEl);   // S193: detección diurna, aparte
     const aguaEl = det ? marcaAgua("vc-sobre-agua", v, det.rec) : null;   // S193: pico de la última detección sobre agua
     if (aguaEl) card.appendChild(aguaEl);
+    const cumbreEl = avisoCumbreTarjeta("vc-calor-cumbre", v, d.records, det, innerKm);   // S194: lejana con calor en la cumbre
+    if (cumbreEl) card.appendChild(cumbreEl);
     card.appendChild(mon);
 
     // S180: minigráfico del período (como mosaico.html), sólo si el volcán tiene datos en este tablero.
@@ -3511,6 +3542,7 @@ function renderDetail() {
           if (i === 3 && rot.title) td.title = rot.title;
           if (i === 2 && marca34) td.appendChild(marca34);
           if (i === 2 && r.anomaly_pixels && r.anomaly_pixels.length) { const ma = marcaAgua("marca-agua", v, r); if (ma) td.appendChild(ma); }   // S193
+          if (i === 2) { const mc = marcaCumbre("marca-cumbre", v, r); if (mc) td.appendChild(mc); }   // S194: también calor en la cumbre
         });
         const tdZ = el("td"); celdaCenit(tdZ, r); row.appendChild(tdZ);
         tbody.appendChild(row);
@@ -3635,6 +3667,7 @@ function renderDetail() {
         if (i === 1) td.style.color = "var(--muted)";
         if (i === 2) { td.style.color = zoneColor; td.style.fontWeight = "600"; td.style.whiteSpace = "nowrap"; if (marca34) td.appendChild(marca34); }
         if (i === 2) { const ma = marcaAgua("marca-agua", v, r); if (ma) td.appendChild(ma); }   // S193: pico sobre agua
+        if (i === 2) { const mc = marcaCumbre("marca-cumbre", v, r); if (mc) td.appendChild(mc); }   // S194: también calor en la cumbre
         if (i === 7 && npxCluster != null && npxCluster !== npxTotal) {
           td.title = `${npxCluster} pix en cluster principal · ${npxTotal} pix totales detectados`;
         }
@@ -3901,6 +3934,10 @@ function renderDetail() {
         (ma.dT != null ? `<br>Contraste del pico contra el fondo: ${ma.dT.toFixed(1)} K` +
           (ma.n > 1 ? ` · ${ma.nAgua} de ${ma.n} píxeles sobre agua` : "") : "");
 
+      // S194: pasada lejana con alertados también dentro del radio de la cumbre (frontend/cumbre.js). Sólo display.
+      const mcu = (typeof CumbreTablero !== "undefined") ? CumbreTablero.calorEnCumbre(r, v.inner_radius_km) : null;
+      const popupCumbre = !mcu ? "" : `<br><span style="color:${CumbreTablero.COLOR}" title="${CumbreTablero.tituloCumbre(mcu, r, v.inner_radius_km)}">◉ ${CumbreTablero.textoCumbre(mcu)}</span>`;
+
       // S26 B: cuando toggle "Solo cráter" activo (default), NO renderizar markers
       // far en el mapa para reducir ruido visual. La tabla los mantiene atenuados
       // (preserva evidencia, pedido S18 Nicolás). Toggle "Incluir lejanas" los
@@ -4016,7 +4053,7 @@ function renderDetail() {
           (multiPixel ? `<b>Este pixel:</b> ${Number.isFinite(px.vrp_mw) ? px.vrp_mw.toFixed(4) + " MW" : "sin dato de VRP por pixel"} (pixel #${pxIdx+1})<br>` : '') +
           `BT max: ${tempC(px.bt_k)}<br>` +
           `Distancia al cráter: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}` +
-          popupAgua
+          popupAgua + popupCumbre
         );
         // S12: registrar SOLO el marker primario (pxIdx===0) para el
         // click-row-to-highlight. Si el record tiene múltiples pixels,
