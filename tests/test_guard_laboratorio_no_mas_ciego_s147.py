@@ -61,7 +61,8 @@ def _resolver(perfil: str) -> dict:
     return json.loads(ultima[-1])
 
 
-LABORATORIOS = ("experimental", "experimental_lowT", "experimental_ndc_focus")
+# S193: `laboratorio` (paso 1 del plan docs/PLAN_EXPERIMENTAL_S190.md) entra a la comparación de pisos como los otros.
+LABORATORIOS = ("experimental", "experimental_lowT", "experimental_ndc_focus", "laboratorio")
 
 
 @pytest.fixture(scope="module")
@@ -105,3 +106,51 @@ def test_control_un_piso_mayor_rompe_la_comparacion():
     lab_roto = {"MIN_VRP_MW_VIIRS375": 0.005}   # el valor real que tuvo entre S130 y S147
     assert lab_sano["MIN_VRP_MW_VIIRS375"] <= op["MIN_VRP_MW_VIIRS375"]
     assert not (lab_roto["MIN_VRP_MW_VIIRS375"] <= op["MIN_VRP_MW_VIIRS375"])
+
+
+# ------------------------------------------------------------------------------------------------ S193, G8
+# La sensibilidad por zona que este docstring dejaba prevista ya tiene parámetro (perfil `laboratorio`, plan
+# docs/PLAN_EXPERIMENTAL_S190.md §6 y docs/superpowers/plans/2026-11-21-laboratorio-paso1.md): el multiplicador de
+# sigma de la zona A en el criterio contextual nocturno de la vía. Es monótono en «ver más» (menor multiplicador, más
+# alertas), así que entra aquí: el de la zona A no puede ser mayor que el de la región sensible del .m (s2 nocturno),
+# que es lo que producción ya usa en el cráter. Hoy vale null (el paso 3 lo elige); la comparación queda armada.
+import ast  # noqa: E402
+import re  # noqa: E402
+
+
+def _s2_nocturno_del_detector() -> float:
+    """s2 nocturno leído de detectar_mirova (no copiado aquí: si el .m portado cambia, la vara cambia con él)."""
+    src = (ROOT / "pipeline" / "mirova_v750_codigo.py").read_text(encoding="utf-8")
+    m = re.search(r"if dayflag == 0:[^\n]*\n\s*u_abs, s1, s2, n1, n2, e1, e2 = ([^\n#]+)", src)
+    assert m, "no encontré los umbrales nocturnos de detectar_mirova"
+    return float(ast.literal_eval("(" + m.group(1).strip() + ")")[2])
+
+
+def _zona_a_del_laboratorio() -> dict:
+    codigo = "import pipeline.profile as p; print('@@' + repr(p.LAB_ZONA_A))"
+    env = dict(os.environ, VRP_PROFILE="laboratorio", PYTHONIOENCODING="utf-8")
+    salida = subprocess.run([sys.executable, "-c", codigo], cwd=ROOT, env=env, capture_output=True, text=True,
+                            timeout=120)
+    assert salida.returncode == 0, f"no resolvio el laboratorio: {salida.stderr[-400:]}"
+    lineas = [l for l in salida.stdout.splitlines() if l.startswith("@@")]
+    assert lineas, salida.stdout[-300:]
+    return ast.literal_eval(lineas[-1][2:])
+
+
+def _no_mas_ciego_en_zona_a(valor, s2) -> bool:
+    return valor is None or valor <= s2
+
+
+def test_s193_la_zona_a_no_es_mas_estricta_que_la_region_sensible():
+    s2 = _s2_nocturno_del_detector()
+    assert s2 == 5.0, f"control: el s2 nocturno del .m es 5 (l. 177-199); se leyó {s2}"
+    zona = _zona_a_del_laboratorio()
+    assert zona.get("parametro") == "sigma_contextual_nocturno", zona
+    assert _no_mas_ciego_en_zona_a(zona.get("valor"), s2), (
+        f"la zona A del laboratorio tiene multiplicador {zona.get('valor')}, mayor que el s2 nocturno de la vía ({s2}): "
+        "el laboratorio vería MENOS que producción justo en el cráter")
+
+
+def test_s193_control_un_multiplicador_mayor_rompe_la_comparacion():
+    assert _no_mas_ciego_en_zona_a(None, 5.0) and _no_mas_ciego_en_zona_a(3.0, 5.0)
+    assert not _no_mas_ciego_en_zona_a(6.0, 5.0)

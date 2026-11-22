@@ -31,6 +31,7 @@ WORKFLOWS = ROOT / ".github" / "workflows"
 VIVOS = {
     "mirova_equivalent": True,        # producción: el encendido de este PR
     "sombra_codigo_mirova": True,     # la sombra corre las tres vías a propósito (S167)
+    "laboratorio": True,              # S193: hereda la vía de producción (D2 (a) del plan S190)
     "guardia_k_modis": False,         # la guardia es K de MODIS (PR A)
     "guardia_k_viirs": False,         # la guardia de los dos VIIRS no corre MODIS (S176, PR A)
     "experimental": False,            # laboratorio congelado en C0: sombra de K (S150, S156)
