@@ -21,7 +21,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas --> <script src="diurno.js"></script><!-- S193: qué pasada nuestra es diurna (MODIS de día) y su sol; misma línea por G8 -->
-<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: marca «pico sobre agua» (sólo display); misma línea por G8 -->
+<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: marca «pico sobre agua» (sólo display); misma línea por G8 --> <script src="cumbre.js"></script><!-- S194: marca «también hay calor en la cumbre» (sólo display); misma línea por G8 -->
 <style>
 :root {
   --bg: #1a1a2e; --surface: #16213e; --card: #0f3460;
@@ -125,7 +125,7 @@ main { padding: 12px 24px 32px; max-width: 1600px; margin: 0 auto; }
 }
 .mc-footer .last { color: var(--text); }
 /* S109 — frescura de monitoreo (última pasada procesada, estilo MIROVA) */
-.mc-sobre-agua { font-size: 0.66rem; color: #40c4ff; margin-top: 3px; } .mc-sobre-agua:empty { display: none; }   /* S193 */
+.mc-sobre-agua { font-size: 0.66rem; color: #40c4ff; margin-top: 3px; } .mc-sobre-agua:empty { display: none; }   /* S193 */ .mc-calor-cumbre { font-size: 0.66rem; color: #ff8a65; margin-top: 3px; }   /* S194 */
 .mc-diurna { font-size: 0.66rem; color: #ffc400; margin-top: 3px; } .mc-mon-dia { color: #c9a227; }   /* S193: pasada de día */
 .mc-monitor { font-size: 0.68rem; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 .mc-mon-dot { font-size: 0.7rem; line-height: 1; }
@@ -867,6 +867,15 @@ function renderMosaico() {
       dd.title = "Última detección DIURNA (48 h): " + dia48.ts.slice(0, 16) + " UTC, " + (dia48.sensor || "") + ". " +
         "De día la lectura puede incluir reflejo solar, así que no fija el valor ni el nivel.";
       card.appendChild(dd);
+    }
+    // S194: pasada lejana de las últimas 48 h con alertados también dentro del radio de la cumbre (frontend/cumbre.js;
+    // igual que la tarjeta de index.html), si es más nueva que la detección de la tarjeta. La regla «radiante» (D8') la
+    // ubica en su cúmulo más radiante y la tarjeta no la muestra. Sólo avisa: no cambia el valor ni el nivel.
+    const lc = typeof CumbreTablero === "undefined" ? null : CumbreTablero.ultimaLejanaConCumbre(records, v.inner_radius_km,
+      Date.now() - 48 * 3600000, r => r._diurna !== true && isValidDetection(r), parseUtcMs);   // nocturna, como la tarjeta
+    if (lc && !(latestRec && latestRec !== lc.rec && parseUtcMs(latestTs) >= lc.t)) {
+      card.appendChild(el("div", { className: "mc-calor-cumbre", title: CumbreTablero.tituloCumbre(lc.m, lc.rec, v.inner_radius_km),
+        textContent: "◉ Pasada lejana del " + lc.rec.datetime_utc.slice(0, 16) + " UTC: " + CumbreTablero.textoCumbre(lc.m) }));
     }
 
     if (records.length === 0) {
