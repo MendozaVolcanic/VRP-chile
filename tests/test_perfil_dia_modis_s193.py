@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PRODUCCION = "mirova_equivalent"
 # Heredan de producción y NO deben abrir el día de MODIS (ver el POR QUÉ).
 SIN_DIA = ("guardia_k_modis", "guardia_k_viirs", "experimental", "experimental_lowT", "experimental_ndc_focus",
-           "sombra_34", "sombra_codigo_mirova")
+           "sombra_34", "sombra_codigo_mirova", "laboratorio")
 
 _RESOLVER = """
 import importlib, json, os, sys
