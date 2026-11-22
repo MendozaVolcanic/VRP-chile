@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-22 12:45 UTC (S194): 11 PR en main (v1.67 a v1.75), día MODIS encendido, laboratorio paso 1 y 2, áreas, marcador de cumbre
+
+- Mergeados: #1084, #1086, #1087, #1089, #1088, #1090 (día MODIS en producción), #1091, #1092, #1093, #1094; #1095 en CI al cerrar.
+- Día MODIS verificado en producción: records diurnos escritos, ninguna alerta diurna de cumbre de MIROVA perdida (15 a 22-nov).
+- Plan de los tres prompts (`tasks/PLAN_S194_PROMPTS.md`), comandos `/critico` y `/socio`, borradores de áreas y de independencia.
+- VIIRS de día recalculado sin OCR contaminado: sigue DECIDE NICOLÁS, recomienda encender. Mazos y paper en sesiones paralelas.
+- D: se llenó a 0 por worktrees de merge; liberado. Traspaso en `tasks/BLOQUE_ARRANQUE_S195.md`.
+
 ### 2026-11-21 22:30 UTC (S193): 12 PR en main (v1.57 a v1.66); historia de los 34 completa; fondo nulo cerrado; Codex 9 a 12 resueltos
 - **Tanda 7** unida con dos runs (44768057665 y 44914342023, trozo 28 repuesto tras #1073), #1080, aplicada (run 44938602533): los 32 activos con historia desde 2025-02-15.
 - **#1069** aplicado (run 44946628014): 15 MODIS sin fondo a escena no medida; recuento en main 0. Sitio republicado y comprobado.
