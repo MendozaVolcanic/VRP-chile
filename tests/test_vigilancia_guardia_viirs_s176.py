@@ -499,11 +499,26 @@ def test_el_workflow_abre_issues_con_prefijo_propio_de_cada_sensor_y_no_revierte
 
 
 def test_no_se_toca_la_regla_sellada_de_modis():
-    r = subprocess.run(["git", "diff", "--name-only", "origin/main", "--", "experiments/_s171_modd_adopcion/"], cwd=ROOT,
+    # S192 (A113): la regla sellada dice en su cabecera «una corrección va como marca A113 con fecha, sin tocar lo
+    # sellado». Antes esta prueba exigía 0 archivos cambiados en la carpeta, lo que también vetaba esas marcas (la de la
+    # reversión suspendida del 2026-11-21). Ahora vigila lo que la cabecera promete: ninguna línea de la carpeta se quita
+    # ni se reescribe; sólo se agregan.
+    r = subprocess.run(["git", "diff", "--unified=0", "origin/main", "--", "experiments/_s171_modd_adopcion/"], cwd=ROOT,
                        capture_output=True, text=True, encoding="utf-8")
     if r.returncode != 0:
         pytest.skip("sin origin/main en este checkout")
-    assert r.stdout.strip() == ""
+    # S193 (A113): el registro de pasadas juzgadas (`sombra_pasadas_juzgadas_modis.json`) no es texto sellado: su
+    # esquema dice «agregar una entrada es un commit». Al agregar la primera, la línea `"pasadas": []` se abre en una
+    # lista; es la única línea que ese archivo puede perder. El resto de la carpeta sigue sin poder perder ninguna.
+    quitadas, archivo = [], None
+    for l in r.stdout.splitlines():
+        if l.startswith("+++ "):
+            archivo = l[6:] if l.startswith("+++ b/") else l[4:]
+        elif l.startswith("-") and not l.startswith("---"):
+            if archivo and archivo.endswith("sombra_pasadas_juzgadas_modis.json") and l.strip() == '- "pasadas": []':
+                continue
+            quitadas.append(l)
+    assert quitadas == [], quitadas[:5]
 
 
 def test_cadena_cota_pendiente_con_la_via_encendida_da_vigilancia_ciega(disco, monkeypatch):

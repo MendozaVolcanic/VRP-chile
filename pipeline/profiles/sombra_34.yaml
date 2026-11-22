@@ -3,8 +3,8 @@
 # 11 volcanes esperamos que sea similar para los otros 34, continúa con todo»; tag defensivo pre-s172-sombra-34).
 #
 # POR QUÉ: MIROVA vigila en su NRT sólo los 11 chilenos (plan docs/superpowers/plans/2026-11-02-nrt-34-volcanes.md,
-# H2), así que para los otros 34 no hay referencia contra la cual medir. Antes de llevarlos al tablero hay que ver
-# cómo se comporta en ellos el mismo detector que corre la sombra de los 11, en pasadas reales, sin publicar nada.
+# H2), así que para los otros 34 no hay referencia contra la cual medir. Nació (S172) para ver, antes de llevarlos al
+# tablero, cómo se comporta en ellos el mismo detector que corre la sombra de los 11, en pasadas reales.
 #
 # QUÉ ES: el MISMO detector que pipeline/profiles/sombra_codigo_mirova.yaml (producción K con las vías de VIIRS 750,
 # VIIRS 375 y MODIS encendidas, los tres flags de MxD03 apagados como en producción); cambian sólo el nombre y la
@@ -20,14 +20,21 @@
 # `distance_class: null` y conserva `primary_cluster.centroid_dist_km`, que permite clasificar después con el inner
 # que Nicolás decida (plan, decisión D5; no hay valor de MIROVA que copiar, A5). Si una pasada no puede correr por la
 # vía (MODIS sin MxD03), sigue K con el radio de 5 km del yaml y el record lo dice en `via_codigo_mirova`.
+# ⚠️ S190 (A113, F8-110 de la auditoría de Codex, verificado): la frase anterior es FALSA para MODIS sin MxD03:
+# scripts/run_pipeline.py salta ese gránulo antes del procesador y anota la incidencia `sin_geolocalizacion`
+# (pipeline/fetch.py), sin record. Lo que sí cae a K y lo dice es un volcán sin grilla («sin_grilla»; hoy los 45 la
+# tienen) o un MxD03 que no calza («geo_distinta»). Ver D35 en docs/MIROVA_DIVERGENCES.md. Texto conservado.
 #
-# NO OPERACIONAL: data_subdir propio (A47); nada lo lee el tablero ni el lector sellado de V375-E (que lee
-# data/sombra_codigo_mirova/). Lo corre sólo .github/workflows/sombra-34.yml.
+# PUBLICACIÓN (S190, H08 de la auditoría de Codex; texto anterior: «NO OPERACIONAL: ... nada lo lee el tablero»): desde
+# la ficha v1.26 el tablero SÍ lee data/sombra_34/ y muestra estos 34 volcanes (frontend/index.html, SOMBRA_34_BASE y
+# `fuente: "sombra_34"`). Es salida publicada: un hueco aquí lo ve el operador. data_subdir propio (A47); el lector
+# sellado de V375-E no lo lee (lee data/sombra_codigo_mirova/). Lo corre sólo .github/workflows/sombra-34.yml, que
+# revisa el log con scripts/revisar_sombra.py y scripts/revisar_errores_modis_nrt.py.
 extends: mirova_equivalent
 profile: sombra_34
 description: >
   Sombra de los 34 volcanes fuera del NRT (S172): producción (K) con las vías «código MIROVA» de VIIRS 750, VIIRS 375
-  y MODIS encendidas, en carpeta propia; no publica.
+  y MODIS encendidas, en carpeta propia; el tablero la publica desde la ficha v1.26.
 
 thresholds:
   enable_v750_codigo_mirova: true

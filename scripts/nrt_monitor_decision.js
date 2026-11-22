@@ -12,14 +12,24 @@
 // `maxHoras` horas, la respuesta de la API no describe el presente: SIN DATO, ni se alerta ni se cierra.
 // La antiguedad del DATO publicado la vigila aparte nrt-healthcheck.yml.
 
+// S190 (auditoria de Codex, ronda 2, F6-106, verificado): solo deciden las conclusiones que dicen algo de la salud
+// del NRT. Antes contaba como falla solo failure y timed_out, asi que tres corridas `cancelled` (el grupo push-main
+// cancela la que espera cuando llega otra) daban "0 de 3 fallaron" y el monitor cerraba la alerta como recuperado con
+// el NRT caido; y una cancelada entre dos fallas impedia abrirla. Ahora las no decisivas se saltan y se usan las tres
+// decisivas mas nuevas; startup_failure (workflow invalido, 0 jobs, S160) cuenta como falla.
+// Prueba: tests/test_nrt_monitor_canceladas_s190.py.
+const CONCLUSION_VERDE = new Set(['success']);
+const CONCLUSION_FALLA = new Set(['failure', 'timed_out', 'startup_failure']);
+
 function decidir(runs, ahoraMs, maxHoras) {
   const completas = (runs || [])
-    .filter((r) => r && r.created_at && r.conclusion)
+    .filter((r) => r && r.created_at && (CONCLUSION_VERDE.has(r.conclusion) || CONCLUSION_FALLA.has(r.conclusion)))
     .slice()
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
   const usadas = completas.slice(0, 3);
   if (usadas.length < 3) {
-    return { accion: 'sin_dato', motivo: `menos de 3 corridas completadas (${usadas.length})`, usadas };
+    return { accion: 'sin_dato', motivo: `menos de 3 corridas completadas con conclusion decisiva (${usadas.length})`,
+      usadas };
   }
   const edadHoras = (ahoraMs - Date.parse(usadas[0].created_at)) / 3.6e6;
   if (edadHoras > maxHoras) {
@@ -30,7 +40,7 @@ function decidir(runs, ahoraMs, maxHoras) {
       usadas,
     };
   }
-  const fallas = usadas.filter((r) => r.conclusion === 'failure' || r.conclusion === 'timed_out').length;
+  const fallas = usadas.filter((r) => CONCLUSION_FALLA.has(r.conclusion)).length;
   if (fallas === 3) return { accion: 'alerta', motivo: '3 de 3 corridas recientes fallaron', usadas };
   if (fallas === 0) return { accion: 'recuperado', motivo: '3 de 3 corridas recientes en verde', usadas };
   return { accion: 'nada', motivo: `${fallas} de 3 corridas recientes fallaron`, usadas };

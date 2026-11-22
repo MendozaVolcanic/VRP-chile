@@ -29,6 +29,7 @@ def _reset_cmr_breaker(monkeypatch):
     """Resetea el breaker CMR entre tests y lo deja ON por defecto."""
     fetch._CMR_SEARCH_DOWN = False
     monkeypatch.setattr(fetch, "ENABLE_CMR_SEARCH_BREAKER", True)
+    monkeypatch.setattr(fetch, "_CMR_DIA_ESPERAS_S", [0, 0])  # S190: el reintento de ReadTimeout sin esperar 20 s
     yield
     fetch._CMR_SEARCH_DOWN = False
 
@@ -44,7 +45,9 @@ def test_read_timeout_returns_empty_and_trips(monkeypatch):
     out = fetch.search_granules(PKEY, -23.0, -67.7, 25.0, fetch.datetime(2026, 6, 26))
     assert out == [], "ReadTimeout de CMR debe degradar a [] (no hang ni raise)"
     assert fetch._CMR_SEARCH_DOWN is True, "el breaker CMR debe quedar tripeado para la corrida"
-    assert calls["n"] == 1, f"debe fallar al 1er Timeout (no reintentar versiones), hubo {calls['n']}"
+    # S190 (tests/test_sombra_cmr_s190.py): un ReadTimeout se reintenta UNA vez, mismo producto y versión, antes de
+    # encender el breaker (A64; el 2026-11-16 el reintento de la ventana salvó 3 de 3). Hasta S189 aquí era 1.
+    assert calls["n"] == 2, f"un reintento y breaker (no reintentar versiones), hubo {calls['n']}"
 
 
 def test_breaker_skips_subsequent_search_without_calling_cmr(monkeypatch):
@@ -57,10 +60,10 @@ def test_breaker_skips_subsequent_search_without_calling_cmr(monkeypatch):
     monkeypatch.setattr(fetch.earthaccess, "search_data", boom)
     # 1ª: tripea
     assert fetch.search_granules(PKEY, -23.0, -67.7, 25.0, fetch.datetime(2026, 6, 26)) == []
-    assert calls["n"] == 1
+    assert calls["n"] == 2  # S190: un reintento de ReadTimeout antes de tripear (hasta S189 era 1)
     # 2ª (otro sensor/llamada): debe saltarse SIN llamar search_data de nuevo
     assert fetch.search_granules("VIIRS_SNPP_L1B", -23.0, -67.7, 25.0, fetch.datetime(2026, 6, 26)) == []
-    assert calls["n"] == 1, "tras tripear, la 2ª búsqueda NO debe llamar earthaccess.search_data"
+    assert calls["n"] == 2, "tras tripear, la 2ª búsqueda NO debe llamar earthaccess.search_data"
 
 
 def test_connection_error_also_trips(monkeypatch):

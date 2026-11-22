@@ -5,7 +5,7 @@ Nicolas, 2026-10-17).
 Por que: dos corridas del MISMO commit dejan en MODIS el «pixel mas caliente» de la primera pasada
 (`hotspot_*`, pipeline/process_modis.py:1097, el primero de `np.argsort(-per_pixel_vrp_mw)` en la l. 1085) en
 lugares distintos, con la misma BT maxima, el mismo cumulo y los mismos pixeles guardados. Cuando ese pixel cae
-mas alla de `max_hotspot_dist_km`, el rescate por cumulo (A46, pipeline/store.py:390-422) reescribe
+mas alla de `max_hotspot_dist_km`, el rescate por cumulo (A46, pipeline/store.py:409-441) reescribe
 `final_hotspot_*`, `final_hotspot_source`, `discarded_reason` y el `vrp_mw` del record. Casos reales: F/K V1
 (run 38639658446) Llaima control, y diurno W2a (run 38853230521) Copahue `_s151_ab_diurno_on`. Nicolas decidio
 admitirlo acotado e informado (D-16 a); el arreglo del desempate en produccion es otra tarea (D-16 b).
@@ -69,7 +69,7 @@ def rec_test1(**cambios):
 
 
 def rec_rescate(**cambios):
-    """El mismo record con el pixel mas caliente en otro lugar: el rescate por cumulo (store.py:405-422)."""
+    """El mismo record con el pixel mas caliente en otro lugar: el rescate por cumulo (store.py:424-441)."""
     r = rec_test1(processed_utc="I2", final_hotspot_source="cluster_rescue", vrp_mw=1.834,
                   hotspot_lat=-37.85699, hotspot_lon=-71.19365, hotspot_dist_km=0.941,
                   final_hotspot_lat=-37.85699, final_hotspot_lon=-71.19365, final_hotspot_dist_km=0.941,
@@ -223,7 +223,7 @@ def test_bloquea_si_el_lado_no_rescatado_trae_etiqueta():
 
 @pytest.mark.parametrize("etiqueta", [None, "<sin clave>", "cluster_too_large_for_volcano"])
 def test_bloquea_si_el_rescate_no_trae_su_etiqueta(etiqueta):
-    """Mata m2 del verificador (quitar «el rescate trae su etiqueta», store.py:422)."""
+    """Mata m2 del verificador (quitar «el rescate trae su etiqueta», store.py:441)."""
     b = rec_rescate(discarded_reason=etiqueta)
     if etiqueta == "<sin clave>":
         del b["discarded_reason"]
@@ -272,7 +272,7 @@ def test_b_ancla_final_con_fuente_eruption_y_final_distinto_del_hotspot_bloquea(
 
 
 def test_c_el_lado_rescatado_tiene_el_hotspot_en_el_cumulo():
-    """(c): el rescate escribe el centroide del cumulo en hotspot_* (store.py:397-399)."""
+    """(c): el rescate escribe el centroide del cumulo en hotspot_* (store.py:416-418)."""
     salida, inf = mezcla(rec_test1(), rec_rescate(hotspot_lat=-37.9))
     assert not inf["ok"] and "centroide" in inf["distintos"][0]["no_es_hotspot_escena"]
 

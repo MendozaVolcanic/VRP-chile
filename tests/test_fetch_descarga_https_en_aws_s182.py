@@ -13,6 +13,7 @@ Arreglo: `download_granules` fuerza `in_region=False` antes de bajar, la misma v
 usan todas las corridas verdes del NRT.
 """
 import inspect
+import os
 
 import fsspec
 import pytest
@@ -26,6 +27,13 @@ class _GranuloFalso(dict):
 
     def data_links(self):
         return [f"https://data.laadsdaac.earthdatacloud.nasa.gov/prod-lads/MOD021KM/{self['umm']['GranuleUR']}.hdf"]
+
+
+def _bajar_un_archivo(local_path):
+    # S190 (F6-101): una lista vacía ya no es una descarga buena; el doble deja un archivo como la biblioteca real.
+    ruta = os.path.join(local_path, "MOD021KM.falso.hdf")
+    open(ruta, "wb").close()
+    return [ruta]
 
 
 class _StoreFalso:
@@ -48,7 +56,7 @@ def test_runner_en_us_west_2_descarga_por_https(monkeypatch, tmp_path):
 
     def descarga(granulos, local_path=None, **k):
         visto["in_region"] = fetch.earthaccess.__store__.in_region
-        return []
+        return _bajar_un_archivo(local_path)
 
     monkeypatch.setattr(fetch.earthaccess, "download", descarga)
     fetch.download_granules([_GranuloFalso()], tmp_path)
@@ -60,8 +68,8 @@ def test_runner_en_us_west_2_descarga_por_https(monkeypatch, tmp_path):
 def test_sin_login_no_revienta(monkeypatch, tmp_path):
     """Sin login (store None) el forzado no debe romper la descarga."""
     monkeypatch.setattr(fetch.earthaccess, "__store__", None, raising=False)
-    monkeypatch.setattr(fetch.earthaccess, "download", lambda *a, **k: [])
-    assert fetch.download_granules([_GranuloFalso()], tmp_path) == []
+    monkeypatch.setattr(fetch.earthaccess, "download", lambda g, local_path=None, **k: _bajar_un_archivo(local_path))
+    assert len(fetch.download_granules([_GranuloFalso()], tmp_path)) == 1
 
 
 def test_mecanismo_via_s3_de_earthaccess_rompe_con_partial(tmp_path):

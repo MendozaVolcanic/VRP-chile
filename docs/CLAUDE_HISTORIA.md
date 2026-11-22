@@ -1020,7 +1020,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     desenlace **NO está en producción**: `ENABLE_TEST1_NTI_INTEGRAL = False` (verificado
     con `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
     print(p.ENABLE_TEST1_NTI_INTEGRAL)"`), y la rama `compute_test1_nti` existe **sólo en
-    `process_viirs.py:214/1170`** (era 213/1138 hasta S165, por el import y el bloque de la vía «código MIROVA» de VIIRS 375; el 1112 que decía hasta S164 ya estaba corrido; 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:64` (era 62 hasta S165, por los dos renglones de la cabecera FICHA que nombran los flags MxD03; 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:164` (era 163 hasta S162, por la línea de import de la vía «código MIROVA»)
+    `process_viirs.py:214/1173`** (era 213/1138 hasta S165, por el import y el bloque de la vía «código MIROVA» de VIIRS 375; el 1112 que decía hasta S164 ya estaba corrido; 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:64` (era 62 hasta S165, por los dos renglones de la cabecera FICHA que nombran los flags MxD03; 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:164` (era 163 hasta S162, por la línea de import de la vía «código MIROVA»)
     (eran 674/665; líneas actualizadas S131) importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
     describe sigue viva en los 3 sensores.** Ni encendiendo el flag se cura MODIS/V750,
     que es donde el píxel grande amplifica el gradiente (A80). Caso de manual de A87:
@@ -1321,7 +1321,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 
   | forma | ejemplo | el falso negativo que produjo |
   |---|---|---|
-  | el parámetro no se llama como la clave | `local_kernel_bg_compatible` (firma) vs `local_kernel_bg` (YAML), con `run_pipeline.py:262` (244 hasta S161) de puente | «el kernel no corre en producción» — corre en 5 de los 11 Tier A |
+  | el parámetro no se llama como la clave | `local_kernel_bg_compatible` (firma) vs `local_kernel_bg` (YAML), con `run_pipeline.py:263` (262 hasta S190, 244 hasta S161) de puente | «el kernel no corre en producción» — corre en 5 de los 11 Tier A |
   | la clave se lee de otra sección | `enable_utm_regrid` escrito en la raíz, leído de `thresholds:` (S124) | el flag arrancaba siempre apagado; su A/B habría corrido 4 brazos idénticos |
   | la llamada es calificada o renombrada | `store.append_record(`, `from pipeline.vrptir import vrp_tir_mw as _aveni_vrp_tir_mw` | «nadie la llama» sobre funciones que corren en cada granule |
 
@@ -1658,7 +1658,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   y un evaluador sólo ve los estratos que etiqueta** (S148, dos casos la misma noche; regla
   general). (1) `enable_roi1_box_paper` entregaba la caja de 5 × 5 km sólo al primer pase. El
   segundo pase (`second_pass_adjacent`) seguía recibiendo el círculo de `inner_radius_km`
-  (`pipeline/process_viirs.py:1313` al momento del hallazgo; **arreglado en S149**: los tres procesadores arman hoy esa máscara con `roi1_summit_mask(..., _roi1_mask)` y lo vigila `tests/test_guard_caja_llega_al_segundo_pase_s149.py`, con el flag todavía apagado), corre sin condicionar sobre toda la escena, y recapturaba con
+  (`pipeline/process_viirs.py:1316` al momento del hallazgo; **arreglado en S149**: los tres procesadores arman hoy esa máscara con `roi1_summit_mask(..., _roi1_mask)` y lo vigila `tests/test_guard_caja_llega_al_segundo_pase_s149.py`, con el flag todavía apagado), corre sin condicionar sobre toda la escena, y recapturaba con
   el umbral permisivo lo que el primero acababa de rechazar con el estricto: en los 51 negativos de
   fuera de la caja el primer pase cayó de 86 a 7 píxeles, la recaptura subió de 98 a 175 y el cúmulo
   publicado quedó idéntico en los 51. El cero estaba **bien medido** (el flag se leía desde

@@ -1,6 +1,6 @@
 """S94 (A45) — TDD para el gap del path Test1: anomaly_pixels vacío.
 
-Bug (hallazgo S94, process_viirs.py:1500-1517): los records con
+Bug (hallazgo S94, process_viirs.py:1503-1520): los records con
 final_hotspot_source='test1' arman primary_cluster con la magnitud pero dejan
 anomaly_pixels=[] vacío, aunque tienen los píxeles en t1_vrp_2d. Patrón A07
 ("calculado pero no persistido"). Bloquea el F5' display + rompe el mapa de

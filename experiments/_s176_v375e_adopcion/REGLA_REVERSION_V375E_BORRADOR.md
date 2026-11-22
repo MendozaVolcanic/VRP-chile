@@ -6,6 +6,23 @@ esta versión: D1 a D7 contestadas (D1 «C-rad (14/17)», D2 a D7 «Sí a D2 a D
 El nombre del archivo no cambia: lo citan el vigilante, los workflows y las pruebas. El encendido de cada sensor (B1, B2)
 pide además su tag defensivo y su sí de A45.
 
+> ⚠️ **S192 (A113, 2026-11-21): la reversión pre-autorizada de los tres sensores está SUSPENDIDA.** Decisión de
+> Nicolás del 2026-11-21 en la sesión coordinadora S192, en respuesta a «¿Suspendo la reversión pre-autorizada
+> hasta que el tablero marque el paso de la vía a K?»: «Sí, suspéndela». Viene del hallazgo F11-102 de la auditoría
+> Codex ronda 2, frente 11 (gravedad 4 condicional, verificador limpio,
+> `D:\codex-vrp\_salida\ronda2\f11_verificacion\VEREDICTO.md`, fuera del repo). Por qué, como geólogo: desde el
+> reemplazo del 2026-11-12 toda la historia publicada de los 11 Tier A es de la vía, y el tablero sólo marca el paso
+> de K a la vía (`primeraVia` de `frontend/cambio_detector.js`); con 0 records K en producción hoy no dibuja ninguna
+> marca. Si se revirtiera un sensor, su serie pasaría de la vía a K sin marca y la potencia caería a cerca de la
+> mitad sin aviso: el operador leería un cambio de método como una baja de actividad del volcán. Además, el revert no
+> toca la historia de la vía anterior al encendido (F11-V201) y el NRT ordinario no repone con K los records que ya
+> están en producto estándar (F11-104). La suspensión rige hasta que (1) el tablero marque el paso de la vía a K y
+> (2) una regla aprobada por Nicolás diga qué pasa con la historia ya publicada. Mientras tanto, una
+> `REVERSION_CANDIDATA` de las guardias se confirma en la cabecera de la imagen de MIROVA y se lleva a Nicolás el
+> mismo día; nadie revierte sin su decisión. Las guardias, sus vigilancias, sus issues y el plazo de 29 protegidas o
+> 120 días siguen corriendo igual. Lo que este documento diga de revertir «el mismo día», «sin esperar a nadie» o
+> «pre-autorizada» queda en suspenso y se conserva por historia.
+
 ~~**BORRADOR, SIN SELLO.**~~ (texto anterior al sello, A113) Escrito el 2026-11-08 en el PR A del encendido (S176, diseño
 `docs/superpowers/specs/2026-11-08-encendido-v375e-design.md`, decisiones 3 y 7), para la frase de sello de Nicolás. Modelo: la regla sellada de
 MODIS, `experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md`, y la adopción de K, `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` paso 9.
@@ -64,6 +81,10 @@ La unidad es la pasada nocturna. **Protegida** = alerta de MIROVA del sensor de 
 
 ### 4.3 Reversión inmediata, pre-autorizada
 
+> ⚠️ **S192 (A113, 2026-11-21): esta reversión inmediata está SUSPENDIDA** (marca S192 de la cabecera). El
+> disparador y la confirmación en la imagen siguen; en vez de revertir, la sesión lleva la candidata a Nicolás el
+> mismo día. Texto sellado conservado.
+
 - **Disparador**: una pasada nocturna posterior al encendido de ese sensor, dentro del plazo de §4.6, con una protegida que MIROVA publica, la guardia K publica y producción (la vía) **tiene record y no publica**. La vigilancia la informa como `REVERSION_CANDIDATA` y abre el issue «Guardia K de VIIRS 375: candidata a reversion» (o «VIIRS 750»).
 - **Quién y cuándo**: la sesión que lee el issue, el mismo día UTC.
 - **Confirmación**: la cabecera de la imagen de MIROVA de esa pasada. Si la muestra, revierte. Si no está disponible ese día, según D6 revierte igual cuando la protegida viene de la tabla, y deja la decisión a Nicolás cuando es sólo del OCR. Si la imagen la contradice, no revierte, la anota como juzgada y avisa.
@@ -106,6 +127,17 @@ Como en K y MODIS: una pasada ya decidida por una persona se anota en `experimen
 Por sensor, hasta que la guardia **tenga record** de 29 protegidas nocturnas de ese sensor posteriores al encendido, o 120 días desde el encendido, lo que ocurra primero (D3). Cumplido el plazo, una candidata se sigue informando (`CANDIDATA_FUERA_DE_PLAZO`) pero ya no está pre-autorizada: decide Nicolás.
 
 ### 4.7 El día después de una reversión
+
+> ⚠️ **S192 (A113, 2026-11-21):** este paso no prevé la historia de la vía anterior al encendido (F11-V201), que
+> la guardia no puede reponer porque empieza el 2026-11-03, ni que el tablero no marca el paso de la vía a K
+> (F11-102). Por eso la reversión está suspendida (marca S192 de la cabecera). Texto sellado conservado.
+
+> ⚠️ **S193 (A113, 2026-11-21; auditoría Codex ronda 2, F11-102 y F11-V201, verificadas):** desde #1072 (2026-11-21) el
+> tablero marca también el paso de la vía a K (`frontend/cambio_detector.js`); lo de F11-102 en la marca S192 de arriba
+> describe el tablero anterior a ese PR. La historia sigue sin regla: un revert dejaría de la vía 28.627 records VIIRS
+> 375 y 29.936 VIIRS 750 anteriores al encendido (historia reemplazada el 2026-11-12;
+> `D:\codex-vrp\_salida\ronda2\f11_verificacion\instrumentos\iv201_historia_salida.txt`, fuera del repo). Lo que este
+> paso dice del NRT es correcto (F11-104): sólo el producto estándar o un reproceso reemplazan un record guardado.
 
 El revert apaga el flag pero no deshace los datos: los records de la vía se quedan como están hasta que llegue su producto estándar o se reprocesen. Dentro de los 7 días siguientes, en un PR aparte y con tag defensivo (A38), esos records se apartan a `data/_via_viirs_residuales/` y se reponen con K, o con los records de la guardia si el nulo de §4.4 (c) dio 0 diferencias (D7). Hasta entonces la serie del sensor mezcla dos detectores y así se dice en el issue. La guardia y su vigilancia siguen corriendo hasta que Nicolás decida apagarlas. La ficha SDA y las marcas A113 del PR revertido se reponen con una marca que diga que ese sensor volvió a K y desde cuándo.
 

@@ -7,6 +7,10 @@ name: NRT Healthcheck (Tier A staleness)
 # cron lo detecta y abre un issue automático.
 #
 # Diferencia con assertion A57:
+#   ⚠️ S190 (F6-118, auditoría Codex ronda 2, confirmado): la línea siguiente está OBSOLETA desde S123. Con datos
+#   de más de 72 h, A57 sólo AVISA (::warning y resumen del run) y el run queda verde; rojo deja únicamente con 0
+#   records o un último record sin datetime_utc (nrt.yml, paso «Assert Tier A records fresh (A57)»). El único aviso
+#   accionable por datos viejos es el issue de este healthcheck. Texto original conservado (A113):
 #   - A57 (per-step) detecta T+72h "live" dentro del NRT cron. Falla el
 #     step y deja badge rojo.
 #   - A58 (este healthcheck) detecta T+48h "pasivo" 1×/día independiente

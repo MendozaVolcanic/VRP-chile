@@ -1,12 +1,12 @@
 {
- "generated_utc": "2026-11-17T01:42:27Z",
+ "generated_utc": "2026-11-21T22:43:00Z",
  "regla": "experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4 (en main desde el PR B #934; hasta S173, borrador en la rama loop/activo)",
  "encendido_modis_utc": "2026-11-02 20:11:43",
  "primera_observacion_via": "2025-02-15 01:40",
  "flag_produccion": true,
  "ventana": [
   "2026-10-19",
-  "2026-11-17"
+  "2026-11-21"
  ],
  "fase": "vigilando",
  "veredicto": "VERDE",
@@ -16,9 +16,9 @@
  ],
  "solo_caidas_a_k": false,
  "guardia_desde": "2026-10-26",
- "guardia_hasta": "2026-11-16",
- "n_pasadas_alerta": 38,
- "n_pasadas_alerta_con_guardia": 37,
+ "guardia_hasta": "2026-11-21",
+ "n_pasadas_alerta": 40,
+ "n_pasadas_alerta_con_guardia": 39,
  "reversion": [],
  "fuera_de_plazo": [],
  "muy_bajo": {
@@ -31,9 +31,10 @@
  "protegidas_sin_record_produccion": [],
  "espera_sin_record_h": 24,
  "protegidas_calladas_por_k_de_produccion": [],
+ "protegidas_sin_publicar_sin_aviso": [],
  "sobrepublicacion": {
   "k": 1,
-  "n": 297,
+  "n": 408,
   "cota": 3,
   "dispara": false,
   "pasadas": [
@@ -46,9 +47,10 @@
  "borde_171_01": {
   "por_semana": {
    "2026-W45": 1,
-   "2026-W46": 6
+   "2026-W46": 6,
+   "2026-W47": 4
   },
-  "total": 7,
+  "total": 11,
   "pasadas": [
    {
     "volcano": "Lascar",
@@ -59,6 +61,16 @@
     "volcano": "Tupungatito",
     "sensor": "MODIS_AQUA",
     "fecha_utc": "2026-11-12 08:55"
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS_AQUA",
+    "fecha_utc": "2026-11-17 08:45"
+   },
+   {
+    "volcano": "NevadosDeChillan",
+    "sensor": "MODIS_AQUA",
+    "fecha_utc": "2026-11-18 07:45"
    },
    {
     "volcano": "Llaima",
@@ -76,6 +88,11 @@
     "fecha_utc": "2026-11-04 07:10"
    },
    {
+    "volcano": "Villarrica",
+    "sensor": "MODIS_AQUA",
+    "fecha_utc": "2026-11-17 07:10"
+   },
+   {
     "volcano": "Copahue",
     "sensor": "MODIS_TERRA",
     "fecha_utc": "2026-11-13 01:50"
@@ -84,6 +101,11 @@
     "volcano": "Chaiten",
     "sensor": "MODIS_TERRA",
     "fecha_utc": "2026-11-09 00:55"
+   },
+   {
+    "volcano": "Chaiten",
+    "sensor": "MODIS_AQUA",
+    "fecha_utc": "2026-11-20 09:05"
    }
   ],
   "nota": "pasadas que la guardia (K) registra y producción (la vía) no: el descarte de borde 171-01. Se informa sin disparar: la regla no da cota (A115)"
@@ -112,7 +134,7 @@
  },
  "borde_del_encendido": [],
  "duracion": {
-  "protegidas_vistas_en_guardia": 23,
+  "protegidas_vistas_en_guardia": 25,
   "objetivo": 29,
   "encendido": "2026-11-02 20:11:43",
   "vence": "2027-03-02",
@@ -124,7 +146,46 @@
   "n_pasadas": 14,
   "protegidas_que_la_guardia_publica_y_prod_calla": []
  },
- "juzgadas": [],
+ "juzgadas": [
+  {
+   "volcano": "Chaiten",
+   "sensor": "MODIS",
+   "fecha_utc": "2026-11-19 02:30",
+   "instante_utc": "2026-11-19 02:30:00",
+   "vrp_mirova_mw": 1.07,
+   "protegida": true,
+   "minima": false,
+   "referencia_sospechosa": false,
+   "prod_pub": false,
+   "guardia_pub": false,
+   "prod_via": true,
+   "prod_caida_k": null,
+   "juicio": {
+    "volcano": "Chaiten",
+    "sensor": "MODIS",
+    "fecha_utc": "2026-11-19 02:30",
+    "decision": "alerta marginal de MIROVA no reproducible: no revertir ni cambiar el detector",
+    "quien": "Nicolás Mendoza (S193, «Sí, las dos», 2026-11-21)",
+    "fecha_decision": "2026-11-21",
+    "evidencia": "D:\\vrp-trabajo\\temporales\\s193\\chaiten\\INFORME.md (sesión S193 de Chaitén): fila de la tabla latest.php 1,07 MW a 3,61 km, celda tibia en el anillo conservador de la caja MODIS al 36 % de su umbral, sin repetición en las 4 pasadas siguientes; ninguna variante la recupera en lugar y magnitud"
+   }
+  }
+ ],
  "caidas_a_k": [],
- "protegidas_sin_publicar_produccion": []
+ "protegidas_sin_publicar_produccion": [
+  {
+   "volcano": "Chaiten",
+   "sensor": "MODIS",
+   "fecha_utc": "2026-11-19 02:30",
+   "instante_utc": "2026-11-19 02:30:00",
+   "vrp_mirova_mw": 1.07,
+   "protegida": true,
+   "minima": false,
+   "referencia_sospechosa": false,
+   "prod_pub": false,
+   "guardia_pub": false,
+   "prod_via": true,
+   "prod_caida_k": null
+  }
+ ]
 }

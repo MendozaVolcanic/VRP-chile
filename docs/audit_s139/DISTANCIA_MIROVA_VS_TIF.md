@@ -1,5 +1,11 @@
 # S139: la distancia que MIROVA publica por pasada es la del píxel alertado MÁS LEJANO
 
+> ⚠️ **S191 (A113; auditoría Codex ronda 2, F2-110, verificada en parte):** el título dice más de lo medido (§0.1:
+> SOSPECHA fuerte, no demostración). Lo escrito es la definición del archivo de MIROVA: `Max_Dist`, distancia máxima
+> entre la cumbre y el píxel alertado más lejano, y la posición del píxel alertado más caliente (esquema del OSF v2.5,
+> `experiments/_s139_audit/eje6/schema_v25.md`). Que la distancia de la página NRT sea esa, y con qué origen, sigue
+> sin demostrar. Título conservado.
+
 **Fecha**: 2026-09-14 (hora del servidor, A86). **Alcance**: auditoría read-only. No se modificó
 ningún archivo del repositorio fuera de este informe y de `experiments/_s139_audit/distancia_tif/`.
 No se tocó `../mirova-tif-archive` salvo para leerlo.

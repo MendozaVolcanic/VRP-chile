@@ -45,6 +45,18 @@ PREDICADOS = ["mirovaEqVrp", "mirovaEqVrpCore", "mirovaEqVrpDisplay", "eqVrpDisp
 CAMBIOS_AUTORIZADOS = {
     "f5CoreMagnitude": 'if (r && typeof CambioDetector !== "undefined" && CambioDetector.esViaCodigoMirova(r)) return null;',
 }
+# S190 (H01, auditoría de Codex): el tope de 50.000 MW deja pasar el record que store.py conservó y marcó
+# (`vrp_exceeds_sanity_cap`, BT creíble), para no mostrar en cero una erupción grande. No es un texto agregado sino una
+# condición dentro de una línea existente: se declara como sustitución (texto del tag, texto de hoy), que la comparación
+# aplica al cuerpo del tag antes de comparar. Si el cambio se pierde, el cuerpo de hoy deja de coincidir y falla.
+# Guard: tests/test_tope_publicacion_s190.py
+_MARCA = " && r.vrp_exceeds_sanity_cap !== true"
+SUSTITUCIONES_AUTORIZADAS = {
+    "mirovaEqVrp": [("vfb > 50000 ? 0 : vfb", "vfb > 50000" + _MARCA + " ? 0 : vfb"),
+                    ("vmw > 50000 ? 0 : vmw", "vmw > 50000" + _MARCA + " ? 0 : vmw"),
+                    ("if (vmw > 50000) return 0;", "if (vmw > 50000" + _MARCA + ") return 0;")],
+    "mirovaEqVrpCore": [("core > 50000 ? 0 : core", "core > 50000" + _MARCA + " ? 0 : core")],
+}
 
 
 def _fuente_tag(vista):
@@ -82,6 +94,8 @@ def _diferencias(antes, ahora):
         if c0 is None:
             continue
         c1 = _cuerpo(ahora, nombre)
+        for viejo, nuevo in SUSTITUCIONES_AUTORIZADAS.get(nombre, []):
+            c0 = c0.replace(viejo, nuevo)
         extra = CAMBIOS_AUTORIZADOS.get(nombre)
         if c1 and extra and extra not in c0:
             if extra not in c1:

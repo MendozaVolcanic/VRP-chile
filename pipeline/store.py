@@ -69,9 +69,36 @@ SANITY_CAP_VRP_MW = 50000.0
 
 # S124 — límite físico de temperatura de brillo. Por encima de esto el dato no
 # es "una anomalía muy grande": es imposible. MODIS B21 satura cerca de 500 K
-# (Coppola 2025 Cap.11) y VIIRS clampea antes; una BT de 566 K como la del
-# granule de Lastarria del 2026-04-23 solo sale de un flag DN no enmascarado.
+# (Coppola 2025 Cap.11); una BT de 566 K como la del granule de Lastarria del
+# 2026-04-23 solo sale de un flag DN no enmascarado.
 BT_PHYSICAL_MAX_K = 500.0
+
+# S190 (H04 de la auditoría de Codex): el techo depende de la banda que midió la BT.
+# POR QUÉ: el comentario anterior decía «VIIRS clampea antes», y es falso para M13, que mide hasta 634 K: con el
+# techo de MODIS, una erupción vista por VIIRS 750 a 550 K y más de 50 GW se guardaba como 0 MW.
+# FUENTE del 634: Campus et al. 2022, Sensors 22:1713, Tabla 1, TMAX sobre órbita de M13; es el mismo número que
+# `pipeline/process_viirs_mod.py::BT_LUT_MAX_MBAND["M13"]` (tests/test_techo_bt_por_sensor_s190.py lo compara).
+# VIIRS 375 queda en 500 K, SIN CAMBIO: la LUT de I04 llega a 361,77 K (UserGuide, process_viirs.py::BT_LUT_MAX),
+# pero la vía calcula t_max invirtiendo Planck sobre la radiancia en la longitud de onda central, no con la LUT, y
+# cuánto puede pasar de 361,77 K un píxel I04 saturado es SIN DATO; bajar el techo sin medirlo podría anular una
+# erupción real. Sensor desconocido: 500 K, como antes.
+# ⚠️ S190 (techo M13, experiments/_s190_techo_m13/HALLAZGO.md; A45, Nicolás 2026-11-17 «Sí, prepáralo»): el 634 K de
+# arriba es el Tmax de ESPECIFICACIÓN de M13 (ATBD radiométrico JPSS Rev C, Tabla 2), no lo más alto que el L1B
+# entrega. POR QUÉ 683: el L1B codifica M13 hasta DN 65527 (escala 0,008088269, offset 0,00108056 → 530,0
+# W m-2 sr-1 um-1; VIIRS L1B UserGuide Aug 2021, p. 23), que la vía invierte por Planck a 666,3 K; la LUT oficial de
+# M13 llega a 665,9161 K (misma página). Con 634 K, un píxel válido entre 634 y 666 K se anulaba. FUENTE del 683: el
+# mismo ATBD, Tabla 17, p. 80, «Highest Detectable EBBT» de M13 (1,5 veces la señal de Tmax, p. 81): sobre eso no hay
+# píxel del L1B posible. Prueba: tests/test_techo_bt_por_sensor_s190.py. La guardia K
+# (process_viirs_mod.py::BT_LUT_MAX_MBAND) sigue en 634 K. El texto de arriba se conserva (A113).
+BT_PHYSICAL_MAX_K_VIIRS750 = 683.0
+
+
+def techo_bt_k(sensor) -> float:
+    """Techo físico de la temperatura de brillo para la etiqueta de sensor del record (S190, H04)."""
+    s = str(sensor or "")
+    if s.startswith("VIIRS") and s.endswith("_750"):
+        return BT_PHYSICAL_MAX_K_VIIRS750
+    return BT_PHYSICAL_MAX_K
 
 
 @functools.lru_cache(maxsize=1)
@@ -163,7 +190,7 @@ def _apply_sanity_cap(record: dict) -> None:
         return
 
     t_max = record.get("t_max_k")
-    bt_imposible = t_max is None or t_max > BT_PHYSICAL_MAX_K
+    bt_imposible = t_max is None or t_max > techo_bt_k(record.get("sensor"))  # S190 (H04): techo por sensor
 
     if not bt_imposible:
         # Magnitud enorme pero físicamente admisible: NO anular.
