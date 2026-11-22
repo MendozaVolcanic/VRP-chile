@@ -245,7 +245,7 @@ def imprimir(out):
               f"({p.get('prod_caida_k') or 'K sin marca'}): investigar; no es candidata a reversión")
     for p in out.get("protegidas_sin_publicar_sin_aviso", []):   # S193, F11-101 y F9-101: aviso, sin reversión
         print(f"  PROTEGIDA SIN PUBLICAR (aviso S193, sin reversión): {p['volcano']} {e} {p['fecha_utc']} UTC, MIROVA "
-              f"{p['vrp_mirova_mw']} MW: producción no la publica y la guardia {vg.estado_guardia(p)}. Confirmar en la "
+              f"{p['vrp_mirova_mw']} MW: producción {vg.estado_produccion(p)} y la guardia {vg.estado_guardia(p)}. Confirmar en la "
               "imagen de MIROVA y llevarla a Nicolás")
     for p in out.get("protegidas_sin_record_produccion", []):
         print(f"  SIN RECORD DE PRODUCCIÓN: {p['volcano']} {e} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: "
