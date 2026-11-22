@@ -82,6 +82,15 @@ VRP). Es la «vista de tres estados» de S147 §8, extendida a áreas.
 | AR4 | ¿Quién dibuja las zonas de incendio? | Nicolás sobre un mapa de alertas lejanas persistentes que preparamos; derivarlas de FIRMS | **Nicolás sobre el mapa**: FIRMS queda libre para validar |
 | AR5 | ¿B entra en el reproceso del paso 4 del plan S190? | sí, en el mismo reproceso; en uno aparte | **sí, en el mismo**: un solo reproceso, la misma ventana |
 
+### Respuestas de Nicolás (2026-11-22, S194, de primera mano en la sesión coordinadora)
+
+- **AR1: partición posterior (A)** primero.
+- **AR2: las cinco áreas**, y **AR4: por ahora sin área de incendio**. Quedan cuatro en uso: cráter, agua, flanco y
+  resto (lo que sería incendio cae en flanco o resto).
+- AR3 y AR5 sin respuesta: el flanco usa 10 km mientras no se defina el edificio; B se decide cuando llegue el paso 4.
+- Medido por el marcador «calor en la cumbre» (#1091): `anomaly_pixels` de la vía trae todos los alertados
+  (10.361 de 10.361 records con alertados, `experiments/_s194_marcador_cumbre/censo_pixeles.py`), así que A es viable.
+
 ## 8. Lo que este borrador no resuelve
 
 - Si `anomaly_pixels` trae todos los alertados (lo mide el marcador de S194).
