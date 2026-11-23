@@ -1,0 +1,43 @@
+=== 1. predicado del tablero, producción ===
+datos: C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s196-plan-experimental-274e5a\data\mirova_equivalent; predicado: tablero
+ventana 2026-03-01 a 2026-11-22; persistencia: otra publicación a <= 1.0 km en las 3 noches previas; 200 sorteos uniformes en el disco inner centrado en el vent
+
+Lastarria (inner 3 km): 268 publicaciones nocturnas en 180 noches {'MODIS': 0, 'VIIRS375': 267, 'VIIRS750': 1}
+  con publicación en las 3 noches previas: 252; de ellas a <= 1.0 km: 224 (89 %)
+  sorteo: mediana 29 %, percentil 95 34 %; fracción de sorteos >= observado: 0.000
+
+Villarrica (inner 5 km): 46 publicaciones nocturnas en 38 noches {'MODIS': 1, 'VIIRS375': 36, 'VIIRS750': 9}
+  con publicación en las 3 noches previas: 32; de ellas a <= 1.0 km: 30 (94 %)
+  sorteo: mediana 6 %, percentil 95 16 %; fracción de sorteos >= observado: 0.000
+
+Lascar (inner 5 km): 787 publicaciones nocturnas en 199 noches {'MODIS': 87, 'VIIRS375': 420, 'VIIRS750': 280}
+  con publicación en las 3 noches previas: 760; de ellas a <= 1.0 km: 760 (100 %)
+  sorteo: mediana 35 %, percentil 95 38 %; fracción de sorteos >= observado: 0.000
+
+=== 2. predicado simple, producción, misma ventana que el control ===
+datos: C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s196-plan-experimental-274e5a\data\mirova_equivalent; predicado: simple (vrp > 0 y <= inner)
+ventana 2026-03-01 a 2026-11-02; persistencia: otra publicación a <= 1.0 km en las 3 noches previas; 200 sorteos uniformes en el disco inner centrado en el vent
+
+Lastarria (inner 3 km): 250 publicaciones nocturnas en 166 noches {'MODIS': 0, 'VIIRS375': 249, 'VIIRS750': 1}
+  con publicación en las 3 noches previas: 234; de ellas a <= 1.0 km: 207 (88 %)
+  sorteo: mediana 31 %, percentil 95 35 %; fracción de sorteos >= observado: 0.000
+
+=== 3. CONTROL: predicado simple, volcanes de los 34 (historia_34, la vía) con inner 3 km ===
+datos: data/historia_34; predicado: simple (vrp > 0 y <= inner)
+ventana 2026-03-01 a 2026-11-02; persistencia: otra publicación a <= 1.0 km en las 3 noches previas; 200 sorteos uniformes en el disco inner centrado en el vent
+
+Parinacota (inner 3 km): 5 publicaciones nocturnas en 5 noches {'MODIS': 0, 'VIIRS375': 5, 'VIIRS750': 0}
+  con publicación en las 3 noches previas: 1; de ellas a <= 1.0 km: 0 (0 %)
+  sorteo: mediana 0 %, percentil 95 100 %; fracción de sorteos >= observado: 1.000
+
+Taapaca (inner 3 km): 5 publicaciones nocturnas en 5 noches {'MODIS': 0, 'VIIRS375': 4, 'VIIRS750': 1}
+  con publicación en las 3 noches previas: 0; de ellas a <= 1.0 km: 0 (nan %)
+  sorteo: mediana nan %, percentil 95 nan %; fracción de sorteos >= observado: 0.000
+
+NevadoDeLongavi (inner 3 km): 4 publicaciones nocturnas en 4 noches {'MODIS': 0, 'VIIRS375': 4, 'VIIRS750': 0}
+  con publicación en las 3 noches previas: 0; de ellas a <= 1.0 km: 0 (nan %)
+  sorteo: mediana nan %, percentil 95 nan %; fracción de sorteos >= observado: 0.000
+
+Tinguiririca (inner 3 km): 2 publicaciones nocturnas en 2 noches {'MODIS': 0, 'VIIRS375': 2, 'VIIRS750': 0}
+  con publicación en las 3 noches previas: 0; de ellas a <= 1.0 km: 0 (nan %)
+  sorteo: mediana nan %, percentil 95 nan %; fracción de sorteos >= observado: 0.000

@@ -142,6 +142,15 @@ por volcán y por sensor, y tiene que seguir siendo cierto después del cambio.
   «alerta marginal de MIROVA no reproducible». Por la letra del criterio de victoria, una pérdida es una pérdida: el
   juicio la explica, no la borra.
 
+  **S196: el foco del cráter de Láscar en MODIS entra a esta cuenta (MEJ-7, cerrada por paridad, D-E de Nicolás del
+  2026-11-23).** Es parte de la precisión MODIS de la historia, no una mejora pendiente: la vía publica un píxel chico y
+  caliente en el cráter de Láscar en noches en que MIROVA dejó su MODIS en RUTINA (el foco queda al borde del umbral y
+  cruza unas noches sí y otras no, según el ángulo y cómo cae dentro del píxel de 1 km). Del 2026-03-01 al 2026-11-22
+  la vía publica (predicado del tablero) 6 de las 5.758 pasadas MODIS nocturnas con record nuestro que la tabla lista
+  como RUTINA: 4 de Láscar (0,21 a 1,43 MW, a 0,26 a 0,42 km del cráter), 1 de Nevados de Chillán y 1 de Llaima
+  (`experiments/_s196_plan_mejoras/salida_m7_modis_sobre_rutina.txt`; fila MEJ-7 de
+  `docs/BEYOND_MIROVA_EXTENSIONS.md` §12). Si hay que seguirlo, se sigue aquí, no en el laboratorio.
+
   **S196: noche y día separados.** Desde el 15-nov el día de MODIS se colaba en esa cuenta nocturna: una fila diurna de
   MIROVA con calor lejos del volcán anulaba las noches tranquilas de la misma fecha, y una pasada diurna nuestra entraba
   en la fila de la noche (`experiments/_s196_e3/IDENTIDAD.md`). La comparación ahora cuenta cada franja aparte. Prueba de
