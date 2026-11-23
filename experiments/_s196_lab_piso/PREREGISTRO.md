@@ -260,6 +260,12 @@ Nada de esto se toca en este PR. Para correr el barrido hace falta:
 2. **¿Autorizas el cambio de código del §9 con tag defensivo?** Toca `pipeline/mirova_v750_codigo.py` (A45).
 3. **¿El barrido corre entero (10 volcanes, desde 2026-03-01) o por tandas como el de s?** Son nueve brazos.
 
+Respuestas (2026-11-23, ~12:30 UTC), dadas por Nicolás en la sesión coordinadora S196 y transmitidas a esta sesión
+por la coordinadora (no las leí de primera mano). Textual de las opciones que eligió: (1) «s = 3 (Recomendado)»; (2)
+«Sí, A45 (Recomendado)»; (3) «Por tandas (Recomendado)». La 1 confirma lo sellado: `S_A = 3.0` no cambia, así que el
+evaluador y su sha256 quedan iguales y no hay re-sello. La 2 autoriza el cambio de código del §9 con tag defensivo,
+en un PR aparte. La 3 fija que el barrido se despacha por tandas, como el de s.
+
 ## 12. Archivos
 
 | archivo | qué es |
