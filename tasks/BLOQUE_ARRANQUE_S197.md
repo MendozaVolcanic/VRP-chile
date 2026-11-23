@@ -29,9 +29,9 @@
 | Auditoría semanal del 23-nov (primera con día MODIS) | **FUERA DE BANDA**, issue #1106: recall MODIS 94,6 % < 95 % (n = 37); protegida sin publicar Chaitén MODIS 2026-11-19 02:30 UTC, MIROVA 1,07 MW | `gh issue view 1106`; `data/audit_continuous/latest.json` |
 | Issue #1099 sombra de los 34 | corrida del 22-nov falló sólo en Callaqui (31 verdes): 8 búsquedas o descargas fallidas del 22-nov | run 45065535656 |
 | Día MODIS (desde 15-nov, 11 Tier A) | 166 diurnas, 1 con VRP > 0 (Chillán 22-nov 20:40, 6,654 MW; MIROVA 6,07) | `D:\vrp-trabajo\temporales\s196\dia_modis\salida_contar.txt` |
-| Sesiones | archivadas S194, Paper, VIIRS día, Independencia; Mazos restaurada (se archivó en cascada). Vivas de S196: prereg-piso, paper-r2, indep-paso2, plan-experimental, visor-radios, retiro-c0 (todas terminadas, worktrees en C:) | `list_sessions linked` |
+| Sesiones | archivadas S194, Paper, VIIRS día, Independencia; Mazos restaurada (se archivó en cascada). Las 6 de S196 (prereg-piso, paper-r2, indep-paso2, plan-experimental, visor-radios, retiro-c0) archivadas con el sí de Nicolás (2026-11-23 ~23:00 UTC) y sus 5 worktrees quitados a mano (archivar no los quitó) | `list_sessions linked` |
 | PR abiertos | #1015 (miniaturas), #913 (plan S163) | `gh pr list` |
-| Disco | **C: 9,8 GB** (5 worktrees de sesiones S196 en `.claude\worktrees\`), D: 14 GB | `df` |
+| Disco | C: 19 GB tras quitar los 5 worktrees de S196, D: 14 GB | `df` |
 | Sin commitear en `loop/activo` (no son de S196) | `experiments/_s140/`, `experiments/_s160_espacial/_censo_s159/`, `experiments/_s160_espacial/data/`, `experiments/_s176_codex/*` (nunca se commitea) | `git status --porcelain` |
 
 ## b. Decisiones que espera Nicolás
@@ -39,7 +39,7 @@
 | # | Pregunta | Opciones | Recomendación |
 |---|---|---|---|
 | 1 | Radios del edificio por volcán (D-H) | fijarlos en el visor | **Fijarlos en el visor** (Artifact, botón Guardar); el loop los lee y los pasa a `config/areas_laboratorio.yaml`. P0 entero depende de esto |
-| 2 | Archivar las 6 sesiones de S196 ya terminadas (libera ~5 worktrees en C:, que está en 9,8 GB) | sí / no | **Sí** (Mazos y Miniaturas siguen vivas) |
+| 2 | (resuelta: archivadas el 2026-11-23) | | |
 | 3 | Resto del §14 de #1103: D-A Laguna del Maule, D-C vara de Lastarria, D-D zona A de Cordón Caulle, D-F archivar MEJ-2/3 con disparador, D-G diseñar MEJ-6 ya | ver §14 | las del plan: A/B aislado de LdM antes de decidir; tabla OVDAS de Lastarria con TIR de Landsat en paralelo; radio de PCC que elijas; (a) en D-F y D-G |
 | 4 | Independencia C1: quién del OVDAS fija el requisito de adopción y cuándo | | conversarlo con la jefatura; es lo único que destraba E1 |
 | 5 | Mazos P2 a P8 y Q1 a Q5 | ver `...\congreso geologico 2026\2_PRESENTACIONES\ACTUALIZACION_S194.md` §4 y `ACTUALIZACION_S196.md` | |
@@ -98,7 +98,7 @@ Primero: si te abrió otra sesión, mcp__ccd_session_mgmt__detach_session("self"
    - git fetch --prune; ficha de main (esperado v1.85); gh pr list (esperado #1015 y #913).
    - gh run view 45280588605 (tanda 2b del piso): si quedó verde, corre
      D:\vrp-trabajo\temporales\s196\barrido\contar_brazos_piso.py 45280588605 y mira COMPARAR (control y «donde no actúa»).
-   - gh issue view 1106 y 1099; df de C: (estaba en 9,8 GB) y D:.
+   - gh issue view 1106 y 1099; df de C: (19 GB al cerrar) y D:.
 2. Lee tasks/BLOQUE_ARRANQUE_S197.md (rama loop/activo), la entrada S196 de tasks/LOOP_OBJETIVOS.md §6 y la nota
    C:\Users\nmend\AppData\Local\Claude-Data\claude_pzs8sxrjxfjjc\side-session-notes\local_82fe0d09-30f3-4ac4-a70b-9a334fa376fe\s196_apertura.md
 3. Trabajo, en orden:
@@ -110,7 +110,6 @@ Primero: si te abrió otra sesión, mcp__ccd_session_mgmt__detach_session("self"
    d. Codex ronda 3 (cuota desde 2026-11-24 04:20 UTC).
    e. Leer los radios que Nicolás guarde en el visor (ArtifactData, colección radios) y pasarlos a
       config/areas_laboratorio.yaml en un PR; luego P0 partes 1 y 2 del plan de mejoras.
-   f. Ofrecer archivar las 6 sesiones de S196 (sólo con su sí).
 4. Reglas duras: A45 (tag y sí de Nicolás para EMPEZAR cambios en pipeline/process_*.py, store.py,
    mirova_equivalent.yaml, mirova_v750_codigo.py); los merges que recomiendas los haces tú (CLEAN, CI verde, ficha al
    mergear con D:/vrp-trabajo/temporales/s195/merge/uno.sh, en cadena si hay varios, --match-head-commit) e informas;
