@@ -78,6 +78,11 @@ def _fn(brazo):
     u, n1 = BRAZOS[brazo]
 
     def f(*a, **k):
+        # S197 (rama desechable s197-1106-probe): desde S195/S196 procesar_grilla pasa zona_a, s_a y piso_a; en
+        # producción van en None. La copia del .m no los conoce: se exige None y se descartan.
+        for kk in ("zona_a", "s_a", "piso_a"):
+            if k.pop(kk, None) is not None:
+                raise ValueError("brazos.py: %s distinto de None, no es el perfil de producción" % kk)
         return detectar_param(*a, u_abs_noche=u, n1_noche=n1, **k)
     return f
 
