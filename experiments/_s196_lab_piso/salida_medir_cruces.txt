@@ -1,0 +1,342 @@
+== 1. Producción (data/mirova_equivalent, vía, nocturnas válidas, desde 2026-03-01, 10 volcanes de la zona A)
+última pasada leída: 2026-11-23 07:40
+familia | pasadas | ya_alerta | sin_celda | celda decisiva fuera de zona A | candidatas (zona A, sin alerta)
+MODIS | 5538 | 150 | 0 | 887 | 4501
+VIIRS750 | 10389 | 532 | 0 | 160 | 9697
+VIIRS375 | 10395 | 1997 | 0 | 0 | 8398
+
+== 2. ¿Cuándo manda el piso con s = 5? Pasadas (pase 1) con mu + 5 sd < p, por familia
+familia | p | NTI manda el piso | ETI manda el piso | n
+MODIS | 0.00300 | 1701 | 4332 | 5538
+MODIS | 0.00275 | 1387 | 3985 | 5538
+MODIS | 0.00250 | 1077 | 3564 | 5538
+MODIS | 0.00225 | 782 | 3040 | 5538
+MODIS | 0.00200 | 537 | 2535 | 5538
+MODIS | 0.00175 | 320 | 1928 | 5538
+MODIS | 0.00150 | 143 | 1316 | 5538
+MODIS | 0.00125 | 59 | 729 | 5538
+MODIS | 0.00100 | 12 | 321 | 5538
+MODIS | 0.00050 | 0 | 0 | 5538
+MODIS | 0.00000 | 0 | 0 | 5538
+MODIS cuantiles 10/25/50/75/90 de mu + 5 sd: NTI 0.00203 0.00275 0.00398 0.00552 0.00726 | ETI 0.00115 0.00153 0.00212 0.00286 0.00385
+VIIRS750 | 0.00300 | 2689 | 9274 | 10389
+VIIRS750 | 0.00275 | 1982 | 8804 | 10389
+VIIRS750 | 0.00250 | 1383 | 8097 | 10389
+VIIRS750 | 0.00225 | 781 | 7106 | 10389
+VIIRS750 | 0.00200 | 338 | 5866 | 10389
+VIIRS750 | 0.00175 | 93 | 4033 | 10389
+VIIRS750 | 0.00150 | 14 | 2025 | 10389
+VIIRS750 | 0.00125 | 2 | 531 | 10389
+VIIRS750 | 0.00100 | 0 | 76 | 10389
+VIIRS750 | 0.00050 | 0 | 0 | 10389
+VIIRS750 | 0.00000 | 0 | 0 | 10389
+VIIRS750 cuantiles 10/25/50/75/90 de mu + 5 sd: NTI 0.00236 0.00297 0.00394 0.00515 0.00657 | ETI 0.00135 0.00157 0.00190 0.00241 0.00305
+VIIRS375 | 0.00300 | 2911 | 7728 | 10395
+VIIRS375 | 0.00275 | 1647 | 6623 | 10395
+VIIRS375 | 0.00250 | 722 | 5231 | 10395
+VIIRS375 | 0.00225 | 183 | 3725 | 10395
+VIIRS375 | 0.00200 | 33 | 2228 | 10395
+VIIRS375 | 0.00175 | 5 | 863 | 10395
+VIIRS375 | 0.00150 | 1 | 173 | 10395
+VIIRS375 | 0.00125 | 0 | 3 | 10395
+VIIRS375 | 0.00100 | 0 | 0 | 10395
+VIIRS375 | 0.00050 | 0 | 0 | 10395
+VIIRS375 | 0.00000 | 0 | 0 | 10395
+VIIRS375 cuantiles 10/25/50/75/90 de mu + 5 sd: NTI 0.00259 0.00295 0.00341 0.00409 0.00503 | ETI 0.00179 0.00206 0.00249 0.00302 0.00376
+
+== 3. Candidatas cuya celda decisiva alertaría (estimación de pasadas con alerta nueva en la zona A)
+s | p | MODIS | VIIRS750 | VIIRS375 | total | de ellas en escenas sin ninguna alerta en producción
+5.0 | 0.00300 | 0 | 0 | 0 | 0 | 0
+5.0 | 0.00275 | 2 | 15 | 106 | 123 | 113
+5.0 | 0.00250 | 3 | 28 | 174 | 205 | 184
+5.0 | 0.00225 | 5 | 44 | 223 | 272 | 245
+5.0 | 0.00200 | 6 | 57 | 264 | 327 | 299
+5.0 | 0.00175 | 9 | 65 | 279 | 353 | 325
+5.0 | 0.00150 | 10 | 69 | 282 | 361 | 333
+5.0 | 0.00125 | 10 | 70 | 282 | 362 | 334
+5.0 | 0.00100 | 10 | 70 | 282 | 362 | 334
+5.0 | 0.00050 | 10 | 70 | 282 | 362 | 334
+5.0 | 0.00000 | 10 | 70 | 282 | 362 | 334
+3.0 | 0.00300 | 28 | 114 | 75 | 217 | 209
+3.0 | 0.00275 | 38 | 199 | 248 | 485 | 461
+3.0 | 0.00250 | 51 | 278 | 398 | 727 | 667
+3.0 | 0.00225 | 66 | 378 | 582 | 1026 | 938
+3.0 | 0.00200 | 86 | 502 | 806 | 1394 | 1279
+3.0 | 0.00175 | 105 | 628 | 1023 | 1756 | 1618
+3.0 | 0.00150 | 123 | 737 | 1214 | 2074 | 1919
+3.0 | 0.00125 | 151 | 862 | 1314 | 2327 | 2167
+3.0 | 0.00100 | 170 | 954 | 1338 | 2462 | 2301
+3.0 | 0.00050 | 183 | 972 | 1338 | 2493 | 2332
+3.0 | 0.00000 | 184 | 972 | 1338 | 2494 | 2333
+2.0 | 0.00300 | 41 | 131 | 81 | 253 | 244
+2.0 | 0.00275 | 58 | 229 | 267 | 554 | 529
+2.0 | 0.00250 | 77 | 327 | 447 | 851 | 788
+2.0 | 0.00225 | 105 | 473 | 679 | 1257 | 1163
+2.0 | 0.00200 | 151 | 653 | 1003 | 1807 | 1681
+2.0 | 0.00175 | 196 | 866 | 1437 | 2499 | 2331
+2.0 | 0.00150 | 270 | 1163 | 1983 | 3416 | 3203
+2.0 | 0.00125 | 373 | 1567 | 2642 | 4582 | 4327
+2.0 | 0.00100 | 480 | 2088 | 3174 | 5742 | 5468
+2.0 | 0.00050 | 656 | 2668 | 3340 | 6664 | 6384
+2.0 | 0.00000 | 684 | 2671 | 3340 | 6695 | 6415
+1.0 | 0.00300 | 44 | 133 | 81 | 258 | 249
+1.0 | 0.00275 | 65 | 231 | 267 | 563 | 538
+1.0 | 0.00250 | 86 | 333 | 447 | 866 | 803
+1.0 | 0.00225 | 128 | 486 | 679 | 1293 | 1199
+1.0 | 0.00200 | 194 | 685 | 1009 | 1888 | 1761
+1.0 | 0.00175 | 268 | 937 | 1475 | 2680 | 2506
+1.0 | 0.00150 | 398 | 1310 | 2119 | 3827 | 3602
+1.0 | 0.00125 | 607 | 1900 | 3092 | 5599 | 5311
+1.0 | 0.00100 | 929 | 2930 | 4542 | 8401 | 8034
+1.0 | 0.00050 | 1970 | 6411 | 7054 | 15435 | 14909
+1.0 | 0.00000 | 2389 | 6936 | 7102 | 16427 | 15897
+0.0 | 0.00300 | 44 | 133 | 81 | 258 | 249
+0.0 | 0.00275 | 65 | 231 | 267 | 563 | 538
+0.0 | 0.00250 | 86 | 333 | 447 | 866 | 803
+0.0 | 0.00225 | 128 | 487 | 679 | 1294 | 1200
+0.0 | 0.00200 | 194 | 686 | 1010 | 1890 | 1763
+0.0 | 0.00175 | 269 | 939 | 1476 | 2684 | 2510
+0.0 | 0.00150 | 406 | 1316 | 2122 | 3844 | 3619
+0.0 | 0.00125 | 637 | 1922 | 3101 | 5660 | 5369
+0.0 | 0.00100 | 1009 | 3001 | 4567 | 8577 | 8207
+0.0 | 0.00050 | 2549 | 7515 | 7890 | 17954 | 17368
+0.0 | 0.00000 | 4501 | 9697 | 8398 | 22596 | 21980
+
+== 4. Bajar un solo piso (NTI o ETI) contra los dos, con s = 5, 3 y 1
+s | p | sólo NTI | sólo ETI | los dos
+5.0 | 0.00300 | 0 | 0 | 0
+5.0 | 0.00275 | 2 | 116 | 123
+5.0 | 0.00250 | 2 | 189 | 205
+5.0 | 0.00225 | 2 | 241 | 272
+5.0 | 0.00200 | 2 | 283 | 327
+5.0 | 0.00175 | 2 | 300 | 353
+5.0 | 0.00150 | 2 | 303 | 361
+5.0 | 0.00125 | 3 | 303 | 362
+5.0 | 0.00100 | 3 | 303 | 362
+5.0 | 0.00050 | 3 | 303 | 362
+5.0 | 0.00000 | 3 | 303 | 362
+3.0 | 0.00300 | 217 | 217 | 217
+3.0 | 0.00275 | 234 | 432 | 485
+3.0 | 0.00250 | 238 | 601 | 727
+3.0 | 0.00225 | 240 | 752 | 1026
+3.0 | 0.00200 | 240 | 910 | 1394
+3.0 | 0.00175 | 240 | 1035 | 1756
+3.0 | 0.00150 | 240 | 1105 | 2074
+3.0 | 0.00125 | 241 | 1140 | 2327
+3.0 | 0.00100 | 241 | 1155 | 2462
+3.0 | 0.00050 | 241 | 1155 | 2493
+3.0 | 0.00000 | 241 | 1155 | 2494
+1.0 | 0.00300 | 258 | 258 | 258
+1.0 | 0.00275 | 282 | 494 | 563
+1.0 | 0.00250 | 289 | 681 | 866
+1.0 | 0.00225 | 298 | 868 | 1293
+1.0 | 0.00200 | 303 | 1061 | 1888
+1.0 | 0.00175 | 304 | 1221 | 2680
+1.0 | 0.00150 | 305 | 1336 | 3827
+1.0 | 0.00125 | 307 | 1427 | 5599
+1.0 | 0.00100 | 307 | 1499 | 8401
+1.0 | 0.00050 | 307 | 1565 | 15435
+1.0 | 0.00000 | 307 | 1566 | 16427
+
+== 5. Con s = 5, por volcán (los dos pisos), pasadas nuevas en la zona A
+volcán | 0.00300 | 0.00275 | 0.00250 | 0.00225 | 0.00200 | 0.00175 | 0.00150 | 0.00125 | 0.00100 | 0.00050 | 0.00000
+Lascar | 0 | 26 | 44 | 62 | 75 | 83 | 87 | 87 | 87 | 87 | 87
+Isluga | 0 | 17 | 36 | 42 | 52 | 55 | 56 | 56 | 56 | 56 | 56
+Tupungatito | 0 | 25 | 34 | 46 | 49 | 52 | 53 | 53 | 53 | 53 | 53
+PlanchonPeteroa | 0 | 12 | 17 | 21 | 24 | 26 | 26 | 26 | 26 | 26 | 26
+NevadosDeChillan | 0 | 4 | 8 | 11 | 19 | 21 | 22 | 22 | 22 | 22 | 22
+Llaima | 0 | 1 | 1 | 2 | 5 | 5 | 6 | 6 | 6 | 6 | 6
+Villarrica | 0 | 1 | 1 | 1 | 1 | 2 | 2 | 3 | 3 | 3 | 3
+Copahue | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0
+Chaiten | 0 | 17 | 31 | 46 | 57 | 64 | 64 | 64 | 64 | 64 | 64
+Lastarria | 0 | 20 | 33 | 41 | 45 | 45 | 45 | 45 | 45 | 45 | 45
+
+== 6. Celdas de la zona A dentro y fuera del 7 x 7 de la celda decisiva
+volcán familia | celdas zona A | fuera del 7 x 7
+Chaiten MODIS | 25 | 0
+Chaiten VIIRS375 | 169 | 120
+Chaiten VIIRS750 | 49 | 0
+Copahue MODIS | 25 | 0
+Copahue VIIRS375 | 169 | 120
+Copahue VIIRS750 | 49 | 0
+Isluga MODIS | 25 | 0
+Isluga VIIRS375 | 169 | 120
+Isluga VIIRS750 | 49 | 0
+Lascar MODIS | 25 | 0
+Lascar VIIRS375 | 169 | 120
+Lascar VIIRS750 | 49 | 7
+Lastarria MODIS | 25 | 0
+Lastarria VIIRS375 | 163 | 114
+Lastarria VIIRS750 | 44 | 0
+Llaima MODIS | 25 | 0
+Llaima VIIRS375 | 169 | 120
+Llaima VIIRS750 | 49 | 0
+NevadosDeChillan MODIS | 25 | 0
+NevadosDeChillan VIIRS375 | 169 | 120
+NevadosDeChillan VIIRS750 | 49 | 0
+PlanchonPeteroa MODIS | 14 | 0
+PlanchonPeteroa VIIRS375 | 164 | 115
+PlanchonPeteroa VIIRS750 | 31 | 0
+Tupungatito MODIS | 23 | 17
+Tupungatito VIIRS375 | 169 | 120
+Tupungatito VIIRS750 | 204 | 155
+Villarrica MODIS | 25 | 0
+Villarrica VIIRS375 | 169 | 120
+Villarrica VIIRS750 | 49 | 7
+
+== 7. Validación del instrumento contra el barrido de s ya corrido (run 45114681532, p = 0,003)
+brazo s | predichas (celda decisiva del control) | nuevas reales (vrp_mw > 0 en el brazo y 0 en el control) | predichas y reales | reales no predichas | predichas no reales
+4.5 | 0 | 0 | 0 | [] | []
+4.0 | 1 | 1 | 1 | [] | []
+3.5 | 2 | 2 | 2 | [] | []
+3.0 | 4 | 4 | 4 | [] | []
+2.5 | 4 | 4 | 4 | [] | []
+2.0 | 4 | 4 | 4 | [] | []
+1.5 | 5 | 4 | 4 | [] | [('NevadosDeChillan', 'MODIS_TERRA', '2026-03-07 02:15')]
+1.0 | 5 | 5 | 4 | [('NevadosDeChillan', 'MODIS_TERRA', '2026-03-13 01:15')] | [('NevadosDeChillan', 'MODIS_TERRA', '2026-03-07 02:15')]
+volcanes del barrido: ['Lascar', 'NevadosDeChillan', 'Villarrica']
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-03-01 a 2026-11-23 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR, tambien antes del 2026-06-13, cuando el OCR no media la distancia: una alerta solo OCR de ese tramo decide sin saber si el calor estaba dentro del radio
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+[referencia MIROVA] la ventana 2026-03-01 a 2026-11-23 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR, tambien antes del 2026-06-13, cuando el OCR no media la distancia: una alerta solo OCR de ese tramo decide sin saber si el calor estaba dentro del radio
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+[referencia MIROVA] la ventana 2026-03-01 a 2026-11-23 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR, tambien antes del 2026-06-13, cuando el OCR no media la distancia: una alerta solo OCR de ese tramo decide sin saber si el calor estaba dentro del radio
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+[referencia MIROVA] la ventana 2026-03-01 a 2026-11-23 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR, tambien antes del 2026-06-13, cuando el OCR no media la distancia: una alerta solo OCR de ese tramo decide sin saber si el calor estaba dentro del radio
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+
+== 8. Tasa por noche negativa limpia (tres sensores) predicha por brazo, s = 5.0 (estimación)
+ventana 2026-03-01 a 2026-11-23; noches negativas limpias: 1538; referencia de MIROVA: consolidado fe136c87c831160e2e40d498386dde37ebede005, OCR e0e2f9de93eba35e9f827b04738cd22f2c3c6219
+p | noches que publican | tasa | pasadas neg_limpio que publican / pasadas neg_limpio
+0.00300 | 127 | 0.0826 | 70 / 11068
+0.00275 | 148 | 0.0962 | 95 / 11068
+0.00250 | 160 | 0.1040 | 110 / 11068
+0.00225 | 171 | 0.1112 | 122 / 11068
+0.00200 | 182 | 0.1183 | 136 / 11068
+0.00175 | 188 | 0.1222 | 141 / 11068
+0.00150 | 190 | 0.1235 | 142 / 11068
+0.00125 | 191 | 0.1242 | 143 / 11068
+0.00100 | 191 | 0.1242 | 143 / 11068
+0.00050 | 191 | 0.1242 | 143 / 11068
+0.00000 | 191 | 0.1242 | 143 / 11068
+
+== 9. Unidades S y N predichas por volcán NHI y brazo (s = 5.0; ventana NHI 2026-02-15 a 2026-11-23; sin mirar alertas)
+volcán | 0.00300 S/N | 0.00275 S/N | 0.00250 S/N | 0.00225 S/N | 0.00200 S/N | 0.00175 S/N | 0.00150 S/N | 0.00125 S/N | 0.00100 S/N | 0.00050 S/N | 0.00000 S/N
+Lascar | 0/23 | 1/22 | 2/21 | 3/20 | 3/20 | 3/20 | 3/20 | 3/20 | 3/20 | 3/20 | 3/20
+Isluga | 0/16 | 0/16 | 1/15 | 1/15 | 2/14 | 2/14 | 2/14 | 2/14 | 2/14 | 2/14 | 2/14
+Tupungatito | 0/53 | 5/48 | 6/47 | 6/47 | 6/47 | 6/47 | 6/47 | 6/47 | 6/47 | 6/47 | 6/47
+PlanchonPeteroa | 0/56 | 2/54 | 2/54 | 5/51 | 6/50 | 8/48 | 8/48 | 8/48 | 8/48 | 8/48 | 8/48
+NevadosDeChillan | 0/75 | 2/73 | 4/71 | 4/71 | 7/68 | 8/67 | 8/67 | 8/67 | 8/67 | 8/67 | 8/67
+Llaima | 0/94 | 0/94 | 0/94 | 0/94 | 0/94 | 0/94 | 0/94 | 0/94 | 0/94 | 0/94 | 0/94
+Villarrica | 0/76 | 0/76 | 0/76 | 0/76 | 0/76 | 0/76 | 0/76 | 1/75 | 1/75 | 1/75 | 1/75
+Copahue | 0/123 | 0/123 | 0/123 | 0/123 | 0/123 | 0/123 | 0/123 | 0/123 | 0/123 | 0/123 | 0/123
+Chaiten | 0/46 | 1/45 | 4/42 | 4/42 | 5/41 | 5/41 | 5/41 | 5/41 | 5/41 | 5/41 | 5/41
+
+== 8. Tasa por noche negativa limpia (tres sensores) predicha por brazo, s = 3.0 (estimación)
+ventana 2026-03-01 a 2026-11-23; noches negativas limpias: 1538; referencia de MIROVA: consolidado fe136c87c831160e2e40d498386dde37ebede005, OCR e0e2f9de93eba35e9f827b04738cd22f2c3c6219
+p | noches que publican | tasa | pasadas neg_limpio que publican / pasadas neg_limpio
+0.00300 | 177 | 0.1151 | 112 / 11068
+0.00275 | 240 | 0.1560 | 175 / 11068
+0.00250 | 276 | 0.1795 | 222 / 11068
+0.00225 | 333 | 0.2165 | 299 / 11068
+0.00200 | 390 | 0.2536 | 381 / 11068
+0.00175 | 462 | 0.3004 | 476 / 11068
+0.00150 | 516 | 0.3355 | 563 / 11068
+0.00125 | 553 | 0.3596 | 636 / 11068
+0.00100 | 574 | 0.3732 | 669 / 11068
+0.00050 | 579 | 0.3765 | 679 / 11068
+0.00000 | 580 | 0.3771 | 680 / 11068
+
+== 9. Unidades S y N predichas por volcán NHI y brazo (s = 3.0; ventana NHI 2026-02-15 a 2026-11-23; sin mirar alertas)
+volcán | 0.00300 S/N | 0.00275 S/N | 0.00250 S/N | 0.00225 S/N | 0.00200 S/N | 0.00175 S/N | 0.00150 S/N | 0.00125 S/N | 0.00100 S/N | 0.00050 S/N | 0.00000 S/N
+Lascar | 0/23 | 1/22 | 3/20 | 4/19 | 4/19 | 6/17 | 7/16 | 8/15 | 8/15 | 8/15 | 8/15
+Isluga | 2/14 | 3/13 | 4/12 | 4/12 | 4/12 | 6/10 | 6/10 | 6/10 | 6/10 | 6/10 | 6/10
+Tupungatito | 5/48 | 12/41 | 13/40 | 14/39 | 16/37 | 18/35 | 19/34 | 21/32 | 22/31 | 22/31 | 22/31
+PlanchonPeteroa | 2/54 | 7/49 | 9/47 | 18/38 | 25/31 | 30/26 | 32/24 | 33/23 | 33/23 | 33/23 | 33/23
+NevadosDeChillan | 2/73 | 8/67 | 11/64 | 12/63 | 19/56 | 22/53 | 27/48 | 32/43 | 32/43 | 33/42 | 33/42
+Llaima | 0/94 | 1/93 | 1/93 | 2/92 | 3/91 | 5/89 | 10/84 | 10/84 | 10/84 | 11/83 | 11/83
+Villarrica | 4/72 | 4/72 | 4/72 | 4/72 | 6/70 | 8/68 | 10/66 | 10/66 | 11/65 | 11/65 | 11/65
+Copahue | 1/122 | 3/120 | 4/119 | 5/118 | 5/118 | 7/116 | 10/113 | 10/113 | 11/112 | 11/112 | 11/112
+Chaiten | 1/45 | 6/40 | 10/36 | 15/31 | 17/29 | 19/27 | 19/27 | 19/27 | 20/26 | 20/26 | 20/26
+
+== 8. Tasa por noche negativa limpia (tres sensores) predicha por brazo, s = 2.0 (estimación)
+ventana 2026-03-01 a 2026-11-23; noches negativas limpias: 1538; referencia de MIROVA: consolidado fe136c87c831160e2e40d498386dde37ebede005, OCR e0e2f9de93eba35e9f827b04738cd22f2c3c6219
+p | noches que publican | tasa | pasadas neg_limpio que publican / pasadas neg_limpio
+0.00300 | 184 | 0.1196 | 123 / 11068
+0.00275 | 259 | 0.1684 | 199 / 11068
+0.00250 | 310 | 0.2016 | 266 / 11068
+0.00225 | 398 | 0.2588 | 381 / 11068
+0.00200 | 513 | 0.3336 | 535 / 11068
+0.00175 | 680 | 0.4421 | 765 / 11068
+0.00150 | 863 | 0.5611 | 1095 / 11068
+0.00125 | 1031 | 0.6704 | 1542 / 11068
+0.00100 | 1174 | 0.7633 | 1997 / 11068
+0.00050 | 1220 | 0.7932 | 2347 / 11068
+0.00000 | 1221 | 0.7939 | 2362 / 11068
+
+== 9. Unidades S y N predichas por volcán NHI y brazo (s = 2.0; ventana NHI 2026-02-15 a 2026-11-23; sin mirar alertas)
+volcán | 0.00300 S/N | 0.00275 S/N | 0.00250 S/N | 0.00225 S/N | 0.00200 S/N | 0.00175 S/N | 0.00150 S/N | 0.00125 S/N | 0.00100 S/N | 0.00050 S/N | 0.00000 S/N
+Lascar | 1/22 | 2/21 | 4/19 | 5/18 | 6/17 | 12/11 | 12/11 | 15/8 | 18/5 | 18/5 | 18/5
+Isluga | 2/14 | 3/13 | 4/12 | 4/12 | 4/12 | 7/9 | 10/6 | 11/5 | 12/4 | 13/3 | 13/3
+Tupungatito | 5/48 | 13/40 | 14/39 | 18/35 | 23/30 | 28/25 | 35/18 | 41/12 | 46/7 | 48/5 | 48/5
+PlanchonPeteroa | 2/54 | 8/48 | 11/45 | 20/36 | 29/27 | 38/18 | 42/14 | 44/12 | 47/9 | 47/9 | 47/9
+NevadosDeChillan | 2/73 | 8/67 | 11/64 | 14/61 | 24/51 | 32/43 | 43/32 | 51/24 | 56/19 | 58/17 | 58/17
+Llaima | 1/93 | 2/92 | 3/91 | 5/89 | 9/85 | 15/79 | 26/68 | 35/59 | 49/45 | 53/41 | 53/41
+Villarrica | 4/72 | 5/71 | 5/71 | 6/70 | 11/65 | 13/63 | 22/54 | 28/48 | 37/39 | 41/35 | 41/35
+Copahue | 2/121 | 5/118 | 6/117 | 8/115 | 11/112 | 17/106 | 28/95 | 43/80 | 54/69 | 58/65 | 59/64
+Chaiten | 2/44 | 6/40 | 11/35 | 17/29 | 22/24 | 28/18 | 33/13 | 39/7 | 40/6 | 42/4 | 42/4
+
+== 8. Tasa por noche negativa limpia (tres sensores) predicha por brazo, s = 1.0 (estimación)
+ventana 2026-03-01 a 2026-11-23; noches negativas limpias: 1538; referencia de MIROVA: consolidado fe136c87c831160e2e40d498386dde37ebede005, OCR e0e2f9de93eba35e9f827b04738cd22f2c3c6219
+p | noches que publican | tasa | pasadas neg_limpio que publican / pasadas neg_limpio
+0.00300 | 186 | 0.1209 | 125 / 11068
+0.00275 | 263 | 0.1710 | 203 / 11068
+0.00250 | 315 | 0.2048 | 274 / 11068
+0.00225 | 407 | 0.2646 | 400 / 11068
+0.00200 | 536 | 0.3485 | 570 / 11068
+0.00175 | 734 | 0.4772 | 845 / 11068
+0.00150 | 956 | 0.6216 | 1295 / 11068
+0.00125 | 1186 | 0.7711 | 2040 / 11068
+0.00100 | 1413 | 0.9187 | 3261 / 11068
+0.00050 | 1526 | 0.9922 | 6543 / 11068
+0.00000 | 1527 | 0.9928 | 7044 / 11068
+
+== 9. Unidades S y N predichas por volcán NHI y brazo (s = 1.0; ventana NHI 2026-02-15 a 2026-11-23; sin mirar alertas)
+volcán | 0.00300 S/N | 0.00275 S/N | 0.00250 S/N | 0.00225 S/N | 0.00200 S/N | 0.00175 S/N | 0.00150 S/N | 0.00125 S/N | 0.00100 S/N | 0.00050 S/N | 0.00000 S/N
+Lascar | 1/22 | 2/21 | 4/19 | 5/18 | 6/17 | 13/10 | 15/8 | 17/6 | 22/1 | 23/0 | 23/0
+Isluga | 2/14 | 3/13 | 4/12 | 4/12 | 4/12 | 7/9 | 12/4 | 12/4 | 15/1 | 15/1 | 15/1
+Tupungatito | 5/48 | 13/40 | 14/39 | 18/35 | 23/30 | 30/23 | 37/16 | 47/6 | 51/2 | 52/1 | 52/1
+PlanchonPeteroa | 2/54 | 8/48 | 11/45 | 20/36 | 29/27 | 38/18 | 43/13 | 49/7 | 53/3 | 55/1 | 55/1
+NevadosDeChillan | 3/72 | 9/66 | 12/63 | 15/60 | 25/50 | 33/42 | 46/29 | 55/20 | 66/9 | 67/8 | 67/8
+Llaima | 1/93 | 2/92 | 3/91 | 7/87 | 12/82 | 21/73 | 31/63 | 45/49 | 66/28 | 85/9 | 85/9
+Villarrica | 4/72 | 5/71 | 5/71 | 7/69 | 13/63 | 16/60 | 30/46 | 41/35 | 58/18 | 71/5 | 71/5
+Copahue | 3/120 | 6/117 | 8/115 | 10/113 | 13/110 | 24/99 | 38/85 | 62/61 | 88/35 | 111/12 | 111/12
+Chaiten | 2/44 | 6/40 | 11/35 | 17/29 | 23/23 | 29/17 | 34/12 | 41/5 | 44/2 | 45/1 | 45/1
