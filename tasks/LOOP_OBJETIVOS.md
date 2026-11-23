@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-23 05:00 UTC (S195): #1097 y #1096 en main (v1.77 y v1.78), prueba de humo del barrido verde, VIIRS de día apagado
+
+- Mergeados: #1095 (v1.76, entró al abrir), #1097 (pre-registro del control diurno VIIRS, v1.77), #1096 (laboratorio paso 3, zona A diseño (a), v1.78).
+- Prueba de humo del barrido (run 45093187693): brazo s = 5,0 idéntico al control, 25 de 25 records. Barrido completo sin despachar.
+- VIIRS de día NO se enciende (3 de 8 negativos eran artefactos ≥ 1 MW). Día MODIS: 0 de 143 pasadas diurnas con VRP > 0.
+- 24 sesiones viejas archivadas; mazos corregidos (charlas de 15 + 5 min, logos, lámina MIROVA antes/ahora); difusión de Instagram lista para enviar.
+- Retomar con tasks/BLOQUE_ARRANQUE_S196.md.
+
 ### 2026-11-22 12:45 UTC (S194): 11 PR en main (v1.67 a v1.75), día MODIS encendido, laboratorio paso 1 y 2, áreas, marcador de cumbre
 
 - Mergeados: #1084, #1086, #1087, #1089, #1088, #1090 (día MODIS en producción), #1091, #1092, #1093, #1094; #1095 en CI al cerrar.
