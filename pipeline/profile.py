@@ -988,6 +988,11 @@ def _zona_a_de(t: dict, cfg: dict) -> tuple:
         v = zona.get("valor")
         if v is not None and (isinstance(v, bool) or not isinstance(v, (int, float)) or not v > 0):
             raise ValueError(f"laboratorio_zona_a.valor={v!r}: null o un número positivo")
+        # S196 (palanca del piso, experiments/_s196_lab_piso/PREREGISTRO.md): piso opcional de NTI y ETI en la zona A;
+        # null o ausente = el de producción. Que no pase del piso de producción lo exige la vía, que es donde vive n2.
+        p = zona.get("piso")
+        if p is not None and (isinstance(p, bool) or not isinstance(p, (int, float)) or not p > 0):
+            raise ValueError(f"laboratorio_zona_a.piso={p!r}: null o un número positivo")
         fuera = zona.get("volcanes_fuera", [])
         if not isinstance(fuera, list) or not all(isinstance(x, str) for x in fuera):
             raise ValueError(f"laboratorio_zona_a.volcanes_fuera={fuera!r}: una lista de nombres de volcanes.yaml")

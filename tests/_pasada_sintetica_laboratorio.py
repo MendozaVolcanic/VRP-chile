@@ -53,6 +53,13 @@ PROCESADOR = {"MODIS": PM, "VIIRS750": PVM, "VIIRS375": PV}
 FOCO_ANILLO_KM = 4.0   # dentro del círculo de 5 km de Villarrica y fuera de las cajas sensibles (±2,4 a ±2,6 km)
 RUIDO_DEBIL_K = 2.0
 DT_FOCO_DEBIL_K = {"MODIS": 6.0, "VIIRS750": 6.0, "VIIRS375": 6.0}
+# S196 (palanca del piso): escena quieta, fondo parejo, para que el término mu + s·sd quede bajo el piso de 0,003 y el
+# piso sea lo que decide (como en la mayoría de las pasadas reales en ETI, experiments/_s196_lab_piso/salida_medir_cruces.txt).
+# Con estos saltos el contraste del foco del cráter queda en ~0,0021 a 0,0023 en NTI y ETI en los tres sensores, sobre
+# mu + 3·sd (~0,0004 a 0,0006) y bajo 0,003: con s = 3 alerta sólo si el piso baja a ~0,002. VIIRS 375 necesita un
+# salto mayor porque el remuestreo a su grilla diluye el foco de un píxel nativo.
+RUIDO_QUIETA_K = 0.1
+DT_FOCO_QUIETA_K = {"MODIS": 0.9, "VIIRS750": 1.25, "VIIRS375": 4.0}
 
 
 def granulo(familia, semilla=190, escena="calor"):
@@ -70,7 +77,15 @@ def granulo(familia, semilla=190, escena="calor"):
     lon = V_LON + xe / (111.32 * math.cos(math.radians(V_LAT)))
     lat[c, c], lon[c, c] = V_LAT, V_LON
     cfg = MV.FAMILIAS[familia]
-    if escena == "debil":
+    if escena == "quieta":
+        t = 268.0 + rng.normal(0, 0.05, (n, n))
+        t_mir = t + rng.normal(0, RUIDO_QUIETA_K, (n, n))
+        mir = MV.temperatura_a_radiancia(t_mir, cfg["lam_mir"])
+        tir = MV.temperatura_a_radiancia(t - 3.0, cfg["lam_tir"])
+        k_anillo = c + int(round(FOCO_ANILLO_KM / paso))
+        for f, k in ((c, c), (c, k_anillo)):
+            mir[f, k] = MV.temperatura_a_radiancia(268.0 + DT_FOCO_QUIETA_K[familia], cfg["lam_mir"])
+    elif escena == "debil":
         t = 268.0 + rng.normal(0, 0.4, (n, n))
         t_mir = t + rng.normal(0, RUIDO_DEBIL_K, (n, n))
         mir = MV.temperatura_a_radiancia(t_mir, cfg["lam_mir"])
@@ -122,8 +137,8 @@ def correr(familia, escena="calor"):
 
 if __name__ == "__main__":
     escena = sys.argv[1] if len(sys.argv) > 1 else "calor"
-    if escena == "debil":
-        salida = {f: {"record": correr(f, escena), "zona": zona_independiente(f)} for f in ("MODIS", "VIIRS750", "VIIRS375")}
+    if escena in ("debil", "quieta"):
+        salida ={f: {"record": correr(f, escena), "zona": zona_independiente(f)} for f in ("MODIS", "VIIRS750", "VIIRS375")}
     else:
         salida = {f: correr(f) for f in ("MODIS", "VIIRS750", "VIIRS375")}
     print("@@" + json.dumps(salida, default=float, sort_keys=True))
