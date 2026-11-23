@@ -13,9 +13,10 @@
 # Datos entrada : Records JSON de data/mirova_equivalent y de las guardias K; caché de la historia de K (tag
 #                 pre-s180-reemplazo-historia); registros públicos de MIROVA (Mirova-v1). SIN datos personales.
 # Variables     : Alerta protegida (1 MW o más, lectura A), D-9 modo SN (VIIRS 375 hasta 0,05 MW no es alerta), pareo
-#                 de 120 s, pasada nocturna.
+#                 de 120 s, franja (noche o día por la elevación solar sobre el volcán, pipeline/store.py::_solar_elevation).
 # Limitaciones  : Sólo juzga noches que MIROVA miró. La historia de la vía es un reproceso (S181); la de K se evaluó una
-#                 vez y avisa si el predicado del tablero cambió después.
+#                 vez y avisa si el predicado del tablero cambió después. El día (sólo MODIS, desde #1090) no tiene K: la
+#                 guardia procesa sólo de noche, así que la franja diurna compara la vía con MIROVA y nada más (S196).
 # Refs/datos    : experiments/_s183_comparacion/PROPUESTA.md; plan docs/superpowers/plans/2026-11-14-comparacion-via-k-mirova.md.
 #                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md.
 # ════════════════════════════════════════════════════════════════════
@@ -29,6 +30,17 @@ es una diferencia de detección (se informa aparte, como «sin par»).
 FUENTES DE K. Antes de la adopción de cada sensor (MODIS 2026-11-02, VIIRS 2026-11-11), la historia de K del tag
 pre-s180-reemplazo-historia, evaluada una vez con `--construir-cache-k` (el tag pesa 176 MB y no se baja cada día en
 Actions). Desde la adopción, la guardia (data/guardia_k_modis, data/guardia_k_viirs).
+
+NOCHE Y DÍA (S196, paso 2 de docs/CAMINO_INDEPENDENCIA_MIROVA.md, E3). Desde #1090 (ficha v1.71) producción procesa MODIS
+también de día, y desde S193 `auto_audit_weekly.es_pasada_diurna_descartada` deja pasar las pasadas MODIS diurnas posteriores
+al primer record diurno, en nuestros records y en las filas de MIROVA. Sin separar, el día se colaba en la cuenta nocturna
+por dos lados: una fila diurna de MIROVA con alerta o con calor lejos del volcán marcaba la fecha y quitaba el negativo
+limpio a las pasadas nocturnas de esa fecha (8 noches MODIS del 2026-11-15 al 2026-11-23), y una pasada diurna nuestra
+entraba a la fila de esa noche-satélite. Ahora cada pasada, nuestra o de
+MIROVA, lleva su franja (elevación solar sobre el volcán > 0 es día, la regla de `pipeline/store.py::_solar_elevation` que el
+tablero porta en `frontend/diurno.js`) y cada franja se cuenta aparte: la nocturna con la vía, K y MIROVA como antes; la
+diurna de MODIS con la vía y MIROVA (`resultados["<ref>|dia|MODIS"]` y `dias`). Antes del primer record diurno no hay nada
+que separar, así que los números nocturnos de esos días quedan idénticos (experiments/_s196_e3/IDENTIDAD.md).
 
 Uso diario: python scripts/comparacion_via_k.py --cons C.csv --ocr O.csv
 Caché:      python scripts/comparacion_via_k.py --construir-cache-k <carpeta con los 11 JSON del tag>
@@ -55,7 +67,9 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 import banco_paridad as bp  # noqa: E402
+from auto_audit_weekly import inicio_dia_modis  # noqa: E402
 from clase_mirova import MODO_MINIMAS, alerta_protegida  # noqa: E402
+from pipeline.store import _solar_elevation  # noqa: E402  (sólo se lee; A45)
 from referencia_mirova_unificada import SNAP_CONS, SNAP_OCR, bajar_remoto, cargar_referencia_unificada  # noqa: E402
 
 SENSORES = ("MODIS", "VIIRS375", "VIIRS750")
@@ -75,6 +89,11 @@ CAMPOS_NOCHE = ["vol", "sat", "b", "noche", "lab_tabla", "lab_comb", "prot_tabla
 CAMPOS_USADOS_POR_LA_PAGINA = ["vol", "sat", "b", "noche", "lab_tabla", "lab_comb", "prot_tabla", "prot_comb",
                                "vrp_mirova", "via_pub", "via_vrp", "via_dc", "via_dmc", "k_pub", "k_vrp", "k_dc",
                                "k_dmc", "k_fuente"]
+# S196: una fila por día-satélite MODIS diurno con algo que mirar. Sin K (la guardia no procesa de día). `horas`: las
+# horas UTC de las pasadas diurnas de ese satélite ese día, para buscarlas en el tablero.
+CAMPOS_DIA = ["vol", "sat", "b", "dia", "horas", "lab_tabla", "lab_comb", "prot_tabla", "prot_comb", "vrp_mirova",
+              "via_pub", "via_vrp", "via_dc", "via_dmc"]
+SENSORES_DIA = ("MODIS",)   # #1090: sólo MODIS de día; VIIRS sigue de noche (decisión de Nicolás, issue #813)
 
 
 def _dia_antes(fecha):
@@ -353,6 +372,77 @@ def serie_k(historia, guardia):
             + [p for p in guardia if p["noche"] >= ADOPCION[p["b"]]])
 
 
+# ------------------------------------------------------------------ franja: noche o día (S196)
+def es_dia(lat, lon, dt):
+    """POR QUÉ: de día el infrarrojo medio suma luz solar reflejada y MIROVA usa otros umbrales; una alerta diurna no es
+    la misma pregunta que una nocturna. Día = Sol sobre el horizonte del volcán (elevación > 0), la misma regla y la misma
+    fórmula que la compuerta de `pipeline/store.py::_reject_daytime` y que `frontend/diurno.js`."""
+    return _solar_elevation(lat, lon, dt) > 0
+
+
+def pasadas_de_franja(pasadas, coords, dia):
+    """Pasadas nuestras de una franja. De día sólo los sensores con rama diurna en producción (SENSORES_DIA)."""
+    out = []
+    for p in pasadas:
+        d = es_dia(*coords[p["vol"]], p["dt"])
+        if d == dia and (not dia or p["b"] in SENSORES_DIA):
+            out.append(p)
+    return out
+
+
+def filas_ref_de_franja(filas, coords, dia):
+    """Filas de MIROVA de una franja, ANTES de indexarlas. POR QUÉ antes: `indexar_referencia` resume la referencia por
+    fecha (¿hubo alerta ese día en ese sensor?) y ese resumen decide el negativo limpio; si entra una alerta diurna, las
+    pasadas nocturnas de la misma fecha dejan de ser negativos limpios. Filtrar después no lo arregla."""
+    out = []
+    for f in filas:
+        if f["volcano"] not in coords:
+            continue
+        dt = datetime.strptime(f["fecha_utc"][:19], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        d = es_dia(*coords[f["volcano"]], dt)
+        if d == dia and (not dia or f["sensor_bucket"] in SENSORES_DIA):
+            out.append(f)
+    return out
+
+
+def comparar_dia(via, b):
+    """Franja diurna: sólo la vía contra MIROVA (no hay K de día). `via`: {(volcán, satélite, instante): pasada}."""
+    pv = [via[x] for x in sorted(via) if via[x]["b"] == b]
+    res = {"n_pasadas": len(pv), "via": metricas(agregar_noches(pv), pv),
+           "etiquetas": dict(collections.Counter(p["lab"] for p in pv)), "por_volcan": {}}
+    for vol in bp.VOLS:
+        a_ = [p for p in pv if p["vol"] == vol]
+        if a_:
+            res["por_volcan"][vol] = {"via": metricas(agregar_noches(a_), a_), "n_pasadas": len(a_)}
+    return res
+
+
+def filas_dias(series, ini, hoy):
+    """Una fila por día-satélite diurno con algo que mirar (alerta de MIROVA en alguna referencia o la vía publica).
+    `series[ref]` = pasadas diurnas de la vía etiquetadas contra esa referencia."""
+    n = {ref: agregar_noches(v) for ref, v in series.items()}
+    horas = collections.defaultdict(set)
+    for v in series.values():
+        for p in v:
+            horas[(p["vol"], p["sensor"], p["noche"])].add(p["dt"].strftime("%H:%M"))
+    filas = []
+    for key in sorted(set().union(*[x.keys() for x in n.values()]) if n else (), key=lambda x: (x[2], x[0], x[1])):
+        vol, sat, dia = key
+        if not (ini <= dia <= hoy):
+            continue
+        lab = {ref: (n[ref].get(key) or {}).get("lab") for ref in series}
+        prot = {ref: int(bool((n[ref].get(key) or {}).get("prot"))) for ref in series}
+        v = n["combinado"].get(key) or n["tabla"].get(key)
+        if not ("pos" in lab.values() or (v and v["pub"])):
+            continue
+        vm = [(n[r].get(key) or {}).get("vrp_mirova") for r in ("tabla", "combinado")]
+        filas.append([vol, sat, bp.bucket(sat), dia, sorted(horas[key]), lab.get("tabla"), lab.get("combinado"),
+                      prot.get("tabla"), prot.get("combinado"), next((x for x in vm if x is not None), None),
+                      v["pub"] if v else None, v["vrp_nuestro"] if v else None, v["dc"] if v else None,
+                      v["d_mc"] if v else None])
+    return {"campos": CAMPOS_DIA, "filas": filas}
+
+
 def filas_noches(series, hoy):
     """Una fila por noche-satélite con algo que mirar: alerta de MIROVA en alguna referencia o algún detector publica.
     `series[ref] = (via_etiquetadas, k_etiquetadas)`, con K ya armado (historia antes de la adopción, guardia desde)."""
@@ -427,15 +517,30 @@ def main(argv=None):
     hist, meta_cache = cargar_cache_k(a.cache_k)
     vents = ventanas(a.hoy)
 
-    resultados, series = {}, {}
+    # S196: cada franja se cuenta aparte (docstring, «NOCHE Y DÍA»). La guardia y el caché de K son sólo nocturnos (la
+    # guardia no procesa de día; el caché se construyó con el filtro nocturno), pero se filtran igual: si un día la
+    # guardia procesara de día, sus pasadas diurnas no deben colarse en la cuenta nocturna.
+    via_noche, via_dia = pasadas_de_franja(via, coords, False), pasadas_de_franja(via, coords, True)
+    guardia_noche, hist_noche = pasadas_de_franja(guardia, coords, False), pasadas_de_franja(hist, coords, False)
+    inicio_dia = inicio_dia_modis(a.prod)
+    dia_desde = inicio_dia.strftime("%Y-%m-%d") if inicio_dia else None
+
+    resultados, series, series_dia = {}, {}, {}
     for nombre, fil in refs.items():
-        idx = bp.indexar_referencia(fil, coords, total, regla_minimas=MODO_MINIMAS)
-        v_l, g_l, h_l = etiquetar(via, idx), etiquetar(guardia, idx), etiquetar(hist, idx)
+        idx = bp.indexar_referencia(filas_ref_de_franja(fil, coords, False), coords, total, regla_minimas=MODO_MINIMAS)
+        v_l, g_l, h_l = etiquetar(via_noche, idx), etiquetar(guardia_noche, idx), etiquetar(hist_noche, idx)
         for vent, por_b in vents.items():
             for b, (ini, fin) in por_b.items():
                 k_l = h_l if vent == "historia" else g_l
                 resultados[f"{nombre}|{vent}|{b}"] = comparar(_indice(v_l, b, ini, fin), _indice(k_l, b, ini, fin), b)
         series[nombre] = (v_l, serie_k(h_l, g_l))
+        if dia_desde:
+            idx_d = bp.indexar_referencia(filas_ref_de_franja(fil, coords, True), coords, (dia_desde, a.hoy),
+                                          regla_minimas=MODO_MINIMAS)
+            vd_l = etiquetar([p for p in via_dia if dia_desde <= p["noche"] <= a.hoy], idx_d)
+            for b in SENSORES_DIA:
+                resultados[f"{nombre}|dia|{b}"] = comparar_dia(_indice(vd_l, b, dia_desde, a.hoy), b)
+            series_dia[nombre] = vd_l
 
     ult_tabla = max((f["fecha_utc"] for f in refs["tabla"]), default=None)
     guardia_hasta = max((p["noche"] for p in guardia), default=None)
@@ -443,13 +548,23 @@ def main(argv=None):
                        "sha_index_html": sha, "sha_predicado": sha_pred, "referencia": proc, "regla_minimas": MODO_MINIMAS, "adopcion": ADOPCION,
                        "ventanas": vents, "ultima_fila_tabla_mirova": ult_tabla, "guardia_hasta": guardia_hasta,
                        "via_escenas_sin_medir_fuera": len(via_todas) - len(via),
+                       "franjas": {"regla": "día si la elevación solar sobre el volcán es mayor que 0 "
+                                            "(pipeline/store.py::_solar_elevation); de día sólo " + ", ".join(SENSORES_DIA),
+                                   "dia_desde": dia_desde,
+                                   "dia_desde_utc": inicio_dia.isoformat() if inicio_dia else None,
+                                   "via_pasadas_noche": len(via_noche), "via_pasadas_dia": len(via_dia)},
                        "cache_k": {k: meta_cache.get(k) for k in ("tag", "sha_predicado", "generado_utc", "n")},
                        "avisos": avisos_cache(meta_cache, sha_pred)},
-              "resultados": resultados, "noches": filas_noches(series, a.hoy)}
+              "resultados": resultados, "noches": filas_noches(series, a.hoy),
+              "dias": filas_dias(series_dia, dia_desde, a.hoy) if dia_desde else {"campos": CAMPOS_DIA, "filas": []}}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(salida, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     for clave in sorted(resultados):
-        if clave.startswith("tabla|"):
+        if clave.startswith("tabla|dia|"):
+            r = resultados[clave]
+            print(f"{clave:28s} pasadas {r['n_pasadas']:5d} | vía rec {r['via']['recall']} prec {r['via']['precision']} "
+                  f"prot -{r['via']['protegidas_perdidas']} de {r['via']['protegidas']} | etiquetas {r['etiquetas']}")
+        elif clave.startswith("tabla|"):
             r = resultados[clave]
             print(f"{clave:28s} pares {r['n_pasadas_pareadas']:6d} | vía rec {r['via']['recall']} prec "
                   f"{r['via']['precision']} prot -{r['via']['protegidas_perdidas']} | K rec {r['k']['recall']} prec "
