@@ -287,6 +287,8 @@ workflow, guards), y sólo si el paso 1 no alcanza.
 
 ## 4. P2. MEJ-7: el foco puntual del cráter de Láscar que MIROVA calla en MODIS
 
+> ⚠️ **S196: CERRADA por paridad** (D-E de Nicolás, 2026-11-23, §14). Lo que sigue es el razonamiento que la cerró.
+
 **El fenómeno.** El cráter de Láscar tiene un foco pequeño y caliente casi permanente. Un píxel MODIS de 1 km lo ve como
 un exceso chico sobre el fondo, al borde del umbral: unas noches cruza, otras no, según el ángulo, la geolocalización y
 cómo cae el foco dentro del píxel.
@@ -544,6 +546,16 @@ de Landsat-v1. **A45:** no.
 
 ## 12. P10. Retiro de la sombra C0 (D1-b del plan S190)
 
+> ⚠️ **S196: paso (1) HECHO** (D-B de Nicolás, 2026-11-23, §14), con dos ajustes al inventario de abajo. (i) El control
+> de `tests/test_laboratorio_paso1_s193.py` no se caía al apagar el diario, porque `nrt.yml` conserva la opción manual
+> `--profile experimental`; igual se rehízo para no apoyarse en un perfil retirado: ahora mira `--profile
+> mirova_equivalent` en `nrt.yml` y tres líneas sintéticas que corren el laboratorio. (ii) `vigilancia_guardia_modis.py`
+> y `vigilancia_guardia_viirs.py` no se desacoplaron: `scripts/vigilancia_sombra.py` se conserva entero (sólo se apagó su
+> workflow), así que el import sigue sano; el desacople queda para cuando se borre el script, junto con los datos (A38).
+> La opción manual `profile=experimental` de `nrt.yml` se deja: no commitea `data/experimental_v2/`. Suite completa: sólo
+> `tests/test_vigilancia_sombra_s156.py::test_el_workflow_escucha_al_workflow_de_la_sombra` dependía del disparo, y se
+> reescribió con marca A113.
+
 **El fenómeno (aquí, del sistema).** La sombra C0 (`experimental`, `data/experimental_v2/`) guarda lo que veía producción
 el 2026-10-09 con el detector anterior, para disparar la reversión de K si producción callaba algo que C0 veía. Desde
 el 2026-11-11 ningún sensor corre K, y desde S193 su vigilancia da `SIN_OBJETO` cuando no hay sensores en K
@@ -602,6 +614,19 @@ Lo que está corriendo y no se toca: MEJ-5 (paso 3 del plan S190, pre-registros 
 S190), y ninguna extensión nueva corre al mismo tiempo que MEJ-5 en el mismo perfil (una a la vez, §1).
 
 ## 14. Decisiones que le tocan a Nicolás
+
+**Decididas el 2026-11-23.** Nicolás respondió a la tabla de abajo, textual: «lo que recomiendas pero armas un visor
+donde yo pueda elegir el radio con un mapa e ir moviendolo» (transmitido por la coordinadora S196). Queda así:
+
+| # | decisión | qué se hizo o qué sigue |
+|---|---|---|
+| D-B | **(a)**: retirar ya la sombra C0, en un PR propio | Hecho en el PR del retiro (rama `claude/s196-retiro-c0-cfffa8`): `experimental-diario.yml` y `vigilancia-sombra.yml` sin cron ni `workflow_run`, `data/experimental_v2/` congelada con su README, aviso «SERIE CONGELADA» en la pestaña Laboratorio, control de G6 del paso 1 rehecho y `tests/test_retiro_sombra_c0_s196.py`. El paso (2) de P10 (la pestaña lee el laboratorio) espera a que el laboratorio tenga cron |
+| D-E | **(a)**: MEJ-7 se cierra como paridad | Fila de MEJ-7 en `docs/BEYOND_MIROVA_EXTENSIONS.md` §12 marcada cerrada, y nota en la cuenta de paridad de MODIS (`docs/CAMINO_INDEPENDENCIA_MIROVA.md`, E3). No hay experimento |
+| D-H | **(a), con visor**: un radio del edificio por volcán, que elige Nicolás moviéndolo sobre un mapa | El visor lo arma la sesión `s196-visor-radios`. Hasta que Nicolás guarde los radios, los pasos del P0 que dependen de D-H (series por área, zona nueva, edificio entero) no parten |
+| D-I | **(a)**: la alerta de zona nueva se muestra sólo en la pestaña Laboratorio, con el aviso de que es experimental | El tablero operacional sigue igual a MIROVA hasta tener la tasa de zonas nuevas y su acierto contra OVDAS |
+
+La coordinadora transmitió estas cuatro. D-A, D-C, D-D, D-F y D-G no se registran aquí como decididas: siguen abiertas
+con la recomendación de la tabla de abajo hasta que alguien transmita la respuesta de Nicolás sobre cada una.
 
 | # | pregunta | opciones | recomendación |
 |---|---|---|---|
