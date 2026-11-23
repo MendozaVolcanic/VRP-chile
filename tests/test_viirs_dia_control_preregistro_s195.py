@@ -121,10 +121,19 @@ def test_sello_ventanas_de_veredicto_no_tocan_las_de_desarrollo():
     assert min(dias(E.VENTANAS_VEREDICTO)) >= date(2026, 4, 1)          # A119: VIIRS por pasada desde abril
 
 
-def test_sello_chillan_sin_respaldo_nhi():
-    """NHI-v1 (commit fijado) centra Nevados de Chillán a 61 km del volcán: su serie no puede respaldar nada."""
+def test_sello_chillan_caja_nhi_corregida():
+    """Re-sello S196 (2026-11-23, decisión de Nicolás «Corregir y re-sellar»): NHI-v1 corrigió el centro de Nevados de
+    Chillán (PR #1 de NHI-v1, merge 55461a4fa6d2; cajas en el commit 4d24515abe1e) y su caja ahora contiene el punto del
+    volcán de volcanoes.yaml, así que su serie SWIR puede respaldar o desmentir publicaciones de Chillán. Antes del
+    re-sello (cajas en 09c45707e9a6) el centro estaba a 61 km, junto a Antuco, y la caja no era usable."""
+    # Texto anterior (sello S195, conservado por A113):
+    #   def test_sello_chillan_sin_respaldo_nhi():
+    #       """NHI-v1 (commit fijado) centra Nevados de Chillán a 61 km del volcán: su serie no puede respaldar nada."""
+    #       cajas = E.cargar_cajas()
+    #       assert cajas["NevadosDeChillan"]["usable"] is False
     cajas = E.cargar_cajas()
-    assert cajas["NevadosDeChillan"]["usable"] is False
+    assert cajas["NevadosDeChillan"]["usable"] is True
+    assert cajas["NevadosDeChillan"]["dist_centro_yaml_km"] < 1.0
     assert all(cajas[v]["usable"] for v in ("Lascar", "Villarrica", "Isluga", "Tupungatito", "PuyehueCordonCaulle"))
     assert "Lastarria" not in cajas
 

@@ -13,6 +13,24 @@
 > compara ese hash con el archivo: editar el evaluador sin re-sellar este documento deja el CI en rojo. Base:
 > `origin/main` en `3bb44e830` (2026-11-22). Sin cambio de la lógica de detección ni de ningún valor publicado: no toca
 > `pipeline/`, perfiles, workflows ni tablero.
+>
+> **Re-sello del 2026-11-23 (S196), por la caja de Nevados de Chillán en NHI-v1.** Decisión de Nicolás a la pregunta 3
+> (textual, opción elegida: «Corregir y re-sellar (Recomendado)», transmitida por la coordinadora S196; no la leí de
+> primera mano). NHI-v1 corrigió el centro de «Nevados de Chillan», que estaba a 61 km del volcán, encima de Antuco
+> (PR #1 de NHI-v1, merge `55461a4fa6d2`, centro -36.863, -71.377, el de `volcanoes.yaml`), y regeneró la serie desde
+> 2026-01-27; la vieja quedó en `archivo/chillan_ubicacion_antuco_hasta_2026-11-23/` de NHI-v1. Qué cambió: las cajas
+> de NHI se leen ahora en el commit `4d24515abe1e9fcb0a014d13eeb1963483b98993` de NHI-v1 (2026-11-23 05:15 UTC,
+> `extraer_nhi_cajas.py`); en `nhi_cajas.json` sólo cambia Chillán, cuyo centro queda a 0,00 km del de `volcanoes.yaml`
+> (antes 60,97) y cuya caja pasa a ser usable; las otras diez filas no cambian. La prueba del sello de Chillán exige
+> ahora caja usable. El evaluador **no cambia** (mismo sha256 de arriba), ni las ventanas, umbrales, etiquetas o
+> criterio. El desarrollo (W2 a W7) se re-corrió con el NHI nuevo y las mismas raíces, referencia e historia (§8): las
+> 121 publicaciones salen con las mismas etiquetas y supresiones, y `salida_desarrollo.txt` queda igual byte a byte.
+> No se miró ningún dato de veredicto: el brazo no ha corrido sobre V1 a V5.
+>
+> **Respuestas de Nicolás del 2026-11-23** (transmitidas por la coordinadora S196) a las preguntas del §10: pregunta 2,
+> «Sí, una sola mirada (Recomendado)»: se mantiene una sola mirada, no antes del 2027-03-07; pregunta 3, «Corregir y
+> re-sellar (Recomendado)»: es este re-sello. La pregunta 1 no tiene respuesta registrada aquí; rige lo sellado (cero
+> protegidas perdidas).
 
 ## 1. El fenómeno y la pregunta
 
@@ -106,8 +124,10 @@ ningún lugar: es la misma para todas las celdas.
   mismo commit de `main`, copiados a una carpeta y congelados con su sha256.
 - NHI: las series de NHI-v1 en **el primer commit de NHI-v1 con fecha posterior al 2027-03-07 00:00 UTC**
   (`bajar_nhi.py`, que escribe el commit en `COMMIT.txt`; el evaluador lo copia a su salida).
-- Las cajas de NHI quedan las de `nhi_cajas.json` (commit `09c45707e9a6`), selladas por prueba. Si NHI-v1 corrige
-  Chillán antes de medir, usar la caja nueva exige re-sellar (pregunta 3).
+- Las cajas de NHI quedan las de `nhi_cajas.json` (commit `4d24515abe1e`, re-sello S196), selladas por prueba.
+  (Texto anterior: «Las cajas de NHI quedan las de `nhi_cajas.json` (commit `09c45707e9a6`), selladas por prueba. Si
+  NHI-v1 corrige Chillán antes de medir, usar la caja nueva exige re-sellar (pregunta 3).» NHI-v1 lo corrigió el
+  2026-11-23 y este documento se re-selló ese día.)
 
 ## 4. Etiquetas y qué referencia usa cada parte (A115)
 
@@ -143,11 +163,16 @@ etiqueta (`evaluar.etiquetar`):
 
 **Límites de SWIR que se declaran.** NHI no guarda la posición de sus píxeles calientes, sólo si la caja tiene alguno;
 una mancha fuera de la caja (Cordón Caulle a 17 km, Lastarria a 10 km) no puede ser respaldada ni desmentida por SWIR.
-Lastarria no está en NHI-v1. Y **NHI-v1 mira Nevados de Chillán en el lugar equivocado**: su `config_nhi.py` (commit
-`09c45707e9a6`) pone el centro a 60,97 km del de `volcanoes.yaml`, al lado de Antuco (`salida_nhi_cajas.txt`). El
-evaluador marca una caja como usable sólo si contiene el punto del volcán de `volcanoes.yaml`; la de Chillán no lo es, y
-sus publicaciones sólo pueden ser R por la cumbre de MIROVA. Los otros 9 volcanes con serie tienen el punto dentro de la
-caja.
+Lastarria no está en NHI-v1. El evaluador marca una caja como usable sólo si contiene el punto del volcán de
+`volcanoes.yaml`; con las cajas del re-sello S196 (commit `4d24515abe1e`) los 10 volcanes con serie, Chillán incluido
+(centro a 0,00 km, `salida_nhi_cajas.txt`), tienen el punto dentro de la caja, y las publicaciones de Chillán pueden ser
+R por SWIR o por la cumbre de MIROVA.
+
+Texto anterior (sello S195, conservado por A113): «Y **NHI-v1 mira Nevados de Chillán en el lugar equivocado**: su
+`config_nhi.py` (commit `09c45707e9a6`) pone el centro a 60,97 km del de `volcanoes.yaml`, al lado de Antuco
+(`salida_nhi_cajas.txt`). El evaluador marca una caja como usable sólo si contiene el punto del volcán de
+`volcanoes.yaml`; la de Chillán no lo es, y sus publicaciones sólo pueden ser R por la cumbre de MIROVA. Los otros 9
+volcanes con serie tienen el punto dentro de la caja.»
 
 ## 5. Criterio de éxito
 
@@ -213,11 +238,18 @@ de publicaciones de cada etiqueta y las que la regla suprime:
 
 ## 8. Lo que da el evaluador en los datos de desarrollo (no decide)
 
-`evaluar.py evaluar --fase desarrollo` sobre W2 a W7 (salida `salida_desarrollo.txt`; referencia congelada del A/B,
-`ref_db04d930...`; NHI en `09c45707e9a6`; historia de `data/mirova_equivalent` en `3bb44e830`):
+`evaluar.py evaluar --fase desarrollo` sobre W2 a W7 (salida `salida_desarrollo.txt`; raíces del brazo
+`eval/W2` a `eval/W7` del A/B diurno S190; referencia congelada del A/B, `ref_db04d930...`; NHI en `4d24515abe1e`
+desde el re-sello S196, antes `09c45707e9a6`; historia de `data/mirova_equivalent` en `3bb44e830`):
 
+- **Re-sello S196.** Con el NHI y las cajas nuevas, y las mismas raíces, referencia e historia, la salida es la misma
+  byte a byte (y las 121 filas del detalle, iguales); con las entradas viejas la misma corrida reproduce la salida del
+  sello S195. La única diferencia está en el respaldo de Chillán, que no cambia ninguna etiqueta:
+  `informativo_chillan_swir.py` (salida `salida_chillan_swir.txt`) cuenta que, de las 12 R de Chillán, 9 tienen ahora
+  también respaldo SWIR y 3 sólo el de la cumbre de MIROVA; todas sus publicaciones caen dentro de la caja nueva.
 - **Etiquetas:** P 58 (57 de Chillán, 1 de Láscar), A 7 (Cordón Caulle 3, Láscar 2, Tupungatito 1, Lastarria 1),
-  R 14 (12 de Chillán por la cumbre de MIROVA, 2 de Villarrica por SWIR), O 29, menor 13.
+  R 14 (12 de Chillán por la cumbre de MIROVA, 9 de ellas también por SWIR desde el re-sello; 2 de Villarrica por
+  SWIR), O 29, menor 13.
 - **R1 y R2 dan lo mismo:** suprimen 6 de 7 A, 0 de 14 R, 1 P, 7 O y 9 menor; p = 1,025e-05 (universo P, A, R y O).
 - **Lo informativo:** p estratificado 0,6 (en Cordón Caulle todo lo diurno es A, y el azar dentro del volcán quita lo
   mismo); R0 no quita ningún artefacto (todos los volcanes alertan alguna celda de noche cada mes en una grilla de
@@ -235,7 +267,8 @@ de publicaciones de cada etiqueta y las que la regla suprime:
 Lo que cambié después de ver el desarrollo, y lo que no:
 - Agregué el respaldo (b) por la cumbre de MIROVA. En la primera corrida, las 12 publicaciones de Chillán en erupción
   que MIROVA no tiene quedaban como A (su caja NHI está mal puesta) y el criterio de 2/3 fallaba por calor real mal
-  etiquetado.
+  etiquetado. (Re-sello S196: la caja ya no está mal puesta; con ella, 9 de esas 12 quedarían R también sin el
+  respaldo b, que se mantiene.)
 - Saqué la tercera regla (borde de grilla): en desarrollo no movía ninguna publicación (§2).
 - **No** cambié el cero de protegidas perdidas, aunque Láscar 11-01 lo hace fallar en desarrollo: es la pregunta 1.
 
@@ -290,6 +323,10 @@ transmitida y así lo dice la cabecera.
    corrige antes de medir, se re-sella este pre-registro con la caja nueva de Chillán? **Recomiendo sí a las dos:** el
    re-sello antes de medir no mira datos de veredicto.
 
+Respuestas del 2026-11-23 (transmitidas por la coordinadora S196): 2, «Sí, una sola mirada (Recomendado)», no antes del
+2027-03-07; 3, «Corregir y re-sellar (Recomendado)»: NHI-v1 se corrigió (PR #1, merge `55461a4fa6d2`) y este documento
+se re-selló el mismo día (cabecera). El laboratorio paso 2 (`experiments/_s194_lab_zona_a/`) se re-selló en el mismo PR.
+
 ## 11. Cómo se probó el instrumento antes de medir
 
 - `tests/test_viirs_dia_control_preregistro_s195.py` (en CI): con datos sintéticos de verdad conocida el evaluador da
@@ -298,7 +335,8 @@ transmitida y así lo dice la cabecera.
   celdas); la historia es estrictamente previa, de 30 días, por grilla y sólo de noche; una mancha diurna que vuelve
   todos los días a la misma celda se suprime; R1 y R2 se separan cuando la radiante es la ladera; las etiquetas en sus
   bordes (1 MW, radio interno, tabla contra OCR, ±3 días de NHI, caja, ±12 h de MIROVA); el criterio en sus bordes (2/3
-  exacto, una protegida perdida, 1/3 de R exacto, p = 15/330 contra alfa 0,04); la caja de NHI de Chillán no usable; y
+  exacto, una protegida perdida, 1/3 de R exacto, p = 15/330 contra alfa 0,04); la caja de NHI de Chillán usable desde
+  el re-sello S196 (antes, no usable: `test_sello_chillan_sin_respaldo_nhi`, hoy `test_sello_chillan_caja_nhi_corregida`); y
   cuatro pruebas de sello (valores, hash del evaluador, ventanas de veredicto sin desarrollo, Chillán); además, con
   INVALIDO no sale ninguna métrica, O entra al nulo, el p estratificado, R0 y las A desmentibles.
 - `experiments/_s195_viirs_dia_control/mutar.py` (salida `resultado_mutaciones.json`): mutaciones del criterio sobre
@@ -313,7 +351,8 @@ transmitida y así lo dice la cabecera.
 |---|---|
 | `experiments/_s195_viirs_dia_control/PREREGISTRO.md` | este documento |
 | `experiments/_s195_viirs_dia_control/evaluar.py` | evaluador sellado |
-| `experiments/_s195_viirs_dia_control/extraer_nhi_cajas.py`, `nhi_cajas.json`, `salida_nhi_cajas.txt` | cajas de NHI-v1 en `09c45707e9a6` y su distancia al volcán |
+| `experiments/_s195_viirs_dia_control/extraer_nhi_cajas.py`, `nhi_cajas.json`, `salida_nhi_cajas.txt` | cajas de NHI-v1 en `4d24515abe1e` (re-sello S196; antes `09c45707e9a6`) y su distancia al volcán |
+| `experiments/_s195_viirs_dia_control/informativo_chillan_swir.py`, `salida_chillan_swir.txt` | respaldo de las publicaciones de Chillán en desarrollo con la caja nueva (re-sello S196, no decide) |
 | `experiments/_s195_viirs_dia_control/bajar_nhi.py` | series NHI a un commit fijo |
 | `experiments/_s195_viirs_dia_control/mutar.py`, `resultado_mutaciones.json` | control de mutaciones |
 | `experiments/_s195_viirs_dia_control/salida_desarrollo.txt` | el evaluador sobre los datos de desarrollo |
