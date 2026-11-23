@@ -135,8 +135,12 @@ def test_g4_produccion_resuelve_la_zona_apagada_y_vacia(resueltos):
 
 # S195 (paso 3): los 10 perfiles del barrido (control y 9 brazos, tests/test_laboratorio_paso3_s195.py P7) también la
 # declaran. Texto anterior: sólo laboratorio.yaml.
+# S196 (palanca del piso, A45 de Nicolás del 2026-11-23): los 9 perfiles del barrido del piso (sin zona, control y 7
+# pisos, tests/test_laboratorio_piso_s196.py Q6) también. Texto anterior: el laboratorio y los 10 del S195.
 PERFILES_CON_ZONA = sorted(["laboratorio.yaml", "_s195_lab_control.yaml"]
-                           + ["_s195_lab_s%02d.yaml" % t for t in (50, 45, 40, 35, 30, 25, 20, 15, 10)])
+                           + ["_s195_lab_s%02d.yaml" % t for t in (50, 45, 40, 35, 30, 25, 20, 15, 10)]
+                           + ["_s196_lab_sinzona.yaml", "_s196_lab_control.yaml"]
+                           + ["_s196_lab_p%03d.yaml" % t for t in (300, 275, 250, 225, 200, 175, 150)])
 
 
 def test_g4_ningun_otro_perfil_declara_la_zona():

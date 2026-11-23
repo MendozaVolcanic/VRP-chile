@@ -215,6 +215,30 @@ def test_q4_fuera_de_la_zona_el_umbral_no_cambia():
         assert d[pase]["u_etiA"] < d[pase]["u_eti2"], "control: dentro de la zona el umbral sí bajó"
 
 
+def _tupla_nocturna():
+    src = (RAIZ / "pipeline" / "mirova_v750_codigo.py").read_text(encoding="utf-8")
+    m = re.search(r"if dayflag == 0:[^\n]*\n\s*u_abs, s1, s2, n1, n2, e1, e2 = ([^\n#]+)", src)
+    return ast.literal_eval("(" + m.group(1).strip() + ")")
+
+
+@pytest.mark.parametrize("pase", ("pasada1", "pasada2"))
+def test_q4_fuera_de_la_zona_cada_umbral_es_la_formula_del_m(pase):
+    """S196 (mutación piso_fuera_de_la_zona_u_nti1, que la prueba de arriba no atrapó): comparar con el detector sin
+    piso no ve una fuga del piso al umbral del anillo cuando mu + 10·sd supera el piso de producción. Aquí cada umbral
+    de fuera de la zona se recalcula con la fórmula del .m (l. 306-308 y 376-382) desde los mu y sd que el mismo pase
+    guardó, con los pisos de producción: un piso que se cuela en cualquiera de los cuatro lo cambia."""
+    MV, m13, m15, box, zona = _escena_quieta()
+    _, s1, s2, n1, n2, e1, e2 = _tupla_nocturna()
+    _, d = MV.detectar_mirova(m13, m15, box, 0, 90.0, devolver_diag=True, zona_a=zona, s_a=S_A, piso_a=GRILLA[-1])
+    dp = d[pase]
+    esperado = {"u_nti1": max(dp["mu_nti"] + s1 * dp["sd_nti"], n1), "u_nti2": max(dp["mu_nti"] + s2 * dp["sd_nti"], n2),
+                "u_eti1": max(dp["mu_eti"] + s1 * dp["sd_eti"], e1), "u_eti2": max(dp["mu_eti"] + s2 * dp["sd_eti"], e2)}
+    for k, v in esperado.items():
+        assert dp[k] == v, (pase, k, dp[k], v)
+    # control: el piso de la zona sí es menor que los de fuera, así que una fuga cambiaría al menos un umbral
+    assert GRILLA[-1] < min(n1, n2, e1, e2) and dp["u_etiA"] < dp["u_eti2"], dp
+
+
 @pytest.mark.parametrize("piso", (0.0031, 0.0, -0.001))
 def test_q4_un_piso_mayor_que_el_de_produccion_o_no_positivo_es_error(piso):
     MV, m13, m15, box, zona = _escena_quieta()
@@ -318,8 +342,13 @@ def test_q7_el_workflow_del_barrido_es_manual_no_publica_y_corre_los_nueve_perfi
     for p in (SINZONA, CONTROL, *BRAZOS):
         assert re.search(rf"\b{p}\b", texto), f"el workflow no nombra {p}"
     assert "EARTHDATA_TOKEN" in texto and "EARTHDATA_PASSWORD" not in texto, "A71: sólo el token"
-    assert "experiments/_s195_lab_paso3/comparar_control.py" in texto, "COMPARAR: control contra el brazo sin zona"
-    assert "experiments/_s196_lab_piso/comparar_donde_no_actua.py" in texto, "COMPARAR: donde la zona no actúa"
+    # los comparadores se buscan en líneas que se ejecutan, no en la cabecera de comentarios que los nombra
+    codigo = "\n".join(l for l in texto.splitlines() if not l.lstrip().startswith("#"))
+    assert re.search(r"python experiments/_s195_lab_paso3/comparar_control\.py[^\n]*\n[^\n]*--control "
+                     r"salidas/_s196_lab_sinzona --brazo salidas/_s196_lab_control", codigo), (
+        "COMPARAR: control contra el brazo sin zona")
+    assert re.search(r"python experiments/_s196_lab_piso/comparar_donde_no_actua\.py[^\n]*\n[^\n]*--sin-zona "
+                     r"salidas/_s196_lab_sinzona", codigo), "COMPARAR: donde la zona no actúa"
     assert doc["concurrency"]["group"] == "s196-lab-piso"
 
 
