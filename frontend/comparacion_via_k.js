@@ -166,6 +166,59 @@
       }).join("") : "<tr><td class='vk-n'>Ninguna en esta ventana y referencia.</td></tr>";
   }
 
+  // S196: franja diurna de MODIS (resultados "<ref>|dia|MODIS" y d.dias). Sólo vía contra MIROVA: K no corre de día.
+  let DIAS = [];
+  function prepararDias(d) {
+    const dd = d.dias || { campos: [], filas: [] };
+    const c = dd.campos;
+    const ix = {
+      vol: c.indexOf("vol"), sat: c.indexOf("sat"), b: c.indexOf("b"), dia: c.indexOf("dia"), horas: c.indexOf("horas"),
+      lab_tabla: c.indexOf("lab_tabla"), lab_comb: c.indexOf("lab_comb"), prot_tabla: c.indexOf("prot_tabla"),
+      prot_comb: c.indexOf("prot_comb"), vrp_mirova: c.indexOf("vrp_mirova"), via_pub: c.indexOf("via_pub"),
+      via_vrp: c.indexOf("via_vrp"), via_dc: c.indexOf("via_dc"), via_dmc: c.indexOf("via_dmc")
+    };
+    DIAS = dd.filas.map(f => Object.fromEntries(Object.entries(ix).map(([k, j]) => [k, f[j]])));
+  }
+
+  function pintarDia() {
+    const fr = st.d.meta.franjas || {};
+    const r = st.d.resultados[`${st.ref}|dia|MODIS`];
+    const cont = $("vk-dia-cards"); cont.innerHTML = "";
+    if (!r) {
+      $("vk-dia-nota").textContent = st.d.meta.franjas
+        ? "Todavía no hay pasadas MODIS diurnas en producción."
+        : "Este cálculo es anterior a la separación de la franja diurna: aparece con el próximo refresco diario.";
+      $("vk-dia").innerHTML = "";
+      return;
+    }
+    const v = r.via;
+    $("vk-dia-nota").textContent = `Desde ${fr.dia_desde} hasta ${st.d.meta.hoy}: ${r.n_pasadas} pasadas MODIS diurnas de la vía; `
+      + `${v.TP + v.FN + v.FP + v.TN} días-satélite juzgados contra MIROVA (los demás, MIROVA no listó la pasada o vio calor fuera del volcán).`;
+    cont.insertAdjacentHTML("beforeend", `<div class="card vk-card"><h3>MODIS de día
+      <span class="vk-n">${fr.dia_desde} a ${st.d.meta.hoy} · sólo la vía</span></h3>
+      <table><tr><th></th><th style="color:${COLOR.via}">vía</th></tr>
+      <tr><td>Alertas de MIROVA publicadas (recall)</td><td>${pct(v.recall)}</td></tr>
+      <tr><td>&nbsp;&nbsp;aciertos / silencios</td><td>${v.TP} / ${v.FN}</td></tr>
+      <tr><td>Precisión</td><td>${pct(v.precision)}</td></tr>
+      <tr><td>&nbsp;&nbsp;falsas alarmas en días tranquilos</td><td>${v.FP} de ${v.FP + v.TN}</td></tr>
+      <tr><td>Protegidas (1 MW o más) perdidas</td><td>${v.protegidas_perdidas} de ${v.protegidas}</td></tr>
+      <tr><td>VRP nuestro / MIROVA (mediana; 1 = igual)</td><td>${num(v.mediana_cociente)}</td></tr>
+      </table></div>`);
+    const lb = n => st.ref === "tabla" ? n.lab_tabla : n.lab_comb;
+    const pr = n => !!(st.ref === "tabla" ? n.prot_tabla : n.prot_comb);
+    const filas = DIAS.filter(n => lb(n) === "pos" || n.via_pub === 1)
+      .sort((a, b) => a.dia < b.dia ? 1 : a.dia > b.dia ? -1 : 0);
+    $("vk-dia").innerHTML = filas.length ? "<tr><th>Día</th><th>Volcán</th><th>Satélite</th><th>Hora UTC</th><th>MIROVA</th><th>vía</th><th>¿Coinciden?</th></tr>" +
+      filas.map(n => {
+        const l = lb(n);
+        const mir = l === "pos" ? "alerta " + num(n.vrp_mirova) + " MW" + (pr(n) ? " (protegida)" : "") : l === "neg" ? "miró y no vio nada" : "sin juicio";
+        const ok = l === "pos" ? (n.via_pub ? "sí" : "no: la vía calla") : l === "neg" ? (n.via_pub ? "no: falsa alarma" : "sí") : "sin juicio";
+        return `<tr><td>${n.dia}</td><td>${esc(NOMBRE_VOL[n.vol] || n.vol)}</td><td>${esc(n.sat)}</td><td>${esc((n.horas || []).join(", "))}</td>
+        <td>${mir}</td><td class="${n.via_pub ? "vk-si" : "vk-no"}">${n.via_pub ? "publica " + num(n.via_vrp) + " MW" : "calla"} · ${lugar(n.via_dc, n.via_dmc)}</td>
+        <td>${ok}</td></tr>`;
+      }).join("") : "<tr><td class='vk-n'>Ningún día-satélite con alerta de MIROVA ni publicación de la vía.</td></tr>";
+  }
+
   function pintarEstado() {
     const m = st.d.meta;
     const edadH = (Date.now() - Date.parse(m.generado_utc)) / 3600000;
@@ -177,7 +230,7 @@
 
   function pintar() {
     botones("vk-ctl-ref", REFS, "ref"); botones("vk-ctl-vent", VENTS, "vent");
-    pintarEstado(); pintarTarjetas(); pintarGrilla(); pintarFranja(); pintarDesacuerdos();
+    pintarEstado(); pintarTarjetas(); pintarDia(); pintarGrilla(); pintarFranja(); pintarDesacuerdos();
   }
 
   async function iniciar() {
@@ -197,6 +250,7 @@
       return;
     }
     prepararNoches(st.d);
+    prepararDias(st.d);
     pintar();
   }
   iniciar();
