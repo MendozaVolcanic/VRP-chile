@@ -1,0 +1,327 @@
+name: "Barrido S196: piso de la zona A del laboratorio, sin zona, control y 7 pisos"
+
+# POR QUE EXISTE ESTE ARCHIVO (S196, palanca del piso; PREREGISTRO sellado experiments/_s196_lab_piso/PREREGISTRO.md
+# §5 y §9, #1101; codigo autorizado por Nicolas, A45, 2026-11-23, tag defensivo pre-s196-laboratorio-piso). Es copia de
+# reproc-s195-lab-barrido.yml con lo minimo cambiado: nombre, grupo de concurrencia, candado, defaults de las entradas,
+# el assert del brazo (zona apagada solo en el brazo sin zona; piso declarado en los demas), el paso COMPARAR (dos
+# controles en vez de uno) y la rama de salida.
+#
+# EL FENOMENO. En el crater, de noche, el umbral contextual es max(mu + s sd, piso) en NTI y en ETI. En una escena
+# quieta la sd es chica y manda el piso fijo de 0,003, que deja fuera un foco chico justo donde mejor se veria. Bajar
+# solo s (barrido S195) casi no movio nada por eso. Este barrido fija s = 3,0 en la zona A y baja el piso de 0,003 a
+# 0,0015 (siete brazos), y elige el menor piso cuya tasa por noche negativa limpia no pase de 30 % (PREREGISTRO §5).
+#
+# BRAZOS (perfiles aislados, cada uno con su data_subdir; A47), todos en el MISMO job (scripts/reproc_brazos.py: una
+# busqueda y una descarga por granulo, el proceso se repite por brazo):
+#   _s196_lab_sinzona   el laboratorio con la zona apagada: la referencia de los dos controles
+#   _s196_lab_control   la zona encendida con s = 5,0 y piso 0,003 (los numeros de produccion)
+#   _s196_lab_p300 ... _s196_lab_p150   la zona encendida con s = 3,0 y piso 0,003 a 0,0015
+# Dos controles antes de mirar nada (paso COMPARAR del recolector; si alguno falla el barrido es INVALIDO):
+#   (a) el brazo de control es identico al sin zona record a record (experiments/_s195_lab_paso3/comparar_control.py);
+#   (b) cada brazo de piso es identico al sin zona donde la zona no actua: de dia, fuera de la via y en Cordon Caulle
+#       (experiments/_s196_lab_piso/comparar_donde_no_actua.py). Es lo unico que ve una fuga del piso fuera de la zona.
+#
+# NO DESPACHAR sin el "si" de Nicolas al barrido y desde main con este archivo mergeado (workflow_dispatch solo existe
+# con el yml en main). Ventana de la calibracion sellada: 2026-03-01 al ultimo dia, 10 volcanes (Cordon Caulle fuera,
+# D6). Con 9 brazos el trozo lo dimensiona scripts/reproc_brazos.py::dias_por_trozo(9). Se despacha POR TANDAS (una
+# ventana de semanas y unos volcanes por despacho), nunca entero de una vez. Los defaults son una prueba de humo: un
+# volcan, tres dias.
+#
+# NO COMMITEA A main. Salidas por dos caminos (los artefactos caducan): (a) artefacto por trozo, (b) rama propia de
+# la corrida, s196-lab-piso/<run_id>, con experiments/_s196_lab_piso/salidas/<run_id>/<brazo>/<volcan>.json.
+# Los artefactos se llaman s146ab-* porque scripts/unir_trozos_ab.py reconoce ese prefijo; download-artifact baja solo
+# los de esta corrida, asi que no se mezclan con los de otros barridos.
+#
+# A43: la clave "on" va entre comillas (Norway Problem de YAML 1.1).
+# A71: se autentica SOLO con EARTHDATA_TOKEN. Sin token, el job falla al instante.
+# A15: el paso de reproceso tiene 170 min y el trozo se dimensiona para caber (scripts/reproc_brazos.py::dias_por_trozo).
+"on":
+  workflow_dispatch:
+    inputs:
+      barrido_aprobado:
+        description: "Escribe si SOLO con el si de Nicolas al barrido (PREREGISTRO sellado: experiments/_s196_lab_piso/PREREGISTRO.md)"
+        required: true
+        default: "no"
+      start:
+        description: "Inicio YYYY-MM-DD de la tanda (la calibracion sellada parte el 2026-03-01; default: prueba de humo)"
+        required: true
+        default: "2026-11-10"
+      end:
+        description: "Fin YYYY-MM-DD inclusive de la tanda"
+        required: true
+        default: "2026-11-12"
+      vols:
+        description: 'Lista JSON de volcanes (los 10 de la zona A; uno en la prueba de humo). La lista corta sirve para REPETIR un trozo que quedo con pasadas de menos'
+        required: true
+        default: '["Villarrica"]'
+      brazos:
+        description: 'Lista JSON de brazos: el sin zona, el control y los 7 pisos de la grilla sellada'
+        required: true
+        default: '["_s196_lab_sinzona","_s196_lab_control","_s196_lab_p300","_s196_lab_p275","_s196_lab_p250","_s196_lab_p225","_s196_lab_p200","_s196_lab_p175","_s196_lab_p150"]'
+      max_days:
+        description: 'Dias por trozo. Vacio = scripts/reproc_brazos.py::dias_por_trozo(n_brazos)'
+        required: false
+        default: ""
+
+# No entra al grupo push-main: este workflow no pushea a main. Grupo propio: GitHub guarda un solo run pendiente por
+# grupo, y los otros A/B tienen el suyo.
+concurrency:
+  group: s196-lab-piso
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    if: github.event.inputs.barrido_aprobado == 'si'
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
+    outputs:
+      jobs: ${{ steps.split.outputs.jobs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Trozos de la ventana
+        id: split
+        env:
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_VOLS: ${{ github.event.inputs.vols }}
+          ARM_BRAZOS: ${{ github.event.inputs.brazos }}
+          ARM_MAX_DAYS: ${{ github.event.inputs.max_days }}
+        run: |
+          set -euo pipefail
+          python scripts/plan_trozos_ab.py >> "$GITHUB_OUTPUT"
+
+  reproc:
+    needs: plan
+    if: github.event.inputs.barrido_aprobado == 'si'
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
+    timeout-minutes: 200
+    strategy:
+      fail-fast: false
+      # Un volcan y un trozo por job, con todos los brazos adentro EN SERIE: cada brazo escribe en su propio
+      # data_subdir y nunca dos procesos a la vez (A47). max-parallel 6 deja lugar al cron NRT.
+      max-parallel: 6
+      matrix:
+        job: ${{ fromJson(needs.plan.outputs.jobs) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Credenciales presentes (un secreto ausente se resuelve a string vacio, no a error)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio. Sin token no se mide nada, y el login por usuario y clave con la credencial vencida bloquea la cuenta (A71). No se reintenta."
+            exit 1
+          fi
+          echo "credenciales presentes"
+
+      - name: Dependencias
+        run: |
+          set -euo pipefail
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj
+
+      - name: Cada brazo LEE lo que declara (y escribe donde declara)
+        env:
+          ARM_BRAZOS: ${{ github.event.inputs.brazos }}
+          ARM_VOLCANO: ${{ matrix.job.vol }}
+        run: |
+          set -euo pipefail
+          mkdir -p logs
+          for ARM_PROFILE in $(python -c "import json, os; print(' '.join(json.loads(os.environ['ARM_BRAZOS'])))"); do
+            VRP_PROFILE="$ARM_PROFILE" python -c "import pipeline.profile as p; \
+              print('brazo', p.PROFILE_NAME, '| zona_a', p.ENABLE_LAB_ZONA_A, p.LAB_ZONA_A.get('valor'), p.LAB_ZONA_A.get('piso'), \
+              '| via', p.ENABLE_MODIS_CODIGO_MIROVA, p.ENABLE_V375_CODIGO_MIROVA, p.ENABLE_V750_CODIGO_MIROVA, \
+              '| subdir', p.DATA_SUBDIR); \
+              assert p.DATA_SUBDIR == p.PROFILE_NAME, 'el brazo escribiria fuera de su subdir'; \
+              assert p.ENABLE_MODIS_CODIGO_MIROVA and p.ENABLE_V375_CODIGO_MIROVA and p.ENABLE_V750_CODIGO_MIROVA, 'el brazo no corre la via en los tres sensores'; \
+              assert p.ENABLE_LAB_ZONA_A == (p.PROFILE_NAME != '_s196_lab_sinzona'), 'la zona A no es la que declara el brazo'; \
+              assert (p.LAB_ZONA_A.get('piso') is None) == (p.PROFILE_NAME == '_s196_lab_sinzona'), 'el piso no es el que declara el brazo'; \
+              assert p.LAB_ZONA_A.get('piso') is None or 0 < p.LAB_ZONA_A['piso'] <= 0.003, 'piso fuera de (0, 0,003]: el laboratorio veria menos que produccion'"
+            # La primera linea del log de cada brazo deja escrito que flags LEYO (A89).
+            VRP_PROFILE="$ARM_PROFILE" python -c "import json, pipeline.profile as p; print('FLAGS_BRAZO ' + json.dumps({k: getattr(p, k) for k in ('PROFILE_NAME', 'DATA_SUBDIR', 'ENABLE_LAB_ZONA_A', 'LAB_ZONA_A', 'ENABLE_MODIS_CODIGO_MIROVA', 'ENABLE_V375_CODIGO_MIROVA', 'ENABLE_V750_CODIGO_MIROVA', 'ENABLE_DAYTIME_MODIS', 'ENABLE_DAYTIME_VIIRS', 'ENABLE_TEST1_PATH', 'ENABLE_TESTS_23_PROSE_BRANCH', 'ENABLE_MODIS_B22_PRIMARY')}))" | grep '^FLAGS_BRAZO ' > "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
+          done
+
+      - name: Reproceso de todos los brazos (una busqueda y una descarga por granulo)
+        env:
+          # Solo el token (A71). Ni el usuario ni la clave entran al entorno.
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          # Las entradas viajan por env y NO se interpolan dentro del run (S128).
+          ARM_START: ${{ matrix.job.start }}
+          ARM_END: ${{ matrix.job.end }}
+          ARM_BRAZOS: ${{ github.event.inputs.brazos }}
+          ARM_VOLCANO: ${{ matrix.job.vol }}
+        timeout-minutes: 170
+        run: |
+          set -euo pipefail
+          PERFILES=$(python -c "import json, os; print(','.join(json.loads(os.environ['ARM_BRAZOS'])))")
+          python scripts/reproc_brazos.py \
+            --volcano "$ARM_VOLCANO" --start "$ARM_START" --end "$ARM_END" \
+            --perfiles "$PERFILES" --trabajo "$RUNNER_TEMP/brazos" --logs logs \
+            --overwrite --estricto-cobertura --cobertura-json "cobertura/cobertura_${ARM_VOLCANO}.json"
+
+      - name: Juntar la salida del trozo
+        if: always()
+        env:
+          ARM_BRAZOS: ${{ github.event.inputs.brazos }}
+          ARM_VOLCANO: ${{ matrix.job.vol }}
+        run: |
+          set -euo pipefail
+          mkdir -p salida/logs salida/cobertura
+          for ARM_PROFILE in $(python -c "import json, os; print(' '.join(json.loads(os.environ['ARM_BRAZOS'])))"); do
+            if [ -f "data/$ARM_PROFILE/$ARM_VOLCANO.json" ]; then
+              mkdir -p "salida/data/$ARM_PROFILE" && cp "data/$ARM_PROFILE/$ARM_VOLCANO.json" "salida/data/$ARM_PROFILE/"
+            fi
+          done
+          cp logs/*.log salida/logs/ 2>/dev/null || true
+          cp cobertura/*.json salida/cobertura/ 2>/dev/null || true
+          find salida -type f | sort
+
+      - name: Subir la salida del trozo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s146ab-${{ matrix.job.vol }}-${{ matrix.job.idx }}-${{ matrix.job.start }}_${{ matrix.job.end }}
+          path: salida
+          retention-days: 90
+          if-no-files-found: error
+
+  recolectar:
+    needs: [plan, reproc]
+    if: always() && github.event.inputs.barrido_aprobado == 'si'
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Dependencias minimas
+        run: pip install pyyaml
+
+      - name: Bajar los artefactos de todos los trozos
+        # SIN merge-multiple: dos trozos del mismo brazo y volcan traen el mismo camino y se pisarian en silencio.
+        uses: actions/download-artifact@v4
+        with:
+          pattern: s146ab-*
+          path: recolectado
+
+      - name: Unir los trozos de cada brazo
+        run: |
+          set -euo pipefail
+          python scripts/unir_trozos_ab.py recolectado salidas
+          find salidas -name '*.json' | sort | sed -n '1,200p'
+
+      - name: COMPARAR los dos controles antes de mirar nada (PREREGISTRO §5)
+        env:
+          ARM_BRAZOS: ${{ github.event.inputs.brazos }}
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          if [ ! -d salidas/_s196_lab_sinzona ]; then
+            echo "::warning::el brazo sin zona no esta en esta corrida (relanzamiento parcial): ningun control se comprobo aca, comprobarlos en local antes de calibrar"
+            echo "IDENTIDAD NO COMPROBADA: falta el brazo sin zona" | tee salidas/identidad.txt
+            exit 0
+          fi
+          FALLA=0
+          # (a) el control (s = 5,0, piso 0,003) es el sin zona record a record
+          if [ -d salidas/_s196_lab_control ]; then
+            python experiments/_s195_lab_paso3/comparar_control.py \
+              --control salidas/_s196_lab_sinzona --brazo salidas/_s196_lab_control \
+              --out salidas/identidad_control.json 2>&1 | tee salidas/identidad_control.txt || FALLA=1
+          else
+            echo "::warning::el brazo de control no esta en esta corrida: el control (a) NO se comprobo aca"
+            echo "IDENTIDAD NO COMPROBADA: falta el brazo de control" | tee salidas/identidad_control.txt
+          fi
+          # (b) cada brazo de piso es el sin zona donde la zona no actua (de dia, fuera de la via, Cordon Caulle)
+          for B in $(python -c "import json, os; print(' '.join(b for b in json.loads(os.environ['ARM_BRAZOS']) if b.startswith('_s196_lab_p')))"); do
+            if [ ! -d "salidas/$B" ]; then
+              echo "::warning::el brazo $B no esta en esta corrida: el control (b) de ese brazo NO se comprobo aca"
+              continue
+            fi
+            python experiments/_s196_lab_piso/comparar_donde_no_actua.py \
+              --sin-zona salidas/_s196_lab_sinzona --brazo "salidas/$B" \
+              --out "salidas/no_actua_${B}.json" > "salidas/no_actua_${B}.txt" 2>&1 && RC=0 || RC=$?
+            cat "salidas/no_actua_${B}.txt"
+            # Salida 2 = ningun record donde la zona no actua: el laboratorio no procesa MODIS de dia y casi todo pasa
+            # por la via, asi que sin PuyehueCordonCaulle en vols suele no haber nada que comparar. Eso es NO
+            # COMPROBADO, no identidad (A110); salida 1 es una diferencia o un faltante, y eso invalida el barrido.
+            if [ "$RC" = 2 ]; then
+              echo "::warning::control (b) de $B NO COMPROBADO: ningun record donde la zona no actue; agregar PuyehueCordonCaulle a vols"
+            elif [ "$RC" != 0 ]; then
+              FALLA=1
+            fi
+          done
+          if [ "$FALLA" != 0 ]; then
+            echo "::error::un control de identidad fallo: el barrido es INVALIDO (PREREGISTRO §5); las salidas se publican igual para diagnosticar"
+            exit 1
+          fi
+
+      - name: Publicar las salidas en una rama propia de esta corrida
+        if: always()
+        env:
+          RAMA: s196-lab-piso/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(ls -A salidas 2>/dev/null)" ]; then
+            echo "::error::no llego ninguna salida: no hay nada que publicar"
+            exit 1
+          fi
+          git checkout -b "$RAMA"
+          mkdir -p "experiments/_s196_lab_piso/salidas/${GITHUB_RUN_ID}"
+          cp -r salidas/. "experiments/_s196_lab_piso/salidas/${GITHUB_RUN_ID}/"
+          git add -f "experiments/_s196_lab_piso/salidas/${GITHUB_RUN_ID}"
+          git commit -m "S196 barrido del piso de la zona A del laboratorio: salidas crudas de la corrida ${GITHUB_RUN_ID} (no toca main)"
+          # Reintento propio: si el push se cae por red se pierde la unica copia durable (el artefacto caduca). Este
+          # workflow NO pushea a main y por eso no entra al grupo push-main.
+          for attempt in 1 2 3 4 5; do
+            if git push origin "$RAMA"; then
+              echo "salidas en la rama $RAMA"
+              exit 0
+            fi
+            echo "push fallido, intento $attempt"
+            sleep $((attempt * 10))
+          done
+          echo "::error::no se pudo publicar la rama $RAMA en 5 intentos; queda el artefacto"
+          exit 1
+
+      - name: Subir tambien todo junto como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s196piso-todo
+          path: salidas
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Guard declarado contra efectivo (al final, sobre el arbol con los perfiles nuevos)
+        if: always()
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          pip install pytest
+          python -m pytest tests/test_guard_declarado_vs_efectivo_s131.py -q 2>&1 | tee salidas/guard.txt

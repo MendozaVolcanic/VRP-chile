@@ -1,0 +1,35 @@
+# Barrido del piso de la zona A del laboratorio (S196, palanca del piso; PREREGISTRO sellado
+# experiments/_s196_lab_piso/PREREGISTRO.md §5, #1101; código autorizado por Nicolás, A45, 2026-11-23).
+# BRAZO SIN ZONA: el perfil laboratorio tal cual, con la zona A APAGADA, en su propia carpeta. Es la referencia de
+# los dos controles de identidad (§5): el brazo de control tiene que ser idéntico a éste, y cada brazo de piso tiene que
+# serlo donde la zona no actúa (de día, fuera de la vía y en Cordón Caulle). Corre en el mismo job, sobre los mismos
+# gránulos y con el mismo código que los brazos, así que una diferencia es de la zona y no de otra versión de NASA.
+# Lo demás es copia de laboratorio.yaml: el cargador de perfiles no encadena extends (pipeline/profile.py), así que
+# se hereda de mirova_equivalent y se repite lo que el laboratorio declara.
+# tests/test_laboratorio_piso_s196.py (Q6) vigila que difiera del laboratorio sólo en lo que declara.
+# NO OPERACIONAL: lo corre sólo .github/workflows/reproc-s196-lab-piso.yml, a mano, con salidas fuera de main.
+extends: mirova_equivalent
+profile: _s196_lab_sinzona
+description: >
+  Barrido del piso de la zona A del laboratorio, brazo sin zona (zona apagada; S196).
+
+thresholds:
+  enable_lab_zona_a: false
+
+paths:
+  enable_daytime_modis: false
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+enable_modis_b22_primary: true
+
+laboratorio_zona_a:
+  extension: MEJ-5
+  radio: inner_radius_km
+  parametro: sigma_contextual_nocturno
+  valor: null
+  volcanes_fuera:
+    - PuyehueCordonCaulle   # D6: inner de 20 km
+
+output:
+  data_subdir: _s196_lab_sinzona
