@@ -372,9 +372,19 @@ def test_no_modifica_la_vigilancia_de_k():
     import subprocess
     # S193 (A113): #1081 (F11-106, merge f5973394d) cambió a propósito ese workflow: la sombra C0 da SIN_OBJETO sin
     # issue cuando ningún sensor sigue en K. La base pasa de `pre-s171-adopcion-modd` a ese merge.
-    r = subprocess.run(["git", "diff", "--name-only", "f5973394d78702acbf13087119735f749b229a27", "HEAD", "--",
-                        ".github/workflows/vigilancia-sombra.yml"],
-                       cwd=ROOT, capture_output=True, text=True)
+    # S196 (A113; D-B de Nicolás del 2026-11-23): el retiro de la sombra C0 cambió a propósito la cabecera y los
+    # disparadores de ese workflow (sin cron ni workflow_run; lo vigila tests/test_retiro_sombra_c0_s196.py). Lo que
+    # esta prueba protege es la lógica de la vigilancia, así que ahora compara el nombre y los jobs contra el merge de
+    # #1081 en vez de exigir el archivo idéntico. Texto anterior: `git diff --name-only f5973394d HEAD --
+    # .github/workflows/vigilancia-sombra.yml` vacío.
+    import yaml
+    ruta = ".github/workflows/vigilancia-sombra.yml"
+    r = subprocess.run(["git", "show", f"f5973394d78702acbf13087119735f749b229a27:{ruta}"],
+                       cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
     if r.returncode != 0:
         pytest.skip("sin el merge de #1081 en este checkout")
-    assert r.stdout.strip() == ""
+    antes = yaml.safe_load(r.stdout)
+    ahora = yaml.safe_load((ROOT / ruta).read_text(encoding="utf-8"))
+    assert antes["jobs"]["vigilar"]["steps"], "control: el workflow de #1081 no se leyó"
+    assert ahora["name"] == antes["name"]
+    assert ahora["jobs"] == antes["jobs"], "cambió la lógica de la vigilancia de la sombra"
