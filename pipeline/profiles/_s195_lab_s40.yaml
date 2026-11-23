@@ -1,0 +1,32 @@
+# Barrido de la zona A del laboratorio (S195, paso 3 del plan S190; PREREGISTRO sellado
+# experiments/_s194_lab_zona_a/PREREGISTRO.md §5). BRAZO s = 4.0: el perfil laboratorio con la zona A ENCENDIDA y
+# multiplicador de sigma nocturno 4.0 en la zona A (círculo de inner_radius_km cortado por la región sensible de la vía,
+# decisión (a) de Nicolás del 2026-11-22). Lo demás es copia de laboratorio.yaml: el cargador de perfiles no encadena
+# extends (pipeline/profile.py), así que se hereda de mirova_equivalent y se repite lo que el laboratorio declara.
+# tests/test_laboratorio_paso3_s195.py (P7) vigila que difiera del laboratorio sólo en nombre, carpeta y zona A.
+# NO OPERACIONAL: lo corre sólo .github/workflows/reproc-s195-lab-barrido.yml, a mano, con salidas fuera de main.
+extends: mirova_equivalent
+profile: _s195_lab_s40
+description: >
+  Barrido de la zona A del laboratorio, brazo s = 4.0 (S195, paso 3 del plan S190).
+
+thresholds:
+  enable_lab_zona_a: true
+
+paths:
+  enable_daytime_modis: false
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+enable_modis_b22_primary: true
+
+laboratorio_zona_a:
+  extension: MEJ-5
+  radio: inner_radius_km
+  parametro: sigma_contextual_nocturno
+  valor: 4.0
+  volcanes_fuera:
+    - PuyehueCordonCaulle   # D6: inner de 20 km
+
+output:
+  data_subdir: _s195_lab_s40

@@ -32,6 +32,10 @@
 #                 Cráter no evaluado (S193, F3-107): escena válida sin alertados en la que ninguna celda del 7 x 7 del
 #                 cráter tuvo contraste que evaluar (hueco o nube fría): motivo_vacio «crater_no_evaluado», 0 MW.
 #                 diag_codigo_mirova.roi nombra la caja usada («c13_crater» en VIIRS 375; S193, F2-V303).
+#                 Zona A del laboratorio (S195; nunca en producción, que no la enciende): sólo con un perfil que la
+#                 encienda (laboratorio y su barrido _s195_lab_*), de noche, en las celdas de la región sensible a no
+#                 más de inner_radius_km del cráter, el multiplicador s2 = 5 pasa a s_A <= 5 (mismos pisos, mismos mu y
+#                 sd); con s_A = 5 el resultado es el de producción bit a bit. Cordón Caulle fuera.
 # Limitaciones  : fillmissing2 de MATLAB no documenta su triangulación; se reproduce con un Delaunay de desempate
 #                 simbólico que iguala a MATLAB R2026b en 166 de 166 escenas (S163 O2), sin que el mecanismo interno
 #                 de MATLAB esté verificado. La ROI por volcán la decide V750-B. El umbral contextual depende de la
@@ -393,13 +397,23 @@ def _mean_omitnan(x):
 
 
 def _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, excluidos, s1, s2, n1, n2, e1, e2,
-                       lam_mir=LAMBDA_M13):
+                       lam_mir=LAMBDA_M13, zona_a=None, s_a=None):
     """contextualDetectionPass, .m l. 252-400: tres máscaras (BOX 0, 1 y 2), diagnóstico y los mapas de contraste.
 
     POR QUÉ: el detector compara cada celda con la media de sus 8 vecinos MÁS ella misma, en NTI y en ETI (el NTI
     menos lo que la regresión cuadrática contra el NTI esperado de la superficie predice), y exige los dos. El
     umbral es max(mu + s * sd, piso) con mu y sd de TODA la grilla: por eso un cambio lejos del cráter puede mover
-    el umbral del cráter (S-1)."""
+    el umbral del cráter (S-1).
+
+    zona_a, s_a (S195, sólo el perfil laboratorio y su barrido; nunca producción): en las celdas de zona_a (región
+    sensible a <= inner_radius_km del cráter, mascara_zona_a) el multiplicador de la región 2 es s_a en vez de s2, con
+    los mismos pisos n2 y e2 y los mismos mu y sd. POR QUÉ así: es un solo número, monótono en «ver más» (menor s_a, más
+    alertas), y con s_a == s2 los umbrales son los mismos floats que u_nti2 y u_eti2, así que el resultado es
+    idéntico a producción bit a bit (el control sellado del barrido, experiments/_s194_lab_zona_a/PREREGISTRO.md §5).
+    s_a > s2 haría al laboratorio más ciego que producción en el cráter: es error."""
+    if zona_a is not None and s_a > s2:
+        raise ValueError(f"zona A con s_a={s_a} mayor que s2={s2}: el laboratorio vería menos que producción en el "
+                         "cráter (tests/test_guard_laboratorio_no_mas_ciego_s147.py)")
     vacio = np.zeros(nti_roi.shape, bool)
     pob = nti_roi.copy()                       # l. 275
     pob[excluidos] = np.nan                    # l. 276-277
@@ -415,6 +429,8 @@ def _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, excluidos, s1, s2, 
         u_nti1 = n1
     if np.isnan(mu + s2 * sd):
         u_nti2 = n2
+    if zona_a is not None:                     # S195: zona A del laboratorio, misma forma que u_nti2
+        u_ntia = n2 if np.isnan(mu + s_a * sd) else max(mu + s_a * sd, n2)
 
     m13_esp = temperatura_a_radiancia(bt15, lam_mir)               # l. 319-320 (λ MIR del sensor, l. 144)
     with np.errstate(invalid="ignore", divide="ignore"):
@@ -423,6 +439,8 @@ def _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, excluidos, s1, s2, 
     nti_esp[excl] = np.nan                                          # l. 330
     ok = np.isfinite(nti_esp) & np.isfinite(pob)                    # l. 335-337
     diag = {"mu_nti": mu, "sd_nti": sd, "u_nti1": u_nti1, "u_nti2": u_nti2, "n_ajuste": int(ok.sum())}
+    if zona_a is not None:
+        diag["u_ntiA"] = u_ntia
     c_eti = np.full(nti_roi.shape, np.nan)
     if ok.sum() < 3:                                                # l. 339-341
         return vacio, vacio, vacio, diag, c_nti, c_eti
@@ -435,6 +453,11 @@ def _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, excluidos, s1, s2, 
     u_eti1 = max(mu_e + s1 * sd_e, e1) if np.isfinite(mu_e + s1 * sd_e) else e1   # l. 376-378
     u_eti2 = max(mu_e + s2 * sd_e, e2) if np.isfinite(mu_e + s2 * sd_e) else e2   # l. 380-382
     diag.update({"coef": coef.tolist(), "mu_eti": mu_e, "sd_eti": sd_e, "u_eti1": u_eti1, "u_eti2": u_eti2})
+    if zona_a is not None:                     # S195: zona A del laboratorio (ver docstring)
+        u_etia = max(mu_e + s_a * sd_e, e2) if np.isfinite(mu_e + s_a * sd_e) else e2
+        diag["u_etiA"] = u_etia
+        u_nti2 = np.where(zona_a, u_ntia, u_nti2)
+        u_eti2 = np.where(zona_a, u_etia, u_eti2)
     with np.errstate(invalid="ignore"):
         a0 = (c_nti * m0 > u_nti1) & (c_eti * m0 > u_eti1)          # l. 389-391
         a1 = (c_nti * m1 > u_nti1) & (c_eti * m1 > u_eti1)          # l. 393-395
@@ -443,14 +466,17 @@ def _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, excluidos, s1, s2, 
 
 
 def detectar_mirova(m13, m15, box, dayflag, sunglint, devolver_diag=False, lam_mir=LAMBDA_M13,
-                    lam_tir=LAMBDA_M15):
+                    lam_tir=LAMBDA_M15, zona_a=None, s_a=None):
     """MIROVA_VIIRS750_hotspot_detection.m. Devuelve la máscara booleana de alertados (o (máscara, diag)).
 
     POR QUÉ las piezas: el Test 1 (NTI > -0,7 de noche) es una alerta directa y además saca esas celdas del fondo
     del primer pase contextual; el segundo pase repite la regresión sin las alertas del primero. Sin compuerta de
     temperatura, sin modo de un píxel y sin tope de magnitud (el código no los tiene). El diag lleva, por pase,
     mu, sd y umbrales, y los mapas de contraste para la celda decisiva (S-1). lam_mir y lam_tir son las longitudes de
-    onda del .m l. 144-145 (M13 y M15 por defecto; en MODIS, B22 y B31): lo único del detector que depende del sensor."""
+    onda del .m l. 144-145 (M13 y M15 por defecto; en MODIS, B22 y B31): lo único del detector que depende del sensor.
+
+    zona_a, s_a (S195): zona A del perfil laboratorio (ver _pasada_contextual). Sólo de noche: de día el .m usa s = 15
+    en las dos regiones y MIR sólo es nocturno, así que con dayflag 1 se ignora. Sin zona_a el detector es el .m."""
     m13 = np.asarray(m13, float)
     vacio = np.zeros(m13.shape, bool)
 
@@ -487,18 +513,22 @@ def detectar_mirova(m13, m15, box, dayflag, sunglint, devolver_diag=False, lam_m
         u_abs, s1, s2, n1, n2, e1, e2 = -0.7, 10, 5, 0.02, 0.003, 0.01, 0.003
     else:
         u_abs, s1, s2, n1, n2, e1, e2 = -0.5, 15, 15, 0.02, 0.02, 0.02, 0.02
+    if dayflag != 0 or s_a is None:                                  # S195: la zona A es sólo nocturna
+        zona_a = None
+    if zona_a is not None:
+        zona_a = np.asarray(zona_a, bool) & (box == 2)              # nunca fuera de la región sensible
 
     with np.errstate(invalid="ignore"):
         absol = nti_roi > u_abs                                      # l. 206
     p1 = _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, absol, s1, s2, n1, n2, e1, e2,
-                            lam_mir=lam_mir)                                                     # l. 211-218
+                            lam_mir=lam_mir, zona_a=zona_a, s_a=s_a)                             # l. 211-218
     ctx1 = p1[0] | p1[1] | p1[2]
     p2 = _pasada_contextual(nti_roi, bt15, m15, excl, m0, m1, m2, absol | ctx1, s1, s2, n1, n2, e1, e2,
-                            lam_mir=lam_mir)                                                     # l. 228-235
+                            lam_mir=lam_mir, zona_a=zona_a, s_a=s_a)                             # l. 228-235
     mask = ctx1 | absol | p2[0] | p2[1] | p2[2]                      # l. 241-248 (unión de las siete listas)
     d.update({"pasada1": p1[3], "pasada2": p2[3], "n_abs": int(absol.sum()), "n_p1": int(ctx1.sum()),
               "n_p2": int((p2[0] | p2[1] | p2[2]).sum()), "nti": nti_roi,
-              "contrastes": {1: (p1[4], p1[5]), 2: (p2[4], p2[5])}, "box": box})
+              "contrastes": {1: (p1[4], p1[5]), 2: (p2[4], p2[5])}, "box": box, "zona_a": zona_a})
     return _salida(mask, d)
 
 
@@ -676,9 +706,10 @@ def sunglint_deg(sat_zen, sun_zen, sat_azi, sun_azi):
 
 
 # ---------------------------------------------------------------------------------------------------- S-1
-def _umbral_de(diag_pase, zona):
-    """Umbral (NTI, ETI) de una celda según su zona: u1 en las zonas 0 y 1, u2 en la 2 (.m l. 389-399)."""
-    s = "2" if zona == 2 else "1"
+def _umbral_de(diag_pase, zona, en_zona_a=False):
+    """Umbral (NTI, ETI) de una celda según su zona: u1 en las zonas 0 y 1, u2 en la 2 (.m l. 389-399). S195: en una
+    celda de la zona A del laboratorio, el de la zona A (con s_a == s2 es el mismo float que u2)."""
+    s = "A" if en_zona_a and zona == 2 else ("2" if zona == 2 else "1")
     return diag_pase.get(f"u_nti{s}", np.nan), diag_pase.get(f"u_eti{s}", np.nan)
 
 
@@ -693,6 +724,7 @@ def celda_decisiva(diag, celda_crater, radio=3):
     if not diag or "contrastes" not in diag:
         return None
     box = diag["box"]
+    zona_a = diag.get("zona_a")
     n = box.shape[0]
     f0, k0 = celda_crater
     mejor = None
@@ -704,7 +736,7 @@ def celda_decisiva(diag, celda_crater, radio=3):
                 z = box[f, k]
                 if not np.isfinite(z) or not (np.isfinite(c_nti[f, k]) and np.isfinite(c_eti[f, k])):
                     continue
-                u_n, u_e = _umbral_de(dp, int(z))
+                u_n, u_e = _umbral_de(dp, int(z), zona_a is not None and bool(zona_a[f, k]))
                 if not (np.isfinite(u_n) and np.isfinite(u_e)) or u_n <= 0 or u_e <= 0:
                     continue
                 margen = min(c_nti[f, k] / u_n, c_eti[f, k] / u_e)
@@ -746,8 +778,40 @@ def _cumulo_del_mas_radiante(mascara, m13):
     return sorted(vistos)
 
 
+# ---------------------------------------------------------------------------------------------------- zona A (S195)
+# POR QUÉ existe (perfil laboratorio, extensión MEJ-5, plan docs/PLAN_EXPERIMENTAL_S190.md §6; paso 3 en
+# docs/superpowers/plans/2026-11-22-laboratorio-paso3.md): un foco chico en el cráter queda al borde del umbral
+# contextual de MIROVA y la vía lo copia a propósito. El laboratorio baja SÓLO el multiplicador de sigma de la región
+# sensible y sólo en la cumbre, para medir lo que aparece contra NHI y persistencia, nunca contra MIROVA (A115).
+# POR QUÉ el círculo cortado por la región sensible y no el círculo entero (decisión (a) de Nicolás, 2026-11-22): con
+# el círculo entero, 4.636 celdas que en producción son conservadoras (s1 = 10, pisos 0,02 y 0,01) bajarían de umbral
+# ya con s = 5, y el brazo de control del barrido sellado (s = 5 igual a producción) no podría cumplirse. Con la
+# intersección, s = 5 es la identidad exacta. Producción nunca enciende la zona (tests/test_laboratorio_paso1_s193.py G4).
+def s_zona_a(nombre_volcan):
+    """Multiplicador de la zona A para este volcán según el perfil activo, o None (zona apagada, volcán fuera).
+
+    Lee pipeline.profile al llamarse y no al importar el módulo: la vía se usa también fuera del pipeline (pruebas,
+    experimentos) sin perfil que importar hasta que procesa un gránulo."""
+    from . import profile as _perfil
+    if not _perfil.ENABLE_LAB_ZONA_A:
+        return None
+    zona = _perfil.LAB_ZONA_A
+    if nombre_volcan in zona.get("volcanes_fuera", []):
+        return None
+    return float(zona["valor"])
+
+
+def mascara_zona_a(box, pos_crater, paso_m, inner_km):
+    """Celdas de la región sensible (BOX == 2) a no más de inner_km del cráter, con la misma distancia que decide
+    distance_class (pos_crater fraccionaria, en celdas por el paso). None si el volcán no tiene inner_km."""
+    if inner_km is None:
+        return None
+    r, q = np.indices(np.shape(box))
+    return (np.asarray(box) == 2) & (np.hypot(r - pos_crater[0], q - pos_crater[1]) * paso_m / 1000.0 <= inner_km)
+
+
 def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inner_km, sensor,
-                    coef=None, familia="VIIRS750", roi=None):
+                    coef=None, familia="VIIRS750", roi=None, zona_a=None, s_a=None):
     """Detección + VRP + record (esquema de hoy) sobre una grilla ya remuestreada.
 
     Record: vrp_mw = primary_cluster.vrp_mw = VRP de la UNIÓN de los alertados (lo que publica MIROVA, D32);
@@ -756,12 +820,12 @@ def procesar_grilla(m13g, m15g, grilla, box, dayflag, sunglint, pos_crater, inne
     get_detection_anchor). Sin modo de un píxel y sin tope D9 (N-5: el tope recorta una erupción real). familia elige
     las longitudes de onda y el coeficiente (FAMILIAS); coef, si se da, reemplaza al de la familia. roi es el nombre de
     la caja `box` para el diagnóstico (S193, F2-V303: calcular_vrp_granulo pasa la que de verdad usó); sin él, el de la
-    grilla."""
+    grilla. zona_a y s_a: la zona A del perfil laboratorio (S195; detectar_mirova), None en producción."""
     cfg = FAMILIAS[familia]
     coef = cfg["coef"] if coef is None else coef
     lam = cfg["lam_mir"]
     mascara, d = detectar_mirova(m13g, m15g, box, dayflag, sunglint, devolver_diag=True, lam_mir=lam,
-                                 lam_tir=cfg["lam_tir"])
+                                 lam_tir=cfg["lam_tir"], zona_a=zona_a, s_a=s_a)
     v = vrp_mirova(m13g, mascara, coef=coef)
     # POR QUÉ (S192, F4-101 y F2-108; decisión de Nicolás del 2026-11-20, opción a): si NINGÚN alertado tiene fondo, el
     # .m publica la radiancia entera de los píxeles como si fuera exceso. En MODIS MIROVA no tiene ninguna detección
@@ -1025,7 +1089,11 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
         roi_usada = tipo_roi or g.get("roi", "def")
         box = caja_roi(roi_usada, n=g["n"], celda_crater=celda, inner_km=inner_km,
                        lado_sensible=cfg["lado_sensible"], lado_anillo=cfg["lado_anillo"], paso_m=g["paso"])
-    rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia, roi=roi_usada)
+    # S195: la zona A del laboratorio; en producción s_zona_a es None y la llamada es la de siempre.
+    s_a = s_zona_a(nombre_volcan)
+    zona_a = None if s_a is None else mascara_zona_a(box, pos, float(g["paso"]), inner_km)
+    rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia, roi=roi_usada,
+                          zona_a=zona_a, s_a=s_a)
     if sin_radiancia:
         # con la grilla toda sin dato el detector ya devolvió la escena vacía (reflejo solar o media escena); el motivo
         # se reemplaza porque la causa es otra: no hubo radiancia que interpolar.
