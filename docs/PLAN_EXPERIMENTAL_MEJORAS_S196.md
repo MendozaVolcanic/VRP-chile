@@ -552,9 +552,11 @@ de Landsat-v1. **A45:** no.
 > mirova_equivalent` en `nrt.yml` y tres líneas sintéticas que corren el laboratorio. (ii) `vigilancia_guardia_modis.py`
 > y `vigilancia_guardia_viirs.py` no se desacoplaron: `scripts/vigilancia_sombra.py` se conserva entero (sólo se apagó su
 > workflow), así que el import sigue sano; el desacople queda para cuando se borre el script, junto con los datos (A38).
-> La opción manual `profile=experimental` de `nrt.yml` se deja: no commitea `data/experimental_v2/`. Suite completa: sólo
-> `tests/test_vigilancia_sombra_s156.py::test_el_workflow_escucha_al_workflow_de_la_sombra` dependía del disparo, y se
-> reescribió con marca A113.
+> La opción manual `profile=experimental` de `nrt.yml` se deja: no commitea `data/experimental_v2/`. Suite completa: dos
+> pruebas dependían del workflow retirado y se reescribieron con marca A113:
+> `tests/test_vigilancia_sombra_s156.py::test_el_workflow_escucha_al_workflow_de_la_sombra` (exigía el disparo) y
+> `tests/test_vigilancia_guardia_modis_s172.py::test_no_modifica_la_vigilancia_de_k` (exigía el archivo idéntico; ahora
+> compara el nombre y los jobs, que no cambiaron).
 
 **El fenómeno (aquí, del sistema).** La sombra C0 (`experimental`, `data/experimental_v2/`) guarda lo que veía producción
 el 2026-10-09 con el detector anterior, para disparar la reversión de K si producción callaba algo que C0 veía. Desde
