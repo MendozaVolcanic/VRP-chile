@@ -2,7 +2,8 @@
 
 > **Qué es.** Un plan para cada mejora del laboratorio que no tenía plan escrito. Pedido de Nicolás del 2026-11-23:
 > «debemos tener planes para el experimental»; aprobó escribir un documento de planificación con todos los huecos. No
-> enciende nada ni toca `pipeline/`, perfiles ni workflows. Las decisiones que sólo puede tomar Nicolás están en el §14.
+> enciende nada ni toca `pipeline/`, perfiles ni workflows. Las decisiones que sólo puede tomar Nicolás están en el
+> §14. El ítem P0 (§2b), pedido por Nicolás el mismo día, va primero.
 >
 > **Base.** `origin/main` en `34d87cdc7` (2026-11-23 14:22 UTC). NHI-v1 al commit `4d24515abe1e` (el mismo del
 > re-sello S196 del control diurno). Todo número sale de un script de `experiments/_s196_plan_mejoras/` (cada uno con su
@@ -82,6 +83,7 @@ archivan con una condición de reapertura.
 
 | orden | id | mejora | por qué en este lugar |
 |---|---|---|---|
+| 0 | P0 | que una anomalía conocida no esconda un foco nuevo | requisito de Nicolás del 2026-11-23, va primero; su parte (1) no toca la detección y sale con la partición de #1092 |
 | 1 | P1 | MEJ-8, agua (Laguna del Maule) | es la única con una falsa alarma visible en el tablero público (los 34, como preliminares); el primer paso es una decisión de geometría, no un experimento |
 | 2 | P10 | retiro de la sombra C0 | cuesta 186 minutos-job por día (plan S190 §3) y su vigilancia da `SIN_OBJETO` desde S193; libera cupos para los pasos 4 a 6 del laboratorio |
 | 3 | P9 | vara de Lastarria | sin ella Lastarria no vota en MEJ-5 (`experiments/_s194_lab_zona_a/PREREGISTRO.md`); la medición previa ya muestra una señal que separa |
@@ -94,7 +96,109 @@ archivan con una condición de reapertura.
 | archivada | P7 | MEJ-3, fórmula a todo ángulo | explicada en parte; reabrir con un evento de 100 MW o más sobre 50° de cenit |
 | sale | P2 | MEJ-7, foco MODIS de Láscar | ya lo publica producción: va a la cuenta de paridad |
 
-Las secciones que siguen van en el orden del encargo (P1 a P10), para que cada una se pueda revisar contra él.
+El P0 (§2b) va primero por decisión de Nicolás. Las secciones que siguen van en el orden del encargo (P1 a P10),
+para que cada una se pueda revisar contra él.
+
+## 2b. P0. Que una anomalía conocida no esconda un foco nuevo en otra parte del edificio
+
+> Requisito de Nicolás del 2026-11-23, transmitido por la coordinadora S196, que va **antes que todo lo demás**: «no
+> queremos que una señal constante como el lacolito de puyehue o el crater de villarrica nos oculte posibles señales
+> volcanicas que se den en otra parte del edificio y que si son incipientes quedaran ocultas tras las otras anomalaias
+> ya conocidas y que pueden ser mayores [...] en replica solo se prublica la mayor anomalia [...] en experimental
+> deberia permitir mas de una si es que exisitieran».
+
+**El fenómeno.** Un volcán con una fuente térmica constante (el lacolito y la fisura de Cordón Caulle, el lago de lava de
+Villarrica, el cráter de Láscar) puede abrir un foco nuevo en otro lado: una fisura en el flanco, un domo, una fumarola
+que se calienta. Al principio ese foco es débil, más débil que la fuente conocida. Hay tres maneras en que hoy queda
+escondido, y conviene separarlas porque se arreglan distinto:
+
+1. **En la publicación.** La réplica publica una sola posición por pasada, la del cúmulo de la alertada más radiante
+   (regla «radiante», D8'), y una sola potencia, la suma de todos los alertados (D32). Un foco nuevo y débil entra a la
+   suma y desaparece en la posición del conocido. La única marca de hoy va al revés: v1.72 avisa «también hay calor en
+   la cumbre» cuando la posición publicada está lejos y hay alertados en el cráter.
+2. **En la detección (enmascaramiento).** El umbral del test contextual es max(mu + s·sd, piso), con mu y sd sacados de
+   toda la grilla de 50 km (`pipeline/mirova_v750_codigo.py::_pasada_contextual`). La anomalía grande y su halo tibio
+   agrandan sd; si mu + s·sd pasa sobre el piso, el umbral sube en todo el edificio. El segundo pase saca del fondo las
+   celdas que alertaron en el primero (`excluidos = absol | ctx1`), pero no el halo tibio que no alertó.
+3. **En la ventana de búsqueda.** Cada grilla tiene una región sensible (umbral bajo) y el resto conservador. En Cordón
+   Caulle la región sensible de VIIRS 750 es la caja de 7 × 7 celdas en el cráter (#999); en MODIS, la caja de 5 × 5 al
+   centro de la grilla, con el cráter afuera (D36 punto 7). **Corrección a la premisa del pedido:** fuera de la caja el
+   foco no es invisible. La zona 0 se busca con los umbrales conservadores (docstring de `caja_roi`, verificación
+   F9-106 de S193; el `.m` l. 389 a 391); lo que la deja casi ciega para un foco incipiente es el piso conservador de
+   noche, 0,02 en NTI y 0,01 en ETI, contra 0,003 de la región sensible.
+
+**Lo que ya existe.** La vía guarda los alertados de cada pasada en `anomaly_pixels` (hasta 100 por record, con
+`lat`, `lon`, `bt_k`, `fila`, `col` y distancia; no guarda la potencia por píxel). #1092 (v1.73) reparte a posteriori
+la potencia entre cráter, agua, flanco (10 km provisional, AR3 sin respuesta) y resto, invirtiendo Planck desde `bt_k`,
+con cierre comprobado en 8.997 pasadas (`experiments/_s194_areas/INFORME.md`); y `experiments/_s194_areas/recurrencia.py`
+cuenta en cuántas noches alertó cada casilla de 1 × 1 km. No hay series por área ni alerta de zona nueva publicadas.
+
+**Medido hoy, sin reprocesar.**
+
+- **Enmascaramiento, la firma** (`m0_enmascaramiento.py`, `salida_m0_enmascaramiento.txt`). El umbral sensible del
+  segundo pase (`u_nti2`, mediana) sube con la potencia de la escena: en VIIRS 750 de 0,00386 en escenas sin calor a
+  0,00577 en escenas de 10 a 100 MW (un foco chico tiene que tener 1,5 veces más contraste para alertar); en MODIS de
+  0,00395 a 0,00706; en VIIRS 375 de 0,00338 a 0,00443. En Cordón Caulle, de 0,0036 (sin calor) a 0,0049 (1 a 10 MW). El
+  umbral conservador (`u_nti1`) queda en su piso de 0,02 en casi todas las escenas (0 a 6 %), o sea, fuera de la región
+  sensible lo que frena a un foco chico es el piso fijo, no la anomalía. Dos cautelas: la nubosidad y el ángulo también
+  agrandan sd (las escenas sin calor ya están sobre el piso en el 68 a 72 %), así que esta cuenta muestra la firma pero
+  no la separa de esas causas; y no hay escenas sobre 10 MW en Villarrica ni en Cordón Caulle en la ventana.
+- **Cuántas pasadas ya traen un segundo foco** (`m0b_cumulos_multiples.py`, `salida_m0b_cumulos_multiples.txt`). Con
+  un segundo cúmulo 8-conexo a 3 km o más del principal: Láscar 78 de 896 pasadas con detección, Isluga 72 de 603,
+  Lastarria 56 de 421, Cordón Caulle 38 de 442, Tupungatito 29 de 434, Planchón-Peteroa 20 de 292, Villarrica 2 de 66.
+  Con el principal en el cráter y el segundo fuera del radio interno: Láscar 14, Nevados de Chillán 3, Tupungatito 1,
+  con un segundo cúmulo de mediana 1 píxel (2 en Tupungatito) y más frío que el principal. Muchos serán ruido, y por eso
+  la parte (2) necesita una línea base y persistencia.
+
+**El plan, en cuatro partes, de la más barata a la más cara.**
+
+1. **Publicación múltiple** (sin tocar la detección ni A45). En el laboratorio, una serie de potencia por área (cráter,
+   flanco, resto, agua) y otra por cúmulo, en cada pasada, armadas con la partición de #1092 sobre los records que la vía
+   ya escribe. Es contabilidad exacta de los mismos alertados (su cierre está comprobado), así que no necesita vara: la
+   suma de las series es lo publicado. Sale en la pestaña «Laboratorio» como gráfico por área, con el número de cúmulos
+   de la pasada. Para Cordón Caulle hace falta definir sus áreas (D-D: el radio interno de 20 km no sirve de «cráter»).
+2. **Alerta de zona nueva.** Una casilla de 1 × 1 km que alerta en una noche y no alertó en ninguna de las N noches
+   previas (línea base móvil por volcán, `recurrencia.py`), y que vuelve a alertar en las M noches siguientes, se marca
+   como «zona nueva», sea cual sea el tamaño de la anomalía conocida. La persistencia (M) es lo que separa un foco de un
+   píxel de ruido. N y M se fijan con una medición previa barata, descrita y no hecha: cuántas «zonas nuevas» saldrían por
+   volcán y por mes en la historia de 2026-03-01 a 2026-11-22 con N de 30, 60 y 90 y M de 1 a 3; la tasa tiene que ser
+   tan baja que Nicolás quiera mirar cada una.
+3. **Enmascaramiento, medido de verdad.** Un experimento sintético con el detector de producción
+   (`detectar_mirova`, sin tocarlo): una escena de fondo real (las matrices chilenas guardadas de S159,
+   `experiments/_s159/o1/`, o el ejemplo de Etna del OSF), una anomalía fuerte de 1, 10 y 100 MW con su halo, y un foco
+   débil insertado a 2, 5, 10 y 20 km. Se mide el contraste mínimo con que el foco débil alerta con y sin la anomalía
+   fuerte. Si el enmascaramiento existe, se prueba en el laboratorio la extensión natural: calcular mu y sd del segundo
+   pase sin un halo dilatado de los alertados (3, 5 o 7 celdas, el mismo halo que el `.m` ya usa para el fondo del VRP).
+   La medición en disco de arriba se completa estratificando por cenit y por escenas con la misma potencia en días
+   seguidos, para separar la anomalía de la nube.
+4. **Ventana de todo el edificio.** En el laboratorio, la región sensible deja de ser la caja del cráter y pasa a ser
+   el edificio (un radio por volcán, AR3), con los umbrales sensibles. Ojo con el código de la zona A de MEJ-5: hoy sólo
+   actúa dentro de la región sensible (`zona_a & (box == 2)` en `detectar_mirova`), así que mirar el edificio pide
+   cambiar la caja, no sólo la zona A. Es la parte de mayor costo en falsas alarmas (valles tibios, salares, incendios en
+   el flanco) y por eso va última y medida con los negativos limpios de MEJ-5.
+
+**Qué sería un acierto y contra qué vara.** (1) no necesita vara. (2), (3) y (4) sí, y para el flanco **NHI casi no
+sirve**: su caja mide de 1,3 a 4 km de lado medio en nueve de los diez volcanes con serie (Villarrica 1,5,
+Planchón-Peteroa 1,3, Láscar 3,0; Lastarria no tiene) y sólo la de Cordón Caulle llega a 10 km (`experiments/_s195_viirs_dia_control/nhi_cajas.json`), así que
+un foco en el flanco cae fuera de ella. La vara del flanco es la tabla de episodios del OVDAS (D4 (a)) y la imagen de
+alta resolución mirada a ojo (Sentinel 2 MSI de 20 m en SWIR, Landsat OLI de 30 m y su banda térmica de 100 m) a pocos
+días de cada «zona nueva». Acierto de (2): que las zonas nuevas persistentes caigan donde el OVDAS o la imagen muestran
+algo, más que en un sorteo de casillas del mismo volcán. Acierto de (3) y (4): que el laboratorio alerte focos débiles
+cerca de una anomalía grande sin subir la tasa en negativos limpios sobre lo que Nicolás fije.
+
+**Riesgos y protección de producción.** (1) y (2) son derivados a posteriori: no tocan `pipeline/` ni lo publicado en la
+vista operacional (guard 2 del plan S190 §4: el tablero operacional no lee el laboratorio). (3) en su parte sintética no
+toca nada; la extensión del halo y (4) cambian la detección del laboratorio y entran detrás de un flag apagado, con
+identidad byte a byte de `data/mirova_equivalent/`. El riesgo científico de (2) y (4) es una lluvia de falsas «zonas
+nuevas»: por eso la persistencia y la tasa medida antes.
+
+**Costo.** (1): una sesión (extender `particion.py` a todas las pasadas y a un JSON por volcán, y la vista). (2): una
+sesión para la medición de la tasa y otra para la alerta. (3): una sesión sin Actions para el sintético; la extensión,
+un brazo del laboratorio (del orden de un brazo del barrido S195, `salida_costo_barrido.txt`). (4): un brazo más, después
+del veredicto de MEJ-5.
+
+**A45.** (1), (2) y el sintético de (3): no. La extensión del halo de (3) y la caja de (4): sí
+(`pipeline/mirova_v750_codigo.py`).
 
 ## 3. P1. MEJ-8: lagos y lagunas tibias que se confunden con calor volcánico
 
@@ -432,6 +536,10 @@ pestaña pasa a leerlo. Borrar los datos viejos queda para el final, con tag (A3
 
 | orden | id | primer paso | depende de | A45 | costo del primer paso |
 |---|---|---|---|---|---|
+| 0 | P0 (1) series por área y cúmulo | extender `experiments/_s194_areas/particion.py` a todas las pasadas y a la pestaña Laboratorio | áreas de Cordón Caulle (D-D) y radio del edificio (D-H) | no | una sesión |
+| 0 | P0 (2) zona nueva | medir la tasa de «zonas nuevas» por volcán y mes con N de 30, 60 y 90 y M de 1 a 3 | (1) | no | una sesión |
+| 0 | P0 (3) enmascaramiento | sintético con `detectar_mirova` y estratificación de `m0` por cenit | nada | no (la extensión del halo, sí) | una sesión sin Actions |
+| 0 | P0 (4) edificio entero | brazo del laboratorio con la región sensible del edificio | (3), veredicto de MEJ-5 y D-H | sí | un brazo |
 | 1 | P1 MEJ-8 | Nicolás decide Laguna del Maule (D-A del §14); luego `NaN` en la `BOX` y reproceso de un volcán de los 34 | decisión D-A | sí | una sesión |
 | 2 | P10 C0 | PR que apaga los dos workflows y arregla el control del paso 1 | sí de Nicolás a D1-b (D-B) | no | una sesión |
 | 3 | P9 Lastarria | adenda al pre-registro de MEJ-5 con persistencia y tasa contra controles | Nicolás elige los controles (D-C) | no | una sesión corta |
@@ -452,6 +560,8 @@ S190), y ninguna extensión nueva corre al mismo tiempo que MEJ-5 en el mismo pe
 
 | # | pregunta | opciones | recomendación |
 |---|---|---|---|
+| D-H | Radio del edificio por volcán (AR3 de #1092, sin respuesta): ¿cuánto mide el «flanco» de cada uno? | (a) un radio por volcán que tú das, desde la geología; (b) 10 km en todos, como hoy | **(a)**: el P0 entero (series por área, zona nueva y ventana del edificio) depende de dónde termina el edificio, y eso es de geólogo |
+| D-I | P0: ¿dónde se muestra la alerta de zona nueva? | (a) sólo en la pestaña Laboratorio, con el aviso de que es experimental; (b) también como aviso en el tablero operacional | **(a)** hasta tener su tasa y su acierto contra OVDAS; el operacional sigue igual a MIROVA |
 | D-A | Laguna del Maule: ¿qué hacemos con el punto que cae en el lago? | (a) dejar el punto y sacar de la `BOX` las celdas de lago (`NaN`) en la sombra de los 34; (b) lo mismo, pero sólo en un laboratorio de los 34; (c) mover el punto a otro foco con fuente citada; (d) nada | **(a)**: MIROVA no publica Laguna del Maule, así que no hay réplica que romper; saca 33 de 33 pasadas sobre agua cercanas (S193) y no deshace el punto que fijaste el 2026-04-16. Requiere A45 |
 | D-B | ¿Retiramos ya la sombra C0 (D1-b)? | (a) sí, en un PR propio que apaga los dos workflows y deja los datos congelados; (b) esperar a que el laboratorio tenga cron | **(a)**: ya no vigila nada (`SIN_OBJETO`), cuesta 186 minutos-job por día y ocupa cupos que el laboratorio va a necesitar |
 | D-C | Lastarria: ¿qué vara? | (a) persistencia más tasa contra volcanes de control que tú elijas; (b) esperar la tabla de episodios del OVDAS; (c) explorar TIR de Landsat | **(a) ahora y (b) cuando esté**: (a) ya separa (166 noches contra 2 a 5) y no cuesta nada; dime qué volcanes sirven de control (sin campo fumarólico activo) |
