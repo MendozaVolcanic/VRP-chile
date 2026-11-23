@@ -23,7 +23,7 @@ import yaml
 sys.stdout.reconfigure(encoding="utf-8")
 AQUI = Path(__file__).resolve().parent
 ROOT = AQUI.parents[1]
-COMMIT_NHI = "09c45707e9a6475bb85fefc41f24ba12d6102673"   # main de NHI-v1 el 2026-11-21T22:16:12Z
+COMMIT_NHI = "4d24515abe1e9fcb0a014d13eeb1963483b98993"   # main de NHI-v1 el 2026-11-23T05:15:25Z (re-sello S196: Chillán corregido en NHI-v1 #1; antes 09c45707e9a6, 2026-11-21T22:16:12Z)
 NOMBRE_NHI = {"Chaiten": "Chaiten", "Copahue": "Copahue", "Isluga": "Isluga", "Lascar": "Lascar",
               "Lastarria": "Lastarria", "Llaima": "Llaima", "NevadosDeChillan": "Nevados de Chillan",
               "PlanchonPeteroa": "Planchon-Peteroa", "PuyehueCordonCaulle": "Puyehue - Cordon Caulle",

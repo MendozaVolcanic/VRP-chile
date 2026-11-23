@@ -16,6 +16,21 @@
 > D5 (30 %, 4 de 9, p < 0,05, control de 15 días, SIN PODER bajo 10, ventana NHI desde 2026-02-15) no cambia. El
 > re-sello se commitea antes de cualquier medición: no existe aún ningún record del laboratorio.
 >
+> **Re-sello del 2026-11-23 (S196), por la caja de Nevados de Chillán en NHI-v1.** NHI-v1 tenía el centro de «Nevados
+> de Chillan» a 61 km del volcán, encima de Antuco: la serie NHI de Chillán que leía este pre-registro medía Antuco, no
+> Chillán. NHI-v1 lo corrigió (PR #1 de NHI-v1, merge `55461a4fa6d2`, centro -36.863, -71.377, el de `volcanoes.yaml`)
+> y regeneró la serie desde 2026-01-27 (commit `4d24515abe1e`, 2026-11-23 05:15 UTC; la vieja quedó en
+> `archivo/chillan_ubicacion_antuco_hasta_2026-11-23/` de NHI-v1). Nicolás aprobó re-sellar antes de medir (textual,
+> opción elegida: «Corregir y re-sellar (Recomendado)», transmitida por la coordinadora S196). El evaluador lee NHI del
+> `main` vivo de NHI-v1, así que **no cambia**: su sha256 es el mismo de abajo. Cambian sólo las salidas de la línea
+> base que dependen de NHI (§6): `medir_base.py` se re-corrió sobre un árbol del commit original (`1c6ac41e1`) con la
+> referencia de MIROVA en los shas de la corrida original (`medir_base_fijo.py`) y NHI en `4d24515abe1e`; con el NHI de
+> la corrida original esa misma corrida reproduce byte a byte las salidas del 2026-11-22. Lo que cambió: Chillán pasa de
+> 112 escenas con 16 alertas (tasa 0,143) a 101 con 23 (0,228), y sus escenas pareadas con noches en que producción no
+> publica, de 79 a 75 (alerta NHI en 9 en las dos); Isluga suma una escena del 2026-11-21 que NHI-v1 agregó después de
+> la corrida original (122 a 123 escenas, sin alertas nuevas; pareadas 121 a 122). Ningún valor del criterio, ventana
+> ni umbral cambia, y no existe aún ningún record del laboratorio: no se miró ningún dato de veredicto.
+>
 > **Sello.** El evaluador es `experiments/_s194_lab_zona_a/evaluar.py`,
 > sha256 del evaluador (fin de línea LF): `072400b76afd536ba161a0e488182873eb83045cdc68c9faf21f8c7e5293f903`
 > (el del primer sello, commit `f93c343e5`, era `e0d19ae34188735a1bc468aae3bc887ff9f495eab985a95a68f4911f38cfd74b`).
@@ -163,11 +178,13 @@ sin mirar al laboratorio, y `evaluar.py poder` (salida `salida_poder.txt`) da el
 - NHI desde 2026-02-15: de 74 escenas (Chaitén) a 132 (Tupungatito) por volcán; tasa basal de alerta de 0,068
   (Tupungatito) a 0,351 (Llaima).
 - Las unidades S y N salen sólo de noches en que producción no publica. Escenas pareadas con esas noches hoy: Isluga
-  16, Láscar 23, Chaitén 46, Tupungatito 53, Planchón-Peteroa 56, Villarrica 76, Nevados de Chillán 79, Llaima 94,
-  Copahue 123.
+  16, Láscar 23, Chaitén 46, Tupungatito 53, Planchón-Peteroa 56, Nevados de Chillán 75, Villarrica 76, Llaima 94,
+  Copahue 123. (Re-sello S196: con la caja de Chillán corregida en NHI-v1, `4d24515abe1e`. Texto anterior, con la
+  serie de Chillán que medía Antuco: «Villarrica 76, Nevados de Chillán 79, Llaima 94»; Chillán tenía 112 escenas y
+  tasa basal 0,143, hoy 101 escenas y 0,228.)
 - Humo de identidad (`salida_humo_identidad.txt`): el evaluador corrido con laboratorio = producción sobre los datos
   reales da 0 noches S y 0 noches P, 0 noches con cobertura desigual, todos los volcanes SIN PODER y 0 extras, que es
-  lo que tiene que dar.
+  lo que tiene que dar. (Re-sello S196: re-corrido con el NHI nuevo; sólo cambia el n_N de Chillán, de 79 a 75.)
 
 ## 7. El crítico despiadado: cinco debilidades y qué hice con cada una
 
@@ -260,6 +277,7 @@ Respuestas (2026-11-22, coordinadora S194): 1 «Por noche (Recomendado)», 2 «S
 | `experiments/_s194_lab_zona_a/PREREGISTRO.md` | este documento |
 | `experiments/_s194_lab_zona_a/evaluar.py` | evaluador sellado (`evaluar`, `calibrar`, `poder`) |
 | `experiments/_s194_lab_zona_a/medir_base.py` | línea base de §6 (producción y NHI, sin laboratorio) |
+| `experiments/_s194_lab_zona_a/medir_base_fijo.py` | corre `medir_base.py` con producción y referencia fijas (re-sello S196) |
 | `experiments/_s194_lab_zona_a/mutar.py` | control de mutaciones |
 | `experiments/_s194_lab_zona_a/salida_*.txt`, `resultado_mutaciones.json` | salidas de los tres scripts y del humo |
 | `tests/test_lab_zona_a_preregistro_s194.py` | pruebas del evaluador |
