@@ -93,12 +93,16 @@ def test_la_adopcion_sale_del_js_del_tablero_con_segundos():
 
 
 def test_el_workflow_escucha_al_workflow_de_la_sombra():
-    """Si alguien renombra experimental-diario, la vigilancia deja de dispararse sin error (verificador 2)."""
+    """⚠️ S196 (A113; decisión D-B de Nicolás del 2026-11-23): la sombra C0 se retiró. La vigilancia ya no escucha a
+    experimental-diario ni tiene cron de respaldo; queda sólo el despacho manual, y lo vigila
+    tests/test_retiro_sombra_c0_s196.py. Lo que sigue valiendo: si alguien la despacha, el issue se abre aunque falle
+    el push. Texto anterior: «Si alguien renombra experimental-diario, la vigilancia deja de dispararse sin error
+    (verificador 2)», con las aserciones `wf["on"]["workflow_run"]["workflows"] == [sombra["name"]]` y
+    `wf["on"].get("schedule")` («falta el cron de respaldo»)."""
     import yaml
     wf = yaml.safe_load((ROOT / ".github" / "workflows" / "vigilancia-sombra.yml").read_text(encoding="utf-8"))
-    sombra = yaml.safe_load((ROOT / ".github" / "workflows" / "experimental-diario.yml").read_text(encoding="utf-8"))
-    assert wf["on"]["workflow_run"]["workflows"] == [sombra["name"]]
-    assert wf["on"].get("schedule"), "falta el cron de respaldo"
+    assert "workflow_dispatch" in wf["on"]
+    assert "workflow_run" not in wf["on"] and "schedule" not in wf["on"], "la sombra C0 está retirada (S196)"
     pasos = wf["jobs"]["vigilar"]["steps"]
     issue = next(p for p in pasos if p.get("name") == "Open issue")
     assert issue.get("if") == "always()", "el issue tiene que abrirse aunque falle el push"

@@ -1,5 +1,19 @@
 name: Experimental diario (laboratorio congelado, 11 Tier A)
 
+# RETIRADO (S196, 2026-11-23, decision D-B de Nicolas: «lo que recomiendas», sobre P10 de
+# docs/PLAN_EXPERIMENTAL_MEJORAS_S196.md, que es D1-b de docs/PLAN_EXPERIMENTAL_S190.md).
+# POR QUE: esta corrida producia la sombra C0 (data/experimental_v2/), que existia para disparar la
+# reversion de K si produccion callaba algo que el detector anterior veia. Desde el 2026-11-11 ningun sensor
+# de produccion corre K (los tres corren la via «codigo MIROVA») y vigilancia-sombra.yml da SIN_OBJETO cada
+# dia (corrida del 2026-11-23 03:58 UTC). Costaba unos 186 minutos-job por dia (plan S190 §3) y ocupaba
+# cupos que el laboratorio nuevo va a necesitar.
+# QUE QUEDA: sin cron. El workflow_dispatch se conserva sólo para reconstruir la serie si alguien lo
+# necesitara, y despacharlo DESCONGELA data/experimental_v2/ (lo decide Nicolas). Los datos quedan
+# congelados en el ultimo commit del workflow (README en data/experimental_v2/). El perfil experimental
+# y la opcion manual profile=experimental de nrt.yml siguen existiendo (esa no commitea experimental_v2).
+# Lo vigila tests/test_retiro_sombra_c0_s196.py.
+#
+# Texto anterior (S150), conservado:
 # S150 (decision de Nicolas 2026-10-09). El perfil `experimental` quedo CONGELADO en la deteccion de
 # produccion de hoy (PR #771): conectiva min y Test 1 encendido, que ven las anomalias debiles reales que
 # MIROVA no publica. La replica va a cambiar para parecerse a MIROVA y dejara de verlas; este workflow
@@ -17,8 +31,7 @@ name: Experimental diario (laboratorio congelado, 11 Tier A)
 # A71: autentica SOLO con EARTHDATA_TOKEN y falla al instante si viene vacio.
 # A43: "on" entre comillas.
 "on":
-  schedule:
-    - cron: "0 14 * * *"
+  # S196: cron "0 14 * * *" retirado (ver la cabecera).
   workflow_dispatch:
 
 concurrency:
