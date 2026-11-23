@@ -181,10 +181,19 @@ CORRE_PERFIL = r"(?:--profile[\s=]+|VRP_PROFILE\s*[=:]\s*|profile\s*==\s*)['\"]?
 
 
 def test_g6_ningun_workflow_corre_el_laboratorio():
+    """S196 (P10 de docs/PLAN_EXPERIMENTAL_MEJORAS_S196.md): el control ya no se apoya en el perfil `experimental`,
+    cuyo workflow diario se retiró con la sombra C0 (D-B). Ahora tiene dos patas: la expresión encuentra el perfil de
+    producción en nrt.yml, que tiene cron y no se retira, y encuentra el laboratorio en las tres formas en que un
+    workflow podría correrlo. Texto anterior del control: «assert any(re.search(CORRE_PERFIL.format("experimental"),
+    t) ...), "control: la expresión no encuentra cómo se corre el perfil experimental"»."""
     flujos = sorted((RAIZ / ".github" / "workflows").glob("*.yml"))
     textos = {p.name: p.read_text(encoding="utf-8") for p in flujos}
-    assert any(re.search(CORRE_PERFIL.format("experimental"), t) for t in textos.values()), \
-        "control: la expresión no encuentra cómo se corre el perfil experimental"
+    assert re.search(CORRE_PERFIL.format("mirova_equivalent"), textos["nrt.yml"]), \
+        "control: la expresión no encuentra cómo nrt.yml corre el perfil de producción"
+    for linea in ("python scripts/run_pipeline.py --profile laboratorio --volcano Lascar",
+                  "VRP_PROFILE=laboratorio python -c 'import pipeline.profile'",
+                  "if: ${{ github.event.inputs.profile == 'laboratorio' }}"):
+        assert re.search(CORRE_PERFIL.format("laboratorio"), linea), f"control: la expresión no ve {linea!r}"
     corren = sorted(n for n, t in textos.items()
                     if re.search(CORRE_PERFIL.format("laboratorio"), t) or re.search(r"\blaboratorio_v1\b", t))
     assert not corren, f"el laboratorio entra al cron por tandas en el paso 4 del plan S190, no antes: {corren}"
