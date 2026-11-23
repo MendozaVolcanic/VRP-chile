@@ -569,6 +569,13 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-23 22:45 UTC (S196): main v1.85; NHI Chillán corregido y re-sello; piso del cráter con código y barrido; plan de mejoras con P0
+
+- Mergeados: #1098 (re-sello, v1.79), #1100 (independencia paso 2, v1.80), #1101 (pre-registro del piso, v1.81), #1102 (código del piso, A45, v1.82), #1103 (plan de mejoras del experimental, P0 primero, v1.83), #1104 (retiro de C0 y MEJ-7 paridad, v1.84), #1105 (visor de radios, v1.85). Fuera del repo: NHI-v1 #1 y vrp-chile-paper `ffa6813`.
+- Barrido del factor s pausado (plano). Piso: tanda 1 válida y se separa (4 a 62 nuevas en marzo); tanda 2 inválida por 401 transitorio de NASA; tanda 2b corriendo al cerrar (run 45280588605).
+- Auditoría semanal del 23-nov fuera de banda (#1106, Chaitén MODIS 2026-11-19 02:30, 1,07 MW). Sin diagnosticar.
+- Retomar con `tasks/BLOQUE_ARRANQUE_S197.md`.
+
 ### 2026-11-23 05:00 UTC (S195): #1097 y #1096 en main (v1.77 y v1.78), prueba de humo del barrido verde, VIIRS de día apagado
 
 - Mergeados: #1095 (v1.76, entró al abrir), #1097 (pre-registro del control diurno VIIRS, v1.77), #1096 (laboratorio paso 3, zona A diseño (a), v1.78).
