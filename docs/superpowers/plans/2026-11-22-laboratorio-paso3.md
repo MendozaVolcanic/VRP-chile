@@ -81,13 +81,13 @@ cuenta como atrapada sólo si alguna prueba falla por aserción y ninguna por ex
 
 ## Pasos
 
-- [ ] Pruebas P1 a P8 y cambios de G4, G7 y G8 escritos; correr y ver rojo.
-- [ ] `profile.py` y `mirova_v750_codigo.py`; perfiles del barrido; correr y ver verde.
-- [ ] `identidad_antes_despues.py` contra el tag (byte a byte) y su salida.
-- [ ] Workflow del barrido y su guard.
-- [ ] Mutaciones en copia; tabla.
-- [ ] Suite completa `pytest -q`; anotar passed, failed y skipped.
-- [ ] Commit por archivo, push, PR con la fila de la ficha en la descripción; `gh pr checks <N> --watch`. No mergear.
+- [x] Pruebas P1 a P8 y cambios de G4, G7 y G8 escritos; correr y ver rojo.
+- [x] `profile.py` y `mirova_v750_codigo.py`; perfiles del barrido; correr y ver verde.
+- [x] `identidad_antes_despues.py` contra el tag (byte a byte) y su salida.
+- [x] Workflow del barrido y su guard.
+- [x] Mutaciones en copia; tabla.
+- [x] Suite completa `pytest -q`; anotar passed, failed y skipped.
+- [x] Commit por archivo, push, PR con la fila de la ficha en la descripción; `gh pr checks <N> --watch`. No mergear.
 
 ## Hallazgo al preparar el barrido: el piso de 0,003 limita la palanca
 
