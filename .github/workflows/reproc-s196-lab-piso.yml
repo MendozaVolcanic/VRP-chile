@@ -298,8 +298,11 @@ jobs:
           git commit -m "S196 barrido del piso de la zona A del laboratorio: salidas crudas de la corrida ${GITHUB_RUN_ID} (no toca main)"
           # Reintento propio: si el push se cae por red se pierde la unica copia durable (el artefacto caduca). Este
           # workflow NO pushea a main y por eso no entra al grupo push-main.
+          # S199: --force porque la rama es sólo de esta corrida y un relanzado de recolectar arma su commit desde todos
+          # los artefactos (los del intento anterior y los nuevos). Sin --force, el push de un relanzado rebotaba
+          # contra la rama parcial que dejó el primer intento (tanda 3, run 45308651250, cinco rechazos «fetch first»).
           for attempt in 1 2 3 4 5; do
-            if git push origin "$RAMA"; then
+            if git push --force origin "$RAMA"; then
               echo "salidas en la rama $RAMA"
               exit 0
             fi
