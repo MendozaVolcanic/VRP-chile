@@ -658,17 +658,36 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
     return SENSOR_COLOR[b] ? { clave: b, color: SENSOR_COLOR[b], label: SENSOR_LABEL[b] } : null;
   });
   if (diaPropios.length) ds.push(DiurnoTablero.dataset(diaPropios));   // S193
-  return { datasets: ds, n_records: recsTodos.length };
+  return { datasets: ds, n_records: recsTodos.length, marcasCnm: marcasCnmDiario(jsonData) };
 }
 
-function chartConfig(datasets) {
+// R3F5-101 (auditoría Codex ronda 3): el gráfico del diario no mostraba las pasadas con el cráter no medido (sólo el conteo
+// del período las contaba). Una raya naranja arriba del día: llena si alguna pasada nocturna no midió el cráter (MIR sin
+// dato o barrido sin posición), hueca si sólo la MIR saturó (la potencia publicada es un mínimo). Mismo filtro que el
+// conteo (noche, período, sin escena vacía; frontend/crater_no_medido.js). El día es el UTC de las barras.
+function marcasCnmDiario(jsonData) {
+  if (typeof CraterNoMedido === "undefined") return [];
+  const porDia = new Map();
+  for (const mk of CraterNoMedido.marcasGrafico(jsonData?.records || [],
+         r => r._diurna !== true && enPeriodo(parseUtcMs(r.datetime_utc)), parseUtcMs)) {
+    const d = new Date(mk.t).toISOString().slice(0, 10);
+    const prev = porDia.get(d) || { x: d, noMedido: false, sat: false };
+    prev.noMedido = prev.noMedido || mk.noMedido; prev.sat = prev.sat || mk.sat;
+    porDia.set(d, prev);
+  }
+  return [...porDia.values()];
+}
+
+function chartConfig(datasets, marcasCnm) {
   return {
     type: "bar",
     data: { datasets },
+    plugins: typeof CraterNoMedido !== "undefined" ? [CraterNoMedido.plugin] : [],   // R3F5-101
     options: {
       responsive: true, maintainAspectRatio: false, animation: false,
       interaction: { mode: "indexMasSol", intersect: false },  // S151: "index" + el sol bajo el cursor
       plugins: {
+        craterNoMedido: { marcas: marcasCnm || [] },   // R3F5-101
         legend: { labels: { color: "#7a8fa6", font: { size: 10 } } },
         tooltip: { callbacks: {
           title: (items) => items[0].parsed.x ?
@@ -980,7 +999,7 @@ function renderCard(volc, jsonData, mirovaForVolc) {
   card.appendChild(wrap);
   grid.appendChild(card);
 
-  const { datasets, n_records } = buildDatasets(jsonData, mirovaForVolc || [], volc.name);
+  const { datasets, n_records, marcasCnm } = buildDatasets(jsonData, mirovaForVolc || [], volc.name);
   if (n_records === 0 && datasets.length === 0) {
     while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
     const msg = el("div", "no-data");
@@ -990,7 +1009,7 @@ function renderCard(volc, jsonData, mirovaForVolc) {
     return;
   }
   const ctx = canvas.getContext("2d");
-  charts[volc.name] = new Chart(ctx, chartConfig(datasets));
+  charts[volc.name] = new Chart(ctx, chartConfig(datasets, marcasCnm));
 }
 
 function openModal(volcName) {
@@ -1007,7 +1026,7 @@ function openModal(volcName) {
   const copia = JSON.parse(JSON.stringify(original.data.datasets));
   // S151: la copia JSON pierde las funciones de estilo; sin esto el sol saldria como un circulo en el modal.
   for (const d of copia) if (d.mirovaDia) d.pointStyle = mirovaSolStyle;
-  modalChart = new Chart(ctx, chartConfig(copia));
+  modalChart = new Chart(ctx, chartConfig(copia, original.options.plugins.craterNoMedido && original.options.plugins.craterNoMedido.marcas));   // R3F5-101
 }
 function closeModal() {
   document.getElementById("modal").style.display = "none";

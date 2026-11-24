@@ -99,7 +99,64 @@
     return best;
   }
 
-  const api = { COLOR, SIMBOLO, craterNoMedido, textoCrater, tituloCrater, ultimaPasadaNoMedida };
+  // R3F5-101 (auditoría Codex ronda 3, S198). La marca llegaba a la tabla, el popup, las tarjetas de 48 h y el conteo
+  // del diario, pero no a los gráficos: la evolución de index dibujaba la pasada con el cráter no medido como «se midió,
+  // nada» (y su recuadro decía «sin anomalía»), el minigráfico de mosaico la contaba como día observado y el gráfico del
+  // diario no la mostraba. Pasada la ventana de 48 h, el operador ya no tenía cómo distinguirla de un cráter frío.
+  // esNoMedido: la pasada no midió el cráter entero (hueco de MIR o barrido sin posición). La saturación sola no es «no
+  // medido» (sí se midió, con un valor que es un mínimo): se avisa con su propio texto.
+  function esNoMedido(m) { return !!(m && (m.nMir || m.sinPosicion)); }
+
+  // Marcas para los gráficos por día o por pasada: [{t, sat, noMedido, m}] de los records marcados que pasan el filtro
+  // de la vista. Como ultimaPasadaNoMedida, salta la escena que la vía no midió (motivo_vacio): ya se rotula aparte.
+  function marcasGrafico(records, filtro, parseMs) {
+    const out = [];
+    for (const r of records || []) {
+      if (r && r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio) continue;
+      if (filtro && !filtro(r)) continue;
+      const m = craterNoMedido(r);
+      if (!m) continue;
+      const t = parseMs(r.datetime_utc);
+      if (!Number.isFinite(t)) continue;
+      out.push({ t, noMedido: esNoMedido(m), sat: m.nSat > 0, m });
+    }
+    return out.sort((a, b) => a.t - b.t);
+  }
+
+  // Plugin de Chart.js que dibuja, arriba del área del gráfico, una raya naranja por marca: llena si la pasada no midió
+  // el cráter, hueca si sólo la MIR saturó (la potencia es un mínimo). Opciones en options.plugins.craterNoMedido:
+  // {marcas: [{x, noMedido, sat}]}, con x en las unidades del eje (Date, milisegundos o el texto del día que usa la
+  // vista); se convierte con el parse del propio eje para que la raya caiga donde cae la barra.
+  const plugin = {
+    id: "craterNoMedido",
+    afterDatasetsDraw(chart, args, o) {
+      const a = chart.chartArea, x = chart.scales && chart.scales.x;
+      if (!a || !x || !o || !o.marcas || !o.marcas.length) return;
+      const ctx = chart.ctx; ctx.save();
+      ctx.strokeStyle = COLOR; ctx.fillStyle = COLOR; ctx.lineWidth = 1;
+      for (const mk of o.marcas) {
+        const v = typeof x.parse === "function" ? x.parse(mk.x) : mk.x;
+        if (v == null || !Number.isFinite(+v)) continue;
+        const px = x.getPixelForValue(+v);
+        if (!(px >= a.left && px <= a.right)) continue;
+        if (mk.noMedido) ctx.fillRect(px - 1.5, a.top, 3, 7);
+        else ctx.strokeRect(px - 1.5, a.top + 0.5, 3, 6);
+      }
+      ctx.restore();
+    },
+  };
+
+  // R3F5-V101: un fondo de 0 K es la señal de «fondo no estimado» que dejan algunos records (13 de los Tier A, de
+  // 2025-05 a 2026-04), no una medición: la tabla de index lo mostraba como -273,1 °C y la tarjeta habría leído un ΔT de
+  // 259 a 279 K como «material caliente expuesto». Devuelve el fondo en kelvin o null si no hay fondo medido. No se
+  // inventa un piso físico: sólo se descarta lo que no puede ser una temperatura (no finito, cero o negativo).
+  function fondoK(r) {
+    const k = r ? r.t_bg_k : null;
+    return (typeof k === "number" && Number.isFinite(k) && k > 0) ? k : null;
+  }
+
+  const api = { COLOR, SIMBOLO, craterNoMedido, textoCrater, tituloCrater, ultimaPasadaNoMedida, esNoMedido, marcasGrafico,
+                plugin, fondoK };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else raiz.CraterNoMedido = api;
 })(typeof window !== "undefined" ? window : this);
