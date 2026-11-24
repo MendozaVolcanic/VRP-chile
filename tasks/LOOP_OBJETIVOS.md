@@ -569,6 +569,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-24 04:00 UTC (S197): main v1.88; token Earthdata revocado y rotado; #1106 diagnosticado y aceptado; marzo del piso completo
+
+- **401 de NASA desde 2026-11-23 23:02:47 UTC:** Nicolás había revocado el token del secreto al generar uno para Goes;
+  lo rotó él a las 23:35:59 UTC (vence 2027-01-22 23:03). Detectado por la tanda 2b y dos probes; el NRT no alcanzó a fallar.
+- **#1106 (Chaitén MODIS 2026-11-19 02:30, MIROVA 1,07 MW):** #1107 (v1.86) diagnóstico: borde doble de la caja sensible
+  y del ETI (0,15 %), no el piso de D36; #1108 (v1.87) A/B de la caja en el cráter: empate en 330 pasadas; #1109 (v1.88)
+  pérdida aceptada por Nicolás.
+- **Barrido del piso:** tanda 2b inválida (401); tanda 2c válida (Isluga p150 +41, Tupungatito +48, sin pérdidas); marzo
+  completo. Tanda 3 (abril, run 45308651250) corriendo al cerrar, con un rojo en Villarrica trozo 5.
+- **Sombra de los 34:** despachada a mano (GitHub no lanzó la del 23-nov), 32/32 verdes, Callaqui recuperado.
+- **Guardia MODIS cumplida** (30 de 29, 2026-11-24 03:47 UTC): falta el informe de cierre.
+- **Codex ronda 3** en la sesión `codex-ronda3`: orden 9, 3, 5 y Cierre II, frente 9 desde las 04:21 UTC.
+- Traspaso: `tasks/BLOQUE_ARRANQUE_S198.md`.
+
 ### 2026-11-23 22:45 UTC (S196): main v1.85; NHI Chillán corregido y re-sello; piso del cráter con código y barrido; plan de mejoras con P0
 
 - Mergeados: #1098 (re-sello, v1.79), #1100 (independencia paso 2, v1.80), #1101 (pre-registro del piso, v1.81), #1102 (código del piso, A45, v1.82), #1103 (plan de mejoras del experimental, P0 primero, v1.83), #1104 (retiro de C0 y MEJ-7 paridad, v1.84), #1105 (visor de radios, v1.85). Fuera del repo: NHI-v1 #1 y vrp-chile-paper `ffa6813`.
