@@ -207,8 +207,10 @@ jobs:
           if [ "$VRP_OVERWRITE" = "true" ]; then ARGS+=(--overwrite); fi
           # S198 (F6-104): la cobertura en JSON la resume el paso «Resumir cobertura» para nrt-retry.yml. No cambia el
           # código de salida (sin modo estricto: el NRT no se pone rojo por cobertura).
+          # S184: --miniaturas escribe data/miniaturas/<volcan>/ (las 10 pasadas mas nuevas de cada sensor, para el
+          # tablero; docs/DISENO_MINIATURAS_POR_PASADA.md). Solo aqui: tests/test_miniaturas_por_pasada.py lo vigila.
           python scripts/run_pipeline.py --profile mirova_equivalent \
-            --volcano ${{ matrix.volcano }} \
+            --volcano ${{ matrix.volcano }} --miniaturas \
             --cobertura-json "cobertura_nrt/${{ matrix.volcano }}.json" \
             "${ARGS[@]}" 2>&1 | tee -a pipeline.log
 
@@ -394,6 +396,8 @@ jobs:
           git add "data/mirova_equivalent/${{ matrix.volcano }}.json" 2>/dev/null
           git add "data/experimental/${{ matrix.volcano }}.json" 2>/dev/null
           git add "data/mirova/${{ matrix.volcano }}.json" 2>/dev/null
+          # S184: la carpeta de miniaturas del volcan, con -A para que entren los PNG que salieron de las 10.
+          git add -A -- "data/miniaturas/${{ matrix.volcano }}" 2>/dev/null
           git diff --staged --quiet && { echo "No changes to commit for ${{ matrix.volcano }}"; exit 0; }
           git commit -m "NRT update ${{ matrix.volcano }} $(date -u '+%Y-%m-%d %H:%M UTC')"
           for attempt in 1 2 3 4 5; do

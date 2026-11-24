@@ -80,7 +80,7 @@ if _early_args.profile:
     os.environ["VRP_PROFILE"] = _early_args.profile
 
 from pipeline import fetch, process_modis, process_viirs, process_viirs_mod, store, diurno  # S151 D-10
-from pipeline import profile as vrp_profile
+from pipeline import profile as vrp_profile; from pipeline import mirova_v750_codigo, miniaturas  # S184: miniaturas por pasada, en la misma línea para no correr las citas archivo:línea (guard G8)
 from pipeline.geo_utils import get_detection_anchor
 
 
@@ -267,6 +267,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             _modis_sin_record(l1b, _anotar)  # S175 (153)
                             _sin_record(volcano, date, platform, l1b, _n_inc)  # S190 (H07)
                         if result:
+                            _MINIATURAS.recoger(volcano["name"], result)  # S184: antes del store, que no la ve
                             store.append_record(volcano["name"], result,
                                                 volcano_lat=volcano["lat"], volcano_lon=volcano["lon"],
                                                 overwrite=overwrite,
@@ -316,6 +317,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         if not result:
                             _sin_record(volcano, date, platform, l1b, _n_inc)  # S190 (H07)
                         if result:
+                            _MINIATURAS.recoger(volcano["name"], result)  # S184: antes del store, que no la ve
                             store.append_record(volcano["name"], result,
                                                 volcano_lat=volcano["lat"], volcano_lon=volcano["lon"],
                                                 overwrite=overwrite,
@@ -367,6 +369,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         if not result:
                             _sin_record(volcano, date, platform, l1b, _n_inc)  # S190 (H07)
                         if result:
+                            _MINIATURAS.recoger(volcano["name"], result)  # S184: antes del store, que no la ve
                             store.append_record(volcano["name"], result,
                                                 volcano_lat=volcano["lat"], volcano_lon=volcano["lon"],
                                                 overwrite=overwrite,
@@ -641,6 +644,11 @@ def _ventana_del_entorno(dates: list) -> tuple | None:
     return ini, fin
 
 
+# S184 (definido aquí, después de process_date, para no correr las citas archivo:línea del guard G8): miniaturas de la corrida (las junta process_date, las escribe main al terminar cada volcán). Sin
+# --miniaturas la vía no las genera y el recolector queda vacío.
+_MINIATURAS = miniaturas.Recolector()
+
+
 def main():
     parser = argparse.ArgumentParser(description="VRP Chile pipeline")
     parser.add_argument("--profile", default=None, choices=_VALID_PROFILES,
@@ -660,6 +668,9 @@ def main():
                         help="Overwrite existing records (use when reprocessing with corrected algorithms)")
     parser.add_argument("--cobertura-json", default=None,
                         help="S157: escribe aquí las búsquedas y descargas que no se pudieron hacer")
+    parser.add_argument("--miniaturas", action="store_true",
+                        help="S184: escribe data/miniaturas/<volcan>/ con las 10 pasadas más nuevas de cada sensor "
+                             "(sólo el NRT de producción, nrt.yml; docs/DISENO_MINIATURAS_POR_PASADA.md)")
     parser.add_argument("--estricto-cobertura", action="store_true",
                         help="S157: sale con código 3 si hubo búsquedas o descargas fallidas "
                              "(reprocesos; el NRT no lo usa)")
@@ -721,6 +732,11 @@ def main():
         print(f"Profile mirova_equivalent: filtrado a {len(volcanoes)} volcanes "
               f"MIROVA-monitoreados.")
 
+    # S184: la vía genera la miniatura sólo con --miniaturas (apagada por defecto para todos los demás llamadores).
+    if args.miniaturas:
+        mirova_v750_codigo.GENERAR_MINIATURA = True
+        print(f"Miniaturas por pasada ON: {miniaturas.RAIZ_DEFECTO}")
+
     # S157: una búsqueda a CMR por producto y por ventana, no una por día (pipeline/fetch.py).
     ventana_env = _ventana_del_entorno(dates)
     fetch.limpiar_fallas()
@@ -743,6 +759,17 @@ def main():
             fetch.reset_transient_breakers()
             process_date(volcano, date, nighttime_only=nighttime_only,
                         skip_noaa20=args.skip_noaa20, overwrite=args.overwrite)
+        if args.miniaturas:
+            # S184: al terminar el volcán, con el store ya guardado. POR QUÉ aquí: el NRT procesa 8 días por corrida,
+            # más que las 10 últimas pasadas (~3,4 noches), así que la corrida trae casi todas las imágenes; las que
+            # falten se conservan de la corrida anterior si el gránulo es el mismo (pipeline/miniaturas.py).
+            try:
+                idx = _MINIATURAS.escribir_volcan(volcano["name"], store.get_records(volcano["name"]))
+                n_img = sum(1 for es in idx["familias"].values() for e in es if e["archivo"])
+                print(f"  Miniaturas {volcano['name']}: {n_img} imágenes, {_MINIATURAS.cantidad(volcano['name'])} "
+                      f"de esta corrida")
+            except Exception as e:  # una falla de display no tumba el NRT ni el commit de los datos
+                print(f"  ERROR miniaturas {volcano['name']}: {e!r}")
 
     codigo = informar_cobertura(fetch.fallas_de_cobertura(), ruta_json=args.cobertura_json,
                                 estricto=args.estricto_cobertura,
