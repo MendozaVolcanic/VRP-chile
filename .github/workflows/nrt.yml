@@ -205,8 +205,11 @@ jobs:
           if [ -n "$VRP_START" ]; then ARGS+=(--start "$VRP_START"); fi
           if [ -n "$VRP_END" ]; then ARGS+=(--end "$VRP_END"); fi
           if [ "$VRP_OVERWRITE" = "true" ]; then ARGS+=(--overwrite); fi
+          # S198 (F6-104): la cobertura en JSON la resume el paso «Resumir cobertura» para nrt-retry.yml. No cambia el
+          # código de salida (sin modo estricto: el NRT no se pone rojo por cobertura).
           python scripts/run_pipeline.py --profile mirova_equivalent \
             --volcano ${{ matrix.volcano }} \
+            --cobertura-json "cobertura_nrt/${{ matrix.volcano }}.json" \
             "${ARGS[@]}" 2>&1 | tee -a pipeline.log
 
       - name: Run VRP pipeline — experimental profile
@@ -249,6 +252,31 @@ jobs:
           python scripts/run_pipeline.py --profile experimental \
             --volcano ${{ matrix.volcano }} \
             "${ARGS[@]}" 2>&1 | tee -a pipeline.log
+
+      # S198 (auditoría de Codex, ronda 2, F6-104, opción (b) aprobada por Nicolás el 2026-11-24): con CMR caído o una
+      # descarga cortada la corrida queda VERDE (sólo `::warning` de cobertura incompleta) y nrt-retry.yml sólo
+      # reintentaba las rojas. Estos dos pasos le dejan el dato estructurado: un resumen por volcán con el número de
+      # búsquedas y descargas fallidas, sus fechas y etapas (sin mensajes de error, que son texto libre), como artefacto
+      # `cobertura-<volcán>`. continue-on-error: si fallan, el job no cambia de color y sólo se pierde el reintento.
+      # Prueba: tests/test_reintento_cobertura_nrt_s198.py.
+      - name: Resumir cobertura para nrt-retry
+        if: ${{ !cancelled() && (steps.pipeline_mireq.outcome == 'success' || steps.pipeline_mireq.outcome == 'failure') }}
+        continue-on-error: true
+        run: |
+          python scripts/reintento_cobertura_nrt.py resumir \
+            --entrada "cobertura_nrt/${{ matrix.volcano }}.json" --volcan "${{ matrix.volcano }}" \
+            --salida "cobertura_resumen/${{ matrix.volcano }}.json"
+
+      - name: Subir resumen de cobertura
+        if: ${{ !cancelled() && (steps.pipeline_mireq.outcome == 'success' || steps.pipeline_mireq.outcome == 'failure') }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-${{ matrix.volcano }}
+          path: cobertura_resumen/${{ matrix.volcano }}.json
+          if-no-files-found: ignore
+          retention-days: 3
+          overwrite: true
 
       # S70-0 T2: detectar NASA_AUTH_UNREACHABLE en pipeline.log para etiquetar
       # el run como [NASA_DOWN]. NO cambia exit code — el badge sigue en rojo

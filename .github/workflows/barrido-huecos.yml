@@ -1,0 +1,121 @@
+name: Barrido semanal de huecos (dias 9 a 30)
+
+# S198 (auditoría de Codex, ronda 2, F6-114; opción (a) aprobada por Nicolás el 2026-11-24).
+#
+# POR QUÉ. Una pasada que el NRT no pudo buscar ni bajar (CMR de NASA caído, corte de red) no deja record, y en el
+# tablero esa noche se lee como «sin anomalía». El NRT vuelve a buscar cada día durante 8 días (hoy y los 7 anteriores,
+# scripts/run_pipeline.py::default_date_window); pasado eso ningún workflow volvía a ese día, así que una falla que
+# durara lo suficiente se volvía pérdida permanente. Este barrido recorre una vez por semana los días 9 a 30 hacia atrás
+# de los 11 volcanes del NRT y procesa SÓLO las pasadas que todavía no tienen record (run_pipeline --solo-sin-record):
+# no reprocesa ni baja lo que ya existe, y no reemplaza ningún record. Cada pasada queda dentro de los días 9 a 30 durante 22
+# días, así que la ven al menos tres barridos. Costo: unas búsquedas CMR por volcán y producto (búsqueda por ventana,
+# S157) más la descarga de las pasadas que falten.
+#
+# Mismo perfil (mirova_equivalent) y misma carpeta (data/mirova_equivalent/) que el NRT, mismo `git add` de un solo
+# archivo y el mismo bucle de reintento `pull --rebase` + `push`. Grupo de concurrencia PROPIO y no `push-main`: con
+# `push-main` el NRT esperaría detrás del barrido, y una corrida pendiente del NRT cancelaría al barrido pendiente (o al
+# revés). El NRT y el barrido tocan zonas distintas del JSON (días 0 a 7 y 9 a 30), así que el rebase no choca más que
+# en la línea `updated`, que cualquiera de los dos deja válida.
+#
+# No se pone rojo por cobertura (sin --estricto-cobertura) ni corre el revisor de errores de MODIS del NRT: una pasada
+# que da error se reintentaría y daría rojo cada semana sin aportar nada que el NRT no haya avisado ya en sus 8 días.
+# Prueba: tests/test_barrido_huecos_s198.py.
+
+# A43: "on" entre comillas (Norway problem).
+"on":
+  schedule:
+    - cron: "43 20 * * 0"   # domingos 20:43 UTC: fuera de los minutos del NRT (:00), nrt-retry (:30) y sync (:12)
+  workflow_dispatch:
+
+concurrency:
+  group: barrido-huecos
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-24.04  # el mismo runner fijado del NRT (S150: pyhdf no probado en 26.04)
+    timeout-minutes: 80
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        # Los 11 Tier A del NRT (nrt.yml); la prueba exige que sean los mismos.
+        volcano:
+          - Lascar
+          - PuyehueCordonCaulle
+          - Lastarria
+          - Isluga
+          - Tupungatito
+          - PlanchonPeteroa
+          - Chaiten
+          - Villarrica
+          - NevadosDeChillan
+          - Llaima
+          - Copahue
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        # Como el NRT (S190): la punta de la rama al arrancar el trabajo, no el SHA del despacho.
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj
+
+      # Como el NRT (S172): sin pyproj la vía «código MIROVA» falla en cada gránulo y el job saldría verde sin records.
+      - name: Comprobar pyproj
+        run: python -c "import pyproj; print('pyproj', pyproj.__version__)"
+
+      - name: Barrer dias 9 a 30, solo pasadas sin record
+        id: barrido
+        env:
+          # Sólo token (A71): el par usuario y clave de los secrets está vencido y bloquea la cuenta.
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        timeout-minutes: 60
+        run: |
+          set -o pipefail
+          # S160 (hallazgo 247, A71): un secret ausente llega vacío; cortar antes de tocar NASA.
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacío. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea la cuenta (A71)."
+            exit 1
+          fi
+          INI=$(date -u -d '30 days ago' +%Y-%m-%d)
+          FIN=$(date -u -d '9 days ago' +%Y-%m-%d)
+          echo "Barrido de ${{ matrix.volcano }}: $INI a $FIN, sólo pasadas sin record"
+          python scripts/run_pipeline.py --profile mirova_equivalent \
+            --volcano ${{ matrix.volcano }} \
+            --start "$INI" --end "$FIN" --solo-sin-record 2>&1 | tee -a pipeline.log
+
+      - name: Commit updated data files
+        # !cancelled(): si el paso del barrido falla o se pasa de tiempo a mitad, lo ya guardado (store.py escribe
+        # atómico) se sube igual; lo que falte lo toma el barrido siguiente.
+        if: ${{ !cancelled() && (steps.barrido.outcome == 'success' || steps.barrido.outcome == 'failure') }}
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          F="data/mirova_equivalent/${{ matrix.volcano }}.json"
+          python -c "import json,sys; json.load(open(sys.argv[1], encoding='utf-8'))" "$F" || { echo "::error::$F no es JSON válido; no se sube"; exit 1; }
+          git add "data/mirova_equivalent/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "Sin pasadas nuevas para ${{ matrix.volcano }}"; exit 0; }
+          git commit -m "Barrido de huecos ${{ matrix.volcano }} $(date -u '+%Y-%m-%d %H:%M UTC')"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1

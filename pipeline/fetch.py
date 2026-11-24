@@ -580,6 +580,47 @@ _PLATAFORMAS: dict = {}
 # reset_transient_breakers(), que corre por fecha.
 _DESCARGA_BUENA: bool = False
 
+# S198 (auditoría de Codex, ronda 2, F6-114; opción (a) aprobada por Nicolás el 2026-11-24): pasadas que ya tienen
+# record, como pares (plataforma, «AAAA-MM-DD HH:MM»), la misma clave (sensor, datetime_utc) con que store.py
+# deduplica. POR QUÉ: el barrido semanal de huecos (.github/workflows/barrido-huecos.yml) vuelve a los días 9 a 30, que
+# el NRT ya no busca, y debe bajar SÓLO las pasadas sin record; bajar el resto costaría una descarga por pasada para
+# nada, porque store.py igual las descartaría por duplicadas. None (el NRT y los reprocesos): no se filtra nada. Lo
+# configura scripts/run_pipeline.py con --solo-sin-record. Prueba: tests/test_barrido_huecos_s198.py.
+_PASADAS_EXISTENTES: set | None = None
+_PAT_TIEMPO_GRANULO = re.compile(r"\.A(\d{4})(\d{3})\.(\d{2})(\d{2})\.")
+
+
+def configurar_pasadas_existentes(claves) -> None:
+    """Fija las pasadas (plataforma, minuto) que ya tienen record; None apaga el filtro."""
+    global _PASADAS_EXISTENTES
+    _PASADAS_EXISTENTES = set(claves) if claves is not None else None
+
+
+def _minuto_granulo(g) -> str | None:
+    """Minuto de inicio de la pasada, «AAAA-MM-DD HH:MM». Primero del nombre (A<año><día>.<hhmm>), de donde salen el
+    datetime_utc del record (_parse_datetime de los procesadores); si el nombre no lo trae, del inicio en CMR."""
+    try:
+        m = _PAT_TIEMPO_GRANULO.search(str(g["umm"].get("GranuleUR", "")))
+        if m:
+            anio, dia, hh, mi = (int(x) for x in m.groups())
+            return (datetime(anio, 1, 1) + timedelta(days=dia - 1, hours=hh, minutes=mi)).strftime("%Y-%m-%d %H:%M")
+        inicio = g["umm"]["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"]
+        return datetime.strptime(inicio[:16], "%Y-%m-%dT%H:%M").strftime("%Y-%m-%d %H:%M")
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None
+
+
+def _quitar_pasadas_existentes(platform: str, granules: list) -> list:
+    """Quita los gránulos cuya pasada ya tiene record. Uno cuyo minuto no se lee se queda: ante la duda, se procesa
+    (store.py igual deduplica)."""
+    if _PASADAS_EXISTENTES is None:
+        return granules
+    quedan = [g for g in granules if (platform, _minuto_granulo(g)) not in _PASADAS_EXISTENTES]
+    if len(quedan) < len(granules):
+        print(f"  {platform}: {len(granules) - len(quedan)} de {len(granules)} pasadas ya tienen record, "
+              f"no se bajan (sólo sin record)")
+    return quedan
+
 # S161: ceses anunciados por el operador de cada satélite. POR QUÉ esta lista y no una fecha aquí: es la
 # misma que lee la vigilancia por plataforma de #892 y que el tablero exige por prueba, así que si NASA
 # mueve la fecha se edita un solo archivo. Se lee una vez por proceso.
@@ -1367,6 +1408,12 @@ def fetch_for_volcano(volcano: dict, date: datetime,
                 # whole search was daytime when it was just a subset.
                 if before:
                     print(f"  {platform}: kept {after} of {before} granules (night filter)")
+                if not l1b_granules:
+                    continue
+
+            # S198 (F6-114): en el barrido de huecos, sólo las pasadas sin record (ver _PASADAS_EXISTENTES).
+            if _PASADAS_EXISTENTES is not None:
+                l1b_granules = _quitar_pasadas_existentes(platform, l1b_granules)
                 if not l1b_granules:
                     continue
 
