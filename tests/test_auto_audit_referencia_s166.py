@@ -91,7 +91,10 @@ def test_aparte_solo_del_detector_vigente_y_solo_sin_publicar():
 
 # ------------------------------------------------------------------ 3. pérdida aceptada
 def test_el_registro_de_perdidas_aceptadas_tiene_una_sola_pasada():
-    assert set(aa.PERDIDAS_ACEPTADAS) == {("PuyehueCordonCaulle", "VIIRS750", "2026-10-10 05:54")}
+    # S197: se agregó Chaitén MODIS 2026-11-19 02:30 (issue #1106, tests/test_auto_audit_perdida_chaiten_s197.py);
+    # el nombre del test se conserva, lo que vigila es que el registro tenga sólo las pasadas decididas.
+    assert set(aa.PERDIDAS_ACEPTADAS) == {("PuyehueCordonCaulle", "VIIRS750", "2026-10-10 05:54"),
+                                          ("Chaiten", "MODIS", "2026-11-19 02:30")}
     motivo = aa.PERDIDAS_ACEPTADAS[("PuyehueCordonCaulle", "VIIRS750", "2026-10-10 05:54")]
     assert "#865" in motivo and "#881" in motivo
 

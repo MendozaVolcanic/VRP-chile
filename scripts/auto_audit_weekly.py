@@ -1361,6 +1361,13 @@ PERDIDAS_ACEPTADAS = {
     ("PuyehueCordonCaulle", "VIIRS750", "2026-10-10 05:54"):
         "lacolito de Cordón Caulle, FN de VIIRS 750 publicado en VIIRS 375 en la misma pasada; "
         "decidido sin cambiar K en #865 y PR #881",
+    # S197 (issue #1106): caso de borde de la vía MODIS, una celda tibia al suroeste del cráter, una columna fuera de
+    # la caja sensible (centrada en la grilla) y 0,15 % bajo el umbral de ETI aun con la caja en el cráter; sin
+    # atribuir, probablemente transitorio o artefacto (ningún VIIRS lo vio 2,5 a 4 h después). El A/B de la caja
+    # empató en 330 pasadas. Nicolás la aceptó el 2026-11-24. Test: tests/test_auto_audit_perdida_chaiten_s197.py.
+    ("Chaiten", "MODIS", "2026-11-19 02:30"):
+        "borde de la caja sensible y del ETI en MODIS, sin atribuir; diagnóstico en #1107, "
+        "A/B de la caja sin cambios en #1108; aceptada en el issue #1106",
 }
 
 
