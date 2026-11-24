@@ -47,9 +47,19 @@ def corridas(tmp_path_factory):
     }
 
 
+def _sin_s199(d):
+    """S199 (F6-112): la cobertura de la corrida agregó las búsquedas hechas y la hora en que se escribió (para
+    scripts/cobertura_publicada.py). El golden es de antes; se quitan sólo esas dos claves, que no son del detector."""
+    out = json.loads(json.dumps(d))
+    for v in out.values():
+        v["cobertura"].pop("busquedas", None)
+        v["cobertura"].pop("generado_utc", None)
+    return out
+
+
 def _sin_incidencias(d):
     """La corrida sin lo que este cambio agrega: las incidencias y su conteo."""
-    out = json.loads(json.dumps(d))
+    out = _sin_s199(d)
     for v in out.values():
         v["cobertura"].pop("incidencias", None)
         v["cobertura"].pop("n_incidencias", None)
@@ -64,7 +74,11 @@ def _incidencias(v, tipo="crater_sin_dato"):
 
 def test_apagado_bit_a_bit_con_el_tag(corridas):
     antes = (DATOS / "sin_dato_corrida_apagado_antes.json").read_text(encoding="utf-8")
-    assert corridas["apagado"] == antes
+    # S199 (F6-112): era la igualdad del texto; la cobertura agregó dos claves que no son del detector (_sin_s199), así
+    # que se compara lo leído sin ellas. Records, fallas, incidencias y código siguen exigidos valor por valor.
+    ahora = _sin_s199(json.loads(corridas["apagado"]))
+    assert ahora == json.loads(antes)
+    assert all("busquedas" in v["cobertura"] for v in json.loads(corridas["apagado"]).values())
 
 
 def test_geo_solo_no_anota_nada(corridas):

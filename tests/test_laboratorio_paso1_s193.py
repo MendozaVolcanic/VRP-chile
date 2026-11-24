@@ -173,7 +173,8 @@ def test_g6_el_commit_del_nrt_no_agrega_el_laboratorio():
     texto = (RAIZ / ".github" / "workflows" / "nrt.yml").read_text(encoding="utf-8")
     rutas = re.findall(r"git add\s+\"?(data/[^\"\s]+)", texto)
     assert rutas, "control: no se encontró ningún git add de data/ en nrt.yml"
-    ajenas = [r for r in rutas if not re.match(r"data/(?:mirova_equivalent|experimental|mirova)/", r)]
+    # S199 (F6-112): data/cobertura/ (pasadas no medidas del NRT, scripts/cobertura_publicada.py) es operacional.
+    ajenas = [r for r in rutas if not re.match(r"data/(?:mirova_equivalent|experimental|mirova|cobertura)/", r)]
     assert not ajenas, ajenas
 
 
