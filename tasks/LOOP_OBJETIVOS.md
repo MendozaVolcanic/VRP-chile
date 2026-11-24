@@ -569,6 +569,14 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-24 15:10 UTC (S198): main v1.93; guardia MODIS cumplida y mantenida; cuatro arreglos de la auditoría Codex en main; CMR de NASA degradado
+- **Guardia K de MODIS:** plazo cumplido (30 de 29, VERDE, 0 candidatas), reproducido con referencia fresca a las 05:02 UTC; informe en #1111 (v1.89). Nicolás («Sí, mantenla»): sigue informativa hasta el 2027-03-02 (#1113, v1.90).
+- **Decisiones de Nicolás** («has lo que reomiendes»): R3F9-V101, 8 protegidas V375 sólo OCR dadas por distancia del OCR (D8', #1113); F6-104 (b) y F6-114 (a) en #1114 (v1.92); F7-318 en #1115 (v1.93, script aparte, banco sellado intacto). R3F5-101 y R3F5-V101 (tablero, «cráter no medido» y «sin fondo») en #1112 (v1.91), autorizado por el encargo de g3+ fuera de A45.
+- **Codex ronda 3:** frentes 9, 3 y 5 cerrados y verificados por la sesión `codex-ronda3` (326 filas; g3 tras verificar: R3F5-101 arreglado, R3F3-104 decisión, R3F3-108 Chaitén aceptada). Esa sesión cerró por contexto; S198 tomó el Cierre II (copia refrescada a `4eeda1b37`), que no arrancó por memoria comprometida de 87 a 93 %.
+- **Barrido del piso:** tanda 3 (abril, run 45308651250) roja en 4 intentos por el CMR de NASA («An Internal Error has occurred» desde ~07:15 UTC; también en el NRT, que quedó verde con 344 errores a las 10:10). Cadena `D:\vrp-trabajo\temporales\s198\barrido\cadena_piso_s198b.sh` con espera creciente, sigue con mayo a noviembre.
+- **Disco:** inventario de 22 GB de temporales en 3 raíces; cruzadas 4 fuentes de cita; borrado sólo lo regenerable (3,97 GB). C: 13 GB, D: 15 GB.
+- Detalle y prompt de S199: `tasks/BLOQUE_ARRANQUE_S199.md`.
+
 ### 2026-11-24 04:00 UTC (S197): main v1.88; token Earthdata revocado y rotado; #1106 diagnosticado y aceptado; marzo del piso completo
 
 - **401 de NASA desde 2026-11-23 23:02:47 UTC:** Nicolás había revocado el token del secreto al generar uno para Goes;
