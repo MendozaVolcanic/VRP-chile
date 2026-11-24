@@ -1,4 +1,26 @@
-# Bloque de arranque S199 (escrito por S198, 2026-11-24 ~15:10 UTC)
+# Bloque de arranque S199 (escrito por S198, 2026-11-24 ~15:10 UTC; ACTUALIZADO ~18:05 UTC)
+
+> **ACTUALIZACIÓN S198 CONTINUADA (Nicolás: «continuemos aca mismo», 15:20 UTC). Manda sobre lo de abajo donde lo
+> contradice.**
+> - **Umbral de contexto:** el hook `C:\Users\nmend\.claude\hooks\aviso_contexto.py` tiene piso por proyecto
+>   (`UMBRAL_MIN_POR_PROYECTO`, VRP Chile 550 mil), probado con 3 casos sintéticos; `C:\Users\nmend\.claude\CLAUDE.md`
+>   actualizado.
+> - **#1015 MERGED** 2026-11-24 17:42 UTC (ficha **v1.94**; tag `pre-s198-miniaturas`): panel «Últimas 10 pasadas».
+>   PENDIENTE: ver `data/miniaturas/` en main y el panel en Pages tras el primer NRT posterior; `nrt-retry` no genera
+>   miniaturas (el panel de un volcán reintentado se actualiza 2 h después).
+> - **#1114 en Actions:** el NRT de 14:33 UTC subió los 11 artefactos `cobertura-<volcán>` (15 a 32 búsquedas fallidas
+>   por volcán, CMR degradado). PENDIENTE: la primera decisión de `nrt-retry` (cron `30 1-23/2`, GitHub lo corre tarde).
+> - **Cierre II de Codex HECHO** (17:08 a 17:29 UTC, 9,1 M tokens; el primer intento falló por red de Codex,
+>   «workspace routing discovery failed», archivos en `corridas\c2_intento1`) y **verificado** (C2-101 EN PARTE g3, C2-102
+>   y C2-104 g2, C2-103 g1, nuevo C2-V201 g2 fundido con R3F3-104). Registro: 331 filas. Resumen y **borrador de acta**:
+>   `D:\codex-vrp\_salida\ronda3\RESUMEN_CIERRE2_PARA_NICOLAS.md`. **Decisión 0 de §b: que Nicolás apruebe o corrija el
+>   acta**; con ella la auditoría se cierra con límites explícitos.
+> - **Disco:** zip `D:\vrp-trabajo\archivo_s198_temporales.zip` (182 MB, 23.450 archivos de 96 carpetas, testzip OK) y
+>   borrado (2,18 GB; 7 carpetas quedaron a medias, ver `D:\vrp-trabajo\temporales\s198\zip_y_borrar.log`). Total
+>   liberado en temporales: 6,15 GB. Decisión 2 de §b: HECHA.
+> - **F7-V501 en curso:** agente en `D:\vrp-trabajo\worktrees\s198-v501` (rama `s198-f7-v501`); al abrir PR, mergear
+>   con uno.sh (v1.95) y quitar el worktree.
+> - R3F3-V101 (aviso de alertados sin fondo en el tablero) sigue pendiente: va después de #1015 (mismo frontend).
 
 > El bloque anterior (S198, escrito por S197) queda como histórico en `tasks/BLOQUE_ARRANQUE_S198.md`. Detalle de S198
 > en la bitácora `tasks/LOOP_OBJETIVOS.md` §6 (entrada S198, arriba) y en la nota viva
