@@ -9,10 +9,10 @@
 #                 dia, busquedas vacias, L1B sin geolocalizacion, dias parciales y granulos sin record (S190).
 # Modelo/método : Reglas deterministicas (orquestacion). Sin aprendizaje automatico.
 # Datos entrada : volcanoes.yaml, perfil de pipeline/profiles/, granulos L1B de NASA. SIN datos personales.
-# Variables     : Perfil, volcanes, ventana de fechas, filtro nocturno, modo estricto de cobertura.
+# Variables     : Perfil, volcanes, ventana de fechas, filtro nocturno, modo estricto, solo sin record (S198).
 # Limitaciones  : El NRT no usa el modo estricto: una cobertura incompleta avisa y sale 0, y la corrida
 #                 siguiente vuelve a intentar. Una plataforma que falta se informa como nota, sin cambiar el
-#                 codigo de salida.
+#                 codigo de salida; nrt-retry.yml y barrido-huecos.yml recuperan esas fallas (S198, F6-104/114).
 # Refs/datos    : docs/AUDIT_S160.md (hallazgo 241); experiments/_s157_busqueda_ventana/MEDICION.md.
 #                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
 # ════════════════════════════════════════════════════════════════════
@@ -491,6 +491,14 @@ def default_date_window(today: datetime, lookback_days: int = 7):
     return [today - timedelta(days=d) for d in range(lookback_days, -1, -1)]
 
 
+def claves_con_record(records: list) -> set:
+    """S198 (F6-114): las pasadas que ya tienen record, como (sensor, datetime_utc), la clave con que store.py
+    deduplica. El sensor del record es el nombre de la plataforma en fetch (MODIS_TERRA, VIIRS_NOAA20_750...), así que
+    fetch.configurar_pasadas_existentes las compara sin traducir. Un record sin sensor o sin fecha no tapa nada."""
+    return {(r.get("sensor"), r.get("datetime_utc")) for r in records
+            if r.get("sensor") and r.get("datetime_utc")}
+
+
 def informar_cobertura(fallas: list, ruta_json=None, estricto: bool = False,
                        plataformas: dict | None = None, incidencias: list | None = None) -> int:
     """S157: dice qué búsquedas y descargas no se pudieron hacer, y devuelve el código de salida.
@@ -655,12 +663,18 @@ def main():
     parser.add_argument("--estricto-cobertura", action="store_true",
                         help="S157: sale con código 3 si hubo búsquedas o descargas fallidas "
                              "(reprocesos; el NRT no lo usa)")
+    parser.add_argument("--solo-sin-record", action="store_true",
+                        help="S198 (F6-114): baja y procesa sólo las pasadas que todavía no tienen record en el "
+                             "JSON del volcán (barrido semanal de huecos, .github/workflows/barrido-huecos.yml)")
     args = parser.parse_args()
 
     # S120 (cacería de bugs): --start sin --end (o viceversa) caía en silencio
     # a la ventana NRT default de 8 días — fechas equivocadas sin aviso.
     if bool(args.start) != bool(args.end):
         parser.error("--start y --end deben usarse juntos (rango de fechas)")
+    # S198: --overwrite reemplaza lo que ya existe y --solo-sin-record no lo baja; juntos se contradicen.
+    if args.solo_sin_record and args.overwrite:
+        parser.error("--solo-sin-record no se combina con --overwrite")
 
     print(f"=== {vrp_profile.describe()} ===")
 
@@ -715,6 +729,13 @@ def main():
         fetch.reiniciar_ventana()
         fetch.configurar_ventana(dates, cache_dir=os.environ.get("VRP_CACHE_BUSQUEDA_DIR") or None,
                                  ventana=ventana_env)
+        # S198 (F6-114): se arma por volcán antes de sus días; sin la bandera queda en None (no filtra).
+        if args.solo_sin_record:
+            claves = claves_con_record(store.get_records(volcano["name"]))
+            print(f"Sólo sin record: {volcano['name']} tiene {len(claves)} pasadas con record; no se bajan.")
+            fetch.configurar_pasadas_existentes(claves)
+        else:
+            fetch.configurar_pasadas_existentes(None)
         for date in dates:
             # S120 (cacería): los breakers de fetch son per-día; sin reset, un
             # timeout transitorio del día 1 silenciaba todos los días restantes
