@@ -146,7 +146,8 @@
       const f = p === pico ? fraccion : fraccionAgua(capa, p.lat, p.lon, lado);
       if (f !== null && f >= UMBRAL_CELDA) nAgua++;
     }
-    const dT = Number.isFinite(pico.bt_k) && Number.isFinite(r.t_bg_k) ? pico.bt_k - r.t_bg_k : null;
+    // R3F5-V101: un fondo de 0 K es «sin fondo», no una medición: sin él no hay contraste.
+    const dT = Number.isFinite(pico.bt_k) && Number.isFinite(r.t_bg_k) && r.t_bg_k > 0 ? pico.bt_k - r.t_bg_k : null;
     return { fraccion, sobreAgua: fraccion >= UMBRAL_CELDA, pixel: pico, ladoKm: lado, nAgua, n: pix.length, dT };
   }
 

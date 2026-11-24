@@ -126,7 +126,8 @@ def test_f5_102_el_grafico_dibuja_los_dias_sin_pasada():
     assert "sparkData.values.map(v => (v == null ? rayaSinPasada : null))" in f
     assert "data: sinPasada" in f
     assert "Math.max(0, ...sparkData.values.filter(v => v != null))" in f
-    assert "etiquetaDiaSparkline(sparkData.values[ctx.dataIndex], sparkData.observado[ctx.dataIndex])" in f
+    # R3F5-101 (S198): la llamada agrega noMedido y sat (cráter no medido); los dos primeros argumentos siguen igual.
+    assert "etiquetaDiaSparkline(sparkData.values[ctx.dataIndex], sparkData.observado[ctx.dataIndex]," in f
 
 
 def test_control_el_instrumento_ve_el_corte_viejo(tmp_path):

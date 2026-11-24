@@ -693,6 +693,12 @@ function buildSparklineData(records, innerKm) {
   // S193: las barras son de la noche; el máximo de las pasadas de día va aparte (`dia`, null sin pasada) y se dibuja
   // con el sol de VRP Chile. Sin pasadas de día, `dia` queda todo en null y el minigráfico es el de siempre.
   const dia = new Array(nBins).fill(null);
+  // R3F5-101 (auditoría Codex ronda 3): una pasada con el cráter no medido (frontend/crater_no_medido.js: MIR sin dato o
+  // barrido sin posición sobre el cráter) no hace «observado» al día: antes el día salía «pasadas medidas, sin
+  // detecciones» aunque esa pasada no hubiera visto el cráter. `noMedido` y `sat` (MIR saturada: la potencia es un mínimo)
+  // van al tooltip y a la raya naranja de arriba (CraterNoMedido.plugin).
+  const noMedido = new Array(nBins).fill(false);
+  const sat = new Array(nBins).fill(false);
   for (const r of records) {
     const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t) || t < dayStart || t > now) continue;   // F5-V202: desde la medianoche del primer día
@@ -701,7 +707,10 @@ function buildSparklineData(records, innerKm) {
     const v = eqVrpDisplay(r, innerKm);  // S92: excluir artefacto cirrus del sparkline
     // S194 (unión de #1086 y #1089): la pasada de día no cuenta como «observado», que es de las barras nocturnas.
     if (r._diurna === true) { if (v > 0 && (dia[idx] == null || v > dia[idx])) dia[idx] = v; continue; }
-    if (!(r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio)) observado[idx] = true;
+    const vacia = !!(r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio);
+    const mc = !vacia && typeof CraterNoMedido !== "undefined" ? CraterNoMedido.craterNoMedido(r) : null;
+    if (!vacia) { if (mc && CraterNoMedido.esNoMedido(mc)) noMedido[idx] = true; else observado[idx] = true; }
+    if (mc && mc.nSat > 0 && v > 0) sat[idx] = true;
     if (v <= 0) continue;
     if (v > bins[idx]) bins[idx] = v;
   }
@@ -709,13 +718,19 @@ function buildSparklineData(records, innerKm) {
   for (let i = 0; i < nBins; i++) {
     labels.push(new Date(dayStart + i * ms));
   }
-  return { labels, values: bins.map((v, i) => (observado[i] || v > 0 ? v : null)), observado, dia };
+  return { labels, values: bins.map((v, i) => (observado[i] || v > 0 ? v : null)), observado, dia, noMedido, sat };
 }
 
 // F5-102: texto del tooltip de un día del minigráfico. Separa «se miró y no había calor» de «no hubo pasada medida».
-function etiquetaDiaSparkline(v, observado) {
-  if (v > 0) return "VRP: " + fmtVRP(v) + " MW";
-  return observado ? "pasadas medidas, sin detecciones" : "sin pasadas medidas";
+// R3F5-101: con `noMedido` (alguna pasada de la noche no midió el cráter) y `sat` (la MIR saturó: la potencia es un
+// mínimo) el texto lo dice; un día cuya única pasada no midió el cráter no es «sin pasadas medidas» ni «sin detecciones».
+function etiquetaDiaSparkline(v, observado, noMedido, sat) {
+  const S = typeof CraterNoMedido !== "undefined" ? CraterNoMedido.SIMBOLO + " " : "";
+  if (v > 0) return "VRP: " + fmtVRP(v) + " MW" + (sat ? " · " + S + "MIR saturada en el cráter: la potencia puede ser mayor" : "") +
+                    (noMedido ? " · " + S + "una pasada no midió el cráter" : "");
+  if (observado) return "pasadas medidas, sin detecciones" + (noMedido ? " · " + S + "otra pasada no midió el cráter" : "");
+  return noMedido ? S + "cráter no medido (el infrarrojo medio llegó sin dato o el barrido vino sin posición sobre el cráter)"
+                  : "sin pasadas medidas";
 }
 
 function renderSparkline(canvas, sparkData, level) {
@@ -734,8 +749,15 @@ function renderSparkline(canvas, sparkData, level) {
         : level.key === "vlow"
           ? "rgba(0,208,132,0.85)"
           : "rgba(122,143,166,0.6)";
+  // R3F5-101: raya naranja arriba en los días con una pasada que no midió el cráter (llena) o con la MIR saturada (hueca).
+  const marcasCnm = [];
+  sparkData.labels.forEach((d, i) => {
+    const nm = sparkData.noMedido && sparkData.noMedido[i], st = sparkData.sat && sparkData.sat[i];
+    if (nm || st) marcasCnm.push({ x: d, noMedido: !!nm, sat: !!st });
+  });
   return new Chart(canvas, {
     type: "bar",
+    plugins: typeof CraterNoMedido !== "undefined" ? [CraterNoMedido.plugin] : [],
     data: {
       labels: sparkData.labels,
       datasets: [{
@@ -768,6 +790,7 @@ function renderSparkline(canvas, sparkData, level) {
       animation: false,
       plugins: {
         legend: { display: false },
+        craterNoMedido: { marcas: marcasCnm },
         tooltip: {
           enabled: true,
           mode: "index",
@@ -780,7 +803,8 @@ function renderSparkline(canvas, sparkData, level) {
             },
             label: (ctx) => {
               if (ctx.dataset.diurna) return DiurnoTablero.SIMBOLO + " de día: " + fmtVRP(ctx.parsed.y) + " MW (" + DiurnoTablero.TEXTO + ")";   // S193
-              return etiquetaDiaSparkline(sparkData.values[ctx.dataIndex], sparkData.observado[ctx.dataIndex]);
+              return etiquetaDiaSparkline(sparkData.values[ctx.dataIndex], sparkData.observado[ctx.dataIndex],
+                                          sparkData.noMedido && sparkData.noMedido[ctx.dataIndex], sparkData.sat && sparkData.sat[ctx.dataIndex]);
             },
           },
           // Una sola línea nocturna por día aunque las barras de noche y de «sin pasada» compartan el día (el texto sale

@@ -1901,7 +1901,8 @@ function latestDetection(records, includeFar = false, innerKm = 10, diurnas = fa
                // operador tiene a mano: un píxel apenas por encima del fondo es señal
                // sub-umbral o ruido de nieve; un ΔT de decenas de kelvin es material
                // caliente expuesto. Estaba sólo en la tabla del detalle.
-               tMax: r.t_max_k ?? null, tBg: r.t_bg_k ?? null,
+               // R3F5-V101: 0 K es «sin fondo» (la regla de CraterNoMedido.fondoK, en línea: esta función se prueba sola)
+               tMax: r.t_max_k ?? null, tBg: (typeof r.t_bg_k === "number" && r.t_bg_k > 0) ? r.t_bg_k : null, sinFondo: r.t_bg_k === 0,
                // S132 R3 — si MIROVA publicó algo en esa pasada (CONS ∪ OCR, A11).
                mirova: !!r._mirova_confirmed };
     }
@@ -2370,6 +2371,13 @@ function avisoCumbreTarjeta(clase, v, records, det, innerKm) {
 // La vía lo anota en diag_codigo_mirova; esta marca se lo dice al operador («cráter no medido» no es «cráter frío»), y
 // avisa también la MIR saturada (potencia mínima). No cambia valor, nivel, clase ni frescura. Criterio en
 // frontend/crater_no_medido.js; medición en experiments/_s194_mir_perdido/. Guard: tests/test_tablero_crater_no_medido_s194.py
+// R3F5-V101: fondo local en kelvin, o null si el record no lo trae medido (0 K es la señal de «sin fondo»). La regla vive
+// en CraterNoMedido.fondoK; si el módulo no cargara, la misma regla en línea para no volver a mostrar -273,1 °C.
+function fondoMedidoK(r) {
+  if (typeof CraterNoMedido !== "undefined") return CraterNoMedido.fondoK(r);
+  const k = r ? r.t_bg_k : null;
+  return (typeof k === "number" && Number.isFinite(k) && k > 0) ? k : null;
+}
 function marcaCraterNoMedido(clase, r) {
   if (!r || typeof CraterNoMedido === "undefined") return null;
   const m = CraterNoMedido.craterNoMedido(r);
@@ -3073,6 +3081,14 @@ function filasUltimaLectura(v, d) {
                 + "sobre un volcán nevado suele ser señal sub-umbral o ruido de nieve; "
                 + "decenas de kelvin indican material caliente expuesto.";
     box.appendChild(therm);
+  } else if (det && det.tMax != null && det.sinFondo) {
+    // R3F5-V101: el record no trae fondo estimado (0 K). Sin fondo no hay contraste: antes salía «fondo 0.0 K · ΔT 259 a
+    // 279 K» y el título lo leía como material caliente expuesto.
+    const therm = el("div", "vc-thermal");
+    therm.textContent = "T máx " + det.tMax.toFixed(1) + " K · sin fondo estimado: ΔT no calculable";
+    therm.title = "Esta pasada no trae la temperatura del fondo local (el record la deja en 0 K, que no es una medición), " +
+                  "así que no se puede calcular el contraste térmico.";
+    box.appendChild(therm);
   }
 
   // S132 R3: ¿MIROVA publicó algo en esa misma pasada? Que NO coincida no la invalida: el 95 % de nuestras
@@ -3586,7 +3602,7 @@ function renderDetail() {
       const vrp = getDisplayVrp(r);
       const hasPC = r.primary_cluster && r.primary_cluster.vrp_mw != null;
       const tmax = r.t_max_k ?? r.t_max_i04_k ?? null;
-      const tbg  = r.t_bg_k ?? null;
+      const tbg  = fondoMedidoK(r);   // R3F5-V101: un fondo de 0 K es «sin fondo», no -273,1 °C
       const npxTotal = r.n_anomalous_pixels ?? null;
       const npxCluster = hasPC ? r.primary_cluster.n_pixels : null;
       const lv   = getLevel(vrp);
@@ -3685,7 +3701,7 @@ function renderDetail() {
         // resto de honest-anchor (ctx_cluster, dist>0) y eruption-path muestran el km real.
         isVentLegacy ? "vent" : (dist != null ? (honestAnchor && dist === 0 ? "cráter" : dist.toFixed(2)) : "—"),
         k2c(tmax),
-        k2c(tbg),
+        tbg != null ? k2c(tbg) : (r.t_bg_k === 0 ? "sin fondo" : "—"),
         npxLabel,
       ].forEach((val, i) => {
         const td = el("td");
@@ -4135,7 +4151,7 @@ function renderDetail() {
                          fillColor: colorPorBT(px.bt_k), fillOpacity: 0.55 })
           .bindPopup("<b>Píxel medido</b><br>" + r.datetime_utc + " UTC · " + r.sensor + "<br>" +
                      "Temperatura de brillo: " + k2cMed(px.bt_k) + "<br>" +
-                     (Number.isFinite(px.bt_k) && Number.isFinite(r.t_bg_k) ? "Contraste contra el fondo: " + (px.bt_k - r.t_bg_k).toFixed(1) + " K<br>" : "") +
+                     (Number.isFinite(px.bt_k) && fondoMedidoK(r) != null ? "Contraste contra el fondo: " + (px.bt_k - r.t_bg_k).toFixed(1) + " K<br>" : "") +
                      "Distancia al volcán: " + (Number.isFinite(px.dist_km) ? px.dist_km.toFixed(2) + " km" : "sin dato") +
                      (Number.isFinite(px.vrp_mw) ? "<br>VRP del píxel: " + px.vrp_mw.toFixed(3) + " MW" : "") +
                      (fa != null ? "<br>" + (enAgua ? "💧 " : "") + "Agua en la celda: " + Math.round(fa * 100) + " %" : ""))
@@ -4606,6 +4622,10 @@ function todasPasadasEvol(records, innerKm) {
     const p = { t, dt: r.datetime_utc, sensor: r.sensor, grupo: sensorGroup(r.sensor),
                 zen: num(r.sensor_zenith_deg), azi: num(r.sensor_azimuth_deg),
                 dia: r._diurna === true };   // S193: pasada de día (frontend/diurno.js), se dibuja con su sol
+    // R3F5-101 (auditoría Codex ronda 3): la marca «cráter no medido» (frontend/crater_no_medido.js) viaja con la pasada
+    // para que el gráfico, su tooltip y el recuadro de la última pasada no la lean como «se midió, nada».
+    const cnm = typeof CraterNoMedido !== "undefined" ? CraterNoMedido.craterNoMedido(r) : null;
+    if (cnm) p.cnm = cnm;
     const y = isThermalArtifact(r, innerKm) ? 0 : mirovaEqVrpDisplay(r, innerKm, true);
     if (y > 0) {
       const enCrater = mirovaEqVrpDisplay(r, innerKm, false) > 0;
@@ -4614,6 +4634,7 @@ function todasPasadasEvol(records, innerKm) {
     }
     const sinDato = escenaSinDato(r);
     p.estado = sinDato ? (sinDato === "reflejo solar" ? "reflejo" : "sin_datos")
+             : (cnm && CraterNoMedido.esNoMedido(cnm)) ? "no_medido"   // antes de «nada» y «no publicada»: el cráter no se vio
              : ((r.n_anomalous_pixels ?? 0) > 0 || isValidDetection(r)) ? "no_publicada" : "nada";
     out.push(p);
   }
@@ -4732,7 +4753,9 @@ const EVOL_LIMITE_DETECCION_MW = { MODIS: 1, VIIRS750: 0.1, VIIRS375: 0.01 };
 // gránulos seguidos (6 min); elegir por el orden del archivo dejaba casi siempre la de 750. Entre las pasadas medidas a
 // 10 minutos o menos de la última, manda la de mayor valor publicado y, a igual valor, la de más anomalía.
 const EVOL_MISMA_PASADA_MS = 10 * 60000;
-const EVOL_PRIORIDAD_ESTADO = { crater: 3, fuera: 2, no_publicada: 1, nada: 0 };
+// R3F5-101: «no_medido» va sobre «nada» y «no publicada»: si en la misma pasada un sensor no midió el cráter y el otro no
+// vio nada, el recuadro dice que el cráter no se midió, no «sin anomalía».
+const EVOL_PRIORIDAD_ESTADO = { crater: 3, fuera: 2, no_medido: 1.5, no_publicada: 1, nada: 0 };
 function vrpPublicadoEvol(p, includeFar) { return (p.estado === "crater" || (p.estado === "fuera" && includeFar)) ? p.y : 0; }
 function ultimaPasadaEvol(pasadas, includeFar) {
   const medida = p => p.estado !== "sin_datos" && p.estado !== "reflejo";
@@ -4782,9 +4805,14 @@ function textoUltimaPasadaEvol(u, ahoraMs, includeFar, conCalor) {
   if (!u) return { texto: "Última pasada: sin pasadas medidas en los datos cargados", clave: "nd" };
   const p = u.p, lv = getLevel(u.vrp);
   const clase = (vrp, l) => l.label + (vrp >= EVOL_EXTREMO_MW ? " (Extremo en la escala de MIROVA)" : "") + ", " + mwEvol(vrp) + " MW";
-  const estado = u.vrp > 0 ? clase(u.vrp, lv)
+  // R3F5-101: con la marca de cráter no medido el recuadro lo dice (y no «sin anomalía»); con la MIR saturada, que la
+  // potencia publicada es un mínimo. El texto es el de la tabla y las tarjetas (CraterNoMedido.textoCrater).
+  const avisoCnm = p.cnm && typeof CraterNoMedido !== "undefined" ? CraterNoMedido.SIMBOLO + " " + CraterNoMedido.textoCrater(p.cnm) : "";
+  const estado = (u.vrp > 0 ? clase(u.vrp, lv)
+    : p.estado === "no_medido" ? ""
     : p.estado === "fuera" ? "anomalía fuera del cráter, no publicada"
-    : p.estado === "no_publicada" ? "anomalía no publicada" : "sin anomalía";
+    : p.estado === "no_publicada" ? "anomalía no publicada" : "sin anomalía") +
+    (avisoCnm ? (p.estado === "no_medido" && !(u.vrp > 0) ? "" : " · ") + avisoCnm : "");
   const cen = textoCenitEvol(p.zen, null);
   let texto = "Última pasada: " + p.dt + " UTC (" + haceEvol(p.t, ahoraMs) + ") · " + (ETIQUETA_SENSOR[p.grupo] || p.sensor) +
               (p.dia ? " · ☀ de día, puede incluir reflejo solar" : "") +   // S193
@@ -4798,10 +4826,16 @@ function textoUltimaPasadaEvol(u, ahoraMs, includeFar, conCalor) {
 }
 // Marcas arriba del gráfico para las pasadas sin palito: se miró y no había nada, anomalía no publicada, escena sin datos,
 // reflejo solar. Así se distingue «tranquilo» de «no se pudo medir».
-const EVOL_COLOR_MARCA = { nada: "rgba(150,160,175,0.6)", no_publicada: "#5dade2", sin_datos: "#ffffff", reflejo: "#ffc400" };
-const EVOL_FILA_MARCA = { sin_datos: 0, reflejo: 0, nada: 1, no_publicada: 1 };   // 0: no se pudo medir; 1: se midió
+// R3F5-101: «no_medido» (naranja de CraterNoMedido.COLOR) va en la fila de arriba, la de «no se pudo medir».
+const EVOL_COLOR_MARCA = { nada: "rgba(150,160,175,0.6)", no_publicada: "#5dade2", sin_datos: "#ffffff", reflejo: "#ffc400",
+                           no_medido: "#ffab40" };
+const EVOL_FILA_MARCA = { sin_datos: 0, reflejo: 0, no_medido: 0, nada: 1, no_publicada: 1 };   // 0: no se pudo medir; 1: se midió
+// R3F5-101: una pasada con palito y marca de cráter (potencia publicada que puede ser parcial, o un mínimo si la MIR
+// saturó; la protegida de Chillán del 2026-11-22 06:48 publicó 25,81 MW contra 29,65 de MIROVA) lleva además la raya
+// naranja arriba; su tooltip y el recuadro dicen por qué.
 function marcasEvol(pasadas) {
-  return pasadas.filter(p => EVOL_COLOR_MARCA[p.estado]).map(p => ({ t: p.t, estado: p.estado }));
+  return pasadas.filter(p => EVOL_COLOR_MARCA[p.estado] || p.cnm)
+                .map(p => ({ t: p.t, estado: EVOL_COLOR_MARCA[p.estado] ? p.estado : "no_medido" }));
 }
 // «Datos desde»: la historia publicada empieza el 2025-02-15 en los 11 y el 2026-11-03 en los 34 de la sombra. Si la
 // ventana empieza antes, ese tramo se sombrea y el título lo dice: sin aviso, la falta de observación se lee como un
@@ -5015,8 +5049,9 @@ function armarEvolucion(host, v, d, innerKm, plugExtra) {
   const claves = el("div", "evol-nota");
   claves.textContent = "● cráter · ■ fuera · marcador hueco = pasada oblicua (cenit sobre " + EVOL_CENIT_OBLICUO + "°) · ★ última " +
     "pasada. Rayas arriba, fila de arriba = no se pudo medir: blanca, escena sin datos (borde de la franja o nubes muy " +
-    "frías); amarilla, reflejo solar. Fila de abajo = se midió y no hay palito: gris, sin anomalía; celeste, anomalía no " +
-    "publicada (artefacto o descartada).";
+    "frías); amarilla, reflejo solar; naranja, cráter no medido (el infrarrojo medio llegó sin dato o saturado sobre el " +
+    "cráter, o el barrido que lo cruza vino sin posición: si tiene palito, la potencia puede ser mayor). Fila de abajo = " +
+    "se midió y no hay palito: gris, sin anomalía; celeste, anomalía no publicada (artefacto o descartada).";
   const cenitInfo = el("details", "evol-cenit");
   cenitInfo.open = evolCenitAbierto;   // se redibuja al llegar la historia o al cambiar de pestaña: que no se cierre solo
   cenitInfo.addEventListener("toggle", () => { evolCenitAbierto = cenitInfo.open; });
@@ -5115,7 +5150,8 @@ function armarEvolucion(host, v, d, innerKm, plugExtra) {
                         (p.enCrater ? "en el cráter" : fuera.charAt(0).toLowerCase() + fuera.slice(1))]
                   .concat(textoCenitEvol(p.zen, p.azi) ? ["  " + textoCenitEvol(p.zen, p.azi) +
                           (esOblicuaEvol(p.zen) ? " · mirada oblicua: una fuente chica puede no verse o verse menor" : "")] : [])
-                  .concat(p.dia ? ["  " + DiurnoTablero.SIMBOLO + " " + DiurnoTablero.TEXTO] : []);   // S193
+                  .concat(p.dia ? ["  " + DiurnoTablero.SIMBOLO + " " + DiurnoTablero.TEXTO] : [])   // S193
+                  .concat(p.cnm ? ["  " + CraterNoMedido.SIMBOLO + " " + CraterNoMedido.textoCrater(p.cnm)] : []);   // R3F5-101
               },
             },
           },
