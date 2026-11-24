@@ -18,7 +18,7 @@
 >   tabla del acta y el par commit/corpus del cierre: main tras #1116 y el corpus de 517 filas) por PR con uno.sh, y hacer
 >   los PR que el acta asigna (F6-112 fila «no medida»; marca «sin ángulo» con A45; declarar R3F3-104/C2-V201 y F1V-115
 >   en la ficha y D36).
-> - **#1116 (F7-V501)** abierto y encadenado a merge (`D:rp-trabajo	emporales\s198\merge_1116.sh`, ficha v1.95).
+> - **#1116 (F7-V501)** abierto y encadenado a merge (`D:\vrp-trabajo\temporales\s198\merge_1116.sh`, ficha v1.95).
 > - **Disco:** zip `D:\vrp-trabajo\archivo_s198_temporales.zip` (182 MB, 23.450 archivos de 96 carpetas, testzip OK) y
 >   borrado (2,18 GB; 7 carpetas quedaron a medias, ver `D:\vrp-trabajo\temporales\s198\zip_y_borrar.log`). Total
 >   liberado en temporales: 6,15 GB. Decisión 2 de §b: HECHA.
