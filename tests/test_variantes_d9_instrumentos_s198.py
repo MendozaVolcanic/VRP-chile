@@ -16,7 +16,7 @@ con VRP 0, y otra noche con una protegida de 2 MW. Cada variante tiene que conta
 """
 import json
 import sys
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
