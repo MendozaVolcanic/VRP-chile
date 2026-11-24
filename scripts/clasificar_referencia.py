@@ -43,6 +43,27 @@ def _tabla(recs, clave):
             for k in sorted(t)}
 
 
+def variantes_d9(recs, filas, coords, ventana):
+    """S198 (F7-V501): la distribucion de valores con cada lectura de D-9 (docs/MISSION.md, regla 5): SN decidida, SE,
+    original y las dos con umbral 0,04 (`banco_paridad_variantes_d9.VARIANTES_D9`, una sola definicion, #1115).
+
+    POR QUE. D-9 exige que cada evaluacion informe las cinco; el rotulo que ve el operador (los JSON por volcan) sigue
+    siendo el de la decidida y no se toca. Trabaja sobre COPIAS de `recs`. `publicadas` cuenta las que traen `pub`."""
+    from banco_paridad_variantes_d9 import VARIANTE_DECIDIDA, VARIANTES_D9
+    out = {}
+    for nombre, modo, umbral in VARIANTES_D9:
+        rv = cr.clasificar_pasadas([dict(r) for r in recs], filas, coords, ventana, regla_minimas=modo,
+                                   umbral_minima_mw=umbral)
+        pub = [r for r in rv if r.get("pub")]
+        out[nombre] = {"modo": modo, "umbral_minima_mw": umbral,
+                       "etiquetas_del_banco": dict(collections.Counter(r["lab"] for r in rv)),
+                       "todas": {"total": _tabla(rv, lambda r: "TOTAL"), "por_sensor": _tabla(rv, lambda r: r["b"])},
+                       "publicadas": {"total": _tabla(pub, lambda r: "TOTAL"),
+                                      "por_sensor": _tabla(pub, lambda r: r["b"])}}
+    return {"variante_decidida": VARIANTE_DECIDIDA,
+            "nota": "informa: el rotulo de los JSON por volcan es el de la decidida", "variantes": out}
+
+
 def estadisticas(filas, ventana, procedencia):
     """Distribucion con denominador declarado. POR QUE pasa por el banco: asi el "publica" es el
     del operador y no uno reconstruido a mano, y de paso se controla que el cargador liviano del
@@ -53,7 +74,7 @@ def estadisticas(filas, ventana, procedencia):
     livianos = cr.cargar_pasadas(cr.DATA_RECORDS, coords, ventana)
     mismo = [(a["vol"], a["b"], a["dt"]) for a in recs] == [(b["vol"], b["b"], b["dt"]) for b in livianos]
     pub = [r for r in recs if r["pub"]]
-    return {
+    st = {
         "ventana": list(ventana), "referencia": procedencia,
         "sha_index_html": bp.sha_git(bp.HTML),
         "denominadores": {"todas": "pasadas nocturnas de los 11 Tier A en la ventana",
@@ -66,6 +87,12 @@ def estadisticas(filas, ventana, procedencia):
         "publicadas": {"total": _tabla(pub, lambda r: "TOTAL"), "por_sensor": _tabla(pub, lambda r: r["b"]),
                        "por_volcan": _tabla(pub, lambda r: r["vol"])},
     }
+    # S198 (F7-V501): las cinco lecturas de D-9, al lado. Control: la decidida reproduce `todas` y `publicadas`.
+    v = variantes_d9(recs, filas, coords, ventana)
+    dec = v["variantes"][v["variante_decidida"]]
+    v["decidida_coincide"] = all(dec[u][k] == st[u][k] for u in ("todas", "publicadas") for k in ("total", "por_sensor"))
+    st["variantes_d9"] = v
+    return st
 
 
 def main(argv=None):

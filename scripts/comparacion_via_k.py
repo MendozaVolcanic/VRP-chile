@@ -472,6 +472,48 @@ def filas_noches(series, hoy):
     return {"campos": CAMPOS_NOCHE, "filas": filas}
 
 
+# ------------------------------------------------------------------ D-9: las cinco lecturas (S198, F7-V501)
+def variantes_d9(refs, coords, total, vents, via_noche, guardia_noche, hist_noche, resultados):
+    """La franja nocturna de cada referencia contada con cada lectura de D-9 (docs/MISSION.md, regla 5): SN decidida, SE,
+    original y las dos con umbral 0,04 (`banco_paridad_variantes_d9.VARIANTES_D9`, una sola definición, #1115).
+
+    POR QUÉ. D-9 exige que cada evaluación informe las cinco y diga si algo cambia; esta comparación sólo contaba SN. Sólo
+    los sensores que la regla toca (`clase_mirova.SENSORES_MINIMA`, VIIRS 375): en MODIS y VIIRS 750 las cinco dan lo
+    mismo por construcción, y la etiqueta de una pasada depende sólo de las filas de su volcán y sensor, así que
+    etiquetar sólo esas pasadas da las mismas etiquetas. La franja diurna es sólo MODIS: no entra. Sin `por_volcan`,
+    para no inflar el JSON que baja la página. Control: la decidida tiene que reproducir `resultados` (sin `por_volcan`)."""
+    from banco_paridad_variantes_d9 import VARIANTE_DECIDIDA, VARIANTES_D9
+    from clase_mirova import SENSORES_MINIMA
+
+    def sel(ps):
+        return [p for p in ps if p["b"] in SENSORES_MINIMA]
+
+    vn, gn, hn = sel(via_noche), sel(guardia_noche), sel(hist_noche)
+    out = {}
+    for nombre, modo, umbral in VARIANTES_D9:
+        res = {}
+        for ref, fil in refs.items():
+            idx = bp.indexar_referencia(filas_ref_de_franja(fil, coords, False), coords, total, regla_minimas=modo,
+                                        umbral_minima_mw=umbral)
+            v_l, g_l, h_l = etiquetar(vn, idx), etiquetar(gn, idx), etiquetar(hn, idx)
+            for vent, por_b in vents.items():
+                for b in SENSORES_MINIMA:
+                    if b not in por_b:
+                        continue
+                    ini, fin = por_b[b]
+                    k_l = h_l if vent == "historia" else g_l
+                    res[f"{ref}|{vent}|{b}"] = comparar(_indice(v_l, b, ini, fin), _indice(k_l, b, ini, fin), b,
+                                                        por_volcan=False)
+        out[nombre] = {"modo": modo, "umbral_minima_mw": umbral, "resultados": res}
+    dec = out[VARIANTE_DECIDIDA]["resultados"]
+    coincide = all(k in resultados and dec[k] == {c: v for c, v in resultados[k].items() if c != "por_volcan"}
+                   for k in dec)
+    return {"variante_decidida": VARIANTE_DECIDIDA, "sensores": list(SENSORES_MINIMA),
+            "nota": ("informa, no decide: la franja nocturna con las cinco lecturas de D-9; MODIS y VIIRS 750 no "
+                     "cambian (la regla sólo toca VIIRS 375)"),
+            "variantes": out, "decidida_coincide_con_resultados": coincide}
+
+
 # ------------------------------------------------------------------ principal
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -557,6 +599,8 @@ def main(argv=None):
                        "avisos": avisos_cache(meta_cache, sha_pred)},
               "resultados": resultados, "noches": filas_noches(series, a.hoy),
               "dias": filas_dias(series_dia, dia_desde, a.hoy) if dia_desde else {"campos": CAMPOS_DIA, "filas": []}}
+    # S198 (F7-V501): al final, para que lo de la lectura decidida quede escrito igual que antes.
+    salida["variantes_d9"] = variantes_d9(refs, coords, total, vents, via_noche, guardia_noche, hist_noche, resultados)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(salida, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     for clave in sorted(resultados):
@@ -569,6 +613,15 @@ def main(argv=None):
             print(f"{clave:28s} pares {r['n_pasadas_pareadas']:6d} | vía rec {r['via']['recall']} prec "
                   f"{r['via']['precision']} prot -{r['via']['protegidas_perdidas']} | K rec {r['k']['recall']} prec "
                   f"{r['k']['precision']} prot -{r['k']['protegidas_perdidas']}")
+    vd9 = salida["variantes_d9"]
+    print(f"D-9, cinco lecturas (informa) | la decidida reproduce resultados: {vd9['decidida_coincide_con_resultados']}")
+    for nombre, v in vd9["variantes"].items():
+        for clave in sorted(v["resultados"]):
+            if clave.startswith("tabla|"):
+                r = v["resultados"][clave]
+                print(f"  [{nombre}] {clave:24s} vía TP {r['via']['TP']} FN {r['via']['FN']} FP {r['via']['FP']} TN "
+                      f"{r['via']['TN']} prot -{r['via']['protegidas_perdidas']} de {r['via']['protegidas']} | K TP "
+                      f"{r['k']['TP']} FN {r['k']['FN']} FP {r['k']['FP']} TN {r['k']['TN']}")
     print(f"noches {len(salida['noches']['filas'])} | avisos {salida['meta']['avisos']} -> {a.out}")
     return 0
 
