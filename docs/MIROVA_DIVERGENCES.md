@@ -1558,6 +1558,19 @@ Cuando S62+S63 completen:
 > baja de 98,73 % a 93,59 %. Es el mismo canje que «cercano» (rechazado el 2026-11-15). La tabla de MIROVA no lista
 > ninguna de las 12 y 10 traen sólo la clase del OCR. Costo aceptado: 12 protegidas sólo OCR, 0 con la tabla sola.
 >
+> ⚠️ **S198, las 8 sin alertado en el cráter: aceptadas como distancia del OCR (decisión de Nicolás, 2026-11-24, «has
+> lo que reomiendes», respuesta a la recomendación de R3F9-V101).** La auditoría Codex, ronda 3, frente 9 (verificador
+> limpio, `D:\codex-vrp\_salida\ronda3\f9_r3_verificacion\VEREDICTO.md`, fuera del repo) midió que en las 20 protegidas
+> VIIRS 375 sólo OCR que no se publican nuestro cúmulo tiene la misma energía que MIROVA (20 de 20 dentro de 25 %) y
+> está a 9 a 29 km, mientras la nota del OCR dice 0,8 a 10,5 km; donde Mirova-v1 trae la distancia de su serie de
+> tiempo, coincide con la nuestra (Lastarria 2026-05-02 05:06: 19,4 km contra 19,36). 12 son el costo de «radiante» de
+> la marca S193; las otras 8 no tienen alertado en el cráter y la distancia cercana viene sólo de la nota del OCR,
+> anterior al hito de Suomi NPP (A119): Lastarria 2026-04-18 04:42 (NOAA-20) y 2026-05-02 05:06; Tupungatito 2026-08-01
+> 05:00, 2026-09-14 06:18, 2026-09-28 05:18 y 2026-09-29 04:54; Láscar 2026-08-22 05:06; Isluga 2026-09-09 06:06 (las
+> siete sin satélite indicado, Suomi NPP). Se dan por distancia del OCR, sin investigación una a una y sin cambio de
+> producción; con la tabla sola de MIROVA la pérdida sobre el cráter sigue siendo 1 (Chaitén MODIS 2026-11-19, #1109).
+> Identidad física de las 8: SIN DATO (sin imágenes de MIROVA ni L1B en la auditoría).
+>
 > ⚠️ **S151, segunda marca (A113, tarea 1.4 del loop, PR #809 verificado dos veces):** el estudio sobre
 > los GeoTIFF de MIROVA (`experiments/_s151_seleccion_mirova/README.md`) dice que MIROVA no elige el cráter
 > por ser el cráter: informa el foco lejano cuando es fuerte (15 de 15 pasadas con z ≥ 30 en el TIF; 12 de
