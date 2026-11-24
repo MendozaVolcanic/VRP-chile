@@ -144,13 +144,17 @@ def provisoriedad(valor, dt, frontera):
                   + ", ".join(atrasados) + "); si ese canal trae una alerta, el valor cambia")
 
 
-def clasificar_pasadas(recs, filas_ref, coords, ventana):
+def clasificar_pasadas(recs, filas_ref, coords, ventana, regla_minimas=None, umbral_minima_mw=None):
     """Agrega `valor`, `provisorio`/`motivo_provisorio` (y `dist_ref_km` cuando aplica) a cada
-    pasada de `recs`, en el lugar."""
+    pasada de `recs`, en el lugar.
+
+    S198 (F7-V501): `regla_minimas` y `umbral_minima_mw` sólo para que `clasificar_referencia.py --stats` informe
+    las otras lecturas de D-9; sin ellos, la decidida (lo que se escribe en los JSON por volcán)."""
     # S175 (F2-212 de docs/AUDIT_S175.md): con la regla D-9 decidida (SN, issue #811). Una pasada cuyas alertas son
     # todas de 0,05 MW o menos es una que MIROVA dice no ver (banner NONE): ya no se rotula "MIROVA confirmo".
     por_vb, noche_sensor, noche_volcan, _ = bp.indexar_referencia(filas_ref, coords, ventana,
-                                                                  regla_minimas=bp.MODO_MINIMAS)
+                                                                  regla_minimas=regla_minimas or bp.MODO_MINIMAS,
+                                                                  umbral_minima_mw=umbral_minima_mw)
     bp.etiquetar(recs, por_vb, noche_sensor, noche_volcan)
     frontera = frontera_canales(filas_ref)
     for r in recs:

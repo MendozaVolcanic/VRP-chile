@@ -231,7 +231,94 @@ def banco_ventana(win):
     por_vb, noche_sensor, noche_volcan, _ = bp.indexar_referencia(filas, coords, win,
                                                                   regla_minimas=REGLA_MINIMAS)
     bp.etiquetar(recs, por_vb, noche_sensor, noche_volcan)
+    etiquetas_variantes_d9(recs, filas, coords, win)
     return recs, filas
+
+
+def etiquetas_variantes_d9(recs, filas, coords, win):
+    """S198 (F7-V501): agrega a cada pasada `lab_d9` = {variante: etiqueta del banco} con las cinco lecturas de D-9.
+
+    POR QUÉ. D-9 (docs/MISSION.md, regla 5) decide SN y exige que cada evaluación informe además SE, la original y las
+    dos con umbral 0,04. Se etiquetan COPIAS: `lab` (la decidida) y los demás campos que deja `bp.etiquetar` quedan
+    como estaban, así que nada de lo que ya calculaba el audit cambia. Las variantes son las de
+    `banco_paridad_variantes_d9.VARIANTES_D9` (una sola definición, #1115)."""
+    import banco_paridad as bp  # noqa: E402
+    from banco_paridad_variantes_d9 import VARIANTES_D9  # noqa: E402
+    for nombre, modo, umbral in VARIANTES_D9:
+        por_vb, noche_sensor, noche_volcan, _ = bp.indexar_referencia(filas, coords, win, regla_minimas=modo,
+                                                                      umbral_minima_mw=umbral)
+        copias = [dict(r) for r in recs]
+        bp.etiquetar(copias, por_vb, noche_sensor, noche_volcan)
+        for r, c in zip(recs, copias):
+            r.setdefault("lab_d9", {})[nombre] = c["lab"]
+    return recs
+
+
+def falsas_variantes_d9(recs):
+    """S198 (F7-V501): publicación en negativos limpios por variante de D-9 y por sensor, con el estrato «minima» de SE.
+    `recs` ya filtrados (detector vigente, ventana de falsas). None si alguna pasada no trae `lab_d9`: sin etiquetas no
+    hay cifra que informar."""
+    from banco_paridad_variantes_d9 import VARIANTES_D9  # noqa: E402
+    if any("lab_d9" not in r for r in recs):
+        return None
+    out = {}
+    for nombre, _, _ in VARIANTES_D9:
+        out[nombre] = {}
+        for s in SENSORS:
+            sel = [{"lab": r["lab_d9"][nombre], "pub": r["pub"]} for r in recs if r["b"] == s]
+            out[nombre][s] = dict(_pct_falsas(sel), n_minima=sum(r["lab"] == "minima" for r in sel))
+    return out
+
+
+def recall_variantes_d9(alertas, filas_ref, coords, win, desde_plat, frontera, vigente, via_modis, vistos, ours):
+    """S198 (F7-V501): recall por noche de cada variante de D-9, con el mismo camino que `recall_regla_original` (noches
+    de MIROVA, recorte por plataforma, detector vigente de cada sensor). Para el recall SN y SE dan lo mismo (la noche
+    mínima no es alerta, aplicar_d9); las dos con 0,04 dejan como alerta las de 0,05."""
+    from banco_paridad_variantes_d9 import VARIANTES_D9  # noqa: E402
+    out = {}
+    for nombre, modo, umbral in VARIANTES_D9:
+        mir_v, _ = noches_mirova(aplicar_d9(alertas, modo, filas_ref, umbral), coords, win)
+        mir_v, _ = partir_por_plataformas(mir_v, desde_plat)
+        out[nombre] = recall_por_sensor(
+            {k: v for k, v in mir_v.items()
+             if detector_de_noche(k[2], frontera, k[1], via_modis) == detector_vigente_de(k[1], vigente, via_modis)},
+            vistos, ours, SENSORS, set(VOLS))
+    return out
+
+
+def variantes_d9_audit(alertas, filas_ref, coords, win, desde_plat, frontera, vigente, via_modis, vistos, ours,
+                       recs_falsas, recall, recall_original, falsas):
+    """S198 (F7-V501): la sección `variantes_d9` de latest.json. Informa; no levanta flag ni cambia el veredicto.
+
+    Controles (P1 del instrumento: si el camino de las variantes estuviera roto, se vería): la decidida tiene que dar el
+    recall y las falsas que el audit ya publica, y la original, `recall_regla_original` y `por_sensor_regla_original`."""
+    from banco_paridad_variantes_d9 import VARIANTE_DECIDIDA, VARIANTES_D9  # noqa: E402
+    rv = recall_variantes_d9(alertas, filas_ref, coords, win, desde_plat, frontera, vigente, via_modis, vistos, ours)
+    fv = falsas_variantes_d9(recs_falsas) if recs_falsas is not None else None
+
+    def _tres(d):
+        return {s: {k: (d.get(s) or {}).get(k) for k in ("n_neg_limpio", "n_publica", "falsas_pub_pct")}
+                for s in SENSORS}
+
+    def _igual_falsas(nombre, publicado):
+        if fv is None or not isinstance(publicado, dict):
+            return None
+        return _tres(fv[nombre]) == _tres(publicado)
+
+    falsas = falsas if isinstance(falsas, dict) else {}
+    return {
+        "variante_decidida": VARIANTE_DECIDIDA,
+        "nota": ("D-9 (docs/MISSION.md, regla 5): las cinco lecturas, sin flag ni cambio del veredicto; recall por noche "
+                 "del detector vigente y publicación en negativos limpios de la ventana de falsas"),
+        "variantes": {nombre: {"modo": modo, "umbral_minima_mw": umbral, "recall": rv[nombre],
+                               "falsas_por_sensor": fv[nombre] if fv else None}
+                      for nombre, modo, umbral in VARIANTES_D9},
+        "control": {"decidida_reproduce_recall": rv[VARIANTE_DECIDIDA] == recall,
+                    "original_reproduce_recall_regla_original": rv["original"] == recall_original,
+                    "decidida_reproduce_falsas": _igual_falsas(VARIANTE_DECIDIDA, falsas.get("por_sensor")),
+                    "original_reproduce_falsas_regla_original": _igual_falsas("original",
+                                                                              falsas.get("por_sensor_regla_original"))},
+    }
 
 
 def medir_falsas_ventana(win_falsas, banco=None):
@@ -836,7 +923,7 @@ def sensores_sin_juzgar(recall, desde, ceses, mir_aparte, via_modis=None):
     return estado
 
 
-def aplicar_d9(alertas, modo=REGLA_MINIMAS, filas_ref=None):
+def aplicar_d9(alertas, modo=REGLA_MINIMAS, filas_ref=None, umbral_mw=cm.UMBRAL_MINIMA_MW):
     """Quita las pasadas mínimas (D-9) de las alertas del cargador canónico. 'original' no toca nada.
 
     La regla es la de `clase_mirova.aplicar_regla_minimas` (una sola implementación): una pasada es
@@ -846,6 +933,7 @@ def aplicar_d9(alertas, modo=REGLA_MINIMAS, filas_ref=None):
     por separado, VRP vacío como vacío), que es sobre lo que la regla está definida. Sin ellas se
     calculan sobre las alertas del cargador, que ya vienen deduplicadas (el consolidado le gana al OCR)
     y con el VRP vacío en 0: el verificador de S156 mostró dos casos sintéticos donde eso diverge.
+    S198 (F7-V501): `umbral_mw` para informar la variante de 0,04 (recall_variantes_d9); por defecto el decidido.
     """
     if modo == "original":
         return alertas
@@ -853,7 +941,7 @@ def aplicar_d9(alertas, modo=REGLA_MINIMAS, filas_ref=None):
         filas_ref = [{"volcano": a["volcano"], "sensor_bucket": a["sensor_bucket"],
                       "fecha_utc": a["fecha_utc"] or "", "vrp_mw": a.get("vrp_mw"), "tipo": "ALERTA_TERMICA"}
                      for a in alertas if a.get("fecha_utc")]
-    minimas = cm.aplicar_regla_minimas(filas_ref, "SN").minimas
+    minimas = cm.aplicar_regla_minimas(filas_ref, "SN", umbral_mw).minimas
     return [a for a in alertas
             if (a["volcano"], a["sensor_bucket"], (a["fecha_utc"] or "")[:16]) not in minimas]
 
@@ -1690,6 +1778,17 @@ def main():
         agregar_estratos(out, mir_mag, ours, frontera, vigente, recs_falsas, inst_mir, via_modis=via_modis, via=via)
     else:
         agregar_estratos(out, mir_mag, ours, frontera, vigente, recs_falsas, inst_mir)
+    # S198 (F7-V501): las cinco lecturas de D-9, después del veredicto y sin tocarlo. Si fallan, el error queda escrito
+    # en la sección y el resto de latest.json sale igual (tests/test_variantes_d9_instrumentos_s198.py).
+    recs_vig = None
+    if recs_falsas is not None:
+        recs_vig = [r for r in recs_falsas if r.get("det") == detector_vigente_de(r["b"], vigente, via_modis)]
+    try:
+        out["variantes_d9"] = variantes_d9_audit(alertas, filas_ref, coords, win, desde_plat, frontera, vigente,
+                                                 via_modis, vistos, ours, recs_vig, out["recall"], recall_original,
+                                                 falsas)
+    except Exception as e:  # noqa: BLE001
+        out["variantes_d9"] = {"error": f"{type(e).__name__}: {str(e)[:300]}"}
     os.makedirs(OUTDIR, exist_ok=True)
     with open(os.path.join(OUTDIR, "latest.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1, ensure_ascii=False)
@@ -1746,6 +1845,15 @@ def main():
     print(f"VEREDICTO: {out['verdict']}" + (f" — {len(flags)} flags" if flags else ""))
     for fl in flags:
         print("  ⚠", fl)
+    vd9 = out["variantes_d9"]
+    if "error" in vd9:
+        print(f"D-9, cinco lecturas (sin flag): no se calcularon: {vd9['error']}")
+    else:
+        print(f"D-9, cinco lecturas (sin flag, VIIRS375) · controles {vd9['control']}")
+        for nombre, v in vd9["variantes"].items():
+            rc, fa = v["recall"]["VIIRS375"], (v["falsas_por_sensor"] or {}).get("VIIRS375") or {}
+            print(f"  [{nombre}] recall {rc['recall_crater_pct']}% (n={rc['n_noches']}) · negativos limpios publicados "
+                  f"{fa.get('n_publica')}/{fa.get('n_neg_limpio')} ({fa.get('falsas_pub_pct')}%) · minima {fa.get('n_minima')}")
 
 
 if __name__ == "__main__":

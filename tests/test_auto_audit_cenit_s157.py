@@ -260,6 +260,7 @@ def _sin_claves_nuevas(latest):
     d = copy.deepcopy(latest)
     d.pop("magnitud_publicada_by_vol_sensor_cenit", None)
     d.pop("magnitud_publicada_by_vol_sensor_regimen", None)
+    d.pop("variantes_d9", None)   # S198 (F7-V501): sólo informa, posterior al commit base
     if isinstance(d.get("falsas_publicaciones"), dict):
         d["falsas_publicaciones"].pop("por_cenit", None)
     return d
