@@ -13,8 +13,12 @@
 > - **Cierre II de Codex HECHO** (17:08 a 17:29 UTC, 9,1 M tokens; el primer intento falló por red de Codex,
 >   «workspace routing discovery failed», archivos en `corridas\c2_intento1`) y **verificado** (C2-101 EN PARTE g3, C2-102
 >   y C2-104 g2, C2-103 g1, nuevo C2-V201 g2 fundido con R3F3-104). Registro: 331 filas. Resumen y **borrador de acta**:
->   `D:\codex-vrp\_salida\ronda3\RESUMEN_CIERRE2_PARA_NICOLAS.md`. **Decisión 0 de §b: que Nicolás apruebe o corrija el
->   acta**; con ella la auditoría se cierra con límites explícitos.
+>   `D:\codex-vrp\_salida\ronda3\RESUMEN_CIERRE2_PARA_NICOLAS.md`. **ACTA APROBADA por Nicolás (2026-11-24 ~18:20 UTC, «Sí, apruebo el
+>   acta»)**: la auditoría Codex queda CERRADA con límites explícitos. S199: llevar el acta al repo (doc en `docs/` con la
+>   tabla del acta y el par commit/corpus del cierre: main tras #1116 y el corpus de 517 filas) por PR con uno.sh, y hacer
+>   los PR que el acta asigna (F6-112 fila «no medida»; marca «sin ángulo» con A45; declarar R3F3-104/C2-V201 y F1V-115
+>   en la ficha y D36).
+> - **#1116 (F7-V501)** abierto y encadenado a merge (`D:rp-trabajo	emporales\s198\merge_1116.sh`, ficha v1.95).
 > - **Disco:** zip `D:\vrp-trabajo\archivo_s198_temporales.zip` (182 MB, 23.450 archivos de 96 carpetas, testzip OK) y
 >   borrado (2,18 GB; 7 carpetas quedaron a medias, ver `D:\vrp-trabajo\temporales\s198\zip_y_borrar.log`). Total
 >   liberado en temporales: 6,15 GB. Decisión 2 de §b: HECHA.
