@@ -67,3 +67,7 @@ la reversión automática está suspendida desde S192 (2026-11-21): cumplido el 
 
 **Recomendación: A.** El plazo se cumplió con un solo volcán; dejarla hasta su vencimiento original no cambia
 producción y da la diversidad que hoy falta. Apagarla es un PR chico cuando se decida.
+
+**Decidido (Nicolás, 2026-11-24, «Sí, mantenla»): opción A.** La guardia K de MODIS y su vigilancia siguen corriendo,
+informativas, hasta el 2027-03-02. No hay cambio de código: los workflows siguen como estaban. Una candidata que aparezca
+se informa como «fuera de plazo» y la decide Nicolás.
