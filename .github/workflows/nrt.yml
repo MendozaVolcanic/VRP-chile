@@ -280,6 +280,21 @@ jobs:
           retention-days: 3
           overwrite: true
 
+      # S199 (auditoría externa con Codex, ronda 2, F6-112): el resumen de arriba es un artefacto de 3 días que sólo lee
+      # nrt-retry.yml; en data/ una pasada no medida (CMR caído, descarga o lectura fallida) y una noche sin pasada se
+      # veían igual, y el tablero las mostraba como «sin anomalía». Este paso escribe data/cobertura/<volcán>.json (30
+      # días: lo que no se midió y lo que ya quedó medido entero), que el paso de commit sube y el tablero lee
+      # (frontend/cobertura.js). Sólo escribe si cambió lo que dice. continue-on-error: si falla, el commit de los datos
+      # sigue igual. Prueba: tests/test_cobertura_publicada_s199.py.
+      - name: Publicar pasadas no medidas
+        if: ${{ !cancelled() && (steps.pipeline_mireq.outcome == 'success' || steps.pipeline_mireq.outcome == 'failure') }}
+        continue-on-error: true
+        run: |
+          python scripts/cobertura_publicada.py \
+            --entrada "cobertura_nrt/${{ matrix.volcano }}.json" --volcan "${{ matrix.volcano }}" \
+            --archivo "data/cobertura/${{ matrix.volcano }}.json" \
+            --records "data/mirova_equivalent/${{ matrix.volcano }}.json"
+
       # S70-0 T2: detectar NASA_AUTH_UNREACHABLE en pipeline.log para etiquetar
       # el run como [NASA_DOWN]. NO cambia exit code — el badge sigue en rojo
       # cuando NASA cae (política conservadora Nicolás S70-0). El marker en
@@ -398,6 +413,8 @@ jobs:
           git add "data/mirova/${{ matrix.volcano }}.json" 2>/dev/null
           # S184: la carpeta de miniaturas del volcan, con -A para que entren los PNG que salieron de las 10.
           git add -A -- "data/miniaturas/${{ matrix.volcano }}" 2>/dev/null
+          # S199 (F6-112): las pasadas no medidas del volcán (paso «Publicar pasadas no medidas»).
+          git add "data/cobertura/${{ matrix.volcano }}.json" 2>/dev/null
           git diff --staged --quiet && { echo "No changes to commit for ${{ matrix.volcano }}"; exit 0; }
           git commit -m "NRT update ${{ matrix.volcano }} $(date -u '+%Y-%m-%d %H:%M UTC')"
           for attempt in 1 2 3 4 5; do

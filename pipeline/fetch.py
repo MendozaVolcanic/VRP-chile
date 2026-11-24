@@ -8,7 +8,8 @@
 #                 solo las pasadas nocturnas. Una plataforma con cese anunciado no se busca para los dias
 #                 enteros posteriores al cese (S161). Lo que no se pudo buscar o bajar, y lo que dio cero en
 #                 toda la corrida, queda en la cobertura que informa scripts/run_pipeline.py; tambien, por
-#                 volcan y dia, la busqueda vacia, el L1B sin geolocalizacion y el dia parcial (S159, I1).
+#                 volcan y dia, la busqueda vacia, el L1B sin geolocalizacion y el dia parcial (S159, I1). S199
+#                 (F6-112): tambien cada busqueda hecha (ok o fallida) y el minuto de la pasada que no se bajo.
 # Modelo/método : Reglas deterministicas de busqueda y descarga. Sin aprendizaje automatico.
 # Datos entrada : Catalogo CMR y granulos MOD021KM/MYD021KM, MOD03/MYD03, VNP02IMG/VJ102IMG/VJ202IMG,
 #                 VNP02MOD/VJ102MOD/VJ202MOD y sus geolocalizaciones; scripts/ceses_esperados.json. SIN datos
@@ -841,9 +842,14 @@ def _desde_ventana(product_key: str, bbox: tuple, dia: str):
     return None if lista is None else list(lista)
 
 
-def _registrar_falla(producto, fecha, motivo, etapa="busqueda", plataforma=None) -> None:
-    _FALLAS.append({"volcan": None, "fecha": fecha, "plataforma": plataforma,
-                    "producto": producto, "etapa": etapa, "motivo": str(motivo)[:200]})
+def _registrar_falla(producto, fecha, motivo, etapa="busqueda", plataforma=None, pasada=None) -> None:
+    """S199 (F6-112): `pasada` es el minuto de inicio de la pasada que no se pudo bajar («AAAA-MM-DD HH:MM», la clave
+    datetime_utc del record); va sólo cuando se conoce, para que scripts/cobertura_publicada.py la publique."""
+    f = {"volcan": None, "fecha": fecha, "plataforma": plataforma,
+         "producto": producto, "etapa": etapa, "motivo": str(motivo)[:200]}
+    if pasada:
+        f["pasada"] = pasada
+    _FALLAS.append(f)
 
 
 def fallas_de_cobertura() -> list[dict]:
@@ -851,13 +857,35 @@ def fallas_de_cobertura() -> list[dict]:
     return [dict(f) for f in _FALLAS]
 
 
+# S199 (auditoría externa con Codex, ronda 2, F6-112) POR QUÉ: la cobertura sólo guardaba lo que falló, así que un día
+# y plataforma sin fallas no se distinguía de uno que no se buscó. Para publicar «pasada no medida» y quitarla cuando
+# una corrida posterior sí la mide, scripts/cobertura_publicada.py necesita saber qué búsquedas se hicieron y cuáles
+# respondieron: una entrada por volcán, día y plataforma intentada, con la hora (UTC) de la búsqueda. Las plataformas
+# retiradas por cese no se buscan y no entran.
+_BUSQUEDAS: list = []
+
+
+def _registrar_busqueda(volcan, fecha, plataforma, n_fallas_antes: int) -> None:
+    """Anota la búsqueda de una plataforma: `ok` si ninguna falla de esta plataforma fue de búsqueda."""
+    ok = not any(f.get("etapa") == "busqueda" for f in _FALLAS[n_fallas_antes:])
+    _BUSQUEDAS.append({"volcan": volcan, "fecha": fecha, "plataforma": plataforma, "ok": ok,
+                       "utc": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")})
+
+
+def busquedas_de_cobertura() -> list[dict]:
+    """S199: las búsquedas hechas desde el último limpiar_fallas(), por volcán, día y plataforma."""
+    return [dict(b) for b in _BUSQUEDAS]
+
+
 def limpiar_fallas() -> None:
-    """Olvida las fallas, el conteo por plataforma, las incidencias y la descarga buena (inicio de una corrida)."""
+    """Olvida las fallas, el conteo por plataforma, las incidencias, las búsquedas y la descarga buena (inicio de una
+    corrida)."""
     global _DESCARGA_BUENA
     _DESCARGA_BUENA = False
     _FALLAS.clear()
     _PLATAFORMAS.clear()
     _INCIDENCIAS.clear()
+    _BUSQUEDAS.clear()
 
 
 # ── S159 (tarea I1; AUDIT_S158_R2, R2-9 y VB-1): incidencias de cobertura que no son fallas ──────────
@@ -890,12 +918,16 @@ LATENCIA_MINIMA_NRT_H = 3
 _INCIDENCIAS: list = []
 
 
-def registrar_incidencia(tipo: str, volcan, fecha, plataforma=None, motivo: str = "") -> None:
-    """Anota una incidencia de cobertura (TIPOS_INCIDENCIA). No es una falla: no entra en fallas_de_cobertura()."""
+def registrar_incidencia(tipo: str, volcan, fecha, plataforma=None, motivo: str = "", pasada=None) -> None:
+    """Anota una incidencia de cobertura (TIPOS_INCIDENCIA). No es una falla: no entra en fallas_de_cobertura().
+    S199 (F6-112): `pasada`, el minuto de inicio de la pasada, va sólo cuando se conoce (ver _registrar_falla)."""
     if tipo not in TIPOS_INCIDENCIA:
         raise ValueError("tipo de incidencia desconocido: %r" % tipo)
-    _INCIDENCIAS.append({"tipo": tipo, "cuenta_estricto": TIPOS_INCIDENCIA[tipo], "volcan": volcan,
-                         "fecha": fecha, "plataforma": plataforma, "motivo": str(motivo)[:200]})
+    i = {"tipo": tipo, "cuenta_estricto": TIPOS_INCIDENCIA[tipo], "volcan": volcan,
+         "fecha": fecha, "plataforma": plataforma, "motivo": str(motivo)[:200]}
+    if pasada:
+        i["pasada"] = pasada
+    _INCIDENCIAS.append(i)
 
 
 def incidencias_de_cobertura() -> list[dict]:
@@ -1447,7 +1479,7 @@ def fetch_for_volcano(volcano: dict, date: datetime,
                         rechazo_403_plataforma = True
                     print(f"  WARN: Failed to fetch {platform} (una pasada): {e_par}")
                     _registrar_falla(producto, fecha_str, f"{type(e_par).__name__}: {str(e_par)[:150]}",
-                                     etapa=etapa)
+                                     etapa=etapa, pasada=_minuto_granulo(l1b_g))   # S199 (F6-112): qué pasada
             if rechazo_403_plataforma:
                 rechazos_403 += 1
             results[platform] = paths
@@ -1471,6 +1503,8 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             for f in _FALLAS[n_fallas_antes:]:
                 f["volcan"] = volcano.get("name", "?")
                 f["plataforma"] = f["plataforma"] or platform
+            # S199 (F6-112): en el finally por la misma razón, los `continue` de una búsqueda vacía o filtrada.
+            _registrar_busqueda(volcano.get("name", "?"), fecha_str, platform, n_fallas_antes)
 
     # S175 POR QUÉ: un 403 de LAADS puede ser una colección con permiso propio o un throttling
     # (S123: eso no debe matar el NRT), o un token que CMR acepta y LAADS no. earthaccess descarta

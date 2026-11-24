@@ -97,7 +97,20 @@ jobs:
           echo "Barrido de ${{ matrix.volcano }}: $INI a $FIN, sólo pasadas sin record"
           python scripts/run_pipeline.py --profile mirova_equivalent \
             --volcano ${{ matrix.volcano }} \
-            --start "$INI" --end "$FIN" --solo-sin-record 2>&1 | tee -a pipeline.log
+            --start "$INI" --end "$FIN" --solo-sin-record \
+            --cobertura-json "cobertura_barrido/${{ matrix.volcano }}.json" 2>&1 | tee -a pipeline.log
+      # S199 (auditoría externa con Codex, ronda 2, F6-112): lo que el barrido mide (o vuelve a no poder medir) se anota
+      # en data/cobertura/<volcán>.json, el mismo archivo que escribe el NRT y lee el tablero (frontend/cobertura.js). Sin
+      # esto, un día de una caída larga de CMR seguiría «no medido» en el tablero aunque el barrido ya lo hubiera rellenado.
+      # continue-on-error: si falla, el commit de los datos sigue igual. Prueba: tests/test_cobertura_publicada_s199.py.
+      - name: Publicar pasadas no medidas
+        if: ${{ !cancelled() && (steps.barrido.outcome == 'success' || steps.barrido.outcome == 'failure') }}
+        continue-on-error: true
+        run: |
+          python scripts/cobertura_publicada.py \
+            --entrada "cobertura_barrido/${{ matrix.volcano }}.json" --volcan "${{ matrix.volcano }}" \
+            --archivo "data/cobertura/${{ matrix.volcano }}.json" \
+            --records "data/mirova_equivalent/${{ matrix.volcano }}.json"
 
       - name: Commit updated data files
         # !cancelled(): si el paso del barrido falla o se pasa de tiempo a mitad, lo ya guardado (store.py escribe
@@ -110,6 +123,7 @@ jobs:
           F="data/mirova_equivalent/${{ matrix.volcano }}.json"
           python -c "import json,sys; json.load(open(sys.argv[1], encoding='utf-8'))" "$F" || { echo "::error::$F no es JSON válido; no se sube"; exit 1; }
           git add "data/mirova_equivalent/${{ matrix.volcano }}.json" 2>/dev/null
+          git add "data/cobertura/${{ matrix.volcano }}.json" 2>/dev/null   # S199 (F6-112)
           git diff --staged --quiet && { echo "Sin pasadas nuevas para ${{ matrix.volcano }}"; exit 0; }
           git commit -m "Barrido de huecos ${{ matrix.volcano }} $(date -u '+%Y-%m-%d %H:%M UTC')"
           for attempt in 1 2 3 4 5; do
