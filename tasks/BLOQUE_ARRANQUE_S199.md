@@ -33,7 +33,7 @@
 
 | # | Pregunta | Opciones | Recomendación |
 |---|---|---|---|
-| 1 | #1015, panel «Últimas 10 pasadas» con miniatura NTI (toca `mirova_v750_codigo.py` y `nrt.yml`, A45) | A45 explícito y rebasar / esperar | **Darle A45**: es la mejora del tablero que más acerca a MIROVA. S198 leyó «sigue con todo lo que recomiendas» como sí pero NO lo empezó: pedir el sí explícito |
+| 1 | #1015, panel «Últimas 10 pasadas» con miniatura NTI (toca `mirova_v750_codigo.py` y `nrt.yml`, A45) | A45 explícito y rebasar / esperar | **DECIDIDO: Nicolás dio A45 explícito el 2026-11-24 ~15:15 UTC («Sí, A45 para #1015»), después del cierre de S198.** S199: tag defensivo `pre-s199-miniaturas` y push, rebasar sobre main, resolver conflictos, pruebas, verificar en navegador y mergear con uno.sh |
 | 2 | Las 96 carpetas temporales con contenido «único» (unos 3 GB, 2.928 .py/.md/.sh fuera del repo) | zip de lo textual y borrar / dejar | **Zip de .py .md .sh .txt .csv a `D:\vrp-trabajo\archivo_s199_temporales.zip`, luego borrar** |
 | 3 | `C:\Users\nmend\AppData\Local\Temp-1` a `Temp-228` (1,8 GB, del 2026-04-19, no son de VRP) | borrar / dejar | Preguntar a Nicolás de qué programa son; si no lo sabe, borrar |
 | 4 | R3F3-104: 23 pasadas históricas sin marca «no medido» que el tablero ve «sin anomalía» | reprocesar (A45) / declarar | **Declarar** en la ficha y D36 (no son protegidas); reprocesar sólo si Nicolás lo pide |
@@ -111,7 +111,7 @@ Si te abrió otra sesión, mcp__ccd_session_mgmt__detach_session("self"). S198 c
       RESUMEN_CIERRE2_PARA_NICOLAS.md; arreglos g3+ verificados como PR (A45 donde toque).
    b. Barrido del piso: que la cadena cierre abril y siga con mayo a noviembre; con todo verde, evaluar.py calibrar
       según experiments/_s196_lab_piso/PREREGISTRO.md.
-   c. Decisiones de §b: pedir el sí explícito de A45 para #1015 (rebasar sobre main, tag defensivo, uno.sh); zip y
+   c. Decisiones de §b: #1015 YA TIENE A45 de Nicolás (rebasar sobre main, tag defensivo, uno.sh); zip y
       borrado de las 96 carpetas «únicas» si Nicolás dice que sí; Temp-N.
    d. F7-V501 y R3F3-V101 como PR fuera de A45; radios del visor si Nicolás los fijó.
 4. Reglas duras: A45; merges con D:/vrp-trabajo/temporales/s195/merge/uno.sh (fetch con reintento, ficha al mergear
