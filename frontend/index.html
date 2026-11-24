@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> <link rel="stylesheet" href="vista_volcan.css" /><!-- S180: tarjeta mínima y pestañas por sensor; en la misma línea para no correr las citas archivo:línea (guard G8) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas --> <script src="diurno.js"></script><!-- S193: qué pasada nuestra es diurna (MODIS de día) y su sol; misma línea por G8 -->
-<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: capa de cuerpos de agua y marca «pico sobre agua» (sólo display); misma línea por G8 --> <script src="cumbre.js"></script><!-- S194: marca «también hay calor en la cumbre» (sólo display); misma línea por G8 --> <script src="crater_no_medido.js"></script><!-- S194: marca «cráter no medido» (MIR perdida o saturada sobre el cráter; sólo display); misma línea por G8 --> <script src="miniaturas.js"></script><!-- S184: panel «Últimas 10 pasadas» (miniaturas por pasada); misma línea por el guard G8 -->
+<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: capa de cuerpos de agua y marca «pico sobre agua» (sólo display); misma línea por G8 --> <script src="cumbre.js"></script><!-- S194: marca «también hay calor en la cumbre» (sólo display); misma línea por G8 --> <script src="crater_no_medido.js"></script><!-- S194: marca «cráter no medido» (MIR perdida o saturada sobre el cráter; sólo display); misma línea por G8 --> <script src="miniaturas.js"></script><!-- S184: panel «Últimas 10 pasadas» (miniaturas por pasada); misma línea por el guard G8 --> <script src="cobertura.js"></script><!-- S199 (F6-112): pasadas no medidas (data/cobertura/; sólo display); misma línea por G8 -->
   <style>
     .rango-ctl { display:inline-flex; gap:4px; align-items:center; }
     .rango-ctl[hidden] { display:none; }
@@ -3015,6 +3015,7 @@ function buildCards() {
     if (cumbreEl) card.appendChild(cumbreEl);
     const craterEl = avisoCraterTarjeta("vc-crater-no-medido", d.records, det);   // S194: cráter no medido en la última pasada
     if (craterEl) card.appendChild(craterEl);
+    if (typeof CoberturaTablero !== "undefined" && !esPreliminar(v)) { const cobEl = el("div", "vc-no-medido"); card.appendChild(cobEl); CoberturaTablero.pintar(cobEl, v.name, { desdeMs: Date.now() - 48 * 3600000, prefijo: "En 48 h," }); }   // S199 (F6-112): pasadas no medidas (NASA caída, descarga o lectura fallida); sólo display
     card.appendChild(mon);
 
     // S180: minigráfico del período (como mosaico.html), sólo si el volcán tiene datos en este tablero.
@@ -3502,6 +3503,7 @@ function renderDetail() {
   bAnom.addEventListener("click", () => { if (tablaTodasPasadas) { tablaTodasPasadas = false; renderDetail(); } });
   tTitle.append(tTxt, bTodas, bAnom);
   dp.appendChild(tTitle);
+  if (typeof CoberturaTablero !== "undefined" && !esPreliminar(v)) { const cobHost = el("div", "cobertura-detalle"); dp.appendChild(cobHost); const [c0, c1] = Periodo.intervalo(currentPeriodo, Date.now()); CoberturaTablero.pintar(cobHost, v.name, { modo: "lista", desdeMs: c0, hastaMs: c1, filtro: p => detailSensor === "COMB" || sensorGroup(p) === detailSensor, prefijo: "No medido en el período" }); }   // S199 (F6-112): la tabla sólo lista lo que se midió; esto dice lo que no (sólo display)
 
   const tbl = el("table","events-table");
   const thead = el("thead");

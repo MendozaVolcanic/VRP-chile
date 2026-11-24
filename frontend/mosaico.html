@@ -21,7 +21,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas --> <script src="diurno.js"></script><!-- S193: qué pasada nuestra es diurna (MODIS de día) y su sol; misma línea por G8 -->
-<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: marca «pico sobre agua» (sólo display); misma línea por G8 --> <script src="cumbre.js"></script><!-- S194: marca «también hay calor en la cumbre» (sólo display); misma línea por G8 --> <script src="crater_no_medido.js"></script><!-- S194: marca «cráter no medido» (MIR perdida o saturada sobre el cráter; sólo display); misma línea por G8 -->
+<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: marca «pico sobre agua» (sólo display); misma línea por G8 --> <script src="cumbre.js"></script><!-- S194: marca «también hay calor en la cumbre» (sólo display); misma línea por G8 --> <script src="crater_no_medido.js"></script><!-- S194: marca «cráter no medido» (MIR perdida o saturada sobre el cráter; sólo display); misma línea por G8 --> <script src="cobertura.js"></script><!-- S199 (F6-112): pasadas no medidas (data/cobertura/; sólo display); misma línea por G8 -->
 <style>
 :root {
   --bg: #1a1a2e; --surface: #16213e; --card: #0f3460;
@@ -125,7 +125,7 @@ main { padding: 12px 24px 32px; max-width: 1600px; margin: 0 auto; }
 }
 .mc-footer .last { color: var(--text); }
 /* S109 — frescura de monitoreo (última pasada procesada, estilo MIROVA) */
-.mc-sobre-agua { font-size: 0.66rem; color: #40c4ff; margin-top: 3px; } .mc-sobre-agua:empty { display: none; }   /* S193 */ .mc-calor-cumbre { font-size: 0.66rem; color: #ff8a65; margin-top: 3px; }   /* S194 */ .mc-crater-no-medido { font-size: 0.66rem; color: #ffab40; margin-top: 3px; }   /* S194: cráter no medido */
+.mc-sobre-agua { font-size: 0.66rem; color: #40c4ff; margin-top: 3px; } .mc-sobre-agua:empty { display: none; }   /* S193 */ .mc-calor-cumbre { font-size: 0.66rem; color: #ff8a65; margin-top: 3px; }   /* S194 */ .mc-crater-no-medido { font-size: 0.66rem; color: #ffab40; margin-top: 3px; }   /* S194: cráter no medido */ .mc-no-medido { font-size: 0.66rem; color: #ce93d8; margin-top: 3px; }   /* S199: pasadas no medidas */
 .mc-diurna { font-size: 0.66rem; color: #ffc400; margin-top: 3px; } .mc-mon-dia { color: #c9a227; }   /* S193: pasada de día */
 .mc-monitor { font-size: 0.68rem; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 .mc-mon-dot { font-size: 0.7rem; line-height: 1; }
@@ -911,6 +911,7 @@ function renderMosaico() {
         textContent: CraterNoMedido.SIMBOLO + " Pasada del " + lnm.rec.datetime_utc.slice(0, 16) + " UTC (" +
           (lnm.rec.sensor || "sensor sin dato") + "): " + CraterNoMedido.textoCrater(lnm.m) }));
     }
+    if (typeof CoberturaTablero !== "undefined") { const cobEl = el("div", { className: "mc-no-medido" }); card.appendChild(cobEl); CoberturaTablero.pintar(cobEl, v.name, { desdeMs: Date.now() - 48 * 3600000, prefijo: "En 48 h," }); }   // S199 (F6-112): pasadas no medidas, igual que la tarjeta de index.html (sólo display)
 
     if (records.length === 0) {
       card.appendChild(el("div", { className: "mc-no-data", textContent: "Sin datos cargados" }));

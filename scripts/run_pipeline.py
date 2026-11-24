@@ -411,7 +411,17 @@ def _sin_geolocalizacion(volcano: dict, date: datetime, platform: str, l1b: Path
     líneas en cada procesador, para no correr las citas archivo:línea de CLAUDE.md (guard G8)."""
     print(f"  No geolocation match for {l1b.name}")
     fetch.registrar_incidencia("sin_geolocalizacion", volcano["name"], date.strftime("%Y-%m-%d"), platform,
-                               f"L1B en disco sin su geolocalización: {l1b.name}")
+                               f"L1B en disco sin su geolocalización: {l1b.name}", pasada=_minuto_de_archivo(l1b))
+
+
+def _minuto_de_archivo(l1b: Path) -> str | None:
+    """S199 (F6-112): minuto de inicio de la pasada, «AAAA-MM-DD HH:MM», del nombre del L1B (.A<año><día>.<hhmm>.), la
+    misma clave datetime_utc del record. Lo publica scripts/cobertura_publicada.py; None si el nombre no lo trae."""
+    m = fetch._PAT_TIEMPO_GRANULO.search(Path(l1b).name)
+    if not m:
+        return None
+    anio, dia, hh, mi = (int(x) for x in m.groups())
+    return (datetime(anio, 1, 1) + timedelta(days=dia - 1, hours=hh, minutes=mi)).strftime("%Y-%m-%d %H:%M")
 
 
 def _error_procesamiento(volcano: dict, date: datetime, platform: str, l1b: Path, e: Exception) -> None:
@@ -422,7 +432,7 @@ def _error_procesamiento(volcano: dict, date: datetime, platform: str, l1b: Path
     pasada que existió y se bajó, pero quedó sin record. Incluye la excepción que salte después de guardar el record
     (al imprimirlo): se cuenta igual, porque desde aquí no se distingue y es preferible un rojo de más a un hueco."""
     fetch.registrar_incidencia("error_procesamiento", volcano["name"], date.strftime("%Y-%m-%d"), platform,
-                               f"{l1b.name}: {type(e).__name__}: {e}")
+                               f"{l1b.name}: {type(e).__name__}: {e}", pasada=_minuto_de_archivo(l1b))
 
 
 def _sin_record(volcano: dict, date: datetime, platform: str, l1b: Path, n_antes: int) -> None:
@@ -503,7 +513,8 @@ def claves_con_record(records: list) -> set:
 
 
 def informar_cobertura(fallas: list, ruta_json=None, estricto: bool = False,
-                       plataformas: dict | None = None, incidencias: list | None = None) -> int:
+                       plataformas: dict | None = None, incidencias: list | None = None,
+                       busquedas: list | None = None) -> int:
     """S157: dice qué búsquedas y descargas no se pudieron hacer, y devuelve el código de salida.
 
     POR QUÉ: con CMR caído cada búsqueda caía en un WARN y el job salía verde sin datos
@@ -528,6 +539,9 @@ def informar_cobertura(fallas: list, ruta_json=None, estricto: bool = False,
     descarta porque el cráter no tiene posición en el gránulo; no cuenta en modo estricto.
     S190 (H07): `error_procesamiento` (excepción del procesador con el gránulo en disco; cuenta en modo estricto) y
     `sin_record` (el procesador devolvió None sin anotar nada; sin juicio, no cuenta). Antes las dos salían «completa».
+    S199 (F6-112): `busquedas` es `fetch.busquedas_de_cobertura()` (cada búsqueda hecha, ok o fallida) y va al JSON con
+    `generado_utc`, para que scripts/cobertura_publicada.py publique en data/cobertura/ lo que no se midió y quite lo
+    que una corrida posterior sí midió. No cambia lo que se imprime ni el código de salida.
     """
     import json
     from collections import defaultdict
@@ -542,7 +556,9 @@ def informar_cobertura(fallas: list, ruta_json=None, estricto: bool = False,
         with open(ruta_json, "w", encoding="utf-8") as fh:
             json.dump({"fallas": fallas, "n": len(fallas), "plataformas": plataformas,
                        "retiradas": retiradas, "sin_granulos": sin_granulos,
-                       "incidencias": incidencias, "n_incidencias": len(incidencias)},
+                       "incidencias": incidencias, "n_incidencias": len(incidencias),
+                       "busquedas": list(busquedas or []),
+                       "generado_utc": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")},
                       fh, ensure_ascii=False, indent=1)
     if not fallas and not retiradas and not sin_granulos and not incidencias:
         print("Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).")
@@ -774,7 +790,8 @@ def main():
     codigo = informar_cobertura(fetch.fallas_de_cobertura(), ruta_json=args.cobertura_json,
                                 estricto=args.estricto_cobertura,
                                 plataformas=fetch.cobertura_por_plataforma(),
-                                incidencias=fetch.incidencias_de_cobertura())
+                                incidencias=fetch.incidencias_de_cobertura(),
+                                busquedas=fetch.busquedas_de_cobertura())
     print("\nDone.")
     sys.exit(codigo)
 

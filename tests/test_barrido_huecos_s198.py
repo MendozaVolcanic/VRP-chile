@@ -250,7 +250,9 @@ def test_workflow_parte_de_la_punta_de_la_rama():
 def test_workflow_commitea_solo_el_json_del_volcan_con_grupo_propio_y_reintento():
     txt, d = _wf()
     commit = next(s for s in d["jobs"]["process"]["steps"] if "git push" in s.get("run", ""))
-    assert re.findall(r'git add "([^"]+)"', commit["run"]) == ["data/mirova_equivalent/${{ matrix.volcano }}.json"]
+    # S199 (F6-112): también las pasadas no medidas del volcán (data/cobertura/), que el barrido resuelve o confirma.
+    assert re.findall(r'git add "([^"]+)"', commit["run"]) == ["data/mirova_equivalent/${{ matrix.volcano }}.json",
+                                                              "data/cobertura/${{ matrix.volcano }}.json"]
     assert "for attempt in 1 2 3 4 5" in commit["run"] and "pull --rebase" in commit["run"]
     grupo = d["concurrency"]["group"]
     assert grupo != "push-main" and d["concurrency"]["cancel-in-progress"] is False
