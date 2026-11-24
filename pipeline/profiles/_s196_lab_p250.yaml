@@ -1,0 +1,35 @@
+# Barrido del piso de la zona A del laboratorio (S196, palanca del piso; PREREGISTRO sellado
+# experiments/_s196_lab_piso/PREREGISTRO.md §5, #1101; código autorizado por Nicolás, A45, 2026-11-23).
+# BRAZO piso 0.0025: la zona A ENCENDIDA con s = 3,0 (fijo en todos los brazos de piso, §3) y piso 0.0025 en NTI y en
+# ETI, sólo de noche, en el círculo de inner_radius_km cortado por la región sensible de la vía. Nunca sobre el
+# piso de producción (0,003) ni el s de producción (5): el laboratorio nunca ve menos en el cráter (guard S147).
+# Lo demás es copia de laboratorio.yaml: el cargador de perfiles no encadena extends (pipeline/profile.py), así que
+# se hereda de mirova_equivalent y se repite lo que el laboratorio declara.
+# tests/test_laboratorio_piso_s196.py (Q6) vigila que difiera del laboratorio sólo en lo que declara.
+# NO OPERACIONAL: lo corre sólo .github/workflows/reproc-s196-lab-piso.yml, a mano, con salidas fuera de main.
+extends: mirova_equivalent
+profile: _s196_lab_p250
+description: >
+  Barrido del piso de la zona A del laboratorio, brazo s = 3.0 y piso 0.0025 (S196).
+
+thresholds:
+  enable_lab_zona_a: true
+
+paths:
+  enable_daytime_modis: false
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+enable_modis_b22_primary: true
+
+laboratorio_zona_a:
+  extension: MEJ-5
+  radio: inner_radius_km
+  parametro: sigma_contextual_nocturno
+  valor: 3.0
+  piso: 0.0025
+  volcanes_fuera:
+    - PuyehueCordonCaulle   # D6: inner de 20 km
+
+output:
+  data_subdir: _s196_lab_p250

@@ -1,0 +1,631 @@
+<title>Radio del edificio volcánico</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>/*__LEAFLET_CSS__*/</style>
+<style>
+/* Layout: herramienta de una pantalla; lista de volcanes | mapa | panel de decisión; en el celular se apilan. */
+:root {
+  --bg: #f3f4f1;          /* papel de carta topográfica, gris con sesgo verde */
+  --panel: #ffffff;
+  --fg: #1b221f;
+  --muted: #5d6762;
+  --line: #d6dbd6;
+  --accent: #b4540a;      /* ocre de lava enfriada: el radio que se elige */
+  --accent-ink: #ffffff;
+  --ok: #2f7d4f;
+  --warn: #9a6700;
+  --chip: #e8ebe7;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141917; --panel: #1c2320; --fg: #e6ebe7; --muted: #9aa6a0; --line: #2f3833;
+    --accent: #f08a3a; --accent-ink: #1a0f06; --ok: #6cc38f; --warn: #e0b453; --chip: #26302b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141917; --panel: #1c2320; --fg: #e6ebe7; --muted: #9aa6a0; --line: #2f3833;
+  --accent: #f08a3a; --accent-ink: #1a0f06; --ok: #6cc38f; --warn: #e0b453; --chip: #26302b;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14px; line-height: 1.45;
+  display: flex; flex-direction: column;
+}
+.cab {
+  padding-block: 10px 8px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid var(--line); display: flex; gap: 6px 24px; align-items: baseline; flex-wrap: wrap;
+}
+.cab h1 { font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; margin: 0; letter-spacing: .01em; }
+.cab p { margin: 0; color: var(--muted); max-width: 78ch; font-size: .92rem; text-wrap: pretty; }
+.aviso { margin: 0; font-size: .85rem; color: var(--warn); }
+.app {
+  flex: 1; min-height: 0; display: grid; grid-template-columns: 210px minmax(0, 1fr) 320px;
+}
+.lista { overflow-y: auto; border-right: 1px solid var(--line); padding: 8px 0; background: var(--panel); }
+.lista h2 {
+  font-family: var(--font-display); font-size: .74rem; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); margin: 10px 14px 4px; font-weight: 600;
+}
+.vol {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; width: 100%; text-align: left; border: 0;
+  background: none; color: var(--fg); padding: 6px 14px; cursor: pointer; font: inherit; align-items: baseline;
+}
+.vol:hover { background: var(--chip); }
+.vol[aria-current="true"] { background: var(--chip); box-shadow: inset 3px 0 0 var(--accent); }
+.vol:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.vol .r { font-family: var(--font-data); font-size: .8rem; font-variant-numeric: tabular-nums; }
+.vol .r.guardado { color: var(--ok); font-weight: 500; }
+.vol .r.prov { color: var(--muted); }
+.vol .s { grid-column: 1 / -1; font-size: .74rem; color: var(--muted); }
+.mapa-caja { position: relative; min-width: 0; }
+#mapa { position: absolute; inset: 0; background: #2b3230; }
+.capas {
+  position: absolute; z-index: 500; top: 10px; left: 52px; display: flex; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; overflow: hidden; font-size: .82rem;
+}
+.capas button { border: 0; background: none; color: var(--fg); padding: 5px 10px; cursor: pointer; font: inherit; }
+.capas button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.capas button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.leyenda {
+  position: absolute; z-index: 500; bottom: 22px; left: 10px; background: var(--panel); color: var(--fg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: .76rem; display: grid; gap: 4px;
+  max-width: calc(100% - 20px);
+}
+.leyenda .fila { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.sw { display: inline-block; width: 14px; height: 10px; border: 1px solid rgba(0,0,0,.35); }
+.ln { display: inline-block; width: 22px; height: 0; border-top-width: 2px; vertical-align: middle; }
+.ln-caja { display: inline-flex; align-items: center; background: #38403c; padding: 5px 3px; border-radius: 3px; } /* fondo oscuro como el mapa: la línea blanca se ve en los dos temas */
+.par { display: inline-flex; gap: 4px; align-items: center; white-space: nowrap; }
+.panel { overflow-y: auto; border-left: 1px solid var(--line); background: var(--panel); padding: 14px 16px 24px; display: grid; gap: 16px; align-content: start; }
+.panel h2 { font-family: var(--font-display); font-size: 1.25rem; margin: 0; font-weight: 600; text-wrap: balance; }
+.meta { color: var(--muted); font-size: .8rem; margin: 2px 0 0; }
+.radio { display: grid; gap: 8px; }
+.radio label { font-size: .78rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-family: var(--font-display); font-weight: 600; }
+.radio .valor { display: flex; align-items: baseline; gap: 8px; }
+.radio output { font-family: var(--font-data); font-size: 2rem; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
+.radio .km { color: var(--muted); }
+.paso { display: flex; gap: 6px; }
+.paso button, .btn {
+  font: inherit; border: 1px solid var(--line); background: var(--chip); color: var(--fg); border-radius: 6px;
+  padding: 5px 10px; cursor: pointer;
+}
+.paso button:focus-visible, .btn:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.btn.pri { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn:disabled { opacity: .55; cursor: default; }
+textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: .88rem; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; background: var(--bg); color: var(--fg); resize: vertical; min-height: 54px; }
+.estado { font-size: .82rem; margin: 0; min-height: 1.2em; }
+.estado.ok { color: var(--ok); } .estado.mal { color: var(--warn); }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--font-display); font-weight: 600; font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+td.n { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.bloque h3 { font-family: var(--font-display); font-size: .8rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 0 0 6px; font-weight: 600; }
+.bloque p { margin: 0 0 6px; font-size: .84rem; }
+.nota { font-size: .76rem; color: var(--muted); }
+.acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+details summary { cursor: pointer; font-size: .84rem; }
+pre { font-family: var(--font-data); font-size: .72rem; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; overflow-x: auto; max-height: 260px; }
+.asa { width: 18px; height: 18px; border-radius: 50%; background: #ffb020; border: 2px solid #1b1206; box-shadow: 0 0 0 2px rgba(255,255,255,.7); cursor: ew-resize; box-sizing: border-box; }
+.etq-km { font-family: var(--font-data); font-size: 12px; font-weight: 500; color: #1b1206; background: #ffb020; padding: 1px 5px; border-radius: 3px; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,.4); }
+.leaflet-container { font-family: var(--font-body); }
+.leaflet-tooltip { font-family: var(--font-body); font-size: 12px; }
+@media (max-width: 900px) {
+  body { display: block; height: auto; }
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .lista { border-right: 0; border-bottom: 1px solid var(--line); display: flex; overflow-x: auto; overflow-y: hidden; padding: 6px 8px; gap: 4px; }
+  .lista h2 { display: none; }
+  .vol { width: auto; flex: 0 0 auto; border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; }
+  .vol[aria-current="true"] { box-shadow: inset 0 -3px 0 var(--accent); }
+  .vol .s { display: none; }
+  .mapa-caja { height: 62vh; min-height: 380px; }
+  .panel { border-left: 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<header class="cab">
+  <h1>Radio del edificio volcánico</h1>
+  <p>El «flanco» es el anillo entre el cráter (radio de MIROVA) y el borde del edificio. El laboratorio (P0) vigila ahí, aparte del cráter, para que un calor conocido y constante no esconda un foco nuevo en otra parte del volcán. Mueve el círculo naranjo hasta donde termina el edificio y guárdalo.</p>
+  <p class="aviso" id="aviso" hidden></p>
+</header>
+
+<div class="app">
+  <nav class="lista" id="lista" aria-label="Volcanes"></nav>
+  <div class="mapa-caja">
+    <div id="mapa" role="application" aria-label="Mapa del volcán"></div>
+    <div class="capas" role="group" aria-label="Fondo del mapa">
+      <button type="button" id="capa-sat" aria-pressed="true">Satélite</button>
+      <button type="button" id="capa-rel" aria-pressed="false">Relieve</button>
+      <button type="button" id="capa-mez" aria-pressed="false">Mezcla</button>
+    </div>
+    <div class="leyenda" id="leyenda"></div>
+  </div>
+  <aside class="panel" id="panel">
+    <div>
+      <h2 id="v-titulo">Volcán</h2>
+      <p class="meta" id="v-meta"></p>
+    </div>
+    <div class="radio">
+      <label for="radio-rango">Radio del edificio (flanco)</label>
+      <div class="valor"><output id="radio-salida" for="radio-rango">10,0</output><span class="km">km</span></div>
+      <input type="range" id="radio-rango" min="0.5" max="30" step="0.5" value="10">
+      <div class="paso">
+        <button type="button" id="menos">− 0,5</button>
+        <button type="button" id="mas">+ 0,5</button>
+        <button type="button" id="volver">Volver a lo guardado</button>
+      </div>
+      <p class="nota">También puedes arrastrar el punto naranjo del borde del círculo en el mapa.</p>
+    </div>
+    <div class="bloque">
+      <h3>Con este radio</h3>
+      <table>
+        <thead><tr><th>Área</th><th class="n">Casillas</th><th class="n">Noches</th></tr></thead>
+        <tbody id="tabla-areas"></tbody>
+      </table>
+      <p class="estado mal" id="aviso-radio" hidden></p>
+      <p class="nota" id="nota-ventana"></p>
+    </div>
+    <div class="bloque" id="bloque-fuera">
+      <h3>Calor recurrente que queda fuera del edificio</h3>
+      <div id="lista-fuera"></div>
+    </div>
+    <div class="bloque">
+      <h3>Guardar</h3>
+      <label class="nota" for="criterio">Criterio geológico (opcional): qué marca el borde</label>
+      <textarea id="criterio" placeholder="Ej.: quiebre de pendiente al pie del cono, borde de coladas holocenas"></textarea>
+      <div class="acciones" style="margin-top:8px">
+        <button type="button" class="btn pri" id="guardar">Guardar radio</button>
+      </div>
+      <p class="estado" id="estado" role="status"></p>
+      <p class="nota" id="guardado-info"></p>
+    </div>
+    <div class="bloque">
+      <h3>Llevar al repositorio</h3>
+      <p>El YAML tiene el formato de <code>config/areas_laboratorio.yaml</code> con todos los radios guardados.</p>
+      <div class="acciones">
+        <button type="button" class="btn" id="bajar-yaml">Descargar YAML</button>
+        <button type="button" class="btn" id="copiar-yaml">Copiar YAML</button>
+      </div>
+      <p class="estado" id="estado-yaml" role="status"></p>
+      <details><summary>Ver el YAML</summary><pre id="yaml-pre"></pre></details>
+    </div>
+    <p class="nota">Fondos: imagen Esri World Imagery (Esri, Maxar, Earthstar Geographics); relieve sombreado propio sobre Terrain Tiles de AWS Open Data, curvas cada 100 m y maestras cada 500 m. Calor: alertados de la vía «código MIROVA» en pasadas nocturnas, casillas de 1 × 1 km. Scripts en <code>experiments/_s196_visor_radios/</code>.</p>
+  </aside>
+</div>
+
+<script id="datos" type="application/json">/*__DATOS__*/</script>
+<script id="fondos" type="application/json">/*__FONDOS__*/</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+(function () {
+  "use strict";
+  var DATOS = JSON.parse(document.getElementById("datos").textContent);
+  var FONDOS = JSON.parse(document.getElementById("fondos").textContent);
+  var KM_LAT = 110.574, KM_LON_EQ = 111.320;          // mismas constantes que experiments/_s194_areas/particion.py
+  var PROV = DATOS.radio_provisional_km;
+  var RECURRENTE = 3;                                  // noches; umbral descriptivo de recurrencia.py
+  var CLASES = [                                        // noches distintas por casilla
+    { min: 1, max: 1, color: "#fff3a3", txt: "1" },
+    { min: 2, max: 2, color: "#ffd23f", txt: "2" },
+    { min: 3, max: 5, color: "#ff9f1c", txt: "3 a 5" },
+    { min: 6, max: 15, color: "#f2542d", txt: "6 a 15" },
+    { min: 16, max: 50, color: "#c81d25", txt: "16 a 50" },
+    { min: 51, max: 1e9, color: "#7a0a3d", txt: "más de 50" }
+  ];
+  var fmt = function (x, d) { return Number(x).toLocaleString("es-CL", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var rumbo = function (x, y) {
+    var a = (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
+    return ["N", "NE", "E", "SE", "S", "SO", "O", "NO"][Math.floor((a + 22.5) / 45) % 8];
+  };
+  var porNombre = {};
+  DATOS.volcanes.forEach(function (v) { porNombre[v.nombre] = v; });
+
+  // ---------- estado guardado ----------
+  var guardados = {};            // nombre -> {radio_flanco_km, cuando, criterio, por_id, es_dueno}
+  var db = null, user = null, miId = null, esDueno = false, modo = "local";
+  function leerLocal() { try { return JSON.parse(localStorage.getItem("visor_radios_s196") || "{}"); } catch (e) { return {}; } }
+  function escribirLocal() { try { localStorage.setItem("visor_radios_s196", JSON.stringify(guardados)); } catch (e) { /* sin almacenamiento */ } }
+  guardados = leerLocal();
+
+  // ---------- mapa ----------
+  var mapa = L.map("mapa", { zoomSnap: 0.25, attributionControl: true, preferCanvas: false });
+  mapa.attributionControl.setPrefix(false);
+  var capaSat = null, capaRel = null, grupo = L.layerGroup().addTo(mapa), grupoCirc = L.layerGroup().addTo(mapa);
+  var fondo = "sat";
+  var actual = null, radio = PROV, circElegido = null, asa = null, etiqueta = null, arrastrando = false, tocado = false;
+
+  function aLatLon(v, x, y) {
+    var kx = KM_LON_EQ * Math.cos(v.lat * Math.PI / 180);
+    return [v.lat + y / KM_LAT, v.lon + x / kx];
+  }
+  function clase(n) { for (var i = 0; i < CLASES.length; i++) if (n >= CLASES[i].min && n <= CLASES[i].max) return CLASES[i]; return CLASES[CLASES.length - 1]; }
+  function area(v, c, r) {
+    if (v.inner_km != null && c.d <= v.inner_km) return "crater";
+    if (c.agua) return "agua";
+    return c.d <= r ? "flanco" : "resto";
+  }
+  var NOMBRE_AREA = { crater: "Cráter (radio MIROVA)", agua: "Agua", flanco: "Flanco", resto: "Fuera del edificio" };
+
+  function ponerFondo() {
+    var f = FONDOS[actual.nombre];
+    [capaSat, capaRel].forEach(function (c) { if (c) mapa.removeLayer(c); });
+    capaSat = capaRel = null;
+    if (!f) return;
+    var b = [[f.sur, f.oeste], [f.norte, f.este]];
+    capaSat = L.imageOverlay("fondos/" + actual.nombre + "_sat.jpg", b, { attribution: "Imagen: Esri, Maxar, Earthstar Geographics" });
+    capaRel = L.imageOverlay("fondos/" + actual.nombre + "_relieve.jpg", b, { attribution: "Relieve: Terrain Tiles, AWS Open Data" });
+    if (fondo === "sat" || fondo === "mez") capaSat.addTo(mapa).bringToBack();
+    if (fondo === "rel" || fondo === "mez") { capaRel.setOpacity(fondo === "mez" ? 0.55 : 1).addTo(mapa); }
+    if (capaSat && mapa.hasLayer(capaSat)) capaSat.bringToBack();
+  }
+  function botonesFondo() {
+    [["sat", "capa-sat"], ["rel", "capa-rel"], ["mez", "capa-mez"]].forEach(function (p) {
+      document.getElementById(p[1]).setAttribute("aria-pressed", String(fondo === p[0]));
+    });
+  }
+  ["sat", "rel", "mez"].forEach(function (k) {
+    document.getElementById("capa-" + k).addEventListener("click", function () { fondo = k; botonesFondo(); ponerFondo(); });
+  });
+
+  function dibujarVolcan() {
+    var v = actual;
+    grupo.clearLayers();
+    // Agua
+    v.agua.forEach(function (anillos) {
+      L.polygon(anillos.map(function (a) { return a.map(function (p) { return [p[1], p[0]]; }); }), {
+        color: "#4aa3ff", weight: 1, fillColor: "#4aa3ff", fillOpacity: 0.28, interactive: false
+      }).addTo(grupo);
+    });
+    // Casillas de calor (las de menos noches primero, así las recurrentes quedan arriba)
+    var cs = v.casillas.slice().sort(function (a, b) { return a.n.length - b.n.length; });
+    cs.forEach(function (c) {
+      var nn = c.n.length, k = clase(nn);
+      var sw = aLatLon(v, c.x - 0.5, c.y - 0.5), ne = aLatLon(v, c.x + 0.5, c.y + 0.5);
+      var fams = Object.keys(c.fam).map(function (f) { return f.replace("VIIRS", "VIIRS ") + " " + c.fam[f]; }).join(", ");
+      var r = L.rectangle([sw, ne], { color: "#111", weight: 0.6, opacity: 0.8, fillColor: k.color, fillOpacity: 0.78 });
+      r.bindTooltip(
+        "<b>" + nn + (nn === 1 ? " noche" : " noches") + "</b> · " + c.pas + " pasadas<br>" +
+        fmt(c.d, 1) + " km " + rumbo(c.x, c.y) + " del cráter · BT máx " + fmt(c.bt, 1) + " K<br>" +
+        "Alertados: " + esc(fams) + "<br>Primera " + v.noches[c.n[0]] + ", última " + v.noches[c.n[nn - 1]] +
+        (c.agua ? "<br>Centro sobre agua" : ""), { sticky: true });
+      r.addTo(grupo);
+    });
+    // Cráter
+    L.circleMarker([v.lat, v.lon], { radius: 3, color: "#000", weight: 1, fillColor: "#fff", fillOpacity: 1 })
+      .bindTooltip("Cráter (centro de las distancias de la vía)").addTo(grupo);
+  }
+
+  function dibujarCirculos() {
+    var v = actual;
+    grupoCirc.clearLayers();
+    if (v.inner_km != null) {
+      L.circle([v.lat, v.lon], { radius: v.inner_km * 1000, color: "#5fe3f0", weight: 2, fill: false, interactive: false }).addTo(grupoCirc);
+    }
+    L.circle([v.lat, v.lon], { radius: PROV * 1000, color: "#ffffff", weight: 2, dashArray: "6 6", fill: false, interactive: false }).addTo(grupoCirc);
+    circElegido = L.circle([v.lat, v.lon], { radius: radio * 1000, color: "#ffb020", weight: 3, fill: false, interactive: false }).addTo(grupoCirc);
+    asa = L.marker(puntoBorde(radio), {
+      draggable: true, keyboard: false, title: "Arrastra para cambiar el radio",
+      icon: L.divIcon({ className: "", html: '<div class="asa"></div>', iconSize: [18, 18], iconAnchor: [9, 9] })
+    }).addTo(grupoCirc);
+    etiqueta = L.marker(puntoBorde(radio), {
+      interactive: false, icon: iconoKm(radio)
+    }).addTo(grupoCirc);
+    asa.on("dragstart", function () { arrastrando = true; });
+    asa.on("drag", function (e) {
+      var d = mapa.distance([v.lat, v.lon], e.target.getLatLng()) / 1000;
+      ponerRadio(d, false);
+    });
+    asa.on("dragend", function () { arrastrando = false; tocado = true; asa.setLatLng(puntoBorde(radio)); });
+    actualizarCirculo();
+  }
+  function iconoKm(r) {
+    return L.divIcon({ className: "", html: '<span class="etq-km">' + fmt(r, 1) + " km</span>", iconSize: null, iconAnchor: [-12, 10] });
+  }
+  function puntoBorde(r) {
+    // Punto del borde al este del cráter, en la misma proyección local que las casillas.
+    return aLatLon(actual, r, 0);
+  }
+  function actualizarCirculo() {
+    if (!circElegido) return;
+    circElegido.setRadius(radio * 1000);
+    var p = puntoBorde(radio);
+    if (asa && !arrastrando) asa.setLatLng(p);
+    etiqueta.setLatLng(p);
+    // El texto va en el ícono (no en el DOM del marcador, que Leaflet crea recién cuando el mapa tiene vista).
+    etiqueta.setIcon(iconoKm(radio));
+  }
+
+  // ---------- radio ----------
+  var rango = document.getElementById("radio-rango"), salida = document.getElementById("radio-salida");
+  function ponerRadio(r, moverAsa) {
+    var max = Number(rango.max);
+    r = Math.min(max, Math.max(0.5, Math.round(r * 2) / 2));
+    radio = r;
+    rango.value = String(r);
+    salida.textContent = fmt(r, 1);
+    actualizarCirculo();
+    if (moverAsa && asa) asa.setLatLng(puntoBorde(r));
+    resumen();
+  }
+  rango.addEventListener("input", function () { tocado = true; ponerRadio(Number(rango.value), true); });
+  document.getElementById("menos").addEventListener("click", function () { tocado = true; ponerRadio(radio - 0.5, true); });
+  document.getElementById("mas").addEventListener("click", function () { tocado = true; ponerRadio(radio + 0.5, true); });
+  document.getElementById("volver").addEventListener("click", function () { ponerRadio(radioInicial(actual), true); });
+
+  function radioInicial(v) {
+    var g = guardados[v.nombre];
+    if (g) return g.radio_flanco_km;
+    return v.radio_actual_km != null ? v.radio_actual_km : PROV;
+  }
+
+  // ---------- resumen por área ----------
+  function resumen() {
+    var v = actual, por = { crater: [0, {}], agua: [0, {}], flanco: [0, {}], resto: [0, {}] };
+    var fuera = [];
+    v.casillas.forEach(function (c) {
+      var a = area(v, c, radio);
+      por[a][0]++;
+      c.n.forEach(function (i) { por[a][1][i] = 1; });
+      if (a === "resto" && c.n.length >= RECURRENTE) fuera.push(c);
+    });
+    var tb = document.getElementById("tabla-areas");
+    tb.textContent = "";
+    ["crater", "agua", "flanco", "resto"].forEach(function (a) {
+      if (a === "crater" && v.inner_km == null) return;
+      var tr = document.createElement("tr");
+      var etiquetaArea = NOMBRE_AREA[a] + (a === "crater" ? ", " + fmt(v.inner_km, 0) + " km" : a === "flanco" ? ", hasta " + fmt(radio, 1) + " km" : "");
+      [etiquetaArea, por[a][0], Object.keys(por[a][1]).length].forEach(function (val, i) {
+        var td = document.createElement("td"); td.textContent = String(val); if (i) td.className = "n"; tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    var lf = document.getElementById("lista-fuera");
+    lf.textContent = "";
+    if (!fuera.length) {
+      var p = document.createElement("p");
+      p.textContent = v.casillas.length ? "Ninguna casilla con " + RECURRENTE + " noches o más queda fuera de este radio." : "Sin alertas nocturnas en la ventana.";
+      lf.appendChild(p);
+    } else {
+      fuera.sort(function (a, b) { return b.n.length - a.n.length; });
+      var t = document.createElement("table");
+      t.innerHTML = "<thead><tr><th>Dónde</th><th class=\"n\">Noches</th><th class=\"n\">BT máx</th></tr></thead>";
+      var b = document.createElement("tbody");
+      fuera.slice(0, 8).forEach(function (c) {
+        var tr = document.createElement("tr");
+        [fmt(c.d, 1) + " km " + rumbo(c.x, c.y), c.n.length, fmt(c.bt, 0) + " K"].forEach(function (val, i) {
+          var td = document.createElement("td"); td.textContent = String(val); if (i) td.className = "n"; tr.appendChild(td);
+        });
+        b.appendChild(tr);
+      });
+      t.appendChild(b); lf.appendChild(t);
+      if (fuera.length > 8) { var q = document.createElement("p"); q.className = "nota"; q.textContent = "Y " + (fuera.length - 8) + " más."; lf.appendChild(q); }
+    }
+    var avisoR = document.getElementById("aviso-radio");
+    avisoR.hidden = !(v.inner_km != null && radio <= v.inner_km);
+    avisoR.textContent = "El radio elegido no pasa del radio interno de MIROVA (" + fmt(v.inner_km || 0, 0) + " km): todo lo que está dentro es cráter y el flanco queda vacío.";
+    document.getElementById("nota-ventana").textContent =
+      "Noches distintas con al menos un alertado en el área, de " + v.noches_con_pasada + " noches con pasada nocturna de la vía (" +
+      (v.primera_noche || "sin datos") + " a " + (v.ultima_pasada_utc ? v.ultima_pasada_utc.slice(0, 10) : "sin datos") +
+      "). La casilla se asigna por su centro; la partición asigna cada píxel por su propia distancia.";
+  }
+
+  // ---------- lista ----------
+  function textoRadio(v) {
+    var g = guardados[v.nombre];
+    if (g) return { t: fmt(g.radio_flanco_km, 1) + " km", c: "guardado" };
+    return { t: fmt(v.radio_actual_km != null ? v.radio_actual_km : PROV, 1) + " km", c: "prov" };
+  }
+  function pintarLista() {
+    var nav = document.getElementById("lista");
+    nav.textContent = "";
+    [["Tier A (grilla de 51 km)", true], ["Otros volcanes activos", false]].forEach(function (g) {
+      var h = document.createElement("h2"); h.textContent = g[0]; nav.appendChild(h);
+      DATOS.volcanes.filter(function (v) { return v.tier_a === g[1]; }).forEach(function (v) {
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "vol"; b.id = "vol-" + v.nombre;
+        b.setAttribute("aria-current", String(actual && actual.nombre === v.nombre));
+        var n = document.createElement("span"); n.textContent = v.titulo;
+        var tr = textoRadio(v), r = document.createElement("span"); r.className = "r " + tr.c; r.textContent = tr.t;
+        var s = document.createElement("span"); s.className = "s";
+        s.textContent = guardados[v.nombre] ? "guardado" : (v.en_config ? "provisional" : "sin radio en la partición");
+        b.append(n, r, s);
+        b.addEventListener("click", function () { elegir(v.nombre); });
+        nav.appendChild(b);
+      });
+    });
+  }
+
+  function infoGuardado() {
+    var g = guardados[actual.nombre], el = document.getElementById("guardado-info");
+    if (!g) { el.textContent = "Aún no hay radio guardado para este volcán."; return; }
+    var quien = g.es_dueno ? "la dueña o dueño del visor" : "otra persona";
+    el.textContent = "Guardado: " + fmt(g.radio_flanco_km, 1) + " km, " + (g.cuando || "").replace("T", " ").slice(0, 16) + " UTC" +
+      (modo === "db" ? ", por " + quien : ", en este navegador") + ".";
+    if (modo === "db" && user && g.por_id) {
+      user.profiles([g.por_id]).then(function (ps) {
+        var p = ps && ps[g.por_id];
+        if (p && p.name) el.textContent = el.textContent.replace(quien, p.name);
+      }).catch(function () {});
+    }
+  }
+
+  function elegir(nombre) {
+    actual = porNombre[nombre];
+    var v = actual;
+    rango.max = v.tier_a ? "30" : "20";
+    document.getElementById("v-titulo").textContent = v.titulo;
+    document.getElementById("v-meta").textContent =
+      (v.tier_a ? "Tier A" : "Fuera del NRT (sombra)") + " · cráter " + fmt(v.lat, 4) + ", " + fmt(v.lon, 4) +
+      (v.inner_km != null ? " · radio interno MIROVA " + fmt(v.inner_km, 0) + " km" : " · sin radio interno de MIROVA");
+    var g = guardados[v.nombre];
+    document.getElementById("criterio").value = g && g.criterio ? g.criterio : "";
+    document.getElementById("estado").textContent = "";
+    radio = radioInicial(v); tocado = false;
+    rango.value = String(radio); salida.textContent = fmt(radio, 1);
+    ponerFondo();
+    dibujarVolcan();
+    dibujarCirculos();
+    var f = FONDOS[v.nombre];
+    var vista = Math.max(radio, v.inner_km || 0, PROV) + 3;
+    mapa.invalidateSize();
+    mapa.fitBounds([aLatLon(v, -vista, -vista), aLatLon(v, vista, vista)]);
+    if (f) mapa.setMaxBounds(L.latLngBounds([[f.sur, f.oeste], [f.norte, f.este]]).pad(0.15));
+    resumen(); pintarLista(); infoGuardado();
+    try { history.replaceState(null, "", "#" + v.nombre); } catch (e) { /* marco sin historial */ }
+  }
+
+  // ---------- leyenda ----------
+  (function () {
+    var lg = document.getElementById("leyenda");
+    var f1 = document.createElement("div"); f1.className = "fila";
+    f1.appendChild(document.createTextNode("Noches con alerta:"));
+    CLASES.forEach(function (k) {
+      var par = document.createElement("span"); par.className = "par";
+      var s = document.createElement("span"); s.className = "sw"; s.style.background = k.color;
+      par.append(s, document.createTextNode(k.txt)); f1.appendChild(par);
+    });
+    var f2 = document.createElement("div"); f2.className = "fila";
+    [["#5fe3f0", "solid", "radio interno MIROVA"], ["#ffffff", "dashed", "provisional 10 km"], ["#ffb020", "solid", "radio elegido"]].forEach(function (c) {
+      var par = document.createElement("span"); par.className = "par";
+      var caja = document.createElement("span"); caja.className = "ln-caja";
+      var s = document.createElement("span"); s.className = "ln"; s.style.borderTopColor = c[0]; s.style.borderTopStyle = c[1];
+      caja.appendChild(s); par.append(caja, document.createTextNode(c[2])); f2.appendChild(par);
+    });
+    var par2 = document.createElement("span"); par2.className = "par";
+    var s2 = document.createElement("span"); s2.className = "sw"; s2.style.background = "rgba(74,163,255,.5)";
+    par2.append(s2, document.createTextNode("agua")); f2.appendChild(par2);
+    lg.append(f1, f2);
+  })();
+
+  // ---------- YAML ----------
+  function yaml() {
+    var hoy = new Date().toISOString().slice(0, 10);
+    var nombres = DATOS.volcanes.filter(function (v) { return v.en_config || guardados[v.nombre]; });
+    var L1 = [
+      "# Áreas del laboratorio (S194, opción A). Radios del flanco elegidos en el visor S196",
+      "# (experiments/_s196_visor_radios/), exportados el " + hoy + ". Ver el encabezado completo de",
+      "# config/areas_laboratorio.yaml para la precedencia y el significado de cada área.",
+      "",
+      "version: 1",
+      "precedencia: [crater, agua, flanco, resto]",
+      "radio_flanco_km_defecto: " + PROV.toFixed(1),
+      "",
+      "volcanes:"
+    ];
+    nombres.forEach(function (v) {
+      var g = guardados[v.nombre];
+      var r = g ? g.radio_flanco_km : (v.radio_actual_km != null ? v.radio_actual_km : PROV);
+      var com = g ? "  # visor S196, " + (g.cuando || "").slice(0, 10) + (g.criterio ? ": " + g.criterio.replace(/[\r\n]+/g, " ").slice(0, 120) : "")
+                  : "  # PROVISIONAL, sin elegir en el visor";
+      if (!v.en_config) L1.push("  # " + v.nombre + ": no estaba en la partición" + (v.inner_km == null ? "; no tiene inner_radius_km en volcanoes.yaml" : "") + ".");
+      L1.push("  " + v.nombre + ":");
+      L1.push("    radio_flanco_km: " + r.toFixed(1) + com);
+      L1.push("    agua: frontend/agua/" + v.nombre + ".geojson");
+    });
+    return L1.join("\n") + "\n";
+  }
+  function pintarYaml() { document.getElementById("yaml-pre").textContent = yaml(); }
+  var estadoYaml = document.getElementById("estado-yaml");
+  document.getElementById("copiar-yaml").addEventListener("click", function () {
+    var t = yaml();
+    var ok = function () { estadoYaml.className = "estado ok"; estadoYaml.textContent = "YAML copiado."; };
+    var mal = function () {
+      document.querySelector("details").open = true;
+      var r = document.createRange(); r.selectNodeContents(document.getElementById("yaml-pre"));
+      var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      estadoYaml.className = "estado mal"; estadoYaml.textContent = "No se pudo copiar solo: el texto quedó seleccionado, copia con Ctrl+C.";
+    };
+    try { navigator.clipboard.writeText(t).then(ok, mal); } catch (e) { mal(); }
+  });
+  var descargas = null;
+  document.getElementById("bajar-yaml").addEventListener("click", function () {
+    var t = yaml();
+    if (descargas) {
+      descargas.save({ filename: "areas_laboratorio.yaml.txt", data: new Blob([t], { type: "text/plain" }) }).then(function () {
+        estadoYaml.className = "estado ok"; estadoYaml.textContent = "Descargado como areas_laboratorio.yaml.txt (quítale el .txt).";
+      }).catch(function (e) {
+        estadoYaml.className = "estado mal";
+        estadoYaml.textContent = e && e.code === "declined" ? "Descarga cancelada." : "No se pudo descargar aquí; usa Copiar YAML.";
+      });
+      return;
+    }
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([t], { type: "text/yaml" }));
+    a.download = "areas_laboratorio.yaml";
+    document.body.appendChild(a); a.click(); a.remove();
+    estadoYaml.className = "estado ok"; estadoYaml.textContent = "Descargado areas_laboratorio.yaml.";
+  });
+
+  // ---------- guardar ----------
+  var estado = document.getElementById("estado");
+  document.getElementById("guardar").addEventListener("click", function () {
+    var v = actual, btn = this;
+    var reg = {
+      volcan: v.nombre, radio_flanco_km: radio, cuando: new Date().toISOString().slice(0, 19) + "Z",
+      criterio: document.getElementById("criterio").value.trim().slice(0, 500),
+      radio_provisional_km: PROV, inner_radius_km: v.inner_km
+    };
+    if (modo !== "db") {
+      guardados[v.nombre] = reg; escribirLocal();
+      estado.className = "estado ok";
+      estado.textContent = "Guardado en este navegador: " + fmt(radio, 1) + " km. Para el repositorio, descarga o copia el YAML.";
+      pintarLista(); infoGuardado(); pintarYaml(); return;
+    }
+    reg.por_id = miId; reg.es_dueno = esDueno;
+    btn.disabled = true; estado.className = "estado"; estado.textContent = "Guardando…";
+    db.doc("radios/" + v.nombre).set(reg).then(function () {
+      return db.collection("historial").add(reg);
+    }).then(function () {
+      estado.className = "estado ok"; estado.textContent = "Guardado: " + v.titulo + ", " + fmt(radio, 1) + " km.";
+    }).catch(function (e) {
+      estado.className = "estado mal";
+      estado.textContent = e && e.code === "invalid_argument" ? "No tienes permiso para guardar en este visor." : "No se guardó (" + (e && e.code || "error") + "). Prueba de nuevo.";
+    }).then(function () { btn.disabled = false; });
+  });
+
+  // ---------- arranque ----------
+  pintarYaml();
+  var inicio = (location.hash || "").slice(1);
+  // El contenedor del mapa toma su tamaño del grid; se difiere un turno para que Leaflet no encuadre sobre 0 x 0.
+  setTimeout(function () { elegir(porNombre[inicio] ? inicio : DATOS.volcanes[0].nombre); }, 0);
+  window.addEventListener("resize", function () { mapa.invalidateSize(); });
+
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("downloads").then(function (d) { descargas = d; }).catch(function () {});
+    Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function (r) {
+      if (!r[0]) return;
+      db = r[0]; user = r[1]; modo = "db"; guardados = {};
+      if (user) {
+        user.id().then(function (i) { miId = i; }).catch(function () {});
+        user.isOwner().then(function (o) { esDueno = !!o; }).catch(function () {});
+      }
+      db.collection("radios").onSnapshot(function (snap) {
+        var g = {};
+        snap.docs.forEach(function (d) { var x = d.data(); if (x && porNombre[d.id]) g[d.id] = x; });
+        var antes = guardados[actual.nombre] && guardados[actual.nombre].radio_flanco_km;
+        guardados = g;
+        if (g[actual.nombre] && g[actual.nombre].radio_flanco_km !== antes && !tocado) {
+          ponerRadio(g[actual.nombre].radio_flanco_km, true);
+        }
+        pintarLista(); infoGuardado(); pintarYaml();
+      }, function () {
+        var av = document.getElementById("aviso"); av.hidden = false;
+        av.textContent = "No se pudo leer lo guardado; lo que guardes ahora puede no quedar registrado.";
+      });
+    }).catch(function () {});
+  } else {
+    var av = document.getElementById("aviso"); av.hidden = false;
+    av.textContent = "Abierto desde el disco: lo que guardes queda sólo en este navegador. Para el repositorio, descarga o copia el YAML.";
+  }
+})();
+</script>

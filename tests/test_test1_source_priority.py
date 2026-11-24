@@ -1,6 +1,6 @@
 """Tests S111 — Parte A del fix de magnitud Muy Bajo (design 2026-06-16-test1-lowmag).
 
-El recompute del VRP Test1 (process_viirs.py:1545-1625) está gateado por
+El recompute del VRP Test1 (process_viirs.py:1548-1628) está gateado por
 final_hotspot_source=='test1'. Cuando un cluster cercano DÉBIL (1 píxel, vrp≈0) tapa
 al Test1 en la cascada, source queda 'eruption' → la magnitud colapsa a 0 (FN de la
 reactivación de NdC, 0.06 MW). El fix: cuando el Test1 detecta summit Y el cluster

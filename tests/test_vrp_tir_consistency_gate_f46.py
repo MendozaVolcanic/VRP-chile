@@ -1,10 +1,10 @@
 """F46 fix S77 — Tests TDD para gate de consistencia MIR/NTI sobre vrp_tir_mw.
 
 **STATUS**: tests RED contra estado actual de `pipeline/process_viirs.py`. Marcados
-con `@pytest.mark.xfail(reason="F46 fix pending A45 — store.py:..., process_viirs.py:968-986")`.
+con `@pytest.mark.xfail(reason="F46 fix pending A45 — store.py:..., process_viirs.py:971-989")`.
 
 Pre-fix (estado actual S76):
-- `process_viirs.py:1050-1067` computa `vrp_tir_mw` con `max(0.5K, 4σ_bg)` como
+- `process_viirs.py:1053-1070` computa `vrp_tir_mw` con `max(0.5K, 4σ_bg)` como
   umbral sobre I05. En terreno heterogéneo (nieve/lago/cirrus) σ_bg se infla,
   ~100-230 pixels pasan el gate, cada uno aporta ~3-5 MW residual × A_pix →
   3 000-9 600 MW espurios. 143 records afectados en data/mirova_equivalent/.

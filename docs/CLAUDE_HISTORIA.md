@@ -44,6 +44,27 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo: qué est�
 
 ## Misión vinculante (LEER ANTES DE TOCAR PIPELINE)
 
+> ⚠️ **S186 (A113): texto del CLAUDE.md corto reemplazado el 2026-11-15** (documentos al día con la vía en los tres sensores; el estado vigente está en el `CLAUDE.md` de la raíz). Texto anterior, tal cual:
+>
+> ⚠️ **S177 B2 (A113; PROPUESTA: rige sólo desde el merge del PR B2): VIIRS 750 de producción deja de ser K.** Corre la
+> vía «código MIROVA» (`enable_v750_codigo_mirova: true`); K de VIIRS queda de guardia
+> (`pipeline/profiles/guardia_k_viirs.yaml`), reversión por `git revert -m 1` del merge de B2 (regla
+> `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`). Lo que abajo diga «VIIRS 375 y 750 siguen con
+> K» o «VIIRS 375 y 750 = K» vale para VIIRS 750 sólo hasta ese merge. Ver `docs/MISSION.md`, ficha v1.24.
+>
+> ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde el merge del PR B (#934) MODIS corre la vía «código
+> MIROVA» (`enable_modis_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`); VIIRS 375 y 750 siguen con K.
+> Decisión de Nicolás del 2026-10-31. K de MODIS queda de guardia (`pipeline/profiles/guardia_k_modis.yaml`,
+> `scripts/vigilancia_guardia_modis.py`), reversión pre-autorizada por `git revert` del PR B. Lo que describa el
+> MODIS de producción como K (D21, D12, cara MODIS de D11) es previo a S172. Ver `docs/MISSION.md`, ficha v1.18.
+>
+> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1): VIIRS 375 de producción deja de ser K.** Corre la
+> vía «código MIROVA» (`enable_v375_codigo_mirova: true`); K de VIIRS queda de guardia
+> (`pipeline/profiles/guardia_k_viirs.yaml`), reversión por `git revert -m 1` del merge de B1 (regla
+> `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`). Lo que abajo diga «VIIRS 375 y 750 = K» o que
+> el tablero publica `f5_core_vrp_mw` en VIIRS 375 vale para VIIRS 375 sólo hasta ese merge. Ver `docs/MISSION.md`,
+> ficha v1.23.
+
 > ⚠️ **S175 (A113; hallazgo 154 de `docs/AUDIT_S175.md`, PR #955): lo de «re-escribe las 8 fechas» y «hasta unos 8 días antes» de la marca S172 que sigue no se cumple**; la primera observación con la vía quedó 18,95 horas antes del encendido (detalle en la ficha v1.19, `docs/FICHA_SDA_VRP_CHILE.md`, y en la marca S175 de `docs/MISSION.md`). Texto conservado.
 >
 > ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde la primera corrida del NRT con la vía, después del merge del PR B
@@ -124,6 +145,21 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   `explored`, links `[[]]`, tags jerárquicos): ver `..\..\Vault\CLAUDE.md`.
 
 ## Reglas científicas (no negociables)
+
+> ⚠️ **S186 (A113): texto del CLAUDE.md corto reemplazado el 2026-11-15** (documentos al día con la vía en los tres sensores; el estado vigente está en el `CLAUDE.md` de la raíz). Texto anterior, tal cual:
+>
+> - **Código operacional de MIROVA VIIRS 750** (OSF zm62w, 2026-07-24, D34,
+>   `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`): difiere de producción en 10 de 13 puntos (K1 -0,7, dNTI mínimo
+>   0,02 fuera de la cumbre, media 3 × 3 con el central, fondo interpolado bajo halo).
+>
+> - **Detector de producción**: MODIS = vía «código MIROVA» (S172). VIIRS 375 y 750 = **K** (S153, #850,
+>   `34cea39e`): sin Test 1 integrado (`enable_test1_path: false`, D30), conectiva `max` en Tests 2 y 3 (piso C1
+>   **y** `μ+C2·σ`), banda 22 primaria en MODIS (D21; la guardia K y también la vía). Regla
+>   `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (#848), evidencia `experiments/_s153_fk_v2/README.md`. El
+>   histórico de los 11 Tier A desde 2025-02-15 está reprocesado con K (#883). `experimental` sigue con el detector
+>   anterior (A117). Tag `pre-s153-adopcion-k`; el `git revert` ya no es limpio (S157).
+>
+> - **Kernel dNTI**: `np.mean` de 8 vecinos (D1, S17); en VIIRS 750 MIROVA usa 3 × 3 con el central (S158 R2).
 - **VRP MIR (Wooster)** por sensor, coeficientes **empíricamente validados S14
   contra MIROVA v2.5 OSF (error ≤0.17% sobre 48,360 filas)**:
   - MODIS 1 km (B21/22): `k = 18.9 × A_pix(1e6)` = **18,900,000** (`WOOSTER_COEFF=18.9`)
@@ -216,6 +252,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 - Si dudas de un método con datos geofísicos, **dilo** — nunca adivines.
 
 ## Reglas geométricas S14 (MIROVA-equivalent)
+
+> ⚠️ **S186 (A113): texto del CLAUDE.md corto reemplazado el 2026-11-15** (documentos al día con la vía en los tres sensores; el estado vigente está en el `CLAUDE.md` de la raíz). Texto anterior, tal cual:
+>
+> - Campo unificado `final_hotspot_lat/lon/dist_km` (fallback eruption→vent). Dashboard y auditorías usan sólo
+>   este campo.
 - **`radius_km = 25 km` en los 11 Tier A** — replica grilla MIROVA UTM 51×51 km
   (radio inscrito 25.5 km). Los 34 volcanes restantes quedan en 5 km (`volcanoes.yaml`:
   `{25: 11, 5: 34}`, verificado S131; el texto anterior decía «uniforme» y era falso).
@@ -233,6 +274,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   `hotspot_*` o `vent_hotspot_*` por separado.
 
 ## Reglas operacionales S14 (aprendizajes)
+
+> ⚠️ **S186 (A113): texto del CLAUDE.md corto reemplazado el 2026-11-15** (documentos al día con la vía en los tres sensores; el estado vigente está en el `CLAUDE.md` de la raíz). Texto anterior, tal cual:
+>
+> A114) se escribieron con ese camino encendido; desde #850 no corre (D30) y desde #883 todo el histórico es K.
+>
+> - **A10.** Rebajada en su premisa (S147, D32): `pc.vrp_mw` NO es «lo que MIROVA reporta» (MIROVA suma todos los píxeles alertados). Sigue en pie: `record.vrp_mw` no es el campo correcto; el dashboard publica `f5_core_vrp_mw` en VIIRS 375 (S132) y `pc.vrp_mw` en MODIS y VIIRS 750 (cita vigilada por el guard G8). (historia: A10)
 
 > ⚠️ **S160 (A113; hallazgo 281, `experiments/_s160_audit/v4/INFORME.md` §3)**: el «en los datos desde la
 > observación del 2026-09-18» de la marca que sigue ya no rige. #883 (`8471add46`, 2026-10-21) reprocesó con K el
@@ -973,7 +1020,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     desenlace **NO está en producción**: `ENABLE_TEST1_NTI_INTEGRAL = False` (verificado
     con `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
     print(p.ENABLE_TEST1_NTI_INTEGRAL)"`), y la rama `compute_test1_nti` existe **sólo en
-    `process_viirs.py:214/1170`** (era 213/1138 hasta S165, por el import y el bloque de la vía «código MIROVA» de VIIRS 375; el 1112 que decía hasta S164 ya estaba corrido; 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:64` (era 62 hasta S165, por los dos renglones de la cabecera FICHA que nombran los flags MxD03; 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:164` (era 163 hasta S162, por la línea de import de la vía «código MIROVA»)
+    `process_viirs.py:214/1173`** (era 213/1138 hasta S165, por el import y el bloque de la vía «código MIROVA» de VIIRS 375; el 1112 que decía hasta S164 ya estaba corrido; 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:64` (era 62 hasta S165, por los dos renglones de la cabecera FICHA que nombran los flags MxD03; 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:164` (era 163 hasta S162, por la línea de import de la vía «código MIROVA»)
     (eran 674/665; líneas actualizadas S131) importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
     describe sigue viva en los 3 sensores.** Ni encendiendo el flag se cura MODIS/V750,
     que es donde el píxel grande amplifica el gradiente (A80). Caso de manual de A87:
@@ -1274,7 +1321,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 
   | forma | ejemplo | el falso negativo que produjo |
   |---|---|---|
-  | el parámetro no se llama como la clave | `local_kernel_bg_compatible` (firma) vs `local_kernel_bg` (YAML), con `run_pipeline.py:262` (244 hasta S161) de puente | «el kernel no corre en producción» — corre en 5 de los 11 Tier A |
+  | el parámetro no se llama como la clave | `local_kernel_bg_compatible` (firma) vs `local_kernel_bg` (YAML), con `run_pipeline.py:263` (262 hasta S190, 244 hasta S161) de puente | «el kernel no corre en producción» — corre en 5 de los 11 Tier A |
   | la clave se lee de otra sección | `enable_utm_regrid` escrito en la raíz, leído de `thresholds:` (S124) | el flag arrancaba siempre apagado; su A/B habría corrido 4 brazos idénticos |
   | la llamada es calificada o renombrada | `store.append_record(`, `from pipeline.vrptir import vrp_tir_mw as _aveni_vrp_tir_mw` | «nadie la llama» sobre funciones que corren en cada granule |
 
@@ -1611,7 +1658,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   y un evaluador sólo ve los estratos que etiqueta** (S148, dos casos la misma noche; regla
   general). (1) `enable_roi1_box_paper` entregaba la caja de 5 × 5 km sólo al primer pase. El
   segundo pase (`second_pass_adjacent`) seguía recibiendo el círculo de `inner_radius_km`
-  (`pipeline/process_viirs.py:1313` al momento del hallazgo; **arreglado en S149**: los tres procesadores arman hoy esa máscara con `roi1_summit_mask(..., _roi1_mask)` y lo vigila `tests/test_guard_caja_llega_al_segundo_pase_s149.py`, con el flag todavía apagado), corre sin condicionar sobre toda la escena, y recapturaba con
+  (`pipeline/process_viirs.py:1316` al momento del hallazgo; **arreglado en S149**: los tres procesadores arman hoy esa máscara con `roi1_summit_mask(..., _roi1_mask)` y lo vigila `tests/test_guard_caja_llega_al_segundo_pase_s149.py`, con el flag todavía apagado), corre sin condicionar sobre toda la escena, y recapturaba con
   el umbral permisivo lo que el primero acababa de rechazar con el estricto: en los 51 negativos de
   fuera de la caja el primer pase cayó de 86 a 7 píxeles, la recaptura subió de 98 a 175 y el cúmulo
   publicado quedó idéntico en los 51. El cero estaba **bien medido** (el flag se leía desde
@@ -1692,6 +1739,12 @@ decisiones de umbrales, o cambios metodológicos:
    de un volcán, dilo y andá a mirarlo antes de proponer un umbral.
 
 ## Arquitectura
+
+> ⚠️ **S186 (A113): texto del CLAUDE.md corto reemplazado el 2026-11-15** (documentos al día con la vía en los tres sensores; el estado vigente está en el `CLAUDE.md` de la raíz). Texto anterior, tal cual:
+>
+>   (`mirovaEqVrp`): un cambio de display se replica en las 3 (S92). `comparacion.html` es PREVIEW sin
+>   `mirovaEqVrp` a propósito. Verificar en navegador real. GitHub Pages despliega en push a `frontend/**`.
+> - `volcanoes.yaml`: 45 volcanes; 11 Tier A con serie continua (sin hueco nov-ene tras #883); 34 fuera del cron.
 - `pipeline/`: fetch.py (earthaccess), process_modis.py, process_viirs.py, process_viirs_mod.py, store.py, scan_geometry.py
 - `frontend/` — **3 vistas live + 1 preview**, cada una con su copia de helpers (`mirovaEqVrp`, etc.): `index.html` (dashboard Chart.js+Leaflet), `diario.html` (tendencia 90d/volcán), `mosaico.html` (overview 48h/30d). **Un cambio de display/filtro (ej. supresión cirrus) debe replicarse en esas 3** (S92 L5). La cuarta, `comparacion.html`, **también se despliega** (`cp -r frontend/.`) y está enlazada desde `index.html`, pero se rotula a sí misma *"PREVIEW S115 · no es el dashboard live"* y **no lleva `mirovaEqVrp`** (0 usos, contra 25/8/8) — es deliberado, no un olvido: no la "arregles" replicándole el helper. Verificado S127. Verificación = preview real navegador (no `node --check`): sirven desde `/frontend/`, `BASE_PATH=/`, data en `/data/...`. GitHub Pages (deploy on push a `frontend/**`).
 - (⚠️ **S160, el hueco de la marca S146 que sigue ya no existe** (V4-02 en

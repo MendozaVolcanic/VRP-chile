@@ -1,5 +1,18 @@
 name: Vigilancia de la sombra de K
 
+# RETIRADO (S196, 2026-11-23, decision D-B de Nicolas: «lo que recomiendas», sobre P10 de
+# docs/PLAN_EXPERIMENTAL_MEJORAS_S196.md, D1-b de docs/PLAN_EXPERIMENTAL_S190.md).
+# POR QUE: comparaba K contra la sombra C0. Desde el 2026-11-11 ningun sensor de produccion corre K y su
+# veredicto era SIN_OBJETO cada dia (data/audit_continuous/sombra_latest.json, 2026-11-23 03:59 UTC). La
+# sombra que leia (experimental-diario.yml) tambien se retiro, asi que el cron de respaldo solo habria
+# abierto «vigilancia ciega» sobre datos congelados a proposito.
+# QUE QUEDA: sin workflow_run ni cron; workflow_dispatch para una corrida a mano. scripts/vigilancia_sombra.py
+# NO se borra: scripts/vigilancia_guardia_modis.py y vigilancia_guardia_viirs.py lo importan (vs = vg.vs) y
+# las guardias son la unica alarma de la via mientras la reversion esta suspendida (S192).
+# sombra_latest.json y sombra_history.jsonl quedan con su ultima corrida. Lo vigila
+# tests/test_retiro_sombra_c0_s196.py.
+#
+# Texto anterior (S156), conservado:
 # S156 (arreglo 4 de docs/AUDIT_S155.md §5; experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md §4 paso 9).
 # POR QUE: el detector K dejo de usar el Test 1 integrado, que veia la senal termica debil. La sombra
 # (perfil experimental, congelado en C0, data/experimental_v2/) se compara cada dia contra produccion y
@@ -11,15 +24,11 @@ name: Vigilancia de la sombra de K
 # A43: "on" quoted (Norway Problem YAML 1.1).
 "on":
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Experimental diario (laboratorio congelado, 11 Tier A)"]
-    types: [completed]
-  # Respaldo: si experimental-diario se renombra, se desactiva o no corre, el workflow_run no llega y nadie se
-  # entera. Con este cron la vigilancia corre igual una vez al dia y, sin datos frescos de la sombra, abre el
-  # issue de vigilancia ciega (verificador 2 de S156). El nombre de arriba lo amarra
-  # tests/test_vigilancia_sombra_s156.py::test_el_workflow_escucha_al_workflow_de_la_sombra.
-  schedule:
-    - cron: "40 23 * * *"
+  # S196: retirados el workflow_run (workflows: ["Experimental diario (laboratorio congelado, 11 Tier A)"],
+  # types: [completed]) y el cron de respaldo "40 23 * * *". Texto anterior del respaldo: «si
+  # experimental-diario se renombra, se desactiva o no corre, el workflow_run no llega y nadie se entera. Con
+  # este cron la vigilancia corre igual una vez al dia y, sin datos frescos de la sombra, abre el issue de
+  # vigilancia ciega (verificador 2 de S156)».
 
 permissions:
   contents: write
@@ -139,5 +148,10 @@ jobs:
               abrir "Sombra de K: investigar" "$(printf 'La vigilancia de la sombra encontro un disparador de investigacion (sin reversion automatica):\n\n%s\n\nRegla: experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9. Una vez investigada una racha de persistencia, anotarla en la seccion rachas de experiments/_s151_prereg_fk_11/sombra_pasadas_juzgadas.json para que deje de disparar.\nDetalle: data/audit_continuous/sombra_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
             VIGILANCIA_CIEGA)
               abrir "Sombra de K: vigilancia ciega" "$(printf 'La vigilancia de la sombra no puede mirar:\n\n%s\n\nUna vigilancia ciega no da error, da VERDE: por eso este issue. Revisar experimental-diario.yml y frontend/cambio_detector.js.\nDetalle: data/audit_continuous/sombra_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+            # S193 (auditoria Codex ronda 2, F11-106): sin K en produccion en ningun sensor no hay nada que comparar con
+            # la sombra C0. No es VERDE ni ciega: no abre issue, lo dice en el log y en sombra_latest.json (sin_objeto).
+            # Retirar la sombra C0 lo decide Nicolas (D1 de docs/PLAN_EXPERIMENTAL_S190.md).
+            SIN_OBJETO)
+              echo "sin objeto: ningun sensor de produccion sigue en K; la vigilancia de la sombra C0 no compara nada (sin issue)" ;;
             *) echo "sin issue" ;;
           esac

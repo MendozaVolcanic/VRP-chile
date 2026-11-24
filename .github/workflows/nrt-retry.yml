@@ -1,5 +1,10 @@
 name: NRT Retry (NASA recovery)
 
+# ⚠️ S190 (F6-111, auditoría Codex ronda 2, confirmado por el verificador): el «~30 min después» de abajo es falso
+# respecto de la corrida que este retry revisa. El retry corre a las :30 de las horas impares y mira el último run del
+# principal, que es el de la hora par ANTERIOR: lo reintenta 90 min después de su cron base, no 30 (y 30 min antes del
+# siguiente cron base). Efecto: sólo latencia; el texto original queda abajo (A113).
+#
 # S70-0 T2: cron secundario que dispara ~30 min después del cron principal
 # `nrt.yml` (cada 2h en horas pares). Si el último run del principal falló
 # por NASA_AUTH_UNREACHABLE (badge etiquetado [NASA_DOWN] o warning en logs),
@@ -14,6 +19,10 @@ name: NRT Retry (NASA recovery)
 #   - Si NASA sigue caída, este retry también fallará rápido (~2 min por job)
 #     pero no acumula runs infinitos porque sólo lo dispara el cron de su propio
 #     trigger schedule.
+#   - S198 (F6-104, opción (b) aprobada por Nicolás el 2026-11-24): también reintenta una corrida VERDE del NRT
+#     que tuvo búsquedas o descargas fallidas (lo lee de los artefactos `cobertura-*` que deja nrt.yml, no del log).
+#     Topes del camino verde: no reintenta una corrida que ya es un reintento y como mucho 4 en 24 h
+#     (scripts/reintento_cobertura_nrt.py). El NRT no cambia de color: no suma alarmas ni correos.
 
 # A43 (S103): key quoteada como "on" para evitar el "Norway problem" de YAML 1.1
 # (on/off/yes/no/true/false sin comillas parsean como booleano → HTTP 422 en
@@ -31,6 +40,13 @@ jobs:
       actions: write   # para gh workflow run
       contents: read
     steps:
+      # S198 (F6-104): la decisión del camino verde vive en scripts/reintento_cobertura_nrt.py (probada en
+      # tests/test_reintento_cobertura_nrt_s198.py); hace falta ese archivo en disco, nada más.
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/reintento_cobertura_nrt.py
+          sparse-checkout-cone-mode: false
+
       - name: Inspect last nrt.yml run
         id: check
         env:
@@ -54,6 +70,24 @@ jobs:
           echo "last_id=$LAST_ID"
           echo "last_conclusion=$LAST_CONCLUSION"
           echo "last_status=$LAST_STATUS"
+
+          # S198 (auditoría de Codex, ronda 2, F6-104, opción (b) aprobada por Nicolás el 2026-11-24): camino VERDE.
+          # Con CMR caído o una descarga cortada el NRT queda verde (no corre en modo estricto) y antes este retry no
+          # lo miraba nunca. Ahora baja los resúmenes de cobertura que deja cada volcán (artefactos `cobertura-*`, sólo
+          # números) y reintenta si hubo búsquedas o descargas fallidas. Topes (en el script): no reintenta una
+          # corrida que ya es un reintento (actor github-actions[bot]) y como mucho 4 reintentos en 24 h. Sin dato no
+          # reintenta. Nada de esto puede dejar rojo este job: cada lectura cae a «sin dato».
+          if [ "$LAST_STATUS" = "completed" ] && [ "$LAST_CONCLUSION" = "success" ]; then
+            gh api "repos/${GH_REPO}/actions/workflows/nrt.yml/runs?per_page=100" > runs_nrt.json 2>/dev/null \
+              || echo '{}' > runs_nrt.json
+            mkdir -p cobertura_run
+            gh run download "$LAST_ID" --pattern 'cobertura-*' --dir cobertura_run 2>/dev/null \
+              || echo "Sin artefactos de cobertura en el run $LAST_ID"
+            python3 scripts/reintento_cobertura_nrt.py decidir --runs runs_nrt.json --id "$LAST_ID" \
+              --dir cobertura_run --salida "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "motivo=NASA_DOWN" >> "$GITHUB_OUTPUT"
 
           # Solo retry si concluyó con failure (no si todavía corre o si pasó OK)
           if [ "$LAST_STATUS" != "completed" ] || [ "$LAST_CONCLUSION" != "failure" ]; then
@@ -95,15 +129,24 @@ jobs:
         if: steps.check.outputs.should_retry == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MOTIVO: ${{ steps.check.outputs.motivo }}
         run: |
-          echo "Last NRT run was NASA_DOWN — retriggering nrt.yml"
+          echo "Retriggering nrt.yml ($MOTIVO)"
           gh workflow run nrt.yml
-          echo "## NASA retry triggered" >> "$GITHUB_STEP_SUMMARY"
-          echo "El último \`nrt.yml\` falló con NASA_AUTH_UNREACHABLE." >> "$GITHUB_STEP_SUMMARY"
-          echo "Disparado retry para captar recuperación NASA upstream." >> "$GITHUB_STEP_SUMMARY"
+          echo "## NRT retry triggered" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$MOTIVO" = "NASA_DOWN" ]; then
+            echo "El último \`nrt.yml\` falló con NASA_AUTH_UNREACHABLE." >> "$GITHUB_STEP_SUMMARY"
+            echo "Disparado retry para captar recuperación NASA upstream." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "El último \`nrt.yml\` salió verde con cobertura incompleta (S198, F6-104)." >> "$GITHUB_STEP_SUMMARY"
+            echo "Motivo: $MOTIVO" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Report skip
         if: steps.check.outputs.should_retry != 'true'
+        env:
+          MOTIVO: ${{ steps.check.outputs.motivo }}
         run: |
           echo "## No retry needed" >> "$GITHUB_STEP_SUMMARY"
-          echo "Último \`nrt.yml\` no falló por NASA_DOWN, o aún no había concluido." >> "$GITHUB_STEP_SUMMARY"
+          echo "Último \`nrt.yml\` no falló por NASA_DOWN ni salió verde con búsquedas o descargas fallidas, o aún no había concluido." >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$MOTIVO" ] && [ "$MOTIVO" != "NASA_DOWN" ]; then echo "Motivo: $MOTIVO" >> "$GITHUB_STEP_SUMMARY"; fi

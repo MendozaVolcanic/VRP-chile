@@ -86,6 +86,7 @@ def test_todo_perfil_vivo_declara_donde_escribe():
     ("mirova_equivalent", "mirova_equivalent"),
     ("experimental", "experimental_v2"),
     ("experimental_ndc_focus", "experimental_ndc_focus"),
+    ("laboratorio", "laboratorio_v1"),   # S193, D3 del plan docs/PLAN_EXPERIMENTAL_S190.md
 ])
 def test_los_tres_perfiles_en_uso_escriben_donde_corresponde(perfil, esperado):
     """El operacional NO debe moverse; los experimentales van cada uno al suyo."""

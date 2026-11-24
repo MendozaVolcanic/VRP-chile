@@ -6,8 +6,8 @@
 <title>VRP Chile — Vista Diaria · 11 Tier A</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-<script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
-<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) -->
+<script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas --> <script src="diurno.js"></script><!-- S193: qué pasada nuestra es diurna (MODIS de día) y su sol; misma línea por G8 -->
+<script src="cambio_detector.js"></script><!-- S153: marca de la fecha de adopción del detector K (aviso y línea vertical) --> <script>if (typeof CambioDetector === "undefined") console.error("VRP Chile: no cargó cambio_detector.js; los filtros de cirrus y campo difuso ocultan también los records de la vía «código MIROVA» (regla anterior a S173)");</script><!-- S173 S1 (VPR944-02): la exención de la vía cae a la regla anterior si el módulo no carga; esto lo dice en consola. Misma línea por el guard G8 --> <script src="cese_plataformas.js"></script><!-- S159: aviso del cese de Suomi NPP (NASA, 2026-11-02 13:00 UTC) y línea vertical; en la misma línea para no correr las citas archivo:línea del CLAUDE.md (guard G8) --> <script src="agua.js"></script><!-- S193: marca «pico sobre agua» (sólo display); misma línea por G8 --> <script src="cumbre.js"></script><!-- S194: marca «también hay calor en la cumbre» (sólo display); misma línea por G8 --> <script src="crater_no_medido.js"></script><!-- S194: marca «cráter no medido» (MIR perdida o saturada sobre el cráter; sólo display); misma línea por G8 -->
 <style>
 :root {
   --bg: #0a1628; --panel: #0f1a2a; --border: #1a3a5c;
@@ -51,6 +51,7 @@ header .ts-note { color: #6e7681; margin-top: 8px; font-size: 0.75em; font-style
 .card-monitor { font-size: 0.72em; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; }
 .cm-dot { font-size: 0.8em; line-height: 1; }
 .mon-none .cm-dot, .mon-none .cm-txt { color: var(--muted); opacity: 0.6; }
+.falla-carga, .card-stats .stat b.falla-carga { color: #ff6b6b; }   /* S192 (F5-105): un archivo que no cargó, no un cero */
 .mon-fresh .cm-dot { color: var(--green); }
 .mon-fresh .cm-txt { color: var(--muted); }
 .mon-lagging .cm-dot, .mon-lagging .cm-txt { color: var(--orange); font-weight: 600; }
@@ -59,6 +60,8 @@ header .ts-note { color: #6e7681; margin-top: 8px; font-size: 0.75em; font-style
 .card-stats { font-size: 0.72em; color: var(--muted); margin-top: 4px; }
 .card-stats .stat { display: inline-block; margin: 0 6px; }
 .card-stats .stat b { color: var(--text); }
+.card-stats .sobre-agua { color: #40c4ff; } .card-stats .sobre-agua:empty { display: none; }   /* S193 */ .card-stats .calor-cumbre { color: #ff8a65; }   /* S194 */ .card-stats .crater-no-medido { color: #ffab40; cursor: help; }   /* S194: cráter no medido */
+.card-stats .det-diurnas { color: #ffc400; cursor: help; }   /* S193: detecciones de pasadas de día, aparte */
 .card-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 10; }
 .mini-btn { background: rgba(15, 26, 42, 0.95); color: var(--muted);
             border: 1px solid var(--border); border-radius: 3px; padding: 2px 6px;
@@ -149,18 +152,19 @@ footer a:hover { text-decoration: underline; }
 </footer>
 
 <script>
+// S193: lat y lon de volcanoes.yaml, sólo para saber qué pasada es diurna (frontend/diurno.js, la regla de store.py).
 const TIER_A = [
-  { name: "Lascar",              region: "Antofagasta",  csv: "Lascar" },
-  { name: "Lastarria",           region: "Antofagasta",  csv: "Lastarria" },
-  { name: "Tupungatito",         region: "Metropolitana",csv: "Tupungatito" },
-  { name: "PlanchonPeteroa",     region: "Maule",        csv: "PlanchonPeteroa", display: "Planchón-Peteroa" },
-  { name: "NevadosDeChillan",    region: "Ñuble",        csv: "Nevados de Chillan", display: "Nevados de Chillán" },
-  { name: "Copahue",             region: "Biobío",       csv: "Copahue" },
-  { name: "Llaima",              region: "Araucanía",    csv: "Llaima" },
-  { name: "Villarrica",          region: "Araucanía",    csv: "Villarrica" },
-  { name: "PuyehueCordonCaulle", region: "Los Ríos",     csv: "Puyehue-Cordon Caulle", display: "Puyehue-Cordón Caulle" },
-  { name: "Chaiten",             region: "Los Lagos",    csv: "Chaiten", display: "Chaitén" },
-  { name: "Isluga",              region: "Tarapacá",     csv: "Isluga" }
+  { name: "Lascar",              region: "Antofagasta",  csv: "Lascar", lat: -23.369, lon: -67.732 },
+  { name: "Lastarria",           region: "Antofagasta",  csv: "Lastarria", lat: -25.168, lon: -68.507 },
+  { name: "Tupungatito",         region: "Metropolitana",csv: "Tupungatito", lat: -33.4, lon: -69.8 },
+  { name: "PlanchonPeteroa",     region: "Maule",        csv: "PlanchonPeteroa", display: "Planchón-Peteroa", lat: -35.24, lon: -70.568 },
+  { name: "NevadosDeChillan",    region: "Ñuble",        csv: "Nevados de Chillan", display: "Nevados de Chillán", lat: -36.863, lon: -71.377 },
+  { name: "Copahue",             region: "Biobío",       csv: "Copahue", lat: -37.856, lon: -71.183 },
+  { name: "Llaima",              region: "Araucanía",    csv: "Llaima", lat: -38.692, lon: -71.729 },
+  { name: "Villarrica",          region: "Araucanía",    csv: "Villarrica", lat: -39.42, lon: -71.93 },
+  { name: "PuyehueCordonCaulle", region: "Los Ríos",     csv: "Puyehue-Cordon Caulle", display: "Puyehue-Cordón Caulle", lat: -40.59, lon: -72.117 },
+  { name: "Chaiten",             region: "Los Lagos",    csv: "Chaiten", display: "Chaitén", lat: -42.833, lon: -72.646 },
+  { name: "Isluga",              region: "Tarapacá",     csv: "Isluga", lat: -19.15, lon: -68.83 }
 ];
 
 // S153: el período sale de la URL (?dias= / ?desde=&hasta=, frontend/periodo.js); por defecto 90 días como antes.
@@ -195,7 +199,10 @@ async function loadVolcanoData(volc) {
     let r = Periodo.necesitaHistoria(PERIODO) ? { ok: false } : await fetch(`${BASE_PATH}data/mirova_equivalent/${name}_recent.json`);
     if (!r.ok) r = await fetch(`${BASE_PATH}data/mirova_equivalent/${name}.json`);
     if (!r.ok) return null;
-    return await r.json();
+    const j = await r.json();
+    // S193: `_diurna` en cada record (frontend/diurno.js), como en index.html y mosaico.html.
+    if (j && window.DiurnoTablero) DiurnoTablero.marcar(j.records, volc.lat, volc.lon);
+    return j;
   } catch (e) { return null; }
 }
 
@@ -268,7 +275,11 @@ function mirovaEqVrp(r, volcanoName) {
   // pueden tener pc.vrp_mw > 50K (caso PP 2026-03-18 pre-fix = 695,431 MW).
   // Coherente con index.html mirovaEqVrp + cap pipeline.
   const vmw = pc.vrp_mw ?? 0;
-  if (vmw > 50000) return 0;
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (bajo store.techo_bt_k) y la marca
+  // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
+  // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
+  // tests/test_tope_publicacion_s190.py
+  if (vmw > 50000 && r.vrp_exceeds_sanity_cap !== true) return 0;
   return vmw;
 }
 
@@ -283,7 +294,7 @@ function mirovaEqVrp(r, volcanoName) {
 // ============================================================================
 // S100: default Núcleo F5' (coherencia con index.html; S97 lo cambió allí pero no
 // aquí — S92 L5). El usuario puede apagarlo y se recuerda (storage "false").
-const USE_F5_CORE = true;  // S180 (Nicolás, 2026-11-12): sin botón Magnitud, como en index.html. La vía «código MIROVA» (los tres sensores desde el 2026-11-11) queda fuera del núcleo (f5CoreMagnitude, tests/test_f5_no_recorta_via_s180.py), así que en los datos nuevos Cluster y Núcleo daban lo mismo; queda fijo el modo de siempre, que sólo actúa sobre la historia de K.
+const USE_F5_CORE = true;  // S180 (Nicolás, 2026-11-12): sin botón Magnitud, como en index.html. La vía «código MIROVA» (los tres sensores desde el 2026-11-11) queda fuera del núcleo (f5CoreMagnitude, tests/test_f5_no_recorta_via_s180.py), así que en los datos nuevos Cluster y Núcleo daban lo mismo; queda fijo el modo de siempre, que sólo actúa sobre los records que no son de la vía (caídas a K: sin_grilla, sin_mxd03); S187: la historia publicada ya se reprocesó con la vía (ficha v1.25).
 // ⚠️ S151 (A113; docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md, hallazgo V-1): "el pipeline
 // no deja marca en el record" es falso desde S71 (commit 84c7d312e): cada cúmulo topado lleva
 // primary_cluster.d9_capped = true. Reconocerlo por el valor sigue funcionando igual. Detalle en
@@ -369,7 +380,11 @@ function mirovaEqVrpCore(r, volcanoName) {
   // Guard S96: el Núcleo nunca borra una detección del Cluster (core ≤ 0 con
   // base > 0 = anomaly_pixels no cargan la energía, A46/A07 → mostrar cluster).
   if (core == null || core <= 0) return base;
-  return core > 50000 ? 0 : core;
+  // POR QUÉ (S190, H01): store.py conserva sobre 50.000 MW una VRP con BT creíble (bajo store.techo_bt_k) y la marca
+  // `vrp_exceeds_sanity_cap`, para no borrar una erupción grande (récord de MIROVA ~70 GW). Sin leer la marca,
+  // el tope la mostraba como cero. Sin marca (fósil o basura de saturación) sigue en 0. Guard:
+  // tests/test_tope_publicacion_s190.py
+  return core > 50000 && r.vrp_exceeds_sanity_cap !== true ? 0 : core;
 }
 
 // S92 — artefacto cirrus: píxel más caliente bajo 0 °C con VRP alto = nube fría
@@ -489,7 +504,7 @@ function aggregateDailyMax(records, getter) {
 async function loadMirovaRef(volc) {
   try {
     const r = await fetch(`${BASE_PATH}data/mirova/${encodeURIComponent(volc.name)}.json`);
-    if (!r.ok) return [];
+    if (!r.ok) return null;
     const d = await r.json();
     const mapear = m => ({
       dt: m.datetime_utc, volc: volc.csv, sensor: m.sensor, vrp: parseFloat(m.VRP_MW) || 0,
@@ -504,7 +519,7 @@ async function loadMirovaRef(volc) {
     // cambia (las diurnas de la tabla ya estaban en `records`; ahora traen la marca `dia`).
     ref.diaOcr = (d.records_dia_ocr || []).map(mapear);
     return ref;
-  } catch (e) { return []; }
+  } catch (e) { return null; }   // S192 (F5-105): una falla no es «MIROVA no alertó»; ver textoConteo
 }
 
 // S151 (aprobado por Nicolas, 2026-10-15): alertas DIURNAS de MIROVA, como referencia marcada con un sol. La
@@ -584,10 +599,13 @@ function mirovaSufijoSinGeo(item) { return item && item.raw && item.raw.sinGeo ?
 
 function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
   const ds = [];
-  const recs = (jsonData?.records || []).filter(r => {
+  const recsTodos = (jsonData?.records || []).filter(r => {
     const t = parseUtcMs(r.datetime_utc);
     return enPeriodo(t) && eqVrpDisplay(r, volcanoName) > 0;  // S92: excluir artefacto cirrus; S153: período
   });
+  // S193: las barras son de la noche; las pasadas MODIS de día van con el sol de VRP Chile (al final), aparte, porque
+  // pueden incluir reflejo solar. Sin pasadas de día, recs es lo de siempre.
+  const recs = recsTodos.filter(r => r._diurna !== true);
 
   const buckets = { MODIS: [], VIIRS750: [], VIIRS375: [] };
   for (const r of recs) {
@@ -635,17 +653,41 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
       pointRadius: 8, pointHoverRadius: 9, pointStyle: mirovaSolStyle, mirovaDia: true,
     });
   }
-  return { datasets: ds, n_records: recs.length };
+  const diaPropios = DiurnoTablero.puntosDiarios(recsTodos, r => eqVrpDisplay(r, volcanoName), r => {
+    const b = sensorBucket(r.sensor);
+    return SENSOR_COLOR[b] ? { clave: b, color: SENSOR_COLOR[b], label: SENSOR_LABEL[b] } : null;
+  });
+  if (diaPropios.length) ds.push(DiurnoTablero.dataset(diaPropios));   // S193
+  return { datasets: ds, n_records: recsTodos.length, marcasCnm: marcasCnmDiario(jsonData) };
 }
 
-function chartConfig(datasets) {
+// R3F5-101 (auditoría Codex ronda 3): el gráfico del diario no mostraba las pasadas con el cráter no medido (sólo el conteo
+// del período las contaba). Una raya naranja arriba del día: llena si alguna pasada nocturna no midió el cráter (MIR sin
+// dato o barrido sin posición), hueca si sólo la MIR saturó (la potencia publicada es un mínimo). Mismo filtro que el
+// conteo (noche, período, sin escena vacía; frontend/crater_no_medido.js). El día es el UTC de las barras.
+function marcasCnmDiario(jsonData) {
+  if (typeof CraterNoMedido === "undefined") return [];
+  const porDia = new Map();
+  for (const mk of CraterNoMedido.marcasGrafico(jsonData?.records || [],
+         r => r._diurna !== true && enPeriodo(parseUtcMs(r.datetime_utc)), parseUtcMs)) {
+    const d = new Date(mk.t).toISOString().slice(0, 10);
+    const prev = porDia.get(d) || { x: d, noMedido: false, sat: false };
+    prev.noMedido = prev.noMedido || mk.noMedido; prev.sat = prev.sat || mk.sat;
+    porDia.set(d, prev);
+  }
+  return [...porDia.values()];
+}
+
+function chartConfig(datasets, marcasCnm) {
   return {
     type: "bar",
     data: { datasets },
+    plugins: typeof CraterNoMedido !== "undefined" ? [CraterNoMedido.plugin] : [],   // R3F5-101
     options: {
       responsive: true, maintainAspectRatio: false, animation: false,
       interaction: { mode: "indexMasSol", intersect: false },  // S151: "index" + el sol bajo el cursor
       plugins: {
+        craterNoMedido: { marcas: marcasCnm || [] },   // R3F5-101
         legend: { labels: { color: "#7a8fa6", font: { size: 10 } } },
         tooltip: { callbacks: {
           title: (items) => items[0].parsed.x ?
@@ -679,8 +721,10 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
   // S38: aplicar filtro post-S38 antes del filtro de ventana temporal.
   const baseRecs = applyS38Filter(jsonData?.records || []);
   const recs = baseRecs.filter(r => enPeriodo(parseUtcMs(r.datetime_utc)));   // S153: período
-  const detRecs = recs.filter(r => eqVrpDisplay(r, volcanoName) > 0);  // S92: excluir cirrus
-  const mirovaWindowed = mirovaForVolc.filter(r => {
+  // S193: «det. nuestras», el máximo y la mediana son de la noche; las detecciones de día se cuentan aparte (n_det_dia).
+  const detRecs = recs.filter(r => eqVrpDisplay(r, volcanoName) > 0 && r._diurna !== true);  // S92: excluir cirrus
+  const nDetDia = recs.filter(r => eqVrpDisplay(r, volcanoName) > 0 && r._diurna === true).length;
+  const mirovaWindowed = (mirovaForVolc || []).filter(r => {
     const t = parseUtcMs(r.dt);  // S115 #6: Fecha_Satelite_UTC sin 'Z' → parseUtcMs (no new Date crudo = hora local)
     return enPeriodo(t) && r.vrp > 0;
   });
@@ -710,10 +754,58 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
        : (mDistVals[mDistVals.length / 2 - 1] + mDistVals[mDistVals.length / 2]) / 2)
     : null;
   return {
-    n_det_us: detRecs.length, n_det_mirova: mirovaWindowed.length,
+    // S192 (F5-105): null = no cargó (el JSON nuestro o el de MIROVA); 0 = cargó y no hay. La tarjeta los distingue.
+    n_det_us: jsonData ? detRecs.length : null, n_det_mirova: mirovaForVolc ? mirovaWindowed.length : null,
+    n_det_dia: jsonData ? nDetDia : null,   // S193: detecciones nuestras de pasadas diurnas, fuera de n_det_us
     max_us: ourMaxVrp, median_us: medianVrp,
+    det_recs: jsonData ? detRecs : null,   // S193: para contar las detecciones con el pico sobre agua (marcaAguaPeriodo)
+    // S194: pasadas lejanas del período con alertados también en la cumbre (frontend/cumbre.js); sólo para avisar.
+    lejanas_cumbre: jsonData && typeof CumbreTablero !== "undefined"
+      ? recs.filter(r => r._diurna !== true && isValidDetection(r) && CumbreTablero.calorEnCumbre(r, INNER_RADIUS_KM[volcanoName])).length : null,
+    // S194 (Codex C1-102 y C1-V202): pasadas nocturnas del período con el cráter sin medir entero o la MIR saturada
+    // (frontend/crater_no_medido.js). Una escena que la vía no midió (motivo_vacio) no es pasada (S183) y no cuenta.
+    crater_no_medido: jsonData && typeof CraterNoMedido !== "undefined"
+      ? recs.filter(r => r._diurna !== true && !(r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio) && CraterNoMedido.craterNoMedido(r)).length : null,
     mirova_dist_med: mirovaDistMed,
+    mirova_ventana: mirovaForVolc ? mirovaWindowed : null,   // S192 (F5-V201): para desgloseMirova; el total no cambia
   };
+}
+
+// S192 (auditoría Codex ronda 2, F5-105). POR QUÉ: si no cargaba data/mirova/<Volcan>.json (404, red, JSON roto),
+// loadMirovaRef devolvía [] y la tarjeta decía «MIROVA: 0 alertas», igual que un volcán que MIROVA no vio. Los 11
+// Tier A tienen alertas de MIROVA en 90 días, así que una falla de carga los dejaba a todos en cero sin ninguna señal.
+// Ahora la falla llega como null y se escribe «no cargó». Sólo cambia qué se muestra. Guard: tests/test_tablero_f5_codex_s192.py
+function textoConteo(n) {
+  if (n == null) return { texto: "no cargó", falla: true };
+  return { texto: String(n), falla: false };
+}
+// ⚠️ S193: con la rama diurna de MODIS la réplica mide también de día en MODIS; «det. nuestras» sigue siendo de la noche
+// (las de día van aparte, con ☀) y el título dejó de decir que lo diurno de MIROVA no puede tener par. Texto S192:
+// S192 (auditoría Codex ronda 2, F5-V201). POR QUÉ: nuestra réplica mide sólo de noche (MIR nocturno), así que una
+// alerta diurna de MIROVA nunca puede tener par nuestro. La tarjeta ponía «301 det. nuestras · MIROVA: 353 alertas»
+// en Nevados de Chillán, que sugiere 52 silencios nuestros, cuando las nocturnas de MIROVA eran 277. El total se
+// deja como estaba (S151: computeStats no lee la marca diurna) y se agrega cuántas son de noche, lo comparable.
+// Guard: tests/test_tablero_f5_rotulos_s192.py
+function desgloseMirova(lista) {
+  if (!lista) return null;
+  let diurnas = 0;
+  for (const r of lista) if (r.dia === true) diurnas++;
+  return { nocturnas: lista.length - diurnas, diurnas };
+}
+function textoNocturnas(d) {
+  if (!d || d.diurnas === 0) return null;
+  return { texto: " (" + d.nocturnas + " de noche)",
+    title: "«det. nuestras» cuenta pasadas nocturnas (VIIRS se procesa sólo de noche; las pasadas MODIS de día, si las " +
+      "hay, se cuentan aparte con ☀). De las " + (d.nocturnas + d.diurnas) + " alertas de MIROVA en la ventana, " +
+      d.diurnas + " son de pasadas diurnas; lo comparable con «det. nuestras» son las " + d.nocturnas + " nocturnas." };
+}
+// Aviso del recuadro sin gráfico: no decir «sin detecciones» cuando lo que pasó es que un archivo no cargó.
+function mensajeSinGrafico(jsonData, mirovaForVolc, rotuloPeriodo) {
+  const faltan = [];
+  if (!jsonData) faltan.push("nuestros datos");
+  if (!mirovaForVolc) faltan.push("la referencia de MIROVA");
+  if (faltan.length) return "No cargó " + faltan.join(" ni ") + ": recarga la página. No es un período sin alertas.";
+  return "Sin detecciones nuestras ni alertas MIROVA en " + rotuloPeriodo;
 }
 
 // S109 (pedido Nicolás): frescura del MONITOREO = última pasada PROCESADA (cualquier
@@ -722,6 +814,7 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
 function monitoringFreshness(records) {
   let last = null;
   for (const r of (records || [])) {
+    if (r._diurna === true) continue;   // S193: la frescura se mide con las pasadas nocturnas (ver lastEventTime de index.html)
     if ((!last || r.datetime_utc > last) && !(r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio)) last = r.datetime_utc;   // S183: una escena sin datos no es pasada (espejo de escenaSinDato de index)
   }
   if (!last) return { cls: "mon-none", txt: "sin datos en este tablero" };
@@ -730,6 +823,28 @@ function monitoringFreshness(records) {
   if (h <= 30) return { cls: "mon-fresh",   txt: "monitoreado · última pasada hace " + ago };
   if (h <= 72) return { cls: "mon-lagging", txt: "datos atrasados · última pasada hace " + ago };
   return { cls: "mon-stale", txt: "sin pasadas hace " + ago };
+}
+
+// S193 (Nicolás, 2026-11-21: «tenemos gente revisando las anomalías, sería bueno mejorar los mapas»). POR QUÉ. De noche
+// un lago queda más tibio que la roca y el detector, como el de MIROVA (sin máscara de agua), puede alertarlo
+// (experiments/_s193_lagos/INFORME.md). Esta vista no tiene mapa ni lista de pasadas, así que dice cuántas detecciones
+// del período tienen el píxel más caliente sobre agua, para que el revisor abra el volcán y lo mire en el mapa. Sólo
+// avisa: el conteo de detecciones no cambia. Criterio y fuente en frontend/agua.js. Vacío (capa sin cargar o sin
+// agua) no se ve. Guard: tests/test_tablero_agua_s193.py
+function marcaAguaPeriodo(volc, recs) {
+  if (!recs || !recs.length || typeof AguaTablero === "undefined") return null;
+  const sp = el("span", "sobre-agua");
+  AguaTablero.cargarCapa(volc.name).then(capa => {
+    if (!capa) return;
+    let k = 0;
+    for (const r of recs) { const m = AguaTablero.aguaDePasada(r, capa); if (m && m.sobreAgua) k++; }
+    if (!k) return;
+    sp.textContent = " (💧 " + k + " con el pico sobre agua)";
+    sp.title = k + " de las " + recs.length + " detecciones del período tienen su píxel más caliente en una celda de la que la " +
+      "mitad o más es agua (" + AguaTablero.FUENTE + "). De noche un lago queda más tibio que la roca y el detector puede " +
+      "alertarlo; no es un descarte. Míralas en el mapa de la página del volcán.";
+  });
+  return sp;
 }
 
 function renderCard(volc, jsonData, mirovaForVolc) {
@@ -770,18 +885,53 @@ function renderCard(volc, jsonData, mirovaForVolc) {
 
   // n_det nuestras
   const s1 = el("span", "stat");
-  const b1 = el("b"); b1.textContent = String(stats.n_det_us);
+  const c1 = textoConteo(stats.n_det_us);   // S192 (F5-105): «no cargó» en vez de un 0 falso
+  const b1 = el("b"); b1.textContent = c1.texto;
+  if (c1.falla) { b1.className = "falla-carga"; s1.title = "No cargó el archivo de nuestros datos de este volcán: el conteo no es cero, es desconocido. Recarga la página."; }
+  if (c1.falla) s1.appendChild(document.createTextNode("det. nuestras: "));
   s1.appendChild(b1);
-  s1.appendChild(document.createTextNode(" det. nuestras"));
+  if (!c1.falla) s1.appendChild(document.createTextNode(" det. nuestras"));
+  const sAgua = marcaAguaPeriodo(volc, stats.det_recs);   // S193
+  if (sAgua) s1.appendChild(sAgua);
+  if (stats.n_det_dia > 0) {   // S193: las de día, aparte y con su sol
+    const sDia = el("span", "det-diurnas");
+    sDia.textContent = " (+" + stats.n_det_dia + " " + DiurnoTablero.SIMBOLO + " de día)";
+    sDia.title = stats.n_det_dia + " detecciones del período son de pasadas diurnas (MODIS), que pueden incluir reflejo solar." +
+      " No entran en «det. nuestras», el máximo ni la mediana, que son de la noche; en el gráfico van con su sol.";
+    s1.appendChild(sDia);
+  }
+  if (stats.lejanas_cumbre) {   // S194: la regla «radiante» (D8') las ubica lejos; esta vista no tiene mapa ni lista
+    const sC = el("span", "calor-cumbre");
+    sC.textContent = " (◉ " + stats.lejanas_cumbre + (stats.lejanas_cumbre === 1 ? " lejana" : " lejanas") + " con calor también en la cumbre)";
+    sC.title = "Pasadas del período cuyo cúmulo más radiante está lejos del cráter, pero con píxeles alertados también dentro " +
+      "del radio de la cumbre. Puede ser calor del cráter más débil que la fuente lejana. Con «Solo cráter» no cuentan como " +
+      "detección; míralas en la tabla de pasadas de la página del volcán. Sólo avisa: no cambia el conteo ni el nivel.";
+    s1.appendChild(sC);
+  }
+  if (stats.crater_no_medido) {   // S194: esta vista no tiene lista de pasadas; el detalle está en la página del volcán
+    const sN = el("span", "crater-no-medido");
+    sN.textContent = " (" + CraterNoMedido.SIMBOLO + " " + stats.crater_no_medido + (stats.crater_no_medido === 1 ? " pasada" : " pasadas") +
+      " con el cráter sin medir entero o la MIR saturada)";
+    sN.title = "Pasadas nocturnas del período en que el infrarrojo medio (MIR, la banda que ve el calor) llegó sin dato " +
+      "sobre el cráter, el barrido que lo cruza llegó sin posición, o la MIR llegó saturada. Sin dato, la pasada puede salir " +
+      "«sin anomalía» o con sólo una parte de la potencia aunque haya un foco: no es lo mismo que un cráter frío. Saturada, " +
+      "la potencia de esos píxeles es un mínimo. Míralas en la tabla de pasadas de la página del volcán. Sólo avisa: no " +
+      "cambia el conteo ni el nivel.";
+    s1.appendChild(sN);
+  }
   stRow.appendChild(s1);
   stRow.appendChild(document.createTextNode(" · "));
 
   // n_det MIROVA
   const s2 = el("span", "stat");
   s2.appendChild(document.createTextNode("MIROVA: "));
-  const b2 = el("b"); b2.textContent = String(stats.n_det_mirova);
+  const c2 = textoConteo(stats.n_det_mirova);   // S192 (F5-105)
+  const b2 = el("b"); b2.textContent = c2.texto;
+  if (c2.falla) { b2.className = "falla-carga"; s2.title = "No cargó la referencia de MIROVA de este volcán (data/mirova/): el conteo no es cero, es desconocido. Recarga la página."; }
   s2.appendChild(b2);
-  s2.appendChild(document.createTextNode(" alertas"));
+  if (!c2.falla) s2.appendChild(document.createTextNode(" alertas"));
+  const noche = textoNocturnas(desgloseMirova(stats.mirova_ventana));   // S192 (F5-V201)
+  if (noche) { s2.appendChild(document.createTextNode(noche.texto)); s2.title = noche.title; }
   stRow.appendChild(s2);
   stRow.appendChild(document.createTextNode(" · "));
 
@@ -849,16 +999,17 @@ function renderCard(volc, jsonData, mirovaForVolc) {
   card.appendChild(wrap);
   grid.appendChild(card);
 
-  const { datasets, n_records } = buildDatasets(jsonData, mirovaForVolc, volc.name);
+  const { datasets, n_records, marcasCnm } = buildDatasets(jsonData, mirovaForVolc || [], volc.name);
   if (n_records === 0 && datasets.length === 0) {
     while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
     const msg = el("div", "no-data");
-    msg.textContent = "Sin detecciones nuestras ni alertas MIROVA en " + Periodo.rotulo(PERIODO);
+    msg.textContent = mensajeSinGrafico(jsonData, mirovaForVolc, Periodo.rotulo(PERIODO));   // S192 (F5-105)
+    if (!jsonData || !mirovaForVolc) msg.classList.add("falla-carga");
     wrap.appendChild(msg);
     return;
   }
   const ctx = canvas.getContext("2d");
-  charts[volc.name] = new Chart(ctx, chartConfig(datasets));
+  charts[volc.name] = new Chart(ctx, chartConfig(datasets, marcasCnm));
 }
 
 function openModal(volcName) {
@@ -875,7 +1026,7 @@ function openModal(volcName) {
   const copia = JSON.parse(JSON.stringify(original.data.datasets));
   // S151: la copia JSON pierde las funciones de estilo; sin esto el sol saldria como un circulo en el modal.
   for (const d of copia) if (d.mirovaDia) d.pointStyle = mirovaSolStyle;
-  modalChart = new Chart(ctx, chartConfig(copia));
+  modalChart = new Chart(ctx, chartConfig(copia, original.options.plugins.craterNoMedido && original.options.plugins.craterNoMedido.marcas));   // R3F5-101
 }
 function closeModal() {
   document.getElementById("modal").style.display = "none";

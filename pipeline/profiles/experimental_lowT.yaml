@@ -21,6 +21,14 @@
 # Hasta que A2 esté, este perfil sólo activa el flag pero la pipeline NO
 # llama VRPTIR (el módulo pipeline/vrptir.py es standalone, llamable directo
 # en experimentos, pero NO conectado al run).
+#
+# ⚠️ S190 (A113; F8-V301 de la auditoría de Codex, ronda 2, verificador de contexto limpio en
+# D:\codex-vrp\_salida\ronda2\f8b_verificacion\VEREDICTO.md): «la pipeline NO llama VRPTIR» es FALSO desde la
+# Task A2: pipeline/process_viirs.py lo llama en el camino K de VIIRS 375 (`_compute_vrptir_aveni_diagnostic`, que
+# agrega el campo al record) y lo prueba tests/test_vrptir_a2_integration.py. Lo que sí pasaba: con las vías
+# heredadas encendidas, el procesador retorna el record de la vía antes de ese camino en los 45 volcanes, así que el
+# piloto nunca producía su campo. Desde S190 este perfil declara las tres vías apagadas (`thresholds:`, abajo).
+# Texto conservado.
 
 extends: mirova_equivalent
 profile: experimental_lowT
@@ -40,12 +48,31 @@ vrptir_k_tir_i5: 60.17       # μm·sr para VIIRS I5 11.45 μm (Eq.8 verbatim)
 output:
   data_subdir: experimental_lowT
 
+# S190 (F8-112 y F8-V301 de la auditoría de Codex, verificados): este perfil congela el detector de antes de K (comentario
+# S153 de abajo), pero no declaraba las vías «código MIROVA» que mirova_equivalent encendió en MODIS (S172) y en VIIRS
+# 375 y 750 (S186), así que las heredaba: los tres procesadores retornaban el record de la vía antes del camino K, y el
+# diagnóstico VRPTIR, que sólo existe en el camino K de VIIRS 375, no se calculaba en ningún volcán. Se declaran
+# apagadas en `thresholds:`, donde las lee pipeline/profile.py (A89), igual que experimental.yaml. Lo vigila
+# tests/test_experimental_lowT_congelado_s190.py. No toca producción: ENABLE_VRPTIR_AVENI es false en los perfiles
+# publicados y este perfil lo corre sólo scripts/run_pilot_a5_s76.py.
+thresholds:
+  enable_v375_codigo_mirova: false
+  enable_modis_codigo_mirova: false
+  enable_v750_codigo_mirova: false
+
 # S153, ADOPCION DE K (regla experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848): la replica apago el
 # Test 1 integrado y encendio la conectiva max y la banda 22. Este perfil hereda de mirova_equivalent y su
 # significado era la produccion de ANTES de K mas su propio cambio, asi que congela aca esos flags con el valor
 # previo (como experimental.yaml en S150) para resolver igual que antes de la adopcion. Lo vigila
 # tests/test_guard_perfiles_congelados_s153.py.
+# ⚠️ S190 (A113, F8-112 de la auditoría de Codex, verificado): «para resolver igual que antes de la adopcion» era
+# cierto sólo para estos tres flags; el detector efectivo era la vía heredada hasta el bloque `thresholds:` de S190
+# (arriba). Texto conservado.
 paths:
+  # S193: producción abre el día de MODIS (A/B #813, decisión de Nicolás del 2026-11-21); este perfil
+  # queda sólo de noche, declarado aquí para no heredarlo en silencio (A117). Perfil de laboratorio con el detector anterior; no se midió de día.
+  # Lo vigila tests/test_perfil_dia_modis_s193.py.
+  enable_daytime_modis: false
   enable_test1_path: true
   enable_tests_23_prose_branch: false
 

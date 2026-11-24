@@ -5,7 +5,7 @@ Doc canónica: docs/F47_NDC_RECALL_S76.md §9.
 
 === Resumen del bug ===
 
-`pipeline/store.py:183-195` evalúa `hotspot_dist_km` (= distancia del pixel
+`pipeline/store.py:202-214` evalúa `hotspot_dist_km` (= distancia del pixel
 single más caliente del scene) contra `MAX_HOTSPOT_DIST_KM` (default 5 km
 operacional). Cuando ese pixel está lejos, anula `vrp_eruption` y limpia
 `anomaly_pixels`, dejando `record["vrp_mw"] = 0`.

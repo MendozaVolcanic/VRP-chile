@@ -28,8 +28,8 @@ reales).
 
 Refs:
 - pipeline/process_viirs.py:598-604 (defaults area)
-- pipeline/process_viirs.py:775 (test1_hot original init)
-- pipeline/process_viirs.py:862-867 (combine_hot_paths call)
+- pipeline/process_viirs.py:778 (test1_hot original init)
+- pipeline/process_viirs.py:865-870 (combine_hot_paths call)
 - tag defensivo: pre-s78-f53-test1-hot
 """
 from __future__ import annotations

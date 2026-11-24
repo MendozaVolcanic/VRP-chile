@@ -6,6 +6,8 @@ name: Vigilancia de la guardia K de MODIS
 # POR QUE: con la via «codigo MIROVA» encendida en MODIS, K corre aparte como guardia (guardia-k-modis.yml). Una alerta
 # protegida que MIROVA publica, la guardia publica y produccion calla es el disparador de la reversion pre-autorizada,
 # y la regla pide avisar EL MISMO DIA: por eso corre al terminar la guardia y no una vez por semana.
+# S192: la reversion pre-autorizada esta SUSPENDIDA desde el 2026-11-21 (decision de Nicolas, marca S192 de la regla):
+# la candidata se lleva a Nicolas y no se revierte sola. Texto anterior:
 # El workflow NO revierte: abre el issue. La reversion la confirma una persona en la cabecera de la imagen de MIROVA y
 # la ejecuta una sesion con git revert del PR B (el encendido).
 # A43: "on" quoted (Norway Problem YAML 1.1).
@@ -131,7 +133,7 @@ jobs:
           PY
           case "$VEREDICTO" in
             REVERSION_CANDIDATA)
-              abrir "Guardia K de MODIS: candidata a reversion" "$(printf 'La vigilancia encontro una alerta protegida de MIROVA en MODIS (1 MW o mas) que la guardia (K) publica y produccion (la via codigo MIROVA) calla:\n\n%s\n\nLa regla (experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4) pre-autoriza revertir el encendido con git revert del PR B, DESPUES de confirmar la alerta en la cabecera de la imagen de MIROVA. Avisar a Nicolas hoy. Una vez decidida, anotar la pasada en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
+              abrir "Guardia K de MODIS: candidata a reversion" "$(printf 'La vigilancia encontro una alerta protegida de MIROVA en MODIS (1 MW o mas) que la guardia (K) publica y produccion (la via codigo MIROVA) calla:\n\n%s\n\nLa reversion pre-autorizada de la regla (experiments/_s171_modd_adopcion/REGLA_REVERSION_MODD_BORRADOR.md §4.3) esta SUSPENDIDA por decision de Nicolas del 2026-11-21 (marca S192 de la regla): NO revertir. Confirmar la alerta en la cabecera de la imagen de MIROVA y llevarla a Nicolas hoy; decide el. Una vez decidida, anotar la pasada en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
             CANDIDATA_FUERA_DE_PLAZO)
               abrir "Guardia K de MODIS: candidata fuera de plazo" "$(printf 'La vigilancia encontro una alerta protegida de MIROVA en MODIS que la guardia publica y produccion calla, pero el plazo de la regla ya se cumplio (29 protegidas vistas o 120 dias desde el encendido):\n\n%s\n\nFuera de plazo NO hay reversion pre-autorizada: decide Nicolas. Una vez decidida, anotar la pasada en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json.\nDetalle: data/audit_continuous/guardia_modis_latest.json.' "$(cat /tmp/detalle.txt)")" ;;
             INVESTIGAR)
@@ -146,3 +148,19 @@ jobs:
               fi ;;
             *) echo "sin issue" ;;
           esac
+          # S194 (Cierre I, C1-101): tambien la protegida sin record de produccion, con el mismo issue.
+          # S193 (auditoria Codex ronda 2, F11-101 y F9-101): una protegida que produccion no publica y que ningun
+          # disparador de arriba cubre (la guardia no tiene la pasada, o K tambien calla) abre su propio issue, con
+          # cualquier veredicto. Es un AVISO: no es candidata a reversion (si K tampoco publica, la perdida no dice nada
+          # de K contra la via). Antes quedaba listada en el JSON con VERDE hasta el auto-audit del lunes.
+          python - <<'PY' > /tmp/sin_aviso.txt
+          import json
+          d = json.load(open("data/audit_continuous/guardia_modis_latest.json", encoding="utf-8"))
+          g = {True: "la publica", False: "tampoco la publica", None: "no tiene la pasada"}
+          pr = {False: "no la publica", None: "no tiene record de la pasada"}
+          for p in d.get("protegidas_sin_publicar_sin_aviso", []):
+              print(f"- {p['volcano']} MODIS {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: produccion {pr[p.get('prod_pub')]} y la guardia (K) {g[p.get('guardia_pub')]}")
+          PY
+          if [ -s /tmp/sin_aviso.txt ]; then
+            abrir "Guardia K de MODIS: protegida sin publicar" "$(printf 'Estas alertas protegidas de MIROVA en MODIS (1 MW o mas) no estan en el tablero: produccion (la via codigo MIROVA) no las publica o no tiene record de la pasada, y ningun disparador de la regla las cubre (la guardia K no tiene la pasada o tampoco la publica, o la pasada es anterior al encendido):\n\n%s\n\nEs un AVISO, no una candidata a reversion: si K tampoco la publica, la perdida no dice nada de K contra la via (auditoria Codex ronda 2, F11-101 y F9-101; Cierre I, C1-101). Confirmar la alerta en la cabecera de la imagen de MIROVA y llevarla a Nicolas. Una vez decidida, anotar la pasada en experiments/_s171_modd_adopcion/sombra_pasadas_juzgadas_modis.json para que deje de avisar.\nDetalle: data/audit_continuous/guardia_modis_latest.json (protegidas_sin_publicar_sin_aviso).' "$(cat /tmp/sin_aviso.txt)")"
+          fi

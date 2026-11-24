@@ -6,13 +6,13 @@
 # Lógica        : Recorre volcanes y dias (el NRT: hoy y los 7 anteriores), llama a pipeline/fetch.py y a
 #                 los procesadores MODIS / VIIRS 375 m / VIIRS 750 m, y guarda con pipeline/store.py. La
 #                 cobertura informa fallas, plataformas que faltaron (S161: cese o cero granulos) y, por volcan y
-#                 dia, busquedas vacias, L1B sin geolocalizacion y dias parciales (S159, I1).
+#                 dia, busquedas vacias, L1B sin geolocalizacion, dias parciales y granulos sin record (S190).
 # Modelo/método : Reglas deterministicas (orquestacion). Sin aprendizaje automatico.
 # Datos entrada : volcanoes.yaml, perfil de pipeline/profiles/, granulos L1B de NASA. SIN datos personales.
-# Variables     : Perfil, volcanes, ventana de fechas, filtro nocturno, modo estricto de cobertura.
+# Variables     : Perfil, volcanes, ventana de fechas, filtro nocturno, modo estricto, solo sin record (S198).
 # Limitaciones  : El NRT no usa el modo estricto: una cobertura incompleta avisa y sale 0, y la corrida
 #                 siguiente vuelve a intentar. Una plataforma que falta se informa como nota, sin cambiar el
-#                 codigo de salida.
+#                 codigo de salida; nrt-retry.yml y barrido-huecos.yml recuperan esas fallas (S198, F6-104/114).
 # Refs/datos    : docs/AUDIT_S160.md (hallazgo 241); experiments/_s157_busqueda_ventana/MEDICION.md.
 #                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
 # ════════════════════════════════════════════════════════════════════
@@ -250,6 +250,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     try:
                         eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
+                        _n_inc = len(fetch.incidencias_de_cobertura())  # S190 (H07): ver _sin_record
                         result = process_modis.calculate_vrp(
                             l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"],
                             vent_lat=eff_vent_lat,
@@ -264,6 +265,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         )
                         if not result:
                             _modis_sin_record(l1b, _anotar)  # S175 (153)
+                            _sin_record(volcano, date, platform, l1b, _n_inc)  # S190 (H07)
                         if result:
                             _MINIATURAS.recoger(volcano["name"], result)  # S184: antes del store, que no la ve
                             store.append_record(volcano["name"], result,
@@ -281,6 +283,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                   f"anomalous_px={result['n_anomalous_pixels']}{vent_str}")
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")
+                        _error_procesamiento(volcano, date, platform, l1b, e)  # S190 (H07)
 
             elif platform in ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21"):
                 # VIIRS 375m I-band (IMG product). 3 plataformas: SNPP / NOAA-20 / NOAA-21 (S18)
@@ -297,6 +300,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     try:
                         eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
+                        _n_inc = len(fetch.incidencias_de_cobertura())  # S190 (H07): ver _sin_record
                         result = process_viirs.calculate_vrp(
                             l1b, geo,
                             volcano["lat"], volcano["lon"], volcano["radius_km"],
@@ -310,6 +314,8 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             local_kernel_bg_compatible=volcano.get("local_kernel_bg", False),
                             lava_lake_magmatic=volcano.get("lava_lake_magmatic", False),
                         )
+                        if not result:
+                            _sin_record(volcano, date, platform, l1b, _n_inc)  # S190 (H07)
                         if result:
                             _MINIATURAS.recoger(volcano["name"], result)  # S184: antes del store, que no la ve
                             store.append_record(volcano["name"], result,
@@ -331,6 +337,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                   f"{vent_str}")
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")
+                        _error_procesamiento(volcano, date, platform, l1b, e)  # S190 (H07)
 
             elif platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750", "VIIRS_NOAA21_750"):
                 # VIIRS 750m M-band (MOD product) — MIROVA's "VIIRS" channel. +NOAA-21 (S18)
@@ -347,6 +354,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     try:
                         eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
+                        _n_inc = len(fetch.incidencias_de_cobertura())  # S190 (H07): ver _sin_record
                         result = process_viirs_mod.calculate_vrp(
                             l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"],
                             vent_lat=eff_vent_lat,
@@ -358,6 +366,8 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             lbg_global_compatible=volcano.get("lbg_global_compatible", False),
                             local_kernel_bg_compatible=volcano.get("local_kernel_bg", False),
                         )
+                        if not result:
+                            _sin_record(volcano, date, platform, l1b, _n_inc)  # S190 (H07)
                         if result:
                             _MINIATURAS.recoger(volcano["name"], result)  # S184: antes del store, que no la ve
                             store.append_record(volcano["name"], result,
@@ -375,6 +385,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                   f"anomalous_px={result['n_anomalous_pixels']}{vent_str}")
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")
+                        _error_procesamiento(volcano, date, platform, l1b, e)  # S190 (H07)
 
     finally:
         # Always delete raw granules after processing.
@@ -403,6 +414,28 @@ def _sin_geolocalizacion(volcano: dict, date: datetime, platform: str, l1b: Path
                                f"L1B en disco sin su geolocalización: {l1b.name}")
 
 
+def _error_procesamiento(volcano: dict, date: datetime, platform: str, l1b: Path, e: Exception) -> None:
+    """S190 (H07 de la auditoría de Codex): el procesador lanzó una excepción con el gránulo y su geolocalización en
+    disco. Antes sólo quedaba la línea `ERROR processing` (que se sigue imprimiendo en el llamador, porque la leen
+    scripts/revisar_errores_modis_nrt.py y scripts/revisar_sombra.py) y la cobertura decía «completa», también con
+    --estricto-cobertura. Ahora es incidencia que cuenta en modo estricto (pipeline/fetch.py, TIPOS_INCIDENCIA): una
+    pasada que existió y se bajó, pero quedó sin record. Incluye la excepción que salte después de guardar el record
+    (al imprimirlo): se cuenta igual, porque desde aquí no se distingue y es preferible un rojo de más a un hueco."""
+    fetch.registrar_incidencia("error_procesamiento", volcano["name"], date.strftime("%Y-%m-%d"), platform,
+                               f"{l1b.name}: {type(e).__name__}: {e}")
+
+
+def _sin_record(volcano: dict, date: datetime, platform: str, l1b: Path, n_antes: int) -> None:
+    """S190 (H07): el procesador devolvió None y no registró ninguna incidencia propia mientras corría (por eso
+    `n_antes`, el número de incidencias antes de llamarlo: si ya anotó, por ejemplo `crater_sin_dato`, no se repite).
+    Con la vía «código MIROVA» es sobre todo el descarte de borde (171-01) o el volcán fuera del gránulo, ambos
+    legítimos: va SIN JUICIO, no cuenta en modo estricto, y sólo impide que la cobertura diga «completa»."""
+    if len(fetch.incidencias_de_cobertura()) > n_antes:
+        return
+    fetch.registrar_incidencia("sin_record", volcano["name"], date.strftime("%Y-%m-%d"), platform,
+                               f"{l1b.name}: el procesador no devolvió record")
+
+
 def _crater_sin_dato(volcano: dict, date: datetime, platform: str):
     """S165 (V165-03): aviso que process_modis.calculate_vrp llama cuando descarta la pasada porque el cráter no tiene
     posición en el gránulo (ENABLE_MODIS_CRATER_SIN_DATO, apagado). Sin esto la pasada desaparecía y la cobertura
@@ -419,8 +452,8 @@ def _modis_sin_record(l1b: Path, anotar) -> None:
     nada. Con la vía «código MIROVA» encendida es, sobre todo, el descarte de borde de la vía (171-01: menos de 100
     celdas de la grilla de MIROVA a 45 km, o la más cercana a más de 5 km del centro), que antes desaparecía sin una
     palabra en el log: Villarrica MODIS_AQUA 2026-11-04 07:10 UTC, cenit 65°, la guardia K la escribió y producción no.
-    Sólo el log: distinguir el descarte de borde del volcán fuera del gránulo, o registrar una incidencia de cobertura,
-    exige tocar pipeline/ (process_modis.py, A45; fetch.py, TIPOS_INCIDENCIA), pendiente."""
+    Sólo el log: distinguir el descarte de borde del volcán fuera del gránulo exige tocar process_modis.py (A45),
+    pendiente. S190: la incidencia de cobertura (`sin_record`) la registra _sin_record, que el llamador invoca después."""
     if getattr(anotar, "llamado", False):
         return
     if getattr(vrp_profile, "ENABLE_MODIS_CODIGO_MIROVA", False):
@@ -461,6 +494,14 @@ def default_date_window(today: datetime, lookback_days: int = 7):
     return [today - timedelta(days=d) for d in range(lookback_days, -1, -1)]
 
 
+def claves_con_record(records: list) -> set:
+    """S198 (F6-114): las pasadas que ya tienen record, como (sensor, datetime_utc), la clave con que store.py
+    deduplica. El sensor del record es el nombre de la plataforma en fetch (MODIS_TERRA, VIIRS_NOAA20_750...), así que
+    fetch.configurar_pasadas_existentes las compara sin traducir. Un record sin sensor o sin fecha no tapa nada."""
+    return {(r.get("sensor"), r.get("datetime_utc")) for r in records
+            if r.get("sensor") and r.get("datetime_utc")}
+
+
 def informar_cobertura(fallas: list, ruta_json=None, estricto: bool = False,
                        plataformas: dict | None = None, incidencias: list | None = None) -> int:
     """S157: dice qué búsquedas y descargas no se pudieron hacer, y devuelve el código de salida.
@@ -485,6 +526,8 @@ def informar_cobertura(fallas: list, ruta_json=None, estricto: bool = False,
     de decir «completa». Sin modo estricto el código de salida sigue en 0 (el NRT no cambia de color).
     S165 (V165-03): `crater_sin_dato`, la pasada MODIS que ENABLE_MODIS_CRATER_SIN_DATO (apagado)
     descarta porque el cráter no tiene posición en el gránulo; no cuenta en modo estricto.
+    S190 (H07): `error_procesamiento` (excepción del procesador con el gránulo en disco; cuenta en modo estricto) y
+    `sin_record` (el procesador devolvió None sin anotar nada; sin juicio, no cuenta). Antes las dos salían «completa».
     """
     import json
     from collections import defaultdict
@@ -560,7 +603,9 @@ def _informar_incidencias(incidencias: list, hay_fallas: bool) -> None:
                                "debía haber pasada)",
                "sin_geolocalizacion": "L1B sin geolocalización (descartados sin procesar)",
                "dia_parcial": "día parcial (no había terminado más la latencia mínima de LANCE)",
-               "crater_sin_dato": "cráter sin posición en el gránulo MODIS (sin dato, no se escribió record)"}
+               "crater_sin_dato": "cráter sin posición en el gránulo MODIS (sin dato, no se escribió record)",
+               "error_procesamiento": "error al procesar un gránulo bajado (pasada sin record)",
+               "sin_record": "gránulo procesado sin record, sin juicio (descarte de borde o volcán fuera del gránulo)"}
     if hay_fallas:
         print(f"Además, {len(incidencias)} incidencias de cobertura.")
     else:
@@ -629,12 +674,18 @@ def main():
     parser.add_argument("--estricto-cobertura", action="store_true",
                         help="S157: sale con código 3 si hubo búsquedas o descargas fallidas "
                              "(reprocesos; el NRT no lo usa)")
+    parser.add_argument("--solo-sin-record", action="store_true",
+                        help="S198 (F6-114): baja y procesa sólo las pasadas que todavía no tienen record en el "
+                             "JSON del volcán (barrido semanal de huecos, .github/workflows/barrido-huecos.yml)")
     args = parser.parse_args()
 
     # S120 (cacería de bugs): --start sin --end (o viceversa) caía en silencio
     # a la ventana NRT default de 8 días — fechas equivocadas sin aviso.
     if bool(args.start) != bool(args.end):
         parser.error("--start y --end deben usarse juntos (rango de fechas)")
+    # S198: --overwrite reemplaza lo que ya existe y --solo-sin-record no lo baja; juntos se contradicen.
+    if args.solo_sin_record and args.overwrite:
+        parser.error("--solo-sin-record no se combina con --overwrite")
 
     print(f"=== {vrp_profile.describe()} ===")
 
@@ -694,6 +745,13 @@ def main():
         fetch.reiniciar_ventana()
         fetch.configurar_ventana(dates, cache_dir=os.environ.get("VRP_CACHE_BUSQUEDA_DIR") or None,
                                  ventana=ventana_env)
+        # S198 (F6-114): se arma por volcán antes de sus días; sin la bandera queda en None (no filtra).
+        if args.solo_sin_record:
+            claves = claves_con_record(store.get_records(volcano["name"]))
+            print(f"Sólo sin record: {volcano['name']} tiene {len(claves)} pasadas con record; no se bajan.")
+            fetch.configurar_pasadas_existentes(claves)
+        else:
+            fetch.configurar_pasadas_existentes(None)
         for date in dates:
             # S120 (cacería): los breakers de fetch son per-día; sin reset, un
             # timeout transitorio del día 1 silenciaba todos los días restantes

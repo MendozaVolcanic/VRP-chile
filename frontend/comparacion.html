@@ -87,7 +87,17 @@
   <div class="controls" id="vk-ctl-ref"></div>
   <div class="controls" id="vk-ctl-vent"></div>
   <div class="vk-cards" id="vk-cards"></div>
-  <h2 class="vk-h2">Volcán por volcán</h2>
+  <!-- S196 (E3 de docs/CAMINO_INDEPENDENCIA_MIROVA.md): la franja diurna de MODIS, aparte de la nocturna. -->
+  <h2 class="vk-h2">☀ MODIS de día</h2>
+  <div class="explain">Desde el 15 de noviembre de 2026 la vía procesa MODIS también de día (VIIRS sigue sólo de
+  noche). De día el infrarrojo medio suma la luz del sol reflejada en nubes, salares o nieve, así que una pasada diurna es
+  otra pregunta y se cuenta aparte: nada de lo que pasa de día entra en las cifras nocturnas de arriba. Día es una pasada
+  con el Sol sobre el horizonte del volcán. Sólo se compara la vía con MIROVA: K, la guardia, no procesa de día. Cada
+  pregunta es un día-satélite; las ventanas de arriba no se aplican aquí.</div>
+  <div class="stat" id="vk-dia-nota"></div>
+  <div class="vk-cards" id="vk-dia-cards"></div>
+  <div class="vk-scroll"><table class="vk-disc" id="vk-dia"></table></div>
+  <h2 class="vk-h2">Volcán por volcán (noche)</h2>
   <div class="explain">Verde: vía. Naranjo: K. En cada celda, alertas de MIROVA publicadas (de cuántas) y, después del
   punto, falsas alarmas.</div>
   <div class="vk-scroll"><table class="vk-grid" id="vk-grid"></table></div>
@@ -341,14 +351,15 @@ async function renderScatter(name) {
   const mirRows = mirova.filter(r => r.volc === volc.csv);
   const mirMap = dailyMaxBySensor(mirRows, r=>r.dt, r=>mirovaBucket(r.sensor), r=>r.vrp);
   const bySensor = { MODIS:[], VIIRS750:[], VIIRS375:[] };
-  let lo = Infinity, hi = 0, nMatch = 0, sumLogRatio = 0;
+  let lo = Infinity, hi = 0, nMatch = 0;
+  const cocientes = [];
   for (const [k, ov] of ourMap.entries()) {
     if (!mirMap.has(k)) continue;
     const mv = mirMap.get(k); const sensor = k.split("|")[1];
     if (!bySensor[sensor]) continue;
     bySensor[sensor].push({ x: mv, y: ov });
     lo = Math.min(lo, mv, ov); hi = Math.max(hi, mv, ov); nMatch++;
-    sumLogRatio += Math.log10(ov/mv);
+    cocientes.push(ov / mv);
   }
   if (!isFinite(lo) || lo <= 0) lo = 0.01;
   const ds = Object.keys(bySensor).filter(s=>bySensor[s].length).map(s => ({
@@ -367,9 +378,12 @@ async function renderScatter(name) {
       scales:{ x:{ type:"logarithmic", title:{display:true,text:"VRP MIROVA (MW, máx diario)",color:"#7a8fa6"}, ticks:{color:"#7a8fa6"}, grid:{color:"#1a3a5c55"} },
                y:{ type:"logarithmic", title:{display:true,text:"VRP nuestro (MW, máx diario)",color:"#7a8fa6"}, ticks:{color:"#7a8fa6"}, grid:{color:"#1a3a5c55"} } } }
   });
-  const medRatio = nMatch ? Math.pow(10, sumLogRatio/nMatch) : null;
+  // F5-106 (auditoría Codex ronda 2, S193): el rótulo decía «ratio mediano geométrico» y el número era la media
+  // geométrica (10 elevado a la media de los log10). No son lo mismo: en Láscar daba 1,24 con mediana 1,00, y la media
+  // la arrastran unos pocos días muy desparejos. El sesgo que pide el glosario es la mediana del cociente.
+  const medRatio = median(cocientes);
   el("scatter-stat").innerHTML = `<b>${volc.display}</b> · <b>${nMatch}</b> días-sensor matcheados · `
-    + `ratio mediano geométrico nuestro/MIROVA = <b>${medRatio ? medRatio.toFixed(2)+"×" : "—"}</b> `
+    + `ratio mediano nuestro/MIROVA = <b>${medRatio ? medRatio.toFixed(2)+"×" : "—"}</b> `
     + `(1.0× = calibración perfecta). Puntos sobre la recta = sobre-estimamos; debajo = sub-estimamos.`;
 }
 

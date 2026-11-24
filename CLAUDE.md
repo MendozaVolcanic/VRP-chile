@@ -16,7 +16,8 @@ Repo: https://github.com/MendozaVolcanic/VRP-chile
 > [`docs/FICHA_SDA_VRP_CHILE.md`](docs/FICHA_SDA_VRP_CHILE.md) al día. Estándar:
 > [`../../GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md`](../../GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md).
 > **Número de versión de la ficha: se toma al mergear (Nicolás, S185).** Un PR no escribe la ficha mientras está
-> abierto: su descripción trae el texto de la fila. Al recibir «mergea #N», quien mergea une `origin/main` en la
+> abierto: su descripción trae el texto de la fila. Al mergear (Claude mergea sola lo que recomienda, sin esperar
+> «mergea #N»: regla S193 en A39), quien mergea une `origin/main` en la
 > rama, agrega la fila del historial y pone la cabecera en esa versión (la anterior pasa a «Versión anterior»; se hace
 > en toda versión, cambie o no la lógica, como v1.28 y v1.30), con la versión siguiente a la de main y la fecha del
 > merge, espera el CI de ese commit y mergea con `--match-head-commit`. Por qué: con la versión al abrir, #999 tuvo
@@ -40,24 +41,26 @@ cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo
 
 ## Misión vinculante (LEER ANTES DE TOCAR PIPELINE)
 
-> ⚠️ **S177 B2 (A113; PROPUESTA: rige sólo desde el merge del PR B2): VIIRS 750 de producción deja de ser K.** Corre la
-> vía «código MIROVA» (`enable_v750_codigo_mirova: true`); K de VIIRS queda de guardia
-> (`pipeline/profiles/guardia_k_viirs.yaml`), reversión por `git revert -m 1` del merge de B2 (regla
-> `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`). Lo que abajo diga «VIIRS 375 y 750 siguen con
-> K» o «VIIRS 375 y 750 = K» vale para VIIRS 750 sólo hasta ese merge. Ver `docs/MISSION.md`, ficha v1.24.
+> ⚠️ **S186 (A113): los tres sensores de producción corren la vía «código MIROVA»** (`pipeline/mirova_v750_codigo.py`;
+> `enable_modis_codigo_mirova`, `enable_v375_codigo_mirova` y `enable_v750_codigo_mirova` en `true`): MODIS desde el
+> 2026-11-02 (#934, decisión de Nicolás del 2026-10-31), VIIRS 375 y 750 desde el 2026-11-11 (#974 a las 13:09:21 y
+> #983 a las 13:22:13 UTC, decisión del 2026-11-08). K queda sólo de guardia (`pipeline/profiles/guardia_k_modis.yaml`
+> y `guardia_k_viirs.yaml`; vigilancias `scripts/vigilancia_guardia_modis.py` y `scripts/vigilancia_guardia_viirs.py`),
+> con reversión pre-autorizada por `git revert` del PR de cada sensor (`-m 1` en VIIRS; ⚠️ S192: SUSPENDIDA, marca
+> que sigue). Desde el 2026-11-12 la
+> historia de los 11 Tier A desde 2025-02-15 es de la vía (ficha v1.25): no queda serie K publicada. Lo que un
+> documento diga de la producción con K (D11, D12, D21, D22, D25, D26, D32, `f5_core_vrp_mw`) describe hoy la guardia.
+> Lo que la vía decide fuera del código de MIROVA: `docs/MIROVA_DIVERGENCES.md` D36. Las marcas S172, S177 B1 y S177 B2
+> que decían esto por partes (B1 y B2 como «PROPUESTA») están en la historia. Ver `docs/MISSION.md`, ficha v1.18 y
+> v1.23 a v1.25. (historia: Misión vinculante)
 
-> ⚠️ **S172 (A113): MODIS de producción ya no es K.** Desde el merge del PR B (#934) MODIS corre la vía «código
-> MIROVA» (`enable_modis_codigo_mirova: true`, `pipeline/mirova_v750_codigo.py`); VIIRS 375 y 750 siguen con K.
-> Decisión de Nicolás del 2026-10-31. K de MODIS queda de guardia (`pipeline/profiles/guardia_k_modis.yaml`,
-> `scripts/vigilancia_guardia_modis.py`), reversión pre-autorizada por `git revert` del PR B. Lo que describa el
-> MODIS de producción como K (D21, D12, cara MODIS de D11) es previo a S172. Ver `docs/MISSION.md`, ficha v1.18.
->
-> ⚠️ **S177 B1 (A113; PROPUESTA: rige sólo desde el merge del PR B1): VIIRS 375 de producción deja de ser K.** Corre la
-> vía «código MIROVA» (`enable_v375_codigo_mirova: true`); K de VIIRS queda de guardia
-> (`pipeline/profiles/guardia_k_viirs.yaml`), reversión por `git revert -m 1` del merge de B1 (regla
-> `experiments/_s176_v375e_adopcion/REGLA_REVERSION_V375E_BORRADOR.md`). Lo que abajo diga «VIIRS 375 y 750 = K» o que
-> el tablero publica `f5_core_vrp_mw` en VIIRS 375 vale para VIIRS 375 sólo hasta ese merge. Ver `docs/MISSION.md`,
-> ficha v1.23.
+> ⚠️ **S192 (A113, decisión de Nicolás del 2026-11-21, «Sí, suspéndela»): la reversión pre-autorizada de los tres
+> sensores está SUSPENDIDA** hasta que (1) el tablero marque el paso de la vía a K y (2) una regla aprobada por Nicolás
+> diga qué pasa con la historia ya publicada. Por qué (F11-102, auditoría Codex ronda 2, frente 11): la historia es
+> toda de la vía y `frontend/cambio_detector.js` sólo marca K seguido de la vía (⚠️ S193: describe el tablero anterior a #1072, que desde el 2026-11-21 marca también el paso de la vía a K con la línea «vuelve a K»; lo que falta para levantar la suspensión es la condición (2) y la decisión de Nicolás), así que un revert dejaría caer la
+> potencia a cerca de la mitad sin marca en el tablero. Mientras tanto, una `REVERSION_CANDIDATA` de las guardias se
+> confirma en la imagen de MIROVA y se lleva a Nicolás el mismo día; no se revierte sola. Detalle en la marca S192 de
+> las dos reglas de reversión.
 
 **Objetivo: clon literal MIROVA NRT.** Antes de tocar `pipeline/`, leer [docs/MISSION.md](docs/MISSION.md) y
 aplicar las 3 preguntas; si las 3 dan NO, no implementar y anotarlo en `tasks/backlog_*.md`. Parches viejos
@@ -79,14 +82,24 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
 - **VRP TIR (I05)**: Stefan-Boltzmann puro (Ec. 5 de Aveni 2024). El cierre de D3 está rebajado (S146): la
   Ec. 16 de Springer es el modelo de dos componentes y el «no adoptada» de la Ec. 9 es SOSPECHA.
 - **Código operacional de MIROVA VIIRS 750** (OSF zm62w, 2026-07-24, D34,
-  `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`): difiere de producción en 10 de 13 puntos (K1 -0,7, dNTI mínimo
-  0,02 fuera de la cumbre, media 3 × 3 con el central, fondo interpolado bajo halo).
-- **Detector de producción**: MODIS = vía «código MIROVA» (S172). VIIRS 375 y 750 = **K** (S153, #850,
-  `34cea39e`): sin Test 1 integrado (`enable_test1_path: false`, D30), conectiva `max` en Tests 2 y 3 (piso C1
-  **y** `μ+C2·σ`), banda 22 primaria en MODIS (D21; la guardia K y también la vía). Regla
-  `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (#848), evidencia `experiments/_s153_fk_v2/README.md`. El
-  histórico de los 11 Tier A desde 2025-02-15 está reprocesado con K (#883). `experimental` sigue con el detector
-  anterior (A117). Tag `pre-s153-adopcion-k`; el `git revert` ya no es limpio (S157).
+  `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`): producción corre su port en los tres sensores (K1 -0,7, dNTI mínimo
+  0,02 fuera de la cumbre, media 3 × 3 con el central, fondo interpolado bajo halo, suma de todos los alertados),
+  validado contra Octave y MATLAB en VIIRS 750 (⚠️ S191 (A113; auditoría Codex ronda 2, F3-V301, verificada): los 311 de
+  311 contra MATLAB fijaron el módulo con sha256 `62d6538b`; el de main del 2026-11-20 es `a1615f92`, y los `.mat` de
+  esa vara no están en el repo; lo que se re-comprueba hoy son las 4 pruebas de oro MATLAB y Etna de
+  `tests/test_mirova_v750_codigo_s162.py`, que pasan). MODIS y VIIRS 375 cambian sólo bandas, λ, coeficiente, paso y caja
+  (⚠️ S191, frente 3, R4: además quedan fijos en el valor de 750, sin medir por separado, los cortes de reflejo solar y
+  de frío, la regla de media escena, el halo y los multiplicadores; MODIS y VIIRS 375 agregan el corte de 5 km, D36
+  punto 1);
+  que MODIS use el K1 y el piso de 750 en vez de -0,8 y 0,01 de la Tabla 1 es divergencia sin medir (D36) (⚠️ S190, F1M-110: ya medida, A/B de 330 pasadas en `experiments/_s190_d36/INFORME.md`; con los números de la Tabla 1 y la conectiva `max` del `.m` no se gana ni se pierde ninguna alerta de MIROVA y la potencia cambia en 9 pasadas de NdC; la fórmula «or» del texto del paper no se midió, F1M-117; ⚠️ S193, F9-V303 y F9-V304: las 9 pasadas son todas protegidas, así que «ni se pierde» vale para la detección y no para el valor; de «or» ya se midió la exposición, no el efecto: umbral bajo el de la vía en 6.024 de 6.024 escenas nocturnas MODIS, marca S193 de D36 punto 6). El «difiere
+  de producción en 10 de 13 puntos» de S158 comparaba con K. (S186; historia: Reglas científicas)
+- **Detector de producción**: la vía «código MIROVA» en los tres sensores (S186): grilla fija de MIROVA
+  (`pipeline/grillas_mirova.yaml`), detector y fondo del `.m`, `vrp_mw` = suma de todos los alertados; banda 22
+  primaria en MODIS (D21). K es la guardia (S153, #850, `34cea39e`: sin Test 1 integrado, `enable_test1_path: false`,
+  D30; conectiva `max` en Tests 2 y 3, piso C1 **y** `μ+C2·σ`; banda 22 primaria en MODIS), con regla
+  `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (#848) y evidencia `experiments/_s153_fk_v2/README.md`. La
+  historia de los 11 Tier A desde 2025-02-15 es de la vía (reemplazo del 2026-11-12; #883 la había dejado en K).
+  `experimental` sigue con el detector anterior (A117). Tag `pre-s153-adopcion-k`. (historia: Reglas científicas)
 - **Detector anterior** (N·σ 5/10 noche y 15 día, C1 0,003/0,010 y 0,02 día, rama `min`, banda 21): fiel al
   paper, no al código de MIROVA (S160). El test de BT con N·σ no está en la Tabla 1 y está apagado desde S40
   (D31). El Test 1 integrado era detector propio (su cita «Coppola 2015» es Heap et al.).
@@ -96,7 +109,8 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
   `tests/test_guard_gap_a_pool_musigma_s128.py`; S174: `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK` sigue en `False` en los
   tres procesadores; MODIS de producción no pasa por ese código cuando corre la vía; efecto en VIIRS bajo K SIN MEDIR). «No quedan gaps de fidelidad
   literal» es FALSO (S137).
-- **Kernel dNTI**: `np.mean` de 8 vecinos (D1, S17); en VIIRS 750 MIROVA usa 3 × 3 con el central (S158 R2).
+- **Kernel dNTI**: en producción (la vía) media 3 × 3 con el central, como el `.m` (S158 R2); el `np.mean` de 8
+  vecinos (D1, S17) es de K, hoy la guardia. (S186; historia: Reglas científicas)
 - MIR sólo nocturno. Bandas: MODIS 21/22 + 31; VIIRS I04/I05; M13/M15. Constantes exactas del paper y cita en
   todo cambio metodológico. Si dudas de un método, dilo; nunca adivines. (historia: Reglas científicas)
 
@@ -114,13 +128,33 @@ local (`find documentacion/ -iname "*<topic>*"`), síntesis, PDF, y sólo entonc
 
 - Esquema dual «detectar amplio + clasificar visual»: dentro de `inner_radius_km` → `distance_class="summit"`;
   fuera → `"far"`. No se filtran, se clasifican.
-- Campo unificado `final_hotspot_lat/lon/dist_km` (fallback eruption→vent). Dashboard y auditorías usan sólo
-  este campo.
+- En la vía (producción) la ROI de detección no es el círculo `inner`: es la caja del `.m` sobre la grilla de MIROVA.
+  En VIIRS 750, `roi_v750` de `pipeline/grillas_mirova.yaml`: `def` en casi todos, `crater` en Cordón Caulle (#999,
+  ficha v1.29) y `sens` en Tupungatito (D36); en VIIRS 375 la caja C13 en el cráter; en MODIS `def`, 5 × 5 al centro.
+  `inner_radius_km` sólo clasifica. (S186)
+- **Regla de posición «radiante» (decisión de Nicolás del 2026-11-15 en S186, «Formalizar radiante», respuesta a
+  §b.3 del bloque S186; transmitida por la coordinadora S186):** la
+  posición del record de la vía es el centroide del cúmulo 8-conexo que contiene a la alertada de mayor radiancia MIR,
+  aunque haya otra alertada más débil en el cráter; `distance_class` y la publicación en el tablero salen de ahí. El
+  VRP no depende de la regla (suma de todos los alertados, D32). Clase igual a la de MIROVA en 98,7 % de 2.037
+  pasadas, tabla sola (cercano 93,6 %); `Distancia_km` de MIROVA no sirve para elegir (sesgo al alertado más
+  lejano). ⚠️ S193 (A113; auditoría Codex ronda 2, F12-104 y F12-V301, verificadas): su costo son 12 protegidas
+  nocturnas sólo OCR con el mecanismo de «radiante» del 2026-03-01 al 2026-11-18, no las 5 declaradas; con la tabla
+  sola, 0 (marca S193 de D8'). Prueba: `tests/test_guard_regla_posicion_radiante_s186.py` (#1022, en main desde el 2026-11-15).
+  Detalle en D8'. (S186)
+- Campo unificado `final_hotspot_lat/lon/dist_km`. En la vía es el centroide del cúmulo 8-conexo de la alertada más
+  radiante, con la distancia desde el cráter (⚠️ S191 (A113; auditoría Codex ronda 2, R1, verificada en parte): exacto en
+  los 11 Tier A (copia auditada `785b4c45`: 10.333 records de la vía con cúmulo, 0 discrepancias); en los 34 de la sombra no hay `vent_lat` y
+  `get_detection_anchor` cae al `lat`/`lon` del catálogo, y 10 records de 5 volcanes guardan la grilla y el centro
+  anteriores a la corrección de coordenadas de S190, `experiments/_s190_coordenadas/INFORME.md`); `hotspot_*` es el píxel pico; `distance_class` sale de ese centroide; y
+  `vrp_mw` es la suma de todos los alertados, no la del cúmulo (`procesar_grilla`; D8', D32, D36). En K es el fallback
+  eruption→vent. Dashboard y auditorías usan sólo este campo. (S186; historia: Reglas geométricas)
 
 ## Reglas operacionales A1 a A119 (estado vigente)
 
 Nota S157/S160: las reglas que explican un resultado por el Test 1 integrado (A12, A19, A66, A67, A69, A100,
-A114) se escribieron con ese camino encendido; desde #850 no corre (D30) y desde #883 todo el histórico es K.
+A114) se escribieron con ese camino encendido; desde #850 no corre (D30), y desde el 2026-11-12 todo el histórico
+es de la vía, que no lo tiene (S186; antes, desde #883, era K).
 La lección de método de cada una se conserva; el mecanismo ya no actúa en producción. detalle:
 docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 
@@ -133,7 +167,7 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - **A7.** El ejemplo es OBSOLETO (S125; hoy `diag_sigma_bg_k`, `diag_eff_threshold_k`, `diag_nti_std`). Lección: «no calculado» ≠ «calculado pero no persistido». (historia: A7)
 - **A8.** Verificar data fresca (reprocesar un día con código actual) antes de asumir el problema de un handoff. (historia: A8)
 - **A9.** MIROVA = Torino + Firenze + Sapienza (Coppola, Laiolo, Massimetti, Campus, Aveni, Cigolini). NO MIROVA: INGV Catania (Di Bella, Del Negro...) ni CNR-IMAA Potenza (NHI). Lista: `~memory/reference_papers_mirova_canonical.md`. (historia: A9)
-- **A10.** Rebajada en su premisa (S147, D32): `pc.vrp_mw` NO es «lo que MIROVA reporta» (MIROVA suma todos los píxeles alertados). Sigue en pie: `record.vrp_mw` no es el campo correcto; el dashboard publica `f5_core_vrp_mw` en VIIRS 375 (S132) y `pc.vrp_mw` en MODIS y VIIRS 750 (cita vigilada por el guard G8). (historia: A10)
+- **A10.** ⚠️ S190 (A113; auditoría Codex ronda 2, F4-114, verificada): «`vrp_mw` = `pc.vrp_mw`» no vale si la suma es negativa: `pipeline/store.py` lleva `vrp_mw` a 0 y deja negativo `primary_cluster.vrp_mw` (1 de 10.625 records de la vía con cúmulo: Nevados de Chillán MODIS_TERRA 2025-11-18 03:00, 0 contra -0,032 MW; D36 «Almacén»). Rebajada en su premisa (S147, D32): `pc.vrp_mw` NO es «lo que MIROVA reporta» en K (MIROVA suma todos los píxeles alertados). En la vía, los tres sensores, `vrp_mw` = `pc.vrp_mw` = la suma de todos los alertados, y el tablero publica `pc.vrp_mw` (la vía está eximida del núcleo `f5_core_vrp_mw`, S180); el núcleo de VIIRS 375 (S132) sólo actúa sobre records K residuales (cita vigilada por el guard G8). (S186; historia: A10)
 - **A11.** Universo MIROVA = CONS + OCR; OCR es complemento; `FALSO_POSITIVO_OCR` es etiqueta del scraper, no de MIROVA. (historia: A11)
 - **A12.** El ejemplo es FALSO (S128/S131): ΔT reales Láscar 16,9 K, Isluga 8,3 K. ⚠️ S158 R2: «Coppola 2024 L1129» no respalda el kernel-bg. Lección vigente: el patrón térmico decide, validar por A/B (A19). (historia: A12)
 - **A13.** FALSA (S124): Villarrica no tiene distancia fija 0,84; el campo está cuantizado a la celda de grilla (D15). (historia: A13)
@@ -146,7 +180,7 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - **A20.** R2 con centroide no aplica a anomalías difusas (PCC); validar por magnitud agregada + geometría (D7). (historia: A20)
 - **A21.** Las bandas de los gates R2 dependen del régimen (`docs/R2_GATES_BY_REGIME.md`). (historia: A21)
 - **A22.** PP es bimodal en selección de cúmulo: multi-caso (3 a 5 ALERTAs) y reportar la moda. (historia: A22)
-- **A23.** D9 reabierta en parte (S146): sigue viva sólo la co-validación del path D sobre fondo frío; gate por `t_bg` descartado; el tope de 5 MW recorta sin medir que lo recortado sea artefacto, el código MIROVA V750 no lo tiene (S158) y bajo K casi no actúa (S160). (historia: A23)
+- **A23.** D9 reabierta en parte (S146): sigue viva sólo la co-validación del path D sobre fondo frío; gate por `t_bg` descartado; el tope de 5 MW recorta sin medir que lo recortado sea artefacto, el código MIROVA V750 no lo tiene (S158) y bajo K casi no actúa (S160). ⚠️ S193 (F10-107): la vía, producción en los tres sensores, no tiene tope (70 records MODIS de la vía sobre 5 MW; marca S193 de D9). (historia: A23)
 - **A24.** El TIF de MIROVA no es VRP por píxel sumable (D6). (historia: A24)
 - **A25.** `git fetch origin --prune` al inicio; `git log main` local no refleja `origin/main`. (historia: A25)
 - **A26.** Calidad sobre tokens (Nicolás S70-2): subagentes, skills y verificación sin recortar; evitar re-lecturas, polling y salidas gigantes. (historia: A26)
@@ -154,7 +188,7 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - **A36.** OBSOLETA desde S102/S103: el pipeline ya no aplica sec³ (nadir fijo); seguirla mete un factor espurio. (historia: A36)
 - **A37.** MODIS marca saturación con `SI=65533`, VIIRS con el bit 2 del quality flag: leer el UserGuide de cada sensor. (historia: A37)
 - **A38.** Antes de borrados masivos (>10 archivos o >50 MB): inventario, tag `pre-<scope>-cleanup` + push, confirmación. (historia: A38)
-- **A39.** Claude mergea PRs con `mergeStateStatus=CLEAN`, checks verdes y 0 regresiones (alta criticidad: confirmar); fallback `gh api --method PUT .../pulls/<N>/merge`. Enmienda S142: «0 checks» recién abierto es SIN DATO (`gh pr checks <N> --watch`); tras editar un documento, `grep -rl <archivo> tests/` y suite completa. (historia: A39)
+- **A39.** Claude mergea PRs con `mergeStateStatus=CLEAN`, checks verdes y 0 regresiones (alta criticidad: confirmar); fallback `gh api --method PUT .../pulls/<N>/merge`. Enmienda S142: «0 checks» recién abierto es SIN DATO (`gh pr checks <N> --watch`); tras editar un documento, `grep -rl <archivo> tests/` y suite completa. Enmienda S193 (Nicolás, 2026-11-21, textual: «no necesitas pedirme permiso para mergear, si es lo que recomiendas puedes hacerlo tu mismo, siempre podemos volver atras»): la dueña del loop mergea sin pedir «mergea #N» los PR que recomienda (CLEAN, CI verde, ficha al mergear, `--match-head-commit`) e informa después; lo dudoso se pregunta igual, y A45 para EMPEZAR un cambio y las decisiones científicas siguen siendo de Nicolás. (historia: A39)
 - **A40.** Búsqueda bibliográfica dirigida: manual `investigacion` (OpenAlex) > orquestadores con WebSearch. (historia: A40)
 - **A41.** `Claude_in_Chrome` sirve para Perplexity Pro navegando a `perplexity.ai/search/new?q=<...>&sources=scholar`. (historia: A41)
 - **A42.** OBSOLETA desde S74: la causa del HTTP 422 era el «Norway Problem» (A43): quotear `"on":`. (historia: A42)
@@ -176,7 +210,7 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 - **A63.** Consolidar config no debe revertir fixes deliberados: revisar `git log -S` y dejar un test de regresión. (historia: A63)
 - **A64.** Blindar la red NASA en auth y descarga: circuit-breaker por host (#364); ConnectTimeout no se reintenta, ReadTimeout sí. (historia: A64)
 - **A65.** Hangs de CI: instrumentar con markers `print(..., flush=True)` por etapa antes de adivinar el fix. (historia: A65)
-- **A66.** Nadir fijo adoptado en MODIS (#354), pero no es «clon literal» (S138): el paper remuestrea a 1 km (`ENABLE_UTM_REGRID = False`, D17 abierta). Lección vigente: A/B de 3 brazos con criterio pre-registrado. (historia: A66)
+- **A66.** Nadir fijo adoptado en MODIS (#354), pero no es «clon literal» (S138): el paper remuestrea a 1 km (`ENABLE_UTM_REGRID = False`, D17 abierta). ⚠️ S190 (F1M-111): ese flag sólo rige en la guardia K; MODIS de producción corre la vía, que sí remuestrea a la grilla de 1 km de MIROVA (`mirova_v750_codigo.py::remuestrear_grilla`) y vuelve antes de llegar al flag. Lección vigente: A/B de 3 brazos con criterio pre-registrado. (historia: A66)
 - **A67.** Nadir fijo VIIRS adoptado (#368, #373), misma salvedad D17. Cambiar área o escala cambia también la detección: verificar FN por record. (historia: A67)
 - **A68.** Ante «sobre-detección», separar display de over-detección real; el proxy `t_bg<270K` está contaminado por altitud. (historia: A68)
 - **A69.** Los paths de MIR absoluto son vulnerables al gradiente topográfico de los nevados; el NTI lo atenúa pero no lo cancela (S128), el ETI sí. El Test 1 integrado que culpaba está apagado desde #850; parte del mecanismo puede seguir por D22 (SOSPECHA). `compute_test1_nti` está flag-OFF (S125). Pregunta siempre: ¿MIR absoluto o NTI? (historia: A69)
@@ -243,9 +277,11 @@ docs/CLAUDE_HISTORIA.md, inicio de «Reglas operacionales S14».
 
 - `pipeline/`: fetch.py, process_modis.py, process_viirs.py, process_viirs_mod.py, store.py, scan_geometry.py.
 - `frontend/`: `index.html`, `diario.html`, `mosaico.html` live, cada una con su copia de helpers
-  (`mirovaEqVrp`): un cambio de display se replica en las 3 (S92). `comparacion.html` es PREVIEW sin
+  (`mirovaEqVrp`): un cambio de display se replica en las 3 (S92). `comparacion.html` es pública desde la ficha v1.28 (pestaña «Vía, K y MIROVA»), sin
   `mirovaEqVrp` a propósito. Verificar en navegador real. GitHub Pages despliega en push a `frontend/**`.
-- `volcanoes.yaml`: 45 volcanes; 11 Tier A con serie continua (sin hueco nov-ene tras #883); 34 fuera del cron.
+- `volcanoes.yaml`: 45 volcanes; 11 Tier A con serie continua (sin hueco nov-ene tras #883); 34 fuera del cron del NRT (⚠️ S190, F6-120: 32 activos;
+  OlcaParuma y Putana salieron de la matriz el 2026-11-17, `active: false`, por no estar en la RNVV), que corren
+  a diario con la vía (`sombra-34.yml`, `data/sombra_34/`) y se muestran en el tablero (ficha v1.26). (S186)
 - `nrt.yml`: cron 2 h, matrix por volcán, timeout 50 min. Reprocesos de historia en la máquina de Nicolás
   (`scripts/run_pipeline.py --profile X --volcano Y --start ... --end ...`), nunca full-history en Actions.
   `data/` JSON commiteado; L1B/HDF nunca.
@@ -299,7 +335,7 @@ Estado entre sesiones → memoria. No re-leer archivos sin cambios.
 
 ## Constraints técnicos
 
-- `pyhdf` roto en Windows: MODIS sólo en Actions Linux. LANCE NRT ~3 h. NOAA-20: buscar v2 y v2.1.
+- ⚠️ S190 (F1M-112): `pyhdf` importa y lee HDF4 en Windows con el entorno conda `vrp` y su `Library\bin` en el PATH (sin ese PATH sale con código 127 y sin mensaje); bajar gránulos sigue pidiendo Actions, porque el token de Earthdata existe sólo como secreto. Texto anterior: `pyhdf` roto en Windows: MODIS sólo en Actions Linux. LANCE NRT ~3 h. NOAA-20: buscar v2 y v2.1.
 - **Credenciales**: el NRT usa `EARTHDATA_TOKEN` (rotación cada 50 días; fecha vigente en `C:\Users\nmend\OneDrive\Escritorio\claude\REGISTRO_CREDENCIALES.md`). El par usuario/clave de los secretos
   está VENCIDO y bloquea la cuenta (A71): workflows nuevos sólo por token, copiando el `env` de `nrt.yml`.
 - `fetch.py` intenta Standard y cae a `_NRT`; `store.py` auto-upgrade NRT→Standard.
@@ -310,7 +346,7 @@ Estado entre sesiones → memoria. No re-leer archivos sin cambios.
   `pull --rebase` + `push`, no ambos; en `nrt.yml` el grupo va a nivel workflow. Contrato:
   `tests/test_guard_declarado_vs_efectivo_s131.py::test_g4_pusher_push_main_o_retry`.
 - Geofencing por volcán (`max_hotspot_dist_km`). Refs del scraper son NRT: https://github.com/MendozaVolcanic/Mirova-v1
-- Frontend: VIIRS 375 grafica `vrp_mw`, no `vrp_mir_mw` (S12).
+- Frontend: ⚠️ S190 (A113; auditoría Codex ronda 2, R1, verificada EN PARTE): el gráfico no lee `vrp_mw` del record sino `primary_cluster.vrp_mw` (`vrpTablero` → `mirovaEqVrpDisplay` → `mirovaEqVrp`), o el núcleo F5 en records K; `r.vrp_mw` sólo sin `primary_cluster`. Lo de «no `vrp_mir_mw`» sigue cierto. Texto anterior: VIIRS 375 grafica `vrp_mw`, no `vrp_mir_mw` (S12).
 - Matrix de fechas sobre el mismo JSON: `max-parallel: 1` o chunks + merge (S25).
 - earthaccess: `g["umm"]["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"]`.
 - `workflow_dispatch` sólo con el yml en `main`. **Norway Problem (A43)**: quotear `"on":`; verificar con

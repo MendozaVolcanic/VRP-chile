@@ -1,0 +1,34 @@
+# Barrido de la zona A del laboratorio (S195, paso 3 del plan S190; PREREGISTRO sellado
+# experiments/_s194_lab_zona_a/PREREGISTRO.md §5). BRAZO DE CONTROL: el perfil laboratorio tal cual, con la zona A
+# APAGADA, en su propia carpeta. Es la «producción» contra la que evaluar.py calibrar compara el brazo s = 5,0
+# (--prod): corre en el mismo job, sobre los mismos gránulos y con el mismo código que los 9 brazos, así que toda
+# diferencia con el brazo s = 5,0 es de la zona A y no de una versión distinta de un gránulo de NASA o de un hueco del
+# NRT. Copia de laboratorio.yaml, con el mismo bloque de la zona (apagada, valor null); el cargador no encadena
+# extends (pipeline/profile.py).
+# tests/test_laboratorio_paso3_s195.py (P7) vigila que difiera del laboratorio sólo en nombre y carpeta.
+# NO OPERACIONAL: lo corre sólo .github/workflows/reproc-s195-lab-barrido.yml, a mano, con salidas fuera de main.
+extends: mirova_equivalent
+profile: _s195_lab_control
+description: >
+  Barrido de la zona A del laboratorio, brazo de control (zona apagada; S195, paso 3 del plan S190).
+
+thresholds:
+  enable_lab_zona_a: false
+
+paths:
+  enable_daytime_modis: false
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+enable_modis_b22_primary: true
+
+laboratorio_zona_a:
+  extension: MEJ-5
+  radio: inner_radius_km
+  parametro: sigma_contextual_nocturno
+  valor: null
+  volcanes_fuera:
+    - PuyehueCordonCaulle   # D6: inner de 20 km
+
+output:
+  data_subdir: _s195_lab_control

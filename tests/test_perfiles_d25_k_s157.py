@@ -55,7 +55,10 @@ def test_los_brazos_difieren_solo_en_lo_declarado():
     prod, c, g, on, h1 = (res[n] for n in ("mirova_equivalent",) + TODOS)
     assert len(prod) > 100   # el instrumento ve las constantes de verdad
     # control = producción salvo nombre, directorio y MODIS apagado (D25 no existe en MODIS)
-    assert _distintos(prod, c) == NOMBRE | {"SENSOR_MODIS"}, sorted(_distintos(prod, c))
+    # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y este control,
+    # medido sólo de noche, lo declara apagado (además no corre MODIS). Texto original: `NOMBRE | {"SENSOR_MODIS"}`.
+    assert _distintos(prod, c) == NOMBRE | {"SENSOR_MODIS", "ENABLE_DAYTIME_MODIS"}, sorted(_distintos(prod, c))
+    assert (prod["ENABLE_DAYTIME_MODIS"], c["ENABLE_DAYTIME_MODIS"]) == ("True", "False")
     assert (prod["SENSOR_MODIS"], c["SENSOR_MODIS"]) == ("True", "False")
     assert _distintos(c, g) == NOMBRE, sorted(_distintos(c, g))
     assert _distintos(c, on) == NOMBRE | D25, sorted(_distintos(c, on))

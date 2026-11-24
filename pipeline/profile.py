@@ -487,7 +487,7 @@ LOCAL_CLUSTER_MAG_MIN_CORONA: int = int(_p.get("local_cluster_mag_min_corona", 4
 # un anillo fijo [1,5-3] km al cráter (TEST1_INTERMEDIATE_BG_RING_KM) mientras su ROI
 # es el disco de 3 km (TEST1_ROI_KM): el anillo es el 75 % del área que mide, así que
 # cada píxel se compara contra la media de sus propios tres cuartos exteriores y el
-# clip a cero de process_viirs.py:1729 suma la mitad de arriba del ruido de esa misma
+# clip a cero de process_viirs.py:1732 suma la mitad de arriba del ruido de esa misma
 # corona. Coppola 2016a Eq.6 dice que L4bk sale de la media de los píxeles que RODEAN
 # al clúster activo, que por construcción no contiene a los medidos.
 # Flag propio del sensor (alcance acotado a VIIRS375 por decisión de Nicolás, S126),
@@ -958,6 +958,51 @@ DATA_SUBDIR: str = str(_cfg["output"]["data_subdir"])
 # anillo de fondo [inner_km, outer_km]; achicarlo deja el fondo sin píxeles.
 # Lo que acota la DETECCIÓN es `inner_radius_km` (+ el ancla vent_lat/lon).
 VOLCANO_OVERRIDES: dict = dict(_cfg.get("volcano_overrides") or {})
+
+
+# --- S193: zona A del perfil `laboratorio` (extensión MEJ-5, plan docs/PLAN_EXPERIMENTAL_S190.md §6) ---
+# POR QUÉ existe: un foco chico en el cráter (lago de lava, campo fumarólico) queda al borde del umbral de MIROVA y la
+# réplica lo copia a propósito. El laboratorio bajaría el umbral sólo dentro de inner_radius_km del cráter, donde el
+# prior volcánico es alto, y mediría lo que aparece contra NHI y persistencia (nunca contra MIROVA, A115).
+# S195 (paso 3, A45 de Nicolás del 2026-11-22): la vía ya le da efecto (pipeline/mirova_v750_codigo.py, s_zona_a y
+# mascara_zona_a: el círculo de inner_radius_km cortado por la región sensible, decisión (a) del mismo día). Encenderla
+# ya no es error; encenderla SIN valor sí, porque el laboratorio correría idéntico a producción creyendo medir la
+# extensión: un nulo silencioso (A87). Que el valor no pase del s2 nocturno lo exige la vía (_pasada_contextual), que es
+# donde vive s2. Los perfiles que no la declaran resuelven (False, {}), así que producción no cambia.
+# ⚠️ S195 (A113): texto anterior, del paso 1: «POR QUÉ apagada y con error al encenderla: el umbral de la zona lo elige
+# el paso 3 del plan (barrido sobre negativos limpios) y ningún procesador la lee todavía (tests/test_laboratorio_paso1_s193.py,
+# G4). [...] Por eso encenderla es un error al cargar el perfil hasta que la vía la implemente.»
+_ZONA_A_RADIOS = ("inner_radius_km",)
+_ZONA_A_PARAMETROS = ("sigma_contextual_nocturno",)
+
+
+def _zona_a_de(t: dict, cfg: dict) -> tuple:
+    """(ENABLE_LAB_ZONA_A, LAB_ZONA_A) validados desde la sección thresholds (t) y el perfil resuelto (cfg)."""
+    encendida = bool(t.get("enable_lab_zona_a", False))
+    zona = dict(cfg.get("laboratorio_zona_a") or {})
+    if zona:
+        if zona.get("radio") not in _ZONA_A_RADIOS:
+            raise ValueError(f"laboratorio_zona_a.radio={zona.get('radio')!r}; válidos {_ZONA_A_RADIOS}")
+        if zona.get("parametro") not in _ZONA_A_PARAMETROS:
+            raise ValueError(f"laboratorio_zona_a.parametro={zona.get('parametro')!r}; válidos {_ZONA_A_PARAMETROS}")
+        v = zona.get("valor")
+        if v is not None and (isinstance(v, bool) or not isinstance(v, (int, float)) or not v > 0):
+            raise ValueError(f"laboratorio_zona_a.valor={v!r}: null o un número positivo")
+        # S196 (palanca del piso, experiments/_s196_lab_piso/PREREGISTRO.md): piso opcional de NTI y ETI en la zona A;
+        # null o ausente = el de producción. Que no pase del piso de producción lo exige la vía, que es donde vive n2.
+        p = zona.get("piso")
+        if p is not None and (isinstance(p, bool) or not isinstance(p, (int, float)) or not p > 0):
+            raise ValueError(f"laboratorio_zona_a.piso={p!r}: null o un número positivo")
+        fuera = zona.get("volcanes_fuera", [])
+        if not isinstance(fuera, list) or not all(isinstance(x, str) for x in fuera):
+            raise ValueError(f"laboratorio_zona_a.volcanes_fuera={fuera!r}: una lista de nombres de volcanes.yaml")
+    if encendida and zona.get("valor") is None:
+        raise ValueError("enable_lab_zona_a: true sin laboratorio_zona_a.valor: la zona A encendida sin multiplicador "
+                         "correría idéntica a producción (A87); declarar el valor o apagarla")
+    return encendida, zona
+
+
+ENABLE_LAB_ZONA_A, LAB_ZONA_A = _zona_a_de(_t, _cfg)
 
 
 def describe() -> str:

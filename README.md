@@ -12,6 +12,20 @@ operationally independent of mirovaweb.it.
 
 **Live dashboard:** https://mendozavolcanic.github.io/VRP-chile/
 
+> ⚠️ **Detector vigente (S186, 2026-11-15; A113).** Los tres sensores de producción (perfil `mirova_equivalent`)
+> corren la **vía «código MIROVA»** (`pipeline/mirova_v750_codigo.py`): el código operacional que MIROVA publicó para
+> VIIRS 750 (OSF zm62w), trasladado a MODIS y VIIRS 375 cambiando sólo bandas, longitudes de onda, coeficiente, paso de
+> grilla y caja. MODIS desde el 2026-11-02 (#934), VIIRS 375 y 750 desde el 2026-11-11 (#974, #983). Cada pasada se
+> interpola a la grilla fija de MIROVA del volcán (`pipeline/grillas_mirova.yaml`, 1 km, 750 m o 375 m), se detecta con
+> el `.m` (Test 1 por celda y dos pasadas contextuales, con una región sensible por volcán), el fondo se interpola bajo
+> los alertados y `vrp_mw` es la **suma de todos los alertados**. La posición publicada es el centroide del cúmulo de la
+> alertada más radiante, con la distancia desde el cráter; `distance_class` (`summit` o `far`) sale de ese centroide y
+> `inner_radius_km`. Desde el 2026-11-12 la historia de los 11 Tier A desde 2025-02-15 es de la vía. El detector K
+> (S153) sigue corriendo sólo como guardia (`pipeline/profiles/guardia_k_modis.yaml`, `guardia_k_viirs.yaml`). Lo que
+> este README dice más abajo del Test 1 integrado, del anillo de fondo, del cúmulo anclado al cráter o de K describe
+> detectores anteriores y se conserva por historia. Ficha pública: `docs/FICHA_SDA_VRP_CHILE.md`; divergencias de la
+> vía con MIROVA: `docs/MIROVA_DIVERGENCES.md` D34 y D36.
+
 ---
 
 ## Volcanoes monitored
@@ -32,6 +46,8 @@ MIROVA KMLs:
 34 additional volcanoes are configured but outside the NRT cron; they carry a short
 April-2026 backfill window in `data/mirova_equivalent/` and are not part of the
 operational dashboard selection.
+⚠️ S186: desde el 2026-11-03 los 34 corren a diario con la vía (`.github/workflows/sombra-34.yml`, datos en
+`data/sombra_34/`) y el tablero los muestra con el rótulo «sin referencia de MIROVA» (ficha SDA v1.20 y v1.26).
 
 ---
 
@@ -39,7 +55,8 @@ operational dashboard selection.
 
 ### Pipeline
 - **8 satellite streams**: MODIS Terra/Aqua (1 km), VIIRS SNPP/NOAA-20/NOAA-21 I-band
-  (375 m) and M-band (750 m)
+  (375 m) and M-band (750 m). ⚠️ S186: Suomi NPP dejó de entregar datos el 2026-11-02 a las 13:00 UTC; desde
+  entonces son 6 (ficha SDA v1.10).
 - **Wooster MIR radiance VRP** per sensor, with empirically validated coefficients
   against the official MIROVA OSF v2.5 archive (error ≤0.17%): MODIS 18.9,
   VIIRS 750 m 19.7, VIIRS 375 m 18.0
@@ -48,18 +65,22 @@ operational dashboard selection.
 - **Detection anchored to the physical crater** (`vent_lat/lon`). The ROI is currently
   built around the configured volcano coordinates, **not** around the official MIROVA grid
   center — see divergence D17 in `docs/MIROVA_DIVERGENCES.md` (`get_grid_center()` exists
-  but is not wired into production; `ENABLE_UTM_REGRID=False`)
+  but is not wired into production; `ENABLE_UTM_REGRID=False`). ⚠️ S186: describe K, hoy la guardia; la vía de
+  producción usa la grilla de MIROVA centrada en su punto de referencia (`pipeline/grillas_mirova.yaml`) y mide la
+  distancia desde el cráter
 - ⚠️ **S160 (A113; hallazgo 289, CONFIRMADO en `experiments/_s160_audit/v4/INFORME.md` §3)**: desde el detector K
   (#850, 2026-10-18; S153) la réplica `mirova_equivalent` corre sin el Test 1 integrado en el ROI
   (`enable_test1_path: false`, `pipeline/profiles/mirova_equivalent.yaml:268`; D30), con la conectiva `max` en los
-  Tests 2 y 3 y la banda 22 primaria en MODIS, y desde #883 todo el histórico publicado está reprocesado con K. Lo
+  Tests 2 y 3 y la banda 22 primaria en MODIS, y desde #883 todo el histórico publicado está reprocesado con K
+  (⚠️ S186: superado; K es sólo guardia desde el 2026-11-11 y la historia es de la vía desde el 2026-11-12). Lo
   que este README dice del Test 1 integrado describe el detector anterior y se conserva por historia.
 - **Detection paths**: NTI absolute, dNTI contextual (8-neighbor kernel, Coppola 2016a
   Tests 2–3 with dual-ROI summit/scene thresholds), ETI quadratic scene + second-pass,
   and the **integrated-ROI Test 1** for spatially-extended sub-pixel anomalies
   (lava lakes ~0.05–0.5 MW that no individual pixel can reveal)
 - **Vent-anchored cluster aggregation**: `primary_cluster` is what MIROVA reports
-  (the summit cluster), kept separate from scene-wide totals
+  (the summit cluster), kept separate from scene-wide totals. ⚠️ S186: describe K; en la vía `primary_cluster.vrp_mw`
+  y `vrp_mw` son la suma de todos los alertados (lo que MIROVA publica, D32) y el cúmulo sólo da la posición
 - **TIR VRP** (VIIRS I05, 11.45 µm, Stefan-Boltzmann, Aveni et al. 2024) — implemented,
   currently **disabled** in the operational profile (`ENABLE_VRP_TIR_OUTPUT=False`); the
   published `vrp_tir_mw` field is 0
@@ -91,6 +112,8 @@ VRP-Chile/
 |   |-- _archive/                 One-off A/B and reproc workflows (history)
 |-- pipeline/
 |   |-- fetch.py                  NASA Earthdata download (earthaccess) + circuit breaker
+|   |-- mirova_v750_codigo.py     Vía «código MIROVA»: detector de producción en los 3 sensores (S186)
+|   |-- grillas_mirova.yaml       Grilla y caja de MIROVA por volcán (la usa la vía)
 |   |-- process_modis.py          MODIS Band 21/22 (1 km, 3.93 um)
 |   |-- process_viirs.py          VIIRS I-band I04/I05 (375 m)
 |   |-- process_viirs_mod.py      VIIRS M-band M13 (750 m)
@@ -107,6 +130,7 @@ VRP-Chile/
 |-- data/
 |   |-- mirova_equivalent/        Operational records per volcano (11 Tier A)
 |   |-- experimental/             34 additional volcanoes
+|   |-- sombra_34/                Los 34 sin MIROVA con la vía, diario (S186)
 |   |-- mirova_reference/         MIROVA OSF v2.5 + scraped reference data
 |-- docs/                         Living documentation (see docs/INDEX.md)
 |-- volcanoes.yaml                Volcano configuration
@@ -115,6 +139,10 @@ VRP-Chile/
 ---
 
 ## Algorithm (MIROVA-equivalent)
+
+⚠️ **S186:** esta sección describe K y detectores anteriores (fondo de anillo, kernel de 8 vecinos, Test 1
+integrado). Lo que corre hoy está en la marca «Detector vigente» del inicio: fondo interpolado bajo los alertados
+como el `.m`, media 3 × 3 con el central, suma de todos los alertados. Texto conservado:
 
 ### VRP (MIR)
 
@@ -204,7 +232,11 @@ reproc workflows pattern.
 ```
 
 `primary_cluster.vrp_mw` is the MIROVA-comparable magnitude (summit cluster);
-`vrp_mw` at record level is the scene-wide sum (diagnostic). Sensor naming:
+`vrp_mw` at record level is the scene-wide sum (diagnostic). ⚠️ S186: el ejemplo y esta frase son de K. En un
+record de la vía (`"via_codigo_mirova": true`) los dos campos valen lo mismo, la suma de todos los alertados
+(⚠️ S190, F4-114: salvo si la suma es negativa; el almacén deja `vrp_mw` en 0 y `primary_cluster.vrp_mw` negativo,
+1 de 10.625 records de la vía con cúmulo);
+`final_hotspot_source` es `"codigo_mirova"` y el centroide es el del cúmulo de la alertada más radiante. Sensor naming:
 `VIIRS_<SAT>` = I-band 375 m, `VIIRS_<SAT>_750` = M-band.
 
 ---
@@ -223,7 +255,9 @@ reproc workflows pattern.
 
 ## Known limitations / open fronts
 
-Tracked formally in `docs/MIROVA_DIVERGENCES.md` (open: D2, D3, D9, D11):
+Tracked formally in `docs/MIROVA_DIVERGENCES.md` (open: D2, D3, D9, D11). ⚠️ S186: los puntos 1 y 2 describen K;
+para la vía de producción, las divergencias abiertas son las de D34 y D36 (descartes de cobertura, recorte de 45 km,
+orientación de la matriz, cajas por volcán, umbrales de VIIRS 750 en MODIS, posición).
 
 1. ⚠️ **S160 (hallazgo 289)**: el Test 1 integrado que nombra este punto está apagado en la réplica desde K (#850,
    D30); ver la marca S160 de «Detection paths». Texto conservado:

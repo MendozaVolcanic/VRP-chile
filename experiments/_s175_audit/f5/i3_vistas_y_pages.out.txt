@@ -1,0 +1,32 @@
+== index
+1162:function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
+1163-  if (!r) return 0;
+1165-  if (!r.primary_cluster) {
+1166-    const vfb = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+== diario
+255:function mirovaEqVrp(r, volcanoName) {
+256-  if (!r) return 0;
+257-  if (r.distance_class && r.distance_class !== "summit" && !includeFarDistance) return 0;
+258-  const pc = r.primary_cluster;
+259-  if (!pc) return r.vrp_mw ?? 0;
+== mosaico
+255:function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
+256-  if (!r) return 0;
+257-  if (!r.primary_cluster) {
+258-    const vfb = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+259-    return vfb > 50000 ? 0 : vfb;
+260-  }
+261-  if (r.distance_class && r.distance_class !== "summit" && !includeFar) return 0;
+== guard: funciones que compara
+36:def _cuerpo_isvaliddetection(ruta: Path) -> str:
+66:    cuerpo = _cuerpo_isvaliddetection(ROOT / vista)
+73:    cuerpos = {v: _cuerpo_isvaliddetection(ROOT / v) for v in VISTAS}
+82:    base = _cuerpo_isvaliddetection(ROOT / VISTAS[0])
+== records sin primary_cluster por vrp y distance_class, y PCC con cúmulo summit a 10-20 km
+[(('PCC_pc_10_20km_summit',), 290), (('sin_pc', 'vrp0', None), 60326)]
+diario INNER_RADIUS_KM distinto de volcanoes.yaml: {}
+== GitHub Pages (bajado Date: Sat, 07 Nov 2026 04:32:07 GMT) contra la base, normalizado a LF
+index.html publicado=e3963f56e23c4f3f base=e3963f56e23c4f3f
+diario.html publicado=724f236ebefda3c1 base=724f236ebefda3c1
+mosaico.html publicado=19b5defdf560844a base=19b5defdf560844a
+cambio_detector.js publicado=1f8804ad0a7d1aac base=1f8804ad0a7d1aac

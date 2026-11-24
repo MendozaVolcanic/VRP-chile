@@ -70,10 +70,22 @@ def _los_34():
 
 # --------------------------------------------------------------------------------------------- 1. la lista
 def test_los_34_son_volcanoes_yaml_menos_el_nrt():
+    # S190, D1 opción 1a (Nicolás, 2026-11-17): la lista del sistema son los 43 de la RNVV; Putana y OlcaParuma no
+    # están en ella y quedan con `active: false` en volcanoes.yaml. Los «34» del nombre son desde entonces 32.
     nombres = [v["name"] for v in _los_34()]
-    assert len(nombres) == 34 and len(set(nombres)) == 34
+    assert len(nombres) == 32 and len(set(nombres)) == 32
     assert sorted(_matriz(WF)) == sorted(nombres)
     assert not set(_matriz(WF)) & set(_matriz(NRT))
+
+
+def test_d1_putana_y_olcaparuma_fuera_de_la_sombra():
+    """S190, D1 1a: los únicos inactivos de volcanoes.yaml son los dos que no están en la RNVV, y ninguno de los dos
+    queda en la matriz de la sombra ni del NRT. Sus entradas siguen en el yaml y en la grilla (para reponerlos si D1
+    cambia; respaldo de sus datos en D:/vrp-trabajo/temporales/s189/respaldo_d1_rnvv/)."""
+    inactivos = {v["name"] for v in _volcanes() if not v.get("active", True)}
+    assert inactivos == {"Putana", "OlcaParuma"}
+    assert not inactivos & (set(_matriz(WF)) | set(_matriz(NRT)))
+    assert len(_volcanes()) == 45   # 43 de la RNVV más los dos inactivos
 
 
 # --------------------------------------------------------------------------------------------- 2. la grilla
@@ -118,7 +130,10 @@ def test_vecinos_dentro_de_la_grilla_son_los_de_vecinos_yaml():
     fijado = yaml.safe_load((ROOT / "experiments" / "_s172_sombra34" / "vecinos.yaml").read_text(encoding="utf-8"))
     calc = VE.vecinos()
     assert calc == fijado["volcanes"]
-    assert len(calc) == 13
+    # S190, D1 1a: OlcaParuma (inactivo) deja de tener entrada propia; sigue como vecino de Irruputuncu, porque su
+    # calor entra igual en la grilla de Irruputuncu aunque ya no se vigile. 13 antes de S190.
+    assert len(calc) == 12
+    assert "OlcaParuma" not in calc and [e["vecino"] for e in calc["Irruputuncu"]] == ["OlcaParuma"]
     con_tier_a = sorted(n for n, lista in calc.items() if any(e["tier_a"] for e in lista))
     assert con_tier_a == ["AntillancaCasablanca", "Callaqui", "Michinmahuida", "Quetrupillan"]
     for n in con_tier_a:
@@ -166,10 +181,10 @@ def _granulo_sintetico(lat0, lon0, familia, t_foco=600.0, n=81, span=0.3):
     return rad, LA, LO, ang
 
 
-@pytest.mark.parametrize("i", range(34))
+@pytest.mark.parametrize("i", range(32))   # S190, D1 1a: 34 menos Putana y OlcaParuma
 def test_la_via_acepta_la_grilla_y_encuentra_el_foco_en_el_crater(i):
     """De punta a punta, sin red: la vía corre (no devuelve None ni cae a K) y el foco puesto en el cráter sale a
-    menos de 1 km de él. Los sensores rotan entre los 34 (cada familia en 11 o 12 volcanes) para que la prueba siga
+    menos de 1 km de él. Los sensores rotan entre los 34 (S190: 32, cada familia en 10 u 11) para que la prueba siga
     siendo chica; la geometría de las tres familias en los 34 la cubre la prueba anterior."""
     v = _los_34()[i]
     familia = ("VIIRS750", "VIIRS375", "MODIS")[i % 3]
@@ -295,8 +310,14 @@ def test_workflow_es_el_molde_paso_a_paso_salvo_lo_declarado():
     """VS34-02 (mutaciones W8, W9, W11 y W12 pasaban en verde): cada paso de sombra-34.yml tiene, fuera de su `run`,
     lo mismo que el paso correspondiente de la sombra de los 11 (if con always(), id, uses, with, env y timeouts), y
     el job el mismo runs-on, timeout, permisos y fail-fast. Sólo se permiten distintos el nombre de perfil y carpeta,
-    el nombre del artefacto, la matriz, el paralelismo, el cron y el grupo (probados aparte)."""
-    a = _wf()["jobs"]["process"]
+    el nombre del artefacto, la matriz, el paralelismo, el cron y el grupo (probados aparte).
+    S190 (H07): sombra-34.yml tiene además, como ÚLTIMO paso, el revisor de errores del NRT, porque desde la ficha v1.26
+    el tablero publica data/sombra_34/ y la sombra de los 11 no publica. Se quita sólo ese paso (exactamente uno, al
+    final) antes de comparar; que esté y sea el último lo prueba tests/test_cobertura_honesta_s190.py."""
+    a = dict(_wf()["jobs"]["process"])
+    revisor = [i for i, p in enumerate(a["steps"]) if "scripts/revisar_errores_modis_nrt.py" in (p.get("run") or "")]
+    assert revisor == [len(a["steps"]) - 1], revisor
+    a["steps"] = a["steps"][:-1]
     b = yaml.safe_load(MOLDE.read_text(encoding="utf-8"))["jobs"]["process"]
     for clave in ("runs-on", "timeout-minutes", "permissions"):
         assert a[clave] == b[clave], clave

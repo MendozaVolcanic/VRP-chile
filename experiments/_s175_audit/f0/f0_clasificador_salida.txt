@@ -1,0 +1,51 @@
+# S160 = d516b9d8c0fad5b0ca458b9fb57cdf5e6f75f956; BASE = 752d348bc67190e53b610989877e2405d238a1bc
+id,grupo,en_S160,en_BASE,estado,commit_que_lo_cambia,descripcion
+dec1,decisiones,sigue,no sigue,RESUELTO,0d73f2a4e 2026-10-22 S160: preámbulo del auditor con P1 a P8, autonomía y verificador (#891),#891: el preámbulo del auditor no está en main (falta la regla del módulo csv)
+dec6,decisiones,sin archivo,sigue,ABIERTO (archivo creado después de S160),,C-10 sin mirar antes de dar D18 por vetada (fila C-10 «abierto»)
+241,vencimientos,sigue,no sigue,RESUELTO,c3ee70ed6 2026-10-23 S161: el NRT ante el cese de Suomi NPP (no buscar tras el cese, cobertura por plataforma) (#897),plataforma callada = «Cobertura: completa» (sin nota de plataforma)
+241b,vencimientos,sigue,sigue,ABIERTO,,plataforma callada sigue saliendo con código 0 en modo estricto (sin_granulos no cuenta)
+242,vencimientos,sigue,no sigue,RESUELTO,3489e55c3 2026-10-22 S159: vigilancia por plataforma, aviso del cese de Suomi NPP y ficha SDA v1.10 (#892),vigilante por plataforma fuera de main (nrt-healthcheck sin vigilar_plataformas)
+243,vencimientos,sigue,sigue,ABIERTO,,nadie mide la fracción MODIS product_version nrt (sin vigilante en audit ni workflows)
+245,vencimientos,sigue,no sigue,RESUELTO,2ba670463 2026-10-22 S160: la copia del consolidado de MIROVA avisa (rojo, sin rechazar) si pierde llaves (#896),la copia del consolidado acepta encogimientos sin aviso
+245b,vencimientos,sin archivo,sigue,ABIERTO (archivo creado después de S160),,la copia que se encoge igual se commitea (avisa, no rechaza: decisión de Nicolás)
+247,vencimientos,sigue,no sigue,RESUELTO,79b4e3af6 2026-10-22 S160: el auto-audit avisa protegidas sin record y nrt.yml corta con token vacío (#894),nrt.yml sin guarda de token vacío
+V3-01,vencimientos,sigue,no sigue,RESUELTO,79b4e3af6 2026-10-22 S160: el auto-audit avisa protegidas sin record y nrt.yml corta con token vacío (#894),protegida sin record no genera aviso en el auto-audit
+V3-02,vencimientos,sigue,sigue,ABIERTO,,medir_cadencia_cron ignora workflow_dispatch
+V3-02b,vencimientos,sigue,sigue,ABIERTO,,cadencia.json sin consumidor (sólo lo escribe nrt-healthcheck)
+V3-03,vencimientos,sigue,no sigue,RESUELTO,,= 247 (logins con token vacío en la matriz)
+F1-H6,viirs750,sigue,sigue,ABIERTO,,D32 ABIERTA en el catálogo (publicamos el cúmulo, MIROVA la suma)
+V2-09,viirs750,sigue,sigue,ABIERTO,,umbrales de cumbre rigen hasta inner_radius (caja del paper apagada)
+V2-10,viirs750,sigue,sigue,ABIERTO,,anomaly_pixels.dist_km desde el centro del volcán, rotulado «al cráter»
+V2-11,viirs750,sigue,sigue,ABIERTO,,VRE con convención de 6 h por detección (sin base física)
+V2-12,viirs750,sigue,sigue,ABIERTO,,tope de 50 GW juzga t_max_k antes de copiar t_max_i04_k
+V0a-01,decisiones,sigue,no sigue,RESUELTO,af369ebd7 2026-10-21 S158: el código operacional de MIROVA (VIIRS 750) está publicado en OSF; comparación con nuestro detector,D34 (código de MIROVA V750) fuera del catálogo de main
+V0b-01,decisiones,sigue,sigue,ABIERTO,,K1 decide el tope D9 (n_nti_path == 0) en V750; K1 -0,8 vigente
+V0b-03,decisiones,sigue,sigue,ABIERTO,,el mínimo de cumbre 0,003 gobierna el umbral del dETI (c1_deti_summit=_c1_sum)
+dec2,decisiones,sigue,no sigue,RESUELTO,c8423ce9a 2026-10-24 S162: decisiones de Nicolas aplicadas (D25 no se adopta, marca en el catalogo; #888 cerrado; 9 worktrees quitados); cuatro sesiones hijas con loop,D25 sin decidir con P2 de tolerancia 0 (no hay marca de lectura de D25)
+dec9,decisiones,sigue,sigue,ABIERTO,,K1 -0,7 y tope D9 sin decisión (= V0b-01)
+C-02,cola_campo,sin archivo,sigue,ABIERTO (archivo creado después de S160),,fila C-02 de docs/COLA_CAMPO.md en estado «abierto»
+C-03,cola_campo,sin archivo,sigue,ABIERTO (archivo creado después de S160),,fila C-03 de docs/COLA_CAMPO.md en estado «abierto»
+C-06,cola_campo,sin archivo,sigue,ABIERTO (archivo creado después de S160),,fila C-06 de docs/COLA_CAMPO.md en estado «abierto»
+C-07,cola_campo,sin archivo,sigue,ABIERTO (archivo creado después de S160),,fila C-07 de docs/COLA_CAMPO.md en estado «abierto»
+C-08,cola_campo,sin archivo,sigue,ABIERTO (archivo creado después de S160),,fila C-08 de docs/COLA_CAMPO.md en estado «abierto»
+C-09,cola_campo,sin archivo,sigue,ABIERTO (archivo creado después de S160),,fila C-09 de docs/COLA_CAMPO.md en estado «abierto»
+C-10,cola_campo,sin archivo,sigue,ABIERTO (archivo creado después de S160),,fila C-10 de docs/COLA_CAMPO.md en estado «abierto»
+166,inventario,sigue,sigue,ABIERTO,,bandas RECALL_MIN del auto-audit sin recalibrar desde C0
+F2-210,inventario,sigue,sigue,ABIERTO,,BT_PHYSICAL_MAX_K = 500 K de MODIS aplicado a los tres sensores
+F2-212,inventario,sigue,sigue,ABIERTO,,ETI con refit iterativo a 3 sigma; segundo pase reusa el ETI del primero
+F2-230,inventario,sigue,sigue,ABIERTO,,unidad declarada de WOOSTER_COEFF omite el área
+F2-231,inventario,sigue,sigue,ABIERTO,,index.html usa 111,0 km/grado para el bbox MIROVA (pipeline 111,32)
+F2-232,inventario,sigue,sigue,ABIERTO,,respaldo de inner_radius 10 en index y 5 en diario
+F2-234,inventario,sigue,sigue,ABIERTO,,noche: store.py <= 0 contra run_pipeline < 0.0
+F2-235,inventario,sigue,sigue,ABIERTO,,np.std (N) donde MIROVA usa N-1
+249,inventario,sigue,sigue,ABIERTO,,nrt-retry sólo reintenta con NASA_DOWN
+250,inventario,sigue,no sigue,RESUELTO,ccb378425 2026-10-26 S163: instrumentos de #889 sobre main (cobertura en el NRT y ventana única de pareo; I2 retirado) (#909),L1B sin geolocalización descartado en silencio (sin incidencia)
+251,inventario,sigue,sigue,ABIERTO,,NOAA-20 consultado en versiones que no existen
+252,inventario,sigue,sigue,ABIERTO,,earthaccess sin fijar (>=)
+254,inventario,sigue,sigue,ABIERTO,,reconstrucción de data/mirova falla por volcán con WARN (continuing)
+256,inventario,sigue,no sigue,RESUELTO,6547f5315 2026-10-22 S160: el sync del CSV de MIROVA reintenta sin rebasar (R13, H-V1) (#895),el consolidado bajado no se valida (200 con HTML se commitea)
+255,inventario,sigue,sigue,ABIERTO,,healthcheck con cron 0 12 (arranca horas tarde)
+
+# Línea base roja
+dec1 = RESUELTO; dec6 = ABIERTO (archivo creado después de S160)
+ROJO REENCONTRADO: el clasificador distingue

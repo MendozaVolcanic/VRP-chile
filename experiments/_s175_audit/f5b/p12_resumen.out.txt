@@ -1,0 +1,89 @@
+total aciertos clasificados: 305  errores: 0
+
+| volcán | sensor | n | (i) | (iii) | (iv) | prot n | prot (i) | prot (iii) | prot (iv) | control con dist. OCR (?) | mediana d_png_nuestro km (i+iii) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| NevadosDeChillan | MODIS | 23 | 15 | 6 | 2 | 23 | 15 | 6 | 2 | 1 | 1.85 |
+| NevadosDeChillan | VIIRS375 | 69 | 46 | 1 | 22 | 56 | 33 | 1 | 22 | 7 | 0.25 |
+| NevadosDeChillan | VIIRS750 | 55 | 44 | 3 | 8 | 53 | 42 | 3 | 8 | 3 | 0.67 |
+| Chaiten | VIIRS375 | 9 | 1 | 0 | 8 | 0 | 0 | 0 | 0 | 0 | 0.36 |
+| Chaiten | VIIRS750 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | sin casos |
+| Isluga | VIIRS375 | 43 | 6 | 1 | 36 | 2 | 1 | 0 | 1 | 1 | 0.22 |
+| Lascar | MODIS | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | sin casos |
+| Lascar | VIIRS375 | 23 | 17 | 0 | 6 | 1 | 1 | 0 | 0 | 5 | 0.17 |
+| Lascar | VIIRS750 | 3 | 1 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0.33 |
+| Lastarria | VIIRS375 | 12 | 7 | 3 | 2 | 0 | 0 | 0 | 0 | 0 | 0.19 |
+| PlanchonPeteroa | VIIRS375 | 20 | 14 | 0 | 6 | 0 | 0 | 0 | 0 | 3 | 0.19 |
+| PuyehueCordonCaulle | VIIRS375 | 24 | 17 | 0 | 7 | 2 | 2 | 0 | 0 | 0 | 0.42 |
+| PuyehueCordonCaulle | VIIRS750 | 8 | 2 | 0 | 6 | 4 | 1 | 0 | 3 | 0 | 0.31 |
+| Tupungatito | VIIRS375 | 14 | 2 | 1 | 11 | 0 | 0 | 0 | 0 | 1 | 0.22 |
+
+totales por sensor: {('MODIS', 'i'): 15, ('MODIS', 'iii'): 6, ('MODIS', 'iv'): 3, ('VIIRS375', 'i'): 110, ('VIIRS375', 'iv'): 98, ('VIIRS375', 'iii'): 6, ('VIIRS750', 'i'): 47, ('VIIRS750', 'iv'): 17, ('VIIRS750', 'iii'): 3}
+
+motivos (iv):
+   ('VIIRS375', 'el píxel más claro no reproduce la distancia de la tabla') 96
+   ('VIIRS750', 'el píxel más claro no reproduce la distancia de la tabla') 16
+   ('VIIRS375', 'sin distancia de MIROVA para el control') 2
+   ('MODIS', 'pasada no hallada en los paneles de hasta 8 láminas') 2
+   ('VIIRS750', 'sin distancia de MIROVA para el control') 1
+   ('MODIS', 'el píxel más claro no reproduce la distancia de la tabla') 1
+
+(iii) y (iii?) listados (vol, sensor, dt, vrp, prot, dist tabla, fuente, d_png_mc, d_png_nuestro, prominencia, mancha_px, panel, lámina):
+   Isluga VIIRS_NOAA20 2026-09-22 05:42 0.41 False 2.4 CONS 2.343 2.011 109.3 1 0 20260922_092431_VIIRS375_Latest10NTI.png
+   Lastarria VIIRS_NOAA21 2026-09-24 05:54 0.12 False 2.4 CONS 2.317 1.283 3.7 1 0 20260924_081036_VIIRS375_Latest10NTI.png
+   Lastarria VIIRS_NOAA20 2026-10-02 06:00 0.18 False 2.4 CONS 2.317 1.403 0.0 1 0 20261002_113856_VIIRS375_Latest10NTI.png
+   Lastarria VIIRS_NOAA20 2026-10-22 06:24 0.16 False 2.7 CONS 2.317 1.114 -67.0 2 0 20261022_085725_VIIRS375_Latest10NTI.png
+   NevadosDeChillan VIIRS_NOAA20_750 2026-10-10 06:54 15.26 True 2.37 CONS 1.685 1.826 -9.7 1 0 20261010_092141_VIIRS750_Latest10NTI.png
+   NevadosDeChillan VIIRS_NOAA20_750 2026-10-16 06:42 14.02 True 2.12 CONS 2.721 2.538 -22.7 1 0 20261016_095253_VIIRS750_Latest10NTI.png
+   NevadosDeChillan MODIS_TERRA 2026-10-17 02:20 12.97 True 2.24 CONS 1.449 3.909 -11.0 4 0 20261017_042621_MODIS_Latest10NTI.png
+   NevadosDeChillan MODIS_AQUA 2026-10-17 08:50 7.09 True 2.83 CONS 0.346 3.778 15.7 9 0 20261017_110705_MODIS_Latest10NTI.png
+   NevadosDeChillan MODIS_TERRA 2026-10-18 01:20 14.39 True 2.24 CONS 1.449 3.614 -72.0 4 0 20261018_025425_MODIS_Latest10NTI.png
+   NevadosDeChillan VIIRS_NOAA21 2026-10-18 05:06 21.25 True 1.35 CONS 1.197 1.022 82.3 1 0 20261018_070912_VIIRS375_Latest10NTI.png
+   NevadosDeChillan MODIS_AQUA 2026-10-28 07:35 9.35 True 2.24 CONS 0.812 3.035 58.0 9 2 20261028_224407_MODIS_Latest10NTI.png
+   NevadosDeChillan VIIRS_NOAA21_750 2026-10-29 06:42 29.35 True 2.37 CONS 2.266 2.16 50.0 2 0 20261029_095820_VIIRS750_Latest10NTI.png
+   NevadosDeChillan MODIS_AQUA 2026-10-30 08:55 14.39 True 3.16 CONS 1.278 4.164 12.7 4 0 20261030_152325_MODIS_Latest10NTI.png
+   NevadosDeChillan MODIS_TERRA 2026-10-31 01:35 18.58 True 2.24 CONS 4.684 3.099 -72.0 4 1 20261031_102838_MODIS_Latest10NTI.png
+   Tupungatito VIIRS_NOAA20 2026-09-28 05:36 0.09 False 5.21 CONS 5.053 10.097 -57.0 1 0 20260928_081422_VIIRS375_Latest10NTI.png
+
+protegidas (iv) con lámina y panel pero control fallido (vol, sensor, dt, vrp, dist tabla, fuente, d_png_mc, d_png_nuestro, prominencia):
+   Isluga VIIRS_SNPP 2026-09-28 05:12 1.63 0.95 OCR 4.867 4.534 -4.3
+   NevadosDeChillan VIIRS_SNPP 2026-09-29 06:36 2.11 0.84 CONS 0.018 0.371 26.3
+   NevadosDeChillan VIIRS_SNPP_750 2026-10-01 06:00 10.0 1.76 OCR 0.01 0.42 68.3
+   NevadosDeChillan VIIRS_NOAA20 2026-10-01 06:18 7.28 0.84 CONS 0.018 0.386 84.3
+   NevadosDeChillan VIIRS_NOAA20_750 2026-10-01 06:18 7.06 1.68 CONS 0.01 0.528 73.3
+   NevadosDeChillan VIIRS_SNPP 2026-10-05 06:24 8.24 0.95 OCR 0.018 0.404 77.0
+   NevadosDeChillan VIIRS_SNPP_750 2026-10-05 06:24 7.0 1.76 OCR 0.01 0.639 70.0
+   NevadosDeChillan VIIRS_SNPP 2026-10-10 04:54 5.72 2.28 CONS 1.521 0.493 55.7
+   NevadosDeChillan VIIRS_SNPP_750 2026-10-10 04:54 2.48 2.37 CONS 0.755 0.329 28.7
+   NevadosDeChillan VIIRS_NOAA20 2026-10-10 05:12 8.75 1.19 CONS 0.38 0.084 69.0
+   NevadosDeChillan VIIRS_NOAA20 2026-10-10 06:54 13.78 1.19 CONS 0.4 0.334 77.0
+   NevadosDeChillan VIIRS_NOAA21_750 2026-10-12 05:18 8.44 1.68 CONS 0.01 0.607 50.0
+   NevadosDeChillan MODIS_TERRA 2026-10-16 01:40 12.39 1.41 CONS 4.684 3.408 -92.3
+   NevadosDeChillan VIIRS_NOAA21 2026-10-16 05:42 5.33 0.84 CONS 0.018 0.503 51.0
+   NevadosDeChillan VIIRS_NOAA20 2026-10-16 06:42 14.63 1.19 CONS 0.381 0.436 73.7
+   NevadosDeChillan VIIRS_NOAA20 2026-10-17 06:18 11.36 0.84 CONS 0.018 0.355 75.3
+   NevadosDeChillan VIIRS_SNPP_750 2026-10-18 05:42 20.87 1.06 CONS 4.855 4.626 -79.0
+   NevadosDeChillan VIIRS_NOAA20 2026-10-18 06:00 9.94 0.84 CONS 0.018 0.261 70.0
+   NevadosDeChillan VIIRS_NOAA21 2026-10-18 06:48 25.79 1.88 CONS 0.747 1.228 -24.0
+   NevadosDeChillan VIIRS_NOAA20 2026-10-24 05:48 2.36 0.84 CONS 0.018 0.253 30.0
+   NevadosDeChillan VIIRS_NOAA21 2026-10-25 04:36 9.94 2.52 CONS 1.141 0.382 66.3
+   NevadosDeChillan VIIRS_SNPP 2026-10-25 06:54 5.42 1.06 CONS 0.018 0.401 0.0
+   NevadosDeChillan VIIRS_NOAA20 2026-10-27 04:54 6.34 2.12 CONS 1.197 0.089 57.0
+   NevadosDeChillan VIIRS_NOAA20 2026-10-27 06:36 24.88 1.06 CONS 0.018 0.312 0.0
+   NevadosDeChillan VIIRS_NOAA20 2026-10-28 06:12 16.82 1.35 CONS 0.551 0.233 62.0
+   NevadosDeChillan VIIRS_NOAA21 2026-10-30 04:42 21.69 2.02 CONS 1.197 1.068 55.7
+   NevadosDeChillan VIIRS_NOAA21 2026-10-30 06:18 21.53 1.35 CONS 0.4 0.068 80.3
+   NevadosDeChillan VIIRS_SNPP 2026-10-30 07:00 31.3 2.12 CONS 0.364 0.727 14.7
+   NevadosDeChillan VIIRS_SNPP_750 2026-10-30 07:00 30.85 2.7 CONS 1.077 1.903 30.7
+   NevadosDeChillan VIIRS_NOAA20_750 2026-11-02 04:42 18.13 3.18 CONS 1.077 1.466 15.0
+   NevadosDeChillan VIIRS_NOAA20 2026-11-02 06:18 16.38 1.06 CONS 0.018 0.341 65.3
+   NevadosDeChillan VIIRS_NOAA21 2026-11-06 05:48 7.01 1.35 OCR 0.551 0.294 54.7
+   PuyehueCordonCaulle VIIRS_NOAA20_750 2026-10-25 05:30 1.48 8.55 CONS 19.971 16.788 2.7
+   PuyehueCordonCaulle VIIRS_NOAA20_750 2026-10-28 06:18 1.22 7.83 CONS 19.858 17.485 -8.0
+   PuyehueCordonCaulle VIIRS_NOAA20_750 2026-10-29 05:54 1.49 7.83 CONS 13.236 9.067 21.0
+
+protegidas (iv) sin lámina/panel:
+   NevadosDeChillan MODIS_AQUA 2026-10-10 07:40 3.95 pasada no hallada en los paneles de hasta 8 láminas None
+
+VIIRS con clase (i)/(iii): n=166; d_png_nuestro p50 0.29 p90 1.01 max 10.10 km; prominencia (lum max - p99 panel) p10 -94 p50 31; con prominencia < 0: 58
+lag lámina (h) p50 2.9 p90 7.7 max 26.3; paneles usados: Counter({0: 259, 1: 26, 6: 7, 2: 4, 5: 3, 3: 2, 7: 1, 8: 1})
+láminas distintas usadas: 291  | por sensor: Counter({'VIIRS375': 214, 'VIIRS750': 67, 'MODIS': 22})

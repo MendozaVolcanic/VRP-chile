@@ -22,13 +22,16 @@ const Miniaturas = (() => {
     sin_granulo_en_esta_corrida: "Sin imagen: el gránulo no se pudo volver a bajar",
   };
   const cache = {};
+  // S198: misma raíz que el resto del tablero (BASE_PATH de index.html): en Pages es "" y servido desde la raíz del
+  // repo es "/", porque la página cuelga de /frontend/ y los datos de /data/.
+  const raiz = () => (typeof BASE_PATH === "string" ? BASE_PATH : "");
   let familiaElegida = null;
 
   async function cargarIndice(volcan) {
     if (volcan in cache) return cache[volcan];
     let idx = null;
     try {
-      const r = await fetch(`data/miniaturas/${encodeURIComponent(volcan)}/indice.json`, { cache: "no-cache" });
+      const r = await fetch(`${raiz()}data/miniaturas/${encodeURIComponent(volcan)}/indice.json`, { cache: "no-cache" });
       if (r.ok) idx = await r.json();
     } catch (e) { idx = null; }
     cache[volcan] = idx;
@@ -113,6 +116,9 @@ const Miniaturas = (() => {
       (zen != null ? `cenit ${Math.round(zen)}°` : "cenit ?") + (azi != null ? ` · azimut ${Math.round(azi)}°` : "")));
     const sat = String(entrada.sensor || "").replace(/^VIIRS_|^MODIS_/, "").replace(/_750$/, "");
     let l3 = sat + (entrada.product_version === "nrt" ? " · NRT" : "");
+    // S198: desde que main abrió el día de MODIS (S193) el store trae pasadas diurnas; de día el MIR suma luz solar
+    // reflejada y la imagen sale más clara sin que haya calor, así que se dice.
+    if (entrada.dayflag === 1) l3 += " · de día";
     if (MOTIVOS[entrada.motivo_vacio]) l3 += entrada.motivo_vacio === "escena_invalida" ? " · escena inválida" : " · sun glint";
     if (siguiente && siguiente.sensor === entrada.sensor) {
       const a = minutos(entrada.datetime_utc), b = minutos(siguiente.datetime_utc);
@@ -166,7 +172,7 @@ const Miniaturas = (() => {
     host.appendChild(panel);
     cargarIndice(volcan).then(idx => {
       if (!idx || !idx.familias) { panel.remove(); return; }   // volcán sin miniaturas todavía: no se muestra nada
-      const base = `data/miniaturas/${encodeURIComponent(volcan)}`;
+      const base = `${raiz()}data/miniaturas/${encodeURIComponent(volcan)}`;
       const conDatos = FAMILIAS.filter(f => (idx.familias[f.key] || []).length);
       if (!conDatos.length) { panel.remove(); return; }
       let fam = FAMILIAS.some(f => f.key === opts.sensor) ? opts.sensor : familiaElegida;
@@ -189,7 +195,7 @@ const Miniaturas = (() => {
         }
         cab.appendChild(tabs);
         cab.appendChild(nodo("small", "mini-nota",
-          "NTI de cada pasada nocturna, de la más nueva a la más vieja; frío oscuro, caliente claro; rojo = píxel alertado; tramado = sin dato"));
+          "NTI de cada pasada, de la más nueva a la más vieja; frío oscuro, caliente claro; rojo = píxel alertado; tramado = sin dato"));
         panel.appendChild(cab);
         const grilla = nodo("div", "mini-grilla");
         const lista = idx.familias[fam] || [];
@@ -197,7 +203,7 @@ const Miniaturas = (() => {
         panel.appendChild(grilla);
         panel.appendChild(nodo("div", "mini-aviso",
           "Una anomalía puede deberse a incendios u otras fuentes no volcánicas. Una nube puede ocultarla o atenuarla. " +
-          "Sólo pasadas de noche (MIROVA muestra también las de día)."));
+          "VIIRS: sólo pasadas de noche. MODIS: también de día (marcadas «de día»; el sol aclara la imagen sin que haya calor)."));
       };
       dibujar();
     });

@@ -1,0 +1,23 @@
+referencia congelada del commit db04d930c168d274e174b24638238060c04787cb; sha256 {'registro_vrp_consolidado.csv': '4514af8647c1672279380caf612167d52a16413d43ad6d883608b0835668a307', 'registro_vrp_ocr.csv': '2546f4c54bc30c10aed66481c4d44a205a0f03f994f2400c5bf622be23220e40', 'consolidado_filas_perdidas.csv': '25ea6ab77331ab3334663c941e5cdc3c99b242b18e7dde6362e293024d7acb80', 'respaldo_20260408.csv': '183aff7f38c6ca9ef93c8e0951f8190dd12be2690d54dbacb7d7acabaaa93568'}
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+pasadas de MIROVA W2 a W7 (unión): 19248, diurnas 9280
+
+=== brazo perfecto
+compuertas: inválido [] | indecidible []
+  MODIS: protegidas 16 de 16 | alertas<1MW 2 de 2 | negativos publicados 0 de 2575 | neto -2 | P2 SIN SUSTRATO | D True | base ADOPTAR (caso b) | sin Chillán NO ADOPTAR | sin W7 ADOPTAR | M5 (18, 1.0) | M8 0 -> DECIDE NICOLÁS CON M4 ['R-CH: sin Chillán sale NO ADOPTAR']
+  VIIRS375: protegidas 55 de 55 | alertas<1MW 11 de 11 | negativos publicados 0 de 2953 | neto -11 | P2 GANA | D True | base ADOPTAR (caso a) | sin Chillán ADOPTAR | sin W7 ADOPTAR | M5 (66, 1.0) | M8 0 -> ADOPTAR []
+  VIIRS750: protegidas 30 de 30 | alertas<1MW 0 de 0 | negativos publicados 0 de 3187 | neto +0 | P2 SIN SUSTRATO | D True | base ADOPTAR (caso b) | sin Chillán ADOPTAR | sin W7 ADOPTAR | M5 (30, 1.0) | M8 0 -> ADOPTAR []
+flags principal: {'enable_daytime_modis': 'DECIDE NICOLÁS CON M4', 'enable_daytime_viirs': 'ADOPTAR'}
+variantes: {'tabla': {'enable_daytime_modis': 'DECIDE NICOLÁS CON M4', 'enable_daytime_viirs': 'DECIDE NICOLÁS CON M4'}, 'sin_W2': {'enable_daytime_modis': 'DECIDE NICOLÁS CON M4', 'enable_daytime_viirs': 'ADOPTAR'}, 'sin_reflejo': {'enable_daytime_modis': 'DECIDE NICOLÁS CON M4', 'enable_daytime_viirs': 'DECIDE NICOLÁS CON M4'}, 'otra_como_negativo': {'enable_daytime_modis': 'DECIDE NICOLÁS CON M4', 'enable_daytime_viirs': 'ADOPTAR'}}
+final: {'enable_daytime_modis': ('DECIDE NICOLÁS CON M4', ''), 'enable_daytime_viirs': ('DECIDE NICOLÁS', 'el veredicto cambia en: sin_reflejo (DECIDE NICOLÁS CON M4), tabla (DECIDE NICOLÁS CON M4)')}
+
+=== brazo ruidoso
+compuertas: inválido [] | indecidible []
+  MODIS: protegidas 16 de 16 | alertas<1MW 2 de 2 | negativos publicados 2575 de 2575 | neto +2573 | P2 PIERDE | D False | base NO ADOPTAR (caso d) | sin Chillán NO ADOPTAR | sin W7 NO ADOPTAR | M5 (18, 1.0) | M8 0 -> NO ADOPTAR []
+  VIIRS375: protegidas 55 de 55 | alertas<1MW 11 de 11 | negativos publicados 2953 de 2953 | neto +2942 | P2 PIERDE | D False | base NO ADOPTAR (caso d) | sin Chillán NO ADOPTAR | sin W7 NO ADOPTAR | M5 (66, 1.0) | M8 0 -> NO ADOPTAR []
+  VIIRS750: protegidas 30 de 30 | alertas<1MW 0 de 0 | negativos publicados 3187 de 3187 | neto +3187 | P2 PIERDE | D False | base NO ADOPTAR (caso d) | sin Chillán NO ADOPTAR | sin W7 NO ADOPTAR | M5 (30, 1.0) | M8 0 -> NO ADOPTAR []
+flags principal: {'enable_daytime_modis': 'NO ADOPTAR', 'enable_daytime_viirs': 'NO ADOPTAR'}
+variantes: {'tabla': {'enable_daytime_modis': 'NO ADOPTAR', 'enable_daytime_viirs': 'NO ADOPTAR'}, 'sin_W2': {'enable_daytime_modis': 'NO ADOPTAR', 'enable_daytime_viirs': 'NO ADOPTAR'}, 'sin_reflejo': {'enable_daytime_modis': 'NO ADOPTAR', 'enable_daytime_viirs': 'NO ADOPTAR'}, 'otra_como_negativo': {'enable_daytime_modis': 'NO ADOPTAR', 'enable_daytime_viirs': 'NO ADOPTAR'}}
+final: {'enable_daytime_modis': ('NO ADOPTAR', ''), 'enable_daytime_viirs': ('NO ADOPTAR', '')}
+
+controles de los brazos sintéticos: OK (el perfecto no sale NO ADOPTAR; el ruidoso no sale ADOPTAR)

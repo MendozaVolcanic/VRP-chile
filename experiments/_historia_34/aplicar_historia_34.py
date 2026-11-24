@@ -24,6 +24,15 @@ RAIZ = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RAIZ / "experiments" / "_s180_reemplazo_via"))
 from plan_trozos_historia import LOS_34  # noqa: E402
 
+import yaml  # noqa: E402
+
+# S190, D1 opción 1a (Nicolás, 2026-11-17): la lista del sistema son los 43 de la RNVV. Putana y OlcaParuma quedaron con
+# `active: false` en volcanoes.yaml y su historia salió de data/historia_34/, pero sus .json.gz siguen en la unión de
+# las tandas 1 y 2. Sin este filtro, aplicar la tanda siguiente los volvería a escribir. Se saltan (no se rehúsan, para
+# que la tanda de los demás se aplique igual); se avisa por stderr. Respaldo: D:/vrp-trabajo/temporales/s189/respaldo_d1_rnvv/
+INACTIVOS = frozenset(v["name"] for v in yaml.safe_load((RAIZ / "volcanoes.yaml").read_text(encoding="utf-8"))["volcanoes"]
+                      if not v.get("active", True))
+
 PERFIL = "_s172_retro_paquete"
 CORTE = "2026-11-03 00:00"   # primer día de data/sombra_34 (scripts/ventana_sombra.py no devuelve nada antes)
 UNION = RAIZ / "experiments" / "_historia_34" / "union"
@@ -47,6 +56,9 @@ def aplicar(union: Path, destino: Path, aplicar: bool) -> dict:
     informe, salida = {}, {}
     for gz in sorted(union.glob("*.json.gz")):
         v = gz.name[:-len(".json.gz")]
+        if v in INACTIVOS:
+            print(f"SALTADO: {v} tiene active: false en volcanoes.yaml (D1, 2026-11-17)", file=sys.stderr)
+            continue
         if v not in LOS_34:
             raise Rehusado(f"REHUSADO: {v} no es de los 34")
         recs = json.loads(gzip.decompress(gz.read_bytes())).get("records", [])

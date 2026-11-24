@@ -45,6 +45,18 @@ PREDICADOS = ["mirovaEqVrp", "mirovaEqVrpCore", "mirovaEqVrpDisplay", "eqVrpDisp
 CAMBIOS_AUTORIZADOS = {
     "f5CoreMagnitude": 'if (r && typeof CambioDetector !== "undefined" && CambioDetector.esViaCodigoMirova(r)) return null;',
 }
+# S190 (H01, auditoría de Codex): el tope de 50.000 MW deja pasar el record que store.py conservó y marcó
+# (`vrp_exceeds_sanity_cap`, BT creíble), para no mostrar en cero una erupción grande. No es un texto agregado sino una
+# condición dentro de una línea existente: se declara como sustitución (texto del tag, texto de hoy), que la comparación
+# aplica al cuerpo del tag antes de comparar. Si el cambio se pierde, el cuerpo de hoy deja de coincidir y falla.
+# Guard: tests/test_tope_publicacion_s190.py
+_MARCA = " && r.vrp_exceeds_sanity_cap !== true"
+SUSTITUCIONES_AUTORIZADAS = {
+    "mirovaEqVrp": [("vfb > 50000 ? 0 : vfb", "vfb > 50000" + _MARCA + " ? 0 : vfb"),
+                    ("vmw > 50000 ? 0 : vmw", "vmw > 50000" + _MARCA + " ? 0 : vmw"),
+                    ("if (vmw > 50000) return 0;", "if (vmw > 50000" + _MARCA + ") return 0;")],
+    "mirovaEqVrpCore": [("core > 50000 ? 0 : core", "core > 50000" + _MARCA + " ? 0 : core")],
+}
 
 
 def _fuente_tag(vista):
@@ -82,6 +94,8 @@ def _diferencias(antes, ahora):
         if c0 is None:
             continue
         c1 = _cuerpo(ahora, nombre)
+        for viejo, nuevo in SUSTITUCIONES_AUTORIZADAS.get(nombre, []):
+            c0 = c0.replace(viejo, nuevo)
         extra = CAMBIOS_AUTORIZADOS.get(nombre)
         if c1 and extra and extra not in c0:
             if extra not in c1:
@@ -120,10 +134,19 @@ def _guardas(src, nombre):
     return [g.strip() for g in re.findall(r"if \([^;]*?\) continue;|const v = [^;]*;", c)]
 
 
+# S193 (pasadas MODIS de día, issue #813): la última detección de la tarjeta elige el turno, nocturno por defecto, para
+# que una lectura diurna (puede ser reflejo solar) no titule sin marca; la diurna se pide aparte (`diurnas = true`). Es
+# una guarda agregada a propósito: se quita antes de comparar con el tag y se exige que siga ahí.
+# Guard: tests/test_tablero_diurno_s193.py
+GUARDA_TURNO_S193 = "if ((r._diurna === true) !== diurnas) continue;"
+
+
 @pytest.mark.parametrize("vista,nombre", [("index.html", "latestDetection"), ("mosaico.html", "latestVRP")])
 def test_la_ultima_deteccion_se_elige_igual(vista, nombre):
     g0 = _guardas(_fuente_tag(vista), nombre)
     g1 = _guardas((RAIZ / "frontend" / vista).read_text(encoding="utf-8"), nombre)
+    assert g1.count(GUARDA_TURNO_S193) == 1, g1
+    g1 = [g for g in g1 if g != GUARDA_TURNO_S193]
     assert len(g0) >= 4 and g0 == g1, (g0, g1)
 
 

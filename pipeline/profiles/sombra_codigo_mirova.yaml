@@ -16,10 +16,17 @@
 # (`via_codigo_mirova: true`); si un volcán no tuviera grilla o un gránulo MODIS no trajera MxD03, sigue K y el record
 # lo dice (`via_codigo_mirova: "sin_grilla"` / "sin_mxd03"). Los tres flags de MxD03 quedan apagados, como en
 # producción: van aparte (programa §12.3 punto 4).
+# ⚠️ S190 (A113, F8-110 de la auditoría de Codex, verificado): «un gránulo MODIS sin MxD03 sigue K» es FALSO:
+# scripts/run_pipeline.py lo salta antes del procesador y anota la incidencia `sin_geolocalizacion`
+# (pipeline/fetch.py), sin record. «sin_grilla» y «geo_distinta» sí llegan al record. Ver D35. Texto conservado.
 # Declara los tres flags de K con el valor de producción (tests/test_guard_perfiles_congelados_s153.py, A117).
 #
 # NO OPERACIONAL: data_subdir aislado (A47), nada lo lee el tablero. Lo corre sólo
 # .github/workflows/sombra-codigo-mirova.yml, que no tiene schedule: encenderlo es otro sí de Nicolás (A45).
+# ⚠️ S190 (A113, F8-111 de la auditoría de Codex, verificado): «no tiene schedule» es FALSO desde S168: el workflow
+# tiene `cron: "0 15 * * *"` y se declara encendido en su cabecera; data/sombra_codigo_mirova/ tiene records procesados
+# todos los días del 2026-11-03 al 2026-11-17 (verificador f8b). «Nada lo lee el tablero» sigue cierto (0 apariciones en
+# frontend/). Texto conservado.
 extends: mirova_equivalent
 profile: sombra_codigo_mirova
 description: >
@@ -32,6 +39,10 @@ thresholds:
   enable_modis_codigo_mirova: true
 
 paths:
+  # S193: producción abre el día de MODIS (A/B #813, decisión de Nicolás del 2026-11-21); este perfil
+  # queda sólo de noche, declarado aquí para no heredarlo en silencio (A117). La sombra de la vía corre sus propios volcanes y no se midió de día.
+  # Lo vigila tests/test_perfil_dia_modis_s193.py.
+  enable_daytime_modis: false
   enable_test1_path: false
   enable_tests_23_prose_branch: true
 

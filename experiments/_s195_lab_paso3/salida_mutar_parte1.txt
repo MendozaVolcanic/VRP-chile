@@ -1,0 +1,23 @@
+control sin mutar: 89 passed in 270.58s (0:04:30)
+piso_conservador_en_la_zona        ATRAPADA  aserción=9 caídas=0  9 failed, 80 passed in 280.58s (0:04:40)
+eti_sin_s_a                        ATRAPADA  aserción=5 caídas=0  5 failed, 84 passed in 272.09s (0:04:32)
+umbrales_cruzados                  ATRAPADA  aserción=4 caídas=0  4 failed, 85 passed in 194.30s (0:03:14)
+Traceback (most recent call last):
+  File "D:\vrp-trabajo\worktrees\s195-lab-paso3\experiments\_s195_lab_paso3\mutar.py", line 130, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "D:\vrp-trabajo\worktrees\s195-lab-paso3\experiments\_s195_lab_paso3\mutar.py", line 116, in main
+    r = correr_pruebas(arbol)
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\vrp-trabajo\worktrees\s195-lab-paso3\experiments\_s195_lab_paso3\mutar.py", line 77, in correr_pruebas
+    r = subprocess.run([sys.executable, "-m", "pytest", *PRUEBAS, "-q", "-p", "no:cacheprovider", "--tb=short",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1634, in _communicate
+    raise TimeoutExpired(self.args, orig_timeout)
+subprocess.TimeoutExpired: Command '['C:\\Users\\nmend\\AppData\\Local\\Programs\\Python\\Python312\\python.exe', '-m', 'pytest', 'tests/test_laboratorio_paso3_s195.py', 'tests/test_laboratorio_paso1_s193.py', 'tests/test_guard_laboratorio_no_mas_ciego_s147.py', '-q', '-p', 'no:cacheprovider', '--tb=short', '--junitxml=D:\\vrp-trabajo\\temporales\\s195\\lab_paso3\\mut\\mascara_circulo_entero\\junit.xml']' timed out after 3600 seconds

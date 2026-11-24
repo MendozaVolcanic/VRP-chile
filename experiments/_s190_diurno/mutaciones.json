@@ -1,0 +1,231 @@
+{
+ "pruebas": [
+  "tests/test_evaluar_diurno_via_s190.py"
+ ],
+ "mutaciones": [
+  {
+   "id": "A1",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "and r.get(\"dayflag\") == 1\n",
+   "nuevo": "and r.get(\"diag_dia\")\n",
+   "que": "I2 mira el marcador viejo de K (diag_umbrales_diurnos)"
+  },
+  {
+   "id": "A2",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "SENSORES = (\"MODIS\", \"VIIRS375\", \"VIIRS750\")          # adenda V §3.1",
+   "nuevo": "SENSORES = (\"VIIRS375\", \"VIIRS750\")          # adenda V §3.1",
+   "que": "MODIS fuera de la lista de sensores"
+  },
+  {
+   "id": "A3",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if base == ADOPTAR and sin_chillan == NO_ADOPTAR:",
+   "nuevo": "if False:",
+   "que": "R-CH apagado"
+  },
+  {
+   "id": "A4",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if base == ADOPTAR and m8_1mw >= M8_MIN_1MW:",
+   "nuevo": "if False:",
+   "que": "M8 sin umbral de 5 (no frena el ADOPTAR)"
+  },
+  {
+   "id": "A5",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "and r.get(\"dayflag\") == 1\n",
+   "nuevo": "\n",
+   "que": "dayflag ignorado en I2"
+  },
+  {
+   "id": "A6",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if base == ADOPTAR and sin_w7 == NO_ADOPTAR:",
+   "nuevo": "if False:",
+   "que": "R-W7 apagado"
+  },
+  {
+   "id": "A6L1",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if base == ADOPTAR and sin_w7 == NO_ADOPTAR:",
+   "nuevo": "if sin_w7 == NO_ADOPTAR:",
+   "que": "R-W7 con la lectura 1 (literal), la que Nicolás no eligió"
+  },
+  {
+   "id": "A7",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if base == ADOPTAR and pares >= M5_MIN_PARES",
+   "nuevo": "if False and pares >= M5_MIN_PARES",
+   "que": "M5 apagado"
+  },
+  {
+   "id": "A8",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "    if ADOPTAR in vs:\n        return ADOPTAR",
+   "nuevo": "    if v750 == ADOPTAR:\n        return DECIDE\n    if ADOPTAR in vs:\n        return ADOPTAR",
+   "que": "vuelve la clausula de VIIRS 750 de S163"
+  },
+  {
+   "id": "A9",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if ADOPTAR in vs and NO_ADOPTAR in vs:",
+   "nuevo": "if False:",
+   "que": "un VIIRS en ADOPTAR y el otro en NO ADOPTAR no manda a DECIDE"
+  },
+  {
+   "id": "A10",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "    if dia_c:\n",
+   "nuevo": "    if False:\n",
+   "que": "I2 no vigila records diurnos del control"
+  },
+  {
+   "id": "A11",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "    if sin_ang:\n",
+   "nuevo": "    if False:\n",
+   "que": "I2 no vigila records diurnos de la via sin angulos"
+  },
+  {
+   "id": "A12",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "return [r for r in recs_b if not (r[\"es_dia\"] and r.get(\"via\") is not True)], k",
+   "nuevo": "return list(recs_b), []",
+   "que": "M6 no separa los diurnos que cayeron a K"
+  },
+  {
+   "id": "A13",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "def completar_control_diurno(T, control, brazo, sensores=SENSORES):",
+   "nuevo": "def completar_control_diurno(T, control, brazo, sensores=SENSORES_VIIRS):",
+   "que": "control sintetico diurno sin MODIS"
+  },
+  {
+   "id": "A14",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES, descartes_borde=frozenset()):",
+   "nuevo": "def compuerta_i4(T, recs_b, brazo, p_sup, sensores=SENSORES_VIIRS, descartes_borde=frozenset()):",
+   "que": "I4 sin MODIS"
+  },
+  {
+   "id": "A15",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "                vistos.add(k)\n                recs.append(",
+   "nuevo": "                vistos.add(k)\n                if b == \"MODIS\" and ek.es_dia_vol(vol, dt):\n                    continue\n                recs.append(",
+   "que": "la carga salta MODIS de dia como en S163"
+  },
+  {
+   "id": "A16",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "            continue\n        out.append(p)\n    return out",
+   "nuevo": "            continue\n        if p.sensor_bucket == \"MODIS\" and ek.es_dia_vol(p.volcano, p.instante):\n            continue\n        out.append(p)\n    return out",
+   "que": "las pasadas saltan MODIS de dia como en S163"
+  },
+  {
+   "id": "A17",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "\"motivo\": dg.get(\"motivo_vacio\")",
+   "nuevo": "\"motivo\": dg.get(\"motivo\")",
+   "que": "M7 lee un campo que el record no tiene"
+  },
+  {
+   "id": "A18",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "    esperado.update({k: True for k in FLAGS_VIA})",
+   "nuevo": "    pass",
+   "que": "I1 no vigila los flags de la via"
+  },
+  {
+   "id": "A19",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "\"ENABLE_DAYTIME_MODIS\": diurno,",
+   "nuevo": "\"ENABLE_DAYTIME_MODIS\": False,",
+   "que": "I1 espera ENABLE_DAYTIME_MODIS apagado como en S163"
+  },
+  {
+   "id": "A20",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "OPCION_E = \"e-ii\"",
+   "nuevo": "OPCION_E = \"e-i\"",
+   "que": "opcion del caso e distinta de la sellada"
+  },
+  {
+   "id": "A21",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "sin_volcanes=sin_v | {CHILLAN}",
+   "nuevo": "sin_volcanes=sin_v",
+   "que": "R-CH no saca Chillan"
+  },
+  {
+   "id": "A22",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "excluir_dias=excl_d | _dias_de(ventanas, \"W7\")",
+   "nuevo": "excluir_dias=excl_d",
+   "que": "R-W7 no saca W7"
+  },
+  {
+   "id": "A23",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "\"M7_sospecha\": sum(m7[brazo][s][\"dia\"] for s in SENSORES_VIIRS) == 0,",
+   "nuevo": "\"M7_sospecha\": False,",
+   "que": "M7 nunca avisa"
+  },
+  {
+   "id": "A24",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "out[r[\"b\"]][\"n_1mw\"] += d >= cm.UMBRAL_PROTEGIDA_MW",
+   "nuevo": "out[r[\"b\"]][\"n_1mw\"] += 1",
+   "que": "M8 cuenta tambien lo bajo 1 MW"
+  },
+  {
+   "id": "D1a",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "abs((x - t).total_seconds()) <= cm.VENTANA_S for v, b, x in descartes)",
+   "nuevo": "x.date() == t.date() for v, b, x in descartes)",
+   "que": "desviacion 1: dispensa con cualquier descarte del mismo dia, sin mirar la hora"
+  },
+  {
+   "id": "D1b",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if sin_v and all(_descartada(",
+   "nuevo": "if sin_v and any(_descartada(",
+   "que": "desviacion 1: dispensa si UNA pasada del dia tiene descarte"
+  },
+  {
+   "id": "D1c",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "return any(v == vol and b == s and abs(",
+   "nuevo": "return any(b == s and abs(",
+   "que": "desviacion 1: no mira el volcan"
+  },
+  {
+   "id": "D1d",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "for p in logs.glob(\"%s_*.log\" % brazo):",
+   "nuevo": "for p in logs.glob(\"*.log\"):",
+   "que": "desviacion 1: lee tambien el registro del control"
+  },
+  {
+   "id": "D1e",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "                det[\"I4b_dispensadas\"].append(\"%s|%s|%s\" % v)\n                continue\n",
+   "nuevo": "                continue\n",
+   "que": "desviacion 1: no informa los casos dispensados"
+  },
+  {
+   "id": "D1f",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "if sin_v and all(_descartada(v[0], s,",
+   "nuevo": "if all(_descartada(v[0], s,",
+   "que": "desviacion 1: dia sin pasadas sin record (lista vacia) se dispensa (casi equivalente: solo vive si una pasada diurna se parea con un record de otra fecha)"
+  },
+  {
+   "id": "C-CAIDA",
+   "archivo": "experiments/_s190_diurno/evaluar_diurno_via.py",
+   "viejo": "    if not re.fullmatch(r\"[0-9a-f]{40}\", str(sha)):",
+   "nuevo": "    raise RuntimeError(\"caida\")\n    if not re.fullmatch(r\"[0-9a-f]{40}\", str(sha)):",
+   "que": "CONTROL: tiene que salir CAIDA"
+  }
+ ]
+}

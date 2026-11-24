@@ -771,7 +771,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                                                               clave_roi=_fam["clave_roi"]) is not None:
             _rad = _MV.leer_radiancia_l1b(l1b_path, bandas=_fam["bandas"])
             if _rad is None:
-                return None
+                # S190 (H03): sin una de las dos bandas la pasada no se pudo medir; no es una noche sin calor. El error
+                # llega a run_pipeline como `error_procesamiento` y al revisor de errores del NRT, que lo pone rojo.
+                raise ValueError(f"{l1b_path.name}: L1B sin la banda requerida por la vía código MIROVA: "
+                                 f"{', '.join(_MV.bandas_ausentes_l1b(l1b_path, _fam['bandas']))}")
             _lat, _lon, _ang = _MV.leer_geo_l1b(geo_path)
             _rec = _MV.calcular_vrp_granulo(
                 _rad, _lat, _lon, _ang, volcan_nombre,

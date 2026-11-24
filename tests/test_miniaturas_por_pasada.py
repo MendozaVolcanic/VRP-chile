@@ -204,6 +204,34 @@ def test_la_via_agrega_miniatura_tambien_sin_anomalia(monkeypatch):
     assert rec["vrp_mw"] == 0.0 and rec[MINI.CLAVE]["alertadas"] == []
 
 
+def _rec_sin_miniatura(monkeypatch, encendida, familia, t_foco, sin_radiancia):
+    monkeypatch.setattr(MV, "GENERAR_MINIATURA", encendida)
+    v = _villarrica()
+    rad, LA, LO, ang = _granulo_sintetico(v["lat"], v["lon"], familia, t_foco=t_foco)
+    if sin_radiancia:
+        for b in rad:
+            rad[b] = np.full(rad[b].shape, np.nan)
+    rec = MV.calcular_vrp_granulo(rad, LA, LO, ang, v["name"], v["lat"], v["lon"], 5.0, "SINTETICO",
+                                  familia=familia)
+    assert (MINI.CLAVE in rec) is encendida
+    rec.pop(MINI.CLAVE, None)
+    return json.dumps(rec, sort_keys=True, default=str)
+
+
+@pytest.mark.parametrize("familia", ["VIIRS750", "VIIRS375", "MODIS"])
+@pytest.mark.parametrize("t_foco,sin_radiancia", [(600.0, False), (270.0, False), (270.0, True)])
+def test_encender_la_miniatura_no_cambia_el_record_de_la_via(monkeypatch, familia, t_foco, sin_radiancia):
+    """S198 (merge con main, A45 de Nicolás para #1015): con el interruptor encendido el record de la vía es byte a byte
+    el mismo que apagado, salvo la clave interna que run_pipeline saca antes del store: mismo VRP, mismos alertados
+    (máscara), misma posición y clase. Con foco, sin anomalía y sin radiancia válida (S192, grilla toda sin dato)."""
+    apagado = _rec_sin_miniatura(monkeypatch, False, familia, t_foco, sin_radiancia)
+    encendido = _rec_sin_miniatura(monkeypatch, True, familia, t_foco, sin_radiancia)
+    assert apagado == encendido
+    rec = json.loads(apagado)
+    if t_foco == 600.0:   # el caso con foco ejercita VRP, máscara y posición, no sólo una escena vacía
+        assert rec["vrp_mw"] > 0 and rec["n_anomalous_pixels"] >= 1 and rec["final_hotspot_lat"] is not None
+
+
 # ----------------------------------------------------------------------------------------- 3. recolección y rotación
 def _rec(dt, sensor="VIIRS_NOAA21", granule=None, vrp=0.0, via=True, pv="standard"):
     return {"datetime_utc": dt, "sensor": sensor, "granule": granule or f"G.{sensor}.{dt}", "product_version": pv,

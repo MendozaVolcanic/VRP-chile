@@ -65,7 +65,11 @@ def test_el_perfil_difiere_de_produccion_solo_en_las_tres_vias_y_la_carpeta():
     # S177 B1 y B2 (encendido de las vías de VIIRS 375 y 750): producción también las enciende, así que sombra y
     # producción dejan de diferir en ellas. Texto original: sólo la de MODIS.
     PROD_ENCENDIDAS = {"ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA", "ENABLE_V750_CODIGO_MIROVA"}
-    assert distintas == (VIAS - PROD_ENCENDIDAS) | {"DATA_SUBDIR", "PROFILE_NAME"}, sorted(distintas)
+    # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y este perfil lo
+    # declara apagado (no se midió de día), así que también difieren en ese flag. Texto original: sin ENABLE_DAYTIME_MODIS.
+    assert distintas == (VIAS - PROD_ENCENDIDAS) | {"DATA_SUBDIR", "PROFILE_NAME", "ENABLE_DAYTIME_MODIS"}, \
+        sorted(distintas)
+    assert (prod["ENABLE_DAYTIME_MODIS"], sombra["ENABLE_DAYTIME_MODIS"]) == ("True", "False")
     # control: en producción las vías de PROD_ENCENDIDAS están encendidas y las demás apagadas, y en la sombra las tres
     # encendidas (si no, el diff de arriba podría coincidir por otra razón)
     assert all(prod[k] == ("True" if k in PROD_ENCENDIDAS else "False") for k in VIAS)

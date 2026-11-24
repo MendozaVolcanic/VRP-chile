@@ -1,0 +1,52 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+ventana 2026-03-01 a 2026-11-22; producción data/mirova_equivalent; NHI-v1 commit 4d24515abe1e9fcb0a014d13eeb1963483b98993; cajas 4d24515abe1e9fcb0a014d13eeb1963483b98993
+cajas NHI usables: ['Chaiten', 'Copahue', 'Isluga', 'Lascar', 'Llaima', 'NevadosDeChillan', 'PlanchonPeteroa', 'PuyehueCordonCaulle', 'Tupungatito', 'Villarrica']
+
+PASADAS VIIRS 375 nocturnas por clase (par 750 del mismo satélite a <= 120 s):
+  ambos              576
+  ninguno            9313
+  solo375            1668
+  solo750            45
+
+PASADAS solo375 por volcán, con número de píxeles alertados del 375 y potencia del tablero (MW):
+  Lascar                157  mediana 0.18 MW, máx 1.39 MW; píxeles 1:48 2:39 3+:70
+  Lastarria             267  mediana 0.09 MW, máx 0.35 MW; píxeles 1:97 2:109 3+:61
+  Isluga                365  mediana 0.20 MW, máx 2.15 MW; píxeles 1:86 2:110 3+:169
+  Tupungatito           281  mediana 0.15 MW, máx 0.69 MW; píxeles 1:66 2:113 3+:102
+  PlanchonPeteroa       190  mediana 0.14 MW, máx 3.10 MW; píxeles 1:69 2:72 3+:49
+  NevadosDeChillan       33  mediana 0.09 MW, máx 1.41 MW; píxeles 1:16 2:3 3+:14
+  Llaima                  3  mediana 0.08 MW, máx 0.64 MW; píxeles 1:1 2:2 3+:0
+  Villarrica             29  mediana 0.18 MW, máx 0.57 MW; píxeles 1:5 2:16 3+:8
+  Copahue                 5  mediana 0.09 MW, máx 0.21 MW; píxeles 1:3 2:1 3+:1
+  PuyehueCordonCaulle   254  mediana 0.25 MW, máx 1.31 MW; píxeles 1:79 2:63 3+:112
+  Chaiten                84  mediana 0.10 MW, máx 0.27 MW; píxeles 1:44 2:36 3+:4
+
+NOCHES por clase: {'750': 397, 'ninguno': 1764, 'solo375': 776}
+
+TASA DE ALERTA NHI a ±1 día por clase de noche (sólo cajas usables)
+volcán                   ninguno (alerta/n)     solo375 (alerta/n)         750 (alerta/n)
+Lascar                           4/48 (8 %)            9/26 (35 %)          57/121 (47 %)
+Isluga                         11/35 (31 %)          18/151 (12 %)            8/60 (13 %)
+Tupungatito                     8/104 (8 %)            5/103 (5 %)            5/32 (16 %)
+PlanchonPeteroa                 9/112 (8 %)          19/105 (18 %)             1/12 (8 %)
+NevadosDeChillan              27/149 (18 %)            2/13 (15 %)           29/38 (76 %)
+Llaima                        72/186 (39 %)             1/2 (50 %)                0/0 (-)
+Villarrica                    40/152 (26 %)           17/24 (71 %)             4/7 (57 %)
+Copahue                       32/227 (14 %)              0/5 (0 %)                0/0 (-)
+PuyehueCordonCaulle              4/72 (6 %)            5/52 (10 %)             1/55 (2 %)
+Chaiten                       16/116 (14 %)            8/48 (17 %)              0/2 (0 %)
+TOTAL (agrupado)            223/1201 (19 %)          84/529 (16 %)         105/327 (32 %)
+
+CONTROL: fechas NHI corridas +15 días (debería no separar las clases si el instrumento no mide estación)
+volcán                   ninguno (alerta/n)     solo375 (alerta/n)         750 (alerta/n)
+Lascar                          6/55 (11 %)            7/24 (29 %)          65/118 (55 %)
+Isluga                          6/40 (15 %)          22/150 (15 %)            9/52 (17 %)
+Tupungatito                     7/107 (7 %)          11/101 (11 %)            4/32 (12 %)
+PlanchonPeteroa               19/116 (16 %)          19/102 (19 %)             1/12 (8 %)
+NevadosDeChillan              26/160 (16 %)            3/11 (27 %)           19/32 (59 %)
+Llaima                        78/189 (41 %)            3/3 (100 %)                0/0 (-)
+Villarrica                    56/164 (34 %)           11/22 (50 %)              0/4 (0 %)
+Copahue                       45/229 (20 %)             1/4 (25 %)                0/0 (-)
+PuyehueCordonCaulle              4/89 (4 %)             2/48 (4 %)            4/42 (10 %)
+Chaiten                       19/125 (15 %)            5/31 (16 %)              0/3 (0 %)
+TOTAL (agrupado)            266/1274 (21 %)          84/496 (17 %)         102/295 (35 %)

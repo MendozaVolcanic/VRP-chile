@@ -266,7 +266,10 @@ perfiles `guardia_k_modis` y `guardia_k_viirs` tienen la vía apagada y no lleva
 - **Sólo noches.** `pipeline/fetch.py` filtra los gránulos diurnos antes de bajarlos (`_filter_nighttime_granules`),
   así que nuestras 10 últimas son 10 nocturnas (unos 3,4 días en Chillán) y las de MIROVA mezclan día y noche (10 en
   unas 36 horas). Agregar las diurnas es otra decisión: más descarga y el MIR de día no se usa (regla «MIR sólo
-  nocturno»).
+  nocturno»). ⚠️ S198 (merge con main): ya no vale para MODIS. Main abrió el día de MODIS (S193) y el store trae
+  pasadas MODIS diurnas (`diag_codigo_mirova.dayflag = 1`; en Villarrica, Láscar y Llaima desde el 2026-11-17, 42 de
+  93 records MODIS), así que la pestaña MODIS mezcla día y noche como MIROVA. El panel marca esas tarjetas «de día» y
+  el aviso lo dice (`frontend/miniaturas.js`); VIIRS sigue sólo de noche.
 - **Un paso partido en dos gránulos.** El 14-Nov NOAA-21 pasó sobre Chillán a las 06:36 y 06:42 UTC: son dos gránulos
   consecutivos de 6 minutos del mismo paso. Nosotros guardamos los dos (06:36 con VRP 25,3 MW y 6.927 celdas sin
   dato; 06:42 escena inválida con 9.309). MIROVA muestra sólo el de 06:42, en blanco a medias, y no muestra el de
