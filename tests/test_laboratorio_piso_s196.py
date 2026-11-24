@@ -352,6 +352,19 @@ def test_q7_el_workflow_del_barrido_es_manual_no_publica_y_corre_los_nueve_perfi
     assert doc["concurrency"]["group"] == "s196-lab-piso"
 
 
+def test_q7_relanzar_recolectar_reemplaza_la_rama_parcial_de_su_corrida():
+    """S199: el primer recolectar de la tanda 3 (run 45308651250) publicó la rama con abril incompleto y los cinco
+    relanzados rebotaron con «fetch first», porque cada uno arma un commit nuevo desde todos los artefactos. La rama
+    es de una sola corrida y el relanzado trae todo lo del anterior y más: el push la reemplaza, y sólo a ella."""
+    codigo = "\n".join(l for l in FLUJO.read_text(encoding="utf-8").splitlines() if not l.lstrip().startswith("#"))
+    pushes = re.findall(r"git push[^\n]*", codigo)
+    assert pushes, "el workflow publica sus salidas"
+    for p in pushes:
+        assert re.search(r"--force\b", p), f"un relanzado debe reemplazar la rama parcial: {p}"
+        assert '"$RAMA"' in p and "main" not in p, f"sólo se fuerza la rama propia de la corrida: {p}"
+    assert re.search(r"RAMA: s196-lab-piso/\$\{\{ github\.run_id \}\}", codigo), "la rama es de esta corrida"
+
+
 # ------------------------------------------------------------------------------------------------ Q8 comparador
 def _store(d, nombre, recs):
     d.mkdir(parents=True, exist_ok=True)
