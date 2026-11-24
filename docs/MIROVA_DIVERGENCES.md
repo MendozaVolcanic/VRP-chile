@@ -3772,6 +3772,15 @@ el efecto no se ha medido.
   `.m` (el OSF sí publica fondo 0: 501 y 464 detecciones) y el record cuenta `alertados_sin_fondo`, también cuando sólo
   parte de los alertados quedó sin fondo. `t_bg_k` promedia sólo los alertados con fondo (antes dividía por todos y daba
   0 K sin fondo). Prueba: `tests/test_via_fondo_nulo_s192.py`.
+- **Historia sin reprocesar tras los arreglos de S192 y S193 (S199; auditoría Codex ronda 3, R3F3-104 y C2-V201,
+  verificadas; declarado por el acta de cierre aprobada por Nicolás el 2026-11-24,
+  `docs/ACTA_CIERRE_AUDITORIA_CODEX_2026-11-24.md`).** Los dos puntos anteriores (cráter sin evaluar, #1078, ficha
+  v1.62; fondo no estimable, S192) rigen hacia adelante. La historia publicada de los 11 Tier A no se reprocesó: 23
+  records de la vía cumplen hoy la condición de cráter sin evaluar y siguen sin `motivo_vacio` (se ven «sin anomalía»),
+  y 13 tienen fondo 0 sin el contador `alertados_sin_fondo` (8 publicados en la cumbre con la radiancia entera como
+  exceso). Ninguno es protegida. Reprocesar toca la historia publicada: sólo si Nicolás lo pide. Fuente:
+  `D:\codex-vrp\_salida\ronda3\f3_r3_verificacion\VEREDICTO.md` (R3F3-104) y
+  `D:\codex-vrp\_salida\ronda3\cierre2_verificacion\VEREDICTO.md` (C2-V201), fuera del repo.
 
 **Estado.** ⚠️ **S190:** costo de los puntos 1, 2, 3 y 6 y del escalón medido en `experiments/_s190_d36/INFORME.md` (veredictos: punto 6, no adoptar la Tabla 1, pre-registro «medir más»; escalón, no implementar y medir en el primer evento oblicuo grande; puntos 1 a 3, sin alertas perdidas atribuibles). Ningún cambio de producción. Texto anterior: ABIERTA, documental. Lo siguiente es medir el costo de los puntos 1, 2 y 6 antes de proponer un cambio
 (A116; bloque de arranque S186, §b.6).
