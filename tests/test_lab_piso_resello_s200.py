@@ -239,3 +239,36 @@ def test_b3_las_coordenadas_se_leen_una_vez_por_corrida(tmp_path, monkeypatch):
     _, quitados = M.prod_como_laboratorio(prod, tmp_path / "salida")
     assert quitados["Lascar"] == 1
     assert len(llamadas) == 1
+
+
+# ----------------------------------------------------------------------------------------------- R4FD-107 (S200c)
+# Acta de cierre de la ronda 4, aprobada por Nicolás el 2026-11-25: el fin de la ventana de evaluación queda sellado en
+# 2026-11-23 (último día de la última tanda despachada), antes de mirar ningún resultado. Fallan con el evaluador de
+# #1130 (sha256 0b403901...), que aceptaba cualquier fin.
+def test_107_el_fin_de_la_ventana_esta_sellado():
+    assert M.FIN_SELLADO == "2026-11-23"
+
+
+def test_107_otro_fin_es_invalido(tmp_path, monkeypatch):
+    llamadas = []
+    monkeypatch.setattr(M.E, "tasas_barrido", lambda *a: llamadas.append(a) or {})
+    r = M.calibrar(str(tmp_path), str(tmp_path), {}, str(tmp_path), "2026-07-31", str(tmp_path / "ref"))
+    assert r["estado"] == M.INVALIDO and "fin sellado" in r["detalle"]
+    assert llamadas == []                                       # ni siquiera se cuenta: no hay nada que mirar
+
+
+def test_107_el_fin_por_defecto_de_la_linea_de_comandos_es_el_sellado(monkeypatch, tmp_path):
+    visto = {}
+    monkeypatch.setattr(M, "calibrar", lambda *a: visto.setdefault("fin", a[4]) and {"estado": "x", "valor": None,
+                                                                                       "detalle": ""})
+    M.main(["calibrar", "--sin-zona", "a", "--control", "b", "--brazo", "0.003=c", "--dest", str(tmp_path),
+            "--out", str(tmp_path / "o.json")])
+    assert visto["fin"] == M.FIN_SELLADO
+
+
+def test_107_la_muestra_queda_identificada_por_archivo(tmp_path, monkeypatch):
+    r, _ = _armar(tmp_path, monkeypatch)
+    m = r["muestra"]
+    assert set(m) == {"sin_zona", M.CONTROL} | {str(p) for p in M.GRILLA_PISO}
+    assert all(len(h) == 64 for d in m.values() for h in d.values())
+    assert "Lascar.json" in m["sin_zona"]
