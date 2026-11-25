@@ -3796,7 +3796,7 @@ function renderDetail() {
   }
   // S180: los 34 no tienen imágenes de MIROVA; la galería decía «(0)» y era ruido.
   if (v.hasMirova) { propias.appendChild(galleryHost); renderGallery(v.name, galleryHost); }
-  if (typeof Miniaturas !== "undefined") Miniaturas.montar(dp, v.name, { sensor: detailSensor, getLevel, fmtHora: fmtLocalCL, vrpDe: (e) => { const r = d.records.find(x => x.datetime_utc === e.datetime_utc && x.sensor === e.sensor); return r ? eqVrp(r) : (e.vrp_mw || 0); } });   // S184: «Últimas 10 pasadas» (frontend/miniaturas.js), antes de lo plegado; una sola línea por el guard G8
+  if (typeof Miniaturas !== "undefined") Miniaturas.montar(dp, v.name, { sensor: detailSensor, getLevel, fmtHora: fmtLocalCL, radioKm: innerKm, recordDe: (e) => d.records.find(x => x.datetime_utc === e.datetime_utc && x.sensor === e.sensor) || null, vrpDe: (e, r) => r ? eqVrp(r) : null });   // S184: «Últimas 10 pasadas» (frontend/miniaturas.js), antes de lo plegado; una sola línea por el guard G8. R4FB-V202 (S199): sin record no se cae a e.vrp_mw (suma de todos los alertados, lejanas incluidas): la tarjeta dice «Sin dato del tablero»
   dp.appendChild(propias);
 
   panel.appendChild(dp);
