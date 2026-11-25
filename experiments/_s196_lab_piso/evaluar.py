@@ -184,7 +184,19 @@ def _dia_modis_lab():
     return bool((p.get("paths") or {}).get("enable_daytime_modis", False))
 
 
-def rechaza_como_laboratorio(r, vol, dia_modis_lab=None):
+def _herramientas_almacen():
+    """La regla de día del almacén y las coordenadas de volcanoes.yaml, cargadas UNA vez por llamada a
+    prod_como_laboratorio (re-sello S200b: releerlas en cada record costaba unos 82 minutos sobre producción entera,
+    medido por el verificador de #1129)."""
+    for p in (str(ROOT), str(ROOT / "scripts")):
+        if p not in sys.path:
+            sys.path.insert(0, p)
+    from pipeline.store import _reject_daytime, _solar_elevation
+    import banco_paridad as bp
+    return _reject_daytime, _solar_elevation, bp._coords_por_volcan()
+
+
+def rechaza_como_laboratorio(r, vol, dia_modis_lab=None, herramientas=None):
     """R4FD-V201. POR QUÉ: desde el 2026-11-15 12:30 UTC producción guarda las pasadas MODIS de día y el almacén del
     laboratorio las rechaza (pipeline/store.py::_reject_daytime con su perfil), así que el control «el brazo de
     producción da las cuentas de producción» salía INVÁLIDO por construcción con cualquier ventana que llegue hasta
@@ -192,16 +204,12 @@ def rechaza_como_laboratorio(r, vol, dia_modis_lab=None):
     flags del laboratorio. VIIRS no se filtra aquí: su día lo decide el mismo flag vivo en los dos perfiles
     (pipeline/diurno.py), así que no puede separar al laboratorio de producción. Un record sin hora legible el almacén
     lo guarda, y aquí se conserva."""
-    if str(ROOT) not in sys.path:
-        sys.path.insert(0, str(ROOT))
-    from pipeline.store import _reject_daytime, _solar_elevation
-    sys.path.insert(0, str(ROOT / "scripts"))
-    import banco_paridad as bp
+    _reject_daytime, _solar_elevation, coords = herramientas or _herramientas_almacen()
     try:
         dt = datetime.strptime(r.get("datetime_utc", ""), "%Y-%m-%d %H:%M")
     except (TypeError, ValueError):
         return False
-    lat, lon = bp._coords_por_volcan()[vol]
+    lat, lon = coords[vol]
     dia = _dia_modis_lab() if dia_modis_lab is None else dia_modis_lab
     return _reject_daytime(r.get("sensor", ""), _solar_elevation(lat, lon, dt), dia, enable_daytime_viirs=True)
 
@@ -212,6 +220,7 @@ def prod_como_laboratorio(prod, destino):
     sys.path.insert(0, str(ROOT / "scripts"))
     import banco_paridad as bp
     dia = _dia_modis_lab()
+    herr = _herramientas_almacen()
     destino = Path(destino)
     destino.mkdir(parents=True, exist_ok=True)
     quitados = {}
@@ -221,7 +230,7 @@ def prod_como_laboratorio(prod, destino):
             continue
         d = json.loads(ruta.read_text(encoding="utf-8"))
         recs = d["records"] if isinstance(d, dict) else d
-        quedan = [r for r in recs if not rechaza_como_laboratorio(r, vol, dia)]
+        quedan = [r for r in recs if not rechaza_como_laboratorio(r, vol, dia, herr)]
         quitados[vol] = len(recs) - len(quedan)
         salida = dict(d, records=quedan) if isinstance(d, dict) else {"records": quedan}
         (destino / ("%s.json" % vol)).write_text(json.dumps(salida, ensure_ascii=False), encoding="utf-8")
@@ -288,6 +297,7 @@ def calibrar(sin_zona, control, brazos, prod, fin, dest):
         ident[str(GRILLA_PISO[0])] = identidad_records(recs[str(GRILLA_PISO[0])], base)
     fuera = {str(p): identidad_records(_sin_actuar(recs[str(p)]), _sin_actuar(base), permitir_vacio=True)
              for p in brazos}
+    fuera_en_ventana = {str(p): sum(1 for r in _sin_actuar(recs[str(p)]) if _en_ventana(r, fin)) for p in brazos}
     # R4FD-V201 y R4FD-106: producción contada con las reglas de día del laboratorio, y una sola bajada de la
     # referencia de MIROVA para todos los brazos y producción, con el sha256 de lo que se bajó.
     prod_lab, quitados = prod_como_laboratorio(prod, Path(dest) / "produccion_como_laboratorio")
@@ -314,11 +324,15 @@ def calibrar(sin_zona, control, brazos, prod, fin, dest):
         res = {"estado": INVALIDO, "valor": None,
                "detalle": "el brazo de producción no reproduce las cuentas de producción: %s contra %s"
                           % (tasas.get(CONTROL), tasas_prod)}
-    elif any(v["n"] < N_MIN_FUERA for v in fuera.values()):
+    # Re-sello S200b (verificador de #1129): el poder cuenta sólo los records de la ventana de calibración donde la zona
+    # no actúa (la identidad sigue mirando todos), y SIN PODER no tapa un INVALIDO que ya dio elegir_piso (por ejemplo,
+    # tasa no monótona: un instrumento roto se informa como roto).
+    elif res["estado"] != INVALIDO and any(v < N_MIN_FUERA for v in fuera_en_ventana.values()):
         res = {"estado": SIN_PODER, "valor": None,
-               "detalle": "la identidad donde la zona no actúa compara menos de %d records en algún brazo: %s"
-                          % (N_MIN_FUERA, {k: v["n"] for k, v in fuera.items() if v["n"] < N_MIN_FUERA})}
-    res.update({"identidad": ident, "identidad_donde_no_actua": fuera, "tasas_produccion": tasas_prod,
+               "detalle": "la identidad donde la zona no actúa compara menos de %d records de la ventana en algún "
+                          "brazo: %s" % (N_MIN_FUERA, {k: v for k, v in fuera_en_ventana.items() if v < N_MIN_FUERA})}
+    res.update({"identidad": ident, "identidad_donde_no_actua": fuera,
+                "donde_no_actua_en_ventana": fuera_en_ventana, "tasas_produccion": tasas_prod,
                 "tasas": {str(k): v for k, v in tasas.items()}, "s_a": S_A, "grilla_piso": list(GRILLA_PISO),
                 "cobertura_brazos": cob, "codigo_brazos": cod, "referencia_mirova": referencia,
                 "produccion_como_laboratorio": {"carpeta": prod_lab, "quitados": quitados}})

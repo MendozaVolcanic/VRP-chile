@@ -195,3 +195,47 @@ def test_106_una_sola_bajada_de_la_referencia_y_su_procedencia(tmp_path, monkeyp
     h = hashlib.sha256(b"referencia registro_vrp_ocr.csv\n").hexdigest()
     assert r["referencia_mirova"]["registro_vrp_ocr.csv"] == h
     assert set(r["referencia_mirova"]) == {"registro_vrp_consolidado.csv", "registro_vrp_ocr.csv"}
+
+
+# ----------------------------------------------------------------------------------------------- re-sello S200b
+# Observaciones del verificador independiente de #1129 (D:\vrp-trabajo\temporales\s200\verif_1129\VEREDICTO.md, efectos
+# no buscados 1, 2 y 6). Fallan con el evaluador de #1129 (sha256 5493f1a7...) y pasan con el de S200b.
+def test_b1_sin_poder_no_tapa_un_invalido_por_tasa_no_monotona(tmp_path, monkeypatch):
+    """Tasa no monótona (instrumento roto) y pocos records donde la zona no actúa: manda INVÁLIDO, no SIN PODER."""
+    mono = dict(BASE)
+    BASE[0.0025] = .16                                           # baja en el camino: no monótona
+    try:
+        r, _ = _armar(tmp_path, monkeypatch, n_dia=M.N_MIN_FUERA - 1)
+    finally:
+        BASE.clear()
+        BASE.update(mono)
+    assert r["estado"] == M.INVALIDO and "monótona" in r["detalle"]
+
+
+def test_b2_el_poder_cuenta_solo_records_dentro_de_la_ventana(tmp_path, monkeypatch):
+    """Los records donde la zona no actúa fuera de la ventana de calibración no dan poder."""
+    def cambiar(nombre, recs):
+        for x in recs["Lascar"]:
+            if x["diag_codigo_mirova"]["dayflag"] == 1:
+                # mayo y junio pasan a diciembre de 2025 y enero de 2026, antes de VENTANA_CALIBRACION_INICIO y sin
+                # que dos pasadas caigan en la misma hora (las 40 siguen siendo distintas)
+                mes = {"2026-05": "2025-12", "2026-06": "2026-01"}[x["datetime_utc"][:7]]
+                x["datetime_utc"] = mes + x["datetime_utc"][7:]
+    r, _ = _armar(tmp_path, monkeypatch, cambiar)
+    assert r["estado"] == M.SIN_PODER and "no actúa" in r["detalle"]
+
+
+def test_b3_las_coordenadas_se_leen_una_vez_por_corrida(tmp_path, monkeypatch):
+    """El filtro de día releía volcanoes.yaml en cada record (unos 82 min sobre producción entera, medido por el
+    verificador); ahora una vez por llamada a prod_como_laboratorio."""
+    import sys
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import banco_paridad as bp
+    llamadas = []
+    real = bp._coords_por_volcan
+    monkeypatch.setattr(bp, "_coords_por_volcan", lambda: llamadas.append(1) or real())
+    recs = _recs_lab(40)["Lascar"] + [_rec("2026-11-20 15:00", 1, sensor="MODIS_TERRA")]
+    prod = _escribir(tmp_path / "prod", {"Lascar": recs})
+    _, quitados = M.prod_como_laboratorio(prod, tmp_path / "salida")
+    assert quitados["Lascar"] == 1
+    assert len(llamadas) == 1
