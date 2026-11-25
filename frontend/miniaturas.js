@@ -46,13 +46,23 @@ const Miniaturas = (() => {
   const raiz = () => (typeof BASE_PATH === "string" ? BASE_PATH : "");
   let familiaElegida = null;
 
+  // R4FEF-109 (Codex ronda 4, S199): un índice que no se pudo leer (red, JSON cortado, error del servidor) no se guarda
+  // en caché y el panel lo dice; antes quedaba null toda la sesión y el panel desaparecía sin aviso. Un 404 sigue siendo
+  // «este volcán no tiene miniaturas» (los 34 de la sombra) y no muestra nada.
+  const fallas = {};
   async function cargarIndice(volcan) {
     if (volcan in cache) return cache[volcan];
-    let idx = null;
+    let idx = null, falla = null;
     try {
       const r = await fetch(`${raiz()}data/miniaturas/${encodeURIComponent(volcan)}/indice.json`, { cache: "no-cache" });
       if (r.ok) idx = await r.json();
-    } catch (e) { idx = null; }
+      else if (r.status !== 404) falla = "HTTP " + r.status;
+    } catch (e) { idx = null; falla = e && e.name === "SyntaxError" ? "JSON ilegible" : "falla de red"; }
+    const antes = fallas[volcan];
+    if (falla) fallas[volcan] = falla; else delete fallas[volcan];
+    if (antes !== fallas[volcan] && typeof window !== "undefined" && typeof window.dispatchEvent === "function" &&
+        typeof CustomEvent === "function") window.dispatchEvent(new CustomEvent("vrp-falla-capa"));   // el encabezado lo cuenta
+    if (falla) return null;   // no se guarda: se reintenta la próxima vez que se abra el volcán
     cache[volcan] = idx;
     return idx;
   }
@@ -277,6 +287,12 @@ const Miniaturas = (() => {
     panel.id = "mini-panel";
     host.appendChild(panel);
     cargarIndice(volcan).then(idx => {
+      if (!idx && fallas[volcan]) {   // R4FEF-109: no se pudo leer; no es «sin pasadas»
+        panel.appendChild(nodo("h3", null, "Últimas pasadas"));
+        panel.appendChild(nodo("div", "mini-aviso", "No se pudo leer el índice de miniaturas (" + fallas[volcan] + "). " +
+          "Se vuelve a intentar al abrir de nuevo el volcán; el resto de la página no se afecta."));
+        return;
+      }
       if (!idx || !idx.familias) { panel.remove(); return; }   // volcán sin miniaturas todavía: no se muestra nada
       const base = `${raiz()}data/miniaturas/${encodeURIComponent(volcan)}`;
       const conDatos = FAMILIAS.filter(f => (idx.familias[f.key] || []).length);
@@ -316,5 +332,5 @@ const Miniaturas = (() => {
     return panel;
   }
 
-  return { montar, cargarIndice, _pintar: pintar, _estado: estado };
+  return { montar, cargarIndice, fallasIndice: () => Object.assign({}, fallas), _pintar: pintar, _estado: estado };
 })();
