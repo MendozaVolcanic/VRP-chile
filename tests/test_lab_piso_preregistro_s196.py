@@ -213,15 +213,23 @@ def _base_recs():
     noche["diag_codigo_mirova"] = dict(noche["diag_codigo_mirova"], dayflag=0, s1={"pasada1": {"u_nti2": 0.003}})
     dia = dict(_rec(t="2026-03-02 15:00"), via_codigo_mirova=True)
     dia["diag_codigo_mirova"] = dict(dia["diag_codigo_mirova"], dayflag=1)
-    return {"Lascar": [noche, dia]}
+    # Re-sello S200 (R4FD-102): la identidad donde la zona no actúa necesita N_MIN_FUERA records comparados; con menos
+    # el evaluador dice SIN PODER. Se agregan 30 pasadas de día más (la de índice 1 sigue siendo la que se altera).
+    mas = []
+    for d in range(30):
+        x = dict(_rec(t="2026-04-%02d 15:00" % (d + 1)), via_codigo_mirova=True)
+        x["diag_codigo_mirova"] = dict(x["diag_codigo_mirova"], dayflag=1)
+        mas.append(x)
+    return {"Lascar": [noche, dia] + mas}
 
 
 def _armar(tmp_path, monkeypatch, cambiar=None, prod_igual=True):
     """Barrido sintético: todos los brazos con los records de base; `cambiar(nombre, recs)` altera uno."""
     t = _tasas(BASE)
+    # Re-sello S200 (R4FD-106): una sola llamada con todos los brazos y producción (antes eran dos).
+    prod_t = dict(t[M.CONTROL]) if prod_igual else dict(t[M.CONTROL], NOCHE=(1, 1000))
     monkeypatch.setattr(M.E, "tasas_barrido", lambda brazos, fin, dest: (
-        {"prod": dict(t[M.CONTROL]) if prod_igual else dict(t[M.CONTROL], NOCHE=(1, 1000))} if "prod" in brazos
-        else {k: t[k] for k in brazos}))
+        {k: (prod_t if k == "prod" else t[k]) for k in brazos}))
     dirs = {}
     for nombre in ["sin_zona", M.CONTROL] + [str(p) for p in M.GRILLA_PISO]:
         recs = _base_recs()

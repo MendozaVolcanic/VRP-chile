@@ -13,8 +13,15 @@
 > veredicto NHI; del barrido de s sólo se contaron publicaciones nuevas (tres volcanes, marzo), que es calibración y
 > no mira NHI. Si algún día se juzgaran contra NHI las dos palancas, la segunda se declara segundo intento.
 >
-> **Sello.** El evaluador es `experiments/_s196_lab_piso/evaluar.py`,
-> sha256 del evaluador (fin de línea LF): `16d0360ebea5549000bbea432050102cf9e87a231a9cba23dbd1222ff4a42217`;
+> ⚠️ **Re-sello S200 (2026-11-25), antes de mirar ningún resultado del barrido.** Nicolás decidió re-sellar
+> («Sí, re-sella», 2026-11-25) los cuatro defectos de gravedad 3 que la auditoría externa (Codex, ronda 4, frente D)
+> encontró y un verificador Claude de contexto limpio reprodujo; qué cambió y por qué, en el §5b. La vara (S194) no
+> cambia. Sello vigente:
+> sha256 del evaluador (fin de línea LF): `5493f1a714f709c381bae7722c7cbb09c816288f38857b720f77443d287a8286`.
+> Sello anterior (S196), conservado: el evaluador tenía
+> sha256 (fin de línea LF) `16d0360ebea5549000bbea432050102cf9e87a231a9cba23dbd1222ff4a42217`.
+>
+> **Sello.** El evaluador es `experiments/_s196_lab_piso/evaluar.py`;
 > sha256 del evaluador S194 que importa (fin de línea LF): `072400b76afd536ba161a0e488182873eb83045cdc68c9faf21f8c7e5293f903`
 > (el mismo que declara el pre-registro S194 tras su re-sello del 2026-11-23). Las pruebas
 > `tests/test_lab_piso_preregistro_s196.py::test_sello_hash_del_evaluador_en_el_preregistro` y
@@ -159,6 +166,51 @@ Los del S194 §2, sin cambios: records del laboratorio y de producción desde 20
   **menor p_A** de la grilla cuya tasa por noche no supera 30 %), con la comparación entera 10·publicadas <=
   3·negativas (30 % exacto cumple). Si se queda en 0,003, el estado lo dice («el piso de hoy: sólo actúa el s de la
   zona A»); si llega a 0,0015, también («el piso de la grilla»), para que nadie lea un extremo como una calibración.
+
+## 5b. Re-sello S200 (2026-11-25): cuatro controles corregidos antes de evaluar
+
+**Cuándo y por qué.** La ronda 4 de la auditoría externa con Codex (frente D) y un verificador Claude de contexto limpio
+que la reprodujo con el `calibrar` y el `tasas_barrido` reales encontraron que, tal como estaba sellado, el evaluador
+podía elegir un piso sin poder sostenerlo o salir inválido por construcción
+(`experiments/_s196_lab_piso/PROPUESTA_RESELLO_S199.md`, #1123). Nicolás decidió re-sellar el 2026-11-25. **Nadie ha
+corrido `calibrar` sobre el barrido**: abril, mayo y junio están cerrados y contados por brazo con
+`contar_brazos_piso.py` (records por volcán, cuántos publican y cuántos publican que el control no), sin etiquetar
+negativos limpios contra MIROVA, sin tasa por noche y sin elección. Esos conteos se vieron (los dejó la cadena del
+barrido); por eso este re-sello no toca la regla, la grilla ni la tasa objetivo: sólo arregla controles cuyo defecto
+es mecánico y no depende de ningún número del barrido. Lo que no cambia: los brazos, la grilla, s_A, la medida,
+la tasa objetivo, la unidad, la regla de elección (`elegir_piso`, intacta) y la vara del S194.
+
+**Qué cambia** (todo en `calibrar`; pruebas en `tests/test_lab_piso_resello_s200.py`, que fallan con el evaluador
+sellado en S196):
+
+- **R4FD-V201, producción contada como la guarda el laboratorio.** Desde el 2026-11-15 12:30 UTC producción guarda las
+  pasadas MODIS de día y el almacén del laboratorio las rechaza, así que el control «el brazo `control` da las cuentas
+  de producción» salía INVALIDO con cualquier ventana que llegue hasta hoy (con fin 2026-11-20, un control perfecto
+  daba en MODIS 5.117 negativos contra 5.217). Ahora producción se cuenta sin los records que el almacén del
+  laboratorio habría rechazado: la misma función `pipeline/store.py::_reject_daytime` con el flag del perfil
+  `laboratorio` y las coordenadas de `volcanoes.yaml`. El control sigue completo y la ventana no se corta; una
+  diferencia de noche sigue invalidando. La salida dice cuántos records se quitaron por volcán.
+- **R4FD-101, todos los brazos con las mismas pasadas.** Si un brazo pierde pasadas que otro tiene (un trozo que muere a
+  mitad de la lista, un brazo que cae un día), su tasa cambia y la elección también (caso medido: 17 noches perdidas en
+  0,00175 cambiaban 0,002 por 0,00175 con estado ELEGIDO). Ahora todos los brazos tienen que cubrir exactamente las
+  mismas pasadas (volcán, sensor, hora) dentro de la ventana de calibración, con el `sin-zona` de referencia. Si no:
+  INVALIDO, con cuántas faltan y sobran por brazo.
+- **R4FD-102, la identidad donde la zona no actúa necesita poder.** Ese control se apoyaba casi entero en Cordón Caulle
+  y sin ese volcán comparaba cero records y aun así decía idéntico. Ahora, con menos de 30 records comparados en algún
+  brazo (el mismo umbral de poder de este §5), SIN PODER.
+- **R4FD-105, el mismo código en todos los brazos.** En cada pasada todos los brazos tienen que traer el mismo
+  `regimen.codigo_sha`; si no, INVALIDO. Entre tandas el código puede cambiar (cada mes se despacha aparte) y se
+  declara en la salida cada código con el tramo de fechas que cubre.
+- **R4FD-106 (gravedad 2), una sola bajada de la referencia.** La referencia de MIROVA se baja una vez para todos los
+  brazos y producción, y la salida guarda el sha256 de los dos CSV.
+
+**Orden de los controles.** Primero los que invalidan (cobertura, código, identidad del `control`, fuga donde la zona
+no actúa, cuentas de producción) y después el de poder; con todos en verde rige la regla del §5 sin cambios.
+
+**No entra en este re-sello** (gravedad 2, quedan declarados): R4FD-104 y R4FD-V202 (la recolección y `reproc_brazos.py`
+no dejan escrito qué brazo cayó y en qué día; con R4FD-101 un brazo caído ya invalida, aunque el informe no diga por
+qué cayó), R4FD-108 (cero unidades NHI lanzan excepción en vez de SIN PODER; está en el evaluador S194, que es la vara y
+no se toca aquí) y R4FD-111 (la calibración exige el JSON de Cordón Caulle; hoy todos los brazos lo traen).
 
 ## 6. La vara, sin cambios
 
