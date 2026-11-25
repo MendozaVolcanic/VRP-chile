@@ -21,6 +21,8 @@ página incluye, en su orden) en un DOM mínimo, con un fetch que sirve datos si
 (5) cobertura.js: con el archivo ilegible el aviso dice «cobertura no disponible» (en la tarjeta y en la lista); la falla
     no queda en caché (la llamada siguiente vuelve a pedir el archivo y pinta lo que trae); una lectura buena se relee al
     vencer VIGENCIA_MS y repintar() muestra un hueco nuevo sin redibujar la página. Control: archivo sano y vacío no pinta.
+(6) miniaturas.js: un índice ilegible deja el panel con «No se pudo leer el índice de miniaturas» en vez de quitarlo; un
+    404 (volcán sin miniaturas) sigue sin mostrar nada.
 
 LAS DOS PREGUNTAS DEL INSTRUMENTO. (1) ¿Fallaría con el código de antes? Sí: con frontend/ de origin/main previo a este
 cambio, (1) da 0 tarjetas (init rechaza), (3) queda en «Cargando…», (5) deja el aviso vacío y hace una sola petición
@@ -154,8 +156,12 @@ function cargarPagina(pagina, estado) {
     matchMedia: () => ({ matches: false, addEventListener() {}, addListener() {} }),
     Image: function () {}, URL, URLSearchParams, Blob: function () {}, Intl, Date: DateFijo, Math, JSON, Promise, Map, Set,
     Number, String, Array, Object, TextDecoder, TextEncoder, structuredClone, alert() {}, confirm: () => true,
-    innerWidth: 1280, innerHeight: 900, devicePixelRatio: 1, addEventListener() {}, removeEventListener() {},
+    innerWidth: 1280, innerHeight: 900, devicePixelRatio: 1, removeEventListener() {},
+    CustomEvent: class { constructor(type) { this.type = type; } },
   };
+  const oyentes = {};   // eventos de window ("vrp-falla-capa" de cobertura.js y miniaturas.js)
+  ctx.addEventListener = (t, f) => { (oyentes[t] = oyentes[t] || []).push(f); };
+  ctx.dispatchEvent = e => { for (const f of oyentes[e.type] || []) f(e); return true; };
   ctx.window = ctx; ctx.self = ctx; ctx.globalThis = ctx;
   vm.createContext(ctx);
   const re = /<script(\s[^>]*)?>([\s\S]*?)<\/script>/g;
@@ -197,6 +203,12 @@ async function pagina(caso) {
     out.cabecera = P.doc.getElementById('updated-label').textContent;
   };
   leer();
+  if (caso.detalle) {
+    P.ev('currentVolcano = VOLCANOES.find(x => x.name === ' + JSON.stringify(caso.detalle) + '); renderDetail();');
+    await flush();
+    out.detalle = P.doc.getElementById('detail').textContent;
+    out.semaforo = P.doc.getElementById('status-text').textContent;
+  }
   if (caso.refresco) {
     out.antes = Object.assign({}, out);
     for (const paso of caso.refresco) {
@@ -239,10 +251,12 @@ def _index(fallas=None, **kw):
 @pytest.fixture(scope="module")
 def index():
     return _correr({
-        "control": _index(),
+        "control": _index(detalle="Llaima"),
+        "miniaturas": _index([{"patron": r"miniaturas/Llaima/indice\.json", "modo": "cortado"}], detalle="Llaima"),
         "propio": _index([{"patron": LLAIMA_PROPIO, "modo": "cortado"}]),
         "mirova": _index([{"patron": LLAIMA_MIROVA, "modo": "cortado"}]),
         "sombra": _index([{"patron": ANTUCO_SOMBRA, "modo": "cortado"}]),
+        "cobertura": _index([{"patron": r"cobertura/Villarrica\.json", "modo": "cortado"}]),
         "refresco": _index(refresco=[{"nombre": "falla", "fallas": [{"patron": LLAIMA_PROPIO, "modo": "cortado"}]},
                                      {"nombre": "sana", "fallas": []}]),
     })
@@ -270,6 +284,24 @@ def test_index_un_json_cortado_afecta_solo_a_su_volcan(index, caso, volcan, text
     otro = "Villarrica" if volcan != "Villarrica" else "Llaima"
     assert "no se pudo" not in r["porVolcan"][otro]
     assert r["semaforo"] != "Sistema Operativo", r["semaforo"]
+
+
+def test_index_cobertura_ilegible_lo_dice_la_tarjeta_y_el_encabezado(index):
+    r = index["cobertura"]
+    assert r["rechazo"] is None and r["tarjetas"] == 43
+    assert "cobertura no disponible" in r["porVolcan"]["Villarrica"], r["porVolcan"]["Villarrica"]
+    assert "cobertura no disponible" not in r["porVolcan"]["Llaima"]
+    assert r["semaforo"] == "Archivos sin leer: 1 volcán", r["semaforo"]
+    assert "cobertura no disponible" not in index["control"]["porVolcan"]["Villarrica"]
+
+
+def test_index_miniaturas_ilegibles_lo_dicen_y_no_apagan_el_panel_del_volcan(index):
+    r = index["miniaturas"]
+    assert r["rechazo"] is None and r["tarjetas"] == 43
+    assert "No se pudo leer el índice de miniaturas (JSON ilegible)" in r["detalle"], r["detalle"][:300]
+    assert "Llaima" in r["detalle"]
+    assert "índice de miniaturas" not in index["control"]["detalle"], "control: sin índice (404) no se avisa nada"
+    assert r["semaforo"] == "Archivos sin leer: 1 volcán", r["semaforo"]
 
 
 def test_index_falla_en_el_sondeo_conserva_lo_leido_y_lo_avisa(index):

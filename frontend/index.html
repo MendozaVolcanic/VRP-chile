@@ -1175,7 +1175,7 @@ async function loadVolcano(v, opts = {}) {
     if (window.DiurnoTablero) DiurnoTablero.marcar(allData[v.name].records, v.lat, v.lon);
   } catch (e) {   // R4FEF-109: un archivo que se lee pero trae algo inesperado tampoco apaga el resto del tablero
     console.error("VRP Chile: no se pudieron preparar los datos de " + v.name, e);
-    allData[v.name] = { records: [], mirovaRecords: [], mirovaDiaOcr: [], mirovaPasadas: null, updated: null,
+    allData[v.name] = { records: [], mirovaRecords: [], mirovaPasadas: null, updated: null,   // sin el OCR diurno: quien lo lee usa `|| []`
                         falla: { propio: "datos con forma inesperada", propioConservado: false, mirova: null, hora } };
   }
 }
@@ -2758,15 +2758,7 @@ let _headerWorst = null;
 function trackHeaderFreshness(fresh) {
   if (!(fresh.cls in _FRESH_RANK)) return;
   if (_headerWorst == null || _FRESH_RANK[fresh.cls] > _FRESH_RANK[_headerWorst.cls]) _headerWorst = fresh;
-  const dot = document.querySelector(".status-dot");
-  const txt = document.getElementById("status-text");
-  if (!dot || !_headerWorst) return;
-  dot.className = "status-dot " + _headerWorst.cls;
-  const label = _headerWorst.cls === "mon-fresh" ? "Sistema Operativo"
-              : _headerWorst.cls === "mon-lagging" ? "Datos atrasados"
-              : _headerWorst.cls === "mon-none" ? "Volcán principal sin datos"
-              : "Sin pasadas recientes";
-  if (txt) { txt.textContent = label; txt.title = "Peor frescura entre los volcanes Tier A: " + _headerWorst.txt; }
+  avisoFallasEncabezado();
 }
 
 // R4FEF-109 (Codex ronda 4, S199): qué archivo de un volcán no se pudo leer (allData[v].falla, lo llena loadVolcano).
@@ -2784,17 +2776,34 @@ function textoFallaCarga(f) {
 const TXT_FALLA_CARGA = "El tablero no pudo leer un archivo de este volcán (falta, llegó cortado o la red falló). No es " +
   "«sin anomalía»: lo que no se leyó no se sabe. Se vuelve a intentar en la próxima consulta (cada 5 min); el resto de " +
   "los volcanes no se afecta. Sólo display: no cambia ninguna detección.";
+// Pinta el semáforo: la peor frescura de los Tier A (S131, S190) y, si faltó algún archivo (datos, MIROVA, sombra,
+// cobertura o miniaturas), «Archivos sin leer» en vez de «Sistema Operativo», con la lista en el title. Se llama desde
+// trackHeaderFreshness, al final de buildCards y con el evento "vrp-falla-capa" de cobertura.js y miniaturas.js.
 function avisoFallasEncabezado() {
-  const fallas = VOLCANOES.filter(v => allData[v.name] && allData[v.name].falla);
   const dot = document.querySelector(".status-dot"), txt = document.getElementById("status-text");
-  if (!fallas.length || !dot || !txt) return;
-  if (!_headerWorst || _headerWorst.cls === "mon-fresh") {
+  if (!dot || !_headerWorst) return;
+  dot.className = "status-dot " + _headerWorst.cls;
+  const label = _headerWorst.cls === "mon-fresh" ? "Sistema Operativo"
+              : _headerWorst.cls === "mon-lagging" ? "Datos atrasados"
+              : _headerWorst.cls === "mon-none" ? "Volcán principal sin datos"
+              : "Sin pasadas recientes";
+  if (!txt) return;
+  txt.textContent = label; txt.title = "Peor frescura entre los volcanes Tier A: " + _headerWorst.txt;
+  const vols = typeof VOLCANOES !== "undefined" ? VOLCANOES : [], datos = typeof allData !== "undefined" ? allData : {};
+  const nombre = n => (vols.find(v => v.name === n) || { display: n }).display;
+  const lineas = [], conFalla = new Set();
+  for (const v of vols) if (datos[v.name] && datos[v.name].falla) { conFalla.add(v.name); lineas.push("· " + v.display + ": " + textoFallaCarga(datos[v.name].falla)); }
+  const capas = [["cobertura no disponible", typeof CoberturaTablero !== "undefined" && CoberturaTablero.fallas ? CoberturaTablero.fallas() : {}],
+                 ["no se pudo leer el índice de miniaturas", typeof Miniaturas !== "undefined" && Miniaturas.fallasIndice ? Miniaturas.fallasIndice() : {}]];
+  for (const [que, m] of capas) for (const [n, motivo] of Object.entries(m)) { conFalla.add(n); lineas.push("· " + nombre(n) + ": " + que + " (" + motivo + ")"); }
+  if (!conFalla.size) return;
+  if (_headerWorst.cls === "mon-fresh") {
     dot.className = "status-dot mon-lagging";
-    txt.textContent = "Archivos sin leer: " + fallas.length + (fallas.length === 1 ? " volcán" : " volcanes");
+    txt.textContent = "Archivos sin leer: " + conFalla.size + (conFalla.size === 1 ? " volcán" : " volcanes");
   }
-  txt.title = (txt.title ? txt.title + "\n" : "") + "No se pudo leer:\n" +
-    fallas.map(v => "· " + v.display + ": " + textoFallaCarga(allData[v.name].falla)).join("\n");
+  txt.title += "\nNo se pudo leer:\n" + lineas.join("\n");
 }
+if (typeof window !== "undefined" && typeof window.addEventListener === "function") window.addEventListener("vrp-falla-capa", avisoFallasEncabezado);
 
 // S137 D5 (decisión de Nicolás) — corroboración agregada de MIROVA por volcán.
 // POR QUÉ. La fila R3 de S132 dice si MIROVA publicó en ESA pasada, que es un dato

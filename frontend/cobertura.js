@@ -64,10 +64,20 @@
     })().then(res => {
       if (res.estado === "ok") entrada.t = Date.now();
       else if (cache[volcan] === entrada) delete cache[volcan];
+      const antes = fallas[volcan];
+      if (res.estado === "ok") delete fallas[volcan]; else fallas[volcan] = res.motivo;
+      if (antes !== fallas[volcan]) avisarCambio();
       return res;
     });
     cache[volcan] = entrada;
     return entrada.p;
+  }
+
+  // Volcanes cuya última lectura de cobertura falló, para el encabezado de la página (no puede decir «Sistema
+  // Operativo» si faltó un archivo). Cada cambio se avisa con el evento "vrp-falla-capa" de window.
+  const fallas = {};
+  function avisarCambio() {
+    if (typeof raiz.dispatchEvent === "function" && typeof CustomEvent === "function") raiz.dispatchEvent(new CustomEvent("vrp-falla-capa"));
   }
 
   // Lo no medido que toca [desdeMs, hastaMs] (extremos incluidos) y cuya plataforma pasa `filtro(plataforma)`. Un día
@@ -218,7 +228,7 @@
   }
 
   const api = { COLOR, SIMBOLO, VIGENCIA_MS, TXT_NO_DISPONIBLE, cargar, pendientes, conteo, textoCorto, lineaItem, titulo,
-                pintar, repintar, nombrePlataforma };
+                pintar, repintar, nombrePlataforma, fallas: () => Object.assign({}, fallas) };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else raiz.CoberturaTablero = api;
 })(typeof window !== "undefined" ? window : this);

@@ -558,9 +558,11 @@ function _etiquetaActualizado() {
 }
 // R4FEF-109: si faltó un archivo, la cabecera lo dice (el aviso de cada volcán va en su tarjeta).
 function _sufijoFallas() {
-  const n = TIER_A.filter(v => allData[v.name] && allData[v.name].falla).length;
+  const cob = typeof CoberturaTablero !== "undefined" && CoberturaTablero.fallas ? CoberturaTablero.fallas() : {};
+  const n = TIER_A.filter(v => (allData[v.name] && allData[v.name].falla) || v.name in cob).length;
   return n ? " · archivos sin leer: " + n + (n === 1 ? " volcán" : " volcanes") : "";
 }
+window.addEventListener("vrp-falla-capa", () => { if (Object.keys(allData).length) _etiquetaActualizado(); });   // cobertura.js avisa al fallar o recuperarse
 
 async function loadVolcano(v) {
   // S120: mosaico solo muestra 30 días → el JSON liviano _recent (100d, ~27 MB los 11)
