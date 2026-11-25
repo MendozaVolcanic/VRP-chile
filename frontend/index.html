@@ -5044,7 +5044,7 @@ function historiaEvol(v, innerKm) {
       enrichWithMirovaConfirmation(recs, (allData[v.name] || {}).mirovaRecords || []);
       if (typeof DiurnoTablero !== "undefined") DiurnoTablero.marcar(recs, v.lat, v.lon);   // S193: y la marca de día, también como loadVolcano
       h.todas = todasPasadasEvol(recs, innerKm); h.t0 = tMinRecords(recs); h.estado = "lista";
-    }).catch(() => { h.estado = "fallo"; h.reintentarMs = Date.now() + 60000; });   // fetchJSON no atrapa un JSON cortado (devuelve r.json() sin await)
+    }).catch(() => { h.estado = "fallo"; h.reintentarMs = Date.now() + 60000; });   // red de seguridad: desde #1126 fetchJSON lee el JSON dentro de su try y da null si falla (R4C-106)
   }
   return h;
 }
