@@ -16,8 +16,9 @@
 > ⚠️ **Re-sello S200 (2026-11-25), antes de mirar ningún resultado del barrido.** Nicolás decidió re-sellar
 > («Sí, re-sella», 2026-11-25) los cuatro defectos de gravedad 3 que la auditoría externa (Codex, ronda 4, frente D)
 > encontró y un verificador Claude de contexto limpio reprodujo; qué cambió y por qué, en el §5b. La vara (S194) no
-> cambia. Sello vigente:
-> sha256 del evaluador (fin de línea LF): `5493f1a714f709c381bae7722c7cbb09c816288f38857b720f77443d287a8286`.
+> cambia. Sello vigente (S200b, tras las observaciones del verificador independiente de #1129, §5b al final):
+> sha256 del evaluador (fin de línea LF): `0b403901dedbf566ac0e190cf12d0861b26c24224bc773b1a70e73d42d61dd89`.
+> Sello del re-sello S200 (#1129), conservado: `5493f1a714f709c381bae7722c7cbb09c816288f38857b720f77443d287a8286`.
 > Sello anterior (S196), conservado: el evaluador tenía
 > sha256 (fin de línea LF) `16d0360ebea5549000bbea432050102cf9e87a231a9cba23dbd1222ff4a42217`.
 >
@@ -211,6 +212,24 @@ no actúa, cuentas de producción) y después el de poder; con todos en verde ri
 no dejan escrito qué brazo cayó y en qué día; con R4FD-101 un brazo caído ya invalida, aunque el informe no diga por
 qué cayó), R4FD-108 (cero unidades NHI lanzan excepción en vez de SIN PODER; está en el evaluador S194, que es la vara y
 no se toca aquí) y R4FD-111 (la calibración exige el JSON de Cordón Caulle; hoy todos los brazos lo traen).
+
+**S200b (2026-11-25, misma decisión, todavía antes de evaluar).** Un verificador Claude de contexto limpio revisó #1129
+con su propio instrumento (28 escenarios con el `tasas_barrido` real del S194;
+`D:\vrp-trabajo\temporales\s200\verif_1129\VEREDICTO.md`, fuera del repo) y confirmó los cinco arreglos. Dejó efectos
+no buscados; se corrigen tres, ninguno de los cuales cambiaba un ELEGIDO:
+
+- **SIN PODER ya no tapa un INVALIDO.** Si `elegir_piso` dice INVALIDO (por ejemplo, tasa no monótona: el instrumento
+  está roto), ese estado manda aunque falte poder donde la zona no actúa.
+- **El poder cuenta sólo records de la ventana de calibración** donde la zona no actúa (la identidad sigue mirando
+  todos). Antes, 40 records de enero daban poder a una ventana que empieza en marzo.
+- **Costo.** La regla de día y las coordenadas se cargan una vez por corrida y no en cada record (el verificador midió
+  unos 82 minutos sobre producción entera).
+
+Quedan declarados: R4FD-102 depende en la práctica de Cordón Caulle (en junio, Láscar no trae ningún record de día ni
+fuera de la vía), así que excluir ese volcán, como permite R4FD-111, deja al barrido sin poder para elegir; un brazo
+sin `regimen` en todos sus records pasa el control de código (hoy todos los records reales lo traen); un brazo
+relanzado con el mismo código y otro gránulo (NRT contra estándar) no se detecta, porque el defecto original no lo
+pedía; y se guarda el sha256 de los CSV de MIROVA, no el commit remoto del que vinieron.
 
 ## 6. La vara, sin cambios
 
