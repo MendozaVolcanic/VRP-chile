@@ -155,8 +155,51 @@
     return (typeof k === "number" && Number.isFinite(k) && k > 0) ? k : null;
   }
 
+  // R3F3-V101 (auditoría Codex ronda 3, S199): potencia con alertados sin fondo estimado. La potencia de una pasada suma,
+  // sobre los alertados, el exceso de radiancia sobre el fondo, que se interpola desde los vecinos no alertados. Si un
+  // alertado queda junto a un hueco de datos, el halo que se saca alrededor de los alertados se come los vecinos útiles y
+  // su fondo no se puede estimar; en VIIRS la vía sigue al .m de MIROVA y lo suma con fondo 0: la potencia de ese píxel es
+  // su radiancia entera, posiblemente inflada (D36, «Fondo no estimable»; en MODIS, si ninguno tiene fondo, la escena ya
+  // es no medida con motivo_vacio «fondo_no_estimado» y no entra aquí). El record lo cuenta en alertados_sin_fondo (desde
+  // S192). Los records anteriores no traen la clave: en ellos L_bk = 0 con alertados dice que NINGUNO tuvo fondo (L_bk
+  // suma sólo los fondos que existen, np.nansum en vrp_mirova) y se cuentan todos; si sólo una parte quedó sin fondo, el
+  // record viejo no lo dice (SIN DATO, no se marca). Medición y criterio idéntico en
+  // experiments/_s199_r3f3_v101/medir_sin_fondo.py. Prueba: tests/test_tablero_fondo_no_estimado_r3f3.py
+  // {n, total, inferido} si la potencia suma alertados sin fondo; null si no. total es null si el record no lo trae.
+  function fondoNoEstimado(r) {
+    const d = r && r.diag_codigo_mirova;
+    if (!d || typeof d !== "object" || d.motivo_vacio) return null;
+    const total = entero(r.n_anomalous_pixels);
+    const conClave = Object.prototype.hasOwnProperty.call(d, "alertados_sin_fondo");
+    const n = conClave ? entero(d.alertados_sin_fondo)
+            : (r.via_codigo_mirova === true && total > 0 && d.L_bk === 0 ? total : 0);
+    return n ? { n, total: total >= n ? total : null, inferido: !conClave } : null;
+  }
+
+  // Texto corto: «fondo no estimado en 2 de 5 alertados: la potencia puede estar sobreestimada».
+  function textoFondo(f) {
+    if (!f) return "";
+    return "fondo no estimado en " + (f.total ? f.n + " de " + plural(f.total, "alertado", "alertados")
+                                              : plural(f.n, "alertado", "alertados")) +
+      ": la potencia puede estar sobreestimada";
+  }
+
+  // Explicación para el operador (title).
+  function tituloFondo(f) {
+    if (!f) return "";
+    const uno = f.n === 1;
+    return "La potencia de la pasada suma, sobre los píxeles alertados, el exceso de radiancia sobre el fondo, que se " +
+      "estima con los vecinos no alertados. " + (uno ? "1 píxel alertado quedó" : f.n + " píxeles alertados quedaron") +
+      " junto a un hueco de datos, sin vecinos útiles, y su fondo no se pudo estimar. Como en el código de MIROVA, " +
+      (uno ? "ese píxel se suma" : "esos píxeles se suman") + " con fondo cero: entra su radiancia entera, no sólo el " +
+      "exceso, así que la potencia publicada puede ser mayor que la real." +
+      (f.inferido ? " Record anterior a la marca de fondo: se sabe porque la suma de los fondos de la pasada es cero, lo que " +
+        "dice que ningún alertado tuvo fondo." : "") +
+      " Esta marca no cambia la potencia publicada, ni el nivel, ni la clase: sólo avisa.";
+  }
+
   const api = { COLOR, SIMBOLO, craterNoMedido, textoCrater, tituloCrater, ultimaPasadaNoMedida, esNoMedido, marcasGrafico,
-                plugin, fondoK };
+                plugin, fondoK, fondoNoEstimado, textoFondo, tituloFondo };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else raiz.CraterNoMedido = api;
 })(typeof window !== "undefined" ? window : this);

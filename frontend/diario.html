@@ -766,6 +766,10 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
     // (frontend/crater_no_medido.js). Una escena que la vía no midió (motivo_vacio) no es pasada (S183) y no cuenta.
     crater_no_medido: jsonData && typeof CraterNoMedido !== "undefined"
       ? recs.filter(r => r._diurna !== true && !(r.diag_codigo_mirova && r.diag_codigo_mirova.motivo_vacio) && CraterNoMedido.craterNoMedido(r)).length : null,
+    // R3F3-V101 (Codex ronda 3): pasadas nocturnas del período cuya potencia suma alertados sin fondo estimado
+    // (CraterNoMedido.fondoNoEstimado, que ya salta la escena no medida).
+    fondo_no_estimado: jsonData && typeof CraterNoMedido !== "undefined"
+      ? recs.filter(r => r._diurna !== true && CraterNoMedido.fondoNoEstimado(r)).length : null,
     mirova_dist_med: mirovaDistMed,
     mirova_ventana: mirovaForVolc ? mirovaWindowed : null,   // S192 (F5-V201): para desgloseMirova; el total no cambia
   };
@@ -918,6 +922,16 @@ function renderCard(volc, jsonData, mirovaForVolc) {
       "la potencia de esos píxeles es un mínimo. Míralas en la tabla de pasadas de la página del volcán. Sólo avisa: no " +
       "cambia el conteo ni el nivel.";
     s1.appendChild(sN);
+  }
+  if (stats.fondo_no_estimado) {   // R3F3-V101: el detalle por pasada está en la página del volcán
+    const sF = el("span", "crater-no-medido");
+    sF.textContent = " (" + CraterNoMedido.SIMBOLO + " " + stats.fondo_no_estimado + (stats.fondo_no_estimado === 1 ? " pasada" : " pasadas") +
+      " con fondo no estimado: la potencia puede estar sobreestimada)";
+    sF.title = "Pasadas nocturnas del período en que uno o más píxeles alertados quedaron junto a un hueco de datos y su " +
+      "fondo no se pudo estimar. Como en el código de MIROVA, se suman con fondo cero: entra su radiancia entera, no sólo " +
+      "el exceso, así que la potencia puede ser mayor que la real. Míralas en la tabla de pasadas de la página del volcán. " +
+      "Sólo avisa: no cambia el conteo, el máximo ni el nivel.";
+    s1.appendChild(sF);
   }
   if (typeof CoberturaTablero !== "undefined") { const sCob = el("span", "no-medido"); s1.appendChild(sCob); const [c0, c1] = Periodo.intervalo(PERIODO, Date.now()); CoberturaTablero.pintar(sCob, volc.name, { desdeMs: c0, hastaMs: c1, antes: " (", despues: "; detalle en la página del volcán)" }); }   // S199 (F6-112): días y pasadas que el sistema no pudo medir (sólo display)
   stRow.appendChild(s1);

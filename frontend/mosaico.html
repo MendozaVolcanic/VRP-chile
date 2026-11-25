@@ -699,6 +699,7 @@ function buildSparklineData(records, innerKm) {
   // van al tooltip y a la raya naranja de arriba (CraterNoMedido.plugin).
   const noMedido = new Array(nBins).fill(false);
   const sat = new Array(nBins).fill(false);
+  const sinFondo = new Array(nBins).fill(false);   // R3F3-V101: potencia con alertados sin fondo estimado (frontend/crater_no_medido.js)
   for (const r of records) {
     const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t) || t < dayStart || t > now) continue;   // F5-V202: desde la medianoche del primer día
@@ -711,6 +712,7 @@ function buildSparklineData(records, innerKm) {
     const mc = !vacia && typeof CraterNoMedido !== "undefined" ? CraterNoMedido.craterNoMedido(r) : null;
     if (!vacia) { if (mc && CraterNoMedido.esNoMedido(mc)) noMedido[idx] = true; else observado[idx] = true; }
     if (mc && mc.nSat > 0 && v > 0) sat[idx] = true;
+    if (!vacia && v > 0 && typeof CraterNoMedido !== "undefined" && CraterNoMedido.fondoNoEstimado(r)) sinFondo[idx] = true;   // R3F3-V101
     if (v <= 0) continue;
     if (v > bins[idx]) bins[idx] = v;
   }
@@ -718,15 +720,18 @@ function buildSparklineData(records, innerKm) {
   for (let i = 0; i < nBins; i++) {
     labels.push(new Date(dayStart + i * ms));
   }
-  return { labels, values: bins.map((v, i) => (observado[i] || v > 0 ? v : null)), observado, dia, noMedido, sat };
+  return { labels, values: bins.map((v, i) => (observado[i] || v > 0 ? v : null)), observado, dia, noMedido, sat, sinFondo };
 }
 
 // F5-102: texto del tooltip de un día del minigráfico. Separa «se miró y no había calor» de «no hubo pasada medida».
 // R3F5-101: con `noMedido` (alguna pasada de la noche no midió el cráter) y `sat` (la MIR saturó: la potencia es un
 // mínimo) el texto lo dice; un día cuya única pasada no midió el cráter no es «sin pasadas medidas» ni «sin detecciones».
-function etiquetaDiaSparkline(v, observado, noMedido, sat) {
+// R3F3-V101: con `sinFondo` (una pasada con calor del día suma alertados sin fondo estimado) el texto avisa que la potencia
+// puede estar sobreestimada.
+function etiquetaDiaSparkline(v, observado, noMedido, sat, sinFondo) {
   const S = typeof CraterNoMedido !== "undefined" ? CraterNoMedido.SIMBOLO + " " : "";
   if (v > 0) return "VRP: " + fmtVRP(v) + " MW" + (sat ? " · " + S + "MIR saturada en el cráter: la potencia puede ser mayor" : "") +
+                    (sinFondo ? " · " + S + "fondo no estimado en una pasada: la potencia puede estar sobreestimada" : "") +
                     (noMedido ? " · " + S + "una pasada no midió el cráter" : "");
   if (observado) return "pasadas medidas, sin detecciones" + (noMedido ? " · " + S + "otra pasada no midió el cráter" : "");
   return noMedido ? S + "cráter no medido (el infrarrojo medio llegó sin dato o el barrido vino sin posición sobre el cráter)"
@@ -804,7 +809,8 @@ function renderSparkline(canvas, sparkData, level) {
             label: (ctx) => {
               if (ctx.dataset.diurna) return DiurnoTablero.SIMBOLO + " de día: " + fmtVRP(ctx.parsed.y) + " MW (" + DiurnoTablero.TEXTO + ")";   // S193
               return etiquetaDiaSparkline(sparkData.values[ctx.dataIndex], sparkData.observado[ctx.dataIndex],
-                                          sparkData.noMedido && sparkData.noMedido[ctx.dataIndex], sparkData.sat && sparkData.sat[ctx.dataIndex]);
+                                          sparkData.noMedido && sparkData.noMedido[ctx.dataIndex], sparkData.sat && sparkData.sat[ctx.dataIndex],
+                                          sparkData.sinFondo && sparkData.sinFondo[ctx.dataIndex]);   // R3F3-V101
             },
           },
           // Una sola línea nocturna por día aunque las barras de noche y de «sin pasada» compartan el día (el texto sale
@@ -910,6 +916,13 @@ function renderMosaico() {
       card.appendChild(el("div", { className: "mc-crater-no-medido", title: CraterNoMedido.tituloCrater(lnm.m),
         textContent: CraterNoMedido.SIMBOLO + " Pasada del " + lnm.rec.datetime_utc.slice(0, 16) + " UTC (" +
           (lnm.rec.sensor || "sensor sin dato") + "): " + CraterNoMedido.textoCrater(lnm.m) }));
+    }
+    // R3F3-V101 (Codex ronda 3): la detección de la tarjeta suma alertados sin fondo estimado (frontend/crater_no_medido.js;
+    // igual que la tarjeta de index.html): la potencia de arriba puede estar sobreestimada. Sólo avisa.
+    const lfe = latestRec && typeof CraterNoMedido !== "undefined" ? CraterNoMedido.fondoNoEstimado(latestRec) : null;
+    if (lfe) {
+      card.appendChild(el("div", { className: "mc-crater-no-medido", title: CraterNoMedido.tituloFondo(lfe),
+        textContent: CraterNoMedido.SIMBOLO + " Detección del " + String(latestTs).slice(0, 16) + " UTC: " + CraterNoMedido.textoFondo(lfe) }));
     }
     if (typeof CoberturaTablero !== "undefined") { const cobEl = el("div", { className: "mc-no-medido" }); card.appendChild(cobEl); CoberturaTablero.pintar(cobEl, v.name, { desdeMs: Date.now() - 48 * 3600000, prefijo: "En 48 h," }); }   // S199 (F6-112): pasadas no medidas, igual que la tarjeta de index.html (sólo display)
 
