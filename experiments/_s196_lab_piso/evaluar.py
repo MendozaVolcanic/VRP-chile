@@ -34,7 +34,7 @@ import argparse
 import importlib.util
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -173,6 +173,10 @@ def _sin_actuar(recs):
 # (experiments/_s196_lab_piso/PROPUESTA_RESELLO_S199.md). La vara (S194) no cambia. Pruebas:
 # tests/test_lab_piso_resello_s200.py.
 N_MIN_FUERA = N_MIN_NEG        # R4FD-102: mínimo de records comparados donde la zona no actúa (el umbral de poder §5)
+# R4FD-107 (S200c; acta de cierre de la ronda 4, aprobada por Nicolás el 2026-11-25). POR QUÉ: con las mismas carpetas,
+# fin 2026-05-31 elegía 0,0025, fin 07-31 elegía 0,00225 y fin 11-20 elegía 0,002; quien evalúa podía elegir el fin
+# mirando el resultado. El fin queda sellado en el último día de la última tanda despachada, antes de mirar nada.
+FIN_SELLADO = "2026-11-23"
 PERFIL_LAB = ROOT / "pipeline" / "profiles" / "laboratorio.yaml"
 CSV_REFERENCIA = ("registro_vrp_consolidado.csv", "registro_vrp_ocr.csv")
 
@@ -286,10 +290,18 @@ def _sha256(ruta):
 
 def calibrar(sin_zona, control, brazos, prod, fin, dest):
     """Corre la calibración completa. `brazos`: {piso: carpeta}. Orden de los controles: primero los que invalidan
-    (cobertura, código, identidad, fuga fuera de la zona, cuentas de producción), después el de poder."""
+    (cobertura, código, identidad, fuga fuera de la zona, cuentas de producción), después el de poder. Antes de todo,
+    el fin tiene que ser el sellado (R4FD-107): con otro fin no se carga ni se cuenta nada."""
+    if fin != FIN_SELLADO:
+        return {"estado": INVALIDO, "valor": None,
+                "detalle": "el fin pedido (%s) no es el fin sellado de la ventana (%s): R4FD-107, acta de cierre de la "
+                           "ronda 4" % (fin, FIN_SELLADO)}
     base = cargar_records(sin_zona)
     recs = {"sin_zona": base, CONTROL: cargar_records(control)}
     recs.update({str(p): cargar_records(d) for p, d in brazos.items()})
+    # R4FD-107, segunda parte: la muestra queda identificada por el sha256 de cada archivo leído de cada brazo.
+    carpetas = {"sin_zona": sin_zona, CONTROL: control, **{str(p): d for p, d in brazos.items()}}
+    muestra = {k: {f.name: _sha256(f) for f in sorted(Path(d).glob("*.json"))} for k, d in carpetas.items()}
     cob = cobertura_brazos(recs, fin)
     cod = codigo_brazos(recs, fin)
     ident = {CONTROL: identidad_records(recs[CONTROL], base)}
@@ -335,7 +347,8 @@ def calibrar(sin_zona, control, brazos, prod, fin, dest):
                 "donde_no_actua_en_ventana": fuera_en_ventana, "tasas_produccion": tasas_prod,
                 "tasas": {str(k): v for k, v in tasas.items()}, "s_a": S_A, "grilla_piso": list(GRILLA_PISO),
                 "cobertura_brazos": cob, "codigo_brazos": cod, "referencia_mirova": referencia,
-                "produccion_como_laboratorio": {"carpeta": prod_lab, "quitados": quitados}})
+                "produccion_como_laboratorio": {"carpeta": prod_lab, "quitados": quitados}, "fin": fin,
+                "muestra": muestra})
     return res
 
 
@@ -351,7 +364,7 @@ def main(argv=None):
     c.add_argument("--control", required=True, help="brazo con la zona encendida, s = 5 y piso 0,003")
     c.add_argument("--brazo", action="append", required=True, help="piso=carpeta de records del brazo (s = S_A)")
     c.add_argument("--prod", default=str(ROOT / "data" / "mirova_equivalent"))
-    c.add_argument("--fin", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+    c.add_argument("--fin", default=FIN_SELLADO, help="fin de la ventana; sólo vale el sellado (R4FD-107)")
     c.add_argument("--dest", required=True, help="carpeta temporal para la referencia de MIROVA")
     c.add_argument("--out", required=True)
     a = ap.parse_args(argv)

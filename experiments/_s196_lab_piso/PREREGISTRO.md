@@ -16,8 +16,10 @@
 > ⚠️ **Re-sello S200 (2026-11-25), antes de mirar ningún resultado del barrido.** Nicolás decidió re-sellar
 > («Sí, re-sella», 2026-11-25) los cuatro defectos de gravedad 3 que la auditoría externa (Codex, ronda 4, frente D)
 > encontró y un verificador Claude de contexto limpio reprodujo; qué cambió y por qué, en el §5b. La vara (S194) no
-> cambia. Sello vigente (S200b, tras las observaciones del verificador independiente de #1129, §5b al final):
-> sha256 del evaluador (fin de línea LF): `0b403901dedbf566ac0e190cf12d0861b26c24224bc773b1a70e73d42d61dd89`.
+> cambia. Sello vigente (S200c, fin de la ventana sellado en 2026-11-23 por el acta de cierre de la ronda 4, aprobada
+> por Nicolás el 2026-11-25; §5b al final):
+> sha256 del evaluador (fin de línea LF): `d17a68a2c0a12493a2efafbb839d3018ab4091a5570b52ef18937f024027acbc`.
+> Sello S200b (#1130), conservado: `0b403901dedbf566ac0e190cf12d0861b26c24224bc773b1a70e73d42d61dd89`.
 > Sello del re-sello S200 (#1129), conservado: `5493f1a714f709c381bae7722c7cbb09c816288f38857b720f77443d287a8286`.
 > Sello anterior (S196), conservado: el evaluador tenía
 > sha256 (fin de línea LF) `16d0360ebea5549000bbea432050102cf9e87a231a9cba23dbd1222ff4a42217`.
@@ -230,6 +232,15 @@ fuera de la vía), así que excluir ese volcán, como permite R4FD-111, deja al 
 sin `regimen` en todos sus records pasa el control de código (hoy todos los records reales lo traen); un brazo
 relanzado con el mismo código y otro gránulo (NRT contra estándar) no se detecta, porque el defecto original no lo
 pedía; y se guarda el sha256 de los CSV de MIROVA, no el commit remoto del que vinieron.
+
+**S200c (2026-11-25): el fin de la ventana, sellado (R4FD-107).** La auditoría mostró que, con las mismas carpetas, el
+fin de la ventana decidía el piso (fin 2026-05-31: 0,0025; 07-31: 0,00225; 11-20: 0,002), y el evaluador aceptaba
+cualquiera (por defecto, el día en que se corriera). Quien evalúa podía elegir el fin mirando el resultado. El acta de
+cierre de la ronda 4 (`docs/ACTA_CIERRE_AUDITORIA_CODEX_RONDA4_2026-11-25.md`), aprobada por Nicolás el 2026-11-25, fija
+el fin en **2026-11-23**, el último día de la última tanda despachada del barrido, antes de mirar ningún resultado. Con
+otro fin `calibrar` sale INVALIDO sin cargar ni contar nada, y la línea de comandos usa el sellado por defecto. La
+salida guarda además el sha256 de cada archivo leído de cada brazo, para que la muestra evaluada quede identificada.
+El inicio de la ventana (2026-03-01) no cambia.
 
 ## 6. La vara, sin cambios
 
