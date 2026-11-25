@@ -180,7 +180,17 @@ cuenta en cuántas noches alertó cada casilla de 1 × 1 km. No hay series por �
    misma medición extendida a N de 30, 60 y 90 y M de 1 a 3; la tasa tiene que bajar en un orden de magnitud, hasta que
    Nicolás quiera mirar cada una. Un límite que hay que decir: la alerta sólo marca focos que el detector ya alertó; un
    foco escondido por los mecanismos 2 o 3 nunca la dispara. Por eso (2) sola no responde al pedido: necesita (3) y (4).
-3. **Enmascaramiento, medido de verdad.** Un experimento con el detector de producción (`detectar_mirova`, sin
+3. ⚠️ **S200 (2026-11-25): medido en VIIRS 750 de noche, resultado nulo en el flanco.** Con el detector de producción
+   sin modificar (`b7626b03c`), 10 pasadas reales y la anomalía de Chillán (13 MW) trasplantada a 9 volcanes hasta
+   403 MW, un foco a 1000 K a 5, 10 o 20 km necesita la misma potencia con la anomalía que sin ella (razón mediana
+   1,000, máximo 1,25 fuera de la región sensible); pegado al cráter (2 km) hay un enmascaramiento chico (mediana 1,00 a
+   1,10). El segundo pase lo desarma casi todo y la cumbre no deja halo tibio en la estadística. Lo que decide si un foco
+   en el flanco se ve es la caja: alerta desde 0,34 MW en la región sensible y desde 1,4 MW fuera de ella, por el piso
+   de 0,02. Controles de identidad, linealidad, escena sin calor y ruido pasaron. Límites: sólo Chillán trae una
+   anomalía fuerte real; una anomalía extensa (campo de lava) es SIN DATO; MODIS y VIIRS 375 piden recortes de Actions.
+   En VIIRS 750 la extensión del halo pierde su motivo medido y (4) queda como la palanca; decidirlo es de Nicolás. Detalle:
+   `experiments/_s200_p0_3/INFORME.md`. Texto anterior:
+   **Enmascaramiento, medido de verdad.** Un experimento con el detector de producción (`detectar_mirova`, sin
    tocarlo) que inserta un foco débil a 2, 5, 10 y 20 km de una anomalía fuerte. Lo más fuerte es insertarlo en escenas
    reales con su anomalía real (las 167 de Chillán de 10 a 100 MW, y las de Cordón Caulle), porque un halo sintético es
    un parámetro inventado del que depende el resultado. Los insumos hay que rearmarlos: las matrices chilenas de S159 no
@@ -597,7 +607,7 @@ pestaña pasa a leerlo. Borrar los datos viejos queda para el final, con tag (A3
 |---|---|---|---|---|---|
 | 0 | P0 (1) series por área y cúmulo | extender `experiments/_s194_areas/particion.py` a todas las pasadas y a la pestaña Laboratorio | áreas de Cordón Caulle (D-D) y radio del edificio (D-H) | no | una sesión |
 | 0 | P0 (2) zona nueva | medir la tasa de «zonas nuevas» por volcán y mes con N de 30, 60 y 90 y M de 1 a 3 | (1) | no | una sesión |
-| 0 | P0 (3) enmascaramiento | sintético con `detectar_mirova` y estratificación de `m0` por cenit | nada | no (la extensión del halo, sí) | una sesión sin Actions |
+| 0 | P0 (3) enmascaramiento (⚠️ S200: hecho en VIIRS 750, nulo en el flanco, `experiments/_s200_p0_3/`) | sintético con `detectar_mirova` y estratificación de `m0` por cenit | nada | no (la extensión del halo, sí) | una sesión sin Actions |
 | 0 | P0 (4) edificio entero | brazo del laboratorio con la región sensible del edificio | (3), veredicto de MEJ-5 y D-H | sí | un brazo |
 | 1 | P1 MEJ-8 | A/B aislado de Laguna del Maule con el lago fuera de la `BOX` (alertas perdidas y nuevas); después D-A | sí de Nicolás a A45 | sí | una sesión |
 | 2 | P10 C0 | PR que apaga los dos workflows y arregla el control del paso 1 | sí de Nicolás a D1-b (D-B) | no | una sesión |
