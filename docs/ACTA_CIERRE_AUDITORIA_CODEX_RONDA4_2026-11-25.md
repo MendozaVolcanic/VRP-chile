@@ -1,7 +1,8 @@
 # Acta de cierre de la auditoría externa con Codex, ronda 4
 
-Escrita a pedido de Nicolás Mendoza («Sí, escríbela», 2026-11-25) por la sesión S200. **Para aprobar:** las
-decisiones de la tabla «Acta» son propuestas hasta que Nicolás las apruebe; el PR no se mergea antes.
+Aprobada por Nicolás Mendoza el 2026-11-25 a las ~17:14 UTC («Sí, apruebo»), con la fecha de fin del barrido del
+piso en 2026-11-23 (R4FD-107). Escrita a pedido suyo («Sí, escríbela», 2026-11-25) por la sesión S200; las decisiones
+de la tabla «Acta», que eran propuestas, quedan aprobadas con ella.
 
 ## Por qué existe este documento
 
@@ -77,7 +78,7 @@ en D y 1 del cierre; gravedad 1, 27 en total. Ya cerrados entre ellos: R4FB-105 
 primera mitad de R4FEF-107 (#1126) y la segunda (#1128, v1.105), R4C-106 (#1128) y R4FD-106 (#1129). Los de gravedad 1
 quedan en el registro sin acción.
 
-| Grupo | Qué pasa, como geólogo | Decisión propuesta | Responsable |
+| Grupo | Qué pasa, como geólogo | Decisión (aprobada) | Responsable |
 |---|---|---|---|
 | **R4FD-107 (barrido del piso)** | La fecha de fin con que se evalúa el barrido no está fija: con las mismas carpetas, fin 2026-05-31 elige 0,0025, fin 07-31 elige 0,00225 y fin 11-20 elige 0,002. Quien evalúa podría elegir el fin mirando el resultado | **Fijar el fin en el pre-registro antes de correr `calibrar`**: el último día de la última tanda despachada (2026-11-23), sin mirar nada | Nicolás aprueba; la sesión del loop lo escribe |
 | R4FA-109 (NRT) | Cuando NASA publica el producto estándar, el record NRT se reemplaza entero y podría perder una alerta o una anotación del NRT | Medir, sólo lectura: cuántos reemplazos cambiaron la alerta o la marca de una pasada | Sesión del loop |
