@@ -118,7 +118,7 @@
     .vc-thermal { font-size: 0.68rem; color: #8fa6bd; margin-top: 5px; font-variant-numeric: tabular-nums; }
     .vc-anom { font-size: 0.68rem; color: #8fa6bd; margin-top: 4px; }
     .vc-anom.is-alto { color: var(--orange); font-weight: 600; }
-    .vc-mirova { font-size: 0.68rem; margin-top: 4px; }
+    .vc-mirova { font-size: 0.68rem; margin-top: 4px; } .vc-falla-carga { font-size: 0.68rem; margin-top: 4px; color: #ff6b6b; font-weight: 600; cursor: help; }  /* R4FEF-109: archivo sin leer; misma línea por G8 */
     .vc-mirova.is-conf { color: #6fd08c; }
     .vc-mirova.is-solo { color: #7d8ea0; }
     /* S137 D5 — corroboración acumulada de MIROVA (90 d), sólo Tier A */
@@ -1089,10 +1089,19 @@ async function fetchJSON(url) {
   // (ETag/If-None-Match → 304 barato si no cambió). Resultado: re-entradas casi
   // instantáneas y polls baratos. La frescura la garantiza el auto-refresh
   // detector de cambios (NRT actualiza cada 2h; staleness ≤10 min es irrelevante).
+  return (await leerJSON(url)).datos;
+}
+// R4FEF-109 (auditoría externa con Codex, ronda 4, S199). POR QUÉ: `return r.ok ? r.json() : null` devolvía la promesa
+// sin esperarla, así que un JSON cortado o inválido rechazaba FUERA del try; el Promise.all de la carga caía entero y el
+// tablero quedaba con 0 de 43 tarjetas por un solo archivo (de un volcán, de MIROVA o de la sombra). Ahora el JSON se lee
+// dentro del try y se dice por qué no se pudo: {datos, falla}, con falla null si se leyó. Prueba:
+// tests/test_tablero_falla_de_carga_r4fef.py
+async function leerJSON(url) {
   try {
     const r = await fetch(url);
-    return r.ok ? r.json() : null;
-  } catch { return null; }
+    if (!r.ok) return { datos: null, falla: "HTTP " + r.status };
+    return { datos: await r.json(), falla: null };
+  } catch (e) { return { datos: null, falla: e && e.name === "SyntaxError" ? "JSON ilegible" : "falla de red" }; }
 }
 
 // S77 F30 P3 — Galería imágenes MIROVA: índice global, cargado una vez.
@@ -1123,32 +1132,52 @@ async function loadVolcano(v, opts = {}) {
   // pages-deploy.yml saca las sombras del sitio (techo de 1 GB). No tienen refs de MIROVA ni ventana `_recent`.
   const sombra = v.fuente === "sombra_34";
   const suffix = full ? "" : "_recent";
-  const [dataPrimary, mirova] = sombra
-    ? [await fetchJSON(SOMBRA_34_BASE + v.name + ".json"), null]
+  // R4FEF-109: un archivo que no se lee afecta sólo a su volcán y a su capa (datos propios o MIROVA), y queda dicho en
+  // `falla`. Si ya había una lectura buena (sondeo de 5 min), se conserva y la tarjeta avisa que no se pudo releer; si
+  // no, el volcán queda sin datos y la tarjeta dice «no se pudo leer» (no «sin anomalía»). Nada de esto rechaza.
+  const anterior = allData[v.name] || null;
+  let [lp, lm] = sombra
+    ? [await leerJSON(SOMBRA_34_BASE + v.name + ".json"), { datos: null, falla: null }]
     : await Promise.all([
-    fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + suffix + ".json"),
-    fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
+    leerJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + suffix + ".json"),
+    leerJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
   ]);
   // Fallback robusto: deploy viejo sin `_recent` → usar el completo (nunca romper). La sombra no cae ahí: en
   // data/mirova_equivalent quedó de los 34 una semana de abril de 2026 (2.843 records del detector de entonces, sin marca de régimen, 476 con VRP > 0; F8-V201), que no es su estado.
-  const data = (!dataPrimary && !full && !sombra)
-    ? await fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json")
-    : dataPrimary;
+  if (!lp.datos && !full && !sombra) {
+    const lc = await leerJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json");
+    if (lc.datos) lp = lc;
+  }
+  const data = lp.datos, mirova = lm.datos;
+  const hora = new Date().toISOString().slice(11, 16);
+  const fallaPropio = data ? null : lp.falla, fallaMirova = sombra || mirova ? null : lm.falla;
+  const leidoAntes = (capa) => !!anterior && (!anterior.falla || !anterior.falla[capa] || anterior.falla[capa + "Conservado"]);
+  const conservaPropio = !!fallaPropio && leidoAntes("propio") && anterior.records.length > 0;
+  const conservaMirova = !!fallaMirova && leidoAntes("mirova");
   allData[v.name] = {
-    records:       data?.records   || [],
-    mirovaRecords: mirova?.records || [],
+    records:       conservaPropio ? anterior.records : (data?.records || []),
+    mirovaRecords: conservaMirova ? anterior.mirovaRecords : (mirova?.records || []),
     // S151: alertas diurnas del OCR de MIROVA, SOLO para dibujar (con un sol). Van aparte de mirovaRecords
     // para que ninguna metrica, confirmacion ni tarjeta cambie (ver toMirovaDiaPoints).
-    mirovaDiaOcr:  mirova?.records_dia_ocr || [],
-    mirovaPasadas: mirova?.pasadas_tabla || null,   // F7-301: pasadas sin alerta de la tabla (null = JSON viejo)
-    updated:       data?.updated   || null,
-  }; if (sombra) derivarClaseSombra(allData[v.name].records);  // S180: la sombra de los 34 no trae distance_class (ver la función)
-  // S89 #3: etiquetar mirova_confirmed por-record (cruce con CSV MIROVA, capa
-  // de presentación). Idempotente; campos transitorios "_" no persistidos.
-  enrichWithMirovaConfirmation(allData[v.name].records, allData[v.name].mirovaRecords); if (window.CambioDetector) CambioDetector.notarRecords(allData[v.name].records); // S172: marca de la vía de MODIS desde los datos, en la misma línea para no correr las citas archivo:línea (G8)
-  // S193: `_diurna` en cada record (frontend/diurno.js: Sol sobre el horizonte del volcán, la regla de store.py). La
-  // frescura, las series nocturnas y las cifras del período la leen para no mezclar MODIS de día con la noche.
-  if (window.DiurnoTablero) DiurnoTablero.marcar(allData[v.name].records, v.lat, v.lon);
+    mirovaDiaOcr:  conservaMirova ? anterior.mirovaDiaOcr : (mirova?.records_dia_ocr || []),
+    mirovaPasadas: conservaMirova ? anterior.mirovaPasadas : (mirova?.pasadas_tabla || null),   // F7-301: pasadas sin alerta de la tabla (null = JSON viejo)
+    updated:       conservaPropio ? anterior.updated : (data?.updated || null),
+    falla: (fallaPropio || fallaMirova) ? { propio: fallaPropio, propioConservado: conservaPropio, mirova: fallaMirova,
+                                            mirovaConservado: conservaMirova, hora } : null,
+  };
+  try {
+    if (sombra) derivarClaseSombra(allData[v.name].records);  // S180: la sombra de los 34 no trae distance_class (ver la función)
+    // S89 #3: etiquetar mirova_confirmed por-record (cruce con CSV MIROVA, capa
+    // de presentación). Idempotente; campos transitorios "_" no persistidos.
+    enrichWithMirovaConfirmation(allData[v.name].records, allData[v.name].mirovaRecords); if (window.CambioDetector) CambioDetector.notarRecords(allData[v.name].records); // S172: marca de la vía de MODIS desde los datos
+    // S193: `_diurna` en cada record (frontend/diurno.js: Sol sobre el horizonte del volcán, la regla de store.py). La
+    // frescura, las series nocturnas y las cifras del período la leen para no mezclar MODIS de día con la noche.
+    if (window.DiurnoTablero) DiurnoTablero.marcar(allData[v.name].records, v.lat, v.lon);
+  } catch (e) {   // R4FEF-109: un archivo que se lee pero trae algo inesperado tampoco apaga el resto del tablero
+    console.error("VRP Chile: no se pudieron preparar los datos de " + v.name, e);
+    allData[v.name] = { records: [], mirovaRecords: [], mirovaDiaOcr: [], mirovaPasadas: null, updated: null,
+                        falla: { propio: "datos con forma inesperada", propioConservado: false, mirova: null, hora } };
+  }
 }
 
 // ── Data helpers ─────────────────────────────────────────────────────────────
@@ -2740,6 +2769,33 @@ function trackHeaderFreshness(fresh) {
   if (txt) { txt.textContent = label; txt.title = "Peor frescura entre los volcanes Tier A: " + _headerWorst.txt; }
 }
 
+// R4FEF-109 (Codex ronda 4, S199): qué archivo de un volcán no se pudo leer (allData[v].falla, lo llena loadVolcano).
+// POR QUÉ: un archivo ilegible no es un volcán tranquilo; la tarjeta lo dice y el encabezado no puede quedar en «Sistema
+// Operativo» aunque falte sólo la sombra de uno de los 34 o la referencia de MIROVA de uno de los 11. Sólo display.
+function textoFallaCarga(f) {
+  const p = [];
+  if (f && f.propio) p.push(f.propioConservado
+    ? "no se pudo releer sus datos (" + f.propio + ", " + f.hora + " UTC): se muestran los de la lectura anterior"
+    : "sin datos: no se pudo leer su archivo (" + f.propio + ", " + f.hora + " UTC)");
+  if (f && f.mirova) p.push("no se pudo leer la referencia de MIROVA (" + f.mirova + ", " + f.hora + " UTC)" +
+    (f.mirovaConservado ? ": se usa la lectura anterior" : ": la comparación con MIROVA queda sin dato"));
+  return p.join("; ");
+}
+const TXT_FALLA_CARGA = "El tablero no pudo leer un archivo de este volcán (falta, llegó cortado o la red falló). No es " +
+  "«sin anomalía»: lo que no se leyó no se sabe. Se vuelve a intentar en la próxima consulta (cada 5 min); el resto de " +
+  "los volcanes no se afecta. Sólo display: no cambia ninguna detección.";
+function avisoFallasEncabezado() {
+  const fallas = VOLCANOES.filter(v => allData[v.name] && allData[v.name].falla);
+  const dot = document.querySelector(".status-dot"), txt = document.getElementById("status-text");
+  if (!fallas.length || !dot || !txt) return;
+  if (!_headerWorst || _headerWorst.cls === "mon-fresh") {
+    dot.className = "status-dot mon-lagging";
+    txt.textContent = "Archivos sin leer: " + fallas.length + (fallas.length === 1 ? " volcán" : " volcanes");
+  }
+  txt.title = (txt.title ? txt.title + "\n" : "") + "No se pudo leer:\n" +
+    fallas.map(v => "· " + v.display + ": " + textoFallaCarga(allData[v.name].falla)).join("\n");
+}
+
 // S137 D5 (decisión de Nicolás) — corroboración agregada de MIROVA por volcán.
 // POR QUÉ. La fila R3 de S132 dice si MIROVA publicó en ESA pasada, que es un dato
 // puntual. Lo que el operador no tiene es el contexto: en 90 días Llaima acumula
@@ -3024,6 +3080,7 @@ function buildCards() {
     }
 
     card.append(hdr, vrpEl, vrpSub);
+    if (d.falla) { const fc = el("div", "vc-falla-carga"); fc.textContent = "⚠ " + textoFallaCarga(d.falla); fc.title = TXT_FALLA_CARGA; card.appendChild(fc); }   // R4FEF-109
     if (act.firstChild) card.appendChild(act);
     if (pcEl) card.appendChild(pcEl);   // S183
     if (diaEl) card.appendChild(diaEl);   // S193: detección diurna, aparte
@@ -3035,7 +3092,7 @@ function buildCards() {
     if (craterEl) card.appendChild(craterEl);
     const fondoEl = det ? marcaFondoNoEstimado("vc-crater-no-medido", det.rec) : null;   // R3F3-V101: la detección de la tarjeta suma alertados sin fondo
     if (fondoEl) card.appendChild(fondoEl);
-    if (typeof CoberturaTablero !== "undefined" && !esPreliminar(v)) { const cobEl = el("div", "vc-no-medido"); card.appendChild(cobEl); CoberturaTablero.pintar(cobEl, v.name, { desdeMs: Date.now() - 48 * 3600000, prefijo: "En 48 h," }); }   // S199 (F6-112): pasadas no medidas (NASA caída, descarga o lectura fallida); sólo display
+    if (typeof CoberturaTablero !== "undefined" && !esPreliminar(v)) { const cobEl = el("div", "vc-no-medido"); card.appendChild(cobEl); CoberturaTablero.pintar(cobEl, v.name, { ventanaMs: 48 * 3600000, prefijo: "En 48 h," }); }   // S199 (F6-112): pasadas no medidas (NASA caída, descarga o lectura fallida); sólo display
     card.appendChild(mon);
 
     // S180: minigráfico del período (como mosaico.html), sólo si el volcán tiene datos en este tablero.
@@ -3060,6 +3117,7 @@ function buildCards() {
     }
     grid.appendChild(card);
   });
+  avisoFallasEncabezado();   // R4FEF-109: el encabezado no dice «Sistema Operativo» si faltó un archivo
 }
 
 // S180: lo que la tarjeta mostraba además (S97 distancia y px, S132 R5 contraste térmico, S132 R3 MIROVA en la misma
@@ -3174,6 +3232,7 @@ function renderDetail() {
   const v = currentVolcano;
   const d = allData[v.name] || { records: [], mirovaRecords: [] };
   escribirVolcanEnURL();   // S180: la URL dice qué volcán y qué sensor están abiertos (enlace compartible)
+  if (d.falla) { const fc = el("div", "vc-falla-carga"); fc.textContent = "⚠ " + v.display + ": " + textoFallaCarga(d.falla); fc.title = TXT_FALLA_CARGA; panel.appendChild(fc); }   // R4FEF-109
   // S180: la pestaña de sensor acota TODO lo de abajo (estadísticas, gráficos, mapa, pasadas, métricas) a ese sensor,
   // como las pestañas de MIROVA; «Combinado» deja los tres. Sólo elige qué records se miran: qué es una detección y
   // cuánto vale lo siguen diciendo eqVrp, isValidDetection y compañía, sin cambios.
@@ -5943,14 +6002,19 @@ async function init() {
   // Nicolás), sin molestar cuando no hay novedad. Poll cada 5 min ahora que es
   // barato (304s); el render solo ocurre en cambio real.
   setInterval(async () => {
+    // R4FEF-109: también cuenta como cambio que un archivo deje de leerse o se vuelva a leer (si no, el aviso no aparecía).
+    const firma = v => { const d = allData[v.name]; return d ? d.updated + "|" + (d.falla ? textoFallaCarga(d.falla).replace(/\d\d:\d\d UTC/g, "") : "") : null; };
     const prev = {};
-    for (const v of VOLCANOES) prev[v.name] = allData[v.name] ? allData[v.name].updated : null;
+    for (const v of VOLCANOES) prev[v.name] = firma(v);
     // S120: respetar el nivel cargado — si el usuario ya pidió historia completa,
     // el poll no debe pisarla con la ventana reciente (y viceversa).
     await Promise.all(VOLCANOES.map(v => loadVolcano(v, { full: _fullHistoryLoaded })));
     _updateRefreshTimestamp();
-    const changed = VOLCANOES.filter(v => (allData[v.name] ? allData[v.name].updated : null) !== prev[v.name]);
-    if (changed.length === 0) return;  // sin datos nuevos → no re-renderizar
+    const changed = VOLCANOES.filter(v => firma(v) !== prev[v.name]);
+    if (changed.length === 0) {   // sin datos nuevos → no re-renderizar
+      if (typeof CoberturaTablero !== "undefined" && CoberturaTablero.repintar) CoberturaTablero.repintar();   // R4FEF-106: un hueco nuevo de NASA aparece igual
+      return;
+    }
     buildAlertSummary();
     buildCards();
     buildOverviewMap();

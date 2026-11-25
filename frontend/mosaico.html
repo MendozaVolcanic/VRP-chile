@@ -125,7 +125,7 @@ main { padding: 12px 24px 32px; max-width: 1600px; margin: 0 auto; }
 }
 .mc-footer .last { color: var(--text); }
 /* S109 — frescura de monitoreo (última pasada procesada, estilo MIROVA) */
-.mc-sobre-agua { font-size: 0.66rem; color: #40c4ff; margin-top: 3px; } .mc-sobre-agua:empty { display: none; }   /* S193 */ .mc-calor-cumbre { font-size: 0.66rem; color: #ff8a65; margin-top: 3px; }   /* S194 */ .mc-crater-no-medido { font-size: 0.66rem; color: #ffab40; margin-top: 3px; }   /* S194: cráter no medido */ .mc-no-medido { font-size: 0.66rem; color: #ce93d8; margin-top: 3px; }   /* S199: pasadas no medidas */
+.mc-sobre-agua { font-size: 0.66rem; color: #40c4ff; margin-top: 3px; } .mc-sobre-agua:empty { display: none; }   /* S193 */ .mc-calor-cumbre { font-size: 0.66rem; color: #ff8a65; margin-top: 3px; }   /* S194 */ .mc-crater-no-medido { font-size: 0.66rem; color: #ffab40; margin-top: 3px; }   /* S194: cráter no medido */ .mc-no-medido { font-size: 0.66rem; color: #ce93d8; margin-top: 3px; }   /* S199: pasadas no medidas */ .mc-falla-carga { font-size: 0.66rem; color: #ff6b6b; font-weight: 600; margin-top: 3px; cursor: help; }   /* R4FEF-109: archivo sin leer */
 .mc-diurna { font-size: 0.66rem; color: #ffc400; margin-top: 3px; } .mc-mon-dia { color: #c9a227; }   /* S193: pasada de día */
 .mc-monitor { font-size: 0.68rem; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 .mc-mon-dot { font-size: 0.7rem; line-height: 1; }
@@ -503,12 +503,16 @@ function latestVRP(records, innerKm, diurnas = false) {
 }
 
 // ─── Fetch JSON con cache-bust (sync con index.html L732) ────────────────────
-async function fetchJSON(url) {
+// R4FEF-109 (Codex ronda 4, S199): el JSON se lee dentro del try (antes `r.json()` sin await rechazaba fuera y un solo
+// archivo cortado dejaba el mosaico entero en «Cargando…»). Devuelve {datos, falla}; falla null si se leyó.
+async function leerJSON(url) {
   try {
     const r = await fetch(url + "?_=" + Date.now());
-    return r.ok ? r.json() : null;
-  } catch { return null; }
+    if (!r.ok) return { datos: null, falla: "HTTP " + r.status };
+    return { datos: await r.json(), falla: null };
+  } catch (e) { return { datos: null, falla: e && e.name === "SyntaxError" ? "JSON ilegible" : "falla de red" }; }
 }
+async function fetchJSON(url) { return (await leerJSON(url)).datos; }
 
 const allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
@@ -546,11 +550,16 @@ function _etiquetaActualizado() {
   const stamps = Object.values(allData)
     .map(d => d && d.updated).filter(Boolean).sort();
   const el_ = document.getElementById("updated-label");
-  if (!stamps.length) { el_.textContent = "Sin fecha de dato"; return; }
+  if (!stamps.length) { el_.textContent = "Sin fecha de dato" + _sufijoFallas(); return; }
   const ultimo = stamps[stamps.length - 1];
   const horas = (Date.now() - parseUtcMs(ultimo)) / 36e5;
   el_.textContent = "Dato al " + String(ultimo).slice(0, 16).replace("T", " ") + " UTC"
-    + (horas > 6 ? " · " + horas.toFixed(0) + " h de antiguedad" : "");
+    + (horas > 6 ? " · " + horas.toFixed(0) + " h de antiguedad" : "") + _sufijoFallas();
+}
+// R4FEF-109: si faltó un archivo, la cabecera lo dice (el aviso de cada volcán va en su tarjeta).
+function _sufijoFallas() {
+  const n = TIER_A.filter(v => allData[v.name] && allData[v.name].falla).length;
+  return n ? " · archivos sin leer: " + n + (n === 1 ? " volcán" : " volcanes") : "";
 }
 
 async function loadVolcano(v) {
@@ -558,20 +567,52 @@ async function loadVolcano(v) {
   // cubre de sobra. Evita bajar los completos post-backfill (~171 MB) que timeoutean en
   // red real (mismo modo de falla que se arregló en index.html). Fallback al completo si
   // el deploy aún no generó _recent (nunca romper).
-  const [dataRecent, mirova] = await Promise.all([
+  // R4FEF-109 (como loadVolcano de index.html): un archivo que no se lee afecta sólo a su volcán y queda en `falla`; si
+  // había una lectura buena (refresco de 15 min) se conserva y la tarjeta avisa. Nada de esto rechaza.
+  const anterior = allData[v.name] || null;
+  let [lp, lm] = await Promise.all([
     // S153: un período fuera de la ventana liviana pide el JSON completo.
-    Periodo.necesitaHistoria(PERIODO) ? null : fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + "_recent.json"),
-    fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
+    Periodo.necesitaHistoria(PERIODO) ? { datos: null, falla: null } : leerJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + "_recent.json"),
+    leerJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
   ]);
-  const data = dataRecent || await fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json");
+  if (!lp.datos) { const lc = await leerJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json"); if (lc.datos || !lp.falla) lp = lc; }
+  const data = lp.datos, mirova = lm.datos;
+  const hora = new Date().toISOString().slice(11, 16);
+  const fallaPropio = data ? null : lp.falla, fallaMirova = mirova ? null : lm.falla;
+  const leidoAntes = (capa) => !!anterior && (!anterior.falla || !anterior.falla[capa] || anterior.falla[capa + "Conservado"]);
+  const conservaPropio = !!fallaPropio && leidoAntes("propio") && anterior.records.length > 0;
+  const conservaMirova = !!fallaMirova && leidoAntes("mirova");
   allData[v.name] = {
-    records:       data?.records   || [],
-    mirovaRecords: mirova?.records || [],
-    updated:       data?.updated   || null,
-  }; if (window.CambioDetector) CambioDetector.notarRecords(allData[v.name].records); // S172: marca de la vía de MODIS desde los datos (misma línea: no corre las líneas)
-  // S193: `_diurna` en cada record (frontend/diurno.js, la regla de store.py), como en index.html.
-  if (window.DiurnoTablero) DiurnoTablero.marcar(allData[v.name].records, v.lat, v.lon);
+    records:       conservaPropio ? anterior.records : (data?.records || []),
+    mirovaRecords: conservaMirova ? anterior.mirovaRecords : (mirova?.records || []),
+    updated:       conservaPropio ? anterior.updated : (data?.updated || null),
+    falla: (fallaPropio || fallaMirova) ? { propio: fallaPropio, propioConservado: conservaPropio, mirova: fallaMirova,
+                                            mirovaConservado: conservaMirova, hora } : null,
+  };
+  try {
+    if (window.CambioDetector) CambioDetector.notarRecords(allData[v.name].records); // S172: marca de la vía de MODIS desde los datos
+    // S193: `_diurna` en cada record (frontend/diurno.js, la regla de store.py), como en index.html.
+    if (window.DiurnoTablero) DiurnoTablero.marcar(allData[v.name].records, v.lat, v.lon);
+  } catch (e) {   // R4FEF-109: un archivo que se lee pero trae algo inesperado tampoco apaga el resto del mosaico
+    console.error("VRP Chile: no se pudieron preparar los datos de " + v.name, e);
+    allData[v.name] = { records: [], mirovaRecords: [], updated: null,
+                        falla: { propio: "datos con forma inesperada", propioConservado: false, mirova: null, hora } };
+  }
 }
+
+// R4FEF-109: el mismo texto que textoFallaCarga de index.html (regla S92: cada página con su copia).
+function textoFallaCarga(f) {
+  const p = [];
+  if (f && f.propio) p.push(f.propioConservado
+    ? "no se pudo releer sus datos (" + f.propio + ", " + f.hora + " UTC): se muestran los de la lectura anterior"
+    : "sin datos: no se pudo leer su archivo (" + f.propio + ", " + f.hora + " UTC)");
+  if (f && f.mirova) p.push("no se pudo leer la referencia de MIROVA (" + f.mirova + ", " + f.hora + " UTC)" +
+    (f.mirovaConservado ? ": se usa la lectura anterior" : ": la comparación con MIROVA queda sin dato"));
+  return p.join("; ");
+}
+const TXT_FALLA_CARGA = "El tablero no pudo leer un archivo de este volcán (falta, llegó cortado o la red falló). No es " +
+  "«sin anomalía»: lo que no se leyó no se sabe. Se vuelve a intentar en el próximo refresco (cada 15 min); el resto de " +
+  "los volcanes no se afecta. Sólo display: no cambia ninguna detección.";
 
 // ─── Banner stale F49 (sync con index.html L2675) ────────────────────────────
 function renderMirovaFreshness() {
@@ -875,6 +916,7 @@ function renderMosaico() {
       el("span", { className: "mc-level " + level.cls, textContent: rotuloNivel(level, lastEventTime(records)) }),   // S192 (F5-101)
     ]);
     card.appendChild(metrics);
+    if (d && d.falla) card.appendChild(el("div", { className: "mc-falla-carga", title: TXT_FALLA_CARGA, textContent: "⚠ " + textoFallaCarga(d.falla) }));   // R4FEF-109
 
     // S193: el píxel más caliente de la última detección cae sobre agua (frontend/agua.js; igual que la tarjeta de
     // index.html). De noche un lago queda más tibio que la roca y el detector, como el de MIROVA, puede alertarlo. Sólo
@@ -924,7 +966,7 @@ function renderMosaico() {
       card.appendChild(el("div", { className: "mc-crater-no-medido", title: CraterNoMedido.tituloFondo(lfe),
         textContent: CraterNoMedido.SIMBOLO + " Detección del " + String(latestTs).slice(0, 16) + " UTC: " + CraterNoMedido.textoFondo(lfe) }));
     }
-    if (typeof CoberturaTablero !== "undefined") { const cobEl = el("div", { className: "mc-no-medido" }); card.appendChild(cobEl); CoberturaTablero.pintar(cobEl, v.name, { desdeMs: Date.now() - 48 * 3600000, prefijo: "En 48 h," }); }   // S199 (F6-112): pasadas no medidas, igual que la tarjeta de index.html (sólo display)
+    if (typeof CoberturaTablero !== "undefined") { const cobEl = el("div", { className: "mc-no-medido" }); card.appendChild(cobEl); CoberturaTablero.pintar(cobEl, v.name, { ventanaMs: 48 * 3600000, prefijo: "En 48 h," }); }   // S199 (F6-112): pasadas no medidas, igual que la tarjeta de index.html (sólo display)
 
     if (records.length === 0) {
       card.appendChild(el("div", { className: "mc-no-data", textContent: "Sin datos cargados" }));

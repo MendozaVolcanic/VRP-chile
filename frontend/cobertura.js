@@ -11,10 +11,20 @@
 // Lo que una corrida posterior sí midió ya no está en el archivo. Este módulo lo lee y lo dice en las tres vistas.
 //
 // NO dice nada de la actividad del volcán, no cambia ninguna potencia, nivel, clase ni frescura: sólo avisa que esa
-// parte del período no se miró. Si el archivo no está (volcán fuera del NRT, o antes del primer NRT con S199), no se
-// marca nada: eso es SIN DATO, no «todo medido».
+// parte del período no se miró.
 //
-// UN SOLO LUGAR para las tres vistas (A102), como crater_no_medido.js. Prueba: tests/test_cobertura_publicada_s199.py
+// R4FEF-106 (auditoría externa con Codex, ronda 4, S199). POR QUÉ: si el archivo no se podía leer (falta, falla de red,
+// JSON cortado), el aviso quedaba vacío y oculto, igual que cuando todo se midió, y esa falla quedaba en caché toda la
+// sesión; una lectura buena también, así que un hueco nuevo de NASA nunca aparecía en una página abierta por horas, que
+// es como se usa en turno. Ahora: (1) si el archivo no se puede leer, el aviso dice «cobertura no disponible» (no se
+// sabe si hubo pasadas sin medir) y la falla no se guarda, se reintenta en la consulta siguiente; (2) una lectura buena
+// vale VIGENCIA_MS, la cadencia con que index.html vuelve a consultar los datos (5 min), y después se relee; (3)
+// `repintar()` vuelve a pintar los avisos que siguen en la página, para el sondeo de index.html que no redibuja si no
+// cambió ningún volcán. Las tres vistas llaman este módulo sólo para los volcanes del NRT, que tienen su archivo desde
+// S199, así que un 404 también es «no se pudo leer».
+//
+// UN SOLO LUGAR para las tres vistas (A102), como crater_no_medido.js. Pruebas: tests/test_cobertura_publicada_s199.py y
+// tests/test_tablero_falla_de_carga_r4fef.py
 (function (raiz) {
   "use strict";
 
@@ -28,27 +38,36 @@
   };
   const ETAPAS = { descarga: "no se pudo bajar", procesamiento: "se bajó y falló al procesarse",
                    geolocalizacion: "llegó sin su archivo de posición" };
-  const cache = {};
+  const VIGENCIA_MS = 5 * 60 * 1000;   // R4FEF-106: igual al sondeo de index.html (setInterval de 5 min)
+  const cache = {};                     // volcán -> {p: promesa, t: hora de la lectura buena}
+  let pintados = [];                    // [{host, volcan, opciones}] para repintar()
 
   function nombrePlataforma(p) { return NOMBRES[p] || String(p || "plataforma sin dato"); }
   function msDia(f) { return Date.parse(f + "T00:00:00Z"); }
   function msMinuto(m) { return Date.parse(String(m).replace(" ", "T").slice(0, 16) + ":00Z"); }
   function plural(n, s, p) { return n + " " + (n === 1 ? s : p); }
 
-  // Carga data/cobertura/<volcán>.json. Devuelve {estado: "ok", datos} o {estado: "sin_archivo"}.
+  // Carga data/cobertura/<volcán>.json. Devuelve {estado: "ok", datos} o {estado: "error", motivo}. La falla no queda en
+  // caché (se reintenta en la llamada siguiente) y la lectura buena vale VIGENCIA_MS (R4FEF-106).
   async function cargar(volcan, base) {
     const b = typeof base === "string" ? base : (typeof BASE_PATH === "string" ? BASE_PATH : "");
-    if (volcan in cache) return cache[volcan];
-    const p = (async () => {
+    const c = cache[volcan];
+    if (c && (c.t == null || Date.now() - c.t < VIGENCIA_MS)) return c.p;   // t == null: lectura en curso
+    const entrada = { p: null, t: null };
+    entrada.p = (async () => {
       try {
         const r = await fetch(b + "data/cobertura/" + encodeURIComponent(volcan) + ".json", { cache: "no-cache" });
-        if (!r.ok) return { estado: "sin_archivo" };
+        if (!r.ok) return { estado: "error", motivo: "HTTP " + r.status };
         const d = await r.json();
-        return d && Array.isArray(d.no_medidas) ? { estado: "ok", datos: d } : { estado: "sin_archivo" };
-      } catch (e) { return { estado: "sin_archivo" }; }
-    })();
-    cache[volcan] = p;
-    return p;
+        return d && Array.isArray(d.no_medidas) ? { estado: "ok", datos: d } : { estado: "error", motivo: "archivo sin la lista no_medidas" };
+      } catch (e) { return { estado: "error", motivo: e && e.name === "SyntaxError" ? "JSON ilegible" : "falla de red" }; }
+    })().then(res => {
+      if (res.estado === "ok") entrada.t = Date.now();
+      else if (cache[volcan] === entrada) delete cache[volcan];
+      return res;
+    });
+    cache[volcan] = entrada;
+    return entrada.p;
   }
 
   // Lo no medido que toca [desdeMs, hastaMs] (extremos incluidos) y cuya plataforma pasa `filtro(plataforma)`. Un día
@@ -120,17 +139,47 @@
     return t.join("\n");
   }
 
-  // Pinta en `host` (un elemento vacío ya puesto en la página) el aviso del volcán para [desdeMs, hastaMs]. `modo`:
-  // "corto" (una línea con title) o "lista" (encabezado y una línea por día-plataforma). Si no hay nada que decir, el
-  // host queda vacío y oculto. Devuelve la promesa de los items (para pruebas).
+  // R4FEF-106: texto y explicación cuando el archivo no se pudo leer. No afirma nada de las pasadas: no se sabe.
+  const TXT_NO_DISPONIBLE = "cobertura no disponible";
+  function tituloNoDisponible(motivo) {
+    return "No se pudo leer el registro de pasadas no medidas de este volcán (" + (motivo || "motivo sin dato") + "). " +
+      "No se sabe si hubo pasadas que el sistema no pudo medir: que no aparezca ninguna no confirma que todo se midió. " +
+      "Se vuelve a intentar en la próxima consulta (el tablero consulta cada 5 min). Sólo avisa: no cambia ninguna " +
+      "potencia, nivel ni clase.";
+  }
+
+  // Pinta en `host` (un elemento vacío ya puesto en la página) el aviso del volcán para [desdeMs, hastaMs]; con
+  // `ventanaMs`, el intervalo es [ahora - ventanaMs, ahora] al momento de pintar (así repintar() no lo deja atrás).
+  // `modo`: "corto" (una línea con title) o "lista" (encabezado y una línea por día-plataforma). Si no hay nada que
+  // decir, el host queda vacío y oculto; si el archivo no se pudo leer, dice «cobertura no disponible». Devuelve la
+  // promesa de los items (para pruebas).
   async function pintar(host, volcan, opciones) {
     const o = opciones || {};
     if (!host) return [];
+    pintados = pintados.filter(x => x.host !== host && x.host.isConnected !== false);
+    pintados.push({ host, volcan, opciones: o });
     host.style.display = "none";
     const r = await cargar(volcan, o.base);
-    if (r.estado !== "ok") return [];
-    const items = pendientes(r.datos, o);
     while (host.firstChild) host.removeChild(host.firstChild);
+    host.textContent = "";
+    host.title = "";
+    if (r.estado !== "ok") {
+      host.style.display = "";
+      host.style.color = COLOR;
+      host.style.cursor = "help";
+      host.title = tituloNoDisponible(r.motivo);
+      if (o.modo === "lista") {
+        const h = document.createElement("div");
+        h.className = "cobertura-hdr";
+        h.textContent = SIMBOLO + " " + TXT_NO_DISPONIBLE + ": no se pudo leer qué pasadas quedaron sin medir (" + (r.motivo || "motivo sin dato") + ")";
+        h.title = host.title;
+        host.appendChild(h);
+      } else {
+        host.textContent = (o.antes || "") + SIMBOLO + " " + TXT_NO_DISPONIBLE + (o.despues || "");
+      }
+      return [];
+    }
+    const items = pendientes(r.datos, o.ventanaMs != null ? Object.assign({}, o, { desdeMs: Date.now() - o.ventanaMs, hastaMs: Date.now() }) : o);
     if (!items.length) return items;
     host.style.display = "";
     host.style.color = COLOR;
@@ -161,7 +210,15 @@
     return items;
   }
 
-  const api = { COLOR, SIMBOLO, cargar, pendientes, conteo, textoCorto, lineaItem, titulo, pintar, nombrePlataforma };
+  // R4FEF-106: vuelve a pintar los avisos que siguen en la página (relee los archivos cuya lectura venció). Para el
+  // sondeo de index.html cuando ningún volcán cambió y no se redibujan las tarjetas.
+  function repintar() {
+    pintados = pintados.filter(x => x.host.isConnected !== false);
+    return Promise.all(pintados.slice().map(x => pintar(x.host, x.volcan, x.opciones)));
+  }
+
+  const api = { COLOR, SIMBOLO, VIGENCIA_MS, TXT_NO_DISPONIBLE, cargar, pendientes, conteo, textoCorto, lineaItem, titulo,
+                pintar, repintar, nombrePlataforma };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else raiz.CoberturaTablero = api;
 })(typeof window !== "undefined" ? window : this);
