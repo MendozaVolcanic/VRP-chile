@@ -53,7 +53,9 @@ def lector(t, por_brazo=None):
 
 
 def verdes(run):
-    return {v: ["success"] * 7 for v in V}
+    """Un trabajo en success por trozo de 5 días de la ventana del run (marzo: 7; abril: 6)."""
+    e = {x["run"]: x for x in man()}.get(run, man()[0])
+    return {v: ["success"] * len(U.trozos(e["ini"], e["fin"])) for v in V}
 
 
 def correr(tmp_path, entradas=None, t=None, por_brazo=None, trabajos=verdes, **kw):
@@ -145,6 +147,27 @@ def test_trabajo_caido_o_sin_dato(tmp_path):
     problemas, _ = U.unir(man(), tmp_path / "s3", leer=lector(tablas()),
                           trabajos=lambda run: {v: ["success"] for v in V if v != "Copahue"})
     assert any("Copahue: trabajos no todos en success: []" in p for p in problemas)
+
+
+def test_trabajos_de_menos(tmp_path):
+    def de_menos(run):
+        d = verdes(run)
+        if run == "2":
+            d["Llaima"] = d["Llaima"][:-1]
+        return d
+    problemas, _ = correr(tmp_path, trabajos=de_menos)
+    assert any("t2 (2) Llaima: 5 trabajos y 6 trozos" in p for p in problemas)
+
+
+def test_trozos_y_hora_completa():
+    assert U.trozos("2026-03-01", "2026-03-31")[-1] == ("2026-03-31", "2026-03-31")
+    assert len(U.trozos("2026-03-01", "2026-03-31")) == 7 and len(U.trozos("2026-04-01", "2026-04-30")) == 6
+
+
+def test_hora_en_otra_forma(tmp_path):
+    t = tablas(); t[("1", "Llaima")] = t[("1", "Llaima")] + [rec("2026-03-04T05:00:00", sha="s1")]
+    problemas, _ = correr(tmp_path, t=t)
+    assert any("Llaima: record sin datetime_utc o sensor" in p for p in problemas)
 
 
 def test_trozo_vacio_como_isluga_en_t2(tmp_path):

@@ -21,11 +21,12 @@ comandos sale con 2):
   1. manifiesto: los 11 volcanes de VOLCANES y ningún otro, inicio en INICIO, fechas ISO con ini <= fin, y cada
      (volcán, mes) en una sola entrada;
   2. trabajos: en el último intento de cada run, todos los trabajos `reproc` de cada volcán usado terminaron en
-     success (la CLI lo consulta con `gh run view <run> --json jobs`; sin dato, es problema);
+     success y son tantos como trozos de 5 días tiene su ventana (la CLI los consulta en la API REST de GitHub; sin
+     dato, es problema);
   3. cobertura: cada volcán tiene cada mes, de INICIO al último fin, cubierto;
   4. cada brazo y volcán de cada run existe en su rama y no deja vacío ningún trozo de 5 días de su ventana (así se
      reparten los trabajos del workflow: días 1 a 5, 6 a 10, ... desde `ini`);
-  5. cada record trae `datetime_utc` y `sensor` y cae en la ventana [ini, fin] de su run;
+  5. cada record trae `sensor` y `datetime_utc` con la forma AAAA-MM-DD HH:MM y cae en la ventana [ini, fin] de su run;
   6. una clave (sensor, datetime_utc) repetida es idéntica salvo processed_utc y first_processed_utc; si difiere en
      cualquier otro campo, incluido regimen.codigo_sha, es CONFLICTIVO;
   7. todos los brazos tienen el mismo conjunto de claves que el control en cada volcán, en las dos direcciones;
@@ -62,6 +63,7 @@ INICIO = "2026-03-01"
 DIAS_TROZO = 5
 VOLATILES = {"processed_utc", "first_processed_utc"}
 RE_FECHA = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+RE_HORA = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$")    # la forma del almacén; otra forma duplicaría la pasada
 RE_TRABAJO = re.compile(r"^reproc \(([^,]+),")
 
 
@@ -176,10 +178,13 @@ def unir(manifiesto, salida, fin_esperado=None, leer=None, trabajos=None):
         if t is None:
             problemas.append(f"{e['etiqueta']} ({e['run']}): sin dato de sus trabajos")
             continue
+        n_trozos = len(trozos(e["ini"], e["fin"]))
         for v in e["volcanes"]:
             concl = t.get(v, [])
             if not concl or any(c != "success" for c in concl):
                 problemas.append(f"{e['etiqueta']} ({e['run']}) {v}: trabajos no todos en success: {sorted(concl)}")
+            elif len(concl) != n_trozos:
+                problemas.append(f"{e['etiqueta']} ({e['run']}) {v}: {len(concl)} trabajos y {n_trozos} trozos")
     claves = defaultdict(dict)
     for b in BRAZOS:
         for v in VOLCANES:
@@ -197,7 +202,7 @@ def unir(manifiesto, salida, fin_esperado=None, leer=None, trabajos=None):
                 for r in recs:
                     n_leidos += 1
                     dt, sensor = r.get("datetime_utc"), r.get("sensor")
-                    if not isinstance(dt, str) or not RE_FECHA.match(dt[:10]) or not sensor:   # 5. campos
+                    if not isinstance(dt, str) or not RE_HORA.match(dt) or not sensor:   # 5. campos
                         problemas.append(f"{b} {v}: record sin datetime_utc o sensor válidos en {e['etiqueta']}")
                         continue
                     if not (e["ini"] <= dt[:10] <= e["fin"]):           # 5. ventana
