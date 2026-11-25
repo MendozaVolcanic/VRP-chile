@@ -13,10 +13,25 @@ const Miniaturas = (() => {
     { key: "VIIRS750", label: "VIIRS 750" },
     { key: "MODIS",    label: "MODIS" },
   ];
+  // R4FB-104 (auditoría Codex ronda 4, S199): TODOS los motivos con que la vía deja una escena sin medir
+  // (diag_codigo_mirova.motivo_vacio, pipeline/mirova_v750_codigo.py). POR QUÉ: antes sólo se reconocían los dos
+  // primeros y los otros tres caían a «Sin anomalía», que afirma una medición negativa; una escena sin radiancia, con el
+  // cráter sin contraste que comparar o una pasada MODIS sin fondo no dicen nada del volcán. [rótulo corto, explicación].
   const MOTIVOS = {
-    escena_invalida: "Sin lectura: escena inválida (más de la mitad sin dato, borde de franja)",
-    sunglint: "Sin lectura: reflejo solar (sun glint)",
+    escena_invalida: ["escena inválida", "La vía «código MIROVA» no midió esta escena: la mitad o más de la grilla " +
+      "quedó sin dato útil (borde de la franja o del gránulo, o nubes muy frías). MIROVA tampoco la mide."],
+    sunglint: ["reflejo solar", "La pasada no se pudo medir: el reflejo del sol sobre la escena la anula (corte de 12° " +
+      "del código de MIROVA)."],
+    fondo_no_estimado: ["fondo no estimado", "La vía no midió esta pasada MODIS: los píxeles calientes quedaron junto a " +
+      "un hueco de datos y no hubo suelo vecino para restar, así que su potencia sería la radiancia entera del píxel. " +
+      "MIROVA no publica pasadas MODIS sin fondo."],
+    crater_no_evaluado: ["cráter no evaluable", "La escena pasó el corte de media grilla, pero en el 7 x 7 del cráter no " +
+      "quedó ninguna celda con contraste que comparar (escaneos sin dato o nube muy fría justo encima) y no hubo " +
+      "alertados en ninguna parte: el cráter no se miró. El código de MIROVA deja ese VRP indefinido."],
+    sin_radiancia_valida: ["sin radiancia válida", "La grilla del volcán quedó sin ninguna radiancia válida que " +
+      "interpolar: no hubo medición."],
   };
+  const COLA_NO_MEDIDA = " No dice nada de la actividad del volcán: no es «sin anomalía». El 0 MW guardado no es una medición.";
   const SIN_IMAGEN = {
     detector_k: "Sin imagen: esta pasada la leyó el detector K de guardia, que no usa la grilla de MIROVA",
     sin_granulo_en_esta_corrida: "Sin imagen: el gránulo no se pudo volver a bajar",
@@ -81,10 +96,93 @@ const Miniaturas = (() => {
     return isNaN(ms) ? null : ms / 60000;
   }
 
+  const CNM = () => (typeof CraterNoMedido !== "undefined" ? CraterNoMedido : null);   // frontend/crater_no_medido.js
+  const CUMBRE = () => (typeof CumbreTablero !== "undefined" ? CumbreTablero : null);   // frontend/cumbre.js
+
+  function km(x) {   // como cumbre.js: un decimal bajo 10 km, coma decimal
+    return (typeof x === "number" && Number.isFinite(x)) ? x.toFixed(x < 10 ? 1 : 0).replace(".", ",") + " km" : null;
+  }
+
+  // R4FB-104, R4FB-105, R4FB-106 y R4FB-V202 (auditoría Codex ronda 4, S199): qué dice el pie de la tarjeta. POR QUÉ.
+  // La imagen pinta en rojo TODOS los alertados de la pasada, y la potencia que se publica es la del tablero (eqVrp), que
+  // con «Solo cráter» vale 0 para una detección lejana. Leer ese 0 como «Sin anomalía» al lado de píxeles rojos le dice
+  // al geólogo de turno que no hubo calor (6 de 120 tarjetas al 2026-11-24, VIIRS 375 de Isluga, Láscar, Lastarria y
+  // Planchón-Peteroa). Tampoco es «Sin anomalía» una escena que la vía no midió, ni un cráter con la MIR perdida. Se usa
+  // la misma lógica que la tabla de «Últimas pasadas» (rotuloPasadaSinPublicar de index.html) y las marcas de
+  // crater_no_medido.js, en este orden: escena no medida (motivo_vacio), falta el record del tablero, potencia publicada,
+  // cráter no medido, anomalía lejana, anomalía no publicada, sin anomalía. Con opts.recordDe, si el record de la pasada
+  // no está (el JSON del volcán no cargó o ya no tiene esa pasada) NO se cae a la potencia del índice: esa es la suma de
+  // todos los alertados, sin el filtro de lejanas, y mostraba lejanas como potencia del cráter (R4FB-V202). Sólo display:
+  // no cambia ninguna potencia, nivel, clase ni detección.
+  // Devuelve {tipo, texto, title, vrp, avisos: [{texto, title}]}; tipo: con | no_medida | sin_dato | cnm | lejana |
+  // no_publicada | nada.
+  function estado(entrada, opts) {
+    const conRecord = typeof opts.recordDe === "function";
+    const rec = conRecord ? (opts.recordDe(entrada) || null) : null;
+    const diag = rec && rec.diag_codigo_mirova && typeof rec.diag_codigo_mirova === "object" ? rec.diag_codigo_mirova : null;
+    const motivo = (diag && diag.motivo_vacio) || entrada.motivo_vacio || null;
+    if (motivo) {
+      const m = MOTIVOS[motivo];
+      return { tipo: "no_medida", texto: "No medida: " + (m ? m[0] : String(motivo).replace(/_/g, " ")),
+               title: (m ? m[1] : "La vía «código MIROVA» dejó esta escena sin medir (" + motivo + ").") + COLA_NO_MEDIDA,
+               vrp: 0, avisos: [] };
+    }
+    const sinDato = { tipo: "sin_dato", texto: "Sin dato del tablero", vrp: 0, avisos: [],
+      title: "No se encontró esta pasada en los datos del volcán (no cargaron o ya no la traen), así que no se puede " +
+        "decir qué potencia publica el tablero. La imagen y sus píxeles rojos sí son de la pasada; la suma de todos sus " +
+        "alertados no se muestra porque incluiría las detecciones lejanas que el tablero no publica con «Solo cráter»." };
+    if (conRecord && !rec) return sinDato;
+    const vrp = opts.vrpDe ? opts.vrpDe(entrada, rec) : (entrada.vrp_mw || 0);
+    if (typeof vrp !== "number" || !Number.isFinite(vrp)) return sinDato;
+    const C = CNM();
+    const cnm = rec && C ? C.craterNoMedido(rec) : null;
+    const fondo = rec && C ? C.fondoNoEstimado(rec) : null;
+    const avisoCrater = cnm ? { texto: C.SIMBOLO + " " + C.textoCrater(cnm), title: C.tituloCrater(cnm) } : null;
+    const avisoFondo = fondo ? { texto: C.SIMBOLO + " " + C.textoFondo(fondo), title: C.tituloFondo(fondo) } : null;
+    if (vrp > 0) {
+      return { tipo: "con", texto: `VRP = ${vrp >= 10 ? vrp.toFixed(1) : vrp.toFixed(2)} MW`, title: "", vrp,
+               avisos: [avisoCrater, avisoFondo].filter(Boolean) };
+    }
+    if (cnm && C.esNoMedido(cnm)) {
+      return { tipo: "cnm", texto: "Cráter no medido", title: C.tituloCrater(cnm), vrp: 0,
+               avisos: [avisoFondo].filter(Boolean) };
+    }
+    const fuente = rec || entrada;
+    const nAlert = Math.max(fuente.n_anomalous_pixels || 0, (entrada.alertadas || []).length);
+    const conCumulo = !!(rec && rec.primary_cluster && (rec.primary_cluster.vrp_mw || 0) > 0);
+    const avisos = [avisoCrater, avisoFondo].filter(Boolean);
+    if (nAlert > 0 || conCumulo) {
+      const dist = km(fuente.final_hotspot_dist_km);
+      if (fuente.distance_class === "far") {
+        const radio = km(opts.radioKm);
+        // La regla «radiante» (D8') pone la pasada lejos aunque también haya alertados en la cumbre; la marca de cumbre.js
+        // que ya llevan la tabla y el mapa lo avisa, y aquí también (si no, «lejana» escondería el calor del cráter).
+        const Cu = CUMBRE();
+        const mcu = rec && Cu ? Cu.calorEnCumbre(rec, opts.radioKm) : null;
+        if (mcu) avisos.unshift({ texto: "◉ " + Cu.textoCumbre(mcu), title: Cu.tituloCumbre(mcu, rec, opts.radioKm),
+                                  color: Cu.COLOR });
+        return { tipo: "lejana", texto: "Anomalía lejana" + (dist ? ", " + dist : ""), vrp: 0, avisos,
+          title: "La pasada tuvo " + (nAlert === 1 ? "1 píxel alertado" : nAlert + " píxeles alertados") +
+            (dist ? ", con el foco más radiante a " + dist + " del cráter" : "") + ", fuera del radio del cráter" +
+            (radio ? " (" + radio + ")" : "") + ": son los píxeles rojos de la imagen. Con «Solo cráter» el tablero " +
+            "no publica la potencia de las detecciones lejanas; con «Incluir lejanas» cuenta. No es «sin anomalía»." };
+      }
+      return { tipo: "no_publicada", texto: "Anomalía no publicada", vrp: 0, avisos,
+        title: "La pasada tuvo píxeles anómalos, pero ninguno cuenta como detección publicada: lejana (fuera del radio " +
+          "del cráter, con «Solo cráter»), descartada por el pipeline o marcada como artefacto térmico. Con «Incluir " +
+          "lejanas» las lejanas vuelven a contar." };
+    }
+    return { tipo: "nada", texto: "Sin anomalía", title: "", vrp: 0, avisos };
+  }
+
   function tarjeta(base, entrada, siguiente, opts) {
-    const vrp = opts.vrpDe ? opts.vrpDe(entrada) : (entrada.vrp_mw || 0);
-    const nivel = opts.getLevel ? opts.getLevel(vrp) : null;
-    const t = nodo("figure", "mini-tarjeta" + (vrp > 0 ? " mini-con" : ""));
+    const est = estado(entrada, opts);
+    const vrp = est.vrp;
+    const nivel = opts.getLevel && vrp > 0 ? opts.getLevel(vrp) : null;
+    const t = nodo("figure", "mini-tarjeta" + (vrp > 0 ? " mini-con" : "") +
+      (est.tipo === "lejana" || est.tipo === "no_publicada" ? " mini-lejana" : "") +
+      (est.tipo === "no_medida" || est.tipo === "sin_dato" || est.tipo === "cnm" ? " mini-no-medida" : ""));
+    t.dataset.estado = est.tipo;
     if (nivel && vrp > 0) t.dataset.nivel = nivel.key;
     const fecha = nodo("figcaption", "mini-fecha", opts.fmtHora ? opts.fmtHora(entrada.datetime_utc) : entrada.datetime_utc);
     fecha.title = entrada.datetime_utc + " UTC · " + (entrada.granule || "");
@@ -104,13 +202,15 @@ const Miniaturas = (() => {
     }
     t.appendChild(marco);
     const pie = nodo("div", "mini-pie");
-    let linea1;
-    if (vrp > 0) linea1 = `VRP = ${vrp >= 10 ? vrp.toFixed(1) : vrp.toFixed(2)} MW`;
-    else if (MOTIVOS[entrada.motivo_vacio]) linea1 = "Sin lectura";
-    else linea1 = "Sin anomalía";
-    const l1 = nodo("div", "mini-vrp", linea1);
-    if (MOTIVOS[entrada.motivo_vacio]) l1.title = MOTIVOS[entrada.motivo_vacio];
+    const l1 = nodo("div", "mini-vrp", est.texto);
+    if (est.title) l1.title = est.title;
     pie.appendChild(l1);
+    for (const a of est.avisos) {   // R4FB-105: las marcas de crater_no_medido.js, como en la tabla y los gráficos
+      const ma = nodo("div", "mini-marca", a.texto);
+      ma.title = a.title;
+      if (a.color) ma.style.color = a.color;
+      pie.appendChild(ma);
+    }
     const zen = entrada.sensor_zenith_deg, azi = entrada.sensor_azimuth_deg;
     pie.appendChild(nodo("div", "mini-geo",
       (zen != null ? `cenit ${Math.round(zen)}°` : "cenit ?") + (azi != null ? ` · azimut ${Math.round(azi)}°` : "")));
@@ -119,7 +219,6 @@ const Miniaturas = (() => {
     // S198: desde que main abrió el día de MODIS (S193) el store trae pasadas diurnas; de día el MIR suma luz solar
     // reflejada y la imagen sale más clara sin que haya calor, así que se dice.
     if (entrada.dayflag === 1) l3 += " · de día";
-    if (MOTIVOS[entrada.motivo_vacio]) l3 += entrada.motivo_vacio === "escena_invalida" ? " · escena inválida" : " · sun glint";
     if (siguiente && siguiente.sensor === entrada.sensor) {
       const a = minutos(entrada.datetime_utc), b = minutos(siguiente.datetime_utc);
       if (a != null && b != null && Math.abs(a - b) <= 6) {
@@ -158,6 +257,9 @@ const Miniaturas = (() => {
       .mini-vacia { color: var(--muted, #7a8fa6); padding: 6px; font-size: .72rem; }
       .mini-pie { margin-top: 3px; line-height: 1.3; }
       .mini-geo, .mini-sat { color: var(--muted, #7a8fa6); }
+      .mini-lejana .mini-vrp { color: var(--muted, #7a8fa6); font-weight: 600; }
+      .mini-no-medida .mini-vrp { color: var(--muted, #7a8fa6); font-style: italic; }
+      .mini-marca { color: #ffab40; font-size: .72rem; }
       .mini-aviso { color: var(--muted, #7a8fa6); font-size: .75rem; margin-top: 8px; }
     `;
     document.head.appendChild(s);
@@ -210,5 +312,5 @@ const Miniaturas = (() => {
     return panel;
   }
 
-  return { montar, cargarIndice, _pintar: pintar };
+  return { montar, cargarIndice, _pintar: pintar, _estado: estado };
 })();
