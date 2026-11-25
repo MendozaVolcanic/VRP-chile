@@ -31,6 +31,9 @@
 #                 escena es no medida (motivo_vacio «sin_radiancia_valida», 0 MW) en vez de una excepción.
 #                 Cráter no evaluado (S193, F3-107): escena válida sin alertados en la que ninguna celda del 7 x 7 del
 #                 cráter tuvo contraste que evaluar (hueco o nube fría): motivo_vacio «crater_no_evaluado», 0 MW.
+#                 Sin ángulo (S199, F8-107, F3-102, R3F3-102; acta de cierre de la auditoría Codex): si en el píxel más
+#                 cercano al centro falta, es NaN o es relleno alguno de los cuatro ángulos (cenit y azimut del sol y
+#                 del satélite), no se sabe si es de noche ni cuánto reflejo hay: motivo_vacio «angulo_ausente», 0 MW.
 #                 diag_codigo_mirova.roi nombra la caja usada («c13_crater» en VIIRS 375; S193, F2-V303).
 #                 Zona A del laboratorio (S195; nunca en producción, que no la enciende): sólo con un perfil que la
 #                 encienda (laboratorio y su barrido _s195_lab_*), de noche, en las celdas de la región sensible a no
@@ -144,6 +147,16 @@ ROI_DIAG_V375 = "c13_crater"
 # S193 (F3-107, F3-V201): motivo_vacio de la escena válida en la que el detector corrió pero no pudo evaluar ninguna
 # celda del 7 x 7 del cráter (celda_decisiva nula) y no alertó en ninguna parte. Ver procesar_grilla.
 MOTIVO_CRATER_NO_EVALUADO = "crater_no_evaluado"
+# S199 (F8-107 y F3-102 de la auditoría Codex ronda 2, R3F3-102 de la ronda 3; acta de cierre aprobada por Nicolás,
+# docs/ACTA_CIERRE_AUDITORIA_CODEX_2026-11-24.md: «marcar "sin ángulo" como escena no medida»): motivo_vacio de la
+# pasada en que falta alguno de los cuatro ángulos que deciden la noche y el reflejo solar. Ver calcular_vrp_granulo.
+MOTIVO_ANGULO_AUSENTE = "angulo_ausente"
+# Los cuatro ángulos de observación que la vía lee del píxel más cercano al centro de la grilla, con su rango físico en
+# grados (cenit de 0 a 180; azimut de -180 a 360, para aceptar las dos convenciones). Es geometría, no un umbral de
+# MIROVA: fuera de ese rango un ángulo no existe. El relleno de NASA escalado (int16 -32768 o -32767 por 0,01, o sea
+# -327,68 o -327,67) cae fuera, y por eso basta el rango para reconocerlo sin leer el _FillValue de cada producto.
+RANGO_ANGULOS = {"sensor_zenith": (0.0, 180.0), "sensor_azimuth": (-180.0, 360.0),
+                 "solar_zenith": (0.0, 180.0), "solar_azimuth": (-180.0, 360.0)}
 
 _GRILLAS_YAML = Path(__file__).resolve().parent / "grillas_mirova.yaml"
 
@@ -734,6 +747,17 @@ def t_bg_de(v, lam):
     return round(float(radiancia_a_temperatura(np.array([v["L_bk"] / con]), lam)[0]), 2)
 
 
+def angulos_invalidos_de(geom):
+    """Claves de RANGO_ANGULOS que en `geom` faltan, no son finitas o caen fuera de su rango físico (ordenadas; [] si
+    los cuatro sirven). Ver el POR QUÉ en calcular_vrp_granulo."""
+    malos = []
+    for k, (lo, hi) in RANGO_ANGULOS.items():
+        v = geom.get(k)
+        if v is None or not math.isfinite(v) or not lo <= v <= hi:
+            malos.append(k)
+    return sorted(malos)
+
+
 def sunglint_deg(sat_zen, sun_zen, sat_azi, sun_azi):
     """README.txt / run_example.m del OSF: ángulo de sun-glint."""
     c = (np.cos(np.radians(sat_zen)) * np.cos(np.radians(sun_zen))
@@ -1099,7 +1123,8 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
     inventa una grilla) o si el gránulo no cubre el volcán (menos de 100 píxeles en el recorte de 45 km o, en MODIS y
     VIIRS 375, el píxel más cercano al centro a más de 5 km). Si el gránulo cubre el volcán pero en el recorte una
     banda tiene menos de MIN_PX_TRIANGULAR píxeles con radiancia válida, devuelve la escena vacía con motivo_vacio
-    «sin_radiancia_valida» (S192). familia: "VIIRS750" (rad con M13 y M15), "MODIS" (rad
+    «sin_radiancia_valida» (S192). Si falta, no es finito o está fuera de rango alguno de los cuatro ángulos de
+    observación, devuelve la escena vacía con motivo_vacio «angulo_ausente» (S199). familia: "VIIRS750" (rad con M13 y M15), "MODIS" (rad
     con MIR y TIR, ver leer_radiancia_modis) o "VIIRS375" (rad con I04 e I05; la caja es siempre caja_v375)."""
     cfg = FAMILIAS[familia]
     g = grilla or grilla_del_volcan(nombre_volcan, paso_m=cfg["paso_m"], clave_roi=cfg["clave_roi"])
@@ -1115,9 +1140,25 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
     if cfg["dist_max_centro_km"] is not None and dist[i0] > cfg["dist_max_centro_km"]:
         return None
     geom = {k: float(np.asarray(v)[i0]) for k, v in (angulos or {}).items() if v is not None}
-    dayflag = 0 if geom.get("solar_zenith", 180.0) > 90 else 1
-    sg = sunglint_deg(geom.get("sensor_zenith", 0.0), geom.get("solar_zenith", 0.0),
-                      geom.get("sensor_azimuth", 0.0), geom.get("solar_azimuth", 0.0))
+    # POR QUÉ (S199; F8-107 y F3-102 de la auditoría Codex ronda 2, R3F3-102 de la ronda 3; decisión del acta de cierre
+    # aprobada por Nicolás, docs/ACTA_CIERRE_AUDITORIA_CODEX_2026-11-24.md: «Aceptar con marca: marcar "sin ángulo" como
+    # escena no medida cuando aparezca»). El cenit del sol decide si la pasada es de noche o de día (umbrales
+    # distintos, .m l. 177-199) y los cuatro ángulos dan el reflejo solar que anula la escena bajo 12 grados (.m l.
+    # 87-89; fórmula del README del OSF). Antes, un ángulo ausente se rellenaba en silencio (180 para la noche, 0 para el
+    # reflejo) y uno NaN o de relleno entraba tal cual: con el satélite bajo 12 grados o sin ningún ángulo la escena
+    # salía «reflejo solar» con 0 MW; con el cenit del sol NaN o de relleno corría con umbrales de día de noche; y sin
+    # él, con umbrales de noche sin saber si era de noche. Ninguna de esas pasadas se midió de verdad. Ahora, si falta
+    # cualquiera de los cuatro, la escena es no medida con su propio motivo (0 MW como las demás, D36), sin dayflag ni
+    # sunglint inventados, y angulos_invalidos dice cuáles. El .m no tiene este caso (recibe dayflag y sunglint ya
+    # calculados por su llamador) y, con el reflejo NaN, devuelve la escena vacía; nosotros decimos por qué. Hoy son 0
+    # records (ningún record de la vía con un ángulo ausente o no finito, censos F8-107 i2 y R3F3-102 i1). Con los
+    # cuatro ángulos válidos el cálculo es el de siempre, con los mismos valores: el record no cambia.
+    angulos_invalidos = angulos_invalidos_de(geom)
+    if angulos_invalidos:
+        dayflag, sg = None, float("nan")   # el reflejo NaN corta el detector en su primera línea (.m l. 87-89)
+    else:
+        dayflag = 0 if geom["solar_zenith"] > 90 else 1
+        sg = sunglint_deg(geom["sensor_zenith"], geom["solar_zenith"], geom["sensor_azimuth"], geom["solar_azimuth"])
     b_mir, b_tir = cfg["bandas"]
     # POR QUÉ (S192, run 44768057665): el filtro de arriba cuenta píxeles con POSICIÓN, pero remuestrear_grilla
     # interpola sólo los que además tienen RADIANCIA. La geolocalización sale de la órbita y la actitud y existe
@@ -1154,6 +1195,11 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
     zona_a = None if s_a is None else mascara_zona_a(box, pos, float(g["paso"]), inner_km)
     rec = procesar_grilla(m13g, m15g, g, box, dayflag, sg, pos, inner_km, sensor, familia=familia, roi=roi_usada,
                           zona_a=zona_a, s_a=s_a, piso_a=piso_zona_a(nombre_volcan))
+    if angulos_invalidos:
+        # el detector devolvió la escena vacía por el reflejo NaN; el motivo se reemplaza porque la causa es otra (S199).
+        # Si además no hubo radiancia, el bloque siguiente pone ese motivo (no había nada que medir) y la lista queda.
+        rec["diag_codigo_mirova"].update({"motivo_vacio": MOTIVO_ANGULO_AUSENTE,
+                                          "angulos_invalidos": angulos_invalidos})
     if sin_radiancia:
         # con la grilla toda sin dato el detector ya devolvió la escena vacía (reflejo solar o media escena); el motivo
         # se reemplaza porque la causa es otra: no hubo radiancia que interpolar.
@@ -1161,13 +1207,15 @@ def calcular_vrp_granulo(rad, lat, lon, angulos, nombre_volcan, vent_lat, vent_l
     # celdas_sin_dato cuenta celdas de la grilla sin dato DESPUÉS de interpolar: griddata llena todo lo que cae dentro
     # de la envolvente de los píxeles válidos, así que sólo ve celdas fuera de ella (bordes del gránulo). Un píxel
     # perdido dentro del gránulo no aparece aquí; para eso están las marcas de dato_faltante_crater (S190, F1M-V201).
-    rec["diag_codigo_mirova"].update({"dayflag": dayflag, "sunglint": round(sg, 2),
+    rec["diag_codigo_mirova"].update({"dayflag": dayflag, "sunglint": None if angulos_invalidos else round(sg, 2),
                                       "celdas_sin_dato": int(np.isnan(m13g).sum())})
     filas, cols = np.flatnonzero(sel.any(axis=1)), np.flatnonzero(sel.any(axis=0))
     ventana = (slice(filas[0], filas[-1] + 1), slice(cols[0], cols[-1] + 1))
     rec["diag_codigo_mirova"].update(dato_faltante_crater(rad, lat, lon, b_mir, b_tir, vent_lat, vent_lon,
                                                           g["paso"], ventana=ventana))
-    rec.update({f"{k}_deg": round(v, 2) for k, v in geom.items()})
+    # S199 (R3F3-107): un ángulo NaN se escribe null, no NaN: json.dump escribe NaN, que no es JSON y rompe la carga del
+    # volcán en el navegador. Con los cuatro ángulos finitos es lo de siempre.
+    rec.update({f"{k}_deg": round(v, 2) if math.isfinite(v) else None for k, v in geom.items()})
     if GENERAR_MINIATURA:
         # S184: también en las pasadas sin anomalía, con sun glint o escena inválida (la grilla existe igual): son las
         # que el operador necesita ver. Los alertados son los del record, para que imagen y número digan lo mismo.

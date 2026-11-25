@@ -198,6 +198,7 @@ def test_r4fb_106_las_6_lejanas_reales_no_dicen_sin_anomalia():
     ("sin_radiancia_valida", "No medida: sin radiancia válida"),
     ("escena_invalida", "No medida: escena inválida"),
     ("sunglint", "No medida: reflejo solar"),
+    ("angulo_ausente", "No medida: sin ángulo"),   # S199 (F8-107, F3-102, R3F3-102)
 ])
 def test_r4fb_104_las_escenas_no_medidas_dicen_no_medida(motivo, texto):
     e = _entrada("2026-11-20 05:00", "MODIS_TERRA", motivo_vacio=motivo)

@@ -1965,8 +1965,10 @@ function escenaSinDato(r) {
   const m = r && r.diag_codigo_mirova ? r.diag_codigo_mirova.motivo_vacio : null;
   if (!m) return null;
   // S192 (F4-101): «fondo_no_estimado» = MODIS con todos los alertados junto a un hueco de datos, sin suelo que restar.
+  // S199 (F8-107, F3-102, R3F3-102): «angulo_ausente» = el gránulo no trajo un ángulo de observación válido, así que no
+  // se supo si era de noche ni cuánto reflejo solar había.
   return m === "escena_invalida" ? "escena sin datos" : m === "sunglint" ? "reflejo solar"
-    : m === "fondo_no_estimado" ? "fondo no estimado" : "escena sin medir";
+    : m === "fondo_no_estimado" ? "fondo no estimado" : m === "angulo_ausente" ? "sin ángulo" : "escena sin medir";
 }
 // Rótulo de una fila de «Últimas pasadas» sin valor publicado (antes en línea dentro de renderDetail).
 function rotuloPasadaSinPublicar(r) {
@@ -1982,6 +1984,10 @@ function rotuloPasadaSinPublicar(r) {
     ? "La vía «código MIROVA» no midió esta pasada MODIS: los píxeles calientes quedaron junto a un hueco de datos (borde " +
       "de la franja o del gránulo) y no hubo suelo vecino para restar, así que su potencia sería la radiancia entera del " +
       "píxel. MIROVA no publica pasadas MODIS sin fondo. No dice nada de la actividad y no cuenta como «última pasada»."
+    : sinDato === "sin ángulo"
+    ? "La vía «código MIROVA» no midió esta pasada: el gránulo no trajo un ángulo válido del sol o del satélite, así que " +
+      "no se pudo saber si era de noche ni cuánto reflejo solar había. No dice nada de la actividad y no cuenta como " +
+      "«última pasada»."
     : "La vía «código MIROVA» dejó esta escena sin medir (" +(r.diag_codigo_mirova.motivo_vacio || "motivo sin dato") + "). " +
       "No dice nada de la actividad y no cuenta como «última pasada»." };
   // Verificador S180: una pasada con píxeles anómalos que no se publican (lejana con «Solo cráter», descartada por el
