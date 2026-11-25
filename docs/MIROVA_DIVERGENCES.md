@@ -3781,6 +3781,31 @@ el efecto no se ha medido.
   exceso). Ninguno es protegida. Reprocesar toca la historia publicada: sólo si Nicolás lo pide. Fuente:
   `D:\codex-vrp\_salida\ronda3\f3_r3_verificacion\VEREDICTO.md` (R3F3-104) y
   `D:\codex-vrp\_salida\ronda3\cierre2_verificacion\VEREDICTO.md` (C2-V201), fuera del repo.
+- **Escena sin ángulo de observación (S199; auditoría Codex ronda 2, F8-107 y F3-102, y ronda 3, R3F3-102, verificadas;
+  decisión del acta de cierre aprobada por Nicolás, `docs/ACTA_CIERRE_AUDITORIA_CODEX_2026-11-24.md`: «Aceptar con
+  marca: marcar "sin ángulo" como escena no medida cuando aparezca»; A45 de Nicolás del 2026-11-25, tag
+  `pre-s199-sin-angulo`).** La vía lee del píxel más cercano al centro de la grilla el cenit y el azimut del sol y del
+  satélite: el cenit del sol decide la noche (umbrales del `.m` l. 177-199) y los cuatro dan el ángulo de reflejo solar
+  (fórmula del README del OSF) que anula la escena bajo 12 grados (`.m` l. 87-89). Antes, un ángulo ausente se
+  rellenaba en silencio (180 para la noche, 0 para el reflejo) y uno NaN o de relleno (-327,68 escalado) entraba tal
+  cual: sin ningún ángulo, o sin el cenit del sol con el satélite bajo 12 grados, la escena salía «reflejo solar» con 0
+  MW; con el cenit del sol NaN o de relleno corría de noche con los umbrales de día; sin él y con el satélite oblicuo,
+  con los de noche sin saber si era de noche (casos en sintético: `experiments/_s199_sin_angulo/casos_salida_main.txt`).
+  **Decidido fuera del código de MIROVA:** si alguno de los cuatro falta, no es finito o cae fuera de su rango físico
+  (cenit de 0 a 180, azimut de -180 a 360), la escena es no medida (`motivo_vacio` «angulo_ausente», 0 MW, sin
+  píxeles), con `angulos_invalidos`, y `dayflag` y `sunglint` nulos; el tablero la rotula «sin ángulo». El `.m` no tiene
+  este caso: recibe `dayflag` y `sunglint` ya calculados por su llamador (`run_example.m`, README del OSF) y, con un
+  reflejo NaN, devuelve la escena sin alertas (VRP indefinido); lo que agregamos es decir por qué y no inventar la
+  geometría. Costo aceptado: con sólo un azimut ausente de noche el reflejo nunca baja de 12 grados y la pasada se
+  habría podido medir; igual queda no medida (regla simple, 0 casos). Hoy son 0 records: ningún record de la vía trae
+  un ángulo ausente o no finito (F8-107 i2, 58.936 VIIRS; R3F3-102 i1, 74.506 de la vía). Con los cuatro ángulos
+  válidos el record es idéntico byte a byte (`experiments/_s199_sin_angulo/neutralidad_salida.txt`, 98 escenas en los
+  tres sensores, con su control). En MODIS, un SDS de ángulo ausente en el MxD03 sigue lanzando `HDF4Error` en
+  `leer_geo_mxd03` (ejecutado con pyhdf: `experiments/_s199_sin_angulo/modis_sds_ausente_salida.txt`): la pasada falla
+  en rojo y no se publica como 0 MW, igual que un L1B de VIIRS sin banda (S190, H03); el relleno dentro de un SDS
+  presente sí llega como -327,67 y queda marcado. Un relleno que cayera dentro del rango físico no se distinguiría; que
+  el `_FillValue` real del MxD03 y del GEO de VIIRS sea el escalado a -327,67 o -327,68 no se comprobó contra un
+  archivo (SIN DATO). Prueba: `tests/test_via_angulo_ausente_s199.py`.
 
 **Estado.** ⚠️ **S190:** costo de los puntos 1, 2, 3 y 6 y del escalón medido en `experiments/_s190_d36/INFORME.md` (veredictos: punto 6, no adoptar la Tabla 1, pre-registro «medir más»; escalón, no implementar y medir en el primer evento oblicuo grande; puntos 1 a 3, sin alertas perdidas atribuibles). Ningún cambio de producción. Texto anterior: ABIERTA, documental. Lo siguiente es medir el costo de los puntos 1, 2 y 6 antes de proponer un cambio
 (A116; bloque de arranque S186, §b.6).

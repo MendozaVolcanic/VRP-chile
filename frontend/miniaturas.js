@@ -30,6 +30,10 @@ const Miniaturas = (() => {
       "alertados en ninguna parte: el cráter no se miró. El código de MIROVA deja ese VRP indefinido."],
     sin_radiancia_valida: ["sin radiancia válida", "La grilla del volcán quedó sin ninguna radiancia válida que " +
       "interpolar: no hubo medición."],
+    // S199 (F8-107, F3-102, R3F3-102; acta de cierre de la auditoría Codex): pipeline/mirova_v750_codigo.py,
+    // MOTIVO_ANGULO_AUSENTE.
+    angulo_ausente: ["sin ángulo", "El gránulo no trajo un ángulo válido del sol o del satélite: no se pudo saber si " +
+      "era de noche ni cuánto reflejo solar había, y la vía no midió la pasada."],
   };
   const COLA_NO_MEDIDA = " No dice nada de la actividad del volcán: no es «sin anomalía». El 0 MW guardado no es una medición.";
   const SIN_IMAGEN = {
