@@ -167,18 +167,143 @@ def _sin_actuar(recs):
     return [r for r in recs if zona_no_actua(r) or r["_vol"] in E.VOLCANES_FUERA]
 
 
+# ------------------------------------------------------------------------------------------------ re-sello S200
+# Decisión de Nicolás del 2026-11-25 («Sí, re-sella»), antes de mirar ningún resultado del barrido. Arreglos de la ronda
+# 4 de la auditoría externa con Codex (frente D), verificados por un Claude de contexto limpio
+# (experiments/_s196_lab_piso/PROPUESTA_RESELLO_S199.md). La vara (S194) no cambia. Pruebas:
+# tests/test_lab_piso_resello_s200.py.
+N_MIN_FUERA = N_MIN_NEG        # R4FD-102: mínimo de records comparados donde la zona no actúa (el umbral de poder §5)
+PERFIL_LAB = ROOT / "pipeline" / "profiles" / "laboratorio.yaml"
+CSV_REFERENCIA = ("registro_vrp_consolidado.csv", "registro_vrp_ocr.csv")
+
+
+def _dia_modis_lab():
+    """El laboratorio guarda MODIS de día sólo si su perfil lo declara (hoy no: `paths.enable_daytime_modis: false`)."""
+    import yaml
+    p = yaml.safe_load(PERFIL_LAB.read_text(encoding="utf-8")) or {}
+    return bool((p.get("paths") or {}).get("enable_daytime_modis", False))
+
+
+def rechaza_como_laboratorio(r, vol, dia_modis_lab=None):
+    """R4FD-V201. POR QUÉ: desde el 2026-11-15 12:30 UTC producción guarda las pasadas MODIS de día y el almacén del
+    laboratorio las rechaza (pipeline/store.py::_reject_daytime con su perfil), así que el control «el brazo de
+    producción da las cuentas de producción» salía INVÁLIDO por construcción con cualquier ventana que llegue hasta
+    hoy. Se aplica a producción la MISMA regla del almacén (misma función, mismas coordenadas de volcanoes.yaml) con los
+    flags del laboratorio. VIIRS no se filtra aquí: su día lo decide el mismo flag vivo en los dos perfiles
+    (pipeline/diurno.py), así que no puede separar al laboratorio de producción. Un record sin hora legible el almacén
+    lo guarda, y aquí se conserva."""
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from pipeline.store import _reject_daytime, _solar_elevation
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import banco_paridad as bp
+    try:
+        dt = datetime.strptime(r.get("datetime_utc", ""), "%Y-%m-%d %H:%M")
+    except (TypeError, ValueError):
+        return False
+    lat, lon = bp._coords_por_volcan()[vol]
+    dia = _dia_modis_lab() if dia_modis_lab is None else dia_modis_lab
+    return _reject_daytime(r.get("sensor", ""), _solar_elevation(lat, lon, dt), dia, enable_daytime_viirs=True)
+
+
+def prod_como_laboratorio(prod, destino):
+    """Copia de los JSON de producción (los volcanes del banco) sin los records que el almacén del laboratorio habría
+    rechazado. Devuelve (carpeta, {volcán: records quitados})."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import banco_paridad as bp
+    dia = _dia_modis_lab()
+    destino = Path(destino)
+    destino.mkdir(parents=True, exist_ok=True)
+    quitados = {}
+    for vol in bp.VOLS:
+        ruta = Path(prod) / ("%s.json" % vol)
+        if not ruta.exists():
+            continue
+        d = json.loads(ruta.read_text(encoding="utf-8"))
+        recs = d["records"] if isinstance(d, dict) else d
+        quedan = [r for r in recs if not rechaza_como_laboratorio(r, vol, dia)]
+        quitados[vol] = len(recs) - len(quedan)
+        salida = dict(d, records=quedan) if isinstance(d, dict) else {"records": quedan}
+        (destino / ("%s.json" % vol)).write_text(json.dumps(salida, ensure_ascii=False), encoding="utf-8")
+    return str(destino), quitados
+
+
+def _en_ventana(r, fin):
+    return E.VENTANA_CALIBRACION_INICIO <= str(r.get("datetime_utc", ""))[:10] <= fin
+
+
+def _clave(r):
+    return (r["_vol"], r.get("sensor"), r.get("datetime_utc"))
+
+
+def cobertura_brazos(recs_por_brazo, fin):
+    """R4FD-101. POR QUÉ: si un brazo pierde pasadas que otro tiene (un trozo que muere a mitad de la lista, un brazo
+    que cae un día), su tasa por noche cambia y la elección del piso también, sin que nada lo invalide (caso medido:
+    17 noches perdidas en 0,00175 cambiaban la elección de 0,002 a 0,00175). Todos los brazos tienen que cubrir
+    exactamente las mismas pasadas (volcán, sensor, hora) dentro de la ventana de calibración; la referencia es el
+    brazo sin zona."""
+    claves = {k: {_clave(r) for r in recs if _en_ventana(r, fin)} for k, recs in recs_por_brazo.items()}
+    ref = claves["sin_zona"]
+    dif = {}
+    for k, c in claves.items():
+        if c != ref:
+            dif[k] = {"faltan": len(ref - c), "sobran": len(c - ref),
+                      "ejemplos": [list(x) for x in sorted(ref ^ c, key=lambda x: tuple(map(str, x)))[:5]]}
+    return {"igual": not dif, "n": len(ref), "diferencias": dif}
+
+
+def codigo_brazos(recs_por_brazo, fin):
+    """R4FD-105. POR QUÉ: juntar tandas de corridas distintas, o relanzar sólo algunos brazos, podía mezclar versiones
+    del código sin aviso. En cada pasada todos los brazos tienen que traer el mismo `regimen.codigo_sha`. Entre tandas
+    el código puede cambiar (cada mes se despacha aparte): se declara cada código con el tramo de fechas que cubre."""
+    por = {}
+    for k, recs in recs_por_brazo.items():
+        for r in recs:
+            if _en_ventana(r, fin):
+                por.setdefault(_clave(r), {})[k] = (r.get("regimen") or {}).get("codigo_sha")
+    mezcla = sorted((c for c, d in por.items() if len(set(d.values())) > 1), key=lambda x: tuple(map(str, x)))
+    codigos = {}
+    for c, d in por.items():
+        for sha in set(d.values()):
+            t = codigos.setdefault(str(sha), {"desde": c[2], "hasta": c[2], "n": 0})
+            t["desde"], t["hasta"], t["n"] = min(t["desde"], c[2]), max(t["hasta"], c[2]), t["n"] + 1
+    return {"igual": not mezcla, "n_mezcla": len(mezcla), "ejemplos": [list(x) for x in mezcla[:5]], "codigos": codigos}
+
+
+def _sha256(ruta):
+    import hashlib
+    return hashlib.sha256(Path(ruta).read_bytes()).hexdigest()
+
+
 def calibrar(sin_zona, control, brazos, prod, fin, dest):
-    """Corre la calibración completa. `brazos`: {piso: carpeta}."""
+    """Corre la calibración completa. `brazos`: {piso: carpeta}. Orden de los controles: primero los que invalidan
+    (cobertura, código, identidad, fuga fuera de la zona, cuentas de producción), después el de poder."""
     base = cargar_records(sin_zona)
-    ident = {CONTROL: identidad_records(cargar_records(control), base)}
+    recs = {"sin_zona": base, CONTROL: cargar_records(control)}
+    recs.update({str(p): cargar_records(d) for p, d in brazos.items()})
+    cob = cobertura_brazos(recs, fin)
+    cod = codigo_brazos(recs, fin)
+    ident = {CONTROL: identidad_records(recs[CONTROL], base)}
     if S_A == S_CONTROL and GRILLA_PISO[0] in brazos:
-        ident[str(GRILLA_PISO[0])] = identidad_records(cargar_records(brazos[GRILLA_PISO[0]]), base)
-    fuera = {str(p): identidad_records(_sin_actuar(cargar_records(d)), _sin_actuar(base), permitir_vacio=True)
-             for p, d in brazos.items()}
-    tasas = E.tasas_barrido({CONTROL: control, **brazos}, fin, dest)
-    tasas_prod = E.tasas_barrido({"prod": prod}, fin, dest)["prod"]
+        ident[str(GRILLA_PISO[0])] = identidad_records(recs[str(GRILLA_PISO[0])], base)
+    fuera = {str(p): identidad_records(_sin_actuar(recs[str(p)]), _sin_actuar(base), permitir_vacio=True)
+             for p in brazos}
+    # R4FD-V201 y R4FD-106: producción contada con las reglas de día del laboratorio, y una sola bajada de la
+    # referencia de MIROVA para todos los brazos y producción, con el sha256 de lo que se bajó.
+    prod_lab, quitados = prod_como_laboratorio(prod, Path(dest) / "produccion_como_laboratorio")
+    todas = E.tasas_barrido({CONTROL: control, **brazos, "prod": prod_lab}, fin, dest)
+    tasas_prod = todas.pop("prod")
+    tasas = todas
+    referencia = {n: _sha256(Path(dest) / n) for n in CSV_REFERENCIA if (Path(dest) / n).exists()}
     res = elegir_piso(tasas)
-    if not all(v["identico"] for v in ident.values()):
+    if not cob["igual"]:
+        res = {"estado": INVALIDO, "valor": None,
+               "detalle": "los brazos no cubren las mismas pasadas en la ventana: %s"
+                          % {k: (v["faltan"], v["sobran"]) for k, v in cob["diferencias"].items()}}
+    elif not cod["igual"]:
+        res = {"estado": INVALIDO, "valor": None,
+               "detalle": "%d pasadas con brazos que no corrieron el mismo código (regimen.codigo_sha)" % cod["n_mezcla"]}
+    elif not all(v["identico"] for v in ident.values()):
         res = {"estado": INVALIDO, "valor": None,
                "detalle": "el brazo de producción no es idéntico, record a record, al brazo sin zona"}
     elif not all(v["identico"] for v in fuera.values()):
@@ -189,8 +314,14 @@ def calibrar(sin_zona, control, brazos, prod, fin, dest):
         res = {"estado": INVALIDO, "valor": None,
                "detalle": "el brazo de producción no reproduce las cuentas de producción: %s contra %s"
                           % (tasas.get(CONTROL), tasas_prod)}
-    res.update({"identidad": ident, "identidad_donde_no_actua": fuera, "tasas_produccion": tasas_prod, "tasas": {str(k): v for k, v in tasas.items()},
-                "s_a": S_A, "grilla_piso": list(GRILLA_PISO)})
+    elif any(v["n"] < N_MIN_FUERA for v in fuera.values()):
+        res = {"estado": SIN_PODER, "valor": None,
+               "detalle": "la identidad donde la zona no actúa compara menos de %d records en algún brazo: %s"
+                          % (N_MIN_FUERA, {k: v["n"] for k, v in fuera.items() if v["n"] < N_MIN_FUERA})}
+    res.update({"identidad": ident, "identidad_donde_no_actua": fuera, "tasas_produccion": tasas_prod,
+                "tasas": {str(k): v for k, v in tasas.items()}, "s_a": S_A, "grilla_piso": list(GRILLA_PISO),
+                "cobertura_brazos": cob, "codigo_brazos": cod, "referencia_mirova": referencia,
+                "produccion_como_laboratorio": {"carpeta": prod_lab, "quitados": quitados}})
     return res
 
 

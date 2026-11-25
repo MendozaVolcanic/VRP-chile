@@ -45,7 +45,8 @@ MUTACIONES = [
     ("firma_sin_s1", " + (json.dumps(dg.get(\"s1\"), sort_keys=True),))", ")"),
     ("firma_sin_vrp", "CAMPOS_IDENTIDAD = (\"vrp_mw\", ", "CAMPOS_IDENTIDAD = ("),
     ("firma_sin_clase", "\"distance_class\", \"final_hotspot_lat\"", "\"final_hotspot_lat\""),
-    ("calibrar_sin_identidad", "    if not all(v[\"identico\"] for v in ident.values()):", "    if False:"),
+    # Re-sello S200: el control de identidad pasó de «if» a «elif» (ahora van antes la cobertura y el código).
+    ("calibrar_sin_identidad", "    elif not all(v[\"identico\"] for v in ident.values()):", "    elif False:"),
     ("calibrar_sin_donde_no_actua", "    elif not all(v[\"identico\"] for v in fuera.values()):", "    elif False:"),
     ("calibrar_sin_cuentas", "    elif not control_tasas(tasas, tasas_prod):", "    elif False:"),
     ("zona_no_actua_de_noche", "(r.get(\"diag_codigo_mirova\") or {}).get(\"dayflag\") == 1", "(r.get(\"diag_codigo_mirova\") or {}).get(\"dayflag\") == 0"),
@@ -74,6 +75,18 @@ def _arbol(base, texto):
     s194.parent.mkdir(parents=True, exist_ok=True)
     s194.write_bytes((ROOT / "experiments" / "_s194_lab_zona_a" / "evaluar.py").read_bytes())
     copia.write_text(texto, encoding="utf-8", newline="\n")
+    # Re-sello S200: `calibrar` cuenta producción con la regla del almacén (pipeline/store.py), las coordenadas de
+    # volcanoes.yaml, el banco (scripts/) y el flag del perfil laboratorio. Sin ellos en el árbol la copia sin mutar se
+    # cae (control NO PASA). Se enlazan, no se copian: son los del repo, sin mutar.
+    for d in ("pipeline", "scripts"):
+        enlace = base / d
+        if not enlace.exists():
+            if os.name == "nt":
+                subprocess.run(["cmd", "/c", "mklink", "/J", str(enlace), str(ROOT / d)], check=True,
+                               capture_output=True)
+            else:
+                os.symlink(ROOT / d, enlace, target_is_directory=True)
+    (base / "volcanoes.yaml").write_bytes((ROOT / "volcanoes.yaml").read_bytes())
     return copia
 
 
