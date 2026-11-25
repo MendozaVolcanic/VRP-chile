@@ -50,8 +50,15 @@ const Miniaturas = (() => {
   // en caché y el panel lo dice; antes quedaba null toda la sesión y el panel desaparecía sin aviso. Un 404 sigue siendo
   // «este volcán no tiene miniaturas» (los 34 de la sombra) y no muestra nada.
   const fallas = {};
+  // R4FEF-107, segunda mitad (Codex ronda 4, S200). POR QUÉ: el índice leído bien quedaba en caché toda la sesión; el
+  // sondeo de index.html redibuja el panel cuando el NRT trae pasadas nuevas, pero el panel seguía con el índice viejo
+  // (la tabla mostraba la pasada nueva y «Últimas 10 pasadas» no) hasta recargar. Una lectura, buena o 404, vale
+  // VIGENCIA_MS, la cadencia del sondeo de index.html y de cobertura.js, y después se relee.
+  // Prueba: tests/test_miniaturas_relectura_r4fef107.py
+  const VIGENCIA_MS = 5 * 60 * 1000;
+  const leidoEn = {};
   async function cargarIndice(volcan) {
-    if (volcan in cache) return cache[volcan];
+    if (volcan in cache && Date.now() - leidoEn[volcan] < VIGENCIA_MS) return cache[volcan];
     let idx = null, falla = null;
     try {
       const r = await fetch(`${raiz()}data/miniaturas/${encodeURIComponent(volcan)}/indice.json`, { cache: "no-cache" });
@@ -64,6 +71,7 @@ const Miniaturas = (() => {
         typeof CustomEvent === "function") window.dispatchEvent(new CustomEvent("vrp-falla-capa"));   // el encabezado lo cuenta
     if (falla) return null;   // no se guarda: se reintenta la próxima vez que se abra el volcán
     cache[volcan] = idx;
+    leidoEn[volcan] = Date.now();
     return idx;
   }
 
@@ -332,5 +340,5 @@ const Miniaturas = (() => {
     return panel;
   }
 
-  return { montar, cargarIndice, fallasIndice: () => Object.assign({}, fallas), _pintar: pintar, _estado: estado };
+  return { montar, cargarIndice, VIGENCIA_MS, fallasIndice: () => Object.assign({}, fallas), _pintar: pintar, _estado: estado };
 })();
