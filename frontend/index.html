@@ -2387,6 +2387,18 @@ function marcaCraterNoMedido(clase, r) {
   host.title = CraterNoMedido.tituloCrater(m);
   return host;
 }
+// R3F3-V101 (auditoría Codex ronda 3, S199): la potencia de la pasada suma alertados sin fondo estimado (el .m los suma
+// con fondo 0: entra su radiancia entera), así que puede estar sobreestimada. Criterio en
+// CraterNoMedido.fondoNoEstimado; guard: tests/test_tablero_fondo_no_estimado_r3f3.py. Sólo display.
+function marcaFondoNoEstimado(clase, r) {
+  if (!r || typeof CraterNoMedido === "undefined") return null;
+  const f = CraterNoMedido.fondoNoEstimado(r);
+  if (!f) return null;
+  const host = el("div", clase);
+  host.textContent = CraterNoMedido.SIMBOLO + " " + CraterNoMedido.textoFondo(f);
+  host.title = CraterNoMedido.tituloFondo(f);
+  return host;
+}
 
 // Tarjeta: la pasada nocturna más reciente de las últimas 48 h con el cráter sin medir entero, si no es más vieja que la
 // detección que muestra la tarjeta. No exige detección: el caso peor es justamente el que sale «sin anomalía».
@@ -3015,6 +3027,8 @@ function buildCards() {
     if (cumbreEl) card.appendChild(cumbreEl);
     const craterEl = avisoCraterTarjeta("vc-crater-no-medido", d.records, det);   // S194: cráter no medido en la última pasada
     if (craterEl) card.appendChild(craterEl);
+    const fondoEl = det ? marcaFondoNoEstimado("vc-crater-no-medido", det.rec) : null;   // R3F3-V101: la detección de la tarjeta suma alertados sin fondo
+    if (fondoEl) card.appendChild(fondoEl);
     if (typeof CoberturaTablero !== "undefined" && !esPreliminar(v)) { const cobEl = el("div", "vc-no-medido"); card.appendChild(cobEl); CoberturaTablero.pintar(cobEl, v.name, { desdeMs: Date.now() - 48 * 3600000, prefijo: "En 48 h," }); }   // S199 (F6-112): pasadas no medidas (NASA caída, descarga o lectura fallida); sólo display
     card.appendChild(mon);
 
@@ -3593,6 +3607,7 @@ function renderDetail() {
           if (i === 2 && r.anomaly_pixels && r.anomaly_pixels.length) { const ma = marcaAgua("marca-agua", v, r); if (ma) td.appendChild(ma); }   // S193
           if (i === 2) { const mc = marcaCumbre("marca-cumbre", v, r); if (mc) td.appendChild(mc); }   // S194: también calor en la cumbre
           if (i === 2) { const mn = marcaCraterNoMedido("marca-crater-no-medido", r); if (mn) td.appendChild(mn); }   // S194: cráter no medido (C1-102)
+          if (i === 2) { const mf = marcaFondoNoEstimado("marca-crater-no-medido", r); if (mf) td.appendChild(mf); }   // R3F3-V101: alertados sin fondo
         });
         const tdZ = el("td"); celdaCenit(tdZ, r); row.appendChild(tdZ);
         tbody.appendChild(row);
@@ -3719,6 +3734,7 @@ function renderDetail() {
         if (i === 2) { const ma = marcaAgua("marca-agua", v, r); if (ma) td.appendChild(ma); }   // S193: pico sobre agua
         if (i === 2) { const mc = marcaCumbre("marca-cumbre", v, r); if (mc) td.appendChild(mc); }   // S194: también calor en la cumbre
         if (i === 2) { const mn = marcaCraterNoMedido("marca-crater-no-medido", r); if (mn) td.appendChild(mn); }   // S194: cráter no medido (C1-V202)
+        if (i === 2) { const mf = marcaFondoNoEstimado("marca-crater-no-medido", r); if (mf) td.appendChild(mf); }   // R3F3-V101: alertados sin fondo
         if (i === 7 && npxCluster != null && npxCluster !== npxTotal) {
           td.title = `${npxCluster} pix en cluster principal · ${npxTotal} pix totales detectados`;
         }
@@ -3992,6 +4008,9 @@ function renderDetail() {
       // S194: cráter sin medir entero o MIR saturada (frontend/crater_no_medido.js). Sólo display.
       const mnm = (typeof CraterNoMedido !== "undefined") ? CraterNoMedido.craterNoMedido(r) : null;
       const popupCrater = !mnm ? "" : `<br><span style="color:${CraterNoMedido.COLOR}" title="${CraterNoMedido.tituloCrater(mnm)}">${CraterNoMedido.SIMBOLO} ${CraterNoMedido.textoCrater(mnm)}</span>`;
+      // R3F3-V101 (Codex ronda 3): la potencia suma alertados sin fondo estimado, puede estar sobreestimada. Sólo display.
+      const mfe = (typeof CraterNoMedido !== "undefined") ? CraterNoMedido.fondoNoEstimado(r) : null;
+      const popupFondo = !mfe ? "" : `<br><span style="color:${CraterNoMedido.COLOR}" title="${CraterNoMedido.tituloFondo(mfe)}">${CraterNoMedido.SIMBOLO} ${CraterNoMedido.textoFondo(mfe)}</span>`;
 
       // S26 B: cuando toggle "Solo cráter" activo (default), NO renderizar markers
       // far en el mapa para reducir ruido visual. La tabla los mantiene atenuados
@@ -4108,7 +4127,7 @@ function renderDetail() {
           (multiPixel ? `<b>Este pixel:</b> ${Number.isFinite(px.vrp_mw) ? px.vrp_mw.toFixed(4) + " MW" : "sin dato de VRP por pixel"} (pixel #${pxIdx+1})<br>` : '') +
           `BT max: ${tempC(px.bt_k)}<br>` +
           `Distancia al cráter: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}` +
-          popupAgua + popupCumbre + popupCrater
+          popupAgua + popupCumbre + popupCrater + popupFondo
         );
         // S12: registrar SOLO el marker primario (pxIdx===0) para el
         // click-row-to-highlight. Si el record tiene múltiples pixels,
@@ -4629,6 +4648,9 @@ function todasPasadasEvol(records, innerKm) {
     // para que el gráfico, su tooltip y el recuadro de la última pasada no la lean como «se midió, nada».
     const cnm = typeof CraterNoMedido !== "undefined" ? CraterNoMedido.craterNoMedido(r) : null;
     if (cnm) p.cnm = cnm;
+    // R3F3-V101: la potencia suma alertados sin fondo estimado (puede estar sobreestimada); va al tooltip y al recuadro.
+    const fne = typeof CraterNoMedido !== "undefined" ? CraterNoMedido.fondoNoEstimado(r) : null;
+    if (fne) p.fne = fne;
     const y = isThermalArtifact(r, innerKm) ? 0 : mirovaEqVrpDisplay(r, innerKm, true);
     if (y > 0) {
       const enCrater = mirovaEqVrpDisplay(r, innerKm, false) > 0;
@@ -4811,11 +4833,14 @@ function textoUltimaPasadaEvol(u, ahoraMs, includeFar, conCalor) {
   // R3F5-101: con la marca de cráter no medido el recuadro lo dice (y no «sin anomalía»); con la MIR saturada, que la
   // potencia publicada es un mínimo. El texto es el de la tabla y las tarjetas (CraterNoMedido.textoCrater).
   const avisoCnm = p.cnm && typeof CraterNoMedido !== "undefined" ? CraterNoMedido.SIMBOLO + " " + CraterNoMedido.textoCrater(p.cnm) : "";
-  const estado = (u.vrp > 0 ? clase(u.vrp, lv)
+  let estado = (u.vrp > 0 ? clase(u.vrp, lv)
     : p.estado === "no_medido" ? ""
     : p.estado === "fuera" ? "anomalía fuera del cráter, no publicada"
     : p.estado === "no_publicada" ? "anomalía no publicada" : "sin anomalía") +
     (avisoCnm ? (p.estado === "no_medido" && !(u.vrp > 0) ? "" : " · ") + avisoCnm : "");
+  // R3F3-V101: la potencia de esa pasada suma alertados sin fondo estimado (frontend/crater_no_medido.js, textoFondo).
+  const avisoFondo = (q) => q.fne && typeof CraterNoMedido !== "undefined" ? " · " + CraterNoMedido.SIMBOLO + " " + CraterNoMedido.textoFondo(q.fne) : "";
+  if (p.fne) estado = estado ? estado + avisoFondo(p) : avisoFondo(p).slice(3);
   const cen = textoCenitEvol(p.zen, null);
   let texto = "Última pasada: " + p.dt + " UTC (" + haceEvol(p.t, ahoraMs) + ") · " + (ETIQUETA_SENSOR[p.grupo] || p.sensor) +
               (p.dia ? " · ☀ de día, puede incluir reflejo solar" : "") +   // S193
@@ -4823,7 +4848,8 @@ function textoUltimaPasadaEvol(u, ahoraMs, includeFar, conCalor) {
   if (!(u.vrp > 0) && conCalor) {   // si la última no publicó, la última con calor es otra pasada
     const c = conCalor.p;
     texto += ". Última con calor publicado: " + c.dt + " UTC (" + haceEvol(c.t, ahoraMs) + ") · " +
-             (ETIQUETA_SENSOR[c.grupo] || c.sensor) + (c.dia ? " · ☀ de día" : "") + " · " + clase(conCalor.vrp, getLevel(conCalor.vrp));
+             (ETIQUETA_SENSOR[c.grupo] || c.sensor) + (c.dia ? " · ☀ de día" : "") + " · " + clase(conCalor.vrp, getLevel(conCalor.vrp)) +
+             avisoFondo(c);   // R3F3-V101
   }
   return { texto, clave: lv.key };   // getLevel(0) ya es «nd» (gris): el color es el de la última pasada, como en MIROVA
 }
@@ -5154,7 +5180,8 @@ function armarEvolucion(host, v, d, innerKm, plugExtra) {
                   .concat(textoCenitEvol(p.zen, p.azi) ? ["  " + textoCenitEvol(p.zen, p.azi) +
                           (esOblicuaEvol(p.zen) ? " · mirada oblicua: una fuente chica puede no verse o verse menor" : "")] : [])
                   .concat(p.dia ? ["  " + DiurnoTablero.SIMBOLO + " " + DiurnoTablero.TEXTO] : [])   // S193
-                  .concat(p.cnm ? ["  " + CraterNoMedido.SIMBOLO + " " + CraterNoMedido.textoCrater(p.cnm)] : []);   // R3F5-101
+                  .concat(p.cnm ? ["  " + CraterNoMedido.SIMBOLO + " " + CraterNoMedido.textoCrater(p.cnm)] : [])   // R3F5-101
+                  .concat(p.fne ? ["  " + CraterNoMedido.SIMBOLO + " " + CraterNoMedido.textoFondo(p.fne)] : []);   // R3F3-V101
               },
             },
           },
