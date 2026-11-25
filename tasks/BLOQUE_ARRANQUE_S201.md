@@ -42,6 +42,15 @@
 | 4 | Rotar el PAT de GitHub que sigue en `C:\Users\nmend\.claude\settings.json` | rotar y pasar a variable de entorno | Rotarlo |
 | 5 | Heredadas del bloque S200 §b.2 y §b.3 (R3F3-104; `Temp-1` a `Temp-228`) | | las del bloque S200 |
 
+**Pregunta de Nicolás llegada DESPUÉS del cierre de S200 (vía S195, 2026-11-25 ~18:50 UTC), SIN RESPONDER:** en el mapa
+de Tupungatito del tablero (`?volcano=Tupungatito`, `#hotspot-map`, últimos 30 días al 2026-11-22, zoom 14, centro
+-33.388, -69.828) los puntos de detección forman una línea horizontal perfecta. ¿Es una fila de celdas de la grilla de
+MIROVA (normal, el dibujo es por celda) o un artefacto real del detector? Hipótesis, todas SOSPECHA: (a) alertados en
+la misma fila de la grilla (centroides alineados en latitud); (b) la ROI `sens` de Tupungatito en VIIRS 750 (D36) o un
+borde de caja; (c) geolocalización o dibujo del marcador. Captura: `D:\vrp-trabajo\temporales\s195\mapas_v3\Tupungatito.png`;
+collage (panel arriba a la derecha): `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\congreso geologico 2026\3_MATERIAL\difusion_instagram\AT8-7_VRP-Chile_imagen1_mapas.png`.
+Responderle a Nicolás directo; va a un material de difusión del congreso, así que conviene antes de publicarlo.
+
 **Preguntas de Nicolás de S200 sin respuesta explícita:** ninguna. «¿Cómo va el plan por sensor y el experimental?
 ¿Se reprocesaron el resto de los volcanes?» se contestó con datos (guardias, barrido, `data/historia_34/`).
 
@@ -100,6 +109,9 @@ Autorizó antes seguir sin preguntar cada paso, hasta 900 mil tokens por sesión
 2. Lee tasks/BLOQUE_ARRANQUE_S201.md (rama loop/activo) y la entrada S200 de tasks/LOOP_OBJETIVOS.md §6. Para Codex:
    D:\codex-vrp\_salida\ronda5\_consulta\OPINION_RONDA5.md y la maquinaria D:\vrp-trabajo\temporales\s200_r5\.
 3. Trabajo, en orden:
+   0. Primero la pregunta de Nicolás sobre la línea horizontal del mapa de Tupungatito (bloque §b): medir con los
+      records de data/mirova_equivalent/Tupungatito.json (anomaly_pixels, fila y col de la grilla, sensor) si los
+      puntos caen en una sola fila de la grilla y por qué, y responderle directo antes de que use el collage.
    a. Ronda 5: al terminar cada frente (fa_r5, fcd_r5), verificador Claude de contexto limpio (plantilla
       D:\vrp-trabajo\temporales\s200_r5\verificador_plantilla.txt; copia hacer_verificador_r4.py y consolidar_r4.py de
       s199_r4 a s200_r5 cambiando ronda4 por ronda5 y la central desde ronda4\hallazgos_verificados.csv). Después
