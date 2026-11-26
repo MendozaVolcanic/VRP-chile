@@ -30,6 +30,14 @@
   const CESE_UTC = "2026-11-02T13:00:00Z";
   const FUENTE_URL = "https://www.earthdata.nasa.gov/data/alerts-outages/reminder-suomi-npp-observations-cease-november-2-2026";
   const DIAS_AVISO_DESPUES = 90;
+  // S202: todos los ceses de scripts/ceses_esperados.json, con la misma fecha y fuente (la prueba
+  // tests/test_cese_terra_s202.py exige que coincidan). Terra: NASA anuncia el fin de sus observaciones el 2026-12-01
+  // sin hora; se toma el inicio del día (decisión de Nicolás del 2026-11-26). Desde entonces MODIS sigue sólo con Aqua.
+  const CESES = [
+    { plataforma: PLATAFORMA, utc: CESE_UTC, fuente: FUENTE_URL },
+    { plataforma: "Terra", utc: "2026-12-01T00:00:00Z",
+      fuente: "https://www.earthdata.nasa.gov/data/alerts-outages/new-terra-observations-cease-december-1-2026" },
+  ];
 
   const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   const COLOR = "#8ec5ff";
@@ -96,44 +104,54 @@
     return div;
   }
 
+  // Dibuja la línea de un cese; true si cayó dentro del rango visible de un eje de tiempo.
+  function dibujarLinea(chart, utc, plataforma) {
+    const t = ms(utc);
+    const x = chart && chart.scales ? chart.scales.x : null;
+    if (t == null || !x || x.type !== "time") return false;
+    if (t < x.min || t > x.max) return false;
+    const px = x.getPixelForValue(t);
+    const area = chart.chartArea;
+    if (!isFinite(px) || !area) return false;
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.strokeStyle = COLOR;
+    ctx.lineWidth = 1.5;
+    if (ctx.setLineDash) ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    ctx.moveTo(px, area.top);
+    ctx.lineTo(px, area.bottom);
+    ctx.stroke();
+    if (ctx.setLineDash) ctx.setLineDash([]);
+    ctx.fillStyle = COLOR;
+    ctx.font = "10px sans-serif";
+    ctx.fillText("sin " + plataforma, px + 3, area.top + 22);
+    ctx.restore();
+    return true;
+  }
+
   // Plugin de Chart.js: línea vertical punteada en la fecha del cese, sólo en ejes de tiempo y dentro del rango visible.
+  // `utc` es la fecha de un cese (de PLATAFORMA) o, desde S202, una lista como CESES: una línea por cese.
   function crearPlugin(utc) {
+    const lista = Array.isArray(utc) ? utc : [{ plataforma: PLATAFORMA, utc: utc }];
     return {
       id: "cesePlataformas",
       afterDatasetsDraw(chart) {
-        const t = ms(utc);
-        const x = chart && chart.scales ? chart.scales.x : null;
-        if (t == null || !x || x.type !== "time") return false;
-        if (t < x.min || t > x.max) return false;
-        const px = x.getPixelForValue(t);
-        const area = chart.chartArea;
-        if (!isFinite(px) || !area) return false;
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.strokeStyle = COLOR;
-        ctx.lineWidth = 1.5;
-        if (ctx.setLineDash) ctx.setLineDash([2, 3]);
-        ctx.beginPath();
-        ctx.moveTo(px, area.top);
-        ctx.lineTo(px, area.bottom);
-        ctx.stroke();
-        if (ctx.setLineDash) ctx.setLineDash([]);
-        ctx.fillStyle = COLOR;
-        ctx.font = "10px sans-serif";
-        ctx.fillText("sin " + PLATAFORMA, px + 3, area.top + 22);
-        ctx.restore();
-        return true;
+        let alguna = false;
+        for (const c of lista) alguna = dibujarLinea(chart, c.utc, c.plataforma) || alguna;
+        return alguna;
       },
     };
   }
 
-  const CesePlataformas = { PLATAFORMA, CESE_UTC, FUENTE_URL, DIAS_AVISO_DESPUES, textoAviso, insertarAviso, crearPlugin };
+  const CesePlataformas = { PLATAFORMA, CESE_UTC, FUENTE_URL, CESES, DIAS_AVISO_DESPUES, textoAviso, insertarAviso,
+    crearPlugin };
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = CesePlataformas;
   } else {
     raiz.CesePlataformas = CesePlataformas;
-    if (raiz.Chart && raiz.Chart.register) raiz.Chart.register(crearPlugin(CESE_UTC));
+    if (raiz.Chart && raiz.Chart.register) raiz.Chart.register(crearPlugin(CESES));
     // POR QUÉ (S178, pedido de Nicolás del 2026-11-10, «quita los 3»): ya no se inserta el aviso de texto al cargar; el
     // cese queda marcado sólo por la línea vertical «sin Suomi NPP» en los gráficos, que da la fecha sin ocupar espacio
     // arriba del tablero. insertarAviso y textoAviso siguen exportadas, pero nadie las llama.
